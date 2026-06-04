@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorBochner
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseToL2Packaging
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GenuineBracketSectionSplit
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 
 /-!
@@ -184,8 +185,8 @@ theorem exists_pointwiseTensorCurv_genuineFields_proportional_spectralPairing
                 (rawTensorConnLapSmooth (I := I) g 0 s S).toFun ^ 2 -
               tensorL2Norm (I := I) (M := M) g 0 (s + 1 + 1)
                 (covGrad (I := I) (M := M) g 0 (s + 1)
-                  (covGrad (I := I) (M := M) g 0 s S)).toFun ^ 2 := by
-  sorry
+                  (covGrad (I := I) (M := M) g 0 s S)).toFun ^ 2 :=
+  pointwiseTensorCurv_genuineFields_proportional_spectralPairing_core (I := I) (M := M) g
 
 /-- **Posited deepest curvature primitive (the strictly-more-primitive structural core): the
 genuine third-order Weitzenböck field decomposition with proportional fibre bounds and the

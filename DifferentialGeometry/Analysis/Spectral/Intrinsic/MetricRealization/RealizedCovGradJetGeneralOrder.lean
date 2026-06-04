@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizedCovGradJetInput
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradSlotPermutationNaturality
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqNormBridge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHSSection
 
 /-!
@@ -327,6 +329,8 @@ theorem realizeSymmCcTensor_ccTensorBilin_apply (g₀ : SmoothRiemannianMetric I
   rw [hval, flipCcTensor_ccTensorBilin_apply, ccTensorBilinSymm_apply]
   ring
 
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
 /-- **The slot swap is a parallel fibre isometry: it preserves the `g₀`-Riemannian fibre norm
 of every iterated covariant gradient.**  For every order `i` and base point `x`,
 
@@ -334,20 +338,80 @@ of every iterated covariant gradient.**  For every order `i` and base point `x`,
 
 The slot swap `(v, w) ↦ (w, v)` is, fibrewise, the action of the parallel orthogonal bundle
 automorphism that transposes the two covariant slots; being parallel it commutes with the
-Levi-Civita iterated covariant gradient (sending `∇^i T` to the corresponding slot-permuted
-tensor), and being a fibre isometry it preserves the `g₀`-Riemannian fibre norm (the slot
-permutation invariance of the pointwise tensor inner product,
-`tensorInnerPointwise_0s_domDomCongr`).  This is the precise "realization gains no
-derivatives and no norm" primitive of the metric-realization bundle calculus; it is the
-companion the general bilinear/parallel covariant Leibniz layer supplies. -/
+Levi-Civita iterated covariant gradient (the slot-permutation naturality
+`riemannianFiberNormSq_iteratedCovGrad_eq_of_section_domDomCongr`, sending `∇^i T` to the
+corresponding slot-permuted tensor), and being a fibre isometry it preserves the `g₀`-Riemannian
+fibre norm (the slot permutation invariance of the pointwise tensor inner product,
+`tensorInnerPointwise_0s_domDomCongr`).  This is the precise "realization gains no derivatives
+and no norm" primitive of the metric-realization bundle calculus. -/
 theorem flipCcTensor_iteratedCovGrad_norm_eq (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (i : ℕ) (x : M) :
     letI : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 (2 + i) I bb) :=
       Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + i)
     ‖(iteratedCovGrad (I := I) (M := M) g₀ 0 2 i (flipCcTensor (I := I) g₀ T)).toSection x‖ =
       ‖(iteratedCovGrad (I := I) (M := M) g₀ 0 2 i T).toSection x‖ := by
-  sorry
+  classical
+  -- The slot swap is, fibrewise, the constant slot reindexing `domDomCongr (swap 0 1)` of the
+  -- unit-evaluated model `(0, 2)`-form of `T`.
+  have hbase : ∀ y : M,
+      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitModel (I := I) (M := M) g₀ 2
+          (flipCcTensor (I := I) g₀ T) y =
+        ContinuousMultilinearMap.domDomCongr (Equiv.swap (0 : Fin 2) 1)
+          (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitModel (I := I) (M := M) g₀ 2
+            T y) := by
+    intro y
+    -- The canonical unit `(0, 0)`-tensor `unitTensor y = ofModel (constOfIsEmpty 1)` is the
+    -- unit `(0, 0)`-tensor `constOfIsEmpty 1` (toModel-injectivity; on the empty tuple both
+    -- evaluate to `1`).
+    have hunit : DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitTensor
+          (I := I) (M := M) y =
+        ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I y) (1 : ℝ) := by
+      refine Tensor0SSpace.toModel_injective ?_
+      rw [DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitTensor]
+      simp only [Tensor0SSpace.toModel_ofModel]
+      apply ContinuousMultilinearMap.ext
+      intro w
+      rw [ContinuousMultilinearMap.constOfIsEmpty_apply]
+      exact (ContinuousMultilinearMap.constOfIsEmpty_apply ℝ
+        (fun _ : Fin 0 => TangentSpace I y) (1 : ℝ) _).symm
+    apply ContinuousMultilinearMap.ext
+    intro v
+    rw [DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitModel, hunit,
+      flipCcTensor_toModel_apply (I := I) g₀ T y v]
+    rw [ContinuousMultilinearMap.domDomCongr_apply,
+      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.unitModel, hunit]
+    -- `toModel (T.toSection y unit) ![reindexed] = ccTensorBilin g₀ T y (v 1) (v 0)`.
+    have hT : Tensor0SSpace.toModel
+          ((T.toSection y) (ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I y) (1 : ℝ)))
+          (fun i => v (Equiv.swap (0 : Fin 2) 1 i)) =
+        ccTensorBilin (I := I) g₀ T y (v 1) (v 0) := by
+      rw [show (T.toSection y) (ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I y) (1 : ℝ)) =
+          ccTensorMultilinear (I := I) g₀ T y from (ccTensorMultilinear_apply (I := I) g₀ T y).symm]
+      rw [show ccTensorBilin (I := I) g₀ T y (v 1) (v 0) =
+          Tensor0SSpace.toModel (ccTensorMultilinear (I := I) g₀ T y) ![v 1, v 0] from by
+        rw [ccTensorBilin_apply, ccTensorModel, ccTensorMultilinear_apply]]
+      congr 1
+      funext i
+      fin_cases i <;> rfl
+    rw [hT]
+  -- Slot-permutation naturality preserves the fibre norm of every iterated covariant gradient.
+  have hrfns := riemannianFiberNormSq_iteratedCovGrad_eq_of_section_domDomCongr (I := I) (M := M)
+    g₀ 2 (Equiv.swap (0 : Fin 2) 1) T (flipCcTensor (I := I) g₀ T) hbase i x
+  -- Pass from `riemannianFiberNormSq` equality to fibre-norm equality.
+  refine DifferentialGeometry.Integral.Connection.norm_eq_of_tensorInnerPointwise_eq
+    (I := I) (M := M) g₀ 0 (2 + i) x
+    ((iteratedCovGrad (I := I) (M := M) g₀ 0 2 i (flipCcTensor (I := I) g₀ T)).toSection x)
+    ((iteratedCovGrad (I := I) (M := M) g₀ 0 2 i T).toSection x) ?_
+  rw [← DifferentialGeometry.Integral.Connection.riemannianFiberNormSq_eq_tensorInnerPointwise
+      (I := I) (M := M) g₀ 0 (2 + i) x,
+    ← DifferentialGeometry.Integral.Connection.riemannianFiberNormSq_eq_tensorInnerPointwise
+      (I := I) (M := M) g₀ 0 (2 + i) x]
+  exact hrfns
 
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
 /-- **The general-order covariant-jet bound for the metric-realization map (headline).**
 
 For every order `i` and base point `x`, the `g₀`-Riemannian fibre norm of the order-`i`
