@@ -275,6 +275,71 @@ theorem maxRegDuhamelSolField_coeff_ae (hT : 0 < T) (hT1 : T ≤ 1)
     rw [hs hsmem]
   rw [hcongr]
 
+/-- **The `H^{a+1}`-view structural per-mode identity.**  The `H^{a+1}`-view
+Duhamel solution-field coordinate is the indefinite `Hᵃ`-integral of the carrier's
+time-derivative coordinate, started at `u₀.coeff i`:
+
+  `(maxRegDuhamelSolFieldHa1 … u₀ g t).coeff i =
+      u₀.coeff i + ∫₀ᵗ ((maxRegDuhamelMap … u₀ g).deriv s).coeff i ds`,
+
+for a.e. `t`.  Same per-mode assembly as `maxRegDuhamelSolField_coeff_ae`, but at
+the `H^{a+1}` view: the spectral coordinate functional agrees across the inclusion
+scales, so the two views share the same coordinate identity. -/
+theorem maxRegDuhamelSolFieldHa1_coeff_ae (hT : 0 < T) (hT1 : T ≤ 1)
+    (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
+    (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    (fun t => (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce t).coeff i)
+        =ᵐ[timeMeasure T]
+      fun t => u₀.coeff i + ∫ s in (0 : ℝ)..t,
+        ((maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce).deriv s).coeff i := by
+  have hHa1 := timeModeCoeff_coeFn (I := I) (M := M)
+    (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce) i
+  have hHa1mode : timeModeCoeff (I := I) (M := M)
+      (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce) i =
+        homModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i +
+          solModeCoeff (I := I) (M := M) (a := a) hT.le gforce i := by
+    rw [maxRegDuhamelSolFieldHa1, timeModeCoeff_add (I := I) (M := M),
+      maxRegHomogeneousSolFieldHa1_timeModeCoeff (I := I) (M := M) (a := a)
+        (T := T) hT.le u₀ i,
+      maximalRegularitySolFieldHa1_timeModeCoeff (I := I) (M := M)
+        (h_compact := h_compact) (a := a) hT hT1 gforce i]
+  have haddcoe := Lp.coeFn_add
+    (homModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i)
+    (solModeCoeff (I := I) (M := M) (a := a) hT.le gforce i)
+  have hA := homModeCoeff_eq_init_add_integral (I := I) (M := M) (a := a) (T := T) u₀ i
+  have hB := solModeCoeff_eq_integral (I := I) (M := M) (a := a) hT.le gforce i
+  have hderiv_coe := maxRegDuhamelMap_deriv_coeff_ae (I := I) (M := M)
+    (h_compact := h_compact) (a := a) hT hT1 u₀ gforce i
+  filter_upwards [hHa1, haddcoe, hA, hB,
+    ae_restrict_mem (μ := volume) measurableSet_Icc] with t htHa1 htadd htA htB htmem
+  have htmem' : t ∈ Set.Icc (0 : ℝ) T := htmem
+  have hh0 : (0 : ℝ) ∈ Set.Icc (0 : ℝ) T := ⟨le_rfl, htmem.1.trans htmem.2⟩
+  rw [← htHa1, hHa1mode, htadd, Pi.add_apply, htA, htB]
+  have hint_hom : IntervalIntegrable
+      (fun s => (homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i) s)
+      volume 0 t :=
+    ((TimeSobolev.integrableOn _).mono_set (uIcc_subset_Icc hh0 htmem')).intervalIntegrable
+  have hint_duh : IntervalIntegrable
+      (fun s => (derivModeCoeff (I := I) (M := M) (a := a) hT.le gforce i) s)
+      volume 0 t :=
+    ((TimeSobolev.integrableOn _).mono_set (uIcc_subset_Icc hh0 htmem')).intervalIntegrable
+  rw [add_assoc, ← intervalIntegral.integral_add hint_hom hint_duh]
+  have hcongr : (∫ s in (0 : ℝ)..t,
+        ((homDerivModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i) s +
+          (derivModeCoeff (I := I) (M := M) (a := a) hT.le gforce i) s)) =
+      ∫ s in (0 : ℝ)..t,
+        ((maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce).deriv s).coeff i := by
+    refine intervalIntegral.integral_congr_ae ?_
+    have hsub : Set.uIoc (0 : ℝ) t ⊆ Set.Icc (0 : ℝ) T :=
+      (Set.uIoc_subset_uIcc).trans (uIcc_subset_Icc hh0 htmem')
+    have hae := ae_restrict_of_ae_restrict_of_subset (μ := volume) hsub hderiv_coe
+    rw [ae_restrict_iff' measurableSet_uIoc] at hae
+    filter_upwards [hae] with s hs hsmem
+    rw [hs hsmem]
+  rw [hcongr]
+
 /-- The lower-scale carrier of the recentred field: the time-`H¹` element with
 initial value `0` and time derivative the carrier's derivative. -/
 def recentredCarrier (hT : 0 < T) (hT1 : T ≤ 1)
@@ -868,7 +933,9 @@ the globally-Lipschitz truncated engine
 nonlinearity `Ñ_R` is globally bounded, so its fixed-point forcing is
 `√T`-small), then shrinks the horizon using the sharp Lions–Magenes parabolic
 trace estimate `maxRegDuhamelSolFieldHa1_stay` so the field stays a.e. in the
-ball, where `Ñ_R = N`. -/
+ball, where `Ñ_R = N`.  The final returned conjunct exposes that proven
+stays-in-ball event itself: the `H^{a+1}`-view Duhamel field
+`maxRegDuhamelSolFieldHa1 … u₀ gforce t` lies a.e. in `closedBall (ι u₀) R`. -/
 theorem quasilinear_strong_existence_locallyLipschitz_smallTime_stayDischarged_ofCompact
     {N : tensorHs (I := I) (M := M) g r s (a + 1) →
       tensorHs (I := I) (M := M) g r s a}
@@ -894,7 +961,12 @@ theorem quasilinear_strong_existence_locallyLipschitz_smallTime_stayDischarged_o
                 (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce) +
               nemytskiiHa1 (I := I) (M := M)
                 (truncatedNonlin_lipschitzWith (I := I) (M := M) hR.le hN)
-                (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce) := by
+                (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce) ∧
+          ∀ᵐ t ∂(timeMeasure T),
+            maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce t ∈
+              Metric.closedBall
+                (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+                  (show (a + 1) ≤ a + 2 by linarith) u₀) R := by
   set u₀' := tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
     (show (a + 1) ≤ a + 2 by linarith) u₀ with hu₀'
   set C : ℝ := ‖N u₀'‖ + (L_R : ℝ) * R with hC_def
@@ -931,7 +1003,7 @@ theorem quasilinear_strong_existence_locallyLipschitz_smallTime_stayDischarged_o
       _ = R ^ 2 := mul_one _
   have hstay := maxRegDuhamelSolFieldHa1_stay (I := I) (M := M)
     (h_compact := h_compact) hT hT1 u₀ gforce hC_nn hR.le hgforce_small hhoriz
-  refine ⟨u, gforce, hu, ?_, htrace, hderiv⟩
+  refine ⟨u, gforce, hu, ?_, htrace, hderiv, hstay⟩
   conv_lhs => rw [hfix]
   exact nemytskiiHa1_truncated_eqOn_ball (I := I) (M := M) hR.le hN
     (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce) hstay

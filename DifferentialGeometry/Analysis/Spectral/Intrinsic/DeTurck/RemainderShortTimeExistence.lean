@@ -123,7 +123,10 @@ Concretely the data `u, gforce` satisfy:
   pointwise-in-time remainder along the `H^{a+1}`-view solution field;
 * `trace₀ u = ι u₀` — the initial value is `u₀`;
 * `∂_t u = Δ_∇ (field_{a+2}) + Ñ_R(field_{a+1})` — the equation, where the
-  truncated forcing reproduces `N` on the (proven) stays-in-ball event.
+  truncated forcing reproduces `N` on the (proven) stays-in-ball event;
+* `field_{a+1} t ∈ closedBall (ι u₀) R` a.e. — the stays-in-ball event itself,
+  exposed from the engine so downstream carrier transports can pin the carrier to
+  the engine ball.
 
 The resolvent-compactness hypothesis demanded by the engine is supplied
 **unconditionally** by `tensorResolventL2_isCompactOperator` (no
@@ -159,7 +162,12 @@ theorem deTurckRemainder_strong_shortTime_exists
                 (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce) +
               nemytskiiHa1 (I := I) (M := M)
                 (truncatedNonlin_lipschitzWith (I := I) (M := M) hR.le hN)
-                (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce) :=
+                (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce) ∧
+          ∀ᵐ t ∂(timeMeasure T),
+            maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce t ∈
+              Metric.closedBall
+                (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
+                  (show (a + 1) ≤ a + 2 by linarith) u₀) R :=
   quasilinear_strong_existence_locallyLipschitz_smallTime_stayDischarged_ofCompact
     (I := I) (M := M) (g := g_bg) (r := 0) (s := 2) (a := a)
     (N := N) (L_R := L_R) (R := R) hR
@@ -217,7 +225,9 @@ theorem firstOrderRemainderCLM_strong_shortTime_exists
   obtain ⟨T₀, hT₀_pos, hsol⟩ :=
     deTurckRemainder_strong_shortTime_exists (I := I) (M := M) g_bg
       (N := ⇑R) (L_R := ‖R‖₊) (R := (1 : ℝ)) one_pos u₀ hN
-  exact ⟨T₀, hT₀_pos, fun {T} hT hTT₀ hT1 => hsol hT hTT₀ hT1⟩
+  refine ⟨T₀, hT₀_pos, fun {T} hT hTT₀ hT1 => ?_⟩
+  obtain ⟨u, gforce, hduh, hforce, htrace, hderiv, _hball⟩ := hsol hT hTT₀ hT1
+  exact ⟨u, gforce, hduh, hforce, htrace, hderiv⟩
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 

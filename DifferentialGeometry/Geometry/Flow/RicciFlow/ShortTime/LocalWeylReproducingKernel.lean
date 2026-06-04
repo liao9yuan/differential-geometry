@@ -757,27 +757,82 @@ private lemma norm_smoothToTensorHsRS_eq_spectral_sqrt
   refine congrArg Real.sqrt (tsum_congr (fun i => ?_))
   rw [smoothToTensorHsRS_coeff]
 
+/-- **The general-order Euclidean-pull uniform bound on a compact chart set (posited general-rank
+analytic child).** At a supercritical chart order `a` (`dim M < 2·(2a)`), for each atlas index `α`
+and component pair `IJ`, there is a constant `D ≥ 0` such that on a compact set `Kc` (in chart
+Euclidean coordinates) contained in an open `O ⊆ chartTargetEuclid α` on which the chart
+partition-of-unity pull is `≥ c`, the chart-component pull `|tensorChartComponentRaw … IJ …|` is
+bounded by `D · ‖T.toHs a‖`.
+
+This is the general-order (`a`, not necessarily even) analogue of the in-library `(0, 2k)`-only
+private Euclidean-pull core `uniformRawPull_le_hsNorm` (file `SobolevEmbeddingManifoldC0.lean`),
+which is stated only at order `2k`.  At order `2k` it is built from the local Euclidean ball `L²`
+Sobolev embedding (`smooth_localBall_L2_pointwise_embedding`, itself general-order) composed with
+the order-`2k` chart-block bridge `hsBlock_le_hsNorm_sq`; the genuinely sharp general-order
+assembly (the `H^{2a} ↪ C⁰` chart-Sobolev pull, threshold `dim < 2·(2a)`) is absent from the
+library's even-index-only tensor embedding tower, so it is posited here.  Its statement uses only
+public chart objects; the conclusion is a Euclidean-pull `C⁰` bound by the chart `H^{2a}`-norm,
+structurally distinct from the manifold-side fibre bound it powers (no packaging); the body is
+`sorry` and consumers transitively depend on `sorryAx`. -/
+private theorem uniformRawPullRS_le_hsNorm
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℕ)
+    (ha : (Module.finrank ℝ E : ℝ) < 2 * (2 * a))
+    (α : M)
+    (IJ : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)))
+    {Kc O : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))} {c : ℝ} (hc_pos : 0 < c)
+    (hKc_compact : IsCompact Kc) (hO_open : IsOpen O)
+    (hKcO : Kc ⊆ O)
+    (hO_sub : O ⊆ Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α)
+    (hρ_lb : ∀ y ∈ O,
+      c ≤ (Integral.Measure.chartAtlasPOU I M α : M → ℝ)
+        ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) :
+    ∃ D : ℝ, 0 ≤ D ∧ ∀ (T' : Integral.L2.SmoothCcTensor g r s),
+      ∀ y ∈ Kc,
+        |Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw (I := I) (M := M) g r s T' α IJ.1 IJ.2
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))|
+          ≤ D * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) a T'‖ :=
+  sorry
+
+/-- For a chart base point `α` and a positive threshold `c`, the super-level set
+`{x | c ≤ ρ_α x}` is compact and contained in the chart-`α` source.  In-file re-derivation of the
+private `superlevel_compact_subset_source` (built from the public `chartAtlasPOU` continuity and
+subordination). -/
+private theorem superlevel_compact_subset_source_rs
+    (α : M) {c : ℝ} (hc_pos : 0 < c) :
+    IsCompact {x : M | c ≤ (Integral.Measure.chartAtlasPOU I M α : M → ℝ) x} ∧
+      {x : M | c ≤ (Integral.Measure.chartAtlasPOU I M α : M → ℝ) x} ⊆ (chartAt H α).source := by
+  classical
+  have hρ_cont : Continuous fun x : M => (Integral.Measure.chartAtlasPOU I M α : M → ℝ) x :=
+    (Integral.Measure.chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff.continuous
+  have hclosed : IsClosed {x : M | c ≤ (Integral.Measure.chartAtlasPOU I M α : M → ℝ) x} :=
+    isClosed_le continuous_const hρ_cont
+  refine ⟨hclosed.isCompact, ?_⟩
+  intro x hx
+  have hx_pos : (0 : ℝ) < (Integral.Measure.chartAtlasPOU I M α : M → ℝ) x :=
+    lt_of_lt_of_le hc_pos hx
+  have hx_supp : x ∈ Function.support (fun y : M => (Integral.Measure.chartAtlasPOU I M α : M → ℝ) y) :=
+    ne_of_gt hx_pos
+  have hx_tsupp : x ∈ tsupport (fun y : M => (Integral.Measure.chartAtlasPOU I M α : M → ℝ) y) :=
+    subset_tsupport _ hx_supp
+  exact Integral.Measure.chartAtlasPOU_isSubordinate I M α hx_tsupp
+
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **The general-order per-chart fibre bound on a partition-of-unity super-level set (posited
-general-rank analytic child).** At a supercritical chart order `a` (`dim M < 2·(2a)`), for every
-atlas index `α` there is a constant `D ≥ 0` such that on the super-level set
-`{x | c ≤ chartAtlasPOU α x}` of the chart partition of unity, the bundle-fibre value
-`‖T.toSection x‖` of a smooth `(r, s)`-tensor is bounded by `D · ‖T.toHs a‖` — the intrinsic
-order-`a` Hilbert–Schmidt chart-Sobolev norm (an `H^{2a}` chart norm).
+/-- **The general-order per-chart fibre bound on a partition-of-unity super-level set.** At a
+supercritical chart order `a` (`dim M < 2·(2a)`), for every atlas index `α` there is a constant
+`D ≥ 0` such that on the super-level set `{x | c ≤ chartAtlasPOU α x}` the bundle-fibre value
+`‖T.toSection x‖` of a smooth `(r, s)`-tensor is bounded by `D · ‖T.toHs a‖`, the intrinsic order-`a`
+Hilbert–Schmidt chart-Sobolev (`H^{2a}` chart) norm.
 
 This is the general-order (`a`, not necessarily even) analogue of the in-library `(0, 2k)`-only
-per-chart Euclidean core `chartFiberNorm_le_hsNorm_on_superlevel` (file
-`SobolevEmbeddingManifoldC0.lean`, `private`), which is stated only at order `2k` with `D ·
-‖T.toHs (2k)‖`.  At order `2k` it is built, chart-locality-free, from the local Euclidean ball
-`L²` Sobolev embedding composed with the Hilbert–Schmidt fibre reconstruction; the odd-`a`
-general-order case is absent (the library's tensor embedding tower is even-index-only), so it is
-posited here.  The hypothesis `dim M < 2·(2a)` is the genuine supercritical threshold for the
-chart-`H^{2a} ↪ C⁰` Sobolev embedding.  The conclusion is a fibre `C⁰` bound by the chart
-`H^{2a}`-norm on a super-level set, structurally distinct from the global bound it powers (no
-packaging); the body is `sorry` and consumers transitively depend on `sorryAx`. -/
+per-chart fibre core `chartFiberNorm_le_hsNorm_on_superlevel`, *proved* here by the same chart
+assembly: the off-centre tensor-fibre-norm reconstruction `tensorFiberNorm_sq_le_chartAlphaComponents_on_compact`
+(public) bounds `‖T.toSection x‖²` by a constant times the sum of squared chart-component pulls, each
+of which is bounded by the general-order Euclidean-pull core `uniformRawPullRS_le_hsNorm` (posited
+above) times `‖T.toHs a‖`; the constant is `√(C₁ · #pairs) · Dmax`.  Consumers transitively depend on
+`sorryAx` through the posited Euclidean-pull core. -/
 private theorem chartFiberNormRS_le_hsNorm_on_superlevel_sharp
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℕ)
     (ha : (Module.finrank ℝ E : ℝ) < 2 * (2 * a))
@@ -787,8 +842,153 @@ private theorem chartFiberNormRS_le_hsNorm_on_superlevel_sharp
     ∃ D : ℝ, 0 ≤ D ∧ ∀ (T : Integral.L2.SmoothCcTensor g r s),
       ∀ x ∈ {x : M | c ≤ (Integral.Measure.chartAtlasPOU I M α : M → ℝ) x},
         ‖T.toSection x‖ ≤ D *
-          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) a T‖ :=
-  sorry
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) a T‖ := by
+  letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+  classical
+  set Kset : Set M := {x : M | c ≤ (Integral.Measure.chartAtlasPOU I M α : M → ℝ) x} with hKset_def
+  obtain ⟨hK_compact, hK_sub⟩ := superlevel_compact_subset_source_rs (I := I) (M := M) α hc_pos
+  rw [← hKset_def] at hK_compact hK_sub
+  obtain ⟨C₁, hC₁_pos, hC₁⟩ :=
+    PDE.RicciFlow.HebeyBlock.tensorFiberNorm_sq_le_chartAlphaComponents_on_compact
+      (I := I) (M := M) g r s α hK_compact hK_sub
+  set Kc : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
+    (toEuclidean (E := E)) '' ((extChartAt I α) '' Kset) with hKc_def
+  have hKc_compact : IsCompact Kc := by
+    have h1 : IsCompact ((extChartAt I α) '' Kset) :=
+      hK_compact.image_of_continuousOn
+        ((continuousOn_extChartAt α).mono (by
+          intro x hx; rw [extChartAt_source]; exact hK_sub hx))
+    exact h1.image (toEuclidean (E := E)).continuous
+  set O : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
+    Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α ∩
+      (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
+        (Integral.Measure.chartAtlasPOU I M α : M → ℝ)
+        ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) ⁻¹' (Set.Ioi (c / 2))
+    with hO_def
+  have hO_open : IsOpen O := by
+    rw [hO_def]
+    have hρ_cont : Continuous fun x : M => (Integral.Measure.chartAtlasPOU I M α : M → ℝ) x :=
+      (Integral.Measure.chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff.continuous
+    have hcontOn : ContinuousOn
+        (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
+          (Integral.Measure.chartAtlasPOU I M α : M → ℝ)
+          ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
+        (Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α) :=
+      hρ_cont.comp_continuousOn'
+        (Analysis.Sobolev.Chart.continuousOn_symm_toEuclideanSymm (I := I) (M := M) α)
+    exact hcontOn.isOpen_inter_preimage
+      (Analysis.Sobolev.Chart.chartTargetEuclid_isOpen (I := I) (M := M) α)
+      isOpen_Ioi
+  have hO_sub : O ⊆ Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α := by
+    rw [hO_def]; exact Set.inter_subset_left
+  have hx_ext_src : ∀ x ∈ Kset, x ∈ (extChartAt I α).source := by
+    intro x hx; rw [extChartAt_source]; exact hK_sub hx
+  have hpull_eq : ∀ x ∈ Kset,
+      (extChartAt I α).symm ((toEuclidean (E := E)).symm
+        ((toEuclidean (E := E)) ((extChartAt I α) x))) = x := by
+    intro x hx
+    rw [(toEuclidean (E := E)).symm_apply_apply]
+    exact (extChartAt I α).left_inv (hx_ext_src x hx)
+  have hKcO : Kc ⊆ O := by
+    intro y hy
+    rw [hKc_def] at hy
+    obtain ⟨z, ⟨x, hx_K, hxz⟩, hzy⟩ := hy
+    have hy_eq : y = (toEuclidean (E := E)) ((extChartAt I α) x) := by rw [hxz]; exact hzy.symm
+    have hpull : (extChartAt I α).symm ((toEuclidean (E := E)).symm y) = x := by
+      rw [hy_eq]; exact hpull_eq x hx_K
+    have hy_target : y ∈ Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α := by
+      rw [hy_eq]
+      exact ⟨(extChartAt I α) x, (extChartAt I α).map_source (hx_ext_src x hx_K), rfl⟩
+    refine ⟨hy_target, ?_⟩
+    have hgoal : c / 2 < (Integral.Measure.chartAtlasPOU I M α : M → ℝ)
+        ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) := by
+      rw [hpull]
+      have hx_ge : c ≤ (Integral.Measure.chartAtlasPOU I M α : M → ℝ) x := hx_K
+      linarith [hc_pos, hx_ge]
+    exact hgoal
+  have hρ_on_O : ∀ y ∈ O,
+      c / 2 ≤ (Integral.Measure.chartAtlasPOU I M α : M → ℝ)
+        ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) := by
+    intro y hy
+    rw [hO_def] at hy
+    exact le_of_lt hy.2
+  have hc2_pos : 0 < c / 2 := by linarith
+  have h_comp : ∀ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+      (Fin s → Fin (Module.finrank ℝ E)),
+      ∃ Dij : ℝ, 0 ≤ Dij ∧ ∀ (T' : Integral.L2.SmoothCcTensor g r s), ∀ y ∈ Kc,
+        |Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw (I := I) (M := M) g r s T' α IJ.1 IJ.2
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))|
+          ≤ Dij * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) a T'‖ := by
+    intro IJ
+    exact uniformRawPullRS_le_hsNorm (I := I) (M := M) g r s a ha α IJ hc2_pos
+      hKc_compact hO_open hKcO hO_sub hρ_on_O
+  choose Dfun hDfun_nn hDfun using h_comp
+  set Dmax : ℝ := (Finset.univ.sup' (Finset.univ_nonempty) Dfun) ⊔ 0 with hDmax_def
+  have hDmax_nn : 0 ≤ Dmax := le_sup_right
+  set npairs : ℝ := (Fintype.card ((Fin r → Fin (Module.finrank ℝ E)) ×
+      (Fin s → Fin (Module.finrank ℝ E))) : ℝ) with hnp_def
+  have hnp_nn : 0 ≤ npairs := Nat.cast_nonneg _
+  refine ⟨Real.sqrt (C₁ * npairs) * Dmax, by positivity, ?_⟩
+  intro T x hx
+  set hsn : ℝ := ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) a T‖ with hhsn_def
+  have hhsn_nn : 0 ≤ hsn := norm_nonneg _
+  have hx_K : x ∈ Kset := hx
+  set yx : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) :=
+    (toEuclidean (E := E)) ((extChartAt I α) x) with hyx_def
+  have hyx_Kc : yx ∈ Kc := by
+    rw [hKc_def, hyx_def]
+    exact ⟨(extChartAt I α) x, ⟨x, hx_K, rfl⟩, rfl⟩
+  have hpull_x : (extChartAt I α).symm ((toEuclidean (E := E)).symm yx) = x := by
+    rw [hyx_def]; exact hpull_eq x hx_K
+  have h_core := hC₁ T x hx_K
+  have h_each : ∀ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
+      (Fin s → Fin (Module.finrank ℝ E)),
+      (Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw (I := I) (M := M) g r s T α IJ.1 IJ.2 x) ^ 2 ≤
+        (Dmax * hsn) ^ 2 := by
+    intro IJ
+    have h := hDfun IJ T yx hyx_Kc
+    rw [hpull_x] at h
+    have hDle : Dfun IJ ≤ Dmax := by
+      rw [hDmax_def]
+      exact le_sup_of_le_left (Finset.le_sup' Dfun (Finset.mem_univ IJ))
+    have h' : |Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw (I := I) (M := M) g r s T α IJ.1 IJ.2 x|
+        ≤ Dmax * hsn :=
+      h.trans (mul_le_mul_of_nonneg_right hDle hhsn_nn)
+    have habs_nn : 0 ≤ |Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw (I := I) (M := M) g r s T α IJ.1 IJ.2 x| :=
+      abs_nonneg _
+    have hDhsn_nn : 0 ≤ Dmax * hsn := mul_nonneg hDmax_nn hhsn_nn
+    calc (Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw (I := I) (M := M) g r s T α IJ.1 IJ.2 x) ^ 2
+        = |Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw (I := I) (M := M) g r s T α IJ.1 IJ.2 x| ^ 2 :=
+          (sq_abs _).symm
+      _ ≤ (Dmax * hsn) ^ 2 := by exact pow_le_pow_left₀ habs_nn h' 2
+  have h_sum_sq : (∑ Idx : Fin r → Fin (Module.finrank ℝ E),
+        ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
+          (Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx x) ^ 2)
+        ≤ npairs * (Dmax * hsn) ^ 2 := by
+    rw [hnp_def]
+    rw [← Fintype.sum_prod_type']
+    refine (Finset.sum_le_sum (fun IJ _ => h_each IJ)).trans ?_
+    rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
+  have h_sq : ‖T.toSection x‖ ^ 2 ≤ (Real.sqrt (C₁ * npairs) * Dmax) ^ 2 * hsn ^ 2 := by
+    refine h_core.trans ?_
+    calc C₁ * (∑ Idx : Fin r → Fin (Module.finrank ℝ E),
+            ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
+              (Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx x) ^ 2)
+        ≤ C₁ * (npairs * (Dmax * hsn) ^ 2) :=
+          mul_le_mul_of_nonneg_left h_sum_sq (le_of_lt hC₁_pos)
+      _ = (Real.sqrt (C₁ * npairs) * Dmax) ^ 2 * hsn ^ 2 := by
+          have hsq : Real.sqrt (C₁ * npairs) ^ 2 = C₁ * npairs :=
+            Real.sq_sqrt (by positivity)
+          nlinarith [hsq]
+  have hsec_nn : 0 ≤ ‖T.toSection x‖ := norm_nonneg _
+  have hconst_nn : 0 ≤ Real.sqrt (C₁ * npairs) * Dmax := by positivity
+  have h_rhs_sq : (Real.sqrt (C₁ * npairs) * Dmax) ^ 2 * hsn ^ 2 =
+      (Real.sqrt (C₁ * npairs) * Dmax * hsn) ^ 2 := by ring
+  rw [h_rhs_sq] at h_sq
+  calc ‖T.toSection x‖ = Real.sqrt (‖T.toSection x‖ ^ 2) := (Real.sqrt_sq hsec_nn).symm
+    _ ≤ Real.sqrt ((Real.sqrt (C₁ * npairs) * Dmax * hsn) ^ 2) := Real.sqrt_le_sqrt h_sq
+    _ = Real.sqrt (C₁ * npairs) * Dmax * hsn := Real.sqrt_sq (by positivity)
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -1018,22 +1218,442 @@ private theorem rawConnLapIterRS_l2Norm_le_sqrt_spectral
   rw [← Real.sqrt_sq hnn, hsq_eq]
   exact Real.sqrt_le_sqrt htsum_le
 
-/-- **The general-rank all-order intrinsic Gårding bootstrap (posited general-rank analytic
-child).** For every order `k` there is a constant `C ≥ 0` such that, for every smooth
-`(r, s)`-tensor `T`, the sum of the `L²` norms of the covariant gradients `∇^j T` up to order
-`2k` is bounded by `C` times the sum of the `L²` norms of the iterated rough Laplacians
-`Δ_∇^i T` up to order `k`:
+/-! ### The general-rank all-order Gårding bootstrap
+
+The bidegree-`(r, s)` mirror of the `(0, 2)` `AllOrderGardingBootstrap.lean`.  The strong
+induction `gradOrderRS_l2Norm_le_lapIter_sum` (the engine) is **rank-generic**: it threads only
+norms of `iteratedCovGrad`/`rawTensorConnLapIter`/`covGrad`/`rawTensorConnLapSmooth` (all
+bidegree-`(r, s)` in the library) through pure norm arithmetic, exactly as the `(0, 2)` engine
+`gradOrder_l2Norm_le_lapIter_sum`.  The three per-order inputs it consumes —
+`Order2GardingFamilyRS`, `Order1ControlFamilyRS`, `CommutatorDefectBoundRS` — are the
+genuinely-`(r, s)` curvature/Green content (the `(0, ·)` discharges `order2GardingFamily_holds`,
+`order1ControlFamily_holds`, `commutatorDefectBound_holds` rest on `(0, ·)`-restricted curvature
+primitives), so the three `(r, ·)`-valence families are posited below as precise atoms and the
+bootstrap is *proved* on top of them by the ported induction. -/
+
+/-- **The per-valence order-`2` Gårding family at fixed contravariant rank `r`.** Bidegree-`(r, ·)`
+analogue of `Order2GardingFamily`. -/
+private def Order2GardingFamilyRS
+    (g : SmoothRiemannianMetric I M) (r : ℕ) (Cg : ℕ → ℝ) : Prop :=
+  (∀ s, 0 ≤ Cg s) ∧ ∀ (s : ℕ) (S : Integral.L2.SmoothCcTensor g r s),
+    ‖Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + 1)
+        (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S)‖ ^ 2 ≤
+      Cg s * (‖Integral.Connection.rawTensorConnLapSmooth (I := I) g r s S‖ ^ 2 + ‖S‖ ^ 2)
+
+/-- **The per-valence order-`1` control family at fixed contravariant rank `r`.** Bidegree-`(r, ·)`
+analogue of `Order1ControlFamily`. -/
+private def Order1ControlFamilyRS
+    (g : SmoothRiemannianMetric I M) (r : ℕ) : Prop :=
+  ∀ (s : ℕ) (S : Integral.L2.SmoothCcTensor g r s),
+    ‖Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S‖ ^ 2 ≤
+      ‖Integral.Connection.rawTensorConnLapSmooth (I := I) g r s S‖ * ‖S‖
+
+/-- **The per-order curvature-commutator `L²` defect family at fixed bidegree `(r, s)`.**
+Bidegree-`(r, s)` analogue of `CommutatorDefectBound`. -/
+private def CommutatorDefectBoundRS
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (Cc : ℕ → ℝ) : Prop :=
+  (∀ p, 0 ≤ Cc p) ∧ ∀ (U : Integral.L2.SmoothCcTensor g r s) (p : ℕ),
+    ‖Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + p)
+          (PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s p U) -
+        PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s p
+          (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s U)‖ ≤
+      Cc p * ∑ i ∈ Finset.range (p + 2),
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i U‖
+
+/-- **The general-rank order-`2` Gårding family (posited general-rank analytic child).** At fixed
+contravariant rank `r` there is a valence-dependent `Cg : ℕ → ℝ` with `Order2GardingFamilyRS g r Cg`.
+The `(0, ·)` instance is `order2GardingFamily_holds`, whose curvature cross-term input
+`exists_abs_curvCrossTerm_l2_bound` is `(0, ·)`-restricted; the genuinely general-rank `(r, ·)`
+order-`2` Gårding estimate is absent from the library, so it is posited here.  The body is `sorry`
+and consumers transitively depend on `sorryAx`. -/
+private theorem order2GardingFamilyRS_holds (g : SmoothRiemannianMetric I M) (r : ℕ) :
+    ∃ Cg : ℕ → ℝ, Order2GardingFamilyRS (I := I) (M := M) g r Cg :=
+  sorry
+
+/-- **The general-rank order-`1` control family (posited general-rank analytic child).** At fixed
+contravariant rank `r`, `Order1ControlFamilyRS g r` holds.  The `(0, ·)` instance is
+`order1ControlFamily_holds`, whose `covGrad_l2NormSq_le_rawConnLap_mul_self_gen` is `(0, ·)`-only
+(it rests on the `(0, ·)` connection-Laplacian Green identity); the genuinely general-rank `(r, ·)`
+order-`1` interior estimate is absent from the library, so it is posited here.  The body is `sorry`
+and consumers transitively depend on `sorryAx`. -/
+private theorem order1ControlFamilyRS_holds (g : SmoothRiemannianMetric I M) (r : ℕ) :
+    Order1ControlFamilyRS (I := I) (M := M) g r :=
+  sorry
+
+/-- **The general-rank commutator-defect family (posited general-rank analytic child).** At fixed
+bidegree `(r, s)` there is an order-dependent `Cc : ℕ → ℝ` with `CommutatorDefectBoundRS g r s Cc`.
+The `(0, 2)` instance is `commutatorDefectBound_holds`, whose `exists_commutatorDefect_l2_bound_succ`
+is `(0, 2)`-restricted; the genuinely general-rank `(r, s)` iterated curvature-commutator content
+is absent from the library, so it is posited here.  The body is `sorry` and consumers transitively
+depend on `sorryAx`. -/
+private theorem commutatorDefectBoundRS_holds (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    ∃ Cc : ℕ → ℝ, CommutatorDefectBoundRS (I := I) (M := M) g r s Cc :=
+  sorry
+
+/-- `‖∇^i U‖` as a `SmoothCcTensor` seminorm equals `tensorL2Norm` of its underlying field, at
+bidegree `(r, s)`. -/
+private lemma iteratedCovGradRS_norm_eq_tensorL2Norm
+    (g : SmoothRiemannianMetric I M) (r s j : ℕ) (U : Integral.L2.SmoothCcTensor g r s) :
+    ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s j U‖ =
+      Integral.L2.tensorL2Norm (I := I) (M := M) g r (s + j)
+        (PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s j U).toFun :=
+  Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M)
+    (PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s j U)
+
+/-- `‖Δ_∇^i U‖` as a `SmoothCcTensor` seminorm equals `‖(Δ_∇^i U).toL2‖`, at bidegree `(r, s)`. -/
+private lemma rawTensorConnLapIterRS_norm_eq_toL2
+    (g : SmoothRiemannianMetric I M) (r s i : ℕ) (U : Integral.L2.SmoothCcTensor g r s) :
+    ‖Integral.Connection.rawTensorConnLapIter (I := I) g r s i U‖ =
+      ‖Integral.L2.SmoothCcTensor.toL2
+        (Integral.Connection.rawTensorConnLapIter (I := I) g r s i U)‖ :=
+  (Integral.L2.SmoothCcTensor.norm_toL2 (I := I) (M := M)
+    (Integral.Connection.rawTensorConnLapIter (I := I) g r s i U)).symm
+
+set_option maxHeartbeats 1600000 in
+/-- **The general-rank mixed bound.** The bidegree-`(r, s)` analogue of
+`gradOrder_l2Norm_le_lapIter_sum`, proved by the same strong induction on the gradient order `p`,
+threading the three `(r, ·)` per-order families through pure norm arithmetic. -/
+private lemma gradOrderRS_l2Norm_le_lapIter_sum
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (Cg Cc : ℕ → ℝ)
+    (hgard : Order2GardingFamilyRS (I := I) (M := M) g r Cg)
+    (hgrad1 : Order1ControlFamilyRS (I := I) (M := M) g r)
+    (hcomm : CommutatorDefectBoundRS (I := I) (M := M) g r s Cc) :
+    ∃ Cmix : ℕ → ℝ, (∀ p, 0 ≤ Cmix p) ∧
+      ∀ (p : ℕ) (U : Integral.L2.SmoothCcTensor g r s),
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s p U‖ ≤
+          Cmix p * ∑ i ∈ Finset.range ((p + 1) / 2 + 1),
+            ‖Integral.Connection.rawTensorConnLapIter (I := I) g r s i U‖ := by
+  classical
+  obtain ⟨hCg, hgardS⟩ := hgard
+  obtain ⟨hCc, hcommU⟩ := hcomm
+  set sg : ℕ → ℝ := fun m => Real.sqrt (Cg (s + m)) with hsg_def
+  have hsg_nn : ∀ m, 0 ≤ sg m := fun m => Real.sqrt_nonneg _
+  set K : ℕ → ℝ := fun m => sg m * (2 + Cc m) with hK_def
+  have hK_nn : ∀ m, 0 ≤ K m := fun m => mul_nonneg (hsg_nn m) (by linarith [hCc m])
+  let Bpair : ℕ → ℝ × ℝ := fun n => Nat.rec (motive := fun _ => ℝ × ℝ)
+    (1, 1)
+    (fun n prev =>
+      let s := prev.2
+      let b : ℝ := if n = 0 then 1 else K (n - 1) * s + 1
+      (b, s + b))
+    n
+  let B : ℕ → ℝ := fun n => (Bpair n).1
+  have hBfst_succ : ∀ n, (Bpair (n + 1)).1 =
+      (if n = 0 then 1 else K (n - 1) * (Bpair n).2 + 1) := fun _ => rfl
+  have hBsnd_succ : ∀ n, (Bpair (n + 1)).2 =
+      (Bpair n).2 + (Bpair (n + 1)).1 := fun _ => rfl
+  have hBsnd_zero : (Bpair 0).2 = 1 := rfl
+  have hB0 : B 0 = 1 := rfl
+  have hB1 : B 1 = 1 := rfl
+  have hB_fst : ∀ n, B n = (Bpair n).1 := fun _ => rfl
+  have hBpair_sum : ∀ n, (Bpair n).2 = ∑ i ∈ Finset.range (n + 1), B i := by
+    intro n
+    induction n with
+    | zero => rw [hBsnd_zero, Finset.sum_range_one, hB0]
+    | succ m ihm =>
+        rw [Finset.sum_range_succ, ← ihm, hBsnd_succ m, hB_fst (m + 1)]
+  have hBsucc_pos : ∀ n, B (n + 2) = K n * (∑ i ∈ Finset.range (n + 2), B i) + 1 := by
+    intro n
+    rw [hB_fst (n + 2), hBfst_succ (n + 1)]
+    simp only [Nat.succ_ne_zero, if_false, Nat.add_sub_cancel]
+    rw [hBpair_sum (n + 1)]
+  have hB_nn : ∀ p, 0 ≤ B p := by
+    intro p
+    induction p using Nat.strong_induction_on with
+    | _ n ih =>
+      match n with
+      | 0 => rw [hB0]; norm_num
+      | 1 => rw [hB1]; norm_num
+      | (m + 2) =>
+          rw [hBsucc_pos m]
+          have h2 : 0 ≤ ∑ i ∈ Finset.range (m + 2), B i :=
+            Finset.sum_nonneg (fun i hi => ih i (by
+              have := Finset.mem_range.mp hi; omega))
+          have : 0 ≤ K m * (∑ i ∈ Finset.range (m + 2), B i) := mul_nonneg (hK_nn m) h2
+          linarith
+  have hBstep : ∀ m,
+      sg m * (B m + Cc m * (∑ i ∈ Finset.range (m + 2), B i) + B m) + 1 ≤
+      B (m + 2) := by
+    intro m
+    rw [hBsucc_pos m]
+    have hBm_le : B m ≤ ∑ i ∈ Finset.range (m + 2), B i := by
+      apply Finset.single_le_sum (f := B) (fun i _ => hB_nn i)
+      rw [Finset.mem_range]; omega
+    have hsum_nn : 0 ≤ ∑ i ∈ Finset.range (m + 2), B i :=
+      Finset.sum_nonneg (fun i _ => hB_nn i)
+    have hkey : sg m * (B m + Cc m * (∑ i ∈ Finset.range (m + 2), B i) + B m) ≤
+        K m * (∑ i ∈ Finset.range (m + 2), B i) := by
+      rw [hK_def]
+      have h1 : B m + Cc m * (∑ i ∈ Finset.range (m + 2), B i) + B m ≤
+          (2 + Cc m) * (∑ i ∈ Finset.range (m + 2), B i) := by
+        nlinarith [hBm_le, hCc m, hsum_nn]
+      calc sg m * (B m + Cc m * (∑ i ∈ Finset.range (m + 2), B i) + B m)
+          ≤ sg m * ((2 + Cc m) * (∑ i ∈ Finset.range (m + 2), B i)) :=
+            mul_le_mul_of_nonneg_left h1 (hsg_nn m)
+        _ = sg m * (2 + Cc m) * (∑ i ∈ Finset.range (m + 2), B i) := by ring
+    linarith
+  refine ⟨B, hB_nn, ?_⟩
+  intro p
+  induction p using Nat.strong_induction_on with
+  | _ n ih =>
+    match n with
+    | 0 =>
+        intro U
+        rw [PDE.RicciFlow.iteratedCovGrad_zero]
+        rw [hB0]
+        have hsum : ∑ i ∈ Finset.range ((0 + 1) / 2 + 1),
+            ‖Integral.Connection.rawTensorConnLapIter (I := I) g r s i U‖ = ‖U‖ := by
+          norm_num [Integral.Connection.rawTensorConnLapIter_zero]
+        rw [hsum]; ring_nf; exact le_refl _
+    | 1 =>
+        intro U
+        rw [hB1]
+        have hord1 : ‖Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s U‖ ^ 2 ≤
+            ‖Integral.Connection.rawTensorConnLapSmooth (I := I) g r s U‖ * ‖U‖ := hgrad1 s U
+        have hgrad_eq :
+            PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s 1 U =
+              Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s U := by
+          have h := PDE.RicciFlow.iteratedCovGrad_succ (I := I) (M := M) g r s 0 U
+          rw [PDE.RicciFlow.iteratedCovGrad_zero] at h
+          exact h
+        rw [hgrad_eq]
+        have hsum : ∑ i ∈ Finset.range ((1 + 1) / 2 + 1),
+              ‖Integral.Connection.rawTensorConnLapIter (I := I) g r s i U‖ =
+            ‖U‖ + ‖Integral.Connection.rawTensorConnLapSmooth (I := I) g r s U‖ := by
+          have : (1 + 1) / 2 + 1 = 2 := by norm_num
+          rw [this]
+          rw [Finset.sum_range_succ, Finset.sum_range_one]
+          rw [Integral.Connection.rawTensorConnLapIter_zero,
+            Integral.Connection.rawTensorConnLapIter_one]
+        rw [hsum, one_mul]
+        set a : ℝ := ‖Integral.Connection.rawTensorConnLapSmooth (I := I) g r s U‖ with ha_def
+        set b : ℝ := ‖U‖ with hb_def
+        have ha_nn : 0 ≤ a := norm_nonneg _
+        have hb_nn : 0 ≤ b := norm_nonneg _
+        have hgrad_nn : 0 ≤ ‖Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s U‖ :=
+          norm_nonneg _
+        have hsqrt : ‖Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s U‖ ≤
+            Real.sqrt (a * b) := by
+          rw [← Real.sqrt_sq hgrad_nn]
+          exact Real.sqrt_le_sqrt hord1
+        have hamgm : Real.sqrt (a * b) ≤ b + a := by
+          rw [← Real.sqrt_sq (by positivity : (0:ℝ) ≤ b + a)]
+          apply Real.sqrt_le_sqrt
+          nlinarith [sq_nonneg (a - b), ha_nn, hb_nn]
+        linarith [hsqrt, hamgm]
+    | (m + 2) =>
+        intro U
+        set S : Integral.L2.SmoothCcTensor g r (s + m) :=
+          PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s m U with hS_def
+        have hgrad2_eq :
+            PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s (m + 2) U =
+              Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + m + 1)
+                (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + m) S) := by
+          rw [hS_def]
+          rfl
+        have hgard2 :
+            ‖Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + m + 1)
+                (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + m) S)‖ ^ 2 ≤
+              Cg (s + m) *
+                (‖Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + m) S‖ ^ 2 +
+                  ‖S‖ ^ 2) :=
+          hgardS (s + m) S
+        set nHess : ℝ :=
+          ‖Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + m + 1)
+            (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + m) S)‖
+          with hnHess_def
+        set nLapS : ℝ := ‖Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + m) S‖
+          with hnLapS_def
+        set nS : ℝ := ‖S‖ with hnS_def
+        have hnHess_nn : 0 ≤ nHess := norm_nonneg _
+        have hnLapS_nn : 0 ≤ nLapS := norm_nonneg _
+        have hnS_nn : 0 ≤ nS := norm_nonneg _
+        have hgard_fp : nHess ≤ sg m * (nLapS + nS) := by
+          rw [hsg_def]
+          rw [← Real.sqrt_sq hnHess_nn]
+          calc Real.sqrt (nHess ^ 2)
+              ≤ Real.sqrt (Cg (s + m) * (nLapS ^ 2 + nS ^ 2)) := Real.sqrt_le_sqrt hgard2
+            _ = Real.sqrt (Cg (s + m)) * Real.sqrt (nLapS ^ 2 + nS ^ 2) := by
+                  rw [Real.sqrt_mul (hCg (s + m))]
+            _ ≤ Real.sqrt (Cg (s + m)) * (nLapS + nS) := by
+                  apply mul_le_mul_of_nonneg_left _ (Real.sqrt_nonneg _)
+                  rw [← Real.sqrt_sq (by positivity : (0:ℝ) ≤ nLapS + nS)]
+                  apply Real.sqrt_le_sqrt
+                  nlinarith [mul_nonneg hnLapS_nn hnS_nn]
+        have hΔS_eq : Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + m) S =
+            Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + m)
+              (PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s m U) := by
+          rw [hS_def]
+        have hcomm_m := hcommU U m
+        have hnLapS_eq : nLapS =
+            ‖Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + m)
+              (PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s m U)‖ := by
+          rw [hnLapS_def, hΔS_eq]
+        set DefM : Integral.L2.SmoothCcTensor g r (s + m) :=
+          PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s m
+            (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s U) with hDefM_def
+        have htri :
+            ‖Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + m)
+                (PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s m U)‖ ≤
+              ‖DefM‖ +
+                ‖Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + m)
+                    (PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s m U) - DefM‖ :=
+          norm_le_norm_add_norm_sub'
+            (Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + m)
+              (PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s m U)) DefM
+        have hdef_bound :
+            ‖Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + m)
+                  (PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s m U) - DefM‖ ≤
+              Cc m * ∑ i ∈ Finset.range (m + 2),
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i U‖ := by
+          rw [hDefM_def]; exact hcomm_m
+        have hih_base :
+            ‖DefM‖ ≤ B m * ∑ i ∈ Finset.range ((m + 1) / 2 + 1),
+              ‖Integral.Connection.rawTensorConnLapIter (I := I) g r s i
+                (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s U)‖ := by
+          rw [hDefM_def]
+          exact ih m (by omega) (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s U)
+        have hlapiter_shift : ∀ i,
+            Integral.Connection.rawTensorConnLapIter (I := I) g r s i
+                (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s U) =
+              Integral.Connection.rawTensorConnLapIter (I := I) g r s (i + 1) U := by
+          intro i
+          induction i with
+          | zero => simp [Integral.Connection.rawTensorConnLapIter]
+          | succ n ihn =>
+              rw [Integral.Connection.rawTensorConnLapIter_succ, ihn,
+                ← Integral.Connection.rawTensorConnLapIter_succ]
+        have hih_low : ∀ i, i < m + 2 →
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i U‖ ≤
+              B i * ∑ j ∈ Finset.range ((i + 1) / 2 + 1),
+                ‖Integral.Connection.rawTensorConnLapIter (I := I) g r s j U‖ :=
+          fun i hi => ih i hi U
+        set Rfull : ℕ := ((m + 2) + 1) / 2 + 1 with hRfull_def
+        set Sfull : ℝ := ∑ i ∈ Finset.range Rfull,
+          ‖Integral.Connection.rawTensorConnLapIter (I := I) g r s i U‖ with hSfull_def
+        have hSfull_nn : 0 ≤ Sfull :=
+          Finset.sum_nonneg (fun i _ => norm_nonneg _)
+        have hbase_le_full :
+            ∑ i ∈ Finset.range ((m + 1) / 2 + 1),
+                ‖Integral.Connection.rawTensorConnLapIter (I := I) g r s i
+                  (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s U)‖ ≤ Sfull := by
+          rw [hSfull_def]
+          have hrw : ∑ i ∈ Finset.range ((m + 1) / 2 + 1),
+                ‖Integral.Connection.rawTensorConnLapIter (I := I) g r s i
+                  (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s U)‖ =
+              ∑ i ∈ Finset.range ((m + 1) / 2 + 1),
+                ‖Integral.Connection.rawTensorConnLapIter (I := I) g r s (i + 1) U‖ := by
+            apply Finset.sum_congr rfl
+            intro i _; rw [hlapiter_shift i]
+          rw [hrw]
+          have hshift : ∑ i ∈ Finset.range ((m + 1) / 2 + 1),
+                ‖Integral.Connection.rawTensorConnLapIter (I := I) g r s (i + 1) U‖ =
+              ∑ i ∈ Finset.Ico 1 ((m + 1) / 2 + 2),
+                ‖Integral.Connection.rawTensorConnLapIter (I := I) g r s i U‖ := by
+            rw [Finset.sum_Ico_eq_sum_range]
+            apply Finset.sum_congr (by norm_num) (fun i _ => by ring_nf)
+          rw [hshift]
+          apply Finset.sum_le_sum_of_subset_of_nonneg
+          · intro x hx
+            rw [Finset.mem_Ico] at hx
+            rw [Finset.mem_range]
+            rw [hRfull_def]; omega
+          · intro i _ _; exact norm_nonneg _
+        have hlow_sub_le_full : ∀ i, i < m + 2 →
+            ∑ j ∈ Finset.range ((i + 1) / 2 + 1),
+                ‖Integral.Connection.rawTensorConnLapIter (I := I) g r s j U‖ ≤ Sfull := by
+          intro i hi
+          rw [hSfull_def]
+          apply Finset.sum_le_sum_of_subset_of_nonneg
+          · intro x hx
+            rw [Finset.mem_range] at hx ⊢
+            rw [hRfull_def]; omega
+          · intro j _ _; exact norm_nonneg _
+        have hSlow_nn : 0 ≤ ∑ i ∈ Finset.range (m + 2),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i U‖ :=
+          Finset.sum_nonneg (fun i _ => norm_nonneg _)
+        have hnLapS_le :
+            nLapS ≤ B m * Sfull
+              + Cc m * ∑ i ∈ Finset.range (m + 2),
+                  ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i U‖ := by
+          rw [hnLapS_eq]
+          calc ‖Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + m)
+                  (PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s m U)‖
+              ≤ ‖DefM‖ + ‖Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + m)
+                    (PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s m U) - DefM‖ := htri
+            _ ≤ (B m * ∑ i ∈ Finset.range ((m + 1) / 2 + 1),
+                    ‖Integral.Connection.rawTensorConnLapIter (I := I) g r s i
+                      (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s U)‖)
+                  + Cc m * ∑ i ∈ Finset.range (m + 2),
+                      ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i U‖ :=
+                add_le_add hih_base hdef_bound
+            _ ≤ B m * Sfull
+                  + Cc m * ∑ i ∈ Finset.range (m + 2),
+                      ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i U‖ := by
+                have hb := mul_le_mul_of_nonneg_left hbase_le_full (hB_nn m)
+                linarith [hb]
+        have hSlow_le :
+            ∑ i ∈ Finset.range (m + 2),
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i U‖ ≤
+              (∑ i ∈ Finset.range (m + 2), B i) * Sfull := by
+          rw [Finset.sum_mul]
+          apply Finset.sum_le_sum
+          intro i hi
+          rw [Finset.mem_range] at hi
+          calc ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i U‖
+              ≤ B i * ∑ j ∈ Finset.range ((i + 1) / 2 + 1),
+                  ‖Integral.Connection.rawTensorConnLapIter (I := I) g r s j U‖ := hih_low i hi
+            _ ≤ B i * Sfull :=
+                mul_le_mul_of_nonneg_left (hlow_sub_le_full i hi) (hB_nn i)
+        have hnS_le : nS ≤ B m * Sfull := by
+          rw [hnS_def, hS_def]
+          calc ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s m U‖
+              ≤ B m * ∑ j ∈ Finset.range ((m + 1) / 2 + 1),
+                  ‖Integral.Connection.rawTensorConnLapIter (I := I) g r s j U‖ := ih m (by omega) U
+            _ ≤ B m * Sfull :=
+                mul_le_mul_of_nonneg_left (hlow_sub_le_full m (by omega)) (hB_nn m)
+        have hcombine : nLapS + nS ≤
+            (B m + Cc m * (∑ i ∈ Finset.range (m + 2), B i) + B m) * Sfull := by
+          have h1 : nLapS ≤ B m * Sfull
+              + Cc m * ((∑ i ∈ Finset.range (m + 2), B i) * Sfull) := by
+            calc nLapS ≤ B m * Sfull
+                  + Cc m * ∑ i ∈ Finset.range (m + 2),
+                      ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i U‖ := hnLapS_le
+              _ ≤ B m * Sfull + Cc m * ((∑ i ∈ Finset.range (m + 2), B i) * Sfull) := by
+                  have hc := mul_le_mul_of_nonneg_left hSlow_le (hCc m)
+                  linarith [hc]
+          nlinarith [h1, hnS_le, hSfull_nn]
+        have hfinal : nHess ≤ B (m + 2) * Sfull := by
+          have hstep := hBstep m
+          calc nHess ≤ sg m * (nLapS + nS) := hgard_fp
+            _ ≤ sg m * ((B m + Cc m * (∑ i ∈ Finset.range (m + 2), B i) + B m) * Sfull) := by
+                exact mul_le_mul_of_nonneg_left hcombine (hsg_nn m)
+            _ = (sg m * (B m + Cc m * (∑ i ∈ Finset.range (m + 2), B i) + B m)) * Sfull := by
+                ring
+            _ ≤ B (m + 2) * Sfull := by
+                have hle : sg m * (B m + Cc m * (∑ i ∈ Finset.range (m + 2), B i) + B m) ≤
+                    B (m + 2) := by linarith [hstep]
+                exact mul_le_mul_of_nonneg_right hle hSfull_nn
+        have hLHS : ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s (m + 2) U‖ = nHess := by
+          rw [hgrad2_eq, hnHess_def]
+        have hRHS : (B (m + 2) * ∑ i ∈ Finset.range (((m + 2) + 1) / 2 + 1),
+              ‖Integral.Connection.rawTensorConnLapIter (I := I) g r s i U‖) = B (m + 2) * Sfull := by
+          rw [hSfull_def, hRfull_def]
+        rw [hLHS, hRHS]
+        exact hfinal
+
+/-- **The general-rank all-order intrinsic Gårding bootstrap.** For every order `k` there is a
+constant `C ≥ 0` such that, for every smooth `(r, s)`-tensor `T`, the sum of the `L²` norms of the
+covariant gradients `∇^j T` up to order `2k` is bounded by `C` times the sum of the `L²` norms of
+the iterated rough Laplacians `Δ_∇^i T` up to order `k`:
 `∑_{j ≤ 2k} ‖∇^j T‖_{L²} ≤ C · ∑_{i ≤ k} ‖Δ_∇^i T‖_{L²}`.
 
 This is the bidegree-`(r, s)` analogue of the in-library `(0, 2)`
-`allOrder_covGrad_l2Norm_le_lapIter_sum_unconditional` (file `AllOrderGardingBootstrap.lean`).
-At `(0, 2)` the bootstrap rests on the iterated intrinsic Gårding / Bochner inequality, whose
-curvature-commutator inputs (`order2GardingFamily_holds`, `commutatorDefectBound_holds`) are
-themselves rank-restricted; the genuinely general-rank `(r, s)` bootstrap — the same
-elliptic-regularity estimate controlling all covariant derivatives by the iterated rough
-Laplacian — is absent from the library, so it is posited here.  The conclusion is an `L²`-norm
-domination, structurally distinct from the chart-Sobolev / spectral bound it powers (no
-packaging); the body is `sorry` and consumers transitively depend on `sorryAx`. -/
+`allOrder_covGrad_l2Norm_le_lapIter_sum_unconditional`, *proved* here by the ported strong
+induction `gradOrderRS_l2Norm_le_lapIter_sum` with the three `(r, ·)` per-order families
+(`order2GardingFamilyRS_holds`, `order1ControlFamilyRS_holds`, `commutatorDefectBoundRS_holds`)
+discharged as the genuinely general-rank curvature/Green content.  Consumers transitively depend on
+`sorryAx` through those three posited family atoms. -/
 private theorem covGrad_l2Norm_le_lapIter_sumRS
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -1043,8 +1663,52 @@ private theorem covGrad_l2Norm_le_lapIter_sumRS
               (PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s j T).toFun ≤
           C * ∑ i ∈ Finset.range (k + 1),
             ‖Integral.L2.SmoothCcTensor.toL2
-              (Integral.Connection.rawTensorConnLapIter (I := I) g r s i T)‖ :=
-  sorry
+              (Integral.Connection.rawTensorConnLapIter (I := I) g r s i T)‖ := by
+  classical
+  obtain ⟨Cg, hgard⟩ := order2GardingFamilyRS_holds (I := I) (M := M) g r
+  obtain ⟨Cc, hcomm⟩ := commutatorDefectBoundRS_holds (I := I) (M := M) g r s
+  obtain ⟨Cmix, hCmix_nn, hmix⟩ :=
+    gradOrderRS_l2Norm_le_lapIter_sum (I := I) (M := M) g r s Cg Cc hgard
+      (order1ControlFamilyRS_holds (I := I) (M := M) g r) hcomm
+  set Cmax : ℝ := ∑ j ∈ Finset.range (2 * k + 1), Cmix j with hCmax_def
+  have hCmax_nn : 0 ≤ Cmax := Finset.sum_nonneg (fun j _ => hCmix_nn j)
+  refine ⟨Cmax, hCmax_nn, fun T => ?_⟩
+  have hLHS_eq : ∀ j,
+      Integral.L2.tensorL2Norm (I := I) (M := M) g r (s + j)
+          (PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s j T).toFun =
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s j T‖ :=
+    fun j => (iteratedCovGradRS_norm_eq_tensorL2Norm (I := I) (M := M) g r s j T).symm
+  have hRHS_eq : ∀ i,
+      ‖Integral.L2.SmoothCcTensor.toL2
+          (Integral.Connection.rawTensorConnLapIter (I := I) g r s i T)‖ =
+        ‖Integral.Connection.rawTensorConnLapIter (I := I) g r s i T‖ :=
+    fun i => (rawTensorConnLapIterRS_norm_eq_toL2 (I := I) (M := M) g r s i T).symm
+  rw [Finset.sum_congr rfl (fun j _ => hLHS_eq j),
+      Finset.sum_congr rfl (fun i _ => hRHS_eq i)]
+  set Sk : ℝ := ∑ i ∈ Finset.range (k + 1),
+    ‖Integral.Connection.rawTensorConnLapIter (I := I) g r s i T‖ with hSk_def
+  have hSk_nn : 0 ≤ Sk := Finset.sum_nonneg (fun i _ => norm_nonneg _)
+  have hper : ∀ j ∈ Finset.range (2 * k + 1),
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s j T‖ ≤ Cmix j * Sk := by
+    intro j hj
+    rw [Finset.mem_range] at hj
+    have hsub_le : ∑ i ∈ Finset.range ((j + 1) / 2 + 1),
+          ‖Integral.Connection.rawTensorConnLapIter (I := I) g r s i T‖ ≤ Sk := by
+      rw [hSk_def]
+      apply Finset.sum_le_sum_of_subset_of_nonneg
+      · intro x hx
+        rw [Finset.mem_range] at hx ⊢
+        omega
+      · intro i _ _; exact norm_nonneg _
+    calc ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s j T‖
+        ≤ Cmix j * ∑ i ∈ Finset.range ((j + 1) / 2 + 1),
+            ‖Integral.Connection.rawTensorConnLapIter (I := I) g r s i T‖ := hmix j T
+      _ ≤ Cmix j * Sk := mul_le_mul_of_nonneg_left hsub_le (hCmix_nn j)
+  calc ∑ j ∈ Finset.range (2 * k + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s j T‖
+      ≤ ∑ j ∈ Finset.range (2 * k + 1), Cmix j * Sk := Finset.sum_le_sum hper
+    _ = (∑ j ∈ Finset.range (2 * k + 1), Cmix j) * Sk := by rw [Finset.sum_mul]
+    _ = Cmax * Sk := by rw [hCmax_def]
 
 set_option linter.unusedSectionVars false in
 /-- **The general-rank matching-order Gårding lift `chart-H^{2a} ≤ spectral@{2a}`.** For every

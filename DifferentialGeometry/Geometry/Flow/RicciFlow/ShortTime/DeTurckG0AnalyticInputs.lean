@@ -2403,29 +2403,67 @@ private theorem ccTensorBilinSymm_of_toL2_zero
   rw [hTzero]
   exact ccTensorBilinSymm_zero_apply (I := I) g x v w
 
+open MeasureTheory in
+/-- **a.e.-membership in a closed ball + interior continuity ⟹ everywhere on the open
+interior.**  If `f` is continuous on the open interior `Ioo 0 T` and lies a.e. (under the
+time measure `volume.restrict (Icc 0 T)`) in the closed ball, then it lies in the closed
+ball at *every* interior point: the bad set `Ioo 0 T ∩ f⁻¹(ballᶜ)` is open (continuous
+preimage of the open complement) and null (a.e.), hence empty. -/
+private theorem mem_closedBall_of_ae_of_continuousOn_Ioo
+    {X : Type*} [PseudoMetricSpace X] {T : ℝ}
+    (f : ℝ → X) (hf : ContinuousOn f (Set.Ioo (0 : ℝ) T)) {c : X} {R : ℝ}
+    (hae : ∀ᵐ t ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T),
+      f t ∈ Metric.closedBall c R) :
+    ∀ s ∈ Set.Ioo (0 : ℝ) T, f s ∈ Metric.closedBall c R := by
+  have hsub : Set.Ioo (0 : ℝ) T ⊆ Set.Icc (0 : ℝ) T := Set.Ioo_subset_Icc_self
+  have hae' : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Ioo (0 : ℝ) T)),
+      f t ∈ Metric.closedBall c R := by
+    have := ae_restrict_of_ae_restrict_of_subset (μ := MeasureTheory.volume) hsub hae
+    exact this
+  set S : Set ℝ := Set.Ioo (0 : ℝ) T ∩ f ⁻¹' (Metric.closedBall c R)ᶜ with hS_def
+  have hSopen : IsOpen S :=
+    hf.isOpen_inter_preimage isOpen_Ioo Metric.isClosed_closedBall.isOpen_compl
+  have hSnull : MeasureTheory.volume S = 0 := by
+    rw [MeasureTheory.ae_iff] at hae'
+    rw [MeasureTheory.Measure.restrict_apply₀'
+      (measurableSet_Ioo.nullMeasurableSet)] at hae'
+    rw [hS_def, Set.inter_comm]
+    exact hae'
+  have hSempty : S = ∅ := hSopen.eq_empty_of_measure_zero hSnull
+  intro s hs
+  by_contra hmem
+  exact (Set.eq_empty_iff_forall_notMem.1 hSempty) s ⟨hs, hmem⟩
+
+open MeasureTheory in
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
 set_option linter.unusedVariables false in
 /-- **The engine carrier stays in the radius-`R` ball on the interior (the parabolic
-stays-in-ball transport for the pointwise carrier — posited analytic child).**
+stays-in-ball transport for the pointwise carrier).**
 
 For the maximal-regularity Duhamel solution `u = maxRegDuhamelMap a hT hT1 0 gforce` of the
 `g₀`-anchored DeTurck system with smooth initial datum `0`, whose nonlinearity `N_cont` is
-`LipschitzOnWith K` on the radius-`R` `Hᵃ⁺¹`-ball (`hLipBall`) and whose forcing is reproduced
-a.e. by `N_cont` along the solution field (`hforce`), **every** pointwise order-`(a+2)` bridge
+`LipschitzOnWith K` on the radius-`R` `Hᵃ⁺¹`-ball (`hLipBall`), whose forcing is reproduced
+a.e. by `N_cont` along the solution field (`hforce`), whose `H^{a+1}`-view Duhamel field stays
+a.e. in the engine ball (`hstay`, the conjunct exposed by the maximal-regularity engine
+`quasilinear_strong_existence_locallyLipschitz_smallTime_stayDischarged_ofCompact`), and whose
+forcing satisfies the first-order coupling (`hcouple`), **every** pointwise order-`(a+2)` bridge
 representative `u₂'` of `u` (`hbridge'`: `ι_{a} (u₂' s) = timeH1.toFun u s` on `[0, T]`) has its
 included carrier `ι_{a+1} (u₂' s)` in the closed radius-`R` ball about the included zero datum on
 the open interior `(0, T)`.
 
 This is the genuine **stays-in-ball** transport of the engine solution to its pointwise
-carrier: the sharp Lions–Magenes parabolic-trace stays-in-ball estimate
-`maxRegDuhamelSolFieldHa1_stay` keeps the `H^{a+1}`-view Duhamel field a.e. in the ball at the
-engine radius `R` (the small-forcing horizon, here `T ≤ 1`), and the continuous pointwise
-bridge representative `u₂'` agrees with the represented function `timeH1.toFun u`, so its
-`H^{a+1}`-inclusion stays in the (closed) ball at every interior time.  Its conclusion (the
-carrier-in-ball) is a *genuine geometric constraint* tying the carrier to the engine ball,
-structurally distinct from the supplied Lipschitz/forcing hypotheses; no packaging.  The radius
-`R` is pinned to the engine ball by `hLipBall`, so the statement is sound (not the false bound
-for an arbitrary `R`).  The body is `sorry` (the genuine parabolic-trace stays-in-ball /
-a.e.-to-everywhere transport content), to be discharged by the `/prove` recursion. -/
+carrier.  The engine's stays-in-ball event `hstay` keeps the `H^{a+1}`-view Duhamel field a.e.
+in the ball at the engine radius `R`; the spectral coordinate identity
+`maxRegDuhamelSolFieldHa1_coeff_ae` matches that field's coordinates a.e. with the bridge
+representative's coordinates (both are the indefinite integral of `u.deriv` started at `0`), so
+`ι_{a+1} (u₂' t)` lies a.e. in the ball; and the interior all-scale smoothing
+`interior_allscale_time_continuity` (fed by the free base regularity and `hcouple`) makes
+`s ↦ ι_{a+1} (u₂' s)` continuous on the interior, upgrading the a.e. membership to an
+everywhere-on-`(0, T)` membership.  Its conclusion (the carrier-in-ball) is a *genuine geometric
+constraint* tying the carrier to the engine ball, structurally distinct from the supplied
+Lipschitz / forcing / stay hypotheses; no packaging.  The radius `R` is pinned to the engine
+ball by `hstay`, so the statement is sound (not the false bound for an arbitrary `R`). -/
 theorem deturck_g0_engine_carrier_inBall
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
@@ -2445,7 +2483,17 @@ theorem deturck_g0_engine_carrier_inBall
         =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T]
       (fun t => N_cont (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1
         (I := I) (M := M) (a : ℝ) hT hT1
-        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t))) :
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (hstay : ∀ᵐ t ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T),
+      Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M) (a : ℝ)
+          hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t ∈
+        Metric.closedBall
+          (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R)
+    (hcouple : ∀ d : ℝ,
+      Summable (solFieldMass (I := I) (M := M) hT.le gforce (d + 1)) →
+        Summable (forcingMass (I := I) (M := M) gforce d)) :
     ∀ (u₂' : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)),
       (∀ s ∈ Set.Icc (0 : ℝ) T,
         tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
@@ -2457,7 +2505,140 @@ theorem deturck_g0_engine_carrier_inBall
         Metric.closedBall
           (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
             (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
-            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R := sorry
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R := by
+  classical
+  intro u₂' hbridge'
+  set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+    with hcompact_def
+  set ι₁ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) →L[ℝ]
+      tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) :=
+    tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+      (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) with hι₁_def
+  -- Free base regularity at order `a`: `forcingMass (a - 2)` is summable, and the
+  -- two-derivative gain bumps it to `solFieldMass a` (independent of `hcouple`).
+  have hbase : Summable (solFieldMass (I := I) (M := M) hT.le gforce (a : ℝ)) := by
+    have hfm : Summable (forcingMass (I := I) (M := M) gforce ((a : ℝ) - 2)) := by
+      have hsum := summable_weight_mul_norm_timeModeCoeff_sq (I := I) (M := M) gforce hcompact
+      refine Summable.of_nonneg_of_le
+        (fun i => forcingMass_nonneg (I := I) (M := M) gforce ((a : ℝ) - 2) i)
+        (fun i => ?_) hsum
+      have hbase_ge : (1 : ℝ) ≤ 1 + TensorEigenIdx.lambda (I := I) (M := M) i :=
+        one_le_one_add_lambda (I := I) (M := M) i
+      have hwle : tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) - 2) ≤
+          tensorSobolevWeight (I := I) (M := M) i (a : ℝ) :=
+        Real.rpow_le_rpow_of_exponent_le hbase_ge (by linarith)
+      simpa only [forcingMass] using mul_le_mul_of_nonneg_right hwle (sq_nonneg _)
+    have hgain := solFieldMass_summable_of_forcingMass_summable (I := I) (M := M)
+      hT.le gforce ((a : ℝ) - 2) hfm
+    have hrw : (a : ℝ) - 2 + 2 = (a : ℝ) := by ring
+    rwa [hrw] at hgain
+  -- `s ↦ u₂' s` is `ContinuousOn` the interior into `H^{a+2}`: mirror the carrier-interior
+  -- continuity from the all-scale interior smoothing, identifying `u₂'` with its `[ε,T]` model.
+  have hu₂'_contOn : ContinuousOn (fun r : ℝ => u₂' r) (Set.Ioo (0 : ℝ) T) := by
+    intro s hs
+    obtain ⟨uσ, huσ_cont, huσ_eq⟩ := interior_allscale_time_continuity (I := I) (M := M)
+      g₀ a (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce hT hT1 u hu hcouple
+      hbase ((a : ℝ) + 2) (by linarith) (s / 2) (by linarith [hs.1])
+    have hu₂'_eq : ∀ r ∈ Set.Icc (s / 2) T, u₂' r = uσ r := by
+      intro r hr
+      have hrIcc : r ∈ Set.Icc (0 : ℝ) T := ⟨le_trans (by linarith [hs.1]) hr.1, hr.2⟩
+      refine tensorHsInclusion_injective (I := I) (M := M)
+        (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) ?_
+      rw [hbridge' r hrIcc, huσ_eq r hr]
+    have hu₂'_cont_Icc : ContinuousOn (fun r : ℝ => u₂' r) (Set.Icc (s / 2) T) :=
+      huσ_cont.congr hu₂'_eq
+    have hmem : Set.Icc (s / 2) T ∈ nhdsWithin s (Set.Ioo (0 : ℝ) T) := by
+      apply Filter.mem_of_superset
+        (inter_mem_nhdsWithin (Set.Ioo (0 : ℝ) T)
+          (IsOpen.mem_nhds isOpen_Ioo
+            (show s ∈ Set.Ioo (s / 2) (T + 1) from ⟨by linarith [hs.1], by linarith [hs.2]⟩)))
+      rintro r ⟨⟨_, hrT⟩, hr3, _⟩
+      exact ⟨le_of_lt hr3, le_of_lt hrT⟩
+    have hsIcc : s ∈ Set.Icc (s / 2) T := ⟨by linarith [hs.1], hs.2.le⟩
+    exact (hu₂'_cont_Icc s hsIcc).mono_of_mem_nhdsWithin hmem
+  -- The included carrier `ι₁ ∘ u₂'` is `ContinuousOn` the interior into `H^{a+1}`.
+  have hι₁u₂'_contOn : ContinuousOn (fun r : ℝ => ι₁ (u₂' r)) (Set.Ioo (0 : ℝ) T) :=
+    ι₁.continuous.comp_continuousOn hu₂'_contOn
+  -- a.e. coordinate identity: `ι₁ (u₂' t) = maxRegDuhamelSolFieldHa1 … t` (both are the
+  -- indefinite `Hᵃ`-integral of `u.deriv` started at `0`, matched mode by mode).
+  haveI : Countable (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+      (I := I) (M := M) g₀ 0 2) :=
+    Analysis.Parabolic.MaximalRegularity.countable_tensorEigenIdx (I := I) (M := M)
+      (g := g₀) (r := 0) (s := 2) hcompact
+  have hae_eq : ∀ᵐ t ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T),
+      ι₁ (u₂' t) = Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1
+        (I := I) (M := M) (a : ℝ) hT hT1
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t := by
+    have hper : ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2,
+        ∀ᵐ t ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T),
+          (ι₁ (u₂' t)).coeff i =
+            (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1
+              (I := I) (M := M) (a : ℝ) hT hT1
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t).coeff i := by
+      intro i
+      have hHa1 := Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1_coeff_ae
+        (I := I) (M := M) (h_compact := hcompact) (a := (a : ℝ)) hT hT1
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce i
+      filter_upwards [hHa1, ae_restrict_mem (μ := MeasureTheory.volume) measurableSet_Icc]
+        with t htHa1 htmem
+      have htmem' : t ∈ Set.Icc (0 : ℝ) T := htmem
+      -- LHS: `(ι₁ (u₂' t)).coeff i = (u₂' t).coeff i = (toFun u t).coeff i`.
+      have hlhs : (ι₁ (u₂' t)).coeff i =
+          (Analysis.Parabolic.TimeSobolev.timeH1.toFun u t).coeff i := by
+        rw [hι₁_def, tensorHsInclusion_coeff_apply]
+        have hb := hbridge' t htmem'
+        rw [← tensorHsInclusion_coeff_apply
+          (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂' t) i, hb]
+      -- `(toFun u t).coeff i = u.init.coeff i + ∫₀ᵗ (u.deriv).coeff i`, with `u.init = 0`.
+      have htoFun : (Analysis.Parabolic.TimeSobolev.timeH1.toFun u t).coeff i =
+          ∫ s in (0 : ℝ)..t, (u.deriv s).coeff i := by
+        have hcoeff := Analysis.Parabolic.QuasiLinear.coeffCLM_apply (I := I) (M := M)
+          (g := g₀) (r := 0) (s := 2) (σ := (a : ℝ)) i
+          (Analysis.Parabolic.TimeSobolev.timeH1.toFun u t)
+        have hh0 : (0 : ℝ) ∈ Set.Icc (0 : ℝ) T := ⟨le_rfl, htmem.1.trans htmem.2⟩
+        have hint : IntervalIntegrable (fun s => u.deriv s)
+            MeasureTheory.volume 0 t :=
+          u.intervalIntegrable_deriv hh0 htmem'
+        rw [← hcoeff, Analysis.Parabolic.TimeSobolev.timeH1.toFun_apply, map_add]
+        have hinit : (Analysis.Parabolic.QuasiLinear.coeffCLM (I := I) (M := M)
+            (g := g₀) (r := 0) (s := 2) (σ := (a : ℝ)) i) u.init = 0 := by
+          have : u.init = tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith)
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) := by
+            rw [hu, Analysis.Parabolic.QuasiLinear.maxRegDuhamelMap_init]
+          rw [this, Analysis.Parabolic.QuasiLinear.coeffCLM_apply,
+            tensorHsInclusion_coeff_apply]
+          simp only [tensorHs.zero_coeff, Pi.zero_apply]
+        rw [hinit, zero_add,
+          ← ContinuousLinearMap.intervalIntegral_comp_comm
+            (Analysis.Parabolic.QuasiLinear.coeffCLM (I := I) (M := M)
+              (g := g₀) (r := 0) (s := 2) (σ := (a : ℝ)) i) hint]
+        rfl
+      -- RHS: `(maxRegDuhamelSolFieldHa1 … t).coeff i = 0.coeff i + ∫₀ᵗ (u.deriv).coeff i`.
+      have hrhs : (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1
+          (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t).coeff i =
+          ∫ s in (0 : ℝ)..t, (u.deriv s).coeff i := by
+        rw [htHa1]
+        simp only [tensorHs.zero_coeff, Pi.zero_apply, zero_add]
+        rw [hu]
+      rw [hlhs, htoFun, hrhs]
+    rw [← MeasureTheory.ae_all_iff] at hper
+    filter_upwards [hper] with t ht
+    exact tensorHs.ext (funext ht)
+  -- a.e.-membership of `ι₁ (u₂' t)` in the engine ball, transported from `hstay`.
+  have hae_mem : ∀ᵐ t ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T),
+      ι₁ (u₂' t) ∈ Metric.closedBall
+        (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R := by
+    filter_upwards [hae_eq, hstay] with t hteq htstay
+    rw [hι₁_def] at hteq ⊢
+    rw [hteq]; exact htstay
+  -- Upgrade a.e. → everywhere on the open interior via interior continuity.
+  exact mem_closedBall_of_ae_of_continuousOn_Ioo (T := T) (fun r => ι₁ (u₂' r))
+    hι₁u₂'_contOn hae_mem
 
 set_option linter.unusedVariables false in
 /-- **`L²`-time engine solution → pointwise realized carrier bundle for the
@@ -2573,15 +2754,15 @@ theorem deturck_g0_engine_carrier_extraction
   set Te : ℝ := min T₀ 1 with hTe_def
   have hTe_pos : 0 < Te := lt_min hT₀_pos one_pos
   have hTe1 : Te ≤ 1 := min_le_right _ _
-  obtain ⟨u, gforce, hduh, hforce, _htrace, _hderivEq⟩ :=
+  obtain ⟨u, gforce, hduh, hforce, _htrace, _hderivEq, hstay⟩ :=
     hsol hTe_pos (min_le_left _ _) hTe1
   -- The first-order coupling of the forcing (from the threaded operator-loss `hloss`).
   have hcouple := deTurckForcing_firstOrder_coupling (I := I) (M := M) g₀ a hTe_pos hTe1
     N_cont hloss (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) rfl gforce hforce
-  -- The engine carrier stays in the radius-`R` ball on the interior (posited stays-in-ball
-  -- transport, pinned to the engine ball by `hLipBall`).
+  -- The engine carrier stays in the radius-`R` ball on the interior: the engine's exposed
+  -- stays-in-ball event `hstay` transported to the bridge carrier through the coupling.
   have hcarrier_ball := deturck_g0_engine_carrier_inBall (I := I) (M := M) g₀ a hTe_pos hTe1
-    N_cont hR hLipBall gforce u hduh hforce
+    N_cont hR hLipBall gforce u hduh hforce hstay hcouple
   -- Bochner/FTC transport to the pointwise order-`(a+2)` carrier.
   obtain ⟨u₂, hbridge, hcont, hcar0, hreg⟩ :=
     deturck_g0_engine_pointwise_carrier (I := I) (M := M) g₀ a hTe_pos hTe1

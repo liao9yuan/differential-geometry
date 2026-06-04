@@ -1,5 +1,8 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapIterL2WtwokTwoBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.RawConnLapChartComponentSecondCovDerivFormula
+import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExpansion.SecondCovDerivChartProjEuclidGlobal
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.RawConnLapChartCoordFormulaT0Linear
+import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 import DifferentialGeometry.Tensor.Multilinear.HsBoundOp
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HilbertSpace
@@ -38,10 +41,22 @@ pointwise integrand bound — from the pointwise second-order rough-Laplacian ch
 operator-norm primitive `exists_rawConnLapComp_iteratedFDeriv_norm_sq_le_rawConnLapRhsHsContent`,
 which is proved here (Leibniz on each chart block + compact-kernel coefficient sup-bounds + finite
 active-set assembly) on top of the open-good-set `T₀`-linear chart-coordinate formula
-`rawTensorConnLap_chartα_raw_eq_T₀_linear_formula_on_goodSet` — the single remaining `sorry` of this
-chart-port: the open-good-set strengthening (dropping the inessential partition-of-unity-tsupport
-restriction) of the on-disk `rawTensorConnLap_chartα_raw_eq_T₀_linear_formula`, true because the
-connection Laplacian is the metric trace of the second covariant derivative at every good-set point.
+`rawTensorConnLap_chartα_raw_eq_T₀_linear_formula_on_goodSet`.  That formula is itself proved here,
+sorry-free, by substituting the open-good-set second-covariant-derivative chart expansion
+`secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn` (good-set-wide on disk) into the
+inverse-Gram coordinate metric-trace identity
+`rawTensorConnLap_chartα_raw_eq_invGram_naiveSecondCovDeriv_proj_on_goodSet` and collecting the
+`T₀`-independent smooth coefficients (`C_2 = chartInvGramMatrix`, the inverse-Gram contraction tensor;
+`C_1`, `C_0` the inverse-Gram-weighted correction sums).  The inverse-Gram coordinate metric-trace
+identity is the single remaining `sorry` of this chart-port: the open-good-set strengthening (dropping
+the inessential partition-of-unity-tsupport restriction) of the on-disk
+`chartPushed_rawConnLap_chart_α_proj_eq_chartInvGram_secondCovDeriv_plus_corrections`, true because the
+connection Laplacian is — *unconditionally* at every base point — the metric trace of the second
+covariant derivative (`rawTensorConnLap_eq_metricTraceHessian`), and the metric trace of a fibre
+bilinear form is basis-independent, so it equals the chart-`α` inverse-Gram-weighted coordinate-basis
+trace at every good-set point.  The tsupport restriction of the on-disk version is inessential: it was
+inherited only from the *bumped* globally smooth chart frame `chartFrameNormGlobalSmooth`, whose
+orthonormality is localised to the partition-of-unity tsupport.
 
 The companion primitive `exists_l2Norm_le_toHs_zero` records the reverse of the on-disk
 `tensorPouSobolevHsNorm_zero_le_tensorL2Norm`: the global metric `L²` norm of a smooth
@@ -82,6 +97,11 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
+open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Tensor
+open Tensor0SBundle
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 /-- The Euclidean pull-back of a raw `(r, s)`-component of `T` to the chart target: the leaf's
 chart-pulled integrand factor `raw_{IJ} ∘ chart⁻¹ ∘ toEuclidean⁻¹`. -/
@@ -452,8 +472,273 @@ private lemma euclidPartialIter2_chartPushedRaw_contDiffAt
   euclidPartial_contDiffAt (E := E) l
     (euclidPartialIter1_chartPushedRaw_contDiffAt (I := I) (M := M) g r s T α q k hz)
 
+/-- The principal inverse-Gram coordinate-trace coefficient `C_2 k l := chartInvGramMatrix`,
+pulled back to the Euclidean chart target. -/
+private noncomputable def invGramCoeffPull
+    (g : SmoothRiemannianMetric I M) (α : M)
+    (k l : Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
+  fun y => chartInvGramMatrix (I := I) g α
+    ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) k l
+
+private lemma invGramCoeffPull_contDiffOn
+    (g : SmoothRiemannianMetric I M) (α : M)
+    (k l : Fin (Module.finrank ℝ E)) :
+    ContDiffOn ℝ ∞ (invGramCoeffPull (I := I) (M := M) g α k l)
+      (chartTargetEuclid (I := I) (M := M) α) :=
+  chartInvGramMatrix_pullback_contDiffOn_chartTarget (I := I) (M := M) g α k l
+
+private lemma invGramCoeffPull_at_b
+    (g : SmoothRiemannianMetric I M) (α : M)
+    (k l : Fin (Module.finrank ℝ E))
+    {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α) :
+    invGramCoeffPull (I := I) (M := M) g α k l
+        ((toEuclidean (E := E)) ((extChartAt I α) b)) =
+      chartInvGramMatrix (I := I) g α b k l := by
+  have hb_src : b ∈ (extChartAt I α).source :=
+    chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hb
+  unfold invGramCoeffPull
+  rw [(toEuclidean (E := E)).symm_apply_apply, (extChartAt I α).left_inv hb_src]
+
+/-- The principal-block `GlobalCorr` correction family from the open-good-set second-covariant
+derivative chart expansion `secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn`. -/
+private noncomputable def naiveSCD_GlobalCorr
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E))
+    (k l : Fin (Module.finrank ℝ E))
+    (I' : Fin r → Fin (Module.finrank ℝ E))
+    (J' : Fin s → Fin (Module.finrank ℝ E))
+    (m : Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
+  Classical.choose
+    (secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
+      (I := I) (M := M) g r s α Idx Jdx k l) I' J' m
+
+/-- The zeroth-block `GlobalCorr0` correction family from the open-good-set second-covariant
+derivative chart expansion. -/
+private noncomputable def naiveSCD_GlobalCorr0
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E))
+    (k l : Fin (Module.finrank ℝ E))
+    (I' : Fin r → Fin (Module.finrank ℝ E))
+    (J' : Fin s → Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
+  Classical.choose
+    (Classical.choose_spec
+      (secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
+        (I := I) (M := M) g r s α Idx Jdx k l)) I' J'
+
+private lemma naiveSCD_GlobalCorr_contDiffOn
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E))
+    (k l : Fin (Module.finrank ℝ E))
+    (I' : Fin r → Fin (Module.finrank ℝ E))
+    (J' : Fin s → Fin (Module.finrank ℝ E))
+    (m : Fin (Module.finrank ℝ E)) :
+    ContDiffOn ℝ ∞ (naiveSCD_GlobalCorr (I := I) (M := M) g r s α Idx Jdx k l I' J' m)
+      (chartTargetEuclid (I := I) (M := M) α) :=
+  (Classical.choose_spec
+      (Classical.choose_spec
+        (secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
+          (I := I) (M := M) g r s α Idx Jdx k l))).1 I' J' m
+
+private lemma naiveSCD_GlobalCorr0_contDiffOn
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E))
+    (k l : Fin (Module.finrank ℝ E))
+    (I' : Fin r → Fin (Module.finrank ℝ E))
+    (J' : Fin s → Fin (Module.finrank ℝ E)) :
+    ContDiffOn ℝ ∞ (naiveSCD_GlobalCorr0 (I := I) (M := M) g r s α Idx Jdx k l I' J')
+      (chartTargetEuclid (I := I) (M := M) α) :=
+  (Classical.choose_spec
+      (Classical.choose_spec
+        (secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
+          (I := I) (M := M) g r s α Idx Jdx k l))).2.1 I' J'
+
+/-- **The open-good-set inverse-Gram coordinate metric-trace identity for the connection-Laplacian
+raw component (a genuine differential-geometric prerequisite).**
+
+There exist `T₀`-independent `C^∞` coefficient families `A_1`, `A_0` on the Euclidean chart target
+such that for *every* smooth compactly-supported section `T₀` and *every* base point `b` in the
+chart-`α` Levi-Civita good set, the chart-`α` `(Idx, Jdx)` raw scalar component of
+`Δ_∇ T₀ = rawTensorConnLapSmooth g r s T₀` equals the chart-`α` inverse-Gram-matrix-weighted trace,
+over the coordinate basis `∂_k = chartBasisVecFiber α k`, of the chart-coordinate expansion of the
+naive iterated covariant derivative `∇_{∂_l}(∇_{∂_k} T₀)` (the open-good-set second-covariant
+derivative chart expansion `secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn`, whose principal
+term is the mixed second partial of the chart-pushed raw component and whose `naiveSCD_GlobalCorr`,
+`naiveSCD_GlobalCorr0` corrections are the `T₀`-independent smooth coefficient families), plus a
+first-partial block and a zeroth-order block:
+```
+raw_{IJ}(Δ_∇ T₀)(b)
+  = Σ_{k, l} g^{kl}(b) · ( ∂_l ∂_k (chartPushedRaw raw_{IJ}(T₀))
+        + Σ_{I', J', m} GlobalCorr_{k,l} I' J' m · ∂_m (chartPushedRaw raw_{I'J'}(T₀))
+        + Σ_{I', J'}   GlobalCorr0_{k,l} I' J' · chartPushedRaw raw_{I'J'}(T₀) )
+  + Σ_{I', J', m} A_1 I' J' m · ∂_m (chartPushedRaw raw_{I'J'}(T₀))
+  + Σ_{I', J'}    A_0 I' J' · chartPushedRaw raw_{I'J'}(T₀)    (at toEuclidean (chart b)),
+```
+with `g^{kl} := chartInvGramMatrix g α b k l`.
+
+This is the open-good-set strengthening, at the level of the metric-trace identity, of the
+tsupport-restricted on-disk identity
+`chartPushed_rawConnLap_chart_α_proj_eq_chartInvGram_secondCovDeriv_plus_corrections`.  The rough
+Laplacian is, *unconditionally* at every base point `b`, the metric trace of the second covariant
+derivative against the `g_b`-orthonormal frame centred at `b`
+(`rawTensorConnLap_eq_metricTraceHessian`); the metric trace of a fibre bilinear form is
+basis-independent, so it equals the chart-`α` inverse-Gram-weighted coordinate-basis trace
+`Σ_{k,l} g^{kl}(b) (∇²T₀)(∂_k, ∂_l)(b)` at every good-set point, with the difference between the
+Hessian `(∇²T₀)(∂_k,∂_l)` and the naive iterated derivative `∇_{∂_l}∇_{∂_k}T₀` (the Christoffel
+`∇_{∇_{∂_l}∂_k}T₀` term) absorbed, together with the first-derivative cross-terms, into the
+`T₀`-independent smooth coefficient families `A_1`, `A_0`.  The tsupport restriction of the on-disk
+version is inessential to this trace identity: it was inherited only from the *bumped* globally
+smooth chart frame `chartFrameNormGlobalSmooth`, whose orthonormality is localised to the
+partition-of-unity tsupport; the centred-frame metric trace used here is unconditional, and the
+un-bumped chart Gram matrix `chartInvGramMatrix` is the correct contraction tensor on the whole good
+set.  Posited here as the genuine remaining DG prerequisite; the chart-coordinate `∂²`-form formula
+below is proved sorry-free on top of it. -/
+theorem rawTensorConnLap_chartα_raw_eq_invGram_naiveSecondCovDeriv_proj_on_goodSet
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
+    ∃ (A_1 : (Fin r → Fin (Module.finrank ℝ E)) →
+              (Fin s → Fin (Module.finrank ℝ E)) →
+              Fin (Module.finrank ℝ E) → EuclN → ℝ),
+    ∃ (A_0 : (Fin r → Fin (Module.finrank ℝ E)) →
+              (Fin s → Fin (Module.finrank ℝ E)) → EuclN → ℝ),
+      (∀ I' J' m, ContDiffOn ℝ ∞ (A_1 I' J' m) (chartTargetEuclid (I := I) (M := M) α)) ∧
+      (∀ I' J', ContDiffOn ℝ ∞ (A_0 I' J') (chartTargetEuclid (I := I) (M := M) α)) ∧
+      ∀ (T₀ : Integral.L2.SmoothCcTensor g r s),
+        ∀ {b : M}, b ∈ chartLeviCivitaGoodSet (I := I) α →
+          tensorChartComponentRaw (I := I) (M := M) g r s
+            (rawTensorConnLapSmooth (I := I) g r s T₀) α Idx Jdx b =
+            (∑ k, ∑ l,
+              chartInvGramMatrix (I := I) g α b k l *
+                (euclidPartial (E := E) l
+                    (euclidPartial (E := E) k
+                      (chartPushedRaw I α
+                        (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx)))
+                    ((toEuclidean (E := E)) ((extChartAt I α) b)) +
+                  (∑ I' : Fin r → Fin (Module.finrank ℝ E),
+                    ∑ J' : Fin s → Fin (Module.finrank ℝ E),
+                    ∑ m,
+                    naiveSCD_GlobalCorr (I := I) (M := M) g r s α Idx Jdx k l I' J' m
+                        ((toEuclidean (E := E)) ((extChartAt I α) b)) *
+                      euclidPartial (E := E) m
+                        (chartPushedRaw I α
+                          (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J'))
+                        ((toEuclidean (E := E)) ((extChartAt I α) b))) +
+                  (∑ I' : Fin r → Fin (Module.finrank ℝ E),
+                    ∑ J' : Fin s → Fin (Module.finrank ℝ E),
+                    naiveSCD_GlobalCorr0 (I := I) (M := M) g r s α Idx Jdx k l I' J'
+                        ((toEuclidean (E := E)) ((extChartAt I α) b)) *
+                      chartPushedRaw I α
+                        (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J')
+                        ((toEuclidean (E := E)) ((extChartAt I α) b))))) +
+            (∑ I' : Fin r → Fin (Module.finrank ℝ E),
+              ∑ J' : Fin s → Fin (Module.finrank ℝ E),
+              ∑ m,
+              A_1 I' J' m ((toEuclidean (E := E)) ((extChartAt I α) b)) *
+                euclidPartial (E := E) m
+                  (chartPushedRaw I α
+                    (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J'))
+                  ((toEuclidean (E := E)) ((extChartAt I α) b))) +
+            (∑ I' : Fin r → Fin (Module.finrank ℝ E),
+              ∑ J' : Fin s → Fin (Module.finrank ℝ E),
+              A_0 I' J' ((toEuclidean (E := E)) ((extChartAt I α) b)) *
+                chartPushedRaw I α
+                  (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J')
+                  ((toEuclidean (E := E)) ((extChartAt I α) b))) :=
+  sorry
+
+/-- **Inverse-Gram contraction–reorder for the first-derivative correction block.** Moving the
+inverse-Gram double sum `Σ_{k, l}` past the correction triple sum `Σ_{I', J', m}` and factoring the
+`(k, l)`-independent partial-derivative factor `p I' J' m`:
+```
+Σ_{k, l} c k l · (Σ_{I', J', m} d k l I' J' m · p I' J' m)
+  = Σ_{I', J', m} (Σ_{k, l} c k l · d k l I' J' m) · p I' J' m.
+```
+Pure finite-sum commutativity and distributivity over `ℝ`. -/
+private lemma invGram_reorder_firstDeriv
+    {ι κ μ : Type*} [Fintype ι] [Fintype κ] [Fintype μ]
+    (c : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ)
+    (d : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ι → κ → μ → ℝ)
+    (p : ι → κ → μ → ℝ) :
+    (∑ k, ∑ l, c k l * (∑ i : ι, ∑ j : κ, ∑ m : μ, d k l i j m * p i j m)) =
+      ∑ i : ι, ∑ j : κ, ∑ m : μ, (∑ k, ∑ l, c k l * d k l i j m) * p i j m := by
+  classical
+  have hdist :
+      (∑ k, ∑ l, c k l * (∑ i : ι, ∑ j : κ, ∑ m : μ, d k l i j m * p i j m)) =
+      ∑ k, ∑ l, ∑ i : ι, ∑ j : κ, ∑ m : μ, c k l * (d k l i j m * p i j m) := by
+    refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))
+    rw [Finset.mul_sum]; refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [Finset.mul_sum]; refine Finset.sum_congr rfl (fun j _ => ?_)
+    rw [Finset.mul_sum]
+  rw [hdist, ← Finset.sum_product'
+      (f := fun k l => ∑ i : ι, ∑ j : κ, ∑ m : μ, c k l * (d k l i j m * p i j m)),
+      Finset.univ_product_univ]
+  rw [Finset.sum_comm (γ := Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E))
+    (f := fun kl (i : ι) => ∑ j : κ, ∑ m : μ,
+      c kl.1 kl.2 * (d kl.1 kl.2 i j m * p i j m))]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [Finset.sum_comm (γ := Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E))
+    (f := fun kl (j : κ) => ∑ m : μ, c kl.1 kl.2 * (d kl.1 kl.2 i j m * p i j m))]
+  refine Finset.sum_congr rfl (fun j _ => ?_)
+  rw [Finset.sum_comm (γ := Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E))
+    (f := fun kl (m : μ) => c kl.1 kl.2 * (d kl.1 kl.2 i j m * p i j m))]
+  refine Finset.sum_congr rfl (fun m _ => ?_)
+  rw [show (∑ kl : Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E),
+        c kl.1 kl.2 * (d kl.1 kl.2 i j m * p i j m))
+        = ∑ kl : Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E),
+          (c kl.1 kl.2 * d kl.1 kl.2 i j m) * p i j m from
+      Finset.sum_congr rfl (fun kl _ => by ring)]
+  rw [← Finset.sum_mul]
+  congr 1
+  rw [← Finset.sum_product' (f := fun k l => c k l * d k l i j m),
+    Finset.univ_product_univ]
+
+/-- **Inverse-Gram contraction–reorder for the zeroth-order correction block.** Moving the
+inverse-Gram double sum `Σ_{k, l}` past the correction double sum `Σ_{I', J'}` and factoring the
+`(k, l)`-independent raw-component factor `q I' J'`:
+```
+Σ_{k, l} c k l · (Σ_{I', J'} d k l I' J' · q I' J')
+  = Σ_{I', J'} (Σ_{k, l} c k l · d k l I' J') · q I' J'.
+```
+Pure finite-sum commutativity and distributivity over `ℝ`. -/
+private lemma invGram_reorder_zeroth
+    {ι κ : Type*} [Fintype ι] [Fintype κ]
+    (c : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ)
+    (d : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ι → κ → ℝ)
+    (q : ι → κ → ℝ) :
+    (∑ k, ∑ l, c k l * (∑ i : ι, ∑ j : κ, d k l i j * q i j)) =
+      ∑ i : ι, ∑ j : κ, (∑ k, ∑ l, c k l * d k l i j) * q i j := by
+  classical
+  have hdist :
+      (∑ k, ∑ l, c k l * (∑ i : ι, ∑ j : κ, d k l i j * q i j)) =
+      ∑ k, ∑ l, ∑ i : ι, ∑ j : κ, c k l * (d k l i j * q i j) := by
+    refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))
+    rw [Finset.mul_sum]; refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [Finset.mul_sum]
+  rw [hdist, ← Finset.sum_product'
+      (f := fun k l => ∑ i : ι, ∑ j : κ, c k l * (d k l i j * q i j)),
+      Finset.univ_product_univ]
+  rw [Finset.sum_comm (γ := Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E))
+    (f := fun kl (i : ι) => ∑ j : κ, c kl.1 kl.2 * (d kl.1 kl.2 i j * q i j))]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [Finset.sum_comm (γ := Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E))
+    (f := fun kl (j : κ) => c kl.1 kl.2 * (d kl.1 kl.2 i j * q i j))]
+  refine Finset.sum_congr rfl (fun j _ => ?_)
+  rw [show (∑ kl : Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E),
+        c kl.1 kl.2 * (d kl.1 kl.2 i j * q i j))
+        = ∑ kl : Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E),
+          (c kl.1 kl.2 * d kl.1 kl.2 i j) * q i j from
+      Finset.sum_congr rfl (fun kl _ => by ring)]
+  rw [← Finset.sum_mul]
+  congr 1
+  rw [← Finset.sum_product' (f := fun k l => c k l * d k l i j),
+    Finset.univ_product_univ]
+
 /-- **The open-good-set `T₀`-linear chart-coordinate formula for the connection-Laplacian raw
-component (a genuine differential-geometric prerequisite).**
+component.**
 
 There exist `T₀`-independent `C^∞` coefficient families `C_2`, `C_1`, `C_0` on the Euclidean chart
 target such that for *every* smooth compactly-supported section `T₀` and *every* base point `b` in
@@ -515,8 +800,150 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula_on_goodSet
               C_0 I' J' ((toEuclidean (E := E)) ((extChartAt I α) b)) *
                 chartPushedRaw I α
                   (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J')
-                  ((toEuclidean (E := E)) ((extChartAt I α) b))) :=
-  sorry
+                  ((toEuclidean (E := E)) ((extChartAt I α) b))) := by
+  classical
+  obtain ⟨A_1, A_0, hA1cd, hA0cd, hAform⟩ :=
+    rawTensorConnLap_chartα_raw_eq_invGram_naiveSecondCovDeriv_proj_on_goodSet
+      (I := I) (M := M) g r s α Idx Jdx
+  refine ⟨invGramCoeffPull (I := I) (M := M) g α,
+          fun I' J' m y =>
+            (∑ k, ∑ l, invGramCoeffPull (I := I) (M := M) g α k l y *
+                naiveSCD_GlobalCorr (I := I) (M := M) g r s α Idx Jdx k l I' J' m y) +
+              A_1 I' J' m y,
+          fun I' J' y =>
+            (∑ k, ∑ l, invGramCoeffPull (I := I) (M := M) g α k l y *
+                naiveSCD_GlobalCorr0 (I := I) (M := M) g r s α Idx Jdx k l I' J' y) +
+              A_0 I' J' y,
+          fun k l => invGramCoeffPull_contDiffOn (I := I) (M := M) g α k l, ?_, ?_, ?_⟩
+  · intro I' J' m
+    refine ContDiffOn.add ?_ (hA1cd I' J' m)
+    refine ContDiffOn.sum (fun k _ => ?_)
+    refine ContDiffOn.sum (fun l _ => ?_)
+    exact (invGramCoeffPull_contDiffOn (I := I) (M := M) g α k l).mul
+      (naiveSCD_GlobalCorr_contDiffOn (I := I) (M := M) g r s α Idx Jdx k l I' J' m)
+  · intro I' J'
+    refine ContDiffOn.add ?_ (hA0cd I' J')
+    refine ContDiffOn.sum (fun k _ => ?_)
+    refine ContDiffOn.sum (fun l _ => ?_)
+    exact (invGramCoeffPull_contDiffOn (I := I) (M := M) g α k l).mul
+      (naiveSCD_GlobalCorr0_contDiffOn (I := I) (M := M) g r s α Idx Jdx k l I' J')
+  · intro T₀ b hb
+    set y : EuclN := (toEuclidean (E := E)) ((extChartAt I α) b) with hy_def
+    set P : (Fin r → Fin (Module.finrank ℝ E)) →
+            (Fin s → Fin (Module.finrank ℝ E)) →
+            Fin (Module.finrank ℝ E) → ℝ :=
+      fun I' J' m =>
+        euclidPartial (E := E) m
+          (chartPushedRaw I α
+            (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J')) y
+      with hP_def
+    set R : (Fin r → Fin (Module.finrank ℝ E)) →
+            (Fin s → Fin (Module.finrank ℝ E)) → ℝ :=
+      fun I' J' =>
+        chartPushedRaw I α
+          (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J') y
+      with hR_def
+    set PP : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+      fun k l =>
+        euclidPartial (E := E) l
+          (euclidPartial (E := E) k
+            (chartPushedRaw I α
+              (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx))) y
+      with hPP_def
+    set IG : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+      fun k l => invGramCoeffPull (I := I) (M := M) g α k l y
+      with hIG_def
+    set GC : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+             (Fin r → Fin (Module.finrank ℝ E)) →
+             (Fin s → Fin (Module.finrank ℝ E)) →
+             Fin (Module.finrank ℝ E) → ℝ :=
+      fun k l I' J' m =>
+        naiveSCD_GlobalCorr (I := I) (M := M) g r s α Idx Jdx k l I' J' m y
+      with hGC_def
+    set GC0 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+              (Fin r → Fin (Module.finrank ℝ E)) →
+              (Fin s → Fin (Module.finrank ℝ E)) → ℝ :=
+      fun k l I' J' =>
+        naiveSCD_GlobalCorr0 (I := I) (M := M) g r s α Idx Jdx k l I' J' y
+      with hGC0_def
+    set A1 : (Fin r → Fin (Module.finrank ℝ E)) →
+             (Fin s → Fin (Module.finrank ℝ E)) →
+             Fin (Module.finrank ℝ E) → ℝ :=
+      fun I' J' m => A_1 I' J' m y with hA1_def
+    set A0 : (Fin r → Fin (Module.finrank ℝ E)) →
+             (Fin s → Fin (Module.finrank ℝ E)) → ℝ :=
+      fun I' J' => A_0 I' J' y with hA0_def
+    rw [hAform T₀ hb]
+    have hIGb : ∀ k l, chartInvGramMatrix (I := I) g α b k l = IG k l := by
+      intro k l
+      rw [hIG_def]
+      exact (invGramCoeffPull_at_b (I := I) (M := M) g α k l hb).symm
+    have hPrincipal :
+        (∑ k, ∑ l,
+          chartInvGramMatrix (I := I) g α b k l *
+            (PP k l + (∑ I', ∑ J', ∑ m, GC k l I' J' m * P I' J' m)
+                    + (∑ I', ∑ J', GC0 k l I' J' * R I' J'))) =
+          ∑ k, ∑ l,
+            IG k l * (PP k l + (∑ I', ∑ J', ∑ m, GC k l I' J' m * P I' J' m)
+                            + (∑ I', ∑ J', GC0 k l I' J' * R I' J')) := by
+      refine Finset.sum_congr rfl (fun k _ => ?_)
+      refine Finset.sum_congr rfl (fun l _ => ?_)
+      rw [hIGb k l]
+    rw [hPrincipal]
+    have hC1_distrib :
+        (∑ I' : Fin r → Fin (Module.finrank ℝ E),
+          ∑ J' : Fin s → Fin (Module.finrank ℝ E),
+          ∑ m, ((∑ k, ∑ l, IG k l * GC k l I' J' m) + A1 I' J' m) * P I' J' m) =
+        (∑ I' : Fin r → Fin (Module.finrank ℝ E),
+          ∑ J' : Fin s → Fin (Module.finrank ℝ E),
+          ∑ m, (∑ k, ∑ l, IG k l * GC k l I' J' m) * P I' J' m) +
+        (∑ I' : Fin r → Fin (Module.finrank ℝ E),
+          ∑ J' : Fin s → Fin (Module.finrank ℝ E),
+          ∑ m, A1 I' J' m * P I' J' m) := by
+      rw [← Finset.sum_add_distrib]
+      refine Finset.sum_congr rfl (fun I' _ => ?_)
+      rw [← Finset.sum_add_distrib]
+      refine Finset.sum_congr rfl (fun J' _ => ?_)
+      rw [← Finset.sum_add_distrib]
+      refine Finset.sum_congr rfl (fun m _ => ?_)
+      ring
+    rw [hC1_distrib]
+    have hC0_distrib :
+        (∑ I' : Fin r → Fin (Module.finrank ℝ E),
+          ∑ J' : Fin s → Fin (Module.finrank ℝ E),
+          ((∑ k, ∑ l, IG k l * GC0 k l I' J') + A0 I' J') * R I' J') =
+        (∑ I' : Fin r → Fin (Module.finrank ℝ E),
+          ∑ J' : Fin s → Fin (Module.finrank ℝ E),
+          (∑ k, ∑ l, IG k l * GC0 k l I' J') * R I' J') +
+        (∑ I' : Fin r → Fin (Module.finrank ℝ E),
+          ∑ J' : Fin s → Fin (Module.finrank ℝ E), A0 I' J' * R I' J') := by
+      rw [← Finset.sum_add_distrib]
+      refine Finset.sum_congr rfl (fun I' _ => ?_)
+      rw [← Finset.sum_add_distrib]
+      refine Finset.sum_congr rfl (fun J' _ => ?_)
+      ring
+    rw [hC0_distrib]
+    have hPrincipal_distrib :
+        (∑ k, ∑ l,
+            IG k l * (PP k l + (∑ I', ∑ J', ∑ m, GC k l I' J' m * P I' J' m)
+                            + (∑ I', ∑ J', GC0 k l I' J' * R I' J'))) =
+        (∑ k, ∑ l, IG k l * PP k l) +
+        (∑ k, ∑ l, IG k l *
+            (∑ I' : Fin r → Fin (Module.finrank ℝ E),
+              ∑ J' : Fin s → Fin (Module.finrank ℝ E), ∑ m,
+                GC k l I' J' m * P I' J' m)) +
+        (∑ k, ∑ l, IG k l *
+            (∑ I' : Fin r → Fin (Module.finrank ℝ E),
+              ∑ J' : Fin s → Fin (Module.finrank ℝ E), GC0 k l I' J' * R I' J')) := by
+      rw [← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+      refine Finset.sum_congr rfl (fun k _ => ?_)
+      rw [← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+      refine Finset.sum_congr rfl (fun l _ => ?_)
+      ring
+    rw [hPrincipal_distrib]
+    rw [invGram_reorder_firstDeriv (E := E) IG GC P,
+        invGram_reorder_zeroth (E := E) IG GC0 R]
+    abel
 
 /-- A `C^∞` function on an open set has, on any compact subset, a uniform bound on all its iterated
 Fréchet derivative norms up to a fixed order `N`. -/

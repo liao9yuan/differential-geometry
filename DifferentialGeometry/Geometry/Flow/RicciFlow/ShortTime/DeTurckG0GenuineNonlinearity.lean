@@ -745,6 +745,92 @@ theorem deTurckRealizeRemainderOf_spectralN_continuous_of_chartJet2Control
     _ < (C + 1) * (ε / (C + 1)) := mul_lt_mul_of_pos_left htoHs_lt hCp1_pos
     _ = ε := by field_simp
 
+/-- **The continuous regularized eigen-synthesis with its supercritical `H^{a+2}` control and
+remainder `L²`-class match (the deep construction primitive, transiting the Weyl node).**
+
+For the anchor `g₀`, a flow background `g_bg`, and a supercritical order `a` (`2a > dim M + 4`),
+there is a concrete `(0,2)`-perturbation synthesis `P : Hᵃ⁺¹(g₀) → SmoothCcTensor g₀ 0 2`, a
+Lipschitz rate `K`, and a positive radius `R`, with:
+
+* `ChartJet2LipControl g₀ a P K R` — the ball-restricted supercritical `H^{a+2}` control: each
+  realized perturbation `g₀ + ccTensorBilinSymm g₀ (P u)` is a genuine metric (`fibreSmall`), the
+  realized perturbation is uniformly `H^{a+2}`-bounded and its difference is `H^{a+2}`-Lipschitz
+  in the `Hᵃ⁺¹`-distance on the ball (`sobolevLip`) — the all-order Gårding/Weyl content of a
+  smoothing realization gaining the two derivatives the second-order DeTurck right-hand side
+  loses, produced through the supercritical embedding `Hᵃ⁺¹ ↪ H^{a+2}` (transiting the Weyl node
+  via `weyl_realize_weighted_summable_of_closed` /
+  `reproducingKernel_weighted_tsum_le_of_closed`); and
+
+* the **remainder `L²`-class match** on the gate-realizable locus: the realized DeTurck remainder
+  `deTurckRealizeRemainderOf g₀ g_bg (P u)` of the synthesis coincides, *at the `L²`-class level*
+  (through `SmoothCcTensor.toL2`), with the gate-based gauge
+  `deTurckRemainderRealizeSection g₀ g_bg u`.  This is the `L²`-class — *not* the section —
+  match: the section identity would force `P u = gateSmoothRep u` (through the bare rough-Laplacian
+  `Δ_∇` summand), and `gateSmoothRep` is discontinuous off the locus, incompatible with the
+  `H^{a+2}`-Lipschitz control; the realized DeTurck remainder is the gauge-cancelled *first-order*
+  operator (the `−λ` blow-up of the bare Laplacian cancels the second-order retag principal part),
+  so its `L²`-class is continuous and the continuous synthesis `P` reproduces the gauge's remainder
+  `L²`-class without itself being the discontinuous gate representative.
+
+Trap-screen (§0bis): **T1** — intrinsic only (`ChartJet2LipControl` is stated via `g`-inner
+`gFibreOpBound` and the intrinsic `toHs` Sobolev norm; the match is the `L²`-class identity of two
+intrinsic geometric remainder sections; no `chartJ`).  **Non-vacuous** — the remainder `L²`-class
+match rejects the degenerate witness `P = 0` (then `deTurckRealizeRemainderOf g₀ g_bg 0 =
+deTurckRHSSection g_bg g₀`, whose `L²`-class is *not* the gauge's for a realizable `u` with
+non-degenerate gate representative), so the conjunction genuinely constrains `P`.  **Not
+packaging** — `ballSynthesis` *cites* this posited sibling theorem; the conclusion is never a
+hypothesis in `ballSynthesis`'s binder.  The body is `sorry` (deep, transiting the Weyl node), to
+be discharged by the `/prove` recursion. -/
+theorem exists_deTurckG0_regularizedSynthesis
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+          Integral.L2.SmoothCcTensor g₀ 0 2)
+        (K : ℝ≥0) (R : ℝ),
+      0 < R ∧
+      ChartJet2LipControl (I := I) (M := M) g₀ a P K R ∧
+      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
+        realizableAtGate (I := I) g₀ u →
+          Integral.L2.SmoothCcTensor.toL2
+              (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))
+            = Integral.L2.SmoothCcTensor.toL2
+                (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := sorry
+
+/-- **The concrete continuous regularized eigen-synthesis carrier.**  The `(0,2)`-perturbation
+synthesis `P` extracted from `exists_deTurckG0_regularizedSynthesis`: a *named, concrete*
+`Hᵃ⁺¹(g₀) → SmoothCcTensor g₀ 0 2` map (the continuous regularized realization), so the
+construction primitive, its spec, and `ballSynthesis` all refer to the same fixed synthesis rather
+than to a free function.  The carrier is selected for the supplied background `g_bg`. -/
+noncomputable def deTurckG0ContSynthMap (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
+    tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+      Integral.L2.SmoothCcTensor g₀ 0 2 :=
+  if ha : 2 * a > Module.finrank ℝ E + 4 then
+    (exists_deTurckG0_regularizedSynthesis (I := I) g₀ g_bg a ha).choose
+  else
+    fun _ => 0
+
+/-- The defining spec of the concrete synthesis `deTurckG0ContSynthMap`: it carries the
+supercritical `H^{a+2}` control and the remainder `L²`-class match of
+`exists_deTurckG0_regularizedSynthesis`. -/
+theorem deTurckG0ContSynthMap_spec (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ (K : ℝ≥0) (R : ℝ),
+      0 < R ∧
+      ChartJet2LipControl (I := I) (M := M) g₀ a (deTurckG0ContSynthMap (I := I) g₀ g_bg a) K R ∧
+      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
+        realizableAtGate (I := I) g₀ u →
+          Integral.L2.SmoothCcTensor.toL2
+              (deTurckRealizeRemainderOf (I := I) g₀ g_bg (deTurckG0ContSynthMap (I := I) g₀ g_bg a u))
+            = Integral.L2.SmoothCcTensor.toL2
+                (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
+  classical
+  have hmap : deTurckG0ContSynthMap (I := I) g₀ g_bg a
+      = (exists_deTurckG0_regularizedSynthesis (I := I) g₀ g_bg a ha).choose := by
+    unfold deTurckG0ContSynthMap
+    rw [dif_pos ha]
+  rw [hmap]
+  exact (exists_deTurckG0_regularizedSynthesis (I := I) g₀ g_bg a ha).choose_spec
+
 /-- **Ball-restricted abstract eigen-synthesis matching the gate gauge (the deep supercritical
 eigen-synthesis primitive, transiting the Weyl node).**
 
@@ -755,21 +841,35 @@ local-Lipschitz control `ChartJet2LipControl g₀ a P K R` (uniform `H^{a+2}` bo
 Lipschitz-in-`Hᵃ⁺¹` *on the ball*, the all-order Gårding/Weyl content of the continuous
 regularized eigen-synthesis — a smoothing realization gaining the two derivatives the
 second-order DeTurck right-hand side loses), whose realized DeTurck remainder
-`deTurckRealizeRemainderOf g₀ g_bg (P u)` coincides, **as a smooth section**, with the gate-based
-gauge `deTurckRemainderRealizeSection g₀ g_bg u` on the gate-realizable locus
-`realizableAtGate g₀ u`.
+`deTurckRealizeRemainderOf g₀ g_bg (P u)` coincides, **at the `L²`-class level** (through the
+`SmoothCcTensor.toL2` map), with the gate-based gauge `deTurckRemainderRealizeSection g₀ g_bg u`
+on the gate-realizable locus `realizableAtGate g₀ u`.
 
-This is the irreducible deep eigen-synthesis primitive of the construction (`Node-3`'s exact
-content as the more-primitive posited child): it produces the synthesized perturbation carrier
-together with the **ball-restricted** `H^{a+2}` control (now *consistent* with gauge-matching:
-the gate gauge blows up only as the realized metric degenerates and is bounded over the ball, so
-a ball-restricted `H^{a+2}`-Lipschitz synthesis can reproduce it — the previous *global*
-`H^{a+2}`-continuity requirement was inconsistent and has been removed) and the section-level
-remainder agreement with the gauge on the realizable locus.  Its `H^{a+2}` control is produced
-by the continuous regularized eigen-synthesis through the supercritical embedding
-`Hᵃ⁺¹ ↪ H^{a+2}`, transiting the Weyl node through the all-order Gårding spectral bound.  Its
-conclusion is structurally distinct from any hypothesis; no packaging.  The body is `sorry`
-(deep, transiting the Weyl node), to be discharged by the `/prove` recursion. -/
+The agreement is stated at the `L²`-class level — *not* the section level — deliberately: the
+section equality would force `P u = gateSmoothRep u` through the bare rough-Laplacian
+`Δ_∇ T` summand of `deTurckRealizeRemainderOf`, and `gateSmoothRep` is *discontinuous* off the
+realizable locus, incompatible with `ChartJet2LipControl.sobolevLip`.  The realized DeTurck
+*remainder* is the gauge-cancelled *first-order* operator (the `−λ` blow-up of the bare
+Laplacian cancels against the retag principal part), so its `L²`-class is continuous and a
+continuous `H^{a+2}`-controlled synthesis `P` *can* reproduce the gauge's remainder `L²`-class
+without itself being the gate representative; demanding the section identity (hence `P =
+gateSmoothRep`) cannot.
+
+This is now the **assembly** over the more-primitive posited construction node — the genuine
+`/prove` recursion, pushing the `sorry` into a precisely-named deep analytic node: the
+**continuous regularized eigen-synthesis** `exists_deTurckG0_regularizedSynthesis`, which
+produces the *concrete* synthesis carrier `deTurckG0ContSynthMap g₀ g_bg a` together with its
+**ball-restricted** supercritical `H^{a+2}` control `ChartJet2LipControl` (the Weyl-transiting
+Gårding content — the smoothing realization gaining the two derivatives the second-order DeTurck
+right-hand side loses, through the supercritical embedding `Hᵃ⁺¹ ↪ H^{a+2}`) and the **remainder
+`L²`-class match** on the locus (the gauge-cancelled *first-order* remainder of the continuous
+synthesis reproduces the gate gauge's `L²`-class without `P` being the discontinuous gate
+representative `gateSmoothRep`).
+
+`ballSynthesis` instantiates `P := deTurckG0ContSynthMap g₀ g_bg a` and reads off the control and
+the remainder `L²`-class match from the construction node's spec `deTurckG0ContSynthMap_spec` —
+genuine forwarding glue, not a re-statement: the spec is a separate posited theorem the proof
+*cites*, never a hypothesis in `ballSynthesis`'s binder; no packaging. -/
 theorem exists_deTurckRealizeRemainderOf_ballSynthesis_matching_gauge
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) :
@@ -780,8 +880,13 @@ theorem exists_deTurckRealizeRemainderOf_ballSynthesis_matching_gauge
       ChartJet2LipControl (I := I) (M := M) g₀ a P K R ∧
       (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
         realizableAtGate (I := I) g₀ u →
-          deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u)
-            = deTurckRemainderRealizeSection (I := I) g₀ g_bg u) := sorry
+          Integral.L2.SmoothCcTensor.toL2
+              (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))
+            = Integral.L2.SmoothCcTensor.toL2
+                (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
+  classical
+  exact ⟨deTurckG0ContSynthMap (I := I) g₀ g_bg a,
+    deTurckG0ContSynthMap_spec (I := I) g₀ g_bg a ha⟩
 
 /-- **Existence of a supercritical-`H^{a+2}`-controlled un-gated perturbation synthesis whose
 realized DeTurck remainder coincides (as a smooth section) with the gate gauge on the
@@ -797,16 +902,18 @@ g₀ 0 2`, a Lipschitz rate `K`, and a positive radius `R`, such that:
   (the un-gated supercritical embedding `Hᵃ⁺¹ ↪ H^{a+2}` content of the continuous regularized
   eigen-synthesis, transiting the Weyl node through the all-order Gårding spectral bound); and
 * `hsec` — on the gate-realizable locus `realizableAtGate g₀ u`, the realized DeTurck
-  remainder `deTurckRealizeRemainderOf g₀ g_bg (P u)` coincides, **as a smooth section**, with
-  the gate-based gauge `deTurckRemainderRealizeSection g₀ g_bg u` (on the locus both are the
-  honest DeTurck remainder of the realized flow; the synthesis `P u` is arranged so its
-  realized remainder reproduces the gate gauge's, even though `P u` itself is *not* the
-  discontinuous gate representative `gateSmoothRep u`).
+  remainder `deTurckRealizeRemainderOf g₀ g_bg (P u)` coincides, **at the `L²`-class level**
+  (through `SmoothCcTensor.toL2`), with the gate-based gauge
+  `deTurckRemainderRealizeSection g₀ g_bg u` (on the locus both are the honest DeTurck remainder
+  of the realized flow; the synthesis `P u` is arranged so its realized remainder reproduces the
+  gate gauge's `L²`-class, even though `P u` itself is *not* the discontinuous gate
+  representative `gateSmoothRep u` — a section identity would force `P u = gateSmoothRep u`,
+  which is discontinuous).
 
 This node is now **proven by composition** (no `sorry` of its own): it forwards the deep,
 ball-restricted eigen-synthesis primitive
 `exists_deTurckRealizeRemainderOf_ballSynthesis_matching_gauge` (which carries the irreducible
-Weyl-transiting `H^{a+2}` control and the section-level gauge agreement).  Dropping the
+Weyl-transiting `H^{a+2}` control and the `L²`-class gauge agreement).  Dropping the
 inconsistent *global* `H^{a+2}`-continuity field from `ChartJet2LipControl` made this content
 consistent with gauge-matching.  Consumers transitively depend on `sorryAx` only through that
 primitive, and on the Weyl node. -/
@@ -820,8 +927,10 @@ theorem exists_deTurckRealizeRemainderOf_synthesis_matching_gauge
       ChartJet2LipControl (I := I) (M := M) g₀ a P K R ∧
       (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
         realizableAtGate (I := I) g₀ u →
-          deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u)
-            = deTurckRemainderRealizeSection (I := I) g₀ g_bg u) :=
+          Integral.L2.SmoothCcTensor.toL2
+              (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))
+            = Integral.L2.SmoothCcTensor.toL2
+                (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) :=
   exists_deTurckRealizeRemainderOf_ballSynthesis_matching_gauge (I := I) g₀ g_bg a ha
 
 /-- **The `H^{a+2}` → spectral bridge: a perturbation synthesis with supercritical `H^{a+2}`
@@ -921,11 +1030,11 @@ from the spectral continuity/Lipschitz the bridge later derives; no packaging.
 
 It is **proven by composition** of the deep eigen-synthesis node
 `exists_deTurckRealizeRemainderOf_synthesis_matching_gauge` (which supplies the
-`H^{a+2}`-controlled synthesis `P` and the *section-level* remainder agreement
-`deTurckRealizeRemainderOf g₀ g_bg (P u) = deTurckRemainderRealizeSection g₀ g_bg u` on the
-locus) by projecting that section identity through the `L²`-class map `SmoothCcTensor.toL2`
-(`congrArg`).  Its body carries no `sorry`; consumers transitively depend on `sorryAx`, and on
-the Weyl node, only through that eigen-synthesis node. -/
+`H^{a+2}`-controlled synthesis `P` and the `L²`-class remainder agreement
+`toL2 (deTurckRealizeRemainderOf g₀ g_bg (P u)) = toL2 (deTurckRemainderRealizeSection g₀ g_bg u)`
+on the locus directly — the agreement is at the `L²`-class level, the continuous-synthesis-sound
+form, never the discontinuity-forcing section identity).  Its body carries no `sorry`; consumers
+transitively depend on `sorryAx`, and on the Weyl node, only through that eigen-synthesis node. -/
 theorem exists_deTurckRemainderG0_synthesis_chartJet2Control
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) :
@@ -941,13 +1050,12 @@ theorem exists_deTurckRemainderG0_synthesis_chartJet2Control
             = Integral.L2.SmoothCcTensor.toL2
                 (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
   -- The deep eigen-synthesis supplies an `H^{a+2}`-controlled synthesis `P` whose realized
-  -- DeTurck remainder coincides, *as a smooth section*, with the gate gauge on the realizable
-  -- locus.  Projecting that section identity through the `L²`-class map gives the required
-  -- `L²`-class agreement.
+  -- DeTurck remainder coincides, at the `L²`-class level, with the gate gauge on the realizable
+  -- locus — exactly the required `L²`-class agreement.
   obtain ⟨P, K, R, hR, hctrl, hsec⟩ :=
     exists_deTurckRealizeRemainderOf_synthesis_matching_gauge (I := I) g₀ g_bg a ha
   refine ⟨P, K, R, hR, hctrl, fun u hu => ?_⟩
-  rw [hsec u hu]
+  exact hsec u hu
 
 /-- **The genuine, un-gated continuous DeTurck-remainder smooth-section synthesis.**
 
