@@ -1432,6 +1432,145 @@ theorem lcDiffCompInFrame_eq
     (I := I) g h frame hframe hx a b e]
   exact lcDiffComp_eq (I := I) g h gInv frame hframe hu hx hinv a b e
 
+/-- Local form of DC1 with only a pointwise inverse-metric hypothesis. -/
+theorem lcDiffComp_eq_local
+    [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
+    (g h : SmoothRiemannianMetric I M)
+    (gInv : M -> Idx -> Idx -> Real)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (hinvLeftX : forall i j : Idx,
+      (∑ k : Idx, gInv x i k * metricCompForMetricInFrame (I := I) g frame x k j) =
+        (if i = j then 1 else 0))
+    (a b e : Idx) :
+    2 *
+        componentRS (I := I) (hframe.toBasisAt hx)
+          (connectionDifferenceTensorAt
+            (I := I)
+            (LeviCivita.leviCivitaConnectionOfMetric (I := I) g)
+            (LeviCivita.leviCivitaConnectionOfMetric (I := I) h) x)
+          (fun _ : Fin 1 => e)
+          (fun q : Fin 2 => if q = 0 then a else b) =
+      ∑ c : Idx,
+        gInv x e c *
+          (metricCovDerivForMetricCompInFrame
+              (I := I) g
+              (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
+              frame hframe x a b c +
+            metricCovDerivForMetricCompInFrame
+              (I := I) g
+              (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
+              frame hframe x b a c -
+            metricCovDerivForMetricCompInFrame
+              (I := I) g
+              (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
+              frame hframe x c a b) := by
+  classical
+  let covG := LeviCivita.leviCivitaConnectionOfMetric (I := I) g
+  let covH := LeviCivita.leviCivitaConnectionOfMetric (I := I) h
+  let basis := hframe.toBasisAt hx
+  let D : Idx -> Idx -> Idx -> Real := fun i j k =>
+    componentRS (I := I) basis
+      (connectionDifferenceTensorAt (I := I) covG covH x)
+      (fun _ : Fin 1 => k)
+      (fun q : Fin 2 => if q = 0 then i else j)
+  let G : Idx -> Idx -> Real := fun i j =>
+    metricCompForMetricInFrame (I := I) g frame x i j
+  have hcombo : ∀ c : Idx,
+      metricCovDerivForMetricCompInFrame (I := I) g covH frame hframe x a b c +
+        metricCovDerivForMetricCompInFrame (I := I) g covH frame hframe x b a c -
+        metricCovDerivForMetricCompInFrame (I := I) g covH frame hframe x c a b =
+      2 * (∑ p : Idx, D a b p * G p c) := by
+    intro c
+    simpa [D, G, covG, covH, basis] using
+      lcDiff_combo (I := I) g h frame hframe hu hx a b c
+  have hGsym : ∀ i j : Idx, G i j = G j i := by
+    intro i j
+    simpa [G, metricCompForMetricInFrame] using g.symm x (frame i x) (frame j x)
+  have hcollapse :
+      (∑ c : Idx, gInv x e c * (∑ p : Idx, D a b p * G p c)) =
+        D a b e := by
+    calc
+      (∑ c : Idx, gInv x e c * (∑ p : Idx, D a b p * G p c))
+          = ∑ p : Idx, D a b p *
+              (∑ c : Idx, gInv x e c * G c p) := by
+            calc
+              (∑ c : Idx, gInv x e c * (∑ p : Idx, D a b p * G p c))
+                  =
+                ∑ c : Idx, ∑ p : Idx, gInv x e c * (D a b p * G p c) := by
+                  refine Finset.sum_congr rfl fun c _hc => ?_
+                  rw [Finset.mul_sum]
+              _ = ∑ p : Idx, ∑ c : Idx, gInv x e c * (D a b p * G p c) := by
+                  rw [Finset.sum_comm]
+              _ = ∑ p : Idx, D a b p *
+                    (∑ c : Idx, gInv x e c * G c p) := by
+                  refine Finset.sum_congr rfl fun p _hp => ?_
+                  rw [Finset.mul_sum]
+                  refine Finset.sum_congr rfl fun c _hc => ?_
+                  rw [hGsym p c]
+                  ring
+      _ = ∑ p : Idx, D a b p * (if e = p then 1 else 0) := by
+            refine Finset.sum_congr rfl fun p _hp => ?_
+            rw [hinvLeftX e p]
+      _ = D a b e := by
+            simp
+  change 2 * D a b e =
+      ∑ c : Idx, gInv x e c *
+        (metricCovDerivForMetricCompInFrame (I := I) g covH frame hframe x a b c +
+          metricCovDerivForMetricCompInFrame (I := I) g covH frame hframe x b a c -
+          metricCovDerivForMetricCompInFrame (I := I) g covH frame hframe x c a b)
+  calc
+    2 * D a b e =
+        2 * (∑ c : Idx, gInv x e c * (∑ p : Idx, D a b p * G p c)) := by
+          rw [hcollapse]
+    _ = ∑ c : Idx, gInv x e c * (2 * (∑ p : Idx, D a b p * G p c)) := by
+          rw [Finset.mul_sum]
+          refine Finset.sum_congr rfl fun c _hc => ?_
+          ring
+    _ = ∑ c : Idx, gInv x e c *
+        (metricCovDerivForMetricCompInFrame (I := I) g covH frame hframe x a b c +
+          metricCovDerivForMetricCompInFrame (I := I) g covH frame hframe x b a c -
+          metricCovDerivForMetricCompInFrame (I := I) g covH frame hframe x c a b) := by
+          refine Finset.sum_congr rfl fun c _hc => ?_
+          rw [hcombo c]
+
+/-- Local-frame abbreviation form of `lcDiffComp_eq_local`. -/
+theorem lcDiffCompInFrame_eq_local
+    [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
+    (g h : SmoothRiemannianMetric I M)
+    (gInv : M -> Idx -> Idx -> Real)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (hinvLeftX : forall i j : Idx,
+      (∑ k : Idx, gInv x i k * metricCompForMetricInFrame (I := I) g frame x k j) =
+        (if i = j then 1 else 0))
+    (a b e : Idx) :
+    2 * lcDiffCompInFrame (I := I) g h frame hframe x a b e =
+      ∑ c : Idx,
+        gInv x e c *
+          (metricCovDerivForMetricCompInFrame
+              (I := I) g
+              (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
+              frame hframe x a b c +
+            metricCovDerivForMetricCompInFrame
+              (I := I) g
+              (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
+              frame hframe x b a c -
+            metricCovDerivForMetricCompInFrame
+              (I := I) g
+              (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
+              frame hframe x c a b) := by
+  rw [← lcDiffCompInFrame_eq_component
+    (I := I) g h frame hframe hx a b e]
+  exact lcDiffComp_eq_local
+    (I := I) g h gInv frame hframe hu hx hinvLeftX a b e
+
 /-- Directional derivative of DC1 along a local-frame vector.
 
 This is the scalar product-rule part of the first positive-order
@@ -1502,6 +1641,135 @@ theorem lcDiffCompInFrame_extDeriv_eq
     simpa [Dfun, F, Sfun, covH, lcDiffSymMetricCovComp] using
       lcDiffCompInFrame_eq
       (I := I) g h gInv frame hframe hu hy hinv a b e
+  have hleft :
+      extDerivFun (I := I) (fun y : M => 2 * Dfun y) x (frame d x) =
+        2 * extDerivFun (I := I) Dfun x (frame d x) := by
+    have h := RicciFlower.extDerivFun_const_mul
+      (I := I) (c := (2 : Real)) (f := Dfun) (x := x) hD_mdiff
+    have hv := DFunLike.congr_fun h (frame d x)
+    simpa [Dfun, Pi.smul_apply, smul_eq_mul] using hv
+  have hcongr :
+      extDerivFun (I := I) (fun y : M => 2 * Dfun y) x (frame d x) =
+        extDerivFun (I := I) ((Finset.univ : Finset Idx).sum F) x (frame d x) :=
+    deriv_congr_nhds (I := I) (frame d x) hDC_ev
+  have hsum :
+      extDerivFun (I := I) ((Finset.univ : Finset Idx).sum F) x (frame d x) =
+        ∑ c : Idx, extDerivFun (I := I) (F c) x (frame d x) := by
+    simpa using
+      extDerivFun_finset_sum_real
+        (I := I) (t := (Finset.univ : Finset Idx)) F (frame d x) hF_mdiff
+  have hprod : ∀ c : Idx,
+      extDerivFun (I := I) (F c) x (frame d x) =
+        gInv x e c * extDerivFun (I := I) (Sfun c) x (frame d x) +
+          extDerivFun (I := I) (fun y : M => gInv y e c) x (frame d x) *
+            Sfun c x := by
+    intro c
+    simpa [F, Sfun, mul_comm, mul_left_comm, mul_assoc] using
+      extDerivFun_mul_real
+        (I := I) (x := x) (frame d x) (hginv_mdiff e c) (hS_mdiff c)
+  calc
+    2 * extDerivFun (I := I) Dfun x (frame d x)
+        = extDerivFun (I := I) (fun y : M => 2 * Dfun y) x (frame d x) :=
+          hleft.symm
+    _ = extDerivFun (I := I) ((Finset.univ : Finset Idx).sum F) x (frame d x) :=
+          hcongr
+    _ = ∑ c : Idx, extDerivFun (I := I) (F c) x (frame d x) :=
+          hsum
+    _ = ∑ c : Idx,
+        (gInv x e c *
+          extDerivFun (I := I)
+            (fun y : M =>
+              lcDiffSymMetricCovComp
+                (I := I) g
+                (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
+                frame hframe y a b c)
+            x (frame d x) +
+          extDerivFun (I := I) (fun y : M => gInv y e c)
+            x (frame d x) *
+          lcDiffSymMetricCovComp
+            (I := I) g
+            (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
+            frame hframe x a b c) := by
+          refine Finset.sum_congr rfl fun c _hc => ?_
+          simpa [Sfun, covH] using hprod c
+
+/-- Local form of `lcDiffCompInFrame_extDeriv_eq`.
+
+The inverse-metric identity is required only eventually near the base point,
+which is the natural hypothesis for a local-frame inverse coefficient package. -/
+theorem lcDiffCompInFrame_extDeriv_eq_local
+    [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
+    (g h : SmoothRiemannianMetric I M)
+    (gInv : M -> Idx -> Idx -> Real)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (hinvLeftN : forall i j : Idx,
+      (fun y : M => ∑ k : Idx,
+          gInv y i k * metricCompForMetricInFrame (I := I) g frame y k j) =ᶠ[𝓝 x]
+        fun _ : M => if i = j then 1 else 0)
+    (d a b e : Idx)
+    (hD_mdiff :
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M => lcDiffCompInFrame (I := I) g h frame hframe y a b e) x)
+    (hginv_mdiff : ∀ i j : Idx,
+      MDifferentiableAt I 𝓘(Real, Real) (fun y : M => gInv y i j) x)
+    (hA_mdiff : ∀ i j k : Idx,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M =>
+          metricCovDerivForMetricCompInFrame
+            (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
+            frame hframe y i j k) x) :
+    2 * extDerivFun (I := I)
+        (fun y : M => lcDiffCompInFrame (I := I) g h frame hframe y a b e)
+        x (frame d x) =
+      ∑ c : Idx,
+        (gInv x e c *
+          extDerivFun (I := I)
+            (fun y : M =>
+              lcDiffSymMetricCovComp
+                (I := I) g
+                (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
+                frame hframe y a b c)
+            x (frame d x) +
+          extDerivFun (I := I) (fun y : M => gInv y e c)
+            x (frame d x) *
+          lcDiffSymMetricCovComp
+            (I := I) g
+            (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
+            frame hframe x a b c) := by
+  classical
+  let covH := LeviCivita.leviCivitaConnectionOfMetric (I := I) h
+  let Dfun : M -> Real := fun y =>
+    lcDiffCompInFrame (I := I) g h frame hframe y a b e
+  let Sfun : Idx -> M -> Real := fun c y =>
+    lcDiffSymMetricCovComp (I := I) g covH frame hframe y a b c
+  let F : Idx -> M -> Real := fun c y => gInv y e c * Sfun c y
+  have hS_mdiff : ∀ c : Idx,
+      MDifferentiableAt I 𝓘(Real, Real) (Sfun c) x := by
+    intro c
+    dsimp [Sfun, lcDiffSymMetricCovComp]
+    exact ((hA_mdiff a b c).add (hA_mdiff b a c)).sub (hA_mdiff c a b)
+  have hF_mdiff : ∀ c ∈ (Finset.univ : Finset Idx),
+      MDifferentiableAt I 𝓘(Real, Real) (F c) x := by
+    intro c _hc
+    exact (hginv_mdiff e c).mul (hS_mdiff c)
+  have hinvLeftAll :
+      (∀ᶠ y in 𝓝 x, ∀ i j : Idx,
+        (∑ k : Idx,
+          gInv y i k * metricCompForMetricInFrame (I := I) g frame y k j) =
+            (if i = j then 1 else 0)) := by
+    exact Filter.eventually_all.mpr fun i =>
+      Filter.eventually_all.mpr fun j => hinvLeftN i j
+  have hDC_ev :
+      (fun y : M => 2 * Dfun y) =ᶠ[nhds x]
+        ((Finset.univ : Finset Idx).sum F) := by
+    filter_upwards [hu.mem_nhds hx, hinvLeftAll] with y hy hinvy
+    simpa [Dfun, F, Sfun, covH, lcDiffSymMetricCovComp] using
+      lcDiffCompInFrame_eq_local
+      (I := I) g h gInv frame hframe hu hy hinvy a b e
   have hleft :
       extDerivFun (I := I) (fun y : M => 2 * Dfun y) x (frame d x) =
         2 * extDerivFun (I := I) Dfun x (frame d x) := by
@@ -1792,6 +2060,155 @@ theorem lcDiffCovDerivCompInFrame_eq
   simp only [S, U, A2, Γ, covH]
   ring_nf
 
+/-- Local form of `lcDiffCovDerivCompInFrame_eq`.
+
+This is the reassembly step for the first covariant derivative of DC1 with
+only local inverse-metric data. -/
+theorem lcDiffCovDerivCompInFrame_eq_local
+    [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
+    (g h : SmoothRiemannianMetric I M)
+    (gInv : M -> Idx -> Idx -> Real)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (hinvLeftX : forall i j : Idx,
+      (∑ k : Idx, gInv x i k * metricCompForMetricInFrame (I := I) g frame x k j) =
+        (if i = j then 1 else 0))
+    (hinvLeftN : forall i j : Idx,
+      (fun y : M => ∑ k : Idx,
+          gInv y i k * metricCompForMetricInFrame (I := I) g frame y k j) =ᶠ[𝓝 x]
+        fun _ : M => if i = j then 1 else 0)
+    (d a b e : Idx)
+    (hD_mdiff :
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M => lcDiffCompInFrame (I := I) g h frame hframe y a b e) x)
+    (hginv_mdiff : ∀ i j : Idx,
+      MDifferentiableAt I 𝓘(Real, Real) (fun y : M => gInv y i j) x)
+    (hA_mdiff : ∀ i j k : Idx,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M =>
+          metricCovDerivForMetricCompInFrame
+            (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
+            frame hframe y i j k) x) :
+    2 * lcDiffCovDerivCompInFrame (I := I) g h frame hframe x d a b e =
+      lcDiffCovDerivRHS
+        (I := I) g gInv (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
+        frame hframe x d a b e := by
+  classical
+  let covH := LeviCivita.leviCivitaConnectionOfMetric (I := I) h
+  let D : Idx -> Idx -> Idx -> Real := fun i j k =>
+    lcDiffCompInFrame (I := I) g h frame hframe x i j k
+  let S : Idx -> Idx -> Idx -> Real := fun i j k =>
+    lcDiffSymMetricCovComp (I := I) g covH frame hframe x i j k
+  let U : Idx -> Idx -> Real := fun i j => gInv x i j
+  let DU : Idx -> Idx -> Real := fun i j =>
+    inverseMetricCovDerivForMetricCompInFrame
+      (I := I) gInv covH frame hframe x d i j
+  let A2 : Idx -> Idx -> Idx -> Real := fun i j k =>
+    metricCovDeriv2ForMetricCompInFrame (I := I) g covH frame hframe x d i j k
+  let Γ : Idx -> Idx -> Real := fun i j =>
+    christoffelSymbolInFrame covH frame hframe x d i j
+  let extD : Real :=
+    extDerivFun (I := I)
+      (fun y : M => lcDiffCompInFrame (I := I) g h frame hframe y a b e)
+      x (frame d x)
+  let extS : Idx -> Real := fun c =>
+    extDerivFun (I := I)
+      (fun y : M => lcDiffSymMetricCovComp (I := I) g covH frame hframe y a b c)
+      x (frame d x)
+  let extU : Idx -> Real := fun c =>
+    extDerivFun (I := I) (fun y : M => gInv y e c) x (frame d x)
+  have hDformula : ∀ i j k : Idx,
+      2 * D i j k = ∑ c : Idx, U k c * S i j c := by
+    intro i j k
+    simpa [D, S, U, covH] using
+      lcDiffCompInFrame_eq_local
+        (I := I) g h gInv frame hframe hu hx hinvLeftX i j k
+  have hscalar :
+      2 * extD =
+        ∑ c : Idx, (U e c * extS c + extU c * S a b c) := by
+    simpa [extD, extS, extU, S, U, covH] using
+      lcDiffCompInFrame_extDeriv_eq_local
+        (I := I) g h gInv frame hframe hu hx hinvLeftN d a b e
+        hD_mdiff hginv_mdiff hA_mdiff
+  have hSderiv : ∀ c : Idx,
+      extS c =
+        A2 a b c + A2 b a c - A2 c a b +
+          (∑ p : Idx, Γ a p * S p b c) +
+          (∑ p : Idx, Γ b p * S a p c) +
+          (∑ p : Idx, Γ c p * S a b p) := by
+    intro c
+    simpa [extS, A2, S, Γ, covH] using
+      lcDiffSymMetricCovComp_extDeriv_eq
+        (I := I) g covH frame hframe hA_mdiff d a b c
+  have hDU : ∀ c : Idx,
+      DU e c = extU c + (∑ p : Idx, Γ p e * U p c) +
+        (∑ p : Idx, Γ p c * U e p) := by
+    intro c
+    simp [DU, extU, U, Γ, inverseMetricCovDerivForMetricCompInFrame, covH]
+  have hDUactual : ∀ c : Idx,
+      inverseMetricCovDerivForMetricCompInFrame
+          (I := I) gInv covH frame hframe x d e c =
+        extU c + (∑ p : Idx, Γ p e * U p c) +
+          (∑ p : Idx, Γ p c * U e p) := by
+    intro c
+    simpa [DU] using hDU c
+  have hDUactualFull : ∀ c : Idx,
+      inverseMetricCovDerivForMetricCompInFrame
+          (I := I) gInv
+          (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
+          frame hframe x d e c =
+        extU c + (∑ p : Idx, Γ p e * U p c) +
+          (∑ p : Idx, Γ p c * U e p) := by
+    intro c
+    simpa [covH] using hDUactual c
+  have hswapA :
+      (∑ c : Idx, ∑ p : Idx, U e c * (Γ a p * S p b c)) =
+        (∑ p : Idx, ∑ c : Idx, Γ a p * (U e c * S p b c)) := by
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl fun p _hp => ?_
+    refine Finset.sum_congr rfl fun c _hc => ?_
+    ring
+  have hswapB :
+      (∑ c : Idx, ∑ p : Idx, U e c * (Γ b p * S a p c)) =
+        (∑ p : Idx, ∑ c : Idx, Γ b p * (U e c * S a p c)) := by
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl fun p _hp => ?_
+    refine Finset.sum_congr rfl fun c _hc => ?_
+    ring
+  have hswapC :
+      (∑ c : Idx, ∑ p : Idx, U e c * (Γ c p * S a b p)) =
+        (∑ c : Idx, ∑ p : Idx, Γ p c * (U e p * S a b c)) := by
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl fun p _hp => ?_
+    refine Finset.sum_congr rfl fun c _hc => ?_
+    ring
+  have hswapE :
+      (∑ p : Idx, ∑ c : Idx, Γ p e * (U p c * S a b c)) =
+        (∑ c : Idx, ∑ p : Idx, Γ p e * (U p c * S a b c)) := by
+    rw [Finset.sum_comm]
+  have hleft :
+      2 * lcDiffCovDerivCompInFrame (I := I) g h frame hframe x d a b e =
+        2 * extD +
+          (∑ p : Idx, Γ p e * (2 * D a b p)) -
+          (∑ p : Idx, Γ a p * (2 * D p b e)) -
+          (∑ p : Idx, Γ b p * (2 * D a p e)) := by
+    simp [lcDiffCovDerivCompInFrame, extD, D, Γ, covH, Finset.mul_sum,
+      mul_add, mul_sub]
+    ring_nf
+  rw [hleft]
+  rw [hscalar]
+  unfold lcDiffCovDerivRHS
+  simp only [hDformula]
+  simp only [hSderiv, hDUactualFull]
+  simp only [Finset.sum_add_distrib, Finset.sum_sub_distrib, mul_add, mul_sub,
+    add_mul, Finset.mul_sum, Finset.sum_mul]
+  rw [hswapA, hswapB, hswapC, hswapE]
+  simp only [S, U, A2, Γ, covH]
+  ring_nf
+
 /-- Substitute the inverse-metric derivative formula into the first-derivative
 DC1 RHS. -/
 theorem lcDiffRHS_eq_quad
@@ -1820,6 +2237,44 @@ theorem lcDiffRHS_eq_quad
       (I := I) (g := g) (gInv := gInv) (cov := cov)
       (frame := frame) (hframe := hframe) (hinv := hinv)
       (x := x) hginv_mdiff hmetric_mdiff d e c
+  rw [hderiv]
+
+/-- Local form of `lcDiffRHS_eq_quad`, using only pointwise inverse identities
+at `x` and the row inverse identity eventually near `x`. -/
+theorem lcDiffRHS_eq_quad_local
+    [IsManifold I ∞ M]
+    (g : SmoothRiemannianMetric I M)
+    (gInv : M -> Idx -> Idx -> Real)
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    {x : M}
+    (hinvX : forall i j : Idx,
+      (∑ k : Idx, gInv x i k * metricCompForMetricInFrame (I := I) g frame x k j) =
+          (if i = j then 1 else 0) ∧
+        (∑ k : Idx, metricCompForMetricInFrame (I := I) g frame x i k * gInv x k j) =
+          (if i = j then 1 else 0))
+    (hinvLeftN : forall i j : Idx,
+      (fun y : M => ∑ k : Idx,
+          gInv y i k * metricCompForMetricInFrame (I := I) g frame y k j) =ᶠ[𝓝 x]
+        fun _ : M => if i = j then 1 else 0)
+    (hginv_mdiff : ∀ i j : Idx,
+      MDifferentiableAt I 𝓘(Real, Real) (fun y : M => gInv y i j) x)
+    (hmetric_mdiff : ∀ i j : Idx,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M => metricCompForMetricInFrame (I := I) g frame y i j) x)
+    (d a b e : Idx) :
+    lcDiffCovDerivRHS (I := I) g gInv cov frame hframe x d a b e =
+      lcDiffQuadRHS (I := I) g gInv cov frame hframe x d a b e := by
+  classical
+  unfold lcDiffCovDerivRHS lcDiffQuadRHS
+  congr 1
+  refine Finset.sum_congr rfl fun c _hc => ?_
+  have hderiv :=
+    invMetricCovDeriv_eq_local
+      (I := I) (g := g) (gInv := gInv) (cov := cov)
+      (frame := frame) (hframe := hframe)
+      (x := x) hinvX hinvLeftN hginv_mdiff hmetric_mdiff d e c
   rw [hderiv]
 
 /-- First covariant derivative of DC1 after substituting the inverse-metric
@@ -1871,6 +2326,67 @@ theorem lcDiffDeriv_eq_quad
               (I := I) g gInv
               (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
               frame hframe hinv hginv_mdiff hmetric_mdiff d a b e
+
+/-- Local form of `lcDiffDeriv_eq_quad`.
+
+This is the coordinate producer needed by local-frame HCG estimates: the
+inverse-metric package is only required at and near the point where the
+component is evaluated. -/
+theorem lcDiffDeriv_eq_quad_local
+    [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
+    [VectorBundle Real E (TangentSpace I : M -> Type _)]
+    [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
+    (g h : SmoothRiemannianMetric I M)
+    (gInv : M -> Idx -> Idx -> Real)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u)
+    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (hinvX : forall i j : Idx,
+      (∑ k : Idx, gInv x i k * metricCompForMetricInFrame (I := I) g frame x k j) =
+          (if i = j then 1 else 0) ∧
+        (∑ k : Idx, metricCompForMetricInFrame (I := I) g frame x i k * gInv x k j) =
+          (if i = j then 1 else 0))
+    (hinvLeftN : forall i j : Idx,
+      (fun y : M => ∑ k : Idx,
+          gInv y i k * metricCompForMetricInFrame (I := I) g frame y k j) =ᶠ[𝓝 x]
+        fun _ : M => if i = j then 1 else 0)
+    (d a b e : Idx)
+    (hD_mdiff :
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M => lcDiffCompInFrame (I := I) g h frame hframe y a b e) x)
+    (hginv_mdiff : ∀ i j : Idx,
+      MDifferentiableAt I 𝓘(Real, Real) (fun y : M => gInv y i j) x)
+    (hmetric_mdiff : ∀ i j : Idx,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M => metricCompForMetricInFrame (I := I) g frame y i j) x)
+    (hA_mdiff : ∀ i j k : Idx,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M =>
+          metricCovDerivForMetricCompInFrame
+            (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
+            frame hframe y i j k) x) :
+    2 * lcDiffCovDerivCompInFrame (I := I) g h frame hframe x d a b e =
+      lcDiffQuadRHS
+        (I := I) g gInv (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
+        frame hframe x d a b e := by
+  calc
+    2 * lcDiffCovDerivCompInFrame (I := I) g h frame hframe x d a b e =
+        lcDiffCovDerivRHS
+          (I := I) g gInv (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
+          frame hframe x d a b e := by
+          exact
+            lcDiffCovDerivCompInFrame_eq_local
+              (I := I) g h gInv frame hframe hu hx
+              (fun i j => (hinvX i j).1) hinvLeftN d a b e
+              hD_mdiff hginv_mdiff hA_mdiff
+    _ = lcDiffQuadRHS
+          (I := I) g gInv (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
+          frame hframe x d a b e := by
+          exact
+            lcDiffRHS_eq_quad_local
+              (I := I) g gInv
+              (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
+              frame hframe hinvX hinvLeftN hginv_mdiff hmetric_mdiff d a b e
 
 end
 

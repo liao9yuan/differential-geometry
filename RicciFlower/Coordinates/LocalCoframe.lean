@@ -129,6 +129,36 @@ variable
   {N : Type*} [TopologicalSpace N] [ChartedSpace G N] [IsManifold J ∞ N]
     [T2Space N]
 
+/-- A realized `LocalChartAt` frame admits global smooth section extensions
+which agree with it near the chart center.
+
+This is the general local-chart frame producer.  The dual coframe producer below
+is still only available for the default/tangent-trivialization chart until the
+project has an induced smooth dual-coframe section API for arbitrary tangent
+trivializations. -/
+theorem existsChartFrameSec
+    {x₀ : N} {C : LocalChartAt (I := J) x₀} (F₀ : C.Frame) :
+    ∃ Z : CoordinateIdx (𝕜 := Real) F -> ContMDiffSection J F (∞ : WithTop ℕ∞)
+        (TangentSpace J : N -> Type _),
+      ∀ j : CoordinateIdx (𝕜 := Real) F,
+        (fun y : N => Z j y) =ᶠ[𝓝 x₀]
+          fun y : N => F₀.frame j y := by
+  obtain ⟨Z, hZ⟩ :=
+    F₀.hframe.exists_contMDiffSection_eqOn_nhd F₀.isOpen_domain F₀.mem_base
+  refine ⟨Z, fun j => ?_⟩
+  exact hZ.mono fun _ hy => hy j
+
+/-- The full-source frame attached to a `LocalChartAt` admits smooth section
+extensions near the chart center. -/
+theorem existsChartToFrameSec
+    {x₀ : N} (C : LocalChartAt (I := J) x₀) :
+    ∃ Z : CoordinateIdx (𝕜 := Real) F -> ContMDiffSection J F (∞ : WithTop ℕ∞)
+        (TangentSpace J : N -> Type _),
+      ∀ j : CoordinateIdx (𝕜 := Real) F,
+        (fun y : N => Z j y) =ᶠ[𝓝 x₀]
+          fun y : N => (C.toFrame).frame j y :=
+  existsChartFrameSec (J := J) C.toFrame
+
 /-- The local frame induced by a tangent trivialization admits global smooth
 section extensions which agree with it near the center. -/
 theorem existsTrivFrameSec
@@ -174,6 +204,74 @@ theorem existsTrivFramePair
     (𝕜 := Real) (I := J) (M := N) x₀ b Z hZ i j
 
 set_option backward.isDefEq.respectTransparency false in
+/-- A chart-constant covariant tensor in the tensor-bundle trivialization has a
+global smooth tensor-field section extension which agrees with it near the
+chart center. -/
+theorem existsConstTensor0S
+    (r : Nat) (x₀ : N) (β : Tensor0SBundle.Tensor0SModel r Real F) :
+    ∃ α : Tensor0SBundle.Tensor0SField
+        (𝕜 := Real) (E := F) (H := G) (I := J) (M := N)
+        (n := (∞ : WithTop ℕ∞)) r,
+      (fun y : N =>
+        (⟨y, α y⟩ :
+          TotalSpace (Tensor0SBundle.Tensor0SModel r Real F)
+            (fun p : N => Tensor0SBundle.Tensor0SSpace r J p))) =ᶠ[𝓝 x₀]
+        fun y : N =>
+          (⟨y,
+            Tensor0SBundle.Tensor0SSpace.constInChart
+              (𝕜 := Real) (E := F) (H := G) (I := J) (M := N) r x₀ β y⟩ :
+            TotalSpace (Tensor0SBundle.Tensor0SModel r Real F)
+              (fun p : N => Tensor0SBundle.Tensor0SSpace r J p)) := by
+  classical
+  haveI : IsManifold J ((∞ : WithTop ℕ∞) + 1) N := by
+    simpa using (inferInstance : IsManifold J (∞ : WithTop ℕ∞) N)
+  letI := Tensor0SBundle.tensor0SBundle_topology
+    (𝕜 := Real) (E := F) (H := G) (I := J) (M := N) r
+  letI := Tensor0SBundle.tensor0SBundle_fiber
+    (𝕜 := Real) (E := F) (H := G) (I := J) (M := N) r
+  letI := Tensor0SBundle.tensor0SBundle_vector
+    (𝕜 := Real) (E := F) (H := G) (I := J) (M := N) r
+  letI := Tensor0SBundle.tensor0SBundle_smooth
+    (𝕜 := Real) (E := F) (H := G) (I := J) (M := N)
+    (n := (∞ : WithTop ℕ∞)) r
+  let V : N -> Type _ := fun p : N => Tensor0SBundle.Tensor0SSpace r J p
+  let fiber : Type _ := Tensor0SBundle.Tensor0SModel r Real F
+  let e := trivializationAt fiber V x₀
+  let s : Unit -> (y : N) -> V y :=
+    fun _ y =>
+      Tensor0SBundle.Tensor0SSpace.constInChart
+        (𝕜 := Real) (E := F) (H := G) (I := J) (M := N) r x₀ β y
+  have hs : ∀ i : Unit,
+      ContMDiffOn J
+        (J.prod 𝓘(Real, fiber))
+        (∞ : WithTop ℕ∞)
+        (fun y : N =>
+          (⟨y, s i y⟩ :
+            TotalSpace fiber V))
+        e.baseSet := by
+    intro i
+    simpa [s, e, fiber, V] using
+      Tensor0SBundle.tensor0SConstInChart_contMDiffOn_baseSet
+        (𝕜 := Real) (E := F) (H := G) (I := J) (M := N)
+        (r := r) x₀ β
+  have hx₀ : x₀ ∈ e.baseSet := by
+    simpa [e, fiber, V] using
+      (mem_baseSet_trivializationAt fiber V x₀)
+  obtain ⟨αs, hαs⟩ :=
+    exists_contMDiffSection_eqOn_nhd
+      (E := F) (H := G) (I := J) (M := N)
+      (F := fiber) (V := V)
+      (n := (⊤ : ℕ∞))
+      (s := s) hs e.open_baseSet hx₀
+  refine ⟨αs (), ?_⟩
+  filter_upwards [hαs] with y hy
+  exact congrArg
+    (fun z =>
+      (⟨y, z⟩ :
+        TotalSpace (Tensor0SBundle.Tensor0SModel r Real F)
+          (fun p : N => Tensor0SBundle.Tensor0SSpace r J p)))
+    (hy ())
+
 /-- A chart-constant covector in the tensor-bundle trivialization has a
 global smooth one-form section extension which agrees with it near the chart
 center. -/
@@ -191,56 +289,61 @@ theorem existsConstCoframe
             Tensor0SBundle.Tensor0SSpace.constInChart
               (𝕜 := Real) (E := F) (H := G) (I := J) (M := N) 1 x₀ β y⟩ :
             TotalSpace (Tensor0SBundle.Tensor0SModel 1 Real F)
-              (fun p : N => Tensor0SBundle.Tensor0SSpace 1 J p)) := by
-  classical
-  haveI : IsManifold J ((∞ : WithTop ℕ∞) + 1) N := by
-    simpa using (inferInstance : IsManifold J (∞ : WithTop ℕ∞) N)
-  letI := Tensor0SBundle.tensor0SBundle_topology
-    (𝕜 := Real) (E := F) (H := G) (I := J) (M := N) 1
-  letI := Tensor0SBundle.tensor0SBundle_fiber
-    (𝕜 := Real) (E := F) (H := G) (I := J) (M := N) 1
-  letI := Tensor0SBundle.tensor0SBundle_vector
-    (𝕜 := Real) (E := F) (H := G) (I := J) (M := N) 1
-  letI := Tensor0SBundle.tensor0SBundle_smooth
-    (𝕜 := Real) (E := F) (H := G) (I := J) (M := N)
-    (n := (∞ : WithTop ℕ∞)) 1
-  let V : N -> Type _ := fun p : N => Tensor0SBundle.Tensor0SSpace 1 J p
-  let fiber : Type _ := Tensor0SBundle.Tensor0SModel 1 Real F
-  let e := trivializationAt fiber V x₀
-  let s : Unit -> (y : N) -> V y :=
-    fun _ y =>
-      Tensor0SBundle.Tensor0SSpace.constInChart
-        (𝕜 := Real) (E := F) (H := G) (I := J) (M := N) 1 x₀ β y
-  have hs : ∀ i : Unit,
-      ContMDiffOn J
-        (J.prod 𝓘(Real, fiber))
-        (∞ : WithTop ℕ∞)
-        (fun y : N =>
-          (⟨y, s i y⟩ :
-            TotalSpace fiber V))
-        e.baseSet := by
-    intro i
-    simpa [s, e, fiber, V] using
-      Tensor0SBundle.tensor0SConstInChart_contMDiffOn_baseSet
+              (fun p : N => Tensor0SBundle.Tensor0SSpace 1 J p)) :=
+  existsConstTensor0S (J := J) 1 x₀ β
+
+/-- The basis tensors of a tangent-trivialization model basis have global
+smooth covariant tensor-field section extensions agreeing with the
+chart-constant tensors near the center. -/
+theorem existsTrivTensor0SSec
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (r : Nat) (x₀ : N) (b : Module.Basis Idx Real F) :
+    ∃ θ : (Fin r -> Idx) -> Tensor0SBundle.Tensor0SField
         (𝕜 := Real) (E := F) (H := G) (I := J) (M := N)
-        (r := 1) x₀ β
-  have hx₀ : x₀ ∈ e.baseSet := by
-    simpa [e, fiber, V] using
-      (mem_baseSet_trivializationAt fiber V x₀)
-  obtain ⟨αs, hαs⟩ :=
-    exists_contMDiffSection_eqOn_nhd
-      (E := F) (H := G) (I := J) (M := N)
-      (F := fiber) (V := V)
-      (n := (⊤ : ℕ∞))
-      (s := s) hs e.open_baseSet hx₀
-  refine ⟨αs (), ?_⟩
-  filter_upwards [hαs] with y hy
-  exact congrArg
-    (fun z =>
-      (⟨y, z⟩ :
-        TotalSpace (Tensor0SBundle.Tensor0SModel 1 Real F)
-          (fun p : N => Tensor0SBundle.Tensor0SSpace 1 J p)))
-    (hy ())
+        (n := (∞ : WithTop ℕ∞)) r,
+      ∀ slots : Fin r -> Idx,
+        (fun y : N =>
+          (⟨y, θ slots y⟩ :
+            TotalSpace (Tensor0SBundle.Tensor0SModel r Real F)
+              (fun p : N => Tensor0SBundle.Tensor0SSpace r J p))) =ᶠ[𝓝 x₀]
+          fun y : N =>
+            (⟨y,
+              Tensor0SBundle.Tensor0SSpace.constInChart
+                (𝕜 := Real) (E := F) (H := G) (I := J) (M := N) r x₀
+                ((Tensor0SBundle.continuousMultilinearMapBasis
+                  (𝕜 := Real) (V := F) b r) slots) y⟩ :
+              TotalSpace (Tensor0SBundle.Tensor0SModel r Real F)
+                (fun p : N => Tensor0SBundle.Tensor0SSpace r J p)) := by
+  classical
+  choose θ hθ using fun slots : Fin r -> Idx =>
+    existsConstTensor0S (J := J) r x₀
+      ((Tensor0SBundle.continuousMultilinearMapBasis
+        (𝕜 := Real) (V := F) b r) slots)
+  exact ⟨θ, hθ⟩
+
+/-- Default-coordinate version of `existsTrivTensor0SSec`, using
+`LocalChartAt.default`/`coordinateFrameAt` indices. -/
+theorem existsDefaultTensor0SSec
+    (r : Nat) (x₀ : N) :
+    ∃ θ : (Fin r -> CoordinateIdx (𝕜 := Real) F) ->
+        Tensor0SBundle.Tensor0SField
+          (𝕜 := Real) (E := F) (H := G) (I := J) (M := N)
+          (n := (∞ : WithTop ℕ∞)) r,
+      ∀ slots : Fin r -> CoordinateIdx (𝕜 := Real) F,
+        (fun y : N =>
+          (⟨y, θ slots y⟩ :
+            TotalSpace (Tensor0SBundle.Tensor0SModel r Real F)
+              (fun p : N => Tensor0SBundle.Tensor0SSpace r J p))) =ᶠ[𝓝 x₀]
+          fun y : N =>
+            (⟨y,
+              Tensor0SBundle.Tensor0SSpace.constInChart
+                (𝕜 := Real) (E := F) (H := G) (I := J) (M := N) r x₀
+                ((Tensor0SBundle.continuousMultilinearMapBasis
+                  (𝕜 := Real) (V := F) (Module.finBasis Real F) r)
+                    slots) y⟩ :
+              TotalSpace (Tensor0SBundle.Tensor0SModel r Real F)
+                (fun p : N => Tensor0SBundle.Tensor0SSpace r J p)) :=
+  existsTrivTensor0SSec (J := J) r x₀ (Module.finBasis Real F)
 
 /-- The dual covectors of a tangent-trivialization model basis have global
 smooth one-form section extensions agreeing with the chart-constant covectors
@@ -315,6 +418,47 @@ theorem existsTrivFrameCoframePair
     TotalSpace.mk_inj.mp hθy
   rw [hθy_fiber]
   exact hpair
+
+/-- Smooth frame/coframe section extensions for the default `LocalChartAt`.
+
+This is the chart-facing specialization of `existsTrivFrameCoframePair`.  It
+uses the default tangent trivialization carried by `LocalChartAt.default`, so it
+does not assert the still-missing arbitrary-trivialization coframe smoothness
+bridge. -/
+theorem existsDefaultCoframePair
+    (x₀ : N) :
+    ∃ Z : CoordinateIdx (𝕜 := Real) F -> ContMDiffSection J F (∞ : WithTop ℕ∞)
+        (TangentSpace J : N -> Type _),
+    ∃ θ : CoordinateIdx (𝕜 := Real) F -> Tensor0SBundle.Tensor0SField
+        (𝕜 := Real) (E := F) (H := G) (I := J) (M := N)
+        (n := (∞ : WithTop ℕ∞)) 1,
+      (∀ j : CoordinateIdx (𝕜 := Real) F,
+        (fun y : N => Z j y) =ᶠ[𝓝 x₀]
+          fun y : N => (LocalChartAt.defaultFrame (I := J) x₀).frame j y) ∧
+      (∀ i : CoordinateIdx (𝕜 := Real) F,
+        (fun y : N =>
+          (⟨y, θ i y⟩ :
+            TotalSpace (Tensor0SBundle.Tensor0SModel 1 Real F)
+              (fun p : N => Tensor0SBundle.Tensor0SSpace 1 J p))) =ᶠ[𝓝 x₀]
+          fun y : N =>
+            (⟨y,
+              Tensor0SBundle.Tensor0SSpace.constInChart
+                (𝕜 := Real) (E := F) (H := G) (I := J) (M := N) 1 x₀
+                ((Tensor0SBundle.continuousMultilinearMapBasis
+                  (𝕜 := Real) (V := F) (Module.finBasis Real F) 1)
+                    (fun _ : Fin 1 => i)) y⟩ :
+              TotalSpace (Tensor0SBundle.Tensor0SModel 1 Real F)
+                (fun p : N => Tensor0SBundle.Tensor0SSpace 1 J p))) ∧
+      (∀ i j : CoordinateIdx (𝕜 := Real) F,
+        (fun y : N => θ i y (fun _ : Fin 1 => Z j y)) =ᶠ[𝓝 x₀]
+          fun _ : N => if j = i then (1 : Real) else 0) := by
+  classical
+  obtain ⟨Z, θ, hZ, hθ, hpair⟩ :=
+    existsTrivFrameCoframePair (J := J) (N := N) x₀ (Module.finBasis Real F)
+  refine ⟨Z, θ, ?_, hθ, hpair⟩
+  intro j
+  simpa [LocalChartAt.defaultFrame_frame, coordinateFrameAt]
+    using hZ j
 
 end Real
 

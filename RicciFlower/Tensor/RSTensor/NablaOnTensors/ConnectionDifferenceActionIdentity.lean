@@ -113,8 +113,8 @@ theorem nablaDirSubNorm_le {r s : ℕ}
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (T : TensorRSField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) r s)
-    (β : (x : M) -> Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I)
-      (M := M) r x)
+    (β : (Fin r -> Idx) -> (x : M) -> Tensor0SSpace (𝕜 := Real) (E := E)
+      (H := H) (I := I) (M := M) r x)
     (x₀ : M)
     (basis : Module.Basis Idx Real (TangentSpace I x₀))
     (hinv :
@@ -123,17 +123,17 @@ theorem nablaDirSubNorm_le {r s : ℕ}
     (V : Idx -> (x : M) -> TangentSpace I x)
     (hX_at : X x₀ = basis dir)
     (hβ_at : forall upper : Fin r -> Idx,
-      β x₀ = basisTensor0S (I := I) basis upper)
+      β upper x₀ = basisTensor0S (I := I) basis upper)
     (hV_at : forall i : Idx, V i x₀ = basis i)
-    (hpairT : forall lower : Fin s -> Idx,
+    (hpairT : forall upper : Fin r -> Idx, forall lower : Fin s -> Idx,
       MDifferentiableAt I 𝓘(Real, Real)
-        (fun p : M => (T p (β p)) (fun a : Fin s => V (lower a) p)) x₀)
-    (hpairβ : forall slots : Fin r -> Idx,
+        (fun p : M => (T p (β upper p)) (fun a : Fin s => V (lower a) p)) x₀)
+    (hpairβ : forall upper : Fin r -> Idx, forall slots : Fin r -> Idx,
       MDifferentiableAt I 𝓘(Real, Real)
-        (fun p : M => β p (fun a : Fin r => V (slots a) p)) x₀)
-    (hβmodel : DifferentiableWithinAt Real
+        (fun p : M => β upper p (fun a : Fin r => V (slots a) p)) x₀)
+    (hβmodel : forall upper : Fin r -> Idx, DifferentiableWithinAt Real
       (tensor0SModelInChart (𝕜 := Real) (E := E) (H := H) (I := I)
-        (M := M) r x₀ β)
+        (M := M) r x₀ (β upper))
       (Set.range I) (extChartAt I x₀ x₀))
     (hV : forall i : Idx, MDiffAt (T% (V i)) x₀)
     (hVmodel : forall i : Idx,
@@ -180,9 +180,9 @@ theorem nablaDirSubNorm_le {r s : ℕ}
   have hcomp :=
     componentRS_nablaRSFun_sub_connAct
       (E := E) (H := H) (I := I) (M := M)
-      (r := r) (s := s) cov cov' X T β x₀ basis V upper (Fin.cons dir lower)
-      (by simpa using hX_at) (hβ_at upper) hV_at (by simpa using hpairT lower) hpairβ hβmodel
-      hV hVmodel hcoord
+      (r := r) (s := s) cov cov' X T (β upper) x₀ basis V upper (Fin.cons dir lower)
+      (by simpa using hX_at) (hβ_at upper) hV_at (by simpa using hpairT upper lower)
+      (hpairβ upper) (hβmodel upper) hV hVmodel hcoord
   simpa [B] using
     calc
       |componentRS (I := I) basis
@@ -216,8 +216,8 @@ theorem nablaDirNorm_le {r s : ℕ}
     (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (T : TensorRSField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) r s)
-    (β : (x : M) -> Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I)
-      (M := M) r x)
+    (β : (Fin r -> Idx) -> (x : M) -> Tensor0SSpace (𝕜 := Real) (E := E)
+      (H := H) (I := I) (M := M) r x)
     (x₀ : M)
     (basis : Module.Basis Idx Real (TangentSpace I x₀))
     (hinv :
@@ -226,17 +226,17 @@ theorem nablaDirNorm_le {r s : ℕ}
     (V : Idx -> (x : M) -> TangentSpace I x)
     (hX_at : X x₀ = basis dir)
     (hβ_at : forall upper : Fin r -> Idx,
-      β x₀ = basisTensor0S (I := I) basis upper)
+      β upper x₀ = basisTensor0S (I := I) basis upper)
     (hV_at : forall i : Idx, V i x₀ = basis i)
-    (hpairT : forall lower : Fin s -> Idx,
+    (hpairT : forall upper : Fin r -> Idx, forall lower : Fin s -> Idx,
       MDifferentiableAt I 𝓘(Real, Real)
-        (fun p : M => (T p (β p)) (fun a : Fin s => V (lower a) p)) x₀)
-    (hpairβ : forall slots : Fin r -> Idx,
+        (fun p : M => (T p (β upper p)) (fun a : Fin s => V (lower a) p)) x₀)
+    (hpairβ : forall upper : Fin r -> Idx, forall slots : Fin r -> Idx,
       MDifferentiableAt I 𝓘(Real, Real)
-        (fun p : M => β p (fun a : Fin r => V (slots a) p)) x₀)
-    (hβmodel : DifferentiableWithinAt Real
+        (fun p : M => β upper p (fun a : Fin r => V (slots a) p)) x₀)
+    (hβmodel : forall upper : Fin r -> Idx, DifferentiableWithinAt Real
       (tensor0SModelInChart (𝕜 := Real) (E := E) (H := H) (I := I)
-        (M := M) r x₀ β)
+        (M := M) r x₀ (β upper))
       (Set.range I) (extChartAt I x₀ x₀))
     (hV : forall i : Idx, MDiffAt (T% (V i)) x₀)
     (hVmodel : forall i : Idx,
@@ -298,8 +298,8 @@ theorem totalNablaSub_comp {r s : ℕ}
       (I := I) (M := M) r s cov T nablaT)
     (hreal' : TotalNablaRSRealizes (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) r s cov' T nablaT')
-    (β : (x : M) -> Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I)
-      (M := M) r x)
+    (β : (Fin r -> Idx) -> (x : M) -> Tensor0SSpace (𝕜 := Real) (E := E)
+      (H := H) (I := I) (M := M) r x)
     (x₀ : M)
     (basis : Module.Basis Idx Real (TangentSpace I x₀))
     (Xfield : Idx ->
@@ -307,17 +307,17 @@ theorem totalNablaSub_comp {r s : ℕ}
     (V : Idx -> (x : M) -> TangentSpace I x)
     (hX_at : forall i : Idx, Xfield i x₀ = basis i)
     (hβ_at : forall upper : Fin r -> Idx,
-      β x₀ = basisTensor0S (I := I) basis upper)
+      β upper x₀ = basisTensor0S (I := I) basis upper)
     (hV_at : forall i : Idx, V i x₀ = basis i)
-    (hpairT : forall lower : Fin (s + 1) -> Idx,
+    (hpairT : forall upper : Fin r -> Idx, forall lower : Fin (s + 1) -> Idx,
       MDifferentiableAt I 𝓘(Real, Real)
-        (fun p : M => (T p (β p)) (fun a : Fin s => V (lower a.succ) p)) x₀)
-    (hpairβ : forall slots : Fin r -> Idx,
+        (fun p : M => (T p (β upper p)) (fun a : Fin s => V (lower a.succ) p)) x₀)
+    (hpairβ : forall upper : Fin r -> Idx, forall slots : Fin r -> Idx,
       MDifferentiableAt I 𝓘(Real, Real)
-        (fun p : M => β p (fun a : Fin r => V (slots a) p)) x₀)
-    (hβmodel : DifferentiableWithinAt Real
+        (fun p : M => β upper p (fun a : Fin r => V (slots a) p)) x₀)
+    (hβmodel : forall upper : Fin r -> Idx, DifferentiableWithinAt Real
       (tensor0SModelInChart (𝕜 := Real) (E := E) (H := H) (I := I)
-        (M := M) r x₀ β)
+        (M := M) r x₀ (β upper))
       (Set.range I) (extChartAt I x₀ x₀))
     (hV : forall i : Idx, MDiffAt (T% (V i)) x₀)
     (hVmodel : forall i : Idx,
@@ -369,9 +369,9 @@ theorem totalNablaSub_comp {r s : ℕ}
   rw [hdir_comp]
   exact componentRS_nablaRSFun_sub_connAct
     (E := E) (H := H) (I := I) (M := M)
-    (r := r) (s := s) cov cov' X T β x₀ basis V upper lower
+    (r := r) (s := s) cov cov' X T (β upper) x₀ basis V upper lower
     (by simpa [X] using hX_at (lower 0)) (hβ_at upper) hV_at
-    (hpairT lower) hpairβ hβmodel hV hVmodel hcoord
+    (hpairT upper lower) (hpairβ upper) (hβmodel upper) hV hVmodel hcoord
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Tensor form of `totalNablaSub_comp`.
@@ -392,8 +392,8 @@ theorem totalNablaSub_eq_connActTensor {r s : ℕ}
       (I := I) (M := M) r s cov T nablaT)
     (hreal' : TotalNablaRSRealizes (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) r s cov' T nablaT')
-    (β : (x : M) -> Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I)
-      (M := M) r x)
+    (β : (Fin r -> Idx) -> (x : M) -> Tensor0SSpace (𝕜 := Real) (E := E)
+      (H := H) (I := I) (M := M) r x)
     (x₀ : M)
     (basis : Module.Basis Idx Real (TangentSpace I x₀))
     (Xfield : Idx ->
@@ -401,17 +401,17 @@ theorem totalNablaSub_eq_connActTensor {r s : ℕ}
     (V : Idx -> (x : M) -> TangentSpace I x)
     (hX_at : forall i : Idx, Xfield i x₀ = basis i)
     (hβ_at : forall upper : Fin r -> Idx,
-      β x₀ = basisTensor0S (I := I) basis upper)
+      β upper x₀ = basisTensor0S (I := I) basis upper)
     (hV_at : forall i : Idx, V i x₀ = basis i)
-    (hpairT : forall lower : Fin (s + 1) -> Idx,
+    (hpairT : forall upper : Fin r -> Idx, forall lower : Fin (s + 1) -> Idx,
       MDifferentiableAt I 𝓘(Real, Real)
-        (fun p : M => (T p (β p)) (fun a : Fin s => V (lower a.succ) p)) x₀)
-    (hpairβ : forall slots : Fin r -> Idx,
+        (fun p : M => (T p (β upper p)) (fun a : Fin s => V (lower a.succ) p)) x₀)
+    (hpairβ : forall upper : Fin r -> Idx, forall slots : Fin r -> Idx,
       MDifferentiableAt I 𝓘(Real, Real)
-        (fun p : M => β p (fun a : Fin r => V (slots a) p)) x₀)
-    (hβmodel : DifferentiableWithinAt Real
+        (fun p : M => β upper p (fun a : Fin r => V (slots a) p)) x₀)
+    (hβmodel : forall upper : Fin r -> Idx, DifferentiableWithinAt Real
       (tensor0SModelInChart (𝕜 := Real) (E := E) (H := H) (I := I)
-        (M := M) r x₀ β)
+        (M := M) r x₀ (β upper))
       (Set.range I) (extChartAt I x₀ x₀))
     (hV : forall i : Idx, MDiffAt (T% (V i)) x₀)
     (hVmodel : forall i : Idx,
@@ -454,8 +454,8 @@ theorem totalNablaSub_anti0 {r s : ℕ}
       (I := I) (M := M) r s cov T nablaT)
     (hreal' : TotalNablaRSRealizes (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) r s cov' T nablaT')
-    (β : (x : M) -> Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I)
-      (M := M) r x)
+    (β : (Fin r -> Idx) -> (x : M) -> Tensor0SSpace (𝕜 := Real) (E := E)
+      (H := H) (I := I) (M := M) r x)
     (x₀ : M)
     (basis : Module.Basis Idx Real (TangentSpace I x₀))
     (Xfield : Idx ->
@@ -463,17 +463,17 @@ theorem totalNablaSub_anti0 {r s : ℕ}
     (V : Idx -> (x : M) -> TangentSpace I x)
     (hX_at : forall i : Idx, Xfield i x₀ = basis i)
     (hβ_at : forall upper : Fin r -> Idx,
-      β x₀ = basisTensor0S (I := I) basis upper)
+      β upper x₀ = basisTensor0S (I := I) basis upper)
     (hV_at : forall i : Idx, V i x₀ = basis i)
-    (hpairT : forall lower : Fin (s + 1) -> Idx,
+    (hpairT : forall upper : Fin r -> Idx, forall lower : Fin (s + 1) -> Idx,
       MDifferentiableAt I 𝓘(Real, Real)
-        (fun p : M => (T p (β p)) (fun a : Fin s => V (lower a.succ) p)) x₀)
-    (hpairβ : forall slots : Fin r -> Idx,
+        (fun p : M => (T p (β upper p)) (fun a : Fin s => V (lower a.succ) p)) x₀)
+    (hpairβ : forall upper : Fin r -> Idx, forall slots : Fin r -> Idx,
       MDifferentiableAt I 𝓘(Real, Real)
-        (fun p : M => β p (fun a : Fin r => V (slots a) p)) x₀)
-    (hβmodel : DifferentiableWithinAt Real
+        (fun p : M => β upper p (fun a : Fin r => V (slots a) p)) x₀)
+    (hβmodel : forall upper : Fin r -> Idx, DifferentiableWithinAt Real
       (tensor0SModelInChart (𝕜 := Real) (E := E) (H := H) (I := I)
-        (M := M) r x₀ β)
+        (M := M) r x₀ (β upper))
       (Set.range I) (extChartAt I x₀ x₀))
     (hV : forall i : Idx, MDiffAt (T% (V i)) x₀)
     (hVmodel : forall i : Idx,
@@ -521,8 +521,8 @@ theorem totalNablaSubNorm_le {r s : ℕ}
       (I := I) (M := M) r s cov T nablaT)
     (hreal' : TotalNablaRSRealizes (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) r s cov' T nablaT')
-    (β : (x : M) -> Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I)
-      (M := M) r x)
+    (β : (Fin r -> Idx) -> (x : M) -> Tensor0SSpace (𝕜 := Real) (E := E)
+      (H := H) (I := I) (M := M) r x)
     (x₀ : M)
     (basis : Module.Basis Idx Real (TangentSpace I x₀))
     (hinv :
@@ -532,17 +532,17 @@ theorem totalNablaSubNorm_le {r s : ℕ}
     (V : Idx -> (x : M) -> TangentSpace I x)
     (hX_at : forall i : Idx, Xfield i x₀ = basis i)
     (hβ_at : forall upper : Fin r -> Idx,
-      β x₀ = basisTensor0S (I := I) basis upper)
+      β upper x₀ = basisTensor0S (I := I) basis upper)
     (hV_at : forall i : Idx, V i x₀ = basis i)
-    (hpairT : forall lower : Fin (s + 1) -> Idx,
+    (hpairT : forall upper : Fin r -> Idx, forall lower : Fin (s + 1) -> Idx,
       MDifferentiableAt I 𝓘(Real, Real)
-        (fun p : M => (T p (β p)) (fun a : Fin s => V (lower a.succ) p)) x₀)
-    (hpairβ : forall slots : Fin r -> Idx,
+        (fun p : M => (T p (β upper p)) (fun a : Fin s => V (lower a.succ) p)) x₀)
+    (hpairβ : forall upper : Fin r -> Idx, forall slots : Fin r -> Idx,
       MDifferentiableAt I 𝓘(Real, Real)
-        (fun p : M => β p (fun a : Fin r => V (slots a) p)) x₀)
-    (hβmodel : DifferentiableWithinAt Real
+        (fun p : M => β upper p (fun a : Fin r => V (slots a) p)) x₀)
+    (hβmodel : forall upper : Fin r -> Idx, DifferentiableWithinAt Real
       (tensor0SModelInChart (𝕜 := Real) (E := E) (H := H) (I := I)
-        (M := M) r x₀ β)
+        (M := M) r x₀ (β upper))
       (Set.range I) (extChartAt I x₀ x₀))
     (hV : forall i : Idx, MDiffAt (T% (V i)) x₀)
     (hVmodel : forall i : Idx,
@@ -607,8 +607,8 @@ theorem totalNablaAnti0 {r s : ℕ}
       (I := I) (M := M) r s cov T nablaT)
     (hreal' : TotalNablaRSRealizes (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) r s cov' T nablaT')
-    (β : (x : M) -> Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I)
-      (M := M) r x)
+    (β : (Fin r -> Idx) -> (x : M) -> Tensor0SSpace (𝕜 := Real) (E := E)
+      (H := H) (I := I) (M := M) r x)
     (x₀ : M)
     (basis : Module.Basis Idx Real (TangentSpace I x₀))
     (hinv :
@@ -618,17 +618,17 @@ theorem totalNablaAnti0 {r s : ℕ}
     (V : Idx -> (x : M) -> TangentSpace I x)
     (hX_at : forall i : Idx, Xfield i x₀ = basis i)
     (hβ_at : forall upper : Fin r -> Idx,
-      β x₀ = basisTensor0S (I := I) basis upper)
+      β upper x₀ = basisTensor0S (I := I) basis upper)
     (hV_at : forall i : Idx, V i x₀ = basis i)
-    (hpairT : forall lower : Fin (s + 1) -> Idx,
+    (hpairT : forall upper : Fin r -> Idx, forall lower : Fin (s + 1) -> Idx,
       MDifferentiableAt I 𝓘(Real, Real)
-        (fun p : M => (T p (β p)) (fun a : Fin s => V (lower a.succ) p)) x₀)
-    (hpairβ : forall slots : Fin r -> Idx,
+        (fun p : M => (T p (β upper p)) (fun a : Fin s => V (lower a.succ) p)) x₀)
+    (hpairβ : forall upper : Fin r -> Idx, forall slots : Fin r -> Idx,
       MDifferentiableAt I 𝓘(Real, Real)
-        (fun p : M => β p (fun a : Fin r => V (slots a) p)) x₀)
-    (hβmodel : DifferentiableWithinAt Real
+        (fun p : M => β upper p (fun a : Fin r => V (slots a) p)) x₀)
+    (hβmodel : forall upper : Fin r -> Idx, DifferentiableWithinAt Real
       (tensor0SModelInChart (𝕜 := Real) (E := E) (H := H) (I := I)
-        (M := M) r x₀ β)
+        (M := M) r x₀ (β upper))
       (Set.range I) (extChartAt I x₀ x₀))
     (hV : forall i : Idx, MDiffAt (T% (V i)) x₀)
     (hVmodel : forall i : Idx,
@@ -699,8 +699,8 @@ theorem totalNablaNorm_le {r s : ℕ}
       (I := I) (M := M) r s cov T nablaT)
     (hreal' : TotalNablaRSRealizes (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) r s cov' T nablaT')
-    (β : (x : M) -> Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I)
-      (M := M) r x)
+    (β : (Fin r -> Idx) -> (x : M) -> Tensor0SSpace (𝕜 := Real) (E := E)
+      (H := H) (I := I) (M := M) r x)
     (x₀ : M)
     (basis : Module.Basis Idx Real (TangentSpace I x₀))
     (hinv :
@@ -710,17 +710,17 @@ theorem totalNablaNorm_le {r s : ℕ}
     (V : Idx -> (x : M) -> TangentSpace I x)
     (hX_at : forall i : Idx, Xfield i x₀ = basis i)
     (hβ_at : forall upper : Fin r -> Idx,
-      β x₀ = basisTensor0S (I := I) basis upper)
+      β upper x₀ = basisTensor0S (I := I) basis upper)
     (hV_at : forall i : Idx, V i x₀ = basis i)
-    (hpairT : forall lower : Fin (s + 1) -> Idx,
+    (hpairT : forall upper : Fin r -> Idx, forall lower : Fin (s + 1) -> Idx,
       MDifferentiableAt I 𝓘(Real, Real)
-        (fun p : M => (T p (β p)) (fun a : Fin s => V (lower a.succ) p)) x₀)
-    (hpairβ : forall slots : Fin r -> Idx,
+        (fun p : M => (T p (β upper p)) (fun a : Fin s => V (lower a.succ) p)) x₀)
+    (hpairβ : forall upper : Fin r -> Idx, forall slots : Fin r -> Idx,
       MDifferentiableAt I 𝓘(Real, Real)
-        (fun p : M => β p (fun a : Fin r => V (slots a) p)) x₀)
-    (hβmodel : DifferentiableWithinAt Real
+        (fun p : M => β upper p (fun a : Fin r => V (slots a) p)) x₀)
+    (hβmodel : forall upper : Fin r -> Idx, DifferentiableWithinAt Real
       (tensor0SModelInChart (𝕜 := Real) (E := E) (H := H) (I := I)
-        (M := M) r x₀ β)
+        (M := M) r x₀ (β upper))
       (Set.range I) (extChartAt I x₀ x₀))
     (hV : forall i : Idx, MDiffAt (T% (V i)) x₀)
     (hVmodel : forall i : Idx,
@@ -778,8 +778,8 @@ theorem totalNablaNorm_bound {r s : ℕ}
       (I := I) (M := M) r s cov T nablaT)
     (hreal' : TotalNablaRSRealizes (𝕜 := Real) (E := E) (H := H)
       (I := I) (M := M) r s cov' T nablaT')
-    (β : (x : M) -> Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I)
-      (M := M) r x)
+    (β : (Fin r -> Idx) -> (x : M) -> Tensor0SSpace (𝕜 := Real) (E := E)
+      (H := H) (I := I) (M := M) r x)
     (x₀ : M)
     (basis : Module.Basis Idx Real (TangentSpace I x₀))
     (hinv :
@@ -789,17 +789,17 @@ theorem totalNablaNorm_bound {r s : ℕ}
     (V : Idx -> (x : M) -> TangentSpace I x)
     (hX_at : forall i : Idx, Xfield i x₀ = basis i)
     (hβ_at : forall upper : Fin r -> Idx,
-      β x₀ = basisTensor0S (I := I) basis upper)
+      β upper x₀ = basisTensor0S (I := I) basis upper)
     (hV_at : forall i : Idx, V i x₀ = basis i)
-    (hpairT : forall lower : Fin (s + 1) -> Idx,
+    (hpairT : forall upper : Fin r -> Idx, forall lower : Fin (s + 1) -> Idx,
       MDifferentiableAt I 𝓘(Real, Real)
-        (fun p : M => (T p (β p)) (fun a : Fin s => V (lower a.succ) p)) x₀)
-    (hpairβ : forall slots : Fin r -> Idx,
+        (fun p : M => (T p (β upper p)) (fun a : Fin s => V (lower a.succ) p)) x₀)
+    (hpairβ : forall upper : Fin r -> Idx, forall slots : Fin r -> Idx,
       MDifferentiableAt I 𝓘(Real, Real)
-        (fun p : M => β p (fun a : Fin r => V (slots a) p)) x₀)
-    (hβmodel : DifferentiableWithinAt Real
+        (fun p : M => β upper p (fun a : Fin r => V (slots a) p)) x₀)
+    (hβmodel : forall upper : Fin r -> Idx, DifferentiableWithinAt Real
       (tensor0SModelInChart (𝕜 := Real) (E := E) (H := H) (I := I)
-        (M := M) r x₀ β)
+        (M := M) r x₀ (β upper))
       (Set.range I) (extChartAt I x₀ x₀))
     (hV : forall i : Idx, MDiffAt (T% (V i)) x₀)
     (hVmodel : forall i : Idx,
