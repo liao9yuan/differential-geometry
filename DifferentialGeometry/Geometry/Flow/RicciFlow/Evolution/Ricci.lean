@@ -1,0 +1,16 @@
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Trace
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.GammaAlgebra
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.GammaCoord
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Bianchi
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Commutator
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.CoordinateRegularity
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.CoordinateIdentities
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Lichnerowicz
+
+/-!
+# Ricci Evolution by Tracing Riemann Evolution
+
+Compatibility umbrella for the split Ricci evolution route.  Public declaration
+names remain in their original namespaces; downstream imports of
+`DifferentialGeometry.PDE.RicciFlow.Evolution.Ricci` should continue to work unchanged.
+-/
