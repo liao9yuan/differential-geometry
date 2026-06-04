@@ -388,6 +388,197 @@ theorem extDerivFun_const_mul
     (by exact mdifferentiableAt_const (c := c)) hf v
   simpa [extDerivFun] using hmul
 
+/-- Leibniz product rule for the scalar exterior derivative, applied to a
+tangent vector:
+`d(f · g)_x(v) = f x · dg_x(v) + g x · df_x(v)`. -/
+theorem extDerivFun_mul_at
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    {f g : M -> ℝ} {x : M} (v : TangentSpace I x)
+    (hf : MDifferentiableAt I 𝓘(ℝ, ℝ) f x)
+    (hg : MDifferentiableAt I 𝓘(ℝ, ℝ) g x) :
+    extDerivFun (I := I) (fun y : M => f y * g y) x v =
+      f x * extDerivFun (I := I) g x v + g x * extDerivFun (I := I) f x v := by
+  have hsmul : (fun y : M => f y * g y) = (f • g) := by
+    funext y; simp [smul_eq_mul]
+  rw [hsmul]
+  have hmul := fromTangentSpace_mfderiv_smul_apply
+    (I := I) (f := f) (g := g) hf hg v
+  rw [show extDerivFun (I := I) (f • g) x v =
+        f x * extDerivFun (I := I) g x v + extDerivFun (I := I) f x v * g x from by
+      simpa [extDerivFun, smul_eq_mul] using hmul]
+  ring
+
+/-- Leibniz rule for the scalar exterior derivative of a finite sum of products,
+applied to a tangent vector:
+`d(∑ᵢ Uᵢ · Bᵢ)_x(v) = ∑ᵢ (Uᵢ x · dBᵢ_x(v) + Bᵢ x · dUᵢ_x(v))`. -/
+theorem extDerivFun_finset_sum_mul_at
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    {ι : Type*} (t : Finset ι) (U B : ι -> M -> ℝ)
+    {x : M} (v : TangentSpace I x)
+    (hU : ∀ i ∈ t, MDifferentiableAt I 𝓘(ℝ, ℝ) (U i) x)
+    (hB : ∀ i ∈ t, MDifferentiableAt I 𝓘(ℝ, ℝ) (B i) x) :
+    extDerivFun (I := I) (fun y : M => ∑ i ∈ t, U i y * B i y) x v =
+      ∑ i ∈ t,
+        (U i x * extDerivFun (I := I) (B i) x v +
+          B i x * extDerivFun (I := I) (U i) x v) := by
+  classical
+  -- Differentiability of the partial sums of products.
+  have hsumdiff :
+      ∀ (s : Finset ι), (∀ i ∈ s, MDifferentiableAt I 𝓘(ℝ, ℝ) (U i) x) →
+        (∀ i ∈ s, MDifferentiableAt I 𝓘(ℝ, ℝ) (B i) x) →
+          MDifferentiableAt I 𝓘(ℝ, ℝ)
+            (fun y : M => ∑ i ∈ s, U i y * B i y) x := by
+    intro s
+    induction s using Finset.induction_on with
+    | empty => intro _ _; simpa using mdifferentiableAt_const (I := I) (I' := 𝓘(ℝ, ℝ)) (c := (0 : ℝ))
+    | insert a s has ih =>
+        intro hUs hBs
+        have hUa : MDifferentiableAt I 𝓘(ℝ, ℝ) (U a) x := hUs a (by simp)
+        have hBa : MDifferentiableAt I 𝓘(ℝ, ℝ) (B a) x := hBs a (by simp)
+        have htail := ih (fun i hi => hUs i (by simp [hi])) (fun i hi => hBs i (by simp [hi]))
+        have heqfun :
+            (fun y : M => ∑ i ∈ insert a s, U i y * B i y) =
+              (fun y : M => U a y * B a y) + (fun y : M => ∑ i ∈ s, U i y * B i y) := by
+          funext y; simp only [Pi.add_apply]; rw [Finset.sum_insert has]
+        rw [heqfun]
+        exact (hUa.mul hBa).add htail
+  induction t using Finset.induction_on with
+  | empty => simp
+  | insert a t hat ih =>
+      have hUa : MDifferentiableAt I 𝓘(ℝ, ℝ) (U a) x := hU a (by simp)
+      have hBa : MDifferentiableAt I 𝓘(ℝ, ℝ) (B a) x := hB a (by simp)
+      have hUt : ∀ i ∈ t, MDifferentiableAt I 𝓘(ℝ, ℝ) (U i) x :=
+        fun i hi => hU i (by simp [hi])
+      have hBt : ∀ i ∈ t, MDifferentiableAt I 𝓘(ℝ, ℝ) (B i) x :=
+        fun i hi => hB i (by simp [hi])
+      have hsplit :
+          (fun y : M => ∑ i ∈ insert a t, U i y * B i y) =
+            (fun y : M => U a y * B a y) +
+              (fun y : M => ∑ i ∈ t, U i y * B i y) := by
+        funext y
+        simp only [Pi.add_apply]
+        rw [Finset.sum_insert hat]
+      have hsummand_diff : MDifferentiableAt I 𝓘(ℝ, ℝ)
+          (fun y : M => U a y * B a y) x := hUa.mul hBa
+      have hsumtail_diff : MDifferentiableAt I 𝓘(ℝ, ℝ)
+          (fun y : M => ∑ i ∈ t, U i y * B i y) x :=
+        hsumdiff t hUt hBt
+      rw [hsplit]
+      have hadd := congr($(extDerivFun_add (I := I)
+        (g := fun y : M => U a y * B a y)
+        (g' := fun y : M => ∑ i ∈ t, U i y * B i y)
+        (x := x) hsummand_diff hsumtail_diff) v)
+      rw [show (extDerivFun (I := I)
+            ((fun y : M => U a y * B a y) +
+              fun y : M => ∑ i ∈ t, U i y * B i y) x) v =
+          (extDerivFun (I := I) (fun y : M => U a y * B a y) x) v +
+            (extDerivFun (I := I) (fun y : M => ∑ i ∈ t, U i y * B i y) x) v from by
+        simpa [Pi.add_apply] using hadd]
+      rw [extDerivFun_mul_at (I := I) v hUa hBa]
+      rw [ih hUt hBt]
+      rw [Finset.sum_insert hat]
+
+/-- Additivity of the scalar exterior derivative over a finite sum, applied to a
+tangent vector. -/
+theorem extDerivFun_finset_sum_at'
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    {ι : Type*} (t : Finset ι) (F : ι -> M -> ℝ)
+    {x : M} (v : TangentSpace I x)
+    (hF : ∀ i ∈ t, MDifferentiableAt I 𝓘(ℝ, ℝ) (F i) x) :
+    extDerivFun (I := I) (fun y : M => ∑ i ∈ t, F i y) x v =
+      ∑ i ∈ t, extDerivFun (I := I) (F i) x v := by
+  classical
+  have hsumdiff :
+      ∀ (s : Finset ι), (∀ i ∈ s, MDifferentiableAt I 𝓘(ℝ, ℝ) (F i) x) →
+        MDifferentiableAt I 𝓘(ℝ, ℝ) (fun y : M => ∑ i ∈ s, F i y) x := by
+    intro s
+    induction s using Finset.induction_on with
+    | empty => intro _; simpa using mdifferentiableAt_const (I := I) (I' := 𝓘(ℝ, ℝ)) (c := (0 : ℝ))
+    | insert a s has ih =>
+        intro hFs
+        have hFa : MDifferentiableAt I 𝓘(ℝ, ℝ) (F a) x := hFs a (by simp)
+        have htail := ih (fun i hi => hFs i (by simp [hi]))
+        have heqfun :
+            (fun y : M => ∑ i ∈ insert a s, F i y) =
+              (fun y : M => F a y) + (fun y : M => ∑ i ∈ s, F i y) := by
+          funext y; simp only [Pi.add_apply]; rw [Finset.sum_insert has]
+        rw [heqfun]
+        exact hFa.add htail
+  induction t using Finset.induction_on with
+  | empty => simp
+  | insert a t hat ih =>
+      have hFa : MDifferentiableAt I 𝓘(ℝ, ℝ) (F a) x := hF a (by simp)
+      have hFt : ∀ i ∈ t, MDifferentiableAt I 𝓘(ℝ, ℝ) (F i) x :=
+        fun i hi => hF i (by simp [hi])
+      have hsplit :
+          (fun y : M => ∑ i ∈ insert a t, F i y) =
+            (fun y : M => F a y) + (fun y : M => ∑ i ∈ t, F i y) := by
+        funext y; simp only [Pi.add_apply]; rw [Finset.sum_insert hat]
+      rw [hsplit]
+      have hadd := congr($(extDerivFun_add (I := I)
+        (g := fun y : M => F a y) (g' := fun y : M => ∑ i ∈ t, F i y)
+        (x := x) hFa (hsumdiff t hFt)) v)
+      rw [show (extDerivFun (I := I)
+            ((fun y : M => F a y) + fun y : M => ∑ i ∈ t, F i y) x) v =
+          (extDerivFun (I := I) (fun y : M => F a y) x) v +
+            (extDerivFun (I := I) (fun y : M => ∑ i ∈ t, F i y) x) v from by
+        simpa [Pi.add_apply] using hadd]
+      rw [ih hFt]
+      rw [Finset.sum_insert hat]
+
+/-- Leibniz rule for the scalar exterior derivative of a finite double sum of
+products, applied to a tangent vector:
+`d(∑ᵢ ∑ⱼ Uᵢⱼ · Bᵢⱼ)_x(v) = ∑ᵢ ∑ⱼ (Uᵢⱼ x · dBᵢⱼ_x(v) + Bᵢⱼ x · dUᵢⱼ_x(v))`. -/
+theorem extDerivFun_finset_sum_sum_mul_at
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    {ι κ : Type*} (s : Finset ι) (t : Finset κ) (U B : ι -> κ -> M -> ℝ)
+    {x : M} (v : TangentSpace I x)
+    (hU : ∀ i ∈ s, ∀ j ∈ t, MDifferentiableAt I 𝓘(ℝ, ℝ) (U i j) x)
+    (hB : ∀ i ∈ s, ∀ j ∈ t, MDifferentiableAt I 𝓘(ℝ, ℝ) (B i j) x) :
+    extDerivFun (I := I) (fun y : M => ∑ i ∈ s, ∑ j ∈ t, U i j y * B i j y) x v =
+      ∑ i ∈ s, ∑ j ∈ t,
+        (U i j x * extDerivFun (I := I) (B i j) x v +
+          B i j x * extDerivFun (I := I) (U i j) x v) := by
+  classical
+  -- Differentiability of an inner sum of products.
+  have hinner_diff :
+      ∀ i ∈ s, MDifferentiableAt I 𝓘(ℝ, ℝ)
+        (fun y : M => ∑ j ∈ t, U i j y * B i j y) x := by
+    intro i hi
+    have haux :
+        ∀ (r : Finset κ), (∀ j ∈ r, MDifferentiableAt I 𝓘(ℝ, ℝ) (U i j) x) →
+          (∀ j ∈ r, MDifferentiableAt I 𝓘(ℝ, ℝ) (B i j) x) →
+            MDifferentiableAt I 𝓘(ℝ, ℝ) (fun y : M => ∑ j ∈ r, U i j y * B i j y) x := by
+      intro r
+      induction r using Finset.induction_on with
+      | empty => intro _ _; simpa using mdifferentiableAt_const (I := I) (I' := 𝓘(ℝ, ℝ)) (c := (0 : ℝ))
+      | insert a r har ih =>
+          intro hUr hBr
+          have hUa := hUr a (by simp)
+          have hBa := hBr a (by simp)
+          have htail := ih (fun j hj => hUr j (by simp [hj])) (fun j hj => hBr j (by simp [hj]))
+          have heqfun :
+              (fun y : M => ∑ j ∈ insert a r, U i j y * B i j y) =
+                (fun y : M => U i a y * B i a y) +
+                  (fun y : M => ∑ j ∈ r, U i j y * B i j y) := by
+            funext y; simp only [Pi.add_apply]; rw [Finset.sum_insert har]
+          rw [heqfun]
+          exact (hUa.mul hBa).add htail
+    exact haux t (fun j hj => hU i hi j hj) (fun j hj => hB i hi j hj)
+  rw [extDerivFun_finset_sum_at' (I := I) s
+    (fun i => fun y : M => ∑ j ∈ t, U i j y * B i j y) v hinner_diff]
+  refine Finset.sum_congr rfl fun i hi => ?_
+  rw [extDerivFun_finset_sum_mul_at (I := I) t (fun j => U i j) (fun j => B i j) v
+    (fun j hj => hU i hi j hj) (fun j hj => hB i hi j hj)]
+
 /-- Smoothness of the scalar exterior derivative applied to a smooth tangent field.
 
 This packages the `ContMDiffAt.mfderiv_apply` theorem in the concrete form used

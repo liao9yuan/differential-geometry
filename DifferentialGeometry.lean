@@ -1276,10 +1276,14 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckShortTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckSolutionC1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckVFTimeFamily
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.Defs
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.ChartTrace
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.ConnectionTrace
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.Final
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.Formula510Core
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.Functional
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.Geometry
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.GeometryFormulaCore
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.Producer
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.TraceAlgebra
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.FirstVariation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BlackBox
