@@ -1273,6 +1273,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHSSection
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckShortTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckSolutionC1
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckVFTimeFamily
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.Defs
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BlackBox
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Christoffel
