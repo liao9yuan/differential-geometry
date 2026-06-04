@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.RiemannianFiberNormSqRiemannOpHigherRankParseval
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.CurvatureFrameEnergyContinuity
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.Defs
 import Mathlib.Topology.Order.Compact
 
@@ -142,7 +143,34 @@ theorem exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional
             (riemannOp (tensorCov (I := I) g 0 t) x v w T) ≤
           Ccurv x * g.inner x v v * g.inner x w w *
             riemannianFiberNormSq (I := I) (M := M) g 0 t x T := by
-  sorry
+  classical
+  obtain ⟨Ccurv, hCcurv_cont, hCcurv_nonneg, hCcurv_energy⟩ :=
+    exists_continuous_riemannOp_tensorCovS_frameEnergy_bound (I := I) (M := M) g t
+  refine ⟨Ccurv, hCcurv_cont, hCcurv_nonneg, ?_⟩
+  intro x v w T
+  obtain ⟨n, e, horth, hrepr, hvw⟩ :=
+    riemannianFiberNormSq_riemannOp_tensorCovS_vw_factor_le (I := I) (M := M) g t x v w T
+  have hvv_nonneg : 0 ≤ g.inner x v v := metric_inner_self_nonneg (I := I) (M := M) g x v
+  have hww_nonneg : 0 ≤ g.inner x w w := metric_inner_self_nonneg (I := I) (M := M) g x w
+  have hvw_nonneg : 0 ≤ g.inner x v v * g.inner x w w := mul_nonneg hvv_nonneg hww_nonneg
+  have henergy :
+      (∑ i : Fin n, ∑ j : Fin n,
+          riemannianFiberNormSq (I := I) (M := M) g 0 t x
+            (riemannOp (tensorCov (I := I) g 0 t) x (e i) (e j) T)) ≤
+        Ccurv x * riemannianFiberNormSq (I := I) (M := M) g 0 t x T :=
+    hCcurv_energy x e horth hrepr T
+  calc
+    riemannianFiberNormSq (I := I) (M := M) g 0 t x
+        (riemannOp (tensorCov (I := I) g 0 t) x v w T)
+        ≤ g.inner x v v * g.inner x w w *
+            ∑ i : Fin n, ∑ j : Fin n,
+              riemannianFiberNormSq (I := I) (M := M) g 0 t x
+                (riemannOp (tensorCov (I := I) g 0 t) x (e i) (e j) T) := hvw
+    _ ≤ g.inner x v v * g.inner x w w *
+            (Ccurv x * riemannianFiberNormSq (I := I) (M := M) g 0 t x T) :=
+          mul_le_mul_of_nonneg_left henergy hvw_nonneg
+    _ = Ccurv x * g.inner x v v * g.inner x w w *
+            riemannianFiberNormSq (I := I) (M := M) g 0 t x T := by ring
 
 /-- **Uniform-over-`M` proportional fibre-norm bound for the tensor curvature operator on the
 gradient field.** For a smooth Riemannian metric `g` on a closed manifold `M` and any covariant

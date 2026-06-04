@@ -1319,6 +1319,123 @@ theorem exists_Cx_riemannianFiberNormSq_riemannOp_tensorCovS_le
   exists_Cx_riemannianFiberNormSq_riemannOp_tensorCovS_le_rs
     (I := I) (M := M) g 0 s x
 
+/-- **Intrinsic `(v, w)`-factorised fibre-norm bound for the rank-`(0, t)` tensor curvature
+operator.** For a smooth Riemannian metric `g` on a manifold `M`, any point `x`, any tangent
+vectors `v, w` and any `(0, t)`-tensor `T`, the intrinsic Riemannian fibre norm squared of the
+curvature value `R_x(v, w) T = riemannOp (tensorCov g 0 t) x v w T` is bounded by the intrinsic
+quadratic factors `g.inner x v v = ‖v‖_g²` and `g.inner x w w = ‖w‖_g²` times a `(v, w)`-uniform
+residual: the sum over the `g`-orthonormal frame pairs `(e_i, e_j)` of the intrinsic fibre-norm
+energies of the curvature acting on `T`:
+
+```
+riemannianFiberNormSq g 0 t x (R_x(v, w) T)
+  ≤ (g.inner x v v) · (g.inner x w w)
+      · ∑_{i, j} riemannianFiberNormSq g 0 t x (R_x(e_i, e_j) T).
+```
+
+This is the general covariant-rank-`t` generalisation of
+`riemannianFiberNormSq_riemannOp_tensorCov_vw_factor_le` (the `t = 2` case): the dependence on
+`(v, w)` is entirely through the intrinsic `g`-norms `‖v‖_g²`, `‖w‖_g²`, with the frame `e` and
+its size `n` produced existentially (the `g`-orthonormal frame chosen inside the definition of
+`riemannianFiberNormSq`). The witnessing frame is returned together with its `g`-orthonormality
+(`horth`) and the `riemannianFiberNormSq` frame representation (`hrepr`), so that the residual
+`∑_{i, j} riemannianFiberNormSq g 0 t x (R_x(e_i, e_j) T)` can be discharged on the *same* frame
+by a frame-energy bound; this is the `(v, w)`-factorisation half feeding the continuous
+proportional curvature-operator fibre bound. -/
+theorem riemannianFiberNormSq_riemannOp_tensorCovS_vw_factor_le
+    (g : SmoothRiemannianMetric I M) (t : ℕ) (x : M)
+    (v w : TangentSpace I x) (T : TensorRSSpace 0 t I x) :
+    ∃ (n : ℕ) (e : Fin n → TangentSpace I x),
+      (∀ i j : Fin n, g.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0) ∧
+      (∀ S : TensorRSSpace 0 t I x,
+        riemannianFiberNormSq (I := I) (M := M) g 0 t x S =
+          ∑ K : Fin 0 → Fin n, ∑ J : Fin t → Fin n,
+            fiberNormSqSummand (I := I) (M := M) g x 0 t S n e K J) ∧
+      riemannianFiberNormSq (I := I) (M := M) g 0 t x
+          (riemannOp (tensorCov (I := I) g 0 t) x v w T) ≤
+        g.inner x v v * g.inner x w w *
+          ∑ i : Fin n, ∑ j : Fin n,
+            riemannianFiberNormSq (I := I) (M := M) g 0 t x
+              (riemannOp (tensorCov (I := I) g 0 t) x (e i) (e j) T) := by
+  classical
+  obtain ⟨n, e, _bse, _hn, _hbse, horth, hpars, hexpand, hrepr⟩ :=
+    tangent_orthonormalBasisRS_witness (I := I) (M := M) g 0 t x
+  refine ⟨n, e, horth, hrepr, ?_⟩
+  set R := riemannOp (tensorCov (I := I) g 0 t) x with hR_def
+  rw [hrepr (R v w T)]
+  have hterm : ∀ K : Fin 0 → Fin n, ∀ J : Fin t → Fin n,
+      fiberNormSqSummand (I := I) (M := M) g x 0 t (R v w T) n e K J ≤
+        g.inner x v v * g.inner x w w *
+          ∑ i : Fin n, ∑ j : Fin n,
+            fiberNormSqSummand (I := I) (M := M) g x 0 t (R (e i) (e j) T) n e K J :=
+    fun K J => fiberNormSqSummand_riemannOp_tensorCovRS_vw_le
+      (I := I) (M := M) g x 0 t e hpars hexpand v w T K J
+  calc
+    (∑ K : Fin 0 → Fin n, ∑ J : Fin t → Fin n,
+        fiberNormSqSummand (I := I) (M := M) g x 0 t (R v w T) n e K J)
+        ≤ ∑ K : Fin 0 → Fin n, ∑ J : Fin t → Fin n,
+            g.inner x v v * g.inner x w w *
+              ∑ i : Fin n, ∑ j : Fin n,
+                fiberNormSqSummand (I := I) (M := M) g x 0 t (R (e i) (e j) T) n e K J := by
+          exact Finset.sum_le_sum (fun K _ => Finset.sum_le_sum (fun J _ => hterm K J))
+    _ = g.inner x v v * g.inner x w w *
+          ∑ K : Fin 0 → Fin n, ∑ J : Fin t → Fin n,
+            ∑ i : Fin n, ∑ j : Fin n,
+              fiberNormSqSummand (I := I) (M := M) g x 0 t (R (e i) (e j) T) n e K J := by
+          rw [Finset.mul_sum]
+          refine Finset.sum_congr rfl (fun K _ => ?_)
+          rw [Finset.mul_sum]
+    _ = g.inner x v v * g.inner x w w *
+          ∑ i : Fin n, ∑ j : Fin n,
+            riemannianFiberNormSq (I := I) (M := M) g 0 t x (R (e i) (e j) T) := by
+          congr 1
+          set F : (Fin 0 → Fin n) → (Fin t → Fin n) → Fin n → Fin n → ℝ :=
+            fun K J i j =>
+              fiberNormSqSummand (I := I) (M := M) g x 0 t (R (e i) (e j) T) n e K J
+            with hF_def
+          have hRHS_eq : (∑ i : Fin n, ∑ j : Fin n,
+                riemannianFiberNormSq (I := I) (M := M) g 0 t x (R (e i) (e j) T)) =
+              ∑ i : Fin n, ∑ j : Fin n, ∑ K : Fin 0 → Fin n, ∑ J : Fin t → Fin n,
+                F K J i j := by
+            refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
+            rw [hF_def]
+            exact hrepr (R (e i) (e j) T)
+          rw [hRHS_eq]
+          have hLHS : (∑ K : Fin 0 → Fin n, ∑ J : Fin t → Fin n,
+                ∑ i : Fin n, ∑ j : Fin n, F K J i j) =
+              ∑ q : (Fin 0 → Fin n) × (Fin t → Fin n),
+                ∑ p : Fin n × Fin n, F q.1 q.2 p.1 p.2 := by
+            calc
+              (∑ K : Fin 0 → Fin n, ∑ J : Fin t → Fin n,
+                  ∑ i : Fin n, ∑ j : Fin n, F K J i j)
+                  = ∑ K : Fin 0 → Fin n, ∑ J : Fin t → Fin n,
+                      ∑ p : Fin n × Fin n, F K J p.1 p.2 := by
+                    refine Finset.sum_congr rfl (fun K _ =>
+                      Finset.sum_congr rfl (fun J _ => ?_))
+                    exact (Fintype.sum_prod_type' (f := fun i j => F K J i j)).symm
+              _ = ∑ q : (Fin 0 → Fin n) × (Fin t → Fin n),
+                      ∑ p : Fin n × Fin n, F q.1 q.2 p.1 p.2 :=
+                    (Fintype.sum_prod_type' (f := fun K J =>
+                      ∑ p : Fin n × Fin n, F K J p.1 p.2)).symm
+          have hRHS : (∑ i : Fin n, ∑ j : Fin n,
+                ∑ K : Fin 0 → Fin n, ∑ J : Fin t → Fin n, F K J i j) =
+              ∑ p : Fin n × Fin n,
+                ∑ q : (Fin 0 → Fin n) × (Fin t → Fin n), F q.1 q.2 p.1 p.2 := by
+            calc
+              (∑ i : Fin n, ∑ j : Fin n,
+                  ∑ K : Fin 0 → Fin n, ∑ J : Fin t → Fin n, F K J i j)
+                  = ∑ i : Fin n, ∑ j : Fin n,
+                      ∑ q : (Fin 0 → Fin n) × (Fin t → Fin n), F q.1 q.2 i j := by
+                    refine Finset.sum_congr rfl (fun i _ =>
+                      Finset.sum_congr rfl (fun j _ => ?_))
+                    exact (Fintype.sum_prod_type' (f := fun K J => F K J i j)).symm
+              _ = ∑ p : Fin n × Fin n,
+                      ∑ q : (Fin 0 → Fin n) × (Fin t → Fin n), F q.1 q.2 p.1 p.2 :=
+                    (Fintype.sum_prod_type' (f := fun i j =>
+                      ∑ q : (Fin 0 → Fin n) × (Fin t → Fin n), F q.1 q.2 i j)).symm
+          rw [hLHS, hRHS]
+          exact Finset.sum_comm
+
 end Connection
 end Integral
 end DifferentialGeometry
