@@ -47,16 +47,20 @@ sorry-free, by substituting the open-good-set second-covariant-derivative chart 
 inverse-Gram coordinate metric-trace identity
 `rawTensorConnLap_chartα_raw_eq_invGram_naiveSecondCovDeriv_proj_on_goodSet` and collecting the
 `T₀`-independent smooth coefficients (`C_2 = chartInvGramMatrix`, the inverse-Gram contraction tensor;
-`C_1`, `C_0` the inverse-Gram-weighted correction sums).  The inverse-Gram coordinate metric-trace
-identity is the single remaining `sorry` of this chart-port: the open-good-set strengthening (dropping
-the inessential partition-of-unity-tsupport restriction) of the on-disk
+`C_1`, `C_0` the inverse-Gram-weighted correction sums).  That metric-trace identity is in turn proved
+here, sorry-free, by substituting `secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn` into the
+(frame-independent) chart-`α` inverse-Gram principal sum `chartInvGramPrincipalSum` of the open-good-set
+projected principal-sum identity `rawTensorConnLap_chartα_proj_eq_invGramPrincipalSum_on_goodSet`, which
+is the single remaining `sorry` of this chart-port: the open-good-set strengthening (dropping the
+inessential partition-of-unity-tsupport restriction) of the on-disk
 `chartPushed_rawConnLap_chart_α_proj_eq_chartInvGram_secondCovDeriv_plus_corrections`, true because the
 connection Laplacian is — *unconditionally* at every base point — the metric trace of the second
 covariant derivative (`rawTensorConnLap_eq_metricTraceHessian`), and the metric trace of a fibre
 bilinear form is basis-independent, so it equals the chart-`α` inverse-Gram-weighted coordinate-basis
-trace at every good-set point.  The tsupport restriction of the on-disk version is inessential: it was
-inherited only from the *bumped* globally smooth chart frame `chartFrameNormGlobalSmooth`, whose
-orthonormality is localised to the partition-of-unity tsupport.
+trace `chartInvGramPrincipalSum` at every good-set point.  The tsupport restriction of the on-disk
+version is inessential: it was inherited only from the *bumped* globally smooth chart frame
+`chartFrameNormGlobalSmooth` used to package the residual remainder, whose orthonormality is localised
+to the partition-of-unity tsupport; the principal sum itself is frame-independent.
 
 The companion primitive `exists_l2Norm_le_toHs_zero` records the reverse of the on-disk
 `tensorPouSobolevHsNorm_zero_le_tensorL2Norm`: the global metric `L²` norm of a smooth
@@ -556,6 +560,77 @@ private lemma naiveSCD_GlobalCorr0_contDiffOn
         (secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
           (I := I) (M := M) g r s α Idx Jdx k l))).2.1 I' J'
 
+/-- **The open-good-set projected inverse-Gram principal-sum metric-trace identity for the
+connection-Laplacian raw component (the genuine remaining differential-geometric content).**
+
+There exist `T₀`-independent `C^∞` coefficient families `B_1`, `B_0` on the Euclidean chart target
+such that for *every* smooth compactly-supported section `T₀` and *every* base point `b` in the
+chart-`α` Levi-Civita good set, the chart-`α` `(Idx, Jdx)` raw scalar component of `Δ_∇ T₀` equals
+the (frame-independent) chart-`α` inverse-Gram principal sum `chartInvGramPrincipalSum` — the
+inverse-Gram-matrix-weighted trace, over the chart coordinate basis `∂_k = chartBasisVecFiber α k`,
+of the projected *naive* iterated covariant derivative `cov_RS (∇_{∂_k} T₀) b (∂_l b)` — plus a
+`T₀`-linear first-partial block and a `T₀`-linear zeroth-order block:
+```
+raw_{IJ}(Δ_∇ T₀)(b)
+  = chartInvGramPrincipalSum g r s α T₀ Idx Jdx b
+  + Σ_{I', J', m} B_1 I' J' m · ∂_m (chartPushedRaw raw_{I'J'}(T₀))
+  + Σ_{I', J'}    B_0 I' J' · chartPushedRaw raw_{I'J'}(T₀)    (at toEuclidean (chart b)).
+```
+
+This is the open-good-set strengthening of the tsupport-restricted on-disk identity
+`chartPushed_rawConnLap_chart_α_proj_eq_chartInvGram_secondCovDeriv_plus_corrections`, which reads
+`raw_{IJ}(Δ_∇ T₀)(b) = (chartInvGramPrincipalSum + chartLeibnizRemainder) − chartFrameTraceΓCorrection`
+only on the partition-of-unity tsupport.  The principal sum `chartInvGramPrincipalSum` is itself
+frame-independent (it weights the chart coordinate-basis naive second covariant derivative by the
+un-bumped chart inverse Gram matrix `chartInvGramMatrix`), so it is the correct principal term on the
+whole good set; the rough Laplacian is, *unconditionally* at every base point `b`, the metric trace
+of the second covariant derivative against the `g_b`-orthonormal frame `Bᵢ := smoothOrthoFrame g b i`
+(`rawTensorConnLap_eq_metricTraceHessian`), and the metric trace of a fibre bilinear form is
+basis-independent, so it equals the chart-`α` inverse-Gram-weighted coordinate-basis trace at every
+good-set point.  The residual `(chartLeibnizRemainder − chartFrameTraceΓCorrection)` is `T₀`-linear
+with `T₀`-independent smooth chart-coordinate coefficients, absorbed here into `B_1`, `B_0`.  The
+tsupport restriction of the on-disk version is inessential to this trace identity: it was inherited
+only from the *bumped* globally smooth chart frame `chartFrameNormGlobalSmooth` used to package the
+remainder, whose orthonormality is localised to the partition-of-unity tsupport; the
+centred-orthonormal-frame metric trace used here is unconditional.
+
+Posited here as the genuine remaining DG prerequisite (the bilinear-trace change of basis from the
+orthonormal frame to the chart coordinate basis, with inner-slot tensoriality, removing the bumped
+frame's tsupport restriction); the principal-block substitution of
+`secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn` and the coefficient collection are discharged
+sorry-free below on top of it. -/
+theorem rawTensorConnLap_chartα_proj_eq_invGramPrincipalSum_on_goodSet
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
+    ∃ (B_1 : (Fin r → Fin (Module.finrank ℝ E)) →
+              (Fin s → Fin (Module.finrank ℝ E)) →
+              Fin (Module.finrank ℝ E) → EuclN → ℝ),
+    ∃ (B_0 : (Fin r → Fin (Module.finrank ℝ E)) →
+              (Fin s → Fin (Module.finrank ℝ E)) → EuclN → ℝ),
+      (∀ I' J' m, ContDiffOn ℝ ∞ (B_1 I' J' m) (chartTargetEuclid (I := I) (M := M) α)) ∧
+      (∀ I' J', ContDiffOn ℝ ∞ (B_0 I' J') (chartTargetEuclid (I := I) (M := M) α)) ∧
+      ∀ (T₀ : Integral.L2.SmoothCcTensor g r s),
+        ∀ {b : M}, b ∈ chartLeviCivitaGoodSet (I := I) α →
+          tensorChartComponentRaw (I := I) (M := M) g r s
+            (rawTensorConnLapSmooth (I := I) g r s T₀) α Idx Jdx b =
+            chartInvGramPrincipalSum (I := I) (M := M) g r s α T₀ Idx Jdx b +
+            (∑ I' : Fin r → Fin (Module.finrank ℝ E),
+              ∑ J' : Fin s → Fin (Module.finrank ℝ E),
+              ∑ m,
+              B_1 I' J' m ((toEuclidean (E := E)) ((extChartAt I α) b)) *
+                euclidPartial (E := E) m
+                  (chartPushedRaw I α
+                    (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J'))
+                  ((toEuclidean (E := E)) ((extChartAt I α) b))) +
+            (∑ I' : Fin r → Fin (Module.finrank ℝ E),
+              ∑ J' : Fin s → Fin (Module.finrank ℝ E),
+              B_0 I' J' ((toEuclidean (E := E)) ((extChartAt I α) b)) *
+                chartPushedRaw I α
+                  (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J')
+                  ((toEuclidean (E := E)) ((extChartAt I α) b))) :=
+  sorry
+
 /-- **The open-good-set inverse-Gram coordinate metric-trace identity for the connection-Laplacian
 raw component (a genuine differential-geometric prerequisite).**
 
@@ -647,8 +722,25 @@ theorem rawTensorConnLap_chartα_raw_eq_invGram_naiveSecondCovDeriv_proj_on_good
               A_0 I' J' ((toEuclidean (E := E)) ((extChartAt I α) b)) *
                 chartPushedRaw I α
                   (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J')
-                  ((toEuclidean (E := E)) ((extChartAt I α) b))) :=
-  sorry
+                  ((toEuclidean (E := E)) ((extChartAt I α) b))) := by
+  classical
+  obtain ⟨B_1, B_0, hB1cd, hB0cd, hBform⟩ :=
+    rawTensorConnLap_chartα_proj_eq_invGramPrincipalSum_on_goodSet
+      (I := I) (M := M) g r s α Idx Jdx
+  refine ⟨B_1, B_0, hB1cd, hB0cd, ?_⟩
+  intro T₀ b hb
+  rw [hBform T₀ hb]
+  congr 1
+  congr 1
+  rw [chartInvGramPrincipalSum]
+  refine Finset.sum_congr rfl (fun k _ => ?_)
+  refine Finset.sum_congr rfl (fun l _ => ?_)
+  congr 1
+  exact
+    (Classical.choose_spec
+      (Classical.choose_spec
+        (secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
+          (I := I) (M := M) g r s α Idx Jdx k l))).2.2 T₀ hb
 
 /-- **Inverse-Gram contraction–reorder for the first-derivative correction block.** Moving the
 inverse-Gram double sum `Σ_{k, l}` past the correction triple sum `Σ_{I', J', m}` and factoring the

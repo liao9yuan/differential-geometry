@@ -757,23 +757,56 @@ private lemma norm_smoothToTensorHsRS_eq_spectral_sqrt
   refine congrArg Real.sqrt (tsum_congr (fun i => ?_))
   rw [smoothToTensorHsRS_coeff]
 
-/-- **The general-order Euclidean-pull uniform bound on a compact chart set (posited general-rank
-analytic child).** At a supercritical chart order `a` (`dim M < 2·(2a)`), for each atlas index `α`
-and component pair `IJ`, there is a constant `D ≥ 0` such that on a compact set `Kc` (in chart
-Euclidean coordinates) contained in an open `O ⊆ chartTargetEuclid α` on which the chart
-partition-of-unity pull is `≥ c`, the chart-component pull `|tensorChartComponentRaw … IJ …|` is
-bounded by `D · ‖T.toHs a‖`.
+/-- **The sharp general-order per-ball Euclidean-pull center bound (posited general-rank curvature/
+analysis child).** At a supercritical chart order `a` (`dim M < 2·(2a)`), for an atlas index `α`,
+component pair `IJ`, and a closed Euclidean ball `closedBall y₀ R ⊆ chartTargetEuclid α` on which the
+chart partition-of-unity pull is `≥ c`, there is a constant `Cα ≥ 0` such that on the shrunken ball
+`ball y₀ (R/4)` the chart-component pull is bounded by `Cα · ‖T.toHs a‖`.
 
-This is the general-order (`a`, not necessarily even) analogue of the in-library `(0, 2k)`-only
-private Euclidean-pull core `uniformRawPull_le_hsNorm` (file `SobolevEmbeddingManifoldC0.lean`),
-which is stated only at order `2k`.  At order `2k` it is built from the local Euclidean ball `L²`
-Sobolev embedding (`smooth_localBall_L2_pointwise_embedding`, itself general-order) composed with
-the order-`2k` chart-block bridge `hsBlock_le_hsNorm_sq`; the genuinely sharp general-order
-assembly (the `H^{2a} ↪ C⁰` chart-Sobolev pull, threshold `dim < 2·(2a)`) is absent from the
-library's even-index-only tensor embedding tower, so it is posited here.  Its statement uses only
-public chart objects; the conclusion is a Euclidean-pull `C⁰` bound by the chart `H^{2a}`-norm,
-structurally distinct from the manifold-side fibre bound it powers (no packaging); the body is
+This is the **sharp** general-order (`a`, not necessarily even) analogue of the in-library `(0, 2k)`-only
+private per-ball core `rawPullCenter_le_hsNorm` (`SobolevEmbeddingManifoldC0.lean`), which is stated
+only at order `2k` and bounds by `‖T.toHs (2k)‖`.  The `(0, 2k)` core composes the local Euclidean
+ball `L²`-Sobolev pointwise embedding `smooth_localBall_L2_pointwise_embedding` (the **non-sharp**
+threshold `dim < 2K`, using `2K` derivatives) with the order-`2k` chart-block bridge
+`hsBlock_le_hsNorm_sq` and the per-order chart-FDeriv `eLpNorm` bridge
+`eLpNorm_sq_iteratedFDeriv_le_hsBlock`.  The genuinely **sharp** assembly — bounding `|f|` on a ball by
+only `‖T.toHs a‖` (FDeriv orders `≤ 2a`, i.e. the sharp Sobolev embedding `H^{2a}(ball) ↪ C⁰` at the
+sharp threshold `dim < 2·(2a)`) — requires a sharp local Euclidean embedding absent from the library's
+non-sharp iterated-Morrey chain, and the chart-side bridges of the `(0, 2k)` core are `private` to
+`SobolevEmbeddingManifoldC0.lean` (not importable); so the sharp per-ball bound is posited here.  Its
+statement uses only public chart objects; the conclusion is a Euclidean-pull `C⁰` bound by the chart
+`H^{2a}`-norm, structurally distinct from the compact-set bound it powers (no packaging); the body is
 `sorry` and consumers transitively depend on `sorryAx`. -/
+private theorem rawPullCenterRS_sharp_le_hsNorm
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℕ)
+    (ha : (Module.finrank ℝ E : ℝ) < 2 * (2 * a))
+    (α : M)
+    (IJ : (Fin r → Fin (Module.finrank ℝ E)) × (Fin s → Fin (Module.finrank ℝ E)))
+    {y₀ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))} {R c : ℝ} (hR : 0 < R) (hc_pos : 0 < c)
+    (hball : Metric.closedBall y₀ R ⊆ Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α)
+    (hρ_lb : ∀ y ∈ Metric.ball y₀ R,
+      c ≤ (Integral.Measure.chartAtlasPOU I M α : M → ℝ)
+        ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) :
+    ∃ Cα : ℝ, 0 ≤ Cα ∧ ∀ (T' : Integral.L2.SmoothCcTensor g r s),
+      ∀ y₁ ∈ Metric.ball y₀ (R / 4),
+      |Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw (I := I) (M := M) g r s T' α IJ.1 IJ.2
+          ((extChartAt I α).symm ((toEuclidean (E := E)).symm y₁))|
+        ≤ Cα * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) a T'‖ :=
+  sorry
+
+/-- **The sharp general-order Euclidean-pull uniform bound on a compact chart set.** At a supercritical
+chart order `a` (`dim M < 2·(2a)`), for each atlas index `α` and component pair `IJ`, there is a constant
+`D ≥ 0` such that on a compact set `Kc` (in chart Euclidean coordinates) contained in an open
+`O ⊆ chartTargetEuclid α` on which the chart partition-of-unity pull is `≥ c`, the chart-component pull
+`|tensorChartComponentRaw … IJ …|` is bounded by `D · ‖T.toHs a‖`.
+
+This is the sharp general-order analogue of the in-library `(0, 2k)`-only private
+`uniformRawPull_le_hsNorm`, *proved* here by the verbatim port of that core's public-only uniformity
+assembly: a Lebesgue-number radius `δ` for the cover of the compact `Kc` by `O`
+(`lebesgue_number_lemma_of_metric`), a finite sub-cover of `Kc` by balls of radius `(δ/2)/4`
+(`IsCompact.elim_finite_subcover`), the per-ball center bound `rawPullCenterRS_sharp_le_hsNorm` on each,
+and the finite maximum `Finset.sup'` of the per-ball constants.  Consumers transitively depend on `sorryAx`
+through the posited per-ball core. -/
 private theorem uniformRawPullRS_le_hsNorm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℕ)
     (ha : (Module.finrank ℝ E : ℝ) < 2 * (2 * a))
@@ -790,8 +823,70 @@ private theorem uniformRawPullRS_le_hsNorm
       ∀ y ∈ Kc,
         |Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw (I := I) (M := M) g r s T' α IJ.1 IJ.2
             ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))|
-          ≤ D * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) a T'‖ :=
-  sorry
+          ≤ D * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) a T'‖ := by
+  classical
+  rcases Set.eq_empty_or_nonempty Kc with hKc_empty | hKc_ne
+  · exact ⟨0, le_refl 0, fun T' y hy => by rw [hKc_empty] at hy; exact absurd hy (Set.notMem_empty y)⟩
+  obtain ⟨δ, hδ_pos, hδ_ball⟩ :=
+    lebesgue_number_lemma_of_metric (s := Kc)
+      (c := fun _ : Unit => O)
+      hKc_compact (fun _ => hO_open) (by intro x hx; exact Set.mem_iUnion.mpr ⟨(), hKcO hx⟩)
+  have hδ_sub : ∀ y ∈ Kc, Metric.ball y δ ⊆ O := by
+    intro y hy
+    obtain ⟨_, hsub⟩ := hδ_ball y hy
+    exact hsub
+  have hδ2_pos : 0 < δ / 2 := by linarith
+  have h_center : ∀ y : Kc, ∃ Cy : ℝ, 0 ≤ Cy ∧ ∀ (T' : Integral.L2.SmoothCcTensor g r s),
+      ∀ y₁ ∈ Metric.ball (y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) ((δ / 2) / 4),
+      |Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw (I := I) (M := M) g r s T' α IJ.1 IJ.2
+          ((extChartAt I α).symm ((toEuclidean (E := E)).symm y₁))|
+        ≤ Cy * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) a T'‖ := by
+    intro y
+    have hhalf_lt : δ / 2 < δ := half_lt_self hδ_pos
+    have hhalf_le : δ / 2 ≤ δ := le_of_lt hhalf_lt
+    have hcb_sub : Metric.closedBall (y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) (δ / 2) ⊆
+        Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α := by
+      refine (Metric.closedBall_subset_ball hhalf_lt).trans ?_
+      exact (hδ_sub y y.2).trans hO_sub
+    have hρ_ball : ∀ z ∈ Metric.ball (y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) (δ / 2),
+        c ≤ (Integral.Measure.chartAtlasPOU I M α : M → ℝ)
+          ((extChartAt I α).symm ((toEuclidean (E := E)).symm z)) := by
+      intro z hz
+      have hz' : z ∈ Metric.ball (y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) δ :=
+        Metric.ball_subset_ball hhalf_le hz
+      exact hρ_lb z (hδ_sub y y.2 hz')
+    obtain ⟨Cy, hCy_nn, hCy⟩ :=
+      rawPullCenterRS_sharp_le_hsNorm (I := I) (M := M) g r s a ha
+        α IJ hδ2_pos hc_pos hcb_sub hρ_ball
+    exact ⟨Cy, hCy_nn, hCy⟩
+  choose Cfun hCfun_nn hCfun using h_center
+  obtain ⟨tcov, htcov⟩ :=
+    hKc_compact.elim_finite_subcover
+      (U := fun y : Kc => Metric.ball (y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) ((δ / 2) / 4))
+      (fun y => Metric.isOpen_ball)
+      (by
+        intro z hz
+        refine Set.mem_iUnion.mpr ⟨⟨z, hz⟩, ?_⟩
+        rw [Metric.mem_ball, dist_self]; positivity)
+  set Dmax : ℝ := (tcov.image Cfun).sup' (by
+    rcases hKc_ne with ⟨z, hz⟩
+    obtain ⟨y, hy_t, _⟩ := Set.mem_iUnion₂.mp (htcov hz)
+    exact Finset.image_nonempty.mpr ⟨y, hy_t⟩) id ⊔ 0 with hDmax_def
+  have hDmax_nn : 0 ≤ Dmax := le_sup_right
+  refine ⟨Dmax, hDmax_nn, ?_⟩
+  intro T' y hy
+  set hsn : ℝ := ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) a T'‖ with hhsn_def
+  have hhsn_nn : 0 ≤ hsn := norm_nonneg _
+  obtain ⟨yi, hyi_t, hy_in⟩ := Set.mem_iUnion₂.mp (htcov hy)
+  have h_bound := hCfun yi T' y hy_in
+  have hCyi_le : Cfun yi ≤ Dmax := by
+    rw [hDmax_def]
+    refine le_sup_of_le_left ?_
+    exact Finset.le_sup' id (Finset.mem_image_of_mem Cfun hyi_t)
+  calc |Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw (I := I) (M := M) g r s T' α IJ.1 IJ.2
+          ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))|
+      ≤ Cfun yi * hsn := h_bound
+    _ ≤ Dmax * hsn := mul_le_mul_of_nonneg_right hCyi_le hhsn_nn
 
 /-- For a chart base point `α` and a positive threshold `c`, the super-level set
 `{x | c ≤ ρ_α x}` is compact and contained in the chart-`α` source.  In-file re-derivation of the
@@ -1260,35 +1355,288 @@ private def CommutatorDefectBoundRS
       Cc p * ∑ i ∈ Finset.range (p + 2),
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i U‖
 
-/-- **The general-rank order-`2` Gårding family (posited general-rank analytic child).** At fixed
-contravariant rank `r` there is a valence-dependent `Cg : ℕ → ℝ` with `Order2GardingFamilyRS g r Cg`.
-The `(0, ·)` instance is `order2GardingFamily_holds`, whose curvature cross-term input
-`exists_abs_curvCrossTerm_l2_bound` is `(0, ·)`-restricted; the genuinely general-rank `(r, ·)`
-order-`2` Gårding estimate is absent from the library, so it is posited here.  The body is `sorry`
-and consumers transitively depend on `sorryAx`. -/
-private theorem order2GardingFamilyRS_holds (g : SmoothRiemannianMetric I M) (r : ℕ) :
-    ∃ Cg : ℕ → ℝ, Order2GardingFamilyRS (I := I) (M := M) g r Cg :=
-  sorry
+/-- **The general-rank order-`1` control family.** At fixed contravariant rank `r`,
+`Order1ControlFamilyRS g r` holds: for every covariant rank `s` and smooth compactly-supported
+`(r, s)`-tensor `S`, `‖∇S‖² ≤ ‖Δ_∇ S‖ · ‖S‖`.
 
-/-- **The general-rank order-`1` control family (posited general-rank analytic child).** At fixed
-contravariant rank `r`, `Order1ControlFamilyRS g r` holds.  The `(0, ·)` instance is
-`order1ControlFamily_holds`, whose `covGrad_l2NormSq_le_rawConnLap_mul_self_gen` is `(0, ·)`-only
-(it rests on the `(0, ·)` connection-Laplacian Green identity); the genuinely general-rank `(r, ·)`
-order-`1` interior estimate is absent from the library, so it is posited here.  The body is `sorry`
-and consumers transitively depend on `sorryAx`. -/
+This is the bidegree-`(r, s)` analogue of `order1ControlFamily_holds`, *proved* here by the
+verbatim port of the `(0, ·)` interior-elliptic estimate `covGrad_l2NormSq_le_rawConnLap_mul_self_gen`:
+the squared `L²` gradient norm equals the self-inner product `⟪∇S, ∇S⟫_{L²}` (`tensorL2Norm_sq_toFun`),
+which the general-rank connection-Laplacian Green identity — the in-file posited
+`tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLapRS`, specialised at `v := S` — turns into
+`-⟪Δ_∇ S, S⟫_{L²}`, bounded by `|⟪Δ_∇ S, S⟫_{L²}| ≤ ‖Δ_∇ S‖·‖S‖` through the rank-generic global
+`L²` Cauchy–Schwarz `abs_tensorL2Inner_le` (with `neg_le_abs`). No curvature input is needed (the
+order-`1` control is curvature-free, constant `1`). Consumers transitively depend on `sorryAx` only
+through the posited general-rank Green identity. -/
 private theorem order1ControlFamilyRS_holds (g : SmoothRiemannianMetric I M) (r : ℕ) :
-    Order1ControlFamilyRS (I := I) (M := M) g r :=
+    Order1ControlFamilyRS (I := I) (M := M) g r := by
+  intro s S
+  set ΔS : Integral.L2.SmoothCcTensor g r s :=
+    Integral.Connection.rawTensorConnLapSmooth (I := I) g r s S with hΔS_def
+  rw [Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M)
+      (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S),
+    Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M) ΔS,
+    Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M) S]
+  have hgreen :
+      Integral.L2.tensorL2Norm (I := I) (M := M) g r (s + 1)
+          (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S).toFun ^ 2 =
+        - Integral.L2.tensorL2Inner (I := I) (M := M) g r s ΔS.toFun S.toFun := by
+    rw [Integral.Connection.tensorL2Norm_sq_toFun (I := I) (M := M) g r (s + 1)
+      (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S)]
+    rw [hΔS_def]
+    exact tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLapRS (I := I) (M := M) g r s S S
+  rw [hgreen]
+  have hcs := Integral.L2.abs_tensorL2Inner_le (I := I) (M := M) g r s ΔS.toFun S.toFun
+    (Integral.L2.SmoothCcTensor.memL2_toFun (I := I) (M := M) ΔS)
+    (Integral.L2.SmoothCcTensor.memL2_toFun (I := I) (M := M) S)
+    (Integral.L2.SmoothCcTensor.integrable_inner_cross (I := I) (M := M) ΔS S)
+  exact le_trans (neg_le_abs _) hcs
+
+/-- **The per-valence integrated curvature cross-term bound at fixed contravariant rank `r`.**
+Bidegree-`(r, ·)` analogue of `CurvatureCrossTermBound`: a valence-dependent nonnegative
+`Ccross : ℕ → ℝ` such that at every covariant rank `s` the one-sided `L²` pairing of the
+rough-Laplacian / covariant-gradient commutator defect `Curv := Δ_∇(∇S) − ∇(Δ_∇ S)` against `∇S`
+is bounded by `Ccross s · (‖∇S‖²_{L²} + ‖S‖_{L²}·‖∇S‖_{L²})`. -/
+private def CurvatureCrossTermBoundRS
+    (g : SmoothRiemannianMetric I M) (r : ℕ) (Ccross : ℕ → ℝ) : Prop :=
+  (∀ s, 0 ≤ Ccross s) ∧ ∀ (s : ℕ) (S : Integral.L2.SmoothCcTensor g r s),
+    - Integral.L2.tensorL2Inner (I := I) (M := M) g r (s + 1)
+          (Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + 1)
+              (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S) -
+            Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s
+              (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s S)).toFun
+          (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S).toFun ≤
+      Ccross s *
+        (Integral.L2.tensorL2Norm (I := I) (M := M) g r (s + 1)
+            (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S).toFun ^ 2 +
+          Integral.L2.tensorL2Norm (I := I) (M := M) g r s S.toFun *
+            Integral.L2.tensorL2Norm (I := I) (M := M) g r (s + 1)
+              (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S).toFun)
+
+/-- **The general-rank integrated order-`2` Weitzenböck identity (posited general-rank curvature
+child).** For a smooth compactly-supported `(r, s)`-tensor `S`,
+`‖∇²S‖²_{L²} = ‖Δ_∇ S‖²_{L²} − ⟨Curv, ∇S⟩_{L²}`, where `Curv := Δ_∇(∇S) − ∇(Δ_∇ S)`.
+
+This is the bidegree-`(r, s)` analogue of `weitzenbock_integrated_covGrad_l2_normSq`.  At purely
+covariant rank `(0, s)` the identity is proved in the library from the integration-by-parts of the
+moving-frame `∇²S`-order bracket against `∇S`; the lowering construction it goes through is specific
+to `(0, s)`-tensors, so the genuinely general-rank `(r, s)` identity (the same Weitzenböck integration
+by parts at contravariant rank `r`) is absent and posited here.  The conclusion is an `L²` identity
+equating the squared second-gradient norm to the rough-Laplacian norm minus the curvature cross-pairing,
+structurally distinct from every summability/Gårding inequality it powers (no packaging).  The body is
+`sorry` and consumers transitively depend on `sorryAx`. -/
+private theorem weitzenbockRS_integrated_covGrad_l2_normSq
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : Integral.L2.SmoothCcTensor g r s) :
+    Integral.L2.tensorL2Norm (I := I) (M := M) g r (s + 1 + 1)
+        (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + 1)
+          (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S)).toFun ^ 2 =
+      Integral.L2.tensorL2Norm (I := I) (M := M) g r s
+          (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s S).toFun ^ 2 -
+        Integral.L2.tensorL2Inner (I := I) (M := M) g r (s + 1)
+          (Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + 1)
+              (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S) -
+            Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s
+              (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s S)).toFun
+          (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S).toFun :=
   sorry
 
-/-- **The general-rank commutator-defect family (posited general-rank analytic child).** At fixed
-bidegree `(r, s)` there is an order-dependent `Cc : ℕ → ℝ` with `CommutatorDefectBoundRS g r s Cc`.
-The `(0, 2)` instance is `commutatorDefectBound_holds`, whose `exists_commutatorDefect_l2_bound_succ`
-is `(0, 2)`-restricted; the genuinely general-rank `(r, s)` iterated curvature-commutator content
-is absent from the library, so it is posited here.  The body is `sorry` and consumers transitively
-depend on `sorryAx`. -/
-private theorem commutatorDefectBoundRS_holds (g : SmoothRiemannianMetric I M) (r s : ℕ) :
-    ∃ Cc : ℕ → ℝ, CommutatorDefectBoundRS (I := I) (M := M) g r s Cc :=
+/-- **The general-rank order-`2` Gårding estimate from a cross-term bound.** Bidegree-`(r, s)`
+analogue of `secondCovGrad_l2NormSq_le_of_cross_bound`, *proved* here by the verbatim port of the
+integrated-Weitzenböck Young reduction: the general-rank integrated Weitzenböck identity
+`weitzenbockRS_integrated_covGrad_l2_normSq`, the supplied cross-term hypothesis, the order-`1`
+control `order1ControlFamilyRS_holds` (`‖∇S‖² ≤ ‖Δ_∇ S‖·‖S‖`), and Young's inequality
+`2ab ≤ a² + b²`. -/
+private theorem secondCovGradRS_l2NormSq_le_of_cross_bound
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : Integral.L2.SmoothCcTensor g r s)
+    (Ccross : ℝ) (hCcross : 0 ≤ Ccross)
+    (hcross :
+      - Integral.L2.tensorL2Inner (I := I) (M := M) g r (s + 1)
+            (Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + 1)
+                (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S) -
+              Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s
+                (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s S)).toFun
+            (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S).toFun ≤
+        Ccross *
+          (Integral.L2.tensorL2Norm (I := I) (M := M) g r (s + 1)
+              (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S).toFun ^ 2 +
+            Integral.L2.tensorL2Norm (I := I) (M := M) g r s S.toFun *
+              Integral.L2.tensorL2Norm (I := I) (M := M) g r (s + 1)
+                (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S).toFun)) :
+    Integral.L2.tensorL2Norm (I := I) (M := M) g r (s + 1 + 1)
+        (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + 1)
+          (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S)).toFun ^ 2 ≤
+      (2 + 2 * Ccross) *
+        (Integral.L2.tensorL2Norm (I := I) (M := M) g r s
+            (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s S).toFun ^ 2 +
+          Integral.L2.tensorL2Norm (I := I) (M := M) g r s S.toFun ^ 2) := by
+  classical
+  set nHess : ℝ := Integral.L2.tensorL2Norm (I := I) (M := M) g r (s + 1 + 1)
+    (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + 1)
+      (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S)).toFun with hnHess_def
+  set nGrad : ℝ := Integral.L2.tensorL2Norm (I := I) (M := M) g r (s + 1)
+    (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S).toFun with hnGrad_def
+  set nLap : ℝ := Integral.L2.tensorL2Norm (I := I) (M := M) g r s
+    (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s S).toFun with hnLap_def
+  set nS : ℝ := Integral.L2.tensorL2Norm (I := I) (M := M) g r s S.toFun with hnS_def
+  have hnGrad_nn : 0 ≤ nGrad := Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g r (s + 1) _
+  have hnS_nn : 0 ≤ nS := Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g r s _
+  have hweitz :
+      nHess ^ 2 =
+        nLap ^ 2 -
+          Integral.L2.tensorL2Inner (I := I) (M := M) g r (s + 1)
+            (Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + 1)
+                (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S) -
+              Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s
+                (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s S)).toFun
+            (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S).toFun := by
+    rw [hnHess_def, hnLap_def]
+    exact weitzenbockRS_integrated_covGrad_l2_normSq (I := I) (M := M) g r s S
+  have horder1 : nGrad ^ 2 ≤ nLap * nS := by
+    have h := order1ControlFamilyRS_holds (I := I) (M := M) g r s S
+    rw [Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M)
+        (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S),
+      Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M)
+        (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s S),
+      Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M) S] at h
+    rw [hnGrad_def, hnLap_def, hnS_def]; exact h
+  have hstep1 : nHess ^ 2 ≤ nLap ^ 2 + Ccross * (nGrad ^ 2 + nS * nGrad) := by
+    have hcross' :
+        - Integral.L2.tensorL2Inner (I := I) (M := M) g r (s + 1)
+              (Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + 1)
+                  (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S) -
+                Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s
+                  (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s S)).toFun
+              (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S).toFun ≤
+          Ccross * (nGrad ^ 2 + nS * nGrad) := by
+      rw [hnGrad_def, hnS_def]; exact hcross
+    rw [hweitz]
+    linarith [hcross']
+  have hyoung_ls : nLap * nS ≤ (nLap ^ 2 + nS ^ 2) / 2 := by
+    nlinarith [sq_nonneg (nLap - nS)]
+  have hyoung_sg : nS * nGrad ≤ (nS ^ 2 + nGrad ^ 2) / 2 := by
+    nlinarith [sq_nonneg (nS - nGrad)]
+  have hbracket : nGrad ^ 2 + nS * nGrad ≤ 2 * (nLap ^ 2 + nS ^ 2) := by
+    have h1 : nGrad ^ 2 ≤ (nLap ^ 2 + nS ^ 2) / 2 := le_trans horder1 hyoung_ls
+    nlinarith [h1, hyoung_sg]
+  have hkey : Ccross * (nGrad ^ 2 + nS * nGrad) ≤ Ccross * (2 * (nLap ^ 2 + nS ^ 2)) :=
+    mul_le_mul_of_nonneg_left hbracket hCcross
+  have hnLapSq_nn : 0 ≤ nLap ^ 2 := sq_nonneg _
+  have hnSSq_nn : 0 ≤ nS ^ 2 := sq_nonneg _
+  calc nHess ^ 2
+      ≤ nLap ^ 2 + Ccross * (nGrad ^ 2 + nS * nGrad) := hstep1
+    _ ≤ nLap ^ 2 + Ccross * (2 * (nLap ^ 2 + nS ^ 2)) := by linarith [hkey]
+    _ ≤ (2 + 2 * Ccross) * (nLap ^ 2 + nS ^ 2) := by nlinarith [hnLapSq_nn, hnSSq_nn]
+
+/-- **The general-rank order-`2` cross-term family from the atomic cross-term bound.** The
+bidegree-`(r, ·)` analogue of `order2GardingFamily_of_curvatureCrossTermBound`: from a
+`CurvatureCrossTermBoundRS g r Ccross` witness the order-`2` Gårding family
+`Order2GardingFamilyRS g r (fun s => 2 + 2·Ccross s)` follows, at every valence `s` by the
+general-rank reduction `secondCovGradRS_l2NormSq_le_of_cross_bound`. -/
+private theorem order2GardingFamilyRS_of_curvatureCrossTermBoundRS
+    (g : SmoothRiemannianMetric I M) (r : ℕ) (Ccross : ℕ → ℝ)
+    (hcross : CurvatureCrossTermBoundRS (I := I) (M := M) g r Ccross) :
+    Order2GardingFamilyRS (I := I) (M := M) g r (fun s => 2 + 2 * Ccross s) := by
+  obtain ⟨hCcross, hcrossS⟩ := hcross
+  refine ⟨fun s => by have := hCcross s; linarith, fun s S => ?_⟩
+  rw [Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M)
+      (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r (s + 1)
+        (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g r s S)),
+    Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M)
+      (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s S),
+    Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M) S]
+  exact secondCovGradRS_l2NormSq_le_of_cross_bound (I := I) (M := M) g r s S (Ccross s)
+    (hCcross s) (hcrossS s S)
+
+/-- **The general-rank atomic curvature cross-term bound (posited general-rank curvature child).**
+At fixed contravariant rank `r` there is a valence-dependent nonnegative `Ccross : ℕ → ℝ` with
+`CurvatureCrossTermBoundRS g r Ccross`.
+
+This is the bidegree-`(r, ·)` analogue of the `(0, ·)` atomic cross-term `curvatureCrossTermBound_holds`
+(itself resting on the `(0, ·)`-restricted posited curvature input `exists_abs_curvCrossTerm_l2_bound`):
+fibrewise `Curv` is a Riemann-curvature contraction of `∇S`, so once the moving-frame `∇²S`-order
+bracket is integrated away against `∇S` the cross-pairing is controlled, at each fixed valence `s`, by
+the curvature sup `‖R‖_∞` over the compact manifold (which on the `(r, s)`-tensor bundle grows like
+`(r + s + 1)·‖R‖_∞`, hence the per-valence constant).  The genuinely general-rank `(r, s)` integrated
+curvature estimate is absent from the library, so it is posited here.  The constant is per-valence
+(`ℕ → ℝ`), not a single scalar (the curvature endomorphism of the `(r, s)`-bundle is an `(r+s)`-slot
+derivation), so this is NOT the unsatisfiable single-const-∀s shape.  The body is `sorry` and consumers
+transitively depend on `sorryAx`. -/
+private theorem curvatureCrossTermBoundRS_holds (g : SmoothRiemannianMetric I M) (r : ℕ) :
+    ∃ Ccross : ℕ → ℝ, CurvatureCrossTermBoundRS (I := I) (M := M) g r Ccross :=
   sorry
+
+/-- **The general-rank order-`2` Gårding family.** At fixed contravariant rank `r` there is a
+valence-dependent `Cg : ℕ → ℝ` with `Order2GardingFamilyRS g r Cg`:
+`‖∇²S‖²_{L²} ≤ Cg s · (‖Δ_∇ S‖²_{L²} + ‖S‖²_{L²})` at every valence `s`.
+
+This is the bidegree-`(r, ·)` analogue of `order2GardingFamily_holds`, *proved* here from the atomic
+general-rank cross-term bound `curvatureCrossTermBoundRS_holds` via the general-rank integrated-Weitzenböck
+Young reduction `order2GardingFamilyRS_of_curvatureCrossTermBoundRS`; the resulting Gårding constant
+`Cg s = 2 + 2·Ccross s` inherits the per-valence dependence.  Consumers transitively depend on `sorryAx`
+through the posited general-rank cross-term and Weitzenböck identity. -/
+private theorem order2GardingFamilyRS_holds (g : SmoothRiemannianMetric I M) (r : ℕ) :
+    ∃ Cg : ℕ → ℝ, Order2GardingFamilyRS (I := I) (M := M) g r Cg := by
+  obtain ⟨Ccross, hcross⟩ := curvatureCrossTermBoundRS_holds (I := I) (M := M) g r
+  exact ⟨fun s => 2 + 2 * Ccross s,
+    order2GardingFamilyRS_of_curvatureCrossTermBoundRS (I := I) (M := M) g r Ccross hcross⟩
+
+/-- **The general-rank order-`(p+1)` commutator-defect bound (posited general-rank curvature child).**
+At fixed bidegree `(r, s)` there is an order-dependent nonnegative `Cc : ℕ → ℝ` such that, for every
+smooth compactly-supported `(r, s)`-tensor base `U` and every gradient order `p`, the
+rough-Laplacian / iterated-gradient commutator defect at order `p + 1` is `L²`-controlled by the lower
+gradients:
+`‖Δ_∇(∇^{p+1} U) − ∇^{p+1}(Δ_∇ U)‖ ≤ Cc (p+1) · ∑_{i ≤ p+2} ‖∇^i U‖`.
+
+This is the bidegree-`(r, s)` analogue of the `(0, 2)`-restricted `exists_commutatorDefect_l2_bound_succ`
+(whose `(0, 2)` proof rests on the iterated Ricci identity built from the `(0, ·)` single-step defect
+`pointwiseTensorCurv`): on a closed manifold the iterated commutator `[Δ_∇, ∇^{p+1}]` expands, via the
+Ricci identity, into a finite sum of contractions of `∇^{≤ p}Rm` against `∇^{≤ p+1}U`, a lower-order
+operator with curvature-derivative coefficients bounded by compactness.  The genuinely general-rank
+`(r, s)` iterated curvature-commutator content is absent from the library, so it is posited here.  The
+constant is per-order (`ℕ → ℝ`) — the number of curvature-derivative terms grows with `p` — NOT a single
+scalar.  The conclusion is a lower-order `L²` commutator bound, structurally distinct from the
+summability/Gårding statements it powers (no packaging).  The body is `sorry` and consumers transitively
+depend on `sorryAx`. -/
+private theorem exists_commutatorDefectRS_l2_bound_succ
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    ∃ Cc : ℕ → ℝ, (∀ p, 0 ≤ Cc p) ∧
+      ∀ (U : Integral.L2.SmoothCcTensor g r s) (p : ℕ),
+        ‖Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + (p + 1))
+              (PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s (p + 1) U) -
+            PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s (p + 1)
+              (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s U)‖ ≤
+          Cc (p + 1) * ∑ i ∈ Finset.range ((p + 1) + 2),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i U‖ :=
+  sorry
+
+/-- **The general-rank commutator-defect family.** At fixed bidegree `(r, s)` there is an
+order-dependent nonnegative `Cc : ℕ → ℝ` with `CommutatorDefectBoundRS g r s Cc`.
+
+This is the bidegree-`(r, s)` analogue of `commutatorDefectBound_holds`, *proved* here by splitting on
+the gradient order, exactly as the `(0, 2)` proof: the order-`0` defect `Δ_∇(∇^0 U) − ∇^0(Δ_∇ U) =
+Δ_∇ U − Δ_∇ U` vanishes (here unconditionally, by the general-rank `iteratedCovGrad_zero`), and the
+orders `p + 1` are supplied by the posited general-rank curvature child
+`exists_commutatorDefectRS_l2_bound_succ`.  Consumers transitively depend on `sorryAx` through that
+posited input. -/
+private theorem commutatorDefectBoundRS_holds (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    ∃ Cc : ℕ → ℝ, CommutatorDefectBoundRS (I := I) (M := M) g r s Cc := by
+  obtain ⟨Cc, hCc, hsucc⟩ := exists_commutatorDefectRS_l2_bound_succ (I := I) (M := M) g r s
+  refine ⟨Cc, hCc, fun U p => ?_⟩
+  match p with
+  | 0 =>
+      have hzero :
+          Integral.Connection.rawTensorConnLapSmooth (I := I) g r (s + 0)
+                (PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s 0 U) -
+              PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s 0
+                (Integral.Connection.rawTensorConnLapSmooth (I := I) g r s U) = 0 := by
+        rw [PDE.RicciFlow.iteratedCovGrad_zero, PDE.RicciFlow.iteratedCovGrad_zero]
+        simp
+      rw [hzero, norm_zero]
+      have hsum_nn : 0 ≤ ∑ i ∈ Finset.range (0 + 2),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i U‖ :=
+        Finset.sum_nonneg (fun i _ => norm_nonneg _)
+      exact mul_nonneg (hCc 0) hsum_nn
+  | (p + 1) => exact hsucc U p
 
 /-- `‖∇^i U‖` as a `SmoothCcTensor` seminorm equals `tensorL2Norm` of its underlying field, at
 bidegree `(r, s)`. -/

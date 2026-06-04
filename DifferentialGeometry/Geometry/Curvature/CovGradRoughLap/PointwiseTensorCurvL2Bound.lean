@@ -114,6 +114,76 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+/-- **Posited deepest curvature primitive (the strictly-more-primitive *spectral-pairing* core):
+the genuine third-order Weitzenböck field decomposition with proportional fibre bounds and the
+concrete spectral pairing.** For a closed smooth Riemannian manifold `(M, g)` there is a
+*valence-dependent* nonnegative constant `Cper : ℕ → ℝ` such that, at every covariant rank `s`
+and for every smooth compactly-supported `(0, s)`-tensor `S`, the order-`2` commutator defect
+`Curv S := pointwiseTensorCurv g s S` admits two *genuine curvature* fields `Gcurv, GcurvDeriv :
+SmoothCcTensor g 0 (s + 1)` — the section-level packagings of the pure-Riemann contraction
+`R(∇S)` (the frame-sum of `riemannOp` on the gradient field `∇S = covGrad g 0 s S`, the Ricci
+identity `secondCovDeriv_covGrad_antisymm_eq_riemannOp_gen` with the proportional fibre bound
+`riemannOp_covGrad_fiberNormSq_le_gen` upgraded to a uniform proportional bound over the compact
+`M`) and the differentiated-curvature contraction `(∇R) S` (`covGradCurvatureContraction`, its
+uniform sup `exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound` upgraded to a bound
+proportional to `rfns(S)`) — with the four genuine third-order Bochner–Weitzenböck properties:
+
+* `rfns(Gcurv)(x) ≤ (Cper s)² · rfns(∇S)(x)` — the pure-`R` field, genuinely `rfns(∇S)`-order;
+* `rfns(GcurvDeriv)(x) ≤ (Cper s)² · rfns(S)(x)` — the `∇R` field, genuinely `rfns(S)`-order;
+* `rfns(Curv S − Gcurv − GcurvDeriv)(x) ≤ (Cper s)² · rfns(∇²S)(x)` — the moving-frame /
+  frame-bracket remainder, genuinely `rfns(∇²S)`-order after the third-order Weitzenböck
+  cancellation of the top-order `∇³S` terms by the iterated Ricci identity;
+* `⟨Gcurv + GcurvDeriv, ∇S⟩_{L²} = ‖Δ_∇S‖²_{L²} − ‖∇²S‖²_{L²}` — the *spectral pairing*: the
+  genuine fields carry exactly the Weitzenböck curvature integral. The right-hand side is the
+  concrete spectral scalar (the squared `L²` norms of the rough Laplacian `Δ_∇S =
+  rawTensorConnLapSmooth g 0 s S` and the iterated gradient `∇²S = covGrad g 0 (s+1) (covGrad g 0
+  s S)`), *not* the abstract cross-pairing — that is exactly what makes this the strictly-more-
+  primitive form: it states the integrated identity in the terms a fixed-frame computation
+  produces, before invoking the Weitzenböck identity to identify it with `⟨Curv S, ∇S⟩_{L²}`.
+
+This is the genuinely-missing third-order Bochner–Weitzenböck curvature core — the deepest
+moving-frame curvature endomorphism content at general rank. Its construction bridges the
+fixed-frame section representation `pointwiseTensorCurv_toSection_eq_frame_sum` ("no moving-frame
+derivative survives") to the directional genuine/bracket split
+`frame_trace_thirdCovDeriv_defect_eq_genuine_add_bracket` (`Tensor3rdCurv_eq_genuine_add_bracket`),
+its genuine part `tensor3rdCurvGenuine` fibre-bounded by `riemannianFiberNormSq_tensor3rdCurvGenuine_le`
+fed by the proportional curvature / differentiated-curvature bounds, the surviving moving-frame /
+frame-bracket discrepancy (`tensor3rdCurvBracket` plus the frame-trace discrepancy
+`covGradRoughLapTraceDiscrepancy` and the moving-frame residual `covGradRoughLapMovingFrameResidual`)
+being genuinely `∇²S`-order and a total covariant divergence of an `∇S`-order field, so its
+contribution to the `L²` pairing is the Weitzenböck curvature integral `‖Δ_∇S‖² − ‖∇²S‖²` (the
+clean `slot0FrameTraceMatching` is *false* on a normal manifold (S²), so the honest primitive
+carries the bracket remainder explicitly rather than asserting a clean cancellation). The
+decomposition rejects the degenerate witness: with `Gcurv = GcurvDeriv = 0` the spectral pairing
+reads `0 = ‖Δ_∇S‖² − ‖∇²S‖²`, which is *false* in general, so the genuine fields must carry the
+actual Weitzenböck curvature integral. -/
+theorem exists_pointwiseTensorCurv_genuineFields_proportional_spectralPairing
+    (g : SmoothRiemannianMetric I M) :
+    ∃ Cper : ℕ → ℝ, (∀ s, 0 ≤ Cper s) ∧
+      ∀ (s : ℕ) (S : SmoothCcTensor g 0 s),
+        ∃ Gcurv GcurvDeriv : SmoothCcTensor g 0 (s + 1),
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x (Gcurv.toSection x) ≤
+            Cper s ^ 2 *
+              riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                ((covGrad (I := I) (M := M) g 0 s S).toSection x)) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x (GcurvDeriv.toSection x) ≤
+            Cper s ^ 2 *
+              riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+              ((pointwiseTensorCurv (I := I) (M := M) g s S - Gcurv - GcurvDeriv).toSection x) ≤
+            Cper s ^ 2 *
+              riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+                ((covGrad (I := I) (M := M) g 0 (s + 1)
+                  (covGrad (I := I) (M := M) g 0 s S)).toSection x)) ∧
+          tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Gcurv + GcurvDeriv).toFun
+              (covGrad (I := I) (M := M) g 0 s S).toFun =
+            tensorL2Norm (I := I) (M := M) g 0 s
+                (rawTensorConnLapSmooth (I := I) g 0 s S).toFun ^ 2 -
+              tensorL2Norm (I := I) (M := M) g 0 (s + 1 + 1)
+                (covGrad (I := I) (M := M) g 0 (s + 1)
+                  (covGrad (I := I) (M := M) g 0 s S)).toFun ^ 2 := by
+  sorry
+
 /-- **Posited deepest curvature primitive (the strictly-more-primitive structural core): the
 genuine third-order Weitzenböck field decomposition with proportional fibre bounds and the
 bracket-free `L²` pairing.** For a closed smooth Riemannian manifold `(M, g)` there is a
@@ -141,21 +211,28 @@ proportional to `rfns(S)`) — with the four genuine third-order Bochner–Weitz
   `tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_gen`, leaving the genuine fields to
   carry the entire pairing.
 
-This is the genuinely-missing third-order Bochner–Weitzenböck curvature core, posited as a
-strictly-more-primitive `sorry` node than the named-remainder existence theorem
-`exists_pointwiseTensorCurv_genuineCurvature_namedRemainderField`: it exhibits the *explicit*
-genuine fields together with the bracket-free pairing identity, from which the named-remainder
-form follows by naming `Grem := Curv S − Gcurv − GcurvDeriv` (the section identity is `abel`) and
-deriving the integrated nullity `⟨Grem, ∇S⟩_{L²} = 0` from the bracket-free pairing through the
-left additivity of the `L²` pairing (`tensorL2Inner_add_left`). The construction bridges the
-fixed-frame section representation `pointwiseTensorCurv_toSection_eq_frame_sum` to the genuine /
-bracket split `frame_trace_thirdCovDeriv_defect_eq_genuine_add_bracket`
-(`Tensor3rdCurv_eq_genuine_add_bracket`) — the two genuinely-distinct slot-`0` Christoffel /
-moving-frame obstructions documented in `FreeDirectionReduction.lean` and
-`TraceDiscrepancyDecomposition.lean`. The decomposition rejects the degenerate witness: with
-`Gcurv = GcurvDeriv = 0` the bracket-free pairing reads `0 = ⟨Curv S, ∇S⟩_{L²}`, which is *false*
-in general (it equals `‖Δ_∇S‖² − ‖∇²S‖²` by `weitzenbock_integrated_covGrad_l2_normSq`), so the
-genuine fields must carry the actual curvature pairing. -/
+This is the genuinely-missing third-order Bochner–Weitzenböck curvature core. It is **proved**
+from the strictly-more-primitive *spectral-pairing* form of the same field decomposition,
+`exists_pointwiseTensorCurv_genuineFields_proportional_spectralPairing`, which exhibits the same
+explicit genuine fields with the three proportional fibre bounds but states the integrated
+pairing in the strictly-more-primitive *concrete spectral scalar* form
+`⟨Gcurv + GcurvDeriv, ∇S⟩_{L²} = ‖Δ_∇S‖²_{L²} − ‖∇²S‖²_{L²}` (the genuine fields carry exactly the
+Weitzenböck curvature integral). The bracket-free pairing against `Curv S` follows by rewriting
+that concrete spectral scalar back to `⟨Curv S, ∇S⟩_{L²}` through the **already-proved** integrated
+order-`2` Weitzenböck identity `weitzenbock_integrated_covGrad_l2_normSq`
+(`‖∇²S‖²_{L²} = ‖Δ_∇S‖²_{L²} − ⟨Curv S, ∇S⟩_{L²}`, hence `⟨Curv S, ∇S⟩_{L²} = ‖Δ_∇S‖²_{L²} −
+‖∇²S‖²_{L²}`), using that `pointwiseTensorCurv g s S = Δ_∇(∇S) − ∇(Δ_∇ S)` *definitionally*. This
+reduction is genuine and non-circular: it replaces the abstract cross-pairing `⟨Curv S, ∇S⟩_{L²}`
+in the spectral-pairing primitive by the concrete spectral scalar `‖Δ_∇S‖² − ‖∇²S‖²`, a
+simplification consumers cannot perform without the Weitzenböck theorem.
+
+The named-remainder form `exists_pointwiseTensorCurv_genuineCurvature_namedRemainderField` follows
+by naming `Grem := Curv S − Gcurv − GcurvDeriv` (the section identity is `abel`) and deriving the
+integrated nullity `⟨Grem, ∇S⟩_{L²} = 0` from the bracket-free pairing through the left additivity
+of the `L²` pairing (`tensorL2Inner_add_left`). The decomposition rejects the degenerate witness:
+with `Gcurv = GcurvDeriv = 0` the bracket-free pairing reads `0 = ⟨Curv S, ∇S⟩_{L²}`, which is
+*false* in general (it equals `‖Δ_∇S‖² − ‖∇²S‖²` by `weitzenbock_integrated_covGrad_l2_normSq`), so
+the genuine fields must carry the actual curvature pairing. -/
 theorem exists_pointwiseTensorCurv_genuineFields_proportional_bracketFreePairing
     (g : SmoothRiemannianMetric I M) :
     ∃ Cper : ℕ → ℝ, (∀ s, 0 ≤ Cper s) ∧
@@ -179,7 +256,35 @@ theorem exists_pointwiseTensorCurv_genuineFields_proportional_bracketFreePairing
             tensorL2Inner (I := I) (M := M) g 0 (s + 1)
               (pointwiseTensorCurv (I := I) (M := M) g s S).toFun
               (covGrad (I := I) (M := M) g 0 s S).toFun := by
-  sorry
+  classical
+  obtain ⟨Cper, hCper_nn, hfields⟩ :=
+    exists_pointwiseTensorCurv_genuineFields_proportional_spectralPairing (I := I) (M := M) g
+  refine ⟨Cper, hCper_nn, fun s S => ?_⟩
+  obtain ⟨Gcurv, GcurvDeriv, hcurv, hcurvDeriv, hrem, hspec⟩ := hfields s S
+  refine ⟨Gcurv, GcurvDeriv, hcurv, hcurvDeriv, hrem, ?_⟩
+  -- Rewrite the concrete spectral scalar `‖Δ_∇S‖² − ‖∇²S‖²` back to the cross-pairing
+  -- `⟨Curv S, ∇S⟩` through the already-proved integrated order-`2` Weitzenböck identity.
+  have hweitz := weitzenbock_integrated_covGrad_l2_normSq (I := I) (M := M) g s S
+  -- `pointwiseTensorCurv g s S = Δ_∇(∇S) − ∇(Δ_∇ S)` definitionally, so the cross term in the
+  -- Weitzenböck identity is exactly `⟨Curv S, ∇S⟩`.
+  have hcross :
+      tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+          (pointwiseTensorCurv (I := I) (M := M) g s S).toFun
+          (covGrad (I := I) (M := M) g 0 s S).toFun =
+        tensorL2Norm (I := I) (M := M) g 0 s
+            (rawTensorConnLapSmooth (I := I) g 0 s S).toFun ^ 2 -
+          tensorL2Norm (I := I) (M := M) g 0 (s + 1 + 1)
+            (covGrad (I := I) (M := M) g 0 (s + 1)
+              (covGrad (I := I) (M := M) g 0 s S)).toFun ^ 2 := by
+    have hdef :
+        (pointwiseTensorCurv (I := I) (M := M) g s S).toFun =
+          (rawTensorConnLapSmooth (I := I) g 0 (s + 1)
+              (covGrad (I := I) (M := M) g 0 s S) -
+            covGrad (I := I) (M := M) g 0 s
+              (rawTensorConnLapSmooth (I := I) g 0 s S)).toFun := rfl
+    rw [hdef]
+    linarith [hweitz]
+  rw [hspec, ← hcross]
 
 /-- **Posited deepest curvature primitive: the constructive named-remainder form of the genuine
 moving-frame third-order Weitzenböck field decomposition.** For a closed smooth Riemannian

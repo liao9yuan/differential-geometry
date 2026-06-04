@@ -39,13 +39,19 @@ perturbation factor in `L²`, and the finite-sum pointwise-to-`L²` packaging
 `tensorL2Norm_le_of_pointwise_fiberNormSq_bound_sum` plus a reflection reindexing close it (no
 interpolation needed, since the coefficient factor is `L^∞`-controlled at every order).  The
 Gagliardo–Nirenberg interpolation is reduced by a genuine `k`-th-root `rpow` extraction to its
-integer-power form `l2Interp_pow_iteratedCovGrad`, which is the single posited deep analytic
-input (the closed-manifold tensor interpolation: covariant Green's identity on the iterated
-bundle connection Laplacian — `δ` a pointwise contraction of `∇` giving log-convex `L²`-jets — and
-the discrete log-convex interpolation, with the affine obstruction vanishing on a closed
-manifold).  That input carries the only `sorry`; both displayed cross-term statements are general
-real-valued `L²`-norm product/interpolation inequalities on iterated covariant gradients,
-structurally unrelated to the Nemytskii conclusions that consume them; no packaging. -/
+integer-power form `l2Interp_pow_iteratedCovGrad`, which is proven outright by composing the
+discrete log-convexity of the covariant `L²`-jets `aᵢ := ‖∇^i u‖_{L²}`
+(`l2jet_logConvex_iteratedCovGrad`, `aᵢ₊₁² ≤ K·aᵢ·aᵢ₊₂` — the closed-manifold covariant
+Green/IBP input on the iterated bundle connection Laplacian, the only posited deep analytic
+input), the discrete Hardy–Littlewood–Pólya power law (`hlp_real`, proven here as elementary
+real arithmetic via the discrete chord bound), and the `L^∞`-to-`L²` endpoint
+`l2Norm_le_sup_mul_sqrt_vol` (`a₀ ≤ Λ₀·vol^{1/2}`).  The single `sorry` is therefore isolated in
+`l2jet_logConvex_iteratedCovGrad`; its integration-by-parts half is available on disk as
+`Integral.Connection.covGrad_l2NormSq_le_rawConnLap_mul_self_gen`, the only residual being the
+rough-Laplacian-to-second-covariant-gradient `L²` trace bound (a `Geometry/Connection`-layer
+fact).  All displayed cross-term statements are general real-valued `L²`-norm
+product/interpolation inequalities on iterated covariant gradients, structurally unrelated to the
+Nemytskii conclusions that consume them; no packaging. -/
 
 noncomputable section
 
@@ -217,6 +223,310 @@ theorem exists_moserTameProduct_iteratedCovGrad_l2Norm_le
           mul_nonneg (by positivity) (mul_nonneg hΛ₀ hSc_nn)
         rw [hexp]; linarith
 
+section DiscreteLogConvex
+
+/-- One-step "slope-defect" iterated (bounded form): if `Δ i ≤ Δ (i+1) + d` for all
+`i < N`, then `Δ i ≤ Δ i' + (i'-i) * d` whenever `i ≤ i' ≤ N`. -/
+private lemma slope_spread (Δ : ℕ → ℝ) (d : ℝ) (N : ℕ)
+    (hstep : ∀ i, i < N → Δ i ≤ Δ (i + 1) + d) :
+    ∀ i i' : ℕ, i ≤ i' → i' ≤ N → Δ i ≤ Δ i' + (i' - i : ℕ) * d := by
+  intro i i' hii' hiN
+  induction i' with
+  | zero => interval_cases i; simp
+  | succ n ih =>
+      rcases Nat.lt_or_ge i (n + 1) with hlt | hge
+      · have hin : i ≤ n := Nat.lt_succ_iff.mp hlt
+        have h1 := ih hin (by omega)
+        have h2 := hstep n (by omega)
+        have hbody : Δ i ≤ Δ (n + 1) + d + (n - i : ℕ) * d := by
+          calc Δ i ≤ Δ n + (n - i : ℕ) * d := h1
+            _ ≤ (Δ (n + 1) + d) + (n - i : ℕ) * d := by linarith
+        have hcast : ((n + 1 - i : ℕ) : ℝ) = (n - i : ℕ) + 1 := by
+          have hn : n + 1 - i = (n - i) + 1 := by omega
+          rw [hn]; push_cast; ring
+        rw [hcast]; nlinarith [hbody]
+      · have hie : i = n + 1 := le_antisymm hii' hge
+        subst hie; simp
+
+/-- The discrete chord bound from a convexity defect, in additive form. If
+`Δ i ≤ Δ (i+1) + d` for all `i + 1 < k` and `0 ≤ d`, then for `0 < j < k`
+```
+k * ∑_{i<j} Δ i ≤ j * ∑_{i<k} Δ i + k^3 * d.
+```
+Writing `Δ i = L (i+1) - L i` makes `∑_{i<n} Δ i = L n - L 0`, so this is exactly the
+log-convex chord bound for `L`. -/
+private lemma chord_bound (Δ : ℕ → ℝ) (d : ℝ) (hd : 0 ≤ d) (j k : ℕ)
+    (hstep : ∀ i, i + 1 < k → Δ i ≤ Δ (i + 1) + d) (hj : 0 < j) (hjk : j < k) :
+    (k : ℝ) * (∑ i ∈ Finset.range j, Δ i)
+      ≤ (j : ℝ) * (∑ i ∈ Finset.range k, Δ i) + (k ^ 3 : ℕ) * d := by
+  have hsplit : (∑ i ∈ Finset.range k, Δ i)
+      = (∑ i ∈ Finset.range j, Δ i) + ∑ i ∈ Finset.Ico j k, Δ i := by
+    rw [← Finset.sum_range_add_sum_Ico Δ (le_of_lt hjk)]
+  rw [hsplit, mul_add]
+  set Sj : ℝ := ∑ i ∈ Finset.range j, Δ i with hSj
+  set Sjk : ℝ := ∑ i ∈ Finset.Ico j k, Δ i with hSjk
+  have hcard1 : (Finset.Ico j k).card = k - j := by rw [Nat.card_Ico]
+  have hcard2 : (Finset.range j).card = j := by rw [Finset.card_range]
+  have hLHS : ((k : ℝ) - j) * Sj = ∑ _i' ∈ Finset.Ico j k, Sj := by
+    rw [Finset.sum_const, hcard1, nsmul_eq_mul]
+    have hc : ((k - j : ℕ) : ℝ) = (k : ℝ) - j := by rw [Nat.cast_sub (le_of_lt hjk)]
+    rw [hc]
+  have hRHS : (j : ℝ) * Sjk = ∑ _i ∈ Finset.range j, Sjk := by
+    rw [Finset.sum_const, hcard2, nsmul_eq_mul]
+  have key : ((k : ℝ) - j) * Sj - (j : ℝ) * Sjk ≤ (k ^ 3 : ℕ) * d := by
+    rw [hLHS, hRHS]
+    have e1 : (∑ _i' ∈ Finset.Ico j k, Sj)
+        = ∑ p ∈ (Finset.range j) ×ˢ (Finset.Ico j k), Δ p.1 := by
+      rw [hSj, Finset.sum_product' (f := fun (a : ℕ) (_ : ℕ) => Δ a)]
+      exact (Finset.sum_comm).symm
+    have e2 : (∑ _i ∈ Finset.range j, Sjk)
+        = ∑ p ∈ (Finset.range j) ×ˢ (Finset.Ico j k), Δ p.2 := by
+      rw [hSjk, Finset.sum_product' (f := fun (_ : ℕ) (b : ℕ) => Δ b)]
+    rw [e1, e2, ← Finset.sum_sub_distrib]
+    have hbound : ∀ p ∈ (Finset.range j) ×ˢ (Finset.Ico j k),
+        Δ p.1 - Δ p.2 ≤ (k : ℝ) * d := by
+      intro p hp
+      rw [Finset.mem_product] at hp
+      obtain ⟨hp1, hp2⟩ := hp
+      have hi : p.1 < j := Finset.mem_range.mp hp1
+      have hi' : j ≤ p.2 := (Finset.mem_Ico.mp hp2).1
+      have hi'k : p.2 < k := (Finset.mem_Ico.mp hp2).2
+      have hle : p.1 ≤ p.2 := le_trans (le_of_lt hi) hi'
+      have hstep' : ∀ i, i < k - 1 → Δ i ≤ Δ (i + 1) + d := fun i hik => hstep i (by omega)
+      have hsp := slope_spread Δ d (k - 1) hstep' p.1 p.2 hle (by omega)
+      have hdiff : ((p.2 - p.1 : ℕ) : ℝ) ≤ (k : ℝ) := by
+        have hpp : p.2 - p.1 ≤ k := by omega
+        exact_mod_cast hpp
+      have hstep2 : Δ p.1 - Δ p.2 ≤ (p.2 - p.1 : ℕ) * d := by linarith [hsp]
+      calc Δ p.1 - Δ p.2 ≤ (p.2 - p.1 : ℕ) * d := hstep2
+        _ ≤ (k : ℝ) * d := mul_le_mul_of_nonneg_right hdiff hd
+    calc ∑ p ∈ (Finset.range j) ×ˢ (Finset.Ico j k), (Δ p.1 - Δ p.2)
+        ≤ ∑ _p ∈ (Finset.range j) ×ˢ (Finset.Ico j k), (k : ℝ) * d :=
+          Finset.sum_le_sum hbound
+      _ = ((Finset.range j) ×ˢ (Finset.Ico j k)).card * ((k : ℝ) * d) := by
+          rw [Finset.sum_const, nsmul_eq_mul]
+      _ = ((j * (k - j) : ℕ) : ℝ) * ((k : ℝ) * d) := by
+          rw [Finset.card_product, hcard1, hcard2]
+      _ ≤ (k ^ 3 : ℕ) * d := by
+          have hjk_le : j * (k - j) ≤ k * k := by
+            calc j * (k - j) ≤ k * (k - j) := by apply Nat.mul_le_mul_right; omega
+              _ ≤ k * k := by apply Nat.mul_le_mul_left; omega
+          have hcastjk : ((j * (k - j) : ℕ) : ℝ) ≤ (k : ℝ) * (k : ℝ) := by exact_mod_cast hjk_le
+          have hcast3 : ((k ^ 3 : ℕ) : ℝ) = (k : ℝ) * (k : ℝ) * (k : ℝ) := by push_cast; ring
+          have hkd : 0 ≤ (k : ℝ) * d := mul_nonneg (by positivity) hd
+          have hknn : (0 : ℝ) ≤ (k : ℝ) := by positivity
+          rw [hcast3]
+          nlinarith [hcastjk, hkd, hknn, hd, mul_le_mul_of_nonneg_right hcastjk hkd]
+  nlinarith [key]
+
+/-- Positivity propagates downward from any positive term: with all `a ≥ 0`, the
+log-convexity `a (i+1)^2 ≤ M * a i * a (i+2)` forces `a (i+1) > 0 → a i > 0`, hence a
+single positive `a j` makes every earlier term positive. -/
+private lemma pos_propagate (a : ℕ → ℝ) (ha : ∀ i, 0 ≤ a i) (M : ℝ)
+    (hlc : ∀ i, (a (i + 1)) ^ 2 ≤ M * a i * a (i + 2)) (j : ℕ) (hpos : 0 < a j) :
+    ∀ i, i ≤ j → 0 < a i := by
+  have hL : ∀ i, 0 < a (i + 1) → 0 < a i := by
+    intro i hi
+    by_contra h
+    rw [not_lt] at h
+    have hai : a i = 0 := le_antisymm h (ha i)
+    have hh := hlc i
+    rw [hai] at hh
+    simp only [mul_zero, zero_mul] at hh
+    nlinarith [hh, hi, sq_nonneg (a (i + 1))]
+  have key0 : ∀ s, s ≤ j → 0 < a (j - s) := by
+    intro s
+    induction s with
+    | zero => intro _; simpa using hpos
+    | succ m ihm =>
+        intro hs
+        have hjm : 0 < a (j - m) := ihm (by omega)
+        have hidx : j - m = (j - (m + 1)) + 1 := by omega
+        rw [hidx] at hjm
+        exact hL (j - (m + 1)) hjm
+  intro i hi
+  have heq : i = j - (j - i) := by omega
+  rw [heq]
+  exact key0 (j - i) (by omega)
+
+/-- Positivity also propagates upward: a single positive `a j` (`0 < j`) makes every
+later term positive. -/
+private lemma pos_propagate_up (a : ℕ → ℝ) (ha : ∀ i, 0 ≤ a i) (M : ℝ)
+    (hlc : ∀ i, (a (i + 1)) ^ 2 ≤ M * a i * a (i + 2)) (j : ℕ) (hj : 0 < j)
+    (hpos : 0 < a j) :
+    ∀ i, j ≤ i → 0 < a i := by
+  have hR : ∀ i, 0 < a (i + 1) → 0 < a (i + 2) := by
+    intro i hi
+    by_contra h
+    rw [not_lt] at h
+    have hai : a (i + 2) = 0 := le_antisymm h (ha (i + 2))
+    have hh := hlc i
+    rw [hai] at hh
+    simp only [mul_zero] at hh
+    nlinarith [hh, hi, sq_nonneg (a (i + 1))]
+  intro i hji
+  obtain ⟨t, rfl⟩ : ∃ t, i = j + t := ⟨i - j, by omega⟩
+  clear hji
+  induction t with
+  | zero => simpa using hpos
+  | succ n ih =>
+      have hjn : 0 < a (j + n) := ih
+      have hidx : j + n = (j + n - 1) + 1 := by omega
+      rw [hidx] at hjn
+      have hRr := hR (j + n - 1) hjn
+      have hidx2 : j + n - 1 + 2 = j + (n + 1) := by omega
+      rw [hidx2] at hRr
+      exact hRr
+
+/-- **Discrete log-convexity power law (Hardy–Littlewood–Pólya, real form).** A
+nonnegative sequence `a` satisfying `a (i+1)^2 ≤ M * a i * a (i+2)` with `1 ≤ M` obeys,
+for `0 < j < k`,
+```
+(a j)^k ≤ M^(k^3) * (a 0)^(k-j) * (a k)^j.
+```
+The proof reduces (via the `a (i+1)^2 ≤ M a i a (i+2)` square bound) to the all-positive
+case, in which `i ↦ Real.log (a i)` has a discrete second difference bounded below by
+`-Real.log M`; the chord bound `chord_bound` then yields the linear inequality on logs,
+which exponentiates to the claimed power law. This is elementary real arithmetic on the
+abstract `L²`-jets; it carries no `sorry`. -/
+private theorem hlp_real (a : ℕ → ℝ) (ha : ∀ i, 0 ≤ a i) (M : ℝ) (hM : 1 ≤ M)
+    (hlc : ∀ i, (a (i + 1)) ^ 2 ≤ M * a i * a (i + 2)) (j k : ℕ) (hj : 0 < j) (hjk : j < k) :
+    (a j) ^ k ≤ M ^ (k ^ 3) * (a 0) ^ (k - j) * (a k) ^ j := by
+  have hM0 : 0 < M := lt_of_lt_of_le one_pos hM
+  rcases eq_or_lt_of_le (ha j) with hzero | hpos
+  · rw [← hzero, zero_pow (by omega)]
+    have h0 : 0 ≤ a 0 := ha 0
+    have hk : 0 ≤ a k := ha k
+    have hMnn : 0 ≤ M := le_of_lt hM0
+    positivity
+  · have hposj : 0 < a j := hpos
+    have hpL : ∀ i, i ≤ j → 0 < a i := pos_propagate a ha M hlc j hposj
+    have hpU : ∀ i, j ≤ i → 0 < a i := pos_propagate_up a ha M hlc j hj hposj
+    have hpall : ∀ i, i ≤ k → 0 < a i := by
+      intro i hik
+      rcases Nat.lt_or_ge i j with h | h
+      · exact hpL i (le_of_lt h)
+      · exact hpU i h
+    set L : ℕ → ℝ := fun i => Real.log (a i) with hLdef
+    set Δ : ℕ → ℝ := fun i => L (i + 1) - L i with hΔdef
+    have hlogM : 0 ≤ Real.log M := Real.log_nonneg hM
+    have hstep : ∀ i, i + 1 < k → Δ i ≤ Δ (i + 1) + Real.log M := by
+      intro i hik
+      have hi0 : 0 < a i := hpall i (by omega)
+      have hi1 : 0 < a (i + 1) := hpall (i + 1) (by omega)
+      have hi2 : 0 < a (i + 2) := hpall (i + 2) (by omega)
+      have hlci := hlc i
+      have hlog : Real.log ((a (i + 1)) ^ 2) ≤ Real.log (M * a i * a (i + 2)) :=
+        Real.log_le_log (by positivity) hlci
+      rw [Real.log_pow] at hlog
+      rw [Real.log_mul (by positivity) (ne_of_gt hi2),
+          Real.log_mul (ne_of_gt hM0) (ne_of_gt hi0)] at hlog
+      simp only [hΔdef, hLdef]
+      push_cast at hlog
+      nlinarith [hlog]
+    have hchord := chord_bound Δ (Real.log M) hlogM j k hstep hj hjk
+    have htel : ∀ n, (∑ i ∈ Finset.range n, Δ i) = L n - L 0 := by
+      intro n; simp only [hΔdef]; exact Finset.sum_range_sub L n
+    rw [htel j, htel k] at hchord
+    have hlin : (k : ℝ) * L j ≤
+        ((k - j : ℕ) : ℝ) * L 0 + (j : ℝ) * L k + (k ^ 3 : ℕ) * Real.log M := by
+      have hcastsub : ((k - j : ℕ) : ℝ) = (k : ℝ) - (j : ℝ) := by rw [Nat.cast_sub (le_of_lt hjk)]
+      rw [hcastsub]; nlinarith [hchord]
+    have hLHSpos : 0 < (a j) ^ k := by positivity
+    have h0 : 0 < a 0 := hpall 0 (by omega)
+    have hk : 0 < a k := hpall k (le_refl k)
+    have hRHSpos : 0 < M ^ (k ^ 3) * (a 0) ^ (k - j) * (a k) ^ j := by positivity
+    rw [← Real.log_le_log_iff hLHSpos hRHSpos]
+    rw [Real.log_pow]
+    rw [Real.log_mul (ne_of_gt (by positivity)) (ne_of_gt (by positivity)),
+        Real.log_mul (ne_of_gt (by positivity)) (ne_of_gt (by positivity))]
+    rw [Real.log_pow, Real.log_pow, Real.log_pow]
+    simp only [hLdef] at hlin ⊢
+    push_cast at hlin ⊢
+    nlinarith [hlin]
+
+end DiscreteLogConvex
+
+/-- **The covariant `L²`-jets of a smooth compactly-supported tensor are log-convex on a
+closed manifold (the covariant Green identity).**
+
+Fix an anchor `g` and a base valence `s`. There is a single multiplier `K ≥ 1` (depending
+only on `g, s` and the manifold) such that for every smooth compactly-supported
+`(0, s)`-tensor `u` and every order `i`, the metric `L²` norms `aᵢ := ‖∇^i u‖_{L²}` of the
+iterated covariant gradients satisfy the discrete log-convexity
+```
+‖∇^{i+1} u‖_{L²}^2 ≤ K · ‖∇^i u‖_{L²} · ‖∇^{i+2} u‖_{L²}.
+```
+
+This is the covariant integration-by-parts / Green identity on the iterated bundle
+connection Laplacian on a closed manifold: the diagonal Green identity gives
+`‖∇(∇^i u)‖_{L²}^2 = ⟨∇(∇^i u), ∇(∇^i u)⟩_{L²} = -⟨Δ_∇(∇^i u), ∇^i u⟩_{L²} ≤
+‖Δ_∇(∇^i u)‖_{L²} · ‖∇^i u‖_{L²}` (Cauchy–Schwarz), and the rough Laplacian `Δ_∇` is the
+pointwise `g⁻¹`-trace contraction of the second covariant gradient, whence
+`‖Δ_∇(∇^i u)‖_{L²} ≤ K · ‖∇^{i+2} u‖_{L²}` with `K` controlled by the (compact-manifold-bounded)
+inverse-Gram operator norm. Both ingredients are intrinsic and metric; the conclusion is a
+real-valued `L²`-jet inequality, structurally unrelated to any Nemytskii conclusion.
+
+Its body is `sorry`: this is the genuine closed-manifold covariant Green/IBP analytic input.
+The integration-by-parts half is in fact available on disk as
+`Integral.Connection.covGrad_l2NormSq_le_rawConnLap_mul_self_gen`
+(`‖∇S‖_{L²}^2 ≤ ‖Δ_∇ S‖_{L²} · ‖S‖_{L²}`, proven from the closed-manifold Green identity);
+the only missing companion is the rough-Laplacian-to-second-covariant-gradient `L²`
+trace bound `‖Δ_∇ S‖_{L²} ≤ K · ‖∇²S‖_{L²}` (a `Geometry/Connection`-layer fact, the `g⁻¹`-trace
+of the Hessian), uniform over the valence range. Consumers transitively depend on this
+`sorryAx`. -/
+private theorem l2jet_logConvex_iteratedCovGrad
+    (g : SmoothRiemannianMetric I M) (s : ℕ) :
+    ∃ K : ℝ, 1 ≤ K ∧
+      ∀ (u : Integral.L2.SmoothCcTensor g 0 s) (i : ℕ),
+        (Integral.L2.tensorL2Norm (I := I) g 0 (s + (i + 1))
+            (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s (i + 1) u).toFun) ^ 2 ≤
+          K * Integral.L2.tensorL2Norm (I := I) g 0 (s + i)
+                (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s i u).toFun *
+            Integral.L2.tensorL2Norm (I := I) g 0 (s + (i + 2))
+              (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s (i + 2) u).toFun :=
+  sorry
+
+/-- **The `L^∞`-to-`L²` endpoint.** For a smooth compactly-supported `(0, s)`-tensor `u`
+with pointwise fibre bound `‖u(x)‖² ≤ Λ₀²`, the metric `L²` norm of `u` is at most
+`Λ₀ · √(vol M)`. This is the constant-function comparison of the squared `L²` norm
+`‖u‖_{L²}^2 = ∫ ‖u(x)‖² ≤ ∫ Λ₀² = Λ₀² · vol M` (finite, the manifold being compact),
+square-rooted. -/
+private theorem l2Norm_le_sup_mul_sqrt_vol
+    (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (u : Integral.L2.SmoothCcTensor g 0 s) (Λ₀ : ℝ) (hΛ₀ : 0 ≤ Λ₀)
+    (hsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 s x (u.toSection x) ≤ Λ₀ ^ 2) :
+    Integral.L2.tensorL2Norm (I := I) g 0 s u.toFun ≤
+      Λ₀ * Real.sqrt ((Integral.Measure.riemannianVolumeMeasure I M g) Set.univ).toReal := by
+  classical
+  have hfin : MeasureTheory.IsFiniteMeasure (Integral.Measure.riemannianVolumeMeasure I M g) :=
+    Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
+  set μ := Integral.Measure.riemannianVolumeMeasure I M g with hμ
+  set V : ℝ := (μ Set.univ).toReal with hV
+  have hVnn : 0 ≤ V := ENNReal.toReal_nonneg
+  -- ‖u‖² = ∫ riemannianFiberNormSq u
+  have hsq := tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g s u
+  -- ∫ riemannianFiberNormSq u ≤ ∫ Λ₀² = Λ₀² · V
+  have hint_mono : (∫ x, riemannianFiberNormSq (I := I) (M := M) g 0 s x (u.toSection x) ∂μ)
+      ≤ ∫ _x : M, Λ₀ ^ 2 ∂μ := by
+    apply MeasureTheory.integral_mono
+    · exact integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g 0 s u
+    · exact MeasureTheory.integrable_const _
+    · exact hsup
+  have hconst : (∫ _x : M, Λ₀ ^ 2 ∂μ) = V * Λ₀ ^ 2 := by
+    rw [MeasureTheory.integral_const, smul_eq_mul, hV, MeasureTheory.measureReal_def]
+  have hsq_le : Integral.L2.tensorL2Norm (I := I) g 0 s u.toFun ^ 2 ≤ V * Λ₀ ^ 2 := by
+    rw [hsq]; rw [hconst] at hint_mono; exact hint_mono
+  -- square root
+  have hnn : 0 ≤ Integral.L2.tensorL2Norm (I := I) g 0 s u.toFun :=
+    Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 s _
+  have hrhs_nn : 0 ≤ Λ₀ * Real.sqrt V := mul_nonneg hΛ₀ (Real.sqrt_nonneg V)
+  rw [← Real.sqrt_sq hnn]
+  rw [show Λ₀ * Real.sqrt V = Real.sqrt (Λ₀ ^ 2 * V) by
+    rw [Real.sqrt_mul (by positivity), Real.sqrt_sq hΛ₀]]
+  apply Real.sqrt_le_sqrt
+  rw [mul_comm (Λ₀ ^ 2) V]; exact hsq_le
+
 /-- **The Gagliardo–Nirenberg interpolation in integer-power form** (the genuine deep analytic
 input of `exists_gagliardoNirenberg_iteratedCovGrad_l2Norm_le`).
 
@@ -230,19 +540,24 @@ norm of `∇^j u` is bounded by the interpolated product
 This is the standard tensor interpolation inequality on a closed manifold (Hamilton, Aubin):
 the discrete `L²`-jets `aᵢ := ‖∇^i u‖_{L²}` are log-convex up to a multiplier (closed-manifold
 covariant integration by parts: `aᵢ² = ⟨∇(∇^{i-1}u), ∇^i u⟩_{L²} = ⟨∇^{i-1}u, δ∇^i u⟩_{L²} ≤
-aᵢ₋₁·‖δ∇^i u‖_{L²} ≤ C·aᵢ₋₁·aᵢ₊₁`, since the divergence `δ` is a pointwise contraction of `∇`),
+aᵢ₋₁·‖δ∇^i u‖_{L²} ≤ K·aᵢ₋₁·aᵢ₊₁`, since the divergence `δ` is a pointwise contraction of `∇`),
 and on a closed manifold the affine obstruction vanishes (`∇²u = 0 ⟹ ∇u = 0`), so the pure
 power-law holds with the `L^∞` endpoint `a₀ ≤ Λ₀·vol^{1/2}` folded in.  The exponentiated form is
 recorded because all powers are then integer, which lets the companion statement be obtained by a
 single `k`-th-root (`rpow (1/k)`) extraction.
 
-Its body is `sorry`: this is the deep closed-manifold interpolation analysis (covariant Green's
-identity on the iterated bundle Laplacian plus the discrete log-convex interpolation), posited
-here as the analytic input from which the displayed real-power Gagliardo–Nirenberg statement is
-derived by genuine `rpow` arithmetic.  Its conclusion is the integer-power interpolation, a shape
-structurally distinct from (and not defeq to) the real-power conclusion it feeds; no packaging. -/
+The proof composes three pieces: the log-convexity `l2jet_logConvex_iteratedCovGrad`
+(`aᵢ₊₁² ≤ K·aᵢ·aᵢ₊₂`, the posited covariant Green/IBP input, carrying the only `sorry`); the
+discrete Hardy–Littlewood–Pólya power law `hlp_real` (`aⱼ^k ≤ K^{k³}·a₀^{k-j}·aₖ^j`, proven
+outright as elementary real arithmetic on the abstract jets); and the `L^∞`-to-`L²` endpoint
+`l2Norm_le_sup_mul_sqrt_vol` (`a₀ ≤ Λ₀·√(vol M)`, the compact-manifold constant comparison).
+Choosing `C := K^{k²}·max 1 √(vol M)` absorbs the volume factor `√(vol M)^{k-j} ≤ (max 1 √(vol M))^k`,
+turning the HLP bound into the displayed interpolation.  It therefore depends transitively only on
+the `sorry` of `l2jet_logConvex_iteratedCovGrad`, which `#print axioms` records as `sorryAx`; its
+conclusion is the integer-power interpolation, structurally distinct from any consumer's
+conclusion; no packaging. -/
 private theorem l2Interp_pow_iteratedCovGrad
-    (g : SmoothRiemannianMetric I M) (s k : ℕ) (hk : 1 ≤ k) :
+    (g : SmoothRiemannianMetric I M) (s k : ℕ) (_hk : 1 ≤ k) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (u : Integral.L2.SmoothCcTensor g 0 s) (Λ₀ : ℝ), 0 ≤ Λ₀ →
         (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 s x (u.toSection x) ≤ Λ₀ ^ 2) →
@@ -251,8 +566,66 @@ private theorem l2Interp_pow_iteratedCovGrad
               (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s j u).toFun) ^ k ≤
             C ^ k * Λ₀ ^ (k - j) *
               (Integral.L2.tensorL2Norm (I := I) g 0 (s + k)
-                  (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s k u).toFun) ^ j :=
-  sorry
+                  (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s k u).toFun) ^ j := by
+  classical
+  obtain ⟨K, hK1, hlc⟩ := l2jet_logConvex_iteratedCovGrad (I := I) (M := M) g s
+  set V : ℝ := Real.sqrt ((Integral.Measure.riemannianVolumeMeasure I M g) Set.univ).toReal with hV
+  have hVnn : 0 ≤ V := Real.sqrt_nonneg _
+  have hmax1 : (1 : ℝ) ≤ max 1 V := le_max_left _ _
+  have hmaxV : V ≤ max 1 V := le_max_right _ _
+  have hmax_nn : 0 ≤ max 1 V := le_trans zero_le_one hmax1
+  set C : ℝ := K ^ (k ^ 2) * max 1 V with hC
+  have hC_nn : 0 ≤ C := by
+    have hKnn : 0 ≤ K := le_trans zero_le_one hK1
+    rw [hC]; positivity
+  refine ⟨C, hC_nn, ?_⟩
+  intro u Λ₀ hΛ₀ hsup j hj0 hjk
+  -- The discrete L²-jet sequence.
+  set a : ℕ → ℝ := fun i =>
+    Integral.L2.tensorL2Norm (I := I) g 0 (s + i)
+      (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s i u).toFun with ha_def
+  have ha_nn : ∀ i, 0 ≤ a i := fun i =>
+    Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 (s + i) _
+  -- Log-convexity for this sequence (from the posited child).
+  have ha_lc : ∀ i, (a (i + 1)) ^ 2 ≤ K * a i * a (i + 2) := fun i => hlc u i
+  -- The HLP power law.
+  have hpow : (a j) ^ k ≤ K ^ (k ^ 3) * (a 0) ^ (k - j) * (a k) ^ j :=
+    hlp_real a ha_nn K hK1 ha_lc j k hj0 hjk
+  -- Endpoint: a 0 = ‖u‖_{L²} ≤ Λ₀ · V.
+  have ha0_eq : a 0 = Integral.L2.tensorL2Norm (I := I) g 0 s u.toFun := by
+    rw [ha_def]
+    simp only [Nat.add_zero]
+    rw [PDE.RicciFlow.iteratedCovGrad_zero (I := I) g 0 s u]
+  have ha0_le : a 0 ≤ Λ₀ * V := by
+    rw [ha0_eq, hV]
+    exact l2Norm_le_sup_mul_sqrt_vol (I := I) (M := M) g s u Λ₀ hΛ₀ hsup
+  -- Bound the endpoint power.
+  have ha0_pow : (a 0) ^ (k - j) ≤ (Λ₀ * V) ^ (k - j) :=
+    pow_le_pow_left₀ (ha_nn 0) ha0_le (k - j)
+  -- Combine and absorb the volume factor into C.
+  have hΛ₀V_nn : 0 ≤ Λ₀ * V := mul_nonneg hΛ₀ hVnn
+  have hak_pow_nn : 0 ≤ (a k) ^ j := pow_nonneg (ha_nn k) j
+  have hKpow_nn : 0 ≤ K ^ (k ^ 3) := pow_nonneg (le_trans zero_le_one hK1) _
+  -- step 1: K^{k³}·V^{k-j} ≤ C^k.
+  have hKV_le_Ck : K ^ (k ^ 3) * V ^ (k - j) ≤ C ^ k := by
+    have hVpow : V ^ (k - j) ≤ (max 1 V) ^ k := by
+      calc V ^ (k - j) ≤ (max 1 V) ^ (k - j) := pow_le_pow_left₀ hVnn hmaxV (k - j)
+        _ ≤ (max 1 V) ^ k := pow_le_pow_right₀ hmax1 (by omega)
+    have hexp : k ^ 2 * k = k ^ 3 := by ring
+    have hCk : C ^ k = K ^ (k ^ 3) * (max 1 V) ^ k := by
+      rw [hC, mul_pow, ← pow_mul, hexp]
+    rw [hCk]
+    apply mul_le_mul_of_nonneg_left hVpow hKpow_nn
+  -- step 2: chain.
+  calc (a j) ^ k ≤ K ^ (k ^ 3) * (a 0) ^ (k - j) * (a k) ^ j := hpow
+    _ ≤ K ^ (k ^ 3) * (Λ₀ * V) ^ (k - j) * (a k) ^ j := by
+        apply mul_le_mul_of_nonneg_right _ hak_pow_nn
+        apply mul_le_mul_of_nonneg_left ha0_pow hKpow_nn
+    _ = (K ^ (k ^ 3) * V ^ (k - j)) * Λ₀ ^ (k - j) * (a k) ^ j := by
+        rw [mul_pow]; ring
+    _ ≤ C ^ k * Λ₀ ^ (k - j) * (a k) ^ j := by
+        apply mul_le_mul_of_nonneg_right _ hak_pow_nn
+        apply mul_le_mul_of_nonneg_right hKV_le_Ck (by positivity)
 
 /-- **The intrinsic Gagliardo–Nirenberg interpolation inequality for iterated covariant
 gradients.**
