@@ -32,7 +32,7 @@ namespace MetricFiberData
 
 variable {V W : Type*}
 
-private def realFlatLinear : Real →ₗ[Real] Module.Dual Real Real where
+def realFlatLinear : Real →ₗ[Real] Module.Dual Real Real where
   toFun := fun a =>
     { toFun := fun b => a * b
       map_add' := by
