@@ -360,6 +360,7 @@ import DifferentialGeometry.Analysis.ODE.Flow.Defs
 import DifferentialGeometry.Analysis.ODE.Flow.GlobalExistence
 import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.ContDiffOnK
 import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.ContDiffOnTop
+import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.ContDiffOnTopChartLocal
 import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.VariationalLinearMapSmoothness
 import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.VariationalMapContDiffOnK
 import DifferentialGeometry.Analysis.ODE.Flow.Inhomogeneous
