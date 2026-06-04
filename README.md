@@ -16,6 +16,19 @@ Each is `sorry`-free (axioms: `propext, Classical.choice, Quot.sound`).
 - [Perelman's $\mathcal{W}$-entropy invariances](DifferentialGeometry/Geometry/Flow/RicciFlow/Entropy/Defs.lean#L110) — scale and diffeomorphism invariance.
 - [Perelman's $\mathcal{F}$-functional first variation](DifferentialGeometry/Geometry/Flow/RicciFlow/Entropy/F/Producer.lean#L411) — Perelman's formula 5.10.
 
+## PDE infrastructure
+
+Underlying these results is a substantial geometric-analysis backbone (the [`Analysis/`](DifferentialGeometry/Analysis) pillar):
+
+- [**Integration & the divergence theorem**](DifferentialGeometry/Analysis/Integration) — integration by parts and surface measures, with and without boundary.
+- [**Elliptic regularity**](DifferentialGeometry/Analysis/Elliptic) — the connection Laplacian, Gårding / Caccioppoli estimates, and interior bootstrap.
+- [**Spectral theory**](DifferentialGeometry/Analysis/Spectral) — discreteness of the Laplacian spectrum, compact resolvent, and an eigenbasis on closed manifolds.
+- [**Sobolev spaces**](DifferentialGeometry/Analysis/Sobolev) — chart-based $H^k$ / $W^{k,p}$ spaces, with completeness and embedding / compactness results.
+- [**Parabolic & heat equations**](DifferentialGeometry/Analysis/Parabolic) — heat semigroups, Duhamel mild solutions, and the linear / quasilinear parabolic theory feeding the DeTurck–Ricci reduction.
+- [**ODE flows**](DifferentialGeometry/Analysis/ODE) — $C^\infty$ dependence of flows on their initial data.
+
+The classical De Giorgi–Nash–Moser regularity machinery is vendored under [`External/`](DifferentialGeometry/External).
+
 ## Work in progress
 
 - [Ricci flow short-time existence](DifferentialGeometry/Geometry/Flow/RicciFlow/ShortTimeExistence.lean#L68) — the DeTurck reduction and the conjugating-flow / variational machinery are complete and `sorry`-free; the headline statement currently rests on one deferred parabolic-regularity input.
