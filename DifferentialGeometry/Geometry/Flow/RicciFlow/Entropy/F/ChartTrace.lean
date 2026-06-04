@@ -1,7 +1,3 @@
-/-
-Authors: RicciFlower contributors
--/
-
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.F.TraceAlgebra
 import DifferentialGeometry.Geometry.Connection.LeviCivita.DivergenceFrameInvariance
 

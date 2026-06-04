@@ -1,7 +1,3 @@
-/-
-Authors: RicciFlower contributors
--/
-
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Green
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Analysis.Integration.Measure.VolumeVariation

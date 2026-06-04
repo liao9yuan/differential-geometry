@@ -1,7 +1,3 @@
-/-
-Authors: RicciFlower contributors
--/
-
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.Defs
 import DifferentialGeometry.Analysis.Integration.Measure.VolumeVariation
 import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
