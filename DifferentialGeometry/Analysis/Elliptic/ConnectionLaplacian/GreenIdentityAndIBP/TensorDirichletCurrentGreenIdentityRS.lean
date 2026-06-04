@@ -125,7 +125,7 @@ identity it powers (no packaging); the body is `sorry` and consumers transitivel
 `sorryAx`. -/
 theorem loweringIntertwinerRS_holds (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     LoweringIntertwinerRS (I := I) (M := M) g r s :=
-  sorry
+  fun S x v => loweredCovDerivAt_eq_lower_tensorCovDerivAt_rs (I := I) (M := M) g r s S x v
 
 /-- At purely-covariant rank `(0, s)` the general-rank intertwiner reduces to the in-library
 unconditional intertwiner `loweringIntertwiner_gen` (equivalently `LoweringIntertwiner g s`):

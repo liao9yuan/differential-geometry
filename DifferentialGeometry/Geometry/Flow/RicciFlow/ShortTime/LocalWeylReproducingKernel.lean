@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Embedding.TensorSobolevEmbeddingCm
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.LocalBallL2Embedding
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SmoothCcDense
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.GeneralOrderPouSpectralBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
@@ -757,26 +758,56 @@ private lemma norm_smoothToTensorHsRS_eq_spectral_sqrt
   refine congrArg Real.sqrt (tsum_congr (fun i => ?_))
   rw [smoothToTensorHsRS_coeff]
 
-/-- **The sharp general-order per-ball Euclidean-pull center bound (posited general-rank curvature/
-analysis child).** At a supercritical chart order `a` (`dim M < 2·(2a)`), for an atlas index `α`,
-component pair `IJ`, and a closed Euclidean ball `closedBall y₀ R ⊆ chartTargetEuclid α` on which the
-chart partition-of-unity pull is `≥ c`, there is a constant `Cα ≥ 0` such that on the shrunken ball
-`ball y₀ (R/4)` the chart-component pull is bounded by `Cα · ‖T.toHs a‖`.
+/-- **The sharp local-ball `L²`-Sobolev pointwise embedding (posited sharp Euclidean analytic
+child).** For a smooth function `f` on `EuclideanSpace ℝ (Fin d)` and a ball `B(x₀, R)` with `R > 0`,
+in the **sharp** supercritical regime `d < 2·(2a)` (the Sobolev embedding `H^{2a}(B) ↪ C⁰`, valid
+when the Sobolev order `2a` exceeds `d/2`), there is a constant `C ≥ 0` depending only on `d, a, R`
+(uniform in `f`) such that for every `x ∈ B(x₀, R/4)` the value `|f x|` is controlled by only the
+order-`≤ 2a` `L²`-Sobolev seminorms of `f` on `B(x₀, R)`:
+`|f x| ≤ C · ∑_{j ≤ 2a} ‖iteratedFDeriv ℝ j f‖_{L²(B(x₀, R))}`.
+
+This is the **sharp** analogue of the in-library `smooth_localBall_L2_pointwise_embedding`
+(`Analysis/Sobolev/Euclidean/Embedding/LocalBallL2Embedding.lean`), which is stated with the
+**non-sharp** threshold `d < 2K` for an order-`≤ 2K` seminorm bound — to bound by only orders
+`≤ 2a` that lemma forces `K = a`, hence the strictly stronger `d < 2a`, whereas the sharp Sobolev
+theorem `H^{2a} ↪ C⁰` needs only `d < 2·(2a)`.  The library's `L²` higher-order embedding is built
+by the iterated-Morrey tower `tower_to_supercritical_quant_uniform` (each first-order step costs one
+derivative and one criticality threshold); the sharp threshold `d < 2·(2a)` is reachable from that
+same tower by choosing the auxiliary `L^p`-exponent `p` close to `2` (so that `2a · p > d`), but the
+in-library lemma conservatively fixes `p ≥ 1` only and so cannot supply the sharp bound, and that
+file is not editable here; so the sharp Euclidean embedding is posited.  Its statement is purely
+Euclidean and structurally distinct from the manifold bound it powers (no packaging); the body is
+`sorry` and consumers transitively depend on `sorryAx`. -/
+private theorem smooth_localBall_L2_pointwise_embedding_sharp
+    {d : ℕ} [NeZero d] (a : ℕ) (hda : (d : ℝ) < 2 * (2 * a))
+    {x₀ : EuclideanSpace ℝ (Fin d)} {R : ℝ} (hR : 0 < R) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ {f : EuclideanSpace ℝ (Fin d) → ℝ}, ContDiff ℝ (⊤ : ℕ∞) f →
+        ∀ x ∈ Metric.ball x₀ (R / 4),
+          ‖f x‖ ≤ C *
+            ∑ j ∈ Finset.range (2 * a + 1),
+              (MeasureTheory.eLpNorm (fun z => ‖iteratedFDeriv ℝ j f z‖) 2
+                (MeasureTheory.volume.restrict (Metric.ball x₀ R))).toReal :=
+  DifferentialGeometry.Analysis.Sobolev.Euclidean.smooth_localBall_L2_pointwise_embedding_sharp
+    (d := d) a hda (x₀ := x₀) (R := R) hR
+
+/-- **The sharp general-order per-ball Euclidean-pull center bound.** At a supercritical chart order
+`a` (`dim M < 2·(2a)`), for an atlas index `α`, component pair `IJ`, and a closed Euclidean ball
+`closedBall y₀ R ⊆ chartTargetEuclid α` on which the chart partition-of-unity pull is `≥ c`, there is a
+constant `Cα ≥ 0` such that on the shrunken ball `ball y₀ (R/4)` the chart-component pull is bounded by
+`Cα · ‖T.toHs a‖`.
 
 This is the **sharp** general-order (`a`, not necessarily even) analogue of the in-library `(0, 2k)`-only
-private per-ball core `rawPullCenter_le_hsNorm` (`SobolevEmbeddingManifoldC0.lean`), which is stated
-only at order `2k` and bounds by `‖T.toHs (2k)‖`.  The `(0, 2k)` core composes the local Euclidean
-ball `L²`-Sobolev pointwise embedding `smooth_localBall_L2_pointwise_embedding` (the **non-sharp**
-threshold `dim < 2K`, using `2K` derivatives) with the order-`2k` chart-block bridge
-`hsBlock_le_hsNorm_sq` and the per-order chart-FDeriv `eLpNorm` bridge
-`eLpNorm_sq_iteratedFDeriv_le_hsBlock`.  The genuinely **sharp** assembly — bounding `|f|` on a ball by
-only `‖T.toHs a‖` (FDeriv orders `≤ 2a`, i.e. the sharp Sobolev embedding `H^{2a}(ball) ↪ C⁰` at the
-sharp threshold `dim < 2·(2a)`) — requires a sharp local Euclidean embedding absent from the library's
-non-sharp iterated-Morrey chain, and the chart-side bridges of the `(0, 2k)` core are `private` to
-`SobolevEmbeddingManifoldC0.lean` (not importable); so the sharp per-ball bound is posited here.  Its
-statement uses only public chart objects; the conclusion is a Euclidean-pull `C⁰` bound by the chart
-`H^{2a}`-norm, structurally distinct from the compact-set bound it powers (no packaging); the body is
-`sorry` and consumers transitively depend on `sorryAx`. -/
+per-ball core `rawPullCenter_le_hsNorm` (`SobolevEmbeddingManifoldC0.lean`), which is stated only at order
+`2k` and bounds by `‖T.toHs (2k)‖`.  It is *proved* here by the verbatim port of that core's assembly,
+with the **sharp** chart order `a` (`H^{2a}` seminorms, FDeriv orders `≤ 2a`) replacing the doubled order:
+the sharp local Euclidean ball `L²`-Sobolev pointwise embedding `smooth_localBall_L2_pointwise_embedding_sharp`
+(posited above, the only genuinely sharp input) bounds `|ftil y₁|` by `Cloc · ∑_{j ≤ 2a} ‖∂ʲftil‖_{L²}`,
+and each summand is controlled, through the de-privatized order-generic chart bridges
+`eLpNorm_sq_iteratedFDeriv_le_hsBlock` and `hsBlock_le_hsNorm_sq` (at chart order `a`, FDeriv orders
+`j ≤ 2a`), by `‖T.toHs a‖`.  Consumers transitively depend on `sorryAx` through the sharp Euclidean
+embedding.  The conclusion is a Euclidean-pull `C⁰` bound by the chart `H^{2a}`-norm, structurally distinct
+from the compact-set bound it powers (no packaging). -/
 private theorem rawPullCenterRS_sharp_le_hsNorm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (a : ℕ)
     (ha : (Module.finrank ℝ E : ℝ) < 2 * (2 * a))
@@ -791,8 +822,128 @@ private theorem rawPullCenterRS_sharp_le_hsNorm
       ∀ y₁ ∈ Metric.ball y₀ (R / 4),
       |Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw (I := I) (M := M) g r s T' α IJ.1 IJ.2
           ((extChartAt I α).symm ((toEuclidean (E := E)).symm y₁))|
-        ≤ Cα * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) a T'‖ :=
-  sorry
+        ≤ Cα * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) a T'‖ := by
+  classical
+  obtain ⟨Cloc, hCloc_nn, hCloc⟩ :=
+    smooth_localBall_L2_pointwise_embedding_sharp (d := Module.finrank ℝ E) a ha (x₀ := y₀) (R := R) hR
+  set A : ℝ := Real.sqrt (((Module.finrank ℝ E) ^ (2 * a) : ℕ) * c⁻¹) with hA_def
+  have hA_nn : 0 ≤ A := Real.sqrt_nonneg _
+  refine ⟨Cloc * ((2 * a + 1 : ℕ) * A), by positivity, ?_⟩
+  intro T' y₁ hy₁
+  set hsn : ℝ := ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) a T'‖ with hhsn_def
+  have hhsn_nn : 0 ≤ hsn := norm_nonneg _
+  obtain ⟨ftil, hftil_smooth, hftil_eq⟩ :=
+    exists_global_smooth_eqOn_ball_of_rawPull (I := I) (M := M) g r s T' α IJ.1 IJ.2 hball
+  have hy₁_cb : y₁ ∈ Metric.closedBall y₀ R :=
+    (Metric.ball_subset_ball (by linarith)).trans Metric.ball_subset_closedBall hy₁
+  have h_loc := hCloc (f := ftil) hftil_smooth y₁ hy₁
+  have hftil_y0 : ftil y₁ =
+      Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw (I := I) (M := M) g r s T' α IJ.1 IJ.2
+        ((extChartAt I α).symm ((toEuclidean (E := E)).symm y₁)) := by
+    have := hftil_eq hy₁_cb
+    simpa [Function.comp_apply] using this
+  have hball_open : Metric.ball y₀ R ⊆ Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α :=
+    (Metric.ball_subset_closedBall).trans hball
+  have h_eqOn_ball : Set.EqOn ftil
+      (Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw (I := I) (M := M) g r s T' α IJ.1 IJ.2
+        ∘ (extChartAt I α).symm
+        ∘ (toEuclidean (E := E)).symm) (Metric.ball y₀ R) :=
+    hftil_eq.mono Metric.ball_subset_closedBall
+  have h_eLp_eq : ∀ j,
+      MeasureTheory.eLpNorm (fun z => ‖iteratedFDeriv ℝ j ftil z‖) 2
+          ((MeasureTheory.volume : MeasureTheory.Measure
+              (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict (Metric.ball y₀ R)) =
+        MeasureTheory.eLpNorm (fun z => ‖iteratedFDeriv ℝ j
+            (Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw (I := I) (M := M) g r s T' α IJ.1 IJ.2
+              ∘ (extChartAt I α).symm
+              ∘ (toEuclidean (E := E)).symm) z‖) 2
+          ((MeasureTheory.volume : MeasureTheory.Measure
+              (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict (Metric.ball y₀ R)) := by
+    intro j
+    refine MeasureTheory.eLpNorm_congr_ae ?_
+    refine (MeasureTheory.ae_restrict_iff' measurableSet_ball).2 (Filter.Eventually.of_forall (fun z hz => ?_))
+    have hball_nhd : Metric.ball y₀ R ∈ nhds z := Metric.isOpen_ball.mem_nhds hz
+    have h_ev : ftil =ᶠ[nhds z]
+        (Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw (I := I) (M := M) g r s T' α IJ.1 IJ.2
+          ∘ (extChartAt I α).symm
+          ∘ (toEuclidean (E := E)).symm) :=
+      Filter.eventuallyEq_of_mem hball_nhd h_eqOn_ball
+    have h_iter_eq := (h_ev.iteratedFDeriv ℝ j).eq_of_nhds
+    simp only [h_iter_eq]
+  have h_per_order : ∀ j ∈ Finset.range (2 * a + 1),
+      (MeasureTheory.eLpNorm (fun z => ‖iteratedFDeriv ℝ j ftil z‖) 2
+        ((MeasureTheory.volume : MeasureTheory.Measure
+            (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict (Metric.ball y₀ R))).toReal
+          ≤ A * hsn := by
+    intro j hj
+    rw [h_eLp_eq j]
+    set X : ℝ≥0∞ := MeasureTheory.eLpNorm (fun z => ‖iteratedFDeriv ℝ j
+        (Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw (I := I) (M := M) g r s T' α IJ.1 IJ.2
+          ∘ (extChartAt I α).symm
+          ∘ (toEuclidean (E := E)).symm) z‖) 2
+      ((MeasureTheory.volume : MeasureTheory.Measure
+          (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict (Metric.ball y₀ R)) with hX_def
+    have hX_ne_top : X ≠ ⊤ := by
+      rw [hX_def, ← h_eLp_eq j]
+      exact smooth_eLpNorm_iteratedFDeriv_ball_ne_top (j := j) hftil_smooth
+    have h_key := eLpNorm_sq_iteratedFDeriv_le_hsBlock (I := I) (M := M)
+      g r s T' α IJ j hc_pos hball_open hρ_lb
+    rw [← hX_def] at h_key
+    have h_blk_le := hsBlock_le_hsNorm_sq (I := I) (M := M) g a T' α IJ j hj
+    have h_X_sq_le :
+        X ^ 2 ≤ ENNReal.ofReal (((Module.finrank ℝ E) ^ j : ℕ) * c⁻¹) *
+          (Analysis.Sobolev.Tensor.tensorPouSobolevHsNorm (I := I) (M := M) g a T') ^ 2 :=
+      h_key.trans (mul_le_mul_of_nonneg_left h_blk_le (zero_le _))
+    have h_hsn_ne_top : (Analysis.Sobolev.Tensor.tensorPouSobolevHsNorm (I := I) (M := M) g a T') ≠ ⊤ :=
+      (Analysis.Sobolev.Tensor.tensorPouSobolevHsNorm_lt_top (I := I) (M := M) g a T').ne
+    have h_rhs_ne_top :
+        ENNReal.ofReal (((Module.finrank ℝ E) ^ j : ℕ) * c⁻¹) *
+          (Analysis.Sobolev.Tensor.tensorPouSobolevHsNorm (I := I) (M := M) g a T') ^ 2 ≠ ⊤ :=
+      ENNReal.mul_ne_top ENNReal.ofReal_ne_top
+        (ENNReal.pow_ne_top h_hsn_ne_top)
+    have h_toReal := ENNReal.toReal_mono h_rhs_ne_top h_X_sq_le
+    rw [ENNReal.toReal_pow, ENNReal.toReal_mul, ENNReal.toReal_ofReal
+      (by positivity), ENNReal.toReal_pow] at h_toReal
+    have h_hsn_eq : (Analysis.Sobolev.Tensor.tensorPouSobolevHsNorm (I := I) (M := M) g a T').toReal = hsn := by
+      rw [hhsn_def, tensorPouSobolevHilbert_norm_eq]
+    rw [h_hsn_eq] at h_toReal
+    have hX_toReal_nn : 0 ≤ X.toReal := ENNReal.toReal_nonneg
+    have h_card_mono : (((Module.finrank ℝ E) ^ j : ℕ) : ℝ) * c⁻¹ ≤ A ^ 2 := by
+      rw [hA_def, Real.sq_sqrt (by positivity)]
+      have hjle : j ≤ 2 * a := by rw [Finset.mem_range] at hj; omega
+      have : ((Module.finrank ℝ E) ^ j : ℕ) ≤ ((Module.finrank ℝ E) ^ (2 * a) : ℕ) :=
+        Nat.pow_le_pow_right (NeZero.pos _) hjle
+      have hcast : (((Module.finrank ℝ E) ^ j : ℕ) : ℝ) ≤
+          (((Module.finrank ℝ E) ^ (2 * a) : ℕ) : ℝ) := by exact_mod_cast this
+      exact mul_le_mul_of_nonneg_right hcast (by positivity)
+    have h_Xsq_le_Asq : X.toReal ^ 2 ≤ (A * hsn) ^ 2 := by
+      refine h_toReal.trans ?_
+      have hhsn_sq_nn : 0 ≤ hsn ^ 2 := by positivity
+      calc (((Module.finrank ℝ E) ^ j : ℕ) : ℝ) * c⁻¹ * hsn ^ 2
+          ≤ A ^ 2 * hsn ^ 2 := mul_le_mul_of_nonneg_right h_card_mono hhsn_sq_nn
+        _ = (A * hsn) ^ 2 := by ring
+    have hAhsn_nn : 0 ≤ A * hsn := mul_nonneg hA_nn hhsn_nn
+    calc X.toReal = Real.sqrt (X.toReal ^ 2) := (Real.sqrt_sq hX_toReal_nn).symm
+      _ ≤ Real.sqrt ((A * hsn) ^ 2) := Real.sqrt_le_sqrt h_Xsq_le_Asq
+      _ = A * hsn := Real.sqrt_sq hAhsn_nn
+  rw [← hftil_y0, ← Real.norm_eq_abs]
+  refine h_loc.trans ?_
+  have h_sum_le :
+      (∑ j ∈ Finset.range (2 * a + 1),
+          (MeasureTheory.eLpNorm (fun z => ‖iteratedFDeriv ℝ j ftil z‖) 2
+            ((MeasureTheory.volume : MeasureTheory.Measure
+                (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict (Metric.ball y₀ R))).toReal)
+        ≤ ((2 * a + 1 : ℕ) : ℝ) * (A * hsn) := by
+    have h_each := Finset.sum_le_sum h_per_order
+    rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul] at h_each
+    exact h_each
+  calc Cloc * (∑ j ∈ Finset.range (2 * a + 1),
+          (MeasureTheory.eLpNorm (fun z => ‖iteratedFDeriv ℝ j ftil z‖) 2
+            ((MeasureTheory.volume : MeasureTheory.Measure
+                (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict (Metric.ball y₀ R))).toReal)
+      ≤ Cloc * (((2 * a + 1 : ℕ) : ℝ) * (A * hsn)) :=
+        mul_le_mul_of_nonneg_left h_sum_le hCloc_nn
+    _ = Cloc * (((2 * a + 1 : ℕ) : ℝ) * A) * hsn := by ring
 
 /-- **The sharp general-order Euclidean-pull uniform bound on a compact chart set.** At a supercritical
 chart order `a` (`dim M < 2·(2a)`), for each atlas index `α` and component pair `IJ`, there is a constant

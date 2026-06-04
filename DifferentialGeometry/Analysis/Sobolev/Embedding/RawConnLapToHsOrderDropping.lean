@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2So
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.RawConnLapChartComponentSecondCovDerivFormula
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExpansion.SecondCovDerivChartProjEuclidGlobal
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.RawConnLapChartCoordFormulaT0Linear
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.RawConnLapMinusInvGramPrincipalSmoothCoeff
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 import DifferentialGeometry.Tensor.Multilinear.HsBoundOp
@@ -1441,6 +1442,528 @@ private lemma chartProjCLM_covApply_chartBasis_eq_euclidPartial_add_lowerOrder
 
 end CentredFrameCoordExpansion
 
+section B4Bridge
+
+set_option linter.style.setOption false
+set_option backward.isDefEq.respectTransparency false
+set_option synthInstance.maxHeartbeats 400000
+set_option maxHeartbeats 800000
+
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.DivergenceTheorem
+
+/-- **Per-frame-index projected expansion of the centred-frame second-covariant-derivative
+summand.** For `b ∈ chartLeviCivitaGoodSet α` and a frame index `i`, the chart-`α` `(Idx, Jdx)`
+projection of the `i`-th centred-frame summand `cov_RS (covApply cov_RS Bᵢ T₀) b (Bᵢ b)`
+(`Bᵢ := smoothOrthoFrame g b i`, the frame centred at `b`) splits into:
+
+* a **double-coordinate principal block** weighted by the product `C^l_i(b)·C^k_i(b)` of the
+  centred-frame coordinate-matrix entries (which contracts to the chart inverse Gram matrix after
+  summing over `i`); and
+* a **first-order cross block** weighted by `C^l_i(b)·(∂_l C^k_i)(b)` (the moving-centre derivative
+  of the coordinate matrix), applied to the first covariant derivative `covApply cov_RS ∂_k T₀ b`.
+
+Obtained by expanding the evaluation vector `Bᵢ b = Σ_l C^l_i(b) ∂_l b`
+(`smoothOrthoFrame_eq_centredCoordMatrix_sum` at the centre `c = b`), pushing the projection CLM
+through the resulting finite sum, and applying the inner-Leibniz coordinate expansion
+`centred_cov_RS_covApply_frameVec_eq_coord_expansion` (`c = b`) to each `∂_l`-evaluation. -/
+private lemma centredFrame_proj_summand_expand
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T₀ : Integral.L2.SmoothCcTensor g r s) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E))
+    (i : Fin (Module.finrank ℝ E)) {b : M}
+    (hb : b ∈ chartLeviCivitaGoodSet (I := I) α) :
+    chartProjCLM (I := I) (M := M) r s α Idx Jdx b
+        ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+              (LeviCivita (I := I) g)).toFun
+            (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+              (LeviCivita (I := I) g))
+              (smoothOrthoFrame (I := I) g b i)
+              (fun z : M => T₀.toSection z)) b
+            (smoothOrthoFrame (I := I) g b i b)) =
+      (∑ l : Fin (Module.finrank ℝ E),
+        ∑ k : Fin (Module.finrank ℝ E),
+          centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i l b *
+            (centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i k b *
+              chartProjCLM (I := I) (M := M) r s α Idx Jdx b
+                ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+                    (LeviCivita (I := I) g)).toFun
+                  (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+                    (LeviCivita (I := I) g))
+                    (fun z : M => chartBasisVecFiber (I := I) α k z)
+                    (fun z : M => T₀.toSection z)) b
+                  (chartBasisVecFiber (I := I) α l b)))) +
+      (∑ l : Fin (Module.finrank ℝ E),
+        ∑ k : Fin (Module.finrank ℝ E),
+          centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i l b *
+            (extDerivFun (fun z : M =>
+                centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i k z)
+                b (chartBasisVecFiber (I := I) α l b) *
+              chartProjCLM (I := I) (M := M) r s α Idx Jdx b
+                (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+                  (LeviCivita (I := I) g))
+                  (fun z : M => chartBasisVecFiber (I := I) α k z)
+                  (fun z : M => T₀.toSection z) b))) := by
+  classical
+  have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
+  set cov_RS := TensorRSNabla.tensorRSCovariantDerivative I M r s
+    (LeviCivita (I := I) g) with hcov_RS_def
+  set L : TangentSpace I b →L[ℝ] TensorRSSpace r s I b :=
+    cov_RS.toFun
+        (covApply cov_RS (smoothOrthoFrame (I := I) g b i)
+          (fun z : M => T₀.toSection z)) b with hL_def
+  have hBb : smoothOrthoFrame (I := I) g b i b =
+      ∑ l : Fin (Module.finrank ℝ E),
+        centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i l b •
+          chartBasisVecFiber (I := I) α l b :=
+    smoothOrthoFrame_eq_centredCoordMatrix_sum (I := I) (M := M) g α b i hb_base
+  have hLBb : L (smoothOrthoFrame (I := I) g b i b) =
+      ∑ l : Fin (Module.finrank ℝ E),
+        centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i l b •
+          L (chartBasisVecFiber (I := I) α l b) := by
+    rw [hBb, map_sum]
+    refine Finset.sum_congr rfl (fun l _ => ?_)
+    rw [L.map_smul]
+  have hL_l : ∀ l : Fin (Module.finrank ℝ E),
+      L (chartBasisVecFiber (I := I) α l b) =
+        (∑ k : Fin (Module.finrank ℝ E),
+          centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i k b •
+            cov_RS.toFun
+                (covApply cov_RS
+                  (fun z : M => chartBasisVecFiber (I := I) α k z)
+                  (fun z : M => T₀.toSection z)) b
+                (chartBasisVecFiber (I := I) α l b)) +
+        (∑ k : Fin (Module.finrank ℝ E),
+          extDerivFun (fun z : M =>
+              centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i k z)
+              b (chartBasisVecFiber (I := I) α l b) •
+            covApply cov_RS
+              (fun z : M => chartBasisVecFiber (I := I) α k z)
+              (fun z : M => T₀.toSection z) b) := by
+    intro l
+    exact centred_cov_RS_covApply_frameVec_eq_coord_expansion
+      (I := I) (M := M) g r s α b T₀ i hb l
+  have hProj_arg :
+      cov_RS.toFun
+          (covApply cov_RS (smoothOrthoFrame (I := I) g b i)
+            (fun z : M => T₀.toSection z)) b
+          (smoothOrthoFrame (I := I) g b i b) =
+        ∑ l : Fin (Module.finrank ℝ E),
+          centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i l b •
+            ((∑ k : Fin (Module.finrank ℝ E),
+                centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i k b •
+                  cov_RS.toFun
+                      (covApply cov_RS
+                        (fun z : M => chartBasisVecFiber (I := I) α k z)
+                        (fun z : M => T₀.toSection z)) b
+                      (chartBasisVecFiber (I := I) α l b)) +
+              (∑ k : Fin (Module.finrank ℝ E),
+                extDerivFun (fun z : M =>
+                    centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i k z)
+                    b (chartBasisVecFiber (I := I) α l b) •
+                  covApply cov_RS
+                    (fun z : M => chartBasisVecFiber (I := I) α k z)
+                    (fun z : M => T₀.toSection z) b)) := by
+    rw [show cov_RS.toFun
+            (covApply cov_RS (smoothOrthoFrame (I := I) g b i)
+              (fun z : M => T₀.toSection z)) b
+            (smoothOrthoFrame (I := I) g b i b) =
+          L (smoothOrthoFrame (I := I) g b i b) from rfl]
+    rw [hLBb]
+    refine Finset.sum_congr rfl (fun l _ => ?_)
+    rw [hL_l l]
+  rw [hProj_arg]
+  rw [map_sum]
+  have hsummand : ∀ l : Fin (Module.finrank ℝ E),
+      chartProjCLM (I := I) (M := M) r s α Idx Jdx b
+          (centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i l b •
+            ((∑ k : Fin (Module.finrank ℝ E),
+                centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i k b •
+                  cov_RS.toFun
+                      (covApply cov_RS
+                        (fun z : M => chartBasisVecFiber (I := I) α k z)
+                        (fun z : M => T₀.toSection z)) b
+                      (chartBasisVecFiber (I := I) α l b)) +
+              (∑ k : Fin (Module.finrank ℝ E),
+                extDerivFun (fun z : M =>
+                    centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i k z)
+                    b (chartBasisVecFiber (I := I) α l b) •
+                  covApply cov_RS
+                    (fun z : M => chartBasisVecFiber (I := I) α k z)
+                    (fun z : M => T₀.toSection z) b))) =
+        (∑ k : Fin (Module.finrank ℝ E),
+            centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i l b *
+              (centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i k b *
+                chartProjCLM (I := I) (M := M) r s α Idx Jdx b
+                  (cov_RS.toFun
+                    (covApply cov_RS
+                      (fun z : M => chartBasisVecFiber (I := I) α k z)
+                      (fun z : M => T₀.toSection z)) b
+                    (chartBasisVecFiber (I := I) α l b)))) +
+          (∑ k : Fin (Module.finrank ℝ E),
+            centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i l b *
+              (extDerivFun (fun z : M =>
+                  centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i k z)
+                  b (chartBasisVecFiber (I := I) α l b) *
+                chartProjCLM (I := I) (M := M) r s α Idx Jdx b
+                  (covApply cov_RS
+                    (fun z : M => chartBasisVecFiber (I := I) α k z)
+                    (fun z : M => T₀.toSection z) b))) := by
+    intro l
+    rw [map_smul, smul_eq_mul, map_add, mul_add]
+    congr 1
+    · rw [map_sum, Finset.mul_sum]
+      refine Finset.sum_congr rfl (fun k _ => ?_)
+      rw [map_smul, smul_eq_mul]
+    · rw [map_sum, Finset.mul_sum]
+      refine Finset.sum_congr rfl (fun k _ => ?_)
+      rw [map_smul, smul_eq_mul]
+  rw [Finset.sum_congr rfl (fun l _ => hsummand l)]
+  rw [Finset.sum_add_distrib]
+
+/-- **The centred-frame principal block collapses to the chart-`α` inverse-Gram principal sum.**
+Summing the double-coordinate principal block of `centredFrame_proj_summand_expand` over the frame
+index `i`, the coordinate-matrix product `C^l_i(b)·C^k_i(b)` contracts — over `i` — to the chart-`α`
+inverse Gram matrix `g^{kl}(b) = chartInvGramMatrix g α b k l`
+(`centredOrthoFrameCoordMatrix_orthonormality`, the un-bumped, good-set-wide orthonormality
+identity), so the whole block equals `chartInvGramPrincipalSum`.  This is the inverse-Gram
+contraction that carries the orthonormal-frame metric trace to the chart-coordinate metric trace,
+and it is the genuine frame-independence content of the bridge: the chartJ-looking centred-frame
+coordinate-matrix data cancels against itself precisely here. -/
+private lemma centredFrame_proj_principal_eq_invGramPrincipalSum
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (T₀ : Integral.L2.SmoothCcTensor g r s) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) {b : M}
+    (hb : b ∈ chartLeviCivitaGoodSet (I := I) α) :
+    (∑ i : Fin (Module.finrank ℝ E),
+      ∑ l : Fin (Module.finrank ℝ E),
+        ∑ k : Fin (Module.finrank ℝ E),
+          centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i l b *
+            (centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i k b *
+              chartProjCLM (I := I) (M := M) r s α Idx Jdx b
+                ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+                    (LeviCivita (I := I) g)).toFun
+                  (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+                    (LeviCivita (I := I) g))
+                    (fun z : M => chartBasisVecFiber (I := I) α k z)
+                    (fun z : M => T₀.toSection z)) b
+                  (chartBasisVecFiber (I := I) α l b)))) =
+      chartInvGramPrincipalSum (I := I) (M := M) g r s α T₀ Idx Jdx b := by
+  classical
+  rw [chartInvGramPrincipalSum]
+  set P : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun k l => chartProjCLM (I := I) (M := M) r s α Idx Jdx b
+      ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+          (LeviCivita (I := I) g)).toFun
+        (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+          (LeviCivita (I := I) g))
+          (fun z : M => chartBasisVecFiber (I := I) α k z)
+          (fun z : M => T₀.toSection z)) b
+        (chartBasisVecFiber (I := I) α l b)) with hP_def
+  set C : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun i k => centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i k b with hC_def
+  have hLHS :
+      (∑ i, ∑ l, ∑ k, C i l * (C i k * P k l)) =
+        ∑ k, ∑ l, (∑ i, C i k * C i l) * P k l := by
+    have h1 : (∑ i, ∑ l, ∑ k, C i l * (C i k * P k l)) =
+        ∑ i, ∑ k, ∑ l, C i l * (C i k * P k l) :=
+      Finset.sum_congr rfl (fun i _ => Finset.sum_comm)
+    rw [h1, Finset.sum_comm]
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl (fun l _ => ?_)
+    rw [Finset.sum_mul]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    ring
+  rw [hLHS]
+  refine Finset.sum_congr rfl (fun k _ => ?_)
+  refine Finset.sum_congr rfl (fun l _ => ?_)
+  rw [show (∑ i, C i k * C i l) = chartInvGramMatrix (I := I) g α b k l from
+    centredOrthoFrameCoordMatrix_orthonormality (I := I) (M := M) g α hb k l]
+  simp only [hP_def]
+  rw [chartProjCLM_apply]
+
+/-- **The frame-independent good-set-wide first-order/zeroth-order chart-coordinate form of
+`Δ_∇` after the inverse-Gram principal block is removed.**
+
+There exist `T₀`-independent `C^∞` coefficient families `B_1`, `B_0` on the Euclidean chart target
+such that, for every smooth compactly-supported section `T₀` and every base point `b` in the
+chart-`α` Levi-Civita good set, the difference between the chart-`α` `(Idx, Jdx)` raw scalar
+component of `Δ_∇ T₀` and the chart-`α` inverse-Gram principal sum equals the canonical first-order
+chart-coordinate form
+```
+raw_{IJ}(Δ_∇ T₀)(b) − chartInvGramPrincipalSum g r s α T₀ Idx Jdx b
+  = Σ_{I', J', m} B_1 I' J' m · ∂_m (chartPushedRaw raw_{I'J'}(T₀))
+  + Σ_{I', J'} B_0 I' J' · chartPushedRaw raw_{I'J'}(T₀)    (at toEuclidean (chart b)).
+```
+
+This is the **frame-independent** genuine remaining differential-geometric content (it mentions no
+frame at all — neither the bumped chart frame nor the centred orthonormal frame).  It is TRUE and
+standard: the connection Laplacian is, *unconditionally* at every base point, the metric trace of
+the Hessian (`rawTensorConnLap_eq_metricTraceHessian`); the inverse-Gram principal sum
+`chartInvGramPrincipalSum = Σ_{k,l} g^{kl}·proj(∇_{∂_l}(∇_{∂_k} T₀))` is the inverse-Gram-weighted
+*naive iterated* second covariant derivative, which shares the principal symbol `Σ_{k,l} g^{kl}∂_l∂_k`
+of the metric trace, so their difference is purely first order.  Concretely, by the Hessian formula
+`tensorSecondCovDeriv X Y T = ∇_Y(∇·T)(X) − ∇_T(∇_Y X)` (`tensorSecondCovDeriv_def`,
+`tensorSecondCovDeriv_eq_firstSlotHessMap`) and `g`-symmetry of the `(k,l)`-contraction, the
+difference is the chart-coordinate Christoffel correction
+`−Σ_{k,l} g^{kl}·proj(∇_T(∇_{∂_l}∂_k))` — a *single* first covariant derivative of `T₀` contracted
+against the smooth chart-Christoffel-trace field `Σ_{k,l} g^{kl}·∇_{∂_l}∂_k`, with `C^∞` chart
+coefficients (the frame-independent counterpart of the bumped-frame
+`chartFrameTraceΓCorrection_eq_T₀_linear`, which packages exactly such a
+`Σ_i proj(∇_T((LC g) B_i B_i))` trace against the chart-frame self-Christoffel field).
+
+Posited here as the genuine remaining DG prerequisite, *replacing* the (mathematically unavailable)
+moving-centre route: the centred orthonormal frame `smoothOrthoFrame g b i` has its centre equal to
+the base point, so the centred coordinate-matrix diagonal `b ↦ centredOrthoFrameCoordMatrix g α b i k b`
+and its base-slot directional derivative are NOT chart-smooth — `smoothOrthoFrame g c i b =
+chartBumpAt c b • chartFrameNorm g c i b` depends on the chart centred at `c` (and on a
+`SmoothBumpFunction I c`), which has no joint/diagonal smoothness in `c` (the per-point chart choice
+`chartAt c` is not even continuous in `c` on a general charted space).  Only the frame-independent
+difference `raw_{IJ}(Δ_∇ T₀) − chartInvGramPrincipalSum` admits smooth chart coefficients (the
+moving-centre cross block and the Γ-trace each individually do not, but their combination is the
+frame-independent Christoffel correction).  The bridge from the centred-frame cross-block-minus-Γ LHS
+to this frame-independent difference is discharged sorry-free in the consuming node
+`rawConnLap_chartα_firstOrder_remainder_smooth_coeff_form` (via the centred-frame trace identities
+`rawConnLap_chartα_proj_eq_centredFrame_trace_sum`, `centredFrame_proj_summand_expand`, and
+`centredFrame_proj_principal_eq_invGramPrincipalSum`). -/
+private lemma rawConnLap_chartα_minus_invGramPrincipalSum_smooth_coeff_form
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
+    ∃ (B_1 : (Fin r → Fin (Module.finrank ℝ E)) →
+              (Fin s → Fin (Module.finrank ℝ E)) →
+              Fin (Module.finrank ℝ E) → EuclN → ℝ),
+    ∃ (B_0 : (Fin r → Fin (Module.finrank ℝ E)) →
+              (Fin s → Fin (Module.finrank ℝ E)) → EuclN → ℝ),
+      (∀ I' J' m, ContDiffOn ℝ ∞ (B_1 I' J' m) (chartTargetEuclid (I := I) (M := M) α)) ∧
+      (∀ I' J', ContDiffOn ℝ ∞ (B_0 I' J') (chartTargetEuclid (I := I) (M := M) α)) ∧
+      ∀ (T₀ : Integral.L2.SmoothCcTensor g r s),
+        ∀ {b : M}, b ∈ chartLeviCivitaGoodSet (I := I) α →
+          tensorChartComponentRaw (I := I) (M := M) g r s
+              (rawTensorConnLapSmooth (I := I) g r s T₀) α Idx Jdx b -
+            chartInvGramPrincipalSum (I := I) (M := M) g r s α T₀ Idx Jdx b =
+            (∑ I' : Fin r → Fin (Module.finrank ℝ E),
+              ∑ J' : Fin s → Fin (Module.finrank ℝ E),
+              ∑ m,
+              B_1 I' J' m ((toEuclidean (E := E)) ((extChartAt I α) b)) *
+                euclidPartial (E := E) m
+                  (chartPushedRaw I α
+                    (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J'))
+                  ((toEuclidean (E := E)) ((extChartAt I α) b))) +
+            (∑ I' : Fin r → Fin (Module.finrank ℝ E),
+              ∑ J' : Fin s → Fin (Module.finrank ℝ E),
+              B_0 I' J' ((toEuclidean (E := E)) ((extChartAt I α) b)) *
+                chartPushedRaw I α
+                  (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J')
+                  ((toEuclidean (E := E)) ((extChartAt I α) b))) := by
+  classical
+  obtain ⟨B_1, B_0, hB1cd, hB0cd, hEq⟩ :=
+    christoffelTrace_correction_eq_T₀_linear (I := I) (M := M) g r s α Idx Jdx
+  refine ⟨B_1, B_0, hB1cd, hB0cd, ?_⟩
+  intro T₀ b hb
+  rw [rawConnLap_chartα_minus_invGramPrincipalSum_eq_christoffelTrace
+    (I := I) (M := M) g r s α T₀ Idx Jdx hb]
+  exact hEq T₀ hb
+
+/-- **The centred-frame first-order remainder admits a smooth-coefficient chart-coordinate form.**
+
+There exist `T₀`-independent `C^∞` coefficient families `B_1`, `B_0` on the Euclidean chart target
+such that, for every smooth compactly-supported section `T₀` and every base point `b` in the
+chart-`α` Levi-Civita good set, the chart-`α` `(Idx, Jdx)` *first-order remainder* of `Δ_∇ T₀` —
+the part of the centred-frame trace sum left after the inverse-Gram principal block
+`chartInvGramPrincipalSum` is extracted, namely the centred-coordinate-matrix-derivative *cross
+block* `Σ_{i, l, k} C^l_i(b)·(∂_l C^k_i)(b)·proj(∇_{∂_k} T₀)` plus the *frame-trace Γ-correction*
+`−Σ_i proj(∇_{∇_{Bᵢ}Bᵢ} T₀)` (`Bᵢ := smoothOrthoFrame g b i`) — equals the canonical first-order
+chart-coordinate form
+```
+Σ_{I', J', m} B_1 I' J' m · ∂_m (chartPushedRaw raw_{I'J'}(T₀))
+  + Σ_{I', J'} B_0 I' J' · chartPushedRaw raw_{I'J'}(T₀)    (at toEuclidean (chart b)).
+```
+
+This is TRUE (and standard): the connection Laplacian `Δ_∇` is, in any chart, a genuine second-order
+differential operator `g^{kl}∂_k∂_l + (smooth)·∂_m + (smooth)·id` with `C^∞` coefficients; the
+principal symbol `g^{kl}∂_k∂_l` is exactly the principal block `chartInvGramPrincipalSum` already
+extracted, so the residual is precisely its `C^∞` lower-order part. The on-disk *bumped*-frame
+counterpart of this very statement — the first-order/zeroth-order block with `T₀`-independent `C^∞`
+coefficients — is proved (on the partition-of-unity tsupport) by
+`Integral.Connection.chartLeibnizRemainder_eq_T₀_linear` together with the bumped-frame
+coordinate-matrix chart-smoothness lemmas
+`chartFrameNormGlobalSmoothCoordMatrix_pullback_contDiffOn_chartTarget` and
+`chartFrameNormGlobalSmoothCoordMatrix_dirDeriv_pullback_contDiffOn_chartTarget`
+(and assembled into the tsupport-restricted `T₀`-linear formula
+`Integral.Connection.rawTensorConnLap_chartα_raw_eq_T₀_linear_formula`).
+
+Mechanically: both blocks are `T₀`-linear and first order in `T₀` (each carries at most one covariant
+derivative of `T₀`), so each projected first covariant derivative `proj(∇_{∂_k} T₀)` rewrites, via
+`chartProjCLM_covApply_chartBasis_eq_euclidPartial_add_lowerOrder`, as
+`∂_k(chartPushedRaw raw_{Idx,Jdx}(T₀))` plus a zeroth-order `covDerivLowerOrderTerm`
+(itself `Σ_{I',J'} covDerivLowerOrderCoeff · chartPushedRaw raw_{I'J'}(T₀)`, with `C^∞` coefficient by
+`covDerivLowerOrderCoeff_contDiffOn` and `tensorComponentEuclid_def`), and the Γ-correction (a first
+covariant derivative of `T₀` contracted against the smooth tangent field `∇_{Bᵢ}Bᵢ`) likewise. The
+weighting factors — the moving-centre coordinate-matrix derivative contraction
+`Σ_{i,l} C^l_i·∂_l C^k_i` and the Christoffel-trace `Σ_i ∇_{Bᵢ}Bᵢ` — are `T₀`-independent and
+chart-smooth (the chartJ-looking moving-centre derivative does NOT survive as an unbounded
+operator-norm factor: it enters only as a bounded chart-smooth coordinate coefficient, distinct from
+the principal block where it cancels by orthonormality).
+
+The remaining DG content is the **frame-independent** good-set-wide first-order/zeroth-order
+chart-coordinate form of `Δ_∇` after the principal block `chartInvGramPrincipalSum` is removed —
+namely the `T₀`-linear smooth-coefficient identity for the difference
+`raw_{IJ}(Δ_∇ T₀) − chartInvGramPrincipalSum`, supplied by the frame-independent node
+`rawConnLap_chartα_minus_invGramPrincipalSum_smooth_coeff_form`.  The connection Laplacian is,
+*unconditionally* at every base point, the metric trace of the Hessian
+(`rawTensorConnLap_eq_metricTraceHessian`); the inverse-Gram-weighted naive iterated second
+covariant derivative `chartInvGramPrincipalSum` is its principal part, and the difference is the
+chart-coordinate Christoffel correction `−Σ_{k,l} g^{kl}·proj(∇_T(∇_{∂_l}∂_k))` — a *first* covariant
+derivative of `T₀` contracted against the smooth chart-Christoffel-trace field, with `C^∞` chart
+coefficients (the frame-independent analogue of `chartFrameTraceΓCorrection_eq_T₀_linear`).  This
+node bridges the centred-frame cross-block-minus-Γ-trace LHS to that frame-independent difference,
+via the parent's own centred-frame trace identities, *without* any moving-centre frame smoothness:
+the dropped principal-block Gram collapse (`centredFrame_proj_principal_eq_invGramPrincipalSum`) and
+the centred-frame trace sum (`rawConnLap_chartα_proj_eq_centredFrame_trace_sum`) carry the
+centred-frame data to `raw_{IJ}(Δ_∇ T₀) − chartInvGramPrincipalSum`, which is then frame-independent. -/
+private lemma rawConnLap_chartα_firstOrder_remainder_smooth_coeff_form
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
+    (Idx : Fin r → Fin (Module.finrank ℝ E))
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
+    ∃ (B_1 : (Fin r → Fin (Module.finrank ℝ E)) →
+              (Fin s → Fin (Module.finrank ℝ E)) →
+              Fin (Module.finrank ℝ E) → EuclN → ℝ),
+    ∃ (B_0 : (Fin r → Fin (Module.finrank ℝ E)) →
+              (Fin s → Fin (Module.finrank ℝ E)) → EuclN → ℝ),
+      (∀ I' J' m, ContDiffOn ℝ ∞ (B_1 I' J' m) (chartTargetEuclid (I := I) (M := M) α)) ∧
+      (∀ I' J', ContDiffOn ℝ ∞ (B_0 I' J') (chartTargetEuclid (I := I) (M := M) α)) ∧
+      ∀ (T₀ : Integral.L2.SmoothCcTensor g r s),
+        ∀ {b : M}, b ∈ chartLeviCivitaGoodSet (I := I) α →
+          (∑ i : Fin (Module.finrank ℝ E),
+            ∑ l : Fin (Module.finrank ℝ E),
+              ∑ k : Fin (Module.finrank ℝ E),
+                centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i l b *
+                  (extDerivFun (fun z : M =>
+                      centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i k z)
+                      b (chartBasisVecFiber (I := I) α l b) *
+                    chartProjCLM (I := I) (M := M) r s α Idx Jdx b
+                      (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+                        (LeviCivita (I := I) g))
+                        (fun z : M => chartBasisVecFiber (I := I) α k z)
+                        (fun z : M => T₀.toSection z) b))) -
+          (∑ i : Fin (Module.finrank ℝ E),
+            chartProjCLM (I := I) (M := M) r s α Idx Jdx b
+              ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+                  (LeviCivita (I := I) g)).toFun
+                (fun z : M => T₀.toSection z) b
+                ((LeviCivita (I := I) g).toFun
+                  (smoothOrthoFrame (I := I) g b i) b
+                  (smoothOrthoFrame (I := I) g b i b)))) =
+            (∑ I' : Fin r → Fin (Module.finrank ℝ E),
+              ∑ J' : Fin s → Fin (Module.finrank ℝ E),
+              ∑ m,
+              B_1 I' J' m ((toEuclidean (E := E)) ((extChartAt I α) b)) *
+                euclidPartial (E := E) m
+                  (chartPushedRaw I α
+                    (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J'))
+                  ((toEuclidean (E := E)) ((extChartAt I α) b))) +
+            (∑ I' : Fin r → Fin (Module.finrank ℝ E),
+              ∑ J' : Fin s → Fin (Module.finrank ℝ E),
+              B_0 I' J' ((toEuclidean (E := E)) ((extChartAt I α) b)) *
+                chartPushedRaw I α
+                  (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J')
+                  ((toEuclidean (E := E)) ((extChartAt I α) b))) := by
+  classical
+  obtain ⟨B_1, B_0, hB1cd, hB0cd, hDiff⟩ :=
+    rawConnLap_chartα_minus_invGramPrincipalSum_smooth_coeff_form
+      (I := I) (M := M) g r s α Idx Jdx
+  refine ⟨B_1, B_0, hB1cd, hB0cd, ?_⟩
+  intro T₀ b hb
+  -- Step 1 (proven outright, frame-dependent → frame-independent reduction):
+  -- the centred-frame cross-block minus Γ-trace equals `raw_{IJ}(Δ_∇ T₀) − chartInvGramPrincipalSum`,
+  -- via the parent's centred-frame trace identities (NO moving-centre frame smoothness used).
+  have hReduce :
+      (∑ i : Fin (Module.finrank ℝ E),
+        ∑ l : Fin (Module.finrank ℝ E),
+          ∑ k : Fin (Module.finrank ℝ E),
+            centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i l b *
+              (extDerivFun (fun z : M =>
+                  centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i k z)
+                  b (chartBasisVecFiber (I := I) α l b) *
+                chartProjCLM (I := I) (M := M) r s α Idx Jdx b
+                  (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+                    (LeviCivita (I := I) g))
+                    (fun z : M => chartBasisVecFiber (I := I) α k z)
+                    (fun z : M => T₀.toSection z) b))) -
+      (∑ i : Fin (Module.finrank ℝ E),
+        chartProjCLM (I := I) (M := M) r s α Idx Jdx b
+          ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+              (LeviCivita (I := I) g)).toFun
+            (fun z : M => T₀.toSection z) b
+            ((LeviCivita (I := I) g).toFun
+              (smoothOrthoFrame (I := I) g b i) b
+              (smoothOrthoFrame (I := I) g b i b)))) =
+      tensorChartComponentRaw (I := I) (M := M) g r s
+          (rawTensorConnLapSmooth (I := I) g r s T₀) α Idx Jdx b -
+        chartInvGramPrincipalSum (I := I) (M := M) g r s α T₀ Idx Jdx b := by
+    have hB2 := rawConnLap_chartα_proj_eq_centredFrame_trace_sum
+      (I := I) (M := M) g r s T₀ α Idx Jdx b
+    have hsplit_summand : ∀ i : Fin (Module.finrank ℝ E),
+        chartProjCLM (I := I) (M := M) r s α Idx Jdx b
+            ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+                  (LeviCivita (I := I) g)).toFun
+                (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+                  (LeviCivita (I := I) g))
+                  (smoothOrthoFrame (I := I) g b i)
+                  (fun z : M => T₀.toSection z)) b
+                (smoothOrthoFrame (I := I) g b i b) -
+              (TensorRSNabla.tensorRSCovariantDerivative I M r s
+                  (LeviCivita (I := I) g)).toFun
+                (fun z : M => T₀.toSection z) b
+                ((LeviCivita (I := I) g).toFun
+                  (smoothOrthoFrame (I := I) g b i) b
+                  (smoothOrthoFrame (I := I) g b i b))) =
+          ((∑ l : Fin (Module.finrank ℝ E),
+              ∑ k : Fin (Module.finrank ℝ E),
+                centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i l b *
+                  (centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i k b *
+                    chartProjCLM (I := I) (M := M) r s α Idx Jdx b
+                      ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+                          (LeviCivita (I := I) g)).toFun
+                        (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+                          (LeviCivita (I := I) g))
+                          (fun z : M => chartBasisVecFiber (I := I) α k z)
+                          (fun z : M => T₀.toSection z)) b
+                        (chartBasisVecFiber (I := I) α l b)))) +
+            (∑ l : Fin (Module.finrank ℝ E),
+              ∑ k : Fin (Module.finrank ℝ E),
+                centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i l b *
+                  (extDerivFun (fun z : M =>
+                      centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i k z)
+                      b (chartBasisVecFiber (I := I) α l b) *
+                    chartProjCLM (I := I) (M := M) r s α Idx Jdx b
+                      (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+                        (LeviCivita (I := I) g))
+                        (fun z : M => chartBasisVecFiber (I := I) α k z)
+                        (fun z : M => T₀.toSection z) b)))) -
+          chartProjCLM (I := I) (M := M) r s α Idx Jdx b
+            ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+                (LeviCivita (I := I) g)).toFun
+              (fun z : M => T₀.toSection z) b
+              ((LeviCivita (I := I) g).toFun
+                (smoothOrthoFrame (I := I) g b i) b
+                (smoothOrthoFrame (I := I) g b i b))) := by
+      intro i
+      rw [map_sub]
+      rw [centredFrame_proj_summand_expand (I := I) (M := M) g r s T₀ α Idx Jdx i hb]
+    rw [hB2, Finset.sum_congr rfl (fun i _ => hsplit_summand i),
+      Finset.sum_sub_distrib, Finset.sum_add_distrib,
+      centredFrame_proj_principal_eq_invGramPrincipalSum
+        (I := I) (M := M) g r s T₀ α Idx Jdx hb]
+    ring
+  rw [hReduce]
+  exact hDiff T₀ hb
+
 /-- **The open-good-set projected inverse-Gram principal-sum metric-trace identity for the
 connection-Laplacian raw component (the genuine remaining differential-geometric content).**
 
@@ -1509,8 +2032,73 @@ theorem rawTensorConnLap_chartα_proj_eq_invGramPrincipalSum_on_goodSet
               B_0 I' J' ((toEuclidean (E := E)) ((extChartAt I α) b)) *
                 chartPushedRaw I α
                   (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J')
-                  ((toEuclidean (E := E)) ((extChartAt I α) b))) :=
-  sorry
+                  ((toEuclidean (E := E)) ((extChartAt I α) b))) := by
+  classical
+  obtain ⟨B_1, B_0, hB1cd, hB0cd, hRem⟩ :=
+    rawConnLap_chartα_firstOrder_remainder_smooth_coeff_form
+      (I := I) (M := M) g r s α Idx Jdx
+  refine ⟨B_1, B_0, hB1cd, hB0cd, ?_⟩
+  intro T₀ b hb
+  have hB2 := rawConnLap_chartα_proj_eq_centredFrame_trace_sum
+    (I := I) (M := M) g r s T₀ α Idx Jdx b
+  rw [hB2]
+  have hsplit_summand : ∀ i : Fin (Module.finrank ℝ E),
+      chartProjCLM (I := I) (M := M) r s α Idx Jdx b
+          ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+                (LeviCivita (I := I) g)).toFun
+              (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+                (LeviCivita (I := I) g))
+                (smoothOrthoFrame (I := I) g b i)
+                (fun z : M => T₀.toSection z)) b
+              (smoothOrthoFrame (I := I) g b i b) -
+            (TensorRSNabla.tensorRSCovariantDerivative I M r s
+                (LeviCivita (I := I) g)).toFun
+              (fun z : M => T₀.toSection z) b
+              ((LeviCivita (I := I) g).toFun
+                (smoothOrthoFrame (I := I) g b i) b
+                (smoothOrthoFrame (I := I) g b i b))) =
+        ((∑ l : Fin (Module.finrank ℝ E),
+            ∑ k : Fin (Module.finrank ℝ E),
+              centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i l b *
+                (centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i k b *
+                  chartProjCLM (I := I) (M := M) r s α Idx Jdx b
+                    ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+                        (LeviCivita (I := I) g)).toFun
+                      (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+                        (LeviCivita (I := I) g))
+                        (fun z : M => chartBasisVecFiber (I := I) α k z)
+                        (fun z : M => T₀.toSection z)) b
+                      (chartBasisVecFiber (I := I) α l b)))) +
+          (∑ l : Fin (Module.finrank ℝ E),
+            ∑ k : Fin (Module.finrank ℝ E),
+              centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i l b *
+                (extDerivFun (fun z : M =>
+                    centredOrthoFrameCoordMatrix (I := I) (M := M) g α b i k z)
+                    b (chartBasisVecFiber (I := I) α l b) *
+                  chartProjCLM (I := I) (M := M) r s α Idx Jdx b
+                    (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
+                      (LeviCivita (I := I) g))
+                      (fun z : M => chartBasisVecFiber (I := I) α k z)
+                      (fun z : M => T₀.toSection z) b)))) -
+        chartProjCLM (I := I) (M := M) r s α Idx Jdx b
+          ((TensorRSNabla.tensorRSCovariantDerivative I M r s
+              (LeviCivita (I := I) g)).toFun
+            (fun z : M => T₀.toSection z) b
+            ((LeviCivita (I := I) g).toFun
+              (smoothOrthoFrame (I := I) g b i) b
+              (smoothOrthoFrame (I := I) g b i b))) := by
+    intro i
+    rw [map_sub]
+    rw [centredFrame_proj_summand_expand (I := I) (M := M) g r s T₀ α Idx Jdx i hb]
+  rw [Finset.sum_congr rfl (fun i _ => hsplit_summand i)]
+  rw [Finset.sum_sub_distrib]
+  rw [Finset.sum_add_distrib]
+  rw [centredFrame_proj_principal_eq_invGramPrincipalSum
+    (I := I) (M := M) g r s T₀ α Idx Jdx hb]
+  have hRemEq := hRem T₀ hb
+  linarith [hRemEq]
+
+end B4Bridge
 
 /-- **The open-good-set inverse-Gram coordinate metric-trace identity for the connection-Laplacian
 raw component (a genuine differential-geometric prerequisite).**

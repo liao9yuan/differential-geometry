@@ -842,8 +842,8 @@ theorem deTurckRealizeRemainderOf_gateRepOfWitness (g₀ g_bg : SmoothRiemannian
                   (gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose))
     hmetric
 
-/-- **The continuous regularized eigen-synthesis matching the gate representative's realized
-remainder (the deep construction node, transiting the Weyl node).**
+/-- **The continuous regularized eigen-synthesis matching the gate gauge's realized remainder
+(the deep construction node, transiting the Weyl node).**
 
 For the anchor `g₀`, a flow background `g_bg`, and a supercritical order `a` (`2a > dim M + 4`),
 there is a concrete continuous `(0,2)`-perturbation synthesis `P : Hᵃ⁺¹(g₀) → SmoothCcTensor
@@ -851,34 +851,69 @@ g₀ 0 2`, a Lipschitz rate `K`, and a positive radius `R`, carrying the supercr
 local-Lipschitz control `ChartJet2LipControl g₀ a P K R` (the all-order Gårding/Weyl content of
 a smoothing realization gaining the two derivatives the second-order DeTurck right-hand side
 loses, through the supercritical embedding `Hᵃ⁺¹ ↪ H^{a+2}`, transiting the Weyl node via
-`weyl_realize_weighted_summable_of_closed` / `reproducingKernel_weighted_tsum_le_of_closed`),
-whose realized DeTurck remainder `deTurckRealizeRemainderOf g₀ g_bg (P u)` reproduces, **at the
-`L²`-class level** (through `SmoothCcTensor.toL2`), the realized DeTurck remainder
-`deTurckRealizeRemainderOf g₀ g_bg (gateRepOfWitness g₀ u h)` of the (discontinuous) gate
-representative on the gate-realizable locus.
+`weyl_realize_weighted_summable_of_closed` / `reproducingKernel_weighted_tsum_le_of_closed` /
+`tensorHsSmoothRepr_wtwokTwoNorm_le_uniform`), whose realized DeTurck remainder
+`deTurckRealizeRemainderOf g₀ g_bg (P u)` reproduces, **at the `L²`-class level** (through
+`SmoothCcTensor.toL2`), the gate-based gauge `deTurckRemainderRealizeSection g₀ g_bg u` on the
+gate-realizable locus `realizableAtGate g₀ u`.
 
-This is the genuine deep analytic content, stated *without* reference to the gauge def
-`deTurckRemainderRealizeSection` (the gauge is recovered from this node by the definitional
-bridge `deTurckRealizeRemainderOf_gateRepOfWitness`).  It is the `L²`-class — *not* the section —
-match: a section identity would force `P u = gateRepOfWitness g₀ u h` (through the bare
-rough-Laplacian `Δ_∇` summand), and the gate representative is discontinuous off the locus,
-incompatible with the `H^{a+2}`-Lipschitz control; the realized DeTurck *remainder* is the
+This is the genuine deep analytic content — the single precise missing construction.  It is the
+`L²`-class — *not* the section — match: a section identity would force `P u = gateSmoothRep u`
+(through the bare rough-Laplacian `Δ_∇` summand), and `gateSmoothRep` is discontinuous off the
+locus, incompatible with the `H^{a+2}`-Lipschitz control; the realized DeTurck *remainder* is the
 gauge-cancelled *first-order* operator (the `−λ` blow-up of the bare Laplacian cancels the
 second-order retag principal part), so its `L²`-class is continuous and the continuous synthesis
-`P` reproduces the gate representative's remainder `L²`-class without itself being the
-discontinuous gate representative.
+`P` reproduces the gauge's remainder `L²`-class without itself being the discontinuous gate
+representative.
 
 Trap-screen (§0bis): **T1** — intrinsic only (`ChartJet2LipControl` is stated via `g`-inner
 `gFibreOpBound` and the intrinsic `toHs` Sobolev norm; the match is the `L²`-class identity of
 two intrinsic geometric remainder sections; no `chartJ`).  **Non-vacuous** — the match conjunct
 rejects the degenerate witness `P = 0`: for a realizable `u` with non-degenerate gate
 representative, `deTurckRealizeRemainderOf g₀ g_bg 0` has `L²`-class `deTurckRHSSection g_bg g₀`
-which differs from the gate representative's realized remainder, so the conjunction genuinely
-constrains `P`.  **Not packaging** — this is a posited *sibling* node about the gate
-representative's remainder, never a hypothesis of the consumer
-`exists_deTurckG0_regularizedSynthesis`; the consumer derives the gauge-match from this and the
-bridge.  The body is `sorry` (the deep Weyl-transiting construction), to be discharged by the
-`/prove` recursion. -/
+which differs from the gauge `deTurckRemainderRealizeSection g₀ g_bg u`, so the conjunction
+genuinely constrains `P`.  **Not packaging** — this gauge-match node is *more primitive* than the
+gate-representative-match corollary `exists_deTurckG0_regularizedSynthesis_gateRepMatch`, which is
+proven over it by the definitional bridge `deTurckRealizeRemainderOf_gateRepOfWitness` (a genuine
+rewrite, not a defeq), so its conclusion is never a hypothesis of any consumer.  The body is
+`sorry` (the deep Weyl-transiting construction — a heat-semigroup-regularized smoothing whose
+`H^{a+2}` control comes from the Weyl nodes), to be discharged by the `/prove` recursion. -/
+theorem exists_deTurckG0_regularizedSynthesis_gaugeMatch
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+          Integral.L2.SmoothCcTensor g₀ 0 2)
+        (K : ℝ≥0) (R : ℝ),
+      0 < R ∧
+      ChartJet2LipControl (I := I) (M := M) g₀ a P K R ∧
+      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
+        realizableAtGate (I := I) g₀ u →
+          Integral.L2.SmoothCcTensor.toL2
+              (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))
+            = Integral.L2.SmoothCcTensor.toL2
+                (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := sorry
+
+/-- **The continuous regularized eigen-synthesis matching the gate representative's realized
+remainder (a bridge corollary of the gauge-match construction node).**
+
+For the anchor `g₀`, a flow background `g_bg`, and a supercritical order `a` (`2a > dim M + 4`),
+there is a concrete continuous `(0,2)`-perturbation synthesis `P : Hᵃ⁺¹(g₀) → SmoothCcTensor
+g₀ 0 2`, a Lipschitz rate `K`, and a positive radius `R`, carrying the supercritical `H^{a+2}`
+local-Lipschitz control `ChartJet2LipControl g₀ a P K R`, whose realized DeTurck remainder
+`deTurckRealizeRemainderOf g₀ g_bg (P u)` reproduces, **at the `L²`-class level** (through
+`SmoothCcTensor.toL2`), the realized DeTurck remainder
+`deTurckRealizeRemainderOf g₀ g_bg (gateRepOfWitness g₀ u h)` of the (discontinuous) gate
+representative on the gate-realizable locus.
+
+This is now **proven by composition** (no `sorry` of its own): it forwards the deep
+construction node `exists_deTurckG0_regularizedSynthesis_gaugeMatch` (which carries the
+irreducible Weyl-transiting `H^{a+2}` control and the `L²`-class gauge agreement), and rewrites
+the gauge form into the gate-representative form through the sorry-free definitional bridge
+`deTurckRealizeRemainderOf_gateRepOfWitness`
+(`deTurckRealizeRemainderOf g₀ g_bg (gateRepOfWitness g₀ u h) = deTurckRemainderRealizeSection
+g₀ g_bg u`).  The control and the `P`-side `L²`-class are read verbatim from the construction
+node; only the right-hand side of the match is re-expressed.  Consumers transitively depend on
+`sorryAx` only through the gauge-match construction node and the Weyl node. -/
 theorem exists_deTurckG0_regularizedSynthesis_gateRepMatch
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) :
@@ -893,7 +928,13 @@ theorem exists_deTurckG0_regularizedSynthesis_gateRepMatch
             (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))
           = Integral.L2.SmoothCcTensor.toL2
               (deTurckRealizeRemainderOf (I := I) g₀ g_bg
-                (gateRepOfWitness (I := I) g₀ u h))) := sorry
+                (gateRepOfWitness (I := I) g₀ u h))) := by
+  classical
+  obtain ⟨P, K, R, hR, hctrl, hmatch⟩ :=
+    exists_deTurckG0_regularizedSynthesis_gaugeMatch (I := I) g₀ g_bg a ha
+  refine ⟨P, K, R, hR, hctrl, fun u h => ?_⟩
+  rw [deTurckRealizeRemainderOf_gateRepOfWitness (I := I) g₀ g_bg u h]
+  exact hmatch u h
 
 /-- **The continuous regularized eigen-synthesis with its supercritical `H^{a+2}` control and
 remainder `L²`-class match (the deep construction primitive, transiting the Weyl node).**

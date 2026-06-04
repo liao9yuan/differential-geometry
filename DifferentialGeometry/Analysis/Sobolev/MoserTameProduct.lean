@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseToL2Packaging
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.IntegratedOrder2Garding
+import DifferentialGeometry.Geometry.Connection.Laplacian.RoughLaplacianSecondCovGradL2Bound
 
 /-! # The intrinsic Moser tame product and Gagliardo–Nirenberg interpolation
 
@@ -469,11 +470,16 @@ of a bilinear form is bounded by `dim` times its sup-eigenvalue), and integratin
 bound over the compact manifold gives the displayed `L²` inequality with `K := dim`.  Both sides
 are intrinsic metric `L²` norms; the statement is a valence-uniform real-valued `L²` inequality.
 
-Its body is `sorry`: it isolates the genuine general-valence pointwise trace inequality
-`‖∇²_{Bᵢ,Bᵢ} S (x)‖_{fibre} ≤ ‖∇²S (x)‖_{fibre}` together with its orthonormal-frame fibre-norm
-component comparison and the two-step covariant-gradient evaluation currying — the
-general-valence analogue of the on-disk valence-`2` currying tower, which exists only at fixed
-low valence.  Consumers transitively depend on this `sorryAx`. -/
+It is proven by composition over the general-valence trace bound
+`exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm_gen`
+(`Geometry/Connection/Laplacian/RoughLaplacianSecondCovGradL2Bound.lean`), whose elementary
+metric-trace assembly (the diagonal `g`-trace sum, the `n`-sub-additivity of the squared fibre
+norm, and the pointwise-to-`L²` integration) is fully discharged on top of the single genuine
+general-valence geometric input `secondCovDeriv_unit_frame_fiberNormSq_le`: the orthonormal-frame
+Hessian-component fibre-norm bound `‖∇²_{Bᵢ,Bᵢ} S (x)‖_{fibre} ≤ ‖∇²S (x)‖_{fibre}` (the two-step
+covariant-gradient evaluation currying together with its component comparison — the general-valence
+analogue of the on-disk valence-`2` currying tower, which exists only at fixed low valence). That
+input carries the only `sorry`; consumers transitively depend on its `sorryAx`. -/
 private theorem exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm
     (g : SmoothRiemannianMetric I M) :
     ∃ K : ℝ, 1 ≤ K ∧
@@ -483,7 +489,7 @@ private theorem exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm
           K * Integral.L2.tensorL2Norm (I := I) g 0 (s' + 1 + 1)
             (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) g 0 (s' + 1)
               (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) g 0 s' S)).toFun :=
-  sorry
+  Integral.Connection.exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm_gen (I := I) (M := M) g
 
 /-- **The covariant `L²`-jets of a smooth compactly-supported tensor are log-convex on a
 closed manifold (the covariant Green identity).**

@@ -1135,6 +1135,56 @@ theorem norm_iteratedCovGrad_iteratedCovGrad (g : SmoothRiemannianMetric I M) (r
   norm_heq_congr g r (by omega : (s + a) + b = s + (a + b))
     (iteratedCovGrad_iteratedCovGrad_heq (g := g) (r := r) (s := s) (a := a) (b := b) X)
 
+/-- **Posited deepest covariant-product curvature primitive: the *pointwise fibre-norm* bound on the
+iterated covariant gradient of the single-step commutator defect (rank/order-generic).** For a closed
+smooth Riemannian manifold `(M, g)` there is a *valence/order-dependent* nonnegative constant
+`Cic : ℕ → ℕ → ℝ` such that, at every covariant rank `s`, every gradient order `m`, for every smooth
+compactly-supported `(0, s)`-tensor `T`, and at *every point* `x`, the intrinsic fibre norm of the
+`m`-fold iterated covariant gradient of the order-`2` single-step commutator defect
+`Curv T := pointwiseTensorCurv g s T = Δ_∇(∇T) − ∇(Δ_∇ T)` is bounded by `(Cic s m)²` times the sum of
+the intrinsic fibre norms of the lower iterated gradients `∇^i T` (`i ≤ m + 2`):
+```
+rfns(∇^m(Curv T))(x) ≤ (Cic s m)² · ∑_{i ≤ m + 2} rfns(∇^i T)(x).
+```
+
+This is the genuine rank-generic *and* order-generic moving-frame third-order Bochner–Weitzenböck
+curvature-jet content — the order-`m` generalization of the `m = 0` fibre bound
+`exists_pointwiseTensorCurv_pointwise_fiberNormSq_bound`
+(`rfns(Curv T)(x) ≤ (Ccurv s)²·(rfns(T) + rfns(∇T) + rfns(∇²T))(x)`). The defect `Curv T` is a
+second-order curvature(-derivative) operator in `T` whose top order *cancels* by the iterated Ricci
+identity (`ricci_identity_tensor_commutator_eq_riemannOp`, the rank-generic
+`secondCovDeriv_covGrad_antisymm_eq_riemannOp_gen`): applying `∇^m` produces one more contraction of a
+covariant derivative of curvature against each one-higher iterated gradient `∇^{≤ m + 2} T`, all
+sup-bounded on the compact manifold by the uniform curvature / differentiated-curvature sups
+`exists_uniform_riemannianFiberNormSq_riemannOp_bound`,
+`exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound`. The fibre bound holds at order
+`m + 2` (not `m + 3`) precisely because the top-order `∇^{m + 3} T` terms cancel between the two
+summands `∇^m(Δ_∇∇T)` and `∇^m(∇Δ_∇T)` of the defect — the genuine curvature content that a naive
+per-summand Sobolev order-count (which would land at order `m + 3`) cannot recover.
+
+The constant is valence/order-dependent because the tensor-bundle curvature endomorphism is an
+`O(s + m)`-slot derivation and the curvature-derivative term count grows with `m` (a single scalar
+uniform over all `s, m` is unsatisfiable on a non-flat closed manifold). It is the strictly-more-
+primitive *pointwise* form: the `L²` bound
+`exists_iteratedCovGrad_pointwiseTensorCurv_l2_bound` is *proved* from it through the purely analytic
+finite-sum pointwise-to-`L²` packaging `tensorL2Norm_le_of_pointwise_fiberNormSq_bound_sum`
+(`‖·‖² = ∫ rfns(·)`, integral monotonicity and `∑ pᵢ² ≤ (∑ pᵢ)²`), exactly as the `m = 0` `L²` bound
+`exists_pointwiseTensorCurv_l2_bound` is proved from the `m = 0` fibre bound. The degenerate witness
+is rejected because at `m = 0`, `x` arbitrary, the bound reads
+`rfns(Curv T)(x) ≤ (Cic s 0)²·(rfns(T) + rfns(∇T) + rfns(∇²T))(x)`, which is *false* with `Cic s 0 = 0`
+on a non-flat manifold (the defect carries the genuine curvature contraction of `T`). -/
+theorem exists_iteratedCovGrad_pointwiseTensorCurv_pointwise_fiberNormSq_bound
+    (g : SmoothRiemannianMetric I M) :
+    ∃ Cic : ℕ → ℕ → ℝ, (∀ s m, 0 ≤ Cic s m) ∧
+      ∀ (s m : ℕ) (T : SmoothCcTensor g 0 s) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + m) x
+            ((iteratedCovGrad g 0 (s + 1) m
+              (pointwiseTensorCurv (I := I) (M := M) g s T)).toSection x) ≤
+          Cic s m ^ 2 * ∑ i ∈ Finset.range (m + 3),
+            riemannianFiberNormSq (I := I) (M := M) g 0 (s + i) x
+              ((iteratedCovGrad g 0 s i T).toSection x) := by
+  sorry
+
 /-- **Posited covariant-product curvature primitive: the iterated covariant gradient of the
 single-step commutator defect is `L²`-controlled by the lower iterated gradients of its argument.**
 For a closed smooth Riemannian manifold `(M, g)` there is a *valence/order-dependent* nonnegative
@@ -1169,7 +1219,16 @@ theorem exists_iteratedCovGrad_pointwiseTensorCurv_l2_bound (g : SmoothRiemannia
       ∀ (s m : ℕ) (T : SmoothCcTensor g 0 s),
         ‖iteratedCovGrad g 0 (s + 1) m (pointwiseTensorCurv (I := I) (M := M) g s T)‖ ≤
           Cic s m * ∑ i ∈ Finset.range (m + 3), ‖iteratedCovGrad g 0 s i T‖ := by
-  sorry
+  classical
+  obtain ⟨Cic, hCic_nn, hpt⟩ :=
+    exists_iteratedCovGrad_pointwiseTensorCurv_pointwise_fiberNormSq_bound (I := I) (M := M) g
+  refine ⟨Cic, hCic_nn, fun s m T => ?_⟩
+  -- The `m`-fold iterated gradient of `Curv T` is bounded fibrewise by `(Cic s m)²·∑_{i<m+3} rfns(∇^i T)`;
+  -- the finite-sum pointwise-to-`L²` packaging upgrades it to the `L²` operator bound.
+  exact tensorL2Norm_le_of_pointwise_fiberNormSq_bound_sum (I := I) (M := M) g
+    (c := s + 1 + m) (m + 3) (fun i => s + i) (fun i => iteratedCovGrad g 0 s i T)
+    (iteratedCovGrad g 0 (s + 1) m (pointwiseTensorCurv (I := I) (M := M) g s T))
+    (Cic s m) (hCic_nn s m) (hpt s m T)
 
 /-- **The iterated-gradient commutator-defect `L²` bound (general gradient order, proved from the
 covariant-product curvature input by induction).** For a closed smooth Riemannian manifold `(M, g)`

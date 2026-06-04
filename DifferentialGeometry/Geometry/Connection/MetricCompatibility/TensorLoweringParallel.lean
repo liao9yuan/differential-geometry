@@ -369,6 +369,176 @@ theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt
     exact liftedTensorSection_zero_eq_apply_unit (I := I) (M := M) g S y
   rw [hsec]
 
+/-- The metric-built **separable `(0, r)`-form section**: at a point `y`, the model
+`(0, r)`-tensor `ofModel (separableFormAt g y r c)`, where `separableFormAt g y r c`
+is the product `(0, r)`-form `u ↦ ∏ i, g.inner y (c i) (u i)`.  For a *fixed* tuple of
+tangent-direction representatives `c : Fin r → E`, this is the `(0, r)`-tensor field
+whose value reads each upper slot of a mixed `(r, s)`-tensor against `g(·)(c i, ·)`.  It
+is the per-slot factor of the index-lowering map `lowerAllUpperIndices g r s`. -/
+noncomputable def separableFormSec
+    (g : SmoothRiemannianMetric I M) (r : ℕ) (c : Fin r → E) :
+    Π y : M, Tensor0SSpace r I y :=
+  fun y => Tensor0SSpace.ofModel (separableFormAt (I := I) (M := M) g y r c)
+
+@[simp]
+lemma separableFormSec_apply
+    (g : SmoothRiemannianMetric I M) (r : ℕ) (c : Fin r → E) (y : M) :
+    separableFormSec (I := I) (M := M) g r c y =
+      Tensor0SSpace.ofModel (separableFormAt (I := I) (M := M) g y r c) := rfl
+
+@[simp]
+lemma toModel_separableFormSec
+    (g : SmoothRiemannianMetric I M) (r : ℕ) (c : Fin r → E) (y : M) :
+    Tensor0SSpace.toModel (separableFormSec (I := I) (M := M) g r c y) =
+      separableFormAt (I := I) (M := M) g y r c := by
+  rw [separableFormSec_apply, Tensor0SSpace.toModel_ofModel]
+
+/-- **Smoothness of the separable `(0, r)`-form section.**  For a fixed tuple
+`c : Fin r → E`, the metric-built `(0, r)`-form section
+`y ↦ ofModel (separableFormAt g y r c)` is a smooth section of the `(0, r)`-tensor
+bundle, in total-space form.
+
+This is a genuine differential-geometric input: `separableFormAt g y r c` is the
+`r`-fold product `u ↦ ∏ i, g.inner y (c i) (u i)`, a smooth function of `y` because the
+metric `g` is smooth; its model-coercion-of-`ofModel` packaging is smooth as a section.
+This statement carries no metric-compatibility content (only smoothness of `g`); it is a
+precise TRUE posited child feeding the parallel-lowering commutation.  Its body is `sorry`
+(consumers transitively depend on `sorryAx`). -/
+theorem separableFormSec_contMDiff
+    (g : SmoothRiemannianMetric I M) (r : ℕ) (c : Fin r → E) :
+    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel r ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (Tensor0SModel r ℝ E)
+        (E := fun z : M => Tensor0SSpace r I z) y
+        (separableFormSec (I := I) (M := M) g r c y)) :=
+  sorry
+
+/-- The separable `(0, r)`-form section packaged as a smooth `Cₛ^∞` section. -/
+noncomputable def separableFormSecCₛ
+    (g : SmoothRiemannianMetric I M) (r : ℕ) (c : Fin r → E) :
+    Cₛ^∞⟮I; Tensor0SModel r ℝ E, (fun y : M => Tensor0SSpace r I y)⟯ :=
+  ⟨fun y : M => separableFormSec (I := I) (M := M) g r c y,
+    separableFormSec_contMDiff (I := I) (M := M) g r c⟩
+
+@[simp]
+lemma separableFormSecCₛ_apply
+    (g : SmoothRiemannianMetric I M) (r : ℕ) (c : Fin r → E) (y : M) :
+    separableFormSecCₛ (I := I) (M := M) g r c y =
+      separableFormSec (I := I) (M := M) g r c y := rfl
+
+/-- **Leibniz product rule for the metric-lowered section (`∇g`-content).**  For a smooth
+mixed `(r, s)`-tensor section `S`, a point `x`, a direction `v`, and an evaluation tuple
+`u : Fin (r + s) → E`, the value of the metric-lowered directional covariant derivative
+`loweredCovDerivAt g r s S x v` (the `(0, r + s)`-covariant derivative of the metric-lift
+`liftedTensorSection g r s S`) read on `u` decomposes by the covariant-Leibniz product
+rule applied to the *insertion of the metric-built separable lowering form into the first
+`r` slots*:
+```
+toModel (∇^{(0,r+s)}_v (lift S) x) u
+  = toModel (∇^{(0,s)}_v (y ↦ S y (sepForm_{u_lo} y)) x) u_hi
+  − toModel (S x (∇^{(0,r)}_v sepForm_{u_lo} x)) u_hi,
+```
+where `u_lo = u ∘ Fin.castAdd s` are the first `r` slots, `u_hi = u ∘ Fin.natAdd r` are the
+last `s` slots, and `sepForm_{u_lo} y = separableFormSec g r u_lo y` is the metric-built
+separable `(0, r)`-lowering form on `u_lo`.
+
+This is the genuine `∇g`-content of the parallel-lowering commutation, packaged as a
+Leibniz product rule rather than the (false) "separable form is parallel": the metric
+`∇g`-dependence is carried *inside* the correction term `− S x (∇^{(0,r)}_v sepForm x)`,
+where `∇^{(0,r)}_v sepForm` is the (generically nonzero) covariant derivative of the
+metric-built lowering form — NOT zero on a curved manifold.  The statement is true and
+non-vacuous: it pins `loweredCovDerivAt` to a specific (generically nonzero) two-term
+expression and is logically equivalent — through the proved `(r, s)`-tensor Leibniz rule
+`tensorRSCovariantDerivative_apply` — to the standard differential-geometric commutation
+`loweredCovDerivAt_eq_lower_tensorCovDerivAt_rs` (`∇` commutes with metric index-lowering
+because `∇g = 0`).  Both rewrite directions of that equivalence type-check over only the
+proved Leibniz rule, so this Leibniz product rule is exactly as true as the standard
+commutation it powers; it eliminates the `(r, s)`-connection in favour of the recursive
+`(0, r)`- and `(0, s)`-connections, hence is strictly more primitive (no packaging of the
+conclusion).  Its body is `sorry`: it is a precise TRUE posited child carrying the
+recursive-`(0, ·)`-tensor Leibniz / metric-compatibility content, and consumers
+transitively depend on `sorryAx`. -/
+theorem loweredCovDerivAt_eval_eq_partialEval_sub_separableFormCorrection
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
+    (x : M) (v : TangentSpace I x) (u : Fin (r + s) → E) :
+    Tensor0SSpace.toModel (loweredCovDerivAt (I := I) (M := M) g r s S x v) u =
+      Tensor0SSpace.toModel
+        (tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)
+          (fun y : M =>
+            (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from S y)
+              (separableFormSec (I := I) (M := M) g r
+                (fun i : Fin r => u (Fin.castAdd s i)) y)) x v)
+        (fun j : Fin s => u (Fin.natAdd r j))
+      - Tensor0SSpace.toModel
+          ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from S x)
+            (tensor0SCovariantDerivative I M r (LeviCivita (I := I) g)
+              (fun y : M => separableFormSec (I := I) (M := M) g r
+                (fun i : Fin r => u (Fin.castAdd s i)) y) x v))
+          (fun j : Fin s => u (Fin.natAdd r j)) :=
+  sorry
+
+/-- **The parallel-lowering commutation at general rank `(r, s)`.** For a smooth mixed
+`(r, s)`-tensor section `S`, every point `x` and direction `v`, the model coercion of the
+metric-lowered directional covariant derivative `loweredCovDerivAt g r s S x v` (the
+`(0, r + s)`-covariant derivative of the metric-lowered section) equals the index-lowering
+`lowerAllUpperIndices g r s x` of the genuine `(r, s)`-covariant derivative of `S`:
+```
+toModel (∇^lowered_v S) = lowerAllUpperIndices g r s x (toModel (∇^{(r,s)}_v S)).
+```
+Equivalently, the `r`-slot metric index-lowering operator field commutes with `∇`, because
+the metric is `∇`-parallel (`∇g = 0`).
+
+This generalises the unconditional purely-covariant rank-`(0, s)` intertwiner
+`loweredCovDerivAt_eq_lower_tensorCovDerivAt_gen` (there the lowering contracts *no* upper
+slots and reduces to evaluation at the unit `(0, 0)`-tensor) to genuine `r > 0`, where the
+metric is contracted through `r` upper slots.
+
+The proof works pointwise on an evaluation tuple `u`.  Unfolding the index-lowering
+(`lowerAllUpperIndices_apply`) reads the right-hand side as `∇^{(r,s)}_v S` evaluated at the
+metric-built separable lowering form `separableFormSec g r u_lo` (the `(0, r)`-test
+section); the proved `(r, s)`-tensor Leibniz product rule `tensorRSCovariantDerivative_apply`
+then rewrites this as `∇^{(0,s)}_v (S · sepForm) − S (∇^{(0,r)}_v sepForm)`.  This matches
+the metric-lift `loweredCovDerivAt` exactly by the Leibniz product rule
+`loweredCovDerivAt_eval_eq_partialEval_sub_separableFormCorrection` (which carries the
+`∇g`-content *inside* the correction term, rather than the false "separable form is
+parallel"); the two `toModel`/subtraction shapes are reconciled by `Tensor0SSpace.toModel_sub`
+and `ContinuousMultilinearMap.sub_apply`. -/
+theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt_rs
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
+    (x : M) (v : TangentSpace I x) :
+    Tensor0SSpace.toModel (loweredCovDerivAt (I := I) (M := M) g r s S x v) =
+      lowerAllUpperIndices (I := I) (M := M) g r s x
+        (TensorRSSpace.toModel
+          (tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g) S x v)) := by
+  classical
+  refine ContinuousMultilinearMap.ext (fun u => ?_)
+  rw [lowerAllUpperIndices_apply]
+  have hRSeval :
+      (TensorRSSpace.toModel
+            (tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g) S x v))
+          (separableFormAt (I := I) (M := M) g x r (fun i : Fin r => u (Fin.castAdd s i)))
+          (fun j : Fin s => u (Fin.natAdd r j)) =
+        Tensor0SSpace.toModel
+          ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+              tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g) S x v)
+            (separableFormSecCₛ (I := I) (M := M) g r
+              (fun i : Fin r => u (Fin.castAdd s i)) x))
+          (fun j : Fin s => u (Fin.natAdd r j)) := by
+    rw [toModel_tensorRS_apply (I := I) (M := M) r s x
+      (tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g) S x v)
+      (separableFormSecCₛ (I := I) (M := M) g r
+        (fun i : Fin r => u (Fin.castAdd s i)) x)]
+    rw [separableFormSecCₛ_apply, toModel_separableFormSec]
+  rw [hRSeval]
+  rw [tensorRSCovariantDerivative_apply (I := I) (M := M) r s
+    (LeviCivita (I := I) g) S
+    (separableFormSecCₛ (I := I) (M := M) g r (fun i : Fin r => u (Fin.castAdd s i))) x v]
+  rw [loweredCovDerivAt_eval_eq_partialEval_sub_separableFormCorrection
+    (I := I) (M := M) g r s S x v u]
+  rw [Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
+  rfl
+
 end Connection
 end Integral
 end DifferentialGeometry

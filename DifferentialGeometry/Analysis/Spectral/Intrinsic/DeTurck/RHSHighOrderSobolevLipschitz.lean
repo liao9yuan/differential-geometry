@@ -488,6 +488,74 @@ theorem exists_iteratedCovGrad_l2Norm_le_toHs
     _ ≤ C₁ * ((k + 1 : ℕ) * (C₂ * N)) := mul_le_mul_of_nonneg_left hlap_sum hC₁_nn
     _ = C₁ * ((k + 1 : ℕ) * C₂) * N := by ring
 
+/-- **The covariant-jet fibre-norm Lipschitz bound for the re-tagged Ricci–DeTurck right-hand-side
+difference (the genuine atomic covariant Faà-di-Bruno chain-rule core, in un-squared fibre-norm
+Lipschitz form with the honest order budget).**
+
+For an anchor `g₀`, a flow background `g_bg`, an order `a`, a supercriticality hypothesis
+`ha : 2 * a > Module.finrank ℝ E + 4`, and a uniform `H^{a+2}`-size bound `B ≥ 0`, there is a
+single constant `C ≥ 0` such that for any two `g₀`-fibre-small perturbations `T₁, T₂` whose
+`H^{a+2}` norms are `≤ B`, any two realized metrics `g₁, g₂` of `T₁, T₂` (tied by the fibrewise
+`inner`-identities), every covariant-gradient order `j ≤ 2 * a`, and **every base point `x`**, the
+`g₀`-Riemannian fibre *norm* (un-squared) of the `j`-th intrinsic iterated covariant gradient of
+the re-tagged DeTurck right-hand-side section difference is bounded *pointwise* by `C` times the
+finite sum, over covariant-gradient orders `i ≤ j + 2`, of the `g₀`-Riemannian fibre *norms* of the
+iterated covariant gradients `∇^i(T₁ − T₂)` of the perturbation difference:
+```
+√(rfns g₀ 0 (2+j) x (∇^j (D₁ − D₂) x))
+  ≤ C · ∑_{i ∈ range (j+3)} √(rfns g₀ 0 (2+i) x (∇^i (T₁ − T₂) x))   (j ≤ 2a),
+```
+where `Dₖ = deTurckRHSRetag g₀ g_bg gₖ` and `√(rfns …) = ‖·‖` is the `g₀`-fibre norm.
+
+This is the genuine **covariant Faà-di-Bruno expansion** of the *non-linear* summand `Ric + Lie`
+of the second-order Ricci–DeTurck right-hand side, in the natural **fibre-norm Lipschitz** form: the
+chart right-hand side `deTurckRicciRHS g_bg g = -2 • Ric(g) + 𝓛_{W(g)} g` is a smooth (fibrewise)
+function `F` of the metric `≤2`-jet `(g, ∇g, ∇²g)` and the fibre-inverse `g⁻¹`; by the covariant
+fundamental theorem of calculus along the **segment metric** `g_t = g₂ + t·(g₁ − g₂)` the difference
+`F(g₁) − F(g₂) = ∫₀¹ DF(g_t)·(g₁ − g₂) dt`, whose `j`-th covariant gradient is, by the covariant
+product/chain rule (covariant Leibniz over the contraction), a finite sum of contracted products of
+a **segment-metric `≤(j+2)`-jet coefficient** (a fibrewise-polynomial expression in the `≤(j+2)`-jets
+of the *segment* metric `g_t` and the bounded fibre-inverses, uniformly fibre-norm bounded on the
+compact `M` over the `H^{a+2}`-bounded `B`-family by the supercritical embedding `H^{2(a+2)} ↪ C²`
+implied by `ha`) with an iterated covariant gradient `∇^i(g₁ − g₂)` of order `i ≤ j + 2` of the
+metric difference.  Since the fibrewise `inner`-difference makes `(g₁ − g₂).inner =
+ccTensorBilinSymm g₀ (T₁ − T₂)` the realized bilinear form of `T₁ − T₂`, each `∇^i(g₁ − g₂)` is
+fibre-norm-controlled (the realization `T ↦ ccTensorBilinSymm g₀ T` being a bounded smooth bundle
+map whose covariant jets are bounded combinations of the perturbation's covariant jets) by the
+`≤ i`-order covariant gradients of `T₁ − T₂`; the per-point triangle inequality over the finite
+Faà-di-Bruno index set, folding the coefficient sup into `C`, yields the fibre-norm sum bound.
+
+Its conclusion is a *real-valued pointwise* fibre-*norm* (un-squared) Lipschitz inequality — at each
+base point `x`, in the `g₀`-Riemannian fibre norm, with the **honest order budget** `i ≤ j + 2`
+(the second-order operator gains two derivatives, no more) and a single uniform constant `C` —
+structurally distinct from the parent leaf's **squared** fibre-norm-square conclusion with the slack
+budget `i ≤ 2a + 2`; no packaging.  The supercriticality hypothesis `ha` is genuinely required for
+the uniform-over-the-`B`-family fibre-norm bound on the segment-metric `≤2`-jet coefficient.  Its
+body is `sorry`: it is the genuine atomic covariant-Faà-di-Bruno segment-metric fibre-norm expansion
+(the `Ric + Lie` summand only — the linear `Δ_∇` summand is handled separately), with no
+spectral-nonlinearity, perturbation-indexed-remainder, or Weyl dependence. -/
+theorem exists_deTurckRHSRetagDiff_iteratedCovGrad_fiberNorm_le_perturbationJet
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+        (g₁ g₂ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+        ∀ j : ℕ, j ≤ 2 * a → ∀ x : M,
+          Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) g₀ 0 (2 + j) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+                  (deTurckRHSRetag (I := I) g₀ g_bg g₁
+                    - deTurckRHSRetag (I := I) g₀ g_bg g₂)).toSection x))
+            ≤ C * ∑ i ∈ Finset.range (j + 3),
+                Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) g₀ 0 (2 + i) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)).toSection x)) :=
+  sorry
+
 /-- **The pointwise covariant Faà-di-Bruno fibre-norm-square bound for the re-tagged
 Ricci–DeTurck right-hand-side difference (the genuine atomic segment-metric covariant chain-rule
 core, stated *pointwise* in `g₀`-Riemannian fibre-norm-squares).**
@@ -530,10 +598,22 @@ in the `g₀`-Riemannian fibre norm — structurally distinct from the integrate
 (semi)norm conclusion of the parent leaf (which lifts this pointwise bound to `L²` by the
 pointwise-to-`L²` packaging and re-absorbs the `C⁰`-redistribution through the order-`a`
 chart-Sobolev term); no packaging.  The supercriticality hypothesis `ha` is genuinely required for
-the uniform-over-the-`B`-family fibre-norm bound on the segment-metric `≤2`-jet coefficient.  Its
-body is `sorry`: it is the genuine atomic pointwise covariant-Faà-di-Bruno segment-metric fibre-norm
-expansion (the `Ric + Lie` summand only — the linear `Δ_∇` summand is handled separately), with no
-spectral-nonlinearity, perturbation-indexed-remainder, or Weyl dependence. -/
+the uniform-over-the-`B`-family fibre-norm bound on the segment-metric `≤2`-jet coefficient.
+
+It is **proven by composition** (TRANSIT glue) of the genuine atomic covariant-Faà-di-Bruno
+fibre-*norm* (un-squared) Lipschitz primitive
+`exists_deTurckRHSRetagDiff_iteratedCovGrad_fiberNorm_le_perturbationJet` (the covariant chain-rule
+expansion of `∇^j(D₁ − D₂)` in the `g₀`-Riemannian fibre *norm*, pointwise bounded by `C` times the
+fibre-norm sum, over the *honest* order budget `i ≤ j + 2`, of the perturbation-difference covariant
+jets): squaring the un-squared bound (both sides nonnegative, via `Real.sq_sqrt` on the nonnegative
+fibre-norm-square `√(rfns)² = rfns`) gives `rfns(∇^j(D₁ − D₂)) ≤ C² · (∑_{i ≤ j+2} √rfnsᵢ)²`, the
+finite-sum Cauchy–Schwarz `sq_sum_le_card_mul_sum_sq` collapses `(∑_{i ≤ j+2} √rfnsᵢ)² ≤
+(j+3) · ∑_{i ≤ j+2} rfnsᵢ` (`Real.sq_sqrt` again on each nonnegative summand), the budget extends
+`j + 3 ≤ 2a + 3` (all summands nonnegative), and the `j`-dependent factor `j + 3 ≤ 2a + 3` is
+absorbed into the uniform constant `C² · (2a + 3) = (C · √(2a+3))²`.  Consumers transitively depend
+on `sorryAx` only through the genuine atomic fibre-norm Lipschitz primitive (the `Ric + Lie` summand
+only — the linear `Δ_∇` summand is handled separately), with no spectral-nonlinearity,
+perturbation-indexed-remainder, or Weyl dependence. -/
 theorem exists_segmentMetricFaaDiBruno_covGrad_fiberNormSq_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) :
@@ -553,8 +633,71 @@ theorem exists_segmentMetricFaaDiBruno_covGrad_fiberNormSq_le
                     - deTurckRHSRetag (I := I) g₀ g_bg g₂)).toSection x)
             ≤ C ^ 2 * ∑ i ∈ Finset.range (2 * a + 3),
                 Integral.Connection.riemannianFiberNormSq (I := I) g₀ 0 (2 + i) x
-                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)).toSection x) :=
-  sorry
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)).toSection x) := by
+  classical
+  -- The genuine atomic covariant-Faà-di-Bruno fibre-*norm* (un-squared) Lipschitz primitive: each
+  -- `√(rfns(∇^j(D₁−D₂)))` is bounded by `C₀ · ∑_{i ≤ j+2} √(rfns(∇^i(T₁−T₂)))` (honest budget).
+  obtain ⟨C₀, hC₀_nn, hC₀⟩ :=
+    exists_deTurckRHSRetagDiff_iteratedCovGrad_fiberNorm_le_perturbationJet
+      (I := I) g₀ g_bg a ha B hB
+  -- Leaf constant `C := C₀ · √(2a+3)`; squaring gives `C² = C₀² · (2a+3)`.
+  refine ⟨C₀ * Real.sqrt (2 * a + 3), mul_nonneg hC₀_nn (Real.sqrt_nonneg _),
+    fun T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j hj x => ?_⟩
+  -- Abbreviations for the per-order fibre-norm-squares of the right-hand-side difference and the
+  -- perturbation difference.
+  set rhsSq : ℝ := Integral.Connection.riemannianFiberNormSq (I := I) g₀ 0 (2 + j) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+          (deTurckRHSRetag (I := I) g₀ g_bg g₁
+            - deTurckRHSRetag (I := I) g₀ g_bg g₂)).toSection x) with hrhsSq_def
+  set pertSq : ℕ → ℝ := fun i =>
+    Integral.Connection.riemannianFiberNormSq (I := I) g₀ 0 (2 + i) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)).toSection x) with hpertSq_def
+  have hpertSq_nn : ∀ i, 0 ≤ pertSq i := fun i =>
+    Integral.Connection.riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + i) x _
+  have hrhsSq_nn : 0 ≤ rhsSq :=
+    Integral.Connection.riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + j) x _
+  -- The fibre-norm primitive, in the present abbreviations: `√rhsSq ≤ C₀ · ∑_{i<j+3} √pertSqᵢ`.
+  have hnorm : Real.sqrt rhsSq ≤ C₀ * ∑ i ∈ Finset.range (j + 3), Real.sqrt (pertSq i) :=
+    hC₀ T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j hj x
+  -- Step 1: square the fibre-norm bound.  `rhsSq = (√rhsSq)² ≤ (C₀ · ∑ √pertSqᵢ)²`.
+  have hsq_lhs : rhsSq = (Real.sqrt rhsSq) ^ 2 := (Real.sq_sqrt hrhsSq_nn).symm
+  have hsum_nn : 0 ≤ ∑ i ∈ Finset.range (j + 3), Real.sqrt (pertSq i) :=
+    Finset.sum_nonneg (fun i _ => Real.sqrt_nonneg _)
+  have hsquared : rhsSq ≤ (C₀ * ∑ i ∈ Finset.range (j + 3), Real.sqrt (pertSq i)) ^ 2 := by
+    rw [hsq_lhs]
+    exact pow_le_pow_left₀ (Real.sqrt_nonneg _) hnorm 2
+  -- Step 2: Cauchy–Schwarz collapse `(∑_{i<j+3} √pertSqᵢ)² ≤ (j+3) · ∑_{i<j+3} pertSqᵢ`.
+  have hCS : (∑ i ∈ Finset.range (j + 3), Real.sqrt (pertSq i)) ^ 2 ≤
+      ((j + 3 : ℕ) : ℝ) * ∑ i ∈ Finset.range (j + 3), pertSq i := by
+    have h := sq_sum_le_card_mul_sum_sq (s := Finset.range (j + 3))
+      (f := fun i => Real.sqrt (pertSq i))
+    rw [Finset.card_range] at h
+    refine h.trans (le_of_eq ?_)
+    refine congrArg (((j + 3 : ℕ) : ℝ) * ·) (Finset.sum_congr rfl (fun i _ => ?_))
+    exact Real.sq_sqrt (hpertSq_nn i)
+  -- The honest order budget `j + 3 ≤ 2a + 3` (from `j ≤ 2a`).
+  have hj3 : j + 3 ≤ 2 * a + 3 := by omega
+  -- Step 3: extend the order budget `range (j+3) ⊆ range (2a+3)` (all summands nonnegative).
+  have hbudget : ∑ i ∈ Finset.range (j + 3), pertSq i ≤ ∑ i ∈ Finset.range (2 * a + 3), pertSq i :=
+    Finset.sum_le_sum_of_subset_of_nonneg
+      (Finset.range_subset_range.mpr hj3) (fun i _ _ => hpertSq_nn i)
+  -- Step 4: chain, with the `j`-dependent factor `(j+3)` dominated by `(2a+3)`.
+  have hjle : ((j + 3 : ℕ) : ℝ) ≤ ((2 * a + 3 : ℕ) : ℝ) := by exact_mod_cast hj3
+  have hsumtot_nn : 0 ≤ ∑ i ∈ Finset.range (2 * a + 3), pertSq i :=
+    Finset.sum_nonneg (fun i _ => hpertSq_nn i)
+  have hsqrt_sq : Real.sqrt (2 * a + 3) ^ 2 = (2 * a + 3 : ℝ) :=
+    Real.sq_sqrt (by positivity)
+  calc rhsSq
+      ≤ (C₀ * ∑ i ∈ Finset.range (j + 3), Real.sqrt (pertSq i)) ^ 2 := hsquared
+    _ = C₀ ^ 2 * (∑ i ∈ Finset.range (j + 3), Real.sqrt (pertSq i)) ^ 2 := by rw [mul_pow]
+    _ ≤ C₀ ^ 2 * (((j + 3 : ℕ) : ℝ) * ∑ i ∈ Finset.range (j + 3), pertSq i) :=
+        mul_le_mul_of_nonneg_left hCS (sq_nonneg _)
+    _ ≤ C₀ ^ 2 * (((2 * a + 3 : ℕ) : ℝ) * ∑ i ∈ Finset.range (2 * a + 3), pertSq i) := by
+        refine mul_le_mul_of_nonneg_left ?_ (sq_nonneg _)
+        exact mul_le_mul hjle hbudget
+          (Finset.sum_nonneg (fun i _ => hpertSq_nn i)) (by positivity)
+    _ = (C₀ * Real.sqrt (2 * a + 3)) ^ 2 * ∑ i ∈ Finset.range (2 * a + 3), pertSq i := by
+        rw [mul_pow, hsqrt_sq]; push_cast; ring
 
 /-- **The covariant Faà-di-Bruno Moser-tame `L²`-jet bound for the segment-metric `2`-jet (the
 genuine atomic segment-metric covariant chain-rule core).**
