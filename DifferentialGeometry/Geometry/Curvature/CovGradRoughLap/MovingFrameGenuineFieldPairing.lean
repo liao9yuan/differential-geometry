@@ -172,12 +172,12 @@ theorem exists_pointwiseTensorCurv_movingFrameField_orderSeparated_bracketFreePa
   obtain ⟨Cper, hCper_nn, hdata⟩ :=
     exists_GcurvSection_orderSeparatedBounds_movingFrameDivergence (I := I) (M := M) g
   refine ⟨Cper, hCper_nn, fun s S => ?_⟩
-  obtain ⟨hcurv, hcurvDeriv, hrem, X, hdiv⟩ := hdata s S
+  obtain ⟨hcurv, hcurvDeriv, hrem, hnull⟩ := hdata s S
   refine ⟨GcurvSection (I := I) (M := M) g s S, GcurvDerivSection (I := I) (M := M) g s S,
     hcurv, hcurvDeriv, hrem, ?_⟩
-  exact tensorL2Inner_genuineFields_covGrad_eq_pointwiseTensorCurv_of_pointwise_divergence
+  exact tensorL2Inner_genuineFields_covGrad_eq_pointwiseTensorCurv_of_movingFrameRemainder_nullity
     (I := I) (M := M) g s S
-    (GcurvSection (I := I) (M := M) g s S) (GcurvDerivSection (I := I) (M := M) g s S) X hdiv
+    (GcurvSection (I := I) (M := M) g s S) (GcurvDerivSection (I := I) (M := M) g s S) hnull
 
 end Connection
 end Integral

@@ -206,6 +206,67 @@ theorem tensorL2Inner_genuineFields_covGrad_eq_pointwiseTensorCurv_of_pointwise_
   rw [hnull] at hsplit
   linarith [hsplit]
 
+/-- **The bracket-free `L²` pairing from the integrated moving-frame nullity.** Fix a closed smooth
+Riemannian manifold `(M, g)`, a covariant rank `s`, a smooth compactly-supported `(0, s)`-tensor `S`,
+and two genuine curvature fields `Gcurv`, `GcurvDeriv : SmoothCcTensor g 0 (s + 1)`. If the integrated
+moving-frame nullity holds — the global metric `L²` pairing of the moving-frame remainder
+`Curv S − Gcurv − GcurvDeriv` (`Curv S := pointwiseTensorCurv g s S`) against `∇S = covGrad g 0 s S`
+vanishes,
+
+```
+⟨Curv S − Gcurv − GcurvDeriv, ∇S⟩_{L²} = 0,
+```
+
+— then the genuine fields carry the entire curvature cross-pairing:
+
+```
+⟨Gcurv + GcurvDeriv, ∇S⟩_{L²} = ⟨Curv S, ∇S⟩_{L²}.
+```
+
+This is the integrated-form sibling of
+`tensorL2Inner_genuineFields_covGrad_eq_pointwiseTensorCurv_of_pointwise_divergence`: it consumes the
+integrated nullity directly (the divergence datum's already-integrated half) rather than the pointwise
+`=ᵐ divᵍ X` datum, so the consumer never threads the divergence current `X`. The proof writes
+`Curv S = (Gcurv + GcurvDeriv) + (Curv S − Gcurv − GcurvDeriv)`, splits the `L²` pairing by left
+additivity (`tensorL2Inner_add_left`, the cross-term integrabilities supplied by
+`SmoothCcTensor.integrable_inner_cross`), and drops the remainder term by the supplied nullity. The
+nullity is the genuine moving-frame third-order curvature content (the frame-summed bracket remainder
+is a total covariant divergence of an `∇S`-order field, integrating to zero); it is *false* for an
+arbitrary pair `Gcurv, GcurvDeriv` and holds exactly for the genuine curvature fields, so it is a
+genuine mathematical hypothesis, not a posited universal. -/
+theorem tensorL2Inner_genuineFields_covGrad_eq_pointwiseTensorCurv_of_movingFrameRemainder_nullity
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    (Gcurv GcurvDeriv : SmoothCcTensor g 0 (s + 1))
+    (hnull : tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (pointwiseTensorCurv (I := I) (M := M) g s S - Gcurv - GcurvDeriv).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun = 0) :
+    tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Gcurv + GcurvDeriv).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun =
+      tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (pointwiseTensorCurv (I := I) (M := M) g s S).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun := by
+  classical
+  set Curv : SmoothCcTensor g 0 (s + 1) := pointwiseTensorCurv (I := I) (M := M) g s S with hCurv
+  set gradS : SmoothCcTensor g 0 (s + 1) := covGrad (I := I) (M := M) g 0 s S with hgrad
+  have hCurv_eq : Curv = (Gcurv + GcurvDeriv) + (Curv - Gcurv - GcurvDeriv) := by abel
+  have hfun : ((Gcurv + GcurvDeriv) + (Curv - Gcurv - GcurvDeriv)).toFun =
+      (Gcurv + GcurvDeriv).toFun + (Curv - Gcurv - GcurvDeriv).toFun :=
+    SmoothCcTensor.toFun_add _ _
+  have hint₁ := SmoothCcTensor.integrable_inner_cross (I := I) (M := M) (Gcurv + GcurvDeriv) gradS
+  have hint₂ :=
+    SmoothCcTensor.integrable_inner_cross (I := I) (M := M) (Curv - Gcurv - GcurvDeriv) gradS
+  have hsplit :
+      tensorL2Inner (I := I) (M := M) g 0 (s + 1) Curv.toFun gradS.toFun =
+        tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Gcurv + GcurvDeriv).toFun gradS.toFun +
+          tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+            (Curv - Gcurv - GcurvDeriv).toFun gradS.toFun := by
+    nth_rewrite 1 [hCurv_eq]
+    rw [hfun]
+    exact tensorL2Inner_add_left (I := I) (M := M) g 0 (s + 1)
+      (Gcurv + GcurvDeriv).toFun (Curv - Gcurv - GcurvDeriv).toFun gradS.toFun hint₁ hint₂
+  rw [hnull] at hsplit
+  linarith [hsplit]
+
 end Connection
 end Integral
 end DifferentialGeometry

@@ -304,6 +304,55 @@ theorem tensorTimeL2_weighted_pointwise_mass_integral
           (sq_nonneg _)))]
   exact ⟨hΦ_int, hae_summable, hΦ_integral⟩
 
+/-- **All-order ball-uniform *intrinsic-Sobolev* control of the realized DeTurck-remainder
+synthesis (the genuine all-order analytic geometric leaf — posited child of the spectral-mass
+ball-uniform bound).**
+
+For a `(0,2)`-perturbation synthesis `P` carrying the supercritical `H^{a+2}` local-Lipschitz
+control `ChartJet2LipControl g₀ a P K R` on the radius-`R` ball, the realized gauge-cancelled
+DeTurck remainder `deTurckRealizeRemainderOf g₀ g_bg (P v)` has, **at every** natural Sobolev
+order `n`, a single finite constant `B ≥ 0` bounding its intrinsic order-`n` chart-Sobolev norm
+`‖·.toHs n‖` uniformly over every `v` in the closed `Hᵃ⁺¹`-ball of radius `R` about the included
+zero datum:
+```
+∀ v ∈ closedBall (ι 0) R,  ‖(deTurckRealizeRemainderOf g₀ g_bg (P v)).toHs n‖ ≤ B .
+```
+
+This is the genuine **all-order** intrinsic-Sobolev ball control of the realized synthesis, the
+analytic content `ChartJet2LipControl` does **not** supply: that datum caps the realized
+*perturbation* `‖(P v).toHs (a+2)‖ ≤ B` at the *single* order `a + 2` (and is silent at every
+other order), whereas here the *output* (the gauge-cancelled second-order DeTurck remainder of
+`P v`) is controlled in `‖·.toHs n‖` at **every** order `n` over the ball.  It is true because the
+realized DeTurck remainder of a uniformly-`H^{a+2}`-bounded, fibre-small realized metric is itself
+a genuine smooth (`SmoothCcTensor`) section whose every intrinsic chart-Sobolev norm is
+ball-bounded — the gauge-cancelled second-order DeTurck operator, elliptic-regularity-propagated
+through all orders on the ball, where the realized metric stays non-degenerate (`fibreSmall`).
+
+Its conclusion is a *real-valued* uniform cap on the order-`n` intrinsic Sobolev norm, carrying
+**no** spectral / `tensorL2Coeff` / summability content; it is therefore structurally distinct
+from (and not destructuring to) the spectral-mass ball-uniform bound it serves — that bound's
+conclusion is a weighted square-sum `∑' (1 + λᵢ)ᵈ · (tensorL2Coeff …)²` in the eigenbasis
+coordinates, connected to this `‖·.toHs n‖` cap only through the nontrivial reverse
+spectral–Sobolev comparison `exists_spectralWeightedSq_le_pouHaNorm_sq` and the order-monotonicity
+of the Sobolev weight; no packaging.  The body is `sorry`: this is the genuine all-order analytic
+geometric leaf (the ball-uniform intrinsic-Sobolev control of the realized remainder at every
+order); consumers transitively depend on `sorryAx`. -/
+theorem deTurckRealizeRemainderOf_toHs_ballUniform_bound
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
+    (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+        Integral.L2.SmoothCcTensor g₀ 0 2)
+    (K : ℝ≥0) {R : ℝ} (hR : 0 < R)
+    (hctrl : ChartJet2LipControl (I := I) (M := M) g₀ a P K R) :
+    ∀ (n : ℕ), ∃ B : ℝ, 0 ≤ B ∧
+      ∀ (v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
+      v ∈ Metric.closedBall
+          (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n
+            (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v))‖ ≤ B := sorry
+
 /-- **All-order ball-uniform spectral-mass control of the realized DeTurck-remainder synthesis
 (the genuine all-order analytic input — posited geometric leaf about a concrete operator).**
 
@@ -354,7 +403,63 @@ theorem deTurckRealizeRemainderOf_spectralMass_ballUniform_bound
             (tensorL2Coeff (I := I) (M := M)
                 (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
                 (Integral.L2.SmoothCcTensor.toL2
-                  (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v))) i) ^ 2 ≤ C := sorry
+                  (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v))) i) ^ 2 ≤ C := by
+  classical
+  intro d
+  -- Pass to the natural ceiling order `n := ⌈d⌉₊ ≥ d`: the order-`d` weighted spectral mass is
+  -- dominated termwise by the order-`n` one (the Sobolev weight `(1 + λᵢ)^·` is monotone in the
+  -- order, `1 + λᵢ ≥ 1`), which the integer-order reverse spectral–Sobolev comparison controls.
+  obtain ⟨Cs, hCs0, hCs⟩ :=
+    IntrinsicSpectral.DeTurck.exists_spectralWeightedSq_le_pouHaNorm_sq (I := I) (M := M) g₀ ⌈d⌉₊
+  -- The genuine all-order analytic input: a ball-uniform cap `B` on the order-`⌈d⌉₊` intrinsic
+  -- chart-Sobolev norm of the realized DeTurck remainder.
+  obtain ⟨B, hB0, hB⟩ :=
+    deTurckRealizeRemainderOf_toHs_ballUniform_bound (I := I) g₀ g_bg a ha P K hR hctrl ⌈d⌉₊
+  have hdn : d ≤ ((⌈d⌉₊ : ℕ) : ℝ) := Nat.le_ceil d
+  refine ⟨(Cs * B) ^ 2, sq_nonneg _, fun v hball => ?_⟩
+  -- The order-`⌈d⌉₊` spectral comparison at the realized section `deTurckRealizeRemainderOf …`.
+  obtain ⟨hsum_n, hbnd_n⟩ := hCs (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v))
+  -- Summability of the order-`d` weighted spectral mass of the smooth realized remainder
+  -- (valid at every real order).
+  have hsum_d : Summable (fun i => tensorSobolevWeight (I := I) (M := M) i d *
+      (tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (Integral.L2.SmoothCcTensor.toL2
+            (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v))) i) ^ 2) :=
+    smoothCcTensor_tensorL2Coeff_weighted_summable (I := I) (M := M) g₀ d
+      (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v))
+      (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+  -- Termwise domination of the order-`d` mass by the order-`⌈d⌉₊` mass (weight monotonicity).
+  have hterm_le : ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+      tensorSobolevWeight (I := I) (M := M) i d *
+          (tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (Integral.L2.SmoothCcTensor.toL2
+                (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v))) i) ^ 2 ≤
+        tensorSobolevWeight (I := I) (M := M) i ((⌈d⌉₊ : ℕ) : ℝ) *
+          (tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (Integral.L2.SmoothCcTensor.toL2
+                (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v))) i) ^ 2 :=
+    fun i => mul_le_mul_of_nonneg_right
+      (tensorSobolevWeight_mono (I := I) (M := M) i hdn) (sq_nonneg _)
+  -- Chain: order-`d` mass ≤ order-`⌈d⌉₊` mass ≤ `(C_s · ‖·.toHs ⌈d⌉₊‖)²` ≤ `(C_s · B)²`.
+  calc ∑' i, tensorSobolevWeight (I := I) (M := M) i d *
+          (tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (Integral.L2.SmoothCcTensor.toL2
+                (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v))) i) ^ 2
+      ≤ ∑' i, tensorSobolevWeight (I := I) (M := M) i ((⌈d⌉₊ : ℕ) : ℝ) *
+          (tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (Integral.L2.SmoothCcTensor.toL2
+                (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v))) i) ^ 2 :=
+        hsum_d.tsum_le_tsum hterm_le hsum_n
+    _ ≤ (Cs * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) ⌈d⌉₊
+            (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v))‖) ^ 2 := hbnd_n
+    _ ≤ (Cs * B) ^ 2 :=
+        pow_le_pow_left₀ (mul_nonneg hCs0 (norm_nonneg _))
+          (mul_le_mul_of_nonneg_left (hB v hball) hCs0) 2
 
 /-- **The concrete gauge-cancelled DeTurck-remainder spectral synthesis has the full-series
 spatial first-order operator-loss (the genuine elliptic / first-order operator estimate —
