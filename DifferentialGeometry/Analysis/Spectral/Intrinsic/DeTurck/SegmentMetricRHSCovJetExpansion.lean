@@ -144,7 +144,14 @@ summand `𝓛_{W(g, g_bg)} g`.  Both are promoted to genuine smooth compactly-su
 sections (`SmoothCcTensor g 0 2`), so the section difference `F(g₁) − F(g₂)` splits additively as
 `-2 • (Ric(g₁) − Ric(g₂)) + (Lie(g₁) − Lie(g₂))`.  This is the additive bridge over which the
 target's per-order covariant `L²` bound reduces to the two **per-field** covariant-Faà-di-Bruno
-`L²` primitives (each a separately-reusable Nemytskii estimate). -/
+`L²` primitives (each a separately-reusable Nemytskii estimate).  Each per-field primitive's bound
+is the **Hamilton/Moser tame product** shape: a difference-redistribution part plus a *cross term*
+carrying the unbounded top coefficient jet `∇^{j+2}g_t` (order `j + 2 ∈ (a + 2, 2a + 2]`, NOT
+controlled by an `H^{a+2}` ball) in `L²` against the difference's `C⁰`/`toHs a` factor — finite on
+each fixed `(T₁, T₂)`, ball-bounded only at the terminal absorption (`exists_iteratedCovGrad_l2Norm_le_toHs`
+through the `H^{a+2}`-`B`-ball, where the cross-term coefficient collapses into the Lipschitz
+constant).  An `H^{a+2}` ball cannot bound an `H^{a+3+}` jet; the cross term is exactly the device
+that keeps the bound TRUE while never claiming the top jet pointwise or ball-controlled in isolation. -/
 
 /-- The model `(0,2)`-multilinear value of the **Ricci-tensor** bilinear form `-2 • Ric(g) x`
 (the curvature summand of the Ricci–DeTurck right-hand side), via `bilinFormToModel`. -/
@@ -417,10 +424,12 @@ of **intrinsic order capped at `2`**.  For an anchor `g₀`, an order `a`, a sup
 `C` such that for any two `g₀`-fibre-small perturbations `T₁, T₂` with `H^{a+2}` norms `≤ B`, any two
 realized metrics `g₁, g₂` of `T₁, T₂`, and every order `j ≤ 2 * a`, the metric `L²` (semi)norm of the
 `j`-th covariant gradient of the `g₀`-retagged curvature-summand difference
-`ricciNeg2RetagG0 g₀ g₁ − ricciNeg2RetagG0 g₀ g₂` is dominated by the **Moser-tame redistributed sum**
+`ricciNeg2RetagG0 g₀ g₁ − ricciNeg2RetagG0 g₀ g₂` is dominated by the **Hamilton/Moser-tame sum**
+(a difference-redistribution part plus a fixed-pair cross term)
 ```
 ‖∇^j (ricciNeg2RetagG0 g₁ − ricciNeg2RetagG0 g₂)‖_{L²}
-  ≤ C j · ( ‖(T₁ − T₂).toHs a‖ + ∑_{i ≤ j + 2} ‖∇^i (T₁ − T₂)‖_{L²} )     (for j ≤ 2 * a).
+  ≤ C j · ( ‖(T₁ − T₂).toHs a‖ + ∑_{i ≤ j + 2} ‖∇^i (T₁ − T₂)‖_{L²} )
+    + C j · ( ∑_{i ≤ j + 2} (‖∇^i T₁‖_{L²} + ‖∇^i T₂‖_{L²}) ) · ‖(T₁ − T₂).toHs a‖   (for j ≤ 2 * a).
 ```
 
 This is the covariant Faà-di-Bruno expansion of the curvature nonlinearity, lifted to `L²` by the
@@ -439,15 +448,25 @@ Sobolev embedding folds into the order-`a` chart-Sobolev term `‖(T₁ − T₂
 `≤ i`-order covariant gradients of `T₁ − T₂` (the realization gains no derivatives,
 `exists_riemannianFiberNormSq_iteratedCovGrad_realizeSymm_le_jetSum`).
 
-**Why this is `L²`, not pointwise.**  The FdB `i = 0` term `[∇^{j+2}g_t]·(g₁ − g₂)` carries a
-pointwise-`∇^{j+2}g_t` coefficient, *pointwise-unbounded* over the `H^{a+2}` ball for `j ≥ 1` (only the
-`≤2`-jet sup exists; `H^{a+2} ↪ C²` only).  Its `L²` form `‖∇^{j+2}g_t‖_{L²}·‖g₁ − g₂‖_{C⁰}` keeps the
-unbounded top jet in `L²` (its mass `B`-controlled, `j + 2 ≤ 2a + 2`) and the difference's `C⁰` factor in
-the redistribution term `‖(T₁ − T₂).toHs a‖`; **no jet of order `> 2` is ever taken pointwise**.
+**Why this is `L²`, with a Hamilton-tame cross term — and why a plain ball-bound is FALSE.**  The
+FdB `i = 0` term `[∇^{j+2}g_t]·(g₁ − g₂)` carries the **top coefficient jet** `∇^{j+2}g_t`, whose
+`L²` mass has order `j + 2`.  For `j ∈ (a, 2a]` this is order `j + 2 ∈ (a + 2, 2a + 2]`, which an
+`H^{a+2}` ball **cannot** bound (interpolation only goes down; a high-frequency `T₂⁽ᵏ⁾` in the ball
+has `‖∇^{a+3}T₂⁽ᵏ⁾‖_{L²} → ∞`).  So the older "its mass `B`-controlled, `j + 2 ≤ 2a + 2`" reading is
+FALSE — it conflated the gradient-order *range* with `H^{a+2}`-ball *control*.  The honest bound is
+the standard **Hamilton/Moser tame product**: the difference-redistribution part
+`C j · (‖(T₁ − T₂).toHs a‖ + ∑_{i ≤ j+2} ‖∇^i(T₁ − T₂)‖)` plus a **cross term**
+`C j · (∑_{i ≤ j+2} (‖∇^i T₁‖ + ‖∇^i T₂‖)) · ‖(T₁ − T₂).toHs a‖`, in which the unbounded top jet
+rides on the **fixed-pair** `L²` norms `∑(‖∇^i T₁‖ + ‖∇^i T₂‖)` (finite for each fixed `T₁, T₂`)
+against the difference's `C⁰`/`toHs a` factor `‖(T₁ − T₂).toHs a‖`.  The cross-term coefficient is
+ball-bounded **only at the terminal absorption** (`exists_iteratedCovGrad_l2Norm_le_toHs` through the
+`H^{a+2}`-`B`-ball, order budget `i ≤ 2a + 2 ≤ 2(a + 2)`), where it collapses into the Lipschitz
+constant — that deferral is the whole point.  **No jet of order `> 2` is ever taken pointwise.**
 
 **Non-vacuity.**  A degenerate `C ≡ 0` is rejected: at `j = 0`, for perturbations with
 `Ric(g₁) ≠ Ric(g₂)` on a positive-measure set, the left side is `> 0` while `0 · (…) = 0`,
 contradicting the bound; so `C 0 > 0` and the domination genuinely uses the perturbation difference.
+The cross term's `∑(‖∇^i T₁‖ + ‖∇^i T₂‖)` genuinely uses **both** endpoints, so it is not vacuous.
 
 Its body is `sorry`: the curvature half of the genuine atomic covariant-Faà-di-Bruno (Nemytskii) `L²`
 expansion — the deep metric-jet analytic content of the Ricci nonlinearity, with NO pointwise-`C^{>2}`-jet
@@ -470,7 +489,11 @@ theorem exists_ricciNeg2Diff_faaDiBruno_moserTame_l2Norm_le
                 - ricciNeg2RetagG0 (I := I) g₀ g₂)‖ ≤
             C j * (‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
                 + ∑ i ∈ Finset.range (j + 2 + 1),
-                    ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖) :=
+                    ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖)
+              + C j * (∑ i ∈ Finset.range (j + 2 + 1),
+                    (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
+                      + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
+                  * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ :=
   sorry
 
 /-- **The per-field covariant-Faà-di-Bruno Moser-tame `L²` domination of the segment-metric
@@ -486,24 +509,29 @@ Neumann factors carrying intrinsic order `0`), of **intrinsic order capped at `2
 any two `g₀`-fibre-small perturbations `T₁, T₂` with `H^{a+2}` norms `≤ B`, any two realized metrics
 `g₁, g₂` of `T₁, T₂`, and every order `j ≤ 2 * a`, the metric `L²` (semi)norm of the `j`-th covariant
 gradient of the `g₀`-retagged Lie-summand difference
-`lieDerivRetagG0 g₀ g_bg g₁ − lieDerivRetagG0 g₀ g_bg g₂` is dominated by the **Moser-tame redistributed
-sum**
+`lieDerivRetagG0 g₀ g_bg g₁ − lieDerivRetagG0 g₀ g_bg g₂` is dominated by the **Hamilton/Moser-tame
+sum** (a difference-redistribution part plus a fixed-pair cross term)
 ```
 ‖∇^j (lieDerivRetagG0 g₁ − lieDerivRetagG0 g₂)‖_{L²}
-  ≤ C j · ( ‖(T₁ − T₂).toHs a‖ + ∑_{i ≤ j + 2} ‖∇^i (T₁ − T₂)‖_{L²} )     (for j ≤ 2 * a).
+  ≤ C j · ( ‖(T₁ − T₂).toHs a‖ + ∑_{i ≤ j + 2} ‖∇^i (T₁ − T₂)‖_{L²} )
+    + C j · ( ∑_{i ≤ j + 2} (‖∇^i T₁‖_{L²} + ‖∇^i T₂‖_{L²}) ) · ‖(T₁ − T₂).toHs a‖   (for j ≤ 2 * a).
 ```
 
 This is the covariant Faà-di-Bruno expansion of the Lie/`deTurckVF` nonlinearity, lifted to `L²` by the
-intrinsic Moser tame product (same redistribution structure as the curvature half): the top redistributed
-coefficient derivative (the FdB `i = 0` term's `∇^{j+2}g_t` factor, *pointwise-unbounded* over the
-`H^{a+2}` ball for `j ≥ 1`) is kept in `L²` against the difference factor's `C⁰`/`L^∞` factor folded into
-`‖(T₁ − T₂).toHs a‖`, and the single high derivative lands on the perturbation factor in `L²`; **no jet
-of order `> 2` is ever taken pointwise**.  Since `(g₁ − g₂).inner = ccTensorBilinSymm g₀ (T₁ − T₂)`, the
-metric-difference jets are the perturbation-difference jets.
+intrinsic Moser tame product (same Hamilton-tame structure as the curvature half).  The top coefficient
+derivative (the FdB `i = 0` term's `∇^{j+2}g_t` factor) has `L²` mass of order `j + 2 ∈ (a + 2, 2a + 2]`
+for `j ∈ (a, 2a]`, which an `H^{a+2}` ball **cannot** bound (interpolation only goes down).  So the bound
+is NOT the plain difference-redistribution form: that unbounded top jet is carried by the **cross term**,
+riding on the **fixed-pair** `L²` norms `∑(‖∇^i T₁‖ + ‖∇^i T₂‖)` (finite for each fixed `T₁, T₂`) against
+the difference's `C⁰`/`L^∞` factor `‖(T₁ − T₂).toHs a‖`; the cross-term coefficient is ball-bounded only
+at the terminal absorption.  **No jet of order `> 2` is ever taken pointwise.**  Since
+`(g₁ − g₂).inner = ccTensorBilinSymm g₀ (T₁ − T₂)`, the metric-difference jets are the
+perturbation-difference jets.
 
 **Non-vacuity.**  A degenerate `C ≡ 0` is rejected: at `j = 0`, for perturbations with
 `𝓛_{W(g₁)} g₁ ≠ 𝓛_{W(g₂)} g₂` on a positive-measure set, the left side is `> 0` while `0 · (…) = 0`,
 contradicting the bound; so `C 0 > 0` and the domination genuinely uses the perturbation difference.
+The cross term's `∑(‖∇^i T₁‖ + ‖∇^i T₂‖)` genuinely uses **both** endpoints, so it is not vacuous.
 
 Its body is `sorry`: the gauge half of the genuine atomic covariant-Faà-di-Bruno (Nemytskii) `L²`
 expansion — the deep metric-jet analytic content of the Lie/`deTurckVF` nonlinearity, with NO
@@ -526,7 +554,11 @@ theorem exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le
                 - lieDerivRetagG0 (I := I) g₀ g_bg g₂)‖ ≤
             C j * (‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
                 + ∑ i ∈ Finset.range (j + 2 + 1),
-                    ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖) :=
+                    ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖)
+              + C j * (∑ i ∈ Finset.range (j + 2 + 1),
+                    (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
+                      + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
+                  * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ :=
   sorry
 
 /-- **The per-order covariant-Faà-di-Bruno Moser-tame `L²` domination of the segment-metric
@@ -542,11 +574,13 @@ covariant-Leibniz factors, and the finitely many contraction-shape constants) su
 `g₁, g₂` of `T₁, T₂` (tied by the fibrewise `inner`-identities), and every covariant-gradient order
 `j ≤ 2 * a`, the metric `L²` (semi)norm of the `j`-th covariant gradient of the **re-tagged DeTurck
 right-hand-side section difference** `deTurckRHSRetagG0 g₀ g_bg g₁ − deTurckRHSRetagG0 g₀ g_bg g₂` is
-dominated by the **Moser-tame redistributed sum** — an order-`a` chart-Sobolev `C⁰`-redistribution
-term against the iterated covariant `L²`-gradients of the perturbation difference `T₁ − T₂`:
+dominated by the **Hamilton/Moser-tame sum** — an order-`a` chart-Sobolev `C⁰`-redistribution
+term against the iterated covariant `L²`-gradients of the perturbation difference `T₁ − T₂`, plus a
+fixed-pair cross term carrying the unbounded top coefficient jet:
 ```
 ‖∇^j (deTurckRHSRetagG0 g₁ − deTurckRHSRetagG0 g₂)‖_{L²}
-  ≤ C j · ( ‖(T₁ − T₂).toHs a‖ + ∑_{i ≤ j + 2} ‖∇^i (T₁ − T₂)‖_{L²} )     (for j ≤ 2 * a).
+  ≤ C j · ( ‖(T₁ − T₂).toHs a‖ + ∑_{i ≤ j + 2} ‖∇^i (T₁ − T₂)‖_{L²} )
+    + C j · ( ∑_{i ≤ j + 2} (‖∇^i T₁‖_{L²} + ‖∇^i T₂‖_{L²}) ) · ‖(T₁ − T₂).toHs a‖   (for j ≤ 2 * a).
 ```
 
 This is the genuine **covariant Faà-di-Bruno expansion** of the *non-linear* summand `Ric + Lie` of
@@ -571,25 +605,29 @@ the realized bilinear form of `T₁ − T₂`, each `∇^i(g₁ − g₂)` is `L
 covariant gradients of `T₁ − T₂` (the realization gains no derivatives,
 `exists_riemannianFiberNormSq_iteratedCovGrad_realizeSymm_le_jetSum`).
 
-**Why this is TRUE — and why it is `L²`, not pointwise.** An earlier *pointwise* `rfns` form of this
-domination (`rfns(∇^j(…)) ≤ Cf j · ∑_{i ≤ j+2} rfns(∇^i(T₁ − T₂))`, with **no** `C⁰`-redistribution
-slot) is FALSE for `j ≥ 1`: the covariant-FdB `i = 0` term `[∇^j DF(g_t)]·(g₁ − g₂)` carries a
-pointwise-`∇^{j+2}g_t` coefficient, which is *pointwise-unbounded* over the `H^{a+2}` ball (only the
-`≤2`-jet sup exists — `H^{a+2} ↪ C²` only) times an order-`0` difference factor; a `T₂` with an
-exploding pointwise `(j+2)`-jet at a point (`H^{a+2}`-legal) and `T₁ := T₂ + S` (fixing the small RHS
-difference) drives the pointwise left side to `∞` while the pointwise right side stays bounded.  The
-present statement is at the **`L²` level with the `C⁰`-redistribution term**: that very `i = 0` term
-is `‖[∇^{j+2}g_t]·(g₁ − g₂)‖_{L²} ≤ ‖∇^{j+2}g_t‖_{L²}·‖g₁ − g₂‖_{C⁰}` — the unbounded top jet is kept
-in `L²` (its `L²` mass, for `j + 2 ≤ 2a + 2`, is `B`-controlled through the realize/segment
-`L²`-jets) and the difference's `C⁰`/`L^∞` factor is the redistribution term `‖(T₁ − T₂).toHs a‖`, so
-no jet of order `> 2` is ever taken pointwise.  This is exactly the Moser-tame redistribution that
-makes the bound hold on a manifold of dimension `≥ 4`.
+**Why this is TRUE — and why a plain ball-bound is FALSE, requiring a Hamilton-tame cross term.**
+An earlier *pointwise* `rfns` form (no `C⁰`-redistribution slot) is FALSE for `j ≥ 1`; but so is the
+naive `L²` difference-only form `Cf j · (‖(T₁ − T₂).toHs a‖ + ∑_{i ≤ j+2} ‖∇^i(T₁ − T₂)‖)` for
+`j ∈ (a, 2a]`.  The covariant-FdB `i = 0` term `[∇^{j+2}g_t]·(g₁ − g₂)` carries the **top coefficient
+jet** `∇^{j+2}g_t`, whose `L²` mass has order `j + 2 ∈ (a + 2, 2a + 2]`.  An `H^{a+2}` ball **cannot**
+bound such an `H^{a+3+}` jet (interpolation only goes down): take a high-frequency `T₂⁽ᵏ⁾` in the ball
+with `‖∇^{a+3}T₂⁽ᵏ⁾‖_{L²} → ∞` and `T₁ := T₂⁽ᵏ⁾ + εU`; then `(1/ε)·`LHS at `j = 2a` blows up along
+`k` while `(1/ε)·`(difference-only RHS) stays fixed — a counterexample.  The honest bound is the
+standard **Hamilton/Moser tame product**: the difference-redistribution part plus the **cross term**
+`C j · (∑_{i ≤ j+2} (‖∇^i T₁‖ + ‖∇^i T₂‖)) · ‖(T₁ − T₂).toHs a‖`, in which that very `i = 0` term is
+`‖[∇^{j+2}g_t]·(g₁ − g₂)‖_{L²} ≤ ‖∇^{j+2}g_t‖_{L²}·‖g₁ − g₂‖_{C⁰}` with the unbounded top jet kept in
+`L²` on the **fixed pair** `T₁, T₂` (finite for each fixed pair) and the difference's `C⁰`/`L^∞`
+factor in `‖(T₁ − T₂).toHs a‖`.  The cross-term coefficient `∑(‖∇^i T₁‖ + ‖∇^i T₂‖)` is ball-bounded
+**only at the terminal absorption** (`exists_iteratedCovGrad_l2Norm_le_toHs` through the
+`H^{a+2}`-`B`-ball, order budget `i ≤ 2a + 2 ≤ 2(a + 2)`), where it collapses into the Lipschitz
+constant exactly as the difference-redistribution term does — that deferral is the whole point.  No
+jet of order `> 2` is ever taken pointwise.
 
 **Trap-screen.** The metric jet enters pointwise ONLY through its `≤2`-jet sup (no pointwise sup of
-any order-`>2` metric jet, unavailable for `finrank ≥ 4` — the false-embedding lesson, encoded by the
-`L²`/`C⁰`-redistribution split above); the constant `C` is a *family* over the unbounded gradient
-order `j`; and the uniform `Λ`/`Λ₀`/`L²`-jet budget is scoped to the supercritical `H^{a+2}`-bounded
-`B`-family (`ha`).
+any order-`>2` metric jet, unavailable for `finrank ≥ 4` — the false-embedding lesson); the unbounded
+top jet rides in `L²` on the fixed pair inside the cross term, never ball-bounded in isolation; the
+constant `C` is a *family* over the unbounded gradient order `j`; and the uniform `Λ`/`Λ₀`/`L²`-jet
+budget is scoped to the supercritical `H^{a+2}`-bounded `B`-family (`ha`) only at the terminal absorption.
 
 **Non-vacuity.** A degenerate `C ≡ 0` is rejected: at `j = 0`, for perturbations with
 `deTurckRHSRetagG0 g₁ ≠ deTurckRHSRetagG0 g₂` on a positive-measure set (e.g. `T₁ ≠ T₂` producing
@@ -628,7 +666,11 @@ theorem exists_segmentMetricRHSDiff_faaDiBruno_moserTame_l2Norm_le
                 - deTurckRHSRetagG0 (I := I) g₀ g_bg g₂)‖ ≤
             C j * (‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
                 + ∑ i ∈ Finset.range (j + 2 + 1),
-                    ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖) := by
+                    ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖)
+              + C j * (∑ i ∈ Finset.range (j + 2 + 1),
+                    (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
+                      + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
+                  * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ := by
   classical
   -- The two per-field covariant-Faà-di-Bruno Moser-tame `L²` primitives (curvature and Lie halves).
   obtain ⟨Cric, hCric_nn, hCric⟩ :=
@@ -638,7 +680,7 @@ theorem exists_segmentMetricRHSDiff_faaDiBruno_moserTame_l2Norm_le
   -- The combined per-order constant.
   refine ⟨fun j => Cric j + Clie j, fun j => add_nonneg (hCric_nn j) (hClie_nn j), ?_⟩
   intro T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j hj
-  -- Abbreviate the common redistributed sum (nonnegative).
+  -- Abbreviate the common difference-redistribution sum and the fixed-pair cross factor.
   set R : ℝ := ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
       + ∑ i ∈ Finset.range (j + 2 + 1),
           ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖ with hR_def
@@ -670,8 +712,20 @@ theorem exists_segmentMetricRHSDiff_faaDiBruno_moserTame_l2Norm_le
           ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
             (lieDerivRetagG0 (I := I) g₀ g_bg g₁ - lieDerivRetagG0 (I := I) g₀ g_bg g₂)‖ :=
         norm_add_le _ _
-    _ ≤ Cric j * R + Clie j * R := add_le_add hric hlie
-    _ = (Cric j + Clie j) * R := by ring
+    _ ≤ (Cric j * R + Cric j * (∑ i ∈ Finset.range (j + 2 + 1),
+              (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
+                + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
+            * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖)
+          + (Clie j * R + Clie j * (∑ i ∈ Finset.range (j + 2 + 1),
+              (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
+                + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
+            * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖) :=
+        add_le_add hric hlie
+    _ = (Cric j + Clie j) * R + (Cric j + Clie j) * (∑ i ∈ Finset.range (j + 2 + 1),
+              (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
+                + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
+            * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ := by
+        ring
 
 end DeTurck
 end IntrinsicSpectral
