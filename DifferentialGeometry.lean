@@ -745,6 +745,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureContractio
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureContractionParallelProduct
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.Defs
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLocality
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.AbstractChartPull
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.AbstractChartPullCutoff
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.ChartTransition.ChartTransitionTransportCLM
