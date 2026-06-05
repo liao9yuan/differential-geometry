@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformCurvatureSup
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformProportionalCurvatureSup
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricContractionLeibnizGrid
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedDiffOpProportionalBound
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FiberNormSubadditivity
 
 /-! # The covariant-Leibniz curvature-coefficient grid for the metric contraction, constructed
@@ -60,6 +62,7 @@ specialisation. -/
 
 noncomputable section
 
+set_option backward.isDefEq.respectTransparency false
 set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
@@ -208,6 +211,38 @@ theorem covGrad_diffCurvOp_eq (p r : ℕ) (W : SmoothCcTensor g 0 r) :
           (covGrad (I := I) (M := M) g 0 r W))) + _
   rw [sub_add_cancel]
 
+/-- **The order-`0` differentiated-curvature contraction is a fibrewise curvature operator.** The
+order-`0` base `diffCurvOp 0 r = curvatureContraction g r · hX hY = R(X, Y)·` is `ℝ`-linear in its
+section and value-local (its fibre value at `x` is `riemannOp (tensorCov g 0 r) x (X x) (Y x) (W x)`,
+reading only `W (x)`, by `curvatureContraction_toSection_apply`) — the `IsOrderZeroCurvFactor`
+fingerprint for the differentiated-curvature tower. -/
+theorem diffCurvOp_isOrderZeroCurvFactor :
+    IsOrderZeroCurvFactor (I := I) (M := M) g (diffCurvOp (I := I) (M := M) g hX hY) where
+  linear := by
+    intro r c₁ c₂ W₁ W₂ x
+    rw [show (diffCurvOp (I := I) (M := M) g hX hY 0 r (c₁ • W₁ + c₂ • W₂)).toSection x =
+          (curvatureContraction (I := I) (M := M) g r (c₁ • W₁ + c₂ • W₂) hX hY).toSection x from rfl,
+      show (diffCurvOp (I := I) (M := M) g hX hY 0 r W₁).toSection x =
+          (curvatureContraction (I := I) (M := M) g r W₁ hX hY).toSection x from rfl,
+      show (diffCurvOp (I := I) (M := M) g hX hY 0 r W₂).toSection x =
+          (curvatureContraction (I := I) (M := M) g r W₂ hX hY).toSection x from rfl,
+      curvatureContraction_toSection_apply (I := I) (M := M) g r (c₁ • W₁ + c₂ • W₂) hX hY x,
+      curvatureContraction_toSection_apply (I := I) (M := M) g r W₁ hX hY x,
+      curvatureContraction_toSection_apply (I := I) (M := M) g r W₂ hX hY x]
+    rw [show (c₁ • W₁ + c₂ • W₂).toSection x = c₁ • W₁.toSection x + c₂ • W₂.toSection x from by
+      rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply,
+        SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
+        SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply]]
+    rw [map_add, map_smul, map_smul]
+  local' := by
+    intro r W₁ W₂ x hx
+    rw [show (diffCurvOp (I := I) (M := M) g hX hY 0 r W₁).toSection x =
+          (curvatureContraction (I := I) (M := M) g r W₁ hX hY).toSection x from rfl,
+      show (diffCurvOp (I := I) (M := M) g hX hY 0 r W₂).toSection x =
+          (curvatureContraction (I := I) (M := M) g r W₂ hX hY).toSection x from rfl,
+      curvatureContraction_toSection_apply (I := I) (M := M) g r W₁ hX hY x,
+      curvatureContraction_toSection_apply (I := I) (M := M) g r W₂ hX hY x, hx]
+
 /-- **Posited continuous per-order, per-rank section-proportional fibre envelope for the
 differentiated-curvature contraction.** For a closed smooth Riemannian manifold `(M, g)` and smooth
 global tangent fields `X, Y`, and at every differentiation order `p` **and covariant rank `r`**, there
@@ -256,7 +291,55 @@ theorem exists_continuous_proportional_diffCurvOp (p : ℕ) :
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + p) x
             ((diffCurvOp (I := I) (M := M) g hX hY p r W).toSection x) ≤
           Cp r x * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x) := by
-  sorry
+  classical
+  -- Non-negativity of `g.inner x v v` (metric positive-definiteness).
+  have hgnn : ∀ (x : M) (v : TangentSpace I x), 0 ≤ g.inner x v v := by
+    intro x v
+    rcases eq_or_ne v 0 with hv0 | hv0
+    · rw [hv0]; simp
+    · exact (g.pos x v hv0).le
+  -- Smoothness (hence continuity) of the metric self-pairings of the global frame fields `X`, `Y`.
+  have hgcont : ∀ (Z : Π b : M, TangentSpace I b),
+      ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Z) → Continuous (fun x : M => g.inner x (Z x) (Z x)) := by
+    intro Z hZ
+    have hg : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+        (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+          (E := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) b (g.inner b)) :=
+      g.contMDiff
+    have hgZ : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) ∞
+        (fun b : M => TotalSpace.mk' (E →L[ℝ] ℝ)
+          (E := fun y : M => TangentSpace I y →L[ℝ] ℝ) b (g.inner b (Z b))) :=
+      ContMDiff.clm_bundle_apply (E₁ := fun y : M => TangentSpace I y)
+        (E₂ := fun y : M => TangentSpace I y →L[ℝ] ℝ) (b := fun b : M => b)
+        (ϕ := fun b => g.inner b) (v := fun b => Z b) hg hZ
+    exact (cotangentCov_pairing_contMDiff hgZ hZ).continuous
+  have hXcont : Continuous (fun x : M => g.inner x (X x) (X x)) := hgcont X hX
+  have hYcont : Continuous (fun x : M => g.inner x (Y x) (Y x)) := hgcont Y hY
+  cases p with
+  | zero =>
+      -- Order `0`: the continuous envelope is the rank-`r` curvature-operator envelope `Ccurv r`
+      -- times the continuous metric factors `g(X, X) · g(Y, Y)` — no supremum required.
+      choose Ccurv hCcurv_cont hCcurv_nn hCcurv using
+        fun r => exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional
+          (I := I) (M := M) g r
+      refine ⟨fun r x => Ccurv r x * g.inner x (X x) (X x) * g.inner x (Y x) (Y x),
+        fun r => ((hCcurv_cont r).mul hXcont).mul hYcont, fun r x => ?_, fun r W x => ?_⟩
+      · exact mul_nonneg (mul_nonneg (hCcurv_nn r x) (hgnn x (X x))) (hgnn x (Y x))
+      · rw [show (diffCurvOp (I := I) (M := M) g hX hY 0 r W).toSection x =
+            riemannOp (tensorCov (I := I) g 0 r) x (X x) (Y x) (W.toSection x) from
+          curvatureContraction_toSection_apply (I := I) (M := M) g r W hX hY x]
+        exact hCcurv r x (X x) (Y x) (W.toSection x)
+  | succ p' =>
+      -- Order `p' + 1 ≥ 1`: the uniform high-order envelope of the shared abstract node, as a
+      -- constant (hence continuous) per-rank function.
+      obtain ⟨kappaHigh, hkappaHigh_nn, hkappaHigh⟩ :=
+        exists_proportional_recCurvDiffOp_highOrder (I := I) (M := M) g
+          (diffCurvOp (I := I) (M := M) g hX hY)
+          (fun p r W => covGrad_diffCurvOp_eq (I := I) (M := M) g hX hY p r W)
+          (diffCurvOp_isOrderZeroCurvFactor (I := I) (M := M) g hX hY)
+      refine ⟨fun r _ => kappaHigh p' r, fun r => continuous_const,
+        fun r _ => hkappaHigh_nn p' r, fun r W x => ?_⟩
+      exact hkappaHigh p' r W x
 
 set_option linter.unusedSectionVars false in
 /-- **Per-order, per-rank section-proportional fibre bound for the differentiated-curvature

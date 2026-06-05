@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameCurvatureTraceSmooth
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricContractionLeibnizGrid
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedDiffOpProportionalBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformCurvatureSup
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformProportionalCurvatureSup
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Slot0SliceFiberNormDomination
@@ -1128,6 +1129,110 @@ private theorem covGrad_pureRGenuineDiffOp_eq
   rw [sub_add_cancel]
 
 
+/-- **The moving-frame pure-Riemann endomorphism fibre value depends `ℝ`-linearly on the section
+value.** `pureRGenuineEndoFib g m (c₁ • W₁ + c₂ • W₂) x = c₁ • pureRGenuineEndoFib g m W₁ x +
+c₂ • pureRGenuineEndoFib g m W₂ x`. The fibre reads its section only through the slot-`0` value
+`(covGradBundleEquiv 0 m x).symm (W x) (B_iˣ)` (`pureRFrozenDirCLM_apply`), `ℝ`-linear in `W x`
+(continuous-linear `.symm`, then the curvature CLM `riemannOp`), uncurried through the linear
+`covGradBundleEquiv 0 m x`. -/
+private lemma pureRGenuineEndoFib_linear
+    (g : SmoothRiemannianMetric I M) (m : ℕ) (c₁ c₂ : ℝ)
+    (W₁ W₂ : SmoothCcTensor g 0 (m + 1)) (x : M) :
+    pureRGenuineEndoFib (I := I) (M := M) g m
+        (c₁ • W₁ + c₂ • W₂) x =
+      c₁ • pureRGenuineEndoFib (I := I) (M := M) g m W₁ x +
+        c₂ • pureRGenuineEndoFib (I := I) (M := M) g m W₂ x := by
+  classical
+  rw [pureRGenuineEndoFib, pureRGenuineEndoFib, pureRGenuineEndoFib]
+  rw [pureRFrozenEndoFib, pureRFrozenEndoFib, pureRFrozenEndoFib]
+  rw [← map_smul (covGradBundleEquiv (I := I) (M := M) 0 m x) c₁,
+    ← map_smul (covGradBundleEquiv (I := I) (M := M) 0 m x) c₂,
+    ← map_add (covGradBundleEquiv (I := I) (M := M) 0 m x)]
+  refine congrArg (covGradBundleEquiv (I := I) (M := M) 0 m x) ?_
+  refine ContinuousLinearMap.ext (fun v => ?_)
+  rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
+    ContinuousLinearMap.smul_apply,
+    pureRFrozenDirCLM_apply, pureRFrozenDirCLM_apply, pureRFrozenDirCLM_apply,
+    Finset.smul_sum, Finset.smul_sum, ← Finset.sum_add_distrib]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  have hval : (c₁ • W₁ + c₂ • W₂).toSection x =
+      c₁ • W₁.toSection x + c₂ • W₂.toSection x := by
+    rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply,
+      SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
+      SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply]
+  rw [hval, map_add, map_smul, map_smul,
+    ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
+    ContinuousLinearMap.smul_apply, map_add, map_smul, map_smul]
+
+/-- **The moving-frame pure-Riemann endomorphism fibre value is value-local.** If `W₁.toSection x =
+W₂.toSection x` then `pureRGenuineEndoFib g m W₁ x = pureRGenuineEndoFib g m W₂ x`: the fibre reads its
+section only through the slot-`0` value at `x`. -/
+private lemma pureRGenuineEndoFib_local
+    (g : SmoothRiemannianMetric I M) (m : ℕ)
+    (W₁ W₂ : SmoothCcTensor g 0 (m + 1)) (x : M)
+    (hx : W₁.toSection x = W₂.toSection x) :
+    pureRGenuineEndoFib (I := I) (M := M) g m W₁ x =
+      pureRGenuineEndoFib (I := I) (M := M) g m W₂ x := by
+  classical
+  rw [pureRGenuineEndoFib, pureRGenuineEndoFib, pureRFrozenEndoFib, pureRFrozenEndoFib]
+  refine congrArg (covGradBundleEquiv (I := I) (M := M) 0 m x) ?_
+  refine ContinuousLinearMap.ext (fun v => ?_)
+  rw [pureRFrozenDirCLM_apply, pureRFrozenDirCLM_apply]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [hx]
+
+/-- **The order-`0` moving-frame pure-Riemann curvature operator is a fibrewise curvature operator.**
+The order-`0` base `pureRGenuineDiffOp 0 r = pureRGenuineEndo0 g r` is `ℝ`-linear in its section and
+value-local: at rank `0` it is the zero operator; at rank `m + 1` its fibre value
+`pureRGenuineEndoFib g m W x` reads its section only through the slot-`0` value at `x`
+(`pureRGenuineEndoFib_linear`, `pureRGenuineEndoFib_local`) — the `IsOrderZeroCurvFactor` fingerprint
+for the frame-free pure-Riemann tower. -/
+private theorem pureRGenuineDiffOp_isOrderZeroCurvFactor (g : SmoothRiemannianMetric I M) :
+    IsOrderZeroCurvFactor (I := I) (M := M) g (pureRGenuineDiffOp (I := I) (M := M) g) where
+  linear := by
+    intro r c₁ c₂ W₁ W₂ x
+    cases r with
+    | zero =>
+        have h0 : ∀ W : SmoothCcTensor g 0 0,
+            (pureRGenuineDiffOp (I := I) (M := M) g 0 0 W).toSection x =
+              (0 : TensorRSSpace 0 (0 + 0) I x) := by
+          intro W
+          change (pureRGenuineEndo0 (I := I) (M := M) g 0 W).toSection x =
+            (0 : TensorRSSpace 0 (0 + 0) I x)
+          rw [show pureRGenuineEndo0 (I := I) (M := M) g 0 W = 0 from rfl,
+            SmoothCcTensor.toSection_zero, ContMDiffSection.coe_zero]
+          rfl
+        rw [h0, h0, h0]
+        simp
+    | succ m =>
+        rw [show (pureRGenuineDiffOp (I := I) (M := M) g 0 (m + 1) (c₁ • W₁ + c₂ • W₂)).toSection x =
+              pureRGenuineEndoFib (I := I) (M := M) g m (c₁ • W₁ + c₂ • W₂) x from rfl,
+          show (pureRGenuineDiffOp (I := I) (M := M) g 0 (m + 1) W₁).toSection x =
+              pureRGenuineEndoFib (I := I) (M := M) g m W₁ x from rfl,
+          show (pureRGenuineDiffOp (I := I) (M := M) g 0 (m + 1) W₂).toSection x =
+              pureRGenuineEndoFib (I := I) (M := M) g m W₂ x from rfl,
+          pureRGenuineEndoFib_linear (I := I) (M := M) g m c₁ c₂ W₁ W₂ x]
+  local' := by
+    intro r W₁ W₂ x hx
+    cases r with
+    | zero =>
+        have h0 : ∀ W : SmoothCcTensor g 0 0,
+            (pureRGenuineDiffOp (I := I) (M := M) g 0 0 W).toSection x =
+              (0 : TensorRSSpace 0 (0 + 0) I x) := by
+          intro W
+          change (pureRGenuineEndo0 (I := I) (M := M) g 0 W).toSection x =
+            (0 : TensorRSSpace 0 (0 + 0) I x)
+          rw [show pureRGenuineEndo0 (I := I) (M := M) g 0 W = 0 from rfl,
+            SmoothCcTensor.toSection_zero, ContMDiffSection.coe_zero]
+          rfl
+        rw [h0, h0]
+    | succ m =>
+        rw [show (pureRGenuineDiffOp (I := I) (M := M) g 0 (m + 1) W₁).toSection x =
+              pureRGenuineEndoFib (I := I) (M := M) g m W₁ x from rfl,
+          show (pureRGenuineDiffOp (I := I) (M := M) g 0 (m + 1) W₂).toSection x =
+              pureRGenuineEndoFib (I := I) (M := M) g m W₂ x from rfl,
+          pureRGenuineEndoFib_local (I := I) (M := M) g m W₁ W₂ x hx]
+
 /-- **The high-order (`p ≥ 1`) frame-free per-rank section-proportional fibre envelope for the
 differentiated moving-frame pure-Riemann curvature tower** (the single posited analytic node). For a
 closed smooth Riemannian manifold `(M, g)` there is a nonnegative envelope family `kappaHigh : ℕ → ℕ →
@@ -1168,8 +1273,11 @@ theorem exists_proportional_pureRGenuineDiffOp_highOrder (g : SmoothRiemannianMe
       ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + (p + 1)) x
             ((pureRGenuineDiffOp (I := I) (M := M) g (p + 1) r W).toSection x) ≤
-          kappaHigh p r * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x) := by
-  sorry
+          kappaHigh p r * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x) :=
+  exists_proportional_recCurvDiffOp_highOrder (I := I) (M := M) g
+    (pureRGenuineDiffOp (I := I) (M := M) g)
+    (fun p r W => covGrad_pureRGenuineDiffOp_eq (I := I) (M := M) g p r W)
+    (pureRGenuineDiffOp_isOrderZeroCurvFactor (I := I) (M := M) g)
 
 /-- **The frame-free per-order, per-rank section-proportional fibre envelope for the differentiated
 moving-frame pure-Riemann curvature tower.** For a closed smooth Riemannian manifold `(M, g)` there is
