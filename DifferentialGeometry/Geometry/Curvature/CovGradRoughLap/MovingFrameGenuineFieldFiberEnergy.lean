@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameCurvat
 import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorBochnerFieldSplit
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformProportionalCurvatureSup
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformCurvatureSup
+import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Slot0SliceFiberNormDomination
 
 /-!
 # Frame-summed fibre-norm energy of the genuine moving-frame curvature fibre fields
@@ -63,8 +64,9 @@ For a `g_x`-orthonormal frame `e` with `n = Module.finrank ℝ (TangentSpace I x
 
 noncomputable section
 
+set_option backward.isDefEq.respectTransparency false
 set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 800000
+set_option synthInstance.maxHeartbeats 1200000
 set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
@@ -86,6 +88,15 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+set_option linter.unusedSectionVars false in
+/-- Non-negativity of the metric self-inner product `g(x; v, v)`. -/
+private lemma g_inner_self_nonneg
+    (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
+    0 ≤ g.inner x v v := by
+  rcases eq_or_ne v 0 with hv0 | hv0
+  · rw [hv0]; simp
+  · exact (g.pos x v hv0).le
 
 /-- **Rank-`0` reconstruction of a `(0, s)`-multilinear value as a `(0, s)`-tensor.** Sends a bare
 `(0, s)`-multilinear fibre value `t : Tensor0SSpace s I x` to the `(0, s)`-tensor (continuous linear
@@ -305,9 +316,8 @@ fibre-bounded by the uniform rank-`s` curvature sup (the sup over the compact `M
 per-point proportional envelope `exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional`)
 times the orthonormal Gram scalars `g(Bᵢ x, Bᵢ x) = 1` (`smoothOrthoFrame_orthonormal_at_center`),
 `g(v, v) = 1`, and the directional-derivative slice fibre norm `rfns(∇_{Bᵢ} S)`, in turn controlled by
-the full gradient fibre norm `rfns(∇S)` (the `Bᵢ`-slice of the leftmost slot of `covGrad g 0 s S`, of
-unit `g`-length, is fibre-dominated by the whole gradient through the slot-`0` Parseval decomposition
-`riemannianFiberNormSq_succ_eq_sum_slot0Curry`). Summing the `n`-fold frame sum by
+the full gradient fibre norm `rfns(∇S)` (`riemannianFiberNormSq_covApply_le_covGrad`, the slot-`0`
+Parseval domination of a unit-direction gradient slice). Summing the `n`-fold frame sum by
 `riemannianFiberNormSq_sum_le_card_mul` gives a single `x`-uniform constant.
 
 **Non-vacuity.** A zero envelope `Kpure s = 0` forces `∑ᵢ R(Bᵢ, v)(∇_{Bᵢ} S) = 0` for all unit `v`,
@@ -325,7 +335,202 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
           Kpure s *
             riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
               ((covGrad (I := I) (M := M) g 0 s S).toSection x) := by
-  sorry
+  classical
+  -- Uniformise the rank-`s` continuous proportional curvature envelope over the compact `M`.
+  have huniform : ∀ s : ℕ, ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (x : M) (v w : TangentSpace I x) (T : TensorRSSpace 0 s I x),
+        riemannianFiberNormSq (I := I) (M := M) g 0 s x
+            (riemannOp (tensorCov (I := I) g 0 s) x v w T) ≤
+          C * g.inner x v v * g.inner x w w *
+            riemannianFiberNormSq (I := I) (M := M) g 0 s x T := by
+    intro s
+    obtain ⟨Ccurv, hCcurv_cont, hCcurv_nonneg, hCcurv_bound⟩ :=
+      exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional
+        (I := I) (M := M) g s
+    have hCpt := (isCompact_univ (X := M)).image hCcurv_cont
+    obtain ⟨C₀, hC₀⟩ := hCpt.bddAbove
+    refine ⟨max C₀ 0, le_max_right _ _, fun x v w T => ?_⟩
+    have hCcurv_le : Ccurv x ≤ max C₀ 0 :=
+      le_trans (hC₀ ⟨x, Set.mem_univ _, rfl⟩) (le_max_left _ _)
+    have hfactor_nonneg :
+        0 ≤ g.inner x v v * g.inner x w w *
+          riemannianFiberNormSq (I := I) (M := M) g 0 s x T :=
+      mul_nonneg
+        (mul_nonneg (g_inner_self_nonneg (I := I) (M := M) g x v)
+          (g_inner_self_nonneg (I := I) (M := M) g x w))
+        (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x T)
+    have hstep : Ccurv x * g.inner x v v * g.inner x w w *
+          riemannianFiberNormSq (I := I) (M := M) g 0 s x T ≤
+        max C₀ 0 * g.inner x v v * g.inner x w w *
+          riemannianFiberNormSq (I := I) (M := M) g 0 s x T := by
+      have h := mul_le_mul_of_nonneg_right hCcurv_le hfactor_nonneg
+      nlinarith [h]
+    exact le_trans (hCcurv_bound x v w T) hstep
+  choose C hC_nonneg hC_bound using huniform
+  refine ⟨fun s => (Module.finrank ℝ E : ℝ) * ((Module.finrank ℝ E : ℝ) * C s), fun s => ?_, ?_⟩
+  · exact mul_nonneg (Nat.cast_nonneg _) (mul_nonneg (Nat.cast_nonneg _) (hC_nonneg s))
+  intro s S x v hv
+  -- Expand the trace as a frame sum of `riemannOp` summands.
+  set n : ℕ := Module.finrank ℝ E with hn_def
+  set F : Fin n → TensorRSSpace 0 s I x := fun i =>
+    riemannSec (tensorCov (I := I) g 0 s) (smoothOrthoFrame (I := I) g x i)
+      (smoothExtensionTangent (I := I) x v)
+      (covApply (tensorCov (I := I) g 0 s) (smoothOrthoFrame (I := I) g x i)
+        (fun y : M => S.toSection y)) x with hF_def
+  have htrace : genuineCurvTraceFixedFramePureR (I := I) g s
+      (smoothExtensionTangent (I := I) x v) (smoothOrthoFrame (I := I) g x)
+      (fun y : M => S.toSection y) x = ∑ i : Fin n, F i := by
+    rw [genuineCurvTraceFixedFramePureR]
+  rw [htrace]
+  -- Smoothness inputs for the bundled-operator rewrite of each summand.
+  have hW : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (smoothExtensionTangent (I := I) x v)) :=
+    smoothExtensionTangent_contMDiff (I := I) x v
+  have hS_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
+        (E := fun z : M => TensorRSSpace 0 s I z) y (S.toSection y)) :=
+    S.toSection.contMDiff
+  -- Each summand is the bundled curvature operator on the directional slice.
+  have hFop : ∀ i : Fin n, F i =
+      riemannOp (tensorCov (I := I) g 0 s) x
+        (smoothOrthoFrame (I := I) g x i x) (smoothExtensionTangent (I := I) x v x)
+        (covApply (tensorCov (I := I) g 0 s) (smoothOrthoFrame (I := I) g x i)
+          (fun y : M => S.toSection y) x) := by
+    intro i; rw [hF_def]
+    exact tensor3rdCurv_pure_R_eq_riemannOp (I := I) g 0 s i hW hS_total
+  -- Directional-slice fibre domination: each `∇_{B_i} S(x)` is bounded by the full gradient.
+  -- The slot-`0` slice of `(covGrad g 0 s S).toSection x` along `B_i x`, in the moving frame
+  -- `e a := B_a x`, has the same unit-section value `(∇_{B_i} S(x))(unit)` as the directional
+  -- covariant derivative, so equal fibre norm; the slot-`0` Parseval domination bounds it by `∇S`.
+  have hcovApply_le : ∀ i : Fin n,
+      riemannianFiberNormSq (I := I) (M := M) g 0 s x
+          (covApply (tensorCov (I := I) g 0 s) (smoothOrthoFrame (I := I) g x i)
+            (fun y : M => S.toSection y) x) ≤
+        riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+          ((covGrad (I := I) (M := M) g 0 s S).toSection x) := by
+    intro i
+    set eF : Fin n → TangentSpace I x := fun a => smoothOrthoFrame (I := I) g x a x with heF_def
+    have hnF : n = Module.finrank ℝ (TangentSpace I x) := hn_def
+    have horthF : ∀ a b : Fin n, g.inner x (eF a) (eF b) = if a = b then (1 : ℝ) else 0 := by
+      intro a b; rw [heF_def]; exact smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
+    set K₀ : Fin 0 → Fin n := fun k => k.elim0 with hK₀
+    -- `fiberNormSqSummand`-form representations of the fibre norm at ranks `s` and `s + 1` in `eF`.
+    have hweight : ∀ (m : ℕ),
+        ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+          (fun k => g.inner x (eF (K₀ k))) : Tensor0SSpace 0 I x) =
+          unitZeroSec (I := I) (M := M) x := by
+      intro _
+      have hcf : ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+          (fun k => g.inner x (eF (K₀ k))) : Tensor0SSpace 0 I x) =
+          coframeS (I := I) (M := M) g x 0 eF K₀ := rfl
+      rw [hcf]
+      apply Tensor0SSpace.toModel_injective
+      apply ContinuousMultilinearMap.ext
+      intro m
+      have hL : Tensor0SSpace.toModel (coframeS (I := I) (M := M) g x 0 eF K₀) m = 1 := by
+        have h1 : Tensor0SSpace.toModel (coframeS (I := I) (M := M) g x 0 eF K₀) m =
+            coframeS (I := I) (M := M) g x 0 eF K₀ (fun k : Fin 0 => k.elim0) := by
+          apply congrArg; funext k; exact k.elim0
+        rw [h1, coframeS_apply (I := I) (M := M) g x 0 eF K₀ (fun k : Fin 0 => k.elim0)]
+        simp
+      have hR : Tensor0SSpace.toModel (unitZeroSec (I := I) (M := M) x) m = 1 := by
+        rw [unitZeroSec_apply (I := I) (M := M) x, Tensor0SSpace.toModel_ofModel,
+          ContinuousMultilinearMap.constOfIsEmpty_apply]
+      rw [hL, hR]
+    have hreprS : ∀ U : TensorRSSpace 0 s I x,
+        riemannianFiberNormSq (I := I) (M := M) g 0 s x U =
+          ∑ K : Fin 0 → Fin n, ∑ J : Fin s → Fin n,
+            fiberNormSqSummand (I := I) (M := M) g x 0 s U n eF K J := by
+      intro U
+      rw [riemannianFiberNormSq_eq_sum_toModel_sq (I := I) (M := M) g s x U eF hnF horthF]
+      rw [Finset.sum_eq_single (fun k : Fin 0 => k.elim0)]
+      · refine Finset.sum_congr rfl (fun J _ => ?_)
+        rw [fiberNormSqSummand, hweight s]; rfl
+      · intro K _ hK; exact absurd (Subsingleton.elim K (fun k : Fin 0 => k.elim0)) hK
+      · intro h; exact absurd (Finset.mem_univ (fun k : Fin 0 => k.elim0)) h
+    have hreprSucc : ∀ U : TensorRSSpace 0 (s + 1) I x,
+        riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x U =
+          ∑ K : Fin 0 → Fin n, ∑ J : Fin (s + 1) → Fin n,
+            fiberNormSqSummand (I := I) (M := M) g x 0 (s + 1) U n eF K J := by
+      intro U
+      rw [riemannianFiberNormSq_eq_sum_toModel_sq (I := I) (M := M) g (s + 1) x U eF hnF horthF]
+      rw [Finset.sum_eq_single (fun k : Fin 0 => k.elim0)]
+      · refine Finset.sum_congr rfl (fun J _ => ?_)
+        rw [fiberNormSqSummand, hweight (s + 1)]; rfl
+      · intro K _ hK; exact absurd (Subsingleton.elim K (fun k : Fin 0 => k.elim0)) hK
+      · intro h; exact absurd (Finset.mem_univ (fun k : Fin 0 => k.elim0)) h
+    -- The slot-`0` slice in direction `eF i` equals the directional covariant derivative `∇_{B_i} S`.
+    have hslice_eq :
+        riemannianFiberNormSq (I := I) (M := M) g 0 s x
+            (slot0Curry (I := I) (M := M) g x s eF K₀
+              ((covGrad (I := I) (M := M) g 0 s S).toSection x) i) =
+          riemannianFiberNormSq (I := I) (M := M) g 0 s x
+            (covApply (tensorCov (I := I) g 0 s) (smoothOrthoFrame (I := I) g x i)
+              (fun y : M => S.toSection y) x) := by
+      rw [riemannianFiberNormSq_eq_sum_toModel_sq (I := I) (M := M) g s x _ eF hnF horthF,
+        riemannianFiberNormSq_eq_sum_toModel_sq (I := I) (M := M) g s x _ eF hnF horthF]
+      refine Finset.sum_congr rfl (fun ψ _ => ?_)
+      congr 2
+      have hslot : (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+              slot0Curry (I := I) (M := M) g x s eF K₀
+                ((covGrad (I := I) (M := M) g 0 s S).toSection x) i)
+              (unitZeroSec (I := I) (M := M) x) =
+            tensor0S_curry (I := I) (M := M) s x
+              ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+                (covGrad (I := I) (M := M) g 0 s S).toSection x)
+                (unitZeroSec (I := I) (M := M) x)) (eF i) := by
+        rw [slot0Curry_apply (I := I) (M := M) g x s eF K₀
+          ((covGrad (I := I) (M := M) g 0 s S).toSection x) i
+          (unitZeroSec (I := I) (M := M) x)]
+        rw [hweight s]
+        have hscalar : tensor00Scalar (I := I) (M := M) x (unitZeroSec (I := I) (M := M) x) = 1 := by
+          rw [tensor00Scalar_apply (I := I) (M := M) x _ (fun k : Fin 0 => k.elim0)]
+          have hone : Tensor0SSpace.toModel (unitZeroSec (I := I) (M := M) x)
+              (fun k : Fin 0 => k.elim0) = (1 : ℝ) := by
+            rw [unitZeroSec_apply (I := I) (M := M) x, Tensor0SSpace.toModel_ofModel]
+            simp
+          rw [← hone]; rfl
+        rw [hscalar, one_smul]
+      rw [hslot]
+      rw [curry_covGrad_unit_eval_genVal (I := I) (M := M) g s S x (eF i)]
+      rw [covApply_apply, heF_def]
+      rfl
+    rw [← hslice_eq]
+    exact riemannianFiberNormSq_slot0Curry_le_of_frame (I := I) (M := M) g s x eF K₀
+      hreprS hreprSucc ((covGrad (I := I) (M := M) g 0 s S).toSection x) i
+  -- Per-summand fibre bound: uniform curvature sup × unit Gram scalars × directional slice.
+  have hgv : g.inner x (smoothExtensionTangent (I := I) x v x) (smoothExtensionTangent (I := I) x v x)
+      = 1 := by rw [smoothExtensionTangent_eq x v]; exact hv
+  have hper : ∀ i : Fin n,
+      riemannianFiberNormSq (I := I) (M := M) g 0 s x (F i) ≤
+        C s * riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+          ((covGrad (I := I) (M := M) g 0 s S).toSection x) := by
+    intro i
+    rw [hFop i]
+    have hgB : g.inner x (smoothOrthoFrame (I := I) g x i x) (smoothOrthoFrame (I := I) g x i x) = 1 := by
+      have := smoothOrthoFrame_orthonormal_at_center (I := I) g x i i; rwa [if_pos rfl] at this
+    have hbound := hC_bound s x (smoothOrthoFrame (I := I) g x i x)
+      (smoothExtensionTangent (I := I) x v x)
+      (covApply (tensorCov (I := I) g 0 s) (smoothOrthoFrame (I := I) g x i)
+        (fun y : M => S.toSection y) x)
+    rw [hgB, hgv, mul_one, mul_one] at hbound
+    refine le_trans hbound ?_
+    refine mul_le_mul_of_nonneg_left ?_ (hC_nonneg s)
+    exact hcovApply_le i
+  -- Sum the per-summand bounds with `n`-subadditivity of the fibre norm.
+  calc riemannianFiberNormSq (I := I) (M := M) g 0 s x (∑ i : Fin n, F i)
+      ≤ (n : ℝ) * ∑ i : Fin n, riemannianFiberNormSq (I := I) (M := M) g 0 s x (F i) := by
+        have := riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g 0 s x
+          (Finset.univ : Finset (Fin n)) F
+        rwa [Finset.card_univ, Fintype.card_fin] at this
+    _ ≤ (n : ℝ) * ∑ _i : Fin n, C s *
+          riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+            ((covGrad (I := I) (M := M) g 0 s S).toSection x) := by
+        refine mul_le_mul_of_nonneg_left (Finset.sum_le_sum (fun i _ => hper i)) (Nat.cast_nonneg n)
+    _ = (Module.finrank ℝ E : ℝ) * ((Module.finrank ℝ E : ℝ) * C s) *
+          riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+            ((covGrad (I := I) (M := M) g 0 s S).toSection x) := by
+        rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, hn_def]
+        ring
 
 /-- **Uniform differentiated-curvature genuine-trace fibre bound (`‖∇R‖_∞ · rfns(S)`).** For a closed
 smooth Riemannian manifold `(M, g)` there is a valence-dependent nonnegative constant `KgradR : ℕ → ℝ`

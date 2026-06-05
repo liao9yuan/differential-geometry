@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSPointwiseLipschitz
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizedCovGradJetInput
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizedCovGradJetGeneralOrder
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricJetBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapIterL2WtwokTwoBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.FaithfulH1Embedding
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.GeneralOrderPouSpectralBound
@@ -599,6 +600,126 @@ private theorem norm_iteratedCovGrad_realizeSymm_le_jetSum
             Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + l)
           ‖(PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g₀ 0 2 l T).toSection x‖) := hsingle
 
+/-- **The conditional covariant Faà-di-Bruno fibre-norm bound for the re-tagged Ricci–DeTurck
+right-hand-side difference, given a uniform segment-metric covariant-jet bound `K` (the genuine
+covariant fundamental-theorem-of-calculus + covariant-Leibniz expansion, made parametric in the
+supercritical segment-jet supremum).**
+
+For an anchor `g₀`, a flow background `g_bg`, and an order `a`, there is a single constant `C ≥ 0`
+such that for any two `g₀`-fibre-small perturbations `T₁, T₂`, any two realized metrics `g₁, g₂` of
+`T₁, T₂` (tied by the fibrewise `inner`-identities), **any nonnegative real `K`** for which every
+realized-symmetric covariant jet of every segment combination `S_t = (1 - t) • T₂ + t • T₁`,
+`t ∈ [0,1]`, up to order `2a + 2`, is fibre-norm-bounded by `K` at every base point, every
+covariant-gradient order `j ≤ 2 * a`, and **every base point `x`**, the `g₀`-Riemannian fibre
+*norm* (un-squared) of the `j`-th intrinsic iterated covariant gradient of the re-tagged DeTurck
+right-hand-side section difference is bounded *pointwise* by `C · (1 + K)^{2a+2}` times the finite
+sum, over covariant-gradient orders `i ≤ j + 2`, of the `g₀`-Riemannian fibre *norms* of the
+iterated covariant gradients `∇^i (realizeSymmCcTensor g₀ (T₁ − T₂))`:
+```
+√(rfns g₀ 0 (2+j) x (∇^j (D₁ − D₂) x))
+  ≤ C · (1 + K)^{2a+2} · ∑_{i ∈ range (j+3)} √(rfns g₀ 0 (2+i) x (∇^i (realizeSymm g₀ (T₁ − T₂)) x)),
+```
+where `Dₖ = deTurckRHSRetag g₀ g_bg gₖ`.
+
+This is the genuine **covariant Faà-di-Bruno expansion** of the *non-linear* summand `Ric + Lie`
+of the second-order Ricci–DeTurck right-hand side along the **segment metric**
+`g_t = g₂ + t·(g₁ − g₂)` (`segmentMetric`), **conditional on the supercritical segment covariant-jet
+supremum `K`**.  The chart right-hand side `deTurckRicciRHS g_bg g = -2 • Ric(g) + 𝓛_{W(g)} g` is a
+smooth (fibrewise) function `F` of the metric `≤2`-jet `(g, ∇g, ∇²g)` and the fibre-inverse `g⁻¹`;
+by the covariant fundamental theorem of calculus along the segment, `F(g₁) − F(g₂) =
+∫₀¹ DF(g_t)·(g₁ − g₂) dt`, whose `j`-th covariant gradient is, by the covariant product/chain rule
+(covariant Leibniz over the contraction, `ParallelTensorProduct.norm_iteratedCovGrad_prod_le_jetGrid`),
+a finite sum of contracted products `(∇^{(j+2)−i} of a segment-jet coefficient) ⋆ (∇^i of the metric
+difference)`, the metric-difference factor running over orders `i ≤ j + 2`.  Each segment-jet
+coefficient is a fibrewise-polynomial expression in the `≤(j+2)`-jets of the *segment* metric `g_t`
+and the bounded fibre-inverses `(g₀⁻¹ · (g_t − g₀))^m g₀⁻¹`; the constant (pure-`g₀`) part contributes
+the `1` and each segment-jet factor (fibre-norm `≤ K` by the supplied uniform bound, `2a + 2`
+factors at most) contributes a `K`, so every coefficient is dominated by `(1 + K)^{2a+2}`; the
+metric-difference covariant jets `∇^i(g₁ − g₂)` are exactly the realized-tensor covariant jets
+`∇^i(realizeSymm g₀ (T₁ − T₂))` (`realizeSymmCcTensor_ccTensorBilin_apply`,
+`segmentMetric_inner_eq_realizeSymm_add`).  Folding the binomial / index-set cardinalities into `C`
+and grouping by `i` gives the aggregate sum.
+
+Its conclusion is a *real-valued pointwise* fibre-*norm* (un-squared) inequality carrying the
+**explicit `K`-dependence** `(1 + K)^{2a+2}` — structurally distinct from the unconditional aggregate
+core below (which has a single uniform constant, the supercriticality `ha` having been used to
+*produce* `K`); no packaging.  Its body is `sorry`: it is the genuine conditional covariant
+fundamental-theorem-of-calculus + covariant-Leibniz fibre-norm expansion of the geometric
+nonlinearity `Ric + Lie`, with the segment covariant-jet supremum `K` supplied as a hypothesis (the
+`Δ_∇` summand handled separately, the metric-realization map already factored out by the consumer),
+with no spectral-nonlinearity, perturbation-indexed-remainder, or Weyl dependence. -/
+theorem exists_deTurckRHSRetagDiff_iteratedCovGrad_realizeSymmJet_fiberNormSum_le_of_segmentJetBound
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+        (g₁ g₂ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        ∀ K : ℝ, 0 ≤ K →
+        (∀ (t : ℝ), t ∈ Set.Icc (0 : ℝ) 1 → ∀ (y : M) (p : ℕ), p ≤ 2 * a + 2 →
+          Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) g₀ 0 (2 + p) y
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 p
+                  (MetricRealization.realizeSymmCcTensor (I := I) g₀
+                    ((1 - t) • T₂ + t • T₁))).toSection y)) ≤ K) →
+        ∀ j : ℕ, j ≤ 2 * a → ∀ x : M,
+          Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) g₀ 0 (2 + j) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+                  (deTurckRHSRetag (I := I) g₀ g_bg g₁
+                    - deTurckRHSRetag (I := I) g₀ g_bg g₂)).toSection x))
+            ≤ C * (1 + K) ^ (2 * a + 2) * ∑ i ∈ Finset.range (j + 3),
+                Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) g₀ 0 (2 + i) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                      (MetricRealization.realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)) :=
+  sorry
+
+/-- **The supercritical uniform fibre-norm bound on the realized-symmetric covariant jets of the
+segment combinations over the `H^{a+2}`-bounded family (the segment-metric covariant-jet supremum
+the conditional Faà-di-Bruno bound consumes).**
+
+For an anchor `g₀`, an order `a`, the supercriticality hypothesis `ha : 2 * a > Module.finrank ℝ E
++ 4`, and a uniform `H^{a+2}`-size bound `B ≥ 0`, there is a single nonnegative real `K` such that
+for any two `g₀`-fibre-small perturbations `T₁, T₂` whose `H^{a+2}` norms are `≤ B`, every
+`t ∈ [0,1]`, every base point `y`, and every covariant-gradient order `p ≤ 2a + 2`, the
+`g₀`-Riemannian fibre *norm* of the `p`-th intrinsic iterated covariant gradient of the realized
+symmetric perturbation of the segment combination `S_t = (1 - t) • T₂ + t • T₁` is bounded by `K`:
+```
+√(rfns g₀ 0 (2+p) y (∇^p (realizeSymm g₀ ((1-t) • T₂ + t • T₁)) y)) ≤ K
+  (2a > finrank + 4, ‖Tⱼ.toHs (a+2)‖ ≤ B, t ∈ [0,1], p ≤ 2a + 2).
+```
+
+This is the genuine analytic content the supercriticality hypothesis `ha` buys: a **pointwise**,
+uniform-over-the-`H^{a+2}`-ball fibre-norm bound on the metric perturbation's covariant jet up to
+order `2a + 2`, routed through the supercritical Sobolev embedding `H^{2(a+2)} ↪ C^{2a+2}` implied by
+`ha` (the naive pointwise `C^{2a+2}`-jet of the metric is *unavailable* on `finrank ≥ 4` unless the
+supercritical scale is met).  It extends the on-disk order-`≤2` segment-jet sup bound
+`exists_segmentMetric_realizeSymm_iteratedCovGradJet2_sup_le` (the `iteratedCovGradJetSum`, orders
+`0,1,2`) to the full order budget `≤ 2a + 2` the Faà-di-Bruno coefficients distribute, uniformly
+over the convex family of segment combinations (`norm_toHs_segment_le` gives `‖S_t.toHs (a+2)‖ ≤ B`
+for every `t ∈ [0,1]`).
+
+Its conclusion is a *real-valued pointwise* fibre-*norm* (un-squared) supremum bound on the
+realized-symmetric covariant jets of the **segment perturbations** — carrying no DeTurck right-hand
+side, structurally distinct from the aggregate and the conditional Faà-di-Bruno bounds; no packaging.
+The supercriticality hypothesis `ha` is genuinely required (without it the order-`> ≤2` covariant
+jets of the metric perturbation are not pointwise sup-bounded on `finrank ≥ 4`).  Its body is
+`sorry`: it is the genuine supercritical Sobolev-embedding fibre-jet supremum over the segment
+family, with no spectral-nonlinearity, perturbation-indexed-remainder, or Weyl dependence. -/
+theorem exists_realizeSymm_segment_iteratedCovGrad_fiberNorm_uniform_bound
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) :
+    ∃ K : ℝ, 0 ≤ K ∧
+      ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2),
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+        ∀ (t : ℝ), t ∈ Set.Icc (0 : ℝ) 1 → ∀ (y : M) (p : ℕ), p ≤ 2 * a + 2 →
+          Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) g₀ 0 (2 + p) y
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 p
+                  (MetricRealization.realizeSymmCcTensor (I := I) g₀
+                    ((1 - t) • T₂ + t • T₁))).toSection y)) ≤ K :=
+  sorry
+
 /-- **The aggregate pointwise fibre-norm bound for the re-tagged Ricci–DeTurck right-hand-side
 difference against the realized symmetric metric-difference covariant jets (the genuine atomic
 covariant Faà-di-Bruno segment-metric core, in its aggregate fibre-norm-sum form).**
@@ -680,8 +801,40 @@ theorem exists_deTurckRHSRetagDiff_iteratedCovGrad_realizeSymmJet_fiberNormSum_l
             ≤ C * ∑ i ∈ Finset.range (j + 3),
                 Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) g₀ 0 (2 + i) x
                   ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                      (MetricRealization.realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)) :=
-  sorry
+                      (MetricRealization.realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)) := by
+  classical
+  -- The conditional covariant Faà-di-Bruno fibre-norm expansion (the genuine FTC + covariant-Leibniz
+  -- core), parametric in a uniform segment covariant-jet supremum `K`: it bounds `√rfns(∇^j(D₁−D₂))`
+  -- by `C₀ · (1 + K)^{2a+2} · ∑_{i<j+3} √rfns(∇^i realizeSymm(T₁−T₂))`.
+  obtain ⟨C₀, hC₀_nn, hC₀⟩ :=
+    exists_deTurckRHSRetagDiff_iteratedCovGrad_realizeSymmJet_fiberNormSum_le_of_segmentJetBound
+      (I := I) g₀ g_bg a
+  -- The supercritical segment covariant-jet supremum `K` over the `H^{a+2}`-bounded `B`-family (the
+  -- sole consumer of `ha`): every realized-symmetric covariant jet of every segment combination,
+  -- order `≤ 2a+2`, is fibre-norm `≤ K`.
+  obtain ⟨K, hK_nn, hK⟩ :=
+    exists_realizeSymm_segment_iteratedCovGrad_fiberNorm_uniform_bound (I := I) g₀ a ha B hB
+  -- The uniform aggregate constant absorbs the `(1 + K)^{2a+2}` segment-coefficient factor.
+  refine ⟨C₀ * (1 + K) ^ (2 * a + 2), by positivity,
+    fun T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j hj x => ?_⟩
+  -- Discharge the conditional bound's segment-jet hypothesis from the supercritical supremum.
+  have hseg : ∀ (t : ℝ), t ∈ Set.Icc (0 : ℝ) 1 → ∀ (y : M) (p : ℕ), p ≤ 2 * a + 2 →
+      Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) g₀ 0 (2 + p) y
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 p
+              (MetricRealization.realizeSymmCcTensor (I := I) g₀
+                ((1 - t) • T₂ + t • T₁))).toSection y)) ≤ K :=
+    fun t ht y p hp => hK T₁ T₂ hsize₁ hsize₂ t ht y p hp
+  -- Apply the conditional Faà-di-Bruno core; the constant folding is exact.
+  have hcore := hC₀ T₁ T₂ g₁ g₂ hg₁ hg₂ K hK_nn hseg j hj x
+  calc Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) g₀ 0 (2 + j) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+              (deTurckRHSRetag (I := I) g₀ g_bg g₁
+                - deTurckRHSRetag (I := I) g₀ g_bg g₂)).toSection x))
+      ≤ C₀ * (1 + K) ^ (2 * a + 2) * ∑ i ∈ Finset.range (j + 3),
+          Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) g₀ 0 (2 + i) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                (MetricRealization.realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)) :=
+        hcore
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in

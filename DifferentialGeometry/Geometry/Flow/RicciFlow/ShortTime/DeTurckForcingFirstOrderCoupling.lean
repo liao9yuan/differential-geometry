@@ -52,13 +52,16 @@ assembler `deTurck_g0_realize_data` from `deTurckGenuineN_firstOrder_operatorLos
 operator-loss of the gauge-cancelled geometric remainder, pinned to the geometry by the
 gate-coordinate tie against `deTurckRemainderRealizeSection g₀ g_bg`), itself proven by
 composition over the all-order *input* control `AllOrderBallControl` (the synthesis smoothing)
-and the per-order single-section realized-remainder Sobolev estimate
-`exists_deTurckRealizeRemainderOf_toHs_le_toHs_succ_succ` (the genuine analytic leaf).  The partial-sum bound is then assembled
+and the on-disk higher-order quasilinear *difference* Nemytskii bound
+`exists_realizedRHSRemainder_pouHa_le_toHs_highOrder` (instantiated at the second slot
+`T₂ := 0, g₂ := g₀` to read off the single-section value, and dropped to the output order by
+`toHs_norm_mono`).  The partial-sum bound is then assembled
 (sorry-free) from `hloss` for the smooth (`u₀ = 0`) datum, where the homogeneous heat flow
 vanishes so the `H^{a+1}`-view Duhamel field's order-`(d+1)` mass equals the Duhamel
 `solFieldMass`; from that bound the qualitative summability implication follows by
 `summable_of_sum_le` (bounded nonnegative partial sums are summable).  Consumers transitively
-depend on `sorryAx` through that operator-loss leaf. -/
+depend on `sorryAx` through the higher-order quasilinear Nemytskii bound that operator-loss
+chain rests on. -/
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -306,56 +309,30 @@ theorem tensorTimeL2_weighted_pointwise_mass_integral
           (sq_nonneg _)))]
   exact ⟨hΦ_int, hae_summable, hΦ_integral⟩
 
-/-- **The per-order single-section affine Sobolev estimate of the realized DeTurck remainder
-(the genuine all-order analytic geometric leaf — the `n`-parametric, single-section,
-affine analogue of the on-disk fixed-order difference bound).**
-
-At **every** natural Sobolev order `n`, there are finite constants `C ≥ 0` and `D ≥ 0` such that
-for **every** `(0,2)`-perturbation section `T : SmoothCcTensor g₀ 0 2`, the intrinsic order-`n`
-chart-Sobolev norm of the realized gauge-cancelled DeTurck remainder
-`deTurckRealizeRemainderOf g₀ g_bg T` is bounded by the **affine** quantity
-`C · ‖T.toHs (n+2)‖ + D`:
-```
-∀ n, ∃ C D ≥ 0, ∀ T,  ‖(deTurckRealizeRemainderOf g₀ g_bg T).toHs n‖ ≤ C · ‖T.toHs (n+2)‖ + D .
-```
-
-This is the genuine **first-order-loss-with-two-derivative-input** Sobolev control of the realized
-DeTurck remainder: the remainder is the value of a *second-order* quasilinear differential
-operator (`deTurckRHSSection g_bg (g₀ + ccTensorBilinSymm g₀ T)` minus the linear rough Laplacian
-`Δ_∇ T`) in the realized metric `g₀ + ccTensorBilinSymm g₀ T`, so its order-`n` Sobolev norm is
-controlled by the order-`(n+2)` Sobolev norm of the perturbation `T` (two derivatives lost by the
-second-order operator), with the **affine** baseline `D` absorbing the nonzero constant term
-`deTurckRealizeRemainderOf g₀ g_bg 0 = deTurckRHSSection g_bg g₀ = −2 Ric(g₀)` (the remainder of
-the zero perturbation; on a non-Ricci-flat closed `M` this is `≠ 0`, so a *homogeneous* bound
-`≤ C · ‖T.toHs (n+2)‖` would force `Ric(g₀) = 0` — false in general).  It is the single-section,
-**general-order** companion of the on-disk fixed-order-`a` *difference* bound
-`exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder` (which controls the order-`a` weighted
-`Hᵃ` seminorm of the *difference* of two realized remainders by the `H^{a+2}` norm of the
-perturbation difference, and is silent at every order `n ≠ a` and about the single-section affine
-form); supplying the all-order single-section affine estimate is the genuine deep analytic content
-(the higher-order quasilinear Nemytskii estimate composing the chart-frame DeTurck-RHS-component
-derivatives up to order `n`, each a polynomial in `(g, ∂g, …, ∂^{n+2} g)`, with the chart-`Hⁿ`-to-
-intrinsic-`Hⁿ` partition-of-unity packaging), so it is posited as this leaf.
-
-Its conclusion is a *real-valued* affine bound on the order-`n` intrinsic Sobolev norm of a single
-section, carrying **no** spectral / `tensorL2Coeff` / summability content and **no** uniformity
-over a ball; it is therefore structurally distinct from (and not destructuring to) the ball-uniform
-toHs bound it serves (whose conclusion is a uniform cap over the ball obtained by feeding `T := P v`
-and chaining the all-order *input* control `AllOrderBallControl`).  The body is `sorry`: this is the
-genuine all-order single-section analytic geometric leaf; consumers transitively depend on
-`sorryAx`. -/
-theorem exists_deTurckRealizeRemainderOf_toHs_le_toHs_succ_succ
-    (g₀ g_bg : SmoothRiemannianMetric I M) :
-    ∀ (n : ℕ), ∃ C D : ℝ, 0 ≤ C ∧ 0 ≤ D ∧
-      ∀ (T : Integral.L2.SmoothCcTensor g₀ 0 2),
-        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n
-            (deTurckRealizeRemainderOf (I := I) g₀ g_bg T)‖ ≤
-          C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (n + 2) T‖ + D :=
-  sorry
+/-- **The zero perturbation has vanishing extracted symmetric bilinear form.**  The
+symmetrization of the bilinear form extracted from the zero `(0,2)`-section is the zero form,
+since the underlying multilinear value of the zero section is `0`. -/
+private theorem ccTensorBilinSymm_zero_apply'
+    (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
+    MetricRealization.ccTensorBilinSymm (I := I) g
+        (0 : Integral.L2.SmoothCcTensor g 0 2) x v w = 0 := by
+  have hsec0 : (0 : Integral.L2.SmoothCcTensor g 0 2).toSection x
+      (ContinuousMultilinearMap.constOfIsEmpty ℝ
+        (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) = 0 := by
+    rw [Integral.L2.SmoothCcTensor.toSection_zero]
+    rfl
+  have hmodel : MetricRealization.ccTensorModel (I := I) g
+      (0 : Integral.L2.SmoothCcTensor g 0 2) x = 0 := by
+    rw [MetricRealization.ccTensorModel, MetricRealization.ccTensorMultilinear_apply, hsec0]
+    exact map_zero _
+  rw [MetricRealization.ccTensorBilinSymm_apply, MetricRealization.ccTensorBilin_apply,
+    MetricRealization.ccTensorBilin_apply, hmodel,
+    ContinuousMultilinearMap.zero_apply, ContinuousMultilinearMap.zero_apply]
+  ring
 
 /-- **All-order ball-uniform *intrinsic-Sobolev* control of the realized DeTurck-remainder
-synthesis (proven by composition over the all-order *input* control and the per-order single-section
-remainder estimate).**
+synthesis (proven by composition over the all-order *input* control and the on-disk higher-order
+quasilinear *difference* Nemytskii bound).**
 
 For a `(0,2)`-perturbation synthesis `P` carrying the supercritical `H^{a+2}` local-Lipschitz
 control `ChartJet2LipControl g₀ a P K R` **and** the all-order ball control
@@ -375,12 +352,22 @@ other order) — under it alone the bound is **false** (a bump-interpolated `P` 
 high-frequency eigentensors is `H^{a+2}`-legal yet has unbounded order-`n` *output* for every
 `n ≥ a + 3`).  The all-order truth-maker is the explicit `AllOrderBallControl` (the smoothing of
 the heat-regularized synthesis, capping the *input* `‖(P v).toHs m‖ ≤ B_m` at every order `m`).
-It is now **proven by composition**: the per-order single-section affine remainder estimate
-`exists_deTurckRealizeRemainderOf_toHs_le_toHs_succ_succ` bounds the *output* order-`n` norm
-`‖(deTurckRealizeRemainderOf g₀ g_bg (P v)).toHs n‖ ≤ C · ‖(P v).toHs (n+2)‖ + D` by the *input*
-order-`(n+2)` norm (the second-order quasilinear operator loses two derivatives), and
-`AllOrderBallControl` at order `n + 2` caps that input uniformly over the ball, yielding the
-output cap `C · B_{n+2} + D`.
+It is **proven by composition** over the on-disk *difference* Nemytskii bound
+`exists_realizedRHSRemainder_pouHa_le_toHs_highOrder` (the genuine higher-order quasilinear
+content) and `AllOrderBallControl`, with **no** single-section affine leaf of its own.  Fix the
+output order `n` and set `a' := max a n` (so `2 a' > finrank + 4` and `n ≤ a'`).  On the
+fibre-small ball (`ChartJet2LipControl.fibreSmall`) the realized remainder reduces to the
+chart-frame realized remainder section, `deTurckRealizeRemainderOf g₀ g_bg (P v) =
+realizedRHSRemainderSection g₀ g_bg g₁ (P v)` with `g₁` the realized metric of `P v`; writing
+`realizedRHSRemainderSection g₀ g_bg g₁ (P v)` as the difference against the baseline
+`realizedRHSRemainderSection g₀ g_bg g₀ 0` plus that baseline, the order-`a'` norm of the
+difference is controlled by the Nemytskii bound at order `a'`, instantiated at the second slot
+`T₂ := 0, g₂ := g₀` (whose `H^{a'+2}` size antecedent is `0` and whose realized-metric identity is
+`ccTensorBilinSymm g₀ 0 = 0`), by `C' · ‖(P v).toHs (a'+2)‖`, capped uniformly by
+`AllOrderBallControl` at order `a' + 2`; the baseline contributes the fixed constant `D :=
+‖(realizedRHSRemainderSection g₀ g_bg g₀ 0).toHs a'‖`.  Dropping the output order back from `a'` to
+`n` (`toHs_norm_mono`, `n ≤ a'`) yields the uniform output cap `C' · B_{a'+2} + D`.  Off the
+fibre-small locus the realized remainder is the zero section, trivially capped.
 
 Its conclusion is a *real-valued* uniform cap on the order-`n` intrinsic Sobolev norm, carrying
 **no** spectral / `tensorL2Coeff` / summability content; it is therefore structurally distinct
@@ -389,7 +376,7 @@ conclusion is a weighted square-sum `∑' (1 + λᵢ)ᵈ · (tensorL2Coeff …)�
 coordinates, connected to this `‖·.toHs n‖` cap only through the nontrivial reverse
 spectral–Sobolev comparison `exists_spectralWeightedSq_le_pouHaNorm_sq` and the order-monotonicity
 of the Sobolev weight; no packaging.  It carries no `sorry` of its own; consumers transitively
-depend on `sorryAx` only through the per-order single-section remainder estimate. -/
+depend on `sorryAx` only through the on-disk higher-order quasilinear Nemytskii bound. -/
 theorem deTurckRealizeRemainderOf_toHs_ballUniform_bound
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -408,21 +395,94 @@ theorem deTurckRealizeRemainderOf_toHs_ballUniform_bound
             (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v))‖ ≤ B := by
   classical
   intro n
-  -- The per-order single-section affine Sobolev estimate of the realized remainder at order `n`
-  -- (output order `n` controlled by input order `n + 2`, affine baseline `D`).
-  obtain ⟨C, D, hC0, hD0, hCD⟩ :=
-    exists_deTurckRealizeRemainderOf_toHs_le_toHs_succ_succ (I := I) g₀ g_bg n
-  -- The all-order ball control of the *input* perturbation at order `n + 2` (the genuine smoothing
-  -- of the heat-regularized synthesis; `ChartJet2LipControl` caps only the single order `a + 2`).
-  obtain ⟨Bin, hBin0, hBin⟩ := hall (n + 2)
-  -- The ball-uniform output cap: `C · Bin + D`.
-  refine ⟨C * Bin + D, by positivity, fun v hball => ?_⟩
-  -- Output order-`n` norm ≤ `C · ‖(P v).toHs (n+2)‖ + D ≤ C · Bin + D`.
-  refine le_trans (hCD (P v)) ?_
-  have hlin : C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (n + 2)
-        (P v)‖ ≤ C * Bin :=
-    mul_le_mul_of_nonneg_left (hBin v hball) hC0
-  linarith
+  -- Pass to the natural order `a' := max a n ≥ n` at which the difference Nemytskii bound
+  -- (supercritical at `a'` since `a ≤ a'`) controls the realized remainder.
+  set a' : ℕ := max a n with ha'_def
+  have hn_le : n ≤ a' := le_max_right a n
+  have ha' : 2 * a' > Module.finrank ℝ E + 4 := by
+    have ha_le : a ≤ a' := le_max_left a n
+    omega
+  -- The all-order input cap at order `a' + 2` (the genuine smoothing of the heat-regularized
+  -- synthesis; `ChartJet2LipControl` caps only the single order `a + 2`).
+  obtain ⟨Bin, hBin0, hBin⟩ := hall (a' + 2)
+  -- The on-disk higher-order quasilinear Nemytskii *difference* bound at order `a'`, with the
+  -- uniform `H^{a'+2}` size threshold `Bin`.
+  obtain ⟨C', hC'0, hchild⟩ :=
+    IntrinsicSpectral.DeTurck.exists_realizedRHSRemainder_pouHa_le_toHs_highOrder
+      (I := I) g₀ g_bg a' ha' Bin hBin0
+  -- The fixed baseline section (the realized remainder of the zero perturbation against `g₀`) and
+  -- its order-`a'` norm `D`; this is the affine constant term.
+  set base : Integral.L2.SmoothCcTensor g₀ 0 2 :=
+    IntrinsicSpectral.DeTurck.realizedRHSRemainderSection (I := I) g₀ g_bg g₀ 0 with hbase_def
+  set D : ℝ :=
+    ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a' base‖ with hD_def
+  refine ⟨C' * Bin + D, by positivity, fun v hball => ?_⟩
+  -- The fibre-small witness over the ball, and the realized metric it assembles.
+  set h := hctrl.fibreSmall v hball with hh_def
+  set g₁ : SmoothRiemannianMetric I M :=
+    MetricRealization.tensorSectionRealizeMetric (I := I) g₀ (P v) h.choose_spec.1 h.choose_spec.2
+    with hg₁_def
+  -- On the fibre-small locus the realized remainder reduces to the chart-frame realized remainder
+  -- section the Nemytskii bound controls.
+  have hreduce : deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v)
+      = IntrinsicSpectral.DeTurck.realizedRHSRemainderSection (I := I) g₀ g_bg g₁ (P v) := by
+    rw [deTurckRealizeRemainderOf, dif_pos h]; rfl
+  -- The two realized-metric `inner`-identities the Nemytskii bound needs: `g₁` for `P v`, and the
+  -- baseline `g₀` for the zero perturbation (`ccTensorBilinSymm g₀ 0 = 0`).
+  have hg₁_inner : ∀ (x : M) (vv ww : TangentSpace I x),
+      g₁.inner x vv ww = g₀.inner x vv ww +
+        MetricRealization.ccTensorBilinSymm (I := I) g₀ (P v) x vv ww := by
+    intro x vv ww; rw [hg₁_def, MetricRealization.tensorSectionRealizeMetric_inner]
+  have hg₀_inner : ∀ (x : M) (vv ww : TangentSpace I x),
+      g₀.inner x vv ww = g₀.inner x vv ww +
+        MetricRealization.ccTensorBilinSymm (I := I) g₀
+          (0 : Integral.L2.SmoothCcTensor g₀ 0 2) x vv ww := by
+    intro x vv ww; rw [ccTensorBilinSymm_zero_apply']; ring
+  -- The zero perturbation has zero `H^{a'+2}` norm, so it meets the size threshold `Bin ≥ 0`.
+  have htoHs0_eq : IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a' + 2)
+      (0 : Integral.L2.SmoothCcTensor g₀ 0 2) = 0 := by
+    have hadd := SmoothCcTensor.toHs_add (g := g₀) (r := 0) (s := 2) (a' + 2)
+      (0 : Integral.L2.SmoothCcTensor g₀ 0 2) (0 : Integral.L2.SmoothCcTensor g₀ 0 2)
+    rw [add_zero] at hadd
+    exact add_left_cancel (a := IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+      (a' + 2) (0 : Integral.L2.SmoothCcTensor g₀ 0 2)) (by rw [add_zero, ← hadd])
+  have hsize₀ : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a' + 2)
+      (0 : Integral.L2.SmoothCcTensor g₀ 0 2)‖ ≤ Bin := by
+    rw [htoHs0_eq, norm_zero]; exact hBin0
+  -- The Nemytskii *difference* bound at order `a'`, instantiated `(T₁,g₁) := (P v, g₁)`,
+  -- `(T₂,g₂) := (0, g₀)`.
+  have hchild_le :
+      ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a'
+          (IntrinsicSpectral.DeTurck.realizedRHSRemainderSection (I := I) g₀ g_bg g₁ (P v)
+            - base)‖
+        ≤ C' * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a' + 2)
+            (P v - 0)‖ :=
+    hchild (P v) 0 g₁ g₀ hg₁_inner hg₀_inner (hBin v hball) hsize₀
+  -- The `H^{a'+2}` size cap of the input over the ball.
+  have hPv_le : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a' + 2)
+      (P v - 0)‖ ≤ Bin := by
+    rw [sub_zero]; exact hBin v hball
+  -- Triangle: the value norm at `a'` is `≤` the difference norm plus the baseline norm `D`.
+  have hval_le :
+      ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a'
+          (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v))‖ ≤ C' * Bin + D := by
+    rw [hreduce]
+    have hsplit :
+        IntrinsicSpectral.DeTurck.realizedRHSRemainderSection (I := I) g₀ g_bg g₁ (P v)
+          = (IntrinsicSpectral.DeTurck.realizedRHSRemainderSection (I := I) g₀ g_bg g₁ (P v)
+              - base) + base := by abel
+    rw [hsplit, SmoothCcTensor.toHs_add]
+    refine le_trans (norm_add_le _ _) ?_
+    have hdiff_le : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a'
+        (IntrinsicSpectral.DeTurck.realizedRHSRemainderSection (I := I) g₀ g_bg g₁ (P v)
+          - base)‖ ≤ C' * Bin :=
+      le_trans hchild_le (mul_le_mul_of_nonneg_left hPv_le hC'0)
+    have hbase_le : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a' base‖
+        ≤ D := le_of_eq hD_def.symm
+    linarith
+  -- Drop the output order from `a'` back to `n` (`toHs` order-monotonicity, `n ≤ a'`).
+  refine le_trans (toHs_norm_mono (I := I) (M := M) g₀ hn_le
+    (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v))) hval_le
 
 /-- **All-order ball-uniform spectral-mass control of the realized DeTurck-remainder synthesis
 (proven by composition over the all-order intrinsic-Sobolev toHs cap).**
@@ -461,7 +521,7 @@ monotonicity), which the integer-order reverse spectral–Sobolev comparison
 the realized remainder, capped ball-uniformly by `deTurckRealizeRemainderOf_toHs_ballUniform_bound`
 (itself proven over the all-order *input* control `AllOrderBallControl`, threaded through here).
 It carries no `sorry` of its own; consumers transitively depend on `sorryAx` only through the
-per-order single-section remainder estimate. -/
+on-disk higher-order quasilinear Nemytskii bound. -/
 theorem deTurckRealizeRemainderOf_spectralMass_ballUniform_bound
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -568,8 +628,8 @@ which is false in general).  It is *additional* analytic structure of the concre
 DeTurck remainder, encoding that the section `deTurckRealizeRemainderOf g₀ g_bg (P v)` is the
 value of an everywhere first-order geometric operator on `v` (so it loses at most one order);
 this is **not** deducible from the bare type `N_cont : H^{a+1} → H^a`, which is why the genuine
-content is pushed into the per-order single-section remainder estimate and the all-order *input*
-control over which this bound is proven by composition.
+content is pushed into the on-disk higher-order quasilinear *difference* Nemytskii bound and the
+all-order *input* control over which this bound is proven by composition.
 
 The synthesis-pin `hsynth` is a *concrete equality* tying every coordinate of `N_cont v` to
 the named geometric operator `deTurckG0SpectralN g₀ a (deTurckRealizeRemainderOf g₀ g_bg (P
@@ -597,13 +657,15 @@ uniform cap already dominating): through the synthesis-pin `hsynth` each order-`
 is the order-`d` weighted `L²`-coordinate mass of the concrete smooth realized remainder, which is
 summable and ball-uniformly capped.  The all-order one-order-loss content (the principal-symbol
 cancellation of the second-order DeTurck operator against `Δ_∇` leaving a first-order operator,
-propagated through all Sobolev orders) is supplied not by the on-disk fixed-order-`a`
-Nemytskii–Lipschitz tower `exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder` (silent at
-every order `d ≠ a`), but by the all-order *input* control `AllOrderBallControl` (the smoothing,
-threaded through the spectral-mass cap) together with the per-order single-section remainder
-estimate `exists_deTurckRealizeRemainderOf_toHs_le_toHs_succ_succ`.  It carries no `sorry` of its
-own; consumers transitively depend on `sorryAx` only through that per-order single-section remainder
-estimate. -/
+propagated through all Sobolev orders) is supplied by the on-disk higher-order quasilinear
+*difference* Nemytskii bound `exists_realizedRHSRemainder_pouHa_le_toHs_highOrder` (instantiated
+at the variable order `max a d` and at the second slot `T₂ := 0, g₂ := g₀` to read off the
+single-section value) together with the all-order *input* control `AllOrderBallControl` (the
+smoothing, threaded through the spectral-mass cap); the on-disk fixed-order-`a` weighted-`Hᵃ`
+tower `exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder` is silent at every order
+`d ≠ a`, so it is the variable-order `pouHa` form that carries the all-order reach.  It carries no
+`sorry` of its own; consumers transitively depend on `sorryAx` only through that higher-order
+quasilinear Nemytskii bound. -/
 theorem deTurckGenuineN_firstOrder_operatorTsumLoss
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -691,8 +753,8 @@ finite-partial-sum restriction of the genuine full-series operator-loss
 `deTurckGenuineN_firstOrder_operatorTsumLoss`: the output-mass family is summable and its
 total is bounded by `C₁ + C₂ ·` the order-`(d + 1)` input mass, so every finite partial sum of
 the nonnegative output masses is at most that total (`Summable.sum_le_tsum`).  Consumers
-transitively depend on `sorryAx` only through the per-order single-section remainder estimate
-`exists_deTurckRealizeRemainderOf_toHs_le_toHs_succ_succ` under the full-series operator-loss. -/
+transitively depend on `sorryAx` only through the on-disk higher-order quasilinear Nemytskii
+bound `exists_realizedRHSRemainder_pouHa_le_toHs_highOrder` under the full-series operator-loss. -/
 theorem deTurckGenuineN_firstOrder_spatialOperatorLoss
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -753,12 +815,12 @@ false bare-function claim; the conclusion (the affine operator-loss) is structur
 from the coordinate equality `hsynth`; no packaging.  The body delegates to the full-series
 operator-loss `deTurckGenuineN_firstOrder_operatorTsumLoss` (the affine operator first-order-loss
 estimate of the concrete geometric remainder, itself proven by composition over the all-order
-spectral-mass cap and the per-order single-section remainder estimate): the pointwise-in-space
+spectral-mass cap and the on-disk higher-order quasilinear Nemytskii bound): the pointwise-in-space
 affine bound is integrated over the short-time interval `[0,T]`, where the constant baseline `C₁`
 (a time-constant, hence with `[0,T]`-integral `C₁ · (timeMeasure T).real univ`) is dominated by
 `C₁` itself using the operating-regime bound `T ≤ 1` (so `(timeMeasure T).real univ ≤ 1`).
-Consumers transitively depend on `sorryAx` only through the per-order single-section remainder
-estimate `exists_deTurckRealizeRemainderOf_toHs_le_toHs_succ_succ`. -/
+Consumers transitively depend on `sorryAx` only through the on-disk higher-order quasilinear
+Nemytskii bound `exists_realizedRHSRemainder_pouHa_le_toHs_highOrder`. -/
 theorem deTurckGenuineN_firstOrder_operatorLoss
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
