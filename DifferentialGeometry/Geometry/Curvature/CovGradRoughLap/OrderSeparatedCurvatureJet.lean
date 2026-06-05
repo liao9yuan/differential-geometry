@@ -309,55 +309,9 @@ theorem IsGradedCurvJet.add (g : SmoothRiemannianMetric I M) {s : ℕ}
               riemannianFiberNormSq (I := I) (M := M) g 0 (s + (i + p)) x
                 ((iteratedCovGrad g 0 s (i + p) T).toSection x) := by ring
 
-/-- **Frozen-frame iterated-gradient engine: the centre-frame graded curvature-jet diagonal grid bound
-for the fixed-frame pure-Riemann section `fixedFramePureRSection`.** For a closed smooth Riemannian
-manifold `(M, g)` there is a *valence/order-dependent* nonnegative constant family `c : ℕ → ℕ → ℝ`,
-**uniform over the centre `x`**, such that at every covariant rank `s`, smooth compactly-supported
-`(0, s)`-tensor `S`, gradient order `k`, and centre `x`, the `k`-fold iterated covariant gradient of
-the frozen-frame pure-Riemann section against the *centre frame* `smoothOrthoFrame g x`, evaluated at
-its own centre `x`, is fibre-bounded by
-
-```
-rfns(∇^k (fixedFramePureRSection g s S (smoothOrthoFrame g x)))(x)
-  ≤ (c s k)² · ∑_{i < 1 + k} rfns(∇^{i + 1} S)(x).
-```
-
-This is the **diagonal** (centre-frame-at-its-own-centre) form of the order-`1`/width-`1` graded
-curvature-jet bound. It is exactly `FrozenFramePureRCurvatureTower`'s headline
-`exists_fixedFramePureRSection_iteratedCovGrad_grid_bound`, re-exposed here as the engine the
-moving-centre jet `GcurvSection_gradedCurvJet` consumes through the locality transfer (at each centre
-`x₀`, the moving-centre section agrees with the frozen section against `smoothOrthoFrame g x₀` near
-`x₀`, and the iterated gradient is local, so only the *diagonal* point `x = x₀` of this bound is
-needed). The full `IsGradedCurvJet` (a bound at *every* point) does not hold for a fixed centre frame
-— the frozen-frame envelope is true only at the frame's own centre — which is why this diagonal form,
-not the former free-`B` `IsGradedCurvJet`, is the correct engine.
-
-**Restatement note (certificate-sanctioned).** The former free-frame `∀ B, IsGradedCurvJet …
-(fixedFramePureRSection g s S B)` form is FALSE: the operator is quadratic in the frame `B` (`B_i`
-contracted twice), so for a generic large frame `B` the bound fails; and a fixed centre frame is only
-bounded at its own centre, not at every `x` as `IsGradedCurvJet` demands. The sole consumer
-(`GcurvSection_gradedCurvJet`) uses only the diagonal centre-frame bound, so no generality is lost.
-
-**Non-vacuity.** With `c s 0 = 0` the bound forces `rfns(fixedFramePureRSection g s S
-(smoothOrthoFrame g x))(x) = 0` at `k = 0`, i.e. the pure-Riemann contraction
-`∑ᵢ R(B_iˣ, ·)(∇_{B_iˣ} S)` vanishes; false on a non-flat manifold (`R ≠ 0`) for a non-parallel `S`
-(`∇S ≠ 0`). The constant family is genuinely positive. -/
-theorem fixedFramePureRSection_gradedCurvJet (g : SmoothRiemannianMetric I M) :
-    ∃ c : ℕ → ℕ → ℝ, (∀ s k, 0 ≤ c s k) ∧
-      ∀ (s : ℕ) (S : SmoothCcTensor g 0 s) (k : ℕ) (x : M),
-        riemannianFiberNormSq (I := I) (M := M) g 0 ((s + 1) + k) x
-            ((iteratedCovGrad g 0 (s + 1) k
-              (fixedFramePureRSection (I := I) (M := M) g s S
-                (smoothOrthoFrame (I := I) g x)
-                (fun i => smoothOrthoFrame_smooth (I := I) g x i))).toSection x) ≤
-          (c s k) ^ 2 * ∑ i ∈ Finset.range (1 + k),
-            riemannianFiberNormSq (I := I) (M := M) g 0 (s + (i + 1)) x
-              ((iteratedCovGrad g 0 s (i + 1) S).toSection x) :=
-  exists_fixedFramePureRSection_iteratedCovGrad_grid_bound (I := I) (M := M) g
-
 /-- **The graded curvature-jet bound for the moving-centre pure-Riemann section `GcurvSection`**,
-*proved* by the frozen-frame iterated-gradient engine and the locality of the iterated covariant
-gradient. For a closed smooth Riemannian manifold `(M, g)` there is a valence/order-dependent
+*proved* DIRECTLY by the frame-free pure-Riemann trace tower's iterated-gradient grid (no frozen-frame
+locality detour). For a closed smooth Riemannian manifold `(M, g)` there is a valence/order-dependent
 nonnegative constant family `c : ℕ → ℕ → ℝ` such that, at every covariant rank `s` and every smooth
 compactly-supported `(0, s)`-tensor `T`, the moving-centre pure-Riemann genuine curvature section
 `GcurvSection g s T` (the slot-`0` assembly of the moving-frame trace `∑ᵢ R(Bᵢ, ·)(∇_{Bᵢ}T)`, the
@@ -367,20 +321,15 @@ compactly-supported `(0, s)`-tensor `T`, the moving-centre pure-Riemann genuine 
 rfns(∇^k (GcurvSection g s T))(x) ≤ (c s k)² · ∑_{i < 1 + k} rfns(∇^{i + 1} T)(x).
 ```
 
-**Proof — locality transfer off the frozen-frame engine.** At each point `x₀`, the moving-centre
-section agrees fibrewise with the frozen-frame section against the frame `smoothOrthoFrame g x₀` on a
-neighbourhood of `x₀` (`GcurvSection_toSection_eventuallyEq_fixedFramePureRSection`,
-`MovingFrameCurvatureTraceSmooth`, the bilinear-Parseval frame-independence freeze). The iterated
-covariant gradient is *local* (`riemannianFiberNormSq_iteratedCovGrad_toSection_congr_of_eventuallyEq`,
-`IteratedCovGradLocality`): equal germs at `x₀` give equal `∇^k` fibre values, hence equal
-`riemannianFiberNormSq`, at *every* gradient order `k`. So `rfns(∇^k(GcurvSection g s T))(x₀)` equals
-`rfns(∇^k(fixedFramePureRSection g s T (smoothOrthoFrame g x₀)))(x₀)`, which the frozen-frame engine
-`fixedFramePureRSection_gradedCurvJet` bounds — with its `B`-uniform constant family — by
-`(c s k)² · ∑_{i < 1 + k} rfns(∇^{i + 1} T)(x₀)`. The frame-uniformity of the engine's constant is
-exactly what makes the per-`x₀` choice of frozen frame `smoothOrthoFrame g x₀` legitimate (a single
-constant family serves every centre). This is the genuine glue assembling the moving-centre jet from
-the frozen-frame jet; consumers transitively depend on `sorryAx` only through
-`fixedFramePureRSection_gradedCurvJet`.
+**Proof.** This is *definitionally* `FrozenFramePureRCurvatureTower`'s frame-free headline
+`exists_GcurvSection_iteratedCovGrad_grid_bound`: the bound there is stated directly on the
+moving-centre section `GcurvSection g s T`, with the same constant shape `(c s k)²` and the same
+contracted-order range `∑_{i < 1 + k} rfns(∇^{i + 1} T)`, which unfolds to `IsGradedCurvJet g T (c s) 1
+1 (GcurvSection g s T)`. The grid is proved off the *frame-free* differentiated pure-Riemann tower
+`pureRGenuineDiffOp` (whose order-`0` base is the moving-frame endomorphism, frame-free in value), so it
+needs no per-`x₀` frozen-frame choice and no locality transfer; the constant family is frame-free.
+Consumers transitively depend on `sorryAx` only through the single frame-free envelope node
+`exists_proportional_pureRGenuineDiffOp_highOrder`.
 
 **Non-vacuity.** With `c s 0 = 0` the bound forces `rfns(GcurvSection g s T)(x) = 0` at `k = 0`, i.e.
 the pure-Riemann contraction `∑ᵢ R(Bᵢ, ·)(∇_{Bᵢ}T)` vanishes; false on a non-flat manifold (`R ≠ 0`)
@@ -390,29 +339,8 @@ theorem GcurvSection_gradedCurvJet (g : SmoothRiemannianMetric I M) :
       ∀ (s : ℕ) (T : SmoothCcTensor g 0 s),
         IsGradedCurvJet (I := I) (M := M) g T (c s) 1 1
           (GcurvSection (I := I) (M := M) g s T) := by
-  obtain ⟨c, hc_nn, hfrozen⟩ := fixedFramePureRSection_gradedCurvJet (I := I) (M := M) g
-  refine ⟨c, hc_nn, fun s T k x₀ => ?_⟩
-  -- The frozen-frame section against the centre frame `smoothOrthoFrame g x₀`, smooth frame.
-  have hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
-      (T% (smoothOrthoFrame (I := I) g x₀ i)) := fun i =>
-    smoothOrthoFrame_smooth (I := I) g x₀ i
-  -- Locality: `∇^k` fibre norm of `GcurvSection` at `x₀` equals that of the frozen-frame section
-  -- against the centre frame `smoothOrthoFrame g x₀`, by their eventual fibrewise equality near `x₀`.
-  have htransfer :
-      riemannianFiberNormSq (I := I) (M := M) g 0 ((s + 1) + k) x₀
-          ((iteratedCovGrad g 0 (s + 1) k
-            (GcurvSection (I := I) (M := M) g s T)).toSection x₀) =
-        riemannianFiberNormSq (I := I) (M := M) g 0 ((s + 1) + k) x₀
-          ((iteratedCovGrad g 0 (s + 1) k
-            (fixedFramePureRSection (I := I) (M := M) g s T
-              (smoothOrthoFrame (I := I) g x₀) hB)).toSection x₀) :=
-    riemannianFiberNormSq_iteratedCovGrad_toSection_congr_of_eventuallyEq
-      (I := I) (M := M) g 0 (s + 1)
-      (GcurvSection_toSection_eventuallyEq_fixedFramePureRSection
-        (I := I) (M := M) g s T x₀ hB) k
-  rw [htransfer]
-  -- The diagonal centre-frame engine bound at the centre `x₀` (its own centre).
-  exact hfrozen s T k x₀
+  obtain ⟨c, hc_nn, hgrid⟩ := exists_GcurvSection_iteratedCovGrad_grid_bound (I := I) (M := M) g
+  exact ⟨c, hc_nn, fun s T k x => hgrid s T k x⟩
 
 /-- **Posited combined graded curvature-jet differentiated-curvature-and-remainder field split for the
 `m = 0` decomposition.** For a closed smooth Riemannian manifold `(M, g)` there is a
