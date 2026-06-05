@@ -204,7 +204,7 @@ theorem deTurck_g0_realize_data
   -- the coordinate-spectral nonlinearity supply the engine-shaped ball-continuity `hN_cont`
   -- and local Lipschitz `hLipBall`; `hcarrier` is the gate-realizable agreement of `P`'s
   -- realized remainder with the honest gate gauge `deTurckRemainderRealizeSection g₀ g_bg`.
-  obtain ⟨P, K, R, hR, hctrl, hcarrier⟩ :=
+  obtain ⟨P, K, R, hR, hctrl, hall, hcarrier⟩ :=
     exists_deTurckRemainderG0_synthesis_chartJet2Control (I := I) g₀ g_bg a ha
   obtain ⟨K', hN_cont, hLipBall⟩ :=
     deTurckG0SpectralN_continuous_lipschitz_of_chartJet2Control
@@ -244,10 +244,11 @@ theorem deTurck_g0_realize_data
     intro u hu hball i
     rw [hsynth u i, hcarrier u ⟨hu, hball⟩]
   -- The first-order operator-loss of the concrete gauge-cancelled geometric nonlinearity
-  -- (posited analytic leaf `deTurckGenuineN_firstOrder_operatorLoss`), pinned to the named
+  -- (`deTurckGenuineN_firstOrder_operatorLoss`, proven by composition over the all-order ball
+  -- control `hall` and the per-order single-section remainder estimate), pinned to the named
   -- geometric operator by the all-order concrete-synthesis identity `hsynth`.
   have hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont R :=
-    deTurckGenuineN_firstOrder_operatorLoss (I := I) g₀ g_bg a ha N_cont P K hR hctrl hsynth
+    deTurckGenuineN_firstOrder_operatorLoss (I := I) g₀ g_bg a ha N_cont P K hR hctrl hall hsynth
   obtain ⟨T, g_DT, u₂, T_s, hT, h0, hreal, hcont, hreg, hsmall, hsmoothrepr, hcanon, hHk,
       hcarrier_inball⟩ :=
     deTurck_g0_carrier_realize_transport (I := I) g₀ a ha ha2 N_cont hR hN_cont hLipBall hloss

@@ -50,10 +50,15 @@ For a `g_x`-orthonormal frame `e` with `n = Module.finrank ℝ (TangentSpace I x
   `bracketThirdCurvFieldFib_fiberNormSq_le_secondCovGrad_pointwise`). This cancellation is *false
   term-by-term* through `smoothExtensionTangent`; only the tensorial frame-sum is `∇²S`-order.
 
-* `movingFrameRemainder_toSection_eq_bracketField` — the frame-independent reading of the moving-frame
-  remainder as the bracket field, in *any* orthonormal frame; it closes over the arbitrary-frame
-  pure-Riemann match (proven here, frame-free) and the arbitrary-frame differentiated-curvature match
-  (`GcurvDerivSection_toSection_eq_genuineThirdCurvFieldFibCovDeriv_anyFrame`).
+* `movingFrameRemainder_toSection_eq_bracketField` — the reading of the moving-frame remainder as the
+  bracket field, in a *single witness* orthonormal frame `e`; it closes over the frame-free field split
+  (`pointwiseTensorCurv_toSection_eq_genuine_add_bracket_field_anyFrame`, holding in any orthonormal
+  frame) and the genuine-section sum match
+  (`GcurvSection_add_GcurvDerivSection_toSection_eq_genuineThirdCurvField_anyFrame`, holding only in its
+  construction witness frame). The match is *existential* in `e`, not universal: the
+  differentiated-curvature reconstruction is non-linear in the direction (it sees the covariant
+  derivative of `smoothExtensionTangent`), so the genuine-section sum does *not* match
+  `genuineThirdCurvFieldFib` in every orthonormal frame.
 -/
 
 noncomputable section
@@ -750,62 +755,82 @@ theorem pointwiseTensorCurv_toSection_eq_genuine_add_bracket_field_anyFrame
     (I := I) (M := M) g s S x (e a)]
   rw [Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply, smul_add]
 
-/-- **Arbitrary-frame genuine-section fibre sum.** In *every* `g_x`-orthonormal frame `e`, the
-unit-section fibre values of the two genuine curvature sections `GcurvSection g s S`,
-`GcurvDerivSection g s S` sum to the genuine third-order curvature fibre field
-`genuineThirdCurvFieldFib g s S x e w m` — the frame-free strengthening of
-`GcurvSection_add_GcurvDerivSection_toSection_eq_genuineThirdCurvField`.
+/-- **Witness-frame genuine-section fibre sum.** At every base point `x` there is a *single*
+`g_x`-orthonormal frame `e` in which the unit-section fibre values of the two genuine curvature
+sections `GcurvSection g s S`, `GcurvDerivSection g s S` sum to the genuine third-order curvature
+fibre field `genuineThirdCurvFieldFib g s S x e w m`. This is the existential-witness-frame fibre
+match; it is the same statement as the canonical
+`GcurvSection_add_GcurvDerivSection_toSection_eq_genuineThirdCurvField`
+(`MovingFrameCurvatureTraceSmooth`), re-exported here as the genuine-section input to the moving-frame
+remainder fibre match `movingFrameRemainder_toSection_eq_bracketField`.
 
-**Why this is TRUE.** The two sections are fixed `(0, s + 1)`-tensors; their slot-`0` curries along any
-direction recover the pure-Riemann / differentiated-curvature genuine traces (the pure-Riemann curry
-is unconditional in the direction; the differentiated-curvature section assembles the frame-independent
-differentiated-curvature trace), so the frame-independent slot-`0` uncurry
-`tensor0S_uncurry_cons_eval_orthonormal` reconstructs `genuineThirdCurvFieldFibPureR` /
-`genuineThirdCurvFieldFibCovDeriv` in any orthonormal frame `e`, and their sum is the genuine field by
-`genuineThirdCurvFieldFib_eq_pureR_add_covDeriv`. (Both genuine traces are genuine metric traces — the
-frame index contracted twice — hence frame-independent, so the reconstruction does not depend on the
-choice of `e`.)
+**Why this is TRUE.** `GcurvSection` is the slot-`0` uncurry of the *direction-linear* pure-Riemann
+genuine-trace CLM, so its slot-`0` curry reconstructs `genuineThirdCurvFieldFibPureR` against any
+direction; `GcurvDerivSection` is the slot-`0` uncurry of the differentiated-curvature direction CLM,
+whose slot-`0` curry recovers the differentiated-curvature trace exactly along the frame vectors of
+the construction frame `smoothOrthoFrame g x`, so the reconstruction of `genuineThirdCurvFieldFibCovDeriv`
+holds in *that* witness frame `e`. Their sum is the genuine field by
+`genuineThirdCurvFieldFib_eq_pureR_add_covDeriv` (`GcurvSection_GcurvDerivSection_spec`).
+
+**Frame-dependence warning — the `∀ e` form is FALSE.** This match cannot be strengthened to *every*
+`g_x`-orthonormal frame `e`. The LHS is the evaluation of the two *fixed* `(0, s + 1)`-tensors
+`GcurvSection`, `GcurvDerivSection` (`e`-independent), but the RHS `genuineThirdCurvFieldFib g s S x e`
+collapses (orthonormal Gram) to `toModel (tensor3rdCurvGenuine g 0 s (smoothExtensionTangent x (e (φ 0)))
+S x (unit)) (…)`, whose differentiated-curvature summand `∇_{Bᵢ}(R(Bᵢ, ·) S)` is *non-linear* in the
+direction — by the Leibniz rule (`riemannSec_smul_right`-style covariant Leibniz) its value at
+`smoothExtensionTangent x (e (φ 0))` sees the covariant derivative of the extension (an uncontrolled
+`Classical.choose`), so it depends on the choice of `e`. With an `e` whose differentiated-curvature
+reconstruction does not match the construction frame `smoothOrthoFrame g x`, the RHS differs from the
+fixed LHS; hence the universal-`e` form is unsatisfiable and only the existential witness frame is
+correct (cf. the non-tensorial direction dependence documented at `genuineCovDerivFib_contMDiff`).
 
 **Non-vacuity.** Replacing the genuine sections by zero would force the genuine field to vanish, false
 on a non-flat manifold where the pure-Riemann and differentiated-curvature contractions are nonzero. -/
 theorem GcurvSection_add_GcurvDerivSection_toSection_eq_genuineThirdCurvField_anyFrame
-    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
-    {n : ℕ} (e : Fin n → TangentSpace I x)
-    (hn : n = Module.finrank ℝ (TangentSpace I x))
-    (horth : ∀ i j : Fin n, g.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0)
-    (w : TangentSpace I x) (m : Fin s → TangentSpace I x) :
-    Tensor0SSpace.toModel
-        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
-          (GcurvSection (I := I) (M := M) g s S).toSection x)
-          (unitZeroSec (I := I) (M := M) x)) (Fin.cons w m) +
-      Tensor0SSpace.toModel
-        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
-          (GcurvDerivSection (I := I) (M := M) g s S).toSection x)
-          (unitZeroSec (I := I) (M := M) x)) (Fin.cons w m) =
-      genuineThirdCurvFieldFib (I := I) (M := M) g s S x e w m := by
-  sorry
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) :
+    ∃ (n : ℕ) (e : Fin n → TangentSpace I x),
+      n = Module.finrank ℝ (TangentSpace I x) ∧
+      (∀ i j : Fin n, g.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0) ∧
+      ∀ (w : TangentSpace I x) (m : Fin s → TangentSpace I x),
+        Tensor0SSpace.toModel
+            ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+              (GcurvSection (I := I) (M := M) g s S).toSection x)
+              (unitZeroSec (I := I) (M := M) x)) (Fin.cons w m) +
+          Tensor0SSpace.toModel
+            ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+              (GcurvDerivSection (I := I) (M := M) g s S).toSection x)
+              (unitZeroSec (I := I) (M := M) x)) (Fin.cons w m) =
+          genuineThirdCurvFieldFib (I := I) (M := M) g s S x e w m :=
+  GcurvSection_add_GcurvDerivSection_toSection_eq_genuineThirdCurvField (I := I) (M := M) g s S x
 
-/-- **The moving-frame remainder fibre-matches the bracket curvature fibre field (any orthonormal
-frame).** For a closed smooth Riemannian manifold `(M, g)`, every covariant rank `s`, smooth
-compactly-supported `(0, s)`-tensor `S`, point `x`, and *arbitrary* `g_x`-orthonormal frame `e` (with
-`n = Module.finrank ℝ (TangentSpace I x)`), the unit-section value of the moving-frame remainder
-`Curv S − GcurvSection − GcurvDerivSection` (`Curv S := pointwiseTensorCurv g s S`) reconstructs, at
-every slot-`0` direction `w` and tail tuple `m`, as the bracket curvature fibre field:
+/-- **The moving-frame remainder fibre-matches the bracket curvature fibre field (witness frame).**
+For a closed smooth Riemannian manifold `(M, g)`, every covariant rank `s`, smooth compactly-supported
+`(0, s)`-tensor `S` and point `x`, there is a *single* `g_x`-orthonormal frame `e` (the genuine-section
+witness frame, with `n = Module.finrank ℝ (TangentSpace I x)`) in which the unit-section value of the
+moving-frame remainder `Curv S − GcurvSection − GcurvDerivSection` (`Curv S := pointwiseTensorCurv g s S`)
+reconstructs, at every slot-`0` direction `w` and tail tuple `m`, as the bracket curvature fibre field:
 ```
 toModel ((Curv S − GcurvSection − GcurvDerivSection).toSection x (unit)) (Fin.cons w m)
   = bracketThirdCurvFieldFib g s S x e w m.
 ```
 
-**Why this is TRUE.** The remainder section value splits pointwise into the three section values
-(`SmoothCcTensor.toSection_sub`), and the model coercion of the unit-section is additive on the
-subtraction. In the *arbitrary* orthonormal frame `e`, the field split
-`pointwiseTensorCurv_toSection_eq_genuine_add_bracket_field_anyFrame` reads
-`toModel ((Curv S).toSection x (unit)) (cons w m)` as
-`genuineThirdCurvFieldFib g s S x e w m + bracketThirdCurvFieldFib g s S x e w m`, and
-`GcurvSection_add_GcurvDerivSection_toSection_eq_genuineThirdCurvField_anyFrame` identifies the sum of
-the two genuine-section model values with `genuineThirdCurvFieldFib g s S x e w m`; subtracting the
-genuine sections leaves exactly the bracket field. Both identities hold in *one common* arbitrary
-orthonormal frame `e` because the genuine moving-frame curvature trace is frame-independent.
+**Why this is TRUE.** Take `e` to be the genuine-section witness frame of
+`GcurvSection_add_GcurvDerivSection_toSection_eq_genuineThirdCurvField_anyFrame` (in which the sum of
+the two genuine-section unit-section model values equals `genuineThirdCurvFieldFib g s S x e w m`). The
+remainder section value splits pointwise into the three section values (`SmoothCcTensor.toSection_sub`),
+and the model coercion of the unit-section is additive on the subtraction. The field split
+`pointwiseTensorCurv_toSection_eq_genuine_add_bracket_field_anyFrame` is *frame-free* (it holds in every
+orthonormal frame, in particular in `e`) and reads `toModel ((Curv S).toSection x (unit)) (cons w m)`
+as `genuineThirdCurvFieldFib g s S x e w m + bracketThirdCurvFieldFib g s S x e w m`; subtracting the
+genuine sections (whose sum is the genuine field, in the *same* frame `e`) leaves exactly the bracket
+field.
+
+**Frame-dependence warning — the `∀ e` form is FALSE.** The genuine-section sum match holds only in the
+construction witness frame, not in *every* orthonormal `e` (the differentiated-curvature reconstruction
+is non-linear in the direction via the covariant derivative of `smoothExtensionTangent`; see the
+warning on `GcurvSection_add_GcurvDerivSection_toSection_eq_genuineThirdCurvField_anyFrame` and
+`genuineCovDerivFib_contMDiff`), so this fibre match is correctly stated only existentially in a single
+witness frame `e`, not universally.
 
 **Non-vacuity.** Replacing the genuine sections by zero would assert
 `toModel ((Curv S).toSection x (unit)) (cons w m) = bracketThirdCurvFieldFib g s S x e w m`, dropping the
@@ -813,19 +838,23 @@ genuine field `genuineThirdCurvFieldFib`, false on a non-flat manifold (the pure
 differentiated-curvature contractions are genuinely nonzero). So the identity holds exactly for the
 genuine curvature sections. -/
 theorem movingFrameRemainder_toSection_eq_bracketField
-    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
-    {n : ℕ} (e : Fin n → TangentSpace I x)
-    (hn : n = Module.finrank ℝ (TangentSpace I x))
-    (horth : ∀ i j : Fin n, g.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0)
-    (w : TangentSpace I x) (m : Fin s → TangentSpace I x) :
-    Tensor0SSpace.toModel
-        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
-          (pointwiseTensorCurv (I := I) (M := M) g s S -
-              GcurvSection (I := I) (M := M) g s S -
-              GcurvDerivSection (I := I) (M := M) g s S).toSection x)
-          (unitZeroSec (I := I) (M := M) x)) (Fin.cons w m) =
-      bracketThirdCurvFieldFib (I := I) (M := M) g s S x e w m := by
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) :
+    ∃ (n : ℕ) (e : Fin n → TangentSpace I x),
+      n = Module.finrank ℝ (TangentSpace I x) ∧
+      (∀ i j : Fin n, g.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0) ∧
+      ∀ (w : TangentSpace I x) (m : Fin s → TangentSpace I x),
+        Tensor0SSpace.toModel
+            ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+              (pointwiseTensorCurv (I := I) (M := M) g s S -
+                  GcurvSection (I := I) (M := M) g s S -
+                  GcurvDerivSection (I := I) (M := M) g s S).toSection x)
+              (unitZeroSec (I := I) (M := M) x)) (Fin.cons w m) =
+          bracketThirdCurvFieldFib (I := I) (M := M) g s S x e w m := by
   classical
+  obtain ⟨n, e, hn, horth, hgenuine⟩ :=
+    GcurvSection_add_GcurvDerivSection_toSection_eq_genuineThirdCurvField_anyFrame
+      (I := I) (M := M) g s S x
+  refine ⟨n, e, hn, horth, fun w m => ?_⟩
   have hsec : (pointwiseTensorCurv (I := I) (M := M) g s S -
         GcurvSection (I := I) (M := M) g s S -
         GcurvDerivSection (I := I) (M := M) g s S).toSection x =
@@ -855,8 +884,7 @@ theorem movingFrameRemainder_toSection_eq_bracketField
     ContinuousMultilinearMap.sub_apply, ContinuousMultilinearMap.sub_apply]
   rw [pointwiseTensorCurv_toSection_eq_genuine_add_bracket_field_anyFrame
     (I := I) (M := M) g s S x e hn horth w m]
-  rw [← GcurvSection_add_GcurvDerivSection_toSection_eq_genuineThirdCurvField_anyFrame
-    (I := I) (M := M) g s S x e hn horth w m]
+  rw [← hgenuine w m]
   ring
 
 end Connection

@@ -361,10 +361,12 @@ private theorem movingFrameRemainder_fiberNormSq_le_secondCovGrad
   classical
   obtain ⟨C₃, hC₃_nn, hbound⟩ := bracketThirdCurvFieldFib_fiberNormEnergy_le (I := I) (M := M) g
   refine ⟨C₃, hC₃_nn, fun s S x => ?_⟩
-  -- Read the fibre norm of the moving-frame remainder in a `g_x`-orthonormal frame `e`, identify each
-  -- model component with the bracket fibre field, and bound the frame-summed bracket energy.
-  obtain ⟨n, e, hn, horth, _⟩ :=
-    pointwiseTensorCurv_toSection_eq_genuine_add_bracket_field (I := I) (M := M) g s S x
+  -- Read the fibre norm of the moving-frame remainder in the genuine-section witness frame `e`,
+  -- identify each model component with the bracket fibre field, and bound the frame-summed bracket
+  -- energy. The witness frame is produced by the moving-frame remainder fibre match itself (the
+  -- section sum match holds only in that frame; the `∀`-frame form is false).
+  obtain ⟨n, e, hn, horth, hmatch⟩ :=
+    movingFrameRemainder_toSection_eq_bracketField (I := I) (M := M) g s S x
   rw [riemannianFiberNormSq_succ_section_eq_sum_toModel_unit_sq (I := I) (M := M) g s
     (pointwiseTensorCurv (I := I) (M := M) g s S -
       GcurvSection (I := I) (M := M) g s S -
@@ -387,8 +389,7 @@ private theorem movingFrameRemainder_fiberNormSq_le_secondCovGrad
       · simp
       · intro j; simp [Fin.tail]
     rw [hcons]
-    exact congrArg (· ^ 2) (movingFrameRemainder_toSection_eq_bracketField
-      (I := I) (M := M) g s S x e hn horth (e (φ 0)) (fun k => e (Fin.tail φ k)))
+    exact congrArg (· ^ 2) (hmatch (e (φ 0)) (fun k => e (Fin.tail φ k)))
   calc ∑ φ : Fin (s + 1) → Fin n,
           Tensor0SSpace.toModel
               ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from

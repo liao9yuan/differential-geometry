@@ -48,10 +48,12 @@ nonlinearity at the spectral-mass level — a finite operator constant `C` bound
 order `d` and for every reproduced pair of time fields, the order-`d` output partial sums by
 the total order-`(d+1)` input mass; *additional* structure of the DeTurck remainder not
 deducible from the fixed-order datum `N_cont : H^{a+1} → H^a`).  That datum is supplied at the
-assembler `deTurck_g0_realize_data` from the posited genuine analytic leaf
-`deTurckGenuineN_firstOrder_operatorLoss` (the operator-loss of the gauge-cancelled geometric
-remainder, pinned to the geometry by the gate-coordinate tie against
-`deTurckRemainderRealizeSection g₀ g_bg`).  The partial-sum bound is then assembled
+assembler `deTurck_g0_realize_data` from `deTurckGenuineN_firstOrder_operatorLoss` (the
+operator-loss of the gauge-cancelled geometric remainder, pinned to the geometry by the
+gate-coordinate tie against `deTurckRemainderRealizeSection g₀ g_bg`), itself proven by
+composition over the all-order *input* control `AllOrderBallControl` (the synthesis smoothing)
+and the per-order single-section realized-remainder Sobolev estimate
+`exists_deTurckRealizeRemainderOf_toHs_le_toHs_succ_succ` (the genuine analytic leaf).  The partial-sum bound is then assembled
 (sorry-free) from `hloss` for the smooth (`u₀ = 0`) datum, where the homogeneous heat flow
 vanishes so the `H^{a+1}`-view Duhamel field's order-`(d+1)` mass equals the Duhamel
 `solFieldMass`; from that bound the qualitative summability implication follows by
@@ -304,12 +306,60 @@ theorem tensorTimeL2_weighted_pointwise_mass_integral
           (sq_nonneg _)))]
   exact ⟨hΦ_int, hae_summable, hΦ_integral⟩
 
+/-- **The per-order single-section affine Sobolev estimate of the realized DeTurck remainder
+(the genuine all-order analytic geometric leaf — the `n`-parametric, single-section,
+affine analogue of the on-disk fixed-order difference bound).**
+
+At **every** natural Sobolev order `n`, there are finite constants `C ≥ 0` and `D ≥ 0` such that
+for **every** `(0,2)`-perturbation section `T : SmoothCcTensor g₀ 0 2`, the intrinsic order-`n`
+chart-Sobolev norm of the realized gauge-cancelled DeTurck remainder
+`deTurckRealizeRemainderOf g₀ g_bg T` is bounded by the **affine** quantity
+`C · ‖T.toHs (n+2)‖ + D`:
+```
+∀ n, ∃ C D ≥ 0, ∀ T,  ‖(deTurckRealizeRemainderOf g₀ g_bg T).toHs n‖ ≤ C · ‖T.toHs (n+2)‖ + D .
+```
+
+This is the genuine **first-order-loss-with-two-derivative-input** Sobolev control of the realized
+DeTurck remainder: the remainder is the value of a *second-order* quasilinear differential
+operator (`deTurckRHSSection g_bg (g₀ + ccTensorBilinSymm g₀ T)` minus the linear rough Laplacian
+`Δ_∇ T`) in the realized metric `g₀ + ccTensorBilinSymm g₀ T`, so its order-`n` Sobolev norm is
+controlled by the order-`(n+2)` Sobolev norm of the perturbation `T` (two derivatives lost by the
+second-order operator), with the **affine** baseline `D` absorbing the nonzero constant term
+`deTurckRealizeRemainderOf g₀ g_bg 0 = deTurckRHSSection g_bg g₀ = −2 Ric(g₀)` (the remainder of
+the zero perturbation; on a non-Ricci-flat closed `M` this is `≠ 0`, so a *homogeneous* bound
+`≤ C · ‖T.toHs (n+2)‖` would force `Ric(g₀) = 0` — false in general).  It is the single-section,
+**general-order** companion of the on-disk fixed-order-`a` *difference* bound
+`exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder` (which controls the order-`a` weighted
+`Hᵃ` seminorm of the *difference* of two realized remainders by the `H^{a+2}` norm of the
+perturbation difference, and is silent at every order `n ≠ a` and about the single-section affine
+form); supplying the all-order single-section affine estimate is the genuine deep analytic content
+(the higher-order quasilinear Nemytskii estimate composing the chart-frame DeTurck-RHS-component
+derivatives up to order `n`, each a polynomial in `(g, ∂g, …, ∂^{n+2} g)`, with the chart-`Hⁿ`-to-
+intrinsic-`Hⁿ` partition-of-unity packaging), so it is posited as this leaf.
+
+Its conclusion is a *real-valued* affine bound on the order-`n` intrinsic Sobolev norm of a single
+section, carrying **no** spectral / `tensorL2Coeff` / summability content and **no** uniformity
+over a ball; it is therefore structurally distinct from (and not destructuring to) the ball-uniform
+toHs bound it serves (whose conclusion is a uniform cap over the ball obtained by feeding `T := P v`
+and chaining the all-order *input* control `AllOrderBallControl`).  The body is `sorry`: this is the
+genuine all-order single-section analytic geometric leaf; consumers transitively depend on
+`sorryAx`. -/
+theorem exists_deTurckRealizeRemainderOf_toHs_le_toHs_succ_succ
+    (g₀ g_bg : SmoothRiemannianMetric I M) :
+    ∀ (n : ℕ), ∃ C D : ℝ, 0 ≤ C ∧ 0 ≤ D ∧
+      ∀ (T : Integral.L2.SmoothCcTensor g₀ 0 2),
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n
+            (deTurckRealizeRemainderOf (I := I) g₀ g_bg T)‖ ≤
+          C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (n + 2) T‖ + D :=
+  sorry
+
 /-- **All-order ball-uniform *intrinsic-Sobolev* control of the realized DeTurck-remainder
-synthesis (the genuine all-order analytic geometric leaf — posited child of the spectral-mass
-ball-uniform bound).**
+synthesis (proven by composition over the all-order *input* control and the per-order single-section
+remainder estimate).**
 
 For a `(0,2)`-perturbation synthesis `P` carrying the supercritical `H^{a+2}` local-Lipschitz
-control `ChartJet2LipControl g₀ a P K R` on the radius-`R` ball, the realized gauge-cancelled
+control `ChartJet2LipControl g₀ a P K R` **and** the all-order ball control
+`AllOrderBallControl g₀ a P R` on the radius-`R` ball, the realized gauge-cancelled
 DeTurck remainder `deTurckRealizeRemainderOf g₀ g_bg (P v)` has, **at every** natural Sobolev
 order `n`, a single finite constant `B ≥ 0` bounding its intrinsic order-`n` chart-Sobolev norm
 `‖·.toHs n‖` uniformly over every `v` in the closed `Hᵃ⁺¹`-ball of radius `R` about the included
@@ -318,15 +368,19 @@ zero datum:
 ∀ v ∈ closedBall (ι 0) R,  ‖(deTurckRealizeRemainderOf g₀ g_bg (P v)).toHs n‖ ≤ B .
 ```
 
-This is the genuine **all-order** intrinsic-Sobolev ball control of the realized synthesis, the
-analytic content `ChartJet2LipControl` does **not** supply: that datum caps the realized
+This is the genuine **all-order** intrinsic-Sobolev ball control of the realized *output*, the
+content the bare `ChartJet2LipControl` does **not** supply: that datum caps the realized
 *perturbation* `‖(P v).toHs (a+2)‖ ≤ B` at the *single* order `a + 2` (and is silent at every
-other order), whereas here the *output* (the gauge-cancelled second-order DeTurck remainder of
-`P v`) is controlled in `‖·.toHs n‖` at **every** order `n` over the ball.  It is true because the
-realized DeTurck remainder of a uniformly-`H^{a+2}`-bounded, fibre-small realized metric is itself
-a genuine smooth (`SmoothCcTensor`) section whose every intrinsic chart-Sobolev norm is
-ball-bounded — the gauge-cancelled second-order DeTurck operator, elliptic-regularity-propagated
-through all orders on the ball, where the realized metric stays non-degenerate (`fibreSmall`).
+other order) — under it alone the bound is **false** (a bump-interpolated `P` hitting
+high-frequency eigentensors is `H^{a+2}`-legal yet has unbounded order-`n` *output* for every
+`n ≥ a + 3`).  The all-order truth-maker is the explicit `AllOrderBallControl` (the smoothing of
+the heat-regularized synthesis, capping the *input* `‖(P v).toHs m‖ ≤ B_m` at every order `m`).
+It is now **proven by composition**: the per-order single-section affine remainder estimate
+`exists_deTurckRealizeRemainderOf_toHs_le_toHs_succ_succ` bounds the *output* order-`n` norm
+`‖(deTurckRealizeRemainderOf g₀ g_bg (P v)).toHs n‖ ≤ C · ‖(P v).toHs (n+2)‖ + D` by the *input*
+order-`(n+2)` norm (the second-order quasilinear operator loses two derivatives), and
+`AllOrderBallControl` at order `n + 2` caps that input uniformly over the ball, yielding the
+output cap `C · B_{n+2} + D`.
 
 Its conclusion is a *real-valued* uniform cap on the order-`n` intrinsic Sobolev norm, carrying
 **no** spectral / `tensorL2Coeff` / summability content; it is therefore structurally distinct
@@ -334,16 +388,16 @@ from (and not destructuring to) the spectral-mass ball-uniform bound it serves �
 conclusion is a weighted square-sum `∑' (1 + λᵢ)ᵈ · (tensorL2Coeff …)²` in the eigenbasis
 coordinates, connected to this `‖·.toHs n‖` cap only through the nontrivial reverse
 spectral–Sobolev comparison `exists_spectralWeightedSq_le_pouHaNorm_sq` and the order-monotonicity
-of the Sobolev weight; no packaging.  The body is `sorry`: this is the genuine all-order analytic
-geometric leaf (the ball-uniform intrinsic-Sobolev control of the realized remainder at every
-order); consumers transitively depend on `sorryAx`. -/
+of the Sobolev weight; no packaging.  It carries no `sorry` of its own; consumers transitively
+depend on `sorryAx` only through the per-order single-section remainder estimate. -/
 theorem deTurckRealizeRemainderOf_toHs_ballUniform_bound
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
     (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
         Integral.L2.SmoothCcTensor g₀ 0 2)
     (K : ℝ≥0) {R : ℝ} (hR : 0 < R)
-    (hctrl : ChartJet2LipControl (I := I) (M := M) g₀ a P K R) :
+    (hctrl : ChartJet2LipControl (I := I) (M := M) g₀ a P K R)
+    (hall : AllOrderBallControl (I := I) (M := M) g₀ a P R) :
     ∀ (n : ℕ), ∃ B : ℝ, 0 ≤ B ∧
       ∀ (v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
       v ∈ Metric.closedBall
@@ -351,10 +405,27 @@ theorem deTurckRealizeRemainderOf_toHs_ballUniform_bound
             (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
             (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n
-            (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v))‖ ≤ B := sorry
+            (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v))‖ ≤ B := by
+  classical
+  intro n
+  -- The per-order single-section affine Sobolev estimate of the realized remainder at order `n`
+  -- (output order `n` controlled by input order `n + 2`, affine baseline `D`).
+  obtain ⟨C, D, hC0, hD0, hCD⟩ :=
+    exists_deTurckRealizeRemainderOf_toHs_le_toHs_succ_succ (I := I) g₀ g_bg n
+  -- The all-order ball control of the *input* perturbation at order `n + 2` (the genuine smoothing
+  -- of the heat-regularized synthesis; `ChartJet2LipControl` caps only the single order `a + 2`).
+  obtain ⟨Bin, hBin0, hBin⟩ := hall (n + 2)
+  -- The ball-uniform output cap: `C · Bin + D`.
+  refine ⟨C * Bin + D, by positivity, fun v hball => ?_⟩
+  -- Output order-`n` norm ≤ `C · ‖(P v).toHs (n+2)‖ + D ≤ C · Bin + D`.
+  refine le_trans (hCD (P v)) ?_
+  have hlin : C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (n + 2)
+        (P v)‖ ≤ C * Bin :=
+    mul_le_mul_of_nonneg_left (hBin v hball) hC0
+  linarith
 
 /-- **All-order ball-uniform spectral-mass control of the realized DeTurck-remainder synthesis
-(the genuine all-order analytic input — posited geometric leaf about a concrete operator).**
+(proven by composition over the all-order intrinsic-Sobolev toHs cap).**
 
 For a `(0,2)`-perturbation synthesis `P` carrying the supercritical `H^{a+2}` local-Lipschitz
 control `ChartJet2LipControl g₀ a P K R` on the radius-`R` ball, the realized gauge-cancelled
@@ -383,16 +454,22 @@ Its conclusion is a *real-valued* uniform cap on the order-`d` spectral square-s
 **no** summability conjunct, **no** input-mass rate term, and **no** affine `C₂`-structure — it
 is therefore structurally far weaker than (and not destructuring to) the operator first-order-loss
 predicate, which is an affine bound `‖·‖²_{H^d} ≤ C₁ + C₂ · ‖v‖²_{H^{d+1}}` *with* a summability
-assertion *and* the input-mass rate term: no packaging.  The body is `sorry`: this is the genuine
-all-order analytic geometric leaf (the ball-uniform Sobolev control of the realized remainder at
-every order); consumers transitively depend on `sorryAx`. -/
+assertion *and* the input-mass rate term: no packaging.  It is **proven by composition**: the
+order-`d` spectral mass is dominated termwise by the order-`⌈d⌉₊` mass (Sobolev-weight
+monotonicity), which the integer-order reverse spectral–Sobolev comparison
+`exists_spectralWeightedSq_le_pouHaNorm_sq` controls by the order-`⌈d⌉₊` intrinsic Sobolev norm of
+the realized remainder, capped ball-uniformly by `deTurckRealizeRemainderOf_toHs_ballUniform_bound`
+(itself proven over the all-order *input* control `AllOrderBallControl`, threaded through here).
+It carries no `sorry` of its own; consumers transitively depend on `sorryAx` only through the
+per-order single-section remainder estimate. -/
 theorem deTurckRealizeRemainderOf_spectralMass_ballUniform_bound
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
     (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
         Integral.L2.SmoothCcTensor g₀ 0 2)
     (K : ℝ≥0) {R : ℝ} (hR : 0 < R)
-    (hctrl : ChartJet2LipControl (I := I) (M := M) g₀ a P K R) :
+    (hctrl : ChartJet2LipControl (I := I) (M := M) g₀ a P K R)
+    (hall : AllOrderBallControl (I := I) (M := M) g₀ a P R) :
     ∀ (d : ℝ), ∃ C : ℝ, 0 ≤ C ∧
       ∀ (v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
       v ∈ Metric.closedBall
@@ -414,7 +491,7 @@ theorem deTurckRealizeRemainderOf_spectralMass_ballUniform_bound
   -- The genuine all-order analytic input: a ball-uniform cap `B` on the order-`⌈d⌉₊` intrinsic
   -- chart-Sobolev norm of the realized DeTurck remainder.
   obtain ⟨B, hB0, hB⟩ :=
-    deTurckRealizeRemainderOf_toHs_ballUniform_bound (I := I) g₀ g_bg a ha P K hR hctrl ⌈d⌉₊
+    deTurckRealizeRemainderOf_toHs_ballUniform_bound (I := I) g₀ g_bg a ha P K hR hctrl hall ⌈d⌉₊
   have hdn : d ≤ ((⌈d⌉₊ : ℕ) : ℝ) := Nat.le_ceil d
   refine ⟨(Cs * B) ^ 2, sq_nonneg _, fun v hball => ?_⟩
   -- The order-`⌈d⌉₊` spectral comparison at the realized section `deTurckRealizeRemainderOf …`.
@@ -463,7 +540,7 @@ theorem deTurckRealizeRemainderOf_spectralMass_ballUniform_bound
 
 /-- **The concrete gauge-cancelled DeTurck-remainder spectral synthesis has the full-series
 spatial first-order operator-loss (the genuine elliptic / first-order operator estimate —
-posited geometric leaf about a concrete operator).**
+proven by composition over the all-order spectral-mass cap).**
 
 The nonlinearity `N_cont : H^{a+1} → H^a` is pinned, **at every eigen-coordinate and for
 every input** `v` (`hsynth`), to the *concrete* gauge-cancelled DeTurck-remainder spectral
@@ -490,8 +567,9 @@ affine — a homogeneous `≤ C · ‖v‖²` would force `N_cont 0 = 0` at `v =
 which is false in general).  It is *additional* analytic structure of the concrete realized
 DeTurck remainder, encoding that the section `deTurckRealizeRemainderOf g₀ g_bg (P v)` is the
 value of an everywhere first-order geometric operator on `v` (so it loses at most one order);
-this is **not** deducible from the bare type `N_cont : H^{a+1} → H^a`, which is why it is posited
-as the genuine analytic leaf.
+this is **not** deducible from the bare type `N_cont : H^{a+1} → H^a`, which is why the genuine
+content is pushed into the per-order single-section remainder estimate and the all-order *input*
+control over which this bound is proven by composition.
 
 The synthesis-pin `hsynth` is a *concrete equality* tying every coordinate of `N_cont v` to
 the named geometric operator `deTurckG0SpectralN g₀ a (deTurckRealizeRemainderOf g₀ g_bg (P
@@ -513,16 +591,19 @@ single pair valid at all `d` would be *false* — the `v = 0` slice would force 
 constant term `N_cont 0 = −2 Ric(g₀)` to satisfy `‖−2 Ric(g₀)‖²_{H^d} ≤ C₁` for all real `d`,
 but its order-`d` mass (weight `(1 + λᵢ)ᵈ → ∞`) is unbounded in `d`.
 
-The body is `sorry`: this is the single genuine analytic geometric leaf — the per-order
-*first-order* (`H^{d+1} → H^d`) operator-loss of the gauge-cancelled remainder at **every** order
-`d`.  It is *not* discharged by the on-disk fixed-order Nemytskii–Lipschitz tower
-`exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder`, which controls the realized
-remainder **only at the single fixed order `a`** (bounding `‖·‖_{H^a}` by `‖·‖_{H^{a+2}}`, a
-*two*-order-loss difference/Lipschitz bound), and is silent at every order `d ≠ a` and about the
-*one*-order-loss claimed here.  Supplying the all-order one-order-loss bound is the genuine deep
-analytic content (the principal-symbol cancellation of the second-order DeTurck operator against
-`Δ_∇` leaving a first-order operator, propagated through all Sobolev orders), so it is posited as
-this leaf.  Consumers transitively depend on `sorryAx`. -/
+It is **proven by composition** over the all-order ball-uniform spectral-mass cap
+`deTurckRealizeRemainderOf_spectralMass_ballUniform_bound` (with the affine rate `C₂ = 0`, the
+uniform cap already dominating): through the synthesis-pin `hsynth` each order-`d` output-mass term
+is the order-`d` weighted `L²`-coordinate mass of the concrete smooth realized remainder, which is
+summable and ball-uniformly capped.  The all-order one-order-loss content (the principal-symbol
+cancellation of the second-order DeTurck operator against `Δ_∇` leaving a first-order operator,
+propagated through all Sobolev orders) is supplied not by the on-disk fixed-order-`a`
+Nemytskii–Lipschitz tower `exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder` (silent at
+every order `d ≠ a`), but by the all-order *input* control `AllOrderBallControl` (the smoothing,
+threaded through the spectral-mass cap) together with the per-order single-section remainder
+estimate `exists_deTurckRealizeRemainderOf_toHs_le_toHs_succ_succ`.  It carries no `sorry` of its
+own; consumers transitively depend on `sorryAx` only through that per-order single-section remainder
+estimate. -/
 theorem deTurckGenuineN_firstOrder_operatorTsumLoss
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -532,6 +613,7 @@ theorem deTurckGenuineN_firstOrder_operatorTsumLoss
         Integral.L2.SmoothCcTensor g₀ 0 2)
     (K : ℝ≥0) {R : ℝ} (hR : 0 < R)
     (hctrl : ChartJet2LipControl (I := I) (M := M) g₀ a P K R)
+    (hall : AllOrderBallControl (I := I) (M := M) g₀ a P R)
     (hsynth : ∀ (v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
         ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
           (N_cont v).coeff i =
@@ -557,9 +639,10 @@ theorem deTurckGenuineN_firstOrder_operatorTsumLoss
   intro d
   -- The all-order ball-uniform spectral-mass cap of the realized DeTurck-remainder synthesis
   -- at order `d` (the genuine all-order analytic input; `ChartJet2LipControl` caps only the
-  -- single order `a + 2`).
+  -- single order `a + 2`, so the all-order `AllOrderBallControl` is threaded through).
   obtain ⟨C, hC0, hcap⟩ :=
-    deTurckRealizeRemainderOf_spectralMass_ballUniform_bound (I := I) g₀ g_bg a ha P K hR hctrl d
+    deTurckRealizeRemainderOf_spectralMass_ballUniform_bound (I := I) g₀ g_bg a ha P K hR hctrl
+      hall d
   -- The affine baseline is the uniform cap `C`; the rate `C₂ = 0` (the cap already dominates,
   -- and the nonnegative order-`(d + 1)` input-mass rate term only relaxes the bound).
   refine ⟨C, 0, hC0, le_refl 0, fun v hball hsum => ?_⟩
@@ -608,7 +691,8 @@ finite-partial-sum restriction of the genuine full-series operator-loss
 `deTurckGenuineN_firstOrder_operatorTsumLoss`: the output-mass family is summable and its
 total is bounded by `C₁ + C₂ ·` the order-`(d + 1)` input mass, so every finite partial sum of
 the nonnegative output masses is at most that total (`Summable.sum_le_tsum`).  Consumers
-transitively depend on `sorryAx` through the full-series operator-loss leaf. -/
+transitively depend on `sorryAx` only through the per-order single-section remainder estimate
+`exists_deTurckRealizeRemainderOf_toHs_le_toHs_succ_succ` under the full-series operator-loss. -/
 theorem deTurckGenuineN_firstOrder_spatialOperatorLoss
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -618,6 +702,7 @@ theorem deTurckGenuineN_firstOrder_spatialOperatorLoss
         Integral.L2.SmoothCcTensor g₀ 0 2)
     (K : ℝ≥0) {R : ℝ} (hR : 0 < R)
     (hctrl : ChartJet2LipControl (I := I) (M := M) g₀ a P K R)
+    (hall : AllOrderBallControl (I := I) (M := M) g₀ a P R)
     (hsynth : ∀ (v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
         ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
           (N_cont v).coeff i =
@@ -640,7 +725,8 @@ theorem deTurckGenuineN_firstOrder_spatialOperatorLoss
               ((v.coeff i)) ^ 2 := by
   intro d
   obtain ⟨C₁, C₂, hC₁0, hC₂0, hP⟩ :=
-    deTurckGenuineN_firstOrder_operatorTsumLoss (I := I) g₀ g_bg a ha N_cont P K hR hctrl hsynth d
+    deTurckGenuineN_firstOrder_operatorTsumLoss (I := I) g₀ g_bg a ha N_cont P K hR hctrl hall
+      hsynth d
   refine ⟨C₁, C₂, hC₁0, hC₂0, fun v hball hsum F => ?_⟩
   obtain ⟨hsumm, hle⟩ := hP v hball hsum
   refine le_trans (Summable.sum_le_tsum F (fun i _ => ?_) hsumm) hle
@@ -664,13 +750,15 @@ bare type `N_cont : H^{a+1} → H^a` alone (this is why it is posited).  The syn
 of all inputs (a generic function — even one agreeing with the geometric `N_cont` on the dense
 realizable gate at the fixed order `a` — does *not* satisfy it), so the statement is *not* the
 false bare-function claim; the conclusion (the affine operator-loss) is structurally distinct
-from the coordinate equality `hsynth`; no packaging.  The body delegates to the single genuine
-analytic leaf `deTurckGenuineN_firstOrder_operatorTsumLoss` (the affine operator first-order-loss
-estimate of the concrete geometric remainder): the pointwise-in-space affine bound is integrated
-over the short-time interval `[0,T]`, where the constant baseline `C₁` (a time-constant, hence
-with `[0,T]`-integral `C₁ · (timeMeasure T).real univ`) is dominated by `C₁` itself using the
-operating-regime bound `T ≤ 1` (so `(timeMeasure T).real univ ≤ 1`).  Consumers transitively
-depend on `sorryAx`. -/
+from the coordinate equality `hsynth`; no packaging.  The body delegates to the full-series
+operator-loss `deTurckGenuineN_firstOrder_operatorTsumLoss` (the affine operator first-order-loss
+estimate of the concrete geometric remainder, itself proven by composition over the all-order
+spectral-mass cap and the per-order single-section remainder estimate): the pointwise-in-space
+affine bound is integrated over the short-time interval `[0,T]`, where the constant baseline `C₁`
+(a time-constant, hence with `[0,T]`-integral `C₁ · (timeMeasure T).real univ`) is dominated by
+`C₁` itself using the operating-regime bound `T ≤ 1` (so `(timeMeasure T).real univ ≤ 1`).
+Consumers transitively depend on `sorryAx` only through the per-order single-section remainder
+estimate `exists_deTurckRealizeRemainderOf_toHs_le_toHs_succ_succ`. -/
 theorem deTurckGenuineN_firstOrder_operatorLoss
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -680,6 +768,7 @@ theorem deTurckGenuineN_firstOrder_operatorLoss
         Integral.L2.SmoothCcTensor g₀ 0 2)
     (K : ℝ≥0) {R : ℝ} (hR : 0 < R)
     (hctrl : ChartJet2LipControl (I := I) (M := M) g₀ a P K R)
+    (hall : AllOrderBallControl (I := I) (M := M) g₀ a P R)
     (hsynth : ∀ (v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
         ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
           (N_cont v).coeff i =
@@ -693,7 +782,7 @@ theorem deTurckGenuineN_firstOrder_operatorLoss
   -- The genuine **spatial** affine first-order operator-loss of the gauge-cancelled remainder
   -- at the order `d`.
   obtain ⟨C₁, C₂, hC₁0, hC₂0, hP⟩ :=
-    deTurckGenuineN_firstOrder_spatialOperatorLoss (I := I) g₀ g_bg a ha N_cont P K hR hctrl
+    deTurckGenuineN_firstOrder_spatialOperatorLoss (I := I) g₀ g_bg a ha N_cont P K hR hctrl hall
       hsynth d
   refine ⟨C₁, C₂, hC₁0, hC₂0, fun T hT1 w Nw hNw hball_w hsum F => ?_⟩
   -- The order-`(d + 1)` time-Plancherel/Tonelli package for the input field `w`.

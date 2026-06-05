@@ -300,6 +300,52 @@ structure ChartJet2LipControl (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
             (P u - P u')‖ ≤ C * (K : ℝ) * dist u u'
 
+/-- **The all-order ball-uniform intrinsic-Sobolev control of the perturbation synthesis `P`
+(the genuine smoothing property of the heat-regularized synthesis, exposed as an explicit
+predicate).**
+
+`AllOrderBallControl g₀ a P R` asserts that the `(0,2)`-perturbation synthesis `P` carries, at
+**every** natural Sobolev order `n`, a single finite constant `B ≥ 0` bounding the intrinsic
+order-`n` chart-Sobolev norm `‖(P u).toHs n‖` of the realized perturbation uniformly over every
+`u` in the closed `Hᵃ⁺¹`-ball of radius `R` about the included zero datum:
+```
+∀ n, ∃ B ≥ 0, ∀ u ∈ closedBall (ι 0) R,  ‖(P u).toHs n‖ ≤ B .
+```
+
+This is the genuine analytic content `ChartJet2LipControl` does **not** supply: that datum caps
+the realized perturbation `‖(P u).toHs (a+2)‖ ≤ B` at the *single* order `a + 2` (its
+`sobolevLip` arm) and is silent at every other order, whereas a bump-interpolated synthesis that
+hits high-frequency eigentensors is `ChartJet2LipControl`-legal yet has *unbounded* order-`n`
+output for every `n ≥ a + 3`.  It is **true** for the concrete synthesis carrier produced by the
+heat-semigroup-regularized eigen-synthesis construction (`exists_deTurckG0_regularizedSynthesis`):
+the heat smoothing in the realization gains every derivative, so the realized perturbation `P u`
+is a genuine smooth (`SmoothCcTensor`) section whose every intrinsic chart-Sobolev norm is
+ball-bounded — this is the all-order truth-maker that the bare `ChartJet2LipControl` spec leaves
+unexposed.  It caps the **input** perturbation `P u`, *not* the realized DeTurck remainder
+`deTurckRealizeRemainderOf g₀ g_bg (P u)` (the gauge-cancelled *output*); the latter's all-order
+bound (`deTurckRealizeRemainderOf_toHs_ballUniform_bound`) is *derived* from this input cap
+through the per-order single-section realized-remainder Sobolev estimate (output order `n` from
+input order `n + 2`), so this predicate is structurally distinct from that output cap — no
+packaging.
+
+**Non-vacuous** — a synthesis with unbounded high-order output violates it: take the eigentensor
+bump family `P u := ∑_{i} χ(u) · φ(λᵢ) · eᵢ` whose order-`n` Sobolev norm
+`(∑ᵢ (1 + λᵢ)ⁿ φ(λᵢ)²)^{1/2}` diverges for `n` large while its order-`(a+2)` norm stays bounded;
+such a `P` satisfies `ChartJet2LipControl` but fails `AllOrderBallControl` at every order
+`n ≥ a + 3`, so the predicate genuinely constrains `P` (it rejects the high-frequency-loaded
+witness). -/
+def AllOrderBallControl (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+      Integral.L2.SmoothCcTensor g₀ 0 2)
+    (R : ℝ) : Prop :=
+  ∀ (n : ℕ), ∃ B : ℝ, 0 ≤ B ∧
+    ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
+      u ∈ Metric.closedBall
+          (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R →
+      ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n (P u)‖ ≤ B
+
 set_option linter.unusedVariables false in
 /-- **The quantitative `H^{a+2}` → spectral `Hᵃ`-Lipschitz bound of the realized
 DeTurck remainder (a chart-RHS-tower node of the bridge, fully proven here).**
@@ -856,6 +902,15 @@ rate `K`, and a positive radius `R`, given here in **unfolded** form (not yet pa
 * `hsl` — the `sobolevLip` arm: there is a uniform `H^{a+2}` size bound `B` and a Lipschitz
   constant `C` so the realized perturbation is `H^{a+2}`-bounded and `C·K`-Lipschitz in the
   `Hᵃ⁺¹`-distance on the ball;
+* `hall` — the `AllOrderBallControl` arm: the realized perturbation `P u` is, at **every** natural
+  Sobolev order `n`, uniformly `‖·.toHs n‖`-bounded over the ball.  This is the genuine smoothing
+  property of the heat-semigroup-regularized eigen-synthesis carrier: the heat smoothing in the
+  realization gains every derivative, so `P u` is a genuine smooth (`SmoothCcTensor`) section whose
+  every intrinsic chart-Sobolev norm is ball-bounded (not merely the single order `a + 2` of
+  `hsl`).  It is the all-order truth-maker that the bare supercritical `H^{a+2}` control leaves
+  unexposed, threaded explicitly so the downstream all-order remainder bounds become true (a
+  bump-interpolated `P` hitting high-frequency eigentensors is `H^{a+2}`-legal yet blows up every
+  order `n ≥ a + 3`, so this arm genuinely constrains the carrier);
 * `hmatch` — on the ball-restricted gate-realizable locus (witness `h : realizableAtGate g₀ u`,
   `u` in the radius-`R` ball), the realized DeTurck remainder of the selector coincides, **at
   the `L²`-class level** (through `SmoothCcTensor.toL2`), with the realized DeTurck remainder
@@ -915,6 +970,7 @@ theorem exists_deTurckRemainderClassSelector_gateRep_ball
               ≤ B ∧
             ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
                 (P u - P u')‖ ≤ C * (K : ℝ) * dist u u') ∧
+      AllOrderBallControl (I := I) (M := M) g₀ a P R ∧
       (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
           (h : realizableAtGate (I := I) g₀ u),
         u ∈ Metric.closedBall
@@ -971,6 +1027,7 @@ theorem exists_deTurckG0_regularizedSynthesis_gaugeMatch
         (K : ℝ≥0) (R : ℝ),
       0 < R ∧
       ChartJet2LipControl (I := I) (M := M) g₀ a P K R ∧
+      AllOrderBallControl (I := I) (M := M) g₀ a P R ∧
       (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
         realizableAtGate (I := I) g₀ u ∧
             u ∈ Metric.closedBall
@@ -983,14 +1040,14 @@ theorem exists_deTurckG0_regularizedSynthesis_gaugeMatch
                 (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
   classical
   -- The deep first-order remainder-class selector through the gate representatives, given in
-  -- unfolded form (the two `ChartJet2LipControl` arms separately) and targeting
-  -- `gateRepOfWitness`'s realized remainder `L²`-class.
-  obtain ⟨P, K, R, hR, hfs, hsl, hmatch⟩ :=
+  -- unfolded form (the two `ChartJet2LipControl` arms separately, plus the all-order ball
+  -- control) and targeting `gateRepOfWitness`'s realized remainder `L²`-class.
+  obtain ⟨P, K, R, hR, hfs, hsl, hall, hmatch⟩ :=
     exists_deTurckRemainderClassSelector_gateRep_ball (I := I) g₀ g_bg a ha
-  -- Build the named control inductive from the two unfolded arms, and convert the gate-rep
-  -- match into the gate-gauge match through the (non-defeq) bridge theorem
-  -- `deTurckRealizeRemainderOf_gateRepOfWitness`.
-  refine ⟨P, K, R, hR, ⟨hfs, hsl⟩, fun u hu => ?_⟩
+  -- Build the named control inductive from the two unfolded arms, forward the all-order ball
+  -- control, and convert the gate-rep match into the gate-gauge match through the (non-defeq)
+  -- bridge theorem `deTurckRealizeRemainderOf_gateRepOfWitness`.
+  refine ⟨P, K, R, hR, ⟨hfs, hsl⟩, hall, fun u hu => ?_⟩
   obtain ⟨hu_real, hu_ball⟩ := hu
   rw [hmatch u hu_real hu_ball,
     deTurckRealizeRemainderOf_gateRepOfWitness (I := I) g₀ g_bg u hu_real]
@@ -1024,6 +1081,7 @@ theorem exists_deTurckG0_regularizedSynthesis_gateRepMatch
         (K : ℝ≥0) (R : ℝ),
       0 < R ∧
       ChartJet2LipControl (I := I) (M := M) g₀ a P K R ∧
+      AllOrderBallControl (I := I) (M := M) g₀ a P R ∧
       (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
           (h : realizableAtGate (I := I) g₀ u),
         u ∈ Metric.closedBall
@@ -1036,9 +1094,9 @@ theorem exists_deTurckG0_regularizedSynthesis_gateRepMatch
               (deTurckRealizeRemainderOf (I := I) g₀ g_bg
                 (gateRepOfWitness (I := I) g₀ u h))) := by
   classical
-  obtain ⟨P, K, R, hR, hctrl, hmatch⟩ :=
+  obtain ⟨P, K, R, hR, hctrl, hall, hmatch⟩ :=
     exists_deTurckG0_regularizedSynthesis_gaugeMatch (I := I) g₀ g_bg a ha
-  refine ⟨P, K, R, hR, hctrl, fun u h hball => ?_⟩
+  refine ⟨P, K, R, hR, hctrl, hall, fun u h hball => ?_⟩
   rw [deTurckRealizeRemainderOf_gateRepOfWitness (I := I) g₀ g_bg u h]
   exact hmatch u ⟨h, hball⟩
 
@@ -1086,6 +1144,7 @@ theorem exists_deTurckG0_regularizedSynthesis
         (K : ℝ≥0) (R : ℝ),
       0 < R ∧
       ChartJet2LipControl (I := I) (M := M) g₀ a P K R ∧
+      AllOrderBallControl (I := I) (M := M) g₀ a P R ∧
       (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
         realizableAtGate (I := I) g₀ u ∧
             u ∈ Metric.closedBall
@@ -1097,12 +1156,12 @@ theorem exists_deTurckG0_regularizedSynthesis
             = Integral.L2.SmoothCcTensor.toL2
                 (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
   classical
-  -- The deep continuous regularized eigen-synthesis: an `H^{a+2}`-controlled `P` whose realized
-  -- DeTurck remainder reproduces, at the `L²`-class level, the gate representative's own realized
-  -- remainder on the gate-realizable locus.
-  obtain ⟨P, K, R, hR, hctrl, hmatch⟩ :=
+  -- The deep continuous regularized eigen-synthesis: an `H^{a+2}`-controlled `P` (additionally
+  -- all-order ball-controlled, the smoothing) whose realized DeTurck remainder reproduces, at the
+  -- `L²`-class level, the gate representative's own realized remainder on the gate-realizable locus.
+  obtain ⟨P, K, R, hR, hctrl, hall, hmatch⟩ :=
     exists_deTurckG0_regularizedSynthesis_gateRepMatch (I := I) g₀ g_bg a ha
-  refine ⟨P, K, R, hR, hctrl, fun u hu => ?_⟩
+  refine ⟨P, K, R, hR, hctrl, hall, fun u hu => ?_⟩
   obtain ⟨hu_real, hu_ball⟩ := hu
   -- Chain the gate-representative remainder `L²`-class match through the definitional bridge
   -- `deTurckRealizeRemainderOf g₀ g_bg (gateRepOfWitness g₀ u hu) = deTurckRemainderRealizeSection`.
@@ -1129,6 +1188,7 @@ theorem deTurckG0ContSynthMap_spec (g₀ g_bg : SmoothRiemannianMetric I M) (a :
     ∃ (K : ℝ≥0) (R : ℝ),
       0 < R ∧
       ChartJet2LipControl (I := I) (M := M) g₀ a (deTurckG0ContSynthMap (I := I) g₀ g_bg a) K R ∧
+      AllOrderBallControl (I := I) (M := M) g₀ a (deTurckG0ContSynthMap (I := I) g₀ g_bg a) R ∧
       (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
         realizableAtGate (I := I) g₀ u ∧
             u ∈ Metric.closedBall
@@ -1194,6 +1254,7 @@ theorem exists_deTurckRealizeRemainderOf_ballSynthesis_matching_gauge
         (K : ℝ≥0) (R : ℝ),
       0 < R ∧
       ChartJet2LipControl (I := I) (M := M) g₀ a P K R ∧
+      AllOrderBallControl (I := I) (M := M) g₀ a P R ∧
       (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
         realizableAtGate (I := I) g₀ u ∧
             u ∈ Metric.closedBall
@@ -1245,6 +1306,7 @@ theorem exists_deTurckRealizeRemainderOf_synthesis_matching_gauge
         (K : ℝ≥0) (R : ℝ),
       0 < R ∧
       ChartJet2LipControl (I := I) (M := M) g₀ a P K R ∧
+      AllOrderBallControl (I := I) (M := M) g₀ a P R ∧
       (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
         realizableAtGate (I := I) g₀ u ∧
             u ∈ Metric.closedBall
@@ -1367,6 +1429,7 @@ theorem exists_deTurckRemainderG0_synthesis_chartJet2Control
         (K : ℝ≥0) (R : ℝ),
       0 < R ∧
       ChartJet2LipControl (I := I) (M := M) g₀ a P K R ∧
+      AllOrderBallControl (I := I) (M := M) g₀ a P R ∧
       (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
         realizableAtGate (I := I) g₀ u ∧
             u ∈ Metric.closedBall
@@ -1377,12 +1440,12 @@ theorem exists_deTurckRemainderG0_synthesis_chartJet2Control
               (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))
             = Integral.L2.SmoothCcTensor.toL2
                 (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
-  -- The deep eigen-synthesis supplies an `H^{a+2}`-controlled synthesis `P` whose realized
-  -- DeTurck remainder coincides, at the `L²`-class level, with the gate gauge on the realizable
-  -- locus — exactly the required `L²`-class agreement.
-  obtain ⟨P, K, R, hR, hctrl, hsec⟩ :=
+  -- The deep eigen-synthesis supplies an `H^{a+2}`-controlled synthesis `P` (additionally
+  -- all-order ball-controlled) whose realized DeTurck remainder coincides, at the `L²`-class
+  -- level, with the gate gauge on the realizable locus — exactly the required `L²`-class agreement.
+  obtain ⟨P, K, R, hR, hctrl, hall, hsec⟩ :=
     exists_deTurckRealizeRemainderOf_synthesis_matching_gauge (I := I) g₀ g_bg a ha
-  refine ⟨P, K, R, hR, hctrl, fun u hu => ?_⟩
+  refine ⟨P, K, R, hR, hctrl, hall, fun u hu => ?_⟩
   exact hsec u hu
 
 /-- **The genuine, un-gated continuous DeTurck-remainder smooth-section synthesis.**
@@ -1454,8 +1517,9 @@ theorem exists_deTurckRemainderG0ContSynth
                 (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
   classical
   -- The un-gated perturbation synthesis `P` with its supercritical `H^{a+2}` control on the
-  -- ball and the realized-remainder/gauge `L²`-class agreement on the gate-realizable locus.
-  obtain ⟨P, K, R, hR, hctrl, hcarrier⟩ :=
+  -- ball (and the all-order ball control, unused here) and the realized-remainder/gauge
+  -- `L²`-class agreement on the gate-realizable locus.
+  obtain ⟨P, K, R, hR, hctrl, _hall, hcarrier⟩ :=
     exists_deTurckRemainderG0_synthesis_chartJet2Control (I := I) g₀ g_bg a ha
   -- The `H^{a+2}` → spectral bridge upgrades the `H^{a+2}` control to continuity and
   -- local Lipschitz of the coordinate-spectral nonlinearity on the realized DeTurck remainder.

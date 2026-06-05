@@ -968,6 +968,212 @@ private noncomputable def genuineCurvPureRSection
     (genuineCurvPureRSection (I := I) (M := M) g s S).toSection x =
       genuineCurvPureRFib (I := I) (M := M) g s S x := rfl
 
+/-- **The differentiated-curvature genuine trace, lifted to a `(0, s)`-tensor.** For a fixed smooth
+tangent field `W` and the moving orthonormal frame `smoothOrthoFrame g x`, the `(0, s)`-tensor whose
+unit-section value is the differentiated-curvature genuine trace
+`genuineCurvTraceFixedFrameCovDeriv g s W (smoothOrthoFrame g x) (S.toSection) x`. -/
+private noncomputable def covDerivTraceSlot
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
+    (W : Π b : M, TangentSpace I b) :
+    TensorRSSpace 0 s I x :=
+  genuineCurvTraceFixedFrameCovDeriv (I := I) g s W (smoothOrthoFrame (I := I) g x)
+    (fun y : M => S.toSection y) x
+
+/-- **The linearized differentiated-curvature direction map** (pre-continuity). Fixing the moving
+orthonormal frame `e₀ := smoothOrthoFrame g x`, the linear extension of the differentiated-curvature
+genuine trace from the basis `e₀`:
+```
+v ↦ ∑ₐ ⟨e₀ a, v⟩_g • genuineCurvTraceFixedFrameCovDeriv g s (smoothExtensionTangent x (e₀ a)) e₀ S x.
+```
+Unlike the pure-Riemann trace, the differentiated-curvature trace is *not* tensorial in its direction
+(its Leibniz expansion sees the covariant derivative of the smooth extension of the direction), so the
+genuine trace at the smooth extension of `v` is *not* linear in `v`. The map below is the *linear
+extension* of that trace from the orthonormal basis `e₀`; on each basis vector `e₀ b` it agrees with
+the genuine trace (`orthonormal` collapse), which is exactly what the slot-`0` reconstruction in the
+frame `e₀` consumes. -/
+private noncomputable def genuineCovDerivDirLM
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) :
+    TangentSpace I x →ₗ[ℝ] TensorRSSpace 0 s I x where
+  toFun v := ∑ a : Fin (Module.finrank ℝ E),
+    g.inner x (smoothOrthoFrame (I := I) g x a x) v •
+      covDerivTraceSlot (I := I) (M := M) g s S x
+        (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g x a x))
+  map_add' v v' := by
+    rw [← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    rw [(g.inner x (smoothOrthoFrame (I := I) g x a x)).map_add v v', add_smul]
+  map_smul' c v := by
+    rw [Finset.smul_sum]
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    rw [(g.inner x (smoothOrthoFrame (I := I) g x a x)).map_smul c v, smul_eq_mul,
+      smul_smul, RingHom.id_apply]
+
+private noncomputable def genuineCovDerivDirCLM
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) :
+    TangentSpace I x →L[ℝ] TensorRSSpace 0 s I x :=
+  haveI : T2Space (TangentSpace I x) := inferInstanceAs (T2Space E)
+  haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
+  LinearMap.toContinuousLinearMap (genuineCovDerivDirLM (I := I) (M := M) g s S x)
+
+/-- **The linearized differentiated-curvature direction CLM, evaluated at a frame vector `e₀ b`,
+recovers the differentiated-curvature genuine trace at the smooth extension of `e₀ b`.** The
+orthonormality of `e₀ := smoothOrthoFrame g x` at its centre `x` collapses the linear-extension sum to
+the single index `b`. -/
+private lemma genuineCovDerivDirCLM_apply_frame
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
+    (b : Fin (Module.finrank ℝ E)) :
+    genuineCovDerivDirCLM (I := I) (M := M) g s S x
+        (smoothOrthoFrame (I := I) g x b x) =
+      covDerivTraceSlot (I := I) (M := M) g s S x
+        (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g x b x)) := by
+  classical
+  rw [genuineCovDerivDirCLM, LinearMap.coe_toContinuousLinearMap', genuineCovDerivDirLM,
+    LinearMap.coe_mk, AddHom.coe_mk]
+  rw [Finset.sum_eq_single b]
+  · rw [smoothOrthoFrame_orthonormal_at_center (I := I) g x b b, if_pos rfl, one_smul]
+  · intro a _ hab
+    rw [smoothOrthoFrame_orthonormal_at_center (I := I) g x a b, if_neg hab, zero_smul]
+  · intro h; exact absurd (Finset.mem_univ b) h
+
+/-- **The differentiated-curvature moving-centre genuine `(0, s + 1)`-tensor fibre value.** The
+slot-`0` uncurry, through `covGradBundleEquiv 0 s x`, of the linearized differentiated-curvature
+direction CLM `genuineCovDerivDirCLM g s S x`. Its slot-`0` curry along a frame vector `e₀ b` recovers
+the differentiated-curvature genuine trace at the smooth extension of `e₀ b`. -/
+private noncomputable def genuineCovDerivFib
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) :
+    TensorRSSpace 0 (s + 1) I x :=
+  covGradBundleEquiv (I := I) (M := M) 0 s x (genuineCovDerivDirCLM (I := I) (M := M) g s S x)
+
+/-- **The slot-`0` curry of the differentiated-curvature genuine fibre value, at a frame vector
+`e₀ b`, recovers the differentiated-curvature genuine trace at the smooth extension of `e₀ b`.**
+Combining the generic gradient-slot reading `genericTensor0S_curry_covGradBundleEquiv_unit` with the
+frame-vector identification `genuineCovDerivDirCLM_apply_frame`. -/
+private lemma tensor0S_curry_genuineCovDerivFib_unit_frame
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
+    (b : Fin (Module.finrank ℝ E)) :
+    tensor0S_curry (I := I) (M := M) s x
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+          genuineCovDerivFib (I := I) (M := M) g s S x)
+          (unitZeroSec (I := I) (M := M) x)) (smoothOrthoFrame (I := I) g x b x) =
+      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+        genuineCurvTraceFixedFrameCovDeriv (I := I) g s
+          (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g x b x))
+          (smoothOrthoFrame (I := I) g x) (fun y : M => S.toSection y) x)
+        (unitZeroSec (I := I) (M := M) x) := by
+  rw [genuineCovDerivFib]
+  rw [genericTensor0S_curry_covGradBundleEquiv_unit (I := I) (M := M) s x
+    (genuineCovDerivDirCLM (I := I) (M := M) g s S x) (smoothOrthoFrame (I := I) g x b x)]
+  rw [genuineCovDerivDirCLM_apply_frame (I := I) (M := M) g s S x b, covDerivTraceSlot]
+
+/-- **Posited: base-point smoothness of the differentiated-curvature moving-centre genuine fibre
+field.** For a closed smooth Riemannian manifold `(M, g)`, the differentiated-curvature
+`(0, s + 1)`-tensor fibre field `x ↦ genuineCovDerivFib g s S x` is a smooth section.
+
+**Why this is TRUE.** `genuineCovDerivFib g s S x` is the slot-`0` uncurry
+(`covGradBundleEquiv 0 s x`) of the linearized differentiated-curvature direction CLM
+`genuineCovDerivDirCLM g s S x`, the linear extension from the moving orthonormal frame
+`e₀ := smoothOrthoFrame g x` of the differentiated-curvature genuine trace
+`v ↦ ∑ᵢ ∇_{Bᵢ}(R(Bᵢ, v) S)(x)`. On every smooth tangent field `Y`, the value
+`genuineCovDerivDirCLM g s S x (Y x)
+  = ∑ₐ ⟨B_a, Y x⟩_g • genuineCurvTraceFixedFrameCovDeriv g s (smoothExtensionTangent x B_a) e₀ S x`
+(with `B_a := smoothOrthoFrame g x a x`) is a finite combination of the smooth Gram pairings
+`⟨smoothOrthoFrame g x a, Y⟩_g` (`smoothOrthoFrame_smooth`, `g.inner` smooth) and the
+differentiated-curvature genuine trace fibre values; `x ↦ genuineCovDerivDirCLM g s S x` is then a
+smooth `Hom(TM, T^{(0,s)})`-bundle section (`cotangentCov_clmSection_smooth_aux`), transported through
+the smooth bundle equivalence `covGradBundleSmoothEquiv 0 s` into the `(0, s + 1)`-tensor bundle (the
+`genuineCurvPureRFibFixedFrame_contMDiff` route).
+
+**Remaining atomic obligation.** Unlike the pure-Riemann fibre value, whose trace is *tensorial* in the
+direction (so `genuineCurvTraceFixedFramePureR g s (smoothExtensionTangent x v) e₀ S x` depends only on
+`v` and inherits smoothness through `genuineCurvTraceFixedFramePureR_contMDiff` against a *fixed* smooth
+field), the differentiated-curvature trace is *not* tensorial: its value at the smooth extension of the
+moving frame vector `B_a := smoothOrthoFrame g x a x` genuinely sees the covariant derivative of
+`smoothExtensionTangent x B_a`, whose centre *and* extended vector both move with `x`. Its smoothness
+therefore does *not* reduce to the frame-independence freeze used for `rawTensorConnLap`
+(`rawTensorConnLap_eq_fixedFrame_of_orthonormal`), which the differentiated-curvature trace lacks;
+it is the genuinely-irreducible joint (centre, base-point) smoothness of the moving-centre
+differentiated-curvature trace assembly. This single smoothness primitive is posited here (TRUE — a
+finite combination of smooth curvature, connection, and smooth-extension data of the fixed smooth
+metric on the compact `M`); the slot-`0` assembly, the curry property, and the genuine-section
+existence above it are all proved in full.
+
+**Non-vacuity.** The field is genuinely non-zero on a manifold with `∇R ≠ 0` and non-parallel `S`: its
+slot-`0` curry along any frame vector `e₀ b` is the differentiated-curvature contraction
+`∑ᵢ ∇_{Bᵢ}(R(Bᵢ, ·) S)(x)` (`tensor0S_curry_genuineCovDerivFib_unit_frame`), non-zero when `∇R ≠ 0`; so
+the field carries the actual `(∇R) S` content and cannot be replaced by the zero section. -/
+private theorem genuineCovDerivFib_contMDiff
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 (s + 1) ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel 0 (s + 1) ℝ E)
+        (E := fun z : M => TensorRSSpace 0 (s + 1) I z) y
+        (genuineCovDerivFib (I := I) (M := M) g s S y)) := by
+  sorry
+
+/-- **The differentiated-curvature moving-centre genuine section** as a `SmoothCcTensor`. The smooth
+section `x ↦ genuineCovDerivFib g s S x` (`genuineCovDerivFib_contMDiff`), compactly supported on the
+closed manifold `M` (`HasCompactSupport.of_compactSpace`). -/
+private noncomputable def genuineCovDerivSection
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
+    SmoothCcTensor g 0 (s + 1) where
+  toSection :=
+    { toFun := fun y : M => genuineCovDerivFib (I := I) (M := M) g s S y
+      contMDiff_toFun := genuineCovDerivFib_contMDiff (I := I) (M := M) g s S }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+@[simp] private lemma genuineCovDerivSection_toSection
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) :
+    (genuineCovDerivSection (I := I) (M := M) g s S).toSection x =
+      genuineCovDerivFib (I := I) (M := M) g s S x := rfl
+
+/-- **Parseval expansion in the moving orthonormal frame `smoothOrthoFrame g x`.** Every tangent
+vector at `x` is its `g_x`-orthonormal expansion against the moving frame `smoothOrthoFrame g x`
+(orthonormal at its centre `x`); the curvature-side analogue of `orthoFrame_parseval_expand`, used to
+supply the slot-`0` reconstruction frame `e := smoothOrthoFrame g x`. -/
+private lemma smoothOrthoFrame_parseval_expand
+    (g : SmoothRiemannianMetric I M) (x : M) (u : TangentSpace I x) :
+    u = ∑ a : Fin (Module.finrank ℝ E),
+      g.inner x (smoothOrthoFrame (I := I) g x a x) u • (smoothOrthoFrame (I := I) g x a x) := by
+  classical
+  haveI : Nonempty (Fin (Module.finrank ℝ E)) :=
+    ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne (Module.finrank ℝ E))⟩⟩
+  set e : Fin (Module.finrank ℝ E) → TangentSpace I x :=
+    fun a => smoothOrthoFrame (I := I) g x a x with he_def
+  have horth : ∀ i j : Fin (Module.finrank ℝ E),
+      g.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0 := fun i j =>
+    smoothOrthoFrame_orthonormal_at_center (I := I) g x i j
+  have he_li : LinearIndependent ℝ e := by
+    rw [linearIndependent_iff']
+    intro fs c hsum k hk_mem
+    have h_zero : g.inner x (e k) (∑ j ∈ fs, c j • e j) = 0 := by rw [hsum]; simp
+    rw [map_sum] at h_zero
+    have h_pull : ∀ j ∈ fs, g.inner x (e k) (c j • e j) = c j * (if k = j then (1 : ℝ) else 0) := by
+      intro j _
+      rw [(g.inner x (e k)).map_smul (c j) (e j), smul_eq_mul, horth k j]
+    rw [Finset.sum_congr rfl h_pull, Finset.sum_eq_single_of_mem k hk_mem] at h_zero
+    · rwa [if_pos rfl, mul_one] at h_zero
+    · intro j _ hjk; rw [if_neg (fun h => hjk h.symm), mul_zero]
+  have hcard : Fintype.card (Fin (Module.finrank ℝ E)) = Module.finrank ℝ (TangentSpace I x) := by
+    rw [Fintype.card_fin]; rfl
+  set bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x) :=
+    basisOfLinearIndependentOfCardEqFinrank he_li hcard with hbse_def
+  have hbse_eq : ∀ i, bse i = e i := by
+    intro i; rw [hbse_def]; exact congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard) i
+  conv_lhs => rw [← bse.sum_repr u]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  rw [hbse_eq a]
+  congr 1
+  have hrepr : g.inner x (e a) u =
+      ∑ b : Fin (Module.finrank ℝ E), bse.repr u b * g.inner x (e a) (e b) := by
+    conv_lhs => rw [show u = ∑ b : Fin (Module.finrank ℝ E),
+      bse.repr u b • bse b from (bse.sum_repr u).symm]
+    rw [map_sum]
+    refine Finset.sum_congr rfl (fun b _ => ?_)
+    rw [(g.inner x (e a)).map_smul (bse.repr u b) (bse b), smul_eq_mul, hbse_eq b]
+  rw [hrepr, Finset.sum_eq_single a]
+  · rw [horth a a, if_pos rfl, mul_one]
+  · intro b _ hba; rw [horth a b, if_neg (fun h => hba h.symm), mul_zero]
+  · intro h; exact absurd (Finset.mem_univ a) h
+
 /-- **Posited: the differentiated-curvature moving-centre genuine curvature section.** For a closed
 smooth Riemannian manifold `(M, g)`, every covariant rank `s` and every smooth compactly-supported
 `(0, s)`-tensor `S`, there is a single smooth compactly-supported `(0, s + 1)`-tensor section
@@ -1024,7 +1230,13 @@ private theorem exists_genuineCurvCovDerivSection
                 (smoothExtensionTangent (I := I) x (e a))
                 (smoothOrthoFrame (I := I) g x) (fun y : M => S.toSection y) x)
               (unitZeroSec (I := I) (M := M) x) := by
-  sorry
+  classical
+  refine ⟨genuineCovDerivSection (I := I) (M := M) g s S, fun x => ?_⟩
+  refine ⟨Module.finrank ℝ E, fun a => smoothOrthoFrame (I := I) g x a x, rfl,
+    fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g x i j,
+    fun u => smoothOrthoFrame_parseval_expand (I := I) (M := M) g x u, fun a => ?_⟩
+  rw [genuineCovDerivSection_toSection]
+  exact tensor0S_curry_genuineCovDerivFib_unit_frame (I := I) (M := M) g s S x a
 
 /-- **Posited: the moving-centre genuine curvature sections `Gcurv`, `GcurvDeriv`.** For a closed
 smooth Riemannian manifold `(M, g)`, every covariant rank `s` and every smooth compactly-supported
