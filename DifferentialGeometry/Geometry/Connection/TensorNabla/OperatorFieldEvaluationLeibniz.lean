@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricContractionLeibnizGrid
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.TensorRSContRiemannianBundle
 
 /-! # The operator-field evaluation covariant Leibniz and the per-order curvature-operator envelope
 
@@ -35,8 +36,11 @@ on the compact `M`, giving the per-order section-proportional fibre bound
   pointwise `ℝ`-linearity of the order-`0` base to `C^∞(M, ℝ)`-linearity (a smooth scalar contributes
   only its value at the point, by value-locality); the bridge that makes the order-`0` operator field
   extraction (`ofLinearMapSection`) applicable.
-* **P4** `riemannianFiberNormSq_clm_apply_le` (**posited**) — the fibrewise Cauchy–Schwarz
-  `rfns(φ v) ≤ Cφ · rfns(v)` for a fibrewise continuous-linear operator `φ` between tensor fibres.
+* **P4** `riemannianFiberNormSq_clm_apply_le` (**proved**) — the fibrewise Cauchy–Schwarz
+  `rfns(φ v) ≤ Cφ · rfns(v)` for a fibrewise continuous-linear operator `φ` between tensor fibres,
+  via the proved intrinsic-fibre-norm/`g`-bundle-norm bridge `riemannianFiberNormSq_eq_bundle_norm_sq`
+  (`riemannianFiberNormSq = ‖·‖²` under the `(r, s)`-tensor Riemannian bundle instance) and the
+  continuous-linear-map operator-norm bound.
 * **P2/P3/P5** `op_perOrder_factorisation_continuous` (**posited**) — the telescoping factorisation
   `op p r W (x) = Lᵖ x (W x)` packaged with a *continuous* per-point fibre constant controlling the
   fibrewise operator (the deep core; the recursion's cast-cancellation through the Hom-evaluation
@@ -46,11 +50,12 @@ on the compact `M`, giving the per-order section-proportional fibre bound
   here, **non-`sorry`**, from `op_perOrder_factorisation_continuous` by the standard
   continuous-on-compact-`M` supremum (the established `(isCompact_univ).image · |>.bddAbove` route).
 
-Consumers transitively depend on `sorryAx` through `riemannianFiberNormSq_clm_apply_le` and
-`op_perOrder_factorisation_continuous` alone (the latter being the single genuinely-irreducible
-operator-field telescoping; `op_zero_value_homogeneous` is proved). Each posited piece is a precise,
-independently-fillable analytic sub-lemma with a full trap screen (value-reads only / per-`(p, r)`
-families / zero-witness rejection / no free binders).
+Consumers transitively depend on `sorryAx` through `op_perOrder_factorisation_continuous` alone (the
+single genuinely-irreducible operator-field telescoping; `op_zero_value_homogeneous` and the fibrewise
+Cauchy–Schwarz `riemannianFiberNormSq_clm_apply_le` are proved). The posited piece is a precise
+analytic sub-lemma with a full trap screen (value-reads only / per-`(p, r)` families / zero-witness
+rejection / no free binders); its two concrete obstructions (the nested-Hom model-fibre norm diamond
+and the `hbase`-continuity gap) are recorded in its docstring.
 -/
 
 noncomputable section
@@ -131,7 +136,41 @@ theorem op_zero_value_homogeneous
   simp only [zero_smul, add_zero]
 
 set_option linter.unusedSectionVars false in
-/-- **P4 — the fibrewise Cauchy–Schwarz for an operator-field evaluation** (posited). For a fibrewise
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **The intrinsic-fibre-norm/`g`-bundle-norm bridge** (proved). Under the `(r, s)`-tensor
+Riemannian bundle instance `tensorRS_riemannianBundle g r s`, the intrinsic squared Riemannian fibre
+norm `riemannianFiberNormSq g r s x z` coincides with the squared bundle-fibre norm `‖z‖²`. The proof
+runs entirely through the *proved* fibre-norm bridge `riemannianFiberNormSq = tensorInnerPointwise`
+(`riemannianFiberNormSq_eq_tensorInnerPointwise`), the bundle-fibre inner product
+`tensorRSRiemannianInnerCLM` and its `tensorInnerPointwise` apply formula, and
+`real_inner_self_eq_norm_sq`; the ambient model-induced fibre norm is removed (`attribute [-instance]`)
+so that `‖·‖` resolves to the Riemannian bundle norm. -/
+private lemma riemannianFiberNormSq_eq_bundle_norm_sq
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (z : TensorRSSpace r s I x) :
+    letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+    riemannianFiberNormSq (I := I) (M := M) g r s x z = ‖z‖ ^ 2 := by
+  letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
+  have h_inner :
+      (DifferentialGeometry.Tensor.TensorRSRiemannianBundle.tensorRSRiemannianInnerCLM
+          (I := I) (M := M) g r s x z z : ℝ) =
+        riemannianFiberNormSq (I := I) (M := M) g r s x z := by
+    rw [DifferentialGeometry.Tensor.TensorRSRiemannianBundle.tensorRSRiemannianInnerCLM_apply]
+    exact (riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x z).symm
+  have hself : (inner ℝ z z : ℝ) =
+      riemannianFiberNormSq (I := I) (M := M) g r s x z := by
+    rw [← h_inner]; rfl
+  rw [← hself, real_inner_self_eq_norm_sq]
+
+set_option maxHeartbeats 3200000 in
+set_option synthInstance.maxHeartbeats 1600000 in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **P4 — the fibrewise Cauchy–Schwarz for an operator-field evaluation** (proved). For a fibrewise
 continuous-linear operator `φ : TensorRSSpace 0 r I x →L[ℝ] TensorRSSpace 0 s I x` between tensor
 fibres at a point `x`, the intrinsic squared Riemannian fibre norm of the evaluation `φ v` is
 controlled by a nonnegative fibre-operator constant `Cφ` (the squared `g`-fibre operator norm of `φ`)
@@ -140,26 +179,41 @@ times the intrinsic squared fibre norm of `v`:
 rfns(φ v) ≤ Cφ · rfns(v).
 ```
 
-**Why this is TRUE.** Both `TensorRSSpace 0 r I x` and `TensorRSSpace 0 s I x` are finite-dimensional
-and carry the intrinsic `g`-fibre inner product whose squared norm is `riemannianFiberNormSq`. A
-continuous-linear map between finite-dimensional inner-product spaces is bounded; taking `Cφ` to be the
-square of its `g`-fibre operator norm and squaring the operator bound `‖φ v‖_g ≤ ‖φ‖_g · ‖v‖_g` gives
-the displayed inequality. Equivalently, expanding `v` in a `g`-orthonormal frame of the source tensor
-fibre and applying Cauchy–Schwarz over the frame index (the route of
-`riemannianFiberNormSq_riemannOp_tensorCov_vw_factor_le`) yields `Cφ = ∑_α rfns(φ fα)` over the frame
-`(fα)`. The ambient-to-intrinsic step is the fibre-norm bridge `riemannianFiberNormSq = ‖·‖²` (itself a
-sanctioned posited child elsewhere because of the model-vs-`g`-fibre norm diamond).
+**Proof.** Install the source- and target-fibre `(0, r)`/`(0, s)`-tensor Riemannian bundle instances;
+under them each fibre is a finite-dimensional inner-product space whose squared norm is
+`riemannianFiberNormSq` (the *proved* bridge `riemannianFiberNormSq_eq_bundle_norm_sq`). Repackage `φ`
+as a continuous-linear map `φg` for the `g`-fibre norm topologies (`LinearMap.toContinuousLinearMap` on
+the finite-dimensional domain; same underlying map, hence `φg v = φ v`); take `Cφ := ‖φg‖²` and square
+the operator bound `‖φg v‖ ≤ ‖φg‖ · ‖v‖` (`ContinuousLinearMap.le_opNorm`). The bridge converts both
+sides to `riemannianFiberNormSq`.
 
 **Trap screen.** Reads only the *value* `v` (no jet); a single fibrewise operator `φ` at one point `x`
-(no free `(p, r)` family); the witness `Cφ` genuinely uses `φ` and rejects `Cφ ≡ 0` whenever `φ ≠ 0`
-(then `rfns(φ v) > 0 = 0 · rfns(v)` for a suitable `v`); no free binders escape `x`. -/
+(no free `(p, r)` family); the witness `Cφ = ‖φg‖²` genuinely uses `φ` and rejects `Cφ ≡ 0` whenever
+`φ ≠ 0` (then `‖φg‖ > 0`, so `rfns(φ v) > 0 = 0 · rfns(v)` for a suitable `v`); no free binders escape
+`x`. -/
 theorem riemannianFiberNormSq_clm_apply_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (φ : TensorRSSpace 0 r I x →L[ℝ] TensorRSSpace 0 s I x) :
     ∃ Cφ : ℝ, 0 ≤ Cφ ∧ ∀ v : TensorRSSpace 0 r I x,
       riemannianFiberNormSq (I := I) (M := M) g 0 s x (φ v) ≤
         Cφ * riemannianFiberNormSq (I := I) (M := M) g 0 r x v := by
-  sorry
+  letI instSrc : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 r I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g 0 r
+  letI instTgt : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 s I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g 0 s
+  let φg : TensorRSSpace 0 r I x →L[ℝ] TensorRSSpace 0 s I x :=
+    LinearMap.toContinuousLinearMap (φ.toLinearMap)
+  have hφg_apply : ∀ v, φg v = φ v := fun v => by
+    show (LinearMap.toContinuousLinearMap (φ.toLinearMap)) v = φ v
+    rw [LinearMap.coe_toContinuousLinearMap']; rfl
+  refine ⟨‖φg‖ ^ 2, sq_nonneg _, fun v => ?_⟩
+  rw [riemannianFiberNormSq_eq_bundle_norm_sq (I := I) (M := M) g 0 s x (φ v),
+      riemannianFiberNormSq_eq_bundle_norm_sq (I := I) (M := M) g 0 r x v, ← hφg_apply v]
+  calc ‖φg v‖ ^ 2 ≤ (‖φg‖ * ‖v‖) ^ 2 := by
+          apply sq_le_sq'
+          · nlinarith [φg.le_opNorm v, norm_nonneg (φg v), norm_nonneg v, norm_nonneg φg]
+          · exact φg.le_opNorm v
+    _ = ‖φg‖ ^ 2 * ‖v‖ ^ 2 := by ring
 
 /-- **P2/P3/P5 — the operator-field telescoping factorisation with a continuous fibre constant**
 (posited; the single genuinely-irreducible operator-field content). For a recursive
@@ -192,8 +246,33 @@ iterated coefficient `∇ᵖ L₀` is a smooth fibrewise operator field, so its 
 norm `Cf` is continuous in `x` (the per-point Cauchy–Schwarz constant of
 `riemannianFiberNormSq_clm_apply_le`, made continuous by smoothness of the field). The Hom-evaluation
 Leibniz and the iterated Hom-derivative on the operator-field bundle `Hom(T⁰_r, T⁰_{r+p})` (whose source
-and target are themselves Hom-bundles, requiring a Hom-connection presently absent from the library) are
-the genuine, *large independent differential-geometry* content posited here.
+and target are themselves Hom-bundles) are the genuine, *large independent differential-geometry*
+content posited here.
+
+**The two concrete obstructions to discharging this node** (recorded for the next iteration; the
+fibrewise Cauchy–Schwarz `riemannianFiberNormSq_clm_apply_le` it pairs with is now *proved*):
+
+1. *The nested-Hom connection does not instantiate compositionally.* The natural construction of the
+   operator-field covariant derivative on `Hom(T⁰_r, T⁰_{r+p})` is
+   `HomConnectionGen.homBundleCovariantDerivativeGen` with source bundle `TensorRSSpace 0 r` and target
+   `TensorRSSpace 0 (r + p)` and the connections `TensorRSNabla.tensorRSCovariantDerivative 0 r`,
+   `… 0 (r + p)` (both `ContMDiffCovariantDerivative` generically). This *fails to type-check*: the
+   model fibre of the source bundle is `TensorRSModel 0 r = Tensor0SModel 0 →L Tensor0SModel r`, which
+   carries TWO non-defeq normed structures — the `ContinuousLinearMap`-derived
+   `ContinuousLinearMap.toSeminormedAddCommGroup` and the `tensorRSModel_normedAddCommGroup` — so the
+   `NormedSpace ℝ (TensorRSModel 0 r ℝ E)` and `NormedAddCommGroup (TensorRSModel 0 r →L[ℝ]
+   TensorRSModel 0 (r + p))` that `homBundleCovariantDerivativeGen` requires are a genuine instance
+   diamond (`NormedSpace` synthesises with the wrong `SeminormedAddCommGroup`). Discharging would need a
+   diamond-resolved bundle presentation of the nested-Hom model fibre (or a Hom-of-Hom connection
+   bypassing the model-fibre Hom-norm).
+2. *Continuity of `Cf` is not provided by `hbase`.* The `IsOrderZeroCurvFactor` fingerprint gives only
+   pointwise `ℝ`-linearity + value-locality of the order-`0` base — no smoothness/continuity. So `Cf`'s
+   continuity (even at `p = 0`) is unavailable for an *abstract* `op`: it comes from the operator field
+   being a *smooth* curvature section (`∇ᵖ L₀` built from `g, R`), which is exactly the telescoping
+   content. The existing continuous curvature bound
+   `exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional` is for the *literal*
+   `riemannOp (tensorCov)`, not the abstract value-local `op`, so it cannot supply `Cf` here. Hence the
+   node is irreducible even at `p = 0` under the present `hbase`.
 
 **Trap screen / non-vacuity.** The factorisation forces the operator to read *only the value* `W (x)`
 (no jet), the structural fingerprint of the iterated curvature operator; `L`, `Cf` are a single field
@@ -221,8 +300,9 @@ theorem op_perOrder_factorisation_continuous
   sorry
 
 /-- **P6 — the per-order section-proportional fibre envelope, assembled** (non-`sorry`, over the
-posited operator-field telescoping `op_perOrder_factorisation_continuous` and the posited fibrewise
-Cauchy–Schwarz `riemannianFiberNormSq_clm_apply_le`). For a recursive covariant-Leibniz-remainder family
+posited operator-field telescoping `op_perOrder_factorisation_continuous`; the fibrewise Cauchy–Schwarz
+`riemannianFiberNormSq_clm_apply_le` it would also consume is now proved). For a recursive
+covariant-Leibniz-remainder family
 `op` whose order-`0` base is a fibrewise curvature operator (`hbase`) with the exact single-step
 covariant Leibniz (`hcovGrad_op`), there is a nonnegative order × rank envelope `kappa` with
 ```
