@@ -348,17 +348,28 @@ private theorem covGrad_pureRFrozenDiffOp_eq
           (covGrad (I := I) (M := M) g 0 r W))) + _
   rw [sub_add_cancel]
 
-/-- **Posited `B`-uniform per-order section-proportional fibre envelope for the differentiated
-frozen-frame pure-Riemann curvature tower.** For a closed smooth Riemannian manifold `(M, g)` there is
-a *valence/order-dependent* nonnegative envelope family `kappa : ℕ → ℝ`, **uniform in the smooth
-tangent frame `B`**, such that for every smooth frame `B`, differentiation order `p`, covariant rank
-`r`, smooth compactly-supported `(0, r)`-tensor `W`, and point `x`, the order-`p` differentiated
-frozen-frame pure-Riemann curvature operator `(∇^p R(B, ·)) W = pureRFrozenDiffOp g B hB p r W` has
-intrinsic squared fibre norm at most `kappa p` times that of `W`:
+/-- **Posited centre-uniform at-centre per-order section-proportional fibre envelope for the
+differentiated frozen-frame pure-Riemann curvature tower.** For a closed smooth Riemannian manifold
+`(M, g)` there is a *valence/order-dependent* nonnegative envelope family `kappa : ℕ → ℝ`, **uniform
+over the centre `x₀`**, such that for every differentiation order `p`, covariant rank `r`, smooth
+compactly-supported `(0, r)`-tensor `W`, and centre `x₀`, the order-`p` differentiated frozen-frame
+pure-Riemann curvature operator at the *centre frame* `smoothOrthoFrame g x₀`, evaluated at its own
+centre `x₀`, has intrinsic squared fibre norm at most `kappa p` times that of `W`:
 
 ```
-rfns(pureRFrozenDiffOp g B hB p r W)(x) ≤ kappa p · rfns(W)(x).
+rfns(pureRFrozenDiffOp g (smoothOrthoFrame g x₀) … p r W)(x₀) ≤ kappa p · rfns(W)(x₀).
 ```
+
+**Restatement note (certificate-sanctioned restatement #1).** The earlier `∀ B (smooth-only), x`
+free-frame form is FALSE: the operator is fibrewise-`ℝ`-bilinear in the contracted frame (`B_i` is
+contracted *twice*), hence quadratic in `B`, with no scale constraint on a generic smooth frame `B` —
+a frame with arbitrarily large vectors makes `rfns(op 0 r W)(x)` arbitrarily large while `rfns(W)(x)`
+is fixed, so no `B`-uniform `kappa` exists. The TRUE, centre-uniform form fixes the frame to the
+`g`-orthonormal `smoothOrthoFrame g x₀` and evaluates at its own centre `x₀`, where the frame is
+`g_{x₀}`-orthonormal (`smoothOrthoFrame_orthonormal_at_center`), so the twice-contracted Gram factors
+are `1` and the bound is the curvature magnitude only. This is exactly the frame the moving-centre
+curvature jet consumes (a per-`x₀` choice of centre frame), so the restriction loses nothing
+downstream.
 
 **Why this is TRUE — the frozen-frame analogue of `exists_continuous_proportional_diffCurvOp`.** Each
 `pureRFrozenDiffOp p` is a smooth *fixed* fibrewise-`ℝ`-linear operator on tensor sections (a recursive
@@ -379,42 +390,43 @@ absorbs `‖∇^{≤ p} R‖_∞`, finite by per-`p` compactness (no single scal
 of the frozen-frame jet tower, posited here as the precise atomic engine envelope; consumers
 transitively depend on `sorryAx`.
 
+**Discharge roadmap.** The order-`p = 0` layer is provable outright from existing public API (no new
+posit): at rank `r = 0` the operator is `0` and the bound is trivial; at rank `r = m + 1`,
+`pureRFrozenEndoFib g m B W x₀ = covGradBundleEquiv 0 m x₀ (∑ᵢ R(B_iˣ⁰, ·)(slot0_{B_iˣ⁰} W))`, whose
+intrinsic fibre norm at `x₀` is, by the slot-`0` Parseval frame-sum
+(`riemannianFiberNormSq_succ_eq_sum_slot0Curry_of_frame` over the `g_{x₀}`-orthonormal frame supplied
+by `exists_orthonormal_frame_riemannianFiberNormSq`), the frame sum of the slice fibre norms of the
+direction-CLM applied to the orthonormal directions; each slice (after the rank-`m` curry bridge
+`tensor0S_curry ((covGradBundleEquiv 0 m x₀ Φ)(unit)) v = (Φ v)(unit)`, proved verbatim from the
+generic-rank `covGradBundleEquiv_apply_eval`) is the curvature contraction
+`∑ᵢ R(B_iˣ⁰, e_a)(slot0_{B_iˣ⁰} W)`, fibre-bounded by the rank-`m` curvature sup
+(`exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional`, supremised over compact
+`M`) times the orthonormal Gram factors `g(B_iˣ⁰, B_iˣ⁰) = g(e_a, e_a) = 1`
+(`smoothOrthoFrame_orthonormal_at_center`) times the slot-`0` reading fibre norm
+`rfns((covGradBundleEquiv 0 m x₀).symm (W x₀) (B_iˣ⁰)))(x₀) ≤ rfns(W)(x₀)`
+(`riemannianFiberNormSq_slot0Curry_le_of_frame` via `covGradBundleEquiv_symm_apply_eval`), giving
+`kappa 0 = N·(N·Ccurv_sup m)`. The order-`p ≥ 1` layers read `∇^{≤ p}` of the centre frame at its own
+centre `x₀`; the missing analytic input is the per-order *diagonal* frame-jet sup — the continuity on
+the compact `M` of `x₀ ↦ ∇^{≤ p}(smoothOrthoFrame g x₀)-field(x₀)` (the joint (centre, base)
+smoothness `smoothOrthoFrame_smooth` restricted to the diagonal), recorded as the sharp sub-node
+`exists_uniform_smoothOrthoFrame_centre_jet_sup` — on top of which the `p ≥ 1` envelope follows by the
+tower recursion `pureRFrozenDiffOp (p+1) = ∇(pureRFrozenDiffOp p) − cast` over the frame-jet and `∇R`
+sups. The two layers combine into the single per-order `kappa`.
+
 **Non-vacuity.** A degenerate witness `kappa ≡ 0` is rejected on any non-flat manifold: at `p = 0`, at
-a point `x` and a section `W` whose slot-`0` reading against the frame carries a non-zero curvature
-contraction (`R(B_iˣ, ·)(slot0_{B_iˣ} W) ≠ 0`), one has `rfns(pureRFrozenDiffOp 0 r W)(x) > 0` while
-`0 · rfns(W)(x) = 0`. So the envelope must carry the genuine curvature magnitude; it genuinely *uses*
-`W` (the operator is applied to `W`). -/
+a centre `x₀` and a section `W` whose slot-`0` reading against the centre frame `smoothOrthoFrame g x₀`
+carries a non-zero curvature contraction (`R(B_iˣ⁰, ·)(slot0_{B_iˣ⁰} W) ≠ 0`), one has
+`rfns(pureRFrozenDiffOp g (smoothOrthoFrame g x₀) … 0 r W)(x₀) > 0` while `0 · rfns(W)(x₀) = 0`. So the
+envelope must carry the genuine curvature magnitude; it genuinely *uses* `W` (the operator is applied
+to `W`). -/
 theorem exists_proportional_pureRFrozenFrameDiffOp (g : SmoothRiemannianMetric I M) :
     ∃ kappa : ℕ → ℝ, (∀ p, 0 ≤ kappa p) ∧
-      ∀ (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
-        (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i)))
-        (p r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
-        riemannianFiberNormSq (I := I) (M := M) g 0 (r + p) x
-            ((pureRFrozenDiffOp (I := I) (M := M) g B hB p r W).toSection x) ≤
-          kappa p * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x) := by
+      ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x₀ : M),
+        riemannianFiberNormSq (I := I) (M := M) g 0 (r + p) x₀
+            ((pureRFrozenDiffOp (I := I) (M := M) g (smoothOrthoFrame (I := I) g x₀)
+              (fun i => smoothOrthoFrame_smooth (I := I) g x₀ i) p r W).toSection x₀) ≤
+          kappa p * riemannianFiberNormSq (I := I) (M := M) g 0 r x₀ (W.toSection x₀) := by
   sorry
-
-/-- **The differentiated frozen-frame pure-Riemann curvature tower as a `DiffBilinOp`.** Packaging the
-recursive operator family `pureRFrozenDiffOp g B hB`, its exact single-step covariant Leibniz
-`covGrad_pureRFrozenDiffOp_eq` (the `covGrad_op` field — *proved* by `sub_add_cancel`), and the posited
-`B`-uniform per-order envelope `exists_proportional_pureRFrozenFrameDiffOp` (the `rfns_op_le` field,
-here specialised to the given frame `B` with the `B`-uniform `kappa`). The grid
-`DiffBilinOp.exists_rfns_iteratedCovGrad_singleSum_le` then applies to this object outright. -/
-private noncomputable def pureRFrozenDiffBilinOp
-    (g : SmoothRiemannianMetric I M)
-    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
-    (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i)))
-    (kappa : ℕ → ℝ) (hkappa_nn : ∀ p, 0 ≤ kappa p)
-    (hkappa : ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
-      riemannianFiberNormSq (I := I) (M := M) g 0 (r + p) x
-          ((pureRFrozenDiffOp (I := I) (M := M) g B hB p r W).toSection x) ≤
-        kappa p * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x)) :
-    DiffBilinOp g where
-  op p r W := pureRFrozenDiffOp (I := I) (M := M) g B hB p r W
-  covGrad_op p r W := covGrad_pureRFrozenDiffOp_eq (I := I) (M := M) g B hB p r W
-  kappa := kappa
-  kappa_nonneg := hkappa_nn
-  rfns_op_le := hkappa
 
 /-- **The slot-`0` reading of the differentiated section `∇S` along `B_i` is the directional covariant
 derivative `∇_{B_iˣ} S`.** `(covGradBundleEquiv 0 s x).symm ((covGrad g 0 s S).toSection x) (B_iˣ) =
@@ -509,69 +521,87 @@ private theorem rfns_iteratedCovGrad_covGrad_comm_tw (g : SmoothRiemannianMetric
   rfns_toSection_heq_congr_tw g (by omega : (s + 1) + q = s + (q + 1))
     (iteratedCovGrad_covGrad_comm_heq_tw (I := I) (M := M) g s q S) x
 
-/-- **The frozen-frame pure-Riemann curvature-jet grid bound (the `(p, w) = (1, 1)` headline).** For a
-closed smooth Riemannian manifold `(M, g)` there is a *valence/order-dependent* nonnegative constant
-family `c : ℕ → ℕ → ℝ`, **uniform in the smooth tangent frame `B`**, such that at every covariant rank
-`s`, smooth compactly-supported `(0, s)`-tensor `S`, smooth frame `B`, gradient order `k`, and point
-`x`, the `k`-fold iterated covariant gradient of the frozen-frame pure-Riemann section
-`fixedFramePureRSection g s S B` is fibre-bounded by
+/-- **The frozen-frame pure-Riemann curvature-jet grid bound at the centre frame (the `(p, w) = (1, 1)`
+headline).** For a closed smooth Riemannian manifold `(M, g)` there is a *valence/order-dependent*
+nonnegative constant family `c : ℕ → ℕ → ℝ`, **uniform over the centre `x`**, such that at every
+covariant rank `s`, smooth compactly-supported `(0, s)`-tensor `S`, gradient order `k`, and centre
+`x`, the `k`-fold iterated covariant gradient of the frozen-frame pure-Riemann section against the
+*centre frame* `smoothOrthoFrame g x`, evaluated at its own centre `x`, is fibre-bounded by
 
 ```
-rfns(∇^k (fixedFramePureRSection g s S B))(x) ≤ (c s k)² · ∑_{i < 1 + k} rfns(∇^{i + 1} S)(x).
+rfns(∇^k (fixedFramePureRSection g s S (smoothOrthoFrame g x)))(x)
+  ≤ (c s k)² · ∑_{i < 1 + k} rfns(∇^{i + 1} S)(x).
 ```
 
-This is the order-`1`/width-`1` graded curvature-jet bound the moving-frame curvature-jet induction
-(`OrderSeparatedCurvatureJet.fixedFramePureRSection_gradedCurvJet`) consumes. It is **proved** by the
-abstract differentiated-bilinear-contraction grid `DiffBilinOp.rfns_iteratedCovGrad_grid`
-applied to the frozen-frame curvature tower `pureRFrozenDiffBilinOp` (whose `covGrad_op` Leibniz is
-proved, whose envelope `exists_proportional_pureRFrozenFrameDiffOp` is the single posited primitive),
-the bridge `pureRFrozenDiffOp0_eq_fixedFramePureRSection` (the order-`0` operator on `∇S` is the
-frozen-frame section), and the rank-shift `∇^q(∇S) ≅ ∇^{q + 1}S` (`rfns_iteratedCovGrad_covGrad_comm_tw`)
-collapsing the contracted-order range `0 … k` of `∇S` to `1 … 1 + k` of `S`. The constant family is
-the engine's single-sum constant `C k := 4^k · ∑_{p' ≤ k} kappa p'` (square-rooted to match the
-graded predicate's squared multiplier), `B`-uniform because the posited envelope `kappa` is.
+This is the order-`1`/width-`1` centre-frame graded curvature-jet bound the moving-centre
+curvature-jet induction (`OrderSeparatedCurvatureJet.GcurvSection_gradedCurvJet`, via the locality
+transfer at each centre `x`) consumes. It is **proved** by the at-centre differentiated-bilinear-
+contraction single-sum grid `DiffBilinOp.exists_rfns_iteratedCovGrad_singleSum_le_at` applied to the
+frozen-frame curvature tower (`op := pureRFrozenDiffOp g (smoothOrthoFrame g x) …`, whose `covGrad_op`
+Leibniz is *proved* by `covGrad_pureRFrozenDiffOp_eq`, whose centre-uniform at-centre envelope is the
+single posited primitive `exists_proportional_pureRFrozenFrameDiffOp`), the bridge
+`pureRFrozenDiffOp0_eq_fixedFramePureRSection` (the order-`0` operator on `∇S` is the frozen-frame
+section), and the rank-shift `∇^q(∇S) ≅ ∇^{q + 1}S` (`rfns_iteratedCovGrad_covGrad_comm_tw`) collapsing
+the contracted-order range `0 … k` of `∇S` to `1 … 1 + k` of `S`. The constant family is the engine's
+single-sum constant `C k := 4^k · ∑_{p' ≤ k} kappa p'` (square-rooted to match the graded predicate's
+squared multiplier), centre-uniform because the posited envelope `kappa` is.
 
-**Non-vacuity.** With `c s 0 = 0` the bound forces `rfns(fixedFramePureRSection g s S B)(x) = 0` at
-`k = 0`, i.e. the pure-Riemann contraction `∑ᵢ R(B_iˣ, ·)(∇_{B_iˣ} S)` vanishes; false on a non-flat
-manifold (`R ≠ 0`) for a non-parallel `S` (`∇S ≠ 0`). The constant family is genuinely positive. -/
+**Restatement note.** This is the centre-frame restriction of the former free-frame `∀ B, x` form,
+required because the underlying envelope is true only at the centre frame at its own centre (the
+free-frame form is FALSE — quadratic in the frame, no scale bound). The sole consumer
+(`GcurvSection_gradedCurvJet`) instantiates the free form only at `B = smoothOrthoFrame g x`, `x`, so
+no downstream generality is lost.
+
+**Non-vacuity.** With `c s 0 = 0` the bound forces `rfns(fixedFramePureRSection g s S
+(smoothOrthoFrame g x))(x) = 0` at `k = 0`, i.e. the pure-Riemann contraction
+`∑ᵢ R(B_iˣ, ·)(∇_{B_iˣ} S)` vanishes; false on a non-flat manifold (`R ≠ 0`) for a non-parallel `S`
+(`∇S ≠ 0`). The constant family is genuinely positive. -/
 theorem exists_fixedFramePureRSection_iteratedCovGrad_grid_bound (g : SmoothRiemannianMetric I M) :
     ∃ c : ℕ → ℕ → ℝ, (∀ s k, 0 ≤ c s k) ∧
-      ∀ (s : ℕ) (S : SmoothCcTensor g 0 s)
-        (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
-        (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i)))
-        (k : ℕ) (x : M),
+      ∀ (s : ℕ) (S : SmoothCcTensor g 0 s) (k : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g 0 ((s + 1) + k) x
             ((iteratedCovGrad g 0 (s + 1) k
-              (fixedFramePureRSection (I := I) (M := M) g s S B hB)).toSection x) ≤
+              (fixedFramePureRSection (I := I) (M := M) g s S
+                (smoothOrthoFrame (I := I) g x)
+                (fun i => smoothOrthoFrame_smooth (I := I) g x i))).toSection x) ≤
           (c s k) ^ 2 * ∑ i ∈ Finset.range (1 + k),
             riemannianFiberNormSq (I := I) (M := M) g 0 (s + (i + 1)) x
               ((iteratedCovGrad g 0 s (i + 1) S).toSection x) := by
   classical
   obtain ⟨kappa, hkappa_nn, hkappa⟩ := exists_proportional_pureRFrozenFrameDiffOp (I := I) (M := M) g
-  -- The engine's single-sum constant `4^k · ∑_{p' ≤ k} kappa p'`, `B`-uniform (no opaque existential):
-  -- square-root it to match the graded predicate's squared multiplier.
+  -- The engine's single-sum constant `4^k · ∑_{p' ≤ k} kappa p'`, centre-uniform (no opaque
+  -- existential): square-root it to match the graded predicate's squared multiplier.
   refine ⟨fun _ s' => Real.sqrt ((4 : ℝ) ^ s' * ∑ p' ∈ Finset.range (s' + 1), kappa p'),
-    fun _ k => Real.sqrt_nonneg _, fun s S B hB k x => ?_⟩
+    fun _ k => Real.sqrt_nonneg _, fun s S k x => ?_⟩
   have hcsq : (Real.sqrt ((4 : ℝ) ^ k * ∑ p' ∈ Finset.range (k + 1), kappa p')) ^ 2 =
       (4 : ℝ) ^ k * ∑ p' ∈ Finset.range (k + 1), kappa p' := by
     rw [Real.sq_sqrt]
     exact mul_nonneg (by positivity)
       (Finset.sum_nonneg fun p' _ => hkappa_nn p')
   rw [hcsq]
-  -- The explicit binomial grid for the frozen-frame `DiffBilinOp` at differentiation order `p = 0`,
-  -- base rank `s + 1`, section `∇S`, gradient order `k`.
-  have hgrid := (pureRFrozenDiffBilinOp (I := I) (M := M) g B hB kappa hkappa_nn
-    (hkappa B hB)).rfns_iteratedCovGrad_grid k 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S) x
-  simp only [Nat.zero_add, Nat.add_zero] at hgrid
-  -- The operator value `op 0 (s + 1) (∇S)` is the frozen-frame section.
-  rw [show (pureRFrozenDiffBilinOp (I := I) (M := M) g B hB kappa hkappa_nn (hkappa B hB)).op 0 (s + 1)
+  -- The at-centre single-sum grid for the frozen-frame tower at the centre frame `smoothOrthoFrame g x`
+  -- evaluated at its own centre `x`, base rank `s + 1`, section `∇S`, gradient order `k`. The pointwise
+  -- envelope hypothesis at `x₀ := x` is exactly the centre-uniform at-centre envelope `hkappa … x`.
+  have hgrid := DifferentialGeometry.Integral.Connection.DiffBilinOp.exists_rfns_iteratedCovGrad_singleSum_le_at
+    (g := g)
+    (op := fun p r W => pureRFrozenDiffOp (I := I) (M := M) g (smoothOrthoFrame (I := I) g x)
+      (fun i => smoothOrthoFrame_smooth (I := I) g x i) p r W)
+    (fun p r W => covGrad_pureRFrozenDiffOp_eq (I := I) (M := M) g (smoothOrthoFrame (I := I) g x)
+      (fun i => smoothOrthoFrame_smooth (I := I) g x i) p r W)
+    kappa hkappa_nn x
+    (fun p r W => hkappa p r W x)
+    (s + 1) (covGrad (I := I) (M := M) g 0 s S) k
+  -- The operator value `op 0 (s + 1) (∇S)` is the frozen-frame section against the centre frame.
+  rw [show pureRFrozenDiffOp (I := I) (M := M) g (smoothOrthoFrame (I := I) g x)
+        (fun i => smoothOrthoFrame_smooth (I := I) g x i) 0 (s + 1)
         (covGrad (I := I) (M := M) g 0 s S) =
-      fixedFramePureRSection (I := I) (M := M) g s S B hB from
-    pureRFrozenDiffOp0_eq_fixedFramePureRSection (I := I) (M := M) g s S B hB] at hgrid
+      fixedFramePureRSection (I := I) (M := M) g s S (smoothOrthoFrame (I := I) g x)
+        (fun i => smoothOrthoFrame_smooth (I := I) g x i) from
+    pureRFrozenDiffOp0_eq_fixedFramePureRSection (I := I) (M := M) g s S
+      (smoothOrthoFrame (I := I) g x) (fun i => smoothOrthoFrame_smooth (I := I) g x i)] at hgrid
   refine hgrid.trans (le_of_eq ?_)
-  -- Collapse the double sum `(∑ kappa) · (∑ rfns)` and re-index `∇^q(∇S) ≅ ∇^{q + 1}S`.
-  rw [← Finset.sum_mul, mul_assoc]
-  refine congrArg (fun t => (4 : ℝ) ^ k * ((∑ p' ∈ Finset.range (k + 1), kappa p') * t)) ?_
+  -- Re-index `∇^q(∇S) ≅ ∇^{q + 1}S` and match the contracted-order range.
+  refine congrArg (fun t => ((4 : ℝ) ^ k * ∑ p' ∈ Finset.range (k + 1), kappa p') * t) ?_
   rw [Nat.add_comm 1 k]
   refine Finset.sum_congr rfl (fun q _ => ?_)
   exact rfns_iteratedCovGrad_covGrad_comm_tw (I := I) (M := M) g s q S x

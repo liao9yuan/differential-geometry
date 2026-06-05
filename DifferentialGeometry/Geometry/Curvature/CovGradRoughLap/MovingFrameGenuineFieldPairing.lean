@@ -85,10 +85,12 @@ differentiated-curvature contraction `(∇R) S` (`covGradCurvatureContraction`) 
 order-separated fibre bounds and the bracket-free `L²` pairing:
 
 * `rfns(Gcurv)(x) ≤ (Cper s)² · rfns(∇S)(x)` — the pure-`R` field, genuinely `rfns(∇S)`-order;
-* `rfns(GcurvDeriv)(x) ≤ (Cper s)² · rfns(S)(x)` — the `∇R` field, genuinely `rfns(S)`-order;
-* `rfns(Curv S − Gcurv − GcurvDeriv)(x) ≤ (Cper s)² · rfns(∇²S)(x)` — the moving-frame /
-  frame-bracket remainder, genuinely `rfns(∇²S)`-order after the third-order Weitzenböck
-  cancellation of the top-order `∇³S` terms by the iterated Ricci identity;
+* `rfns(GcurvDeriv)(x) ≤ (Cper s)² · (rfns(∇S)(x) + rfns(S)(x))` — the `∇R` field, sum-order (the
+  gauge-glued tensorial differentiated-curvature section, the Leibniz defect absorbed in the sum);
+* `rfns(Curv S − Gcurv − GcurvDeriv)(x) ≤ (Cper s)² · (rfns(∇²S)(x) + rfns(∇S)(x) + rfns(S)(x))` — the
+  moving-frame / frame-bracket remainder, `rfns(∇²S)`-order in its leading term after the third-order
+  Weitzenböck cancellation of the top-order `∇³S` terms by the iterated Ricci identity, with the lower
+  Leibniz-defect terms in the sum;
 * `⟨Gcurv + GcurvDeriv, ∇S⟩_{L²} = ⟨Curv S, ∇S⟩_{L²}` — the bracket-free `L²` pairing: the
   moving-frame remainder is a total covariant divergence of an `∇S`-order field, so it integrates
   by parts to zero against `∇S`, leaving the genuine fields to carry the entire cross-pairing.
@@ -156,13 +158,18 @@ theorem exists_pointwiseTensorCurv_movingFrameField_orderSeparated_bracketFreePa
                 ((covGrad (I := I) (M := M) g 0 s S).toSection x)) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x (GcurvDeriv.toSection x) ≤
             Cper s ^ 2 *
-              riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) ∧
+              (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                  ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x))) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
               ((pointwiseTensorCurv (I := I) (M := M) g s S - Gcurv - GcurvDeriv).toSection x) ≤
             Cper s ^ 2 *
-              riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
-                ((covGrad (I := I) (M := M) g 0 (s + 1)
-                  (covGrad (I := I) (M := M) g 0 s S)).toSection x)) ∧
+              (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+                  ((covGrad (I := I) (M := M) g 0 (s + 1)
+                    (covGrad (I := I) (M := M) g 0 s S)).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                    ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x))) ∧
           tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Gcurv + GcurvDeriv).toFun
               (covGrad (I := I) (M := M) g 0 s S).toFun =
             tensorL2Inner (I := I) (M := M) g 0 (s + 1)

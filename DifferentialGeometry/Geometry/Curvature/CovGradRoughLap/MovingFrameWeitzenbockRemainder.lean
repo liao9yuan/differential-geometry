@@ -80,15 +80,17 @@ with the four genuine third-order Weitzenböck properties:
   proportional per-point curvature bound `riemannOp_covGrad_fiberNormSq_le_gen` upgraded to a single
   uniform proportional constant over the compact `M` (the per-point curvature operator norm and the
   frame Gram scalars are continuous, hence sup-bounded);
-* `rfns(GcurvDeriv)(x) ≤ (Cper s)² · rfns(S)(x)` — the differentiated-curvature field `(∇R) S`, the
-  frame-sum of `covGradCurvatureContraction`, fibre-bounded `rfns(S)`-order by the uniform
-  differentiated-curvature sup `exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound`
-  upgraded to a bound proportional to `rfns(S)`;
-* `rfns(Grem)(x) ≤ (Cper s)² · rfns(∇²S)(x)` — the moving-frame / frame-bracket remainder
-  (`tensor3rdCurvBracket` plus the frame-trace discrepancy and the moving-frame residual), genuinely
-  `rfns(∇²S)`-order after the third-order Weitzenböck cancellation of the top-order `∇³S` terms by
-  the iterated Ricci identity (`riemannianFiberNormSq_tensor3rdCurvGenuine_le` controls the genuine
-  part; the bracket fibre order controls the discrepancy);
+* `rfns(GcurvDeriv)(x) ≤ (Cper s)² · (rfns(∇S)(x) + rfns(S)(x))` — the differentiated-curvature field
+  `(∇R) S`, the gauge-glued tensorial frame-trace of `covGradCurvatureContraction`, fibre-bounded
+  sum-order by the uniform differentiated-curvature sup
+  `exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound` (the gauge-glue Leibniz defect lands
+  in the wider envelope);
+* `rfns(Grem)(x) ≤ (Cper s)² · (rfns(∇²S)(x) + rfns(∇S)(x) + rfns(S)(x))` — the moving-frame /
+  frame-bracket remainder (`tensor3rdCurvBracket` plus the frame-trace discrepancy and the moving-frame
+  residual), `rfns(∇²S)`-order in its leading term after the third-order Weitzenböck cancellation of
+  the top-order `∇³S` terms by the iterated Ricci identity
+  (`riemannianFiberNormSq_tensor3rdCurvGenuine_le` controls the genuine part; the bracket fibre order
+  controls the discrepancy), with the lower Leibniz-defect terms in the sum;
 * `⟨Grem, ∇S⟩_{L²} = 0` — the integrated divergence-nullity: the moving-frame remainder is a total
   covariant divergence of an `∇S`-order field, so it integrates by parts to zero against `∇S` by the
   covariant integration-by-parts identity
@@ -144,12 +146,17 @@ theorem pointwiseTensorCurv_movingFrameWeitzenbock_namedRemainder
                 ((covGrad (I := I) (M := M) g 0 s S).toSection x)) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x (GcurvDeriv.toSection x) ≤
             Cper s ^ 2 *
-              riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) ∧
+              (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                  ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x))) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x (Grem.toSection x) ≤
             Cper s ^ 2 *
-              riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
-                ((covGrad (I := I) (M := M) g 0 (s + 1)
-                  (covGrad (I := I) (M := M) g 0 s S)).toSection x)) ∧
+              (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+                  ((covGrad (I := I) (M := M) g 0 (s + 1)
+                    (covGrad (I := I) (M := M) g 0 s S)).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                    ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x))) ∧
           tensorL2Inner (I := I) (M := M) g 0 (s + 1) Grem.toFun
               (covGrad (I := I) (M := M) g 0 s S).toFun = 0 := by
   classical

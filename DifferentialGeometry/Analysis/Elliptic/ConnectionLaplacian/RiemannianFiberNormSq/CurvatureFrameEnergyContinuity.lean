@@ -201,6 +201,54 @@ private lemma orthonormal_rfns_exists_basis
   intro i
   rw [coe_basisOfLinearIndependentOfCardEqFinrank]
 
+/-- **Uniform-over-`M` single-term dual-frame curvature bound (genuine analytic primitive).**
+For a smooth Riemannian metric `g` on a closed manifold `M` and any covariant rank `t`, there is a
+*single* nonnegative constant `K`, independent of the base point, of the `g`-orthonormal frame `e`,
+and of the frame indices, bounding **one** dual-frame curvature term
+`riemannianFiberNormSq g 0 t x (R_x(e_i, e_j)(dualTensorFrameS g x t e J))`:
+
+```
+riemannianFiberNormSq g 0 t x (R_x(e_i, e_j)(dualTensorFrameS g x t e J)) ≤ K,
+```
+
+at every base point `x`, every `g`-orthonormal frame `e` of `T_x M`
+(`g.inner x (e i) (e j) = δ_{ij}`), and all frame indices `i, j, J`, where
+`R = riemannOp (tensorCov g 0 t)` is the bundled tensor curvature operator.
+
+**Why this is TRUE — and why it is strictly more primitive than the displayed energy sum.** The
+quantity `R_x(e_i, e_j)(dualTensorFrameS g x t e J)` is the tensor curvature operator applied to a
+fixed **normalised** input: the dual tensor frame `dualTensorFrameS g x t e J` is the unit
+frame-coordinate tensor (its `g`-fibre norm is `1`), and the frame pair `(e_i, e_j)` is `g`-unit.
+By the slot-wise tensor curvature formula `riemannSec_tensor0SCov_apply_eval` the tensor curvature
+`R_x(e_i, e_j)` acts as the negated sum over slots of the base-tangent Riemann curvature
+`R^{TM}_x(e_i, e_j)` inserted into each argument; since `e_i, e_j` are unit `g`-vectors, the
+base-tangent curvature `R^{TM}_x(e_i, e_j)` (equal, in any chart at `α`, to the chart-coordinate
+sum `chartRiemannCLM g α e_i e_j` of the chart Riemann tensor entries) has `g`-operator norm
+bounded by the chart Riemann data, which is `C^∞` (polynomial in the chart Christoffel symbols and
+their first partials) and *uniformly bounded* on the compact chart-`α` partition-of-unity support
+by `exists_chartRiemannData_uniform_bound_compact`. Hence a single application — bounded
+independently of the frame because all inputs are `g`-unit — has intrinsic fibre norm bounded by a
+fixed chart-data envelope on each of the finitely-many compact chart supports that cover `M`, whose
+maximum is the global constant `K`. This is the chart-locality-free route (no
+`HasLocallyConstantChartAt`, no chart-trivialisation operator-norm scalar); the only chart objects
+are the bounded chart Christoffel / Riemann data and the positive-definite chart Gram matrix.
+
+**Non-vacuity.** A degenerate witness `K = 0` is rejected on any non-flat manifold: at a point `x`
+where the curvature operator is nonzero there is a `g`-orthonormal frame pair `(e_i, e_j)` and a
+dual frame index `J` with `R_x(e_i, e_j)(dualTensorFrameS g x t e J) ≠ 0`, hence the term
+`riemannianFiberNormSq g 0 t x (R_x(e_i, e_j)(dualTensorFrameS g x t e J)) > 0`, so `K` must carry
+the genuine curvature magnitude — it cannot be the trivial zero constant. -/
+theorem exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_single_term_bound
+    (g : SmoothRiemannianMetric I M) (t : ℕ) :
+    ∃ K : ℝ, 0 ≤ K ∧
+      ∀ (x : M) {n : ℕ} (e : Fin n → TangentSpace I x),
+        (∀ i j : Fin n, g.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0) →
+        ∀ (i j : Fin n) (J : Fin t → Fin n),
+          riemannianFiberNormSq (I := I) (M := M) g 0 t x
+            (riemannOp (tensorCov (I := I) g 0 t) x (e i) (e j)
+              (dualTensorFrameS (I := I) (M := M) g x t e J)) ≤ K := by
+  sorry
+
 /-- **Posited uniform-over-`M` dual-frame curvature energy constant.** For a smooth Riemannian
 metric `g` on a closed manifold `M` and any covariant rank `t`, there is a *single* nonnegative
 constant `C`, independent of the base point and of the chosen frame, bounding the **dual-frame
@@ -255,7 +303,61 @@ theorem exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_const
             riemannianFiberNormSq (I := I) (M := M) g 0 t x
               (riemannOp (tensorCov (I := I) g 0 t) x (e i) (e j)
                 (dualTensorFrameS (I := I) (M := M) g x t e J))) ≤ C := by
-  sorry
+  classical
+  -- The single dual-frame curvature term is uniformly bounded by `K`; the displayed energy is a
+  -- sum of `n^(t+2)` such terms with `n ≤ d := finrank E` (a `g`-orthonormal family is linearly
+  -- independent), so the energy is bounded by the fixed constant `C := d^(t+2) · K`.
+  obtain ⟨K, hK_nonneg, hK_term⟩ :=
+    exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_single_term_bound (I := I) (M := M) g t
+  set d : ℕ := Module.finrank ℝ E with hd_def
+  refine ⟨(d : ℝ) ^ (t + 2) * K, ?_, ?_⟩
+  · exact mul_nonneg (pow_nonneg (Nat.cast_nonneg d) _) hK_nonneg
+  intro x n e horth
+  -- `n ≤ d`: the `g`-orthonormal family `e` is linearly independent in the `d`-dimensional
+  -- `g`-inner-product structure on `T_x M`.
+  have hn_le_d : n ≤ d := by
+    let cd : InnerProductSpace.Core ℝ (TangentSpace I x) := g.toRiemannianMetric.toCore x
+    have hc : ContinuousAt (fun v : TangentSpace I x => cd.inner v v) 0 :=
+      g.toRiemannianMetric.continuousAt x
+    have hbnd : Bornology.IsVonNBounded ℝ {v : TangentSpace I x |
+        RCLike.re (cd.inner v v) < 1} :=
+      g.toRiemannianMetric.isVonNBounded x
+    letI nag : NormedAddCommGroup (TangentSpace I x) :=
+      cd.toNormedAddCommGroupOfTopology hc hbnd
+    letI ips : InnerProductSpace ℝ (TangentSpace I x) :=
+      InnerProductSpace.ofCoreOfTopology cd hc hbnd
+    have hinner_eq : ∀ u v : TangentSpace I x, (inner ℝ u v : ℝ) = g.inner x u v :=
+      fun u v => rfl
+    have horthonormal : Orthonormal ℝ e := by
+      rw [orthonormal_iff_ite]
+      intro i j; rw [hinner_eq (e i) (e j)]; exact horth i j
+    have hcard := horthonormal.linearIndependent.fintype_card_le_finrank
+    have hcardE : Module.finrank ℝ (TangentSpace I x) = d := rfl
+    rw [hcardE] at hcard
+    simpa using hcard
+  -- Bound the displayed energy term-by-term by the constant `K`, then count `n^(t+2)` terms.
+  have hsum_le_const :
+      (∑ i : Fin n, ∑ j : Fin n, ∑ J : Fin t → Fin n,
+          riemannianFiberNormSq (I := I) (M := M) g 0 t x
+            (riemannOp (tensorCov (I := I) g 0 t) x (e i) (e j)
+              (dualTensorFrameS (I := I) (M := M) g x t e J))) ≤
+        ∑ _i : Fin n, ∑ _j : Fin n, ∑ _J : Fin t → Fin n, K := by
+    refine Finset.sum_le_sum (fun i _ => ?_)
+    refine Finset.sum_le_sum (fun j _ => ?_)
+    refine Finset.sum_le_sum (fun J _ => ?_)
+    exact hK_term x e horth i j J
+  refine le_trans hsum_le_const ?_
+  -- Evaluate the constant triple sum: `∑_{i,j,J} K = n^(t+2) · K`.
+  have hconst_eq :
+      (∑ _i : Fin n, ∑ _j : Fin n, ∑ _J : Fin t → Fin n, K) = (n : ℝ) ^ (t + 2) * K := by
+    rw [Finset.sum_const, Finset.sum_const, Finset.sum_const]
+    simp only [Finset.card_univ, Fintype.card_fun, Fintype.card_fin, nsmul_eq_mul]
+    push_cast
+    ring
+  rw [hconst_eq]
+  -- `n^(t+2) · K ≤ d^(t+2) · K` since `n ≤ d` and `K ≥ 0`.
+  refine mul_le_mul_of_nonneg_right ?_ hK_nonneg
+  exact pow_le_pow_left₀ (Nat.cast_nonneg n) (by exact_mod_cast hn_le_d) (t + 2)
 
 /-- **Posited continuous frame-energy bound for the tensor curvature operator.** For a smooth
 Riemannian metric `g` on a closed manifold `M` and any covariant rank `t`, there is a

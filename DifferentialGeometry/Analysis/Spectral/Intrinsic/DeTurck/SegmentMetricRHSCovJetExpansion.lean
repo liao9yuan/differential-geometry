@@ -41,38 +41,48 @@ sup — exactly the **binomial-Leibniz `rfns` domination** the Moser-tame produc
 
 ## What is proved vs. posited
 
-* The **per-order covariant Faà-di-Bruno Moser-tame `L²` domination** of the retagged DeTurck
+* The headline **per-order covariant Faà-di-Bruno Moser-tame `L²` domination** of the retagged DeTurck
   right-hand-side section difference, `exists_segmentMetricRHSDiff_faaDiBruno_moserTame_l2Norm_le`, is
-  *posited* here as the genuine atomic covariant-Faà-di-Bruno content (the per-field Nemytskii `L²`
-  estimates of the geometric nonlinearity `Ric + Lie`, which on a manifold of dimension `≥ 4` cannot
-  be reduced to a pointwise `C^{>2}`-jet of the metric — the metric pointwise `C^{>2}`-jet does not
-  exist there).  It is stated **at the `L²`-consumable level**, NOT pointwise: the `j`-th covariant
-  gradient's metric `L²` norm is dominated, with a per-order family constant `Cf j`, by the sum of an
-  order-`a` chart-Sobolev `C⁰`-redistribution term `‖(T₁ − T₂).toHs a‖` (carrying, through the
+  **proven by composition** here: the second-order Ricci–DeTurck right-hand side `F(g) = -2 • Ric(g) +
+  𝓛_{W(g, g_bg)} g` is split additively into its two genuine `SmoothCcTensor` summands — the curvature
+  summand `ricciNeg2CcSection` and the Lie-derivative summand `lieDerivCcSection` — via the proven
+  section identity `deTurckRHSSection_eq_ricciNeg2_add_lieDeriv`; the `j`-th covariant gradient of the
+  retagged difference splits additively (`iteratedCovGrad_add`) and the `L²`-seminorm triangle
+  inequality reduces the headline bound to the sum of the two **per-field** primitives, with combined
+  per-order constant.
+* The two genuine atomic posits are the **per-field covariant-Faà-di-Bruno Moser-tame `L²`
+  dominations** of each summand difference: the curvature half
+  `exists_ricciNeg2Diff_faaDiBruno_moserTame_l2Norm_le` and the Lie half
+  `exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le`.  Each is the per-field Nemytskii `L²` estimate
+  of one geometric nonlinearity (`Ric`, resp. `𝓛_{deTurckVF} g`), which on a manifold of dimension
+  `≥ 4` cannot be reduced to a pointwise `C^{>2}`-jet of the metric (the metric pointwise `C^{>2}`-jet
+  does not exist there).  Each is stated **at the `L²`-consumable level**, NOT pointwise: the `j`-th
+  covariant gradient's metric `L²` norm is dominated, with a per-order family constant, by the sum of
+  an order-`a` chart-Sobolev `C⁰`-redistribution term `‖(T₁ − T₂).toHs a‖` (carrying, through the
   supercritical embedding, the `L^∞` factor on the order-`0` difference that the unbounded top
   coefficient jet multiplies in `L²`) and the order-`≤ j+2` covariant `L²`-jets of the perturbation
-  difference `T₁ − T₂` (carrying the high derivative on the difference factor).  Its trap-screened
+  difference `T₁ − T₂` (carrying the high derivative on the difference factor).  Their trap-screened
   design: NO pointwise sup of any order-`>2` metric jet appears (the false-embedding lesson — an
-  earlier *pointwise* `rfns` form of this domination, lacking the `C⁰`-redistribution slot, is FALSE
+  earlier *pointwise* `rfns` form of these dominations, lacking the `C⁰`-redistribution slot, is FALSE
   for `j ≥ 1` because the covariant-FdB `i = 0` term carries a pointwise-unbounded `∇^{j+2}g_t`
   coefficient over the `H^{a+2}` family; the `L²`-level statement keeps that jet in `L²` against the
   difference's `C⁰` factor, never claiming it pointwise); the per-order constant is a *family* over
   the unbounded gradient order; and the uniform redistribution/jet budget is scoped to the
-  supercritical `H^{a+2}`-bounded `B`-family (`ha`).  It carries **no** spectral-nonlinearity,
+  supercritical `H^{a+2}`-bounded `B`-family (`ha`).  They carry **no** spectral-nonlinearity,
   perturbation-indexed-remainder, or Weyl dependence.
-* The reduction shape — that the section the bound is stated on is the `g₀`-retagged DeTurck
+* The reduction shape — that the section the headline bound is stated on is the `g₀`-retagged DeTurck
   right-hand side `deTurckRHSRetagG0` (definitionally the downstream `deTurckRHSRetag`), and that the
   perturbation factor is the `(0,2)`-difference `T₁ − T₂` — is *fixed by construction* so the
   follow-up assembler (which uniformises the per-order constant and extends the jet-sum range) plugs
   it into the order-`a` chart-RHS tower directly.
 
-The `L²` engine the domination is the natural output of is the proven (sorry-free) intrinsic
+The `L²` engine each per-field domination is the natural output of is the proven (sorry-free) intrinsic
 Moser-tame product `exists_moserTameProduct_iteratedCovGrad_l2Norm_le`
 (`Analysis/Sobolev/MoserTameProduct.lean`), fed by the proven order-`≤2` segment-metric jet sup
 `exists_segmentMetric_realizeSymm_iteratedCovGradJet2_sup_le` (the bounded `Λ`-arm coefficient sup)
 and the proven `C⁰` Sobolev embedding `tensorPouSobolevHilbert_embedding_Ck` (the `Λ₀`-arm `C⁰`
-control on the difference factor); consumers transitively depend on `sorryAx` only through the single
-posited per-order covariant-Faà-di-Bruno Moser-tame `L²` domination. -/
+control on the difference factor); consumers transitively depend on `sorryAx` only through the two
+posited per-field covariant-Faà-di-Bruno Moser-tame `L²` dominations. -/
 
 noncomputable section
 
@@ -98,6 +108,7 @@ open DifferentialGeometry.PDE
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
+open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E]
@@ -123,6 +134,129 @@ section `deTurckRHSSection g_bg g₁`'s section (the retag is a pure type-tag ch
 @[simp] theorem deTurckRHSRetagG0_toSection (g₀ g_bg g₁ : SmoothRiemannianMetric I M) :
     (deTurckRHSRetagG0 (I := I) g₀ g_bg g₁).toSection =
       (deTurckRHSSection (I := I) g_bg g₁).toSection := rfl
+
+/-! ### The additive `Ric + Lie` split of the DeTurck right-hand-side section
+
+The genuine first decomposition of the second-order Ricci–DeTurck right-hand side `F(g) =
+deTurckRicciRHS g_bg g = -2 • Ric(g) + 𝓛_{W(g, g_bg)} g` into its two *separate* geometric
+nonlinearities — the **Ricci-curvature** summand `-2 • Ric(g)` and the **Lie-derivative-of-metric**
+summand `𝓛_{W(g, g_bg)} g`.  Both are promoted to genuine smooth compactly-supported `(0,2)`-tensor
+sections (`SmoothCcTensor g 0 2`), so the section difference `F(g₁) − F(g₂)` splits additively as
+`-2 • (Ric(g₁) − Ric(g₂)) + (Lie(g₁) − Lie(g₂))`.  This is the additive bridge over which the
+target's per-order covariant `L²` bound reduces to the two **per-field** covariant-Faà-di-Bruno
+`L²` primitives (each a separately-reusable Nemytskii estimate). -/
+
+/-- The model `(0,2)`-multilinear value of the **Ricci-tensor** bilinear form `-2 • Ric(g) x`
+(the curvature summand of the Ricci–DeTurck right-hand side), via `bilinFormToModel`. -/
+private def ricciNeg2ModelFun (g : SmoothRiemannianMetric I M) (x : M) :
+    Tensor0SSpace 2 I x :=
+  Tensor0SSpace.ofModel
+    (bilinFormToModel (TangentSpace I x)
+      ((-2 : ℝ) • ricciTensor (I := I) (smoothRiemannianMetricToInfty (I := I) g) x))
+
+private theorem ricciNeg2ModelFun_toModel_apply (g : SmoothRiemannianMetric I M) (x : M)
+    (v : Fin 2 → TangentSpace I x) :
+    Tensor0SSpace.toModel (ricciNeg2ModelFun (I := I) g x) v =
+      ((-2 : ℝ) • ricciTensor (I := I) (smoothRiemannianMetricToInfty (I := I) g) x)
+        (v 0) (v 1) := by
+  unfold ricciNeg2ModelFun
+  rw [Tensor0SSpace.toModel_ofModel]
+  exact bilinFormToModel_apply (TangentSpace I x)
+    ((-2 : ℝ) • ricciTensor (I := I) (smoothRiemannianMetricToInfty (I := I) g) x) v
+
+/-- **The `-2 • Ric(g)` curvature summand is a smooth covariant `(0,2)`-tensor field.**  Its chart
+component smoothness is the Ricci chart-component smoothness `chartRicci_affine_in_d2g` scaled by
+`-2`. -/
+def ricciNeg2Field (g : SmoothRiemannianMetric I M) :
+    Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) ∞ 2 :=
+  letI := tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 2
+  letI := TangentBundle.contMDiffVectorBundle (I := I) (M := M) (n := ∞)
+  ⟨fun x => ricciNeg2ModelFun (I := I) g x, by
+    let d := Module.finrank ℝ E
+    let b : Module.Basis (Fin d) ℝ E := chartModelBasis E
+    refine (contMDiff_multilinearSection_iff_coord (TangentSpace I) ∞ b _).mpr
+      fun σ x₀ => ?_
+    have hcomp : ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+        (fun x : M =>
+          (-2 : ℝ) • ricciTensor (I := I) (smoothRiemannianMetricToInfty (I := I) g) x
+            (chartFrameVec (I := I) x₀ (σ 0) x)
+            (chartFrameVec (I := I) x₀ (σ 1) x))
+        (chartAt H x₀).source :=
+      (contMDiffOn_const (c := (-2 : ℝ))).smul
+        (chartRicci_affine_in_d2g (I := I)
+          (smoothRiemannianMetricToInfty (I := I) g) x₀ (σ 0) (σ 1))
+    have hx₀_src : x₀ ∈ (chartAt H x₀).source := mem_chart_source H x₀
+    have hx₀_base : x₀ ∈ (trivializationAt E (TangentSpace I) x₀).baseSet :=
+      mem_baseSet_trivializationAt E (TangentSpace I) x₀
+    have h_src_nhd : (chartAt H x₀).source ∈ 𝓝 x₀ :=
+      (chartAt H x₀).open_source.mem_nhds hx₀_src
+    refine ((hcomp x₀ hx₀_src).contMDiffAt h_src_nhd).congr_of_eventuallyEq ?_
+    have h_base_nhd :
+        (trivializationAt E (TangentSpace I) x₀).baseSet ∈ 𝓝 x₀ :=
+      (trivializationAt E (TangentSpace I) x₀).open_baseSet.mem_nhds hx₀_base
+    filter_upwards [h_base_nhd] with x hx
+    rw [continuousMultilinearMap_basis_repr]
+    change Tensor0SSpace.toModel (ricciNeg2ModelFun (I := I) g x)
+        (fun j => (trivializationAt E (TangentSpace I) x₀).symmL ℝ x (b (σ j))) = _
+    rw [ricciNeg2ModelFun_toModel_apply]
+    simp only [ContinuousLinearMap.smul_apply]
+    rfl⟩
+
+/-- The `-2 • Ric(g)` curvature summand as a smooth mixed `(0,2)`-tensor section. -/
+def ricciNeg2MixedSection (g : SmoothRiemannianMetric I M) :
+    Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯ :=
+  MixedSection.fromMultilinearSection (𝕜 := ℝ) (F := E) (IB := I)
+    (E := (TangentSpace I : M → Type _)) ∞ (ricciNeg2Field (I := I) g)
+
+/-- **The `-2 • Ric(g)` curvature summand as a `SmoothCcTensor g 0 2`.** -/
+def ricciNeg2CcSection (g : SmoothRiemannianMetric I M) :
+    SmoothCcTensor g 0 2 where
+  toSection := ricciNeg2MixedSection (I := I) g
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+/-- **The `𝓛_{W(g, g_bg)} g` Lie-derivative summand as a `SmoothCcTensor g 0 2`.**  Defined as the
+algebraic complement `deTurckRHSSection g_bg g − ricciNeg2CcSection g`, so the additive `Ric + Lie`
+split `deTurckRHSSection g_bg g = ricciNeg2CcSection g + lieDerivCcSection g_bg g` holds by
+construction; its underlying field is `𝓛_{W(g, g_bg)} g` (the deTurck-vector-field Lie deformation),
+since `deTurckRHSSection`'s field is `-2 • Ric(g) + 𝓛_{W} g`. -/
+def lieDerivCcSection (g_bg g : SmoothRiemannianMetric I M) :
+    SmoothCcTensor g 0 2 :=
+  deTurckRHSSection (I := I) g_bg g - ricciNeg2CcSection (I := I) g
+
+/-- **The additive `Ric + Lie` split of the DeTurck right-hand-side section.**  The Ricci–DeTurck
+right-hand-side section is the sum of its curvature summand `-2 • Ric(g)` and its Lie-derivative
+summand `𝓛_{W(g, g_bg)} g` (both genuine `SmoothCcTensor`s). -/
+theorem deTurckRHSSection_eq_ricciNeg2_add_lieDeriv (g_bg g : SmoothRiemannianMetric I M) :
+    deTurckRHSSection (I := I) g_bg g =
+      ricciNeg2CcSection (I := I) g + lieDerivCcSection (I := I) g_bg g := by
+  rw [lieDerivCcSection]; abel
+
+/-- **The `g₀`-re-tagged `-2 • Ric(g₁)` curvature summand.**  The curvature summand
+`ricciNeg2CcSection g₁` re-tagged from the `g₁` type tag to the `g₀` type tag (a pure type-level
+parameter change; the underlying section is unchanged). -/
+def ricciNeg2RetagG0 (g₀ g₁ : SmoothRiemannianMetric I M) :
+    Integral.L2.SmoothCcTensor g₀ 0 2 :=
+  { toSection := (ricciNeg2CcSection (I := I) g₁).toSection
+    hasCompactSupport := (ricciNeg2CcSection (I := I) g₁).hasCompactSupport }
+
+/-- **The `g₀`-re-tagged `𝓛_{W(g₁, g_bg)} g₁` Lie-derivative summand.**  The Lie-derivative summand
+`lieDerivCcSection g_bg g₁` re-tagged from the `g₁` type tag to the `g₀` type tag. -/
+def lieDerivRetagG0 (g₀ g_bg g₁ : SmoothRiemannianMetric I M) :
+    Integral.L2.SmoothCcTensor g₀ 0 2 :=
+  { toSection := (lieDerivCcSection (I := I) g_bg g₁).toSection
+    hasCompactSupport := (lieDerivCcSection (I := I) g_bg g₁).hasCompactSupport }
+
+/-- **The retagged additive `Ric + Lie` split.**  The `g₀`-retagged DeTurck right-hand-side section
+splits additively into its `g₀`-retagged curvature and Lie-derivative summands. -/
+theorem deTurckRHSRetagG0_eq_ricciNeg2_add_lieDeriv
+    (g₀ g_bg g₁ : SmoothRiemannianMetric I M) :
+    deTurckRHSRetagG0 (I := I) g₀ g_bg g₁ =
+      ricciNeg2RetagG0 (I := I) g₀ g₁ + lieDerivRetagG0 (I := I) g₀ g_bg g₁ := by
+  refine Integral.L2.SmoothCcTensor.ext ?_
+  have h := congrArg Integral.L2.SmoothCcTensor.toSection
+    (deTurckRHSSection_eq_ricciNeg2_add_lieDeriv (I := I) g_bg g₁)
+  rw [Integral.L2.SmoothCcTensor.toSection_add] at h
+  exact h
 
 /-! ### The realize-jet `rfns` domination: the metric difference's jets are the perturbation's jets
 
@@ -271,6 +405,130 @@ theorem exists_riemannianFiberNormSq_iteratedCovGrad_realizeSymm_le_jetSum
   rw [Finset.card_range] at hCS
   exact le_trans hBsq (by exact_mod_cast hCS)
 
+/-- **The per-field covariant-Faà-di-Bruno Moser-tame `L²` domination of the segment-metric
+*Ricci-curvature* summand difference (the curvature half of the geometric nonlinearity, stated at the
+`L²`-consumable level).**
+
+The Ricci half of the second-order Ricci–DeTurck right-hand side, `-2 • Ric(g)`, is a fibrewise-smooth
+function of the metric `≤2`-jet `(g, ∇g, ∇²g)` and the fibre-inverse `g⁻¹` (schematically
+`Ric(g) = g⁻¹ · ∂²g + g⁻¹ · g⁻¹ · ∂g · ∂g`, the `g⁻¹` Neumann factors carrying intrinsic order `0`),
+of **intrinsic order capped at `2`**.  For an anchor `g₀`, an order `a`, a supercriticality hypothesis
+`ha`, and a uniform `H^{a+2}`-size bound `B ≥ 0`, there is an order-indexed nonnegative constant family
+`C` such that for any two `g₀`-fibre-small perturbations `T₁, T₂` with `H^{a+2}` norms `≤ B`, any two
+realized metrics `g₁, g₂` of `T₁, T₂`, and every order `j ≤ 2 * a`, the metric `L²` (semi)norm of the
+`j`-th covariant gradient of the `g₀`-retagged curvature-summand difference
+`ricciNeg2RetagG0 g₀ g₁ − ricciNeg2RetagG0 g₀ g₂` is dominated by the **Moser-tame redistributed sum**
+```
+‖∇^j (ricciNeg2RetagG0 g₁ − ricciNeg2RetagG0 g₂)‖_{L²}
+  ≤ C j · ( ‖(T₁ − T₂).toHs a‖ + ∑_{i ≤ j + 2} ‖∇^i (T₁ − T₂)‖_{L²} )     (for j ≤ 2 * a).
+```
+
+This is the covariant Faà-di-Bruno expansion of the curvature nonlinearity, lifted to `L²` by the
+intrinsic Moser tame product `exists_moserTameProduct_iteratedCovGrad_l2Norm_le`: the covariant FTC
+`Ric(g₁) − Ric(g₂) = ∫₀¹ DRic(g_t)·(g₁ − g₂) dt` along the segment `g_t = g₂ + t·(g₁ − g₂)` and the
+covariant product/chain rule expand `∇^j` of the difference into a finite sum of contracted products
+of a segment-metric `≤(j+2)`-jet coefficient (a `DRic(g_t)`-polynomial in the `≤(j+2)`-jets of `g_t`
+and the bounded fibre-inverses) with an iterated covariant gradient `∇^i(g₁ − g₂)`, `i ≤ j + 2`, of the
+metric difference.  The coefficient's genuinely-needed pointwise sup is only its `≤2`-jet (supplied by
+the proven order-`≤2` segment-metric jet sup `exists_segmentMetric_realizeSymm_iteratedCovGradJet2_sup_le`,
+the bounded `Λ`-arm); the **single high derivative** lands on the perturbation factor `∇^i(g₁ − g₂)` in
+`L²`, while the **top redistributed coefficient derivative** (the FdB `i = 0` term's `∇^{j+2}g_t`
+factor) is kept in `L²` against the difference factor's `C⁰`/`L^∞` factor, which the supercritical `C⁰`
+Sobolev embedding folds into the order-`a` chart-Sobolev term `‖(T₁ − T₂).toHs a‖`.  Since
+`(g₁ − g₂).inner = ccTensorBilinSymm g₀ (T₁ − T₂)`, each `∇^i(g₁ − g₂)` is `L²`-controlled by the
+`≤ i`-order covariant gradients of `T₁ − T₂` (the realization gains no derivatives,
+`exists_riemannianFiberNormSq_iteratedCovGrad_realizeSymm_le_jetSum`).
+
+**Why this is `L²`, not pointwise.**  The FdB `i = 0` term `[∇^{j+2}g_t]·(g₁ − g₂)` carries a
+pointwise-`∇^{j+2}g_t` coefficient, *pointwise-unbounded* over the `H^{a+2}` ball for `j ≥ 1` (only the
+`≤2`-jet sup exists; `H^{a+2} ↪ C²` only).  Its `L²` form `‖∇^{j+2}g_t‖_{L²}·‖g₁ − g₂‖_{C⁰}` keeps the
+unbounded top jet in `L²` (its mass `B`-controlled, `j + 2 ≤ 2a + 2`) and the difference's `C⁰` factor in
+the redistribution term `‖(T₁ − T₂).toHs a‖`; **no jet of order `> 2` is ever taken pointwise**.
+
+**Non-vacuity.**  A degenerate `C ≡ 0` is rejected: at `j = 0`, for perturbations with
+`Ric(g₁) ≠ Ric(g₂)` on a positive-measure set, the left side is `> 0` while `0 · (…) = 0`,
+contradicting the bound; so `C 0 > 0` and the domination genuinely uses the perturbation difference.
+
+Its body is `sorry`: the curvature half of the genuine atomic covariant-Faà-di-Bruno (Nemytskii) `L²`
+expansion — the deep metric-jet analytic content of the Ricci nonlinearity, with NO pointwise-`C^{>2}`-jet
+claim, NO spectral-nonlinearity, and NO Weyl dependence. -/
+theorem exists_ricciNeg2Diff_faaDiBruno_moserTame_l2Norm_le
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) :
+    ∃ C : ℕ → ℝ, (∀ j, 0 ≤ C j) ∧
+      ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+        (g₁ g₂ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+        ∀ j : ℕ, j ≤ 2 * a →
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+              (ricciNeg2RetagG0 (I := I) g₀ g₁
+                - ricciNeg2RetagG0 (I := I) g₀ g₂)‖ ≤
+            C j * (‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
+                + ∑ i ∈ Finset.range (j + 2 + 1),
+                    ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖) :=
+  sorry
+
+/-- **The per-field covariant-Faà-di-Bruno Moser-tame `L²` domination of the segment-metric
+*Lie-derivative* summand difference (the gauge half of the geometric nonlinearity, stated at the
+`L²`-consumable level).**
+
+The Lie half of the second-order Ricci–DeTurck right-hand side, `𝓛_{W(g, g_bg)} g` with `W = deTurckVF`
+the metric-`g`-trace of the connection difference, is a fibrewise-smooth function of the metric `≤2`-jet
+`(g, ∇g, ∇²g)` and the fibre-inverse (schematically `𝓛_{W(g)} g = g⁻¹ · ∂g · ∂g + g⁻¹ · ∂²g`, the `g⁻¹`
+Neumann factors carrying intrinsic order `0`), of **intrinsic order capped at `2`**.  For an anchor
+`g₀`, a flow background `g_bg`, an order `a`, a supercriticality hypothesis `ha`, and a uniform
+`H^{a+2}`-size bound `B ≥ 0`, there is an order-indexed nonnegative constant family `C` such that for
+any two `g₀`-fibre-small perturbations `T₁, T₂` with `H^{a+2}` norms `≤ B`, any two realized metrics
+`g₁, g₂` of `T₁, T₂`, and every order `j ≤ 2 * a`, the metric `L²` (semi)norm of the `j`-th covariant
+gradient of the `g₀`-retagged Lie-summand difference
+`lieDerivRetagG0 g₀ g_bg g₁ − lieDerivRetagG0 g₀ g_bg g₂` is dominated by the **Moser-tame redistributed
+sum**
+```
+‖∇^j (lieDerivRetagG0 g₁ − lieDerivRetagG0 g₂)‖_{L²}
+  ≤ C j · ( ‖(T₁ − T₂).toHs a‖ + ∑_{i ≤ j + 2} ‖∇^i (T₁ − T₂)‖_{L²} )     (for j ≤ 2 * a).
+```
+
+This is the covariant Faà-di-Bruno expansion of the Lie/`deTurckVF` nonlinearity, lifted to `L²` by the
+intrinsic Moser tame product (same redistribution structure as the curvature half): the top redistributed
+coefficient derivative (the FdB `i = 0` term's `∇^{j+2}g_t` factor, *pointwise-unbounded* over the
+`H^{a+2}` ball for `j ≥ 1`) is kept in `L²` against the difference factor's `C⁰`/`L^∞` factor folded into
+`‖(T₁ − T₂).toHs a‖`, and the single high derivative lands on the perturbation factor in `L²`; **no jet
+of order `> 2` is ever taken pointwise**.  Since `(g₁ − g₂).inner = ccTensorBilinSymm g₀ (T₁ − T₂)`, the
+metric-difference jets are the perturbation-difference jets.
+
+**Non-vacuity.**  A degenerate `C ≡ 0` is rejected: at `j = 0`, for perturbations with
+`𝓛_{W(g₁)} g₁ ≠ 𝓛_{W(g₂)} g₂` on a positive-measure set, the left side is `> 0` while `0 · (…) = 0`,
+contradicting the bound; so `C 0 > 0` and the domination genuinely uses the perturbation difference.
+
+Its body is `sorry`: the gauge half of the genuine atomic covariant-Faà-di-Bruno (Nemytskii) `L²`
+expansion — the deep metric-jet analytic content of the Lie/`deTurckVF` nonlinearity, with NO
+pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, and NO Weyl dependence. -/
+theorem exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) :
+    ∃ C : ℕ → ℝ, (∀ j, 0 ≤ C j) ∧
+      ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+        (g₁ g₂ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+        ∀ j : ℕ, j ≤ 2 * a →
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+              (lieDerivRetagG0 (I := I) g₀ g_bg g₁
+                - lieDerivRetagG0 (I := I) g₀ g_bg g₂)‖ ≤
+            C j * (‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
+                + ∑ i ∈ Finset.range (j + 2 + 1),
+                    ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖) :=
+  sorry
+
 /-- **The per-order covariant-Faà-di-Bruno Moser-tame `L²` domination of the segment-metric
 DeTurck right-hand-side difference (the genuine atomic metric-jet Nemytskii primitive, stated at the
 `L²`-consumable level).**
@@ -338,10 +596,20 @@ order `j`; and the uniform `Λ`/`Λ₀`/`L²`-jet budget is scoped to the superc
 distinct curvatures), the left side is `> 0` while `0 · (… ) = 0`, contradicting the bound; so
 `C 0 > 0` and the domination genuinely uses the perturbation difference.
 
-Its body is `sorry`: the genuine atomic covariant-Faà-di-Bruno (Nemytskii) `L²` expansion of the
-geometric nonlinearity `Ric + Lie` along the segment metric — the deep metric-jet analytic content,
+It is **proven by composition** (TRANSIT glue) of the two **per-field** covariant-Faà-di-Bruno
+Moser-tame `L²` primitives — the curvature-summand difference bound
+`exists_ricciNeg2Diff_faaDiBruno_moserTame_l2Norm_le` and the Lie-summand difference bound
+`exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le` — over the additive `Ric + Lie` split of the
+re-tagged DeTurck right-hand-side section `deTurckRHSRetagG0_eq_ricciNeg2_add_lieDeriv` (the section is
+the sum of its genuine `SmoothCcTensor` curvature and Lie summands).  Since the section difference
+`deTurckRHSRetagG0 g₁ − deTurckRHSRetagG0 g₂` splits as `(ricciNeg2RetagG0 g₁ − ricciNeg2RetagG0 g₂) +
+(lieDerivRetagG0 g₁ − lieDerivRetagG0 g₂)`, the additivity of the iterated covariant gradient
+(`iteratedCovGrad_add`) and the `L²`-seminorm triangle inequality reduce the bound to the sum of the two
+per-field bounds, with combined per-order constant `Cric j + Clie j`.  The genuine deep metric-jet
+analytic content — the covariant Faà-di-Bruno (Nemytskii) `L²` expansion of each geometric nonlinearity,
 with NO pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, NO perturbation-indexed-remainder, and
-NO Weyl dependence.  Consumers transitively depend on `sorryAx` only through this single primitive. -/
+NO Weyl dependence — lives in the two per-field primitives.  Consumers transitively depend on `sorryAx`
+only through those two atomic per-field covariant-Faà-di-Bruno Moser-tame `L²` primitives. -/
 theorem exists_segmentMetricRHSDiff_faaDiBruno_moserTame_l2Norm_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) :
@@ -360,8 +628,50 @@ theorem exists_segmentMetricRHSDiff_faaDiBruno_moserTame_l2Norm_le
                 - deTurckRHSRetagG0 (I := I) g₀ g_bg g₂)‖ ≤
             C j * (‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
                 + ∑ i ∈ Finset.range (j + 2 + 1),
-                    ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖) :=
-  sorry
+                    ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖) := by
+  classical
+  -- The two per-field covariant-Faà-di-Bruno Moser-tame `L²` primitives (curvature and Lie halves).
+  obtain ⟨Cric, hCric_nn, hCric⟩ :=
+    exists_ricciNeg2Diff_faaDiBruno_moserTame_l2Norm_le (I := I) g₀ a ha B hB
+  obtain ⟨Clie, hClie_nn, hClie⟩ :=
+    exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le (I := I) g₀ g_bg a ha B hB
+  -- The combined per-order constant.
+  refine ⟨fun j => Cric j + Clie j, fun j => add_nonneg (hCric_nn j) (hClie_nn j), ?_⟩
+  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j hj
+  -- Abbreviate the common redistributed sum (nonnegative).
+  set R : ℝ := ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
+      + ∑ i ∈ Finset.range (j + 2 + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖ with hR_def
+  have hR_nn : 0 ≤ R := by
+    rw [hR_def]
+    exact add_nonneg (norm_nonneg _)
+      (Finset.sum_nonneg fun i _ => norm_nonneg _)
+  -- The retagged additive split of each section, hence of the difference.
+  have hsplit :
+      deTurckRHSRetagG0 (I := I) g₀ g_bg g₁ - deTurckRHSRetagG0 (I := I) g₀ g_bg g₂ =
+        (ricciNeg2RetagG0 (I := I) g₀ g₁ - ricciNeg2RetagG0 (I := I) g₀ g₂) +
+          (lieDerivRetagG0 (I := I) g₀ g_bg g₁ - lieDerivRetagG0 (I := I) g₀ g_bg g₂) := by
+    rw [deTurckRHSRetagG0_eq_ricciNeg2_add_lieDeriv (I := I) g₀ g_bg g₁,
+      deTurckRHSRetagG0_eq_ricciNeg2_add_lieDeriv (I := I) g₀ g_bg g₂]
+    abel
+  -- The `j`-th covariant gradient of the difference splits additively.
+  rw [hsplit, PDE.RicciFlow.iteratedCovGrad_add]
+  -- The two per-field child bounds, specialized to this `j ≤ 2a`.
+  have hric := hCric T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j hj
+  have hlie := hClie T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j hj
+  rw [← hR_def] at hric hlie
+  -- Triangle inequality on the `L²` seminorm, then the two child bounds and the constant split.
+  calc ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+          (ricciNeg2RetagG0 (I := I) g₀ g₁ - ricciNeg2RetagG0 (I := I) g₀ g₂) +
+        PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+          (lieDerivRetagG0 (I := I) g₀ g_bg g₁ - lieDerivRetagG0 (I := I) g₀ g_bg g₂)‖
+      ≤ ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+            (ricciNeg2RetagG0 (I := I) g₀ g₁ - ricciNeg2RetagG0 (I := I) g₀ g₂)‖ +
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+            (lieDerivRetagG0 (I := I) g₀ g_bg g₁ - lieDerivRetagG0 (I := I) g₀ g_bg g₂)‖ :=
+        norm_add_le _ _
+    _ ≤ Cric j * R + Clie j * R := add_le_add hric hlie
+    _ = (Cric j + Clie j) * R := by ring
 
 end DeTurck
 end IntrinsicSpectral

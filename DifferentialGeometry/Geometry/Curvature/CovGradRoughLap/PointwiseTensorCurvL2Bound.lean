@@ -134,8 +134,10 @@ uniform sup `exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound` upgra
 proportional to `rfns(S)`) — with the four genuine third-order Bochner–Weitzenböck properties:
 
 * `rfns(Gcurv)(x) ≤ (Cper s)² · rfns(∇S)(x)` — the pure-`R` field, genuinely `rfns(∇S)`-order;
-* `rfns(GcurvDeriv)(x) ≤ (Cper s)² · rfns(S)(x)` — the `∇R` field, genuinely `rfns(S)`-order;
-* `rfns(Curv S − Gcurv − GcurvDeriv)(x) ≤ (Cper s)² · rfns(∇²S)(x)` — the moving-frame /
+* `rfns(GcurvDeriv)(x) ≤ (Cper s)² · (rfns(∇S)(x) + rfns(S)(x))` — the `∇R` field, sum-order (the
+  gauge-glued tensorial differentiated-curvature section, the Leibniz defect in the sum);
+* `rfns(Curv S − Gcurv − GcurvDeriv)(x) ≤ (Cper s)² · (rfns(∇²S)(x) + rfns(∇S)(x) + rfns(S)(x))` — the
+  moving-frame /
   frame-bracket remainder, genuinely `rfns(∇²S)`-order after the third-order Weitzenböck
   cancellation of the top-order `∇³S` terms by the iterated Ricci identity;
 * `⟨Gcurv + GcurvDeriv, ∇S⟩_{L²} = ‖Δ_∇S‖²_{L²} − ‖∇²S‖²_{L²}` — the *spectral pairing*: the
@@ -173,13 +175,18 @@ theorem exists_pointwiseTensorCurv_genuineFields_proportional_spectralPairing
                 ((covGrad (I := I) (M := M) g 0 s S).toSection x)) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x (GcurvDeriv.toSection x) ≤
             Cper s ^ 2 *
-              riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) ∧
+              (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                  ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x))) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
               ((pointwiseTensorCurv (I := I) (M := M) g s S - Gcurv - GcurvDeriv).toSection x) ≤
             Cper s ^ 2 *
-              riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
-                ((covGrad (I := I) (M := M) g 0 (s + 1)
-                  (covGrad (I := I) (M := M) g 0 s S)).toSection x)) ∧
+              (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+                  ((covGrad (I := I) (M := M) g 0 (s + 1)
+                    (covGrad (I := I) (M := M) g 0 s S)).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                    ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x))) ∧
           tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Gcurv + GcurvDeriv).toFun
               (covGrad (I := I) (M := M) g 0 s S).toFun =
             tensorL2Norm (I := I) (M := M) g 0 s
@@ -204,8 +211,10 @@ uniform sup `exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound` upgra
 proportional to `rfns(S)`) — with the four genuine third-order Bochner–Weitzenböck properties:
 
 * `rfns(Gcurv)(x) ≤ (Cper s)² · rfns(∇S)(x)` — the pure-`R` field, genuinely `rfns(∇S)`-order;
-* `rfns(GcurvDeriv)(x) ≤ (Cper s)² · rfns(S)(x)` — the `∇R` field, genuinely `rfns(S)`-order;
-* `rfns(Curv S − Gcurv − GcurvDeriv)(x) ≤ (Cper s)² · rfns(∇²S)(x)` — the moving-frame /
+* `rfns(GcurvDeriv)(x) ≤ (Cper s)² · (rfns(∇S)(x) + rfns(S)(x))` — the `∇R` field, sum-order (the
+  gauge-glued tensorial differentiated-curvature section, the Leibniz defect in the sum);
+* `rfns(Curv S − Gcurv − GcurvDeriv)(x) ≤ (Cper s)² · (rfns(∇²S)(x) + rfns(∇S)(x) + rfns(S)(x))` — the
+  moving-frame /
   frame-bracket remainder (`tensor3rdCurvBracket` plus the frame-trace discrepancy
   `covGradRoughLapTraceDiscrepancy` and the moving-frame residual
   `covGradRoughLapMovingFrameResidual`), genuinely `rfns(∇²S)`-order after the third-order
@@ -249,13 +258,18 @@ theorem exists_pointwiseTensorCurv_genuineFields_proportional_bracketFreePairing
                 ((covGrad (I := I) (M := M) g 0 s S).toSection x)) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x (GcurvDeriv.toSection x) ≤
             Cper s ^ 2 *
-              riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) ∧
+              (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                  ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x))) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
               ((pointwiseTensorCurv (I := I) (M := M) g s S - Gcurv - GcurvDeriv).toSection x) ≤
             Cper s ^ 2 *
-              riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
-                ((covGrad (I := I) (M := M) g 0 (s + 1)
-                  (covGrad (I := I) (M := M) g 0 s S)).toSection x)) ∧
+              (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+                  ((covGrad (I := I) (M := M) g 0 (s + 1)
+                    (covGrad (I := I) (M := M) g 0 s S)).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                    ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x))) ∧
           tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Gcurv + GcurvDeriv).toFun
               (covGrad (I := I) (M := M) g 0 s S).toFun =
             tensorL2Inner (I := I) (M := M) g 0 (s + 1)
@@ -307,10 +321,10 @@ with the four genuine Weitzenböck properties
   `rfns(∇S)`-order (the Ricci identity on the gradient field `∇S = covGrad g 0 s S`,
   `secondCovDeriv_covGrad_antisymm_eq_riemannOp_gen`, with the proportional fibre bound
   `riemannOp_covGrad_fiberNormSq_le_gen`);
-* `rfns(GcurvDeriv)(x) ≤ (Cper s)² · rfns(S)(x)` — the differentiated-curvature field `(∇R) S`,
+* `rfns(GcurvDeriv)(x) ≤ (Cper s)² · (rfns(∇S)(x) + rfns(S)(x))` — the differentiated-curvature field `(∇R) S`,
   genuinely `rfns(S)`-order (`covGradCurvatureContraction`, with its uniform sup upgraded to a bound
   proportional to `rfns(S)`);
-* `rfns(Grem)(x) ≤ (Cper s)² · rfns(∇²S)(x)` — the moving-frame / frame-bracket remainder
+* `rfns(Grem)(x) ≤ (Cper s)² · (rfns(∇²S)(x) + rfns(∇S)(x) + rfns(S)(x))` — the moving-frame / frame-bracket remainder
   (`tensor3rdCurvBracket` plus the frame-trace discrepancy `covGradRoughLapTraceDiscrepancy` and the
   moving-frame residual `covGradRoughLapMovingFrameResidual`), genuinely `rfns(∇²S)`-order after the
   third-order Weitzenböck cancellation of the top-order `∇³S` terms by the iterated Ricci identity;
@@ -356,12 +370,17 @@ theorem exists_pointwiseTensorCurv_genuineCurvature_namedRemainderField
                 ((covGrad (I := I) (M := M) g 0 s S).toSection x)) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x (GcurvDeriv.toSection x) ≤
             Cper s ^ 2 *
-              riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) ∧
+              (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                  ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x))) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x (Grem.toSection x) ≤
             Cper s ^ 2 *
-              riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
-                ((covGrad (I := I) (M := M) g 0 (s + 1)
-                  (covGrad (I := I) (M := M) g 0 s S)).toSection x)) ∧
+              (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+                  ((covGrad (I := I) (M := M) g 0 (s + 1)
+                    (covGrad (I := I) (M := M) g 0 s S)).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                    ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x))) ∧
           tensorL2Inner (I := I) (M := M) g 0 (s + 1) Grem.toFun
               (covGrad (I := I) (M := M) g 0 s S).toFun = 0 := by
   classical
@@ -406,9 +425,9 @@ pure-Riemann contraction `R(∇S)` and the differentiated-curvature contraction 
 order-`2` commutator defect `Curv S := pointwiseTensorCurv g s S` — such that:
 
 * `rfns(Gcurv)(x) ≤ (Cper s)² · rfns(∇S)(x)` (genuinely `rfns(∇S)`-order),
-* `rfns(GcurvDeriv)(x) ≤ (Cper s)² · rfns(S)(x)` (genuinely `rfns(S)`-order),
+* `rfns(GcurvDeriv)(x) ≤ (Cper s)² · (rfns(∇S)(x) + rfns(S)(x))` (sum-order),
 * the **moving-frame remainder** — the *concrete* subtraction `Curv S − Gcurv − GcurvDeriv` —
-  satisfies `rfns(Curv S − Gcurv − GcurvDeriv)(x) ≤ (Cper s)² · rfns(∇²S)(x)`,
+  satisfies `rfns(Curv S − Gcurv − GcurvDeriv)(x) ≤ (Cper s)² · (rfns(∇²S)(x) + rfns(∇S)(x) + rfns(S)(x))`,
 
 at **every** point `x`, with `∇²S = covGrad g 0 (s + 1) (covGrad g 0 s S)`.
 
@@ -466,13 +485,18 @@ theorem exists_pointwiseTensorCurv_genuineCurvature_orderSeparatedFields
                 ((covGrad (I := I) (M := M) g 0 s S).toSection x)) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x (GcurvDeriv.toSection x) ≤
             Cper s ^ 2 *
-              riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) ∧
+              (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                  ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x))) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
               ((pointwiseTensorCurv (I := I) (M := M) g s S - Gcurv - GcurvDeriv).toSection x) ≤
             Cper s ^ 2 *
-              riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
-                ((covGrad (I := I) (M := M) g 0 (s + 1)
-                  (covGrad (I := I) (M := M) g 0 s S)).toSection x)) ∧
+              (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+                  ((covGrad (I := I) (M := M) g 0 (s + 1)
+                    (covGrad (I := I) (M := M) g 0 s S)).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                    ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x))) ∧
           tensorL2Inner (I := I) (M := M) g 0 (s + 1)
               (pointwiseTensorCurv (I := I) (M := M) g s S - Gcurv - GcurvDeriv).toFun
               (covGrad (I := I) (M := M) g 0 s S).toFun = 0 := by
@@ -533,12 +557,17 @@ theorem exists_pointwiseTensorCurv_orderSeparated_field
                 ((covGrad (I := I) (M := M) g 0 s S).toSection x)) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x (GcurvDeriv.toSection x) ≤
             Cper s ^ 2 *
-              riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) ∧
+              (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                  ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x))) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x (Grem.toSection x) ≤
             Cper s ^ 2 *
-              riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
-                ((covGrad (I := I) (M := M) g 0 (s + 1)
-                  (covGrad (I := I) (M := M) g 0 s S)).toSection x)) := by
+              (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+                  ((covGrad (I := I) (M := M) g 0 (s + 1)
+                    (covGrad (I := I) (M := M) g 0 s S)).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                    ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x))) := by
   classical
   obtain ⟨Cper, hCper_nn, hfields⟩ :=
     exists_pointwiseTensorCurv_genuineCurvature_orderSeparatedFields (I := I) (M := M) g
@@ -553,8 +582,8 @@ from the section-level field decomposition, per-valence).** For a closed smooth 
 covariant rank `s`, for every smooth compactly-supported `(0, s)`-tensor `S`, and at *every point*
 `x`, the fibre value of the order-`2` commutator defect `Curv S := pointwiseTensorCurv g s S` splits
 as `Curv S (x) = Gcurv + GcurvDeriv + Grem`, with the pure-Riemann part `Gcurv` fibre-bounded by
-`rfns(∇S)`, the differentiated-curvature part `GcurvDeriv` by `rfns(S)`, and the moving-frame
-remainder `Grem` by `rfns(∇²S)` (each by `(Cper s)²`, uniformly in `S`). This is **proved** from the
+`rfns(∇S)`, the differentiated-curvature part `GcurvDeriv` by `rfns(∇S) + rfns(S)`, and the moving-frame
+remainder `Grem` by `rfns(∇²S) + rfns(∇S) + rfns(S)` (each by `(Cper s)²`, uniformly in `S`). This is **proved** from the
 section-level field decomposition `exists_pointwiseTensorCurv_orderSeparated_field` (which supplies
 global fields `Gcurv, GcurvDeriv, Grem` with `Curv S = Gcurv + GcurvDeriv + Grem` and the three
 per-point fibre bounds) by reading the section identity off at `x` through
@@ -574,12 +603,17 @@ theorem exists_pointwiseTensorCurv_genuineRemainder_orderSeparated_bound
                 ((covGrad (I := I) (M := M) g 0 s S).toSection x) ∧
           riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x GcurvDeriv ≤
             Cper s ^ 2 *
-              riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) ∧
+              (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                  ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) ∧
           riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x Grem ≤
             Cper s ^ 2 *
-              riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
-                ((covGrad (I := I) (M := M) g 0 (s + 1)
-                  (covGrad (I := I) (M := M) g 0 s S)).toSection x) := by
+              (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+                  ((covGrad (I := I) (M := M) g 0 (s + 1)
+                    (covGrad (I := I) (M := M) g 0 s S)).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                    ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) := by
   classical
   obtain ⟨Cper, hCper_nn, hfield⟩ :=
     exists_pointwiseTensorCurv_orderSeparated_field (I := I) (M := M) g
@@ -596,10 +630,11 @@ order-separated input, per-valence).** For a closed smooth Riemannian manifold `
 every smooth compactly-supported `(0, s)`-tensor `S`, and at *every point* `x`, the fibre value of
 the order-`2` commutator defect `Curv S := pointwiseTensorCurv g s S` splits as `Curv S (x) =
 Ggen + Grem`, with the genuine curvature part `Ggen` fibre-bounded by `rfns(S) + rfns(∇S)` and the
-moving-frame remainder `Grem` by `rfns(∇²S)` (each by `(Cper s)²`, uniformly in `S`). This is
+moving-frame remainder `Grem` by `rfns(∇²S) + rfns(∇S) + rfns(S)` (each by `(Cper s)²`, uniformly in `S`). This is
 **proved** from the order-separated three-term split
 `exists_pointwiseTensorCurv_genuineRemainder_orderSeparated_bound` (`Curv S (x) = Gcurv + GcurvDeriv
-+ Grem`, with `Gcurv` bounded by `rfns(∇S)`, `GcurvDeriv` by `rfns(S)`, `Grem` by `rfns(∇²S)`) by
++ Grem`, with `Gcurv` bounded by `rfns(∇S)`, `GcurvDeriv` by `rfns(∇S) + rfns(S)`, `Grem` by
+`rfns(∇²S) + rfns(∇S) + rfns(S)`) by
 merging the two genuine pieces `Ggen := Gcurv + GcurvDeriv` through the two-term fibre subadditivity
 `riemannianFiberNormSq_add_le` (taking `Cper := √2 · Cper`). Its only `sorry`-dependence is through
 that posited curvature input; the aggregate fibre-norm bound
@@ -617,45 +652,38 @@ theorem exists_pointwiseTensorCurv_genuineRemainder_fiberNormSq_bound
                   ((covGrad (I := I) (M := M) g 0 s S).toSection x)) ∧
           riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x Grem ≤
             Cper s ^ 2 *
-              riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
-                ((covGrad (I := I) (M := M) g 0 (s + 1)
-                  (covGrad (I := I) (M := M) g 0 s S)).toSection x) := by
+              (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+                  ((covGrad (I := I) (M := M) g 0 (s + 1)
+                    (covGrad (I := I) (M := M) g 0 s S)).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                    ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) := by
   classical
   obtain ⟨Cper, hCper_nn, hsplit⟩ :=
     exists_pointwiseTensorCurv_genuineRemainder_orderSeparated_bound (I := I) (M := M) g
-  refine ⟨fun s => Real.sqrt 2 * Cper s, fun s => ?_, fun s S x => ?_⟩
-  · exact mul_nonneg (Real.sqrt_nonneg 2) (hCper_nn s)
-  · obtain ⟨Gcurv, GcurvDeriv, Grem, heq, hcurv, hcurvDeriv, hrem⟩ := hsplit s S x
-    refine ⟨Gcurv + GcurvDeriv, Grem, by rw [heq], ?_, ?_⟩
-    · have hSnn := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x (S.toSection x)
-      have hGSnn := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x
-        ((covGrad (I := I) (M := M) g 0 s S).toSection x)
-      have hadd := riemannianFiberNormSq_add_le (I := I) (M := M) g 0 (s + 1) x Gcurv GcurvDeriv
-      have hsq2 : (Real.sqrt 2 * Cper s) ^ 2 = 2 * Cper s ^ 2 := by
-        rw [mul_pow, Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 2)]
-      rw [hsq2]
-      calc riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x (Gcurv + GcurvDeriv)
-          ≤ 2 * riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x Gcurv +
-              2 * riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x GcurvDeriv := hadd
-        _ ≤ 2 * (Cper s ^ 2 *
-                riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
-                  ((covGrad (I := I) (M := M) g 0 s S).toSection x)) +
-              2 * (Cper s ^ 2 *
-                riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) := by
-            have e1 := mul_le_mul_of_nonneg_left hcurv (by norm_num : (0 : ℝ) ≤ 2)
-            have e2 := mul_le_mul_of_nonneg_left hcurvDeriv (by norm_num : (0 : ℝ) ≤ 2)
-            linarith
-        _ = 2 * Cper s ^ 2 *
-              (riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) +
-                riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
-                  ((covGrad (I := I) (M := M) g 0 s S).toSection x)) := by ring
-    · have hsq2 : (Real.sqrt 2 * Cper s) ^ 2 = 2 * Cper s ^ 2 := by
-        rw [mul_pow, Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 2)]
-      have hHnn := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1 + 1) x
-        ((covGrad (I := I) (M := M) g 0 (s + 1)
-          (covGrad (I := I) (M := M) g 0 s S)).toSection x)
-      rw [hsq2]
-      nlinarith [hrem, hHnn, sq_nonneg (Cper s)]
+  refine ⟨fun s => 2 * Cper s, fun s => mul_nonneg (by norm_num) (hCper_nn s), fun s S x => ?_⟩
+  obtain ⟨Gcurv, GcurvDeriv, Grem, heq, hcurv, hcurvDeriv, hrem⟩ := hsplit s S x
+  set fS : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) with hfS
+  set fgS : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+      ((covGrad (I := I) (M := M) g 0 s S).toSection x) with hfgS
+  set fg2S : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+      ((covGrad (I := I) (M := M) g 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S)).toSection x)
+    with hfg2S
+  have hfS_nn : 0 ≤ fS := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x _
+  have hfgS_nn : 0 ≤ fgS := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x _
+  have hfg2S_nn : 0 ≤ fg2S := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1 + 1) x _
+  have hCsq_nn : 0 ≤ Cper s ^ 2 := sq_nonneg _
+  refine ⟨Gcurv + GcurvDeriv, Grem, by rw [heq], ?_, ?_⟩
+  · -- `rfns(Gcurv + GcurvDeriv) ≤ 2 rfns(Gcurv) + 2 rfns(GcurvDeriv) ≤ 2 Cper² (2 fgS + fS)`,
+    -- dominated by `(2 Cper)² (fS + fgS) = 4 Cper² (fS + fgS)`.
+    have hadd := riemannianFiberNormSq_add_le (I := I) (M := M) g 0 (s + 1) x Gcurv GcurvDeriv
+    have hsq : (2 * Cper s) ^ 2 = 4 * Cper s ^ 2 := by ring
+    rw [hsq]
+    nlinarith [hadd, hcurv, hcurvDeriv, hfS_nn, hfgS_nn, hCsq_nn]
+  · -- `rfns(Grem) ≤ Cper² (fg2S + fgS + fS) ≤ 4 Cper² (fg2S + fgS + fS)`.
+    have hsq : (2 * Cper s) ^ 2 = 4 * Cper s ^ 2 := by ring
+    rw [hsq]
+    nlinarith [hrem, hfS_nn, hfgS_nn, hfg2S_nn, hCsq_nn]
 
 /-- **The pointwise fibre-norm bound for the order-`2` commutator defect (proved from the
 per-summand input, per-valence).** For a closed smooth Riemannian manifold `(M, g)` there is a
@@ -669,7 +697,7 @@ rfns(Curv S)(x) ≤ (Ccurv s)² · ( rfns(S)(x) + rfns(∇S)(x) + rfns(∇²S)(x
 ```
 This is **proved** from the genuine + remainder section-decomposition input
 `exists_pointwiseTensorCurv_genuineRemainder_fiberNormSq_bound` (`Curv S (x) = Ggen + Grem`, with
-`Ggen` fibre-bounded by `rfns(S) + rfns(∇S)` and `Grem` by `rfns(∇²S)`) through the two-term fibre
+`Ggen` fibre-bounded by `rfns(S) + rfns(∇S)` and `Grem` by `rfns(∇²S) + rfns(∇S) + rfns(S)`) through the two-term fibre
 subadditivity `riemannianFiberNormSq_add_le` (taking `Ccurv s := √2 · Cper s`). Its only
 `sorry`-dependence is through that posited curvature input; the *integrated* `∇²S`-removing form is
 `exists_pointwiseTensorCurv_bracketFree_field`. -/
@@ -688,41 +716,25 @@ theorem exists_pointwiseTensorCurv_pointwise_fiberNormSq_bound
   classical
   obtain ⟨Cper, hCper_nn, hsplit⟩ :=
     exists_pointwiseTensorCurv_genuineRemainder_fiberNormSq_bound (I := I) (M := M) g
-  refine ⟨fun s => Real.sqrt 2 * Cper s, fun s => ?_, fun s S x => ?_⟩
-  · exact mul_nonneg (Real.sqrt_nonneg 2) (hCper_nn s)
-  · obtain ⟨Ggen, Grem, heq, hgen, hrem⟩ := hsplit s S x
-    have hSnn := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x (S.toSection x)
-    have hGSnn := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x
-      ((covGrad (I := I) (M := M) g 0 s S).toSection x)
-    have hHSnn := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1 + 1) x
-      ((covGrad (I := I) (M := M) g 0 (s + 1)
-        (covGrad (I := I) (M := M) g 0 s S)).toSection x)
-    have hadd := riemannianFiberNormSq_add_le (I := I) (M := M) g 0 (s + 1) x Ggen Grem
-    rw [heq]
-    have hsq2 : (Real.sqrt 2 * Cper s) ^ 2 = 2 * Cper s ^ 2 := by
-      rw [mul_pow, Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 2)]
-    rw [hsq2]
-    calc riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x (Ggen + Grem)
-        ≤ 2 * riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x Ggen +
-            2 * riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x Grem := hadd
-      _ ≤ 2 * (Cper s ^ 2 *
-              (riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) +
-                riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
-                  ((covGrad (I := I) (M := M) g 0 s S).toSection x))) +
-            2 * (Cper s ^ 2 *
-              riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
-                ((covGrad (I := I) (M := M) g 0 (s + 1)
-                  (covGrad (I := I) (M := M) g 0 s S)).toSection x)) := by
-          have e1 := mul_le_mul_of_nonneg_left hgen (by norm_num : (0 : ℝ) ≤ 2)
-          have e2 := mul_le_mul_of_nonneg_left hrem (by norm_num : (0 : ℝ) ≤ 2)
-          linarith
-      _ = 2 * Cper s ^ 2 *
-            (riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) +
-              riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
-                ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
-              riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
-                ((covGrad (I := I) (M := M) g 0 (s + 1)
-                  (covGrad (I := I) (M := M) g 0 s S)).toSection x)) := by ring
+  refine ⟨fun s => 2 * Cper s, fun s => mul_nonneg (by norm_num) (hCper_nn s), fun s S x => ?_⟩
+  obtain ⟨Ggen, Grem, heq, hgen, hrem⟩ := hsplit s S x
+  set fS : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) with hfS
+  set fgS : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+      ((covGrad (I := I) (M := M) g 0 s S).toSection x) with hfgS
+  set fg2S : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+      ((covGrad (I := I) (M := M) g 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S)).toSection x)
+    with hfg2S
+  have hfS_nn : 0 ≤ fS := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x _
+  have hfgS_nn : 0 ≤ fgS := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x _
+  have hfg2S_nn : 0 ≤ fg2S := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1 + 1) x _
+  have hCsq_nn : 0 ≤ Cper s ^ 2 := sq_nonneg _
+  have hadd := riemannianFiberNormSq_add_le (I := I) (M := M) g 0 (s + 1) x Ggen Grem
+  rw [heq]
+  -- `rfns(Ggen + Grem) ≤ 2 rfns(Ggen) + 2 rfns(Grem) ≤ 2 Cper² (2 fS + 2 fgS + fg2S)`,
+  -- dominated by `(2 Cper)² (fS + fgS + fg2S) = 4 Cper² (fS + fgS + fg2S)`.
+  have hsq : (2 * Cper s) ^ 2 = 4 * Cper s ^ 2 := by ring
+  rw [hsq]
+  nlinarith [hadd, hgen, hrem, hfS_nn, hfgS_nn, hfg2S_nn, hCsq_nn]
 
 set_option linter.unusedSectionVars false in
 /-- **The single-step commutator-defect `L²` norm bound (proved from the pointwise curvature
@@ -799,8 +811,7 @@ theorem exists_pointwiseTensorCurv_genuineBracket_divergence_field
   classical
   obtain ⟨Cper, hCper_nn, hfields⟩ :=
     exists_pointwiseTensorCurv_genuineCurvature_orderSeparatedFields (I := I) (M := M) g
-  refine ⟨fun s => Real.sqrt 2 * Cper s, fun s => mul_nonneg (Real.sqrt_nonneg 2) (hCper_nn s),
-    fun s S => ?_⟩
+  refine ⟨fun s => 2 * Cper s, fun s => mul_nonneg (by norm_num) (hCper_nn s), fun s S => ?_⟩
   obtain ⟨Gcurv, GcurvDeriv, hcurv, hcurvDeriv, _hrem, hnull⟩ := hfields s S
   set G : SmoothCcTensor g 0 (s + 1) := Gcurv + GcurvDeriv with hG
   refine ⟨G, pointwiseTensorCurv (I := I) (M := M) g s S - G, by abel, ?_, fun x => ?_⟩
@@ -809,21 +820,22 @@ theorem exists_pointwiseTensorCurv_genuineBracket_divergence_field
         pointwiseTensorCurv (I := I) (M := M) g s S - Gcurv - GcurvDeriv := by
       rw [hG]; abel
     rw [hbrk_eq]; exact hnull
-  · -- `rfns(Gcurv + GcurvDeriv) ≤ 2·Cper²·(rfns ∇S + rfns S)`.
-    have hsq2 : (Real.sqrt 2 * Cper s) ^ 2 = 2 * Cper s ^ 2 := by
-      rw [mul_pow, Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 2)]
+  · -- `rfns(Gcurv + GcurvDeriv) ≤ 2 rfns(Gcurv) + 2 rfns(GcurvDeriv)`, with `Gcurv` bounded by
+    -- `Cper²·rfns(∇S)` and `GcurvDeriv` by `Cper²·(rfns(∇S) + rfns(S))`; dominated by
+    -- `(2 Cper)² (rfns(∇S) + rfns(S)) = 4 Cper² (rfns(∇S) + rfns(S))`.
+    set fS : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) with hfS
+    set fgS : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+        ((covGrad (I := I) (M := M) g 0 s S).toSection x) with hfgS
+    have hfS_nn : 0 ≤ fS := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x _
+    have hfgS_nn : 0 ≤ fgS := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x _
+    have hCsq_nn : 0 ≤ Cper s ^ 2 := sq_nonneg _
     have hadd := riemannianFiberNormSq_add_le (I := I) (M := M) g 0 (s + 1) x
       (Gcurv.toSection x) (GcurvDeriv.toSection x)
-    have hSnn := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x (S.toSection x)
-    have hGSnn := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x
-      ((covGrad (I := I) (M := M) g 0 s S).toSection x)
-    rw [hsq2, hG]
-    have e1 := mul_le_mul_of_nonneg_left (hcurv x) (by norm_num : (0 : ℝ) ≤ 2)
-    have e2 := mul_le_mul_of_nonneg_left (hcurvDeriv x) (by norm_num : (0 : ℝ) ≤ 2)
     have hGSec : (Gcurv + GcurvDeriv).toSection x = Gcurv.toSection x + GcurvDeriv.toSection x := by
       rw [SmoothCcTensor.toSection_add]; rfl
-    rw [hGSec]
-    nlinarith [hadd, e1, e2, hSnn, hGSnn, sq_nonneg (Cper s)]
+    have hsq : (2 * Cper s) ^ 2 = 4 * Cper s ^ 2 := by ring
+    rw [hsq, hG, hGSec]
+    nlinarith [hadd, hcurv x, hcurvDeriv x, hfS_nn, hfgS_nn, hCsq_nn]
 
 /-- **The integrated bracket-free curvature representation of the cross term (proved from the
 genuine/bracket section-level divergence decomposition).** For a closed smooth Riemannian manifold
