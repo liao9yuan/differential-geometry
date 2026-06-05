@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameCurvatureTraceSmooth
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformCurvatureSup
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameDiffCurvAnchor
 
 /-!
 # The smooth moving-centre differentiated-curvature section `(∇R) S`
@@ -188,7 +189,13 @@ theorem exists_movingCentreDiffCurvSection_fiberNormSq_bound
               (pointwiseTensorCurv (I := I) (M := M) g s S -
                 GcurvSection (I := I) (M := M) g s S - Gcd).toFun
               (covGrad (I := I) (M := M) g 0 s S).toFun = 0 := by
-  sorry
+  obtain ⟨K, hK_nn, h⟩ :=
+    exists_movingCentreDiffCurvSection_divergenceDatum (I := I) (M := M) g
+  refine ⟨K, hK_nn, fun s S => ?_⟩
+  obtain ⟨Gcd, X, hGcd, hGrem, hdiv⟩ := h s S
+  refine ⟨Gcd, hGcd, hGrem, ?_⟩
+  exact tensorL2Inner_movingFrameRemainder_eq_zero_of_pointwise_divergence (I := I) (M := M) g s S
+    (GcurvSection (I := I) (M := M) g s S) Gcd X hdiv
 
 end Connection
 end Integral
