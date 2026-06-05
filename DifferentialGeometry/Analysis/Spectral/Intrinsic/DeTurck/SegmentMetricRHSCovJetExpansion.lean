@@ -41,27 +41,38 @@ sup — exactly the **binomial-Leibniz `rfns` domination** the Moser-tame produc
 
 ## What is proved vs. posited
 
-* The **assembled** binomial-Leibniz `rfns` domination of the retagged DeTurck right-hand-side section
-  difference, `exists_segmentMetricRHSDiff_binomialLeibniz_rfns_le`, in the exact shape consumed by
-  `exists_moserTameProduct_iteratedCovGrad_l2Norm_le`, is *posited* here as the genuine atomic
-  covariant-Faà-di-Bruno content (the per-field Nemytskii fibre estimates of the geometric
-  nonlinearity `Ric + Lie`, which on a manifold of dimension `≥ 4` cannot be reduced to a pointwise
-  `C^{>2}`-jet of the metric).  Its trap-screened design: the metric jet enters only through its
-  `≤2`-jet sup (NO pointwise sup of any order-`>2` metric jet — the false-embedding lesson), the
-  per-order constant is a *family* over the unbounded gradient order, and the uniform constant is
-  scoped to the supercritical `H^{a+2}`-bounded `B`-family (`ha`, where unboundedness otherwise
-  lurks).  It carries **no** spectral-nonlinearity, perturbation-indexed-remainder, or Weyl
-  dependence.
+* The **per-order covariant Faà-di-Bruno Moser-tame `L²` domination** of the retagged DeTurck
+  right-hand-side section difference, `exists_segmentMetricRHSDiff_faaDiBruno_moserTame_l2Norm_le`, is
+  *posited* here as the genuine atomic covariant-Faà-di-Bruno content (the per-field Nemytskii `L²`
+  estimates of the geometric nonlinearity `Ric + Lie`, which on a manifold of dimension `≥ 4` cannot
+  be reduced to a pointwise `C^{>2}`-jet of the metric — the metric pointwise `C^{>2}`-jet does not
+  exist there).  It is stated **at the `L²`-consumable level**, NOT pointwise: the `j`-th covariant
+  gradient's metric `L²` norm is dominated, with a per-order family constant `Cf j`, by the sum of an
+  order-`a` chart-Sobolev `C⁰`-redistribution term `‖(T₁ − T₂).toHs a‖` (carrying, through the
+  supercritical embedding, the `L^∞` factor on the order-`0` difference that the unbounded top
+  coefficient jet multiplies in `L²`) and the order-`≤ j+2` covariant `L²`-jets of the perturbation
+  difference `T₁ − T₂` (carrying the high derivative on the difference factor).  Its trap-screened
+  design: NO pointwise sup of any order-`>2` metric jet appears (the false-embedding lesson — an
+  earlier *pointwise* `rfns` form of this domination, lacking the `C⁰`-redistribution slot, is FALSE
+  for `j ≥ 1` because the covariant-FdB `i = 0` term carries a pointwise-unbounded `∇^{j+2}g_t`
+  coefficient over the `H^{a+2}` family; the `L²`-level statement keeps that jet in `L²` against the
+  difference's `C⁰` factor, never claiming it pointwise); the per-order constant is a *family* over
+  the unbounded gradient order; and the uniform redistribution/jet budget is scoped to the
+  supercritical `H^{a+2}`-bounded `B`-family (`ha`).  It carries **no** spectral-nonlinearity,
+  perturbation-indexed-remainder, or Weyl dependence.
 * The reduction shape — that the section the bound is stated on is the `g₀`-retagged DeTurck
   right-hand side `deTurckRHSRetagG0` (definitionally the downstream `deTurckRHSRetag`), and that the
   perturbation factor is the `(0,2)`-difference `T₁ − T₂` — is *fixed by construction* so the
-  follow-up assembler plugs it into the Moser-tame product directly.
+  follow-up assembler (which uniformises the per-order constant and extends the jet-sum range) plugs
+  it into the order-`a` chart-RHS tower directly.
 
-The abstract engine the assembly rides on is the proven (sorry-free) abstract `rfns` covariant-Leibniz
-grid `DiffBilinOp.exists_rfns_iteratedCovGrad_singleSum_le`
-(`Analysis/Spectral/Tensor/CovGrad/MetricContractionLeibnizGrid.lean`) and the proven order-`≤2`
-segment-metric jet sup `exists_segmentMetric_realizeSymm_iteratedCovGradJet2_sup_le`; consumers
-transitively depend on `sorryAx` only through the single posited per-field Nemytskii domination. -/
+The `L²` engine the domination is the natural output of is the proven (sorry-free) intrinsic
+Moser-tame product `exists_moserTameProduct_iteratedCovGrad_l2Norm_le`
+(`Analysis/Sobolev/MoserTameProduct.lean`), fed by the proven order-`≤2` segment-metric jet sup
+`exists_segmentMetric_realizeSymm_iteratedCovGradJet2_sup_le` (the bounded `Λ`-arm coefficient sup)
+and the proven `C⁰` Sobolev embedding `tensorPouSobolevHilbert_embedding_Ck` (the `Λ₀`-arm `C⁰`
+control on the difference factor); consumers transitively depend on `sorryAx` only through the single
+posited per-order covariant-Faà-di-Bruno Moser-tame `L²` domination. -/
 
 noncomputable section
 
@@ -260,54 +271,78 @@ theorem exists_riemannianFiberNormSq_iteratedCovGrad_realizeSymm_le_jetSum
   rw [Finset.card_range] at hCS
   exact le_trans hBsq (by exact_mod_cast hCS)
 
-/-- **The covariant-Faà-di-Bruno binomial-Leibniz `rfns` fibre domination of the segment-metric
-DeTurck right-hand-side difference (the genuine atomic metric-jet Nemytskii primitive).**
+/-- **The per-order covariant-Faà-di-Bruno Moser-tame `L²` domination of the segment-metric
+DeTurck right-hand-side difference (the genuine atomic metric-jet Nemytskii primitive, stated at the
+`L²`-consumable level).**
 
 For an anchor `g₀`, a flow background `g_bg`, an order `a`, a supercriticality hypothesis
 `ha : 2 * a > Module.finrank ℝ E + 4`, and a uniform `H^{a+2}`-size bound `B ≥ 0`, there is an
 order-indexed nonnegative constant family `C : ℕ → ℝ` (absorbing the bounded `≤2`-jet metric
-coefficient sup `Λ`, the `4^j` covariant-Leibniz factor, and the finitely many contraction-shape
-constants) such that for any two `g₀`-fibre-small perturbations `T₁, T₂` whose `H^{a+2}` norms are
-`≤ B`, any two realized metrics `g₁, g₂` of `T₁, T₂` (tied by the fibrewise `inner`-identities), every
-covariant-gradient order `j ≤ 2 * a`, and every base point `x`, the intrinsic squared fibre norm of
-the `j`-th covariant gradient of the **re-tagged DeTurck right-hand-side section difference**
-`deTurckRHSRetagG0 g₀ g_bg g₁ − deTurckRHSRetagG0 g₀ g_bg g₂` is dominated by the **binomial covariant
-Leibniz grid** of a bounded `≤2`-jet metric coefficient `Λ` against the iterated covariant gradients
-of the perturbation difference `T₁ − T₂`:
+coefficient sup `Λ`, the segment-metric `L²`-jet mass, the `C⁰`-embedding constant, the binomial
+covariant-Leibniz factors, and the finitely many contraction-shape constants) such that for any two
+`g₀`-fibre-small perturbations `T₁, T₂` whose `H^{a+2}` norms are `≤ B`, any two realized metrics
+`g₁, g₂` of `T₁, T₂` (tied by the fibrewise `inner`-identities), and every covariant-gradient order
+`j ≤ 2 * a`, the metric `L²` (semi)norm of the `j`-th covariant gradient of the **re-tagged DeTurck
+right-hand-side section difference** `deTurckRHSRetagG0 g₀ g_bg g₁ − deTurckRHSRetagG0 g₀ g_bg g₂` is
+dominated by the **Moser-tame redistributed sum** — an order-`a` chart-Sobolev `C⁰`-redistribution
+term against the iterated covariant `L²`-gradients of the perturbation difference `T₁ − T₂`:
 ```
-rfns(∇^j (deTurckRHSRetagG0 g₁ − deTurckRHSRetagG0 g₂))(x)
-  ≤ C j · ∑_{i ≤ j + 2} rfns(∇^i (T₁ − T₂))(x)     (for j ≤ 2 * a).
+‖∇^j (deTurckRHSRetagG0 g₁ − deTurckRHSRetagG0 g₂)‖_{L²}
+  ≤ C j · ( ‖(T₁ − T₂).toHs a‖ + ∑_{i ≤ j + 2} ‖∇^i (T₁ − T₂)‖_{L²} )     (for j ≤ 2 * a).
 ```
 
-This is the exact pointwise input the intrinsic Moser-tame product
-`exists_moserTameProduct_iteratedCovGrad_l2Norm_le` lifts to the tame `L²` bound: the bounded
-coefficient factor (the segment-metric `≤2`-jet, uniformly sup-bounded over the supercritical
-`H^{a+2}` family by `exists_segmentMetric_realizeSymm_iteratedCovGradJet2_sup_le`, hence `≤ Λ²`) keeps
-the **single high derivative on the perturbation factor `∇^i(T₁ − T₂)`**, the metric difference's jets
-being the perturbation difference's jets because `(g₁ − g₂).inner = ccTensorBilinSymm g₀ (T₁ − T₂)`.
+This is the genuine **covariant Faà-di-Bruno expansion** of the *non-linear* summand `Ric + Lie` of
+the second-order Ricci–DeTurck right-hand side, lifted to `L²` by the intrinsic Moser tame product
+`exists_moserTameProduct_iteratedCovGrad_l2Norm_le`.  The chart right-hand side is a fibrewise-smooth
+function `F` of the metric `≤2`-jet `(g, ∇g, ∇²g)` and the fibre-inverse; the covariant FTC
+`F(g₁) − F(g₂) = ∫₀¹ DF(g_t)·(g₁ − g₂) dt` along the **segment metric** `g_t = g₂ + t·(g₁ − g₂)` and
+the covariant product/chain rule expand `∇^j` of the difference into a finite sum of contracted
+products of a segment-metric `≤(j+2)`-jet coefficient (a `DF(g_t)`-polynomial in the `≤(j+2)`-jets of
+`g_t` and the bounded fibre-inverses) with an iterated covariant gradient `∇^i(g₁ − g₂)`, `i ≤ j + 2`,
+of the metric difference.  In every Moser-tame term the **intrinsic order of the geometric
+nonlinearity `Ric + Lie` is capped at `2`** (it is `g⁻¹·∂²g` or `g⁻¹·g⁻¹·∂g·∂g`; the `g⁻¹` Neumann
+factors carry intrinsic order `0`), so the coefficient's genuinely-needed pointwise sup is only its
+`≤2`-jet, supplied by the proven order-`≤2` segment-metric jet sup
+`exists_segmentMetric_realizeSymm_iteratedCovGradJet2_sup_le` (the bounded `Λ`-arm); the **single high
+derivative** lands on the perturbation factor `∇^i(g₁ − g₂)` in `L²` (the `Λ`-arm of the Moser-tame
+product), while the **top redistributed coefficient derivative** is kept in `L²` against the
+difference factor's `C⁰`/`L^∞` factor (the `Λ₀`-arm), which the supercritical `C⁰` Sobolev embedding
+`tensorPouSobolevHilbert_embedding_Ck` folds into the order-`a` chart-Sobolev term `‖(T₁ − T₂).toHs
+a‖`.  Since the fibrewise `inner`-difference makes `(g₁ − g₂).inner = ccTensorBilinSymm g₀ (T₁ − T₂)`
+the realized bilinear form of `T₁ − T₂`, each `∇^i(g₁ − g₂)` is `L²`-controlled by the `≤ i`-order
+covariant gradients of `T₁ − T₂` (the realization gains no derivatives,
+`exists_riemannianFiberNormSq_iteratedCovGrad_realizeSymm_le_jetSum`).
 
-**Why this is TRUE.** The chart right-hand side is a fibrewise-smooth function `F` of the metric
-`≤2`-jet and the fibre-inverse; the covariant FTC `F(g₁) − F(g₂) = ∫₀¹ DF(g_t)·(g₁ − g₂) dt` and the
-covariant product/chain rule expand `∇^j` of the difference into a finite sum of contracted products
-of a segment-metric `≤(j+2)`-jet coefficient (whose genuinely-needed pointwise sup is only its
-`≤2`-jet, the geometric nonlinearity `Ric + Lie` being `g⁻¹·∂²g` or `g⁻¹·g⁻¹·∂g·∂g`) with
-`∇^i(g₁ − g₂)`, `i ≤ j + 2`.  Bounding every metric `≤2`-jet coefficient by `Λ` and every binomial
-by its square produces the displayed grid (the `C j` family absorbs `4^j` and the finitely many
-contraction-shape constants).  **Trap-screen.** The metric jet enters ONLY through its `≤2`-jet sup
-(no pointwise sup of any order-`>2` metric jet, unavailable for `finrank ≥ 4`); the constant `C` is a
-*family* over the unbounded gradient order `j`; and the uniform `Λ` is scoped to the supercritical
-`H^{a+2}`-bounded `B`-family (`ha`).
+**Why this is TRUE — and why it is `L²`, not pointwise.** An earlier *pointwise* `rfns` form of this
+domination (`rfns(∇^j(…)) ≤ Cf j · ∑_{i ≤ j+2} rfns(∇^i(T₁ − T₂))`, with **no** `C⁰`-redistribution
+slot) is FALSE for `j ≥ 1`: the covariant-FdB `i = 0` term `[∇^j DF(g_t)]·(g₁ − g₂)` carries a
+pointwise-`∇^{j+2}g_t` coefficient, which is *pointwise-unbounded* over the `H^{a+2}` ball (only the
+`≤2`-jet sup exists — `H^{a+2} ↪ C²` only) times an order-`0` difference factor; a `T₂` with an
+exploding pointwise `(j+2)`-jet at a point (`H^{a+2}`-legal) and `T₁ := T₂ + S` (fixing the small RHS
+difference) drives the pointwise left side to `∞` while the pointwise right side stays bounded.  The
+present statement is at the **`L²` level with the `C⁰`-redistribution term**: that very `i = 0` term
+is `‖[∇^{j+2}g_t]·(g₁ − g₂)‖_{L²} ≤ ‖∇^{j+2}g_t‖_{L²}·‖g₁ − g₂‖_{C⁰}` — the unbounded top jet is kept
+in `L²` (its `L²` mass, for `j + 2 ≤ 2a + 2`, is `B`-controlled through the realize/segment
+`L²`-jets) and the difference's `C⁰`/`L^∞` factor is the redistribution term `‖(T₁ − T₂).toHs a‖`, so
+no jet of order `> 2` is ever taken pointwise.  This is exactly the Moser-tame redistribution that
+makes the bound hold on a manifold of dimension `≥ 4`.
+
+**Trap-screen.** The metric jet enters pointwise ONLY through its `≤2`-jet sup (no pointwise sup of
+any order-`>2` metric jet, unavailable for `finrank ≥ 4` — the false-embedding lesson, encoded by the
+`L²`/`C⁰`-redistribution split above); the constant `C` is a *family* over the unbounded gradient
+order `j`; and the uniform `Λ`/`Λ₀`/`L²`-jet budget is scoped to the supercritical `H^{a+2}`-bounded
+`B`-family (`ha`).
 
 **Non-vacuity.** A degenerate `C ≡ 0` is rejected: at `j = 0`, for perturbations with
-`deTurckRHSRetagG0 g₁ ≠ deTurckRHSRetagG0 g₂` at some `x` (e.g. `T₁ ≠ T₂` producing distinct
-curvatures), the left side is `> 0` while `0 · ∑ … = 0`, contradicting the bound; so `C 0 > 0` and the
-domination genuinely uses the perturbation difference.
+`deTurckRHSRetagG0 g₁ ≠ deTurckRHSRetagG0 g₂` on a positive-measure set (e.g. `T₁ ≠ T₂` producing
+distinct curvatures), the left side is `> 0` while `0 · (… ) = 0`, contradicting the bound; so
+`C 0 > 0` and the domination genuinely uses the perturbation difference.
 
-Its body is `sorry`: the genuine atomic covariant-Faà-di-Bruno (Nemytskii) fibre expansion of the
+Its body is `sorry`: the genuine atomic covariant-Faà-di-Bruno (Nemytskii) `L²` expansion of the
 geometric nonlinearity `Ric + Lie` along the segment metric — the deep metric-jet analytic content,
 with NO pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, NO perturbation-indexed-remainder, and
 NO Weyl dependence.  Consumers transitively depend on `sorryAx` only through this single primitive. -/
-theorem exists_segmentMetricRHSDiff_binomialLeibniz_rfns_le
+theorem exists_segmentMetricRHSDiff_faaDiBruno_moserTame_l2Norm_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) :
     ∃ C : ℕ → ℝ, (∀ j, 0 ≤ C j) ∧
@@ -319,14 +354,13 @@ theorem exists_segmentMetricRHSDiff_binomialLeibniz_rfns_le
           g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
-        ∀ j : ℕ, j ≤ 2 * a → ∀ x : M,
-          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
-              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
-                  (deTurckRHSRetagG0 (I := I) g₀ g_bg g₁
-                    - deTurckRHSRetagG0 (I := I) g₀ g_bg g₂)).toSection x) ≤
-            C j * ∑ i ∈ Finset.range (j + 2 + 1),
-              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)).toSection x) :=
+        ∀ j : ℕ, j ≤ 2 * a →
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+              (deTurckRHSRetagG0 (I := I) g₀ g_bg g₁
+                - deTurckRHSRetagG0 (I := I) g₀ g_bg g₂)‖ ≤
+            C j * (‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
+                + ∑ i ∈ Finset.range (j + 2 + 1),
+                    ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖) :=
   sorry
 
 end DeTurck

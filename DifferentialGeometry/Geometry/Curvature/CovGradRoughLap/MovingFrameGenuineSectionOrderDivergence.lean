@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameCurvatureTraceSmooth
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemainderDivergenceForm
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameGenuineFieldFiberEnergy
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameDifferentiatedCurvatureSection
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformProportionalCurvatureSup
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
 
@@ -273,8 +274,130 @@ private theorem GcurvSection_fiberNormSq_le_covGrad
           riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
             ((covGrad (I := I) (M := M) g 0 s S).toSection x) := hbound s S x e hn horth
 
-/-- **Posited deepest moving-frame curvature primitive: the intrinsic genuine moving-frame tri-split
-with the integrated divergence nullity.** For a closed smooth Riemannian manifold `(M, g)` there is a
+/-- **The moving-frame differentiated-curvature fibre match** of a candidate `(0, s + 1)`-tensor
+`Gcd` against `S`: at every base point `x` there is a `g_x`-orthonormal frame `e` (the moving frame
+`smoothOrthoFrame g x` at its centre) in which the unit-section fibre value of `Gcd` reconstructs as
+the differentiated-curvature fibre field `genuineThirdCurvFieldFibCovDeriv g s S x e`. This is the
+property that pins `Gcd` to the genuine `(∇R) S` field; it is exactly what
+`exists_movingCentreDiffCurvSection_fiberNormSq_bound` supplies, and what the remainder bound and the
+integrated nullity below consume. -/
+def IsMovingCentreDiffCurvFibreMatch
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    (Gcd : SmoothCcTensor g 0 (s + 1)) : Prop :=
+  ∀ x : M, ∃ (n : ℕ) (e : Fin n → TangentSpace I x),
+    n = Module.finrank ℝ (TangentSpace I x) ∧
+    (∀ i j : Fin n, g.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0) ∧
+    ∀ (w : TangentSpace I x) (m : Fin s → TangentSpace I x),
+      Tensor0SSpace.toModel
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+            Gcd.toSection x) (unitZeroSec (I := I) (M := M) x)) (Fin.cons w m) =
+        genuineThirdCurvFieldFibCovDeriv (I := I) (M := M) g s S x e w m
+
+/-- **Posited moving-frame bracket-remainder fibre bound (`rfns(∇²S)`-order, the `∇³S`-cancellation
+atom).** For a closed smooth Riemannian manifold `(M, g)` there is a *valence-dependent* nonnegative
+constant `K : ℕ → ℝ` such that, at every covariant rank `s`, smooth compactly-supported `(0, s)`-tensor
+`S`, and differentiated-curvature field `Gcd : SmoothCcTensor g 0 (s + 1)` satisfying the moving-frame
+differentiated-curvature fibre match `IsMovingCentreDiffCurvFibreMatch g s S Gcd`, the moving-frame
+remainder `Grem := Curv S − GcurvSection g s S − Gcd` (`Curv S := pointwiseTensorCurv g s S`) is
+`rfns(∇²S)`-order:
+
+```
+rfns(Curv S − GcurvSection g s S − Gcd)(x) ≤ (K s)² · rfns(∇²S)(x),
+  ∇²S := covGrad g 0 (s + 1) (covGrad g 0 s S).
+```
+
+**Why this is TRUE.** By the committed sorry-free field split
+`pointwiseTensorCurv_toSection_eq_genuine_add_bracket_field`, in the moving-frame witness frame the
+unit-section fibre value of `Curv S` is `genuineThirdCurvFieldFib + bracketThirdCurvFieldFib`, and
+`genuineThirdCurvFieldFib = genuineThirdCurvFieldFibPureR + genuineThirdCurvFieldFibCovDeriv`
+(`genuineThirdCurvFieldFib_eq_pureR_add_covDeriv`). The pure-Riemann part is the unit fibre value of
+`GcurvSection` (`GcurvSection_toSection_eq_genuineThirdCurvFieldFibPureR`), and the
+differentiated-curvature part is the unit fibre value of `Gcd` (the fibre-match hypothesis), so the
+remainder's unit fibre value is exactly `bracketThirdCurvFieldFib` — the bracket / frame-trace
+discrepancy / moving-frame residual. The bracket carries the frame-bracket jet `[Bᵢ, W]`, a
+contraction of the smooth frame data against the **second** covariant derivative `∇²S`, after the
+top-order `∇³S` terms cancel by the iterated Ricci identity
+(`secondCovDeriv_covGrad_antisymm_eq_riemannOp_gen`); its fibre norm is therefore `rfns(∇²S)`-order
+with all curvature coefficients sup-bounded over the compact `M`
+(`riemannianFiberNormSq_tensor3rdCurvGenuine_le`, the uniform curvature sups). This `∇³S`-cancellation
+is *false term-by-term* through `smoothExtensionTangent`; only the tensorial frame-summed remainder is
+`∇²S`-order — the irreducible moving-frame content.
+
+**Non-vacuity.** Drop the fibre-match hypothesis (e.g. take `Gcd = 0`): the conclusion would read
+`rfns(Curv S − GcurvSection)(x) ≤ (K s)² · rfns(∇²S)(x)`, *false* on a non-flat manifold because
+`Curv S − GcurvSection` retains the `rfns(S)`-order differentiated-curvature contraction `(∇R) S`
+(genuinely non-zero when `∇R ≠ 0`). So the fibre match genuinely selects the `Gcd` that absorbs the
+`(∇R) S` content, leaving the `∇²S`-order bracket — the bound is a genuine mathematical statement,
+not hypothesis-packaging (the conclusion is a fibre bound, not the fibre-match hypothesis). Posited as
+the precise bracket-remainder order atom; consumers transitively depend on `sorryAx`. -/
+theorem exists_movingFrameBracketRemainder_fiberNormSq_bound
+    (g : SmoothRiemannianMetric I M) :
+    ∃ K : ℕ → ℝ, (∀ s, 0 ≤ K s) ∧
+      ∀ (s : ℕ) (S : SmoothCcTensor g 0 s) (Gcd : SmoothCcTensor g 0 (s + 1)),
+        IsMovingCentreDiffCurvFibreMatch (I := I) (M := M) g s S Gcd →
+        ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+            ((pointwiseTensorCurv (I := I) (M := M) g s S -
+              GcurvSection (I := I) (M := M) g s S - Gcd).toSection x) ≤
+          K s ^ 2 *
+            riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+              ((covGrad (I := I) (M := M) g 0 (s + 1)
+                (covGrad (I := I) (M := M) g 0 s S)).toSection x) := by
+  sorry
+
+/-- **Posited integrated moving-frame bracket-remainder nullity (the frame-summed integration-by-parts
+atom).** For a closed smooth Riemannian manifold `(M, g)`, at every covariant rank `s`, smooth
+compactly-supported `(0, s)`-tensor `S`, and differentiated-curvature field
+`Gcd : SmoothCcTensor g 0 (s + 1)` satisfying the moving-frame differentiated-curvature fibre match
+`IsMovingCentreDiffCurvFibreMatch g s S Gcd`, the global metric `L²` pairing of the moving-frame
+remainder `Curv S − GcurvSection g s S − Gcd` (`Curv S := pointwiseTensorCurv g s S`) against
+`∇S = covGrad g 0 s S` vanishes:
+
+```
+⟨Curv S − GcurvSection g s S − Gcd, ∇S⟩_{L²} = 0.
+```
+
+**Why this is TRUE — the frame-summed covariant integration by parts.** Under the fibre match, the
+remainder's unit fibre value is the bracket field `bracketThirdCurvFieldFib` (the
+`tensor3rdCurvBracket` together with the frame-trace discrepancy `covGradRoughLapTraceDiscrepancy_gen`
+and the moving-frame residual `covGradRoughLapMovingFrameResidual_gen`) — see the
+`exists_movingFrameBracketRemainder_fiberNormSq_bound` justification. Paired against `∇S` and summed
+over the `g_x`-orthonormal frame `Bᵢ := smoothOrthoFrame g x i`, this remainder telescopes into a
+total covariant divergence `divᵍ X` of an honest smooth `∇S`-order tangent field `X`: the
+per-direction covariant integration by parts
+`integral_tensorInner_tangentAction_add_smul_divergence_eq_zero` (equivalently the rank-generic
+covariant Green identity `tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_gen`), summed over the
+orthonormal frame, exhibits `⟨Curv S − GcurvSection − Gcd, ∇S⟩(x)` as `divᵍ X(x)` almost everywhere,
+and the closed-manifold divergence theorem
+(`tensorL2Inner_eq_zero_of_pointwise_inner_eq_divergence`, via
+`integral_divergence_eq_zero_of_hasCompactSupport`) integrates it to zero. The cancellation is *false
+term-by-term* through `smoothExtensionTangent` — the bracket's first summand
+`∑ᵢ ∇_{[Bᵢ, W]}(∇_{Bᵢ}S)` is not individually a covariant divergence — so only the *frame-summed*
+moving-frame remainder, paired against `∇S`, is a total covariant divergence. The pointwise pairing is
+*not* zero: by the pointwise Bochner divergence identity `divergence_dirichletVFGen_eq` it carries the
+genuine non-divergence content `‖∇²S‖² − ⟨Δ_∇²(∇S), S⟩`, so only the *integral* vanishes — the
+integrated nullity is the honest primitive, never a pointwise divergence of the pinned remainder.
+
+**Non-vacuity.** Drop the fibre-match hypothesis (e.g. `Gcd = 0`): the conclusion would read
+`⟨Curv S − GcurvSection, ∇S⟩_{L²} = 0`. But by `weitzenbock_integrated_covGrad_l2_normSq` the genuine
+pairing `⟨Curv S, ∇S⟩_{L²} = ‖Δ_∇S‖²_{L²} − ‖∇²S‖²_{L²}`, and `⟨GcurvSection, ∇S⟩_{L²}` is the
+pure-Riemann pairing alone; their difference is *not* zero on a non-flat manifold (the
+differentiated-curvature pairing `⟨(∇R) S, ∇S⟩_{L²}` is missing). So the fibre match genuinely selects
+the `Gcd` absorbing the `(∇R) S` pairing, leaving the bracket remainder which alone integrates to zero
+— the nullity is a genuine mathematical statement, not hypothesis-packaging (the conclusion is an
+`L²`-pairing equality, not the fibre-match hypothesis). Posited as the precise frame-summed
+integration-by-parts atom; consumers transitively depend on `sorryAx`. -/
+theorem tensorL2Inner_movingFrameBracketRemainder_covGrad_eq_zero
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    (Gcd : SmoothCcTensor g 0 (s + 1))
+    (_hmatch : IsMovingCentreDiffCurvFibreMatch (I := I) (M := M) g s S Gcd) :
+    tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (pointwiseTensorCurv (I := I) (M := M) g s S -
+          GcurvSection (I := I) (M := M) g s S - Gcd).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun = 0 := by
+  sorry
+
+/-- **Deepest moving-frame curvature primitive: the intrinsic genuine moving-frame tri-split with the
+integrated divergence nullity.** For a closed smooth Riemannian manifold `(M, g)` there is a
 *valence-dependent* nonnegative constant `K : ℕ → ℝ` such that, at every covariant rank `s` and for
 every smooth compactly-supported `(0, s)`-tensor `S`, the order-`2` commutator defect
 `Curv S := pointwiseTensorCurv g s S` splits, over the concrete pure-Riemann genuine section
@@ -297,35 +420,33 @@ whole tower (the root that `exists_GcurvSection_orderSeparatedBounds_movingFrame
 `exists_pointwiseTensorCurv_movingFrameField_orderSeparated_bracketFreePairing`
 (`MovingFrameGenuineFieldPairing`), `pointwiseTensorCurv_movingFrameWeitzenbock_namedRemainder`
 (`MovingFrameWeitzenbockRemainder`), and through them the entire genuine-field tower of
-`PointwiseTensorCurvL2Bound.lean` are assembled over). It is posited here in its **sound integrated
+`PointwiseTensorCurvL2Bound.lean` are assembled over). The integrated nullity is the **sound integrated
 form**: the moving-frame remainder pairs to zero against `∇S` only *under the integral* — its pointwise
-pairing carries the genuine non-divergence content `‖∇²S‖² − ⟨Δ_∇²(∇S), S⟩` (the pointwise Bochner
-divergence identity `divergence_dirichletVFGen_eq`, `TensorConnLapGreenDivergenceIdentityAnySection`,
-exhibits the bracketed term as pointwise-nonzero, vanishing only in the integral by the closed-manifold
-divergence theorem). The differentiated-curvature field `Gcd` and the remainder `Grem` are carried
-existentially because the differentiated-curvature trace `∑ᵢ ∇_{Bᵢ}(R(Bᵢ, ·) S)` is non-tensorial in
-the direction (its Leibniz expansion sees the first jet of the direction's smooth extension), so it has
-no sound per-direction `smoothExtensionTangent`-curried section; only the intrinsic existential tri-split
-— with the `∇³S` top-order cancellation feeding the `∇²S`-order remainder and the bracket frame-sum
-telescoping into a total covariant divergence integrating to zero against `∇S` — is order-controlled.
-The construction bridges the fixed-frame field-level genuine/bracket split
-`pointwiseTensorCurv_toSection_eq_genuine_add_bracket_field`
-(`Tensor3rdCurv_eq_genuine_add_bracket`,
-`frame_trace_thirdCovDeriv_defect_eq_genuine_add_bracket`) to the order-separated fibre bounds
-(`riemannianFiberNormSq_tensor3rdCurvGenuine_le` fed by the uniform proportional
-curvature / differentiated-curvature sups) and the covariant Green / integration-by-parts nullity
-(`tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_gen`,
-`integral_tensorInner_tangentAction_add_smul_divergence_eq_zero` summed over the orthonormal frame).
-It is the precise genuine curvature node, discharged by the orchestrator.
+pairing carries the genuine non-divergence content `‖∇²S‖² − ⟨Δ_∇²(∇S), S⟩` (`divergence_dirichletVFGen_eq`),
+vanishing only in the integral by the closed-manifold divergence theorem.
+
+**Proof — the order-separated genuine-field assembly.** The remainder is the literal subtraction
+`Grem := Curv S − GcurvSection g s S − Gcd`, so the section split `Curv S = GcurvSection g s S + Gcd +
+Grem` is `abel`. The differentiated-curvature field `Gcd` (the `(∇R) S` contraction) with its
+`rfns(S)`-order fibre bound and the moving-frame differentiated-curvature fibre match is supplied by the
+section primitive `exists_movingCentreDiffCurvSection_fiberNormSq_bound`
+(`MovingFrameDifferentiatedCurvatureSection`); under that fibre match the remainder's unit fibre value is
+the bracket field `bracketThirdCurvFieldFib` (the committed sorry-free field split
+`pointwiseTensorCurv_toSection_eq_genuine_add_bracket_field` with
+`genuineThirdCurvFieldFib_eq_pureR_add_covDeriv` and the pure-Riemann match
+`GcurvSection_toSection_eq_genuineThirdCurvFieldFibPureR`), so the `rfns(∇²S)`-order remainder bound is
+the bracket-remainder order atom `exists_movingFrameBracketRemainder_fiberNormSq_bound` (the third-order
+Weitzenböck `∇³S`-cancellation) and the integrated nullity is the frame-summed integration-by-parts atom
+`tensorL2Inner_movingFrameBracketRemainder_covGrad_eq_zero`. The two valence constants are combined into
+a single `K` by `max`, the proportional bounds preserved by monotonicity.
 
 **Non-vacuity.** The zero witness `Gcd = Grem = 0` is rejected: it forces `Curv S = GcurvSection g s S`,
-so the integrated nullity `⟨Grem, ∇S⟩_{L²} = 0` would read `⟨Curv S − GcurvSection, ∇S⟩_{L²} = 0`, i.e.
-`⟨Curv S, ∇S⟩_{L²} = ⟨GcurvSection, ∇S⟩_{L²}`, whereas the genuine Weitzenböck value
-`⟨Curv S, ∇S⟩_{L²} = ‖Δ_∇S‖²_{L²} − ‖∇²S‖²_{L²}` (`weitzenbock_integrated_covGrad_l2_normSq`) is not
-carried by the pure-Riemann field alone on a non-flat manifold; and the `Grem` fibre bound
-`rfns(Curv S − GcurvSection − Gcd) ≤ (K s)² · rfns(∇²S)` is *false* with `Gcd = 0`, since the
-differentiated-curvature contraction `(∇R) S` is genuinely `rfns(S)`-order. So the existential fields
-must carry the actual third-order Weitzenböck content. -/
+so the integrated nullity `⟨Grem, ∇S⟩_{L²} = 0` would read `⟨Curv S, ∇S⟩_{L²} = ⟨GcurvSection, ∇S⟩_{L²}`,
+whereas the genuine Weitzenböck value `⟨Curv S, ∇S⟩_{L²} = ‖Δ_∇S‖²_{L²} − ‖∇²S‖²_{L²}`
+(`weitzenbock_integrated_covGrad_l2_normSq`) is not carried by the pure-Riemann field alone on a
+non-flat manifold; and the `Grem` fibre bound `rfns(Curv S − GcurvSection − Gcd) ≤ (K s)² · rfns(∇²S)`
+is *false* with `Gcd = 0`, since the differentiated-curvature contraction `(∇R) S` is genuinely
+`rfns(S)`-order. So the existential fields must carry the actual third-order Weitzenböck content. -/
 theorem exists_pointwiseTensorCurv_genuineTriSplit_divergence
     (g : SmoothRiemannianMetric I M) :
     ∃ K : ℕ → ℝ, (∀ s, 0 ≤ K s) ∧
@@ -343,7 +464,35 @@ theorem exists_pointwiseTensorCurv_genuineTriSplit_divergence
               riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
                 ((covGrad (I := I) (M := M) g 0 (s + 1)
                   (covGrad (I := I) (M := M) g 0 s S)).toSection x)) := by
-  sorry
+  classical
+  -- The differentiated-curvature genuine section `Gcd` (the `(∇R) S` field) with its `rfns(S)`-order
+  -- bound and the moving-frame fibre match, together with the bracket-remainder order atom and the
+  -- frame-summed integration-by-parts nullity atom. The remainder field is the literal subtraction
+  -- `Grem := Curv S − GcurvSection g s S − Gcd`, so the section split is `abel`.
+  obtain ⟨K₁, hK₁_nn, hdiff⟩ :=
+    exists_movingCentreDiffCurvSection_fiberNormSq_bound (I := I) (M := M) g
+  obtain ⟨K₂, hK₂_nn, hrem⟩ := exists_movingFrameBracketRemainder_fiberNormSq_bound (I := I) (M := M) g
+  refine ⟨fun s => max (K₁ s) (K₂ s), fun s => le_trans (hK₁_nn s) (le_max_left _ _),
+    fun s S => ?_⟩
+  obtain ⟨Gcd, hGcd_bound, hGcd_match_pt⟩ := hdiff s S
+  have hmatch : IsMovingCentreDiffCurvFibreMatch (I := I) (M := M) g s S Gcd := hGcd_match_pt
+  refine ⟨Gcd, pointwiseTensorCurv (I := I) (M := M) g s S -
+    GcurvSection (I := I) (M := M) g s S - Gcd, by abel, ?_, fun x => ?_, fun x => ?_⟩
+  · -- Integrated nullity: the moving-frame remainder pairs to zero against `∇S` by the frame-summed
+    -- integration-by-parts atom, on the genuine configuration pinned by the fibre match.
+    exact tensorL2Inner_movingFrameBracketRemainder_covGrad_eq_zero
+      (I := I) (M := M) g s S Gcd hmatch
+  · -- `Gcd` fibre bound (`rfns(S)`-order), promoted to the common constant `max (K₁ s) (K₂ s)`.
+    refine le_trans (hGcd_bound x)
+      (mul_le_mul_of_nonneg_right ?_
+        (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x _))
+    exact pow_le_pow_left₀ (hK₁_nn s) (le_max_left _ _) 2
+  · -- `Grem` fibre bound (`rfns(∇²S)`-order) from the bracket-remainder order atom, promoted to the
+    -- common constant.
+    refine le_trans (hrem s S Gcd hmatch x)
+      (mul_le_mul_of_nonneg_right ?_
+        (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1 + 1) x _))
+    exact pow_le_pow_left₀ (hK₂_nn s) (le_max_right _ _) 2
 
 /-- **Genuine moving-frame producer: order bounds and the divergence datum for the genuine curvature
 fields.** For a closed smooth Riemannian manifold `(M, g)` there is a *valence-dependent* nonnegative

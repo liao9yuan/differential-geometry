@@ -535,8 +535,10 @@ private lemma tensor0S_curry_genuineCurvPureRFib_unit
 Fixing the frame index `i` and a general smooth tangent frame `B`, the linear map in the curvature
 direction `v ↦ riemannOp (tensorCov g 0 s) x (B i x) v (∇_{B i} S(x))`, the slot-`i` summand of the
 fixed-frame pure-Riemann genuine trace. This is the general-`B` version of
-`genuinePureRDirLMSummand` (which is the special case `B = smoothOrthoFrame g x`). -/
-private def pureRDirLMSummandFixedFrame
+`genuinePureRDirLMSummand` (which is the special case `B = smoothOrthoFrame g x`). (De-privatized so
+the frozen-frame curvature endomorphism tower `FrozenFramePureRCurvatureTower` can identify its
+order-`0` operator on `∇S` with the frozen-frame section.) -/
+def pureRDirLMSummandFixedFrame
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
     (i : Fin (Module.finrank ℝ E)) :
@@ -550,7 +552,9 @@ private def pureRDirLMSummandFixedFrame
     rw [(riemannOp (tensorCov (I := I) g 0 s) x (B i x)).map_smul c v]
     rfl
 
-private noncomputable def pureRDirCLMSummandFixedFrame
+/-- The continuous-linear-map form of `pureRDirLMSummandFixedFrame` (de-privatized for the
+frozen-frame curvature endomorphism tower). -/
+noncomputable def pureRDirCLMSummandFixedFrame
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
     (i : Fin (Module.finrank ℝ E)) :
@@ -563,7 +567,7 @@ private noncomputable def pureRDirCLMSummandFixedFrame
 sum over `i` of `pureRDirCLMSummandFixedFrame`, i.e. the continuous linear map
 `v ↦ ∑ᵢ riemannOp (tensorCov g 0 s) x (B i x) v (∇_{B i} S(x))`, the curvature-direction-linear form
 of the fixed-frame pure-Riemann genuine trace `∑ᵢ R(B i, ·)(∇_{B i} S)`. -/
-private noncomputable def pureRDirCLMFixedFrame
+noncomputable def pureRDirCLMFixedFrame
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M) :
     TangentSpace I x →L[ℝ] TensorRSSpace 0 s I x :=
@@ -578,7 +582,7 @@ pureRDirCLMFixedFrame g s S B x (W x)
 ```
 Each summand is identified by `riemannOp_apply_smooth` against the smooth fields `B i`, `W`, and the
 smooth covariant-derivative section `covApply (tensorCov g 0 s) (B i) (S.toSection)`. -/
-private lemma pureRDirCLMFixedFrame_apply_smooth
+lemma pureRDirCLMFixedFrame_apply_smooth
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {W : Π b : M, TangentSpace I b}
     {B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b}
@@ -646,7 +650,7 @@ private theorem pureRDirCLMFixedFrame_homSection_contMDiff
 /-- **The fixed-frame pure-Riemann moving-centre genuine curvature `(0, s + 1)`-tensor fibre value.**
 The slot-`0` uncurry, through `covGradBundleEquiv 0 s x`, of the fixed-frame pure-Riemann genuine
 direction CLM `pureRDirCLMFixedFrame g s S B x`. The general-`B` version of `genuineCurvPureRFib`. -/
-private noncomputable def genuineCurvPureRFibFixedFrame
+noncomputable def genuineCurvPureRFibFixedFrame
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M) :
     TensorRSSpace 0 (s + 1) I x :=

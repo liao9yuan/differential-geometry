@@ -6,6 +6,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2So
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.FaithfulH1Embedding
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.GeneralOrderPouSpectralBound
 import DifferentialGeometry.Analysis.Sobolev.Embedding.RawConnLapToHsOrderDropping
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricRHSCovJetExpansion
 
 /-! # The higher-order chart-RHS Sobolev–Lipschitz Nemytskii bound
 
@@ -574,13 +575,23 @@ realized bilinear form of `T₁ − T₂`, each `∇^i(g₁ − g₂)` is `L²`-
 no derivatives) by the `≤ i`-order covariant gradients of `T₁ − T₂`; folding the (finitely many)
 Moser-tame term constants into `C` yields the stated bound.
 
-Its body is `sorry`: it is the genuine atomic `L²`-covariant-Faà-di-Bruno (Moser-tame) expansion
-of the geometric nonlinearity `Ric + Lie` along the segment metric — the deep analytic content of
-the order-`a` chart-RHS tower (the linear `Δ_∇` summand is handled separately, the
-metric-realization map already factored out by the consumer).  It carries **no** pointwise-sup claim
-on any jet of order `> 2`, and **no** spectral-nonlinearity, perturbation-indexed-remainder, or Weyl
-dependence.  Consumers transitively depend on `sorryAx` only through this single atomic `L²`
-covariant-Moser-tame segment-metric primitive. -/
+It is **proven by composition** (TRANSIT glue) of the genuine atomic covariant-Faà-di-Bruno
+Moser-tame `L²` domination `exists_segmentMetricRHSDiff_faaDiBruno_moserTame_l2Norm_le`
+(`SegmentMetricRHSCovJetExpansion.lean`, the deep metric-jet analytic content, stated already at the
+`L²`-consumable level: the `j`-th covariant gradient's metric `L²` norm is dominated, with a per-order
+family constant `Cf j`, by the order-`a` chart-Sobolev `C⁰`-redistribution term `‖(T₁ − T₂).toHs a‖`
+plus the order-`≤ j+2` covariant-`L²`-gradient sum of the perturbation difference).  The glue
+uniformises the per-order constant and extends the jet-sum range: the child's `range (j+2+1)` jet-sum
+is extended to the parent's full `range (2a+3)` sum (since `j ≤ 2a`, the extra summands being
+nonnegative, after the `‖∇^i(T₁ − T₂)‖ = tensorL2Norm … .toFun` bridge), and the per-order `Cf j` is
+dominated by the single uniform constant `∑_{j' ≤ 2a} Cf j'` (the retagged section `deTurckRHSRetag`
+being definitionally the child's `deTurckRHSRetagG0`, bridged by `rfl`).  The genuine analytic content
+— the metric-jet covariant Faà-di-Bruno expansion of the geometric nonlinearity `Ric + Lie` along the
+segment metric, lifted to `L²` by the intrinsic Moser tame product (the top metric jet kept in `L²`,
+the perturbation's `C⁰` factor in the redistribution term), with **no** pointwise-sup claim on any jet
+of order `> 2`, and **no** spectral-nonlinearity, perturbation-indexed-remainder, or Weyl dependence —
+lives in that single Moser-tame `L²` child.  Consumers transitively depend on `sorryAx` only through
+that single atomic covariant-Faà-di-Bruno segment-metric Moser-tame `L²` primitive. -/
 theorem exists_segmentMetricJet2DiffFaaDiBruno_moserTame_l2Norm_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) :
@@ -599,8 +610,88 @@ theorem exists_segmentMetricJet2DiffFaaDiBruno_moserTame_l2Norm_le
             ≤ C * (‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
                 + ∑ i ∈ Finset.range (2 * a + 3),
                     Integral.L2.tensorL2Norm (I := I) g₀ 0 (2 + i)
-                      (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)).toFun) :=
-  sorry
+                      (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)).toFun) := by
+  classical
+  -- The genuine atomic covariant-Faà-di-Bruno Moser-tame `L²` domination of the segment-metric
+  -- DeTurck right-hand-side difference (stated already at the `L²`-consumable level): its `j`-th
+  -- covariant gradient's metric `L²` norm is dominated, with a per-order family constant `Cf j`, by
+  -- the order-`a` chart-Sobolev `C⁰`-redistribution term `‖(T₁ − T₂).toHs a‖` plus the order-`≤ j+2`
+  -- covariant-`L²`-gradient sum of the perturbation difference `T₁ − T₂`.
+  obtain ⟨Cf, hCf_nn, hCf⟩ :=
+    exists_segmentMetricRHSDiff_faaDiBruno_moserTame_l2Norm_le (I := I) g₀ g_bg a ha B hB
+  -- The single uniform constant: the (finite) sum over the gradient-order window `j ≤ 2a` of the
+  -- per-order family constants — it dominates each `Cf j`.
+  refine ⟨∑ j' ∈ Finset.range (2 * a + 1), Cf j',
+    Finset.sum_nonneg (fun j' _ => hCf_nn j'), ?_⟩
+  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j hj
+  -- The retagged right-hand side `deTurckRHSRetag` is *definitionally* the child's
+  -- `deTurckRHSRetagG0` (both are the anonymous-constructor `SmoothCcTensor` of the same DeTurck
+  -- section), so the section differences coincide by `rfl`.
+  have hretag :
+      deTurckRHSRetag (I := I) g₀ g_bg g₁ - deTurckRHSRetag (I := I) g₀ g_bg g₂
+        = deTurckRHSRetagG0 (I := I) g₀ g_bg g₁ - deTurckRHSRetagG0 (I := I) g₀ g_bg g₂ := rfl
+  -- The child's `L²` bound, specialized to this `j ≤ 2a`.
+  have hchild :
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+          (deTurckRHSRetagG0 (I := I) g₀ g_bg g₁
+            - deTurckRHSRetagG0 (I := I) g₀ g_bg g₂)‖ ≤
+        Cf j * (‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
+            + ∑ i ∈ Finset.range (j + 2 + 1),
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖) :=
+    hCf T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j hj
+  -- Convert each `SmoothCcTensor` norm `‖∇^i(T₁ − T₂)‖` to its `tensorL2Norm … .toFun` form.
+  have hnorm_eq : ∀ i,
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖ =
+        Integral.L2.tensorL2Norm (I := I) g₀ 0 (2 + i)
+          (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)).toFun :=
+    fun i => Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M) _
+  rw [hretag]
+  -- Abbreviate the full jet-sum (range `2a+3`) and the order-`a` `Hᵃ` redistribution term.
+  set jetSumFull : ℝ := ∑ i ∈ Finset.range (2 * a + 3),
+      Integral.L2.tensorL2Norm (I := I) g₀ 0 (2 + i)
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)).toFun with hjetSumFull_def
+  have hjetSumFull_nn : 0 ≤ jetSumFull :=
+    Finset.sum_nonneg (fun i _ => Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g₀ 0 (2 + i) _)
+  have htoHs_nn : 0 ≤ ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ :=
+    norm_nonneg _
+  -- The child's partial jet-sum (range `j+2+1`) is dominated by the full jet-sum (range `2a+3`),
+  -- since `j ≤ 2a ⟹ j + 2 + 1 ≤ 2a + 3` and every summand is nonnegative.
+  have hrange_le : j + 2 + 1 ≤ 2 * a + 3 := by omega
+  have hpartial_le :
+      (∑ i ∈ Finset.range (j + 2 + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖) ≤ jetSumFull := by
+    rw [hjetSumFull_def]
+    refine le_trans (le_of_eq (Finset.sum_congr rfl (fun i _ => hnorm_eq i))) ?_
+    exact Finset.sum_le_sum_of_subset_of_nonneg
+      (Finset.range_subset_range.mpr hrange_le)
+      (fun i _ _ => Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g₀ 0 (2 + i) _)
+  -- The child's redistributed sum (`toHs a + partialSum`) is dominated by `toHs a + jetSumFull`.
+  have hsum_le :
+      (‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
+          + ∑ i ∈ Finset.range (j + 2 + 1),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖) ≤
+        (‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
+          + jetSumFull) := by linarith [hpartial_le]
+  -- `Cf j` is dominated by the uniform constant `∑_{j' ≤ 2a} Cf j'` (single nonneg term).
+  have hj_mem : j ∈ Finset.range (2 * a + 1) := Finset.mem_range.mpr (by omega)
+  have hCf_le :
+      Cf j ≤ ∑ j' ∈ Finset.range (2 * a + 1), Cf j' :=
+    Finset.single_le_sum (fun j' _ => hCf_nn j') hj_mem
+  -- Chain: `‖∇^j(RHS-diff)‖ ≤ Cf j · (toHs + partialSum) ≤ Cuniform · (toHs + fullSum)`.
+  calc ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+          (deTurckRHSRetagG0 (I := I) g₀ g_bg g₁
+            - deTurckRHSRetagG0 (I := I) g₀ g_bg g₂)‖
+      ≤ Cf j * (‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
+            + ∑ i ∈ Finset.range (j + 2 + 1),
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖) := hchild
+    _ ≤ Cf j *
+          (‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
+            + jetSumFull) :=
+        mul_le_mul_of_nonneg_left hsum_le (hCf_nn j)
+    _ ≤ (∑ j' ∈ Finset.range (2 * a + 1), Cf j') *
+          (‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
+            + jetSumFull) :=
+        mul_le_mul_of_nonneg_right hCf_le (by linarith [htoHs_nn, hjetSumFull_nn])
 
 /-- **The covariant Nemytskii covariant-jet `L²` bound for the re-tagged Ricci–DeTurck
 right-hand side, stated in covariant `L²`-jets of the perturbation difference (the genuine deep

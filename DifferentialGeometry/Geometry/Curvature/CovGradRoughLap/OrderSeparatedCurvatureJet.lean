@@ -6,6 +6,7 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLocality
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameCurvatureTraceSmooth
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FrozenFramePureRCurvatureTower
 
 /-!
 # The order-`m` order-separated moving-frame curvature-jet field decomposition
@@ -357,7 +358,12 @@ theorem fixedFramePureRSection_gradedCurvJet (g : SmoothRiemannianMetric I M) :
         (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i))),
         IsGradedCurvJet (I := I) (M := M) g S (c s) 1 1
           (fixedFramePureRSection (I := I) (M := M) g s S B hB) := by
-  sorry
+  -- The frozen-frame iterated-gradient grid (`FrozenFramePureRCurvatureTower`) supplies the
+  -- `B`-uniform constant family and the order-`1`/width-`1` curvature-jet fibre bound at every
+  -- gradient order `k`; that bound is exactly the unfolding of `IsGradedCurvJet … 1 1`.
+  obtain ⟨c, hc_nn, hbound⟩ :=
+    exists_fixedFramePureRSection_iteratedCovGrad_grid_bound (I := I) (M := M) g
+  exact ⟨c, hc_nn, fun s S B hB k x => hbound s S B hB k x⟩
 
 /-- **The graded curvature-jet bound for the moving-centre pure-Riemann section `GcurvSection`**,
 *proved* by the frozen-frame iterated-gradient engine and the locality of the iterated covariant
