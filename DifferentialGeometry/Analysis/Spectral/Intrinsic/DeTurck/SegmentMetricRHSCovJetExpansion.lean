@@ -684,6 +684,91 @@ theorem exists_ricciNeg2Diff_faaDiBruno_moserTame_l2Norm_le
           linarith
         linarith [he1, he2]
 
+/-- **The pointwise covariant-Faà-di-Bruno two-product domination of the Lie-derivative summand
+difference (the deep covariant-gauge-jet posit).**
+
+For an anchor `g₀`, a flow background `g_bg`, an order `a`, a supercriticality hypothesis `ha`, a
+uniform `H^{a+2}`-size bound `B ≥ 0`, and a covariant-gradient order `j`, there is a nonnegative
+coefficient sup `Λ` such that for any two `g₀`-fibre-small perturbations `T₁, T₂` with `H^{a+2}` norms
+`≤ B`, any two realized metrics `g₁, g₂` of `T₁, T₂`, and every base point `x`, the squared intrinsic
+fibre norm (`riemannianFiberNormSq`, `rfns`) of the `j`-th covariant gradient of the `g₀`-retagged
+Lie-summand difference `lieDerivRetagG0 g₀ g_bg g₁ − lieDerivRetagG0 g₀ g_bg g₂` is dominated
+**pointwise** by the Hamilton/Moser **two-product**
+```
+rfns(∇^j (lieDerivRetagG0 g₁ − lieDerivRetagG0 g₂))(x)
+  ≤ Λ² · ∑_{i ≤ j+2} rfns(∇^i w)(x)
+    + (∑_{i ≤ j+2} (rfns(∇^i T₁)(x) + rfns(∇^i T₂)(x))) · ‖(T₁ − T₂).toHs a‖²,
+```
+with `w := realizeSymmCcTensor g₀ (T₁ − T₂)`.
+
+This is the **covariant Faà-di-Bruno expansion** of the *sealed* Lie/`deTurckVF` nonlinearity
+`𝓛_{W(g, g_bg)} g` (the `deTurckVF`-vector-field Lie deformation of the metric, the gauge summand
+`deTurckRHSSection g_bg g − ricciNeg2CcSection g` of the Ricci–DeTurck right-hand side,
+`DeTurckRHSSection.lean`), differenced along the segment metric `g_t = g₂ + t·(g₁ − g₂)`: the
+covariant FTC `Lie(g₁) − Lie(g₂) = ∫₀¹ DLie(g_t)·(g₁ − g₂) dt` and the covariant product/chain rule
+expand `∇^j` of the difference into a finite sum of contracted products of a segment-metric-jet
+coefficient with a covariant jet of the metric difference `g₁ − g₂` (whose `inner` is the realized
+form `ccTensorBilinSymm g₀ (T₁ − T₂)`, so each `∇^i(g₁ − g₂)` is fibre-controlled by `∇^{≤ i} w`).
+The Lie field `𝓛_{W(g)} g` has the **same intrinsic order-`≤2` structure** as the curvature half: it
+is `g⁻¹ · ∂g · ∂g + g⁻¹ · ∂²g` (the deTurck vector field `W = g⁻¹ · (Γ(g) − Γ(g_bg))` is a
+`g⁻¹·∂g`-type field, and one further metric derivative produces the Lie deformation), the `g⁻¹`
+Neumann factors carrying intrinsic order `0`.  The `j = 0` witness of exactly this two-product
+structure is the chart-level structural difference identity `chartLieDeTurckComp_sub_eq`
+(`DeTurckCoefficients/ChartLieDerivStructuralDifference.lean`), which exhibits the `Lie(g₁) − Lie(g₂)`
+chart component as a difference of products of metric `≤2`-jets, splitting into a difference factor
+(the `g₁ − g₂` jets) and a fixed-endpoint coefficient factor.  In the **regular** product the
+coefficient's genuinely-needed pointwise sup is only its `≤2`-jet (`Λ`, ball-uniform over the
+supercritical `H^{a+2}` family by the order-`≤2` segment-metric jet sup
+`exists_segmentMetric_realizeSymm_iteratedCovGradJet2_sup_le`), the single high derivative landing on
+the difference factor `w`; in the **top-jet** product the FdB `i = 0` term's unbounded top coefficient
+jet `∇^{j+2}g_t` (`L²` mass of order `j + 2 ∈ (a + 2, 2a + 2]`, which an `H^{a+2}` ball cannot bound —
+interpolation only goes down) is kept on the *fixed pair* endpoints `T₁, T₂` in `L²` against the
+difference's `C⁰` mass, which the supercritical Sobolev embedding (`ha : 2 * a > dim M + 4`, i.e.
+`a > dim M / 2`, the sharp `H^a ↪ C⁰` threshold) bounds by `‖(T₁ − T₂).toHs a‖`.  No jet of order `> 2`
+is ever taken pointwise; the top jet rides in `L²` on the fixed pair, never ball-controlled in
+isolation.
+
+**Non-vacuity.**  Neither product discards its perturbation argument: the regular product carries the
+difference factor `w` (its order-`0` term `rfns(w)(x) = 0` iff `T₁ = T₂` at `x`) and the top-jet
+product carries **both** endpoints `T₁, T₂` (its order-`0` term `rfns(T₁)(x) + rfns(T₂)(x)`); a
+witness with `Λ = 0` and the `‖(T₁ − T₂).toHs a‖`-coefficient effectively `0` fails whenever
+`𝓛_{W(g₁)} g₁ ≠ 𝓛_{W(g₂)} g₂` on a positive-measure set (there `rfns(Lie-diff)(x) > 0`, the right side
+`0`).  `Λ` is the genuine ball-uniform `≤2`-jet coefficient sup, `‖(T₁ − T₂).toHs a‖` the genuine
+difference `C⁰` mass.
+
+Its body is `sorry`: the genuine deep covariant-gauge-jet content — the covariant Faà-di-Bruno
+expansion of the sealed Lie/`deTurckVF` nonlinearity, with NO pointwise-`C^{>2}`-jet claim, NO
+spectral-nonlinearity, and NO Weyl dependence.  Consumers transitively depend on `sorryAx` only
+through this posit. -/
+theorem lieDerivDiff_covFdB_pointwise_twoProduct_rfns_le
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) (j : ℕ) :
+    ∃ Λ : ℝ, 0 ≤ Λ ∧
+      ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+        (g₁ g₂ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+        ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+                  (lieDerivRetagG0 (I := I) g₀ g_bg g₁
+                    - lieDerivRetagG0 (I := I) g₀ g_bg g₂)).toSection x) ≤
+            Λ ^ 2 * ∑ i ∈ Finset.range (j + 2 + 1),
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                      (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
+              + (∑ i ∈ Finset.range (j + 2 + 1),
+                  (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
+                    + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
+                * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=
+  sorry
+
 /-- **The per-field covariant-Faà-di-Bruno Moser-tame `L²` domination of the segment-metric
 *Lie-derivative* summand difference (the gauge half of the geometric nonlinearity, stated at the
 `L²`-consumable level).**
@@ -746,8 +831,119 @@ theorem exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le
               + C j * (∑ i ∈ Finset.range (j + 2 + 1),
                     (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
                       + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
-                  * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ :=
-  sorry
+                  * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ := by
+  classical
+  -- The deep covariant-gauge-jet posit: a per-order coefficient sup `Λ j` with the pointwise
+  -- Hamilton/Moser two-product domination of `∇^j(Lie-diff)`.
+  choose Λ hΛ_nn hΛ using
+    fun j => lieDerivDiff_covFdB_pointwise_twoProduct_rfns_le (I := I) g₀ g_bg a ha B hB j
+  -- The per-order realize-difference covariant `L²`-jet constant: `‖∇^i realizeSymm S‖ ≤ Cr i · ∑_{l≤i}
+  -- ‖∇^l S‖` (the realization gains no derivatives).
+  choose Cr hCr_nn hCr using
+    fun i => realizeSymm_iteratedCovGrad_l2Norm_le_jetSum (I := I) g₀ i
+  -- The combined per-order constant: `Λ j · (∑_{i ≤ j+2} Cr i)` (folding the realize-jet constant on
+  -- the difference arm) plus `1` (dominating the cross-term coefficient `1`).
+  refine ⟨fun j => Λ j * (∑ i ∈ Finset.range (j + 2 + 1), Cr i) + 1, fun j => ?_, ?_⟩
+  · have : 0 ≤ Λ j * ∑ i ∈ Finset.range (j + 2 + 1), Cr i :=
+      mul_nonneg (hΛ_nn j) (Finset.sum_nonneg fun i _ => hCr_nn i)
+    linarith
+  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j hj
+  set D₀ : ℝ := ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
+    with hD₀_def
+  have hD₀_nn : 0 ≤ D₀ := norm_nonneg _
+  -- Abbreviate the difference-jet `L²` sum and the cross-coefficient endpoint-jet sum.
+  set diffSum : ℝ := ∑ i ∈ Finset.range (j + 2 + 1),
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖ with hdiffSum_def
+  have hdiffSum_nn : 0 ≤ diffSum :=
+    Finset.sum_nonneg fun i _ => norm_nonneg _
+  set crossSum : ℝ := ∑ i ∈ Finset.range (j + 2 + 1),
+      (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
+        + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖) with hcrossSum_def
+  have hcrossSum_nn : 0 ≤ crossSum :=
+    Finset.sum_nonneg fun i _ => add_nonneg (norm_nonneg _) (norm_nonneg _)
+  -- Apply the two-product pointwise-to-`L²` lift to the deep posit's pointwise bound, with the
+  -- difference factor `w = realizeSymm (T₁ − T₂)` on the regular arm (coefficient `Λ j`) and the
+  -- fixed-pair endpoints `T₁, T₂` on the cross arm (coefficient `D₀ = ‖(T₁ − T₂).toHs a‖`).
+  have hlift :
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+          (lieDerivRetagG0 (I := I) g₀ g_bg g₁ - lieDerivRetagG0 (I := I) g₀ g_bg g₂)‖
+        ≤ Λ j * ∑ i ∈ Finset.range (j + 2 + 1),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖
+          + D₀ * ∑ i ∈ Finset.range (j + 2 + 1),
+              (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
+                + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖) := by
+    refine tensorL2Norm_le_of_pointwise_twoProduct_rfns_bound (I := I) (M := M) g₀ (j + 2 + 1)
+      (fun i => 2 + i) (fun i => 2 + i)
+      (fun i => PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+        (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂)))
+      (fun i => PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁)
+      (fun i => PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂)
+      (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+        (lieDerivRetagG0 (I := I) g₀ g_bg g₁ - lieDerivRetagG0 (I := I) g₀ g_bg g₂))
+      (Λ j) D₀ (hΛ_nn j) hD₀_nn (fun x => ?_)
+    rw [hD₀_def]
+    exact hΛ j T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ x
+  -- The realize-difference covariant `L²`-jet bound on the regular arm: each `‖∇^i realizeSymm
+  -- (T₁ − T₂)‖ ≤ Cr i · ∑_{l ≤ i} ‖∇^l (T₁ − T₂)‖ ≤ Cr i · diffSum` (since `i ≤ j + 2`).
+  have hrealize_termwise : ∀ i ∈ Finset.range (j + 2 + 1),
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+          (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ≤ Cr i * diffSum := by
+    intro i hi
+    have hi' : i ≤ j + 2 := by rw [Finset.mem_range] at hi; omega
+    -- The realize bound is stated in `tensorL2Norm … .toFun`; convert to `‖·‖`.
+    have hbound := hCr i (T₁ - T₂)
+    rw [← Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M)
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+          (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂)))] at hbound
+    refine hbound.trans ?_
+    refine mul_le_mul_of_nonneg_left ?_ (hCr_nn i)
+    -- `∑_{l ≤ i} ‖∇^l (T₁ − T₂)‖ ≤ ∑_{l ≤ j+2} ‖∇^l (T₁ − T₂)‖ = diffSum`.
+    rw [hdiffSum_def]
+    have hsubset : Finset.range (i + 1) ⊆ Finset.range (j + 2 + 1) :=
+      Finset.range_subset_range.mpr (by omega)
+    refine le_trans (le_of_eq ?_) (Finset.sum_le_sum_of_subset_of_nonneg hsubset
+      (fun l _ _ => norm_nonneg _))
+    exact Finset.sum_congr rfl fun l _ =>
+      (Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M)
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l (T₁ - T₂)))
+  have hrealize_sum :
+      ∑ i ∈ Finset.range (j + 2 + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+            (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖
+        ≤ (∑ i ∈ Finset.range (j + 2 + 1), Cr i) * diffSum := by
+    refine le_trans (Finset.sum_le_sum hrealize_termwise) ?_
+    rw [Finset.sum_mul]
+  -- Chain: `‖∇^j(Lie-diff)‖ ≤ Λj·(Σ Cr i)·diffSum + D₀·crossSum`, then match the target shape.
+  have hCr_sum_nn : 0 ≤ ∑ i ∈ Finset.range (j + 2 + 1), Cr i :=
+    Finset.sum_nonneg fun i _ => hCr_nn i
+  calc ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+          (lieDerivRetagG0 (I := I) g₀ g_bg g₁ - lieDerivRetagG0 (I := I) g₀ g_bg g₂)‖
+      ≤ Λ j * ∑ i ∈ Finset.range (j + 2 + 1),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+              (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖
+          + D₀ * crossSum := by rw [hcrossSum_def]; exact hlift
+    _ ≤ Λ j * ((∑ i ∈ Finset.range (j + 2 + 1), Cr i) * diffSum) + D₀ * crossSum :=
+        add_le_add (mul_le_mul_of_nonneg_left hrealize_sum (hΛ_nn j)) (le_refl _)
+    _ ≤ (Λ j * (∑ i ∈ Finset.range (j + 2 + 1), Cr i) + 1) * (D₀ + diffSum)
+          + (Λ j * (∑ i ∈ Finset.range (j + 2 + 1), Cr i) + 1) * crossSum * D₀ := by
+        set C : ℝ := Λ j * (∑ i ∈ Finset.range (j + 2 + 1), Cr i) with hC_def
+        have hC_nn : 0 ≤ C := mul_nonneg (hΛ_nn j) hCr_sum_nn
+        have h1 : Λ j * ((∑ i ∈ Finset.range (j + 2 + 1), Cr i) * diffSum) = C * diffSum := by
+          rw [hC_def]; ring
+        rw [h1]
+        have he1 : C * diffSum ≤ (C + 1) * (D₀ + diffSum) := by
+          have : (C + 1) * (D₀ + diffSum) = C * diffSum + (C * D₀ + (D₀ + diffSum)) := by ring
+          rw [this]
+          have : 0 ≤ C * D₀ + (D₀ + diffSum) := by positivity
+          linarith
+        have he2 : D₀ * crossSum ≤ (C + 1) * crossSum * D₀ := by
+          have hCS_nn : 0 ≤ crossSum := hcrossSum_nn
+          have : (C + 1) * crossSum * D₀ = D₀ * crossSum + (C * crossSum * D₀) := by ring
+          rw [this]
+          have : 0 ≤ C * crossSum * D₀ := by positivity
+          linarith
+        linarith [he1, he2]
 
 /-- **The per-order covariant-Faà-di-Bruno Moser-tame `L²` domination of the segment-metric
 DeTurck right-hand-side difference (the genuine atomic metric-jet Nemytskii primitive, stated at the
