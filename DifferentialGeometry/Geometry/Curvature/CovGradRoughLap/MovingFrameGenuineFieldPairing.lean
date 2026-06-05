@@ -172,12 +172,21 @@ theorem exists_pointwiseTensorCurv_movingFrameField_orderSeparated_bracketFreePa
   obtain ⟨Cper, hCper_nn, hdata⟩ :=
     exists_GcurvSection_orderSeparatedBounds_movingFrameDivergence (I := I) (M := M) g
   refine ⟨Cper, hCper_nn, fun s S => ?_⟩
-  obtain ⟨hcurv, hcurvDeriv, hrem, hnull⟩ := hdata s S
-  refine ⟨GcurvSection (I := I) (M := M) g s S, GcurvDerivSection (I := I) (M := M) g s S,
-    hcurv, hcurvDeriv, hrem, ?_⟩
-  exact tensorL2Inner_genuineFields_covGrad_eq_pointwiseTensorCurv_of_movingFrameRemainder_nullity
-    (I := I) (M := M) g s S
-    (GcurvSection (I := I) (M := M) g s S) (GcurvDerivSection (I := I) (M := M) g s S) hnull
+  obtain ⟨Gcd, Grem, hsplit, hGScurv, hGcd, hGrem, hnull⟩ := hdata s S
+  -- Instantiate `Gcurv := GcurvSection` (the concrete sound pure-Riemann section) and
+  -- `GcurvDeriv := Gcd` (the existential differentiated-curvature field of the intrinsic tri-split).
+  -- The moving-frame remainder `Curv S − GcurvSection − Gcd` is exactly `Grem` by the section split.
+  have hrem_eq : pointwiseTensorCurv (I := I) (M := M) g s S -
+      GcurvSection (I := I) (M := M) g s S - Gcd = Grem := by
+    rw [hsplit]; abel
+  refine ⟨GcurvSection (I := I) (M := M) g s S, Gcd, hGScurv, hGcd, fun x => ?_, ?_⟩
+  · -- Remainder fibre bound: `rfns((Curv − GcurvSection − Gcd).toSection x) = rfns(Grem.toSection x)`.
+    rw [hrem_eq]; exact hGrem x
+  · -- Bracket-free pairing: the moving-frame remainder `Curv S − GcurvSection − Gcd = Grem` pairs to
+    -- zero against `∇S` (the integrated nullity `hnull`), so the genuine fields carry the cross-pairing.
+    refine tensorL2Inner_genuineFields_covGrad_eq_pointwiseTensorCurv_of_movingFrameRemainder_nullity
+      (I := I) (M := M) g s S (GcurvSection (I := I) (M := M) g s S) Gcd ?_
+    rw [hrem_eq]; exact hnull
 
 end Connection
 end Integral
