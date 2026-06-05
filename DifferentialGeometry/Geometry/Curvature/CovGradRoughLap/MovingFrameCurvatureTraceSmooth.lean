@@ -1066,6 +1066,54 @@ theorem GcurvSection_toSection_eq_genuineThirdCurvFieldFibPureR
   refine Finset.sum_congr rfl (fun a _ => ?_)
   rw [tensor0S_curry_genuineCurvPureRFib_unit (I := I) (M := M) g s S x (e a)]
 
+/-- **The fixed-frame pure-Riemann genuine curvature section against a smooth frame `B`**, a smooth
+compactly-supported `(0, s + 1)`-tensor section. The general-`B` analogue of `GcurvSection`: its fibre
+value at `x` is `genuineCurvPureRFibFixedFrame g s S B x`, the slot-`0` uncurry (through
+`covGradBundleEquiv 0 s x`) of the fixed-frame pure-Riemann direction CLM `pureRDirCLMFixedFrame g s S
+B x : v ↦ ∑ᵢ R(B_iˣ, v)(∇_{B_iˣ} S)(x)`. Its base-point smoothness is
+`genuineCurvPureRFibFixedFrame_contMDiff` (the smooth `Hom`-section transported through
+`covGradBundleSmoothEquiv`); compact support on the closed manifold. This is the *frozen-frame* object
+that `GcurvSection` agrees with on `smoothOrthoFrameNbhd x₀` (`GcurvSection_toSection_eventuallyEq_
+fixedFramePureRSection`), the bridge through which the locality of the iterated covariant gradient
+transfers the frozen section's graded curvature-jet bounds to the moving-centre `GcurvSection`. -/
+noncomputable def fixedFramePureRSection
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
+    (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i))) :
+    SmoothCcTensor g 0 (s + 1) where
+  toSection :=
+    { toFun := fun x : M => genuineCurvPureRFibFixedFrame (I := I) (M := M) g s S B x
+      contMDiff_toFun := genuineCurvPureRFibFixedFrame_contMDiff (I := I) (M := M) g s S hB }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+@[simp] theorem fixedFramePureRSection_toSection
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b}
+    (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i))) (x : M) :
+    (fixedFramePureRSection (I := I) (M := M) g s S B hB).toSection x =
+      genuineCurvPureRFibFixedFrame (I := I) (M := M) g s S B x := rfl
+
+/-- **On `smoothOrthoFrameNbhd x₀`, the moving-centre pure-Riemann section `GcurvSection g s S` agrees
+fibrewise with the frozen-frame section against `smoothOrthoFrame g x₀`.** The moving section's fibre
+value `genuineCurvPureRFib g s S y` equals the frozen-frame fibre value
+`genuineCurvPureRFibFixedFrame g s S (smoothOrthoFrame g x₀) y` for every `y ∈ smoothOrthoFrameNbhd x₀`
+(`genuineCurvPureRFib_eq_fixedFrame_smoothOrthoFrame_on_nbhd`, the bilinear-Parseval frame-independence
+freeze), and that neighbourhood is a member of `𝓝 x₀` (`smoothOrthoFrameNbhd_mem_nhds`). This is the
+exact eventual fibrewise equality the iterated-covariant-gradient locality
+(`riemannianFiberNormSq_iteratedCovGrad_toSection_congr_of_eventuallyEq`) consumes to transfer the
+frozen section's `∇^k`-bounds at `x₀` to `GcurvSection`. -/
+theorem GcurvSection_toSection_eventuallyEq_fixedFramePureRSection
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x₀ : M)
+    (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (T% (smoothOrthoFrame (I := I) g x₀ i))) :
+    ∀ᶠ y in 𝓝 x₀,
+      (GcurvSection (I := I) (M := M) g s S).toSection y =
+        (fixedFramePureRSection (I := I) (M := M) g s S
+          (smoothOrthoFrame (I := I) g x₀) hB).toSection y := by
+  filter_upwards [smoothOrthoFrameNbhd_mem_nhds (I := I) (M := M) x₀] with y hy
+  rw [GcurvSection, genuineCurvPureRSection_toSection, fixedFramePureRSection_toSection]
+  exact genuineCurvPureRFib_eq_fixedFrame_smoothOrthoFrame_on_nbhd (I := I) (M := M) g s S x₀ hy
+
 end Connection
 end Integral
 end DifferentialGeometry

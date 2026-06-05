@@ -674,6 +674,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSHighOrderSobo
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSPointwiseLipschitz
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricJetBound
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricRHSCovJetExpansion
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChristoffelPerturbation
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.InverseGramPerturbation
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieMatrixChartBridge
@@ -747,6 +748,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureContractio
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.Defs
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLocality
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricContractionLeibnizGrid
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.AbstractChartPull
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.AbstractChartPullCutoff
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.ChartTransition.ChartTransitionTransportCLM
@@ -1034,6 +1036,7 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.Tensor0SPartialEval
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorExtension
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSCovariantDerivativeCongrLocally
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSNabla
+import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvature
 import DifferentialGeometry.Geometry.Curvature.Bochner.BochnerConcrete
 import DifferentialGeometry.Geometry.Curvature.Bochner.BochnerConcreteWithBoundary
 import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
