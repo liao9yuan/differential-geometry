@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameCurvatureTraceSmooth
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricContractionLeibnizGrid
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformCurvatureSup
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformProportionalCurvatureSup
+import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Slot0SliceFiberNormDomination
 
 /-!
 # The frozen-frame pure-Riemann curvature endomorphism tower and its iterated-gradient grid
@@ -348,6 +350,554 @@ private theorem covGrad_pureRFrozenDiffOp_eq
           (covGrad (I := I) (M := M) g 0 r W))) + _
   rw [sub_add_cancel]
 
+/-- **`fiberNormSqSummand` representation of the fibre norm in an arbitrary `g_{x}`-orthonormal frame.**
+For a `(0, s)`-tensor `S` at `x` and any `g_x`-orthonormal frame `e` with `n = Module.finrank`, the
+intrinsic fibre norm squared is the double frame sum of `fiberNormSqSummand`. The single non-trivial
+multi-index is the empty one (`K : Fin 0 → Fin n`); the rank-`s` index `J` ranges over the dual
+tensor frame. Ported from the diagonal-sum reconstruction
+`tensorInnerPointwise_0s_eq_diag_sum_orthoFrame`. -/
+private lemma rfns_eq_sum_fiberNormSqSummand_of_orthoFrame
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (S : TensorRSSpace 0 s I x)
+    {n : ℕ} (e : Fin n → TangentSpace I x)
+    (hn : n = Module.finrank ℝ (TangentSpace I x))
+    (horth : ∀ i j : Fin n, g.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 s x S =
+      ∑ K : Fin 0 → Fin n, ∑ J : Fin s → Fin n,
+        fiberNormSqSummand (I := I) (M := M) g x 0 s S n e K J := by
+  classical
+  subst hn
+  haveI : Nonempty (Fin (Module.finrank ℝ (TangentSpace I x))) :=
+    ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne (Module.finrank ℝ E))⟩⟩
+  have he_li : LinearIndependent ℝ e := by
+    rw [linearIndependent_iff']
+    intro fs c hsum k hk_mem
+    have h_zero : g.inner x (e k) (∑ j ∈ fs, c j • e j) = 0 := by rw [hsum]; simp
+    rw [map_sum] at h_zero
+    have h_pull : ∀ j ∈ fs, g.inner x (e k) (c j • e j) = c j * (if k = j then (1 : ℝ) else 0) := by
+      intro j _
+      rw [(g.inner x (e k)).map_smul (c j) (e j), smul_eq_mul, horth k j]
+    rw [Finset.sum_congr rfl h_pull, Finset.sum_eq_single_of_mem k hk_mem] at h_zero
+    · rwa [if_pos rfl, mul_one] at h_zero
+    · intro j _ hjk; rw [if_neg (fun h => hjk h.symm), mul_zero]
+  have hcard : Fintype.card (Fin (Module.finrank ℝ (TangentSpace I x))) =
+      Module.finrank ℝ (TangentSpace I x) := Fintype.card_fin _
+  set bse : Module.Basis (Fin (Module.finrank ℝ (TangentSpace I x))) ℝ (TangentSpace I x) :=
+    basisOfLinearIndependentOfCardEqFinrank he_li hcard with hbse_def
+  have hbse_eq : ∀ i, bse i = e i := by
+    intro i; rw [hbse_def]; exact congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard) i
+  have hbse_orth : ∀ i j, g.inner x (bse i) (bse j) = if i = j then (1 : ℝ) else 0 := by
+    intro i j; rw [hbse_eq i, hbse_eq j]; exact horth i j
+  -- Reduce each summand to a squared model component and reassemble via the diagonal sum.
+  have hstep : riemannianFiberNormSq (I := I) (M := M) g 0 s x S =
+      ∑ ψ : Fin s → Fin (Module.finrank ℝ (TangentSpace I x)),
+        Tensor0SSpace.toModel
+            ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from S)
+              (unitZeroSec (I := I) (M := M) x))
+            (fun k => e (ψ k)) ^ 2 := by
+    rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 s x S]
+    rw [show tensorInnerPointwise (I := I) (M := M) g 0 s x
+          (TensorRSSpace.toModel S) (TensorRSSpace.toModel S) =
+        tensorInnerPointwise_0s (I := I) (M := M) (0 + s) g x
+          (lowerAllUpperIndices (I := I) (M := M) g 0 s x (TensorRSSpace.toModel S))
+          (lowerAllUpperIndices (I := I) (M := M) g 0 s x (TensorRSSpace.toModel S)) from rfl]
+    rw [tensorInnerPointwise_0s_eq_diag_sum_orthoFrame (I := I) (M := M) g x (0 + s)
+      bse hbse_orth _ _]
+    have hkey : ∀ ξ : Fin (0 + s) → Fin (Module.finrank ℝ (TangentSpace I x)),
+        lowerAllUpperIndices (I := I) (M := M) g 0 s x
+            (TensorRSSpace.toModel S) (fun k => bse (ξ k)) =
+          Tensor0SSpace.toModel
+              ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from S)
+                (unitZeroSec (I := I) (M := M) x))
+              (fun j : Fin s => bse (ξ (Fin.natAdd 0 j))) := by
+      intro ξ
+      rw [lowerAllUpperIndices_apply (I := I) (M := M) g 0 s x (TensorRSSpace.toModel S)
+        (fun k => bse (ξ k))]
+      rw [toModel_tensorRS_apply (I := I) (M := M) 0 s x S (unitZeroSec (I := I) (M := M) x)]
+      rw [unitZeroSec_apply (I := I) (M := M) x, Tensor0SSpace.toModel_ofModel]
+      rw [separableFormAt_zero (I := I) (M := M) g x
+        (fun i : Fin 0 => (fun k => bse (ξ k)) (Fin.castAdd s i))]
+    have hstep2 : ∀ ξ : Fin (0 + s) → Fin (Module.finrank ℝ (TangentSpace I x)),
+        lowerAllUpperIndices (I := I) (M := M) g 0 s x
+              (TensorRSSpace.toModel S) (fun k => bse (ξ k)) *
+            lowerAllUpperIndices (I := I) (M := M) g 0 s x
+              (TensorRSSpace.toModel S) (fun k => bse (ξ k)) =
+          Tensor0SSpace.toModel
+              ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from S)
+                (unitZeroSec (I := I) (M := M) x))
+              (fun k => e (ξ (Fin.natAdd 0 k))) ^ 2 := by
+      intro ξ
+      rw [hkey ξ, ← pow_two]
+      congr 2
+      funext k
+      rw [hbse_eq]
+    refine Eq.trans (Finset.sum_congr rfl (fun ξ _ => hstep2 ξ)) ?_
+    refine Fintype.sum_bijective
+      (fun ξ : Fin (0 + s) → Fin (Module.finrank ℝ (TangentSpace I x)) =>
+        fun k : Fin s => ξ (Fin.natAdd 0 k))
+      ?_ _ _ (fun ξ => rfl)
+    refine ⟨fun ξ₁ ξ₂ h => ?_, fun φ => ⟨fun k => φ (Fin.cast (Nat.zero_add s) k), ?_⟩⟩
+    · funext k
+      have hk : k = Fin.natAdd 0 (Fin.cast (Nat.zero_add s) k) := by ext; simp
+      rw [hk]; exact congrFun h (Fin.cast (Nat.zero_add s) k)
+    · funext k
+      change φ (Fin.cast (Nat.zero_add s) (Fin.natAdd 0 k)) = φ k
+      have : Fin.cast (Nat.zero_add s) (Fin.natAdd 0 k) = k := by ext; simp
+      rw [this]
+  rw [hstep]
+  -- Collapse the empty `K`-sum and identify each summand with `fiberNormSqSummand`.
+  rw [Finset.sum_eq_single (fun k : Fin 0 => k.elim0)]
+  · refine Finset.sum_congr rfl (fun J _ => ?_)
+    rw [fiberNormSqSummand_eq_component_sq]
+    -- The coframe covector along the empty multi-index is the unit `(0,0)`-tensor.
+    have hweight : ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+        (fun k => g.inner x (e ((fun k : Fin 0 => k.elim0) k))) : Tensor0SSpace 0 I x) =
+        unitZeroSec (I := I) (M := M) x := by
+      have hcf : ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+          (fun k => g.inner x (e ((fun k : Fin 0 => k.elim0) k))) : Tensor0SSpace 0 I x) =
+          coframeS (I := I) (M := M) g x 0 e (fun k : Fin 0 => k.elim0) := rfl
+      rw [hcf]
+      apply Tensor0SSpace.toModel_injective
+      apply ContinuousMultilinearMap.ext
+      intro mm
+      have hL : Tensor0SSpace.toModel (coframeS (I := I) (M := M) g x 0 e
+          (fun k : Fin 0 => k.elim0)) mm = 1 := by
+        have h1 : Tensor0SSpace.toModel (coframeS (I := I) (M := M) g x 0 e
+            (fun k : Fin 0 => k.elim0)) mm =
+            coframeS (I := I) (M := M) g x 0 e (fun k : Fin 0 => k.elim0)
+              (fun k : Fin 0 => k.elim0) := by
+          apply congrArg; funext k; exact k.elim0
+        rw [h1, coframeS_apply (I := I) (M := M) g x 0 e (fun k : Fin 0 => k.elim0)
+          (fun k : Fin 0 => k.elim0)]
+        simp
+      have hR : Tensor0SSpace.toModel (unitZeroSec (I := I) (M := M) x) mm = 1 := by
+        rw [unitZeroSec_apply (I := I) (M := M) x, Tensor0SSpace.toModel_ofModel,
+          ContinuousMultilinearMap.constOfIsEmpty_apply]
+      rw [hL, hR]
+    rw [fiberNormSqComponent, hweight]
+    rfl
+  · intro K _ hK; exact absurd (Subsingleton.elim K (fun k : Fin 0 => k.elim0)) hK
+  · intro h; exact absurd (Finset.mem_univ (fun k : Fin 0 => k.elim0)) h
+
+/-- **Uniform-over-`M` rank-`m` proportional curvature-operator fibre bound.** The supremum over the
+compact `M` of the continuous per-point proportional curvature envelope
+`exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional`: a single nonnegative
+constant `Csup` with, for every point `x`, tangent vectors `v, w`, and `(0, m)`-tensor `T`,
+`rfns(R_x(v, w) T)(x) ≤ Csup · g(v, v) · g(w, w) · rfns(T)(x)`. It is the rank-`m` curvature
+operator's base-point-uniform proportional fibre constant. -/
+private lemma exists_uniform_riemannOp_tensorCov_proportional
+    (g : SmoothRiemannianMetric I M) (m : ℕ) :
+    ∃ Csup : ℝ, 0 ≤ Csup ∧
+      ∀ (x : M) (v w : TangentSpace I x) (T : TensorRSSpace 0 m I x),
+        riemannianFiberNormSq (I := I) (M := M) g 0 m x
+            (riemannOp (tensorCov (I := I) g 0 m) x v w T) ≤
+          Csup * g.inner x v v * g.inner x w w *
+            riemannianFiberNormSq (I := I) (M := M) g 0 m x T := by
+  classical
+  obtain ⟨Ccurv, hCcurv_cont, hCcurv_nonneg, hCcurv_bound⟩ :=
+    exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional (I := I) (M := M) g m
+  have hCpt := (isCompact_univ (X := M)).image hCcurv_cont
+  obtain ⟨C₀, hC₀⟩ := hCpt.bddAbove
+  refine ⟨max C₀ 0, le_max_right _ _, fun x v w T => ?_⟩
+  have hCcurv_le : Ccurv x ≤ max C₀ 0 :=
+    le_trans (hC₀ ⟨x, Set.mem_univ _, rfl⟩) (le_max_left _ _)
+  have hvv_nonneg : 0 ≤ g.inner x v v := by
+    rcases eq_or_ne v 0 with hv0 | hv0
+    · rw [hv0]; simp
+    · exact (g.pos x v hv0).le
+  have hww_nonneg : 0 ≤ g.inner x w w := by
+    rcases eq_or_ne w 0 with hw0 | hw0
+    · rw [hw0]; simp
+    · exact (g.pos x w hw0).le
+  have hfactor_nonneg :
+      0 ≤ g.inner x v v * g.inner x w w *
+        riemannianFiberNormSq (I := I) (M := M) g 0 m x T :=
+    mul_nonneg (mul_nonneg hvv_nonneg hww_nonneg)
+      (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 m x T)
+  calc
+    riemannianFiberNormSq (I := I) (M := M) g 0 m x
+        (riemannOp (tensorCov (I := I) g 0 m) x v w T)
+        ≤ Ccurv x * g.inner x v v * g.inner x w w *
+            riemannianFiberNormSq (I := I) (M := M) g 0 m x T :=
+          hCcurv_bound x v w T
+    _ = Ccurv x * (g.inner x v v * g.inner x w w *
+            riemannianFiberNormSq (I := I) (M := M) g 0 m x T) := by ring
+    _ ≤ max C₀ 0 * (g.inner x v v * g.inner x w w *
+            riemannianFiberNormSq (I := I) (M := M) g 0 m x T) :=
+          mul_le_mul_of_nonneg_right hCcurv_le hfactor_nonneg
+    _ = max C₀ 0 * g.inner x v v * g.inner x w w *
+            riemannianFiberNormSq (I := I) (M := M) g 0 m x T := by ring
+
+/-- **The slot-`0` curry slice of the order-`0` frozen-frame endomorphism fibre is the curvature
+direction CLM applied to the slice direction.** For a `g_{x}`-orthonormal frame `e` (built from a
+`Module.Basis`) representing the rank-`m` fibre norm, the slot-`0` curry of
+`pureRFrozenEndoFib g m B W x` along the frame direction `e a` has the same intrinsic `(0, m)` fibre
+norm as the curvature direction CLM `pureRFrozenDirCLM g m B (W.toSection) x (e a)`. The slot-`0`
+curry reads the leftmost covariant slot at `e a`; through `covGradBundleEquiv_apply_eval` this is
+exactly the value of the direction CLM at `e a`, so the two `(0, m)`-tensors agree component-by-frame
+component (`fiberNormSqComponent`), hence have equal fibre norm. -/
+private lemma pureRFrozenEndoFib_slot0Curry_rfns_eq
+    (g : SmoothRiemannianMetric I M) (m : ℕ)
+    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
+    (W : SmoothCcTensor g 0 (m + 1)) (x : M)
+    {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n)
+    (hreprS : ∀ S : TensorRSSpace 0 m I x,
+      riemannianFiberNormSq (I := I) (M := M) g 0 m x S =
+        ∑ K : Fin 0 → Fin n, ∑ J : Fin m → Fin n,
+          fiberNormSqSummand (I := I) (M := M) g x 0 m S n e K J)
+    (a : Fin n) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 m x
+        (slot0Curry (I := I) (M := M) g x m e K₀
+          (pureRFrozenEndoFib (I := I) (M := M) g m B W x) a) =
+      riemannianFiberNormSq (I := I) (M := M) g 0 m x
+        (pureRFrozenDirCLM (I := I) (M := M) g m B (fun y : M => W.toSection y) x (e a)) := by
+  classical
+  rw [riemannianFiberNormSq_eq_sum_componentS_sq (I := I) (M := M) g x m e hreprS _ K₀,
+    riemannianFiberNormSq_eq_sum_componentS_sq (I := I) (M := M) g x m e hreprS _ K₀]
+  refine Finset.sum_congr rfl (fun J _ => ?_)
+  congr 1
+  -- Compare the two `(0, m)`-tensors component-by-component in the frame `e`.
+  unfold fiberNormSqComponent
+  set ωK : Tensor0SSpace 0 I x :=
+    (ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+      (fun k => g.inner x (e (K₀ k))) with hωK
+  -- The slot-`0` curry's CLM value at `ωK` is the `tensor0S_curry` of the endomorphism fibre at
+  -- `ωK`, evaluated at `e a` (the scalar weight is `1`).
+  have hslot : (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace m I x from
+          slot0Curry (I := I) (M := M) g x m e K₀
+            (pureRFrozenEndoFib (I := I) (M := M) g m B W x) a) ωK =
+        tensor0S_curry (I := I) (M := M) m x
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+            pureRFrozenEndoFib (I := I) (M := M) g m B W x) ωK) (e a) := by
+    rw [slot0Curry_apply (I := I) (M := M) g x m e K₀
+      (pureRFrozenEndoFib (I := I) (M := M) g m B W x) a ωK]
+    have hscalar : tensor00Scalar (I := I) (M := M) x ωK = 1 := by
+      rw [hωK,
+        show ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+            (fun k => g.inner x (e (K₀ k))) : Tensor0SSpace 0 I x) =
+          coframeS (I := I) (M := M) g x 0 e K₀ from rfl,
+        tensor00Scalar_apply (I := I) (M := M) x _ (fun k : Fin 0 => k.elim0),
+        coframeS_apply (I := I) (M := M) g x 0 e K₀]
+      simp
+    rw [hscalar, one_smul]
+  rw [hslot]
+  -- Evaluate both `toModel`s; the endomorphism fibre is `covGradBundleEquiv 0 m x Φ`, so the
+  -- slot-`0` reading at `e a` recovers `Φ (e a)` by `covGradBundleEquiv_apply_eval`.
+  rw [show (tensor0S_curry (I := I) (M := M) m x
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+          pureRFrozenEndoFib (I := I) (M := M) g m B W x) ωK) (e a)
+        (fun k => e (J k)) : ℝ) =
+      Tensor0SSpace.toModel
+        (tensor0S_curry (I := I) (M := M) m x
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+            pureRFrozenEndoFib (I := I) (M := M) g m B W x) ωK) (e a))
+        (fun k => e (J k)) from rfl]
+  rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+    (T := (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+      pureRFrozenEndoFib (I := I) (M := M) g m B W x) ωK) (v0 := e a) (vs := fun k => e (J k))]
+  -- `pureRFrozenEndoFib = covGradBundleEquiv 0 m x Φ`; apply the eval bridge with the `cons` tuple.
+  rw [pureRFrozenEndoFib]
+  rw [covGradBundleEquiv_apply_eval (I := I) (M := M) 0 m x
+    (pureRFrozenDirCLM (I := I) (M := M) g m B (fun y : M => W.toSection y) x) ωK
+    (Fin.cons (e a) (fun k => e (J k)))]
+  rw [Fin.cons_zero]
+  congr 1
+
+/-- **The slot-`0` reading of a `(0, m+1)`-tensor along a frame vector is fibre-dominated by the whole.**
+For a `g_{x}`-orthonormal frame `e` (representing the rank-`m`/rank-`(m+1)` fibre norms), the slot-`0`
+reading `(covGradBundleEquiv 0 m x).symm T (e a)` — a `(0, m)`-tensor — has the same fibre norm as the
+slot-`0` curry `slot0Curry g x m e K₀ T a` (both read the leftmost covariant slot at `e a`, agreeing
+component-by-frame-component through `covGradBundleEquiv_symm_apply_eval`), hence by the slot-`0`
+Parseval domination is bounded by the full `(0, m+1)` fibre norm of `T`. -/
+private lemma covGradBundleEquiv_symm_reading_rfns_le
+    (g : SmoothRiemannianMetric I M) (m : ℕ) (x : M)
+    (T : TensorRSSpace 0 (m + 1) I x)
+    {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n)
+    (hreprS : ∀ S : TensorRSSpace 0 m I x,
+      riemannianFiberNormSq (I := I) (M := M) g 0 m x S =
+        ∑ K : Fin 0 → Fin n, ∑ J : Fin m → Fin n,
+          fiberNormSqSummand (I := I) (M := M) g x 0 m S n e K J)
+    (hreprSucc : ∀ S : TensorRSSpace 0 (m + 1) I x,
+      riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x S =
+        ∑ K : Fin 0 → Fin n, ∑ J : Fin (m + 1) → Fin n,
+          fiberNormSqSummand (I := I) (M := M) g x 0 (m + 1) S n e K J)
+    (a : Fin n) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 m x
+        ((covGradBundleEquiv (I := I) (M := M) 0 m x).symm T (e a)) ≤
+      riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x T := by
+  classical
+  have heq : riemannianFiberNormSq (I := I) (M := M) g 0 m x
+        ((covGradBundleEquiv (I := I) (M := M) 0 m x).symm T (e a)) =
+      riemannianFiberNormSq (I := I) (M := M) g 0 m x
+        (slot0Curry (I := I) (M := M) g x m e K₀ T a) := by
+    rw [riemannianFiberNormSq_eq_sum_componentS_sq (I := I) (M := M) g x m e hreprS _ K₀,
+      riemannianFiberNormSq_eq_sum_componentS_sq (I := I) (M := M) g x m e hreprS _ K₀]
+    refine Finset.sum_congr rfl (fun J _ => ?_)
+    congr 1
+    unfold fiberNormSqComponent
+    set ωK : Tensor0SSpace 0 I x :=
+      (ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+        (fun k => g.inner x (e (K₀ k))) with hωK
+    -- The slot-`0` curry's CLM value at `ωK` is the `tensor0S_curry` of `T ωK` at `e a` (scalar `1`).
+    have hslot : (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace m I x from
+            slot0Curry (I := I) (M := M) g x m e K₀ T a) ωK =
+          tensor0S_curry (I := I) (M := M) m x
+            ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from T) ωK) (e a) := by
+      rw [slot0Curry_apply (I := I) (M := M) g x m e K₀ T a ωK]
+      have hscalar : tensor00Scalar (I := I) (M := M) x ωK = 1 := by
+        rw [hωK,
+          show ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+              (fun k => g.inner x (e (K₀ k))) : Tensor0SSpace 0 I x) =
+            coframeS (I := I) (M := M) g x 0 e K₀ from rfl,
+          tensor00Scalar_apply (I := I) (M := M) x _ (fun k : Fin 0 => k.elim0),
+          coframeS_apply (I := I) (M := M) g x 0 e K₀]
+        simp
+      rw [hscalar, one_smul]
+    -- Rewrite the slot-`0` reading side (LHS) to `toModel (T ωK) (cons (e a) (e ∘ J))`.
+    rw [show ((((covGradBundleEquiv (I := I) (M := M) 0 m x).symm T (e a)) ωK)
+          (fun k => e (J k)) : ℝ) =
+        Tensor0SSpace.toModel
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace m I x from
+            (covGradBundleEquiv (I := I) (M := M) 0 m x).symm T (e a)) ωK)
+          (fun k => e (J k)) from rfl]
+    rw [covGradBundleEquiv_symm_apply_eval (I := I) (M := M) 0 m x T (e a) ωK (fun k => e (J k))]
+    -- Rewrite the slot-`0` curry side (RHS) to the same `cons` read.
+    rw [hslot]
+    rw [show ((tensor0S_curry (I := I) (M := M) m x
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from T) ωK) (e a))
+          (fun k => e (J k)) : ℝ) =
+        Tensor0SSpace.toModel
+          (tensor0S_curry (I := I) (M := M) m x
+            ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from T) ωK) (e a))
+          (fun k => e (J k)) from rfl]
+    rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+      (T := (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from T) ωK)
+      (v0 := e a) (vs := fun k => e (J k))]
+  rw [heq]
+  exact riemannianFiberNormSq_slot0Curry_le_of_frame (I := I) (M := M) g m x e K₀
+    hreprS hreprSucc T a
+
+/-- **The slot-`0` reading of a `(0, m+1)`-tensor along a centre-frame curvature direction is
+fibre-dominated by the whole.** Specialisation of `covGradBundleEquiv_symm_reading_rfns_le` to the
+`g_{x₀}`-orthonormal centre frame `eC i := B i x₀` (orthonormal at its own centre by `hBorth`): the
+slot-`0` reading `(covGradBundleEquiv 0 m x₀).symm T (B i x₀)` is bounded by the full `(0, m+1)` fibre
+norm of `T`. -/
+private lemma covGradBundleEquiv_symm_reading_rfns_le_centreFrame
+    (g : SmoothRiemannianMetric I M) (m : ℕ) (x₀ : M)
+    (T : TensorRSSpace 0 (m + 1) I x₀)
+    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
+    (hBorth : ∀ i j : Fin (Module.finrank ℝ E),
+      g.inner x₀ (B i x₀) (B j x₀) = if i = j then (1 : ℝ) else 0)
+    (i : Fin (Module.finrank ℝ E)) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 m x₀
+        ((covGradBundleEquiv (I := I) (M := M) 0 m x₀).symm T (B i x₀)) ≤
+      riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x₀ T := by
+  classical
+  set eC : Fin (Module.finrank ℝ E) → TangentSpace I x₀ := fun j => B j x₀ with heC_def
+  have hnC : Module.finrank ℝ E = Module.finrank ℝ (TangentSpace I x₀) := rfl
+  have horthC : ∀ a b : Fin (Module.finrank ℝ E),
+      g.inner x₀ (eC a) (eC b) = if a = b then (1 : ℝ) else 0 := fun a b => hBorth a b
+  set K₀ : Fin 0 → Fin (Module.finrank ℝ E) := fun k => k.elim0 with hK₀
+  have hreprS : ∀ S : TensorRSSpace 0 m I x₀,
+      riemannianFiberNormSq (I := I) (M := M) g 0 m x₀ S =
+        ∑ K : Fin 0 → Fin (Module.finrank ℝ E), ∑ J : Fin m → Fin (Module.finrank ℝ E),
+          fiberNormSqSummand (I := I) (M := M) g x₀ 0 m S (Module.finrank ℝ E) eC K J :=
+    fun S => rfns_eq_sum_fiberNormSqSummand_of_orthoFrame (I := I) (M := M) g m x₀ S eC hnC horthC
+  have hreprSucc : ∀ S : TensorRSSpace 0 (m + 1) I x₀,
+      riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x₀ S =
+        ∑ K : Fin 0 → Fin (Module.finrank ℝ E), ∑ J : Fin (m + 1) → Fin (Module.finrank ℝ E),
+          fiberNormSqSummand (I := I) (M := M) g x₀ 0 (m + 1) S (Module.finrank ℝ E) eC K J :=
+    fun S => rfns_eq_sum_fiberNormSqSummand_of_orthoFrame (I := I) (M := M) g (m + 1) x₀ S eC hnC
+      horthC
+  have h := covGradBundleEquiv_symm_reading_rfns_le (I := I) (M := M) g m x₀ T eC K₀
+    hreprS hreprSucc i
+  rwa [heC_def] at h
+
+/-- **Posited centre-uniform at-centre per-order (`p ≥ 1`), per-rank section-proportional fibre
+envelope for the high-order differentiated frozen-frame pure-Riemann curvature tower.** For a closed
+smooth Riemannian manifold `(M, g)` there is a nonnegative envelope family
+`kappaHigh : ℕ → ℕ → ℝ`, **uniform over the centre `x₀`**, such that for every differentiation order
+`p`, covariant rank `r`, smooth compactly-supported `(0, r)`-tensor `W`, and centre `x₀`, the
+order-`(p + 1)` differentiated frozen-frame pure-Riemann curvature operator at the centre frame
+`smoothOrthoFrame g x₀`, evaluated at its own centre `x₀`, has intrinsic squared fibre norm at most
+`kappaHigh p r` times that of `W`:
+
+```
+rfns(pureRFrozenDiffOp g (smoothOrthoFrame g x₀) … (p + 1) r W)(x₀) ≤ kappaHigh p r · rfns(W)(x₀).
+```
+
+**Why this is TRUE — the genuinely-irreducible high-order analytic primitive.** The order-`(p + 1)`
+operator `pureRFrozenDiffOp (p + 1) r` is, by the exact covariant-Leibniz cancellation
+`covGrad_pureRFrozenDiffOp_eq`, the FIXED smooth fibrewise-`ℝ`-linear operator `∇^{p+1}(R(B, ·))`
+applied to `W` (the gradient `∇W` produced by the recursion's two terms exactly cancels — the
+remainder hits only the curvature factor `R(B, ·)` and the frame jets, never the input section's
+derivatives). At the centre frame `B = smoothOrthoFrame g x₀` evaluated at its own centre `x₀`, this
+reads `∇^{≤ p+1}` of the curvature `R` (the existing compact `∇^{≤ p+1}R` sups) and `∇^{≤ p+1}` of the
+centre frame at the diagonal — the per-order *diagonal* frame-jet sup, the continuity on the compact
+`M` of `x₀ ↦ ∇^{≤ p+1}(smoothOrthoFrame g x₀)-field(x₀)` (the joint (centre, base) smoothness
+`smoothOrthoFrame_smooth` restricted to the diagonal). Being a fixed smooth operator applied to `W`,
+its fibre-operator norm is bounded uniformly over the compact `M`, proportionally to its section — the
+exact frozen-frame analogue of the metric-contraction tower's posited continuous envelope
+`exists_continuous_proportional_diffCurvOp` (the same continuity-of-the-iterated-curvature-operator-norm
+analytic content, here at the centre frame). The bound is `B`-uniform-at-the-centre because the frame
+`B = smoothOrthoFrame g x₀` enters only through the bounded curvature magnitude and the bounded
+diagonal frame jets, never an unbounded generic frame jet. It is posited here as the precise atomic
+high-order engine envelope; consumers transitively depend on `sorryAx`.
+
+**Non-vacuity.** A degenerate witness `kappaHigh ≡ 0` is rejected on any non-flat manifold: at `p = 0`,
+`pureRFrozenDiffOp 1 r W = ∇(R(B, ·) W) − cast(R(B, ·)(∇W))` is the differentiated curvature
+`(∇R(B, ·)) W`, genuinely nonzero when `∇R ≠ 0` and the slot-`0` reading carries a non-zero
+contraction, so `rfns(pureRFrozenDiffOp 1 r W)(x₀) > 0` while `0 · rfns(W)(x₀) = 0`. The envelope must
+carry the genuine differentiated-curvature magnitude; it genuinely *uses* `W`. -/
+theorem exists_proportional_pureRFrozenFrameDiffOp_highOrder
+    (g : SmoothRiemannianMetric I M) :
+    ∃ kappaHigh : ℕ → ℕ → ℝ, (∀ p r, 0 ≤ kappaHigh p r) ∧
+      ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x₀ : M),
+        riemannianFiberNormSq (I := I) (M := M) g 0 (r + (p + 1)) x₀
+            ((pureRFrozenDiffOp (I := I) (M := M) g (smoothOrthoFrame (I := I) g x₀)
+              (fun i => smoothOrthoFrame_smooth (I := I) g x₀ i) (p + 1) r W).toSection x₀) ≤
+          kappaHigh p r * riemannianFiberNormSq (I := I) (M := M) g 0 r x₀ (W.toSection x₀) := by
+  sorry
+
+/-- **The order-`0` layer of the frozen-frame curvature envelope, proved at the centre frame.** For a
+closed smooth Riemannian manifold `(M, g)` there is a nonnegative rank-indexed family `kappa0 : ℕ → ℝ`,
+**uniform over the centre `x₀`**, such that the order-`0` frozen-frame pure-Riemann curvature
+endomorphism at the centre frame `smoothOrthoFrame g x₀`, evaluated at its own centre `x₀`, has
+intrinsic squared fibre norm at most `kappa0 r` times that of `W`:
+```
+rfns(pureRFrozenDiffOp g (smoothOrthoFrame g x₀) … 0 r W)(x₀) ≤ kappa0 r · rfns(W)(x₀).
+```
+
+At rank `r = 0` the operator is the zero endomorphism and the bound is trivial; at rank `r = m + 1`
+the endomorphism fibre `covGradBundleEquiv 0 m x₀ (∑ᵢ R(B_iˣ⁰, ·)(slot0_{B_iˣ⁰} W))` is read by the
+slot-`0` Parseval frame-sum over a `g_{x₀}`-orthonormal frame `e`, each slice being the curvature
+contraction `∑ᵢ R(B_iˣ⁰, e_a)(slot0_{B_iˣ⁰} W)`, fibre-bounded by the rank-`m` curvature sup
+(`exists_uniform_riemannOp_tensorCov_proportional`) times the orthonormal Gram factors
+`g(B_iˣ⁰, B_iˣ⁰) = g(e_a, e_a) = 1` (`smoothOrthoFrame_orthonormal_at_center`) and the slot-`0`
+reading fibre norm `rfns((covGradBundleEquiv 0 m x₀).symm (W x₀) (B_iˣ⁰))(x₀) ≤ rfns(W)(x₀)`
+(`covGradBundleEquiv_symm_reading_rfns_le`), giving `kappa0 (m + 1) = N³ · Csup m`. -/
+theorem exists_proportional_pureRFrozenFrameDiffOp_orderZero
+    (g : SmoothRiemannianMetric I M) :
+    ∃ kappa0 : ℕ → ℝ, (∀ r, 0 ≤ kappa0 r) ∧
+      ∀ (r : ℕ) (W : SmoothCcTensor g 0 r) (x₀ : M),
+        riemannianFiberNormSq (I := I) (M := M) g 0 (r + 0) x₀
+            ((pureRFrozenDiffOp (I := I) (M := M) g (smoothOrthoFrame (I := I) g x₀)
+              (fun i => smoothOrthoFrame_smooth (I := I) g x₀ i) 0 r W).toSection x₀) ≤
+          kappa0 r * riemannianFiberNormSq (I := I) (M := M) g 0 r x₀ (W.toSection x₀) := by
+  classical
+  set N : ℝ := (Module.finrank ℝ E : ℝ) with hN_def
+  -- The rank-`m` curvature sups give the order-`0` constant family.
+  choose Csup hCsup_nonneg hCsup using fun m =>
+    exists_uniform_riemannOp_tensorCov_proportional (I := I) (M := M) g m
+  refine ⟨fun r => match r with | 0 => 0 | (m + 1) => N ^ 3 * Csup m,
+    fun r => ?_, fun r W x₀ => ?_⟩
+  · -- Nonnegativity of the constant family.
+    cases r with
+    | zero => exact le_refl 0
+    | succ m => exact mul_nonneg (by positivity) (hCsup_nonneg m)
+  -- The order-`0` operator is `pureRFrozenEndo0 g B hB r W`; case on the rank.
+  rw [show (pureRFrozenDiffOp (I := I) (M := M) g (smoothOrthoFrame (I := I) g x₀)
+        (fun i => smoothOrthoFrame_smooth (I := I) g x₀ i) 0 r W) =
+      pureRFrozenEndo0 (I := I) (M := M) g (smoothOrthoFrame (I := I) g x₀)
+        (fun i => smoothOrthoFrame_smooth (I := I) g x₀ i) r W from rfl]
+  cases r with
+  | zero =>
+      -- Rank `0`: the endomorphism is the zero operator, fibre norm `0`.
+      rw [show ((pureRFrozenEndo0 (I := I) (M := M) g (smoothOrthoFrame (I := I) g x₀)
+            (fun i => smoothOrthoFrame_smooth (I := I) g x₀ i) 0 W).toSection x₀ :
+            TensorRSSpace 0 (0 + 0) I x₀) = (0 : TensorRSSpace 0 (0 + 0) I x₀) from rfl]
+      rw [riemannianFiberNormSq_zero]
+      have hrhs0 : (fun r => match r with
+          | 0 => (0 : ℝ) | (m + 1) => N ^ 3 * Csup m) 0 = 0 := rfl
+      rw [hrhs0, zero_mul]
+  | succ m =>
+      -- Rank `m + 1`: the genuine frozen-frame endomorphism.
+      set B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b := smoothOrthoFrame (I := I) g x₀
+        with hB_def
+      have hBorth : ∀ i j : Fin (Module.finrank ℝ E),
+          g.inner x₀ (B i x₀) (B j x₀) = if i = j then (1 : ℝ) else 0 := by
+        intro i j; rw [hB_def]; exact smoothOrthoFrame_orthonormal_at_center (I := I) g x₀ i j
+      -- A `g_{x₀}`-orthonormal Parseval frame `e` with `n = finrank` directions.
+      obtain ⟨n, e, _bse, hn, _hbse_eq, horth, _hpars, _hexp, _hreprm1⟩ :=
+        tangent_orthonormalBasisS_witness (I := I) (M := M) g (m + 1) x₀
+      set K₀ : Fin 0 → Fin n := fun k => k.elim0 with hK₀
+      -- The `fiberNormSqSummand` representations of the fibre norm in frame `e`, at ranks `m`, `m+1`.
+      have hreprS : ∀ S : TensorRSSpace 0 m I x₀,
+          riemannianFiberNormSq (I := I) (M := M) g 0 m x₀ S =
+            ∑ K : Fin 0 → Fin n, ∑ J : Fin m → Fin n,
+              fiberNormSqSummand (I := I) (M := M) g x₀ 0 m S n e K J :=
+        fun S => rfns_eq_sum_fiberNormSqSummand_of_orthoFrame (I := I) (M := M) g m x₀ S e
+          (by rw [hn]) horth
+      have hreprSucc : ∀ S : TensorRSSpace 0 (m + 1) I x₀,
+          riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x₀ S =
+            ∑ K : Fin 0 → Fin n, ∑ J : Fin (m + 1) → Fin n,
+              fiberNormSqSummand (I := I) (M := M) g x₀ 0 (m + 1) S n e K J :=
+        fun S => rfns_eq_sum_fiberNormSqSummand_of_orthoFrame (I := I) (M := M) g (m + 1) x₀ S e
+          (by rw [hn]) horth
+      -- The order-`0` endomorphism fibre at `x₀`.
+      rw [show (pureRFrozenEndo0 (I := I) (M := M) g B
+            (fun i => smoothOrthoFrame_smooth (I := I) g x₀ i) (m + 1) W).toSection x₀ =
+          pureRFrozenEndoFib (I := I) (M := M) g m B W x₀ from rfl]
+      -- Step 1: Parseval frame-sum over the slot-`0` direction `e a`.
+      rw [riemannianFiberNormSq_succ_eq_sum_slot0Curry_of_frame (I := I) (M := M) g m x₀ e K₀
+        hreprS hreprSucc (pureRFrozenEndoFib (I := I) (M := M) g m B W x₀)]
+      -- Step 2: each slice equals the curvature direction CLM at `e a`.
+      have hslice : ∀ a : Fin n,
+          riemannianFiberNormSq (I := I) (M := M) g 0 m x₀
+              (slot0Curry (I := I) (M := M) g x₀ m e K₀
+                (pureRFrozenEndoFib (I := I) (M := M) g m B W x₀) a) =
+            riemannianFiberNormSq (I := I) (M := M) g 0 m x₀
+              (pureRFrozenDirCLM (I := I) (M := M) g m B (fun y : M => W.toSection y) x₀ (e a)) :=
+        fun a => pureRFrozenEndoFib_slot0Curry_rfns_eq (I := I) (M := M) g m B W x₀ e K₀ hreprS a
+      rw [Finset.sum_congr rfl (fun a (_ : a ∈ Finset.univ) => hslice a)]
+      -- Step 3: per-direction bound on the curvature contraction `∑ᵢ R(Bᵢ, e a)(reading_i)`.
+      set Csm : ℝ := Csup m with hCsm_def
+      have hper : ∀ a : Fin n,
+          riemannianFiberNormSq (I := I) (M := M) g 0 m x₀
+              (pureRFrozenDirCLM (I := I) (M := M) g m B (fun y : M => W.toSection y) x₀ (e a)) ≤
+            (n : ℝ) * ((n : ℝ) * (Csm *
+              riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x₀ (W.toSection x₀))) := by
+        intro a
+        rw [pureRFrozenDirCLM_apply (I := I) (M := M) g m B (fun y : M => W.toSection y) x₀ (e a)]
+        -- `n`-subadditivity over the frame index `i`.
+        refine le_trans (riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g 0 m x₀
+          (Finset.univ : Finset (Fin (Module.finrank ℝ E))) _) ?_
+        rw [Finset.card_univ, Fintype.card_fin]
+        -- The `i`-sum is bounded by `n` copies of the curvature-sup bound on the reading.
+        have hcard_le : (Module.finrank ℝ E : ℝ) = (n : ℝ) := by rw [hn]; rfl
+        rw [hcard_le]
+        refine mul_le_mul_of_nonneg_left ?_ (Nat.cast_nonneg n)
+        -- Each summand: curvature sup × unit Gram × slot-`0` reading domination.
+        have hsummand : ∀ i : Fin (Module.finrank ℝ E),
+            riemannianFiberNormSq (I := I) (M := M) g 0 m x₀
+                (riemannOp (tensorCov (I := I) g 0 m) x₀ (B i x₀) (e a)
+                  ((covGradBundleEquiv (I := I) (M := M) 0 m x₀).symm (W.toSection x₀) (B i x₀))) ≤
+              Csm * riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x₀ (W.toSection x₀) := by
+          intro i
+          have hgB : g.inner x₀ (B i x₀) (B i x₀) = 1 := by
+            have := hBorth i i; rwa [if_pos rfl] at this
+          have hge : g.inner x₀ (e a) (e a) = 1 := by
+            have := horth a a; rwa [if_pos rfl] at this
+          have hbound := hCsup m x₀ (B i x₀) (e a)
+            ((covGradBundleEquiv (I := I) (M := M) 0 m x₀).symm (W.toSection x₀) (B i x₀))
+          rw [hgB, hge, mul_one, mul_one, ← hCsm_def] at hbound
+          refine le_trans hbound ?_
+          refine mul_le_mul_of_nonneg_left ?_ (by rw [hCsm_def]; exact hCsup_nonneg m)
+          -- The slot-`0` reading along `B i x₀` is dominated by the full `(0, m+1)` fibre norm.
+          -- `B i x₀ = e' a'` for the centre frame `e' a' := B a' x₀`; use the reading domination.
+          exact covGradBundleEquiv_symm_reading_rfns_le_centreFrame (I := I) (M := M) g m x₀
+            (W.toSection x₀) B hBorth i
+        refine le_trans (Finset.sum_le_sum (fun i _ => hsummand i)) ?_
+        rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, hcard_le]
+      -- Step 4: assemble the frame sum into `kappa0 (m+1) = n³ · Csup m`.
+      refine le_trans (Finset.sum_le_sum (fun a _ => hper a)) ?_
+      rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+      have hn_eq : (n : ℝ) = N := by rw [hn, hN_def]; rfl
+      have hrhs : (fun r => match r with
+          | 0 => (0 : ℝ) | (m' + 1) => N ^ 3 * Csup m') (m + 1) = N ^ 3 * Csup m := rfl
+      rw [hn_eq, hCsm_def, hrhs]
+      exact le_of_eq (by ring)
+
+
 /-- **Posited centre-uniform at-centre per-order, per-rank section-proportional fibre envelope for the
 differentiated frozen-frame pure-Riemann curvature tower.** For a closed smooth Riemannian manifold
 `(M, g)` there is a *valence/order-dependent* nonnegative envelope family `kappa : ℕ → ℕ → ℝ` (indexed
@@ -431,7 +981,29 @@ theorem exists_proportional_pureRFrozenFrameDiffOp (g : SmoothRiemannianMetric I
             ((pureRFrozenDiffOp (I := I) (M := M) g (smoothOrthoFrame (I := I) g x₀)
               (fun i => smoothOrthoFrame_smooth (I := I) g x₀ i) p r W).toSection x₀) ≤
           kappa p r * riemannianFiberNormSq (I := I) (M := M) g 0 r x₀ (W.toSection x₀) := by
-  sorry
+  classical
+  -- The order-`0` layer (proved) and the high-order `p ≥ 1` layer (the posited diagonal-jet primitive).
+  obtain ⟨kappa0, hkappa0_nn, hkappa0⟩ :=
+    exists_proportional_pureRFrozenFrameDiffOp_orderZero (I := I) (M := M) g
+  obtain ⟨kappaHigh, hkappaHigh_nn, hkappaHigh⟩ :=
+    exists_proportional_pureRFrozenFrameDiffOp_highOrder (I := I) (M := M) g
+  -- Combine into a single per-order, per-rank family: `p = 0` uses `kappa0`, `p + 1` uses `kappaHigh`.
+  refine ⟨fun p r => match p with | 0 => kappa0 r | (p' + 1) => kappaHigh p' r,
+    fun p r => ?_, fun p r W x₀ => ?_⟩
+  · cases p with
+    | zero => exact hkappa0_nn r
+    | succ p' => exact hkappaHigh_nn p' r
+  · cases p with
+    | zero =>
+        have h := hkappa0 r W x₀
+        rw [show (fun p r => match p with
+            | 0 => kappa0 r | (p' + 1) => kappaHigh p' r) 0 r = kappa0 r from rfl]
+        exact h
+    | succ p' =>
+        have h := hkappaHigh p' r W x₀
+        rw [show (fun p r => match p with
+            | 0 => kappa0 r | (p'' + 1) => kappaHigh p'' r) (p' + 1) r = kappaHigh p' r from rfl]
+        exact h
 
 /-- **The slot-`0` reading of the differentiated section `∇S` along `B_i` is the directional covariant
 derivative `∇_{B_iˣ} S`.** `(covGradBundleEquiv 0 s x).symm ((covGrad g 0 s S).toSection x) (B_iˣ) =

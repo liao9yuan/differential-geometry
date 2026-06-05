@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.RiemannianFiberNormSqRiemannOpHigherRankParseval
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTrivialisationOpNorm.ChartRiemannDataUniformBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorCurvatureUnitEvalBridge
 import Mathlib.Topology.Order.Compact
 
 /-!
@@ -48,7 +49,7 @@ namespace Connection
 open DifferentialGeometry.Integral.Measure
 open Tensor0SBundle
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+variable {E : Type*} [NormedAddCommGroup E]
   [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -58,7 +59,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 /-- `finrank ℝ (Tensor0SModel t ℝ E) = (finrank ℝ E) ^ t`. Re-derivation of the chart-inner
 finrank fact by induction on the multilinear-curry equivalences. -/
-private lemma finrank_tensor0SModel_eq (t : ℕ) :
+private lemma finrank_tensor0SModel_eq_cfec (t : ℕ) :
     Module.finrank ℝ (Tensor0SModel t ℝ E) = (Module.finrank ℝ E) ^ t := by
   induction t with
   | zero =>
@@ -94,8 +95,8 @@ private lemma finrank_tensorRSSpace_zero_eq (t : ℕ) (x : M) :
       right_inv := fun _ => rfl
       map_add' := fun _ _ => rfl
       map_smul' := fun _ _ => rfl }
-  rw [φ.finrank_eq, Module.finrank_linearMap, finrank_tensor0SModel_eq,
-    finrank_tensor0SModel_eq, pow_zero, one_mul]
+  rw [φ.finrank_eq, Module.finrank_linearMap, finrank_tensor0SModel_eq_cfec,
+    finrank_tensor0SModel_eq_cfec, pow_zero, one_mul]
 
 /-- **The `g`-orthonormal frame in the rfns representation is a `Module.Basis` (rank `≥ 1`).**
 For a `g`-orthonormal family `e : Fin n → T_x M` (`horth`) that represents the intrinsic fibre
@@ -246,8 +247,8 @@ theorem exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_single_term_bound
         ∀ (i j : Fin n) (J : Fin t → Fin n),
           riemannianFiberNormSq (I := I) (M := M) g 0 t x
             (riemannOp (tensorCov (I := I) g 0 t) x (e i) (e j)
-              (dualTensorFrameS (I := I) (M := M) g x t e J)) ≤ K := by
-  sorry
+              (dualTensorFrameS (I := I) (M := M) g x t e J)) ≤ K :=
+  exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_single_term_bound' (I := I) (M := M) g t
 
 /-- **Posited uniform-over-`M` dual-frame curvature energy constant.** For a smooth Riemannian
 metric `g` on a closed manifold `M` and any covariant rank `t`, there is a *single* nonnegative
