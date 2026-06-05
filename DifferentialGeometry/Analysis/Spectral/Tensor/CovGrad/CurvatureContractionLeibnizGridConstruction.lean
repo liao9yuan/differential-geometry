@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformCurvatureSup
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricContractionLeibnizGrid
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FiberNormSubadditivity
 
 /-! # The covariant-Leibniz curvature-coefficient grid for the metric contraction, constructed
@@ -29,25 +30,27 @@ the curvature contraction's own double grid: a sum over the differentiation orde
 curvature factor `∇^p R` (the operator `diffCurvOp p`) and the gradient order `q` of the contracted
 section `W`,
 ```
-rfns(∇^j(R W))(x) ≤ A j · ∑_{p ≤ j} kappa p · ∑_{q ≤ j} rfns(∇^q W)(x).
+rfns(∇^j(R W))(x) ≤ 4^j · gridWindowSum kappa 0 r j · ∑_{q ≤ j} rfns(∇^q W)(x),
 ```
-The curvature factor enters only as the *base-point-uniform, section-proportional* coefficient
-`kappa p` — the proportional fibre-operator norm of the smooth fixed operator `diffCurvOp p` on the
-compact `M` — while only the gradient order `q` of the *section* survives as a fibre-norm grid; the
-constant `A j := 2 ^ j` absorbs the binomial coefficients of the exact covariant Leibniz expansion.
+where `gridWindowSum kappa 0 r j = ∑_{p ≤ j} ∑_{r' ≤ j} kappa p (r + r')` is the order × rank window
+sum. The curvature factor enters only as the *base-point-uniform, section-proportional, per-rank*
+coefficient `kappa p r` — the proportional fibre-operator norm of the smooth fixed operator
+`diffCurvOp p` at rank `r` on the compact `M` (the rank coordinate is genuine: the rank-`r` curvature
+derivation acts on all `r` slots) — while only the gradient order `q` of the *section* survives as a
+fibre-norm grid; the `4^j` absorbs the binomial coefficients of the exact covariant Leibniz expansion.
 
 ## What is posited vs. derived
 
-The single genuinely-irreducible analytic primitive is the **per-order section-proportional fibre
-bound for the differentiated-curvature contraction operators**, `exists_proportional_diffCurvOp`:
-`rfns(diffCurvOp p r W)(x) ≤ kappa p · rfns(W)(x)`. Each `diffCurvOp p` is a smooth fixed
+The single genuinely-irreducible analytic primitive is the **per-order, per-rank section-proportional
+fibre bound for the differentiated-curvature contraction operators**, `exists_proportional_diffCurvOp`:
+`rfns(diffCurvOp p r W)(x) ≤ kappa p r · rfns(W)(x)`. Each `diffCurvOp p` is a smooth fixed
 fibrewise-linear operator (a recursive Leibniz remainder of the smooth curvature contraction), so it
-is uniformly bounded, proportionally to its section, on the compact `M` — the order-`0` case
-`kappa 0` is the curvature operator's own uniform proportional bound
-`exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional`. It is posited here as the
-precise true primitive; consumers transitively depend on `sorryAx` through it. The degenerate witness
-is rejected: at `p = 0`, `j = 0` the grid reads `rfns(R W)(x) ≤ A 0 · kappa 0 · rfns(W)(x)`, false
-with `kappa 0 = 0` on a non-flat manifold whenever `R W ≠ 0`.
+is uniformly bounded, proportionally to its section, on the compact `M` — the order-`0`, rank-`r` case
+`kappa 0 r` is the rank-`r` curvature operator's own uniform proportional bound
+`exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional` (rank-`r`-indexed). It is
+posited here as the precise true primitive; consumers transitively depend on `sorryAx` through it. The
+degenerate witness is rejected: at `p = 0`, `j = 0` the grid reads `rfns(R W)(x) ≤ kappa 0 r · rfns(W)(x)`,
+false with `kappa 0 r = 0` on a non-flat manifold whenever `R W ≠ 0`.
 
 Everything else — the recursive operator construction, the binomial covariant-Leibniz induction
 (through `riemannianFiberNormSq_add_le` and the iterated-gradient additivity `iteratedCovGrad_add`),
@@ -205,16 +208,16 @@ theorem covGrad_diffCurvOp_eq (p r : ℕ) (W : SmoothCcTensor g 0 r) :
           (covGrad (I := I) (M := M) g 0 r W))) + _
   rw [sub_add_cancel]
 
-/-- **Posited continuous per-order section-proportional fibre envelope for the differentiated-curvature
-contraction.** For a closed smooth Riemannian manifold `(M, g)` and smooth global tangent fields
-`X, Y`, and at every differentiation order `p`, there is a *continuous* nonnegative envelope
-`Cp : M → ℝ` such that, for every covariant rank `r`, every smooth compactly-supported `(0, r)`-tensor
-section `W`, and every point `x`, the order-`p` differentiated-curvature contraction
-`(∇^p R)(X, Y) W = diffCurvOp p r W` has intrinsic squared fibre norm at most `Cp x` times that of
-`W`:
+/-- **Posited continuous per-order, per-rank section-proportional fibre envelope for the
+differentiated-curvature contraction.** For a closed smooth Riemannian manifold `(M, g)` and smooth
+global tangent fields `X, Y`, and at every differentiation order `p` **and covariant rank `r`**, there
+is a *continuous* nonnegative envelope `Cp : ℕ → M → ℝ` (indexed by rank `r` and point `x`) such that,
+for every smooth compactly-supported `(0, r)`-tensor section `W` and every point `x`, the order-`p`
+differentiated-curvature contraction `(∇^p R)(X, Y) W = diffCurvOp p r W` has intrinsic squared fibre
+norm at most `Cp r x` times that of `W`:
 
 ```
-rfns(diffCurvOp p r W)(x) ≤ Cp x · rfns(W)(x).
+rfns(diffCurvOp p r W)(x) ≤ Cp r x · rfns(W)(x).
 ```
 
 **Why this is TRUE.** Each `diffCurvOp p` is a smooth *fixed* fibrewise-`ℝ`-linear operator on tensor
@@ -225,61 +228,69 @@ with `rfns(diffCurvOp p r W)(x) ≤ c · rfns(W)(x)` for all `W` at `x` — is *
 the constituent chart Christoffel / Riemann coordinate data and their iterated partials are `C^∞` and
 uniformly bounded on the compact chart partition-of-unity supports
 (`exists_chartRiemannData_uniform_bound_compact`), controlled through the forward chart-frame Gram
-Rayleigh route on the positive-definite chart Gram matrix. The order-`0` case `Cp = `
-`Ccurv x · g(X x, X x) · g(Y x, Y x)` is exactly the existing continuous curvature-operator envelope
-`exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional` (continuous, with
-`g(X x, X x)`, `g(Y x, Y x)` continuous by smoothness). This is the same continuity-of-the-iterated-
-curvature-operator-norm analytic primitive that the existing order-`0` curvature envelope
-`exists_continuous_riemannOp_tensorCovS_frameEnergy_bound` is itself discharged by, here lifted to
-every differentiation order `p`; it is the genuinely-irreducible analytic content posited as the
-precise primitive (the chart-locality-free route — no `HasLocallyConstantChartAt`, no
-chart-trivialisation operator-norm scalar).
+Rayleigh route on the positive-definite chart Gram matrix.
 
-**Non-vacuity.** A degenerate witness `Cp ≡ 0` is rejected on any non-flat manifold: at `p = 0`, at a
-point `x` and a section `W` with `R(X, Y) W ≠ 0`, one has `rfns(diffCurvOp 0 r W)(x) > 0` while
-`0 · rfns(W)(x) = 0`, contradicting the bound. So the envelope must carry the genuine curvature
+**Restatement note (certificate-sanctioned restatement #1).** The earlier rank-free `Cp : M → ℝ` form
+is FALSE: the order-`p` differentiated-curvature contraction `diffCurvOp p r` acts through the rank-`r`
+curvature derivation `riemannOp (tensorCov g 0 r)`, which is a derivation on *all* `r` tensor slots,
+so its raw Hilbert–Schmidt fibre-operator constant — the dual-frame energy is slot-summed — grows with
+the rank `r`; no single rank-free `Cp x` covers all ranks. The order-`0` case `Cp 0 x = `
+`Ccurv 0 x · g(X x, X x) · g(Y x, Y x)`, and at general rank `r`, `Cp r x = `
+`Ccurv r x · g(X x, X x) · g(Y x, Y x)`, with `Ccurv r` the *rank-`r`* continuous curvature-operator
+envelope `exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional` (which is itself
+rank-`r`-indexed, with `g(X x, X x)`, `g(Y x, Y x)` continuous by smoothness). This is the same
+continuity-of-the-iterated-curvature-operator-norm analytic primitive that the existing order-`0`
+curvature envelope `exists_continuous_riemannOp_tensorCovS_frameEnergy_bound` is itself discharged by,
+here lifted to every differentiation order `p` and every rank `r`; it is the genuinely-irreducible
+analytic content posited as the precise primitive (the chart-locality-free route — no
+`HasLocallyConstantChartAt`, no chart-trivialisation operator-norm scalar).
+
+**Non-vacuity.** A degenerate witness `Cp ≡ 0` is rejected on any non-flat manifold: at `p = 0`, some
+rank `r`, a point `x` and a section `W` with `R(X, Y) W ≠ 0`, one has `rfns(diffCurvOp 0 r W)(x) > 0`
+while `0 · rfns(W)(x) = 0`, contradicting the bound. So the envelope must carry the genuine curvature
 magnitude; it genuinely *uses* `W` (the operator is applied to `W`), so it is not a vacuous
 predicate. -/
 theorem exists_continuous_proportional_diffCurvOp (p : ℕ) :
-    ∃ Cp : M → ℝ, Continuous Cp ∧ (∀ x, 0 ≤ Cp x) ∧
+    ∃ Cp : ℕ → M → ℝ, (∀ r, Continuous (Cp r)) ∧ (∀ r x, 0 ≤ Cp r x) ∧
       ∀ (r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + p) x
             ((diffCurvOp (I := I) (M := M) g hX hY p r W).toSection x) ≤
-          Cp x * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x) := by
+          Cp r x * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x) := by
   sorry
 
 set_option linter.unusedSectionVars false in
-/-- **Per-order section-proportional fibre bound for the differentiated-curvature contraction,
-uniform over the compact manifold.** Derived from the posited continuous envelope
+/-- **Per-order, per-rank section-proportional fibre bound for the differentiated-curvature
+contraction, uniform over the compact manifold.** Derived from the posited continuous envelope
 `exists_continuous_proportional_diffCurvOp` by supremising over the compact `M`: the uniform
-coefficient `kappa p` is the supremum of the continuous envelope `Cp` (a continuous real function on
-a compact space has bounded range, `IsCompact.bddAbove_image`), so for every differentiation order
-`p`, covariant rank `r`, section `W` and point `x`,
+coefficient `kappa p r` is the supremum of the continuous rank-`r` envelope `Cp p r` (a continuous
+real function on a compact space has bounded range, `IsCompact.bddAbove_image`), so for every
+differentiation order `p`, covariant rank `r`, section `W` and point `x`,
 
 ```
-rfns(diffCurvOp p r W)(x) ≤ kappa p · rfns(W)(x).
+rfns(diffCurvOp p r W)(x) ≤ kappa p r · rfns(W)(x).
 ```
 
-This is the base-point-uniform coefficient family the binomial covariant-Leibniz grid consumes; it
-depends on `sorryAx` only through the continuous-envelope primitive. -/
+This is the base-point-uniform, **per-rank** coefficient family the binomial covariant-Leibniz grid
+consumes; the rank index is genuine (the rank-`r` curvature derivation's fibre constant grows with the
+slot count `r`). It depends on `sorryAx` only through the continuous-envelope primitive. -/
 theorem exists_proportional_diffCurvOp :
-    ∃ kappa : ℕ → ℝ, (∀ p, 0 ≤ kappa p) ∧
+    ∃ kappa : ℕ → ℕ → ℝ, (∀ p r, 0 ≤ kappa p r) ∧
       ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + p) x
             ((diffCurvOp (I := I) (M := M) g hX hY p r W).toSection x) ≤
-          kappa p * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x) := by
+          kappa p r * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x) := by
   classical
   choose Cp hCp_cont hCp_nn hCp_bound using
     fun p => exists_continuous_proportional_diffCurvOp (I := I) (M := M) g hX hY p
-  refine ⟨fun p => sSup (Set.range (Cp p)), fun p => ?_, fun p r W x => ?_⟩
+  refine ⟨fun p r => sSup (Set.range (Cp p r)), fun p r => ?_, fun p r W x => ?_⟩
   · -- The supremum of a nonnegative continuous function on the compact `M` is nonnegative.
-    have hbdd : BddAbove (Set.range (Cp p)) := (isCompact_range (hCp_cont p)).bddAbove
+    have hbdd : BddAbove (Set.range (Cp p r)) := (isCompact_range (hCp_cont p r)).bddAbove
     rcases isEmpty_or_nonempty M with hM | hM
-    · simp [Set.range_eq_empty (f := Cp p)]
+    · simp [Set.range_eq_empty (f := Cp p r)]
     · obtain ⟨x₀⟩ := hM
-      exact le_trans (hCp_nn p x₀) (le_csSup hbdd ⟨x₀, rfl⟩)
-  · have hbdd : BddAbove (Set.range (Cp p)) := (isCompact_range (hCp_cont p)).bddAbove
-    have hCp_le : Cp p x ≤ sSup (Set.range (Cp p)) := le_csSup hbdd ⟨x, rfl⟩
+      exact le_trans (hCp_nn p r x₀) (le_csSup hbdd ⟨x₀, rfl⟩)
+  · have hbdd : BddAbove (Set.range (Cp p r)) := (isCompact_range (hCp_cont p r)).bddAbove
+    have hCp_le : Cp p r x ≤ sSup (Set.range (Cp p r)) := le_csSup hbdd ⟨x, rfl⟩
     refine (hCp_bound p r W x).trans ?_
     exact mul_le_mul_of_nonneg_right hCp_le
       (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 r x _)
@@ -301,11 +312,11 @@ private lemma sum_range_shift_le (n : ℕ) (f : ℕ → ℝ)
 
 section GridInduction
 
-variable {kappa : ℕ → ℝ} (hkappa_nn : ∀ p, 0 ≤ kappa p)
+variable {kappa : ℕ → ℕ → ℝ} (hkappa_nn : ∀ p r, 0 ≤ kappa p r)
   (hkappa : ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
     riemannianFiberNormSq (I := I) (M := M) g 0 (r + p) x
         ((diffCurvOp (I := I) (M := M) g hX hY p r W).toSection x) ≤
-      kappa p * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x))
+      kappa p r * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x))
 
 include hkappa_nn hkappa in
 set_option linter.unusedSectionVars false in
@@ -326,37 +337,39 @@ covariant gradient by the exact Leibniz identity `covGrad_diffCurvOp_eq` and dis
 (`iteratedCovGrad_add`), bounds the resulting sum by `riemannianFiberNormSq_add_le`, recurses on the
 two pieces (the higher-order remainder `diffCurvOp (p + 1)`, and the lower-order operator on `∇W`
 front-commuted by `rfns_iteratedCovGrad_covGrad_comm_lg` and rank-cast by
-`rfns_iteratedCovGrad_castRankCc_lg`), and dominates both by the common `range (j + 2)` grids, the two
-copies combining into the `4^{j + 1}` factor. -/
+`rfns_iteratedCovGrad_castRankCc_lg`), and dominates both by the common order × rank window
+`gridWindowSum kappa p r (j + 1)` (the order window `[p, p + j + 1]` and rank window `[r, r + j + 1]`
+the recursion climbs — the rank coordinate is genuine, `kappa` being per-rank) and the gradient grid
+`range (j + 2)`, the two copies combining into the `4^{j + 1}` factor. -/
 theorem rfns_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
     ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
       riemannianFiberNormSq (I := I) (M := M) g 0 ((r + p) + j) x
           ((iteratedCovGrad g 0 (r + p) j
             (diffCurvOp (I := I) (M := M) g hX hY p r W)).toSection x) ≤
-        (4 : ℝ) ^ j * ∑ p' ∈ Finset.range (j + 1), kappa (p + p') *
+        (4 : ℝ) ^ j * gridWindowSum kappa p r j *
           ∑ q ∈ Finset.range (j + 1),
             riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
               ((iteratedCovGrad g 0 r q W).toSection x) := by
   induction j with
   | zero =>
       intro p r W x
-      have hrhs : (4 : ℝ) ^ 0 * ∑ p' ∈ Finset.range (0 + 1), kappa (p + p') *
+      have hrhs : (4 : ℝ) ^ 0 * gridWindowSum kappa p r 0 *
             ∑ q ∈ Finset.range (0 + 1),
               riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
                 ((iteratedCovGrad g 0 r q W).toSection x) =
-          kappa p * riemannianFiberNormSq (I := I) (M := M) g 0 (r + 0) x
+          kappa p r * riemannianFiberNormSq (I := I) (M := M) g 0 (r + 0) x
             ((iteratedCovGrad g 0 r 0 W).toSection x) := by
-        rw [pow_zero, one_mul, Finset.sum_range_one, Finset.sum_range_one, add_zero]
+        rw [pow_zero, one_mul, gridWindowSum_zero, Finset.sum_range_one]
       rw [iteratedCovGrad_zero, hrhs, iteratedCovGrad_zero]
       exact hkappa p r W x
   | succ j ih =>
       intro p r W x
-      -- Abbreviations for the target curvature-order sum `K` and gradient-order grid `S` at j+1.
-      set K : ℝ := ∑ p' ∈ Finset.range (j + 1 + 1), kappa (p + p') with hK_def
+      -- Abbreviations for the target order × rank window `K` and gradient-order grid `S` at j+1.
+      set K : ℝ := gridWindowSum kappa p r (j + 1) with hK_def
       set S : ℝ := ∑ q ∈ Finset.range (j + 1 + 1),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
           ((iteratedCovGrad g 0 r q W).toSection x) with hS_def
-      have hK_nn : 0 ≤ K := Finset.sum_nonneg fun p' _ => hkappa_nn (p + p')
+      have hK_nn : 0 ≤ K := gridWindowSum_nonneg hkappa_nn p r (j + 1)
       have hS_nn : 0 ≤ S := Finset.sum_nonneg fun q _ =>
         riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + q) x _
       have hpow_nn : (0 : ℝ) ≤ (4 : ℝ) ^ j := by positivity
@@ -378,10 +391,10 @@ theorem rfns_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
             (castRankCc_lg g 0 (by omega : (r + 1) + p = r + (p + 1))
               (diffCurvOp (I := I) (M := M) g hX hY p (r + 1)
                 (covGrad (I := I) (M := M) g 0 r W)))).toSection x)).trans ?_
-      -- Abbreviate the curvature-order sums (`kA`, `kB`) and gradient grids (`sA`, `sB`) of the two
-      -- pieces, each dominated by the target `K` resp. `S`.
-      set kA : ℝ := ∑ p' ∈ Finset.range (j + 1), kappa ((p + 1) + p') with hkA_def
-      set kB : ℝ := ∑ p' ∈ Finset.range (j + 1), kappa (p + p') with hkB_def
+      -- Abbreviate the order × rank window sums (`kA`, `kB`) and gradient grids (`sA`, `sB`) of the
+      -- two pieces, each dominated by the target `K` resp. `S`.
+      set kA : ℝ := gridWindowSum kappa (p + 1) r j with hkA_def
+      set kB : ℝ := gridWindowSum kappa p (r + 1) j with hkB_def
       set sA : ℝ := ∑ q ∈ Finset.range (j + 1),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
           ((iteratedCovGrad g 0 r q W).toSection x) with hsA_def
@@ -394,16 +407,15 @@ theorem rfns_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
               (diffCurvOp (I := I) (M := M) g hX hY (p + 1) r W)).toSection x) ≤
           (4 : ℝ) ^ j * (kA * sA) := by
         refine (ih (p + 1) r W x).trans_eq ?_
-        rw [hkA_def, hsA_def, Finset.sum_mul]
+        rw [hkA_def, hsA_def, mul_assoc]
       have hB0 := ih p (r + 1) (covGrad (I := I) (M := M) g 0 r W) x
       -- Shift the second piece's `q`-grid `∇^q(∇W) = ∇^{q+1}W`.
-      have hBshift : ∑ p' ∈ Finset.range (j + 1), kappa (p + p') *
+      have hBshift : gridWindowSum kappa p (r + 1) j *
             ∑ q ∈ Finset.range (j + 1),
               riemannianFiberNormSq (I := I) (M := M) g 0 ((r + 1) + q) x
                 ((iteratedCovGrad g 0 (r + 1) q (covGrad (I := I) (M := M) g 0 r W)).toSection x) =
           kB * sB := by
-        rw [hkB_def, hsB_def, Finset.sum_mul]
-        refine Finset.sum_congr rfl fun p' _ => ?_
+        rw [hkB_def, hsB_def]
         congr 1
         exact Finset.sum_congr rfl fun q _ => rfns_iteratedCovGrad_covGrad_comm_lg g 0 r q W x
       have hB : riemannianFiberNormSq (I := I) (M := M) g 0 (((r + 1) + p) + j) x
@@ -412,16 +424,14 @@ theorem rfns_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
                 (covGrad (I := I) (M := M) g 0 r W))).toSection x) ≤
           (4 : ℝ) ^ j * (kB * sB) := by
         refine hB0.trans_eq ?_
-        rw [← hBshift]
-      -- The four sums are dominated by `K` resp. `S`, all nonnegative.
+        rw [mul_assoc, ← hBshift]
+      -- The four window/grid sums are dominated by `K` resp. `S`, all nonnegative.
       have hkA_le : kA ≤ K := by
         rw [hkA_def, hK_def]
-        refine (sum_range_shift_le (j + 1) (fun i => kappa (p + i))
-          (fun i _ => hkappa_nn (p + i))).trans' ?_
-        exact le_of_eq (Finset.sum_congr rfl fun p' _ => by congr 1; omega)
+        exact gridWindowSum_shift_le hkappa_nn p r j 1 0 le_rfl (Nat.zero_le _)
       have hkB_le : kB ≤ K := by
         rw [hkB_def, hK_def]
-        exact sum_range_le_succ_of_nonneg (j + 1) (fun p' => kappa (p + p')) (hkappa_nn (p + (j + 1)))
+        exact gridWindowSum_shift_le hkappa_nn p r j 0 1 (Nat.zero_le _) le_rfl
       have hsA_le : sA ≤ S := by
         rw [hsA_def, hS_def]
         exact sum_range_le_succ_of_nonneg (j + 1) _
@@ -432,8 +442,8 @@ theorem rfns_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
           (fun q => riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
             ((iteratedCovGrad g 0 r q W).toSection x))
           (fun q _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + q) x _)
-      have hkA_nn : 0 ≤ kA := Finset.sum_nonneg fun p' _ => hkappa_nn ((p + 1) + p')
-      have hkB_nn : 0 ≤ kB := Finset.sum_nonneg fun p' _ => hkappa_nn (p + p')
+      have hkA_nn : 0 ≤ kA := gridWindowSum_nonneg hkappa_nn (p + 1) r j
+      have hkB_nn : 0 ≤ kB := gridWindowSum_nonneg hkappa_nn p (r + 1) j
       have hsA_nn : 0 ≤ sA :=
         Finset.sum_nonneg fun q _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + q) x _
       have hsB_nn : 0 ≤ sB :=
@@ -451,11 +461,11 @@ theorem rfns_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
           mul_le_mul_of_nonneg_left hprodA hpow_nn,
           mul_le_mul_of_nonneg_left hprodB hpow_nn]
       have htarget : (4 : ℝ) ^ (j + 1) * (K * S) =
-          (4 : ℝ) ^ (j + 1) * ∑ p' ∈ Finset.range (j + 1 + 1), kappa (p + p') *
+          (4 : ℝ) ^ (j + 1) * gridWindowSum kappa p r (j + 1) *
             ∑ q ∈ Finset.range (j + 1 + 1),
               riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
                 ((iteratedCovGrad g 0 r q W).toSection x) := by
-        rw [hK_def, hS_def, Finset.sum_mul]
+        rw [hK_def, hS_def, mul_assoc]
       rw [htarget] at hgoal
       refine le_trans ?_ hgoal
       -- The second addend carries the rank-cast; convert it to `hB`'s uncast fibre norm.
@@ -479,39 +489,43 @@ end GridInduction
 
 set_option linter.unusedSectionVars false in
 /-- **The covariant-Leibniz curvature-coefficient grid for the metric contraction.** Assembling the
-posited per-order proportional bound `exists_proportional_diffCurvOp` (the curvature factor `∇^p R`
-as the base-point-uniform coefficient `kappa p`) with the constructed binomial covariant-Leibniz grid
-`rfns_iteratedCovGrad_diffCurvOp_grid` (specialised to differentiation order `p = 0`, where
-`diffCurvOp 0 s Z = curvatureContraction g s Z hX hY = R(X, Y) Z`), the `j`-fold iterated covariant
-gradient of the curvature contraction satisfies the coefficient grid
+posited per-order, per-rank proportional bound `exists_proportional_diffCurvOp` (the curvature factor
+`∇^p R` as the base-point-uniform, per-rank coefficient `kappa p r`) with the constructed binomial
+covariant-Leibniz grid `rfns_iteratedCovGrad_diffCurvOp_grid` (specialised to differentiation order
+`p = 0`, where `diffCurvOp 0 s Z = curvatureContraction g s Z hX hY = R(X, Y) Z`), the `j`-fold
+iterated covariant gradient of the curvature contraction satisfies the windowed coefficient grid
 
 ```
-rfns(∇^j(R(X, Y) Z))(x) ≤ 4^j · ∑_{p < j + 1} kappa p · ∑_{q < j + 1} rfns(∇^q Z)(x),
+rfns(∇^j(R(X, Y) Z))(x) ≤ 4^j · gridWindowSum kappa 0 s j · ∑_{q < j + 1} rfns(∇^q Z)(x),
 ```
 
-with `A j := 4^j` absorbing the binomial coefficients and `kappa` the per-order curvature-coefficient
-family. This is the precise conclusion the order-`m` curvature-jet induction consumes; consumers
-transitively depend on `sorryAx` only through `exists_proportional_diffCurvOp`. -/
+where `gridWindowSum kappa 0 s j = ∑_{p < j + 1} ∑_{r < j + 1} kappa p (s + r)` is the order × rank
+window sum over orders `[0, j]` and ranks `[s, s + j]` the covariant-Leibniz recursion climbs; the
+`4^j` absorbs the binomial coefficients and `kappa` is the per-order, per-rank curvature-coefficient
+family (the rank coordinate is genuine — the rank-`r` curvature derivation acts on all `r` slots). The
+former order-only `∑_{p < j + 1} kappa p` is replaced by the windowed sum because a single rank-uniform
+`kappa p` cannot bound the operator at all ranks the grid reaches. This is the precise conclusion the
+order-`m` curvature-jet induction consumes; consumers transitively depend on `sorryAx` only through
+`exists_proportional_diffCurvOp`. -/
 theorem exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_kappaGrid_le_of_construction
     (s : ℕ) :
-    ∃ (A : ℕ → ℝ) (kappa : ℕ → ℝ), (∀ j, 0 ≤ A j) ∧ (∀ p, 0 ≤ kappa p) ∧
+    ∃ kappa : ℕ → ℕ → ℝ, (∀ p r, 0 ≤ kappa p r) ∧
       ∀ (Z : SmoothCcTensor g 0 s) (j : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g 0 (s + j) x
             ((iteratedCovGrad g 0 s j (curvatureContraction (I := I) (M := M) g s Z hX hY)).toSection
               x) ≤
-          A j * ∑ p ∈ Finset.range (j + 1), kappa p *
+          (4 : ℝ) ^ j * gridWindowSum kappa 0 s j *
             ∑ q ∈ Finset.range (j + 1),
               riemannianFiberNormSq (I := I) (M := M) g 0 (s + q) x
                 ((iteratedCovGrad g 0 s q Z).toSection x) := by
   obtain ⟨kappa, hkappa_nn, hkappa⟩ := exists_proportional_diffCurvOp (I := I) (M := M) g hX hY
-  refine ⟨fun j => (4 : ℝ) ^ j, kappa, fun j => by positivity, hkappa_nn, fun Z j x => ?_⟩
+  refine ⟨kappa, hkappa_nn, fun Z j x => ?_⟩
   have hgrid := rfns_iteratedCovGrad_diffCurvOp_grid (I := I) (M := M) g hX hY
     hkappa_nn hkappa j 0 s Z x
-  -- `diffCurvOp 0 s Z = curvatureContraction g s Z hX hY`, and `s + 0 = s`, `0 + p' = p'`.
+  -- `diffCurvOp 0 s Z = curvatureContraction g s Z hX hY`, and `s + 0 = s`; the windowed grid is
+  -- already the claimed `4^j · gridWindowSum kappa 0 s j · ∑_q rfns`.
   rw [diffCurvOp_zero g hX hY s Z] at hgrid
-  refine hgrid.trans_eq ?_
-  refine congrArg (fun t => (4 : ℝ) ^ j * t) ?_
-  exact Finset.sum_congr rfl fun p' _ => by rw [Nat.zero_add]
+  simpa only [Nat.add_zero] using hgrid
 
 end Connection
 end Integral

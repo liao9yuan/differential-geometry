@@ -348,28 +348,33 @@ private theorem covGrad_pureRFrozenDiffOp_eq
           (covGrad (I := I) (M := M) g 0 r W))) + _
   rw [sub_add_cancel]
 
-/-- **Posited centre-uniform at-centre per-order section-proportional fibre envelope for the
+/-- **Posited centre-uniform at-centre per-order, per-rank section-proportional fibre envelope for the
 differentiated frozen-frame pure-Riemann curvature tower.** For a closed smooth Riemannian manifold
-`(M, g)` there is a *valence/order-dependent* nonnegative envelope family `kappa : ℕ → ℝ`, **uniform
-over the centre `x₀`**, such that for every differentiation order `p`, covariant rank `r`, smooth
-compactly-supported `(0, r)`-tensor `W`, and centre `x₀`, the order-`p` differentiated frozen-frame
-pure-Riemann curvature operator at the *centre frame* `smoothOrthoFrame g x₀`, evaluated at its own
-centre `x₀`, has intrinsic squared fibre norm at most `kappa p` times that of `W`:
+`(M, g)` there is a *valence/order-dependent* nonnegative envelope family `kappa : ℕ → ℕ → ℝ` (indexed
+by differentiation order `p` and covariant rank `r`), **uniform over the centre `x₀`**, such that for
+every differentiation order `p`, covariant rank `r`, smooth compactly-supported `(0, r)`-tensor `W`,
+and centre `x₀`, the order-`p` differentiated frozen-frame pure-Riemann curvature operator at the
+*centre frame* `smoothOrthoFrame g x₀`, evaluated at its own centre `x₀`, has intrinsic squared fibre
+norm at most `kappa p r` times that of `W`:
 
 ```
-rfns(pureRFrozenDiffOp g (smoothOrthoFrame g x₀) … p r W)(x₀) ≤ kappa p · rfns(W)(x₀).
+rfns(pureRFrozenDiffOp g (smoothOrthoFrame g x₀) … p r W)(x₀) ≤ kappa p r · rfns(W)(x₀).
 ```
 
-**Restatement note (certificate-sanctioned restatement #1).** The earlier `∀ B (smooth-only), x`
-free-frame form is FALSE: the operator is fibrewise-`ℝ`-bilinear in the contracted frame (`B_i` is
-contracted *twice*), hence quadratic in `B`, with no scale constraint on a generic smooth frame `B` —
-a frame with arbitrarily large vectors makes `rfns(op 0 r W)(x)` arbitrarily large while `rfns(W)(x)`
-is fixed, so no `B`-uniform `kappa` exists. The TRUE, centre-uniform form fixes the frame to the
-`g`-orthonormal `smoothOrthoFrame g x₀` and evaluates at its own centre `x₀`, where the frame is
-`g_{x₀}`-orthonormal (`smoothOrthoFrame_orthonormal_at_center`), so the twice-contracted Gram factors
-are `1` and the bound is the curvature magnitude only. This is exactly the frame the moving-centre
-curvature jet consumes (a per-`x₀` choice of centre frame), so the restriction loses nothing
-downstream.
+**Restatement note (certificate-sanctioned restatement #2).** Two facts force this shape. (i) The
+earlier `∀ B (smooth-only), x` free-frame form is FALSE: the operator is fibrewise-`ℝ`-bilinear in the
+contracted frame (`B_i` is contracted *twice*), hence quadratic in `B`, with no scale constraint on a
+generic smooth frame `B`; the centre-uniform form fixes the frame to the `g`-orthonormal
+`smoothOrthoFrame g x₀` evaluated at its own centre `x₀`, where the frame is `g_{x₀}`-orthonormal
+(`smoothOrthoFrame_orthonormal_at_center`), so the twice-contracted Gram factors are `1`. (ii) The
+constant is genuinely **rank-indexed** (`kappa : ℕ → ℕ → ℝ`, not the earlier order-only `ℕ → ℝ`): the
+rank-`m` curvature derivation `riemannOp (tensorCov g 0 m)` acts on *all* `m` tensor slots, so its raw
+Hilbert–Schmidt fibre-operator constant — the dual-frame energy is slot-summed — grows with the rank
+`m`; no single order-only `kappa p` covers all ranks `r` (the order-`0` constant of the discharge
+roadmap is already `N·(N·Ccurv_sup m)` with `Ccurv_sup m` the *rank-`m`* curvature sup). This is
+exactly the frame the moving-centre curvature jet consumes (a per-`x₀` choice of centre frame), so the
+restriction loses nothing downstream; the rank index is absorbed by the consumer's per-rank constant
+family `c : ℕ → ℕ → ℝ` through the rank window `[s + 1, s + 1 + k]` the grid headline supremises.
 
 **Why this is TRUE — the frozen-frame analogue of `exists_continuous_proportional_diffCurvOp`.** Each
 `pureRFrozenDiffOp p` is a smooth *fixed* fibrewise-`ℝ`-linear operator on tensor sections (a recursive
@@ -413,19 +418,19 @@ smoothness `smoothOrthoFrame_smooth` restricted to the diagonal), recorded as th
 tower recursion `pureRFrozenDiffOp (p+1) = ∇(pureRFrozenDiffOp p) − cast` over the frame-jet and `∇R`
 sups. The two layers combine into the single per-order `kappa`.
 
-**Non-vacuity.** A degenerate witness `kappa ≡ 0` is rejected on any non-flat manifold: at `p = 0`, at
-a centre `x₀` and a section `W` whose slot-`0` reading against the centre frame `smoothOrthoFrame g x₀`
-carries a non-zero curvature contraction (`R(B_iˣ⁰, ·)(slot0_{B_iˣ⁰} W) ≠ 0`), one has
-`rfns(pureRFrozenDiffOp g (smoothOrthoFrame g x₀) … 0 r W)(x₀) > 0` while `0 · rfns(W)(x₀) = 0`. So the
-envelope must carry the genuine curvature magnitude; it genuinely *uses* `W` (the operator is applied
-to `W`). -/
+**Non-vacuity.** A degenerate witness `kappa ≡ 0` is rejected on any non-flat manifold: at `p = 0`,
+some rank `r`, a centre `x₀` and a section `W` whose slot-`0` reading against the centre frame
+`smoothOrthoFrame g x₀` carries a non-zero curvature contraction (`R(B_iˣ⁰, ·)(slot0_{B_iˣ⁰} W) ≠ 0`),
+one has `rfns(pureRFrozenDiffOp g (smoothOrthoFrame g x₀) … 0 r W)(x₀) > 0` while
+`kappa 0 r · rfns(W)(x₀) = 0` when `kappa 0 r = 0`. So the envelope must carry the genuine curvature
+magnitude; it genuinely *uses* `W` (the operator is applied to `W`). -/
 theorem exists_proportional_pureRFrozenFrameDiffOp (g : SmoothRiemannianMetric I M) :
-    ∃ kappa : ℕ → ℝ, (∀ p, 0 ≤ kappa p) ∧
+    ∃ kappa : ℕ → ℕ → ℝ, (∀ p r, 0 ≤ kappa p r) ∧
       ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x₀ : M),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + p) x₀
             ((pureRFrozenDiffOp (I := I) (M := M) g (smoothOrthoFrame (I := I) g x₀)
               (fun i => smoothOrthoFrame_smooth (I := I) g x₀ i) p r W).toSection x₀) ≤
-          kappa p * riemannianFiberNormSq (I := I) (M := M) g 0 r x₀ (W.toSection x₀) := by
+          kappa p r * riemannianFiberNormSq (I := I) (M := M) g 0 r x₀ (W.toSection x₀) := by
   sorry
 
 /-- **The slot-`0` reading of the differentiated section `∇S` along `B_i` is the directional covariant
@@ -543,8 +548,11 @@ single posited primitive `exists_proportional_pureRFrozenFrameDiffOp`), the brid
 `pureRFrozenDiffOp0_eq_fixedFramePureRSection` (the order-`0` operator on `∇S` is the frozen-frame
 section), and the rank-shift `∇^q(∇S) ≅ ∇^{q + 1}S` (`rfns_iteratedCovGrad_covGrad_comm_tw`) collapsing
 the contracted-order range `0 … k` of `∇S` to `1 … 1 + k` of `S`. The constant family is the engine's
-single-sum constant `C k := 4^k · ∑_{p' ≤ k} kappa p'` (square-rooted to match the graded predicate's
-squared multiplier), centre-uniform because the posited envelope `kappa` is.
+single-sum constant `c s k := √(4^k · gridWindowSum kappa 0 (s + 1) k)` — the `4^k`-scaled order × rank
+window sum over orders `[0, k]` and ranks `[s + 1, s + 1 + k]` (square-rooted to match the graded
+predicate's squared multiplier), centre-uniform because the posited per-rank envelope `kappa` is. It
+genuinely depends on the source rank `s` through the base rank `s + 1` of the rank window, since the
+rank-`m` curvature derivation's fibre-operator constant grows with `m`.
 
 **Restatement note.** This is the centre-frame restriction of the former free-frame `∀ B, x` form,
 required because the underlying envelope is true only at the centre frame at its own centre (the
@@ -569,19 +577,22 @@ theorem exists_fixedFramePureRSection_iteratedCovGrad_grid_bound (g : SmoothRiem
               ((iteratedCovGrad g 0 s (i + 1) S).toSection x) := by
   classical
   obtain ⟨kappa, hkappa_nn, hkappa⟩ := exists_proportional_pureRFrozenFrameDiffOp (I := I) (M := M) g
-  -- The engine's single-sum constant `4^k · ∑_{p' ≤ k} kappa p'`, centre-uniform (no opaque
-  -- existential): square-root it to match the graded predicate's squared multiplier.
-  refine ⟨fun _ s' => Real.sqrt ((4 : ℝ) ^ s' * ∑ p' ∈ Finset.range (s' + 1), kappa p'),
+  -- The engine's single-sum constant `4^k · gridWindowSum kappa 0 (s + 1) k` (the `4^k`-scaled order ×
+  -- rank window sum over orders `[0, k]` and ranks `[s + 1, s + 1 + k]`), centre-uniform (no opaque
+  -- existential): square-root it to match the graded predicate's squared multiplier. The constant now
+  -- genuinely depends on the source rank `s` through the base rank `s + 1` of the rank window — the
+  -- per-rank curvature-operator constant.
+  refine ⟨fun s' k => Real.sqrt ((4 : ℝ) ^ k * gridWindowSum kappa 0 (s' + 1) k),
     fun _ k => Real.sqrt_nonneg _, fun s S k x => ?_⟩
-  have hcsq : (Real.sqrt ((4 : ℝ) ^ k * ∑ p' ∈ Finset.range (k + 1), kappa p')) ^ 2 =
-      (4 : ℝ) ^ k * ∑ p' ∈ Finset.range (k + 1), kappa p' := by
+  have hcsq : (Real.sqrt ((4 : ℝ) ^ k * gridWindowSum kappa 0 (s + 1) k)) ^ 2 =
+      (4 : ℝ) ^ k * gridWindowSum kappa 0 (s + 1) k := by
     rw [Real.sq_sqrt]
-    exact mul_nonneg (by positivity)
-      (Finset.sum_nonneg fun p' _ => hkappa_nn p')
+    exact mul_nonneg (by positivity) (gridWindowSum_nonneg hkappa_nn 0 (s + 1) k)
   rw [hcsq]
   -- The at-centre single-sum grid for the frozen-frame tower at the centre frame `smoothOrthoFrame g x`
   -- evaluated at its own centre `x`, base rank `s + 1`, section `∇S`, gradient order `k`. The pointwise
-  -- envelope hypothesis at `x₀ := x` is exactly the centre-uniform at-centre envelope `hkappa … x`.
+  -- (per-rank) envelope hypothesis at `x₀ := x` is exactly the centre-uniform at-centre envelope
+  -- `hkappa … x`.
   have hgrid := DifferentialGeometry.Integral.Connection.DiffBilinOp.exists_rfns_iteratedCovGrad_singleSum_le_at
     (g := g)
     (op := fun p r W => pureRFrozenDiffOp (I := I) (M := M) g (smoothOrthoFrame (I := I) g x)
@@ -601,7 +612,7 @@ theorem exists_fixedFramePureRSection_iteratedCovGrad_grid_bound (g : SmoothRiem
       (smoothOrthoFrame (I := I) g x) (fun i => smoothOrthoFrame_smooth (I := I) g x i)] at hgrid
   refine hgrid.trans (le_of_eq ?_)
   -- Re-index `∇^q(∇S) ≅ ∇^{q + 1}S` and match the contracted-order range.
-  refine congrArg (fun t => ((4 : ℝ) ^ k * ∑ p' ∈ Finset.range (k + 1), kappa p') * t) ?_
+  refine congrArg (fun t => ((4 : ℝ) ^ k * gridWindowSum kappa 0 (s + 1) k) * t) ?_
   rw [Nat.add_comm 1 k]
   refine Finset.sum_congr rfl (fun q _ => ?_)
   exact rfns_iteratedCovGrad_covGrad_comm_tw (I := I) (M := M) g s q S x

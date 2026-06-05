@@ -144,13 +144,14 @@ theorem exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_grid_l
           C j * ∑ q ∈ Finset.range (j + 1),
             riemannianFiberNormSq (I := I) (M := M) g 0 (s + q) x
               ((iteratedCovGrad g 0 s q Z).toSection x) := by
-  obtain ⟨A, kappa, hA, hkappa, hbound⟩ :=
+  obtain ⟨kappa, hkappa_nn, hbound⟩ :=
     exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_kappaGrid_le
       (I := I) (M := M) g s hX hY
-  refine ⟨fun j => A j * ∑ p ∈ Finset.range (j + 1), kappa p,
-    fun j => mul_nonneg (hA j) (Finset.sum_nonneg fun p _ => hkappa p), fun Z j x => ?_⟩
-  refine (hbound Z j x).trans_eq ?_
-  rw [← Finset.sum_mul, mul_assoc]
+  -- The curvature-order × rank window `gridWindowSum kappa 0 s j` is a finite nonnegative constant at
+  -- each gradient order `j`; absorb it (with `4^j`) into the single-sum constant `C j`.
+  refine ⟨fun j => (4 : ℝ) ^ j * gridWindowSum kappa 0 s j,
+    fun j => mul_nonneg (by positivity) (gridWindowSum_nonneg hkappa_nn 0 s j), fun Z j x => ?_⟩
+  exact hbound Z j x
 
 /-- **The grid constant of the curvature-contraction fibre bound is nonnegative at every order.**
 A direct read-off of the nonnegativity field of

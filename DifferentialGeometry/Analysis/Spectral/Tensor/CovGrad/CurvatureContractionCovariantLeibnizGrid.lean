@@ -88,44 +88,48 @@ variable [CompleteSpace E]
 
 /-- **Posited covariant-Leibniz curvature-coefficient grid for the metric curvature contraction.**
 For a closed smooth Riemannian manifold `(M, g)`, smooth global tangent fields `X, Y`, and at every
-covariant rank `s`, there are a nonnegative binomial constant `A : ℕ → ℝ` and a nonnegative
-*base-point-uniform* curvature-coefficient family `kappa : ℕ → ℝ` (`kappa p = ‖∇^p R‖_∞`, the uniform
-fibre-norm sup of the order-`p` differentiated curvature) such that for every smooth
+covariant rank `s`, there is a nonnegative *base-point-uniform, per-rank* curvature-coefficient family
+`kappa : ℕ → ℕ → ℝ` (`kappa p r ≈ r · ‖∇^p R‖_∞`, the uniform fibre-norm sup of the order-`p`
+differentiated curvature as a derivation on rank-`r` tensors) such that for every smooth
 compactly-supported `(0, s)`-tensor section `Z`, every gradient order `j`, and every point `x`, the
 `j`-fold iterated covariant gradient of the curvature contraction `R(X, Y) Z` has intrinsic squared
-fibre norm at most `A j` times the curvature-order sum of `kappa p` times the gradient-order grid of
-the iterated covariant gradients of `Z`:
+fibre norm at most `4^j` times the order × rank window sum `gridWindowSum kappa 0 s j` times the
+gradient-order grid of the iterated covariant gradients of `Z`:
 
 ```
-rfns(∇^j(R(X, Y) Z))(x) ≤ A j · ∑_{p < j + 1} kappa p · ∑_{q < j + 1} rfns(∇^q Z)(x).
+rfns(∇^j(R(X, Y) Z))(x) ≤ 4^j · gridWindowSum kappa 0 s j · ∑_{q < j + 1} rfns(∇^q Z)(x),
 ```
+
+where `gridWindowSum kappa 0 s j = ∑_{p < j + 1} ∑_{r < j + 1} kappa p (s + r)` ranges the curvature
+order over `[0, j]` and the rank over `[s, s + j]` the covariant-Leibniz recursion climbs.
 
 This is the genuine conclusion of realizing the curvature contraction as a parallel tensor product
 (`ParallelTensorProduct`, blocked on the absent covariant-derivative–metric-contraction commutation
 `covGrad_prod`) and applying its iterated covariant-Leibniz double grid
 `exists_norm_iteratedCovGrad_prod_le`: the curvature factor `∇^p R` enters only as the
-base-point-uniform coefficient `kappa p` (its `p = 0, 1` values are the existing curvature /
+base-point-uniform, per-rank coefficient `kappa p r` (its `p = 0, 1` values are the existing curvature /
 differentiated-curvature sups `exists_uniform_riemannianFiberNormSq_riemannOp_bound`,
 `exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound`), while only the gradient order `q` of
-the section `Z` survives as a fibre-norm grid; `A j` absorbs the binomial `2^j`. The ambient-to-intrinsic
-step is the fibre-norm bridge `riemannianFiberNormSq = ‖·‖²`. It is posited as a precise true child;
+the section `Z` survives as a fibre-norm grid; `4^j` absorbs the binomial coefficients. The rank index
+is genuine: the rank-`r` curvature derivation acts on all `r` slots, so a single rank-uniform `kappa p`
+cannot bound the operator at all ranks the grid reaches. It is posited as a precise true child;
 consumers transitively depend on `sorryAx` through it.
 
 The degenerate witness is rejected: at `j = 0` the bound reads
-`rfns(R(X, Y) Z)(x) ≤ A 0 · kappa 0 · rfns(Z)(x)`, false with `kappa 0 = 0` on a non-flat manifold
+`rfns(R(X, Y) Z)(x) ≤ kappa 0 s · rfns(Z)(x)`, false with `kappa 0 s = 0` on a non-flat manifold
 when `R(X, Y) Z ≠ 0` (the contraction carries the genuine Riemann curvature of `Z`), so the curvature
-coefficient `kappa 0 = ‖R‖_∞` is genuinely positive. -/
+coefficient `kappa 0 s` is genuinely positive. -/
 theorem exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_kappaGrid_le
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     {X Y : Π b : M, TangentSpace I b}
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X))
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y)) :
-    ∃ (A : ℕ → ℝ) (kappa : ℕ → ℝ), (∀ j, 0 ≤ A j) ∧ (∀ p, 0 ≤ kappa p) ∧
+    ∃ kappa : ℕ → ℕ → ℝ, (∀ p r, 0 ≤ kappa p r) ∧
       ∀ (Z : SmoothCcTensor g 0 s) (j : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g 0 (s + j) x
             ((iteratedCovGrad g 0 s j (curvatureContraction (I := I) (M := M) g s Z hX hY)).toSection
               x) ≤
-          A j * ∑ p ∈ Finset.range (j + 1), kappa p *
+          (4 : ℝ) ^ j * gridWindowSum kappa 0 s j *
             ∑ q ∈ Finset.range (j + 1),
               riemannianFiberNormSq (I := I) (M := M) g 0 (s + q) x
                 ((iteratedCovGrad g 0 s q Z).toSection x) :=

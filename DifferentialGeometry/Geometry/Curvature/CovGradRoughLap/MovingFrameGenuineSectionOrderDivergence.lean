@@ -624,7 +624,17 @@ theorem exists_pointwiseTensorCurv_genuineTriSplit_divergence
                 riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
                     ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
                 riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x))) := by
-  sorry
+  obtain ⟨K, hK_nn, h⟩ :=
+    exists_movingCentreDiffCurvSection_fiberNormSq_bound (I := I) (M := M) g
+  refine ⟨K, hK_nn, fun s S => ?_⟩
+  obtain ⟨Gcd, hGcd, hGrem, hnull⟩ := h s S
+  -- Set the moving-frame remainder to the literal subtraction `Curv − GcurvSection − Gcd`; the section
+  -- split is then `abel`, and the integrated nullity and the two sum fibre bounds are exactly the
+  -- coupled facts carried by `exists_movingCentreDiffCurvSection_fiberNormSq_bound` about that same
+  -- remainder.
+  refine ⟨Gcd, pointwiseTensorCurv (I := I) (M := M) g s S -
+      GcurvSection (I := I) (M := M) g s S - Gcd, ?_, hnull, hGcd, hGrem⟩
+  abel
 
 /-- **Genuine moving-frame producer: order bounds and the divergence datum for the genuine curvature
 fields.** For a closed smooth Riemannian manifold `(M, g)` there is a *valence-dependent* nonnegative
