@@ -4,6 +4,8 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.IntegratedOrder2W
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformCurvatureSup
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformProportionalCurvatureSup
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovariantIntegrationByParts
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameCurvatureTraceSmooth
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameGenuineSectionOrderDivergence
 
 /-!
 # The genuine moving-frame third-order field decomposition (bracket-free-pairing form)
@@ -166,7 +168,16 @@ theorem exists_pointwiseTensorCurv_movingFrameField_orderSeparated_bracketFreePa
             tensorL2Inner (I := I) (M := M) g 0 (s + 1)
               (pointwiseTensorCurv (I := I) (M := M) g s S).toFun
               (covGrad (I := I) (M := M) g 0 s S).toFun := by
-  sorry
+  classical
+  obtain ⟨Cper, hCper_nn, hdata⟩ :=
+    exists_GcurvSection_orderSeparatedBounds_movingFrameDivergence (I := I) (M := M) g
+  refine ⟨Cper, hCper_nn, fun s S => ?_⟩
+  obtain ⟨hcurv, hcurvDeriv, hrem, X, hdiv⟩ := hdata s S
+  refine ⟨GcurvSection (I := I) (M := M) g s S, GcurvDerivSection (I := I) (M := M) g s S,
+    hcurv, hcurvDeriv, hrem, ?_⟩
+  exact tensorL2Inner_genuineFields_covGrad_eq_pointwiseTensorCurv_of_pointwise_divergence
+    (I := I) (M := M) g s S
+    (GcurvSection (I := I) (M := M) g s S) (GcurvDerivSection (I := I) (M := M) g s S) X hdiv
 
 end Connection
 end Integral

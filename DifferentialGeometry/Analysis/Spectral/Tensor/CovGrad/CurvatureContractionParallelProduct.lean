@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantBilinearLeibniz
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformCurvatureSup
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureContractionCovariantLeibnizGrid
 
 /-! # The iterated-gradient grid bound for the metric curvature contraction
 
@@ -143,7 +144,13 @@ theorem exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_grid_l
           C j * ∑ q ∈ Finset.range (j + 1),
             riemannianFiberNormSq (I := I) (M := M) g 0 (s + q) x
               ((iteratedCovGrad g 0 s q Z).toSection x) := by
-  sorry
+  obtain ⟨A, kappa, hA, hkappa, hbound⟩ :=
+    exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_kappaGrid_le
+      (I := I) (M := M) g s hX hY
+  refine ⟨fun j => A j * ∑ p ∈ Finset.range (j + 1), kappa p,
+    fun j => mul_nonneg (hA j) (Finset.sum_nonneg fun p _ => hkappa p), fun Z j x => ?_⟩
+  refine (hbound Z j x).trans_eq ?_
+  rw [← Finset.sum_mul, mul_assoc]
 
 /-- **The grid constant of the curvature-contraction fibre bound is nonnegative at every order.**
 A direct read-off of the nonnegativity field of
