@@ -118,7 +118,7 @@ Applying `m` covariant gradients to `covGrad g r s X` has the same section-value
 as the `(m + 1)`-fold iterated gradient of `X`: the rank reassociation `(s + 1) + m = s + (m + 1)`
 is invisible to the fibre norm. Proved from `iteratedCovGrad_covGrad_comm_heq` through
 `norm_toSection_heq_congr`. -/
-private theorem norm_toSection_iteratedCovGrad_covGrad_comm (g : SmoothRiemannianMetric I M)
+theorem norm_toSection_iteratedCovGrad_covGrad_comm (g : SmoothRiemannianMetric I M)
     (r s m : ℕ) (X : SmoothCcTensor g r s) (x : M) :
     ‖(iteratedCovGrad g r (s + 1) m (covGrad g r s X)).toSection x‖ =
       ‖(iteratedCovGrad g r s (m + 1) X).toSection x‖ :=
@@ -129,7 +129,7 @@ private theorem norm_toSection_iteratedCovGrad_covGrad_comm (g : SmoothRiemannia
 transported through `SmoothCcTensor.congr_simp`.  Used only to align the left Leibniz summand
 `prod (∇S) T` (covariant rank `(s₀ + a + 1) + b`) with the differentiated product
 `∇(prod S T)` (covariant rank `(s₀ + a + b) + 1`). -/
-private def castRankCc (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ} (h : a = b)
+def castRankCc (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ} (h : a = b)
     (Y : SmoothCcTensor g r a) : SmoothCcTensor g r b :=
   h ▸ Y
 
@@ -137,7 +137,7 @@ private def castRankCc (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ} (h
 covariant gradient of the rank-cast `castRankCc g r h Y` has the same section-value fibre norm at
 `x` as that of `Y`. Proved by `subst` on the rank equality, which collapses the cast to the
 identity. -/
-private theorem norm_toSection_iteratedCovGrad_castRankCc (g : SmoothRiemannianMetric I M) (r : ℕ)
+theorem norm_toSection_iteratedCovGrad_castRankCc (g : SmoothRiemannianMetric I M) (r : ℕ)
     {a b : ℕ} (h : a = b) (Y : SmoothCcTensor g r a) (j : ℕ) (x : M) :
     ‖(iteratedCovGrad g r b j (castRankCc g r h Y)).toSection x‖ =
       ‖(iteratedCovGrad g r a j Y).toSection x‖ := by
