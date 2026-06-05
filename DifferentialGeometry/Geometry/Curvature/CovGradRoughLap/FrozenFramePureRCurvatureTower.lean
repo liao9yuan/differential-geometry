@@ -712,36 +712,82 @@ private lemma covGradBundleEquiv_symm_reading_rfns_le_centreFrame
     hreprS hreprSucc i
   rwa [heC_def] at h
 
-/-- **Posited centre-uniform at-centre per-order (`p ≥ 1`), per-rank section-proportional fibre
+/-- **Posited continuous-in-centre diagonal per-order (`p ≥ 1`), per-rank section-proportional fibre
 envelope for the high-order differentiated frozen-frame pure-Riemann curvature tower.** For a closed
-smooth Riemannian manifold `(M, g)` there is a nonnegative envelope family
-`kappaHigh : ℕ → ℕ → ℝ`, **uniform over the centre `x₀`**, such that for every differentiation order
-`p`, covariant rank `r`, smooth compactly-supported `(0, r)`-tensor `W`, and centre `x₀`, the
-order-`(p + 1)` differentiated frozen-frame pure-Riemann curvature operator at the centre frame
-`smoothOrthoFrame g x₀`, evaluated at its own centre `x₀`, has intrinsic squared fibre norm at most
-`kappaHigh p r` times that of `W`:
+smooth Riemannian manifold `(M, g)`, every differentiation order `p` and covariant rank `r`, there is
+a *continuous* nonnegative diagonal envelope `Chr : M → ℝ` (indexed by the centre `x₀`) such that, for
+every smooth compactly-supported `(0, r)`-tensor `W` and every centre `x₀`, the order-`(p + 1)`
+differentiated frozen-frame pure-Riemann curvature operator at the *centre frame* `smoothOrthoFrame g x₀`,
+evaluated at its own centre `x₀`, has intrinsic squared fibre norm at most `Chr x₀` times that of `W`:
+
+```
+rfns(pureRFrozenDiffOp g (smoothOrthoFrame g x₀) … (p + 1) r W)(x₀) ≤ Chr x₀ · rfns(W)(x₀).
+```
+
+**Why this is TRUE — the genuinely-irreducible high-order analytic primitive (the frozen-frame
+diagonal analogue of `exists_continuous_proportional_diffCurvOp`).** By the exact covariant-Leibniz
+cancellation `covGrad_pureRFrozenDiffOp_eq`, the order-`(p + 1)` operator `pureRFrozenDiffOp (p + 1) r`
+is the FIXED smooth fibrewise-`ℝ`-linear operator `∇^{p+1}(R(B, ·))` applied to `W` (the gradient
+`∇W` produced by the recursion's two terms cancels exactly — the remainder hits only the curvature
+factor `R(B, ·)` and the frame jets, never the input section's derivatives). For a *fixed* smooth frame
+`B` this is the exact frozen-frame analogue of the metric-contraction tower's order-`p` continuous
+envelope `exists_continuous_proportional_diffCurvOp` (the same continuity-of-the-iterated-curvature-
+operator-norm analytic content), so its fibre-operator norm is a continuous nonnegative function of the
+base point, controlled by the smooth chart Christoffel / Riemann coordinate data and their iterated
+partials on the compact chart partition-of-unity supports (`exists_chartRiemannData_uniform_bound_compact`).
+
+At the *centre frame* `B = smoothOrthoFrame g x₀` evaluated at its own centre `x₀` the bound reads
+`∇^{≤ p+1}` of the curvature `R` and `∇^{≤ p+1}` of the centre frame *at the diagonal* — the per-order
+diagonal frame-jet, continuous in `x₀` by the joint (centre, base) smoothness of `smoothOrthoFrame`
+(`smoothOrthoFrame_smooth`, in the base variable for each fixed centre, with continuous dependence on
+the centre) restricted to the diagonal `x₀ ↦ ∇^{≤ p+1}(smoothOrthoFrame g x₀)-field(x₀)`. The envelope
+`Chr` is therefore a continuous nonnegative function of `x₀`. It is **`B`-uniform-at-the-centre**
+because the frame `B = smoothOrthoFrame g x₀` enters the operator *only through the two contracted
+slots of the curvature factor and the bounded diagonal frame jets* — `B_i` is contracted twice (as the
+slot-`1` argument of `R(B_iˣ, ·)` and as the slot-`0` reading direction), so the `B`-dependence is the
+bounded curvature *magnitude* and the bounded diagonal frame jets, never an unbounded generic frame
+jet. It is posited here as the precise atomic high-order engine envelope, the continuous-in-centre
+form from which the uniform per-`(p, r)` constant is supremised over the compact `M`; consumers
+transitively depend on `sorryAx`.
+
+**Non-vacuity.** A degenerate witness `Chr ≡ 0` is rejected on any non-flat manifold: at some centre
+`x₀` and a section `W` whose slot-`0` reading against the centre frame carries a non-zero
+differentiated-curvature contraction (`(∇^{p+1} R(B, ·)) W ≠ 0`, genuinely nonzero when `∇^{p+1}R ≠ 0`),
+one has `rfns(pureRFrozenDiffOp g (smoothOrthoFrame g x₀) … (p + 1) r W)(x₀) > 0` while
+`0 · rfns(W)(x₀) = 0`. The envelope must carry the genuine differentiated-curvature magnitude; it
+genuinely *uses* `W` (the operator is applied to `W`). -/
+theorem exists_continuous_pureRFrozenFrameDiffOp_highOrder_centreDiag
+    (g : SmoothRiemannianMetric I M) (p r : ℕ) :
+    ∃ Chr : M → ℝ, Continuous Chr ∧ (∀ x₀ : M, 0 ≤ Chr x₀) ∧
+      ∀ (W : SmoothCcTensor g 0 r) (x₀ : M),
+        riemannianFiberNormSq (I := I) (M := M) g 0 (r + (p + 1)) x₀
+            ((pureRFrozenDiffOp (I := I) (M := M) g (smoothOrthoFrame (I := I) g x₀)
+              (fun i => smoothOrthoFrame_smooth (I := I) g x₀ i) (p + 1) r W).toSection x₀) ≤
+          Chr x₀ * riemannianFiberNormSq (I := I) (M := M) g 0 r x₀ (W.toSection x₀) := by
+  sorry
+
+/-- **Centre-uniform at-centre per-order (`p ≥ 1`), per-rank section-proportional fibre envelope for
+the high-order differentiated frozen-frame pure-Riemann curvature tower.** For a closed smooth
+Riemannian manifold `(M, g)` there is a nonnegative envelope family `kappaHigh : ℕ → ℕ → ℝ`, **uniform
+over the centre `x₀`**, such that for every differentiation order `p`, covariant rank `r`, smooth
+compactly-supported `(0, r)`-tensor `W`, and centre `x₀`, the order-`(p + 1)` differentiated
+frozen-frame pure-Riemann curvature operator at the centre frame `smoothOrthoFrame g x₀`, evaluated at
+its own centre `x₀`, has intrinsic squared fibre norm at most `kappaHigh p r` times that of `W`:
 
 ```
 rfns(pureRFrozenDiffOp g (smoothOrthoFrame g x₀) … (p + 1) r W)(x₀) ≤ kappaHigh p r · rfns(W)(x₀).
 ```
 
-**Why this is TRUE — the genuinely-irreducible high-order analytic primitive.** The order-`(p + 1)`
-operator `pureRFrozenDiffOp (p + 1) r` is, by the exact covariant-Leibniz cancellation
-`covGrad_pureRFrozenDiffOp_eq`, the FIXED smooth fibrewise-`ℝ`-linear operator `∇^{p+1}(R(B, ·))`
-applied to `W` (the gradient `∇W` produced by the recursion's two terms exactly cancels — the
-remainder hits only the curvature factor `R(B, ·)` and the frame jets, never the input section's
-derivatives). At the centre frame `B = smoothOrthoFrame g x₀` evaluated at its own centre `x₀`, this
-reads `∇^{≤ p+1}` of the curvature `R` (the existing compact `∇^{≤ p+1}R` sups) and `∇^{≤ p+1}` of the
-centre frame at the diagonal — the per-order *diagonal* frame-jet sup, the continuity on the compact
-`M` of `x₀ ↦ ∇^{≤ p+1}(smoothOrthoFrame g x₀)-field(x₀)` (the joint (centre, base) smoothness
-`smoothOrthoFrame_smooth` restricted to the diagonal). Being a fixed smooth operator applied to `W`,
-its fibre-operator norm is bounded uniformly over the compact `M`, proportionally to its section — the
-exact frozen-frame analogue of the metric-contraction tower's posited continuous envelope
-`exists_continuous_proportional_diffCurvOp` (the same continuity-of-the-iterated-curvature-operator-norm
-analytic content, here at the centre frame). The bound is `B`-uniform-at-the-centre because the frame
-`B = smoothOrthoFrame g x₀` enters only through the bounded curvature magnitude and the bounded
-diagonal frame jets, never an unbounded generic frame jet. It is posited here as the precise atomic
-high-order engine envelope; consumers transitively depend on `sorryAx`.
+**Proof.** Each continuous-in-centre diagonal envelope `Chr p r`, the genuinely-irreducible high-order
+analytic primitive `exists_continuous_pureRFrozenFrameDiffOp_highOrder_centreDiag`, is supremised over
+the compact `M`: the uniform per-`(p, r)` constant `kappaHigh p r := sSup (range (Chr p r))` is finite
+because a continuous real function on a compact space has bounded range (`IsCompact.bddAbove`), and the
+diagonal bound at each centre `x₀` lifts to the supremum by `le_csSup`. Being a fixed smooth operator
+applied to `W` (by the exact covariant-Leibniz cancellation `covGrad_pureRFrozenDiffOp_eq`, the
+operator is `∇^{p+1}(R(B, ·))` with the input section's derivatives cancelled), the bound is genuinely
+`rfns(W)`-order; it is `B`-uniform-at-the-centre because the centre frame `B = smoothOrthoFrame g x₀`
+enters only through the bounded curvature magnitude and the bounded diagonal frame jets, never an
+unbounded generic frame jet. Consumers transitively depend on `sorryAx` through the diagonal envelope.
 
 **Non-vacuity.** A degenerate witness `kappaHigh ≡ 0` is rejected on any non-flat manifold: at `p = 0`,
 `pureRFrozenDiffOp 1 r W = ∇(R(B, ·) W) − cast(R(B, ·)(∇W))` is the differentiated curvature
@@ -756,7 +802,25 @@ theorem exists_proportional_pureRFrozenFrameDiffOp_highOrder
             ((pureRFrozenDiffOp (I := I) (M := M) g (smoothOrthoFrame (I := I) g x₀)
               (fun i => smoothOrthoFrame_smooth (I := I) g x₀ i) (p + 1) r W).toSection x₀) ≤
           kappaHigh p r * riemannianFiberNormSq (I := I) (M := M) g 0 r x₀ (W.toSection x₀) := by
-  sorry
+  classical
+  -- The genuinely-deep analytic primitive: a continuous-in-centre diagonal proportional envelope
+  -- `Chr p r` for the high-order frozen-frame operator at the centre frame, per order `p` and rank `r`.
+  choose Chr hChr_cont hChr_nn hChr_bound using
+    fun p r => exists_continuous_pureRFrozenFrameDiffOp_highOrder_centreDiag (I := I) (M := M) g p r
+  -- Supremise each continuous diagonal envelope over the compact `M` to the uniform per-`(p, r)`
+  -- constant `kappaHigh p r := sSup (range (Chr p r))` (a continuous real function on a compact space
+  -- has bounded range, `IsCompact.bddAbove`).
+  refine ⟨fun p r => sSup (Set.range (Chr p r)), fun p r => ?_, fun p r W x₀ => ?_⟩
+  · have hbdd : BddAbove (Set.range (Chr p r)) := (isCompact_range (hChr_cont p r)).bddAbove
+    rcases isEmpty_or_nonempty M with hM | hM
+    · simp [Set.range_eq_empty (f := Chr p r)]
+    · obtain ⟨x₀⟩ := hM
+      exact le_trans (hChr_nn p r x₀) (le_csSup hbdd ⟨x₀, rfl⟩)
+  · have hbdd : BddAbove (Set.range (Chr p r)) := (isCompact_range (hChr_cont p r)).bddAbove
+    have hle : Chr p r x₀ ≤ sSup (Set.range (Chr p r)) := le_csSup hbdd ⟨x₀, rfl⟩
+    refine (hChr_bound p r W x₀).trans ?_
+    exact mul_le_mul_of_nonneg_right hle
+      (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 r x₀ _)
 
 /-- **The order-`0` layer of the frozen-frame curvature envelope, proved at the centre frame.** For a
 closed smooth Riemannian manifold `(M, g)` there is a nonnegative rank-indexed family `kappa0 : ℕ → ℝ`,
