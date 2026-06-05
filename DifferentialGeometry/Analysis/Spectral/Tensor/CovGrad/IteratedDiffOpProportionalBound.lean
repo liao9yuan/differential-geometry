@@ -28,31 +28,43 @@ fibrewise-factorisation hypothesis `hbase` (`op 0 r W (x) = L₀_r x (W (x))`), 
 the genuine curvature setting and is itself *proved* on disk for both concrete towers (at order `0` the
 operator reads only the value of its section).
 
-The genuine analytic content is the *higher-order* layer. Because `L₀` is a smooth fibrewise curvature
+The genuine analytic content is the *higher-order* layer, isolated here at gradient order `0` as a
+**per-order section-proportional fibre envelope**. Because `L₀` is a smooth fibrewise curvature
 operator, its iterated covariant derivative `∇^{p+1} L₀` is again a smooth fibrewise operator (the
 covariant-derivative–curvature-operator product Leibniz `∇(L₀·W) = (∇L₀)·W + L₀·(∇W)` makes the
 recursion telescope to `op (p+1) r W = (∇^{p+1} L₀)·W`, the input section's derivatives cancelling
 exactly through the rank-cast term), and the iterated curvature coefficient `∇^{p+1} L₀` is uniformly
 fibre-operator-bounded on the compact `M` by `‖∇^{≤ p+1} R‖_∞`. Hence `op (p+1) r` is itself a
-section-proportional fibrewise operator. This telescoping is the covariant-derivative–metric-contraction
-commutation, a large independent differential-geometry construction
+section-proportional fibrewise operator, giving `rfns(op p r W)(x) ≤ kappa p r · rfns(W)(x)`. This
+telescoping is the covariant-derivative–metric-contraction commutation, a large independent
+differential-geometry construction
 (`CovariantBilinearLeibniz.ParallelTensorProduct.covGrad_prod` is its abstract shell; the concrete
 instance for the bundled curvature operator is presently absent from the library); it is the one
-posited node here.
+posited node here, and it is posited at gradient order `0` (the per-order envelope) — the *strictly
+weakest* form carrying the deep content.
 
 ## What is posited vs. derived
 
-* `exists_proportional_recCurvDiffOp_highOrder` (the single posited node) — the all-order analytic
-  envelope, stated for a recursive Leibniz-remainder family whose order-`0` base is a fibrewise
-  curvature operator (the `hbase` factorisation carrier). Consumers transitively depend on `sorryAx`
-  through it.
+* `exists_proportional_recCurvDiffOp_perOrderEnvelope` (**the single posited node**) — the per-order,
+  per-rank, gradient-order-`0` section-proportional fibre envelope
+  `rfns(op p r W)(x) ≤ kappa p r · rfns(W)(x)`, stated for a recursive Leibniz-remainder family whose
+  order-`0` base is a fibrewise curvature operator (the `hbase` factorisation carrier). This is the
+  genuinely-irreducible analytic primitive (the operator-field telescoping with its curvature sups).
+  Consumers transitively depend on `sorryAx` through it alone.
+* `exists_proportional_recCurvDiffOp_iteratedGrid` — the all-order *iterated-gradient grid* envelope,
+  *derived* outright from the per-order envelope by the binomial covariant-Leibniz grid engine
+  `DiffBilinOp.rfns_iteratedCovGrad_grid_at` (`MetricContractionLeibnizGrid`, no posit of its own):
+  the per-order envelope feeds the engine's `rfns_op_le`-style input, the `j`-grid being free
+  combinatorics. No posit of its own.
+* `exists_proportional_recCurvDiffOp_highOrder` — the all-order section-proportional fibre envelope at
+  gradient order `0`, the order-`(p + 1)` collapse of the iterated grid; *derived* here.
 * `exists_proportional_recCurvDiffOp` — the *combined* per-order family (order `0` from the supplied
-  order-`0` bound, order `p ≥ 1` from the posited node), the exact shape the two concrete towers'
+  order-`0` bound, order `p ≥ 1` from the high-order node), the exact shape the two concrete towers'
   envelope nodes consume; *derived* here.
 
 Both concrete towers instantiate `exists_proportional_recCurvDiffOp` with their own order-`0`
 proportional bound and order-`0` factorisation (proved on disk) and the shared `hcovGrad_op` identity,
-discharging their previously posited high-order envelope to this single shared node.
+discharging their previously posited high-order envelope to this single shared per-order-envelope node.
 -/
 
 noncomputable section
@@ -106,10 +118,80 @@ structure IsOrderZeroCurvFactor (g : SmoothRiemannianMetric I M)
   local' : ∀ (r : ℕ) (W₁ W₂ : SmoothCcTensor g 0 r) (x : M),
     W₁.toSection x = W₂.toSection x → (op 0 r W₁).toSection x = (op 0 r W₂).toSection x
 
+/-- **The all-order, per-order, per-rank section-proportional fibre envelope for a
+recursively-differentiated bundled curvature operator** (the single genuinely-irreducible analytic
+primitive of this file — the gradient-order-`0` layer of the operator-field covariant-Leibniz
+telescoping). For a closed smooth Riemannian manifold `(M, g)` and a recursive
+covariant-Leibniz-remainder operator family `op` whose
+
+* single-step covariant Leibniz is the exact remainder identity (`hcovGrad_op`), and whose
+* order-`0` base is a fibrewise curvature operator (`hbase : IsOrderZeroCurvFactor g op`),
+
+there is a nonnegative order × rank envelope `kappa : ℕ → ℕ → ℝ` such that for every differentiation
+order `p`, covariant rank `r`, section `W` and point `x`,
+```
+rfns(op p r W)(x) ≤ kappa p r · rfns(W)(x).
+```
+
+**Why this is TRUE — the operator-field telescoping (the deep content), isolated at gradient order
+`0`.** The `hbase` linearity + value-locality identify the order-`0` base with a smooth *fibrewise*
+curvature operator field `L₀` (`op 0 r W (x) = L₀ x (W (x))`), built from the metric `g` and the
+smooth Riemann curvature `R` alone; its squared fibre-operator norm is uniformly bounded on the
+compact `M`, giving the `p = 0` layer by fibrewise Cauchy–Schwarz `rfns(L₀ · W) ≤ ‖L₀‖² · rfns(W)`. By
+the exact single-step covariant Leibniz `hcovGrad_op`, the recursion telescopes: the input section's
+derivative `∇W` produced by `∇(op p r W)` is cancelled exactly by the rank-cast lower-order term
+`op p (r + 1)(∇W)`, so `op (p + 1) r W (x) = (∇^{p+1} L₀) · W (x)` is the `(p + 1)`-fold covariant
+derivative of the smooth fibrewise curvature operator `L₀`, applied *fibrewise* to `W (x)` — no
+derivative of `W` survives. Because `L₀` is built from `g` and the smooth `R`, the iterated
+coefficient `∇^{p+1} L₀` is a smooth fibrewise operator field whose squared fibre-operator norm is
+uniformly bounded on the compact `M` by `‖∇^{≤ p+1} R‖_∞`
+(`exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound` at each order, finite by per-`p`
+compactness), giving the displayed per-order section-proportional fibre bound with `kappa p r` the
+squared iterated-curvature-operator sup at rank `r`. The covariant-derivative–curvature-operator-field
+product Leibniz `∇(L₀ · W) = (∇L₀) · W + L₀ · (∇W)` that powers the telescoping (the parallel-product
+realization `CovariantBilinearLeibniz.ParallelTensorProduct.covGrad_prod` for the bundled curvature
+operator field) is the genuine, *large independent differential-geometry* content presently absent
+from the library; it is posited here as the precise shared analytic primitive of the two concrete
+curvature towers. Consumers transitively depend on `sorryAx` through this single node.
+
+**Why this is the minimal primitive.** Given this per-order (gradient-order-`0`) envelope, the
+*full* all-order iterated-gradient grid `exists_proportional_recCurvDiffOp_iteratedGrid` is derived
+outright, with *no further posit*, by the binomial covariant-Leibniz grid engine
+`DiffBilinOp.rfns_iteratedCovGrad_grid_at` (`MetricContractionLeibnizGrid`): the engine takes exactly
+`hcovGrad_op` plus this per-order envelope and produces the `j`-fold grid mechanically, the `4^j` and
+the order × rank window absorbing the binomial coefficients. Positing the envelope is therefore
+*strictly weaker* than positing the grid — the deep analytic content is the boundedness of the
+differentiated curvature operators (the telescoping + curvature sups), the `j`-grid being free
+combinatorics on top of it.
+
+**Non-vacuity.** A degenerate witness `kappa ≡ 0` is rejected on any non-flat manifold: at `p = 1`,
+`op 1 r W = ∇(L₀ · W) − cast(L₀ · (∇W)) = (∇L₀) · W` is the differentiated bundled curvature operator,
+genuinely nonzero when `∇R ≠ 0` and the fibrewise operator `L₀` (from `hbase`) carries a non-zero
+contraction, so `rfns(op 1 r W)(x) > 0` while `0 · rfns(W)(x) = 0`. The envelope must carry the
+genuine differentiated-curvature magnitude; it genuinely *uses* `W` (the operator is applied to `W`),
+so it is not vacuous. The `hbase` hypothesis (linearity + value-locality) fixes the family to a
+genuine fibrewise curvature operator (the node is *false* for an arbitrary `covGrad_op`-family: a
+pathological family satisfying only the Leibniz remainder identity can be unbounded at high order),
+making this a genuine, non-vacuous statement about the iterated curvature operator. -/
+theorem exists_proportional_recCurvDiffOp_perOrderEnvelope
+    (g : SmoothRiemannianMetric I M)
+    (op : ∀ (p r : ℕ), SmoothCcTensor g 0 r → SmoothCcTensor g 0 (r + p))
+    (hcovGrad_op : ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r),
+      covGrad g 0 (r + p) (op p r W) =
+        op (p + 1) r W +
+          castRankCc_db g 0 (by omega : (r + 1) + p = r + (p + 1)) (op p (r + 1) (covGrad g 0 r W)))
+    (hbase : IsOrderZeroCurvFactor (I := I) (M := M) g op) :
+    ∃ kappa : ℕ → ℕ → ℝ, (∀ p r, 0 ≤ kappa p r) ∧
+      ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g 0 (r + p) x ((op p r W).toSection x) ≤
+          kappa p r * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x) := by
+  sorry
+
 /-- **The all-order iterated-gradient grid envelope for the differentiated bundled curvature
-operator** (the single posited analytic primitive of this file — the genuine conclusion of the
-*library-absent* operator-field covariant Leibniz construction). For a closed smooth Riemannian
-manifold `(M, g)` and a recursive covariant-Leibniz-remainder operator family `op` whose
+operator** (derived here, with no posit of its own, from the gradient-order-`0` per-order envelope
+`exists_proportional_recCurvDiffOp_perOrderEnvelope` via the binomial covariant-Leibniz grid engine).
+For a closed smooth Riemannian manifold `(M, g)` and a recursive covariant-Leibniz-remainder operator
+family `op` whose
 
 * single-step covariant Leibniz is the exact remainder identity (`hcovGrad_op`), and whose
 * order-`0` base is a fibrewise curvature operator (`hbase : IsOrderZeroCurvFactor g op`),
@@ -123,26 +205,25 @@ squared fibre norms of the iterated covariant gradients of `W`:
 rfns(∇^j (op (p + 1) r W))(x) ≤ C p r j · ∑_{q < j + 1} rfns(∇^q W)(x).
 ```
 
-**Why this is TRUE — the operator-field telescoping.** The `hbase` linearity + value-locality
-identify the order-`0` base with a smooth *fibrewise* curvature operator field `L₀`
-(`op 0 r W (x) = L₀ x (W (x))`), built from the metric `g` and the smooth Riemann curvature `R`
-alone. By the exact single-step covariant Leibniz `hcovGrad_op`, the recursion telescopes: the input
-section's derivative `∇W` produced by `∇(op p r W)` is cancelled exactly by the rank-cast lower-order
-term `op p (r + 1)(∇W)`, so `op (p + 1) r W (x) = (∇^{p + 1} L₀) · W (x)` is the iterated covariant
-derivative of `L₀` applied *fibrewise* to `W (x)` — no derivative of `W` survives at order `0`. The
-`j`-fold iterated gradient `∇^j (op (p + 1) r W)` is then, by the *operator-field* covariant Leibniz
-`∇(L₀ · W) = (∇L₀) · W + L₀ · (∇W)` (the parallel-product realization `ParallelTensorProduct.covGrad_prod`
-for the bundled curvature operator field, `CovariantBilinearLeibniz`), the binomial covariant-Leibniz
-grid `∑_{i + l = j} ∇^{p + 1 + i} L₀ · ∇^l W`
-(`ParallelTensorProduct.norm_iteratedCovGrad_prod_le_jetGrid`); every iterated-curvature-coefficient
-fibre norm `‖∇^{≤ p + 1 + j} L₀‖` is absorbed, uniformly over the compact `M` by `‖∇^{≤ p + 1 + j} R‖_∞`
-(`exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound` at each order, finite by per-order
-compactness), into the constant `C p r j`, leaving the displayed single `W`-grid. The
-covariant-derivative–curvature-operator-field commutation that powers the telescoping is the genuine,
-*large independent differential-geometry* content presently absent from the library
-(`ParallelTensorProduct.covGrad_prod` for the bundled curvature operator field); it is posited here as
-the precise shared analytic primitive of the two concrete curvature towers. Consumers transitively
-depend on `sorryAx` through this single node.
+**Why this is TRUE — the binomial covariant-Leibniz grid over the per-order envelope.** This node is
+*derived*, not posited: it follows from the gradient-order-`0` per-order envelope
+`exists_proportional_recCurvDiffOp_perOrderEnvelope` (`rfns(op p r W)(x) ≤ kappa p r · rfns(W)(x)`,
+the single genuinely-irreducible analytic primitive of this file — the operator-field telescoping with
+its curvature sups) by the binomial covariant-Leibniz `rfns`-grid engine
+`DiffBilinOp.rfns_iteratedCovGrad_grid_at` (`MetricContractionLeibnizGrid`, proved outright with no
+posit of its own). That engine takes exactly the section-level recursive Leibniz identity
+`hcovGrad_op` together with the per-order envelope and produces, by induction on the gradient order
+`j`, the displayed grid
+```
+rfns(∇^j (op p r W))(x) ≤ 4^j · gridWindowSum kappa p r j · ∑_{q < j + 1} rfns(∇^q W)(x),
+```
+the `4^j` and the order × rank window sum `gridWindowSum kappa p r j` absorbing the binomial
+coefficients of the exact covariant-Leibniz expansion; the present statement is its specialisation at
+differentiation order `p + 1`, with `C p r j := 4^j · gridWindowSum kappa (p + 1) r j`. The deep
+analytic content lives entirely in the per-order envelope (the telescoping
+`op (p + 1) r W (x) = (∇^{p + 1} L₀) · W (x)` and the uniform curvature-operator sups); the `j`-grid
+is free combinatorics on top of it. Consumers transitively depend on `sorryAx` only through the
+per-order envelope node.
 
 **Non-vacuity.** A degenerate witness `C ≡ 0` is rejected on any non-flat manifold: at `p = j = 0`,
 `op 1 r W (x) = (∇L₀) · W (x)` is the differentiated bundled curvature operator, genuinely nonzero
@@ -167,11 +248,20 @@ theorem exists_proportional_recCurvDiffOp_iteratedGrid
           C p r j * ∑ q ∈ Finset.range (j + 1),
             riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
               ((iteratedCovGrad g 0 r q W).toSection x) := by
-  sorry
+  obtain ⟨kappa, hkappa_nn, henv⟩ :=
+    exists_proportional_recCurvDiffOp_perOrderEnvelope (I := I) (M := M) g op hcovGrad_op hbase
+  refine ⟨fun p r j => (4 : ℝ) ^ j * gridWindowSum kappa (p + 1) r j,
+    fun p r j => mul_nonneg (by positivity) (gridWindowSum_nonneg hkappa_nn (p + 1) r j),
+    fun p r W j x => ?_⟩
+  exact DiffBilinOp.rfns_iteratedCovGrad_grid_at (g := g) op hcovGrad_op kappa hkappa_nn x
+    (fun p r W => henv p r W x) j (p + 1) r W
 
 /-- **The all-order section-proportional fibre envelope for a recursively-differentiated bundled
-curvature operator** (the single posited analytic node of this file). For a closed smooth Riemannian
-manifold `(M, g)` and a recursive covariant-Leibniz-remainder operator family `op` whose
+curvature operator** (the order-`(p + 1)` collapse of the iterated-gradient grid
+`exists_proportional_recCurvDiffOp_iteratedGrid`; *derived* here, carrying `sorryAx` only through the
+single posited per-order envelope `exists_proportional_recCurvDiffOp_perOrderEnvelope`). For a closed
+smooth Riemannian manifold `(M, g)` and a recursive covariant-Leibniz-remainder operator family `op`
+whose
 
 * single-step covariant Leibniz is the exact remainder identity (`hcovGrad_op`,
   `∇(op p r W) = op (p+1) r W + (rank-cast) op p (r+1)(∇W)`), and whose
@@ -197,9 +287,10 @@ compactness), giving the displayed section-proportional fibre bound with `kappaH
 iterated-curvature-operator sup. The telescoping uses the covariant-derivative–curvature-operator
 product Leibniz `∇(L₀·W) = (∇L₀)·W + L₀·(∇W)` (the covariant-derivative–metric-contraction commutation,
 `ParallelTensorProduct.covGrad_prod` for the bundled curvature operator, presently absent from the
-library and a large independent differential-geometry construction); it is posited here as the precise
-shared analytic primitive of the two concrete curvature towers. Consumers transitively depend on
-`sorryAx` through this single node.
+library and a large independent differential-geometry construction); its gradient-order-`0` content is
+posited as `exists_proportional_recCurvDiffOp_perOrderEnvelope`, the precise shared analytic primitive
+of the two concrete curvature towers, and this node is the order-`(p + 1)` collapse of the grid built
+over it. Consumers transitively depend on `sorryAx` through that single per-order-envelope node.
 
 **Non-vacuity.** A degenerate witness `kappaHigh ≡ 0` is rejected on any non-flat manifold: at `p = 0`,
 `op 1 r W = ∇(L₀·W) − cast(L₀·(∇W)) = (∇L₀)·W` is the differentiated bundled curvature operator,
@@ -233,14 +324,15 @@ theorem exists_proportional_recCurvDiffOp_highOrder
 
 /-- **The combined all-order section-proportional fibre envelope for a recursively-differentiated
 bundled curvature operator.** Combining the supplied order-`0` proportional bound `hbase0` with the
-posited high-order node `exists_proportional_recCurvDiffOp_highOrder`, there is a single nonnegative
-per-order, per-rank envelope `kappa : ℕ → ℕ → ℝ` with
+high-order node `exists_proportional_recCurvDiffOp_highOrder` (itself derived from the iterated grid
+over the single posited per-order envelope `exists_proportional_recCurvDiffOp_perOrderEnvelope`), there
+is a single nonnegative per-order, per-rank envelope `kappa : ℕ → ℕ → ℝ` with
 ```
 rfns(op p r W)(x) ≤ kappa p r · rfns(W)(x)
 ```
 at every order `p`, rank `r`, section `W` and point `x`. The order-`0` layer is `hbase0` (the
-fully-proven curvature-operator order-`0` bound); the order-`p ≥ 1` layer is the single posited node.
-Derived here; consumers transitively depend on `sorryAx` only through the high-order node. -/
+fully-proven curvature-operator order-`0` bound); the order-`p ≥ 1` layer is the high-order node.
+Derived here; consumers transitively depend on `sorryAx` only through the per-order-envelope node. -/
 theorem exists_proportional_recCurvDiffOp
     (g : SmoothRiemannianMetric I M)
     (op : ∀ (p r : ℕ), SmoothCcTensor g 0 r → SmoothCcTensor g 0 (r + p))
