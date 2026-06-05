@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricContractionLeibnizGrid
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformProportionalCurvatureSup
+import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldEvaluationLeibniz
 
 /-! # All-order proportional fibre bound for a recursively-differentiated curvature operator
 
@@ -93,31 +94,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 variable [CompleteSpace E]
 
-/-- **The order-`0` fibrewise-curvature-operator factorisation hypothesis.** For a recursive operator
-family `op`, this records the two structural facts that fix the order-`0` base `op 0 r` to a *fibrewise*
-operator — one reading only the *value* of its section (no derivative), the structural fingerprint of a
-bundled curvature operator:
-
-* `linear` — the order-`0` base is `ℝ`-linear in the section: `op 0 r (c₁ • W₁ + c₂ • W₂) =
-  c₁ • op 0 r W₁ + c₂ • op 0 r W₂`;
-* `local'` — the order-`0` base is *value-local*: its fibre value at `x` depends only on the section
-  value `W (x)` (if two sections agree at `x`, the operator's values at `x` agree).
-
-Together these force `op 0 r` to factor, fibrewise, through a continuous-`ℝ`-linear operator on the
-fibre applied to `W (x)` — the carrier of the genuine curvature setting. Both facts are *proved* on disk
-for the two concrete towers (at order `0` each reads only its section's value, linearly). This is the
-honest, instance-plumbing-free fingerprint of the fibrewise curvature operator; it is what fixes the
-family away from a pathological free `covGrad_op`-family (whose high-order layer can be unbounded). -/
-structure IsOrderZeroCurvFactor (g : SmoothRiemannianMetric I M)
-    (op : ∀ (p r : ℕ), SmoothCcTensor g 0 r → SmoothCcTensor g 0 (r + p)) : Prop where
-  /-- The order-`0` base is `ℝ`-linear in the section (stated at the fibre-value level). -/
-  linear : ∀ (r : ℕ) (c₁ c₂ : ℝ) (W₁ W₂ : SmoothCcTensor g 0 r) (x : M),
-    (op 0 r (c₁ • W₁ + c₂ • W₂)).toSection x =
-      c₁ • (op 0 r W₁).toSection x + c₂ • (op 0 r W₂).toSection x
-  /-- The order-`0` base is value-local: its fibre value at `x` depends only on `W (x)`. -/
-  local' : ∀ (r : ℕ) (W₁ W₂ : SmoothCcTensor g 0 r) (x : M),
-    W₁.toSection x = W₂.toSection x → (op 0 r W₁).toSection x = (op 0 r W₂).toSection x
-
 /-- **The all-order, per-order, per-rank section-proportional fibre envelope for a
 recursively-differentiated bundled curvature operator** (the single genuinely-irreducible analytic
 primitive of this file — the gradient-order-`0` layer of the operator-field covariant-Leibniz
@@ -184,8 +160,9 @@ theorem exists_proportional_recCurvDiffOp_perOrderEnvelope
     ∃ kappa : ℕ → ℕ → ℝ, (∀ p r, 0 ≤ kappa p r) ∧
       ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + p) x ((op p r W).toSection x) ≤
-          kappa p r * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x) := by
-  sorry
+          kappa p r * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x) :=
+  exists_proportional_recCurvDiffOp_perOrderEnvelope_via_factorisation
+    (I := I) (M := M) g op hcovGrad_op hbase
 
 /-- **The all-order iterated-gradient grid envelope for the differentiated bundled curvature
 operator** (derived here, with no posit of its own, from the gradient-order-`0` per-order envelope
