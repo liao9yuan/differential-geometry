@@ -118,12 +118,19 @@ normalized short-time horizon `T = min T₀ 1 ≤ 1`, so `T ≤ 1` is always ava
 def FirstOrderOperatorLoss
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
-        tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) : Prop :=
+        tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+    (R : ℝ) : Prop :=
   ∀ (d : ℝ), ∃ C₁ C₂ : ℝ, 0 ≤ C₁ ∧ 0 ≤ C₂ ∧ ∀ (T : ℝ), T ≤ 1 →
     ∀ (w : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) T)
       (Nw : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T),
       ((Nw : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) =ᵐ[timeMeasure T]
         (fun t => N_cont (w t))) →
+      (∀ᵐ t ∂(timeMeasure T),
+        (w : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) t ∈
+          Metric.closedBall
+            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) →
       Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (d + 1) *
           ‖timeModeCoeff (I := I) (M := M) w i‖ ^ 2) →
         ∀ F : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2),
@@ -361,10 +368,13 @@ analytic content (the principal-symbol cancellation of the second-order DeTurck 
 this leaf.  Consumers transitively depend on `sorryAx`. -/
 theorem deTurckGenuineN_firstOrder_operatorTsumLoss
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
         tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
     (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
         Integral.L2.SmoothCcTensor g₀ 0 2)
+    (K : ℝ≥0) {R : ℝ} (hR : 0 < R)
+    (hctrl : ChartJet2LipControl (I := I) (M := M) g₀ a P K R)
     (hsynth : ∀ (v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
         ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
           (N_cont v).coeff i =
@@ -374,6 +384,10 @@ theorem deTurckGenuineN_firstOrder_operatorTsumLoss
                 (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v))) i) :
     ∀ (d : ℝ), ∃ C₁ C₂ : ℝ, 0 ≤ C₁ ∧ 0 ≤ C₂ ∧
       ∀ (v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
+      v ∈ Metric.closedBall
+          (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R →
       Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (d + 1) *
           ((v.coeff i)) ^ 2) →
         Summable (fun i => tensorSobolevWeight (I := I) (M := M) i d *
@@ -406,10 +420,13 @@ the nonnegative output masses is at most that total (`Summable.sum_le_tsum`).  C
 transitively depend on `sorryAx` through the full-series operator-loss leaf. -/
 theorem deTurckGenuineN_firstOrder_spatialOperatorLoss
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
         tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
     (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
         Integral.L2.SmoothCcTensor g₀ 0 2)
+    (K : ℝ≥0) {R : ℝ} (hR : 0 < R)
+    (hctrl : ChartJet2LipControl (I := I) (M := M) g₀ a P K R)
     (hsynth : ∀ (v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
         ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
           (N_cont v).coeff i =
@@ -419,6 +436,10 @@ theorem deTurckGenuineN_firstOrder_spatialOperatorLoss
                 (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v))) i) :
     ∀ (d : ℝ), ∃ C₁ C₂ : ℝ, 0 ≤ C₁ ∧ 0 ≤ C₂ ∧
       ∀ (v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
+      v ∈ Metric.closedBall
+          (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R →
       Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (d + 1) *
           ((v.coeff i)) ^ 2) →
         ∀ F : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2),
@@ -428,9 +449,9 @@ theorem deTurckGenuineN_firstOrder_spatialOperatorLoss
               ((v.coeff i)) ^ 2 := by
   intro d
   obtain ⟨C₁, C₂, hC₁0, hC₂0, hP⟩ :=
-    deTurckGenuineN_firstOrder_operatorTsumLoss (I := I) g₀ g_bg a N_cont P hsynth d
-  refine ⟨C₁, C₂, hC₁0, hC₂0, fun v hsum F => ?_⟩
-  obtain ⟨hsumm, hle⟩ := hP v hsum
+    deTurckGenuineN_firstOrder_operatorTsumLoss (I := I) g₀ g_bg a ha N_cont P K hR hctrl hsynth d
+  refine ⟨C₁, C₂, hC₁0, hC₂0, fun v hball hsum F => ?_⟩
+  obtain ⟨hsumm, hle⟩ := hP v hball hsum
   refine le_trans (Summable.sum_le_tsum F (fun i _ => ?_) hsumm) hle
   exact mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i d) (sq_nonneg _)
 
@@ -461,10 +482,13 @@ operating-regime bound `T ≤ 1` (so `(timeMeasure T).real univ ≤ 1`).  Consum
 depend on `sorryAx`. -/
 theorem deTurckGenuineN_firstOrder_operatorLoss
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
         tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
     (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
         Integral.L2.SmoothCcTensor g₀ 0 2)
+    (K : ℝ≥0) {R : ℝ} (hR : 0 < R)
+    (hctrl : ChartJet2LipControl (I := I) (M := M) g₀ a P K R)
     (hsynth : ∀ (v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
         ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
           (N_cont v).coeff i =
@@ -472,14 +496,15 @@ theorem deTurckGenuineN_firstOrder_operatorLoss
               (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
               (Integral.L2.SmoothCcTensor.toL2
                 (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v))) i) :
-    FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont := by
+    FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont R := by
   classical
   intro d
   -- The genuine **spatial** affine first-order operator-loss of the gauge-cancelled remainder
   -- at the order `d`.
   obtain ⟨C₁, C₂, hC₁0, hC₂0, hP⟩ :=
-    deTurckGenuineN_firstOrder_spatialOperatorLoss (I := I) g₀ g_bg a N_cont P hsynth d
-  refine ⟨C₁, C₂, hC₁0, hC₂0, fun T hT1 w Nw hNw hsum F => ?_⟩
+    deTurckGenuineN_firstOrder_spatialOperatorLoss (I := I) g₀ g_bg a ha N_cont P K hR hctrl
+      hsynth d
+  refine ⟨C₁, C₂, hC₁0, hC₂0, fun T hT1 w Nw hNw hball_w hsum F => ?_⟩
   -- The order-`(d + 1)` time-Plancherel/Tonelli package for the input field `w`.
   obtain ⟨hPmass_int, hPmass_ae_summable, hPmass_integral⟩ :=
     tensorTimeL2_weighted_pointwise_mass_integral (I := I) g₀ (b := (a : ℝ) + 1)
@@ -517,7 +542,8 @@ theorem deTurckGenuineN_firstOrder_operatorLoss
     (ae_ball_iff F.countable_toSet).2
       (fun i _ => timeModeCoeff_coeFn (I := I) (M := M) Nw i)
   have hbound_ae : ∀ᵐ t ∂(timeMeasure T), LHSint t ≤ C₁ + C₂ * Pmass t := by
-    filter_upwards [hmode_ae, hNw, hPmass_ae_summable] with t hmode hNwt hsumt
+    filter_upwards [hmode_ae, hNw, hPmass_ae_summable, hball_w]
+      with t hmode hNwt hsumt hball_wt
     have hstep : LHSint t =
         ∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i d *
           ((N_cont (w t)).coeff i) ^ 2 := by
@@ -525,7 +551,7 @@ theorem deTurckGenuineN_firstOrder_operatorLoss
       refine Finset.sum_congr rfl (fun i hi => ?_)
       rw [hmode i hi, hNwt]
     rw [hstep, hPmass_def]
-    exact hP (w t) hsumt F
+    exact hP (w t) hball_wt hsumt F
   -- **Step D.**  Integrate the a.e. affine bound, identify the rate integral with the summed
   -- order-`(d + 1)` time-mode masses (the Tonelli identity), and dominate the integrated
   -- constant baseline `C₁ · (timeMeasure T).real univ` by `C₁` using the operating regime
@@ -596,13 +622,20 @@ theorem deTurckForcing_firstOrder_partialSum_bound
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
         tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
-    (hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont)
+    {R : ℝ}
+    (hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont R)
     (u₀ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) (hu0 : u₀ = 0)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : (gforce : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
         =ᵐ[timeMeasure T]
       (fun t => N_cont (maxRegDuhamelSolFieldHa1 (I := I) (M := M) (a : ℝ)
-        hT hT1 u₀ gforce t))) :
+        hT hT1 u₀ gforce t)))
+    (hstay : ∀ᵐ t ∂(timeMeasure T),
+      maxRegDuhamelSolFieldHa1 (I := I) (M := M) (a : ℝ) hT hT1 u₀ gforce t ∈
+        Metric.closedBall
+          (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) :
     ∀ d : ℝ, ∃ C₁ C₂ : ℝ, 0 ≤ C₁ ∧ 0 ≤ C₂ ∧
       (Summable (solFieldMass (I := I) (M := M) hT.le gforce (d + 1)) →
         ∀ F : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2),
@@ -660,8 +693,9 @@ theorem deTurckForcing_firstOrder_partialSum_bound
       ∑' i, solFieldMass (I := I) (M := M) hT.le gforce (d + 1) i :=
     tsum_congr hmass_eq
   -- Apply the affine operator-loss bound to `w` and `Nw := gforce` (reproduced via `hforce`),
-  -- on the short-time horizon `T ≤ 1`.
-  have hkey := hbound T hT1 w gforce hforce hsum_w F
+  -- on the short-time horizon `T ≤ 1`, with the engine's stays-in-ball event `hstay` discharging
+  -- the a.e.-in-ball restriction on the input field `w`.
+  have hkey := hbound T hT1 w gforce hforce hstay hsum_w F
   rw [htsum_w] at hkey
   refine le_trans (le_of_eq (Finset.sum_congr rfl (fun i _ => ?_))) hkey
   rw [forcingMass]
@@ -716,20 +750,27 @@ theorem deTurckForcing_firstOrder_coupling
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
         tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
-    (hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont)
+    {R : ℝ}
+    (hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont R)
     (u₀ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) (hu0 : u₀ = 0)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : (gforce : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
         =ᵐ[timeMeasure T]
       (fun t => N_cont (maxRegDuhamelSolFieldHa1 (I := I) (M := M) (a : ℝ)
-        hT hT1 u₀ gforce t))) :
+        hT hT1 u₀ gforce t)))
+    (hstay : ∀ᵐ t ∂(timeMeasure T),
+      maxRegDuhamelSolFieldHa1 (I := I) (M := M) (a : ℝ) hT hT1 u₀ gforce t ∈
+        Metric.closedBall
+          (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) :
     ∀ d : ℝ,
       Summable (solFieldMass (I := I) (M := M) hT.le gforce (d + 1)) →
         Summable (forcingMass (I := I) (M := M) gforce d) := by
   intro d hsol
   obtain ⟨C₁, C₂, hC₁0, hC₂0, hbound⟩ :=
     deTurckForcing_firstOrder_partialSum_bound (I := I) (M := M) g₀ a hT hT1 N_cont hloss u₀ hu0
-      gforce hforce d
+      gforce hforce hstay d
   -- The order-`d` forcing masses are nonnegative with all finite partial sums bounded
   -- by the fixed affine constant `C₁ + C₂ · (total order-(d+1) solution-field mass)`,
   -- hence summable.

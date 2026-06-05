@@ -216,7 +216,7 @@ theorem deTurck_g0_carrier_realize_transport
         (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
           (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R))
-    (hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont) :
+    (hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont R) :
     ∃ (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
         (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
         (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2),
@@ -254,7 +254,14 @@ theorem deTurck_g0_carrier_realize_transport
       (∀ (k : ℕ), 2 * k > Module.finrank ℝ E + 4 →
         ContinuousOn
           (fun s : ℝ => SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * k) (T_s s))
-          (Set.Icc 0 T)) :=
+          (Set.Icc 0 T)) ∧
+      (∀ s ∈ Set.Ico (0 : ℝ) T,
+        tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s) ∈
+          Metric.closedBall
+            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) :=
   deturck_g0_engine_carrier_extraction (I := I) (M := M) g₀ a ha ha2 N_cont hR
     hN_cont hLipBall hloss
     (gFibreOpBound_ccTensorBilinSymm_le_tensorHsNorm (I := I) (M := M) g₀)

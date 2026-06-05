@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformCurvatureSup
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureContractionLeibnizGridConstruction
 
 /-! # The intrinsic covariant-Leibniz curvature-coefficient grid for the metric contraction
 
@@ -127,8 +128,9 @@ theorem exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_kappaG
           A j * ∑ p ∈ Finset.range (j + 1), kappa p *
             ∑ q ∈ Finset.range (j + 1),
               riemannianFiberNormSq (I := I) (M := M) g 0 (s + q) x
-                ((iteratedCovGrad g 0 s q Z).toSection x) := by
-  sorry
+                ((iteratedCovGrad g 0 s q Z).toSection x) :=
+  exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_kappaGrid_le_of_construction
+    (I := I) (M := M) g hX hY s
 
 end Connection
 end Integral

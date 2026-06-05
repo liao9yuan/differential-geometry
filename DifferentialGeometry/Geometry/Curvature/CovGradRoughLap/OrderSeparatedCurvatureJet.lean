@@ -48,13 +48,16 @@ bound on `F` gives no bound on `rfns(∇F)`; the library controls iterated gradi
 induction therefore carries a **re-differentiable graded invariant**: each genuine field is required
 to satisfy, not only its order-`m` fibre bound, but the entire graded family of its own iterated
 covariant gradients, in the same order-separated curvature-jet form. Concretely the carrier is the
-predicate `IsGradedCurvJet g T c p w G`, asserting that for *every* further gradient order `k` and
-every `x` the `k`-fold iterated gradient `∇^k G` is fibre-bounded by
-`c² · ∑_{i < w + k} rfns(∇^{i + p}T)(x)` (lowest contracted order `p`, base width `w`). This predicate
-is **closed under one covariant gradient** (`IsGradedCurvJet_covGrad`): the `k`-th gradient of `∇G`
-is the `(k + 1)`-th gradient of `G`, so the bound shifts `k → k + 1` and stays in the family. This is
-the exact structure the per-step consumes: applying one further `∇` to the order-`m` split and
-re-Leibniz-ing keeps every genuine jet inside the graded family, advancing its order by one.
+predicate `IsGradedCurvJet g T c p w G` with an order-indexed constant family `c : ℕ → ℝ`, asserting
+that for *every* further gradient order `k` and every `x` the `k`-fold iterated gradient `∇^k G` is
+fibre-bounded by `(c k)² · ∑_{i < w + k} rfns(∇^{i + p}T)(x)` (lowest contracted order `p`, base
+width `w`). The constant must be a family because `sup_k ‖∇^k R‖_∞ = ∞` on a generic closed metric —
+no single scalar dominates all gradient orders; the `k`-th constant absorbs `‖∇^{≤k} R‖_∞`, finite by
+per-`k` compactness. This predicate is **closed under one covariant gradient**
+(`IsGradedCurvJet_covGrad`): the `k`-th gradient of `∇G` is the `(k + 1)`-th gradient of `G`, so the
+bound shifts `k → k + 1` (the constant re-windows to `fun k => c (k + 1)`) and stays in the family.
+This is the exact structure the per-step consumes: applying one further `∇` to the order-`m` split
+and re-Leibniz-ing keeps every genuine jet inside the graded family, advancing its order by one.
 
 ## What is proved vs. posited
 
@@ -87,10 +90,10 @@ graded invariant by specialising `IsGradedCurvJet` to gradient order `k = 0`. Co
 depend on `sorryAx` through these two posited primitives.
 
 The degenerate witness is rejected: at `m = 0`, gradient order `k = 0`, the split reads
-`Curv T (x) = Gcurv + GcurvDeriv + Grem` with `rfns(Gcurv)(x) ≤ c²·rfns(∇T)(x)`,
-`rfns(GcurvDeriv)(x) ≤ c²·rfns(T)(x)`, `rfns(Grem)(x) ≤ c²·rfns(∇²T)(x)`, which — merged — is the
-`m = 0` two-term split `exists_pointwiseTensorCurv_genuineRemainder_fiberNormSq_bound`, *false* with
-`c = 0` on a non-flat manifold (the defect carries the genuine curvature contraction of `T`).
+`Curv T (x) = Gcurv + GcurvDeriv + Grem` with `rfns(Gcurv)(x) ≤ (c 0)²·rfns(∇T)(x)`,
+`rfns(GcurvDeriv)(x) ≤ (c 0)²·rfns(T)(x)`, `rfns(Grem)(x) ≤ (c 0)²·rfns(∇²T)(x)`, which — merged — is
+the `m = 0` two-term split `exists_pointwiseTensorCurv_genuineRemainder_fiberNormSq_bound`, *false*
+with `c 0 = 0` on a non-flat manifold (the defect carries the genuine curvature contraction of `T`).
 
 ## Sign / order conventions
 
@@ -168,15 +171,21 @@ private theorem riemannianFiberNormSq_toSection_heq_congr (g : SmoothRiemannianM
   rw [eq_of_heq hYZ]
 
 /-- **The re-differentiable graded curvature-jet predicate.** For a closed smooth Riemannian
-manifold `(M, g)`, a fixed source `(0, s)`-tensor `T`, a nonnegative constant `c`, a lowest
-contracted order `p`, a base width `w`, and a field `G : SmoothCcTensor g 0 r` (rank generic),
-`IsGradedCurvJet g T c p w G` asserts that for *every* further gradient order `k` and *every* point
-`x` the `k`-fold iterated covariant gradient `∇^k G` is fibre-bounded by `c²` times the truncated sum
-of the iterated-gradient fibre norms of `T` from contracted order `p` up to width `w + k`:
+manifold `(M, g)`, a fixed source `(0, s)`-tensor `T`, an order-indexed nonnegative constant family
+`c : ℕ → ℝ`, a lowest contracted order `p`, a base width `w`, and a field `G : SmoothCcTensor g 0 r`
+(rank generic), `IsGradedCurvJet g T c p w G` asserts that for *every* further gradient order `k` and
+*every* point `x` the `k`-fold iterated covariant gradient `∇^k G` is fibre-bounded by `(c k)²` times
+the truncated sum of the iterated-gradient fibre norms of `T` from contracted order `p` up to width
+`w + k`:
 
 ```
-rfns(∇^k G)(x) ≤ c² · ∑_{i < w + k} rfns(∇^{i + p} T)(x).
+rfns(∇^k G)(x) ≤ (c k)² · ∑_{i < w + k} rfns(∇^{i + p} T)(x).
 ```
+
+The constant must be a *family* indexed by the gradient order `k` (not a single scalar): on a generic
+closed manifold `sup_k ‖∇^k R‖_∞ = ∞`, so no single `c` dominates all gradient orders; the `k`-th
+constant absorbs `‖∇^{≤k} R‖_∞` (finite by per-`k` compactness), and that is exactly what makes the
+graded predicate satisfiable.
 
 This is the operational meaning of "`G` is a curvature jet of `T` of lowest order `p`": not merely a
 single-order fibre bound (which is uncontrolled under differentiation), but the entire graded family,
@@ -186,11 +195,11 @@ the per-step of the order-`m` induction requires: one further `∇` keeps every 
 family, with its order advanced by one. The genuine fields of the order-`m` split satisfy it; the
 abstract single-order fibre bound the headline exposes is the `k = 0` specialisation. -/
 def IsGradedCurvJet (g : SmoothRiemannianMetric I M) {s : ℕ} (T : SmoothCcTensor g 0 s)
-    (c : ℝ) (p w : ℕ) {r : ℕ} (G : SmoothCcTensor g 0 r) : Prop :=
+    (c : ℕ → ℝ) (p w : ℕ) {r : ℕ} (G : SmoothCcTensor g 0 r) : Prop :=
   ∀ (k : ℕ) (x : M),
     riemannianFiberNormSq (I := I) (M := M) g 0 (r + k) x
         ((iteratedCovGrad g 0 r k G).toSection x) ≤
-      c ^ 2 * ∑ i ∈ Finset.range (w + k),
+      (c k) ^ 2 * ∑ i ∈ Finset.range (w + k),
         riemannianFiberNormSq (I := I) (M := M) g 0 (s + (i + p)) x
           ((iteratedCovGrad g 0 s (i + p) T).toSection x)
 
@@ -201,9 +210,9 @@ graded curvature jet of the same lowest order `p` with base width `w + 1`: the `
 (k + 1) = (w + 1) + k`. This is the structural step that makes the order-`m` induction's per-step
 re-differentiable — differentiating a genuine jet keeps it in the curvature-jet family. -/
 theorem IsGradedCurvJet_covGrad (g : SmoothRiemannianMetric I M) {s : ℕ} (T : SmoothCcTensor g 0 s)
-    {c : ℝ} {p w r : ℕ} {G : SmoothCcTensor g 0 r}
+    {c : ℕ → ℝ} {p w r : ℕ} {G : SmoothCcTensor g 0 r}
     (hG : IsGradedCurvJet (I := I) (M := M) g T c p w G) :
-    IsGradedCurvJet (I := I) (M := M) g T c p (w + 1)
+    IsGradedCurvJet (I := I) (M := M) g T (fun k => c (k + 1)) p (w + 1)
       (covGrad (I := I) (M := M) g 0 r G) := by
   intro k x
   -- The `k`-fold gradient of `∇G` is the `(k + 1)`-fold gradient of `G`, the two living in the ranks
@@ -229,36 +238,38 @@ private lemma gradedCurvJet_targetSum_nonneg (g : SmoothRiemannianMetric I M) {s
           ((iteratedCovGrad g 0 s (i + p) T).toSection x) :=
   Finset.sum_nonneg fun i _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + (i + p)) x _
 
-/-- **Monotonicity of the graded curvature-jet predicate in its constant.** If `G` is a graded
-curvature jet of `T` with nonnegative constant `c` and `c ≤ c'`, then `G` is also a graded curvature
-jet with the larger constant `c'`: at every gradient order `k` the bound multiplier grows
-(`c² ≤ c'²`, since `0 ≤ c ≤ c'`) while the truncated target sum stays nonnegative, so the bound only
-weakens. This lets several jets of the same `(p, w)` shape but distinct constants be promoted to a
-single common constant. -/
+/-- **Monotonicity of the graded curvature-jet predicate in its constant family.** If `G` is a graded
+curvature jet of `T` with nonnegative constant family `c` and `c k ≤ c' k` at every order `k`, then
+`G` is also a graded curvature jet with the larger constant family `c'`: at every gradient order `k`
+the bound multiplier grows (`(c k)² ≤ (c' k)²`, since `0 ≤ c k ≤ c' k`) while the truncated target
+sum stays nonnegative, so the bound only weakens. This lets several jets of the same `(p, w)` shape
+but distinct constant families be promoted to a single common family. -/
 theorem IsGradedCurvJet.mono_const (g : SmoothRiemannianMetric I M) {s : ℕ}
-    (T : SmoothCcTensor g 0 s) {c c' : ℝ} {p w r : ℕ} {G : SmoothCcTensor g 0 r}
-    (hc : 0 ≤ c) (hcc' : c ≤ c') (hG : IsGradedCurvJet (I := I) (M := M) g T c p w G) :
+    (T : SmoothCcTensor g 0 s) {c c' : ℕ → ℝ} {p w r : ℕ} {G : SmoothCcTensor g 0 r}
+    (hc : ∀ k, 0 ≤ c k) (hcc' : ∀ k, c k ≤ c' k)
+    (hG : IsGradedCurvJet (I := I) (M := M) g T c p w G) :
     IsGradedCurvJet (I := I) (M := M) g T c' p w G := by
   intro k x
   refine (hG k x).trans ?_
   refine mul_le_mul_of_nonneg_right ?_ (gradedCurvJet_targetSum_nonneg (I := I) (M := M) g T p w k x)
-  exact pow_le_pow_left₀ hc hcc' 2
+  exact pow_le_pow_left₀ (hc k) (hcc' k) 2
 
 /-- **The graded curvature-jet predicate is closed under addition of two jets of the same shape.**
 If `G₁`, `G₂` are graded curvature jets of `T` of the *same* lowest order `p` and base width `w`,
-with nonnegative constants `c₁`, `c₂`, then their sum `G₁ + G₂` is a graded curvature jet of the same
-lowest order `p` and base width `w`, with constant `√(2·(c₁² + c₂²))`: at every gradient order `k`,
-`∇^k(G₁ + G₂) = ∇^k G₁ + ∇^k G₂` (`iteratedCovGrad_add`, `SmoothCcTensor.toSection_add`), so the
-fibre norm is `≤ 2·rfns(∇^k G₁) + 2·rfns(∇^k G₂)` (`riemannianFiberNormSq_add_le`), each term bounded
-by its jet, giving `2(c₁² + c₂²)` times the shared target sum. This is the field-level subadditivity
-that merges two genuine jets while keeping the curvature-jet shape — exactly the per-step's
-reclassification merge. -/
+with nonnegative constant families `c₁`, `c₂`, then their sum `G₁ + G₂` is a graded curvature jet of
+the same lowest order `p` and base width `w`, with constant family `k ↦ √(2·((c₁ k)² + (c₂ k)²))`: at
+every gradient order `k`, `∇^k(G₁ + G₂) = ∇^k G₁ + ∇^k G₂` (`iteratedCovGrad_add`,
+`SmoothCcTensor.toSection_add`), so the fibre norm is `≤ 2·rfns(∇^k G₁) + 2·rfns(∇^k G₂)`
+(`riemannianFiberNormSq_add_le`), each term bounded by its jet, giving `2((c₁ k)² + (c₂ k)²)` times
+the shared target sum. This is the field-level subadditivity that merges two genuine jets while
+keeping the curvature-jet shape — exactly the per-step's reclassification merge. -/
 theorem IsGradedCurvJet.add (g : SmoothRiemannianMetric I M) {s : ℕ}
-    (T : SmoothCcTensor g 0 s) {c₁ c₂ : ℝ} {p w r : ℕ}
+    (T : SmoothCcTensor g 0 s) {c₁ c₂ : ℕ → ℝ} {p w r : ℕ}
     {G₁ G₂ : SmoothCcTensor g 0 r}
     (hG₁ : IsGradedCurvJet (I := I) (M := M) g T c₁ p w G₁)
     (hG₂ : IsGradedCurvJet (I := I) (M := M) g T c₂ p w G₂) :
-    IsGradedCurvJet (I := I) (M := M) g T (Real.sqrt (2 * (c₁ ^ 2 + c₂ ^ 2))) p w (G₁ + G₂) := by
+    IsGradedCurvJet (I := I) (M := M) g T
+      (fun k => Real.sqrt (2 * ((c₁ k) ^ 2 + (c₂ k) ^ 2))) p w (G₁ + G₂) := by
   intro k x
   have hsum_nonneg := gradedCurvJet_targetSum_nonneg (I := I) (M := M) g T p w k x
   have hsplit : (iteratedCovGrad g 0 r k (G₁ + G₂)).toSection x =
@@ -268,7 +279,7 @@ theorem IsGradedCurvJet.add (g : SmoothRiemannianMetric I M) {s : ℕ}
   rw [hsplit]
   have hadd := riemannianFiberNormSq_add_le (I := I) (M := M) g 0 (r + k) x
     ((iteratedCovGrad g 0 r k G₁).toSection x) ((iteratedCovGrad g 0 r k G₂).toSection x)
-  have hcsq : Real.sqrt (2 * (c₁ ^ 2 + c₂ ^ 2)) ^ 2 = 2 * (c₁ ^ 2 + c₂ ^ 2) := by
+  have hcsq : Real.sqrt (2 * ((c₁ k) ^ 2 + (c₂ k) ^ 2)) ^ 2 = 2 * ((c₁ k) ^ 2 + (c₂ k) ^ 2) := by
     rw [Real.sq_sqrt]
     positivity
   rw [hcsq]
@@ -278,27 +289,27 @@ theorem IsGradedCurvJet.add (g : SmoothRiemannianMetric I M) {s : ℕ}
             ((iteratedCovGrad g 0 r k G₁).toSection x) +
           2 * riemannianFiberNormSq (I := I) (M := M) g 0 (r + k) x
             ((iteratedCovGrad g 0 r k G₂).toSection x) := hadd
-    _ ≤ 2 * (c₁ ^ 2 * ∑ i ∈ Finset.range (w + k),
+    _ ≤ 2 * ((c₁ k) ^ 2 * ∑ i ∈ Finset.range (w + k),
               riemannianFiberNormSq (I := I) (M := M) g 0 (s + (i + p)) x
                 ((iteratedCovGrad g 0 s (i + p) T).toSection x)) +
-          2 * (c₂ ^ 2 * ∑ i ∈ Finset.range (w + k),
+          2 * ((c₂ k) ^ 2 * ∑ i ∈ Finset.range (w + k),
               riemannianFiberNormSq (I := I) (M := M) g 0 (s + (i + p)) x
                 ((iteratedCovGrad g 0 s (i + p) T).toSection x)) := by
         gcongr <;> [exact hG₁ k x; exact hG₂ k x]
-    _ = 2 * (c₁ ^ 2 + c₂ ^ 2) * ∑ i ∈ Finset.range (w + k),
+    _ = 2 * ((c₁ k) ^ 2 + (c₂ k) ^ 2) * ∑ i ∈ Finset.range (w + k),
               riemannianFiberNormSq (I := I) (M := M) g 0 (s + (i + p)) x
                 ((iteratedCovGrad g 0 s (i + p) T).toSection x) := by ring
 
 /-- **Posited graded curvature-jet bound for the pure-Riemann genuine section `GcurvSection`.** For a
-closed smooth Riemannian manifold `(M, g)` there is a *valence-dependent* nonnegative constant
-`c : ℕ → ℝ` such that, at every covariant rank `s` and every smooth compactly-supported `(0, s)`-
-tensor `T`, the moving-centre pure-Riemann genuine curvature section `GcurvSection g s T`
+closed smooth Riemannian manifold `(M, g)` there is a *valence/order-dependent* nonnegative constant
+family `c : ℕ → ℕ → ℝ` such that, at every covariant rank `s` and every smooth compactly-supported
+`(0, s)`-tensor `T`, the moving-centre pure-Riemann genuine curvature section `GcurvSection g s T`
 (`MovingFrameCurvatureTraceSmooth`, the slot-`0` assembly of the moving-frame trace
 `∑ᵢ R(Bᵢ, ·)(∇_{Bᵢ}T)`, i.e. the `R(∇T)` contraction) is a **graded** curvature jet of `T` of lowest
 order `1` and base width `1`:
 
 ```
-rfns(∇^k (GcurvSection g s T))(x) ≤ (c s)² · ∑_{i < 1 + k} rfns(∇^{i + 1} T)(x).
+rfns(∇^k (GcurvSection g s T))(x) ≤ (c s k)² · ∑_{i < 1 + k} rfns(∇^{i + 1} T)(x).
 ```
 
 **Why this is TRUE.** `GcurvSection g s T` is the slot-`0` assembly of the moving-frame pure-Riemann
@@ -306,60 +317,63 @@ trace `∑ᵢ R(Bᵢ, ·)(∇_{Bᵢ}T)`, a fixed-curvature contraction applied t
 section `∇T = covGrad g 0 s T`. Each `∇^k` of it is, by the iterated covariant Leibniz expansion
 (`covGrad_prod`-style), a sum of contractions of iterated covariant derivatives of curvature `∇^p R`
 (`p ≤ k`) against iterated gradients `∇^{q}(∇T) = ∇^{q + 1}T` (`q ≤ k`); every curvature coefficient
-`‖∇^p R‖` is absorbed, uniformly over the compact manifold, into `(c s)²` via the curvature /
-differentiated-curvature sups `exists_uniform_riemannianFiberNormSq_riemannOp_bound`,
+`‖∇^p R‖` (`p ≤ k`) is absorbed, uniformly over the compact manifold, into the `k`-th constant
+`(c s k)²` — the per-order constant carries `‖∇^{≤k} R‖_∞`, which is finite by per-`k` compactness
+(no single scalar dominates all `k`, since `sup_k ‖∇^k R‖_∞ = ∞` on a generic closed metric) — via
+the curvature / differentiated-curvature sups `exists_uniform_riemannianFiberNormSq_riemannOp_bound`,
 `exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound`. The contracted-order range is
 `1 … 1 + k` (lowest order `1`, since the contraction acts on `∇T`), exactly the `(p, w) = (1, 1)`
 graded shape. This is the moving-frame graded refinement of the per-contraction grid bound
 `exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_grid_le` summed over the frame; it
 is posited as a precise true child (consumers transitively depend on `sorryAx`).
 
-**Non-vacuity.** With `c s = 0` the bound forces `rfns(GcurvSection g s T)(x) = 0` at `k = 0`, i.e.
+**Non-vacuity.** With `c s 0 = 0` the bound forces `rfns(GcurvSection g s T)(x) = 0` at `k = 0`, i.e.
 the pure-Riemann contraction `∑ᵢ R(Bᵢ, ·)(∇_{Bᵢ}T)` vanishes; false on a non-flat manifold (`R ≠ 0`)
-for a non-parallel `T` (`∇T ≠ 0`). The constant is genuinely positive. -/
+for a non-parallel `T` (`∇T ≠ 0`). The constant family is genuinely positive. -/
 theorem GcurvSection_gradedCurvJet (g : SmoothRiemannianMetric I M) :
-    ∃ c : ℕ → ℝ, (∀ s, 0 ≤ c s) ∧
+    ∃ c : ℕ → ℕ → ℝ, (∀ s k, 0 ≤ c s k) ∧
       ∀ (s : ℕ) (T : SmoothCcTensor g 0 s),
         IsGradedCurvJet (I := I) (M := M) g T (c s) 1 1
           (GcurvSection (I := I) (M := M) g s T) := by
   sorry
 
 /-- **Posited graded curvature-jet bound for the differentiated-curvature genuine section
-`GcurvDerivSection`.** For a closed smooth Riemannian manifold `(M, g)` there is a *valence-dependent*
-nonnegative constant `c : ℕ → ℝ` such that, at every covariant rank `s` and every smooth
-compactly-supported `(0, s)`-tensor `T`, the moving-centre differentiated-curvature genuine section
-`GcurvDerivSection g s T` (`MovingFrameCurvatureTraceSmooth`, the slot-`0` assembly of the moving-frame
-trace `∑ᵢ ∇_{Bᵢ}(R(Bᵢ, ·) T)`, i.e. the `(∇R) T` contraction) is a **graded** curvature jet of `T` of
-lowest order `0` and base width `1`:
+`GcurvDerivSection`.** For a closed smooth Riemannian manifold `(M, g)` there is a
+*valence/order-dependent* nonnegative constant family `c : ℕ → ℕ → ℝ` such that, at every covariant
+rank `s` and every smooth compactly-supported `(0, s)`-tensor `T`, the moving-centre
+differentiated-curvature genuine section `GcurvDerivSection g s T` (`MovingFrameCurvatureTraceSmooth`,
+the slot-`0` assembly of the moving-frame trace `∑ᵢ ∇_{Bᵢ}(R(Bᵢ, ·) T)`, i.e. the `(∇R) T`
+contraction) is a **graded** curvature jet of `T` of lowest order `0` and base width `1`:
 
 ```
-rfns(∇^k (GcurvDerivSection g s T))(x) ≤ (c s)² · ∑_{i < 1 + k} rfns(∇^{i + 0} T)(x).
+rfns(∇^k (GcurvDerivSection g s T))(x) ≤ (c s k)² · ∑_{i < 1 + k} rfns(∇^{i + 0} T)(x).
 ```
 
 **Why this is TRUE.** `GcurvDerivSection g s T` is the slot-`0` assembly of the moving-frame
 differentiated-curvature trace `∑ᵢ ∇_{Bᵢ}(R(Bᵢ, ·) T)`, a fixed (once-differentiated) curvature
 operator applied to the *undifferentiated* section `T`. Each `∇^k` of it is, by the iterated covariant
 Leibniz expansion, a sum of contractions of iterated covariant derivatives of curvature `∇^p R`
-(`p ≤ k + 1`) against iterated gradients `∇^{q}T` (`q ≤ k`); every curvature coefficient `‖∇^p R‖` is
-absorbed uniformly over the compact manifold into `(c s)²` via the curvature / differentiated-curvature
-sups. The contracted-order range is `0 … k` (lowest order `0`, the contraction acting on `T`), exactly
-the `(p, w) = (0, 1)` graded shape. Posited as a precise true child (consumers transitively depend on
-`sorryAx`).
+(`p ≤ k + 1`) against iterated gradients `∇^{q}T` (`q ≤ k`); every curvature coefficient `‖∇^p R‖`
+(`p ≤ k + 1`) is absorbed uniformly over the compact manifold into the `k`-th constant `(c s k)²` —
+the per-order constant carries `‖∇^{≤k+1} R‖_∞`, finite by per-`k` compactness — via the curvature /
+differentiated-curvature sups. The contracted-order range is `0 … k` (lowest order `0`, the
+contraction acting on `T`), exactly the `(p, w) = (0, 1)` graded shape. Posited as a precise true
+child (consumers transitively depend on `sorryAx`).
 
-**Non-vacuity.** With `c s = 0` the bound forces `rfns(GcurvDerivSection g s T)(x) = 0` at `k = 0`,
+**Non-vacuity.** With `c s 0 = 0` the bound forces `rfns(GcurvDerivSection g s T)(x) = 0` at `k = 0`,
 i.e. the differentiated-curvature contraction `∑ᵢ ∇_{Bᵢ}(R(Bᵢ, ·) T)` vanishes; false on a manifold
-with `∇R ≠ 0` for a non-zero `T`. The constant is genuinely positive. -/
+with `∇R ≠ 0` for a non-zero `T`. The constant family is genuinely positive. -/
 theorem GcurvDerivSection_gradedCurvJet (g : SmoothRiemannianMetric I M) :
-    ∃ c : ℕ → ℝ, (∀ s, 0 ≤ c s) ∧
+    ∃ c : ℕ → ℕ → ℝ, (∀ s k, 0 ≤ c s k) ∧
       ∀ (s : ℕ) (T : SmoothCcTensor g 0 s),
         IsGradedCurvJet (I := I) (M := M) g T (c s) 0 1
           (GcurvDerivSection (I := I) (M := M) g s T) := by
   sorry
 
 /-- **Posited graded curvature-jet bracket-remainder field for the `m = 0` split.** For a closed
-smooth Riemannian manifold `(M, g)` there is a *valence-dependent* nonnegative constant `c : ℕ → ℝ`
-such that, at every covariant rank `s` and every smooth compactly-supported `(0, s)`-tensor `T`, the
-order-`2` commutator defect `Curv T := pointwiseTensorCurv g s T` splits as
+smooth Riemannian manifold `(M, g)` there is a *valence/order-dependent* nonnegative constant family
+`c : ℕ → ℕ → ℝ` such that, at every covariant rank `s` and every smooth compactly-supported
+`(0, s)`-tensor `T`, the order-`2` commutator defect `Curv T := pointwiseTensorCurv g s T` splits as
 
 ```
 Curv T = GcurvSection g s T + GcurvDerivSection g s T + Grem
@@ -369,7 +383,7 @@ for a smooth compactly-supported `(0, s + 1)`-tensor remainder field `Grem` that
 curvature jet of `T` of lowest order `2` and base width `1`:
 
 ```
-rfns(∇^k Grem)(x) ≤ (c s)² · ∑_{i < 1 + k} rfns(∇^{i + 2} T)(x).
+rfns(∇^k Grem)(x) ≤ (c s k)² · ∑_{i < 1 + k} rfns(∇^{i + 2} T)(x).
 ```
 
 **Why this is TRUE.** By the committed sorry-free fibre field split
@@ -382,18 +396,19 @@ which equals the moving-frame/frame-bracket discrepancy `tensor3rdCurvBracket` p
 residual — genuinely `rfns(∇²T)`-order (the bracket carries two covariant derivatives of `T`). Each
 `∇^k Grem` is, by the iterated covariant Leibniz expansion of the bracket contraction, a sum of
 contractions of `∇^p R` (`p ≤ k`) against `∇^{q + 2}T` (`q ≤ k`), with all curvature coefficients
-absorbed uniformly into `(c s)²` via the curvature / differentiated-curvature sups; the contracted-
-order range is `2 … 2 + k`, exactly the `(p, w) = (2, 1)` graded shape. Posited as a precise true
-child (consumers transitively depend on `sorryAx`).
+(`p ≤ k`) absorbed uniformly into the `k`-th constant `(c s k)²` (carrying `‖∇^{≤k} R‖_∞`, finite by
+per-`k` compactness) via the curvature / differentiated-curvature sups; the contracted-order range is
+`2 … 2 + k`, exactly the `(p, w) = (2, 1)` graded shape. Posited as a precise true child (consumers
+transitively depend on `sorryAx`).
 
-**Non-vacuity.** With `c s = 0` the bound forces `rfns(Grem)(x) = 0` at `k = 0`, making the split
+**Non-vacuity.** With `c s 0 = 0` the bound forces `rfns(Grem)(x) = 0` at `k = 0`, making the split
 `Curv T = GcurvSection + GcurvDerivSection`; merged with the two genuine jets this is the `m = 0`
 two-term split `exists_pointwiseTensorCurv_genuineRemainder_fiberNormSq_bound` with vanishing
 remainder, *false* on a non-flat manifold where the moving-frame bracket discrepancy is genuinely
-non-zero. The constant is genuinely positive. -/
+non-zero. The constant family is genuinely positive. -/
 theorem exists_pointwiseTensorCurv_bracketRemainder_gradedCurvJet
     (g : SmoothRiemannianMetric I M) :
-    ∃ c : ℕ → ℝ, (∀ s, 0 ≤ c s) ∧
+    ∃ c : ℕ → ℕ → ℝ, (∀ s k, 0 ≤ c s k) ∧
       ∀ (s : ℕ) (T : SmoothCcTensor g 0 s),
         ∃ Grem : SmoothCcTensor g 0 (s + 1),
           pointwiseTensorCurv (I := I) (M := M) g s T =
@@ -404,8 +419,9 @@ theorem exists_pointwiseTensorCurv_bracketRemainder_gradedCurvJet
 
 /-- **Posited explicit graded curvature-jet seed: the `m = 0` order-separated graded field split of
 the order-`2` commutator defect.** For a closed smooth Riemannian manifold `(M, g)` there is a
-*valence-dependent* nonnegative constant `c : ℕ → ℝ` such that, at every covariant rank `s` and for
-every smooth compactly-supported `(0, s)`-tensor `T`, the order-`2` commutator defect
+*valence/order-dependent* nonnegative constant family `c : ℕ → ℕ → ℝ` such that, at every covariant
+rank `s` and for every smooth compactly-supported `(0, s)`-tensor `T`, the order-`2` commutator
+defect
 `Curv T := pointwiseTensorCurv g s T` admits an explicit graded curvature-jet split
 
 ```
@@ -433,11 +449,11 @@ specialisation.
 The degenerate witness is rejected: at gradient order `k = 0`, the split reads
 `Curv T (x) = Gcurv + GcurvDeriv + Grem` with the three `k = 0` order-separated bounds, which —
 merged — is the `m = 0` two-term split `exists_pointwiseTensorCurv_genuineRemainder_fiberNormSq_bound`,
-*false* with `c s = 0` on a non-flat manifold (the defect carries the genuine curvature contraction of
-`T`). -/
+*false* with `c s 0 = 0` on a non-flat manifold (the defect carries the genuine curvature contraction
+of `T`). -/
 theorem pointwiseTensorCurv_gradedCurvJet_field_base
     (g : SmoothRiemannianMetric I M) :
-    ∃ c : ℕ → ℝ, (∀ s, 0 ≤ c s) ∧
+    ∃ c : ℕ → ℕ → ℝ, (∀ s k, 0 ≤ c s k) ∧
       ∀ (s : ℕ) (T : SmoothCcTensor g 0 s),
         ∃ Gcurv GcurvDeriv Grem : SmoothCcTensor g 0 (s + 1),
           pointwiseTensorCurv (I := I) (M := M) g s T = Gcurv + GcurvDeriv + Grem ∧
@@ -447,29 +463,30 @@ theorem pointwiseTensorCurv_gradedCurvJet_field_base
   classical
   -- The three genuine fields are `GcurvSection` (pure-Riemann, order `1`), `GcurvDerivSection`
   -- (differentiated-curvature, order `0`), and the bracket remainder (order `2`); each carries its
-  -- own graded constant family. Promote all three to a single common constant by `mono_const`.
+  -- own graded constant family. Promote all three to a single common per-order family by `mono_const`.
   obtain ⟨c₁, hc₁_nn, hcurv⟩ := GcurvSection_gradedCurvJet (I := I) (M := M) g
   obtain ⟨c₂, hc₂_nn, hcurvDeriv⟩ := GcurvDerivSection_gradedCurvJet (I := I) (M := M) g
   obtain ⟨c₃, hc₃_nn, hrem⟩ := exists_pointwiseTensorCurv_bracketRemainder_gradedCurvJet
     (I := I) (M := M) g
-  refine ⟨fun s => max (max (c₁ s) (c₂ s)) (c₃ s), fun s => ?_, fun s T => ?_⟩
-  · exact le_trans (hc₁_nn s) (le_trans (le_max_left _ _) (le_max_left _ _))
+  refine ⟨fun s k => max (max (c₁ s k) (c₂ s k)) (c₃ s k), fun s k => ?_, fun s T => ?_⟩
+  · exact le_trans (hc₁_nn s k) (le_trans (le_max_left _ _) (le_max_left _ _))
   · obtain ⟨Grem, hsplit, hrem_jet⟩ := hrem s T
     refine ⟨GcurvSection (I := I) (M := M) g s T, GcurvDerivSection (I := I) (M := M) g s T, Grem,
       hsplit, ?_, ?_, ?_⟩
     · exact (hcurv s T).mono_const (I := I) (M := M) g T (hc₁_nn s)
-        (le_trans (le_max_left _ _) (le_max_left _ _))
+        (fun k => le_trans (le_max_left _ _) (le_max_left _ _))
     · exact (hcurvDeriv s T).mono_const (I := I) (M := M) g T (hc₂_nn s)
-        (le_trans (le_max_right _ _) (le_max_left _ _))
-    · exact hrem_jet.mono_const (I := I) (M := M) g T (hc₃_nn s) (le_max_right _ _)
+        (fun k => le_trans (le_max_right _ _) (le_max_left _ _))
+    · exact hrem_jet.mono_const (I := I) (M := M) g T (hc₃_nn s) (fun k => le_max_right _ _)
 
 /-- **Posited genuine per-step moving-frame remainder-refinement (the iterated Ricci cancellation).**
 For a closed smooth Riemannian manifold `(M, g)`, a fixed covariant rank `s`, gradient order `m`, and
-nonnegative input-bound constant `C`, there is a nonnegative constant `C'` — depending only on
-`g, s, m, C`, *uniform* in the source `T` and the remainder field `Grem` — such that: for every smooth
-compactly-supported `(0, s)`-tensor `T` and every smooth compactly-supported `(0, s + 1 + m)`-tensor
-field `Grem` that is a **graded** curvature jet of `T` of lowest order `m + 2` and width `1`, the
-*single covariant gradient* `∇Grem := covGrad g 0 (s + 1 + m) Grem` splits as
+nonnegative input-bound constant family `C : ℕ → ℝ`, there is a nonnegative constant family
+`C' : ℕ → ℝ` — depending only on `g, s, m, C`, *uniform* in the source `T` and the remainder field
+`Grem` — such that: for every smooth compactly-supported `(0, s)`-tensor `T` and every smooth
+compactly-supported `(0, s + 1 + m)`-tensor field `Grem` that is a **graded** curvature jet of `T` of
+lowest order `m + 2` and width `1`, the *single covariant gradient* `∇Grem := covGrad g 0 (s + 1 + m)
+Grem` splits as
 
 ```
 ∇Grem = Greclass + Grem',
@@ -489,19 +506,20 @@ commuted curvature term is a contraction of curvature (a uniformly bounded coeff
 manifold, `exists_uniform_riemannianFiberNormSq_riemannOp_bound`,
 `exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound`) against the field, hence a graded jet
 of *lowest order `1`* (`Greclass`, absorbable into the genuine differentiated-Riemann jet); what
-remains, `Grem'`, is genuinely order `m + 3` and width `1`. The constant `C'` multiplies `C` by the
-manifold's curvature sup and the frame-count, uniform in `T, Grem`. Posited as a precise true child
-(consumers transitively depend on `sorryAx`).
+remains, `Grem'`, is genuinely order `m + 3` and width `1`. The constant family `C'` multiplies `C`
+by the manifold's per-order curvature sup and the frame-count, uniform in `T, Grem`. Posited as a
+precise true child (consumers transitively depend on `sorryAx`).
 
 **Strictly weaker than the per-step (no hypothesis-packaging).** This refines *one field's* single
 covariant gradient; it neither mentions `Curv T` nor produces the order-`(m + 1)` triple split — the
 per-step is assembled on top of it together with `IsGradedCurvJet_covGrad` on the two genuine jets and
-`IsGradedCurvJet.add`. **Non-vacuity.** With `C' = 0` the conclusion forces `rfns(Greclass) = 0` and
-`rfns(Grem') = 0` at every order, hence `∇Grem = 0` for every graded remainder `Grem`; false on a
-non-flat manifold where the once-differentiated moving-frame remainder is genuinely non-zero. -/
+`IsGradedCurvJet.add`. **Non-vacuity.** With `C' = 0` (the zero family) the conclusion forces
+`rfns(Greclass) = 0` and `rfns(Grem') = 0` at every order, hence `∇Grem = 0` for every graded
+remainder `Grem`; false on a non-flat manifold where the once-differentiated moving-frame remainder is
+genuinely non-zero. -/
 theorem exists_iteratedCovGrad_remainder_gradedCurvJet_refine
-    (g : SmoothRiemannianMetric I M) (s m : ℕ) (C : ℝ) (_hC : 0 ≤ C) :
-    ∃ C' : ℝ, 0 ≤ C' ∧
+    (g : SmoothRiemannianMetric I M) (s m : ℕ) (C : ℕ → ℝ) (_hC : ∀ k, 0 ≤ C k) :
+    ∃ C' : ℕ → ℝ, (∀ k, 0 ≤ C' k) ∧
       ∀ (T : SmoothCcTensor g 0 s) (Grem : SmoothCcTensor g 0 (s + 1 + m)),
         IsGradedCurvJet (I := I) (M := M) g T C (m + 2) 1 Grem →
         ∃ Greclass Grem' : SmoothCcTensor g 0 (s + 1 + (m + 1)),
@@ -513,9 +531,9 @@ theorem exists_iteratedCovGrad_remainder_gradedCurvJet_refine
 /-- **Posited genuine per-step moving-frame curvature-jet primitive: one covariant-gradient step of
 the order-separated *graded* section-field split of the iterated commutator defect.** For a closed
 smooth Riemannian manifold `(M, g)`, a fixed covariant rank `s`, gradient order `m`, and nonnegative
-constant `C`, suppose the `m`-fold iterated covariant gradient of the order-`2` commutator defect
-`Curv T := pointwiseTensorCurv g s T` admits, for *every* smooth compactly-supported `(0, s)`-tensor
-`T`, an order-separated *graded* section-level split
+constant family `C : ℕ → ℝ`, suppose the `m`-fold iterated covariant gradient of the order-`2`
+commutator defect `Curv T := pointwiseTensorCurv g s T` admits, for *every* smooth compactly-supported
+`(0, s)`-tensor `T`, an order-separated *graded* section-level split
 
 ```
 ∇^m(Curv T) = Gcurv + GcurvDeriv + Grem
@@ -524,8 +542,8 @@ constant `C`, suppose the `m`-fold iterated covariant gradient of the order-`2` 
 where each field is a **graded** curvature jet (`IsGradedCurvJet` — re-differentiable: the entire
 family of its own iterated-gradient bounds is controlled) of the appropriate lowest order: `Gcurv` of
 lowest order `1` and width `m + 1`, `GcurvDeriv` of lowest order `0` and width `m + 1`, and `Grem` of
-lowest order `m + 2` and width `1`. Then there is a nonnegative constant `C'` such that the
-*one-higher* iterated covariant gradient `∇^{m + 1}(Curv T)` admits, for every `T`, the
+lowest order `m + 2` and width `1`. Then there is a nonnegative constant family `C' : ℕ → ℝ` such
+that the *one-higher* iterated covariant gradient `∇^{m + 1}(Curv T)` admits, for every `T`, the
 order-`(m + 1)` order-separated graded split
 
 ```
@@ -561,7 +579,7 @@ itself (no hypothesis-packaging). The degenerate witness is rejected: at `m = 0`
 `rfns(Curv T) ≤ 0`, which already fails on a non-flat manifold; the genuine fields must carry the
 actual curvature contractions, and one further gradient genuinely advances their order. -/
 theorem iteratedCovGrad_pointwiseTensorCurv_gradedCurvJet_field_step
-    (g : SmoothRiemannianMetric I M) (s m : ℕ) (C : ℝ) (_hC : 0 ≤ C)
+    (g : SmoothRiemannianMetric I M) (s m : ℕ) (C : ℕ → ℝ) (_hC : ∀ k, 0 ≤ C k)
     (hm : ∀ T : SmoothCcTensor g 0 s,
       ∃ Gcurv GcurvDeriv Grem : SmoothCcTensor g 0 (s + 1 + m),
         iteratedCovGrad g 0 (s + 1) m (pointwiseTensorCurv (I := I) (M := M) g s T) =
@@ -569,7 +587,7 @@ theorem iteratedCovGrad_pointwiseTensorCurv_gradedCurvJet_field_step
         IsGradedCurvJet (I := I) (M := M) g T C 1 (m + 1) Gcurv ∧
         IsGradedCurvJet (I := I) (M := M) g T C 0 (m + 1) GcurvDeriv ∧
         IsGradedCurvJet (I := I) (M := M) g T C (m + 2) 1 Grem) :
-    ∃ C' : ℝ, 0 ≤ C' ∧
+    ∃ C' : ℕ → ℝ, (∀ k, 0 ≤ C' k) ∧
       ∀ T : SmoothCcTensor g 0 s,
         ∃ Gcurv GcurvDeriv Grem : SmoothCcTensor g 0 (s + 1 + (m + 1)),
           iteratedCovGrad g 0 (s + 1) (m + 1) (pointwiseTensorCurv (I := I) (M := M) g s T) =
@@ -582,11 +600,14 @@ theorem iteratedCovGrad_pointwiseTensorCurv_gradedCurvJet_field_step
   -- remainder (the iterated-Ricci-cancellation reclassification), uniform in `T`.
   obtain ⟨Cref, hCref_nn, href⟩ :=
     exists_iteratedCovGrad_remainder_gradedCurvJet_refine (I := I) (M := M) g s m C _hC
-  -- The order-`(m + 1)` constant must dominate both `C` (for the two `covGrad`-advanced genuine jets)
-  -- and the merged-genuine constant `√(2·(C² + Cref²))` produced by adding the reclassified piece
-  -- into the differentiated-Riemann jet, as well as `Cref` (for the order-`(m + 3)` remainder).
-  refine ⟨max (max C Cref) (Real.sqrt (2 * (C ^ 2 + Cref ^ 2))), ?_, fun T => ?_⟩
-  · exact le_trans _hC (le_trans (le_max_left _ _) (le_max_left _ _))
+  -- The order-`(m + 1)` per-order constant must dominate, at order `k`, both the re-windowed
+  -- `C (k + 1)` (the `covGrad`-advanced genuine jets pick up `fun k => C (k + 1)` via
+  -- `IsGradedCurvJet_covGrad`) and the merged-genuine constant `√(2·((C (k + 1))² + (Cref k)²))`
+  -- produced by adding the reclassified piece into the differentiated-Riemann jet, as well as
+  -- `Cref k` (for the order-`(m + 3)` remainder).
+  refine ⟨fun k => max (max (C (k + 1)) (Cref k))
+      (Real.sqrt (2 * ((C (k + 1)) ^ 2 + (Cref k) ^ 2))), fun k => ?_, fun T => ?_⟩
+  · exact le_trans (_hC (k + 1)) (le_trans (le_max_left _ _) (le_max_left _ _))
   · obtain ⟨Gcurv, GcurvDeriv, Grem, hsplit, hcurv, hcurvDeriv, hrem⟩ := hm T
     obtain ⟨Greclass, Grem', hrefeq, hreclass, hrem'⟩ := href T Grem hrem
     -- `∇^{m+1}(Curv T) = ∇(∇^m(Curv T)) = ∇(Gcurv + GcurvDeriv + Grem)`
@@ -599,24 +620,26 @@ theorem iteratedCovGrad_pointwiseTensorCurv_gradedCurvJet_field_step
       abel
     refine ⟨covGrad (I := I) (M := M) g 0 (s + 1 + m) Gcurv + Greclass,
       covGrad (I := I) (M := M) g 0 (s + 1 + m) GcurvDeriv, Grem', hstep_eq, ?_, ?_, ?_⟩
-    · -- `Gcurv'`: merge the `∇`-advanced pure-Riemann jet (order `1`, width `(m + 1) + 1`) with the
-      -- reclassified remainder piece `Greclass` (order `1`, width `m + 2`), then promote to the
-      -- common constant.
-      have hadvCurv : IsGradedCurvJet (I := I) (M := M) g T C 1 ((m + 1) + 1)
+    · -- `Gcurv'`: merge the `∇`-advanced pure-Riemann jet (order `1`, width `(m + 1) + 1`, constant
+      -- re-windowed to `fun k => C (k + 1)`) with the reclassified remainder piece `Greclass`
+      -- (order `1`, width `m + 2`, constant `Cref`), then promote to the common per-order family.
+      have hadvCurv : IsGradedCurvJet (I := I) (M := M) g T (fun k => C (k + 1)) 1 ((m + 1) + 1)
           (covGrad (I := I) (M := M) g 0 (s + 1 + m) Gcurv) :=
         IsGradedCurvJet_covGrad (I := I) (M := M) g T hcurv
       have hmerge := hadvCurv.add (I := I) (M := M) g T hreclass
-      exact hmerge.mono_const (I := I) (M := M) g T (Real.sqrt_nonneg _) (le_max_right _ _)
-    · -- `GcurvDeriv'`: the `∇`-advanced differentiated-curvature jet (order `0`, width `(m + 1) + 1`),
-      -- promoted to the common constant.
-      have hadvDeriv : IsGradedCurvJet (I := I) (M := M) g T C 0 ((m + 1) + 1)
+      exact hmerge.mono_const (I := I) (M := M) g T (fun k => Real.sqrt_nonneg _)
+        (fun k => le_max_right _ _)
+    · -- `GcurvDeriv'`: the `∇`-advanced differentiated-curvature jet (order `0`, width `(m + 1) + 1`,
+      -- constant re-windowed to `fun k => C (k + 1)`), promoted to the common per-order family.
+      have hadvDeriv : IsGradedCurvJet (I := I) (M := M) g T (fun k => C (k + 1)) 0 ((m + 1) + 1)
           (covGrad (I := I) (M := M) g 0 (s + 1 + m) GcurvDeriv) :=
         IsGradedCurvJet_covGrad (I := I) (M := M) g T hcurvDeriv
-      exact hadvDeriv.mono_const (I := I) (M := M) g T _hC
-        (le_trans (le_max_left _ _) (le_max_left _ _))
-    · -- `Grem'`: the order-`(m + 3)` width-`1` remainder, promoted to the common constant.
+      exact hadvDeriv.mono_const (I := I) (M := M) g T (fun k => _hC (k + 1))
+        (fun k => le_trans (le_max_left _ _) (le_max_left _ _))
+    · -- `Grem'`: the order-`(m + 3)` width-`1` remainder (constant `Cref`), promoted to the common
+      -- per-order family.
       exact hrem'.mono_const (I := I) (M := M) g T hCref_nn
-        (le_trans (le_max_right _ _) (le_max_left _ _))
+        (fun k => le_trans (le_max_right _ _) (le_max_left _ _))
 
 /-- **The deepest order-`m` curvature primitive: the order-`m` order-separated section-field
 decomposition of the iterated commutator defect (rank/order-generic).** The direct order-`m` lift of
@@ -690,9 +713,9 @@ theorem exists_iteratedCovGrad_pointwiseTensorCurv_orderSeparated_field
   classical
   -- A field-level (global `SmoothCcTensor`) version of the order-separated split at each order `m`,
   -- carrying the re-differentiable graded curvature-jet invariant `IsGradedCurvJet`, proved by
-  -- induction on `m`. The per-`m` constant family `c : ℕ → ℝ` (indexed by rank `s`) is existentially
-  -- produced; the global `Cper` is its choice.
-  have hkey : ∀ m : ℕ, ∃ c : ℕ → ℝ, (∀ s, 0 ≤ c s) ∧
+  -- induction on `m`. The per-`m` constant family `c : ℕ → ℕ → ℝ` (indexed by rank `s` and gradient
+  -- order `k`) is existentially produced; the global `Cper` is its `k = 0` specialisation.
+  have hkey : ∀ m : ℕ, ∃ c : ℕ → ℕ → ℝ, (∀ s k, 0 ≤ c s k) ∧
       ∀ (s : ℕ) (T : SmoothCcTensor g 0 s),
         ∃ Gcurv GcurvDeriv Grem : SmoothCcTensor g 0 (s + 1 + m),
           iteratedCovGrad g 0 (s + 1) m (pointwiseTensorCurv (I := I) (M := M) g s T) =
@@ -717,7 +740,7 @@ theorem exists_iteratedCovGrad_pointwiseTensorCurv_orderSeparated_field
         -- The per-step primitive turns the order-`m` graded field split (uniform in `T` at rank `s`)
         -- into the order-`(m + 1)` graded field split. Apply it at each rank `s` and choose the
         -- resulting constant.
-        have hstep : ∀ s : ℕ, ∃ C' : ℝ, 0 ≤ C' ∧
+        have hstep : ∀ s : ℕ, ∃ C' : ℕ → ℝ, (∀ k, 0 ≤ C' k) ∧
             ∀ T : SmoothCcTensor g 0 s,
               ∃ Gcurv GcurvDeriv Grem : SmoothCcTensor g 0 (s + 1 + (m + 1)),
                 iteratedCovGrad g 0 (s + 1) (m + 1)
@@ -731,9 +754,11 @@ theorem exists_iteratedCovGrad_pointwiseTensorCurv_orderSeparated_field
             g s m (c s) (hc_nn s) (hsplit s)
         refine ⟨fun s => (hstep s).choose, fun s => (hstep s).choose_spec.1, fun s T => ?_⟩
         exact (hstep s).choose_spec.2 T
-  -- Assemble the global constant `Cper s m := (hkey m).choose s` and read the abstract single-order
-  -- three-field split off the graded invariant at gradient order `k = 0` and point `x`.
-  refine ⟨fun s m => (hkey m).choose s, fun s m => (hkey m).choose_spec.1 s, fun s m T x => ?_⟩
+  -- Assemble the global constant `Cper s m := (hkey m).choose s 0` (the graded constant family
+  -- evaluated at gradient order `k = 0`, the order at which the abstract per-point fibre split is
+  -- read off) and read the abstract single-order three-field split off the graded invariant at
+  -- gradient order `k = 0` and point `x`.
+  refine ⟨fun s m => (hkey m).choose s 0, fun s m => (hkey m).choose_spec.1 s 0, fun s m T x => ?_⟩
   obtain ⟨Gcurv, GcurvDeriv, Grem, heq, hcurv, hcurvDeriv, hrem⟩ :=
     (hkey m).choose_spec.2 s T
   -- Specialise each graded jet to gradient order `k = 0`: `∇^0 G = G`, width `w + 0 = w`, and the

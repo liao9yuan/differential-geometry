@@ -231,20 +231,25 @@ theorem deTurck_g0_realize_data
   -- `deTurckRemainderRealizeSection g₀ g_bg u` (`hcarrier`), so their `tensorL2Coeff`s agree.
   have hcoeff : ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
       realizableAtGate (I := I) g₀ u →
+      u ∈ Metric.closedBall
+          (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R →
         ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2,
           (N_cont u).coeff i =
             tensorL2Coeff (I := I) (M := M)
               (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
               (Integral.L2.SmoothCcTensor.toL2
                 (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) i := by
-    intro u hu i
-    rw [hsynth u i, hcarrier u hu]
+    intro u hu hball i
+    rw [hsynth u i, hcarrier u ⟨hu, hball⟩]
   -- The first-order operator-loss of the concrete gauge-cancelled geometric nonlinearity
   -- (posited analytic leaf `deTurckGenuineN_firstOrder_operatorLoss`), pinned to the named
   -- geometric operator by the all-order concrete-synthesis identity `hsynth`.
-  have hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont :=
-    deTurckGenuineN_firstOrder_operatorLoss (I := I) g₀ g_bg a N_cont P hsynth
-  obtain ⟨T, g_DT, u₂, T_s, hT, h0, hreal, hcont, hreg, hsmall, hsmoothrepr, hcanon, hHk⟩ :=
+  have hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont R :=
+    deTurckGenuineN_firstOrder_operatorLoss (I := I) g₀ g_bg a ha N_cont P K hR hctrl hsynth
+  obtain ⟨T, g_DT, u₂, T_s, hT, h0, hreal, hcont, hreg, hsmall, hsmoothrepr, hcanon, hHk,
+      hcarrier_inball⟩ :=
     deTurck_g0_carrier_realize_transport (I := I) g₀ a ha ha2 N_cont hR hN_cont hLipBall hloss
   -- Discharge the honest `realizableAtGate` membership of the carrier inclusion on the
   -- whole closed interval: `MemAllTensorHs` from the smooth representative `T_s s`, and
@@ -289,7 +294,8 @@ theorem deTurck_g0_realize_data
     intro s hs i
     exact hcoeff
       (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-        (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (hgate s hs) i
+        (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (hgate s hs)
+      (hcarrier_inball s hs) i
   exact ⟨T, a, hT, ha, g_DT, u₂, T_s, N_cont, repr, Nsec, h0, hreal, hN_coeff,
     hNsec_realize, hcont, hreg, hsmall, hsmoothrepr,
     hNsec_geom_univ T g_DT u₂ T_s hgate

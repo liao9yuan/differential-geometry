@@ -2799,7 +2799,7 @@ theorem deturck_g0_pointwise_carrier_interior_pde
         (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
           (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R))
-    (hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont)
+    (hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont R)
     (gforce : Analysis.Parabolic.TimeSobolev.timeL2
       (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (u : Analysis.Parabolic.QuasiLinear.MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
@@ -2815,6 +2815,13 @@ theorem deturck_g0_pointwise_carrier_interior_pde
       (fun t => N_cont (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1
         (I := I) (M := M) (a : ℝ) hT hT1
         (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (hstay : ∀ᵐ t ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T),
+      Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M) (a : ℝ)
+          hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t ∈
+        Metric.closedBall
+          (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R)
     (hcarrier_ball : ∀ s ∈ Set.Ioo (0 : ℝ) T,
       tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
         (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s) ∈
@@ -2848,7 +2855,7 @@ theorem deturck_g0_pointwise_carrier_interior_pde
       Summable (solFieldMass (I := I) (M := M) hT.le gforce (d + 1)) →
         Summable (forcingMass (I := I) (M := M) gforce d) :=
     deTurckForcing_firstOrder_coupling (I := I) (M := M) g₀ a hT hT1 N_cont hloss
-      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) rfl gforce hforce
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) rfl gforce hforce hstay
   have hRHS_cont : ContinuousOn RHS (Set.Ioo (0 : ℝ) T) :=
     deturck_g0_carrier_RHS_continuousOn_interior (I := I) (M := M) g₀ a hT hT1 N_cont
       hR hN_cont gforce u u₂ hu hbridge hcouple hcarrier_ball
@@ -2931,7 +2938,7 @@ theorem deturck_g0_engine_pointwise_carrier
         (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
           (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R))
-    (hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont)
+    (hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont R)
     (gforce : Analysis.Parabolic.TimeSobolev.timeL2
       (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (u : Analysis.Parabolic.QuasiLinear.MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
@@ -2945,6 +2952,13 @@ theorem deturck_g0_engine_pointwise_carrier
       (fun t => N_cont (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1
         (I := I) (M := M) (a : ℝ) hT hT1
         (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (hstay : ∀ᵐ t ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T),
+      Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M) (a : ℝ)
+          hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t ∈
+        Metric.closedBall
+          (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R)
     (hcarrier_ball : ∀ (u₂' : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)),
       (∀ s ∈ Set.Icc (0 : ℝ) T,
         tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
@@ -2991,7 +3005,7 @@ theorem deturck_g0_engine_pointwise_carrier
   · -- Interior strong derivative (posited child `deturck_g0_pointwise_carrier_interior_pde`).
     -- The carrier-in-ball for this `u₂` is the `∀`-bridge-rep hypothesis at `u₂`/`hu₂bridge`.
     exact deturck_g0_pointwise_carrier_interior_pde (I := I) (M := M) g₀ a hT hT1
-      N_cont hR hN_cont hloss gforce u u₂ hu hu₂bridge hforce
+      N_cont hR hN_cont hloss gforce u u₂ hu hu₂bridge hforce hstay
       (hcarrier_ball u₂ hu₂bridge)
 
 /-- **All-order interior membership of the smooth-datum carrier.**  For the
@@ -3434,7 +3448,7 @@ theorem deturck_g0_engine_carrier_extraction
         (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
           (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R))
-    (hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont)
+    (hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont R)
     (hfibre : ∃ C : ℝ, 0 ≤ C ∧ ∀ (k : ℕ), 2 * k > Module.finrank ℝ E + 4 →
         ∀ T : Integral.L2.SmoothCcTensor g₀ 0 2,
           gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T)
@@ -3476,7 +3490,14 @@ theorem deturck_g0_engine_carrier_extraction
       (∀ (k : ℕ), 2 * k > Module.finrank ℝ E + 4 →
         ContinuousOn
           (fun s : ℝ => SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * k) (T_s s))
-          (Set.Icc 0 T)) := by
+          (Set.Icc 0 T)) ∧
+      (∀ s ∈ Set.Ico (0 : ℝ) T,
+        tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s) ∈
+          Metric.closedBall
+            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) := by
   classical
   set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
     with hcompact_def
@@ -3491,9 +3512,10 @@ theorem deturck_g0_engine_carrier_extraction
   have hTe1 : Te ≤ 1 := min_le_right _ _
   obtain ⟨u, gforce, hduh, hforce, _htrace, _hderivEq, hstay⟩ :=
     hsol hTe_pos (min_le_left _ _) hTe1
-  -- The first-order coupling of the forcing (from the threaded operator-loss `hloss`).
+  -- The first-order coupling of the forcing (from the threaded operator-loss `hloss`), the
+  -- engine's exposed stays-in-ball event `hstay` discharging the a.e.-in-ball input restriction.
   have hcouple := deTurckForcing_firstOrder_coupling (I := I) (M := M) g₀ a hTe_pos hTe1
-    N_cont hloss (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) rfl gforce hforce
+    N_cont hloss (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) rfl gforce hforce hstay
   -- The engine carrier stays in the radius-`R` ball on the interior: the engine's exposed
   -- stays-in-ball event `hstay` transported to the bridge carrier through the coupling.
   have hcarrier_ball := deturck_g0_engine_carrier_inBall (I := I) (M := M) g₀ a hTe_pos hTe1
@@ -3501,7 +3523,7 @@ theorem deturck_g0_engine_carrier_extraction
   -- Bochner/FTC transport to the pointwise order-`(a+2)` carrier.
   obtain ⟨u₂, hbridge, hcont, hcar0, hreg⟩ :=
     deturck_g0_engine_pointwise_carrier (I := I) (M := M) g₀ a hTe_pos hTe1
-      N_cont hR hN_cont hloss gforce u hduh hcouple hforce hcarrier_ball
+      N_cont hR hN_cont hloss gforce u hduh hcouple hforce hstay hcarrier_ball
   -- All-order interior membership of the carrier's `L²` class.
   have hmem := carrier_memAllTensorHs (I := I) (M := M) g₀ a hTe_pos hTe1 u₂ gforce u hduh
     hcouple hbridge
@@ -3595,12 +3617,23 @@ theorem deturck_g0_engine_carrier_extraction
   refine ⟨Tf, g_DT, u₂, T_s, hTf_pos, h0,
     fun s hs => hreal s hs, ?_, ?_, ?_,
     fun s hs => hsmoothrepr s (hsub hs), fun s hs => hcanon s (hsub hs),
-    fun k hk => (hHk k hk).mono hsub⟩
+    fun k hk => (hHk k hk).mono hsub, ?_⟩
   · exact hcont.mono hsub
   · intro s hs
     exact hreg s ⟨hs.1, lt_of_lt_of_le hs.2 (min_le_left _ _)⟩
   · intro s hs
     exact hsmall_all s ⟨hs.1.le, hs.2.le⟩
+  · -- The included carrier stays in the radius-`R` ball on `[0, Tf)`: the interior membership
+    -- from the engine carrier-in-ball, and at `s = 0` the carrier vanishes (`ι (u₂ 0) = 0`).
+    intro s hs
+    rcases eq_or_lt_of_le hs.1 with hs0 | hs0
+    · have hu₂0 : u₂ s = 0 := by
+        rw [← hs0]
+        exact carrier_zero_at_zero (I := I) (M := M) g₀ a u₂ u
+          (hbridge 0 (hsub ⟨le_rfl, hTf_pos.le⟩)) hcar0 rfl
+      rw [hu₂0, map_zero]
+      exact Metric.mem_closedBall_self hR.le
+    · exact hcarrier_ball u₂ hbridge s ⟨hs0, lt_of_lt_of_le hs.2 (min_le_left _ _)⟩
 
 end DifferentialGeometry.PDE.RicciFlow
 
