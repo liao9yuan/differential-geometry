@@ -1937,6 +1937,120 @@ private theorem tensorL2NormRS_le_of_pointwise_fiberNormSq_bound_two
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
+/-- **Finite-sum pointwise-to-`L²` packaging at contravariant rank `r`.** The bidegree-`(r, ·)`
+analogue of `Integral.Connection.tensorL2Norm_le_of_pointwise_fiberNormSq_bound_sum`: for a per-index
+valence assignment `v : ℕ → ℕ`, a finite family `T : ∀ i, SmoothCcTensor g r (v i)` of jet terms, a
+target `Curv : SmoothCcTensor g r c`, and `C ≥ 0`, a pointwise fibre-norm bound
+`rfns(Curv)(x) ≤ C² · ∑_{i < N} rfns(Tᵢ)(x)` upgrades to the `L²` operator bound
+`‖Curv‖ ≤ C · ∑_{i < N} ‖Tᵢ‖`.  Proved verbatim from the rank-`0` original, whose underlying engine
+(the fibre-norm bridge `tensorL2Norm_sq_eq_integral_riemannianFiberNormSq`, integrability
+`integrable_riemannianFiberNormSq_toSection`, `integral_mono`, and the elementary `∑ pᵢ² ≤ (∑ pᵢ)²`)
+is already rank-generic. -/
+private theorem tensorL2NormRS_le_of_pointwise_fiberNormSq_bound_sum
+    (g : SmoothRiemannianMetric I M) (r : ℕ) {c : ℕ} (N : ℕ) (v : ℕ → ℕ)
+    (T : ∀ i, Integral.L2.SmoothCcTensor g r (v i)) (Curv : Integral.L2.SmoothCcTensor g r c)
+    (C : ℝ) (hC : 0 ≤ C)
+    (hpt : ∀ x : M,
+      Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r c x (Curv.toSection x) ≤
+        C ^ 2 * ∑ i ∈ Finset.range N,
+          Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r (v i) x
+            ((T i).toSection x)) :
+    ‖Curv‖ ≤ C * ∑ i ∈ Finset.range N, ‖T i‖ := by
+  classical
+  set μ := Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g with hμ_def
+  rw [Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M) Curv]
+  conv_rhs => rw [show (fun i => ‖T i‖) =
+      fun i => Integral.L2.tensorL2Norm (I := I) (M := M) g r (v i) (T i).toFun from by
+    funext i; exact Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M) (T i)]
+  set nCurv : ℝ := Integral.L2.tensorL2Norm (I := I) (M := M) g r c Curv.toFun with hnCurv_def
+  set fi : ℕ → ℝ := fun i => Integral.L2.tensorL2Norm (I := I) (M := M) g r (v i) (T i).toFun
+    with hfi_def
+  have hfi_nn : ∀ i, 0 ≤ fi i := fun i =>
+    Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g r (v i) _
+  have hnCurv_nn : 0 ≤ nCurv := Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g r c _
+  set gi : ℕ → M → ℝ := fun i x =>
+    Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r (v i) x ((T i).toSection x)
+    with hgi_def
+  have hint_i : ∀ i, MeasureTheory.Integrable (gi i) μ := by
+    intro i; rw [hgi_def, hμ_def]
+    exact Integral.Connection.integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g r (v i)
+      (T i)
+  have hbridge_i : ∀ i, fi i ^ 2 = ∫ x, gi i x ∂μ := by
+    intro i
+    have hfun : (T i).toFun = fun x => Tensor0SBundle.TensorRSSpace.toModel (𝕜 := ℝ) (E := E)
+        (I := I) (M := M) (r := r) (s := v i) (x := x) ((T i).toSection x) := rfl
+    change Integral.L2.tensorL2Norm (I := I) (M := M) g r (v i) (T i).toFun ^ 2 =
+      ∫ x, Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r (v i) x
+        ((T i).toSection x) ∂μ
+    rw [hμ_def, hfun]
+    exact Integral.Connection.tensorL2Norm_sq_eq_integral_riemannianFiberNormSq
+      (I := I) (M := M) g r (v i) _
+  have hbridgeCurv : nCurv ^ 2 =
+      ∫ x, Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r c x (Curv.toSection x) ∂μ
+      := by
+    have hfun : Curv.toFun = fun x => Tensor0SBundle.TensorRSSpace.toModel (𝕜 := ℝ) (E := E)
+        (I := I) (M := M) (r := r) (s := c) (x := x) (Curv.toSection x) := rfl
+    rw [hnCurv_def, hμ_def, hfun]
+    exact Integral.Connection.tensorL2Norm_sq_eq_integral_riemannianFiberNormSq
+      (I := I) (M := M) g r c _
+  set RHS : M → ℝ := fun x => C ^ 2 * ∑ i ∈ Finset.range N, gi i x with hRHS_def
+  have hsum_int : MeasureTheory.Integrable (fun x => ∑ i ∈ Finset.range N, gi i x) μ :=
+    MeasureTheory.integrable_finset_sum (Finset.range N) (fun i _ => hint_i i)
+  have hRHS_int : MeasureTheory.Integrable RHS μ := by
+    rw [hRHS_def]; exact hsum_int.const_mul (C ^ 2)
+  have hcurv_nn_ae : (0 : M → ℝ) ≤ᵐ[μ]
+      (fun x => Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r c x
+        (Curv.toSection x)) :=
+    Filter.Eventually.of_forall (fun x =>
+      Integral.Connection.riemannianFiberNormSq_nonneg (I := I) (M := M) g r c x _)
+  have hpt' : ∀ x : M,
+      Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r c x (Curv.toSection x) ≤
+        RHS x := by
+    intro x; rw [hRHS_def, hgi_def]; exact hpt x
+  have hint_le :
+      (∫ x, Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r c x
+          (Curv.toSection x) ∂μ) ≤ ∫ x, RHS x ∂μ :=
+    MeasureTheory.integral_mono_of_nonneg hcurv_nn_ae hRHS_int
+      (Filter.Eventually.of_forall hpt')
+  have hRHS_integral :
+      (∫ x, RHS x ∂μ) = C ^ 2 * ∑ i ∈ Finset.range N, ∫ x, gi i x ∂μ := by
+    rw [hRHS_def, MeasureTheory.integral_const_mul]
+    congr 1
+    exact MeasureTheory.integral_finset_sum (Finset.range N) (fun i _ => hint_i i)
+  have hsq_bound : nCurv ^ 2 ≤ C ^ 2 * ∑ i ∈ Finset.range N, fi i ^ 2 := by
+    rw [hbridgeCurv]
+    calc (∫ x, Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r c x
+            (Curv.toSection x) ∂μ)
+        ≤ ∫ x, RHS x ∂μ := hint_le
+      _ = C ^ 2 * ∑ i ∈ Finset.range N, ∫ x, gi i x ∂μ := hRHS_integral
+      _ = C ^ 2 * ∑ i ∈ Finset.range N, fi i ^ 2 := by
+            congr 1
+            exact Finset.sum_congr rfl (fun i _ => (hbridge_i i).symm)
+  have hsum_sq_le : ∑ i ∈ Finset.range N, fi i ^ 2 ≤ (∑ i ∈ Finset.range N, fi i) ^ 2 := by
+    have hsq_sum : (∑ i ∈ Finset.range N, fi i) ^ 2 =
+        ∑ i ∈ Finset.range N, fi i * (∑ j ∈ Finset.range N, fi j) := by
+      rw [pow_two, Finset.sum_mul]
+    rw [hsq_sum]
+    refine Finset.sum_le_sum (fun i hi => ?_)
+    have hle : fi i ≤ ∑ j ∈ Finset.range N, fi j :=
+      Finset.single_le_sum (f := fun j => fi j) (fun j _ => hfi_nn j) hi
+    calc fi i ^ 2 = fi i * fi i := by rw [pow_two]
+      _ ≤ fi i * (∑ j ∈ Finset.range N, fi j) :=
+          mul_le_mul_of_nonneg_left hle (hfi_nn i)
+  clear_value nCurv fi
+  set Sf : ℝ := ∑ i ∈ Finset.range N, fi i with hSf_def
+  have hSf_nn : 0 ≤ Sf := hSf_def ▸ Finset.sum_nonneg (fun i _ => hfi_nn i)
+  have hy_nn : 0 ≤ C * Sf := mul_nonneg hC hSf_nn
+  have hfinal_sq : nCurv ^ 2 ≤ (C * Sf) ^ 2 := by
+    refine le_trans hsq_bound ?_
+    calc C ^ 2 * ∑ i ∈ Finset.range N, fi i ^ 2
+        ≤ C ^ 2 * Sf ^ 2 := by
+          rw [hSf_def]; exact mul_le_mul_of_nonneg_left hsum_sq_le (sq_nonneg C)
+      _ = (C * Sf) ^ 2 := by ring
+  nlinarith [hfinal_sq, hnCurv_nn, hy_nn, sq_nonneg (nCurv - C * Sf)]
+
+set_option maxHeartbeats 1600000 in
+set_option synthInstance.maxHeartbeats 1600000 in
 /-- **The general-rank integrated bracket-free curvature representation (posited general-rank
 curvature child).** At fixed contravariant rank `r` there is a valence-dependent nonnegative
 `K : ℕ → ℝ` such that, at every covariant rank `s` and for every smooth compactly-supported
@@ -2177,10 +2291,40 @@ rank-`0` field `pointwiseTensorCurv` and its iterated-gradient bound are stated 
 rank `0`), so it is posited here.  The constant is per-valence/order (`ℕ → ℕ → ℝ`), not a single scalar
 (the tensor-bundle curvature endomorphism is an `O(r + s + m)`-slot derivation and the
 curvature-derivative term count grows with `m`), so this is NOT the unsatisfiable single-const-∀ shape.
-The degenerate witness is rejected at `m = 0`: the bound is `‖Curv T‖ ≤ Cic s 0 · (‖T‖ + ‖∇T‖ + ‖∇²T‖)`,
-the genuine single-step defect norm bound, *false* with `Cic s 0 = 0` on a non-flat manifold (the
-defect carries the genuine curvature contraction of `T`).  The body is `sorry`; consumers transitively
-depend on `sorryAx`. -/
+The degenerate witness is rejected at `m = 0`, gradient `x` arbitrary: the bound reads
+`rfns(Curv T)(x) ≤ (Cic s 0)²·(rfns(T) + rfns(∇T) + rfns(∇²T))(x)`, *false* with `Cic s 0 = 0` on a
+non-flat manifold (the defect carries the genuine curvature contraction of `T`).  Posited as a precise
+general-rank curvature child; the body is `sorry` and consumers transitively depend on `sorryAx`. -/
+private theorem exists_iteratedCovGrad_pointwiseTensorCurvRS_pointwise_fiberNormSq_bound
+    (g : SmoothRiemannianMetric I M) (r : ℕ) :
+    ∃ Cic : ℕ → ℕ → ℝ, (∀ s m, 0 ≤ Cic s m) ∧
+      ∀ (s m : ℕ) (T : Integral.L2.SmoothCcTensor g r s) (x : M),
+        Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r (s + 1 + m) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r (s + 1) m
+              (Integral.Connection.pointwiseTensorCurvRS (I := I) (M := M) g r s T)).toSection x) ≤
+          Cic s m ^ 2 * ∑ i ∈ Finset.range (m + 3),
+            Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r (s + i) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i T).toSection x) :=
+  sorry
+
+/-- **The general-rank covariant-product curvature primitive (general-rank `L²` curvature bound).**
+The bidegree-`(r, ·)` analogue of the `(0, ·)` covariant-product input
+`exists_iteratedCovGrad_pointwiseTensorCurv_l2_bound`
+(`Geometry/Curvature/CovGradRoughLap/PointwiseTensorCurvL2Bound.lean`).
+At fixed contravariant rank `r` there is a *valence/order-dependent* nonnegative constant
+`Cic : ℕ → ℕ → ℝ` such that, at every covariant rank `s`, every gradient order `m`, and for every
+smooth compactly-supported `(r, s)`-tensor `T`, the `m`-fold iterated covariant gradient of the
+order-`2` single-step commutator defect `Curv T := pointwiseTensorCurvRS g r s T = Δ_∇(∇T) − ∇(Δ_∇ T)`
+is `L²`-controlled by the `≤ m + 2`-order iterated gradients of `T`:
+`‖∇^m(Curv T)‖ ≤ Cic s m · ∑_{i < m + 3} ‖∇^i T‖`.
+
+*Proved* — exactly as the rank-`0` `L²` bound is proved from its pointwise fibre form — from the
+general-rank pointwise fibre bound `exists_iteratedCovGrad_pointwiseTensorCurvRS_pointwise_fiberNormSq_bound`
+by the rank-`r` finite-sum pointwise-to-`L²` packaging
+`tensorL2NormRS_le_of_pointwise_fiberNormSq_bound_sum` (`‖·‖² = ∫ rfns(·)`, integral monotonicity, and
+`∑ pᵢ² ≤ (∑ pᵢ)²`), at output rank `c := (s + 1) + m`, valence assignment `i ↦ s + i`, and jet family
+`i ↦ ∇^i T`.  Consumers transitively depend on `sorryAx` through the posited pointwise curvature
+child. -/
 private theorem exists_iteratedCovGrad_pointwiseTensorCurvRS_l2_bound
     (g : SmoothRiemannianMetric I M) (r : ℕ) :
     ∃ Cic : ℕ → ℕ → ℝ, (∀ s m, 0 ≤ Cic s m) ∧
@@ -2188,8 +2332,17 @@ private theorem exists_iteratedCovGrad_pointwiseTensorCurvRS_l2_bound
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r (s + 1) m
             (Integral.Connection.pointwiseTensorCurvRS (I := I) (M := M) g r s T)‖ ≤
           Cic s m * ∑ i ∈ Finset.range (m + 3),
-            ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i T‖ :=
-  sorry
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i T‖ := by
+  classical
+  obtain ⟨Cic, hCic_nn, hpt⟩ :=
+    exists_iteratedCovGrad_pointwiseTensorCurvRS_pointwise_fiberNormSq_bound (I := I) (M := M) g r
+  refine ⟨Cic, hCic_nn, fun s m T => ?_⟩
+  exact tensorL2NormRS_le_of_pointwise_fiberNormSq_bound_sum (I := I) (M := M) g r
+    (c := s + 1 + m) (m + 3) (fun i => s + i)
+    (fun i => PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i T)
+    (PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r (s + 1) m
+      (Integral.Connection.pointwiseTensorCurvRS (I := I) (M := M) g r s T))
+    (Cic s m) (hCic_nn s m) (hpt s m T)
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
