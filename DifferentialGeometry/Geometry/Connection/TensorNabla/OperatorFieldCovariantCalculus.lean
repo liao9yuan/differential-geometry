@@ -27,6 +27,23 @@ application operator `W x ↦ (φ x).comp (W x)` is itself a continuous-linear m
 `TensorRSSpace 0 r I x →L[ℝ] TensorRSSpace 0 s I x`, so the fibrewise Cauchy–Schwarz applies to it
 directly.
 
+## The section-level operator-field action
+
+This file also packages the *section-level* operator-field action `appCc g r s Φ W`, a smooth
+compactly-supported `(0, s)`-tensor whose fibre value is the fibrewise composition `(Φ x).comp (W x)`
+(`appCcFib`):
+
+* `appCcFib` / `appCc` — the operator-field action of an `(r, s)`-tensor field `Φ` on a `(0, r)`-tensor
+  `W`, fibrewise and as a smooth section;
+* `appCcFib_contMDiff` — base-point smoothness of the action fibre field, via the pointwise-smoothness
+  bridge `contMDiff_clm_section_of_pointwise` over two `ContMDiff.clm_bundle_apply` evaluations;
+* `appCc_toSection` — the definitional fibre-value formula `(appCc Φ W) x = (Φ x).comp (W x)`.
+
+This is the typed action object through which the operator-field covariant calculus expresses
+`(r, s)`-operator fields acting on `(0, r)`-tensors at the section level (the carrier on which the
+operator-field covariant product rule and the differentiated-curvature operator-field induction are
+built).
+
 ## The diamond management
 
 The application operator `W ↦ φ.comp W` is built through the bare linear map (composition is
@@ -113,6 +130,76 @@ theorem riemannianFiberNormSq_appCLM_le
       φ.comp (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W)) := rfl
   rw [← happ]
   exact hCφ W
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The fibrewise operator-field action value.** The fibre value at `x` of the action of an
+`(r, s)`-operator field `Φ` on a `(0, r)`-tensor `W`: the fibrewise composition
+`(Φ x).comp (W x) : Tensor0SSpace 0 I x →L Tensor0SSpace s I x = TensorRSSpace 0 s I x`, a
+`(0, s)`-tensor. -/
+def appCcFib (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) (x : M) :
+    TensorRSSpace 0 s I x :=
+  (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x).comp
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x)
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- **Base-point smoothness of the operator-field action fibre field.** The `(0, s)`-tensor fibre
+field `x ↦ appCcFib g r s Φ W x = (Φ x).comp (W x)` is a smooth section: pointwise on any smooth
+`(0, 0)`-tensor `Y`, its value `Φ x (W x (Y x))` is smooth by two applications of
+`ContMDiff.clm_bundle_apply` (the smoothness of `Φ` and `W` applied through the bundle
+evaluation), and `contMDiff_clm_section_of_pointwise` lifts that per-vector smoothness to the
+operator-valued section. -/
+theorem appCcFib_contMDiff (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
+        (E := fun z : M => TensorRSSpace 0 s I z) x
+        (appCcFib (I := I) (M := M) g r s Φ W x)) := by
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (F₁ := Tensor0SModel 0 ℝ E) (V₁ := fun x : M => Tensor0SSpace 0 I x)
+    (F₂ := Tensor0SModel s ℝ E) (V₂ := fun x : M => Tensor0SSpace s I x)
+    (φ := fun x => appCcFib (I := I) (M := M) g r s Φ W x)
+  intro Y
+  have heq : (fun x : M => TotalSpace.mk' (Tensor0SModel s ℝ E)
+      (E := fun z : M => Tensor0SSpace s I z) x
+      (appCcFib (I := I) (M := M) g r s Φ W x (Y x))) =
+      (fun x : M => TotalSpace.mk' (Tensor0SModel s ℝ E)
+      (E := fun z : M => Tensor0SSpace s I z) x
+      ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x) (Y x)))) := by
+    funext x; rfl
+  rw [heq]
+  have hWY : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel r ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SModel r ℝ E)
+        (E := fun z : M => Tensor0SSpace r I z) x
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x) (Y x))) :=
+    ContMDiff.clm_bundle_apply (b := id) W.toSection.contMDiff Y.contMDiff
+  exact ContMDiff.clm_bundle_apply (b := id) Φ.toSection.contMDiff hWY
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The operator-field action of an `(r, s)`-tensor field on a `(0, r)`-tensor**, as a smooth
+compactly-supported `(0, s)`-tensor. The fibre value at `x` is the fibrewise composition
+`(Φ x).comp (W x)` (`appCcFib`), smooth by `appCcFib_contMDiff`; on the closed manifold it has
+compact support. This is the typed operator-field action through which an `(r, s)`-operator-field
+section acts on a `(0, r)`-tensor section, the section-level companion of the composition
+evaluation `riemannianFiberNormSq_appCLM_le`. -/
+def appCc (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) : SmoothCcTensor g 0 s where
+  toSection :=
+    { toFun := fun x : M => appCcFib (I := I) (M := M) g r s Φ W x
+      contMDiff_toFun := appCcFib_contMDiff (I := I) (M := M) g r s Φ W }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- The underlying section value of `appCc g r s Φ W` at `x` is the fibrewise composition
+`(Φ x).comp (W x)`. Definitional. -/
+@[simp] lemma appCc_toSection (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) (x : M) :
+    (appCc (I := I) (M := M) g r s Φ W).toSection x =
+      (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x).comp
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x) := rfl
 
 end Connection
 end Integral
