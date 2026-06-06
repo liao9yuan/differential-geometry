@@ -243,6 +243,58 @@ theorem diffCurvOp_isOrderZeroCurvFactor :
       curvatureContraction_toSection_apply (I := I) (M := M) g r W₁ hX hY x,
       curvatureContraction_toSection_apply (I := I) (M := M) g r W₂ hX hY x, hx]
 
+/-- **The high-order (`p ≥ 1`) per-rank section-proportional fibre envelope for the
+differentiated-curvature contraction** (the single posited analytic node for this tower). For a closed
+smooth Riemannian manifold `(M, g)` and smooth global tangent fields `X, Y`, there is a nonnegative
+envelope family `kappaHigh : ℕ → ℕ → ℝ` such that for every order `p`, covariant rank `r`, smooth
+compactly-supported `(0, r)`-tensor `W`, and base point `x`, the order-`(p + 1)` differentiated-curvature
+contraction has intrinsic squared fibre norm at most `kappaHigh p r` times that of `W`:
+
+```
+rfns(diffCurvOp (p + 1) r W)(x) ≤ kappaHigh p r · rfns(W)(x).
+```
+
+**Why this is TRUE.** The order-`0` base `diffCurvOp 0 r W (x) = riemannOp (tensorCov g 0 r) x (X x)
+(Y x) (W x)` is a smooth *fibrewise* curvature operator built from the smooth metric `g`, the smooth
+Levi-Civita curvature `R`, and the smooth frame fields `X, Y`. The differentiated tower
+`diffCurvOp (p + 1) r W = ∇(op p r W) − cast(op p (r + 1) (∇W))` (the exact covariant-Leibniz remainder,
+`covGrad_diffCurvOp_eq`) telescopes to `∇^{p+1}` of the smooth curvature coefficient applied *fibrewise*
+to `W` (the input section's derivatives cancel through the rank-cast term), whose fibre-operator norm is
+uniformly bounded over the compact `M` by `‖∇^{≤ p+1} R‖_∞ · g(X, X) · g(Y, Y)`
+(`exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound` at each order, finite by per-`p`
+compactness; the metric self-pairings continuous hence bounded). The genuinely-irreducible analytic
+content is this uniform `‖∇^{≤ p+1} R‖_∞`-control of the iterated covariant derivative of the curvature
+contraction operator; it is posited here as the precise atomic engine envelope, per order `p` and per
+rank `r` (the rank-`r` curvature derivation acts on all `r` slots, so the constant grows with `r`; no
+single order-only family covers all ranks).
+
+**Why this is the honest per-tower posit (and not an abstract one).** This high-order boundedness cannot
+be derived from an abstract order-`0` fingerprint plus the Leibniz remainder identity alone: that
+abstract route (the deleted `op_perOrder_factorisation_continuous` in `OperatorFieldEvaluationLeibniz`)
+is FALSE — the order-`0` fingerprint constrains the base only per-rank while the recursion mixes ranks,
+so a value-local-at-order-`0` family can produce a one-jet-reading (unbounded) order-`1` operator
+(counterexample `op 0 0 := 0`, `op 0 1 := id`). The bound is TRUE *here* only because `diffCurvOp` is the
+genuine differentiated tower of the *smooth* curvature contraction `R(X, Y)·` (coefficient `g, R, X, Y`),
+content available only to this concrete operator; the posit is therefore stated *concretely* about
+`diffCurvOp`, and its proof is the uniform-curvature-derivative-norm control of this specific tower —
+the single genuinely-irreducible analytic node, disclosed as a `sorry`.
+
+**Non-vacuity / counterexample violation.** The bound is FALSE for an arbitrary covariant-Leibniz family
+satisfying only the order-`0` fingerprint (the counterexample `op 0 0 := 0`, `op 0 1 := id` satisfies
+`IsOrderZeroCurvFactor` yet its order-`1` operator reads the one-jet of `W`, so no `kappaHigh 0 0` bounds
+it relative to `rfns(W (x))`), which is exactly why this is a genuine analytic posit about the concrete
+`diffCurvOp` and not a vacuous or packaged claim. A degenerate witness `kappaHigh ≡ 0` is likewise
+rejected on any non-flat manifold: at `p = 0`, `diffCurvOp 1 r W = (∇R)(X, Y) W` is the differentiated
+curvature contraction, genuinely nonzero when `∇R ≠ 0`, so `rfns(diffCurvOp 1 r W)(x) > 0` while
+`0 · rfns(W)(x) = 0`. The envelope genuinely *uses* `W` (the operator is applied to `W`). -/
+theorem exists_proportional_diffCurvOp_highOrder :
+    ∃ kappaHigh : ℕ → ℕ → ℝ, (∀ p r, 0 ≤ kappaHigh p r) ∧
+      ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g 0 (r + (p + 1)) x
+            ((diffCurvOp (I := I) (M := M) g hX hY (p + 1) r W).toSection x) ≤
+          kappaHigh p r * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x) := by
+  sorry
+
 /-- **Posited continuous per-order, per-rank section-proportional fibre envelope for the
 differentiated-curvature contraction.** For a closed smooth Riemannian manifold `(M, g)` and smooth
 global tangent fields `X, Y`, and at every differentiation order `p` **and covariant rank `r`**, there
@@ -330,13 +382,10 @@ theorem exists_continuous_proportional_diffCurvOp (p : ℕ) :
           curvatureContraction_toSection_apply (I := I) (M := M) g r W hX hY x]
         exact hCcurv r x (X x) (Y x) (W.toSection x)
   | succ p' =>
-      -- Order `p' + 1 ≥ 1`: the uniform high-order envelope of the shared abstract node, as a
-      -- constant (hence continuous) per-rank function.
+      -- Order `p' + 1 ≥ 1`: the per-tower posited high-order envelope, as a constant (hence
+      -- continuous) per-rank function.
       obtain ⟨kappaHigh, hkappaHigh_nn, hkappaHigh⟩ :=
-        exists_proportional_recCurvDiffOp_highOrder (I := I) (M := M) g
-          (diffCurvOp (I := I) (M := M) g hX hY)
-          (fun p r W => covGrad_diffCurvOp_eq (I := I) (M := M) g hX hY p r W)
-          (diffCurvOp_isOrderZeroCurvFactor (I := I) (M := M) g hX hY)
+        exists_proportional_diffCurvOp_highOrder (I := I) (M := M) g hX hY
       refine ⟨fun r _ => kappaHigh p' r, fun r => continuous_const,
         fun r _ => hkappaHigh_nn p' r, fun r W x => ?_⟩
       exact hkappaHigh p' r W x

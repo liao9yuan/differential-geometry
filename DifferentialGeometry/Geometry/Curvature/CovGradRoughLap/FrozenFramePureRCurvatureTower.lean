@@ -1262,7 +1262,25 @@ frame-free engine envelope, per order `p` and per rank `r` (the rank-`m` curvatu
 all `m` slots, so the constant grows with `r`; no single order-only family covers all ranks). Consumers
 transitively depend on `sorryAx` through this single frame-free node.
 
-**Non-vacuity.** A degenerate witness `kappaHigh ≡ 0` is rejected on any non-flat manifold: at `p = 0`,
+**Why this is the honest per-tower posit (and not an abstract one).** This high-order boundedness
+*cannot* be derived from an abstract order-`0` fingerprint plus the Leibniz remainder identity alone:
+that abstract route (the deleted `op_perOrder_factorisation_continuous` in `OperatorFieldEvaluationLeibniz`)
+is FALSE — the order-`0` fingerprint constrains the base only per-rank while the recursion mixes ranks,
+so a value-local-at-order-`0` family can produce a one-jet-reading (unbounded) order-`1` operator
+(counterexample `op 0 0 := 0`, `op 0 1 := id`). The bound is TRUE *here* only because
+`pureRGenuineDiffOp` is the genuine differentiated tower of the *smooth* frame-free curvature coefficient
+`K_r = g, R`, whose iterated covariant derivative `∇^{p+1} K_r` is uniformly fibre-operator-bounded by
+`‖∇^{≤ p+1} R‖_∞`; that smooth-coefficient content is available only to this concrete operator. The
+posit is therefore stated *concretely* about `pureRGenuineDiffOp` (not abstractly over an arbitrary
+Leibniz family, for which it would be false), and its proof is the uniform-curvature-derivative-norm
+control of this specific tower — the single genuinely-irreducible analytic node, disclosed as a `sorry`.
+
+**Non-vacuity / counterexample violation.** The bound is FALSE for an arbitrary covariant-Leibniz family
+satisfying only the order-`0` fingerprint (the counterexample `op 0 0 := 0`, `op 0 1 := id` satisfies
+`IsOrderZeroCurvFactor` yet its order-`1` operator `op 1 0 W = − cast(covGrad g 0 0 W)` reads the
+one-jet of `W`, so no `kappaHigh 0 0` bounds it relative to `rfns(W (x))`), which is exactly why this is
+a genuine analytic posit about the concrete `pureRGenuineDiffOp` and not a vacuous or packaged claim. A
+degenerate witness `kappaHigh ≡ 0` is likewise rejected on any non-flat manifold: at `p = 0`,
 `pureRGenuineDiffOp 1 r W = ∇(K_r·W) − cast(K_r·(∇W)) = (∇K_r)·W` is the differentiated frame-free
 curvature endomorphism, genuinely nonzero when `∇R ≠ 0` and the slot-`0` reading carries a non-zero
 contraction, so `rfns(pureRGenuineDiffOp 1 r W)(x) > 0` while `0 · rfns(W)(x) = 0`. The envelope must
@@ -1273,11 +1291,8 @@ theorem exists_proportional_pureRGenuineDiffOp_highOrder (g : SmoothRiemannianMe
       ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + (p + 1)) x
             ((pureRGenuineDiffOp (I := I) (M := M) g (p + 1) r W).toSection x) ≤
-          kappaHigh p r * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x) :=
-  exists_proportional_recCurvDiffOp_highOrder (I := I) (M := M) g
-    (pureRGenuineDiffOp (I := I) (M := M) g)
-    (fun p r W => covGrad_pureRGenuineDiffOp_eq (I := I) (M := M) g p r W)
-    (pureRGenuineDiffOp_isOrderZeroCurvFactor (I := I) (M := M) g)
+          kappaHigh p r * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x) := by
+  sorry
 
 /-- **The frame-free per-order, per-rank section-proportional fibre envelope for the differentiated
 moving-frame pure-Riemann curvature tower.** For a closed smooth Riemannian manifold `(M, g)` there is
