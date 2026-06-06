@@ -52,26 +52,35 @@ sup — exactly the **binomial-Leibniz `rfns` domination** the Moser-tame produc
   retagged difference splits additively (`iteratedCovGrad_add`) and the `L²`-seminorm triangle
   inequality reduces the headline bound to the sum of the two **per-field** primitives, with combined
   per-order constant.
-* The two genuine atomic posits are the **per-field covariant-Faà-di-Bruno Moser-tame `L²`
-  dominations** of each summand difference: the curvature half
-  `exists_ricciNeg2Diff_faaDiBruno_moserTame_l2Norm_le` and the Lie half
-  `exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le`.  Each is the per-field Nemytskii `L²` estimate
-  of one geometric nonlinearity (`Ric`, resp. `𝓛_{deTurckVF} g`), which on a manifold of dimension
-  `≥ 4` cannot be reduced to a pointwise `C^{>2}`-jet of the metric (the metric pointwise `C^{>2}`-jet
-  does not exist there).  Each is stated **at the `L²`-consumable level**, NOT pointwise: the `j`-th
-  covariant gradient's metric `L²` norm is dominated, with a per-order family constant, by the sum of
-  an order-`a` chart-Sobolev `C⁰`-redistribution term `‖(T₁ − T₂).toHs a‖` (carrying, through the
-  supercritical embedding, the `L^∞` factor on the order-`0` difference that the unbounded top
-  coefficient jet multiplies in `L²`) and the order-`≤ j+2` covariant `L²`-jets of the perturbation
-  difference `T₁ − T₂` (carrying the high derivative on the difference factor).  Their trap-screened
-  design: NO pointwise sup of any order-`>2` metric jet appears (the false-embedding lesson — an
-  earlier *pointwise* `rfns` form of these dominations, lacking the `C⁰`-redistribution slot, is FALSE
-  for `j ≥ 1` because the covariant-FdB `i = 0` term carries a pointwise-unbounded `∇^{j+2}g_t`
-  coefficient over the `H^{a+2}` family; the `L²`-level statement keeps that jet in `L²` against the
-  difference's `C⁰` factor, never claiming it pointwise); the per-order constant is a *family* over
-  the unbounded gradient order; and the uniform redistribution/jet budget is scoped to the
-  supercritical `H^{a+2}`-bounded `B`-family (`ha`).  They carry **no** spectral-nonlinearity,
-  perturbation-indexed-remainder, or Weyl dependence.
+* The per-field **`L²` dominations** `exists_ricciNeg2Diff_faaDiBruno_moserTame_l2Norm_le` and
+  `exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le`, and the per-field **pointwise two-product `rfns`
+  dominations** `ricciNeg2Diff_covFdB_pointwise_twoProduct_rfns_le` and
+  `lieDerivDiff_covFdB_pointwise_twoProduct_rfns_le`, are all **proven by composition**: the `L²`
+  dominations from the pointwise two-products via the Hamilton/Moser pointwise-to-`L²` lift
+  `tensorL2Norm_le_of_pointwise_twoProduct_rfns_bound` and the realize-jet `L²` control; and each
+  pointwise two-product, in turn, from the **structural covariant Faà-di-Bruno split** of the
+  corresponding summand difference (the two genuine atomic posits below).
+* The two genuine atomic posits are the **structural covariant Faà-di-Bruno difference/cross splits**
+  of each summand difference: the curvature half `ricciNeg2Diff_covFdB_section_split` and the Lie half
+  `lieDerivDiff_covFdB_section_split`.  Each provides a uniform difference-arm constant `Cd` and, per
+  perturbation, the structural identity `∇^j(summand-diff) = Adiff + Cross` splitting the `j`-th
+  covariant gradient of one geometric nonlinearity (`Ric`, resp. `𝓛_{deTurckVF} g`) into a
+  **difference-arm piece** `Adiff` — the high derivative on the difference factor
+  `w = realizeSymm (T₁ − T₂)`, `rfns(Adiff) ≤ Cd · ∑_{i ≤ j+2} rfns(∇^i w)` (the metric-built `≤2`-jet
+  coefficient folded into `Cd` by the `DiffBilinOp` covariant-Leibniz `rfns` grid) — and a **fixed-pair
+  cross piece** `Cross` — the Faà-di-Bruno `i = 0` term's unbounded top coefficient jet `∇^{j+2}g_t`
+  kept on the fixed pair `T₁, T₂` against the difference's `C⁰` mass,
+  `rfns(Cross) ≤ (1/2)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·‖(T₁ − T₂).toHs a‖²`.  Their
+  trap-screened design: NO pointwise sup of any order-`>2` metric jet appears (the false-embedding
+  lesson — the covariant-FdB `i = 0` term's pointwise-unbounded `∇^{j+2}g_t` rides in the cross piece on
+  the fixed pair against the difference's `C⁰` factor, never claimed pointwise); the difference-arm
+  constant is uniform over the supercritical `H^{a+2}`-bounded `B`-family (`ha`); and the cross
+  coefficient `1/2` is the deep normalisation residual that, after the squared-fibre-norm subadditivity
+  factor `2`, yields the coefficient-`1` cross arm the pointwise-to-`L²` lift consumes.  Each split is
+  *coupled* (the identity ties the two arm bounds), rejecting both the `Adiff = 0` witness (cross bound
+  false for `j ≥ 1`) and the `Cross = 0` witness (difference-arm bound false for `j ∈ (a, 2a]`); both
+  pieces carry genuine content.  They carry **no** spectral-nonlinearity, perturbation-indexed-remainder,
+  or Weyl dependence.
 * The reduction shape — that the section the headline bound is stated on is the `g₀`-retagged DeTurck
   right-hand side `deTurckRHSRetagG0` (definitionally the downstream `deTurckRHSRetag`), and that the
   perturbation factor is the `(0,2)`-difference `T₁ − T₂` — is *fixed by construction* so the
@@ -84,7 +93,8 @@ Moser-tame product `exists_moserTameProduct_iteratedCovGrad_l2Norm_le`
 `exists_segmentMetric_realizeSymm_iteratedCovGradJet2_sup_le` (the bounded `Λ`-arm coefficient sup)
 and the proven `C⁰` Sobolev embedding `tensorPouSobolevHilbert_embedding_Ck` (the `Λ₀`-arm `C⁰`
 control on the difference factor); consumers transitively depend on `sorryAx` only through the two
-posited per-field covariant-Faà-di-Bruno Moser-tame `L²` dominations. -/
+structural covariant Faà-di-Bruno split posits `ricciNeg2Diff_covFdB_section_split` and
+`lieDerivDiff_covFdB_section_split`. -/
 
 noncomputable section
 
@@ -414,6 +424,83 @@ theorem exists_riemannianFiberNormSq_iteratedCovGrad_realizeSymm_le_jetSum
   rw [Finset.card_range] at hCS
   exact le_trans hBsq (by exact_mod_cast hCS)
 
+/-- **The covariant Faà-di-Bruno difference/cross split of the Ricci-curvature summand difference
+(the deep covariant-curvature-jet structural posit).**
+
+For an anchor `g₀`, an order `a`, a supercriticality hypothesis `ha`, a uniform `H^{a+2}`-size bound
+`B ≥ 0`, and a covariant-gradient order `j`, then for any two `g₀`-fibre-small perturbations
+`T₁, T₂` with `H^{a+2}` norms `≤ B` and any two realized metrics `g₁, g₂` of `T₁, T₂`, the `j`-th
+covariant gradient of the `g₀`-retagged curvature-summand difference
+`ricciNeg2RetagG0 g₀ g₁ − ricciNeg2RetagG0 g₀ g₂` splits as a **difference-arm piece** `Adiff` plus a
+**fixed-pair cross piece** `Cross`:
+```
+∇^j (ricciNeg2RetagG0 g₁ − ricciNeg2RetagG0 g₂) = Adiff + Cross,
+rfns(Adiff)(x)  ≤ Cd · ∑_{i ≤ j+2} rfns(∇^i w)(x),
+rfns(Cross)(x) ≤ (1/2) · (∑_{i ≤ j+2} (rfns(∇^i T₁)(x) + rfns(∇^i T₂)(x))) · ‖(T₁ − T₂).toHs a‖²,
+```
+with `w := realizeSymmCcTensor g₀ (T₁ − T₂)` and a nonnegative difference-arm constant `Cd`.
+
+This is the **covariant Faà-di-Bruno expansion** of the *sealed* curvature nonlinearity `-2 • Ric(g)`
+(the trace of the Levi-Civita curvature operator, `RicciConnection.lean`), differenced along the
+segment metric `g_t = g₂ + t·(g₁ − g₂)`, collected by where the single high derivative lands.  The
+**difference-arm** piece carries it on the difference factor `w` (the metric-built `≤2`-jet coefficient
+folded into `Cd` via the binomial covariant-Leibniz `rfns` grid of the contraction `DiffBilinOp`); the
+**cross** piece carries the Faà-di-Bruno `i = 0` term's unbounded top coefficient jet `∇^{j+2}g_t`
+(`L²` mass of order `j + 2 ∈ (a + 2, 2a + 2]`, which an `H^{a+2}` ball cannot bound — interpolation
+only goes down) on the *fixed pair* `T₁, T₂` in `L²` against the difference's `C⁰` mass, which the
+supercritical Sobolev embedding (`ha : 2 * a > dim M + 4`) bounds by `‖(T₁ − T₂).toHs a‖`.  No jet of
+order `> 2` is ever taken pointwise; the top jet rides on the fixed pair, never ball-controlled in
+isolation.  The cross coefficient is normalised to `1/2` — the genuine top-jet contraction-shape
+constant times the supercritical-embedding constant times the segment-metric-jet constant, folded into
+the deep coefficient analysis — so that after the squared-fibre-norm subadditivity factor `2` it yields
+the coefficient-`1` cross arm the two-product consumer below records.
+
+**Non-vacuity.**  The two arm bounds are *coupled* by the structural identity
+`∇^j(summand-diff) = Adiff + Cross`, and the coupling rejects both degenerate witnesses.  With
+`Adiff = 0`, `Cross = ∇^j(summand-diff)` would have to satisfy the *cross* bound
+`rfns ≤ (1/2)(∑(rfns ∇^i T₁ + rfns ∇^i T₂)) · ‖(T₁ − T₂).toHs a‖²`, FALSE for `j ≥ 1` (the
+difference-arm content `∑ rfns(∇^i w)` is genuinely present and is *not* dominated by the fixed-pair ·
+`C⁰` cross arm — exactly the known-false *pointwise* form without a difference arm).  With `Cross = 0`,
+`Adiff = ∇^j(summand-diff)` would have to satisfy the *difference-arm* bound `rfns ≤ Cd · ∑ rfns(∇^i w)`,
+FALSE for `j ∈ (a, 2a]` (the top coefficient jet `∇^{j+2}g_t` content is genuinely
+`(∑ fixed-pair) · C⁰`-order and is *not* difference-arm controlled).  Both pieces carry genuine
+content; neither arm constant is vacuous.
+
+Its body is `sorry`: the genuine deep covariant-curvature-jet content — the covariant Faà-di-Bruno
+expansion of the sealed Ricci nonlinearity, with NO pointwise-`C^{>2}`-jet claim, NO
+spectral-nonlinearity, and NO Weyl dependence. -/
+theorem ricciNeg2Diff_covFdB_section_split
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) (j : ℕ) :
+    ∃ Cd : ℝ, 0 ≤ Cd ∧
+      ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+        (g₁ g₂ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+        ∃ Adiff Cross : Integral.L2.SmoothCcTensor g₀ 0 (2 + j),
+          PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+              (ricciNeg2RetagG0 (I := I) g₀ g₁ - ricciNeg2RetagG0 (I := I) g₀ g₂)
+            = Adiff + Cross ∧
+          (∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x (Adiff.toSection x) ≤
+              Cd * ∑ i ∈ Finset.range (j + 2 + 1),
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                      (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)) ∧
+          (∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x (Cross.toSection x) ≤
+              (1 / 2 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+                  (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
+                    + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
+                * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) :=
+  sorry
+
 /-- **The pointwise covariant-Faà-di-Bruno two-product domination of the Ricci-curvature summand
 difference (the deep covariant-curvature-jet posit).**
 
@@ -457,9 +544,17 @@ witness with `Λ = 0` and the `‖(T₁ − T₂).toHs a‖`-coefficient effecti
 `Λ` is the genuine ball-uniform `≤2`-jet coefficient sup, `‖(T₁ − T₂).toHs a‖` the genuine difference
 `C⁰` mass.
 
-Its body is `sorry`: the genuine deep covariant-curvature-jet content — the covariant Faà-di-Bruno
-expansion of the sealed Ricci nonlinearity, with NO pointwise-`C^{>2}`-jet claim, NO
-spectral-nonlinearity, and NO Weyl dependence. -/
+It is **proven by composition** over the structural covariant Faà-di-Bruno split
+`ricciNeg2Diff_covFdB_section_split`: that split provides a uniform difference-arm constant `Cd` and,
+per perturbation, the structural identity `∇^j(Ric-diff) = Adiff + Cross` with the difference-arm grid
+bound `rfns(Adiff) ≤ Cd · ∑ rfns(∇^i w)` and the cross-piece fixed-pair bound
+`rfns(Cross) ≤ (1/2)·(∑ fixed-pair)·‖(T₁ − T₂).toHs a‖²`.  The two-product follows by the
+squared-fibre-norm subadditivity `riemannianFiberNormSq_add_le` (factor `2`) over the identity, with
+the coefficient `Λ = √(2 Cd)` (`Λ² = 2 Cd` absorbing the difference-arm constant and the factor `2`)
+and the cross-piece `1/2` cancelling the same factor `2` into the coefficient-`1` cross arm.  Consumers
+transitively depend on `sorryAx` only through the structural split posit, which carries the genuine deep
+covariant-curvature-jet content — the covariant Faà-di-Bruno expansion of the sealed Ricci
+nonlinearity, with NO pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, and NO Weyl dependence. -/
 theorem ricciNeg2Diff_covFdB_pointwise_twoProduct_rfns_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) (j : ℕ) :
@@ -486,8 +581,36 @@ theorem ricciNeg2Diff_covFdB_pointwise_twoProduct_rfns_le
                       ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
                     + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
                       ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
-                * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=
-  sorry
+                * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 := by
+  classical
+  -- The covariant Faà-di-Bruno difference/cross split of the curvature-summand difference: a uniform
+  -- difference-arm constant `Cd` and, per perturbation, the structural identity `∇^j(Ric-diff) =
+  -- Adiff + Cross` with the difference-arm grid bound and the cross-piece fixed-pair bound.
+  obtain ⟨Cd, hCd_nn, hsplit⟩ :=
+    ricciNeg2Diff_covFdB_section_split (I := I) g₀ a ha B hB j
+  -- The two-product coefficient `Λ = √(2 Cd)`: the squared-fibre-norm subadditivity factor `2` folds
+  -- the difference-arm constant `Cd` into `Λ² = 2 Cd`, and the cross-piece `1/2` cancels the same
+  -- factor `2` into the coefficient-`1` cross arm.
+  refine ⟨Real.sqrt (2 * Cd), Real.sqrt_nonneg _,
+    fun T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ x => ?_⟩
+  obtain ⟨Adiff, Cross, heq, hAdiff, hCross⟩ := hsplit T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂
+  -- The squared-fibre-norm subadditivity over the structural identity `∇^j(Ric-diff) = Adiff + Cross`.
+  have hsplit_norm :
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+              (ricciNeg2RetagG0 (I := I) g₀ g₁
+                - ricciNeg2RetagG0 (I := I) g₀ g₂)).toSection x) ≤
+        2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x (Adiff.toSection x)
+          + 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x (Cross.toSection x) := by
+    rw [heq, Integral.L2.SmoothCcTensor.toSection_add]
+    exact riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (2 + j) x
+      (Adiff.toSection x) (Cross.toSection x)
+  -- `Λ² = (√(2 Cd))² = 2 Cd`: the subadditivity factor `2` folds the difference-arm constant `Cd`
+  -- into the coefficient, and the cross-piece `1/2` cancels the same factor `2`.
+  rw [show Real.sqrt (2 * Cd) ^ 2 = 2 * Cd from Real.sq_sqrt (by positivity)]
+  have hA := hAdiff x
+  have hC := hCross x
+  nlinarith [hsplit_norm, hA, hC]
 
 /-- **The per-field covariant-Faà-di-Bruno Moser-tame `L²` domination of the segment-metric
 *Ricci-curvature* summand difference (the curvature half of the geometric nonlinearity, stated at the
@@ -684,6 +807,79 @@ theorem exists_ricciNeg2Diff_faaDiBruno_moserTame_l2Norm_le
           linarith
         linarith [he1, he2]
 
+/-- **The covariant Faà-di-Bruno difference/cross split of the Lie-derivative summand difference
+(the deep covariant-gauge-jet structural posit).**
+
+The Lie/`deTurckVF`-gauge analogue of `ricciNeg2Diff_covFdB_section_split`.  For an anchor `g₀`, a
+flow background `g_bg`, an order `a`, a supercriticality hypothesis `ha`, and a uniform `H^{a+2}`-size
+bound `B ≥ 0`, then for any two `g₀`-fibre-small perturbations `T₁, T₂` with `H^{a+2}` norms `≤ B` and
+any two realized metrics `g₁, g₂` of `T₁, T₂`, the `j`-th covariant gradient of the `g₀`-retagged
+Lie-summand difference `lieDerivRetagG0 g₀ g_bg g₁ − lieDerivRetagG0 g₀ g_bg g₂` splits as a
+**difference-arm piece** `Adiff` plus a **fixed-pair cross piece** `Cross`:
+```
+∇^j (lieDerivRetagG0 g₁ − lieDerivRetagG0 g₂) = Adiff + Cross,
+rfns(Adiff)(x)  ≤ Cd · ∑_{i ≤ j+2} rfns(∇^i w)(x),
+rfns(Cross)(x) ≤ (1/2) · (∑_{i ≤ j+2} (rfns(∇^i T₁)(x) + rfns(∇^i T₂)(x))) · ‖(T₁ − T₂).toHs a‖²,
+```
+with `w := realizeSymmCcTensor g₀ (T₁ − T₂)` and a nonnegative difference-arm constant `Cd`.
+
+This is the **covariant Faà-di-Bruno expansion** of the *sealed* Lie/`deTurckVF` nonlinearity
+`𝓛_{W(g, g_bg)} g` (the gauge summand `deTurckRHSSection g_bg g − ricciNeg2CcSection g`), differenced
+along the segment metric `g_t = g₂ + t·(g₁ − g₂)`, collected by where the single high derivative lands.
+The Lie field `𝓛_{W(g)} g` has the **same intrinsic order-`≤2` structure** as the curvature half (the
+deTurck vector field `W = g⁻¹ · (Γ(g) − Γ(g_bg))` is a `g⁻¹·∂g`-type field, and one further metric
+derivative produces the Lie deformation), so its segment difference admits the identical
+difference/cross split: the **difference-arm** piece carries the high derivative on the difference
+factor `w` (the metric-built `≤2`-jet coefficient folded into `Cd` via the binomial covariant-Leibniz
+`rfns` grid of the contraction `DiffBilinOp`); the **cross** piece carries the Faà-di-Bruno `i = 0`
+term's unbounded top coefficient jet `∇^{j+2}g_t` on the *fixed pair* `T₁, T₂` against the difference's
+`C⁰` mass (bounded by `‖(T₁ − T₂).toHs a‖` through the supercritical embedding).  The `j = 0` witness of
+exactly this two-piece structure is the chart-level structural difference identity
+`chartLieDeTurckComp_sub_eq`.  No jet of order `> 2` is ever taken pointwise; the cross coefficient is
+normalised to `1/2` so that after the squared-fibre-norm subadditivity factor `2` it yields the
+coefficient-`1` cross arm the two-product consumer below records.
+
+**Non-vacuity.**  As for the curvature half, the two arm bounds are *coupled* by the structural identity
+`∇^j(summand-diff) = Adiff + Cross`, rejecting both `Adiff = 0` (the cross bound would be false for
+`j ≥ 1`, the difference-arm content `∑ rfns(∇^i w)` genuinely present) and `Cross = 0` (the
+difference-arm bound would be false for `j ∈ (a, 2a]`, the top-jet content genuinely
+`(∑ fixed-pair) · C⁰`-order).  Both pieces carry genuine content; neither arm constant is vacuous.
+
+Its body is `sorry`: the genuine deep covariant-gauge-jet content — the covariant Faà-di-Bruno
+expansion of the sealed Lie/`deTurckVF` nonlinearity, with NO pointwise-`C^{>2}`-jet claim, NO
+spectral-nonlinearity, and NO Weyl dependence. -/
+theorem lieDerivDiff_covFdB_section_split
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) (j : ℕ) :
+    ∃ Cd : ℝ, 0 ≤ Cd ∧
+      ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+        (g₁ g₂ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+        ∃ Adiff Cross : Integral.L2.SmoothCcTensor g₀ 0 (2 + j),
+          PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+              (lieDerivRetagG0 (I := I) g₀ g_bg g₁ - lieDerivRetagG0 (I := I) g₀ g_bg g₂)
+            = Adiff + Cross ∧
+          (∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x (Adiff.toSection x) ≤
+              Cd * ∑ i ∈ Finset.range (j + 2 + 1),
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                      (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)) ∧
+          (∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x (Cross.toSection x) ≤
+              (1 / 2 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+                  (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
+                    + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
+                * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) :=
+  sorry
+
 /-- **The pointwise covariant-Faà-di-Bruno two-product domination of the Lie-derivative summand
 difference (the deep covariant-gauge-jet posit).**
 
@@ -736,10 +932,17 @@ witness with `Λ = 0` and the `‖(T₁ − T₂).toHs a‖`-coefficient effecti
 `0`).  `Λ` is the genuine ball-uniform `≤2`-jet coefficient sup, `‖(T₁ − T₂).toHs a‖` the genuine
 difference `C⁰` mass.
 
-Its body is `sorry`: the genuine deep covariant-gauge-jet content — the covariant Faà-di-Bruno
-expansion of the sealed Lie/`deTurckVF` nonlinearity, with NO pointwise-`C^{>2}`-jet claim, NO
-spectral-nonlinearity, and NO Weyl dependence.  Consumers transitively depend on `sorryAx` only
-through this posit. -/
+It is **proven by composition** over the structural covariant Faà-di-Bruno split
+`lieDerivDiff_covFdB_section_split` (the same assembly as the curvature half): that split provides a
+uniform difference-arm constant `Cd` and, per perturbation, the structural identity
+`∇^j(Lie-diff) = Adiff + Cross` with the difference-arm grid bound `rfns(Adiff) ≤ Cd · ∑ rfns(∇^i w)`
+and the cross-piece fixed-pair bound `rfns(Cross) ≤ (1/2)·(∑ fixed-pair)·‖(T₁ − T₂).toHs a‖²`.  The
+two-product follows by the squared-fibre-norm subadditivity `riemannianFiberNormSq_add_le` (factor `2`)
+over the identity, with the coefficient `Λ = √(2 Cd)` and the cross-piece `1/2` cancelling the factor
+`2` into the coefficient-`1` cross arm.  Consumers transitively depend on `sorryAx` only through the
+structural split posit, which carries the genuine deep covariant-gauge-jet content — the covariant
+Faà-di-Bruno expansion of the sealed Lie/`deTurckVF` nonlinearity, with NO pointwise-`C^{>2}`-jet
+claim, NO spectral-nonlinearity, and NO Weyl dependence. -/
 theorem lieDerivDiff_covFdB_pointwise_twoProduct_rfns_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) (j : ℕ) :
@@ -766,8 +969,36 @@ theorem lieDerivDiff_covFdB_pointwise_twoProduct_rfns_le
                       ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
                     + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
                       ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
-                * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=
-  sorry
+                * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 := by
+  classical
+  -- The covariant Faà-di-Bruno difference/cross split of the Lie-summand difference: a uniform
+  -- difference-arm constant `Cd` and, per perturbation, the structural identity `∇^j(Lie-diff) =
+  -- Adiff + Cross` with the difference-arm grid bound and the cross-piece fixed-pair bound.
+  obtain ⟨Cd, hCd_nn, hsplit⟩ :=
+    lieDerivDiff_covFdB_section_split (I := I) g₀ g_bg a ha B hB j
+  -- The two-product coefficient `Λ = √(2 Cd)`: the squared-fibre-norm subadditivity factor `2` folds
+  -- the difference-arm constant `Cd` into `Λ² = 2 Cd`, and the cross-piece `1/2` cancels the same
+  -- factor `2` into the coefficient-`1` cross arm.
+  refine ⟨Real.sqrt (2 * Cd), Real.sqrt_nonneg _,
+    fun T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ x => ?_⟩
+  obtain ⟨Adiff, Cross, heq, hAdiff, hCross⟩ := hsplit T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂
+  -- The squared-fibre-norm subadditivity over the structural identity `∇^j(Lie-diff) = Adiff + Cross`.
+  have hsplit_norm :
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+              (lieDerivRetagG0 (I := I) g₀ g_bg g₁
+                - lieDerivRetagG0 (I := I) g₀ g_bg g₂)).toSection x) ≤
+        2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x (Adiff.toSection x)
+          + 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x (Cross.toSection x) := by
+    rw [heq, Integral.L2.SmoothCcTensor.toSection_add]
+    exact riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (2 + j) x
+      (Adiff.toSection x) (Cross.toSection x)
+  -- `Λ² = (√(2 Cd))² = 2 Cd`: the subadditivity factor `2` folds the difference-arm constant `Cd`
+  -- into the coefficient, and the cross-piece `1/2` cancels the same factor `2`.
+  rw [show Real.sqrt (2 * Cd) ^ 2 = 2 * Cd from Real.sq_sqrt (by positivity)]
+  have hA := hAdiff x
+  have hC := hCross x
+  nlinarith [hsplit_norm, hA, hC]
 
 /-- **The per-field covariant-Faà-di-Bruno Moser-tame `L²` domination of the segment-metric
 *Lie-derivative* summand difference (the gauge half of the geometric nonlinearity, stated at the
