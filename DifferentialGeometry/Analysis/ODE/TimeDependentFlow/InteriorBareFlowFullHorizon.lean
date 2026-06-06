@@ -533,6 +533,303 @@ theorem wch_full_coherence
   intro t ht
   exact (hScl.Icc_subset_of_forall_exists_gt h0S hgt) ht
 
+set_option linter.unusedSectionVars false in
+/-- **Coherence of two from-`0` orbits on a closed sub-horizon.**  Two curves `f g : ℝ → M` that
+agree at `0`, each carrying `X`'s bare velocity on `Ico 0 β` (one-sided, `Ici 0`) and two-sided on
+the interior `Ioo 0 β`, agree on the whole half-open sub-horizon `Ico 0 β`.
+
+Same continuous-induction skeleton as `wch_full_coherence` (here the orbit data is local to
+`[0, β)`): the agreement set is closed (the bare velocity gives continuity, the target is `T2`),
+contains `0`, and is right-extendable — at `0` by the weak-datum corner coherence
+`fromZero_bare_flow_coherent_of_weakDatum`, at interior points by `wch_interior_coherence`. -/
+private theorem wch_orbit_coherence
+    (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
+    (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+    (hcont0 : ContinuousOn
+      (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2))
+      (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
+    (hgrad0 : ∀ α : M,
+      ContinuousOn
+        (fun q : ℝ × M =>
+          fderiv ℝ (chartRawRepr (I := I) α (X q.1)) (extChartAt I α q.2))
+        (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
+    (f g : ℝ → M) {β : ℝ} (hβT : β ≤ T)
+    (hstart : f 0 = g 0)
+    (hfbare : ∀ t ∈ Set.Ico (0:ℝ) β,
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I f (Set.Ici (0:ℝ)) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (f t))))
+    (hgbare : ∀ t ∈ Set.Ico (0:ℝ) β,
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I g (Set.Ici (0:ℝ)) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (g t))))
+    (hftwo : ∀ t ∈ Set.Ioo (0:ℝ) β,
+      HasMFDerivAt 𝓘(ℝ, ℝ) I f t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (f t))))
+    (hgtwo : ∀ t ∈ Set.Ioo (0:ℝ) β,
+      HasMFDerivAt 𝓘(ℝ, ℝ) I g t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (g t)))) :
+    Set.EqOn f g (Set.Ico 0 β) := by
+  rcases le_or_gt β 0 with hβ0 | hβpos
+  · intro t ht; exact absurd (lt_of_lt_of_le ht.2 hβ0) (not_lt.mpr ht.1)
+  set S : Set ℝ := {t : ℝ | f t = g t} with hS
+  have h0S : (0:ℝ) ∈ S := hstart
+  obtain ⟨δ', hδ'_pos, hcoh0⟩ :=
+    fromZero_bare_flow_coherent_of_weakDatum (I := I) X T hT hint hcont0 hgrad0
+      (fun s _ => f s) (fun s _ => g s) (f 0) (g 0) (δ := β) hβpos hstart hfbare hgbare
+  -- closed-induction on `S ∩ Icc 0 β'` for an arbitrary `β' < β`, then push to `Ico 0 β`
+  have key : ∀ β' : ℝ, β' < β → Set.Icc (0:ℝ) β' ⊆ S := by
+    intro β' hβ'
+    rcases le_or_gt β' 0 with hβ'0 | hβ'pos
+    · intro t ht
+      have : t = 0 := le_antisymm (le_trans ht.2 hβ'0) ht.1
+      rw [this]; exact h0S
+    have hf_cont : ContinuousOn f (Set.Icc 0 β') := by
+      intro t ht
+      exact ((hfbare t ⟨ht.1, lt_of_le_of_lt ht.2 hβ'⟩).1).mono (fun u hu => hu.1)
+    have hg_cont : ContinuousOn g (Set.Icc 0 β') := by
+      intro t ht
+      exact ((hgbare t ⟨ht.1, lt_of_le_of_lt ht.2 hβ'⟩).1).mono (fun u hu => hu.1)
+    have hScl : IsClosed (S ∩ Set.Icc (0:ℝ) β') := by
+      have h := (isClosed_Icc (a := (0:ℝ)) (b := β')).isClosed_eq hf_cont hg_cont
+      have heq : {t ∈ Set.Icc (0:ℝ) β' | f t = g t} = S ∩ Set.Icc (0:ℝ) β' := by
+        ext t; simp only [hS, Set.mem_inter_iff, Set.mem_setOf_eq]; tauto
+      rwa [heq] at h
+    have hgt : ∀ y ∈ S ∩ Set.Ico (0:ℝ) β', ∀ z ∈ Set.Ioi y, (S ∩ Set.Ioc y z).Nonempty := by
+      rintro y ⟨hyS, hy_mem⟩ z hz
+      have hy0 : 0 ≤ y := hy_mem.1
+      have hyβ' : y < β' := hy_mem.2
+      rcases eq_or_lt_of_le hy0 with hy_eq | hy_pos
+      · subst hy_eq
+        set w : ℝ := min z (min δ' β') with hw
+        have hw_pos : 0 < w := lt_min hz (lt_min hδ'_pos hβ'pos)
+        have hwS : w ∈ S := by
+          simp only [hS, Set.mem_setOf_eq]
+          exact hcoh0 w ⟨le_of_lt hw_pos, le_trans (min_le_right _ _) (min_le_left _ _)⟩
+        exact ⟨w, hwS, hw_pos, min_le_left _ _⟩
+      · set b' : ℝ := min z ((y + β) / 2) with hb'
+        have hb'_gt : y < b' := lt_min hz (by linarith)
+        have hb'_lt_β : b' < β := lt_of_le_of_lt (min_le_right _ _) (by linarith)
+        have hb'_le_z : b' ≤ z := min_le_left _ _
+        have hsub_Icc : Set.Icc y b' ⊆ Set.Ioo (0:ℝ) β :=
+          fun u hu => ⟨lt_of_lt_of_le hy_pos hu.1, lt_of_le_of_lt hu.2 hb'_lt_β⟩
+        have hflow_Icc : ∀ t ∈ Set.Icc y b',
+            HasMFDerivWithinAt 𝓘(ℝ, ℝ) I f (Set.Icc y b') t
+              ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (f t))) :=
+          fun t ht => (hftwo t (hsub_Icc ht)).hasMFDerivWithinAt
+        have hflow_Icc' : ∀ t ∈ Set.Icc y b',
+            HasMFDerivWithinAt 𝓘(ℝ, ℝ) I g (Set.Icc y b') t
+              ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (g t))) :=
+          fun t ht => (hgtwo t (hsub_Icc ht)).hasMFDerivWithinAt
+        have hcoh := wch_interior_coherence X T hint
+          (fun s _ => f s) (fun s _ => g s) (f 0) (f 0)
+          hy_pos hb'_gt (lt_of_lt_of_le hb'_lt_β hβT) hflow_Icc hflow_Icc' hyS
+        refine ⟨b', ?_, hb'_gt, hb'_le_z⟩
+        simp only [hS, Set.mem_setOf_eq]
+        exact hcoh b' ⟨le_of_lt hb'_gt, le_refl _⟩
+    exact hScl.Icc_subset_of_forall_exists_gt h0S hgt
+  intro t ht
+  set β'' : ℝ := (t + β) / 2 with hβ''
+  have ht_lt : t < β'' := by rw [hβ'']; have := ht.2; linarith
+  have hβ''_lt : β'' < β := by rw [hβ'']; have := ht.2; linarith
+  exact key β'' hβ''_lt ⟨ht.1, le_of_lt ht_lt⟩
+
+set_option linter.unusedVariables false in
+/-- **Anchor-uniform interior local existence radius (the no-blow-up ODE kernel input).**
+
+On a closed interior anchor interval `[a, b] ⊂ (0, T)` there is a single positive window radius
+`r` that works **uniformly over every anchor** `e ∈ [a, b]`: at each such `e` the field `X` admits
+a flow `W : M → ℝ → M` anchored at `e` (`W p e = p`), defined on the window `Ioo (e - r) (e + r)`
+(which stays inside `(0, T)`), carrying `X`'s two-sided bare geometric velocity on the window.
+
+This is the *uniform* local-existence radius — the standard `ε`-of-room input that drives the
+classical no-blow-up continuation argument, **strictly weaker** than the full-horizon orbit it is
+used to build: per anchor it is only the short-window Hartman flow `wch_anchored_window_flow`, whose
+own radius `T'(e)` is anchor-dependent and can shrink to `0` as `e → T`; the content here is the
+uniform-over-anchors *lower bound* `r`, obtained by the time-shift reduction (an integral curve of
+`X` from `(e, q)` is one from `(0, q)` of the shifted field `s ↦ X (e + s)`, whose existence radius
+is bounded below by the uniform field bounds of the global cut-off of `X` over the compact time
+window `[a - 1, b + 1] × M`).  It does not package any hypothesis: it asserts genuine flow existence
+with a uniform radius (the zero/degenerate window is rejected, `r > 0`).  Isolated here as a posited
+input; consumers transit `sorryAx`. -/
+theorem wch_uniform_interior_window
+    (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ)
+    (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+    {a b : ℝ} (ha : 0 < a) (hab : a ≤ b) (hbT : b < T) :
+    ∃ r : ℝ, 0 < r ∧
+      ∀ e ∈ Set.Icc a b, ∃ W : M → ℝ → M,
+        Set.Ioo (e - r) (e + r) ⊆ Set.Ioo (0 : ℝ) T ∧
+        (∀ p, W p e = p) ∧
+        (∀ p, ∀ t ∈ Set.Ioo (e - r) (e + r),
+          HasMFDerivAt 𝓘(ℝ, ℝ) I (fun s => W p s) t
+            ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (W p t)))) := by
+  sorry
+
+/-- The reachability predicate of the no-blow-up continuation: a from-`0` orbit carrying `X`'s
+**bare** geometric velocity (one-sided, `Ici 0`) on the whole half-open sub-horizon `Ico 0 s`.  The
+two-sided interior velocity is not tracked separately: at any interior `t > 0` the set `Ici 0` is a
+neighbourhood, so the one-sided derivative upgrades to the two-sided `HasMFDerivAt`. -/
+private def whzReached (X : ℝ → ∀ x : M, TangentSpace I x) (x : M) (s : ℝ) : Prop :=
+  ∃ c : ℝ → M, c 0 = x ∧
+    ∀ t ∈ Set.Ico (0:ℝ) s,
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I c (Set.Ici (0:ℝ)) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (c t)))
+
+set_option linter.unusedSectionVars false in
+/-- Shrinking the reached horizon. -/
+private theorem whzReached_mono (X : ℝ → ∀ x : M, TangentSpace I x) (x : M) {s s' : ℝ}
+    (hss : s' ≤ s) (h : whzReached X x s) : whzReached X x s' := by
+  obtain ⟨c, hc0, hc⟩ := h
+  exact ⟨c, hc0, fun t ht => hc t ⟨ht.1, lt_of_lt_of_le ht.2 hss⟩⟩
+
+set_option linter.unusedSectionVars false in
+/-- **One window-step of the continuation.**  A reached orbit on `Ico 0 s` is extended past an
+interior anchor `e ∈ (0, s)` by an `e`-anchored window flow `W` carrying `X`'s two-sided velocity on
+`Ioo (e - ρ) (e + ρ)`: the stitch `s ↦ if s ≤ e then c s else W (c e) s` reaches `e + ρ`.  The seam
+glue is `wch_piecewise_bare_velocity`; the orbit's left derivative at the interior seam `e` is the
+upgrade of its one-sided velocity (since `Ici 0 ∈ 𝓝 e` for `e > 0`). -/
+private theorem whzReached_extend
+    (X : ℝ → ∀ x : M, TangentSpace I x) (x : M) {s e ρ : ℝ}
+    (he0 : 0 < e) (hes : e < s) (hρ : 0 < ρ)
+    (hR : whzReached X x s)
+    (W : M → ℝ → M)
+    (hW : ∀ p, ∀ t ∈ Set.Ioo (e - ρ) (e + ρ),
+      HasMFDerivAt 𝓘(ℝ, ℝ) I (fun u => W p u) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (W p t))))
+    (hWinit : ∀ p, W p e = p) :
+    whzReached X x (e + ρ) := by
+  classical
+  obtain ⟨c, hc0, hc⟩ := hR
+  set f2 : ℝ → M := fun u => W (c e) u with hf2def
+  refine ⟨fun t => if t ≤ e then c t else f2 t, ?_, ?_⟩
+  · simp only [if_pos (le_of_lt he0)]; exact hc0
+  · have hf1 : ∀ t ∈ Set.Ico (0:ℝ) e, HasMFDerivWithinAt 𝓘(ℝ, ℝ) I c (Set.Ici (0:ℝ)) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (c t))) :=
+      fun t ht => hc t ⟨ht.1, lt_trans ht.2 hes⟩
+    have hce_two : HasMFDerivAt 𝓘(ℝ, ℝ) I c e ((1 : ℝ →L[ℝ] ℝ).smulRight (X e (c e))) :=
+      (hc e ⟨le_of_lt he0, hes⟩).hasMFDerivAt (Ici_mem_nhds he0)
+    have hf1c : HasMFDerivWithinAt 𝓘(ℝ, ℝ) I c (Set.Iic e) e
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X e (c e))) := hce_two.hasMFDerivWithinAt
+    have hf2 : ∀ t ∈ Set.Ico e (e + ρ), HasMFDerivWithinAt 𝓘(ℝ, ℝ) I f2 (Set.Ici e) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (f2 t))) := by
+      intro t ht
+      have htw : t ∈ Set.Ioo (e - ρ) (e + ρ) := ⟨by linarith [ht.1], ht.2⟩
+      exact (hW (c e) t htw).hasMFDerivWithinAt
+    have hagree : c e = f2 e := by rw [hf2def]; exact (hWinit (c e)).symm
+    exact wch_piecewise_bare_velocity X c f2 (c := e) (c' := e + ρ)
+      (by linarith) hagree hf1 hf1c hf2
+
+set_option linter.unusedSectionVars false in
+/-- **The finite continuation chain.**  From a seed reaching `δ` and an anchor-uniform window radius
+`r` over `[δ/2, β]`, the orbit reaches `β` in finitely many `r/4`-steps.  Inducting on the step
+count `n`, the orbit reaches `min (δ + n·(r/4)) β`; each step anchors at `e = s - min (r/4) (s/2)`
+(interior to the current horizon and inside `[δ/2, β]`), extending the horizon by `≥ r/4` via
+`whzReached_extend`; a large enough `n` clears `β`. -/
+private theorem whzReached_chain
+    (X : ℝ → ∀ x : M, TangentSpace I x) (x : M)
+    {δ β r : ℝ} (hδ : 0 < δ) (hr : 0 < r)
+    (hRδ : whzReached X x δ)
+    (hwin : ∀ e ∈ Set.Icc (δ/2) β, ∃ W : M → ℝ → M,
+        (∀ p, W p e = p) ∧
+        (∀ p, ∀ t ∈ Set.Ioo (e - r) (e + r),
+          HasMFDerivAt 𝓘(ℝ, ℝ) I (fun s => W p s) t
+            ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (W p t))))) :
+    whzReached X x β := by
+  classical
+  set step : ℝ := r / 4 with hstep
+  have hstep_pos : 0 < step := by rw [hstep]; positivity
+  have key : ∀ n : ℕ, whzReached X x (min (δ + n * step) β) := by
+    intro n
+    induction n with
+    | zero =>
+        simp only [Nat.cast_zero, zero_mul, add_zero]
+        exact whzReached_mono X x (min_le_left _ _) hRδ
+    | succ k ih =>
+        set s : ℝ := min (δ + (k:ℝ) * step) β with hs
+        by_cases hsβ : δ + (k:ℝ) * step < β
+        · have hs_eq : s = δ + (k:ℝ) * step := by rw [hs, min_eq_left (le_of_lt hsβ)]
+          have hs_lt_β : s < β := by rw [hs_eq]; exact hsβ
+          have hs_ge_δ : δ ≤ s := by
+            rw [hs_eq]
+            have hk : (0:ℝ) ≤ (k:ℝ) * step := mul_nonneg (Nat.cast_nonneg k) hstep_pos.le
+            linarith
+          have hs_pos : 0 < s := lt_of_lt_of_le hδ hs_ge_δ
+          set m : ℝ := min step (s/2) with hm
+          have hm_pos : 0 < m := lt_min hstep_pos (by linarith)
+          set e : ℝ := s - m with he
+          have he0 : 0 < e := by
+            rw [he]; have : m ≤ s/2 := min_le_right _ _; linarith
+          have hes : e < s := by rw [he]; linarith
+          have he_ge : δ/2 ≤ e := by
+            have hms : m ≤ s/2 := min_le_right _ _
+            have hhalf : s/2 ≤ e := by rw [he]; linarith
+            have : δ/2 ≤ s/2 := by linarith
+            linarith
+          have he_le : e ≤ β := le_of_lt (lt_trans hes hs_lt_β)
+          obtain ⟨W, hWinit, hWbare⟩ := hwin e ⟨he_ge, he_le⟩
+          have hext : whzReached X x (e + r) :=
+            whzReached_extend X x he0 hes hr ih W hWbare hWinit
+          have hmr : m ≤ step := min_le_left _ _
+          have hge : δ + ((k:ℝ)+1) * step ≤ e + r := by
+            have hee : e + r = s - m + r := by rw [he]
+            rw [hee, hs_eq]
+            have : step ≤ r := by rw [hstep]; linarith
+            nlinarith [hmr, hstep_pos.le, hr]
+          have hbig : min (δ + ((k+1:ℕ):ℝ) * step) β ≤ e + r := by
+            push_cast
+            calc min (δ + ((k:ℝ)+1) * step) β ≤ δ + ((k:ℝ)+1) * step := min_le_left _ _
+              _ ≤ e + r := hge
+          exact whzReached_mono X x hbig hext
+        · have hsβ' : β ≤ δ + (k:ℝ) * step := not_lt.mp hsβ
+          have hs_eq : s = β := by rw [hs, min_eq_right hsβ']
+          have h1 : β ≤ δ + ((k:ℝ)+1) * step := by nlinarith [hstep_pos.le]
+          have heq2 : min (δ + ((k+1:ℕ):ℝ) * step) β = β := by
+            rw [min_eq_right]; push_cast; nlinarith [hstep_pos.le, h1]
+          rw [heq2]
+          rw [hs_eq] at ih
+          exact ih
+  obtain ⟨n, hn⟩ := exists_nat_ge ((β - δ) / step)
+  have hn' : β ≤ δ + (n:ℝ) * step := by
+    rw [div_le_iff₀ hstep_pos] at hn
+    nlinarith [hn]
+  have hkey := key n
+  rwa [min_eq_right hn'] at hkey
+
+set_option linter.unusedVariables false in
+/-- **The reached horizon covers every `β < T`.**  Combines the from-`0` orbit germ
+`fromZero_forward_orbit_germ_flow` (the seed `whzReached X x δ`) with the anchor-uniform window
+radius `wch_uniform_interior_window` and the finite chain `whzReached_chain`. -/
+private theorem whzReached_of_lt
+    (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
+    (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+    (hcont0 : ContinuousOn
+      (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2))
+      (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
+    (hgrad0 : ∀ α : M,
+      ContinuousOn
+        (fun q : ℝ × M =>
+          fderiv ℝ (chartRawRepr (I := I) α (X q.1)) (extChartAt I α q.2))
+        (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
+    (x : M) :
+    ∀ β, 0 ≤ β → β < T → whzReached X x β := by
+  obtain ⟨δ, hδpos, hδT, Φ, hΦ0, hΦsrc, hΦderiv, hΦbare⟩ :=
+    fromZero_forward_orbit_germ_flow (I := I) X T hT hint hcont0 hgrad0
+  have hRδ : whzReached X x δ := ⟨fun s => Φ s x, hΦ0 x, fun t ht => hΦbare x t ht⟩
+  intro β hβ0 hβT
+  rcases eq_or_lt_of_le hβ0 with hβ_eq | hβpos
+  · exact ⟨fun _ => x, rfl, fun t ht => absurd (by rw [← hβ_eq] at ht; exact ht.2)
+      (not_lt.mpr ht.1)⟩
+  rcases le_or_gt β δ with hβδ | hδβ
+  · exact whzReached_mono X x hβδ hRδ
+  · have ha : 0 < δ/2 := by linarith
+    have hab : δ/2 ≤ β := by linarith
+    obtain ⟨r, hr, hwin⟩ := wch_uniform_interior_window (I := I) X T hint ha hab hβT
+    refine whzReached_chain X x hδpos hr hRδ (fun e he => ?_)
+    obtain ⟨W, _, hWinit, hWbare⟩ := hwin e he
+    exact ⟨W, hWinit, hWbare⟩
+
 /-! ## Per-orbit full-horizon existence and flow regularity (strictly-smaller posited inputs) -/
 
 set_option linter.unusedVariables false in
@@ -572,7 +869,66 @@ theorem wch_orbit_full_horizon
       (∀ t ∈ Set.Ioo (0:ℝ) T,
         HasMFDerivAt 𝓘(ℝ, ℝ) I γ t
           ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ t)))) := by
-  sorry
+  classical
+  have hR := whzReached_of_lt (I := I) X T hT hint hcont0 hgrad0 x
+  set cstar : ℝ → ℝ → M :=
+    fun β => if h : 0 ≤ β ∧ β < T then Classical.choose (hR β h.1 h.2) else (fun _ => x)
+    with hcstar
+  have hcstar_spec : ∀ β, 0 ≤ β → β < T →
+      (cstar β 0 = x) ∧ ∀ t ∈ Set.Ico (0:ℝ) β,
+        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (cstar β) (Set.Ici (0:ℝ)) t
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (cstar β t))) := by
+    intro β h h'
+    have hspec := Classical.choose_spec (hR β h h')
+    have hval : cstar β = Classical.choose (hR β h h') := by
+      simp only [hcstar, dif_pos (⟨h, h'⟩ : 0 ≤ β ∧ β < T)]
+    rw [hval]; exact hspec
+  set γ : ℝ → M := fun t => cstar ((t + T) / 2) t with hγ
+  have hbare : ∀ t ∈ Set.Ico (0:ℝ) T,
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I γ (Set.Ici (0:ℝ)) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ t))) := by
+    intro t ht
+    obtain ⟨ht0, htT⟩ := ht
+    set βt : ℝ := (t + T) / 2 with hβtdef
+    have hβt0 : 0 ≤ βt := by rw [hβtdef]; linarith
+    have hβtT : βt < T := by rw [hβtdef]; linarith
+    have ht_lt_βt : t < βt := by rw [hβtdef]; linarith
+    obtain ⟨hc0, hc⟩ := hcstar_spec βt hβt0 hβtT
+    have hval : γ t = cstar βt t := by rw [hγ]
+    have heq : γ =ᶠ[𝓝[Set.Ici (0:ℝ)] t] (cstar βt) := by
+      have hnbhd : Set.Iio βt ∈ 𝓝[Set.Ici (0:ℝ)] t :=
+        nhdsWithin_le_nhds (Iio_mem_nhds ht_lt_βt)
+      filter_upwards [hnbhd, self_mem_nhdsWithin] with s hs hs0
+      have hs0' : 0 ≤ s := hs0
+      have hsβt : s < βt := hs
+      have hsT : s < T := lt_trans hsβt hβtT
+      set βs : ℝ := (s + T) / 2 with hβsdef
+      have hβs0 : 0 ≤ βs := by rw [hβsdef]; linarith
+      have hβsT : βs < T := by rw [hβsdef]; linarith
+      have hs_lt_βs : s < βs := by rw [hβsdef]; linarith
+      obtain ⟨hcs0, hcs⟩ := hcstar_spec βs hβs0 hβsT
+      set μ : ℝ := min βs βt with hμ
+      have hμT : μ ≤ T := le_trans (min_le_right _ _) (le_of_lt hβtT)
+      have hcoh := wch_orbit_coherence X T hT hint hcont0 hgrad0
+        (cstar βs) (cstar βt) (β := μ) hμT (by rw [hcs0, hc0])
+        (fun u hu => hcs u ⟨hu.1, lt_of_lt_of_le hu.2 (min_le_left _ _)⟩)
+        (fun u hu => hc u ⟨hu.1, lt_of_lt_of_le hu.2 (min_le_right _ _)⟩)
+        (fun u hu => (hcs u ⟨le_of_lt hu.1, lt_of_lt_of_le hu.2 (min_le_left _ _)⟩).hasMFDerivAt
+          (Ici_mem_nhds hu.1))
+        (fun u hu => (hc u ⟨le_of_lt hu.1, lt_of_lt_of_le hu.2 (min_le_right _ _)⟩).hasMFDerivAt
+          (Ici_mem_nhds hu.1))
+      have hsμ : s ∈ Set.Ico (0:ℝ) μ := ⟨hs0', lt_min hs_lt_βs hsβt⟩
+      have hval2 : cstar βs s = cstar βt s := hcoh hsμ
+      rw [hγ]; exact hval2
+    have hres := (hc t ⟨ht0, ht_lt_βt⟩).congr_of_eventuallyEq heq hval
+    rw [show ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ t)))
+        = ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (cstar βt t))) by rw [hval]]
+    exact hres
+  refine ⟨γ, ?_, hbare, ?_⟩
+  · obtain ⟨hc0, _⟩ := hcstar_spec ((0 + T) / 2) (by linarith) (by linarith)
+    rw [hγ]; simpa using hc0
+  · intro t ht
+    exact (hbare t ⟨le_of_lt ht.1, ht.2⟩).hasMFDerivAt (Ici_mem_nhds ht.1)
 
 set_option linter.unusedVariables false in
 /-- **Flow regularity from per-orbit existence (strictly-smaller posited input).**
