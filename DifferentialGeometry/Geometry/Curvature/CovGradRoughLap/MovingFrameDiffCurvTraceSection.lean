@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemain
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameIntegratedNullity
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.OperatorFieldPairingIBP
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFramePureRCurvatureTracePairing
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemainderFrameSumBridge
 
 /-!
 # The gauge-glued tensorial differentiated-curvature section `(∇R) S`
@@ -55,11 +56,16 @@ calculus.
   (posited, so the consuming anchor stays upstream of the downstream `L²` bound, no import cycle).
 * `genuineCurvFields_residue_eq_weitzenbockValue` — the **rank-generic integrated tensor
   Bochner–Weitzenböck identity** over the smooth global pure-Riemann operator tower: the explicit
-  three-pairing curvature residue equals the Weitzenböck value `‖Δ_∇ S‖²_{L²} − ‖∇²S‖²_{L²}`. This is
-  the curvature line's **terminal quantitative leaf** (the one remaining `sorry` of the
-  differentiated-curvature reasoning, the classical Bochner curvature-term identity); its proof is a
-  dedicated build of the operator-field ↔ Ricci-identity ↔ divergence-telescoping infrastructure, not a
-  composition of existing lemmas.
+  three-pairing curvature residue equals the Weitzenböck value `‖Δ_∇ S‖²_{L²} − ‖∇²S‖²_{L²}`. The
+  classical Bochner curvature-term identity; **proved by composition** over the genuine curvature-fields
+  value `(★)` `genuineCurvFields_crossPairing_value`, itself assembled over the landed frame-summed
+  remainder current (`MovingFrameRemainderFrameSumBridge`) from two per-family integrated identities
+  (the pure-Riemann genuine-sum `remDiffFib_genuineFrameSum_pairing_eq_genuineFields` and the
+  differentiated-curvature genuine-sum with integrated bracket nullity
+  `integral_frameSum_remDiffBracket_pairing_eq_genuineDiffCurv`).
+* `genuineCurvFields_crossPairing_value` — the genuine curvature-fields cross-pairing value `(★)`
+  `⟨GcurvSection g s S + genuineDiffCurvSection g s S, ∇S⟩_{L²} = ⟨pointwiseTensorCurv g s S, ∇S⟩_{L²}`,
+  assembled over the frame-summed remainder current from the two per-family integrated identities.
 * `genuineDiffCurv_crossPairing_remainder_nullity` — the genuine integrated moving-frame nullity for the
   concrete section, `⟨pointwiseTensorCurv g s S − GcurvSection g s S − genuineDiffCurvSection g s S,
   ∇S⟩_{L²} = 0`: the third-order moving-frame Weitzenböck IBP-telescoping content, **proved by
@@ -396,6 +402,129 @@ theorem genuineCurvFields_crossPairing_eq_residue
   rw [tensorL2Inner_genuineDiffCurvSection_covGrad_eq_neg (I := I) (M := M) g s S]
   ring
 
+/-- **The frame-bracket remainder frame-sum pairing equals the concrete differentiated-curvature section
+value (posit, per-family integrated identity).** For a closed smooth Riemannian manifold `(M, g)`,
+covariant rank `s`, and smooth compactly-supported `(0, s)`-tensor `S`, the integral over the closed
+manifold of the fixed-frame sum of the per-direction frame-bracket remainder fibres `remDiffBracketFib`
+(the frame summand minus its pure-Riemann genuine fibre — carrying the differentiated-curvature `(∇R) S`
+content and the frame-bracket discrepancy), paired against `∇S := covGrad g 0 s S`, equals the global
+metric `L²` pairing of the concrete gauge-glued differentiated-curvature section
+`genuineDiffCurvSection g s S` against `∇S`:
+```
+∫_M ∑ᵢ ⟨remDiffBracketFib g s S x i, ∇S(x)⟩ dvol_g = ⟨genuineDiffCurvSection g s S, ∇S⟩_{L²}.
+```
+
+This is the **differentiated-curvature genuine-sum identification with integrated bracket nullity**
+(per-family integrated identity). After removing the pure-Riemann genuine fibres
+(`remDiffGenuineFib`, whose frame-sum pairing is `⟨GcurvSection g s S, ∇S⟩_{L²}` by
+`remDiffFib_genuineFrameSum_pairing_eq_genuineFields`), the surviving per-direction remainder carries
+two contributions: (i) the differentiated-curvature contraction `∇_{Bᵢ}(R(Bᵢ, ·) S)` (the `(∇R) S`
+content), whose *integrated* pairing against `∇S` is that of the gauge-glued tensorial section
+`genuineDiffCurvSection g s S` — the per-direction `smoothExtensionTangent`-curried cov-derivative match
+is *false pointwise* on a normal manifold (FENCED), but the **summed, integrated** match is the sound
+form, the differentiated-curvature integration-by-parts content
+`tensorL2Inner_genuineDiffCurvSection_covGrad_eq_neg`; and (ii) the frame-bracket discrepancy
+(`tensor3rdCurvBracket` plus the trace discrepancy and moving-frame residual), a total covariant
+divergence of an `∇S`-order field whose integral over the closed manifold vanishes by the covariant
+integration-by-parts engine `integral_tensorInner_tangentAction_add_smul_divergence_eq_zero`
+(`integral_frameSummed_covDeriv_combined_eq_zero`). The bracket pointwise pairing is *not* zero (the
+slot-`0` frame-trace matching is false on a normal manifold); only its integral vanishes. It is the
+per-family integrated identity between named on-disk objects, strictly below the integrated curvature
+value `(★)`. -/
+theorem integral_frameSum_remDiffBracket_pairing_eq_genuineDiffCurv
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
+    (∫ x, (∑ i : Fin (Module.finrank ℝ E),
+            tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x
+              (TensorRSSpace.toModel (remDiffBracketFib (I := I) (M := M) g s S x i))
+              ((covGrad (I := I) (M := M) g 0 s S).toFun x))
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+      tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (genuineDiffCurvSection (I := I) (M := M) g s S).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun := by
+  sorry
+
+/-- **The genuine curvature-fields cross-pairing value `(★)` (the K-A finale, assembled over the
+frame-sum from the per-family integrated identities).** For a closed smooth Riemannian manifold
+`(M, g)`, covariant rank `s`, and smooth compactly-supported `(0, s)`-tensor `S`, the global metric
+`L²` pairing of the concrete genuine curvature sections `GcurvSection g s S + genuineDiffCurvSection
+g s S` against `∇S := covGrad g 0 s S` equals the cross-pairing of the order-`2` commutator defect
+`Curv S := pointwiseTensorCurv g s S` against `∇S`:
+```
+⟨GcurvSection g s S + genuineDiffCurvSection g s S, ∇S⟩_{L²} = ⟨Curv S, ∇S⟩_{L²}.   (★)
+```
+
+**Proof (assembled over the landed frame-sum from the per-family integrated identities).** The
+cross-pairing `⟨Curv S, ∇S⟩_{L²}` is the integral of the fixed-frame sum of the per-summand pairings
+`⟨remDiffFib …, ∇S⟩` (`tensorL2Inner_pointwiseTensorCurv_covGrad_eq_frameSum_integral`, sorry-free over
+the landed `pointwiseTensorCurvPairing_eq_frameSum`). Each summand splits into its pure-Riemann genuine
+fibre and its named frame-bracket remainder (`remDiffFib_eq_genuine_add_bracket`, sorry-free): the
+integrand is the sum of the genuine frame-sum integrand and the bracket frame-sum integrand. The genuine
+frame-sum integral is `⟨GcurvSection g s S, ∇S⟩_{L²}` (the pure-Riemann genuine-sum identification
+`remDiffFib_genuineFrameSum_pairing_eq_genuineFields`) and the bracket frame-sum integral is
+`⟨genuineDiffCurvSection g s S, ∇S⟩_{L²}` (the differentiated-curvature genuine-sum identification with
+integrated bracket nullity `integral_frameSum_remDiffBracket_pairing_eq_genuineDiffCurv`); both
+integrands are Bochner-integrable (the genuine one by the genuine identity's integrability conjunct, the
+bracket one as the difference of the landed frame-sum integrand — integrable since `⟨Curv S, ∇S⟩` is —
+and the genuine integrand). Splitting the integral by `integral_add` and recombining by left additivity
+of the `L²` pairing (`tensorL2Inner_add_left`, the cross-integrabilities
+`SmoothCcTensor.integrable_inner_cross`) gives `⟨GcurvSection + genuineDiffCurvSection, ∇S⟩_{L²} =
+⟨Curv S, ∇S⟩_{L²}`. -/
+theorem genuineCurvFields_crossPairing_value
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
+    tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (GcurvSection (I := I) (M := M) g s S +
+          genuineDiffCurvSection (I := I) (M := M) g s S).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun =
+      tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (pointwiseTensorCurv (I := I) (M := M) g s S).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun := by
+  classical
+  set μ := riemannianVolumeMeasure (I := I) (M := M) g with hμ
+  set fG : M → ℝ := fun x => ∑ i : Fin (Module.finrank ℝ E),
+      tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x
+        (TensorRSSpace.toModel (remDiffGenuineFib (I := I) (M := M) g s S x i))
+        ((covGrad (I := I) (M := M) g 0 s S).toFun x) with hfG
+  set fB : M → ℝ := fun x => ∑ i : Fin (Module.finrank ℝ E),
+      tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x
+        (TensorRSSpace.toModel (remDiffBracketFib (I := I) (M := M) g s S x i))
+        ((covGrad (I := I) (M := M) g 0 s S).toFun x) with hfB
+  set fR : M → ℝ := fun x => ∑ i : Fin (Module.finrank ℝ E),
+      tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x
+        (TensorRSSpace.toModel (remDiffFib (I := I) (M := M) g s S x i))
+        ((covGrad (I := I) (M := M) g 0 s S).toFun x) with hfR
+  obtain ⟨hG_int, hG_val⟩ :=
+    remDiffFib_genuineFrameSum_pairing_eq_genuineFields (I := I) (M := M) g s S
+  have hB_val := integral_frameSum_remDiffBracket_pairing_eq_genuineDiffCurv (I := I) (M := M) g s S
+  have hRsplit : fR = fun x => fG x + fB x := by
+    funext x
+    rw [hfR, hfG, hfB, ← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [remDiffFib_eq_genuine_add_bracket (I := I) (M := M) g s S x i,
+      TensorRSSpace.toModel_add, tensorInnerPointwise_add_left]
+  have hR_int : MeasureTheory.Integrable fR μ := by
+    have hcross := SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+      (pointwiseTensorCurv (I := I) (M := M) g s S) (covGrad (I := I) (M := M) g 0 s S)
+    refine hcross.congr (Filter.Eventually.of_forall (fun x => ?_))
+    rw [hfR]
+    exact pointwiseTensorCurvPairing_eq_frameSum (I := I) (M := M) g s S x
+  have hB_int : MeasureTheory.Integrable fB μ := by
+    have hBeq : fB = fun x => fR x - fG x := by
+      funext x; rw [hRsplit]; ring
+    rw [hBeq]; exact hR_int.sub hG_int
+  rw [SmoothCcTensor.toFun_add,
+    tensorL2Inner_add_left (I := I) (M := M) g 0 (s + 1)
+      (GcurvSection (I := I) (M := M) g s S).toFun
+      (genuineDiffCurvSection (I := I) (M := M) g s S).toFun
+      (covGrad (I := I) (M := M) g 0 s S).toFun
+      (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+        (GcurvSection (I := I) (M := M) g s S) (covGrad (I := I) (M := M) g 0 s S))
+      (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+        (genuineDiffCurvSection (I := I) (M := M) g s S) (covGrad (I := I) (M := M) g 0 s S))]
+  rw [← hG_val, ← hB_val]
+  rw [tensorL2Inner_pointwiseTensorCurv_covGrad_eq_frameSum_integral (I := I) (M := M) g s S]
+  change (∫ x, fG x ∂μ) + (∫ x, fB x ∂μ) = ∫ x, fR x ∂μ
+  rw [hRsplit, MeasureTheory.integral_add hG_int hB_int]
+
 /-- **The rank-generic integrated tensor Bochner–Weitzenböck identity (the curvature line's terminal
 quantitative leaf).** For a closed smooth Riemannian manifold `(M, g)`, every covariant rank `s`, and
 every smooth compactly-supported `(0, s)`-tensor `S`, the explicit rank-generic Bochner
@@ -424,14 +553,28 @@ integrated order-`2` Weitzenböck value `‖Δ_∇ S‖² − ‖∇²S‖²` of
 through those two sorry-free bridges, to the integrated moving-frame remainder nullity
 `⟨pointwiseTensorCurv g s S − GcurvSection g s S − genuineDiffCurvSection g s S, ∇S⟩_{L²} = 0`
 (`genuineDiffCurv_crossPairing_remainder_nullity`, proven by composition over *this* leaf): the
-genuine curvature fields carry the entire defect cross-pairing. Sixteen rounds of adjudication
-isolated this as the line's terminal quantitative leaf — the natural two-way Ricci-commutation split
+genuine curvature fields carry the entire defect cross-pairing.
+
+**Proof (assembled over the frame-summed remainder current from two per-family integrated
+identities).** The left-hand residue equals the genuine curvature-fields cross-pairing
+`⟨GcurvSection g s S + genuineDiffCurvSection g s S, ∇S⟩_{L²}` by the sorry-free bookkeeping bridge
+`genuineCurvFields_crossPairing_eq_residue` (run backwards); the genuine curvature-fields value `(★)`
+`genuineCurvFields_crossPairing_value` rewrites it to `⟨pointwiseTensorCurv g s S, ∇S⟩_{L²}`, which is
+`‖Δ_∇ S‖²_{L²} − ‖∇²S‖²_{L²}` by the sorry-free `weitzenbock_curvature_crossPairing_value`. The value
+`(★)` is assembled over the landed frame-summed integrand identity
+`tensorL2Inner_pointwiseTensorCurv_covGrad_eq_frameSum_integral`
+(`MovingFrameRemainderFrameSumBridge`) and the per-direction genuine/bracket split
+`remDiffFib_eq_genuine_add_bracket` from two per-family integrated identities: the pure-Riemann
+genuine-sum identification `remDiffFib_genuineFrameSum_pairing_eq_genuineFields` (the genuine fibres'
+frame-sum integral is `⟨GcurvSection, ∇S⟩_{L²}`) and the differentiated-curvature genuine-sum
+identification with integrated bracket nullity
+`integral_frameSum_remDiffBracket_pairing_eq_genuineDiffCurv` (the bracket remainder's frame-sum
+integral is `⟨genuineDiffCurvSection, ∇S⟩_{L²}`). The natural two-way Ricci-commutation split
 (leading-slot trace `[Gcurv]` plus `(∇R)`-trace `[Gcd]` plus Green-vanishing residuals) fails on the
-operator/frame-jet Leibniz defect, so no strictly-smaller integrated peel exists; its proof is a
-dedicated build of the operator-field ↔ Ricci-identity ↔ divergence-telescoping infrastructure
-(frame-summing the on-disk Ricci identity `secondCovDeriv_covGrad_antisymm_eq_riemannOp_gen` against
-`∇S`, the slot algebra, and the covariant integration-by-parts / Green moves), not a composition of
-existing lemmas.
+operator/frame-jet Leibniz defect *pointwise* (the differentiated-curvature trace is non-tensorial in
+the direction — FENCED), so only the *summed, integrated* match is sound: the genuine content lives in
+those two per-family integrated identities (the frame-summed covariant integration by parts and the
+gauge-glued differentiated-curvature identification), assembled here over the frame-sum.
 
 **Non-vacuity (every term is genuinely nonzero on a non-flat manifold; the identity fails for a
 `κ`-perturbed left-hand side).** On a non-flat manifold (`R ≠ 0`) with a non-parallel `S` each of the
@@ -441,7 +584,11 @@ is the genuine Weitzenböck defect `⟨pointwiseTensorCurv g s S, ∇S⟩_{L²}`
 when curvature is present (`weitzenbock_integrated_covGrad_l2_normSq`). The identity is *not* a
 triviality such as `0 = 0`: scaling the left-hand curvature residue by a factor `κ ≠ 1` (a
 `κ`-perturbed pure-Riemann operator) breaks the equality, since the unperturbed residue alone equals
-the fixed Weitzenböck value. The body is `sorry`; consumers transitively depend on `sorryAx`. -/
+the fixed Weitzenböck value. The body is proven by composition over the genuine curvature-fields value
+`(★)`; consumers transitively depend on the `sorryAx` of the two per-family integrated identities
+`remDiffFib_genuineFrameSum_pairing_eq_genuineFields` and
+`integral_frameSum_remDiffBracket_pairing_eq_genuineDiffCurv` (the frame-summed covariant
+integration-by-parts curvature content). -/
 theorem genuineCurvFields_residue_eq_weitzenbockValue
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     tensorL2Inner (I := I) (M := M) g 0 (s + 1)
@@ -462,7 +609,9 @@ theorem genuineCurvFields_residue_eq_weitzenbockValue
         tensorL2Norm (I := I) (M := M) g 0 (s + 1 + 1)
           (covGrad (I := I) (M := M) g 0 (s + 1)
             (covGrad (I := I) (M := M) g 0 s S)).toFun ^ 2 := by
-  sorry
+  rw [← genuineCurvFields_crossPairing_eq_residue (I := I) (M := M) g s S]
+  rw [genuineCurvFields_crossPairing_value (I := I) (M := M) g s S]
+  exact weitzenbock_curvature_crossPairing_value (I := I) (M := M) g s S
 
 /-- **Genuine differentiated-curvature integrated moving-frame nullity (the third-order moving-frame
 Weitzenböck IBP-telescoping content, in remainder-orthogonality form).** For a closed smooth
