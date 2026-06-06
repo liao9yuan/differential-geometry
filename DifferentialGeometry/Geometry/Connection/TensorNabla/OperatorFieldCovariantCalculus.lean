@@ -87,6 +87,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open TensorMultilinear
+open TensorRSNabla
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -458,6 +459,270 @@ set_option backward.isDefEq.respectTransparency false in
       (show TensorRSSpace (r + 1) (s + 1) I x from
         slotExtendFib (I := I) (M := M) g r s x
           (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)) := rfl
+
+/-! ## Bilinearity of the operator-field action
+
+The operator-field action `appCc Φ W` is `ℝ`-bilinear: additive and homogeneous in both the
+operator-field factor `Φ` and the contracted `(0, r)`-tensor `W`.  This is the bilinearity of fibrewise
+composition (`ContinuousLinearMap.comp_add`, `comp_smul`, `add_comp`); the double induction over the
+differentiated-curvature tower uses it to distribute the recursion's sum/subtraction through the action. -/
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- The operator-field action is additive in the contracted `(0, r)`-tensor. -/
+theorem appCc_add_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : SmoothCcTensor g r s) (W₁ W₂ : SmoothCcTensor g 0 r) :
+    appCc (I := I) (M := M) g r s Φ (W₁ + W₂) =
+      appCc (I := I) (M := M) g r s Φ W₁ + appCc (I := I) (M := M) g r s Φ W₂ := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [show ((appCc (I := I) (M := M) g r s Φ W₁ + appCc (I := I) (M := M) g r s Φ W₂).toSection x) =
+      (appCc (I := I) (M := M) g r s Φ W₁).toSection x +
+        (appCc (I := I) (M := M) g r s Φ W₂).toSection x from rfl]
+  rw [appCc_toSection, appCc_toSection, appCc_toSection]
+  rw [show ((W₁ + W₂).toSection x : TensorRSSpace 0 r I x) = W₁.toSection x + W₂.toSection x from by
+    rw [SmoothCcTensor.toSection_add]; rfl]
+  rw [ContinuousLinearMap.comp_add]
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- The operator-field action is `ℝ`-homogeneous in the contracted `(0, r)`-tensor. -/
+theorem appCc_smul_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (c : ℝ) (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
+    appCc (I := I) (M := M) g r s Φ (c • W) =
+      c • appCc (I := I) (M := M) g r s Φ W := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [show ((c • appCc (I := I) (M := M) g r s Φ W).toSection x) =
+      c • (appCc (I := I) (M := M) g r s Φ W).toSection x from rfl]
+  rw [appCc_toSection, appCc_toSection]
+  rw [show ((c • W).toSection x : TensorRSSpace 0 r I x) = c • W.toSection x from by
+    rw [SmoothCcTensor.toSection_smul]; rfl]
+  rw [ContinuousLinearMap.comp_smul]
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- The operator-field action is additive in the operator-field factor. -/
+theorem appCc_add_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ₁ Φ₂ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
+    appCc (I := I) (M := M) g r s (Φ₁ + Φ₂) W =
+      appCc (I := I) (M := M) g r s Φ₁ W + appCc (I := I) (M := M) g r s Φ₂ W := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [show ((appCc (I := I) (M := M) g r s Φ₁ W + appCc (I := I) (M := M) g r s Φ₂ W).toSection x) =
+      (appCc (I := I) (M := M) g r s Φ₁ W).toSection x +
+        (appCc (I := I) (M := M) g r s Φ₂ W).toSection x from rfl]
+  rw [appCc_toSection, appCc_toSection, appCc_toSection]
+  rw [show ((Φ₁ + Φ₂).toSection x : TensorRSSpace r s I x) = Φ₁.toSection x + Φ₂.toSection x from by
+    rw [SmoothCcTensor.toSection_add]; rfl]
+  rw [ContinuousLinearMap.add_comp]
+
+/-! ## The directional covariant product rule for the operator-field composition
+
+The covariant derivative of the fibrewise composition `(Φ y).comp (W y)` (the value of the operator-field
+action `appCc Φ W`) splits — directionally and at a point — into the standard composition Leibniz
+```
+∇_v ((Φ).comp W) = (∇_v Φ).comp (W x) + (Φ x).comp (∇_v W),
+```
+an equation of `(0, s)`-tensors (continuous linear maps `Tensor0SSpace 0 I x →L Tensor0SSpace s I x`),
+where `∇_v Φ = tensorCovDerivAt g r s Φ x v : TensorRSSpace r s I x` is an `(r, s)`-tensor and
+`∇_v W = tensorCovDerivAt g 0 r W x v : TensorRSSpace 0 r I x` a `(0, r)`-tensor.  The proof tests on a
+`(0, 0)`-tensor `d` (a local smooth section through it) and applies the Hom-connection product-rule
+`tensorRSCovariantDerivative_apply` three times — to the `(0, s)`-section `appCc Φ W` paired with `d`,
+to the `(r, s)`-section `Φ` paired with the `(0, r)`-section `y ↦ W y (d y)`, and to the `(0, r)`-section
+`W` paired with `d` — the shared middle term `Φ x (∇^{(0,r)}_v (y ↦ W y d y))` cancelling, the surviving
+`(0, 0)`-correction `Φ x (W x (∇^{(0,0)}_v d))` matching on both sides. -/
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+theorem tensorCovDerivAt_appCc_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) (x : M) (v : E) :
+    (show TensorRSSpace 0 s I x from
+        tensorCovDerivAt (I := I) (M := M) g 0 s (appCc (I := I) (M := M) g r s Φ W) x v) =
+      (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+          tensorCovDerivAt (I := I) (M := M) g r s Φ x v).comp
+          (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x) +
+        (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x).comp
+          (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
+            tensorCovDerivAt (I := I) (M := M) g 0 r W x v) := by
+  apply ContinuousLinearMap.ext
+  intro d
+  obtain ⟨dSec, hdSec⟩ := ContMDiffSection.exists_eq_at (I := I)
+    (F := Tensor0SModel 0 ℝ E) (V := fun y : M => Tensor0SSpace 0 I y) (n := (⊤ : ℕ∞)) x d
+  have hWd_smooth : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel r ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (Tensor0SModel r ℝ E)
+        (E := fun z : M => Tensor0SSpace r I z) y
+        ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace r I y from W.toSection y) (dSec y))) :=
+    ContMDiff.clm_bundle_apply (b := id) W.toSection.contMDiff dSec.contMDiff
+  let Wd : Cₛ^∞⟮I; Tensor0SModel r ℝ E, (fun y : M => Tensor0SSpace r I y)⟯ :=
+    ⟨fun y : M => (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace r I y from W.toSection y) (dSec y),
+      hWd_smooth⟩
+  -- LHS: the (0, s) Hom-connection product rule applied to `appCc Φ W` paired with the section `dSec`.
+  have hLHS :
+      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+          tensorCovDerivAt (I := I) (M := M) g 0 s (appCc (I := I) (M := M) g r s Φ W) x v) d =
+        (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)
+            (fun y : M =>
+              (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from Φ.toSection y) (Wd y)) x v) -
+          (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)
+            ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x)
+              (Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g)
+                (fun y : M => dSec y) x v)) := by
+    have hval : (fun y : M =>
+          (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from
+            (appCc (I := I) (M := M) g r s Φ W).toSection y) (dSec y)) =
+        (fun y : M =>
+          (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from Φ.toSection y) (Wd y)) := by
+      funext y
+      rw [appCc_toSection (I := I) (M := M) g r s Φ W y]
+      rfl
+    rw [show d = dSec x from hdSec.symm,
+      tensorCovDerivAt_def (I := I) (M := M) g 0 s (appCc (I := I) (M := M) g r s Φ W) x v,
+      tensorRSCovariantDerivative_apply (I := I) (M := M) 0 s (LeviCivita (I := I) g)
+        (appCc (I := I) (M := M) g r s Φ W).toSection dSec x v, hval,
+      appCc_toSection (I := I) (M := M) g r s Φ W x, ContinuousLinearMap.comp_apply]
+  -- Term 1: the (r, s) Hom-connection product rule applied to `Φ` paired with `Wd`.
+  have hT1 :
+      (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+          tensorCovDerivAt (I := I) (M := M) g r s Φ x v)
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x) d) =
+        (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)
+            (fun y : M =>
+              (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from Φ.toSection y) (Wd y)) x v) -
+          (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)
+            (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g)
+              (fun y : M => Wd y) x v) := by
+    rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x) d = Wd x from by
+      rw [show d = dSec x from hdSec.symm]; rfl,
+      tensorCovDerivAt_def (I := I) (M := M) g r s Φ x v,
+      tensorRSCovariantDerivative_apply (I := I) (M := M) r s (LeviCivita (I := I) g)
+        Φ.toSection Wd x v]
+  -- Term 2: the (0, r) Hom-connection product rule applied to `W` paired with `dSec`.
+  have hT2 :
+      (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
+          tensorCovDerivAt (I := I) (M := M) g 0 r W x v) d) =
+        (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)
+          (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g)
+              (fun y : M => Wd y) x v) -
+          (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)
+            ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x)
+              (Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g)
+                (fun y : M => dSec y) x v)) := by
+    rw [show d = dSec x from hdSec.symm,
+      tensorCovDerivAt_def (I := I) (M := M) g 0 r W x v,
+      tensorRSCovariantDerivative_apply (I := I) (M := M) 0 r (LeviCivita (I := I) g)
+        W.toSection dSec x v]
+    rw [map_sub (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)]
+    rfl
+  rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply,
+    hLHS, hT1, hT2]
+  abel
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- **Slot-`0` reading of the slot-extended operator field on a curried `(0, r + 1)`-tensor.** The
+leading covariant passenger slot of `tensor0S_curry r x D v0` (the slot read first by
+`slotExtendFib_apply_eval`) recovers, for `D = (covGrad g 0 r W).toSection x d` the covariant gradient of
+the contracted section, the directional covariant derivative `(tensorCovDerivAt g 0 r W x v0) d`. -/
+theorem tensor0S_curry_covGrad_appCc_eq (g : SmoothRiemannianMetric I M) (r : ℕ)
+    (W : SmoothCcTensor g 0 r) (x : M) (d : Tensor0SSpace 0 I x) (v0 : E) :
+    (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x)
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (r + 1) I x from
+          (covGrad (I := I) (M := M) g 0 r W).toSection x) d) v0 =
+      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
+        tensorCovDerivAt (I := I) (M := M) g 0 r W x v0) d := by
+  apply Tensor0SSpace.toModel_injective
+  refine ContinuousMultilinearMap.ext (fun m => ?_)
+  rw [tensor0S_curry_apply_eval (I := I) (M := M)
+    (T := (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (r + 1) I x from
+      (covGrad (I := I) (M := M) g 0 r W).toSection x) d) (v0 := v0) (vs := m)]
+  rw [covGrad_toSection_apply_eval (I := I) (M := M) g 0 r W x d (Fin.cons v0 m)]
+  simp only [Fin.cons_zero, Matrix.vecTail]
+  rw [show (Fin.cons v0 m ∘ Fin.succ) = m from funext (fun j => by simp [Fin.cons_succ])]
+
+/-! ## The slot-augmented covariant product rule (B-rule) for the operator-field action
+
+The covariant gradient of the operator-field action `appCc Φ W` of an `(r, s)`-operator field `Φ` on a
+`(0, r)`-tensor `W` splits into two operator-field actions: the action of the gradient `covGrad g r s Φ`
+(an `(r, s + 1)`-operator field) on `W`, plus the action of the passenger-slot extension `slotExtend Φ`
+(an `(r + 1, s + 1)`-operator field) on the gradient `covGrad g 0 r W` (a `(0, r + 1)`-tensor):
+```
+covGrad g 0 s (appCc Φ W) = appCc (covGrad g r s Φ) W + appCc (slotExtend Φ) (covGrad g 0 r W).
+```
+This is the section-level packaging of the directional rule `tensorCovDerivAt_appCc_eq`: testing on a
+`(0, 0)`-tensor `d` and a `Fin (s + 1)`-tuple `v`, the leftmost (gradient) slot `v 0` is read off each
+side (`covGrad_toSection_apply_eval` for the left and first right term; `slotExtendFib_apply_eval` then
+`tensor0S_curry_covGrad_appCc_eq` for the second right term), reducing both sides to the directional rule
+evaluated in direction `v 0`, applied to `d`, and read on the tail.  This is the carrier on which the
+differentiated-curvature operator-field double induction expresses `∇(op p r W)` as `appCc (∇Φ_{p,r}) W`. -/
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+theorem covGrad_appCc_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
+    covGrad (I := I) (M := M) g 0 s (appCc (I := I) (M := M) g r s Φ W) =
+      appCc (I := I) (M := M) g r (s + 1) (covGrad (I := I) (M := M) g r s Φ) W +
+        appCc (I := I) (M := M) g (r + 1) (s + 1) (slotExtend (I := I) (M := M) g r s Φ)
+          (covGrad (I := I) (M := M) g 0 r W) := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [show ((appCc (I := I) (M := M) g r (s + 1) (covGrad (I := I) (M := M) g r s Φ) W +
+        appCc (I := I) (M := M) g (r + 1) (s + 1) (slotExtend (I := I) (M := M) g r s Φ)
+          (covGrad (I := I) (M := M) g 0 r W)).toSection x) =
+      (appCc (I := I) (M := M) g r (s + 1) (covGrad (I := I) (M := M) g r s Φ) W).toSection x +
+        (appCc (I := I) (M := M) g (r + 1) (s + 1) (slotExtend (I := I) (M := M) g r s Φ)
+          (covGrad (I := I) (M := M) g 0 r W)).toSection x from rfl]
+  apply ContinuousLinearMap.ext
+  intro d
+  rw [ContinuousLinearMap.add_apply]
+  apply Tensor0SSpace.toModel_injective
+  refine ContinuousMultilinearMap.ext (fun v => ?_)
+  beta_reduce
+  rw [Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
+  -- LHS: read the gradient slot `v 0` of `covGrad g 0 s (appCc Φ W)`.
+  rw [covGrad_toSection_apply_eval (I := I) (M := M) g 0 s (appCc (I := I) (M := M) g r s Φ W) x d v]
+  -- Term 1: `appCc (covGrad g r s Φ) W` reads the gradient slot of `covGrad g r s Φ`.
+  rw [appCc_toSection (I := I) (M := M) g r (s + 1) (covGrad (I := I) (M := M) g r s Φ) W x,
+    ContinuousLinearMap.comp_apply,
+    covGrad_toSection_apply_eval (I := I) (M := M) g r s Φ x
+      ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x) d) v]
+  -- Term 2: `appCc (slotExtend Φ) (covGrad g 0 r W)` reads the new passenger slot `v 0` first.
+  have hT2val : Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+          (appCc (I := I) (M := M) g (r + 1) (s + 1) (slotExtend (I := I) (M := M) g r s Φ)
+            (covGrad (I := I) (M := M) g 0 r W)).toSection x) d) v =
+      Tensor0SSpace.toModel
+        ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
+            tensorCovDerivAt (I := I) (M := M) g 0 r W x (v 0)) d))
+        (Matrix.vecTail v) := by
+    rw [appCc_toSection (I := I) (M := M) g (r + 1) (s + 1) (slotExtend (I := I) (M := M) g r s Φ)
+        (covGrad (I := I) (M := M) g 0 r W) x, ContinuousLinearMap.comp_apply,
+      slotExtend_toSection (I := I) (M := M) g r s Φ x]
+    rw [show v = Fin.cons (v 0) (Matrix.vecTail v) from (Fin.cons_self_tail v).symm]
+    rw [slotExtendFib_apply_eval (I := I) (M := M) g r s x
+      (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)
+      ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (r + 1) I x from
+        (covGrad (I := I) (M := M) g 0 r W).toSection x) d) (v 0) (Matrix.vecTail v)]
+    rw [tensor0S_curry_covGrad_appCc_eq (I := I) (M := M) g r W x d (v 0)]
+    simp only [Fin.cons_zero, Matrix.vecTail]
+    rw [show (Fin.cons (v 0) (v ∘ Fin.succ) ∘ Fin.succ) = v ∘ Fin.succ from
+      funext (fun j => by simp [Fin.cons_succ])]
+  rw [hT2val]
+  -- Both sides now read the tail of the directional rule `tensorCovDerivAt_appCc_eq` in direction `v 0`.
+  rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+        tensorCovDerivAt (I := I) (M := M) g 0 s (appCc (I := I) (M := M) g r s Φ W) x (v 0)) =
+      (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+          tensorCovDerivAt (I := I) (M := M) g r s Φ x (v 0)).comp
+          (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x) +
+        (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x).comp
+          (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
+            tensorCovDerivAt (I := I) (M := M) g 0 r W x (v 0)) from
+    tensorCovDerivAt_appCc_eq (I := I) (M := M) g r s Φ W x (v 0)]
+  rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply,
+    Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
 
 end Connection
 end Integral
