@@ -1102,7 +1102,7 @@ pure-Riemann curvature endomorphism, defined recursively as the exact covariant-
 By construction the single-step covariant Leibniz holds by `sub_add_cancel`. Since the order-`0` base is
 frame-free in value, the differentiated tower differentiates only the curvature factor, never a frame
 jet — the sound analogue of the unsound `pureRFrozenDiffOp`. -/
-private noncomputable def pureRGenuineDiffOp
+noncomputable def pureRGenuineDiffOp
     (g : SmoothRiemannianMetric I M) :
     ∀ (p r : ℕ), SmoothCcTensor g 0 r → SmoothCcTensor g 0 (r + p)
   | 0, r => fun W => pureRGenuineEndo0 (I := I) (M := M) g r W
@@ -1700,7 +1700,7 @@ This isolates the order-`0` curvature content — the single per-tower input the
 normal-form engine (`OperatorFieldDifferentiatedTowerNormalForm`) needs to deliver the high-order jet
 envelope.  The genuinely-irreducible packaging here is the base-point smoothness of the frame-free
 curvature endomorphism field `Φ₀ r`; it is the precise atomic node disclosed as a `sorry`. -/
-private theorem exists_pureRGenuineDiffOp_base_appCc (g : SmoothRiemannianMetric I M) :
+theorem exists_pureRGenuineDiffOp_base_appCc (g : SmoothRiemannianMetric I M) :
     ∃ Φ₀ : ∀ r : ℕ, SmoothCcTensor g (r + 0) (r + 0),
       ∀ (r : ℕ) (W : SmoothCcTensor g 0 r),
         pureRGenuineDiffOp (I := I) (M := M) g 0 r W =
