@@ -10,60 +10,63 @@ metric curvature contraction `R(X, Y) Z := riemannOp (tensorCov g 0 s) (X, Y) Z`
 (`curvatureContraction g s Z hX hY`, a smooth compactly-supported `(0, s)`-tensor section), in the
 intrinsic `riemannianFiberNormSq` form the order-`m` curvature-jet induction consumes.
 
-## The parallel-tensor-product abstraction and the structural obstruction
+## The differentiated-curvature normal-form route
 
-The bilinear covariant-Leibniz file `CovariantBilinearLeibniz` packages a *parallel* fibrewise
-continuous-bilinear bundle map as `ParallelTensorProduct g r₁ s₁ r₂ s₂ r₀ s₀`, and from its two
-genuine `∇`-compatibility hypotheses — the uniform fibrewise operator bound `norm_prod_le` and the
-*exact* single-step covariant Leibniz identity `covGrad_prod`
-(`∇(prod S T) = prod (∇S) T + prod S (∇T)`) — derives the iterated-gradient double-grid bound
-`exists_norm_iteratedCovGrad_prod_le`:
-`‖∇^j(prod S T)‖ ≤ C j · ∑_{p, q ≤ j} ‖∇^p S‖ · ‖∇^q T‖`.
+The metric curvature contraction `R(X, Y)·` is *linear in the single section* `Z`
+(`curvatureContraction`, `curvatureContraction_toSection_apply`), the curvature `R` being a *fixed*
+operator built from the metric and the frame fields `X, Y`, not a second differentiable
+`SmoothCcTensor` argument; and the curvature is **not parallel** (`∇R ≠ 0` on a non-flat manifold),
+so the single-step covariant Leibniz reads `∇(R(X, Y) Z) = (∇R)(X, Y) Z + R(X, Y)(∇Z)` with a
+*non-vanishing* differentiated-curvature cross term `(∇R)(X, Y) Z`. Iterating this exact Leibniz is
+the genuine route, and it is **carried out** in `CurvatureContractionLeibnizGridConstruction`: the
+order-`p` differentiated-curvature contraction is packaged as the fixed fibrewise-`ℝ`-linear operator
+field `diffCurvOp g hX hY p r` (`(∇^p R)(X, Y)·`), with `diffCurvOp 0 s Z = curvatureContraction`
+(`diffCurvOp_zero`) and the exact single-step recursion
+`∇(diffCurvOp p r W) = diffCurvOp (p+1) r W + cast(diffCurvOp p (r+1) (∇W))` (`covGrad_diffCurvOp_eq`).
 
-That abstraction is realized exactly by a contraction whose bilinear map is *parallel* (`∇Φ = 0`),
-the prototypical case being a metric contraction `contract_g(S ⊗ T)` of two tensor *sections* `S, T`,
-parallel because `∇g = 0`, with `covGrad_prod` then the genuine theorem *covariant differentiation
-commutes with the metric contraction*.
+Feeding this recursion to the abstract operator-field **normal form** machinery
+(`OperatorFieldDifferentiatedTowerNormalForm`: `normalForm_of_base` builds the normal form from the
+single-step recursion, and `exists_jet_bound_of_normalForm` turns it into the per-order covariant jet
+envelope) yields, after supremising the per-point envelope over the compact `M`, the base-point-uniform
+per-order, per-rank jet bound `exists_proportional_diffCurvOp`
+(`rfns(diffCurvOp p r W)(x) ≤ kappa p r · ∑_{q ≤ p} rfns(∇^q W)(x)`), whose curvature coefficient
+`kappa p r` is supplied at the bottom by the continuous curvature-operator envelope
+`exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional`. The binomial covariant
+Leibniz expansion (`rfns_iteratedCovGrad_diffCurvOp_grid`) then assembles the iterated-gradient grid.
+This entire chain is **proved** — the grid theorems below are axiom-clean
+(`#print axioms` is exactly `[propext, Classical.choice, Quot.sound]`).
 
-The metric curvature contraction `R(X, Y) Z` does **not** fit `ParallelTensorProduct` as a two-section
-product directly: `R(X, Y)·` is *linear in the single section* `Z` (`curvatureContraction`,
-`curvatureContraction_toSection_apply`), the curvature `R` being a *fixed* operator built from the
-metric and the frame fields `X, Y`, not a second differentiable `SmoothCcTensor` argument; and the
-curvature is **not parallel** (`∇R ≠ 0` on a non-flat manifold), so the single-step rule reads
-`∇(R(X, Y) Z) = (∇R)(X, Y) Z + R(X, Y)(∇Z)` with the *non-vanishing* differentiated-curvature cross
-term `(∇R)(X, Y) Z` — which is not of the form `prod (∇S) T` for any second section `S`. Realizing
-`R(X, Y) Z` as a genuine `ParallelTensorProduct` therefore requires the strictly-upstream
-construction of (a) the curvature packaged as a differentiable tensor *section* `Rm`, (b) a parallel
-metric-contraction bilinear product of two sections, and (c) its exact covariant Leibniz equality
-`covGrad_prod` — the covariant-derivative–metric-contraction commutation, presently absent from the
-library and a large independent differential-geometry construction.
+The `ParallelTensorProduct` abstraction of `CovariantBilinearLeibniz` (a parallel fibrewise bilinear
+bundle map, deriving the double grid `exists_norm_iteratedCovGrad_prod_le` from an exact covariant
+Leibniz `covGrad_prod`) is a *different*, two-section, parallel-map route; it does **not** apply here,
+because the curvature is non-parallel and `R(X, Y)·` is single-section. The diffCurvOp normal-form
+route above replaces it and is the one actually used.
 
-## What is proved vs. posited
+## What is proved
 
-By the iterated covariant Leibniz of that (posited) parallel realization, together with the
-base-point-uniform curvature / differentiated-curvature fibre-norm sups
-`exists_uniform_riemannianFiberNormSq_riemannOp_bound` (`‖R‖_∞`),
-`exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound` (`‖∇R‖_∞`) — which absorb every
-iterated-curvature coefficient `‖∇^p R‖` into a single order-dependent constant on the compact
-manifold — the genuine conclusion is the **single-sum** iterated-gradient grid bound: the `S`-factor
-double sum of `exists_norm_iteratedCovGrad_prod_le` collapses, because the curvature factor is a
-uniformly bounded coefficient, to a single sum over the gradient orders of the *contracted section*
-`Z`. Bridged to the intrinsic fibre norm through `norm_eq_sqrt_tensorInnerPointwise` /
-`riemannianFiberNormSq_eq_tensorInnerPointwise` (`riemannianFiberNormSq = ‖·‖²` for the installed
-Riemannian-bundle inner product), this reads
+The **single-sum** iterated-gradient grid bound
+`exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_grid_le` is **proved** here by
+collapsing the per-rank curvature-coefficient grid of its sibling
+`exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_kappaGrid_le`
+(`CurvatureContractionCovariantLeibnizGrid`): the curvature-order × rank window
+`gridWindowSum kappa 0 s j` (with `4^j`) is a finite nonnegative number at each gradient order `j`,
+absorbed into the single-sum constant `C j`, leaving only a sum over the gradient orders of the
+*contracted section* `Z`,
 
 ```
 rfns(∇^j(R(X, Y) Z))(x) ≤ C j · ∑_{q ≤ j} rfns(∇^q Z)(x),
 ```
 
-with `C : ℕ → ℝ` nonnegative and *uniform in the base point* `x` (the curvature sups are uniform).
-This rfns grid bound — the deliverable the order-`m` curvature-jet induction consumes to feed
-`IsGradedCurvJet` — is **posited** here as the precise true conclusion of the (blocked) parallel
-realization, `exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_grid_le`; consumers
-transitively depend on `sorryAx` through it. The genuine, immediately-derivable consumer API is
-**proved** on top of it: the nonnegativity of the grid constant, and the gradient-order-`0`
-specialisation `riemannianFiberNormSq_curvatureContraction_le` (the `∇^0 = id` head term, the single
-order-`0` fibre comparison the per-step's seed reads off).
+with `C : ℕ → ℝ` nonnegative and *uniform in the base point* `x`. The whole tower underneath is
+axiom-clean (the curvature coefficient ultimately comes from the continuous curvature-operator
+envelope `exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional`, supremised over
+the compact `M`). This rfns grid bound is the deliverable the order-`m` curvature-jet induction
+consumes to feed `IsGradedCurvJet`.
+
+The immediately-derivable consumer API is also **proved** on top of it: the nonnegativity of the
+grid constant `curvatureContraction_grid_const_nonneg`, and the gradient-order-`0` specialisation
+`riemannianFiberNormSq_curvatureContraction_le` (the `∇^0 = id` head term, the single order-`0` fibre
+comparison the per-step's seed reads off).
 
 The degenerate witness is rejected: at gradient order `j = 0` the bound reads
 `rfns(R(X, Y) Z)(x) ≤ C 0 · rfns(Z)(x)`, false with `C 0 = 0` on a non-flat manifold whenever the
@@ -72,10 +75,11 @@ grid constant must be strictly positive, so the bound is not vacuous.
 
 ## Rank genericity
 
-`ParallelTensorProduct` and its grid bound `exists_norm_iteratedCovGrad_prod_le` are rank-generic;
-the curvature contraction `curvatureContraction g s` and its uniform sups are stated at general
-covariant rank `s` (contravariant rank `0`, the case the moving-frame curvature engine uses). The
-grid bound below is correspondingly stated at general `s`.
+The diffCurvOp normal-form tower and its grid are rank-generic; the curvature contraction
+`curvatureContraction g s` and the curvature coefficient `kappa p r` are stated at general covariant
+rank `s` (contravariant rank `0`, the case the moving-frame curvature engine uses; the rank index of
+`kappa` is genuine — the rank-`r` curvature derivation acts on all `r` slots). The grid bound below
+is correspondingly stated at general `s`.
 -/
 
 noncomputable section
@@ -104,29 +108,28 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 variable [CompleteSpace E]
 
-/-- **Posited iterated-gradient grid bound for the metric curvature contraction, in intrinsic
-fibre-norm form.** For a closed smooth Riemannian manifold `(M, g)`, smooth global tangent fields
-`X, Y`, and at every covariant rank `s`, there is a nonnegative order-dependent constant
-`C : ℕ → ℝ`, *uniform in the base point*, such that for every smooth compactly-supported
-`(0, s)`-tensor section `Z`, every gradient order `j`, and every point `x`, the `j`-fold iterated
-covariant gradient of the curvature contraction `R(X, Y) Z := curvatureContraction g s Z hX hY` has
-intrinsic squared fibre norm at most `C j` times the sum, over gradient orders `q ≤ j`, of the
-intrinsic squared fibre norms of the iterated covariant gradients of `Z`:
+/-- **Iterated-gradient grid bound for the metric curvature contraction, in intrinsic fibre-norm
+form.** For a closed smooth Riemannian manifold `(M, g)`, smooth global tangent fields `X, Y`, and at
+every covariant rank `s`, there is a nonnegative order-dependent constant `C : ℕ → ℝ`, *uniform in
+the base point*, such that for every smooth compactly-supported `(0, s)`-tensor section `Z`, every
+gradient order `j`, and every point `x`, the `j`-fold iterated covariant gradient of the curvature
+contraction `R(X, Y) Z := curvatureContraction g s Z hX hY` has intrinsic squared fibre norm at most
+`C j` times the sum, over gradient orders `q ≤ j`, of the intrinsic squared fibre norms of the
+iterated covariant gradients of `Z`:
 
 ```
 rfns(∇^j(R(X, Y) Z))(x) ≤ C j · ∑_{q < j + 1} rfns(∇^q Z)(x).
 ```
 
-This is the genuine conclusion of realizing the curvature contraction as a parallel tensor product
-(`ParallelTensorProduct`, blocked on the absent covariant-derivative–metric-contraction commutation
-`covGrad_prod`) and applying its iterated covariant-Leibniz grid bound
-`exists_norm_iteratedCovGrad_prod_le`: the `S`-factor double sum collapses to the single `Z`-sum
-because every iterated-curvature coefficient `‖∇^p R‖` is absorbed, uniformly over the compact
-manifold, into `C j` via the curvature / differentiated-curvature sups
-`exists_uniform_riemannianFiberNormSq_riemannOp_bound`,
-`exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound`; the ambient-to-intrinsic step is the
-fibre-norm bridge `riemannianFiberNormSq = ‖·‖²`. It is posited as a precise true child; consumers
-transitively depend on `sorryAx` through it.
+This is proved by collapsing the per-rank curvature-coefficient grid of the sibling
+`exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_kappaGrid_le`: the curvature-order
+× rank window `gridWindowSum kappa 0 s j` (with `4^j`) is a finite nonnegative number at each gradient
+order `j` (`gridWindowSum_nonneg`), absorbed into `C j`, leaving the single sum over the gradient
+orders of `Z`. The kappaGrid tower is itself proved through the differentiated-curvature operator
+`diffCurvOp` normal form (`CurvatureContractionLeibnizGridConstruction`), whose curvature coefficient
+comes from the continuous curvature-operator envelope
+`exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional` supremised over the compact
+`M`; the whole chain is axiom-clean.
 
 The degenerate witness is rejected: at `j = 0` the bound reads `rfns(R(X, Y) Z)(x) ≤ C 0 · rfns(Z)(x)`,
 false with `C 0 = 0` on a non-flat manifold when `R(X, Y) Z ≠ 0` (the contraction carries the genuine
