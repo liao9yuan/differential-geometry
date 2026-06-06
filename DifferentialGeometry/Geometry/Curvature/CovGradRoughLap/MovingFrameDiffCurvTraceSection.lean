@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FrozenFramePureRC
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldContractionBound
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemainderDivergenceForm
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameIntegratedNullity
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.OperatorFieldPairingIBP
 
 /-!
 # The gauge-glued tensorial differentiated-curvature section `(∇R) S`
@@ -65,6 +66,12 @@ calculus.
   with the sorry-free Weitzenböck value `weitzenbock_curvature_crossPairing_value`), feeding the
   integrated-nullity producer `movingFrameNullity_of_genuineCrossPairingValue` verbatim with
   `Gcd := genuineDiffCurvSection g s S`.
+* `tensorL2Inner_genuineDiffCurvSection_covGrad_eq_neg` — the differentiated-curvature cross-pairing's
+  integration-by-parts formula `⟨Gcd, ∇S⟩_{L²} = −⟨Δ_∇ (pureRGenuineDiffOp g 0 s S), S⟩_{L²} −
+  ⟨appCc (slotExtend (Φ₀ s)) (∇S), ∇S⟩_{L²}`, the operator-field integration-by-parts identity
+  `tensorL2Inner_appCc_covGrad_covGrad_eq_neg` (`OperatorFieldPairingIBP`) specialised to the frame-free
+  curvature operator field, expressing `⟨Gcd, ∇S⟩_{L²}` through the rough Laplacian of the order-`0`
+  curvature trace and the passenger-slot curvature bilinear of `∇S` (sorry-free).
 
 ## Convention
 
@@ -369,6 +376,59 @@ theorem genuineDiffCurv_crossPairing_value
       (genuineDiffCurvSection (I := I) (M := M) g s S)
       (genuineDiffCurv_crossPairing_remainder_nullity (I := I) (M := M) g s S)
   rw [hpair, weitzenbock_curvature_crossPairing_value (I := I) (M := M) g s S]
+
+/-- **The differentiated-curvature cross-pairing's integration-by-parts formula (the tensorial
+bookkeeping for the concrete `(∇R) S` section).** For a closed smooth Riemannian manifold `(M, g)`,
+covariant rank `s`, and smooth compactly-supported `(0, s)`-tensor `S`, the global metric `L²` pairing
+of the gauge-glued tensorial differentiated-curvature section `genuineDiffCurvSection g s S` (the
+`(∇R) S` field, the operator-field action `appCc (∇Φ₀ s) S`) against `∇S = covGrad g 0 s S` is
+
+```
+⟨genuineDiffCurvSection g s S, ∇S⟩_{L²}
+  = −⟨Δ_∇ (pureRGenuineDiffOp g 0 s S), S⟩_{L²}
+    − ⟨appCc (slotExtend (Φ₀ s)) (∇S), ∇S⟩_{L²},
+```
+
+with `Δ_∇ := rawTensorConnLapSmooth g 0 s` the rough connection Laplacian, `pureRGenuineDiffOp g 0 s S`
+the order-`0` moving-frame pure-Riemann curvature trace (the action `appCc (Φ₀ s) S` of the curvature
+operator field `Φ₀ s := curvOpField g s`), and `∇S := covGrad g 0 s S`.
+
+**Proof.** This is the operator-field integration-by-parts identity
+`tensorL2Inner_appCc_covGrad_covGrad_eq_neg` (`OperatorFieldPairingIBP`) specialised to the frame-free
+curvature operator field `Φ₀ s = curvOpField g s`.  The differentiated-action `appCc (∇Φ₀ s) S` is
+`genuineDiffCurvSection g s S` by definition, and the order-`0` action `appCc (Φ₀ s) S` is
+`pureRGenuineDiffOp g 0 s S` by the operator-field base identity
+`exists_pureRGenuineDiffOp_base_appCc` (the `Classical.choose` spec defining `curvOpField`).
+
+This expresses the differentiated-curvature cross-pairing in terms of (i) the rough Laplacian of the
+order-`0` curvature trace `pureRGenuineDiffOp g 0 s S` paired against `S`, and (ii) the passenger-slot
+curvature bilinear of `∇S` with itself.  The passenger-slot operator field `slotExtend (Φ₀ s)` is *not*
+the next-rank curvature operator `Φ₀ (s + 1)` (it leaves the inserted leading slot a spectator and acts
+by the rank-`s` curvature endomorphism on the trailing slots, whereas `Φ₀ (s + 1)` contracts the
+leading slot with the curvature direction), so the second term is a genuine curvature bilinear, not a
+re-indexed order-`0` trace pairing — it is carried as-is. -/
+theorem tensorL2Inner_genuineDiffCurvSection_covGrad_eq_neg
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
+    tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (genuineDiffCurvSection (I := I) (M := M) g s S).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun =
+      - tensorL2Inner (I := I) (M := M) g 0 s
+          (rawTensorConnLapSmooth (I := I) g 0 s
+            (pureRGenuineDiffOp (I := I) (M := M) g 0 s S)).toFun S.toFun -
+        tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+          (appCc (I := I) (M := M) g (s + 1) (s + 1)
+            (slotExtend (I := I) (M := M) g (s + 0) (s + 0)
+              (curvOpField (I := I) (M := M) g s))
+            (covGrad (I := I) (M := M) g 0 s S)).toFun
+          (covGrad (I := I) (M := M) g 0 s S).toFun := by
+  classical
+  have hbase : appCc (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s) S =
+      pureRGenuineDiffOp (I := I) (M := M) g 0 s S :=
+    (Classical.choose_spec (exists_pureRGenuineDiffOp_base_appCc (I := I) (M := M) g) s S).symm
+  have hgen := tensorL2Inner_appCc_covGrad_covGrad_eq_neg (I := I) (M := M) g (s + 0)
+    (curvOpField (I := I) (M := M) g s) S
+  rw [hbase] at hgen
+  exact hgen
 
 end Connection
 end Integral
