@@ -644,12 +644,22 @@ This is the *uniform* local-existence radius — the standard `ε`-of-room input
 classical no-blow-up continuation argument, **strictly weaker** than the full-horizon orbit it is
 used to build: per anchor it is only the short-window Hartman flow `wch_anchored_window_flow`, whose
 own radius `T'(e)` is anchor-dependent and can shrink to `0` as `e → T`; the content here is the
-uniform-over-anchors *lower bound* `r`, obtained by the time-shift reduction (an integral curve of
-`X` from `(e, q)` is one from `(0, q)` of the shifted field `s ↦ X (e + s)`, whose existence radius
-is bounded below by the uniform field bounds of the global cut-off of `X` over the compact time
-window `[a - 1, b + 1] × M`).  It does not package any hypothesis: it asserts genuine flow existence
-with a uniform radius (the zero/degenerate window is rejected, `r > 0`).  Isolated here as a posited
-input; consumers transit `sorryAx`. -/
+uniform-over-anchors *lower bound* `r`.
+
+The proof is the **time-shift reduction**, realised through the *autonomisation* of a single global
+cut-off field.  First `interior_field_global_cutoff_extension_loc` produces one globally-`C∞` field
+`Xt` agreeing with `X` on a window `(lo - δ, hi + δ) ⊇ [a, b]`.  Its autonomisation
+`Ξ := (1, Xt)` on `N := ℝ × M` is a single autonomous `C∞` field, and an integral curve of `Ξ`
+through the point `(e, q)` is exactly an `X`-orbit from `(e, q)` (the time component runs as
+`s ↦ e + s`, the time-shift).  The manifold smooth-dependence theorem
+`local_flow_jointSmooth_and_integralCurve` gives, at every point of `N`, an open neighbourhood on
+which one existence radius works *uniformly*; the compact anchor box `[a, b] ×ˢ univ ⊆ N` is covered
+by finitely many such neighbourhoods, and the minimum of their radii is the single `r` valid for
+every anchor `e` and every base point `q` simultaneously (the opaque per-neighbourhood radius is
+fine — uniformity comes from the finite subcover of *one* field, not from any radius formula).  The
+reparametrisation `t ↦ t - e` re-anchors the orbit at `e` (`W q e = q`) and shifts the bare velocity
+back to `X t (W q t)` on the window.  It does not package any hypothesis: it asserts genuine flow
+existence with a uniform radius (the zero/degenerate window is rejected, `r > 0`). -/
 theorem wch_uniform_interior_window
     (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -663,7 +673,143 @@ theorem wch_uniform_interior_window
         (∀ p, ∀ t ∈ Set.Ioo (e - r) (e + r),
           HasMFDerivAt 𝓘(ℝ, ℝ) I (fun s => W p s) t
             ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (W p t)))) := by
-  sorry
+  classical
+  obtain ⟨Xt, δc, hδc, hXt_eq, hXt_cont, _hXt_auto⟩ :=
+    interior_field_global_cutoff_extension_loc X T hint (a := a / 2) (b := (b + T) / 2)
+      (by linarith) (by linarith) (by linarith)
+  set lo : ℝ := a / 2 with hlo_def
+  set hi : ℝ := (b + T) / 2 with hhi_def
+  have hlo_a : lo < a := by rw [hlo_def]; linarith
+  have hb_hi : b < hi := by rw [hhi_def]; linarith
+  set Xi : ℝ → ∀ p : ℝ × M, TangentSpace (𝓘(ℝ, ℝ).prod I) p :=
+    fun _ p => autonomizedFlowVF Xt p with hXi_def
+  have hXi' : ContMDiff (𝓘(ℝ, ℝ).prod (𝓘(ℝ, ℝ).prod I))
+      ((𝓘(ℝ, ℝ).prod I).prod 𝓘(ℝ, ℝ × E)) ∞
+      (fun q : ℝ × (ℝ × M) =>
+        (TotalSpace.mk' (ℝ × E) q.2 (Xi q.1 q.2) :
+          TangentBundle (𝓘(ℝ, ℝ).prod I) (ℝ × M))) :=
+    (autonomizedFlowVF_section_contMDiff Xt hXt_cont).comp contMDiff_snd
+  have hper := fun p₀ : ℝ × M =>
+    local_flow_jointSmooth_and_integralCurve (I := 𝓘(ℝ, ℝ).prod I) (M := ℝ × M)
+      Xi hXi' 0 p₀
+  choose U hUopen hUmem Tnb hTnb_pos Ψ hΨinit _hΨsm hΨbare using hper
+  have hKcompact : IsCompact (Set.Icc a b ×ˢ (Set.univ : Set M)) :=
+    isCompact_Icc.prod isCompact_univ
+  have hKcover : (Set.Icc a b ×ˢ (Set.univ : Set M)) ⊆ ⋃ p : ℝ × M, U p :=
+    fun q _ => Set.mem_iUnion.mpr ⟨q, hUmem q⟩
+  obtain ⟨S, hScover⟩ := hKcompact.elim_finite_subcover U hUopen hKcover
+  set rcap : ℝ := min (min a (T - b)) (min (a - lo) (hi - b)) with hrcap_def
+  have hrcap_pos : 0 < rcap := by
+    rw [hrcap_def]
+    exact lt_min (lt_min ha (by linarith))
+      (lt_min (by linarith) (by linarith))
+  have hrcap_le_a : rcap ≤ a := le_trans (min_le_left _ _) (min_le_left _ _)
+  have hrcap_le_Tb : rcap ≤ T - b := le_trans (min_le_left _ _) (min_le_right _ _)
+  have hrcap_le_alo : rcap ≤ a - lo := le_trans (min_le_right _ _) (min_le_left _ _)
+  have hrcap_le_hib : rcap ≤ hi - b := le_trans (min_le_right _ _) (min_le_right _ _)
+  by_cases hSne : S.Nonempty
+  · set Tmin : ℝ := S.inf' hSne Tnb with hTmin_def
+    have hTmin_pos : 0 < Tmin := by
+      rw [hTmin_def, Finset.lt_inf'_iff]; exact fun p _ => hTnb_pos p
+    have hTmin_le : ∀ p ∈ S, Tmin ≤ Tnb p := fun p hp => Finset.inf'_le _ hp
+    set r : ℝ := min rcap Tmin with hr_def
+    have hr_pos : 0 < r := lt_min hrcap_pos hTmin_pos
+    have hr_le_cap : r ≤ rcap := min_le_left _ _
+    have hr_le_Tmin : r ≤ Tmin := min_le_right _ _
+    have hr_le_a : r ≤ a := le_trans hr_le_cap hrcap_le_a
+    have hr_le_Tb : r ≤ T - b := le_trans hr_le_cap hrcap_le_Tb
+    have hr_le_alo : r ≤ a - lo := le_trans hr_le_cap hrcap_le_alo
+    have hr_le_hib : r ≤ hi - b := le_trans hr_le_cap hrcap_le_hib
+    refine ⟨r, hr_pos, fun e he => ?_⟩
+    have he_a : a ≤ e := he.1
+    have he_b : e ≤ b := he.2
+    have hsub0T : Set.Ioo (e - r) (e + r) ⊆ Set.Ioo (0 : ℝ) T := by
+      apply Set.Ioo_subset_Ioo <;> · linarith
+    have hsubAgree : Set.Ioo (e - r) (e + r) ⊆ Set.Ioo (lo - δc) (hi + δc) := by
+      apply Set.Ioo_subset_Ioo <;> · linarith
+    have hmem : ∀ q : M, ∃ p₀ ∈ S, ((e, q) : ℝ × M) ∈ U p₀ := by
+      intro q
+      have hmemK : ((e, q) : ℝ × M) ∈ Set.Icc a b ×ˢ (Set.univ : Set M) :=
+        ⟨he, Set.mem_univ _⟩
+      rcases Set.mem_iUnion₂.mp (hScover hmemK) with ⟨p₀, hp₀S, hp₀U⟩
+      exact ⟨p₀, hp₀S, hp₀U⟩
+    choose p0 hp0S hp0U using hmem
+    set c : M → ℝ → (ℝ × M) := fun q s => Ψ (p0 q) (e, q) s with hc_def
+    have hwin : ∀ q : M, ∀ τ ∈ Set.Ioo (-r) r,
+        τ ∈ Set.Ioo (0 - Tnb (p0 q)) (0 + Tnb (p0 q)) := by
+      intro q τ hτ
+      have hle : r ≤ Tnb (p0 q) := le_trans hr_le_Tmin (hTmin_le _ (hp0S q))
+      exact ⟨by simp only [zero_sub]; linarith [hτ.1],
+        by simp only [zero_add]; linarith [hτ.2]⟩
+    have hgbare : ∀ q : M, ∀ s ∈ Set.Ioo (-r) r,
+        HasMFDerivAt 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod I) (c q) s
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (autonomizedFlowVF Xt (c q s))) := by
+      intro q s hs
+      exact hΨbare (p0 q) (e, q) (hp0U q) s (hwin q s hs)
+    have htimeid : ∀ q : M, ∀ s ∈ Set.Ioo (-r) r, (c q s).1 = e + s := by
+      intro q
+      have hfst : ∀ s ∈ Set.Ioo (-r) r, HasDerivAt (fun u => (c q u).1) 1 s :=
+        fun s hs => autonomizedFlow_fst_hasDerivAt Xt (c q) s (hgbare q s hs)
+      have hval : (c q 0).1 = e := by
+        simp only [hc_def]
+        rw [hΨinit (p0 q) (e, q) (hp0U q)]
+      have h0mem : (0 : ℝ) ∈ Set.Ioo (-r) r := ⟨by linarith, hr_pos⟩
+      have hconst : ∀ s ∈ Set.Ioo (-r) r,
+          HasDerivAt (fun u => (c q u).1 - u) (0 : ℝ) s := by
+        intro u hu; simpa using (hfst u hu).sub (hasDerivAt_id u)
+      intro s hs
+      have hkey : (fun u => (c q u).1 - u) s = (fun u => (c q u).1 - u) 0 := by
+        apply Convex.is_const_of_fderivWithin_eq_zero (𝕜 := ℝ) (convex_Ioo (-r) r)
+          (f := fun u => (c q u).1 - u) (s := Set.Ioo (-r) r)
+        · intro u hu; exact (hconst u hu).differentiableAt.differentiableWithinAt
+        · intro u hu
+          have huniq : UniqueDiffWithinAt ℝ (Set.Ioo (-r) r) u :=
+            isOpen_Ioo.uniqueDiffWithinAt hu
+          have hfd : HasFDerivWithinAt (fun u => (c q u).1 - u)
+              (ContinuousLinearMap.smulRight (1 : ℝ →L[ℝ] ℝ) (0 : ℝ)) (Set.Ioo (-r) r) u :=
+            ((hconst u hu).hasDerivWithinAt).hasFDerivWithinAt
+          rw [hfd.fderivWithin huniq]; ext1; simp
+        · exact hs
+        · exact h0mem
+      simp only at hkey; rw [hval] at hkey; linarith
+    have hXtX : ∀ q : M, ∀ s ∈ Set.Ioo (e - r) (e + r), ∀ x : M, Xt s x = X s x :=
+      fun q s hs x => hXt_eq s (hsubAgree hs) x
+    refine ⟨fun q t => (c q (t - e)).2, hsub0T, ?_, ?_⟩
+    · intro q
+      simp only [hc_def, sub_self]
+      exact congrArg Prod.snd (hΨinit (p0 q) (e, q) (hp0U q))
+    · intro q t ht
+      have hte : (t - e) ∈ Set.Ioo (-r) r := ⟨by linarith [ht.1], by linarith [ht.2]⟩
+      have hsnd := autonomizedFlow_snd_hasMFDerivAt Xt (c q) (t - e) (hgbare q (t - e) hte)
+      have htime : (c q (t - e)).1 = t := by rw [htimeid q (t - e) hte]; ring
+      rw [htime] at hsnd
+      have hXeq : Xt t ((c q (t - e)).2) = X t ((c q (t - e)).2) :=
+        hXtX q t ht ((c q (t - e)).2)
+      rw [hXeq] at hsnd
+      have hshift : HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun s : ℝ => s - e) t (1 : ℝ →L[ℝ] ℝ) := by
+        rw [hasMFDerivAt_iff_hasFDerivAt]
+        have h2 := ((hasDerivAt_id t).sub_const e).hasFDerivAt
+        have he1 : (ContinuousLinearMap.toSpanSingleton ℝ (1 : ℝ)) = (1 : ℝ →L[ℝ] ℝ) := by
+          ext1; simp
+        rwa [he1] at h2
+      have hcomp := hsnd.comp t hshift
+      have hfun : ((fun s => (c q s).2) ∘ fun s : ℝ => s - e)
+          = (fun s => (c q (s - e)).2) := rfl
+      rw [hfun] at hcomp
+      simpa using hcomp
+  · refine ⟨rcap, hrcap_pos, fun e he => ?_⟩
+    have hMempty : IsEmpty M := by
+      rw [isEmpty_iff]
+      intro q
+      have hmemK : ((e, q) : ℝ × M) ∈ Set.Icc a b ×ˢ (Set.univ : Set M) :=
+        ⟨he, Set.mem_univ _⟩
+      rcases Set.mem_iUnion₂.mp (hScover hmemK) with ⟨p₀, hp₀S, _⟩
+      exact hSne ⟨p₀, hp₀S⟩
+    refine ⟨fun p _ => p, ?_, fun p => (hMempty.false p).elim,
+      fun p => (hMempty.false p).elim⟩
+    have he_a : a ≤ e := he.1
+    have he_b : e ≤ b := he.2
+    apply Set.Ioo_subset_Ioo <;> · linarith
 
 /-- The reachability predicate of the no-blow-up continuation: a from-`0` orbit carrying `X`'s
 **bare** geometric velocity (one-sided, `Ici 0`) on the whole half-open sub-horizon `Ico 0 s`.  The
