@@ -210,13 +210,31 @@ fields:
   differentiated rank `(r+p)+1`).  This is the defining identity of the recursive Leibniz-remainder
   construction of the differentiated operators.
 * `kappa`, `kappa_nonneg`, `rfns_op_le` — the **per-order base-point-uniform proportional fibre
-  envelope** `rfns(op p r W)(x) ≤ kappa p · rfns(W)(x)`, the boundedness of the smooth fixed operator
-  on the compact manifold, uniform over the contracted section.
+  envelope in *jet* form** `rfns(op p r W)(x) ≤ kappa p r · ∑_{q < p + 1} rfns(∇^q W)(x)`, the
+  boundedness of the smooth fixed operator on the compact manifold against the order-`≤ p` covariant
+  jet of the contracted section, uniform over the section.
+
+**Why the jet form (and not the single-value form `rfns(op p r W)(x) ≤ kappa p r · rfns(W)(x)`).**  The
+single-value envelope is **Lean-refuted FALSE** at the rank-`0`-degenerate bases of the curvature
+towers.  The order-`0` curvature contraction is value-local *per rank* but its rank-`0` value vanishes
+(`riemannSec_tensor0SCov_zero_eq_zero`, the scalar curvature is zero), so `op 0 0 = 0`; the recursion
+then forces `op 1 0 W = ∇(op 0 0 W) − (cast)(op 0 1 (∇W)) = −(cast)(op 0 1 (∇W))`, which reads the
+*gradient* `∇W (x)` (not the value `W (x)`).  On a non-flat manifold, an `W` with `W (x) = 0`,
+`∇W (x) ≠ 0` breaks `rfns(op 1 0 W)(x) ≤ kappa 1 0 · rfns(W)(x) = 0`.  Structurally the recursion
+subtracts the *full* rank-`(r+1)` operator on `∇W`, while the genuine Leibniz spectator is the
+slot-extended rank-`r` operator; the difference acts on the gradient slot — an irreducible one-jet term
+at every step.  The honest invariant the recursion *does* satisfy is the jet bound: `op p r W (x)`
+reads up to `∇^p W (x)`, so it is controlled by the order-`≤ p` jet `∑_{q < p + 1} rfns(∇^q W)(x)`.  The
+downstream consumers (the iterated grid `rfns_iteratedCovGrad_grid`, whose own conclusion is the jet sum
+`∑_q rfns(∇^q W)`) only ever need the jet shape; the single-value form was an over-strong intermediate.
 
 These are genuine mathematical inputs (the consumer constructs `op` and discharges the two fields);
 the structure is kept generic and decoupled from any specific nonlinearity as a reusable
 covariant-calculus byproduct.  A degenerate `kappa ≡ 0` witness is rejected whenever `op 0 r W ≠ 0`
-(then `rfns(op 0 r W)(x) > 0 = 0 · rfns(W)(x)`), so the envelope genuinely uses the section. -/
+(then at `p = 0` the jet RHS is `kappa 0 r · rfns(W)(x) = 0` while `rfns(op 0 r W)(x) > 0`), so the
+envelope genuinely uses the section; at the rank-`0`-degenerate base, `op 1 0 W = −cast(op 0 1 (∇W))`
+is genuinely nonzero on a non-flat `M` with the jet RHS `kappa 1 0 · (rfns(W) + rfns(∇W))(x)` positive,
+so it is not vacuous. -/
 structure DiffBilinOp (g : SmoothRiemannianMetric I M) where
   /-- The `p`-times differentiated operator at base rank `r`, fibrewise-linear in the section. -/
   op : ∀ (p r : ℕ), SmoothCcTensor g 0 r → SmoothCcTensor g 0 (r + p)
@@ -231,11 +249,15 @@ structure DiffBilinOp (g : SmoothRiemannianMetric I M) where
   kappa : ℕ → ℕ → ℝ
   /-- The envelope constant is nonnegative. -/
   kappa_nonneg : ∀ p r, 0 ≤ kappa p r
-  /-- The per-order, per-rank, base-point-uniform proportional fibre bound (boundedness of the
-  operator at rank `r`). -/
+  /-- The per-order, per-rank, base-point-uniform proportional fibre bound in **jet form**
+  (boundedness of the operator at rank `r` against the order-`≤ p` covariant jet of the section). The
+  single-value form `≤ kappa p r · rfns(W)(x)` is FALSE at the rank-`0`-degenerate base
+  (`op 1 0 W = −cast(op 0 1 (∇W))` reads `∇W`); the honest invariant reads up to `∇^p W`. -/
   rfns_op_le : ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
     riemannianFiberNormSq (I := I) (M := M) g 0 (r + p) x ((op p r W).toSection x) ≤
-      kappa p r * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x)
+      kappa p r * ∑ q ∈ Finset.range (p + 1),
+        riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
+          ((iteratedCovGrad g 0 r q W).toSection x)
 
 namespace DiffBilinOp
 
@@ -245,45 +267,52 @@ variable {g : SmoothRiemannianMetric I M}
 
 For every gradient order `j`, every differentiation order `p`, every base rank `r`, every section
 `W`, and every point `x`, the intrinsic squared fibre norm of `∇^j(op p r W)` is bounded by the
-binomial grid
+binomial **jet** grid
 ```
-rfns(∇^j(op p r W))(x) ≤ 4^j · ∑_{p' ≤ j} kappa(p + p') · ∑_{q ≤ j} rfns(∇^q W)(x),
+rfns(∇^j(op p r W))(x) ≤ 4^j · ∑_{p' ≤ j} kappa(p + p') · ∑_{q < p + j + 1} rfns(∇^q W)(x),
 ```
 the differentiated operator entering only as the base-point-uniform coefficient `kappa(p + p')` and
-only the gradient order `q` of the contracted section surviving as a fibre-norm grid; the `4^j`
-absorbs the binomial coefficients of the exact covariant Leibniz expansion.
+only the gradient order `q` of the contracted section surviving as a fibre-norm jet grid; the `4^j`
+absorbs the binomial coefficients of the exact covariant Leibniz expansion.  The contracted-jet window
+is `q < p + j + 1`: the order-`p` operator reads up to `∇^p W` (the jet field `rfns_op_le`), and each
+of the `j` gradient steps can advance the read order by one, so the leaves reach `∇^{p + j} W`.  At the
+consumer entry `p = 0` the window collapses to `q < j + 1` (only `∇^{≤ j} W` is read).
 
-Proved by induction on `j`: the base case is the per-order envelope `rfns_op_le` (at `q = 0`); the
-successor step front-commutes the innermost gradient (`rfns_iteratedCovGrad_covGrad_comm_db`), expands
-the single covariant gradient by the exact recursive Leibniz `covGrad_op`, distributes `∇^j` over the
-sum (`iteratedCovGrad_add`, `riemannianFiberNormSq_add_le`), recurses on the two shifted pieces, and
-dominates the four resulting sums by the common `range (j + 2)` grid, the two copies combining into
-the `4^{j+1}` factor.  No posit (the curvature file's `rfns_iteratedCovGrad_diffCurvOp_grid` is the
-`R(X, Y)·` instance of this proof). -/
+Proved by induction on `j`: the base case is the per-order **jet** envelope `rfns_op_le` (window
+`q < p + 1`); the successor step front-commutes the innermost gradient
+(`rfns_iteratedCovGrad_covGrad_comm_db`), expands the single covariant gradient by the exact recursive
+Leibniz `covGrad_op`, distributes `∇^j` over the sum (`iteratedCovGrad_add`,
+`riemannianFiberNormSq_add_le`), recurses on the two shifted pieces (the order-advanced `op (p + 1)`
+with window `q < (p + 1) + j + 1`, equal to the target, and the rank-advanced `op p` on `∇W` with the
+shifted window `q < p + j + 1` of `∇^{q+1} W ⊆ ∇^{≤ p + j + 1} W`), and dominates them by the common
+target window `range (p + (j + 1) + 1)`, the two copies combining into the `4^{j+1}` factor.  No posit
+(the curvature file's `rfns_iteratedCovGrad_diffCurvOp_grid` is the `R(X, Y)·` instance of this
+proof). -/
 theorem rfns_iteratedCovGrad_grid (Φ : DiffBilinOp g) (j : ℕ) :
     ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
       riemannianFiberNormSq (I := I) (M := M) g 0 ((r + p) + j) x
           ((iteratedCovGrad g 0 (r + p) j (Φ.op p r W)).toSection x) ≤
         (4 : ℝ) ^ j * gridWindowSum Φ.kappa p r j *
-          ∑ q ∈ Finset.range (j + 1),
+          ∑ q ∈ Finset.range (p + j + 1),
             riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
               ((iteratedCovGrad g 0 r q W).toSection x) := by
   induction j with
   | zero =>
       intro p r W x
       have hrhs : (4 : ℝ) ^ 0 * gridWindowSum Φ.kappa p r 0 *
-            ∑ q ∈ Finset.range (0 + 1),
+            ∑ q ∈ Finset.range (p + 0 + 1),
               riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
                 ((iteratedCovGrad g 0 r q W).toSection x) =
-          Φ.kappa p r * riemannianFiberNormSq (I := I) (M := M) g 0 (r + 0) x
-            ((iteratedCovGrad g 0 r 0 W).toSection x) := by
-        rw [pow_zero, one_mul, gridWindowSum_zero, Finset.sum_range_one]
-      rw [iteratedCovGrad_zero, hrhs, iteratedCovGrad_zero]
+          Φ.kappa p r * ∑ q ∈ Finset.range (p + 1),
+              riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
+                ((iteratedCovGrad g 0 r q W).toSection x) := by
+        rw [pow_zero, one_mul, gridWindowSum_zero, Nat.add_zero]
+      rw [iteratedCovGrad_zero, hrhs]
       exact Φ.rfns_op_le p r W x
   | succ j ih =>
       intro p r W x
       set K : ℝ := gridWindowSum Φ.kappa p r (j + 1) with hK_def
-      set S : ℝ := ∑ q ∈ Finset.range (j + 1 + 1),
+      set S : ℝ := ∑ q ∈ Finset.range (p + (j + 1) + 1),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
           ((iteratedCovGrad g 0 r q W).toSection x) with hS_def
       have hK_nn : 0 ≤ K := gridWindowSum_nonneg Φ.kappa_nonneg p r (j + 1)
@@ -304,10 +333,12 @@ theorem rfns_iteratedCovGrad_grid (Φ : DiffBilinOp g) (j : ℕ) :
               (Φ.op p (r + 1) (covGrad g 0 r W)))).toSection x)).trans ?_
       set kA : ℝ := gridWindowSum Φ.kappa (p + 1) r j with hkA_def
       set kB : ℝ := gridWindowSum Φ.kappa p (r + 1) j with hkB_def
-      set sA : ℝ := ∑ q ∈ Finset.range (j + 1),
+      -- Branch A's `(p+1, r, W)` window `range ((p+1)+j+1) = range (p+(j+1)+1)` equals the target `S`.
+      set sA : ℝ := ∑ q ∈ Finset.range ((p + 1) + j + 1),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
           ((iteratedCovGrad g 0 r q W).toSection x) with hsA_def
-      set sB : ℝ := ∑ q ∈ Finset.range (j + 1),
+      -- Branch B's `(p, r+1, ∇W)` window `range (p+j+1)`, summand shifted to `∇^{q+1}W`.
+      set sB : ℝ := ∑ q ∈ Finset.range (p + j + 1),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + (q + 1)) x
           ((iteratedCovGrad g 0 r (q + 1) W).toSection x) with hsB_def
       have hA : riemannianFiberNormSq (I := I) (M := M) g 0 ((r + (p + 1)) + j) x
@@ -317,7 +348,7 @@ theorem rfns_iteratedCovGrad_grid (Φ : DiffBilinOp g) (j : ℕ) :
         rw [hkA_def, hsA_def, mul_assoc]
       have hB0 := ih p (r + 1) (covGrad g 0 r W) x
       have hBshift : gridWindowSum Φ.kappa p (r + 1) j *
-            ∑ q ∈ Finset.range (j + 1),
+            ∑ q ∈ Finset.range (p + j + 1),
               riemannianFiberNormSq (I := I) (M := M) g 0 ((r + 1) + q) x
                 ((iteratedCovGrad g 0 (r + 1) q (covGrad g 0 r W)).toSection x) =
           kB * sB := by
@@ -336,16 +367,20 @@ theorem rfns_iteratedCovGrad_grid (Φ : DiffBilinOp g) (j : ℕ) :
       have hkB_le : kB ≤ K := by
         rw [hkB_def, hK_def]
         exact gridWindowSum_shift_le Φ.kappa_nonneg p r j 0 1 (Nat.zero_le _) le_rfl
+      -- Branch A's window equals the target window `range (p+(j+1)+1)` (the indices coincide).
       have hsA_le : sA ≤ S := by
         rw [hsA_def, hS_def]
-        exact sum_range_le_succ_of_nonneg_db (j + 1) _
-          (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + (j + 1)) x _)
+        exact le_of_eq (Finset.sum_congr (by rw [show (p + 1) + j + 1 = p + (j + 1) + 1 from by omega])
+          (fun _ _ => rfl))
+      -- Branch B's shifted window `range (p+j+1)` of `∇^{q+1}W` sits inside the target `range (p+j+2)`.
       have hsB_le : sB ≤ S := by
         rw [hsB_def, hS_def]
-        exact sum_range_shift_le_db (j + 1)
+        refine le_trans (sum_range_shift_le_db (p + j + 1)
           (fun q => riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
             ((iteratedCovGrad g 0 r q W).toSection x))
-          (fun q => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + q) x _)
+          (fun q => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + q) x _)) ?_
+        exact le_of_eq (Finset.sum_congr (by rw [show (p + j + 1) + 1 = p + (j + 1) + 1 from by omega])
+          (fun _ _ => rfl))
       have hkA_nn : 0 ≤ kA := gridWindowSum_nonneg Φ.kappa_nonneg (p + 1) r j
       have hkB_nn : 0 ≤ kB := gridWindowSum_nonneg Φ.kappa_nonneg p (r + 1) j
       have hsA_nn : 0 ≤ sA :=
@@ -365,7 +400,7 @@ theorem rfns_iteratedCovGrad_grid (Φ : DiffBilinOp g) (j : ℕ) :
           mul_le_mul_of_nonneg_left hprodB hpow_nn]
       have htarget : (4 : ℝ) ^ (j + 1) * (K * S) =
           (4 : ℝ) ^ (j + 1) * gridWindowSum Φ.kappa p r (j + 1) *
-            ∑ q ∈ Finset.range (j + 1 + 1),
+            ∑ q ∈ Finset.range (p + (j + 1) + 1),
               riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
                 ((iteratedCovGrad g 0 r q W).toSection x) := by
         rw [hK_def, hS_def, mul_assoc]
@@ -411,28 +446,31 @@ theorem exists_rfns_iteratedCovGrad_singleSum_le (Φ : DiffBilinOp g) :
     fun r j => mul_nonneg (by positivity) (gridWindowSum_nonneg Φ.kappa_nonneg 0 r j),
     fun r W j x => ?_⟩
   have hgrid := Φ.rfns_iteratedCovGrad_grid j 0 r W x
-  -- The `p = 0` instance: `op 0 r W` lives at rank `(r + 0) + j`; the grid RHS is already the
-  -- three-factor `4^j · gridWindowSum κ 0 r j · ∑_q rfns`, i.e. the claimed `C r j · ∑_q rfns`.
-  simpa only [Nat.add_zero] using hgrid
+  -- The `p = 0` instance: `op 0 r W` lives at rank `(r + 0) + j`; the grid RHS jet window is
+  -- `range (0 + j + 1) = range (j + 1)`, so the three-factor `4^j · gridWindowSum κ 0 r j · ∑_q rfns`
+  -- is the claimed `C r j · ∑_q rfns`.
+  simpa only [Nat.add_zero, Nat.zero_add] using hgrid
 
 /-- **The binomial covariant-Leibniz `rfns` double grid at a single centre `x₀`.**
 
 The *at-the-centre* mirror of `rfns_iteratedCovGrad_grid`: the envelope is supplied **only at one
-point** `x₀` (`hrfns_at`, the hypothesis `rfns(op p r W)(x₀) ≤ kappa p · rfns(W)(x₀)` for every
-`p, r, W`, with no requirement at any other point), and the grid conclusion is **at `x₀`**:
+point** `x₀` (`hrfns_at`, the **jet** hypothesis `rfns(op p r W)(x₀) ≤ kappa p r · ∑_{q < p+1}
+rfns(∇^q W)(x₀)` for every `p, r, W`, with no requirement at any other point), and the grid conclusion
+is **at `x₀`** in jet form:
 ```
-rfns(∇^j(op p r W))(x₀) ≤ 4^j · ∑_{p' ≤ j} kappa(p + p') · ∑_{q ≤ j} rfns(∇^q W)(x₀).
+rfns(∇^j(op p r W))(x₀) ≤ 4^j · ∑_{p' ≤ j} kappa(p + p') · ∑_{q < p + j + 1} rfns(∇^q W)(x₀).
 ```
 It is the same statement as the global grid restricted to one base point, but it does **not** require
 the global field `rfns_op_le` of a `DiffBilinOp`; only the recursive single-step covariant Leibniz
 `hcovGrad_op` (a section-level identity, point-free), the per-order constant `kappa` with
-`kappa_nonneg`, and the pointwise envelope `hrfns_at` at `x₀`.
+`kappa_nonneg`, and the pointwise **jet** envelope `hrfns_at` at `x₀`.  At the consumer entry `p = 0`
+both windows collapse (`q < 1` in the hypothesis, `q < j + 1` in the conclusion).
 
 The proof is the **verbatim single-point replay** of `rfns_iteratedCovGrad_grid`: the binomial
 covariant-Leibniz induction on `j` evaluates everything at the *one* point `x₀` through the whole
-recursion (the base case is `hrfns_at` at `x₀`; the successor front-commutes the innermost gradient
-with `rfns_iteratedCovGrad_covGrad_comm_db` at `x₀`, expands the single covariant gradient by the
-point-free `hcovGrad_op`, distributes `∇^j` and `riemannianFiberNormSq_add_le` at `x₀`, and recurses
+recursion (the base case is the jet `hrfns_at` at `x₀`; the successor front-commutes the innermost
+gradient with `rfns_iteratedCovGrad_covGrad_comm_db` at `x₀`, expands the single covariant gradient by
+the point-free `hcovGrad_op`, distributes `∇^j` and `riemannianFiberNormSq_add_le` at `x₀`, and recurses
 the inductive hypothesis on the two shifted pieces *at the same `x₀`*). The covariant Leibniz
 recursion never invokes the envelope at any point other than `x₀`: `∇^k(op p r W)` at `x₀` is a fibre
 value at `x₀`, and the recursion `op (p+1) = covGrad(op p) − cast` keeps every operator-application
@@ -447,30 +485,33 @@ theorem rfns_iteratedCovGrad_grid_at
     (kappa : ℕ → ℕ → ℝ) (kappa_nonneg : ∀ p r, 0 ≤ kappa p r) (x₀ : M)
     (hrfns_at : ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r),
       riemannianFiberNormSq (I := I) (M := M) g 0 (r + p) x₀ ((op p r W).toSection x₀) ≤
-        kappa p r * riemannianFiberNormSq (I := I) (M := M) g 0 r x₀ (W.toSection x₀)) (j : ℕ) :
+        kappa p r * ∑ q ∈ Finset.range (p + 1),
+          riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x₀
+            ((iteratedCovGrad g 0 r q W).toSection x₀)) (j : ℕ) :
     ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r),
       riemannianFiberNormSq (I := I) (M := M) g 0 ((r + p) + j) x₀
           ((iteratedCovGrad g 0 (r + p) j (op p r W)).toSection x₀) ≤
         (4 : ℝ) ^ j * gridWindowSum kappa p r j *
-          ∑ q ∈ Finset.range (j + 1),
+          ∑ q ∈ Finset.range (p + j + 1),
             riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x₀
               ((iteratedCovGrad g 0 r q W).toSection x₀) := by
   induction j with
   | zero =>
       intro p r W
       have hrhs : (4 : ℝ) ^ 0 * gridWindowSum kappa p r 0 *
-            ∑ q ∈ Finset.range (0 + 1),
+            ∑ q ∈ Finset.range (p + 0 + 1),
               riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x₀
                 ((iteratedCovGrad g 0 r q W).toSection x₀) =
-          kappa p r * riemannianFiberNormSq (I := I) (M := M) g 0 (r + 0) x₀
-            ((iteratedCovGrad g 0 r 0 W).toSection x₀) := by
-        rw [pow_zero, one_mul, gridWindowSum_zero, Finset.sum_range_one]
-      rw [iteratedCovGrad_zero, hrhs, iteratedCovGrad_zero]
+          kappa p r * ∑ q ∈ Finset.range (p + 1),
+              riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x₀
+                ((iteratedCovGrad g 0 r q W).toSection x₀) := by
+        rw [pow_zero, one_mul, gridWindowSum_zero, Nat.add_zero]
+      rw [iteratedCovGrad_zero, hrhs]
       exact hrfns_at p r W
   | succ j ih =>
       intro p r W
       set K : ℝ := gridWindowSum kappa p r (j + 1) with hK_def
-      set S : ℝ := ∑ q ∈ Finset.range (j + 1 + 1),
+      set S : ℝ := ∑ q ∈ Finset.range (p + (j + 1) + 1),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x₀
           ((iteratedCovGrad g 0 r q W).toSection x₀) with hS_def
       have hK_nn : 0 ≤ K := gridWindowSum_nonneg kappa_nonneg p r (j + 1)
@@ -491,10 +532,10 @@ theorem rfns_iteratedCovGrad_grid_at
               (op p (r + 1) (covGrad g 0 r W)))).toSection x₀)).trans ?_
       set kA : ℝ := gridWindowSum kappa (p + 1) r j with hkA_def
       set kB : ℝ := gridWindowSum kappa p (r + 1) j with hkB_def
-      set sA : ℝ := ∑ q ∈ Finset.range (j + 1),
+      set sA : ℝ := ∑ q ∈ Finset.range ((p + 1) + j + 1),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x₀
           ((iteratedCovGrad g 0 r q W).toSection x₀) with hsA_def
-      set sB : ℝ := ∑ q ∈ Finset.range (j + 1),
+      set sB : ℝ := ∑ q ∈ Finset.range (p + j + 1),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + (q + 1)) x₀
           ((iteratedCovGrad g 0 r (q + 1) W).toSection x₀) with hsB_def
       have hA : riemannianFiberNormSq (I := I) (M := M) g 0 ((r + (p + 1)) + j) x₀
@@ -504,7 +545,7 @@ theorem rfns_iteratedCovGrad_grid_at
         rw [hkA_def, hsA_def, mul_assoc]
       have hB0 := ih p (r + 1) (covGrad g 0 r W)
       have hBshift : gridWindowSum kappa p (r + 1) j *
-            ∑ q ∈ Finset.range (j + 1),
+            ∑ q ∈ Finset.range (p + j + 1),
               riemannianFiberNormSq (I := I) (M := M) g 0 ((r + 1) + q) x₀
                 ((iteratedCovGrad g 0 (r + 1) q (covGrad g 0 r W)).toSection x₀) =
           kB * sB := by
@@ -525,14 +566,16 @@ theorem rfns_iteratedCovGrad_grid_at
         exact gridWindowSum_shift_le kappa_nonneg p r j 0 1 (Nat.zero_le _) le_rfl
       have hsA_le : sA ≤ S := by
         rw [hsA_def, hS_def]
-        exact sum_range_le_succ_of_nonneg_db (j + 1) _
-          (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + (j + 1)) x₀ _)
+        exact le_of_eq (Finset.sum_congr (by rw [show (p + 1) + j + 1 = p + (j + 1) + 1 from by omega])
+          (fun _ _ => rfl))
       have hsB_le : sB ≤ S := by
         rw [hsB_def, hS_def]
-        exact sum_range_shift_le_db (j + 1)
+        refine le_trans (sum_range_shift_le_db (p + j + 1)
           (fun q => riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x₀
             ((iteratedCovGrad g 0 r q W).toSection x₀))
-          (fun q => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + q) x₀ _)
+          (fun q => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + q) x₀ _)) ?_
+        exact le_of_eq (Finset.sum_congr (by rw [show (p + j + 1) + 1 = p + (j + 1) + 1 from by omega])
+          (fun _ _ => rfl))
       have hkA_nn : 0 ≤ kA := gridWindowSum_nonneg kappa_nonneg (p + 1) r j
       have hkB_nn : 0 ≤ kB := gridWindowSum_nonneg kappa_nonneg p (r + 1) j
       have hsA_nn : 0 ≤ sA :=
@@ -552,7 +595,7 @@ theorem rfns_iteratedCovGrad_grid_at
           mul_le_mul_of_nonneg_left hprodB hpow_nn]
       have htarget : (4 : ℝ) ^ (j + 1) * (K * S) =
           (4 : ℝ) ^ (j + 1) * gridWindowSum kappa p r (j + 1) *
-            ∑ q ∈ Finset.range (j + 1 + 1),
+            ∑ q ∈ Finset.range (p + (j + 1) + 1),
               riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x₀
                 ((iteratedCovGrad g 0 r q W).toSection x₀) := by
         rw [hK_def, hS_def, mul_assoc]
@@ -580,9 +623,11 @@ window sum over orders `[0, j]` and ranks `[r, r + j]`) such that, **at the one 
 ```
 rfns(∇^j(op 0 r W))(x₀) ≤ C r j · ∑_{q ≤ j} rfns(∇^q W)(x₀).
 ```
-Only the pointwise envelope at `x₀` is required, and the envelope is per-rank (the rank-`r` operator's
-fibre constant grows with `r`); the constant is the same engine constant as the global collapse, so a
-single `x₀`-uniform family serves whichever centre is chosen. -/
+Only the pointwise **jet** envelope at `x₀` is required (per order, per rank — the rank-`r` operator's
+fibre constant grows with `r`, and the order-`p` operator reads up to `∇^p W`); at the consumer's
+differentiation order `p = 0` the grid's contracted-jet window collapses to `q < j + 1`.  The constant
+is the same engine constant as the global collapse, so a single `x₀`-uniform family serves whichever
+centre is chosen. -/
 theorem exists_rfns_iteratedCovGrad_singleSum_le_at
     (op : ∀ (p r : ℕ), SmoothCcTensor g 0 r → SmoothCcTensor g 0 (r + p))
     (hcovGrad_op : ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r),
@@ -592,7 +637,9 @@ theorem exists_rfns_iteratedCovGrad_singleSum_le_at
     (kappa : ℕ → ℕ → ℝ) (kappa_nonneg : ∀ p r, 0 ≤ kappa p r) (x₀ : M)
     (hrfns_at : ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r),
       riemannianFiberNormSq (I := I) (M := M) g 0 (r + p) x₀ ((op p r W).toSection x₀) ≤
-        kappa p r * riemannianFiberNormSq (I := I) (M := M) g 0 r x₀ (W.toSection x₀)) :
+        kappa p r * ∑ q ∈ Finset.range (p + 1),
+          riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x₀
+            ((iteratedCovGrad g 0 r q W).toSection x₀)) :
     ∀ (r : ℕ) (W : SmoothCcTensor g 0 r) (j : ℕ),
       riemannianFiberNormSq (I := I) (M := M) g 0 (r + j) x₀
           ((iteratedCovGrad g 0 r j (op 0 r W)).toSection x₀) ≤
@@ -602,7 +649,7 @@ theorem exists_rfns_iteratedCovGrad_singleSum_le_at
               ((iteratedCovGrad g 0 r q W).toSection x₀) := by
   intro r W j
   have hgrid := rfns_iteratedCovGrad_grid_at op hcovGrad_op kappa kappa_nonneg x₀ hrfns_at j 0 r W
-  simpa only [Nat.add_zero] using hgrid
+  simpa only [Nat.add_zero, Nat.zero_add] using hgrid
 
 end DiffBilinOp
 

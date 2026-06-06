@@ -40,13 +40,17 @@ per-tower nodes alone.
 
 ## What is abstract and proved here
 
-* `exists_proportional_recCurvDiffOp` (**proved, sorry-free**) — the abstract combination: given a
-  tower's order-`0` proportional fibre bound `hbase0` (`rfns(op 0 r W)(x) ≤ kappa0 r · rfns(W)(x)`) and
-  its high-order proportional fibre envelope `hhigh`
-  (`rfns(op (p+1) r W)(x) ≤ kappaHigh p r · rfns(W)(x)`), the single per-order, per-rank family
-  `rfns(op p r W)(x) ≤ kappa p r · rfns(W)(x)` (order `0` from `hbase0`, order `p ≥ 1` from `hhigh`).
-  This is pure case-bookkeeping on the order `p`; it introduces no `sorry` and uses no curvature
-  structure beyond the two supplied bounds.
+* `exists_proportional_recCurvDiffOp` (**proved, sorry-free**) — the abstract combination, in **jet**
+  form: given a tower's order-`0` proportional fibre bound `hbase0`
+  (`rfns(op 0 r W)(x) ≤ kappa0 r · rfns(W)(x)`, the value form — the order-`0` operator is value-local)
+  and its high-order proportional fibre **jet** envelope `hhigh`
+  (`rfns(op (p+1) r W)(x) ≤ kappaHigh p r · ∑_{q < p + 2} rfns(∇^q W)(x)`), the single per-order,
+  per-rank jet family `rfns(op p r W)(x) ≤ kappa p r · ∑_{q < p + 1} rfns(∇^q W)(x)` (order `0` from
+  `hbase0`, where the jet window `q < 1` carries only the value; order `p ≥ 1` from `hhigh`).  The jet
+  shape is forced because the single-value high-order form is FALSE at the rank-`0`-degenerate base
+  (`op 1 0 W = −cast(op 0 1 (∇W))` reads `∇W`); see `MetricContractionLeibnizGrid.DiffBilinOp`.  This is
+  pure case-bookkeeping on the order `p`; it introduces no `sorry` and uses no curvature structure
+  beyond the two supplied bounds.
 
 The iterated-gradient grid that each tower needs on top of its per-order family is the genuinely-abstract
 *and proved* binomial covariant-Leibniz engine `DiffBilinOp.rfns_iteratedCovGrad_grid_at`
@@ -81,19 +85,21 @@ variable [CompleteSpace E]
 
 set_option linter.unusedSectionVars false in
 /-- **The combined all-order section-proportional fibre envelope for a recursively-differentiated
-bundled curvature operator, from its order-`0` and high-order bounds** (proved, sorry-free). Combining a
-tower's supplied order-`0` proportional fibre bound `hbase0` with its supplied high-order
-(`p ≥ 1`) proportional fibre envelope `hhigh`, there is a single nonnegative per-order, per-rank envelope
-`kappa : ℕ → ℕ → ℝ` with
+bundled curvature operator, from its order-`0` and high-order bounds, in JET form** (proved,
+sorry-free). Combining a tower's supplied order-`0` proportional fibre bound `hbase0` (value form) with
+its supplied high-order (`p ≥ 1`) proportional fibre **jet** envelope `hhigh`, there is a single
+nonnegative per-order, per-rank jet envelope `kappa : ℕ → ℕ → ℝ` with
 ```
-rfns(op p r W)(x) ≤ kappa p r · rfns(W)(x)
+rfns(op p r W)(x) ≤ kappa p r · ∑_{q < p + 1} rfns(∇^q W)(x)
 ```
 at every order `p`, rank `r`, section `W` and point `x`. The order-`0` layer is `hbase0` (the
-fully-proven curvature-operator order-`0` bound); the order-`p ≥ 1` layer is `hhigh` (each concrete
-tower's posited high-order envelope, where the deep `‖∇^{≤ p} R‖_∞`-content lives). This step is pure
-case-bookkeeping on the order `p`: it introduces no `sorry` and uses no curvature structure beyond the
-two supplied bounds. Consumers transitively depend on `sorryAx` only through the per-tower high-order
-node supplied as `hhigh`. -/
+fully-proven curvature-operator order-`0` bound; its jet window `q < 1` carries only the value
+`∇^0 W = W`); the order-`p ≥ 1` layer is `hhigh` (each concrete tower's posited high-order jet
+envelope, window `q < (p' + 1) + 1`, where the deep `‖∇^{≤ p} R‖_∞`-content lives). The jet shape is
+forced because the single-value high-order form is FALSE at the rank-`0`-degenerate base. This step is
+pure case-bookkeeping on the order `p`: it introduces no `sorry` and uses no curvature structure beyond
+the two supplied bounds. Consumers transitively depend on `sorryAx` only through the per-tower
+high-order node supplied as `hhigh`. -/
 theorem exists_proportional_recCurvDiffOp
     (g : SmoothRiemannianMetric I M)
     (op : ∀ (p r : ℕ), SmoothCcTensor g 0 r → SmoothCcTensor g 0 (r + p))
@@ -105,11 +111,15 @@ theorem exists_proportional_recCurvDiffOp
     (hhigh : ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
       riemannianFiberNormSq (I := I) (M := M) g 0 (r + (p + 1)) x
           ((op (p + 1) r W).toSection x) ≤
-        kappaHigh p r * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x)) :
+        kappaHigh p r * ∑ q ∈ Finset.range (p + 2),
+          riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
+            ((iteratedCovGrad g 0 r q W).toSection x)) :
     ∃ kappa : ℕ → ℕ → ℝ, (∀ p r, 0 ≤ kappa p r) ∧
       ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + p) x ((op p r W).toSection x) ≤
-          kappa p r * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x) := by
+          kappa p r * ∑ q ∈ Finset.range (p + 1),
+            riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
+              ((iteratedCovGrad g 0 r q W).toSection x) := by
   classical
   refine ⟨fun p r => match p with | 0 => kappa0 r | (p' + 1) => kappaHigh p' r,
     fun p r => ?_, fun p r W x => ?_⟩
@@ -120,10 +130,14 @@ theorem exists_proportional_recCurvDiffOp
     | zero =>
         rw [show (fun p r => match p with
             | 0 => kappa0 r | (p' + 1) => kappaHigh p' r) 0 r = kappa0 r from rfl]
+        -- The jet window `range 1` carries only the value `∇^0 W = W` (defeq), matching `hbase0`.
+        rw [Finset.sum_range_one]
         exact hbase0 r W x
     | succ p' =>
         rw [show (fun p r => match p with
             | 0 => kappa0 r | (p'' + 1) => kappaHigh p'' r) (p' + 1) r = kappaHigh p' r from rfl]
+        -- The per-order jet window `range ((p' + 1) + 1)` is the high-order window `range (p' + 2)`.
+        rw [show (p' + 1) + 1 = p' + 2 from rfl]
         exact hhigh p' r W x
 
 end Connection

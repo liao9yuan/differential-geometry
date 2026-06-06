@@ -617,7 +617,7 @@ theorem ricciNeg2Diff_covFdB_section_split
         ∑ q ∈ Finset.range (j + 1),
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
             ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 q w).toSection x) := by
-    simpa only [Nat.add_zero] using hg
+    simpa only [Nat.add_zero, Nat.zero_add] using hg
   refine hg'.trans ?_
   -- Dominate `gridWindowSum Φ.kappa ≤ gridWindowSum kbar` and extend `range (j+1) ⊆ range (j+2+1)`.
   have hkappa : Integral.Connection.gridWindowSum Φ.kappa 0 2 j ≤
@@ -1124,7 +1124,7 @@ theorem lieDerivDiff_covFdB_section_split
         ∑ q ∈ Finset.range (j + 1),
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
             ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 q w).toSection x) := by
-    simpa only [Nat.add_zero] using hg
+    simpa only [Nat.add_zero, Nat.zero_add] using hg
   refine hg'.trans ?_
   -- Dominate `gridWindowSum Φ.kappa ≤ gridWindowSum kbar` and extend `range (j+1) ⊆ range (j+2+1)`.
   have hkappa : Integral.Connection.gridWindowSum Φ.kappa 0 2 j ≤

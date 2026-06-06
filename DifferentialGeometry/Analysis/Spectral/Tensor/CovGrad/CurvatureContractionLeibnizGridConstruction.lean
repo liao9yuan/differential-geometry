@@ -244,68 +244,86 @@ theorem diffCurvOp_isOrderZeroCurvFactor :
       curvatureContraction_toSection_apply (I := I) (M := M) g r W₂ hX hY x, hx]
 
 /-- **The high-order (`p ≥ 1`) per-rank section-proportional fibre envelope for the
-differentiated-curvature contraction** (the single posited analytic node for this tower). For a closed
-smooth Riemannian manifold `(M, g)` and smooth global tangent fields `X, Y`, there is a nonnegative
-envelope family `kappaHigh : ℕ → ℕ → ℝ` such that for every order `p`, covariant rank `r`, smooth
-compactly-supported `(0, r)`-tensor `W`, and base point `x`, the order-`(p + 1)` differentiated-curvature
-contraction has intrinsic squared fibre norm at most `kappaHigh p r` times that of `W`:
+differentiated-curvature contraction, in JET form** (the single posited analytic node for this tower).
+For a closed smooth Riemannian manifold `(M, g)` and smooth global tangent fields `X, Y`, there is a
+nonnegative envelope family `kappaHigh : ℕ → ℕ → ℝ` such that for every order `p`, covariant rank `r`,
+smooth compactly-supported `(0, r)`-tensor `W`, and base point `x`, the order-`(p + 1)`
+differentiated-curvature contraction has intrinsic squared fibre norm at most `kappaHigh p r` times the
+order-`≤ (p + 1)` covariant jet of `W`:
 
 ```
-rfns(diffCurvOp (p + 1) r W)(x) ≤ kappaHigh p r · rfns(W)(x).
+rfns(diffCurvOp (p + 1) r W)(x) ≤ kappaHigh p r · ∑_{q < p + 2} rfns(∇^q W)(x).
 ```
 
-**Why this is TRUE.** The order-`0` base `diffCurvOp 0 r W (x) = riemannOp (tensorCov g 0 r) x (X x)
-(Y x) (W x)` is a smooth *fibrewise* curvature operator built from the smooth metric `g`, the smooth
-Levi-Civita curvature `R`, and the smooth frame fields `X, Y`. The differentiated tower
-`diffCurvOp (p + 1) r W = ∇(op p r W) − cast(op p (r + 1) (∇W))` (the exact covariant-Leibniz remainder,
-`covGrad_diffCurvOp_eq`) telescopes to `∇^{p+1}` of the smooth curvature coefficient applied *fibrewise*
-to `W` (the input section's derivatives cancel through the rank-cast term), whose fibre-operator norm is
-uniformly bounded over the compact `M` by `‖∇^{≤ p+1} R‖_∞ · g(X, X) · g(Y, Y)`
-(`exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound` at each order, finite by per-`p`
-compactness; the metric self-pairings continuous hence bounded). The genuinely-irreducible analytic
+**Why the jet form, and not the single-value form `≤ kappaHigh p r · rfns(W)(x)`.** The single-value
+form is **Lean-refuted FALSE** at the rank-`0`-degenerate base.  The order-`0` base
+`diffCurvOp 0 r W (x) = riemannOp (tensorCov g 0 r) x (X x) (Y x) (W x)` is the rank-`r` curvature
+contraction; at rank `0` the *scalar* curvature vanishes (`riemannSec_tensor0SCov_zero_eq_zero`, the
+`(0, 0)`-tensor bundle is flat), so `diffCurvOp 0 0 = 0` (`diffCurvOp_zero`).  The Leibniz remainder
+then forces, at `(p, r) = (0, 0)`,
+`diffCurvOp 1 0 W = ∇(diffCurvOp 0 0 W) − cast(diffCurvOp 0 1 (∇W)) = −cast(diffCurvOp 0 1 (∇W))`,
+which reads the *gradient* `∇W (x)` — the rank-`1` curvature contraction `R(X, Y)·` applied to `∇W` —
+not the value `W (x)`.  On a non-flat manifold there is a `W` with `W (x) = 0`, `∇W (x) ≠ 0`,
+`R(X, Y)(∇W)(x) ≠ 0`, breaking `rfns(…) ≤ kappaHigh 0 0 · rfns(W)(x) = 0`.  Structurally the recursion
+subtracts the *full* rank-`(r + 1)` operator on `∇W`, while the genuine Leibniz spectator is the
+slot-extended rank-`r` operator; their difference acts on the gradient slot — an irreducible one-jet
+term at every step.  The honest invariant is the jet bound: `diffCurvOp (p + 1) r W (x)` reads up to
+`∇^{p+1} W (x)`, controlled by `∑_{q < p + 2} rfns(∇^q W)(x)`.
+
+**Why this is TRUE in the jet form.** Writing the order-`0` contraction as the operator-field action
+`diffCurvOp 0 r W = appCc Φ_r W` of the smooth `(r, r)`-tensor field `Φ_r = R(X, Y)·`
+(`OperatorFieldCovariantCalculus.appCc`, fibrewise the smooth Riemann operator), the operator-field
+covariant product rule (`covGrad_appCc_eq`) gives
+`diffCurvOp (p + 1) r W = appCc(∇Φ_{p,r}) W + appCc(slotExtend Φ_{p,r} − Φ_{p,r+1}) (∇W)`, the sum of
+the differentiated curvature coefficient `∇^{p+1} Φ` acting on `W` and the *bounded* slot-mismatch
+operator acting on `∇W`.  Each operator factor is a fixed smooth tensor field, uniformly
+fibre-operator-bounded over the compact `M` by `‖∇^{≤ p+1} R‖_∞ · g(X, X) · g(Y, Y)`
+(`exists_uniform_riemannianFiberNormSq_appCc_le` per order, finite by per-`p` compactness); the jet
+window absorbs the surviving `∇W ⊆ ∇^{≤ p+1}W` term at every step.  The genuinely-irreducible analytic
 content is this uniform `‖∇^{≤ p+1} R‖_∞`-control of the iterated covariant derivative of the curvature
-contraction operator; it is posited here as the precise atomic engine envelope, per order `p` and per
-rank `r` (the rank-`r` curvature derivation acts on all `r` slots, so the constant grows with `r`; no
-single order-only family covers all ranks).
+contraction operator; it is posited as the precise atomic engine envelope, per order `p` and per rank
+`r` (the rank-`r` curvature derivation acts on all `r` slots, so the constant grows with `r`).
 
 **Why this is the honest per-tower posit (and not an abstract one).** This high-order boundedness cannot
 be derived from an abstract order-`0` fingerprint plus the Leibniz remainder identity alone: that
 abstract route (the deleted `op_perOrder_factorisation_continuous` in `OperatorFieldEvaluationLeibniz`)
 is FALSE — the order-`0` fingerprint constrains the base only per-rank while the recursion mixes ranks,
-so a value-local-at-order-`0` family can produce a one-jet-reading (unbounded) order-`1` operator
-(counterexample `op 0 0 := 0`, `op 0 1 := id`). The bound is TRUE *here* only because `diffCurvOp` is the
-genuine differentiated tower of the *smooth* curvature contraction `R(X, Y)·` (coefficient `g, R, X, Y`),
-content available only to this concrete operator; the posit is therefore stated *concretely* about
-`diffCurvOp`, and its proof is the uniform-curvature-derivative-norm control of this specific tower —
-the single genuinely-irreducible analytic node, disclosed as a `sorry`.
+so a value-local-at-order-`0` family can produce an order-`1` operator whose one-jet content is not
+bounded by a uniform (curvature-free) constant against any jet of `W`.  The bound is TRUE *here* only
+because `diffCurvOp` is the genuine differentiated tower of the *smooth* curvature contraction
+`R(X, Y)·` (coefficient `g, R, X, Y`), content available only to this concrete operator; the posit is
+stated *concretely* about `diffCurvOp`, and its proof is the uniform-curvature-derivative-norm control
+of this specific tower — the single genuinely-irreducible analytic node, disclosed as a `sorry`.
 
-**Non-vacuity / counterexample violation.** The bound is FALSE for an arbitrary covariant-Leibniz family
-satisfying only the order-`0` fingerprint (the counterexample `op 0 0 := 0`, `op 0 1 := id` satisfies
-`IsOrderZeroCurvFactor` yet its order-`1` operator reads the one-jet of `W`, so no `kappaHigh 0 0` bounds
-it relative to `rfns(W (x))`), which is exactly why this is a genuine analytic posit about the concrete
-`diffCurvOp` and not a vacuous or packaged claim. A degenerate witness `kappaHigh ≡ 0` is likewise
-rejected on any non-flat manifold: at `p = 0`, `diffCurvOp 1 r W = (∇R)(X, Y) W` is the differentiated
-curvature contraction, genuinely nonzero when `∇R ≠ 0`, so `rfns(diffCurvOp 1 r W)(x) > 0` while
-`0 · rfns(W)(x) = 0`. The envelope genuinely *uses* `W` (the operator is applied to `W`). -/
+**Non-vacuity / counterexample violation.** A degenerate witness `kappaHigh ≡ 0` is rejected on any
+non-flat manifold: at `(p, r) = (0, 0)`, `diffCurvOp 1 0 W = −cast(diffCurvOp 0 1 (∇W))` is genuinely
+nonzero for a `W` with `∇W (x) ≠ 0` and `R(X, Y)(∇W)(x) ≠ 0` (`R ≠ 0`), so
+`rfns(diffCurvOp 1 0 W)(x) > 0` while the jet RHS `0 · ∑_{q < 2} rfns(∇^q W)(x) = 0`. The envelope
+genuinely *uses* `W` (the operator is applied to `W`, and the jet window genuinely reaches `∇^{p+1} W`). -/
 theorem exists_proportional_diffCurvOp_highOrder :
     ∃ kappaHigh : ℕ → ℕ → ℝ, (∀ p r, 0 ≤ kappaHigh p r) ∧
       ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + (p + 1)) x
             ((diffCurvOp (I := I) (M := M) g hX hY (p + 1) r W).toSection x) ≤
-          kappaHigh p r * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x) := by
+          kappaHigh p r * ∑ q ∈ Finset.range (p + 2),
+            riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
+              ((iteratedCovGrad g 0 r q W).toSection x) := by
   sorry
 
-/-- **Posited continuous per-order, per-rank section-proportional fibre envelope for the
-differentiated-curvature contraction.** For a closed smooth Riemannian manifold `(M, g)` and smooth
-global tangent fields `X, Y`, and at every differentiation order `p` **and covariant rank `r`**, there
-is a *continuous* nonnegative envelope `Cp : ℕ → M → ℝ` (indexed by rank `r` and point `x`) such that,
-for every smooth compactly-supported `(0, r)`-tensor section `W` and every point `x`, the order-`p`
-differentiated-curvature contraction `(∇^p R)(X, Y) W = diffCurvOp p r W` has intrinsic squared fibre
-norm at most `Cp r x` times that of `W`:
+/-- **Continuous per-order, per-rank section-proportional fibre envelope for the
+differentiated-curvature contraction, in JET form.** For a closed smooth Riemannian manifold `(M, g)`
+and smooth global tangent fields `X, Y`, and at every differentiation order `p` **and covariant rank
+`r`**, there is a *continuous* nonnegative envelope `Cp : ℕ → M → ℝ` (indexed by rank `r` and point
+`x`) such that, for every smooth compactly-supported `(0, r)`-tensor section `W` and every point `x`,
+the order-`p` differentiated-curvature contraction `(∇^p R)(X, Y) W = diffCurvOp p r W` has intrinsic
+squared fibre norm at most `Cp r x` times the order-`≤ p` covariant jet of `W`:
 
 ```
-rfns(diffCurvOp p r W)(x) ≤ Cp r x · rfns(W)(x).
+rfns(diffCurvOp p r W)(x) ≤ Cp r x · ∑_{q < p + 1} rfns(∇^q W)(x).
 ```
+
+The jet window is forced by the rank-`0`-degenerate base (see `exists_proportional_diffCurvOp_highOrder`);
+at the consumer entry `p = 0` it collapses to the single value (window `q < 1`).
 
 **Why this is TRUE.** Each `diffCurvOp p` is a smooth *fixed* fibrewise-`ℝ`-linear operator on tensor
 sections (a recursive covariant-Leibniz remainder of the smooth Riemann curvature contraction
@@ -342,7 +360,9 @@ theorem exists_continuous_proportional_diffCurvOp (p : ℕ) :
       ∀ (r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + p) x
             ((diffCurvOp (I := I) (M := M) g hX hY p r W).toSection x) ≤
-          Cp r x * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x) := by
+          Cp r x * ∑ q ∈ Finset.range (p + 1),
+            riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
+              ((iteratedCovGrad g 0 r q W).toSection x) := by
   classical
   -- Non-negativity of `g.inner x v v` (metric positive-definiteness).
   have hgnn : ∀ (x : M) (v : TangentSpace I x), 0 ≤ g.inner x v v := by
@@ -377,40 +397,48 @@ theorem exists_continuous_proportional_diffCurvOp (p : ℕ) :
       refine ⟨fun r x => Ccurv r x * g.inner x (X x) (X x) * g.inner x (Y x) (Y x),
         fun r => ((hCcurv_cont r).mul hXcont).mul hYcont, fun r x => ?_, fun r W x => ?_⟩
       · exact mul_nonneg (mul_nonneg (hCcurv_nn r x) (hgnn x (X x))) (hgnn x (Y x))
-      · rw [show (diffCurvOp (I := I) (M := M) g hX hY 0 r W).toSection x =
+      · rw [Finset.sum_range_one]
+        -- The single jet summand `rfns g 0 (r + 0) x ((∇^0 W).toSection x)` is defeq to
+        -- `rfns g 0 r x (W.toSection x)`; the order-`0` contraction is value-local.
+        rw [show (diffCurvOp (I := I) (M := M) g hX hY 0 r W).toSection x =
             riemannOp (tensorCov (I := I) g 0 r) x (X x) (Y x) (W.toSection x) from
           curvatureContraction_toSection_apply (I := I) (M := M) g r W hX hY x]
         exact hCcurv r x (X x) (Y x) (W.toSection x)
   | succ p' =>
-      -- Order `p' + 1 ≥ 1`: the per-tower posited high-order envelope, as a constant (hence
-      -- continuous) per-rank function.
+      -- Order `p' + 1 ≥ 1`: the per-tower posited high-order **jet** envelope, as a constant (hence
+      -- continuous) per-rank function; its window `range (p' + 2)` is the per-order window
+      -- `range ((p' + 1) + 1)`.
       obtain ⟨kappaHigh, hkappaHigh_nn, hkappaHigh⟩ :=
         exists_proportional_diffCurvOp_highOrder (I := I) (M := M) g hX hY
       refine ⟨fun r _ => kappaHigh p' r, fun r => continuous_const,
         fun r _ => hkappaHigh_nn p' r, fun r W x => ?_⟩
+      rw [show (p' + 1) + 1 = p' + 2 from rfl]
       exact hkappaHigh p' r W x
 
 set_option linter.unusedSectionVars false in
 /-- **Per-order, per-rank section-proportional fibre bound for the differentiated-curvature
-contraction, uniform over the compact manifold.** Derived from the posited continuous envelope
+contraction, uniform over the compact manifold, in JET form.** Derived from the continuous envelope
 `exists_continuous_proportional_diffCurvOp` by supremising over the compact `M`: the uniform
 coefficient `kappa p r` is the supremum of the continuous rank-`r` envelope `Cp p r` (a continuous
 real function on a compact space has bounded range, `IsCompact.bddAbove_image`), so for every
 differentiation order `p`, covariant rank `r`, section `W` and point `x`,
 
 ```
-rfns(diffCurvOp p r W)(x) ≤ kappa p r · rfns(W)(x).
+rfns(diffCurvOp p r W)(x) ≤ kappa p r · ∑_{q < p + 1} rfns(∇^q W)(x).
 ```
 
-This is the base-point-uniform, **per-rank** coefficient family the binomial covariant-Leibniz grid
-consumes; the rank index is genuine (the rank-`r` curvature derivation's fibre constant grows with the
-slot count `r`). It depends on `sorryAx` only through the continuous-envelope primitive. -/
+This is the base-point-uniform, **per-rank** jet coefficient family the binomial covariant-Leibniz grid
+consumes (the rank index is genuine — the rank-`r` curvature derivation's fibre constant grows with the
+slot count `r`; the jet window is forced by the rank-`0`-degenerate base, collapsing to `q < 1` at the
+consumer entry `p = 0`). It depends on `sorryAx` only through the continuous-envelope primitive. -/
 theorem exists_proportional_diffCurvOp :
     ∃ kappa : ℕ → ℕ → ℝ, (∀ p r, 0 ≤ kappa p r) ∧
       ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + p) x
             ((diffCurvOp (I := I) (M := M) g hX hY p r W).toSection x) ≤
-          kappa p r * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x) := by
+          kappa p r * ∑ q ∈ Finset.range (p + 1),
+            riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
+              ((iteratedCovGrad g 0 r q W).toSection x) := by
   classical
   choose Cp hCp_cont hCp_nn hCp_bound using
     fun p => exists_continuous_proportional_diffCurvOp (I := I) (M := M) g hX hY p
@@ -424,8 +452,8 @@ theorem exists_proportional_diffCurvOp :
   · have hbdd : BddAbove (Set.range (Cp p r)) := (isCompact_range (hCp_cont p r)).bddAbove
     have hCp_le : Cp p r x ≤ sSup (Set.range (Cp p r)) := le_csSup hbdd ⟨x, rfl⟩
     refine (hCp_bound p r W x).trans ?_
-    exact mul_le_mul_of_nonneg_right hCp_le
-      (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 r x _)
+    refine mul_le_mul_of_nonneg_right hCp_le ?_
+    exact Finset.sum_nonneg fun q _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + q) x _
 
 /-- Extending the range of a nonnegative-tailed real sum by one only increases it:
 `∑_{i<n} f i ≤ ∑_{i<n+1} f i` when `0 ≤ f n`. -/
@@ -448,7 +476,9 @@ variable {kappa : ℕ → ℕ → ℝ} (hkappa_nn : ∀ p r, 0 ≤ kappa p r)
   (hkappa : ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
     riemannianFiberNormSq (I := I) (M := M) g 0 (r + p) x
         ((diffCurvOp (I := I) (M := M) g hX hY p r W).toSection x) ≤
-      kappa p r * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x))
+      kappa p r * ∑ q ∈ Finset.range (p + 1),
+        riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
+          ((iteratedCovGrad g 0 r q W).toSection x))
 
 include hkappa_nn hkappa in
 set_option linter.unusedSectionVars false in
@@ -479,26 +509,27 @@ theorem rfns_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
           ((iteratedCovGrad g 0 (r + p) j
             (diffCurvOp (I := I) (M := M) g hX hY p r W)).toSection x) ≤
         (4 : ℝ) ^ j * gridWindowSum kappa p r j *
-          ∑ q ∈ Finset.range (j + 1),
+          ∑ q ∈ Finset.range (p + j + 1),
             riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
               ((iteratedCovGrad g 0 r q W).toSection x) := by
   induction j with
   | zero =>
       intro p r W x
       have hrhs : (4 : ℝ) ^ 0 * gridWindowSum kappa p r 0 *
-            ∑ q ∈ Finset.range (0 + 1),
+            ∑ q ∈ Finset.range (p + 0 + 1),
               riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
                 ((iteratedCovGrad g 0 r q W).toSection x) =
-          kappa p r * riemannianFiberNormSq (I := I) (M := M) g 0 (r + 0) x
-            ((iteratedCovGrad g 0 r 0 W).toSection x) := by
-        rw [pow_zero, one_mul, gridWindowSum_zero, Finset.sum_range_one]
-      rw [iteratedCovGrad_zero, hrhs, iteratedCovGrad_zero]
+          kappa p r * ∑ q ∈ Finset.range (p + 1),
+              riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
+                ((iteratedCovGrad g 0 r q W).toSection x) := by
+        rw [pow_zero, one_mul, gridWindowSum_zero, Nat.add_zero]
+      rw [iteratedCovGrad_zero, hrhs]
       exact hkappa p r W x
   | succ j ih =>
       intro p r W x
-      -- Abbreviations for the target order × rank window `K` and gradient-order grid `S` at j+1.
+      -- Abbreviations for the target order × rank window `K` and gradient-order jet grid `S` at j+1.
       set K : ℝ := gridWindowSum kappa p r (j + 1) with hK_def
-      set S : ℝ := ∑ q ∈ Finset.range (j + 1 + 1),
+      set S : ℝ := ∑ q ∈ Finset.range (p + (j + 1) + 1),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
           ((iteratedCovGrad g 0 r q W).toSection x) with hS_def
       have hK_nn : 0 ≤ K := gridWindowSum_nonneg hkappa_nn p r (j + 1)
@@ -523,14 +554,15 @@ theorem rfns_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
             (castRankCc_lg g 0 (by omega : (r + 1) + p = r + (p + 1))
               (diffCurvOp (I := I) (M := M) g hX hY p (r + 1)
                 (covGrad (I := I) (M := M) g 0 r W)))).toSection x)).trans ?_
-      -- Abbreviate the order × rank window sums (`kA`, `kB`) and gradient grids (`sA`, `sB`) of the
-      -- two pieces, each dominated by the target `K` resp. `S`.
+      -- Abbreviate the order × rank window sums (`kA`, `kB`) and gradient jet grids (`sA`, `sB`).
       set kA : ℝ := gridWindowSum kappa (p + 1) r j with hkA_def
       set kB : ℝ := gridWindowSum kappa p (r + 1) j with hkB_def
-      set sA : ℝ := ∑ q ∈ Finset.range (j + 1),
+      -- Branch A's `(p+1, r, W)` jet window `range ((p+1)+j+1) = range (p+(j+1)+1)` equals `S`.
+      set sA : ℝ := ∑ q ∈ Finset.range ((p + 1) + j + 1),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
           ((iteratedCovGrad g 0 r q W).toSection x) with hsA_def
-      set sB : ℝ := ∑ q ∈ Finset.range (j + 1),
+      -- Branch B's `(p, r+1, ∇W)` jet window `range (p+j+1)`, summand shifted to `∇^{q+1}W`.
+      set sB : ℝ := ∑ q ∈ Finset.range (p + j + 1),
         riemannianFiberNormSq (I := I) (M := M) g 0 (r + (q + 1)) x
           ((iteratedCovGrad g 0 r (q + 1) W).toSection x) with hsB_def
       -- The induction hypothesis on the two pieces, factored to `4^j · (k · s)`.
@@ -543,7 +575,7 @@ theorem rfns_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
       have hB0 := ih p (r + 1) (covGrad (I := I) (M := M) g 0 r W) x
       -- Shift the second piece's `q`-grid `∇^q(∇W) = ∇^{q+1}W`.
       have hBshift : gridWindowSum kappa p (r + 1) j *
-            ∑ q ∈ Finset.range (j + 1),
+            ∑ q ∈ Finset.range (p + j + 1),
               riemannianFiberNormSq (I := I) (M := M) g 0 ((r + 1) + q) x
                 ((iteratedCovGrad g 0 (r + 1) q (covGrad (I := I) (M := M) g 0 r W)).toSection x) =
           kB * sB := by
@@ -564,16 +596,20 @@ theorem rfns_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
       have hkB_le : kB ≤ K := by
         rw [hkB_def, hK_def]
         exact gridWindowSum_shift_le hkappa_nn p r j 0 1 (Nat.zero_le _) le_rfl
+      -- Branch A's jet window equals the target window `range (p+(j+1)+1)`.
       have hsA_le : sA ≤ S := by
         rw [hsA_def, hS_def]
-        exact sum_range_le_succ_of_nonneg (j + 1) _
-          (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + (j + 1)) x _)
+        exact le_of_eq (Finset.sum_congr (by rw [show (p + 1) + j + 1 = p + (j + 1) + 1 from by omega])
+          (fun _ _ => rfl))
+      -- Branch B's shifted jet window `range (p+j+1)` of `∇^{q+1}W` sits inside the target.
       have hsB_le : sB ≤ S := by
         rw [hsB_def, hS_def]
-        exact sum_range_shift_le (j + 1)
+        refine le_trans (sum_range_shift_le (p + j + 1)
           (fun q => riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
             ((iteratedCovGrad g 0 r q W).toSection x))
-          (fun q _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + q) x _)
+          (fun q _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (r + q) x _)) ?_
+        exact le_of_eq (Finset.sum_congr (by rw [show (p + j + 1) + 1 = p + (j + 1) + 1 from by omega])
+          (fun _ _ => rfl))
       have hkA_nn : 0 ≤ kA := gridWindowSum_nonneg hkappa_nn (p + 1) r j
       have hkB_nn : 0 ≤ kB := gridWindowSum_nonneg hkappa_nn p (r + 1) j
       have hsA_nn : 0 ≤ sA :=
@@ -594,7 +630,7 @@ theorem rfns_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
           mul_le_mul_of_nonneg_left hprodB hpow_nn]
       have htarget : (4 : ℝ) ^ (j + 1) * (K * S) =
           (4 : ℝ) ^ (j + 1) * gridWindowSum kappa p r (j + 1) *
-            ∑ q ∈ Finset.range (j + 1 + 1),
+            ∑ q ∈ Finset.range (p + (j + 1) + 1),
               riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
                 ((iteratedCovGrad g 0 r q W).toSection x) := by
         rw [hK_def, hS_def, mul_assoc]
@@ -654,10 +690,10 @@ theorem exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_kappaG
   refine ⟨kappa, hkappa_nn, fun Z j x => ?_⟩
   have hgrid := rfns_iteratedCovGrad_diffCurvOp_grid (I := I) (M := M) g hX hY
     hkappa_nn hkappa j 0 s Z x
-  -- `diffCurvOp 0 s Z = curvatureContraction g s Z hX hY`, and `s + 0 = s`; the windowed grid is
-  -- already the claimed `4^j · gridWindowSum kappa 0 s j · ∑_q rfns`.
+  -- `diffCurvOp 0 s Z = curvatureContraction g s Z hX hY`, and `s + 0 = s`; the grid's jet window at
+  -- `p = 0` is `range (0 + j + 1) = range (j + 1)`, the claimed `∑_{q < j + 1} rfns`.
   rw [diffCurvOp_zero g hX hY s Z] at hgrid
-  simpa only [Nat.add_zero] using hgrid
+  simpa only [Nat.add_zero, Nat.zero_add] using hgrid
 
 end Connection
 end Integral
