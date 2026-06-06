@@ -90,7 +90,7 @@ theorem ricci_flow_short_time_existence
           ((-2 : ℝ) *
             DifferentialGeometry.Integral.Connection.ricciTensor
               (I := I) (g_fam t) x v w) (Set.Ici 0) t) := by
-  obtain ⟨T_DT, g_DT, hDT, h_reg, h_cont0, h_grad0, h_gram_DT, h_gram0_DT,
+  obtain ⟨T_DT, g_DT, hDT, h_reg, _h_cont0, _h_grad0, h_smooth0, h_gram_DT, h_gram0_DT,
       h_gramOnE0_DT, h_C2_DT⟩ :=
     DifferentialGeometry.PDE.RicciFlow.deturck_ricci_flow_parabolic_short_time_existence
       (I := I) (M := M) g₀ g₀
@@ -120,7 +120,7 @@ theorem ricci_flow_short_time_existence
     obtain ⟨T, hT0, hT_le, Φ_fam, hΦ0, hΦode, hΦorbit0, hΦmfderiv0,
         hΦorbit_joint, hΦsection_joint⟩ :=
       conjugating_diffeo_family
-        (I := I) g_DT g₀ T_DT hT_DT_pos h_reg h_cont0 h_grad0
+        (I := I) g_DT g₀ T_DT hT_DT_pos h_smooth0
     have hΦode' : ∀ x : M, ∀ t ∈ Set.Ioo (0 : ℝ) T,
         HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => (Φ_fam s : M → M) x)
           (Set.Ici (0 : ℝ)) t

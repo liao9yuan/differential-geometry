@@ -207,6 +207,47 @@ theorem realizedMetric_deTurckVF_chartRawRepr_fderiv_continuousOn_uptoZero
           (extChartAt I α q.2))
       (Set.Icc (0 : ℝ) T ×ˢ Set.univ) := sorry
 
+/-- **Joint `C∞`-up-to-AND-across-`0` of the realized DeTurck vector field as a tangent-bundle
+section (genuine parabolic up-to-boundary smoothing of the field).**
+
+For the realized DeTurck flow `g_DT = g₀ + ccTensorBilinSymm (T_s ·)` realized off the anchor
+`g₀` (`hreal`) whose order-`2k` spatial Sobolev trace is time-continuous up to `0` at a
+supercritical order (`hHk`), the joint tangent-bundle section of the DeTurck vector field of
+`g_DT` against the flow background `g_bg`,
+`(t, x) ↦ ⟨x, deTurckVF (g_DT t) g_bg x⟩`, is jointly `C∞` on the *closed* slab `Icc 0 T ×ˢ univ`.
+
+This is the up-to-AND-across-the-initial-datum joint smoothness of the (smooth-quasi-linear,
+lower-order) DeTurck field — the closed-slab `hsmooth0` datum the forward-flow construction
+(`forward_flow_existence_onesided_of_jointsmooth_field`,
+`conjugating_diffeo_family`) consumes: the strictly-parabolic, smooth-quasilinear DeTurck–Ricci
+flow with smooth initial metric `g₀` is jointly `C∞` up to and across `t = 0` (Chow–Knopf), and
+the DeTurck vector field, being a smooth function of `g_DT` and its first two spatial jets, inherits
+that joint smoothness on the closed slab.  This is the SOUND replacement for the former
+doubly-defective weak trio (`hcont0` controls only `C⁰`; `hgrad0` controls the wrong — raw chart —
+gradient): the single closed-slab section smoothness subsumes both and, via Seeley extension across
+`0`, drives the interior flow machinery directly.
+
+The anchor `g₀` (the realize base) and the flow background `g_bg` (the DeTurck-field background)
+are decoupled.  The hypotheses are the carrier/PDE realize data; the conclusion is the closed-slab
+joint smoothness of the field, distinct from them — no packaging (it rejects a merely-`C⁰` family).
+The node is the deferred classical up-to-boundary parabolic-regularity input; its body is `sorry`,
+so consumers transitively depend on `sorryAx`. -/
+theorem realizedMetric_deTurckVF_jointContMDiffOn_uptoZero
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2) {k : ℕ} {T : ℝ}
+    (hk : 2 * k > Module.finrank ℝ E + 4)
+    (hreal : ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
+      (g_DT t).inner x v w
+        = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s t) x v w)
+    (hHk : ContinuousOn (fun t : ℝ =>
+      IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * k) (T_s t))
+      (Set.Icc 0 T)) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
+        : TangentBundle I M))
+      (Set.Icc (0 : ℝ) T ×ˢ Set.univ) := sorry
+
 end MetricRealization
 end IntrinsicSpectral
 end RicciFlow

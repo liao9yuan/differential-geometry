@@ -109,6 +109,10 @@ theorem deturck_ricci_parabolic_interior_regularity
             fderiv ℝ (chartRawRepr (I := I) α (fun x => deTurckVF (I := I) (g_DT q.1) g_bg x))
               (extChartAt I α q.2))
           (Set.Icc 0 T ×ˢ Set.univ)) ∧
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+        (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
+          : TangentBundle I M))
+        (Set.Icc 0 T ×ˢ Set.univ) ∧
       (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
         ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
           (fun p : ℝ × M =>
@@ -134,7 +138,7 @@ theorem deturck_ricci_parabolic_interior_regularity
   set k₀ : ℕ := Module.finrank ℝ E + 3 with hk₀_def
   have hk₀ : 2 * k₀ > Module.finrank ℝ E + 4 := by omega
   have hHk₀ := hHk k₀ hk₀
-  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, hC2_chart⟩
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, hC2_chart⟩
   · refine deturck_vf_joint_smoothness (I := I) g_bg g_DT T ?_
     intro x₀ i j
     exact IntrinsicSpectral.MetricRealization.realizedMetric_chartGramOnE_jointContMDiffOn_interior
@@ -145,6 +149,8 @@ theorem deturck_ricci_parabolic_interior_regularity
     exact
       IntrinsicSpectral.MetricRealization.realizedMetric_deTurckVF_chartRawRepr_fderiv_continuousOn_uptoZero
         (I := I) g₀ g_bg α g_DT T_s hk₀ hreal hHk₀
+  · exact IntrinsicSpectral.MetricRealization.realizedMetric_deTurckVF_jointContMDiffOn_uptoZero
+      (I := I) g₀ g_bg g_DT T_s hk₀ hreal hHk₀
   · intro x₀ i j
     have hA := IntrinsicSpectral.MetricRealization.realizedMetric_chartGramOnE_jointContMDiffOn_interior
       (I := I) g₀ x₀ i j g_DT T_s hk₀ hreal hHk₀
@@ -209,6 +215,10 @@ theorem deturck_ricci_flow_parabolic_short_time_existence
             fderiv ℝ (chartRawRepr (I := I) α (fun x => deTurckVF (I := I) (g_DT q.1) g_bg x))
               (extChartAt I α q.2))
           (Set.Icc 0 T ×ˢ Set.univ)) ∧
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+        (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
+          : TangentBundle I M))
+        (Set.Icc 0 T ×ˢ Set.univ) ∧
       (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
         ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
           (fun p : ℝ × M =>
