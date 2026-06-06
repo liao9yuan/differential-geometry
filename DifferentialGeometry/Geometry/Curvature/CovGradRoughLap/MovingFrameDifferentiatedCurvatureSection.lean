@@ -192,10 +192,8 @@ theorem exists_movingCentreDiffCurvSection_fiberNormSq_bound
   obtain ⟨K, hK_nn, h⟩ :=
     exists_movingCentreDiffCurvSection_divergenceDatum (I := I) (M := M) g
   refine ⟨K, hK_nn, fun s S => ?_⟩
-  obtain ⟨Gcd, X, hGcd, hGrem, hdiv⟩ := h s S
-  refine ⟨Gcd, hGcd, hGrem, ?_⟩
-  exact tensorL2Inner_movingFrameRemainder_eq_zero_of_pointwise_divergence (I := I) (M := M) g s S
-    (GcurvSection (I := I) (M := M) g s S) Gcd X hdiv
+  obtain ⟨Gcd, hGcd, hGrem, hnull⟩ := h s S
+  exact ⟨Gcd, hGcd, hGrem, hnull⟩
 
 end Connection
 end Integral
