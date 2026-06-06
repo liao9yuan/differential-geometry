@@ -1234,6 +1234,453 @@ private theorem pureRGenuineDiffOp_isOrderZeroCurvFactor (g : SmoothRiemannianMe
               pureRGenuineEndoFib (I := I) (M := M) g m W₂ x from rfl,
           pureRGenuineEndoFib_local (I := I) (M := M) g m W₁ W₂ x hx]
 
+/-- **The fibre version of the pure-Riemann curvature direction CLM reading a single tensor.** Reads
+the slot-`0` direction of a single `(0, m + 1)`-tensor `τ` along each frame vector `B_iˣ` and contracts
+it through the curvature operator `R(B_iˣ, ·)`, exactly as `pureRFrozenDirCLM` reads the section value
+`W x`; it is the section-free reading needed to factor the order-`0` endomorphism through a fixed fibre
+operator. -/
+private noncomputable def pureRDirCLMTensor
+    (g : SmoothRiemannianMetric I M) (m : ℕ)
+    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
+    (x : M) (τ : TensorRSSpace 0 (m + 1) I x) :
+    TangentSpace I x →L[ℝ] TensorRSSpace 0 m I x :=
+  ∑ i : Fin (Module.finrank ℝ E),
+    (haveI : T2Space (TangentSpace I x) := inferInstanceAs (T2Space E)
+     haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
+     LinearMap.toContinuousLinearMap
+      { toFun := fun v => riemannOp (tensorCov (I := I) g 0 m) x (B i x) v
+          ((covGradBundleEquiv (I := I) (M := M) 0 m x).symm τ (B i x))
+        map_add' := fun v v' => by
+          rw [map_add (riemannOp (tensorCov (I := I) g 0 m) x (B i x)) v v']; rfl
+        map_smul' := fun c v => by
+          rw [map_smul (riemannOp (tensorCov (I := I) g 0 m) x (B i x)) c v]; rfl })
+
+set_option linter.unusedSectionVars false in
+/-- The defining apply formula for `pureRDirCLMTensor`. -/
+private lemma pureRDirCLMTensor_apply
+    (g : SmoothRiemannianMetric I M) (m : ℕ)
+    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
+    (x : M) (τ : TensorRSSpace 0 (m + 1) I x) (v : TangentSpace I x) :
+    pureRDirCLMTensor (I := I) (M := M) g m B x τ v =
+      ∑ i : Fin (Module.finrank ℝ E),
+        riemannOp (tensorCov (I := I) g 0 m) x (B i x) v
+          ((covGradBundleEquiv (I := I) (M := M) 0 m x).symm τ (B i x)) := by
+  classical
+  rw [pureRDirCLMTensor, ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk]
+
+set_option linter.unusedSectionVars false in
+/-- **The moving-frame pure-Riemann direction CLM is the single-tensor reading of the section value.**
+`pureRFrozenDirCLM g m B (W.toSection) x = pureRDirCLMTensor g m B x (W.toSection x)`: both unfold to
+the same frame sum of curvature contractions of the slot-`0` reading of `W x`. -/
+private lemma pureRFrozenDirCLM_eq_pureRDirCLMTensor
+    (g : SmoothRiemannianMetric I M) (m : ℕ)
+    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
+    (W : SmoothCcTensor g 0 (m + 1)) (x : M) :
+    pureRFrozenDirCLM (I := I) (M := M) g m B (fun y : M => W.toSection y) x =
+      pureRDirCLMTensor (I := I) (M := M) g m B x (W.toSection x) := by
+  refine ContinuousLinearMap.ext (fun v => ?_)
+  rw [pureRFrozenDirCLM_apply, pureRDirCLMTensor_apply]
+
+set_option linter.unusedSectionVars false in
+/-- **Source-rank-`0` Hom-bundle curvature naturality (single fibre).** For the `(0, m)`-tensor
+curvature operator `riemannOp (tensorCov g 0 m)` applied to a `(0, m)`-rank tensor `Ξ` (a CLM
+`Tensor0S0 → Tensor0Sm`), reading the result at a `(0, 0)`-tensor `d` recovers the abstract
+`(0, m)`-tensor curvature on `Ξ d`:
+`(R^{(0,m)}_x(v, w) Ξ) d = riemannOp (tensor0SCov m) x v w (Ξ d)`. The scalar source-curvature
+`R^{(0,0)}` vanishes (`riemannSec_tensor0SCov_zero_eq_zero`); the proof converts both bundled
+curvatures to `riemannSec`s through smooth extensions (`riemannOp_apply_smooth`) and applies the generic
+Hom curvature–Leibniz rule `riemannSec_homBundleGen_apply_eq` with vanishing source term. -/
+private theorem riemannOp_tensorCov_homNatural
+    (g : SmoothRiemannianMetric I M) (m : ℕ) (x : M) (v w : TangentSpace I x)
+    (Ξ : TensorRSSpace 0 m I x) (d : Tensor0SSpace 0 I x) :
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace m I x from
+        riemannOp (tensorCov (I := I) g 0 m) x v w Ξ) d =
+      riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M m (LeviCivita (I := I) g)) x v w
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace m I x from Ξ) d) := by
+  classical
+  set X : Π y : M, TangentSpace I y := smoothExtensionTangent (I := I) x v with hX_def
+  set Wfield : Π y : M, TangentSpace I y := smoothExtensionTangent (I := I) x w with hW_def
+  have hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X) :=
+    smoothExtensionTangent_contMDiff (I := I) x v
+  have hW : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Wfield) :=
+    smoothExtensionTangent_contMDiff (I := I) x w
+  have hXx : X x = v := smoothExtensionTangent_eq (I := I) x v
+  have hWx : Wfield x = w := smoothExtensionTangent_eq (I := I) x w
+  obtain ⟨Ξsec, hΞx⟩ := ContMDiffSection.exists_eq_at (I := I)
+    (F := TensorRSModel 0 m ℝ E) (V := fun y : M => TensorRSSpace 0 m I y) (n := (⊤ : ℕ∞)) x Ξ
+  obtain ⟨dSec, hdSec⟩ := ContMDiffSection.exists_eq_at (I := I)
+    (F := Tensor0SModel 0 ℝ E) (V := fun y : M => Tensor0SSpace 0 I y) (n := (⊤ : ℕ∞)) x d
+  have hΞd_smooth : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel m ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (Tensor0SModel m ℝ E)
+        (E := fun z : M => Tensor0SSpace m I z) y
+        ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace m I y from Ξsec y) (dSec y))) :=
+    ContMDiff.clm_bundle_apply (b := id) Ξsec.contMDiff dSec.contMDiff
+  rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace m I x from
+        riemannOp (tensorCov (I := I) g 0 m) x v w Ξ) d =
+      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace m I x from
+        riemannSec (tensorCov (I := I) g 0 m) (fun b => X b) (fun b => Wfield b)
+          (fun b => Ξsec b) x) (dSec x) from by
+    rw [← hXx, ← hWx, ← hΞx,
+      riemannOp_apply_smooth (cov := tensorCov (I := I) g 0 m) hX hW Ξsec.contMDiff]
+    rw [show d = dSec x from hdSec.symm]]
+  rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace m I x from
+        riemannSec (tensorCov (I := I) g 0 m) (fun b => X b) (fun b => Wfield b)
+          (fun b => Ξsec b) x) (dSec x) =
+      riemannSec (Tensor0SNabla.tensor0SCovariantDerivative I M m (LeviCivita (I := I) g))
+          (fun b => X b) (fun b => Wfield b)
+          (HomConnectionGen.pairedSection (M := M) (U := fun z : M => Tensor0SSpace 0 I z)
+            (V := fun z : M => Tensor0SSpace m I z)
+            (fun b => Ξsec b) (fun b => dSec b)) x -
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace m I x from Ξsec x)
+          (riemannSec (Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g))
+            (fun b => X b) (fun b => Wfield b) (fun b => dSec b) x) from
+    HomConnectionGen.riemannSec_homBundleGen_apply_eq I M
+      (Tensor0SModel 0 ℝ E) (fun z : M => Tensor0SSpace 0 I z)
+      (Tensor0SModel m ℝ E) (fun z : M => Tensor0SSpace m I z)
+      (Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g))
+      (Tensor0SNabla.tensor0SCovariantDerivative I M m (LeviCivita (I := I) g))
+      ⟨fun b => X b, hX⟩ ⟨fun b => Wfield b, hW⟩ Ξsec dSec x]
+  rw [show riemannSec (Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g))
+        (fun b => X b) (fun b => Wfield b) (fun b => dSec b) x = 0 from
+    riemannSec_tensor0SCov_zero_eq_zero (I := I) (M := M) g ⟨fun b => X b, hX⟩
+      ⟨fun b => Wfield b, hW⟩ (fun b => dSec b) dSec.contMDiff x]
+  rw [map_zero, sub_zero]
+  rw [show riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M m (LeviCivita (I := I) g)) x v w
+      ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace m I x from Ξ) d) =
+      riemannSec (Tensor0SNabla.tensor0SCovariantDerivative I M m (LeviCivita (I := I) g))
+          (fun b => X b) (fun b => Wfield b)
+          (HomConnectionGen.pairedSection (M := M) (U := fun z : M => Tensor0SSpace 0 I z)
+            (V := fun z : M => Tensor0SSpace m I z)
+            (fun b => Ξsec b) (fun b => dSec b)) x from by
+    rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace m I x from Ξ) d =
+        HomConnectionGen.pairedSection (M := M) (U := fun z : M => Tensor0SSpace 0 I z)
+          (V := fun z : M => Tensor0SSpace m I z)
+          (fun b => Ξsec b) (fun b => dSec b) x from by
+      rw [HomConnectionGen.pairedSection_apply, show d = dSec x from hdSec.symm, hΞx]]
+    rw [← hXx, ← hWx]
+    exact riemannOp_apply_smooth
+      (cov := Tensor0SNabla.tensor0SCovariantDerivative I M m (LeviCivita (I := I) g)) hX hW
+      hΞd_smooth]
+
+set_option linter.unusedSectionVars false in
+/-- **The slot-reading bridge.** The slot-`0` reading of `(covGradBundleEquiv 0 m x).symm τ` along
+`w`, applied to the `(0, 0)`-tensor `d`, equals the slot-`0` curry of `τ d` along `w`:
+`((covGradBundleEquiv 0 m x).symm τ w) d = tensor0S_curry m x (τ d) w`. Both evaluate on `v'` to
+`toModel (τ d) (cons w v')` (`covGradBundleEquiv_symm_apply_eval`, `tensor0S_curry_apply_eval`). -/
+private lemma covGradBundleEquiv_symm_apply_eq_curry
+    (m : ℕ) (x : M)
+    (τ : TensorRSSpace 0 (m + 1) I x) (w : TangentSpace I x) (d : Tensor0SSpace 0 I x) :
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace m I x from
+      ((covGradBundleEquiv (I := I) (M := M) 0 m x).symm τ) w) d =
+      tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) m x
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from τ) d) w := by
+  apply tensor0SSpace_ext (𝕜 := ℝ) m x
+  intro v'
+  rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace m I x from
+        ((covGradBundleEquiv (I := I) (M := M) 0 m x).symm τ) w) d v' =
+      Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace m I x from
+          ((covGradBundleEquiv (I := I) (M := M) 0 m x).symm τ) w) d) v' from rfl]
+  rw [covGradBundleEquiv_symm_apply_eval (I := I) (M := M) 0 m x τ w d v']
+  rw [show tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) m x
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from τ) d) w v' =
+      Tensor0SSpace.toModel
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) m x
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from τ) d) w) v' from rfl]
+  rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+    ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from τ) d) w v']
+
+set_option linter.unusedSectionVars false in
+/-- **The slot-`0` pure-Riemann endomorphism value reads its tensor only through the slot-`0` slice of
+`τ d`.** Evaluated at the `(0, 0)`-tensor `d` on a tuple `v`, the uncurry of `pureRDirCLMTensor g m B x τ`
+through `covGradBundleEquiv` is the frame sum of abstract `(0, m)`-tensor curvature values
+`R^{(0,m)}(B_iˣ, v 0)(tensor0S_curry m x (τ d) (B_iˣ))`, read on `tail v` — depending on `τ` solely
+through `τ d`. From `covGradBundleEquiv_apply_eval`, the single-fibre Hom naturality
+`riemannOp_tensorCov_homNatural`, and the slot-reading bridge
+`covGradBundleEquiv_symm_apply_eq_curry`. -/
+private lemma pureRDirCLMTensor_covGradEquiv_eval
+    (g : SmoothRiemannianMetric I M) (m : ℕ)
+    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
+    (x : M) (τ : TensorRSSpace 0 (m + 1) I x) (d : Tensor0SSpace 0 I x)
+    (v : Fin (m + 1) → TangentSpace I x) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+          covGradBundleEquiv (I := I) (M := M) 0 m x
+            (pureRDirCLMTensor (I := I) (M := M) g m B x τ)) d) v =
+      ∑ i : Fin (Module.finrank ℝ E),
+        Tensor0SSpace.toModel
+          (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M m (LeviCivita (I := I) g)) x
+            (B i x) (v 0)
+            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) m x
+              ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from τ) d) (B i x)))
+          (Matrix.vecTail v) := by
+  classical
+  rw [covGradBundleEquiv_apply_eval (I := I) (M := M) 0 m x
+    (pureRDirCLMTensor (I := I) (M := M) g m B x τ) d v]
+  rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace m I x from
+        pureRDirCLMTensor (I := I) (M := M) g m B x τ (v 0)) d =
+      (∑ i : Fin (Module.finrank ℝ E),
+        riemannOp (tensorCov (I := I) g 0 m) x (B i x) (v 0)
+          ((covGradBundleEquiv (I := I) (M := M) 0 m x).symm τ (B i x))) d from by
+    rw [pureRDirCLMTensor_apply (I := I) (M := M) g m B x τ (v 0)]]
+  rw [ContinuousLinearMap.sum_apply, ← Tensor0SSpace.toModelL_apply, map_sum,
+    ContinuousMultilinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [Tensor0SSpace.toModelL_apply]
+  rw [riemannOp_tensorCov_homNatural (I := I) (M := M) g m x (B i x) (v 0)
+    ((covGradBundleEquiv (I := I) (M := M) 0 m x).symm τ (B i x)) d]
+  rw [covGradBundleEquiv_symm_apply_eq_curry (I := I) (M := M) m x τ (B i x) d]
+
+set_option linter.unusedSectionVars false in
+/-- **The slot-`0` pure-Riemann fibre value of a single tensor, read at the unit.** For a single
+`(0, m + 1)`-tensor `S` and a tuple `v`, the unit-read uncurry of
+`pureRDirCLMTensor g m B x (unitScalarRSLift x S)` is the frame sum of abstract `(0, m)`-tensor
+curvature values `R^{(0,m)}(B_iˣ, v 0)(tensor0S_curry m x S (B_iˣ))` on `tail v`. Specialisation of
+`pureRDirCLMTensor_covGradEquiv_eval` at `τ = unitScalarRSLift x S`, `d = unitZeroSec`, using the unit
+round-trip `unitScalarRSLift_apply_unit`. -/
+private lemma pureREndoOpFibVal_eval
+    (g : SmoothRiemannianMetric I M) (m : ℕ)
+    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
+    (x : M) (S : Tensor0SSpace (m + 1) I x) (v : Fin (m + 1) → TangentSpace I x) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+          covGradBundleEquiv (I := I) (M := M) 0 m x
+            (pureRDirCLMTensor (I := I) (M := M) g m B x
+              (unitScalarRSLift (I := I) (M := M) x S)))
+          (unitZeroSec (I := I) (M := M) x)) v =
+      ∑ i : Fin (Module.finrank ℝ E),
+        Tensor0SSpace.toModel
+          (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M m (LeviCivita (I := I) g)) x
+            (B i x) (v 0)
+            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) m x S (B i x)))
+          (Matrix.vecTail v) := by
+  rw [pureRDirCLMTensor_covGradEquiv_eval (I := I) (M := M) g m B x
+    (unitScalarRSLift (I := I) (M := M) x S) (unitZeroSec (I := I) (M := M) x) v]
+  rw [unitScalarRSLift_apply_unit (I := I) (M := M) x S]
+
+set_option linter.unusedSectionVars false in
+/-- **The fibre pure-Riemann endomorphism operator at rank `m + 1`.** The fixed fibre operator
+`Φ₀ (m + 1) x : T0S(m+1) →L T0S(m+1)` post-composed with a section value to recover the order-`0`
+endomorphism: on a single `(0, m + 1)`-tensor `S`, `pureREndoOpFib g m x S` is the unit-read uncurry of
+`pureRDirCLMTensor g m (smoothOrthoFrame g x) x (unitScalarRSLift x S)`. It is `ℝ`-linear in `S` (the
+value formula `pureREndoOpFibVal_eval` is linear in `S` through the currying equivalence
+`tensor0S_curry`), closed to a continuous-linear map on the finite-dimensional fibre. -/
+private noncomputable def pureREndoOpFib
+    (g : SmoothRiemannianMetric I M) (m : ℕ) (x : M) :
+    Tensor0SSpace (m + 1) I x →L[ℝ] Tensor0SSpace (m + 1) I x :=
+  haveI : FiniteDimensional ℝ (Tensor0SSpace (m + 1) I x) := inferInstance
+  LinearMap.toContinuousLinearMap
+    { toFun := fun S =>
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+          covGradBundleEquiv (I := I) (M := M) 0 m x
+            (pureRDirCLMTensor (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x
+              (unitScalarRSLift (I := I) (M := M) x S)))
+          (unitZeroSec (I := I) (M := M) x)
+      map_add' := fun S S' => by
+        apply tensor0SSpace_ext (𝕜 := ℝ) (m + 1) x
+        intro v
+        rw [show (show Tensor0SSpace (m + 1) I x from
+                (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+                  covGradBundleEquiv (I := I) (M := M) 0 m x
+                    (pureRDirCLMTensor (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x
+                      (unitScalarRSLift (I := I) (M := M) x (S + S'))))
+                  (unitZeroSec (I := I) (M := M) x)) v =
+              Tensor0SSpace.toModel
+                ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+                  covGradBundleEquiv (I := I) (M := M) 0 m x
+                    (pureRDirCLMTensor (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x
+                      (unitScalarRSLift (I := I) (M := M) x (S + S'))))
+                  (unitZeroSec (I := I) (M := M) x)) v from rfl,
+          show (show Tensor0SSpace (m + 1) I x from
+                (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+                  covGradBundleEquiv (I := I) (M := M) 0 m x
+                    (pureRDirCLMTensor (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x
+                      (unitScalarRSLift (I := I) (M := M) x S)))
+                  (unitZeroSec (I := I) (M := M) x) +
+                (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+                  covGradBundleEquiv (I := I) (M := M) 0 m x
+                    (pureRDirCLMTensor (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x
+                      (unitScalarRSLift (I := I) (M := M) x S')))
+                  (unitZeroSec (I := I) (M := M) x)) v =
+              Tensor0SSpace.toModel
+                  ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+                    covGradBundleEquiv (I := I) (M := M) 0 m x
+                      (pureRDirCLMTensor (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x
+                        (unitScalarRSLift (I := I) (M := M) x S)))
+                    (unitZeroSec (I := I) (M := M) x)) v +
+                Tensor0SSpace.toModel
+                  ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+                    covGradBundleEquiv (I := I) (M := M) 0 m x
+                      (pureRDirCLMTensor (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x
+                        (unitScalarRSLift (I := I) (M := M) x S')))
+                    (unitZeroSec (I := I) (M := M) x)) v from rfl]
+        rw [pureREndoOpFibVal_eval (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x (S + S') v,
+          pureREndoOpFibVal_eval (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x S v,
+          pureREndoOpFibVal_eval (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x S' v,
+          ← Finset.sum_add_distrib]
+        refine Finset.sum_congr rfl (fun i _ => ?_)
+        rw [show tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) m x (S + S')
+                (smoothOrthoFrame (I := I) g x i x) =
+              tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) m x S (smoothOrthoFrame (I := I) g x i x) +
+                tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) m x S'
+                  (smoothOrthoFrame (I := I) g x i x) from by
+          rw [map_add (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) m x),
+            ContinuousLinearMap.add_apply]]
+        rw [map_add (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M m (LeviCivita (I := I) g))
+          x (smoothOrthoFrame (I := I) g x i x) (v 0)), Tensor0SSpace.toModel_add,
+          ContinuousMultilinearMap.add_apply]
+      map_smul' := fun c S => by
+        apply tensor0SSpace_ext (𝕜 := ℝ) (m + 1) x
+        intro v
+        rw [show (show Tensor0SSpace (m + 1) I x from
+                (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+                  covGradBundleEquiv (I := I) (M := M) 0 m x
+                    (pureRDirCLMTensor (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x
+                      (unitScalarRSLift (I := I) (M := M) x (c • S))))
+                  (unitZeroSec (I := I) (M := M) x)) v =
+              Tensor0SSpace.toModel
+                ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+                  covGradBundleEquiv (I := I) (M := M) 0 m x
+                    (pureRDirCLMTensor (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x
+                      (unitScalarRSLift (I := I) (M := M) x (c • S))))
+                  (unitZeroSec (I := I) (M := M) x)) v from rfl,
+          show (show Tensor0SSpace (m + 1) I x from
+                (RingHom.id ℝ) c • (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+                  covGradBundleEquiv (I := I) (M := M) 0 m x
+                    (pureRDirCLMTensor (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x
+                      (unitScalarRSLift (I := I) (M := M) x S)))
+                  (unitZeroSec (I := I) (M := M) x)) v =
+              c • Tensor0SSpace.toModel
+                  ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+                    covGradBundleEquiv (I := I) (M := M) 0 m x
+                      (pureRDirCLMTensor (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x
+                        (unitScalarRSLift (I := I) (M := M) x S)))
+                    (unitZeroSec (I := I) (M := M) x)) v from rfl]
+        rw [pureREndoOpFibVal_eval (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x (c • S) v,
+          pureREndoOpFibVal_eval (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x S v,
+          Finset.smul_sum]
+        refine Finset.sum_congr rfl (fun i _ => ?_)
+        rw [show tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) m x (c • S)
+                (smoothOrthoFrame (I := I) g x i x) =
+              c • tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) m x S
+                (smoothOrthoFrame (I := I) g x i x) from by
+          rw [map_smul (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) m x),
+            ContinuousLinearMap.smul_apply]]
+        rw [map_smul (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M m (LeviCivita (I := I) g))
+          x (smoothOrthoFrame (I := I) g x i x) (v 0)), Tensor0SSpace.toModel_smul,
+          ContinuousMultilinearMap.smul_apply] }
+
+set_option linter.unusedSectionVars false in
+/-- The defining apply formula for `pureREndoOpFib`. -/
+private lemma pureREndoOpFib_apply
+    (g : SmoothRiemannianMetric I M) (m : ℕ) (x : M) (S : Tensor0SSpace (m + 1) I x) :
+    pureREndoOpFib (I := I) (M := M) g m x S =
+      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+        covGradBundleEquiv (I := I) (M := M) 0 m x
+          (pureRDirCLMTensor (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x
+            (unitScalarRSLift (I := I) (M := M) x S)))
+        (unitZeroSec (I := I) (M := M) x) := by
+  rw [pureREndoOpFib, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk]
+
+set_option linter.unusedSectionVars false in
+/-- **The order-`0` endomorphism factors as post-composition by `pureREndoOpFib`.** For a smooth
+section `W`, `pureRGenuineEndoFib g m W x = (pureREndoOpFib g m x).comp (W x)` (as `(0, m + 1)`-rank
+tensors `T0S(0) →L T0S(m+1)`). Tested on a `(0, 0)`-tensor `d`, both sides have the same `toModel`
+value: by `pureRDirCLMTensor_covGradEquiv_eval` (twice), each reads the slot-`0` curry of the same
+`(0, m + 1)`-tensor `W x d` — the LHS through the moving section `W`, the RHS through the unit lift of
+`W x d`. -/
+private lemma pureRGenuineEndoFib_eq_comp
+    (g : SmoothRiemannianMetric I M) (m : ℕ) (W : SmoothCcTensor g 0 (m + 1)) (x : M) :
+    pureRGenuineEndoFib (I := I) (M := M) g m W x =
+      TensorRSSpace.ofCLM
+        ((pureREndoOpFib (I := I) (M := M) g m x).comp
+          (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from W.toSection x)) := by
+  apply tensorRSSpace_ext (𝕜 := ℝ) 0 (m + 1) x
+  intro d
+  apply tensor0SSpace_ext (𝕜 := ℝ) (m + 1) x
+  intro v
+  -- LHS value via the eval formula (W read directly).
+  rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+        pureRGenuineEndoFib (I := I) (M := M) g m W x) d v =
+      Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+          covGradBundleEquiv (I := I) (M := M) 0 m x
+            (pureRDirCLMTensor (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x
+              (W.toSection x))) d) v from by
+    rw [pureRGenuineEndoFib, pureRFrozenEndoFib,
+      pureRFrozenDirCLM_eq_pureRDirCLMTensor (I := I) (M := M) g m
+        (smoothOrthoFrame (I := I) g x) W x]
+    rfl]
+  rw [pureRDirCLMTensor_covGradEquiv_eval (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x
+    (W.toSection x) d v]
+  -- RHS value via the eval formula (unit lift of W x d).
+  rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+        TensorRSSpace.ofCLM
+          ((pureREndoOpFib (I := I) (M := M) g m x).comp
+            (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from W.toSection x))) d v =
+      Tensor0SSpace.toModel
+        (pureREndoOpFib (I := I) (M := M) g m x
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from W.toSection x) d)) v from rfl]
+  rw [pureREndoOpFib_apply (I := I) (M := M) g m x
+    ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from W.toSection x) d)]
+  rw [pureRDirCLMTensor_covGradEquiv_eval (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x
+    (unitScalarRSLift (I := I) (M := M) x
+      ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from W.toSection x) d))
+    (unitZeroSec (I := I) (M := M) x) v]
+  rw [unitScalarRSLift_apply_unit (I := I) (M := M) x
+    ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from W.toSection x) d)]
+
+set_option linter.unusedSectionVars false in
+/-- **Base-point smoothness of the rank-`m + 1` pure-Riemann endomorphism operator field.** The
+`(m + 1, m + 1)`-tensor fibre field `x ↦ pureREndoOpFib g m x` is a smooth section of the operator
+bundle. By `contMDiff_clm_section_of_pointwise` it suffices to show, for every smooth
+`(0, m + 1)`-tensor section `Z`, that `x ↦ pureREndoOpFib g m x (Z x)` is smooth; this equals
+`x ↦ pureRGenuineEndoFib g m (lift Z) x (unit)` — the smooth order-`0` endomorphism field
+(`pureRGenuineEndoFib_contMDiff`) of the unit-scalar lift `lift Z` evaluated at the smooth unit
+`(0, 0)`-tensor (`ContMDiff.clm_bundle_apply`). -/
+private theorem pureREndoOp_contMDiff (g : SmoothRiemannianMetric I M) (m : ℕ) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel (m + 1) (m + 1) ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (TensorRSModel (m + 1) (m + 1) ℝ E)
+        (E := fun z : M => TensorRSSpace (m + 1) (m + 1) I z)
+        x (TensorRSSpace.ofCLM (pureREndoOpFib (I := I) (M := M) g m x))) := by
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (F₁ := Tensor0SModel (m + 1) ℝ E) (V₁ := fun x : M => Tensor0SSpace (m + 1) I x)
+    (F₂ := Tensor0SModel (m + 1) ℝ E) (V₂ := fun x : M => Tensor0SSpace (m + 1) I x)
+    (φ := fun x => (show Tensor0SSpace (m + 1) I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+      pureREndoOpFib (I := I) (M := M) g m x))
+  intro Z
+  set Wσ : SmoothCcTensor g 0 (m + 1) :=
+    ⟨unitScalarRSLiftCₛ (I := I) (M := M) Z, HasCompactSupport.of_compactSpace _⟩ with hWσ_def
+  -- On a smooth section `Z`, the fibre operator value is the unit-read order-`0` endomorphism of the
+  -- unit-scalar lift `Wσ`; both unfold to the same `covGradBundleEquiv ∘ pureRDirCLMTensor` reading.
+  have hpt : ∀ x : M, pureREndoOpFib (I := I) (M := M) g m x (Z x) =
+      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+        pureRGenuineEndoFib (I := I) (M := M) g m Wσ x) (unitZeroSec (I := I) (M := M) x) := by
+    intro x
+    rw [pureREndoOpFib_apply (I := I) (M := M) g m x (Z x)]
+    rw [pureRGenuineEndoFib, pureRFrozenEndoFib,
+      pureRFrozenDirCLM_eq_pureRDirCLMTensor (I := I) (M := M) g m
+        (smoothOrthoFrame (I := I) g x) Wσ x]
+    rfl
+  have hWσ : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 (m + 1) ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (TensorRSModel 0 (m + 1) ℝ E)
+        (E := fun z : M => TensorRSSpace 0 (m + 1) I z) x
+        (pureRGenuineEndoFib (I := I) (M := M) g m Wσ x)) :=
+    pureRGenuineEndoFib_contMDiff (I := I) (M := M) g m Wσ
+  have heval : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel (m + 1) ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SModel (m + 1) ℝ E)
+        (E := fun z : M => Tensor0SSpace (m + 1) I z) x
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+          pureRGenuineEndoFib (I := I) (M := M) g m Wσ x)
+          (unitZeroSec (I := I) (M := M) x))) :=
+    ContMDiff.clm_bundle_apply (b := id) hWσ (unitZeroSec (I := I) (M := M)).contMDiff
+  refine heval.congr ?_
+  intro x
+  exact (congrArg (TotalSpace.mk' (Tensor0SModel (m + 1) ℝ E)
+    (E := fun z : M => Tensor0SSpace (m + 1) I z) x) (hpt x)).symm ▸ rfl
+
 /-- **The order-`0` moving-frame pure-Riemann curvature operator is a fixed-operator-field action.** For
 each covariant rank `r` there is a *fixed* smooth `(r, r)`-operator field `Φ₀ r` such that the order-`0`
 frame-free endomorphism is its operator-field action on the section:
@@ -1258,7 +1705,43 @@ private theorem exists_pureRGenuineDiffOp_base_appCc (g : SmoothRiemannianMetric
       ∀ (r : ℕ) (W : SmoothCcTensor g 0 r),
         pureRGenuineDiffOp (I := I) (M := M) g 0 r W =
           appCc (I := I) (M := M) g (r + 0) (r + 0) (Φ₀ r) W := by
-  sorry
+  classical
+  -- `Φ₀ r`: at rank `0` the zero operator field; at rank `m + 1` the smooth fibre endomorphism
+  -- field `x ↦ pureREndoOpFib g m x`, smooth by `pureREndoOp_contMDiff`.
+  refine ⟨fun r => match r with
+    | 0 => 0
+    | (m + 1) =>
+        { toSection :=
+            { toFun := fun x : M => TensorRSSpace.ofCLM (pureREndoOpFib (I := I) (M := M) g m x)
+              contMDiff_toFun := pureREndoOp_contMDiff (I := I) (M := M) g m }
+          hasCompactSupport := HasCompactSupport.of_compactSpace _ }, ?_⟩
+  intro r W
+  cases r with
+  | zero =>
+      -- Both sides are the zero `(0, 0)`-tensor: `pureRGenuineDiffOp 0 0 = 0` and `appCc 0 W = 0`.
+      apply SmoothCcTensor.ext
+      apply ContMDiffSection.ext
+      intro x
+      rw [show (pureRGenuineDiffOp (I := I) (M := M) g 0 0 W).toSection x =
+            (pureRGenuineEndo0 (I := I) (M := M) g 0 W).toSection x from rfl,
+        show pureRGenuineEndo0 (I := I) (M := M) g 0 W = 0 from rfl,
+        SmoothCcTensor.toSection_zero, ContMDiffSection.coe_zero]
+      rw [appCc_toSection (I := I) (M := M) g 0 0 0 W]
+      rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 0 I x from
+            (0 : SmoothCcTensor g 0 0).toSection x) = 0 from by
+        rw [SmoothCcTensor.toSection_zero, ContMDiffSection.coe_zero]; rfl]
+      rw [ContinuousLinearMap.zero_comp]
+      rfl
+  | succ m =>
+      -- Fibrewise the factorisation `pureRGenuineEndoFib g m W x = (Φ₀ (m+1) x).comp (W x)`.
+      apply SmoothCcTensor.ext
+      apply ContMDiffSection.ext
+      intro x
+      rw [show (pureRGenuineDiffOp (I := I) (M := M) g 0 (m + 1) W).toSection x =
+            pureRGenuineEndoFib (I := I) (M := M) g m W x from rfl]
+      rw [appCc_toSection (I := I) (M := M) g (m + 1) (m + 1) _ W]
+      rw [pureRGenuineEndoFib_eq_comp (I := I) (M := M) g m W x]
+      rfl
 
 /-- **The high-order (`p ≥ 1`) frame-free per-rank section-proportional fibre envelope for the
 differentiated moving-frame pure-Riemann curvature tower, in JET form** (the single posited analytic
