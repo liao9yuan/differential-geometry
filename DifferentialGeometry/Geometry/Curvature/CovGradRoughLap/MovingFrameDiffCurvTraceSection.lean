@@ -467,56 +467,46 @@ theorem frameSum_remDiffBracket_pairing_pointwise_eq_movingFrameRemainder
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [one_mul]
 
-/-- **The concrete moving-frame remainder is a total covariant divergence (the genuine third-order
-moving-frame Weitzenböck IBP datum).** For a closed smooth Riemannian manifold `(M, g)`, covariant rank
-`s`, and smooth compactly-supported `(0, s)`-tensor `S`, there is a smooth tangent vector field `X`
-whose metric divergence `divᵍ X` agrees almost everywhere with the pointwise metric inner product of
-the concrete moving-frame remainder `pointwiseTensorCurv g s S − GcurvSection g s S −
-genuineDiffCurvSection g s S` against `∇S := covGrad g 0 s S`:
+/-- **The concrete moving-frame remainder pairing integrates to zero (the genuine third-order
+moving-frame integrated Weitzenböck nullity).** For a closed smooth Riemannian manifold `(M, g)`,
+covariant rank `s`, and smooth compactly-supported `(0, s)`-tensor `S`, the global metric `L²` pairing
+of the concrete moving-frame remainder `pointwiseTensorCurv g s S − GcurvSection g s S −
+genuineDiffCurvSection g s S` against `∇S := covGrad g 0 s S` vanishes:
 ```
-⟨Curv S − GcurvSection g s S − genuineDiffCurvSection g s S, ∇S⟩(x)
-  =ᵐ divᵍ X (x).
+⟨Curv S − GcurvSection g s S − genuineDiffCurvSection g s S, ∇S⟩_{L²} = 0.
 ```
 
 This is the genuine third-order moving-frame Bochner–Weitzenböck content for the **concrete**
 operator-field curvature sections (the pure-Riemann trace `GcurvSection g s S` and the gauge-glued
-tensorial `(∇R) S` trace `genuineDiffCurvSection g s S`): once both genuine curvature contractions are
-subtracted, the surviving frame-bracket remainder is the explicit obstruction field
-`bracketThirdCurvFieldFib` (`PointwiseTensorBochnerFieldSplit`, the `tensor3rdCurvBracket` together with
-the frame-trace discrepancy `covGradRoughLapTraceDiscrepancy_gen` and the moving-frame residual
-`covGradRoughLapMovingFrameResidual_gen`), whose frame-summed pairing against `∇S` telescopes — through
-the per-direction covariant integration by parts
-`integral_tensorInner_tangentAction_add_smul_divergence_eq_zero`
-(`integral_frameSummed_covDeriv_combined_eq_zero`) — into the metric divergence `divᵍ X` of an honest
-smooth `∇S`-order tangent field `X`. The cancellation of the top-order `∇³S` terms is by the iterated
-Ricci identity `secondCovDeriv_covGrad_antisymm_eq_riemannOp_gen`; the resulting `∇²S`-order remainder
-is a total covariant divergence whose value vanishes on the closed manifold.
+tensorial `(∇R) S` trace `genuineDiffCurvSection g s S`), stated in the INTEGRATED form — the sound
+form. An earlier *pointwise* divergence-current form (`∃ X, ⟨remainder, ∇S⟩ =ᵐ divᵍ X`) was
+machine-adjudicated OVER-STRONG: by the Dirichlet divergence identity `divergence_dirichletVFGen_eq`
+the remainder pairing decomposes as `divᵍ(D₁ − D₂ − D₃) + Res` with explicit Dirichlet currents and a
+residual density `Res` dominated by the sign-definite `−‖∇²S‖²` plus zeroth-order curvature bilinears —
+`Res` is not a total covariant divergence, and exhibiting the pointwise current would require a
+Poisson/Hodge solve absent from the library (the same wall recorded at `MovingFrameDiffCurvAnchor`,
+`MovingFrameIntegratedNullity`, and `MovingFrameGenuineSectionOrderDivergence`). Only the INTEGRAL of
+`Res` vanishes (the integrated Weitzenböck cancellation), which is exactly this nullity.
 
 It is the concrete-section analogue of the abstract divergence-null primitive
 `exists_pointwiseTensorCurv_movingFrameField_orderSeparated_divergenceNull`
 (`MovingFrameFieldDecomposition`, posited): there the genuine fields are carried existentially; here
-they are the *concrete* operator-field sections `GcurvSection g s S` and `genuineDiffCurvSection g s S`,
-so the divergence datum is stated for the concrete remainder rather than an existential one.
+they are the *concrete* operator-field sections, so the nullity is stated for the concrete remainder.
 
-**Non-vacuity (the datum is FALSE for an arbitrary remainder).** A pointwise inner product is a total
-covariant divergence only when its integral over the closed manifold vanishes (the divergence theorem
-forces `∫ divᵍ X = 0`). The remainder pairing `⟨Curv S − GcurvSection g s S − genuineDiffCurvSection
-g s S, ∇S⟩` integrates to zero precisely because the genuine curvature fields carry the entire
-Weitzenböck value `‖Δ_∇S‖²_{L²} − ‖∇²S‖²_{L²}` (`weitzenbock_curvature_crossPairing_value`); with
-either genuine field replaced by a degenerate (e.g. zero) section the integral is genuinely nonzero on a
-non-flat manifold, so no such `X` exists. The datum therefore genuinely constrains the moving-frame
-remainder. The body is `sorry` (the genuine moving-frame curvature-endomorphism construction);
-consumers transitively depend on `sorryAx`. -/
-theorem exists_movingFrameDiffCurv_remainder_divergenceCurrent
+**Non-vacuity.** The remainder pairing integrates to zero precisely because the genuine curvature
+fields carry the entire Weitzenböck value `‖Δ_∇S‖²_{L²} − ‖∇²S‖²_{L²}`
+(`weitzenbock_curvature_crossPairing_value`); with either genuine field replaced by a degenerate
+(e.g. zero) section the integral is genuinely nonzero on a non-flat manifold. The nullity therefore
+genuinely constrains the moving-frame remainder. The body is `sorry` (the genuine moving-frame
+integrated Bochner computation: the three-current Dirichlet decomposition plus the direct
+frame-expansion proof that `∫ Res = 0`); consumers transitively depend on `sorryAx`. -/
+theorem movingFrameDiffCurv_remainder_integrated_nullity
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
-    ∃ X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯,
-      (fun x : M => tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x
-            ((pointwiseTensorCurv (I := I) (M := M) g s S -
-              GcurvSection (I := I) (M := M) g s S -
-              genuineDiffCurvSection (I := I) (M := M) g s S).toFun x)
-            ((covGrad (I := I) (M := M) g 0 s S).toFun x))
-        =ᵐ[riemannianVolumeMeasure (I := I) (M := M) g]
-      (fun x : M => divergence_g (I := I) g X x) := by
+    tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+      (pointwiseTensorCurv (I := I) (M := M) g s S -
+        GcurvSection (I := I) (M := M) g s S -
+        genuineDiffCurvSection (I := I) (M := M) g s S).toFun
+      (covGrad (I := I) (M := M) g 0 s S).toFun = 0 := by
   sorry
 
 /-- **The frame-bracket remainder frame-sum pairing equals the concrete differentiated-curvature section
@@ -543,18 +533,14 @@ moving-frame nullity `⟨Curv S − GcurvSection g s S − genuineDiffCurvSectio
 is, in turn, *equivalent* to the genuine curvature value `(★)` `genuineCurvFields_crossPairing_value`
 through the two landed sorry-free frame-sum identities. Since `(★)` is assembled *over this very
 identity*, the identity cannot be proved by subtracting the landed frame-sum pieces (that route is
-circular). It is proved *directly*: the concrete moving-frame remainder is exhibited as a total
-covariant divergence by the genuine divergence datum
-`exists_movingFrameDiffCurv_remainder_divergenceCurrent`, whose integral over the closed manifold
-vanishes by the divergence theorem (`tensorL2Inner_movingFrameRemainder_eq_zero_of_pointwise_divergence`,
-`MovingFrameRemainderDivergenceForm`) — the genuine third-order moving-frame Bochner–Weitzenböck IBP
-content, never citing `(★)`/the value/the residue-to-Weitzenböck identity (all downstream of this
-identity).
+circular). It is proved over the genuine integrated nullity
+`movingFrameDiffCurv_remainder_integrated_nullity` — the genuine third-order moving-frame
+Bochner–Weitzenböck content, never citing `(★)`/the value/the residue-to-Weitzenböck identity (all
+downstream of this identity).
 
 **Proof.** The integrated nullity
-`⟨Curv S − GcurvSection g s S − genuineDiffCurvSection g s S, ∇S⟩_{L²} = 0` follows from the divergence
-datum by `tensorL2Inner_movingFrameRemainder_eq_zero_of_pointwise_divergence` (the closed-manifold
-divergence theorem). Writing `Curv S − GcurvSection g s S =
+`⟨Curv S − GcurvSection g s S − genuineDiffCurvSection g s S, ∇S⟩_{L²} = 0` is the posited
+`movingFrameDiffCurv_remainder_integrated_nullity`. Writing `Curv S − GcurvSection g s S =
 (Curv S − GcurvSection g s S − genuineDiffCurvSection g s S) + genuineDiffCurvSection g s S` and
 splitting the `L²` pairing by left additivity (`tensorL2Inner_add_left`, cross-integrabilities from
 `SmoothCcTensor.integrable_inner_cross`) drops the remainder term by the nullity, giving
@@ -573,16 +559,12 @@ theorem integral_frameSum_remDiffBracket_pairing_eq_genuineDiffCurv
         (genuineDiffCurvSection (I := I) (M := M) g s S).toFun
         (covGrad (I := I) (M := M) g 0 s S).toFun := by
   classical
-  obtain ⟨X, hdiv⟩ :=
-    exists_movingFrameDiffCurv_remainder_divergenceCurrent (I := I) (M := M) g s S
   have hnull : tensorL2Inner (I := I) (M := M) g 0 (s + 1)
       (pointwiseTensorCurv (I := I) (M := M) g s S -
         GcurvSection (I := I) (M := M) g s S -
         genuineDiffCurvSection (I := I) (M := M) g s S).toFun
       (covGrad (I := I) (M := M) g 0 s S).toFun = 0 :=
-    tensorL2Inner_movingFrameRemainder_eq_zero_of_pointwise_divergence
-      (I := I) (M := M) g s S (GcurvSection (I := I) (M := M) g s S)
-      (genuineDiffCurvSection (I := I) (M := M) g s S) X hdiv
+    movingFrameDiffCurv_remainder_integrated_nullity (I := I) (M := M) g s S
   set Curv : SmoothCcTensor g 0 (s + 1) := pointwiseTensorCurv (I := I) (M := M) g s S with hCurv
   set Gcurv : SmoothCcTensor g 0 (s + 1) := GcurvSection (I := I) (M := M) g s S with hGcurv
   set Gcd : SmoothCcTensor g 0 (s + 1) := genuineDiffCurvSection (I := I) (M := M) g s S with hGcd
