@@ -351,6 +351,7 @@ import DifferentialGeometry.Analysis.Integration.Measure.PouThickening
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
 import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import DifferentialGeometry.Analysis.Integration.Measure.TensorChartPulled
+import DifferentialGeometry.Analysis.ODE.ChartLocalPicardIntegral
 import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.ContDiffOnOne
 import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.FrechetDerivative
 import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.JointFrechetDerivative
