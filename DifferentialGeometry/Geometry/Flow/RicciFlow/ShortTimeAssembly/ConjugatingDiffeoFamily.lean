@@ -137,7 +137,7 @@ theorem conjugating_diffeo_family
       rw [hcr, fderiv_fun_neg]
     rw [hfun]
     exact (h_grad0 α).neg
-  obtain ⟨Φ, hΦ0, hdiffeo, hflow, hΦcont0, _hΦmfderiv0,
+  obtain ⟨Φ, hΦ0, hdiffeo, hflow, hΦcont0,
       hΦbundle0, hΦorbit_joint, hΦsection_joint⟩ :=
     forward_flow_existence_onesided_of_jointsmooth_field (I := I) X_DT T_DT hDT hint hcont0 hgrad0
   obtain ⟨Φ_fam, hfam0, hfameq, hfamode⟩ :=

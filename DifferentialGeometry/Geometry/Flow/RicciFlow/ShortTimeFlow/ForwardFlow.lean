@@ -76,15 +76,22 @@ on the orbit (which stays in the chart source near `0`) and applying the FTC; th
 variational anchor likewise from the spatial-Jacobian ODE, and the Jacobian bound from
 the linear Grönwall estimate `‖J r‖ ≤ ‖J₀‖ · exp (CA · r)`.
 
-The chart-Picard *integral* form (`extChartAt I α x + ∫ … chartRawRepr …`) and the
-variational integral form have NO producer anywhere in the on-disk flow infrastructure
-(`ODE/TimeDependentFlow/**` provides only the chart-coordinate `HasDerivWithinAt` Picard
-flow, the chart-cover *transported*-velocity manifold ODE, and the bare-flow
-existence/uniqueness — not the FTC integral form nor the variational integral form).
-Building that chart-Picard / variational integral layer plus the multi-window glue is a
-multi-file effort beyond this leaf's budget; it is isolated here as a SINGLE labeled
-`sorry` and reported.  The conclusion is the flow-existence statement, distinct from the
-field-regularity inputs `hint`/`hcont0`/`hgrad0` — this is not hypothesis-packaging.
+The chart-Picard *integral* form uses the genuine **chart velocity**
+`tangentCoordChange I (Φ r x) α (Φ r x) (X_DT r (Φ r x))` of the orbit read in chart `α`,
+NOT the basepoint-raw value `chartRawRepr α (X_DT r) (extChartAt I α (Φ r x))`: the latter
+is the chart push of `X_DT` read with the trivialisation of the chart at `α` evaluated at
+the *moving* orbit point `Φ r x`, which equals the true chart velocity only when the
+transition Jacobian from the chart at `Φ r x` to the chart at `α` is the identity off the
+basepoint — i.e. only under a (banned) globally-flat / chart-locally-constant atlas, FALSE
+on a normal manifold (S² etc.).  The correct integrand is forced by Mathlib's
+`IsMIntegralCurveOn.hasDerivWithinAt`, whose chart-pushed derivative is exactly
+`tangentCoordChange I (γ t) (γ t₀) (γ t) (v (γ t))`.  The variational integral form
+likewise differentiates the chart-velocity field
+`z ↦ tangentCoordChange I (φ.symm z) α (φ.symm z) (X_DT r (φ.symm z))` along the orbit, not
+the raw `chartRawRepr α (X_DT r)`.
+
+The conclusion is the flow-existence statement, distinct from the field-regularity inputs
+`hint`/`hcont0`/`hgrad0` — this is not hypothesis-packaging.
 
 The last three conjuncts record the `t = 0`-endpoint regularity in BUNDLE / JOINT form (the
 sound replacements for the moving-source `chartJ` reading): the per-fibre bundle Jacobian
@@ -117,13 +124,15 @@ private theorem interior_forward_bare_flow_from_zero
         ∀ s ∈ Set.Ico (0 : ℝ) (min δ T), Φ s x ∈ (chartAt H α).source ∧
           extChartAt I α (Φ s x)
             = extChartAt I α x + ∫ r in (0 : ℝ)..s,
-                chartRawRepr (I := I) α (X_DT r) (extChartAt I α (Φ r x))) ∧
+                tangentCoordChange I (Φ r x) α (Φ r x) (X_DT r (Φ r x))) ∧
       (∀ (x : M) (v : TangentSpace I x), ∃ α : M, ∃ δ : ℝ, 0 < δ ∧
         ∀ s ∈ Set.Ico (0 : ℝ) (min δ T),
           (mfderiv I I (fun y : M => Φ s y) x v : E)
             = (@id E (mfderiv I I (fun y : M => Φ 0 y) x v))
               + ∫ r in (0 : ℝ)..s,
-                  (fderiv ℝ (chartRawRepr (I := I) α (X_DT r))
+                  (fderiv ℝ (fun z : E =>
+                      tangentCoordChange I ((extChartAt I α).symm z) α ((extChartAt I α).symm z)
+                        (X_DT r ((extChartAt I α).symm z)))
                       (extChartAt I α (Φ r x)))
                     (mfderiv I I (fun y : M => Φ r y) x v : E)) ∧
       (∀ (x : M) (v : TangentSpace I x), ∃ δ : ℝ, ∃ B : ℝ, 0 < δ ∧
@@ -142,277 +151,82 @@ private theorem interior_forward_bare_flow_from_zero
   sorry
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
-  [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-/-- **Orbit right-continuity at `t = 0`.**
+  [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M]
+  [SigmaCompactSpace M] in
+/-- **Orbit right-continuity at `t = 0` from the joint orbit continuity.**
 
-Self-contained helper for the first conjunct of `flow_t0_continuity_extension`.
-Fix `x : M`.  By `hpicard` the orbit `s ↦ Φ s x` satisfies, on a right-half
-neighbourhood `Ico 0 (min δ T)` of `0`, the chart-Picard integral identity
-`extChartAt I α (Φ s x) = extChartAt I α x + ∫₀ˢ chartRawRepr α (X_DT r) (extChartAt I α (Φ r x))`.
-The integrand equals `(X_DT r (Φ r x) : E)` (after rewriting through the chart
-inverse on the orbit, which stays in the chart source), and is bounded by a constant
-`C` near `0` because `(t, y) ↦ X_DT t y` is continuous on the compact set
-`Icc 0 T ×ˢ univ` (compactness of `M`).  Hence the chart image of the orbit differs
-from `extChartAt I α x` by an integral of norm `≤ C·|s|`, which tends to `0` as
-`s → 0⁺`; composing with the continuous chart inverse and using `Φ 0 x = x` gives
-right-continuity of the orbit at `0`. -/
+Self-contained helper for `flow_t0_continuity_extension`.  The producer
+`interior_forward_bare_flow_from_zero` already establishes the *joint* orbit continuity
+`ContinuousOn (fun p => Φ p.1 p.2) (Ico 0 T ×ˢ univ)` (the `t = 0`-endpoint conjunct).
+Right-continuity of the single orbit `s ↦ Φ s x` at `0` is the restriction of that joint
+continuity to the slice `s ↦ (s, x)`: the slice map is continuous within `Ici 0` at `0`
+and maps `Ico 0 T` into the joint domain, so the composite is continuous within `Ico 0 T`
+at `0`, and `Ico 0 T = Ici 0 ∩ Iio T` with `Iio T ∈ 𝓝 0` upgrades this to `Ici 0`.
+
+This is the sound replacement for the former chart-Picard-integral bound argument: the raw
+chart integrand `chartRawRepr α (X_DT r) (extChartAt I α (Φ r x))` was FALSE for moving
+orbits (the genuine chart velocity is `tangentCoordChange I (Φ r x) α (Φ r x) (X_DT r …)`,
+see `interior_forward_bare_flow_from_zero`), and the corrected chart-velocity integrand is
+not uniformly bounded over the whole chart source (the chart-transition operator blows up
+near the chart boundary, the S² `chartJ` obstruction); the joint orbit continuity carries
+the endpoint continuity directly and soundly. -/
 private theorem flow_orbit_continuousWithinAt_zero
-    (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
-    (Φ : ℝ → M → M) (hΦ0 : ∀ x : M, Φ 0 x = x)
-    (hcont0 : ContinuousOn
-      (fun q : ℝ × M => (X_DT q.1 q.2 : TangentSpace I q.2))
-      (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
-    (hpicard : ∀ x : M, ∃ α : M, ∃ δ : ℝ, 0 < δ ∧ x ∈ (chartAt H α).source ∧
-      ∀ s ∈ Set.Ico (0 : ℝ) (min δ T), Φ s x ∈ (chartAt H α).source ∧
-        extChartAt I α (Φ s x)
-          = extChartAt I α x + ∫ r in (0 : ℝ)..s,
-              chartRawRepr (I := I) α (X_DT r) (extChartAt I α (Φ r x))) :
+    (T : ℝ) (hT : 0 < T) (Φ : ℝ → M → M)
+    (horbit_joint :
+      ContinuousOn (fun p : ℝ × M => Φ p.1 p.2) (Set.Ico 0 T ×ˢ Set.univ)) :
     ∀ x : M, ContinuousWithinAt (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) 0 := by
   intro x
-  obtain ⟨α, δ, hδ, hxsrc, hpic⟩ := hpicard x
-  set z₀ : E := extChartAt I α x with hz₀
-  have hxsrc' : x ∈ (extChartAt I α).source := by
-    rw [extChartAt_source]; exact hxsrc
-  have hKcompact : IsCompact (Set.Icc (0 : ℝ) T ×ˢ (Set.univ : Set M)) :=
-    (isCompact_Icc).prod isCompact_univ
-  obtain ⟨C, hC⟩ :=
-    hKcompact.exists_bound_of_continuousOn (f := fun q : ℝ × M =>
-      (X_DT q.1 q.2 : TangentSpace I q.2)) hcont0
-  have hδT : (0 : ℝ) < min δ T := lt_min hδ hT
-  have hbound : ∀ s ∈ Set.Ico (0 : ℝ) (min δ T),
-      ‖extChartAt I α (Φ s x) - z₀‖ ≤ C * |s| := by
-    intro s hs
-    obtain ⟨hΦsrc_s, hident⟩ := hpic s hs
-    rw [hident, add_sub_cancel_left]
-    have hnorm := intervalIntegral.norm_integral_le_of_norm_le_const
-      (a := (0 : ℝ)) (b := s) (C := C)
-      (f := fun r : ℝ => chartRawRepr (I := I) α (X_DT r) (extChartAt I α (Φ r x)))
-      (fun r hr => ?_)
-    · simpa using hnorm
-    · rw [Set.uIoc_of_le hs.1] at hr
-      have hr_mem : r ∈ Set.Ico (0 : ℝ) (min δ T) :=
-        ⟨le_of_lt hr.1, lt_of_le_of_lt hr.2 hs.2⟩
-      obtain ⟨hΦsrc_r, _⟩ := hpic r hr_mem
-      have hrT : r ∈ Set.Icc (0 : ℝ) T :=
-        ⟨le_of_lt hr.1, le_of_lt (lt_of_lt_of_le hr_mem.2 (min_le_right _ _))⟩
-      have hΦsrc_r' : Φ r x ∈ (extChartAt I α).source := by
-        rw [extChartAt_source]; exact hΦsrc_r
-      have heq : chartRawRepr (I := I) α (X_DT r) (extChartAt I α (Φ r x))
-          = (X_DT r (Φ r x) : E) := by
-        unfold chartRawRepr
-        rw [(extChartAt I α).left_inv hΦsrc_r']
-      change ‖chartRawRepr (I := I) α (X_DT r) (extChartAt I α (Φ r x))‖ ≤ C
-      rw [heq]
-      have := hC (r, Φ r x) ⟨hrT, Set.mem_univ _⟩
-      simpa using this
-  have htendsto : Filter.Tendsto (fun s : ℝ => extChartAt I α (Φ s x))
-      (𝓝[Set.Ici (0 : ℝ)] 0) (𝓝 z₀) := by
-    have htsub : Filter.Tendsto
-        (fun s : ℝ => extChartAt I α (Φ s x) - z₀) (𝓝[Set.Ici (0 : ℝ)] 0) (𝓝 0) := by
-      refine squeeze_zero_norm' (a := fun s : ℝ => C * |s|) ?_ ?_
-      · have hmem : Set.Ico (0 : ℝ) (min δ T) ∈ 𝓝[Set.Ici (0 : ℝ)] 0 := by
-          refine Filter.mem_of_superset (Filter.inter_mem self_mem_nhdsWithin
-            (nhdsWithin_le_nhds (Iio_mem_nhds hδT))) (fun s hs => ?_)
-          exact ⟨hs.1, hs.2⟩
-        filter_upwards [hmem] with s hs using hbound s hs
-      · have hcontmul : Continuous (fun s : ℝ => C * |s|) := by fun_prop
-        have := (hcontmul.tendsto (0 : ℝ)).mono_left
-          (nhdsWithin_le_nhds (a := (0 : ℝ)) (s := Set.Ici (0 : ℝ)))
-        simpa using this
-    have := htsub.add (tendsto_const_nhds (x := z₀)
-      (f := 𝓝[Set.Ici (0 : ℝ)] (0 : ℝ)))
-    simpa using this
-  have hchart_cont :
-      ContinuousWithinAt (fun s : ℝ => extChartAt I α (Φ s x)) (Set.Ici (0 : ℝ)) 0 := by
-    have hval : extChartAt I α (Φ 0 x) = z₀ := by rw [hΦ0, hz₀]
-    rw [ContinuousWithinAt, hval]
-    exact htendsto
-  have hmemtgt : z₀ ∈ (extChartAt I α).target := by
-    rw [hz₀]; exact (extChartAt I α).map_source hxsrc'
-  have hcont_symm : ContinuousAt (extChartAt I α).symm z₀ :=
-    continuousAt_extChartAt_symm'' hmemtgt
-  have hsymm_cont :
-      ContinuousWithinAt
-        (fun s : ℝ => (extChartAt I α).symm (extChartAt I α (Φ s x)))
-        (Set.Ici (0 : ℝ)) 0 := by
-    have hval0 : extChartAt I α (Φ 0 x) = z₀ := by rw [hΦ0, hz₀]
-    exact hcont_symm.comp_continuousWithinAt_of_eq hchart_cont hval0
-  have hmem' : Set.Ico (0 : ℝ) (min δ T) ∈ 𝓝[Set.Ici (0 : ℝ)] 0 := by
-    refine Filter.mem_of_superset (Filter.inter_mem self_mem_nhdsWithin
-      (nhdsWithin_le_nhds (Iio_mem_nhds hδT))) (fun s hs => ?_)
-    exact ⟨hs.1, hs.2⟩
-  refine hsymm_cont.congr_of_eventuallyEq ?_ ?_
-  · filter_upwards [hmem'] with s hs
-    obtain ⟨hΦsrc_s, _⟩ := hpic s hs
-    have hΦsrc_s' : Φ s x ∈ (extChartAt I α).source := by
-      rw [extChartAt_source]; exact hΦsrc_s
-    exact ((extChartAt I α).left_inv hΦsrc_s').symm
-  · simp only [hΦ0]
-    exact ((extChartAt I α).left_inv hxsrc').symm
+  have h0mem : ((0 : ℝ), x) ∈ Set.Ico 0 T ×ˢ (Set.univ : Set M) :=
+    ⟨⟨le_rfl, hT⟩, Set.mem_univ _⟩
+  have hcwa : ContinuousWithinAt (fun p : ℝ × M => Φ p.1 p.2)
+      (Set.Ico 0 T ×ˢ Set.univ) (0, x) := horbit_joint (0, x) h0mem
+  have hslice : ContinuousWithinAt (fun s : ℝ => ((s, x) : ℝ × M)) (Set.Ico 0 T) 0 :=
+    continuousWithinAt_id.prodMk continuousWithinAt_const
+  have hmaps : Set.MapsTo (fun s : ℝ => ((s, x) : ℝ × M)) (Set.Ico 0 T)
+      (Set.Ico 0 T ×ˢ Set.univ) := fun s hs => ⟨hs, Set.mem_univ _⟩
+  have hcomp : ContinuousWithinAt (fun s : ℝ => Φ s x) (Set.Ico 0 T) 0 :=
+    ContinuousWithinAt.comp (g := fun p : ℝ × M => Φ p.1 p.2)
+      (f := fun s : ℝ => ((s, x) : ℝ × M)) (t := Set.Ico 0 T ×ˢ Set.univ) hcwa hslice hmaps
+  have hIco_eq : Set.Ico (0 : ℝ) T = Set.Ici (0 : ℝ) ∩ Set.Iio T := by
+    ext s; exact ⟨fun ⟨h1, h2⟩ => ⟨h1, h2⟩, fun ⟨h1, h2⟩ => ⟨h1, h2⟩⟩
+  rw [hIco_eq] at hcomp
+  rwa [continuousWithinAt_inter (Iio_mem_nhds hT)] at hcomp
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
-  [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-/-- **Moving-spatial-Jacobian right-continuity at `t = 0` (variational endpoint).**
+  [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M]
+  [SigmaCompactSpace M] in
+/-- **The `t = 0` orbit-continuity extension of the forward flow.**
 
-The variational analogue of `flow_orbit_continuousWithinAt_zero`.  Fix `x : M` and
-`v : TangentSpace I x`.  The `E`-valued moving spatial Jacobian
-`J s := (mfderiv I I (Φ s) x v : E)` satisfies, on a right-half neighbourhood
-`Ico 0 (min δ T)` of `0`, the *linearised (variational) integral equation*
+From the producer's joint orbit continuity `horbit_joint` on `Ico 0 T ×ˢ univ`
+(a `t = 0`-endpoint conjunct of `interior_forward_bare_flow_from_zero`) this records the
+per-base orbit right-continuity at `0`, the slice restriction of the joint continuity
+(`flow_orbit_continuousWithinAt_zero`).
 
-  `J s = J₀ + ∫₀ˢ A r (J r) dr`,
-
-where `J₀ = (mfderiv I I (Φ 0) x v : E)` is the initial Jacobian value and
-`A r := fderiv ℝ (chartRawRepr α (X_DT r)) (extChartAt I α (Φ r x))` is the spatial
-gradient of the field along the orbit (continuous up to `0` by `hgrad0`, evaluated at
-`(r, Φ r x)`).  The integrand `A r (J r)` is bounded by `C_A · B` near `0`, where
-`C_A` bounds `‖A‖` on the compact `Icc 0 T ×ˢ univ` (via `hgrad0` continuity composed
-with the orbit, restricted to the chart neighbourhood) and `B` bounds `‖J r‖` near `0`
-(`hJbound`, the genuine near-`0` boundedness of the variational Jacobian, dischargeable
-downstream by the linear Grönwall estimate `‖J r‖ ≤ ‖J₀‖ · exp (C_A · r)`).  Hence
-`‖J s − J₀‖ ≤ (C_A · B) · |s| → 0` as `s → 0⁺`; with `J 0 = J₀` this is right-continuity
-at `0`.
-
-`hvarpicard` (the variational integral equation for the moving Jacobian) and `hJbound`
-(near-`0` boundedness of the Jacobian) are genuine dischargeable analytic data about the
-linearised flow — neither is the conclusion (a `ContinuousWithinAt` of `J`), so this is
-not hypothesis-packaging. -/
-private theorem flow_mfderiv_continuousWithinAt_zero
-    (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
-    (Φ : ℝ → M → M)
-    (hgrad0 : ∀ α : M,
-      ContinuousOn
-        (fun q : ℝ × M =>
-          fderiv ℝ (chartRawRepr (I := I) α (X_DT q.1)) (extChartAt I α q.2))
-        (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
-    (hvarpicard : ∀ (x : M) (v : TangentSpace I x), ∃ α : M, ∃ δ : ℝ, 0 < δ ∧
-      ∀ s ∈ Set.Ico (0 : ℝ) (min δ T),
-        (mfderiv I I (fun y : M => Φ s y) x v : E)
-          = (@id E (mfderiv I I (fun y : M => Φ 0 y) x v))
-            + ∫ r in (0 : ℝ)..s,
-                (fderiv ℝ (chartRawRepr (I := I) α (X_DT r))
-                    (extChartAt I α (Φ r x)))
-                  (mfderiv I I (fun y : M => Φ r y) x v : E))
-    (hJbound : ∀ (x : M) (v : TangentSpace I x), ∃ δ : ℝ, ∃ B : ℝ, 0 < δ ∧
-      ∀ s ∈ Set.Ico (0 : ℝ) (min δ T),
-        ‖(mfderiv I I (fun y : M => Φ s y) x v : E)‖ ≤ B) :
-    ∀ (x : M) (v : TangentSpace I x),
-      ContinuousWithinAt (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E))
-        (Set.Ici (0 : ℝ)) 0 := by
-  intro x v
-  obtain ⟨α, δ₁, hδ₁, hpic⟩ := hvarpicard x v
-  obtain ⟨δ₂, B, hδ₂, hBound⟩ := hJbound x v
-  set J : ℝ → E := fun s : ℝ => @id E (mfderiv I I (fun y : M => Φ s y) x v) with hJ
-  set J₀ : E := J 0 with hJ₀
-  have hKcompact : IsCompact (Set.Icc (0 : ℝ) T ×ˢ (Set.univ : Set M)) :=
-    (isCompact_Icc).prod isCompact_univ
-  obtain ⟨CA, hCA⟩ :=
-    hKcompact.exists_bound_of_continuousOn
-      (f := fun q : ℝ × M =>
-        fderiv ℝ (chartRawRepr (I := I) α (X_DT q.1)) (extChartAt I α q.2)) (hgrad0 α)
-  have hδpos : (0 : ℝ) < min δ₁ δ₂ := lt_min hδ₁ hδ₂
-  have hδT : (0 : ℝ) < min (min δ₁ δ₂) T := lt_min hδpos hT
-  have hle1 : min (min δ₁ δ₂) T ≤ min δ₁ T :=
-    min_le_min (min_le_left _ _) (le_refl _)
-  have hle2 : min (min δ₁ δ₂) T ≤ min δ₂ T :=
-    min_le_min (min_le_right _ _) (le_refl _)
-  set A : ℝ → (E →L[ℝ] E) := fun r : ℝ =>
-    fderiv ℝ (chartRawRepr (I := I) α (X_DT r)) (extChartAt I α (Φ r x)) with hA
-  have hbound : ∀ s ∈ Set.Ico (0 : ℝ) (min (min δ₁ δ₂) T),
-      ‖J s - J₀‖ ≤ (CA * B) * |s| := by
-    intro s hs
-    have hs1 : s ∈ Set.Ico (0 : ℝ) (min δ₁ T) :=
-      ⟨hs.1, lt_of_lt_of_le hs.2 hle1⟩
-    have hpics : J s = J₀ + ∫ r in (0 : ℝ)..s, A r (J r) := hpic s hs1
-    rw [hpics, add_sub_cancel_left]
-    have hnorm := intervalIntegral.norm_integral_le_of_norm_le_const
-      (a := (0 : ℝ)) (b := s) (C := CA * B)
-      (f := fun r : ℝ => A r (J r)) (fun r hr => ?_)
-    · simpa using hnorm
-    · rw [Set.uIoc_of_le hs.1] at hr
-      have hr_mem : r ∈ Set.Ico (0 : ℝ) (min (min δ₁ δ₂) T) :=
-        ⟨le_of_lt hr.1, lt_of_le_of_lt hr.2 hs.2⟩
-      have hrT : r ∈ Set.Icc (0 : ℝ) T :=
-        ⟨le_of_lt hr.1, le_of_lt (lt_of_lt_of_le hr_mem.2 (min_le_right _ _))⟩
-      have hr2 : r ∈ Set.Ico (0 : ℝ) (min δ₂ T) :=
-        ⟨le_of_lt hr.1, lt_of_lt_of_le hr_mem.2 hle2⟩
-      refine le_trans (ContinuousLinearMap.le_opNorm _ _) ?_
-      have hAnorm : ‖A r‖ ≤ CA := by
-        have := hCA (r, Φ r x) ⟨hrT, Set.mem_univ _⟩
-        simpa [hA] using this
-      have hJnorm : ‖J r‖ ≤ B := hBound r hr2
-      have hCA0 : (0 : ℝ) ≤ CA := le_trans (norm_nonneg _) hAnorm
-      exact mul_le_mul hAnorm hJnorm (norm_nonneg _) hCA0
-  have htsub : Filter.Tendsto (fun s : ℝ => J s - J₀)
-      (𝓝[Set.Ici (0 : ℝ)] 0) (𝓝 0) := by
-    refine squeeze_zero_norm' (a := fun s : ℝ => (CA * B) * |s|) ?_ ?_
-    · have hmem : Set.Ico (0 : ℝ) (min (min δ₁ δ₂) T) ∈ 𝓝[Set.Ici (0 : ℝ)] 0 := by
-        refine Filter.mem_of_superset (Filter.inter_mem self_mem_nhdsWithin
-          (nhdsWithin_le_nhds (Iio_mem_nhds hδT))) (fun s hs => ?_)
-        exact ⟨hs.1, hs.2⟩
-      filter_upwards [hmem] with s hs using hbound s hs
-    · have hcontmul : Continuous (fun s : ℝ => (CA * B) * |s|) := by fun_prop
-      have := (hcontmul.tendsto (0 : ℝ)).mono_left
-        (nhdsWithin_le_nhds (a := (0 : ℝ)) (s := Set.Ici (0 : ℝ)))
-      simpa using this
-  have htendsto : Filter.Tendsto J (𝓝[Set.Ici (0 : ℝ)] 0) (𝓝 J₀) := by
-    have := htsub.add (tendsto_const_nhds (x := J₀)
-      (f := 𝓝[Set.Ici (0 : ℝ)] (0 : ℝ)))
-    simpa using this
-  change ContinuousWithinAt J (Set.Ici (0 : ℝ)) 0
-  rw [ContinuousWithinAt]
-  exact htendsto
-
-omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
-  [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
-set_option linter.unusedVariables false in
+The earlier chart-Picard / variational *integral* derivation of the endpoint continuity has
+been retired: its raw chart integrand was FALSE off the basepoint (the genuine chart
+velocity is a `tangentCoordChange`, not the raw `chartRawRepr` reading — see
+`interior_forward_bare_flow_from_zero`), and the corrected chart-velocity integrand is not
+uniformly boundable over the chart source (the chart-transition operator's S² `chartJ`
+blow-up).  The joint continuity carries the endpoint directly; the bundle-Jacobian endpoint
+is supplied in BUNDLE form by the producer's own conjuncts. -/
 theorem flow_t0_continuity_extension
-    (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
-    (Φ : ℝ → M → M) (hΦ0 : ∀ x : M, Φ 0 x = x)
-    (hcont0 : ContinuousOn
-      (fun q : ℝ × M => (X_DT q.1 q.2 : TangentSpace I q.2))
-      (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
-    (hgrad0 : ∀ α : M,
-      ContinuousOn
-        (fun q : ℝ × M =>
-          fderiv ℝ (chartRawRepr (I := I) α (X_DT q.1)) (extChartAt I α q.2))
-        (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
-    (hinterior : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
-      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) t
-        ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φ t x))))
-    (hpicard : ∀ x : M, ∃ α : M, ∃ δ : ℝ, 0 < δ ∧ x ∈ (chartAt H α).source ∧
-      ∀ s ∈ Set.Ico (0 : ℝ) (min δ T), Φ s x ∈ (chartAt H α).source ∧
-        extChartAt I α (Φ s x)
-          = extChartAt I α x + ∫ r in (0 : ℝ)..s,
-              chartRawRepr (I := I) α (X_DT r) (extChartAt I α (Φ r x)))
-    (hvarpicard : ∀ (x : M) (v : TangentSpace I x), ∃ α : M, ∃ δ : ℝ, 0 < δ ∧
-      ∀ s ∈ Set.Ico (0 : ℝ) (min δ T),
-        (mfderiv I I (fun y : M => Φ s y) x v : E)
-          = (@id E (mfderiv I I (fun y : M => Φ 0 y) x v))
-            + ∫ r in (0 : ℝ)..s,
-                (fderiv ℝ (chartRawRepr (I := I) α (X_DT r))
-                    (extChartAt I α (Φ r x)))
-                  (mfderiv I I (fun y : M => Φ r y) x v : E))
-    (hJbound : ∀ (x : M) (v : TangentSpace I x), ∃ δ : ℝ, ∃ B : ℝ, 0 < δ ∧
-      ∀ s ∈ Set.Ico (0 : ℝ) (min δ T),
-        ‖(mfderiv I I (fun y : M => Φ s y) x v : E)‖ ≤ B) :
-    (∀ x : M, ContinuousWithinAt (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) 0)
-    ∧ (∀ (x : M) (v : TangentSpace I x),
-        ContinuousWithinAt (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E))
-          (Set.Ici (0 : ℝ)) 0) :=
-  ⟨flow_orbit_continuousWithinAt_zero X_DT T hT Φ hΦ0 hcont0 hpicard,
-    flow_mfderiv_continuousWithinAt_zero X_DT T hT Φ hgrad0 hvarpicard hJbound⟩
+    (T : ℝ) (hT : 0 < T) (Φ : ℝ → M → M)
+    (horbit_joint :
+      ContinuousOn (fun p : ℝ × M => Φ p.1 p.2) (Set.Ico 0 T ×ˢ Set.univ)) :
+    ∀ x : M, ContinuousWithinAt (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) 0 :=
+  flow_orbit_continuousWithinAt_zero T hT Φ horbit_joint
 
 /-- A time-dependent field `X_DT` that is jointly `C∞` on the interior `(0,T) ×ˢ univ`
 (`hint`) and continuous together with its chart-gradient up to `t = 0` (`hcont0`,
 `hgrad0`) admits a single forward flow `Φ : ℝ → M → M` with `Φ 0 = id`, per-time
 diffeomorphisms on `(0,T)`, the bare geometric velocity `∂ₛ Φ s x = X_DT t (Φ t x)` on
-`(0,T)`, and `t = 0` right-continuity of both the orbit `s ↦ Φ s x` and the moving
-spatial Jacobian `s ↦ mfderiv I I (Φ s) x v`.
+`(0,T)`, the per-fibre bundle-Jacobian right-continuity at `0`, the joint orbit continuity
+up to `0`, and the joint chart-basis bundle-section continuity up to `0`.
 
 The flow, its `Φ 0 = id` value, the per-time diffeomorphisms, the bare velocity, and the
-chart-Picard / variational integral anchors are supplied by the producer
-`interior_forward_bare_flow_from_zero`; the two `t = 0` right-continuity claims are then
-obtained from `flow_t0_continuity_extension` applied to those anchors. -/
+three `t = 0`-endpoint conjuncts are supplied by the producer
+`interior_forward_bare_flow_from_zero`; the orbit right-continuity at `0` (conjunct 4) is
+the slice restriction of the joint orbit continuity via `flow_t0_continuity_extension`. -/
 theorem forward_flow_existence_onesided_of_jointsmooth_field
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -432,9 +246,6 @@ theorem forward_flow_existence_onesided_of_jointsmooth_field
         (Set.Ici (0 : ℝ)) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φ t x)))) ∧
       (∀ x : M, ContinuousWithinAt (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) 0) ∧
       (∀ (x : M) (v : TangentSpace I x),
-        ContinuousWithinAt (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E))
-          (Set.Ici (0 : ℝ)) 0) ∧
-      (∀ (x : M) (v : TangentSpace I x),
         ContinuousWithinAt (fun s : ℝ => (TotalSpace.mk' E (Φ s x)
           (mfderiv I I (fun y : M => Φ s y) x v) : TangentBundle I M)) (Set.Ici (0 : ℝ)) 0) ∧
       (ContinuousOn (fun p : ℝ × M => Φ p.1 p.2) (Set.Ico 0 T ×ˢ Set.univ)) ∧
@@ -444,15 +255,11 @@ theorem forward_flow_existence_onesided_of_jointsmooth_field
             (mfderiv I I (fun y : M => Φ p.1 y) p.2
               (chartBasisVecFiber (I := I) x₀ i p.2)) : TangentBundle I M))
           (Set.Ico 0 T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) := by
-  obtain ⟨Φ, hΦ0, hdiffeo, hflow, hpicard, hvarpicard, hJbound,
+  obtain ⟨Φ, hΦ0, hdiffeo, hflow, -, -, -,
       hbundle0, horbit_joint, hsection_joint⟩ :=
     interior_forward_bare_flow_from_zero (I := I) X_DT T hT hint hcont0 hgrad0
-  have hinterior : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
-      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) t
-        ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φ t x))) := hflow
-  obtain ⟨hcont4, hcont5⟩ :=
-    flow_t0_continuity_extension (I := I) X_DT T hT Φ hΦ0 hcont0 hgrad0
-      hinterior hpicard hvarpicard hJbound
-  exact ⟨Φ, hΦ0, hdiffeo, hflow, hcont4, hcont5, hbundle0, horbit_joint, hsection_joint⟩
+  have hcont4 : ∀ x : M, ContinuousWithinAt (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) 0 :=
+    flow_t0_continuity_extension T hT Φ horbit_joint
+  exact ⟨Φ, hΦ0, hdiffeo, hflow, hcont4, hbundle0, horbit_joint, hsection_joint⟩
 
 end DifferentialGeometry.PDE.RicciFlow
