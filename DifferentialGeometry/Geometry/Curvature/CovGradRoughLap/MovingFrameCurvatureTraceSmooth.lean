@@ -392,7 +392,7 @@ private def genuinePureRDirLMSummand
       (smoothOrthoFrame (I := I) g x i x)).map_smul c v]
     rfl
 
-private noncomputable def genuinePureRDirCLMSummand
+noncomputable def genuinePureRDirCLMSummand
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
     (i : Fin (Module.finrank ℝ E)) :
     TangentSpace I x →L[ℝ] TensorRSSpace 0 s I x :=
@@ -404,7 +404,7 @@ private noncomputable def genuinePureRDirCLMSummand
 of `genuinePureRDirCLMSummand`, i.e. the continuous linear map
 `v ↦ ∑ᵢ riemannOp (tensorCov g 0 s) x (B_i x) v (∇_{B_i} S(x))`, the curvature-direction-linear form
 of the pure-Riemann genuine trace `∑ᵢ R(B_i, ·)(∇_{B_i} S)`. -/
-private noncomputable def genuinePureRDirCLM
+noncomputable def genuinePureRDirCLM
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) :
     TangentSpace I x →L[ℝ] TensorRSSpace 0 s I x :=
   ∑ i : Fin (Module.finrank ℝ E), genuinePureRDirCLMSummand (I := I) (M := M) g s S x i
@@ -505,7 +505,7 @@ slot-`0` uncurry of the pure-Riemann genuine direction continuous-linear map `ge
 through the covariant-gradient bundle equivalence `covGradBundleEquiv 0 s x`: the unique
 `(0, s + 1)`-tensor whose slot-`0` curry along `v` is the pure-Riemann genuine trace at the smooth
 extension of `v`. Its base-point smoothness is the frame-independence content posited below. -/
-private noncomputable def genuineCurvPureRFib
+noncomputable def genuineCurvPureRFib
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) :
     TensorRSSpace 0 (s + 1) I x :=
   covGradBundleEquiv (I := I) (M := M) 0 s x (genuinePureRDirCLM (I := I) (M := M) g s S x)
@@ -957,7 +957,7 @@ private noncomputable def genuineCurvPureRSection
       contMDiff_toFun := genuineCurvPureRFib_contMDiff (I := I) (M := M) g s S }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-@[simp] private lemma genuineCurvPureRSection_toSection
+@[simp] lemma genuineCurvPureRSection_toSection
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) :
     (genuineCurvPureRSection (I := I) (M := M) g s S).toSection x =
       genuineCurvPureRFib (I := I) (M := M) g s S x := rfl

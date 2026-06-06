@@ -268,6 +268,101 @@ theorem remDiffFib_eq_genuine_add_bracket (g : SmoothRiemannianMetric I M) (s : 
         remDiffBracketFib (I := I) (M := M) g s S x i := by
   rw [remDiffBracketFib, add_sub_cancel]
 
+omit [CompactSpace M] [I.Boundaryless] in
+/-- **The per-direction pure-Riemann genuine curvature direction CLM is the slot-`i` summand of the
+pure-Riemann genuine direction CLM (sorry-free, by definition).** The frame-bridge object
+`remDiffGenuineDirCLM g s S x i` (the slot-`i` curvature direction CLM `v ↦ R(Bᵢ, v)(∇_{Bᵢ} S(x))`)
+coincides with the trace-section summand `genuinePureRDirCLMSummand g s S x i` of
+`MovingFrameCurvatureTraceSmooth`: both are the continuous-linear upgrade of the identical
+curvature-direction linear map. -/
+theorem remDiffGenuineDirCLM_eq_genuinePureRDirCLMSummand
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
+    (i : Fin (Module.finrank ℝ E)) :
+    remDiffGenuineDirCLM (I := I) (M := M) g s S x i =
+      genuinePureRDirCLMSummand (I := I) (M := M) g s S x i := rfl
+
+/-- **The pure-Riemann genuine fibre frame-sum is the concrete pure-Riemann section value, pointwise
+(sorry-free).** For a closed smooth Riemannian manifold `(M, g)`, covariant rank `s`, smooth
+compactly-supported `(0, s)`-tensor `S`, and point `x`, the fixed-frame sum of the per-direction
+pure-Riemann genuine curvature fibres `remDiffGenuineFib` is the fibre value of the concrete
+pure-Riemann genuine curvature section `GcurvSection g s S`:
+```
+∑ᵢ remDiffGenuineFib g s S x i = (GcurvSection g s S).toSection x.
+```
+
+**Proof (sorry-free).** Each fibre `remDiffGenuineFib g s S x i` is the slot-`0` uncurry through
+`covGradBundleEquiv 0 s x` of the curvature-direction CLM `remDiffGenuineDirCLM g s S x i`, which is
+the trace-section summand `genuinePureRDirCLMSummand g s S x i`. Pushing
+`covGradBundleEquiv 0 s x` (a continuous-linear equivalence) through the frame sum (`map_sum`)
+reconstructs `covGradBundleEquiv 0 s x (∑ᵢ genuinePureRDirCLMSummand g s S x i) =
+covGradBundleEquiv 0 s x (genuinePureRDirCLM g s S x) = genuineCurvPureRFib g s S x`, which is the
+fibre value of `GcurvSection g s S` (`genuineCurvPureRSection_toSection`). The pure-Riemann trace is
+genuinely tensorial (direction-linear, read off `riemannOp`), so this is a sound pointwise frame-sum
+identity. -/
+theorem remDiffGenuineFib_sum_eq_GcurvSection_toSection
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) :
+    (∑ i : Fin (Module.finrank ℝ E), remDiffGenuineFib (I := I) (M := M) g s S x i) =
+      (GcurvSection (I := I) (M := M) g s S).toSection x := by
+  classical
+  have hfib : ∀ i : Fin (Module.finrank ℝ E),
+      remDiffGenuineFib (I := I) (M := M) g s S x i =
+        covGradBundleEquiv (I := I) (M := M) 0 s x
+          (genuinePureRDirCLMSummand (I := I) (M := M) g s S x i) := by
+    intro i
+    rw [remDiffGenuineFib, remDiffGenuineDirCLM_eq_genuinePureRDirCLMSummand]
+  rw [Finset.sum_congr rfl (fun i _ => hfib i),
+    ← map_sum (covGradBundleEquiv (I := I) (M := M) 0 s x)
+      (fun i : Fin (Module.finrank ℝ E) =>
+        genuinePureRDirCLMSummand (I := I) (M := M) g s S x i) Finset.univ]
+  rfl
+
+/-- **The genuine frame-sum integrand equals the concrete pure-Riemann section pairing integrand
+(sorry-free).** For a closed smooth Riemannian manifold `(M, g)`, covariant rank `s`, smooth
+compactly-supported `(0, s)`-tensor `S`, and point `x`, the fixed-frame sum of the per-direction
+pure-Riemann genuine curvature fibres `remDiffGenuineFib`, paired against `∇S := covGrad g 0 s S`,
+is the pointwise metric inner product of the concrete pure-Riemann genuine section `GcurvSection g s S`
+against `∇S`:
+```
+∑ᵢ ⟨remDiffGenuineFib g s S x i, ∇S(x)⟩ = ⟨GcurvSection g s S, ∇S⟩(x).
+```
+
+**Proof (sorry-free).** Pull the frame sum into the left argument of `tensorInnerPointwise`
+(`tensorInnerPointwise_sum_left`, weights `1`), reduce `∑ᵢ TensorRSSpace.toModel (remDiffGenuineFib …)
+= TensorRSSpace.toModel (∑ᵢ remDiffGenuineFib …)` by additivity of `TensorRSSpace.toModel`, and rewrite
+the inner frame sum by the sorry-free pointwise identity
+`remDiffGenuineFib_sum_eq_GcurvSection_toSection`; the model coercion of the section fibre value is
+`(GcurvSection g s S).toFun x`. -/
+theorem genuineFrameSum_pairing_pointwise_eq_GcurvSection
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) :
+    (∑ i : Fin (Module.finrank ℝ E),
+        tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x
+          (TensorRSSpace.toModel (remDiffGenuineFib (I := I) (M := M) g s S x i))
+          ((covGrad (I := I) (M := M) g 0 s S).toFun x)) =
+      tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x
+        ((GcurvSection (I := I) (M := M) g s S).toFun x)
+        ((covGrad (I := I) (M := M) g 0 s S).toFun x) := by
+  classical
+  have htoM : TensorRSSpace.toModel
+        (∑ i : Fin (Module.finrank ℝ E), remDiffGenuineFib (I := I) (M := M) g s S x i) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        TensorRSSpace.toModel (remDiffGenuineFib (I := I) (M := M) g s S x i) := by
+    induction (Finset.univ : Finset (Fin (Module.finrank ℝ E))) using Finset.induction with
+    | empty => simp [TensorRSSpace.toModel_zero]
+    | insert i₀ s'' hi₀ ih =>
+        rw [Finset.sum_insert hi₀, TensorRSSpace.toModel_add, ih, Finset.sum_insert hi₀]
+  rw [show (GcurvSection (I := I) (M := M) g s S).toFun x =
+        TensorRSSpace.toModel ((GcurvSection (I := I) (M := M) g s S).toSection x) from
+      SmoothCcTensor.toFun_apply (GcurvSection (I := I) (M := M) g s S) x,
+    ← remDiffGenuineFib_sum_eq_GcurvSection_toSection (I := I) (M := M) g s S x, htoM]
+  rw [show (∑ i : Fin (Module.finrank ℝ E),
+        TensorRSSpace.toModel (remDiffGenuineFib (I := I) (M := M) g s S x i)) =
+      ∑ i : Fin (Module.finrank ℝ E), (1 : ℝ) •
+        TensorRSSpace.toModel (remDiffGenuineFib (I := I) (M := M) g s S x i) from by
+    refine Finset.sum_congr rfl (fun i _ => ?_); rw [one_smul]]
+  rw [tensorInnerPointwise_sum_left (I := I) (M := M) g 0 (s + 1) x Finset.univ]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [one_mul]
+
 /-- **The pure-Riemann genuine frame-sum pairing equals the concrete pure-Riemann section value (posit,
 per-family integrated identity).** For a closed smooth Riemannian manifold `(M, g)`, covariant rank
 `s`, and smooth compactly-supported `(0, s)`-tensor `S`, the integral over the closed manifold of the
@@ -305,7 +400,26 @@ theorem remDiffFib_genuineFrameSum_pairing_eq_genuineFields
       tensorL2Inner (I := I) (M := M) g 0 (s + 1)
         (GcurvSection (I := I) (M := M) g s S).toFun
         (covGrad (I := I) (M := M) g 0 s S).toFun := by
-  sorry
+  classical
+  have hpoint : (fun x => ∑ i : Fin (Module.finrank ℝ E),
+        tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x
+          (TensorRSSpace.toModel (remDiffGenuineFib (I := I) (M := M) g s S x i))
+          ((covGrad (I := I) (M := M) g 0 s S).toFun x)) =
+      (fun x => tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x
+          ((GcurvSection (I := I) (M := M) g s S).toFun x)
+          ((covGrad (I := I) (M := M) g 0 s S).toFun x)) := by
+    funext x
+    exact genuineFrameSum_pairing_pointwise_eq_GcurvSection (I := I) (M := M) g s S x
+  have hint : MeasureTheory.Integrable
+      (fun x => tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x
+          ((GcurvSection (I := I) (M := M) g s S).toFun x)
+          ((covGrad (I := I) (M := M) g 0 s S).toFun x))
+      (riemannianVolumeMeasure (I := I) (M := M) g) :=
+    DifferentialGeometry.Integral.L2.SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+      (GcurvSection (I := I) (M := M) g s S) (covGrad (I := I) (M := M) g 0 s S)
+  refine ⟨hpoint ▸ hint, ?_⟩
+  rw [tensorL2Inner]
+  exact hpoint ▸ rfl
 
 end Connection
 end Integral
