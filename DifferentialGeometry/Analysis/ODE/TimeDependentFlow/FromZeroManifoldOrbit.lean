@@ -577,4 +577,47 @@ theorem fromZero_manifold_orbit_uniform_delta [CompactSpace M]
   · show ((Real.toNNReal Mbd + K * a : ℝ≥0) : ℝ) * δ < (a : ℝ) / 2
     rw [← hL]; exact hstrict
 
+/-- **From-`0` forward orbit germ flow: a single `Φ : ℝ → M → M` on the seed window.**
+
+Assembles the per-base from-`0` orbits of `fromZero_manifold_orbit_uniform_delta` (one orbit
+`Φ_α : ℝ → M` per base point `α`, all on a common uniform window `Ico 0 δ`) into a *single*
+two-argument flow `Φ : ℝ → M → M` by choosing, for each base point `x`, the orbit through `x`
+and setting `Φ s x = Φ_x s`.  The resulting germ flow has `Φ 0 = id`, stays in the chart source
+on `Ico 0 δ`, and carries both the `tangentCoordChange` chart-coordinate one-sided derivative and
+the **bare** geometric velocity `(1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x))` on `Ico 0 δ`.
+
+This is the `[0, δ)` seed of the forward flow: the chart pinned to each initial point is never
+read off a moving orbit point, so all chart reads are `T1`-safe.  It is the single-`Φ` packaging
+of the uniform-delta orbit family, the starting datum from which the interior flow is extended. -/
+theorem fromZero_forward_orbit_germ_flow [CompactSpace M]
+    (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
+    (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+    (hcont0 : ContinuousOn
+      (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2))
+      (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
+    (hgrad0 : ∀ α : M,
+      ContinuousOn
+        (fun q : ℝ × M =>
+          fderiv ℝ (chartRawRepr (I := I) α (X q.1)) (extChartAt I α q.2))
+        (Set.Icc (0 : ℝ) T ×ˢ Set.univ)) :
+    ∃ (δ : ℝ), 0 < δ ∧ δ ≤ T ∧ ∃ Φ : ℝ → M → M, (∀ x : M, Φ 0 x = x) ∧
+      (∀ x : M, ∀ s ∈ Set.Ico (0 : ℝ) δ, Φ s x ∈ (chartAt H x).source) ∧
+      (∀ x : M, ∀ t ∈ Set.Ico (0 : ℝ) δ,
+        HasDerivWithinAt (fun s : ℝ => extChartAt I x (Φ s x))
+          (tangentCoordChange I (Φ t x) x (Φ t x) (X t (Φ t x))) (Set.Ici (0 : ℝ)) t) ∧
+      (∀ x : M, ∀ t ∈ Set.Ico (0 : ℝ) δ,
+        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) t
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x)))) := by
+  classical
+  obtain ⟨δ, hδ_pos, hδ_le, horbit⟩ :=
+    fromZero_manifold_orbit_uniform_delta (I := I) X T hT hint hcont0 hgrad0
+  choose g hg0 hgsrc hgderiv hgbare using horbit
+  refine ⟨δ, hδ_pos, hδ_le, fun s x => g x s, ?_, ?_, ?_, ?_⟩
+  · intro x; exact hg0 x
+  · intro x s hs; exact hgsrc x s hs
+  · intro x t ht; simpa using hgderiv x t ht
+  · intro x t ht; simpa using hgbare x t ht
+
 end DifferentialGeometry.PDE.RicciFlow.ODE

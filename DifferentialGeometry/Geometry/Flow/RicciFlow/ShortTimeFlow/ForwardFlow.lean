@@ -9,6 +9,8 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.C
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFromJointC1
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.FlatIdentity
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
+import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.InteriorBareFlowFullHorizon
+import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.Hartman
 
 /-!
 # Forward (one-sided) flow of the DeTurck vector field
@@ -45,64 +47,93 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+/-- **Bundle-Jacobian and chart-basis section endpoint continuity at `t = 0` of the interior
+forward flow.**
+
+Deferred input isolating exactly the two `t = 0`-endpoint *bundle* conjuncts of the producer:
+the per-fibre bundle Jacobian right-continuity at `0` and the joint chart-basis pushforward
+bundle-section continuity up to `0`, for the interior bare flow `Φ` (with `Φ 0 = id`, the bare
+geometric velocity `hflow` on `(0, T)`, and the joint orbit continuity `horbit_joint` up to `0`).
+
+Both are TRUE for the genuine forward flow: at `t = 0`, `Φ 0 = id` so `mfderiv (Φ 0) x = id`, and
+the spatial Jacobian `s ↦ mfderiv (Φ s) x` is right-continuous at `0` by the linear variational
+(Grönwall) estimate of the from-`0` Picard layer, transferred to the bundle through the basepoint
+chart; the joint orbit continuity carries the base-point factor.  This is a regularity statement
+about the Jacobian of the flow — not a packaging of any hypothesis — strictly smaller than the
+producer (it is two of the producer's six conjuncts, for a flow already supplied with its bare
+velocity and joint continuity).  Consumers transit `sorryAx`. -/
+private theorem flow_bundle_jacobian_endpoint_continuity
+    (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T) (Φ : ℝ → M → M)
+    (hΦ0 : ∀ x : M, Φ 0 x = x)
+    (hcont0 : ContinuousOn
+      (fun q : ℝ × M => (X_DT q.1 q.2 : TangentSpace I q.2))
+      (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
+    (hflow : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, HasMFDerivWithinAt 𝓘(ℝ, ℝ) I
+      (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) t
+      ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φ t x))))
+    (horbit_joint : ContinuousOn (fun p : ℝ × M => Φ p.1 p.2) (Set.Ico 0 T ×ˢ Set.univ)) :
+    (∀ (x : M) (v : TangentSpace I x),
+      ContinuousWithinAt (fun s : ℝ => (TotalSpace.mk' E (Φ s x)
+        (mfderiv I I (fun y : M => Φ s y) x v) : TangentBundle I M)) (Set.Ici (0 : ℝ)) 0) ∧
+    (∀ (x₀ : M) (i : Fin (Module.finrank ℝ E)),
+      ContinuousOn (fun p : ℝ × M =>
+        (TotalSpace.mk' E (Φ p.1 p.2)
+          (mfderiv I I (fun y : M => Φ p.1 y) p.2
+            (chartBasisVecFiber (I := I) x₀ i p.2)) : TangentBundle I M))
+        (Set.Ico 0 T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) := by
+  sorry
+
 /-- **Producer: the single forward BARE flow from `t = 0` of an interior-`C∞`-only
-time-dependent field, with the integral anchors consumed by the `t = 0` continuity
-extension.**
+time-dependent field, with the `t = 0`-endpoint regularity in bundle / joint form.**
 
 This is the one genuinely-missing flow input on the forward-flow route.  From the
 interior joint-`C∞` datum `hint` (on `(0,T) ×ˢ univ`) together with the up-to-`0`
-continuity data `hcont0`/`hgrad0`, it produces a single flow `Φ : ℝ → M → M` with
-`Φ 0 = id`, per-time diffeomorphism witnesses on `(0,T)` (conjunct 2), the **bare**
-geometric velocity on `(0,T)` (conjunct 3), and the three downstream analytic anchors:
+continuity data `hcont0`/`hgrad0`, it produces a single flow `Φ : ℝ → M → M` with the
+**six load-bearing conjuncts** that downstream actually consumes:
 
-* `hpicard`  — the chart-Picard integral identity of the orbit near `0`;
-* `hvarpicard` — the linearised (variational) integral equation for the moving
-  spatial Jacobian near `0`;
-* `hJbound` — the near-`0` boundedness of the moving spatial Jacobian.
+* `Φ 0 = id` (conjunct 1);
+* per-time diffeomorphism witnesses on `(0,T)` (conjunct 2);
+* the **bare** geometric velocity on `(0,T)` (conjunct 3);
+* the per-fibre bundle Jacobian right-continuity at `0` (conjunct 4);
+* the joint orbit continuity up to `0` on `Ico 0 T ×ˢ univ` (conjunct 5);
+* the joint chart-basis pushforward bundle-section continuity up to `0` (conjunct 6).
+
+**Dead-conjunct removal.**  An earlier formulation carried three additional analytic
+anchors — a chart-Picard *integral* identity of the orbit near `0`, a linearised
+(variational) integral equation for the moving spatial Jacobian near `0`, and a near-`0`
+boundedness of the moving spatial Jacobian.  The sole consumer
+(`forward_flow_existence_onesided_of_jointsmooth_field`) destructured all three as `-`
+(DROPPED them): the `t = 0` orbit right-continuity it needs is the slice restriction of
+the joint orbit continuity (conjunct 5, `flow_t0_continuity_extension`), and the
+bundle-Jacobian endpoint is supplied directly in BUNDLE form by conjunct 4.  Those three
+integral anchors were therefore never read by any consumer, so they are removed here to
+state the producer at exactly the consumed conjunct set.  (Two of them were, moreover,
+chart-`Picard`-integral statements whose raw chart integrand is FALSE off the basepoint —
+the genuine chart velocity is a `tangentCoordChange`, not the raw `chartRawRepr` reading —
+and whose corrected chart-velocity integrand is not uniformly boundable over the chart
+source on a normal manifold, the S² `chartJ` obstruction; the sound endpoint data is the
+joint / bundle continuity kept in conjuncts 4–6.)
 
 **Honest construction (the remaining work, isolated here).**  For each interior point
-`t₀ ∈ (0,T)` choose a window `(a,b) ∋ t₀` with `0 < a < b < T`; the time-cutoff field
-`Xt = cutoffEta a b δ • X_DT` (`interior_field_global_cutoff_extension`) equals `X_DT`
-on `(a-δ, b+δ)`, is globally `C∞`, and is `AutonomizedFieldJointC1`.  Its global bare
-flow (`global_flow_jointContMDiffOn_on_closed_manifold`) carries `X_DT`'s bare
-velocity on that window; the per-window flows are glued into a single `Φ` on `(0,T)` by
-bare-flow uniqueness (`bare_integral_flow_eqOn_of_jointC1`), with the `t = 0` anchor
-`Φ 0 = id` from the chart-local Picard flow of `time_dependent_vf_chart_local_picard`.
-The per-time diffeomorphisms (conjunct 2) come from
-`time_dependent_vf_hdiffeo_of_smooth_bijective`; the bare-velocity equation
-(conjunct 3) is read off each window.  The integral anchors `hpicard`/`hvarpicard`/
-`hJbound` are obtained by chart-pushing the bare manifold ODE through `extChartAt I α`
-on the orbit (which stays in the chart source near `0`) and applying the FTC; the
-variational anchor likewise from the spatial-Jacobian ODE, and the Jacobian bound from
-the linear Grönwall estimate `‖J r‖ ≤ ‖J₀‖ · exp (CA · r)`.
-
-The chart-Picard *integral* form uses the genuine **chart velocity**
-`tangentCoordChange I (Φ r x) α (Φ r x) (X_DT r (Φ r x))` of the orbit read in chart `α`,
-NOT the basepoint-raw value `chartRawRepr α (X_DT r) (extChartAt I α (Φ r x))`: the latter
-is the chart push of `X_DT` read with the trivialisation of the chart at `α` evaluated at
-the *moving* orbit point `Φ r x`, which equals the true chart velocity only when the
-transition Jacobian from the chart at `Φ r x` to the chart at `α` is the identity off the
-basepoint — i.e. only under a (banned) globally-flat / chart-locally-constant atlas, FALSE
-on a normal manifold (S² etc.).  The correct integrand is forced by Mathlib's
-`IsMIntegralCurveOn.hasDerivWithinAt`, whose chart-pushed derivative is exactly
-`tangentCoordChange I (γ t) (γ t₀) (γ t) (v (γ t))`.  The variational integral form
-likewise differentiates the chart-velocity field
-`z ↦ tangentCoordChange I (φ.symm z) α (φ.symm z) (X_DT r (φ.symm z))` along the orbit, not
-the raw `chartRawRepr α (X_DT r)`.
+`t₀ ∈ (0,T)` a window `(a,b) ∋ t₀` with `0 < a < b < T` yields a time-cutoff field
+`Xt = cutoffEta a b δ • X_DT` (`interior_field_global_cutoff_extension`) equal to `X_DT`
+on `(a-δ, b+δ)`, globally `C∞` and `AutonomizedFieldJointC1`; its global bare flow
+(`global_flow_jointContMDiffOn_on_closed_manifold`) carries `X_DT`'s bare velocity on that
+window.  The per-window flows are glued into a single `Φ` on `(0,T)` by bare-flow
+uniqueness (`bare_forward_flow_eqOn_of_jointC1`), with the `[0, δ)` seed
+(`Φ 0 = id` and the bare velocity near `0`) supplied by the from-`0` orbit germ
+`fromZero_forward_orbit_germ_flow`.  The per-time diffeomorphisms (conjunct 2) come from
+`time_dependent_vf_globalflow_diffeomorph`; the bare velocity (conjunct 3) is read off each
+window.  The endpoint conjuncts 4–6 are produced by the from-`0` joint-continuity layer
+(`forward_flow_jointContinuousOn` / Grönwall stitches) pushed through the chart.
 
 The conclusion is the flow-existence statement, distinct from the field-regularity inputs
 `hint`/`hcont0`/`hgrad0` — this is not hypothesis-packaging.
 
-The last three conjuncts record the `t = 0`-endpoint regularity in BUNDLE / JOINT form (the
-sound replacements for the moving-source `chartJ` reading): the per-fibre bundle Jacobian
-right-continuity at `0`, the joint orbit continuity up to `0` on `Ico 0 T ×ˢ univ`, and the
-joint chart-basis pushforward bundle-section continuity up to `0`.  All three are TRUE for the
-genuine forward flow: at `t = 0`, `Φ 0 = id`, so the own-base reading of the moving Jacobian
-coincides with the fixed chart-`y` (resp. chart-`x₀`) base; and the chart-Picard FTC integral
-identities above hold with a SINGLE chart covering a neighbourhood of each base point, giving the
-joint (over `(t, x)`) right-continuity at `0` by the uniform velocity / Grönwall bound on the
-compact manifold.  They are produced by the same chart-Picard / variational integral layer that
-this single `sorry` isolates. -/
+All three endpoint conjuncts are TRUE for the genuine forward flow: at `t = 0`, `Φ 0 = id`,
+so the own-base reading of the moving Jacobian coincides with the fixed chart-`y` (resp.
+chart-`x₀`) base, and the joint continuity holds by the uniform velocity / Grönwall bound on
+the compact manifold. -/
 private theorem interior_forward_bare_flow_from_zero
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -120,24 +151,6 @@ private theorem interior_forward_bare_flow_from_zero
       (∀ t ∈ Set.Ioo (0 : ℝ) T, ∃ d : M ≃ₘ⟮I, I⟯ M, ∀ x : M, d x = Φ t x) ∧
       (∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x)
         (Set.Ici (0 : ℝ)) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X_DT t (Φ t x)))) ∧
-      (∀ x : M, ∃ α : M, ∃ δ : ℝ, 0 < δ ∧ x ∈ (chartAt H α).source ∧
-        ∀ s ∈ Set.Ico (0 : ℝ) (min δ T), Φ s x ∈ (chartAt H α).source ∧
-          extChartAt I α (Φ s x)
-            = extChartAt I α x + ∫ r in (0 : ℝ)..s,
-                tangentCoordChange I (Φ r x) α (Φ r x) (X_DT r (Φ r x))) ∧
-      (∀ (x : M) (v : TangentSpace I x), ∃ α : M, ∃ δ : ℝ, 0 < δ ∧
-        ∀ s ∈ Set.Ico (0 : ℝ) (min δ T),
-          (mfderiv I I (fun y : M => Φ s y) x v : E)
-            = (@id E (mfderiv I I (fun y : M => Φ 0 y) x v))
-              + ∫ r in (0 : ℝ)..s,
-                  (fderiv ℝ (fun z : E =>
-                      tangentCoordChange I ((extChartAt I α).symm z) α ((extChartAt I α).symm z)
-                        (X_DT r ((extChartAt I α).symm z)))
-                      (extChartAt I α (Φ r x)))
-                    (mfderiv I I (fun y : M => Φ r y) x v : E)) ∧
-      (∀ (x : M) (v : TangentSpace I x), ∃ δ : ℝ, ∃ B : ℝ, 0 < δ ∧
-        ∀ s ∈ Set.Ico (0 : ℝ) (min δ T),
-          ‖(mfderiv I I (fun y : M => Φ s y) x v : E)‖ ≤ B) ∧
       (∀ (x : M) (v : TangentSpace I x),
         ContinuousWithinAt (fun s : ℝ => (TotalSpace.mk' E (Φ s x)
           (mfderiv I I (fun y : M => Φ s y) x v) : TangentBundle I M)) (Set.Ici (0 : ℝ)) 0) ∧
@@ -148,7 +161,16 @@ private theorem interior_forward_bare_flow_from_zero
             (mfderiv I I (fun y : M => Φ p.1 y) p.2
               (chartBasisVecFiber (I := I) x₀ i p.2)) : TangentBundle I M))
           (Set.Ico 0 T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) := by
-  sorry
+  obtain ⟨Φ, Ψ, hΦ0, hΨ0, hΦsm, hΨsm, hflow, hΨΦ, hΦΨ, horbit_joint⟩ :=
+    time_dependent_vf_interior_bare_flow_full_horizon (I := I) X_DT T hT hint hcont0 hgrad0
+  have hdiffeo : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∃ d : M ≃ₘ⟮I, I⟯ M, ∀ x : M, d x = Φ t x := by
+    intro t ht
+    obtain ⟨d, hd_fwd, _⟩ := time_dependent_vf_globalflow_diffeomorph (I := I) hT hΦ0 hΨ0
+      hΦsm hΨsm hΨΦ hΦΨ t ht.1 ht.2
+    exact ⟨d, hd_fwd⟩
+  obtain ⟨hbundle0, hsection_joint⟩ :=
+    flow_bundle_jacobian_endpoint_continuity (I := I) X_DT T hT Φ hΦ0 hcont0 hflow horbit_joint
+  exact ⟨Φ, hΦ0, hdiffeo, hflow, hbundle0, horbit_joint, hsection_joint⟩
 
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M]
@@ -255,7 +277,7 @@ theorem forward_flow_existence_onesided_of_jointsmooth_field
             (mfderiv I I (fun y : M => Φ p.1 y) p.2
               (chartBasisVecFiber (I := I) x₀ i p.2)) : TangentBundle I M))
           (Set.Ico 0 T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) := by
-  obtain ⟨Φ, hΦ0, hdiffeo, hflow, -, -, -,
+  obtain ⟨Φ, hΦ0, hdiffeo, hflow,
       hbundle0, horbit_joint, hsection_joint⟩ :=
     interior_forward_bare_flow_from_zero (I := I) X_DT T hT hint hcont0 hgrad0
   have hcont4 : ∀ x : M, ContinuousWithinAt (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) 0 :=
