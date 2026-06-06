@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FrozenFramePureRCurvatureTower
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldContractionBound
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseTensorCurvL2Bound
 
 /-!
 # The gauge-glued tensorial differentiated-curvature section `(∇R) S`
@@ -46,9 +45,15 @@ calculus.
   `rfns(genuineDiffCurvSection g s S)(x) ≤ (K s)² · (rfns(∇S)(x) + rfns(S)(x))`, uniform in `x`, with a
   valence-dependent nonnegative constant `K`. The bound holds even in the strict `rfns(S)` form (the
   operator-field action is order-`0` in `S`), weakened to the **sum** envelope the consumer reads.
-* `exists_pointwiseTensorCurv_fiberNormSq_bound` — the companion `pointwiseTensorCurv` fibre bound
-  `rfns(Curv S)(x) ≤ (C s)² · (rfns(∇²S)(x) + rfns(∇S)(x) + rfns(S)(x))` feeding the remainder order
-  `(4')`, re-exported from the proved pointwise commutator-defect fibre bound.
+* `exists_pointwiseTensorCurv_fiberNormSq_bound_upstream` — the companion `pointwiseTensorCurv` fibre
+  bound `rfns(Curv S)(x) ≤ (C s)² · (rfns(∇²S)(x) + rfns(∇S)(x) + rfns(S)(x))` feeding the remainder
+  order `(4')`, the order-`2` commutator-defect fibre order homed *upstream* of the moving-frame spine
+  (posited, so the consuming anchor stays upstream of the downstream `L²` bound, no import cycle).
+* `genuineDiffCurv_crossPairing_value` — the genuine differentiated-curvature cross-pairing value
+  `⟨GcurvSection g s S + genuineDiffCurvSection g s S, ∇S⟩_{L²} = ‖Δ_∇ S‖²_{L²} − ‖∇²S‖²_{L²}`, the
+  third-order moving-frame Weitzenböck IBP-telescoping content (posited), feeding the integrated-nullity
+  producer `movingFrameNullity_of_genuineCrossPairingValue` verbatim with `Gcd := genuineDiffCurvSection
+  g s S`.
 
 ## Convention
 
@@ -194,7 +199,8 @@ theorem exists_genuineDiffCurvSection_fiberNormSq_bound
   nlinarith [h, hfgS_nn, hfS_nn, hC_nn s,
     mul_nonneg (hC_nn s) hfgS_nn]
 
-/-- **The companion `pointwiseTensorCurv` fibre bound feeding the remainder order `(4')`.** For a closed
+/-- **Posited upstream companion `pointwiseTensorCurv` fibre bound feeding the remainder order `(4')`
+(the order-`2` commutator-defect fibre order, homed upstream of the moving-frame spine).** For a closed
 smooth Riemannian manifold `(M, g)` there is a *valence-dependent* nonnegative constant `C : ℕ → ℝ` such
 that, at every covariant rank `s`, for every smooth compactly-supported `(0, s)`-tensor `S`, and at
 *every point* `x`, the intrinsic fibre norm of the order-`2` commutator defect
@@ -203,12 +209,34 @@ norms of `∇²S = covGrad g 0 (s + 1) (covGrad g 0 s S)`, `∇S = covGrad g 0 s
 ```
 rfns(Curv S)(x) ≤ (C s)² · ( rfns(∇²S)(x) + rfns(∇S)(x) + rfns(S)(x) ).
 ```
-This is re-exported (with the summands reordered into the `(4')` shape) from the proved pointwise
-commutator-defect fibre bound `exists_pointwiseTensorCurv_pointwise_fiberNormSq_bound`
-(`PointwiseTensorCurvL2Bound`); it feeds the companion remainder fibre order in the consuming anchor. Its
-`sorry`-dependence is inherited from that source (the posited curvature input), introducing no new
-defect. -/
-theorem exists_pointwiseTensorCurv_fiberNormSq_bound
+
+**Why this is TRUE — the iterated Ricci identity controls the commutator defect.** By definition
+`Curv S = Δ_∇(∇S) − ∇(Δ_∇ S)` (`PointwiseTensorBochner`), i.e. the rough Laplacian of the gradient
+field minus the gradient of the rough Laplacian. Reading both as fixed-`g`-orthonormal-frame traces of
+the second covariant derivative (`rawTensorConnLap_eq_frame_trace_secondCovDeriv`) and commuting the
+two derivative slots by the rank-`(0, s + 1)` Ricci identity
+`secondCovDeriv_covGrad_antisymm_eq_riemannOp_gen` (`IntegratedOrder2WeitzenbockCurvature`), the
+top-order `∇³S` terms cancel: the difference is a sum of (i) curvature contractions of the gradient
+field `R(∇S)`, each fibre-bounded by `‖R‖_∞ · rfns(∇S)` via the uniform curvature fibre bound
+`riemannOp_covGrad_fiberNormSq_le_gen`, plus (ii) genuine `(∇R) S` and frame-derivative terms of
+`rfns(S)`-order, plus (iii) a residual `∇²S`-order moving-frame remainder. Aggregating the three over
+the finite frame with the per-point curvature sup made *uniform* over `M` by compactness
+(`exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound`, the curvature-operator `g`-norm sup)
+gives the single nonnegative valence-dependent `C`. The full quantitative aggregation is the order-`2`
+commutator-defect curvature input; it is posited here (homed *upstream* of the moving-frame
+partition-of-unity spine so the anchor below can consume it without an import cycle through the
+downstream `L²` bound). It is the rank-generic analogue of the order-separated curvature field
+decomposition `exists_pointwiseTensorCurv_orderSeparated_field` (`PointwiseTensorCurvL2Bound`,
+downstream, posited `sorry`).
+
+**Non-vacuity (the bound rejects the degenerate `C ≡ 0` on a non-flat manifold).** With `C s = 0` the
+bound would force `rfns(Curv S)(x) = 0`, i.e. `Δ_∇(∇S) = ∇(Δ_∇ S)` at every point — the covariant
+derivatives commute through the rough Laplacian. This is *false* on a non-flat manifold (`R ≠ 0`) for a
+non-parallel `S`: the commutator defect `Curv S` is exactly the genuine third-order Weitzenböck
+curvature field `‖Δ_∇ S‖²_{L²} − ‖∇²S‖²_{L²} = ⟨Curv S, ∇S⟩_{L²}`
+(`weitzenbock_integrated_covGrad_l2_normSq`), which is nonzero when curvature is present. So `C` is
+genuinely positive. The body is `sorry`; consumers transitively depend on `sorryAx`. -/
+theorem exists_pointwiseTensorCurv_fiberNormSq_bound_upstream
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℕ → ℝ, (∀ s, 0 ≤ C s) ∧
       ∀ (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M),
@@ -221,26 +249,60 @@ theorem exists_pointwiseTensorCurv_fiberNormSq_bound
               riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
                   ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
               riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) := by
-  classical
-  obtain ⟨Ccurv, hCcurv_nn, hCcurv⟩ :=
-    exists_pointwiseTensorCurv_pointwise_fiberNormSq_bound (I := I) (M := M) g
-  refine ⟨Ccurv, hCcurv_nn, fun s S x => ?_⟩
-  have h := hCcurv s S x
-  -- The source bounds by `Ccurv² · (rfns(S) + rfns(∇S) + rfns(∇²S))`; reorder the sum to the `(4')`
-  -- shape `Ccurv² · (rfns(∇²S) + rfns(∇S) + rfns(S))`.
-  rw [show riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) +
-        riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
-            ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
-        riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
-            ((covGrad (I := I) (M := M) g 0 (s + 1)
-              (covGrad (I := I) (M := M) g 0 s S)).toSection x) =
-      riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
-            ((covGrad (I := I) (M := M) g 0 (s + 1)
-              (covGrad (I := I) (M := M) g 0 s S)).toSection x) +
-        riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
-            ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
-        riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) from by ring] at h
-  exact h
+  sorry
+
+/-- **Posited genuine differentiated-curvature cross-pairing value (the third-order moving-frame
+Weitzenböck IBP telescoping, in cross-pairing form).** For a closed smooth Riemannian manifold
+`(M, g)`, every covariant rank `s`, and every smooth compactly-supported `(0, s)`-tensor `S`, the
+global metric `L²` pairing of the genuine curvature fields `GcurvSection g s S + genuineDiffCurvSection
+g s S` (the pure-Riemann `R(∇S)` trace section `Gcurv` plus the gauge-glued tensorial `(∇R) S`
+differentiated-curvature trace section `Gcd`) against `∇S := covGrad g 0 s S` equals the genuine
+Weitzenböck curvature integral
+
+```
+⟨Gcurv + Gcd, ∇S⟩_{L²} = ‖Δ_∇ S‖²_{L²} − ‖∇²S‖²_{L²},
+```
+
+with `Δ_∇ S := rawTensorConnLapSmooth g 0 s S` and `∇²S := covGrad g 0 (s + 1) (covGrad g 0 s S)`.
+
+**Why this is TRUE — the genuine curvature fields carry the whole Weitzenböck value.** The order-`2`
+commutator defect splits (in the slot-`0` witness frame, `PointwiseTensorBochnerFieldSplit`) into the
+genuine third-order curvature field and the moving-frame / frame-bracket remainder; the genuine field
+splits further into the pure-Riemann `R(∇S)` trace (reconstructing `Gcurv = GcurvSection g s S`) and
+the differentiated-curvature `(∇R) S` trace (carried tensorially by `Gcd = genuineDiffCurvSection g s
+S`, the operator-field action of `covGrad (Φ₀ s)` on `S`). The defining integrated property of the
+gauge-glued `Gcd` is exactly that the bracket/frame remainder, paired against `∇S` and summed over the
+`g_x`-orthonormal frame, telescopes into a total covariant divergence whose integral over the closed
+manifold vanishes (the frame-summed third-order covariant integration by parts,
+`integral_frameSummed_covDeriv_combined_eq_zero`); hence the *genuine* curvature pairing carries the
+*entire* defect pairing `⟨Curv S, ∇S⟩_{L²}`, and `weitzenbock_curvature_crossPairing_value`
+(`MovingFrameIntegratedNullity`) records that this defect pairing equals `‖Δ_∇ S‖²_{L²} − ‖∇²S‖²_{L²}`.
+This is the third-order Weitzenböck IBP-telescoping content; it is posited here as the genuine
+differentiated-curvature leaf of the curvature line. It feeds the integrated-nullity producer
+`movingFrameNullity_of_genuineCrossPairingValue` (`MovingFrameIntegratedNullity`) verbatim as its
+hypothesis `hval` with `Gcd := genuineDiffCurvSection g s S`.
+
+**Non-vacuity (the value rejects the degenerate `Gcd = 0` on a non-flat manifold — and is distinct from
+the anchor's conclusion).** This is a *value equality* — a specific number — not the moving-frame
+remainder orthogonality the anchor concludes, so it is genuine mathematical input (no
+hypothesis-packaging). With `genuineDiffCurvSection g s S = 0` it would force
+`⟨GcurvSection g s S, ∇S⟩_{L²} = ‖Δ_∇ S‖²_{L²} − ‖∇²S‖²_{L²}`, i.e. the pure-Riemann pairing alone
+carries the whole Weitzenböck value; *false* on a non-flat manifold (`R ≠ 0`) for a non-parallel `S`,
+where the differentiated-curvature `(∇R) S` content is genuinely missing from the pure-Riemann trace.
+So the differentiated-curvature section `Gcd` genuinely carries the missing `(∇R) S` content. The body
+is `sorry`; consumers transitively depend on `sorryAx`. -/
+theorem genuineDiffCurv_crossPairing_value
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
+    tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (GcurvSection (I := I) (M := M) g s S +
+          genuineDiffCurvSection (I := I) (M := M) g s S).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun =
+      tensorL2Norm (I := I) (M := M) g 0 s
+          (rawTensorConnLapSmooth (I := I) g 0 s S).toFun ^ 2 -
+        tensorL2Norm (I := I) (M := M) g 0 (s + 1 + 1)
+          (covGrad (I := I) (M := M) g 0 (s + 1)
+            (covGrad (I := I) (M := M) g 0 s S)).toFun ^ 2 := by
+  sorry
 
 end Connection
 end Integral
