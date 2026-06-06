@@ -9,6 +9,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciPreservation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ScalarFiniteTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximalTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.Noncollapsing
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeExistence
 import DifferentialGeometry.Geometry.Curvature.DimensionThree.RicciControlsRm
 
 set_option autoImplicit false
@@ -40,8 +41,8 @@ namespace HamiltonPositiveRicci
 open Bundle
 open scoped Manifold ContDiff
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E] [CompleteSpace E]
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -439,11 +440,189 @@ def LimitConstPosSec (L : Ham3CGHLimitData (I := I) M) : Prop :=
   exists gInf : SmoothRiemannianMetric I L.N,
     ConstPosSecMetric (I := I) (M := L.N) gInf
 
+/-- The checked short-time existence stage available from the Hamilton-DeTurck
+construction.
+
+This is exactly the raw metric-family/PDE output of
+`ricci_flow_short_time_existence`, repackaged under the Hamilton closed-manifold
+hypothesis.  It is intentionally weaker than `Ham3FlowPackage`: it does not
+construct the canonical `SolutionOn`/`IsSmoothSolutionOn` package, a normalized
+maximal interval, or endpoint curvature blow-up. -/
+theorem ham3_short_exists
+    {E0 : Type*} [NormedAddCommGroup E0] [InnerProductSpace Real E0]
+    [FiniteDimensional Real E0] [NeZero (Module.finrank Real E0)] [CompleteSpace E0]
+    {H0 : Type*} [TopologicalSpace H0] {I0 : ModelWithCorners Real E0 H0}
+    {M0 : Type u} [TopologicalSpace M0] [ChartedSpace H0 M0] [IsManifold I0 ∞ M0]
+    [SigmaCompactSpace M0] [T2Space M0] [BoundarylessManifold I0 M0]
+    (hM : Closed3Manifold (I := I0) (M := M0))
+    (g0 : SmoothRiemannianMetric I0 M0) :
+    ∃ T : Real, 0 < T ∧ ∃ g_fam : Real → SmoothRiemannianMetric I0 M0,
+      g_fam 0 = g0 ∧
+      (∀ (x0 : M0) (i j : Fin (Module.finrank Real E0)),
+        ContMDiffOn (𝓘(Real, Real).prod I0) 𝓘(Real) ∞
+          (fun p : Real × M0 =>
+            Integral.Measure.chartGramMatrix (I := I0) (g_fam p.1) x0 p.2 i j)
+          (Set.Ioo (0 : Real) T ×ˢ (trivializationAt E0 (TangentSpace I0) x0).baseSet)) ∧
+      (∀ (x0 : M0) (i j : Fin (Module.finrank Real E0)),
+        ContinuousOn
+          (fun p : Real × M0 =>
+            Integral.Measure.chartGramMatrix (I := I0) (g_fam p.1) x0 p.2 i j)
+          (Set.Ico (0 : Real) T ×ˢ (trivializationAt E0 (TangentSpace I0) x0).baseSet)) ∧
+      (∀ t ∈ Set.Ico (0 : Real) T, ∀ x : M0, ∀ v w : TangentSpace I0 x,
+        HasDerivWithinAt (fun s : Real => (g_fam s).inner x v w)
+          ((-2 : Real) *
+            DifferentialGeometry.Integral.Connection.ricciTensor
+              (I := I0) (g_fam t) x v w) (Set.Ici 0) t) := by
+  classical
+  letI : CompactSpace M0 := hM.1
+  letI : I0.Boundaryless := hM.2.2.1
+  exact DifferentialGeometry.PDE.RicciFlow.ricci_flow_short_time_existence
+    (I := I0) (M := M0) g0
+
+/-- Checked local bridge: the short-time Hamilton-DeTurck headline packaged as a
+folder-level `SolutionOn` candidate on the half-open interval `[0, T)`.
+
+This genuinely cites `ham3_short_exists` (hence `ricci_flow_short_time_existence`)
+at the file's own `E, I, M`.  The raw chart-Gram smoothness/continuity and the
+pointwise Ricci-flow PDE are restated verbatim in terms of the candidate's
+metric family `S.family.metric` (which is definitionally the short-time
+`g_fam`).  It does *not* yet supply `IsSolutionOn`; see
+`ham3_isSolution_of_shortTimeData`. -/
+theorem ham3_short_solution_candidate
+    [BoundarylessManifold I M]
+    (hM : Closed3Manifold (I := I) (M := M))
+    (g0 : SmoothRiemannianMetric I M) :
+    ∃ T : Real, ∃ hT : 0 < T,
+      ∃ S : DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M)
+        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 T hT),
+        S.family.metric
+            (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 T hT).initial
+              = g0 ∧
+        (∀ (x0 : M) (i j : Fin (Module.finrank Real E)),
+          ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+            (fun p : Real × M =>
+              Integral.Measure.chartGramMatrix (I := I) (S.family.metric p.1) x0 p.2 i j)
+            (Set.Ioo (0 : Real) T ×ˢ (trivializationAt E (TangentSpace I) x0).baseSet)) ∧
+        (∀ (x0 : M) (i j : Fin (Module.finrank Real E)),
+          ContinuousOn
+            (fun p : Real × M =>
+              Integral.Measure.chartGramMatrix (I := I) (S.family.metric p.1) x0 p.2 i j)
+            (Set.Ico (0 : Real) T ×ˢ (trivializationAt E (TangentSpace I) x0).baseSet)) ∧
+        (∀ t ∈ Set.Ico (0 : Real) T, ∀ x : M, ∀ v w : TangentSpace I x,
+          HasDerivWithinAt (fun s : Real => (S.family.metric s).inner x v w)
+            ((-2 : Real) *
+              DifferentialGeometry.Integral.Connection.ricciTensor
+                (I := I) (S.family.metric t) x v w) (Set.Ici 0) t) := by
+  obtain ⟨T, hT, g_fam, hg0, hsmooth, hcont, hpde⟩ :=
+    ham3_short_exists hM g0
+  refine ⟨T, hT, ⟨⟨g_fam⟩⟩, ?_, ?_, ?_, ?_⟩
+  · show g_fam 0 = g0
+    exact hg0
+  · intro x0 i j
+    exact hsmooth x0 i j
+  · intro x0 i j
+    exact hcont x0 i j
+  · intro t ht x v w
+    exact hpde t ht x v w
+
+/-- Remaining frontier (currently **blocked**, not a thin adapter): promote the
+raw short-time chart-Gram/PDE output of `ham3_short_solution_candidate` to the
+metric Ricci-flow solution predicate `IsSolutionOn`.
+
+The hypotheses are *only* the genuine short-time analytic output: joint
+chart-Gram `C∞` on the open slab `Ioo 0 T`, chart-Gram continuity up to `t = 0`
+on `Ico 0 T`, and the pointwise `∂_t g = -2 Ric` equation.  A 2026-06-05
+feasibility audit (recorded in `HamiltonPositiveRicci.md`) found this is a
+missing-producer / statement-strength frontier, not a local proof:
+
+* **(hard blocker)** `IsSolutionOn.scalarCont` is stated *globally*
+  (`∀ p : Real × M, ContinuousAt ...`).  A half-open `SolutionOn` controls its
+  metric family only on the carrier `Ico 0 T`; outside it the family is
+  unconstrained, so global scalar continuity is not produced by — and is in
+  general false for — short-time data.  The honest fix is a carrier-local
+  `scalarCont`, an `IsSolutionOn` redesign deliberately deferred on this pass.
+* `MetricFamilySmoothOn.coeff`/`frameCompSmooth` ask for `ContDiffOn ⊤`
+  (`C∞`-in-time) on the closed-at-`0` carrier, but the short-time layer exposes
+  joint `C∞` only on the *open* `Ioo 0 T` plus `C²` up to the endpoints
+  (`deturck_solution_c2_continuous_icc0`).  `C∞`-up-to-`t=0` is true but unexposed.
+* `nablaRicCont` needs continuity of the 3rd-order `∇Ric`; the short-time layer
+  exposes chart time-continuity only up to 2nd order (`ricci_continuous_in_metric_time`).
+* `scalarEvolution` (the scalar curvature heat equation) is a genuine evolution
+  frontier.
+
+Reachable from the current data: `equation`, `smoothConnection`, `ricciCont`,
+`metricTensor_cont`.  The four items above are not.  The downstream promotion
+`IsSolutionOn → IsSmoothSolutionOn` is the *checked* `smoothOfSol`
+(`RicciFlow/Regularity.lean`).  Left as `sorry` until the short-time regularity
+producer and the `IsSolutionOn.scalarCont` redesign land. -/
+theorem ham3_isSolution_of_shortTimeData
+    [BoundarylessManifold I M]
+    {T : Real} (hT : 0 < T)
+    (S : DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M)
+      (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 T hT))
+    (_hSmooth : ∀ (x0 : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
+        (fun p : Real × M =>
+          Integral.Measure.chartGramMatrix (I := I) (S.family.metric p.1) x0 p.2 i j)
+        (Set.Ioo (0 : Real) T ×ˢ (trivializationAt E (TangentSpace I) x0).baseSet))
+    (_hCont : ∀ (x0 : M) (i j : Fin (Module.finrank Real E)),
+      ContinuousOn
+        (fun p : Real × M =>
+          Integral.Measure.chartGramMatrix (I := I) (S.family.metric p.1) x0 p.2 i j)
+        (Set.Ico (0 : Real) T ×ˢ (trivializationAt E (TangentSpace I) x0).baseSet))
+    (_hPDE : ∀ t ∈ Set.Ico (0 : Real) T, ∀ x : M, ∀ v w : TangentSpace I x,
+      HasDerivWithinAt (fun s : Real => (S.family.metric s).inner x v w)
+        ((-2 : Real) *
+          DifferentialGeometry.Integral.Connection.ricciTensor
+            (I := I) (S.family.metric t) x v w) (Set.Ici 0) t) :
+    DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) S := by
+  sorry
+
+/-- Short-time *smooth* normalized existence, assembled from the checked bridge
+`ham3_short_solution_candidate`, the metric-solution frontier
+`ham3_isSolution_of_shortTimeData`, and the *checked* regularity promotion
+`smoothOfSol` (`IsSolutionOn → IsSmoothSolutionOn`).
+
+This is the natural building block for the normalized maximal-flow setup: it
+produces a genuine folder-level smooth Ricci-flow solution on `[0, T)` with the
+prescribed initial metric.  Its only gap flows through
+`ham3_isSolution_of_shortTimeData`; the `IsSolutionOn → IsSmoothSolutionOn` step
+is fully proved by `smoothOfSol`. -/
+theorem ham3_short_smooth_solution
+    (hM : Closed3Manifold (I := I) (M := M))
+    (g0 : SmoothRiemannianMetric I M) :
+    ∃ T : Real, ∃ hT : 0 < T,
+      ∃ S : DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M)
+        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 T hT),
+        S.family.metric
+            (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 T hT).initial
+              = g0 ∧
+          DifferentialGeometry.PDE.RicciFlow.IsSmoothSolutionOn (I := I) (M := M) S := by
+  haveI : I.Boundaryless := hM.2.2.1
+  obtain ⟨T, hT, S, hstart, hSmooth, hCont, hPDE⟩ :=
+    ham3_short_solution_candidate (I := I) (M := M) hM g0
+  have hSol : DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) S :=
+    ham3_isSolution_of_shortTimeData (I := I) (M := M) hT S hSmooth hCont hPDE
+  exact ⟨T, hT, S, hstart,
+    DifferentialGeometry.PDE.RicciFlow.smoothOfSol (I := I) S hSol⟩
+
 /-- Global analytic black box for Hamilton's normalized maximal-flow setup.
 
 This is only the Ricci-flow existence/setup stage: short-time existence,
 maximal-time construction, normalization of the initial time to `0`, and the
-verified Ricci-flow equation package. -/
+verified Ricci-flow equation package.
+
+The short-time *smooth* stage is now a genuine cite: `ham3_short_smooth_solution`
+(built from the checked bridge `ham3_short_solution_candidate` and the scoped
+regularity frontier `ham3_isSmoothSolution_of_shortTimeData`) produces a smooth
+folder-level Ricci-flow solution on `[0, T)` with `S.family.metric 0 = g0`.
+
+The remaining gap in this theorem is the *maximal continuation*: extending that
+short-time smooth flow to a maximal normalized interval `[0, ω)` and reading off
+endpoint curvature blow-up.  `MaximalTime.lean` supplies blow-up *from*
+maximality (`formsSing_of_maximal_metric`/`rmUnbounded_of_maximal`) but not the
+maximal continuation itself (its `extends_of_rmBounded` Black Box 11.2 is the
+unproved extension criterion), so the closure is left as `sorry`. -/
 theorem ham3_flow_exists_normalized
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
@@ -451,6 +630,11 @@ theorem ham3_flow_exists_normalized
     exists omega : Real, exists h0ω : 0 < omega,
       exists P : Ham3FlowPackage (I := I) (M := M) g0,
         P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω := by
+  -- Genuine cite of the short-time smooth headline; the short-time stage is no
+  -- longer part of this `sorry`.
+  have _hshort := ham3_short_smooth_solution (I := I) (M := M) hM g0
+  -- Remaining frontier: maximal continuation of `_hshort` plus endpoint blow-up
+  -- assembly into `Ham3FlowPackage` (see the docstring).
   sorry
 
 /-- Compatibility nonempty form of the normalized maximal-flow setup. -/
