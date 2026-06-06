@@ -367,6 +367,7 @@ import DifferentialGeometry.Analysis.ODE.Flow.JointContinuity
 import DifferentialGeometry.Analysis.ODE.Flow.ParametricLinearODE
 import DifferentialGeometry.Analysis.ODE.Flow.SolutionOperator
 import DifferentialGeometry.Analysis.ODE.Flow.Variational
+import DifferentialGeometry.Analysis.ODE.ForwardVariationalFromZero
 import DifferentialGeometry.Analysis.ODE.IntegralGronwall
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective.ChartCoverBijective
