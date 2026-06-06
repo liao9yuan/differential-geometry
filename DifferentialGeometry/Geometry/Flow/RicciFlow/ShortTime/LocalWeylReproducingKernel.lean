@@ -12,6 +12,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.TensorRSContRiemannianBundle
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorDirichletCurrentGreenIdentityRS
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameGenuineFieldPairingRS
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.OrderSeparatedCurvatureJetRS
 
 /-! # The pointwise reproducing-kernel bound underlying the local Weyl law
 
@@ -2304,8 +2305,48 @@ private theorem exists_iteratedCovGrad_pointwiseTensorCurvRS_pointwise_fiberNorm
               (Integral.Connection.pointwiseTensorCurvRS (I := I) (M := M) g r s T)).toSection x) ≤
           Cic s m ^ 2 * ∑ i ∈ Finset.range (m + 3),
             Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r (s + i) x
-              ((PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i T).toSection x) :=
-  sorry
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i T).toSection x) := by
+  classical
+  obtain ⟨Cgr, hCgr_nn, hsplit⟩ :=
+    Integral.Connection.exists_iteratedCovGrad_pointwiseTensorCurvRS_genuineRemainder_fiberNormSq_bound
+      (I := I) (M := M) g r
+  refine ⟨fun s m => Real.sqrt 2 * Cgr s m, fun s m => ?_, fun s m T x => ?_⟩
+  · exact mul_nonneg (Real.sqrt_nonneg 2) (hCgr_nn s m)
+  · obtain ⟨Ggen, Grem, heq, hgen, hrem⟩ := hsplit s m T x
+    set FullSum : ℝ := ∑ i ∈ Finset.range (m + 3),
+        Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r (s + i) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i T).toSection x) with hFullSum
+    set LowSum : ℝ := ∑ i ∈ Finset.range (m + 2),
+        Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r (s + i) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s i T).toSection x) with hLowSum
+    have hLowSum_nn : 0 ≤ LowSum :=
+      Finset.sum_nonneg
+        (fun i _ => Integral.Connection.riemannianFiberNormSq_nonneg (I := I) (M := M) g r (s + i) x _)
+    have hTop_nn : 0 ≤ Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r (s + (m + 2)) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s (m + 2) T).toSection x) :=
+      Integral.Connection.riemannianFiberNormSq_nonneg (I := I) (M := M) g r (s + (m + 2)) x _
+    have hFull_split : FullSum = LowSum +
+        Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r (s + (m + 2)) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s (m + 2) T).toSection x) := by
+      rw [hFullSum, hLowSum, Finset.sum_range_succ]
+    have hsq2 : (Real.sqrt 2 * Cgr s m) ^ 2 = 2 * Cgr s m ^ 2 := by
+      rw [mul_pow, Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 2)]
+    have hCgr_nn' : 0 ≤ Cgr s m := hCgr_nn s m
+    rw [heq, hsq2]
+    have hadd := Integral.Connection.riemannianFiberNormSq_add_le (I := I) (M := M) g r (s + 1 + m) x
+      Ggen Grem
+    calc Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r (s + 1 + m) x (Ggen + Grem)
+        ≤ 2 * Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r (s + 1 + m) x Ggen +
+            2 * Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r (s + 1 + m) x Grem :=
+          hadd
+      _ ≤ 2 * (Cgr s m ^ 2 * LowSum) +
+            2 * (Cgr s m ^ 2 *
+              Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r (s + (m + 2)) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) (M := M) g r s (m + 2) T).toSection x)) := by
+          have e1 := mul_le_mul_of_nonneg_left hgen (by norm_num : (0 : ℝ) ≤ 2)
+          have e2 := mul_le_mul_of_nonneg_left hrem (by norm_num : (0 : ℝ) ≤ 2)
+          linarith
+      _ = 2 * Cgr s m ^ 2 * FullSum := by rw [hFull_split]; ring
 
 /-- **The general-rank covariant-product curvature primitive (general-rank `L²` curvature bound).**
 The bidegree-`(r, ·)` analogue of the `(0, ·)` covariant-product input
