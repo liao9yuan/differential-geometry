@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Glob
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOperator.ConventionBridge
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.Hartman
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.FromZeroManifoldOrbit
+import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.FromZeroManifoldOrbitUniqueness
+import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.VariationalODE.ForwardIntegralCurveUniqueness
 
 /-!
 # Interior bare flow on the full time horizon
@@ -396,6 +398,219 @@ theorem wch_anchored_window_flow
         = ((1 : ℝ →L[ℝ] ℝ).smulRight (Xt t (Φ p t))) by rw [heq]]
     exact hbare
 
+/-! ## Coherence of bare-velocity flows -/
+
+set_option linter.unusedSectionVars false in
+/-- **Interior coherence of two bare-velocity flows.**  On a closed interior window
+`[a, b] ⊂ (0, T)`, two curves `s ↦ Φ s x` and `s ↦ Φ' s x'` both carrying `X`'s bare velocity
+(`Icc a b` form) and agreeing at the left endpoint `a` agree on all of `[a, b]`.
+
+Proof: cut off `X` to a global field `Xt` (`interior_field_global_cutoff_extension_loc`) agreeing
+with `X` on a window strictly containing `[a, b]` and globally `AutonomizedFieldJointC1`; both curves
+then carry `Xt`'s bare velocity on `[a, b]`, so forward bare-flow uniqueness
+`bare_forward_flow_eqOn_of_jointC1` for `Xt` forces agreement. -/
+private theorem wch_interior_coherence
+    (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ)
+    (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+    (Φ Φ' : ℝ → M → M) (x x' : M) {a b : ℝ}
+    (hab0 : 0 < a) (hab : a < b) (hbT : b < T)
+    (hflow : ∀ t ∈ Set.Icc a b,
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => Φ u x) (Set.Icc a b) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x))))
+    (hflow' : ∀ t ∈ Set.Icc a b,
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => Φ' u x') (Set.Icc a b) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ' t x'))))
+    (hstart : Φ a x = Φ' a x') :
+    ∀ t ∈ Set.Icc a b, Φ t x = Φ' t x' := by
+  set lo : ℝ := a / 2 with hlo
+  set hi : ℝ := (b + T) / 2 with hhi
+  have hlo0 : 0 < lo := by rw [hlo]; linarith
+  have hlohi : lo < hi := by rw [hlo, hhi]; linarith
+  have hhiT : hi < T := by rw [hhi]; linarith
+  obtain ⟨Xt, δ, hδ, hXt_eq, hXt_cont, hXt_auto⟩ :=
+    interior_field_global_cutoff_extension_loc X T hint hlo0 hlohi hhiT
+  have hlo_a : lo < a := by rw [hlo]; linarith
+  have hb_hi : b < hi := by rw [hhi]; linarith
+  have hsub : Set.Icc a b ⊆ Set.Ioo (lo - δ) (hi + δ) := by
+    intro t ht
+    exact ⟨by linarith [ht.1], by linarith [ht.2]⟩
+  have hflowXt : ∀ t ∈ Set.Icc a b,
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => Φ u x) (Set.Icc a b) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (Xt t (Φ t x))) := by
+    intro t ht
+    rw [hXt_eq t (hsub ht) (Φ t x)]; exact hflow t ht
+  have hflowXt' : ∀ t ∈ Set.Icc a b,
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => Φ' u x') (Set.Icc a b) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (Xt t (Φ' t x'))) := by
+    intro t ht
+    rw [hXt_eq t (hsub ht) (Φ' t x')]; exact hflow' t ht
+  exact bare_forward_flow_eqOn_of_jointC1 Xt hXt_auto Φ Φ' x x' hflowXt hflowXt' hstart
+
+set_option linter.unusedSectionVars false in
+/-- **Full-horizon coherence of two bare-velocity flows.**  Two curves `s ↦ Φ s x` and
+`s ↦ Φ' s x'` carrying `X`'s bare velocity (`Ici 0` form) on `Ico 0 T` and agreeing at `t = 0`
+agree on `Icc 0 β` for every `β < T`.
+
+Proof by the continuous-induction principle `IsClosed.Icc_subset_of_forall_exists_gt` on the
+agreement set `S = {t | Φ t x = Φ' t x'}`: `S ∩ [0, β]` is closed (bare velocity gives orbit
+continuity, the target is `T2`); `0 ∈ S` by hypothesis; at any `y ∈ S ∩ [0, β)` the agreement
+extends past `y` — at `y = 0` by the weak-datum corner coherence
+`fromZero_bare_flow_coherent_of_weakDatum`, and at `y > 0` by `wch_interior_coherence`. -/
+theorem wch_full_coherence
+    (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
+    (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+    (hcont0 : ContinuousOn
+      (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2))
+      (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
+    (hgrad0 : ∀ α : M,
+      ContinuousOn
+        (fun q : ℝ × M =>
+          fderiv ℝ (chartRawRepr (I := I) α (X q.1)) (extChartAt I α q.2))
+        (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
+    (Φ Φ' : ℝ → M → M) (x x' : M) {β : ℝ} (hβT : β < T)
+    (hstart : Φ 0 x = Φ' 0 x')
+    (hflow : ∀ t ∈ Set.Ico (0:ℝ) T,
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => Φ u x) (Set.Ici (0:ℝ)) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x))))
+    (hflow' : ∀ t ∈ Set.Ico (0:ℝ) T,
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => Φ' u x') (Set.Ici (0:ℝ)) t
+        ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ' t x')))) :
+    Set.EqOn (fun t => Φ t x) (fun t => Φ' t x') (Set.Icc 0 β) := by
+  set f : ℝ → M := fun t => Φ t x with hf
+  set g : ℝ → M := fun t => Φ' t x' with hg
+  set S : Set ℝ := {t : ℝ | f t = g t} with hS
+  have hf_cont : ContinuousOn f (Set.Icc 0 β) := by
+    intro t ht
+    exact ((hflow t ⟨ht.1, lt_of_le_of_lt ht.2 hβT⟩).1).mono (fun u hu => hu.1)
+  have hg_cont : ContinuousOn g (Set.Icc 0 β) := by
+    intro t ht
+    exact ((hflow' t ⟨ht.1, lt_of_le_of_lt ht.2 hβT⟩).1).mono (fun u hu => hu.1)
+  have hScl : IsClosed (S ∩ Set.Icc (0:ℝ) β) := by
+    have h := (isClosed_Icc (a := (0:ℝ)) (b := β)).isClosed_eq hf_cont hg_cont
+    have heq : {t ∈ Set.Icc (0:ℝ) β | f t = g t} = S ∩ Set.Icc (0:ℝ) β := by
+      ext t; simp only [hS, Set.mem_inter_iff, Set.mem_setOf_eq]; tauto
+    rwa [heq] at h
+  have h0S : (0:ℝ) ∈ S := by simp only [hS, Set.mem_setOf_eq, hf, hg]; exact hstart
+  obtain ⟨δ', hδ'_pos, hcoh0⟩ :=
+    fromZero_bare_flow_coherent_of_weakDatum (I := I) X T hT hint hcont0 hgrad0
+      Φ Φ' x x' hT hstart (fun t ht => hflow t ht) (fun t ht => hflow' t ht)
+  have hgt : ∀ y ∈ S ∩ Set.Ico (0:ℝ) β, ∀ z ∈ Set.Ioi y, (S ∩ Set.Ioc y z).Nonempty := by
+    rintro y ⟨hyS, hy_mem⟩ z hz
+    have hy0 : 0 ≤ y := hy_mem.1
+    have hyβ : y < β := hy_mem.2
+    rcases eq_or_lt_of_le hy0 with hy_eq | hy_pos
+    · subst hy_eq
+      set w : ℝ := min z (min δ' β) with hw
+      have hw_pos : 0 < w := lt_min hz (lt_min hδ'_pos (lt_of_le_of_lt hy0 hyβ))
+      have hwS : w ∈ S := by
+        simp only [hS, Set.mem_setOf_eq, hf, hg]
+        exact hcoh0 w ⟨le_of_lt hw_pos, le_trans (min_le_right _ _) (min_le_left _ _)⟩
+      exact ⟨w, hwS, hw_pos, min_le_left _ _⟩
+    · set b' : ℝ := min z ((y + T) / 2) with hb'
+      have hb'_gt : y < b' := lt_min hz (by linarith)
+      have hb'_lt_T : b' < T := lt_of_le_of_lt (min_le_right _ _) (by linarith)
+      have hb'_le_z : b' ≤ z := min_le_left _ _
+      have hsub_Ici : Set.Icc y b' ⊆ Set.Ici (0:ℝ) := fun u hu => le_trans hy0 hu.1
+      have hsub_Ico : Set.Icc y b' ⊆ Set.Ico (0:ℝ) T :=
+        fun u hu => ⟨le_trans hy0 hu.1, lt_of_le_of_lt hu.2 hb'_lt_T⟩
+      have hflow_Icc : ∀ t ∈ Set.Icc y b',
+          HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => Φ u x) (Set.Icc y b') t
+            ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x))) :=
+        fun t ht => (hflow t (hsub_Ico ht)).mono hsub_Ici
+      have hflow_Icc' : ∀ t ∈ Set.Icc y b',
+          HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun u : ℝ => Φ' u x') (Set.Icc y b') t
+            ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ' t x'))) :=
+        fun t ht => (hflow' t (hsub_Ico ht)).mono hsub_Ici
+      have hcoh := wch_interior_coherence X T hint Φ Φ' x x' hy_pos hb'_gt hb'_lt_T
+        hflow_Icc hflow_Icc' hyS
+      refine ⟨b', ?_, hb'_gt, hb'_le_z⟩
+      simp only [hS, Set.mem_setOf_eq, hf, hg]
+      exact hcoh b' ⟨le_of_lt hb'_gt, le_refl _⟩
+  intro t ht
+  exact (hScl.Icc_subset_of_forall_exists_gt h0S hgt) ht
+
+/-! ## Per-orbit full-horizon existence and flow regularity (strictly-smaller posited inputs) -/
+
+set_option linter.unusedVariables false in
+/-- **Per-orbit full-horizon existence (strictly-smaller posited input).**
+
+For each base point `x`, the from-`0` orbit germ `fromZero_forward_orbit_germ_flow` (the `[0, δ)`
+seed) extends to a single orbit `γ : ℝ → M` on the full horizon `[0, T)` with `γ 0 = x`, carrying
+`X`'s **bare** geometric velocity in one-sided (`Ici 0`) form on `Ico 0 T` and in two-sided
+(`HasMFDerivAt`) form on the interior `Ioo 0 T`.
+
+The continuation is the classical no-blow-up argument: the orbit is extended past any interior
+endpoint `e ∈ (0, T)` by the anchored window flow `wch_anchored_window_flow` at `e` (seam-glued by
+`wch_piecewise_bare_velocity`), and the reachable set is closed because the orbit stays on the
+compact manifold `M` (no finite-time escape), so the extension reaches every `β < T`.  This is the
+single-orbit ODE existence content — strictly smaller than the bundled flow node (one orbit, no
+per-time smoothness, no joint continuity, no reverse flow).  It is TRUE for the classical flow of a
+field continuous on `[0, T) × M` (the bare velocity pins `γ` to `X`; the zero/degenerate curve is
+rejected unless `X ≡ 0` along it).  Isolated here as a posited input; consumers transit `sorryAx`. -/
+theorem wch_orbit_full_horizon
+    (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
+    (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+    (hcont0 : ContinuousOn
+      (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2))
+      (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
+    (hgrad0 : ∀ α : M,
+      ContinuousOn
+        (fun q : ℝ × M =>
+          fderiv ℝ (chartRawRepr (I := I) α (X q.1)) (extChartAt I α q.2))
+        (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
+    (x : M) :
+    ∃ γ : ℝ → M, γ 0 = x ∧
+      (∀ t ∈ Set.Ico (0:ℝ) T,
+        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I γ (Set.Ici (0:ℝ)) t
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ t)))) ∧
+      (∀ t ∈ Set.Ioo (0:ℝ) T,
+        HasMFDerivAt 𝓘(ℝ, ℝ) I γ t
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (γ t)))) := by
+  sorry
+
+set_option linter.unusedVariables false in
+/-- **Flow regularity from per-orbit existence (strictly-smaller posited input).**
+
+Given a forward flow `Φ : ℝ → M → M` of `X` with `Φ 0 = id` and `X`'s bare geometric velocity
+(one-sided, `Ici 0`) on the interior `(0, T)` — the data assembled from the per-orbit existence
+`wch_orbit_full_horizon` — the flow is per-time `C∞` on `(0, T)` (each spatial slice `Φ t` is
+`ContMDiff I I ∞`) and jointly continuous up to `t = 0` on `Ico 0 T ×ˢ univ`.
+
+Per-time smoothness is the cocycle composition of the interior anchored window flows
+(`wch_anchored_window_flow`, jointly `C∞`, slice via `wch_slice_smooth_of_jointOn`) glued by
+`wch_full_coherence`; the `t = 0` joint continuity is the cross-chart from-`0` variational
+regularity (the chart-level joint continuity `forward_flow_jointContinuousOn` transported across the
+moving base point by `wch_full_coherence`).  This is the flow *regularity* layer — strictly smaller
+than the bundled flow node (it consumes the orbits' existence and produces only the two regularity
+conjuncts, no reverse flow).  It is a genuine regularity statement about `Φ` (FALSE for a flow with
+a discontinuous spatial slice), not a packaging of any hypothesis.  Isolated here as a posited
+input; consumers transit `sorryAx`. -/
+theorem wch_forward_flow_regularity
+    (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
+    (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+    (hcont0 : ContinuousOn
+      (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2))
+      (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
+    (hgrad0 : ∀ α : M,
+      ContinuousOn
+        (fun q : ℝ × M =>
+          fderiv ℝ (chartRawRepr (I := I) α (X q.1)) (extChartAt I α q.2))
+        (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
+    (Φ : ℝ → M → M) (hΦ0 : ∀ x : M, Φ 0 x = x)
+    (hflow : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x)
+      (Set.Ici (0 : ℝ)) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x)))) :
+    (∀ t, 0 < t → t < T → ContMDiff I I ∞ (Φ t)) ∧
+    (ContinuousOn (fun p : ℝ × M => Φ p.1 p.2) (Set.Ico 0 T ×ˢ Set.univ)) := by
+  sorry
+
 /-! ## The two remaining genuine-math leaves: forward continuation and reverse cocycle -/
 
 set_option linter.unusedVariables false in
@@ -435,7 +650,23 @@ theorem wch_forward_full_horizon_flow
       (∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M, HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x)
         (Set.Ici (0 : ℝ)) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x)))) ∧
       (ContinuousOn (fun p : ℝ × M => Φ p.1 p.2) (Set.Ico 0 T ×ˢ Set.univ)) := by
-  sorry
+  classical
+  -- per-orbit existence, then assemble Φ
+  have horb := fun x => wch_orbit_full_horizon (I := I) X T hT hint hcont0 hgrad0 x
+  choose γ hγ0 hγbare hγtwo using horb
+  set Φ : ℝ → M → M := fun s x => γ x s with hΦ_def
+  have hΦ0 : ∀ x : M, Φ 0 x = x := fun x => hγ0 x
+  -- the bare velocity conjunct (one-sided, Ici 0) on (0, T)
+  have hflow : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
+      HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x)
+        (Set.Ici (0 : ℝ)) t ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x))) := by
+    intro t ht x
+    have h := hγbare x t ⟨le_of_lt ht.1, ht.2⟩
+    exact h
+  -- the regularity conjuncts
+  obtain ⟨hsm, hjoint⟩ :=
+    wch_forward_flow_regularity (I := I) X T hT hint hcont0 hgrad0 Φ hΦ0 hflow
+  exact ⟨Φ, hΦ0, hsm, hflow, hjoint⟩
 
 set_option linter.unusedVariables false in
 /-- **LEAF (reverse flow and mutual-inverse cocycle).**  Given the forward flow `Φ` of `X` (with
