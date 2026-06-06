@@ -117,7 +117,8 @@ theorem ricci_flow_short_time_existence
         HasDerivWithinAt (fun s : ℝ => (g_DT s).inner x v w)
           (deTurckRicciRHS (I := I) g₀ (g_DT t) x v w)
           (Set.Ici 0) t := hDT_deriv
-    obtain ⟨T, hT0, hT_le, Φ_fam, hΦ0, hΦode, hΦorbit0, hΦmfderiv0⟩ :=
+    obtain ⟨T, hT0, hT_le, Φ_fam, hΦ0, hΦode, hΦorbit0, hΦmfderiv0,
+        hΦorbit_joint, hΦsection_joint⟩ :=
       conjugating_diffeo_family
         (I := I) g_DT g₀ T_DT hT_DT_pos h_reg h_cont0 h_grad0
     have hΦode' : ∀ x : M, ∀ t ∈ Set.Ioo (0 : ℝ) T,
@@ -170,7 +171,7 @@ theorem ricci_flow_short_time_existence
         h_reg_T hΦorbit0 hΦmfderiv0
     obtain ⟨h_gram_fam, h_gram0_fam⟩ :=
       conjugating_flow_pullback_jointGram_data (I := I) g_DT g₀ T Φ_fam hΦode'
-        h_reg_T h_gram_DT_T h_gram0_DT_T
+        h_reg_T h_gram_DT_T h_gram0_DT_T hΦorbit_joint hΦsection_joint
     refine ⟨T, hT0, fun s => Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s),
       ?_, h_gram_fam, h_gram0_fam, ?_⟩
     · change Diffeomorph.pullbackMetric (g_DT 0) (Φ_fam 0) = g₀

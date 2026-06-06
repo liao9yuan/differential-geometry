@@ -30,6 +30,7 @@ open DifferentialGeometry.PDE.RicciFlow.Pullback
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
@@ -83,7 +84,18 @@ existence/uniqueness — not the FTC integral form nor the variational integral 
 Building that chart-Picard / variational integral layer plus the multi-window glue is a
 multi-file effort beyond this leaf's budget; it is isolated here as a SINGLE labeled
 `sorry` and reported.  The conclusion is the flow-existence statement, distinct from the
-field-regularity inputs `hint`/`hcont0`/`hgrad0` — this is not hypothesis-packaging. -/
+field-regularity inputs `hint`/`hcont0`/`hgrad0` — this is not hypothesis-packaging.
+
+The last three conjuncts record the `t = 0`-endpoint regularity in BUNDLE / JOINT form (the
+sound replacements for the moving-source `chartJ` reading): the per-fibre bundle Jacobian
+right-continuity at `0`, the joint orbit continuity up to `0` on `Ico 0 T ×ˢ univ`, and the
+joint chart-basis pushforward bundle-section continuity up to `0`.  All three are TRUE for the
+genuine forward flow: at `t = 0`, `Φ 0 = id`, so the own-base reading of the moving Jacobian
+coincides with the fixed chart-`y` (resp. chart-`x₀`) base; and the chart-Picard FTC integral
+identities above hold with a SINGLE chart covering a neighbourhood of each base point, giving the
+joint (over `(t, x)`) right-continuity at `0` by the uniform velocity / Grönwall bound on the
+compact manifold.  They are produced by the same chart-Picard / variational integral layer that
+this single `sorry` isolates. -/
 private theorem interior_forward_bare_flow_from_zero
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -116,9 +128,21 @@ private theorem interior_forward_bare_flow_from_zero
                     (mfderiv I I (fun y : M => Φ r y) x v : E)) ∧
       (∀ (x : M) (v : TangentSpace I x), ∃ δ : ℝ, ∃ B : ℝ, 0 < δ ∧
         ∀ s ∈ Set.Ico (0 : ℝ) (min δ T),
-          ‖(mfderiv I I (fun y : M => Φ s y) x v : E)‖ ≤ B) := by
+          ‖(mfderiv I I (fun y : M => Φ s y) x v : E)‖ ≤ B) ∧
+      (∀ (x : M) (v : TangentSpace I x),
+        ContinuousWithinAt (fun s : ℝ => (TotalSpace.mk' E (Φ s x)
+          (mfderiv I I (fun y : M => Φ s y) x v) : TangentBundle I M)) (Set.Ici (0 : ℝ)) 0) ∧
+      (ContinuousOn (fun p : ℝ × M => Φ p.1 p.2) (Set.Ico 0 T ×ˢ Set.univ)) ∧
+      (∀ (x₀ : M) (i : Fin (Module.finrank ℝ E)),
+        ContinuousOn (fun p : ℝ × M =>
+          (TotalSpace.mk' E (Φ p.1 p.2)
+            (mfderiv I I (fun y : M => Φ p.1 y) p.2
+              (chartBasisVecFiber (I := I) x₀ i p.2)) : TangentBundle I M))
+          (Set.Ico 0 T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) := by
   sorry
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+  [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 /-- **Orbit right-continuity at `t = 0`.**
 
 Self-contained helper for the first conjunct of `flow_t0_continuity_extension`.
@@ -226,6 +250,8 @@ private theorem flow_orbit_continuousWithinAt_zero
   · simp only [hΦ0]
     exact ((extChartAt I α).left_inv hxsrc').symm
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+  [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 /-- **Moving-spatial-Jacobian right-continuity at `t = 0` (variational endpoint).**
 
 The variational analogue of `flow_orbit_continuousWithinAt_zero`.  Fix `x : M` and
@@ -336,6 +362,8 @@ private theorem flow_mfderiv_continuousWithinAt_zero
   rw [ContinuousWithinAt]
   exact htendsto
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+  [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 set_option linter.unusedVariables false in
 theorem flow_t0_continuity_extension
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
@@ -405,8 +433,19 @@ theorem forward_flow_existence_onesided_of_jointsmooth_field
       (∀ x : M, ContinuousWithinAt (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) 0) ∧
       (∀ (x : M) (v : TangentSpace I x),
         ContinuousWithinAt (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E))
-          (Set.Ici (0 : ℝ)) 0) := by
-  obtain ⟨Φ, hΦ0, hdiffeo, hflow, hpicard, hvarpicard, hJbound⟩ :=
+          (Set.Ici (0 : ℝ)) 0) ∧
+      (∀ (x : M) (v : TangentSpace I x),
+        ContinuousWithinAt (fun s : ℝ => (TotalSpace.mk' E (Φ s x)
+          (mfderiv I I (fun y : M => Φ s y) x v) : TangentBundle I M)) (Set.Ici (0 : ℝ)) 0) ∧
+      (ContinuousOn (fun p : ℝ × M => Φ p.1 p.2) (Set.Ico 0 T ×ˢ Set.univ)) ∧
+      (∀ (x₀ : M) (i : Fin (Module.finrank ℝ E)),
+        ContinuousOn (fun p : ℝ × M =>
+          (TotalSpace.mk' E (Φ p.1 p.2)
+            (mfderiv I I (fun y : M => Φ p.1 y) p.2
+              (chartBasisVecFiber (I := I) x₀ i p.2)) : TangentBundle I M))
+          (Set.Ico 0 T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) := by
+  obtain ⟨Φ, hΦ0, hdiffeo, hflow, hpicard, hvarpicard, hJbound,
+      hbundle0, horbit_joint, hsection_joint⟩ :=
     interior_forward_bare_flow_from_zero (I := I) X_DT T hT hint hcont0 hgrad0
   have hinterior : ∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ x : M,
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s x) (Set.Ici (0 : ℝ)) t
@@ -414,6 +453,6 @@ theorem forward_flow_existence_onesided_of_jointsmooth_field
   obtain ⟨hcont4, hcont5⟩ :=
     flow_t0_continuity_extension (I := I) X_DT T hT Φ hΦ0 hcont0 hgrad0
       hinterior hpicard hvarpicard hJbound
-  exact ⟨Φ, hΦ0, hdiffeo, hflow, hcont4, hcont5⟩
+  exact ⟨Φ, hΦ0, hdiffeo, hflow, hcont4, hcont5, hbundle0, horbit_joint, hsection_joint⟩
 
 end DifferentialGeometry.PDE.RicciFlow

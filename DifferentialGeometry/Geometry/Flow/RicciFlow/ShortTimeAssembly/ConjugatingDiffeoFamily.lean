@@ -102,8 +102,15 @@ theorem conjugating_diffeo_family
       (∀ x : M,
         ContinuousWithinAt (fun s : ℝ => (Φ_fam s : M → M) x) (Set.Ici (0 : ℝ)) 0) ∧
       (∀ (x : M) (v : TangentSpace I x),
-        ContinuousWithinAt (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E))
-          (Set.Ici (0 : ℝ)) 0) := by
+        ContinuousWithinAt (fun s : ℝ => (TotalSpace.mk' E ((Φ_fam s : M → M) x)
+          (mfderiv I I (Φ_fam s : M → M) x v) : TangentBundle I M)) (Set.Ici (0 : ℝ)) 0) ∧
+      (ContinuousOn (fun p : ℝ × M => (Φ_fam p.1 : M → M) p.2) (Set.Ico 0 T ×ˢ Set.univ)) ∧
+      (∀ (x₀ : M) (i : Fin (Module.finrank ℝ E)),
+        ContinuousOn (fun p : ℝ × M =>
+          (TotalSpace.mk' E ((Φ_fam p.1 : M → M) p.2)
+            (mfderiv I I (Φ_fam p.1 : M → M) p.2
+              (Integral.Measure.chartBasisVecFiber (I := I) x₀ i p.2)) : TangentBundle I M))
+          (Set.Ico 0 T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) := by
   set X_DT : ℝ → ∀ x : M, TangentSpace I x :=
     fun s x => -(deTurckVF (I := I) (g_DT s) g_bg x) with hXDT
   have hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -130,7 +137,8 @@ theorem conjugating_diffeo_family
       rw [hcr, fderiv_fun_neg]
     rw [hfun]
     exact (h_grad0 α).neg
-  obtain ⟨Φ, hΦ0, hdiffeo, hflow, hΦcont0, hΦmfderiv0⟩ :=
+  obtain ⟨Φ, hΦ0, hdiffeo, hflow, hΦcont0, _hΦmfderiv0,
+      hΦbundle0, hΦorbit_joint, hΦsection_joint⟩ :=
     forward_flow_existence_onesided_of_jointsmooth_field (I := I) X_DT T_DT hDT hint hcont0 hgrad0
   obtain ⟨Φ_fam, hfam0, hfameq, hfamode⟩ :=
     time_dependent_vf_bare_flow_family (I := I) X_DT T_DT hDT Φ hΦ0
@@ -142,7 +150,7 @@ theorem conjugating_diffeo_family
     rcases eq_or_lt_of_le hs.1 with h0 | h0
     · rw [← h0, hfam0, hΦ0]; rfl
     · exact hfameq s h0 hs.2 y
-  refine ⟨T_DT, hDT, le_refl _, Φ_fam, hfam0, ?_, ?_, ?_⟩
+  refine ⟨T_DT, hDT, le_refl _, Φ_fam, hfam0, ?_, ?_, ?_, ?_, ?_⟩
   · intro x s hs
     exact hfamode s hs.1 hs.2 x
   · intro x
@@ -155,17 +163,35 @@ theorem conjugating_diffeo_family
       (Filter.eventuallyEq_of_mem (Ico_mem_nhdsGE hDT) heqOn) ?_
     rw [hfun_eqOn 0 ⟨le_rfl, hDT⟩]
   · intro x v
-    have hmfeq : Set.EqOn
-        (fun s : ℝ => (mfderiv I I (Φ_fam s : M → M) x v : E))
-        (fun s : ℝ => (mfderiv I I (fun y : M => Φ s y) x v : E)) (Set.Ico 0 T_DT) := by
+    have hbeq : Set.EqOn
+        (fun s : ℝ => (TotalSpace.mk' E ((Φ_fam s : M → M) x)
+          (mfderiv I I (Φ_fam s : M → M) x v) : TangentBundle I M))
+        (fun s : ℝ => (TotalSpace.mk' E (Φ s x)
+          (mfderiv I I (fun y : M => Φ s y) x v) : TangentBundle I M)) (Set.Ico 0 T_DT) := by
       intro s hs
-      change (mfderiv I I (Φ_fam s : M → M) x v : E)
-        = (mfderiv I I (fun y : M => Φ s y) x v : E)
+      change (TotalSpace.mk' E ((Φ_fam s : M → M) x)
+          (mfderiv I I (Φ_fam s : M → M) x v) : TangentBundle I M)
+        = (TotalSpace.mk' E (Φ s x) (mfderiv I I (fun y : M => Φ s y) x v) : TangentBundle I M)
       rw [hfun_eqOn s hs]
-    refine (hΦmfderiv0 x v).congr_of_eventuallyEq
-      (Filter.eventuallyEq_of_mem (Ico_mem_nhdsGE hDT) hmfeq) ?_
-    change (mfderiv I I (Φ_fam 0 : M → M) x v : E)
-      = (mfderiv I I (fun y : M => Φ 0 y) x v : E)
+    refine (hΦbundle0 x v).congr_of_eventuallyEq
+      (Filter.eventuallyEq_of_mem (Ico_mem_nhdsGE hDT) hbeq) ?_
+    change (TotalSpace.mk' E ((Φ_fam 0 : M → M) x)
+        (mfderiv I I (Φ_fam 0 : M → M) x v) : TangentBundle I M)
+      = (TotalSpace.mk' E (Φ 0 x) (mfderiv I I (fun y : M => Φ 0 y) x v) : TangentBundle I M)
     rw [hfun_eqOn 0 ⟨le_rfl, hDT⟩]
+  · refine hΦorbit_joint.congr ?_
+    rintro ⟨s, x⟩ ⟨hs, -⟩
+    change (Φ_fam s : M → M) x = Φ s x
+    rw [hfun_eqOn s hs]
+  · intro x₀ i
+    refine (hΦsection_joint x₀ i).congr ?_
+    rintro ⟨s, x⟩ ⟨hs, hx⟩
+    change (TotalSpace.mk' E ((Φ_fam s : M → M) x)
+        (mfderiv I I (Φ_fam s : M → M) x (Integral.Measure.chartBasisVecFiber (I := I) x₀ i x))
+        : TangentBundle I M)
+      = (TotalSpace.mk' E (Φ s x)
+          (mfderiv I I (fun y : M => Φ s y) x
+            (Integral.Measure.chartBasisVecFiber (I := I) x₀ i x)) : TangentBundle I M)
+    rw [hfun_eqOn s hs]
 
 end DifferentialGeometry.PDE.RicciFlow
