@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedDiffOpPropo
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformCurvatureSup
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformProportionalCurvatureSup
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Slot0SliceFiberNormDomination
+import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldDifferentiatedTowerNormalForm
 
 /-!
 # The frozen-frame pure-Riemann curvature endomorphism tower and its iterated-gradient grid
@@ -1233,6 +1234,32 @@ private theorem pureRGenuineDiffOp_isOrderZeroCurvFactor (g : SmoothRiemannianMe
               pureRGenuineEndoFib (I := I) (M := M) g m W₂ x from rfl,
           pureRGenuineEndoFib_local (I := I) (M := M) g m W₁ W₂ x hx]
 
+/-- **The order-`0` moving-frame pure-Riemann curvature operator is a fixed-operator-field action.** For
+each covariant rank `r` there is a *fixed* smooth `(r, r)`-operator field `Φ₀ r` such that the order-`0`
+frame-free endomorphism is its operator-field action on the section:
+`pureRGenuineDiffOp 0 r W = appCc (Φ₀ r) W` for every `W`.
+
+**Mathematical content (sound, not packaging, frame-free).** At rank `0` the order-`0` operator is the
+zero operator (`pureRGenuineEndo0`, the `r = 0` branch), matched by `Φ₀ 0 = 0` (`appCc 0 W = 0`). At
+rank `m + 1` the fibre value `pureRGenuineEndoFib g m W x` is the slot-`0` uncurry of the pure-Riemann
+direction CLM against the moving frame `smoothOrthoFrame g x`; its *value* is frame-free (a genuine
+`g`-metric trace, `pureRFrozenDirCLM_frame_independent`), `ℝ`-linear and value-local in the slot-`0`
+reading of `W x` (`pureRGenuineEndoFib_linear`, `pureRGenuineEndoFib_local`), so it factors as a fixed
+fibrewise operator `Φ₀ (m + 1) x : T0S(m+1) →L T0S(m+1)` post-composed with `W x` — exactly the
+operator-field action `appCc (Φ₀ (m + 1)) W`.  Because the value is frame-free, `Φ₀` is a fixed smooth
+curvature-coefficient field (built from `g, R` alone), never a chart-selection-unbounded frame jet.
+
+This isolates the order-`0` curvature content — the single per-tower input the abstract operator-field
+normal-form engine (`OperatorFieldDifferentiatedTowerNormalForm`) needs to deliver the high-order jet
+envelope.  The genuinely-irreducible packaging here is the base-point smoothness of the frame-free
+curvature endomorphism field `Φ₀ r`; it is the precise atomic node disclosed as a `sorry`. -/
+private theorem exists_pureRGenuineDiffOp_base_appCc (g : SmoothRiemannianMetric I M) :
+    ∃ Φ₀ : ∀ r : ℕ, SmoothCcTensor g (r + 0) (r + 0),
+      ∀ (r : ℕ) (W : SmoothCcTensor g 0 r),
+        pureRGenuineDiffOp (I := I) (M := M) g 0 r W =
+          appCc (I := I) (M := M) g (r + 0) (r + 0) (Φ₀ r) W := by
+  sorry
+
 /-- **The high-order (`p ≥ 1`) frame-free per-rank section-proportional fibre envelope for the
 differentiated moving-frame pure-Riemann curvature tower, in JET form** (the single posited analytic
 node). For a closed smooth Riemannian manifold `(M, g)` there is a nonnegative envelope family
@@ -1311,7 +1338,24 @@ theorem exists_proportional_pureRGenuineDiffOp_highOrder (g : SmoothRiemannianMe
           kappaHigh p r * ∑ q ∈ Finset.range (p + 2),
             riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
               ((iteratedCovGrad g 0 r q W).toSection x) := by
-  sorry
+  classical
+  -- The recursion of `pureRGenuineDiffOp` is already in the engine's `castRankCc_db` form.
+  obtain ⟨Φ₀, hΦ₀⟩ := exists_pureRGenuineDiffOp_base_appCc (I := I) (M := M) g
+  -- The operator-field normal form holds at every order from the base factorisation.
+  have hNF : ∀ (p r : ℕ),
+      NormalForm (I := I) (M := M) g (pureRGenuineDiffOp (I := I) (M := M) g) p r :=
+    fun p => normalForm_of_base (I := I) (M := M) g
+      (pureRGenuineDiffOp (I := I) (M := M) g)
+      (covGrad_pureRGenuineDiffOp_eq (I := I) (M := M) g) Φ₀ hΦ₀ p
+  -- The per-order jet envelope, assembled into a per-order, per-rank family.
+  choose kap hkap_nn hkap using fun p r =>
+    exists_jet_bound_of_normalForm (I := I) (M := M) g
+      (pureRGenuineDiffOp (I := I) (M := M) g) p r (hNF p r)
+  refine ⟨fun p r => kap (p + 1) r, fun p r => hkap_nn (p + 1) r, fun p r W x => ?_⟩
+  -- The order-`(p + 1)` jet bound has window `range ((p + 1) + 1) = range (p + 2)`.
+  have h := hkap (p + 1) r W x
+  rw [show (p + 1) + 1 = p + 2 from rfl] at h
+  exact h
 
 /-- **The frame-free per-order, per-rank section-proportional fibre envelope for the differentiated
 moving-frame pure-Riemann curvature tower, in JET form.** For a closed smooth Riemannian manifold

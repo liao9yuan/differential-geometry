@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLine
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricContractionLeibnizGrid
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedDiffOpProportionalBound
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FiberNormSubadditivity
+import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldDifferentiatedTowerNormalForm
 
 /-! # The covariant-Leibniz curvature-coefficient grid for the metric contraction, constructed
 
@@ -243,6 +244,165 @@ theorem diffCurvOp_isOrderZeroCurvFactor :
       curvatureContraction_toSection_apply (I := I) (M := M) g r W₁ hX hY x,
       curvatureContraction_toSection_apply (I := I) (M := M) g r W₂ hX hY x, hx]
 
+set_option backward.isDefEq.respectTransparency false in
+/-- **The order-`0` curvature endomorphism on `(0, r)`-tensors, as a fibre operator.** At a point `x`,
+the bundled curvature endomorphism `R(X, Y)·` on the `(0, r)`-tensor space (a fibre of the `(r, r)`-tensor
+bundle), `riemannOp (tensor0SCovariantDerivative r (LeviCivita g)) x (X x) (Y x)`. Built from `g, R, X, Y`
+alone — frame-free. -/
+noncomputable def diffCurvPhi0Fib (g : SmoothRiemannianMetric I M)
+    (X Y : Π b : M, TangentSpace I b) (r : ℕ) (x : M) : TensorRSSpace r r I x :=
+  (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace r I x from
+    riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g)) x (X x) (Y x) :
+    TensorRSSpace r r I x)
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- **Base-point smoothness of the order-`0` curvature endomorphism field.** The `(r, r)`-tensor fibre
+field `x ↦ diffCurvPhi0Fib g X Y r x` is a smooth section: pointwise on a smooth `(0, r)`-section `Z`, its
+value `riemannOp (tensor0SCov r) x (X x) (Y x) (Z x) = riemannSec (tensor0SCov r) X Y Z x` is smooth
+(`riemannSec_contMDiff`), and `contMDiff_clm_section_of_pointwise` lifts that per-section smoothness to the
+operator-valued section. -/
+theorem diffCurvPhi0Fib_contMDiff (g : SmoothRiemannianMetric I M)
+    {X Y : Π b : M, TangentSpace I b}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X))
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y)) (r : ℕ) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r r ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (TensorRSModel r r ℝ E)
+        (E := fun z : M => TensorRSSpace r r I z)
+        x (diffCurvPhi0Fib (I := I) (M := M) g X Y r x)) := by
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (F₁ := Tensor0SModel r ℝ E) (V₁ := fun x : M => Tensor0SSpace r I x)
+    (F₂ := Tensor0SModel r ℝ E) (V₂ := fun x : M => Tensor0SSpace r I x)
+    (φ := fun x => (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace r I x from
+      diffCurvPhi0Fib (I := I) (M := M) g X Y r x))
+  intro Z
+  have heq : (fun x : M => TotalSpace.mk' (Tensor0SModel r ℝ E)
+      (E := fun z : M => Tensor0SSpace r I z) x
+      ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace r I x from
+        diffCurvPhi0Fib (I := I) (M := M) g X Y r x) (Z x))) =
+      (fun x : M => TotalSpace.mk' (Tensor0SModel r ℝ E)
+      (E := fun z : M => Tensor0SSpace r I z) x
+      (riemannSec (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g))
+        (fun b => X b) (fun b => Y b) (fun b => Z b) x)) := by
+    funext x
+    rw [show (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace r I x from
+        diffCurvPhi0Fib (I := I) (M := M) g X Y r x) =
+      riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g))
+        x (X x) (Y x) from rfl]
+    rw [riemannOp_apply_smooth
+      (cov := Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g))
+      hX hY Z.contMDiff]
+  rw [heq]
+  exact riemannSec_contMDiff
+    (cov := Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g))
+    hX hY Z.contMDiff
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The order-`0` curvature endomorphism as a smooth `(r, r)`-tensor section** `Φ₀ r`, the fixed
+operator field through which the order-`0` contraction acts. -/
+noncomputable def diffCurvPhi0 (g : SmoothRiemannianMetric I M)
+    {X Y : Π b : M, TangentSpace I b}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X))
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y)) (r : ℕ) : SmoothCcTensor g r r where
+  toSection :=
+    { toFun := fun x : M => diffCurvPhi0Fib (I := I) (M := M) g X Y r x
+      contMDiff_toFun := diffCurvPhi0Fib_contMDiff (I := I) (M := M) g hX hY r }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The order-`0` differentiated-curvature contraction is the operator-field action of `Φ₀`.**
+`diffCurvOp 0 r W = appCc (Φ₀ r) W`.
+
+**Proof (sound, frame-free).** Fibrewise, `diffCurvOp 0 r W (x) = riemannOp (tensorCov g 0 r) x (X x)
+(Y x) (W x)` (`curvatureContraction_toSection_apply`), while `appCc (Φ₀ r) W (x) = (Φ₀ r x).comp (W x)`
+(`appCc_toSection`).  Both are `(0, r)`-tensors; tested on a `(0, 0)`-tensor `d` (extended to a smooth
+section `dSec`), the `(0, r)`-tensor bundle's curvature is the generic Hom-bundle curvature–Leibniz rule
+`riemannSec_homBundleGen_apply_eq`, `R^{Hom} W = R_V(W·d) − W(R_U d)` with `R_V = R^{(0,r)}`,
+`R_U = R^{(0,0)} = 0` (the scalar curvature vanishes, `riemannSec_tensor0SCov_zero_eq_zero`).  So both
+sides reduce to `riemannSec (tensor0SCov r) X Y (y ↦ W y (dSec y)) x`, the value of `R^{(0,r)}` on the
+fibre `W x d` — exactly `(Φ₀ r x) (W x d)`. -/
+theorem diffCurvOp_zero_eq_appCc (g : SmoothRiemannianMetric I M)
+    {X Y : Π b : M, TangentSpace I b}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X))
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y)) (r : ℕ) (W : SmoothCcTensor g 0 r) :
+    diffCurvOp (I := I) (M := M) g hX hY 0 r W =
+      appCc (I := I) (M := M) g r r (diffCurvPhi0 (I := I) (M := M) g hX hY r) W := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  -- Both sides are `(0, r)`-tensors at `x`, i.e. CLMs `T0S(0) →L T0S(r)`; test on `d`.
+  apply ContinuousLinearMap.ext
+  intro d
+  -- `appCc`'s section value is definitionally the fibrewise composition (`appCc_toSection` is `rfl`);
+  -- `Φ₀`'s fibre is definitionally the bundled curvature endomorphism (`diffCurvPhi0Fib` is `rfl`).
+  show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
+      (diffCurvOp (I := I) (M := M) g hX hY 0 r W).toSection x) d =
+    (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace r I x from
+        riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g))
+          x (X x) (Y x))
+      ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x) d)
+  rw [show (diffCurvOp (I := I) (M := M) g hX hY 0 r W).toSection x =
+      (curvatureContraction (I := I) (M := M) g r W hX hY).toSection x from rfl,
+    curvatureContraction_toSection_apply (I := I) (M := M) g r W hX hY x]
+  -- Goal: riemannOp(tensorCov g 0 r) x (X x)(Y x)(W x) d = riemannOp(tensor0SCov r) x (X x)(Y x)(W x d).
+  obtain ⟨dSec, hdSec⟩ := ContMDiffSection.exists_eq_at (I := I)
+    (F := Tensor0SModel 0 ℝ E) (V := fun y : M => Tensor0SSpace 0 I y) (n := (⊤ : ℕ∞)) x d
+  have hWd_smooth : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel r ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (Tensor0SModel r ℝ E)
+        (E := fun z : M => Tensor0SSpace r I z) y
+        ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace r I y from W.toSection y) (dSec y))) :=
+    ContMDiff.clm_bundle_apply (b := id) W.toSection.contMDiff dSec.contMDiff
+  -- LHS: convert riemannOp(tensorCov)(W x) d to riemannSec and apply the Hom-bundle naturality.
+  rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
+        riemannOp (tensorCov (I := I) g 0 r) x (X x) (Y x) (W.toSection x)) d =
+      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
+        riemannSec (tensorCov (I := I) g 0 r) (fun b => X b) (fun b => Y b)
+          (fun b => W.toSection b) x) (dSec x) from by
+    rw [riemannOp_apply_smooth (cov := tensorCov (I := I) g 0 r) hX hY W.toSection.contMDiff]
+    rw [show d = dSec x from hdSec.symm]]
+  rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
+        riemannSec (tensorCov (I := I) g 0 r) (fun b => X b) (fun b => Y b)
+          (fun b => W.toSection b) x) (dSec x) =
+      riemannSec (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g))
+          (fun b => X b) (fun b => Y b)
+          (HomConnectionGen.pairedSection (M := M) (U := fun z : M => Tensor0SSpace 0 I z)
+            (V := fun z : M => Tensor0SSpace r I z) (fun b => W.toSection b) (fun b => dSec b)) x -
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x)
+          (riemannSec (Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g))
+            (fun b => X b) (fun b => Y b) (fun b => dSec b) x) from
+    HomConnectionGen.riemannSec_homBundleGen_apply_eq I M
+      (Tensor0SModel 0 ℝ E) (fun z : M => Tensor0SSpace 0 I z)
+      (Tensor0SModel r ℝ E) (fun z : M => Tensor0SSpace r I z)
+      (Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g))
+      (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g))
+      ⟨fun b => X b, hX⟩ ⟨fun b => Y b, hY⟩ W.toSection dSec x]
+  rw [show riemannSec (Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g))
+        (fun b => X b) (fun b => Y b) (fun b => dSec b) x = 0 from
+    riemannSec_tensor0SCov_zero_eq_zero (I := I) (M := M) g ⟨fun b => X b, hX⟩ ⟨fun b => Y b, hY⟩
+      (fun b => dSec b) dSec.contMDiff x]
+  rw [map_zero, sub_zero]
+  -- RHS: convert riemannOp(tensor0SCov r)(W x d) to riemannSec of the same paired section.
+  rw [show (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace r I x from
+        riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g))
+          x (X x) (Y x))
+      ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x) d) =
+      riemannSec (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g))
+          (fun b => X b) (fun b => Y b)
+          (HomConnectionGen.pairedSection (M := M) (U := fun z : M => Tensor0SSpace 0 I z)
+            (V := fun z : M => Tensor0SSpace r I z) (fun b => W.toSection b) (fun b => dSec b)) x from by
+    rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x) d =
+        HomConnectionGen.pairedSection (M := M) (U := fun z : M => Tensor0SSpace 0 I z)
+          (V := fun z : M => Tensor0SSpace r I z) (fun b => W.toSection b) (fun b => dSec b) x from by
+      rw [HomConnectionGen.pairedSection_apply, show d = dSec x from hdSec.symm]]
+    rw [riemannOp_apply_smooth
+      (cov := Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g)) hX hY
+      (show ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel r ℝ E)) ∞
+        (fun y : M => TotalSpace.mk' (Tensor0SModel r ℝ E)
+          (E := fun z : M => Tensor0SSpace r I z) y
+          (HomConnectionGen.pairedSection (M := M) (U := fun z : M => Tensor0SSpace 0 I z)
+            (V := fun z : M => Tensor0SSpace r I z) (fun b => W.toSection b) (fun b => dSec b) y))
+        from hWd_smooth)]]
+
 /-- **The high-order (`p ≥ 1`) per-rank section-proportional fibre envelope for the
 differentiated-curvature contraction, in JET form** (the single posited analytic node for this tower).
 For a closed smooth Riemannian manifold `(M, g)` and smooth global tangent fields `X, Y`, there is a
@@ -308,7 +468,33 @@ theorem exists_proportional_diffCurvOp_highOrder :
           kappaHigh p r * ∑ q ∈ Finset.range (p + 2),
             riemannianFiberNormSq (I := I) (M := M) g 0 (r + q) x
               ((iteratedCovGrad g 0 r q W).toSection x) := by
-  sorry
+  classical
+  -- The recursion of `diffCurvOp` in the engine's `castRankCc_db` form (the tower's `covGrad_diffCurvOp_eq`
+  -- uses `castRankCc_lg`, defeq to `castRankCc_db` — both are `h ▸ ·`).
+  have hcovGrad_op : ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r),
+      covGrad g 0 (r + p) (diffCurvOp (I := I) (M := M) g hX hY p r W) =
+        diffCurvOp (I := I) (M := M) g hX hY (p + 1) r W +
+          castRankCc_db g 0 (by omega : (r + 1) + p = r + (p + 1))
+            (diffCurvOp (I := I) (M := M) g hX hY p (r + 1) (covGrad g 0 r W)) := by
+    intro p r W
+    rw [covGrad_diffCurvOp_eq (I := I) (M := M) g hX hY p r W]
+    rfl
+  -- The operator-field normal form holds at every order from the (proved) base factorisation.
+  have hNF : ∀ (p r : ℕ),
+      NormalForm (I := I) (M := M) g (diffCurvOp (I := I) (M := M) g hX hY) p r :=
+    fun p => normalForm_of_base (I := I) (M := M) g
+      (diffCurvOp (I := I) (M := M) g hX hY) hcovGrad_op
+      (fun r => diffCurvPhi0 (I := I) (M := M) g hX hY r)
+      (fun r W => diffCurvOp_zero_eq_appCc (I := I) (M := M) g hX hY r W) p
+  -- The per-order jet envelope, assembled into a per-order, per-rank family.
+  choose kap hkap_nn hkap using fun p r =>
+    exists_jet_bound_of_normalForm (I := I) (M := M) g
+      (diffCurvOp (I := I) (M := M) g hX hY) p r (hNF p r)
+  refine ⟨fun p r => kap (p + 1) r, fun p r => hkap_nn (p + 1) r, fun p r W x => ?_⟩
+  -- The order-`(p + 1)` jet bound has window `range ((p + 1) + 1) = range (p + 2)`.
+  have h := hkap (p + 1) r W x
+  rw [show (p + 1) + 1 = p + 2 from rfl] at h
+  exact h
 
 /-- **Continuous per-order, per-rank section-proportional fibre envelope for the
 differentiated-curvature contraction, in JET form.** For a closed smooth Riemannian manifold `(M, g)`
