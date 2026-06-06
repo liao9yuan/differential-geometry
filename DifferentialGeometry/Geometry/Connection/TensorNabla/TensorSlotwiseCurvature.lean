@@ -161,7 +161,7 @@ theorem riemannSec_tensor0SCov_zero_eq_zero
 
 /-- The base-tangent Riemann curvature acting on a fixed slot vector `u`, packaged as the
 section-level `riemannSec` of the Levi-Civita connection along a smooth extension of `u`. -/
-private def baseSlotCurv
+def baseSlotCurv
     (g : SmoothRiemannianMetric I M)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
     TangentSpace I x :=
@@ -172,7 +172,7 @@ private def baseSlotCurv
 with source bundle the tangent bundle and target the `(0, s)`-tensor bundle, both connected by
 the Levi-Civita connection and its induced `(0, s)`-tensor connection. This is the connection
 whose curvature–Leibniz rule `riemannSec_homBundleGen_apply_eq` supplies the leading-slot peel. -/
-private noncomputable def homGenS (g : SmoothRiemannianMetric I M) (s : ℕ) :
+noncomputable def homGenS (g : SmoothRiemannianMetric I M) (s : ℕ) :
     CovariantDerivative I (E →L[ℝ] Tensor0SModel s ℝ E)
       (fun x : M => TangentSpace I x →L[ℝ] Tensor0SSpace s I x) :=
   HomConnectionGen.homBundleCovariantDerivativeGen I M E
