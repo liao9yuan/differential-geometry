@@ -2010,7 +2010,7 @@ pureRFrozenEndoFib g s (smoothOrthoFrame g x) (∇T) x` equals the frozen-frame 
 reading of `∇T` along `B_i` is the directional covariant derivative `∇_{B_i} T`), which equals the
 moving-centre `GcurvSection` fibre at the centre `x` itself
 (`GcurvSection_toSection_eventuallyEq_fixedFramePureRSection` at its own centre). -/
-private lemma pureRGenuineDiffOp0_eq_GcurvSection
+lemma pureRGenuineDiffOp0_eq_GcurvSection
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T : SmoothCcTensor g 0 s) :
     pureRGenuineDiffOp (I := I) (M := M) g 0 (s + 1)
         (covGrad (I := I) (M := M) g 0 s T) =
