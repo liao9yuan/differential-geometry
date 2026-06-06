@@ -911,15 +911,17 @@ is a banked continuous, `sobolevLip`/`AllOrderBallControl`-supplying smoothing t
 tower that once consumed it dissolved: the remainder-class match is now carried directly by the
 single deep selector `exists_deTurckRemainderClassSelector_ball`).
 
-This node is posited (`sorry`) **only because of an import-layer constraint**: the heat
-smooth-output suite `HeatOutputContinuousRepr` sits *above* this file in the DeTurck tower (it
-imports `DeTurckG0AnalyticInputs`, which imports `DeTurckForcingFirstOrderCoupling`, which imports
-this file), so its bounds cannot be cited here without a build cycle.  The bounds themselves are
-already proven sorry-free over the Weyl baseline in that suite; the `/prove` recursion discharges
-this node by exposing those bounds below the cycle (a thin relocation of the order-`n` size and
-Lipschitz lemmas, whose proofs need only the cycle-free pieces
-`spectralSmoothRealizesAsSmooth_of_closed` / `pouSobolevToHsNorm_le_spectral` /
-`tensorHeatSemigroupHs`).
+This node is **proven** (its body carries no `sorry`): it directly cites the relocated all-order
+heat smooth-output bounds `tensorHeatSemigroupHs_output_smoothRepr_toHs_le` /
+`tensorHeatSemigroupHs_output_smoothRepr_toHs_sub_le` from the suite `HeatOutputContinuousRepr`,
+which lives in `Analysis/Spectral/Intrinsic/MetricRealization` *below* this file (the bilinear
+fibre-`Hˢ` bound was relocated to its analysis home precisely so the suite no longer imports any
+`Geometry/Flow/RicciFlow/ShortTime/DeTurck*` file, severing the former cycle).  Consumers
+transitively depend on `sorryAx` only through the project's single deferred Weyl/Gårding spectral
+substrate underlying those bounds (`spectralSmoothRealizesAsSmooth_of_closed` /
+`pouSobolevToHsNorm_le_spectral`, which transit the local-Weyl-law node
+`weyl_eigenvalue_counting_bound_of_closed` and the connection-Laplacian maximal-regularity node),
+not through any import-constraint placeholder.
 
 **Non-vacuous** — `hBsize`/`hBlip` reject a carrier with unbounded high-order output: a
 bump-interpolated synthesis hitting high-frequency eigentensors has order-`n` Sobolev norm
