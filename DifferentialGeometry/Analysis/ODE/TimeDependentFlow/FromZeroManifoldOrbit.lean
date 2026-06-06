@@ -1,0 +1,580 @@
+import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Manifold
+import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOperator.ConventionBridge
+import DifferentialGeometry.Analysis.ODE.ForwardVariationalFromZero
+import Mathlib.Geometry.Manifold.IntegralCurve.Basic
+
+/-!
+# From-`0` manifold orbit of an interior-`C∞` time-dependent field
+
+This file pushes the Banach **from-`0` Picard layer**
+(`forward_picard_solution_from_zero`) through the basepoint chart, producing the manifold
+flow germ at `t = 0` for a time-dependent vector field `X` on a closed manifold `M` that is
+interior-`C∞` on `(0, T) ×ˢ univ` and continuous up to `t = 0` on `Icc 0 T ×ˢ univ`.
+
+For each base point `x : M` we choose the chart `α := x` *pinned to the initial point* and run
+the from-`0` Picard solution of the **trivialised** chart field
+`F s c = tangentCoordChange I (φ.symm c) α (φ.symm c) (X s (φ.symm c))`
+(the genuine chart velocity, `field_form_identity_trivreading_eq_chartvelocity`).  The chart
+solution pulls back to the manifold orbit `Φ s = (extChartAt I α).symm (γ_E s)`, on which the
+chart-coordinate one-sided derivative is the `tangentCoordChange` form and — after the
+pushforward cancellation `pushforward_velocity_cancellation` — the manifold velocity is the
+**bare** geometric velocity `(1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t x))`.  Because the chart is
+pinned to the initial point (never read off a moving orbit point), the chart reads here are
+`T1`-safe.
+
+## Main results
+
+* `fromZero_manifold_orbit_of_lipschitz` — per base point, the from-`0` orbit with
+  `Φ 0 = x`, the `tangentCoordChange` chart-coordinate one-sided derivative on `Ico 0 δ`,
+  and the bare manifold velocity on `Ico 0 δ`, from an explicit chart-field Lipschitz datum.
+-/
+
+open Set Function Filter Metric Bundle
+open scoped Topology NNReal ContDiff Manifold
+
+namespace DifferentialGeometry.PDE.RicciFlow.ODE
+
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+  [CompleteSpace E]
+variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [BoundarylessManifold I M] [I.Boundaryless] [T2Space M]
+
+/-- The **trivialised chart field** of a time-dependent vector field `X`, read in the chart
+at `α`: `F s c = tangentCoordChange I (φ.symm c) α (φ.symm c) (X s (φ.symm c))`, equal to the
+`.2`-component of the chart trivialization applied to the bundle value at `φ.symm c`
+(`field_form_identity_trivreading_eq_chartvelocity`). -/
+noncomputable def fromZeroChartField (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) :
+    ℝ → E → E :=
+  fun s c =>
+    ((trivializationAt E (TangentSpace I) α)
+      (TotalSpace.mk' E ((extChartAt I α).symm c) (X s ((extChartAt I α).symm c)))).2
+
+lemma fromZeroChartField_eq_tangentCoordChange
+    (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (s : ℝ) (c : E) :
+    fromZeroChartField (I := I) X α s c
+      = tangentCoordChange I ((extChartAt I α).symm c) α ((extChartAt I α).symm c)
+          (X s ((extChartAt I α).symm c)) := rfl
+
+/-- **Interior joint-`C∞` of the trivialised chart field on a time-window.**
+
+The from-`0` companion of `chart_pushforward_field_jointContDiff`, restricted to the open time
+interval `(0, T)` where the interior datum `hint` lives.  On `(0, T) ×ˢ Metric.ball x₀ ρ` (with
+the ball inside the chart target), the trivialised chart field `fromZeroChartField X α` is jointly
+`C∞`.  The proof transcribes the global version with `univ` replaced by `Ioo 0 T`. -/
+theorem fromZeroChartField_jointContDiffOn_Ioo
+    (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (T : ℝ)
+    (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+    {ρ : ℝ} (_hρ : 0 < ρ)
+    (hρ_sub : Metric.ball (extChartAt I α α) ρ ⊆ (extChartAt I α).target) :
+    ContDiffOn ℝ ∞ (Function.uncurry (fromZeroChartField (I := I) X α))
+      (Set.Ioo (0 : ℝ) T ×ˢ Metric.ball (extChartAt I α α) ρ) := by
+  set x₀ : E := extChartAt I α α with hx₀
+  set e := trivializationAt E (TangentSpace I) α with he
+  set f : ℝ × M → TangentBundle I M :=
+    fun q => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M) with hf
+  set S : Set (ℝ × M) :=
+    Set.Ioo (0 : ℝ) T ×ˢ ((extChartAt I α).symm '' Metric.ball x₀ ρ) with hS
+  have hX_on : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞ f S := by
+    refine hint.mono ?_
+    rintro ⟨s, p⟩ ⟨hs, _⟩
+    exact ⟨hs, Set.mem_univ _⟩
+  have hmaps : Set.MapsTo f S e.source := by
+    rintro ⟨s, p⟩ hq
+    obtain ⟨-, c, hc, rfl⟩ := hq
+    have hcsrc : (extChartAt I α).symm c ∈ (chartAt H α).source := by
+      have hmem : (extChartAt I α).symm c ∈ (extChartAt I α).source :=
+        (extChartAt I α).map_target (hρ_sub hc)
+      rwa [extChartAt_source] at hmem
+    rw [he, TangentBundle.trivializationAt_source]
+    exact hcsrc
+  have hreading : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, E) ∞
+      (fun q : ℝ × M => (e (f q)).2) S :=
+    ((e.contMDiffOn_iff hmaps).mp hX_on).2
+  have hsymm : ContMDiffOn 𝓘(ℝ, E) I ∞ (extChartAt I α).symm (Metric.ball x₀ ρ) :=
+    (contMDiffOn_extChartAt_symm α).mono hρ_sub
+  have hreindex :
+      ContMDiffOn (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E)) (𝓘(ℝ, ℝ).prod I) ∞
+        (Prod.map (id : ℝ → ℝ) (extChartAt I α).symm)
+        (Set.Ioo (0 : ℝ) T ×ˢ Metric.ball x₀ ρ) :=
+    (contMDiffOn_id (I := 𝓘(ℝ, ℝ))).prodMap hsymm
+  have hsub :
+      (Set.Ioo (0 : ℝ) T ×ˢ Metric.ball x₀ ρ) ⊆
+        Prod.map (id : ℝ → ℝ) (extChartAt I α).symm ⁻¹' S := by
+    rintro ⟨s, c⟩ ⟨hs, hc⟩
+    exact ⟨hs, Set.mem_image_of_mem _ hc⟩
+  have hcomp :
+      ContMDiffOn (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E)) 𝓘(ℝ, E) ∞
+        ((fun q : ℝ × M => (e (f q)).2) ∘ Prod.map (id : ℝ → ℝ) (extChartAt I α).symm)
+        (Set.Ioo (0 : ℝ) T ×ˢ Metric.ball x₀ ρ) :=
+    hreading.comp hreindex hsub
+  have hfun :
+      ((fun q : ℝ × M => (e (f q)).2) ∘ Prod.map (id : ℝ → ℝ) (extChartAt I α).symm)
+        = Function.uncurry (fromZeroChartField (I := I) X α) := by
+    funext q
+    rfl
+  rw [hfun] at hcomp
+  rw [← contMDiffOn_iff_contDiffOn, modelWithCornersSelf_prod, ← chartedSpaceSelf_prod]
+  exact hcomp
+
+/-- **Time-continuity of the trivialised chart field up to `t = 0`.**
+
+For a fixed chart coordinate `c`, the trivialised chart field `s ↦ fromZeroChartField X α s c`
+is the fixed continuous linear map `tangentCoordChange I (φ.symm c) α (φ.symm c)` applied to the
+section value `s ↦ X s (φ.symm c)`, which is continuous up to `t = 0` by the `t = 0`-continuity
+datum `hcont0`.  No moving-base smoothness is required (the chart base is the fixed point
+`φ.symm c`). -/
+theorem fromZeroChartField_continuousOn_time_from_zero
+    (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) {T δ : ℝ} (hδT : δ ≤ T)
+    (hcont0 : ContinuousOn
+      (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2))
+      (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
+    (c : E) :
+    ContinuousOn (fun s : ℝ => fromZeroChartField (I := I) X α s c) (Set.Icc (0 : ℝ) δ) := by
+  set y : M := (extChartAt I α).symm c with hy
+  set T₀ : E →L[ℝ] E := tangentCoordChange I y α y with hT₀
+  have hrw : (fun s : ℝ => fromZeroChartField (I := I) X α s c)
+      = fun s : ℝ => T₀ (X s y) := by
+    funext s
+    rw [fromZeroChartField_eq_tangentCoordChange]
+  rw [hrw]
+  have hXy : ContinuousOn (fun s : ℝ => (X s y : TangentSpace I y)) (Set.Icc (0 : ℝ) δ) := by
+    have hcomp : ContinuousOn (fun s : ℝ => (X s y : TangentSpace I y))
+        (Set.Icc (0 : ℝ) T) := by
+      have hmaps : Set.MapsTo (fun s : ℝ => ((s, y) : ℝ × M))
+          (Set.Icc (0 : ℝ) T) (Set.Icc (0 : ℝ) T ×ˢ Set.univ) :=
+        fun s hs => ⟨hs, Set.mem_univ _⟩
+      have hpair : ContinuousOn (fun s : ℝ => ((s, y) : ℝ × M)) (Set.Icc (0 : ℝ) T) :=
+        (continuous_id.prodMk continuous_const).continuousOn
+      exact hcont0.comp hpair hmaps
+    exact hcomp.mono (Set.Icc_subset_Icc_right hδT)
+  exact T₀.continuous.comp_continuousOn hXy
+
+/-- **A-priori confinement of a from-`0` ODE solution to the validity ball.**
+
+Banach-space helper.  If `γ : ℝ → E` is continuous on `[0, δ]`, starts at the center `x₀`, has
+the one-sided right derivative `f t (γ t)` on `[0, δ)`, the field is norm-bounded by `L` on the
+closed ball `closedBall x₀ a` (for times in `[0, δ]`), and the **strict** validity `L · δ < a`
+holds, then `γ s ∈ closedBall x₀ a` for every `s ∈ [0, δ]`.
+
+The proof is the standard a-priori continuation estimate: the set
+`{t | dist (γ t) x₀ ≤ L · t}` meets `[0, δ]` on a closed subset and contains `0`; at any
+confined interior point `x` the strict margin `L · x ≤ L · δ < a` puts `γ x` in the *open* ball,
+so the velocity bound `‖f u (γ u)‖ ≤ L` holds on a whole neighborhood, and the mean-value
+segment bound `‖γ z − γ x‖ ≤ L · (z − x)` propagates the estimate to a point beyond `x`
+(`IsClosed.Icc_subset_of_forall_exists_gt`). -/
+private theorem fromZero_orbit_confined
+    {f : ℝ → E → E} {x₀ : E} {a L : ℝ} {δ : ℝ} (hL : 0 ≤ L)
+    (γ : ℝ → E) (hγ_init : γ 0 = x₀)
+    (hγcont : ContinuousOn γ (Set.Icc (0 : ℝ) δ))
+    (hγderiv : ∀ t ∈ Set.Ico (0 : ℝ) δ, HasDerivWithinAt γ (f t (γ t)) (Set.Ici (0 : ℝ)) t)
+    (hfnorm : ∀ t ∈ Set.Icc (0 : ℝ) δ, ∀ y ∈ Metric.closedBall x₀ a, ‖f t y‖ ≤ L)
+    (hLδ : L * δ < a) :
+    ∀ s ∈ Set.Icc (0 : ℝ) δ, γ s ∈ Metric.closedBall x₀ a := by
+  have hdist_continuousOn : ContinuousOn (fun t : ℝ => dist (γ t) x₀) (Set.Icc 0 δ) :=
+    continuous_dist.comp_continuousOn (hγcont.prodMk continuousOn_const)
+  set g : ℝ → ℝ := fun t => dist (γ t) x₀ - L * t with hg
+  have hg_cont : ContinuousOn g (Set.Icc 0 δ) :=
+    hdist_continuousOn.sub (continuousOn_const.mul continuousOn_id)
+  set S : Set ℝ := {t : ℝ | dist (γ t) x₀ ≤ L * t} with hS
+  have hbound_to_openball : ∀ s, s ∈ Set.Ico (0 : ℝ) δ → s ∈ S →
+      dist (γ s) x₀ < a := by
+    intro s hs hsS
+    refine lt_of_le_of_lt hsS ?_
+    have hsδ : s ≤ δ := le_of_lt hs.2
+    calc L * s ≤ L * δ := by nlinarith [hL]
+      _ < a := hLδ
+  have hScl : IsClosed (S ∩ Set.Icc (0 : ℝ) δ) := by
+    have hpre : IsClosed (Set.Icc (0 : ℝ) δ ∩ g ⁻¹' Set.Iic 0) :=
+      hg_cont.preimage_isClosed_of_isClosed isClosed_Icc isClosed_Iic
+    have heq : Set.Icc (0 : ℝ) δ ∩ g ⁻¹' Set.Iic 0 = S ∩ Set.Icc (0 : ℝ) δ := by
+      ext t
+      simp only [hS, hg, Set.mem_inter_iff, Set.mem_preimage, Set.mem_Iic, Set.mem_setOf_eq,
+        sub_nonpos]
+      tauto
+    rwa [heq] at hpre
+  have h0S : (0 : ℝ) ∈ S := by
+    simp only [hS, Set.mem_setOf_eq, hγ_init, dist_self, mul_zero, le_refl]
+  have hgt : ∀ x ∈ S ∩ Set.Ico (0 : ℝ) δ, ∀ y ∈ Set.Ioi x, (S ∩ Set.Ioc x y).Nonempty := by
+    rintro x ⟨hxS, hx_mem⟩ y hy
+    have hxδ : x < δ := hx_mem.2
+    have hx0 : 0 ≤ x := hx_mem.1
+    have hopen_x : dist (γ x) x₀ < a := hbound_to_openball x hx_mem hxS
+    have hballnbhd : {u : ℝ | dist (γ u) x₀ < a} ∈ nhdsWithin x (Set.Icc (0 : ℝ) δ) := by
+      have hcontx : ContinuousWithinAt (fun u : ℝ => dist (γ u) x₀) (Set.Icc 0 δ) x :=
+        hdist_continuousOn x ⟨hx0, le_of_lt hxδ⟩
+      exact hcontx (isOpen_Iio.mem_nhds hopen_x)
+    obtain ⟨ε, hε_pos, hε_sub⟩ : ∃ ε > 0, ∀ u ∈ Set.Icc x (x + ε),
+        u ∈ Set.Icc (0 : ℝ) δ ∧ dist (γ u) x₀ ≤ a := by
+      rw [Metric.mem_nhdsWithin_iff] at hballnbhd
+      obtain ⟨ρ, hρ_pos, hρ_sub⟩ := hballnbhd
+      have hm_pos : 0 < min ρ (δ - x) := lt_min hρ_pos (by linarith)
+      refine ⟨min ρ (δ - x) / 2, by positivity, fun u hu => ?_⟩
+      have hu1 : x ≤ u := hu.1
+      have hu2 : u ≤ x + min ρ (δ - x) / 2 := hu.2
+      have hux_lt : u - x < min ρ (δ - x) := by
+        have : u - x ≤ min ρ (δ - x) / 2 := by linarith
+        linarith [hm_pos]
+      have hu_le_δ : u ≤ δ := by
+        have h1 : u - x < δ - x := lt_of_lt_of_le hux_lt (min_le_right _ _)
+        linarith
+      have hu_mem : u ∈ Set.Icc (0 : ℝ) δ := ⟨le_trans hx0 hu1, hu_le_δ⟩
+      refine ⟨hu_mem, le_of_lt ?_⟩
+      have hu_ball : u ∈ Metric.ball x ρ := by
+        rw [Metric.mem_ball, Real.dist_eq, abs_of_nonneg (by linarith)]
+        exact lt_of_lt_of_le hux_lt (min_le_left _ _)
+      have := hρ_sub ⟨hu_ball, hu_mem⟩
+      simpa using this
+    set z : ℝ := min y (x + ε / 2) with hz
+    have hxz : x < z := by
+      rw [hz]; exact lt_min hy (by linarith)
+    have hzy : z ≤ y := by rw [hz]; exact min_le_left _ _
+    have hz_lt : z < x + ε := by
+      rw [hz]; exact lt_of_le_of_lt (min_le_right _ _) (by linarith)
+    have hvel : ∀ u ∈ Set.Ico x z, ‖f u (γ u)‖ ≤ L := by
+      intro u hu
+      have huicc : u ∈ Set.Icc x (x + ε) :=
+        ⟨hu.1, le_of_lt (lt_trans hu.2 hz_lt)⟩
+      obtain ⟨hu_mem, hu_ball⟩ := hε_sub u huicc
+      exact hfnorm u hu_mem (γ u) (by rwa [Metric.mem_closedBall])
+    have hz_le_δ : z ≤ δ := by
+      have hxe : x + ε ≤ δ :=
+        (hε_sub (x + ε) ⟨by linarith, le_refl _⟩).1.2
+      linarith [hz_lt]
+    have hseg : ‖γ z - γ x‖ ≤ L * (z - x) := by
+      have hcont_xz : ContinuousOn γ (Set.Icc x z) :=
+        hγcont.mono (fun u hu => ⟨le_trans hx0 hu.1, le_trans hu.2 hz_le_δ⟩)
+      have hderiv_xz : ∀ u ∈ Set.Ico x z, HasDerivWithinAt γ (f u (γ u)) (Set.Ici u) u := by
+        intro u hu
+        have hu_mem : u ∈ Set.Ico (0 : ℝ) δ :=
+          ⟨le_trans hx0 hu.1, lt_of_lt_of_le hu.2 hz_le_δ⟩
+        exact (hγderiv u hu_mem).mono_of_mem_nhdsWithin
+          (by
+            apply Filter.mem_of_superset (self_mem_nhdsWithin)
+            intro w hw; exact le_trans (le_trans hx0 hu.1) hw)
+      exact norm_image_sub_le_of_norm_deriv_right_le_segment hcont_xz hderiv_xz hvel z
+        (right_mem_Icc.2 (le_of_lt hxz))
+    refine ⟨z, ?_, hxz, hzy⟩
+    simp only [hS, Set.mem_setOf_eq]
+    calc dist (γ z) x₀ ≤ dist (γ z) (γ x) + dist (γ x) x₀ := dist_triangle _ _ _
+      _ = ‖γ z - γ x‖ + dist (γ x) x₀ := by rw [dist_eq_norm]
+      _ ≤ L * (z - x) + L * x := by gcongr; exact hxS
+      _ = L * z := by ring
+  have hmain : Set.Icc (0 : ℝ) δ ⊆ S :=
+    hScl.Icc_subset_of_forall_exists_gt h0S hgt
+  intro s hs
+  rw [Metric.mem_closedBall]
+  rcases eq_or_lt_of_le hs.2 with hsδ | hsδ
+  · have hsS : s ∈ S := hmain hs
+    refine le_of_lt (lt_of_le_of_lt hsS ?_)
+    rw [hsδ]; exact hLδ
+  · exact le_of_lt (hbound_to_openball s ⟨hs.1, hsδ⟩ (hmain hs))
+
+/-- **From-`0` manifold orbit from an explicit chart-field Lipschitz/norm datum.**
+
+Fix the basepoint chart `α` and a closed coordinate ball `closedBall x₀ a ⊆ (extChartAt I α).target`
+around `x₀ = extChartAt I α α`.  Given that the trivialised chart field `fromZeroChartField X α`
+is, on `Icc 0 δ`, Lipschitz-in-space (`K`) on that ball, continuous-in-time on the ball, and
+norm-bounded by `L`, with the **strict** validity condition `L · δ < a - r` and `0 < r`, the
+from-`0` Banach Picard solution pulls back through the chart to a manifold orbit `Φ : ℝ → M`
+with `Φ 0 = α`, staying inside the chart source on `Ico 0 δ`, with the `tangentCoordChange`
+chart-coordinate one-sided derivative and the **bare** manifold velocity on `Ico 0 δ`.
+
+The chart `α` is pinned to the initial point throughout (the orbit value is never read off a
+moving point as a basepoint), so the chart reads are `T1`-safe.  The orbit is confined to the
+validity ball by `fromZero_orbit_confined`; the bare velocity is produced from the
+chart-coordinate derivative by `chartCoord_hasDerivWithinAt_to_manifold_hasMFDerivWithinAt`
+followed by `pushforward_velocity_cancellation`. -/
+theorem fromZero_manifold_orbit_of_lipschitz
+    (X : ℝ → ∀ x : M, TangentSpace I x) (α : M)
+    {a r : ℝ≥0} {K L : ℝ≥0} {δ : ℝ} (hδ : 0 < δ)
+    (hball : Metric.closedBall (extChartAt I α α) (a : ℝ) ⊆ (extChartAt I α).target)
+    (hlip : ∀ t ∈ Set.Icc (0 : ℝ) δ,
+      LipschitzOnWith K (fromZeroChartField (I := I) X α t)
+        (Metric.closedBall (extChartAt I α α) a))
+    (hcont : ∀ c ∈ Metric.closedBall (extChartAt I α α) a,
+      ContinuousOn (fun s : ℝ => fromZeroChartField (I := I) X α s c) (Set.Icc (0 : ℝ) δ))
+    (hnorm : ∀ t ∈ Set.Icc (0 : ℝ) δ, ∀ c ∈ Metric.closedBall (extChartAt I α α) a,
+      ‖fromZeroChartField (I := I) X α t c‖ ≤ L)
+    (hmul : (L : ℝ) * δ < (a : ℝ) - r) (hr : (0 : ℝ) < r) :
+    ∃ Φ : ℝ → M, Φ 0 = α ∧
+      (∀ s ∈ Set.Ico (0 : ℝ) δ, Φ s ∈ (chartAt H α).source) ∧
+      (∀ t ∈ Set.Ico (0 : ℝ) δ,
+        HasDerivWithinAt (fun s : ℝ => extChartAt I α (Φ s))
+          (tangentCoordChange I (Φ t) α (Φ t) (X t (Φ t))) (Set.Ici (0 : ℝ)) t) ∧
+      (∀ t ∈ Set.Ico (0 : ℝ) δ,
+        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s) (Set.Ici (0 : ℝ)) t
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t)))) := by
+  classical
+  set x₀ : E := extChartAt I α α with hx₀
+  set F : ℝ → E → E := fromZeroChartField (I := I) X α with hF
+  have hLnn : (0 : ℝ) ≤ (L : ℝ) := L.coe_nonneg
+  have hmul_le : (L : ℝ) * δ ≤ (a : ℝ) - r := le_of_lt hmul
+  have hxmem : x₀ ∈ Metric.closedBall x₀ (r : ℝ) := Metric.mem_closedBall_self r.coe_nonneg
+  obtain ⟨γE, hγE0, hγEcont, hγEderiv⟩ :=
+    DifferentialGeometry.Analysis.ODE.forward_picard_solution_from_zero
+      (E := E) (f := F) (x₀ := x₀)
+      (a := a) (r := r) (L := L) (K := K) (δ := δ) hδ hlip hcont hnorm hmul_le hxmem
+  have hLδ_a : (L : ℝ) * δ < (a : ℝ) := lt_of_lt_of_le hmul (by linarith [r.coe_nonneg])
+  have hconf : ∀ s ∈ Set.Icc (0 : ℝ) δ, γE s ∈ Metric.closedBall x₀ (a : ℝ) :=
+    fromZero_orbit_confined (f := F) (x₀ := x₀) (a := a) (L := L) hLnn γE hγE0 hγEcont hγEderiv
+      hnorm hLδ_a
+  refine ⟨fun s => (extChartAt I α).symm (γE s), ?_, ?_, ?_, ?_⟩
+  · simp only [hγE0, hx₀]
+    exact (extChartAt I α).left_inv (mem_extChartAt_source α)
+  · intro s hs
+    have hsicc : s ∈ Set.Icc (0 : ℝ) δ := ⟨hs.1, le_of_lt hs.2⟩
+    have htgt : γE s ∈ (extChartAt I α).target := hball (hconf s hsicc)
+    have : (extChartAt I α).symm (γE s) ∈ (extChartAt I α).source :=
+      (extChartAt I α).map_target htgt
+    rwa [extChartAt_source] at this
+  · -- chart-coordinate one-sided derivative
+    intro t ht
+    have hticc : t ∈ Set.Icc (0 : ℝ) δ := ⟨ht.1, le_of_lt ht.2⟩
+    have hIco_mem : Set.Ico (0 : ℝ) δ ∈ nhdsWithin t (Set.Ici (0 : ℝ)) := by
+      have hIco_eq : Set.Ico (0 : ℝ) δ = Set.Ici (0 : ℝ) ∩ Set.Iio δ := by
+        ext u; exact ⟨fun h => ⟨h.1, h.2⟩, fun h => ⟨h.1, h.2⟩⟩
+      rw [hIco_eq]
+      exact Filter.inter_mem self_mem_nhdsWithin (nhdsWithin_le_nhds (Iio_mem_nhds ht.2))
+    have hd : HasDerivWithinAt γE (F t (γE t)) (Set.Ici (0 : ℝ)) t := hγEderiv t ht
+    have hvel_eq : F t (γE t)
+        = tangentCoordChange I ((extChartAt I α).symm (γE t)) α ((extChartAt I α).symm (γE t))
+            (X t ((extChartAt I α).symm (γE t))) := rfl
+    have hcongr : (fun s : ℝ => extChartAt I α ((extChartAt I α).symm (γE s)))
+        =ᶠ[nhdsWithin t (Set.Ici (0 : ℝ))] γE := by
+      filter_upwards [hIco_mem] with u hu
+      have huicc : u ∈ Set.Icc (0 : ℝ) δ := ⟨hu.1, le_of_lt hu.2⟩
+      exact (extChartAt I α).right_inv (hball (hconf u huicc))
+    have hd' : HasDerivWithinAt (fun s : ℝ => extChartAt I α ((extChartAt I α).symm (γE s)))
+        (F t (γE t)) (Set.Ici (0 : ℝ)) t :=
+      hd.congr_of_eventuallyEq hcongr
+        ((extChartAt I α).right_inv (hball (hconf t hticc)))
+    rw [hvel_eq] at hd'
+    exact hd'
+  · -- bare manifold velocity
+    intro t ht
+    have hticc : t ∈ Set.Icc (0 : ℝ) δ := ⟨ht.1, le_of_lt ht.2⟩
+    have htgt_t : γE t ∈ (extChartAt I α).target := hball (hconf t hticc)
+    have hIco_mem : Set.Ico (0 : ℝ) δ ∈ nhdsWithin t (Set.Ici (0 : ℝ)) := by
+      have hIco_eq : Set.Ico (0 : ℝ) δ = Set.Ici (0 : ℝ) ∩ Set.Iio δ := by
+        ext u; exact ⟨fun h => ⟨h.1, h.2⟩, fun h => ⟨h.1, h.2⟩⟩
+      rw [hIco_eq]
+      exact Filter.inter_mem self_mem_nhdsWithin (nhdsWithin_le_nhds (Iio_mem_nhds ht.2))
+    have hconf_range : γE ⁻¹' (Set.range I) ∈ nhdsWithin t (Set.Ici (0 : ℝ)) := by
+      filter_upwards [hIco_mem] with u hu
+      have huicc : u ∈ Set.Icc (0 : ℝ) δ := ⟨hu.1, le_of_lt hu.2⟩
+      exact extChartAt_target_subset_range α (hball (hconf u huicc))
+    have hd : HasDerivWithinAt γE (F t (γE t)) (Set.Ici (0 : ℝ)) t := hγEderiv t ht
+    have hbridge := chartCoord_hasDerivWithinAt_to_manifold_hasMFDerivWithinAt
+      (I := I) α γE (Set.Ici (0 : ℝ)) t (F t (γE t)) htgt_t hconf_range hd
+    set q : M := (extChartAt I α).symm (γE t) with hq_def
+    have hq_src : q ∈ (extChartAt I α).source := (extChartAt I α).map_target htgt_t
+    have hq_round : extChartAt I α q = γE t := (extChartAt I α).right_inv htgt_t
+    have hcancel :
+        (mfderivWithin 𝓘(ℝ, E) I (extChartAt I α).symm (Set.range I) (γE t)) (F t (γE t))
+          = X t q := by
+      have hFeq : F t (γE t)
+          = tangentCoordChange I q α q (X t q) := rfl
+      rw [hFeq, ← hq_round]
+      exact pushforward_velocity_cancellation (I := I) α q hq_src (X t q)
+    have hvelCLM :
+        (mfderivWithin 𝓘(ℝ, E) I (extChartAt I α).symm (Set.range I) (γE t)) ∘L
+            ((ContinuousLinearMap.id ℝ ℝ).smulRight (F t (γE t)))
+          = (1 : ℝ →L[ℝ] ℝ).smulRight (X t q) :=
+      ContinuousLinearMap.ext fun rr => by
+        simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.smulRight_apply,
+          ContinuousLinearMap.id_apply, ContinuousLinearMap.one_apply, map_smul, hcancel]
+    rw [← hvelCLM]
+    exact hbridge
+
+/-- **Uniform-in-time (up to `t = 0`) and uniform-in-base Lipschitz datum for the trivialised
+chart field, on the compact manifold.**
+
+ISOLATED DEFERRED INPUT (the single posited fact of this file).  For a field `X` interior-`C∞`
+on `(0, T) ×ˢ univ` (`hint`), continuous up to `t = 0` (`hcont0`), with chart-gradient continuous
+up to `t = 0` at every base point (`hgrad0`), there are *uniform* constants `a, δ₀ > 0` (with
+`δ₀ ≤ T`) and a uniform Lipschitz constant `K` such that, for **every** base point `α : M`, the
+ball `closedBall (extChartAt I α α) a` lies in the chart target and the trivialised chart field
+`fromZeroChartField X α t` is `K`-Lipschitz on it, uniformly for `t ∈ [0, δ₀]`.
+
+This is TRUE: per base point, writing `F t = chartTrivRepr α (X t) = chartMovingTriv α · ∘ chartRawRepr α (X t)`
+on the ball, the spatial Fréchet derivative decomposes (product rule) as
+`chartMovingTriv α c · (fderiv (chartRawRepr α (X t)) c) + (fderiv (chartMovingTriv α) c) · (X t (φ.symm c))`;
+the moving-trivialization and its derivative are `C∞`-in-`c` (smooth-structure, bounded on the
+compact ball), `fderiv (chartRawRepr α (X t)) c` is bounded up to `t = 0` by `hgrad0`, and
+`X t (φ.symm c)` is bounded up to `t = 0` by `hcont0`; the resulting derivative bound yields a
+Lipschitz constant by the mean-value inequality on the convex ball, made uniform in the base point
+by compactness of `M` (a finite subcover of charts).  The derivation requires the general-point
+trivialised-gradient product rule and the moving-trivialization smoothness (the `ConventionBridge`
+chart-calculus layer, whose current `chartTrivRepr_fderiv_eq` is stated only at the basepoint), so it
+is isolated here as the single deferred input; consumers transit `sorryAx`. -/
+theorem fromZeroChartField_uniform_lipschitz_from_zero [CompactSpace M]
+    (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
+    (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+    (hcont0 : ContinuousOn
+      (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2))
+      (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
+    (hgrad0 : ∀ α : M,
+      ContinuousOn
+        (fun q : ℝ × M =>
+          fderiv ℝ (chartRawRepr (I := I) α (X q.1)) (extChartAt I α q.2))
+        (Set.Icc (0 : ℝ) T ×ˢ Set.univ)) :
+    ∃ (a : ℝ≥0) (δ₀ : ℝ) (K : ℝ≥0), 0 < (a : ℝ) ∧ 0 < δ₀ ∧ δ₀ ≤ T ∧
+      ∀ α : M,
+        Metric.closedBall (extChartAt I α α) (a : ℝ) ⊆ (extChartAt I α).target ∧
+        ∀ t ∈ Set.Icc (0 : ℝ) δ₀,
+          LipschitzOnWith K (fromZeroChartField (I := I) X α t)
+            (Metric.closedBall (extChartAt I α α) a) := by
+  sorry
+
+/-- **Orbit assembly on a time window from a ball Lipschitz datum and a center-norm bound.**
+
+Given, at base point `α`, a chart ball `closedBall x₀ a ⊆ (extChartAt I α).target`, a `K`-Lipschitz
+datum for `fromZeroChartField X α t` on the ball for `t ∈ [0, δ_w]`, an explicit center-norm bound
+`Mbd`, the time-continuity datum (`hcont0`, with `δ_w ≤ T`), and the strict validity
+`(Real.toNNReal Mbd + K · a) · δ_w < a/2`, the core orbit construction produces the manifold orbit
+on `Ico 0 δ_w`.  The Picard norm bound is `Real.toNNReal Mbd + K · a`, obtained from the Lipschitz
+datum and the center bound. -/
+private theorem fromZero_orbit_of_window
+    (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) {T : ℝ}
+    {a : ℝ≥0} {δ_w : ℝ} {K : ℝ≥0} {Mbd : ℝ}
+    (ha_pos : 0 < (a : ℝ)) (hδw_pos : 0 < δ_w) (hδw_le : δ_w ≤ T)
+    (hcont0 : ContinuousOn
+      (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2))
+      (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
+    (hball : Metric.closedBall (extChartAt I α α) (a : ℝ) ⊆ (extChartAt I α).target)
+    (hlip0 : ∀ t ∈ Set.Icc (0 : ℝ) δ_w,
+      LipschitzOnWith K (fromZeroChartField (I := I) X α t)
+        (Metric.closedBall (extChartAt I α α) a))
+    (hcenter : ∀ t ∈ Set.Icc (0 : ℝ) δ_w,
+      ‖fromZeroChartField (I := I) X α t (extChartAt I α α)‖ ≤ Mbd)
+    (hstrict : ((Real.toNNReal Mbd + K * a : ℝ≥0) : ℝ) * δ_w < (a : ℝ) / 2) :
+    ∃ Φ : ℝ → M, Φ 0 = α ∧
+      (∀ s ∈ Set.Ico (0 : ℝ) δ_w, Φ s ∈ (chartAt H α).source) ∧
+      (∀ t ∈ Set.Ico (0 : ℝ) δ_w,
+        HasDerivWithinAt (fun s : ℝ => extChartAt I α (Φ s))
+          (tangentCoordChange I (Φ t) α (Φ t) (X t (Φ t))) (Set.Ici (0 : ℝ)) t) ∧
+      (∀ t ∈ Set.Ico (0 : ℝ) δ_w,
+        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s) (Set.Ici (0 : ℝ)) t
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t)))) := by
+  set x₀ : E := extChartAt I α α with hx₀
+  set F : ℝ → E → E := fromZeroChartField (I := I) X α with hF
+  set M₀N : ℝ≥0 := Real.toNNReal Mbd with hM₀N
+  have hM₀N_coe : (M₀N : ℝ) = max Mbd 0 := by rw [hM₀N, Real.coe_toNNReal']
+  set L : ℝ≥0 := M₀N + K * a with hL
+  have hL_coe : (L : ℝ) = (M₀N : ℝ) + (K : ℝ) * (a : ℝ) := by push_cast [hL]; ring
+  set r : ℝ≥0 := a / 2 with hr
+  have hr_pos : (0 : ℝ) < (r : ℝ) := by rw [hr]; push_cast; positivity
+  have har : (a : ℝ) - (r : ℝ) = (a : ℝ) / 2 := by rw [hr]; push_cast; ring
+  have hnorm : ∀ t ∈ Set.Icc (0 : ℝ) δ_w, ∀ c ∈ Metric.closedBall x₀ (a : ℝ),
+      ‖F t c‖ ≤ L := by
+    intro t ht c hc
+    have hdist : dist c x₀ ≤ (a : ℝ) := by rwa [Metric.mem_closedBall] at hc
+    have hLip := (hlip0 t ht).dist_le_mul c hc x₀ (Metric.mem_closedBall_self ha_pos.le)
+    have hcb : ‖F t x₀‖ ≤ (M₀N : ℝ) :=
+      le_trans (hcenter t ht) (by rw [hM₀N_coe]; exact le_max_left _ _)
+    calc ‖F t c‖
+        ≤ ‖F t c - F t x₀‖ + ‖F t x₀‖ := norm_le_norm_sub_add _ _
+      _ = dist (F t c) (F t x₀) + ‖F t x₀‖ := by rw [dist_eq_norm]
+      _ ≤ (K : ℝ) * dist c x₀ + ‖F t x₀‖ := by gcongr
+      _ ≤ (K : ℝ) * (a : ℝ) + (M₀N : ℝ) := by gcongr
+      _ = (L : ℝ) := by rw [hL_coe]; ring
+  have hstrict' : (L : ℝ) * δ_w < (a : ℝ) - r := by rw [har]; exact hstrict
+  exact fromZero_manifold_orbit_of_lipschitz (I := I) X α (a := a) (r := r) (K := K) (L := L)
+    (δ := δ_w) hδw_pos hball hlip0
+    (fun c _ => fromZeroChartField_continuousOn_time_from_zero (I := I) X α hδw_le hcont0 c)
+    hnorm hstrict' hr_pos
+
+/-- The center value `fromZeroChartField X α t (extChartAt I α α) = X t α`: the self
+`tangentCoordChange` is the identity. -/
+private lemma fromZeroChartField_center_eq
+    (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (t : ℝ) :
+    fromZeroChartField (I := I) X α t (extChartAt I α α) = (X t α : TangentSpace I α) := by
+  have hsymm : (extChartAt I α).symm (extChartAt I α α) = α :=
+    (extChartAt I α).left_inv (mem_extChartAt_source α)
+  rw [fromZeroChartField_eq_tangentCoordChange, hsymm]
+  exact tangentCoordChange_self (I := I) (mem_extChartAt_source α)
+
+/-- **Uniform from-`0` manifold orbit germ over the compact manifold.**
+
+Combines the (single posited) uniform Lipschitz datum, the time-continuity datum, and the orbit
+construction.  For `X` interior-`C∞` on `(0, T) ×ˢ univ` and continuous (with chart-gradient at
+every base point) up to `t = 0`, there is a **single** positive `δ` (with `δ ≤ T`) such that every
+base point `α` admits an orbit `Φ : ℝ → M` with `Φ 0 = α`, staying in the chart source on
+`Ico 0 δ`, with the `tangentCoordChange` chart-coordinate one-sided derivative and the **bare**
+manifold velocity on `Ico 0 δ`.
+
+The uniform `δ` is built from the uniform ball radius and Lipschitz constant of the posited datum
+together with the uniform center bound `‖X t α‖ ≤ Mbd` over the compact `Icc 0 T ×ˢ univ`
+(`hcont0`, `univ = M` compact). -/
+theorem fromZero_manifold_orbit_uniform_delta [CompactSpace M]
+    (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ) (hT : 0 < T)
+    (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M))
+      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+    (hcont0 : ContinuousOn
+      (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2))
+      (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
+    (hgrad0 : ∀ α : M,
+      ContinuousOn
+        (fun q : ℝ × M =>
+          fderiv ℝ (chartRawRepr (I := I) α (X q.1)) (extChartAt I α q.2))
+        (Set.Icc (0 : ℝ) T ×ˢ Set.univ)) :
+    ∃ (δ : ℝ), 0 < δ ∧ δ ≤ T ∧ ∀ α : M, ∃ Φ : ℝ → M, Φ 0 = α ∧
+      (∀ s ∈ Set.Ico (0 : ℝ) δ, Φ s ∈ (chartAt H α).source) ∧
+      (∀ t ∈ Set.Ico (0 : ℝ) δ,
+        HasDerivWithinAt (fun s : ℝ => extChartAt I α (Φ s))
+          (tangentCoordChange I (Φ t) α (Φ t) (X t (Φ t))) (Set.Ici (0 : ℝ)) t) ∧
+      (∀ t ∈ Set.Ico (0 : ℝ) δ,
+        HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => Φ s) (Set.Ici (0 : ℝ)) t
+          ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (Φ t)))) := by
+  classical
+  obtain ⟨a, δ₀, K, ha_pos, hδ₀_pos, hδ₀_le, hdata⟩ :=
+    fromZeroChartField_uniform_lipschitz_from_zero (I := I) X T hT hint hcont0 hgrad0
+  obtain ⟨Mbd, hMbd⟩ : ∃ Mbd : ℝ, ∀ q : ℝ × M, q ∈ Set.Icc (0 : ℝ) δ₀ ×ˢ Set.univ →
+      ‖(X q.1 q.2 : TangentSpace I q.2)‖ ≤ Mbd := by
+    have hcompact : IsCompact (Set.Icc (0 : ℝ) δ₀ ×ˢ (Set.univ : Set M)) :=
+      isCompact_Icc.prod isCompact_univ
+    have hcont0' : ContinuousOn (fun q : ℝ × M => (X q.1 q.2 : TangentSpace I q.2))
+        (Set.Icc (0 : ℝ) δ₀ ×ˢ Set.univ) :=
+      hcont0.mono (Set.prod_mono (Set.Icc_subset_Icc_right hδ₀_le) (le_refl _))
+    have hbdd : Bornology.IsBounded
+        ((fun q : ℝ × M => ‖(X q.1 q.2 : TangentSpace I q.2)‖) ''
+          (Set.Icc (0 : ℝ) δ₀ ×ˢ Set.univ)) :=
+      (hcompact.image_of_continuousOn hcont0'.norm).isBounded
+    obtain ⟨C, hC⟩ := hbdd.subset_closedBall 0
+    refine ⟨C, fun q hq => ?_⟩
+    have := hC (Set.mem_image_of_mem _ hq)
+    simpa [Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)] using this
+  set L : ℝ≥0 := Real.toNNReal Mbd + K * a with hL
+  have hL_coe : (L : ℝ) = max Mbd 0 + (K : ℝ) * (a : ℝ) := by
+    rw [hL]; push_cast [Real.coe_toNNReal']; ring
+  have hLpos : (0 : ℝ) < (L : ℝ) + 1 := by positivity
+  set δ : ℝ := min δ₀ (((a : ℝ) / 2) / ((L : ℝ) + 1)) with hδ
+  have hδ_pos : 0 < δ := lt_min hδ₀_pos (div_pos (by positivity) hLpos)
+  have hδ_le_δ₀ : δ ≤ δ₀ := min_le_left _ _
+  have hstrict : (L : ℝ) * δ < (a : ℝ) / 2 := by
+    have hδ_le2 : δ ≤ ((a : ℝ) / 2) / ((L : ℝ) + 1) := min_le_right _ _
+    calc (L : ℝ) * δ ≤ (L : ℝ) * (((a : ℝ) / 2) / ((L : ℝ) + 1)) :=
+            mul_le_mul_of_nonneg_left hδ_le2 L.coe_nonneg
+      _ = ((L : ℝ) / ((L : ℝ) + 1)) * ((a : ℝ) / 2) := by ring
+      _ < 1 * ((a : ℝ) / 2) := by
+            apply mul_lt_mul_of_pos_right _ (by positivity)
+            rw [div_lt_one hLpos]; linarith
+      _ = (a : ℝ) / 2 := one_mul _
+  refine ⟨δ, hδ_pos, le_trans hδ_le_δ₀ hδ₀_le, fun α => ?_⟩
+  obtain ⟨hball, hlip0⟩ := hdata α
+  refine fromZero_orbit_of_window (I := I) X α (T := T) (a := a) (δ_w := δ) (K := K) (Mbd := Mbd)
+    ha_pos hδ_pos (le_trans hδ_le_δ₀ hδ₀_le) hcont0 hball
+    (fun t ht => hlip0 t ⟨ht.1, le_trans ht.2 hδ_le_δ₀⟩)
+    (fun t ht => ?_) ?_
+  · rw [fromZeroChartField_center_eq]
+    exact hMbd (t, α) ⟨⟨ht.1, le_trans ht.2 hδ_le_δ₀⟩, Set.mem_univ _⟩
+  · show ((Real.toNNReal Mbd + K * a : ℝ≥0) : ℝ) * δ < (a : ℝ) / 2
+    rw [← hL]; exact hstrict
+
+end DifferentialGeometry.PDE.RicciFlow.ODE
