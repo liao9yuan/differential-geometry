@@ -534,6 +534,108 @@ lemma curry_unitGradFieldGen_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
   rw [Tensor0SNabla.curriedSection_apply, unitGradFieldGen_apply]
   exact curry_covGrad_unit_eval_genVal (I := I) (M := M) g s S y w
 
+/-- **Smoothness of the `(0, s + 1)`-tensor gradient field in mk' form (general valence).**
+General-valence analogue of `covGrad_contMDiff_mk'`. The gradient `covGrad g 0 s S` is a
+`SmoothCcTensor g 0 (s + 1)`; its underlying section is smooth in total-space `mk'` form. -/
+lemma covGrad_contMDiff_mk'_genVal
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 (s + 1) ℝ E)) ∞
+      (fun b : M => TotalSpace.mk' (TensorRSModel 0 (s + 1) ℝ E)
+        (E := fun z : M => TensorRSSpace 0 (s + 1) I z) b
+        ((covGrad (I := I) (M := M) g 0 s S).toSection b)) :=
+  (covGrad (I := I) (M := M) g 0 s S).toSection.contMDiff
+
+/-- The directionally-derived gradient field `covApply (tensorCov g 0 (s + 1)) X
+(covGrad g 0 s S)` packaged as a smooth `Cₛ^∞` `(0, s + 1)`-tensor section (general valence).
+General-valence analogue of `covApplyCovGradSection`; smoothness is `covApplyRS_contMDiff`
+applied to the smooth gradient field. The total-space fibre-bundle instances for the symbolic
+valence `s + 1` are supplied explicitly (`tensorRSBundle_topology`/`tensorRSBundle_fiber`),
+matching the codebase pattern, since typeclass search stalls on the `Nat.succ` head. -/
+noncomputable def covApplyCovGradSection_genVal
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {X : Π b : M, TangentSpace I b}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X)) :
+    @ContMDiffSection ℝ _ E _ _ H _ I M _ _ (TensorRSModel 0 (s + 1) ℝ E) _ _ ∞
+      (fun y : M => TensorRSSpace 0 (s + 1) I y)
+      (Tensor0SBundle.tensorRSBundle_topology 0 (s + 1)) (fun _ => inferInstance)
+      (Tensor0SBundle.tensorRSBundle_fiber 0 (s + 1)) :=
+  @ContMDiffSection.mk ℝ _ E _ _ H _ I M _ _ (TensorRSModel 0 (s + 1) ℝ E) _ _ ∞
+    (fun y : M => TensorRSSpace 0 (s + 1) I y)
+    (Tensor0SBundle.tensorRSBundle_topology 0 (s + 1)) (fun _ => inferInstance)
+    (Tensor0SBundle.tensorRSBundle_fiber 0 (s + 1))
+    (fun y : M =>
+      covApply (tensorCov (I := I) g 0 (s + 1)) X
+        (fun z : M => (covGrad (I := I) (M := M) g 0 s S).toSection z) y)
+    (covApplyRS_contMDiff (I := I) g 0 (s + 1)
+      (covGrad_contMDiff_mk'_genVal (I := I) (M := M) g s S) hX)
+
+@[simp] lemma covApplyCovGradSection_genVal_apply
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {X : Π b : M, TangentSpace I b}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X)) (y : M) :
+    covApplyCovGradSection_genVal (I := I) (M := M) g s S hX y =
+      covApply (tensorCov (I := I) g 0 (s + 1)) X
+        (fun z : M => (covGrad (I := I) (M := M) g 0 s S).toSection z) y := rfl
+
+/-- **Unit-evaluation intertwines `covApply` (general valence).** For a smooth `Cₛ^∞`
+`(0, t)`-tensor section `σ` and a smooth tangent vector field `X`, the unit-evaluation of
+`covApply (tensorCov g 0 t) X σ` equals `covApply (tensor0SCovariantDerivative I M t
+(LeviCivita g)) X` of the unit-evaluated section `y ↦ σ y (unit)`, as dependent functions of
+the base point. General-valence analogue of `covApply_unit_eval_eq` (its `t = 3` instance);
+the valence is a bare variable `t`, so the consumer instantiates it at `t = s + 1`. -/
+lemma covApply_unit_eval_eq_genVal
+    (g : SmoothRiemannianMetric I M) (t : ℕ)
+    (σ : Cₛ^∞⟮I; TensorRSModel 0 t ℝ E, (fun y : M => TensorRSSpace 0 t I y)⟯)
+    (X : Π b : M, TangentSpace I b) :
+    (fun y : M =>
+      (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace t I y from
+        covApply (tensorCov (I := I) g 0 t) X (fun z : M => σ z) y)
+        (unitZeroSec (I := I) (M := M) y)) =
+      covApply (Tensor0SNabla.tensor0SCovariantDerivative I M t (LeviCivita (I := I) g)) X
+        (fun y : M =>
+          (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace t I y from σ y)
+            (unitZeroSec (I := I) (M := M) y)) := by
+  funext y
+  rw [covApply_apply, covApply_apply]
+  exact covDeriv_unit_eval_eq_genVal (I := I) (M := M) g t σ y (X y)
+
+/-- **Transport of the `(0, s + 1)` second covariant derivative through the unit (general
+valence).** For smooth tangent vector fields `B`, the second covariant derivative
+`tensorSecondCovDeriv g 0 (s + 1) B B (covGrad g 0 s S)` of the gradient field, evaluated at
+the unit `(0, 0)`-tensor, equals the abstract `(0, s + 1)`-tensor second covariant derivative
+of the unit-evaluated gradient field `U := unitGradFieldGen g s S`. General-valence analogue of
+`tensorSecondCovDeriv_covGrad_unit_eval` (its `s = 2` instance); the proof ports verbatim, the
+slot-uniform `tensorSecondCovDeriv` definition combined with the general-valence unit-transport
+`covDeriv_unit_eval_eq_genVal` and `covApply_unit_eval_eq_genVal`. -/
+lemma tensorSecondCovDeriv_covGrad_unit_eval_genVal
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {B : Π b : M, TangentSpace I b}
+    (hB : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% B)) (x : M) :
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+        tensorSecondCovDeriv (I := I) g 0 (s + 1) B B
+          (fun y : M => (covGrad (I := I) (M := M) g 0 s S).toSection y) x)
+        (unitZeroSec (I := I) (M := M) x) =
+      (Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g)).toFun
+          (covApply (Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1)
+              (LeviCivita (I := I) g)) B
+            (unitGradFieldGen (I := I) (M := M) g s S)) x (B x) -
+        (Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g)).toFun
+          (unitGradFieldGen (I := I) (M := M) g s S) x
+          ((LeviCivita (I := I) g).toFun B x (B x)) := by
+  classical
+  rw [tensorSecondCovDeriv_def]
+  rw [ContinuousLinearMap.sub_apply]
+  congr 1
+  · have h1 := covDeriv_unit_eval_eq_genVal (I := I) (M := M) g (s + 1)
+      (covApplyCovGradSection_genVal (I := I) (M := M) g s S hB) x (B x)
+    simp only [covApplyCovGradSection_genVal_apply] at h1
+    rw [h1]
+    rw [covApply_unit_eval_eq_genVal (I := I) (M := M) g (s + 1)
+      (covGrad (I := I) (M := M) g 0 s S).toSection B]
+    rfl
+  · exact covDeriv_unit_eval_eq_genVal (I := I) (M := M) g (s + 1)
+      (covGrad (I := I) (M := M) g 0 s S).toSection x ((LeviCivita (I := I) g).toFun B x (B x))
+
 /-- **Two-slot evaluation bridge (general valence).** The genuine tensorial second covariant
 derivative `tensorSecondCovDeriv g 0 s X Y S` of a smooth `(0, s)`-tensor `S` along smooth fields
 `X, Y`, evaluated at the unit `(0, 0)`-tensor and on a `Fin s`-tuple `m`, is the
