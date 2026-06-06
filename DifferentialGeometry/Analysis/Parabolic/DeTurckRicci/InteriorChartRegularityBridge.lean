@@ -54,6 +54,15 @@ continuity of `t ↦ (T_s t).toHs (2k)` closes the joint upgrade.
 * `chartGram_realizedMetric_jointContinuousOn` — the chart-Gram entry of a metric
   family realized as `g_bg + ccTensorBilinSymm (T_s ·)` is jointly `(t, x)`
   continuous on `J ×ˢ baseSet`, from the time-continuity of `t ↦ (T_s t).toHs (2k)`.
+* `chartGram_realizedMetric_jointContMDiffOn` — the interior `C∞` arm (conjunct (4)): the
+  chart-Gram entry is jointly `(t, x)`-`C∞` from the joint smoothness of the metric
+  inner-product `Hom`-section, via `ContMDiffOn.clm_bundle_apply₂` over base map `Prod.snd`.
+* `chartGramOnE_realizedMetric_jointContinuousOn` — the `chartGramOnE` `C⁰` arm
+  (conjunct (6)): the chart-pulled-back Gram entry is jointly continuous on the chart source,
+  the chart round-trip collapsing it to `chartGram_realizedMetric_jointContinuousOn`.
+* `iteratedFDeriv_zero_chartGramOnE_realizedMetric_jointContinuousOn` — the `k = 0` arm of the
+  spatial-jet conjunct (7).  The higher jets `k ∈ {1, 2}` need a partial-iteratedFDeriv ↔
+  joint-regularity bridge that is absent in Mathlib and in this library (the jet wall).
 -/
 
 noncomputable section
@@ -320,6 +329,143 @@ theorem chartGram_realizedMetric_jointContinuousOn
     ring
   rw [hcancel]
   exact hB t t' x hxK
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+/-- **The chart-Gram entry is jointly `(t, x)` `C∞` on the interior (the spectral →
+chart-local bridge, `C∞` arm).**
+
+Let `g_DT : ℝ → SmoothRiemannianMetric I M` be a metric family whose *bundle inner-product
+`Hom`-section* `(t, x) ↦ (g_DT t).inner x` is jointly `C∞` over the product model
+`𝓘(ℝ, ℝ).prod I` on `J ×ˢ baseSet` (`hsmooth`).  Then for the chart centred at `x₀` each
+chart-Gram entry `(t, x) ↦ chartGramMatrix (g_DT t) x₀ x i j` is jointly `C∞` on
+`J ×ˢ baseSet`.
+
+This is the joint `(t, x)`-`C∞` analogue of the fixed-metric chart-Gram smoothness
+`chartGramMatrix_entry_contMDiffOn`: the chart-Gram entry is the metric `Hom`-section
+paired against the (`t`-independent, jointly smooth) chart frame `chartBasisVec`, so it is
+delivered by `ContMDiffOn.clm_bundle_apply₂` over base `M` with base map `Prod.snd`.  It is
+the interior `C∞` form of conjunct (4) of
+`deturck_ricci_parabolic_interior_regularity` (the `chartGramMatrix` `ContMDiffOn`).
+
+The hypothesis is the *joint* smoothness of the metric `Hom`-section, NOT a Sobolev
+time-jet datum: separate regularity (continuity-in-time into every spatial `Hˢ` plus the
+spatial `Hˢ ↪ C^m` embedding) yields only an anisotropic tensor-product regularity and
+does *not* close to joint `C∞` (there is no separate-variable → joint-smoothness principle
+for manifolds, in Mathlib or here).  The interior parabolic smoothing supplies this joint
+smoothness directly; this lemma is the reduction from it to the scalar chart-Gram entry. -/
+theorem chartGram_realizedMetric_jointContMDiffOn
+    (x₀ : M) (i j : Fin (Module.finrank ℝ E))
+    (g_DT : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ}
+    (hsmooth : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+      (fun q : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+        q.2 ((g_DT q.1).inner q.2))
+      (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+      (fun p : ℝ × M => chartGramMatrix (I := I) (g_DT p.1) x₀ p.2 i j)
+      (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+  have hv : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => chartBasisVec (I := I) x₀ i q.2)
+      (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+    (chartBasisVec_contMDiffOn (I := I) x₀ i).comp contMDiffOn_snd (fun q hq => hq.2)
+  have hw : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => chartBasisVec (I := I) x₀ j q.2)
+      (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+    (chartBasisVec_contMDiffOn (I := I) x₀ j).comp contMDiffOn_snd (fun q hq => hq.2)
+  have happ : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, ℝ)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' ℝ (E := Bundle.Trivial M ℝ) q.2
+          ((g_DT q.1).inner q.2
+            (chartBasisVecFiber (I := I) x₀ i q.2)
+            (chartBasisVecFiber (I := I) x₀ j q.2))))
+      (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+    ContMDiffOn.clm_bundle_apply₂ (F₁ := E) (F₂ := E) (F₃ := ℝ) hsmooth hv hw
+  intro p hp
+  have hpb := happ p hp
+  rw [Bundle.contMDiffWithinAt_totalSpace] at hpb
+  exact hpb.2
+
+/-- **The chart-pulled-back Gram entry `chartGramOnE` is jointly `(t, x)` continuous on the
+chart source (the spectral → chart-local bridge, `chartGramOnE` `C⁰` arm).**
+
+Under the same realization data as `chartGram_realizedMetric_jointContinuousOn` — the family
+realized off `g_bg` by a smooth-section family `T_s` (`hreal`) with continuous order-`2k`
+Sobolev time-trace (`hHs`) at a supercritical order — the chart-`α`-pulled-back Gram entry
+`(t, x) ↦ chartGramOnE (g_DT t) α i j (extChartAt I α x)` is jointly continuous on
+`J ×ˢ (chartAt H α).source`.
+
+On the chart source the chart round-trip is the identity
+(`(extChartAt I α).left_inv`), so `chartGramOnE (g_DT t) α i j (extChartAt I α x)` equals the
+chart-Gram entry `chartGramMatrix (g_DT t) α x i j`; the statement is then
+`chartGram_realizedMetric_jointContinuousOn` transported along the identification
+`(trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source`
+(`TangentBundle.trivializationAt_baseSet`).  It is the `chartGramOnE` form of conjunct (6) of
+`deturck_ricci_parabolic_interior_regularity`. -/
+theorem chartGramOnE_realizedMetric_jointContinuousOn
+    (g_bg : SmoothRiemannianMetric I M) (α : M) (i j : Fin (Module.finrank ℝ E))
+    (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (T_s : ℝ → Integral.L2.SmoothCcTensor g_bg 0 2) {k : ℕ} {J : Set ℝ}
+    (hk : 2 * k > Module.finrank ℝ E + 4)
+    (hreal : ∀ t ∈ J, ∀ (x : M) (v w : TangentSpace I x),
+      (g_DT t).inner x v w
+        = g_bg.inner x v w + ccTensorBilinSymm (I := I) g_bg (T_s t) x v w)
+    (hHs : ContinuousOn (fun t : ℝ =>
+      IntrinsicSobolev.SmoothCcTensor.toHs (g := g_bg) (r := 0) (s := 2) (2 * k) (T_s t)) J) :
+    ContinuousOn
+      (fun q : ℝ × M =>
+        Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j (extChartAt I α q.2))
+      (J ×ˢ (chartAt H α).source) := by
+  have hbase :
+      (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source :=
+    TangentBundle.trivializationAt_baseSet (I := I) α
+  have hjoint := chartGram_realizedMetric_jointContinuousOn (I := I) (M := M)
+    g_bg α i j g_DT T_s hk hreal hHs
+  rw [hbase] at hjoint
+  refine hjoint.congr ?_
+  rintro ⟨t, x⟩ ⟨_, hx⟩
+  change Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j (extChartAt I α x)
+    = chartGramMatrix (I := I) (g_DT t) α x i j
+  rw [Integral.DivergenceTheorem.chartGramOnE_def]
+  have hxsource : x ∈ (extChartAt I α).source := by rwa [extChartAt_source]
+  rw [(extChartAt I α).left_inv hxsource]
+
+/-- **The `0`-jet of `chartGramOnE` is jointly `(t, x)` continuous (the `k = 0` arm of the
+spatial-jet conjunct).**
+
+The Euclidean `iteratedFDeriv ℝ 0` of the chart-pulled-back Gram entry is, by
+`iteratedFDeriv_zero_eq_comp`, the order-`0` curry isometry applied to the value, so its
+joint continuity is equivalent to that of the value `chartGramOnE (g_DT t) α i j`
+(`chartGramOnE_realizedMetric_jointContinuousOn`).  This is the `k = 0` component of conjunct
+(7) of `deturck_ricci_parabolic_interior_regularity` and the joint feed for
+`RicciContJointAux.jointGram_continuousOn`.
+
+The higher jets `k ∈ {1, 2}` are NOT delivered here: producing joint `(t, x)`-continuity of
+the *partial spatial* iterated Fréchet derivative `(t, y) ↦ iteratedFDeriv ℝ k
+(chartGramOnE (g_DT t) α i j) y` requires a partial-iteratedFDeriv ↔ joint-regularity bridge
+that is absent both in Mathlib and in this library (see the file's note); it is the genuine
+jet wall for this conjunct. -/
+theorem iteratedFDeriv_zero_chartGramOnE_realizedMetric_jointContinuousOn
+    (g_bg : SmoothRiemannianMetric I M) (α : M) (i j : Fin (Module.finrank ℝ E))
+    (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (T_s : ℝ → Integral.L2.SmoothCcTensor g_bg 0 2) {k : ℕ} {J : Set ℝ}
+    (hk : 2 * k > Module.finrank ℝ E + 4)
+    (hreal : ∀ t ∈ J, ∀ (x : M) (v w : TangentSpace I x),
+      (g_DT t).inner x v w
+        = g_bg.inner x v w + ccTensorBilinSymm (I := I) g_bg (T_s t) x v w)
+    (hHs : ContinuousOn (fun t : ℝ =>
+      IntrinsicSobolev.SmoothCcTensor.toHs (g := g_bg) (r := 0) (s := 2) (2 * k) (T_s t)) J) :
+    ContinuousOn
+      (fun q : ℝ × M => iteratedFDeriv ℝ 0
+        (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j)
+        (extChartAt I α q.2))
+      (J ×ˢ (chartAt H α).source) := by
+  have hjoint := chartGramOnE_realizedMetric_jointContinuousOn (I := I) (M := M)
+    g_bg α i j g_DT T_s hk hreal hHs
+  have hcurry : Continuous ((continuousMultilinearCurryFin0 ℝ E ℝ).symm) :=
+    (continuousMultilinearCurryFin0 ℝ E ℝ).symm.continuous
+  refine (hcurry.comp_continuousOn hjoint).congr ?_
+  intro q _
+  simp only [Function.comp_apply, iteratedFDeriv_zero_eq_comp]
 
 end MetricRealization
 end IntrinsicSpectral
