@@ -108,7 +108,7 @@ theorem deturck_ricci_parabolic_interior_regularity
           (fun q : ℝ × M =>
             fderiv ℝ (chartRawRepr (I := I) α (fun x => deTurckVF (I := I) (g_DT q.1) g_bg x))
               (extChartAt I α q.2))
-          (Set.Icc 0 T ×ˢ Set.univ)) ∧
+          (Set.Icc 0 T ×ˢ (chartAt H α).source)) ∧
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
         (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
           : TangentBundle I M))
@@ -128,7 +128,7 @@ theorem deturck_ricci_parabolic_interior_regularity
           (fun q : ℝ × M =>
             Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j
               (extChartAt I α q.2))
-          (Set.Icc 0 T ×ˢ Set.univ)) ∧
+          (Set.Icc 0 T ×ˢ (chartAt H α).source)) ∧
       (∀ (α : M) (i j : Fin (Module.finrank ℝ E)) (k : ℕ), k ≤ 2 →
         ContinuousOn
           (fun q : ℝ × M => iteratedFDeriv ℝ k
@@ -165,7 +165,11 @@ theorem deturck_ricci_parabolic_interior_regularity
   · intro x₀ i j
     have hC := IntrinsicSpectral.MetricRealization.realizedMetric_chartGramOnE_continuousOn_uptoZero
       (I := I) g₀ x₀ i j g_DT T_s hk₀ hreal hHk₀
-    refine (hC.mono (Set.prod_mono Set.Ico_subset_Icc_self (fun x _ => Set.mem_univ x))).congr ?_
+    have hsub : Set.Ico (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet
+        ⊆ Set.Icc (0 : ℝ) T ×ˢ (chartAt H x₀).source := by
+      rw [TangentBundle.trivializationAt_baseSet (I := I) x₀]
+      exact Set.prod_mono Set.Ico_subset_Icc_self (subset_refl _)
+    refine (hC.mono hsub).congr ?_
     rintro ⟨t, x⟩ ⟨_, hx⟩
     have hxsource : x ∈ (extChartAt I x₀).source := by
       rw [extChartAt_source]
@@ -214,7 +218,7 @@ theorem deturck_ricci_flow_parabolic_short_time_existence
           (fun q : ℝ × M =>
             fderiv ℝ (chartRawRepr (I := I) α (fun x => deTurckVF (I := I) (g_DT q.1) g_bg x))
               (extChartAt I α q.2))
-          (Set.Icc 0 T ×ˢ Set.univ)) ∧
+          (Set.Icc 0 T ×ˢ (chartAt H α).source)) ∧
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
         (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
           : TangentBundle I M))
@@ -234,7 +238,7 @@ theorem deturck_ricci_flow_parabolic_short_time_existence
           (fun q : ℝ × M =>
             Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j
               (extChartAt I α q.2))
-          (Set.Icc 0 T ×ˢ Set.univ)) ∧
+          (Set.Icc 0 T ×ˢ (chartAt H α).source)) ∧
       (∀ (α : M) (i j : Fin (Module.finrank ℝ E)) (k : ℕ), k ≤ 2 →
         ContinuousOn
           (fun q : ℝ × M => iteratedFDeriv ℝ k

@@ -782,7 +782,7 @@ theorem conjugating_flow_t0_continuity_data
         (fun q : ℝ × M =>
           Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j
             (extChartAt I α q.2))
-        (Set.Icc 0 T ×ˢ Set.univ))
+        (Set.Icc 0 T ×ˢ (chartAt H α).source))
     (hC2 : ∀ (α : M) (i j : Fin (Module.finrank ℝ E)) (k : ℕ), k ≤ 2 →
       ContinuousOn
         (fun q : ℝ × M => iteratedFDeriv ℝ k

@@ -148,7 +148,7 @@ theorem ricci_flow_short_time_existence
           (fun q : ℝ × M =>
             Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j
               (extChartAt I α q.2))
-          (Set.Icc 0 T ×ˢ Set.univ) := by
+          (Set.Icc 0 T ×ˢ (chartAt H α).source) := by
       intro α i j
       exact (h_gramOnE0_DT α i j).mono
         (Set.prod_mono_left (Set.Icc_subset_Icc_right hT_le))

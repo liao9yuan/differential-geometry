@@ -110,15 +110,23 @@ For the realized DeTurck flow `g_DT = g_bg + ccTensorBilinSymm (T_s ·)` (`hreal
 order-`2k` spatial Sobolev trace is time-continuous up to `0` at a supercritical order
 (`hHk`), each single-chart Gram entry
 `(t, x) ↦ chartGramOnE (g_DT t) α i j (extChartAt I α x)` is jointly continuous on the
-closed-from-below `Icc 0 T ×ˢ univ`.
+closed-from-below `Icc 0 T ×ˢ (chartAt H α).source`.
 
 This is continuity up to the smooth initial metric, in the single-chart form the
 conjugating-flow continuity assembler `gfam_inner_continuous_on`
-(`ShortTimeAssembly/RicciContinuityInMetricTime.lean`) consumes (the orbit ranges over all
-of `M`, so the `univ` formulation is genuinely needed).  The hypotheses are the carrier/PDE
+(`ShortTimeAssembly/RicciContinuityInMetricTime.lean`) consumes.  The domain is the chart
+`α`-source: off the source the chart round-trip `extChartAt I α` is junk, so the pull-back
+Gram entry there carries no parabolic meaning; the consumers only ever evaluate at points of
+the orbit, which stay in the source near each chart centre (a `nhdsWithin` restriction at the
+centre upgrades the source statement to the orbit datum).  The hypotheses are the carrier/PDE
 realize data; the conclusion is the up-to-`0` joint continuity, distinct from them — no
-packaging.  The node is the deferred classical up-to-boundary parabolic-regularity input;
-its body is `sorry`, so consumers transitively depend on `sorryAx`. -/
+packaging.
+
+This is sorry-free: it is the spectral → chart-local bridge
+`chartGramOnE_realizedMetric_jointContinuousOn`
+(`Analysis/Parabolic/DeTurckRicci/InteriorChartRegularityBridge.lean`), which delivers exactly
+this `J ×ˢ (chartAt H α).source` joint continuity off the `H^{2k} ↪ C⁰` embedding and the
+locally-uniform joint-continuity engine. -/
 theorem realizedMetric_chartGramOnE_continuousOn_uptoZero
     (g_bg : SmoothRiemannianMetric I M) (α : M) (i j : Fin (Module.finrank ℝ E))
     (g_DT : ℝ → SmoothRiemannianMetric I M)
@@ -134,40 +142,9 @@ theorem realizedMetric_chartGramOnE_continuousOn_uptoZero
       (fun q : ℝ × M =>
         Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j
           (extChartAt I α q.2))
-      (Set.Icc (0 : ℝ) T ×ˢ Set.univ) := sorry
-
-/-- **`C⁰`-up-to-`0` of the realized DeTurck vector field (genuine parabolic up-to-boundary
-continuity of the field).**
-
-For the realized DeTurck flow `g_DT = g₀ + ccTensorBilinSymm (T_s ·)` realized off the
-anchor `g₀` (`hreal`) whose order-`2k` spatial Sobolev trace is time-continuous up to `0`
-at a supercritical order (`hHk`), the DeTurck vector field of `g_DT` against the flow
-background `g_bg`, `(t, x) ↦ deTurckVF (g_DT t) g_bg x`, is jointly continuous up to `0` on
-`Icc 0 T ×ˢ univ`.
-
-This is continuity up to the smooth initial datum of the (quasi-linear, lower-order)
-DeTurck field — exactly the `hcont0` datum the from-zero manifold-orbit assemblers
-(`fromZero_manifold_orbit_uniform_delta`, `Analysis/ODE/.../FromZeroManifoldOrbit.lean`)
-consume for the conjugating-diffeomorphism construction.  The anchor `g₀` (the realize
-base) and the flow background `g_bg` (the DeTurck-field background) are decoupled.  The
-hypotheses are the carrier/PDE realize data; the conclusion is the up-to-`0` field
-continuity, distinct from them — no packaging.  The node is the deferred classical
-up-to-boundary parabolic-regularity input; its body is `sorry`, so consumers transitively
-depend on `sorryAx`. -/
-theorem realizedMetric_deTurckVF_continuousOn_uptoZero
-    (g₀ g_bg : SmoothRiemannianMetric I M)
-    (g_DT : ℝ → SmoothRiemannianMetric I M)
-    (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2) {k : ℕ} {T : ℝ}
-    (hk : 2 * k > Module.finrank ℝ E + 4)
-    (hreal : ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
-      (g_DT t).inner x v w
-        = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s t) x v w)
-    (hHk : ContinuousOn (fun t : ℝ =>
-      IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * k) (T_s t))
-      (Set.Icc 0 T)) :
-    ContinuousOn
-      (fun q : ℝ × M => (deTurckVF (I := I) (g_DT q.1) g_bg q.2 : TangentSpace I q.2))
-      (Set.Icc (0 : ℝ) T ×ˢ Set.univ) := sorry
+      (Set.Icc (0 : ℝ) T ×ˢ (chartAt H α).source) :=
+  chartGramOnE_realizedMetric_jointContinuousOn (I := I) (M := M)
+    g_bg α i j g_DT T_s hk hreal hHk
 
 /-- **`C⁰`-up-to-`0` of the raw-fibre chart Fréchet derivative of the realized DeTurck
 vector field (genuine parabolic up-to-boundary gradient regularity).**
@@ -185,10 +162,13 @@ This is the up-to-`0` chart-gradient regularity of the DeTurck field — exactly
 consume for the conjugating-diffeomorphism construction (the general-point trivialised-
 gradient product rule the chart-calculus layer isolates as a deferred input).  The anchor
 `g₀` (the realize base) and the flow background `g_bg` (the DeTurck-field background) are
-decoupled.  The hypotheses are the carrier/PDE realize data; the conclusion is the up-to-`0`
-gradient continuity, distinct from them — no packaging.  The node is the deferred classical
-up-to-boundary gradient parabolic-regularity input; its body is `sorry`, so consumers
-transitively depend on `sorryAx`. -/
+decoupled.  The domain is the chart `α`-source: the raw chart representation
+`chartRawRepr α` and its Fréchet derivative read through `extChartAt I α` carry no meaning
+off the chart source (where the round-trip is junk), so the `univ` formulation would be
+false-as-stated; the source statement is the honest one.  The hypotheses are the carrier/PDE
+realize data; the conclusion is the up-to-`0` gradient continuity, distinct from them — no
+packaging.  The node is the deferred classical up-to-boundary gradient parabolic-regularity
+input; its body is `sorry`, so consumers transitively depend on `sorryAx`. -/
 theorem realizedMetric_deTurckVF_chartRawRepr_fderiv_continuousOn_uptoZero
     (g₀ g_bg : SmoothRiemannianMetric I M) (α : M)
     (g_DT : ℝ → SmoothRiemannianMetric I M)
@@ -205,7 +185,7 @@ theorem realizedMetric_deTurckVF_chartRawRepr_fderiv_continuousOn_uptoZero
         fderiv ℝ (chartRawRepr (I := I) α
           (fun x => deTurckVF (I := I) (g_DT q.1) g_bg x))
           (extChartAt I α q.2))
-      (Set.Icc (0 : ℝ) T ×ˢ Set.univ) := sorry
+      (Set.Icc (0 : ℝ) T ×ˢ (chartAt H α).source) := sorry
 
 /-- **Joint `C∞`-up-to-AND-across-`0` of the realized DeTurck vector field as a tangent-bundle
 section (genuine parabolic up-to-boundary smoothing of the field).**
@@ -247,6 +227,137 @@ theorem realizedMetric_deTurckVF_jointContMDiffOn_uptoZero
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
         : TangentBundle I M))
       (Set.Icc (0 : ℝ) T ×ˢ Set.univ) := sorry
+
+/-- **Bare-fibre continuity of the chart-`α` coordinate frame (pure bundle geometry).**
+
+The chart-`α` coordinate frame vector `x ↦ chartBasisVecFiber α i x`, read as a bare element
+of the model space `E` (through the type synonym `TangentSpace I x = E`), is continuous on the
+chart-`α` base set.  Geometrically this is the smooth chart-`α` coordinate frame field of the
+tangent bundle, read in its own chart; it is a pure tangent-bundle locality fact, independent
+of any metric/PDE datum.
+
+It is isolated here as the one genuine bundle-geometry input that the up-to-`0` field
+continuity below needs but that the present library only exposes in `chartJ`-wrapped /
+locally-constant-chart forms (`chartJinv_wrapped_continuousAt`,
+`Analysis/Spectral/Tensor/ChartTensor/ChartGeometry/JinvContinuity.lean`;
+`chartJinv_continuousOn_loc`,
+`Analysis/Spectral/Tensor/UniformChartBounds/ChartJUniformBoundLocallyConstant.lean`), neither
+of which strips to the bare `symmL`-applied-to-a-constant continuity over the *whole* source.
+Its body is `sorry`; consumers transitively depend on `sorryAx`. -/
+theorem chartBasisVecFiber_continuousOn_baseSet
+    (α : M) (i : Fin (Module.finrank ℝ E)) :
+    ContinuousOn (fun x : M => (chartBasisVecFiber (I := I) α i x : E))
+      (trivializationAt E (TangentSpace I) α).baseSet := sorry
+
+/-- **`C⁰`-up-to-`0` of the realized DeTurck vector field (genuine parabolic up-to-boundary
+continuity of the field).**
+
+For the realized DeTurck flow `g_DT = g₀ + ccTensorBilinSymm (T_s ·)` realized off the
+anchor `g₀` (`hreal`) whose order-`2k` spatial Sobolev trace is time-continuous up to `0`
+at a supercritical order (`hHk`), the DeTurck vector field of `g_DT` against the flow
+background `g_bg`, `(t, x) ↦ deTurckVF (g_DT t) g_bg x`, is jointly continuous up to `0` on
+`Icc 0 T ×ˢ univ`.
+
+This is continuity up to the smooth initial datum of the (quasi-linear, lower-order)
+DeTurck field — exactly the `hcont0` datum the from-zero manifold-orbit assemblers
+(`fromZero_manifold_orbit_uniform_delta`, `Analysis/ODE/.../FromZeroManifoldOrbit.lean`)
+consume for the conjugating-diffeomorphism construction.  The anchor `g₀` (the realize
+base) and the flow background `g_bg` (the DeTurck-field background) are decoupled.  The
+hypotheses are the carrier/PDE realize data; the conclusion is the up-to-`0` field
+continuity, distinct from them — no packaging.
+
+This is no longer an independent classical input: it is sorry-free GLUE over the closed-slab
+joint smoothness `realizedMetric_deTurckVF_jointContMDiffOn_uptoZero` (the SOUND replacement
+that subsumes it).  Locally at each base point `α := q₀.2`, the bare field is recomposed in
+the chart-`α` frame, `deTurckVF (g_DT t) g_bg x
+  = ∑ i (repr (e_α.clmAt x (deTurckVF (g_DT t) g_bg x)))_i • chartBasisVecFiber α i x`
+(`chartBasisVecFiber_recompose`): the trivialised coefficient `e_α.clmAt x (deTurckVF …)` is
+the chart-`α`-trivialisation fibre coordinate of the (continuous, from the closed-slab
+smoothness) total-space section, hence continuous on the base set; the frame vectors are
+continuous by `chartBasisVecFiber_continuousOn_baseSet`; the finite `E`-sum is therefore
+continuous on `Icc 0 T ×ˢ baseSet_α`, and `mono_of_mem_nhdsWithin` upgrades it to the `univ`
+slab at `q₀`.  Consumers transitively depend on the closed-slab leaf's (and the bundle-frame
+node's) `sorryAx`. -/
+theorem realizedMetric_deTurckVF_continuousOn_uptoZero
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2) {k : ℕ} {T : ℝ}
+    (hk : 2 * k > Module.finrank ℝ E + 4)
+    (hreal : ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
+      (g_DT t).inner x v w
+        = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s t) x v w)
+    (hHk : ContinuousOn (fun t : ℝ =>
+      IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * k) (T_s t))
+      (Set.Icc 0 T)) :
+    ContinuousOn
+      (fun q : ℝ × M => (deTurckVF (I := I) (g_DT q.1) g_bg q.2 : TangentSpace I q.2))
+      (Set.Icc (0 : ℝ) T ×ˢ Set.univ) := by
+  classical
+  have h5 := realizedMetric_deTurckVF_jointContMDiffOn_uptoZero
+    (I := I) g₀ g_bg g_DT T_s hk hreal hHk
+  have hcont5 := h5.continuousOn
+  intro q₀ hq₀
+  set α : M := q₀.2 with hα
+  set e := trivializationAt E (TangentSpace I) α with he
+  have hbase0 : α ∈ e.baseSet := by
+    rw [he, hα]; exact FiberBundle.mem_baseSet_trivializationAt E (TangentSpace I) α
+  set U : Set (ℝ × M) := Set.Icc (0 : ℝ) T ×ˢ e.baseSet with hU
+  set σ : ℝ × M → TangentBundle I M :=
+    fun q => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2) : TangentBundle I M)
+    with hσ
+  have hσ_cont : ContinuousOn σ (Set.Icc (0 : ℝ) T ×ˢ Set.univ) := hcont5
+  have hmaps : Set.MapsTo σ U e.source := by
+    rintro ⟨t, x⟩ ⟨ht, hx⟩
+    rw [Trivialization.mem_source]; exact hx
+  have htriv_cont : ContinuousOn (fun q : ℝ × M => (e (σ q)).2) U := by
+    have h1 : ContinuousOn (fun q => e (σ q)) U :=
+      (e.continuousOn.comp (hσ_cont.mono (Set.prod_mono_right (Set.subset_univ _))) hmaps)
+    exact continuous_snd.comp_continuousOn h1
+  have hcoord_eq : Set.EqOn
+      (fun q : ℝ × M => e.continuousLinearMapAt ℝ q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2))
+      (fun q : ℝ × M => (e (σ q)).2) U := by
+    rintro ⟨t, x⟩ ⟨ht, hx⟩
+    show e.continuousLinearMapAt ℝ x (deTurckVF (I := I) (g_DT t) g_bg x) = (e (σ (t, x))).2
+    rw [e.continuousLinearMapAt_apply (R := ℝ), e.coe_linearMapAt_of_mem hx]
+  have hclm_cont : ContinuousOn (fun q : ℝ × M =>
+      e.continuousLinearMapAt ℝ q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)) U :=
+    htriv_cont.congr hcoord_eq
+  have hrepr : ∀ i : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => ((chartModelBasis E).repr
+        (e.continuousLinearMapAt ℝ q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2))) i) U := by
+    intro i
+    have hlin : Continuous (fun y : E => ((chartModelBasis E).repr y) i) :=
+      ((Finsupp.lapply (R := ℝ) (M := ℝ) (α := Fin (Module.finrank ℝ E)) i).comp
+        (chartModelBasis E).repr.toLinearMap).continuous_of_finiteDimensional
+    exact hlin.comp_continuousOn hclm_cont
+  have hframe : ∀ i : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => (chartBasisVecFiber (I := I) α i q.2 : E)) U := by
+    intro i
+    exact (chartBasisVecFiber_continuousOn_baseSet (I := I) α i).comp continuousOn_snd
+      (fun q hq => hq.2)
+  have hrecomp : Set.EqOn
+      (fun q : ℝ × M => (deTurckVF (I := I) (g_DT q.1) g_bg q.2 : TangentSpace I q.2))
+      (fun q : ℝ × M => ∑ i : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr
+          (e.continuousLinearMapAt ℝ q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2))) i •
+        chartBasisVecFiber (I := I) α i q.2) U := by
+    rintro ⟨t, x⟩ ⟨ht, hx⟩
+    exact chartBasisVecFiber_recompose (I := I) α hx (deTurckVF (I := I) (g_DT t) g_bg x)
+  have hsumcont : ContinuousOn
+      (fun q : ℝ × M => ∑ i : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr
+          (e.continuousLinearMapAt ℝ q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2))) i •
+        chartBasisVecFiber (I := I) α i q.2) U := by
+    refine continuousOn_finset_sum _ (fun i _ => ?_)
+    exact (hrepr i).smul (hframe i)
+  have hbareU : ContinuousOn
+      (fun q : ℝ × M => (deTurckVF (I := I) (g_DT q.1) g_bg q.2 : TangentSpace I q.2)) U :=
+    hsumcont.congr hrecomp
+  have hq₀U : q₀ ∈ U := ⟨hq₀.1, hbase0⟩
+  refine (hbareU q₀ hq₀U).mono_of_mem_nhdsWithin ?_
+  rw [hU, nhdsWithin_prod_eq]
+  exact Filter.prod_mem_prod self_mem_nhdsWithin
+    (nhdsWithin_le_nhds (e.open_baseSet.mem_nhds hbase0))
 
 end MetricRealization
 end IntrinsicSpectral
