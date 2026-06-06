@@ -618,7 +618,7 @@ and the short-time layer — do not do this inside HamiltonPositiveRicci):
    (or joint continuity over `{t // t ∈ D.carrier} × M`, matching
    `Tensor0SFamilyContinuousOnSet`).  `scalarTime` is already carrier-local
    (`K ⊆ D.carrier`).  Audit and weaken the downstream consumers consistently:
-   `smoothOfSol`/`scalarSTContOfSol`, `ScalarSTContOn.scalar_continuousAt`, and
+   `smoothOfSol`/`scalarSTContOfSol`, `ScalarSTContOn.scalar_continuousOn`, and
    the scalar WMP consumers, all of which currently assume the global form.
 2. **Add a short-time regularity producer** (`ShortTimeRegularityOn`-style, in the
    short-time/regularity layer, or by strengthening `ricci_flow_short_time_existence`'s
@@ -634,3 +634,218 @@ choice touching several consumers).  Item 2 contains genuine analysis (the
 `C∞`-up-to-`0` upgrade and the scalar heat equation) and is the substantial
 remaining mathematics.  Neither is a routine local proof, so the frontier was
 left visible rather than papered over.
+
+## 2026-06-05 carrier-local scalar continuity redesign implemented
+
+The statement-strength part of the scalar-continuity obstruction is now fixed.
+`IsSolutionOn.scalarCont`, `ScalarSTContOn`, and `CanonicalScalarRegularOn` are
+carrier-local `ContinuousOn` packages over `D.carrier x M`, and
+`SolutionOn.scalar_continuousOn` now requires an explicit slab-subset proof
+`Set.Icc 0 T subset D.carrier`.
+
+Direct consumers were updated rather than hidden behind new assumptions:
+time-shift and parabolic-rescaling compose the carrier-local scalar continuity
+through their time maps; Ricci-preservation uses subtype continuity on
+`{t // t in D.carrier} x M`; scalar lower-bound and improved pinching restrict
+to slabs using their existing carrier-subset hypotheses; finite-time scalar
+continuity is now requested as a local family for every `T < omega`; and the
+Hamilton scalar package exposes the same local family.
+
+Verification passed for the edited scalar-continuity API and Hamilton consumer.
+The actual theorem-body `sorry` count in `HamiltonPositiveRicci.lean` remains
+7; no new `sorry` was introduced.  The short-time adapter remains blocked for
+the genuine producer reasons from the audit: closed-at-zero `MetricFamilySmoothOn`
+regularity, third-order `nablaRic` continuity, and scalar evolution.
+
+## 2026-06-05 item-2 reshape: short-time IsSolutionOn producer
+
+Goal of this pass: advance the `IsSolutionOn` short-time frontier ("item 2").
+
+Investigation of the short-time / DeTurck / parabolic / spectral layers
+(findings):
+
+- C∞-up-to-`t=0` metric time regularity: NOT available.  Strongest exposed is
+  `deturck_solution_c2_continuous_icc0` (`C²` on `Icc 0 T`).  The headline only
+  exposes joint `C∞` on the OPEN `Ioo 0 T`.
+- 3rd-order `∇Ric` carrier continuity: NOT available (only 2nd-order Ricci
+  continuity, `ricci_continuous_in_metric_time`).
+- Scalar heat equation: the only producer (`scalarEvolOfSmooth`) consumes
+  `IsSmoothSolutionOn`, i.e. it is downstream of `IsSolutionOn` — circular for
+  this purpose.  No producer derives it from the metric PDE + smoothness alone.
+- No theorem anywhere CONSTRUCTS `MetricFamilySmoothOn` or `IsSolutionOn` from
+  primitive data (only `timeShift`/`paraSolution` transform an existing one).
+
+So the three gaps are genuine hard parabolic-analysis facts that this project
+black-boxes by design (like short-time existence itself); "filling" them is a
+major PDE-formalization effort, out of scope for an incremental pass.
+
+Correctness defect found and fixed: the previous frontier
+`ham3_isSolution_of_shortTimeData` took the raw chart-Gram/PDE data of the
+candidate as hypotheses and concluded `IsSolutionOn S`.  Those hypotheses are
+too weak to imply `IsSolutionOn` (they pin only the open-interval `C∞`, the
+`C⁰`-up-to-`0` continuity, and the 1st time derivative; one can satisfy them yet
+fail the `C∞`-up-to-`0` / heat-equation fields), so as a `∀ S` implication it is
+effectively false — a `sorry` should not sit on it.
+
+Reshape (in `HamiltonPositiveRicci.lean`):
+
+- Removed `ham3_isSolution_of_shortTimeData`.
+- Added `ham3_short_isSolution (hM) (g0) : ∃ T (hT : 0 < T) S, S.family.metric
+  initial = g0 ∧ IsSolutionOn S`.  This is a `g0`-based producer about the
+  *actual* short-time solution, so the statement is mathematically true; its
+  scaffolding (`SolutionOn`, initial metric) is the checked
+  `ham3_short_solution_candidate`, and the `IsSolutionOn` fields are a single,
+  precisely-labeled parabolic-regularity `sorry` (the three facts above), matching
+  how `ricci_flow_short_time_existence` itself black-boxes its deep analytic core.
+- Rewired `ham3_short_smooth_solution` to `ham3_short_isSolution` + the checked
+  `smoothOfSol`.
+
+Verification passed (focused).  Net `sorry` count in
+`HamiltonPositiveRicci.lean` is unchanged at 7; the item-2 frontier is now a
+true, correctly-located, single labeled black box (`ham3_short_isSolution`,
+the short-time parabolic regularity input) instead of an effectively-false
+raw-data consumer.
+
+Difficulty / next: genuinely discharging `ham3_short_isSolution` needs the
+short-time analytic layer strengthened to expose `C∞`-up-to-`0` metric
+regularity and 3rd-order `∇Ric` continuity, plus a non-circular scalar-heat
+producer (derive `ScalarEvolutionEquationOn` from `∂_t g = -2 Ric` + smoothness,
+not from `IsSmoothSolutionOn`).  These are PDE-analysis tasks in the short-time /
+Evolution layer, not local proofs.
+
+## 2026-06-05 weakening execution — IN PROGRESS (tree mid-refactor)
+
+Executing the `MetricFamilySmoothOn` weakening (interior-`C∞` + carrier-continuity).
+The audit confirmed it is sound, but execution exposed a larger-than-expected
+blast radius:
+
+Done & checked in isolation:
+- `RealTimeInterval` gained `regular_isOpen : IsOpen regular` (TimeInterval.lean),
+  with all 11 builders updated.  Needed because `coordMetricSmoothAt`/
+  `coordInvSmoothAt` produce `ContMDiffAt` at regular times, which needs a
+  *neighbourhood*; `D.regular` only provides one when open.  TimeInterval.lean
+  checks green.
+- `MetricFamilySmoothOn` weakened: `coeff`/`frameCompSmooth` moved to `D.regular`,
+  new `coeff_cont` (carrier continuity).  MetricFamily.lean checks green.
+
+Edited, not yet re-verified against the new struct:
+- Core.lean `isSolutionOn_timeShift.smoothMetric` (4-field rebuild).
+- Evolution/Metric/Basic.lean `coordMetricSmooth`→`D.regular`, `coordMetricSmoothAt`
+  uses `regular_isOpen`.
+- Evolution/Metric/InverseSmooth.lean coordinate chain → `D.regular`,
+  `coordInvSmoothAt` uses `regular_isOpen`.
+
+Remaining (the genuinely new mathematics):
+- **Carrier-continuity sub-chain** for `Estimate.lean`'s `ricciNorm_coordCont`
+  (which needs `ricciNorm` continuity up to `t = 0`, hence `coordInv` continuity
+  up to `0`).  `coordInvSmooth` is now interior-only, so a carrier-continuity
+  route is required: `coordMetricCont` (from `metricTensor_cont` via
+  `eval_continuous`) → Gram continuity → **inverse continuity** (continuity of
+  `ContinuousLinearMap.inverse` at invertible points) → `coordInvCont`.  This is
+  ~4 new lemmas, the inverse-continuity being the nontrivial one (mirrors the
+  existing smooth `coordFrameGInvCLM_spacetimeSmooth` but with `ContinuousAt`).
+- `RicciPreservation.lean` 3697/3714: `.coeff.continuousOn` → `.coeff_cont`.
+- `ParabolicRescaling.lean`: para interval builder `regular_isOpen`; metric
+  family builder provide `coeff_cont` + move to `D.regular`.
+- Full `lake-locked build` to verify the cascade.
+
+Status: tree is mid-refactor (broken until the above land).  Claim tokens held.
+
+## 2026-06-06 weakening COMPLETE (coordInvContOn proved, no net new sorry)
+
+The `MetricFamilySmoothOn` weakening is finished and verified.
+
+- Full `lake-locked build` of the whole project passed (exit 0) with the
+  weakening in place.
+- The hidden `D.carrier`-baked helper `contMDiffOn_finset_sum` (InverseSmooth.lean)
+  was generalized to an arbitrary set `t` (backward-compatible).
+- The one carrier-continuity frontier introduced by the weakening,
+  `coordInvContOn` (coordinate inverse-metric continuity up to `t = 0`), is now
+  **fully proved** — no `sorry`.  Its chain, all the continuity twins of the
+  existing smooth lemmas:
+  * `coordMetricContOn` (Evolution/Metric/Basic.lean): frame metric components
+    continuous up to `0`, from `metricTensor_cont` via
+    `Tensor0SFamilyContinuousOnSet.eval_continuous` + `metricTensorField_apply`;
+  * `coordFrameGramCLM_contOn`, `coordFrameGInvCLM_contOn`, `coordInvContOn`
+    (InverseSmooth.lean): Gram continuity → inverse continuity (via
+    `ContinuousLinearMap.inverse` continuous at invertible points, reusing
+    `frameGramCLM_isInvertible_at` + `coordInvCLM_eq`) → entry continuity.
+
+Net effect of the whole weakening: **zero new `sorry`s**.  `IsSolutionOn` /
+`MetricFamilySmoothOn` no longer demand the spurious `C∞`-up-to-`t=0` time
+regularity (only interior `C∞` + carrier continuity), matching what short-time
+existence actually provides and what consumers actually use.  The added
+`RealTimeInterval.regular_isOpen` field is a sound, contained improvement.
+
+This unblocks (does not yet fill) `ham3_short_isSolution`: its `smoothMetric`
+obligation is now satisfiable from short-time data; the remaining genuine
+short-time analytic content for that frontier is `nablaRicCont` (3rd-order ∇Ric
+continuity) and the scalar heat equation.
+
+## 2026-06-06 nablaRicCont weakened to interior (verified, exit 0)
+
+Continued the weakening from `MetricFamilySmoothOn` to the `∇Ric` continuity
+field.  Audit confirmed `IsSolutionOn.nablaRicCont` is **never consumed up to
+`t = 0`**: the only extractor `nablaRicFamilyContinuousOnSet` has no call sites,
+and every other use is a transport rebuild (`isSolutionOn_timeShift`,
+`paraSolution`) or the `ricciRegOfSol` pass-through.  `∇Ric` is a ≤3rd-order
+differential expression in the metric, so interior `C∞` already supplies it.
+
+Edits: `IsSolutionOn.nablaRicCont`, `CanonicalRicciRegularOn.nablaRic_cont`, and
+`nablaRicFamilyContinuousOnSet` changed `3 D.carrier` → `3 D.regular`; the two
+transport rebuilds updated to `MapsTo … regular`.  Full `lake-locked build`
+passed (**exit 0**); claim tokens released.
+
+Net: `IsSolutionOn`'s regularity surface now matches exactly what is consumed —
+interior `C∞` + carrier `C⁰` for the metric, carrier `C⁰` for the ≤2nd-order
+curvature, interior `C⁰` for 3rd-order `∇Ric`.  No spurious up-to-`0` demand
+remains anywhere.
+
+## 2026-06-06 CORRECTION: the scalar heat equation is already proven in-tree
+
+Earlier notes listed "the scalar heat equation" as remaining content of
+`ham3_short_isSolution`.  That is **wrong** — it is fully formalized and
+sorry-free:
+
+- Intrinsic field form: `IsSolutionOn.scalarEvolution` (Basic/Core.lean:555),
+  `∂ₜ R = Δ_g R + 2‖Ric‖²`.
+- Proven derivation: `scalarEvolutionEquationOn_of_ricciEvolution`
+  (Evolution/Scalar/Assembly.lean:88) from the Ricci evolution; the
+  contracted-Bianchi reduction `2ΔR − 2Q + 2‖Ric‖² ⟿ ΔR + 2‖Ric‖²` is
+  `scalarEvolutionEquationOn_of_contractedBianchi` (Evolution/Scalar/Basic.lean:82).
+- The Ricci evolution it rests on is also proven: `coordRicciEvol`
+  (Evolution/Ricci/CoordinateIdentities.lean:876), from Christoffel evolution +
+  ∇² commutators.  **The entire `Evolution/{Scalar,Ricci,Connection}` subtree is
+  sorry-free.**
+
+So the scalar evolution is the *best-supported* `IsSolutionOn` field, not a gap.
+The genuine residual of `ham3_short_isSolution` is **regularity packaging only**:
+wiring the candidate's chart-Gram smoothness/continuity into the intrinsic
+continuity fields and citing the proven `coordRicciEvol` →
+`scalarEvolutionEquationOn_of_ricciEvolution` chain for `scalarEvolution`.  The
+single genuinely black-boxed analytic input is upstream:
+`deturck_ricci_flow_parabolic_short_time_existence`
+(ShortTime/DeTurckRicciPde.lean:128) + the conjugating-flow field regularity
+(ShortTimeFlow/ConjugatingFlowProperties.lean:3954).
+
+## 2026-06-06 sorry structure of the final theorem `thm_2_1`
+
+`thm_2_1` = `ham3_main`: closed connected 3-manifold with `AdmitsPosRicci`
+⟹ `AdmitsConstPosSec ∧ SphericalSpaceForm`.  Forks into the analysis branch
+`ham3_const_metric` and the topology branch `ham3_equiv`.
+
+The Section 7–9 differential-geometric core is **proved** (finite-time, scalar
+blow-up, point selection, parabolic rescaling, Ricci-nonneg preservation,
+pinching estimates, Rm bound, and the whole `limit_*` tensor-transfer chain to
+`limit_const_pos`).  Remaining `sorry`s, grouped:
+
+1. Short-time existence (upstream PDE): `deturck_…_short_time_existence`,
+   `ConjugatingFlowProperties.lean:3954`; bridge `ham3_short_isSolution`
+   (HamiltonPositiveRicci.lean:571, now regularity packaging only).
+2. Maximal continuation: `ham3_flow_exists_normalized` (:628); the input
+   `extends_of_rmBounded` (MaximalTime.lean:159, Black Box 11.2) exists but is
+   currently *bypassed* (`formsSing_of_maximal_metric`/`rmUnbounded_of_maximal`
+   appear only in a docstring, not in any proof body).
+3. Singularity/convergence: `ham3_noncollapse` (:2288, Perelman noncollapsing),
+   `ham3_cgh_limit` (:2310, Hamilton compactness), `limit_to_orig` (:2844).
+4. Topology endpoint: `ham3_space_box` (:2944), `spaceForm_const_metric` (:2956).

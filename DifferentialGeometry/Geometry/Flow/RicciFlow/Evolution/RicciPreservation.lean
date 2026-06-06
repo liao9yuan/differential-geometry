@@ -808,13 +808,16 @@ theorem scalar0_cont_sol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S) :
+    (hS : IsSolutionOn (I := I) S)
+    (h0 : (0 : Real) ∈ D.carrier) :
     Continuous (fun x : M => S.scalar 0 x) := by
-  rw [continuous_iff_continuousAt]
-  intro x
   have hmap : Continuous (fun y : M => ((0 : Real), y)) :=
     continuous_const.prodMk continuous_id
-  exact (hS.scalarCont (0, x)).comp hmap.continuousAt
+  have hmem : ∀ y : M, ((0 : Real), y) ∈ D.carrier ×ˢ (Set.univ : Set M) := by
+    intro y
+    exact ⟨h0, trivial⟩
+  have hcomp := hS.scalarCont.comp_continuous hmap hmem
+  simpa [Function.comp_def] using hcomp
 
 /-- Preserved pinching conclusion for a fixed `delta`. -/
 def PinchPres
@@ -3218,24 +3221,15 @@ theorem pinchSecFamilyContinuousOnSet
     (hS : IsSolutionOn (I := I) S) (delta : Real) :
     Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2 D.carrier
       (fun t x => (pinchSec (I := I) S delta) t x) := by
-  have hmap :
-      Continuous (fun q : {t : Real // t ∈ D.carrier} × M =>
-        ((q.1.1 : Real), q.2)) := by
-    exact (continuous_subtype_val.comp continuous_fst).prodMk continuous_snd
   have hcoef :
       Continuous (fun q : {t : Real // t ∈ D.carrier} × M =>
         delta * S.scalar q.1.1 q.2) := by
     have hscalarSub :
         Continuous (fun q : {t : Real // t ∈ D.carrier} × M =>
           S.scalar q.1.1 q.2) := by
-      rw [continuous_iff_continuousAt]
-      intro q
-      exact ContinuousAt.comp
-        (x := q)
-        (f := fun q : {t : Real // t ∈ D.carrier} × M =>
-          ((q.1.1 : Real), q.2))
-        (g := fun p : Real × M => S.scalar p.1 p.2)
-        (hS.scalarCont (q.1.1, q.2)) hmap.continuousAt
+      exact ScalarSTContOn.continuous_subtype (I := I) (M := M) (S := S)
+        ({ scalar_continuousOn := hS.scalarCont } :
+          ScalarSTContOn (I := I) (M := M) S)
     exact continuous_const.mul hscalarSub
   have hmetric :
       Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2 D.carrier
@@ -3289,21 +3283,12 @@ theorem pinchLipFamilyContinuousOnSet
     (hS : IsSolutionOn (I := I) S) :
     Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2 D.carrier
       (fun t x => (pinchLipSec (I := I) S) t x) := by
-  have hmap :
-      Continuous (fun q : {t : Real // t ∈ D.carrier} × M =>
-        ((q.1.1 : Real), q.2)) := by
-    exact (continuous_subtype_val.comp continuous_fst).prodMk continuous_snd
   have hscalarSub :
       Continuous (fun q : {t : Real // t ∈ D.carrier} × M =>
         S.scalar q.1.1 q.2) := by
-    rw [continuous_iff_continuousAt]
-    intro q
-    exact ContinuousAt.comp
-      (x := q)
-      (f := fun q : {t : Real // t ∈ D.carrier} × M =>
-        ((q.1.1 : Real), q.2))
-      (g := fun p : Real × M => S.scalar p.1 p.2)
-      (hS.scalarCont (q.1.1, q.2)) hmap.continuousAt
+    exact ScalarSTContOn.continuous_subtype (I := I) (M := M) (S := S)
+      ({ scalar_continuousOn := hS.scalarCont } :
+        ScalarSTContOn (I := I) (M := M) S)
   have hmetric :
       Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2 D.carrier
         (fun t x => metricTensorField (I := I) (S.base.metric t) x) := by
@@ -3709,7 +3694,7 @@ theorem pinchBarrierReg
   metric_eval_continuous := by
     intro x v w
     simpa [SolutionOn.family] using
-      ((hS.smoothMetric.coeff x v w).continuousOn.mono hTsub)
+      ((hS.smoothMetric.coeff_cont x v w).mono hTsub)
   barrier_eval_continuous := by
     intro epsilon d t0 hsub x v w
     have hScont :
@@ -3726,7 +3711,7 @@ theorem pinchBarrierReg
       exact
         (by
           simpa [SolutionOn.family] using
-            ((hS.smoothMetric.coeff x v w).continuousOn.mono hTsub) :
+            ((hS.smoothMetric.coeff_cont x v w).mono hTsub) :
           ContinuousOn
             (fun t : Real => (S.base.metric t).inner x v w)
             (Set.Icc 0 T)).mono hsub
@@ -4753,6 +4738,7 @@ theorem strict_pinch_sol_lt
       (scalar := S.scalar)
       (metricData_sol0 (I := I) (M := M) S)
       (metricData_sol0_pos (I := I) (M := M) S hpos)
-      (scalar0_cont_sol (I := I) (M := M) S hS.isSolution))
+      (scalar0_cont_sol (I := I) (M := M) S hS.isSolution
+        (hTsub (show (0 : Real) ∈ Set.Icc 0 T from ⟨le_rfl, hT⟩))))
 
 end DifferentialGeometry.PDE.RicciFlow

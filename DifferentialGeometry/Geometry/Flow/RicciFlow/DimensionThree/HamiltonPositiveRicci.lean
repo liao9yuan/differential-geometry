@@ -487,7 +487,7 @@ at the file's own `E, I, M`.  The raw chart-Gram smoothness/continuity and the
 pointwise Ricci-flow PDE are restated verbatim in terms of the candidate's
 metric family `S.family.metric` (which is definitionally the short-time
 `g_fam`).  It does *not* yet supply `IsSolutionOn`; see
-`ham3_isSolution_of_shortTimeData`. -/
+`ham3_short_isSolution`. -/
 theorem ham3_short_solution_candidate
     [BoundarylessManifold I M]
     (hM : Closed3Manifold (I := I) (M := M))
@@ -525,69 +525,60 @@ theorem ham3_short_solution_candidate
   · intro t ht x v w
     exact hpde t ht x v w
 
-/-- Remaining frontier (currently **blocked**, not a thin adapter): promote the
-raw short-time chart-Gram/PDE output of `ham3_short_solution_candidate` to the
-metric Ricci-flow solution predicate `IsSolutionOn`.
+/-- **Short-time Ricci-flow regularity (classical parabolic black box).**
 
-The hypotheses are *only* the genuine short-time analytic output: joint
-chart-Gram `C∞` on the open slab `Ioo 0 T`, chart-Gram continuity up to `t = 0`
-on `Ico 0 T`, and the pointwise `∂_t g = -2 Ric` equation.  A 2026-06-05
-feasibility audit (recorded in `HamiltonPositiveRicci.md`) found this is a
-missing-producer / statement-strength frontier, not a local proof:
+From a smooth initial metric `g0` on a closed three-manifold, the
+Hamilton–DeTurck short-time flow is a genuine folder-level Ricci-flow solution:
+there are `T > 0` and a `SolutionOn (closedOpen 0 T)` with initial metric `g0`
+that is an `IsSolutionOn`.
 
-* **(hard blocker)** `IsSolutionOn.scalarCont` is stated *globally*
-  (`∀ p : Real × M, ContinuousAt ...`).  A half-open `SolutionOn` controls its
-  metric family only on the carrier `Ico 0 T`; outside it the family is
-  unconstrained, so global scalar continuity is not produced by — and is in
-  general false for — short-time data.  The honest fix is a carrier-local
-  `scalarCont`, an `IsSolutionOn` redesign deliberately deferred on this pass.
-* `MetricFamilySmoothOn.coeff`/`frameCompSmooth` ask for `ContDiffOn ⊤`
-  (`C∞`-in-time) on the closed-at-`0` carrier, but the short-time layer exposes
+The existence / interior-`C∞` / `C⁰`-up-to-`0` / first-order-PDE scaffolding is
+supplied (checked) by `ham3_short_solution_candidate`.  The remaining
+`IsSolutionOn` fields are the genuine short-time *parabolic-regularity* content
+that this project black-boxes, exactly as it already does for the existence
+headline `ricci_flow_short_time_existence`:
+
+* `C∞`-up-to-`t = 0` metric-coefficient time regularity
+  (`MetricFamilySmoothOn.coeff`/`frameCompSmooth`); the short-time layer exposes
   joint `C∞` only on the *open* `Ioo 0 T` plus `C²` up to the endpoints
-  (`deturck_solution_c2_continuous_icc0`).  `C∞`-up-to-`t=0` is true but unexposed.
-* `nablaRicCont` needs continuity of the 3rd-order `∇Ric`; the short-time layer
-  exposes chart time-continuity only up to 2nd order (`ricci_continuous_in_metric_time`).
-* `scalarEvolution` (the scalar curvature heat equation) is a genuine evolution
-  frontier.
+  (`deturck_solution_c2_continuous_icc0`).
+* joint continuity of the 3rd-order `∇Ric` on the carrier (`nablaRicCont`); only
+  2nd-order chart continuity is exposed (`ricci_continuous_in_metric_time`).
+* the scalar curvature heat equation `∂_t R = Δ R + 2 |Ric|²` (`scalarEvolution`).
 
-Reachable from the current data: `equation`, `smoothConnection`, `ricciCont`,
-`metricTensor_cont`.  The four items above are not.  The downstream promotion
-`IsSolutionOn → IsSmoothSolutionOn` is the *checked* `smoothOfSol`
-(`RicciFlow/Regularity.lean`).  Left as `sorry` until the short-time regularity
-producer and the `IsSolutionOn.scalarCont` redesign land. -/
-theorem ham3_isSolution_of_shortTimeData
-    [BoundarylessManifold I M]
-    {T : Real} (hT : 0 < T)
-    (S : DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M)
-      (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 T hT))
-    (_hSmooth : ∀ (x0 : M) (i j : Fin (Module.finrank Real E)),
-      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real) ∞
-        (fun p : Real × M =>
-          Integral.Measure.chartGramMatrix (I := I) (S.family.metric p.1) x0 p.2 i j)
-        (Set.Ioo (0 : Real) T ×ˢ (trivializationAt E (TangentSpace I) x0).baseSet))
-    (_hCont : ∀ (x0 : M) (i j : Fin (Module.finrank Real E)),
-      ContinuousOn
-        (fun p : Real × M =>
-          Integral.Measure.chartGramMatrix (I := I) (S.family.metric p.1) x0 p.2 i j)
-        (Set.Ico (0 : Real) T ×ˢ (trivializationAt E (TangentSpace I) x0).baseSet))
-    (_hPDE : ∀ t ∈ Set.Ico (0 : Real) T, ∀ x : M, ∀ v w : TangentSpace I x,
-      HasDerivWithinAt (fun s : Real => (S.family.metric s).inner x v w)
-        ((-2 : Real) *
-          DifferentialGeometry.Integral.Connection.ricciTensor
-            (I := I) (S.family.metric t) x v w) (Set.Ici 0) t) :
-    DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) S := by
+Unlike a raw-chart-data consumer (whose hypotheses are too weak to *imply*
+`IsSolutionOn` — they pin only the 1st time derivative and the open-interval
+smoothness), this statement is about the *actual* short-time solution, so it is
+mathematically true; the single `sorry` is the labeled parabolic-regularity
+input.  Downstream, `smoothOfSol` promotes the result to `IsSmoothSolutionOn`. -/
+theorem ham3_short_isSolution
+    (hM : Closed3Manifold (I := I) (M := M))
+    (g0 : SmoothRiemannianMetric I M) :
+    ∃ T : Real, ∃ hT : 0 < T,
+      ∃ S : DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M)
+        (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 T hT),
+        S.family.metric
+            (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 T hT).initial
+              = g0 ∧
+          DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) S := by
+  haveI : I.Boundaryless := hM.2.2.1
+  obtain ⟨T, hT, S, hstart, _hSmooth, _hCont, _hPDE⟩ :=
+    ham3_short_solution_candidate (I := I) (M := M) hM g0
+  refine ⟨T, hT, S, hstart, ?_⟩
+  -- The genuine short-time parabolic-regularity black box (see the docstring):
+  -- `C∞`-up-to-`0` metric regularity, `∇Ric` continuity, and the scalar heat
+  -- equation.  The statement is true of this specific short-time solution `S`.
   sorry
 
-/-- Short-time *smooth* normalized existence, assembled from the checked bridge
-`ham3_short_solution_candidate`, the metric-solution frontier
-`ham3_isSolution_of_shortTimeData`, and the *checked* regularity promotion
+/-- Short-time *smooth* normalized existence, assembled from the short-time
+solution producer `ham3_short_isSolution` and the *checked* regularity promotion
 `smoothOfSol` (`IsSolutionOn → IsSmoothSolutionOn`).
 
 This is the natural building block for the normalized maximal-flow setup: it
 produces a genuine folder-level smooth Ricci-flow solution on `[0, T)` with the
-prescribed initial metric.  Its only gap flows through
-`ham3_isSolution_of_shortTimeData`; the `IsSolutionOn → IsSmoothSolutionOn` step
-is fully proved by `smoothOfSol`. -/
+prescribed initial metric.  Its only gap flows through `ham3_short_isSolution`
+(the labeled short-time parabolic-regularity black box); the
+`IsSolutionOn → IsSmoothSolutionOn` step is fully proved by `smoothOfSol`. -/
 theorem ham3_short_smooth_solution
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M) :
@@ -599,10 +590,8 @@ theorem ham3_short_smooth_solution
               = g0 ∧
           DifferentialGeometry.PDE.RicciFlow.IsSmoothSolutionOn (I := I) (M := M) S := by
   haveI : I.Boundaryless := hM.2.2.1
-  obtain ⟨T, hT, S, hstart, hSmooth, hCont, hPDE⟩ :=
-    ham3_short_solution_candidate (I := I) (M := M) hM g0
-  have hSol : DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) S :=
-    ham3_isSolution_of_shortTimeData (I := I) (M := M) hT S hSmooth hCont hPDE
+  obtain ⟨T, hT, S, hstart, hSol⟩ :=
+    ham3_short_isSolution (I := I) (M := M) hM g0
   exact ⟨T, hT, S, hstart,
     DifferentialGeometry.PDE.RicciFlow.smoothOfSol (I := I) S hSol⟩
 
@@ -613,9 +602,10 @@ maximal-time construction, normalization of the initial time to `0`, and the
 verified Ricci-flow equation package.
 
 The short-time *smooth* stage is now a genuine cite: `ham3_short_smooth_solution`
-(built from the checked bridge `ham3_short_solution_candidate` and the scoped
-regularity frontier `ham3_isSmoothSolution_of_shortTimeData`) produces a smooth
-folder-level Ricci-flow solution on `[0, T)` with `S.family.metric 0 = g0`.
+(built from the checked bridge `ham3_short_solution_candidate`, the short-time
+solution producer `ham3_short_isSolution`, and the checked `smoothOfSol`
+promotion) produces a smooth folder-level Ricci-flow solution on `[0, T)` with
+`S.family.metric 0 = g0`.
 
 The remaining gap in this theorem is the *maximal continuation*: extending that
 short-time smooth flow to a maximal normalized interval `[0, ω)` and reading off
@@ -1097,16 +1087,17 @@ theorem ham3_init74
     ⟨c0, hmin⟩
   exact ⟨c0, hmin, ham3_scalar0_pos74 (I := I) (M := M) hdim h0ω hpos P hD⟩
 
-/-- Scalar curvature is continuous on the compact pole slab used in the
-finite-time argument. -/
+/-- Scalar curvature is continuous on every compact slab strictly inside the
+closed-open flow interval. -/
 theorem ham3_cont74
+    {omega : Real} (h0ω : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
-    (c0 : Real) :
+    (hD : P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω)
+    (T : Real) (hTω : T < omega) :
     ContinuousOn
       (fun p : Real × M => ham3Scalar (I := I) P p.1 p.2)
-      (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M)
-        (DifferentialGeometry.PDE.RicciFlow.scalarBlowupTime 3 c0)) := by
+      (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
   have hreg :
       DifferentialGeometry.PDE.RicciFlow.ScalarSTContOn
         (I := I) (M := M) (ham3Solution (I := I) P) :=
@@ -1115,7 +1106,11 @@ theorem ham3_cont74
     DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar_continuousOn
       (I := I) (M := M) (ham3Solution (I := I) P)
       P.isSmooth.isSolution hreg
-      (DifferentialGeometry.PDE.RicciFlow.scalarBlowupTime 3 c0)
+      T
+      (by
+        intro t ht
+        rw [hD]
+        exact ⟨ht.1, lt_of_le_of_lt ht.2 hTω⟩)
 
 /-- Scalar evolution in the intrinsic package:
 `partial_t R = Delta R + 2 |Ric|^2`. -/
@@ -1244,16 +1239,16 @@ theorem ham3_ricBound74
 /-- Compact value-set Lipschitz producer for the scalar lower-bound reaction. -/
 theorem ham3_lip74
     [CompactSpace M]
+    {omega : Real}
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
     (c0 : Real)
     (hc0 : 0 < c0)
-    (hcont : ContinuousOn
-      (fun p : Real × M => ham3Scalar (I := I) P p.1 p.2)
-      (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M)
-        (DifferentialGeometry.PDE.RicciFlow.scalarBlowupTime 3 c0))) :
+    (hcont : forall T : Real, 0 <= T -> T < omega ->
+      ContinuousOn (fun p : Real × M => ham3Scalar (I := I) P p.1 p.2)
+        (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T)) :
     exists K : Real -> NNReal,
-      forall T : Real, 0 < T -> forall omega : Real, T < omega ->
+      forall T : Real, 0 < T -> T < omega ->
         T < DifferentialGeometry.PDE.RicciFlow.scalarBlowupTime 3 c0 ->
           forall t : Real, t ∈ Set.Icc 0 T ->
             LipschitzOnWith (K T)
@@ -1263,7 +1258,8 @@ theorem ham3_lip74
                 (DifferentialGeometry.PDE.RicciFlow.scalarLowerBarrier 3 c0)) := by
   classical
   have hExists :
-      ∀ T : Real, 0 < T -> T < DifferentialGeometry.PDE.RicciFlow.scalarBlowupTime 3 c0 ->
+      ∀ T : Real, 0 < T -> T < omega ->
+        T < DifferentialGeometry.PDE.RicciFlow.scalarBlowupTime 3 c0 ->
         ∃ K : NNReal,
           ∀ t : Real, t ∈ Set.Icc 0 T ->
             LipschitzOnWith K
@@ -1271,18 +1267,12 @@ theorem ham3_lip74
               (DifferentialGeometry.Integral.Connection.scalarWMPValueSet (M := M) T
                 (ham3Scalar (I := I) P)
                 (DifferentialGeometry.PDE.RicciFlow.scalarLowerBarrier 3 c0)) := by
-    intro T _hT hPole
-    have hsubset :
-        DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T ⊆
-          DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M)
-            (DifferentialGeometry.PDE.RicciFlow.scalarBlowupTime 3 c0) := by
-      intro p hp
-      exact ⟨⟨hp.1.1, le_trans hp.1.2 (le_of_lt hPole)⟩, trivial⟩
+    intro T hT hTω hPole
     have hscalar_cont_T :
         ContinuousOn
           (fun p : Real × M => ham3Scalar (I := I) P p.1 p.2)
           (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) :=
-      hcont.mono hsubset
+      hcont T (le_of_lt hT) hTω
     have hden :
         ∀ t : Real, t ∈ Set.Icc 0 T ->
           0 < 1 - (2 / 3 : Real) * c0 * t :=
@@ -1309,14 +1299,15 @@ theorem ham3_lip74
         (M := M) 3 T (ham3Scalar (I := I) P)
         (DifferentialGeometry.PDE.RicciFlow.scalarLowerBarrier 3 c0) hcompact
   let K : Real -> NNReal := fun T =>
-    if h : 0 < T ∧ T < DifferentialGeometry.PDE.RicciFlow.scalarBlowupTime 3 c0 then
-      Classical.choose (hExists T h.1 h.2)
+    if h : 0 < T ∧ T < omega ∧
+        T < DifferentialGeometry.PDE.RicciFlow.scalarBlowupTime 3 c0 then
+      Classical.choose (hExists T h.1 h.2.1 h.2.2)
     else 0
   refine ⟨K, ?_⟩
-  intro T hT _omega _hTω hPole t ht
+  intro T hT hTω hPole t ht
   dsimp [K]
-  rw [dif_pos ⟨hT, hPole⟩]
-  exact Classical.choose_spec (hExists T hT hPole) t ht
+  rw [dif_pos ⟨hT, hTω, hPole⟩]
+  exact Classical.choose_spec (hExists T hT hTω hPole) t ht
 
 /-- Section 11/7 producer: extract the scalar package needed by Corollary 7.4
 from Hamilton's normalized maximal Ricci-flow package.
@@ -1338,10 +1329,9 @@ theorem ham3_scalar74
       exists K : Real -> NNReal,
         DifferentialGeometry.PDE.RicciFlow.InitialScalarMinimum (M := M) scalar c0 /\
         (forall x : M, 0 < scalar 0 x) /\
-        ContinuousOn
-          (fun p : Real × M => scalar p.1 p.2)
-          (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M)
-            (DifferentialGeometry.PDE.RicciFlow.scalarBlowupTime 3 c0)) /\
+        (forall T : Real, 0 <= T -> T < omega ->
+          ContinuousOn (fun p : Real × M => scalar p.1 p.2)
+            (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T)) /\
         (forall T : Real, 0 < T -> T < omega ->
           T < DifferentialGeometry.PDE.RicciFlow.scalarBlowupTime 3 c0 ->
             DifferentialGeometry.PDE.RicciFlow.ScalarLowerBoundWMPRegularity
@@ -1369,11 +1359,16 @@ theorem ham3_scalar74
   letI : Nonempty M := inferInstance
   rcases ham3_init74 (I := I) (M := M) hdim h0ω hpos P hD with
     ⟨c0, hinit_min, hinit_pos⟩
-  have hcont := ham3_cont74 (I := I) (M := M) P c0
+  have hcont :
+      forall T : Real, 0 <= T -> T < omega ->
+        ContinuousOn (fun p : Real × M => ham3Scalar (I := I) P p.1 p.2)
+          (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
+    intro T _hT hTω
+    exact ham3_cont74 (I := I) (M := M) h0ω P hD T hTω
   have hc0 : 0 < c0 :=
     DifferentialGeometry.PDE.RicciFlow.InitialScalarMinimum.pos_of_forall_pos
       (M := M) hinit_min hinit_pos
-  rcases ham3_lip74 (I := I) (M := M) P c0 hc0 hcont with
+  rcases ham3_lip74 (I := I) (M := M) (omega := omega) P c0 hc0 hcont with
     ⟨K, hK⟩
   refine ⟨ham3RealFamily (I := I) P, c0,
     ham3Scalar (I := I) P, ham3ScalarLap (I := I) P,
@@ -1385,7 +1380,7 @@ theorem ham3_scalar74
   · intro _T _hT _hTω _hPole t _ht x
     exact ham3_ricBound74 (I := I) (M := M) hdim P t x
   · intro T hT hTω hPole
-    exact hK T hT omega hTω hPole
+    exact hK T hT hTω hPole
 
 /-- Lemma 11.1-style input: the maximal Ricci flow reaches a finite singular
 time. -/
@@ -1498,20 +1493,17 @@ private theorem scalar_gt_of_rm {A R rm : Real}
   nlinarith
 
 private theorem ham3_scalar_cont_slab
+    {omega : Real} (h0ω : 0 < omega)
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω)
     (T : Real) :
+    T < omega ->
     ContinuousOn
       (fun p : Real × M => ham3Scalar (I := I) P p.1 p.2)
       (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
-  have hreg :
-      DifferentialGeometry.PDE.RicciFlow.ScalarSTContOn
-        (I := I) (M := M) (ham3Solution (I := I) (M := M) P) :=
-    ham3_scalarSTCont (I := I) (M := M) P
-  simpa [ham3Scalar, DifferentialGeometry.Integral.Connection.spacetimeSlab] using
-    DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar_continuousOn
-      (I := I) (M := M) (ham3Solution (I := I) (M := M) P)
-      P.isSmooth.isSolution hreg T
+  intro hTω
+  exact ham3_cont74 (I := I) (M := M) h0ω P hD T hTω
 
 private theorem slab_max_of_continuousOn
     [CompactSpace M]
@@ -1624,7 +1616,7 @@ theorem ham3_point_select
       ContinuousOn
         (fun p : Real × M => ham3Scalar (I := I) P p.1 p.2)
         (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) half) :=
-    ham3_scalar_cont_slab (I := I) (M := M) P half
+    ham3_scalar_cont_slab (I := I) (M := M) h0ω P hD half hhalf_lt_omega
   have hbounded_half :
       DifferentialGeometry.PDE.RicciFlow.ScalarBoundedAboveOnSlab
         (M := M) (ham3Scalar (I := I) P) half :=
@@ -1666,7 +1658,7 @@ theorem ham3_point_select
     exact slab_max_of_continuousOn (M := M)
       (f := fun p : Real × M => ham3Scalar (I := I) P p.1 p.2)
       (T := rawTime i) (t := rawTime i) (x := rawPoint i)
-      (ham3_scalar_cont_slab (I := I) (M := M) P (rawTime i))
+      (ham3_scalar_cont_slab (I := I) (M := M) h0ω P hD (rawTime i) (hraw_lt_omega i))
       ⟨hraw_nonneg i, le_rfl⟩
   let qTime : Nat -> Real := fun i => Classical.choose (hmax_exists i)
   let qPoint : Nat -> M := fun i =>
@@ -1824,7 +1816,11 @@ theorem ham3_pinch9_fixed
       (scalar := P.S.scalar)
       (DifferentialGeometry.PDE.RicciFlow.metricData_sol0 (I := I) (M := M) P.S)
       (DifferentialGeometry.PDE.RicciFlow.metricData_sol0_pos (I := I) (M := M) P.S hpos0)
-      (DifferentialGeometry.PDE.RicciFlow.scalar0_cont_sol (I := I) (M := M) P.S P.isSmooth.isSolution)
+      (DifferentialGeometry.PDE.RicciFlow.scalar0_cont_sol (I := I) (M := M) P.S
+        P.isSmooth.isSolution
+        (by
+          rw [hD]
+          exact ⟨le_rfl, h0ω⟩))
   rcases hinit with ⟨delta, hdelta0, hdelta13, hpinch0⟩
   refine ⟨delta, hdelta0, hdelta13, ?_⟩
   intro T hT hTω
@@ -1978,11 +1974,16 @@ theorem ham3_scalar_pos
   letI : Nonempty M := inferInstance
   rcases ham3_init74 (I := I) (M := M) hdim h0ω hpos P hD with
     ⟨c0, hinit_min, hinit_pos⟩
-  have hcont := ham3_cont74 (I := I) (M := M) P c0
+  have hcont :
+      forall T : Real, 0 <= T -> T < omega ->
+        ContinuousOn (fun p : Real × M => ham3Scalar (I := I) P p.1 p.2)
+          (DifferentialGeometry.Integral.Connection.spacetimeSlab (M := M) T) := by
+    intro T _hT hTω
+    exact ham3_cont74 (I := I) (M := M) h0ω P hD T hTω
   have hc0 : 0 < c0 :=
     DifferentialGeometry.PDE.RicciFlow.InitialScalarMinimum.pos_of_forall_pos
       (M := M) hinit_min hinit_pos
-  rcases ham3_lip74 (I := I) (M := M) P c0 hc0 hcont with
+  rcases ham3_lip74 (I := I) (M := M) (omega := omega) P c0 hc0 hcont with
     ⟨K, hK⟩
   have hreg :
       ∀ T : Real, 0 < T -> T < omega ->
@@ -2025,7 +2026,7 @@ theorem ham3_scalar_pos
                 (ham3Scalar (I := I) P)
                 (DifferentialGeometry.PDE.RicciFlow.scalarLowerBarrier 3 c0)) := by
     intro T hT hTω hPole
-    exact hK T hT omega hTω hPole
+    exact hK T hT hTω hPole
   have hfinite :
       omega <= DifferentialGeometry.PDE.RicciFlow.scalarBlowupTime 3 c0 := by
     have hfin := DifferentialGeometry.PDE.RicciFlow.finiteTime3D (I := I) (M := M)

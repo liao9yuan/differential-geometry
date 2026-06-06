@@ -470,14 +470,25 @@ theorem tensor0SFamily_quadCont
     b hb T hT v hv
   simpa [quad02, P, b, T, v] using hEval
 
-/-- Time smoothness of metric coefficients over a concrete real interval,
-together with joint total-space continuity of the metric tensor family. -/
+/-- Time regularity of metric coefficients over a concrete real interval,
+together with joint total-space continuity of the metric tensor family.
+
+The high-order (`C∞`) time/joint smoothness is required only on the *interior*
+`D.regular`; up to the closed initial endpoint (`D.carrier`) only continuity is
+required.  This matches what parabolic short-time existence actually provides
+(joint `C∞` on the open slab plus `C⁰` up to `t = 0`) and what consumers
+actually use (finite-order smoothness at interior/regular times via `.of_le`,
+and continuity up to `t = 0`); see the consumer audit in
+`DimensionThree/HamiltonPositiveRicci.md`. -/
 structure MetricFamilySmoothOn
     (D : RealTimeInterval)
     (G : RealizedMetricFamilyOn (I := I) (M := M) D) : Prop where
   coeff :
     forall (x : M) (X Y : TangentSpace I x),
-    ContDiffOn Real ⊤ (fun t : Real => (G.metric t).inner x X Y) D.carrier
+    ContDiffOn Real ⊤ (fun t : Real => (G.metric t).inner x X Y) D.regular
+  coeff_cont :
+    forall (x : M) (X Y : TangentSpace I x),
+    ContinuousOn (fun t : Real => (G.metric t).inner x X Y) D.carrier
   metricTensor_cont :
     Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2 D.carrier
       (fun t x => metricTensorField (I := I) (G.metric t) x)
@@ -489,16 +500,25 @@ structure MetricFamilySmoothOn
         ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
           (fun p : Real × M =>
             (G.metric p.1).inner p.2 (frame i p.2) (frame j p.2))
-          (D.carrier ×ˢ u)
+          (D.regular ×ˢ u)
 
-/-- Extract a metric coefficient's interval time smoothness. -/
+/-- Extract a metric coefficient's interior time smoothness. -/
 theorem metric_smooth_coeff_of_metricFamilySmoothOn
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
     (x : M) (X Y : TangentSpace I x) :
-    ContDiffOn Real ⊤ (fun t : Real => (G.metric t).inner x X Y) D.carrier :=
+    ContDiffOn Real ⊤ (fun t : Real => (G.metric t).inner x X Y) D.regular :=
   hG.coeff x X Y
+
+/-- Extract a metric coefficient's continuity up to the closed initial endpoint. -/
+theorem metric_coeff_cont_of_metricFamilySmoothOn
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (x : M) (X Y : TangentSpace I x) :
+    ContinuousOn (fun t : Real => (G.metric t).inner x X Y) D.carrier :=
+  hG.coeff_cont x X Y
 
 /-- Extract the metric tensor total-space continuity from a smooth metric family. -/
 theorem metricTensor_cont_of_metricFamilySmoothOn

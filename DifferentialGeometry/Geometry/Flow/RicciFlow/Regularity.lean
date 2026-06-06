@@ -46,10 +46,10 @@ metric Ricci-flow solution. -/
 theorem scalarContOfSol
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
-    (p : Real × M) :
-    ContinuousAt (fun q : Real × M => S.scalar q.1 q.2) p := by
-  exact hS.scalarCont p
+    (hS : IsSolutionOn (I := I) S) :
+    ContinuousOn (fun q : Real × M => S.scalar q.1 q.2)
+      (D.carrier ×ˢ (Set.univ : Set M)) := by
+  exact hS.scalarCont
 
 /-- Within-time differentiability of the canonical scalar curvature produced
 from a metric Ricci-flow solution. -/
@@ -70,7 +70,7 @@ theorem scalarRegOfSol
     CanonicalScalarRegularOn (I := I) (M := M) S := by
   classical
   refine
-    { scalar_continuousAt := ?_
+    { scalar_continuousOn := ?_
       scalar_time_within := ?_
       scalar_space := ?_
       scalar_grad := ?_
@@ -81,8 +81,7 @@ theorem scalarRegOfSol
       scalar_sq_div_grad := ?_
       scalar_grad_sub_const := ?_
       scalar_grad_const_mul_sub_const := ?_ }
-  · intro p
-    exact scalarContOfSol (I := I) S hS p
+  · exact scalarContOfSol (I := I) S hS
   · intro K t ht hK x
     exact scalarTimeOfSol (I := I) S hS ht hK x
   · intro t ht x

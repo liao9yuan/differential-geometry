@@ -511,10 +511,12 @@ structure IsSolutionOn
   smoothMetric : DifferentialGeometry.Integral.Connection.MetricFamilySmoothOn (I := I) (M := M) D S.family
   smoothConnection : DifferentialGeometry.Integral.Connection.ConnectionFamilySmoothOn (I := I) (M := M) S.family
   equation : MetricVariationEquationOn (I := I) S
-  /-- Spacetime continuity of scalar curvature supplied by the smooth
-  metric-family regularity in the short-time existence package. -/
-  scalarCont : ∀ p : Real × M,
-    ContinuousAt (fun q : Real × M => S.scalar q.1 q.2) p
+  /-- Spacetime continuity of scalar curvature on the solution time carrier,
+  supplied by the smooth metric-family regularity in the short-time existence
+  package.  The metric family is unconstrained away from `D.carrier`, so this
+  field is deliberately carrier-local. -/
+  scalarCont : ContinuousOn (fun q : Real × M => S.scalar q.1 q.2)
+    (D.carrier ×ˢ (Set.univ : Set M))
   /-- Within-time differentiability of scalar curvature on time sets contained
   in the solution carrier, supplied by the smooth metric-family regularity in
   the short-time existence package. -/
@@ -529,9 +531,12 @@ structure IsSolutionOn
   rm04Cont :
     DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 4 D.carrier
       (fun t x => S.base.rm04 t x)
-  /-- Total-space continuity of the canonical `∇ Ric` family. -/
+  /-- Interior continuity of the canonical `∇ Ric` family.  `∇Ric` is a
+  ≤3rd-order differential expression in the metric, so this follows from the
+  interior metric smoothness; it is stated on `D.regular` (not the closed-at-`0`
+  carrier) because nothing consumes `∇Ric` continuity up to `t = 0`. -/
   nablaRicCont :
-    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 3 D.carrier
+    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 3 D.regular
       (fun t x =>
         totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
           2 (S.family.connection t) (S.ricci t) x)
@@ -589,8 +594,31 @@ tensor regularity live in `CanonicalRicciRegularOn`. -/
 structure ScalarSTContOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) : Prop where
-  scalar_continuousAt : ∀ p : Real × M,
-    ContinuousAt (fun q : Real × M => S.scalar q.1 q.2) p
+  scalar_continuousOn : ContinuousOn (fun q : Real × M => S.scalar q.1 q.2)
+    (D.carrier ×ˢ (Set.univ : Set M))
+
+namespace ScalarSTContOn
+
+/-- Scalar spacetime continuity pulled back to the product of the carrier
+subtype with the manifold. -/
+theorem continuous_subtype
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    {S : SolutionOn (I := I) (M := M) D}
+    (hreg : ScalarSTContOn (I := I) (M := M) S) :
+    Continuous (fun q : {t : Real // t ∈ D.carrier} × M =>
+      S.scalar q.1.1 q.2) := by
+  have hmap : Continuous (fun q : {t : Real // t ∈ D.carrier} × M =>
+      ((q.1.1 : Real), q.2)) :=
+    (continuous_subtype_val.comp continuous_fst).prodMk continuous_snd
+  have hmem :
+      ∀ q : {t : Real // t ∈ D.carrier} × M,
+        ((q.1.1 : Real), q.2) ∈ D.carrier ×ˢ (Set.univ : Set M) := by
+    intro q
+    exact ⟨q.1.2, trivial⟩
+  have hcomp := hreg.scalar_continuousOn.comp_continuous hmap hmem
+  simpa [Function.comp_def] using hcomp
+
+end ScalarSTContOn
 
 /-- Regularity of the canonical scalar curvature needed by scalar maximum
 principle consumers.
@@ -603,8 +631,8 @@ package, while WMP files derive their barrier-specific hypotheses from it. -/
 structure CanonicalScalarRegularOn
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) : Prop where
-  scalar_continuousAt : ∀ p : Real × M,
-    ContinuousAt (fun q : Real × M => S.scalar q.1 q.2) p
+  scalar_continuousOn : ContinuousOn (fun q : Real × M => S.scalar q.1 q.2)
+    (D.carrier ×ˢ (Set.univ : Set M))
   scalar_time_within :
     ∀ {K : Set Real} {t : Real}, t ∈ K -> K ⊆ D.carrier -> ∀ x : M,
       DifferentiableWithinAt Real (fun s : Real => S.scalar s x) K t
@@ -656,7 +684,7 @@ theorem toScalarSTCont
     {S : SolutionOn (I := I) (M := M) D}
     (hreg : CanonicalScalarRegularOn (I := I) (M := M) S) :
     ScalarSTContOn (I := I) (M := M) S where
-  scalar_continuousAt := hreg.scalar_continuousAt
+  scalar_continuousOn := hreg.scalar_continuousOn
 
 end CanonicalScalarRegularOn
 
@@ -677,7 +705,7 @@ structure CanonicalRicciRegularOn
     DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 4 D.carrier
       (fun t x => S.base.rm04 t x)
   nablaRic_cont :
-    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 3 D.carrier
+    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 3 D.regular
       (fun t x =>
         totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
           2 (S.family.connection t) (S.ricci t) x)
@@ -717,7 +745,7 @@ theorem nablaRicFamilyContinuousOnSet
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     {S : SolutionOn (I := I) (M := M) D}
     (hreg : CanonicalRicciRegularOn (I := I) (M := M) S) :
-    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 3 D.carrier
+    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 3 D.regular
       (fun t x =>
         totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
           2 (S.family.connection t) (S.ricci t) x) :=
@@ -734,10 +762,11 @@ theorem scalar_continuousOn
     (S : SolutionOn (I := I) (M := M) D)
     (_hS : IsSolutionOn (I := I) S)
     (hreg : ScalarSTContOn (I := I) (M := M) S)
-    (T : Real) :
+    (T : Real)
+    (hT : Set.Icc 0 T ⊆ D.carrier) :
     ContinuousOn (fun p : Real × M => S.scalar p.1 p.2)
       ((Set.Icc 0 T).prod (Set.univ : Set M)) := by
-  exact (continuous_iff_continuousAt.mpr hreg.scalar_continuousAt).continuousOn
+  exact hreg.scalar_continuousOn.mono (Set.prod_mono hT (Set.Subset.rfl))
 
 end SolutionOn
 
@@ -753,20 +782,36 @@ theorem isSolutionOn_timeShift
     (hS : IsSolutionOn (I := I) S) (τ : Real) :
     IsSolutionOn (I := I) (S.timeShift τ) where
   smoothMetric := by
-    constructor
-    · intro x X Y
+    refine ⟨?_, ?_, ?_, ?_⟩
+    · -- coeff: interior `C∞`, on `D.regular`
+      intro x X Y
       have hOld := hS.smoothMetric.coeff x X Y
       have haff : ContDiff Real ⊤ (fun s : Real => s + τ) :=
         contDiff_id.add contDiff_const
       have hmaps :
-          Set.MapsTo (fun s : Real => s + τ) (D.timeShift τ).carrier D.carrier := by
+          Set.MapsTo (fun s : Real => s + τ) (D.timeShift τ).regular D.regular := by
         intro s hs
         exact hs
       have hcomp :
           ContDiffOn Real ⊤
             (fun s : Real => (S.family.metric (s + τ)).inner x X Y)
-            (D.timeShift τ).carrier := by
+            (D.timeShift τ).regular := by
         simpa [Function.comp_def] using hOld.comp haff.contDiffOn hmaps
+      simpa [SolutionOn.family, SolutionOn.timeShift, SolutionFamily.timeShift] using hcomp
+    · -- coeff_cont: continuity up to `t = 0`, on `D.carrier`
+      intro x X Y
+      have hOld := hS.smoothMetric.coeff_cont x X Y
+      have htime : Continuous (fun s : Real => s + τ) :=
+        (continuous_id.add continuous_const)
+      have hmaps :
+          Set.MapsTo (fun s : Real => s + τ) (D.timeShift τ).carrier D.carrier := by
+        intro s hs
+        exact hs
+      have hcomp :
+          ContinuousOn
+            (fun s : Real => (S.family.metric (s + τ)).inner x X Y)
+            (D.timeShift τ).carrier := by
+        simpa [Function.comp_def] using hOld.comp htime.continuousOn hmaps
       simpa [SolutionOn.family, SolutionOn.timeShift, SolutionFamily.timeShift] using hcomp
     · have hmaps :
           Set.MapsTo (fun s : Real => s + τ) (D.timeShift τ).carrier D.carrier := by
@@ -784,7 +829,7 @@ theorem isSolutionOn_timeShift
           ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
             (fun p : Real × M =>
               (S.family.metric p.1).inner p.2 (frame i p.2) (frame j p.2))
-            (D.carrier ×ˢ u) :=
+            (D.regular ×ˢ u) :=
         hS.smoothMetric.frameCompSmooth frame hframe i j
       have hmapSmooth :
           ContMDiff (𝓘(Real, Real).prod I) (𝓘(Real, Real).prod I) ⊤
@@ -792,7 +837,7 @@ theorem isSolutionOn_timeShift
         exact (contMDiff_fst.add contMDiff_const).prodMk contMDiff_snd
       have hmaps :
           Set.MapsTo (fun p : Real × M => (p.1 + τ, p.2))
-            ((D.timeShift τ).carrier ×ˢ u) (D.carrier ×ˢ u) := by
+            ((D.timeShift τ).regular ×ˢ u) (D.regular ×ˢ u) := by
         intro p hp
         exact ⟨hp.1, hp.2⟩
       have hcomp :
@@ -800,7 +845,7 @@ theorem isSolutionOn_timeShift
             (fun p : Real × M =>
               (S.family.metric (p.1 + τ)).inner p.2
                 (frame i p.2) (frame j p.2))
-            ((D.timeShift τ).carrier ×ˢ u) := by
+            ((D.timeShift τ).regular ×ˢ u) := by
         simpa [Function.comp_def] using hOld.comp hmapSmooth.contMDiffOn hmaps
       simpa [SolutionOn.family, SolutionOn.timeShift, SolutionFamily.timeShift]
         using hcomp
@@ -827,21 +872,19 @@ theorem isSolutionOn_timeShift
     simpa [MetricVariationEquationOn, SolutionOn.family, SolutionOn.timeShift,
       SolutionFamily.timeShift, RicciAtFamily.toTensorField, Function.comp_def] using hcomp
   scalarCont := by
-    intro p
-    have hOld := hS.scalarCont (p.1 + τ, p.2)
-    have htime : ContinuousAt (fun q : Real × M => q.1 + τ) p :=
-      continuousAt_fst.add continuousAt_const
-    have hmap : ContinuousAt (fun q : Real × M => (q.1 + τ, q.2)) p :=
-      htime.prodMk continuousAt_snd
-    have hcomp :
-        ContinuousAt
-          (fun q : Real × M => S.scalar (q.1 + τ) q.2) p :=
-      ContinuousAt.comp
-        (x := p)
-        (f := fun q : Real × M => (q.1 + τ, q.2))
-        (g := fun q : Real × M => S.scalar q.1 q.2)
-        hOld hmap
-    simpa [Function.comp_def] using hcomp
+    have hmap : Continuous (fun q : Real × M => (q.1 + τ, q.2)) :=
+      (continuous_fst.add continuous_const).prodMk continuous_snd
+    have hmapOn : ContinuousOn (fun q : Real × M => (q.1 + τ, q.2))
+        ((D.timeShift τ).carrier ×ˢ (Set.univ : Set M)) :=
+      hmap.continuousOn
+    have hmaps : Set.MapsTo (fun q : Real × M => (q.1 + τ, q.2))
+        ((D.timeShift τ).carrier ×ˢ (Set.univ : Set M))
+        (D.carrier ×ˢ (Set.univ : Set M)) := by
+      intro q hq
+      exact ⟨hq.1, trivial⟩
+    have hcomp := hS.scalarCont.comp hmapOn hmaps
+    simpa [SolutionOn.scalar, SolutionFamily.scalar, SolutionOn.timeShift,
+      SolutionFamily.timeShift, Function.comp_def] using hcomp
   scalarTime := by
     intro K t ht hK x
     let shift : Real -> Real := fun s => s + τ
@@ -883,7 +926,7 @@ theorem isSolutionOn_timeShift
     simpa [SolutionOn.timeShift, SolutionFamily.timeShift] using hcont
   nablaRicCont := by
     have hmaps :
-        Set.MapsTo (fun s : Real => s + τ) (D.timeShift τ).carrier D.carrier := by
+        Set.MapsTo (fun s : Real => s + τ) (D.timeShift τ).regular D.regular := by
       intro s hs
       exact hs
     have htime : Continuous (fun s : Real => s + τ) :=
