@@ -90,7 +90,7 @@ theorem ricci_flow_short_time_existence
           ((-2 : ℝ) *
             DifferentialGeometry.Integral.Connection.ricciTensor
               (I := I) (g_fam t) x v w) (Set.Ici 0) t) := by
-  obtain ⟨T_DT, g_DT, hDT, h_reg, _h_cont0, _h_grad0, h_smooth0, h_gram_DT, h_gram0_DT,
+  obtain ⟨T_DT, g_DT, hDT, h_reg, _h_grad0, h_smooth0, h_gram_DT, h_gram0_DT,
       h_gramOnE0_DT, h_C2_DT⟩ :=
     DifferentialGeometry.PDE.RicciFlow.deturck_ricci_flow_parabolic_short_time_existence
       (I := I) (M := M) g₀ g₀

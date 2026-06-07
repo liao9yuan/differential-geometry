@@ -61,8 +61,9 @@ interior-jointly-`C∞` and continuous up to `t = 0` together with its spatial j
 form the conjugating-diffeomorphism construction consumes:
 
 * interior joint-`C∞` of the DeTurck field `q ↦ ⟨q.2, deTurckVF (g_DT q.1) g_bg q.2⟩`
-  on `Ioo 0 T ×ˢ univ`;
-* `C⁰`-up-to-`0` of the field and of its raw-fibre chart Fréchet derivative;
+  on `Ioo 0 T ×ˢ univ`, and the closed-slab joint-`C∞`-up-to-AND-across-`0` of the same
+  field bundle section on `Icc 0 T ×ˢ univ`;
+* `C⁰`-up-to-`0` of the field's raw-fibre chart Fréchet derivative;
 * interior joint-`(t, x)` `C∞` and `C⁰`-up-to-`0` of each chart-local Gram-matrix entry of
   `g_DT` (the `chartGramMatrix` and `chartGramOnE` formulations);
 * `C⁰`-up-to-`0` of the spatial `k ≤ 2` iterated Fréchet jets of each chart-Gram entry
@@ -100,9 +101,6 @@ theorem deturck_ricci_parabolic_interior_regularity
         (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
           : TangentBundle I M))
         (Set.Ioo (0 : ℝ) T ×ˢ Set.univ) ∧
-      ContinuousOn
-        (fun q : ℝ × M => (deTurckVF (I := I) (g_DT q.1) g_bg q.2 : TangentSpace I q.2))
-        (Set.Icc 0 T ×ˢ Set.univ) ∧
       (∀ α : M,
         ContinuousOn
           (fun q : ℝ × M =>
@@ -138,13 +136,11 @@ theorem deturck_ricci_parabolic_interior_regularity
   set k₀ : ℕ := Module.finrank ℝ E + 3 with hk₀_def
   have hk₀ : 2 * k₀ > Module.finrank ℝ E + 4 := by omega
   have hHk₀ := hHk k₀ hk₀
-  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, hC2_chart⟩
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, hC2_chart⟩
   · refine deturck_vf_joint_smoothness (I := I) g_bg g_DT T ?_
     intro x₀ i j
     exact IntrinsicSpectral.MetricRealization.realizedMetric_chartGramOnE_jointContMDiffOn_interior
       (I := I) g₀ x₀ i j g_DT T_s hk₀ hreal hHk₀
-  · exact IntrinsicSpectral.MetricRealization.realizedMetric_deTurckVF_continuousOn_uptoZero
-      (I := I) g₀ g_bg g_DT T_s hk₀ hreal hHk₀
   · intro α
     exact
       IntrinsicSpectral.MetricRealization.realizedMetric_deTurckVF_chartRawRepr_fderiv_continuousOn_uptoZero
@@ -210,9 +206,6 @@ theorem deturck_ricci_flow_parabolic_short_time_existence
         (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
           : TangentBundle I M))
         (Set.Ioo (0 : ℝ) T ×ˢ Set.univ) ∧
-      ContinuousOn
-        (fun q : ℝ × M => (deTurckVF (I := I) (g_DT q.1) g_bg q.2 : TangentSpace I q.2))
-        (Set.Icc 0 T ×ˢ Set.univ) ∧
       (∀ α : M,
         ContinuousOn
           (fun q : ℝ × M =>
