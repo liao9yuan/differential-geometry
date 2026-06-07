@@ -204,7 +204,7 @@ theorem deTurck_g0_realize_data
   -- the coordinate-spectral nonlinearity supply the engine-shaped ball-continuity `hN_cont`
   -- and local Lipschitz `hLipBall`; `hcarrier` is the gate-realizable agreement of `P`'s
   -- realized remainder with the honest gate gauge `deTurckRemainderRealizeSection g₀ g_bg`.
-  obtain ⟨P, K, R, hR, hctrl, hall, hcarrier⟩ :=
+  obtain ⟨P, K, R, Q, hR, hQ, hctrl, hall, hcarrier⟩ :=
     exists_deTurckRemainderG0_synthesis_chartJet2Control (I := I) g₀ g_bg a ha
   obtain ⟨K', hN_cont, hLipBall⟩ :=
     deTurckG0SpectralN_continuous_lipschitz_of_chartJet2Control
@@ -229,29 +229,126 @@ theorem deTurck_g0_realize_data
   -- The gate-realizable coordinate tie to the honest gauge: on `realizableAtGate g₀ u` the
   -- `L²` class of `deTurckRealizeRemainderOf g₀ g_bg (P u)` equals that of the honest gauge
   -- `deTurckRemainderRealizeSection g₀ g_bg u` (`hcarrier`), so their `tensorL2Coeff`s agree.
-  have hcoeff : ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
-      realizableAtGate (I := I) g₀ u →
+  have hcoeff : ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+      (h : realizableAtGate (I := I) g₀ u),
       u ∈ Metric.closedBall
           (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
             (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
             (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R →
+      ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+          (gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose)‖ ≤ Q →
         ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2,
           (N_cont u).coeff i =
             tensorL2Coeff (I := I) (M := M)
               (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
               (Integral.L2.SmoothCcTensor.toL2
                 (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) i := by
-    intro u hu hball i
-    rw [hsynth u i, hcarrier u ⟨hu, hball⟩]
+    intro u h hball hgateQ i
+    rw [hsynth u i, hcarrier u h ⟨hball, hgateQ⟩]
   -- The first-order operator-loss of the concrete gauge-cancelled geometric nonlinearity
   -- (`deTurckGenuineN_firstOrder_operatorLoss`, proven by composition over the all-order ball
   -- control `hall` and the per-order single-section remainder estimate), pinned to the named
   -- geometric operator by the all-order concrete-synthesis identity `hsynth`.
   have hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont R :=
     deTurckGenuineN_firstOrder_operatorLoss (I := I) g₀ g_bg a ha N_cont P K hR hctrl hall hsynth
-  obtain ⟨T, g_DT, u₂, T_s, hT, h0, hreal, hcont, hreg, hsmall, hsmoothrepr, hcanon, hHk,
-      hcarrier_inball⟩ :=
+  obtain ⟨T₀, g_DT, u₂, T_s, hT₀, h0, hreal₀, hcont₀, hreg₀, hsmall₀, hsmoothrepr₀, hcanon₀, hHk,
+      hcarrier_inball₀, hTs0⟩ :=
     deTurck_g0_carrier_realize_transport (I := I) g₀ a ha ha2 N_cont hR hN_cont hLipBall hloss
+  -- **Shrink to a horizon on which the carrier's order-`2a` Sobolev norm stays below the
+  -- selector's positive slack `Q`.**  The smooth representative `T_s` vanishes at `t = 0`
+  -- (`hTs0`) and its order-`2a` norm is continuous up to `0` (`hHk a ha`), so it tends to `0`
+  -- as `t → 0⁺`; since `0 < Q`, it is `≤ Q` on a closed horizon `[0, T]` about `0`.
+  have hTs0z : T_s 0 = 0 := by
+    apply smoothCcTensor_toL2_injective (I := I) (M := M) g₀ 0 2
+    rw [hTs0, map_zero]
+  have hval0 : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+      (T_s 0)‖ = 0 := by
+    rw [hTs0z]
+    have hz : IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+        (0 : Integral.L2.SmoothCcTensor g₀ 0 2) = 0 := by
+      simp only [IntrinsicSobolev.SmoothCcTensor.toHs]
+      exact UniformSpace.Completion.coe_zero
+    rw [hz, norm_zero]
+  have hcontN : ContinuousOn
+      (fun s : ℝ => ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+        (2 * a) (T_s s)‖) (Set.Icc 0 T₀) := (hHk a ha).norm
+  have htend : Filter.Tendsto
+      (fun s : ℝ => ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+        (2 * a) (T_s s)‖) (nhdsWithin 0 (Set.Icc 0 T₀)) (nhds 0) := by
+    have hcw : Filter.Tendsto
+        (fun s : ℝ => ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+          (2 * a) (T_s s)‖) (nhdsWithin 0 (Set.Icc 0 T₀))
+        (nhds (‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+          (2 * a) (T_s 0)‖)) := hcontN 0 ⟨le_rfl, hT₀.le⟩
+    rwa [hval0] at hcw
+  have hev : ∀ᶠ s in nhdsWithin (0 : ℝ) (Set.Icc 0 T₀),
+      ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+        (2 * a) (T_s s)‖ ≤ Q :=
+    htend.eventually (Iic_mem_nhds hQ)
+  rw [eventually_nhdsWithin_iff, Metric.eventually_nhds_iff] at hev
+  obtain ⟨η, hη_pos, hη⟩ := hev
+  set T : ℝ := min T₀ (η / 2) with hT_def
+  have hT : 0 < T := lt_min hT₀ (by linarith)
+  have hT_le : T ≤ T₀ := min_le_left _ _
+  have hIcc_sub : Set.Icc (0 : ℝ) T ⊆ Set.Icc (0 : ℝ) T₀ := Set.Icc_subset_Icc le_rfl hT_le
+  have hIco_sub : Set.Ico (0 : ℝ) T ⊆ Set.Ico (0 : ℝ) T₀ := Set.Ico_subset_Ico le_rfl hT_le
+  have hIoo_sub : Set.Ioo (0 : ℝ) T ⊆ Set.Ioo (0 : ℝ) T₀ := Set.Ioo_subset_Ioo le_rfl hT_le
+  -- Restrict the carrier bundle facts to the shrunk horizon `[0, T]`.
+  have hreal : ∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
+      (g_DT s).inner x v w
+        = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s s) x v w :=
+    fun s hs => hreal₀ s (hIcc_sub hs)
+  have hcont : ContinuousOn
+      (fun s : ℝ => tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (Set.Icc 0 T) :=
+    hcont₀.mono hIcc_sub
+  have hreg : ∀ s ∈ Set.Ioo (0 : ℝ) T,
+      HasDerivAt
+        (fun r => (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ r)))
+        (scaleLaplacianFun (I := I) (M := M) (u₂ s) +
+          N_cont
+            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s :=
+    fun s hs => hreg₀ s (hIoo_sub hs)
+  have hsmall : ∀ s ∈ Set.Ioo (0 : ℝ) T, ∃ δ' : ℝ, δ' < 1 ∧
+      gFibreOpBound (I := I) (M := M) g₀
+        (ccTensorBilinSymm (I := I) g₀ (T_s s)) δ' :=
+    fun s hs => hsmall₀ s (hIoo_sub hs)
+  have hsmoothrepr : ∀ s ∈ Set.Icc (0 : ℝ) T,
+      ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+      (u₂ s).coeff i
+        = tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i :=
+    fun s hs => hsmoothrepr₀ s (hIcc_sub hs)
+  have hcanon : ∀ s ∈ Set.Icc (0 : ℝ) T,
+      Integral.L2.SmoothCcTensor.toL2 (T_s s) =
+        tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (show (0 : ℝ) ≤ (a : ℝ) + 2 by positivity) (u₂ s) :=
+    fun s hs => hcanon₀ s (hIcc_sub hs)
+  have hcarrier_inball : ∀ s ∈ Set.Ico (0 : ℝ) T,
+      tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s) ∈
+        Metric.closedBall
+          (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R :=
+    fun s hs => hcarrier_inball₀ s (hIco_sub hs)
+  have hHk' : ∀ (k : ℕ), 2 * k > Module.finrank ℝ E + 4 →
+      ContinuousOn
+        (fun s : ℝ => IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+          (2 * k) (T_s s))
+        (Set.Icc 0 T) := fun k hk => (hHk k hk).mono hIcc_sub
+  -- The carrier's order-`2a` Sobolev norm stays `≤ Q` on the shrunk horizon `[0, T]`.
+  have hQcarrier : ∀ s ∈ Set.Icc (0 : ℝ) T,
+      ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a) (T_s s)‖ ≤ Q := by
+    intro s hs
+    exact hη (by
+        rw [Real.dist_eq, sub_zero, abs_of_nonneg hs.1]
+        exact lt_of_le_of_lt hs.2 (lt_of_le_of_lt (min_le_right _ _) (by linarith)))
+      (hIcc_sub hs)
   -- Discharge the honest `realizableAtGate` membership of the carrier inclusion on the
   -- whole closed interval: `MemAllTensorHs` from the smooth representative `T_s s`, and
   -- the `g₀`-fibre-smallness from `hsmall` on the interior and from `hreal`/`h0`
@@ -293,10 +390,21 @@ theorem deTurck_g0_realize_data
             (Nsec (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
               (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)))) i := by
     intro s hs i
+    -- The gate representative at the carrier inclusion is the smooth representative `T_s s`
+    -- (`gateSmoothRep_carrierInclusion_eq`), whose order-`2a` Sobolev norm is `≤ Q` on the
+    -- shrunk horizon (`hQcarrier`); this discharges the quantitative match-gate.
+    have hgateQ : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+        (gateSmoothRep (I := I) g₀
+          (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))
+          (hgate s hs).choose (hgate s hs).choose_spec.choose)‖ ≤ Q := by
+      rw [gateSmoothRep_carrierInclusion_eq (I := I) g₀ a u₂ T_s
+        (hsmoothrepr s (Set.Ico_subset_Icc_self hs)) (hgate s hs)]
+      exact hQcarrier s (Set.Ico_subset_Icc_self hs)
     exact hcoeff
       (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
         (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (hgate s hs)
-      (hcarrier_inball s hs) i
+      (hcarrier_inball s hs) hgateQ i
   exact ⟨T, a, hT, ha, g_DT, u₂, T_s, N_cont, repr, Nsec, h0, hreal, hN_coeff,
     hNsec_realize, hcont, hreg, hsmall, hsmoothrepr,
     hNsec_geom_univ T g_DT u₂ T_s hgate
@@ -304,7 +412,7 @@ theorem deTurck_g0_realize_data
       (fun s hs => hsmoothrepr s (Set.Ico_subset_Icc_self hs))
       (fun s hs => hcanon s (Set.Ico_subset_Icc_self hs)),
     deTurck_g0_chartGram_continuity (I := I) g₀ a ha hT g_DT u₂ T_s N_cont
-      hreal hcont hreg h0 hcanon hHk⟩
+      hreal hcont hreg h0 hcanon hHk'⟩
 
 /-- **Interior one-sided time-derivative of the realized `g₀`-anchored flow
 (genuine analytic input).**

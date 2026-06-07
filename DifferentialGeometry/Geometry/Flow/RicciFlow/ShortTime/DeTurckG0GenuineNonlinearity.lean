@@ -1067,11 +1067,33 @@ rate `K`, and a positive radius `R`, given here in **unfolded** form (not yet pa
   unexposed, threaded explicitly so the downstream all-order remainder bounds become true (a
   bump-interpolated `P` hitting high-frequency eigentensors is `H^{a+2}`-legal yet blows up every
   order `n ≥ a + 3`, so this arm genuinely constrains the carrier);
-* `hmatch` — on the ball-restricted gate-realizable locus (`realizableAtGate g₀ u`, `u` in the
-  radius-`R` ball), the realized DeTurck remainder of the selector coincides, **at the `L²`-class
-  level** (through `SmoothCcTensor.toL2`), with the carrier's canonical gauge section
+* `hmatch` — on the **quantitatively-gated** ball-restricted gate-realizable locus
+  (`realizableAtGate g₀ u`, `u` in the radius-`R` ball, *and* the gate smooth representative
+  `gateSmoothRep g₀ u` order-`2a` Sobolev-norm-bounded by the `∃`-output slack `Q`), the realized
+  DeTurck remainder of the selector coincides, **at the `L²`-class level** (through
+  `SmoothCcTensor.toL2`), with the carrier's canonical gauge section
   `deTurckRemainderRealizeSection g₀ g_bg u` (the honest DeTurck remainder of the gate-realized
   flow on the locus).
+
+**Why the quantitative gate is honest (and necessary).** `realizableAtGate g₀ u` is purely
+*qualitative* — `MemAllTensorHs` (infinite smoothness of the `L²` class) plus `g₀`-fibre-smallness
+of the gate representative.  Fibre-smallness constrains only a *low-order* (`C⁰`/fibre) norm of
+`gateSmoothRep g₀ u`; it places **no** bound on its high-order Sobolev norm
+`‖gateSmoothRep g₀ u‖_{H^{a+2}}`, which is *unbounded* on eigenmode families (an eigenmode train
+with `‖·‖_{H^{a+1}} = δ` small but `‖·‖_{H^{a+2}} ∼ √λ·δ → ∞`, fibre-small via the supercritical
+embedding, is realizable-in-ball).  At such a witness the *matched* gauge remainder
+`deTurckRemainderRealizeSection g₀ g_bg u` has `H^{a+1}`-class `→ ∞`, while the control arms
+(`hall`/`AllOrderBallControl`) cap **every** Sobolev norm of `deTurckRealizeRemainderOf g₀ g_bg
+(P u)` — the *same* `L²` class via `smoothCcTensor_toL2_injective` — uniformly over the ball.  So
+the *unrestricted* match arm (`∀ realizable u in ball → match`) is **incompatible** with the
+control arms (at best unfillable).  Restricting the match domain by the P-independent order-`2a`
+bound `‖gateSmoothRep g₀ u‖_{H^{2a}} ≤ Q` excises exactly the eigenmode-train obstruction
+(`2a ≥ a + 2`, so the bound caps the loss order), leaving the honest, consumer-shaped statement:
+the sole consumer applies the match only at carrier points `ι (u₂ s)`, whose gate representative is
+the smooth `T_s s` (`gateSmoothRep_carrierInclusion_eq`) with `H^{2a}` norm continuous up to
+`t = 0` and vanishing there (`toL2 (T_s 0) = 0`), hence below any `Q > 0` on a shrunk horizon.
+The gate is `P`-independent (it references only `u`/`gateSmoothRep`/`Q`, never `P`), and
+non-vacuous (it genuinely rejects the eigenmode-train witness above).
 
 This is the genuine deep content, and it carries the same existential weight as the gauge-match
 node `exists_deTurckG0_regularizedSynthesis_gaugeMatch` it discharges.  It is **not** the claim
@@ -1089,24 +1111,27 @@ control supplied by the all-order Gårding/Weyl spectral bound.  The heat suite 
 derivative); the `hmatch` conjunct is the genuine remaining content.
 
 Trap-screen: **T1** — intrinsic only (`gFibreOpBound`/`toHs` are `g`-inner; the match is the
-`L²`-class identity of two intrinsic geometric remainder sections; no `chartJ`).  **Non-vacuous**
-— `hmatch` rejects the degenerate witness `P ≡ 0`: `deTurckRealizeRemainderOf g₀ g_bg 0 =
-deTurckRHSSection g_bg g₀ − 0`, whose `L²`-class differs from the canonical gauge's at any
-realizable `u` with non-zero remainder class; and the discontinuous gate representative itself
-fails `sobolevLip` (`‖gateRepOfWitness u‖_{H^{a+2}}` is unbounded on eigenmode families), so the
-control arms genuinely constrain `P` beyond the trivial and the gated witnesses.  **Not
-packaging** — the selector presents the control *unfolded* (not as the named inductive
-`ChartJet2LipControl`); `gaugeMatch` below derives its own statement by *building* the inductive
-(`⟨hfs, hsl⟩`) and forwarding `hmatch`, so this child's conclusion is never a hypothesis in
-`gaugeMatch`'s binder.  The body is `sorry` (the deep Weyl-transiting first-order-freedom
-construction), to be discharged by the `/prove` recursion. -/
+`L²`-class identity of two intrinsic geometric remainder sections; no `chartJ`).  **T6/T2-safe**
+— the new quantitative match-gate `‖gateSmoothRep g₀ u‖_{H^{2a}} ≤ Q` references only
+`u`/`gateSmoothRep`/`Q`, never the selector `P`.  **Non-vacuous** — `hmatch` rejects the degenerate
+witness `P ≡ 0`: `deTurckRealizeRemainderOf g₀ g_bg 0 = deTurckRHSSection g_bg g₀ − 0`, whose
+`L²`-class differs from the canonical gauge's at any gate-bounded realizable `u` with non-zero
+remainder class; and the quantitative gate itself rejects the eigenmode-train witness
+(`‖gateSmoothRep g₀ u‖_{H^{2a}} → ∞`), so the match domain is a *proper* restriction (not vacuous,
+not the whole locus).  **Not packaging** — the selector presents the control *unfolded* (not as the
+named inductive `ChartJet2LipControl`); `gaugeMatch` below derives its own statement by *building*
+the inductive (`⟨hfs, hsl⟩`) and forwarding `hmatch`, so this child's conclusion is never a
+hypothesis in `gaugeMatch`'s binder.  The body is `sorry` (the deep Weyl-transiting
+first-order-freedom construction, now over the gate-controlled match domain), to be discharged by
+the `/prove` recursion. -/
 theorem exists_deTurckRemainderClassSelector_ball
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) :
     ∃ (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
           Integral.L2.SmoothCcTensor g₀ 0 2)
-        (K : ℝ≥0) (R : ℝ),
+        (K : ℝ≥0) (R : ℝ) (Q : ℝ),
       0 < R ∧
+      0 < Q ∧
       (∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
         u ∈ Metric.closedBall
             (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
@@ -1131,12 +1156,14 @@ theorem exists_deTurckRemainderClassSelector_ball
             ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
                 (P u - P u')‖ ≤ C * (K : ℝ) * dist u u') ∧
       AllOrderBallControl (I := I) (M := M) g₀ a P R ∧
-      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
-        realizableAtGate (I := I) g₀ u ∧
-            u ∈ Metric.closedBall
-              (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
-                (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R →
+      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+          (h : realizableAtGate (I := I) g₀ u),
+        u ∈ Metric.closedBall
+            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R ∧
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+              (gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose)‖ ≤ Q →
         Integral.L2.SmoothCcTensor.toL2
             (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))
           = Integral.L2.SmoothCcTensor.toL2
@@ -1184,16 +1211,19 @@ theorem exists_deTurckG0_regularizedSynthesis_gaugeMatch
     (ha : 2 * a > Module.finrank ℝ E + 4) :
     ∃ (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
           Integral.L2.SmoothCcTensor g₀ 0 2)
-        (K : ℝ≥0) (R : ℝ),
+        (K : ℝ≥0) (R : ℝ) (Q : ℝ),
       0 < R ∧
+      0 < Q ∧
       ChartJet2LipControl (I := I) (M := M) g₀ a P K R ∧
       AllOrderBallControl (I := I) (M := M) g₀ a P R ∧
-      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
-        realizableAtGate (I := I) g₀ u ∧
-            u ∈ Metric.closedBall
-              (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
-                (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R →
+      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+          (h : realizableAtGate (I := I) g₀ u),
+        u ∈ Metric.closedBall
+            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R ∧
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+              (gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose)‖ ≤ Q →
           Integral.L2.SmoothCcTensor.toL2
               (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))
             = Integral.L2.SmoothCcTensor.toL2
@@ -1202,12 +1232,12 @@ theorem exists_deTurckG0_regularizedSynthesis_gaugeMatch
   -- The deep first-order remainder-class selector, given in unfolded form (the two
   -- `ChartJet2LipControl` arms separately, plus the all-order ball control) and already
   -- targeting the carrier's own canonical gauge section `deTurckRemainderRealizeSection`'s
-  -- realized remainder `L²`-class.
-  obtain ⟨P, K, R, hR, hfs, hsl, hall, hmatch⟩ :=
+  -- realized remainder `L²`-class, on the quantitatively-gated match domain.
+  obtain ⟨P, K, R, Q, hR, hQ, hfs, hsl, hall, hmatch⟩ :=
     exists_deTurckRemainderClassSelector_ball (I := I) g₀ g_bg a ha
   -- Build the named control inductive from the two unfolded arms and forward the all-order ball
   -- control and the gate-gauge match verbatim (the selector already targets the gauge form).
-  exact ⟨P, K, R, hR, ⟨hfs, hsl⟩, hall, hmatch⟩
+  exact ⟨P, K, R, Q, hR, hQ, ⟨hfs, hsl⟩, hall, hmatch⟩
 
 /-- **The continuous regularized eigen-synthesis matching the gate representative's realized
 remainder (a bridge corollary of the gauge-match construction node).**
@@ -1235,8 +1265,9 @@ theorem exists_deTurckG0_regularizedSynthesis_gateRepMatch
     (ha : 2 * a > Module.finrank ℝ E + 4) :
     ∃ (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
           Integral.L2.SmoothCcTensor g₀ 0 2)
-        (K : ℝ≥0) (R : ℝ),
+        (K : ℝ≥0) (R : ℝ) (Q : ℝ),
       0 < R ∧
+      0 < Q ∧
       ChartJet2LipControl (I := I) (M := M) g₀ a P K R ∧
       AllOrderBallControl (I := I) (M := M) g₀ a P R ∧
       (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
@@ -1244,18 +1275,20 @@ theorem exists_deTurckG0_regularizedSynthesis_gateRepMatch
         u ∈ Metric.closedBall
             (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
               (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
-              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R →
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R ∧
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+              (gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose)‖ ≤ Q →
         Integral.L2.SmoothCcTensor.toL2
             (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))
           = Integral.L2.SmoothCcTensor.toL2
               (deTurckRealizeRemainderOf (I := I) g₀ g_bg
                 (gateRepOfWitness (I := I) g₀ u h))) := by
   classical
-  obtain ⟨P, K, R, hR, hctrl, hall, hmatch⟩ :=
+  obtain ⟨P, K, R, Q, hR, hQ, hctrl, hall, hmatch⟩ :=
     exists_deTurckG0_regularizedSynthesis_gaugeMatch (I := I) g₀ g_bg a ha
-  refine ⟨P, K, R, hR, hctrl, hall, fun u h hball => ?_⟩
+  refine ⟨P, K, R, Q, hR, hQ, hctrl, hall, fun u h hgate => ?_⟩
   rw [deTurckRealizeRemainderOf_gateRepOfWitness (I := I) g₀ g_bg u h]
-  exact hmatch u ⟨h, hball⟩
+  exact hmatch u h hgate
 
 /-- **The continuous regularized eigen-synthesis with its supercritical `H^{a+2}` control and
 remainder `L²`-class match (the deep construction primitive, transiting the Weyl node).**
@@ -1298,16 +1331,19 @@ theorem exists_deTurckG0_regularizedSynthesis
     (ha : 2 * a > Module.finrank ℝ E + 4) :
     ∃ (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
           Integral.L2.SmoothCcTensor g₀ 0 2)
-        (K : ℝ≥0) (R : ℝ),
+        (K : ℝ≥0) (R : ℝ) (Q : ℝ),
       0 < R ∧
+      0 < Q ∧
       ChartJet2LipControl (I := I) (M := M) g₀ a P K R ∧
       AllOrderBallControl (I := I) (M := M) g₀ a P R ∧
-      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
-        realizableAtGate (I := I) g₀ u ∧
-            u ∈ Metric.closedBall
-              (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
-                (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R →
+      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+          (h : realizableAtGate (I := I) g₀ u),
+        u ∈ Metric.closedBall
+            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R ∧
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+              (gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose)‖ ≤ Q →
           Integral.L2.SmoothCcTensor.toL2
               (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))
             = Integral.L2.SmoothCcTensor.toL2
@@ -1315,14 +1351,14 @@ theorem exists_deTurckG0_regularizedSynthesis
   classical
   -- The deep continuous regularized eigen-synthesis: an `H^{a+2}`-controlled `P` (additionally
   -- all-order ball-controlled, the smoothing) whose realized DeTurck remainder reproduces, at the
-  -- `L²`-class level, the gate representative's own realized remainder on the gate-realizable locus.
-  obtain ⟨P, K, R, hR, hctrl, hall, hmatch⟩ :=
+  -- `L²`-class level, the gate representative's own realized remainder on the quantitatively-gated
+  -- gate-realizable locus.
+  obtain ⟨P, K, R, Q, hR, hQ, hctrl, hall, hmatch⟩ :=
     exists_deTurckG0_regularizedSynthesis_gateRepMatch (I := I) g₀ g_bg a ha
-  refine ⟨P, K, R, hR, hctrl, hall, fun u hu => ?_⟩
-  obtain ⟨hu_real, hu_ball⟩ := hu
+  refine ⟨P, K, R, Q, hR, hQ, hctrl, hall, fun u h hgate => ?_⟩
   -- Chain the gate-representative remainder `L²`-class match through the definitional bridge
-  -- `deTurckRealizeRemainderOf g₀ g_bg (gateRepOfWitness g₀ u hu) = deTurckRemainderRealizeSection`.
-  rw [hmatch u hu_real hu_ball, deTurckRealizeRemainderOf_gateRepOfWitness (I := I) g₀ g_bg u hu_real]
+  -- `deTurckRealizeRemainderOf g₀ g_bg (gateRepOfWitness g₀ u h) = deTurckRemainderRealizeSection`.
+  rw [hmatch u h hgate, deTurckRealizeRemainderOf_gateRepOfWitness (I := I) g₀ g_bg u h]
 
 /-- **The concrete continuous regularized eigen-synthesis carrier.**  The `(0,2)`-perturbation
 synthesis `P` extracted from `exists_deTurckG0_regularizedSynthesis`: a *named, concrete*
@@ -1342,16 +1378,19 @@ supercritical `H^{a+2}` control and the remainder `L²`-class match of
 `exists_deTurckG0_regularizedSynthesis`. -/
 theorem deTurckG0ContSynthMap_spec (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) :
-    ∃ (K : ℝ≥0) (R : ℝ),
+    ∃ (K : ℝ≥0) (R : ℝ) (Q : ℝ),
       0 < R ∧
+      0 < Q ∧
       ChartJet2LipControl (I := I) (M := M) g₀ a (deTurckG0ContSynthMap (I := I) g₀ g_bg a) K R ∧
       AllOrderBallControl (I := I) (M := M) g₀ a (deTurckG0ContSynthMap (I := I) g₀ g_bg a) R ∧
-      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
-        realizableAtGate (I := I) g₀ u ∧
-            u ∈ Metric.closedBall
-              (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
-                (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R →
+      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+          (h : realizableAtGate (I := I) g₀ u),
+        u ∈ Metric.closedBall
+            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R ∧
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+              (gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose)‖ ≤ Q →
           Integral.L2.SmoothCcTensor.toL2
               (deTurckRealizeRemainderOf (I := I) g₀ g_bg (deTurckG0ContSynthMap (I := I) g₀ g_bg a u))
             = Integral.L2.SmoothCcTensor.toL2
@@ -1408,16 +1447,19 @@ theorem exists_deTurckRealizeRemainderOf_ballSynthesis_matching_gauge
     (ha : 2 * a > Module.finrank ℝ E + 4) :
     ∃ (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
           Integral.L2.SmoothCcTensor g₀ 0 2)
-        (K : ℝ≥0) (R : ℝ),
+        (K : ℝ≥0) (R : ℝ) (Q : ℝ),
       0 < R ∧
+      0 < Q ∧
       ChartJet2LipControl (I := I) (M := M) g₀ a P K R ∧
       AllOrderBallControl (I := I) (M := M) g₀ a P R ∧
-      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
-        realizableAtGate (I := I) g₀ u ∧
-            u ∈ Metric.closedBall
-              (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
-                (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R →
+      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+          (h : realizableAtGate (I := I) g₀ u),
+        u ∈ Metric.closedBall
+            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R ∧
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+              (gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose)‖ ≤ Q →
           Integral.L2.SmoothCcTensor.toL2
               (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))
             = Integral.L2.SmoothCcTensor.toL2
@@ -1460,16 +1502,19 @@ theorem exists_deTurckRealizeRemainderOf_synthesis_matching_gauge
     (ha : 2 * a > Module.finrank ℝ E + 4) :
     ∃ (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
           Integral.L2.SmoothCcTensor g₀ 0 2)
-        (K : ℝ≥0) (R : ℝ),
+        (K : ℝ≥0) (R : ℝ) (Q : ℝ),
       0 < R ∧
+      0 < Q ∧
       ChartJet2LipControl (I := I) (M := M) g₀ a P K R ∧
       AllOrderBallControl (I := I) (M := M) g₀ a P R ∧
-      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
-        realizableAtGate (I := I) g₀ u ∧
-            u ∈ Metric.closedBall
-              (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
-                (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R →
+      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+          (h : realizableAtGate (I := I) g₀ u),
+        u ∈ Metric.closedBall
+            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R ∧
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+              (gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose)‖ ≤ Q →
           Integral.L2.SmoothCcTensor.toL2
               (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))
             = Integral.L2.SmoothCcTensor.toL2
@@ -1583,27 +1628,31 @@ theorem exists_deTurckRemainderG0_synthesis_chartJet2Control
     (ha : 2 * a > Module.finrank ℝ E + 4) :
     ∃ (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
           Integral.L2.SmoothCcTensor g₀ 0 2)
-        (K : ℝ≥0) (R : ℝ),
+        (K : ℝ≥0) (R : ℝ) (Q : ℝ),
       0 < R ∧
+      0 < Q ∧
       ChartJet2LipControl (I := I) (M := M) g₀ a P K R ∧
       AllOrderBallControl (I := I) (M := M) g₀ a P R ∧
-      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
-        realizableAtGate (I := I) g₀ u ∧
-            u ∈ Metric.closedBall
-              (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
-                (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R →
+      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+          (h : realizableAtGate (I := I) g₀ u),
+        u ∈ Metric.closedBall
+            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R ∧
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+              (gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose)‖ ≤ Q →
           Integral.L2.SmoothCcTensor.toL2
               (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))
             = Integral.L2.SmoothCcTensor.toL2
                 (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
   -- The deep eigen-synthesis supplies an `H^{a+2}`-controlled synthesis `P` (additionally
   -- all-order ball-controlled) whose realized DeTurck remainder coincides, at the `L²`-class
-  -- level, with the gate gauge on the realizable locus — exactly the required `L²`-class agreement.
-  obtain ⟨P, K, R, hR, hctrl, hall, hsec⟩ :=
+  -- level, with the gate gauge on the quantitatively-gated realizable locus — exactly the
+  -- required `L²`-class agreement.
+  obtain ⟨P, K, R, Q, hR, hQ, hctrl, hall, hsec⟩ :=
     exists_deTurckRealizeRemainderOf_synthesis_matching_gauge (I := I) g₀ g_bg a ha
-  refine ⟨P, K, R, hR, hctrl, hall, fun u hu => ?_⟩
-  exact hsec u hu
+  refine ⟨P, K, R, Q, hR, hQ, hctrl, hall, fun u h hgate => ?_⟩
+  exact hsec u h hgate
 
 /-- **The genuine, un-gated continuous DeTurck-remainder smooth-section synthesis.**
 
@@ -1651,8 +1700,9 @@ theorem exists_deTurckRemainderG0ContSynth
     (ha : 2 * a > Module.finrank ℝ E + 4) :
     ∃ (S : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
           Integral.L2.SmoothCcTensor g₀ 0 2)
-        (K : ℝ≥0) (R : ℝ),
+        (K : ℝ≥0) (R : ℝ) (Q : ℝ),
       0 < R ∧
+      0 < Q ∧
       ContinuousOn (fun u => deTurckG0SpectralN (I := I) g₀ a (S u))
         (Metric.closedBall
           (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
@@ -1663,20 +1713,22 @@ theorem exists_deTurckRemainderG0ContSynth
           (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
             (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
             (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) ∧
-      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
-        realizableAtGate (I := I) g₀ u ∧
-            u ∈ Metric.closedBall
-              (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
-                (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R →
+      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+          (h : realizableAtGate (I := I) g₀ u),
+        u ∈ Metric.closedBall
+            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R ∧
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+              (gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose)‖ ≤ Q →
           Integral.L2.SmoothCcTensor.toL2 (S u)
             = Integral.L2.SmoothCcTensor.toL2
                 (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
   classical
   -- The un-gated perturbation synthesis `P` with its supercritical `H^{a+2}` control on the
   -- ball (and the all-order ball control, unused here) and the realized-remainder/gauge
-  -- `L²`-class agreement on the gate-realizable locus.
-  obtain ⟨P, K, R, hR, hctrl, _hall, hcarrier⟩ :=
+  -- `L²`-class agreement on the quantitatively-gated gate-realizable locus.
+  obtain ⟨P, K, R, Q, hR, hQ, hctrl, _hall, hcarrier⟩ :=
     exists_deTurckRemainderG0_synthesis_chartJet2Control (I := I) g₀ g_bg a ha
   -- The `H^{a+2}` → spectral bridge upgrades the `H^{a+2}` control to continuity and
   -- local Lipschitz of the coordinate-spectral nonlinearity on the realized DeTurck remainder.
@@ -1684,7 +1736,7 @@ theorem exists_deTurckRemainderG0ContSynth
     deTurckG0SpectralN_continuous_lipschitz_of_chartJet2Control
       (I := I) g₀ g_bg a ha P K hR hctrl
   -- The genuine synthesis section is the realized DeTurck remainder of `P`.
-  exact ⟨fun u => deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u), K', R, hR, hcont, hlip,
+  exact ⟨fun u => deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u), K', R, Q, hR, hQ, hcont, hlip,
     hcarrier⟩
 
 /-- **The genuine, un-gated coordinate-spectral DeTurck nonlinearity and its
@@ -1732,8 +1784,9 @@ theorem deTurck_g0_genuine_nonlinearity
     (ha : 2 * a > Module.finrank ℝ E + 4) :
     ∃ (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
           tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
-        (K : ℝ≥0) (R : ℝ),
+        (K : ℝ≥0) (R : ℝ) (Q : ℝ),
       0 < R ∧
+      0 < Q ∧
       ContinuousOn N_cont
         (Metric.closedBall
           (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
@@ -1744,12 +1797,14 @@ theorem deTurck_g0_genuine_nonlinearity
           (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
             (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
             (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) ∧
-      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
-        realizableAtGate (I := I) g₀ u ∧
-            u ∈ Metric.closedBall
-              (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
-                (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R →
+      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+          (h : realizableAtGate (I := I) g₀ u),
+        u ∈ Metric.closedBall
+            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R ∧
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+              (gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose)‖ ≤ Q →
           ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
               (I := I) (M := M) g₀ 0 2,
             (N_cont u).coeff i =
@@ -1760,15 +1815,15 @@ theorem deTurck_g0_genuine_nonlinearity
   classical
   -- The genuine un-gated continuous DeTurck-remainder smooth-section synthesis `S`, with the
   -- continuity and local Lipschitz of its induced coordinate-spectral nonlinearity, and the
-  -- carrier-agreement with the gate-based gauge on the gate-realizable domain.
-  obtain ⟨S, K, R, hR, hcont, hlip, hcarrier⟩ :=
+  -- carrier-agreement with the gate-based gauge on the quantitatively-gated gate-realizable domain.
+  obtain ⟨S, K, R, Q, hR, hQ, hcont, hlip, hcarrier⟩ :=
     exists_deTurckRemainderG0ContSynth (I := I) g₀ g_bg a ha
   -- The genuine continuous nonlinearity is the coordinate-spectral synthesis of `S`.
-  refine ⟨fun u => deTurckG0SpectralN (I := I) g₀ a (S u), K, R, hR, hcont, hlip, ?_⟩
+  refine ⟨fun u => deTurckG0SpectralN (I := I) g₀ a (S u), K, R, Q, hR, hQ, hcont, hlip, ?_⟩
   -- Carrier-only coordinate tie: on the gate-realizable domain the synthesis section `S u`
   -- coincides with the gauge `deTurckRemainderRealizeSection g₀ g_bg u`, so their `L²`
   -- classes — hence every eigenbasis coordinate — agree.
-  intro u hu i
-  rw [deTurckG0SpectralN_coeff, hcarrier u hu]
+  intro u h hgate i
+  rw [deTurckG0SpectralN_coeff, hcarrier u h hgate]
 
 end DifferentialGeometry.PDE.RicciFlow

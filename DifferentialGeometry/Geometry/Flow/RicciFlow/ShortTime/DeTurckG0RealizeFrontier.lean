@@ -190,7 +190,11 @@ metric family `g_DT`, with:
   class equals the `L²` realization `tensorHsToL2` of `u₂ s`);
 * `hHk` — every supercritical `H^{2k}` Sobolev norm of `T_s s` is continuous up to
   `t = 0` (the parabolic-up-to-boundary regularity, established at the driver from the
-  Duhamel data; the input the chart-`C²` joint-continuity bridge consumes).
+  Duhamel data; the input the chart-`C²` joint-continuity bridge consumes);
+* `hTs0` — the smooth representative vanishes at the initial time
+  (`toL2 (T_s 0) = 0`, since the Duhamel carrier starts at `0`).  Combined with `hHk`
+  this lets a consumer transport a quantitative `H^{2k}` control of `T_s s` to a
+  shrunk horizon where it lies below any prescribed positive bound.
 
 The engine outputs an `L²`-time/`H¹`-time object and its derivative *as an
 `L²`-time element*; the conversion to the pointwise carrier function with the
@@ -261,7 +265,8 @@ theorem deTurck_g0_carrier_realize_transport
           Metric.closedBall
             (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
               (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
-              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) :=
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) ∧
+      Integral.L2.SmoothCcTensor.toL2 (T_s 0) = 0 :=
   deturck_g0_engine_carrier_extraction (I := I) (M := M) g₀ a ha ha2 N_cont hR
     hN_cont hLipBall hloss
     (gFibreOpBound_ccTensorBilinSymm_le_tensorHsNorm (I := I) (M := M) g₀)

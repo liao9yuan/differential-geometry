@@ -67,18 +67,24 @@ form the conjugating-diffeomorphism construction consumes:
 * interior joint-`C∞` of the DeTurck field `q ↦ ⟨q.2, deTurckVF (g_DT q.1) g_bg q.2⟩`
   on `Ioo 0 T ×ˢ univ`, and the closed-slab joint-`C∞`-up-to-AND-across-`0` of the same
   field bundle section on `Icc 0 T ×ˢ univ`;
-* `C⁰`-up-to-`0` of the field's raw-fibre chart Fréchet derivative;
 * interior joint-`(t, x)` `C∞` and `C⁰`-up-to-`0` of each chart-local Gram-matrix entry of
   `g_DT` (the `chartGramMatrix` and `chartGramOnE` formulations);
 * `C⁰`-up-to-`0` of the spatial `k ≤ 2` iterated Fréchet jets of each chart-Gram entry
   (controlling the Hessian/Ricci a `k = 0`-only datum cannot reach up to `0`).
 
-This is sorry-free glue assembling the seven conjuncts from the genuine classical
+(A former conjunct — `C⁰`-up-to-`0` of the field's *raw-fibre* chart Fréchet derivative
+`fderiv ℝ (chartRawRepr α (deTurckVF …))` — has been removed: it is false-as-stated (the raw
+moving-chart representation post-composes with the unbounded moving-frame Jacobian
+`chartMovingTriv α`, the chartJ object that is genuinely unbounded on `S²`), and it was dead
+downstream — its only end consumer bound it to an unused underscore.)
+
+This is sorry-free glue assembling the six conjuncts from the genuine classical
 parabolic-regularity inputs isolated in
 `Analysis/Parabolic/DeTurckRicci/InteriorJointSmoothing.lean` (the spectrally-pinned joint
 `Hom`-section smoothing `realizedMetric_innerHomSection_jointContMDiffOn_uptoZero` and its
-DeTurck-field consumer `realizedMetric_deTurckVF_*`, both fed the carrier/PDE pinning
-`u₂`/`N_cont`/`hcont`/`hreg`/`hcanon`, plus the up-to-`0` `chartGramOnE`-continuity
+DeTurck-field consumer `realizedMetric_deTurckVF_jointContMDiffOn_uptoZero`, both fed the
+carrier/PDE pinning `u₂`/`N_cont`/`hcont`/`hreg`/`hcanon`, plus the up-to-`0`
+`chartGramOnE`-continuity
 `realizedMetric_chartGramOnE_continuousOn_uptoZero` fed the Sobolev trace `hHk`), the
 chart-frame vector-field smoothness assembler `deturck_vf_joint_smoothness`
 (`Geometry/Flow/RicciFlow/ShortTimeFlow/DeTurckVFSmoothness.lean`), and the supplied
@@ -128,12 +134,6 @@ theorem deturck_ricci_parabolic_interior_regularity
         (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
           : TangentBundle I M))
         (Set.Ioo (0 : ℝ) T ×ˢ Set.univ) ∧
-      (∀ α : M,
-        ContinuousOn
-          (fun q : ℝ × M =>
-            fderiv ℝ (chartRawRepr (I := I) α (fun x => deTurckVF (I := I) (g_DT q.1) g_bg x))
-              (extChartAt I α q.2))
-          (Set.Icc 0 T ×ˢ (chartAt H α).source)) ∧
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
         (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
           : TangentBundle I M))
@@ -178,17 +178,11 @@ theorem deturck_ricci_parabolic_interior_regularity
           q.2 ((g_DT q.1).inner q.2))
         (Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := fun x₀ =>
     hsmoothFull.mono (Set.prod_mono Set.Ioo_subset_Icc_self (Set.subset_univ _))
-  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, hC2_chart⟩
+  refine ⟨?_, ?_, ?_, ?_, ?_, hC2_chart⟩
   · refine deturck_vf_joint_smoothness (I := I) g_bg g_DT T ?_
     intro x₀ i j
     exact IntrinsicSpectral.MetricRealization.realizedMetric_chartGramOnE_jointContMDiffOn_interior
       (I := I) x₀ i j g_DT (hsmooth_interior x₀)
-  · intro α
-    exact
-      IntrinsicSpectral.MetricRealization.realizedMetric_deTurckVF_chartRawRepr_fderiv_continuousOn_uptoZero
-        (I := I) g_bg α g_DT
-        (IntrinsicSpectral.MetricRealization.realizedMetric_deTurckVF_jointContMDiffOn_uptoZero
-          (I := I) g₀ g_bg g_DT T_s u₂ N_cont ha hreal hcont hreg hcanon)
   · exact IntrinsicSpectral.MetricRealization.realizedMetric_deTurckVF_jointContMDiffOn_uptoZero
       (I := I) g₀ g_bg g_DT T_s u₂ N_cont ha hreal hcont hreg hcanon
   · intro x₀ i j
@@ -254,12 +248,6 @@ theorem deturck_ricci_flow_parabolic_short_time_existence
         (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
           : TangentBundle I M))
         (Set.Ioo (0 : ℝ) T ×ˢ Set.univ) ∧
-      (∀ α : M,
-        ContinuousOn
-          (fun q : ℝ × M =>
-            fderiv ℝ (chartRawRepr (I := I) α (fun x => deTurckVF (I := I) (g_DT q.1) g_bg x))
-              (extChartAt I α q.2))
-          (Set.Icc 0 T ×ˢ (chartAt H α).source)) ∧
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
         (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
           : TangentBundle I M))

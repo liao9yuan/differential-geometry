@@ -353,6 +353,71 @@ theorem realizableAtGate_carrierInclusion (g₀ : SmoothRiemannianMetric I M) (a
   obtain ⟨δ', hδ'_lt, hδ'⟩ := hfibre
   exact ⟨hσ, h_mem, δ', hδ'_lt, by rw [hgate_eq]; exact hδ'⟩
 
+/-- **The carrier inclusion's gate representative is the smooth representative `T_s s`.**
+For the realized `g₀`-anchored flow at a time `s`, any gate-realizability witness `h` of the
+carrier inclusion `ι (u₂ s)` produces, through its canonical `Exists.choose` witnesses, the
+gate smooth representative `gateSmoothRep g₀ (ι (u₂ s)) h.choose h.choose_spec.choose`; given the
+coordinate identity `hsmoothrepr` (the carrier coordinates are the `L²` coordinates of `T_s s`),
+that representative is *exactly* the smooth representative `T_s s`.  The conclusion is
+witness-independent (it holds for **any** realizability proof `h`): the `L²` class of the
+inclusion equals `T_s s`'s `L²` class by `hsmoothrepr`, regardless of the particular
+non-negativity/membership witnesses, so `L²`-injectivity (`smoothCcTensor_toL2_injective`) pins
+the gate representative.  This exposes, as a reusable bridge, the identity proven internally by
+`realizableAtGate_carrierInclusion`; it lets a consumer transport a quantitative `H^{2k}`
+control of `T_s s` (continuous up to `t = 0`) to the gate representative referenced by the
+gate-realizable match domain. -/
+theorem gateSmoothRep_carrierInclusion_eq (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
+    (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2) {s : ℝ}
+    (hsmoothrepr : ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2,
+        (u₂ s).coeff i
+          = tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i)
+    (h : realizableAtGate (I := I) g₀
+      (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) :
+    gateSmoothRep (I := I) g₀
+        (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))
+        h.choose h.choose_spec.choose
+      = T_s s := by
+  classical
+  set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+    with hcompact_def
+  set u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) :=
+    tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+      (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s) with hu_def
+  -- The inclusion's `L²` class (computed through the witness `h.choose`) coincides with the
+  -- smooth representative's `L²` class; the proof uses only the coordinate identity
+  -- `hsmoothrepr`, hence holds for any non-negativity witness.
+  have hclass :
+      tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hcompact h.choose u
+        = Integral.L2.SmoothCcTensor.toL2 (T_s s) := by
+    set b := tensorResolventHilbertEigenbasisSigma (I := I) (M := M) hcompact with hb
+    apply b.repr.injective
+    ext i
+    have hlhs :
+        (b.repr (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            hcompact h.choose u)) i = (u₂ s).coeff i := by
+      rw [show (b.repr (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            hcompact h.choose u)) i =
+          tensorL2Coeff (I := I) (M := M) hcompact
+            (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              hcompact h.choose u) i from rfl,
+        tensorHsToL2_tensorL2Coeff (I := I) (M := M) h.choose u i, hu_def,
+        tensorHsInclusion_coeff_apply]
+    have hrhs :
+        (b.repr (Integral.L2.SmoothCcTensor.toL2 (T_s s))) i = (u₂ s).coeff i := by
+      rw [show (b.repr (Integral.L2.SmoothCcTensor.toL2 (T_s s))) i =
+          tensorL2Coeff (I := I) (M := M) hcompact
+            (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i from rfl]
+      exact (hsmoothrepr i).symm
+    rw [hlhs, hrhs]
+  apply smoothCcTensor_toL2_injective (I := I) (M := M) g₀ 0 2
+  rw [gateSmoothRep_toL2 (I := I) g₀ u h.choose h.choose_spec.choose, hclass]
+
 open scoped Classical in
 /-- **The decoupled (`g₀`-anchored, `g_bg`-background) Ricci–DeTurck remainder gauge
 as a smooth compactly-supported `(0,2)`-tensor section.**

@@ -3363,7 +3363,8 @@ theorem deturck_g0_engine_carrier_extraction
           Metric.closedBall
             (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
               (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
-              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) := by
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) ∧
+      Integral.L2.SmoothCcTensor.toL2 (T_s 0) = 0 := by
   classical
   set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
     with hcompact_def
@@ -3470,20 +3471,20 @@ theorem deturck_g0_engine_carrier_extraction
     rw [hg_DT_def]
     simp only [dif_pos (hsmall_all s hs)]
     exact tensorSectionRealizeMetric_inner (I := I) g₀ (T_s s) _ _ x v w
-  have h0 : g_DT 0 = g₀ := by
+  have hTs0 : Integral.L2.SmoothCcTensor.toL2 (T_s 0) = 0 := by
     have h0mem : (0 : ℝ) ∈ Set.Icc (0 : ℝ) Tf := ⟨le_rfl, hTf_pos.le⟩
-    -- The perturbation vanishes at `s = 0` (carrier vanishes there).
     have hu₂0 : u₂ 0 = 0 :=
       carrier_zero_at_zero (I := I) (M := M) g₀ a u₂ u (hbridge 0 (hsub h0mem)) hcar0 rfl
-    have hTsL2 : Integral.L2.SmoothCcTensor.toL2 (T_s 0) = 0 := by
-      rw [hcanon 0 (hsub h0mem), hu₂0, map_zero]
+    rw [hcanon 0 (hsub h0mem), hu₂0, map_zero]
+  have h0 : g_DT 0 = g₀ := by
+    have h0mem : (0 : ℝ) ∈ Set.Icc (0 : ℝ) Tf := ⟨le_rfl, hTf_pos.le⟩
     refine smoothRiemannianMetric_eq_of_inner (I := I) (g_DT 0) g₀ (fun x v w => ?_)
     rw [hreal 0 h0mem x v w,
-      ccTensorBilinSymm_of_toL2_zero (I := I) g₀ (T_s 0) hTsL2 x v w, add_zero]
+      ccTensorBilinSymm_of_toL2_zero (I := I) g₀ (T_s 0) hTs0 x v w, add_zero]
   refine ⟨Tf, g_DT, u₂, T_s, hTf_pos, h0,
     fun s hs => hreal s hs, ?_, ?_, ?_,
     fun s hs => hsmoothrepr s (hsub hs), fun s hs => hcanon s (hsub hs),
-    fun k hk => (hHk k hk).mono hsub, ?_⟩
+    fun k hk => (hHk k hk).mono hsub, ?_, hTs0⟩
   · exact hcont.mono hsub
   · intro s hs
     exact hreg s ⟨hs.1, lt_of_lt_of_le hs.2 (min_le_left _ _)⟩

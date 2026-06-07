@@ -46,8 +46,6 @@ parabolic-smoothing bodies remain `sorry`, so consumers transitively depend on `
   `(t, x)`-`C∞` of `chartGramOnE α (extChartAt I α ·)` on `Ioo 0 T ×ˢ univ`.
 * `realizedMetric_chartGramOnE_continuousOn_uptoZero` — single-chart `C⁰`-up-to-`0` of
   `chartGramOnE α (extChartAt I α ·)` on `Icc 0 T ×ˢ univ`.
-* `realizedMetric_deTurckVF_chartRawRepr_fderiv_continuousOn_uptoZero` — `C⁰`-up-to-`0` of
-  the raw-fibre chart Fréchet derivative of the realized DeTurck vector field.
 * `realizedMetric_deTurckVF_jointContMDiffOn_uptoZero` — closed-slab joint `C∞`-up-to-AND-
   across-`0` of the realized DeTurck vector-field bundle section on `Icc 0 T ×ˢ univ`.
 -/
@@ -239,59 +237,6 @@ theorem realizedMetric_chartGramOnE_continuousOn_uptoZero
       (Set.Icc (0 : ℝ) T ×ˢ (chartAt H α).source) :=
   chartGramOnE_realizedMetric_jointContinuousOn (I := I) (M := M)
     g_bg α i j g_DT T_s hk hreal hHk
-
-/-- **`C⁰`-up-to-`0` of the raw-fibre chart Fréchet derivative of the realized DeTurck
-vector field, from the field's closed-slab joint smoothness (genuine moving-frame
-up-to-boundary gradient regularity).**
-
-For a DeTurck vector field whose tangent-bundle section `(t, x) ↦ ⟨x, deTurckVF (g_DT t) g_bg x⟩`
-is jointly `C∞` up to and across `0` on the closed slab `Icc 0 T ×ˢ univ` (`hVF` — supplied by
-`realizedMetric_deTurckVF_jointContMDiffOn_uptoZero`, the sound closed-slab field-smoothness
-node), the chart-`α` raw-fibre Fréchet derivative of the field,
-`(t, x) ↦ fderiv ℝ (chartRawRepr α (deTurckVF (g_DT t) g_bg)) (extChartAt I α x)`, is jointly
-continuous up to `0` on `Icc 0 T ×ˢ (chartAt H α).source`.
-
-This is the up-to-`0` chart-gradient regularity of the DeTurck field — the `hgrad0` datum the
-from-zero manifold-orbit assembler `fromZero_manifold_orbit_uniform_delta`
-(`Analysis/ODE/.../FromZeroManifoldOrbit.lean`) consumes for the conjugating-diffeomorphism
-construction.  The domain is the chart `α`-source: the raw chart representation `chartRawRepr α`
-and its Fréchet derivative read through `extChartAt I α` carry no meaning off the chart source
-(where the round-trip is junk), so the `univ` formulation would be false-as-stated; the source
-statement is the honest one.
-
-The previous `{hreal, hHk}`-only form of this node was FALSE: time-continuity of the spectral
-Sobolev trace does not pin the *joint* `(t, x)` regularity of the field's gradient (the
-`T_s t := |t − t₀| · S₀` family is time-continuous at every Sobolev order yet has no joint `C¹`
-gradient at `t = t₀`).  The corrected hypothesis is the field's *joint* closed-slab smoothness
-`hVF`, which is genuinely sufficient: it gives the joint smoothness of the field's *trivialised*
-chart representation `chartTrivRepr α (deTurckVF (g_DT t) g_bg)`
-(`Bundle.Trivialization.contMDiffOn` over the chart `α`); the *raw* representation
-`chartRawRepr α (deTurckVF …)` is the trivialised one post-composed with the ring-inverse of the
-moving trivialisation `chartMovingTriv α (·) = trivToE α ∘ (extChartAt I α).symm` (an `E →L[ℝ] E`
-that is a unit on the chart source, `chartMovingTriv_basepoint_isUnit`), and the smooth-structure
-moving-frame Jacobian `z ↦ chartMovingTriv α z = mfderiv (extChartAt I α) ((extChartAt I α).symm z)`
-(`TangentBundle.continuousLinearMapAt_trivializationAt`) is `C∞` on the chart-target interior, so
-the spatial Fréchet derivative of the raw representation is jointly continuous up to `0` by the
-matrix/CLM product-and-inverse rule.  The hypothesis is the field's joint smoothness; the
-conclusion is the raw-gradient continuity, distinct from it — no packaging.
-
-The body is the genuine moving-frame (chart-Jacobian) smoothness bridge — a chart-frame-layer
-input distinct from the parabolic smoothing isolated in
-`realizedMetric_innerHomSection_jointContMDiffOn_uptoZero`; it remains `sorry`, so consumers
-transitively depend on `sorryAx`. -/
-theorem realizedMetric_deTurckVF_chartRawRepr_fderiv_continuousOn_uptoZero
-    (g_bg : SmoothRiemannianMetric I M) (α : M)
-    (g_DT : ℝ → SmoothRiemannianMetric I M) {T : ℝ}
-    (hVF : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
-      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
-        : TangentBundle I M))
-      (Set.Icc (0 : ℝ) T ×ˢ Set.univ)) :
-    ContinuousOn
-      (fun q : ℝ × M =>
-        fderiv ℝ (chartRawRepr (I := I) α
-          (fun x => deTurckVF (I := I) (g_DT q.1) g_bg x))
-          (extChartAt I α q.2))
-      (Set.Icc (0 : ℝ) T ×ˢ (chartAt H α).source) := sorry
 
 namespace ClosedSlabVFEngine
 

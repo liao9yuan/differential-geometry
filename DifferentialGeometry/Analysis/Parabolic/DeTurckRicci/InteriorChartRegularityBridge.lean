@@ -54,14 +54,14 @@ continuity of `t ↦ (T_s t).toHs (2k)` closes the joint upgrade.
 * `chartGram_realizedMetric_jointContinuousOn` — the chart-Gram entry of a metric
   family realized as `g_bg + ccTensorBilinSymm (T_s ·)` is jointly `(t, x)`
   continuous on `J ×ˢ baseSet`, from the time-continuity of `t ↦ (T_s t).toHs (2k)`.
-* `chartGram_realizedMetric_jointContMDiffOn` — the interior `C∞` arm (conjunct (4)): the
+* `chartGram_realizedMetric_jointContMDiffOn` — the interior `C∞` arm (conjunct (3)): the
   chart-Gram entry is jointly `(t, x)`-`C∞` from the joint smoothness of the metric
   inner-product `Hom`-section, via `ContMDiffOn.clm_bundle_apply₂` over base map `Prod.snd`.
 * `chartGramOnE_realizedMetric_jointContinuousOn` — the `chartGramOnE` `C⁰` arm
-  (conjunct (6)): the chart-pulled-back Gram entry is jointly continuous on the chart source,
+  (conjunct (5)): the chart-pulled-back Gram entry is jointly continuous on the chart source,
   the chart round-trip collapsing it to `chartGram_realizedMetric_jointContinuousOn`.
 * `iteratedFDeriv_zero_chartGramOnE_realizedMetric_jointContinuousOn` — the `k = 0` arm of the
-  spatial-jet conjunct (7).  The higher jets `k ∈ {1, 2}` need a partial-iteratedFDeriv ↔
+  spatial-jet conjunct (6).  The higher jets `k ∈ {1, 2}` need a partial-iteratedFDeriv ↔
   joint-regularity bridge that is absent in Mathlib and in this library (the jet wall).
 -/
 
@@ -288,7 +288,7 @@ smoothness `metric_inner_chartBasisFibers_continuousOn`), and the time modulus i
 uniform on every compact piece of the base set
 (`exists_chartGram_realized_uniform_modulus`, off the `H^{2k} ↪ C⁰` embedding), so the
 locally-uniform joint-continuity engine `joint_continuousOn_open_of_slice_normModulus`
-applies.  It is the `C⁰`-up-to-interior foundation of conjuncts (4)/(5) of
+applies.  It is the `C⁰`-up-to-interior foundation of conjuncts (3)/(4) of
 `deturck_ricci_parabolic_interior_regularity` (the `chartGramMatrix` continuity); the
 interior `ContMDiffOn` form and the `chartGramOnE` jets are layered on top downstream. -/
 theorem chartGram_realizedMetric_jointContinuousOn
@@ -345,7 +345,7 @@ This is the joint `(t, x)`-`C∞` analogue of the fixed-metric chart-Gram smooth
 `chartGramMatrix_entry_contMDiffOn`: the chart-Gram entry is the metric `Hom`-section
 paired against the (`t`-independent, jointly smooth) chart frame `chartBasisVec`, so it is
 delivered by `ContMDiffOn.clm_bundle_apply₂` over base `M` with base map `Prod.snd`.  It is
-the interior `C∞` form of conjunct (4) of
+the interior `C∞` form of conjunct (3) of
 `deturck_ricci_parabolic_interior_regularity` (the `chartGramMatrix` `ContMDiffOn`).
 
 The hypothesis is the *joint* smoothness of the metric `Hom`-section, NOT a Sobolev
@@ -399,7 +399,7 @@ On the chart source the chart round-trip is the identity
 chart-Gram entry `chartGramMatrix (g_DT t) α x i j`; the statement is then
 `chartGram_realizedMetric_jointContinuousOn` transported along the identification
 `(trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source`
-(`TangentBundle.trivializationAt_baseSet`).  It is the `chartGramOnE` form of conjunct (6) of
+(`TangentBundle.trivializationAt_baseSet`).  It is the `chartGramOnE` form of conjunct (5) of
 `deturck_ricci_parabolic_interior_regularity`. -/
 theorem chartGramOnE_realizedMetric_jointContinuousOn
     (g_bg : SmoothRiemannianMetric I M) (α : M) (i j : Fin (Module.finrank ℝ E))
@@ -479,7 +479,7 @@ The Euclidean `iteratedFDeriv ℝ 0` of the chart-pulled-back Gram entry is, by
 `iteratedFDeriv_zero_eq_comp`, the order-`0` curry isometry applied to the value, so its
 joint continuity is equivalent to that of the value `chartGramOnE (g_DT t) α i j`
 (`chartGramOnE_realizedMetric_jointContinuousOn`).  This is the `k = 0` component of conjunct
-(7) of `deturck_ricci_parabolic_interior_regularity` and the joint feed for
+(6) of `deturck_ricci_parabolic_interior_regularity` and the joint feed for
 `RicciContJointAux.jointGram_continuousOn`.
 
 The higher jets `k ∈ {1, 2}` are NOT delivered here: producing joint `(t, x)`-continuity of
