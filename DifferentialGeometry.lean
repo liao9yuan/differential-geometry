@@ -638,6 +638,7 @@ import DifferentialGeometry.Analysis.Sobolev.Solutions.SobolevToCinftyRep
 import DifferentialGeometry.Analysis.Sobolev.Solutions.WeakSolution
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponentRawNorm
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponents
+import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartEntryJetCLM
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartEntryJointSmoothness
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartLocality
 import DifferentialGeometry.Analysis.Sobolev.Tensor.Defs
@@ -910,6 +911,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.FractionalPowe
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.GeneralOrderPouSpectralBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Inclusion
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Order2Equivalence
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralToPouSobolevCLM
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.CompactInclusion
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.CompactResolvent
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.Defs
@@ -1119,6 +1121,7 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ContractedBianc
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedSlotwiseCurvature
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.OperatorFieldSlotwiseDifferentiatedCurvatureBridge
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciDifferenceTelescope
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciIdentity
