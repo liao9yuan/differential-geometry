@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorBochnerFie
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.IntegratedOrder2WeitzenbockCurvature
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformCurvatureSup
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FrozenFramePureRCurvatureTower
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RemDiffBracketFiberOrder
 
 /-!
 # The fibre order of the order-`2` rough-Laplacian / covariant-gradient commutator defect
@@ -125,9 +126,26 @@ S)(x) = 0`. At `s = 0` the pure-Riemann trace vanishes (`GcurvSection g 0 f` is 
 which vanishes), so the bound would force `Curv f = 0` pointwise — false on a non-flat manifold for a
 non-harmonic `f` (the scalar commutator defect is `Curv f = Ric(∇f, ·)` integrated, nonzero when
 curvature is present, `ricTraceSection_zero_apply`, `weitzenbock_integrated_covGrad_l2_normSq`). So `C` is
-genuinely positive. The body is `sorry` (the genuine classical moving-frame third-order curvature content:
-the `∇³S` cancellation followed by the differentiated-curvature and bracket-discrepancy fibre sups);
-consumers transitively depend on `sorryAx`. -/
+genuinely positive.
+
+**Proof (composition over the per-direction bracket-summand fibre order).** The moving-frame remainder
+is the fixed-`g`-orthonormal-frame sum of the per-direction bracket summands `remDiffBracketFib g s S x i`
+(`MovingFrameRemainderFrameSumBridge`): by the sorry-free frame-sum representation
+`pointwiseTensorCurv_toSection_eq_frame_sum` (`Bochner/PointwiseTensorBochner`) the defect's section
+value is `∑ᵢ remDiffFib g s S x i`, each summand splits as
+`remDiffFib = remDiffGenuineFib + remDiffBracketFib` (`remDiffFib_eq_genuine_add_bracket`), and the
+pure-Riemann genuine fibres frame-sum to the concrete pure-Riemann section value
+`∑ᵢ remDiffGenuineFib = (GcurvSection g s S).toSection x`
+(`remDiffGenuineFib_sum_eq_GcurvSection_toSection`), so
+`(Curv S − GcurvSection g s S).toSection x = ∑ᵢ remDiffBracketFib g s S x i`. The `n`-sub-additivity of
+the squared fibre norm `riemannianFiberNormSq_sum_le_card_mul` (`FiberNormSubadditivity`) then bounds
+`rfns(∑ᵢ remDiffBracketFib) ≤ (finrank) · ∑ᵢ rfns(remDiffBracketFib)`, and the posited per-direction
+bracket fibre order `exists_remDiffBracketFib_fiberOrder_bound` (`RemDiffBracketFiberOrder`, the genuine
+`∇³S`-cancellation content: the residual `R(∇S)`, differentiated-curvature `(∇R) S`, and `∇²S`-order
+frame-bracket discrepancy past the tensorial pure-Riemann fibre) bounds each summand by
+`(Cleaf s)² · (rfns(∇²S) + rfns(∇S) + rfns(S))`. Taking `C s := (finrank) · Cleaf s` absorbs the
+`finrank²` from the double frame factor. Consumers transitively depend on the posited per-direction
+bracket leaf's `sorryAx`. -/
 theorem exists_pointwiseTensorCurv_subGcurv_obstruction_fiberOrder_bound
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℕ → ℝ, (∀ s, 0 ≤ C s) ∧
@@ -142,7 +160,75 @@ theorem exists_pointwiseTensorCurv_subGcurv_obstruction_fiberOrder_bound
               riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
                   ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
               riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) := by
-  sorry
+  classical
+  obtain ⟨Cleaf, hCleaf_nn, hCleaf⟩ :=
+    exists_remDiffBracketFib_fiberOrder_bound (I := I) (M := M) g
+  refine ⟨fun s => (Module.finrank ℝ E : ℝ) * Cleaf s,
+    fun s => mul_nonneg (by positivity) (hCleaf_nn s), fun s S x => ?_⟩
+  -- Abbreviations for the three nonnegative fibre-norm orders on the right.
+  set A : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+      ((covGrad (I := I) (M := M) g 0 (s + 1)
+        (covGrad (I := I) (M := M) g 0 s S)).toSection x) with hA
+  set B : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+      ((covGrad (I := I) (M := M) g 0 s S).toSection x) with hB
+  set D : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) with hD
+  have hsum_nn : 0 ≤ A + B + D := by
+    have hA_nn : 0 ≤ A := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1 + 1) x _
+    have hB_nn : 0 ≤ B := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x _
+    have hD_nn : 0 ≤ D := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x _
+    positivity
+  -- The moving-frame remainder is the frame sum of the per-direction bracket summands.
+  have hsub_apply : (pointwiseTensorCurv (I := I) (M := M) g s S -
+        GcurvSection (I := I) (M := M) g s S).toSection x =
+      (pointwiseTensorCurv (I := I) (M := M) g s S).toSection x -
+        (GcurvSection (I := I) (M := M) g s S).toSection x := by
+    rw [SmoothCcTensor.toSection_sub]; rfl
+  have hframe : (pointwiseTensorCurv (I := I) (M := M) g s S).toSection x =
+      ∑ i : Fin (Module.finrank ℝ E), remDiffFib (I := I) (M := M) g s S x i :=
+    pointwiseTensorCurv_toSection_eq_frame_sum (I := I) (M := M) g s S x
+  have hbracket_sum : (pointwiseTensorCurv (I := I) (M := M) g s S -
+        GcurvSection (I := I) (M := M) g s S).toSection x =
+      ∑ i : Fin (Module.finrank ℝ E), remDiffBracketFib (I := I) (M := M) g s S x i := by
+    rw [hsub_apply, hframe, ← remDiffGenuineFib_sum_eq_GcurvSection_toSection (I := I) (M := M) g s S x,
+      ← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [remDiffBracketFib]
+  rw [hbracket_sum]
+  -- `n`-sub-additivity of the squared fibre norm on the frame sum.
+  have hcard := riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g 0 (s + 1) x
+    (Finset.univ : Finset (Fin (Module.finrank ℝ E)))
+    (fun i => remDiffBracketFib (I := I) (M := M) g s S x i)
+  rw [Finset.card_univ, Fintype.card_fin] at hcard
+  -- Each per-direction bracket summand is bounded by the posited leaf.
+  have hper : ∀ i : Fin (Module.finrank ℝ E),
+      riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+        (remDiffBracketFib (I := I) (M := M) g s S x i) ≤ Cleaf s ^ 2 * (A + B + D) := by
+    intro i
+    have := hCleaf s S x i
+    rw [← hA, ← hB, ← hD] at this
+    exact this
+  -- Sum the per-direction bounds over the frame.
+  have hsumbound : (∑ i : Fin (Module.finrank ℝ E),
+        riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+          (remDiffBracketFib (I := I) (M := M) g s S x i)) ≤
+      (Module.finrank ℝ E : ℝ) * (Cleaf s ^ 2 * (A + B + D)) := by
+    calc (∑ i : Fin (Module.finrank ℝ E),
+            riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+              (remDiffBracketFib (I := I) (M := M) g s S x i))
+        ≤ ∑ _i : Fin (Module.finrank ℝ E), Cleaf s ^ 2 * (A + B + D) :=
+          Finset.sum_le_sum (fun i _ => hper i)
+      _ = (Module.finrank ℝ E : ℝ) * (Cleaf s ^ 2 * (A + B + D)) := by
+          rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+  -- Assemble: rfns(∑ bracket) ≤ n · ∑ rfns ≤ n · (n · Cleaf² · (A+B+D)) = (n·Cleaf)² · (A+B+D).
+  have hfinrank_nn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := by positivity
+  calc riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+          (∑ i : Fin (Module.finrank ℝ E), remDiffBracketFib (I := I) (M := M) g s S x i)
+      ≤ (Module.finrank ℝ E : ℝ) * ∑ i : Fin (Module.finrank ℝ E),
+            riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+              (remDiffBracketFib (I := I) (M := M) g s S x i) := hcard
+    _ ≤ (Module.finrank ℝ E : ℝ) * ((Module.finrank ℝ E : ℝ) * (Cleaf s ^ 2 * (A + B + D))) :=
+        mul_le_mul_of_nonneg_left hsumbound hfinrank_nn
+    _ = ((Module.finrank ℝ E : ℝ) * Cleaf s) ^ 2 * (A + B + D) := by ring
 
 /-- **The order-`2` commutator-defect fibre order (the curvature line's irreducible quantitative atom,
 posited upstream of the moving-frame spine).** For a closed smooth Riemannian manifold `(M, g)` there is
