@@ -1,11 +1,9 @@
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricJetBound
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricContractionLeibnizGrid
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRHSSectionRetag
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizedCovGradJetGeneralOrder
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqNormBridge
-import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHSSection
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricRicciDiffOperatorExpansion
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.MetricDifferenceFdBTermTree
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.BilinearDifferenceCovJetSplit
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricCurvatureDifferenceOpDecomposition
 
 /-! # The covariant-jet Faà-di-Bruno expansion of the Ricci–DeTurck right-hand side along the segment
 
@@ -93,19 +91,40 @@ Moser-tame product `exists_moserTameProduct_iteratedCovGrad_l2Norm_le`
 (`Analysis/Sobolev/MoserTameProduct.lean`), fed by the proven order-`≤2` segment-metric jet sup
 `exists_segmentMetric_realizeSymm_iteratedCovGradJet2_sup_le` (the bounded `Λ`-arm coefficient sup)
 and the proven `C⁰` Sobolev embedding `tensorPouSobolevHilbert_embedding_Ck` (the `Λ₀`-arm `C⁰`
-control on the difference factor); consumers transitively depend on `sorryAx` only through the two
-covariant Faà-di-Bruno difference/cross split leaves `ricciNeg2Diff_covFdB_section_split` and
-`lieDerivDiff_covFdB_section_split`.
+control on the difference factor).  The two covariant Faà-di-Bruno difference/cross split leaves
+`ricciNeg2Diff_covFdB_section_split` and `lieDerivDiff_covFdB_section_split` are now themselves **proven
+by composition** over the order-zero linear/cross section splits; consumers transitively depend on
+`sorryAx` only through the three genuine Core-II deep posits the splits descend into — the curvature
+difference-arm and Cross per-order jet bounds `ricciLinearSection_iteratedCovGrad_diffArm_rfns_le` /
+`ricciCrossSection_iteratedCovGrad_cross_rfns_le`, and the Lie order-zero linear/cross split
+`lieDerivDiff_order0_linearCross_split`.
 
 An earlier `DiffBilinOp`-contraction *structural-split* layer beneath each leaf (factoring the
-difference arm `Adiff` through `Φ.op 0 2 w` plus the binomial covariant-Leibniz engine grid) was
-**refuted** and removed: at the consumer's differentiation order `p = 0` the `DiffBilinOp` jet
-envelope `DiffBilinOp.rfns_op_le` collapses to the value-order sum `kappa · rfns(w)` (window
+difference arm `Adiff` through an undifferentiated metric-contraction `Φ.op 0 2 w` of a differentiated
+bilinear contraction operator family plus the binomial covariant-Leibniz engine grid) was **refuted**
+and removed: at the consumer's differentiation order `p = 0` the `DiffBilinOp` jet envelope
+`DiffBilinOp.rfns_op_le` collapses to the value-order sum `kappa · rfns(w)` (window
 `range (0 + 1) = {0}`), so the `Φ.op 0 2 w` arm cannot carry the difference's principal `∇^{j+2}w`
 content, and a supercritical localized bump violates the resulting cross bound at the bump centre, for
-every `j`.  The two leaves are therefore stated directly in the satisfiable `Adiff + Cross`
-jet-window form (the grid-windowed difference-arm bound with the fixed-pair cross), with the single
-high derivative collected onto whichever factor carries it. -/
+every `j`.  The two leaves are therefore re-architected directly onto the **satisfiable order-zero
+linear/cross section split** of each summand difference, on which the single high derivative is
+collected onto whichever factor carries it:
+
+* the curvature half over the order-zero section split `ricciNeg2RetagG0_sub_eq_linear_add_cross`
+  (`SegmentMetricCurvatureDifferenceOpDecomposition.lean`, which exhibits the *concrete* smooth
+  linear-in-difference section `linearSection` and quadratic-in-difference Cross section `crossSection`),
+  plus the two per-order jet-bound posits `ricciLinearSection_iteratedCovGrad_diffArm_rfns_le` (the
+  difference arm carries `∇^{j+2}w`) and `ricciCrossSection_iteratedCovGrad_cross_rfns_le` (the fixed-pair
+  Cross);
+* the Lie half over the order-zero linear/cross split posit `lieDerivDiff_order0_linearCross_split`,
+  which posits the genuine existence of the linear/cross decomposition of the Lie-summand difference
+  together with the per-order difference-arm and fixed-pair Cross jet bounds (the value-level Lie split
+  `lieDerivRetagG0_sub_eq_linear_add_cross` is, unlike the curvature half, genuinely absent on disk).
+
+These posits are the genuine Core-II deep leaves: each carries the difference arm up to `∇^{j+2}w` (so a
+zero difference-arm constant or a dropped difference arm falsifies it — non-vacuous), and none carries any
+value-bounded `Φ.op 0 2 w` shape, NO pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, and NO Weyl
+dependence. -/
 
 noncomputable section
 
@@ -139,154 +158,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
-
-/-- **The `g₀`-re-tagged Ricci–DeTurck right-hand-side section.**  The chart-frame DeTurck
-right-hand side `deTurckRHSSection g_bg g₁` of the realized metric `g₁`, re-tagged from the `g₁`
-type tag to the `g₀` type tag (the metric tag being a pure type-level parameter): the non-linear
-`Ric + Lie` summand whose higher-order covariant-jet Nemytskii fibre bound this file states.  This is
-definitionally identical to the downstream consumer's `deTurckRHSRetag g₀ g_bg g₁`; the follow-up
-assembler bridges the two by `rfl`. -/
-def deTurckRHSRetagG0 (g₀ g_bg g₁ : SmoothRiemannianMetric I M) :
-    Integral.L2.SmoothCcTensor g₀ 0 2 :=
-  { toSection := (deTurckRHSSection (I := I) g_bg g₁).toSection
-    hasCompactSupport := (deTurckRHSSection (I := I) g_bg g₁).hasCompactSupport }
-
-omit [CompleteSpace E] [BoundarylessManifold I M] in
-/-- The underlying smooth section of `deTurckRHSRetagG0 g₀ g_bg g₁` is the DeTurck right-hand-side
-section `deTurckRHSSection g_bg g₁`'s section (the retag is a pure type-tag change). -/
-@[simp] theorem deTurckRHSRetagG0_toSection (g₀ g_bg g₁ : SmoothRiemannianMetric I M) :
-    (deTurckRHSRetagG0 (I := I) g₀ g_bg g₁).toSection =
-      (deTurckRHSSection (I := I) g_bg g₁).toSection := rfl
-
-/-! ### The additive `Ric + Lie` split of the DeTurck right-hand-side section
-
-The genuine first decomposition of the second-order Ricci–DeTurck right-hand side `F(g) =
-deTurckRicciRHS g_bg g = -2 • Ric(g) + 𝓛_{W(g, g_bg)} g` into its two *separate* geometric
-nonlinearities — the **Ricci-curvature** summand `-2 • Ric(g)` and the **Lie-derivative-of-metric**
-summand `𝓛_{W(g, g_bg)} g`.  Both are promoted to genuine smooth compactly-supported `(0,2)`-tensor
-sections (`SmoothCcTensor g 0 2`), so the section difference `F(g₁) − F(g₂)` splits additively as
-`-2 • (Ric(g₁) − Ric(g₂)) + (Lie(g₁) − Lie(g₂))`.  This is the additive bridge over which the
-target's per-order covariant `L²` bound reduces to the two **per-field** covariant-Faà-di-Bruno
-`L²` primitives (each a separately-reusable Nemytskii estimate).  Each per-field primitive's bound
-is the **Hamilton/Moser tame product** shape: a difference-redistribution part plus a *cross term*
-carrying the unbounded top coefficient jet `∇^{j+2}g_t` (order `j + 2 ∈ (a + 2, 2a + 2]`, NOT
-controlled by an `H^{a+2}` ball) in `L²` against the difference's `C⁰`/`toHs a` factor — finite on
-each fixed `(T₁, T₂)`, ball-bounded only at the terminal absorption (`exists_iteratedCovGrad_l2Norm_le_toHs`
-through the `H^{a+2}`-`B`-ball, where the cross-term coefficient collapses into the Lipschitz
-constant).  An `H^{a+2}` ball cannot bound an `H^{a+3+}` jet; the cross term is exactly the device
-that keeps the bound TRUE while never claiming the top jet pointwise or ball-controlled in isolation. -/
-
-/-- The model `(0,2)`-multilinear value of the **Ricci-tensor** bilinear form `-2 • Ric(g) x`
-(the curvature summand of the Ricci–DeTurck right-hand side), via `bilinFormToModel`. -/
-private def ricciNeg2ModelFun (g : SmoothRiemannianMetric I M) (x : M) :
-    Tensor0SSpace 2 I x :=
-  Tensor0SSpace.ofModel
-    (bilinFormToModel (TangentSpace I x)
-      ((-2 : ℝ) • ricciTensor (I := I) (smoothRiemannianMetricToInfty (I := I) g) x))
-
-private theorem ricciNeg2ModelFun_toModel_apply (g : SmoothRiemannianMetric I M) (x : M)
-    (v : Fin 2 → TangentSpace I x) :
-    Tensor0SSpace.toModel (ricciNeg2ModelFun (I := I) g x) v =
-      ((-2 : ℝ) • ricciTensor (I := I) (smoothRiemannianMetricToInfty (I := I) g) x)
-        (v 0) (v 1) := by
-  unfold ricciNeg2ModelFun
-  rw [Tensor0SSpace.toModel_ofModel]
-  exact bilinFormToModel_apply (TangentSpace I x)
-    ((-2 : ℝ) • ricciTensor (I := I) (smoothRiemannianMetricToInfty (I := I) g) x) v
-
-/-- **The `-2 • Ric(g)` curvature summand is a smooth covariant `(0,2)`-tensor field.**  Its chart
-component smoothness is the Ricci chart-component smoothness `chartRicci_affine_in_d2g` scaled by
-`-2`. -/
-def ricciNeg2Field (g : SmoothRiemannianMetric I M) :
-    Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) ∞ 2 :=
-  letI := tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 2
-  letI := TangentBundle.contMDiffVectorBundle (I := I) (M := M) (n := ∞)
-  ⟨fun x => ricciNeg2ModelFun (I := I) g x, by
-    let d := Module.finrank ℝ E
-    let b : Module.Basis (Fin d) ℝ E := chartModelBasis E
-    refine (contMDiff_multilinearSection_iff_coord (TangentSpace I) ∞ b _).mpr
-      fun σ x₀ => ?_
-    have hcomp : ContMDiffOn I 𝓘(ℝ, ℝ) ∞
-        (fun x : M =>
-          (-2 : ℝ) • ricciTensor (I := I) (smoothRiemannianMetricToInfty (I := I) g) x
-            (chartFrameVec (I := I) x₀ (σ 0) x)
-            (chartFrameVec (I := I) x₀ (σ 1) x))
-        (chartAt H x₀).source :=
-      (contMDiffOn_const (c := (-2 : ℝ))).smul
-        (chartRicci_affine_in_d2g (I := I)
-          (smoothRiemannianMetricToInfty (I := I) g) x₀ (σ 0) (σ 1))
-    have hx₀_src : x₀ ∈ (chartAt H x₀).source := mem_chart_source H x₀
-    have hx₀_base : x₀ ∈ (trivializationAt E (TangentSpace I) x₀).baseSet :=
-      mem_baseSet_trivializationAt E (TangentSpace I) x₀
-    have h_src_nhd : (chartAt H x₀).source ∈ 𝓝 x₀ :=
-      (chartAt H x₀).open_source.mem_nhds hx₀_src
-    refine ((hcomp x₀ hx₀_src).contMDiffAt h_src_nhd).congr_of_eventuallyEq ?_
-    have h_base_nhd :
-        (trivializationAt E (TangentSpace I) x₀).baseSet ∈ 𝓝 x₀ :=
-      (trivializationAt E (TangentSpace I) x₀).open_baseSet.mem_nhds hx₀_base
-    filter_upwards [h_base_nhd] with x hx
-    rw [continuousMultilinearMap_basis_repr]
-    change Tensor0SSpace.toModel (ricciNeg2ModelFun (I := I) g x)
-        (fun j => (trivializationAt E (TangentSpace I) x₀).symmL ℝ x (b (σ j))) = _
-    rw [ricciNeg2ModelFun_toModel_apply]
-    simp only [ContinuousLinearMap.smul_apply]
-    rfl⟩
-
-/-- The `-2 • Ric(g)` curvature summand as a smooth mixed `(0,2)`-tensor section. -/
-def ricciNeg2MixedSection (g : SmoothRiemannianMetric I M) :
-    Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯ :=
-  MixedSection.fromMultilinearSection (𝕜 := ℝ) (F := E) (IB := I)
-    (E := (TangentSpace I : M → Type _)) ∞ (ricciNeg2Field (I := I) g)
-
-/-- **The `-2 • Ric(g)` curvature summand as a `SmoothCcTensor g 0 2`.** -/
-def ricciNeg2CcSection (g : SmoothRiemannianMetric I M) :
-    SmoothCcTensor g 0 2 where
-  toSection := ricciNeg2MixedSection (I := I) g
-  hasCompactSupport := HasCompactSupport.of_compactSpace _
-
-/-- **The `𝓛_{W(g, g_bg)} g` Lie-derivative summand as a `SmoothCcTensor g 0 2`.**  Defined as the
-algebraic complement `deTurckRHSSection g_bg g − ricciNeg2CcSection g`, so the additive `Ric + Lie`
-split `deTurckRHSSection g_bg g = ricciNeg2CcSection g + lieDerivCcSection g_bg g` holds by
-construction; its underlying field is `𝓛_{W(g, g_bg)} g` (the deTurck-vector-field Lie deformation),
-since `deTurckRHSSection`'s field is `-2 • Ric(g) + 𝓛_{W} g`. -/
-def lieDerivCcSection (g_bg g : SmoothRiemannianMetric I M) :
-    SmoothCcTensor g 0 2 :=
-  deTurckRHSSection (I := I) g_bg g - ricciNeg2CcSection (I := I) g
-
-/-- **The additive `Ric + Lie` split of the DeTurck right-hand-side section.**  The Ricci–DeTurck
-right-hand-side section is the sum of its curvature summand `-2 • Ric(g)` and its Lie-derivative
-summand `𝓛_{W(g, g_bg)} g` (both genuine `SmoothCcTensor`s). -/
-theorem deTurckRHSSection_eq_ricciNeg2_add_lieDeriv (g_bg g : SmoothRiemannianMetric I M) :
-    deTurckRHSSection (I := I) g_bg g =
-      ricciNeg2CcSection (I := I) g + lieDerivCcSection (I := I) g_bg g := by
-  rw [lieDerivCcSection]; abel
-
-/-- **The `g₀`-re-tagged `-2 • Ric(g₁)` curvature summand.**  The curvature summand
-`ricciNeg2CcSection g₁` re-tagged from the `g₁` type tag to the `g₀` type tag (a pure type-level
-parameter change; the underlying section is unchanged). -/
-def ricciNeg2RetagG0 (g₀ g₁ : SmoothRiemannianMetric I M) :
-    Integral.L2.SmoothCcTensor g₀ 0 2 :=
-  { toSection := (ricciNeg2CcSection (I := I) g₁).toSection
-    hasCompactSupport := (ricciNeg2CcSection (I := I) g₁).hasCompactSupport }
-
-/-- **The `g₀`-re-tagged `𝓛_{W(g₁, g_bg)} g₁` Lie-derivative summand.**  The Lie-derivative summand
-`lieDerivCcSection g_bg g₁` re-tagged from the `g₁` type tag to the `g₀` type tag. -/
-def lieDerivRetagG0 (g₀ g_bg g₁ : SmoothRiemannianMetric I M) :
-    Integral.L2.SmoothCcTensor g₀ 0 2 :=
-  { toSection := (lieDerivCcSection (I := I) g_bg g₁).toSection
-    hasCompactSupport := (lieDerivCcSection (I := I) g_bg g₁).hasCompactSupport }
-
-/-- **The retagged additive `Ric + Lie` split.**  The `g₀`-retagged DeTurck right-hand-side section
-splits additively into its `g₀`-retagged curvature and Lie-derivative summands. -/
-theorem deTurckRHSRetagG0_eq_ricciNeg2_add_lieDeriv
-    (g₀ g_bg g₁ : SmoothRiemannianMetric I M) :
-    deTurckRHSRetagG0 (I := I) g₀ g_bg g₁ =
-      ricciNeg2RetagG0 (I := I) g₀ g₁ + lieDerivRetagG0 (I := I) g₀ g_bg g₁ := by
-  refine Integral.L2.SmoothCcTensor.ext ?_
-  have h := congrArg Integral.L2.SmoothCcTensor.toSection
-    (deTurckRHSSection_eq_ricciNeg2_add_lieDeriv (I := I) g_bg g₁)
-  rw [Integral.L2.SmoothCcTensor.toSection_add] at h
-  exact h
 
 /-! ### The realize-jet `rfns` domination: the metric difference's jets are the perturbation's jets
 
@@ -435,70 +306,46 @@ theorem exists_riemannianFiberNormSq_iteratedCovGrad_realizeSymm_le_jetSum
   rw [Finset.card_range] at hCS
   exact le_trans hBsq (by exact_mod_cast hCS)
 
-/-- **The order × rank window grid coefficient is monotone in the envelope family.**  For two
-nonnegative-difference two-index families `κ ≤ κ'` pointwise, the `4^j`-scaled order × rank window
-sum is monotone: `gridWindowSum κ p r j ≤ gridWindowSum κ' p r j`.  Pure `Finset.sum` monotonicity;
-the bridge by which a per-perturbation `DiffBilinOp`'s envelope `Φ.kappa`, dominated by a
-*perturbation-uniform* envelope `kbar`, yields a perturbation-uniform difference-arm grid constant. -/
-theorem gridWindowSum_le_of_kappa_le {κ κ' : ℕ → ℕ → ℝ}
-    (hle : ∀ p r, κ p r ≤ κ' p r) (p r j : ℕ) :
-    Integral.Connection.gridWindowSum κ p r j ≤ Integral.Connection.gridWindowSum κ' p r j := by
-  unfold Integral.Connection.gridWindowSum
-  exact Finset.sum_le_sum fun _ _ => Finset.sum_le_sum fun _ _ => hle _ _
+/-! ### The per-order covariant jet bounds of the order-zero linear/cross section split
 
-/-! ### The per-field explicit order-zero single-difference-factor telescope data
+The genuine Core-II deep leaves on which the two per-field covariant-Faà-di-Bruno difference/cross
+splits stand.  Each summand difference `F g₁ − F g₂` decomposes at order zero into a
+**linear-in-difference** section and a **quadratic-in-difference Cross** section
+(`ricciNeg2RetagG0_sub_eq_linear_add_cross` for the curvature half — over the concrete
+`linearSection` / `crossSection` of `SegmentMetricCurvatureDifferenceOpDecomposition.lean`; the posited
+order-zero split `lieDerivDiff_order0_linearCross_split` for the Lie half, the value-level split being
+genuinely absent on disk).  The deep content is the per-order covariant-jet behaviour of the two parts:
+the linear part's `j`-th covariant gradient carries the single high derivative on the **difference
+factor** `w := realizeSymmCcTensor g₀ (T₁ − T₂)` up to order `j + 2` (the difference-arm grid bound,
+with the metric-built `≤2`-jet coefficient folded into a family-uniform constant `Cd`), while the Cross
+part's `j`-th covariant gradient is the Faà-di-Bruno `i = 0` term's unbounded top coefficient jet
+`∇^{j+2}g_t` kept on the **fixed pair** `T₁, T₂` against the difference's order-`a` chart-Sobolev `C⁰`
+mass `‖(T₁ − T₂).toHs a‖²`.  No jet of order `> 2` is ever taken pointwise; the difference arm carries
+`∇^{j+2}w` (so a zero difference-arm constant, or a dropped difference arm, falsifies the bound — the
+posits are non-vacuous), and neither bound is a value-bounded `Φ.op 0 2 w` shape. -/
 
-The two per-field instances of the shared abstract telescope datum `DeTurck.TelescopeData`
-(`BilinearDifferenceCovJetSplit.lean`), supplying the order-zero algebraic single-difference-factor
-expansion of each segment-differenced geometric nonlinearity to the shared covariant-jet brick
-`bilinDiff_covFdB_section_split`.  They live here next to their summand functors `ricciNeg2RetagG0` /
-`lieDerivRetagG0`; the abstract brick they feed is upstream. -/
-
-/-- **The covariant Faà-di-Bruno bilinear-contraction realization of the segment-differenced curvature
-summand (the irreducible curvature operator-construction leaf).**
-
-For the `g₀`-retagged curvature summand functor `g ↦ ricciNeg2RetagG0 g₀ g`, there is a family-uniform
-nonnegative order × rank envelope `kbar` such that, for every pair of `g₀`-fibre-small perturbations
-`T₁, T₂` with `H^{a+2}` norms `≤ B` and every realized pair `g₁, g₂`, there is a differentiated bilinear
-contraction operator `Φ : DiffBilinOp g₀` — the metric-built covariant Faà-di-Bruno coefficient of the
-sealed curvature nonlinearity `-2 • Ric(g)` along the segment metric `g_t = (1-t)·g₂ + t·g₁` — whose
-per-order fibre envelope is dominated by `kbar` (uniformly over the family), and whose undifferentiated
-metric-contraction `Φ.op 0 2 w` against the difference factor `w := realizeSymmCcTensor g₀ (T₁ − T₂)`
-realizes the **linear-in-difference part** of the curvature-summand difference, the residual
-`(ricciNeg2RetagG0 g₀ g₁ − ricciNeg2RetagG0 g₀ g₂) − Φ.op 0 2 w` being the quadratic-in-difference Cross
-remainder whose **every** covariant jet is `rfns`-dominated by the fixed-pair jet sum against the
-difference's order-`a` chart-Sobolev `C⁰` mass `‖(T₁ − T₂).toHs a‖²`:
+/-- **(POSIT — the curvature difference-arm covariant-jet bound.)**  The intrinsic squared fibre norm
+of the order-`j` covariant gradient of the concrete linear-in-difference curvature section
+`linearSection g₀ g₁ g₂` is dominated by the order-`≤ j + 2` covariant jets of the difference factor
+`w := realizeSymmCcTensor g₀ (T₁ − T₂)`, with a nonnegative constant `Cd` **uniform** over the
+supercritical `H^{a+2}`-bounded perturbation family:
 ```
-∀ p r, Φ.kappa p r ≤ kbar p r,
-∀ jj x, rfns(∇^jj ((diff) − Φ.op 0 2 w))(x)
-          ≤ (1/2)·(∑_{i ≤ jj+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·‖(T₁ − T₂).toHs a‖².
+rfns(∇^j linearSection)(x) ≤ Cd · ∑_{i ≤ j+2} rfns(∇^i w)(x).
 ```
 
-This is the **irreducible deep content** of the curvature half: the construction of the differentiated
-bilinear contraction operator `Φ` for the sealed Ricci nonlinearity's covariant Faà-di-Bruno expansion
-(the metric-built coefficient organised through the connection-difference cocycle Ricci-difference
-telescope `ricciTensor_sub_telescope` — whose every summand carries a single metric-difference factor
-through `D₁ − D₂ = connDiff g₁ g₂` — and the M2 Koszul realization `connDiffField_eq_koszul_contraction`,
-so the difference factor's bilinear form `ccTensorBilinSymm g₀ (T₁ − T₂)` is `realizeSymmCcTensor`'s
-realized form, the metric jet entering only as the per-order/per-rank fibre envelope `Φ.kappa`,
-ball-uniform by the order-`≤ 2` segment-metric jet sup
-`exists_segmentMetric_realizeSymm_iteratedCovGradJet2_sup_le`, the source of `kbar`), together with the
-all-order covariant-jet domination of the genuinely quadratic Cross remainder.  The downstream order-zero
-section normal form `ricciNeg2RetagG0_sub_eq_linear_add_cross`
-(`SegmentMetricCurvatureDifferenceOpDecomposition.lean`) is the `jj = 0` single-metric witness of exactly
-this `linearSection + crossSection` structure, but lives downstream of this file (its carrier
-`SegmentMetricRicciSectionIdentity` imports this file) and so cannot discharge it without an import cycle.
-
-Its body is `sorry`: the genuine atomic covariant Faà-di-Bruno operator construction of the sealed
-curvature nonlinearity, with NO pointwise-`C^{>2}`-jet claim (the difference factor's jets are
-perturbation-difference jets; the unbounded top metric jet rides on the fixed-pair Cross remainder
-against the `C⁰` factor, never taken pointwise), NO spectral-nonlinearity, and NO Weyl dependence.  It
-is non-vacuous: the Cross remainder genuinely vanishes to second order (`crossSection_self_toModel`,
-`g₁ = g₂ ⇒ Cross = 0`), so the realization `Φ.op 0 2 w` carries the genuine principal part. -/
-theorem ricciNeg2RetagG0_segmentDiffBilinOp_realization
+This is the difference arm of the curvature half: the single high derivative lands on the difference
+factor `w` (`linearSection` is the linear-in-difference part, whose covariant jets are realize-controlled
+by the perturbation difference's jets — the realization gains no derivatives,
+`exists_riemannianFiberNormSq_iteratedCovGrad_realizeSymm_le_jetSum`), the metric-built `≤2`-jet
+coefficient folded into `Cd` by the binomial covariant-Leibniz `rfns` grid over the window `j + 2`,
+ball-uniform by the order-`≤2` segment-metric jet sup.  It is **not** `T₁`/`w` restated: it carries the
+difference arm up to `∇^{j+2}w`, and a zero `Cd` falsifies it whenever the linear part is genuinely
+present.  NO pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, NO Weyl dependence.  Its body is
+`sorry`: the genuine deep covariant-Leibniz difference-arm content. -/
+theorem ricciLinearSection_iteratedCovGrad_diffArm_rfns_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) :
-    ∃ kbar : ℕ → ℕ → ℝ, (∀ p r, 0 ≤ kbar p r) ∧
+    (B : ℝ) (hB : 0 ≤ B) (j : ℕ) :
+    ∃ Cd : ℝ, 0 ≤ Cd ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
         (∀ (x : M) (v w : TangentSpace I x),
@@ -507,89 +354,87 @@ theorem ricciNeg2RetagG0_segmentDiffBilinOp_realization
           g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
-        ∃ Φ : DiffBilinOp g₀, (∀ p r, Φ.kappa p r ≤ kbar p r) ∧
-          ∀ (jj : ℕ) (x : M),
-            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + jj) x
-                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 jj
-                    (ricciNeg2RetagG0 (I := I) g₀ g₁ - ricciNeg2RetagG0 (I := I) g₀ g₂
-                      - Φ.op 0 2 (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂)))).toSection x) ≤
-              (1 / 2 : ℝ) * (∑ i ∈ Finset.range (jj + 2 + 1),
-                  (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
-                    + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
-                * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=
+        ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+                  (linearSection (I := I) g₀ g₁ g₂)).toSection x) ≤
+            Cd * ∑ i ∈ Finset.range (j + 2 + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                    (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x) :=
   sorry
 
-/-- **The explicit order-zero telescope datum of the `g₀`-retagged curvature summand functor.**
+/-- **(POSIT — the curvature fixed-pair Cross covariant-jet bound.)**  The intrinsic squared fibre norm
+of the order-`j` covariant gradient of the concrete quadratic-in-difference curvature Cross section
+`crossSection g₀ g₁ g₂` is dominated by the order-`≤ j + 2` **fixed-pair** jet sum against the
+difference's order-`a` chart-Sobolev `C⁰` mass:
+```
+rfns(∇^j crossSection)(x)
+  ≤ (1/2) · (∑_{i ≤ j+2} (rfns(∇^i T₁)(x) + rfns(∇^i T₂)(x))) · ‖(T₁ − T₂).toHs a‖².
+```
 
-The curvature summand functor `g ↦ ricciNeg2RetagG0 g₀ g` of the Ricci–DeTurck right-hand side admits
-the explicit order-zero single-difference-factor telescope datum `DeTurck.TelescopeData`: its segment
-difference is a metric-contraction `Φ.op 0 2 w` of the difference factor
-`w := realizeSymmCcTensor g₀ (T₁ − T₂)` plus a fixed-pair cross remainder whose all-order jet is
-`rfns`-controlled by the fixed-pair jet sum against the difference's order-`a` chart-Sobolev `C⁰` mass.
-
-**Proven by composition** over the irreducible curvature operator-construction leaf
-`ricciNeg2RetagG0_segmentDiffBilinOp_realization`: that leaf supplies the family-uniform envelope `kbar`
-and, per pair, the differentiated bilinear contraction `Φ` (with `Φ.kappa ≤ kbar`) realizing the
-linear-in-difference part as `Φ.op 0 2 w`, together with the all-order cross jet bound on the residual
-`(diff) − Φ.op 0 2 w`.  This node packages those into `TelescopeData`: the cross remainder `C` is the
-explicit residual `(diff) − Φ.op 0 2 w`, the equation `diff = Φ.op 0 2 w + C` is `add_sub_cancel`, and
-the cross bound is the leaf's residual bound verbatim. -/
-theorem ricciNeg2RetagG0_telescope_data
+This is the Cross arm of the curvature half: the covariant Faà-di-Bruno `i = 0` term's unbounded top
+coefficient jet `∇^{j+2}g_t` (`L²` mass of order `j + 2 ∈ (a + 2, 2a + 2]`, which an `H^{a+2}` ball
+cannot bound) is kept on the **fixed pair** `T₁, T₂` against the difference's `C⁰` mass, which the
+supercritical Sobolev embedding (`ha`) bounds by `‖(T₁ − T₂).toHs a‖`.  The cross coefficient `1/2` is
+the deep normalisation residual that, after the squared-fibre-norm subadditivity factor `2`, yields the
+coefficient-`1` cross arm the pointwise-to-`L²` lift consumes.  Non-vacuous: the Cross section genuinely
+vanishes to second order (`crossSection_self_toModel`), so it is the genuine quadratic remainder, and
+both fixed-pair endpoints are carried.  NO pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, NO
+Weyl dependence.  Its body is `sorry`: the genuine deep fixed-pair top-jet content. -/
+theorem ricciCrossSection_iteratedCovGrad_cross_rfns_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) :
-    TelescopeData (I := I) g₀ (fun g => ricciNeg2RetagG0 (I := I) g₀ g) a B := by
-  classical
-  obtain ⟨kbar, hkbar_nn, hreal⟩ :=
-    ricciNeg2RetagG0_segmentDiffBilinOp_realization (I := I) g₀ a ha B hB
-  refine ⟨kbar, hkbar_nn, ?_⟩
-  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂
-  obtain ⟨Φ, hkappa, hcross⟩ := hreal T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂
-  refine ⟨Φ, ricciNeg2RetagG0 (I := I) g₀ g₁ - ricciNeg2RetagG0 (I := I) g₀ g₂
-      - Φ.op 0 2 (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂)),
-    hkappa, ?_, hcross⟩
-  -- `diff = Φ.op 0 2 w + (diff − Φ.op 0 2 w)` by additive-group cancellation.
-  abel
+    (B : ℝ) (hB : 0 ≤ B) (j : ℕ) :
+    ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+      (g₁ g₂ : SmoothRiemannianMetric I M),
+      (∀ (x : M) (v w : TangentSpace I x),
+        g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+      (∀ (x : M) (v w : TangentSpace I x),
+        g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+      ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+      ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+      ∀ x : M,
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+                (crossSection (I := I) g₀ g₁ g₂)).toSection x) ≤
+          (1 / 2 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+              (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
+                + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
+            * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=
+  sorry
 
-/-- **The covariant Faà-di-Bruno bilinear-contraction realization of the segment-differenced
-Lie/`deTurckVF` summand (the irreducible gauge operator-construction leaf).**
+/-- **(POSIT — the order-zero linear/cross split of the Lie-summand difference, with per-order jet
+bounds.)**  The genuine Core-II deep leaf of the Lie half.  The `g₀`-retagged Lie-summand difference
+`lieDerivRetagG0 g₀ g_bg g₁ − lieDerivRetagG0 g₀ g_bg g₂` decomposes at order zero into a
+**linear-in-difference** section `L` and a **quadratic-in-difference Cross** section `C` (genuine smooth
+`SmoothCcTensor g₀ 0 2`s), whose per-order covariant jets satisfy the difference-arm grid bound
+(carrying the difference factor `w := realizeSymmCcTensor g₀ (T₁ − T₂)` up to `∇^{j+2}w`, with a
+family-uniform constant `Cd`) and the fixed-pair Cross bound:
+```
+lieDerivRetagG0 g₁ − lieDerivRetagG0 g₂ = L + C,
+rfns(∇^j L)(x) ≤ Cd · ∑_{i ≤ j+2} rfns(∇^i w)(x),
+rfns(∇^j C)(x) ≤ (1/2) · (∑_{i ≤ j+2} (rfns(∇^i T₁)(x) + rfns(∇^i T₂)(x))) · ‖(T₁ − T₂).toHs a‖².
+```
 
-The Lie/`deTurckVF`-gauge analogue of `ricciNeg2RetagG0_segmentDiffBilinOp_realization`.  For the
-`g₀`-retagged Lie summand functor `g ↦ lieDerivRetagG0 g₀ g_bg g`, there is a family-uniform nonnegative
-order × rank envelope `kbar` such that, for every pair of `g₀`-fibre-small perturbations `T₁, T₂` with
-`H^{a+2}` norms `≤ B` and every realized pair `g₁, g₂`, there is a differentiated bilinear contraction
-operator `Φ : DiffBilinOp g₀` — the metric-built covariant Faà-di-Bruno coefficient of the sealed
-Lie/`deTurckVF` nonlinearity `𝓛_{W(g, g_bg)} g` along the segment metric — with `Φ.kappa ≤ kbar`
-uniformly, whose contraction `Φ.op 0 2 w` against `w := realizeSymmCcTensor g₀ (T₁ − T₂)` realizes the
-linear-in-difference part of the Lie-summand difference, the residual
-`(lieDerivRetagG0 g₀ g_bg g₁ − lieDerivRetagG0 g₀ g_bg g₂) − Φ.op 0 2 w` being the
-quadratic-in-difference Cross remainder whose **every** covariant jet is `rfns`-dominated by the
-fixed-pair jet sum against `‖(T₁ − T₂).toHs a‖²`.
-
-This is the **irreducible deep content** of the Lie half: the construction of the differentiated
-bilinear contraction operator `Φ` for the sealed Lie/`deTurckVF` nonlinearity's covariant Faà-di-Bruno
-expansion.  The Lie field `𝓛_{W(g)} g` has the **same intrinsic order-`≤2` structure** as the curvature
-half (the deTurck vector field `W = g⁻¹ · (Γ(g) − Γ(g_bg))` is a `g⁻¹·∂g`-type field, and one further
-metric derivative produces the Lie deformation), so its segment difference admits the identical
-metric-built bilinear contraction realization; the chart-level structural difference identity
-`chartLieDeTurckComp_sub_eq` (`ChartLieDerivStructuralDifference.lean`) — which exhibits the
+The Lie field `𝓛_{W(g)} g` has the **same intrinsic order-`≤2` structure** as the curvature half (the
+deTurck vector field `W = g⁻¹ · (Γ(g) − Γ(g_bg))` is a `g⁻¹·∂g`-type field, and one further metric
+derivative produces the Lie deformation), so its segment difference admits the identical order-zero
+linear/cross split — the `j = 0` chart witness being the structural difference identity
+`chartLieDeTurckComp_sub_eq` (`ChartLieDerivStructuralDifference.lean`), which exhibits the
 `Lie(g₁) − Lie(g₂)` chart component as a difference of products of metric `≤2`-jets, each carrying a
-single Gram/vector-field-component difference factor — is its `jj = 0` chart witness, the metric jet
-entering only as the per-order/per-rank fibre envelope `Φ.kappa`, ball-uniform by the order-`≤ 2`
-segment-metric jet sup `exists_segmentMetric_realizeSymm_iteratedCovGradJet2_sup_le` (the source of
-`kbar`).
-
-Its body is `sorry`: the genuine atomic covariant Faà-di-Bruno operator construction of the sealed
-Lie/`deTurckVF` nonlinearity, with NO pointwise-`C^{>2}`-jet claim (the unbounded top metric jet rides on
-the fixed-pair Cross remainder against the `C⁰` factor, never taken pointwise), NO spectral-nonlinearity,
-and NO Weyl dependence.  It is non-vacuous: the Cross remainder genuinely vanishes to second order
-(`g₁ = g₂ ⇒` the connection difference, hence the Lie difference's quadratic part, is zero), so the
-realization `Φ.op 0 2 w` carries the genuine principal part. -/
-theorem lieDerivRetagG0_segmentDiffBilinOp_realization
+single Gram/vector-field-component difference factor.  Unlike the curvature half, the value-level split
+`lieDerivRetagG0_sub_eq_linear_add_cross` is genuinely absent on disk, so this node posits its existence
+together with the per-order jet bounds.  Non-vacuous and coupled: the difference arm carries `∇^{j+2}w`
+(a zero `Cd` falsifies it), and the Cross genuinely vanishes when `g₁ = g₂` (the connection difference,
+hence the Lie difference's quadratic part, is zero).  NO value-bounded `Φ.op 0 2 w` shape, NO
+pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, NO Weyl dependence.  Its body is `sorry`: the
+genuine deep covariant-gauge-jet content. -/
+theorem lieDerivDiff_order0_linearCross_split
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) :
-    ∃ kbar : ℕ → ℕ → ℝ, (∀ p r, 0 ≤ kbar p r) ∧
+    ∃ Cd : ℝ, 0 ≤ Cd ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
         (∀ (x : M) (v w : TangentSpace I x),
@@ -598,48 +443,25 @@ theorem lieDerivRetagG0_segmentDiffBilinOp_realization
           g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
-        ∃ Φ : DiffBilinOp g₀, (∀ p r, Φ.kappa p r ≤ kbar p r) ∧
-          ∀ (jj : ℕ) (x : M),
-            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + jj) x
-                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 jj
-                    (lieDerivRetagG0 (I := I) g₀ g_bg g₁ - lieDerivRetagG0 (I := I) g₀ g_bg g₂
-                      - Φ.op 0 2 (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂)))).toSection x) ≤
-              (1 / 2 : ℝ) * (∑ i ∈ Finset.range (jj + 2 + 1),
+        ∃ L C : Integral.L2.SmoothCcTensor g₀ 0 2,
+          lieDerivRetagG0 (I := I) g₀ g_bg g₁ - lieDerivRetagG0 (I := I) g₀ g_bg g₂ = L + C ∧
+          (∀ (j : ℕ) (x : M),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j L).toSection x) ≤
+              Cd * ∑ i ∈ Finset.range (j + 2 + 1),
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                      (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)) ∧
+          (∀ (j : ℕ) (x : M),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j C).toSection x) ≤
+              (1 / 2 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
                   (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
                       ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
                     + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
                       ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
-                * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=
+                * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) :=
   sorry
-
-/-- **The explicit order-zero telescope datum of the `g₀`-retagged Lie-derivative summand functor.**
-
-The Lie/`deTurckVF` summand functor `g ↦ lieDerivRetagG0 g₀ g_bg g` of the Ricci–DeTurck right-hand
-side admits the explicit order-zero single-difference-factor telescope datum `DeTurck.TelescopeData`:
-its segment difference is a metric-contraction `Φ.op 0 2 w` of the difference factor
-`w := realizeSymmCcTensor g₀ (T₁ − T₂)` plus a fixed-pair cross remainder whose all-order jet is
-`rfns`-controlled by the fixed-pair jet sum against the difference's order-`a` chart-Sobolev `C⁰` mass.
-
-**Proven by composition** over the irreducible gauge operator-construction leaf
-`lieDerivRetagG0_segmentDiffBilinOp_realization` (the same packaging as the curvature half): that leaf
-supplies the family-uniform envelope `kbar` and, per pair, the contraction `Φ` realizing the
-linear-in-difference part with the all-order cross jet bound on the residual; this node sets the cross
-remainder `C` to the explicit residual `(diff) − Φ.op 0 2 w` and closes the equation by
-`add_sub_cancel`. -/
-theorem lieDerivRetagG0_telescope_data
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) :
-    TelescopeData (I := I) g₀ (fun g => lieDerivRetagG0 (I := I) g₀ g_bg g) a B := by
-  classical
-  obtain ⟨kbar, hkbar_nn, hreal⟩ :=
-    lieDerivRetagG0_segmentDiffBilinOp_realization (I := I) g₀ g_bg a ha B hB
-  refine ⟨kbar, hkbar_nn, ?_⟩
-  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂
-  obtain ⟨Φ, hkappa, hcross⟩ := hreal T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂
-  refine ⟨Φ, lieDerivRetagG0 (I := I) g₀ g_bg g₁ - lieDerivRetagG0 (I := I) g₀ g_bg g₂
-      - Φ.op 0 2 (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂)),
-    hkappa, ?_, hcross⟩
-  abel
 
 /-- **The covariant Faà-di-Bruno difference/cross split of the Ricci-curvature summand difference
 (the deep covariant-curvature-jet structural posit).**
@@ -683,25 +505,25 @@ FALSE for `j ∈ (a, 2a]` (the top coefficient jet `∇^{j+2}g_t` content is gen
 `(∑ fixed-pair) · C⁰`-order and is *not* difference-arm controlled).  Both pieces carry genuine
 content; neither arm constant is vacuous.
 
-It is **proven by composition** (TRANSIT) over the section-functor-abstract covariant-jet brick
-`bilinDiff_covFdB_section_split` (`BilinearDifferenceCovJetSplit.lean`), instantiated with the curvature
-summand functor `g ↦ ricciNeg2RetagG0 g₀ g` and its explicit order-zero telescope datum
-`ricciNeg2RetagG0_telescope_data`.  The abstract brick takes the order-zero single-difference-factor
-expansion `Ric-diff = Φ.op 0 2 w + C` (the metric-contraction of the difference factor `w :=
-realizeSymmCcTensor g₀ (T₁ − T₂)` plus a fixed-pair remainder `C`) and pushes `∇^j` through it: the high
-derivative on the difference factor lands in the difference-arm piece `Adiff` (the metric-built
-coefficient folded into the uniform `Cd` over the binomial covariant-Leibniz grid window `j + 2`), and
-the order-`j` covariant gradient of the fixed-pair remainder `C` rides the cross piece `Cross`.
+It is **proven by composition** (TRANSIT) over the *concrete* order-zero linear/cross section split
+`ricciNeg2RetagG0_sub_eq_linear_add_cross` (`SegmentMetricCurvatureDifferenceOpDecomposition.lean`),
+which exhibits the sealed curvature-section difference `ricciNeg2RetagG0 g₀ g₁ − ricciNeg2RetagG0 g₀ g₂`
+as the sum of the concrete smooth linear-in-difference section `linearSection g₀ g₁ g₂` and the concrete
+smooth quadratic-in-difference Cross section `crossSection g₀ g₁ g₂` (the latter assembled through the M2
+connection-difference operator field `connDiffField` as an operator-trace Cross bilinear form).  Pushing
+`∇^j` through the split (`iteratedCovGrad_add`) sets `Adiff := ∇^j linearSection` and
+`Cross := ∇^j crossSection`, and the two arm bounds are the two per-order jet-bound posits applied at
+order `j`.
 
-The genuine deep content has descended into two named posits: the section-functor-abstract `∇^j`-push
-brick `bilinDiff_covFdB_section_split` (the shared covariant-Leibniz grid content) and the per-field
-explicit order-zero telescope datum `ricciNeg2RetagG0_telescope_data` (the single-difference-factor
-algebraic expansion of the *sealed* curvature nonlinearity `-2 • Ric(g)` — the connection-difference
-cocycle Ricci-difference telescope `ricciTensor_sub_telescope`, `RicciDifferenceTelescope.lean`,
-promoted to the `Φ.op 0 2 w + C` section form, the downstream `j = 0` witness being
-`ricciNeg2RetagG0_sub_eq_linear_add_cross`, `SegmentMetricCurvatureDifferenceOpDecomposition.lean`).
-Consumers transitively depend on `sorryAx` only through those two posits; this leaf carries NO
-pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, and NO Weyl dependence. -/
+The genuine deep content has descended into two named posits: the difference-arm grid bound
+`ricciLinearSection_iteratedCovGrad_diffArm_rfns_le` (the binomial covariant-Leibniz `rfns` grid of the
+linear part `∇^j linearSection`, the single high derivative on the difference factor `w :=
+realizeSymmCcTensor g₀ (T₁ − T₂)`, the metric-built `≤2`-jet coefficient folded into the family-uniform
+`Cd` over the window `j + 2`) and the fixed-pair Cross bound
+`ricciCrossSection_iteratedCovGrad_cross_rfns_le` (the Faà-di-Bruno `i = 0` term's unbounded top
+coefficient jet `∇^{j+2}g_t` kept on the fixed pair against the difference's `C⁰` mass).  Consumers
+transitively depend on `sorryAx` only through those two posits; this leaf carries NO value-bounded
+`Φ.op 0 2 w` shape, NO pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, and NO Weyl dependence. -/
 theorem ricciNeg2Diff_covFdB_section_split
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) (j : ℕ) :
@@ -732,8 +554,18 @@ theorem ricciNeg2Diff_covFdB_section_split
                     + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
                       ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
                 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) :=
-  bilinDiff_covFdB_section_split (I := I) g₀ (fun g => ricciNeg2RetagG0 (I := I) g₀ g) a B hB
-    (ricciNeg2RetagG0_telescope_data (I := I) g₀ a ha B hB) j
+  by
+  classical
+  obtain ⟨Cd, hCd_nn, hAdiff⟩ :=
+    ricciLinearSection_iteratedCovGrad_diffArm_rfns_le (I := I) g₀ a ha B hB j
+  have hCross := ricciCrossSection_iteratedCovGrad_cross_rfns_le (I := I) g₀ a ha B hB j
+  refine ⟨Cd, hCd_nn, fun T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ => ?_⟩
+  refine ⟨PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j (linearSection (I := I) g₀ g₁ g₂),
+    PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j (crossSection (I := I) g₀ g₁ g₂), ?_,
+    hAdiff T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂,
+    hCross T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂⟩
+  rw [ricciNeg2RetagG0_sub_eq_linear_add_cross (I := I) g₀ g₁ g₂,
+    PDE.RicciFlow.iteratedCovGrad_add]
 
 /-- **The pointwise covariant-Faà-di-Bruno two-product domination of the Ricci-curvature summand
 difference (the deep covariant-curvature-jet posit).**
@@ -1079,25 +911,23 @@ coefficient-`1` cross arm the two-product consumer below records.
 difference-arm bound would be false for `j ∈ (a, 2a]`, the top-jet content genuinely
 `(∑ fixed-pair) · C⁰`-order).  Both pieces carry genuine content; neither arm constant is vacuous.
 
-It is **proven by composition** (TRANSIT) over the section-functor-abstract covariant-jet brick
-`bilinDiff_covFdB_section_split` (`BilinearDifferenceCovJetSplit.lean`, the same shared brick the
-curvature half uses), instantiated with the Lie summand functor `g ↦ lieDerivRetagG0 g₀ g_bg g` and its
-explicit order-zero telescope datum `lieDerivRetagG0_telescope_data`.  The abstract brick takes the
-order-zero single-difference-factor expansion `Lie-diff = Φ.op 0 2 w + C` (the metric-contraction of the
-difference factor `w := realizeSymmCcTensor g₀ (T₁ − T₂)` plus a fixed-pair remainder `C`) and pushes
-`∇^j` through it: the high derivative on the difference factor lands in the difference-arm piece `Adiff`
-(the metric-built coefficient folded into the uniform `Cd` over the binomial covariant-Leibniz grid
-window `j + 2`), and the order-`j` covariant gradient of the fixed-pair remainder `C` rides the cross
-piece `Cross`.
+It is **proven by composition** (TRANSIT) over the single order-zero linear/cross split posit
+`lieDerivDiff_order0_linearCross_split`, which posits the genuine order-zero decomposition
+`lieDerivRetagG0 g₁ − lieDerivRetagG0 g₂ = L + C` into a linear-in-difference section `L` and a
+quadratic-in-difference Cross section `C` (genuine smooth `SmoothCcTensor`s) together with the per-order
+difference-arm grid bound on `∇^j L` (carrying the difference factor `w := realizeSymmCcTensor g₀
+(T₁ − T₂)` up to `∇^{j+2}w`, with a family-uniform `Cd`) and the fixed-pair Cross bound on `∇^j C`.
+Pushing `∇^j` through the split (`iteratedCovGrad_add`) sets `Adiff := ∇^j L` and `Cross := ∇^j C`, and
+the two arm bounds are the posit's all-order bounds at order `j`.
 
-The genuine deep content has descended into two named posits: the section-functor-abstract `∇^j`-push
-brick `bilinDiff_covFdB_section_split` (shared with the curvature half) and the per-field explicit
-order-zero telescope datum `lieDerivRetagG0_telescope_data` (the single-difference-factor algebraic
-expansion of the *sealed* Lie/`deTurckVF` nonlinearity `𝓛_{W(g, g_bg)} g` — the chart-level structural
-difference identity `chartLieDeTurckComp_sub_eq`, `ChartLieDerivStructuralDifference.lean`, promoted to
-the `Φ.op 0 2 w + C` section form).  Consumers transitively depend on `sorryAx` only through those two
-posits; this leaf carries NO pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, and NO Weyl
-dependence. -/
+Unlike the curvature half (where the value-level split `ricciNeg2RetagG0_sub_eq_linear_add_cross` and the
+concrete `linearSection` / `crossSection` exist on disk), the value-level Lie split
+`lieDerivRetagG0_sub_eq_linear_add_cross` is genuinely absent, so the order-zero split and its per-order
+jet bounds are bundled into the single posit `lieDerivDiff_order0_linearCross_split` (the genuine deep
+covariant-gauge-jet content — the `j = 0` chart witness being the structural difference identity
+`chartLieDeTurckComp_sub_eq`, `ChartLieDerivStructuralDifference.lean`).  Consumers transitively depend
+on `sorryAx` only through that posit; this leaf carries NO value-bounded `Φ.op 0 2 w` shape, NO
+pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, and NO Weyl dependence. -/
 theorem lieDerivDiff_covFdB_section_split
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) (j : ℕ) :
@@ -1128,8 +958,15 @@ theorem lieDerivDiff_covFdB_section_split
                     + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
                       ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
                 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) :=
-  bilinDiff_covFdB_section_split (I := I) g₀ (fun g => lieDerivRetagG0 (I := I) g₀ g_bg g) a B hB
-    (lieDerivRetagG0_telescope_data (I := I) g₀ g_bg a ha B hB) j
+  by
+  classical
+  obtain ⟨Cd, hCd_nn, hbody⟩ :=
+    lieDerivDiff_order0_linearCross_split (I := I) g₀ g_bg a ha B hB
+  refine ⟨Cd, hCd_nn, fun T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ => ?_⟩
+  obtain ⟨L, C, hsplit, hL, hC⟩ := hbody T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂
+  refine ⟨PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j L,
+    PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j C, ?_, hL j, hC j⟩
+  rw [hsplit, PDE.RicciFlow.iteratedCovGrad_add]
 
 /-- **The pointwise covariant-Faà-di-Bruno two-product domination of the Lie-derivative summand
 difference (the deep covariant-gauge-jet posit).**
