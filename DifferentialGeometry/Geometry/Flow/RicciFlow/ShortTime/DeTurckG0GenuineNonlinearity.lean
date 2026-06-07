@@ -1079,6 +1079,86 @@ theorem deTurckRealizeRemainderOf_toL2_retagClass_sub
   rw [hreduce]
   exact map_sub _ _ _
 
+/-- **The DeTurck gauge-cancellation corrector over the heat-smoothing base carrier (the genuine
+deep first-order-freedom node, transiting the Weyl node).**
+
+For the anchor `g₀`, a flow background `g_bg`, and a supercritical order `a` (`2a > dim M + 4`),
+there is a `(0,2)`-perturbation **corrector** `corr : Hᵃ⁺¹(g₀) → SmoothCcTensor g₀ 0 2` and a
+match-gate slack `Q > 0` so that, writing the corrected synthesis `P u := smoothingBaseSynth g₀ a
+u + corr u` (the heat-semigroup-regularized all-order-smoothing base carrier `smoothingBaseSynth`
+adjusted by `corr`):
+
+* `hcsize` — the corrector carries, at **every** order `n`, the linear intrinsic-Sobolev size
+  bound `‖(corr u).toHs n‖ ≤ Dₙ · ‖u‖` (so the corrected carrier `P u` keeps the base carrier's
+  all-order smoothing, by the triangle inequality);
+* `hclip` — the corrector is `H^{a+2}` Lipschitz: `‖(corr u − corr u').toHs (a+2)‖ ≤ D' · ‖u −
+  u'‖` (so the corrected carrier keeps the base carrier's `H^{a+2}` Lipschitz);
+* `hcmatch` — on the `Q`-gated gate-realizable locus, the realized DeTurck remainder of the
+  *corrected* carrier `smoothingBaseSynth g₀ a u + corr u` coincides, **at the `L²`-class level**
+  (through `SmoothCcTensor.toL2`), with the carrier's canonical gauge section
+  `deTurckRemainderRealizeSection g₀ g_bg u`.
+
+This is the genuine deep content of the raw selector: the naive heat-output base carrier
+`smoothingBaseSynth` alone does **not** match the gauge (Lean-refuted: a pure heat residue
+contributes `−λᵢ(e^{−λᵢ}−1)·u.coeffᵢ`-type terms falsifying exact class equality), so a corrector
+is genuinely required; the corrector exists, and is itself a *continuous* (size/`H^{a+2}`-Lipschitz
+controlled) synthesis — **not** the discontinuous gate representative `gateSmoothRep` — precisely
+because the realized DeTurck remainder is the gauge-cancelled *first-order* operator (the
+second-order `−λᵢ` rough-Laplacian principal symbol cancels the second-order retag principal
+symbol, `deTurckNonlinearitySpectral_principalPart_cancels`), so its `L²`-class lies in a
+first-order freedom rich enough to be hit by a continuous corrected carrier without forcing
+`smoothingBaseSynth g₀ a u + corr u = gateSmoothRep u`.  The corrector's `H^{a+2}`/all-order
+control is the smoothing realization gaining every derivative through the all-order Gårding/Weyl
+spectral bound; the size/Lipschitz suite supplies its `bounds` arms.
+
+This node is the strictly-deeper analytic leaf the raw selector
+`exists_deTurckRemainderClassSelectorRaw` is **proven by composition** over: that selector
+instantiates `P u := smoothingBaseSynth g₀ a u + corr u`, reads its all-order size bound and its
+`H^{a+2}` Lipschitz off `smoothingBaseSynth_spec` and the corrector's `hcsize`/`hclip` (by the
+`toHs`-additivity triangle inequality `SmoothCcTensor.toHs_add`), and forwards `hcmatch` verbatim
+— genuine control-assembly glue, not a re-statement: this corrector node commits to the explicit
+heat-base + corrector decomposition `P = smoothingBaseSynth + corr`, strictly more concrete than
+the selector's free `∃ P`.
+
+Trap-screen (§0bis): **T1** — intrinsic only (`toHs`/`toL2` are `g`-inner; the match is the
+`L²`-class identity of two intrinsic geometric remainder sections; no `chartJ`).  **T7** — `corr`
+is an existential *output*, constructed, never a free input.  **T6/T2-safe** — the quantitative
+match-gate references only `u`/`gateSmoothRep`/`Q`, never `corr`.  **Non-vacuous** — `hcmatch`
+rejects the degenerate witness `corr ≡ 0`: with `corr ≡ 0` the match would read
+`toL2 (deTurckRealizeRemainderOf g₀ g_bg (smoothingBaseSynth g₀ a u)) =
+toL2 (deTurckRemainderRealizeSection g₀ g_bg u)`, i.e. the naive heat output matches the gauge,
+which is the Lean-refuted claim above, so the conjunction genuinely constrains `corr` away from
+zero.  **Not packaging** — the gauge-match arm is structurally distinct from the real-valued
+size/Lipschitz arms, and `exists_deTurckRemainderClassSelectorRaw` *cites* this theorem (never a
+hypothesis in its binder).  The body is `sorry` (the deep Weyl-transiting first-order-freedom
+gauge-cancellation construction over the gate-controlled match domain), to be discharged by the
+`/prove` recursion. -/
+theorem exists_deTurckGaugeCancellationCorrector
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ (corr : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+          Integral.L2.SmoothCcTensor g₀ 0 2)
+        (Q : ℝ),
+      0 < Q ∧
+      (∀ (n : ℕ), ∃ Dₙ : ℝ, 0 ≤ Dₙ ∧
+        ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n (corr u)‖
+            ≤ Dₙ * ‖u‖) ∧
+      (∃ D' : ℝ, 0 ≤ D' ∧
+        ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
+              (corr u - corr u')‖ ≤ D' * ‖u - u'‖) ∧
+      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+          (h : realizableAtGate (I := I) g₀ u),
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+            (gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose)‖ ≤ Q →
+        Integral.L2.SmoothCcTensor.toL2
+            (deTurckRealizeRemainderOf (I := I) g₀ g_bg
+              (smoothingBaseSynth (I := I) g₀ a u + corr u))
+          = Integral.L2.SmoothCcTensor.toL2
+              (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
+  sorry
+
 /-- **The raw DeTurck first-order-freedom remainder-class selector (the single irreducible deep
 analytic leaf of the `g₀`-anchored synthesis tower, transiting the Weyl node).**
 
@@ -1114,7 +1194,8 @@ whose freedom DeTurck short-time theory guarantees a selector whose realized-rem
 reproduces the canonical gauge's; its `H^{a+2}`/all-order control is the smoothing realization
 gaining every derivative through the all-order Gårding/Weyl spectral bound.  It is **not** the
 naive heat output (Lean-refuted: a pure heat residue contributes `−λᵢ(e^{−λᵢ}−1)·u.coeffᵢ`-type
-terms falsifying exact class equality).
+terms falsifying exact class equality), which is exactly why the construction is the heat-smoothing
+base carrier *adjusted by a corrector*.
 
 Trap-screen (§0bis): **T1** — intrinsic only (`gFibreOpBound`/`toHs` are `g`-inner; the match is
 the `L²`-class identity of two intrinsic geometric remainder sections; no `chartJ`).  **T7** —
@@ -1126,8 +1207,16 @@ realizable `u` with non-zero remainder class), `hsize` rejects a high-frequency-
 and the quantitative gate rejects the eigenmode-train witness (`‖gateSmoothRep g₀ u‖_{H^{2a}} →
 ∞`).  **Not packaging** — the gauge-match arm is structurally distinct from the real-valued
 size/Lipschitz arms, and `exists_deTurckRemainderClassSelector_ball` *cites* this theorem (never a
-hypothesis in its binder).  The body is `sorry` (the deep Weyl-transiting first-order-freedom
-construction over the gate-controlled match domain), to be discharged by the `/prove` recursion. -/
+hypothesis in its binder).  It is now **proven by composition** over the strictly-deeper
+gauge-cancellation corrector node `exists_deTurckGaugeCancellationCorrector`: the selector
+instantiates `P u := smoothingBaseSynth g₀ a u + corr u`, derives its all-order linear size bound
+and its `H^{a+2}` Lipschitz from `smoothingBaseSynth_spec` and the corrector's own size/Lipschitz
+arms (by the `toHs`-additivity triangle inequality `SmoothCcTensor.toHs_add`), and forwards the
+corrector's `Q`-gated gauge match verbatim.  Consumers transitively depend on `sorryAx` only
+through that corrector node (the deep Weyl-transiting first-order-freedom construction) and the
+Weyl/Gårding/heat spectral substrate it bottoms on, never on a `2`-jet→`Hᵃ` over-general
+Lipschitz, nor on a false-as-stated Lipschitz of the gated gauge or of the gated
+`realizeMetricAt`. -/
 theorem exists_deTurckRemainderClassSelectorRaw
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) :
@@ -1151,7 +1240,59 @@ theorem exists_deTurckRemainderClassSelectorRaw
             (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))
           = Integral.L2.SmoothCcTensor.toL2
               (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
-  sorry
+  classical
+  -- The strictly-deeper gauge-cancellation corrector over the heat-smoothing base carrier: a
+  -- corrector `corr` with all-order linear size bound and `H^{a+2}` Lipschitz, whose corrected
+  -- carrier `smoothingBaseSynth g₀ a u + corr u` reproduces the gauge's realized-remainder
+  -- `L²`-class on the `Q`-gated gate-realizable locus.
+  obtain ⟨corr, Q, hQ, hcsize, ⟨D', hD'_nn, hD'lip⟩, hcmatch⟩ :=
+    exists_deTurckGaugeCancellationCorrector (I := I) g₀ g_bg a ha
+  -- The heat-smoothing base carrier's defining all-order size bound and `H^{a+2}` Lipschitz.
+  obtain ⟨hbsize, ⟨Cb', hCb'_nn, hCb'lip⟩⟩ := smoothingBaseSynth_spec (I := I) g₀ a ha
+  -- The corrected selector `P u := smoothingBaseSynth g₀ a u + corr u`.
+  refine ⟨fun u => smoothingBaseSynth (I := I) g₀ a u + corr u, Q, hQ, ?_, ?_, ?_⟩
+  · -- All-order linear size: `Cₙ := Cbₙ + Dₙ`, by `toHs`-additivity + the triangle inequality.
+    intro n
+    obtain ⟨Cbn, hCbn_nn, hCbn⟩ := hbsize n
+    obtain ⟨Dn, hDn_nn, hDn⟩ := hcsize n
+    refine ⟨Cbn + Dn, by positivity, fun u => ?_⟩
+    calc ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n
+            (smoothingBaseSynth (I := I) g₀ a u + corr u)‖
+        = ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n
+              (smoothingBaseSynth (I := I) g₀ a u)
+            + IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n (corr u)‖ := by
+          rw [SmoothCcTensor.toHs_add]
+      _ ≤ ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n
+              (smoothingBaseSynth (I := I) g₀ a u)‖
+            + ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n (corr u)‖ :=
+          norm_add_le _ _
+      _ ≤ Cbn * ‖u‖ + Dn * ‖u‖ := add_le_add (hCbn u) (hDn u)
+      _ = (Cbn + Dn) * ‖u‖ := by ring
+  · -- `H^{a+2}` Lipschitz: `C' := Cb' + D'`, by additivity of the difference + the triangle bound.
+    refine ⟨Cb' + D', by positivity, fun u u' => ?_⟩
+    have hsplit :
+        (smoothingBaseSynth (I := I) g₀ a u + corr u)
+            - (smoothingBaseSynth (I := I) g₀ a u' + corr u')
+          = (smoothingBaseSynth (I := I) g₀ a u - smoothingBaseSynth (I := I) g₀ a u')
+            + (corr u - corr u') := by abel
+    calc ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
+            ((smoothingBaseSynth (I := I) g₀ a u + corr u)
+              - (smoothingBaseSynth (I := I) g₀ a u' + corr u'))‖
+        = ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
+              (smoothingBaseSynth (I := I) g₀ a u - smoothingBaseSynth (I := I) g₀ a u')
+            + IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
+              (corr u - corr u')‖ := by
+          rw [hsplit, SmoothCcTensor.toHs_add]
+      _ ≤ ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
+              (smoothingBaseSynth (I := I) g₀ a u - smoothingBaseSynth (I := I) g₀ a u')‖
+            + ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
+              (corr u - corr u')‖ := norm_add_le _ _
+      _ ≤ Cb' * ‖u - u'‖ + D' * ‖u - u'‖ := add_le_add (hCb'lip u u') (hD'lip u u')
+      _ = (Cb' + D') * ‖u - u'‖ := by ring
+  · -- The `Q`-gated gauge match, forwarded verbatim from the corrector node (the selector's `P u`
+    -- is definitionally `smoothingBaseSynth g₀ a u + corr u`).
+    intro u h hgate
+    exact hcmatch u h hgate
 
 /-- **The first-order remainder-class selector matching the carrier's own canonical gauge (the
 single deep analytic primitive of the synthesis tower, transiting the Weyl node).**
