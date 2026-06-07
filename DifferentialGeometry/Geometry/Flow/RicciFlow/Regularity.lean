@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciNorm
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.IntrinsicDerivation
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -191,6 +192,7 @@ theorem ricciRegOfSol
 
 /-- Scalar evolution produced from a metric Ricci-flow solution. -/
 theorem scalarEvolOfSol
+    [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) :
@@ -208,7 +210,7 @@ theorem scalarEvolOfSol
               (S.ricci (t : Real) x))
           D.carrier
           (t : Real) := by
-  exact hS.scalarEvolution
+  exact scalarEvolution_of_isSolution (I := I) S hS
 
 /-- Coordinate inverse-metric evolution produced from a metric Ricci-flow
 solution. -/

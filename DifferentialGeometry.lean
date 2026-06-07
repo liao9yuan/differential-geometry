@@ -1402,6 +1402,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.DeTurckVFSmoot
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.FlowVariation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.ForwardFlow
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeFlow.InteriorLocalFlow
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness
 import DifferentialGeometry.Geometry.Flow.VectorField
 import DifferentialGeometry.Geometry.Flow.VectorFieldSmooth
 import DifferentialGeometry.Geometry.Geodesic.AffineReparam

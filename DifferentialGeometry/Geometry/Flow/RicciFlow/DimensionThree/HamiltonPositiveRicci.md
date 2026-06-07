@@ -849,3 +849,207 @@ pinching estimates, Rm bound, and the whole `limit_*` tensor-transfer chain to
 3. Singularity/convergence: `ham3_noncollapse` (:2288, Perelman noncollapsing),
    `ham3_cgh_limit` (:2310, Hamilton compactness), `limit_to_orig` (:2844).
 4. Topology endpoint: `ham3_space_box` (:2944), `spaceForm_const_metric` (:2956).
+
+## 2026-06-06 scalarEvolution: assumed field → derived theorem (DONE, exit 0)
+
+The scalar-curvature heat equation is no longer a black-boxed structure field.
+`IsSolutionOn.scalarEvolution` was **removed as a field** and replaced by a
+sorry-free derivation, so `ham3_short_isSolution` no longer assumes it.
+
+New file `Evolution/Scalar/IntrinsicDerivation.lean` (sorry-free):
+
+- `coordNab2Ric_eq_nabla2RicField` — the explicit coordinate-frame `∇²Ric`
+  (`extDeriv − Γ` formula) equals the abstract bundled `totalNabla0SFun³` of
+  Ricci, via `nabla0SFun_apply_selfChart_slots` + the `ext0S_basis`
+  agree-on-a-basis principle.  (The repo already had `coordNab2Can` proving the
+  same crux — the explicit↔abstract bridge was NOT missing, contrary to an
+  earlier over-pessimistic read.)
+- `scalarLaplacianTraceInFrame_coord_eq_laplacianAt` — the **diffusion bridge**:
+  `gⁱʲgᵏˡ∇²Ricᵢⱼₖₗ = ΔR` (`laplacianAt`).  Assembled from `nabla2Trace02`
+  (Hessian-trace commutation, `∇g=0`), `scalarLap_smooth` (laplacian = trace of
+  Hessian), `metricTracePair0SAt_eq_sum_basis`, and the sum-swap
+  `scalarHessianFromNabla2Ric_trace_eq_roughLapRic_trace`.
+- `scalarEvolution_of_isSolution` — derives the EXACT former field statement
+  `∂ₜR = ΔR + 2|Ric|²` from `hS : IsSolutionOn`, by running the proven frame-form
+  chain `scalarEvolutionEquationOn_of_ricciEvolution` (∂ₜg⁻¹ = 2Ric° via
+  `coordInvEvol`, ∂ₜRic Lichnerowicz via `coordRicciEvol`, curvature
+  trace/symmetry) and applying the three frame→intrinsic bridges (scalar trace,
+  diffusion, reaction) plus a `G`-congruence to `flowG`.
+
+Integration:
+- `IsSolutionOn` lost its `scalarEvolution` field (`Basic/Core.lean`); the unused
+  `scalarEvolAt` and the two transport constructions (`timeShift` in `Core`,
+  `paraSolution` in `ParabolicRescaling`) dropped it.
+- `scalarEvolOfSol` (`Regularity.lean`) reroutes to `scalarEvolution_of_isSolution`
+  (gains `[I.Boundaryless]`; its sole caller `smoothOfSol` already carries it, so
+  no further propagation).  `IsSmoothSolutionOn.scalarEvolution` is a *separate*
+  field and is untouched.
+- Full `lake-locked build` **exit 0**, no new `sorry`.
+
+Net: the scalar evolution is now mathematically grounded end-to-end — the
+frame-form heat equation (already in `Evolution/Scalar`) plus the realization
+identity `ΔR = gⁱʲgᵏˡ∇²Ricᵢⱼₖₗ`.  `ham3_short_isSolution`'s residual is purely the
+remaining regularity-packaging fields, never the scalar PDE.
+
+## 2026-06-06 Bernstein–Bando–Shi derivative estimates (toward `extends_of_rmBounded`)
+
+Goal: fill `extends_of_rmBounded` (`MaximalTime.lean:159`, Black Box 11.2 — the
+maximal-continuation extension criterion) by formalizing the global BBS
+derivative estimates (Chow–Knopf *The Ricci Flow: An Introduction*, Theorem 7.1,
+the compact-manifold / global-maximum-principle case — no Shi cutoffs needed).
+
+**BBS core — COMPLETE, sorry-free, full `lake-locked build` exit 0 (9847 jobs),
+`#print axioms` clean (no `sorryAx`):**
+
+- `Evolution/BernsteinShi.lean` — Stage 1: upper-bound scalar maximum principle
+  `scalar_subsolution_affine_bound` (`(∂ₜ−Δ)F ≤ b`, `F(0)≤a` ⟹ `F ≤ a+bt`), the
+  `|∇Rm|²` heat predicate `NablaRm04NormHeatBoundOn`, and the `m=1` Bernstein
+  estimate `bernstein_first_derivative_estimate` (`F = t|∇Rm|²+β|Rm|²`).
+- `Evolution/BernsteinShiHigher.lean` — Stage 2: the **general-`m`**
+  `G`-quantity induction `BernsteinTower.estimate` /`estimate_div`
+  (`|∇ᵐRm|² ≤ towerConst²·K²/tᵐ`, all `m`), via eqs 7.4–7.6 (the telescoping
+  `Wterms_nonpos` + `scalar_subsolution_affine_bound`).  Parametric in the
+  `BernsteinTower` structure (the tower of heat inequalities).
+- `Evolution/RiemannNormHeatProducer.lean` — Stage 3a (`k=0`): `|Rm|²` heat
+  equation for a solution + `|reaction| ≤ 16·card⁶·|Rm|³` (Lemma 7.4), from the
+  Uhlenbeck curvature evolution.
+- `Evolution/NablaRiemannHeat.lean` — Stage 3b (`k=1`): `|∇Rm|²` heat bound
+  (eq 7.2/14.17) + the general-`k` `∗`-reaction bound `abs_nablaRmReactionMulti_le`
+  in the `towerReactionSum` shape.
+- `Evolution/IteratedNablaRmTower.lean` — the variable-rank `∇ᵏRm` tower bridge
+  (Route A, no dependent-type issues): `iteratedRmComp` (rank-`(4+k)` component
+  recursion), the general orthonormal reduction `multiNormInFrame_eq_compNormSqMulti`,
+  and the producer `iteratedRmTower_heatBound : IteratedRmTowerOn → TowerHeatBoundOn`.
+
+The reusable lever throughout is the `A∗B` convention: evolution stated as
+*inequalities* with norm-product bounds `Σ|∇ʲRm||∇^{k−j}Rm||∇ᵏRm|`, never exact
+reaction tensors (the producers leave the raw Uhlenbeck/Bochner/commutator
+component facts as hypotheses, matching the existing `|Ric|²` architecture).
+
+**In progress (final two pieces):**
+- All-`m` BBS for a real solution (`BernsteinShiSolution.lean`): instantiate the
+  `BernsteinTower` per-`m` from the tower bridge (uniform constant via the
+  "zero above `m`" truncation), apply `estimate_div`.
+- Stage 4 (`CinftyLimitGlue.lean`): `C^∞` limit `g(t)→g(ω)` from the BBS bounds
+  + restart short-time + smooth glue ⟹ the single-endpoint extension; then wire
+  into `extends_of_rmBounded`.  (No Ricci-flow uniqueness needed — that is only
+  for the maximal-flow *construction*, a separate gap.)
+
+## 2026-06-06 k=1 ∇Rm evolution: EQUATION derived; BBS bound is the framework frontier
+
+Goal (user-authorized): genuinely ground the `k=1` `IteratedRmTowerOn.heatEq`
+(the `∇Rm` tensor evolution) from Ricci-flow/Uhlenbeck geometry, rather than
+leave it an assumed interface field.  Outcome: **the `k=1` evolution EQUATION is
+fully derived** (the residual `(∂ₜ−Δ)(∇Rm)` is now *identified* as curvature
+actions, not assumed); **the BBS quantitative *bound* `|reaction| ≤ C|Rm||∇Rm|`
+is blocked on four framework-level gaps** and is the documented frontier.
+
+**Equation — DONE, all sorry-free, `#print axioms` clean (no `sorryAx`):**
+
+- `Evolution/RmRealizationBridge.lean` — the rank-`(0,4)/(0,5)` realization
+  bridge (the crux), mirroring `coordNab2Ric_eq_nabla2RicField`.  Bundled fields
+  `nablaRm04Field`/`nabla2Rm04Field`/`nabla3Rm04Field` (`totalNabla0S` of
+  `S.base.rm04`); the rank-uniform step bridge `covDerivStepComp_frameComp_eq`;
+  `iteratedRmComp_one_eq_nablaRm04Field` (neighbourhood) /
+  `iteratedRmComp_two_eq_nabla2Rm04Field` (centre); and the **discharged**
+  `Nabla20SRealizesAt` packages → `rm04_ricciIdentityAt` (s=4) /
+  `nablaRm04_ricciIdentityAt` (s=5), making the general `(0,s)` Ricci identity
+  `tensor0S_ricciIdentity_of_torsionFree` (`Tensor/RicciIdentity/Tensor0S/Formula.lean:975`)
+  genuinely applicable to `Rm`/`∇Rm`.  Witnesses come from `totalNabla0S_realizes`,
+  never assumed.
+- `Evolution/NablaRiemannCommutator.lean` (spatial) — `nablaLapComm_orthonormalTrace`:
+  `Δ(∇Rm)(c) − ∇(ΔRm)(c) = Σ_a nablaLapCommReactionTerm(a,a,c)`, from the `(0,5)`
+  Ricci identity + telescoping (the `[Δ,∇]` commutator is **derived**).
+- `Evolution/NablaRiemannTimeDeriv.lean` (temporal) —
+  `iteratedRmComp_one_hasDerivWithinAt`: `∂ₜ(∇Rm) = ∇(∂ₜRm) − (∂ₜΓ)∗Rm` in the
+  `MultiLevelTimeDerivOn` shape, from the `extDeriv`/`∂ₜ` swap +
+  `evol_christoffel_inFrame` (`∂ₜΓ`) + Uhlenbeck (`∂ₜRm`) as cited shapes.
+- `Evolution/NablaRiemannCommutatorBound.lean` —
+  `nablaLapComm_T1_eq_covDeriv_curvatureAction` (the slot-swap/∇ commutation,
+  proved concretely via `eval_smooth_slots`) and
+  `nablaLapCommReactionTerm_eq_covDeriv_curvatureAction_add_curvatureAction`: the
+  full `k=1` reaction exhibited as `∇(curvatureAction(Rm)) + curvatureAction(∇Rm)`
+  (`= ∇(Rm∗Rm) + Rm∗∇Rm`).
+
+So `(∂ₜ−Δ)(∇Rm)` is genuinely the curvature reaction — the **equation half of
+`heatEq` is grounded for `k=1`**.
+
+**Bound — the frontier.**  `|reaction| ≤ C|Rm||∇Rm|` (the BBS Cauchy–Schwarz step)
+is blocked on four *framework-level* gaps (confirmed by three independent agents,
+each via a different route — none is a single lemma):
+
+1. The inverse metric is `InverseMetricComponents : M → Idx → Idx → ℝ` (a
+   frame-component function), **not** a bundled `(2,0)` tensor — so `∇g⁻¹=0`
+   cannot even be *stated* in the `totalNabla0S` framework.
+2. `Rm13 = raise(Rm04)` is unavailable — `metricRm13`/`metricRm04` are produced
+   independently; raising-parallelism is proven only at rank `(0,2)`, never `(1,3)`.
+3. `∇Rm13` does not exist — no `totalNablaRS` realization for the `(1,3)` curvature.
+4. Frame mismatch — `nablaLapCommReactionTerm` lives in `coordinateFrameAt` (not
+   orthonormal at its centre), while the norms require an orthonormal frame.
+
+Closing it is a major framework project (bundled inverse metric `+∇g⁻¹=0`; the
+`(1,3)` raising equivalence `+`parallelism; `∇Rm13` via `totalNablaRS`;
+coordinate↔orthonormal reconciliation) — reusable for all-`k` but disproportionate
+to one estimate.  **Decision (user): bank the genuine equation; the bound stays
+the documented frontier; the BBS estimates remain parametric in `IteratedRmTowerOn`.**
+
+Routes that informed this (all genuine reports, no fakes): route 1 — bridge the
+bundled `tensorCov` `[Δ,∇]` (`frame_trace_thirdCovDeriv_swap`) to components: no
+bridge exists from that representation.  Route 2 — rework producers to the bundled
+level: the tree has **no time derivative of a bundled tensor section at all**.
+Route 3 — the `(0,s)` Ricci identity in the realization rep: found
+`tensor0S_ricciIdentity_of_torsionFree`, which **enabled route 4** (the bridge
+above).  The `k=1` bound's three attempts (field-level, orthonormal/concrete,
+rm04-contraction) all converged on the four gaps above.
+
+**Consolidation (2026-06-06):** full `lake-locked build` → **exit 0 (9847 jobs)**.
+All new `k=1` modules — `RmRealizationBridge`, `NablaRiemannCommutator`,
+`NablaRiemannTimeDeriv`, `NablaRiemannCommutatorBound` — plus the earlier BBS
+stack (`MultiNormHeat`, `BernsteinShi`/`BernsteinShiHigher`/`BernsteinShiSolution`,
+`RiemannNormHeatProducer`, `NablaRiemannHeat`, `IteratedNablaRmTower`,
+`CinftyLimitGlue`) coexist green and sorry-free.  The only `sorry`s remaining in
+the tree are the pre-existing main-theorem frontier items
+(`HamiltonPositiveRicci.lean`: `ham3_flow_exists_normalized`, `ham3_noncollapse`,
+`ham3_cgh_limit`, `limit_to_orig`, `ham3_space_box`, `spaceForm_const_metric`) and
+a few in unrelated files (`UniversalCover`, `Exterior`).  Net new `sorry`s from all
+of the BBS / `k=1` work: **zero**.
+
+## 2026-06-07 session-end: k=1 spatial reaction bound CLOSED + roadmap
+
+**Done + independently verified:** the `k=1` quantitative SPATIAL reaction bound
+`|nablaLapCommReactionTerm| ≤ C·|Rm|·|∇Rm|` is genuinely closed
+(`Evolution/NablaRiemannReactionBound.lean`, `#print axioms` =
+`[propext, Classical.choice, Quot.sound]` on all four headline theorems, no `sorry`,
+full `lake-locked build` EXIT 0 / 9860 jobs).  **All four framework gaps** that six
+prior agents had declared blocking are resolved (see `Evolution/IteratedNablaRmTower.md`
+follow-ups 1–10 for per-piece detail).  New banked, axiom-clean files:
+`RmRaisingBridge`, `NablaRiemannOrthoFrame`, `Tensor/RSTensor/ContractionLeibniz`,
+`RmFrozenSlotField`, `Geometry/Operator/CotangentSharpSmooth`,
+`NablaRiemannCommutator(+Bound)`, `NablaRiemannTimeDeriv`, `NablaRiemannT2Bound`,
+`NablaRiemannReactionBound`.
+
+**Roadmap — to close `extends_of_rmBounded` (the BBS pillar):**
+1. **Full `k=1` producer** `nablaRm04NormHeatBoundOn_of_components` for a solution.
+   Spatial input is done; remaining = the **time-derivative assembly**: instantiate
+   `iteratedRmComp_one_hasDerivWithinAt`'s `hrm`/`hchr`/`hswap` from the solution
+   (Uhlenbeck `∂ₜRm`, `evol_christoffel_inFrame` `∂ₜΓ`, the time/spatial swap) + the
+   `MultiNormHeat` Bochner norm-square step.  *[MEDIUM — instantiating existing shapes.]*
+2. **All-`k` producer** (discharge `IteratedRmTowerOn` for a solution at every `k`):
+   generalize the `k=1` spatial+time work to all `k` (rank-uniform `[Δ,∇]∇ᵏRm` + the
+   `∇ʲRm ∗ ∇^{k−j}Rm` reaction bound).  The primitives and the pattern now exist.  *[LARGE.]*
+3. **BBS bounds**: `BernsteinShiSolution` (done, parametric) instantiated with (2) →
+   all-`m` `|∇ᵏRm| ≤ Cₘ K / t^{m/2}` for a solution.
+4. **`C^∞` convergence** (`CinftyLimitData`/`CinftyGlueData`, Stage 4's labelled
+   interface): Arzelà–Ascoli from the BBS bounds → the smooth limit metric `g(ω)`.
+   *[MEDIUM–LARGE, genuine analysis.]*
+5. **Wire** `ricci_flow_extends_construction` (Stage 4, done Route B) + (4) →
+   `extends_of_rmBounded` (`MaximalTime.lean:159`).  *[MEDIUM.]*
+
+**Then for the full theorem** (`thm_2_1` / `ham3_flow_exists_normalized`):
+`extends_of_rmBounded` (above) **plus** the still-open convergence/compactness pillar —
+`ham3_noncollapse` (Perelman κ-noncollapsing), `ham3_cgh_limit` (Cheeger–Gromov
+compactness), `limit_to_orig`, `ham3_space_box`, `spaceForm_const_metric` — a comparably
+large body of work, largely untouched.  Foundation: the short-time-existence (DeTurck)
+`sorryAx` remains the standing black box.
+
+**Next concrete step:** the `k=1` time-derivative assembly (roadmap step 1).

@@ -550,23 +550,6 @@ structure IsSolutionOn
       MDiffAt (T% fun y : M =>
         DifferentialGeometry.Integral.Connection.gradientFun (I := I) (S.family.metric t)
           (ricciNorm (I := I) S t) y) x
-  /-- Scalar curvature heat equation supplied by the smooth Ricci-flow
-  solution package. -/
-  scalarEvolution : ∀
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real),
-      (∀ t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
-        G.metric (t : Real) = S.family.metric (t : Real)) ->
-      (∀ t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
-        G.connection (t : Real) = S.family.connection (t : Real)) ->
-      ∀ (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
-        HasDerivWithinAt
-          (fun s : Real => S.scalar s x)
-          (DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G (t : Real)
-              (S.scalar (t : Real)) x +
-            2 * normSq0S (I := I) (S.family.metric (t : Real)) x 2
-              (S.ricci (t : Real) x))
-          D.carrier
-          (t : Real)
 
 namespace IsSolutionOn
 
@@ -946,52 +929,6 @@ theorem isSolutionOn_timeShift
     have h := hS.ricciNormGrad (t + τ) ht x
     simpa [ricciNorm, SolutionOn.family, SolutionOn.ricci, SolutionOn.timeShift,
       SolutionFamily.timeShift] using h
-  scalarEvolution := by
-    intro G hmetric hconnection t x
-    let G' : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real :=
-      { metric := fun r : Real => G.metric (r - τ)
-        connection := fun r : Real => G.connection (r - τ)
-        metricCompatible := fun r => by
-          simpa using G.metricCompatible (r - τ) }
-    have hmetric' : ∀ r : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
-        G'.metric (r : Real) = S.family.metric (r : Real) := by
-      intro r
-      let rs : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime (D.timeShift τ) :=
-        ⟨(r : Real) - τ, by
-          rw [DifferentialGeometry.Integral.Connection.RealTimeInterval.timeShift_regular]
-          change (r : Real) - τ + τ ∈ D.regular
-          rw [sub_add_cancel]
-          exact r.2⟩
-      have h := hmetric rs
-      simpa [G', rs, SolutionOn.family, SolutionOn.timeShift, SolutionFamily.timeShift,
-        sub_add_cancel] using h
-    have hconnection' : ∀ r : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
-        G'.connection (r : Real) = S.family.connection (r : Real) := by
-      intro r
-      let rs : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime (D.timeShift τ) :=
-        ⟨(r : Real) - τ, by
-          rw [DifferentialGeometry.Integral.Connection.RealTimeInterval.timeShift_regular]
-          change (r : Real) - τ + τ ∈ D.regular
-          rw [sub_add_cancel]
-          exact r.2⟩
-      have h := hconnection rs
-      simpa [G', rs, SolutionOn.family, SolutionOn.timeShift, SolutionFamily.timeShift,
-        SolutionFamily.connection, sub_add_cancel] using h
-    let t' : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D := ⟨(t : Real) + τ, t.2⟩
-    have hOld := hS.scalarEvolution G' hmetric' hconnection' t' x
-    have hshift :
-        HasDerivWithinAt (fun s : Real => s + τ) 1
-          (D.timeShift τ).carrier (t : Real) := by
-      simpa using
-        ((hasDerivWithinAt_id (t : Real) (D.timeShift τ).carrier).add_const τ)
-    have hmaps :
-        Set.MapsTo (fun s : Real => s + τ) (D.timeShift τ).carrier D.carrier := by
-      intro s hs
-      exact hs
-    have hcomp := hOld.comp (x := (t : Real)) hshift hmaps
-    simpa [G', t', DifferentialGeometry.Integral.Connection.laplacianAt, SolutionOn.family, SolutionOn.ricci,
-      SolutionOn.timeShift, SolutionFamily.timeShift, SolutionFamily.connection,
-      Function.comp_def, sub_eq_add_neg, add_assoc] using hcomp
 
 /-- Convert the folder-level solution predicate to the older realized
 compatibility predicate. -/
@@ -1036,28 +973,5 @@ theorem metricDerivAt
       (t : Real) :=
   (metric_derivWithin_eq_neg_two_ricci
     (I := I) S hS t x X Y).hasDerivAt (D.regular_mem_nhds t.2)
-
-/-- At a regular time the scalar evolution equation is an ordinary time
-derivative.  This is just the `HasDerivAt` projection of the smooth solution
-package's interval-local scalar heat equation. -/
-theorem scalarEvolAt
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-    (S : SolutionOn (I := I) (M := M) D)
-    (hS : IsSolutionOn (I := I) S)
-    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real)
-    (hmetric : ∀ t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
-      G.metric (t : Real) = S.family.metric (t : Real))
-    (hconnection : ∀ t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
-      G.connection (t : Real) = S.family.connection (t : Real))
-    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M) :
-    HasDerivAt
-      (fun s : Real => S.scalar s x)
-      (DifferentialGeometry.Integral.Connection.laplacianAt (I := I) G (t : Real)
-          (S.scalar (t : Real)) x +
-        2 * normSq0S (I := I) (S.family.metric (t : Real)) x 2
-          (S.ricci (t : Real) x))
-      (t : Real) :=
-  (hS.scalarEvolution G hmetric hconnection t x).hasDerivAt
-    (D.regular_mem_nhds t.2)
 
 end DifferentialGeometry.PDE.RicciFlow
