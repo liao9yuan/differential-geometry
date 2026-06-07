@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.CcTensorBilinFibreHsBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HilbertSpace
+import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartEntryJointSmoothness
+import DifferentialGeometry.Bundle.Equiv
 
 /-!
 # Joint `(t, x)`-`C∞` of a realized bilinear `Hom`-section from a Sobolev time-tower
@@ -57,6 +59,9 @@ namespace MetricRealization
 open DifferentialGeometry
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.Integral.L2
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -65,6 +70,44 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
+/-- **`ContMDiffWithinAt` analogue of `contMDiffAt_clm_of_pointwise`.**  Pointwise smoothness
+(within a set) of a continuous-linear-map-valued map `A : X → (F₁ →L[ℝ] F₂)` into a *fixed
+finite-dimensional* operator space lifts to operator-valued smoothness, by embedding
+`F₁ →L[ℝ] F₂ ↪ Fin (rank F₁) → F₂` via evaluation on a basis and a continuous linear left
+inverse (the within-a-set version of the proof in `Bundle/Equiv.lean`). -/
+private lemma contMDiffWithinAt_clm_of_pointwise
+    {F₁ : Type*} [NormedAddCommGroup F₁] [NormedSpace ℝ F₁] [FiniteDimensional ℝ F₁]
+    {F₂ : Type*} [NormedAddCommGroup F₂] [NormedSpace ℝ F₂] [FiniteDimensional ℝ F₂]
+    {n : ℕ∞} {X : Type*} [TopologicalSpace X] [ChartedSpace (ModelProd ℝ H) X]
+    {A : X → (F₁ →L[ℝ] F₂)} {s : Set X} {x : X}
+    (h : ∀ v, ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, F₂) (n : ℕ∞)
+      (fun q => A q v) s x) :
+    ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, F₁ →L[ℝ] F₂) (n : ℕ∞) A s x := by
+  haveI : FiniteDimensional ℝ (F₁ →L[ℝ] F₂) := ContinuousLinearMap.finiteDimensional
+  let bF₁ := Module.finBasis ℝ F₁
+  let evalBasis : (F₁ →L[ℝ] F₂) →L[ℝ] (Fin (Module.finrank ℝ F₁) → F₂) :=
+    ContinuousLinearMap.pi (fun i => ContinuousLinearMap.apply ℝ F₂ (bF₁ i))
+  have evalBasis_inj : Function.Injective evalBasis := fun L₁ L₂ heq => by
+    ext v; rw [← bF₁.sum_equivFun v]; simp only [map_sum, map_smul]
+    congr 1; ext i; exact congrArg _ (congrFun heq i)
+  obtain ⟨gLM, hgLM⟩ := evalBasis.toLinearMap.exists_leftInverse_of_injective
+    (evalBasis.ker_eq_bot_of_injective evalBasis_inj)
+  let g : (Fin (Module.finrank ℝ F₁) → F₂) →L[ℝ] (F₁ →L[ℝ] F₂) :=
+    ⟨gLM, LinearMap.continuous_of_finiteDimensional _⟩
+  have hg : ∀ y, g (evalBasis y) = y := fun y => congr($(hgLM) y)
+  have hEA : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, Fin _ → F₂) (n : ℕ∞)
+      (evalBasis ∘ A) s x :=
+    contMDiffWithinAt_pi_space.mpr fun i => h (bF₁ i)
+  have hAeq : A = g ∘ evalBasis ∘ A := by funext q; exact (hg (A q)).symm
+  rw [hAeq]
+  have hgsm : ContMDiffWithinAt 𝓘(ℝ, Fin (Module.finrank ℝ F₁) → F₂)
+      𝓘(ℝ, F₁ →L[ℝ] F₂) (n : ℕ∞) (⇑g) Set.univ (evalBasis (A x)) :=
+    (ContinuousLinearMap.contMDiff (n := (n : ℕ∞)) g).contMDiffAt.contMDiffWithinAt
+  exact hgsm.comp x hEA (Set.mapsTo_univ _ _)
+
+set_option maxHeartbeats 3200000 in
+set_option synthInstance.maxHeartbeats 800000 in
 /-- **Single-chart `baseSet` joint `(t, x)`-`C∞` of the realized symmetrized bilinear
 `Hom`-section from a Sobolev time-tower (the genuine anisotropic-Sobolev ⟹ joint-smoothness
 analytic core).**
@@ -107,7 +150,162 @@ theorem jointContMDiffOn_ccTensorBilinSymm_of_timeContDiffTower_baseSet
       (fun q : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
         (E := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
         q.2 (ccTensorBilinSymm (I := I) g (T_s q.1) q.2))
-      (Set.Icc (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) α).baseSet) := sorry
+      (Set.Icc (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) α).baseSet) := by
+  classical
+  set s : Set (ℝ × M) := Set.Icc (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) α).baseSet
+    with hs_def
+  set e₁ := trivializationAt E (TangentSpace I) α with he₁_def
+  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := chartModelBasis E with hb_def
+  -- The per-basis-pair chart-frame scalar entries are jointly smooth (the jet-wall child).
+  have hentry : ∀ i j : Fin (Module.finrank ℝ E),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun q : ℝ × M =>
+          ccTensorBilinSymm (I := I) g (T_s q.1) q.2
+            (chartBasisVecFiber (I := I) α i q.2)
+            (chartBasisVecFiber (I := I) α j q.2)) s := fun i j =>
+    jointContMDiffOn_ccTensorBilinSymm_chartEntry_baseSet (I := I) (M := M) g α i j T_s htower
+  -- For arbitrary model vectors `v, w`, the scalar entry against the chart-`α` frame images of
+  -- `v, w` is jointly smooth on `s`: expand `v, w` in the basis `b` and use bilinearity.
+  have hscalar : ∀ (v w : E) (q₀ : ℝ × M), q₀ ∈ s →
+      ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun q : ℝ × M =>
+          ccTensorBilinSymm (I := I) g (T_s q.1) q.2
+            (e₁.symm q.2 v) (e₁.symm q.2 w)) s q₀ := by
+    intro v w q₀ hq₀
+    have hbase : ∀ q : ℝ × M, q ∈ s → q.2 ∈ e₁.baseSet := fun q hq => hq.2
+    -- On `s` the entry is the double sum over basis pairs of smooth coefficient × child entry.
+    have heqOn : Set.EqOn
+        (fun q : ℝ × M =>
+          ccTensorBilinSymm (I := I) g (T_s q.1) q.2 (e₁.symm q.2 v) (e₁.symm q.2 w))
+        (fun q : ℝ × M =>
+          ∑ i, ∑ j, (b.repr v i * b.repr w j) •
+            ccTensorBilinSymm (I := I) g (T_s q.1) q.2
+              (chartBasisVecFiber (I := I) α i q.2)
+              (chartBasisVecFiber (I := I) α j q.2)) s := by
+      intro q hq
+      have hbq : q.2 ∈ e₁.baseSet := hbase q hq
+      have hframe : ∀ i : Fin (Module.finrank ℝ E),
+          e₁.symmL ℝ q.2 (b i) = chartBasisVecFiber (I := I) α i q.2 := by
+        intro i
+        have hsnd : (e₁ ⟨q.2, chartBasisVecFiber (I := I) α i q.2⟩).2 = b i := by
+          rw [hb_def]
+          exact trivializationAt_chartBasisVec_snd (I := I) α i hbq
+        rw [Trivialization.symmL_apply, ← hsnd,
+          Trivialization.symm_apply_apply_mk e₁ hbq (chartBasisVecFiber (I := I) α i q.2)]
+      have hv : e₁.symm q.2 v = ∑ i, b.repr v i • chartBasisVecFiber (I := I) α i q.2 := by
+        rw [show e₁.symm q.2 v = e₁.symmL ℝ q.2 v from rfl]
+        conv_lhs => rw [← b.sum_repr v]
+        rw [map_sum]; refine Finset.sum_congr rfl (fun i _ => ?_)
+        rw [map_smul, hframe i]
+      have hw : e₁.symm q.2 w = ∑ j, b.repr w j • chartBasisVecFiber (I := I) α j q.2 := by
+        rw [show e₁.symm q.2 w = e₁.symmL ℝ q.2 w from rfl]
+        conv_lhs => rw [← b.sum_repr w]
+        rw [map_sum]; refine Finset.sum_congr rfl (fun j _ => ?_)
+        rw [map_smul, hframe j]
+      change ccTensorBilinSymm (I := I) g (T_s q.1) q.2 (e₁.symm q.2 v) (e₁.symm q.2 w) = _
+      rw [hv, hw]
+      simp only [map_sum, map_smul, ContinuousLinearMap.sum_apply,
+        ContinuousLinearMap.smul_apply, smul_eq_mul]
+      rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl (fun i _ => ?_)
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl (fun j _ => ?_)
+      ring
+    have hsum : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun q : ℝ × M =>
+          ∑ i, ∑ j, (b.repr v i * b.repr w j) •
+            ccTensorBilinSymm (I := I) g (T_s q.1) q.2
+              (chartBasisVecFiber (I := I) α i q.2)
+              (chartBasisVecFiber (I := I) α j q.2)) s q₀ := by
+      refine contMDiffWithinAt_finset_sum (fun i _ => ?_)
+      refine contMDiffWithinAt_finset_sum (fun j _ => ?_)
+      exact (contMDiffWithinAt_const).smul ((hentry i j) q₀ hq₀)
+    refine hsum.congr_of_eventuallyEq ?_ (heqOn hq₀)
+    filter_upwards [self_mem_nhdsWithin] with q hq using heqOn hq
+  -- Reconstruct the `Hom`-section pointwise via the fixed chart-`α` trivialization.
+  intro q₀ hq₀
+  have hq₀base : q₀.2 ∈ e₁.baseSet := hq₀.2
+  -- The base projection of the section is `q ↦ q.2`, smooth.
+  have hproj : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) I ∞
+      (fun q : ℝ × M => (TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+        q.2 (ccTensorBilinSymm (I := I) g (T_s q.1) q.2)).proj) s q₀ :=
+    contMDiffWithinAt_snd
+  -- Membership of the section value in the chart-`α` and chart-`q₀.2` `Hom`-trivialisations.
+  have hmemα : ∀ q : ℝ × M, q ∈ s →
+      (TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+        q.2 (ccTensorBilinSymm (I := I) g (T_s q.1) q.2)) ∈
+      (trivializationAt (E →L[ℝ] E →L[ℝ] ℝ)
+        (fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) α).source := by
+    intro q hq
+    rw [Trivialization.mem_source]
+    change q.2 ∈ (trivializationAt (E →L[ℝ] E →L[ℝ] ℝ)
+      (fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) α).baseSet
+    rw [hom_trivializationAt_baseSet, hom_trivializationAt_baseSet]
+    exact ⟨hq.2, hq.2, Set.mem_univ _⟩
+  have hmemq₀ : (TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+        q₀.2 (ccTensorBilinSymm (I := I) g (T_s q₀.1) q₀.2)) ∈
+      (trivializationAt (E →L[ℝ] E →L[ℝ] ℝ)
+        (fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) q₀.2).source := by
+    rw [Trivialization.mem_source]
+    change q₀.2 ∈ (trivializationAt (E →L[ℝ] E →L[ℝ] ℝ)
+      (fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) q₀.2).baseSet
+    rw [hom_trivializationAt_baseSet, hom_trivializationAt_baseSet]
+    refine ⟨?_, ?_, Set.mem_univ _⟩ <;>
+      exact FiberBundle.mem_baseSet_trivializationAt' (F := E) (E := TangentSpace I) q₀.2
+  -- It suffices to prove the chart-`α` trivialised fibre value smooth; transport to the
+  -- canonical chart-`q₀.2` trivialisation that `contMDiffWithinAt_totalSpace` consumes.
+  refine Bundle.contMDiffWithinAt_totalSpace.mpr ⟨hproj, ?_⟩
+  refine ContMDiffWithinAt.change_section_trivialization
+    (e := trivializationAt (E →L[ℝ] E →L[ℝ] ℝ)
+      (fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) α)
+    hproj ?_ (hmemα q₀ hq₀) hmemq₀
+  -- The chart-`α` trivialised fibre value is `inCoordinates` at the chart-`α` frame.
+  have htriv_eq : ∀ q : ℝ × M,
+      (trivializationAt (E →L[ℝ] E →L[ℝ] ℝ)
+        (fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) α
+        (TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+        q.2 (ccTensorBilinSymm (I := I) g (T_s q.1) q.2))).2 =
+        ContinuousLinearMap.inCoordinates E (TangentSpace I) (E →L[ℝ] ℝ)
+          (fun y : M => TangentSpace I y →L[ℝ] ℝ) α q.2 α q.2
+          (ccTensorBilinSymm (I := I) g (T_s q.1) q.2) := by
+    intro q; rw [hom_trivializationAt_apply]
+  simp only [htriv_eq]
+  -- Reduce the operator-valued map to its scalar evaluations against arbitrary `v, w`.
+  refine contMDiffWithinAt_clm_of_pointwise (I := I) (fun v => ?_)
+  refine contMDiffWithinAt_clm_of_pointwise (I := I) (fun w => ?_)
+  -- Each scalar evaluation is the chart-`α`-frame entry (`inCoordinates_apply_eq₂`).
+  have hscalar_eqOn : Set.EqOn
+      (fun q : ℝ × M =>
+        ContinuousLinearMap.inCoordinates E (TangentSpace I) (E →L[ℝ] ℝ)
+          (fun y : M => TangentSpace I y →L[ℝ] ℝ) α q.2 α q.2
+          (ccTensorBilinSymm (I := I) g (T_s q.1) q.2) v w)
+      (fun q : ℝ × M =>
+        ccTensorBilinSymm (I := I) g (T_s q.1) q.2 (e₁.symm q.2 v) (e₁.symm q.2 w)) s := by
+    intro q hq
+    have hbq : q.2 ∈ e₁.baseSet := hq.2
+    have hbqℝ : q.2 ∈ (trivializationAt ℝ (Bundle.Trivial M ℝ) α).baseSet := Set.mem_univ _
+    change ContinuousLinearMap.inCoordinates E (TangentSpace I) (E →L[ℝ] ℝ)
+        (fun y : M => TangentSpace I y →L[ℝ] ℝ) α q.2 α q.2
+        (ccTensorBilinSymm (I := I) g (T_s q.1) q.2) v w = _
+    rw [inCoordinates_apply_eq₂ (𝕜 := ℝ)
+      (F₁ := E) (F₂ := E) (F₃ := ℝ)
+      (E₁ := fun y : M => TangentSpace I y) (E₂ := fun y : M => TangentSpace I y)
+      (E₃ := Bundle.Trivial M ℝ)
+      (x₀ := α) (x := q.2)
+      (ϕ := ccTensorBilinSymm (I := I) g (T_s q.1) q.2)
+      (v := v) (w := w) hbq hbq hbqℝ]
+    have h_lm_id : (trivializationAt ℝ (Bundle.Trivial M ℝ) α).linearMapAt ℝ q.2
+        (ccTensorBilinSymm (I := I) g (T_s q.1) q.2 (e₁.symm q.2 v) (e₁.symm q.2 w)) =
+        ccTensorBilinSymm (I := I) g (T_s q.1) q.2 (e₁.symm q.2 v) (e₁.symm q.2 w) := by
+      rw [(trivializationAt ℝ (Bundle.Trivial M ℝ) α).coe_linearMapAt_of_mem hbqℝ]
+      rfl
+    exact h_lm_id
+  refine (hscalar v w q₀ hq₀).congr_of_eventuallyEq ?_ (hscalar_eqOn hq₀)
+  filter_upwards [self_mem_nhdsWithin] with q hq using hscalar_eqOn hq
 
 /-- **Joint `(t, x)`-`C∞` of the realized symmetrized bilinear `Hom`-section from a Sobolev
 time-tower (the reusable anisotropic-Sobolev ⟹ joint-smoothness principle).**

@@ -638,6 +638,7 @@ import DifferentialGeometry.Analysis.Sobolev.Solutions.SobolevToCinftyRep
 import DifferentialGeometry.Analysis.Sobolev.Solutions.WeakSolution
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponentRawNorm
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponents
+import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartEntryJointSmoothness
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartLocality
 import DifferentialGeometry.Analysis.Sobolev.Tensor.Defs
 import DifferentialGeometry.Analysis.Sobolev.Tensor.NormBasics
