@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorBochner
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseToL2Packaging
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GenuineBracketSectionSplit
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.OrderSeparatedCurvatureJet
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.CommutatorDefectFullSumJet
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 
 /-!
@@ -1316,43 +1317,17 @@ theorem exists_iteratedCovGrad_pointwiseTensorCurv_pointwise_fiberNormSq_bound
             riemannianFiberNormSq (I := I) (M := M) g 0 (s + i) x
               ((iteratedCovGrad g 0 s i T).toSection x) := by
   classical
-  obtain ⟨Cgr, hCgr_nn, hsplit⟩ :=
-    exists_iteratedCovGrad_pointwiseTensorCurv_genuineRemainder_fiberNormSq_bound
-      (I := I) (M := M) g
-  refine ⟨fun s m => Real.sqrt 2 * Cgr s m, fun s m => ?_, fun s m T x => ?_⟩
-  · exact mul_nonneg (Real.sqrt_nonneg 2) (hCgr_nn s m)
-  · obtain ⟨Ggen, Grem, heq, hgen, hrem⟩ := hsplit s m T x
-    set FullSum : ℝ := ∑ i ∈ Finset.range (m + 3),
-        riemannianFiberNormSq (I := I) (M := M) g 0 (s + i) x
-          ((iteratedCovGrad g 0 s i T).toSection x) with hFullSum
-    set LowSum : ℝ := ∑ i ∈ Finset.range (m + 2),
-        riemannianFiberNormSq (I := I) (M := M) g 0 (s + i) x
-          ((iteratedCovGrad g 0 s i T).toSection x) with hLowSum
-    have hLowSum_nn : 0 ≤ LowSum :=
-      Finset.sum_nonneg (fun i _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + i) x _)
-    have hTop_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 (s + (m + 2)) x
-        ((iteratedCovGrad g 0 s (m + 2) T).toSection x) :=
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + (m + 2)) x _
-    have hFull_split : FullSum = LowSum +
-        riemannianFiberNormSq (I := I) (M := M) g 0 (s + (m + 2)) x
-          ((iteratedCovGrad g 0 s (m + 2) T).toSection x) := by
-      rw [hFullSum, hLowSum, Finset.sum_range_succ]
-    have hsq2 : (Real.sqrt 2 * Cgr s m) ^ 2 = 2 * Cgr s m ^ 2 := by
-      rw [mul_pow, Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 2)]
-    have hCgr_nn' : 0 ≤ Cgr s m := hCgr_nn s m
-    rw [heq, hsq2]
-    have hadd := riemannianFiberNormSq_add_le (I := I) (M := M) g 0 (s + 1 + m) x Ggen Grem
-    calc riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + m) x (Ggen + Grem)
-        ≤ 2 * riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + m) x Ggen +
-            2 * riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + m) x Grem := hadd
-      _ ≤ 2 * (Cgr s m ^ 2 * LowSum) +
-            2 * (Cgr s m ^ 2 *
-              riemannianFiberNormSq (I := I) (M := M) g 0 (s + (m + 2)) x
-                ((iteratedCovGrad g 0 s (m + 2) T).toSection x)) := by
-          have e1 := mul_le_mul_of_nonneg_left hgen (by norm_num : (0 : ℝ) ≤ 2)
-          have e2 := mul_le_mul_of_nonneg_left hrem (by norm_num : (0 : ℝ) ≤ 2)
-          linarith
-      _ = 2 * Cgr s m ^ 2 * FullSum := by rw [hFull_split]; ring
+  -- Direct full-sum route: the order-`2` commutator defect is a full-sum graded curvature jet of
+  -- lowest order `0` / width `3` (`pointwiseTensorCurv_fullSum_gradedCurvJet`); its `k = m`
+  -- specialisation IS this bound (the order-collapsed sum `∑_{i < 3 + m}` matches `∑_{i < m + 3}`,
+  -- modulo `i + 0 = i` and `3 + m = m + 3`). No order-separated pure-order remainder is needed.
+  obtain ⟨Cic, hCic_nn, hjet⟩ := pointwiseTensorCurv_fullSum_gradedCurvJet (I := I) (M := M) g
+  refine ⟨Cic, hCic_nn, fun s m T x => ?_⟩
+  have hkey := hjet s T m x
+  refine hkey.trans (le_of_eq ?_)
+  refine congrArg (Cic s m ^ 2 * ·) ?_
+  rw [Nat.add_comm 3 m]
+  exact Finset.sum_congr rfl (fun i _ => by rw [Nat.add_zero])
 
 /-- **Posited covariant-product curvature primitive: the iterated covariant gradient of the
 single-step commutator defect is `L²`-controlled by the lower iterated gradients of its argument.**
