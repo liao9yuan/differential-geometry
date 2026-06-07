@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemainderFrameSumBridge
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RemDiffFibThirdOrderCancellation
 
 /-!
 # The fibre order of the per-direction moving-frame remainder bracket summand
@@ -121,10 +121,20 @@ differentiated-curvature `(∇R) S` channel together with the moving-frame brack
 (`⟨Curv S, ∇S⟩_{L²} = ‖Δ_∇ S‖²_{L²} − ‖∇²S‖²_{L²}`, `weitzenbock_integrated_covGrad_l2_normSq`, nonzero
 when curvature is present). At `s = 0` already the scalar commutator defect `Curv f = Ric(∇f, ·)`
 integrated is nonzero for a non-harmonic `f` on a curved manifold. So `C` is genuinely positive, and the
-summand `remDiffBracketFib` genuinely uses `S` (through the `∇²(∇S)` term of `remDiffFib`). The body is
-`sorry` (the genuine classical moving-frame third-order curvature content: the `∇³S` cancellation through
-the iterated Ricci identity, followed by the differentiated-curvature and bracket-discrepancy fibre
-sups); consumers transitively depend on `sorryAx`. -/
+summand `remDiffBracketFib` genuinely uses `S` (through the `∇²(∇S)` term of `remDiffFib`).
+
+**Proof (composition over the two per-direction frontiers).** The bracket remainder is the *named*
+difference `remDiffBracketFib g s S x i = remDiffFib g s S x i − remDiffGenuineFib g s S x i`
+(`remDiffBracketFib`, `MovingFrameRemainderFrameSumBridge`), so by fibre subadditivity
+`riemannianFiberNormSq_sub_le` its fibre norm is bounded by twice the fibre norm of the commutator
+`remDiffFib` plus twice that of the pure-Riemann curvature fibre `remDiffGenuineFib`. The two are bounded
+by the two strictly-smaller, intrinsic per-direction frontiers `exists_remDiffFib_fiberOrder_bound` (the
+genuine `∇³S`-cancellation content: the commutator `Aᵢ − Dᵢ`, order-`≤ 2` through the iterated Ricci
+identity `covGrad_covDeriv_leadingSlot_secondOrder_commutation`) and
+`exists_remDiffGenuineFib_fiberOrder_bound` (the pure-Riemann `R(∇S)` contraction, `rfns(∇S)`-order)
+(`RemDiffFibThirdOrderCancellation`). Taking `C s := Real.sqrt (2 (Cfib s)² + 2 (Cgen s)²)` absorbs both
+contributions, since every fibre norm on the right is nonnegative. Consumers transitively depend on the
+two posited per-direction frontiers' `sorryAx`. -/
 theorem exists_remDiffBracketFib_fiberOrder_bound
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℕ → ℝ, (∀ s, 0 ≤ C s) ∧
@@ -138,7 +148,46 @@ theorem exists_remDiffBracketFib_fiberOrder_bound
               riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
                   ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
               riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) := by
-  sorry
+  classical
+  obtain ⟨Cfib, hCfib_nn, hCfib⟩ := exists_remDiffFib_fiberOrder_bound (I := I) (M := M) g
+  obtain ⟨Cgen, hCgen_nn, hCgen⟩ := exists_remDiffGenuineFib_fiberOrder_bound (I := I) (M := M) g
+  refine ⟨fun s => Real.sqrt (2 * (Cfib s) ^ 2 + 2 * (Cgen s) ^ 2),
+    fun s => Real.sqrt_nonneg _, fun s S x i => ?_⟩
+  set A : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+      ((covGrad (I := I) (M := M) g 0 (s + 1)
+        (covGrad (I := I) (M := M) g 0 s S)).toSection x) with hA
+  set B : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+      ((covGrad (I := I) (M := M) g 0 s S).toSection x) with hB
+  set D : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) with hD
+  have hA_nn : 0 ≤ A := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1 + 1) x _
+  have hB_nn : 0 ≤ B := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x _
+  have hD_nn : 0 ≤ D := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x _
+  -- The bracket remainder is the named difference `remDiffFib − remDiffGenuineFib`.
+  have hbracket : remDiffBracketFib (I := I) (M := M) g s S x i =
+      remDiffFib (I := I) (M := M) g s S x i - remDiffGenuineFib (I := I) (M := M) g s S x i := rfl
+  rw [hbracket]
+  -- Fibre subadditivity over the named difference.
+  have hsub := riemannianFiberNormSq_sub_le (I := I) (M := M) g 0 (s + 1) x
+    (remDiffFib (I := I) (M := M) g s S x i) (remDiffGenuineFib (I := I) (M := M) g s S x i)
+  -- The two per-direction fibre bounds.
+  have hfib := hCfib s S x i
+  rw [← hA, ← hB, ← hD] at hfib
+  have hgen := hCgen s S x i
+  rw [← hA, ← hB, ← hD] at hgen
+  -- Assemble: `rfns(rem) ≤ 2·rfns(fib) + 2·rfns(gen) ≤ (2Cfib² + 2Cgen²)·(A+B+D)`.
+  have hCsq : (Real.sqrt (2 * (Cfib s) ^ 2 + 2 * (Cgen s) ^ 2)) ^ 2 =
+      2 * (Cfib s) ^ 2 + 2 * (Cgen s) ^ 2 := by
+    rw [Real.sq_sqrt]; positivity
+  rw [hCsq]
+  calc riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+          (remDiffFib (I := I) (M := M) g s S x i - remDiffGenuineFib (I := I) (M := M) g s S x i)
+      ≤ 2 * riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+            (remDiffFib (I := I) (M := M) g s S x i) +
+          2 * riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+            (remDiffGenuineFib (I := I) (M := M) g s S x i) := hsub
+    _ ≤ 2 * ((Cfib s) ^ 2 * (A + B + D)) + 2 * ((Cgen s) ^ 2 * (A + B + D)) :=
+        add_le_add (by linarith [hfib]) (by linarith [hgen])
+    _ = (2 * (Cfib s) ^ 2 + 2 * (Cgen s) ^ 2) * (A + B + D) := by ring
 
 end Connection
 end Integral
