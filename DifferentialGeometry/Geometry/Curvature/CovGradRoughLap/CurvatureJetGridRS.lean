@@ -60,6 +60,7 @@ namespace Connection
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -69,6 +70,32 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+set_option linter.unusedSectionVars false in
+/-- **Shifted-window domination for a nonnegative sequence** (pure `ℕ`/`ℝ` bookkeeping). For a
+nonnegative `G : ℕ → ℝ`, if `d + w ≤ w'`, then the `d`-shifted length-`(w + k)` window is dominated by
+the unshifted length-`(w' + k)` window:
+```
+∑_{i < w + k} G (i + d) ≤ ∑_{j < w' + k} G j.
+```
+The image of `range (w + k)` under `· + d` lands in `range (w' + k)` (every `i + d < (w + k) + d ≤
+w' + k` since `d + w ≤ w'`), and all summands are nonnegative. The order-window bookkeeping behind the
+graded-jet shape-relaxation `IsGradedCurvJetRS_widen`; stated abstractly to avoid forcing `whnf` on the
+fibre-norm terms. -/
+private theorem sum_window_widen (G : ℕ → ℝ) (hG : ∀ j, 0 ≤ G j) {w w' k d : ℕ}
+    (hd : d + w ≤ w') :
+    ∑ i ∈ Finset.range (w + k), G (i + d) ≤ ∑ j ∈ Finset.range (w' + k), G j := by
+  have hinj : ∀ a ∈ Finset.range (w + k), ∀ b ∈ Finset.range (w + k),
+      a + d = b + d → a = b := fun a _ b _ hab => by omega
+  rw [show ∑ i ∈ Finset.range (w + k), G (i + d) =
+      ∑ j ∈ (Finset.range (w + k)).image (fun i => i + d), G j from
+    (Finset.sum_image hinj).symm]
+  refine Finset.sum_le_sum_of_subset_of_nonneg ?_ (fun j _ _ => hG _)
+  intro j hj
+  rw [Finset.mem_image] at hj
+  obtain ⟨i, hi, rfl⟩ := hj
+  rw [Finset.mem_range] at hi ⊢
+  omega
 
 /-- **The rank-`r` pure-Riemann genuine-section graded curvature-jet grid (posited general-rank
 curvature child).** The contravariant-rank-`r` lift of the rank-`0` pure-Riemann genuine-section jet
@@ -116,6 +143,66 @@ theorem GcurvSectionRS_gradedCurvJet (g : SmoothRiemannianMetric I M) (r : ℕ) 
   -- `p = 1`, base width `w = 1`, so the contracted-order window `∑_{i < 1 + k} rfns(∇^{i + 1} S)`).
   obtain ⟨c, hc_nn, hgrid⟩ := exists_GcurvSectionRS_iteratedCovGrad_grid_bound (I := I) (M := M) g r
   exact ⟨c, hc_nn, fun s S k x => hgrid s S k x⟩
+
+/-- **The rank-`r` graded curvature-jet predicate widens to a longer/lower contracted-order window.**
+If `G` is a graded curvature jet of `S` of lowest order `p` and base width `w`, and the wider shape
+`(p', w')` has a lower base order (`p' ≤ p`) and a not-smaller top order (`p + w ≤ p' + w'`), then `G`
+is also a graded curvature jet of shape `(p', w')` with the **same** constant family: the source
+contracted-order window `{p, …, p + w + k − 1}` is a subset of the target window
+`{p', …, p' + w' + k − 1}`, and all summands `rfns(∇^· S)` are nonnegative, so the source sum is
+dominated by the wider target sum. The shape-relaxation that lets the order-separated `(1, 1)`, `(0, 1)`,
+`(2, 1)` graded jets all be read as the sound full-sum `(0, 3)` shape. -/
+private theorem IsGradedCurvJetRS_widen (g : SmoothRiemannianMetric I M) {r s : ℕ}
+    (S : SmoothCcTensor g r s) {c : ℕ → ℝ} {p w p' w' t : ℕ} {G : SmoothCcTensor g r t}
+    (hp : p' ≤ p) (hpw : p + w ≤ p' + w')
+    (hG : IsGradedCurvJetRS (I := I) (M := M) g S c p w G) :
+    IsGradedCurvJetRS (I := I) (M := M) g S c p' w' G := by
+  intro k x
+  refine (hG k x).trans ?_
+  refine mul_le_mul_of_nonneg_left ?_ (sq_nonneg (c k))
+  -- The source window `∑_{i < w + k} rfns(∇^{i + p} S)` is a sub-sum of the target window
+  -- `∑_{j < w' + k} rfns(∇^{j + p'} S)` via the shift `i ↦ i + (p − p')` (`p' ≤ p`), whose image lands
+  -- in `range (w' + k)` (`p + w ≤ p' + w'`); the abstract `sum_window_widen` carries the bookkeeping
+  -- over the abstract summand `j ↦ rfns(∇^{j + p'} S)`, applied at `i + (p − p')` and `j`.
+  obtain ⟨d, rfl⟩ : ∃ d, p = p' + d := ⟨p - p', by omega⟩
+  have hwin := sum_window_widen
+    (fun j => riemannianFiberNormSq (I := I) (M := M) g r (s + (j + p')) x
+      ((iteratedCovGrad g r s (j + p') S).toSection x))
+    (fun j => riemannianFiberNormSq_nonneg (I := I) (M := M) g r (s + (j + p')) x _)
+    (w := w) (w' := w') (k := k) (d := d) (by omega)
+  refine le_trans (le_of_eq ?_) hwin
+  exact Finset.sum_congr rfl (fun i _ => by rw [show i + (p' + d) = (i + d) + p' from by omega])
+
+/-- **The rank-`r` graded curvature-jet predicate is closed under negation.** If `G` is a graded
+curvature jet of `S` (lowest order `p`, base width `w`, constant family `c`), then so is `-G`, with the
+same constant family: `∇^k(-G) = -∇^k G` (`iteratedCovGrad_neg`) and `rfns(-v) = rfns(v)` (the fibre
+norm is even). The closure that lets a subtracted genuine field re-enter the graded family. -/
+private theorem IsGradedCurvJetRS_neg (g : SmoothRiemannianMetric I M) {r s : ℕ}
+    (S : SmoothCcTensor g r s) {c : ℕ → ℝ} {p w t : ℕ} {G : SmoothCcTensor g r t}
+    (hG : IsGradedCurvJetRS (I := I) (M := M) g S c p w G) :
+    IsGradedCurvJetRS (I := I) (M := M) g S c p w (-G) := by
+  intro k x
+  have hneg : (iteratedCovGrad g r t k (-G)).toSection x =
+      -(iteratedCovGrad g r t k G).toSection x := by
+    rw [iteratedCovGrad_neg, SmoothCcTensor.toSection_neg]
+    simp only [ContMDiffSection.coe_neg, Pi.neg_apply]
+  rw [hneg]
+  have heven : riemannianFiberNormSq (I := I) (M := M) g r (t + k) x
+      (-(iteratedCovGrad g r t k G).toSection x) =
+      riemannianFiberNormSq (I := I) (M := M) g r (t + k) x
+        ((iteratedCovGrad g r t k G).toSection x) := by
+    rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r (t + k) x,
+      riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r (t + k) x
+        ((iteratedCovGrad g r t k G).toSection x),
+      TensorRSSpace.toModel_neg]
+    rw [show (-(TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := r) (s := t + k)
+          (x := x) ((iteratedCovGrad g r t k G).toSection x))) =
+        ((-1 : ℝ) • TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := r) (s := t + k)
+          (x := x) ((iteratedCovGrad g r t k G).toSection x)) from by rw [neg_one_smul]]
+    rw [tensorInnerPointwise_smul_left, tensorInnerPointwise_smul_right]
+    ring
+  rw [heven]
+  exact hG k x
 
 /-- **The rank-`r` differentiated-curvature-and-remainder full-sum graded curvature-jet seed (posited
 general-rank curvature child — the genuinely-missing upstream differentiated grid).** The
@@ -166,7 +253,72 @@ theorem exists_pointwiseTensorCurvRS_diffCurvAndRemainder_fullSum_gradedCurvJet_
               GcurvSectionRS (I := I) (M := M) g r s S + Gcd + Grem ∧
           IsGradedCurvJetRS (I := I) (M := M) g S (c s) 0 1 Gcd ∧
           IsGradedCurvJetRS (I := I) (M := M) g S (c s) 0 3 Grem := by
-  sorry
+  classical
+  -- The full-sum seed is read off the `m = 0` graded base split `Curv = Gcurv₀ + GcurvDeriv₀ + Grem₀`
+  -- (`pointwiseTensorCurvRS_gradedCurvJet_field_base`, with `Gcurv₀` of shape `(1, 1)`, `GcurvDeriv₀`
+  -- of shape `(0, 1)`, `Grem₀` of shape `(2, 1)`) together with the rank-`r` pure-Riemann section
+  -- graded jet `GcurvSectionRS_gradedCurvJet` (`GcurvSectionRS` of shape `(1, 1)`):
+  --   `Gcd  := GcurvDeriv₀`                          (already the required `(0, 1)` shape),
+  --   `Grem := Gcurv₀ + Grem₀ − GcurvSectionRS`,     so the section split anchors on `GcurvSectionRS`,
+  -- and `Grem` is a `(0, 3)` jet because every component — `Gcurv₀ (1,1)`, `Grem₀ (2,1)`,
+  -- `−GcurvSectionRS (1,1)` — widens (`IsGradedCurvJetRS_widen`, `_neg`) to the full-sum `(0, 3)` window
+  -- (orders `0 … k + 2`), and the graded family is additive (`IsGradedCurvJetRS.add`).
+  obtain ⟨cBase, hcBase_nn, hbase⟩ :=
+    pointwiseTensorCurvRS_gradedCurvJet_field_base (I := I) (M := M) g r
+  obtain ⟨cS, hcS_nn, hScurv⟩ := GcurvSectionRS_gradedCurvJet (I := I) (M := M) g r
+  -- The combined `(0, 3)` constant family: `Grem` is the sum of three `(0, 3)` jets whose constants are
+  -- the per-`s` widenings of `cBase s` (twice, for `Gcurv₀` and `Grem₀`) and `cS s` (for the negated
+  -- `GcurvSectionRS`); two `.add`s give exactly the family below.
+  refine ⟨fun s k => Real.sqrt (2 * ((Real.sqrt (2 * ((cBase s k) ^ 2 + (cBase s k) ^ 2))) ^ 2 +
+      (cS s k) ^ 2)), fun s k => Real.sqrt_nonneg _, fun s S => ?_⟩
+  obtain ⟨Gcurv₀, GcurvDeriv₀, Grem₀, hsplit, hGcurv₀, hGcurvDeriv₀, hGrem₀⟩ := hbase s S
+  -- The chosen witness family `c s k` dominates `cBase s k` (`8(cBase)² + 2(cS)² ≥ (cBase)²`,
+  -- `cBase ≥ 0`), so the `(0, 1)` differentiated-curvature jet `GcurvDeriv₀` re-enters at family `c s`.
+  have hcmono : ∀ k, cBase s k ≤ Real.sqrt (2 * ((Real.sqrt (2 * ((cBase s k) ^ 2 +
+      (cBase s k) ^ 2))) ^ 2 + (cS s k) ^ 2)) := by
+    intro k
+    have hinner : (Real.sqrt (2 * ((cBase s k) ^ 2 + (cBase s k) ^ 2))) ^ 2 =
+        2 * ((cBase s k) ^ 2 + (cBase s k) ^ 2) := by
+      rw [Real.sq_sqrt]; positivity
+    have hle : cBase s k ^ 2 ≤ 2 * ((Real.sqrt (2 * ((cBase s k) ^ 2 + (cBase s k) ^ 2))) ^ 2 +
+        (cS s k) ^ 2) := by
+      rw [hinner]; nlinarith [sq_nonneg (cBase s k), sq_nonneg (cS s k)]
+    calc cBase s k ≤ |cBase s k| := le_abs_self _
+      _ = Real.sqrt ((cBase s k) ^ 2) := by rw [Real.sqrt_sq_eq_abs]
+      _ ≤ Real.sqrt (2 * ((Real.sqrt (2 * ((cBase s k) ^ 2 + (cBase s k) ^ 2))) ^ 2 +
+            (cS s k) ^ 2)) := Real.sqrt_le_sqrt hle
+  -- `Gcd := GcurvDeriv₀` is the `(0, 1)` differentiated-curvature jet, bumped to the witness family.
+  refine ⟨GcurvDeriv₀, Gcurv₀ + Grem₀ - GcurvSectionRS (I := I) (M := M) g r s S, ?_,
+    IsGradedCurvJetRS.mono_const (I := I) (M := M) g S (hcBase_nn s) hcmono hGcurvDeriv₀, ?_⟩
+  · -- The section split anchors on `GcurvSectionRS`: `GcurvSectionRS + GcurvDeriv₀ + (Gcurv₀ + Grem₀
+    -- − GcurvSectionRS) = Gcurv₀ + GcurvDeriv₀ + Grem₀ = Curv S`.
+    rw [hsplit]; abel
+  · -- `Grem`'s `(0, 3)` graded jet: widen each component to `(0, 3)` and add.
+    have hGcurv₀_03 : IsGradedCurvJetRS (I := I) (M := M) g S (cBase s) 0 3 Gcurv₀ :=
+      IsGradedCurvJetRS_widen (I := I) (M := M) g S (by omega : (0 : ℕ) ≤ 1)
+        (by omega : 1 + 1 ≤ 0 + 3) hGcurv₀
+    have hGrem₀_03 : IsGradedCurvJetRS (I := I) (M := M) g S (cBase s) 0 3 Grem₀ :=
+      IsGradedCurvJetRS_widen (I := I) (M := M) g S (by omega : (0 : ℕ) ≤ 2)
+        (by omega : 2 + 1 ≤ 0 + 3) hGrem₀
+    have hGScurv_03 : IsGradedCurvJetRS (I := I) (M := M) g S (cS s) 0 3
+        (GcurvSectionRS (I := I) (M := M) g r s S) :=
+      IsGradedCurvJetRS_widen (I := I) (M := M) g S (by omega : (0 : ℕ) ≤ 1)
+        (by omega : 1 + 1 ≤ 0 + 3) (hScurv s S)
+    have hNegGScurv_03 : IsGradedCurvJetRS (I := I) (M := M) g S (cS s) 0 3
+        (-(GcurvSectionRS (I := I) (M := M) g r s S)) :=
+      IsGradedCurvJetRS_neg (I := I) (M := M) g S hGScurv_03
+    -- `Gcurv₀ + Grem₀` is a `(0, 3)` jet; adding the negated `GcurvSectionRS` gives the target.
+    have hsum1 : IsGradedCurvJetRS (I := I) (M := M) g S
+        (fun k => Real.sqrt (2 * ((cBase s k) ^ 2 + (cBase s k) ^ 2))) 0 3 (Gcurv₀ + Grem₀) :=
+      IsGradedCurvJetRS.add (I := I) (M := M) g S hGcurv₀_03 hGrem₀_03
+    have hsum2 : IsGradedCurvJetRS (I := I) (M := M) g S
+        (fun k => Real.sqrt (2 * ((Real.sqrt (2 * ((cBase s k) ^ 2 + (cBase s k) ^ 2))) ^ 2 +
+          (cS s k) ^ 2))) 0 3 (Gcurv₀ + Grem₀ + -(GcurvSectionRS (I := I) (M := M) g r s S)) :=
+      IsGradedCurvJetRS.add (I := I) (M := M) g S hsum1 hNegGScurv_03
+    -- Rewrite the literal subtraction as the `+ neg` form; the witnessed family is exactly `hsum2`'s.
+    rw [show Gcurv₀ + Grem₀ - GcurvSectionRS (I := I) (M := M) g r s S =
+        Gcurv₀ + Grem₀ + -(GcurvSectionRS (I := I) (M := M) g r s S) from by abel]
+    exact hsum2
 
 /-- **The rank-`r` combined differentiated-curvature-and-remainder full-sum graded curvature-jet split
 (posited general-rank curvature child, the sound full-sum form).** The contravariant-rank-`r`,
