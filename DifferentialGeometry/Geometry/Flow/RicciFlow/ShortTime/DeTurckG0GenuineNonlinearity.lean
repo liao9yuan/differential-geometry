@@ -1079,57 +1079,131 @@ theorem deTurckRealizeRemainderOf_toL2_retagClass_sub
   rw [hreduce]
   exact map_sub _ _ _
 
-/-- **The first-order-freedom gauge corrector against the gate representative's own realized
-remainder (the irreducible analytic crux of the gauge-cancellation node, posited and reduced to
-the Weyl/Gårding spectral substrate).**
+/-- **The globally-controlled first-order-freedom corrected carrier (the genuine deep analytic
+primitive of the gauge corrector, transiting the Weyl/Gårding spectral substrate).**
 
 For the anchor `g₀`, a flow background `g_bg`, and a supercritical order `a` (`2a > dim M + 4`),
-there is a continuous corrector `corr : Hᵃ⁺¹(g₀) → SmoothCcTensor g₀ 0 2` and a match-gate slack
-`Q > 0` carrying the all-order linear size bound, the `H^{a+2}` Lipschitz bound, and — on the
-`Q`-gated gate-realizable locus — the corrected carrier's realized-remainder `L²`-class identity
-against the gate representative's *own* realized remainder:
+there is a `(0,2)`-perturbation **corrected carrier** `S : Hᵃ⁺¹(g₀) → SmoothCcTensor g₀ 0 2` and
+a match-gate slack `Q > 0` carrying, in **global** (un-ball-restricted, linear) form:
+
+* the all-order linear intrinsic-Sobolev size bound `‖(S u).toHs n‖ ≤ Cₙ · ‖u‖` (at every order
+  `n`, over **all** of `Hᵃ⁺¹`);
+* the `H^{a+2}` Lipschitz bound `‖(S u − S u').toHs (a+2)‖ ≤ C' · ‖u − u'‖` (over **all** of
+  `Hᵃ⁺¹`); and
+* on the `Q`-gated gate-realizable locus, the corrected carrier's realized-remainder `L²`-class
+  identity against the gate representative's *own* realized remainder
+  `Φ(S u) = Φ(gateRep u)`, where `Φ(T) := toL2 (deTurckRealizeRemainderOf g₀ g_bg T)`.
+
+This is the natural analytic object the gauge corrector is built on: the *corrected carrier* `S u`
+(a continuous, all-order-`Hᵃ⁺¹`-controlled smoothing realization whose realized DeTurck remainder
+reproduces, at the `L²`-class level, the gate representative's), in its **global** linear shape —
+strictly stronger than the ball-restricted `ChartJet2LipControl`/`AllOrderBallControl`-packaged
+synthesis `exists_deTurckG0_regularizedSynthesis` (whose size cap is a single uniform `B` over a
+*ball*, with no linear `·‖u‖` scaling, and whose match needs ball-membership), so it does **not**
+follow from that ball machinery — it is the genuine global-control strengthening this `/prove`
+recursion bottoms on.
+
+**Why it is genuinely first order (the reduction to the substrate).**  `Φ` is genuinely first
+order: on a fibre-small perturbation `T` it splits as
+`Φ(T) = toL2 (deTurckRHSRetag g₀ g_bg g_T) − toL2 (Δ_∇ T)`
+(`deTurckRealizeRemainderOf_toL2_retagClass_sub`, sorry-free), and the leading second-order `−λᵢ`
+rough-Laplacian principal symbol cancels the second-order re-tagged-RHS principal symbol
+(`deTurckNonlinearitySpectral_principalPart_cancels`, sorry-free), so the class quantity to repair
+is first order.  The existence of a *globally controlled* corrected carrier solving this first-order
+class equation is the local solvability of the gauge-cancelled DeTurck operator: its linearization
+is `−Δ_∇` perturbed by a first-order coefficient operator, invertible with a bounded inverse onto
+the first-order class by Gårding coercivity (the all-order Gårding bootstrap
+`allOrder_covGrad_l2Norm_le_lapIter_sum_unconditional` + `order2GardingFamily_holds`
+(`AllOrderGardingBootstrap.lean`), the elliptic-regularity `chart ≤ spectral` lift
+`pouSobolevToHsNorm_le_spectral` (`GeneralOrderPouSpectralBound.lean`) closed against the
+reproducing-kernel diagonal bound `reproducingKernel_weighted_tsum_le_of_closed`
+(`LocalWeylReproducingKernel.lean`), and the higher-order Nemytskii control
+`exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder` (`RHSHighOrderSobolevLipschitz.lean`)).
+The carrier's all-order size / `H^{a+2}` Lipschitz arms are the bounded-inverse / smoothing
+realization gaining every derivative, supplied by the heat-output bounds
+`tensorHeatSemigroupHs_output_smoothRepr_toHs_le` / `…_toHs_sub_le`
+(`HeatOutputContinuousRepr.lean`) composed with the Gårding/Weyl spectral substrate.  Mathlib's
+inverse-function theorem (`HasStrictFDerivAt.to_localInverse`) is *not* turnkey here: it needs the
+solving map's codomain to be a complete normed space, but the corrector's codomain
+`SmoothCcTensor g₀ 0 2` carries no norm (only `toL2`/`toHs` maps into normed spaces), so the
+Sobolev-tower solution must additionally be realized as a smooth section — building that
+strict-FDeriv + invertible-`ContinuousLinearEquiv` + smooth-realization scaffolding over the
+Gårding-coercive linearization is the deep work this node abstracts.
+
+**Non-vacuous** — the match rejects the degenerate witness `S ≡ smoothingBaseSynth g₀ a` (the
+naive heat carrier): with `S u = smoothingBaseSynth g₀ a u` the match would read
+`Φ(smoothingBaseSynth g₀ a u) = Φ(gateRep u)`, i.e. the naive heat output's realized remainder
+matches the gate representative's — the Lean-refuted naive-heat claim (a pure heat residue
+contributes `−λᵢ(e^{−λᵢ}−1)·u.coeffᵢ`-type terms falsifying exact class equality) — so the
+size/Lipschitz/match conjunction genuinely constrains `S` away from the naive carrier.  **Not
+packaging** — the match arm is the `L²`-class identity of two realized DeTurck remainders,
+structurally distinct from the real-valued size/Lipschitz arms; this is an `Exists`-output
+carrier, never a binder hypothesis, and the gauge corrector *cites* this theorem.  **Intrinsic** —
+`toL2`/`toHs` are `g`-inner; no `chartJ`, no raw `M → E`.
+
+The body is `sorry` (the deep Weyl/Gårding-transiting first-order-freedom solvability over the
+gate-controlled match domain), the precisely-posited analytic frontier of the `/prove` recursion:
+it bottoms on the Gårding/Weyl/heat spectral substrate cited above (which itself bottoms on the
+curvature leaves and the Euclidean Sobolev embedding), not on any import-constraint placeholder. -/
+private theorem exists_firstOrderFreedomCorrectedCarrier
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ (S : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+          Integral.L2.SmoothCcTensor g₀ 0 2)
+        (Q : ℝ),
+      0 < Q ∧
+      (∀ (n : ℕ), ∃ Cₙ : ℝ, 0 ≤ Cₙ ∧
+        ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n (S u)‖
+            ≤ Cₙ * ‖u‖) ∧
+      (∃ C' : ℝ, 0 ≤ C' ∧
+        ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
+              (S u - S u')‖ ≤ C' * ‖u - u'‖) ∧
+      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+          (h : realizableAtGate (I := I) g₀ u),
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+            (gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose)‖ ≤ Q →
+        Integral.L2.SmoothCcTensor.toL2
+            (deTurckRealizeRemainderOf (I := I) g₀ g_bg (S u))
+          = Integral.L2.SmoothCcTensor.toL2
+              (deTurckRealizeRemainderOf (I := I) g₀ g_bg
+                (gateRepOfWitness (I := I) g₀ u h))) := by
+  sorry
+
+/-- **The first-order-freedom gauge corrector against the gate representative's own realized
+remainder (proven by composition over the globally-controlled corrected carrier).**
+
+For the anchor `g₀`, a flow background `g_bg`, and a supercritical order `a` (`2a > dim M + 4`),
+there is a corrector `corr : Hᵃ⁺¹(g₀) → SmoothCcTensor g₀ 0 2` and a match-gate slack `Q > 0`
+carrying the all-order linear size bound, the `H^{a+2}` Lipschitz bound, and — on the `Q`-gated
+gate-realizable locus — the corrected carrier's realized-remainder `L²`-class identity against the
+gate representative's *own* realized remainder:
 ```
 toL2 (deTurckRealizeRemainderOf g₀ g_bg (smoothingBaseSynth g₀ a u + corr u))
   = toL2 (deTurckRealizeRemainderOf g₀ g_bg (gateRepOfWitness g₀ u h)) .
 ```
 
-This is the strictly-deeper analytic primitive `exists_deTurckGaugeCancellationCorrector` is
-proven by composition over: that node reads the size/Lipschitz arms verbatim and rewrites the
-right-hand side `toL2 (deTurckRealizeRemainderOf g₀ g_bg (gateRepOfWitness g₀ u h))` into the
-gate-based gauge `toL2 (deTurckRemainderRealizeSection g₀ g_bg u)` through the sorry-free bridge
-`deTurckRealizeRemainderOf_gateRepOfWitness` (the realized remainder of the gate representative
-*is* the gauge section).  Stating the corrector's match against the gate representative's own
-realized remainder `deTurckRealizeRemainderOf g₀ g_bg (gateRepOfWitness g₀ u h)` — rather than
-the gate-based gauge — is the honest first-order shape: both sides are then realized DeTurck
-remainders `deTurckRealizeRemainderOf g₀ g_bg ·` of fibre-small perturbations, so the match is a
-single first-order class equality `Φ(base u + corr u) = Φ(gateRep u)` of the *same* operator
-`Φ := toL2 ∘ deTurckRealizeRemainderOf g₀ g_bg`.
+Both sides are realized DeTurck remainders `deTurckRealizeRemainderOf g₀ g_bg ·` of fibre-small
+perturbations, so the match is a single first-order class equality `Φ(base u + corr u) =
+Φ(gateRep u)` of the *same* operator `Φ := toL2 ∘ deTurckRealizeRemainderOf g₀ g_bg`.  `Φ` is
+genuinely first order: on a fibre-small `T` it splits as `Φ(T) = toL2 (deTurckRHSRetag g₀ g_bg
+g_T) − toL2 (Δ_∇ T)` (`deTurckRealizeRemainderOf_toL2_retagClass_sub`, sorry-free) with the
+leading second-order `−λᵢ` rough-Laplacian principal symbol cancelling the second-order
+re-tagged-RHS principal symbol (`deTurckNonlinearitySpectral_principalPart_cancels`, sorry-free),
+so the class difference `Φ(base u + corr u) − Φ(gateRep u)` is a first-order quantity in `corr`.
 
-**Why it is genuinely first order (the reduction to the substrate).**  The operator `Φ` is
-genuinely first order: on a fibre-small perturbation `T` it splits as `Φ(T) = toL2
-(deTurckRHSRetag g₀ g_bg g_T) − toL2 (Δ_∇ T)` (`deTurckRealizeRemainderOf_toL2_retagClass_sub`),
-and the leading second-order `−λᵢ` rough-Laplacian principal symbol cancels the second-order
-re-tagged-RHS principal symbol (`deTurckNonlinearitySpectral_principalPart_cancels`), so the
-class difference `Φ(base u + corr u) − Φ(gateRep u)` is a first-order quantity in `corr`.  The
-existence of a *continuous*, size/Lipschitz-controlled `corr` solving this first-order class
-equation is the local solvability of the gauge-cancelled DeTurck operator: its linearization is
-`−Δ_∇` perturbed by a first-order coefficient operator, surjective onto the first-order class by
-Gårding coercivity (the substrate `allOrder_covGrad_l2Norm_le_lapIter_sum_unconditional`
-(`AllOrderGardingBootstrap.lean`) + `order2GardingFamily_holds`, the elliptic-regularity
-`chart ≤ spectral` lift `pouSobolevToHsNorm_le_spectral`
-(`GeneralOrderPouSpectralBound.lean`) closed against the reproducing-kernel diagonal bound
-`reproducingKernel_weighted_tsum_le_of_closed` (`LocalWeylReproducingKernel.lean`), and the
-higher-order Nemytskii control `exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder`
-(`RHSHighOrderSobolevLipschitz.lean`)).  The corrector's all-order size / `H^{a+2}` Lipschitz
-arms are the bounded-inverse / smoothing realization gaining every derivative, supplied by the
-heat-output bounds `tensorHeatSemigroupHs_output_smoothRepr_toHs_le` / `…_toHs_sub_le`
-(`HeatOutputContinuousRepr.lean`) composed with the Gårding/Weyl spectral substrate.  Mathlib's
-inverse-function theorem (`HasStrictFDerivAt.to_localInverse`) is *not* turnkey here — not for a
-finite-dimensional-codomain reason (it works for infinite-dimensional Banach codomains; it needs
-only domain completeness and the derivative as a `ContinuousLinearEquiv`) but because the map
-`Φ` and the smooth-section / `tensorHs` spaces are not yet equipped with the
-`HasStrictFDerivAt` + invertible-derivative scaffolding it consumes; building that scaffolding
-over the Gårding-coercive linearization is the deep work this node abstracts.
+This is **proven by composition** over the strictly-deeper, globally-controlled *corrected
+carrier* primitive `exists_firstOrderFreedomCorrectedCarrier`: that node supplies a carrier `S`
+with the all-order linear size bound and `H^{a+2}` Lipschitz (both *global*, over all of `Hᵃ⁺¹`)
+and the gate match `Φ(S u) = Φ(gateRep u)`.  The corrector is then `corr u := S u −
+smoothingBaseSynth g₀ a u`; its global size / Lipschitz arms follow from `S`'s and
+`smoothingBaseSynth_spec`'s by the `toHs`-subtraction triangle inequality (`SmoothCcTensor.toHs_sub`),
+and the gate match follows because the corrected carrier `smoothingBaseSynth g₀ a u + corr u`
+is exactly `S u` (an `AddCommGroup` cancellation), so the match forwards verbatim.  Consumers
+transitively depend on `sorryAx` only through that corrected-carrier primitive (the deep
+Weyl/Gårding-transiting first-order-freedom solvability over the gate-controlled match domain) and
+the Weyl/Gårding/heat spectral substrate it bottoms on.
 
 **Non-vacuous** — the match rejects the degenerate witness `corr ≡ 0`: with `corr ≡ 0` the match
 would read `toL2 (deTurckRealizeRemainderOf g₀ g_bg (smoothingBaseSynth g₀ a u)) = toL2
@@ -1138,13 +1212,7 @@ realized remainder matches the gate representative's — the Lean-refuted naive-
 size/Lipschitz/match conjunction genuinely constrains `corr` away from zero.  **Not packaging** —
 the match arm is the `L²`-class identity of two realized DeTurck remainders, structurally distinct
 from the real-valued size/Lipschitz arms; this is an `Exists`-output corrector, never a binder
-hypothesis.  **Intrinsic** — `toL2`/`toHs` are `g`-inner; no `chartJ`, no raw `M → E`.
-
-The body is `sorry` (the deep Weyl/Gårding-transiting first-order-freedom gauge-cancellation
-solvability over the gate-controlled match domain), the precisely-posited analytic frontier of
-the `/prove` recursion: it bottoms on the Gårding/Weyl/heat spectral substrate cited above (which
-itself bottoms on the curvature leaves and the Euclidean Sobolev embedding), not on any
-import-constraint placeholder. -/
+hypothesis.  **Intrinsic** — `toL2`/`toHs` are `g`-inner; no `chartJ`, no raw `M → E`. -/
 private theorem exists_firstOrderFreedomGaugeCorrector
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) :
@@ -1170,7 +1238,65 @@ private theorem exists_firstOrderFreedomGaugeCorrector
           = Integral.L2.SmoothCcTensor.toL2
               (deTurckRealizeRemainderOf (I := I) g₀ g_bg
                 (gateRepOfWitness (I := I) g₀ u h))) := by
-  sorry
+  classical
+  -- The globally-controlled first-order-freedom *corrected carrier* `S` (the natural analytic
+  -- object): an all-order linearly `Hᵃ⁺¹`-controlled, `H^{a+2}`-Lipschitz smoothing realization
+  -- whose realized DeTurck remainder reproduces, on the `Q`-gated gate-realizable locus, the gate
+  -- representative's own realized-remainder `L²`-class `Φ(S u) = Φ(gateRep u)`.
+  obtain ⟨S, Q, hQ, hSsize, ⟨C', hC'_nn, hC'lip⟩, hSmatch⟩ :=
+    exists_firstOrderFreedomCorrectedCarrier (I := I) g₀ g_bg a ha
+  -- The heat-smoothing base carrier's defining all-order size bound and `H^{a+2}` Lipschitz.
+  obtain ⟨hbsize, ⟨Cb', hCb'_nn, hCb'lip⟩⟩ := smoothingBaseSynth_spec (I := I) g₀ a ha
+  -- The corrector is the carrier minus the heat-smoothing base: `corr u := S u − smoothingBaseSynth`.
+  refine ⟨fun u => S u - smoothingBaseSynth (I := I) g₀ a u, Q, hQ, ?_, ?_, ?_⟩
+  · -- All-order linear size of `corr`: `Dₙ := Cₙ(S) + Cₙ(base)`, by `toHs`-additivity on the
+    -- difference + the triangle inequality.
+    intro n
+    obtain ⟨Cn, hCn_nn, hCn⟩ := hSsize n
+    obtain ⟨Cbn, hCbn_nn, hCbn⟩ := hbsize n
+    refine ⟨Cn + Cbn, by positivity, fun u => ?_⟩
+    calc ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n
+            (S u - smoothingBaseSynth (I := I) g₀ a u)‖
+        = ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n (S u)
+            - IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n
+                (smoothingBaseSynth (I := I) g₀ a u)‖ := by
+          rw [SmoothCcTensor.toHs_sub]
+      _ ≤ ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n (S u)‖
+            + ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n
+                (smoothingBaseSynth (I := I) g₀ a u)‖ := norm_sub_le _ _
+      _ ≤ Cn * ‖u‖ + Cbn * ‖u‖ := add_le_add (hCn u) (hCbn u)
+      _ = (Cn + Cbn) * ‖u‖ := by ring
+  · -- `H^{a+2}` Lipschitz of `corr`: `D' := C'(S) + Cb'`, by additivity of the difference of
+    -- differences + the triangle bound.
+    refine ⟨C' + Cb', by positivity, fun u u' => ?_⟩
+    have hsplit :
+        (S u - smoothingBaseSynth (I := I) g₀ a u)
+            - (S u' - smoothingBaseSynth (I := I) g₀ a u')
+          = (S u - S u')
+            - (smoothingBaseSynth (I := I) g₀ a u - smoothingBaseSynth (I := I) g₀ a u') := by
+      abel
+    calc ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
+            ((S u - smoothingBaseSynth (I := I) g₀ a u)
+              - (S u' - smoothingBaseSynth (I := I) g₀ a u'))‖
+        = ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) (S u - S u')
+            - IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
+                (smoothingBaseSynth (I := I) g₀ a u
+                  - smoothingBaseSynth (I := I) g₀ a u')‖ := by
+          rw [hsplit, SmoothCcTensor.toHs_sub]
+      _ ≤ ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) (S u - S u')‖
+            + ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
+                (smoothingBaseSynth (I := I) g₀ a u
+                  - smoothingBaseSynth (I := I) g₀ a u')‖ := norm_sub_le _ _
+      _ ≤ C' * ‖u - u'‖ + Cb' * ‖u - u'‖ := add_le_add (hC'lip u u') (hCb'lip u u')
+      _ = (C' + Cb') * ‖u - u'‖ := by ring
+  · -- The `Q`-gated gauge match: `smoothingBaseSynth g₀ a u + corr u = S u`, so the corrector's
+    -- corrected carrier *is* the carrier `S u`, and the match is forwarded from `hSmatch`.
+    intro u h hgate
+    have hcarrier :
+        smoothingBaseSynth (I := I) g₀ a u + (S u - smoothingBaseSynth (I := I) g₀ a u) = S u := by
+      abel
+    rw [hcarrier]
+    exact hSmatch u h hgate
 
 /-- **The DeTurck gauge-cancellation corrector over the heat-smoothing base carrier (the genuine
 deep first-order-freedom node, transiting the Weyl node).**
