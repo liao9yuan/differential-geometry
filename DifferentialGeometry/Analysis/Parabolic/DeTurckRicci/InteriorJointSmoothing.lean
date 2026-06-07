@@ -4,6 +4,8 @@ import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOperator.ConventionBridge
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.OperatorEquation
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence
+import DifferentialGeometry.Analysis.Parabolic.DuhamelTrajectoryTimeRegularity
+import DifferentialGeometry.Analysis.Parabolic.JointSmoothnessFromSobolevTower
 
 /-!
 # Interior joint smoothing and up-to-`0` boundary regularity of the realized DeTurck metric
@@ -80,6 +82,41 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
+
+/-- **Fibrewise addition of two jointly-smooth `Hom(TM, Hom(TM, ℝ))`-bundle "sections over
+`M` parametrized by time".**  If `q ↦ TotalSpace.mk' _ q.2 (φ₁ q)` and
+`q ↦ TotalSpace.mk' _ q.2 (φ₂ q)` are both jointly `(t, x)`-`C∞` on a set `s ⊆ ℝ × M`, so is
+`q ↦ TotalSpace.mk' _ q.2 (φ₁ q + φ₂ q)`: the trivialization is fibrewise linear, so the
+trivialized fibre value of the sum is the sum of the trivialized fibre values, and the base
+map `q ↦ q.2` is shared (`Bundle.contMDiffWithinAt_totalSpace`). -/
+private lemma contMDiffWithinAt_homSection_add {s : Set (ℝ × M)} {q₀ : ℝ × M}
+    {φ₁ φ₂ : ℝ × M → (y : M) → TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ}
+    (h₁ : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+      (fun q : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+        q.2 (φ₁ q q.2)) s q₀)
+    (h₂ : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+      (fun q : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+        q.2 (φ₂ q q.2)) s q₀) :
+    ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+      (fun q : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+        q.2 (φ₁ q q.2 + φ₂ q q.2)) s q₀ := by
+  set V : M → Type _ := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ with hV
+  rw [Bundle.contMDiffWithinAt_totalSpace] at h₁ h₂ ⊢
+  refine ⟨h₁.1, ?_⟩
+  set e := trivializationAt (E →L[ℝ] E →L[ℝ] ℝ) V q₀.2 with he
+  have hsum := h₁.2.add h₂.2
+  refine hsum.congr_of_eventuallyEq ?_ ?_
+  · have hmem : (fun q : ℝ × M => q.2) ⁻¹' e.baseSet ∈ nhdsWithin q₀ s := by
+      refine mem_nhdsWithin_of_mem_nhds ?_
+      exact (continuous_snd.continuousAt).preimage_mem_nhds
+        (e.open_baseSet.mem_nhds (FiberBundle.mem_baseSet_trivializationAt' q₀.2))
+    filter_upwards [hmem] with q hq
+    exact ((e.linear ℝ hq).map_add (φ₁ q q.2) (φ₂ q q.2))
+  · exact (e.linear ℝ (FiberBundle.mem_baseSet_trivializationAt' q₀.2)).map_add
+      (φ₁ q₀ q₀.2) (φ₂ q₀ q₀.2)
 
 /-- **Joint `(t, x)`-`C∞`-up-to-AND-across-`0` of the realized metric inner-product
 `Hom`-section over all of `M`, pinned to the Duhamel mild solution (the genuine parabolic
@@ -186,7 +223,50 @@ theorem realizedMetric_innerHomSection_jointContMDiffOn_uptoZero
       (fun q : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
         (E := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
         q.2 ((g_DT q.1).inner q.2))
-      (Set.Icc (0 : ℝ) T ×ˢ Set.univ) := sorry
+      (Set.Icc (0 : ℝ) T ×ˢ Set.univ) := by
+  have htower : ∀ (k m : ℕ),
+      ContDiffOn ℝ (k : ℕ∞)
+        (fun t : ℝ =>
+          IntrinsicSobolev.SmoothCcTensor.toHs (g := g_bg) (r := 0) (s := 2) (2 * m) (T_s t))
+        (Set.Icc (0 : ℝ) T) := fun k m =>
+    realizedPerturbation_timeContDiffTower_uptoZero (I := I) (M := M)
+      g_bg T_s u₂ N_cont ha hHk hcont hreg hcanon hduhamel k m
+  have hpert : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+      (fun q : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+        q.2 (ccTensorBilinSymm (I := I) g_bg (T_s q.1) q.2))
+      (Set.Icc (0 : ℝ) T ×ˢ Set.univ) :=
+    jointContMDiffOn_ccTensorBilinSymm_of_timeContDiffTower (I := I) (M := M)
+      g_bg T_s htower
+  have hbg : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+      (fun q : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+        q.2 (g_bg.inner q.2))
+      (Set.Icc (0 : ℝ) T ×ˢ Set.univ) := by
+    have hbg_M : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+        (fun y : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+          (E := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+          y (g_bg.inner y)) := g_bg.contMDiff
+    exact (hbg_M.comp_contMDiffOn contMDiffOn_snd)
+  intro q₀ hq₀
+  have hsum := contMDiffWithinAt_homSection_add (I := I) (M := M)
+    (φ₁ := fun _ : ℝ × M => fun y : M => g_bg.inner y)
+    (φ₂ := fun q : ℝ × M => fun y : M => ccTensorBilinSymm (I := I) g_bg (T_s q.1) y)
+    (hbg q₀ hq₀) (hpert q₀ hq₀)
+  refine hsum.congr_of_eventuallyEq ?_ ?_
+  · filter_upwards [self_mem_nhdsWithin] with q hq
+    have hqIcc : q.1 ∈ Set.Icc (0 : ℝ) T := hq.1
+    refine congrArg (TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+      (E := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) q.2) ?_
+    ext v w
+    rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply]
+    exact hreal q.1 hqIcc q.2 v w
+  · have hq₀Icc : q₀.1 ∈ Set.Icc (0 : ℝ) T := hq₀.1
+    refine congrArg (TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+      (E := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) q₀.2) ?_
+    ext v w
+    rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply]
+    exact hreal q₀.1 hq₀Icc q₀.2 v w
 
 /-- **Single-chart interior joint `(t, x)`-`C∞` of the realized chart-Gram entry
 (genuine parabolic interior smoothing).**
