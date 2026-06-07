@@ -5,6 +5,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Realiz
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricRicciDiffOperatorExpansion
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.MetricDifferenceFdBTermTree
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricCurvatureDifferenceOpDecomposition
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricCurvatureDifferenceCovJet
 
 /-! # The covariant-jet Faà-di-Bruno expansion of the Ricci–DeTurck right-hand side along the segment
 
@@ -215,8 +216,52 @@ theorem ricciLinearSection_iteratedCovGrad_diffArm_rfns_le
             Cd * ∑ i ∈ Finset.range (j + 2 + 1),
               riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
                 ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                    (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x) :=
-  sorry
+                    (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x) := by
+  classical
+  -- The curvature-trace covariant-jet reduction to the connection level: a family-uniform constant
+  -- `Cd` and the bound `rfns(∇^j linearSection)(x) ≤ Cd · ∑_{p ≤ j+1} rfns(∇^p R)(x)` with
+  -- `R := covGrad g₀ 0 2 w` the connection-level first covariant gradient of the difference factor.
+  obtain ⟨Cd, hCd_nn, hred⟩ :=
+    ricciLinearSection_covGrad_traceReduction_rfns_le (I := I) g₀ a ha B hB j
+  refine ⟨Cd, hCd_nn, fun T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ x => ?_⟩
+  set w : Integral.L2.SmoothCcTensor g₀ 0 2 := realizeSymmCcTensor (I := I) g₀ (T₁ - T₂) with hw_def
+  set R : Integral.L2.SmoothCcTensor g₀ 0 3 :=
+    Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 2 w with hR_def
+  -- The connection-level reduction at `x`.
+  have hbound := hred T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ x
+  rw [← hw_def, ← hR_def] at hbound
+  refine hbound.trans ?_
+  -- The sorry-free rank-shift `rfns(∇^p R)(x) = rfns(∇^{p+1} w)(x)` (front-commutation `R = ∇w`).
+  have hshift : ∀ p : ℕ,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p R).toSection x) =
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p + 1)) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 (p + 1) w).toSection x) := by
+    intro p
+    rw [hR_def]
+    exact DifferentialGeometry.PDE.DeTurck.riemannianFiberNormSq_toSection_heq (I := I) (M := M) g₀
+      (by omega : (3 : ℕ) + p = 2 + (p + 1))
+      (DifferentialGeometry.PDE.DeTurck.iteratedCovGrad_covGrad_comm_heq_local
+        (I := I) (M := M) g₀ 2 p w) x
+  -- Rewrite the connection-level jet sum into the `∇^{p+1} w` jet sum, then dominate by the
+  -- `∇^{≤ j+2} w` jet sum (the extra order-`0` term `rfns(w)(x) ≥ 0` is dropped).
+  refine mul_le_mul_of_nonneg_left ?_ hCd_nn
+  -- The connection-level sum `∑_{p ≤ j+1} rfns(∇^p R)` equals the shifted sum `∑_{p ≤ j+1} rfns(∇^{p+1} w)`.
+  have hsum_eq : (∑ p ∈ Finset.range (j + 1 + 1),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p R).toSection x)) =
+      ∑ p ∈ Finset.range (j + 1 + 1),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p + 1)) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 (p + 1) w).toSection x) :=
+    Finset.sum_congr rfl fun p _ => hshift p
+  rw [hsum_eq, hw_def]
+  -- `∑_{i ≤ j+2} rfns(∇^i w) = ∑_{p ≤ j+1} rfns(∇^{p+1} w) + rfns(∇^0 w)`, the order-`0` term nonneg.
+  rw [Finset.sum_range_succ' (fun i =>
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+          (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)) (j + 2)]
+  exact le_add_of_nonneg_right
+    (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + 0) x _)
 
 /-- **(POSIT — the curvature fixed-pair Cross covariant-jet bound.)**  The intrinsic squared fibre norm
 of the order-`j` covariant gradient of the concrete quadratic-in-difference curvature Cross section
