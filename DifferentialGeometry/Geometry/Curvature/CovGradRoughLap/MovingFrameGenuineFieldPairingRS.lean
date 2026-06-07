@@ -608,6 +608,93 @@ noncomputable def GcurvSectionRS
     (GcurvSectionRS (I := I) (M := M) g r s S).toSection x =
       genuineCurvPureRFibRS (I := I) (M := M) g r s S x := rfl
 
+/-- **The moving-centre differentiated-curvature fibre bound at contravariant rank `r` (the deepest
+coupled curvature atom).** The rank-`r` lift of the rank-`0` deepest moving-frame curvature atom
+`exists_movingCentreDiffCurvSection_fiberNormSq_bound`
+(`MovingFrameDifferentiatedCurvatureSection`), with the proportional pure-Riemann section bound folded
+in (the rank-`r` analogue of `GcurvSection_fiberNormSq_le_covGrad` is itself absent — it needs the
+absent rank-`r` proportional curvature sup
+`riemannianFiberNormSq_riemannOp_covGrad_uniform_proportional_bound`, stated only at rank `0`). For a
+closed smooth Riemannian manifold `(M, g)` there is a *valence-dependent* nonnegative constant
+`K : ℕ → ℝ` such that, at every covariant rank `s` and for every smooth compactly-supported
+`(r, s)`-tensor `S`, the order-`2` commutator defect `Curv S := pointwiseTensorCurvRS g r s S` admits a
+single differentiated-curvature genuine field `Gcd : SmoothCcTensor g r (s + 1)` — the gauge-glued
+tensorial `(∇R) S` section over the concrete pure-Riemann genuine section `GcurvSectionRS g r s S` (the
+`R(∇S)` contraction) — such that, writing the moving-frame remainder as the literal subtraction
+`Grem := Curv S − GcurvSectionRS g r s S − Gcd`:
+
+* `rfns(GcurvSectionRS)(x) ≤ (K s)² · rfns(∇S)(x)` — the pure-`R` field, genuinely `rfns(∇S)`-order
+  (each summand is a bundled curvature operator `riemannOp (tensorCov g r (s + 1)) x Bᵢ · (∇S(x))`,
+  fibre-bounded proportional to `rfns(∇S)` by the rank-`r` proportional curvature sup, summed over the
+  orthonormal frame);
+* `rfns(Gcd)(x) ≤ (K s)² · (rfns(∇S)(x) + rfns(S)(x))` — the differentiated-curvature `(∇R) S` field,
+  sum-order (the gauge-glued tensorial section, the Leibniz defect against the non-tensorial
+  moving-frame `(∇R) S` trace absorbed into the wider envelope);
+* `rfns(Grem)(x) ≤ (K s)² · (rfns(∇²S)(x) + rfns(∇S)(x) + rfns(S)(x))` — the moving-frame /
+  frame-bracket remainder, `rfns(∇²S)`-order in its leading term after the third-order Weitzenböck
+  cancellation of the top-order `∇³S` terms by the iterated Ricci identity
+  (`secondCovDeriv_covGrad_antisymm_eq_riemannOp_gen`, lifted to the `(r, s)`-bundle through the
+  slot-wise curvature formula `riemannSec_tensorCov_apply_eval` of `TensorSlotwiseCurvatureRS`), the
+  lower-order Leibniz-defect terms in the sum;
+* `⟨Grem, ∇S⟩_{L²} = 0` — the integrated moving-frame nullity (the moving-frame remainder is a total
+  covariant divergence of an `∇S`-order field, integrating to zero against `∇S` over the closed
+  manifold by the covariant Green identity).
+
+**T1 (integrated-only).** Only the *integrated* nullity `⟨Grem, ∇S⟩_{L²} = 0` and the *summed* fibre
+bounds are sound; the per-point / per-direction moving-frame remainder is non-tensorial
+(chartJ-unbounded through `smoothExtensionTangent`) and a pointwise-divergence form would be
+false-as-stated. The pointwise pairing is *not* zero — it carries the genuine non-divergence Bochner
+content `‖∇²S‖² − ⟨Δ_∇²(∇S), S⟩`.
+
+**Non-vacuity.** The zero witness `Gcd = 0` is rejected by the *coupling*: with `Gcd = 0` the nullity
+reads `⟨Curv S − GcurvSectionRS, ∇S⟩_{L²} = 0`, i.e. the pure-Riemann pairing carries the entire
+Weitzenböck value, which fails on a non-flat manifold (the differentiated-curvature `(∇R) S` content is
+genuinely missing); and the `Grem` bound with `Gcd = 0` reads
+`rfns(Curv S − GcurvSectionRS) ≤ (K s)² · (rfns(∇²S) + rfns(∇S) + rfns(S))`, *false* since the `(∇R) S`
+content is genuinely `rfns(S)`-order and would not be carried. So the existential `Gcd` must carry the
+actual differentiated-curvature content; the constant family is genuinely positive.
+
+This genuinely general-rank `(r, s)` moving-frame curvature-endomorphism content is absent from the
+library (the rank-`0` atom, the rank-`0` proportional curvature sups, and the rank-`0` tri-split are all
+stated only at contravariant rank `0`), so it is posited here as **one** deepest coupled curvature
+atom — exactly the rank-`r` lift of the rank-`0` deepest atom
+`exists_movingCentreDiffCurvSection_fiberNormSq_bound`, with the proportional pure-Riemann section bound
+folded in. The constant is per-valence (`ℕ → ℝ`), not a single scalar (the curvature endomorphism of
+the `(r, s)`-bundle is an `(r + s)`-slot derivation whose operator norm on the compact manifold grows
+with the valence), so this is NOT the unsatisfiable single-const-∀s shape.
+
+The body is `sorry`; consumers transitively depend on `sorryAx`. -/
+theorem exists_movingCentreDiffCurvSectionRS_fiberNormSq_bound
+    (g : SmoothRiemannianMetric I M) (r : ℕ) :
+    ∃ K : ℕ → ℝ, (∀ s, 0 ≤ K s) ∧
+      ∀ (s : ℕ) (S : SmoothCcTensor g r s),
+        ∃ Gcd : SmoothCcTensor g r (s + 1),
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
+              ((GcurvSectionRS (I := I) (M := M) g r s S).toSection x) ≤
+            K s ^ 2 *
+              riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
+                ((covGrad (I := I) (M := M) g r s S).toSection x)) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x (Gcd.toSection x) ≤
+            K s ^ 2 *
+              (riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
+                  ((covGrad (I := I) (M := M) g r s S).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g r s x (S.toSection x))) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
+              ((pointwiseTensorCurvRS (I := I) (M := M) g r s S -
+                  GcurvSectionRS (I := I) (M := M) g r s S - Gcd).toSection x) ≤
+            K s ^ 2 *
+              (riemannianFiberNormSq (I := I) (M := M) g r (s + 1 + 1) x
+                  ((covGrad (I := I) (M := M) g r (s + 1)
+                    (covGrad (I := I) (M := M) g r s S)).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
+                    ((covGrad (I := I) (M := M) g r s S).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g r s x (S.toSection x))) ∧
+          tensorL2Inner (I := I) (M := M) g r (s + 1)
+              (pointwiseTensorCurvRS (I := I) (M := M) g r s S -
+                GcurvSectionRS (I := I) (M := M) g r s S - Gcd).toFun
+              (covGrad (I := I) (M := M) g r s S).toFun = 0 :=
+  sorry
+
 /-- **The deepest moving-frame curvature primitive at contravariant rank `r` (posited general-rank
 curvature child).** For a closed smooth Riemannian manifold `(M, g)` there is a *valence-dependent*
 nonnegative constant `Cper : ℕ → ℝ` such that, at every covariant rank `s` and for every smooth
@@ -698,8 +785,14 @@ theorem exists_pointwiseTensorCurvRS_genuineTriSplit_divergence
                     (covGrad (I := I) (M := M) g r s S)).toSection x) +
                 riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
                     ((covGrad (I := I) (M := M) g r s S).toSection x) +
-                riemannianFiberNormSq (I := I) (M := M) g r s x (S.toSection x))) :=
-  sorry
+                riemannianFiberNormSq (I := I) (M := M) g r s x (S.toSection x))) := by
+  obtain ⟨K, hK_nn, h⟩ :=
+    exists_movingCentreDiffCurvSectionRS_fiberNormSq_bound (I := I) (M := M) g r
+  refine ⟨K, hK_nn, fun s S => ?_⟩
+  obtain ⟨Gcd, hGScurv, hGcd, hGrem, hnull⟩ := h s S
+  refine ⟨Gcd, pointwiseTensorCurvRS (I := I) (M := M) g r s S -
+      GcurvSectionRS (I := I) (M := M) g r s S - Gcd, ?_, hnull, hGScurv, hGcd, hGrem⟩
+  abel
 
 /-- **The bracket-free `L²` pairing of the genuine fields at `(r, s)` (purely-algebraic nullity
 reduction).** If the moving-frame remainder `Curv S − Gcurv − GcurvDeriv` pairs to zero against `∇S`
