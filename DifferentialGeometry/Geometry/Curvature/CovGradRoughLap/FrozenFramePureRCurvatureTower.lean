@@ -1633,6 +1633,61 @@ private lemma pureRGenuineEndoFib_eq_comp
     ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from W.toSection x) d)]
 
 set_option linter.unusedSectionVars false in
+/-- **The order-`0` moving-frame pure-Riemann operator trace value is the frame-summed bundle curvature
+contraction of the slot-`0` slice (the frame-free `∑ᵢ R(Bᵢ, ·)`-trace value anatomy).** For a smooth
+compactly-supported `(0, m + 1)`-tensor `W`, base point `x`, and tuple `v`, the unit-evaluated value of
+the order-`0` pure-Riemann curvature operator `pureRGenuineDiffOp g 0 (m + 1) W` is the moving-frame sum
+(over `Bᵢ := smoothOrthoFrame g x i`, orthonormal at `x`) of the `(0, m)`-tensor bundle curvature
+`riemannOp (tensor0SCov m)` evaluated in the leading curvature direction `Bᵢ` and the gradient direction
+`v 0`, contracted against the slot-`0` slice `slot0_{Bᵢ} W := tensor0S_curry m x (W(x) ⟨unit⟩) (Bᵢ)` of `W`
+(the unit-read curry of `W` along `Bᵢ`), read on the trailing tuple:
+```
+(pureRGenuineDiffOp g 0 (m + 1) W)(x)(unit)(v)
+  = ∑ᵢ toModel(R^{(0,m)}(Bᵢ, v 0)(slot0_{Bᵢ} W))(tail v).
+```
+This is the explicit `riemannOp`-trace value of the operator-field carrier `appCc (Φ₀ (m + 1)) W =
+pureRGenuineDiffOp g 0 (m + 1) W` (the `Classical.choose` base spec defining `curvOpField`): it pins
+*what* the choose-spec carries — the frame-summed bundle curvature trace `∑ᵢ R(Bᵢ, ·)` acting through the
+slot-`0` reading of `W`, built from `g` and the Levi-Civita curvature alone (no
+`smoothExtensionTangent` jet). It is frame-free in value (`pureRFrozenDirCLM_frame_independent`), the
+sound order-`0` content whose covariant derivative is the differentiated trace `(∇R) W`.
+
+**Proof.** The fibre value `(pureRGenuineDiffOp g 0 (m + 1) W)(x) = pureRGenuineEndoFib g m W x` (the
+order-`0` base, `m + 1` branch) is the slot-`0` uncurry through `covGradBundleEquiv` of the moving-frame
+pure-Riemann direction CLM (`pureRGenuineEndoFib`, `pureRFrozenEndoFib`,
+`pureRFrozenDirCLM_eq_pureRDirCLMTensor`); the value formula `pureRDirCLMTensor_covGradEquiv_eval` reads
+that uncurry as the frame sum of bundle curvature contractions of `tensor0S_curry m x (W x) (Bᵢ)`. -/
+theorem pureRGenuineDiffOp_zero_succ_toSection_unit_eval
+    (g : SmoothRiemannianMetric I M) (m : ℕ) (W : SmoothCcTensor g 0 (m + 1)) (x : M)
+    (v : Fin (m + 1) → TangentSpace I x) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+          (pureRGenuineDiffOp (I := I) (M := M) g 0 (m + 1) W).toSection x)
+          (unitZeroSec (I := I) (M := M) x)) v =
+      ∑ i : Fin (Module.finrank ℝ E),
+        Tensor0SSpace.toModel
+          (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M m (LeviCivita (I := I) g)) x
+            (smoothOrthoFrame (I := I) g x i x) (v 0)
+            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) m x
+              ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from W.toSection x)
+                (unitZeroSec (I := I) (M := M) x))
+              (smoothOrthoFrame (I := I) g x i x)))
+          (Matrix.vecTail v) := by
+  rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+        (pureRGenuineDiffOp (I := I) (M := M) g 0 (m + 1) W).toSection x) =
+      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+        covGradBundleEquiv (I := I) (M := M) 0 m x
+          (pureRDirCLMTensor (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x
+            (W.toSection x))) from by
+    change (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from
+        pureRGenuineEndoFib (I := I) (M := M) g m W x) = _
+    rw [pureRGenuineEndoFib, pureRFrozenEndoFib,
+      pureRFrozenDirCLM_eq_pureRDirCLMTensor (I := I) (M := M) g m
+        (smoothOrthoFrame (I := I) g x) W x]]
+  rw [pureRDirCLMTensor_covGradEquiv_eval (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x
+    (W.toSection x) (unitZeroSec (I := I) (M := M) x) v]
+
+set_option linter.unusedSectionVars false in
 /-- **Base-point smoothness of the rank-`m + 1` pure-Riemann endomorphism operator field.** The
 `(m + 1, m + 1)`-tensor fibre field `x ↦ pureREndoOpFib g m x` is a smooth section of the operator
 bundle. By `contMDiff_clm_section_of_pointwise` it suffices to show, for every smooth
