@@ -341,7 +341,7 @@ private lemma chartGramOnE_joint_contDiffOn_of_manifold
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
         (fun q : ℝ × M =>
           chartGramOnE (I := I) (g_DT q.1) α i j (extChartAt I α q.2))
-        (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+        (Set.Ioo (0 : ℝ) T ×ˢ (chartAt H α).source))
     (i j : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞
       (fun p : ℝ × E => chartGramOnE (I := I) (g_DT p.1) α i j p.2)
@@ -358,9 +358,11 @@ private lemma chartGramOnE_joint_contDiffOn_of_manifold
       intro p hp; exact Set.mem_preimage.mpr (interior_subset hp.2)
   have hmaps : Set.MapsTo Ψ
       (Set.Ioo (0 : ℝ) T ×ˢ interior (extChartAt I α).target)
-      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ) := by
+      (Set.Ioo (0 : ℝ) T ×ˢ (chartAt H α).source) := by
     intro p hp
-    exact ⟨hp.1, Set.mem_univ _⟩
+    refine ⟨hp.1, ?_⟩
+    have hbase := symm_mem_baseSet_of_mem_interior (I := I) (α := α) hp.2
+    rwa [trivializationAt_baseSet_eq_chartAt_source] at hbase
   have hcomp : ContMDiffOn ((𝓘(ℝ, ℝ)).prod 𝓘(ℝ, E)) 𝓘(ℝ, ℝ) ∞
       ((fun q : ℝ × M =>
           chartGramOnE (I := I) (g_DT q.1) α i j (extChartAt I α q.2)) ∘ Ψ)
@@ -389,7 +391,7 @@ private lemma chartDeTurckVFComp_joint_contMDiffOn
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
         (fun q : ℝ × M =>
           chartGramOnE (I := I) (g_DT q.1) α i j (extChartAt I α q.2))
-        (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
+        (Set.Ioo (0 : ℝ) T ×ˢ (chartAt H α).source))
     (p : Fin (Module.finrank ℝ E)) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun q : ℝ × M =>
@@ -1014,7 +1016,7 @@ theorem deturck_vf_joint_smoothness
         (fun q : ℝ × M =>
           Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) x₀ i j
             (extChartAt I x₀ q.2))
-        (Set.Ioo (0 : ℝ) T ×ˢ Set.univ)) :
+        (Set.Ioo (0 : ℝ) T ×ˢ (chartAt H x₀).source)) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
         : TangentBundle I M))
@@ -1189,7 +1191,7 @@ theorem deturck_solution_joint_smooth
         (fun q : ℝ × M =>
           Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) x₀ i j
             (extChartAt I x₀ q.2))
-        (Set.Ioo (0 : ℝ) T ×ˢ Set.univ)) :
+        (Set.Ioo (0 : ℝ) T ×ˢ (chartAt H x₀).source)) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2
         (deTurckVF (I := I) (g_DT q.1) (g_DT 0) q.2) : TangentBundle I M))

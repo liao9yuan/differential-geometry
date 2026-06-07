@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.InteriorChartRegular
 import DifferentialGeometry.Geometry.Flow.VectorField
 import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOperator.ConventionBridge
+import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.OperatorEquation
 
 /-!
 # Interior joint smoothing and up-to-`0` boundary regularity of the realized DeTurck metric
@@ -26,10 +27,18 @@ consumes).  These are the genuine interior parabolic smoothing plus continuity u
 smooth initial datum for the strictly-parabolic, smooth-quasilinear DeTurck–Ricci flow.
 
 Each node is stated against the realized family `g_DT = g_bg + ccTensorBilinSymm (T_s ·)`
-(`hreal`) whose order-`2k` spatial Sobolev trace is time-continuous (`hHk`): it asserts
-genuine regularity *of that realized parabolic flow*, and rejects a merely-`C⁰` family.
-The hypotheses are the carrier/PDE realize data, not the conclusion; no packaging.  The
-bodies remain `sorry`, so consumers transitively depend on `sorryAx`.
+(`hreal`).  The genuine parabolic-smoothing node
+`realizedMetric_innerHomSection_jointContMDiffOn_uptoZero` (and its DeTurck-field consumer
+`realizedMetric_deTurckVF_jointContMDiffOn_uptoZero`) is pinned to the **spectral Duhamel
+carrier** `u₂` — the carrier solving the abstract parabolic equation
+`∂_t (ι u₂) = Δ_∇ u₂ + N_cont (ι u₂)` (`hreg`, the heat-semigroup/Duhamel defining identity)
+with time-continuous inclusion (`hcont`) and carrier↔perturbation coordinate identity
+(`hcanon`).  This spectral pinning rejects any non-parabolic free family (e.g.
+`T_s t := |t − t₀| · S₀`, which has no interior time-derivative and so violates `hreg`),
+whereas the bare order-`2k` Sobolev-trace time-continuity `hHk` (used by the `C⁰`-up-to-`0`
+chart-Gram node `realizedMetric_chartGramOnE_continuousOn_uptoZero`) would not.  The
+hypotheses are the carrier/PDE/realize data, not the conclusion; no packaging.  The genuine
+parabolic-smoothing bodies remain `sorry`, so consumers transitively depend on `sorryAx`.
 
 ## Main results
 
@@ -62,6 +71,8 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
+open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -71,39 +82,120 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+/-- **Joint `(t, x)`-`C∞`-up-to-AND-across-`0` of the realized metric inner-product
+`Hom`-section over all of `M`, pinned to the spectral parabolic trajectory (the genuine
+parabolic up-to-boundary smoothing — the single open node).**
+
+For the realized DeTurck flow `g_DT = g_bg + ccTensorBilinSymm (T_s ·)` (`hreal`) whose
+perturbation `T_s` is the realization of the **spectral Duhamel carrier** `u₂` — i.e. the
+carrier's spectral coordinates are the `L²` coordinates of `T_s` (`hcanon`), the carrier
+inclusion `t ↦ ι (u₂ t)` is time-continuous up to `0` (`hcont`), and on the open interior
+`u₂` solves the abstract parabolic equation `∂_t (ι u₂) = Δ_∇ u₂ + N_cont (ι u₂)` (`hreg`,
+the heat-semigroup/Duhamel defining identity) — the bundle inner-product `Hom`-section
+`(t, x) ↦ (g_DT t).inner x` (a section of `Hom(TM, Hom(TM, ℝ))`) is jointly `(t, x)`-`C∞`
+over the product model `𝓘(ℝ, ℝ).prod I` on the *closed* slab `Icc 0 T ×ˢ univ`.
+
+This is the SINGLE genuine classical parabolic-regularity input for the strictly-parabolic,
+smooth-quasilinear DeTurck–Ricci flow with smooth initial metric (Chow–Knopf): the realized
+metric is, jointly in time and space, smooth up to and across the initial datum.  Its
+genuine content is the parabolic-semigroup time-smoothing of the realized solution — `hreg`
+exhibits `ι u₂` as a strong/mild solution of the analytic-semigroup-generated abstract heat
+equation, and the parabolic smoothing of that equation (time-analyticity of the semigroup,
+the Duhamel time-derivative tower) upgrades the bare time-continuity `hcont` into joint
+`(t, x)`-`C∞` of the realized `Hom`-section.  The hypotheses are the spectral-side defining
+data of the trajectory; the conclusion is the joint smoothness of the bundle `Hom`-section,
+a different object on `M` — no packaging.
+
+**The pinning is genuine — it rejects the kink family (litmus).**  The earlier
+`{hreal, hHk}`-only form of this node (and the formerly-`{hreal, hHk}`-stated chart-Gram
+nodes) is FALSE: the family `T_s t := |t − t₀| · S₀` (fixed smooth `S₀ ≠ 0`,
+`t₀ ∈ (0, T)`) is time-continuous into every Sobolev scale, so it satisfies any
+`{hreal, hHk}` set, yet `(t, x) ↦ (g_DT t).inner x` has the `|t − t₀|` kink at `t₀` and is
+not even jointly `C¹`.  This kink family is now rejected by the spectral pinning: by
+`hcanon` the carrier coordinates `(u₂ s).coeff i` are the (linear) `L²` coordinates of
+`T_s s = |s − t₀| · S₀`, hence each coordinate of `ι (u₂ s)` is `|s − t₀|` times a constant,
+which is **not differentiable at `t₀`** — so `hreg` (which demands `HasDerivAt (ι ∘ u₂) … t₀`
+for every interior `t₀`) is violated.  `hreg` is the spectral-side defining identity of a
+genuine parabolic trajectory, not the joint-smoothness conclusion (it is a `1`-D
+time-derivative in the Sobolev Banach space about `u₂`, not a `ContMDiffOn` of a bundle
+section over `M`); it constrains `u₂`/`T_s`/`g_DT`, not the conclusion.
+
+This node supplies the missing joint datum in the basis-free `Hom`-section form the
+chart-local bridge `chartGramOnE_realizedMetric_jointContMDiffOn`
+(`Analysis/Parabolic/DeTurckRicci/InteriorChartRegularityBridge.lean`) consumes; the body is
+`sorry` (the genuine parabolic-semigroup time-smoothing), so consumers transitively depend
+on `sorryAx`. -/
+theorem realizedMetric_innerHomSection_jointContMDiffOn_uptoZero
+    (g_bg : SmoothRiemannianMetric I M)
+    (g_DT : ℝ → SmoothRiemannianMetric I M)
+    (T_s : ℝ → Integral.L2.SmoothCcTensor g_bg 0 2) {a : ℕ} {T : ℝ}
+    (u₂ : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
+    (N_cont : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1) →
+      tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ))
+    (ha : 2 * a > Module.finrank ℝ E + 4)
+    (hreal : ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
+      (g_DT t).inner x v w
+        = g_bg.inner x v w + ccTensorBilinSymm (I := I) g_bg (T_s t) x v w)
+    (hcont : ContinuousOn
+      (fun s : ℝ => tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
+        (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (Set.Icc 0 T))
+    (hreg : ∀ s ∈ Set.Ioo (0 : ℝ) T,
+      HasDerivAt
+        (fun r => (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
+          (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ r)))
+        (scaleLaplacianFun (I := I) (M := M) (u₂ s) +
+          N_cont
+            (tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s)
+    (hcanon : ∀ s ∈ Set.Icc (0 : ℝ) T,
+        ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g_bg 0 2,
+      (u₂ s).coeff i
+        = tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g_bg 0 2)
+            (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+      (fun q : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+        q.2 ((g_DT q.1).inner q.2))
+      (Set.Icc (0 : ℝ) T ×ˢ Set.univ) := sorry
+
 /-- **Single-chart interior joint `(t, x)`-`C∞` of the realized chart-Gram entry
 (genuine parabolic interior smoothing).**
 
-For the realized DeTurck flow `g_DT = g_bg + ccTensorBilinSymm (T_s ·)` (`hreal`) whose
-order-`2k` spatial Sobolev trace `t ↦ (T_s t).toHs (2k)` is time-continuous at a
-supercritical order (`hHk`), each single-chart Gram entry
+For a realized DeTurck flow `g_DT` whose bundle inner-product `Hom`-section
+`(t, x) ↦ (g_DT t).inner x` is jointly `(t, x)`-`C∞` over the product model `𝓘(ℝ, ℝ).prod I`
+on the interior `Ioo 0 T ×ˢ baseSet` (`hsmooth`), each single-chart Gram entry
 `(t, x) ↦ chartGramOnE (g_DT t) α i j (extChartAt I α x)` is jointly `(t, x)`-`C∞` on the
-interior `Ioo 0 T ×ˢ univ`.
+interior `Ioo 0 T ×ˢ (chartAt H α).source`.
 
 This is the interior parabolic smoothing of the strictly-parabolic, smooth-quasilinear
 DeTurck–Ricci flow, in the single-chart `chartGramOnE α ∘ extChartAt I α` form the
 vector-field joint-smoothness assembler `deturck_solution_joint_smooth`
-(`DeTurckVFSmoothness.lean`) consumes (at each base point the field uses its own chart, so
-the `univ` formulation is genuinely needed).  The hypotheses are the carrier/PDE realize
-data; the conclusion is interior joint smoothness, distinct from them — no packaging.  The
-node is the deferred classical interior-parabolic-regularity input; its body is `sorry`,
-so consumers transitively depend on `sorryAx`. -/
+(`DeTurckVFSmoothness.lean`) consumes (each base point uses its own chart `α`; off the chart
+source the round-trip `extChartAt I α` is junk, so the source domain is the honest one).  The
+hypothesis is the *joint* smoothness of the metric `Hom`-section (the genuine parabolic
+datum supplied by `realizedMetric_innerHomSection_jointContMDiffOn_uptoZero`); the conclusion
+is the scalar chart-Gram entry's interior joint smoothness, distinct from it — no packaging.
+
+This is sorry-free glue: the chart-local `C∞` bridge
+`chartGramOnE_realizedMetric_jointContMDiffOn`
+(`Analysis/Parabolic/DeTurckRicci/InteriorChartRegularityBridge.lean`), which transports the
+joint `Hom`-section smoothness to the scalar chart-Gram entry on the chart source via the
+chart round-trip identity. -/
 theorem realizedMetric_chartGramOnE_jointContMDiffOn_interior
-    (g_bg : SmoothRiemannianMetric I M) (α : M) (i j : Fin (Module.finrank ℝ E))
-    (g_DT : ℝ → SmoothRiemannianMetric I M)
-    (T_s : ℝ → Integral.L2.SmoothCcTensor g_bg 0 2) {k : ℕ} {T : ℝ}
-    (hk : 2 * k > Module.finrank ℝ E + 4)
-    (hreal : ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
-      (g_DT t).inner x v w
-        = g_bg.inner x v w + ccTensorBilinSymm (I := I) g_bg (T_s t) x v w)
-    (hHk : ContinuousOn (fun t : ℝ =>
-      IntrinsicSobolev.SmoothCcTensor.toHs (g := g_bg) (r := 0) (s := 2) (2 * k) (T_s t))
-      (Set.Icc 0 T)) :
+    (α : M) (i j : Fin (Module.finrank ℝ E))
+    (g_DT : ℝ → SmoothRiemannianMetric I M) {T : ℝ}
+    (hsmooth : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+      (fun q : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+        q.2 ((g_DT q.1).inner q.2))
+      (Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) α).baseSet)) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
       (fun q : ℝ × M =>
         Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j
           (extChartAt I α q.2))
-      (Set.Ioo (0 : ℝ) T ×ˢ Set.univ) := sorry
+      (Set.Ioo (0 : ℝ) T ×ˢ (chartAt H α).source) :=
+  chartGramOnE_realizedMetric_jointContMDiffOn (I := I) (M := M) α i j g_DT hsmooth
 
 /-- **Single-chart `C⁰`-up-to-`0` of the realized chart-Gram entry (genuine parabolic
 continuity up to the initial datum).**
@@ -149,39 +241,51 @@ theorem realizedMetric_chartGramOnE_continuousOn_uptoZero
     g_bg α i j g_DT T_s hk hreal hHk
 
 /-- **`C⁰`-up-to-`0` of the raw-fibre chart Fréchet derivative of the realized DeTurck
-vector field (genuine parabolic up-to-boundary gradient regularity).**
+vector field, from the field's closed-slab joint smoothness (genuine moving-frame
+up-to-boundary gradient regularity).**
 
-For the realized DeTurck flow `g_DT = g₀ + ccTensorBilinSymm (T_s ·)` realized off the
-anchor `g₀` (`hreal`) whose order-`2k` spatial Sobolev trace is time-continuous up to `0`
-at a supercritical order (`hHk`), the chart-`α` raw-fibre Fréchet derivative of the DeTurck
-vector field of `g_DT` against the flow background `g_bg`,
-`(t, x) ↦ fderiv ℝ (chartRawRepr α (deTurckVF (g_DT t) g_bg)) (extChartAt I α x)`, is
-jointly continuous up to `0` on `Icc 0 T ×ˢ univ`.
+For a DeTurck vector field whose tangent-bundle section `(t, x) ↦ ⟨x, deTurckVF (g_DT t) g_bg x⟩`
+is jointly `C∞` up to and across `0` on the closed slab `Icc 0 T ×ˢ univ` (`hVF` — supplied by
+`realizedMetric_deTurckVF_jointContMDiffOn_uptoZero`, the sound closed-slab field-smoothness
+node), the chart-`α` raw-fibre Fréchet derivative of the field,
+`(t, x) ↦ fderiv ℝ (chartRawRepr α (deTurckVF (g_DT t) g_bg)) (extChartAt I α x)`, is jointly
+continuous up to `0` on `Icc 0 T ×ˢ (chartAt H α).source`.
 
-This is the up-to-`0` chart-gradient regularity of the DeTurck field — exactly the
-`hgrad0` datum the from-zero manifold-orbit assemblers
-(`fromZero_manifold_orbit_uniform_delta`, `Analysis/ODE/.../FromZeroManifoldOrbit.lean`)
-consume for the conjugating-diffeomorphism construction (the general-point trivialised-
-gradient product rule the chart-calculus layer isolates as a deferred input).  The anchor
-`g₀` (the realize base) and the flow background `g_bg` (the DeTurck-field background) are
-decoupled.  The domain is the chart `α`-source: the raw chart representation
-`chartRawRepr α` and its Fréchet derivative read through `extChartAt I α` carry no meaning
-off the chart source (where the round-trip is junk), so the `univ` formulation would be
-false-as-stated; the source statement is the honest one.  The hypotheses are the carrier/PDE
-realize data; the conclusion is the up-to-`0` gradient continuity, distinct from them — no
-packaging.  The node is the deferred classical up-to-boundary gradient parabolic-regularity
-input; its body is `sorry`, so consumers transitively depend on `sorryAx`. -/
+This is the up-to-`0` chart-gradient regularity of the DeTurck field — the `hgrad0` datum the
+from-zero manifold-orbit assembler `fromZero_manifold_orbit_uniform_delta`
+(`Analysis/ODE/.../FromZeroManifoldOrbit.lean`) consumes for the conjugating-diffeomorphism
+construction.  The domain is the chart `α`-source: the raw chart representation `chartRawRepr α`
+and its Fréchet derivative read through `extChartAt I α` carry no meaning off the chart source
+(where the round-trip is junk), so the `univ` formulation would be false-as-stated; the source
+statement is the honest one.
+
+The previous `{hreal, hHk}`-only form of this node was FALSE: time-continuity of the spectral
+Sobolev trace does not pin the *joint* `(t, x)` regularity of the field's gradient (the
+`T_s t := |t − t₀| · S₀` family is time-continuous at every Sobolev order yet has no joint `C¹`
+gradient at `t = t₀`).  The corrected hypothesis is the field's *joint* closed-slab smoothness
+`hVF`, which is genuinely sufficient: it gives the joint smoothness of the field's *trivialised*
+chart representation `chartTrivRepr α (deTurckVF (g_DT t) g_bg)`
+(`Bundle.Trivialization.contMDiffOn` over the chart `α`); the *raw* representation
+`chartRawRepr α (deTurckVF …)` is the trivialised one post-composed with the ring-inverse of the
+moving trivialisation `chartMovingTriv α (·) = trivToE α ∘ (extChartAt I α).symm` (an `E →L[ℝ] E`
+that is a unit on the chart source, `chartMovingTriv_basepoint_isUnit`), and the smooth-structure
+moving-frame Jacobian `z ↦ chartMovingTriv α z = mfderiv (extChartAt I α) ((extChartAt I α).symm z)`
+(`TangentBundle.continuousLinearMapAt_trivializationAt`) is `C∞` on the chart-target interior, so
+the spatial Fréchet derivative of the raw representation is jointly continuous up to `0` by the
+matrix/CLM product-and-inverse rule.  The hypothesis is the field's joint smoothness; the
+conclusion is the raw-gradient continuity, distinct from it — no packaging.
+
+The body is the genuine moving-frame (chart-Jacobian) smoothness bridge — a chart-frame-layer
+input distinct from the parabolic smoothing isolated in
+`realizedMetric_innerHomSection_jointContMDiffOn_uptoZero`; it remains `sorry`, so consumers
+transitively depend on `sorryAx`. -/
 theorem realizedMetric_deTurckVF_chartRawRepr_fderiv_continuousOn_uptoZero
-    (g₀ g_bg : SmoothRiemannianMetric I M) (α : M)
-    (g_DT : ℝ → SmoothRiemannianMetric I M)
-    (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2) {k : ℕ} {T : ℝ}
-    (hk : 2 * k > Module.finrank ℝ E + 4)
-    (hreal : ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
-      (g_DT t).inner x v w
-        = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s t) x v w)
-    (hHk : ContinuousOn (fun t : ℝ =>
-      IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * k) (T_s t))
-      (Set.Icc 0 T)) :
+    (g_bg : SmoothRiemannianMetric I M) (α : M)
+    (g_DT : ℝ → SmoothRiemannianMetric I M) {T : ℝ}
+    (hVF : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
+        : TangentBundle I M))
+      (Set.Icc (0 : ℝ) T ×ˢ Set.univ)) :
     ContinuousOn
       (fun q : ℝ × M =>
         fderiv ℝ (chartRawRepr (I := I) α
@@ -462,7 +566,7 @@ private lemma chartGramOnE_joint_contDiffOn_of_manifold_closed
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
         (fun q : ℝ × M =>
           chartGramOnE (I := I) (g_DT q.1) α i j (extChartAt I α q.2))
-        (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
+        (Set.Icc (0 : ℝ) T ×ˢ (chartAt H α).source))
     (i j : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞
       (fun p : ℝ × E => chartGramOnE (I := I) (g_DT p.1) α i j p.2)
@@ -479,9 +583,11 @@ private lemma chartGramOnE_joint_contDiffOn_of_manifold_closed
       intro p hp; exact Set.mem_preimage.mpr (interior_subset hp.2)
   have hmaps : Set.MapsTo Ψ
       (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target)
-      (Set.Icc (0 : ℝ) T ×ˢ Set.univ) := by
+      (Set.Icc (0 : ℝ) T ×ˢ (chartAt H α).source) := by
     intro p hp
-    exact ⟨hp.1, Set.mem_univ _⟩
+    refine ⟨hp.1, ?_⟩
+    have hbase := symm_mem_baseSet_of_mem_interior (I := I) (α := α) hp.2
+    rwa [trivializationAt_baseSet_eq_chartAt_source] at hbase
   have hcomp : ContMDiffOn ((𝓘(ℝ, ℝ)).prod 𝓘(ℝ, E)) 𝓘(ℝ, ℝ) ∞
       ((fun q : ℝ × M =>
           chartGramOnE (I := I) (g_DT q.1) α i j (extChartAt I α q.2)) ∘ Ψ)
@@ -512,7 +618,7 @@ private lemma chartDeTurckVFComp_joint_contMDiffOn_closed
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
         (fun q : ℝ × M =>
           chartGramOnE (I := I) (g_DT q.1) α i j (extChartAt I α q.2))
-        (Set.Icc (0 : ℝ) T ×ˢ Set.univ))
+        (Set.Icc (0 : ℝ) T ×ˢ (chartAt H α).source))
     (p : Fin (Module.finrank ℝ E)) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
       (fun q : ℝ × M =>
@@ -585,7 +691,7 @@ theorem deturck_vf_joint_smoothness_uptoZero
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
         (fun q : ℝ × M =>
           chartGramOnE (I := I) (g_DT q.1) x₀ i j (extChartAt I x₀ q.2))
-        (Set.Icc (0 : ℝ) T ×ˢ Set.univ)) :
+        (Set.Icc (0 : ℝ) T ×ˢ (chartAt H x₀).source)) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
         : TangentBundle I M))
@@ -664,44 +770,49 @@ end ClosedSlabVFEngine
 /-- **Single-chart joint `(t, x)`-`C∞`-up-to-AND-across-`0` of the realized chart-Gram
 entry (genuine parabolic up-to-boundary smoothing).**
 
-The closed-slab twin of `realizedMetric_chartGramOnE_jointContMDiffOn_interior`: for the
-realized DeTurck flow `g_DT = g_bg + ccTensorBilinSymm (T_s ·)` (`hreal`) whose order-`2k`
-spatial Sobolev trace is time-continuous up to `0` at a supercritical order (`hHk`), each
-single-chart Gram entry `(t, x) ↦ chartGramOnE (g_DT t) α i j (extChartAt I α x)` is jointly
-`(t, x)`-`C∞` on the *closed* slab `Icc 0 T ×ˢ univ`.
+The closed-slab twin of `realizedMetric_chartGramOnE_jointContMDiffOn_interior`: for a
+realized DeTurck flow `g_DT` whose bundle inner-product `Hom`-section
+`(t, x) ↦ (g_DT t).inner x` is jointly `(t, x)`-`C∞` over the product model `𝓘(ℝ, ℝ).prod I`
+on the *closed* slab `Icc 0 T ×ˢ baseSet` (`hsmooth`), each single-chart Gram entry
+`(t, x) ↦ chartGramOnE (g_DT t) α i j (extChartAt I α x)` is jointly `(t, x)`-`C∞` on the
+*closed* slab `Icc 0 T ×ˢ (chartAt H α).source`.
 
 This is the up-to-and-across-the-initial-datum interior parabolic smoothing of the
 strictly-parabolic, smooth-quasilinear DeTurck–Ricci flow with smooth initial metric `g₀`
-(Chow–Knopf), in the single-chart `chartGramOnE α ∘ extChartAt I α` form (at each base point
-the field uses its own chart, so the `univ` formulation is genuinely needed).  The hypotheses
-are the carrier/PDE realize data; the conclusion is the closed-slab joint smoothness of the
-scalar Gram entry, distinct from them (it rejects a merely-`C⁰` family) — no packaging.  The
-node is the deferred classical up-to-boundary parabolic-regularity input; its body is `sorry`,
-so consumers transitively depend on `sorryAx`. -/
+(Chow–Knopf), in the single-chart `chartGramOnE α ∘ extChartAt I α` form (each base point uses
+its own chart `α`; off the chart source the round-trip is junk, so the source domain is the
+honest one).  The hypothesis is the *joint* smoothness of the metric `Hom`-section (supplied
+by `realizedMetric_innerHomSection_jointContMDiffOn_uptoZero`); the conclusion is the
+closed-slab joint smoothness of the scalar Gram entry, distinct from it — no packaging.
+
+This is sorry-free glue: the chart-local `C∞` bridge
+`chartGramOnE_realizedMetric_jointContMDiffOn`
+(`Analysis/Parabolic/DeTurckRicci/InteriorChartRegularityBridge.lean`), transporting the
+joint `Hom`-section smoothness to the scalar chart-Gram entry on the chart source. -/
 theorem realizedMetric_chartGramOnE_jointContMDiffOn_uptoZero
-    (g_bg : SmoothRiemannianMetric I M) (α : M) (i j : Fin (Module.finrank ℝ E))
-    (g_DT : ℝ → SmoothRiemannianMetric I M)
-    (T_s : ℝ → Integral.L2.SmoothCcTensor g_bg 0 2) {k : ℕ} {T : ℝ}
-    (hk : 2 * k > Module.finrank ℝ E + 4)
-    (hreal : ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
-      (g_DT t).inner x v w
-        = g_bg.inner x v w + ccTensorBilinSymm (I := I) g_bg (T_s t) x v w)
-    (hHk : ContinuousOn (fun t : ℝ =>
-      IntrinsicSobolev.SmoothCcTensor.toHs (g := g_bg) (r := 0) (s := 2) (2 * k) (T_s t))
-      (Set.Icc 0 T)) :
+    (α : M) (i j : Fin (Module.finrank ℝ E))
+    (g_DT : ℝ → SmoothRiemannianMetric I M) {T : ℝ}
+    (hsmooth : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+      (fun q : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+        q.2 ((g_DT q.1).inner q.2))
+      (Set.Icc (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) α).baseSet)) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
       (fun q : ℝ × M =>
         Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j
           (extChartAt I α q.2))
-      (Set.Icc (0 : ℝ) T ×ˢ Set.univ) := sorry
+      (Set.Icc (0 : ℝ) T ×ˢ (chartAt H α).source) :=
+  chartGramOnE_realizedMetric_jointContMDiffOn (I := I) (M := M) α i j g_DT hsmooth
 
 /-- **Joint `C∞`-up-to-AND-across-`0` of the realized DeTurck vector field as a tangent-bundle
 section (genuine parabolic up-to-boundary smoothing of the field).**
 
 For the realized DeTurck flow `g_DT = g₀ + ccTensorBilinSymm (T_s ·)` realized off the anchor
-`g₀` (`hreal`) whose order-`2k` spatial Sobolev trace is time-continuous up to `0` at a
-supercritical order (`hHk`), the joint tangent-bundle section of the DeTurck vector field of
-`g_DT` against the flow background `g_bg`,
+`g₀` (`hreal`) whose perturbation `T_s` realizes the **spectral Duhamel carrier** `u₂` (the
+carrier coordinates are the `L²` coordinates of `T_s`, `hcanon`; the carrier inclusion is
+time-continuous up to `0`, `hcont`; and `u₂` solves the abstract parabolic equation
+`∂_t (ι u₂) = Δ_∇ u₂ + N_cont (ι u₂)` on the interior, `hreg`), the joint tangent-bundle
+section of the DeTurck vector field of `g_DT` against the flow background `g_bg`,
 `(t, x) ↦ ⟨x, deTurckVF (g_DT t) g_bg x⟩`, is jointly `C∞` on the *closed* slab `Icc 0 T ×ˢ univ`.
 
 This is the up-to-AND-across-the-initial-datum joint smoothness of the (smooth-quasi-linear,
@@ -716,31 +827,56 @@ gradient): the single closed-slab section smoothness subsumes both and, via Seel
 `0`, drives the interior flow machinery directly.
 
 The anchor `g₀` (the realize base) and the flow background `g_bg` (the DeTurck-field background)
-are decoupled.  The hypotheses are the carrier/PDE realize data; the conclusion is the closed-slab
-joint smoothness of the field, distinct from them — no packaging (it rejects a merely-`C⁰` family).
-The node is the deferred classical up-to-boundary parabolic-regularity input; its body is `sorry`,
-so consumers transitively depend on `sorryAx`. -/
+are decoupled.  The hypotheses are the spectral-trajectory realize/PDE data pinning the metric
+to the genuine parabolic carrier (the spectral PDE `hreg` rejects the kink family
+`T_s t := |t − t₀| · S₀`, which has no interior time-derivative — see
+`realizedMetric_innerHomSection_jointContMDiffOn_uptoZero`); the conclusion is the closed-slab
+joint smoothness of the field, distinct from them — no packaging.  This node is sorry-free glue:
+it routes the spectral pinning into `realizedMetric_innerHomSection_jointContMDiffOn_uptoZero`
+(the genuine parabolic-smoothing leaf) and pushes the resulting joint `Hom`-section smoothness
+through the chart-frame vector-field assembler `deturck_vf_joint_smoothness_uptoZero`; consumers
+transitively depend on the inner node's `sorryAx`. -/
 theorem realizedMetric_deTurckVF_jointContMDiffOn_uptoZero
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (g_DT : ℝ → SmoothRiemannianMetric I M)
-    (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2) {k : ℕ} {T : ℝ}
-    (hk : 2 * k > Module.finrank ℝ E + 4)
+    (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2) {a : ℕ} {T : ℝ}
+    (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
+    (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+      tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+    (ha : 2 * a > Module.finrank ℝ E + 4)
     (hreal : ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
       (g_DT t).inner x v w
         = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s t) x v w)
-    (hHk : ContinuousOn (fun t : ℝ =>
-      IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * k) (T_s t))
-      (Set.Icc 0 T)) :
+    (hcont : ContinuousOn
+      (fun s : ℝ => tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (Set.Icc 0 T))
+    (hreg : ∀ s ∈ Set.Ioo (0 : ℝ) T,
+      HasDerivAt
+        (fun r => (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ r)))
+        (scaleLaplacianFun (I := I) (M := M) (u₂ s) +
+          N_cont
+            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s)
+    (hcanon : ∀ s ∈ Set.Icc (0 : ℝ) T,
+        ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+      (u₂ s).coeff i
+        = tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
         : TangentBundle I M))
       (Set.Icc (0 : ℝ) T ×ˢ Set.univ) := by
   rcases lt_or_ge 0 T with hT | hT
-  · refine ClosedSlabVFEngine.deturck_vf_joint_smoothness_uptoZero
+  · have hsmooth := realizedMetric_innerHomSection_jointContMDiffOn_uptoZero
+      (I := I) g₀ g_DT T_s u₂ N_cont ha hreal hcont hreg hcanon
+    refine ClosedSlabVFEngine.deturck_vf_joint_smoothness_uptoZero
       (I := I) g_bg g_DT hT ?_
     intro x₀ i j
     exact realizedMetric_chartGramOnE_jointContMDiffOn_uptoZero
-      (I := I) g₀ x₀ i j g_DT T_s hk hreal hHk
+      (I := I) x₀ i j g_DT
+      (hsmooth.mono (Set.prod_mono_right (Set.subset_univ _)))
   · have hsub : Set.Icc (0 : ℝ) T ⊆ {0} := by
       intro t ht
       have ht0 : t = 0 := le_antisymm (le_trans ht.2 hT) ht.1

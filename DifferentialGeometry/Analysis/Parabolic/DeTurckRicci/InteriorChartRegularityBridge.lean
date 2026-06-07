@@ -429,6 +429,49 @@ theorem chartGramOnE_realizedMetric_jointContinuousOn
   have hxsource : x ∈ (extChartAt I α).source := by rwa [extChartAt_source]
   rw [(extChartAt I α).left_inv hxsource]
 
+/-- **The chart-pulled-back Gram entry `chartGramOnE` is jointly `(t, x)`-`C∞` on the chart
+source (the spectral → chart-local bridge, `chartGramOnE` `C∞` arm).**
+
+The `C∞` analogue of `chartGramOnE_realizedMetric_jointContinuousOn`: from the joint
+smoothness of the metric inner-product `Hom`-section `(t, x) ↦ (g_DT t).inner x` over the
+product model `𝓘(ℝ, ℝ).prod I` on `J ×ˢ baseSet` (`hsmooth`), the chart-`α`-pulled-back Gram
+entry `(t, x) ↦ chartGramOnE (g_DT t) α i j (extChartAt I α x)` is jointly `C∞` on
+`J ×ˢ (chartAt H α).source`.
+
+On the chart source the chart round-trip is the identity (`(extChartAt I α).left_inv`), so the
+`chartGramOnE` value collapses to the chart-Gram entry `chartGramMatrix (g_DT t) α x i j`; the
+statement is then `chartGram_realizedMetric_jointContMDiffOn` transported along the
+identification `(trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source`
+(`TangentBundle.trivializationAt_baseSet`).  It is the `chartGramOnE` `C∞` form the
+DeTurck-vector-field joint-smoothness assemblers require (off the chart source the round-trip is
+junk, so the `Set.univ` formulation would be false-as-stated; the source statement is the
+honest one). -/
+theorem chartGramOnE_realizedMetric_jointContMDiffOn
+    (α : M) (i j : Fin (Module.finrank ℝ E))
+    (g_DT : ℝ → SmoothRiemannianMetric I M) {J : Set ℝ}
+    (hsmooth : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+      (fun q : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+        q.2 ((g_DT q.1).inner q.2))
+      (J ×ˢ (trivializationAt E (TangentSpace I) α).baseSet)) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+      (fun q : ℝ × M =>
+        Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j (extChartAt I α q.2))
+      (J ×ˢ (chartAt H α).source) := by
+  have hbase :
+      (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source :=
+    TangentBundle.trivializationAt_baseSet (I := I) α
+  have hjoint := chartGram_realizedMetric_jointContMDiffOn (I := I) (M := M)
+    α i j g_DT hsmooth
+  rw [hbase] at hjoint
+  refine hjoint.congr ?_
+  rintro ⟨t, x⟩ ⟨_, hx⟩
+  change Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT t) α i j (extChartAt I α x)
+    = chartGramMatrix (I := I) (g_DT t) α x i j
+  rw [Integral.DivergenceTheorem.chartGramOnE_def]
+  have hxsource : x ∈ (extChartAt I α).source := by rwa [extChartAt_source]
+  rw [(extChartAt I α).left_inv hxsource]
+
 /-- **The `0`-jet of `chartGramOnE` is jointly `(t, x)` continuous (the `k = 0` arm of the
 spatial-jet conjunct).**
 

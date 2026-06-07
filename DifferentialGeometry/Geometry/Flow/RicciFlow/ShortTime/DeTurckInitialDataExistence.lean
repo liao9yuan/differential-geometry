@@ -53,23 +53,31 @@ additionally re-exporting the realize-carrier data the interior-regularity bundl
 `deturck_ricci_parabolic_interior_regularity`
 (`Geometry/Flow/RicciFlow/ShortTime/DeTurckRicciPde.lean`) consumes to discharge its
 chart-local regularity conjuncts: the realize order `a`, the smooth perturbation
-representative `T_s`, the linear realize identity `hreal` (`g_DT = g₀ + ccTensorBilinSymm
-(T_s ·)`), the supercritical `H^{2k}` Sobolev-trace time-continuity `hHk`, and the `k ≤ 2`
+representative `T_s`, the **spectral Duhamel carrier** `u₂` and its continuous gauge-cancelled
+nonlinearity `N_cont`, the linear realize identity `hreal` (`g_DT = g₀ + ccTensorBilinSymm
+(T_s ·)`), the supercritical `H^{2k}` Sobolev-trace time-continuity `hHk`, the carrier
+time-continuity `hcont`, the **spectral parabolic PDE** `hreg`
+(`∂_t (ι u₂) = Δ_∇ u₂ + N_cont (ι u₂)`, the heat-semigroup/Duhamel defining identity that
+pins `u₂`/`T_s`/`g_DT` to the genuine parabolic trajectory and rejects any non-parabolic
+free family), the carrier↔perturbation coordinate identity `hcanon`, and the `k ≤ 2`
 chart-Gram up-to-`0` continuity `hC2_chart`, together with the four interior-existence
 conjuncts (continuity up to `0` of the components and the right-hand side, and the interior
 one-sided derivative).
 
-The single existential `g_DT` carries *both* the interior-existence data (consumed by the
-short-time-existence leaf `deTurckRicci_shortTime_existence_of_closed`) and the realize-
-carrier data (consumed by the interior-regularity bundle), so the two are about the *same*
-flow.  This is sorry-free glue over the `g₀`-anchored realize data bundle
-`deTurck_g0_realize_data` and the three derived interior-existence frontier nodes;
-consumers transitively depend on their `sorryAx`. -/
+The single existential `g_DT` (and its carrier `u₂`) carries *both* the interior-existence
+data (consumed by the short-time-existence leaf `deTurckRicci_shortTime_existence_of_closed`)
+and the realize-carrier/spectral-pinning data (consumed by the interior-regularity bundle),
+so the two are about the *same* flow.  This is sorry-free glue over the `g₀`-anchored carrier
+realize transport `deTurck_g0_carrier_realize_transport` and the three derived
+interior-existence frontier nodes; consumers transitively depend on their `sorryAx`. -/
 theorem deturck_metric_pde_interior_at_initial_with_carrier
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ (T : ℝ) (a : ℕ), 0 < T ∧ 2 * a > Module.finrank ℝ E + 4 ∧
       ∃ (g_DT : ℝ → SmoothRiemannianMetric I M)
-        (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2),
+        (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2)
+        (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
+        (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+          tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)),
         g_DT 0 = g₀ ∧
         (∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
           (g_DT s).inner x v w
@@ -78,6 +86,23 @@ theorem deturck_metric_pde_interior_at_initial_with_carrier
           ContinuousOn
             (fun s : ℝ => IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
               (2 * k) (T_s s)) (Set.Icc 0 T)) ∧
+        ContinuousOn
+          (fun s : ℝ => tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (Set.Icc 0 T) ∧
+        (∀ s ∈ Set.Ioo (0 : ℝ) T,
+          HasDerivAt
+            (fun r => (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ r)))
+            (scaleLaplacianFun (I := I) (M := M) (u₂ s) +
+              N_cont
+                (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                  (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s) ∧
+        (∀ s ∈ Set.Icc (0 : ℝ) T,
+            ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+          (u₂ s).coeff i
+            = tensorL2Coeff (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) ∧
         (∀ (α : M) (i j : Fin (Module.finrank ℝ E)) (k : ℕ), k ≤ 2 →
           ContinuousOn
             (fun q : ℝ × M => iteratedFDeriv ℝ k
@@ -188,7 +213,8 @@ theorem deturck_metric_pde_interior_at_initial_with_carrier
       (fun s hs => hreal s (Set.Ico_subset_Icc_self hs))
       (fun s hs => hsmoothrepr s (Set.Ico_subset_Icc_self hs))
       (fun s hs => hcanon s (Set.Ico_subset_Icc_self hs))
-  refine ⟨T, a, hT, ha, g_DT, T_s, h0, hreal, hHk, hC2_chart, ?_, ?_, ?_⟩
+  refine ⟨T, a, hT, ha, g_DT, T_s, u₂, N_cont, h0, hreal, hHk, hcont, hreg, hsmoothrepr,
+    hC2_chart, ?_, ?_, ?_⟩
   · exact deTurck_g0_inner_continuous_icc (I := I) g₀ a ha g_DT u₂ T_s hcont hreal
       hsmoothrepr hC2_chart
   · exact deTurck_g0_rhs_right_continuous_at_zero (I := I) g₀ g_bg hT a ha g_DT T_s u₂
