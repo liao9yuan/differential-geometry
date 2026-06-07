@@ -271,14 +271,19 @@ structure ChartJet2LipControl (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
       Integral.L2.SmoothCcTensor g₀ 0 2)
     (K : ℝ≥0) (R : ℝ) : Prop where
-  /-- Over the ball, each realized perturbation is `g₀`-fibre small with some `δ < 1`, so
-  `g₀ + ccTensorBilinSymm g₀ (P u)` assembles into a genuine smooth Riemannian metric. -/
-  fibreSmall : ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-    u ∈ Metric.closedBall
-        (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
-          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R →
-      ∃ δ : ℝ, δ < 1 ∧
+  /-- Over the ball, a **single uniform** `δ < 1/2` makes every realized perturbation `g₀`-fibre
+  small, so `g₀ + ccTensorBilinSymm g₀ (P u)` assembles into a genuine smooth Riemannian metric and
+  the fibre-smallness is strong enough — *uniformly over the ball* — to gate the
+  connection-difference covariant-jet bricks (which need `δ < 1/2` to divide out the recursion
+  factor `4 − 8δ > 0`, with a Nemytskii constant uniform in `δ` only when `δ` is a single ball
+  bound, not a per-point value).  The selector produces this single `δ = Cfib · C₂ₐ · R` (the ball
+  radius shrunk so `δ < 1/2`). -/
+  fibreSmall : ∃ δ : ℝ, 0 ≤ δ ∧ δ < 1 / 2 ∧
+    ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+      u ∈ Metric.closedBall
+          (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R →
         gFibreOpBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (P u)) δ
   /-- Over the ball, the intrinsic `H^{a+2}` Sobolev norm of each realized perturbation is
@@ -405,24 +410,39 @@ theorem deTurckRealizeRemainderOf_spectralN_dist_le_of_chartJet2Control
           ≤ (K' : ℝ) * dist u u' := by
   classical
   obtain ⟨B, Csob, hB, hCsob, hsob⟩ := hctrl.sobolevLip
+  -- The single uniform `δ < 1/2` fibre-smallness over the ball (the gate the Nemytskii tower needs;
+  -- a per-point `δ` would not give a uniform Nemytskii constant).
+  obtain ⟨δ, hδ_nn, hδ_lt, hfib⟩ := hctrl.fibreSmall
   obtain ⟨C', hC', hchild⟩ :=
-    exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder (I := I) g₀ g_bg a ha B hB
+    exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder (I := I) g₀ g_bg a ha B hB δ hδ_nn hδ_lt
   refine ⟨⟨C', hC'⟩ * (⟨Csob, hCsob⟩ * K), fun u u' hu hu' => ?_⟩
-  -- The fibre-small witnesses over the ball, and the realized metrics they assemble.
-  set h := hctrl.fibreSmall u hu with hh_def
-  set h' := hctrl.fibreSmall u' hu' with hh'_def
+  -- The per-point fibre-small witnesses (the uniform `δ`, restricted to `u` and `u'`), the `δ < 1`
+  -- weakening for the metric assembly, and the realized metrics.
+  have hfib_u : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ (P u)) δ :=
+    hfib u hu
+  have hfib_u' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ (P u')) δ :=
+    hfib u' hu'
+  have hδ_lt_one : δ < 1 := by linarith
+  have hex_u : ∃ δ' : ℝ, δ' < 1 ∧
+      gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ (P u)) δ' :=
+    ⟨δ, hδ_lt_one, hfib_u⟩
+  have hex_u' : ∃ δ' : ℝ, δ' < 1 ∧
+      gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ (P u')) δ' :=
+    ⟨δ, hδ_lt_one, hfib_u'⟩
   set g₁ : SmoothRiemannianMetric I M :=
-    tensorSectionRealizeMetric (I := I) g₀ (P u) h.choose_spec.1 h.choose_spec.2 with hg₁_def
+    tensorSectionRealizeMetric (I := I) g₀ (P u) hex_u.choose_spec.1 hex_u.choose_spec.2
+    with hg₁_def
   set g₂ : SmoothRiemannianMetric I M :=
-    tensorSectionRealizeMetric (I := I) g₀ (P u') h'.choose_spec.1 h'.choose_spec.2 with hg₂_def
+    tensorSectionRealizeMetric (I := I) g₀ (P u') hex_u'.choose_spec.1 hex_u'.choose_spec.2
+    with hg₂_def
   -- `deTurckRealizeRemainderOf` reduces, on the fibre-small locus, to the chart-frame
   -- realized DeTurck remainder section the Nemytskii bound controls.
   have hreduce_u : deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u)
       = realizedRHSRemainderSection (I := I) g₀ g_bg g₁ (P u) := by
-    rw [deTurckRealizeRemainderOf, dif_pos h]; rfl
+    rw [deTurckRealizeRemainderOf, dif_pos hex_u]; rfl
   have hreduce_u' : deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u')
       = realizedRHSRemainderSection (I := I) g₀ g_bg g₂ (P u') := by
-    rw [deTurckRealizeRemainderOf, dif_pos h']; rfl
+    rw [deTurckRealizeRemainderOf, dif_pos hex_u']; rfl
   -- The realized metrics carry the fibrewise `inner`-identities the Nemytskii bound needs.
   have hg₁_inner : ∀ (x : M) (v w : TangentSpace I x),
       g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (P u) x v w := by
@@ -433,7 +453,7 @@ theorem deTurckRealizeRemainderOf_spectralN_dist_le_of_chartJet2Control
   -- The uniform `H^{a+2}` size bounds + the `H^{a+2}` Lipschitz of the perturbation difference.
   obtain ⟨hsize_u, hsize_u', hlip⟩ := hsob u u' hu hu'
   -- The higher-order Nemytskii bound on the weighted-`Hᵃ` square-sum of the coordinate diff.
-  obtain ⟨_, hsum_le⟩ := hchild (P u) (P u') g₁ g₂ hg₁_inner hg₂_inner hsize_u hsize_u'
+  obtain ⟨_, hsum_le⟩ := hchild (P u) (P u') g₁ g₂ hg₁_inner hg₂_inner hfib_u hfib_u' hsize_u hsize_u'
   -- Rewrite the spectral `dist²` as that weighted-`Hᵃ` square-sum.
   have hdist_sq :
       dist (deTurckG0SpectralN (I := I) g₀ a
@@ -660,26 +680,40 @@ theorem deTurckRealizeRemainderOf_pouToHs_continuous_of_chartJet2Control
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) := by
   classical
   obtain ⟨B, Csob, hB, hCsob, hsob⟩ := hctrl.sobolevLip
+  -- The single uniform `δ < 1/2` fibre-smallness over the ball (the gate the Nemytskii tower needs).
+  obtain ⟨δ, hδ_nn, hδ_lt, hfib⟩ := hctrl.fibreSmall
   obtain ⟨C', hC', hchild⟩ :=
-    exists_realizedRHSRemainder_pouHa_le_toHs_highOrder (I := I) g₀ g_bg a ha B hB
+    exists_realizedRHSRemainder_pouHa_le_toHs_highOrder (I := I) g₀ g_bg a ha B hB δ hδ_nn hδ_lt
   -- On the ball, `u ↦ (deTurckRealizeRemainderOf g₀ g_bg (P u)).toHs a` is Lipschitz.
   refine (LipschitzOnWith.continuousOn (K := ⟨C', hC'⟩ * (⟨Csob, hCsob⟩ * K)) ?_)
   refine LipschitzOnWith.of_dist_le_mul (fun u hu u' hu' => ?_)
-  -- The fibre-small witnesses over the ball, and the realized metrics they assemble.
-  set h := hctrl.fibreSmall u hu with hh_def
-  set h' := hctrl.fibreSmall u' hu' with hh'_def
+  -- The per-point fibre-small witnesses (the uniform `δ` restricted to `u`, `u'`), the `δ < 1`
+  -- weakening for the metric assembly, and the realized metrics.
+  have hfib_u : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ (P u)) δ :=
+    hfib u hu
+  have hfib_u' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ (P u')) δ :=
+    hfib u' hu'
+  have hδ_lt_one : δ < 1 := by linarith
+  have hex_u : ∃ δ' : ℝ, δ' < 1 ∧
+      gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ (P u)) δ' :=
+    ⟨δ, hδ_lt_one, hfib_u⟩
+  have hex_u' : ∃ δ' : ℝ, δ' < 1 ∧
+      gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ (P u')) δ' :=
+    ⟨δ, hδ_lt_one, hfib_u'⟩
   set g₁ : SmoothRiemannianMetric I M :=
-    tensorSectionRealizeMetric (I := I) g₀ (P u) h.choose_spec.1 h.choose_spec.2 with hg₁_def
+    tensorSectionRealizeMetric (I := I) g₀ (P u) hex_u.choose_spec.1 hex_u.choose_spec.2
+    with hg₁_def
   set g₂ : SmoothRiemannianMetric I M :=
-    tensorSectionRealizeMetric (I := I) g₀ (P u') h'.choose_spec.1 h'.choose_spec.2 with hg₂_def
+    tensorSectionRealizeMetric (I := I) g₀ (P u') hex_u'.choose_spec.1 hex_u'.choose_spec.2
+    with hg₂_def
   -- `deTurckRealizeRemainderOf` reduces, on the fibre-small locus, to the chart-frame
   -- realized DeTurck remainder section the Nemytskii bound controls.
   have hreduce_u : deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u)
       = realizedRHSRemainderSection (I := I) g₀ g_bg g₁ (P u) := by
-    rw [deTurckRealizeRemainderOf, dif_pos h]; rfl
+    rw [deTurckRealizeRemainderOf, dif_pos hex_u]; rfl
   have hreduce_u' : deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u')
       = realizedRHSRemainderSection (I := I) g₀ g_bg g₂ (P u') := by
-    rw [deTurckRealizeRemainderOf, dif_pos h']; rfl
+    rw [deTurckRealizeRemainderOf, dif_pos hex_u']; rfl
   -- The realized metrics carry the fibrewise `inner`-identities the Nemytskii bound needs.
   have hg₁_inner : ∀ (x : M) (v w : TangentSpace I x),
       g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (P u) x v w := by
@@ -690,7 +724,8 @@ theorem deTurckRealizeRemainderOf_pouToHs_continuous_of_chartJet2Control
   -- The uniform `H^{a+2}` size bounds + the `H^{a+2}` Lipschitz of the perturbation difference.
   obtain ⟨hsize_u, hsize_u', hlip⟩ := hsob u u' hu hu'
   -- The higher-order Nemytskii `toHs a` bound on the realized-remainder difference.
-  have hchild_le := hchild (P u) (P u') g₁ g₂ hg₁_inner hg₂_inner hsize_u hsize_u'
+  have hchild_le :=
+    hchild (P u) (P u') g₁ g₂ hg₁_inner hg₂_inner hfib_u hfib_u' hsize_u hsize_u'
   -- Rewrite the `dist` of the two intrinsic-`Hᵃ` syntheses as the `toHs a` of the difference.
   rw [dist_eq_norm, ← smoothCcTensor_toHs_sub, hreduce_u, hreduce_u']
   -- Chain: `‖(realizedRem₁ − realizedRem₂).toHs a‖ ≤ C'·‖(Pu − Pu').toHs(a+2)‖ ≤ K'·dist u u'`.
@@ -1044,6 +1079,80 @@ theorem deTurckRealizeRemainderOf_toL2_retagClass_sub
   rw [hreduce]
   exact map_sub _ _ _
 
+/-- **The raw DeTurck first-order-freedom remainder-class selector (the single irreducible deep
+analytic leaf of the `g₀`-anchored synthesis tower, transiting the Weyl node).**
+
+For the anchor `g₀`, a flow background `g_bg`, and a supercritical order `a` (`2a > dim M + 4`),
+there is a `(0,2)`-perturbation selector `P : Hᵃ⁺¹(g₀) → SmoothCcTensor g₀ 0 2` and a match-gate
+slack `Q > 0` carrying, in **raw** (global, un-packaged, linear) form:
+
+* `hsize` — the all-order linear intrinsic-Sobolev size bound: at **every** order `n`, the
+  realized perturbation `P u` has `‖(P u).toHs n‖ ≤ Cₙ · ‖u‖` (the genuine smoothing of the
+  heat-regularized realization — positive time gains every derivative);
+* `hlip` — the `H^{a+2}` Lipschitz bound: `‖(P u − P u').toHs (a+2)‖ ≤ C' · ‖u − u'‖`;
+* `hmatch` — on the `Q`-gated gate-realizable locus (`realizableAtGate g₀ u`, the gate smooth
+  representative order-`2a` Sobolev-norm-bounded by `Q`), the realized DeTurck remainder of `P`
+  coincides, at the `L²`-class level (through `SmoothCcTensor.toL2`), with the carrier's canonical
+  gauge section `deTurckRemainderRealizeSection g₀ g_bg u`.
+
+This is the **strictly-more-primitive** form of the ball-restricted, control-packaged selector
+`exists_deTurckRemainderClassSelector_ball`: instead of the ball-restricted,
+`ChartJet2LipControl`/`AllOrderBallControl`-packaged controls, it carries the synthesis controls
+in their raw, global, linear shape (`hsize`/`hlip`, over all of `Hᵃ⁺¹`) together with the
+`Q`-gated `L²`-class gauge match `hmatch`.  The ball-restricted selector is **proven by
+composition** over this primitive (`exists_deTurckRemainderClassSelector_ball` instantiates the
+same `P`/`Q`, shrinks `R` so the all-order linear size bound forces each realized perturbation
+`g₀`-fibre small with `δ < 1` through `gFibreOpBound_ccTensorBilinSymm_le_tensorHsNorm`, converts
+the raw bounds into the `ChartJet2LipControl` arms and `AllOrderBallControl`, and forwards `hmatch`
+verbatim — genuine ball-shrinking / control-packaging glue, not a re-statement: this raw primitive
+states neither `gFibreOpBound`, nor `AllOrderBallControl`, nor the ball restriction).
+
+The deep content is the gauge-cancelled first-order-freedom construction: the second-order `−λᵢ`
+rough-Laplacian principal symbol cancels the second-order retag principal symbol
+(`deTurckNonlinearitySpectral_principalPart_cancels`), leaving a *first-order* class quantity in
+whose freedom DeTurck short-time theory guarantees a selector whose realized-remainder `L²`-class
+reproduces the canonical gauge's; its `H^{a+2}`/all-order control is the smoothing realization
+gaining every derivative through the all-order Gårding/Weyl spectral bound.  It is **not** the
+naive heat output (Lean-refuted: a pure heat residue contributes `−λᵢ(e^{−λᵢ}−1)·u.coeffᵢ`-type
+terms falsifying exact class equality).
+
+Trap-screen (§0bis): **T1** — intrinsic only (`gFibreOpBound`/`toHs` are `g`-inner; the match is
+the `L²`-class identity of two intrinsic geometric remainder sections; no `chartJ`).  **T7** —
+`P` is an existential *output*, constructed, never a free input.  **T6/T2-safe** — the
+quantitative match-gate references only `u`/`gateSmoothRep`/`Q`, never `P`.  **Non-vacuous** —
+`hmatch` rejects the degenerate witness `P ≡ 0` (`deTurckRealizeRemainderOf g₀ g_bg 0` has
+`L²`-class `deTurckRHSSection g_bg g₀`, differing from the canonical gauge's at any gate-bounded
+realizable `u` with non-zero remainder class), `hsize` rejects a high-frequency-loaded carrier,
+and the quantitative gate rejects the eigenmode-train witness (`‖gateSmoothRep g₀ u‖_{H^{2a}} →
+∞`).  **Not packaging** — the gauge-match arm is structurally distinct from the real-valued
+size/Lipschitz arms, and `exists_deTurckRemainderClassSelector_ball` *cites* this theorem (never a
+hypothesis in its binder).  The body is `sorry` (the deep Weyl-transiting first-order-freedom
+construction over the gate-controlled match domain), to be discharged by the `/prove` recursion. -/
+theorem exists_deTurckRemainderClassSelectorRaw
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ (P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+          Integral.L2.SmoothCcTensor g₀ 0 2)
+        (Q : ℝ),
+      0 < Q ∧
+      (∀ (n : ℕ), ∃ Cₙ : ℝ, 0 ≤ Cₙ ∧
+        ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n (P u)‖
+            ≤ Cₙ * ‖u‖) ∧
+      (∃ C' : ℝ, 0 ≤ C' ∧
+        ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
+              (P u - P u')‖ ≤ C' * ‖u - u'‖) ∧
+      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+          (h : realizableAtGate (I := I) g₀ u),
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+            (gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose)‖ ≤ Q →
+        Integral.L2.SmoothCcTensor.toL2
+            (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))
+          = Integral.L2.SmoothCcTensor.toL2
+              (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
+  sorry
+
 /-- **The first-order remainder-class selector matching the carrier's own canonical gauge (the
 single deep analytic primitive of the synthesis tower, transiting the Weyl node).**
 
@@ -1132,12 +1241,12 @@ theorem exists_deTurckRemainderClassSelector_ball
         (K : ℝ≥0) (R : ℝ) (Q : ℝ),
       0 < R ∧
       0 < Q ∧
-      (∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-        u ∈ Metric.closedBall
-            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
-              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R →
-        ∃ δ : ℝ, δ < 1 ∧
+      (∃ δ : ℝ, 0 ≤ δ ∧ δ < 1 / 2 ∧
+        ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+          u ∈ Metric.closedBall
+              (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+                (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R →
           gFibreOpBound (I := I) (M := M) g₀
             (ccTensorBilinSymm (I := I) g₀ (P u)) δ) ∧
       (∃ (B : ℝ) (C : ℝ), 0 ≤ B ∧ 0 ≤ C ∧
@@ -1168,7 +1277,84 @@ theorem exists_deTurckRemainderClassSelector_ball
             (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))
           = Integral.L2.SmoothCcTensor.toL2
               (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
-  sorry
+  classical
+  -- The raw first-order-freedom selector: the same `P`/`Q`, with the synthesis controls in raw
+  -- global-linear form (all-order size bound + `H^{a+2}` Lipschitz) and the `Q`-gated gauge match.
+  obtain ⟨P, Q, hQ, hsize, ⟨C', hC'_nn, hC'lip⟩, hmatch⟩ :=
+    exists_deTurckRemainderClassSelectorRaw (I := I) g₀ g_bg a ha
+  -- The `C⁰`-Sobolev fibre embedding constant: `gFibreOpBound g₀ (ccTensorBilinSymm g₀ T)`
+  -- is controlled by `Cfib · ‖T.toHs (2k)‖` at any supercritical order `2k > dim M + 4`.
+  obtain ⟨Cfib, hCfib_nn, hCfib⟩ :=
+    gFibreOpBound_ccTensorBilinSymm_le_tensorHsNorm (I := I) (M := M) g₀
+  -- The order-`(2a)` size constant: `‖(P u).toHs (2a)‖ ≤ C2a · ‖u‖`.
+  obtain ⟨C2a, hC2a_nn, hC2a⟩ := hsize (2 * a)
+  -- The order-`(a+2)` size constant: `‖(P u).toHs (a+2)‖ ≤ Ca2 · ‖u‖`.
+  obtain ⟨Ca2, hCa2_nn, hCa2⟩ := hsize (a + 2)
+  -- The radius: small enough that `Cfib · ‖(P u).toHs (2a)‖ < 1` on the ball (so each realized
+  -- perturbation is `g₀`-fibre small with `δ < 1`).
+  set R : ℝ := 1 / (2 * (Cfib * C2a + 1)) with hR_def
+  have hCC_nn : 0 ≤ Cfib * C2a := mul_nonneg hCfib_nn hC2a_nn
+  have hden_pos : 0 < 2 * (Cfib * C2a + 1) := by positivity
+  have hR_pos : 0 < R := by rw [hR_def]; positivity
+  -- Ball membership unfolds to `‖u‖ ≤ R` (the inclusion of the zero datum is zero).
+  have hball_norm : ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+      u ∈ Metric.closedBall
+          (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R → ‖u‖ ≤ R := by
+    intro u hu
+    rw [Metric.mem_closedBall, map_zero, dist_zero_right] at hu
+    exact hu
+  refine ⟨P, 1, R, Q, hR_pos, hQ, ?_, ?_, ?_, ?_⟩
+  · -- Conjunct (1): a **single uniform** `δ := Cfib · (C2a · R) < 1/2` makes every realized
+    -- perturbation `g₀`-fibre small over the ball.  Each `P u`'s individual fibre bound
+    -- `Cfib · ‖(P u).toHs (2a)‖` is `≤ δ` on the ball, so the (monotone) `gFibreOpBound` weakens to `δ`.
+    refine ⟨Cfib * (C2a * R), ?_, ?_, ?_⟩
+    · -- `0 ≤ δ`.
+      have : 0 ≤ C2a * R := mul_nonneg hC2a_nn hR_pos.le
+      positivity
+    · -- `δ = Cfib · (C2a · R) < 1/2`.
+      have hrw : Cfib * (C2a * R) = (Cfib * C2a) * R := by ring
+      rw [hrw, hR_def, mul_one_div, div_lt_iff₀ hden_pos]
+      nlinarith [hCC_nn]
+    · -- For each `u` in the ball, the per-point fibre bound `Cfib · ‖(P u).toHs (2a)‖` is `≤ δ`, and
+      -- `gFibreOpBound` is monotone in the bound (a larger `δ` is a weaker constraint).
+      intro u hu
+      have hnorm_le : ‖u‖ ≤ R := hball_norm u hu
+      have hsize_le :
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a) (P u)‖
+            ≤ C2a * R := le_trans (hC2a u) (mul_le_mul_of_nonneg_left hnorm_le hC2a_nn)
+      have hδ_le : Cfib * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+            (2 * a) (P u)‖ ≤ Cfib * (C2a * R) :=
+        mul_le_mul_of_nonneg_left hsize_le hCfib_nn
+      -- The per-point fibre bound at order `2a`, then weaken its constant to the uniform `δ`.
+      intro x v w
+      refine le_trans (hCfib a ha (P u) x v w) ?_
+      exact mul_le_mul_of_nonneg_right
+        (mul_le_mul_of_nonneg_right hδ_le (Real.sqrt_nonneg _)) (Real.sqrt_nonneg _)
+  · -- Conjunct (2): `H^{a+2}` size bound `B := Ca2 · R` and Lipschitz constant `C := C'` (rate `K = 1`).
+    refine ⟨Ca2 * R, C', mul_nonneg hCa2_nn hR_pos.le, hC'_nn, fun u u' hu hu' => ?_⟩
+    have hnorm_u : ‖u‖ ≤ R := hball_norm u hu
+    have hnorm_u' : ‖u'‖ ≤ R := hball_norm u' hu'
+    refine ⟨?_, ?_, ?_⟩
+    · exact le_trans (hCa2 u) (mul_le_mul_of_nonneg_left hnorm_u hCa2_nn)
+    · exact le_trans (hCa2 u') (mul_le_mul_of_nonneg_left hnorm_u' hCa2_nn)
+    · -- `‖(P u − P u').toHs (a+2)‖ ≤ C'·‖u−u'‖ = C'·1·dist u u'`.
+      rw [dist_eq_norm]
+      calc ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
+              (P u - P u')‖
+          ≤ C' * ‖u - u'‖ := hC'lip u u'
+        _ = C' * ((1 : ℝ≥0) : ℝ) * ‖u - u'‖ := by push_cast; ring
+  · -- Conjunct (3): `AllOrderBallControl` — at each order `n`, `B := Cₙ · R`.
+    intro n
+    obtain ⟨Cn, hCn_nn, hCn⟩ := hsize n
+    refine ⟨Cn * R, mul_nonneg hCn_nn hR_pos.le, fun u hu => ?_⟩
+    have hnorm_u : ‖u‖ ≤ R := hball_norm u hu
+    exact le_trans (hCn u) (mul_le_mul_of_nonneg_left hnorm_u hCn_nn)
+  · -- Conjunct (4): the `Q`-gated gauge match, forwarded from `hmatch` (the ball-membership
+    -- half of the joint hypothesis is unused; the `Q`-bound half drives the match).
+    intro u h hgate
+    exact hmatch u h hgate.2
 
 /-- **The continuous regularized eigen-synthesis matching the gate gauge's realized remainder
 (the deep construction node, transiting the Weyl node).**

@@ -597,7 +597,7 @@ lives in that single Moser-tame `L²` child.  Consumers transitively depend on `
 that single atomic covariant-Faà-di-Bruno segment-metric Moser-tame `L²` primitive. -/
 theorem exists_segmentMetricJet2DiffFaaDiBruno_moserTame_l2Norm_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) :
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -605,6 +605,8 @@ theorem exists_segmentMetricJet2DiffFaaDiBruno_moserTame_l2Norm_le
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         (∀ (x : M) (v w : TangentSpace I x),
           g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
         ∀ j : ℕ, j ≤ 2 * a →
@@ -627,12 +629,12 @@ theorem exists_segmentMetricJet2DiffFaaDiBruno_moserTame_l2Norm_le
   -- the order-`a` chart-Sobolev `C⁰`-redistribution term `‖(T₁ − T₂).toHs a‖` plus the order-`≤ j+2`
   -- covariant-`L²`-gradient sum of the perturbation difference `T₁ − T₂`.
   obtain ⟨Cf, hCf_nn, hCf⟩ :=
-    exists_segmentMetricRHSDiff_faaDiBruno_moserTame_l2Norm_le (I := I) g₀ g_bg a ha B hB
+    exists_segmentMetricRHSDiff_faaDiBruno_moserTame_l2Norm_le (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
   -- The single uniform constant: the (finite) sum over the gradient-order window `j ≤ 2a` of the
   -- per-order family constants — it dominates each `Cf j`.
   refine ⟨∑ j' ∈ Finset.range (2 * a + 1), Cf j',
     Finset.sum_nonneg (fun j' _ => hCf_nn j'), ?_⟩
-  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j hj
+  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j hj
   -- The retagged right-hand side `deTurckRHSRetag` is *definitionally* the child's
   -- `deTurckRHSRetagG0` (both are the anonymous-constructor `SmoothCcTensor` of the same DeTurck
   -- section), so the section differences coincide by `rfl`.
@@ -651,7 +653,7 @@ theorem exists_segmentMetricJet2DiffFaaDiBruno_moserTame_l2Norm_le
                 (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
                   + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
               * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ :=
-    hCf T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j hj
+    hCf T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j hj
   -- Convert each `SmoothCcTensor` norm `‖∇^i S‖` to its `tensorL2Norm … .toFun` form.
   have hnorm_eq : ∀ (S : Integral.L2.SmoothCcTensor g₀ 0 2) (i : ℕ),
       ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i S‖ =
@@ -804,7 +806,7 @@ genuine covariant-Faà-di-Bruno segment-metric Moser-tame primitive (and the rev
 own atomic Sobolev primitives). -/
 theorem exists_deTurckRHSRetagDiff_iteratedCovGrad_l2Norm_le_iteratedCovGrad_sum
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) :
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -812,6 +814,8 @@ theorem exists_deTurckRHSRetagDiff_iteratedCovGrad_l2Norm_le_iteratedCovGrad_sum
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         (∀ (x : M) (v w : TangentSpace I x),
           g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
         ∀ j : ℕ, j ≤ 2 * a →
@@ -828,7 +832,7 @@ theorem exists_deTurckRHSRetagDiff_iteratedCovGrad_l2Norm_le_iteratedCovGrad_sum
   -- the order-`a` chart-Sobolev redistribution term — all uniform over the `H^{a+2}`-bounded
   -- `B`-family via the supercritical embedding implied by `ha`).
   obtain ⟨C, hC_nn, hC⟩ :=
-    exists_segmentMetricJet2DiffFaaDiBruno_moserTame_l2Norm_le (I := I) g₀ g_bg a ha B hB
+    exists_segmentMetricJet2DiffFaaDiBruno_moserTame_l2Norm_le (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
   -- The on-disk reverse chart-Sobolev comparison, at the redistribution order `a`: the chart-`Hᵃ`
   -- norm of the perturbation difference is dominated by its covariant-`L²`-jet sum up to order
   -- `2a` — this re-absorbs the Moser-tame `C⁰`-redistribution term into the covariant-`L²`-jet sum.
@@ -841,7 +845,7 @@ theorem exists_deTurckRHSRetagDiff_iteratedCovGrad_l2Norm_le_iteratedCovGrad_sum
   -- `H^{a+2}`-`B`-ball it collapses to a constant, folding the cross term into the Lipschitz constant.
   obtain ⟨CB, hCB_nn, hCB⟩ := exists_iteratedCovGrad_l2Norm_le_toHs (I := I) g₀ (a + 2)
   refine ⟨C * (CR + 1) + C * ((2 * a + 3 : ℕ) * (2 * (CB * B))) * CR, by positivity,
-    fun T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j hj => ?_⟩
+    fun T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j hj => ?_⟩
   set jetSum : ℝ := ∑ i ∈ Finset.range (2 * a + 3),
       Integral.L2.tensorL2Norm (I := I) g₀ 0 (2 + i)
         (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)).toFun with hjetSum_def
@@ -910,7 +914,7 @@ theorem exists_deTurckRHSRetagDiff_iteratedCovGrad_l2Norm_le_iteratedCovGrad_sum
           + C * crossSum
               * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ := by
         rw [hjetSum_def, hcrossSum_def]
-        exact hC T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j hj
+        exact hC T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j hj
     _ ≤ C * (CR * jetSum + jetSum)
           + C * ((2 * a + 3 : ℕ) * (2 * (CB * B))) * (CR * jetSum) :=
         add_le_add (mul_le_mul_of_nonneg_left (by linarith [htoHs_le]) hC_nn) hcross_le
@@ -971,7 +975,7 @@ rough-Laplacian order-dropping bound), with no spectral-nonlinearity, no
 perturbation-indexed-remainder, and no Weyl dependence. -/
 theorem exists_deTurckRHSRetagDiff_iteratedCovGrad_l2Norm_le_toHs_highOrder
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) :
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -979,6 +983,8 @@ theorem exists_deTurckRHSRetagDiff_iteratedCovGrad_l2Norm_le_toHs_highOrder
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         (∀ (x : M) (v w : TangentSpace I x),
           g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
         ∀ j : ℕ, j ≤ 2 * a →
@@ -992,11 +998,11 @@ theorem exists_deTurckRHSRetagDiff_iteratedCovGrad_l2Norm_le_toHs_highOrder
   -- Sobolev comparison (each covariant `L²`-jet of `T₁ − T₂` bounded by `‖·.toHs (a+2)‖`).
   obtain ⟨CA, hCA_nn, hCA⟩ :=
     exists_deTurckRHSRetagDiff_iteratedCovGrad_l2Norm_le_iteratedCovGrad_sum
-      (I := I) g₀ g_bg a ha B hB
+      (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
   obtain ⟨CF, hCF_nn, hCF⟩ :=
     exists_iteratedCovGrad_l2Norm_le_toHs (I := I) g₀ (a + 2)
   refine ⟨CA * ((2 * a + 3 : ℕ) * CF), by positivity, ?_⟩
-  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j hj
+  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j hj
   set N : ℝ := ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
       (T₁ - T₂)‖ with hN_def
   have hN_nn : 0 ≤ N := norm_nonneg _
@@ -1020,7 +1026,7 @@ theorem exists_deTurckRHSRetagDiff_iteratedCovGrad_l2Norm_le_toHs_highOrder
       ≤ CA * ∑ i ∈ Finset.range (2 * a + 3),
           Integral.L2.tensorL2Norm (I := I) g₀ 0 (2 + i)
             (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)).toFun :=
-        hCA T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j hj
+        hCA T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j hj
     _ ≤ CA * ((2 * a + 3 : ℕ) * (CF * N)) :=
         mul_le_mul_of_nonneg_left hsum_le hCA_nn
     _ = CA * ((2 * a + 3 : ℕ) * CF) * N := by ring
@@ -1065,7 +1071,7 @@ is locally Lipschitz only above the critical Sobolev scale; see the child for th
 mirrors the sibling consumer chain `exists_deTurckRemainderG0ContSynth`. -/
 theorem exists_deTurckRHSRetagDiff_pouHa_le_toHs_highOrder
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) :
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -1073,6 +1079,8 @@ theorem exists_deTurckRHSRetagDiff_pouHa_le_toHs_highOrder
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         (∀ (x : M) (v w : TangentSpace I x),
           g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
@@ -1083,12 +1091,12 @@ theorem exists_deTurckRHSRetagDiff_pouHa_le_toHs_highOrder
   -- The intrinsic covariant-gradient `L²` Nemytskii bound, and the reverse chart-Sobolev
   -- comparison expressing the chart-`Hᵃ` norm by the iterated covariant-gradient `L²` norms.
   obtain ⟨CN, hCN_nn, hCN⟩ :=
-    exists_deTurckRHSRetagDiff_iteratedCovGrad_l2Norm_le_toHs_highOrder (I := I) g₀ g_bg a ha B hB
+    exists_deTurckRHSRetagDiff_iteratedCovGrad_l2Norm_le_toHs_highOrder (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
   obtain ⟨CR, hCR_nn, hCR⟩ :=
     DifferentialGeometry.PDE.RicciFlow.exists_tensorPouSobolevHsNorm_toReal_le_iteratedCovGrad_tensorL2Norm_sum
       (I := I) g₀ 0 2 a
   refine ⟨CR * ((2 * a + 1 : ℕ) * CN), by positivity, ?_⟩
-  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂
+  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂
   set R : Integral.L2.SmoothCcTensor g₀ 0 2 :=
     deTurckRHSRetag (I := I) g₀ g_bg g₁ - deTurckRHSRetag (I := I) g₀ g_bg g₂ with hR_def
   set N : ℝ := ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
@@ -1106,7 +1114,7 @@ theorem exists_deTurckRHSRetagDiff_pouHa_le_toHs_highOrder
           (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j R).toFun ≤ CN * N := by
     intro j hj
     rw [Analysis.Sobolev.Tensor.tensorL2Norm_toFun_eq_norm]
-    exact hCN T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j (by rw [Finset.mem_range] at hj; omega)
+    exact hCN T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j (by rw [Finset.mem_range] at hj; omega)
   -- Sum the per-`j` bounds: `∑_{j} ‖∇^j R‖ ≤ (2*a+1) · (CN · N)`.
   have hsum_le : ∑ j ∈ Finset.range (2 * a + 1),
         Integral.L2.tensorL2Norm (I := I) g₀ 0 (2 + j)
@@ -1171,7 +1179,7 @@ rough-Laplacian arm is order-free), and mirrors the sibling consumer chain
 `exists_deTurckRemainderG0ContSynth`. -/
 theorem exists_realizedRHSRemainder_pouHa_le_toHs_highOrder
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) :
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -1179,6 +1187,8 @@ theorem exists_realizedRHSRemainder_pouHa_le_toHs_highOrder
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         (∀ (x : M) (v w : TangentSpace I x),
           g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
@@ -1190,10 +1200,10 @@ theorem exists_realizedRHSRemainder_pouHa_le_toHs_highOrder
   -- The quasilinear Nemytskii bound for the re-tagged DeTurck right-hand side, and the tight
   -- single-step rough-Laplacian order-dropping bound.
   obtain ⟨CD, hCD_nn, hCD⟩ :=
-    exists_deTurckRHSRetagDiff_pouHa_le_toHs_highOrder (I := I) g₀ g_bg a ha B hB
+    exists_deTurckRHSRetagDiff_pouHa_le_toHs_highOrder (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
   obtain ⟨CL, hCL_nn, hCL⟩ :=
     exists_rawConnLapSmooth_toHs_le_toHs_succ (I := I) g₀ a
-  refine ⟨CD + CL, by positivity, fun T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ => ?_⟩
+  refine ⟨CD + CL, by positivity, fun T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ => ?_⟩
   set D₁ : Integral.L2.SmoothCcTensor g₀ 0 2 := deTurckRHSRetag (I := I) g₀ g_bg g₁ with hD₁_def
   set D₂ : Integral.L2.SmoothCcTensor g₀ 0 2 := deTurckRHSRetag (I := I) g₀ g_bg g₂ with hD₂_def
   set L₁ : Integral.L2.SmoothCcTensor g₀ 0 2 := rawTensorConnLapSmooth (I := I) g₀ 0 2 T₁
@@ -1219,7 +1229,7 @@ theorem exists_realizedRHSRemainder_pouHa_le_toHs_highOrder
       ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (D₁ - D₂)‖
         ≤ CD * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) TΔ‖ := by
     rw [hD₁_def, hD₂_def, hTΔ_def]
-    exact hCD T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂
+    exact hCD T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂
   -- The linear piece `‖(L₁ − L₂).toHs a‖ ≤ CL · ‖TΔ.toHs (a+1)‖ ≤ CL · ‖TΔ.toHs (a+2)‖`.
   have hLbound :
       ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (L₁ - L₂)‖
@@ -1284,7 +1294,7 @@ threaded into, the higher-order intrinsic Nemytskii bound, and mirrors the sibli
 `exists_deTurckRemainderG0ContSynth`. -/
 theorem exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) :
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -1292,6 +1302,8 @@ theorem exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         (∀ (x : M) (v w : TangentSpace I x),
           g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
         Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
@@ -1318,9 +1330,9 @@ theorem exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder
   -- The reverse spectral bound at order `a` and the higher-order intrinsic Nemytskii bound.
   obtain ⟨CB, hCB_nn, hCB⟩ := exists_spectralWeightedSq_le_pouHaNorm_sq (I := I) g₀ a
   obtain ⟨CA, hCA_nn, hCA⟩ :=
-    exists_realizedRHSRemainder_pouHa_le_toHs_highOrder (I := I) g₀ g_bg a ha B hB
+    exists_realizedRHSRemainder_pouHa_le_toHs_highOrder (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
   refine ⟨CB * CA, mul_nonneg hCB_nn hCA_nn, ?_⟩
-  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂
+  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂
   -- The realized-remainder section difference and the `L²`-coordinate `map_sub` rewrite.
   set R : Integral.L2.SmoothCcTensor g₀ 0 2 :=
     realizedRHSRemainderSection (I := I) g₀ g_bg g₁ T₁
@@ -1336,7 +1348,7 @@ theorem exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder
   have hnem :
       ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a R‖
         ≤ CA * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
-            (T₁ - T₂)‖ := hCA T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂
+            (T₁ - T₂)‖ := hCA T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂
   refine ⟨by rw [hL2]; exact hsummable, ?_⟩
   -- Chain: spectral square-sum `≤ (CB·‖R.toHs a‖)² ≤ (CB·CA·‖(T₁−T₂).toHs(a+2)‖)²`.
   rw [hL2]

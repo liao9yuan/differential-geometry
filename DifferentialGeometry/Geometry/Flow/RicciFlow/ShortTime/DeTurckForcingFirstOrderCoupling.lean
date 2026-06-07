@@ -405,28 +405,44 @@ theorem deTurckRealizeRemainderOf_toHs_ballUniform_bound
   -- The all-order input cap at order `a' + 2` (the genuine smoothing of the heat-regularized
   -- synthesis; `ChartJet2LipControl` caps only the single order `a + 2`).
   obtain ⟨Bin, hBin0, hBin⟩ := hall (a' + 2)
+  -- The single uniform `δ < 1/2` fibre-smallness over the ball (the gate the Nemytskii bound needs).
+  obtain ⟨δ, hδ_nn, hδ_lt, hfib⟩ := hctrl.fibreSmall
   -- The on-disk higher-order quasilinear Nemytskii *difference* bound at order `a'`, with the
-  -- uniform `H^{a'+2}` size threshold `Bin`.
+  -- uniform `H^{a'+2}` size threshold `Bin` and the uniform fibre-smallness `δ`.
   obtain ⟨C', hC'0, hchild⟩ :=
     IntrinsicSpectral.DeTurck.exists_realizedRHSRemainder_pouHa_le_toHs_highOrder
-      (I := I) g₀ g_bg a' ha' Bin hBin0
+      (I := I) g₀ g_bg a' ha' Bin hBin0 δ hδ_nn hδ_lt
   -- The fixed baseline section (the realized remainder of the zero perturbation against `g₀`) and
   -- its order-`a'` norm `D`; this is the affine constant term.
   set base : Integral.L2.SmoothCcTensor g₀ 0 2 :=
     IntrinsicSpectral.DeTurck.realizedRHSRemainderSection (I := I) g₀ g_bg g₀ 0 with hbase_def
   set D : ℝ :=
     ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a' base‖ with hD_def
+  -- The zero perturbation is `g₀`-fibre small for the uniform `δ` (`ccTensorBilinSymm g₀ 0 = 0`).
+  have hfib0 : MetricRealization.gFibreOpBound (I := I) (M := M) g₀
+      (MetricRealization.ccTensorBilinSymm (I := I) g₀ (0 : Integral.L2.SmoothCcTensor g₀ 0 2)) δ := by
+    intro x vv ww
+    rw [ccTensorBilinSymm_zero_apply', abs_zero]
+    exact mul_nonneg (mul_nonneg hδ_nn (Real.sqrt_nonneg _)) (Real.sqrt_nonneg _)
   refine ⟨C' * Bin + D, by positivity, fun v hball => ?_⟩
-  -- The fibre-small witness over the ball, and the realized metric it assembles.
-  set h := hctrl.fibreSmall v hball with hh_def
+  -- The per-point fibre-small witness (the uniform `δ` restricted to `v`), the `δ < 1` weakening for
+  -- the metric assembly, and the realized metric.
+  have hfib_v : MetricRealization.gFibreOpBound (I := I) (M := M) g₀
+      (MetricRealization.ccTensorBilinSymm (I := I) g₀ (P v)) δ := hfib v hball
+  have hδ_lt_one : δ < 1 := by linarith
+  have hex_v : ∃ δ' : ℝ, δ' < 1 ∧
+      MetricRealization.gFibreOpBound (I := I) (M := M) g₀
+        (MetricRealization.ccTensorBilinSymm (I := I) g₀ (P v)) δ' :=
+    ⟨δ, hδ_lt_one, hfib_v⟩
   set g₁ : SmoothRiemannianMetric I M :=
-    MetricRealization.tensorSectionRealizeMetric (I := I) g₀ (P v) h.choose_spec.1 h.choose_spec.2
+    MetricRealization.tensorSectionRealizeMetric (I := I) g₀ (P v)
+      hex_v.choose_spec.1 hex_v.choose_spec.2
     with hg₁_def
   -- On the fibre-small locus the realized remainder reduces to the chart-frame realized remainder
   -- section the Nemytskii bound controls.
   have hreduce : deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v)
       = IntrinsicSpectral.DeTurck.realizedRHSRemainderSection (I := I) g₀ g_bg g₁ (P v) := by
-    rw [deTurckRealizeRemainderOf, dif_pos h]; rfl
+    rw [deTurckRealizeRemainderOf, dif_pos hex_v]; rfl
   -- The two realized-metric `inner`-identities the Nemytskii bound needs: `g₁` for `P v`, and the
   -- baseline `g₀` for the zero perturbation (`ccTensorBilinSymm g₀ 0 = 0`).
   have hg₁_inner : ∀ (x : M) (vv ww : TangentSpace I x),
@@ -457,7 +473,7 @@ theorem deTurckRealizeRemainderOf_toHs_ballUniform_bound
             - base)‖
         ≤ C' * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a' + 2)
             (P v - 0)‖ :=
-    hchild (P v) 0 g₁ g₀ hg₁_inner hg₀_inner (hBin v hball) hsize₀
+    hchild (P v) 0 g₁ g₀ hg₁_inner hg₀_inner hfib_v hfib0 (hBin v hball) hsize₀
   -- The `H^{a'+2}` size cap of the input over the ball.
   have hPv_le : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a' + 2)
       (P v - 0)‖ ≤ Bin := by

@@ -199,7 +199,7 @@ present.  NO pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, NO Weyl dep
 `sorry`: the genuine deep covariant-Leibniz difference-arm content. -/
 theorem ricciLinearSection_iteratedCovGrad_diffArm_rfns_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) (j : ℕ) :
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (j : ℕ) :
     ∃ Cd : ℝ, 0 ≤ Cd ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -207,6 +207,8 @@ theorem ricciLinearSection_iteratedCovGrad_diffArm_rfns_le
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         (∀ (x : M) (v w : TangentSpace I x),
           g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
         ∀ x : M,
@@ -222,13 +224,13 @@ theorem ricciLinearSection_iteratedCovGrad_diffArm_rfns_le
   -- `Cd` and the bound `rfns(∇^j linearSection)(x) ≤ Cd · ∑_{p ≤ j+1} rfns(∇^p R)(x)` with
   -- `R := covGrad g₀ 0 2 w` the connection-level first covariant gradient of the difference factor.
   obtain ⟨Cd, hCd_nn, hred⟩ :=
-    ricciLinearSection_covGrad_traceReduction_rfns_le (I := I) g₀ a ha B hB j
-  refine ⟨Cd, hCd_nn, fun T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ x => ?_⟩
+    ricciLinearSection_covGrad_traceReduction_rfns_le (I := I) g₀ a ha B hB δ hδ0 hδ1 j
+  refine ⟨Cd, hCd_nn, fun T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ x => ?_⟩
   set w : Integral.L2.SmoothCcTensor g₀ 0 2 := realizeSymmCcTensor (I := I) g₀ (T₁ - T₂) with hw_def
   set R : Integral.L2.SmoothCcTensor g₀ 0 3 :=
     Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 2 w with hR_def
   -- The connection-level reduction at `x`.
-  have hbound := hred T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ x
+  have hbound := hred T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ x
   rw [← hw_def, ← hR_def] at hbound
   refine hbound.trans ?_
   -- The sorry-free rank-shift `rfns(∇^p R)(x) = rfns(∇^{p+1} w)(x)` (front-commutation `R = ∇w`).
@@ -283,13 +285,15 @@ both fixed-pair endpoints are carried.  NO pointwise-`C^{>2}`-jet claim, NO spec
 Weyl dependence.  Its body is `sorry`: the genuine deep fixed-pair top-jet content. -/
 theorem ricciCrossSection_iteratedCovGrad_cross_rfns_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) (j : ℕ) :
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (j : ℕ) :
     ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
       (g₁ g₂ : SmoothRiemannianMetric I M),
       (∀ (x : M) (v w : TangentSpace I x),
         g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
       (∀ (x : M) (v w : TangentSpace I x),
         g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+      gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+      gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
       ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
       ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
       ∀ x : M,
@@ -332,7 +336,7 @@ pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, NO Weyl dependence.  Its
 genuine deep covariant-gauge-jet content. -/
 theorem lieDerivDiff_order0_linearCross_split
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) :
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
     ∃ Cd : ℝ, 0 ≤ Cd ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -340,6 +344,8 @@ theorem lieDerivDiff_order0_linearCross_split
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         (∀ (x : M) (v w : TangentSpace I x),
           g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
         ∃ L C : Integral.L2.SmoothCcTensor g₀ 0 2,
@@ -425,7 +431,7 @@ transitively depend on `sorryAx` only through those two posits; this leaf carrie
 `Φ.op 0 2 w` shape, NO pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, and NO Weyl dependence. -/
 theorem ricciNeg2Diff_covFdB_section_split
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) (j : ℕ) :
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (j : ℕ) :
     ∃ Cd : ℝ, 0 ≤ Cd ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -433,6 +439,8 @@ theorem ricciNeg2Diff_covFdB_section_split
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         (∀ (x : M) (v w : TangentSpace I x),
           g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
         ∃ Adiff Cross : Integral.L2.SmoothCcTensor g₀ 0 (2 + j),
@@ -456,13 +464,13 @@ theorem ricciNeg2Diff_covFdB_section_split
   by
   classical
   obtain ⟨Cd, hCd_nn, hAdiff⟩ :=
-    ricciLinearSection_iteratedCovGrad_diffArm_rfns_le (I := I) g₀ a ha B hB j
-  have hCross := ricciCrossSection_iteratedCovGrad_cross_rfns_le (I := I) g₀ a ha B hB j
-  refine ⟨Cd, hCd_nn, fun T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ => ?_⟩
+    ricciLinearSection_iteratedCovGrad_diffArm_rfns_le (I := I) g₀ a ha B hB δ hδ0 hδ1 j
+  have hCross := ricciCrossSection_iteratedCovGrad_cross_rfns_le (I := I) g₀ a ha B hB δ hδ0 hδ1 j
+  refine ⟨Cd, hCd_nn, fun T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ => ?_⟩
   refine ⟨PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j (linearSection (I := I) g₀ g₁ g₂),
     PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j (crossSection (I := I) g₀ g₁ g₂), ?_,
-    hAdiff T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂,
-    hCross T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂⟩
+    hAdiff T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂,
+    hCross T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂⟩
   rw [ricciNeg2RetagG0_sub_eq_linear_add_cross (I := I) g₀ g₁ g₂,
     PDE.RicciFlow.iteratedCovGrad_add]
 
@@ -522,7 +530,7 @@ covariant-curvature-jet content — the covariant Faà-di-Bruno expansion of the
 nonlinearity, with NO pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, and NO Weyl dependence. -/
 theorem ricciNeg2Diff_covFdB_pointwise_twoProduct_rfns_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) (j : ℕ) :
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (j : ℕ) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -530,6 +538,8 @@ theorem ricciNeg2Diff_covFdB_pointwise_twoProduct_rfns_le
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         (∀ (x : M) (v w : TangentSpace I x),
           g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
         ∀ x : M,
@@ -552,13 +562,13 @@ theorem ricciNeg2Diff_covFdB_pointwise_twoProduct_rfns_le
   -- difference-arm constant `Cd` and, per perturbation, the structural identity `∇^j(Ric-diff) =
   -- Adiff + Cross` with the difference-arm grid bound and the cross-piece fixed-pair bound.
   obtain ⟨Cd, hCd_nn, hsplit⟩ :=
-    ricciNeg2Diff_covFdB_section_split (I := I) g₀ a ha B hB j
+    ricciNeg2Diff_covFdB_section_split (I := I) g₀ a ha B hB δ hδ0 hδ1 j
   -- The two-product coefficient `Λ = √(2 Cd)`: the squared-fibre-norm subadditivity factor `2` folds
   -- the difference-arm constant `Cd` into `Λ² = 2 Cd`, and the cross-piece `1/2` cancels the same
   -- factor `2` into the coefficient-`1` cross arm.
   refine ⟨Real.sqrt (2 * Cd), Real.sqrt_nonneg _,
-    fun T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ x => ?_⟩
-  obtain ⟨Adiff, Cross, heq, hAdiff, hCross⟩ := hsplit T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂
+    fun T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ x => ?_⟩
+  obtain ⟨Adiff, Cross, heq, hAdiff, hCross⟩ := hsplit T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂
   -- The squared-fibre-norm subadditivity over the structural identity `∇^j(Ric-diff) = Adiff + Cross`.
   have hsplit_norm :
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
@@ -638,7 +648,7 @@ expansion — the deep metric-jet analytic content of the Ricci nonlinearity, wi
 claim, NO spectral-nonlinearity, and NO Weyl dependence. -/
 theorem exists_ricciNeg2Diff_faaDiBruno_moserTame_l2Norm_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) :
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
     ∃ C : ℕ → ℝ, (∀ j, 0 ≤ C j) ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -646,6 +656,8 @@ theorem exists_ricciNeg2Diff_faaDiBruno_moserTame_l2Norm_le
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         (∀ (x : M) (v w : TangentSpace I x),
           g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
         ∀ j : ℕ, j ≤ 2 * a →
@@ -663,7 +675,7 @@ theorem exists_ricciNeg2Diff_faaDiBruno_moserTame_l2Norm_le
   -- The deep covariant-curvature-jet posit: a per-order coefficient sup `Λ j` with the pointwise
   -- Hamilton/Moser two-product domination of `∇^j(Ric-diff)`.
   choose Λ hΛ_nn hΛ using
-    fun j => ricciNeg2Diff_covFdB_pointwise_twoProduct_rfns_le (I := I) g₀ a ha B hB j
+    fun j => ricciNeg2Diff_covFdB_pointwise_twoProduct_rfns_le (I := I) g₀ a ha B hB δ hδ0 hδ1 j
   -- The per-order realize-difference covariant `L²`-jet constant: `‖∇^i realizeSymm S‖ ≤ Cr i · ∑_{l≤i}
   -- ‖∇^l S‖` (the realization gains no derivatives).
   choose Cr hCr_nn hCr using
@@ -674,7 +686,7 @@ theorem exists_ricciNeg2Diff_faaDiBruno_moserTame_l2Norm_le
   · have : 0 ≤ Λ j * ∑ i ∈ Finset.range (j + 2 + 1), Cr i :=
       mul_nonneg (hΛ_nn j) (Finset.sum_nonneg fun i _ => hCr_nn i)
     linarith
-  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j hj
+  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j hj
   set D₀ : ℝ := ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
     with hD₀_def
   have hD₀_nn : 0 ≤ D₀ := norm_nonneg _
@@ -710,7 +722,7 @@ theorem exists_ricciNeg2Diff_faaDiBruno_moserTame_l2Norm_le
         (ricciNeg2RetagG0 (I := I) g₀ g₁ - ricciNeg2RetagG0 (I := I) g₀ g₂))
       (Λ j) D₀ (hΛ_nn j) hD₀_nn (fun x => ?_)
     rw [hD₀_def]
-    exact hΛ j T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ x
+    exact hΛ j T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ x
   -- The realize-difference covariant `L²`-jet bound on the regular arm: each `‖∇^i realizeSymm
   -- (T₁ − T₂)‖ ≤ Cr i · ∑_{l ≤ i} ‖∇^l (T₁ − T₂)‖ ≤ Cr i · diffSum` (since `i ≤ j + 2`).
   have hrealize_termwise : ∀ i ∈ Finset.range (j + 2 + 1),
@@ -829,7 +841,7 @@ on `sorryAx` only through that posit; this leaf carries NO value-bounded `Φ.op 
 pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, and NO Weyl dependence. -/
 theorem lieDerivDiff_covFdB_section_split
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) (j : ℕ) :
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (j : ℕ) :
     ∃ Cd : ℝ, 0 ≤ Cd ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -837,6 +849,8 @@ theorem lieDerivDiff_covFdB_section_split
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         (∀ (x : M) (v w : TangentSpace I x),
           g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
         ∃ Adiff Cross : Integral.L2.SmoothCcTensor g₀ 0 (2 + j),
@@ -860,9 +874,9 @@ theorem lieDerivDiff_covFdB_section_split
   by
   classical
   obtain ⟨Cd, hCd_nn, hbody⟩ :=
-    lieDerivDiff_order0_linearCross_split (I := I) g₀ g_bg a ha B hB
-  refine ⟨Cd, hCd_nn, fun T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ => ?_⟩
-  obtain ⟨L, C, hsplit, hL, hC⟩ := hbody T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂
+    lieDerivDiff_order0_linearCross_split (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
+  refine ⟨Cd, hCd_nn, fun T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ => ?_⟩
+  obtain ⟨L, C, hsplit, hL, hC⟩ := hbody T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂
   refine ⟨PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j L,
     PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j C, ?_, hL j, hC j⟩
   rw [hsplit, PDE.RicciFlow.iteratedCovGrad_add]
@@ -932,7 +946,7 @@ Faà-di-Bruno expansion of the sealed Lie/`deTurckVF` nonlinearity, with NO poin
 claim, NO spectral-nonlinearity, and NO Weyl dependence. -/
 theorem lieDerivDiff_covFdB_pointwise_twoProduct_rfns_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) (j : ℕ) :
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (j : ℕ) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -940,6 +954,8 @@ theorem lieDerivDiff_covFdB_pointwise_twoProduct_rfns_le
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         (∀ (x : M) (v w : TangentSpace I x),
           g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
         ∀ x : M,
@@ -962,13 +978,13 @@ theorem lieDerivDiff_covFdB_pointwise_twoProduct_rfns_le
   -- difference-arm constant `Cd` and, per perturbation, the structural identity `∇^j(Lie-diff) =
   -- Adiff + Cross` with the difference-arm grid bound and the cross-piece fixed-pair bound.
   obtain ⟨Cd, hCd_nn, hsplit⟩ :=
-    lieDerivDiff_covFdB_section_split (I := I) g₀ g_bg a ha B hB j
+    lieDerivDiff_covFdB_section_split (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1 j
   -- The two-product coefficient `Λ = √(2 Cd)`: the squared-fibre-norm subadditivity factor `2` folds
   -- the difference-arm constant `Cd` into `Λ² = 2 Cd`, and the cross-piece `1/2` cancels the same
   -- factor `2` into the coefficient-`1` cross arm.
   refine ⟨Real.sqrt (2 * Cd), Real.sqrt_nonneg _,
-    fun T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ x => ?_⟩
-  obtain ⟨Adiff, Cross, heq, hAdiff, hCross⟩ := hsplit T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂
+    fun T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ x => ?_⟩
+  obtain ⟨Adiff, Cross, heq, hAdiff, hCross⟩ := hsplit T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂
   -- The squared-fibre-norm subadditivity over the structural identity `∇^j(Lie-diff) = Adiff + Cross`.
   have hsplit_norm :
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
@@ -1029,7 +1045,7 @@ expansion — the deep metric-jet analytic content of the Lie/`deTurckVF` nonlin
 pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, and NO Weyl dependence. -/
 theorem exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) :
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
     ∃ C : ℕ → ℝ, (∀ j, 0 ≤ C j) ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -1037,6 +1053,8 @@ theorem exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         (∀ (x : M) (v w : TangentSpace I x),
           g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
         ∀ j : ℕ, j ≤ 2 * a →
@@ -1054,7 +1072,7 @@ theorem exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le
   -- The deep covariant-gauge-jet posit: a per-order coefficient sup `Λ j` with the pointwise
   -- Hamilton/Moser two-product domination of `∇^j(Lie-diff)`.
   choose Λ hΛ_nn hΛ using
-    fun j => lieDerivDiff_covFdB_pointwise_twoProduct_rfns_le (I := I) g₀ g_bg a ha B hB j
+    fun j => lieDerivDiff_covFdB_pointwise_twoProduct_rfns_le (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1 j
   -- The per-order realize-difference covariant `L²`-jet constant: `‖∇^i realizeSymm S‖ ≤ Cr i · ∑_{l≤i}
   -- ‖∇^l S‖` (the realization gains no derivatives).
   choose Cr hCr_nn hCr using
@@ -1065,7 +1083,7 @@ theorem exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le
   · have : 0 ≤ Λ j * ∑ i ∈ Finset.range (j + 2 + 1), Cr i :=
       mul_nonneg (hΛ_nn j) (Finset.sum_nonneg fun i _ => hCr_nn i)
     linarith
-  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j hj
+  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j hj
   set D₀ : ℝ := ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
     with hD₀_def
   have hD₀_nn : 0 ≤ D₀ := norm_nonneg _
@@ -1101,7 +1119,7 @@ theorem exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le
         (lieDerivRetagG0 (I := I) g₀ g_bg g₁ - lieDerivRetagG0 (I := I) g₀ g_bg g₂))
       (Λ j) D₀ (hΛ_nn j) hD₀_nn (fun x => ?_)
     rw [hD₀_def]
-    exact hΛ j T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ x
+    exact hΛ j T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ x
   -- The realize-difference covariant `L²`-jet bound on the regular arm: each `‖∇^i realizeSymm
   -- (T₁ − T₂)‖ ≤ Cr i · ∑_{l ≤ i} ‖∇^l (T₁ − T₂)‖ ≤ Cr i · diffSum` (since `i ≤ j + 2`).
   have hrealize_termwise : ∀ i ∈ Finset.range (j + 2 + 1),
@@ -1252,7 +1270,7 @@ NO Weyl dependence — lives in the two per-field primitives.  Consumers transit
 only through those two atomic per-field covariant-Faà-di-Bruno Moser-tame `L²` primitives. -/
 theorem exists_segmentMetricRHSDiff_faaDiBruno_moserTame_l2Norm_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) :
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
     ∃ C : ℕ → ℝ, (∀ j, 0 ≤ C j) ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -1260,6 +1278,8 @@ theorem exists_segmentMetricRHSDiff_faaDiBruno_moserTame_l2Norm_le
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         (∀ (x : M) (v w : TangentSpace I x),
           g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
         ∀ j : ℕ, j ≤ 2 * a →
@@ -1276,12 +1296,12 @@ theorem exists_segmentMetricRHSDiff_faaDiBruno_moserTame_l2Norm_le
   classical
   -- The two per-field covariant-Faà-di-Bruno Moser-tame `L²` primitives (curvature and Lie halves).
   obtain ⟨Cric, hCric_nn, hCric⟩ :=
-    exists_ricciNeg2Diff_faaDiBruno_moserTame_l2Norm_le (I := I) g₀ a ha B hB
+    exists_ricciNeg2Diff_faaDiBruno_moserTame_l2Norm_le (I := I) g₀ a ha B hB δ hδ0 hδ1
   obtain ⟨Clie, hClie_nn, hClie⟩ :=
-    exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le (I := I) g₀ g_bg a ha B hB
+    exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
   -- The combined per-order constant.
   refine ⟨fun j => Cric j + Clie j, fun j => add_nonneg (hCric_nn j) (hClie_nn j), ?_⟩
-  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j hj
+  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j hj
   -- Abbreviate the common difference-redistribution sum and the fixed-pair cross factor.
   set R : ℝ := ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
       + ∑ i ∈ Finset.range (j + 2 + 1),
@@ -1301,8 +1321,8 @@ theorem exists_segmentMetricRHSDiff_faaDiBruno_moserTame_l2Norm_le
   -- The `j`-th covariant gradient of the difference splits additively.
   rw [hsplit, PDE.RicciFlow.iteratedCovGrad_add]
   -- The two per-field child bounds, specialized to this `j ≤ 2a`.
-  have hric := hCric T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j hj
-  have hlie := hClie T₁ T₂ g₁ g₂ hg₁ hg₂ hsize₁ hsize₂ j hj
+  have hric := hCric T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j hj
+  have hlie := hClie T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j hj
   rw [← hR_def] at hric hlie
   -- Triangle inequality on the `L²` seminorm, then the two child bounds and the constant split.
   calc ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j

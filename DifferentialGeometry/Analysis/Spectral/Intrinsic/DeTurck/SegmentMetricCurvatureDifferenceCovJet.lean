@@ -112,7 +112,7 @@ spectral-nonlinearity, NO Weyl dependence.  Its body is `sorry`: the genuine dee
 covariant-Leibniz reduction content. -/
 theorem ricciLinearSection_covGrad_traceReduction_rfns_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) (j : ℕ) :
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (j : ℕ) :
     ∃ Cd : ℝ, 0 ≤ Cd ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -120,6 +120,8 @@ theorem ricciLinearSection_covGrad_traceReduction_rfns_le
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         (∀ (x : M) (v w : TangentSpace I x),
           g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
         ∀ x : M,
