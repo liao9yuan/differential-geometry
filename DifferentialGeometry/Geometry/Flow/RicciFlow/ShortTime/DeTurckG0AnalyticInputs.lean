@@ -2219,6 +2219,145 @@ theorem deturck_g0_carrier_realize_package
     rw [dif_pos hs, gateSmoothRep_toL2 (I := I) g₀ (u₂ s) hσ (hmem s hs)]
 
 open MeasureTheory in
+/-- **The `H^{a+1}`-view Duhamel solution field of the smooth datum `0` agrees a.e. with the
+included pointwise carrier.**
+
+For the maximal-regularity Duhamel carrier `u` of the smooth datum `0` (`hu`) and its
+pointwise order-`(a+2)` representative `u₂` matching `u` through the everywhere bridge
+`hbridge` (`ι_{a} (u₂ s) = timeH1.toFun u s` on `[0, T]`), the `H^{a+1}`-view solution field
+`maxRegDuhamelSolFieldHa1 … 0 gforce` agrees almost everywhere on `[0, T]` with the
+`H^{a+1}`-inclusion of the carrier, `ι_{a+1} (u₂ ·)`.  Both have, mode by mode, the same
+spectral coordinate `t ↦ ∫₀ᵗ derivModeCoeff gforce i` (the homogeneous part vanishes since the
+datum is `0`), so they coincide a.e. as `H^{a+1}` elements (`tensorHs.ext` after collecting the
+per-mode null sets via `ae_all_iff`).  This is the field↔carrier reconciliation the
+forcing-trajectory identification consumes. -/
+theorem maxRegDuhamelSolFieldHa1_zeroDatum_ae_eq_carrier
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (gforce : Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (u : Analysis.Parabolic.QuasiLinear.MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+    (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
+    (hu : u = Analysis.Parabolic.QuasiLinear.maxRegDuhamelMap (I := I) (M := M) (a : ℝ)
+      hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce)
+    (hbridge : ∀ s ∈ Set.Icc (0 : ℝ) T,
+      tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s) =
+        Analysis.Parabolic.TimeSobolev.timeH1.toFun u s) :
+    (fun t => Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+        (a : ℝ) hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)
+      =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T]
+      fun t => tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ t) := by
+  classical
+  set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+    with hcompact_def
+  haveI : Countable (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+      (I := I) (M := M) g₀ 0 2) :=
+    Analysis.Parabolic.MaximalRegularity.countable_tensorEigenIdx (I := I) (M := M)
+      (g := g₀) (r := 0) (s := 2) hcompact
+  set solFHa1 := Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+    (a : ℝ) hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce
+    with hsolFHa1_def
+  have hhomderiv_zero : ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+        (I := I) (M := M) g₀ 0 2,
+      ⇑(Analysis.Parabolic.QuasiLinear.homDerivModeCoeff (I := I) (M := M)
+        (a := (a : ℝ)) (T := T) (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) i)
+        =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T] fun _ => (0 : ℝ) := by
+    intro i
+    have hcoe : ⇑(Analysis.Parabolic.QuasiLinear.homDerivModeCoeff (I := I) (M := M)
+        (a := (a : ℝ)) (T := T) (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) i)
+        =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T]
+      fun τ => -(Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx.lambda
+          (I := I) (M := M) i) *
+        (Real.exp (-(Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx.lambda
+            (I := I) (M := M) i) * τ) *
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)).coeff i) :=
+      Analysis.Parabolic.TimeSobolev.coeFn_ofContinuousOn _
+    filter_upwards [hcoe] with τ hτ
+    rw [hτ, tensorHs.zero_coeff, mul_zero, mul_zero]
+  have hcoeff_u₂ : ∀ i, (fun t => (u₂ t).coeff i) =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T]
+      fun t => (Analysis.Parabolic.TimeSobolev.timeH1.toFun u t).coeff i := by
+    intro i
+    filter_upwards [ae_restrict_mem (μ := MeasureTheory.volume) measurableSet_Icc] with t htmem
+    have hb := hbridge t htmem
+    rw [← tensorHsInclusion_coeff_apply
+      (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ t) i, hb]
+  have hcoeff_fieldHa1 : ∀ i,
+      (fun t => (solFHa1 t).coeff i) =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T]
+      fun t => (Analysis.Parabolic.TimeSobolev.timeH1.toFun u t).coeff i := by
+    intro i
+    have hHa1 := Analysis.Parabolic.MaximalRegularity.timeModeCoeff_coeFn
+      (I := I) (M := M) solFHa1 i
+    have hHa1mode : Analysis.Parabolic.MaximalRegularity.timeModeCoeff
+        (I := I) (M := M) solFHa1 i =
+          Analysis.Parabolic.QuasiLinear.homModeCoeff (I := I) (M := M) (a := (a : ℝ)) (T := T)
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) i +
+            Analysis.Parabolic.MaximalRegularity.solModeCoeff (I := I) (M := M)
+              (a := (a : ℝ)) hT.le gforce i := by
+      rw [hsolFHa1_def, Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1,
+        Analysis.Parabolic.MaximalRegularity.timeModeCoeff_add (I := I) (M := M),
+        Analysis.Parabolic.QuasiLinear.maxRegHomogeneousSolFieldHa1_timeModeCoeff
+          (I := I) (M := M) (a := (a : ℝ)) (T := T) hT.le _ i,
+        Analysis.Parabolic.MaximalRegularity.maximalRegularitySolFieldHa1_timeModeCoeff
+          (I := I) (M := M) (h_compact := hcompact) (a := (a : ℝ)) hT hT1 gforce i]
+    have haddcoe := Lp.coeFn_add
+      (Analysis.Parabolic.QuasiLinear.homModeCoeff (I := I) (M := M) (a := (a : ℝ)) (T := T)
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) i)
+      (Analysis.Parabolic.MaximalRegularity.solModeCoeff (I := I) (M := M)
+        (a := (a : ℝ)) hT.le gforce i)
+    have hA := Analysis.Parabolic.QuasiLinear.homModeCoeff_eq_init_add_integral
+      (I := I) (M := M) (a := (a : ℝ)) (T := T)
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) i
+    have hB := Analysis.Parabolic.QuasiLinear.solModeCoeff_eq_integral
+      (I := I) (M := M) (a := (a : ℝ)) hT.le gforce i
+    filter_upwards [hHa1, haddcoe, hA, hB,
+      ae_restrict_mem (μ := MeasureTheory.volume) measurableSet_Icc]
+      with t htHa1 htadd htA htB htmem
+    have hfield : (solFHa1 t).coeff i =
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)).coeff i
+          + (∫ τ in (0 : ℝ)..t,
+              (Analysis.Parabolic.QuasiLinear.homDerivModeCoeff (I := I) (M := M)
+                (a := (a : ℝ)) (T := T)
+                (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) i) τ)
+          + ∫ τ in (0 : ℝ)..t,
+              (Analysis.Parabolic.MaximalRegularity.derivModeCoeff (I := I) (M := M)
+                (a := (a : ℝ)) hT.le gforce i) τ := by
+      rw [← htHa1, hHa1mode, htadd, Pi.add_apply, htA, htB]
+    have hu_eq : (Analysis.Parabolic.TimeSobolev.timeH1.toFun u t).coeff i
+        = Real.exp (-(Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx.lambda
+              (I := I) (M := M) i) * t) *
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)).coeff i
+          + ∫ τ in (0 : ℝ)..t,
+              (Analysis.Parabolic.MaximalRegularity.derivModeCoeff (I := I) (M := M)
+                (a := (a : ℝ)) hT.le gforce i) τ := by
+      rw [hu]
+      exact coeffFun_u_eq (I := I) (M := M)
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce hT hT1 i htmem
+    rw [hfield, hu_eq]
+    simp only [tensorHs.zero_coeff, mul_zero, zero_add]
+    have hh0 : (0 : ℝ) ∈ Set.Icc (0 : ℝ) T := ⟨le_rfl, htmem.1.trans htmem.2⟩
+    have hhom_int_zero : (∫ τ in (0 : ℝ)..t,
+          (Analysis.Parabolic.QuasiLinear.homDerivModeCoeff (I := I) (M := M)
+            (a := (a : ℝ)) (T := T)
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) i) τ) = 0 := by
+      rw [intervalIntegral.integral_congr_ae (g := fun _ => (0 : ℝ)) ?_]
+      · simp
+      · rw [← MeasureTheory.ae_restrict_iff' measurableSet_uIoc]
+        exact ae_restrict_of_ae_restrict_of_subset (μ := MeasureTheory.volume)
+          ((Set.uIoc_subset_uIcc).trans (Set.uIcc_subset_Icc hh0 htmem)) (hhomderiv_zero i)
+    rw [hhom_int_zero]; ring
+  have hall : ∀ᵐ t ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T),
+      ∀ i, (solFHa1 t).coeff i =
+        (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ t)).coeff i := by
+    rw [MeasureTheory.ae_all_iff]
+    intro i
+    filter_upwards [hcoeff_fieldHa1 i, hcoeff_u₂ i] with t hf hu₂
+    rw [hf, tensorHsInclusion_coeff_apply, hu₂]
+  filter_upwards [hall] with t ht
+  exact tensorHs.ext (funext ht)
+
+open MeasureTheory in
 /-- **`L²`-time derivative identity of the `g₀`-anchored carrier transported to the
 pointwise representative (deep `L²`-time → pointwise transport input).**
 
@@ -2855,7 +2994,9 @@ theorem deturck_g0_engine_pointwise_carrier
             N_cont
               (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
                 (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s) ∧
-      DuhamelMildSolutionData (I := I) (M := M) g₀ (a : ℝ) T u₂ N_cont R := by
+      DuhamelMildSolutionData (I := I) (M := M) g₀ (a : ℝ) T u₂ N_cont R
+        (fun t => N_cont (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ t))) := by
   classical
   -- The up-to-`t = 0` synthesis carrier at order `a + 2`.
   obtain ⟨u₂, hu₂cont, hu₂bridge⟩ :=
@@ -2877,12 +3018,20 @@ theorem deturck_g0_engine_pointwise_carrier
   · -- The Duhamel / mild-solution structural datum: the engine's exported structure
     -- (`hu`, `hforce`, `hstay`, `hN_cont`) transported to the pointwise carrier via the
     -- bridge `ι (u₂ s) = toFun u s`.  The carrier is the zero-datum Duhamel mild solution
-    -- on the full horizon `Te := T` (`hTe := le_rfl`).
-    refine ⟨T, hT, le_rfl, hT1, gforce, hN_cont, ?_, ?_, ?_⟩
+    -- on the full horizon `Te := T` (`hTe := le_rfl`).  The forcing trajectory is
+    -- `N_cont ∘ (ι_{a+1} u₂)`, and the trajectory-identification conjunct is the
+    -- forcing-reproduction `hforce` (`gforce =ᵐ N_cont(field)`) post-composed with the
+    -- field↔carrier reconciliation `field =ᵐ ι_{a+1} u₂` (`timeMeasure T = restrict [0, T]`).
+    refine ⟨T, hT, le_rfl, hT1, gforce, hN_cont, ?_, ?_, ?_, ?_⟩
     · intro s hs
       rw [hu₂bridge s hs, hu]
     · exact hforce
     · exact hstay
+    · refine hforce.trans ?_
+      have hfield := maxRegDuhamelSolFieldHa1_zeroDatum_ae_eq_carrier (I := I) (M := M)
+        g₀ a hT hT1 gforce u u₂ hu hu₂bridge
+      filter_upwards [hfield] with t ht
+      exact congrArg N_cont ht
 
 /-- **All-order interior membership of the smooth-datum carrier.**  For the
 `g₀`-anchored maximal-regularity carrier `u` of the smooth datum `0` (`hu`), the
@@ -3375,7 +3524,9 @@ theorem deturck_g0_engine_carrier_extraction
               (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
               (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) ∧
       Integral.L2.SmoothCcTensor.toL2 (T_s 0) = 0 ∧
-      DuhamelMildSolutionData (I := I) (M := M) g₀ (a : ℝ) T u₂ N_cont R := by
+      DuhamelMildSolutionData (I := I) (M := M) g₀ (a : ℝ) T u₂ N_cont R
+        (fun s => N_cont (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) := by
   classical
   set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
     with hcompact_def

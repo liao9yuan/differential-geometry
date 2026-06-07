@@ -113,7 +113,16 @@ carrier `u₂` *is* the Duhamel mild solution of the quasi-linear tensor heat eq
   `H^{a+1}`-view Duhamel field, i.e. `gforce` is `N_cont` evaluated on the solution
   (the fixed-point equation of the construction);
 * the field stays a.e. in the radius-`R` ball (so `N_cont` is evaluated where it is
-  continuous).
+  continuous);
+* the **trajectory identification** `gforce =ᵐ gtraj` of the forcing with the supplied
+  spectral forcing trajectory `gtraj : ℝ → Hᵃ(g)`.  This is the conjunct the per-mode time
+  bootstrap consumes: it ties the existential `L²`-time forcing `gforce` to the explicit
+  time-path `gtraj` whose `C^k`-in-time regularity is supplied externally (for the concrete
+  Ricci–DeTurck flow, `gtraj s = deTurckG0SpectralN g₀ a (deTurckRealizeRemainderOf g₀ g_bg
+  (T_s s))`, whose all-order time smoothness is the realized-remainder Nemytskii chain rule).
+  Because `gforce`'s own coordinate paths are `L²`-time elements whose per-mode convolutions
+  recover the carrier coordinates, this a.e. tie suffices to transport the `C^k`-in-time
+  regularity of `gtraj` to the per-mode bootstrap.
 
 This is exactly the engine's exported structure (`deTurckRemainder_strong_shortTime_exists`:
 `u = maxRegDuhamelMap … 0 gforce`, `gforce =ᵐ N(field)`, the stays-in-ball event) transported
@@ -136,7 +145,8 @@ def DuhamelMildSolutionData (g : SmoothRiemannianMetric I M) (a : ℝ) (T : ℝ)
     (u₂ : ℝ → tensorHs (I := I) (M := M) g 0 2 (a + 2))
     (N_cont : tensorHs (I := I) (M := M) g 0 2 (a + 1) →
       tensorHs (I := I) (M := M) g 0 2 a)
-    (R : ℝ) : Prop :=
+    (R : ℝ)
+    (gtraj : ℝ → tensorHs (I := I) (M := M) g 0 2 a) : Prop :=
   ∃ (Te : ℝ) (hT : 0 < T) (hTe : T ≤ Te) (hTe1 : Te ≤ 1)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) Te),
     ContinuousOn N_cont
@@ -160,7 +170,9 @@ def DuhamelMildSolutionData (g : SmoothRiemannianMetric I M) (a : ℝ) (T : ℝ)
         Metric.closedBall
           (tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
             (show (a + 1) ≤ a + 2 by linarith)
-            (0 : tensorHs (I := I) (M := M) g 0 2 (a + 2))) R)
+            (0 : tensorHs (I := I) (M := M) g 0 2 (a + 2))) R) ∧
+    ((gforce : ℝ → tensorHs (I := I) (M := M) g 0 2 a)
+      =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) T)] gtraj)
 
 /-- **Downward horizon-monotonicity of the Duhamel mild-solution datum.**  A Duhamel
 datum on `[0, T]` is, verbatim, a Duhamel datum on any shorter positive horizon
@@ -171,12 +183,32 @@ theorem DuhamelMildSolutionData.mono {g : SmoothRiemannianMetric I M} {a : ℝ} 
     {u₂ : ℝ → tensorHs (I := I) (M := M) g 0 2 (a + 2)}
     {N_cont : tensorHs (I := I) (M := M) g 0 2 (a + 1) →
       tensorHs (I := I) (M := M) g 0 2 a}
-    {R : ℝ} (hTT' : T' ≤ T) (hT' : 0 < T')
-    (h : DuhamelMildSolutionData (I := I) (M := M) g a T u₂ N_cont R) :
-    DuhamelMildSolutionData (I := I) (M := M) g a T' u₂ N_cont R := by
-  obtain ⟨Te, _hT, hTe, hTe1, gforce, hN_cont, hid, hforce, hball⟩ := h
-  exact ⟨Te, hT', le_trans hTT' hTe, hTe1, gforce, hN_cont,
-    fun s hs => hid s ⟨hs.1, le_trans hs.2 hTT'⟩, hforce, hball⟩
+    {R : ℝ} {gtraj : ℝ → tensorHs (I := I) (M := M) g 0 2 a}
+    (hTT' : T' ≤ T) (hT' : 0 < T')
+    (h : DuhamelMildSolutionData (I := I) (M := M) g a T u₂ N_cont R gtraj) :
+    DuhamelMildSolutionData (I := I) (M := M) g a T' u₂ N_cont R gtraj := by
+  obtain ⟨Te, _hT, hTe, hTe1, gforce, hN_cont, hid, hforce, hball, htraj⟩ := h
+  refine ⟨Te, hT', le_trans hTT' hTe, hTe1, gforce, hN_cont,
+    fun s hs => hid s ⟨hs.1, le_trans hs.2 hTT'⟩, hforce, hball, ?_⟩
+  exact ae_restrict_of_ae_restrict_of_subset (Set.Icc_subset_Icc le_rfl hTT') htraj
+
+/-- **A.e.-congruence of the Duhamel mild-solution datum in the forcing trajectory.**  A
+Duhamel datum with forcing trajectory `gtraj` is, for any `gtraj'` agreeing with `gtraj`
+a.e. on the slab `[0, T]`, a Duhamel datum with trajectory `gtraj'`: only the final
+trajectory-identification conjunct `gforce =ᵐ gtraj` is affected, and it transports by
+transitivity along `gtraj =ᵐ gtraj'`.  This is the step the realize-construction uses to
+swap the abstract forcing trajectory `N_cont ∘ field` for the concrete realized-remainder
+spectral path `s ↦ deTurckG0SpectralN g₀ a (deTurckRealizeRemainderOf g₀ g_bg (T_s s))`. -/
+theorem DuhamelMildSolutionData.congr_gtraj {g : SmoothRiemannianMetric I M} {a : ℝ} {T : ℝ}
+    {u₂ : ℝ → tensorHs (I := I) (M := M) g 0 2 (a + 2)}
+    {N_cont : tensorHs (I := I) (M := M) g 0 2 (a + 1) →
+      tensorHs (I := I) (M := M) g 0 2 a}
+    {R : ℝ} {gtraj gtraj' : ℝ → tensorHs (I := I) (M := M) g 0 2 a}
+    (hg : gtraj =ᵐ[MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) T)] gtraj')
+    (h : DuhamelMildSolutionData (I := I) (M := M) g a T u₂ N_cont R gtraj) :
+    DuhamelMildSolutionData (I := I) (M := M) g a T u₂ N_cont R gtraj' := by
+  obtain ⟨Te, hT, hTe, hTe1, gforce, hN_cont, hid, hforce, hball, htraj⟩ := h
+  exact ⟨Te, hT, hTe, hTe1, gforce, hN_cont, hid, hforce, hball, htraj.trans hg⟩
 
 /-- **Strong short-time existence for a Ricci–DeTurck first-order remainder.**
 

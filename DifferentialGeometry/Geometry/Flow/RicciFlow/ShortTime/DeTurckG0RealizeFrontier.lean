@@ -267,7 +267,9 @@ theorem deTurck_g0_carrier_realize_transport
               (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
               (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) ∧
       Integral.L2.SmoothCcTensor.toL2 (T_s 0) = 0 ∧
-      DuhamelMildSolutionData (I := I) (M := M) g₀ (a : ℝ) T u₂ N_cont R :=
+      DuhamelMildSolutionData (I := I) (M := M) g₀ (a : ℝ) T u₂ N_cont R
+        (fun s => N_cont (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) :=
   deturck_g0_engine_carrier_extraction (I := I) (M := M) g₀ a ha ha2 N_cont hR
     hN_cont hLipBall hloss
     (gFibreOpBound_ccTensorBilinSymm_le_tensorHsNorm (I := I) (M := M) g₀)

@@ -135,7 +135,9 @@ theorem deturck_ricci_parabolic_interior_regularity
           (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j)
           (extChartAt I α q.2))
         (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α))
-    (hduhamel : DuhamelMildSolutionData (I := I) (M := M) g₀ (a : ℝ) T u₂ N_cont R) :
+    (hduhamel : DuhamelMildSolutionData (I := I) (M := M) g₀ (a : ℝ) T u₂ N_cont R
+      (fun s => deTurckG0SpectralN (I := I) g₀ a
+        (deTurckRealizeRemainderOf (I := I) g₀ g_bg (T_s s)))) :
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
         (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
           : TangentBundle I M))
@@ -176,7 +178,7 @@ theorem deturck_ricci_parabolic_interior_regularity
           q.2 ((g_DT q.1).inner q.2))
         (Set.Icc (0 : ℝ) T ×ˢ Set.univ) :=
     IntrinsicSpectral.MetricRealization.realizedMetric_innerHomSection_jointContMDiffOn_uptoZero
-      (I := I) g₀ g_DT T_s u₂ N_cont ha hreal hHk hcont hreg hcanon hduhamel
+      (I := I) g₀ g_bg g_DT T_s u₂ N_cont ha hreal hHk hcont hreg hcanon hduhamel
   have hsmooth_interior : ∀ x₀ : M,
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
         (fun q : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)

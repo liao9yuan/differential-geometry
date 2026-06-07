@@ -187,7 +187,7 @@ chart-local bridge `chartGramOnE_realizedMetric_jointContMDiffOn`
 `sorry` (the genuine parabolic-semigroup time-smoothing tower), so consumers transitively
 depend on `sorryAx`. -/
 theorem realizedMetric_innerHomSection_jointContMDiffOn_uptoZero
-    (g_bg : SmoothRiemannianMetric I M)
+    (g_bg g_flow : SmoothRiemannianMetric I M)
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (T_s : ℝ → Integral.L2.SmoothCcTensor g_bg 0 2) {a : ℕ} {T : ℝ} {R : ℝ}
     (u₂ : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
@@ -218,7 +218,9 @@ theorem realizedMetric_innerHomSection_jointContMDiffOn_uptoZero
         = tensorL2Coeff (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g_bg 0 2)
             (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i)
-    (hduhamel : DuhamelMildSolutionData (I := I) (M := M) g_bg (a : ℝ) T u₂ N_cont R) :
+    (hduhamel : DuhamelMildSolutionData (I := I) (M := M) g_bg (a : ℝ) T u₂ N_cont R
+      (fun s => deTurckG0SpectralN (I := I) g_bg a
+        (deTurckRealizeRemainderOf (I := I) g_bg g_flow (T_s s)))) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
       (fun q : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
         (E := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -230,7 +232,7 @@ theorem realizedMetric_innerHomSection_jointContMDiffOn_uptoZero
           IntrinsicSobolev.SmoothCcTensor.toHs (g := g_bg) (r := 0) (s := 2) (2 * m) (T_s t))
         (Set.Icc (0 : ℝ) T) := fun k m =>
     realizedPerturbation_timeContDiffTower_uptoZero (I := I) (M := M)
-      g_bg T_s u₂ N_cont ha hHk hcont hreg hcanon hduhamel k m
+      g_bg g_flow T_s u₂ N_cont ha hHk hcont hreg hcanon hduhamel k m
   have hpert : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
       (fun q : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
         (E := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -928,14 +930,16 @@ theorem realizedMetric_deTurckVF_jointContMDiffOn_uptoZero
         = tensorL2Coeff (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
             (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i)
-    (hduhamel : DuhamelMildSolutionData (I := I) (M := M) g₀ (a : ℝ) T u₂ N_cont R) :
+    (hduhamel : DuhamelMildSolutionData (I := I) (M := M) g₀ (a : ℝ) T u₂ N_cont R
+      (fun s => deTurckG0SpectralN (I := I) g₀ a
+        (deTurckRealizeRemainderOf (I := I) g₀ g_bg (T_s s)))) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
         : TangentBundle I M))
       (Set.Icc (0 : ℝ) T ×ˢ Set.univ) := by
   rcases lt_or_ge 0 T with hT | hT
   · have hsmooth := realizedMetric_innerHomSection_jointContMDiffOn_uptoZero
-      (I := I) g₀ g_DT T_s u₂ N_cont ha hreal hHk hcont hreg hcanon hduhamel
+      (I := I) g₀ g_bg g_DT T_s u₂ N_cont ha hreal hHk hcont hreg hcanon hduhamel
     refine ClosedSlabVFEngine.deturck_vf_joint_smoothness_uptoZero
       (I := I) g_bg g_DT hT ?_
     intro x₀ i j

@@ -118,7 +118,9 @@ theorem deturck_metric_pde_interior_at_initial_with_carrier
         (∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
           HasDerivWithinAt (fun s : ℝ => (g_DT s).inner x v w)
             (deTurckRicciRHS (I := I) g_bg (g_DT t) x v w) (Set.Ici 0) t) ∧
-        DuhamelMildSolutionData (I := I) (M := M) g₀ (a : ℝ) T u₂ N_cont R := by
+        DuhamelMildSolutionData (I := I) (M := M) g₀ (a : ℝ) T u₂ N_cont R
+          (fun s => deTurckG0SpectralN (I := I) g₀ a
+            (deTurckRealizeRemainderOf (I := I) g₀ g_bg (T_s s))) := by
   classical
   set a : ℕ := Module.finrank ℝ E + 5 with ha_def
   have ha : 2 * a > Module.finrank ℝ E + 4 := by omega
@@ -170,8 +172,8 @@ theorem deturck_metric_pde_interior_at_initial_with_carrier
     rw [hsynth u i, hcarrier u h ⟨hball, hgateQ⟩]
   have hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont R :=
     deTurckGenuineN_firstOrder_operatorLoss (I := I) g₀ g_bg a ha N_cont P K hR hctrl hall hsynth
-  obtain ⟨T₀, g_DT, u₂, T_s, hT₀, h0, hreal₀, hcont₀, hreg₀, hsmall₀, hsmoothrepr₀, hcanon₀, hHk,
-      hcarrier_inball₀, hTs0, hduhamel₀⟩ :=
+  obtain ⟨T₀, g_DT, u₂, T_s, hT₀, h0, hreal₀, hcont₀, hreg₀, hsmall₀, hsmoothrepr₀,
+      hcanon₀, hHk, hcarrier_inball₀, hTs0, hduhamel₀⟩ :=
     deTurck_g0_carrier_realize_transport (I := I) g₀ a ha ha2 N_cont hR hN_cont hLipBall hloss
   -- **Shrink to a horizon on which the carrier's order-`2a` Sobolev norm stays below the
   -- selector's positive slack `Q`** (the smooth representative vanishes at `t = 0` and its
@@ -324,8 +326,66 @@ theorem deturck_metric_pde_interior_at_initial_with_carrier
       hreal hcont hsmoothrepr hC2_chart
   · exact deTurck_g0_interior_deriv_from_data (I := I) g₀ g_bg a ha g_DT u₂ T_s
       N_cont repr Nsec hreal hN_coeff hNsec_realize hreg hsmoothrepr hNsec_geom
-  · -- The Duhamel datum on the carrier-transport horizon `T₀`, restricted to the shrunk `T ≤ T₀`.
-    exact hduhamel₀.mono hT_le hT
+  · -- The Duhamel datum on the carrier-transport horizon `T₀`, restricted to the shrunk `T ≤ T₀`,
+    -- with the forcing trajectory `N_cont ∘ (ι_{a+1} u₂)` rewritten to the concrete realized-
+    -- remainder spectral path `s ↦ deTurckG0SpectralN g₀ a (deTurckRealizeRemainderOf g₀ g_bg
+    -- (T_s s))` via the gate gauge reconciliation (a.e. on `[0, T]`, off the null endpoint `{T}`).
+    refine DuhamelMildSolutionData.congr_gtraj ?_ (hduhamel₀.mono hT_le hT)
+    -- The two trajectories agree pointwise on `Ico 0 T` (hence a.e. on `Icc 0 T`).
+    have hpt : ∀ s ∈ Set.Ico (0 : ℝ) T,
+        N_cont (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))
+          = deTurckG0SpectralN (I := I) g₀ a
+              (deTurckRealizeRemainderOf (I := I) g₀ g_bg (T_s s)) := by
+      intro s hs
+      refine tensorHs.ext (funext (fun i => ?_))
+      -- `Nsec (ι u₂ s)` and `deTurckRealizeRemainderOf g₀ g_bg (T_s s)` have the same `L²` class:
+      -- the gate representative of `ι u₂ s` is `T_s s`, and the realized remainder of that gate
+      -- representative is the gate-based gauge `Nsec (ι u₂ s)`.
+      have hgateEq : gateRepOfWitness (I := I) g₀
+            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (hgate s hs)
+          = T_s s :=
+        gateSmoothRep_carrierInclusion_eq (I := I) g₀ a u₂ T_s
+          (hsmoothrepr s (Set.Ico_subset_Icc_self hs)) (hgate s hs)
+      have hsecEq : Nsec (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))
+          = deTurckRealizeRemainderOf (I := I) g₀ g_bg (T_s s) :=
+        calc Nsec (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))
+            = deTurckRealizeRemainderOf (I := I) g₀ g_bg
+                (gateRepOfWitness (I := I) g₀
+                  (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                    (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (hgate s hs)) :=
+              (deTurckRealizeRemainderOf_gateRepOfWitness (I := I) g₀ g_bg
+                (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                  (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (hgate s hs)).symm
+          _ = deTurckRealizeRemainderOf (I := I) g₀ g_bg (T_s s) :=
+              congrArg (deTurckRealizeRemainderOf (I := I) g₀ g_bg) hgateEq
+      calc (N_cont (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))).coeff i
+          = tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (Integral.L2.SmoothCcTensor.toL2
+                (Nsec (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                  (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)))) i :=
+            hN_coeff s hs i
+        _ = tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (Integral.L2.SmoothCcTensor.toL2
+                (deTurckRealizeRemainderOf (I := I) g₀ g_bg (T_s s))) i := by rw [hsecEq]
+        _ = (deTurckG0SpectralN (I := I) g₀ a
+              (deTurckRealizeRemainderOf (I := I) g₀ g_bg (T_s s))).coeff i :=
+            (deTurckG0SpectralN_coeff (I := I) g₀ a
+              (deTurckRealizeRemainderOf (I := I) g₀ g_bg (T_s s)) i).symm
+    -- Upgrade the `Ico`-pointwise equality to a.e. on `Icc 0 T` (the endpoint `{T}` is null,
+    -- `Ico 0 T =ᵐ Icc 0 T`, so the two restrictions coincide).
+    rw [show MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) T)
+          = MeasureTheory.volume.restrict (Set.Ico (0 : ℝ) T) from
+        MeasureTheory.Measure.restrict_congr_set (MeasureTheory.Ico_ae_eq_Icc (μ := MeasureTheory.volume)
+          (a := (0 : ℝ)) (b := T)).symm]
+    rw [Filter.eventuallyEq_iff_exists_mem]
+    exact ⟨Set.Ico (0 : ℝ) T, MeasureTheory.self_mem_ae_restrict measurableSet_Ico, hpt⟩
 
 /-- **`g₀`-anchored DeTurck–Ricci interior parabolic existence (genuine analytic input).**
 
