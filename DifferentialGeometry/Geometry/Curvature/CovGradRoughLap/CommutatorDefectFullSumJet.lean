@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorBochner
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.OrderSeparatedCurvatureJet
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.OrderSeparatedCurvatureJetRS
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.DiffCurvatureGenuineTower
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.CurvatureJetGridRS
 
 /-!
 # The order-`2` commutator defect is a full-sum graded curvature jet
@@ -274,7 +275,21 @@ theorem pointwiseTensorCurvRS_directFullSum_baseSplit
           IsGradedCurvJetRS (I := I) (M := M) g S (c s) 1 1 Gcurv ∧
           IsGradedCurvJetRS (I := I) (M := M) g S (c s) 0 1 Gdiff ∧
           IsGradedCurvJetRS (I := I) (M := M) g S (c s) 0 3 Grem := by
-  sorry
+  classical
+  -- The pure-Riemann genuine section `GcurvSectionRS` is a `(1, 1)` graded jet; the existential
+  -- differentiated-curvature `Gcd` (`(0, 1)`) and the moving-frame remainder `Grem` (the SOUND
+  -- full-sum `(0, 3)`, not the false `(2, 1)`) come from the combined rank-`r` full-sum split, over
+  -- the concrete `GcurvSectionRS`. Promote all three to a single common per-order family by `max`.
+  obtain ⟨c₁, hc₁_nn, hcurv⟩ := GcurvSectionRS_gradedCurvJet (I := I) (M := M) g r
+  obtain ⟨c₂, hc₂_nn, hdiffrem⟩ :=
+    exists_pointwiseTensorCurvRS_diffCurvAndRemainder_fullSum_gradedCurvJet (I := I) (M := M) g r
+  refine ⟨fun s k => max (c₁ s k) (c₂ s k), fun s k => ?_, fun s S => ?_⟩
+  · exact le_trans (hc₁_nn s k) (le_max_left _ _)
+  · obtain ⟨Gcd, Grem, hsplit, hGcd_jet, hGrem_jet⟩ := hdiffrem s S
+    refine ⟨GcurvSectionRS (I := I) (M := M) g r s S, Gcd, Grem, hsplit, ?_, ?_, ?_⟩
+    · exact (hcurv s S).mono_const (I := I) (M := M) g S (hc₁_nn s) (fun k => le_max_left _ _)
+    · exact hGcd_jet.mono_const (I := I) (M := M) g S (hc₂_nn s) (fun k => le_max_right _ _)
+    · exact hGrem_jet.mono_const (I := I) (M := M) g S (hc₂_nn s) (fun k => le_max_right _ _)
 
 /-- **The rank-`r` order-`2` commutator defect is a full-sum graded curvature jet of lowest order `0`
 and base width `3`, derived from the genuine base split.** This is the *bare-jet* corollary of the

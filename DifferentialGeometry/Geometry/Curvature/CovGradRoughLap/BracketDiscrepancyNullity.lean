@@ -5,21 +5,18 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameIntegr
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.BracketDivergenceForm
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFramePureRCurvatureTracePairing
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemainderFrameSumBridge
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameCurvatureValueAnchor
 
 /-!
 # The frame-free curvature operator field, the frame-bracket divergence nullity, and the integrated
 tensor Bochner–Weitzenböck curvature-term residue (the curvature line's single irreducible deep root)
 
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` this upstream file homes three
+For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` this upstream file homes
 pieces of the third-order tensor Bochner–Weitzenböck curvature line, *above* the moving-frame
-differentiated-curvature spine `MovingFrameDiffCurvTraceSection`:
-
-* `curvOpField g s` — the **frame-free curvature operator field** `Φ₀ s`, the fixed smooth
-  `(s, s)`-operator field whose operator-field action recovers the order-`0` moving-frame pure-Riemann
-  curvature endomorphism `pureRGenuineDiffOp g 0 s W = appCc (Φ₀ s) W` (`exists_pureRGenuineDiffOp_base_appCc`).
-  It is the curvature coefficient whose covariant derivative carries the differentiated-curvature `(∇R)`
-  content; it is a pure `Classical.choose` definition with no downstream dependency, so it is homed here
-  for the curvature line to share.
+differentiated-curvature spine `MovingFrameDiffCurvTraceSection`. The frame-free curvature operator field
+`curvOpField g s` (`Φ₀ s`) and the integrated tensor Bochner–Weitzenböck *curvature value*
+`curvatureValue_genuineFields_eq_weitzenbock` (the single genuine deep root, in value form) are homed
+one level further upstream in `MovingFrameCurvatureValueAnchor`; this file consumes them.
 
 * `frameBracket_combined_divergence_integral_eq_zero` — the **frame-summed frame-bracket covariant
   Green nullity**: for any two `g_x`-orthonormal-frame-bracket-indexed families of direction fields and
@@ -108,29 +105,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
-
-/-- **The frame-free curvature operator field `Φ₀ s`.** The fixed smooth `(s, s)`-operator field whose
-operator-field action recovers the order-`0` moving-frame pure-Riemann curvature endomorphism
-`pureRGenuineDiffOp g 0 s W = appCc (Φ₀ s) W` (`exists_pureRGenuineDiffOp_base_appCc`); its fibre value
-is the genuine `g`-metric curvature trace `W ↦ ∑ᵢ R(Bᵢ, ·) W`, frame-free (built from `g, R` alone). It
-is the curvature coefficient whose covariant derivative carries the differentiated-curvature `(∇R)`
-content. It is a pure `Classical.choose` definition (no downstream dependency), homed upstream so the
-curvature line shares it. -/
-noncomputable def curvOpField (g : SmoothRiemannianMetric I M) (s : ℕ) :
-    SmoothCcTensor g (s + 0) (s + 0) :=
-  (Classical.choose (exists_pureRGenuineDiffOp_base_appCc (I := I) (M := M) g)) s
-
-/-- **The order-`0` curvature operator base spec for `curvOpField`.** The defining `Classical.choose`
-specification: the operator-field action of the frame-free curvature operator field `Φ₀ s := curvOpField
-g s` on a smooth compactly-supported `(0, s)`-tensor `S` recovers the order-`0` moving-frame pure-Riemann
-curvature trace `pureRGenuineDiffOp g 0 s S`. This is the identity through which the differentiated
-operator field `covGrad (Φ₀ s)` and its passenger-slot extension `slotExtend (Φ₀ s)` are identified with
-the curvature-derivative content. -/
-theorem appCc_curvOpField_eq_pureRGenuineDiffOp
-    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
-    appCc (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s) S =
-      pureRGenuineDiffOp (I := I) (M := M) g 0 s S :=
-  (Classical.choose_spec (exists_pureRGenuineDiffOp_base_appCc (I := I) (M := M) g) s S).symm
 
 /-- **The frame-summed frame-bracket covariant Green nullity (the honest divergence-vanishing pillar).**
 For a closed smooth Riemannian manifold `(M, g)`, ranks `(r, s)`, a finite index family `ι`, smooth
@@ -309,10 +283,20 @@ empty curvature slot), so the nullity reads `⟨ricTraceSection g 0 f, ∇f⟩_{
 (`ricTraceSection_zero_apply`, `weitzenbock_curvature_crossPairing_value`), genuinely nonzero on a
 non-flat manifold. Dropping the Ricci-trace carrier (perturbing the curvature to flat, the degenerate
 witness) makes the nullity FALSE at `s = 0`, so the carrier is genuinely required and the node is not
-vacuous (it fails for a `κ ≠ 1`-perturbed curvature residue). The body is `sorry` (the genuine classical
-integrated tensor Bochner–Weitzenböck curvature-term derivation: the integrated second-Bianchi Ricci
-fold, the differentiated-curvature operator-field identification, and the gradient-slot divergence-zero
-lift, all sound only under the integral); consumers transitively depend on `sorryAx`. -/
+vacuous (it fails for a `κ ≠ 1`-perturbed curvature residue).
+
+**Proof (composition over the posited curvature value, with the divergence-IBP half discharged).** This
+nullity is proved by the sorry-free integrated-nullity producer
+`movingFrameNullity_of_genuineCrossPairingValue` (`MovingFrameIntegratedNullity`) fed the posited
+integrated tensor Bochner–Weitzenböck *curvature value* `curvatureValue_genuineFields_eq_weitzenbock`
+(`MovingFrameCurvatureValueAnchor`) with the slot-complete carrier
+`Gcd := appCc (∇Φ₀ s) S + ricTraceSection g s S`. The producer *discharges the gradient-slot
+divergence-zero lift* — the third genuine piece — by the frame-summed covariant integration by parts
+(`tensorL2Inner_movingFrameRemainder_eq_zero_of_bracketFreePairing`), so the remaining genuine content
+(the second-Bianchi Ricci fold and the differentiated-curvature operator-field identification) is
+isolated entirely in the posited value identity, *sound only under the integral*. The literal-subtraction
+remainder of the producer is the four-carrier remainder by `sub_sub` (`abel`). Consumers transitively
+depend on the value identity's `sorryAx`. -/
 theorem fourCarrierMovingFrameRemainder_integrated_nullity
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     tensorL2Inner (I := I) (M := M) g 0 (s + 1)
@@ -322,7 +306,24 @@ theorem fourCarrierMovingFrameRemainder_integrated_nullity
             (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S -
           ricTraceSection (I := I) (M := M) g s S).toFun
         (covGrad (I := I) (M := M) g 0 s S).toFun = 0 := by
-  sorry
+  classical
+  -- The slot-complete carrier `Gcd := appCc (∇Φ₀ s) S + ricTraceSection g s S`.
+  set Gcd : SmoothCcTensor g 0 (s + 1) :=
+    appCc (I := I) (M := M) g s (s + 1)
+        (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S +
+      ricTraceSection (I := I) (M := M) g s S with hGcd
+  -- The integrated moving-frame nullity producer, fed the posited curvature value identity.
+  have hnull := movingFrameNullity_of_genuineCrossPairingValue (I := I) (M := M) g s S Gcd
+    (curvatureValue_genuineFields_eq_weitzenbock (I := I) (M := M) g s S)
+  -- The producer's literal-subtraction remainder is the four-carrier remainder (`sub_sub`).
+  rw [show (pointwiseTensorCurv (I := I) (M := M) g s S -
+          GcurvSection (I := I) (M := M) g s S -
+          appCc (I := I) (M := M) g s (s + 1)
+            (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S -
+          ricTraceSection (I := I) (M := M) g s S) =
+        pointwiseTensorCurv (I := I) (M := M) g s S -
+          GcurvSection (I := I) (M := M) g s S - Gcd from by rw [hGcd]; abel]
+  exact hnull
 
 /-- **The frame-bracket remainder frame-sum integral carries the differentiated-curvature operator-field
 trace plus the Ricci trace (the curvature line's single irreducible integrated deep root, in its

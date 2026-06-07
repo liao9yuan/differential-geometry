@@ -8,6 +8,7 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFramePureRC
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemainderFrameSumBridge
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RicciTraceCarrier
 import DifferentialGeometry.Geometry.Curvature.Bochner.TensorWeitzenbockIdentity
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.Order2DefectFiberOrder
 
 /-!
 # The gauge-glued tensorial differentiated-curvature section `(∇R) S`
@@ -994,7 +995,79 @@ theorem fourCarrierRemainder_fiberNormSq_bound_upstream
               riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
                   ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
               riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) := by
-  sorry
+  classical
+  -- The order-`2` commutator-defect fibre order (the genuine upstream-irreducible quantitative atom).
+  obtain ⟨Ccurv, hCcurv_nn, hCcurv⟩ :=
+    exists_pointwiseTensorCurv_fiberOrder_bound (I := I) (M := M) g
+  -- The pure-Riemann section grid bound at gradient order `k = 0` (sorry-free).
+  obtain ⟨cg, hcg_nn, hcg⟩ :=
+    exists_GcurvSection_iteratedCovGrad_grid_bound (I := I) (M := M) g
+  -- The differentiated-curvature section sum bound (sorry-free).
+  obtain ⟨Kgcd, hKgcd_nn, hKgcd⟩ :=
+    exists_genuineDiffCurvSection_fiberNormSq_bound (I := I) (M := M) g
+  -- The Ricci-trace carrier sum bound (sorry-free).
+  obtain ⟨Crc, hCrc_nn, hCrc⟩ :=
+    exists_ricTraceSection_fiberNormSq_bound (I := I) (M := M) g
+  refine ⟨fun s => Real.sqrt (8 * (Ccurv s) ^ 2 + 8 * (cg s 0) ^ 2 + 8 * (Kgcd s) ^ 2
+      + 8 * (Crc s) ^ 2), fun s => Real.sqrt_nonneg _, fun s S x => ?_⟩
+  have hKsq : Real.sqrt (8 * (Ccurv s) ^ 2 + 8 * (cg s 0) ^ 2 + 8 * (Kgcd s) ^ 2
+      + 8 * (Crc s) ^ 2) ^ 2 =
+      8 * (Ccurv s) ^ 2 + 8 * (cg s 0) ^ 2 + 8 * (Kgcd s) ^ 2 + 8 * (Crc s) ^ 2 := by
+    rw [Real.sq_sqrt]; positivity
+  rw [hKsq]
+  set Curv : SmoothCcTensor g 0 (s + 1) := pointwiseTensorCurv (I := I) (M := M) g s S with hCurv
+  set Gcurv : SmoothCcTensor g 0 (s + 1) := GcurvSection (I := I) (M := M) g s S with hGcurv
+  -- Resolve the fibre value of the literal subtraction into the componentwise fibre values.
+  simp only [SmoothCcTensor.toSection_sub, SmoothCcTensor.toSection_add,
+    ContMDiffSection.coe_sub, ContMDiffSection.coe_add, Pi.sub_apply, Pi.add_apply]
+  set fS : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) with hfS
+  set fgS : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+      ((covGrad (I := I) (M := M) g 0 s S).toSection x) with hfgS
+  set fg2S : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+      ((covGrad (I := I) (M := M) g 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S)).toSection x)
+    with hfg2S
+  have hfS_nn : 0 ≤ fS := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x _
+  have hfgS_nn : 0 ≤ fgS := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x _
+  have hfg2S_nn : 0 ≤ fg2S := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1 + 1) x _
+  -- Triangle inequalities: `rfns((Curv − Gcurv) − (Gcd + Gric))`.
+  have hsub1 := riemannianFiberNormSq_sub_le (I := I) (M := M) g 0 (s + 1) x
+    (Curv.toSection x - Gcurv.toSection x)
+    ((genuineDiffCurvSection (I := I) (M := M) g s S).toSection x +
+      (ricTraceSection (I := I) (M := M) g s S).toSection x)
+  have hsub2 := riemannianFiberNormSq_sub_le (I := I) (M := M) g 0 (s + 1) x
+    (Curv.toSection x) (Gcurv.toSection x)
+  have hsubGcd := riemannianFiberNormSq_add_le (I := I) (M := M) g 0 (s + 1) x
+    ((genuineDiffCurvSection (I := I) (M := M) g s S).toSection x)
+    ((ricTraceSection (I := I) (M := M) g s S).toSection x)
+  -- The four genuine/curvature carrier bounds.
+  have hCurvB := hCcurv s S x
+  rw [← hCurv] at hCurvB
+  have hgc0 := hcg s S 0 x
+  simp only [DifferentialGeometry.PDE.RicciFlow.iteratedCovGrad_zero, Nat.add_zero,
+    Finset.range_one, Finset.sum_singleton,
+    DifferentialGeometry.PDE.RicciFlow.iteratedCovGrad_succ] at hgc0
+  rw [← hGcurv] at hgc0
+  have hgc : riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x (Gcurv.toSection x) ≤
+      cg s 0 ^ 2 * fgS := hgc0
+  have hgd := hKgcd s S x
+  have hrc := hCrc s S x
+  nlinarith [hsub1, hsub2, hsubGcd, hCurvB, hgc, hgd, hrc, hfS_nn, hfgS_nn, hfg2S_nn,
+    sq_nonneg (Ccurv s), sq_nonneg (cg s 0), sq_nonneg (Kgcd s), sq_nonneg (Crc s),
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x (Curv.toSection x),
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x (Gcurv.toSection x),
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x
+      (Curv.toSection x - Gcurv.toSection x),
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x
+      ((genuineDiffCurvSection (I := I) (M := M) g s S).toSection x),
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x
+      ((ricTraceSection (I := I) (M := M) g s S).toSection x),
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x
+      ((genuineDiffCurvSection (I := I) (M := M) g s S).toSection x +
+        (ricTraceSection (I := I) (M := M) g s S).toSection x),
+    mul_nonneg hfg2S_nn (sq_nonneg (Ccurv s)), mul_nonneg hfgS_nn (sq_nonneg (Ccurv s)),
+    mul_nonneg hfS_nn (sq_nonneg (Ccurv s)), mul_nonneg hfgS_nn (sq_nonneg (cg s 0)),
+    mul_nonneg hfgS_nn (sq_nonneg (Kgcd s)), mul_nonneg hfS_nn (sq_nonneg (Kgcd s)),
+    mul_nonneg hfgS_nn (sq_nonneg (Crc s)), mul_nonneg hfS_nn (sq_nonneg (Crc s))]
 
 /-- **Posited upstream genuine third-order Weitzenböck field decomposition with proportional fibre
 bounds and the concrete spectral pairing (the deepest curvature core, homed upstream of the
