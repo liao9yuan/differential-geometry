@@ -682,6 +682,7 @@ import DifferentialGeometry.Analysis.Sobolev.WithBoundary.Intrinsic.Lp
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.Intrinsic.Trace
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.ConnectionLaplacianMaximalRegularity
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.BilinearDifferenceCovJetSplit
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.Linearization
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.MetricDifferenceFdBTermTree
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.Nonlinearity

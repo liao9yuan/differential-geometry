@@ -5,6 +5,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHSSection
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricRicciDiffOperatorExpansion
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.MetricDifferenceFdBTermTree
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.BilinearDifferenceCovJetSplit
 
 /-! # The covariant-jet Faà-di-Bruno expansion of the Ricci–DeTurck right-hand side along the segment
 
@@ -445,6 +446,68 @@ theorem gridWindowSum_le_of_kappa_le {κ κ' : ℕ → ℕ → ℝ}
   unfold Integral.Connection.gridWindowSum
   exact Finset.sum_le_sum fun _ _ => Finset.sum_le_sum fun _ _ => hle _ _
 
+/-! ### The per-field explicit order-zero single-difference-factor telescope data
+
+The two per-field instances of the shared abstract telescope datum `DeTurck.TelescopeData`
+(`BilinearDifferenceCovJetSplit.lean`), supplying the order-zero algebraic single-difference-factor
+expansion of each segment-differenced geometric nonlinearity to the shared covariant-jet brick
+`bilinDiff_covFdB_section_split`.  They live here next to their summand functors `ricciNeg2RetagG0` /
+`lieDerivRetagG0`; the abstract brick they feed is upstream. -/
+
+/-- **The explicit order-zero telescope datum of the `g₀`-retagged curvature summand functor (the deep
+algebraic curvature-difference posit).**
+
+The curvature summand functor `g ↦ ricciNeg2RetagG0 g₀ g` of the Ricci–DeTurck right-hand side admits
+the explicit order-zero single-difference-factor telescope datum `DeTurck.TelescopeData`: its segment
+difference is a metric-contraction `Φ.op 0 2 w` of the difference factor
+`w := realizeSymmCcTensor g₀ (T₁ − T₂)` plus a fixed-pair cross remainder whose all-order jet is
+`rfns`-controlled by the fixed-pair jet sum against the difference's order-`a` chart-Sobolev `C⁰` mass.
+
+This is the upstream algebraic floor the curvature leaf `ricciNeg2Diff_covFdB_section_split` stands on:
+the single-difference-factor expansion of the *sealed* curvature nonlinearity `-2 • Ric(g)` (the trace
+of the Levi-Civita curvature operator), differenced along the segment metric.  Its body is `sorry`: the
+genuine atomic algebraic content is the promotion of the connection-difference cocycle Ricci-difference
+telescope `ricciTensor_sub_telescope` (`RicciDifferenceTelescope.lean`) — whose every summand carries a
+single metric-difference factor through `D₁ − D₂ = connDiff g₁ g₂` — to the `Φ.op 0 2 w + C` section
+form (the metric-built coefficient organised as the differentiated bilinear contraction `Φ`, the
+difference factor's bilinear form `ccTensorBilinSymm g₀ (T₁ − T₂)` being `realizeSymmCcTensor`'s realized
+form, and the quadratic-in-difference term as the fixed-pair remainder `C`).  The downstream order-zero
+section normal form `ricciNeg2RetagG0_sub_eq_linear_add_cross`
+(`SegmentMetricCurvatureDifferenceOpDecomposition.lean`) is the `j = 0`, single-metric witness of
+exactly this structure, but lives downstream of this leaf and so cannot discharge it.  It carries NO
+pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, and NO Weyl dependence. -/
+theorem ricciNeg2RetagG0_telescope_data
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) :
+    TelescopeData (I := I) g₀ (fun g => ricciNeg2RetagG0 (I := I) g₀ g) a B :=
+  sorry
+
+/-- **The explicit order-zero telescope datum of the `g₀`-retagged Lie-derivative summand functor (the
+deep algebraic gauge-difference posit).**
+
+The Lie/`deTurckVF` summand functor `g ↦ lieDerivRetagG0 g₀ g_bg g` of the Ricci–DeTurck right-hand
+side admits the explicit order-zero single-difference-factor telescope datum `DeTurck.TelescopeData`:
+its segment difference is a metric-contraction `Φ.op 0 2 w` of the difference factor
+`w := realizeSymmCcTensor g₀ (T₁ − T₂)` plus a fixed-pair cross remainder whose all-order jet is
+`rfns`-controlled by the fixed-pair jet sum against the difference's order-`a` chart-Sobolev `C⁰` mass.
+
+This is the upstream algebraic floor the Lie leaf `lieDerivDiff_covFdB_section_split` stands on: the
+single-difference-factor expansion of the *sealed* Lie/`deTurckVF` nonlinearity `𝓛_{W(g, g_bg)} g` (the
+gauge summand `deTurckRHSSection g_bg g − ricciNeg2CcSection g`), differenced along the segment metric.
+The Lie field has the same intrinsic order-`≤2` structure as the curvature half (the deTurck vector
+field `W = g⁻¹ · (Γ(g) − Γ(g_bg))` is a `g⁻¹·∂g`-type field), so its segment difference admits the
+identical `Φ.op 0 2 w + C` section form.  Its body is `sorry`: the genuine atomic algebraic content is
+the promotion of the chart-level structural difference identity `chartLieDeTurckComp_sub_eq`
+(`ChartLieDerivStructuralDifference.lean`) — which exhibits the `Lie(g₁) − Lie(g₂)` chart component as a
+difference of products of metric `≤2`-jets, each carrying a single Gram/vector-field-component
+difference factor — to the section form with the fixed-pair remainder.  It carries NO
+pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, and NO Weyl dependence. -/
+theorem lieDerivRetagG0_telescope_data
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) :
+    TelescopeData (I := I) g₀ (fun g => lieDerivRetagG0 (I := I) g₀ g_bg g) a B :=
+  sorry
+
 /-- **The covariant Faà-di-Bruno difference/cross split of the Ricci-curvature summand difference
 (the deep covariant-curvature-jet structural posit).**
 
@@ -487,32 +550,25 @@ FALSE for `j ∈ (a, 2a]` (the top coefficient jet `∇^{j+2}g_t` content is gen
 `(∑ fixed-pair) · C⁰`-order and is *not* difference-arm controlled).  Both pieces carry genuine
 content; neither arm constant is vacuous.
 
-Its body is `sorry`: the genuine atomic deferred content is the **identity-level covariant
-Faà-di-Bruno collection** of the segment-differenced curvature nonlinearity, sorting the single high
-covariant derivative either onto the difference factor `w` (→ the difference-arm piece `Adiff`, whose
-`rfns ≤ Cd · ∑_{i ≤ j+2} rfns(∇^i w)` follows once the metric-built `≤2`-jet coefficient is bounded —
-all bounding assets are present: the curvature-difference telescope
-`ricciTensor_sub_eq_basisSum_difference`/`ricciTensor_sub_telescope`
-(`Curvature/CurvatureOperator/RicciDifferenceTelescope.lean`) for the `∇₀D`-term reduction, the
-connection-difference Koszul value-order-in-`∇h` of `ConnectionDifferenceCurvature.lean`, the
-abstract differentiated-bilinear Leibniz grid `telescope_bilin`
-(`MetricDifferenceFdBTermTree.lean`), and the order-`≤2` segment-metric jet sup
-`exists_segmentMetric_realizeSymm_iteratedCovGradJet2_sup_le` (`SegmentMetricJetBound.lean`)) or onto
-the fixed-pair coefficient (→ the cross piece `Cross`, the Faà-di-Bruno `i = 0` term's unbounded top
-jet `∇^{j+2}g_t` on `T₁, T₂` against the difference's `C⁰` mass).
+It is **proven by composition** (TRANSIT) over the section-functor-abstract covariant-jet brick
+`bilinDiff_covFdB_section_split` (`BilinearDifferenceCovJetSplit.lean`), instantiated with the curvature
+summand functor `g ↦ ricciNeg2RetagG0 g₀ g` and its explicit order-zero telescope datum
+`ricciNeg2RetagG0_telescope_data`.  The abstract brick takes the order-zero single-difference-factor
+expansion `Ric-diff = Φ.op 0 2 w + C` (the metric-contraction of the difference factor `w :=
+realizeSymmCcTensor g₀ (T₁ − T₂)` plus a fixed-pair remainder `C`) and pushes `∇^j` through it: the high
+derivative on the difference factor lands in the difference-arm piece `Adiff` (the metric-built
+coefficient folded into the uniform `Cd` over the binomial covariant-Leibniz grid window `j + 2`), and
+the order-`j` covariant gradient of the fixed-pair remainder `C` rides the cross piece `Cross`.
 
-The earlier **structural-split layer** (factoring `Adiff` through a `DiffBilinOp` contraction
-`Φ.op 0 2 w` plus the engine grid) was **refuted** and is gone: at the consumer's differentiation
-order `p = 0`, the `DiffBilinOp` jet envelope `DiffBilinOp.rfns_op_le` collapses to the value-order
-sum `kappa · ∑_{q ∈ range 1} rfns(∇^q w) = kappa · rfns(w)` (the window `range (0 + 1) = {0}`), so the
-`Φ.op 0 2 w` arm cannot carry the difference's principal `∇^{j+2}w` content (it enters via the
-`∇₀D`-term of `ricciTensor_sub_eq_basisSum_difference` and the Koszul value-order-in-`∇h`); a
-localized bump `w = ε φ(·/δ)` (`δ → 0`: `‖toHs a‖² = O(ε²δ^{n−2a}) → 0` supercritically while
-`|∇^{j+2}S(x₀)| → ∞`) then violates the cross bound at the bump centre, for every `j` — the false
-witness certificate.  The honest leaf is therefore this `Adiff + Cross` shape directly, with the high
-derivative collected onto whichever factor carries it.  Consumers transitively depend on `sorryAx`
-only through this leaf; it carries NO pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, and NO
-Weyl dependence. -/
+The genuine deep content has descended into two named posits: the section-functor-abstract `∇^j`-push
+brick `bilinDiff_covFdB_section_split` (the shared covariant-Leibniz grid content) and the per-field
+explicit order-zero telescope datum `ricciNeg2RetagG0_telescope_data` (the single-difference-factor
+algebraic expansion of the *sealed* curvature nonlinearity `-2 • Ric(g)` — the connection-difference
+cocycle Ricci-difference telescope `ricciTensor_sub_telescope`, `RicciDifferenceTelescope.lean`,
+promoted to the `Φ.op 0 2 w + C` section form, the downstream `j = 0` witness being
+`ricciNeg2RetagG0_sub_eq_linear_add_cross`, `SegmentMetricCurvatureDifferenceOpDecomposition.lean`).
+Consumers transitively depend on `sorryAx` only through those two posits; this leaf carries NO
+pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, and NO Weyl dependence. -/
 theorem ricciNeg2Diff_covFdB_section_split
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) (j : ℕ) :
@@ -543,7 +599,8 @@ theorem ricciNeg2Diff_covFdB_section_split
                     + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
                       ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
                 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) :=
-  sorry
+  bilinDiff_covFdB_section_split (I := I) g₀ (fun g => ricciNeg2RetagG0 (I := I) g₀ g) a B hB
+    (ricciNeg2RetagG0_telescope_data (I := I) g₀ a ha B hB) j
 
 /-- **The pointwise covariant-Faà-di-Bruno two-product domination of the Ricci-curvature summand
 difference (the deep covariant-curvature-jet posit).**
@@ -889,28 +946,25 @@ coefficient-`1` cross arm the two-product consumer below records.
 difference-arm bound would be false for `j ∈ (a, 2a]`, the top-jet content genuinely
 `(∑ fixed-pair) · C⁰`-order).  Both pieces carry genuine content; neither arm constant is vacuous.
 
-Its body is `sorry`: the genuine atomic deferred content is the **identity-level covariant
-Faà-di-Bruno collection** of the segment-differenced Lie/`deTurckVF` nonlinearity, sorting the single
-high covariant derivative either onto the difference factor `w` (→ the difference-arm piece `Adiff`,
-whose `rfns ≤ Cd · ∑_{i ≤ j+2} rfns(∇^i w)` follows once the metric-built `≤2`-jet coefficient is
-bounded — the gauge analogue of the curvature half, the `j = 0` two-piece witness being the chart-level
-structural difference identity `chartLieDeTurckComp_sub_eq`
-(`DeTurckCoefficients/ChartLieDerivStructuralDifference.lean`), with the order-`≤2` segment-metric jet
-sup `exists_segmentMetric_realizeSymm_iteratedCovGradJet2_sup_le` (`SegmentMetricJetBound.lean`) and
-the abstract differentiated-bilinear Leibniz grid `telescope_bilin` (`MetricDifferenceFdBTermTree.lean`)
-supplying the bounds) or onto the fixed-pair coefficient (→ the cross piece `Cross`, the Faà-di-Bruno
-`i = 0` term's unbounded top jet `∇^{j+2}g_t` on `T₁, T₂` against the difference's `C⁰` mass).
+It is **proven by composition** (TRANSIT) over the section-functor-abstract covariant-jet brick
+`bilinDiff_covFdB_section_split` (`BilinearDifferenceCovJetSplit.lean`, the same shared brick the
+curvature half uses), instantiated with the Lie summand functor `g ↦ lieDerivRetagG0 g₀ g_bg g` and its
+explicit order-zero telescope datum `lieDerivRetagG0_telescope_data`.  The abstract brick takes the
+order-zero single-difference-factor expansion `Lie-diff = Φ.op 0 2 w + C` (the metric-contraction of the
+difference factor `w := realizeSymmCcTensor g₀ (T₁ − T₂)` plus a fixed-pair remainder `C`) and pushes
+`∇^j` through it: the high derivative on the difference factor lands in the difference-arm piece `Adiff`
+(the metric-built coefficient folded into the uniform `Cd` over the binomial covariant-Leibniz grid
+window `j + 2`), and the order-`j` covariant gradient of the fixed-pair remainder `C` rides the cross
+piece `Cross`.
 
-The earlier **structural-split layer** (factoring `Adiff` through a `DiffBilinOp` contraction
-`Φ.op 0 2 w` plus the engine grid) was **refuted** identically to the curvature half and is gone: at
-the consumer's differentiation order `p = 0`, the `DiffBilinOp` jet envelope `DiffBilinOp.rfns_op_le`
-collapses to the value-order sum `kappa · ∑_{q ∈ range 1} rfns(∇^q w) = kappa · rfns(w)` (the window
-`range (0 + 1) = {0}`), so the `Φ.op 0 2 w` arm cannot carry the difference's principal `∇^{j+2}w`
-content; a localized bump `w = ε φ(·/δ)` (`δ → 0`: `‖toHs a‖² = O(ε²δ^{n−2a}) → 0` supercritically
-while `|∇^{j+2}S(x₀)| → ∞`) then violates the cross bound at the bump centre, for every `j`.  The
-honest leaf is therefore this `Adiff + Cross` shape directly, with the high derivative collected onto
-whichever factor carries it.  Consumers transitively depend on `sorryAx` only through this leaf; it
-carries NO pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, and NO Weyl dependence. -/
+The genuine deep content has descended into two named posits: the section-functor-abstract `∇^j`-push
+brick `bilinDiff_covFdB_section_split` (shared with the curvature half) and the per-field explicit
+order-zero telescope datum `lieDerivRetagG0_telescope_data` (the single-difference-factor algebraic
+expansion of the *sealed* Lie/`deTurckVF` nonlinearity `𝓛_{W(g, g_bg)} g` — the chart-level structural
+difference identity `chartLieDeTurckComp_sub_eq`, `ChartLieDerivStructuralDifference.lean`, promoted to
+the `Φ.op 0 2 w + C` section form).  Consumers transitively depend on `sorryAx` only through those two
+posits; this leaf carries NO pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, and NO Weyl
+dependence. -/
 theorem lieDerivDiff_covFdB_section_split
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) (j : ℕ) :
@@ -941,7 +995,8 @@ theorem lieDerivDiff_covFdB_section_split
                     + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
                       ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
                 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) :=
-  sorry
+  bilinDiff_covFdB_section_split (I := I) g₀ (fun g => lieDerivRetagG0 (I := I) g₀ g_bg g) a B hB
+    (lieDerivRetagG0_telescope_data (I := I) g₀ g_bg a ha B hB) j
 
 /-- **The pointwise covariant-Faà-di-Bruno two-product domination of the Lie-derivative summand
 difference (the deep covariant-gauge-jet posit).**
