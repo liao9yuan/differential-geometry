@@ -2854,13 +2854,14 @@ theorem deturck_g0_engine_pointwise_carrier
           (scaleLaplacianFun (I := I) (M := M) (u₂ s) +
             N_cont
               (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s) := by
+                (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))) s) ∧
+      DuhamelMildSolutionData (I := I) (M := M) g₀ (a : ℝ) T u₂ N_cont R := by
   classical
   -- The up-to-`t = 0` synthesis carrier at order `a + 2`.
   obtain ⟨u₂, hu₂cont, hu₂bridge⟩ :=
     zeroDatum_allscale_continuity_uptoZero (I := I) (M := M) g₀ a gforce hT hT1 u hu
       hcouple ((a : ℝ) + 2) (by linarith)
-  refine ⟨u₂, hu₂bridge, ?_, ?_, ?_⟩
+  refine ⟨u₂, hu₂bridge, ?_, ?_, ?_, ?_⟩
   · -- Continuity of the included carrier on `[0, T]`.
     exact (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
       (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith)).continuous.comp_continuousOn hu₂cont
@@ -2873,6 +2874,15 @@ theorem deturck_g0_engine_pointwise_carrier
     exact deturck_g0_pointwise_carrier_interior_pde (I := I) (M := M) g₀ a hT hT1
       N_cont hR hN_cont hloss gforce u u₂ hu hu₂bridge hforce hstay
       (hcarrier_ball u₂ hu₂bridge)
+  · -- The Duhamel / mild-solution structural datum: the engine's exported structure
+    -- (`hu`, `hforce`, `hstay`, `hN_cont`) transported to the pointwise carrier via the
+    -- bridge `ι (u₂ s) = toFun u s`.  The carrier is the zero-datum Duhamel mild solution
+    -- on the full horizon `Te := T` (`hTe := le_rfl`).
+    refine ⟨T, hT, le_rfl, hT1, gforce, hN_cont, ?_, ?_, ?_⟩
+    · intro s hs
+      rw [hu₂bridge s hs, hu]
+    · exact hforce
+    · exact hstay
 
 /-- **All-order interior membership of the smooth-datum carrier.**  For the
 `g₀`-anchored maximal-regularity carrier `u` of the smooth datum `0` (`hu`), the
@@ -3364,7 +3374,8 @@ theorem deturck_g0_engine_carrier_extraction
             (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
               (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
               (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R) ∧
-      Integral.L2.SmoothCcTensor.toL2 (T_s 0) = 0 := by
+      Integral.L2.SmoothCcTensor.toL2 (T_s 0) = 0 ∧
+      DuhamelMildSolutionData (I := I) (M := M) g₀ (a : ℝ) T u₂ N_cont R := by
   classical
   set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
     with hcompact_def
@@ -3387,8 +3398,9 @@ theorem deturck_g0_engine_carrier_extraction
   -- stays-in-ball event `hstay` transported to the bridge carrier through the coupling.
   have hcarrier_ball := deturck_g0_engine_carrier_inBall (I := I) (M := M) g₀ a hTe_pos hTe1
     N_cont hR hLipBall gforce u hduh hforce hstay hcouple
-  -- Bochner/FTC transport to the pointwise order-`(a+2)` carrier.
-  obtain ⟨u₂, hbridge, hcont, hcar0, hreg⟩ :=
+  -- Bochner/FTC transport to the pointwise order-`(a+2)` carrier, with the Duhamel /
+  -- mild-solution structural datum on the engine horizon `Te`.
+  obtain ⟨u₂, hbridge, hcont, hcar0, hreg, hduhamel⟩ :=
     deturck_g0_engine_pointwise_carrier (I := I) (M := M) g₀ a hTe_pos hTe1
       N_cont hR hN_cont hloss gforce u hduh hcouple hforce hstay hcarrier_ball
   -- All-order interior membership of the carrier's `L²` class.
@@ -3484,7 +3496,7 @@ theorem deturck_g0_engine_carrier_extraction
   refine ⟨Tf, g_DT, u₂, T_s, hTf_pos, h0,
     fun s hs => hreal s hs, ?_, ?_, ?_,
     fun s hs => hsmoothrepr s (hsub hs), fun s hs => hcanon s (hsub hs),
-    fun k hk => (hHk k hk).mono hsub, ?_, hTs0⟩
+    fun k hk => (hHk k hk).mono hsub, ?_, hTs0, ?_⟩
   · exact hcont.mono hsub
   · intro s hs
     exact hreg s ⟨hs.1, lt_of_lt_of_le hs.2 (min_le_left _ _)⟩
@@ -3501,6 +3513,8 @@ theorem deturck_g0_engine_carrier_extraction
       rw [hu₂0, map_zero]
       exact Metric.mem_closedBall_self hR.le
     · exact hcarrier_ball u₂ hbridge s ⟨hs0, lt_of_lt_of_le hs.2 (min_le_left _ _)⟩
+  · -- The Duhamel datum on the engine horizon `Te`, restricted to the shrunk horizon `Tf ≤ Te`.
+    exact hduhamel.mono (min_le_left _ _) hTf_pos
 
 end DifferentialGeometry.PDE.RicciFlow
 

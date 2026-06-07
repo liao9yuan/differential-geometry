@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.VectorField
 import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOperator.ConventionBridge
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.OperatorEquation
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence
 
 /-!
 # Interior joint smoothing and up-to-`0` boundary regularity of the realized DeTurck metric
@@ -81,52 +82,77 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 /-- **Joint `(t, x)`-`C∞`-up-to-AND-across-`0` of the realized metric inner-product
-`Hom`-section over all of `M`, pinned to the spectral parabolic trajectory (the genuine
-parabolic up-to-boundary smoothing — the single open node).**
+`Hom`-section over all of `M`, pinned to the Duhamel mild solution (the genuine parabolic
+up-to-boundary smoothing — the single open node).**
 
 For the realized DeTurck flow `g_DT = g_bg + ccTensorBilinSymm (T_s ·)` (`hreal`) whose
-perturbation `T_s` is the realization of the **spectral Duhamel carrier** `u₂` — i.e. the
-carrier's spectral coordinates are the `L²` coordinates of `T_s` (`hcanon`), the carrier
-inclusion `t ↦ ι (u₂ t)` is time-continuous up to `0` (`hcont`), and on the open interior
-`u₂` solves the abstract parabolic equation `∂_t (ι u₂) = Δ_∇ u₂ + N_cont (ι u₂)` (`hreg`,
-the heat-semigroup/Duhamel defining identity) — the bundle inner-product `Hom`-section
+perturbation `T_s` is the realization of the carrier `u₂` — the carrier's spectral
+coordinates are the `L²` coordinates of `T_s` (`hcanon`), the carrier inclusion
+`t ↦ ι (u₂ t)` is time-continuous up to `0` (`hcont`), every supercritical `H^{2k}`
+Sobolev trace of `T_s` is time-continuous up to `0` (`hHk`), on the interior `u₂` has the
+one-sided strong derivative `∂_t (ι u₂) = Δ_∇ u₂ + N_cont (ι u₂)` (`hreg`), and — the
+**structural** pinning — `u₂` IS the Duhamel mild solution of the quasi-linear tensor heat
+equation `∂_t u = Δ_∇ u + N_cont(u)`, `u(0) = 0` (`hduhamel`,
+`DuhamelMildSolutionData`: there is an `L²`-time forcing `gforce` reproducing
+`N_cont` along the field with `N_cont` ball-continuous, such that `ι (u₂ s)` equals, value
+by value in time, the indefinite-Bochner-integral Duhamel solution
+`(maxRegDuhamelMap a … 0 gforce).toFun s`) — the bundle inner-product `Hom`-section
 `(t, x) ↦ (g_DT t).inner x` (a section of `Hom(TM, Hom(TM, ℝ))`) is jointly `(t, x)`-`C∞`
 over the product model `𝓘(ℝ, ℝ).prod I` on the *closed* slab `Icc 0 T ×ˢ univ`.
 
 This is the SINGLE genuine classical parabolic-regularity input for the strictly-parabolic,
 smooth-quasilinear DeTurck–Ricci flow with smooth initial metric (Chow–Knopf): the realized
 metric is, jointly in time and space, smooth up to and across the initial datum.  Its
-genuine content is the parabolic-semigroup time-smoothing of the realized solution — `hreg`
-exhibits `ι u₂` as a strong/mild solution of the analytic-semigroup-generated abstract heat
-equation, and the parabolic smoothing of that equation (time-analyticity of the semigroup,
-the Duhamel time-derivative tower) upgrades the bare time-continuity `hcont` into joint
-`(t, x)`-`C∞` of the realized `Hom`-section.  The hypotheses are the spectral-side defining
-data of the trajectory; the conclusion is the joint smoothness of the bundle `Hom`-section,
-a different object on `M` — no packaging.
+genuine content is the parabolic-semigroup time-smoothing of the Duhamel mild solution —
+`hduhamel` exhibits `ι u₂` as the heat-semigroup Duhamel solution
+`e^{tΔ_∇} 0 + ∫₀ᵗ e^{(t−τ)Δ_∇} N_cont(field τ) dτ` (the genuine mild-solution identity, with
+ball-continuous `N_cont`), and the parabolic smoothing of that equation (the bootstrap:
+the semigroup output is `C^∞`-in-`t` for `t > 0` against the integrand, which itself inherits
+ever-higher time-regularity as the solution does) upgrades the time-continuity `hcont` and
+the all-order spatial regularity `hHk` into joint `(t, x)`-`C∞` of the realized `Hom`-section.
+The hypotheses are the mild-solution defining data of the trajectory; the conclusion is the
+joint smoothness of the bundle `Hom`-section, a different object on `M` — no packaging.
 
-**The pinning is genuine — it rejects the kink family (litmus).**  The earlier
-`{hreal, hHk}`-only form of this node (and the formerly-`{hreal, hHk}`-stated chart-Gram
-nodes) is FALSE: the family `T_s t := |t − t₀| · S₀` (fixed smooth `S₀ ≠ 0`,
-`t₀ ∈ (0, T)`) is time-continuous into every Sobolev scale, so it satisfies any
-`{hreal, hHk}` set, yet `(t, x) ↦ (g_DT t).inner x` has the `|t − t₀|` kink at `t₀` and is
-not even jointly `C¹`.  This kink family is now rejected by the spectral pinning: by
-`hcanon` the carrier coordinates `(u₂ s).coeff i` are the (linear) `L²` coordinates of
-`T_s s = |s − t₀| · S₀`, hence each coordinate of `ι (u₂ s)` is `|s − t₀|` times a constant,
-which is **not differentiable at `t₀`** — so `hreg` (which demands `HasDerivAt (ι ∘ u₂) … t₀`
-for every interior `t₀`) is violated.  `hreg` is the spectral-side defining identity of a
-genuine parabolic trajectory, not the joint-smoothness conclusion (it is a `1`-D
-time-derivative in the Sobolev Banach space about `u₂`, not a `ContMDiffOn` of a bundle
-section over `M`); it constrains `u₂`/`T_s`/`g_DT`, not the conclusion.
+**The Duhamel pinning is genuine — it rejects both kink families (litmus).**
+*The lesson of restatement #2:* a finite-order time-regularity hypothesis can never carry a
+`C∞` conclusion, so the carrier must be pinned by the STRUCTURAL identity (`hduhamel`) whose
+smoothing produces all orders, not merely by a one-time-derivative statement.
+
+* *The `C⁰`-kink* `T_s t := |t − t₀| · S₀` (fixed smooth `S₀ ≠ 0`, `t₀ ∈ (0, T)`) is
+  rejected: by `hcanon` each coordinate of `ι (u₂ s)` is `|s − t₀|` times a constant, not
+  differentiable at `t₀`, so already `hreg` (demanding `HasDerivAt (ι ∘ u₂) … t₀`) fails.
+* *The `C¹`-not-`C²` kink* `T_s t := (t − t₀)|t − t₀| · S₀`, `u₂ t := (t − t₀)|t − t₀| · v_S`
+  — which DEFEATED the earlier `{hreal, hcont, hreg, hcanon}` form (it is once-differentiable,
+  `∂_t = 2|t − t₀|·v_S`, so `hreg` holds for a freely-chosen bare `N_cont` cooked on the
+  injective trajectory's range, yet `(t,x) ↦ (g_DT t).inner x` has the `|t − t₀|`-kink in its
+  second time-derivative and is not jointly `C²`) — is now rejected by `hduhamel`: the Duhamel
+  mild solution with **ball-continuous** `N_cont` and a continuous-in-time field is, by the
+  parabolic smoothing bootstrap, `C^∞`-in-`t` on the interior (the homogeneous semigroup part
+  is `C^∞`-in-`t`, and the Duhamel integral of the continuous integrand `e^{(t−τ)Δ_∇}
+  N_cont(field τ)` is `C¹`, then `C²`, … as the field's regularity rises) and is therefore the
+  *unique* such solution; a `C¹`-not-`C²` carrier cannot coincide with this `C^∞` solution at
+  the interior `t₀`, contradicting the pointwise identity `ι (u₂ s) = (maxRegDuhamelMap … 0
+  gforce).toFun s`.  Equivalently: were such a carrier to satisfy `hduhamel`, the forcing
+  `gforce =ᵐ N_cont(field)` would have to make the Duhamel integral carry the `|t − t₀|`
+  second-derivative kink, but a continuous `N_cont` evaluated on a continuous field yields a
+  continuous forcing, whose Duhamel integral is `C¹`-with-continuous-second-derivative — no
+  kink.  (The full quantitative smoothing tower is the genuine fill, the NEXT dispatch; this
+  litmus is the honest argument that the hypothesis set is `C∞`-TRUE-shaped and the kink is
+  excluded.)
+
+`hduhamel` is the spectral-Banach mild-solution identity (a time-indexed integral identity
+about `u₂`/`N_cont`/`gforce`), NOT the joint-smoothness conclusion (a `ContMDiffOn` of a
+bundle section over `M`) — distinct objects, so no packaging; it constrains `u₂`/`T_s`/`g_DT`.
 
 This node supplies the missing joint datum in the basis-free `Hom`-section form the
 chart-local bridge `chartGramOnE_realizedMetric_jointContMDiffOn`
 (`Analysis/Parabolic/DeTurckRicci/InteriorChartRegularityBridge.lean`) consumes; the body is
-`sorry` (the genuine parabolic-semigroup time-smoothing), so consumers transitively depend
-on `sorryAx`. -/
+`sorry` (the genuine parabolic-semigroup time-smoothing tower), so consumers transitively
+depend on `sorryAx`. -/
 theorem realizedMetric_innerHomSection_jointContMDiffOn_uptoZero
     (g_bg : SmoothRiemannianMetric I M)
     (g_DT : ℝ → SmoothRiemannianMetric I M)
-    (T_s : ℝ → Integral.L2.SmoothCcTensor g_bg 0 2) {a : ℕ} {T : ℝ}
+    (T_s : ℝ → Integral.L2.SmoothCcTensor g_bg 0 2) {a : ℕ} {T : ℝ} {R : ℝ}
     (u₂ : ℝ → tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
     (N_cont : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1) →
       tensorHs (I := I) (M := M) g_bg 0 2 (a : ℝ))
@@ -134,6 +160,10 @@ theorem realizedMetric_innerHomSection_jointContMDiffOn_uptoZero
     (hreal : ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
       (g_DT t).inner x v w
         = g_bg.inner x v w + ccTensorBilinSymm (I := I) g_bg (T_s t) x v w)
+    (hHk : ∀ (k : ℕ), 2 * k > Module.finrank ℝ E + 4 →
+      ContinuousOn (fun s : ℝ =>
+        IntrinsicSobolev.SmoothCcTensor.toHs (g := g_bg) (r := 0) (s := 2) (2 * k) (T_s s))
+        (Set.Icc 0 T))
     (hcont : ContinuousOn
       (fun s : ℝ => tensorHsInclusion (I := I) (M := M) (g := g_bg) (r := 0) (s := 2)
         (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (Set.Icc 0 T))
@@ -150,7 +180,8 @@ theorem realizedMetric_innerHomSection_jointContMDiffOn_uptoZero
       (u₂ s).coeff i
         = tensorL2Coeff (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g_bg 0 2)
-            (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) :
+            (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i)
+    (hduhamel : DuhamelMildSolutionData (I := I) (M := M) g_bg (a : ℝ) T u₂ N_cont R) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
       (fun q : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
         (E := fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -753,11 +784,14 @@ theorem realizedMetric_chartGramOnE_jointContMDiffOn_uptoZero
 section (genuine parabolic up-to-boundary smoothing of the field).**
 
 For the realized DeTurck flow `g_DT = g₀ + ccTensorBilinSymm (T_s ·)` realized off the anchor
-`g₀` (`hreal`) whose perturbation `T_s` realizes the **spectral Duhamel carrier** `u₂` (the
-carrier coordinates are the `L²` coordinates of `T_s`, `hcanon`; the carrier inclusion is
-time-continuous up to `0`, `hcont`; and `u₂` solves the abstract parabolic equation
-`∂_t (ι u₂) = Δ_∇ u₂ + N_cont (ι u₂)` on the interior, `hreg`), the joint tangent-bundle
-section of the DeTurck vector field of `g_DT` against the flow background `g_bg`,
+`g₀` (`hreal`) whose perturbation `T_s` realizes the carrier `u₂` (the carrier coordinates are
+the `L²` coordinates of `T_s`, `hcanon`; the carrier inclusion is time-continuous up to `0`,
+`hcont`; every supercritical `H^{2k}` Sobolev trace of `T_s` is time-continuous up to `0`,
+`hHk`; `u₂` has the interior strong derivative `∂_t (ι u₂) = Δ_∇ u₂ + N_cont (ι u₂)`, `hreg`;
+and — the structural pinning — `u₂` IS the Duhamel mild solution
+`ι (u₂ s) = (maxRegDuhamelMap a … 0 gforce).toFun s` of `∂_t u = Δ_∇ u + N_cont(u)`, `u(0)=0`,
+with ball-continuous `N_cont`, `hduhamel`), the joint tangent-bundle section of the DeTurck
+vector field of `g_DT` against the flow background `g_bg`,
 `(t, x) ↦ ⟨x, deTurckVF (g_DT t) g_bg x⟩`, is jointly `C∞` on the *closed* slab `Icc 0 T ×ˢ univ`.
 
 This is the up-to-AND-across-the-initial-datum joint smoothness of the (smooth-quasi-linear,
@@ -772,19 +806,20 @@ gradient): the single closed-slab section smoothness subsumes both and, via Seel
 `0`, drives the interior flow machinery directly.
 
 The anchor `g₀` (the realize base) and the flow background `g_bg` (the DeTurck-field background)
-are decoupled.  The hypotheses are the spectral-trajectory realize/PDE data pinning the metric
-to the genuine parabolic carrier (the spectral PDE `hreg` rejects the kink family
-`T_s t := |t − t₀| · S₀`, which has no interior time-derivative — see
-`realizedMetric_innerHomSection_jointContMDiffOn_uptoZero`); the conclusion is the closed-slab
-joint smoothness of the field, distinct from them — no packaging.  This node is sorry-free glue:
-it routes the spectral pinning into `realizedMetric_innerHomSection_jointContMDiffOn_uptoZero`
-(the genuine parabolic-smoothing leaf) and pushes the resulting joint `Hom`-section smoothness
-through the chart-frame vector-field assembler `deturck_vf_joint_smoothness_uptoZero`; consumers
-transitively depend on the inner node's `sorryAx`. -/
+are decoupled.  The hypotheses are the mild-solution realize/PDE data pinning the metric to the
+genuine Duhamel parabolic carrier (`hduhamel` rejects BOTH the `C⁰`-kink `T_s t := |t − t₀|·S₀`
+and the `C¹`-not-`C²` kink `T_s t := (t − t₀)|t − t₀|·S₀` — the latter defeated the earlier
+finite-order form, see the litmus in `realizedMetric_innerHomSection_jointContMDiffOn_uptoZero`);
+the conclusion is the closed-slab joint smoothness of the field, distinct from them — no
+packaging.  This node is sorry-free glue: it routes the mild-solution pinning into
+`realizedMetric_innerHomSection_jointContMDiffOn_uptoZero` (the genuine parabolic-smoothing leaf)
+and pushes the resulting joint `Hom`-section smoothness through the chart-frame vector-field
+assembler `deturck_vf_joint_smoothness_uptoZero`; consumers transitively depend on the inner
+node's `sorryAx`. -/
 theorem realizedMetric_deTurckVF_jointContMDiffOn_uptoZero
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (g_DT : ℝ → SmoothRiemannianMetric I M)
-    (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2) {a : ℕ} {T : ℝ}
+    (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2) {a : ℕ} {T : ℝ} {R : ℝ}
     (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
     (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
@@ -792,6 +827,10 @@ theorem realizedMetric_deTurckVF_jointContMDiffOn_uptoZero
     (hreal : ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
       (g_DT t).inner x v w
         = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s t) x v w)
+    (hHk : ∀ (k : ℕ), 2 * k > Module.finrank ℝ E + 4 →
+      ContinuousOn (fun s : ℝ =>
+        IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * k) (T_s s))
+        (Set.Icc 0 T))
     (hcont : ContinuousOn
       (fun s : ℝ => tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
         (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (Set.Icc 0 T))
@@ -808,14 +847,15 @@ theorem realizedMetric_deTurckVF_jointContMDiffOn_uptoZero
       (u₂ s).coeff i
         = tensorL2Coeff (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-            (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i) :
+            (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i)
+    (hduhamel : DuhamelMildSolutionData (I := I) (M := M) g₀ (a : ℝ) T u₂ N_cont R) :
     ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
         : TangentBundle I M))
       (Set.Icc (0 : ℝ) T ×ˢ Set.univ) := by
   rcases lt_or_ge 0 T with hT | hT
   · have hsmooth := realizedMetric_innerHomSection_jointContMDiffOn_uptoZero
-      (I := I) g₀ g_DT T_s u₂ N_cont ha hreal hcont hreg hcanon
+      (I := I) g₀ g_DT T_s u₂ N_cont ha hreal hHk hcont hreg hcanon hduhamel
     refine ClosedSlabVFEngine.deturck_vf_joint_smoothness_uptoZero
       (I := I) g_bg g_DT hT ?_
     intro x₀ i j

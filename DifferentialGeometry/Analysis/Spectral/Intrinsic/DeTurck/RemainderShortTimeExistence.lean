@@ -95,6 +95,89 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+/-- **The Duhamel / mild-solution structural datum of a parabolic carrier.**
+
+For an anchor metric `g`, spectral Sobolev exponent `a`, horizon `T`, a pointwise
+carrier `u₂ : ℝ → H^{a+2}(g)`, a lower-order nonlinearity
+`N_cont : H^{a+1}(g) → Hᵃ(g)`, and a radius `R`, this predicate asserts that the
+carrier `u₂` *is* the Duhamel mild solution of the quasi-linear tensor heat equation
+`∂_t u = Δ_∇ u + N_cont(u)`, `u(0) = 0`, on `[0, T]`: there is a positive,
+`≤ 1` horizon witness and an `L²`-time forcing `gforce` with
+
+* `N_cont` continuous on the closed `H^{a+1}`-ball `closedBall (ι 0) R` (the genuine
+  ball-continuity of the engine nonlinearity — the smoothing-enabling datum);
+* the **pointwise mild-solution identity** `ι (u₂ s) = (maxRegDuhamelMap a … 0 gforce).toFun s`
+  for every `s ∈ [0, T]` — the carrier equals, value by value in time, the indefinite
+  Bochner integral representing `t ↦ e^{tΔ_∇} 0 + ∫₀ᵗ e^{(t−τ)Δ_∇} gforce(τ) dτ`;
+* the **forcing-reproduction** `gforce =ᵐ (fun t => N_cont (field_{a+1} t))` along the
+  `H^{a+1}`-view Duhamel field, i.e. `gforce` is `N_cont` evaluated on the solution
+  (the fixed-point equation of the construction);
+* the field stays a.e. in the radius-`R` ball (so `N_cont` is evaluated where it is
+  continuous).
+
+This is exactly the engine's exported structure (`deTurckRemainder_strong_shortTime_exists`:
+`u = maxRegDuhamelMap … 0 gforce`, `gforce =ᵐ N(field)`, the stays-in-ball event) transported
+to the pointwise carrier through the bridge `ι (u₂ s) = u.toFun s`.  It is the **structural
+identity whose parabolic smoothing produces all time-derivative orders**, and it is genuinely
+stronger than any finite-order time-regularity statement: a single interior
+`HasDerivAt`/`HasDerivWithinAt` of the carrier (one time-derivative) is *implied* by this
+identity on the interior but does **not** imply it, and — crucially — cannot reject a
+`C¹`-not-`C²` family, whereas this identity does (see the litmus in the consuming nodes).
+
+The Duhamel solution is exhibited on a possibly-**larger** existential horizon `Te ≥ T` (with
+`0 < T ≤ Te ≤ 1`), with the carrier identity required only on `[0, T]` — this makes the datum
+**downward monotone in the horizon** `T` (a witness on `[0, Te]` restricts verbatim to any
+`0 < T' ≤ Te`), which is exactly what the realize-construction's repeated horizon-shrinks need.
+
+The hypotheses constrain `u₂`/`N_cont`/`gforce`; the predicate is **not** a joint-smoothness
+conclusion (it is a time-indexed integral identity in a Banach space, not a `ContMDiffOn` of a
+bundle section over `M`), so it never packages a consumer's conclusion. -/
+def DuhamelMildSolutionData (g : SmoothRiemannianMetric I M) (a : ℝ) (T : ℝ)
+    (u₂ : ℝ → tensorHs (I := I) (M := M) g 0 2 (a + 2))
+    (N_cont : tensorHs (I := I) (M := M) g 0 2 (a + 1) →
+      tensorHs (I := I) (M := M) g 0 2 a)
+    (R : ℝ) : Prop :=
+  ∃ (Te : ℝ) (hT : 0 < T) (hTe : T ≤ Te) (hTe1 : Te ≤ 1)
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g 0 2 a) Te),
+    ContinuousOn N_cont
+      (Metric.closedBall
+        (tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
+          (show (a + 1) ≤ a + 2 by linarith)
+          (0 : tensorHs (I := I) (M := M) g 0 2 (a + 2))) R) ∧
+    (∀ s ∈ Set.Icc (0 : ℝ) T,
+      tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
+          (show a ≤ a + 2 by linarith) (u₂ s)
+        = timeH1.toFun
+            (maxRegDuhamelMap (I := I) (M := M) a (lt_of_lt_of_le hT hTe) hTe1
+              (0 : tensorHs (I := I) (M := M) g 0 2 (a + 2)) gforce) s) ∧
+    (gforce =ᵐ[timeMeasure Te]
+      (fun t => N_cont (maxRegDuhamelSolFieldHa1 (I := I) (M := M) a
+        (lt_of_lt_of_le hT hTe) hTe1
+        (0 : tensorHs (I := I) (M := M) g 0 2 (a + 2)) gforce t))) ∧
+    (∀ᵐ t ∂(timeMeasure Te),
+      maxRegDuhamelSolFieldHa1 (I := I) (M := M) a (lt_of_lt_of_le hT hTe) hTe1
+          (0 : tensorHs (I := I) (M := M) g 0 2 (a + 2)) gforce t ∈
+        Metric.closedBall
+          (tensorHsInclusion (I := I) (M := M) (g := g) (r := 0) (s := 2)
+            (show (a + 1) ≤ a + 2 by linarith)
+            (0 : tensorHs (I := I) (M := M) g 0 2 (a + 2))) R)
+
+/-- **Downward horizon-monotonicity of the Duhamel mild-solution datum.**  A Duhamel
+datum on `[0, T]` is, verbatim, a Duhamel datum on any shorter positive horizon
+`0 < T' ≤ T`: the exhibited solution horizon `Te` (`≥ T ≥ T'`) and forcing are reused, and
+the carrier identity, which holds on `[0, T] ⊇ [0, T']`, is restricted.  This is the
+restriction step the realize-construction's repeated horizon-shrinks consume. -/
+theorem DuhamelMildSolutionData.mono {g : SmoothRiemannianMetric I M} {a : ℝ} {T T' : ℝ}
+    {u₂ : ℝ → tensorHs (I := I) (M := M) g 0 2 (a + 2)}
+    {N_cont : tensorHs (I := I) (M := M) g 0 2 (a + 1) →
+      tensorHs (I := I) (M := M) g 0 2 a}
+    {R : ℝ} (hTT' : T' ≤ T) (hT' : 0 < T')
+    (h : DuhamelMildSolutionData (I := I) (M := M) g a T u₂ N_cont R) :
+    DuhamelMildSolutionData (I := I) (M := M) g a T' u₂ N_cont R := by
+  obtain ⟨Te, _hT, hTe, hTe1, gforce, hN_cont, hid, hforce, hball⟩ := h
+  exact ⟨Te, hT', le_trans hTT' hTe, hTe1, gforce, hN_cont,
+    fun s hs => hid s ⟨hs.1, le_trans hs.2 hTT'⟩, hforce, hball⟩
+
 /-- **Strong short-time existence for a Ricci–DeTurck first-order remainder.**
 
 Let `(M, g_bg)` be a closed Riemannian manifold (compact, boundaryless,

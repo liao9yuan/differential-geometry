@@ -53,12 +53,17 @@ variable
 regularity input, over the realize carrier).**
 
 Given the `g₀`-anchored realized DeTurck–Ricci flow `g_DT = g₀ + ccTensorBilinSymm (T_s ·)`
-(`hreal`) whose perturbation `T_s` realizes the **spectral Duhamel carrier** `u₂` — the
+(`hreal`) whose perturbation `T_s` realizes the Duhamel mild-solution carrier `u₂` — the
 carrier solving the abstract parabolic PDE `∂_t (ι u₂) = Δ_∇ u₂ + N_cont (ι u₂)` on the
-interior (`hreg`, the heat-semigroup/Duhamel defining identity), with time-continuous carrier
-inclusion (`hcont`) and carrier↔perturbation coordinate identity (`hcanon`) — together with
-the supercritical `H^{2k}` Sobolev-trace time-continuity (`hHk`) and the `k ≤ 2` chart-Gram
-up-to-`0` continuity (`hC2_chart`) — the realize/spectral-pinning carrier data supplied by
+interior (`hreg`), with time-continuous carrier inclusion (`hcont`), carrier↔perturbation
+coordinate identity (`hcanon`), and — the structural pinning — the Duhamel mild-solution
+identity `ι (u₂ s) = (maxRegDuhamelMap a … 0 gforce).toFun s` for a forcing reproducing
+`N_cont` along the field (`hduhamel`, `DuhamelMildSolutionData`; this is the
+heat-semigroup/Duhamel defining identity whose parabolic smoothing produces all
+time-derivative orders, and which — unlike a finite-order derivative — rejects the
+`C¹`-not-`C²` kink) — together with the supercritical `H^{2k}` Sobolev-trace time-continuity
+(`hHk`) and the `k ≤ 2` chart-Gram up-to-`0` continuity (`hC2_chart`) — the
+realize/mild-solution-pinning carrier data supplied by
 `deturck_metric_pde_interior_at_initial_with_carrier`
 (`Geometry/Flow/RicciFlow/ShortTime/DeTurckInitialDataExistence.lean`) — the solution is
 interior-jointly-`C∞` and continuous up to `t = 0` together with its spatial jets, in every
@@ -93,7 +98,7 @@ restrictions of the single-chart `chartGramOnE` regularity (the chart round-trip
 It constrains only the internal realized `g_DT`/`T_s`/`u₂`, never the headline.  Consumers
 transitively depend on the `InteriorJointSmoothing` leaves' `sorryAx`. -/
 theorem deturck_ricci_parabolic_interior_regularity
-    (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} {a : ℕ}
+    (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} {a : ℕ} {R : ℝ}
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2)
     (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
@@ -129,7 +134,8 @@ theorem deturck_ricci_parabolic_interior_regularity
         (fun q : ℝ × M => iteratedFDeriv ℝ k
           (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j)
           (extChartAt I α q.2))
-        (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α)) :
+        (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α))
+    (hduhamel : DuhamelMildSolutionData (I := I) (M := M) g₀ (a : ℝ) T u₂ N_cont R) :
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
         (fun q : ℝ × M => (TotalSpace.mk' E q.2 (deTurckVF (I := I) (g_DT q.1) g_bg q.2)
           : TangentBundle I M))
@@ -170,7 +176,7 @@ theorem deturck_ricci_parabolic_interior_regularity
           q.2 ((g_DT q.1).inner q.2))
         (Set.Icc (0 : ℝ) T ×ˢ Set.univ) :=
     IntrinsicSpectral.MetricRealization.realizedMetric_innerHomSection_jointContMDiffOn_uptoZero
-      (I := I) g₀ g_DT T_s u₂ N_cont ha hreal hcont hreg hcanon
+      (I := I) g₀ g_DT T_s u₂ N_cont ha hreal hHk hcont hreg hcanon hduhamel
   have hsmooth_interior : ∀ x₀ : M,
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
         (fun q : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
@@ -184,7 +190,7 @@ theorem deturck_ricci_parabolic_interior_regularity
     exact IntrinsicSpectral.MetricRealization.realizedMetric_chartGramOnE_jointContMDiffOn_interior
       (I := I) x₀ i j g_DT (hsmooth_interior x₀)
   · exact IntrinsicSpectral.MetricRealization.realizedMetric_deTurckVF_jointContMDiffOn_uptoZero
-      (I := I) g₀ g_bg g_DT T_s u₂ N_cont ha hreal hcont hreg hcanon
+      (I := I) g₀ g_bg g_DT T_s u₂ N_cont ha hreal hHk hcont hreg hcanon hduhamel
   · intro x₀ i j
     have hA := IntrinsicSpectral.MetricRealization.realizedMetric_chartGramOnE_jointContMDiffOn_interior
       (I := I) x₀ i j g_DT (hsmooth_interior x₀)
@@ -274,8 +280,8 @@ theorem deturck_ricci_flow_parabolic_short_time_existence
             (Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j)
             (extChartAt I α q.2))
           (Set.Icc 0 T ×ˢ chartLeviCivitaGoodSet (I := I) α)) := by
-  obtain ⟨T, a, hT, ha, g_DT, T_s, u₂, N_cont, h0, hreal, hHk, hcont, hreg, hcanon,
-      hC2_chart, h_inner_cont, h_rhs_cont, h_interior_deriv⟩ :=
+  obtain ⟨T, a, hT, ha, g_DT, T_s, u₂, N_cont, R, h0, hreal, hHk, hcont, hreg, hcanon,
+      hC2_chart, h_inner_cont, h_rhs_cont, h_interior_deriv, hduhamel⟩ :=
     deturck_metric_pde_interior_at_initial_with_carrier (I := I) g₀ g_bg
   have hsol : IsQuasilinearMetricParabolicSolution (I := I)
       (deTurckRicciRHS (I := I) g_bg) g₀ T g_DT := by
@@ -303,7 +309,7 @@ theorem deturck_ricci_flow_parabolic_short_time_existence
     · exact h_interior_deriv t ⟨ht0, ht.2⟩ x v w
   exact ⟨T, g_DT, hsol,
     deturck_ricci_parabolic_interior_regularity g₀ g_bg g_DT T_s u₂ N_cont ha hreal hHk
-      hcont hreg hcanon hC2_chart⟩
+      hcont hreg hcanon hC2_chart hduhamel⟩
 
 set_option linter.unusedVariables false in
 /-- **Interior metric-level DeTurck–Ricci time-derivative (fully ungated).**

@@ -77,7 +77,7 @@ theorem deturck_metric_pde_interior_at_initial_with_carrier
         (T_s : ℝ → Integral.L2.SmoothCcTensor g₀ 0 2)
         (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
         (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
-          tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)),
+          tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) (R : ℝ),
         g_DT 0 = g₀ ∧
         (∀ s ∈ Set.Icc (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
           (g_DT s).inner x v w
@@ -117,7 +117,8 @@ theorem deturck_metric_pde_interior_at_initial_with_carrier
             (Set.Ioi 0) 0) ∧
         (∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
           HasDerivWithinAt (fun s : ℝ => (g_DT s).inner x v w)
-            (deTurckRicciRHS (I := I) g_bg (g_DT t) x v w) (Set.Ici 0) t) := by
+            (deTurckRicciRHS (I := I) g_bg (g_DT t) x v w) (Set.Ici 0) t) ∧
+        DuhamelMildSolutionData (I := I) (M := M) g₀ (a : ℝ) T u₂ N_cont R := by
   classical
   set a : ℕ := Module.finrank ℝ E + 5 with ha_def
   have ha : 2 * a > Module.finrank ℝ E + 4 := by omega
@@ -170,7 +171,7 @@ theorem deturck_metric_pde_interior_at_initial_with_carrier
   have hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont R :=
     deTurckGenuineN_firstOrder_operatorLoss (I := I) g₀ g_bg a ha N_cont P K hR hctrl hall hsynth
   obtain ⟨T₀, g_DT, u₂, T_s, hT₀, h0, hreal₀, hcont₀, hreg₀, hsmall₀, hsmoothrepr₀, hcanon₀, hHk,
-      hcarrier_inball₀, hTs0⟩ :=
+      hcarrier_inball₀, hTs0, hduhamel₀⟩ :=
     deTurck_g0_carrier_realize_transport (I := I) g₀ a ha ha2 N_cont hR hN_cont hLipBall hloss
   -- **Shrink to a horizon on which the carrier's order-`2a` Sobolev norm stays below the
   -- selector's positive slack `Q`** (the smooth representative vanishes at `t = 0` and its
@@ -315,14 +316,16 @@ theorem deturck_metric_pde_interior_at_initial_with_carrier
       (fun s hs => hreal s (Set.Ico_subset_Icc_self hs))
       (fun s hs => hsmoothrepr s (Set.Ico_subset_Icc_self hs))
       (fun s hs => hcanon s (Set.Ico_subset_Icc_self hs))
-  refine ⟨T, a, hT, ha, g_DT, T_s, u₂, N_cont, h0, hreal, hHk', hcont, hreg, hsmoothrepr,
-    hC2_chart, ?_, ?_, ?_⟩
+  refine ⟨T, a, hT, ha, g_DT, T_s, u₂, N_cont, R, h0, hreal, hHk', hcont, hreg, hsmoothrepr,
+    hC2_chart, ?_, ?_, ?_, ?_⟩
   · exact deTurck_g0_inner_continuous_icc (I := I) g₀ a ha g_DT u₂ T_s hcont hreal
       hsmoothrepr hC2_chart
   · exact deTurck_g0_rhs_right_continuous_at_zero (I := I) g₀ g_bg hT a ha g_DT T_s u₂
       hreal hcont hsmoothrepr hC2_chart
   · exact deTurck_g0_interior_deriv_from_data (I := I) g₀ g_bg a ha g_DT u₂ T_s
       N_cont repr Nsec hreal hN_coeff hNsec_realize hreg hsmoothrepr hNsec_geom
+  · -- The Duhamel datum on the carrier-transport horizon `T₀`, restricted to the shrunk `T ≤ T₀`.
+    exact hduhamel₀.mono hT_le hT
 
 /-- **`g₀`-anchored DeTurck–Ricci interior parabolic existence (genuine analytic input).**
 

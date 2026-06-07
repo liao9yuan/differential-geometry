@@ -252,7 +252,7 @@ theorem deTurck_g0_realize_data
   have hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont R :=
     deTurckGenuineN_firstOrder_operatorLoss (I := I) g₀ g_bg a ha N_cont P K hR hctrl hall hsynth
   obtain ⟨T₀, g_DT, u₂, T_s, hT₀, h0, hreal₀, hcont₀, hreg₀, hsmall₀, hsmoothrepr₀, hcanon₀, hHk,
-      hcarrier_inball₀, hTs0⟩ :=
+      hcarrier_inball₀, hTs0, _⟩ :=
     deTurck_g0_carrier_realize_transport (I := I) g₀ a ha ha2 N_cont hR hN_cont hLipBall hloss
   -- **Shrink to a horizon on which the carrier's order-`2a` Sobolev norm stays below the
   -- selector's positive slack `Q`.**  The smooth representative `T_s` vanishes at `t = 0`
