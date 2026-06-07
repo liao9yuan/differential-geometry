@@ -5,6 +5,8 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantBilinearLe
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricRicciSectionIdentity
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricRHSCovJetExpansion
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.PosDefPerturbation
+import DifferentialGeometry.Geometry.Connection.TensorNabla.LiftedSectionCovariantRealizeBridge
+import DifferentialGeometry.Analysis.Sobolev.Embedding.RawConnLapToHsOrderDropping
 
 /-! # The metrically-lowered connection difference as a covariant section and its iterated-jet bound
 
@@ -553,6 +555,115 @@ The two genuine deep covariant-jet posits below — the *clean-linear-part jet b
 differentiated-Koszul recursion; `T1` is their algebraic combination over the section-level Koszul
 identity. -/
 
+/-- **The Koszul clean-linear-part section as a symmetric combination of one realized covariant
+gradient.**  Under the realize identity, `koszulCombSection g₁ g₀ T₁` equals the symmetric covariant
+combination
+```
+R + permuteCcTensor (swap 0 1) R − permuteCcTensor c[0,2,1] R,   R := covGrad g₀ 0 2 (realizeSymm g₀ T₁),
+```
+where the slot-permutations realize the `(b,a,c)` and `(c,a,b)` readings of the realized
+covariant-derivative evaluation.  Proved by unit-extensionality (`tensor0s_ext_unitZero`): the
+unit-evaluated model form of `koszulCombSection` is the `covDerivRealizeEval` combination
+(`koszulCombSection_toModel_apply`), and each summand's unit-evaluated model form is the corresponding
+slot reading of `R`'s (`covGrad_realizeSymm_unitModel_eq_covDerivRealizeEval`, transported by the slot
+reindexing `permuteCcTensor_unitModel`). -/
+private theorem koszulCombSection_eq_permuted_covGrad_realizeSymm
+    (g₁ g₀ : SmoothRiemannianMetric I M) (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2)
+    (hr : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) :
+    koszulCombSection (I := I) g₁ g₀ T₁ =
+      Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 2
+          (realizeSymmCcTensor (I := I) g₀ T₁)
+      + permuteCcTensor (I := I) g₀ (Equiv.swap 0 1)
+          (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 2
+            (realizeSymmCcTensor (I := I) g₀ T₁))
+      - permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 2, 1]
+          (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 2
+            (realizeSymmCcTensor (I := I) g₀ T₁)) := by
+  classical
+  set R := Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 2
+    (realizeSymmCcTensor (I := I) g₀ T₁) with hR
+  apply Integral.L2.SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply tensor0s_ext_unitZero (I := I) (M := M) (s := 3)
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro v
+  -- The unit `(0,0)`-tensor `unitZeroSec x` is the canonical `constOfIsEmpty 1`.
+  have hunit : (unitZeroSec (I := I) (M := M) x : Tensor0SSpace 0 I x) =
+      ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ) := rfl
+  -- LHS unit-evaluated model form: the `covDerivRealizeEval` combination.
+  have hL : Tensor0SSpace.toModel
+      ((koszulCombSection (I := I) g₁ g₀ T₁).toSection x
+        (unitZeroSec (I := I) (M := M) x)) v =
+      covDerivRealizeEval (I := I) g₀ T₁ x (v 0) (v 1) (v 2)
+        + covDerivRealizeEval (I := I) g₀ T₁ x (v 1) (v 0) (v 2)
+        - covDerivRealizeEval (I := I) g₀ T₁ x (v 2) (v 0) (v 1) := by
+    have h := koszulCombSection_toModel_apply (I := I) g₁ g₀ T₁ hr x (v 0) (v 1) (v 2)
+    rw [hunit]
+    have hvtuple : (![v 0, v 1, v 2] : Fin 3 → TangentSpace I x) = v := by
+      funext i; fin_cases i <;> rfl
+    rw [hvtuple] at h
+    exact h
+  -- The three summands' unit-evaluated model forms via the bridge + slot reindexings.
+  have hRu : ∀ w : Fin 3 → TangentSpace I x, Analysis.Parabolic.TensorSpectral.unitModel (I := I) (M := M) g₀ 3 R x w =
+      covDerivRealizeEval (I := I) g₀ T₁ x (w 0) (w 1) (w 2) := by
+    intro w
+    rw [hR, Analysis.Parabolic.TensorSpectral.unitModel]
+    have h := covGrad_realizeSymm_unitModel_eq_covDerivRealizeEval (I := I) g₀ T₁ x
+      (w 0) (w 1) (w 2)
+    have hwtuple : (![w 0, w 1, w 2] : Fin 3 → TangentSpace I x) = w := by
+      funext i; fin_cases i <;> rfl
+    rw [hwtuple] at h
+    exact h
+  -- Read the RHS section value at the unit through additivity / the perm unit-models.
+  rw [show (R + permuteCcTensor (I := I) g₀ (Equiv.swap 0 1) R
+        - permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 2, 1] R).toSection x
+          (unitZeroSec (I := I) (M := M) x) =
+      R.toSection x (unitZeroSec (I := I) (M := M) x)
+        + (permuteCcTensor (I := I) g₀ (Equiv.swap 0 1) R).toSection x
+            (unitZeroSec (I := I) (M := M) x)
+        - (permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 2, 1] R).toSection x
+            (unitZeroSec (I := I) (M := M) x) from by
+    rw [Integral.L2.SmoothCcTensor.toSection_sub, Integral.L2.SmoothCcTensor.toSection_add,
+      ContMDiffSection.coe_sub, ContMDiffSection.coe_add, Pi.sub_apply, Pi.add_apply,
+      ContinuousLinearMap.sub_apply, ContinuousLinearMap.add_apply]]
+  simp only [Tensor0SSpace.toModel_sub, Tensor0SSpace.toModel_add,
+    ContinuousMultilinearMap.sub_apply, ContinuousMultilinearMap.add_apply]
+  rw [hL]
+  -- The three RHS terms are the three slot readings of `R`'s unit-model.
+  have hP1 := permuteCcTensor_unitModel (I := I) g₀ (Equiv.swap (0 : Fin 3) 1) R x
+  have hP2 := permuteCcTensor_unitModel (I := I) g₀ c[(0 : Fin 3), 2, 1] R x
+  have e0 : Tensor0SSpace.toModel (R.toSection x (unitZeroSec (I := I) (M := M) x)) v =
+      covDerivRealizeEval (I := I) g₀ T₁ x (v 0) (v 1) (v 2) := by
+    have hmod : Tensor0SSpace.toModel (R.toSection x (unitZeroSec (I := I) (M := M) x)) v =
+        Analysis.Parabolic.TensorSpectral.unitModel (I := I) (M := M) g₀ 3 R x v := rfl
+    rw [hmod]; exact hRu v
+  have e1 : Tensor0SSpace.toModel
+      ((permuteCcTensor (I := I) g₀ (Equiv.swap (0 : Fin 3) 1) R).toSection x
+        (unitZeroSec (I := I) (M := M) x)) v =
+      covDerivRealizeEval (I := I) g₀ T₁ x (v 1) (v 0) (v 2) := by
+    have hmod : Tensor0SSpace.toModel
+        ((permuteCcTensor (I := I) g₀ (Equiv.swap (0 : Fin 3) 1) R).toSection x
+          (unitZeroSec (I := I) (M := M) x)) v =
+        Analysis.Parabolic.TensorSpectral.unitModel (I := I) (M := M) g₀ 3
+          (permuteCcTensor (I := I) g₀ (Equiv.swap (0 : Fin 3) 1) R) x v := rfl
+    rw [hmod, hP1, ContinuousMultilinearMap.domDomCongr_apply]
+    exact hRu _
+  have e2 : Tensor0SSpace.toModel
+      ((permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 2, 1] R).toSection x
+        (unitZeroSec (I := I) (M := M) x)) v =
+      covDerivRealizeEval (I := I) g₀ T₁ x (v 2) (v 0) (v 1) := by
+    have hmod : Tensor0SSpace.toModel
+        ((permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 2, 1] R).toSection x
+          (unitZeroSec (I := I) (M := M) x)) v =
+        Analysis.Parabolic.TensorSpectral.unitModel (I := I) (M := M) g₀ 3
+          (permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 2, 1] R) x v := rfl
+    rw [hmod, hP2, ContinuousMultilinearMap.domDomCongr_apply]
+    exact hRu _
+  rw [e0, e1, e2]
+
 /-- **(POSIT — the clean-linear-part jet brick.)**  The intrinsic squared fibre norm of the
 order-`p` covariant gradient of the Koszul clean-linear-part section `koszulCombSection` is dominated
 by the `≤ (p+1)`-jet of the perturbation `T₁`, with a constant uniform over the realize family.
@@ -584,6 +695,110 @@ theorem koszulCombSection_iteratedCovGrad_rfns_le
             C * ∑ l ∈ Finset.range (p + 1 + 1),
               riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
                 ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x) := by
+  classical
+  obtain ⟨Crz, hCrz0, hCrz⟩ :=
+    exists_riemannianFiberNormSq_iteratedCovGrad_realizeSymm_le_jetSum (I := I) g₀ (p + 1)
+  refine ⟨18 * Crz, by positivity, ?_⟩
+  intro T₁ g₁ hr x
+  set R := Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 2
+    (realizeSymmCcTensor (I := I) g₀ T₁) with hR
+  set S := ∑ l ∈ Finset.range (p + 1 + 1),
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x) with hS
+  -- Abbreviate the order-`p` jet fibre norm of `R` and the two slot-permuted copies.
+  set LR := riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p R).toSection x) with hLR
+  have hLR_nn : 0 ≤ LR := riemannianFiberNormSq_nonneg _ _ _ _ _
+  -- The two permuted copies have the same order-`p` jet fibre norm as `R`.
+  have hP1eq : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+        (permuteCcTensor (I := I) g₀ (Equiv.swap (0 : Fin 3) 1) R)).toSection x) = LR := by
+    rw [hLR]; exact riemannianFiberNormSq_iteratedCovGrad_permuteCcTensor (I := I) g₀
+      (Equiv.swap (0 : Fin 3) 1) R p x
+  have hP2eq : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+        (permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 2, 1] R)).toSection x) = LR := by
+    rw [hLR]; exact riemannianFiberNormSq_iteratedCovGrad_permuteCcTensor (I := I) g₀
+      c[(0 : Fin 3), 2, 1] R p x
+  -- The order-`p` jet of `R = ∇₀ realizeSymm` is the order-`(p+1)` jet of `realizeSymm`.
+  have hRcomm : LR = riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p + 1)) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 (p + 1)
+        (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x) := by
+    rw [hLR, hR]
+    -- `∇^p (∇₀ realizeSymm) ≍ ∇^{p+1} realizeSymm` (front/back commutation), so rfns agree.
+    exact riemannianFiberNormSq_toSection_heq (I := I) (M := M) g₀
+      (by omega : (3 : ℕ) + p = 2 + (p + 1))
+      (iteratedCovGrad_covGrad_comm_heq_local (I := I) (M := M) g₀ 2 p
+        (realizeSymmCcTensor (I := I) g₀ T₁)) x
+  have hRz : LR ≤ Crz * S := by
+    rw [hRcomm]
+    exact hCrz T₁ x
+  -- Subadditivity over the section identity `koszulComb = R + P1 − P2`.
+  rw [koszulCombSection_eq_permuted_covGrad_realizeSymm (I := I) g₁ g₀ T₁ hr]
+  rw [← hR]
+  rw [PDE.RicciFlow.iteratedCovGrad_sub, PDE.RicciFlow.iteratedCovGrad_add]
+  rw [Integral.L2.SmoothCcTensor.toSection_sub, Integral.L2.SmoothCcTensor.toSection_add,
+    ContMDiffSection.coe_sub, ContMDiffSection.coe_add, Pi.sub_apply, Pi.add_apply]
+  refine le_trans (riemannianFiberNormSq_sub_le (I := I) (M := M) g₀ 0 (3 + p) x _ _) ?_
+  rw [show ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p R).toSection x +
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+          (permuteCcTensor (I := I) g₀ (Equiv.swap (0 : Fin 3) 1) R)).toSection x) =
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p R).toSection x +
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+          (permuteCcTensor (I := I) g₀ (Equiv.swap (0 : Fin 3) 1) R)).toSection x) from rfl]
+  have hadd := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (3 + p) x
+    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p R).toSection x)
+    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+      (permuteCcTensor (I := I) g₀ (Equiv.swap (0 : Fin 3) 1) R)).toSection x)
+  rw [hP1eq] at hadd
+  rw [hP2eq]
+  -- Combine: rfns(koszulComb) ≤ 2·(2·LR + 2·LR) + 2·LR = 18·LR ≤ 18·Crz·S.
+  nlinarith [hadd, hLR_nn, hRz, hCrz0,
+    Finset.sum_nonneg (fun l (_ : l ∈ Finset.range (p + 1 + 1)) =>
+      riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + l) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x))]
+
+/-- **(POSIT — the cross-correction covariant-Leibniz contraction grid, δ-separated.)**  The pure
+*contraction-algebra* content of the cross-correction's order-`p` covariant jet: the binomial covariant
+Leibniz expansion of the metric/evaluation contraction `h ⌟ D` (`h = ccTensorBilinSymm g₀ T₁`,
+`D = connDiff g₁ g₀`) with the **top term** `∇^0 h ⌟ ∇^p D` separated and bounded by
+`δ · rfns(∇^p loweredConnDiffSection)` via the fibre-smallness `gFibreOpBound … δ` and the `g₀`-lowering
+parallel isometry, and **all lower terms** `∇^i h ⌟ ∇^q D` (`q < p`, `i ≥ 1`) bounded by the
+`H^{p+3}` Sobolev ball into `∑_{q < p} rfns(∇^q loweredConnDiffSection)` (the lower covariant gradients
+of the connection difference) plus the `≤ (p+1)`-jet of `T₁`.
+
+This is the **strictly-smaller** brick of `crossCorrectionSection_iteratedCovGrad_rfns_le`: it is the
+*non-inductive* contraction-Leibniz grid (no fibre-small `g₁^{-1}` recursion, no strong induction over
+the order), carrying the lower covariant gradients of the connection difference *as themselves* on the
+right.  The full cross-correction bound then folds these lower `loweredConnDiffSection` jets into the
+`T₁`-jets by the route-(a) strong induction (`crossCorrectionSection_iteratedCovGrad_rfns_le`), which is
+*not* part of this brick.
+
+* **j = 0 collapse litmus.**  At `p = 0` the lower-`loweredConnDiff` sum is empty, so this is
+  `rfns(crossCorrectionSection)(x) ≤ δ·rfns(loweredConnDiffSection)(x) + Cgrid·∑_{l ≤ 1} rfns(∇^l T₁)(x)`.
+* **self-zero litmus.**  At `T₁ = 0`, `crossCorrectionSection = 0` and the bound is `0 ≤ 0`. -/
+theorem crossCorrectionSection_iteratedCovGrad_grid_le
+    (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ) :
+    ∃ Cgrid : ℝ, 0 ≤ Cgrid ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+        (∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (p + 3) T₁‖ ≤ B →
+        ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+                  (crossCorrectionSection (I := I) g₁ g₀ T₁)).toSection x) ≤
+            δ * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+                    (loweredConnDiffSection (I := I) g₁ g₀)).toSection x)
+            + Cgrid * (∑ q ∈ Finset.range p,
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + q) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+                      (loweredConnDiffSection (I := I) g₁ g₀)).toSection x)
+              + ∑ l ∈ Finset.range (p + 1 + 1),
+                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)) := by
   sorry
 
 /-- **(POSIT — the fibre-small-gated cross-correction jet brick.)**  On the fibre-small ball
@@ -629,7 +844,218 @@ theorem crossCorrectionSection_iteratedCovGrad_rfns_le
             + Ccross * ∑ l ∈ Finset.range (p + 1 + 1),
                 riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
                   ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x) := by
-  sorry
+  classical
+  -- **Strong induction on `p`** establishing the per-order lowered-jet bound
+  -- `rfns(∇^q lowered) ≤ Clow q · S` for all `q ≤ p` (the route-(a) differentiated-Koszul recursion,
+  -- folding the cross-correction grid's lower covariant gradients of the connection difference into
+  -- the perturbation jets), then reading off the cross-correction bound from the grid brick.
+  -- The auxiliary lowered-jet bound, with the order-`p` Sobolev ball uniform over `q ≤ p`.
+  suffices haux : ∀ q : ℕ, ∃ Clow : ℝ, 0 ≤ Clow ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+        (∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (q + 3) T₁‖ ≤ B →
+        ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + q) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+                  (loweredConnDiffSection (I := I) g₁ g₀)).toSection x) ≤
+            Clow * ∑ l ∈ Finset.range (q + 1 + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x) by
+    -- Read off `crossCorrectionSection_iteratedCovGrad_rfns_le` from the grid brick + the lower-order
+    -- lowered-jet bounds folded into the perturbation jets.
+    obtain ⟨Cgrid, hCgrid0, hCgrid⟩ :=
+      crossCorrectionSection_iteratedCovGrad_grid_le (I := I) g₀ p δ hδ0 hδ1 B
+    -- Collect the per-order lowered constants for `q < p`.
+    choose Clow hClow0 hClow using haux
+    have hClowsum_nn : 0 ≤ ∑ q ∈ Finset.range p, Clow q :=
+      Finset.sum_nonneg fun q _ => hClow0 q
+    refine ⟨Cgrid + Cgrid * ∑ q ∈ Finset.range p, Clow q, by positivity, ?_⟩
+    intro T₁ g₁ hr hfib hball x
+    set S := ∑ l ∈ Finset.range (p + 1 + 1),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x) with hSdef
+    have hSnn : 0 ≤ S := Finset.sum_nonneg fun l _ => riemannianFiberNormSq_nonneg _ _ _ _ _
+    have hgrid := hCgrid T₁ g₁ hr hfib hball x
+    -- Each lower lowered-jet `rfns(∇^q lowered)` (q < p) ≤ Clow q · (its own jet sum) ≤ Clow q · S.
+    have hlow_le : ∀ q ∈ Finset.range p,
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + q) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+                (loweredConnDiffSection (I := I) g₁ g₀)).toSection x) ≤ Clow q * S := by
+      intro q hq
+      have hqp : q ≤ p := Nat.le_of_lt (Finset.mem_range.mp hq)
+      -- The order-`q` Sobolev ball follows from the order-`p` one by Sobolev-norm monotonicity.
+      have hball_q : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (q + 3) T₁‖
+          ≤ B := le_trans (toHs_norm_mono (I := I) (M := M) g₀ (by omega : q + 3 ≤ p + 3) T₁) hball
+      have h := hClow q T₁ g₁ hr hfib hball_q x
+      refine le_trans h ?_
+      -- the order-`q` jet sum `∑_{l ≤ q+1}` is ≤ the order-`p` sum `S = ∑_{l ≤ p+1}` (nonneg terms).
+      have hsub : (∑ l ∈ Finset.range (q + 1 + 1),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)) ≤ S := by
+        rw [hSdef]
+        exact Finset.sum_le_sum_of_subset_of_nonneg
+          (Finset.range_subset_range.2 (by omega : q + 1 + 1 ≤ p + 1 + 1))
+          fun l _ _ => riemannianFiberNormSq_nonneg _ _ _ _ _
+      exact mul_le_mul_of_nonneg_left hsub (hClow0 q)
+    -- Sum the lower bounds and substitute into the grid brick.
+    have hsum_low : (∑ q ∈ Finset.range p,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + q) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+                (loweredConnDiffSection (I := I) g₁ g₀)).toSection x)) ≤
+        (∑ q ∈ Finset.range p, Clow q) * S := by
+      rw [Finset.sum_mul]
+      exact Finset.sum_le_sum hlow_le
+    calc
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+              (crossCorrectionSection (I := I) g₁ g₀ T₁)).toSection x)
+          ≤ δ * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+                    (loweredConnDiffSection (I := I) g₁ g₀)).toSection x)
+            + Cgrid * (∑ q ∈ Finset.range p,
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + q) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+                      (loweredConnDiffSection (I := I) g₁ g₀)).toSection x) + S) := hgrid
+      _ ≤ δ * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+                    (loweredConnDiffSection (I := I) g₁ g₀)).toSection x)
+            + (Cgrid + Cgrid * ∑ q ∈ Finset.range p, Clow q) * S := by
+        have := hsum_low
+        nlinarith [this, hSnn, hCgrid0,
+          Finset.sum_nonneg (fun q (_ : q ∈ Finset.range p) => hClow0 q)]
+  -- **The strong induction proving `haux`.**
+  intro q
+  induction q using Nat.strong_induction_on with
+  | _ q ih =>
+    obtain ⟨Ck, hCk0, hCk⟩ := koszulCombSection_iteratedCovGrad_rfns_le (I := I) g₀ q
+    obtain ⟨Cg, hCg0, hCg⟩ := crossCorrectionSection_iteratedCovGrad_grid_le (I := I) g₀ q δ hδ0 hδ1 B
+    -- Collect the IH constants for the strictly-lower orders `i < q`.
+    have hih : ∀ i ∈ Finset.range q, ∃ Ci : ℝ, 0 ≤ Ci ∧
+        ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+          (∀ (y : M) (v w : TangentSpace I y),
+            g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
+          gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (i + 3) T₁‖ ≤ B →
+          ∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i
+                    (loweredConnDiffSection (I := I) g₁ g₀)).toSection x) ≤
+              Ci * ∑ l ∈ Finset.range (i + 1 + 1),
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x) :=
+      fun i hi => ih i (Finset.mem_range.mp hi)
+    choose! Ci hCi0 hCi using hih
+    have hden : 0 < 4 - 8 * δ := by linarith
+    refine ⟨(2 * Ck + 8 * Cg + 8 * Cg * ∑ i ∈ Finset.range q, Ci i) / (4 - 8 * δ), ?_, ?_⟩
+    · have : 0 ≤ ∑ i ∈ Finset.range q, Ci i :=
+        Finset.sum_nonneg fun i hi => hCi0 i hi
+      positivity
+    intro T₁ g₁ hr hfib hball x
+    set S := ∑ l ∈ Finset.range (q + 1 + 1),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x) with hSdef
+    have hSnn : 0 ≤ S := Finset.sum_nonneg fun l _ => riemannianFiberNormSq_nonneg _ _ _ _ _
+    set L := riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + q) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+        (loweredConnDiffSection (I := I) g₁ g₀)).toSection x) with hLdef
+    have hLnn : 0 ≤ L := riemannianFiberNormSq_nonneg _ _ _ _ _
+    set Kr := riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + q) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+        (koszulCombSection (I := I) g₁ g₀ T₁)).toSection x) with hKrdef
+    set Cr := riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + q) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+        (crossCorrectionSection (I := I) g₁ g₀ T₁)).toSection x) with hCrdef
+    -- The section-level Koszul identity under ∇^q: 2•lowered = koszulComb − 2•cross ⟹ 4L ≤ 2Kr + 8Cr.
+    have hsub : (4 : ℝ) * L ≤ 2 * Kr + 8 * Cr := by
+      have hid : PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+            ((2 : ℝ) • loweredConnDiffSection (I := I) g₁ g₀) =
+          PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q (koszulCombSection (I := I) g₁ g₀ T₁) -
+            PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+              ((2 : ℝ) • crossCorrectionSection (I := I) g₁ g₀ T₁) := by
+        rw [← PDE.RicciFlow.iteratedCovGrad_sub]
+        congr 1
+        rw [koszulCombSection]
+        abel
+      have h4L : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + q) x
+            (((2 : ℝ) • PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+              (loweredConnDiffSection (I := I) g₁ g₀)).toSection x) = 4 * L := by
+        rw [Integral.L2.SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
+          rfns_smul, hLdef]; norm_num
+      have h4Cr : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + q) x
+            (((2 : ℝ) • PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+              (crossCorrectionSection (I := I) g₁ g₀ T₁)).toSection x) = 4 * Cr := by
+        rw [Integral.L2.SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
+          rfns_smul, hCrdef]; norm_num
+      have hsmulL : PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+            ((2 : ℝ) • loweredConnDiffSection (I := I) g₁ g₀) =
+          (2 : ℝ) • PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+            (loweredConnDiffSection (I := I) g₁ g₀) := iteratedCovGrad_smul _ _ _ _ _ _
+      have hsmulC : PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+            ((2 : ℝ) • crossCorrectionSection (I := I) g₁ g₀ T₁) =
+          (2 : ℝ) • PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+            (crossCorrectionSection (I := I) g₁ g₀ T₁) := iteratedCovGrad_smul _ _ _ _ _ _
+      have hle := riemannianFiberNormSq_sub_le (I := I) (M := M) g₀ 0 (3 + q) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+          (koszulCombSection (I := I) g₁ g₀ T₁)).toSection x)
+        (((2 : ℝ) • PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+          (crossCorrectionSection (I := I) g₁ g₀ T₁)).toSection x)
+      have hidsec : ((2 : ℝ) • PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+            (loweredConnDiffSection (I := I) g₁ g₀)).toSection x =
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+              (koszulCombSection (I := I) g₁ g₀ T₁)).toSection x)
+            - (((2 : ℝ) • PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+                (crossCorrectionSection (I := I) g₁ g₀ T₁)).toSection x) := by
+        rw [← hsmulC, ← hsmulL, hid, Integral.L2.SmoothCcTensor.toSection_sub,
+          ContMDiffSection.coe_sub, Pi.sub_apply]
+      rw [← h4L, hidsec]
+      have : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + q) x
+          (((2 : ℝ) • PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+            (crossCorrectionSection (I := I) g₁ g₀ T₁)).toSection x) = 4 * Cr := h4Cr
+      nlinarith [hle, this]
+    -- POSIT 1 and the grid brick at order `q`.
+    have hKr_le : Kr ≤ Ck * S := hCk T₁ g₁ hr x
+    have hCr_le : Cr ≤ δ * L + Cg * ((∑ i ∈ Finset.range q,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i
+                (loweredConnDiffSection (I := I) g₁ g₀)).toSection x)) + S) := hCg T₁ g₁ hr hfib hball x
+    -- Fold the lower `loweredConnDiff` jets (i < q) into `S` by the IH.
+    have hlow_le : ∀ i ∈ Finset.range q,
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i
+                (loweredConnDiffSection (I := I) g₁ g₀)).toSection x) ≤ Ci i * S := by
+      intro i hi
+      have hball_i : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (i + 3) T₁‖
+          ≤ B := le_trans (toHs_norm_mono (I := I) (M := M) g₀
+            (by have := Finset.mem_range.mp hi; omega : i + 3 ≤ q + 3) T₁) hball
+      have h := hCi i hi T₁ g₁ hr hfib hball_i x
+      refine le_trans h ?_
+      have hsub2 : (∑ l ∈ Finset.range (i + 1 + 1),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)) ≤ S := by
+        rw [hSdef]
+        exact Finset.sum_le_sum_of_subset_of_nonneg
+          (Finset.range_subset_range.2 (by have := Finset.mem_range.mp hi; omega : i + 1 + 1 ≤ q + 1 + 1))
+          fun l _ _ => riemannianFiberNormSq_nonneg _ _ _ _ _
+      exact mul_le_mul_of_nonneg_left hsub2 (hCi0 i hi)
+    have hsum_low : (∑ i ∈ Finset.range q,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i
+                (loweredConnDiffSection (I := I) g₁ g₀)).toSection x)) ≤
+        (∑ i ∈ Finset.range q, Ci i) * S := by
+      rw [Finset.sum_mul]; exact Finset.sum_le_sum hlow_le
+    have hsumCi_nn : 0 ≤ ∑ i ∈ Finset.range q, Ci i :=
+      Finset.sum_nonneg fun i hi => hCi0 i hi
+    -- Close: (4 - 16δ)·L ≤ (2Ck + 8Cg + 8Cg·∑Ci)·S, divide.
+    have hkey : (4 - 8 * δ) * L ≤
+        (2 * Ck + 8 * Cg + 8 * Cg * ∑ i ∈ Finset.range q, Ci i) * S := by
+      nlinarith [hsub, hKr_le, hCr_le, hsum_low, hSnn, hLnn, hCg0, hCk0, hsumCi_nn,
+        mul_le_mul_of_nonneg_left hsum_low hCg0]
+    rw [hLdef] at hkey ⊢
+    rw [div_mul_eq_mul_div, le_div_iff₀ hden]
+    rw [← hLdef] at hkey ⊢
+    nlinarith [hkey]
 
 /-- **T1 — the iterated-covariant-jet bound for the metrically-lowered connection difference**
 (fibre-small ball regime).
