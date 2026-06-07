@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.CcTensorBilinFibreHsBound
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmOrderDropping
+import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartEntryJetCLM
 
 /-!
 # Joint `(t, x)`-`C∞` of a single chart-frame entry of `ccTensorBilinSymm g (T_s ·)` from a
@@ -103,9 +104,18 @@ This is the genuine analytic theorem: the supercritical Sobolev embedding read i
 chart's coordinates (controlling every spatial-coordinate jet of the chart-frame entry by
 `‖T.toHs (2m)‖`) bigraded against the all-order time control of the tower, so every mixed
 partial `∂_t^k ∂_x^β` of the entry exists and is continuous up to and across the closed slab
-(the up-to-`0` boundary jet being the honest one-sided derivative, `uniqueDiffOn_Icc`).  See
-the file header for the full `C^{k,j}` induction structure.  The body is `sorry`; consumers
-transitively depend on `sorryAx`.
+(the up-to-`0` boundary jet being the honest one-sided derivative, `uniqueDiffOn_Icc`).
+
+The bigraded `C^{k, j}` induction is realised cleanly through the finite-order jet-CLM wall
+`exists_contMDiffOn_chartEntryJetCLM_baseSet`: it suffices (`contMDiffOn_infty`) to prove joint
+`C^N` for every finite `N`; for each `N` the jet-CLM child supplies a supercritical Sobolev
+exponent `m` and a continuous-linear functional family `A : M → (H^{2m} →L[ℝ] ℝ)` that is
+`ContMDiffOn ℝ N` in the base point on the chart base set and reads the entry on the dense
+smooth subspace.  The Sobolev time-tower at order `N` (`htower N m`) makes the Banach-valued
+path `t ↦ (T_s t).toHs (2 m)` `ContMDiffOn ℝ N`, so `ContMDiffOn.clm_apply` assembles the joint
+`C^N` smoothness of `q ↦ A q.2 ((T_s q.1).toHs (2 m))`, which agrees on the slab with the
+entry.  This is sorry-free glue over the jet-CLM child (the genuine missing analytic leaf), so
+consumers transitively depend on `sorryAx` only through that child.
 
 The hypothesis is a time-regularity-into-Sobolev statement about scalar Hilbert elements; the
 conclusion is the joint smoothness of a scalar function on `ℝ × M` — a different object — so no
@@ -123,7 +133,43 @@ theorem jointContMDiffOn_ccTensorBilinSymm_chartEntry_baseSet
         ccTensorBilinSymm (I := I) g (T_s q.1) q.2
           (chartBasisVecFiber (I := I) α i q.2)
           (chartBasisVecFiber (I := I) α j q.2))
-      (Set.Icc (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) α).baseSet) := sorry
+      (Set.Icc (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) α).baseSet) := by
+  classical
+  set s : Set (ℝ × M) :=
+    Set.Icc (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) α).baseSet with hs_def
+  -- Joint `C∞` is joint `C^N` for every finite order `N`.
+  rw [contMDiffOn_infty]
+  intro N
+  -- The finite-order jet-CLM wall: at order `N` it produces a supercritical exponent `m` and a
+  -- base-point-`C^N` continuous-linear functional family reading the entry on smooth sections.
+  obtain ⟨m, A, hA_smooth, hA_agree⟩ :=
+    exists_contMDiffOn_chartEntryJetCLM_baseSet (I := I) (M := M) g α i j N
+  -- The Sobolev time-tower at order `N` makes the Banach-valued path `C^N` in time.
+  have hψ : ContMDiffOn 𝓘(ℝ, ℝ)
+      𝓘(ℝ, IntrinsicSobolev.TensorPouSobolevHilbert g 0 2 (2 * m)) (N : ℕ∞)
+      (fun t : ℝ =>
+        IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) (2 * m) (T_s t))
+      (Set.Icc (0 : ℝ) T) :=
+    (htower N m).contMDiffOn
+  -- Lift the base-point family and the time path to the product slab.
+  have hAsnd : ContMDiffOn (𝓘(ℝ, ℝ).prod I)
+      𝓘(ℝ, IntrinsicSobolev.TensorPouSobolevHilbert g 0 2 (2 * m) →L[ℝ] ℝ) (N : ℕ∞)
+      (fun q : ℝ × M => A q.2) s :=
+    hA_smooth.comp contMDiffOn_snd (fun q hq => hq.2)
+  have hψfst : ContMDiffOn (𝓘(ℝ, ℝ).prod I)
+      𝓘(ℝ, IntrinsicSobolev.TensorPouSobolevHilbert g 0 2 (2 * m)) (N : ℕ∞)
+      (fun q : ℝ × M =>
+        IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) (2 * m) (T_s q.1)) s :=
+    hψ.comp contMDiffOn_fst (fun q hq => hq.1)
+  -- The continuous-linear application is jointly `C^N`.
+  have happ : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) (N : ℕ∞)
+      (fun q : ℝ × M =>
+        A q.2 (IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) (2 * m)
+          (T_s q.1))) s :=
+    hAsnd.clm_apply hψfst
+  -- On the slab the application agrees with the chart-frame entry.
+  refine happ.congr (fun q hq => ?_)
+  exact (hA_agree (T_s q.1) q.2 hq.2).symm
 
 end MetricRealization
 end IntrinsicSpectral
