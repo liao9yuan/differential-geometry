@@ -1053,3 +1053,54 @@ large body of work, largely untouched.  Foundation: the short-time-existence (De
 `sorryAx` remains the standing black box.
 
 **Next concrete step:** the `k=1` time-derivative assembly (roadmap step 1).
+
+## 2026-06-07 consolidation: generic Bochner stack + all-k heat equation landed
+
+The `k=1` "three framework walls" dead-end was dissolved — the walls were over-counts
+(`∇g⁻¹=0`, the frame change, the covariant Leibniz were all present/buildable). The
+user's `∂ₜ‖T‖²` abstraction was the lever: it cascaded into a complete **general
+norm-square Bochner machinery** and the **all-k heat equation**.
+
+**New verified modules** (each `lake-locked build` EXIT 0, no `sorry`, `#print axioms`
+= `[propext, Classical.choice, Quot.sound]`):
+- `Tensor/RSTensor/FiberMetric/Tensor0SMetricDeriv.lean` — general `∂ₜ‖T‖²`
+  (`hasDerivWithinAt_normSq0S`; flow form `…_ricciFlow` = `Ric∗T² + 2⟨∂ₜT,T⟩`).
+- `…/Tensor0SInnerLeibniz.lean` — the covariant inner-product Leibniz `inner0S_nabla`
+  (`∇⟨T,S⟩=⟨∇T,S⟩+⟨T,∇S⟩`) — the recurring "covariant Leibniz" wall, resolved generically.
+- `…/Tensor0SBochnerSplit.lean` + `…/Tensor0SBochnerProduct.lean` — the general Bochner
+  Laplacian split `tensorNormBochnerSplit_mc` (`Δ‖T‖²=2⟨ΔT,T⟩+2‖∇T‖²`, hypothesis-free
+  via `hess_norm0S`).
+- `Evolution/NablaRiemannHeatFrameInvariant.lean` — `abs_spatialCommNablaRm_intrinsic_le`
+  (frame-independent k=1 spatial reaction bound) + `compNormSqMulti_orthoBasis_eq_normSq0S`.
+- `Evolution/NablaRiemannHeatSolution.lean` — the `horth`-free producer
+  `nablaRm04NormHeatBoundOn_scalar`.
+- `Evolution/NablaRiemannHeatFull.lean` — `nablaRm04NormHeatEquationOn_intrinsic`
+  (k=1 heat equation DERIVED from the two Bochner lemmas — was always a raw input).
+- `Evolution/RmRealizationBridgeAllK.lean` — rank-uniform bridge
+  `iteratedRmComp_eq_nablaKRm04Field` + `nablaKRm04_ricciIdentityAt` ((0,4+k) Ricci id, all k).
+- `Evolution/IteratedRmTowerHeatEq.lean` — `nablaKRm04NormHeatEquationOn_intrinsic`
+  (**all-k** heat equation `∂ₜ|∇ᵏRm|²=Δ|∇ᵏRm|²−2|∇^{k+1}Rm|²+reaction`) +
+  `iteratedRmComp_hasDerivWithinAt` (rank-uniform `∂ₜ∇ᵏRm`).
+- `Evolution/IteratedRmTowerProducer.lean` — reaction-form bridge
+  `nablaKRm04Reaction_orthoBasis_eq_compContract` (concrete reaction = `2⟨combinedStar,∇ᵏRm⟩`
+  in a g-orthonormal basis; inverse-metric mismatch closed; Ricci half a genuine bounded
+  `j=0` factor).
+
+**Precise remaining frontier** to discharge `IteratedRmTowerOn.heatEq` → BBS bounds →
+`extends_of_rmBounded` (a GENUINE wall, carefully verified — not an over-count):
+1. **All-k iterated commuted-curvature identity** `(∂ₜ−Δ)∇ᵏRm = Σⱼ ∇ʲRm∗∇^{k−j}Rm` — the
+   BBS eq-7.5/7.6 higher-order induction. `j=0`/`j=k` boundary terms come from
+   `nablaKRm04_ricciIdentityAt` + `inner0S_nabla`; the **`0<j<k` cross terms** (iterated
+   `[Δ,∇ᵏ]Rm`) are assembled only at `k=1` (~2500-LOC `T₁`/`T₂`). This is the hard core.
+2. **`∂ₜ∇ᵏRm`** (component time derivative, Lemma 6.1): banked `∂ₜRm13`+realization+lowering,
+   unblocked but unbuilt.
+3. **Frame reconciliation**: clean-`∂ₜ` `iteratedRmComp_hasDerivWithinAt` is in
+   time-independent `coordinateFrameAt`; the reaction collapse needs the `g(t)`-orthonormal basis.
+
+Pillar B (convergence/compactness: `ham3_noncollapse`, `ham3_cgh_limit`, …) and the DeTurck
+short-time `sorryAx` remain as before. Per-piece detail: `Evolution/IteratedNablaRmTower.md`
+follow-ups #1–15.
+
+**Resume:** frontier #1 (the all-k iterated commutator) is the genuine remaining mathematics
+— generalize the `k=1` `T₁`/`T₂` machinery to all ranks via the rank-uniform `(0,s)` Ricci
+identity + `inner0S_nabla` applied iteratively.

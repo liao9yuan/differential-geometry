@@ -249,7 +249,7 @@ section Solution
 
 /-- The connection of a solution at time `t` is `∞`-smooth (Levi-Civita), the
 input required by `CanonicalSpatialDerivs0S.of_smooth_connection`. -/
-private theorem connSmoothInf
+theorem connSmoothInf
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
     CovariantDerivative.ContMDiffCovariantDerivativeLocally
@@ -259,7 +259,7 @@ private theorem connSmoothInf
 
 /-- The scalar exterior-derivative directional derivative respects eventual
 equality of the differentiated function. -/
-private theorem extDerivFun_eventuallyEq_congr
+theorem extDerivFun_eventuallyEq_congr
     {f g : M → Real} {x : M} (V : TangentSpace I x)
     (h : f =ᶠ[nhds x] g) :
     extDerivFun (I := I) f x V = extDerivFun (I := I) g x V := by

@@ -1,0 +1,8 @@
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedRmTowerHeatEq
+
+open DifferentialGeometry.PDE.RicciFlow
+
+#print axioms nablaKRm04NormHeatEquationOn_intrinsic
+#print axioms iteratedRmComp_hasDerivWithinAt
+#print axioms iteratedRmCompDt_succ
+#print axioms nablaKRm04NormSqIntrinsic_nonneg

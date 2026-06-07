@@ -1361,6 +1361,386 @@ unbuilt (a bounded ~Lemma-6.1 assembly).
 `BernsteinShiSolution.lean` remains parametric in `IteratedRmTowerOn`.  No files
 changed this pass (a faithful assembly would require `sorry` at walls 1–2).
 
+## 2026-06-07 twelfth follow-up: the `horth`-free / frame-independent `k = 1` producer is BUILT; WALL 1 (`hswap`) is over-counted (template-confirmed); WALL 2 (frame reconciliation) is the sole genuine remaining frontier
+
+This pass took the dedicated task of closing the full `k = 1` producer
+`NablaRm04NormHeatBoundOn` for a real `SolutionOn`, building a `horth`-free /
+general-`gInv` variant if the producer's `horth` blocks the time-independent-frame
+route.  The **frame-independent producer chain is now built, sorry-free,
+axiom-clean**, in a new file `Evolution/NablaRiemannHeatSolution.lean` (no existing
+file edited).  `#print axioms` on every public theorem is
+`[propext, Classical.choice, Quot.sound]`.  Focused `lake-locked build`: EXIT 0
+(3629 jobs).
+
+### What was proved (`Evolution/NablaRiemannHeatSolution.lean`, all sorry-free, axiom-clean)
+
+The `horth`-free *scalar* producer (frame-independent, no `gInv`/`compNormSq`):
+
+* `nablaRm04NormHeatBoundSharp_scalar` / `nablaRm04NormHeatBoundOn_scalar` — from a
+  bare scalar heat **equation** `NablaRm04NormHeatEquationOn u uLap nabla2 reaction`,
+  a frame-independent reaction bound `reaction ≤ cReact·√v·u`, and `nabla2 ≥ 0`,
+  the sharp and dropped scalar heat inequalities, the latter being **exactly**
+  `NablaRm04NormHeatBoundOn u uLap v cReact` (the predicate
+  `bernstein_first_derivative_estimate` consumes).  This is the `horth`-free analogue
+  of `nablaRm04NormHeatBoundOn_of_components`: it mentions no frame, no inverse
+  metric, no `compNormSq`.  The orthonormal frame was only ever a *convenience* for
+  `compNormSq` and the Cauchy–Schwarz reaction bound; the scalar inequality is
+  intrinsic.
+
+The Bochner-splice bridge into the producer's predicate:
+
+* `nablaRm04NormHeatEquationOn_of_multiBochner` — the rank-`r=4` Bochner splice
+  `multiNormHeatEquationOn_of_components` (`MultiNormHeat.lean`) produces
+  `NablaRm04NormHeatEquationOn` with `reaction = multiReactionDown` (`= 2⟨(∂ₜ−Δ)∇Rm,
+  ∇Rm⟩`).  The two `HasDerivWithinAt` shapes are identical; this certifies the
+  existing `MultiNormHeat` machinery *is* the `k = 1` heat-equation producer (the
+  geometric input being the Bochner Laplacian split `MultiNormLaplacianSplit`, same
+  status as the `k = 0` producer's `Rm04NormLaplacianComponentsOn`).
+* `nablaRm04NormHeatBoundOn_of_multiBochner_residual` — the assembled
+  frame-independent producer from the Bochner-splice data + the schematic residual
+  identity `(∂ₜ−Δ)∇Rm = star` (`hres`) + a frame-independent `∗`-bound on
+  `2⟨star, ∇Rm⟩` (Cauchy–Schwarz), via `multiReactionDown_eq_of_residual`.
+
+### WALL 1 (`hswap` needs `∂ₜ∂²ₓΓ`) is OVER-COUNTED — refuted by the `coordGammaMix` template
+
+The eleventh follow-up's WALL 1 ("`hswap` for `rm04` needs an unbanked
+`∂ₜ∂²ₓΓ`") is **incorrect**.  `hswap` (`NablaRiemannTimeDeriv.lean:267`) is a
+`FixedBaseExtDerivTimeDerivativeOnRegular` for the *scalar* `rm04`-frame component,
+and `fixedBaseOnRegLocal` / `fixedBaseOnReg_of_timeDerivWithin`
+(`Bundle/PartialMfderiv/FixedBase.lean`) build it from just:
+`hSmooth` (spacetime `C²` of the scalar component `F`), `hFdiff`/`hFtdiff` (spatial
+differentiability of `F`, `Ft`), and `hTime` (the *first-order* `∂ₜF = Ft` fact).
+The exterior spatial derivative is swapped *automatically*; **no second-order
+spatial Christoffel derivative is required.**  This is exactly how `coordGammaMix`
+(`Ricci/CoordinateRegularity.lean:1255`) builds `∂ₜ∂ₓΓ` — its `hSmooth` is plain
+Christoffel smoothness (`coordGammaSmoothAt`), its `hTime` is just `∂ₜΓ` (`hGamma`),
+**not** any `∂ₜ∂ₓ`-derivative identity.  So `hswap` for `rm04` reduces to `hrm`
+(`∂ₜrm04`) + spacetime-`C²` smoothness of the `rm04` frame component (the `(0,4)`
+analogue of `coordGammaSmoothAt`), with `Rm04` kept as the *smooth* field (never
+unfolded to `∂ₓΓ + Γ²`, which would manufacture the spurious `∂ₜ∂²ₓΓ` need).
+
+### The genuine remaining frontier for the from-bare-`S` producer
+
+The `horth`-free producers reduce `NablaRm04NormHeatBoundOn` to two *frame-independent
+scalar* inputs (same status as the `k = 0` producer's hypotheses):
+(1) the heat equation `NablaRm04NormHeatEquationOn` (= Bochner-splice data +
+residual), and (2) the reaction bound `2⟨(∂ₜ−Δ)∇Rm, ∇Rm⟩ ≤ C·|Rm|·|∇Rm|²`.
+Assembling those two scalars *from a bare `SolutionOn` in one frame* still needs:
+
+* **`hrm` (`∂ₜrm04`) — UNBLOCKED, unbuilt** (the `(0,4)` analogue of the banked
+  `coordRicciEvol`: banked `∂ₜRm13`
+  `christoffelCurvCoeffAt_hasDerivWithinAt_of_christoffelVariation` + realization +
+  metric lowering), plus the `rm04` spacetime-`C²` smoothness for `hswap`
+  (analogue of `coordGammaSmoothAt`).  A bounded ~Lemma-6.1 assembly, no missing
+  primitive.
+* **WALL 2 (frame reconciliation) — the SOLE genuine framework-scale wall,
+  grep-confirmed absent.**  The clean-`∂ₜ` time derivative
+  (`iteratedRmComp_one_hasDerivWithinAt`) is in the **time-independent**
+  `coordinateFrameAt` (actual `gInv`); the quantitative spatial reaction bound
+  `abs_spatialCommNablaRm_orthoFrame_le` is **only** in the **`g(t)`-orthonormal**
+  frame (`gInv = δ`).  The scalar reaction `2⟨(∂ₜ−Δ)∇Rm, ∇Rm⟩` is intrinsic and
+  equal in both frames, but **no** lemma identifies the contracted reaction scalar
+  across frames (searched: no `coordinateFrameAt`-with-actual-`gInv` reaction
+  bound; no scalar reaction frame-invariance; the only `nablaRmReactionInFrame` /
+  `abs_nablaRmReactionInFrame_le` are `horth`-bound), and **no** moving-frame
+  `∂ₜ(frame)` correction to `iteratedRmComp_one_hasDerivWithinAt` exists
+  (searched: no `frameDt`/moving-frame `∂ₜ` covariant-derivative correction).
+  Either closes the gap; both are framework-scale.  *Note:* the new `horth`-free
+  producer removes the *producer-side* half of route (a) (a `horth`-free producer
+  now exists), but route (a) still needs the **general-`gInv` reaction bound**
+  (the absent fibre-norm↔component-norm machinery / scalar frame-invariance), which
+  is unchanged.
+
+### Net
+
+* **`horth`-free / frame-independent `k = 1` producer — DONE.**  The producer's
+  `InverseMetricOrthonormalAt` is no longer required: `NablaRm04NormHeatBoundOn`
+  follows from the intrinsic scalar heat equation + a frame-independent reaction
+  bound (`nablaRm04NormHeatBoundOn_scalar` /
+  `nablaRm04NormHeatBoundOn_of_multiBochner_residual`).
+* **WALL 1 (`hswap`) — over-counted, dissolved** (template-confirmed via
+  `coordGammaMix`/`fixedBaseOnRegLocal`: `hswap` = `hrm` + spacetime-`C²`, no
+  `∂ₜ∂²ₓΓ`).
+* **`hrm` (`∂ₜrm04`) + `rm04` smoothness — unblocked, unbuilt** (bounded
+  `coordRicciEvol`-analogue assembly).
+* **WALL 2 (frame reconciliation) — the sole genuine framework-scale wall**,
+  grep-confirmed absent (general-`gInv` reaction bound / scalar frame-invariance, or
+  moving-frame `∂ₜ(frame)` correction).
+
+Files added: `Evolution/NablaRiemannHeatSolution.lean` (no existing file edited).
+`BernsteinShiSolution.lean` remains parametric in `IteratedRmTowerOn` (it consumes
+`IteratedRmTowerOn`, not the `k = 1` producer; the `k = 1` producer feeds the
+*parametric* `bernstein_first_derivative_estimate`, which has no solution-level
+caller to wire up).
+
+## 2026-06-07 thirteenth follow-up: the norm frame-invariance half of WALL 2 (Route (b)) is BUILT — the proven spatial commutator bound is now stated against frame-independent INTRINSIC fibre norms
+
+This pass took the dedicated WALL-2 task (close the full `k = 1` producer
+`NablaRm04NormHeatBoundOn` for a real `SolutionOn`, picking the cleaner of Route (a)
+/ Route (b)).  After grep-verifying the building blocks, **Route (b)'s norm
+frame-invariance is closed, sorry-free, axiom-clean**, in a new file
+`Evolution/NablaRiemannHeatFrameInvariant.lean` (no existing file edited).
+`#print axioms` on every public theorem is `[propext, Classical.choice, Quot.sound]`.
+Focused `lake-locked build`: EXIT 0 (3694 jobs).  This refutes part of the twelfth
+follow-up's "scalar reaction frame-invariance — grep-confirmed absent" framing for
+the *spatial* half: the norm frame-invariance **is** assemblable from the intrinsic
+fibre norm `normSq0S` and its orthonormal-basis component identity.
+
+### The key infrastructure found (correcting "frame-invariance absent")
+
+The twelfth follow-up listed Route (b) as needing a "`multiNormRaised gInv =
+(intrinsic)` frame-independently" fact that was "grep-confirmed absent".  In fact the
+intrinsic fibre norm and its orthonormal-component identity **already exist**:
+
+* `normSq0S g x s A` (`Tensor/RSTensor/FiberMetric/Tensor0SMetric.lean`) — the
+  metric-induced squared fibre norm of a `(0,s)` tensor `A`, mentioning **no** frame.
+* `normSq0S_identity_eq_sum_sq` (`Tensor/RSTensor/Tensor0SRiemannian/Comparison.lean`)
+  — in any basis with `MetricInverseInBasis_gen g x basis identityInvMetric`,
+  `normSq0S g x s A = ∑_slots (component0S basis A slots)²`.
+* `SmoothRiemannianMetric`/`SmoothMetric`/`SmoothMetric_gen` are the **same** abbrev
+  (`Bundle.ContMDiffRiemannianMetric I ∞ E (TangentSpace I)`), so `S.base.metric t`
+  feeds all three interfaces with no coercion.
+
+A `g`-orthonormal basis (`g.inner basis i basis j = δ`) trivially satisfies
+`MetricInverseInBasis_gen … identityInvMetric` (the inline computation of
+`cotangentSharp_orthoBasis_expand'`), so the orthonormal-component squared sum
+`compNormSqMulti (basis components)` **is** the intrinsic `normSq0S`, the same for
+every `g`-orthonormal basis.
+
+### What was proved (`Evolution/NablaRiemannHeatFrameInvariant.lean`, all sorry-free, axiom-clean)
+
+* `metricInverseInBasis_identity_of_orthonormal` — a `g`-orthonormal basis carries
+  the Kronecker-delta inverse metric in the `MetricInverseInBasis_gen` sense.
+* `compNormSqMulti_orthoBasis_eq_normSq0S` — **the norm frame-invariance bridge**:
+  `compNormSqMulti (fun idx => A (basis ∘ idx)) = normSq0S g x s A` for a
+  `g`-orthonormal basis (rank-uniform, any `(0,s)` tensor).  The RHS is frame-free,
+  so the orthonormal-component norm is frame-independent.  Combined with
+  `multiNormInFrame_eq_compNormSqMulti` (`multiNormRaised δ A = compNormSqMulti A`,
+  `IteratedNablaRmTower.lean`) this is exactly the Route (b) condition.
+* `rm04NormSqInFrame_orthoBasis_eq_normSq0S` /
+  `nablaRm04NormSqInFrame_orthoBasis_eq_normSq0S` — the producer's `δ`-raised frame
+  norms equal the intrinsic `normSq0S g 4 (Rm04)` (`= |Rm|²`) /
+  `normSq0S g 5 (∇Rm)` (`= |∇Rm|²`), via the orthonormal reductions
+  `rm04NormSqInFrame_eq_compNormSq4` / `nablaRm04NormSqInFrame_eq_compNormSq5` + the
+  bridge + the existing `compNormSqMulti_eq_compNormSq4_basis`/`_compNormSq5`
+  reindexings.
+* `abs_spatialCommNablaRm_intrinsic_le` — **the frame-independent restatement of the
+  proven spatial commutator bound** `abs_spatialCommNablaRm_orthoFrame_le`:
+  `|Δ(∇Rm)(c) − ∇(ΔRm)(c)| ≤ 13·card²·√(normSq0S g Rm)·√(normSq0S g ∇Rm)`, with the
+  `Rm`/`∇Rm` factors now the **intrinsic** fibre norms — genuinely frame-independent
+  scalars.  This is the `Rm ∗ ∇Rm` shape the `horth`-free scalar producer
+  (`nablaRm04NormHeatBoundOn_scalar`) consumes as the *spatial* part of its reaction
+  bound `reaction ≤ cReact·√v·u` with `v = |Rm|²`, `u = |∇Rm|²` intrinsic.
+
+### Net (the `k = 1` frontier after this pass)
+
+* **Route (b) norm frame-invariance — DONE.**  The orthonormal-component norm is the
+  intrinsic fibre norm, and the proven spatial commutator bound is now stated against
+  frame-independent intrinsic scalars (`abs_spatialCommNablaRm_intrinsic_le`).  The
+  twelfth follow-up's "scalar frame-invariance grep-confirmed absent" is corrected
+  for the **norm** (the `normSq0S` machinery supplies it).
+* **WALL 2's remaining genuine half — the intrinsic-norm TIME derivative `∂ₜ|∇Rm|²`.**
+  The full scalar heat **equation** `NablaRm04NormHeatEquationOn` still needs `∂ₜu`
+  for `u = normSq0S (g(t)) (∇Rm)`, and:
+  * `iteratedRmComp_one_hasDerivWithinAt` (`Evolution/NablaRiemannTimeDeriv.lean`)
+    gives the per-component time derivative in the **time-independent
+    `coordinateFrameAt`**, not `∂ₜ(normSq0S (g(t)) ·)`;
+  * `normSq0S (g(t)) ·` carries the **moving metric `g(t)`**, so `∂ₜ` picks up a
+    `∂ₜg`-contraction term.
+  Crucially, this is the **same status as the `k = 0` producer**: `k = 0`'s
+  `rm04NormHeatEquationOn_of_solution` (`Evolution/RiemannNormHeatProducer.lean`)
+  *also* takes its raw time-derivative identity `Rm04NormRawDerivativeEquationOn`
+  (`Evolution/RiemannNorm.lean`) as a **hypothesis**, in a fixed frame with moving
+  `gInv` (Route (a)), with the `∂ₜgInv` term explicit
+  (`raisedRm04DerivRHSInFrame`/`inverseMetricEvolutionRHSInFrame`); the project's
+  `k = 0` baseline **never** closes `∂ₜ|Rm|²` from a bare `SolutionOn` either, and
+  there is **no** `Rm04NormHeatBoundOn`/`rm04NormHeatBoundOn_of_solution` (grep:
+  absent).  So the time-derivative gap is *not* a `k = 1`-specific wall; it is the
+  shared `k = 0`-status analytic input, and the `horth`-free scalar producer already
+  abstracts it (input (1), `NablaRm04NormHeatEquationOn`).
+* **The temporal residual `(∂ₜΓ) ∗ Rm` + Uhlenbeck `Rm ∗ Rm`** — the residual
+  `(∂ₜ − Δ)∇Rm` beyond the (now-frame-independent) spatial commutator also has the
+  temporal pieces, not yet assembled into the contracted reaction scalar.
+
+### Honest verdict on closing the full producer from bare `S`
+
+The full `NablaRm04NormHeatBoundOn`-from-`SolutionOn` is **not** closed, and (after
+this pass) is reduced to exactly the `k = 0`-status inputs:
+(1) the intrinsic-norm heat **equation** `NablaRm04NormHeatEquationOn` (the
+hypothesis-status time-derivative/Bochner-split input, identical in status to
+`k = 0`'s `Rm04NormRawDerivativeEquationOn` + Bochner split), and
+(2) the frame-independent reaction bound — whose **spatial half is now discharged
+intrinsically** (`abs_spatialCommNablaRm_intrinsic_le`), with the temporal half
+(`∂ₜΓ ∗ Rm` + Uhlenbeck) the only remaining `Rm ∗ ∇Rm`/`Rm ∗ Rm` assembly.  The
+genuinely framework-scale residue is the moving-metric time derivative of the
+intrinsic norm — the same obstruction the `k = 0` baseline leaves open — not a
+missing tensor API.  `BernsteinShiSolution.lean` remains parametric in
+`IteratedRmTowerOn`.
+
+Files added: `Evolution/NablaRiemannHeatFrameInvariant.lean` (no existing file
+edited).
+
+## 2026-06-07 fourteenth follow-up: the intrinsic moving-metric norm TIME derivative `∂ₜ normSq0S(g(t), T(t))` is BUILT GENERICALLY — WALL 2's remaining half (the thirteenth follow-up's item 1) is closed at the reusable tensor level, modulo the same `∂ₜT` component input the `k = 0` baseline takes
+
+This pass attacked the thirteenth follow-up's named remaining half of WALL 2 — the
+**intrinsic-norm time derivative** `∂ₜ|∇Rm|²` for the *moving* metric `g(t)` inside
+`normSq0S`, which "picks up a `∂ₜg`-contraction term".  The deliverable is the
+**general, frame-free, rank-uniform** Bochner-type time-derivative of a covariant
+tensor norm, stated and proved once at the reusable fibre-metric level (it has **no**
+Ricci-flow content), so it serves `k = 0`, `k = 1`, and every `k` uniformly.  New
+file `Tensor/RSTensor/FiberMetric/Tensor0SMetricDeriv.lean` (no existing file
+edited), all sorry-free, every public theorem `#print axioms = [propext,
+Classical.choice, Quot.sound]`, focused `lake-locked build` EXIT 0.
+
+### Why this sidesteps the frame reconciliation entirely
+
+The thirteenth follow-up's spatial half used the orthonormal-frame route.  The
+time-derivative half is done **intrinsically**: the key infrastructure
+`normSq0S_eq_coord` / `inner0S_eq_coord`
+(`Tensor/RSTensor/FiberMetric/Tensor0SMetric.lean`) — which were **already fully
+proved, not open** — equate the intrinsic fibre norm/inner product with the
+`gInv`-raised coordinate contraction `coordInner0S` in *any* tangent basis with
+`MetricInverseInBasis`.  Differentiating that finite sum in `t` by the product rule
+is pure real algebra; no orthonormal frame and no coordinate↔frame bridge is
+needed.
+
+### What was proved (`Tensor/RSTensor/FiberMetric/Tensor0SMetricDeriv.lean`)
+
+* `hasDerivWithinAt_coordContract` — **the product-rule core** (assumption-free, on
+  raw real component arrays): for time-dependent inverse-metric components `gInv t`
+  and rank-`s` arrays `cA t`, `cB t` with `HasDerivWithinAt` data `gInvDt`, `cAdt`,
+  `cBdt`, the contraction `coordContract (gInv t) (cA t) (cB t) = Σ_{I0,J0} (∏_a gInv
+  (I0 a)(J0 a))·cA I0·cB J0` is differentiable with derivative `coordContractDt +
+  coordContract gInv cAdt cB + coordContract gInv cA cBdt`.  The `∏ gInv` factor is
+  differentiated by Mathlib's `HasDerivWithinAt.fun_finset_prod`; the metric term
+  `coordContractDt` is the `∂ₜgInv`-contraction (one `gInv` slot differentiated at a
+  time).  This is `MultiNormHeat.lean:158`'s fixed-metric product rule
+  (`hasDerivWithinAt_compNormSqMulti`, the `∂ₜgInv = 0` case) generalised to a moving
+  metric — same product-rule structure, **plus** the metric term.
+* `hasDerivWithinAt_normSq0S_coord` / **`hasDerivWithinAt_normSq0S`** — **the GENERAL
+  intrinsic lemma**: for arbitrary time-dependent metric `g(t)` (inverse components
+  `gInv t`, genuinely inverse via `MetricInverseInBasis`) and tensor
+  `T : Real → Tensor0SSpace s I x`, with `∂ₜgInv` and the component derivatives `∂ₜT`
+  supplied as `HasDerivWithinAt` hypotheses,
+  `∂ₜ (normSq0S (g t) x s (T t)) = (metric term in ∂ₜgInv) + 2·inner0S (g t) (∂ₜT) (T)`.
+  The "2·inner" packaging uses the symmetry of the fibre inner product
+  (`MetricFiberData.symm`).  **Completely general in `T` and `g`; no curvature,
+  metric-compatibility, or flow hypothesis.**  This is the abstraction that closes
+  the standing per-case raw time-derivative hypothesis (`k = 0`'s
+  `Rm04NormRawDerivativeEquationOn`, the `k = 1`/all-`k` analogues) in one lemma.
+* `coordContractDt_eq_ricReactionContract` + **`hasDerivWithinAt_normSq0S_ricciFlow`**
+  — **the flow instantiation**: under the Ricci-flow inverse-metric-derivative
+  relation `gInvDt i j = 2·Σ_{p,q} gInv i p·gInv j q·ric p q` (the conclusion of
+  `inverseMetric_derivative_solve`, from `∂ₜg = −2 Ric`), the metric term becomes the
+  explicit **Ricci reaction** `ricReactionContract`, giving
+  `∂ₜ|T|² = (Ric ∗ T²) + 2⟨∂ₜT, T⟩` — the architecture's raw curvature-norm time
+  derivative, now **derived** from the product rule rather than assumed, for `T =
+  ∇ᵏRm` at any rank `s = 4 + k`.
+
+### Net (what is closed, what remains)
+
+* **WALL 2's intrinsic-norm time-derivative half — DONE generically.**  The
+  moving-metric `∂ₜ normSq0S(g(t), T(t))` is derived in closed form; the `∂ₜg`
+  contraction is the explicit metric term, and under Ricci flow it is the `Ric ∗ T²`
+  reaction.  This was the thirteenth follow-up's item (1)/"genuinely framework-scale
+  residue".
+* **The remaining input is the bare component time derivative `∂ₜT = ∂ₜ(∇ᵏRm)`** — the
+  `Tdt`/`hT`/`hTdot` hypotheses of `hasDerivWithinAt_normSq0S`.  This is the **same
+  hypothesis-status data** the `k = 0` producer already takes
+  (`Rm04NormRawDerivativeEquationOn`) and the `k = 1` analogues; the general lemma
+  *consumes* it and produces the full intrinsic time derivative including the
+  previously-missing moving-metric reaction.  So the framework-scale obstruction the
+  `k = 0` baseline leaves open (the `∂ₜg` term) is now discharged at the reusable
+  tensor level; only the schematic `∂ₜ(∇ᵏRm)` curvature input (and, for the heat
+  *equation*, the Bochner Laplacian split — `MultiNormHeat.lean`'s
+  `MultiNormLaplacianSplit`) remain, exactly as before.
+
+Files added: `Tensor/RSTensor/FiberMetric/Tensor0SMetricDeriv.lean` (no existing
+file edited).
+
+## 2026-06-07 fifteenth follow-up: the orthonormal-frame reaction-form bridge is BUILT — the concrete intrinsic reaction collapses to the schematic plain-component form; the residual star decomposition (wall 1) is the isolated remainder
+
+This pass took the dedicated task of bridging the *concrete, derived* all-`k` heat
+equation `nablaKRm04NormHeatEquationOn_intrinsic`
+(`Evolution/IteratedRmTowerHeatEq.lean`, reaction `= ricReactionContract + 2⟨(∂ₜ −
+Δ)∇ᵏRm, ∇ᵏRm⟩`) to the *schematic* tower interface `IteratedRmTowerOn.heatEq`
+(reaction `= towerReactionMulti = Σⱼ 2·Σ_m (∇ᵏRm m)·(star j m)`, plain component
+contraction).  The **algebraic (orthonormal-collapse) half** is now **closed,
+sorry-free, axiom-clean**, in a new file `Evolution/IteratedRmTowerProducer.lean`
+(no existing file edited).  `#print axioms` on every public declaration is
+`[propext, Classical.choice, Quot.sound]`.  Focused `lake-locked build`: EXIT 0
+(3706 jobs).
+
+### The precise mismatch identified, and the collapse that resolves it
+
+The two reaction forms differ **only by the inverse metric**: the concrete
+reaction is *metric-contracted* (`inner0S` and `ricReactionContract` carry `gInv`),
+while `towerReactionMulti`/`nablaRmReactionMulti` is a *plain* orthonormal-frame
+component sum.  In a `g`-orthonormal basis (`gInv = δ`) they coincide — the same
+collapse `compNormSqMulti_orthoBasis_eq_normSq0S` (thirteenth follow-up) uses for
+the norms, here polarized for the inner product and the Ricci reaction.
+
+### What was proved (`Evolution/IteratedRmTowerProducer.lean`, all sorry-free, axiom-clean)
+
+* `inner0S_orthoBasis_eq_compContract` — the orthonormal collapse of the metric
+  inner product: `inner0S g x s A B = Σ_m (comp A m)·(comp B m)` for a
+  `g`-orthonormal basis (polarization of `compNormSqMulti_orthoBasis_eq_normSq0S`,
+  via `inner0S_eq_coord` + `coordInner0S_identity_eq_sum`).
+* `sum_delta_erase_slot_eq` — the slot delta-collapse `Σ_{J0} (∏_{a≠b} δ(I0a,J0a))·G
+  J0 = Σ_e G(update I0 b e)` (the engine of the Ricci-reaction collapse;
+  `Finset.sum_image` over the injective `e ↦ update I0 b e`, summand vanishing off
+  the image).
+* `ricStarArray` + `abs_ricStarArray_le` — the genuine `Ric ∗ cB` slot-contraction
+  star array `Σ_b Σ_e ric(I0b)e·cB(update I0 b e)`, and its Cauchy–Schwarz bound
+  `|ricStarArray ric cB I0| ≤ s·card·Rbnd·√(compNormSqMulti cB)` (with `Rbnd =
+  √|Ric|²`, the genuine `j = 0` `starBound` shape — the Ricci half is a *controlled*
+  factor, not a vacuous dump).  Mirror of `abs_curvatureAction0SAt_orthoBasis_le`.
+* `ricReactionContract_delta_eq_compContract` — the orthonormal collapse of the
+  Ricci reaction term: `ricReactionContract δ ric cA cB = 2·Σ_I0 cA I0·ricStarArray
+  ric cB I0` (pure finite-sum algebra: the off-slot `δ`s collapse the `J0`-sum, the
+  inner `(p,q)`-deltas reduce the Ricci-raised contraction to `ric (I0 b) (J0 b)`).
+* `combinedStarArray` + `nablaKRm04Reaction_orthoBasis_eq_compContract` — **the
+  assembled reaction-form bridge**: in a `g`-orthonormal basis, the concrete
+  reaction equals the *single* plain component contraction `2·Σ_m (∇ᵏRm m)·
+  (combinedStarArray m)`, with `combinedStarArray = ricStarArray ric (comp ∇ᵏRm) +
+  (comp (∂ₜ − Δ)∇ᵏRm)` — the genuine combined Ricci + residual star.  This is the
+  CLAUDE.md crux's *"set the tower's star arrays to these factors so towerReaction
+  matches the concrete reaction"* step, at the algebraic level: the `heatEq`
+  reaction *shapes* now coincide (plain contraction), with no vacuous discharge and
+  no renamed identity.
+
+### The isolated remaining wall (grep-confirmed, matches walls 1–3 of follow-ups 11–14)
+
+`nablaKRm04Reaction_orthoBasis_eq_compContract` writes the reaction as a *single*
+contraction `2⟨combinedStar, ∇ᵏRm⟩`.  Populating `IteratedRmTowerOn` needs that star
+*split over `j ∈ {0,…,k}`* into genuine `∇ʲRm ∗ ∇^{k−j}Rm` factors with the per-`j`
+`starBound`.  The Ricci half (`ricStarArray`, bounded by `abs_ricStarArray_le`) is
+the genuine `j = 0` factor; the **residual half `(∂ₜ − Δ)∇ᵏRm`** is the standing
+frontier:
+
+1. **The commuted-curvature decomposition `(∂ₜ − Δ)∇ᵏRm = Σⱼ ∇ʲRm ∗ ∇^{k−j}Rm`.**
+   The available all-`k` pieces — the *single*-derivative spatial commutator
+   `nablaKRm04_ricciIdentityAt` (`= Rm ∗ ∇ᵏRm`), its rank-uniform Cauchy–Schwarz
+   `abs_curvatureAction0SAt_orthoBasis_le` (all-`s`), and the covariant Leibniz
+   `inner0S_nabla` — give only the `j = 0`/`j = k` boundary terms; the **iterated**
+   spatial commutator `[Δ,∇ᵏ]Rm` (the `0 < j < k` cross terms) is assembled only at
+   `k = 1` (the `T₁`/`T₂` machinery of `NablaRiemannReactionBound.lean`).
+2. **The component time derivative `∂ₜ∇ᵏRm`** (`Tdot`) — unbuilt Lemma-6.1 assembly
+   (eleventh follow-up: banked `∂ₜRm13` + realization + lowering; unblocked,
+   unbuilt).
+3. **Frame reconciliation (WALL 2)** — the collapse needs the `g(t)`-orthonormal
+   basis; the clean-`∂ₜ` `iteratedRmComp_hasDerivWithinAt` is in the
+   time-independent `coordinateFrameAt`.
+
+Net: the `heatEq`-reaction-*shape* mismatch is reduced to a single reusable
+orthonormal-collapse identity (`nablaKRm04Reaction_orthoBasis_eq_compContract`),
+isolating the commuted-curvature residual decomposition (wall 1) as the genuine
+remaining content.  `BernsteinShiSolution.lean` remains parametric in
+`IteratedRmTowerOn` (it consumes `IteratedRmTowerOn`; the producer is not yet
+dischargeable from a bare `SolutionOn` for the reasons above).
+
+Files added: `Evolution/IteratedRmTowerProducer.lean` (no existing file edited).
+
 ## Claude prompt
 
 ```text
@@ -1425,3 +1805,546 @@ run #print axioms and require only [propext, Classical.choice, Quot.sound].
 Update IteratedNablaRmTower.md with what was proved or the exact remaining
 blocker.
 ```
+
+## 2026-06-07 follow-up: the general Bochner Laplacian split of a tensor norm is BUILT (the spatial twin of the time derivative)
+
+This pass built the **rank-uniform, intrinsic Bochner Laplacian split** of a
+covariant-tensor norm — the spatial twin of the general moving-metric time
+derivative `Tensor0SBundle.hasDerivWithinAt_normSq0S`
+(`Tensor/RSTensor/FiberMetric/Tensor0SMetricDeriv.lean`).  New file:
+`Tensor/RSTensor/FiberMetric/Tensor0SBochnerSplit.lean`, all sorry-free, every
+public theorem `#print axioms = [propext, Classical.choice, Quot.sound]`, focused
+`lake-locked build`: EXIT 0.
+
+### What was proved (`Tensor0SBochnerSplit.lean`)
+
+* `sum_trace_coordContract_rough`, `sum_trace_coordContract_nabla` — the
+  rank-uniform trace algebra: tracing `g^{ij}` over the `(i,j)`-frozen second
+  covariant derivative rebuilds the rough Laplacian contraction `⟨ΔT,T⟩`, and over
+  the `i`/`j`-frozen first derivative rebuilds the rank-`s+1` norm `|∇T|²`.  These
+  generalise the `(0,2)` `sum_trace_tensor02_rough`/`sum_trace_tensor02_nabla`
+  (`Curvature/Bochner/BochnerTensor.lean`) to all ranks.  Helpers `sum_fin_cons`,
+  `sum_fin_cons2`, `sum_comm_blocks`.
+* `TensorNormHessianProductInBasis` — the pointwise Hessian product rule of the
+  norm, in basis component form (the rank-uniform analogue of
+  `BochnerTensor.Tensor02NormHessianProductInBasis`).
+* `tensorNormBochnerSplit_coord` — the coordinate split
+  `tr_g (Hess|T|²) = 2·coordInner0S s gInv (ΔT) T + 2·coordInner0S (s+1) gInv (∇T)(∇T)`,
+  valid for **any** `gInv` (no inverse hypothesis).
+* `tensorNormBochnerSplit` — the **intrinsic split**
+  `Δ|T|² = 2·inner0S g x s (roughLap T) T + 2·normSq0S g x (s+1) (∇T)`,
+  where `roughLap T = metricTrace0S2TensorInBasis basis gInv (∇²T)` is the rough
+  Laplacian `g^{ab}∇_a∇_b T`.  This is exactly the basis-free formula left as a TODO
+  in `Geometry/Operator/RoughLaplacian.lean` (lines ~1037–1060), and the
+  `MultiNormLaplacianSplit` half of the BBS norm-square machinery
+  (`Evolution/MultiNormHeat.lean:137`), now derived from the pointwise product rule.
+
+### Status of the geometric input
+
+The genuine geometric content — the pointwise Hessian product rule
+`Hess|T|²(X,Y) = 2(⟨∇²T(X,Y,·),T⟩ + ⟨∇T(Y,·),∇T(X,·)⟩)` — is taken as a hypothesis
+(`TensorNormHessianProductInBasis`), at exactly the same status as
+`MultiNormLaplacianSplit` itself and as the `(0,2)` producer's `hess_norm02`
+hypothesis chain.  A fully self-contained derivation from `nabla_metric_zero` needs
+the **general-rank covariant inner-product Leibniz** `∇⟨T,S⟩ = ⟨∇T,S⟩ + ⟨T,∇S⟩`,
+which is grep-confirmed **absent** (only the `(0,2)` `inner0S_two_nabla` /
+`inner0S_two_metricCompatible_extDerivFun` exist, in
+`Tensor/RSTensor/Tensor0SRiemannian/Smooth.lean`, ~340 lines of coordinate
+Christoffel algebra); building it intrinsically runs into the bundled inverse-metric
+parallelism `∇gInv = 0` wall (footer obstruction #1 above — the inverse metric is a
+component function, not a bundled `(2,0)` tensor; `ContractionLeibniz.lean`'s
+`nabla_metricPow_zero` covers the **lowering** metric power `g^{⊗r}`, not the
+**raising** `gInv^{⊗r}` needed for the norm).  So the pointwise rule is the honest
+input frontier; the `(0,2)` producer `BochnerTensor.second_norm02_mc` discharges it
+for `s = 2`.  Generalising `du_norm02`/`freeze02_deriv`/`hess_norm02` to all ranks
+(the four-item TODO in `RoughLaplacian.lean`) remains the route to discharge it for
+all `s`, gated by that same missing inner-product Leibniz.
+
+## 2026-06-07 follow-up: the general-rank covariant inner-product Leibniz is BUILT (the "absent" verdict above is refuted)
+
+The general-rank covariant inner-product Leibniz named as the missing frontier in
+the section above is now **proved, sorry-free and axiom-clean**, in a new file
+`Tensor/RSTensor/FiberMetric/Tensor0SInnerLeibniz.lean`.  `#print axioms` on every
+new public theorem is `[propext, Classical.choice, Quot.sound]`.
+
+### What was proved
+
+* `inner0S_nabla` — **the headline primitive**, the rank-uniform directional metric
+  compatibility of the induced fibre inner product on covariant `(0,s)` tensors:
+  `∇_X ⟨A, B⟩_g = ⟨∇_X A, B⟩_g + ⟨A, ∇_X B⟩_g` for a metric-compatible connection,
+  smooth `(0,s)` fields `A`, `B`, and `∇_X = nabla0SFun`.  This is the genuine
+  generalisation of the `(0,2)` `inner0S_two_nabla`, for **all** `s`.
+* `normSq0S_nabla` — the first-order norm derivative `∇_X ‖T‖² = 2⟨∇_X T, T⟩`,
+  directly from `inner0S_nabla` (the rank-uniform `du_norm02`).
+* `inner0S_symm` — fibre inner-product symmetry on `(0,s)` tensors.
+* `coordContractDt_eq_neg_christoffelCorr` — the **rank-uniform algebraic heart**:
+  the metric-derivative term of the coordinate contraction, with the
+  metric-compatible `∇gInv = 0` value substituted, equals the negated
+  Christoffel-correction contractions.  Pure finite-sum algebra over a per-slot
+  index swap (`slotSwap`), generalising the position-hardcoded `(0,2)`
+  `inner0S_two_metricCompatible_coord_algebra`.
+* `extDerivFun_coordContract` — the directional product rule of the coordinate
+  contraction (the rank-uniform spatial analogue of `deriv4sum`), with the
+  `extDerivFun` finite-product Leibniz `extDerivFun_finset_prod_real`.
+
+### Route (the `∇gInv = 0` wall is *not* hit for the inner product)
+
+The inner-product Leibniz does **not** need a bundled `(2,0)`/`gInv^{⊗r}`
+parallelism.  It is proved in the **coordinate route** mirroring `inner0S_two_nabla`:
+expand `⟨A,B⟩ = coordContract gInv (comps A)(comps B)` (`inner0S_eq_coord`),
+differentiate along `X` (`extDerivFun_coordContract`), kill the metric-derivative
+term with the *component-function* identity `∇gInv = 0` (`gInvCovZeroAt`, the
+already-present `inverseMetricCovDerivForMetricCompAlongInFrame_eq_zero` family),
+and recognise the Christoffel corrections as the `nabla0SFun` components
+(`nabla0S_coordFrame_slots_of_smooth`).  So footer obstruction #1 (the inverse
+metric being a component function, not a bundled tensor) is exactly what makes the
+component route work — `gInvCovZeroAt` *is* `∇gInv = 0` at the component level.
+
+### What remains for the Bochner Hessian discharge
+
+`tensorNormBochnerSplit`'s hypothesis `TensorNormHessianProductInBasis`
+(`Tensor/RSTensor/FiberMetric/Tensor0SBochnerSplit.lean`) is **not yet** discharged
+for all `s`.  With `inner0S_nabla` in hand the remaining work is the rank-`s`
+generalisation of `freeze02_deriv`'s `hBderiv` — the covariant derivative of the
+first-slot-frozen field `y ↦ (∇T)(Y_y, ·)` as `∇²T(X,Y,·) + (∇T)(∇_X Y, ·)` — plus
+the `du`/Hessian assembly (`hess_norm02`).  The frozen field's bundled smoothness is
+available generically as `tensor0SPartialEval` + `contMDiff_tensor0SPartialEval`
+(`Geometry/Connection/TensorNabla/Tensor0SPartialEval.lean`, needs
+`[SigmaCompactSpace M]`), and the second Leibniz step is `inner0S_nabla` applied to
+`(freezeFirst1Field nablaT Y, T)`.  This is now mechanical realization combinatorics
+over the missing-Leibniz frontier, which is closed.
+
+## 2026-06-07 follow-up #2: the Bochner Hessian product rule is DISCHARGED for all `s` (the general Bochner Laplacian split is now hypothesis-free)
+
+The remaining realization combinatorics above are now **carried out, sorry-free and
+axiom-clean**, in a new file
+`Tensor/RSTensor/FiberMetric/Tensor0SBochnerProduct.lean`.  `#print axioms` on every
+new public theorem is `[propext, Classical.choice, Quot.sound]`.  The general
+Bochner Laplacian split `tensorNormBochnerSplit` no longer needs the
+`TensorNormHessianProductInBasis` hypothesis supplied by callers — it is derived
+from metric compatibility.
+
+### What was proved (rank-uniform, namespace `Tensor0SBundle`)
+
+* `partialEval0SField nablaT Y` — the first-slot-frozen field `y ↦ (∇T)(Y_y,·)`
+  as a bundled `Tensor0SField s`, smooth via `contMDiff_tensor0SPartialEval`
+  (the rank-`s` `freeze02Field`).
+* `inner0S_mdiff` — the fibre inner product `y ↦ ⟨A_y,B_y⟩_g` of two smooth
+  `(0,s)` fields is `MDifferentiableAt` (the rank-`s` `inner0S_two_mdiff`),
+  proved from differentiability of the coordinate contraction.
+* `nabla_partialEval0S` — **the only nontrivial realization step**, the rank-`s`
+  generalisation of `freeze02_deriv`'s `hBderiv`:
+  `∇_X ((∇T)(Y,·)) = ∇²T(X,Y,·) + (∇T)(∇_X Y,·)`, i.e.
+  `nabla0SFun s cov X (partialEval0SField nablaT Y) x
+    = freezeFirstTwoArgs0S (nabla2T x) (X x) (Y x)
+      + tensor0S_curry s x (nablaT x) ((cov Y x) (X x))`.  Proved by the
+  `Fin s`-tuple realization (`exists_eq_at_gen` per slot,
+  `nabla0SFun_eval_smooth_slots` for the frozen field,
+  `TotalNabla0SRealizes.eval_smooth_slots` for `∇²T`), with the `(s+1)`-slot
+  correction sum split `Fin.sum_univ_succ` into the `Y`-slot
+  (`= (∇T)(∇_X Y,·)`) and the `V`-slots (cancelling against the frozen-field
+  corrections via `Fin.cons_update`).
+* `freeze0S_deriv` — the rank-`s` `freeze02_deriv`: differentiating
+  `2⟨(∇T)(Y,·),T⟩` along `X` gives
+  `2(⟨∇²T(X,Y,·),T⟩ + ⟨(∇T)(∇_X Y,·),T⟩ + ⟨(∇T)(Y,·),(∇T)(X,·)⟩)`, by the second
+  Leibniz step `inner0S_nabla` + `nabla_partialEval0S`.
+* `du_norm0S` — the rank-`s` `du_norm02`: `du(W) = 2⟨(∇T)(W,·),T⟩`, from
+  `normSq0S_nabla`.
+* `hess_norm0S` — the rank-`s` `hess_norm02`, **discharging
+  `TensorNormHessianProductInBasis`** from metric compatibility via the
+  `nablaDuAt`/`HessianRealizesNablaDuAt` assembly
+  (`Geometry/Operator/HessianTraceRealization.lean`).
+* `tensorNormBochnerSplit_mc` — **the hypothesis-free general Bochner Laplacian
+  split**: `tensorNormBochnerSplit` with `hprod` removed (derived from `hess_norm0S`),
+  `Δ‖T‖² = 2⟨ΔT,T⟩ + 2‖∇T‖²` for all `s`.
+
+### Notes
+
+* The variable-rank `Tensor0SModel` `NormedSpace` instance-resolution diamond (the
+  KNOWN PITFALL) is resolved by `set_option backward.isDefEq.respectTransparency
+  false` together with file-local `tensor0SModel_normedSpace`/`…AddCommGroup`
+  instances, exactly mirroring `Geometry/Metric/TensorInner/Tensor0SRiemannian.lean`.
+* Extra instances over `Tensor0SBochnerSplit.lean`:
+  `[CompleteSpace E] [SigmaCompactSpace M] [T2Space M] [IsManifold I (∞+1) M]`,
+  needed by `tensor0SPartialEval` and the `(0,2)`-template Hessian assembly.
+* So the `MultiNormLaplacianSplit` half of the BBS norm-square machinery is now
+  derivable from metric compatibility at all ranks; the time-derivative half
+  remains `hasDerivWithinAt_compNormSqMulti`.
+
+## 2026-06-07 follow-up #3: the intrinsic `k = 1` heat EQUATION for `|∇Rm|²` is ASSEMBLED from the two general Bochner lemmas — `NablaRm04NormHeatEquationOn` is no longer a raw input
+
+This pass took the dedicated task of instantiating the two now-general Bochner
+lemmas (`hasDerivWithinAt_normSq0S_ricciFlow` + `tensorNormBochnerSplit_mc`) at
+`T = ∇Rm` (`nablaRm04Field`) and assembling the `k = 1` heat equation, then feeding
+the `horth`-free scalar producer `nablaRm04NormHeatBoundOn_scalar`.  It is now
+**closed, sorry-free, axiom-clean**, in a new file
+`Evolution/NablaRiemannHeatFull.lean` (no existing file edited).  `#print axioms`
+on every public theorem is `[propext, Classical.choice, Quot.sound]`.  Focused
+`lake-locked build`: EXIT 0 (3702 jobs).
+
+### What was proved (`Evolution/NablaRiemannHeatFull.lean`, all sorry-free, axiom-clean)
+
+Intrinsic scalar fields (frame-free `(t, x)` functions):
+
+* `nablaRm04NormSqIntrinsic` (`= |∇Rm|² = normSq0S g 5 (∇Rm)`),
+  `nabla2Rm04NormSqIntrinsic` (`= |∇²Rm|² = normSq0S g 6 (∇²Rm)`), and
+* `nablaRm04ReactionIntrinsic` — the **derived** `k = 1` reaction
+  `(Ric ∗ ∇Rm²) + 2⟨(∂ₜ − Δ)∇Rm, ∇Rm⟩`, with `Δ∇Rm = metricTrace0S2TensorInBasis
+  basis gInv (∇³Rm)` the rough Laplacian (`nabla3Rm04Field`, rank `7 → 5`) and the
+  metric reaction the `ricReactionContract` produced from the moving-metric `∂ₜg`
+  term of `hasDerivWithinAt_normSq0S_ricciFlow`.  **Not** a renamed hypothesis.
+
+The assembly:
+
+* `nablaRm04NormHeatEquationOn_intrinsic` — **the headline**: the producer predicate
+  `NablaRm04NormHeatEquationOn` (`Evolution/NablaRiemannHeat.lean`)
+  `∂ₜ|∇Rm|² = Δ|∇Rm|² + (−2|∇²Rm|² + reaction)` in the intrinsic fibre norms, by
+  *subtracting* the two Bochner lemmas instantiated at `∇Rm`:
+  - time half `hasDerivWithinAt_normSq0S_ricciFlow` (`s = 5`):
+    `∂ₜ|∇Rm|² = ricReaction + 2⟨∂ₜ∇Rm, ∇Rm⟩` (the `∂ₜg` reaction is the explicit
+    `ricReactionContract`, derived from `hgInvDt` = the Ricci-flow inverse-metric
+    relation `inverseMetric_derivative_solve`, **not** assumed);
+  - Laplacian half `tensorNormBochnerSplit_mc` (`s = 5`, with
+    `T/∇T/∇²T = ∇Rm/∇²Rm/∇³Rm` realized by
+    `nabla2Rm04Field_realizes`/`nabla3Rm04Field_realizes`):
+    `Δ|∇Rm|² = 2⟨Δ∇Rm, ∇Rm⟩ + 2|∇²Rm|²`.
+  The subtraction cancels the `2⟨Δ∇Rm, ∇Rm⟩` against the residual term, leaving the
+  exact reaction `ricReaction + 2⟨∂ₜ∇Rm − Δ∇Rm, ∇Rm⟩` — proved by `inner0S`
+  additivity (`map_sub`) + `ring`.
+* `nabla2Rm04NormSqIntrinsic_nonneg` — `|∇²Rm|² ≥ 0` (fibre inner-product
+  positivity, `MetricFiberData.inner_nonneg`).
+* `nablaRm04NormHeatBoundOn_intrinsic` — feeds the heat equation + the nonnegativity
+  + a frame-independent reaction bound `reaction ≤ cReact·√(|Rm|²)·|∇Rm|²` into
+  `nablaRm04NormHeatBoundOn_scalar`, producing the
+  **`NablaRm04NormHeatBoundOn`** predicate consumed by
+  `bernstein_first_derivative_estimate`, in the intrinsic norms `|∇Rm|²`/`|Rm|²`.
+
+### The advance, and the honest input status
+
+The advance over the previous `k = 1` status: the assembled heat **equation**
+`NablaRm04NormHeatEquationOn` — formerly **always a raw input**
+(`Evolution/NablaRiemannHeat.lean` takes it as a hypothesis, the `(0,5)` analogue
+of `Rm04NormHeatEquationOn`) — is now **derived** from the two general Bochner
+lemmas plus the component time derivative `∂ₜ∇Rm`.  The previously-missing
+moving-metric `∂ₜg` reaction term is supplied **intrinsically** by
+`hasDerivWithinAt_normSq0S_ricciFlow` (the `Ric ∗ ∇Rm²` reaction), not assumed.
+
+The remaining inputs are taken as hypotheses **at exactly the status the `(0,2)`
+producer `ricci_heat_mc` (`Basic/RicciNorm.lean`) takes them** — that producer
+likewise takes `DuFieldRealizes`, `HessianRealizesNablaDuAt`,
+`SmoothBasisFieldsAt`, the genuine inverse metric `hinv`, the per-component
+time-derivative facts (`h_inv`/`h_ricci`), and the reaction term as hypotheses:
+
+* the `∇Rm`/`∇²Rm`/`∇³Rm` covariant-derivative realizations — **banked**
+  (`RmRealizationBridge.lean`, `nabla2Rm04Field_realizes`/`nabla3Rm04Field_realizes`),
+  discharged inside the theorem with no extra hypothesis;
+* `DuFieldRealizes`/`HessianRealizesNablaDuAt` of `|∇Rm|²`, `SmoothBasisFieldsAt`,
+  the genuine inverse metric `hinv` — `(0,2)`-parity hypotheses;
+* `hgInvDt` — the Ricci-flow inverse-metric-derivative relation
+  (`inverseMetric_derivative_solve`'s conclusion), `(0,2)`-parity;
+* `hT`/`Tdot` — the component time derivative `∂ₜ∇Rm` (the `(0,5)` analogue of
+  `k = 0`'s `Rm04NormRawDerivativeEquationOn`), `(0,2)`-parity;
+* `hreact_bound` — the BBS reaction estimate `2⟨(∂ₜ − Δ)∇Rm, ∇Rm⟩ + Ric ∗ ∇Rm²
+  ≤ C·|Rm|·|∇Rm|²`, the same status as the `(0,2)` `ricciNormCurvatureReactionInFrame`.
+
+### What this does NOT close (and why `BernsteinShiSolution.lean` stays parametric)
+
+* `NablaRm04NormHeatBoundOn` is **not** discharged from a *bare* `SolutionOn`
+  (without the `(0,2)`-parity hypotheses).  The `∂ₜ∇Rm` component derivative
+  (`hT`/`Tdot`), the `DuFieldRealizes`/`HessianRealizesNablaDuAt` of `|∇Rm|²`, and
+  the full contracted reaction bound `hreact_bound` are still hypotheses — at the
+  same status as the project's `k = 0` baseline (`ricci_heat_mc` / the
+  `k = 0` `rm04NormHeatEquationOn_of_solution`, which also never close `∂ₜ|Rm|²`
+  from a bare solution).  The intrinsic *spatial* half of the reaction is
+  separately discharged (`abs_spatialCommNablaRm_intrinsic_le`, thirteenth
+  follow-up); wiring it + the temporal `(∂ₜΓ ∗ Rm + Uhlenbeck)` half into
+  `hreact_bound` is the remaining `Rm ∗ ∇Rm`/`Rm ∗ Rm` assembly (frame-invariant
+  footer item 2).
+* `BernsteinShiSolution.lean` consumes the **all-`k` `IteratedRmTowerOn`**
+  interface, not the single `k = 1` `NablaRm04NormHeatBoundOn`; the `k = 1`
+  producer feeds the *parametric* `bernstein_first_derivative_estimate`, which has
+  no solution-level caller.  So `BernsteinShiSolution.lean` **remains parametric in
+  `IteratedRmTowerOn`** (correctly; no edit warranted).
+
+### Net
+
+* **The intrinsic `k = 1` heat EQUATION — DONE**, assembled from the two general
+  Bochner lemmas; `NablaRm04NormHeatEquationOn` is no longer a raw input, and the
+  `∂ₜg` reaction is derived (not assumed).  The `k = 1` heat-inequality producer
+  `NablaRm04NormHeatBoundOn_intrinsic` follows, reducing the `k = 1` frontier to
+  exactly the `(0,2)`-parity inputs (`∂ₜ∇Rm` component derivative + the contracted
+  reaction bound), the same status as the `k = 0` baseline.
+* **Notes:** the variable-rank `Tensor0SModel` `NormedSpace` diamond is resolved by
+  `set_option backward.isDefEq.respectTransparency false` + file-local instances
+  (mirroring `Tensor0SBochnerProduct.lean`); rank bookkeeping is the subtle point —
+  the rough Laplacian of `∇Rm` traces `∇³Rm` (`nabla3Rm04Field`, rank 7), while the
+  `2‖∇T‖²` term is `normSq0S g 6 (∇²Rm)` (`nabla2Rm04Field`).
+
+Files added: `Evolution/NablaRiemannHeatFull.lean` (no existing file edited).
+
+## 2026-06-07 follow-up #4: the rank-uniform (all-`k`) `∇ᵏRm` realization bridge is BUILT — the `k=1`/`k=2` `RmRealizationBridge.lean` template is generalized to every `k` by induction
+
+This pass took the dedicated task of generalizing the curvature-derivative
+realization bridge of `Evolution/RmRealizationBridge.lean` — proven there only at
+the concrete ranks `k = 1` (`iteratedRmComp_one_eq_nablaRm04Field`) and `k = 2`
+(`iteratedRmComp_two_eq_nabla2Rm04Field`) — to **all** `k`, by induction.  It is
+closed, sorry-free and axiom-clean, in a new file
+`Evolution/RmRealizationBridgeAllK.lean`.  `#print axioms` on every public
+declaration is `[propext, Classical.choice, Quot.sound]`.
+
+### What was proved (`Evolution/RmRealizationBridgeAllK.lean`, all sorry-free)
+
+The three pieces named in the task, all rank-uniform in `k`:
+
+1. **The bundled iterated field** `nablaKRm04Field S t k : Tensor0SField ∞ (4+k)`
+   — `k` iterations of `totalNabla0S` starting from `S.base.rm04 t`
+   (`Tensor/RSTensor/NablaOnTensors/HigherOrder.lean`), the rank-uniform
+   generalization of `nablaRm04Field`/`nabla2Rm04Field`/`nabla3Rm04Field`.  Defined
+   by recursion on `k`: base `k = 0` is `S.base.rm04 t`, step `k+1` is
+   `totalNabla0S (4+k) (S.family.connection t) (nablaKRm04Field S t k) (totalNabla0S_reg …)`.
+   The arity step `4 + (k+1) = (4+k) + 1` is definitional (the same `Nat.add`
+   reduction the component-level `iteratedRmComp` recursion already relies on), so
+   no `Fin (4+k) ↔ Fin ((4+k)+1)` coercion is needed.
+   - `nablaKRm04Field_zero`, `nablaKRm04Field_succ` — the definitional unfolding lemmas.
+   - `nablaKRm04Field_realizes` — the step `TotalNabla0SRealizes`, read off from
+     `totalNabla0S_realizes` at rank `4+k`.  Rank-uniform generalization of
+     `nablaRm04Field_realizes`/`nabla2Rm04Field_realizes`/`nabla3Rm04Field_realizes`.
+
+2. **The rank-uniform bridge** `iteratedRmComp_eq_nablaKRm04Field` — for **every**
+   `k`, at every point `x` of the coordinate-frame neighbourhood
+   `coordinateFrameSet x₀`,
+
+   ```text
+   iteratedRmComp (coordinateFrameAt x₀) (realizedChr S x₀) (realizedRmBase S x₀) k t x (frameTuple …)
+     = nablaKRm04Field S t k x (frameTuple …)
+   ```
+
+   **Proved by induction on `k`.**  The statement is set up in the neighbourhood
+   form `∀ k {x}, x ∈ coordinateFrameSet x₀ → ∀ n, …` (universally quantified `k`
+   first, then the membership), so the inductive hypothesis is available at *every*
+   nearby point — exactly what the step needs.
+   - base `k = 0`: `iteratedRmComp_zero` + `nablaKRm04Field_zero` + the definitional
+     unfolding of `realizedRmBase`/`frameComp0S` (this is `realizedRmBase`);
+   - step `k+1`: rewrite the inner level-`k` array as the frame-component array of the
+     bundled `∇ᵏRm` throughout the neighbourhood via the IH (an `=ᶠ[nhds x]`
+     eventual equality), push it through `frameExtData` with
+     `extDerivFun_eventuallyEq_congr`, then apply the rank-uniform step bridge
+     `covDerivStepComp_frameComp_eq` (`RmRealizationBridge.lean`) for the rank-`(4+k)`
+     field `∇ᵏRm`.  `realizedChr` is *definitionally* `christoffelSymbolInFrame`, so
+     the step bridge's Christoffel data matches with a `simpa [realizedChr]`.
+
+   This is the **exact chaining** of `iteratedRmComp_two_eq_nabla2Rm04Field`
+   (rank 5 → 6) lifted to arbitrary `k → k+1`; the `k = 1`/`k = 2` theorems of
+   `RmRealizationBridge.lean` are recovered by specialization
+   (`iteratedRmComp_one_eq_nablaKRm04Field` is included as the explicit `k = 1`
+   corollary).
+
+3. **The rank-uniform `(0,s)` Ricci-identity instances** at `s = 4 + k`:
+   - `nablaKRm04_nabla0SSectionRealizes` — the `Nabla0SSectionRealizes` first-derivative
+     realization at rank `4+k`;
+   - `nablaKRm04_nabla20SRealizesAt` — the discharged `Nabla20SRealizesAt` package
+     (the bundled `∇^{k+1}Rm`/`∇^{k+2}Rm` realize the first/second covariant
+     derivatives of `∇ᵏRm`), the rank-uniform generalization of
+     `rm04_nabla20SRealizesAt` (`k = 0`) / `nablaRm04_nabla20SRealizesAt` (`k = 1`);
+   - `nablaKRm04_ricciIdentityAt` — the `(0, 4+k)` Ricci identity for `∇ᵏRm`,
+     produced from `tensor0S_ricciIdentity_of_torsionFree`
+     (`Tensor/RicciIdentity/Tensor0S/Formula.lean`, rank-uniform in `s`) instantiated
+     at `s = 4+k`, with `hcov`/`htor` discharged from `connSmoothOfSol`/`lcAt_regular`
+     exactly as `rm04_ricciIdentityAt`/`nablaRm04_ricciIdentityAt` do.
+
+### Building blocks reused (grep-confirmed)
+
+`covDerivStepComp_frameComp_eq` (the rank-uniform step bridge; takes any `s`),
+`iteratedRmComp`/`iteratedRmComp_succ`/`iteratedRmComp_zero`, `frameTuple`/`frameComp0S`,
+`frameExtData`, `realizedChr`/`realizedRmBase`, `coordinateFrameAt`/
+`coordinateFrameSet_open`/`coordinateFrameAt_isLocalFrame_one`/`coordinateFrameAt_mem`,
+`totalNabla0S`/`totalNabla0S_realizes`/`totalNabla0S_reg` (all rank-uniform in `s`),
+`tensor0S_ricciIdentity_of_torsionFree`/`Nabla20SRealizesAt`/`Nabla0SSectionRealizes`,
+`connSmoothOfSol`/`rm13OfSol`/`lcAt_regular`/`torsionFree_of_isLeviCivita`.
+
+### One-line edit to `RmRealizationBridge.lean`
+
+Two genuinely reusable helpers in `RmRealizationBridge.lean` — `connSmoothInf` (the
+solution connection is `∞`-smooth) and `extDerivFun_eventuallyEq_congr` (the scalar
+ext-derivative respects `=ᶠ[nhds x]`) — were `private`; both are now non-private so the
+all-`k` file reuses them rather than duplicating.  No proof body changed.
+
+### The defeq question in the task's STOP CONDITIONS did NOT arise
+
+The task flagged a possible wall: "the induction step needs a dependent-type /
+`Fin (4+k) ↔ Fin ((4+k)+1)` coercion that doesn't go through".  It does **not**
+arise.  `totalNabla0S` at `s = 4+k` returns `Tensor0SField ((4+k)+1)`, and the
+declared `k+1` return type `Tensor0SField (4+(k+1))` is **definitionally equal** to
+it (`Nat.add` recurses on its second argument, so `4 + (k+1) ≡ (4+k) + 1` by `rfl`);
+`covDerivStepComp_frameComp_eq` is stated for an arbitrary `s` and is applied at
+`s = 4+k` with no coercion.  Both flagged stop conditions are therefore vacuous here.
+
+### Net
+
+The all-`k` realization bridge — pieces (1)–(3) of the task — is **DONE** and
+reusable: the bundled `∇ᵏRm` field, its rank-uniform realization, the inductive
+producer↔bundled bridge on the coordinate-frame neighbourhood, and the `(0, 4+k)`
+Ricci identity for every `k`.  This is the foundation for the all-`k` `heatEq`
+(instantiate the now-complete general Bochner stack
+`hasDerivWithinAt_normSq0S_ricciFlow`/`tensorNormBochnerSplit_mc` at `T = ∇ᵏRm`, add
+the all-`k` residual: `∂ₜ∇ᵏRm` + the `(0,s)` commutator `nablaKRm04_ricciIdentityAt`
++ Uhlenbeck), which is the next pass.  Per the task's scope, the all-`k`
+residual/`heatEq` assembly was **not** attempted in this pass.
+
+Focused `lake-locked build +…RmRealizationBridgeAllK`: EXIT 0.  Files added:
+`Evolution/RmRealizationBridgeAllK.lean`; one-line visibility edit to
+`Evolution/RmRealizationBridge.lean` (`private` → public on two reusable helpers).
+
+## 2026-06-07 follow-up #5: the rank-uniform (all-`k`) `|∇ᵏRm|²` heat EQUATION is BUILT — `NablaRiemannHeatFull.lean`'s `k=1` headline is generalized to every `k`
+
+This pass took the parked `Evolution/IteratedRmTowerHeatEq.lean.wip` (the prior
+agent's all-`k` heat-equation scaffolding, sorry-free in source but not building),
+moved it back to `Evolution/IteratedRmTowerHeatEq.lean`, and made it build.  It is
+now **sorry-free, axiom-clean, EXIT 0**.  `#print axioms` on every public
+declaration is `[propext, Classical.choice, Quot.sound]`.
+
+### The build fix (Step 1)
+
+The wip's *only* defect was a **missing import**.  The file uses `covDerivStepDt`
+and `covDerivStepComp_hasDerivWithinAt`, which live in
+`Evolution/NablaRiemannTimeDeriv.lean` (namespace `DifferentialGeometry.PDE.RicciFlow`),
+but it imported only `NablaRiemannHeatFull`, `RmRealizationBridgeAllK`,
+`IteratedNablaRmTower` — and **no file in the tree transitively imports
+`NablaRiemannTimeDeriv`** (grep-confirmed: `import .*NablaRiemannTimeDeriv` had zero
+matches).  The exact errors were three `lean.unknownIdentifier`:
+
+```
+IteratedRmTowerHeatEq.lean:375:6  Unknown identifier `covDerivStepDt`
+IteratedRmTowerHeatEq.lean:400:6  Unknown identifier `covDerivStepDt`
+IteratedRmTowerHeatEq.lean:477:12 Unknown identifier `covDerivStepComp_hasDerivWithinAt`
+```
+
+(`covDerivStepComp`/`frameExtData`/`iteratedRmComp` resolved fine — they are in the
+imported `IteratedNablaRmTower.lean`.)  Fix: add the one line
+`import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannTimeDeriv`.
+No proof body changed; the scaffolding's mathematics was correct.
+
+### What was proved (`Evolution/IteratedRmTowerHeatEq.lean`, all sorry-free, axiom-clean)
+
+* `nablaKRm04NormSqIntrinsic S k` (`= |∇ᵏRm|² = normSq0S g (4+k) (∇ᵏRm)`), the
+  rank-uniform generalization of `nablaRm04NormSqIntrinsic`;
+* `nablaKRm04ReactionIntrinsic` — the **derived** all-`k` reaction
+  `(Ric ∗ ∇ᵏRm²) + 2⟨(∂ₜ − Δ)∇ᵏRm, ∇ᵏRm⟩`, with `Δ∇ᵏRm = metricTrace0S2TensorInBasis
+  basis gInv (∇^{k+2}Rm)` the rough Laplacian and the metric reaction the
+  `ricReactionContract` from the moving-metric `∂ₜg` term;
+* **`nablaKRm04NormHeatEquationOn_intrinsic`** — **the headline**: the producer
+  predicate `NablaRm04NormHeatEquationOn`
+  `∂ₜ|∇ᵏRm|² = Δ|∇ᵏRm|² + (−2|∇^{k+1}Rm|² + reaction)` in the intrinsic fibre norms,
+  by *subtracting* the two general Bochner lemmas instantiated at `T = ∇ᵏRm`
+  (`nablaKRm04Field S t k`, rank `4+k`):
+  - time half `hasDerivWithinAt_normSq0S_ricciFlow` (`s = 4+k`):
+    `∂ₜ|∇ᵏRm|² = ricReaction + 2⟨∂ₜ∇ᵏRm, ∇ᵏRm⟩` (the `∂ₜg` reaction is the explicit
+    `ricReactionContract`, derived from the Ricci-flow inverse-metric relation
+    `hgInvDt`, **not** assumed);
+  - Laplacian half `tensorNormBochnerSplit_mc` (`s = 4+k`, with `T/∇T/∇²T =
+    ∇ᵏRm/∇^{k+1}Rm/∇^{k+2}Rm` discharged by `nablaKRm04Field_realizes` —
+    **not** hypotheses):
+    `Δ|∇ᵏRm|² = 2⟨Δ∇ᵏRm, ∇ᵏRm⟩ + 2|∇^{k+1}Rm|²`.
+  The subtraction cancels `2⟨Δ∇ᵏRm, ∇ᵏRm⟩` against the residual, leaving the exact
+  reaction — by `inner0S` additivity (`map_sub`) + `ring`.  At `k = 1` this is
+  defeq to the `k=1` headline `nablaRm04NormHeatEquationOn_intrinsic`.
+* `iteratedRmComp_hasDerivWithinAt` — **the rank-uniform `∂ₜ∇ᵏRm` producer**: by
+  induction on `k` from `covDerivStepComp_hasDerivWithinAt`, the level-`k` component
+  tower `s ↦ ∇ᵏRm(s)` is time-differentiable with derivative the explicit
+  `iteratedRmCompDt` (`∂ₜ∇ᵏRm = ∇(∂ₜ∇^{k-1}Rm) − (∂ₜΓ)∗∇^{k-1}Rm`).  The three
+  geometric inputs (`∂ₜRm`, `∂ₜΓ`, per-level swap) are the cited interface
+  hypotheses, exactly as at `k = 1`.
+* `iteratedRmCompDt` (+`_zero`/`_succ`), `nablaKRm04NormSqIntrinsic_nonneg`.
+
+### Honest input status (identical to the `k=1` headline)
+
+Exactly the `(0,2)`-parity hypotheses the `k=1` `nablaRm04NormHeatEquationOn_intrinsic`
+and the `(0,2)` `ricci_heat_mc` take: `DuFieldRealizes`/`HessianRealizesNablaDuAt`
+of `|∇ᵏRm|²`, `SmoothBasisFieldsAt`, the genuine inverse metric `hinv`, the
+Ricci-flow inverse-metric-derivative relation `hgInvDt`, and the **component time
+derivative `∂ₜ∇ᵏRm`** (`hT`/`Tdot`).  The covariant-derivative realizations
+`∇^{k+1}Rm`/`∇^{k+2}Rm` are **discharged** (`nablaKRm04Field_realizes`), not assumed.
+The assembled heat **equation** is **derived**, not a renamed input; the `∂ₜg`
+reaction is derived intrinsically.
+
+### Step 2 — `IteratedRmTowerOn.heatEq`: NOT dischargeable from the all-`k` heat equation (grep-confirmed wall — the documented `IteratedRmCommutedHeatOn` blocker)
+
+`IteratedRmTowerOn.heatEq` (`IteratedNablaRmTower.lean:309`) requires, for level
+fields `w k = compNormSqMulti (level k)` (forced by `wDef`):
+
+```
+∂ₜ(w k) = wLap k + (−2·w (k+1) + towerReactionMulti (level·) (star·) k)
+```
+
+where `towerReactionMulti = nablaRmReactionMulti (level k) (star k)
+= Σⱼ 2·Σ_m (level k m)·(star k j m)` — the **schematic** `∗`-reaction contracting
+`∇ᵏRm` against *abstract* star arrays `star k j` (only constrained by `starBound`,
+the `√(w j)·√(w (k−j))` Cauchy–Schwarz input).
+
+The all-`k` heat equation produces the derivative
+`uLap + (−2·|∇^{k+1}Rm|² + nablaKRm04ReactionIntrinsic)` with the **concrete**
+reaction `ricReactionContract(...) + 2⟨(∂ₜ − Δ)∇ᵏRm, ∇ᵏRm⟩`.  The norm-form and
+`wLap` halves bridge cleanly:
+
+* `w k = compNormSqMulti (level k) = normSq0S = nablaKRm04NormSqIntrinsic` in a
+  `g(t)`-orthonormal basis, via `compNormSqMulti_orthoBasis_eq_normSq0S`
+  (`NablaRiemannHeatFrameInvariant.lean`) + `iteratedRmComp_eq_nablaKRm04Field`;
+* the `−2·w(k+1)` term matches `−2·|∇^{k+1}Rm|²` the same way;
+* `wLap` matches the realized Hessian-trace Laplacian.
+
+**The reaction halves do not bridge.**  To discharge `heatEq` *meaningfully*, the
+`star k j` must be genuine `∗`-factors with `towerReactionMulti = ` (the concrete
+reaction) **and** satisfying `starBound`.  That is precisely the schematic
+commuted-curvature identity
+
+```
+(∂ₜ − Δ)∇ᵏRm = Σⱼ ∇ʲRm ∗ ∇^{k−j}Rm
+```
+
+(`IteratedRmCommutedHeatOn` in this md's plan, §1) — a **genuine analytic/geometric
+producer that does not exist in Lean** and is flagged here as "the hard blocker".
+
+This is grep-confirmed, not an over-count.  Searching the whole tree
+(`nablaRmReactionMulti|towerReactionMulti|nablaRm04ReactionIntrinsic|nablaKRm04ReactionIntrinsic`
+over `*.lean`) finds **no theorem** relating the concrete BBS reaction
+(`nablaKRm04ReactionIntrinsic`/`nablaRm04ReactionIntrinsic`) to the schematic
+`nablaRmReactionMulti`/`towerReactionMulti` — even at `k = 1`.  And
+`IteratedRmCommutedHeatOn`/`MultiNormHeatEquationOn`/`iteratedRmTowerOn_of_solution`
+exist **only in this md** (planning), never in Lean.  So neither the new all-`k`
+heat equation nor the `k=1` headline closes `heatEq`; `BernsteinShiSolution.lean`
+correctly stays parametric in `IteratedRmTowerOn`.
+
+A *vacuous* discharge (set `star k 0 :=` the residual components, `star k j := 0`
+for `j ≥ 1`, so the schematic sum equals the concrete reaction by definition) is
+**rejected**: it is exactly the md's forbidden "close the theorem by adding a new
+assumption that is just `heatEq` under a different name", and it makes `starBound`
+(the entire analytic point — the `√(w j)·√(w (k−j))` bound) unprovable.
+
+* **`heatEq` status**: a **grep-confirmed wall** — requires `IteratedRmCommutedHeatOn`
+  (the schematic curvature commutator/connection-variation producer), absent in
+  Lean.  The norm-form (`wDef`) and Laplacian (`wLap`) halves *are* bridgeable from
+  the all-`k` heat equation; only the reaction equality is blocked.
+* **`starBound` status**: a separate follow-up (the all-`k` generalization of
+  `abs_spatialCommNablaRm_intrinsic_le`, currently `k=1`-only); its temporal half
+  (`∂ₜΓ ∗ Rm` + Uhlenbeck) is likewise the BBS-assembly frontier.
+* **realization predicates** (`DuFieldRealizes`/`HessianRealizesNablaDuAt`): remain
+  at standard-interface status, identical to the `(0,2)` `ricci_heat_mc` and the
+  `k=1` producer.
+
+### Net
+
+The intrinsic **all-`k` heat EQUATION** — the task's Step 1 — is **DONE**, the
+faithful rank-uniform generalization of the `k=1` "DONE" headline, assembled from
+the two general Bochner lemmas + the all-`k` `∂ₜ∇ᵏRm` producer; no heat equation,
+residual, or reaction is renamed/axiomatized.  Step 2 (`IteratedRmTowerOn.heatEq`)
+is **not** dischargeable from these foundations: the missing fact is the schematic
+commuted-curvature identity `(∂ₜ − Δ)∇ᵏRm = Σⱼ ∇ʲRm ∗ ∇^{k−j}Rm`
+(`IteratedRmCommutedHeatOn`), a documented genuine producer with no Lean
+realization.
+
+Focused `lake-locked build +…IteratedRmTowerHeatEq`: EXIT 0 (3705 jobs).
+`#print axioms` on `nablaKRm04NormHeatEquationOn_intrinsic`,
+`iteratedRmComp_hasDerivWithinAt`, `iteratedRmCompDt_succ`,
+`nablaKRm04NormSqIntrinsic_nonneg` = `[propext, Classical.choice, Quot.sound]`.
+Files: `Evolution/IteratedRmTowerHeatEq.lean.wip` → `Evolution/IteratedRmTowerHeatEq.lean`
+(one import line added; no proof body changed).
