@@ -758,14 +758,75 @@ theorem koszulCombSection_iteratedCovGrad_rfns_le
       riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + l) x
         ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x))]
 
-/-- **(POSIT — the cross-correction covariant-Leibniz contraction grid, δ-separated.)**  The pure
-*contraction-algebra* content of the cross-correction's order-`p` covariant jet: the binomial covariant
-Leibniz expansion of the metric/evaluation contraction `h ⌟ D` (`h = ccTensorBilinSymm g₀ T₁`,
-`D = connDiff g₁ g₀`) with the **top term** `∇^0 h ⌟ ∇^p D` separated and bounded by
-`δ · rfns(∇^p loweredConnDiffSection)` via the fibre-smallness `gFibreOpBound … δ` and the `g₀`-lowering
-parallel isometry, and **all lower terms** `∇^i h ⌟ ∇^q D` (`q < p`, `i ≥ 1`) bounded by the
-`H^{p+3}` Sobolev ball into `∑_{q < p} rfns(∇^q loweredConnDiffSection)` (the lower covariant gradients
-of the connection difference) plus the `≤ (p+1)`-jet of `T₁`.
+/-- **(POSIT — the cross-correction order-`p` covariant jet top/rest split, δ-separated.)**  The
+genuine *contraction-algebra* content underlying the cross-correction's order-`p` covariant jet: the
+section-level value `(∇^p crossCorrectionSection) x` splits, fibrewise at every base point `x`, into a
+**top** fibre tensor `Top` and a **rest** fibre tensor `Rest` (the order-`0` term and the strictly
+lower-order terms of the binomial covariant Leibniz expansion of the metric/evaluation contraction
+`h ⌟ D`, `h = ccTensorBilinSymm g₀ T₁`, `D = connDiff g₁ g₀`), with:
+
+* the **top** term `Top = ∇^0 h ⌟ ∇^p D` controlled by the fibre-smallness in *squared* form
+  `rfns(Top)(x) ≤ δ² · rfns(∇^p loweredConnDiffSection)(x)` — the `g₀`-fibre operator norm of `h` is
+  `≤ δ` (`gFibreOpBound … δ`), and the `g₀`-lowering of the connection difference is a parallel fibre
+  isometry (`∇₀ g₀ = 0`), so `‖h ⌟ ∇^p D‖²_{g₀} ≤ δ² · ‖∇^p D‖²_{g₀} = δ² · rfns(∇^p lowered)`; and
+
+* the **rest** term `Rest = ∑_{i ≥ 1, i + q = p} C(p, i) ∇^i h ⌟ ∇^q D` controlled, uniformly over the
+  fibre-small `H^{p+3}` ball, by `rfns(Rest)(x) ≤ Crest · (∑_{q < p} rfns(∇^q loweredConnDiffSection)(x)
+  + ∑_{l ≤ p+1} rfns(∇^l T₁)(x))` — each lower factor `∇^i h` (`i ≥ 1`) is the jet of the fibrewise
+  *linear* realized perturbation `h`, whose `g₀`-fibre operator norm is bounded pointwise and uniformly
+  on the compact `M` by the `H^{p+3}` Sobolev ball through the supercritical Sobolev embedding
+  `H^{p+3} ↪ C^{p+1}`, leaving the surviving connection-difference jet factor `rfns(∇^q lowered)` (`q <
+  p`); the `∑_{l ≤ p+1} rfns(∇^l T₁)` carrier is the perturbation-jet slack absorbing the boundary terms.
+
+This is the genuine **shared bottom** of the cross-correction tower: the δ-separated contraction
+Leibniz, carrying the lower covariant gradients of the connection difference *as themselves* on the
+right.  It contains no fibre-small `g₁^{-1}` recursion and no strong induction over the order; the full
+cross-correction bound `crossCorrectionSection_iteratedCovGrad_rfns_le` folds these lower
+`loweredConnDiffSection` jets into the `T₁`-jets by its own route-(a) strong induction.
+
+* **j = 0 collapse litmus.**  At `p = 0` the lower-order Leibniz terms are empty, so `Rest = 0` and the
+  split is `(crossCorrectionSection) x = Top` with `rfns(Top)(x) ≤ δ² · rfns(loweredConnDiffSection)(x)`.
+* **self-zero litmus.**  At `T₁ = 0`, `ccTensorBilinSymm g₀ 0 = 0`, so `crossCorrectionSection = 0` and
+  both `Top` and `Rest` vanish (`0 ≤ 0`). -/
+theorem crossCorrectionSection_iteratedCovGrad_topRest_split
+    (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ) :
+    ∃ Crest : ℝ, 0 ≤ Crest ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+        (∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (p + 3) T₁‖ ≤ B →
+        ∀ x : M,
+          ∃ Top Rest : Tensor0SBundle.TensorRSSpace 0 (3 + p) I x,
+            (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+                (crossCorrectionSection (I := I) g₁ g₀ T₁)).toSection x = Top + Rest ∧
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x Top ≤
+              δ ^ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+                    (loweredConnDiffSection (I := I) g₁ g₀)).toSection x) ∧
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x Rest ≤
+              Crest * (∑ q ∈ Finset.range p,
+                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + q) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+                        (loweredConnDiffSection (I := I) g₁ g₀)).toSection x)
+                + ∑ l ∈ Finset.range (p + 1 + 1),
+                    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)) := by
+  sorry
+
+/-- **The cross-correction covariant-Leibniz contraction grid, δ-separated.**  The order-`p` covariant
+jet of the cross-correction `h ⌟ D` (`h = ccTensorBilinSymm g₀ T₁`, `D = connDiff g₁ g₀`) is dominated,
+uniformly over the fibre-small `H^{p+3}` ball, by the **δ-separated** grid: the principal term
+`δ · rfns(∇^p loweredConnDiffSection)` (the order-`0` contraction absorbed by the fibre-smallness) plus
+a constant times the lower covariant gradients of the connection difference `∑_{q < p}
+rfns(∇^q loweredConnDiffSection)` and the `≤ (p+1)`-jet of `T₁`.
+
+Proved by the section-level top/rest split `crossCorrectionSection_iteratedCovGrad_topRest_split`
+(the genuine contraction-algebra bottom): the `2`-sub-additivity of the squared fibre norm
+(`riemannianFiberNormSq_add_le`, factor `2`) over the split `(∇^p crossCorrectionSection) x = Top + Rest`
+turns the top bound `rfns(Top) ≤ δ² · rfns(∇^p lowered)` into `2 δ² · rfns(∇^p lowered)`, and the
+hypothesis `δ < 1/2` collapses `2 δ² ≤ δ` (`δ(2δ − 1) ≤ 0`), recovering the exact principal coefficient
+`δ`; the rest bound `rfns(Rest) ≤ Crest · (…)` contributes the lower-order grid with constant `2 Crest`.
 
 This is the **strictly-smaller** brick of `crossCorrectionSection_iteratedCovGrad_rfns_le`: it is the
 *non-inductive* contraction-Leibniz grid (no fibre-small `g₁^{-1}` recursion, no strong induction over
@@ -799,7 +860,42 @@ theorem crossCorrectionSection_iteratedCovGrad_grid_le
               + ∑ l ∈ Finset.range (p + 1 + 1),
                   riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
                     ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)) := by
-  sorry
+  classical
+  obtain ⟨Crest, hCrest0, hsplit⟩ :=
+    crossCorrectionSection_iteratedCovGrad_topRest_split (I := I) g₀ p δ hδ0 hδ1 B
+  refine ⟨2 * Crest, by positivity, ?_⟩
+  intro T₁ g₁ hr hfib hball x
+  obtain ⟨Top, Rest, heq, hTop, hRest⟩ := hsplit T₁ g₁ hr hfib hball x
+  -- Abbreviate the principal jet term `L` and the lower-order grid `G`.
+  set L := riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+        (loweredConnDiffSection (I := I) g₁ g₀)).toSection x) with hLdef
+  set G := (∑ q ∈ Finset.range p,
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + q) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+              (loweredConnDiffSection (I := I) g₁ g₀)).toSection x)
+      + ∑ l ∈ Finset.range (p + 1 + 1),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)) with hGdef
+  have hLnn : 0 ≤ L := riemannianFiberNormSq_nonneg _ _ _ _ _
+  have hGnn : 0 ≤ G := by
+    rw [hGdef]
+    exact add_nonneg (Finset.sum_nonneg fun q _ => riemannianFiberNormSq_nonneg _ _ _ _ _)
+      (Finset.sum_nonneg fun l _ => riemannianFiberNormSq_nonneg _ _ _ _ _)
+  -- `2`-sub-additivity over the split, then `2 δ² ≤ δ` (from `δ < 1/2`).
+  rw [heq]
+  have hadd := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (3 + p) x Top Rest
+  -- `set L` / `set G` have already folded `hTop` to `≤ δ² * L` and `hRest` to `≤ Crest * G`.
+  -- `2 δ² · L ≤ δ · L`: `(δ − 2 δ²) · L ≥ 0` since `0 ≤ δ`, `2 δ ≤ 1`, and `0 ≤ L`.
+  have hδcoeff : 0 ≤ δ - 2 * δ ^ 2 := by nlinarith [hδ0, hδ1]
+  have hδsq : 2 * δ ^ 2 * L ≤ δ * L := by nlinarith [mul_nonneg hδcoeff hLnn]
+  have hTop2 : 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x Top ≤ 2 * δ ^ 2 * L := by
+    have := mul_le_mul_of_nonneg_left hTop (by norm_num : (0 : ℝ) ≤ 2)
+    linarith [this]
+  have hRest2 : 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x Rest ≤ 2 * Crest * G := by
+    have := mul_le_mul_of_nonneg_left hRest (by norm_num : (0 : ℝ) ≤ 2)
+    nlinarith [this]
+  linarith [hadd, hTop2, hRest2, hδsq]
 
 /-- **(POSIT — the fibre-small-gated cross-correction jet brick.)**  On the fibre-small ball
 (`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ` with `δ < 1/2`) and the Sobolev `H^{p+3}` ball
