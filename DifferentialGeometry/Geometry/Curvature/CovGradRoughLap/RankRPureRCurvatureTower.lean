@@ -697,6 +697,329 @@ theorem riemannianFiberNormSq_covGradBundleEquiv_le_card_mul_rs
   have hfr : Module.finrank ℝ (TangentSpace I x) = Module.finrank ℝ E := rfl
   rw [hn_def, hfr]
 
+/-- Local model `NormedSpace`/`FiniteDimensional` instances (the bundle-level instances are
+noncomputable; reproduced from `RankRUniformProportionalCurvatureSup`). -/
+private instance tensor0SModelNormedSpace_rrct {s : ℕ} :
+    NormedSpace ℝ (Tensor0SModel s ℝ E) :=
+  Tensor0SBundle.tensor0SModel_normedSpace s
+
+private instance tensorRSModelNormedSpace_rrct {r s : ℕ} :
+    NormedSpace ℝ (TensorRSModel r s ℝ E) := by
+  unfold TensorRSModel
+  infer_instance
+
+/-- **Per-point single dual-frame curvature-term bound at valence `(r, s)`.** For a `g`-orthonormal
+frame `e` (`horth`) and the Levi-Civita base-curvature `g`-norm bound `Kbase` (CHILD), the intrinsic
+fibre norm squared of one dual-frame curvature term at valence `(r, s)` is bounded by
+`(finrank E)^(r + s) · ((r + s) · √Kbase)²`. Each Parseval component (read off the internal
+`g`-orthonormal frame) is the unit-evaluation of the `(r, s)` curvature on the dual frame, split by
+`riemannOp_tensorCovRS_apply_eval` into a covariant `(0, s)` branch on the `g`-coframe and a
+contravariant `(0, r)` branch on the `g`-coframe, each bounded by `abs_toModel_riemannOp_tensor0SCov_`
+`coframeS_le`. -/
+private lemma riemannianFiberNormSq_riemannOp_tensorCovRS_dualTensorFrameRS_le
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
+    {n : ℕ} (e : Fin n → TangentSpace I x) (i j : Fin n)
+    (K : Fin r → Fin n) (J : Fin s → Fin n)
+    (Kbase : ℝ) (hKbase : 0 ≤ Kbase)
+    (hKb : ∀ (a b c : TangentSpace I x),
+      g.inner x (riemannOp (cov := LeviCivita (I := I) g) x a b c)
+          (riemannOp (cov := LeviCivita (I := I) g) x a b c) ≤
+        Kbase * g.inner x a a * g.inner x b b * g.inner x c c)
+    (horth : ∀ i j : Fin n, g.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0) :
+    riemannianFiberNormSq (I := I) (M := M) g r s x
+        (riemannOp (tensorCov (I := I) g r s) x (e i) (e j)
+          (dualTensorFrameRS (I := I) (M := M) g x r s e K J)) ≤
+      (Module.finrank ℝ E : ℝ) ^ (r + s) * (((r + s : ℕ) : ℝ) * Real.sqrt Kbase) ^ 2 := by
+  classical
+  have hii : g.inner x (e i) (e i) ≤ 1 := by rw [horth i i, if_pos rfl]
+  have hjj : g.inner x (e j) (e j) ≤ 1 := by rw [horth j j, if_pos rfl]
+  -- Build the internal `g`-orthonormal frame `eb` of `riemannianFiberNormSq`.
+  let cd : InnerProductSpace.Core ℝ (TangentSpace I x) := g.toRiemannianMetric.toCore x
+  have hc : ContinuousAt (fun z : TangentSpace I x => cd.inner z z) 0 :=
+    g.toRiemannianMetric.continuousAt x
+  have hbnd : Bornology.IsVonNBounded ℝ {z : TangentSpace I x |
+      RCLike.re (cd.inner z z) < 1} := g.toRiemannianMetric.isVonNBounded x
+  letI nag : NormedAddCommGroup (TangentSpace I x) :=
+    cd.toNormedAddCommGroupOfTopology hc hbnd
+  letI ips : InnerProductSpace ℝ (TangentSpace I x) :=
+    InnerProductSpace.ofCoreOfTopology cd hc hbnd
+  set nb : ℕ := Module.finrank ℝ (TangentSpace I x) with hnb_def
+  set eob : OrthonormalBasis (Fin nb) ℝ (TangentSpace I x) := stdOrthonormalBasis ℝ _ with heob_def
+  set eb : Fin nb → TangentSpace I x := fun a => eob a with heb_def
+  have hinner_eq : ∀ a b : TangentSpace I x, (inner ℝ a b : ℝ) = g.inner x a b := fun _ _ => rfl
+  have hnbE : nb = Module.finrank ℝ E := rfl
+  have hnorm_sq : ∀ a : TangentSpace I x, ‖a‖ ^ 2 = g.inner x a a := by
+    intro a; rw [← hinner_eq a a]; exact (real_inner_self_eq_norm_sq a).symm
+  have horthb : ∀ a b : Fin nb, g.inner x (eb a) (eb b) = if a = b then (1 : ℝ) else 0 := by
+    intro a b
+    have hite := (orthonormal_iff_ite (𝕜 := ℝ) (E := TangentSpace I x)).mp eob.orthonormal a b
+    rw [← hinner_eq (eb a) (eb b)]; exact hite
+  have hreprT : ∀ S : TensorRSSpace r s I x,
+      riemannianFiberNormSq (I := I) (M := M) g r s x S =
+        ∑ K : Fin r → Fin nb, ∑ Jp : Fin s → Fin nb,
+          fiberNormSqSummand (I := I) (M := M) g x r s S nb eb K Jp := fun S => rfl
+  -- `e`-frame and `eb`-frame are `g`-unit.
+  have he_unit : ∀ a : Fin n, ‖e a‖ ≤ 1 := by
+    intro a
+    have h1 : ‖e a‖ ^ 2 = 1 := by rw [hnorm_sq (e a), horth a a, if_pos rfl]
+    nlinarith [norm_nonneg (e a), h1]
+  have heb_unit : ∀ a : Fin nb, ‖eb a‖ ≤ 1 := by
+    intro a
+    have h1 : ‖eb a‖ ^ 2 = 1 := by rw [hnorm_sq (eb a), horthb a a, if_pos rfl]
+    nlinarith [norm_nonneg (eb a), h1]
+  set V : TensorRSSpace r s I x :=
+    riemannOp (tensorCov (I := I) g r s) x (e i) (e j)
+      (dualTensorFrameRS (I := I) (M := M) g x r s e K J) with hV_def
+  rw [riemannianFiberNormSq_eq_sum_componentRS_sq (I := I) (M := M) g x r s eb hreprT V]
+  -- Per-component split via `riemannOp_tensorCovRS_apply_eval`.
+  have hsplit : ∀ (K' : Fin r → Fin nb) (J' : Fin s → Fin nb),
+      fiberNormSqComponent (I := I) (M := M) g x r s V nb eb K' J' =
+        Tensor0SSpace.toModel
+            (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) x (e i) (e j)
+              ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+                  dualTensorFrameRS (I := I) (M := M) g x r s e K J)
+                (coframeS (I := I) (M := M) g x r eb K')))
+            (fun k => eb (J' k)) -
+          Tensor0SSpace.toModel
+            ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+                dualTensorFrameRS (I := I) (M := M) g x r s e K J)
+              (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g)) x (e i) (e j)
+                (coframeS (I := I) (M := M) g x r eb K')))
+            (fun k => eb (J' k)) := by
+    intro K' J'
+    rw [hV_def]
+    rw [show fiberNormSqComponent (I := I) (M := M) g x r s
+          (riemannOp (tensorCov (I := I) g r s) x (e i) (e j)
+            (dualTensorFrameRS (I := I) (M := M) g x r s e K J)) nb eb K' J' =
+        Tensor0SSpace.toModel
+          ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+              riemannOp (tensorCov (I := I) g r s) x (e i) (e j)
+                (dualTensorFrameRS (I := I) (M := M) g x r s e K J))
+            (coframeS (I := I) (M := M) g x r eb K')) (fun k => eb (J' k)) from rfl]
+    exact riemannOp_tensorCovRS_apply_eval (I := I) (M := M) g r s x (e i) (e j)
+      (dualTensorFrameRS (I := I) (M := M) g x r s e K J)
+      (coframeS (I := I) (M := M) g x r eb K') (fun k => eb (J' k))
+  -- Each component is bounded in absolute value by `(r + s) · √Kbase`.
+  have hcomp_bnd : ∀ (K' : Fin r → Fin nb) (J' : Fin s → Fin nb),
+      |fiberNormSqComponent (I := I) (M := M) g x r s V nb eb K' J'| ≤
+        ((r + s : ℕ) : ℝ) * Real.sqrt Kbase := by
+    intro K' J'
+    rw [hsplit K' J']
+    -- Covariant branch: `D(coframeS_r eb K') = scalar_cov • coframeS_s e J`.
+    set scov : ℝ := tensorEvalAtFrame (I := I) (M := M) x r e K
+      (coframeS (I := I) (M := M) g x r eb K') with hscov_def
+    have hcovbr :
+        (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+            dualTensorFrameRS (I := I) (M := M) g x r s e K J)
+          (coframeS (I := I) (M := M) g x r eb K') =
+          scov • coframeS (I := I) (M := M) g x s e J := by
+      rw [dualTensorFrameRS_apply (I := I) (M := M) g x r s e K J
+        (coframeS (I := I) (M := M) g x r eb K')]
+    have hcov_eval :
+        Tensor0SSpace.toModel
+            (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) x (e i) (e j)
+              ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+                  dualTensorFrameRS (I := I) (M := M) g x r s e K J)
+                (coframeS (I := I) (M := M) g x r eb K')))
+            (fun k => eb (J' k)) =
+          scov * Tensor0SSpace.toModel
+            (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) x (e i) (e j)
+              (coframeS (I := I) (M := M) g x s e J)) (fun k => eb (J' k)) := by
+      rw [hcovbr, ContinuousLinearMap.map_smul, Tensor0SSpace.toModel_smul,
+        ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+    -- |scov| ≤ 1.
+    have hscov_le : |scov| ≤ 1 := by
+      rw [hscov_def, tensorEvalAtFrame_apply (I := I) (M := M) x r e K,
+        coframeS_apply (I := I) (M := M) g x r eb K' (fun k => e (K k))]
+      rw [Finset.abs_prod]
+      refine Finset.prod_le_one (fun k _ => abs_nonneg _) (fun k _ => ?_)
+      rw [← hinner_eq (eb (K' k)) (e (K k))]
+      refine le_trans (abs_real_inner_le_norm (eb (K' k)) (e (K k))) ?_
+      calc ‖eb (K' k)‖ * ‖e (K k)‖ ≤ 1 * 1 :=
+            mul_le_mul (heb_unit (K' k)) (he_unit (K k)) (norm_nonneg _) zero_le_one
+        _ = 1 := one_mul 1
+    -- Contravariant branch: `D(R^{(0,r)} coframeS_r eb K') = scon • coframeS_s e J`.
+    set scon : ℝ := tensorEvalAtFrame (I := I) (M := M) x r e K
+      (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g)) x (e i) (e j)
+        (coframeS (I := I) (M := M) g x r eb K')) with hscon_def
+    have hconbr :
+        (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+            dualTensorFrameRS (I := I) (M := M) g x r s e K J)
+          (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g)) x (e i) (e j)
+            (coframeS (I := I) (M := M) g x r eb K')) =
+          scon • coframeS (I := I) (M := M) g x s e J := by
+      rw [dualTensorFrameRS_apply (I := I) (M := M) g x r s e K J _]
+    have hcon_eval :
+        Tensor0SSpace.toModel
+            ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+                dualTensorFrameRS (I := I) (M := M) g x r s e K J)
+              (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g)) x (e i) (e j)
+                (coframeS (I := I) (M := M) g x r eb K')))
+            (fun k => eb (J' k)) =
+          scon * Tensor0SSpace.toModel (coframeS (I := I) (M := M) g x s e J)
+            (fun k => eb (J' k)) := by
+      rw [hconbr, Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+    -- scon = toModel(R^{(0,r)}(coframeS_r eb K'))(e∘K); |scon| ≤ r·√Kbase.
+    have hscon_eq : scon =
+        Tensor0SSpace.toModel
+          (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g)) x (e i) (e j)
+            (coframeS (I := I) (M := M) g x r eb K')) (fun k => e (K k)) := by
+      rw [hscon_def, tensorEvalAtFrame_apply (I := I) (M := M) x r e K]
+      rfl
+    have hscon_le : |scon| ≤ ((r : ℕ) : ℝ) * Real.sqrt Kbase := by
+      rw [hscon_eq]
+      exact abs_toModel_riemannOp_tensor0SCov_coframeS_le (I := I) (M := M) g r x (e i) (e j)
+        eb K' (fun k => e (K k)) Kbase hKbase hKb hii hjj horthb
+        (fun k => by rw [horth (K k) (K k), if_pos rfl])
+    -- coframe-output factor of contravariant branch: |coframeS_s e J (eb∘J')| ≤ 1.
+    have hcofo_le : |Tensor0SSpace.toModel (coframeS (I := I) (M := M) g x s e J)
+        (fun k => eb (J' k))| ≤ 1 := by
+      rw [show Tensor0SSpace.toModel (coframeS (I := I) (M := M) g x s e J)
+            (fun k => eb (J' k)) = coframeS (I := I) (M := M) g x s e J (fun k => eb (J' k)) from rfl,
+        coframeS_apply (I := I) (M := M) g x s e J (fun k => eb (J' k))]
+      rw [Finset.abs_prod]
+      refine Finset.prod_le_one (fun l _ => abs_nonneg _) (fun l _ => ?_)
+      rw [← hinner_eq (e (J l)) (eb (J' l))]
+      refine le_trans (abs_real_inner_le_norm (e (J l)) (eb (J' l))) ?_
+      calc ‖e (J l)‖ * ‖eb (J' l)‖ ≤ 1 * 1 :=
+            mul_le_mul (he_unit (J l)) (heb_unit (J' l)) (norm_nonneg _) zero_le_one
+        _ = 1 := one_mul 1
+    -- covariant-curvature factor: |toModel(R^{(0,s)}(coframeS_s e J))(eb∘J')| ≤ s·√Kbase.
+    have hcovc_le : |Tensor0SSpace.toModel
+        (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) x (e i) (e j)
+          (coframeS (I := I) (M := M) g x s e J)) (fun k => eb (J' k))| ≤
+          ((s : ℕ) : ℝ) * Real.sqrt Kbase :=
+      abs_toModel_riemannOp_tensor0SCov_coframeS_le (I := I) (M := M) g s x (e i) (e j)
+        e J (fun k => eb (J' k)) Kbase hKbase hKb hii hjj horth
+        (fun k => by rw [horthb (J' k) (J' k), if_pos rfl])
+    rw [hcov_eval, hcon_eval]
+    -- |scov · A − scon · B| ≤ |scov||A| + |scon||B| ≤ 1·s√K + r√K·1 = (r+s)√K.
+    have hKsqrt_nn : 0 ≤ Real.sqrt Kbase := Real.sqrt_nonneg _
+    calc |scov * Tensor0SSpace.toModel
+              (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) x (e i) (e j)
+                (coframeS (I := I) (M := M) g x s e J)) (fun k => eb (J' k)) -
+            scon * Tensor0SSpace.toModel (coframeS (I := I) (M := M) g x s e J)
+              (fun k => eb (J' k))|
+        ≤ |scov * Tensor0SSpace.toModel
+              (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) x (e i) (e j)
+                (coframeS (I := I) (M := M) g x s e J)) (fun k => eb (J' k))| +
+            |scon * Tensor0SSpace.toModel (coframeS (I := I) (M := M) g x s e J)
+              (fun k => eb (J' k))| := abs_sub _ _
+      _ = |scov| * |Tensor0SSpace.toModel
+              (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) x (e i) (e j)
+                (coframeS (I := I) (M := M) g x s e J)) (fun k => eb (J' k))| +
+            |scon| * |Tensor0SSpace.toModel (coframeS (I := I) (M := M) g x s e J)
+              (fun k => eb (J' k))| := by rw [abs_mul, abs_mul]
+      _ ≤ 1 * (((s : ℕ) : ℝ) * Real.sqrt Kbase) +
+            (((r : ℕ) : ℝ) * Real.sqrt Kbase) * 1 := by
+            refine add_le_add (mul_le_mul hscov_le hcovc_le (abs_nonneg _) zero_le_one)
+              (mul_le_mul hscon_le hcofo_le (abs_nonneg _) ?_)
+            exact mul_nonneg (by positivity) hKsqrt_nn
+      _ = ((r + s : ℕ) : ℝ) * Real.sqrt Kbase := by push_cast; ring
+  -- Sum the `nb^(r+s)` squared components, each ≤ ((r+s)√K)².
+  calc (∑ K' : Fin r → Fin nb, ∑ J' : Fin s → Fin nb,
+          (fiberNormSqComponent (I := I) (M := M) g x r s V nb eb K' J') ^ 2)
+      ≤ ∑ _K' : Fin r → Fin nb, ∑ _J' : Fin s → Fin nb,
+          (((r + s : ℕ) : ℝ) * Real.sqrt Kbase) ^ 2 := by
+        refine Finset.sum_le_sum (fun K' _ => Finset.sum_le_sum (fun J' _ => ?_))
+        have h := hcomp_bnd K' J'
+        exact sq_le_sq' (neg_le_of_abs_le h) (le_of_abs_le h)
+    _ = (Module.finrank ℝ E : ℝ) ^ (r + s) * (((r + s : ℕ) : ℝ) * Real.sqrt Kbase) ^ 2 := by
+        rw [Finset.sum_const, Finset.sum_const, Finset.card_univ, Finset.card_univ,
+          Fintype.card_pi, Fintype.card_pi]
+        simp only [Fintype.card_fin, Finset.prod_const, Finset.card_univ, nsmul_eq_mul]
+        rw [hnbE]
+        push_cast
+        ring
+
+/-- **Uniform-over-`M` single dual-frame curvature-term bound at valence `(r, s)`.** A single
+nonnegative constant `K`, independent of the base point, of the `g`-orthonormal frame `e`, and of the
+frame indices, bounding one dual-frame curvature term — the valence-`(r, s)` mirror of
+`exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_single_term_bound'`. The constant is
+`(finrank E)^(r + s) · ((r + s) · √Kbase)²`, `Kbase` the uniform Levi-Civita base-curvature `g`-norm
+bound from `exists_uniform_riemannOp_LeviCivita_gNorm_bound`. -/
+private lemma exists_uniform_riemannOp_tensorCovRS_dualFrameEnergy_single_term
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    ∃ K : ℝ, 0 ≤ K ∧
+      ∀ (x : M) {n : ℕ} (e : Fin n → TangentSpace I x),
+        (∀ i j : Fin n, g.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0) →
+        ∀ (i j : Fin n) (K' : Fin r → Fin n) (J : Fin s → Fin n),
+          riemannianFiberNormSq (I := I) (M := M) g r s x
+            (riemannOp (tensorCov (I := I) g r s) x (e i) (e j)
+              (dualTensorFrameRS (I := I) (M := M) g x r s e K' J)) ≤ K := by
+  obtain ⟨Kbase, hKbase, hKb⟩ := exists_uniform_riemannOp_LeviCivita_gNorm_bound (g := g)
+  refine ⟨(Module.finrank ℝ E : ℝ) ^ (r + s) * (((r + s : ℕ) : ℝ) * Real.sqrt Kbase) ^ 2, ?_, ?_⟩
+  · exact mul_nonneg (pow_nonneg (Nat.cast_nonneg _) _) (sq_nonneg _)
+  intro x n e horth i j K' J
+  exact riemannianFiberNormSq_riemannOp_tensorCovRS_dualTensorFrameRS_le (I := I) (M := M) g r s x
+    e i j K' J Kbase hKbase (fun a b c => hKb x a b c) horth
+
+/-- **Uniform-over-`M` dual-frame curvature energy constant at valence `(r, s)`.** A single
+nonnegative constant `C`, independent of the base point and of the chosen `g`-orthonormal frame,
+bounding the dual-frame curvature energy
+`∑_{i, j, K, J} riemannianFiberNormSq g r s x (R_x(e_i, e_j)(dualTensorFrameRS g x r s e K J))` — the
+valence-`(r, s)` mirror of `exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_const`.  The energy is
+a sum of `n^(r + s + 2)` single dual-frame terms with `n ≤ d := finrank E` (a `g`-orthonormal family
+is linearly independent), so it is bounded by `d^(r + s + 2) · K`. -/
+private lemma exists_uniform_riemannOp_tensorCovRS_dualFrameEnergy_const
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (x : M) {n : ℕ} (e : Fin n → TangentSpace I x),
+        (∀ i j : Fin n, g.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0) →
+        (∑ i : Fin n, ∑ j : Fin n, ∑ K : Fin r → Fin n, ∑ J : Fin s → Fin n,
+            riemannianFiberNormSq (I := I) (M := M) g r s x
+              (riemannOp (tensorCov (I := I) g r s) x (e i) (e j)
+                (dualTensorFrameRS (I := I) (M := M) g x r s e K J))) ≤ C := by
+  classical
+  obtain ⟨K, hK_nonneg, hK_term⟩ :=
+    exists_uniform_riemannOp_tensorCovRS_dualFrameEnergy_single_term (I := I) (M := M) g r s
+  set d : ℕ := Module.finrank ℝ E with hd_def
+  refine ⟨(d : ℝ) ^ (r + s + 2) * K, ?_, ?_⟩
+  · exact mul_nonneg (pow_nonneg (Nat.cast_nonneg d) _) hK_nonneg
+  intro x n e horth
+  -- `n ≤ d`: the `g`-orthonormal family `e` is linearly independent in `T_x M`.
+  have hn_le_d : n ≤ d := by
+    let cd : InnerProductSpace.Core ℝ (TangentSpace I x) := g.toRiemannianMetric.toCore x
+    have hc : ContinuousAt (fun v : TangentSpace I x => cd.inner v v) 0 :=
+      g.toRiemannianMetric.continuousAt x
+    have hbnd : Bornology.IsVonNBounded ℝ {v : TangentSpace I x |
+        RCLike.re (cd.inner v v) < 1} := g.toRiemannianMetric.isVonNBounded x
+    letI nag : NormedAddCommGroup (TangentSpace I x) :=
+      cd.toNormedAddCommGroupOfTopology hc hbnd
+    letI ips : InnerProductSpace ℝ (TangentSpace I x) :=
+      InnerProductSpace.ofCoreOfTopology cd hc hbnd
+    have hinner_eq : ∀ u v : TangentSpace I x, (inner ℝ u v : ℝ) = g.inner x u v := fun u v => rfl
+    have horthonormal : Orthonormal ℝ e := by
+      rw [orthonormal_iff_ite]
+      intro a b; rw [hinner_eq (e a) (e b)]; exact horth a b
+    have hcard := horthonormal.linearIndependent.fintype_card_le_finrank
+    have hcardE : Module.finrank ℝ (TangentSpace I x) = d := rfl
+    rw [hcardE] at hcard
+    simpa using hcard
+  -- Bound the energy term-by-term by `K`, then count `n^(r + s + 2)` terms.
+  have hsum_le_const :
+      (∑ i : Fin n, ∑ j : Fin n, ∑ K' : Fin r → Fin n, ∑ J : Fin s → Fin n,
+          riemannianFiberNormSq (I := I) (M := M) g r s x
+            (riemannOp (tensorCov (I := I) g r s) x (e i) (e j)
+              (dualTensorFrameRS (I := I) (M := M) g x r s e K' J))) ≤
+        ∑ _i : Fin n, ∑ _j : Fin n, ∑ _K' : Fin r → Fin n, ∑ _J : Fin s → Fin n, K := by
+    refine Finset.sum_le_sum (fun i _ => ?_)
+    refine Finset.sum_le_sum (fun j _ => ?_)
+    refine Finset.sum_le_sum (fun K' _ => ?_)
+    refine Finset.sum_le_sum (fun J _ => ?_)
+    exact hK_term x e horth i j K' J
+  refine le_trans hsum_le_const ?_
+  have hconst_eq :
+      (∑ _i : Fin n, ∑ _j : Fin n, ∑ _K' : Fin r → Fin n, ∑ _J : Fin s → Fin n, K) =
+        (n : ℝ) ^ (r + s + 2) * K := by
+    rw [Finset.sum_const, Finset.sum_const, Finset.sum_const, Finset.sum_const]
+    simp only [Finset.card_univ, Fintype.card_fun, Fintype.card_fin, nsmul_eq_mul]
+    push_cast
+    ring
+  rw [hconst_eq]
+  refine mul_le_mul_of_nonneg_right ?_ hK_nonneg
+  exact pow_le_pow_left₀ (Nat.cast_nonneg n) (by exact_mod_cast hn_le_d) (r + s + 2)
+
 /-- **The uniform-over-`M` proportional curvature-operator fibre bound at valence `(r, s)` (posited
 general-valence analytic child — the "mirror-2" uniform curvature sup).** For a closed smooth
 Riemannian manifold `(M, g)` and fixed valence `(r, s)` there is a single nonnegative constant `Csup`,
@@ -739,7 +1062,115 @@ theorem exists_uniform_riemannianFiberNormSq_riemannOp_tensorCovRS_proportional
             (riemannOp (tensorCov (I := I) g r s) x v w T) ≤
           Csup * g.inner x v v * g.inner x w w *
             riemannianFiberNormSq (I := I) (M := M) g r s x T := by
-  sorry
+  classical
+  obtain ⟨C, hC_nonneg, hC_energy⟩ :=
+    exists_uniform_riemannOp_tensorCovRS_dualFrameEnergy_const (I := I) (M := M) g r s
+  refine ⟨C, hC_nonneg, fun x v w T => ?_⟩
+  obtain ⟨n, e, bse, hn, hbse, horth, hpars, hexpand, hrepr⟩ :=
+    tangent_orthonormalBasisRS_witness (I := I) (M := M) g r s x
+  set R := riemannOp (tensorCov (I := I) g r s) x with hR_def
+  have hvv_nonneg : 0 ≤ g.inner x v v := by
+    rw [← hpars v]; exact Finset.sum_nonneg (fun i _ => sq_nonneg _)
+  have hww_nonneg : 0 ≤ g.inner x w w := by
+    rw [← hpars w]; exact Finset.sum_nonneg (fun i _ => sq_nonneg _)
+  have hrfns_nonneg : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g r s x T :=
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g r s x T
+  -- `(v, w)`-factorisation: `rfns(R(v,w)T) ≤ g(v,v)·g(w,w)·∑_{i,j} rfns(R(eᵢ,eⱼ)T)`.
+  have hvw : riemannianFiberNormSq (I := I) (M := M) g r s x (R v w T) ≤
+      g.inner x v v * g.inner x w w *
+        ∑ i : Fin n, ∑ j : Fin n,
+          riemannianFiberNormSq (I := I) (M := M) g r s x (R (e i) (e j) T) := by
+    rw [hrepr (R v w T)]
+    have hterm : ∀ K : Fin r → Fin n, ∀ J : Fin s → Fin n,
+        fiberNormSqSummand (I := I) (M := M) g x r s (R v w T) n e K J ≤
+          g.inner x v v * g.inner x w w *
+            ∑ i : Fin n, ∑ j : Fin n,
+              fiberNormSqSummand (I := I) (M := M) g x r s (R (e i) (e j) T) n e K J :=
+      fun K J => fiberNormSqSummand_riemannOp_tensorCovRS_vw_le
+        (I := I) (M := M) g x r s e hpars hexpand v w T K J
+    calc
+      (∑ K : Fin r → Fin n, ∑ J : Fin s → Fin n,
+          fiberNormSqSummand (I := I) (M := M) g x r s (R v w T) n e K J)
+          ≤ ∑ K : Fin r → Fin n, ∑ J : Fin s → Fin n,
+              g.inner x v v * g.inner x w w *
+                ∑ i : Fin n, ∑ j : Fin n,
+                  fiberNormSqSummand (I := I) (M := M) g x r s (R (e i) (e j) T) n e K J := by
+            exact Finset.sum_le_sum (fun K _ => Finset.sum_le_sum (fun J _ => hterm K J))
+      _ = g.inner x v v * g.inner x w w *
+            ∑ K : Fin r → Fin n, ∑ J : Fin s → Fin n,
+              ∑ i : Fin n, ∑ j : Fin n,
+                fiberNormSqSummand (I := I) (M := M) g x r s (R (e i) (e j) T) n e K J := by
+            rw [Finset.mul_sum]
+            refine Finset.sum_congr rfl (fun K _ => ?_)
+            rw [Finset.mul_sum]
+      _ = g.inner x v v * g.inner x w w *
+            ∑ i : Fin n, ∑ j : Fin n,
+              riemannianFiberNormSq (I := I) (M := M) g r s x (R (e i) (e j) T) := by
+            congr 1
+            set F : (Fin r → Fin n) → (Fin s → Fin n) → Fin n → Fin n → ℝ :=
+              fun K J i j =>
+                fiberNormSqSummand (I := I) (M := M) g x r s (R (e i) (e j) T) n e K J
+              with hF_def
+            have hRHS_eq : (∑ i : Fin n, ∑ j : Fin n,
+                  riemannianFiberNormSq (I := I) (M := M) g r s x (R (e i) (e j) T)) =
+                ∑ i : Fin n, ∑ j : Fin n, ∑ K : Fin r → Fin n, ∑ J : Fin s → Fin n,
+                  F K J i j := by
+              refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
+              rw [hF_def]
+              exact hrepr (R (e i) (e j) T)
+            rw [hRHS_eq]
+            have hLHS : (∑ K : Fin r → Fin n, ∑ J : Fin s → Fin n,
+                  ∑ i : Fin n, ∑ j : Fin n, F K J i j) =
+                ∑ q : (Fin r → Fin n) × (Fin s → Fin n),
+                  ∑ p : Fin n × Fin n, F q.1 q.2 p.1 p.2 := by
+              calc
+                (∑ K : Fin r → Fin n, ∑ J : Fin s → Fin n,
+                    ∑ i : Fin n, ∑ j : Fin n, F K J i j)
+                    = ∑ K : Fin r → Fin n, ∑ J : Fin s → Fin n,
+                        ∑ p : Fin n × Fin n, F K J p.1 p.2 := by
+                      refine Finset.sum_congr rfl (fun K _ =>
+                        Finset.sum_congr rfl (fun J _ => ?_))
+                      exact (Fintype.sum_prod_type' (f := fun i j => F K J i j)).symm
+                _ = ∑ q : (Fin r → Fin n) × (Fin s → Fin n),
+                        ∑ p : Fin n × Fin n, F q.1 q.2 p.1 p.2 :=
+                      (Fintype.sum_prod_type' (f := fun K J =>
+                        ∑ p : Fin n × Fin n, F K J p.1 p.2)).symm
+            have hRHS : (∑ i : Fin n, ∑ j : Fin n,
+                  ∑ K : Fin r → Fin n, ∑ J : Fin s → Fin n, F K J i j) =
+                ∑ p : Fin n × Fin n,
+                  ∑ q : (Fin r → Fin n) × (Fin s → Fin n), F q.1 q.2 p.1 p.2 := by
+              calc
+                (∑ i : Fin n, ∑ j : Fin n,
+                    ∑ K : Fin r → Fin n, ∑ J : Fin s → Fin n, F K J i j)
+                    = ∑ i : Fin n, ∑ j : Fin n,
+                        ∑ q : (Fin r → Fin n) × (Fin s → Fin n), F q.1 q.2 i j := by
+                      refine Finset.sum_congr rfl (fun i _ =>
+                        Finset.sum_congr rfl (fun j _ => ?_))
+                      exact (Fintype.sum_prod_type' (f := fun K J => F K J i j)).symm
+                _ = ∑ p : Fin n × Fin n,
+                        ∑ q : (Fin r → Fin n) × (Fin s → Fin n), F q.1 q.2 p.1 p.2 :=
+                      (Fintype.sum_prod_type' (f := fun i j =>
+                        ∑ q : (Fin r → Fin n) × (Fin s → Fin n), F q.1 q.2 i j)).symm
+            rw [hLHS, hRHS]
+            exact Finset.sum_comm
+  -- `∑_{i,j} rfns(R(eᵢ,eⱼ)T) ≤ (energy)·rfns(T) ≤ C·rfns(T)`.
+  have hCxT : (∑ i : Fin n, ∑ j : Fin n,
+        riemannianFiberNormSq (I := I) (M := M) g r s x (R (e i) (e j) T)) ≤
+      C * riemannianFiberNormSq (I := I) (M := M) g r s x T := by
+    refine le_trans (sum_riemannianFiberNormSq_riemannOpRS_le_Cx
+      (I := I) (M := M) g x r s e bse hbse horth hrepr T) ?_
+    exact mul_le_mul_of_nonneg_right (hC_energy x e horth) hrfns_nonneg
+  calc
+    riemannianFiberNormSq (I := I) (M := M) g r s x (R v w T)
+        ≤ g.inner x v v * g.inner x w w *
+            ∑ i : Fin n, ∑ j : Fin n,
+              riemannianFiberNormSq (I := I) (M := M) g r s x (R (e i) (e j) T) := hvw
+    _ ≤ g.inner x v v * g.inner x w w *
+            (C * riemannianFiberNormSq (I := I) (M := M) g r s x T) := by
+          refine mul_le_mul_of_nonneg_left hCxT ?_
+          exact mul_nonneg hvv_nonneg hww_nonneg
+    _ = C * g.inner x v v * g.inner x w w *
+            riemannianFiberNormSq (I := I) (M := M) g r s x T := by ring
 
 set_option linter.unusedVariables false in
 /-- **The order-`0` (value-local) layer of the frame-free pure-Riemann curvature envelope at valence
