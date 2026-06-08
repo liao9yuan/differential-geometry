@@ -275,6 +275,51 @@ theorem flipCcTensor_ccTensorBilin_apply (g₀ : SmoothRiemannianMetric I M)
   have h := flipCcTensor_toModel_apply (I := I) g₀ T x ![v, w]
   simpa using h
 
+/-- **The fibrewise model value of the slot swap is subtractive in the tensor section.**
+`flipCcModelFun g₀ (S - T) x = flipCcModelFun g₀ S x - flipCcModelFun g₀ T x` as `(0,2)`-fibre
+model tensors.  Proved at the `toModel` level (`flipCcModelFun_toModel_apply`) from the
+subtractivity of the extracted bilinear form `ccTensorBilin_sub`. -/
+theorem flipCcModelFun_sub (g₀ : SmoothRiemannianMetric I M)
+    (S T : SmoothCcTensor g₀ 0 2) (x : M) :
+    flipCcModelFun (I := I) g₀ (S - T) x =
+      flipCcModelFun (I := I) g₀ S x - flipCcModelFun (I := I) g₀ T x := by
+  apply Tensor0SSpace.toModel_injective (s := 2) (x := x)
+  apply ContinuousMultilinearMap.ext
+  intro v
+  simp only [Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply,
+    flipCcModelFun_toModel_apply, ccTensorBilin_sub]
+
+/-- **The slot-swapped tensor is subtractive in the tensor section.**
+`flipCcTensor g₀ (S - T) = flipCcTensor g₀ S - flipCcTensor g₀ T`.  Proved by
+section-extensionality: at each base point the `eval₀.smulRight` packaging of `flipCcMixedSection`
+distributes over the fibrewise difference `flipCcModelFun_sub`, since `smulRight` is `ℝ`-linear in
+its second argument (`smul_sub`). -/
+theorem flipCcTensor_sub (g₀ : SmoothRiemannianMetric I M)
+    (S T : SmoothCcTensor g₀ 0 2) :
+    flipCcTensor (I := I) g₀ (S - T) =
+      flipCcTensor (I := I) g₀ S - flipCcTensor (I := I) g₀ T := by
+  classical
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
+  have hfield : (flipCcTensorField (I := I) g₀ (S - T) x : Tensor0SSpace 2 I x) =
+      flipCcTensorField (I := I) g₀ S x - flipCcTensorField (I := I) g₀ T x := by
+    change flipCcModelFun (I := I) g₀ (S - T) x =
+      flipCcModelFun (I := I) g₀ S x - flipCcModelFun (I := I) g₀ T x
+    exact flipCcModelFun_sub (I := I) g₀ S T x
+  apply ContinuousLinearMap.ext
+  intro D
+  rw [ContinuousLinearMap.sub_apply]
+  change (MixedSection.eval₀ (F := E) (E := (TangentSpace I : M → Type _)) x).smulRight
+        (flipCcTensorField (I := I) g₀ (S - T) x) D =
+      (MixedSection.eval₀ (F := E) (E := (TangentSpace I : M → Type _)) x).smulRight
+          (flipCcTensorField (I := I) g₀ S x) D -
+        (MixedSection.eval₀ (F := E) (E := (TangentSpace I : M → Type _)) x).smulRight
+          (flipCcTensorField (I := I) g₀ T x) D
+  rw [ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.smulRight_apply,
+    ContinuousLinearMap.smulRight_apply, hfield, smul_sub]
+
 /-- **The symmetric realized tensor as a smooth, compactly-supported `(0,2)`-tensor
 section.**  The half-sum of `T` with its slot swap `flipCcTensor g₀ T`; its extracted
 bilinear form is exactly the symmetric realized perturbation `ccTensorBilinSymm g₀ T`
@@ -290,6 +335,19 @@ theorem realizeSymmCcTensor_eq (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) :
     realizeSymmCcTensor (I := I) g₀ T =
       (1 / 2 : ℝ) • T + (1 / 2 : ℝ) • flipCcTensor (I := I) g₀ T := rfl
+
+/-- **The symmetric realization is subtractive in the tensor section.**
+`realizeSymmCcTensor g₀ (T₁ - T₂) = realizeSymmCcTensor g₀ T₁ - realizeSymmCcTensor g₀ T₂`.
+The symmetrization `T ↦ ½ • T + ½ • flipCcTensor g₀ T` is a fibrewise-`ℝ`-linear operation; the
+identity follows from the subtractivity of the slot swap (`flipCcTensor_sub`) and the
+`AddCommGroup`/`Module ℝ` algebra of `SmoothCcTensor g₀ 0 2`. -/
+theorem realizeSymmCcTensor_sub (g₀ : SmoothRiemannianMetric I M)
+    (T₁ T₂ : SmoothCcTensor g₀ 0 2) :
+    realizeSymmCcTensor (I := I) g₀ (T₁ - T₂) =
+      realizeSymmCcTensor (I := I) g₀ T₁ - realizeSymmCcTensor (I := I) g₀ T₂ := by
+  rw [realizeSymmCcTensor_eq, realizeSymmCcTensor_eq, realizeSymmCcTensor_eq,
+    flipCcTensor_sub]
+  module
 
 /-- **The extracted bilinear form of the symmetric realized tensor is exactly the symmetric
 realized perturbation.**  `ccTensorBilin g₀ (realizeSymmCcTensor g₀ T) x v w =
