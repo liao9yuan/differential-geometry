@@ -5,6 +5,8 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricContractionLe
 import DifferentialGeometry.Geometry.Connection.TensorNabla.LiftedSectionCovariantRealizeBridge
 import DifferentialGeometry.Geometry.Connection.ConnectionDifferenceQuadraticTraceProduct
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParallelRankReducingContractionGrid
+import DifferentialGeometry.Tensor.RSTensor.Derivation.Contract
+import DifferentialGeometry.Geometry.Connection.Realization.SmoothSections
 
 /-! # The curvature-trace covariant-jet reduction of the sealed Ricci–DeTurck curvature difference
 
@@ -108,28 +110,147 @@ private def crossCorrTripleDiff (g₀ : SmoothRiemannianMetric I M)
   (2 : ℝ) • DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
     - (2 : ℝ) • DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂
 
-/-- **(POSIT — the section-level `−2` model-basis Ricci-trace operator `(0, 4 + a) → (0, 2 + a)`.)**
-The genuinely-deep building block of the model-basis Ricci-trace parallel contraction: the section-level
-operator at gradient-shift `a` that contracts the leading two of the `4 + a` covariant slots of a smooth
-`(0, 4 + a)`-tensor against the background inverse metric `g₀^{ij}` (the model-basis double trace) and
-scales by `−2`, producing a smooth compactly-supported `(0, 2 + a)`-tensor.  This is the rank-reducing
-metric-trace contraction the Ricci difference arm needs (the `−2 g₀^{ij} R_{ij··}` curvature trace
-lowering rank `4 + a → 2 + a`); its body is `sorry`, the genuine smooth model-basis double-trace
-contraction-operator construction (the same smooth-section route as `loweredConnDiffField` /
-`ricSlotOpField`, contracting against the parallel background inverse metric). -/
-noncomputable def ricciModelTrace42Op (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
-    Integral.L2.SmoothCcTensor g₀ 0 (4 + a) → Integral.L2.SmoothCcTensor g₀ 0 (2 + a) :=
+/-- **The model-fibre rank cast `Tensor0SModel m → Tensor0SModel n` along `h : m = n`.**  The
+continuous-linear (isometric) reindex of the model multilinear fibre, via
+`ContinuousMultilinearMap.domDomCongrₗᵢ (finCongr h)`.  Used to chain the two leading-slot interior
+products of the model-basis double trace across the `Nat`-equalities `4 + a = (3 + a) + 1` and
+`3 + a = (2 + a) + 1` (which hold by `omega` but not `rfl`, as `Nat.add` recurses on the right). -/
+noncomputable def modelRankCast {m n : ℕ} (h : m = n) :
+    Tensor0SBundle.Tensor0SModel m ℝ E →L[ℝ] Tensor0SBundle.Tensor0SModel n ℝ E :=
+  (ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ
+    (finCongr h)).toContinuousLinearEquiv.toContinuousLinearMap
+
+/-- **The fixed model-level `−2` model-basis double-trace map `(0, 4 + a) → (0, 2 + a)`.**  The
+base-point-independent continuous-linear map on the model fibre `Tensor0SModel` that contracts the
+leading two of the `4 + a` model slots of a model `(0, 4 + a)`-tensor against the fixed Euclidean model
+basis `eᵢ := chartModelBasis E i` (feeding `eᵢ` into the two leading slots via two iterated
+`model_interior_product` interior products) and sums over `i`, scaled by `−2`:
+```
+modelTrace42Map a D = (-2) • ∑ᵢ D(eᵢ, eᵢ, ·).
+```
+It is a *fixed* model-level CLM — no manifold, no metric — the model image of the `−2` model-basis Ricci
+trace.  The two interior products `model_interior_product (2 + a) eᵢ ∘ model_interior_product (3 + a) eᵢ`
+feed `eᵢ` into the first two model slots (chained across the slot-count rank casts `modelRankCast`);
+the outer sum runs over the fixed model basis. -/
+noncomputable def modelTrace42Map (a : ℕ) :
+    Tensor0SBundle.Tensor0SModel (4 + a) ℝ E →L[ℝ] Tensor0SBundle.Tensor0SModel (2 + a) ℝ E :=
+  (-2 : ℝ) • ∑ i : Fin (Module.finrank ℝ E),
+    (Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) (2 + a)
+          (Integral.Measure.chartModelBasis E i)).comp
+      ((modelRankCast (E := E) (by omega : (3 + a) = (2 + a) + 1)).comp
+        ((Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) (3 + a)
+            (Integral.Measure.chartModelBasis E i)).comp
+          (modelRankCast (E := E) (by omega : (4 + a) = (3 + a) + 1))))
+
+/-- **The fibrewise `−2` model-basis double-trace fibre operator.**  At a base point `x`, the
+`−2`-scaled fixed model double trace transported through the fibre/model continuous-linear equivalence
+`tensor0SSpace_continuousLinearEquiv`: a continuous-linear map between tensor fibres
+`Tensor0SSpace (4 + a) I x →L Tensor0SSpace (2 + a) I x`, i.e. a `(0, 4 + a) → (0, 2 + a)` fibre map.
+Conjugating the fixed `modelTrace42Map a` by the bundle/model equivalence is the same construction as
+the algebraic trace `Tensor0SBundle.contract_trace` (a fixed model CLM transported through the fibre
+equivalence). -/
+noncomputable def ricciModelTrace42Fib (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (x : M) :
+    Tensor0SBundle.Tensor0SSpace (4 + a) I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (2 + a) I x :=
+  (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (2 + a) x).symm.toContinuousLinearMap.comp
+    ((modelTrace42Map (E := E) a).comp
+      (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (4 + a) x).toContinuousLinearMap)
+
+set_option linter.unusedSectionVars false in
+/-- **The model image of the fibre operator is the fixed model double trace.**  `toModel` intertwines
+`ricciModelTrace42Fib` with the fixed model-level `modelTrace42Map`:
+`toModel (ricciModelTrace42Fib g₀ a x D) = modelTrace42Map a (toModel D)`.  Definitional, since
+`Tensor0SSpace.toModel = tensor0SSpace_continuousLinearEquiv` and the equivalence is `id`. -/
+@[simp] theorem ricciModelTrace42Fib_toModel (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (x : M)
+    (D : Tensor0SBundle.Tensor0SSpace (4 + a) I x) :
+    Tensor0SBundle.Tensor0SSpace.toModel (ricciModelTrace42Fib (I := I) g₀ a x D) =
+      modelTrace42Map (E := E) a (Tensor0SBundle.Tensor0SSpace.toModel D) := rfl
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(POSIT — base-point smoothness of the fixed model-basis double-trace operator field.)**  The
+fibre field `x ↦ ricciModelTrace42Fib g₀ a x` is a smooth section of the `(4 + a, 2 + a)`-tensor bundle.
+This is the standard smoothness of a *fixed* model-level continuous-linear map transported through the
+bundle/model trivialization — the exact analogue of the on-disk algebraic-trace smoothness
+`Tensor0SBundle.contract_TensorRSField` (which proves precisely this for the fixed model trace
+`model_contract_trace`, via `Bundle.contMDiffAt_section` + the trivialization-frame compatibility
+`contract_trace_trivialization_eq`).  Here the fixed model map is `modelTrace42Map a` (the `−2`
+model-basis double trace, also a finite sum over the fixed Euclidean model basis), so the same
+trivialization-frame argument applies verbatim.  Its body is `sorry`: the genuine
+trivialization-frame smoothness of the fixed model-basis double-trace operator field (the model-basis
+analogue of `contract_TensorRSField`'s smooth-section skeleton). -/
+theorem ricciModelTrace42Fib_contMDiff (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
+    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel (4 + a) (2 + a) ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel (4 + a) (2 + a) ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace (4 + a) (2 + a) I z) x
+        (ricciModelTrace42Fib (I := I) g₀ a x)) :=
   sorry
 
-/-- **(POSIT — fibrewise `ℝ`-additivity of the section-level model-basis Ricci-trace operator.)**  The
-`−2` model-basis double trace `ricciModelTrace42Op` distributes over a section difference (a metric
-contraction is fibrewise `ℝ`-linear in the contracted section).  Its body is `sorry`: the additivity of
-the model-basis Ricci-trace contraction operator. -/
+/-- **The fixed double-trace operator field as a smooth compactly-supported `(4 + a, 2 + a)`-tensor.**
+The fibre value at `x` is `ricciModelTrace42Fib g₀ a x` (smooth by `ricciModelTrace42Fib_contMDiff`); on
+the closed manifold it has compact support.  This is the *fixed* smooth operator field whose
+operator-field action contracts the leading two slots against the fixed model basis (scaled by `−2`). -/
+noncomputable def ricciModelTrace42Field (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
+    Integral.L2.SmoothCcTensor g₀ (4 + a) (2 + a) where
+  toSection :=
+    { toFun := fun x : M =>
+        (show Tensor0SBundle.TensorRSSpace (4 + a) (2 + a) I x from
+          ricciModelTrace42Fib (I := I) g₀ a x)
+      contMDiff_toFun := ricciModelTrace42Fib_contMDiff (I := I) g₀ a }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+set_option linter.unusedSectionVars false in
+/-- The underlying section value of `ricciModelTrace42Field g₀ a` at `x` is the fibre operator
+`ricciModelTrace42Fib g₀ a x`.  Definitional. -/
+@[simp] theorem ricciModelTrace42Field_toSection (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (x : M) :
+    (ricciModelTrace42Field (I := I) g₀ a).toSection x =
+      (show Tensor0SBundle.TensorRSSpace (4 + a) (2 + a) I x from
+        ricciModelTrace42Fib (I := I) g₀ a x) := rfl
+
+/-- **The section-level `−2` model-basis Ricci-trace operator `(0, 4 + a) → (0, 2 + a)`.**  The
+genuine building block of the model-basis Ricci-trace parallel contraction: the operator at
+gradient-shift `a` that contracts the leading two of the `4 + a` covariant slots of a smooth
+`(0, 4 + a)`-tensor against the fixed Euclidean model basis (the model-basis double trace `∑ᵢ D(eᵢ, eᵢ,
+·)`) and scales by `−2`, producing a smooth compactly-supported `(0, 2 + a)`-tensor.  This is the
+rank-reducing metric-trace contraction the Ricci difference arm needs (the `−2` model-basis curvature
+trace lowering rank `4 + a → 2 + a`).
+
+It is constructed concretely as the operator-field action `appCcRS` of the *fixed* smooth double-trace
+operator field `ricciModelTrace42Field g₀ a` (the fixed model CLM `modelTrace42Map a` transported
+through the bundle/model equivalence) on the input `(0, 4 + a)`-tensor — the same smooth-section route
+as the algebraic trace `contractCcTensor` and the curvature operator-field action `appCc`. -/
+noncomputable def ricciModelTrace42Op (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
+    Integral.L2.SmoothCcTensor g₀ 0 (4 + a) → Integral.L2.SmoothCcTensor g₀ 0 (2 + a) :=
+  fun T =>
+    DifferentialGeometry.Integral.Connection.appCcRS (I := I) (M := M) g₀ 0 (4 + a) (2 + a)
+      (ricciModelTrace42Field (I := I) g₀ a) T
+
+set_option linter.unusedSectionVars false in
+/-- **The fibre value of `ricciModelTrace42Op` is the fibrewise composition of the double-trace fibre
+operator with the input section.**  Definitional via `appCcRS_toSection`. -/
+@[simp] theorem ricciModelTrace42Op_toSection (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (T : Integral.L2.SmoothCcTensor g₀ 0 (4 + a)) (x : M) :
+    (ricciModelTrace42Op (I := I) g₀ a T).toSection x =
+      (show Tensor0SBundle.Tensor0SSpace (4 + a) I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (2 + a) I x from
+        ricciModelTrace42Fib (I := I) g₀ a x).comp
+        (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (4 + a) I x from
+          T.toSection x) := by
+  rw [ricciModelTrace42Op,
+    DifferentialGeometry.Integral.Connection.appCcRS_toSection (I := I) (M := M) g₀ 0 (4 + a) (2 + a)
+      (ricciModelTrace42Field (I := I) g₀ a) T x, ricciModelTrace42Field_toSection]
+
+set_option linter.unusedSectionVars false in
+/-- **Fibrewise `ℝ`-additivity of the section-level model-basis Ricci-trace operator.**  The
+`−2` model-basis double trace `ricciModelTrace42Op` distributes over a section difference: it is the
+operator-field action `appCcRS` of the fixed double-trace field, and that action is additive in the
+contracted section (via `appCcRS_add_right` / `appCcRS_smul_right`, the operator-field action being
+fibrewise composition, additive in the right factor). -/
 theorem ricciModelTrace42Op_sub (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (A B : Integral.L2.SmoothCcTensor g₀ 0 (4 + a)) :
     ricciModelTrace42Op (I := I) g₀ a (A - B) =
-      ricciModelTrace42Op (I := I) g₀ a A - ricciModelTrace42Op (I := I) g₀ a B :=
-  sorry
+      ricciModelTrace42Op (I := I) g₀ a A - ricciModelTrace42Op (I := I) g₀ a B := by
+  rw [ricciModelTrace42Op, ricciModelTrace42Op, ricciModelTrace42Op, sub_eq_add_neg,
+    DifferentialGeometry.Integral.Connection.appCcRS_add_right,
+    show (-B) = (-1 : ℝ) • B by rw [neg_one_smul],
+    DifferentialGeometry.Integral.Connection.appCcRS_smul_right, neg_one_smul, ← sub_eq_add_neg]
 
 /-- **(POSIT — the exact parallel single-step covariant Leibniz of the model-basis Ricci trace.)**
 Because the background inverse metric `g₀^{ij}` is `∇₀`-parallel (`∇₀ g₀⁻¹ = 0`, the cometric skew core

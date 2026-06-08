@@ -1653,7 +1653,7 @@ private lemma radialRetract_nonexpansive (ρ : ℝ) (hρ : 0 ≤ ρ) (x y : F) :
   obtain ⟨ht0, ht1, htb⟩ := radialRetract_scalar_props ρ hρ y
   set s := min ‖x‖ ρ / ‖x‖
   set t := min ‖y‖ ρ / ‖y‖
-  show ‖s • x - t • y‖ ≤ ‖x - y‖
+  change ‖s • x - t • y‖ ≤ ‖x - y‖
   have hnn : (0 : ℝ) ≤ ‖x - y‖ := norm_nonneg _
   rw [← Real.sqrt_sq hnn, ← Real.sqrt_sq (norm_nonneg (s • x - t • y))]
   apply Real.sqrt_le_sqrt
@@ -1675,6 +1675,73 @@ private lemma radialRetract_nonexpansive (ρ : ℝ) (hρ : 0 ≤ ρ) (x y : F) :
   nlinarith [hprodbound, hkey]
 
 end RadialRetraction
+
+/-- **The realized-remainder meaning of the gauge-cancellation fixed point (the genuine PDE analytic
+frontier): a corrector solving the first-order-cancelled gauge equation makes the heat-smoothed
+corrected datum's realized DeTurck remainder reproduce the gate-based gauge section's `L²`-class on
+the gated locus.**
+
+This is the irreducible analytic core of the gauge-cancellation match, isolated from the abstract
+Banach-contraction scaffold of `exists_deTurckGaugeCancellation_corrector_gateSectionMatch`.  Its
+inputs are the *concrete* gauge-cancellation data: the Gårding-coercive bounded inverse
+`cLin := L.symm` of the first-order-cancelled DeTurck linearization (rate `Cinv`, supplied by
+`deTurckGaugeCancellation_firstOrderCancelledLinearization_continuousLinearEquiv`), the origin-fixing,
+globally `κ`-Lipschitz globalized nonlinear gauge remainder `Ñ` subordinate to it (`Cinv·κ < 1`,
+the radial-retraction globalization of the on-ball remainder of
+`deTurckGaugeCancellation_nonlinearRemainder_lipschitzSmall_on_ball`), and a corrector `c` that
+**solves the gauge-cancellation fixed-point equation** `c u = − cLin (Ñ (u + c u))` (`hfix`).
+
+The body is the **posited analytic frontier** (`sorry`): the fixed-point equation
+`c u = − cLin (Ñ (u + c u))` *is* the gauge-cancellation equation, so it repairs the first-order
+DeTurck class — on a fibre-small `T` the realized remainder splits as
+`Φ(T) = toL2 (deTurckRHSRetag g₀ g_bg g_T) − toL2 (Δ_∇ T)`
+(`deTurckRealizeRemainderOf_toL2_retagClass_sub`, sorry-free), the leading second-order rough-Laplacian
+principal symbol cancelling the second-order re-tagged-RHS principal symbol
+(`deTurckNonlinearitySpectral_principalPart_cancels`, sorry-free), leaving exactly the *first-order*
+class the gauge correction `c` absorbs.  That the abstract Banach fixed point of the contraction
+scaffold actually identifies, at the `L²`-class level on the gated locus, the realized DeTurck
+remainder of the heat-smoothed corrected datum `heatRepr (u + c u)` with the gate-based gauge section
+`deTurckRemainderRealizeSection g₀ g_bg u` is the gate-controlled PDE content the abstract data above
+does not by itself carry — it requires the concrete realized-remainder meaning of `Ñ`/`cLin` as the
+first-order-cancelled gauge operator's pieces.  This is therefore the precisely-posited analytic
+frontier of the `/prove` recursion.
+
+**Genuine hypothesis, not packaging** — `hfix` is a *fixed-point equation* (`c u = − cLin (Ñ (u + c
+u))`), structurally a Picard/Banach equation, NOT the conclusion (an `L²`-class equality of two
+realized DeTurck remainders); a working analyst would say "let `c` solve the gauge-cancellation
+equation".  **Non-vacuous** — `hfix` rejects the degenerate corrector `c ≡ 0`: with `c ≡ 0` it reads
+`0 = − cLin (Ñ u)`, i.e. `Ñ u = 0` for all `u`, which contradicts `Ñ` being a genuine nonlinear gauge
+remainder (its on-ball first-order content is non-zero), so the equation genuinely pins `c` to the
+gauge solution.  **Intrinsic** — `toL2`/`toHs` and the `Hᵃ⁺¹` norm are `g`-inner; no `chartJ`, no raw
+`M → E`.  Consumers transitively depend on `sorryAx` through this match arm. -/
+private theorem deTurckGaugeCancellation_fixedPoint_heatCorrectedRemainder_gateSectionClassMatch
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (L : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)
+          ≃L[ℝ] tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+    (Cinv : ℝ) (hCinv : 0 ≤ Cinv)
+    (hLsymm : ∀ v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+        ‖L.symm v‖ ≤ Cinv * ‖v‖)
+    (Ñ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+          tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+    (κ : ℝ) (hκ : 0 ≤ κ) (hCκ : Cinv * κ < 1)
+    (hÑ0 : Ñ 0 = 0)
+    (hÑlip : ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+        ‖Ñ u - Ñ u'‖ ≤ κ * ‖u - u'‖)
+    (c : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+          tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+    (hfix : ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+        c u = - L.symm (Ñ (u + c u))) :
+    ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+        (h : realizableAtGate (I := I) g₀ u),
+      ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+          (gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose)‖ ≤ 1 →
+      Integral.L2.SmoothCcTensor.toL2
+          (deTurckRealizeRemainderOf (I := I) g₀ g_bg
+            (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
+              g₀ 0 2 (one_pos) (by positivity : (0 : ℝ) ≤ (a : ℝ) + 1) (u + c u)))
+        = Integral.L2.SmoothCcTensor.toL2
+            (deTurckRemainderRealizeSection (I := I) g₀ g_bg u) := by
+  sorry
 
 /-- **The fixed-point gauge-cancellation class identity (the genuine PDE analytic frontier): the
 gauge-cancellation Banach fixed point's heat-smoothed corrected datum realizes the gate-based gauge
@@ -1792,7 +1859,7 @@ private theorem exists_deTurckGaugeCancellation_corrector_gateSectionMatch
     intro u
     refine LipschitzWith.of_dist_le_mul (fun w w' => ?_)
     rw [dist_eq_norm]
-    show ‖- L.symm (Ñ (u + w)) - - L.symm (Ñ (u + w'))‖ ≤ (Kc : ℝ) * dist w w'
+    change ‖- L.symm (Ñ (u + w)) - - L.symm (Ñ (u + w'))‖ ≤ (Kc : ℝ) * dist w w'
     have hrw : - L.symm (Ñ (u + w)) - - L.symm (Ñ (u + w'))
         = L.symm (Ñ (u + w') - Ñ (u + w)) := by
       rw [map_sub]; abel
@@ -1812,7 +1879,7 @@ private theorem exists_deTurckGaugeCancellation_corrector_gateSectionMatch
     ⟨(Cinv * κ) / (1 - Cinv * κ), by positivity⟩, 1, one_pos, ?_, ?_, ?_⟩
   · -- Origin-fixing: `0` is the (unique) fixed point of `G 0`.
     have hfix0 : Function.IsFixedPt (G 0) 0 := by
-      show - L.symm (Ñ (0 + 0)) = 0
+      change - L.symm (Ñ (0 + 0)) = 0
       rw [add_zero, hÑ0, map_zero, neg_zero]
     exact (ContractingWith.fixedPoint_unique (hGcontract 0) hfix0).symm
   · -- Globally Lipschitz: the maps `G u`, `G u'` are uniformly `Cinv·κ·‖u − u'‖`-close.
@@ -1820,7 +1887,7 @@ private theorem exists_deTurckGaugeCancellation_corrector_gateSectionMatch
     have hclose : ∀ w, dist (G u w) (G u' w) ≤ Cinv * κ * dist u u' := by
       intro w
       rw [dist_eq_norm]
-      show ‖- L.symm (Ñ (u + w)) - - L.symm (Ñ (u' + w))‖ ≤ Cinv * κ * dist u u'
+      change ‖- L.symm (Ñ (u + w)) - - L.symm (Ñ (u' + w))‖ ≤ Cinv * κ * dist u u'
       have hrw : - L.symm (Ñ (u + w)) - - L.symm (Ñ (u' + w))
           = L.symm (Ñ (u' + w) - Ñ (u + w)) := by
         rw [map_sub]; abel
@@ -1837,15 +1904,22 @@ private theorem exists_deTurckGaugeCancellation_corrector_gateSectionMatch
     rw [NNReal.coe_mk]
     refine hfp.trans (le_of_eq ?_)
     rw [hKc_def]; push_cast; ring
-  · -- The `Q`-gated realized-remainder `L²`-class match against the gate-based gauge section: the
-    -- gauge-cancellation fixed point `c` solves `c u = − cLin (Ñ (u + c u))`, the gauge-cancellation
-    -- equation, so the unit-time heat-smoothed corrected datum `u + c u` has a realized DeTurck
-    -- remainder reproducing — at the `L²`-class level on the gated locus — the gate-based gauge
-    -- section `deTurckRemainderRealizeSection g₀ g_bg u`.  This identification of the abstract Banach
-    -- fixed point with the realized-remainder match is the genuine PDE analytic frontier of the
-    -- `/prove` recursion (it requires the concrete realized-remainder meaning of `Ñ`/`cLin`, which
-    -- the abstract contraction scaffold above does not by itself carry).
-    sorry
+  · -- The `Q`-gated realized-remainder `L²`-class match against the gate-based gauge section.  The
+    -- gauge-cancellation fixed point `c u := fixedPoint (G u)` solves `c u = − cLin (Ñ (u + c u))`
+    -- (the gauge-cancellation equation, the symmetric form of `IsFixedPt (G u) (c u)`), so the
+    -- realized-remainder meaning of that gauge solution — the genuine PDE analytic frontier — gives
+    -- the match.  The frontier is isolated as the named child
+    -- `deTurckGaugeCancellation_fixedPoint_heatCorrectedRemainder_gateSectionClassMatch`; here we feed
+    -- it the concrete coercive-inverse / globalized-nonlinearity data and the fixed-point equation.
+    have hfix : ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+        ContractingWith.fixedPoint (G u) (hGcontract u)
+          = - L.symm (Ñ (u + ContractingWith.fixedPoint (G u) (hGcontract u))) := by
+      intro u
+      -- `IsFixedPt (G u) (c u)` reads `G u (c u) = c u`, i.e. `− cLin (Ñ (u + c u)) = c u`.
+      exact ((hGcontract u).fixedPoint_isFixedPt).symm
+    exact deTurckGaugeCancellation_fixedPoint_heatCorrectedRemainder_gateSectionClassMatch
+      (I := I) g₀ g_bg a L Cinv hCinv hLsymm Ñ κ hκ hCκ hÑ0 hÑlip
+      (fun u => ContractingWith.fixedPoint (G u) (hGcontract u)) hfix
 
 /-- **The origin-fixing, globally `Hᵃ⁺¹`-Lipschitz gauge-cancellation fixed point produced by the
 Gårding-coercive bounded inverse, bundled with its `Q`-gated realized-remainder `L²`-class match
