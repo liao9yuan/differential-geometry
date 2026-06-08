@@ -7,6 +7,7 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RankRPureRCurvatu
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.Algebra
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Integrability
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.IntegratedOrder2WeitzenbockRS
 
 /-!
 # The genuine moving-frame third-order field decomposition at contravariant rank `r`
@@ -1007,6 +1008,128 @@ theorem exists_diffCurvSectionRS_carrier_valueDatum (g : SmoothRiemannianMetric 
                   (covGrad (I := I) (M := M) g r s S)).toFun ^ 2 := by
   sorry
 
+/-- **The integrated order-`2` Weitzenböck identity at contravariant rank `r`.** The
+contravariant-rank-`r` lift of `weitzenbock_integrated_covGrad_l2_normSq`
+(`IntegratedOrder2Weitzenbock`). For a closed smooth Riemannian manifold `(M, g)` and a smooth
+compactly-supported `(r, s)`-tensor field `S`, the squared `L²` norm of the iterated covariant gradient
+`∇²S := covGrad g r (s + 1) (covGrad g r s S)` equals the squared `L²` norm of the rough Laplacian
+`Δ_∇ S := rawTensorConnLapSmooth g r s S` minus the `L²` cross term against the commutator defect:
+```
+‖∇²S‖²_{L²} = ‖Δ_∇ S‖²_{L²} − ⟨Δ_∇(∇S) − ∇(Δ_∇ S), ∇S⟩_{L²}.
+```
+
+**Proof.** This is the verbatim contravariant-rank-`r` lift of the rank-`0` integrated order-`2`
+Weitzenböck identity `weitzenbock_integrated_covGrad_l2_normSq`, discharged by the rank-`r` Green chain
+`weitzenbock_integrated_covGrad_l2_normSq_rs` (`IntegratedOrder2WeitzenbockRS`). That chain mirrors the
+rank-`0` proof: it chains the diagonal connection-Laplacian Green identity at rank `(r, s + 1)`
+(`covGrad_l2Inner_self_eq_neg_rawTensorConnLap_inner_rs`) with the cross-pairing split through the
+commutator (`rawTensorConnLap_l2Inner_covGrad_split_rs`) and closes by ring arithmetic. The
+genuinely-deep analytic ingredient is the general-rank connection-Laplacian Green identity
+`tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawTensorConnLapSmooth_rs_of_intertwiner`
+(`TensorDirichletCurrentGreenIdentityRS`), i.e. integration by parts for the rough Laplacian on the
+closed `(r, s)`-bundle, supplied with its metric-lowering intertwiner witness `loweringIntertwinerRS_holds`
+(the `r`-slot metric index-lowering commutes with `∇` because `∇g = 0`). The identity is *false* for an
+arbitrary choice of sign — it pins the iterated-gradient `L²` norm to a specific Bochner combination. -/
+theorem weitzenbock_integrated_covGrad_l2_normSqRS
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
+    tensorL2Norm (I := I) (M := M) g r (s + 1 + 1)
+        (covGrad (I := I) (M := M) g r (s + 1)
+          (covGrad (I := I) (M := M) g r s S)).toFun ^ 2 =
+      tensorL2Norm (I := I) (M := M) g r s
+          (rawTensorConnLapSmooth (I := I) g r s S).toFun ^ 2 -
+        tensorL2Inner (I := I) (M := M) g r (s + 1)
+          (rawTensorConnLapSmooth (I := I) g r (s + 1)
+              (covGrad (I := I) (M := M) g r s S) -
+            covGrad (I := I) (M := M) g r s
+              (rawTensorConnLapSmooth (I := I) g r s S)).toFun
+          (covGrad (I := I) (M := M) g r s S).toFun :=
+  weitzenbock_integrated_covGrad_l2_normSq_rs (I := I) (M := M) g r s S
+
+/-- **The genuine curvature cross-pairing value at contravariant rank `r`** (the integrated order-`2`
+Weitzenböck identity, in cross-pairing form). The contravariant-rank-`r` lift of
+`weitzenbock_curvature_crossPairing_value` (`MovingFrameIntegratedNullity`). For a closed smooth
+Riemannian manifold `(M, g)`, every covariant rank `s`, and every smooth compactly-supported
+`(r, s)`-tensor `S`, the global metric `L²` pairing of the order-`2` commutator defect
+`Curv S := pointwiseTensorCurvRS g r s S` against `∇S := covGrad g r s S` equals the genuine Weitzenböck
+curvature integral
+```
+⟨Curv S, ∇S⟩_{L²} = ‖Δ_∇ S‖²_{L²} − ‖∇²S‖²_{L²}.
+```
+This is `weitzenbock_integrated_covGrad_l2_normSqRS` solved for the cross-pairing, recorded here as the
+value the genuine curvature fields `GcurvSectionRS + Gcd` must carry. The proof rewrites the defect into
+its definitional form `Δ_∇(∇S) − ∇(Δ_∇ S)` (`rfl` on `pointwiseTensorCurvRS`) and rearranges the
+integrated Weitzenböck identity. Consumers transitively depend on `sorryAx` through
+`weitzenbock_integrated_covGrad_l2_normSqRS`. -/
+theorem weitzenbock_curvature_crossPairing_valueRS
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
+    tensorL2Inner (I := I) (M := M) g r (s + 1)
+        (pointwiseTensorCurvRS (I := I) (M := M) g r s S).toFun
+        (covGrad (I := I) (M := M) g r s S).toFun =
+      tensorL2Norm (I := I) (M := M) g r s
+          (rawTensorConnLapSmooth (I := I) g r s S).toFun ^ 2 -
+        tensorL2Norm (I := I) (M := M) g r (s + 1 + 1)
+          (covGrad (I := I) (M := M) g r (s + 1)
+            (covGrad (I := I) (M := M) g r s S)).toFun ^ 2 := by
+  have hw := weitzenbock_integrated_covGrad_l2_normSqRS (I := I) (M := M) g r s S
+  have hCurv :
+      tensorL2Inner (I := I) (M := M) g r (s + 1)
+          (rawTensorConnLapSmooth (I := I) g r (s + 1)
+              (covGrad (I := I) (M := M) g r s S) -
+            covGrad (I := I) (M := M) g r s
+              (rawTensorConnLapSmooth (I := I) g r s S)).toFun
+          (covGrad (I := I) (M := M) g r s S).toFun =
+        tensorL2Inner (I := I) (M := M) g r (s + 1)
+          (pointwiseTensorCurvRS (I := I) (M := M) g r s S).toFun
+          (covGrad (I := I) (M := M) g r s S).toFun := rfl
+  rw [hCurv] at hw
+  linarith [hw]
+
+/-- **Bracket-free-pairing nullity reduction for the moving-frame bracket remainder at contravariant
+rank `r`.** The contravariant-rank-`r` lift of
+`tensorL2Inner_movingFrameRemainder_eq_zero_of_bracketFreePairing` (`MovingFrameBracketDivergence`). Fix
+a closed smooth Riemannian manifold `(M, g)`, a covariant rank `s`, a smooth compactly-supported
+`(r, s)`-tensor `S`, and two `(r, s + 1)`-tensor fields `Gcurv`, `GcurvDeriv`. If the genuine fields
+carry the entire curvature cross-pairing — the bracket-free `L²` pairing
+`⟨Gcurv + GcurvDeriv, ∇S⟩_{L²} = ⟨Curv S, ∇S⟩_{L²}` (`Curv S := pointwiseTensorCurvRS g r s S`) — then
+the complementary moving-frame remainder `Curv S − Gcurv − GcurvDeriv` pairs to zero against `∇S`. This
+is the purely algebraic step: it writes `Curv S = (Gcurv + GcurvDeriv) + (Curv S − Gcurv − GcurvDeriv)`
+and splits the `L²` pairing by left additivity (`tensorL2Inner_add_left`, the cross-term integrabilities
+supplied by `SmoothCcTensor.integrable_inner_cross`), so the bracket-free pairing forces the remainder
+term to vanish. The left-additivity engine and the cross integrability are rank-generic, so this ports
+verbatim from the rank-`0` reduction (no `sorry`). -/
+theorem tensorL2Inner_movingFrameRemainder_eq_zero_of_bracketFreePairingRS
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s)
+    (Gcurv GcurvDeriv : SmoothCcTensor g r (s + 1))
+    (hpair : tensorL2Inner (I := I) (M := M) g r (s + 1) (Gcurv + GcurvDeriv).toFun
+        (covGrad (I := I) (M := M) g r s S).toFun =
+      tensorL2Inner (I := I) (M := M) g r (s + 1)
+        (pointwiseTensorCurvRS (I := I) (M := M) g r s S).toFun
+        (covGrad (I := I) (M := M) g r s S).toFun) :
+    tensorL2Inner (I := I) (M := M) g r (s + 1)
+        (pointwiseTensorCurvRS (I := I) (M := M) g r s S - Gcurv - GcurvDeriv).toFun
+        (covGrad (I := I) (M := M) g r s S).toFun = 0 := by
+  classical
+  set Curv : SmoothCcTensor g r (s + 1) := pointwiseTensorCurvRS (I := I) (M := M) g r s S with hCurv
+  set gradS : SmoothCcTensor g r (s + 1) := covGrad (I := I) (M := M) g r s S with hgrad
+  have hCurv_eq : Curv = (Gcurv + GcurvDeriv) + (Curv - Gcurv - GcurvDeriv) := by abel
+  have hfun : ((Gcurv + GcurvDeriv) + (Curv - Gcurv - GcurvDeriv)).toFun =
+      (Gcurv + GcurvDeriv).toFun + (Curv - Gcurv - GcurvDeriv).toFun :=
+    SmoothCcTensor.toFun_add _ _
+  have hint₁ := SmoothCcTensor.integrable_inner_cross (I := I) (M := M) (Gcurv + GcurvDeriv) gradS
+  have hint₂ :=
+    SmoothCcTensor.integrable_inner_cross (I := I) (M := M) (Curv - Gcurv - GcurvDeriv) gradS
+  have hsplit :
+      tensorL2Inner (I := I) (M := M) g r (s + 1) Curv.toFun gradS.toFun =
+        tensorL2Inner (I := I) (M := M) g r (s + 1) (Gcurv + GcurvDeriv).toFun gradS.toFun +
+          tensorL2Inner (I := I) (M := M) g r (s + 1)
+            (Curv - Gcurv - GcurvDeriv).toFun gradS.toFun := by
+    nth_rewrite 1 [hCurv_eq]
+    rw [hfun]
+    exact tensorL2Inner_add_left (I := I) (M := M) g r (s + 1)
+      (Gcurv + GcurvDeriv).toFun (Curv - Gcurv - GcurvDeriv).toFun gradS.toFun hint₁ hint₂
+  rw [hpair] at hsplit
+  linarith [hsplit]
+
 /-- **The rank-`r` integrated moving-frame nullity producer (from the genuine cross-pairing VALUE,
 posited general-rank divergence converter).** The contravariant-rank-`r` analogue of the rank-`0`
 *sorry-free* converter `movingFrameNullity_of_genuineCrossPairingValue` (`MovingFrameIntegratedNullity`).
@@ -1044,7 +1167,16 @@ theorem movingFrameNullityRS_of_genuineCrossPairingValue
         (pointwiseTensorCurvRS (I := I) (M := M) g r s S -
           GcurvSectionRS (I := I) (M := M) g r s S - Gcd).toFun
         (covGrad (I := I) (M := M) g r s S).toFun = 0 := by
-  sorry
+  have hpair :
+      tensorL2Inner (I := I) (M := M) g r (s + 1)
+          (GcurvSectionRS (I := I) (M := M) g r s S + Gcd).toFun
+          (covGrad (I := I) (M := M) g r s S).toFun =
+        tensorL2Inner (I := I) (M := M) g r (s + 1)
+          (pointwiseTensorCurvRS (I := I) (M := M) g r s S).toFun
+          (covGrad (I := I) (M := M) g r s S).toFun := by
+    rw [hval, weitzenbock_curvature_crossPairing_valueRS (I := I) (M := M) g r s S]
+  exact tensorL2Inner_movingFrameRemainder_eq_zero_of_bracketFreePairingRS
+    (I := I) (M := M) g r s S (GcurvSectionRS (I := I) (M := M) g r s S) Gcd hpair
 
 /-- **The rank-`r` coupled differentiated-curvature `(∇R) S` anchor with its integrated moving-frame
 nullity (proved over the carrier value-datum and the divergence converter).** The contravariant-rank-`r`
