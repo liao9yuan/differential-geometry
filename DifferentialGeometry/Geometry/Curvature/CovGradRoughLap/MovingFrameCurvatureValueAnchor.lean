@@ -1,3 +1,4 @@
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.BracketChannelEngineIdentification
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FrozenFramePureRCurvatureTower
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RicciTraceCarrier
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameIntegratedNullity
@@ -13,17 +14,17 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemain
 /-!
 # The frame-free curvature operator field and the integrated tensor Bochner–Weitzenböck curvature value
 
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` this upstream file homes the
-**frame-free curvature operator field** `Φ₀ s := curvOpField g s` and the single genuinely-irreducible
-**integrated tensor Bochner–Weitzenböck curvature value** of the rank-generic order-`2` rough-Laplacian /
-covariant-gradient commutator defect `Curv S := Δ_∇(∇S) − ∇(Δ_∇ S)` (`pointwiseTensorCurv g s S`,
-`∇S := covGrad g 0 s S`).
-
-* `curvOpField g s` — the fixed smooth `(s, s)`-operator field whose operator-field action recovers the
-  order-`0` moving-frame pure-Riemann curvature endomorphism `pureRGenuineDiffOp g 0 s W = appCc (Φ₀ s) W`
-  (`exists_pureRGenuineDiffOp_base_appCc`). It is the curvature coefficient whose covariant derivative
-  carries the differentiated-curvature `(∇R)` content; a pure `Classical.choose` definition with no
-  downstream dependency, homed here so the whole curvature line shares it.
+For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` this file homes the single
+genuinely-irreducible **integrated tensor Bochner–Weitzenböck curvature value** of the rank-generic
+order-`2` rough-Laplacian / covariant-gradient commutator defect `Curv S := Δ_∇(∇S) − ∇(Δ_∇ S)`
+(`pointwiseTensorCurv g s S`, `∇S := covGrad g 0 s S`). The **frame-free curvature operator field**
+`Φ₀ s := curvOpField g s` (the fixed smooth `(s, s)`-operator field whose action recovers the order-`0`
+moving-frame pure-Riemann curvature endomorphism, `appCc_curvOpField_eq_pureRGenuineDiffOp`) is imported
+from the most-upstream curvature node `BracketChannelEngineIdentification`, where it is co-homed with the
+single irreducible bracket-channel divergence-engine identification
+`bracketChannelRemainder_integral_eq_diffCurvOpField_ricTrace` over which the value `(★)` of this file is
+proved by composition (so the architectural circle `BracketDiscrepancyNullity →
+MovingFrameCurvatureValueAnchor` is never re-entered).
 
 * `curvatureValue_genuineFields_eq_weitzenbock` — the **integrated tensor Bochner–Weitzenböck curvature
   value** (the curvature line's single genuine deep root, in its canonical value form): the three
@@ -72,29 +73,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
-
-/-- **The frame-free curvature operator field `Φ₀ s`.** The fixed smooth `(s, s)`-operator field whose
-operator-field action recovers the order-`0` moving-frame pure-Riemann curvature endomorphism
-`pureRGenuineDiffOp g 0 s W = appCc (Φ₀ s) W` (`exists_pureRGenuineDiffOp_base_appCc`); its fibre value
-is the genuine `g`-metric curvature trace `W ↦ ∑ᵢ R(Bᵢ, ·) W`, frame-free (built from `g, R` alone). It
-is the curvature coefficient whose covariant derivative carries the differentiated-curvature `(∇R)`
-content. It is a pure `Classical.choose` definition (no downstream dependency), homed upstream so the
-curvature line shares it. -/
-noncomputable def curvOpField (g : SmoothRiemannianMetric I M) (s : ℕ) :
-    SmoothCcTensor g (s + 0) (s + 0) :=
-  (Classical.choose (exists_pureRGenuineDiffOp_base_appCc (I := I) (M := M) g)) s
-
-/-- **The order-`0` curvature operator base spec for `curvOpField`.** The defining `Classical.choose`
-specification: the operator-field action of the frame-free curvature operator field `Φ₀ s := curvOpField
-g s` on a smooth compactly-supported `(0, s)`-tensor `S` recovers the order-`0` moving-frame pure-Riemann
-curvature trace `pureRGenuineDiffOp g 0 s S`. This is the identity through which the differentiated
-operator field `covGrad (Φ₀ s)` and its passenger-slot extension `slotExtend (Φ₀ s)` are identified with
-the curvature-derivative content. -/
-theorem appCc_curvOpField_eq_pureRGenuineDiffOp
-    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
-    appCc (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s) S =
-      pureRGenuineDiffOp (I := I) (M := M) g 0 s S :=
-  (Classical.choose_spec (exists_pureRGenuineDiffOp_base_appCc (I := I) (M := M) g) s S).symm
 
 /-- **The differentiated-curvature operator-field section `(∇R) S`** (the homed-upstream copy of the
 spine's `genuineDiffCurvSection`, value-anchored at the curvature operator field). For a smooth
@@ -296,7 +274,62 @@ theorem genuineCurvFields_starValue_bochnerLeaf
       tensorL2Inner (I := I) (M := M) g 0 (s + 1)
         (pointwiseTensorCurv (I := I) (M := M) g s S).toFun
         (covGrad (I := I) (M := M) g 0 s S).toFun := by
-  sorry
+  classical
+  set μ := riemannianVolumeMeasure (I := I) (M := M) g with hμ
+  set fG : M → ℝ := fun x => ∑ i : Fin (Module.finrank ℝ E),
+      tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x
+        (TensorRSSpace.toModel (remDiffGenuineFib (I := I) (M := M) g s S x i))
+        ((covGrad (I := I) (M := M) g 0 s S).toFun x) with hfG
+  set fB : M → ℝ := fun x => ∑ i : Fin (Module.finrank ℝ E),
+      tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x
+        (TensorRSSpace.toModel (remDiffBracketFib (I := I) (M := M) g s S x i))
+        ((covGrad (I := I) (M := M) g 0 s S).toFun x) with hfB
+  set fR : M → ℝ := fun x => ∑ i : Fin (Module.finrank ℝ E),
+      tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x
+        (TensorRSSpace.toModel (remDiffFib (I := I) (M := M) g s S x i))
+        ((covGrad (I := I) (M := M) g 0 s S).toFun x) with hfR
+  obtain ⟨hG_int, hG_val⟩ :=
+    remDiffFib_genuineFrameSum_pairing_eq_genuineFields (I := I) (M := M) g s S
+  -- Bridge A's carrier `appCc (covGrad g s s (Φ₀ s)) S` is `diffCurvOpFieldSection g s S` by definition,
+  -- so its `L²` value matches the value-anchor carrier in the goal verbatim.
+  have hB_val : (∫ x, fB x ∂μ) =
+      tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (diffCurvOpFieldSection (I := I) (M := M) g s S +
+          ricTraceSection (I := I) (M := M) g s S).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun := by
+    rw [hfB, hμ]
+    exact bracketChannelRemainder_integral_eq_diffCurvOpField_ricTrace (I := I) (M := M) g s S
+  have hRsplit : fR = fun x => fG x + fB x := by
+    funext x
+    rw [hfR, hfG, hfB, ← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [remDiffFib_eq_genuine_add_bracket (I := I) (M := M) g s S x i,
+      TensorRSSpace.toModel_add, tensorInnerPointwise_add_left]
+  have hR_int : MeasureTheory.Integrable fR μ := by
+    have hcross := SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+      (pointwiseTensorCurv (I := I) (M := M) g s S) (covGrad (I := I) (M := M) g 0 s S)
+    refine hcross.congr (Filter.Eventually.of_forall (fun x => ?_))
+    rw [hfR]
+    exact pointwiseTensorCurvPairing_eq_frameSum (I := I) (M := M) g s S x
+  have hB_int : MeasureTheory.Integrable fB μ := by
+    have hBeq : fB = fun x => fR x - fG x := by
+      funext x; rw [hRsplit]; ring
+    rw [hBeq]; exact hR_int.sub hG_int
+  rw [tensorL2Inner_pointwiseTensorCurv_covGrad_eq_frameSum_integral (I := I) (M := M) g s S]
+  rw [SmoothCcTensor.toFun_add,
+    tensorL2Inner_add_left (I := I) (M := M) g 0 (s + 1)
+      (GcurvSection (I := I) (M := M) g s S).toFun
+      (diffCurvOpFieldSection (I := I) (M := M) g s S +
+        ricTraceSection (I := I) (M := M) g s S).toFun
+      (covGrad (I := I) (M := M) g 0 s S).toFun
+      (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+        (GcurvSection (I := I) (M := M) g s S) (covGrad (I := I) (M := M) g 0 s S))
+      (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+        (diffCurvOpFieldSection (I := I) (M := M) g s S +
+          ricTraceSection (I := I) (M := M) g s S) (covGrad (I := I) (M := M) g 0 s S))]
+  rw [← hG_val, ← hB_val]
+  change (∫ x, fG x ∂μ) + (∫ x, fB x ∂μ) = ∫ x, fR x ∂μ
+  rw [hRsplit, MeasureTheory.integral_add hG_int hB_int]
 
 /-- **The frame-bracket remainder frame-sum integral carries the differentiated-curvature operator-field
 trace plus the Ricci trace (the curvature line's single irreducible integrated deep root, the strictly-

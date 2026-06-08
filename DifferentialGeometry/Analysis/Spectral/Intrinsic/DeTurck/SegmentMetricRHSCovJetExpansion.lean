@@ -227,32 +227,41 @@ theorem ricciLinearSection_iteratedCovGrad_diffArm_rfns_le
                 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=
   ricciLinearSection_covGrad_traceReduction_rfns_le (I := I) g₀ a ha B hB δ hδ0 hδ1 j
 
-/-- **(POSIT — the curvature Cross section's two-arm covariant-jet bound.)**  The intrinsic squared
-fibre norm of the order-`j` covariant gradient of the concrete quadratic-in-difference curvature Cross
-section `crossSection g₀ g₁ g₂` is dominated by the **Hamilton/Moser two-arm sum** — a difference-arm
-piece `Cd · ∑_{i ≤ j+2} rfns(∇^i w)` plus a fixed-pair cross piece against the difference's order-`a`
-chart-Sobolev `C⁰` mass — with `w := realizeSymmCcTensor g₀ (T₁ − T₂)` and a nonnegative family-uniform
-constant `Cd`:
+/-- **(The curvature Cross section's two-arm covariant-jet bound — re-export of the connection-level
+trace-reduction.)**  The intrinsic squared fibre norm of the order-`j` covariant gradient of the concrete
+quadratic-in-difference curvature Cross section `crossSection g₀ g₁ g₂` is dominated by the
+**Hamilton/Moser two-arm sum** — a difference-arm piece `Cd · ∑_{i ≤ j+2} rfns(∇^i w)` plus a fixed-pair
+cross piece against the difference's order-`a` chart-Sobolev `C⁰` mass — with `w := realizeSymmCcTensor g₀
+(T₁ − T₂)` and a nonnegative family-uniform constant `Cd`:
 ```
 rfns(∇^j crossSection)(x) ≤ Cd · ∑_{i ≤ j+2} rfns(∇^i w)(x)
                           + (∑_{i ≤ j+2} (rfns(∇^i T₁)(x) + rfns(∇^i T₂)(x))) · ‖(T₁ − T₂).toHs a‖².
 ```
 
-This is the **corrected** (two-arm) bound of the curvature Cross section.  The order-zero
-linear/quadratic split (`linearSection` / `crossSection`) does **not** coincide with the analytic
-difference-arm/fixed-pair split: the differenced operator-trace Cross section
-(`D₁ ∘ D₁ − D₂ ∘ D₂`, `D_k = connDiffField g_k g₀`) carries **both** a diff-high × fixed-low arm and a
-fixed-high × diff-low arm (the connection-difference bilinear product of two independently varying
-endomorphism fields).  The **difference arm** carries the single high derivative on the difference factor
-`w` (the realized perturbation difference), with the fixed-pair coefficient folded into `Cd`; the
-**cross arm** keeps the top coefficient jet on the **fixed pair** `T₁, T₂` (`L²` mass of order
-`j + 2 ∈ (a + 2, 2a + 2]`, which an `H^{a+2}` ball cannot bound) against the difference's `C⁰` mass,
-which the supercritical Sobolev embedding (`ha`) bounds by `‖(T₁ − T₂).toHs a‖`.  The two arms arise from
-the parallel two-section bilinear product `RfnsBilinearProduct` grid of `connDiffField ∘ connDiffField`,
-where the high derivative may land on either factor.  Non-vacuous: the Cross section genuinely vanishes
-to second order (`crossSection_self_toModel`), so it is the genuine quadratic remainder, both fixed-pair
-endpoints are carried, and the difference arm carries `∇^{j+2}w`.  NO pointwise-`C^{>2}`-jet claim, NO
-spectral-nonlinearity, NO Weyl dependence.  Its body is `sorry`: the genuine deep two-arm content. -/
+This is the two-arm bound of the curvature Cross half.  The order-zero linear/quadratic split
+(`linearSection` / `crossSection`) does **not** coincide with the analytic difference-arm/fixed-pair
+split: the differenced operator-trace Cross section (`D₁ ∘ D₁ − D₂ ∘ D₂`, `D_k = connDiffField g_k g₀`)
+carries **both** a diff-high × fixed-low arm and a fixed-high × diff-low arm (the connection-difference
+bilinear product of two independently varying endomorphism fields).  The **difference arm** carries the
+single high derivative on the difference factor `w` (the realized perturbation difference), with the
+fixed-pair coefficient folded into `Cd`; the **cross arm** keeps the top coefficient jet on the **fixed
+pair** `T₁, T₂` (`L²` mass of order `j + 2 ∈ (a + 2, 2a + 2]`, which an `H^{a+2}` ball cannot bound)
+against the difference's `C⁰` mass, which the supercritical Sobolev embedding (`ha`) bounds by
+`‖(T₁ − T₂).toHs a‖`.  The two arms arise from the parallel two-section bilinear product
+`RfnsBilinearProduct` grid of `connDiffField ∘ connDiffField`, where the high derivative may land on
+either factor.  Non-vacuous: the Cross section genuinely vanishes to second order
+(`crossSection_self_toModel`), so it is the genuine quadratic remainder, both fixed-pair endpoints are
+carried, and the difference arm carries `∇^{j+2}w`.  NO pointwise-`C^{>2}`-jet claim, NO
+spectral-nonlinearity, NO Weyl dependence.
+
+It is the connection-level trace-reduction `ricciCrossSection_covGrad_traceReduction_rfns_le`
+(`SegmentMetricCurvatureDifferenceCovJet.lean`) restated (same two-arm conclusion at the section level)
+and so is a direct re-export — exactly as the linear half `ricciLinearSection_iteratedCovGrad_diffArm_rfns_le`
+re-exports `ricciLinearSection_covGrad_traceReduction_rfns_le`.  Consumers transitively depend on
+`sorryAx` only through the connection-level quadratic-Cross reduction
+`ricciCrossSection_covGrad_traceReductionConn_rfns_le` that the trace-reduction descends into (the
+genuinely-deep curvature-trace covariant-Leibniz content of the quadratic Cross, at the connection level /
+rank `3`, the `D₁ ∘ D₁ − D₂ ∘ D₂` bilinear product). -/
 theorem ricciCrossSection_iteratedCovGrad_cross_rfns_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (j : ℕ) :
@@ -281,7 +290,7 @@ theorem ricciCrossSection_iteratedCovGrad_cross_rfns_le
                     + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
                       ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
                 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=
-  sorry
+  ricciCrossSection_covGrad_traceReduction_rfns_le (I := I) g₀ a ha B hB δ hδ0 hδ1 j
 
 /-- **(POSIT — the order-zero linear/cross split of the Lie-summand difference, with per-order jet
 bounds.)**  The genuine Core-II deep leaf of the Lie half.  The `g₀`-retagged Lie-summand difference
