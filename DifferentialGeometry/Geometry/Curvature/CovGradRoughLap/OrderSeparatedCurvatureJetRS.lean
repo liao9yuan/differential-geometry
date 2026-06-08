@@ -332,8 +332,8 @@ The concrete field `diffCurvSectionRS g r s S` is pinned (no `∃ Gcd`), mirrori
 at gradient order `k`, point `x`, is exactly the raw iterated-gradient grid bound
 `exists_diffCurvSectionRS_iteratedCovGrad_grid_bound` (`RankRDiffCurvatureTower`, window `w + k = 1 + k`,
 lowest order `p = 0`, target jets `∇^{i + 0} S`), which is *proved* off the rank-`r` `(∇R)·` carrier
-tower's rank-raising operator-field normal form. Consumers transitively depend on `sorryAx` through the
-carrier tower's single posited node `exists_curvOpFieldRS`.
+tower's binomial covariant-Leibniz grid and per-order envelope. Consumers transitively depend on `sorryAx`
+through the carrier tower's single posited node `exists_diffCurvGenuineTowerRS`.
 This carries NO remainder and NO section split (those are
 `exists_pointwiseTensorCurvRS_remainder_afterDiffCurv_gradedCurvJet` below).
 
