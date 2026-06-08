@@ -108,40 +108,143 @@ private def crossCorrTripleDiff (g₀ : SmoothRiemannianMetric I M)
   (2 : ℝ) • DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
     - (2 : ℝ) • DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂
 
-/-- **(POSIT — the `(0, 4) → (0, 2)` model-basis Ricci-trace parallel contraction.)**  The genuine
-parallel rank-reducing single-section contraction realising the `−2` model-basis Ricci trace `g₀^{ij}·`
-on the once-`∇₀`-differentiated rank-`4` Koszul operand: a `ParallelRankReducingContraction g₀ 4 2`.
-Its three fields are the genuinely-deep content: the `op` is the `−2` background-metric trace
-`g₀^{ij} R_{ij··}` (contracting the leading two of the four covariant slots against the background
-inverse metric, then `−2`-scaling); its exact parallel single-step covariant Leibniz field
-`covGrad_op` (`∇₀(op a R) = (rank-cast) op (a+1) (∇₀ R)`, cross-term-free) is `∇₀ g₀⁻¹ = 0` (the
-cometric skew core `cometric_skew_core`) carried through `castRankCc_db`; and its single-value
-fibre envelope field `rfns_op_le` is value-locality of the trace (it reads only the fibre `R(x)`).
-Its body is `sorry`: the genuine model-basis Ricci-trace contraction-operator construction. -/
-noncomputable def ricciModelTrace42 (g₀ : SmoothRiemannianMetric I M) :
-    Integral.Connection.ParallelRankReducingContraction (I := I) (M := M) g₀ 4 2 :=
+/-- **(POSIT — the section-level `−2` model-basis Ricci-trace operator `(0, 4 + a) → (0, 2 + a)`.)**
+The genuinely-deep building block of the model-basis Ricci-trace parallel contraction: the section-level
+operator at gradient-shift `a` that contracts the leading two of the `4 + a` covariant slots of a smooth
+`(0, 4 + a)`-tensor against the background inverse metric `g₀^{ij}` (the model-basis double trace) and
+scales by `−2`, producing a smooth compactly-supported `(0, 2 + a)`-tensor.  This is the rank-reducing
+metric-trace contraction the Ricci difference arm needs (the `−2 g₀^{ij} R_{ij··}` curvature trace
+lowering rank `4 + a → 2 + a`); its body is `sorry`, the genuine smooth model-basis double-trace
+contraction-operator construction (the same smooth-section route as `loweredConnDiffField` /
+`ricSlotOpField`, contracting against the parallel background inverse metric). -/
+noncomputable def ricciModelTrace42Op (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
+    Integral.L2.SmoothCcTensor g₀ 0 (4 + a) → Integral.L2.SmoothCcTensor g₀ 0 (2 + a) :=
   sorry
 
-/-- **(POSIT — fibrewise `ℝ`-linearity of the model-basis Ricci trace.)**  The `op` of the
-`(0, 4) → (0, 2)` model-basis Ricci-trace contraction `ricciModelTrace42` distributes over a section
-difference (it is fibrewise `ℝ`-linear: a metric contraction is linear in the contracted section).
-Its body is `sorry`: the linearity of the model-basis Ricci-trace operator. -/
+/-- **(POSIT — fibrewise `ℝ`-additivity of the section-level model-basis Ricci-trace operator.)**  The
+`−2` model-basis double trace `ricciModelTrace42Op` distributes over a section difference (a metric
+contraction is fibrewise `ℝ`-linear in the contracted section).  Its body is `sorry`: the additivity of
+the model-basis Ricci-trace contraction operator. -/
+theorem ricciModelTrace42Op_sub (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (A B : Integral.L2.SmoothCcTensor g₀ 0 (4 + a)) :
+    ricciModelTrace42Op (I := I) g₀ a (A - B) =
+      ricciModelTrace42Op (I := I) g₀ a A - ricciModelTrace42Op (I := I) g₀ a B :=
+  sorry
+
+/-- **(POSIT — the exact parallel single-step covariant Leibniz of the model-basis Ricci trace.)**
+Because the background inverse metric `g₀^{ij}` is `∇₀`-parallel (`∇₀ g₀⁻¹ = 0`, the cometric skew core
+`cometric_skew_core` read on the orthonormal frame), the covariant gradient passes through the `−2`
+model-basis double trace with **no** differentiated-operator cross term:
+`∇₀(ricciModelTrace42Op a R) = (rank-cast) ricciModelTrace42Op (a+1) (∇₀ R)`, the new gradient slot
+carried at the front, rank-cast from `2 + (a + 1)` to `(2 + a) + 1` by `castRankCc_db`.  Its body is
+`sorry`: the cometric-parallelism intertwining of `∇₀` and the model-basis trace. -/
+theorem ricciModelTrace42Op_covGrad (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (R : Integral.L2.SmoothCcTensor g₀ 0 (4 + a)) :
+    Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 (2 + a)
+        (ricciModelTrace42Op (I := I) g₀ a R) =
+      Integral.Connection.castRankCc_db g₀ 0 (by omega : 2 + (a + 1) = (2 + a) + 1)
+        (ricciModelTrace42Op (I := I) g₀ (a + 1)
+          (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 (4 + a) R)) :=
+  sorry
+
+/-- **(POSIT — the single-value fibre envelope of the model-basis Ricci trace.)**  A parallel metric
+contraction is value-local (it reads only the fibre value `R(x)`, never a jet of `R`), so its intrinsic
+squared fibre norm obeys the strong single-value proportional bound with the concrete envelope constant
+`(2 · dim)²`: contracting the leading two of the `4 + a` slots against the orthonormal frame produces at
+most `dim` diagonal terms, and the `−2`-scaling lands the squared factor `(2 · dim)²`.  Its body is
+`sorry`: the value-local fibre bound of the model-basis trace. -/
+theorem ricciModelTrace42Op_rfns_le (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (R : Integral.L2.SmoothCcTensor g₀ 0 (4 + a)) (x : M) :
+    Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+        ((ricciModelTrace42Op (I := I) g₀ a R).toSection x) ≤
+      (2 * (Module.finrank ℝ E : ℝ)) ^ 2 *
+        Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + a) x
+          (R.toSection x) :=
+  sorry
+
+/-- **The `(0, 4) → (0, 2)` model-basis Ricci-trace parallel contraction.**  The parallel rank-reducing
+single-section contraction realising the `−2` model-basis Ricci trace `g₀^{ij}·` on the
+once-`∇₀`-differentiated rank-`4` Koszul operand, a `ParallelRankReducingContraction g₀ 4 2`, assembled
+from its four genuinely-deep fields: the section-level double trace `ricciModelTrace42Op`, its exact
+parallel single-step covariant Leibniz `ricciModelTrace42Op_covGrad` (the cometric parallelism
+`∇₀ g₀⁻¹ = 0`, carried through `castRankCc_db`), the concrete envelope constant `(2 · dim)²`, and its
+single-value fibre envelope `ricciModelTrace42Op_rfns_le` (value-locality of the trace).
+
+The contraction is **genuine** (non-degenerate): its envelope `kappa = (2 · dim)²` is strictly positive
+(`dim ≥ 1` since `NeZero (finrank ℝ E)`), so the value-local bound genuinely uses the section; the
+trace is tied to the linearized-Ricci principal part by the section identity
+`linearSection_eq_ricciModelTrace42_koszulTriple_sub_crossCorrTriple` (a degenerate zero trace would
+falsify it whenever the linear part is genuinely present, `linearSection_self_toModel`). -/
+noncomputable def ricciModelTrace42 (g₀ : SmoothRiemannianMetric I M) :
+    Integral.Connection.ParallelRankReducingContraction (I := I) (M := M) g₀ 4 2 where
+  op := fun a => ricciModelTrace42Op (I := I) g₀ a
+  covGrad_op := fun a R => ricciModelTrace42Op_covGrad (I := I) g₀ a R
+  kappa := (2 * (Module.finrank ℝ E : ℝ)) ^ 2
+  kappa_nonneg := by positivity
+  rfns_op_le := fun a R x => ricciModelTrace42Op_rfns_le (I := I) g₀ a R x
+
+set_option linter.unusedSectionVars false in
+/-- **Fibrewise `ℝ`-linearity of the model-basis Ricci trace.**  The `op` of the `(0, 4) → (0, 2)`
+model-basis Ricci-trace contraction `ricciModelTrace42` distributes over a section difference (it is
+fibrewise `ℝ`-linear: a metric contraction is linear in the contracted section).  This is the assembled
+instance's `op` unfolding to `ricciModelTrace42Op`, whose additivity is `ricciModelTrace42Op_sub`. -/
 theorem ricciModelTrace42_op_sub (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (A B : Integral.L2.SmoothCcTensor g₀ 0 (4 + a)) :
     (ricciModelTrace42 (I := I) g₀).op a (A - B) =
       (ricciModelTrace42 (I := I) g₀).op a A - (ricciModelTrace42 (I := I) g₀).op a B :=
+  ricciModelTrace42Op_sub (I := I) g₀ a A B
+
+set_option linter.unusedSectionVars false in
+/-- **The single-step covariant gradient distributes over a section difference.**  `covGrad g₀ 0 s` is
+`ℝ`-linear (`covGrad_add`, `covGrad_smul`), hence subtractive.  Local re-statement (the single-step
+`covGrad_sub` is not on disk; the *iterated* `iteratedCovGrad_sub` is). -/
+private theorem covGrad_sub_local (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
+    (A B : Integral.L2.SmoothCcTensor g₀ 0 s) :
+    Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 s (A - B) =
+      Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 s A
+        - Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 s B := by
+  rw [sub_eq_add_neg, Analysis.Parabolic.TensorSpectral.covGrad_add,
+    show (-B) = (-1 : ℝ) • B by rw [neg_one_smul],
+    Analysis.Parabolic.TensorSpectral.covGrad_smul, neg_one_smul, ← sub_eq_add_neg]
+
+/-- **(POSIT — the linearized-Ricci principal-part value identity, the irreducible trace bridge.)**  The
+genuine value content of the linearized-Ricci principal part: the linear-in-difference curvature section
+`linearSection g₀ g₁ g₂` is the `−2` model-basis Ricci trace `ricciModelTrace42.op 0` of the
+**once-`∇₀`-differentiated** `g₀`-lowered connection-difference *difference*
+`∇₀ (2·loweredConnDiffSection g₁ g₀ − 2·loweredConnDiffSection g₂ g₀)`.  This is the section-level lift
+of the once-differentiated pointwise lowered-Koszul form `connDiffDiff_g0_lowered_koszul_diffFactor`
+(`ricciNeg2SectionDiffLinearEval = −2 g₀^{ij}` double trace of `∇₀` of the lowered connection-difference
+difference), the genuine reconciliation tying the model-basis trace `op` to the linearized-Ricci
+principal part `linearSection` (`linearSection_toModel_apply = ricciNeg2SectionDiffLinearEval`,
+`ricciModelTrace42Op` the `−2 g₀^{ij}` double trace).  Its body is `sorry`: the irreducible
+linearized-Ricci principal-part covariant trace identity. -/
+theorem linearSection_eq_ricciModelTrace42_loweredConnDiffSub
+    (g₀ : SmoothRiemannianMetric I M) (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+    (g₁ g₂ : SmoothRiemannianMetric I M)
+    (hr1 : ∀ (x : M) (v w : TangentSpace I x),
+      g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w)
+    (hr2 : ∀ (x : M) (v w : TangentSpace I x),
+      g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) :
+    linearSection (I := I) g₀ g₁ g₂ =
+      (ricciModelTrace42 (I := I) g₀).op 0
+        (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+          ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀
+            - (2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₂ g₀)) :=
   sorry
 
-/-- **(POSIT — the linearized-Ricci principal-part value identity for the model-basis Ricci trace.)**
-The lift of the once-differentiated pointwise lowered-Koszul form
-(`connDiffDiff_g0_lowered_koszul_diffFactor`, lifted to the section level by the **proven** child-A
-`loweredConnDiffSection_sub_eq_koszulRealizeDiff_sub_crossCorrDiff`) through the `−2` model-basis Ricci
-trace `ricciModelTrace42`: the linear-in-difference curvature section `linearSection g₀ g₁ g₂` is the
-trace of the **once-`∇₀`-differentiated** connection-difference Koszul **difference arm**
-`∇₀ koszulTripleDiff` minus the trace of the once-`∇₀`-differentiated **cross arm**
-`∇₀ crossCorrTripleDiff`.  This is the pointwise reconciliation `ricciNeg2SectionDiffLinearEval =`
-trace of `∇₀` of the lowered combination (the docstring-target), promoted to the section level.  Its
-body is `sorry`: the genuine linearized-Ricci principal-part covariant section identity. -/
+/-- **The linearized-Ricci principal-part value identity for the model-basis Ricci trace.**  The
+linear-in-difference curvature section `linearSection g₀ g₁ g₂` is the trace of the
+**once-`∇₀`-differentiated** connection-difference Koszul **difference arm** `∇₀ koszulTripleDiff` minus
+the trace of the once-`∇₀`-differentiated **cross arm** `∇₀ crossCorrTripleDiff`.
+
+**Decomposition.**  By the **proven** child-A `loweredConnDiffSection_sub_eq_koszulRealizeDiff_sub_crossCorrDiff`,
+`koszulTripleDiff − crossCorrTripleDiff = 2·loweredConnDiffSection g₁ g₀ − 2·loweredConnDiffSection g₂ g₀`
+(the `koszulTripleDiff` shape `R + perm₁ R − perm₂ R` is the clean realized combination, and
+`crossCorrTripleDiff = 2·crossCorrectionSection g₁ − 2·crossCorrectionSection g₂` is the cross arm).  The
+two traces re-collect over the section difference by the fibrewise-`ℝ`-linearity `ricciModelTrace42_op_sub`
+and the covariant-gradient linearity `covGrad_sub_local`, reducing the goal to the irreducible value
+bridge `linearSection_eq_ricciModelTrace42_loweredConnDiffSub` (the trace of the once-differentiated
+lowered connection-difference difference equals `linearSection`). -/
 theorem linearSection_eq_ricciModelTrace42_koszulTriple_sub_crossCorrTriple
     (g₀ : SmoothRiemannianMetric I M) (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
     (g₁ g₂ : SmoothRiemannianMetric I M)
@@ -155,8 +258,24 @@ theorem linearSection_eq_ricciModelTrace42_koszulTriple_sub_crossCorrTriple
             (koszulTripleDiff (I := I) g₀ T₁ T₂))
         - (ricciModelTrace42 (I := I) g₀).op 0
           (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
-            (crossCorrTripleDiff (I := I) g₀ T₁ T₂ g₁ g₂)) :=
-  sorry
+            (crossCorrTripleDiff (I := I) g₀ T₁ T₂ g₁ g₂)) := by
+  -- Re-collect the two traces over the section difference (fibrewise-`ℝ`-linearity of the trace and
+  -- linearity of `∇₀`), reducing to `op 0 (∇₀ (koszulTripleDiff − crossCorrTripleDiff))`.
+  rw [← ricciModelTrace42_op_sub (I := I) g₀ 0
+        (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+          (koszulTripleDiff (I := I) g₀ T₁ T₂))
+        (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+          (crossCorrTripleDiff (I := I) g₀ T₁ T₂ g₁ g₂)),
+    ← covGrad_sub_local (I := I) g₀ 3
+      (koszulTripleDiff (I := I) g₀ T₁ T₂) (crossCorrTripleDiff (I := I) g₀ T₁ T₂ g₁ g₂)]
+  -- Child-A: `koszulTripleDiff − crossCorrTripleDiff = 2·loweredConnDiff g₁ − 2·loweredConnDiff g₂`.
+  have hchildA :=
+    (DeTurck.loweredConnDiffSection_sub_eq_koszulRealizeDiff_sub_crossCorrDiff
+      (I := I) g₀ g₁ g₂ T₁ T₂ hr1 hr2).symm
+  rw [koszulTripleDiff, crossCorrTripleDiff] at *
+  rw [hchildA]
+  -- The irreducible value bridge.
+  exact linearSection_eq_ricciModelTrace42_loweredConnDiffSub (I := I) g₀ T₁ T₂ g₁ g₂ hr1 hr2
 
 /-- **The linearized-Ricci principal-part section identity: `linearSection` as a parallel model-basis
 Ricci trace of the *once-covariantly-differentiated* connection-difference Koszul combination.**  There
@@ -670,6 +789,68 @@ theorem ricciLinearSection_covGrad_traceReduction_rfns_le
   refine le_trans hconn ?_
   linarith [harm]
 
+/-- **(POSIT — the connection-level top/rest split of the quadratic Cross section.)**  The genuine deep
+**connection-level** (rank-`3`, `∇w`-level) two-piece decomposition of the quadratic-in-difference
+curvature Cross section `crossSection g₀ g₁ g₂`: its order-`j` covariant gradient splits, at each point
+`x`, into a connection-level difference part `Top` and a fixed-pair cross part `Rest`,
+```
+∇^j (crossSection)(x) = Top + Rest,
+rfns(Top)(x)  ≤ Cd · ∑_{p ≤ j+1} rfns(∇^p R)(x),
+rfns(Rest)(x) ≤ (1/8) · (∑_{i ≤ j+2} (rfns(∇^i T₁)(x) + rfns(∇^i T₂)(x))) · ‖(T₁ − T₂).toHs a‖²,
+```
+where `R := covGrad g₀ 0 2 (realizeSymmCcTensor g₀ (T₁ − T₂))` (rank `3`).
+
+`crossSection`'s fibre value is the `−2` model-basis trace of the quadratic
+`connDiffField ∧ connDiffField` summand difference (`ricciDiffQuad_modelTrace_eq_crossEndoTrace`); the
+quadratic difference `D₁ ∘ D₁ − D₂ ∘ D₂ = (D₁ − D₂) ∘ D₁ + D₂ ∘ (D₁ − D₂)` (`D_k = connDiffField g_k
+g₀`) puts the single high derivative on the difference factor `D₁ − D₂ = connDiffField g₁ g₂` (the
+cocycle), whose `g₀`-lowered Koszul form is `R = ∇₀ w`.  The `Top` part collects the connection-level
+difference-factor jets through the rank-reducing `(0, 3) → (0, 2)` curvature trace and the parallel
+two-section bilinear product grid `RfnsBilinearProduct` (where the high derivative may land on either
+factor, folded with the *fixed* factor sup and the metric-built `≤ 2`-jet trace coefficient into the
+family-uniform `Cd`); the `Rest` part keeps the top coefficient jet on the **fixed pair** `T₁, T₂`
+against the difference's order-`a` chart-Sobolev `C⁰` mass (the supercritical embedding `ha`), with the
+per-recombination share `(1/8)` so that the `2·rfns` `riemannianFiberNormSq_add_le` recombination lands
+the consumer's `(1/4)` cross coefficient.
+
+**Non-vacuity.**  The `Top` part carries the connection-level high derivative `∇^{j+1} R`, and the
+`Rest` part carries **both** fixed-pair endpoints `T₁, T₂`.  At `g₁ = g₂` the Cross section vanishes
+(`crossSection_self_toModel`), so the split is `0 = 0 + 0`.  NO value-bounded operator shape, NO
+pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, NO Weyl dependence.  Its body is `sorry`: the
+genuine deep connection-level quadratic-Cross covariant-Leibniz split. -/
+theorem crossSection_iteratedCovGrad_connLevel_split
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (j : ℕ) :
+    ∃ Cd : ℝ, 0 ≤ Cd ∧
+      ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+        (g₁ g₂ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+        ∀ x : M,
+          ∃ Top Rest : Tensor0SBundle.TensorRSSpace 0 (2 + j) I x,
+            (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+                  (crossSection (I := I) g₀ g₁ g₂)).toSection x = Top + Rest ∧
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x Top ≤
+                Cd * ∑ p ∈ Finset.range (j + 1 + 1),
+                    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+                          (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 2
+                            (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂)))).toSection x) ∧
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x Rest ≤
+                (1 / 8 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+                    (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
+                      + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
+                  * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=
+  sorry
+
 /-! ### The curvature-trace covariant-jet reduction of the *quadratic* Cross section
 
 The quadratic-half analogue of the linear difference-arm reduction above.  The Cross section
@@ -747,8 +928,22 @@ theorem ricciCrossSection_covGrad_traceReductionConn_rfns_le
                       ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
                     + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
                       ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
-                * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=
-  sorry
+                * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 := by
+  classical
+  -- The connection-level Cross split (`(1/8)`-cross arm).
+  obtain ⟨Cd, hCd0, hsplit⟩ :=
+    crossSection_iteratedCovGrad_connLevel_split (I := I) g₀ a ha B hB δ hδ0 hδ1 j
+  refine ⟨2 * Cd, by positivity, ?_⟩
+  intro T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 x
+  obtain ⟨Top, Rest, hsum, hTop, hRest⟩ :=
+    hsplit T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 x
+  -- Recombine the split via the `2·rfns` subadditivity `riemannianFiberNormSq_add_le`: the doubled
+  -- `(1/8)` cross share lands the consumer's `(1/4)` cross coefficient, the doubled `Cd` diff bound the
+  -- consumer's `2·Cd` diff coefficient.
+  rw [hsum]
+  refine le_trans (riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (2 + j) x Top Rest) ?_
+  nlinarith [hTop, hRest, hCd0, riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + j) x Top,
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + j) x Rest]
 
 /-- **(POSIT-DERIVED — the curvature-trace covariant-jet two-arm bound of the quadratic Cross section.)**
 The intrinsic squared fibre norm of the order-`j` covariant gradient of the concrete

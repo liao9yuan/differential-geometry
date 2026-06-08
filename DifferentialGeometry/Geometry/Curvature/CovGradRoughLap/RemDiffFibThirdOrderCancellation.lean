@@ -451,6 +451,54 @@ private lemma riemannianFiberNormSq_tensor0SAsRS_riemannOp_abstract_le
     tensor0SAsRS_eq_unitScalarRSLift (I := I) (M := M) x T₀]
   exact hCsup x v w (unitScalarRSLift (I := I) (M := M) x T₀)
 
+/-- **The uniform differentiated-curvature operator proportional fibre sup (posited genuine `‖∇R‖_∞`
+compactness infrastructure).** For a closed smooth Riemannian manifold `(M, g)` and rank `s` there is a
+single nonnegative constant `Cdr`, independent of the tensor `S`, the base point `x`, the frame index
+`i`, and the smooth slot-`0` reading direction `w` (a unit direction, `g(w x, w x) ≤ 1`), bounding the
+intrinsic fibre norm of the `tensor0SAsRS`-wrapped per-direction differentiated curvature
+`nablaTensorCurvSec nab Bᵢ Bᵢ w V x` (`V := unitEvalSection g s S`, `Bᵢ := smoothOrthoFrame g x i`,
+`nab := tensor0SCovariantDerivative I M s (LeviCivita g)`) by the sum of the `tensor0SAsRS`-wrapped
+`≤ 1`-jet fibre norms of `V`:
+```
+∀ S x i w, g(w x, w x) ≤ 1 →
+  rfns(tensor0SAsRS x (nablaTensorCurvSec nab Bᵢ Bᵢ w V x))
+    ≤ Cdr · ( rfns(tensor0SAsRS x (∇^{abs}_{Bᵢ} V x)) + rfns(tensor0SAsRS x (V x)) ).
+```
+
+This is the genuine `‖∇R‖_∞` envelope: `nablaTensorCurvSec` is *tensorial* in its reading direction `w`
+(its slot-`0` curry reads only the value `w x`, never the chart-selection-unbounded `1`-jet of `w` —
+the per-term `∇_{Bᵢ} w` factors cancel through the Leibniz definition), and contracts the bundled
+curvature's covariant derivative against `w x` and the `≤ 1`-jet of `V` (the `0`-jet `V x` and the
+abstract directional derivative `∇^{abs}_{Bᵢ} V`). The proportional constant is the differentiated
+curvature operator's base-point-uniform fibre constant over the compact `M` and the frame indices,
+one bundle up from `exists_uniform_riemannOp_tensorCov_proportional_local`, the `∇R` analogue of that
+`R` sup. No uniform fibre bound on the per-direction `nablaTensorCurvSec` exists on disk (the bundled
+differentiated-curvature towers `diffCurvOp` / `genuineDiffCurvSection` are computed frame-freely on
+whole tensors, not as a per-direction per-frame fibre value); the body is `sorry` and
+`exists_nablaTensorCurvSec_tensor0SAsRS_fiberOrder_bound` transitively depends on its `sorryAx`. -/
+theorem exists_uniform_nablaTensorCurvSec_tensor0SAsRS_proportional_local
+    (g : SmoothRiemannianMetric I M) (s : ℕ) :
+    ∃ Cdr : ℝ, 0 ≤ Cdr ∧
+      ∀ (S : SmoothCcTensor g 0 s) (x : M) (i : Fin (Module.finrank ℝ E))
+        (w : Π b : M, TangentSpace I b),
+        ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% w) →
+        g.inner x (w x) (w x) ≤ 1 →
+        riemannianFiberNormSq (I := I) (M := M) g 0 s x
+            (tensor0SAsRS (I := I) (M := M) x
+              (nablaTensorCurvSec (I := I) g
+                (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+                (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i) w
+                (unitEvalSection (I := I) (M := M) g s S) x)) ≤
+          Cdr *
+            (riemannianFiberNormSq (I := I) (M := M) g 0 s x
+                (tensor0SAsRS (I := I) (M := M) x
+                  (covApply (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+                    (smoothOrthoFrame (I := I) g x i)
+                    (unitEvalSection (I := I) (M := M) g s S) x)) +
+              riemannianFiberNormSq (I := I) (M := M) g 0 s x
+                (tensor0SAsRS (I := I) (M := M) x (unitEvalSection (I := I) (M := M) g s S x))) := by
+  sorry
+
 /-- **The recentered orthonormal-frame Christoffel-direction uniform sup (posited genuine missing
 compactness infrastructure).** For a closed smooth Riemannian manifold `(M, g)` there is a single
 nonnegative constant `Kchr`, independent of the base point `x` and the frame index `i`, bounding the
@@ -495,11 +543,16 @@ rfns(tensor0SAsRS x (nablaTensorCurvSec nab Bᵢ Bᵢ w V x))(x) ≤ Ca s · (rf
 
 This is the genuine `‖∇R‖_∞` envelope: `nablaTensorCurvSec` is the covariant derivative of the bundled
 curvature operator contracted against the value `w x` (a unit direction) and the `≤ 1`-jet of `V`
-(transported to `rfns(∇S), rfns(S)`), uniformly bounded over the compact `M` and the frame indices
-through the differentiated-curvature operator tower `diffCurvOp` / `genuineDiffCurvSection`
-(`exists_continuous_proportional_diffCurvOp`, `genuineDiffCurvSection_gradedCurvJet`). It is genuine new
-content — no uniform fibre bound on `nablaTensorCurvSec` exists on disk; the body is `sorry` and consumers
-transitively depend on its `sorryAx`. -/
+(transported to `rfns(∇S), rfns(S)`), uniformly bounded over the compact `M` and the frame indices.
+
+**Proof (glue, TRANSIT over the `‖∇R‖_∞` sup).** Apply the uniform differentiated-curvature operator
+proportional fibre sup `exists_uniform_nablaTensorCurvSec_tensor0SAsRS_proportional_local`, bounding
+the wrapped differentiated curvature by `Cdr ·` the sum of the wrapped `≤ 1`-jet fibre norms of `V`.
+The proven `1`-jet transport `riemannianFiberNormSq_tensor0SAsRS_covApply_unitEval_le` dominates
+`rfns(tensor0SAsRS x (∇^{abs}_{Bᵢ} V x))` by `rfns(∇S)`, and the `0`-jet transport
+`riemannianFiberNormSq_tensor0SAsRS_unitEval_eq` identifies `rfns(tensor0SAsRS x (V x))` with `rfns(S)`;
+adding the nonnegative `rfns(∇²S)` gives `Cdr · (rfns(∇²S) + rfns(∇S) + rfns(S))`, so `Ca s := Cdr`.
+Transits the sup's `sorryAx`. -/
 theorem exists_nablaTensorCurvSec_tensor0SAsRS_fiberOrder_bound
     (g : SmoothRiemannianMetric I M) :
     ∃ Ca : ℕ → ℝ, (∀ s, 0 ≤ Ca s) ∧
@@ -520,7 +573,41 @@ theorem exists_nablaTensorCurvSec_tensor0SAsRS_fiberOrder_bound
               riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
                   ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
               riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) := by
-  sorry
+  classical
+  choose Cdr hCdr_nn hCdr using fun s =>
+    exists_uniform_nablaTensorCurvSec_tensor0SAsRS_proportional_local (I := I) (M := M) g s
+  refine ⟨Cdr, hCdr_nn, fun s S x i w hw hww => ?_⟩
+  set A : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+      ((covGrad (I := I) (M := M) g 0 (s + 1)
+        (covGrad (I := I) (M := M) g 0 s S)).toSection x) with hA
+  set B : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+      ((covGrad (I := I) (M := M) g 0 s S).toSection x) with hB
+  set D : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) with hD
+  have hA_nn : 0 ≤ A := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1 + 1) x _
+  have hB_nn : 0 ≤ B := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x _
+  have hD_nn : 0 ≤ D := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x _
+  refine le_trans (hCdr s S x i w hw hww) ?_
+  have hjet1 : riemannianFiberNormSq (I := I) (M := M) g 0 s x
+      (tensor0SAsRS (I := I) (M := M) x
+        (covApply (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+          (smoothOrthoFrame (I := I) g x i)
+          (unitEvalSection (I := I) (M := M) g s S) x)) ≤ B :=
+    riemannianFiberNormSq_tensor0SAsRS_covApply_unitEval_le (I := I) (M := M) g s S x i
+  have hjet0 : riemannianFiberNormSq (I := I) (M := M) g 0 s x
+      (tensor0SAsRS (I := I) (M := M) x (unitEvalSection (I := I) (M := M) g s S x)) = D :=
+    riemannianFiberNormSq_tensor0SAsRS_unitEval_eq (I := I) (M := M) g s S x
+  rw [hjet0]
+  have hsum : Cdr s * (B + D) ≤ Cdr s * (A + B + D) :=
+    mul_le_mul_of_nonneg_left (by linarith) (hCdr_nn s)
+  calc Cdr s *
+        (riemannianFiberNormSq (I := I) (M := M) g 0 s x
+            (tensor0SAsRS (I := I) (M := M) x
+              (covApply (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+                (smoothOrthoFrame (I := I) g x i)
+                (unitEvalSection (I := I) (M := M) g s S) x)) + D)
+      ≤ Cdr s * (B + D) :=
+        mul_le_mul_of_nonneg_left (by linarith [hjet1]) (hCdr_nn s)
+    _ ≤ Cdr s * (A + B + D) := hsum
 
 /-- **Child B — the curvature-`R(diff) V` class fibre envelope (posited genuine `R(∇V)`/`R(∇B,w)`
 content).** For a closed smooth Riemannian manifold `(M, g)` there is a nonnegative valence-dependent
@@ -754,28 +841,87 @@ theorem exists_riemannSecClass_tensor0SAsRS_fiberOrder_bound
   rw [h0rfns] at hsub2
   linarith [hsub1, hsub2, hb1, hb3]
 
-/-- **Child C — the Christoffel-derivative residual fibre envelope (posited genuine internal-cancellation
-content).** For a closed smooth Riemannian manifold `(M, g)` there is a nonnegative valence-dependent
-`Cc : ℕ → ℝ` such that, at every rank `s`, smooth `(0, s)`-tensor `S`, point `x`, frame index `i`, and
-smooth slot-`0` direction field `w` with `g(w x, w x) ≤ 1` whose covariant `1`- and `2`-jets vanish at
-`x` (`∇_u w(x) = 0` for every `u`, and `∇_Y(∇_Y w)(x) = 0` for every smooth `Y`), the
-`tensor0SAsRS`-wrapped Christoffel-derivative residual `secondOrderChristoffelResidual nab Bᵢ w V x`
-(`MetricCompatibility/CovGradCovDerivSecondOrderCommutation`) has intrinsic fibre norm bounded by `Cc s`
-times the sum of the `∇²S, ∇S, S` fibre norms.
+/-- **The per-direction Christoffel-residual uniform proportional fibre sup (posited genuine
+`‖∇²‖_∞`/Christoffel/bracket compactness infrastructure).** For a closed smooth Riemannian manifold
+`(M, g)` and rank `s` there is a single nonnegative constant `Cres`, independent of the tensor `S`, the
+base point `x`, the frame index `i`, and the smooth slot-`0` reading direction `w` whose covariant `1`-
+and `2`-jets vanish at `x` (`g(w x, w x) ≤ 1`, `∇_u w(x) = 0`, `∇_Y(∇_Y w)(x) = 0`), bounding the
+intrinsic fibre norm of the `tensor0SAsRS`-wrapped Christoffel-derivative residual
+`secondOrderChristoffelResidual nab Bᵢ w V x` (`V := unitEvalSection g s S`, `Bᵢ := smoothOrthoFrame g x
+i`, `nab := tensor0SCovariantDerivative I M s (LeviCivita g)`) by the full `(0, s + 2)`-fibre norm of the
+top-order `2`-jet `rfns(∇²S)` plus the wrapped `≤ 1`-jet fibre norms of `V` (the abstract directional
+derivative `∇^{abs}_{Bᵢ} V` and `V`):
+```
+∀ S x i w, [2-jet-vanishing hyps] →
+  rfns(tensor0SAsRS x (secondOrderChristoffelResidual nab Bᵢ w V x))
+    ≤ Cres · ( rfns(∇²S) + rfns(tensor0SAsRS x (∇^{abs}_{Bᵢ} V x)) + rfns(tensor0SAsRS x (V x)) ).
+```
 
 **This is the genuine internal-cancellation content of the residual `ρ`.** The residual carries seven
 iterated-`covApply` summands reading the tangent Christoffel directions `∇_{Bᵢ} Bᵢ`, the bracket
 `[Bᵢ, w]`, the `1`-jet `∇_{Bᵢ} w` and the `2`-jet `∇_{Bᵢ}(∇_{Bᵢ} w)` contracted against the `≤ 2`-jet of
-`V := unitEvalSection g s S`. Through `∇w(x) = 0`, `∇²w(x) = 0` the explicit single-direction `2`-jet
-term `∇_{∇_{Bᵢ}(∇_{Bᵢ} w)} V` and the `∇_{∇_{Bᵢ} w}(·)` terms vanish; the surviving terms — the
-`∇_{[Bᵢ, w]}(·)` and `∇_w(·)` order-`≤ 2` derivatives of `V` along the (value-only) bracket direction
-`[Bᵢ, w] x = −∇_{w x} Bᵢ` and the Christoffel direction `∇_{∇_{Bᵢ} Bᵢ} w` — contract the `≤ 2`-jet of
-`V` (transported to `rfns(∇²S), rfns(∇S), rfns(S)`) against metric/Christoffel direction factors,
-uniformly bounded over `M` and the frame indices `(i, a)` by compactness. (The `∇³S`-cancellation that
-makes the *full* commutator order-`≤ 2` is internal to this residual together with the curvature classes;
-the bound here is the order-`≤ 2` envelope of the residual itself, which is sound.) It is genuine new
-content — no fibre envelope of `secondOrderChristoffelResidual` exists on disk; the body is `sorry` and
-consumers transitively depend on its `sorryAx`. -/
+`V`. Through `∇w(x) = 0`, `∇²w(x) = 0` the explicit single-direction `2`-jet term `∇_{∇_{Bᵢ}(∇_{Bᵢ} w)}
+V` and the `∇_{∇_{Bᵢ} w}(·)` terms vanish; the surviving terms — the `∇_{[Bᵢ, w]}(∇_{Bᵢ} V)`,
+`∇_{Bᵢ}(∇_{[Bᵢ, w]} V)`, `∇_{∇_{Bᵢ} Bᵢ}(∇_w V)` and `∇_w(∇_{∇_{Bᵢ} Bᵢ} V)` order-`≤ 2` derivatives of
+`V` — contract the second covariant derivative of `V` along the direction *pairs* built from the
+recentered-Christoffel direction `∇_{Bᵢ} Bᵢ` and the bracket value `[Bᵢ, w] x = −∇_{w x} Bᵢ` (both
+recentered-frame quantities bounded uniformly over `M` and the frame indices by compactness), plus
+lower-order `∇B`-derivative corrections reading the `≤ 1`-jet of `V`. Because the `2`-jet is read along
+*varying* direction pairs (the bracket `[Bᵢ, w] x` paired with `Bᵢ x`), it is the **full** second
+gradient fibre norm `rfns(∇²S)` — not a single direction-pair reading — that dominates the top-order
+contribution; the lower jets are the abstract directional derivative `covApply nab Bᵢ V` and `V`. The
+proportional constant is the residual's base-point-uniform fibre constant (the abstract Hessian
+transports `tensorSecondCovDeriv_unit_eval_genVal`, `curry_covApply_unitGradFieldGen_eq_abstractHess`
+exhibit the surviving terms as second covariant derivatives of `V`). No fibre envelope of
+`secondOrderChristoffelResidual` exists on disk; the body is `sorry` and
+`exists_secondOrderChristoffelResidual_tensor0SAsRS_fiberOrder_bound` transitively depends on its
+`sorryAx`. -/
+theorem exists_uniform_secondOrderChristoffelResidual_tensor0SAsRS_proportional_local
+    (g : SmoothRiemannianMetric I M) (s : ℕ) :
+    ∃ Cres : ℝ, 0 ≤ Cres ∧
+      ∀ (S : SmoothCcTensor g 0 s) (x : M) (i : Fin (Module.finrank ℝ E))
+        (w : Π b : M, TangentSpace I b),
+        ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% w) →
+        g.inner x (w x) (w x) ≤ 1 →
+        (∀ u : TangentSpace I x, (LeviCivita (I := I) g).toFun w x u = 0) →
+        (∀ Y : Π b : M, TangentSpace I b, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y) →
+          (LeviCivita (I := I) g).toFun (covApply (LeviCivita (I := I) g) Y w) x (Y x) = 0) →
+        riemannianFiberNormSq (I := I) (M := M) g 0 s x
+            (tensor0SAsRS (I := I) (M := M) x
+              (secondOrderChristoffelResidual (I := I) g
+                (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+                (smoothOrthoFrame (I := I) g x i) w
+                (unitEvalSection (I := I) (M := M) g s S) x)) ≤
+          Cres *
+            (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+                ((covGrad (I := I) (M := M) g 0 (s + 1)
+                  (covGrad (I := I) (M := M) g 0 s S)).toSection x) +
+              riemannianFiberNormSq (I := I) (M := M) g 0 s x
+                (tensor0SAsRS (I := I) (M := M) x
+                  (covApply (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+                    (smoothOrthoFrame (I := I) g x i)
+                    (unitEvalSection (I := I) (M := M) g s S) x)) +
+              riemannianFiberNormSq (I := I) (M := M) g 0 s x
+                (tensor0SAsRS (I := I) (M := M) x (unitEvalSection (I := I) (M := M) g s S x))) := by
+  sorry
+
+/-- **Child C — the Christoffel-derivative residual fibre envelope.** For a closed smooth Riemannian
+manifold `(M, g)` there is a nonnegative valence-dependent `Cc : ℕ → ℝ` such that, at every rank `s`,
+smooth `(0, s)`-tensor `S`, point `x`, frame index `i`, and smooth slot-`0` direction field `w` with
+`g(w x, w x) ≤ 1` whose covariant `1`- and `2`-jets vanish at `x` (`∇_u w(x) = 0` for every `u`, and
+`∇_Y(∇_Y w)(x) = 0` for every smooth `Y`), the `tensor0SAsRS`-wrapped Christoffel-derivative residual
+`secondOrderChristoffelResidual nab Bᵢ w V x`
+(`MetricCompatibility/CovGradCovDerivSecondOrderCommutation`) has intrinsic fibre norm bounded by `Cc s`
+times the sum of the `∇²S, ∇S, S` fibre norms.
+
+**Proof (glue, TRANSIT over the residual sup).** Apply the per-direction Christoffel-residual
+proportional fibre sup `exists_uniform_secondOrderChristoffelResidual_tensor0SAsRS_proportional_local`,
+bounding the wrapped residual by `Cres ·` the sum `rfns(∇²S) +` the wrapped `≤ 1`-jet fibre norms of
+`V`. The proven `1`-jet transport `riemannianFiberNormSq_tensor0SAsRS_covApply_unitEval_le` dominates
+`rfns(tensor0SAsRS x (∇^{abs}_{Bᵢ} V x))` by `rfns(∇S)`, and the `0`-jet transport
+`riemannianFiberNormSq_tensor0SAsRS_unitEval_eq` identifies `rfns(tensor0SAsRS x (V x))` with `rfns(S)`;
+the top-order `rfns(∇²S)` slot is already in `S`-form. Adding gives `Cres · (rfns(∇²S) + rfns(∇S) +
+rfns(S))`, so `Cc s := Cres`. Transits the sup's `sorryAx`. -/
 theorem exists_secondOrderChristoffelResidual_tensor0SAsRS_fiberOrder_bound
     (g : SmoothRiemannianMetric I M) :
     ∃ Cc : ℕ → ℝ, (∀ s, 0 ≤ Cc s) ∧
@@ -799,7 +945,40 @@ theorem exists_secondOrderChristoffelResidual_tensor0SAsRS_fiberOrder_bound
               riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
                   ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
               riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) := by
-  sorry
+  classical
+  choose Cres hCres_nn hCres using fun s =>
+    exists_uniform_secondOrderChristoffelResidual_tensor0SAsRS_proportional_local
+      (I := I) (M := M) g s
+  refine ⟨Cres, hCres_nn, fun s S x i w hw hww hgrad hhess => ?_⟩
+  set A : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+      ((covGrad (I := I) (M := M) g 0 (s + 1)
+        (covGrad (I := I) (M := M) g 0 s S)).toSection x) with hA
+  set B : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+      ((covGrad (I := I) (M := M) g 0 s S).toSection x) with hB
+  set D : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) with hD
+  have hA_nn : 0 ≤ A := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1 + 1) x _
+  have hB_nn : 0 ≤ B := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x _
+  have hD_nn : 0 ≤ D := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x _
+  refine le_trans (hCres s S x i w hw hww hgrad hhess) ?_
+  have hjet1 : riemannianFiberNormSq (I := I) (M := M) g 0 s x
+      (tensor0SAsRS (I := I) (M := M) x
+        (covApply (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+          (smoothOrthoFrame (I := I) g x i)
+          (unitEvalSection (I := I) (M := M) g s S) x)) ≤ B :=
+    riemannianFiberNormSq_tensor0SAsRS_covApply_unitEval_le (I := I) (M := M) g s S x i
+  have hjet0 : riemannianFiberNormSq (I := I) (M := M) g 0 s x
+      (tensor0SAsRS (I := I) (M := M) x (unitEvalSection (I := I) (M := M) g s S x)) = D :=
+    riemannianFiberNormSq_tensor0SAsRS_unitEval_eq (I := I) (M := M) g s S x
+  rw [hjet0]
+  refine mul_le_mul_of_nonneg_left ?_ (hCres_nn s)
+  have hsum : A +
+      riemannianFiberNormSq (I := I) (M := M) g 0 s x
+        (tensor0SAsRS (I := I) (M := M) x
+          (covApply (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+            (smoothOrthoFrame (I := I) g x i)
+            (unitEvalSection (I := I) (M := M) g s S) x)) + D ≤ A + B + D := by
+    linarith [hjet1]
+  exact hsum
 
 /-- **Posited uniform fibre order of the second-order commutation curvature residue (the genuine
 `∇R`-and-curvature content of the `∇³S`-cancellation).** For a closed smooth Riemannian manifold
