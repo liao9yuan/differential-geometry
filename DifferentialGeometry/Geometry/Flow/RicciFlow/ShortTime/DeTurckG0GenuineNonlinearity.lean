@@ -1676,68 +1676,56 @@ private lemma radialRetract_nonexpansive (ρ : ℝ) (hρ : 0 ≤ ρ) (x y : F) :
 
 end RadialRetraction
 
-/-- **The origin-fixing, globally `Hᵃ⁺¹`-Lipschitz gauge-cancellation fixed point produced by the
-Gårding-coercive bounded inverse, bundled with its `Q`-gated realized-remainder `L²`-class match
-(the full gauge-cancellation solvability over the spectral tower).**
+/-- **The fixed-point gauge-cancellation class identity (the genuine PDE analytic frontier): the
+gauge-cancellation Banach fixed point's heat-smoothed corrected datum realizes the gate-based gauge
+section's `L²`-class on the gated locus.**
 
-For the anchor `g₀`, a flow background `g_bg`, a supercritical order `a` (`2a > dim M + 4`), and the
-strictly positive Gårding coercivity rate `μ > 0` of `−Δ_∇` on the tower (the Lax-Milgram input
-making the first-order-cancelled DeTurck linearization `−Δ_∇ + B₁` boundedly invertible), there is an
-origin-fixing, globally `Hᵃ⁺¹`-Lipschitz gauge correction `c : Hᵃ⁺¹(g₀) → Hᵃ⁺¹(g₀)`, a single
-`NNReal` rate `Lip`, and a match-gate slack `Q > 0`, with `c 0 = 0`, `LipschitzWith Lip c`, and — on
-the `Q`-gated gate-realizable locus — the unit-time heat-smoothed corrected datum's realized-remainder
-`L²`-class match `Φ(heatRepr (u + c u)) = Φ(gateRep u)` (`Φ T := toL2 (deTurckRealizeRemainderOf g₀
-g_bg T)`).
-
-This carries the **full** gauge-cancellation solution: the bounded inverse of the coercive
-linearization produces a globally Lipschitz origin-fixing correction `c` whose single rate `Lip` is
-the inverse operator-norm controlled by `μ⁻¹`, and *that same* `c` is the gauge-cancellation fixed
-point `c u = − cLin (Ñ (u + c u))` — which IS the gauge-cancellation equation, so it repairs the
-first-order DeTurck class on the gated locus (the match).  Mathlib's inverse function theorem
-(`HasStrictFDerivAt.to_localInverse`) supplies only a *local* inverse near a single point with no
-global rate; promoting it to the single global `LipschitzWith Lip c` over all of `Hᵃ⁺¹` is the
-genuine global-control strengthening — here realized as a **Banach fixed-point** contraction whose
-nonlinearity is **globalized off the ball by the nonexpansive radial retraction**.
-
-**Non-vacuous** — the match rejects the degenerate witness `c ≡ 0`: with `c ≡ 0` it would read
-`Φ(heatRepr u) = Φ(gateRep u)`, the Lean-refuted naive-heat claim (a pure unit-time heat residue
-contributes `−λᵢ(e^{−λᵢ}−1)·u.coeffᵢ`-type terms falsifying exact class equality), so the
-`origin`/`lip`/`match` conjunction genuinely constrains `c` away from zero.  **Not packaging** — the
-hypothesis is the *real-valued* coercivity rate `μ > 0` of the rough Laplacian, structurally distinct
-from the existential conclusion (a gauge-correction operator with an origin-fixing global Lipschitz
-rate together with an `L²`-class identity of two realized DeTurck remainders); the conclusion is in no
-way assumed.  **Intrinsic** — `toL2`/`toHs` and the `Hᵃ⁺¹` norm are `g`-inner; no `chartJ`, no raw
-`M → E`.
+This is the irreducible analytic core extracted from
+`deTurckGaugeCancellation_globalLipschitz_promotion`'s match arm, stated against the *primitive*
+gate-based gauge section `deTurckRemainderRealizeSection g₀ g_bg u` (the actual gauge object) rather
+than the gate representative's realized remainder.  For the anchor `g₀`, a flow background `g_bg`, a
+supercritical order `a` (`2a > dim M + 4`), and the strictly positive Gårding coercivity rate `μ > 0`
+of `−Δ_∇` on the tower, there is an origin-fixing, globally `Hᵃ⁺¹`-Lipschitz gauge correction `c`, a
+single `NNReal` rate `Lip`, and a match-gate slack `Q > 0`, with `c 0 = 0`, `LipschitzWith Lip c`,
+and — on the `Q`-gated gate-realizable locus — the unit-time heat-smoothed corrected datum's
+realized-remainder `L²`-class match
+`Φ(heatRepr (u + c u)) = toL2 (deTurckRemainderRealizeSection g₀ g_bg u)`
+(`Φ T := toL2 (deTurckRealizeRemainderOf g₀ g_bg T)`).
 
 The `origin`/`lip` arms are **proven by composition** (transiting child-1 + child-2): the
-Gårding-coercive bounded inverse `cLin := L.symm` (with rate `Cinv`) comes from the linear child
+Gårding-coercive bounded inverse `cLin := L.symm` (rate `Cinv`) comes from
 `deTurckGaugeCancellation_firstOrderCancelledLinearization_continuousLinearEquiv` (Lax-Milgram, its
-own body sorry-free); the origin-fixing, **on-ball**-Lipschitz nonlinear gauge remainder `N` (on the
-ball of radius `ρ`, with rate `κ` subordinate to `Cinv`, `Cinv·κ < 1`) comes from the non-linear child
-`deTurckGaugeCancellation_nonlinearRemainder_lipschitzSmall_on_ball` (the higher-order Nemytskii
-control).  Since `N` is Lipschitz only on the ball — a global Banach contraction over all of `Hᵃ⁺¹`
-would be *unsound* — we first **globalize** `N` by composing with the nonexpansive radial retraction
-`radialRetract ρ` onto `closedBall 0 ρ`: `Ñ u := N (radialRetract ρ u)` is origin-fixing (`Ñ 0 = N
-(radialRetract ρ 0) = N 0 = 0`, as the retraction fixes `0`) and *globally* `κ`-Lipschitz (the
-retraction lands in the ball, where `N`'s on-ball rate `κ` applies, and `radialRetract_nonexpansive`
-keeps the retracted arguments `κ·‖u − u'‖`-close).  For each `u`, the gauge-cancellation map `G u w :=
-− cLin (Ñ (u + w))` is a *global* contraction with rate `Cinv·κ < 1`, so on the complete inner-product
-space `Hᵃ⁺¹(g₀)` Banach's `ContractingWith.fixedPoint` yields a unique fixed point `c u`.
-Origin-fixing: at `u = 0`, `0` is the (unique) fixed point of `G 0`, so `c 0 = 0`.  Globally
-Lipschitz: the maps `G u`, `G u'` are *uniformly* `Cinv·κ·‖u − u'‖`-close, so
-`ContractingWith.fixedPoint_lipschitz_in_map` gives `LipschitzWith Lip c` with `Lip := (Cinv·κ)/(1 −
-Cinv·κ)`.
+own body sorry-free); the origin-fixing, on-ball-Lipschitz nonlinear gauge remainder `N` (rate `κ`,
+`Cinv·κ < 1`) comes from `deTurckGaugeCancellation_nonlinearRemainder_lipschitzSmall_on_ball` (the
+higher-order Nemytskii control).  `N` is globalized off its ball by the nonexpansive radial
+retraction `radialRetract ρ`, giving a global `κ`-Lipschitz `Ñ`; for each `u` the map
+`G u w := − cLin (Ñ (u + w))` is a global `Cinv·κ`-contraction on the complete tower `Hᵃ⁺¹(g₀)`, so
+`ContractingWith.fixedPoint` yields `c u`, origin-fixing (`c 0 = 0`) and globally `LipschitzWith Lip`
+(`Lip := (Cinv·κ)/(1 − Cinv·κ)`, from `fixedPoint_lipschitz_in_map`).
 
-The `match` arm is the genuine PDE analytic frontier (the posited `sorry`): that this Banach fixed
-point `c` — the solution of the gauge-cancellation equation `c u = − cLin (Ñ (u + c u))` — actually
-identifies, at the `L²`-class level on the gated locus, the realized DeTurck remainder of the
-heat-smoothed corrected datum with the gate representative's own realized remainder.  This is the
-first-order-class repair the fixed point solves for; its identification with the realized-remainder
-match is the gate-controlled PDE content the abstract contraction scaffold above does not by itself
-carry, so this single arm is the precisely-posited analytic frontier of the `/prove` recursion.
-Consumers transitively depend on `sorryAx` through this match arm, and on child-1 + child-2 through the
-`origin`/`lip` construction of `c`. -/
-private theorem deTurckGaugeCancellation_globalLipschitz_promotion
+**The `match` arm is the genuine PDE analytic frontier (the posited `sorry`).**  The fixed-point
+equation `c u = − cLin (Ñ (u + c u))` IS the gauge-cancellation equation, so it repairs the
+first-order DeTurck class: `Φ` is first order, on a fibre-small `T` splitting as
+`Φ(T) = toL2 (deTurckRHSRetag g₀ g_bg g_T) − toL2 (Δ_∇ T)`
+(`deTurckRealizeRemainderOf_toL2_retagClass_sub`, sorry-free), with the leading second-order `−λᵢ`
+rough-Laplacian principal symbol cancelling the second-order re-tagged-RHS principal symbol
+(`deTurckNonlinearitySpectral_principalPart_cancels`, sorry-free).  That the abstract Banach fixed
+point of the scaffold above actually identifies, at the `L²`-class level on the gated locus, the
+realized DeTurck remainder of the heat-smoothed corrected datum with the gate-based gauge section is
+the gate-controlled PDE content the abstract contraction scaffold does **not** by itself carry — it
+requires the concrete realized-remainder meaning of `Ñ`/`cLin` as the first-order-cancelled
+gauge operator's pieces — so this single arm is the precisely-posited analytic frontier of the
+`/prove` recursion.
+
+**Non-vacuous** — the match rejects the degenerate witness `c ≡ 0`: with `c ≡ 0` it would read
+`Φ(heatRepr u) = toL2 (deTurckRemainderRealizeSection g₀ g_bg u)`, the Lean-refuted naive-heat claim
+(a pure unit-time heat residue contributes `−λᵢ(e^{−λᵢ}−1)·u.coeffᵢ`-type terms falsifying exact
+class equality), so the `origin`/`lip`/`match` conjunction genuinely constrains `c` away from zero.
+**Not packaging** — the hypothesis is the *real-valued* coercivity rate `μ > 0`, structurally distinct
+from the existential conclusion.  **Intrinsic** — `toL2`/`toHs` and the `Hᵃ⁺¹` norm are `g`-inner; no
+`chartJ`, no raw `M → E`.  Consumers transitively depend on `sorryAx` through this match arm, and on
+child-1 + child-2 through the `origin`/`lip` construction of `c`. -/
+private theorem exists_deTurckGaugeCancellation_corrector_gateSectionMatch
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
     {μ : ℝ} (hμ : 0 < μ)
@@ -1760,8 +1748,7 @@ private theorem deTurckGaugeCancellation_globalLipschitz_promotion
               (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
                 g₀ 0 2 (one_pos) (by positivity : (0 : ℝ) ≤ (a : ℝ) + 1) (u + c u)))
           = Integral.L2.SmoothCcTensor.toL2
-              (deTurckRealizeRemainderOf (I := I) g₀ g_bg
-                (gateRepOfWitness (I := I) g₀ u h))) := by
+              (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
   classical
   -- The Gårding-coercive bounded inverse `cLin := L.symm` (rate `Cinv`).
   obtain ⟨L, Cinv, hCinv, hLsymm⟩ :=
@@ -1820,10 +1807,7 @@ private theorem deTurckGaugeCancellation_globalLipschitz_promotion
       _ = Cinv * κ * ‖w - w'‖ := by rw [norm_sub_rev w' w]; ring
   have hGcontract : ∀ u, ContractingWith Kc (G u) := fun u => ⟨hKc_lt, hGlip u⟩
   -- The gauge correction `c u := fixedPoint (G u)` (the gauge-cancellation fixed point), the global
-  -- Lipschitz rate `Lip := (Cinv·κ)/(1 − Cinv·κ)`, and a positive match-gate slack `Q := 1`.  The
-  -- `origin`/`lip` arms are proven below by composition (transiting child-1 + child-2 through this
-  -- fixed point); the final `match` arm — that this same fixed point repairs the realized-remainder
-  -- class on the gated locus — is the genuine PDE analytic frontier (the posited `sorry`).
+  -- Lipschitz rate `Lip := (Cinv·κ)/(1 − Cinv·κ)`, and a positive match-gate slack `Q := 1`.
   refine ⟨fun u => ContractingWith.fixedPoint (G u) (hGcontract u),
     ⟨(Cinv * κ) / (1 - Cinv * κ), by positivity⟩, 1, one_pos, ?_, ?_, ?_⟩
   · -- Origin-fixing: `0` is the (unique) fixed point of `G 0`.
@@ -1850,17 +1834,128 @@ private theorem deTurckGaugeCancellation_globalLipschitz_promotion
         _ = Cinv * κ * ‖u - u'‖ := by rw [norm_sub_rev u' u]; ring
     have hfp :=
       ContractingWith.fixedPoint_lipschitz_in_map (hGcontract u) (hGcontract u') hclose
-    -- `dist (c u) (c u') ≤ (Cinv·κ·dist u u')/(1 − Cinv·κ) = Lip · dist u u'`.
     rw [NNReal.coe_mk]
     refine hfp.trans (le_of_eq ?_)
     rw [hKc_def]; push_cast; ring
-  · -- The `Q`-gated realized-remainder `L²`-class match of the heat-smoothed corrected datum: the
+  · -- The `Q`-gated realized-remainder `L²`-class match against the gate-based gauge section: the
     -- gauge-cancellation fixed point `c` solves `c u = − cLin (Ñ (u + c u))`, the gauge-cancellation
     -- equation, so the unit-time heat-smoothed corrected datum `u + c u` has a realized DeTurck
-    -- remainder reproducing — at the `L²`-class level on the gated locus — the gate representative's
-    -- own realized remainder.  This identification of the abstract Banach fixed point with the
-    -- realized-remainder match is the genuine PDE analytic frontier of the `/prove` recursion.
+    -- remainder reproducing — at the `L²`-class level on the gated locus — the gate-based gauge
+    -- section `deTurckRemainderRealizeSection g₀ g_bg u`.  This identification of the abstract Banach
+    -- fixed point with the realized-remainder match is the genuine PDE analytic frontier of the
+    -- `/prove` recursion (it requires the concrete realized-remainder meaning of `Ñ`/`cLin`, which
+    -- the abstract contraction scaffold above does not by itself carry).
     sorry
+
+/-- **The origin-fixing, globally `Hᵃ⁺¹`-Lipschitz gauge-cancellation fixed point produced by the
+Gårding-coercive bounded inverse, bundled with its `Q`-gated realized-remainder `L²`-class match
+(the full gauge-cancellation solvability over the spectral tower).**
+
+For the anchor `g₀`, a flow background `g_bg`, a supercritical order `a` (`2a > dim M + 4`), and the
+strictly positive Gårding coercivity rate `μ > 0` of `−Δ_∇` on the tower (the Lax-Milgram input
+making the first-order-cancelled DeTurck linearization `−Δ_∇ + B₁` boundedly invertible), there is an
+origin-fixing, globally `Hᵃ⁺¹`-Lipschitz gauge correction `c : Hᵃ⁺¹(g₀) → Hᵃ⁺¹(g₀)`, a single
+`NNReal` rate `Lip`, and a match-gate slack `Q > 0`, with `c 0 = 0`, `LipschitzWith Lip c`, and — on
+the `Q`-gated gate-realizable locus — the unit-time heat-smoothed corrected datum's realized-remainder
+`L²`-class match `Φ(heatRepr (u + c u)) = Φ(gateRep u)` (`Φ T := toL2 (deTurckRealizeRemainderOf g₀
+g_bg T)`).
+
+This carries the **full** gauge-cancellation solution: the bounded inverse of the coercive
+linearization produces a globally Lipschitz origin-fixing correction `c` whose single rate `Lip` is
+the inverse operator-norm controlled by `μ⁻¹`, and *that same* `c` is the gauge-cancellation fixed
+point `c u = − cLin (Ñ (u + c u))` — which IS the gauge-cancellation equation, so it repairs the
+first-order DeTurck class on the gated locus (the match).  Mathlib's inverse function theorem
+(`HasStrictFDerivAt.to_localInverse`) supplies only a *local* inverse near a single point with no
+global rate; promoting it to the single global `LipschitzWith Lip c` over all of `Hᵃ⁺¹` is the
+genuine global-control strengthening — here realized as a **Banach fixed-point** contraction whose
+nonlinearity is **globalized off the ball by the nonexpansive radial retraction**.
+
+**Non-vacuous** — the match rejects the degenerate witness `c ≡ 0`: with `c ≡ 0` it would read
+`Φ(heatRepr u) = Φ(gateRep u)`, the Lean-refuted naive-heat claim (a pure unit-time heat residue
+contributes `−λᵢ(e^{−λᵢ}−1)·u.coeffᵢ`-type terms falsifying exact class equality), so the
+`origin`/`lip`/`match` conjunction genuinely constrains `c` away from zero.  **Not packaging** — the
+hypothesis is the *real-valued* coercivity rate `μ > 0` of the rough Laplacian, structurally distinct
+from the existential conclusion (a gauge-correction operator with an origin-fixing global Lipschitz
+rate together with an `L²`-class identity of two realized DeTurck remainders); the conclusion is in no
+way assumed.  **Intrinsic** — `toL2`/`toHs` and the `Hᵃ⁺¹` norm are `g`-inner; no `chartJ`, no raw
+`M → E`.
+
+The `origin`/`lip` arms are **proven by composition** (transiting child-1 + child-2): the
+Gårding-coercive bounded inverse `cLin := L.symm` (with rate `Cinv`) comes from the linear child
+`deTurckGaugeCancellation_firstOrderCancelledLinearization_continuousLinearEquiv` (Lax-Milgram, its
+own body sorry-free); the origin-fixing, **on-ball**-Lipschitz nonlinear gauge remainder `N` (on the
+ball of radius `ρ`, with rate `κ` subordinate to `Cinv`, `Cinv·κ < 1`) comes from the non-linear child
+`deTurckGaugeCancellation_nonlinearRemainder_lipschitzSmall_on_ball` (the higher-order Nemytskii
+control).  Since `N` is Lipschitz only on the ball — a global Banach contraction over all of `Hᵃ⁺¹`
+would be *unsound* — we first **globalize** `N` by composing with the nonexpansive radial retraction
+`radialRetract ρ` onto `closedBall 0 ρ`: `Ñ u := N (radialRetract ρ u)` is origin-fixing (`Ñ 0 = N
+(radialRetract ρ 0) = N 0 = 0`, as the retraction fixes `0`) and *globally* `κ`-Lipschitz (the
+retraction lands in the ball, where `N`'s on-ball rate `κ` applies, and `radialRetract_nonexpansive`
+keeps the retracted arguments `κ·‖u − u'‖`-close).  For each `u`, the gauge-cancellation map `G u w :=
+− cLin (Ñ (u + w))` is a *global* contraction with rate `Cinv·κ < 1`, so on the complete inner-product
+space `Hᵃ⁺¹(g₀)` Banach's `ContractingWith.fixedPoint` yields a unique fixed point `c u`.
+Origin-fixing: at `u = 0`, `0` is the (unique) fixed point of `G 0`, so `c 0 = 0`.  Globally
+Lipschitz: the maps `G u`, `G u'` are *uniformly* `Cinv·κ·‖u − u'‖`-close, so
+`ContractingWith.fixedPoint_lipschitz_in_map` gives `LipschitzWith Lip c` with `Lip := (Cinv·κ)/(1 −
+Cinv·κ)`.
+
+This node is **proven by composition** (its body carries no `sorry` of its own): it forwards the
+gauge-cancellation fixed point produced by the frontier child
+`exists_deTurckGaugeCancellation_corrector_gateSectionMatch` — which supplies `Q > 0`, `c 0 = 0`,
+`LipschitzWith Lip c`, and the `Q`-gated realized-remainder `L²`-class match stated against the
+*primitive* gate-based gauge section `deTurckRemainderRealizeSection g₀ g_bg u` — and re-tags that
+match into this node's `gateRepOfWitness`-form through the **gate-class compatibility** bridge
+`deTurckRealizeRemainderOf_gateRepOfWitness` (sorry-free: the realized DeTurck remainder of the gate
+representative *is* the gate-based gauge section).  Consumers transitively depend on `sorryAx` through
+that frontier child's posited `match`-arm (the gauge-cancellation fixed-point class identity), and on
+child-1 + child-2 through its `origin`/`lip` construction of `c`. -/
+private theorem deTurckGaugeCancellation_globalLipschitz_promotion
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
+    {μ : ℝ} (hμ : 0 < μ)
+    (hcoercive : ∀ T : Integral.L2.SmoothCcTensor g₀ 0 2,
+        μ * ‖covGrad (I := I) (M := M) g₀ 0 (2 + 1)
+              (covGrad (I := I) (M := M) g₀ 0 2 T)‖
+          ≤ ‖rawTensorConnLapSmooth (I := I) g₀ 0 2 T‖ + ‖T‖) :
+    ∃ (c : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+          tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+        (Lip : ℝ≥0) (Q : ℝ),
+      0 < Q ∧
+      c 0 = 0 ∧
+      LipschitzWith Lip c ∧
+      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+          (h : realizableAtGate (I := I) g₀ u),
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+            (gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose)‖ ≤ Q →
+        Integral.L2.SmoothCcTensor.toL2
+            (deTurckRealizeRemainderOf (I := I) g₀ g_bg
+              (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
+                g₀ 0 2 (one_pos) (by positivity : (0 : ℝ) ≤ (a : ℝ) + 1) (u + c u)))
+          = Integral.L2.SmoothCcTensor.toL2
+              (deTurckRealizeRemainderOf (I := I) g₀ g_bg
+                (gateRepOfWitness (I := I) g₀ u h))) := by
+  classical
+  -- The frontier child supplies the gauge-cancellation fixed point `c` with `Q > 0`, `c 0 = 0`,
+  -- `LipschitzWith Lip c`, and — on the `Q`-gated gate-realizable locus — the heat-smoothed corrected
+  -- datum's realized-remainder `L²`-class match against the *primitive* gate-based gauge section
+  -- `deTurckRemainderRealizeSection g₀ g_bg u`.
+  obtain ⟨c, Lip, Q, hQ, hc0, hlip, hmatch⟩ :=
+    exists_deTurckGaugeCancellation_corrector_gateSectionMatch
+      (I := I) (M := M) g₀ g_bg a ha hμ hcoercive
+  refine ⟨c, Lip, Q, hQ, hc0, hlip, fun u h hgate => ?_⟩
+  -- The gate-class compatibility bridge (sorry-free): the realized DeTurck remainder of the gate
+  -- representative `gateRepOfWitness g₀ u h` *is* the gate-based gauge section
+  -- `deTurckRemainderRealizeSection g₀ g_bg u`, so their `L²` classes coincide; re-tag the child's
+  -- match (against the gauge section) into this node's `gateRepOfWitness`-form.
+  have hbridge :
+      Integral.L2.SmoothCcTensor.toL2
+          (deTurckRealizeRemainderOf (I := I) g₀ g_bg (gateRepOfWitness (I := I) g₀ u h))
+        = Integral.L2.SmoothCcTensor.toL2
+            (deTurckRemainderRealizeSection (I := I) g₀ g_bg u) :=
+    congrArg Integral.L2.SmoothCcTensor.toL2
+      (deTurckRealizeRemainderOf_gateRepOfWitness (I := I) g₀ g_bg u h)
+  rw [hbridge]
+  exact hmatch u h hgate
 
 /-- **The non-linear globally-`Lipschitz` gauge-cancellation solution from the linear Gårding
 coercivity (the Banach fixed-point / inverse-function global-control strengthening — the genuine

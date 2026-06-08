@@ -6,6 +6,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricRic
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.MetricDifferenceFdBTermTree
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricCurvatureDifferenceOpDecomposition
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricCurvatureDifferenceCovJet
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricLieDiffCovJet
 
 /-! # The covariant-jet Faà-di-Bruno expansion of the Ricci–DeTurck right-hand side along the segment
 
@@ -475,8 +476,17 @@ theorem exists_lieDerivLinearCross_section_connLevel
                         ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
                       + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
                         ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
-                  * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) :=
-  sorry
+                  * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) := by
+  classical
+  -- The connection-level gauge value-level split (`SegmentMetricLieDiffCovJet.lean`), which produces the
+  -- intrinsic linear/Cross section pair `(L, C)` with `diff = L + C` and BOTH arms' connection-level
+  -- two-arm bounds.  The Lie value-level leaf is its first projection (the linear-arm half).
+  obtain ⟨Cd, hCd0, hsplit⟩ :=
+    exists_lieDerivDiff_connLevel_split (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
+  refine ⟨Cd, hCd0, fun T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 => ?_⟩
+  obtain ⟨L, C, hLC, hLbound, _hCbound⟩ :=
+    hsplit T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2
+  exact ⟨L, C, hLC, hLbound⟩
 
 /-- **(POSIT — the value-level Lie linear/cross split bundled with the linear-arm difference-arm jet
 bound: the genuine Core-II value-level leaf of the Lie half.)**  For an anchor `g₀`, a flow background
@@ -780,43 +790,18 @@ theorem lieDerivDiff_order0_linearCross_split
                         ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
                   * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) := by
   classical
-  -- Child (a): the value-level Lie split bundled with its linear-arm difference-arm bound, producing
-  -- the concrete linear/Cross section pair `(L, C)` with `diff = L + C` and the bound on `∇^j L`.
-  obtain ⟨CdLin, hCdLin_nn, hLin⟩ :=
-    exists_lieDerivLinearCross_diffArm (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
-  -- Child (b): the fixed-pair Cross bound, stated on the value-split's `(L, C)` pair under the value
-  -- identity and the linear bound.
-  obtain ⟨CdCross, hCdCross_nn, hCross⟩ :=
-    lieDerivCrossSection_iteratedCovGrad_cross_rfns_le (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
-  -- A common difference-arm constant for both arms, uniform over the gradient order `j`.
-  refine ⟨max CdLin CdCross, le_trans hCdLin_nn (le_max_left _ _),
-    fun T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ => ?_⟩
-  obtain ⟨L, C, hLC, hLbound⟩ := hLin T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂
-  -- The fixed-pair Cross bound on `∇^j C`, fed the value identity and the linear bound of child (a)
-  -- (packaged with its own constant `CdLin`, decoupled from the Cross arm's constant `CdCross`).
-  have hCbound := hCross T₁ T₂ g₁ g₂ L C hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ hLC
-    ⟨CdLin, hCdLin_nn, hLbound⟩
-  refine ⟨L, C, hLC, ?_, ?_⟩
-  · -- The linear arm's two-arm bound, with the difference-arm constant widened to `max CdLin CdCross`.
-    intro j x
-    refine (hLbound j x).trans ?_
-    have hwsum_nn : 0 ≤ ∑ i ∈ Finset.range (j + 2 + 1),
-        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-              (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x) :=
-      Finset.sum_nonneg fun i _ => riemannianFiberNormSq_nonneg _ _ _ _ _
-    gcongr
-    exact le_max_left _ _
-  · -- The Cross arm's two-arm bound, with the difference-arm constant widened to `max CdLin CdCross`.
-    intro j x
-    refine (hCbound j x).trans ?_
-    have hwsum_nn : 0 ≤ ∑ i ∈ Finset.range (j + 2 + 1),
-        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-              (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x) :=
-      Finset.sum_nonneg fun i _ => riemannianFiberNormSq_nonneg _ _ _ _ _
-    gcongr
-    exact le_max_right _ _
+  -- The connection-level gauge value-level split (`SegmentMetricLieDiffCovJet.lean`): produces the
+  -- intrinsic linear/Cross section pair `(L, C)` with `diff = L + C` and BOTH arms' *connection-level*
+  -- (rank-`3`, `∇w`-level) two-arm bounds.  Both `w`-jet target arms are recovered by the sorry-free
+  -- rank-shift `connLevel_diffArm_to_wJet_le` (the front/back covariant-commutation `R = ∇₀ w`), applied
+  -- separately to the linear bound on `∇^j L` and the Cross bound on `∇^j C`.
+  obtain ⟨Cd, hCd0, hsplit⟩ :=
+    exists_lieDerivDiff_connLevel_split (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
+  refine ⟨Cd, hCd0, fun T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ => ?_⟩
+  obtain ⟨L, C, hLC, hLconn, hCconn⟩ := hsplit T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂
+  exact ⟨L, C, hLC,
+    fun j x => connLevel_diffArm_to_wJet_le (I := I) g₀ a Cd hCd0 j T₁ T₂ x L (hLconn j x),
+    fun j x => connLevel_diffArm_to_wJet_le (I := I) g₀ a Cd hCd0 j T₁ T₂ x C (hCconn j x)⟩
 
 /-- **The covariant Faà-di-Bruno difference/cross split of the Ricci-curvature summand difference
 (the deep covariant-curvature-jet structural posit).**
