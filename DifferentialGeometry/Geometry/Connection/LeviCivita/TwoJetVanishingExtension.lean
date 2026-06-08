@@ -574,6 +574,47 @@ theorem covApply_covApply_linearExtensionTangent_basepoint_eq
       Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))))
     ring
 
+/-- **The jet-cancelling chart-polynomial correction (posited genuine chart construction).** For a
+smooth Riemannian metric `g` on a closed manifold, a base point `x₀`, and a fibre vector
+`v : TangentSpace I x₀`, there is a smooth tangent-bundle section `C : Π b, TangentSpace I b` that
+
+* vanishes at the basepoint: `C x₀ = 0`;
+* has covariant `1`-jet at `x₀` equal to the *negative* of the covariant `1`-jet of
+  `linearExtensionTangent x₀ v`: `∇_u C(x₀) = − ∇_u(linExt x₀ v)(x₀)` for every direction `u`; and
+* has iterated covariant `2`-jet at `x₀`, read along every coordinate-constant linear-extension
+  direction `linearExtensionTangent x₀ u`, equal to the *negative* of that of `linExt x₀ v`:
+  `∇_{linExt u}(∇_{linExt u} C)(x₀)(u) = − ∇_{linExt u}(∇_{linExt u}(linExt x₀ v))(x₀)(u)`.
+
+**This is the genuine chart-polynomial correction-field construction.** `C` is the explicit degree-`≤ 2`
+chart-coordinate field whose chart-representation, pulled back through `(extChartAt I x₀).symm`, is a
+polynomial vanishing at `extChartAt I x₀ x₀` (cut off by the centred bump): its degree-`1` part solves the
+linear `1`-jet cancellation equation supplied by `covApply_linearExtensionTangent_basepoint_eq` (the
+chart derivative at the centre is the linear coefficient, the basepoint value being `0`), and its
+degree-`2` part solves the linear `2`-jet cancellation equation supplied by
+`covApply_covApply_linearExtensionTangent_basepoint_eq` (the second chart derivative at the centre is the
+quadratic coefficient). The covariant `1`- and linear-extension-`2`-jets of such a chart-polynomial field
+at `x₀` are computed by the chart covariant-derivative formula `chartLeviCivita_apply` and its iterate,
+exactly mirroring the two proved `linearExtensionTangent` basepoint chart formulas for a non-constant
+chart-representation.
+
+It is genuine new content — the iterated covariant chart formula for a non-constant chart-polynomial
+correction field does not exist on disk (only its constant-chart-representation `linExt` companions are
+proved); the body is `sorry` and consumers transitively depend on its `sorryAx`. -/
+theorem exists_linExtJetCancellingCorrection
+    (g : SmoothRiemannianMetric I M) (x₀ : M) (v : TangentSpace I x₀) :
+    ∃ C : Π b : M, TangentSpace I b,
+      ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% C) ∧
+      C x₀ = 0 ∧
+      (∀ u : TangentSpace I x₀, (LeviCivita (I := I) g).toFun C x₀ u =
+        -((LeviCivita (I := I) g).toFun (linearExtensionTangent (I := I) x₀ v) x₀ u)) ∧
+      (∀ u : TangentSpace I x₀,
+        (LeviCivita (I := I) g).toFun
+            (covApply (LeviCivita (I := I) g) (linearExtensionTangent (I := I) x₀ u) C) x₀ u =
+          -((LeviCivita (I := I) g).toFun
+            (covApply (LeviCivita (I := I) g) (linearExtensionTangent (I := I) x₀ u)
+              (linearExtensionTangent (I := I) x₀ v)) x₀ u)) := by
+  sorry
+
 /-- **The covariant-`1`-jet-vanishing tangent extension whose iterated covariant derivative also
 vanishes along every coordinate-constant (linear-extension) reading direction (linear-extension
 `2`-jet-vanishing construction).** This is the genuine chart-polynomial correction of
@@ -595,8 +636,14 @@ chart formulas. It is a NEW genuine-content sub-node of `exists_twoJetVanishing_
 rephrasing of it (its `2`-jet clause is restricted to linear-extension reading directions, where the
 chart `2`-jet formula applies directly).
 
-**Posited** (body `sorry`): the explicit `C₁, C₂` chart-polynomial correction field and the discharge of
-its `1`- and linear-extension-`2`-jet cancellation over the two proved chart formulas. -/
+**Proof (glue, TRANSIT over the jet-cancelling correction child).** Take the jet-cancelling
+chart-polynomial correction `C := exists_linExtJetCancellingCorrection g x₀ v` (vanishing at `x₀`, with
+covariant `1`- and linear-extension-`2`-jets the negatives of those of `linExt x₀ v`), and set
+`W := linExt x₀ v + C`. The basepoint value is `v + 0 = v`; the covariant `1`-jet is, by additivity of
+the Levi-Civita connection, `∇_u(linExt v)(x₀) + ∇_u C(x₀) = 0`; and the iterated covariant `2`-jet along
+each linear-extension direction is, by additivity of the inner gradient and the outer covariant
+derivative, `∇_{linExt u}(∇_{linExt u}(linExt v))(x₀)(u) + ∇_{linExt u}(∇_{linExt u} C)(x₀)(u) = 0`.
+Transits the correction child's `sorryAx`. -/
 theorem exists_linExtTwoJetVanishing_tangentExtension
     (g : SmoothRiemannianMetric I M) (x₀ : M) (v : TangentSpace I x₀) :
     ∃ W : Π b : M, TangentSpace I b,
@@ -606,7 +653,85 @@ theorem exists_linExtTwoJetVanishing_tangentExtension
       (∀ u : TangentSpace I x₀,
         (LeviCivita (I := I) g).toFun
             (covApply (LeviCivita (I := I) g) (linearExtensionTangent (I := I) x₀ u) W) x₀ u = 0) := by
-  sorry
+  classical
+  -- The jet-cancelling chart-polynomial correction `C` of `linearExtensionTangent x₀ v`.
+  obtain ⟨C, hC_sm, hC_x, hC_grad, hC_hess⟩ :=
+    exists_linExtJetCancellingCorrection (I := I) g x₀ v
+  -- `W := linExt x₀ v + C`.
+  refine ⟨fun b => linearExtensionTangent (I := I) x₀ v b + C b, ?_, ?_, ?_, ?_⟩
+  · -- smoothness
+    exact (linearExtensionTangent_smooth (I := I) x₀ v).add_section hC_sm
+  · -- basepoint value: `linExt v x₀ + C x₀ = v + 0 = v`
+    change linearExtensionTangent (I := I) x₀ v x₀ + C x₀ = v
+    rw [linearExtensionTangent_eq (I := I) x₀ v, hC_x, add_zero]
+  · -- vanishing covariant `1`-jet
+    intro u
+    have hLv : MDiffAt (T% (linearExtensionTangent (I := I) x₀ v)) x₀ :=
+      (linearExtensionTangent_smooth (I := I) x₀ v).mdifferentiableAt (by norm_num)
+    have hCd : MDiffAt (T% C) x₀ := hC_sm.mdifferentiableAt (by norm_num)
+    have hadd := (LeviCivita (I := I) g).isCovariantDerivativeOnUniv.add hLv hCd
+      (Set.mem_univ x₀)
+    rw [LeviCivita_toFun] at hadd ⊢
+    rw [show (fun b => linearExtensionTangent (I := I) x₀ v b + C b) =
+        linearExtensionTangent (I := I) x₀ v + C from rfl, hadd]
+    rw [ContinuousLinearMap.add_apply]
+    rw [show leviCivitaStitched (I := I) g (linearExtensionTangent (I := I) x₀ v) x₀ u =
+        (LeviCivita (I := I) g).toFun (linearExtensionTangent (I := I) x₀ v) x₀ u from rfl]
+    rw [show leviCivitaStitched (I := I) g C x₀ u =
+        (LeviCivita (I := I) g).toFun C x₀ u from rfl]
+    rw [hC_grad u, add_neg_cancel]
+  · -- vanishing iterated covariant `2`-jet along the linear-extension reading directions
+    intro u
+    -- split the inner gradient `covApply (linExt u) (linExt v + C)` additively (both inner
+    -- sections are globally smooth, hence differentiable at every base point of its own good set)
+    have hsplit : covApply (LeviCivita (I := I) g) (linearExtensionTangent (I := I) x₀ u)
+          (fun b => linearExtensionTangent (I := I) x₀ v b + C b) =
+        covApply (LeviCivita (I := I) g) (linearExtensionTangent (I := I) x₀ u)
+            (linearExtensionTangent (I := I) x₀ v) +
+          covApply (LeviCivita (I := I) g) (linearExtensionTangent (I := I) x₀ u) C := by
+      funext b
+      have hLvb : MDiffAt (T% (linearExtensionTangent (I := I) x₀ v)) b :=
+        (linearExtensionTangent_smooth (I := I) x₀ v).mdifferentiableAt (by norm_num)
+      have hCb : MDiffAt (T% C) b := hC_sm.mdifferentiableAt (by norm_num)
+      have hbgood : b ∈ chartLeviCivitaGoodSet (I := I) b :=
+        self_mem_chartLeviCivitaGoodSet (I := I) (α := b)
+      simp only [Connection.covApply_apply, Pi.add_apply]
+      rw [show (fun b => linearExtensionTangent (I := I) x₀ v b + C b) =
+          linearExtensionTangent (I := I) x₀ v + C from rfl]
+      rw [LeviCivita_toFun,
+        leviCivitaStitched_add_on_goodSet (I := I) g b hLvb hCb hbgood]
+      rfl
+    rw [hsplit]
+    -- the outer covariant derivative is additive on the two differentiable inner sections
+    have hLu1 : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1)
+        (T% (linearExtensionTangent (I := I) x₀ v)) := by
+      rw [show ((∞ : WithTop ℕ∞) + 1) = (∞ : WithTop ℕ∞) from by rw [ENat.coe_top_add_one]]
+      exact linearExtensionTangent_smooth (I := I) x₀ v
+    have hC1 : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1) (T% C) := by
+      rw [show ((∞ : WithTop ℕ∞) + 1) = (∞ : WithTop ℕ∞) from by rw [ENat.coe_top_add_one]]
+      exact hC_sm
+    have hBLv : MDiffAt (T% (covApply (LeviCivita (I := I) g)
+        (linearExtensionTangent (I := I) x₀ u) (linearExtensionTangent (I := I) x₀ v))) x₀ :=
+      Connection.covApply_mdifferentiableAt (cov := LeviCivita (I := I) g)
+        (linearExtensionTangent_smooth (I := I) x₀ u) hLu1
+    have hBC : MDiffAt (T% (covApply (LeviCivita (I := I) g)
+        (linearExtensionTangent (I := I) x₀ u) C)) x₀ :=
+      Connection.covApply_mdifferentiableAt (cov := LeviCivita (I := I) g)
+        (linearExtensionTangent_smooth (I := I) x₀ u) hC1
+    have hadd := (LeviCivita (I := I) g).isCovariantDerivativeOnUniv.add hBLv hBC
+      (Set.mem_univ x₀)
+    rw [LeviCivita_toFun] at hadd ⊢
+    rw [hadd, ContinuousLinearMap.add_apply]
+    rw [show leviCivitaStitched (I := I) g (covApply (LeviCivita (I := I) g)
+          (linearExtensionTangent (I := I) x₀ u) (linearExtensionTangent (I := I) x₀ v)) x₀ u =
+        (LeviCivita (I := I) g).toFun (covApply (LeviCivita (I := I) g)
+          (linearExtensionTangent (I := I) x₀ u) (linearExtensionTangent (I := I) x₀ v)) x₀ u
+        from rfl]
+    rw [show leviCivitaStitched (I := I) g (covApply (LeviCivita (I := I) g)
+          (linearExtensionTangent (I := I) x₀ u) C) x₀ u =
+        (LeviCivita (I := I) g).toFun (covApply (LeviCivita (I := I) g)
+          (linearExtensionTangent (I := I) x₀ u) C) x₀ u from rfl]
+    rw [hC_hess u, add_neg_cancel]
 
 /-- **Value-locality of the iterated covariant derivative at a `1`-jet-vanishing section.** If the
 covariant `1`-jet of `W` vanishes at `x₀` (the `(1,1)`-tensor `∇W(x₀) = 0`), then the iterated
