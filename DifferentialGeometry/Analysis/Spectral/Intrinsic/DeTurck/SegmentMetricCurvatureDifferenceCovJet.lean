@@ -108,44 +108,57 @@ private def crossCorrTripleDiff (g₀ : SmoothRiemannianMetric I M)
   (2 : ℝ) • DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
     - (2 : ℝ) • DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂
 
-/-- **(POSIT — the curvature-trace section identity: `linearSection` as a parallel model-basis Ricci
-trace of the connection-difference Koszul combination.)**  The genuinely-missing section-level identity
-lifting the pointwise lowered-Koszul form (`connDiffDiff_g0_lowered_koszul_diffFactor`) through the
-model-basis Ricci trace: there is a **parallel rank-reducing `(0, 3) → (0, 2)` contraction** `Φ` (the
-`−2` model-basis Ricci trace `g^{ij}·`, parallel because `∇₀ g₀⁻¹ = 0`, value-local because it reads
-only the fibre), **fibrewise `ℝ`-linear** (so it distributes over the section difference), with the
-linear-in-difference curvature section `linearSection g₀ g₁ g₂` equal to the trace of the connection-
-difference Koszul **difference arm** minus the trace of the **cross arm**:
+/-- **(POSIT — the linearized-Ricci principal-part section identity: `linearSection` as a parallel
+model-basis Ricci trace of the *once-covariantly-differentiated* connection-difference Koszul
+combination.)**  The genuinely-missing section-level identity lifting the pointwise lowered-Koszul form
+(`connDiffDiff_g0_lowered_koszul_diffFactor`) through the model-basis Ricci trace: there is a **parallel
+rank-reducing `(0, 4) → (0, 2)` contraction** `Φ` (the `−2` model-basis Ricci trace `g^{ij}·`, parallel
+because `∇₀ g₀⁻¹ = 0`, value-local because it reads only the fibre), **fibrewise `ℝ`-linear** (so it
+distributes over the section difference), with the linear-in-difference curvature section
+`linearSection g₀ g₁ g₂` equal to the trace of the **once-`∇₀`-differentiated** connection-difference
+Koszul **difference arm** minus the trace of the once-`∇₀`-differentiated **cross arm**:
 ```
-linearSection g₀ g₁ g₂ = Φ.op 0 (koszulTripleDiff) − Φ.op 0 (crossCorrTripleDiff),
+linearSection g₀ g₁ g₂ = Φ.op 0 (∇₀ koszulTripleDiff) − Φ.op 0 (∇₀ crossCorrTripleDiff),
 ```
-where `koszulTripleDiff = R + permute (swap 0 1) R − permute c[0,2,1] R`,
+where `∇₀ · = covGrad g₀ 0 3 ·`,
+`koszulTripleDiff = R + permute (swap 0 1) R − permute c[0,2,1] R`,
 `R := covGrad g₀ 0 2 (realizeSymmCcTensor g₀ (T₁ − T₂))`, and
 `crossCorrTripleDiff = 2·crossCorrectionSection g₁ g₀ T₁ − 2·crossCorrectionSection g₂ g₀ T₂`.
 
-`linearSection`'s fibre value is the `−2` model-basis Ricci trace of the antisymmetrised
-`∇₀`-of-connection-difference summand difference (`ricciNeg2SectionDiffLinearEval`); by the
-two-metric cocycle and the M1/M2 lowered-Koszul form (`connDiffDiff_g0_lowered_koszul_diffFactor`) its
-`g₀`-lowered Koszul value is the `covDerivRealizeEval g₀ (T₁ − T₂)` combination (the difference arm)
-minus the cross-correction value (the cross arm), and child A
-(`loweredConnDiffSection_sub_eq_koszulRealizeDiff_sub_crossCorrDiff`) packages exactly this as the
-`(0, 3)`-section equality `2·lowered g₁ − 2·lowered g₂ = koszulTripleDiff − crossCorrTripleDiff`.  This
-node posits the genuinely-missing piece: that the rank-`2` `linearSection` is the model-basis Ricci
-trace `op 0` of that rank-`3` difference, as a **linear** parallel rank-reducing contraction.
+**Why the second covariant derivative (the order correction that repairs the refuted first-order
+form).**  `linearSection`'s fibre value is the `−2` model-basis Ricci trace of the antisymmetrised
+`∇₀`-of-connection-difference summand difference `ricciDiffLinearSummand g₁ − ricciDiffLinearSummand g₂`
+(`ricciNeg2SectionDiffLinearEval`, `SegmentMetricCurvatureDifferenceOpDecomposition.lean:190`), and
+`ricciDiffLinearSummand = covDerivDiff = ∇₀ D` with `D = connDiff gₖ g₀` the connection difference — i.e.
+`linearSection` is the Ricci trace of a **second**-order object in the perturbation
+(`∇₀ D ≈ ∇₀∇₀ h`).  By the two-metric cocycle and the M1/M2 lowered-Koszul form
+(`connDiffDiff_g0_lowered_koszul_diffFactor`) the `g₀`-lowered connection difference of the difference is
+`2·loweredConnDiffSection g₁ g₀ − 2·loweredConnDiffSection g₂ g₀`, whose fibre is the difference arm
+`koszulTripleDiff` (the three slot readings of `R = ∇₀ w`) minus the cross arm `crossCorrTripleDiff`
+(the docstring-target reconciliation `ricciNeg2SectionDiffLinearEval_g0_lowered_koszul`).  The
+linear summand is the *covariant derivative* `∇₀` of that lowered combination, so `linearSection` is the
+trace of `∇₀(koszulTripleDiff − crossCorrTripleDiff)`, a rank-`4` object.  A value-local trace of the
+rank-`3` `koszulTripleDiff` (the `∇w`-level, `R = ∇₀ w`) reaches only `∇^{j+1} w` at order `j`, **one
+derivative short** of the `∇^{j+2} w` the linear part genuinely carries — which is exactly why the
+earlier `(0, 3) → (0, 2)` value-local form (a single value-local trace, no derivative) was *false* as a
+representation of `linearSection`.  Carrying the trace on the **once-differentiated** rank-`4`
+`∇₀ koszulTripleDiff` supplies the missing derivative (`∇^{j+1} R = ∇^{j+2} w`).
 
 The contraction `Φ` is the `−2` model-basis Ricci trace, depending **only on the background `g₀`**
 (`g₀^{ij}·`); the section identity holds for **every** realizing pair `g₁, g₂` of perturbations
 `T₁, T₂` over `g₀`.
 
 **Non-vacuity.**  `Φ` is a *genuine* parallel contraction (its `kappa` envelope rejects the degenerate
-zero witness whenever `op a R ≠ 0`); `linearSection` genuinely vanishes only at `g₁ = g₂`
-(`linearSection_self_toModel`).  Its body is `sorry`: the genuine curvature-trace covariant section
-identity (the parallel model-basis Ricci-trace `(0, 3) → (0, 2)` contraction and the lift of the
-pointwise lowered-Koszul form to the section trace). -/
+zero witness whenever `op a R ≠ 0`), and the right-hand side genuinely carries the once-differentiated
+rank-`4` jet `∇₀ koszulTripleDiff` (so a degenerate trace falsifies it whenever the linear part is
+present); `linearSection` genuinely vanishes only at `g₁ = g₂` (`linearSection_self_toModel`).  Its body
+is `sorry`: the genuine linearized-Ricci principal-part covariant section identity (the parallel
+model-basis Ricci-trace `(0, 4) → (0, 2)` contraction and the lift of the once-differentiated pointwise
+lowered-Koszul form to the section trace). -/
 theorem exists_parallelTrace_linearSection_eq_koszulTriple_sub_crossCorrTriple
     (g₀ : SmoothRiemannianMetric I M) :
-    ∃ Φ : Integral.Connection.ParallelRankReducingContraction (I := I) (M := M) g₀ 3 2,
-      (∀ (a : ℕ) (A B : Integral.L2.SmoothCcTensor g₀ 0 (3 + a)),
+    ∃ Φ : Integral.Connection.ParallelRankReducingContraction (I := I) (M := M) g₀ 4 2,
+      (∀ (a : ℕ) (A B : Integral.L2.SmoothCcTensor g₀ 0 (4 + a)),
           Φ.op a (A - B) = Φ.op a A - Φ.op a B) ∧
         ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
           (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -154,45 +167,116 @@ theorem exists_parallelTrace_linearSection_eq_koszulTriple_sub_crossCorrTriple
           (∀ (x : M) (v w : TangentSpace I x),
             g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
           linearSection (I := I) g₀ g₁ g₂ =
-            Φ.op 0 (koszulTripleDiff (I := I) g₀ T₁ T₂)
-              - Φ.op 0 (crossCorrTripleDiff (I := I) g₀ T₁ T₂ g₁ g₂) :=
+            Φ.op 0 (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+                (koszulTripleDiff (I := I) g₀ T₁ T₂))
+              - Φ.op 0 (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+                (crossCorrTripleDiff (I := I) g₀ T₁ T₂ g₁ g₂)) :=
   sorry
 
-/-- **(POSIT — the post-trace connection-level cross-correction-difference covariant-jet bound,
-`(1/8)`-cross arm.)**  For any parallel rank-reducing `(0, 3) → (0, 2)` contraction `Φ` (the model-basis
-Ricci trace), the intrinsic squared fibre norm of the order-`j` covariant gradient of the **traced**
-cross-correction difference `Φ.op 0 (crossCorrTripleDiff)` is dominated by the **connection-level**
-Hamilton/Moser two-arm sum: a difference arm carried by the order-`≤ j+1` covariant jets of the
-once-differentiated realized difference factor `R := covGrad g₀ 0 2 (realizeSymmCcTensor g₀ (T₁ − T₂))`
-(rank `3`), plus the fixed-pair cross piece carrying the endpoint jets against the difference's order-`a`
-chart-Sobolev `C⁰` mass with the explicit coefficient `(1/8)`, uniformly over the supercritical
-`H^{a+2}`-bounded fibre-small perturbation family:
+/-- **(POSIT — the connection-level top/rest split of the traced once-differentiated cross-correction
+difference.)**  For any parallel rank-reducing `(0, 4) → (0, 2)` contraction `Φ` (the model-basis Ricci
+trace), the order-`j` covariant gradient of the traced once-`∇₀`-differentiated cross-correction
+difference `Φ.op 0 (∇₀ crossCorrTripleDiff)` (`∇₀ · = covGrad g₀ 0 3 ·`) splits, at each point `x`, into
+a **connection-level difference part** `Top` and a **fixed-pair cross part** `Rest`:
 ```
-rfns(∇^j (Φ.op 0 crossCorrTripleDiff))(x)
+∇^j (Φ.op 0 (∇₀ crossCorrTripleDiff))(x) = Top + Rest,
+rfns(Top)(x)  ≤ Cd · ∑_{p ≤ j+1} rfns(∇^p R)(x),
+rfns(Rest)(x) ≤ (1/16) · (∑_{i ≤ j+2} (rfns(∇^i T₁)(x) + rfns(∇^i T₂)(x))) · ‖(T₁ − T₂).toHs a‖²,
+```
+where `R := covGrad g₀ 0 2 (realizeSymmCcTensor g₀ (T₁ − T₂))` (rank `3`).
+
+This is the genuine **connection-level** (rank-`3`, `∇w`-level) two-piece decomposition of the traced,
+once-differentiated cross-correction difference.  It is the *difference* (two-metric) analogue of the
+single-metric `crossCorrectionSection_iteratedCovGrad_topRest_split` (`ConnectionDifferenceFieldJets`),
+but its difference part is carried by the **connection-level** `∑_{p ≤ j+1} rfns(∇^p R)` jet sum (rank
+`3`), **not** that child's `w`-jet sum `∑_{i} rfns(∇^i w)`: after the value-local model-basis Ricci
+trace `Φ.op` and the once-`∇₀` differentiation, the cross-correction-difference jet is controlled by the
+connection-level `R = ∇₀ w` jets.  The `Top` part collects the connection-level difference-factor jets
+(folded with the trace envelope and the metric-built `≤ 2`-jet coefficient into the family-uniform
+`Cd`); the `Rest` part keeps the top coefficient jet on the **fixed pair** `T₁, T₂` against the
+difference's order-`a` chart-Sobolev `C⁰` mass, with the per-recombination share `(1/16)` so that the
+two-fold `riemannianFiberNormSq_add_le` recombination lands the consumer's `(1/8)` cross coefficient.
+
+**Non-vacuity.**  The `Top` part carries the connection-level high derivative `∇^{j+1} R`, and the
+`Rest` part carries **both** fixed-pair endpoints `T₁, T₂`.  At `T₁ = T₂` the cross-correction
+difference vanishes (`ccTensorBilinSymm g₀ 0 = 0`), so `crossCorrTripleDiff = 0` and the split is
+`0 = 0 + 0`.  NO value-bounded operator shape, NO pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity,
+NO Weyl dependence.  Its body is `sorry`: the genuine deep connection-level post-trace
+cross-correction-difference covariant-Leibniz split. -/
+theorem crossCorrectionDiff_iteratedCovGrad_connLevel_split
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (j : ℕ)
+    (Φ : Integral.Connection.ParallelRankReducingContraction (I := I) (M := M) g₀ 4 2) :
+    ∃ Cd : ℝ, 0 ≤ Cd ∧
+      ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+        (g₁ g₂ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+        ∀ x : M,
+          ∃ Top Rest : Tensor0SBundle.TensorRSSpace 0 (2 + j) I x,
+            (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+                  (Φ.op 0 (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+                    (crossCorrTripleDiff (I := I) g₀ T₁ T₂ g₁ g₂)))).toSection x = Top + Rest ∧
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x Top ≤
+                Cd * ∑ p ∈ Finset.range (j + 1 + 1),
+                    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+                          (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 2
+                            (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂)))).toSection x) ∧
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x Rest ≤
+                (1 / 16 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+                    (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
+                      + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
+                  * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=
+  sorry
+
+/-- **(POSIT-DERIVED — the post-trace connection-level cross-correction-difference covariant-jet bound,
+`(1/8)`-cross arm.)**  For any parallel rank-reducing `(0, 4) → (0, 2)` contraction `Φ` (the model-basis
+Ricci trace), the intrinsic squared fibre norm of the order-`j` covariant gradient of the **traced
+once-`∇₀`-differentiated** cross-correction difference `Φ.op 0 (∇₀ crossCorrTripleDiff)` is dominated by
+the **connection-level** Hamilton/Moser two-arm sum: a difference arm carried by the order-`≤ j+1`
+covariant jets of the once-differentiated realized difference factor
+`R := covGrad g₀ 0 2 (realizeSymmCcTensor g₀ (T₁ − T₂))` (rank `3`), plus the fixed-pair cross piece
+carrying the endpoint jets against the difference's order-`a` chart-Sobolev `C⁰` mass with the explicit
+coefficient `(1/8)`, uniformly over the supercritical `H^{a+2}`-bounded fibre-small perturbation family:
+```
+rfns(∇^j (Φ.op 0 (∇₀ crossCorrTripleDiff)))(x)
   ≤ Cd · ∑_{p ≤ j+1} rfns(∇^p R)(x)
     + (1/8) · (∑_{i ≤ j+2} (rfns(∇^i T₁)(x) + rfns(∇^i T₂)(x))) · ‖(T₁ − T₂).toHs a‖².
 ```
 
 This is the **connection-level** (rank-`3`, `∇w`-level) form of the cross-correction-difference bound:
-it sits *strictly below* the consumer-level child
-`crossCorrectionDiff_iteratedCovGrad_topRest_split` (whose difference arm is the `w`-jet sum
-`∑_{i ≤ j+2} rfns(∇^i w)`, carrying the extra `∇^0 w` term), because the model-basis Ricci trace `Φ.op`
-is value-local (its grid is the single-value `rfns(Φ.op 0 ·) ≤ kappa · rfns(·)`) and the
-cross-correction-difference jet, *after* the trace, is controlled by the connection-level `R = ∇₀ w`
-jets, not the `w` jets.  The `(1/8)` coefficient is the per-trace share so that the doubled cross arm
-of the `linearSection` two-section split (the `2·rfns` subadditivity of
-`riemannianFiberNormSq_sub_le`) re-collects to the target's `(1/4)` cross coefficient.
+it sits *strictly below* the consumer-level child `crossCorrectionSection_iteratedCovGrad_topRest_split`
+(whose difference arm is the `w`-jet sum, carrying the extra `∇^0 w` term), because the model-basis
+Ricci trace `Φ.op` is value-local and the cross-correction-difference jet, *after* the trace and the
+once-`∇₀` differentiation, is controlled by the connection-level `R = ∇₀ w` jets, not the `w` jets.  The
+`(1/8)` coefficient is the per-trace share so that the doubled cross arm of the `linearSection`
+two-section split (the `2·rfns` subadditivity of `riemannianFiberNormSq_sub_le`) re-collects to the
+target's `(1/4)` cross coefficient.
+
+**Decomposition.**  This is the recombination of the genuinely-deep connection-level top/rest split
+`crossCorrectionDiff_iteratedCovGrad_connLevel_split` (above): the split exhibits the order-`j` jet as
+`Top + Rest`, and `riemannianFiberNormSq_add_le` (the `2·rfns` subadditivity) plus the split's two
+fibre-norm bounds (`rfns(Top) ≤ Cd · ∑ rfns(∇^p R)`, `rfns(Rest) ≤ (1/16) · cross`) re-collect to
+`(2·Cd) · ∑ rfns(∇^p R) + (1/8) · cross` (the doubled `(1/16)` cross share landing the `(1/8)`).
 
 **Non-vacuity.**  Both arms carry genuine content: the difference arm carries the connection-level high
 derivative `∇^{j+1} R`, and the cross arm carries **both** fixed-pair endpoints `T₁, T₂`.  At
 `T₁ = T₂` the cross-correction difference vanishes (`ccTensorBilinSymm g₀ 0 = 0`), so
 `crossCorrTripleDiff = 0` and the bound is `0 ≤ 0`.  NO value-bounded operator shape, NO
-pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, NO Weyl dependence.  Its body is `sorry`: the
-genuine deep post-trace connection-level cross-correction-difference covariant-Leibniz content. -/
+pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, NO Weyl dependence. -/
 theorem parallelTrace_crossCorrTripleDiff_iteratedCovGrad_connLevel_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (j : ℕ)
-    (Φ : Integral.Connection.ParallelRankReducingContraction (I := I) (M := M) g₀ 3 2) :
+    (Φ : Integral.Connection.ParallelRankReducingContraction (I := I) (M := M) g₀ 4 2) :
     ∃ Cd : ℝ, 0 ≤ Cd ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -207,7 +291,8 @@ theorem parallelTrace_crossCorrTripleDiff_iteratedCovGrad_connLevel_le
         ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
               ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
-                  (Φ.op 0 (crossCorrTripleDiff (I := I) g₀ T₁ T₂ g₁ g₂))).toSection x) ≤
+                  (Φ.op 0 (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+                    (crossCorrTripleDiff (I := I) g₀ T₁ T₂ g₁ g₂)))).toSection x) ≤
             Cd * ∑ p ∈ Finset.range (j + 1 + 1),
                 riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
                   ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
@@ -218,8 +303,21 @@ theorem parallelTrace_crossCorrTripleDiff_iteratedCovGrad_connLevel_le
                       ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
                     + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
                       ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
-                * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=
-  sorry
+                * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 := by
+  classical
+  obtain ⟨Cd, hCd0, hsplit⟩ :=
+    crossCorrectionDiff_iteratedCovGrad_connLevel_split (I := I) g₀ a ha B hB δ hδ0 hδ1 j Φ
+  refine ⟨2 * Cd, by positivity, ?_⟩
+  intro T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 x
+  obtain ⟨Top, Rest, hsum, hTop, hRest⟩ :=
+    hsplit T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 x
+  -- Recombine the split via the `2·rfns` subadditivity of `riemannianFiberNormSq_add_le`: the doubled
+  -- `(1/16)` cross share of `Rest` lands the consumer's `(1/8)` cross coefficient, the doubled `Cd`
+  -- diff bound of `Top` the consumer's `2·Cd` diff coefficient.
+  rw [hsum]
+  refine le_trans (riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (2 + j) x Top Rest) ?_
+  nlinarith [hTop, hRest, hCd0, riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + j) x Top,
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + j) x Rest]
 
 /-- **(POSIT — the connection-level curvature-trace covariant-jet two-arm reduction.)**  The genuine
 deep curvature-trace covariant-Leibniz content beneath the difference-arm curvature leaf: the intrinsic
@@ -288,8 +386,8 @@ theorem ricciLinearSection_covGrad_traceReductionConn_rfns_le
                       ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
                 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 := by
   classical
-  -- The model-basis Ricci trace `Φ` (parallel, rank-reducing `(0,3) → (0,2)`, fibrewise-linear) and
-  -- the section identity `linearSection = Φ.op 0 (koszulTripleDiff) − Φ.op 0 (crossCorrTripleDiff)`.
+  -- The model-basis Ricci trace `Φ` (parallel, rank-reducing `(0,4) → (0,2)`, fibrewise-linear) and
+  -- the principal-part identity `linearSection = Φ.op 0 (∇₀ koszulTripleDiff) − Φ.op 0 (∇₀ crossCorrTripleDiff)`.
   obtain ⟨Φ, hΦlin, hΦid⟩ :=
     exists_parallelTrace_linearSection_eq_koszulTriple_sub_crossCorrTriple (I := I) g₀
   -- The post-trace connection-level cross-correction-difference jet bound (`(1/8)`-cross arm).
@@ -315,73 +413,93 @@ theorem ricciLinearSection_covGrad_traceReductionConn_rfns_le
       add_nonneg (riemannianFiberNormSq_nonneg _ _ _ _ _) (riemannianFiberNormSq_nonneg _ _ _ _ _)
   set P := ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 with hP
   have hPnn : 0 ≤ P := by rw [hP]; positivity
-  -- The trace identity, specialized to this realizing pair.
+  -- The once-differentiated rank-`4` Koszul triple `Q := ∇₀ koszulTripleDiff` (the linearized-Ricci
+  -- principal-part operand the model-basis Ricci trace `Φ` reads).
+  set Q := Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+    (koszulTripleDiff (I := I) g₀ T₁ T₂) with hQ
+  -- The principal-part identity, specialized to this realizing pair.
   have hid := hΦid T₁ T₂ g₁ g₂ hr1 hr2
   -- Split the squared fibre norm of `∇^j linearSection` over the trace difference identity.
   have hsplit : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
         ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
             (linearSection (I := I) g₀ g₁ g₂)).toSection x) ≤
       2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
-          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
-              (Φ.op 0 (koszulTripleDiff (I := I) g₀ T₁ T₂))).toSection x)
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j (Φ.op 0 Q)).toSection x)
         + 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
           ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
-              (Φ.op 0 (crossCorrTripleDiff (I := I) g₀ T₁ T₂ g₁ g₂))).toSection x) := by
-    rw [hid, PDE.RicciFlow.iteratedCovGrad_sub, Integral.L2.SmoothCcTensor.toSection_sub,
+              (Φ.op 0 (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+                (crossCorrTripleDiff (I := I) g₀ T₁ T₂ g₁ g₂)))).toSection x) := by
+    rw [hid, ← hQ, PDE.RicciFlow.iteratedCovGrad_sub, Integral.L2.SmoothCcTensor.toSection_sub,
       ContMDiffSection.coe_sub, Pi.sub_apply]
     exact riemannianFiberNormSq_sub_le (I := I) (M := M) g₀ 0 (2 + j) x _ _
-  -- **Difference arm.**  The trace grid bounds `∇^j (Φ.op 0 koszulTripleDiff)` by `kappa · ∇^j koszul`.
-  have htrace : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
-        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
-            (Φ.op 0 (koszulTripleDiff (I := I) g₀ T₁ T₂))).toSection x) ≤
-      Φ.kappa * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + j) x
-        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 j
-            (koszulTripleDiff (I := I) g₀ T₁ T₂)).toSection x) :=
-    Φ.rfns_iteratedCovGrad_le j 0 (koszulTripleDiff (I := I) g₀ T₁ T₂) x
-  -- The order-`j` jet of `koszulTripleDiff = R + perm₁ R − perm₂ R` is dominated by `18 · rfns(∇^j R)`,
+  -- **Difference arm.**  The value-local trace grid bounds `∇^j (Φ.op 0 Q)` by `kappa · ∇^j Q`
+  -- (`Φ.rfns_iteratedCovGrad_le` at shift `0`, lowering rank `4 → 2`).
+  have htrace : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 0 + j) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (2 + 0) j (Φ.op 0 Q)).toSection x) ≤
+      Φ.kappa * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + 0 + j) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (4 + 0) j Q).toSection x) :=
+    Φ.rfns_iteratedCovGrad_le j 0 Q x
+  -- Rank-shift: `∇^j (∇₀ koszulTripleDiff) = ∇^{j+1} koszulTripleDiff` (front-commutation), so the
+  -- difference arm carries the *second*-order jet `∇^{j+1} R`, not `∇^j R`.
+  have hshift : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + 0 + j) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (4 + 0) j Q).toSection x) =
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + (j + 1)) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 (j + 1)
+            (koszulTripleDiff (I := I) g₀ T₁ T₂)).toSection x) := by
+    rw [hQ]
+    exact DeTurck.riemannianFiberNormSq_toSection_heq (I := I) (M := M) g₀
+      (by omega : (4 : ℕ) + 0 + j = 3 + (j + 1))
+      (DeTurck.iteratedCovGrad_covGrad_comm_heq_local (I := I) (M := M) g₀ 3 j
+        (koszulTripleDiff (I := I) g₀ T₁ T₂)) x
+  -- The order-`(j+1)` jet of `koszulTripleDiff = R + perm₁ R − perm₂ R` is dominated by `18 · rfns(∇^{j+1} R)`,
   -- since the two slot permutations preserve the jet fibre norm (`permuteCcTensor`-invariance).
-  set LR := riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + j) x
-    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 j R).toSection x) with hLR
+  set LR := riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + (j + 1)) x
+    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 (j + 1) R).toSection x) with hLR
   have hLRnn : 0 ≤ LR := riemannianFiberNormSq_nonneg _ _ _ _ _
-  have hP1eq : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + j) x
-      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 j
+  have hP1eq : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + (j + 1)) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 (j + 1)
         (DeTurck.permuteCcTensor (I := I) g₀ (Equiv.swap (0 : Fin 3) 1) R)).toSection x) = LR := by
     rw [hLR]
     exact DeTurck.riemannianFiberNormSq_iteratedCovGrad_permuteCcTensor (I := I) g₀
-      (Equiv.swap (0 : Fin 3) 1) R j x
-  have hP2eq : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + j) x
-      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 j
+      (Equiv.swap (0 : Fin 3) 1) R (j + 1) x
+  have hP2eq : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + (j + 1)) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 (j + 1)
         (DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 2, 1] R)).toSection x) = LR := by
     rw [hLR]
     exact DeTurck.riemannianFiberNormSq_iteratedCovGrad_permuteCcTensor (I := I) g₀
-      c[(0 : Fin 3), 2, 1] R j x
-  have hkoszul : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + j) x
-        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 j
+      c[(0 : Fin 3), 2, 1] R (j + 1) x
+  have hkoszul : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + (j + 1)) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 (j + 1)
             (koszulTripleDiff (I := I) g₀ T₁ T₂)).toSection x) ≤ 18 * LR := by
     rw [koszulTripleDiff, ← hR, PDE.RicciFlow.iteratedCovGrad_sub, PDE.RicciFlow.iteratedCovGrad_add,
       Integral.L2.SmoothCcTensor.toSection_sub, Integral.L2.SmoothCcTensor.toSection_add,
       ContMDiffSection.coe_sub, ContMDiffSection.coe_add, Pi.sub_apply, Pi.add_apply]
-    refine le_trans (riemannianFiberNormSq_sub_le (I := I) (M := M) g₀ 0 (3 + j) x _ _) ?_
-    have hadd := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (3 + j) x
-      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 j R).toSection x)
-      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 j
+    refine le_trans (riemannianFiberNormSq_sub_le (I := I) (M := M) g₀ 0 (3 + (j + 1)) x _ _) ?_
+    have hadd := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (3 + (j + 1)) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 (j + 1) R).toSection x)
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 (j + 1)
         (DeTurck.permuteCcTensor (I := I) g₀ (Equiv.swap (0 : Fin 3) 1) R)).toSection x)
     rw [hP1eq] at hadd
     rw [hP2eq]
     nlinarith [hadd, hLRnn]
-  -- `rfns(∇^j R) = LR` is the `p = j` term of `SR`, hence `LR ≤ SR` (the dropped terms are nonneg).
+  -- `rfns(∇^{j+1} R) = LR` is the `p = j+1` term of `SR`, hence `LR ≤ SR` (the dropped terms are nonneg).
   have hLR_le_SR : LR ≤ SR := by
     rw [hLR, hSR]
     refine Finset.single_le_sum (f := fun p => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
         ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p R).toSection x))
       (fun p _ => riemannianFiberNormSq_nonneg _ _ _ _ _) ?_
     exact Finset.mem_range.mpr (by omega)
-  -- The difference arm: `rfns(∇^j (Φ.op 0 koszul)) ≤ kappa · 18 · SR`.
+  -- The difference arm: `rfns(∇^j (Φ.op 0 Q)) ≤ kappa · 18 · SR` (reaching `∇^{j+1} R = ∇^{j+2} w`).
   have hdiffarm : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
-        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
-            (Φ.op 0 (koszulTripleDiff (I := I) g₀ T₁ T₂))).toSection x) ≤
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j (Φ.op 0 Q)).toSection x) ≤
       Φ.kappa * 18 * SR := by
-    refine le_trans htrace ?_
+    have htrace' : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j (Φ.op 0 Q)).toSection x) ≤
+        Φ.kappa * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + (j + 1)) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 (j + 1)
+              (koszulTripleDiff (I := I) g₀ T₁ T₂)).toSection x) := by
+      rw [← hshift]; exact htrace
+    refine le_trans htrace' ?_
     have hk : (0 : ℝ) ≤ Φ.kappa := Φ.kappa_nonneg
     nlinarith [hkoszul, hLR_le_SR, hLRnn, hk, hSRnn]
   -- **Cross arm.**  The post-trace connection-level cross bound (`(1/8)`-cross arm).
@@ -392,7 +510,8 @@ theorem ricciLinearSection_covGrad_traceReductionConn_rfns_le
   nlinarith [hdiffarm, hcrossarm, hSRnn, hSTnn, hPnn, Φ.kappa_nonneg, hCdQ0, mul_nonneg hSTnn hPnn,
     riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + j) x
       ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
-          (Φ.op 0 (crossCorrTripleDiff (I := I) g₀ T₁ T₂ g₁ g₂))).toSection x)]
+          (Φ.op 0 (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+            (crossCorrTripleDiff (I := I) g₀ T₁ T₂ g₁ g₂)))).toSection x)]
 
 /-- **(POSIT — the curvature-trace covariant-jet two-arm bound of the linear difference section.)**
 The intrinsic squared fibre norm of the order-`j` covariant gradient of the concrete
