@@ -1149,6 +1149,83 @@ private theorem deTurckGaugeLinearization_towerCoercivity
   exact coercivityRate_of_sq_bound (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
     (hCg_nn 2) (hgard 2 T)
 
+/-- **The Gårding-coercive bounded inverse of the first-order-cancelled DeTurck linearization on
+the spectral Sobolev tower (the Lax-Milgram operator half — the linear core of the
+gauge-cancellation solvability).**
+
+For the anchor `g₀`, an order `a`, and the strictly positive Gårding coercivity rate `μ > 0` of
+`−Δ_∇` on the tower (`hcoercive`, the Lax-Milgram input), the first-order-cancelled DeTurck
+linearization — `−Δ_∇` perturbed by the first-order coefficient operator `B₁` left after the
+second-order principal-symbol cancellation `deTurckNonlinearitySpectral_principalPart_cancels` —
+is a coercive bounded operator on the complete inner-product space `Hᵃ⁺¹(g₀)`, so by Lax-Milgram
+(`IsCoercive.continuousLinearEquivOfBilin`) it is boundedly invertible: there is a
+`ContinuousLinearEquiv` `L : Hᵃ⁺¹(g₀) ≃L[ℝ] Hᵃ⁺¹(g₀)` and a finite inverse-norm rate `Cinv ≥ 0`
+controlling its inverse `‖L.symm v‖ ≤ Cinv · ‖v‖` for every `v`.
+
+This carries the **linear** half of the gauge-cancellation solution: the coercive linearization's
+bounded inverse `cLin := L.symm`, with operator-norm rate `Cinv` controlled by `μ⁻¹`.  It is the
+Lax-Milgram input on which the non-linear fixed-point contraction
+`deTurckGaugeCancellation_globalLipschitz_promotion` runs.
+
+**Not packaging** — the hypothesis is the *real-valued* coercivity rate `μ > 0` of the rough
+Laplacian, structurally distinct from the existential conclusion (a continuous linear equivalence
+with a bounded-inverse norm rate).  **Intrinsic** — the `Hᵃ⁺¹` norm is `g`-inner; no `chartJ`, no
+raw `M → E`.
+
+The body is `sorry` (the Lax-Milgram bounded invertibility of the coercive first-order-cancelled
+linearization over the spectral Sobolev tower). -/
+private theorem deTurckGaugeCancellation_firstOrderCancelledLinearization_continuousLinearEquiv
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    {μ : ℝ} (hμ : 0 < μ)
+    (hcoercive : ∀ T : Integral.L2.SmoothCcTensor g₀ 0 2,
+        μ * ‖covGrad (I := I) (M := M) g₀ 0 (2 + 1)
+              (covGrad (I := I) (M := M) g₀ 0 2 T)‖
+          ≤ ‖rawTensorConnLapSmooth (I := I) g₀ 0 2 T‖ + ‖T‖) :
+    ∃ (L : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)
+            ≃L[ℝ] tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+        (Cinv : ℝ),
+      0 ≤ Cinv ∧
+      ∀ v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+        ‖L.symm v‖ ≤ Cinv * ‖v‖ := sorry
+
+/-- **The Lipschitz-small non-linear DeTurck gauge remainder on the spectral Sobolev tower,
+subordinate to the coercive bounded inverse (the non-linear half of the gauge-cancellation
+solvability).**
+
+For the anchor `g₀`, a flow background `g_bg`, a supercritical order `a` (`2a > dim M + 4`), and a
+finite inverse-norm rate `Cinv ≥ 0` (the bounded-inverse rate the coercive linearization supplies),
+the non-linear remainder `N : Hᵃ⁺¹(g₀) → Hᵃ⁺¹(g₀)` of the first-order-cancelled DeTurck
+gauge-cancellation map is origin-fixing (`N 0 = 0`) and globally Lipschitz with a rate `κ ≥ 0` that
+is **small relative to the bounded inverse**, `Cinv · κ < 1` — i.e. the non-linearity is
+*subordinate* to the coercive elliptic principal part.
+
+This is the genuine **supercritical** content `exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder`
+(`RHSHighOrderSobolevLipschitz.lean`, sorry-free body) supplies: in the regime `2a > dim M + 4` the
+realized Ricci–DeTurck-RHS Sobolev–Lipschitz Nemytskii bound controls the remainder difference by the
+intrinsic `H^{a+2}` norm of the perturbation difference, which the supercritical embedding
+`Hᵃ⁺¹ ↪ H^{a+2}` makes Lipschitz-small enough that, against the coercive bounded inverse's rate
+`Cinv`, the composite contracts (`Cinv · κ < 1`).  It is the non-linear input on which the
+fixed-point contraction `deTurckGaugeCancellation_globalLipschitz_promotion` runs.
+
+**Not packaging** — the conclusion is a real-valued Lipschitz bound on the remainder `N`,
+structurally distinct from the existence of the gauge correction the consuming node builds from it.
+**Intrinsic** — the `Hᵃ⁺¹` norm is `g`-inner; no `chartJ`, no raw `M → E`.
+
+The body is `sorry` (the supercritical Lipschitz-smallness of the realized DeTurck gauge remainder,
+subordinate to the coercive bounded inverse). -/
+private theorem deTurckGaugeCancellation_nonlinearRemainder_lipschitzSmall_on_ball
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
+    (Cinv : ℝ) (hCinv : 0 ≤ Cinv) :
+    ∃ (N : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+          tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+        (κ : ℝ),
+      0 ≤ κ ∧
+      Cinv * κ < 1 ∧
+      N 0 = 0 ∧
+      ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+        ‖N u - N u'‖ ≤ κ * ‖u - u'‖ := sorry
+
 /-- **The origin-fixing, globally `Hᵃ⁺¹`-Lipschitz gauge correction produced by the Gårding-coercive
 bounded inverse (the linear/operator half of the gauge-cancellation solvability).**
 
@@ -1163,16 +1240,28 @@ coercive linearization produces a globally Lipschitz origin-fixing correction wh
 is the inverse operator-norm controlled by `μ⁻¹`.  Mathlib's inverse function theorem
 (`HasStrictFDerivAt.to_localInverse`) supplies only a *local* inverse near a single point with no
 global rate; promoting it to the single global `LipschitzWith Lip c` over all of `Hᵃ⁺¹` is the
-genuine global-control strengthening, the precisely-posited analytic frontier of the `/prove`
-recursion.
+genuine global-control strengthening — here realized as a **Banach fixed-point** contraction.
 
 **Not packaging** — the hypothesis is the *real-valued* coercivity rate `μ > 0` of the rough
 Laplacian, structurally distinct from the existential conclusion (a gauge-correction operator with an
 origin-fixing global Lipschitz rate).  **Intrinsic** — the `Hᵃ⁺¹` norm is `g`-inner; no `chartJ`, no
 raw `M → E`.
 
-The body is `sorry` (the global-`Lipschitz` bounded-inverse solvability of the coercive linearization
-over the spectral Sobolev tower). -/
+This node is **proven by composition** (its body carries no `sorry` of its own).  The Gårding-coercive
+bounded inverse `cLin := L.symm` (with rate `Cinv`) comes from the linear child
+`deTurckGaugeCancellation_firstOrderCancelledLinearization_continuousLinearEquiv`; the origin-fixing,
+globally Lipschitz nonlinear gauge remainder `N` (with rate `κ` subordinate to `Cinv`, `Cinv·κ < 1`)
+comes from the non-linear child `deTurckGaugeCancellation_nonlinearRemainder_lipschitzSmall_on_ball`.
+For each `u`, the gauge-cancellation map `G u w := − cLin (N (u + w))` is a contraction with rate
+`Cinv·κ < 1` (each application of `cLin` to a remainder difference loses at most `Cinv·κ` of the
+`w`-distance), so on the complete inner-product space `Hᵃ⁺¹(g₀)` Banach's `ContractingWith.fixedPoint`
+yields a unique fixed point `c u`.  Origin-fixing: at `u = 0`, `0` is the (unique) fixed point of
+`G 0` since `G 0 0 = − cLin (N 0) = − cLin 0 = 0` (`N 0 = 0` and `cLin` is linear), so `c 0 = 0`.
+Globally Lipschitz: for `u, u'` the maps `G u` and `G u'` are *uniformly* `Cinv·κ·‖u − u'‖`-close (the
+`w`-argument cancels in `(u + w) − (u' + w) = u − u'`), so `ContractingWith.fixedPoint_lipschitz_in_map`
+gives `dist (c u) (c u') ≤ (Cinv·κ·‖u − u'‖)/(1 − Cinv·κ)`, i.e. `LipschitzWith Lip c` with the single
+rate `Lip := (Cinv·κ)/(1 − Cinv·κ)`.  Consumers transitively depend on `sorryAx` through those two
+analytic children (the precisely-posited analytic frontier of the `/prove` recursion). -/
 private theorem deTurckGaugeCancellation_globalLipschitz_promotion
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -1185,7 +1274,78 @@ private theorem deTurckGaugeCancellation_globalLipschitz_promotion
           tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
         (Lip : ℝ≥0),
       c 0 = 0 ∧
-      LipschitzWith Lip c := sorry
+      LipschitzWith Lip c := by
+  classical
+  -- The Gårding-coercive bounded inverse `cLin := L.symm` (rate `Cinv`).
+  obtain ⟨L, Cinv, hCinv, hLsymm⟩ :=
+    deTurckGaugeCancellation_firstOrderCancelledLinearization_continuousLinearEquiv
+      (I := I) (M := M) g₀ a hμ hcoercive
+  -- The origin-fixing, globally Lipschitz nonlinear gauge remainder `N` (rate `κ` subordinate
+  -- to `Cinv`: `Cinv · κ < 1`).
+  obtain ⟨N, κ, hκ, hCκ, hN0, hNlip⟩ :=
+    deTurckGaugeCancellation_nonlinearRemainder_lipschitzSmall_on_ball
+      (I := I) (M := M) g₀ g_bg a ha Cinv hCinv
+  -- The contraction rate `Kc := Cinv · κ < 1` as a nonnegative real, and the positive denominator.
+  have hKc_nn : 0 ≤ Cinv * κ := mul_nonneg hCinv hκ
+  have hden_pos : 0 < 1 - Cinv * κ := by linarith
+  set Kc : ℝ≥0 := ⟨Cinv * κ, hKc_nn⟩ with hKc_def
+  have hKc_lt : Kc < 1 := by
+    rw [hKc_def, ← NNReal.coe_lt_coe]; push_cast; exact hCκ
+  -- The gauge-cancellation map `G u w := − cLin (N (u + w))`.
+  let G : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+      tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+      tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) :=
+    fun u w => - L.symm (N (u + w))
+  -- Each `G u` is a contraction with rate `Kc`.
+  have hGlip : ∀ u, LipschitzWith Kc (G u) := by
+    intro u
+    refine LipschitzWith.of_dist_le_mul (fun w w' => ?_)
+    rw [dist_eq_norm]
+    show ‖- L.symm (N (u + w)) - - L.symm (N (u + w'))‖ ≤ (Kc : ℝ) * dist w w'
+    have hrw : - L.symm (N (u + w)) - - L.symm (N (u + w'))
+        = L.symm (N (u + w') - N (u + w)) := by
+      rw [map_sub]; abel
+    rw [hrw, hKc_def, dist_eq_norm]
+    refine (hLsymm (N (u + w') - N (u + w))).trans ?_
+    have hN : ‖N (u + w') - N (u + w)‖ ≤ κ * ‖(u + w') - (u + w)‖ := hNlip (u + w') (u + w)
+    have hww : (u + w') - (u + w) = w' - w := by abel
+    push_cast
+    calc Cinv * ‖N (u + w') - N (u + w)‖
+        ≤ Cinv * (κ * ‖(u + w') - (u + w)‖) := mul_le_mul_of_nonneg_left hN hCinv
+      _ = Cinv * (κ * ‖w' - w‖) := by rw [hww]
+      _ = Cinv * κ * ‖w - w'‖ := by rw [norm_sub_rev w' w]; ring
+  have hGcontract : ∀ u, ContractingWith Kc (G u) := fun u => ⟨hKc_lt, hGlip u⟩
+  -- The gauge correction `c u := fixedPoint (G u)`, and the global Lipschitz rate.
+  refine ⟨fun u => ContractingWith.fixedPoint (G u) (hGcontract u),
+    ⟨(Cinv * κ) / (1 - Cinv * κ), by positivity⟩, ?_, ?_⟩
+  · -- Origin-fixing: `0` is the (unique) fixed point of `G 0`.
+    have hfix0 : Function.IsFixedPt (G 0) 0 := by
+      show - L.symm (N (0 + 0)) = 0
+      rw [add_zero, hN0, map_zero, neg_zero]
+    exact (ContractingWith.fixedPoint_unique (hGcontract 0) hfix0).symm
+  · -- Globally Lipschitz: the maps `G u`, `G u'` are uniformly `Cinv·κ·‖u − u'‖`-close.
+    refine LipschitzWith.of_dist_le_mul (fun u u' => ?_)
+    have hclose : ∀ w, dist (G u w) (G u' w) ≤ Cinv * κ * dist u u' := by
+      intro w
+      rw [dist_eq_norm]
+      show ‖- L.symm (N (u + w)) - - L.symm (N (u' + w))‖ ≤ Cinv * κ * dist u u'
+      have hrw : - L.symm (N (u + w)) - - L.symm (N (u' + w))
+          = L.symm (N (u' + w) - N (u + w)) := by
+        rw [map_sub]; abel
+      rw [hrw, dist_eq_norm]
+      refine (hLsymm (N (u' + w) - N (u + w))).trans ?_
+      have hN : ‖N (u' + w) - N (u + w)‖ ≤ κ * ‖(u' + w) - (u + w)‖ := hNlip (u' + w) (u + w)
+      have huw : (u' + w) - (u + w) = u' - u := by abel
+      calc Cinv * ‖N (u' + w) - N (u + w)‖
+          ≤ Cinv * (κ * ‖(u' + w) - (u + w)‖) := mul_le_mul_of_nonneg_left hN hCinv
+        _ = Cinv * (κ * ‖u' - u‖) := by rw [huw]
+        _ = Cinv * κ * ‖u - u'‖ := by rw [norm_sub_rev u' u]; ring
+    have hfp :=
+      ContractingWith.fixedPoint_lipschitz_in_map (hGcontract u) (hGcontract u') hclose
+    -- `dist (c u) (c u') ≤ (Cinv·κ·dist u u')/(1 − Cinv·κ) = Lip · dist u u'`.
+    rw [NNReal.coe_mk]
+    refine hfp.trans (le_of_eq ?_)
+    rw [hKc_def]; push_cast; ring
 
 /-- **The `Q`-gated realized-remainder `L²`-class match of the heat-smoothed gauge-corrected datum
 (the non-linear/identity half of the gauge-cancellation solvability).**
