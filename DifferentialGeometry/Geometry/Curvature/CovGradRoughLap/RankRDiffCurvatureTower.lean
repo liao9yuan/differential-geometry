@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldCovariantCalculusRS
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RankRPureRCurvatureTower
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RankRDiffCurvatureFactorization
 
 /-!
 # The frame-free differentiated `(∇R)·` curvature tower at contravariant valence `r`
@@ -257,34 +258,72 @@ private theorem genuinePureRDiffOp_orderOne_local
     (W₁ W₂ : SmoothCcTensor g r rr) (x : M)
     (hW : W₁.toSection x = W₂.toSection x) :
     (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₁).toSection x =
-      (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₂).toSection x := by
+      (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₂).toSection x :=
+  genuinePureRDiffOpRS_one_local (I := I) (M := M) g r rr W₁ W₂ x hW
+
+set_option linter.unusedVariables false in
+set_option backward.isDefEq.respectTransparency false in
+/-- **Child (the full-Hom operator-field normal form of the differentiated `(∇R)·` tower).** For a closed
+smooth Riemannian manifold `(M, g)` and a fixed contravariant valence `r`, at every order `p` and base
+width `rr` the differentiated `(∇R)·` tower value `diffCurvGenuineTowerOpRS g r p rr W` decomposes as a
+finite sum of full Hom-bundle actions (`appFullRS`, `RankRDiffCurvatureFactorization`) of *fixed* smooth
+full Hom-bundle fields `Ψ k : Π x, TensorRSSpace r (rr + k) I x →L TensorRSSpace r (rr + 1 + p) I x` (the
+iterated curvature jets `∇^{≤ p}(∇R)`) on the covariant jets `∇^k W` of the contracted `(r, rr)`-section,
+`k < p + 1`:
+```
+diffCurvGenuineTowerOpRS g r p rr W = ∑_{k < p + 1} appFullRS (Ψ k) (∇^k W).
+```
+
+**Why this is TRUE.** The full-Hom analogue of the *proved* codomain-only normal form
+`normalForm_of_baseRS`.  The tower's order-`0` base value-locally factors as the full Hom-bundle action of
+the fixed curvature-jet field `∇R` (`exists_genuinePureRDiffOpRS_one_appFullRS`,
+`RankRDiffCurvatureFactorization`); the full Hom-bundle covariant product rule
+(`homBundleCovariantDerivativeGen`) then runs the same single-index telescoping induction on the order `p`
+as `normalForm_of_baseRS` — each step differentiates the fixed coefficient (the gradient term) and
+slot-extends it onto the next jet `∇^{k+1}W` — expressing `op p rr W` as a finite sum of full Hom-bundle
+actions of the fixed iterated curvature jets `∇^{≤ p}(∇R)`.  The full-Hom covariant product rule and the
+full-Hom normal-form induction are absent sorry-free at the full-Hom level (the codomain-only `appCcRS`
+post-composition misses the contravariant curvature branch), so the full-Hom normal form is posited here
+as one precise true child.  Consumers transitively depend on `sorryAx`.
+
+**Non-vacuity.** A degenerate normal form (all `Ψ k ≡ 0`) is rejected on any non-flat manifold: at
+`(p, rr) = (0, rr)` the tower value is the recast genuine `(∇R) W` (`diffCurvGenuineTowerOpRS_zero`),
+genuinely non-zero for a non-parallel `W`, so the leading coefficient `Ψ 0` is the non-vanishing curvature
+field `∇R`, not zero. -/
+private theorem exists_diffCurvGenuineTowerOpRS_normalFormFull (g : SmoothRiemannianMetric I M) (r : ℕ)
+    (p rr : ℕ) :
+    ∃ (Ψ : (k : ℕ) → Π x : M, TensorRSSpace r (rr + k) I x →L[ℝ] TensorRSSpace r (rr + 1 + p) I x)
+      (hΨ : ∀ k : ℕ,
+        ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r (rr + k) ℝ E →L[ℝ] TensorRSModel r (rr + 1 + p) ℝ E)) ∞
+          (fun x : M => TotalSpace.mk' (TensorRSModel r (rr + k) ℝ E →L[ℝ] TensorRSModel r (rr + 1 + p) ℝ E)
+            (E := fun z : M => TensorRSSpace r (rr + k) I z →L[ℝ] TensorRSSpace r (rr + 1 + p) I z) x
+            (Ψ k x))),
+      ∀ W : SmoothCcTensor g r rr,
+        diffCurvGenuineTowerOpRS (I := I) (M := M) g r p rr W =
+          ∑ k ∈ Finset.range (p + 1),
+            appFullRS (I := I) (M := M) g r (rr + k) (rr + 1 + p) (Ψ k) (hΨ k)
+              (iteratedCovGrad g r rr k W) := by
   sorry
 
-/-- **Child (the tight-window jet envelope, the `‖∇^{≤ p} R‖_∞` curvature-jet sup).** For a closed smooth
-Riemannian manifold `(M, g)` and a fixed contravariant valence `r` there is a nonnegative per-order,
-per-rank envelope `kappa : ℕ → ℕ → ℝ` such that, for every order `p`, base width `rr`, smooth
-compactly-supported `(r, rr)`-tensor `W`, and base point `x`,
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- **Child (the tight-window jet envelope, the `‖∇^{≤ p} R‖_∞` curvature-jet sup) — assembled from the
+full-Hom normal form and the uniform full-Hom contraction bound.** For a closed smooth Riemannian manifold
+`(M, g)` and a fixed contravariant valence `r` there is a nonnegative per-order, per-rank envelope
+`kappa : ℕ → ℕ → ℝ` such that, for every order `p`, base width `rr`, smooth compactly-supported
+`(r, rr)`-tensor `W`, and base point `x`,
 ```
 rfns(diffCurvGenuineTowerOpRS g r p rr W)(x) ≤ kappa p rr · ∑_{q < p + 1} rfns(∇^q W)(x).
 ```
 The window is the *tight* `p + 1` (the section enters at order `0`, width `1`).
 
-**Why this is TRUE.** The tower is the exact covariant-Leibniz remainder recursion off the genuine order-`1`
-trace `(∇R) W`, whose order-`0` base value-locally factors as the full Hom action `appFullRS (∇R) W` of the
-*fixed* smooth curvature-jet coefficient `∇R` (`genuinePureRDiffOp_orderOne_local` /
-`genuinePureRDiffOp_orderOne_linear`).  Running the full-tensor operator-field normal form
-(`NormalFormRaiseRS`, the full-fibre analogue of the proved `appCcRS` normal form `normalForm_of_baseRS`)
-over the fixed coefficient `∇R` expresses `op p rr W` as a finite sum of full Hom actions
-`appFullRS (∇^k(∇R)) (∇^k W)`, `k < p + 1`, of the *fixed* iterated curvature jets `∇^{≤ p}(∇R)` on the
-covariant jets `∇^{≤ p}W` of the contracted section; each `∇^k(∇R)` is a fixed smooth Hom-bundle field,
-uniformly fibre-operator-bounded over the compact `M` by `‖∇^{≤ p + 1} R‖_∞`, and the full-fibre
-partial-contraction Cauchy–Schwarz `rfns(Ψ x (W x)) ≤ rfns_Hom(Ψ x) · rfns(W x)` (the full-fibre lift of
-`riemannianFiberNormSq_compRS_le_mul`) bounds each summand by `‖∇^k(∇R)‖_∞ · rfns(∇^k W)(x)`, giving the
-tight `p + 1` window.  The full-Hom `appFullRS` calculus, its Hom-bundle covariant product rule, the
-`(∇R)`-endo factorisation, and the `‖∇^{≤ p} R‖_∞` uniform curvature-jet sup are absent sorry-free at
-valence `r` below this file (the codomain-only `appCcRS` post-composition misses the contravariant
-curvature branch), so this tight-window envelope is posited here as one precise true child.  Consumers
-transitively depend on `sorryAx`.
+**Proof.** By the full-Hom normal form `exists_diffCurvGenuineTowerOpRS_normalFormFull`, the order-`p`
+tower value is a finite sum `∑_{k < p + 1} appFullRS (Ψ k) (∇^k W)` of full Hom-bundle actions of fixed
+smooth full-Hom curvature-jet fields `Ψ k`; each summand is uniformly fibre-bounded by the uniform full-Hom
+contraction bound `exists_uniform_riemannianFiberNormSq_appFullRS_le` (the `‖∇^k(∇R)‖_∞` sup,
+`RankRDiffCurvatureFactorization`) times `rfns(∇^k W)(x)`, and the finite sum is accumulated by
+`riemannianFiberNormSq_sum_le_card_mul`, giving the tight `p + 1` window.  Consumers transitively depend on
+the full-Hom calculus children's `sorryAx`.
 
 **Non-vacuity.** A degenerate witness `kappa ≡ 0` is rejected on any non-flat manifold: at
 `(p, rr) = (0, rr)`, `diffCurvGenuineTowerOpRS g r 0 rr W` is the genuine `(∇R) W`, genuinely non-zero
@@ -298,7 +337,81 @@ private theorem exists_diffCurvGenuineTowerOpRS_envelope (g : SmoothRiemannianMe
           kappa p rr * ∑ q ∈ Finset.range (p + 1),
             riemannianFiberNormSq (I := I) (M := M) g r (rr + q) x
               ((iteratedCovGrad g r rr q W).toSection x) := by
-  sorry
+  classical
+  -- The fixed full-Hom curvature-jet field family and its uniform contraction constant, per `(p, rr)`.
+  set Ψf : ∀ p rr : ℕ,
+      (k : ℕ) → Π x : M, TensorRSSpace r (rr + k) I x →L[ℝ] TensorRSSpace r (rr + 1 + p) I x :=
+    fun p rr => (exists_diffCurvGenuineTowerOpRS_normalFormFull (I := I) (M := M) g r p rr).choose
+    with hΨf_def
+  set hΨf : ∀ p rr : ℕ, ∀ k : ℕ,
+      ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r (rr + k) ℝ E →L[ℝ] TensorRSModel r (rr + 1 + p) ℝ E)) ∞
+        (fun x : M => TotalSpace.mk' (TensorRSModel r (rr + k) ℝ E →L[ℝ] TensorRSModel r (rr + 1 + p) ℝ E)
+          (E := fun z : M => TensorRSSpace r (rr + k) I z →L[ℝ] TensorRSSpace r (rr + 1 + p) I z) x
+          (Ψf p rr k x)) :=
+    fun p rr => (exists_diffCurvGenuineTowerOpRS_normalFormFull (I := I) (M := M) g r p rr)
+      |>.choose_spec.choose with hhΨf_def
+  set Cf : ∀ p rr : ℕ, ℕ → ℝ :=
+    fun p rr k => (exists_uniform_riemannianFiberNormSq_appFullRS_le (I := I) (M := M) g r (rr + k)
+      (rr + 1 + p) (Ψf p rr k) (hΨf p rr k)).choose with hCf_def
+  have hCf_nn : ∀ p rr k, 0 ≤ Cf p rr k := fun p rr k =>
+    (exists_uniform_riemannianFiberNormSq_appFullRS_le (I := I) (M := M) g r (rr + k) (rr + 1 + p)
+      (Ψf p rr k) (hΨf p rr k)).choose_spec.1
+  have hCf_bound : ∀ (p rr k : ℕ) (V : SmoothCcTensor g r (rr + k)) (y : M),
+      riemannianFiberNormSq (I := I) (M := M) g r (rr + 1 + p) y
+          ((appFullRS (I := I) (M := M) g r (rr + k) (rr + 1 + p) (Ψf p rr k) (hΨf p rr k) V).toSection y) ≤
+        Cf p rr k * riemannianFiberNormSq (I := I) (M := M) g r (rr + k) y (V.toSection y) := fun p rr k V y =>
+    (exists_uniform_riemannianFiberNormSq_appFullRS_le (I := I) (M := M) g r (rr + k) (rr + 1 + p)
+      (Ψf p rr k) (hΨf p rr k)).choose_spec.2 V y
+  have hNFf : ∀ (p rr : ℕ) (W : SmoothCcTensor g r rr),
+      diffCurvGenuineTowerOpRS (I := I) (M := M) g r p rr W =
+        ∑ k ∈ Finset.range (p + 1),
+          appFullRS (I := I) (M := M) g r (rr + k) (rr + 1 + p) (Ψf p rr k) (hΨf p rr k)
+            (iteratedCovGrad g r rr k W) := fun p rr =>
+    (exists_diffCurvGenuineTowerOpRS_normalFormFull (I := I) (M := M) g r p rr) |>.choose_spec.choose_spec
+  refine ⟨fun p rr => (p + 1 : ℝ) * ∑ k ∈ Finset.range (p + 1), Cf p rr k, ?_, ?_⟩
+  · intro p rr
+    exact mul_nonneg (by positivity) (Finset.sum_nonneg fun k _ => hCf_nn p rr k)
+  · intro p rr W x
+    -- Per-summand uniform constant and jet terms (specialised to this `(p, rr)`).
+    set C : ℕ → ℝ := fun k => Cf p rr k with hC_def
+    have hC_nn : ∀ k, 0 ≤ C k := fun k => hCf_nn p rr k
+    have hC_bound : ∀ (k : ℕ) (V : SmoothCcTensor g r (rr + k)),
+        riemannianFiberNormSq (I := I) (M := M) g r (rr + 1 + p) x
+            ((appFullRS (I := I) (M := M) g r (rr + k) (rr + 1 + p) (Ψf p rr k) (hΨf p rr k) V).toSection x) ≤
+          C k * riemannianFiberNormSq (I := I) (M := M) g r (rr + k) x (V.toSection x) := fun k V =>
+      hCf_bound p rr k V x
+    have hNF := hNFf p rr
+    set a : ℕ → ℝ := fun k => riemannianFiberNormSq (I := I) (M := M) g r (rr + k) x
+      ((iteratedCovGrad g r rr k W).toSection x) with ha_def
+    have ha_nn : ∀ k, 0 ≤ a k := fun k =>
+      riemannianFiberNormSq_nonneg (I := I) (M := M) g r (rr + k) x _
+    -- Step 1: rewrite the tower value by the normal form and pass `rfns` through the finite sum.
+    rw [hNF W, SmoothCcTensor.toSection_sum_apply]
+    -- Step 2: `rfns(∑ ...) ≤ card · ∑ rfns(appFullRS (Ψ k) (∇^k W))`.
+    refine le_trans (riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g r (rr + 1 + p) x
+      (Finset.range (p + 1))
+      (fun k => (appFullRS (I := I) (M := M) g r (rr + k) (rr + 1 + p) (Ψf p rr k) (hΨf p rr k)
+        (iteratedCovGrad g r rr k W)).toSection x)) ?_
+    rw [Finset.card_range]
+    -- Step 3: each summand `rfns(appFullRS (Ψ k) (∇^k W))(x) ≤ C k · a k`.
+    have hsummand : ∀ k ∈ Finset.range (p + 1),
+        riemannianFiberNormSq (I := I) (M := M) g r (rr + 1 + p) x
+            ((appFullRS (I := I) (M := M) g r (rr + k) (rr + 1 + p) (Ψf p rr k) (hΨf p rr k)
+              (iteratedCovGrad g r rr k W)).toSection x) ≤ C k * a k :=
+      fun k _ => hC_bound k (iteratedCovGrad g r rr k W)
+    refine le_trans (mul_le_mul_of_nonneg_left (Finset.sum_le_sum hsummand) (by positivity)) ?_
+    -- Step 4: `∑_k C k · a k ≤ (∑_k C k) · (∑_k a k)`, giving the claimed bound.
+    have hCa_le : (∑ k ∈ Finset.range (p + 1), C k * a k) ≤
+        (∑ k ∈ Finset.range (p + 1), C k) * ∑ k ∈ Finset.range (p + 1), a k := by
+      rw [Finset.sum_mul]
+      refine Finset.sum_le_sum (fun k _ => ?_)
+      refine mul_le_mul_of_nonneg_left ?_ (hC_nn k)
+      exact Finset.single_le_sum (f := a) (fun j _ => ha_nn j) ‹k ∈ Finset.range (p + 1)›
+    rw [show ((p + 1 : ℕ) : ℝ) = (p : ℝ) + 1 from by push_cast; ring]
+    calc (p + 1 : ℝ) * ∑ k ∈ Finset.range (p + 1), C k * a k
+        ≤ (p + 1 : ℝ) * ((∑ k ∈ Finset.range (p + 1), C k) * ∑ k ∈ Finset.range (p + 1), a k) :=
+          mul_le_mul_of_nonneg_left hCa_le (by positivity)
+      _ = (p + 1 : ℝ) * (∑ k ∈ Finset.range (p + 1), C k) * ∑ k ∈ Finset.range (p + 1), a k := by ring
 
 set_option linter.unusedVariables false in
 /-- **The genuine differentiated `(∇R)·` curvature tower at valence `r` (assembled from the recursion and

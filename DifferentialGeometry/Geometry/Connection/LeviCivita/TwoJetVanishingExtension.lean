@@ -1079,6 +1079,435 @@ private lemma fderiv_jetCancelPoly_centred
   rw [ContinuousLinearMap.neg_apply, hL]
   rfl
 
+/-- The basepoint coordinate `tangentCoord x₀ u = u` (the basepoint trivialization is the
+identity on `E`). -/
+private lemma tangentCoord_self (x₀ : M) (u : TangentSpace I x₀) :
+    tangentCoord (I := I) x₀ u = u := trivToE_self_apply (I := I) x₀ u
+
+/-- **Bundled continuous-bilinear form of the basepoint Christoffel correction.** A continuous
+bilinear map `E →L[ℝ] (TangentSpace I x₀ →L[ℝ] E)` with
+`christoffelCorrectionBilin g x₀ Y v = christoffelCorrection g x₀ x₀ Y v`. -/
+private def christoffelCorrectionBilin (g : SmoothRiemannianMetric I M) (x₀ : M) :
+    E →L[ℝ] (TangentSpace I x₀ →L[ℝ] E) :=
+  ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+    ∑ k : Fin (Module.finrank ℝ E),
+      (((chartModelBasis E).coord j).toContinuousLinearMap).smulRight
+        ((((chartModelBasis E).coord i).toContinuousLinearMap.comp
+            (trivToE (I := I) x₀ x₀)).smulRight
+          (chartChristoffel (I := I) g x₀ i j k (extChartAt I x₀ x₀) • (chartModelBasis E) k))
+
+private lemma christoffelCorrectionBilin_apply (g : SmoothRiemannianMetric I M) (x₀ : M)
+    (Y : E) (v : TangentSpace I x₀) :
+    christoffelCorrectionBilin (I := I) g x₀ Y v =
+      christoffelCorrection (I := I) g x₀ x₀ Y v := by
+  classical
+  rw [christoffelCorrection_apply]
+  unfold christoffelCorrectionBilin
+  rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun j _ => ?_)
+  rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun k _ => ?_)
+  rw [ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.smul_apply,
+    ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.comp_apply, smul_smul, smul_smul]
+  congr 1
+  show ((chartModelBasis E).coord j) Y * ((chartModelBasis E).coord i) (trivToE (I := I) x₀ x₀ v) *
+      chartChristoffel (I := I) g x₀ i j k (extChartAt I x₀ x₀) =
+    ((chartModelBasis E).coord i) (trivToE (I := I) x₀ x₀ v) * ((chartModelBasis E).coord j) Y *
+      chartChristoffel (I := I) g x₀ i j k (extChartAt I x₀ x₀)
+  ring
+
+/-- **Bundled continuous-bilinear `∂Γ` form** (with coefficient `V`): the continuous bilinear map
+whose diagonal at `u` reproduces the `∂Γ`-summand of the linear-extension `2`-jet, with the two
+coordinate-constant `u`-slots split into the bilinear arguments `(a, b)` (the chart-Christoffel
+`fderiv` direction `eₖ` reading `a`, the lower index `i` reading `b`). -/
+private def psiDGamma (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E) :
+    E →L[ℝ] E →L[ℝ] E :=
+  ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+    ∑ k : Fin (Module.finrank ℝ E), ∑ m : Fin (Module.finrank ℝ E),
+      (((chartModelBasis E).coord k).toContinuousLinearMap).smulRight
+        ((((chartModelBasis E).coord i).toContinuousLinearMap).smulRight
+          (((chartModelBasis E).repr V) j •
+            trivFromE (I := I) x₀ x₀
+              ((fderiv ℝ (fun y : E => chartChristoffel (I := I) g x₀ i j m y)
+                  (extChartAt I x₀ x₀)) ((chartModelBasis E) k) • (chartModelBasis E) m)))
+
+private lemma psiDGamma_apply (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E) (a b : E) :
+    psiDGamma (I := I) g x₀ V a b =
+      ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        ∑ k : Fin (Module.finrank ℝ E), ∑ m : Fin (Module.finrank ℝ E),
+          (((chartModelBasis E).repr a) k * ((chartModelBasis E).repr b) i *
+              ((chartModelBasis E).repr V) j) •
+            trivFromE (I := I) x₀ x₀
+              ((fderiv ℝ (fun y : E => chartChristoffel (I := I) g x₀ i j m y)
+                  (extChartAt I x₀ x₀)) ((chartModelBasis E) k) • (chartModelBasis E) m) := by
+  classical
+  unfold psiDGamma
+  rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun j _ => ?_)
+  rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun k _ => ?_)
+  rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun m _ => ?_)
+  rw [ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.smul_apply,
+    ContinuousLinearMap.smulRight_apply]
+  conv_rhs =>
+    rw [show ((chartModelBasis E).repr a) k * ((chartModelBasis E).repr b) i *
+          ((chartModelBasis E).repr V) j =
+        ((chartModelBasis E).repr a) k *
+          (((chartModelBasis E).repr b) i * ((chartModelBasis E).repr V) j) from by ring,
+      mul_smul, mul_smul]
+  rfl
+
+/-- **Bundled continuous-bilinear `Γ·Γ` form** (with coefficient `V`): the continuous bilinear map
+whose diagonal at `u` reproduces the quadratic `Γ·Γ`-summand of the linear-extension `2`-jet, with
+the two coordinate-constant `u`-slots split into the bilinear arguments `(a, b)`. -/
+private def psiGG (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E) :
+    E →L[ℝ] E →L[ℝ] E :=
+  ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+    ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+      ∑ m : Fin (Module.finrank ℝ E),
+        (((chartModelBasis E).coord i).toContinuousLinearMap).smulRight
+          ((((chartModelBasis E).coord k).toContinuousLinearMap).smulRight
+            ((((chartModelBasis E).repr V) j *
+                chartChristoffel (I := I) g x₀ k l m (extChartAt I x₀ x₀) *
+                chartChristoffel (I := I) g x₀ i j l (extChartAt I x₀ x₀)) •
+              trivFromE (I := I) x₀ x₀ ((chartModelBasis E) m)))
+
+private lemma psiGG_apply (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E) (a b : E) :
+    psiGG (I := I) g x₀ V a b =
+      ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+          ∑ m : Fin (Module.finrank ℝ E),
+            (((chartModelBasis E).repr a) i * ((chartModelBasis E).repr b) k *
+                ((chartModelBasis E).repr V) j *
+                chartChristoffel (I := I) g x₀ k l m (extChartAt I x₀ x₀) *
+                chartChristoffel (I := I) g x₀ i j l (extChartAt I x₀ x₀)) •
+              trivFromE (I := I) x₀ x₀ ((chartModelBasis E) m) := by
+  classical
+  unfold psiGG
+  rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun j _ => ?_)
+  rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun k _ => ?_)
+  rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun l _ => ?_)
+  rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun m _ => ?_)
+  rw [ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.smul_apply,
+    ContinuousLinearMap.smulRight_apply]
+  conv_rhs =>
+    rw [show ((chartModelBasis E).repr a) i * ((chartModelBasis E).repr b) k *
+          ((chartModelBasis E).repr V) j *
+          chartChristoffel (I := I) g x₀ k l m (extChartAt I x₀ x₀) *
+          chartChristoffel (I := I) g x₀ i j l (extChartAt I x₀ x₀) =
+        ((chartModelBasis E).repr a) i *
+          (((chartModelBasis E).repr b) k *
+            (((chartModelBasis E).repr V) j *
+              chartChristoffel (I := I) g x₀ k l m (extChartAt I x₀ x₀) *
+              chartChristoffel (I := I) g x₀ i j l (extChartAt I x₀ x₀))) from by ring,
+      mul_smul, mul_smul]
+  rfl
+
+/-- The Fréchet derivative of `jetCancelPoly g x₀ v Qbil` at a general point `z`, applied to `w`:
+`fderiv P z w = −christoffelCorrection g x₀ x₀ (tangentCoord x₀ v) w + ½ (Qbil z w + Qbil w z)`. -/
+private lemma fderiv_jetCancelPoly_apply (g : SmoothRiemannianMetric I M) (x₀ : M)
+    (v : TangentSpace I x₀) (Qbil : E →L[ℝ] E →L[ℝ] E) (z w : E) :
+    fderiv ℝ (jetCancelPoly (I := I) g x₀ v Qbil) z w =
+      -(christoffelCorrection (I := I) g x₀ x₀ (tangentCoord (I := I) x₀ v) w) +
+        (1 / 2 : ℝ) • (Qbil z w + Qbil w z) := by
+  classical
+  set L : E →L[ℝ] E := christoffelCorrection (I := I) g x₀ x₀ (tangentCoord (I := I) x₀ v) with hL
+  have hlin : HasFDerivAt (fun y : E => -(L y)) (-L) z := (L.hasFDerivAt).neg
+  have hid : HasFDerivAt (fun y : E => y) (ContinuousLinearMap.id ℝ E) z := hasFDerivAt_id z
+  have hc : HasFDerivAt (fun y : E => Qbil y) (Qbil.comp (ContinuousLinearMap.id ℝ E)) z :=
+    (Qbil.hasFDerivAt).comp z hid
+  have hquad : HasFDerivAt (fun y : E => (1 / 2 : ℝ) • Qbil y y)
+      ((1 / 2 : ℝ) • ((Qbil z).comp (ContinuousLinearMap.id ℝ E) +
+        (Qbil.comp (ContinuousLinearMap.id ℝ E)).flip z)) z :=
+    (hc.clm_apply hid).const_smul (1 / 2 : ℝ)
+  have hsum : HasFDerivAt (jetCancelPoly (I := I) g x₀ v Qbil)
+      (-L + (1 / 2 : ℝ) • ((Qbil z).comp (ContinuousLinearMap.id ℝ E) +
+        (Qbil.comp (ContinuousLinearMap.id ℝ E)).flip z)) z := by
+    refine (hlin.add hquad).congr_of_eventuallyEq ?_
+    filter_upwards with y
+    show jetCancelPoly (I := I) g x₀ v Qbil y = -(L y) + (1 / 2 : ℝ) • Qbil y y
+    rw [hL]; rfl
+  rw [hsum.fderiv]
+  rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.neg_apply,
+    ContinuousLinearMap.smul_apply, ContinuousLinearMap.add_apply,
+    ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply,
+    ContinuousLinearMap.flip_apply, ContinuousLinearMap.comp_apply,
+    ContinuousLinearMap.id_apply, hL]
+  congr 1
+
+/-- The basepoint Fréchet derivative of `jetCancelPoly g x₀ v Qbil` is its linear part:
+`fderiv P 0 w = −christoffelCorrection g x₀ x₀ (tangentCoord x₀ v) w`. -/
+private lemma fderiv_jetCancelPoly_zero_apply (g : SmoothRiemannianMetric I M) (x₀ : M)
+    (v : TangentSpace I x₀) (Qbil : E →L[ℝ] E →L[ℝ] E) (w : E) :
+    fderiv ℝ (jetCancelPoly (I := I) g x₀ v Qbil) 0 w =
+      -(christoffelCorrection (I := I) g x₀ x₀ (tangentCoord (I := I) x₀ v) w) := by
+  rw [fderiv_jetCancelPoly_apply]; simp
+
+/-- The derivative at the chart centre, in direction `u`, of the inner-section "`fderiv P`" head
+`y ↦ fderiv P (y − c) U` for `P = jetCancelPoly g x₀ v Qbil`: `½ (Qbil u U + Qbil U u)` (the
+constant `−christoffelCorrection` head drops, the quadratic head's derivative is the symmetrised
+`Qbil`). -/
+private lemma fderiv_jetCancel_Aterm (g : SmoothRiemannianMetric I M) (x₀ : M)
+    (v : TangentSpace I x₀) (Qbil : E →L[ℝ] E →L[ℝ] E) (U u : E) :
+    fderiv ℝ (fun y : E => fderiv ℝ (jetCancelPoly (I := I) g x₀ v Qbil)
+        (y - extChartAt I x₀ x₀) U) (extChartAt I x₀ x₀) u =
+      (1 / 2 : ℝ) • (Qbil u U + Qbil U u) := by
+  classical
+  set c := extChartAt I x₀ x₀ with hc
+  have hfun : (fun y : E => fderiv ℝ (jetCancelPoly (I := I) g x₀ v Qbil) (y - c) U) =
+      (fun y : E => -(christoffelCorrection (I := I) g x₀ x₀ (tangentCoord (I := I) x₀ v) U) +
+        (1 / 2 : ℝ) • (Qbil (y - c) U + Qbil U (y - c))) := by
+    funext y; rw [fderiv_jetCancelPoly_apply]
+  rw [hfun]
+  have hA1 : HasFDerivAt (fun y : E => Qbil (y - c) U) (Qbil.flip U) c := by
+    have hgen : ∀ z : E, HasFDerivAt (fun y : E => Qbil (y - c) U)
+        ((Qbil.flip U).comp (ContinuousLinearMap.id ℝ E)) z := by
+      intro z
+      have hshiftz : HasFDerivAt (fun y : E => y - c) (ContinuousLinearMap.id ℝ E) z :=
+        (hasFDerivAt_id z).sub_const c
+      have hq : HasFDerivAt (fun w : E => Qbil w U) (Qbil.flip U) (z - c) := by
+        refine ((Qbil.flip U).hasFDerivAt (x := z - c)).congr_of_eventuallyEq ?_
+        filter_upwards with w; rw [ContinuousLinearMap.flip_apply]
+      exact hq.comp z hshiftz
+    have h := hgen c; rwa [ContinuousLinearMap.comp_id] at h
+  have hA2 : HasFDerivAt (fun y : E => Qbil U (y - c)) (Qbil U) c := by
+    have hgen : ∀ z : E, HasFDerivAt (fun y : E => Qbil U (y - c))
+        ((Qbil U).comp (ContinuousLinearMap.id ℝ E)) z := by
+      intro z
+      have hshiftz : HasFDerivAt (fun y : E => y - c) (ContinuousLinearMap.id ℝ E) z :=
+        (hasFDerivAt_id z).sub_const c
+      exact ((Qbil U).hasFDerivAt).comp z hshiftz
+    have h := hgen c; rwa [ContinuousLinearMap.comp_id] at h
+  have hAfull : HasFDerivAt
+      (fun y : E => -(christoffelCorrection (I := I) g x₀ x₀ (tangentCoord (I := I) x₀ v) U) +
+        (1 / 2 : ℝ) • (Qbil (y - c) U + Qbil U (y - c)))
+      ((1 / 2 : ℝ) • (Qbil.flip U + Qbil U)) c := by
+    have hconst : HasFDerivAt
+        (fun _ : E => -(christoffelCorrection (I := I) g x₀ x₀ (tangentCoord (I := I) x₀ v) U))
+        (0 : E →L[ℝ] E) c := hasFDerivAt_const _ c
+    have := hconst.add ((hA1.add hA2).const_smul (1 / 2 : ℝ))
+    rwa [zero_add] at this
+  rw [hAfull.fderiv, ContinuousLinearMap.smul_apply, ContinuousLinearMap.add_apply,
+    ContinuousLinearMap.flip_apply]
+
+/-- `chartChristoffel` is differentiable at the chart basepoint (it is `C^∞` on the interior of
+the chart target). -/
+private lemma chartChristoffel_differentiableAt_basepoint'
+    (g : SmoothRiemannianMetric I M) (x₀ : M) (i j m : Fin (Module.finrank ℝ E)) :
+    DifferentiableAt ℝ (fun y : E => chartChristoffel (I := I) g x₀ i j m y)
+      (extChartAt I x₀ x₀) :=
+  chartChristoffel_differentiableAt_basepoint (I := I) g x₀ i j m
+
+/-- A single `(i,j,m)`-summand of the inner-section Christoffel sum is differentiable at the
+chart basepoint. -/
+private lemma diffAt_jetCancel_Bsummand (g : SmoothRiemannianMetric I M) (x₀ : M)
+    {P : E → E} (hP : ContDiff ℝ ∞ P) (U : E) (i j m : Fin (Module.finrank ℝ E)) :
+    DifferentiableAt ℝ (fun y : E =>
+        (((chartModelBasis E).repr U) i *
+            (((chartModelBasis E).repr (P (y - extChartAt I x₀ x₀))) j) *
+            chartChristoffel (I := I) g x₀ i j m y) • (chartModelBasis E) m)
+        (extChartAt I x₀ x₀) := by
+  classical
+  set c := extChartAt I x₀ x₀ with hc
+  have hPshift : Differentiable ℝ (fun y : E => P (y - c)) :=
+    (hP.differentiable (by norm_num)).comp ((differentiable_id).sub_const c)
+  have hcoordj : DifferentiableAt ℝ (fun y : E => ((chartModelBasis E).repr (P (y - c))) j) c :=
+    (((chartModelBasis E).coord j).toContinuousLinearMap.differentiable.comp
+      hPshift).differentiableAt
+  have hγ : DifferentiableAt ℝ (fun y : E => chartChristoffel (I := I) g x₀ i j m y) c :=
+    chartChristoffel_differentiableAt_basepoint (I := I) g x₀ i j m
+  exact (((hcoordj.const_mul _).mul hγ)).smul_const ((chartModelBasis E) m)
+
+/-- The Fréchet derivative at the chart basepoint, in direction `u`, of a single `(i,j,m)`-summand
+`y ↦ (Uᵢ (P (y−c))ⱼ Γᵐᵢⱼ(y)) eₘ` of the inner-section Christoffel sum, for `P` with `P 0 = 0`:
+the `∂Γ`-head drops (it reads `(P 0)ⱼ = 0`), leaving `Uᵢ (fderiv P 0 u)ⱼ Γᵐᵢⱼ(c) eₘ`. -/
+private lemma fderiv_jetCancel_Bsummand (g : SmoothRiemannianMetric I M) (x₀ : M)
+    {P : E → E} (hP : ContDiff ℝ ∞ P) (hP0 : P 0 = 0) (U u : E)
+    (i j m : Fin (Module.finrank ℝ E)) :
+    fderiv ℝ (fun y : E =>
+        (((chartModelBasis E).repr U) i *
+            (((chartModelBasis E).repr (P (y - extChartAt I x₀ x₀))) j) *
+            chartChristoffel (I := I) g x₀ i j m y) • (chartModelBasis E) m)
+        (extChartAt I x₀ x₀) u =
+      (((chartModelBasis E).repr U) i *
+          (((chartModelBasis E).repr (fderiv ℝ P 0 u)) j) *
+          chartChristoffel (I := I) g x₀ i j m (extChartAt I x₀ x₀)) • (chartModelBasis E) m := by
+  classical
+  set c := extChartAt I x₀ x₀ with hc
+  set cst := ((chartModelBasis E).repr U) i with hcst
+  set γ := fun y : E => chartChristoffel (I := I) g x₀ i j m y with hγ
+  have hγdiff : DifferentiableAt ℝ γ c :=
+    chartChristoffel_differentiableAt_basepoint (I := I) g x₀ i j m
+  set e := (chartModelBasis E) m with he
+  have hcomp : HasFDerivAt (fun y : E => P (y - c)) (fderiv ℝ P 0) c := by
+    have hcompgen : ∀ z : E, HasFDerivAt (fun y : E => P (y - c)) (fderiv ℝ P (z - c)) z := by
+      intro z
+      have hshiftz : HasFDerivAt (fun y : E => y - c) (ContinuousLinearMap.id ℝ E) z :=
+        (hasFDerivAt_id z).sub_const c
+      have hPdz : HasFDerivAt P (fderiv ℝ P (z - c)) (z - c) :=
+        (hP.differentiable (by norm_num)).differentiableAt.hasFDerivAt
+      have hcz : HasFDerivAt (fun y : E => P (y - c))
+          ((fderiv ℝ P (z - c)).comp (ContinuousLinearMap.id ℝ E)) z := hPdz.comp z hshiftz
+      rwa [ContinuousLinearMap.comp_id] at hcz
+    have h := hcompgen c; rwa [sub_self] at h
+  have hcoordj : HasFDerivAt (fun y : E => ((chartModelBasis E).repr (P (y - c))) j)
+      ((((chartModelBasis E).coord j).toContinuousLinearMap).comp (fderiv ℝ P 0)) c :=
+    ((((chartModelBasis E).coord j).toContinuousLinearMap).hasFDerivAt).comp c hcomp
+  have hγ' : HasFDerivAt γ (fderiv ℝ γ c) c := hγdiff.hasFDerivAt
+  have h1 : HasFDerivAt (fun y : E => cst * (((chartModelBasis E).repr (P (y - c))) j))
+      ((cst : ℝ) • ((((chartModelBasis E).coord j).toContinuousLinearMap).comp (fderiv ℝ P 0))) c :=
+    hcoordj.const_mul cst
+  have hs := (h1.mul hγ').smul_const e
+  have hFD : fderiv ℝ (fun y : E =>
+        (cst * (((chartModelBasis E).repr (P (y - c))) j) * γ y) • e) c =
+      ((fun y => cst * (((chartModelBasis E).repr (P (y - c))) j)) c • fderiv ℝ γ c +
+        γ c • ((cst : ℝ) • ((((chartModelBasis E).coord j).toContinuousLinearMap).comp
+          (fderiv ℝ P 0)))).smulRight e := hs.fderiv
+  rw [hFD, ContinuousLinearMap.smulRight_apply]
+  have hP0c : ((chartModelBasis E).repr (P (c - c))) j = 0 := by rw [sub_self, hP0]; simp
+  have hcoordeq : (((chartModelBasis E).coord j).toContinuousLinearMap) (fderiv ℝ P 0 u) =
+      ((chartModelBasis E).repr (fderiv ℝ P 0 u)) j := rfl
+  have hcoeff :
+      (((fun y => cst * (((chartModelBasis E).repr (P (y - c))) j)) c • fderiv ℝ γ c +
+        γ c • ((cst : ℝ) • ((((chartModelBasis E).coord j).toContinuousLinearMap).comp
+          (fderiv ℝ P 0)))) u) =
+        cst * (((chartModelBasis E).repr (fderiv ℝ P 0 u)) j) * γ c := by
+    simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
+      ContinuousLinearMap.comp_apply, hcoordeq, hP0c, smul_eq_mul]
+    ring
+  rw [hcoeff]
+
+/-- The centre value of the inner-section chart representation `innerReprPoly` for `P` with
+`P 0 = 0`: the Christoffel sum reads `(P 0)ⱼ = 0` and drops, leaving the `fderiv P` head
+`fderiv P 0 (tangentCoord x₀ u)`. -/
+private lemma innerReprPoly_centre (g : SmoothRiemannianMetric I M) (x₀ : M)
+    {P : E → E} (hP0 : P 0 = 0) (u : TangentSpace I x₀) :
+    innerReprPoly (I := I) g x₀ P u (extChartAt I x₀ x₀) =
+      fderiv ℝ P 0 (tangentCoord (I := I) x₀ u) := by
+  classical
+  unfold innerReprPoly
+  rw [sub_self, hP0]
+  have hzero : ∀ i j m : Fin (Module.finrank ℝ E),
+      (((chartModelBasis E).repr (tangentCoord (I := I) x₀ u)) i *
+          ((chartModelBasis E).repr (0 : E)) j *
+          chartChristoffel (I := I) g x₀ i j m (extChartAt I x₀ x₀)) •
+        (chartModelBasis E) m = 0 := by
+    intro i j m; rw [map_zero]; simp
+  rw [Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ =>
+    Finset.sum_congr rfl (fun m _ => hzero i j m)))]
+  simp
+
+/-- The full Fréchet derivative at the chart basepoint, in direction `u`, of the inner-section
+chart representation `innerReprPoly g x₀ P u` for `P = jetCancelPoly g x₀ v Qbil`: the `A`-head
+(symmetrised `Qbil`) plus the `B`-head (the `∂(P)`-once-differentiated Christoffel sum). -/
+private lemma fderiv_innerReprPoly_jetCancel (g : SmoothRiemannianMetric I M) (x₀ : M)
+    (v : TangentSpace I x₀) (Qbil : E →L[ℝ] E →L[ℝ] E) (u : TangentSpace I x₀) :
+    fderiv ℝ (innerReprPoly (I := I) g x₀ (jetCancelPoly (I := I) g x₀ v Qbil) u)
+        (extChartAt I x₀ x₀) u =
+      (1 / 2 : ℝ) • (Qbil u (tangentCoord (I := I) x₀ u) + Qbil (tangentCoord (I := I) x₀ u) u) +
+        ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+          ∑ m : Fin (Module.finrank ℝ E),
+            (((chartModelBasis E).repr (tangentCoord (I := I) x₀ u)) i *
+                (((chartModelBasis E).repr
+                  (fderiv ℝ (jetCancelPoly (I := I) g x₀ v Qbil) 0 u)) j) *
+                chartChristoffel (I := I) g x₀ i j m (extChartAt I x₀ x₀)) •
+              (chartModelBasis E) m := by
+  classical
+  set c := extChartAt I x₀ x₀ with hc
+  set U := tangentCoord (I := I) x₀ u with hU
+  set P := jetCancelPoly (I := I) g x₀ v Qbil with hP
+  have hPcd : ContDiff ℝ ∞ P := jetCancelPoly_contDiff (I := I) g x₀ v Qbil
+  have hP0 : P 0 = 0 := jetCancelPoly_zero (I := I) g x₀ v Qbil
+  set Afun : E → E := fun y : E => fderiv ℝ P (y - c) U with hAfun
+  set Bfun : E → E := fun y : E =>
+    ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+      ∑ m : Fin (Module.finrank ℝ E),
+        (((chartModelBasis E).repr U) i * ((chartModelBasis E).repr (P (y - c))) j *
+            chartChristoffel (I := I) g x₀ i j m y) • (chartModelBasis E) m with hBfun
+  have hsplit : innerReprPoly (I := I) g x₀ P u = fun y => Afun y + Bfun y := by funext y; rfl
+  rw [hsplit]
+  have hAdiff : DifferentiableAt ℝ Afun c := by
+    rw [hAfun]
+    have hfun : (fun y : E => fderiv ℝ P (y - c) U) =
+        (fun y : E => -(christoffelCorrection (I := I) g x₀ x₀ (tangentCoord (I := I) x₀ v) U) +
+          (1 / 2 : ℝ) • (Qbil (y - c) U + Qbil U (y - c))) := by
+      funext y; rw [hP, fderiv_jetCancelPoly_apply]
+    rw [hfun]
+    have hd1 : Differentiable ℝ (fun y : E => Qbil (y - c) U) :=
+      (Qbil.flip U).differentiable.comp ((differentiable_id).sub_const c)
+    have hd2 : Differentiable ℝ (fun y : E => Qbil U (y - c)) :=
+      (Qbil U).differentiable.comp ((differentiable_id).sub_const c)
+    exact (differentiableAt_const _).add (((hd1.add hd2).differentiableAt).const_smul (1 / 2 : ℝ))
+  have hBdiff : DifferentiableAt ℝ Bfun c := by
+    rw [hBfun]
+    exact DifferentiableAt.fun_sum (fun i _ => DifferentiableAt.fun_sum (fun j _ =>
+      DifferentiableAt.fun_sum (fun m _ => diffAt_jetCancel_Bsummand (I := I) g x₀ hPcd U i j m)))
+  rw [fderiv_fun_add hAdiff hBdiff, ContinuousLinearMap.add_apply]
+  congr 1
+  · rw [hAfun, hP]
+    exact fderiv_jetCancel_Aterm (I := I) g x₀ v Qbil U u
+  · rw [hBfun]
+    rw [fderiv_fun_sum (fun i _ => DifferentiableAt.fun_sum
+      (fun j _ => DifferentiableAt.fun_sum
+        (fun m _ => diffAt_jetCancel_Bsummand (I := I) g x₀ hPcd U i j m)))]
+    rw [ContinuousLinearMap.sum_apply]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [fderiv_fun_sum (fun j _ => DifferentiableAt.fun_sum
+      (fun m _ => diffAt_jetCancel_Bsummand (I := I) g x₀ hPcd U i j m))]
+    rw [ContinuousLinearMap.sum_apply]
+    refine Finset.sum_congr rfl (fun j _ => ?_)
+    rw [fderiv_fun_sum (fun m _ => diffAt_jetCancel_Bsummand (I := I) g x₀ hPcd U i j m)]
+    rw [ContinuousLinearMap.sum_apply]
+    refine Finset.sum_congr rfl (fun m _ => ?_)
+    exact fderiv_jetCancel_Bsummand (I := I) g x₀ hPcd hP0 U u i j m
+
+/-- The diagonal of `psiDGamma g x₀ V` at `u` is the `∂Γ`-summand of the linear-extension `2`-jet
+read with `tangentCoord x₀ u` in both coordinate slots (with `trivFromE x₀ x₀` distributed in). -/
+private lemma psiDGamma_diag (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E)
+    (u : TangentSpace I x₀) :
+    psiDGamma (I := I) g x₀ V u u =
+      trivFromE (I := I) x₀ x₀
+        (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+          ∑ k : Fin (Module.finrank ℝ E), ∑ m : Fin (Module.finrank ℝ E),
+            (((chartModelBasis E).repr (tangentCoord (I := I) x₀ u)) k *
+                ((chartModelBasis E).repr (tangentCoord (I := I) x₀ u)) i *
+                ((chartModelBasis E).repr V) j) •
+              ((fderiv ℝ (fun y : E => chartChristoffel (I := I) g x₀ i j m y)
+                  (extChartAt I x₀ x₀)) ((chartModelBasis E) k) • (chartModelBasis E) m)) := by
+  classical
+  rw [psiDGamma_apply, tangentCoord_self]
+  simp only [map_sum, ContinuousLinearMap.map_smul]
+
+/-- The diagonal of `psiGG g x₀ V` at `u` is the `Γ·Γ`-summand of the linear-extension `2`-jet
+read with `tangentCoord x₀ u` in both coordinate slots (with `trivFromE x₀ x₀` distributed in). -/
+private lemma psiGG_diag (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E)
+    (u : TangentSpace I x₀) :
+    psiGG (I := I) g x₀ V u u =
+      trivFromE (I := I) x₀ x₀
+        (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+          ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+            ∑ m : Fin (Module.finrank ℝ E),
+            (((chartModelBasis E).repr (tangentCoord (I := I) x₀ u)) i *
+                ((chartModelBasis E).repr (tangentCoord (I := I) x₀ u)) k *
+                ((chartModelBasis E).repr V) j *
+                chartChristoffel (I := I) g x₀ k l m (extChartAt I x₀ x₀) *
+                chartChristoffel (I := I) g x₀ i j l (extChartAt I x₀ x₀)) •
+              (chartModelBasis E) m) := by
+  classical
+  rw [psiGG_apply, tangentCoord_self]
+  simp only [map_sum, ContinuousLinearMap.map_smul]
+
 /-- **Existence of the cancelling quadratic coefficient (iterated chart `2`-jet content).** There is
 a continuous bilinear quadratic coefficient `Qbil : E →L[ℝ] E →L[ℝ] E` such that the degree-`≤ 2`
 chart-polynomial correction `polyCoordExtensionTangent x₀ (jetCancelPoly g x₀ v Qbil)` has iterated
@@ -1110,7 +1539,81 @@ private lemma exists_jetCancelQuadraticCoeff
           -((LeviCivita (I := I) g).toFun
             (covApply (LeviCivita (I := I) g) (linearExtensionTangent (I := I) x₀ u)
               (linearExtensionTangent (I := I) x₀ v)) x₀ u) := by
-  sorry
+  classical
+  set V : E := tangentCoord (I := I) x₀ v with hV
+  -- the bilinear `Γ·(fderiv P 0)` head, as a continuous bilinear map (read off `christoffelCorrectionBilin`)
+  set Φ₁ : E →L[ℝ] E →L[ℝ] E :=
+    (christoffelCorrectionBilin (I := I) g x₀).comp
+      (-(christoffelCorrection (I := I) g x₀ x₀ V)) with hΦ₁
+  refine ⟨-(psiDGamma (I := I) g x₀ V) - psiGG (I := I) g x₀ V - (2 : ℝ) • Φ₁, fun u => ?_⟩
+  set Qbil : E →L[ℝ] E →L[ℝ] E :=
+    -(psiDGamma (I := I) g x₀ V) - psiGG (I := I) g x₀ V - (2 : ℝ) • Φ₁ with hQbil
+  set P : E → E := jetCancelPoly (I := I) g x₀ v Qbil with hP
+  set c := extChartAt I x₀ x₀ with hc
+  -- the basepoint reading direction `tangentCoord x₀ u = u`
+  have hU : tangentCoord (I := I) x₀ u = u := tangentCoord_self (I := I) x₀ u
+  -- `fderiv P 0 u = -christoffelCorrection g x₀ x₀ V u`
+  have hfP0 : fderiv ℝ P 0 u = -(christoffelCorrection (I := I) g x₀ x₀ V u) := by
+    rw [hP]; exact fderiv_jetCancelPoly_zero_apply (I := I) g x₀ v Qbil u
+  -- LHS reduction
+  rw [covApply_covApply_polyCoordExt_basepoint_reduce (I := I) g x₀
+    (jetCancelPoly_contDiff (I := I) g x₀ v Qbil) u]
+  rw [show jetCancelPoly (I := I) g x₀ v Qbil = P from rfl]
+  rw [innerReprPoly_centre (I := I) g x₀ (jetCancelPoly_zero (I := I) g x₀ v Qbil) u]
+  rw [show fderiv ℝ (innerReprPoly (I := I) g x₀ P u) c u =
+        (1 / 2 : ℝ) • (Qbil u (tangentCoord (I := I) x₀ u) + Qbil (tangentCoord (I := I) x₀ u) u) +
+          ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+            ∑ m : Fin (Module.finrank ℝ E),
+              (((chartModelBasis E).repr (tangentCoord (I := I) x₀ u)) i *
+                  (((chartModelBasis E).repr (fderiv ℝ P 0 u)) j) *
+                  chartChristoffel (I := I) g x₀ i j m c) • (chartModelBasis E) m from
+      fderiv_innerReprPoly_jetCancel (I := I) g x₀ v Qbil u]
+  -- the inner-Christoffel `B`-sum equals `christoffelCorrection g x₀ x₀ (fderiv P 0 u) u`
+  rw [show (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        ∑ m : Fin (Module.finrank ℝ E),
+          (((chartModelBasis E).repr (tangentCoord (I := I) x₀ u)) i *
+              (((chartModelBasis E).repr (fderiv ℝ P 0 u)) j) *
+              chartChristoffel (I := I) g x₀ i j m c) • (chartModelBasis E) m) =
+      christoffelCorrection (I := I) g x₀ x₀ (fderiv ℝ P 0 u) u from by
+    rw [christoffelCorrection_apply]
+    refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ =>
+      Finset.sum_congr rfl (fun m _ => ?_)))
+    rw [show trivToE (I := I) x₀ x₀ u = u from trivToE_self_apply (I := I) x₀ u, hU]]
+  rw [hU]
+  -- collapse the inner expression to `Qbil u u + 2 • Cterm`, with `Cterm := Γ·(fderiv P 0)` head
+  set Cterm : E := christoffelCorrection (I := I) g x₀ x₀ (fderiv ℝ P 0 u) u with hCterm
+  rw [show (1 / 2 : ℝ) • (Qbil u u + Qbil u u) = Qbil u u from by
+    rw [← two_smul ℝ (Qbil u u), smul_smul]; norm_num]
+  rw [show Qbil u u + Cterm + Cterm = Qbil u u + (2 : ℝ) • Cterm from by
+    rw [add_assoc, ← two_smul ℝ Cterm]]
+  -- distribute trivFromE (= identity at the basepoint)
+  rw [map_add, map_smul,
+    show trivFromE (I := I) x₀ x₀ (Qbil u u) = Qbil u u from
+      trivFromE_self_apply (I := I) x₀ (Qbil u u),
+    show trivFromE (I := I) x₀ x₀ Cterm = Cterm from trivFromE_self_apply (I := I) x₀ Cterm]
+  -- RHS reduction
+  rw [show (LeviCivita (I := I) g).toFun
+        (covApply (LeviCivita (I := I) g) (linearExtensionTangent (I := I) x₀ u)
+          (linearExtensionTangent (I := I) x₀ v)) x₀ u =
+      (LeviCivita (I := I) g).toFun
+        (covApply (LeviCivita (I := I) g) (linearExtensionTangent (I := I) x₀ u)
+          (linearExtensionTangent (I := I) x₀ v)) x₀ (linearExtensionTangent (I := I) x₀ u x₀) from by
+    rw [linearExtensionTangent_eq (I := I) x₀ u]]
+  rw [covApply_covApply_linearExtensionTangent_basepoint_eq (I := I) g x₀ v u]
+  rw [← hV]
+  -- `Qbil u u = -(∂Γ) - (Γ·Γ) - 2•Cterm`
+  rw [hQbil]
+  simp only [ContinuousLinearMap.sub_apply, ContinuousLinearMap.neg_apply,
+    ContinuousLinearMap.smul_apply]
+  rw [psiDGamma_diag (I := I) g x₀ V u, psiGG_diag (I := I) g x₀ V u]
+  rw [show Φ₁ u u = Cterm from by
+    rw [hCterm, hfP0, hΦ₁]
+    change christoffelCorrectionBilin (I := I) g x₀
+        ((-(christoffelCorrection (I := I) g x₀ x₀ V)) u) u =
+      christoffelCorrection (I := I) g x₀ x₀ (-(christoffelCorrection (I := I) g x₀ x₀ V u)) u
+    rw [christoffelCorrectionBilin_apply, ContinuousLinearMap.neg_apply]]
+  -- both sides `−(trivFromE ∂Γ) − (trivFromE Γ·Γ) − 2•Cterm + 2•Cterm`
+  module
 
 /-- **The jet-cancelling chart-polynomial correction.** For a smooth Riemannian metric `g` on a
 closed manifold, a base point `x₀`, and a fibre vector `v : TangentSpace I x₀`, there is a smooth
