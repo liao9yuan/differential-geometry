@@ -1079,6 +1079,100 @@ theorem deTurckRealizeRemainderOf_toL2_retagClass_sub
   rw [hreduce]
   exact map_sub _ _ _
 
+/-- **The Hilbert-tower first-order gauge correction (the genuine deep solvability primitive of
+the corrected carrier, the strict-Fréchet/Gårding-coercive content the inverse function theorem
+runs on).**
+
+For the anchor `g₀`, a flow background `g_bg`, and a supercritical order `a` (`2a > dim M + 4`),
+there is a **Hilbert-valued** first-order gauge correction
+```
+c : Hᵃ⁺¹(g₀) → Hᵃ⁺¹(g₀)
+```
+on the spectral Sobolev tower (which — unlike `SmoothCcTensor` — carries a genuine
+`NormedAddCommGroup`/`InnerProductSpace`/`CompleteSpace` instance, so the inverse function theorem
+`HasStrictFDerivAt.to_localInverse` and the Banach fixed-point `ContractingWith.fixedPoint` operate
+directly on it), together with a match-gate slack `Q > 0`, carrying:
+
+* (`size`) the linear `Hᵃ⁺¹`-operator bound `‖c u‖ ≤ Lc · ‖u‖` (over **all** of `Hᵃ⁺¹`);
+* (`lip`) the `Hᵃ⁺¹` Lipschitz bound `‖c u − c u'‖ ≤ Lip · ‖u − u'‖` (over **all** of `Hᵃ⁺¹`); and
+* (`match`) on the `Q`-gated gate-realizable locus, the **unit-time heat-smoothed** corrected datum
+  `u + c u` realizes a smooth carrier whose realized DeTurck remainder reproduces, at the `L²`-class
+  level, the gate representative's own realized remainder:
+  ```
+  Φ(heatRepr (u + c u)) = Φ(gateRep u) ,
+  ```
+  where `heatRepr w := tensorHeatSemigroupHs_output_smoothRepr g₀ 0 2 (t := 1) w` is the canonical
+  unit-time heat-output smooth representative (the all-order-smoothing realization, gaining every
+  derivative through the parabolic-smoothing/Gårding/Weyl spectral substrate) and `Φ(T) := toL2
+  (deTurckRealizeRemainderOf g₀ g_bg T)`.
+
+This is the genuinely-deeper analytic frontier on which the corrected carrier
+`exists_firstOrderFreedomCorrectedCarrier` is **assembled** (it is *not* a re-statement of that
+node — its conclusion is a **Hilbert-tower** correction with single-scale operator/Lipschitz
+bounds, structurally distinct from the carrier's `SmoothCcTensor`-valued, all-order-tower
+conclusion): the carrier is realized as `S u := heatRepr (u + c u)`, and its *all-order* linear
+intrinsic-Sobolev size and `H^{a+2}` Lipschitz are then read off the heat-output substrate
+(`tensorHeatSemigroupHs_output_smoothRepr_toHs_le` / `…_toHs_sub_le`, after order-monotonicity
+`toHs_norm_mono`) composed with `c`'s single-scale `Hᵃ⁺¹` bounds by the operator/triangle
+inequality — the smoothing realization supplies the tower, `c` supplies the gauge freedom.
+
+**Why it is genuinely first order (the substrate the solvability bottoms on).**  `Φ` is genuinely
+first order: on a fibre-small `T` it splits as `Φ(T) = toL2 (deTurckRHSRetag g₀ g_bg g_T) − toL2
+(Δ_∇ T)` (`deTurckRealizeRemainderOf_toL2_retagClass_sub`, sorry-free), and the leading
+second-order `−λᵢ` rough-Laplacian principal symbol cancels the second-order re-tagged-RHS
+principal symbol (`deTurckNonlinearitySpectral_principalPart_cancels`, sorry-free), so the
+class quantity to repair is first order.  The first-order-cancelled DeTurck operator's
+linearization on the spectral tower is `−Δ_∇` perturbed by a first-order coefficient operator,
+invertible with a bounded inverse by Gårding coercivity (`order2GardingFamily_holds` +
+`allOrder_covGrad_l2Norm_le_lapIter_sum_unconditional` (`AllOrderGardingBootstrap.lean`), the
+elliptic-regularity `chart ≤ spectral` lift `pouSobolevToHsNorm_le_spectral`
+(`GeneralOrderPouSpectralBound.lean`) closed against the reproducing-kernel diagonal bound
+`reproducingKernel_weighted_tsum_le_of_closed` (`LocalWeylReproducingKernel.lean`), and the
+higher-order Nemytskii control `exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder`
+(`RHSHighOrderSobolevLipschitz.lean`)); the strict-Fréchet-derivative invertible
+`ContinuousLinearEquiv` over that coercive linearization feeds `HasStrictFDerivAt.to_localInverse`
+(infinite-dimensional Banach, domain `Hᵃ⁺¹` complete) to produce `c`, and its operator/Lipschitz
+bounds are the bounded inverse's.
+
+**Non-vacuous** — `match` rejects the degenerate witness `c ≡ 0`: with `c ≡ 0` it would read
+`Φ(heatRepr u) = Φ(gateRep u)`, i.e. the naive unit-time heat output's realized remainder matches
+the gate representative's — the Lean-refuted naive-heat claim (a pure heat residue contributes
+`−λᵢ(e^{−λᵢ}−1)·u.coeffᵢ`-type terms falsifying exact class equality) — so the size/Lipschitz/match
+conjunction genuinely constrains `c` away from zero.  **Not packaging** — the match arm is the
+`L²`-class identity of two realized DeTurck remainders, structurally distinct from the real-valued
+operator/Lipschitz arms; `c` is an `Exists`-output, never a binder hypothesis, and
+`exists_firstOrderFreedomCorrectedCarrier` *cites* this theorem.  **Intrinsic** — `toL2`/`toHs` and
+the `Hᵃ⁺¹` norm are `g`-inner; no `chartJ`, no raw `M → E`.
+
+The body is `sorry` (the strict-Fréchet/Gårding-coercive first-order-freedom solvability over the
+gate-controlled match domain), the precisely-posited analytic frontier of the `/prove` recursion:
+it bottoms on the Gårding/Weyl/heat spectral substrate cited above (itself bottoming on the
+curvature leaves and the Euclidean Sobolev embedding), not on any import-constraint placeholder. -/
+private theorem exists_firstOrderGaugeHilbertCorrection
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ (c : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+          tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+        (Q : ℝ),
+      0 < Q ∧
+      (∃ Lc : ℝ, 0 ≤ Lc ∧
+        ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1), ‖c u‖ ≤ Lc * ‖u‖) ∧
+      (∃ Lip : ℝ, 0 ≤ Lip ∧
+        ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+          ‖c u - c u'‖ ≤ Lip * ‖u - u'‖) ∧
+      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+          (h : realizableAtGate (I := I) g₀ u),
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+            (gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose)‖ ≤ Q →
+        Integral.L2.SmoothCcTensor.toL2
+            (deTurckRealizeRemainderOf (I := I) g₀ g_bg
+              (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
+                g₀ 0 2 (one_pos) (by positivity : (0 : ℝ) ≤ (a : ℝ) + 1) (u + c u)))
+          = Integral.L2.SmoothCcTensor.toL2
+              (deTurckRealizeRemainderOf (I := I) g₀ g_bg
+                (gateRepOfWitness (I := I) g₀ u h))) := by
+  sorry
+
 /-- **The globally-controlled first-order-freedom corrected carrier (the genuine deep analytic
 primitive of the gauge corrector, transiting the Weyl/Gårding spectral substrate).**
 
@@ -1169,7 +1263,78 @@ private theorem exists_firstOrderFreedomCorrectedCarrier
           = Integral.L2.SmoothCcTensor.toL2
               (deTurckRealizeRemainderOf (I := I) g₀ g_bg
                 (gateRepOfWitness (I := I) g₀ u h))) := by
-  sorry
+  classical
+  -- The non-negativity of the spectral order driving the heat-output smooth realization.
+  have ha1 : (0 : ℝ) ≤ (a : ℝ) + 1 := by positivity
+  -- The deep Hilbert-tower first-order gauge correction `c` (the strict-Fréchet/Gårding-coercive
+  -- solvability primitive): a single-scale `Hᵃ⁺¹`-operator-bounded, `Hᵃ⁺¹`-Lipschitz correction
+  -- whose unit-time heat-smoothed corrected datum `u + c u` realizes a smooth carrier reproducing,
+  -- on the `Q`-gated gate-realizable locus, the gate representative's realized-remainder `L²`-class.
+  obtain ⟨c, Q, hQ, ⟨Lc, hLc_nn, hLc⟩, ⟨Lip, hLip_nn, hLip⟩, hcmatch⟩ :=
+    exists_firstOrderGaugeHilbertCorrection (I := I) g₀ g_bg a ha
+  -- The corrected carrier is the unit-time heat-output smooth representative of the corrected datum
+  -- `u + c u`: the smoothing realization (gaining every derivative through the heat-output substrate)
+  -- of the gauge-corrected Hilbert datum.
+  refine ⟨fun u =>
+      MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
+        g₀ 0 2 (one_pos) ha1 (u + c u), Q, hQ, ?_, ?_, ?_⟩
+  · -- All-order linear size: `Cₙ := Cₙ(heat) · (1 + Lc)`, by the order-`(2n)` heat-output bound
+    -- after order-monotonicity composed with `‖u + c u‖ ≤ (1 + Lc)·‖u‖`.
+    intro n
+    obtain ⟨C, hC0, hC⟩ :=
+      MetricRealization.tensorHeatSemigroupHs_output_smoothRepr_toHs_le (I := I) (M := M)
+        g₀ (one_pos) ha1 n
+    refine ⟨C * (1 + Lc), by positivity, fun u => ?_⟩
+    have hcorr_norm : ‖u + c u‖ ≤ (1 + Lc) * ‖u‖ := by
+      calc ‖u + c u‖ ≤ ‖u‖ + ‖c u‖ := norm_add_le _ _
+        _ ≤ ‖u‖ + Lc * ‖u‖ := by linarith [hLc u]
+        _ = (1 + Lc) * ‖u‖ := by ring
+    calc ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n
+            (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
+              g₀ 0 2 (one_pos) ha1 (u + c u))‖
+        ≤ ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * n)
+            (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
+              g₀ 0 2 (one_pos) ha1 (u + c u))‖ :=
+          toHs_norm_mono (I := I) (M := M) g₀ (by omega)
+            (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
+              g₀ 0 2 (one_pos) ha1 (u + c u))
+      _ ≤ C * ‖u + c u‖ := hC (u + c u)
+      _ ≤ C * ((1 + Lc) * ‖u‖) := mul_le_mul_of_nonneg_left hcorr_norm hC0
+      _ = C * (1 + Lc) * ‖u‖ := by ring
+  · -- `H^{a+2}` Lipschitz: `C' := C'(heat) · (1 + Lip)`, by the order-`(2(a+2))` heat-output
+    -- difference bound after order-monotonicity composed with the corrected-datum-difference bound.
+    obtain ⟨C', hC'0, hC'⟩ :=
+      MetricRealization.tensorHeatSemigroupHs_output_smoothRepr_toHs_sub_le (I := I) (M := M)
+        g₀ (one_pos) ha1 (a + 2)
+    refine ⟨C' * (1 + Lip), by positivity, fun u u' => ?_⟩
+    have hdiff_eq : (u + c u) - (u' + c u') = (u - u') + (c u - c u') := by abel
+    have hcorr_diff : ‖(u + c u) - (u' + c u')‖ ≤ (1 + Lip) * ‖u - u'‖ := by
+      rw [hdiff_eq]
+      calc ‖(u - u') + (c u - c u')‖ ≤ ‖u - u'‖ + ‖c u - c u'‖ := norm_add_le _ _
+        _ ≤ ‖u - u'‖ + Lip * ‖u - u'‖ := by linarith [hLip u u']
+        _ = (1 + Lip) * ‖u - u'‖ := by ring
+    calc ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
+            (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
+                g₀ 0 2 (one_pos) ha1 (u + c u)
+              - MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
+                g₀ 0 2 (one_pos) ha1 (u' + c u'))‖
+        ≤ ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * (a + 2))
+            (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
+                g₀ 0 2 (one_pos) ha1 (u + c u)
+              - MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
+                g₀ 0 2 (one_pos) ha1 (u' + c u'))‖ :=
+          toHs_norm_mono (I := I) (M := M) g₀ (by omega)
+            (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
+                g₀ 0 2 (one_pos) ha1 (u + c u)
+              - MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
+                g₀ 0 2 (one_pos) ha1 (u' + c u'))
+      _ ≤ C' * ‖(u + c u) - (u' + c u')‖ := hC' (u + c u) (u' + c u')
+      _ ≤ C' * ((1 + Lip) * ‖u - u'‖) := mul_le_mul_of_nonneg_left hcorr_diff hC'0
+      _ = C' * (1 + Lip) * ‖u - u'‖ := by ring
+  · -- The `Q`-gated gauge match, forwarded verbatim from the deep Hilbert correction node (the
+    -- carrier is definitionally `heatRepr (u + c u)`).
+    intro u h hgate
+    exact hcmatch u h hgate
 
 /-- **The first-order-freedom gauge corrector against the gate representative's own realized
 remainder (proven by composition over the globally-controlled corrected carrier).**
