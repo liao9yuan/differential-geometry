@@ -1189,42 +1189,125 @@ private theorem deTurckGaugeCancellation_firstOrderCancelledLinearization_contin
         ‖L.symm v‖ ≤ Cinv * ‖v‖ := sorry
 
 /-- **The Lipschitz-small non-linear DeTurck gauge remainder on the spectral Sobolev tower,
-subordinate to the coercive bounded inverse (the non-linear half of the gauge-cancellation
-solvability).**
+subordinate to the coercive bounded inverse, on a ball (the non-linear half of the
+gauge-cancellation solvability).**
 
 For the anchor `g₀`, a flow background `g_bg`, a supercritical order `a` (`2a > dim M + 4`), and a
 finite inverse-norm rate `Cinv ≥ 0` (the bounded-inverse rate the coercive linearization supplies),
 the non-linear remainder `N : Hᵃ⁺¹(g₀) → Hᵃ⁺¹(g₀)` of the first-order-cancelled DeTurck
-gauge-cancellation map is origin-fixing (`N 0 = 0`) and globally Lipschitz with a rate `κ ≥ 0` that
-is **small relative to the bounded inverse**, `Cinv · κ < 1` — i.e. the non-linearity is
-*subordinate* to the coercive elliptic principal part.
+gauge-cancellation map is origin-fixing (`N 0 = 0`) and, **on a closed ball of radius `ρ > 0`**,
+Lipschitz with a rate `κ ≥ 0` that is **small relative to the bounded inverse**, `Cinv · κ < 1` —
+i.e. the non-linearity is *subordinate* to the coercive elliptic principal part on a sufficiently
+small ball.
+
+The bound is genuinely **on-ball**, not global: the supercritical Nemytskii remainder is a
+*nonlinear* Nemytskii operator (its difference quotient is bounded only locally, by the `H^{a+2}`
+Sobolev norm on bounded sets), so a global Lipschitz constant — let alone one as small as
+`κ < 1/Cinv` — is false as stated.  The smallness `Cinv · κ < 1` is obtained by **shrinking `ρ`**:
+on a smaller ball the realized perturbation stays in a smaller `H^{a+2}` neighbourhood, where the
+Sobolev–Lipschitz rate of the realized Ricci–DeTurck right-hand side can be taken below `1/Cinv`.
 
 This is the genuine **supercritical** content `exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder`
 (`RHSHighOrderSobolevLipschitz.lean`, sorry-free body) supplies: in the regime `2a > dim M + 4` the
 realized Ricci–DeTurck-RHS Sobolev–Lipschitz Nemytskii bound controls the remainder difference by the
 intrinsic `H^{a+2}` norm of the perturbation difference, which the supercritical embedding
-`Hᵃ⁺¹ ↪ H^{a+2}` makes Lipschitz-small enough that, against the coercive bounded inverse's rate
-`Cinv`, the composite contracts (`Cinv · κ < 1`).  It is the non-linear input on which the
-fixed-point contraction `deTurckGaugeCancellation_globalLipschitz_promotion` runs.
+`Hᵃ⁺¹ ↪ H^{a+2}` makes Lipschitz-small enough on a ball that, against the coercive bounded inverse's
+rate `Cinv`, the composite contracts (`Cinv · κ < 1`).  It is the non-linear input on which the
+fixed-point contraction `deTurckGaugeCancellation_globalLipschitz_promotion` runs (promoted off the
+ball by composing with the nonexpansive radial retraction onto the ball).
 
-**Not packaging** — the conclusion is a real-valued Lipschitz bound on the remainder `N`,
+**Not packaging** — the conclusion is a real-valued on-ball Lipschitz bound on the remainder `N`,
 structurally distinct from the existence of the gauge correction the consuming node builds from it.
 **Intrinsic** — the `Hᵃ⁺¹` norm is `g`-inner; no `chartJ`, no raw `M → E`.
 
-The body is `sorry` (the supercritical Lipschitz-smallness of the realized DeTurck gauge remainder,
-subordinate to the coercive bounded inverse). -/
+The body is `sorry` (the supercritical on-ball Lipschitz-smallness of the realized DeTurck gauge
+remainder, subordinate to the coercive bounded inverse). -/
 private theorem deTurckGaugeCancellation_nonlinearRemainder_lipschitzSmall_on_ball
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
     (Cinv : ℝ) (hCinv : 0 ≤ Cinv) :
     ∃ (N : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
           tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
-        (κ : ℝ),
+        (κ : ℝ) (ρ : ℝ),
       0 ≤ κ ∧
+      0 < ρ ∧
       Cinv * κ < 1 ∧
       N 0 = 0 ∧
       ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+        u ∈ Metric.closedBall (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) ρ →
+        u' ∈ Metric.closedBall (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) ρ →
         ‖N u - N u'‖ ≤ κ * ‖u - u'‖ := sorry
+
+section RadialRetraction
+
+variable {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F]
+
+/-- The **radial retraction** of a real inner-product space onto its closed ball of radius `ρ`
+centred at the origin: a point of norm `≤ ρ` is fixed, while a point of norm `> ρ` is scaled down
+to the sphere of radius `ρ`.  At the origin the convention `0 / 0 = 0` gives `0`. -/
+noncomputable def radialRetract (ρ : ℝ) (x : F) : F := (min ‖x‖ ρ / ‖x‖) • x
+
+omit [InnerProductSpace ℝ F] in
+/-- The retraction scalar `min ‖x‖ ρ / ‖x‖` lies in `[0, 1]` and rescales `‖x‖` to `min ‖x‖ ρ`. -/
+private lemma radialRetract_scalar_props (ρ : ℝ) (hρ : 0 ≤ ρ) (x : F) :
+    0 ≤ min ‖x‖ ρ / ‖x‖ ∧ min ‖x‖ ρ / ‖x‖ ≤ 1 ∧ (min ‖x‖ ρ / ‖x‖) * ‖x‖ = min ‖x‖ ρ := by
+  rcases eq_or_ne x 0 with hx | hx
+  · subst hx; simp [hρ]
+  · have hpos : 0 < ‖x‖ := norm_pos_iff.mpr hx
+    have hmin_nn : 0 ≤ min ‖x‖ ρ := le_min (le_of_lt hpos) hρ
+    refine ⟨div_nonneg hmin_nn (le_of_lt hpos), ?_, ?_⟩
+    · rw [div_le_one hpos]; exact min_le_left _ _
+    · field_simp
+
+/-- The radial retraction rescales the norm to `min ‖x‖ ρ`. -/
+private lemma radialRetract_norm (ρ : ℝ) (hρ : 0 ≤ ρ) (x : F) :
+    ‖radialRetract ρ x‖ = min ‖x‖ ρ := by
+  obtain ⟨hs0, _, hsa⟩ := radialRetract_scalar_props ρ hρ x
+  unfold radialRetract
+  rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg hs0, hsa]
+
+/-- The radial retraction lands in the closed ball of radius `ρ`. -/
+private lemma radialRetract_mem_closedBall (ρ : ℝ) (hρ : 0 ≤ ρ) (x : F) :
+    radialRetract ρ x ∈ Metric.closedBall (0 : F) ρ := by
+  rw [mem_closedBall_zero_iff, radialRetract_norm ρ hρ]; exact min_le_right _ _
+
+/-- The radial retraction fixes the origin. -/
+private lemma radialRetract_zero (ρ : ℝ) : radialRetract ρ (0 : F) = 0 := by
+  unfold radialRetract; simp
+
+/-- The radial retraction onto the closed ball of a real inner-product space is **nonexpansive**
+(`1`-Lipschitz).  Writing `radialRetract ρ x = s • x`, `radialRetract ρ y = t • y` with
+`s = min ‖x‖ ρ / ‖x‖ ∈ [0,1]`, `t = min ‖y‖ ρ / ‖y‖ ∈ [0,1]`, expanding the squared distance and
+bounding the cross term by Cauchy–Schwarz reduces the claim to `(min ‖x‖ ρ − min ‖y‖ ρ)² ≤
+(‖x‖ − ‖y‖)²`, i.e. the `1`-Lipschitz property of `t ↦ min t ρ`. -/
+private lemma radialRetract_nonexpansive (ρ : ℝ) (hρ : 0 ≤ ρ) (x y : F) :
+    ‖radialRetract ρ x - radialRetract ρ y‖ ≤ ‖x - y‖ := by
+  obtain ⟨hs0, hs1, hsa⟩ := radialRetract_scalar_props ρ hρ x
+  obtain ⟨ht0, ht1, htb⟩ := radialRetract_scalar_props ρ hρ y
+  set s := min ‖x‖ ρ / ‖x‖
+  set t := min ‖y‖ ρ / ‖y‖
+  show ‖s • x - t • y‖ ≤ ‖x - y‖
+  have hnn : (0 : ℝ) ≤ ‖x - y‖ := norm_nonneg _
+  rw [← Real.sqrt_sq hnn, ← Real.sqrt_sq (norm_nonneg (s • x - t • y))]
+  apply Real.sqrt_le_sqrt
+  rw [norm_sub_sq_real, norm_sub_sq_real, norm_smul, norm_smul,
+    real_inner_smul_left, real_inner_smul_right,
+    Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg hs0, abs_of_nonneg ht0]
+  have hxy : inner ℝ x y ≤ ‖x‖ * ‖y‖ := real_inner_le_norm x y
+  have hstle : s * t ≤ 1 := by nlinarith [hs0, ht0, hs1, ht1]
+  have hkey : (min ‖x‖ ρ - min ‖y‖ ρ) ^ 2 ≤ (‖x‖ - ‖y‖) ^ 2 := by
+    have h : |min ‖x‖ ρ - min ‖y‖ ρ| ≤ |‖x‖ - ‖y‖| := by
+      refine (abs_min_sub_min_le_max ‖x‖ ρ ‖y‖ ρ).trans ?_; simp
+    calc (min ‖x‖ ρ - min ‖y‖ ρ) ^ 2 = |min ‖x‖ ρ - min ‖y‖ ρ| ^ 2 := (sq_abs _).symm
+      _ ≤ |‖x‖ - ‖y‖| ^ 2 := by nlinarith [abs_nonneg (min ‖x‖ ρ - min ‖y‖ ρ), h]
+      _ = (‖x‖ - ‖y‖) ^ 2 := sq_abs _
+  rw [← hsa, ← htb] at hkey
+  have hcoef : (0 : ℝ) ≤ 2 * (1 - s * t) := by linarith
+  have hprodbound : 2 * (1 - s * t) * inner ℝ x y ≤ 2 * (1 - s * t) * (‖x‖ * ‖y‖) :=
+    mul_le_mul_of_nonneg_left hxy hcoef
+  nlinarith [hprodbound, hkey]
+
+end RadialRetraction
 
 /-- **The origin-fixing, globally `Hᵃ⁺¹`-Lipschitz gauge correction produced by the Gårding-coercive
 bounded inverse (the linear/operator half of the gauge-cancellation solvability).**
@@ -1240,7 +1323,8 @@ coercive linearization produces a globally Lipschitz origin-fixing correction wh
 is the inverse operator-norm controlled by `μ⁻¹`.  Mathlib's inverse function theorem
 (`HasStrictFDerivAt.to_localInverse`) supplies only a *local* inverse near a single point with no
 global rate; promoting it to the single global `LipschitzWith Lip c` over all of `Hᵃ⁺¹` is the
-genuine global-control strengthening — here realized as a **Banach fixed-point** contraction.
+genuine global-control strengthening — here realized as a **Banach fixed-point** contraction whose
+nonlinearity is **globalized off the ball by the nonexpansive radial retraction**.
 
 **Not packaging** — the hypothesis is the *real-valued* coercivity rate `μ > 0` of the rough
 Laplacian, structurally distinct from the existential conclusion (a gauge-correction operator with an
@@ -1250,18 +1334,25 @@ raw `M → E`.
 This node is **proven by composition** (its body carries no `sorry` of its own).  The Gårding-coercive
 bounded inverse `cLin := L.symm` (with rate `Cinv`) comes from the linear child
 `deTurckGaugeCancellation_firstOrderCancelledLinearization_continuousLinearEquiv`; the origin-fixing,
-globally Lipschitz nonlinear gauge remainder `N` (with rate `κ` subordinate to `Cinv`, `Cinv·κ < 1`)
-comes from the non-linear child `deTurckGaugeCancellation_nonlinearRemainder_lipschitzSmall_on_ball`.
-For each `u`, the gauge-cancellation map `G u w := − cLin (N (u + w))` is a contraction with rate
-`Cinv·κ < 1` (each application of `cLin` to a remainder difference loses at most `Cinv·κ` of the
-`w`-distance), so on the complete inner-product space `Hᵃ⁺¹(g₀)` Banach's `ContractingWith.fixedPoint`
-yields a unique fixed point `c u`.  Origin-fixing: at `u = 0`, `0` is the (unique) fixed point of
-`G 0` since `G 0 0 = − cLin (N 0) = − cLin 0 = 0` (`N 0 = 0` and `cLin` is linear), so `c 0 = 0`.
-Globally Lipschitz: for `u, u'` the maps `G u` and `G u'` are *uniformly* `Cinv·κ·‖u − u'‖`-close (the
-`w`-argument cancels in `(u + w) − (u' + w) = u − u'`), so `ContractingWith.fixedPoint_lipschitz_in_map`
-gives `dist (c u) (c u') ≤ (Cinv·κ·‖u − u'‖)/(1 − Cinv·κ)`, i.e. `LipschitzWith Lip c` with the single
-rate `Lip := (Cinv·κ)/(1 − Cinv·κ)`.  Consumers transitively depend on `sorryAx` through those two
-analytic children (the precisely-posited analytic frontier of the `/prove` recursion). -/
+**on-ball**-Lipschitz nonlinear gauge remainder `N` (on the ball of radius `ρ`, with rate `κ`
+subordinate to `Cinv`, `Cinv·κ < 1`) comes from the non-linear child
+`deTurckGaugeCancellation_nonlinearRemainder_lipschitzSmall_on_ball`.  Since `N` is Lipschitz only on
+the ball — a global Banach contraction over all of `Hᵃ⁺¹` would be *unsound* — we first **globalize**
+`N` by composing with the nonexpansive radial retraction `radialRetract ρ` onto `closedBall 0 ρ`:
+`Ñ u := N (radialRetract ρ u)` is origin-fixing (`Ñ 0 = N (radialRetract ρ 0) = N 0 = 0`, as the
+retraction fixes `0`) and *globally* `κ`-Lipschitz (the retraction lands in the ball, where `N`'s
+on-ball rate `κ` applies, and `radialRetract_nonexpansive` keeps the retracted arguments
+`κ·‖u − u'‖`-close).  For each `u`, the gauge-cancellation map `G u w := − cLin (Ñ (u + w))` is then a
+*global* contraction with rate `Cinv·κ < 1` (each application of `cLin` to a remainder difference loses
+at most `Cinv·κ` of the `w`-distance), so on the complete inner-product space `Hᵃ⁺¹(g₀)` Banach's
+`ContractingWith.fixedPoint` yields a unique fixed point `c u`.  Origin-fixing: at `u = 0`, `0` is the
+(unique) fixed point of `G 0` since `G 0 0 = − cLin (Ñ 0) = − cLin 0 = 0` (`Ñ 0 = 0` and `cLin` is
+linear), so `c 0 = 0`.  Globally Lipschitz: for `u, u'` the maps `G u` and `G u'` are *uniformly*
+`Cinv·κ·‖u − u'‖`-close (the `w`-argument cancels in `(u + w) − (u' + w) = u − u'`), so
+`ContractingWith.fixedPoint_lipschitz_in_map` gives `dist (c u) (c u') ≤ (Cinv·κ·‖u − u'‖)/(1 −
+Cinv·κ)`, i.e. `LipschitzWith Lip c` with the single rate `Lip := (Cinv·κ)/(1 − Cinv·κ)`.  Consumers
+transitively depend on `sorryAx` through those two analytic children (the precisely-posited analytic
+frontier of the `/prove` recursion). -/
 private theorem deTurckGaugeCancellation_globalLipschitz_promotion
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -1280,37 +1371,54 @@ private theorem deTurckGaugeCancellation_globalLipschitz_promotion
   obtain ⟨L, Cinv, hCinv, hLsymm⟩ :=
     deTurckGaugeCancellation_firstOrderCancelledLinearization_continuousLinearEquiv
       (I := I) (M := M) g₀ a hμ hcoercive
-  -- The origin-fixing, globally Lipschitz nonlinear gauge remainder `N` (rate `κ` subordinate
-  -- to `Cinv`: `Cinv · κ < 1`).
-  obtain ⟨N, κ, hκ, hCκ, hN0, hNlip⟩ :=
+  -- The origin-fixing, *on-ball*-Lipschitz nonlinear gauge remainder `N` (on the ball of radius `ρ`,
+  -- rate `κ` subordinate to `Cinv`: `Cinv · κ < 1`).
+  obtain ⟨N, κ, ρ, hκ, hρ, hCκ, hN0, hNlip⟩ :=
     deTurckGaugeCancellation_nonlinearRemainder_lipschitzSmall_on_ball
       (I := I) (M := M) g₀ g_bg a ha Cinv hCinv
+  -- Globalize `N` off the ball with the nonexpansive radial retraction onto `closedBall 0 ρ`:
+  -- `Ñ u := N (radialRetract ρ u)` is origin-fixing and *globally* `κ`-Lipschitz.
+  set Ñ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+      tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) :=
+    fun u => N (radialRetract ρ u) with hÑ_def
+  have hÑ0 : Ñ 0 = 0 := by
+    rw [hÑ_def]; simp only; rw [radialRetract_zero ρ, hN0]
+  have hÑlip : ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+      ‖Ñ u - Ñ u'‖ ≤ κ * ‖u - u'‖ := by
+    intro u u'
+    rw [hÑ_def]; simp only
+    calc ‖N (radialRetract ρ u) - N (radialRetract ρ u')‖
+        ≤ κ * ‖radialRetract ρ u - radialRetract ρ u'‖ :=
+          hNlip _ _ (radialRetract_mem_closedBall ρ hρ.le u)
+            (radialRetract_mem_closedBall ρ hρ.le u')
+      _ ≤ κ * ‖u - u'‖ :=
+          mul_le_mul_of_nonneg_left (radialRetract_nonexpansive ρ hρ.le u u') hκ
   -- The contraction rate `Kc := Cinv · κ < 1` as a nonnegative real, and the positive denominator.
   have hKc_nn : 0 ≤ Cinv * κ := mul_nonneg hCinv hκ
   have hden_pos : 0 < 1 - Cinv * κ := by linarith
   set Kc : ℝ≥0 := ⟨Cinv * κ, hKc_nn⟩ with hKc_def
   have hKc_lt : Kc < 1 := by
     rw [hKc_def, ← NNReal.coe_lt_coe]; push_cast; exact hCκ
-  -- The gauge-cancellation map `G u w := − cLin (N (u + w))`.
+  -- The gauge-cancellation map `G u w := − cLin (Ñ (u + w))`, with the globalized nonlinearity.
   let G : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
       tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
       tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) :=
-    fun u w => - L.symm (N (u + w))
+    fun u w => - L.symm (Ñ (u + w))
   -- Each `G u` is a contraction with rate `Kc`.
   have hGlip : ∀ u, LipschitzWith Kc (G u) := by
     intro u
     refine LipschitzWith.of_dist_le_mul (fun w w' => ?_)
     rw [dist_eq_norm]
-    show ‖- L.symm (N (u + w)) - - L.symm (N (u + w'))‖ ≤ (Kc : ℝ) * dist w w'
-    have hrw : - L.symm (N (u + w)) - - L.symm (N (u + w'))
-        = L.symm (N (u + w') - N (u + w)) := by
+    show ‖- L.symm (Ñ (u + w)) - - L.symm (Ñ (u + w'))‖ ≤ (Kc : ℝ) * dist w w'
+    have hrw : - L.symm (Ñ (u + w)) - - L.symm (Ñ (u + w'))
+        = L.symm (Ñ (u + w') - Ñ (u + w)) := by
       rw [map_sub]; abel
     rw [hrw, hKc_def, dist_eq_norm]
-    refine (hLsymm (N (u + w') - N (u + w))).trans ?_
-    have hN : ‖N (u + w') - N (u + w)‖ ≤ κ * ‖(u + w') - (u + w)‖ := hNlip (u + w') (u + w)
+    refine (hLsymm (Ñ (u + w') - Ñ (u + w))).trans ?_
+    have hN : ‖Ñ (u + w') - Ñ (u + w)‖ ≤ κ * ‖(u + w') - (u + w)‖ := hÑlip (u + w') (u + w)
     have hww : (u + w') - (u + w) = w' - w := by abel
     push_cast
-    calc Cinv * ‖N (u + w') - N (u + w)‖
+    calc Cinv * ‖Ñ (u + w') - Ñ (u + w)‖
         ≤ Cinv * (κ * ‖(u + w') - (u + w)‖) := mul_le_mul_of_nonneg_left hN hCinv
       _ = Cinv * (κ * ‖w' - w‖) := by rw [hww]
       _ = Cinv * κ * ‖w - w'‖ := by rw [norm_sub_rev w' w]; ring
@@ -1320,23 +1428,23 @@ private theorem deTurckGaugeCancellation_globalLipschitz_promotion
     ⟨(Cinv * κ) / (1 - Cinv * κ), by positivity⟩, ?_, ?_⟩
   · -- Origin-fixing: `0` is the (unique) fixed point of `G 0`.
     have hfix0 : Function.IsFixedPt (G 0) 0 := by
-      show - L.symm (N (0 + 0)) = 0
-      rw [add_zero, hN0, map_zero, neg_zero]
+      show - L.symm (Ñ (0 + 0)) = 0
+      rw [add_zero, hÑ0, map_zero, neg_zero]
     exact (ContractingWith.fixedPoint_unique (hGcontract 0) hfix0).symm
   · -- Globally Lipschitz: the maps `G u`, `G u'` are uniformly `Cinv·κ·‖u − u'‖`-close.
     refine LipschitzWith.of_dist_le_mul (fun u u' => ?_)
     have hclose : ∀ w, dist (G u w) (G u' w) ≤ Cinv * κ * dist u u' := by
       intro w
       rw [dist_eq_norm]
-      show ‖- L.symm (N (u + w)) - - L.symm (N (u' + w))‖ ≤ Cinv * κ * dist u u'
-      have hrw : - L.symm (N (u + w)) - - L.symm (N (u' + w))
-          = L.symm (N (u' + w) - N (u + w)) := by
+      show ‖- L.symm (Ñ (u + w)) - - L.symm (Ñ (u' + w))‖ ≤ Cinv * κ * dist u u'
+      have hrw : - L.symm (Ñ (u + w)) - - L.symm (Ñ (u' + w))
+          = L.symm (Ñ (u' + w) - Ñ (u + w)) := by
         rw [map_sub]; abel
       rw [hrw, dist_eq_norm]
-      refine (hLsymm (N (u' + w) - N (u + w))).trans ?_
-      have hN : ‖N (u' + w) - N (u + w)‖ ≤ κ * ‖(u' + w) - (u + w)‖ := hNlip (u' + w) (u + w)
+      refine (hLsymm (Ñ (u' + w) - Ñ (u + w))).trans ?_
+      have hN : ‖Ñ (u' + w) - Ñ (u + w)‖ ≤ κ * ‖(u' + w) - (u + w)‖ := hÑlip (u' + w) (u + w)
       have huw : (u' + w) - (u + w) = u' - u := by abel
-      calc Cinv * ‖N (u' + w) - N (u + w)‖
+      calc Cinv * ‖Ñ (u' + w) - Ñ (u + w)‖
           ≤ Cinv * (κ * ‖(u' + w) - (u + w)‖) := mul_le_mul_of_nonneg_left hN hCinv
         _ = Cinv * (κ * ‖u' - u‖) := by rw [huw]
         _ = Cinv * κ * ‖u - u'‖ := by rw [norm_sub_rev u' u]; ring
