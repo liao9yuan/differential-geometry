@@ -551,12 +551,105 @@ theorem genuinePureRDiffOp0_covGrad_fib_eq
     rw [covApply_apply]
   rw [hslot]
 
-/-! ## The posited frame-free envelope and the `DiffBilinOpRS g r` package -/
+/-! ## The two frame-free envelope layers and the `DiffBilinOpRS g r` package -/
+
+set_option linter.unusedVariables false in
+/-- **The order-`0` (value-local) layer of the frame-free pure-Riemann curvature envelope at valence
+`r` (posited general-valence analytic child).** For a closed smooth Riemannian manifold `(M, g)` and a
+fixed contravariant valence `r` there is a nonnegative family `kappa0 : ℕ → ℝ` such that the order-`0`
+moving-centre pure-Riemann curvature operator `genuinePureRDiffOpRS g r 0 rr W` is *value-locally*
+fibre-bounded by `kappa0 rr` times the value fibre norm of `W`:
+```
+rfns(genuinePureRDiffOpRS g r 0 rr W)(x) ≤ kappa0 rr · rfns(W)(x).
+```
+
+**Why this is TRUE.** This is the verbatim contravariant-valence-`r` mirror of the *proved* rank-`0`
+order-`0` layer `exists_proportional_pureRFrozenFrameDiffOp_orderZero`
+(`FrozenFramePureRCurvatureTower`).  At width `rr = 0` the operator is the zero endomorphism
+(`genuinePureREndo0RS`, the `rr = 0` branch) and the bound is trivial; at width `rr = m + 1` the
+order-`0` fibre `genuinePureREndoFibRS g r m W x` is the moving-frame freeze at `smoothOrthoFrame g x`
+(orthonormal at its own centre `x`), read by the slot-`0` Parseval frame-sum over a `g_x`-orthonormal
+frame, each slice being the curvature contraction `∑ᵢ R(Bᵢˣ, eₐ)(slot0_{Bᵢˣ} W)` fibre-bounded by the
+valence-`r` curvature-operator sup (`exists_Cx_riemannianFiberNormSq_riemannOp_tensorCovS_le_rs`,
+made uniform over the compact `M`) times the unit Gram factors and the slot-`0` reading fibre norm
+`rfns((covGradBundleEquiv r m x).symm (W x) (Bᵢˣ))(x) ≤ rfns(W)(x)` (the valence-`r` slot-`0` reading
+domination).  The slot-`0` reading domination at valence `r` and the uniform-over-`M` valence-`r`
+curvature sup are the genuinely-irreducible rank-`r` analytic content here (the rank-`0` slot-`0`
+Parseval domination `riemannianFiberNormSq_slot0Curry_le` and the rank-`0` continuous curvature sup
+`exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional` are stated only at
+contravariant rank `0`), absent sorry-free below this file at valence `r`, so this order-`0` layer is
+posited as one precise true child — strictly weaker than the full envelope (value-local, no jet
+window, no high-order content).  Consumers transitively depend on `sorryAx`.
+
+**Non-vacuity.** A degenerate witness `kappa0 ≡ 0` is rejected on any non-flat manifold: at
+`rr = s + 1`, `genuinePureRDiffOpRS g r 0 (s + 1) W` is the pure-Riemann contraction
+`∑ᵢ R(Bᵢˣ, ·)(slot0_{Bᵢˣ} W)`, genuinely nonzero (`R ≠ 0`, a nonzero slot-`0` reading), forcing
+`rfns(…)(x) > 0` while the RHS `0 · rfns(W)(x) = 0`; the layer must carry the genuine curvature
+magnitude and the constant family is genuinely positive. -/
+theorem exists_genuinePureRDiffOpRS_orderZero (g : SmoothRiemannianMetric I M) (r : ℕ) :
+    ∃ kappa0 : ℕ → ℝ, (∀ rr, 0 ≤ kappa0 rr) ∧
+      ∀ (rr : ℕ) (W : SmoothCcTensor g r rr) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g r (rr + 0) x
+            ((genuinePureRDiffOpRS (I := I) (M := M) g r 0 rr W).toSection x) ≤
+          kappa0 rr * riemannianFiberNormSq (I := I) (M := M) g r rr x (W.toSection x) := by
+  sorry
+
+set_option linter.unusedVariables false in
+/-- **The high-order (`p ≥ 1`) layer of the frame-free pure-Riemann curvature envelope at valence `r`,
+in JET form (posited general-valence analytic child).** For a closed smooth Riemannian manifold
+`(M, g)` and a fixed contravariant valence `r` there is a nonnegative family `kappaHigh : ℕ → ℕ → ℝ`
+such that the order-`(p + 1)` differentiated frame-free pure-Riemann curvature operator has intrinsic
+squared fibre norm at most `kappaHigh p rr` times the order-`≤ (p + 1)` covariant jet of `W`:
+```
+rfns(genuinePureRDiffOpRS g r (p + 1) rr W)(x) ≤ kappaHigh p rr · ∑_{q < p + 2} rfns(∇^q W)(x).
+```
+
+**Why the jet form (not the single-value form).** The single-value form is FALSE at the
+width-`0`-degenerate base, exactly as at rank `0` (`exists_proportional_pureRGenuineDiffOp_highOrder`):
+the order-`0` base reads the slot-`0` direction, so at width `0` it is the zero operator, and the
+order-`1` Leibniz remainder reads the *gradient* `∇W (x)`, not the value `W (x)`.  The honest invariant
+is the jet bound `op (p + 1) rr W (x)` reads up to `∇^{p+1} W (x)`, controlled by
+`∑_{q < p + 2} rfns(∇^q W)(x)`.
+
+**Why this is TRUE — and FRAME-FREE.** This is the verbatim contravariant-valence-`r` mirror of the
+rank-`0` high-order posited node `exists_proportional_pureRGenuineDiffOp_highOrder`.  The order-`0`
+base `genuinePureREndo0RS` is the moving-frame pure-Riemann endomorphism whose fibre *value* is a
+genuine `g`-metric trace (`pureRFrozenDirCLMRS_frame_independent`), built from `g, R` *alone* — NOT a
+frame jet; writing the order-`0` operator as the action of a smooth frame-free operator-field section
+`Φ_{rr}` (curvature data), the operator-field covariant product rule gives
+`op (p + 1) rr W = appCc(∇Φ) W + appCc(slotExtend Φ − Φ') (∇W)`, the sum of a *frame-free* operator-field
+action of the differentiated curvature coefficient `∇^{p+1} Φ` on `W` and an operator-field action of
+the *bounded* slot-mismatch on `∇W`, each uniformly fibre-operator-bounded over the compact `M` by
+`‖∇^{≤ p+1} R‖_∞`; the jet window absorbs the surviving `∇W ⊆ ∇^{≤ p+1}W` term at every step.  Because
+`Φ` is frame-free, `∇^{p+1} Φ` differentiates *only* the curvature factor, never the
+chart-selection-unbounded frame jet.  The operator-field normal-form engine
+(`normalForm_of_base` + `exists_jet_bound_of_normalForm`) and the operator-field calculus
+(`appCc`, `slotExtend`, `exists_uniform_riemannianFiberNormSq_appCc_le`) are stated **only at
+contravariant rank `0`** (a literal contravariant `0` in the operator-field action
+`appCc · : SmoothCcTensor g 0 r → …`), so the whole high-order frame-free jet envelope at valence `r`
+is absent sorry-free below this file and is posited here as one precise true child — strictly weaker
+than the full envelope (no order-`0` content).  Consumers transitively depend on `sorryAx`.
+
+**Non-vacuity.** A degenerate witness `kappaHigh ≡ 0` is rejected on any non-flat manifold: at
+`(p, rr) = (0, 0)`, `genuinePureRDiffOpRS g r 1 0 W = −cast(genuinePureRDiffOpRS g r 0 1 (∇W))` is
+genuinely nonzero for a `W` with `∇W (x) ≠ 0` whose slot-`0` reading carries a non-zero pure-Riemann
+contraction (`R ≠ 0`), so `rfns(…)(x) > 0` while the jet RHS `0 · ∑_{q < 2} rfns(∇^q W)(x) = 0`.  The
+envelope genuinely uses `W` (the jet window reaches `∇^{p+1} W`); the constant family is genuinely
+positive. -/
+theorem exists_genuinePureRDiffOpRS_highOrder (g : SmoothRiemannianMetric I M) (r : ℕ) :
+    ∃ kappaHigh : ℕ → ℕ → ℝ, (∀ p rr, 0 ≤ kappaHigh p rr) ∧
+      ∀ (p rr : ℕ) (W : SmoothCcTensor g r rr) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g r (rr + (p + 1)) x
+            ((genuinePureRDiffOpRS (I := I) (M := M) g r (p + 1) rr W).toSection x) ≤
+          kappaHigh p rr * ∑ q ∈ Finset.range (p + 2),
+            riemannianFiberNormSq (I := I) (M := M) g r (rr + q) x
+              ((iteratedCovGrad g r rr q W).toSection x) := by
+  sorry
 
 set_option linter.unusedVariables false in
 /-- **The per-order, per-rank frame-free proportional fibre envelope for the differentiated
-moving-centre pure-Riemann curvature tower at valence `r`, in JET form (the single posited analytic
-node).** For a closed smooth Riemannian manifold `(M, g)` and a fixed contravariant valence `r` there is
+moving-centre pure-Riemann curvature tower at valence `r`, in JET form.** For a closed smooth
+Riemannian manifold `(M, g)` and a fixed contravariant valence `r` there is
 a nonnegative envelope family `kappa : ℕ → ℕ → ℝ` such that for every order `p`, covariant width `rr`,
 smooth compactly-supported `(r, rr)`-tensor `W`, and base point `x`,
 
@@ -564,27 +657,13 @@ smooth compactly-supported `(r, rr)`-tensor `W`, and base point `x`,
 rfns(genuinePureRDiffOpRS g r p rr W)(x) ≤ kappa p rr · ∑_{q < p + 1} rfns(∇^q W)(x).
 ```
 
-**Why this is TRUE.** This is the verbatim contravariant-valence-`r` mirror of the rank-`0` frame-free
-envelope `exists_proportional_pureRGenuineDiffOp` (`FrozenFramePureRCurvatureTower`).  The order-`0`
-base `genuinePureREndo0RS` is the moving-frame pure-Riemann endomorphism whose fibre *value* is a
-genuine `g`-metric trace (`pureRFrozenDirCLMRS_frame_independent`), built from the smooth metric `g` and
-the smooth Levi-Civita curvature `R` *alone* — NOT from any frame jet; written as the action of a smooth
-frame-free operator-field section, the order-`(p + 1)` covariant-Leibniz remainder
-`genuinePureRDiffOpRS g r (p + 1) rr W` is the sum of a *frame-free* operator-field action of the
-differentiated curvature coefficient `∇^{p+1} Φ` on `W` and an operator-field action of the *bounded*
-slot-mismatch on `∇W`, each uniformly fibre-operator-bounded over the compact `M` by `‖∇^{≤ p+1} R‖_∞`
-(finite by per-`p` compactness), with the jet window absorbing the surviving `∇W ⊆ ∇^{≤ p+1} W` term at
-every step.  At rank `0` this envelope's order-`0` layer is *proved* off the rank-`0` proportional
-curvature sup `exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional` and its
-high-order layer is the lone posited node `exists_proportional_pureRGenuineDiffOp_highOrder`; that
-proportional curvature sup, the differentiated-curvature normal-form jet envelope
-(`normalForm_of_base` + `exists_jet_bound_of_normalForm`), and the operator-field uniform-bound machinery
-(`appCc`, `slotExtend`, `exists_uniform_riemannianFiberNormSq_appCc_le`) are all stated **only at
-contravariant rank `0`** (a literal contravariant `0` in `riemannOp (tensorCov g 0 ·)` and in the
-operator-field action `appCc · : SmoothCcTensor g 0 r → …`), so the whole frame-free envelope at valence
-`r` is absent sorry-free below this file and is posited here as the single precise true child — exactly
-the valence-`r` mirror of the rank-`0` `exists_proportional_pureRGenuineDiffOp`, the posit count not
-increasing.  Consumers transitively depend on `sorryAx` through this single frame-free node.
+**Proof (composition of the two layers).** The order-`p = 0` layer is the value-local
+`exists_genuinePureRDiffOpRS_orderZero`: at order `0` the jet window `range 1` carries only the value
+`∇^0 W = W`, so `kappa0 rr · rfns(W)(x) = kappa0 rr · ∑_{q < 1} rfns(∇^q W)(x)`.  The order-`p ≥ 1`
+layer is `exists_genuinePureRDiffOpRS_highOrder` (window `q < (p' + 1) + 1 = p' + 2`).  The two combine
+by `cases p` into one per-order jet family — exactly the valence-`r` mirror of the rank-`0` glue
+`exists_proportional_pureRGenuineDiffOp` (`FrozenFramePureRCurvatureTower`).  Consumers transitively
+depend on `sorryAx` only through the two layer children.
 
 **Non-vacuity (the envelope is genuinely positive).** A degenerate witness `kappa ≡ 0` is rejected on
 any non-flat manifold: at `(p, rr) = (0, s + 1)`, `genuinePureRDiffOpRS g r 0 (s + 1) W` is the
@@ -600,7 +679,30 @@ theorem exists_proportional_genuinePureRDiffOpRS (g : SmoothRiemannianMetric I M
           kappa p rr * ∑ q ∈ Finset.range (p + 1),
             riemannianFiberNormSq (I := I) (M := M) g r (rr + q) x
               ((iteratedCovGrad g r rr q W).toSection x) := by
-  sorry
+  classical
+  obtain ⟨kappa0, hkappa0_nn, hkappa0⟩ :=
+    exists_genuinePureRDiffOpRS_orderZero (I := I) (M := M) g r
+  obtain ⟨kappaHigh, hkappaHigh_nn, hkappaHigh⟩ :=
+    exists_genuinePureRDiffOpRS_highOrder (I := I) (M := M) g r
+  refine ⟨fun p rr => match p with | 0 => kappa0 rr | (p' + 1) => kappaHigh p' rr,
+    fun p rr => ?_, fun p rr W x => ?_⟩
+  · cases p with
+    | zero => exact hkappa0_nn rr
+    | succ p' => exact hkappaHigh_nn p' rr
+  · cases p with
+    | zero =>
+        have h := hkappa0 rr W x
+        rw [show (fun p rr => match p with
+            | 0 => kappa0 rr | (p' + 1) => kappaHigh p' rr) 0 rr = kappa0 rr from rfl]
+        rw [Finset.sum_range_one]
+        rw [show (iteratedCovGrad g r rr 0 W) = W from iteratedCovGrad_zero g r rr W] at *
+        exact h
+    | succ p' =>
+        have h := hkappaHigh p' rr W x
+        rw [show (fun p rr => match p with
+            | 0 => kappa0 rr | (p'' + 1) => kappaHigh p'' rr) (p' + 1) rr = kappaHigh p' rr from rfl]
+        rw [show (p' + 1) + 1 = p' + 2 from rfl]
+        exact h
 
 /-- **The frame-free pure-Riemann differentiated curvature tower at valence `r`, packaged as a
 `DiffBilinOpRS g r`.** The order-`p` operator family is `genuinePureRDiffOpRS g r p`; the exact
