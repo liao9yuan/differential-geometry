@@ -555,6 +555,36 @@ theorem genuinePureRDiffOp0_covGrad_fib_eq
 
 /-! ## The two frame-free envelope layers and the `DiffBilinOpRS g r` package -/
 
+/-- **The forward-uncurry frame component is the slot-`0`-shifted per-direction component.** For a
+frame `e`, the `(K, J)` frame component of the slot-`0` uncurry `covGradBundleEquiv r s x Φ` — an
+`(r, s + 1)`-tensor — at a `Fin (s + 1)`-index `J` equals the `(K, Matrix.vecTail J)` frame component
+of the per-direction value `Φ (e (J 0))` — an `(r, s)`-tensor.  This is the forward mirror of
+`reading_fiberNormSqComponent_eq` (`RankRReadingDominationUniformSup`): through the rank-generic
+forward evaluation bridge `covGradBundleEquiv_apply_eval`, the leftmost slot reads the tangent
+direction `e (J 0)` and the remaining slots read `e ∘ Matrix.vecTail J`. -/
+private lemma forward_fiberNormSqComponent_eq
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
+    (Φ : TangentSpace I x →L[ℝ] TensorRSSpace r s I x)
+    {n : ℕ} (e : Fin n → TangentSpace I x)
+    (K : Fin r → Fin n) (J : Fin (s + 1) → Fin n) :
+    fiberNormSqComponent (I := I) (M := M) g x r (s + 1)
+        (covGradBundleEquiv (I := I) (M := M) r s x Φ) n e K J =
+      fiberNormSqComponent (I := I) (M := M) g x r s (Φ (e (J 0))) n e K (Matrix.vecTail J) := by
+  unfold fiberNormSqComponent
+  set ωK : Tensor0SSpace r I x :=
+    (ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin r) ℝ).compContinuousLinearMap
+      (fun k => g.inner x (e (K k))) with hωK
+  rw [show ((covGradBundleEquiv (I := I) (M := M) r s x Φ) ωK (fun k => e (J k)) : ℝ) =
+      Tensor0SSpace.toModel
+        ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+          covGradBundleEquiv (I := I) (M := M) r s x Φ) ωK) (fun k => e (J k)) from rfl]
+  rw [show (((Φ (e (J 0))) ωK) (fun k => e (Matrix.vecTail J k)) : ℝ) =
+      Tensor0SSpace.toModel
+        ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ (e (J 0))) ωK)
+        (fun k => e (Matrix.vecTail J k)) from rfl]
+  rw [covGradBundleEquiv_apply_eval (I := I) (M := M) r s x Φ ωK (fun k => e (J k))]
+  congr 1
+
 /-- **Frame-summed forward-uncurry fibre bound for a covariant-gradient bundle image at valence `r`
 (posited general-valence Parseval child).** If every per-direction value `Φ v` of a curvature-direction
 continuous-linear map `Φ : T_x M →L T^{(r,s)}_x` along a *unit* tangent direction (`g(v, v) = 1`) has
@@ -590,7 +620,82 @@ theorem riemannianFiberNormSq_covGradBundleEquiv_le_card_mul_rs
     riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
         (covGradBundleEquiv (I := I) (M := M) r s x Φ) ≤
       (Module.finrank ℝ E : ℝ) * b := by
-  sorry
+  classical
+  -- Build the `stdOrthonormalBasis` frame on `TangentSpace I x` and its δ-form Gram.
+  let cd : InnerProductSpace.Core ℝ (TangentSpace I x) := g.toRiemannianMetric.toCore x
+  have hc : ContinuousAt (fun v : TangentSpace I x => cd.inner v v) 0 :=
+    g.toRiemannianMetric.continuousAt x
+  have hbnd : Bornology.IsVonNBounded ℝ {v : TangentSpace I x |
+      RCLike.re (cd.inner v v) < 1} :=
+    g.toRiemannianMetric.isVonNBounded x
+  letI nag : NormedAddCommGroup (TangentSpace I x) :=
+    cd.toNormedAddCommGroupOfTopology hc hbnd
+  letI ips : InnerProductSpace ℝ (TangentSpace I x) :=
+    InnerProductSpace.ofCoreOfTopology cd hc hbnd
+  set n : ℕ := Module.finrank ℝ (TangentSpace I x) with hn_def
+  set eob : OrthonormalBasis (Fin n) ℝ (TangentSpace I x) := stdOrthonormalBasis ℝ _
+    with heob_def
+  set e : Fin n → TangentSpace I x := fun i => eob i with he_def
+  have hinner_eq : ∀ u v : TangentSpace I x, (inner ℝ u v : ℝ) = g.inner x u v :=
+    fun u v => rfl
+  have horth : ∀ i j : Fin n, g.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0 := by
+    intro i j
+    have horthb : Orthonormal ℝ (fun i : Fin n => eob i) := eob.orthonormal
+    have hite := (orthonormal_iff_ite (𝕜 := ℝ) (E := TangentSpace I x)).mp horthb i j
+    rw [he_def, ← hinner_eq (eob i) (eob j)]
+    exact hite
+  -- The rank-`(r, s)` and rank-`(r, s + 1)` fibre norms unfold to the frame-component sum by `rfl`.
+  have hreprS : ∀ S : TensorRSSpace r s I x,
+      riemannianFiberNormSq (I := I) (M := M) g r s x S =
+        ∑ K : Fin r → Fin n, ∑ J : Fin s → Fin n,
+          fiberNormSqSummand (I := I) (M := M) g x r s S n e K J := by
+    intro S; rfl
+  have hreprSucc : ∀ S : TensorRSSpace r (s + 1) I x,
+      riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x S =
+        ∑ K : Fin r → Fin n, ∑ J : Fin (s + 1) → Fin n,
+          fiberNormSqSummand (I := I) (M := M) g x r (s + 1) S n e K J := by
+    intro S; rfl
+  -- Parseval-expand the `(r, s + 1)` fibre norm of the slot-`0` uncurry in the frame `e`.
+  rw [riemannianFiberNormSq_eq_sum_componentRS_sq (I := I) (M := M) g x r (s + 1) e hreprSucc]
+  -- Rewrite each forward component as a slot-`0`-shifted per-direction component.
+  have hforward : ∀ K : Fin r → Fin n, ∀ J : Fin (s + 1) → Fin n,
+      (fiberNormSqComponent (I := I) (M := M) g x r (s + 1)
+          (covGradBundleEquiv (I := I) (M := M) r s x Φ) n e K J) ^ 2 =
+        (fiberNormSqComponent (I := I) (M := M) g x r s (Φ (e (J 0))) n e K
+          (Matrix.vecTail J)) ^ 2 := by
+    intro K J
+    rw [forward_fiberNormSqComponent_eq (I := I) (M := M) g r s x Φ e K J]
+  rw [Finset.sum_congr rfl (fun K _ => Finset.sum_congr rfl (fun J _ => hforward K J))]
+  -- Reindex `J : Fin (s + 1) → Fin n` as `(a, J') ↦ Fin.cons a J'` (`J 0 = a`, tail = `J'`).
+  have hreindex : ∀ K : Fin r → Fin n,
+      (∑ J : Fin (s + 1) → Fin n,
+        (fiberNormSqComponent (I := I) (M := M) g x r s (Φ (e (J 0))) n e K
+          (Matrix.vecTail J)) ^ 2) =
+      ∑ a : Fin n, ∑ J' : Fin s → Fin n,
+        (fiberNormSqComponent (I := I) (M := M) g x r s (Φ (e a)) n e K J') ^ 2 := by
+    intro K
+    rw [← (Fin.consEquiv (fun _ : Fin (s + 1) => Fin n)).sum_comp
+      (fun J => (fiberNormSqComponent (I := I) (M := M) g x r s (Φ (e (J 0))) n e K
+        (Matrix.vecTail J)) ^ 2)]
+    rw [Fintype.sum_prod_type]
+    refine Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun J' _ => ?_))
+    simp only [Fin.consEquiv_apply, Fin.cons_zero]
+    rfl
+  rw [Finset.sum_congr rfl (fun K _ => hreindex K)]
+  -- Swap the `∑_K ∑_a` order to collect, per direction `a`, the full `(r, s)` Parseval sum.
+  rw [Finset.sum_comm]
+  -- Each per-direction inner sum is exactly `rfns (Φ (e a))`; bound it by `b` (unit direction).
+  have hper : ∀ a : Fin n,
+      (∑ K : Fin r → Fin n, ∑ J' : Fin s → Fin n,
+        (fiberNormSqComponent (I := I) (M := M) g x r s (Φ (e a)) n e K J') ^ 2) ≤ b := by
+    intro a
+    rw [← riemannianFiberNormSq_eq_sum_componentRS_sq (I := I) (M := M) g x r s e hreprS]
+    refine hbound (e a) ?_
+    have := horth a a; rwa [if_pos rfl] at this
+  refine le_trans (Finset.sum_le_sum (fun a _ => hper a)) ?_
+  rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+  have hfr : Module.finrank ℝ (TangentSpace I x) = Module.finrank ℝ E := rfl
+  rw [hn_def, hfr]
 
 /-- **The uniform-over-`M` proportional curvature-operator fibre bound at valence `(r, s)` (posited
 general-valence analytic child — the "mirror-2" uniform curvature sup).** For a closed smooth
