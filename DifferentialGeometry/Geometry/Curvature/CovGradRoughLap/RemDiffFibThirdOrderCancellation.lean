@@ -212,22 +212,18 @@ vanish for every `S` — false on a non-flat manifold. Already at `s = 0` the sc
 (`weitzenbock_integrated_covGrad_l2_normSq`), and `remDiffFib` genuinely uses `S` through its
 `∇²_{Bᵢ, Bᵢ}(∇S)` top-order term. So `C` is genuinely positive.
 
-**Proof (slot-`0` Parseval reconstruction over the sorry-free commutation identity).** This is now proved
-by composition over the strictly-smaller posited curvature-residue frontier
-`exists_secondOrderResidue_frameSum_fiberOrder_bound` (`SecondOrderCommutationResidueFiberBound`, the
-genuine `∇³S`-cancellation content: the residue surviving the iterated Ricci identity). Building a
-`g_x`-orthonormal slot-`0` witness frame `e`, the bare-curry slot-`0` Parseval decomposition
-`riemannianFiberNormSq_succ_eq_sum_bareSlot0Curry_of_orthoFrame` reads the intrinsic `(0, s + 1)` fibre
-norm of `remDiffFib g s S x i` as the frame-sum of the slot-`s` fibre norms of the `tensor0SAsRS`-wrapped
-bare curries of its unit-evaluation. Each such bare curry along `e a` is the slot-`0` curry of the
-difference `Aᵢ − Dᵢ` of the two frame summands (`remDiffFib` is *definitionally* this difference,
-`ContinuousLinearMap.sub_apply` + the curry continuous-linear-equivalence `map_sub`), which is the
-curvature residue `secondOrderResidue g s S x i (smoothExtensionTangent x (e a))` by the sorry-free
-rank-generic second-order leading-slot commutation `covGrad_covDeriv_leadingSlot_secondOrder_commutation`
-(via `secondOrderResidue_eq_curry_remDiffFib_unit`, with the slot-`0` direction realised as the smooth
-extension `smoothExtensionTangent x (e a)`, `smoothExtensionTangent_eq` giving its value `e a` at `x`).
-The posited residue fibre order then bounds the frame-sum by `(C s)² · (rfns(∇²S) + rfns(∇S) + rfns(S))`.
-Consumers transitively depend on the posited residue frontier's `sorryAx`. -/
+**Posited as the genuine irreducible leaf (the intrinsic `∇³S`-cancellation content).** The bound is the
+single tensorial fibre-order statement of the iterated-Ricci `∇³S`-cancellation: the per-direction frame
+summand `remDiffFib g s S x i` is intrinsically a *tensor* (its slot-`0` curry depends only on the value
+of the reading direction, not its jet — the commutation identity `secondOrderResidue_eq_curry_remDiffFib_unit`
+exhibits it as the order-`≤ 2` curvature residue), so its intrinsic fibre norm is bounded by
+`(C s)² · (rfns(∇²S) + rfns(∇S) + rfns(S))` through the genuine curvature-residue cancellation surviving
+the iterated Ricci identity. A prior attempt to prove this by a slot-`0` Parseval reconstruction over a
+*per-direction `secondOrderResidue` per-class* split was found UNSOUND — the per-class split exposes a
+chart-selection-unbounded `smoothExtensionTangent` 1-jet (read by an inner `covApply`) that cancels only
+in the full residue sum, never class-by-class — so the per-class decomposition is false-as-stated and this
+fibre-order bound is posited directly as the irreducible `∇³S`-cancellation leaf. The body is `sorry`;
+consumers transitively depend on its `sorryAx`. -/
 theorem exists_remDiffFib_fiberOrder_bound
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℕ → ℝ, (∀ s, 0 ≤ C s) ∧
@@ -241,67 +237,7 @@ theorem exists_remDiffFib_fiberOrder_bound
               riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
                   ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
               riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) := by
-  classical
-  obtain ⟨C, hC_nn, hC⟩ := exists_secondOrderResidue_frameSum_fiberOrder_bound (I := I) (M := M) g
-  refine ⟨C, hC_nn, fun s S x i => ?_⟩
-  -- Build the `stdOrthonormalBasis` slot-`0` witness frame at `x`.
-  let cd : InnerProductSpace.Core ℝ (TangentSpace I x) := g.toRiemannianMetric.toCore x
-  have hcont : ContinuousAt (fun v : TangentSpace I x => cd.inner v v) 0 :=
-    g.toRiemannianMetric.continuousAt x
-  have hbnd : Bornology.IsVonNBounded ℝ {v : TangentSpace I x |
-      RCLike.re (cd.inner v v) < 1} :=
-    g.toRiemannianMetric.isVonNBounded x
-  letI nag : NormedAddCommGroup (TangentSpace I x) :=
-    cd.toNormedAddCommGroupOfTopology hcont hbnd
-  letI ips : InnerProductSpace ℝ (TangentSpace I x) :=
-    InnerProductSpace.ofCoreOfTopology cd hcont hbnd
-  set n : ℕ := Module.finrank ℝ (TangentSpace I x) with hn_def
-  set eob : OrthonormalBasis (Fin n) ℝ (TangentSpace I x) := stdOrthonormalBasis ℝ _ with heob_def
-  set e : Fin n → TangentSpace I x := fun i => eob i with he_def
-  have hinner_eq : ∀ u v : TangentSpace I x, (inner ℝ u v : ℝ) = g.inner x u v := fun u v => rfl
-  have horth : ∀ a b : Fin n, g.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0 := by
-    intro a b
-    have horthb : Orthonormal ℝ (fun i : Fin n => eob i) := eob.orthonormal
-    have hite := (orthonormal_iff_ite (𝕜 := ℝ) (E := TangentSpace I x)).mp horthb a b
-    rw [he_def, ← hinner_eq (eob a) (eob b)]
-    exact hite
-  -- The bare-curry slot-`0` Parseval decomposition of `remDiffFib` in the frame `e`.
-  rw [riemannianFiberNormSq_succ_eq_sum_bareSlot0Curry_of_orthoFrame (I := I) (M := M) g s x
-    (remDiffFib (I := I) (M := M) g s S x i) e hn_def horth]
-  -- Each bare curry slice equals the curvature residue at `w := smoothExtensionTangent x (e a)`.
-  have hslice : ∀ a : Fin n,
-      tensor0S_curry (I := I) (M := M) s x
-          ((remDiffFib (I := I) (M := M) g s S x i :
-            Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x)
-            (unitZeroSec (I := I) (M := M) x)) (e a) =
-        secondOrderResidue (I := I) (M := M) g s S x i
-          (smoothExtensionTangent (I := I) x (e a)) := by
-    intro a
-    -- The commutation identity at the smooth extension `w := smoothExtensionTangent x (e a)`.
-    have hcomm := secondOrderResidue_eq_curry_remDiffFib_unit (I := I) (M := M) g s S x i
-      (smoothExtensionTangent_contMDiff (I := I) x (e a))
-    -- Its value at `x` is `e a`, simplifying the slot-`0` reading direction.
-    rw [smoothExtensionTangent_eq (I := I) x (e a)] at hcomm
-    -- `remDiffFib = Aᵢ − Dᵢ`; the unit-evaluation and the curry distribute over the difference.
-    rw [show (remDiffFib (I := I) (M := M) g s S x i :
-          Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x) =
-        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
-          tensorSecondCovDeriv (I := I) g 0 (s + 1)
-            (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i)
-            (fun y : M => (covGrad (I := I) (M := M) g 0 s S).toSection y) x) -
-        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
-          covGradBundleEquiv (I := I) (M := M) 0 s x
-            ((tensorCov (I := I) g 0 s).toFun
-              (fun y : M => tensorSecondCovDeriv (I := I) g 0 s
-                (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i)
-                (fun z : M => S.toSection z) y) x)) from rfl]
-    rw [ContinuousLinearMap.sub_apply]
-    rw [map_sub (tensor0S_curry (I := I) (M := M) s x)]
-    rw [ContinuousLinearMap.sub_apply]
-    exact hcomm
-  -- Replace each slice and apply the posited residue fibre order.
-  rw [Finset.sum_congr rfl (fun a (_ : a ∈ Finset.univ) => by rw [hslice a])]
-  exact hC s S x i e hn_def horth
+  sorry
 
 /-- **Posited per-direction pure-Riemann curvature fibre order.** For a closed smooth Riemannian
 manifold `(M, g)` there is a *valence-dependent* nonnegative constant `C : ℕ → ℝ` such that, at every
