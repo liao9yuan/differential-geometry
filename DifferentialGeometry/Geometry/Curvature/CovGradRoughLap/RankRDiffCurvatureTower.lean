@@ -281,10 +281,17 @@ the fixed curvature-jet field `∇R` (`exists_genuinePureRDiffOpRS_one_appFullRS
 (`homBundleCovariantDerivativeGen`) then runs the same single-index telescoping induction on the order `p`
 as `normalForm_of_baseRS` — each step differentiates the fixed coefficient (the gradient term) and
 slot-extends it onto the next jet `∇^{k+1}W` — expressing `op p rr W` as a finite sum of full Hom-bundle
-actions of the fixed iterated curvature jets `∇^{≤ p}(∇R)`.  The full-Hom covariant product rule and the
-full-Hom normal-form induction are absent sorry-free at the full-Hom level (the codomain-only `appCcRS`
-post-composition misses the contravariant curvature branch), so the full-Hom normal form is posited here
-as one precise true child.  Consumers transitively depend on `sorryAx`.
+actions of the fixed iterated curvature jets `∇^{≤ p}(∇R)`.
+
+**Precise missing prerequisite (verified).** This node rests on the order-`0` full-Hom factorisation child
+`exists_genuinePureRDiffOpRS_one_appFullRS` AND the section-level full-Hom covariant product rule
+`covGrad_appFullRS_eq` with a `slotExtend` for the abstract second-order Hom-bundle field — both requiring
+the generic Hom-bundle covariant derivative `homBundleCovariantDerivativeGen` instantiated on
+`Hom(TensorRSSpace r (rr + k), TensorRSSpace r (rr + 1 + p))`, which carries **no** bundle instance suite
+(`TopologicalSpace (TotalSpace …)` / `FiberBundle` / `VectorBundle` / `ContMDiffVectorBundle`, nor a
+computable Hom-model normed structure) — the same multi-file second-order-Hom-bundle infrastructure node
+named in `exists_genuinePureRDiffOpRS_one_appFullRS`.  Absent below this file, so the full-Hom normal form
+is posited here as one precise true child.  Consumers transitively depend on `sorryAx`.
 
 **Non-vacuity.** A degenerate normal form (all `Ψ k ≡ 0`) is rejected on any non-flat manifold: at
 `(p, rr) = (0, rr)` the tower value is the recast genuine `(∇R) W` (`diffCurvGenuineTowerOpRS_zero`),

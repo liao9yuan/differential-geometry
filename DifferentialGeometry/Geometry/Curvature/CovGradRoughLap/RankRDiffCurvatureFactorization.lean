@@ -51,20 +51,27 @@ rank-`0` / codomain-only node) are:
   `Θ` (the curvature derivative `∇R` as a full Hom endomorphism).  Its two irreducible facts are (i) the
   value-locality / `∇W`-cancellation of the order-`1` trace and (ii) the base-point smoothness of `Θ`; both
   rest on the full-Hom covariant product rule `covGrad_appFullRS_eq` (`∇(R·W) = (∇R)·W + R·(∇W)` for the
-  abstract `Hom(T^{r,rr}, T^{r,rr+1})` bundle), absent sorry-free below this file (the codomain-only
-  `appCcRS` post-composition `diffCurvGenuineDiffOp_zero_eq_appCc` misses the contravariant curvature branch
-  `riemannOp_tensorCovRS_apply_eval`, and the full `TensorRS` operator bundle carries no chart-component
-  continuity API the rank-`0` `pureREndoOp_contMDiff` relied on);
-* `exists_uniform_riemannianFiberNormSq_homSection_clm_le` — the uniform `g`-fibre-operator bound
-  `rfns(Ψ x v) ≤ C · rfns(v)` (`C` uniform over the compact `M`) for a fixed smooth full Hom-bundle section
-  `Ψ`.  This is the genuine atomic primitive isolated by decomposing the uniform full-Hom contraction
-  bound: the uniform fibre-operator boundedness of a smooth full Hom-bundle section over a compact base —
-  the full-Hom analogue of the *tensor*-section bound `exists_bound_riemannianFiberNormSq_smoothCcTensor`,
-  which does NOT apply since the abstract `Hom(T^{r,a}, T^{r,c})` bundle is no `SmoothCcTensor`.  The
-  contraction bound `exists_uniform_riemannianFiberNormSq_appFullRS_le` is *proved* over this leaf
-  (specialise to the fibre value `v = W x`, `appFullRS_toSection`).
+  abstract second-order Hom-bundle `Hom(T^{r,rr}, T^{r,rr+1})`).  The precise missing prerequisite is the
+  generic Hom-bundle covariant derivative `homBundleCovariantDerivativeGen` *instantiated on that
+  second-order Hom-bundle* `Hom(TensorRSSpace r rr, TensorRSSpace r (rr + 1))`, which carries **no** bundle
+  instance suite (`TopologicalSpace (TotalSpace …)` / `FiberBundle` / `VectorBundle` /
+  `ContMDiffVectorBundle`, nor a computable Hom-model normed structure) — unlike the *first-order*
+  `Hom(Tensor0S r, Tensor0S s)` carrier `tensorRSCovariantDerivative` (whose `Tensor0S` source/target have
+  the full global instance suite).  Building that second-order Hom-bundle instance tower is a multi-file
+  infrastructure node (see the per-leaf docstring);
+* `exists_continuous_riemannianFiberNormSq_homSection_clm_le` — the **continuous per-point** `g`-fibre-
+  operator contraction envelope `rfns(Ψ x v) ≤ Cop x · rfns(v)` (`Cop : M → ℝ` continuous nonnegative) for a
+  fixed smooth full Hom-bundle section `Ψ`.  This is the genuine atomic primitive: the base-point
+  *continuity* of the `g`-fibre operator norm `x ↦ ‖Ψ x‖_g²` of a smooth Hom-bundle section — the full-Hom
+  analogue of the *proved* continuous curvature-operator envelope
+  `exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional`.  The abstract
+  `Hom(T^{r,a}, T^{r,c})` bundle is no `SmoothCcTensor`, so the tensor-section route
+  `exists_bound_riemannianFiberNormSq_smoothCcTensor` does not apply.
 
-Consumers transitively depend on these two leaves' `sorryAx`.
+Over this continuous-envelope leaf, the uniform `g`-fibre-operator bound
+`exists_uniform_riemannianFiberNormSq_homSection_clm_le` and hence the full-Hom contraction bound
+`exists_uniform_riemannianFiberNormSq_appFullRS_le` are **proved** (compactness uniformisation of `Cop`,
+then `appFullRS_toSection`).  Consumers transitively depend on these two leaves' `sorryAx`.
 
 ## Convention
 
@@ -301,12 +308,24 @@ order-`0` coefficient is the smooth `∇R = ∇(g, R)`, has the cancellation); a
 smoothness** of the extracted full-Hom curvature-coefficient field `Θ rr`, the valence-`r` full-Hom
 analogue of the rank-`0` *proved* `pureREndoOp_contMDiff` (the ~600-line unit-scalar-lift reduction to the
 moving-frame endomorphism smoothness `genuinePureREndoFibRS_contMDiff`).  Fact (i) needs the full-tensor
-Hom-bundle covariant product rule for the abstract `Hom(T^{r,rr}, T^{r,rr+1})` bundle
-(`covGrad_appFullRS_eq`), and fact (ii) needs the pointwise smoothness route
-`contMDiff_clm_section_of_pointwise` lifted to that abstract Hom bundle — both absent sorry-free below
-this file (the codomain-only `appCcRS` post-composition misses the contravariant curvature branch
-`riemannOp_tensorCovRS_apply_eval`, and the full `TensorRS` operator bundle carries no chart-component
-continuity API).  Posited here as one precise true child.  Consumers transitively depend on `sorryAx`.
+Hom-bundle covariant product rule for the abstract second-order Hom-bundle
+`Hom(T^{(r,rr)}, T^{(r,rr+1)}) = fun x => TensorRSSpace r rr I x →L TensorRSSpace r (rr + 1) I x`
+(`covGrad_appFullRS_eq`, the `homBundleCovariantDerivativeGen` Leibniz over the two source/target tensor
+connections `tensorCov g r rr`, `tensorCov g r (rr + 1)`), and fact (ii) needs the pointwise smoothness
+route `contMDiff_clm_section_of_pointwise` lifted to that same abstract Hom-bundle.
+
+**Precise missing prerequisite (verified).** Both facts require the generic Hom-bundle covariant
+derivative `HomConnectionGen.homBundleCovariantDerivativeGen` *instantiated on the second-order Hom-bundle*
+`Hom(TensorRSSpace r rr, TensorRSSpace r (rr + 1))`; but that bundle carries **no** `TopologicalSpace
+(TotalSpace …)` / `FiberBundle` / `VectorBundle` / `ContMDiffVectorBundle` instance, nor a *computable*
+`NormedAddCommGroup`/`NormedSpace` on its model `TensorRSModel r rr ℝ E →L TensorRSModel r (rr + 1) ℝ E`
+(unlike the first-order `Hom(Tensor0S r, Tensor0S s)` carrier `tensorRSCovariantDerivative`, whose
+`Tensor0S` source/target bundles have the full global instance suite).  Building that second-order
+Hom-bundle instance tower (the `Hom(TensorRS, TensorRS)` analogue of the entire `Tensor0SBundle` instance
+suite — total-space topology, fibre bundle, vector bundle, smooth vector bundle, and the canonical
+computable Hom-model normed structure) is the genuine prerequisite, absent below this file; it is a
+multi-file infrastructure node.  Posited here as one precise true child.  Consumers transitively depend on
+`sorryAx`.
 
 **Non-vacuity.** A degenerate factorisation `Θ ≡ 0` is rejected on any non-flat manifold: the order-`1`
 trace `genuinePureRDiffOpRS g r 1 rr W` is the genuine differentiated curvature `(∇R) W`, genuinely
@@ -352,30 +371,64 @@ sum is accumulated by `riemannianFiberNormSq_sum_le_card_mul`, giving the tight 
 
 set_option linter.unusedVariables false in
 set_option backward.isDefEq.respectTransparency false in
-/-- **Child (uniform `g`-fibre-operator boundedness of a smooth full Hom-bundle section).** For a *fixed*
-smooth full Hom-bundle field `Ψ : Π x, TensorRSSpace r a I x →L TensorRSSpace r c I x` on a closed
-Riemannian manifold there is a single nonnegative constant `C`, uniform over `M`, with the per-point
-fibrewise contraction bound
+/-- **Child (the continuous per-point `g`-fibre-operator contraction envelope of a smooth full Hom-bundle
+section).** For a *fixed* smooth full Hom-bundle field `Ψ : Π x, TensorRSSpace r a I x →L TensorRSSpace r c
+I x` on a Riemannian manifold there is a **continuous** nonnegative function `Cop : M → ℝ` with the
+per-point fibrewise contraction bound
+```
+rfns(Ψ x v) ≤ Cop x · rfns(v)
+```
+at every point `x` and every `(r, a)`-tensor fibre value `v`.
+
+**Why this is TRUE.** Each fibre evaluation obeys the per-point fibrewise Cauchy–Schwarz
+`rfns(Ψ x v) ≤ ‖Ψ x‖_g² · rfns(v)` (`riemannianFiberNormSq_appFullRS_clm_apply_le`, *proved*), where
+`‖Ψ x‖_g` is the operator norm of `Ψ x` taken in the installed `g`-fibre `RiemannianBundle` inner-product
+structures on `TensorRSSpace r a` / `TensorRSSpace r c`.  The genuinely-irreducible analytic content is the
+**base-point continuity** `Cop x := ‖Ψ x‖_g²`: the `g`-fibre operator norm of the continuous Hom-bundle
+section `Ψ` is continuous in `x` (the fibre inner products vary continuously with `g`, and `Ψ` varies
+continuously in the model trivialisation; this is genuine *continuity*, never the chart-selection-*uniform*
+operator-norm bound which is unbounded on multi-chart manifolds).  This is the exact full-Hom analogue of
+the *proved* per-point continuous curvature-operator envelope
+`exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional`
+(`UniformProportionalCurvatureSup`); the abstract `Hom(T^{r,a}, T^{r,c})` bundle is *not* a `SmoothCcTensor`
+of any rank (it is a higher-order operator bundle with no chart-component continuity API, so the
+tensor-section route `exists_bound_riemannianFiberNormSq_smoothCcTensor` does not apply), so the operator-
+norm continuity is the single precise atomic primitive of the uniform contraction bound, posited here.
+Consumers transitively depend on `sorryAx`.
+
+**Non-vacuity.** A degenerate `Cop ≡ 0` is rejected: the bound at any `v` with `rfns(v) > 0` and
+`Ψ x v ≠ 0` forces `Cop x > 0`; the smallest valid value is the genuine squared `g`-fibre operator norm
+`‖Ψ x‖_g²`, positive wherever `Ψ x ≠ 0`. -/
+theorem exists_continuous_riemannianFiberNormSq_homSection_clm_le
+    (g : SmoothRiemannianMetric I M) (r a c : ℕ)
+    (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x)
+    (hΨ : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)
+        (E := fun z : M => TensorRSSpace r a I z →L[ℝ] TensorRSSpace r c I z) x (Ψ x))) :
+    ∃ Cop : M → ℝ, Continuous Cop ∧ (∀ x : M, 0 ≤ Cop x) ∧
+      ∀ (x : M) (v : TensorRSSpace r a I x),
+        riemannianFiberNormSq (I := I) (M := M) g r c x (Ψ x v) ≤
+          Cop x * riemannianFiberNormSq (I := I) (M := M) g r a x v := by
+  sorry
+
+set_option linter.unusedVariables false in
+set_option backward.isDefEq.respectTransparency false in
+/-- **Child (uniform `g`-fibre-operator boundedness of a smooth full Hom-bundle section), assembled from
+the continuous envelope and compactness.** For a *fixed* smooth full Hom-bundle field
+`Ψ : Π x, TensorRSSpace r a I x →L TensorRSSpace r c I x` on a closed Riemannian manifold there is a single
+nonnegative constant `C`, uniform over `M`, with the per-point fibrewise contraction bound
 ```
 rfns(Ψ x v) ≤ C · rfns(v)
 ```
 for every point `x` and every `(r, a)`-tensor fibre value `v`.
 
-**Why this is TRUE.** Each fibre evaluation obeys the per-point fibrewise Cauchy–Schwarz
-`rfns(Ψ x v) ≤ ‖Ψ x‖_g² · rfns(v)` (`riemannianFiberNormSq_appFullRS_clm_apply_le`, *proved*), where
-`‖Ψ x‖_g` is the operator norm of `Ψ x` taken in the installed `g`-fibre `RiemannianBundle` inner-product
-structures on `TensorRSSpace r a` / `TensorRSSpace r c`.  The squared `g`-fibre operator norm
-`x ↦ ‖Ψ x‖_g²` of the *fixed smooth* full Hom-bundle section `Ψ` is a continuous function on the compact
-`M` (the `g`-fibre operator norm of a continuous Hom-bundle section is continuous in the base point: the
-fibre inner products vary continuously with `g`, and `Ψ` varies continuously in the model trivialisation;
-this is genuine *continuity*, never the chart-selection-*uniform* operator-norm bound which is unbounded on
-multi-chart manifolds), so it attains a finite uniform maximum `C` over the compact base.  The uniform
-`g`-fibre-operator boundedness of a fixed smooth full Hom-bundle section over a compact base — the genuine
-full-Hom analogue of the *tensor*-section bound `exists_bound_riemannianFiberNormSq_smoothCcTensor` (which
-does **not** apply: the abstract `Hom(T^{r,a}, T^{r,c})` bundle is *not* a `SmoothCcTensor` of any rank,
-it is a higher-order operator bundle with no chart-component continuity API) — is absent sorry-free below
-this file, so it is the single precise true child of the uniform contraction bound.  Consumers transitively
-depend on `sorryAx`.
+**Proof.** By the continuous per-point envelope `exists_continuous_riemannianFiberNormSq_homSection_clm_le`
+there is a continuous nonnegative `Cop : M → ℝ` with `rfns(Ψ x v) ≤ Cop x · rfns(v)`; on the compact `M`
+the continuous `Cop` has bounded range (`(isCompact_univ).image Cop_cont |>.bddAbove`), so
+`C := max C₀ 0 ≥ Cop x` uniformly, and `Cop x · rfns(v) ≤ C · rfns(v)` by `rfns(v) ≥ 0`.  This is the exact
+full-Hom mirror of `riemannianFiberNormSq_riemannOp_covGrad_uniform_proportional_bound`'s
+continuous-envelope-to-uniform-sup step.  Consumers transitively depend on the continuous envelope child's
+`sorryAx`.
 
 **Non-vacuity.** A degenerate `C < 0` is rejected: the conclusion `rfns(Ψ x v) ≤ C · rfns(v)` at any `v`
 with `rfns(v) > 0` and `Ψ x v ≠ 0` forces `C > 0`; the smallest valid `C` is the genuine uniform squared
@@ -389,7 +442,16 @@ theorem exists_uniform_riemannianFiberNormSq_homSection_clm_le
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (x : M) (v : TensorRSSpace r a I x),
       riemannianFiberNormSq (I := I) (M := M) g r c x (Ψ x v) ≤
         C * riemannianFiberNormSq (I := I) (M := M) g r a x v := by
-  sorry
+  obtain ⟨Cop, hCop_cont, hCop_nn, hCop_bound⟩ :=
+    exists_continuous_riemannianFiberNormSq_homSection_clm_le (I := I) (M := M) g r a c Ψ hΨ
+  have hCpt := (isCompact_univ (X := M)).image hCop_cont
+  obtain ⟨C₀, hC₀⟩ := hCpt.bddAbove
+  refine ⟨max C₀ 0, le_max_right _ _, fun x v => ?_⟩
+  have hCop_le : Cop x ≤ max C₀ 0 :=
+    le_trans (hC₀ ⟨x, Set.mem_univ _, rfl⟩) (le_max_left _ _)
+  refine le_trans (hCop_bound x v) ?_
+  exact mul_le_mul_of_nonneg_right hCop_le
+    (riemannianFiberNormSq_nonneg (I := I) (M := M) g r a x v)
 
 set_option linter.unusedVariables false in
 set_option backward.isDefEq.respectTransparency false in

@@ -405,6 +405,60 @@ the sole consumer `exists_pointwiseTensorCurvRS_diffCurvAndRemainder_gradedCurvJ
 **Non-vacuity.** With `c s 0 = 0` the bound at `k = 0` forces `rfns(Grem)(x) = 0`, i.e.
 `Curv S = GcurvSectionRS + diffCurvSectionRS`; *false* on a non-flat manifold (the moving-frame bracket
 remainder is genuinely non-zero). The constant family is genuinely positive. -/
+theorem exists_pointwiseTensorCurvRS_subGcurvSubDiffCurv_gradedCurvJet
+    (g : SmoothRiemannianMetric I M) (r : ℕ) :
+    ∃ c : ℕ → ℕ → ℝ, (∀ s k, 0 ≤ c s k) ∧
+      ∀ (s : ℕ) (S : SmoothCcTensor g r s),
+        IsGradedCurvJetRS (I := I) (M := M) g S (c s) 2 1
+          (pointwiseTensorCurvRS (I := I) (M := M) g r s S -
+            GcurvSectionRS (I := I) (M := M) g r s S -
+            diffCurvSectionRS (I := I) (M := M) g r s S) := by
+  sorry
+
+/-- **Posited rank-`r` moving-frame remainder graded jet after the differentiated-curvature peel (the
+genuine remainder core), in existential-`Grem` form (proved over the pinned-remainder graded jet).** The
+contravariant-rank-`r` analogue of the rank-`0` remainder content of
+`exists_pointwiseTensorCurv_diffCurvAndRemainder_gradedCurvJet` (`OrderSeparatedCurvatureJet`). For a
+closed smooth Riemannian manifold `(M, g)`, fixed contravariant rank `r`, there is a
+*valence/order-dependent* nonnegative constant family `c : ℕ → ℕ → ℝ` such that, at every covariant rank
+`s` and for every smooth compactly-supported `(r, s)`-tensor `S`, peeling off the *concrete* gauge-glued
+differentiated-curvature carrier `diffCurvSectionRS g r s S` (the `(∇R) S` field, the canonical carrier
+pinned by `exists_diffCurvSectionRS_gradedCurvJet`), there is a moving-frame remainder field
+`Grem : SmoothCcTensor g r (s + 1)` such that the order-`2` commutator defect splits over the
+pure-Riemann section `GcurvSectionRS g r s S` and that carrier:
+`pointwiseTensorCurvRS g r s S = GcurvSectionRS g r s S + diffCurvSectionRS g r s S + Grem`, with `Grem`
+a graded curvature jet of lowest order `2` and width `1`: `IsGradedCurvJetRS g S (c s) 2 1 Grem`.
+
+**Proof (glue over the pinned-remainder graded jet).** The moving-frame remainder is the literal
+subtraction `Grem := pointwiseTensorCurvRS g r s S − GcurvSectionRS g r s S − diffCurvSectionRS g r s S`,
+so the section split `Curv S = GcurvSectionRS + diffCurvSectionRS + Grem` is `abel`, and its order-`2`
+graded jet is exactly the pinned-remainder graded jet
+`exists_pointwiseTensorCurvRS_subGcurvSubDiffCurv_gradedCurvJet` (the genuine remainder core, transiting
+`sorryAx`). The carrier `diffCurvSectionRS` carries the genuine `(∇R) S` (order-`0`) content, so
+subtracting it off is exactly what makes the surviving `Grem` order-`2`. Consumers transitively depend on
+`sorryAx`.
+
+**Signature soundness — why the carrier `Gcd` is pinned, not a free input.** The carrier is the concrete
+`diffCurvSectionRS g r s S`, *not* a universally-quantified `Gcd` input. A version taking an arbitrary
+graded-jet field `Gcd` (of lowest order `0`, width `1`) as input, with the constant family `c` chosen
+*before* `Gcd`, is FALSE: the section equation forces `Grem = Curv − Gcurv − Gcd`, and feeding the
+admissible witness `Gcd = 0` (a graded jet of any order with the zero family) forces
+`Grem = Curv − Gcurv`, whose graded-`2` bound at `k = 0` reads `rfns(Curv − Gcurv)(x) ≤ (c s 0)² ·
+rfns(∇²S)(x)`. At a point where the covariant `2`-jet of `S` vanishes but `S(x) ≠ 0` and `∇R(x) ≠ 0`
+the pure-Riemann `Gcurv` (reading `∇S(x) = 0`) and the `∇²S`-order remainder both vanish while the
+differentiated-curvature `(∇R) S` content is genuinely non-zero, so `rfns(Curv − Gcurv)(x) > 0 =
+(c s 0)² · 0` — contradiction for any finite `c`. Equivalently, two admissible carriers (e.g.
+`diffCurvSectionRS` and `0`) would force `diffCurvSectionRS = Grem₀ − Grem₁` to be a graded jet of
+lowest order `2`, contradicting that `diffCurvSectionRS` is genuinely order-`0` (its non-vacuity at
+`exists_diffCurvSectionRS_gradedCurvJet`). Pinning the carrier to the canonical
+`diffCurvSectionRS g r s S` (the same field `exists_diffCurvSectionRS_gradedCurvJet` pins) removes this
+defect and matches both the rank-`0` analogue (which carries `Gcd` *existentially*, not as an input) and
+the sole consumer `exists_pointwiseTensorCurvRS_diffCurvAndRemainder_gradedCurvJet` (which always feeds
+`Gcd = diffCurvSectionRS g r s S`).
+
+**Non-vacuity.** With `c s 0 = 0` the bound at `k = 0` forces `rfns(Grem)(x) = 0`, i.e.
+`Curv S = GcurvSectionRS + diffCurvSectionRS`; *false* on a non-flat manifold (the moving-frame bracket
+remainder is genuinely non-zero). The constant family is genuinely positive. -/
 theorem exists_pointwiseTensorCurvRS_remainder_afterDiffCurv_gradedCurvJet
     (g : SmoothRiemannianMetric I M) (r : ℕ) :
     ∃ c : ℕ → ℕ → ℝ, (∀ s k, 0 ≤ c s k) ∧
@@ -414,7 +468,14 @@ theorem exists_pointwiseTensorCurvRS_remainder_afterDiffCurv_gradedCurvJet
               GcurvSectionRS (I := I) (M := M) g r s S +
                 diffCurvSectionRS (I := I) (M := M) g r s S + Grem ∧
           IsGradedCurvJetRS (I := I) (M := M) g S (c s) 2 1 Grem := by
-  sorry
+  classical
+  obtain ⟨c, hc_nn, hjet⟩ :=
+    exists_pointwiseTensorCurvRS_subGcurvSubDiffCurv_gradedCurvJet (I := I) (M := M) g r
+  refine ⟨c, hc_nn, fun s S => ?_⟩
+  refine ⟨pointwiseTensorCurvRS (I := I) (M := M) g r s S -
+      GcurvSectionRS (I := I) (M := M) g r s S -
+      diffCurvSectionRS (I := I) (M := M) g r s S, ?_, hjet s S⟩
+  abel
 
 /-- **Rank-`r` combined differentiated-curvature / moving-frame remainder graded split (proved over the
 two genuine cores).** The contravariant-rank-`r` mirror of the rank-`0`
