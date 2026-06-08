@@ -108,53 +108,81 @@ private def crossCorrTripleDiff (g₀ : SmoothRiemannianMetric I M)
   (2 : ℝ) • DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
     - (2 : ℝ) • DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂
 
-/-- **(POSIT — the linearized-Ricci principal-part section identity: `linearSection` as a parallel
-model-basis Ricci trace of the *once-covariantly-differentiated* connection-difference Koszul
-combination.)**  The genuinely-missing section-level identity lifting the pointwise lowered-Koszul form
-(`connDiffDiff_g0_lowered_koszul_diffFactor`) through the model-basis Ricci trace: there is a **parallel
-rank-reducing `(0, 4) → (0, 2)` contraction** `Φ` (the `−2` model-basis Ricci trace `g^{ij}·`, parallel
-because `∇₀ g₀⁻¹ = 0`, value-local because it reads only the fibre), **fibrewise `ℝ`-linear** (so it
-distributes over the section difference), with the linear-in-difference curvature section
-`linearSection g₀ g₁ g₂` equal to the trace of the **once-`∇₀`-differentiated** connection-difference
-Koszul **difference arm** minus the trace of the once-`∇₀`-differentiated **cross arm**:
+/-- **(POSIT — the `(0, 4) → (0, 2)` model-basis Ricci-trace parallel contraction.)**  The genuine
+parallel rank-reducing single-section contraction realising the `−2` model-basis Ricci trace `g₀^{ij}·`
+on the once-`∇₀`-differentiated rank-`4` Koszul operand: a `ParallelRankReducingContraction g₀ 4 2`.
+Its three fields are the genuinely-deep content: the `op` is the `−2` background-metric trace
+`g₀^{ij} R_{ij··}` (contracting the leading two of the four covariant slots against the background
+inverse metric, then `−2`-scaling); its exact parallel single-step covariant Leibniz field
+`covGrad_op` (`∇₀(op a R) = (rank-cast) op (a+1) (∇₀ R)`, cross-term-free) is `∇₀ g₀⁻¹ = 0` (the
+cometric skew core `cometric_skew_core`) carried through `castRankCc_db`; and its single-value
+fibre envelope field `rfns_op_le` is value-locality of the trace (it reads only the fibre `R(x)`).
+Its body is `sorry`: the genuine model-basis Ricci-trace contraction-operator construction. -/
+noncomputable def ricciModelTrace42 (g₀ : SmoothRiemannianMetric I M) :
+    Integral.Connection.ParallelRankReducingContraction (I := I) (M := M) g₀ 4 2 :=
+  sorry
+
+/-- **(POSIT — fibrewise `ℝ`-linearity of the model-basis Ricci trace.)**  The `op` of the
+`(0, 4) → (0, 2)` model-basis Ricci-trace contraction `ricciModelTrace42` distributes over a section
+difference (it is fibrewise `ℝ`-linear: a metric contraction is linear in the contracted section).
+Its body is `sorry`: the linearity of the model-basis Ricci-trace operator. -/
+theorem ricciModelTrace42_op_sub (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (A B : Integral.L2.SmoothCcTensor g₀ 0 (4 + a)) :
+    (ricciModelTrace42 (I := I) g₀).op a (A - B) =
+      (ricciModelTrace42 (I := I) g₀).op a A - (ricciModelTrace42 (I := I) g₀).op a B :=
+  sorry
+
+/-- **(POSIT — the linearized-Ricci principal-part value identity for the model-basis Ricci trace.)**
+The lift of the once-differentiated pointwise lowered-Koszul form
+(`connDiffDiff_g0_lowered_koszul_diffFactor`, lifted to the section level by the **proven** child-A
+`loweredConnDiffSection_sub_eq_koszulRealizeDiff_sub_crossCorrDiff`) through the `−2` model-basis Ricci
+trace `ricciModelTrace42`: the linear-in-difference curvature section `linearSection g₀ g₁ g₂` is the
+trace of the **once-`∇₀`-differentiated** connection-difference Koszul **difference arm**
+`∇₀ koszulTripleDiff` minus the trace of the once-`∇₀`-differentiated **cross arm**
+`∇₀ crossCorrTripleDiff`.  This is the pointwise reconciliation `ricciNeg2SectionDiffLinearEval =`
+trace of `∇₀` of the lowered combination (the docstring-target), promoted to the section level.  Its
+body is `sorry`: the genuine linearized-Ricci principal-part covariant section identity. -/
+theorem linearSection_eq_ricciModelTrace42_koszulTriple_sub_crossCorrTriple
+    (g₀ : SmoothRiemannianMetric I M) (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+    (g₁ g₂ : SmoothRiemannianMetric I M)
+    (hr1 : ∀ (x : M) (v w : TangentSpace I x),
+      g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w)
+    (hr2 : ∀ (x : M) (v w : TangentSpace I x),
+      g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) :
+    linearSection (I := I) g₀ g₁ g₂ =
+      (ricciModelTrace42 (I := I) g₀).op 0
+          (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+            (koszulTripleDiff (I := I) g₀ T₁ T₂))
+        - (ricciModelTrace42 (I := I) g₀).op 0
+          (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+            (crossCorrTripleDiff (I := I) g₀ T₁ T₂ g₁ g₂)) :=
+  sorry
+
+/-- **The linearized-Ricci principal-part section identity: `linearSection` as a parallel model-basis
+Ricci trace of the *once-covariantly-differentiated* connection-difference Koszul combination.**  There
+is a **parallel rank-reducing `(0, 4) → (0, 2)` contraction** `Φ` (the `−2` model-basis Ricci trace
+`g₀^{ij}·`, parallel because `∇₀ g₀⁻¹ = 0`, value-local because it reads only the fibre), **fibrewise
+`ℝ`-linear** (so it distributes over the section difference), with the linear-in-difference curvature
+section `linearSection g₀ g₁ g₂` equal to the trace of the **once-`∇₀`-differentiated**
+connection-difference Koszul **difference arm** minus the trace of the once-`∇₀`-differentiated **cross
+arm**:
 ```
 linearSection g₀ g₁ g₂ = Φ.op 0 (∇₀ koszulTripleDiff) − Φ.op 0 (∇₀ crossCorrTripleDiff),
 ```
-where `∇₀ · = covGrad g₀ 0 3 ·`,
-`koszulTripleDiff = R + permute (swap 0 1) R − permute c[0,2,1] R`,
-`R := covGrad g₀ 0 2 (realizeSymmCcTensor g₀ (T₁ − T₂))`, and
-`crossCorrTripleDiff = 2·crossCorrectionSection g₁ g₀ T₁ − 2·crossCorrectionSection g₂ g₀ T₂`.
+where `∇₀ · = covGrad g₀ 0 3 ·`.  Carrying the trace on the **once-differentiated** rank-`4`
+`∇₀ koszulTripleDiff` supplies the missing derivative (`∇^{j+1} R = ∇^{j+2} w`) that the refuted
+value-local `(0, 3) → (0, 2)` form was one short of.
 
-**Why the second covariant derivative (the order correction that repairs the refuted first-order
-form).**  `linearSection`'s fibre value is the `−2` model-basis Ricci trace of the antisymmetrised
-`∇₀`-of-connection-difference summand difference `ricciDiffLinearSummand g₁ − ricciDiffLinearSummand g₂`
-(`ricciNeg2SectionDiffLinearEval`, `SegmentMetricCurvatureDifferenceOpDecomposition.lean:190`), and
-`ricciDiffLinearSummand = covDerivDiff = ∇₀ D` with `D = connDiff gₖ g₀` the connection difference — i.e.
-`linearSection` is the Ricci trace of a **second**-order object in the perturbation
-(`∇₀ D ≈ ∇₀∇₀ h`).  By the two-metric cocycle and the M1/M2 lowered-Koszul form
-(`connDiffDiff_g0_lowered_koszul_diffFactor`) the `g₀`-lowered connection difference of the difference is
-`2·loweredConnDiffSection g₁ g₀ − 2·loweredConnDiffSection g₂ g₀`, whose fibre is the difference arm
-`koszulTripleDiff` (the three slot readings of `R = ∇₀ w`) minus the cross arm `crossCorrTripleDiff`
-(the docstring-target reconciliation `ricciNeg2SectionDiffLinearEval_g0_lowered_koszul`).  The
-linear summand is the *covariant derivative* `∇₀` of that lowered combination, so `linearSection` is the
-trace of `∇₀(koszulTripleDiff − crossCorrTripleDiff)`, a rank-`4` object.  A value-local trace of the
-rank-`3` `koszulTripleDiff` (the `∇w`-level, `R = ∇₀ w`) reaches only `∇^{j+1} w` at order `j`, **one
-derivative short** of the `∇^{j+2} w` the linear part genuinely carries — which is exactly why the
-earlier `(0, 3) → (0, 2)` value-local form (a single value-local trace, no derivative) was *false* as a
-representation of `linearSection`.  Carrying the trace on the **once-differentiated** rank-`4`
-`∇₀ koszulTripleDiff` supplies the missing derivative (`∇^{j+1} R = ∇^{j+2} w`).
-
-The contraction `Φ` is the `−2` model-basis Ricci trace, depending **only on the background `g₀`**
-(`g₀^{ij}·`); the section identity holds for **every** realizing pair `g₁, g₂` of perturbations
-`T₁, T₂` over `g₀`.
+**Decomposition.**  Assembled from the model-basis Ricci-trace instance `ricciModelTrace42` (witness),
+its linearity `ricciModelTrace42_op_sub`, and the value identity
+`linearSection_eq_ricciModelTrace42_koszulTriple_sub_crossCorrTriple` (the lift of the once-differentiated
+pointwise lowered-Koszul form to the section trace, over the proven child-A
+`loweredConnDiffSection_sub_eq_koszulRealizeDiff_sub_crossCorrDiff`).
 
 **Non-vacuity.**  `Φ` is a *genuine* parallel contraction (its `kappa` envelope rejects the degenerate
 zero witness whenever `op a R ≠ 0`), and the right-hand side genuinely carries the once-differentiated
-rank-`4` jet `∇₀ koszulTripleDiff` (so a degenerate trace falsifies it whenever the linear part is
-present); `linearSection` genuinely vanishes only at `g₁ = g₂` (`linearSection_self_toModel`).  Its body
-is `sorry`: the genuine linearized-Ricci principal-part covariant section identity (the parallel
-model-basis Ricci-trace `(0, 4) → (0, 2)` contraction and the lift of the once-differentiated pointwise
-lowered-Koszul form to the section trace). -/
+rank-`4` jet `∇₀ koszulTripleDiff`; `linearSection` genuinely vanishes only at `g₁ = g₂`
+(`linearSection_self_toModel`). -/
 theorem exists_parallelTrace_linearSection_eq_koszulTriple_sub_crossCorrTriple
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ Φ : Integral.Connection.ParallelRankReducingContraction (I := I) (M := M) g₀ 4 2,
@@ -171,7 +199,11 @@ theorem exists_parallelTrace_linearSection_eq_koszulTriple_sub_crossCorrTriple
                 (koszulTripleDiff (I := I) g₀ T₁ T₂))
               - Φ.op 0 (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
                 (crossCorrTripleDiff (I := I) g₀ T₁ T₂ g₁ g₂)) :=
-  sorry
+  ⟨ricciModelTrace42 (I := I) g₀,
+    fun a A B => ricciModelTrace42_op_sub (I := I) g₀ a A B,
+    fun T₁ T₂ g₁ g₂ hr1 hr2 =>
+      linearSection_eq_ricciModelTrace42_koszulTriple_sub_crossCorrTriple (I := I) g₀ T₁ T₂ g₁ g₂
+        hr1 hr2⟩
 
 /-- **(POSIT — the connection-level top/rest split of the traced once-differentiated cross-correction
 difference.)**  For any parallel rank-reducing `(0, 4) → (0, 2)` contraction `Φ` (the model-basis Ricci
