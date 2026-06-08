@@ -2,6 +2,9 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemain
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.IntegratedOrder2WeitzenbockCurvature
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradCovDerivSecondOrderCommutation
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.BareSlot0CurryParseval
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.CovGradBundleEquivFiberNormFrameSum
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.SecondOrderCommutationResidueFiberBound
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformProportionalCurvatureSup
 
 /-!
 # The per-direction third-order cancellation of the moving-frame frame summand
@@ -69,8 +72,9 @@ All fibre norms are the intrinsic Riemannian fibre norm `riemannianFiberNormSq` 
 
 noncomputable section
 
+set_option backward.isDefEq.respectTransparency false
 set_option linter.style.setOption false
-set_option synthInstance.maxHeartbeats 800000
+set_option synthInstance.maxHeartbeats 1200000
 set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
@@ -92,6 +96,74 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+/-- **Uniform-over-`M` rank-`s` proportional curvature-operator fibre bound.** The supremum over the
+compact `M` of the continuous per-point proportional curvature envelope
+`exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional`: a single nonnegative
+constant `Csup` with, for every point `x`, tangent vectors `v, w`, and `(0, s)`-tensor `T`,
+`rfns(R_x(v, w) T)(x) ≤ Csup · g(v, v) · g(w, w) · rfns(T)(x)`. It is the rank-`s` curvature
+operator's base-point-uniform proportional fibre constant. -/
+private lemma exists_uniform_riemannOp_tensorCov_proportional_local
+    (g : SmoothRiemannianMetric I M) (s : ℕ) :
+    ∃ Csup : ℝ, 0 ≤ Csup ∧
+      ∀ (x : M) (v w : TangentSpace I x) (T : TensorRSSpace 0 s I x),
+        riemannianFiberNormSq (I := I) (M := M) g 0 s x
+            (riemannOp (tensorCov (I := I) g 0 s) x v w T) ≤
+          Csup * g.inner x v v * g.inner x w w *
+            riemannianFiberNormSq (I := I) (M := M) g 0 s x T := by
+  classical
+  obtain ⟨Ccurv, hCcurv_cont, hCcurv_nonneg, hCcurv_bound⟩ :=
+    exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional (I := I) (M := M) g s
+  have hCpt := (isCompact_univ (X := M)).image hCcurv_cont
+  obtain ⟨C₀, hC₀⟩ := hCpt.bddAbove
+  refine ⟨max C₀ 0, le_max_right _ _, fun x v w T => ?_⟩
+  have hCcurv_le : Ccurv x ≤ max C₀ 0 :=
+    le_trans (hC₀ ⟨x, Set.mem_univ _, rfl⟩) (le_max_left _ _)
+  have hvv_nn : 0 ≤ g.inner x v v := by
+    rcases eq_or_ne v 0 with hv0 | hv0
+    · rw [hv0]; simp
+    · exact (g.pos x v hv0).le
+  have hww_nn : 0 ≤ g.inner x w w := by
+    rcases eq_or_ne w 0 with hw0 | hw0
+    · rw [hw0]; simp
+    · exact (g.pos x w hw0).le
+  have hfactor_nonneg :
+      0 ≤ g.inner x v v * g.inner x w w *
+        riemannianFiberNormSq (I := I) (M := M) g 0 s x T :=
+    mul_nonneg (mul_nonneg hvv_nn hww_nn)
+      (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x T)
+  calc
+    riemannianFiberNormSq (I := I) (M := M) g 0 s x
+        (riemannOp (tensorCov (I := I) g 0 s) x v w T)
+        ≤ Ccurv x * g.inner x v v * g.inner x w w *
+            riemannianFiberNormSq (I := I) (M := M) g 0 s x T :=
+          hCcurv_bound x v w T
+    _ = Ccurv x * (g.inner x v v * g.inner x w w *
+            riemannianFiberNormSq (I := I) (M := M) g 0 s x T) := by ring
+    _ ≤ max C₀ 0 * (g.inner x v v * g.inner x w w *
+            riemannianFiberNormSq (I := I) (M := M) g 0 s x T) :=
+          mul_le_mul_of_nonneg_right hCcurv_le hfactor_nonneg
+    _ = max C₀ 0 * g.inner x v v * g.inner x w w *
+            riemannianFiberNormSq (I := I) (M := M) g 0 s x T := by ring
+
+/-- **The bridge from the per-direction covariant derivative to the slot-`0` reading of the gradient.**
+The directional covariant derivative `(tensorCov g 0 s).toFun (S.toSection) x v = ∇_v S(x)` is the
+slot-`0` reading of the gradient `∇S = covGrad g 0 s S` along `v`:
+```
+(tensorCov g 0 s).toFun (S.toSection) x v =
+  ((covGradBundleEquiv 0 s x).symm ((covGrad g 0 s S).toSection x)) v.
+```
+Both sides are `tensorRSCovariantDerivative I M 0 s (LeviCivita g) (S.toSection) x v`: the left by
+definition of `tensorCov`, the right by the pointwise gradient formula `covGrad_toSection_apply` after
+applying `(covGradBundleEquiv 0 s x).symm`. -/
+private lemma tensorCov_toFun_eq_covGradBundleEquiv_symm_reading
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
+    (v : TangentSpace I x) :
+    (tensorCov (I := I) g 0 s).toFun (fun y : M => S.toSection y) x v =
+      ((covGradBundleEquiv (I := I) (M := M) 0 s x).symm
+        ((covGrad (I := I) (M := M) g 0 s S).toSection x)) v := by
+  rw [covGrad_toSection_apply (I := I) (M := M) g 0 s S x,
+    ContinuousLinearEquiv.symm_apply_apply]
 
 /-- **Posited per-direction moving-frame commutator fibre order (the genuine `∇³S`-cancellation
 content).** For a closed smooth Riemannian manifold `(M, g)` there is a *valence-dependent* nonnegative
@@ -138,9 +210,24 @@ for every direction `i`, hence `remDiffFib g s S x i = 0`, hence the frame sum
 vanish for every `S` — false on a non-flat manifold. Already at `s = 0` the scalar commutator defect
 `Curv f = Ric(∇f, ·)` integrated is nonzero for a non-harmonic `f` on a curved manifold
 (`weitzenbock_integrated_covGrad_l2_normSq`), and `remDiffFib` genuinely uses `S` through its
-`∇²_{Bᵢ, Bᵢ}(∇S)` top-order term. So `C` is genuinely positive. The body is `sorry` (the genuine
-classical iterated-Ricci `∇³S`-cancellation content: the curvature-residue uniform fibre sups of the
-commutation identity); consumers transitively depend on `sorryAx`. -/
+`∇²_{Bᵢ, Bᵢ}(∇S)` top-order term. So `C` is genuinely positive.
+
+**Proof (slot-`0` Parseval reconstruction over the sorry-free commutation identity).** This is now proved
+by composition over the strictly-smaller posited curvature-residue frontier
+`exists_secondOrderResidue_frameSum_fiberOrder_bound` (`SecondOrderCommutationResidueFiberBound`, the
+genuine `∇³S`-cancellation content: the residue surviving the iterated Ricci identity). Building a
+`g_x`-orthonormal slot-`0` witness frame `e`, the bare-curry slot-`0` Parseval decomposition
+`riemannianFiberNormSq_succ_eq_sum_bareSlot0Curry_of_orthoFrame` reads the intrinsic `(0, s + 1)` fibre
+norm of `remDiffFib g s S x i` as the frame-sum of the slot-`s` fibre norms of the `tensor0SAsRS`-wrapped
+bare curries of its unit-evaluation. Each such bare curry along `e a` is the slot-`0` curry of the
+difference `Aᵢ − Dᵢ` of the two frame summands (`remDiffFib` is *definitionally* this difference,
+`ContinuousLinearMap.sub_apply` + the curry continuous-linear-equivalence `map_sub`), which is the
+curvature residue `secondOrderResidue g s S x i (smoothExtensionTangent x (e a))` by the sorry-free
+rank-generic second-order leading-slot commutation `covGrad_covDeriv_leadingSlot_secondOrder_commutation`
+(via `secondOrderResidue_eq_curry_remDiffFib_unit`, with the slot-`0` direction realised as the smooth
+extension `smoothExtensionTangent x (e a)`, `smoothExtensionTangent_eq` giving its value `e a` at `x`).
+The posited residue fibre order then bounds the frame-sum by `(C s)² · (rfns(∇²S) + rfns(∇S) + rfns(S))`.
+Consumers transitively depend on the posited residue frontier's `sorryAx`. -/
 theorem exists_remDiffFib_fiberOrder_bound
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℕ → ℝ, (∀ s, 0 ≤ C s) ∧
@@ -154,7 +241,67 @@ theorem exists_remDiffFib_fiberOrder_bound
               riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
                   ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
               riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) := by
-  sorry
+  classical
+  obtain ⟨C, hC_nn, hC⟩ := exists_secondOrderResidue_frameSum_fiberOrder_bound (I := I) (M := M) g
+  refine ⟨C, hC_nn, fun s S x i => ?_⟩
+  -- Build the `stdOrthonormalBasis` slot-`0` witness frame at `x`.
+  let cd : InnerProductSpace.Core ℝ (TangentSpace I x) := g.toRiemannianMetric.toCore x
+  have hcont : ContinuousAt (fun v : TangentSpace I x => cd.inner v v) 0 :=
+    g.toRiemannianMetric.continuousAt x
+  have hbnd : Bornology.IsVonNBounded ℝ {v : TangentSpace I x |
+      RCLike.re (cd.inner v v) < 1} :=
+    g.toRiemannianMetric.isVonNBounded x
+  letI nag : NormedAddCommGroup (TangentSpace I x) :=
+    cd.toNormedAddCommGroupOfTopology hcont hbnd
+  letI ips : InnerProductSpace ℝ (TangentSpace I x) :=
+    InnerProductSpace.ofCoreOfTopology cd hcont hbnd
+  set n : ℕ := Module.finrank ℝ (TangentSpace I x) with hn_def
+  set eob : OrthonormalBasis (Fin n) ℝ (TangentSpace I x) := stdOrthonormalBasis ℝ _ with heob_def
+  set e : Fin n → TangentSpace I x := fun i => eob i with he_def
+  have hinner_eq : ∀ u v : TangentSpace I x, (inner ℝ u v : ℝ) = g.inner x u v := fun u v => rfl
+  have horth : ∀ a b : Fin n, g.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0 := by
+    intro a b
+    have horthb : Orthonormal ℝ (fun i : Fin n => eob i) := eob.orthonormal
+    have hite := (orthonormal_iff_ite (𝕜 := ℝ) (E := TangentSpace I x)).mp horthb a b
+    rw [he_def, ← hinner_eq (eob a) (eob b)]
+    exact hite
+  -- The bare-curry slot-`0` Parseval decomposition of `remDiffFib` in the frame `e`.
+  rw [riemannianFiberNormSq_succ_eq_sum_bareSlot0Curry_of_orthoFrame (I := I) (M := M) g s x
+    (remDiffFib (I := I) (M := M) g s S x i) e hn_def horth]
+  -- Each bare curry slice equals the curvature residue at `w := smoothExtensionTangent x (e a)`.
+  have hslice : ∀ a : Fin n,
+      tensor0S_curry (I := I) (M := M) s x
+          ((remDiffFib (I := I) (M := M) g s S x i :
+            Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x)
+            (unitZeroSec (I := I) (M := M) x)) (e a) =
+        secondOrderResidue (I := I) (M := M) g s S x i
+          (smoothExtensionTangent (I := I) x (e a)) := by
+    intro a
+    -- The commutation identity at the smooth extension `w := smoothExtensionTangent x (e a)`.
+    have hcomm := secondOrderResidue_eq_curry_remDiffFib_unit (I := I) (M := M) g s S x i
+      (smoothExtensionTangent_contMDiff (I := I) x (e a))
+    -- Its value at `x` is `e a`, simplifying the slot-`0` reading direction.
+    rw [smoothExtensionTangent_eq (I := I) x (e a)] at hcomm
+    -- `remDiffFib = Aᵢ − Dᵢ`; the unit-evaluation and the curry distribute over the difference.
+    rw [show (remDiffFib (I := I) (M := M) g s S x i :
+          Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x) =
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+          tensorSecondCovDeriv (I := I) g 0 (s + 1)
+            (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i)
+            (fun y : M => (covGrad (I := I) (M := M) g 0 s S).toSection y) x) -
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+          covGradBundleEquiv (I := I) (M := M) 0 s x
+            ((tensorCov (I := I) g 0 s).toFun
+              (fun y : M => tensorSecondCovDeriv (I := I) g 0 s
+                (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i)
+                (fun z : M => S.toSection z) y) x)) from rfl]
+    rw [ContinuousLinearMap.sub_apply]
+    rw [map_sub (tensor0S_curry (I := I) (M := M) s x)]
+    rw [ContinuousLinearMap.sub_apply]
+    exact hcomm
+  -- Replace each slice and apply the posited residue fibre order.
+  rw [Finset.sum_congr rfl (fun a (_ : a ∈ Finset.univ) => by rw [hslice a])]
+  exact hC s S x i e hn_def horth
 
 /-- **Posited per-direction pure-Riemann curvature fibre order.** For a closed smooth Riemannian
 manifold `(M, g)` there is a *valence-dependent* nonnegative constant `C : ℕ → ℝ` such that, at every
@@ -205,7 +352,84 @@ theorem exists_remDiffGenuineFib_fiberOrder_bound
               riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
                   ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
               riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) := by
-  sorry
+  classical
+  -- The uniform rank-`s` curvature sup family.
+  choose Csup hCsup_nn hCsup using fun s =>
+    exists_uniform_riemannOp_tensorCov_proportional_local (I := I) (M := M) g s
+  refine ⟨fun s => Real.sqrt ((Module.finrank ℝ E : ℝ) * Csup s),
+    fun s => Real.sqrt_nonneg _, fun s S x i => ?_⟩
+  set A : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+      ((covGrad (I := I) (M := M) g 0 (s + 1)
+        (covGrad (I := I) (M := M) g 0 s S)).toSection x) with hA
+  set B : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+      ((covGrad (I := I) (M := M) g 0 s S).toSection x) with hB
+  set D : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) with hD
+  have hA_nn : 0 ≤ A := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1 + 1) x _
+  have hB_nn : 0 ≤ B := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x _
+  have hD_nn : 0 ≤ D := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x _
+  -- The per-direction genuine fibre is the slot-`0` uncurry of the curvature-direction CLM.
+  have hfib : remDiffGenuineFib (I := I) (M := M) g s S x i =
+      covGradBundleEquiv (I := I) (M := M) 0 s x
+        (remDiffGenuineDirCLM (I := I) (M := M) g s S x i) := rfl
+  rw [hfib]
+  -- The squared constant.
+  have hCsq : (Real.sqrt ((Module.finrank ℝ E : ℝ) * Csup s)) ^ 2 =
+      (Module.finrank ℝ E : ℝ) * Csup s := by
+    rw [Real.sq_sqrt]
+    exact mul_nonneg (by positivity) (hCsup_nn s)
+  rw [hCsq]
+  -- Per-direction unit-direction fibre bound on the curvature contraction.
+  have hbound : ∀ v : TangentSpace I x, g.inner x v v = 1 →
+      riemannianFiberNormSq (I := I) (M := M) g 0 s x
+          (remDiffGenuineDirCLM (I := I) (M := M) g s S x i v) ≤ Csup s * B := by
+    intro v hv
+    -- Unfold the CLM to its curvature-contraction value.
+    have hval : remDiffGenuineDirCLM (I := I) (M := M) g s S x i v =
+        riemannOp (tensorCov (I := I) g 0 s) x (smoothOrthoFrame (I := I) g x i x) v
+          ((covGradBundleEquiv (I := I) (M := M) 0 s x).symm
+            ((covGrad (I := I) (M := M) g 0 s S).toSection x)
+            (smoothOrthoFrame (I := I) g x i x)) := by
+      rw [remDiffGenuineDirCLM, LinearMap.coe_toContinuousLinearMap', remDiffGenuineDirLM,
+        LinearMap.coe_mk, AddHom.coe_mk]
+      rw [show covApply (tensorCov (I := I) g 0 s) (smoothOrthoFrame (I := I) g x i)
+            (fun y : M => S.toSection y) x =
+          (tensorCov (I := I) g 0 s).toFun (fun y : M => S.toSection y) x
+            (smoothOrthoFrame (I := I) g x i x) from rfl,
+        tensorCov_toFun_eq_covGradBundleEquiv_symm_reading (I := I) (M := M) g s S x
+          (smoothOrthoFrame (I := I) g x i x)]
+    rw [hval]
+    -- The orthonormality scalars at the centre frame are `1`.
+    have hgB : g.inner x (smoothOrthoFrame (I := I) g x i x)
+        (smoothOrthoFrame (I := I) g x i x) = 1 := by
+      have := smoothOrthoFrame_orthonormal_at_center (I := I) g x i i; rwa [if_pos rfl] at this
+    -- The curvature sup bound on the contraction.
+    have hcurv := hCsup s x (smoothOrthoFrame (I := I) g x i x) v
+      ((covGradBundleEquiv (I := I) (M := M) 0 s x).symm
+        ((covGrad (I := I) (M := M) g 0 s S).toSection x)
+        (smoothOrthoFrame (I := I) g x i x))
+    rw [hgB, hv, mul_one, mul_one] at hcurv
+    refine le_trans hcurv ?_
+    -- The slot-`0` reading of the gradient along the centre frame is dominated by `rfns(∇S) = B`.
+    have hread : riemannianFiberNormSq (I := I) (M := M) g 0 s x
+        ((covGradBundleEquiv (I := I) (M := M) 0 s x).symm
+          ((covGrad (I := I) (M := M) g 0 s S).toSection x)
+          (smoothOrthoFrame (I := I) g x i x)) ≤ B := by
+      rw [hB]
+      exact riemannianFiberNormSq_covGradBundleEquiv_symm_reading_le (I := I) (M := M) g s x
+        ((covGrad (I := I) (M := M) g 0 s S).toSection x) (smoothOrthoFrame (I := I) g x)
+        (fun a b => smoothOrthoFrame_orthonormal_at_center (I := I) g x a b) i
+    exact mul_le_mul_of_nonneg_left hread (hCsup_nn s)
+  -- Lift the per-direction bound to the full fibre norm via the frame-sum engine.
+  refine le_trans
+    (riemannianFiberNormSq_covGradBundleEquiv_le_card_mul (I := I) (M := M) g s x
+      (remDiffGenuineDirCLM (I := I) (M := M) g s S x i) (Csup s * B) hbound) ?_
+  -- `finrank · (Csup · B) = (finrank · Csup) · B ≤ (finrank · Csup) · (A + B + D)`.
+  have hfr_nn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := by positivity
+  calc (Module.finrank ℝ E : ℝ) * (Csup s * B)
+      = (Module.finrank ℝ E : ℝ) * Csup s * B := by ring
+    _ ≤ (Module.finrank ℝ E : ℝ) * Csup s * (A + B + D) := by
+        refine mul_le_mul_of_nonneg_left ?_ (mul_nonneg hfr_nn (hCsup_nn s))
+        nlinarith [hA_nn, hD_nn]
 
 end Connection
 end Integral
