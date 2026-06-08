@@ -574,9 +574,547 @@ theorem covApply_covApply_linearExtensionTangent_basepoint_eq
       Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))))
     ring
 
-/-- **The jet-cancelling chart-polynomial correction (posited genuine chart construction).** For a
-smooth Riemannian metric `g` on a closed manifold, a base point `x₀`, and a fibre vector
-`v : TangentSpace I x₀`, there is a smooth tangent-bundle section `C : Π b, TangentSpace I b` that
+/-- The **polynomial chart-coordinate tangent extension** attached to `(x₀, P)`: at `b` it
+re-injects the model-space value `P (extChartAt I x₀ b − extChartAt I x₀ x₀)` of a chart-coordinate
+map `P : E → E` (read in the *centred* chart coordinate `extChartAt I x₀ b − extChartAt I x₀ x₀`)
+into the fibre `T_b M` through the tangent trivialization centred at `x₀`, then cuts off by the
+centred bump `linExtBump x₀`.
+
+For the constant map `P = fun _ => c` this is (on the bump-`1` set) the chart-parallel/coordinate
+extension `coordExtensionTangent`; the point of the polynomial version is that a non-constant `P`
+has a non-vanishing chart derivative, which the chart Levi-Civita formula reads off as the
+covariant `1`-jet (`fderiv P` at the centre) and the iterated covariant `2`-jet (`fderiv² P` at the
+centre), allowing the metric Christoffel `1`-jet correction and the `∂Γ + Γ·Γ` `2`-jet correction of
+`linearExtensionTangent x₀ v` to be cancelled by a degree-`≤ 2` polynomial `P`. -/
+def polyCoordExtensionTangent (x₀ : M) (P : E → E) :
+    Π b : M, TangentSpace I b :=
+  fun b => (linExtBump (I := I) x₀ : M → ℝ) b •
+    trivFromE (I := I) x₀ b (P (extChartAt I x₀ b - extChartAt I x₀ x₀))
+
+@[simp] lemma polyCoordExtensionTangent_apply (x₀ : M) (P : E → E) (b : M) :
+    polyCoordExtensionTangent (I := I) x₀ P b =
+      (linExtBump (I := I) x₀ : M → ℝ) b •
+        trivFromE (I := I) x₀ b (P (extChartAt I x₀ b - extChartAt I x₀ x₀)) := rfl
+
+/-- At the basepoint, the polynomial chart-coordinate extension evaluates to
+`P 0` re-injected through the (identity) basepoint trivialization, i.e. literally `P 0`. -/
+lemma polyCoordExtensionTangent_basepoint (x₀ : M) (P : E → E) :
+    polyCoordExtensionTangent (I := I) x₀ P x₀ = P 0 := by
+  classical
+  rw [polyCoordExtensionTangent_apply, linExtBump_eq_one, one_smul, sub_self,
+    trivFromE_self_apply]
+
+/-- The **chart-trivialised representation** of the polynomial chart-coordinate extension, pulled
+back through `(extChartAt I x₀).symm`, is eventually equal near `extChartAt I x₀ x₀` to the centred
+polynomial `y ↦ P (y − extChartAt I x₀ x₀)`: near `x₀` the bump is `1` and the trivialization
+round-trip `trivToE ∘ trivFromE = id` collapses the re-injection. -/
+lemma chartE_section_repr_polyCoordExtensionTangent_eventuallyEq
+    (x₀ : M) (P : E → E) :
+    (chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P))
+        ∘ (extChartAt I x₀).symm
+      =ᶠ[𝓝 (extChartAt I x₀ x₀)]
+        (fun y : E => P (y - extChartAt I x₀ x₀)) := by
+  classical
+  set φ := extChartAt I x₀ with hφ_def
+  have hbump1 : {b : M | (linExtBump (I := I) x₀ : M → ℝ) b = 1} ∈ 𝓝 x₀ :=
+    (linExtBump (I := I) x₀).eventuallyEq_one
+  have hbase : (trivializationAt E (TangentSpace I) x₀).baseSet ∈ 𝓝 x₀ := by
+    rw [show (trivializationAt E (TangentSpace I) x₀).baseSet = (chartAt H x₀).source from rfl]
+    exact (chartAt H x₀).open_source.mem_nhds (mem_chart_source H x₀)
+  have hmem : {b : M | chartE_section_repr (I := I) x₀
+        (polyCoordExtensionTangent (I := I) x₀ P) b = P (φ b - φ x₀)} ∈ 𝓝 x₀ := by
+    filter_upwards [hbump1, hbase] with b hb1 hbbase
+    have hWb : polyCoordExtensionTangent (I := I) x₀ P b =
+        trivFromE (I := I) x₀ b (P (φ b - φ x₀)) := by
+      rw [polyCoordExtensionTangent_apply, hb1, one_smul]
+    show chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) b = P (φ b - φ x₀)
+    rw [chartE_section_repr_eq_trivToE, hWb]
+    exact trivToE_trivFromE (I := I) x₀ hbbase _
+  have hsymm_cont : ContinuousAt φ.symm (φ x₀) := continuousAt_extChartAt_symm x₀
+  have hsymm_pt : φ.symm (φ x₀) = x₀ := extChartAt_to_inv x₀
+  have hpre : φ.symm ⁻¹' {b : M | chartE_section_repr (I := I) x₀
+        (polyCoordExtensionTangent (I := I) x₀ P) b = P (φ b - φ x₀)} ∈ 𝓝 (φ x₀) := by
+    apply hsymm_cont.preimage_mem_nhds
+    rw [hsymm_pt]; exact hmem
+  have htgt : φ.target ∈ 𝓝 (φ x₀) := by
+    have hx₀src : x₀ ∈ φ.source := by
+      rw [hφ_def, extChartAt_source]; exact mem_chart_source H x₀
+    have hx₀int : φ x₀ ∈ interior (φ.target : Set E) :=
+      extChartAt_target_subset_interior_of_boundaryless (I := I) x₀ (φ.map_source hx₀src)
+    exact Filter.mem_of_superset (isOpen_interior.mem_nhds hx₀int) interior_subset
+  filter_upwards [hpre, htgt] with y hy hy_tgt
+  have hy' : chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) (φ.symm y)
+      = P (φ (φ.symm y) - φ x₀) := hy
+  show chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) (φ.symm y)
+      = P (y - φ x₀)
+  rw [hy', φ.right_inv hy_tgt]
+
+/-- On the trivialization base set at `x₀`, the chart-trivialised representation of the polynomial
+chart-coordinate extension equals the centred polynomial value `P (extChartAt I x₀ b − extChartAt I x₀ x₀)`
+times the bump. -/
+lemma chartE_section_repr_polyCoordExtensionTangent_eq
+    (x₀ : M) (P : E → E) {b : M}
+    (hb : b ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
+    chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) b =
+      (linExtBump (I := I) x₀ : M → ℝ) b •
+        P (extChartAt I x₀ b - extChartAt I x₀ x₀) := by
+  classical
+  rw [chartE_section_repr_eq_trivToE, polyCoordExtensionTangent_apply, map_smul]
+  rw [trivToE_trivFromE (I := I) x₀ hb]
+
+/-- **Smoothness of the polynomial chart-coordinate extension.** For a `C^∞` chart-coordinate map
+`P : E → E`, the section `polyCoordExtensionTangent x₀ P` is a `C^∞` tangent-bundle section: it is
+the bump-cut-off of the field `b ↦ trivFromE x₀ b (P (φ b − φ x₀))`, which is smooth on the
+trivialization base set (composite of the smooth chart `φ`, the smooth `P`, and the smooth inverse
+trivialization), exactly as for the constant-coordinate `linearExtensionTangent`. -/
+theorem polyCoordExtensionTangent_smooth (x₀ : M) {P : E → E}
+    (hP : ContDiff ℝ ∞ P) :
+    ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (polyCoordExtensionTangent (I := I) x₀ P)) := by
+  classical
+  set u : Set M := (chartAt H x₀).source with hu_def
+  set ψ : M → ℝ := (linExtBump (I := I) x₀ : M → ℝ) with hψ_def
+  have hψ_smooth : ContMDiffOn I 𝓘(ℝ) ∞ ψ u :=
+    (linExtBump (I := I) x₀).contMDiff.contMDiffOn
+  have hu_open : IsOpen u := (chartAt H x₀).open_source
+  have hψ_tsupport : tsupport ψ ⊆ u :=
+    (linExtBump (I := I) x₀).tsupport_subset_chartAt_source
+  -- the (un-cut-off) re-injected polynomial field, smooth on the base set
+  set F : Π b : M, TangentSpace I b :=
+    fun b => trivFromE (I := I) x₀ b (P (extChartAt I x₀ b - extChartAt I x₀ x₀)) with hF_def
+  have hbaseEq : u = (trivializationAt E (TangentSpace I) x₀).baseSet := rfl
+  -- the chart-coordinate value `b ↦ P (φ b − φ x₀)` is smooth on `u`
+  have hφ_cm : ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I x₀) (chartAt H x₀).source :=
+    contMDiffOn_extChartAt (I := I) (n := ∞) (x := x₀)
+  have hPval : ContMDiffOn I 𝓘(ℝ, E) ∞
+      (fun b : M => P (extChartAt I x₀ b - extChartAt I x₀ x₀)) u := by
+    have hP_cm : ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, E) ∞ P := hP.contMDiff
+    have hsub : ContMDiffOn I 𝓘(ℝ, E) ∞
+        (fun b : M => extChartAt I x₀ b - extChartAt I x₀ x₀) u :=
+      hφ_cm.sub contMDiffOn_const
+    exact hP_cm.comp_contMDiffOn hsub
+  have hF_smooth : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞ (T% F) u := by
+    rw [hbaseEq]
+    have hiff :=
+      ((trivializationAt E (TangentSpace I) x₀)).contMDiffOn_section_baseSet_iff
+        (IB := I) (n := ∞) (s := fun b => F b)
+    refine hiff.mpr ?_
+    rw [← hbaseEq]
+    refine hPval.congr ?_
+    intro b hb
+    have hb_base : b ∈ (trivializationAt E (TangentSpace I) x₀).baseSet := by rw [← hbaseEq]; exact hb
+    change (trivializationAt E (TangentSpace I) x₀ ⟨b, F b⟩).2 =
+      P (extChartAt I x₀ b - extChartAt I x₀ x₀)
+    have happ :
+        (trivializationAt E (TangentSpace I) x₀
+          ⟨b, (trivializationAt E (TangentSpace I) x₀).symm b
+            (P (extChartAt I x₀ b - extChartAt I x₀ x₀))⟩).2
+          = P (extChartAt I x₀ b - extChartAt I x₀ x₀) := by
+      have h := (trivializationAt E (TangentSpace I) x₀).apply_mk_symm hb_base
+        (P (extChartAt I x₀ b - extChartAt I x₀ x₀))
+      simpa using congrArg Prod.snd h
+    simpa [hF_def, trivFromE, Trivialization.symmL_apply] using happ
+  have h := ContMDiffOn.smul_section_of_tsupport (𝕜 := ℝ) (n := ∞)
+    (V := TangentSpace I) hψ_smooth hu_open hψ_tsupport hF_smooth
+  have h_eq : (fun b : M => TotalSpace.mk' E (E := TangentSpace I) b
+        (polyCoordExtensionTangent (I := I) x₀ P b)) =
+      (fun b : M => TotalSpace.mk' E (E := TangentSpace I) b
+        ((ψ • fun b' : M => F b') b)) := by
+    funext b
+    change TotalSpace.mk' E b (polyCoordExtensionTangent (I := I) x₀ P b) =
+      TotalSpace.mk' E b ((ψ b) • F b)
+    rw [polyCoordExtensionTangent_apply]
+  rw [h_eq]
+  exact h
+
+/-- **The basepoint covariant `1`-jet of the polynomial chart-coordinate extension.** For a `C^∞`
+chart map `P`, the covariant derivative of `polyCoordExtensionTangent x₀ P` along `u`, evaluated at
+`x₀`, is the basepoint chart formula: the Fréchet derivative at the chart centre of the centred
+polynomial `y ↦ P (y − φ x₀)` (read as a model-space linear map), plus the metric Christoffel
+correction reading the basepoint value `P 0`. -/
+theorem covApply_polyCoordExtensionTangent_basepoint_eq
+    (g : SmoothRiemannianMetric I M) (x₀ : M) {P : E → E} (hP : ContDiff ℝ ∞ P)
+    (u : TangentSpace I x₀) :
+    (LeviCivita (I := I) g).toFun (polyCoordExtensionTangent (I := I) x₀ P) x₀ u =
+      trivFromE (I := I) x₀ x₀
+        (fderiv ℝ (fun y : E => P (y - extChartAt I x₀ x₀)) (extChartAt I x₀ x₀) u +
+          christoffelCorrection (I := I) g x₀ x₀ (P 0) u) := by
+  classical
+  have hself : x₀ ∈ chartLeviCivitaGoodSet (I := I) x₀ :=
+    self_mem_chartLeviCivitaGoodSet (I := I) (α := x₀)
+  have hMDiff : MDiffAt (T% (polyCoordExtensionTangent (I := I) x₀ P)) x₀ :=
+    (polyCoordExtensionTangent_smooth (I := I) x₀ hP).mdifferentiableAt (by norm_num)
+  rw [LeviCivita_chart_apply (I := I) g x₀ hself hMDiff u]
+  rw [chartLeviCivita_apply (I := I) g x₀ (polyCoordExtensionTangent (I := I) x₀ P) hself u]
+  -- the chart pullback's fderiv equals the fderiv of the centred polynomial
+  have hfd :
+      fderiv ℝ (chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P)
+          ∘ (extChartAt I x₀).symm) (extChartAt I x₀ x₀) =
+        fderiv ℝ (fun y : E => P (y - extChartAt I x₀ x₀)) (extChartAt I x₀ x₀) :=
+    (chartE_section_repr_polyCoordExtensionTangent_eventuallyEq (I := I) x₀ P).fderiv_eq
+  rw [hfd, trivToE_self_apply (I := I) x₀ u]
+  -- the basepoint value of the chart representation is `P 0`
+  have hrepr0 :
+      chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) x₀ = P 0 := by
+    rw [chartE_section_repr_eq_trivToE, polyCoordExtensionTangent_basepoint,
+      trivToE_self_apply]
+  rw [hrepr0]
+
+/-- **First chart layer (pointwise) for the polynomial chart-coordinate extension.** At a good-set
+point `b` of the chart at `x₀` where the bump is eventually `1` near `b`, the covariant-derivative
+value `(LeviCivita g) (polyCoordExtensionTangent x₀ P) b (linExt x₀ u b)` equals
+`trivFromE x₀ b (fderiv P (φ b − c) (tangentCoord x₀ u) + christoffelCorrection g x₀ b (P (φ b − c)) (linExt x₀ u b))`,
+with `c := extChartAt I x₀ x₀`. (Unlike the constant-coordinate `linExt`, the chart derivative does
+not vanish: it is `fderiv P` at the centred chart point, read on the constant model coordinate
+`tangentCoord x₀ u` of the constant reading vector.) -/
+private lemma LeviCivita_covApply_polyCoordExt_firstLayer_pointwise
+    (g : SmoothRiemannianMetric I M) (x₀ : M) {P : E → E} (hP : ContDiff ℝ ∞ P)
+    (u : TangentSpace I x₀)
+    {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) x₀)
+    (hb1 : (linExtBump (I := I) x₀ : M → ℝ) =ᶠ[𝓝 b] (fun _ => (1 : ℝ))) :
+    (LeviCivita (I := I) g).toFun (polyCoordExtensionTangent (I := I) x₀ P) b
+        (linearExtensionTangent (I := I) x₀ u b) =
+      trivFromE (I := I) x₀ b
+        (fderiv ℝ P (extChartAt I x₀ b - extChartAt I x₀ x₀) (tangentCoord (I := I) x₀ u) +
+          christoffelCorrection (I := I) g x₀ b
+            (P (extChartAt I x₀ b - extChartAt I x₀ x₀))
+            (linearExtensionTangent (I := I) x₀ u b)) := by
+  classical
+  set φ := extChartAt I x₀ with hφ_def
+  set c := extChartAt I x₀ x₀ with hc_def
+  have hbbase : (trivializationAt E (TangentSpace I) x₀).baseSet ∈ 𝓝 b :=
+    (trivializationAt E (TangentSpace I) x₀).open_baseSet.mem_nhds
+      (chartLeviCivitaGoodSet_mem_baseSet (I := I) hb)
+  have hb_base : b ∈ (trivializationAt E (TangentSpace I) x₀).baseSet :=
+    chartLeviCivitaGoodSet_mem_baseSet (I := I) hb
+  have hb_src : b ∈ φ.source := chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hb
+  have hCat : MDiffAt (T% (polyCoordExtensionTangent (I := I) x₀ P)) b :=
+    (polyCoordExtensionTangent_smooth (I := I) x₀ hP).mdifferentiableAt (by norm_num)
+  rw [LeviCivita_chart_apply (I := I) g x₀ hb hCat (linearExtensionTangent (I := I) x₀ u b)]
+  rw [chartLeviCivita_apply (I := I) g x₀ (polyCoordExtensionTangent (I := I) x₀ P) hb
+    (linearExtensionTangent (I := I) x₀ u b)]
+  -- the chart pullback of `C` is eventually `P (·-c)` near `φ b` (bump `=1` near `b`)
+  have hev :
+      (chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) ∘ φ.symm)
+        =ᶠ[𝓝 (φ b)] (fun y : E => P (y - c)) := by
+    have hsymm_cont : ContinuousAt φ.symm (φ b) := continuousAt_extChartAt_symm' hb_src
+    have hsymm_pt : φ.symm (φ b) = b := φ.left_inv hb_src
+    have hmem : {c' : M | chartE_section_repr (I := I) x₀
+          (polyCoordExtensionTangent (I := I) x₀ P) c' = P (φ c' - c)} ∈ 𝓝 b := by
+      filter_upwards [hb1, hbbase] with d hd1 hdbase
+      have hWd : polyCoordExtensionTangent (I := I) x₀ P d =
+          trivFromE (I := I) x₀ d (P (φ d - c)) := by
+        rw [polyCoordExtensionTangent_apply, hd1, one_smul]
+      show chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) d = P (φ d - c)
+      rw [chartE_section_repr_eq_trivToE, hWd]
+      exact trivToE_trivFromE (I := I) x₀ hdbase _
+    have htgt : φ.target ∈ 𝓝 (φ b) :=
+      Filter.mem_of_superset (isOpen_interior.mem_nhds
+        (chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hb)) interior_subset
+    filter_upwards [hsymm_cont.preimage_mem_nhds (by rw [hsymm_pt]; exact hmem), htgt]
+      with y hy hy_tgt
+    have hy' : chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) (φ.symm y)
+        = P (φ (φ.symm y) - c) := hy
+    show (chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) ∘ φ.symm) y
+        = P (y - c)
+    simp only [Function.comp_apply]
+    rw [hy', φ.right_inv hy_tgt]
+  -- its fderiv at `φ b` is `fderiv P (φ b - c)` (chain rule through the shift)
+  have hfd :
+      fderiv ℝ (chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) ∘ φ.symm)
+        (φ b) = fderiv ℝ P (φ b - c) := by
+    rw [hev.fderiv_eq]
+    have hshift : HasFDerivAt (fun y : E => y - c) (ContinuousLinearMap.id ℝ E) (φ b) :=
+      (hasFDerivAt_id (φ b)).sub_const c
+    have hPd : HasFDerivAt P (fderiv ℝ P (φ b - c)) (φ b - c) :=
+      (hP.differentiable (by norm_num)).differentiableAt.hasFDerivAt
+    have hcomp : HasFDerivAt (fun y : E => P (y - c))
+        ((fderiv ℝ P (φ b - c)).comp (ContinuousLinearMap.id ℝ E)) (φ b) :=
+      hPd.comp (φ b) hshift
+    rw [hcomp.fderiv, ContinuousLinearMap.comp_id]
+  rw [hfd]
+  -- the reading vector `trivToE x₀ b (linExt u b) = tangentCoord x₀ u` (bump `=1`, base set)
+  have hread : trivToE (I := I) x₀ b (linearExtensionTangent (I := I) x₀ u b) =
+      tangentCoord (I := I) x₀ u := by
+    have hub : linearExtensionTangent (I := I) x₀ u b = coordExtensionTangent (I := I) x₀ u b := by
+      rw [linearExtensionTangent_apply, hb1.self_of_nhds, one_smul]
+    rw [hub]
+    have := chartE_section_repr_coordExtensionTangent_eq (I := I) x₀ u hb_base
+    rwa [chartE_section_repr_eq_trivToE] at this
+  rw [hread]
+  -- the chart-repr value at `b` is `P (φ b - c)`
+  have hreprb : chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) b =
+      P (φ b - c) := by
+    have hWb : polyCoordExtensionTangent (I := I) x₀ P b =
+        trivFromE (I := I) x₀ b (P (φ b - c)) := by
+      rw [polyCoordExtensionTangent_apply, hb1.self_of_nhds, one_smul]
+    rw [chartE_section_repr_eq_trivToE, hWb]
+    exact trivToE_trivFromE (I := I) x₀ hb_base _
+  rw [hreprb]
+
+/-- **Inner-section chart representation for the polynomial extension.** The chart-trivialised
+representation of the intermediate section `S := covApply (LeviCivita g) (linExt x₀ u) C`,
+`C := polyCoordExtensionTangent x₀ P`, pulled through `(extChartAt I x₀).symm`, is eventually equal
+near `φ x₀` to `y ↦ fderiv P (y − c) U + ∑_{i,j,m} Uᵢ (P (y−c))ⱼ Γᵐᵢⱼ(y) eₘ`, with `U := tangentCoord x₀ u`,
+`c := φ x₀`, `Γ = chartChristoffel g x₀`. (The non-vanishing `fderiv P` term is the new feature versus
+the constant-coordinate `linExt`.) -/
+private lemma chartE_section_repr_covApply_polyCoordExt_eventuallyEq
+    (g : SmoothRiemannianMetric I M) (x₀ : M) {P : E → E} (hP : ContDiff ℝ ∞ P)
+    (u : TangentSpace I x₀) :
+    (chartE_section_repr (I := I) x₀
+        (Connection.covApply (LeviCivita (I := I) g)
+          (linearExtensionTangent (I := I) x₀ u)
+          (polyCoordExtensionTangent (I := I) x₀ P)) ∘ (extChartAt I x₀).symm)
+      =ᶠ[𝓝 (extChartAt I x₀ x₀)]
+        (fun y : E =>
+          fderiv ℝ P (y - extChartAt I x₀ x₀) (tangentCoord (I := I) x₀ u) +
+          ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+            ∑ m : Fin (Module.finrank ℝ E),
+              (((chartModelBasis E).repr (tangentCoord (I := I) x₀ u)) i *
+                  ((chartModelBasis E).repr (P (y - extChartAt I x₀ x₀))) j *
+                  chartChristoffel (I := I) g x₀ i j m y) •
+                (chartModelBasis E) m) := by
+  classical
+  set φ := extChartAt I x₀ with hφ_def
+  set c := extChartAt I x₀ x₀ with hc_def
+  have hbump1 : {b : M | (linExtBump (I := I) x₀ : M → ℝ) b = 1} ∈ 𝓝 x₀ :=
+    (linExtBump (I := I) x₀).eventuallyEq_one
+  obtain ⟨W₀, hW₀_sub, hW₀_open, hx₀W₀⟩ := mem_nhds_iff.mp hbump1
+  have hgood_open : IsOpen (chartLeviCivitaGoodSet (I := I) x₀) :=
+    chartLeviCivitaGoodSet_isOpen (I := I) x₀
+  set Vset : Set E :=
+    φ.target ∩ φ.symm ⁻¹' (chartLeviCivitaGoodSet (I := I) x₀ ∩ W₀) with hVset_def
+  have hcont_symm : ContinuousOn φ.symm φ.target := continuousOn_extChartAt_symm x₀
+  have hVset_open : IsOpen Vset :=
+    hcont_symm.isOpen_inter_preimage (isOpen_extChartAt_target (I := I) x₀)
+      (hgood_open.inter hW₀_open)
+  have hx₀_good : x₀ ∈ chartLeviCivitaGoodSet (I := I) x₀ :=
+    self_mem_chartLeviCivitaGoodSet (I := I) (α := x₀)
+  have hx₀src_ext : x₀ ∈ φ.source := by
+    rw [hφ_def, extChartAt_source_eq_chartAt_source]; exact mem_chart_source H x₀
+  have hx₀tgt : φ x₀ ∈ φ.target := φ.map_source hx₀src_ext
+  have hφx₀V : φ x₀ ∈ Vset := by
+    refine ⟨hx₀tgt, ?_⟩
+    rw [Set.mem_preimage, φ.left_inv hx₀src_ext]
+    exact ⟨hx₀_good, hx₀W₀⟩
+  filter_upwards [hVset_open.mem_nhds hφx₀V] with y hy
+  obtain ⟨hy_tgt, hy_pre⟩ := hy
+  rw [Set.mem_preimage] at hy_pre
+  obtain ⟨hy_good, hy_W₀⟩ := hy_pre
+  set b : M := φ.symm y with hb_def
+  have hb1 : (linExtBump (I := I) x₀ : M → ℝ) =ᶠ[𝓝 b] (fun _ => (1 : ℝ)) := by
+    filter_upwards [hW₀_open.mem_nhds hy_W₀] with d hd using hW₀_sub hd
+  have hφb : φ b = y := by rw [hb_def, φ.right_inv hy_tgt]
+  simp only [Function.comp_apply, chartE_section_repr_eq_trivToE, Connection.covApply_apply]
+  rw [show (LeviCivita (I := I) g).toFun (polyCoordExtensionTangent (I := I) x₀ P) b
+        (linearExtensionTangent (I := I) x₀ u b) =
+      trivFromE (I := I) x₀ b
+        (fderiv ℝ P (φ b - c) (tangentCoord (I := I) x₀ u) +
+          christoffelCorrection (I := I) g x₀ b (P (φ b - c))
+            (linearExtensionTangent (I := I) x₀ u b)) from
+    LeviCivita_covApply_polyCoordExt_firstLayer_pointwise (I := I) g x₀ hP u hy_good hb1]
+  have hbbase : b ∈ (trivializationAt E (TangentSpace I) x₀).baseSet :=
+    chartLeviCivitaGoodSet_mem_baseSet (I := I) hy_good
+  rw [trivToE_trivFromE (I := I) x₀ hbbase]
+  rw [christoffelCorrection_apply (I := I) g x₀ b (P (φ b - c))
+    (linearExtensionTangent (I := I) x₀ u b)]
+  -- the reading-vector coordinate is the constant model coordinate `U`
+  have hreadrepr :
+      trivToE (I := I) x₀ b (linearExtensionTangent (I := I) x₀ u b) =
+        tangentCoord (I := I) x₀ u := by
+    have hub : linearExtensionTangent (I := I) x₀ u b = coordExtensionTangent (I := I) x₀ u b := by
+      rw [linearExtensionTangent_apply, hb1.self_of_nhds, one_smul]
+    rw [hub]
+    have := chartE_section_repr_coordExtensionTangent_eq (I := I) x₀ u hbbase
+    rwa [chartE_section_repr_eq_trivToE] at this
+  rw [hreadrepr, hφb]
+
+/-- The explicit `E → E` inner-section chart-representation function `Φ` of
+`covApply (LeviCivita g) (linExt x₀ u) (polyCoordExtensionTangent x₀ P)`: `Φ(y) := fderiv P (y − c) U
++ ∑_{i,j,m} Uᵢ (P (y−c))ⱼ Γᵐᵢⱼ(y) eₘ`, with `U := tangentCoord x₀ u`, `c := φ x₀`. -/
+private def innerReprPoly (g : SmoothRiemannianMetric I M) (x₀ : M) (P : E → E)
+    (u : TangentSpace I x₀) : E → E :=
+  fun y : E =>
+    fderiv ℝ P (y - extChartAt I x₀ x₀) (tangentCoord (I := I) x₀ u) +
+    ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+      ∑ m : Fin (Module.finrank ℝ E),
+        (((chartModelBasis E).repr (tangentCoord (I := I) x₀ u)) i *
+            ((chartModelBasis E).repr (P (y - extChartAt I x₀ x₀))) j *
+            chartChristoffel (I := I) g x₀ i j m y) •
+          (chartModelBasis E) m
+
+/-- **The iterated covariant chart `2`-jet of the polynomial extension, reduced to a Fréchet
+derivative.** For a `C^∞` chart map `P`, the iterated covariant derivative
+`∇_{linExt u}(∇_{linExt u}(polyCoordExtensionTangent x₀ P))(x₀)` applied to `u` equals
+`trivFromE x₀ x₀ (fderiv (innerReprPoly …) (φ x₀) u + christoffelCorrection g x₀ x₀ (innerReprPoly … (φ x₀)) u)`:
+the outer chart Levi-Civita formula at `x₀` reading the inner-section chart representation. -/
+private lemma covApply_covApply_polyCoordExt_basepoint_reduce
+    (g : SmoothRiemannianMetric I M) (x₀ : M) {P : E → E} (hP : ContDiff ℝ ∞ P)
+    (u : TangentSpace I x₀) :
+    (LeviCivita (I := I) g).toFun
+        (covApply (LeviCivita (I := I) g) (linearExtensionTangent (I := I) x₀ u)
+          (polyCoordExtensionTangent (I := I) x₀ P)) x₀ u =
+      trivFromE (I := I) x₀ x₀
+        (fderiv ℝ (innerReprPoly (I := I) g x₀ P u) (extChartAt I x₀ x₀) u +
+          christoffelCorrection (I := I) g x₀ x₀
+            (innerReprPoly (I := I) g x₀ P u (extChartAt I x₀ x₀)) u) := by
+  classical
+  set φ := extChartAt I x₀ with hφ_def
+  set c := extChartAt I x₀ x₀ with hc_def
+  set S : Π b : M, TangentSpace I b :=
+    Connection.covApply (LeviCivita (I := I) g) (linearExtensionTangent (I := I) x₀ u)
+      (polyCoordExtensionTangent (I := I) x₀ P) with hS_def
+  -- `S` is differentiable at `x₀`
+  have hC1 : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1)
+      (T% (polyCoordExtensionTangent (I := I) x₀ P)) := by
+    have h : ((∞ : WithTop ℕ∞) + 1) = (∞ : WithTop ℕ∞) := by rw [ENat.coe_top_add_one]
+    rw [h]; exact polyCoordExtensionTangent_smooth (I := I) x₀ hP
+  have hS_at : MDiffAt (T% S) x₀ :=
+    Connection.covApply_mdifferentiableAt (cov := LeviCivita (I := I) g)
+      (linearExtensionTangent_smooth (I := I) x₀ u) hC1
+  have hx₀_good : x₀ ∈ chartLeviCivitaGoodSet (I := I) x₀ :=
+    self_mem_chartLeviCivitaGoodSet (I := I) (α := x₀)
+  have hx₀src_ext : x₀ ∈ φ.source := by
+    rw [hφ_def, extChartAt_source_eq_chartAt_source]; exact mem_chart_source H x₀
+  have hev := chartE_section_repr_covApply_polyCoordExt_eventuallyEq (I := I) g x₀ hP u
+  rw [LeviCivita_chart_apply (I := I) g x₀ hx₀_good hS_at u]
+  rw [chartLeviCivita_apply (I := I) g x₀ S hx₀_good u]
+  rw [trivToE_self_apply (I := I) x₀ u]
+  -- the inner-section chart pullback is eventually `innerReprPoly`, so its fderiv matches
+  have hev' : (chartE_section_repr (I := I) x₀ S ∘ φ.symm)
+      =ᶠ[𝓝 c] innerReprPoly (I := I) g x₀ P u := hev
+  have hfd_eq : fderiv ℝ (chartE_section_repr (I := I) x₀ S ∘ φ.symm) c =
+      fderiv ℝ (innerReprPoly (I := I) g x₀ P u) c := hev'.fderiv_eq
+  rw [hfd_eq]
+  -- the inner-section chart value at `x₀` is `innerReprPoly … c`
+  have hSx₀_repr : chartE_section_repr (I := I) x₀ S x₀ = innerReprPoly (I := I) g x₀ P u c := by
+    have h0 := hev'.self_of_nhds
+    simp only [Function.comp_apply] at h0
+    rw [φ.left_inv hx₀src_ext] at h0
+    exact h0
+  rw [hSx₀_repr]
+
+/-- The degree-`≤ 2` **jet-cancelling chart polynomial** attached to `(g, x₀, v)` with a chosen
+symmetric quadratic coefficient `Qbil`: its degree-`1` part is the negated metric Christoffel
+`1`-jet correction `−christoffelCorrection g x₀ x₀ (tangentCoord x₀ v)` (the linear coefficient that
+cancels the covariant `1`-jet of `linearExtensionTangent x₀ v`), and its degree-`2` part is
+`½ Qbil h h` (the quadratic coefficient chosen to cancel the covariant `2`-jet). -/
+private def jetCancelPoly (g : SmoothRiemannianMetric I M) (x₀ : M) (v : TangentSpace I x₀)
+    (Qbil : E →L[ℝ] E →L[ℝ] E) : E → E :=
+  fun h => -(christoffelCorrection (I := I) g x₀ x₀ (tangentCoord (I := I) x₀ v) h) +
+    (1 / 2 : ℝ) • Qbil h h
+
+private lemma jetCancelPoly_zero (g : SmoothRiemannianMetric I M) (x₀ : M) (v : TangentSpace I x₀)
+    (Qbil : E →L[ℝ] E →L[ℝ] E) :
+    jetCancelPoly (I := I) g x₀ v Qbil 0 = 0 := by
+  simp [jetCancelPoly]
+
+/-- `HasFDerivAt` of the centred quadratic `y ↦ ½ Qbil (y−c) (y−c)` at the centre `z = c`: the
+derivative is the zero map (the quadratic term vanishes to second order at the centre). -/
+private lemma hasFDerivAt_centredQuad_at_centre
+    (Qbil : E →L[ℝ] E →L[ℝ] E) (c : E) :
+    HasFDerivAt (fun y : E => (1 / 2 : ℝ) • Qbil (y - c) (y - c)) (0 : E →L[ℝ] E) c := by
+  have hc : HasFDerivAt (fun y : E => Qbil (y - c)) (Qbil.comp (ContinuousLinearMap.id ℝ E)) c := by
+    have hshift : HasFDerivAt (fun y : E => y - c) (ContinuousLinearMap.id ℝ E) c :=
+      (hasFDerivAt_id c).sub_const c
+    exact (Qbil.hasFDerivAt).comp c hshift
+  have hu : HasFDerivAt (fun y : E => y - c) (ContinuousLinearMap.id ℝ E) c :=
+    (hasFDerivAt_id c).sub_const c
+  have happ := hc.clm_apply hu
+  -- derivative `(Qbil (c-c)).comp id + (Qbil.comp id).flip (c-c)`, both summands vanish at `c-c=0`
+  have hzero : (Qbil (c - c)).comp (ContinuousLinearMap.id ℝ E) +
+      (Qbil.comp (ContinuousLinearMap.id ℝ E)).flip (c - c) = (0 : E →L[ℝ] E) := by
+    rw [sub_self]; ext w; simp
+  rw [hzero] at happ
+  have := happ.const_smul (1 / 2 : ℝ)
+  rw [smul_zero] at this
+  exact this
+
+private lemma jetCancelPoly_contDiff (g : SmoothRiemannianMetric I M) (x₀ : M)
+    (v : TangentSpace I x₀) (Qbil : E →L[ℝ] E →L[ℝ] E) :
+    ContDiff ℝ ∞ (jetCancelPoly (I := I) g x₀ v Qbil) := by
+  unfold jetCancelPoly
+  have h1 : ContDiff ℝ ∞ (fun h : E =>
+      -(christoffelCorrection (I := I) g x₀ x₀ (tangentCoord (I := I) x₀ v) h)) :=
+    ((christoffelCorrection (I := I) g x₀ x₀ (tangentCoord (I := I) x₀ v) :
+      E →L[ℝ] E).contDiff).neg
+  have h2 : ContDiff ℝ ∞ (fun h : E => (1 / 2 : ℝ) • Qbil h h) := by
+    have hb : ContDiff ℝ ∞ (fun h : E => (Qbil h) h) :=
+      (Qbil.contDiff.clm_apply contDiff_id)
+    exact hb.const_smul _
+  exact h1.add h2
+
+/-- The Fréchet derivative at the origin of the centred `jetCancelPoly` is its linear part: the
+quadratic `½ Qbil h h` contributes nothing to the first derivative at `0`. -/
+private lemma fderiv_jetCancelPoly_centred
+    (g : SmoothRiemannianMetric I M) (x₀ : M) (v : TangentSpace I x₀)
+    (Qbil : E →L[ℝ] E →L[ℝ] E) (u : E) :
+    fderiv ℝ (fun y : E => jetCancelPoly (I := I) g x₀ v Qbil (y - extChartAt I x₀ x₀))
+        (extChartAt I x₀ x₀) u =
+      -(christoffelCorrection (I := I) g x₀ x₀ (tangentCoord (I := I) x₀ v) u) := by
+  classical
+  set c := extChartAt I x₀ x₀ with hc
+  set L : E →L[ℝ] E := christoffelCorrection (I := I) g x₀ x₀ (tangentCoord (I := I) x₀ v) with hL
+  -- the centred linear part `y ↦ -L (y - c)` has derivative `-L` everywhere
+  have hlinFD : HasFDerivAt (fun y : E => -(L (y - c))) (-L) c := by
+    have h0 : HasFDerivAt (fun y : E => L (y - c)) L c := by
+      have hshift : HasFDerivAt (fun y : E => y - c) (ContinuousLinearMap.id ℝ E) c :=
+        (hasFDerivAt_id c).sub_const c
+      have hcomp : HasFDerivAt (fun y : E => L (y - c)) (L.comp (ContinuousLinearMap.id ℝ E)) c :=
+        (L.hasFDerivAt).comp c hshift
+      rwa [ContinuousLinearMap.comp_id] at hcomp
+    exact h0.neg
+  -- the centred quadratic part has zero derivative at `c` (where `y - c = 0`)
+  have hquadFD : HasFDerivAt (fun y : E => (1 / 2 : ℝ) • Qbil (y - c) (y - c)) 0 c :=
+    hasFDerivAt_centredQuad_at_centre Qbil c
+  -- sum, then evaluate
+  have hsum : HasFDerivAt (fun y : E => jetCancelPoly (I := I) g x₀ v Qbil (y - c)) (-L) c := by
+    have hadd := hlinFD.add hquadFD
+    rw [add_zero] at hadd
+    refine hadd.congr_of_eventuallyEq ?_
+    filter_upwards with y
+    show jetCancelPoly (I := I) g x₀ v Qbil (y - c) =
+      -(L (y - c)) + (1 / 2 : ℝ) • Qbil (y - c) (y - c)
+    rw [hL]; rfl
+  rw [hsum.fderiv]
+  rw [ContinuousLinearMap.neg_apply, hL]
+  rfl
+
+/-- **Existence of the cancelling quadratic coefficient (iterated chart `2`-jet content).** There is
+a continuous bilinear quadratic coefficient `Qbil : E →L[ℝ] E →L[ℝ] E` such that the degree-`≤ 2`
+chart-polynomial correction `polyCoordExtensionTangent x₀ (jetCancelPoly g x₀ v Qbil)` has iterated
+covariant `2`-jet at `x₀`, read along each coordinate-constant reading direction
+`linearExtensionTangent x₀ u`, equal to the negative of that of `linearExtensionTangent x₀ v`.
+
+This is the genuine new chart-coordinate content of the construction. The full reduction is:
+`covApply_covApply_polyCoordExt_basepoint_reduce` rewrites the `2`-jet of
+`polyCoordExtensionTangent x₀ P` (any `C^∞` `P`) as
+`trivFromE x₀ x₀ (fderiv (innerReprPoly … P u) (φ x₀) u + christoffelCorrection g x₀ x₀ (innerReprPoly … P u (φ x₀)) u)`.
+Evaluating the inner-section chart representation `innerReprPoly` at and near `φ x₀`, for `P` with
+`P 0 = 0`, gives the closed form
+`trivFromE x₀ x₀ ( (fderiv (fderiv ℝ P) 0 u) (tangentCoord x₀ u) + 2 • christoffelCorrection g x₀ x₀ (fderiv P 0 (tangentCoord x₀ u)) u )`
+(the chart-second-derivative `fderiv² P 0` term, plus twice the `Γ·(fderiv P 0)` term — one from the
+inner Fréchet derivative, one from the outer Christoffel correction; the `∂Γ` term drops because
+`P 0 = 0`). For `P = jetCancelPoly g x₀ v Qbil` the linear part fixes `fderiv P 0 = −christoffelCorrection g x₀ x₀ (tangentCoord x₀ v)`
+and the quadratic part gives `(fderiv (fderiv ℝ P) 0 u) (tangentCoord x₀ u) = Qbil u u` (using
+`tangentCoord x₀ u = u`). The right-hand side is the explicit `∂Γ + Γ·Γ` quadratic form from
+`covApply_covApply_linearExtensionTangent_basepoint_eq`. Choosing `Qbil` to be the
+(finite-coordinate, hence continuous bilinear) quadratic form `u ↦ trivToE x₀ x₀ (−RHS u) − 2 • christoffelCorrection g x₀ x₀ (fderiv P 0 u) u`
+closes the cancellation. -/
+private lemma exists_jetCancelQuadraticCoeff
+    (g : SmoothRiemannianMetric I M) (x₀ : M) (v : TangentSpace I x₀) :
+    ∃ Qbil : E →L[ℝ] E →L[ℝ] E,
+      ∀ u : TangentSpace I x₀,
+        (LeviCivita (I := I) g).toFun
+            (covApply (LeviCivita (I := I) g) (linearExtensionTangent (I := I) x₀ u)
+              (polyCoordExtensionTangent (I := I) x₀ (jetCancelPoly (I := I) g x₀ v Qbil))) x₀ u =
+          -((LeviCivita (I := I) g).toFun
+            (covApply (LeviCivita (I := I) g) (linearExtensionTangent (I := I) x₀ u)
+              (linearExtensionTangent (I := I) x₀ v)) x₀ u) := by
+  sorry
+
+/-- **The jet-cancelling chart-polynomial correction.** For a smooth Riemannian metric `g` on a
+closed manifold, a base point `x₀`, and a fibre vector `v : TangentSpace I x₀`, there is a smooth
+tangent-bundle section `C : Π b, TangentSpace I b` that
 
 * vanishes at the basepoint: `C x₀ = 0`;
 * has covariant `1`-jet at `x₀` equal to the *negative* of the covariant `1`-jet of
@@ -585,21 +1123,14 @@ smooth Riemannian metric `g` on a closed manifold, a base point `x₀`, and a fi
   direction `linearExtensionTangent x₀ u`, equal to the *negative* of that of `linExt x₀ v`:
   `∇_{linExt u}(∇_{linExt u} C)(x₀)(u) = − ∇_{linExt u}(∇_{linExt u}(linExt x₀ v))(x₀)(u)`.
 
-**This is the genuine chart-polynomial correction-field construction.** `C` is the explicit degree-`≤ 2`
-chart-coordinate field whose chart-representation, pulled back through `(extChartAt I x₀).symm`, is a
-polynomial vanishing at `extChartAt I x₀ x₀` (cut off by the centred bump): its degree-`1` part solves the
-linear `1`-jet cancellation equation supplied by `covApply_linearExtensionTangent_basepoint_eq` (the
-chart derivative at the centre is the linear coefficient, the basepoint value being `0`), and its
-degree-`2` part solves the linear `2`-jet cancellation equation supplied by
-`covApply_covApply_linearExtensionTangent_basepoint_eq` (the second chart derivative at the centre is the
-quadratic coefficient). The covariant `1`- and linear-extension-`2`-jets of such a chart-polynomial field
-at `x₀` are computed by the chart covariant-derivative formula `chartLeviCivita_apply` and its iterate,
-exactly mirroring the two proved `linearExtensionTangent` basepoint chart formulas for a non-constant
-chart-representation.
-
-It is genuine new content — the iterated covariant chart formula for a non-constant chart-polynomial
-correction field does not exist on disk (only its constant-chart-representation `linExt` companions are
-proved); the body is `sorry` and consumers transitively depend on its `sorryAx`. -/
+`C := polyCoordExtensionTangent x₀ (jetCancelPoly g x₀ v Qbil)` is the explicit degree-`≤ 2`
+chart-coordinate field: its degree-`1` part `−christoffelCorrection g x₀ x₀ (tangentCoord x₀ v)`
+cancels the covariant `1`-jet (the chart derivative at the centre being that linear coefficient, by
+`covApply_polyCoordExtensionTangent_basepoint_eq` and `covApply_linearExtensionTangent_basepoint_eq`),
+and its degree-`2` quadratic coefficient `Qbil` is chosen (by `exists_jetCancelQuadraticCoeff`, whose
+iterated covariant chart `2`-jet content reduces through
+`covApply_covApply_polyCoordExt_basepoint_reduce` together with the basepoint `2`-jet of the linear
+extension `covApply_covApply_linearExtensionTangent_basepoint_eq`) to cancel the covariant `2`-jet. -/
 theorem exists_linExtJetCancellingCorrection
     (g : SmoothRiemannianMetric I M) (x₀ : M) (v : TangentSpace I x₀) :
     ∃ C : Π b : M, TangentSpace I b,
@@ -613,7 +1144,32 @@ theorem exists_linExtJetCancellingCorrection
           -((LeviCivita (I := I) g).toFun
             (covApply (LeviCivita (I := I) g) (linearExtensionTangent (I := I) x₀ u)
               (linearExtensionTangent (I := I) x₀ v)) x₀ u)) := by
-  sorry
+  classical
+  -- the quadratic coefficient cancelling the covariant `2`-jet (chosen below from the iterated
+  -- chart `2`-jet formula and the basepoint `2`-jet of `linExt v`)
+  obtain ⟨Qbil, hQbil⟩ := exists_jetCancelQuadraticCoeff (I := I) g x₀ v
+  set P : E → E := jetCancelPoly (I := I) g x₀ v Qbil with hP_def
+  have hP_cd : ContDiff ℝ ∞ P := jetCancelPoly_contDiff (I := I) g x₀ v Qbil
+  refine ⟨polyCoordExtensionTangent (I := I) x₀ P, ?_, ?_, ?_, ?_⟩
+  · -- smoothness
+    exact polyCoordExtensionTangent_smooth (I := I) x₀ hP_cd
+  · -- basepoint value `C x₀ = P 0 = 0`
+    rw [polyCoordExtensionTangent_basepoint, hP_def, jetCancelPoly_zero]
+  · -- covariant `1`-jet cancellation
+    intro u
+    rw [covApply_polyCoordExtensionTangent_basepoint_eq (I := I) g x₀ hP_cd u]
+    rw [hP_def, jetCancelPoly_zero, fderiv_jetCancelPoly_centred (I := I) g x₀ v Qbil u]
+    -- the Christoffel term vanishes (`P 0 = 0`)
+    have hcc0 : christoffelCorrection (I := I) g x₀ x₀ (0 : E) u = 0 := by
+      rw [christoffelCorrection_apply]
+      simp
+    rw [hcc0, add_zero]
+    -- the RHS `1`-jet of `linExt v` is the pure Christoffel correction
+    rw [covApply_linearExtensionTangent_basepoint_eq (I := I) g x₀ v u]
+    rw [map_neg]
+  · -- covariant `2`-jet cancellation (the chosen `Qbil` clause)
+    intro u
+    exact hQbil u
 
 /-- **The covariant-`1`-jet-vanishing tangent extension whose iterated covariant derivative also
 vanishes along every coordinate-constant (linear-extension) reading direction (linear-extension

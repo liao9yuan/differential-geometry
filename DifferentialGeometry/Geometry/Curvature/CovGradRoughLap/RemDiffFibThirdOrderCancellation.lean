@@ -220,6 +220,268 @@ private lemma riemannianFiberNormSq_tensor0SAsRS_add_le
   rw [tensor0SAsRS_add (I := I) (M := M) x a b]
   exact riemannianFiberNormSq_add_le (I := I) (M := M) g 0 s x _ _
 
+/-- **The `tensor0SAsRS` wrapper of a `(0, s)`-tensor is its `unitScalarRSLift`.** Both lifts of a
+model `(0, s)`-tensor `C` to a `(0, s)`-rank tensor are the continuous-linear map `τ ↦ (unit-scalar of
+`τ`) • C`; the unit scalar is extracted identically (`tensor00Scalar x τ = tensor0Iso x τ`, both factor
+through `continuousMultilinearCurryFin0`). -/
+private lemma tensor0SAsRS_eq_unitScalarRSLift {s : ℕ} (x : M) (C : Tensor0SSpace s I x) :
+    tensor0SAsRS (I := I) (M := M) x C = unitScalarRSLift (I := I) (M := M) x C := by
+  apply tensorRSSpace_ext 0 s x
+  intro τ
+  show (tensor0SAsRS (I := I) (M := M) x C :
+        Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) τ =
+      (unitScalarRSLift (I := I) (M := M) x C :
+        Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) τ
+  rw [tensor0SAsRS_apply (I := I) (M := M) x C τ]
+  rw [show (unitScalarRSLift (I := I) (M := M) x C :
+        Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) τ =
+      (Tensor0SNabla.tensor0Iso (I := I) M x τ) • C from
+    unitScalarRSLift_apply (I := I) (M := M) x C τ]
+  congr 1
+
+/-- **The intrinsic `(0, s)` fibre norm reads only the unit `(0, 0)`-evaluation.** If two `(0, s)`-rank
+tensors `T, T'` agree at the unit `(0, 0)`-tensor, they have the same intrinsic fibre norm: the
+Parseval summands of the rank-`0` covariant slot range over the empty-index coframe covector, which is
+the unit (`coframeS_zero_eq_unitZeroSec`), so every summand reads only `T(unit)`. -/
+private lemma riemannianFiberNormSq_eq_of_unit_eq {s : ℕ} (g : SmoothRiemannianMetric I M) (x : M)
+    (T T' : TensorRSSpace 0 s I x)
+    (h : (T : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) (unitZeroSec (I := I) (M := M) x) =
+         (T' : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) (unitZeroSec (I := I) (M := M) x)) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 s x T =
+      riemannianFiberNormSq (I := I) (M := M) g 0 s x T' := by
+  classical
+  set e : Fin (Module.finrank ℝ E) → TangentSpace I x :=
+    fun a => smoothOrthoFrame (I := I) g x a x with he
+  have hn : (Module.finrank ℝ E) = Module.finrank ℝ (TangentSpace I x) := rfl
+  have horth : ∀ a b : Fin (Module.finrank ℝ E),
+      g.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0 := fun a b =>
+    smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
+  rw [rfns_eq_sum_fiberNormSqSummand_of_orthoFrame (I := I) (M := M) g s x T e hn horth,
+    rfns_eq_sum_fiberNormSqSummand_of_orthoFrame (I := I) (M := M) g s x T' e hn horth]
+  refine Finset.sum_congr rfl (fun K _ => Finset.sum_congr rfl (fun J _ => ?_))
+  unfold fiberNormSqSummand
+  have hKunit : ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+      (fun k => g.inner x (e (K k))) : Tensor0SSpace 0 I x) =
+      unitZeroSec (I := I) (M := M) x := by
+    rw [show ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+        (fun k => g.inner x (e (K k))) : Tensor0SSpace 0 I x) =
+        coframeS (I := I) (M := M) g x 0 e K from rfl]
+    exact coframeS_zero_eq_unitZeroSec (I := I) (M := M) g x e K
+  rw [hKunit, h]
+
+/-- **The intrinsic fibre norm of the `tensor0SAsRS`-wrapped abstract curvature operator equals the
+fibre norm of the bundled `(0, s)` curvature operator on the unit-scalar lift.** For the abstract
+`(0, s)`-tensor connection `nab := tensor0SCovariantDerivative I M s (LeviCivita g)`,
+```
+rfns(tensor0SAsRS x (riemannOp nab x v w T₀))
+  = rfns(riemannOp (tensorCov g 0 s) x v w (unitScalarRSLift x T₀)).
+```
+The wrapper is the unit-scalar lift (`tensor0SAsRS_eq_unitScalarRSLift`); the abstract curvature value
+is the unit-evaluation of the bundled curvature on the lift
+(`riemannOp_tensorCov_unitScalarRSLift_unitEval`); and the `(0, s)` fibre norm reads only that
+unit-evaluation (`riemannianFiberNormSq_eq_of_unit_eq`). -/
+private lemma riemannianFiberNormSq_tensor0SAsRS_riemannOp_abstract_eq
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (v w : TangentSpace I x)
+    (T₀ : Tensor0SSpace s I x) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 s x
+        (tensor0SAsRS (I := I) (M := M) x
+          (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+            x v w T₀)) =
+      riemannianFiberNormSq (I := I) (M := M) g 0 s x
+        (riemannOp (tensorCov (I := I) g 0 s) x v w
+          (unitScalarRSLift (I := I) (M := M) x T₀)) := by
+  rw [tensor0SAsRS_eq_unitScalarRSLift (I := I) (M := M) x
+    (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) x v w T₀)]
+  refine riemannianFiberNormSq_eq_of_unit_eq (I := I) (M := M) g x _ _ ?_
+  rw [unitScalarRSLift_apply_unit (I := I) (M := M) x _]
+  exact (riemannOp_tensorCov_unitScalarRSLift_unitEval (I := I) (M := M) g s x v w T₀).symm
+
+/-- **The `0`-jet transport.** The intrinsic fibre norm of the `tensor0SAsRS`-wrapped unit-evaluated
+section `V := unitEvalSection g s S` at `x` equals the intrinsic fibre norm of `S` at `x`: the wrapper
+is the unit-scalar lift, and `V x = (S.toSection x)(unit)`, so the `(0, s)` fibre norm reads only that
+value (`riemannianFiberNormSq_eq_of_unit_eq`). -/
+private lemma riemannianFiberNormSq_tensor0SAsRS_unitEval_eq
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 s x
+        (tensor0SAsRS (I := I) (M := M) x (unitEvalSection (I := I) (M := M) g s S x)) =
+      riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) := by
+  rw [tensor0SAsRS_eq_unitScalarRSLift (I := I) (M := M) x
+    (unitEvalSection (I := I) (M := M) g s S x)]
+  refine riemannianFiberNormSq_eq_of_unit_eq (I := I) (M := M) g x _ _ ?_
+  rw [show (unitScalarRSLift (I := I) (M := M) x (unitEvalSection (I := I) (M := M) g s S x) :
+        Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) (unitZeroSec (I := I) (M := M) x) =
+      unitEvalSection (I := I) (M := M) g s S x from
+    unitScalarRSLift_apply_unit (I := I) (M := M) x _]
+  rw [unitEvalSection_apply (I := I) (M := M) g s S x]
+
+/-- **The `1`-jet transport along the centre frame.** The intrinsic fibre norm of the
+`tensor0SAsRS`-wrapped abstract directional covariant derivative `∇^{abs}_{Bᵢ} V` of `V :=
+unitEvalSection g s S` along the orthonormal centre-frame direction `Bᵢ := smoothOrthoFrame g x i` is
+bounded by the intrinsic `(0, s + 1)` fibre norm of the gradient `∇S = covGrad g 0 s S`. The abstract
+directional derivative of `V` is the slot-`0` reading of the gradient field
+(`curriedSection_unitGradFieldGen_apply`); read at the unit it is the slot-`0` curry of `(∇S).toSection
+x` along `Bᵢ x` (`tensor0S_curry_covGradBundleEquiv_unit_genVal`), whose squared fibre norm is dominated
+by the full `(0, s + 1)` fibre norm of `∇S` over the orthonormal frame
+(`riemannianFiberNormSq_covGradBundleEquiv_symm_reading_le`). -/
+private lemma riemannianFiberNormSq_tensor0SAsRS_covApply_unitEval_le
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
+    (i : Fin (Module.finrank ℝ E)) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 s x
+        (tensor0SAsRS (I := I) (M := M) x
+          (covApply (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+            (smoothOrthoFrame (I := I) g x i)
+            (unitEvalSection (I := I) (M := M) g s S) x)) ≤
+      riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+        ((covGrad (I := I) (M := M) g 0 s S).toSection x) := by
+  classical
+  have hval : covApply (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+        (smoothOrthoFrame (I := I) g x i)
+        (unitEvalSection (I := I) (M := M) g s S) x =
+      tensor0S_curry (I := I) (M := M) s x
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+          (covGrad (I := I) (M := M) g 0 s S).toSection x)
+          (unitZeroSec (I := I) (M := M) x)) (smoothOrthoFrame (I := I) g x i x) := by
+    rw [covApply_apply]
+    rw [← curriedSection_unitGradFieldGen_apply (I := I) (M := M) g s S x
+      (smoothOrthoFrame (I := I) g x i x)]
+    rw [Tensor0SNabla.curriedSection_apply (I := I) M (unitGradFieldGen (I := I) (M := M) g s S) x]
+    rw [unitGradFieldGen_apply (I := I) (M := M) g s S x]
+  rw [hval]
+  set T : TensorRSSpace 0 (s + 1) I x := (covGrad (I := I) (M := M) g 0 s S).toSection x with hT
+  have hcurry : tensor0S_curry (I := I) (M := M) s x
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from T)
+          (unitZeroSec (I := I) (M := M) x)) (smoothOrthoFrame (I := I) g x i x) =
+      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+        (covGradBundleEquiv (I := I) (M := M) 0 s x).symm T (smoothOrthoFrame (I := I) g x i x))
+        (unitZeroSec (I := I) (M := M) x) := by
+    rw [show T = covGradBundleEquiv (I := I) (M := M) 0 s x
+        ((covGradBundleEquiv (I := I) (M := M) 0 s x).symm T) from
+      (ContinuousLinearEquiv.apply_symm_apply _ _).symm]
+    rw [tensor0S_curry_covGradBundleEquiv_unit_genVal (I := I) (M := M) s x
+      ((covGradBundleEquiv (I := I) (M := M) 0 s x).symm T) (smoothOrthoFrame (I := I) g x i x)]
+    rw [ContinuousLinearEquiv.symm_apply_apply]
+  rw [hcurry]
+  have hrw2 : riemannianFiberNormSq (I := I) (M := M) g 0 s x
+      (tensor0SAsRS (I := I) (M := M) x
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+          (covGradBundleEquiv (I := I) (M := M) 0 s x).symm T (smoothOrthoFrame (I := I) g x i x))
+          (unitZeroSec (I := I) (M := M) x))) =
+      riemannianFiberNormSq (I := I) (M := M) g 0 s x
+        ((covGradBundleEquiv (I := I) (M := M) 0 s x).symm T (smoothOrthoFrame (I := I) g x i x)) := by
+    rw [tensor0SAsRS_eq_unitScalarRSLift (I := I) (M := M) x _]
+    refine riemannianFiberNormSq_eq_of_unit_eq (I := I) (M := M) g x _ _ ?_
+    rw [show (unitScalarRSLift (I := I) (M := M) x
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+            (covGradBundleEquiv (I := I) (M := M) 0 s x).symm T
+              (smoothOrthoFrame (I := I) g x i x))
+            (unitZeroSec (I := I) (M := M) x)) :
+          Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) (unitZeroSec (I := I) (M := M) x) =
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+          (covGradBundleEquiv (I := I) (M := M) 0 s x).symm T (smoothOrthoFrame (I := I) g x i x))
+          (unitZeroSec (I := I) (M := M) x) from
+      unitScalarRSLift_apply_unit (I := I) (M := M) x _]
+  rw [hrw2]
+  refine riemannianFiberNormSq_covGradBundleEquiv_symm_reading_le (I := I) (M := M) g s x T
+    (fun a => smoothOrthoFrame (I := I) g x a) ?_ i
+  intro a b
+  exact smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
+
+/-- **Quadratic homogeneity of the `tensor0SAsRS`-wrapped fibre norm.** `rfns(tensor0SAsRS x (c • C)) =
+c² · rfns(tensor0SAsRS x C)`: the wrapper is `ℝ`-linear, and the squared fibre norm is `2`-homogeneous
+(each Parseval component scales by `c`). -/
+private lemma riemannianFiberNormSq_tensor0SAsRS_smul {s : ℕ} (g : SmoothRiemannianMetric I M)
+    (x : M) (c : ℝ) (C : Tensor0SSpace s I x) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 s x (tensor0SAsRS (I := I) (M := M) x (c • C)) =
+      c ^ 2 *
+        riemannianFiberNormSq (I := I) (M := M) g 0 s x (tensor0SAsRS (I := I) (M := M) x C) := by
+  classical
+  have hsmul : tensor0SAsRS (I := I) (M := M) x (c • C) =
+      c • tensor0SAsRS (I := I) (M := M) x C := by
+    apply tensorRSSpace_ext 0 s x
+    intro τ
+    show (tensor0SAsRS (I := I) (M := M) x (c • C) :
+          Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) τ =
+        (c • tensor0SAsRS (I := I) (M := M) x C :
+          Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) τ
+    rw [tensor0SAsRS_apply (I := I) (M := M) x (c • C) τ, ContinuousLinearMap.smul_apply,
+      tensor0SAsRS_apply (I := I) (M := M) x C τ, smul_comm]
+  rw [hsmul]
+  set e : Fin (Module.finrank ℝ E) → TangentSpace I x :=
+    fun a => smoothOrthoFrame (I := I) g x a x with he
+  have hn : (Module.finrank ℝ E) = Module.finrank ℝ (TangentSpace I x) := rfl
+  have horth : ∀ a b : Fin (Module.finrank ℝ E),
+      g.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0 := fun a b =>
+    smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
+  rw [rfns_eq_sum_fiberNormSqSummand_of_orthoFrame (I := I) (M := M) g s x _ e hn horth,
+    rfns_eq_sum_fiberNormSqSummand_of_orthoFrame (I := I) (M := M) g s x
+      (tensor0SAsRS (I := I) (M := M) x C) e hn horth, Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun K _ => ?_)
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun J _ => ?_)
+  rw [fiberNormSqSummand_eq_component_sq, fiberNormSqSummand_eq_component_sq,
+    fiberNormSqComponent_smul]
+  ring
+
+/-- **The per-direction curvature-operator fibre bound on the `tensor0SAsRS`-wrapped abstract curvature.**
+Combining the fibre-norm reduction `riemannianFiberNormSq_tensor0SAsRS_riemannOp_abstract_eq` with the
+base-point-uniform proportional curvature sup `exists_uniform_riemannOp_tensorCov_proportional_local`:
+for the abstract `(0, s)`-tensor connection `nab`,
+```
+rfns(tensor0SAsRS x (riemannOp nab x v w T₀))
+  ≤ Csup s · g(v, v) · g(w, w) · rfns(tensor0SAsRS x T₀),
+```
+with `Csup` the uniform curvature constant. -/
+private lemma riemannianFiberNormSq_tensor0SAsRS_riemannOp_abstract_le
+    (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (Csup : ℝ)
+    (hCsup : ∀ (y : M) (v w : TangentSpace I y) (Tt : TensorRSSpace 0 s I y),
+        riemannianFiberNormSq (I := I) (M := M) g 0 s y
+            (riemannOp (tensorCov (I := I) g 0 s) y v w Tt) ≤
+          Csup * g.inner y v v * g.inner y w w *
+            riemannianFiberNormSq (I := I) (M := M) g 0 s y Tt)
+    (x : M) (v w : TangentSpace I x) (T₀ : Tensor0SSpace s I x) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 s x
+        (tensor0SAsRS (I := I) (M := M) x
+          (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+            x v w T₀)) ≤
+      Csup * g.inner x v v * g.inner x w w *
+        riemannianFiberNormSq (I := I) (M := M) g 0 s x
+          (tensor0SAsRS (I := I) (M := M) x T₀) := by
+  rw [riemannianFiberNormSq_tensor0SAsRS_riemannOp_abstract_eq (I := I) (M := M) g s x v w T₀,
+    tensor0SAsRS_eq_unitScalarRSLift (I := I) (M := M) x T₀]
+  exact hCsup x v w (unitScalarRSLift (I := I) (M := M) x T₀)
+
+/-- **The recentered orthonormal-frame Christoffel-direction uniform sup (posited genuine missing
+compactness infrastructure).** For a closed smooth Riemannian manifold `(M, g)` there is a single
+nonnegative constant `Kchr`, independent of the base point `x` and the frame index `i`, bounding the
+squared `g`-norm of the Christoffel direction `(∇_{Bᵢ} Bᵢ)(x)` of the *recentered* orthonormal frame
+`Bᵢ := smoothOrthoFrame g x i` (the frame centred at `x` itself), `(∇_{Bᵢ} Bᵢ)(x) = (LeviCivita
+g).toFun Bᵢ x (Bᵢ x)`:
+```
+∀ x i, g((∇_{Bᵢ} Bᵢ)(x), (∇_{Bᵢ} Bᵢ)(x)) ≤ Kchr.
+```
+
+This is the genuine `‖∇B‖_∞`-style envelope of the recentered orthonormal frame's covariant derivative
+at its own centre. It is the one genuinely-missing piece of the `R(diff) V` curvature-class fibre
+envelope (`exists_riemannSecClass_tensor0SAsRS_fiberOrder_bound`): the entire reduction of that class to
+the bundled curvature operator + the curvature sup + the `≤ 1`-jet `unitEvalSection` transports is
+established sorry-free above, and the curvature term `R(∇_{Bᵢ} Bᵢ, w) V` is bounded by `Csup ·
+g((∇_{Bᵢ} Bᵢ)(x), (∇_{Bᵢ} Bᵢ)(x)) · g(w x, w x) · rfns(S)` — so only this uniform Christoffel-direction
+bound remains. No bound on the recentered Christoffel direction exists on disk (the existing uniform
+curvature sups are computed frame-freely through the dual-frame route precisely because the recentered
+orthonormal frame is not jointly continuous in `(centre, point)` by elementary means); the body is
+`sorry` and `exists_riemannSecClass_tensor0SAsRS_fiberOrder_bound` transitively depends on its
+`sorryAx`. -/
+theorem exists_uniform_recentered_christoffel_direction_gNorm_bound
+    (g : SmoothRiemannianMetric I M) :
+    ∃ Kchr : ℝ, 0 ≤ Kchr ∧
+      ∀ (x : M) (i : Fin (Module.finrank ℝ E)),
+        g.inner x ((LeviCivita (I := I) g).toFun (smoothOrthoFrame (I := I) g x i) x
+            (smoothOrthoFrame (I := I) g x i x))
+          ((LeviCivita (I := I) g).toFun (smoothOrthoFrame (I := I) g x i) x
+            (smoothOrthoFrame (I := I) g x i x)) ≤ Kchr := by
+  sorry
+
 /-- **Child A — the differentiated-curvature `(∇R) S` class fibre envelope (posited genuine `∇R`
 content).** For a closed smooth Riemannian manifold `(M, g)` there is a nonnegative valence-dependent
 `Ca : ℕ → ℝ` such that, at every rank `s`, smooth `(0, s)`-tensor `S`, point `x`, frame index `i`, and
@@ -309,7 +571,188 @@ theorem exists_riemannSecClass_tensor0SAsRS_fiberOrder_bound
               riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
                   ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
               riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) := by
-  sorry
+  classical
+  choose Csup hCsup_nn hCsup using fun s =>
+    exists_uniform_riemannOp_tensorCov_proportional_local (I := I) (M := M) g s
+  obtain ⟨Kchr, hKchr_nn, hKchr⟩ :=
+    exists_uniform_recentered_christoffel_direction_gNorm_bound (I := I) (M := M) g
+  refine ⟨fun s => 8 * (Csup s * Kchr + Csup s + Csup s), ?_, fun s S x i w hw hww hgrad => ?_⟩
+  · intro s; have := hCsup_nn s; positivity
+  have hBi : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (smoothOrthoFrame (I := I) g x i)) :=
+    smoothOrthoFrame_smooth (I := I) g x i
+  have hChr : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (T% (covApply (LeviCivita (I := I) g) (smoothOrthoFrame (I := I) g x i)
+        (smoothOrthoFrame (I := I) g x i))) :=
+    covApply_contMDiff (LeviCivita (I := I) g) (hcov := LeviCivita_isContMDiff g) hBi hBi
+  have hV : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel s ℝ E)) ∞
+      (fun b : M => TotalSpace.mk' (Tensor0SModel s ℝ E)
+        (E := fun z : M => Tensor0SSpace s I z) b (unitEvalSection (I := I) (M := M) g s S b)) :=
+    contMDiff_unitEvalSection (I := I) (M := M) g s S
+  have hDw : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (T% (covApply (LeviCivita (I := I) g) (smoothOrthoFrame (I := I) g x i) w)) :=
+    covApply_contMDiff (LeviCivita (I := I) g) (hcov := LeviCivita_isContMDiff g) hBi hw
+  have hDV : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel s ℝ E)) ∞
+      (fun b : M => TotalSpace.mk' (Tensor0SModel s ℝ E)
+        (E := fun z : M => Tensor0SSpace s I z) b
+        (covApply (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+          (smoothOrthoFrame (I := I) g x i) (unitEvalSection (I := I) (M := M) g s S) b)) :=
+    covApply_contMDiff (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+      hBi hV
+  have hT1 : riemannSec (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+        (covApply (LeviCivita (I := I) g) (smoothOrthoFrame (I := I) g x i)
+          (smoothOrthoFrame (I := I) g x i)) w (unitEvalSection (I := I) (M := M) g s S) x =
+      riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) x
+        ((covApply (LeviCivita (I := I) g) (smoothOrthoFrame (I := I) g x i)
+          (smoothOrthoFrame (I := I) g x i)) x) (w x)
+        (unitEvalSection (I := I) (M := M) g s S x) :=
+    riemannSec_eq_riemannOp_smooth _ hChr hw hV
+  have hT2 : riemannSec (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+        (smoothOrthoFrame (I := I) g x i)
+        (covApply (LeviCivita (I := I) g) (smoothOrthoFrame (I := I) g x i) w)
+        (unitEvalSection (I := I) (M := M) g s S) x =
+      riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) x
+        (smoothOrthoFrame (I := I) g x i x)
+        ((covApply (LeviCivita (I := I) g) (smoothOrthoFrame (I := I) g x i) w) x)
+        (unitEvalSection (I := I) (M := M) g s S x) :=
+    riemannSec_eq_riemannOp_smooth _ hBi hDw hV
+  have hT3 : riemannSec (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+        (smoothOrthoFrame (I := I) g x i) w
+        (covApply (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+          (smoothOrthoFrame (I := I) g x i) (unitEvalSection (I := I) (M := M) g s S)) x =
+      riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) x
+        (smoothOrthoFrame (I := I) g x i x) (w x)
+        ((covApply (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+          (smoothOrthoFrame (I := I) g x i) (unitEvalSection (I := I) (M := M) g s S)) x) :=
+    riemannSec_eq_riemannOp_smooth _ hBi hw hDV
+  rw [hT1, hT2, hT3]
+  have hDw0 : (covApply (LeviCivita (I := I) g) (smoothOrthoFrame (I := I) g x i) w) x = 0 := by
+    rw [covApply_apply]; exact hgrad (smoothOrthoFrame (I := I) g x i x)
+  rw [hDw0, map_zero]
+  set B := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+    ((covGrad (I := I) (M := M) g 0 s S).toSection x) with hBdef
+  set D := riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) with hDdef
+  set A := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+    ((covGrad (I := I) (M := M) g 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S)).toSection x)
+    with hAdef
+  have hA_nn : 0 ≤ A := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1 + 1) x _
+  have hB_nn : 0 ≤ B := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x _
+  have hD_nn : 0 ≤ D := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x _
+  have hCsnn := hCsup_nn s
+  have hb1 : riemannianFiberNormSq (I := I) (M := M) g 0 s x
+      (tensor0SAsRS (I := I) (M := M) x
+        (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) x
+          ((covApply (LeviCivita (I := I) g) (smoothOrthoFrame (I := I) g x i)
+            (smoothOrthoFrame (I := I) g x i)) x) (w x)
+          (unitEvalSection (I := I) (M := M) g s S x))) ≤ Csup s * Kchr * D := by
+    refine le_trans (riemannianFiberNormSq_tensor0SAsRS_riemannOp_abstract_le (I := I) (M := M) g s
+      (Csup s) (hCsup s) x _ (w x) (unitEvalSection (I := I) (M := M) g s S x)) ?_
+    rw [riemannianFiberNormSq_tensor0SAsRS_unitEval_eq (I := I) (M := M) g s S x]
+    rw [covApply_apply]
+    have hgv := hKchr x i
+    have hgvnn : 0 ≤ g.inner x ((LeviCivita (I := I) g).toFun (smoothOrthoFrame (I := I) g x i) x
+        (smoothOrthoFrame (I := I) g x i x))
+        ((LeviCivita (I := I) g).toFun (smoothOrthoFrame (I := I) g x i) x
+        (smoothOrthoFrame (I := I) g x i x)) := by
+      rcases eq_or_ne ((LeviCivita (I := I) g).toFun (smoothOrthoFrame (I := I) g x i) x
+        (smoothOrthoFrame (I := I) g x i x)) 0 with h0 | h0
+      · rw [h0]; simp
+      · exact (g.pos x _ h0).le
+    have hwwnn : 0 ≤ g.inner x (w x) (w x) := by
+      rcases eq_or_ne (w x) 0 with h0 | h0
+      · rw [h0]; simp
+      · exact (g.pos x _ h0).le
+    have hprod : g.inner x ((LeviCivita (I := I) g).toFun (smoothOrthoFrame (I := I) g x i) x
+          (smoothOrthoFrame (I := I) g x i x))
+          ((LeviCivita (I := I) g).toFun (smoothOrthoFrame (I := I) g x i) x
+          (smoothOrthoFrame (I := I) g x i x)) * g.inner x (w x) (w x) ≤ Kchr := by
+      calc g.inner x _ _ * g.inner x (w x) (w x)
+          ≤ Kchr * g.inner x (w x) (w x) := mul_le_mul_of_nonneg_right hgv hwwnn
+        _ ≤ Kchr * 1 := mul_le_mul_of_nonneg_left hww hKchr_nn
+        _ = Kchr := mul_one _
+    calc Csup s * g.inner x _ _ * g.inner x (w x) (w x) * D
+        = Csup s * (g.inner x _ _ * g.inner x (w x) (w x)) * D := by ring
+      _ ≤ Csup s * Kchr * D := by
+          apply mul_le_mul_of_nonneg_right _ hD_nn
+          exact mul_le_mul_of_nonneg_left hprod hCsnn
+  have hb3 : riemannianFiberNormSq (I := I) (M := M) g 0 s x
+      (tensor0SAsRS (I := I) (M := M) x
+        ((2 : ℝ) • riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+          x (smoothOrthoFrame (I := I) g x i x) (w x)
+          ((covApply (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+            (smoothOrthoFrame (I := I) g x i) (unitEvalSection (I := I) (M := M) g s S)) x))) ≤
+      4 * (Csup s * B) := by
+    rw [riemannianFiberNormSq_tensor0SAsRS_smul (I := I) (M := M) g x (2 : ℝ) _]
+    have hstep := riemannianFiberNormSq_tensor0SAsRS_riemannOp_abstract_le (I := I) (M := M) g s
+      (Csup s) (hCsup s) x (smoothOrthoFrame (I := I) g x i x) (w x)
+      ((covApply (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+        (smoothOrthoFrame (I := I) g x i) (unitEvalSection (I := I) (M := M) g s S)) x)
+    have hgB : g.inner x (smoothOrthoFrame (I := I) g x i x)
+        (smoothOrthoFrame (I := I) g x i x) = 1 := by
+      have := smoothOrthoFrame_orthonormal_at_center (I := I) g x i i; rwa [if_pos rfl] at this
+    rw [hgB] at hstep
+    have hjet1 := riemannianFiberNormSq_tensor0SAsRS_covApply_unitEval_le (I := I) (M := M) g s S x i
+    rw [← hBdef] at hjet1
+    have hX_le : riemannianFiberNormSq (I := I) (M := M) g 0 s x
+        (tensor0SAsRS (I := I) (M := M) x
+          (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+            x (smoothOrthoFrame (I := I) g x i x) (w x)
+            ((covApply (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+              (smoothOrthoFrame (I := I) g x i) (unitEvalSection (I := I) (M := M) g s S)) x))) ≤
+        Csup s * B := by
+      refine le_trans hstep ?_
+      set X := riemannianFiberNormSq (I := I) (M := M) g 0 s x
+        (tensor0SAsRS (I := I) (M := M) x
+          ((covApply (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+            (smoothOrthoFrame (I := I) g x i) (unitEvalSection (I := I) (M := M) g s S)) x)) with hX
+      have hX_nn : 0 ≤ X := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x _
+      have hwwnn : 0 ≤ g.inner x (w x) (w x) := by
+        rcases eq_or_ne (w x) 0 with h0 | h0
+        · rw [h0]; simp
+        · exact (g.pos x _ h0).le
+      calc Csup s * 1 * g.inner x (w x) (w x) * X
+          = Csup s * (g.inner x (w x) (w x) * X) := by ring
+        _ ≤ Csup s * (1 * B) := by
+            refine mul_le_mul_of_nonneg_left ?_ hCsnn
+            calc g.inner x (w x) (w x) * X
+                ≤ 1 * X := mul_le_mul_of_nonneg_right hww hX_nn
+              _ ≤ 1 * B := by rw [one_mul, one_mul]; exact hjet1
+        _ = Csup s * B := by rw [one_mul]
+    nlinarith [hX_le, hCsnn, hB_nn]
+  have hsub1 := riemannianFiberNormSq_tensor0SAsRS_add_le (I := I) (M := M) g x
+    (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) x
+        ((covApply (LeviCivita (I := I) g) (smoothOrthoFrame (I := I) g x i)
+          (smoothOrthoFrame (I := I) g x i)) x) (w x)
+        (unitEvalSection (I := I) (M := M) g s S x) + 0)
+    ((2 : ℝ) • riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+        x (smoothOrthoFrame (I := I) g x i x) (w x)
+        ((covApply (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+          (smoothOrthoFrame (I := I) g x i) (unitEvalSection (I := I) (M := M) g s S)) x))
+  have hsub2 := riemannianFiberNormSq_tensor0SAsRS_add_le (I := I) (M := M) g x
+    (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) x
+        ((covApply (LeviCivita (I := I) g) (smoothOrthoFrame (I := I) g x i)
+          (smoothOrthoFrame (I := I) g x i)) x) (w x)
+        (unitEvalSection (I := I) (M := M) g s S x))
+    (0 : Tensor0SSpace s I x)
+  have h0rfns : riemannianFiberNormSq (I := I) (M := M) g 0 s x
+      (tensor0SAsRS (I := I) (M := M) x (0 : Tensor0SSpace s I x)) = 0 := by
+    rw [show tensor0SAsRS (I := I) (M := M) x (0 : Tensor0SSpace s I x) =
+        (0 : TensorRSSpace 0 s I x) from by
+      apply tensorRSSpace_ext 0 s x
+      intro τ
+      rw [tensor0SAsRS_apply (I := I) (M := M) x (0 : Tensor0SSpace s I x) τ, smul_zero]
+      rfl]
+    exact riemannianFiberNormSq_zero (I := I) (M := M) g 0 s x
+  have hfin : (4 : ℝ) * (Csup s * Kchr) * D + 8 * (Csup s * B) ≤
+      8 * (Csup s * Kchr + Csup s + Csup s) * (A + B + D) := by
+    have h1 : Csup s * Kchr * D ≤ Csup s * Kchr * (A + B + D) :=
+      mul_le_mul_of_nonneg_left (by linarith) (by positivity)
+    have h2 : Csup s * B ≤ Csup s * (A + B + D) :=
+      mul_le_mul_of_nonneg_left (by linarith) hCsnn
+    nlinarith [h1, h2, hA_nn, hB_nn, hD_nn, hCsnn, hKchr_nn,
+      mul_nonneg (mul_nonneg hCsnn hKchr_nn) hD_nn, mul_nonneg hCsnn hB_nn]
+  refine le_trans hsub1 (le_trans ?_ hfin)
+  rw [h0rfns] at hsub2
+  linarith [hsub1, hsub2, hb1, hb3]
 
 /-- **Child C — the Christoffel-derivative residual fibre envelope (posited genuine internal-cancellation
 content).** For a closed smooth Riemannian manifold `(M, g)` there is a nonnegative valence-dependent

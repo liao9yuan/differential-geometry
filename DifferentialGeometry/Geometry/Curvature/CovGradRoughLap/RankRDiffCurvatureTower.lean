@@ -223,7 +223,15 @@ private theorem genuinePureRDiffOp_orderOne_linear
     (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr (c₁ • W₁ + c₂ • W₂)).toSection x =
       c₁ • (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₁).toSection x +
         c₂ • (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₂).toSection x := by
-  sorry
+  rw [genuinePureRDiffOpRS_one_linear (I := I) (M := M) g r rr c₁ c₂ W₁ W₂]
+  rw [show ((c₁ • genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₁ +
+        c₂ • genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₂).toSection x) =
+      (c₁ • genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₁).toSection x +
+        (c₂ • genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₂).toSection x from rfl]
+  rw [show ((c₁ • genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₁).toSection x) =
+      c₁ • (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₁).toSection x from rfl,
+    show ((c₂ • genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₂).toSection x) =
+      c₂ • (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₂).toSection x from rfl]
 
 /-- **Child (the `(∇R)`-endo factorisation, value-locality).** The order-`1` moving-centre pure-Riemann
 differentiated trace `genuinePureRDiffOpRS g r 1 rr` (the genuine `(∇R) W`) is **value-local** in the

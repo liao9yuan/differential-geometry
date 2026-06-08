@@ -514,6 +514,212 @@ theorem covGrad_genuinePureRDiffOpRS_eq
           (covGrad (I := I) (M := M) g r rr W))) + _
   rw [sub_add_cancel]
 
+/-! ## The order-`0` endomorphism is value-local and `ℝ`-linear in the contracted section
+
+The order-`0` moving-centre pure-Riemann curvature endomorphism `genuinePureREndo0RS g r rr` reads only
+the *fibre value* `W x` of the contracted section: its fibre value at `x` is built from the slot-`0`
+reading `(covGradBundleEquiv r m x).symm (W x) (Bᵢ x)` of `W x` against the moving frame `Bᵢ x` and the
+curvature operator `riemannOp (tensorCov g r m)`, all evaluated at the single point `x`.  Hence it is
+value-local and `ℝ`-linear in `W` at the fibre-value level (the moving frame `B = smoothOrthoFrame g x`
+itself is the curvature data, not the contracted section).  These are the structural fingerprint of a
+fixed smooth full-tensor curvature coefficient acting fibrewise on `W`. -/
+
+set_option linter.unusedSectionVars false in
+/-- **The frozen-frame order-`0` endomorphism fibre value reads only `W x`.** For two smooth
+compactly-supported `(r, m + 1)`-tensors `W₁, W₂` agreeing at `x` (`W₁.toSection x = W₂.toSection x`),
+the frozen fibre values coincide: `pureRFrozenEndoFibRS g r m B W₁ x = pureRFrozenEndoFibRS g r m B W₂ x`.
+By the defining formula, the fibre value reads only the slot-`0` reading
+`(covGradBundleEquiv r m x).symm (W x) (B i x)` of `W x`. -/
+private lemma pureRFrozenEndoFibRS_local
+    (g : SmoothRiemannianMetric I M) (r m : ℕ)
+    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
+    (W₁ W₂ : SmoothCcTensor g r (m + 1)) (x : M)
+    (hW : W₁.toSection x = W₂.toSection x) :
+    pureRFrozenEndoFibRS (I := I) (M := M) g r m B W₁ x =
+      pureRFrozenEndoFibRS (I := I) (M := M) g r m B W₂ x := by
+  rw [pureRFrozenEndoFibRS, pureRFrozenEndoFibRS]
+  refine congrArg (covGradBundleEquiv (I := I) (M := M) r m x) ?_
+  refine ContinuousLinearMap.ext (fun v => ?_)
+  rw [pureRFrozenDirCLMRS_apply, pureRFrozenDirCLMRS_apply]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [hW]
+
+set_option linter.unusedSectionVars false in
+/-- **The frozen-frame order-`0` endomorphism fibre value is additive in `W` at the fibre-value level.**
+`pureRFrozenEndoFibRS g r m B (W₁ + W₂) x = pureRFrozenEndoFibRS … W₁ x + pureRFrozenEndoFibRS … W₂ x`,
+because the slot-`0` reading `(covGradBundleEquiv r m x).symm (·) (B i x)` and the curvature operator
+`riemannOp (tensorCov g r m) x (B i x) v` are `ℝ`-linear. -/
+private lemma pureRFrozenEndoFibRS_add
+    (g : SmoothRiemannianMetric I M) (r m : ℕ)
+    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
+    (W₁ W₂ : SmoothCcTensor g r (m + 1)) (x : M) :
+    pureRFrozenEndoFibRS (I := I) (M := M) g r m B (W₁ + W₂) x =
+      pureRFrozenEndoFibRS (I := I) (M := M) g r m B W₁ x +
+        pureRFrozenEndoFibRS (I := I) (M := M) g r m B W₂ x := by
+  rw [pureRFrozenEndoFibRS, pureRFrozenEndoFibRS, pureRFrozenEndoFibRS, ← map_add]
+  refine congrArg (covGradBundleEquiv (I := I) (M := M) r m x) ?_
+  refine ContinuousLinearMap.ext (fun v => ?_)
+  rw [ContinuousLinearMap.add_apply, pureRFrozenDirCLMRS_apply, pureRFrozenDirCLMRS_apply,
+    pureRFrozenDirCLMRS_apply, ← Finset.sum_add_distrib]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [show ((W₁ + W₂).toSection x : TensorRSSpace r (m + 1) I x) =
+      W₁.toSection x + W₂.toSection x from by rw [SmoothCcTensor.toSection_add]; rfl,
+    map_add ((covGradBundleEquiv (I := I) (M := M) r m x).symm), ContinuousLinearMap.add_apply,
+    map_add (riemannOp (tensorCov (I := I) g r m) x (B i x) v)]
+
+set_option linter.unusedSectionVars false in
+/-- **The frozen-frame order-`0` endomorphism fibre value is `ℝ`-homogeneous in `W` at the fibre-value
+level.** `pureRFrozenEndoFibRS g r m B (c • W) x = c • pureRFrozenEndoFibRS … W x`. -/
+private lemma pureRFrozenEndoFibRS_smul
+    (g : SmoothRiemannianMetric I M) (r m : ℕ)
+    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
+    (c : ℝ) (W : SmoothCcTensor g r (m + 1)) (x : M) :
+    pureRFrozenEndoFibRS (I := I) (M := M) g r m B (c • W) x =
+      c • pureRFrozenEndoFibRS (I := I) (M := M) g r m B W x := by
+  rw [pureRFrozenEndoFibRS, pureRFrozenEndoFibRS, ← map_smul]
+  refine congrArg (covGradBundleEquiv (I := I) (M := M) r m x) ?_
+  refine ContinuousLinearMap.ext (fun v => ?_)
+  rw [ContinuousLinearMap.smul_apply, pureRFrozenDirCLMRS_apply, pureRFrozenDirCLMRS_apply,
+    Finset.smul_sum]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [show ((c • W).toSection x : TensorRSSpace r (m + 1) I x) = c • W.toSection x from by
+      rw [SmoothCcTensor.toSection_smul]; rfl,
+    map_smul ((covGradBundleEquiv (I := I) (M := M) r m x).symm), ContinuousLinearMap.smul_apply,
+    map_smul (riemannOp (tensorCov (I := I) g r m) x (B i x) v)]
+
+set_option linter.unusedSectionVars false in
+/-- **The order-`0` moving-centre endomorphism is value-local in the contracted section (public).** For
+two smooth compactly-supported `(r, rr)`-tensors agreeing at `x`, the order-`0` endomorphism fibre values
+coincide: `(genuinePureREndo0RS g r rr W₁).toSection x = (genuinePureREndo0RS g r rr W₂).toSection x`.
+The fibre value reads only `W x` (the curvature contraction of the slot-`0` reading of `W x`). -/
+theorem genuinePureREndo0RS_local
+    (g : SmoothRiemannianMetric I M) (r rr : ℕ)
+    (W₁ W₂ : SmoothCcTensor g r rr) (x : M)
+    (hW : W₁.toSection x = W₂.toSection x) :
+    (genuinePureREndo0RS (I := I) (M := M) g r rr W₁).toSection x =
+      (genuinePureREndo0RS (I := I) (M := M) g r rr W₂).toSection x := by
+  cases rr with
+  | zero => rfl
+  | succ m =>
+      change genuinePureREndoFibRS (I := I) (M := M) g r m W₁ x =
+        genuinePureREndoFibRS (I := I) (M := M) g r m W₂ x
+      rw [genuinePureREndoFibRS, genuinePureREndoFibRS]
+      exact pureRFrozenEndoFibRS_local (I := I) (M := M) g r m (smoothOrthoFrame (I := I) g x) W₁ W₂ x hW
+
+set_option linter.unusedSectionVars false in
+/-- **The order-`0` moving-centre endomorphism is additive in the contracted section at the fibre-value
+level (public).** -/
+theorem genuinePureREndo0RS_add
+    (g : SmoothRiemannianMetric I M) (r rr : ℕ)
+    (W₁ W₂ : SmoothCcTensor g r rr) (x : M) :
+    (genuinePureREndo0RS (I := I) (M := M) g r rr (W₁ + W₂)).toSection x =
+      (genuinePureREndo0RS (I := I) (M := M) g r rr W₁).toSection x +
+        (genuinePureREndo0RS (I := I) (M := M) g r rr W₂).toSection x := by
+  cases rr with
+  | zero =>
+      show (0 : TensorRSSpace r 0 I x) = (0 : TensorRSSpace r 0 I x) + (0 : TensorRSSpace r 0 I x)
+      rw [add_zero]
+  | succ m =>
+      change genuinePureREndoFibRS (I := I) (M := M) g r m (W₁ + W₂) x =
+        genuinePureREndoFibRS (I := I) (M := M) g r m W₁ x +
+          genuinePureREndoFibRS (I := I) (M := M) g r m W₂ x
+      rw [genuinePureREndoFibRS, genuinePureREndoFibRS, genuinePureREndoFibRS]
+      exact pureRFrozenEndoFibRS_add (I := I) (M := M) g r m (smoothOrthoFrame (I := I) g x) W₁ W₂ x
+
+set_option linter.unusedSectionVars false in
+/-- **The order-`0` moving-centre endomorphism is `ℝ`-homogeneous in the contracted section at the
+fibre-value level (public).** -/
+theorem genuinePureREndo0RS_smul
+    (g : SmoothRiemannianMetric I M) (r rr : ℕ)
+    (c : ℝ) (W : SmoothCcTensor g r rr) (x : M) :
+    (genuinePureREndo0RS (I := I) (M := M) g r rr (c • W)).toSection x =
+      c • (genuinePureREndo0RS (I := I) (M := M) g r rr W).toSection x := by
+  cases rr with
+  | zero =>
+      show (0 : TensorRSSpace r 0 I x) = c • (0 : TensorRSSpace r 0 I x)
+      rw [smul_zero]
+  | succ m =>
+      change genuinePureREndoFibRS (I := I) (M := M) g r m (c • W) x =
+        c • genuinePureREndoFibRS (I := I) (M := M) g r m W x
+      rw [genuinePureREndoFibRS, genuinePureREndoFibRS]
+      exact pureRFrozenEndoFibRS_smul (I := I) (M := M) g r m (smoothOrthoFrame (I := I) g x) c W x
+
+set_option linter.unusedSectionVars false in
+/-- **The order-`0` moving-centre endomorphism is additive in the contracted section (public,
+section-level).** `genuinePureREndo0RS g r rr (W₁ + W₂) = genuinePureREndo0RS … W₁ + genuinePureREndo0RS
+… W₂` as smooth compactly-supported `(r, rr)`-tensors. -/
+theorem genuinePureREndo0RS_add_section
+    (g : SmoothRiemannianMetric I M) (r rr : ℕ) (W₁ W₂ : SmoothCcTensor g r rr) :
+    genuinePureREndo0RS (I := I) (M := M) g r rr (W₁ + W₂) =
+      genuinePureREndo0RS (I := I) (M := M) g r rr W₁ +
+        genuinePureREndo0RS (I := I) (M := M) g r rr W₂ := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [show ((genuinePureREndo0RS (I := I) (M := M) g r rr W₁ +
+        genuinePureREndo0RS (I := I) (M := M) g r rr W₂).toSection x) =
+      (genuinePureREndo0RS (I := I) (M := M) g r rr W₁).toSection x +
+        (genuinePureREndo0RS (I := I) (M := M) g r rr W₂).toSection x from rfl]
+  exact genuinePureREndo0RS_add (I := I) (M := M) g r rr W₁ W₂ x
+
+set_option linter.unusedSectionVars false in
+/-- **The order-`0` moving-centre endomorphism is `ℝ`-homogeneous in the contracted section (public,
+section-level).** `genuinePureREndo0RS g r rr (c • W) = c • genuinePureREndo0RS … W`. -/
+theorem genuinePureREndo0RS_smul_section
+    (g : SmoothRiemannianMetric I M) (r rr : ℕ) (c : ℝ) (W : SmoothCcTensor g r rr) :
+    genuinePureREndo0RS (I := I) (M := M) g r rr (c • W) =
+      c • genuinePureREndo0RS (I := I) (M := M) g r rr W := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [show ((c • genuinePureREndo0RS (I := I) (M := M) g r rr W).toSection x) =
+      c • (genuinePureREndo0RS (I := I) (M := M) g r rr W).toSection x from rfl]
+  exact genuinePureREndo0RS_smul (I := I) (M := M) g r rr c W x
+
+set_option linter.unusedSectionVars false in
+/-- **The rank-cast `castRankCc_db` is additive.** -/
+theorem castRankCc_db_add (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ} (h : a = b)
+    (W₁ W₂ : SmoothCcTensor g r a) :
+    castRankCc_db g r h (W₁ + W₂) =
+      castRankCc_db g r h W₁ + castRankCc_db g r h W₂ := by
+  subst h; rfl
+
+set_option linter.unusedSectionVars false in
+/-- **The rank-cast `castRankCc_db` is `ℝ`-homogeneous.** -/
+theorem castRankCc_db_smul (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ} (h : a = b)
+    (c : ℝ) (W : SmoothCcTensor g r a) :
+    castRankCc_db g r h (c • W) = c • castRankCc_db g r h W := by
+  subst h; rfl
+
+set_option linter.unusedSectionVars false in
+/-- **The order-`1` differentiated moving-centre pure-Riemann curvature trace is `ℝ`-linear in the
+contracted section (the `(∇R) W` linearity, section-level).** `genuinePureRDiffOpRS g r 1 rr` is the
+genuine differentiated trace `covGrad(R W) − R(∇W)`, a composite of the `ℝ`-linear order-`0` endomorphism
+`genuinePureREndo0RS`, the `ℝ`-linear covariant gradient `covGrad`, and the `ℝ`-linear rank-cast
+`castRankCc_db`; hence it is `ℝ`-linear in `W`.  (The value-locality of this composite — the `∇W`
+cancellation — is the genuinely-irreducible analytic content; `ℝ`-linearity, by contrast, needs no
+cancellation and follows from the linearity of each constituent.) -/
+theorem genuinePureRDiffOpRS_one_linear
+    (g : SmoothRiemannianMetric I M) (r rr : ℕ)
+    (c₁ c₂ : ℝ) (W₁ W₂ : SmoothCcTensor g r rr) :
+    genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr (c₁ • W₁ + c₂ • W₂) =
+      c₁ • genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₁ +
+        c₂ • genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₂ := by
+  have hrec : ∀ W : SmoothCcTensor g r rr,
+      genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W =
+        covGrad (I := I) (M := M) g r (rr + 0)
+            (genuinePureREndo0RS (I := I) (M := M) g r rr W) -
+          castRankCc_db g r (by omega : (rr + 1) + 0 = rr + (0 + 1))
+            (genuinePureREndo0RS (I := I) (M := M) g r (rr + 1)
+              (covGrad (I := I) (M := M) g r rr W)) := fun W => rfl
+  rw [hrec, hrec, hrec]
+  rw [genuinePureREndo0RS_add_section, genuinePureREndo0RS_smul_section,
+    genuinePureREndo0RS_smul_section, covGrad_add, covGrad_smul, covGrad_smul]
+  rw [covGrad_add, covGrad_smul, covGrad_smul, genuinePureREndo0RS_add_section,
+    genuinePureREndo0RS_smul_section, genuinePureREndo0RS_smul_section,
+    castRankCc_db_add, castRankCc_db_smul, castRankCc_db_smul]
+  module
+
 /-- **The order-`0` endomorphism on `∇S` is the moving-frame pure-Riemann trace, in public form.** At
 valence `r`, rank `s + 1`, applied to the gradient field `∇S := covGrad g r s S`, the order-`0`
 moving-centre endomorphism `genuinePureRDiffOpRS g r 0 (s + 1) (∇S)` has fibre value at `x` equal to
