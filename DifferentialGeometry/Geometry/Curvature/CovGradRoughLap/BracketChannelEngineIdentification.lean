@@ -2,6 +2,9 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FrozenFramePureRC
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RicciTraceCarrier
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemainderFrameSumBridge
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemainderDivergenceForm
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameIntegratedNullity
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFramePureRCurvatureTracePairing
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.OperatorFieldPairingIBP
 
 /-!
 # The frame-free curvature operator field and the bracket-channel divergence-engine identification
@@ -148,10 +151,165 @@ private theorem frameSumBracketFib_pairing_pointwise_eq_movingFrameRemainder
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [one_mul]
 
-/-- **The four-carrier moving-frame remainder integrated nullity (the curvature line's single irreducible
-deep leaf — the integrated tensor Bochner–Weitzenböck identity).** For a closed smooth Riemannian manifold
-`(M, g)`, every covariant rank `s`, and every smooth compactly-supported `(0, s)`-tensor `S`, the global
-metric `L²` pairing of the **four-carrier moving-frame remainder**
+/-- **The integrated tensor Bochner–Weitzenböck curvature value (the curvature line's single irreducible
+deep leaf — the genuine classical integrated Bochner–Weitzenböck content, frame-free residue-value form).**
+For a closed smooth Riemannian manifold `(M, g)`, every covariant rank `s`, and every smooth
+compactly-supported `(0, s)`-tensor `S`, the explicit four-pairing curvature residue built from the
+*frame-free* curvature operator field `Φ₀ s := curvOpField g s` and the raised Ricci endomorphism — the
+gradient-field pure-Riemann curvature bilinear `⟨pureRGenuineDiffOp g 0 (s + 1) (∇S), ∇S⟩`, the rough
+Laplacian of the order-`0` curvature trace against `S`, the passenger-slot curvature bilinear
+`⟨appCc (slotExtend Φ₀) (∇S), ∇S⟩`, and the leading-slot Ricci-trace pairing `⟨ricTraceSection g s S,
+∇S⟩` — equals the genuine Weitzenböck curvature integral `‖Δ_∇ S‖²_{L²} − ‖∇²S‖²_{L²}`:
+```
+  ⟨pureRGenuineDiffOp g 0 (s + 1) (∇S), ∇S⟩_{L²}
+    − ⟨Δ_∇ (pureRGenuineDiffOp g 0 s S), S⟩_{L²}
+    − ⟨appCc (slotExtend Φ₀) (∇S), ∇S⟩_{L²}
+    + ⟨ricTraceSection g s S, ∇S⟩_{L²}
+  = ‖Δ_∇ S‖²_{L²} − ‖∇²S‖²_{L²},
+```
+with `Δ_∇ := rawTensorConnLapSmooth g 0 s`, `∇S := covGrad g 0 s S`,
+`∇²S := covGrad g 0 (s + 1) (covGrad g 0 s S)`, and `pureRGenuineDiffOp g 0 s S = appCc (Φ₀ s) S` the
+order-`0` moving-frame pure-Riemann curvature trace (the `Classical.choose` base spec defining
+`curvOpField`).
+
+**This is the genuine new mathematical content of the entire curvature line — the classical tensor
+Bochner–Weitzenböck curvature-term identity, in its cleanest fully-tensorial frame-free operator-field
+form** (no moving frame, no `remDiffBracketFib`, no `smoothExtensionTangent` jet). By the iterated Ricci
+identity the order-`2` rough-Laplacian / covariant-gradient commutator defect's gradient-slot reordering
+produces (I) the gradient-slot curvature `R(∇S)` and (II) the tail-slot curvature action (carried together
+by the pure-Riemann trace), (III) the differentiated curvature `(∇R) S` (the operator-field carrier
+`appCc (covGrad (Φ₀ s)) S`), and (IV) the leading-slot Ricci trace (the second-Bianchi / frame-Ricci
+folding, carried by `ricTraceSection`), plus a residual `∇²S`-order frame-bracket discrepancy
+(`tensor3rdCurvBracket`) that is a total covariant divergence integrating to zero over the closed manifold.
+The divergence-vanishing half is genuinely discharged downstream of this value by the frame-summed
+covariant integration-by-parts engine (`integral_frameSummed_covDeriv_combined_eq_zero`,
+`MovingFrameIntegratedNullity`); this value carries only the coupled curvature-identification content (the
+operator-field identification of `∑ᵢ ∇_{Bᵢ}(R(Bᵢ, ·) S)` with `appCc (covGrad (Φ₀ s)) S` and the
+second-Bianchi cyclic fold of the contracted slot into the raised Ricci endomorphism
+`ricTraceSection`).
+
+**Why the integrated value, not the pointwise per-direction match.** The differentiated-curvature trace
+`∑ᵢ ∇_{Bᵢ}(R(Bᵢ, ·) S)` is **non-tensorial in the direction** — its per-direction fibre realisation reads
+the `smoothExtensionTangent` jet of the frame direction, which is chart-selection-unbounded on `S²` (T1) —
+so the `∇³S`-cancellation and divergence form are *false term-by-term*. Only the *summed, integrated*
+match is sound, and that sound integrated content is exactly this value identity. The identity is stated at
+the *integrated* frame-free `L²` level throughout — it never extracts a per-direction `M → E` quantity — so
+it is trap-screened.
+
+**Non-vacuity (the `s = 0` litmus rejects the degenerate carrier — each carrier is necessary).** At
+`s = 0` the pure-Riemann and differentiated-curvature carriers vanish (`pureRGenuineDiffOp g 0 0 f` reads
+the curvature of a scalar, which vanishes; `Φ₀ 0 = curvOpField g 0` acts as the zero operator on the empty
+slot), so the value collapses to `⟨ricTraceSection g 0 f, ∇f⟩_{L²} = ‖Δ_∇ f‖²_{L²} − ‖∇²f‖²_{L²} =
+∫ Ric(∇f, ∇f)` — the classical scalar Bochner–Lichnerowicz identity (`ricTraceSection_zero_apply`,
+`weitzenbock_curvature_crossPairing_value`), genuinely nonzero on a non-flat manifold. Dropping the
+Ricci-trace carrier (perturbing the curvature to flat, the degenerate witness) makes the value FALSE at
+`s = 0`, so the carrier is genuinely required and the identity is not vacuous (it fails for a
+`κ ≠ 1`-perturbed curvature residue). The body is `sorry` (the genuine classical coupled curvature
+identification: the differentiated-curvature operator-field identification and the second-Bianchi Ricci
+fold); consumers transitively depend on `sorryAx`. This is the upstream twin of the downstream
+`bochnerWeitzenbockResidue_curvatureValue_root` (`MovingFrameCurvatureValueAnchor`, the verbatim
+restatement, proved over the bracket-channel root); it is homed here as the curvature line's most-upstream
+irreducible root, so the downstream value and the four-carrier nullity are proved over it and the
+architectural circle is never re-entered. -/
+theorem bochnerWeitzenbockCurvatureValue_root
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
+    tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+          (pureRGenuineDiffOp (I := I) (M := M) g 0 (s + 1)
+            (covGrad (I := I) (M := M) g 0 s S)).toFun
+          (covGrad (I := I) (M := M) g 0 s S).toFun -
+        tensorL2Inner (I := I) (M := M) g 0 s
+            (rawTensorConnLapSmooth (I := I) g 0 s
+              (pureRGenuineDiffOp (I := I) (M := M) g 0 s S)).toFun S.toFun -
+          tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+            (appCc (I := I) (M := M) g (s + 1) (s + 1)
+              (slotExtend (I := I) (M := M) g (s + 0) (s + 0)
+                (curvOpField (I := I) (M := M) g s))
+              (covGrad (I := I) (M := M) g 0 s S)).toFun
+            (covGrad (I := I) (M := M) g 0 s S).toFun +
+        tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+          (ricTraceSection (I := I) (M := M) g s S).toFun
+          (covGrad (I := I) (M := M) g 0 s S).toFun =
+      tensorL2Norm (I := I) (M := M) g 0 s
+          (rawTensorConnLapSmooth (I := I) g 0 s S).toFun ^ 2 -
+        tensorL2Norm (I := I) (M := M) g 0 (s + 1 + 1)
+          (covGrad (I := I) (M := M) g 0 (s + 1)
+            (covGrad (I := I) (M := M) g 0 s S)).toFun ^ 2 := by
+  sorry
+
+/-- **The genuine three-section curvature value (the operator-field-section form of the deep root,
+sorry-free reduction).** For a closed smooth Riemannian manifold `(M, g)`, every covariant rank `s`, and
+every smooth compactly-supported `(0, s)`-tensor `S`, the global metric `L²` pairing of the three concrete
+genuine operator-field curvature carriers `GcurvSection g s S + (appCc (covGrad g s s (Φ₀ s)) S +
+ricTraceSection g s S)` — the pure-Riemann `R(∇S)` trace, the differentiated-curvature `(∇R) S` trace, and
+the leading-slot Ricci trace — against `∇S := covGrad g 0 s S` equals the genuine Weitzenböck curvature
+integral `‖Δ_∇ S‖²_{L²} − ‖∇²S‖²_{L²}`.
+
+**Proof (sorry-free reduction to the residue-value root).** Split the LHS cross-pairing by left
+additivity (`tensorL2Inner_add_left`, the cross-integrabilities `SmoothCcTensor.integrable_inner_cross`)
+into the pure-Riemann, differentiated-curvature, and Ricci-trace summands; rewrite the pure-Riemann summand
+by `tensorL2Inner_GcurvSection_covGrad_eq_pureRGenuineDiffOp` and the differentiated-curvature summand by
+the operator-field integration-by-parts identity `tensorL2Inner_appCc_covGrad_covGrad_eq_neg` (the B-rule,
+with `appCc (Φ₀ s) S = pureRGenuineDiffOp g 0 s S` the base spec `appCc_curvOpField_eq_pureRGenuineDiffOp`)
+into the four-pairing curvature residue; that residue equals `‖Δ_∇ S‖²_{L²} − ‖∇²S‖²_{L²}` by the
+residue-value root `bochnerWeitzenbockCurvatureValue_root`. The two sides match by `ring`. The body
+transits only the residue-value root; consumers transitively depend on its `sorryAx`. -/
+theorem bochnerWeitzenbockCurvatureValue_threeSection
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
+    tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (GcurvSection (I := I) (M := M) g s S +
+          (appCc (I := I) (M := M) g s (s + 1)
+              (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S +
+            ricTraceSection (I := I) (M := M) g s S)).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun =
+      tensorL2Norm (I := I) (M := M) g 0 s
+          (rawTensorConnLapSmooth (I := I) g 0 s S).toFun ^ 2 -
+        tensorL2Norm (I := I) (M := M) g 0 (s + 1 + 1)
+          (covGrad (I := I) (M := M) g 0 (s + 1)
+            (covGrad (I := I) (M := M) g 0 s S)).toFun ^ 2 := by
+  classical
+  rw [← bochnerWeitzenbockCurvatureValue_root (I := I) (M := M) g s S]
+  rw [SmoothCcTensor.toFun_add]
+  rw [tensorL2Inner_add_left (I := I) (M := M) g 0 (s + 1)
+    (GcurvSection (I := I) (M := M) g s S).toFun
+    (appCc (I := I) (M := M) g s (s + 1)
+        (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S +
+      ricTraceSection (I := I) (M := M) g s S).toFun
+    (covGrad (I := I) (M := M) g 0 s S).toFun
+    (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+      (GcurvSection (I := I) (M := M) g s S) (covGrad (I := I) (M := M) g 0 s S))
+    (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+      (appCc (I := I) (M := M) g s (s + 1)
+          (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S +
+        ricTraceSection (I := I) (M := M) g s S) (covGrad (I := I) (M := M) g 0 s S))]
+  rw [SmoothCcTensor.toFun_add]
+  rw [tensorL2Inner_add_left (I := I) (M := M) g 0 (s + 1)
+    (appCc (I := I) (M := M) g s (s + 1)
+        (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S).toFun
+    (ricTraceSection (I := I) (M := M) g s S).toFun
+    (covGrad (I := I) (M := M) g 0 s S).toFun
+    (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+      (appCc (I := I) (M := M) g s (s + 1)
+        (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S)
+      (covGrad (I := I) (M := M) g 0 s S))
+    (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+      (ricTraceSection (I := I) (M := M) g s S) (covGrad (I := I) (M := M) g 0 s S))]
+  rw [tensorL2Inner_GcurvSection_covGrad_eq_pureRGenuineDiffOp (I := I) (M := M) g s S]
+  have hIBP := tensorL2Inner_appCc_covGrad_covGrad_eq_neg (I := I) (M := M) g s
+    (curvOpField (I := I) (M := M) g s) S
+  have hbase : appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s) S =
+      pureRGenuineDiffOp (I := I) (M := M) g 0 s S := by
+    have := appCc_curvOpField_eq_pureRGenuineDiffOp (I := I) (M := M) g s S
+    simpa using this
+  rw [hbase] at hIBP
+  rw [hIBP]
+  simp only [Nat.add_zero]
+  ring
+
+/-- **The four-carrier moving-frame remainder integrated nullity (the curvature line's integrated tensor
+Bochner–Weitzenböck identity — proved by composition over the residue-value root, with the divergence-IBP
+half discharged).** For a closed smooth Riemannian manifold `(M, g)`, every covariant rank `s`, and every
+smooth compactly-supported `(0, s)`-tensor `S`, the global metric `L²` pairing of the **four-carrier
+moving-frame remainder**
 ```
 Grem := Curv S − GcurvSection g s S − appCc (covGrad g s s (Φ₀ s)) S − ricTraceSection g s S
 ```
@@ -162,32 +320,18 @@ Grem := Curv S − GcurvSection g s S − appCc (covGrad g s s (Φ₀ s)) S − 
 ⟨Curv S − GcurvSection g s S − appCc (covGrad g s s (Φ₀ s)) S − ricTraceSection g s S, ∇S⟩_{L²} = 0.
 ```
 
-**This is the genuine new mathematical content of the entire curvature line.** After the sorry-free
-pure-Riemann peel removes the gradient-slot `R(∇S)` trace `GcurvSection g s S`, the surviving remainder —
-the differentiated-curvature `(∇R) S` discrepancy, the second-Bianchi / frame-Ricci fold into
-`ricTraceSection`, and the `∇²S`-order gradient-slot frame-bracket discrepancy `tensor3rdCurvBracket` —
-is, paired against `∇S` and **integrated over the closed manifold**, exactly zero. By the iterated Ricci
-identity the gradient-slot reordering of the order-`2` defect produces (I) the gradient-slot curvature
-`R(∇S)` and (II) the tail-slot curvature action (carried together by `GcurvSection`), (III) the
-differentiated curvature `(∇R) S` (the operator-field carrier `appCc (∇Φ₀ s) S`), and (IV) the
-leading-slot Ricci trace (the second-Bianchi / frame-Ricci folding, carried by `ricTraceSection`), and the
-residual is exactly the frame-summed bracket discrepancy, which telescopes — *only summed over the frame
-and integrated* — into the metric divergence of an `∇S`-order field whose closed-manifold integral
-vanishes (`integral_frameSummed_bracketCovDeriv_combined_eq_zero` / `BracketDivergenceForm`, with the
-gradient-slot channel `L²`-orthogonal `gradSlotCurv_pairing_covGrad_eq_zero`, the frame-trace bridge
-`ricEndoRaisedFib_inner_eq_frame_trace` / `ricTraceSection_apply_leadingSlot`, the second-Bianchi
-identities `second_bianchi_levi_civita_metric` / `contracted_second_bianchi`).
-
-**Why the integrated form, not the pointwise divergence-current `=ᵐ divᵍ X`.** The frame-summed bracket
-discrepancy is a *total covariant divergence* only after summing over the frame; exhibiting a single smooth
-tangent field `X` with `⟨Grem, ∇S⟩ =ᵐ divᵍ X` pointwise would require a closed-manifold Poisson/Hodge
-solve that is **absent from the library** (the pointwise divergence-current existence is over-strong — only
-the *integral* of the remainder pairing vanishes, the form recorded here). The bracket's per-direction
-first summand `∑ᵢ ∇_{[Bᵢ, W]}(∇_{Bᵢ} T)` is **false term-by-term** through `smoothExtensionTangent` (it is
-not a `Bᵢ`-divergence per direction, the direction reading being chart-selection-unbounded on `S²`; T1), so
-only the *frame-summed, integrated* moving-frame remainder is sound — and that is exactly the nullity
-posited here, at the integrated frame-free `L²` level over the genuine four carriers (it never extracts a
-per-direction `M → E` quantity, so it is trap-screened).
+**Proof (sorry-free composition over the residue-value root, with the divergence-IBP half discharged by
+the frame-summed engine).** The slot-complete carrier `Gcd := appCc (covGrad g s s (Φ₀ s)) S +
+ricTraceSection g s S` satisfies the genuine three-section value `⟨GcurvSection g s S + Gcd, ∇S⟩_{L²} =
+‖Δ_∇ S‖²_{L²} − ‖∇²S‖²_{L²}` (`bochnerWeitzenbockCurvatureValue_threeSection`, the sorry-free reduction of
+the residue-value root). Fed that value, the integrated moving-frame nullity producer
+`movingFrameNullity_of_genuineCrossPairingValue` (`MovingFrameIntegratedNullity`, which discharges the
+gradient-slot divergence-IBP half of the Bochner mechanism via the frame-summed covariant integration by
+parts `integral_frameSummed_covDeriv_combined_eq_zero` and the sorry-free Weitzenböck value
+`weitzenbock_curvature_crossPairing_value`) produces `⟨Curv S − GcurvSection g s S − Gcd, ∇S⟩_{L²} = 0`.
+The producer's literal-subtraction remainder `Curv S − GcurvSection g s S − Gcd` is the four-carrier
+remainder by `sub_sub` (`abel`). The body transits only the residue-value root
+`bochnerWeitzenbockCurvatureValue_root`; consumers transitively depend on its `sorryAx`.
 
 **Non-vacuity (the `s = 0` litmus — each carrier is necessary).** The nullity is **false** for an
 arbitrary choice of the four carriers: at `s = 0` the pure-Riemann and differentiated-curvature carriers
@@ -196,14 +340,7 @@ is zero), so the nullity forces `⟨Curv f − ricTraceSection g 0 f, ∇f⟩_{L
 Bochner–Lichnerowicz identity `⟨Curv f, ∇f⟩_{L²} = ⟨ricTraceSection g 0 f, ∇f⟩_{L²} = ∫ Ric(∇f, ∇f)`.
 Dropping the Ricci-trace carrier (perturbing the curvature to flat, the degenerate witness) makes the
 nullity FALSE at `s = 0` (the nonzero `∫ Ric(∇f, ∇f)` no longer cancels), so the carrier is genuinely
-required and the leaf is not vacuous (it fails for a `κ ≠ 1`-perturbed curvature residue). The body is
-`sorry` (the genuine classical integrated tensor Bochner–Weitzenböck identity: the second-Bianchi Ricci
-fold, the differentiated-curvature operator-field identification, and the gradient-slot bracket-discrepancy
-integrating to zero over the closed manifold); consumers transitively depend on `sorryAx`. This is the
-upstream twin of the downstream `fourCarrierRemainder_integrated_nullity_valueAnchored`
-(`MovingFrameCurvatureValueAnchor`, proved by composition through the value anchor `(★)`); it is homed here
-as the curvature line's most-upstream irreducible root, so the downstream value is proved over it and the
-architectural circle is never re-entered. -/
+required and the node is not vacuous (it fails for a `κ ≠ 1`-perturbed curvature residue). -/
 theorem fourCarrierRemainder_integrated_nullity
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     tensorL2Inner (I := I) (M := M) g 0 (s + 1)
@@ -213,7 +350,35 @@ theorem fourCarrierRemainder_integrated_nullity
             (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S -
           ricTraceSection (I := I) (M := M) g s S).toFun
         (covGrad (I := I) (M := M) g 0 s S).toFun = 0 := by
-  sorry
+  classical
+  -- The slot-complete carrier `Gcd := appCc (covGrad g s s (Φ₀ s)) S + ricTraceSection g s S`.
+  set Gcd : SmoothCcTensor g 0 (s + 1) :=
+    appCc (I := I) (M := M) g s (s + 1)
+        (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S +
+      ricTraceSection (I := I) (M := M) g s S with hGcd
+  -- The genuine three-section value, converted to the Weitzenböck-norm form the producer reads.
+  have hval : tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (GcurvSection (I := I) (M := M) g s S + Gcd).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun =
+      tensorL2Norm (I := I) (M := M) g 0 s
+          (rawTensorConnLapSmooth (I := I) g 0 s S).toFun ^ 2 -
+        tensorL2Norm (I := I) (M := M) g 0 (s + 1 + 1)
+          (covGrad (I := I) (M := M) g 0 (s + 1)
+            (covGrad (I := I) (M := M) g 0 s S)).toFun ^ 2 := by
+    rw [hGcd]
+    exact bochnerWeitzenbockCurvatureValue_threeSection (I := I) (M := M) g s S
+  -- The integrated moving-frame nullity producer, fed the genuine three-section value.
+  have hnull := movingFrameNullity_of_genuineCrossPairingValue (I := I) (M := M) g s S Gcd hval
+  -- The producer's literal-subtraction remainder is the four-carrier remainder (`sub_sub`).
+  rw [show (pointwiseTensorCurv (I := I) (M := M) g s S -
+          GcurvSection (I := I) (M := M) g s S -
+          appCc (I := I) (M := M) g s (s + 1)
+            (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S -
+          ricTraceSection (I := I) (M := M) g s S) =
+        pointwiseTensorCurv (I := I) (M := M) g s S -
+          GcurvSection (I := I) (M := M) g s S - Gcd from by
+    rw [hGcd]; abel]
+  exact hnull
 
 /-- **The bracket-channel divergence-engine identification (the curvature line's single irreducible deep
 leaf, the strictly-smaller bracket-channel form — the genuine classical leaf, homed at the most-upstream

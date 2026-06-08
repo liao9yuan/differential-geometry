@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradCovDe
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.BareSlot0CurryParseval
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.CovGradBundleEquivFiberNormFrameSum
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.SecondOrderCommutationResidueFiberBound
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RecenteredFrameUniformSups
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformProportionalCurvatureSup
 import DifferentialGeometry.Geometry.Connection.LeviCivita.TwoJetVanishingExtension
 
@@ -499,27 +500,33 @@ theorem exists_uniform_nablaTensorCurvSec_tensor0SAsRS_proportional_local
                 (tensor0SAsRS (I := I) (M := M) x (unitEvalSection (I := I) (M := M) g s S x))) := by
   sorry
 
-/-- **The recentered orthonormal-frame Christoffel-direction uniform sup (posited genuine missing
-compactness infrastructure).** For a closed smooth Riemannian manifold `(M, g)` there is a single
-nonnegative constant `Kchr`, independent of the base point `x` and the frame index `i`, bounding the
-squared `g`-norm of the Christoffel direction `(∇_{Bᵢ} Bᵢ)(x)` of the *recentered* orthonormal frame
-`Bᵢ := smoothOrthoFrame g x i` (the frame centred at `x` itself), `(∇_{Bᵢ} Bᵢ)(x) = (LeviCivita
-g).toFun Bᵢ x (Bᵢ x)`:
+/-- **The recentered orthonormal-frame Christoffel-direction uniform sup (thin re-export of the canonical
+home).** For a closed smooth Riemannian manifold `(M, g)` there is a single nonnegative constant `Kchr`,
+independent of the base point `x` and the frame index `i`, bounding the squared `g`-norm of the
+Christoffel direction `(∇_{Bᵢ} Bᵢ)(x)` of the *recentered* orthonormal frame `Bᵢ := smoothOrthoFrame g x
+i` (the frame centred at `x` itself), `(∇_{Bᵢ} Bᵢ)(x) = (LeviCivita g).toFun Bᵢ x (Bᵢ x)`:
 ```
 ∀ x i, g((∇_{Bᵢ} Bᵢ)(x), (∇_{Bᵢ} Bᵢ)(x)) ≤ Kchr.
 ```
 
 This is the genuine `‖∇B‖_∞`-style envelope of the recentered orthonormal frame's covariant derivative
-at its own centre. It is the one genuinely-missing piece of the `R(diff) V` curvature-class fibre
+at its own centre. It is the one remaining uniform input of the `R(diff) V` curvature-class fibre
 envelope (`exists_riemannSecClass_tensor0SAsRS_fiberOrder_bound`): the entire reduction of that class to
 the bundled curvature operator + the curvature sup + the `≤ 1`-jet `unitEvalSection` transports is
 established sorry-free above, and the curvature term `R(∇_{Bᵢ} Bᵢ, w) V` is bounded by `Csup ·
 g((∇_{Bᵢ} Bᵢ)(x), (∇_{Bᵢ} Bᵢ)(x)) · g(w x, w x) · rfns(S)` — so only this uniform Christoffel-direction
-bound remains. No bound on the recentered Christoffel direction exists on disk (the existing uniform
-curvature sups are computed frame-freely through the dual-frame route precisely because the recentered
-orthonormal frame is not jointly continuous in `(centre, point)` by elementary means); the body is
-`sorry` and `exists_riemannSecClass_tensor0SAsRS_fiberOrder_bound` transitively depends on its
-`sorryAx`. -/
+bound remains.
+
+**Reconciled (single source of truth).** This statement is verbatim the conclusion of the canonical
+home `exists_recenteredFrame_christoffelDirection_gNormSq_uniform_sup` of `RecenteredFrameUniformSups`,
+which proves it as glue over the connection-locality reduction
+`smoothOrthoFrame g x i =ᶠ[𝓝 x] chartFrameNorm g x i` and the chart-frame self-Christoffel chart-data
+sup `exists_uniform_chartFrameNorm_self_christoffel_gNorm_bound` (the genuinely-irreducible
+joint-smoothness bottom; its body is `sorry`). This lemma is discharged by a thin `exact` against that
+canonical home, so the duplicate is removed: consumers transit the single named joint-smoothness bottom
+rather than a bare per-file sorry. (The chart-frame self-Christoffel bottom is `sorry` because the
+recentered orthonormal frame is not jointly continuous in `(centre, point)`; consumers transitively
+depend on its `sorryAx`.) -/
 theorem exists_uniform_recentered_christoffel_direction_gNorm_bound
     (g : SmoothRiemannianMetric I M) :
     ∃ Kchr : ℝ, 0 ≤ Kchr ∧
@@ -527,8 +534,8 @@ theorem exists_uniform_recentered_christoffel_direction_gNorm_bound
         g.inner x ((LeviCivita (I := I) g).toFun (smoothOrthoFrame (I := I) g x i) x
             (smoothOrthoFrame (I := I) g x i x))
           ((LeviCivita (I := I) g).toFun (smoothOrthoFrame (I := I) g x i) x
-            (smoothOrthoFrame (I := I) g x i x)) ≤ Kchr := by
-  sorry
+            (smoothOrthoFrame (I := I) g x i x)) ≤ Kchr :=
+  exists_recenteredFrame_christoffelDirection_gNormSq_uniform_sup (I := I) (M := M) g
 
 /-- **Child A — the differentiated-curvature `(∇R) S` class fibre envelope (posited genuine `∇R`
 content).** For a closed smooth Riemannian manifold `(M, g)` there is a nonnegative valence-dependent
