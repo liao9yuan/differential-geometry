@@ -1219,6 +1219,73 @@ private theorem deTurckGaugeCancellation_firstOrderCancelledLinearization_contin
         tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)).le_opNorm v
   rwa [ContinuousLinearEquiv.coe_coe] at hle
 
+/-- **The order-`(a+1)` coordinate-spectral lift of a smooth compactly-supported `(0,2)`-tensor
+section.**
+
+The order-`(a+1)` analogue of `deTurckG0SpectralN`, with the Sobolev order written in the working
+`Hᵃ⁺¹` form `(a : ℝ) + 1` (so it lands in the *same* tower type the bounded inverse `L.symm` acts
+on, with no `↑(a+1)` cast).  Its eigenbasis coordinates are the `L²` coordinates of `T`; the
+weighted square-summability witness is `smoothCcTensor_tensorL2Coeff_weighted_summable` at the real
+order `(a : ℝ) + 1` (valid at every real order). -/
+noncomputable def g0SpectralLiftSucc (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (T : Integral.L2.SmoothCcTensor g₀ 0 2) :
+    tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) where
+  coeff i :=
+    tensorL2Coeff (I := I) (M := M)
+      (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+      (Integral.L2.SmoothCcTensor.toL2 T) i
+  weighted_summable :=
+    smoothCcTensor_tensorL2Coeff_weighted_summable (I := I) (M := M) g₀
+      ((a : ℝ) + 1) T (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+
+@[simp] theorem g0SpectralLiftSucc_coeff (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (T : Integral.L2.SmoothCcTensor g₀ 0 2)
+    (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
+    (g0SpectralLiftSucc (I := I) g₀ a T).coeff i =
+      tensorL2Coeff (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+        (Integral.L2.SmoothCcTensor.toL2 T) i := rfl
+
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
+  [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+/-- The `g`-fibre operator bound `gFibreOpBound` is monotone in its bound parameter: a control by
+`δ` is also a control by any larger `δ'`. -/
+theorem gFibreOpBound_mono (g₀ : SmoothRiemannianMetric I M)
+    (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
+    {δ δ' : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ h δ) (hle : δ ≤ δ') :
+    gFibreOpBound (I := I) (M := M) g₀ h δ' := by
+  intro x v w
+  refine (hδ x v w).trans ?_
+  have hv : 0 ≤ Real.sqrt (g₀.inner x v v) := Real.sqrt_nonneg _
+  have hw : 0 ≤ Real.sqrt (g₀.inner x w w) := Real.sqrt_nonneg _
+  have hstep : δ * Real.sqrt (g₀.inner x v v) ≤ δ' * Real.sqrt (g₀.inner x v v) :=
+    mul_le_mul_of_nonneg_right hle hv
+  nlinarith [hstep, hw, hv]
+
+/-- **The rescale selector for the on-ball Lipschitz-smallness contraction.**  Given the fixed
+nonnegative heat-output / fibre / Nemytskii / inverse-norm constants, there is a single rescale
+`t > 0` with `t ≤ 1`, keeping the realized perturbation in the `1/4`-fibre gate (`Cf · Cs · t ≤ 1/4`)
+on the unit ball, and making the composite Lipschitz rate `C' · Cl · t` subordinate to the bounded
+inverse (`Cinv · (C' · Cl · t) < 1`).  Purely the real-arithmetic of the shrink, isolated so the main
+proof never folds these scalars through its heavy spectral context. -/
+private theorem exists_lipschitzSmall_rescale
+    (Cinv C' Cl Cf Cs : ℝ) (hCinv : 0 ≤ Cinv) (hC'0 : 0 ≤ C') (hCl0 : 0 ≤ Cl)
+    (hCf0 : 0 ≤ Cf) (hCs0 : 0 ≤ Cs) :
+    ∃ t : ℝ, 0 < t ∧ t ≤ 1 ∧ Cf * Cs * t ≤ 1 / 4 ∧ Cinv * (C' * Cl * t) < 1 := by
+  have hccl : 0 ≤ Cinv * C' * Cl := by positivity
+  have hcfcs : 0 ≤ Cf * Cs := by positivity
+  set D : ℝ := 1 + Cinv * C' * Cl + 4 * Cf * Cs with hD_def
+  have hD1 : (1 : ℝ) ≤ D := by rw [hD_def]; nlinarith
+  have hDpos : 0 < D := by linarith
+  have h4 : 4 * (Cf * Cs) ≤ D := by rw [hD_def]; nlinarith
+  have hkey : Cinv * C' * Cl ≤ D := by rw [hD_def]; nlinarith
+  refine ⟨1 / (2 * D), by positivity, ?_, ?_, ?_⟩
+  · rw [div_le_one (by positivity)]; nlinarith
+  · rw [mul_one_div, div_le_iff₀ (by positivity)]; nlinarith
+  · have heq : Cinv * (C' * Cl * (1 / (2 * D))) = (Cinv * C' * Cl) / (2 * D) := by ring
+    rw [heq, div_lt_one (by positivity)]; nlinarith
+
+set_option maxHeartbeats 400000 in
 /-- **The Lipschitz-small non-linear DeTurck gauge remainder on the spectral Sobolev tower,
 subordinate to the coercive bounded inverse, on a ball (the non-linear half of the
 gauge-cancellation solvability).**
@@ -1251,8 +1318,16 @@ ball by composing with the nonexpansive radial retraction onto the ball).
 structurally distinct from the existence of the gauge correction the consuming node builds from it.
 **Intrinsic** — the `Hᵃ⁺¹` norm is `g`-inner; no `chartJ`, no raw `M → E`.
 
-The body is `sorry` (the supercritical on-ball Lipschitz-smallness of the realized DeTurck gauge
-remainder, subordinate to the coercive bounded inverse). -/
+The remainder map is exhibited concretely as `N u := g0SpectralLiftSucc g₀ a (deTurckRealizeRemainderOf
+g₀ g_bg (P u)) − (its value at 0)`, the order-`(a+1)` coordinate-spectral lift of the realized DeTurck
+remainder of a **rescaled** all-order-smoothing heat synthesis `P u := B₀ (t • u)` (origin-fixed by
+subtracting `N 0`).  The on-ball Lipschitz rate `κ := C' · Cl · t` shrinks with the rescale `t`: a
+smaller `t` shrinks the realized perturbation's `H^{a+3}` norm, hence the order-`(a+1)` weighted-`Hᵃ`
+seminorm of the remainder difference (via the higher-order Nemytskii bound
+`exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder` at order `a+1`, gated at a fixed `Cs`-size
+and `1/4 < 1/2`-fibre slack), so `t` can be taken small enough that `Cinv · κ < 1`.  Consumers
+transitively depend on `sorryAx` through that posited higher-order Nemytskii bound (the precisely-named
+supercritical leaf this fill transits over). -/
 private theorem deTurckGaugeCancellation_nonlinearRemainder_lipschitzSmall_on_ball
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -1267,7 +1342,268 @@ private theorem deTurckGaugeCancellation_nonlinearRemainder_lipschitzSmall_on_ba
       ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
         u ∈ Metric.closedBall (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) ρ →
         u' ∈ Metric.closedBall (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) ρ →
-        ‖N u - N u'‖ ≤ κ * ‖u - u'‖ := sorry
+        ‖N u - N u'‖ ≤ κ * ‖u - u'‖ := by
+  classical
+  -- The supercriticality at the order-`(a+1)` spectral level (the order the spectral remainder
+  -- lives at) and the nonnegativity of the working order `(a : ℝ) + 1`.
+  have ha1 : 2 * (a + 1) > Module.finrank ℝ E + 4 := by omega
+  have ha0 : (0 : ℝ) ≤ (a : ℝ) + 1 := by positivity
+  -- The all-order-smoothing base carrier: the unit-time heat-output smooth representative.  Positive
+  -- time gains every derivative, so every intrinsic chart-Sobolev norm is linearly `‖·‖`-controlled
+  -- and the difference is order-`(2K)`-Lipschitz, for a single even order `2K` covering both the
+  -- order-`(a+3)` Nemytskii input and the fibre-smallness order.
+  set B₀ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) → Integral.L2.SmoothCcTensor g₀ 0 2 :=
+    fun u => tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M) g₀ 0 2 one_pos ha0 u
+    with hB₀_def
+  set K : ℕ := a + 3 + Module.finrank ℝ E with hK_def
+  have hK_ge : a + 3 ≤ 2 * K := by omega
+  have hK_fib : 2 * K > Module.finrank ℝ E + 4 := by omega
+  -- The fixed (rescale-independent) heat-output constants: size at order `2K`, Lipschitz at order
+  -- `2K`, and the `g`-fibre-smallness constant from the `(a+2)`-Sobolev fibre bound.
+  obtain ⟨Cs, hCs0, hCs⟩ :=
+    tensorHeatSemigroupHs_output_smoothRepr_toHs_le (I := I) (M := M) g₀ one_pos ha0 K
+  obtain ⟨Cl, hCl0, hCl⟩ :=
+    tensorHeatSemigroupHs_output_smoothRepr_toHs_sub_le (I := I) (M := M) g₀ one_pos ha0 K
+  obtain ⟨Cf, hCf0, hCf⟩ :=
+    gFibreOpBound_ccTensorBilinSymm_le_tensorHsNorm (I := I) (M := M) g₀
+  -- The higher-order chart-RHS Sobolev–Lipschitz Nemytskii bound at the order-`(a+1)` spectral
+  -- seminorm, gated at the *fixed* size cap `Cs` and a *fixed* fibre slack `1/4 < 1/2` (independent
+  -- of the rescale; the realized perturbation stays inside both gates on the ball for a small
+  -- enough rescale).  This is the genuine supercritical content; its body carries a `sorry`, so
+  -- this fill TRANSITS over `exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder`.
+  obtain ⟨C', hC'0, hchild⟩ :=
+    exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder (I := I) g₀ g_bg (a + 1) ha1
+      Cs hCs0 (1 / 4) (by norm_num) (by norm_num)
+  -- The single rescale `t > 0`, chosen so that on the unit ball the realized perturbation stays in
+  -- the `Cs`-size / `1/4`-fibre gates *and* the composite Lipschitz rate `κ := C' · Cl · t` is
+  -- subordinate to the bounded inverse, `Cinv · κ < 1`.
+  obtain ⟨t, ht_pos, ht_le1, hfib_t, hsmall_t⟩ :=
+    exists_lipschitzSmall_rescale Cinv C' Cl Cf Cs hCinv hC'0 hCl0 hCf0 hCs0
+  -- The rescaled synthesis `P u := B₀ (t • u)`, the order-`(a+1)` spectral nonlinearity of its
+  -- realized DeTurck remainder, and `N` origin-fixed by subtracting its value at `0`.
+  set P : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) → Integral.L2.SmoothCcTensor g₀ 0 2 :=
+    fun u => B₀ (t • u) with hP_def
+  set N : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+      tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) :=
+    fun u => g0SpectralLiftSucc (I := I) g₀ a (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))
+      - g0SpectralLiftSucc (I := I) g₀ a
+          (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))))
+    with hN_def
+  refine ⟨N, C' * Cl * t, 1, by positivity, one_pos, hsmall_t, ?_, ?_⟩
+  · -- Origin-fixing: both summands of `N 0` are the same spectral lift, so `N 0 = 0`.
+    rw [hN_def]; simp
+  · -- The on-ball Lipschitz bound.
+    intro u u' hu hu'
+    -- Ball membership in the order-`(a+1)` norm.
+    rw [mem_closedBall_zero_iff] at hu hu'
+    -- The constant `N 0`-summand cancels in the difference.
+    have hNsub : N u - N u'
+        = g0SpectralLiftSucc (I := I) g₀ a (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))
+          - g0SpectralLiftSucc (I := I) g₀ a
+              (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u')) := by
+      simp only [hN_def]; abel
+    rw [hNsub]
+    -- The order-`(2K)` heat-output size of the rescaled synthesis (linear in `t · ‖·‖`).
+    have hsize : ∀ v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * K) (P v)‖
+          ≤ Cs * (t * ‖v‖) := by
+      intro v
+      have h1 := hCs (t • v)
+      have hnorm : ‖t • v‖ = t * ‖v‖ := by
+        rw [norm_smul, Real.norm_eq_abs, abs_of_nonneg ht_pos.le]
+      rw [hnorm] at h1
+      rw [hP_def]; simp only; rw [hB₀_def]; exact h1
+    -- The order-`(a+3)` heat-output size of the rescaled synthesis (by order monotonicity).
+    have hsize3 : ∀ v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 3) (P v)‖
+          ≤ Cs * (t * ‖v‖) := by
+      intro v
+      exact le_trans (toHs_norm_mono (I := I) (M := M) g₀ hK_ge (P v)) (hsize v)
+    -- The size cap `‖(P v).toHs(a+3)‖ ≤ Cs` for `v` in the unit ball.
+    have hsizeCap : ∀ v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1), ‖v‖ ≤ 1 →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 1 + 2) (P v)‖ ≤ Cs := by
+      intro v hv
+      have h32 : a + 3 = a + 1 + 2 := by omega
+      have := hsize3 v
+      rw [h32] at this
+      refine this.trans ?_
+      have : t * ‖v‖ ≤ 1 := by
+        calc t * ‖v‖ ≤ t * 1 := by exact mul_le_mul_of_nonneg_left hv ht_pos.le
+          _ = t := mul_one t
+          _ ≤ 1 := ht_le1
+      nlinarith [hCs0, this]
+    -- The `g`-fibre-smallness of the rescaled perturbation at the fixed slack `1/4`, for `v` in the
+    -- unit ball (from the order-`(2K)`-Sobolev fibre bound + the order-`(2K)` size, monotone in `t`).
+    have hfibCap : ∀ v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1), ‖v‖ ≤ 1 →
+        gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ (P v)) (1 / 4) := by
+      intro v hv
+      have hfb := hCf K hK_fib (P v)
+      have hbound : Cf * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+          (2 * K) (P v)‖ ≤ 1 / 4 := by
+        have htv : t * ‖v‖ ≤ t := by
+          calc t * ‖v‖ ≤ t * 1 := mul_le_mul_of_nonneg_left hv ht_pos.le
+            _ = t := mul_one t
+        have hsz : Cf * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+            (2 * K) (P v)‖ ≤ Cf * (Cs * t) := by
+          refine mul_le_mul_of_nonneg_left ?_ hCf0
+          exact (hsize v).trans (by nlinarith [hCs0, htv])
+        calc Cf * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * K) (P v)‖
+            ≤ Cf * (Cs * t) := hsz
+          _ = Cf * Cs * t := by ring
+          _ ≤ 1 / 4 := hfib_t
+      exact gFibreOpBound_mono (I := I) (M := M) g₀ _ hfb hbound
+    -- The fibre witnesses for `u`, `u'`, the `δ < 1` weakening, and the realized metrics.
+    have hfib_u : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ (P u)) (1 / 4) :=
+      hfibCap u hu
+    have hfib_u' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ (P u')) (1 / 4) :=
+      hfibCap u' hu'
+    have hex_u : ∃ δ' : ℝ, δ' < 1 ∧
+        gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ (P u)) δ' :=
+      ⟨1 / 4, by norm_num, hfib_u⟩
+    have hex_u' : ∃ δ' : ℝ, δ' < 1 ∧
+        gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ (P u')) δ' :=
+      ⟨1 / 4, by norm_num, hfib_u'⟩
+    set g₁ : SmoothRiemannianMetric I M :=
+      tensorSectionRealizeMetric (I := I) g₀ (P u) hex_u.choose_spec.1 hex_u.choose_spec.2
+      with hg₁_def
+    set g₂ : SmoothRiemannianMetric I M :=
+      tensorSectionRealizeMetric (I := I) g₀ (P u') hex_u'.choose_spec.1 hex_u'.choose_spec.2
+      with hg₂_def
+    -- `deTurckRealizeRemainderOf` reduces, on the fibre-small locus, to the chart-frame realized
+    -- DeTurck remainder section the Nemytskii bound controls.
+    have hreduce_u : deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u)
+        = realizedRHSRemainderSection (I := I) g₀ g_bg g₁ (P u) := by
+      rw [deTurckRealizeRemainderOf, dif_pos hex_u]; rfl
+    have hreduce_u' : deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u')
+        = realizedRHSRemainderSection (I := I) g₀ g_bg g₂ (P u') := by
+      rw [deTurckRealizeRemainderOf, dif_pos hex_u']; rfl
+    -- The realized metrics carry the fibrewise `inner`-identities the Nemytskii bound needs.
+    have hg₁_inner : ∀ (x : M) (v w : TangentSpace I x),
+        g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (P u) x v w := by
+      intro x v w; rw [hg₁_def, tensorSectionRealizeMetric_inner]
+    have hg₂_inner : ∀ (x : M) (v w : TangentSpace I x),
+        g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (P u') x v w := by
+      intro x v w; rw [hg₂_def, tensorSectionRealizeMetric_inner]
+    -- The size caps at the gate order `(a+1)+2`.
+    have hsizeCap_u :
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 1 + 2) (P u)‖ ≤ Cs :=
+      hsizeCap u hu
+    have hsizeCap_u' :
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 1 + 2) (P u')‖ ≤ Cs :=
+      hsizeCap u' hu'
+    -- The higher-order Nemytskii bound on the weighted-`Hᵃ⁺¹` square-sum of the coordinate diff.
+    obtain ⟨_, hsum_le⟩ :=
+      hchild (P u) (P u') g₁ g₂ hg₁_inner hg₂_inner hfib_u hfib_u' hsizeCap_u hsizeCap_u'
+    -- The order-`(a+3)` heat-output Lipschitz of the rescaled synthesis (linear in `t · ‖u − u'‖`).
+    have hlip3 :
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 1 + 2) (P u - P u')‖
+          ≤ Cl * (t * ‖u - u'‖) := by
+      have hmono := toHs_norm_mono (I := I) (M := M) g₀ (m := a + 1 + 2) (n := 2 * K)
+        (by omega) (P u - P u')
+      refine hmono.trans ?_
+      have hsubeq : P u - P u' = B₀ (t • u) - B₀ (t • u') := by
+        simp only [hP_def]
+      rw [hsubeq, hB₀_def]
+      have hcl := hCl (t • u) (t • u')
+      refine hcl.trans ?_
+      have hnorm : ‖t • u - t • u'‖ = t * ‖u - u'‖ := by
+        rw [← smul_sub, norm_smul, Real.norm_eq_abs, abs_of_nonneg ht_pos.le]
+      rw [hnorm]
+    -- The spectral order-`(a+1)` `dist²` equals the weighted-`Hᵃ⁺¹` square-sum the bound controls.
+    have hdist_sq :
+        dist (g0SpectralLiftSucc (I := I) g₀ a (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u)))
+            (g0SpectralLiftSucc (I := I) g₀ a
+              (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u'))) ^ 2
+          = ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+              tensorSobolevWeight (I := I) (M := M) i (((a + 1 : ℕ) : ℝ)) *
+                (tensorL2Coeff (I := I) (M := M)
+                    (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                    (Integral.L2.SmoothCcTensor.toL2
+                        (realizedRHSRemainderSection (I := I) g₀ g_bg g₁ (P u))
+                      - Integral.L2.SmoothCcTensor.toL2
+                        (realizedRHSRemainderSection (I := I) g₀ g_bg g₂ (P u'))) i) ^ 2 := by
+      rw [dist_eq_norm, tensorHs.norm_sq_eq_tsum]
+      refine tsum_congr (fun i => ?_)
+      have hwt : tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 1)
+          = tensorSobolevWeight (I := I) (M := M) i (((a + 1 : ℕ) : ℝ)) := by push_cast; ring_nf
+      rw [hwt]
+      congr 1
+      have hcoeff_sub :
+          (g0SpectralLiftSucc (I := I) g₀ a (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))
+              - g0SpectralLiftSucc (I := I) g₀ a
+                (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u'))).coeff i
+            = (g0SpectralLiftSucc (I := I) g₀ a
+                (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))).coeff i
+              - (g0SpectralLiftSucc (I := I) g₀ a
+                (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u'))).coeff i := by
+        rw [sub_eq_add_neg, tensorHs.add_coeff, tensorHs.neg_coeff, sub_eq_add_neg]
+      rw [hcoeff_sub, g0SpectralLiftSucc_coeff, g0SpectralLiftSucc_coeff, hreduce_u, hreduce_u']
+      have hsub :
+          tensorL2Coeff (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                (Integral.L2.SmoothCcTensor.toL2
+                    (realizedRHSRemainderSection (I := I) g₀ g_bg g₁ (P u))
+                  - Integral.L2.SmoothCcTensor.toL2
+                    (realizedRHSRemainderSection (I := I) g₀ g_bg g₂ (P u'))) i
+              = tensorL2Coeff (I := I) (M := M)
+                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                  (Integral.L2.SmoothCcTensor.toL2
+                    (realizedRHSRemainderSection (I := I) g₀ g_bg g₁ (P u))) i
+                - tensorL2Coeff (I := I) (M := M)
+                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                  (Integral.L2.SmoothCcTensor.toL2
+                    (realizedRHSRemainderSection (I := I) g₀ g_bg g₂ (P u'))) i := by
+        unfold tensorL2Coeff
+        rw [map_sub]
+        rfl
+      rw [hsub]
+    -- Chain: `‖·‖ = dist ≤ (C'·‖diff.toHs(a+3)‖) ≤ (C'·Cl·t·‖u−u'‖) = κ·‖u−u'‖`.
+    have hdist_eq_norm :
+        ‖g0SpectralLiftSucc (I := I) g₀ a (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u))
+            - g0SpectralLiftSucc (I := I) g₀ a
+              (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u'))‖
+          = dist (g0SpectralLiftSucc (I := I) g₀ a (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u)))
+              (g0SpectralLiftSucc (I := I) g₀ a
+                (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u'))) := (dist_eq_norm _ _).symm
+    rw [hdist_eq_norm]
+    -- The Nemytskii target `‖diff.toHs((a+1)+2)‖ = ‖diff.toHs(a+3)‖`, and the `κ` bound on it.
+    have hKlip_nn : 0 ≤ C' * (Cl * (t * ‖u - u'‖)) := by positivity
+    have htoHs_nn : 0 ≤ ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+        (a + 1 + 2) (P u - P u')‖ := norm_nonneg _
+    have hstep1 :
+        dist (g0SpectralLiftSucc (I := I) g₀ a (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u)))
+            (g0SpectralLiftSucc (I := I) g₀ a
+              (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u'))) ^ 2
+          ≤ (C' * (Cl * (t * ‖u - u'‖))) ^ 2 := by
+      rw [hdist_sq]
+      refine hsum_le.trans ?_
+      have hmul : C' * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+            (a + 1 + 2) (P u - P u')‖
+          ≤ C' * (Cl * (t * ‖u - u'‖)) := mul_le_mul_of_nonneg_left hlip3 hC'0
+      have hC'mul_nn : 0 ≤ C' * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0)
+          (s := 2) (a + 1 + 2) (P u - P u')‖ := mul_nonneg hC'0 htoHs_nn
+      nlinarith [hmul, hC'mul_nn, hKlip_nn]
+    have hdist_nn :
+        0 ≤ dist (g0SpectralLiftSucc (I := I) g₀ a (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u)))
+            (g0SpectralLiftSucc (I := I) g₀ a
+              (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u'))) := dist_nonneg
+    have hfinal :
+        dist (g0SpectralLiftSucc (I := I) g₀ a (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u)))
+            (g0SpectralLiftSucc (I := I) g₀ a
+              (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u')))
+          ≤ C' * (Cl * (t * ‖u - u'‖)) := by
+      calc dist (g0SpectralLiftSucc (I := I) g₀ a (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u)))
+            (g0SpectralLiftSucc (I := I) g₀ a
+              (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u')))
+          = Real.sqrt
+              (dist (g0SpectralLiftSucc (I := I) g₀ a (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u)))
+                (g0SpectralLiftSucc (I := I) g₀ a
+                  (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P u'))) ^ 2) :=
+            (Real.sqrt_sq hdist_nn).symm
+        _ ≤ Real.sqrt ((C' * (Cl * (t * ‖u - u'‖))) ^ 2) := Real.sqrt_le_sqrt hstep1
+        _ = C' * (Cl * (t * ‖u - u'‖)) := Real.sqrt_sq hKlip_nn
+    refine hfinal.trans (le_of_eq ?_)
+    ring
 
 section RadialRetraction
 
