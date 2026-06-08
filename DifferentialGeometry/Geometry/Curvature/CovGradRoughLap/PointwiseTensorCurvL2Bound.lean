@@ -715,27 +715,19 @@ theorem exists_pointwiseTensorCurv_pointwise_fiberNormSq_bound
               ((covGrad (I := I) (M := M) g 0 (s + 1)
                 (covGrad (I := I) (M := M) g 0 s S)).toSection x)) := by
   classical
-  obtain ⟨Cper, hCper_nn, hsplit⟩ :=
-    exists_pointwiseTensorCurv_genuineRemainder_fiberNormSq_bound (I := I) (M := M) g
-  refine ⟨fun s => 2 * Cper s, fun s => mul_nonneg (by norm_num) (hCper_nn s), fun s S x => ?_⟩
-  obtain ⟨Ggen, Grem, heq, hgen, hrem⟩ := hsplit s S x
-  set fS : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) with hfS
-  set fgS : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
-      ((covGrad (I := I) (M := M) g 0 s S).toSection x) with hfgS
-  set fg2S : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
-      ((covGrad (I := I) (M := M) g 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S)).toSection x)
-    with hfg2S
-  have hfS_nn : 0 ≤ fS := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x _
-  have hfgS_nn : 0 ≤ fgS := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x _
-  have hfg2S_nn : 0 ≤ fg2S := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1 + 1) x _
-  have hCsq_nn : 0 ≤ Cper s ^ 2 := sq_nonneg _
-  have hadd := riemannianFiberNormSq_add_le (I := I) (M := M) g 0 (s + 1) x Ggen Grem
-  rw [heq]
-  -- `rfns(Ggen + Grem) ≤ 2 rfns(Ggen) + 2 rfns(Grem) ≤ 2 Cper² (2 fS + 2 fgS + fg2S)`,
-  -- dominated by `(2 Cper)² (fS + fgS + fg2S) = 4 Cper² (fS + fgS + fg2S)`.
-  have hsq : (2 * Cper s) ^ 2 = 4 * Cper s ^ 2 := by ring
-  rw [hsq]
-  nlinarith [hadd, hgen, hrem, hfS_nn, hfgS_nn, hfg2S_nn, hCsq_nn]
+  obtain ⟨Cic, hCic_nn, hjet⟩ := pointwiseTensorCurv_fullSum_gradedCurvJet (I := I) (M := M) g
+  -- The `k = 0` specialisation of the full-sum graded curvature jet of `Curv S` (lowest order `0`,
+  -- base width `3`) IS this aggregate three-term fibre bound: `∇^0(Curv S) = Curv S`
+  -- (`iteratedCovGrad_zero`) and the order-collapsed truncated sum `∑_{i < 3 + 0}` expands
+  -- (`Finset.sum_range_succ` / `Finset.sum_range_one`, modulo `i + 0 = i`) to the explicit
+  -- `S, ∇S, ∇²S` triple (`iteratedCovGrad g 0 s {0,1,2} S = S, ∇S, ∇²S` via `iteratedCovGrad_zero`
+  -- / `iteratedCovGrad_succ`).
+  refine ⟨fun s => Cic s 0, fun s => hCic_nn s 0, fun s S x => ?_⟩
+  have hk0 := hjet s S 0 x
+  refine hk0.trans (le_of_eq ?_)
+  refine congrArg (Cic s 0 ^ 2 * ·) ?_
+  rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one]
+  simp only [iteratedCovGrad_zero, iteratedCovGrad_succ, Nat.add_zero, Nat.add_succ]
 
 set_option linter.unusedSectionVars false in
 /-- **The single-step commutator-defect `L²` norm bound (proved from the pointwise curvature

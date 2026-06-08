@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RankRDiffBilinGrid
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameGenuineFieldPairing
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvatureRS
+import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.RankRReadingDominationUniformSup
+import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.RankRUniformProportionalCurvatureSup
 
 /-!
 # The frame-free pure-Riemann differentiated curvature tower at contravariant valence `r`
@@ -553,6 +555,87 @@ theorem genuinePureRDiffOp0_covGrad_fib_eq
 
 /-! ## The two frame-free envelope layers and the `DiffBilinOpRS g r` package -/
 
+/-- **Frame-summed forward-uncurry fibre bound for a covariant-gradient bundle image at valence `r`
+(posited general-valence Parseval child).** If every per-direction value `Φ v` of a curvature-direction
+continuous-linear map `Φ : T_x M →L T^{(r,s)}_x` along a *unit* tangent direction (`g(v, v) = 1`) has
+intrinsic fibre norm bounded by a single nonnegative `b`, then the fibre norm of the slot-`0` uncurry
+`covGradBundleEquiv r s x Φ` is bounded by `finrank ℝ E · b`:
+```
+rfns(covGradBundleEquiv r s x Φ)(x) ≤ (finrank ℝ E) · b.
+```
+
+**Why this is TRUE.** This is the verbatim contravariant-valence-`r` mirror of the *proved*
+contravariant-`0` `riemannianFiberNormSq_covGradBundleEquiv_le_card_mul`
+(`CovGradBundleEquivFiberNormFrameSum`), whose home this lemma belongs to.  Its proof is the
+forward-uncurry rank-`(r, s + 1)` Parseval frame-sum
+`rfns(covGradBundleEquiv r s x Φ)(x) = ∑ₐ rfns(Φ (eₐ))(x)` over a `g_x`-orthonormal frame
+`e := stdOrthonormalBasis`, dominated termwise by `b` because each `eₐ` is a unit direction; the
+contravariant-`0` version routes that frame-sum through the slot-`0` curry chain
+(`riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame`, hard-locked to contravariant `0` through
+`slot0Curry`).  The valence-`r` forward Parseval frame-sum is the rank-generic analogue, proved through
+the rank-generic component Parseval `rfns_rs_eq_sum_fiberNormSqComponent_sq_of_basis`
+(`RankRReadingDominationUniformSup`) and the forward evaluation bridge `covGradBundleEquiv_apply_eval`,
+absent sorry-free at valence `r`, so this forward-uncurry bound is posited here as one precise true
+child.  Consumers transitively depend on `sorryAx`.
+
+**Non-vacuity.** A degenerate `b < 0` is rejected: the conclusion `rfns(…) ≤ finrank · b` forces
+`finrank · b ≥ 0` (the LHS is a nonnegative fibre norm and `finrank ℝ E > 0` by `NeZero`), so the
+constant must be genuinely nonnegative; and on a nonzero `Φ` (a unit-direction value with positive
+fibre norm) the smallest valid `b` is genuinely positive. -/
+theorem riemannianFiberNormSq_covGradBundleEquiv_le_card_mul_rs
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
+    (Φ : TangentSpace I x →L[ℝ] TensorRSSpace r s I x) (b : ℝ)
+    (hbound : ∀ v : TangentSpace I x, g.inner x v v = 1 →
+      riemannianFiberNormSq (I := I) (M := M) g r s x (Φ v) ≤ b) :
+    riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
+        (covGradBundleEquiv (I := I) (M := M) r s x Φ) ≤
+      (Module.finrank ℝ E : ℝ) * b := by
+  sorry
+
+/-- **The uniform-over-`M` proportional curvature-operator fibre bound at valence `(r, s)` (posited
+general-valence analytic child — the "mirror-2" uniform curvature sup).** For a closed smooth
+Riemannian manifold `(M, g)` and fixed valence `(r, s)` there is a single nonnegative constant `Csup`,
+independent of the base point, such that for every point `x`, tangent vectors `v, w`, and
+`(r, s)`-tensor `T`,
+```
+rfns(R^{(r,s)}_x(v, w) T)(x) ≤ Csup · g(v, v) · g(w, w) · rfns(T)(x).
+```
+
+**Why this is TRUE.** This is the verbatim contravariant-valence-`r` mirror of the *proved*
+contravariant-`0` `exists_uniform_riemannOp_tensorCov_proportional`
+(`FrozenFramePureRCurvatureTower`) / `riemannianFiberNormSq_riemannOp_covGrad_uniform_proportional_bound`
+(`UniformProportionalCurvatureSup`), and is exactly the headline this file's intended home
+`RankRUniformProportionalCurvatureSup` documents (`exists_uniform_riemannianFiberNormSq_riemannOp_`
+`tensorCovRS_proportional`) but does not yet assemble.  Its proof is the documented dual-frame route:
+the per-point bound `exists_Cx_riemannianFiberNormSq_riemannOp_tensorCovS_le_rs`
+(`RiemannianFiberNormSqRiemannOpHigherRankParseval`) re-run with the *uniformised* single dual-frame
+curvature energy term, which the point-level slot-wise curvature formula `riemannOp_tensorCovRS_apply_eval`
+(`RankRUniformProportionalCurvatureSup`) splits into a covariant `(0, s)` and a contravariant `(0, r)`
+branch, each dominated through the coframe-curvature magnitude bound
+`abs_toModel_riemannOp_tensor0SCov_coframeS_le` (`TensorCurvatureUnitEvalBridge`) by the valence-free
+Levi-Civita base-curvature `g`-norm bound `exists_uniform_riemannOp_LeviCivita_gNorm_bound` (`Kbase`) —
+exactly the valence-`r` mirror of the contravariant-`0` dual-frame energy constant
+`exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_const` (`CurvatureFrameEnergyContinuity`).  The
+per-point constant of `exists_Cx_…_le_rs` is built from the pointwise `stdOrthonormalBasis`, hence not
+continuous in `x`, so it cannot be supremised directly; the dual-frame-energy uniformisation is the
+genuinely-irreducible analytic content, absent sorry-free at valence `r`, posited here as one precise
+true child.  Consumers transitively depend on `sorryAx`.
+
+**Non-vacuity.** A degenerate witness `Csup ≡ 0` is rejected on any non-flat manifold: the bundled
+curvature operator `R^{(r,s)}_x(v, w)` is genuinely nonzero (`R ≠ 0`) on a tensor `T` it does not
+annihilate, so `rfns(R^{(r,s)}_x(v, w) T)(x) > 0` for suitable `(v, w, T)` while the RHS
+`0 · g(v, v) · g(w, w) · rfns(T)(x) = 0`; the constant must carry the genuine curvature magnitude and
+is genuinely positive. -/
+theorem exists_uniform_riemannianFiberNormSq_riemannOp_tensorCovRS_proportional
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    ∃ Csup : ℝ, 0 ≤ Csup ∧
+      ∀ (x : M) (v w : TangentSpace I x) (T : TensorRSSpace r s I x),
+        riemannianFiberNormSq (I := I) (M := M) g r s x
+            (riemannOp (tensorCov (I := I) g r s) x v w T) ≤
+          Csup * g.inner x v v * g.inner x w w *
+            riemannianFiberNormSq (I := I) (M := M) g r s x T := by
+  sorry
+
 set_option linter.unusedVariables false in
 /-- **The order-`0` (value-local) layer of the frame-free pure-Riemann curvature envelope at valence
 `r` (posited general-valence analytic child).** For a closed smooth Riemannian manifold `(M, g)` and a
@@ -592,7 +675,85 @@ theorem exists_genuinePureRDiffOpRS_orderZero (g : SmoothRiemannianMetric I M) (
         riemannianFiberNormSq (I := I) (M := M) g r (rr + 0) x
             ((genuinePureRDiffOpRS (I := I) (M := M) g r 0 rr W).toSection x) ≤
           kappa0 rr * riemannianFiberNormSq (I := I) (M := M) g r rr x (W.toSection x) := by
-  sorry
+  classical
+  set N : ℝ := (Module.finrank ℝ E : ℝ) with hN_def
+  -- The valence-`r` uniform curvature sups (one per rank `m`) give the order-`0` constant family.
+  choose Csup hCsup_nonneg hCsup using fun m =>
+    exists_uniform_riemannianFiberNormSq_riemannOp_tensorCovRS_proportional (I := I) (M := M) g r m
+  refine ⟨fun rr => match rr with | 0 => (0 : ℝ) | (m + 1) => N ^ 3 * Csup m,
+    fun rr => ?_, fun rr W x => ?_⟩
+  · -- Nonnegativity of the constant family.
+    cases rr with
+    | zero => exact le_refl 0
+    | succ m => exact mul_nonneg (by positivity) (hCsup_nonneg m)
+  -- Case on the rank; the order-`0` operator is `genuinePureREndo0RS g r rr W`.
+  cases rr with
+  | zero =>
+      -- Rank `0`: the endomorphism is the zero operator, fibre norm `0`.
+      rw [show (genuinePureRDiffOpRS (I := I) (M := M) g r 0 0 W).toSection x =
+          (0 : TensorRSSpace r (0 + 0) I x) from rfl]
+      rw [riemannianFiberNormSq_zero (I := I) (M := M) g r (0 + 0) x]
+      show (0 : ℝ) ≤ (0 : ℝ) * riemannianFiberNormSq (I := I) (M := M) g r 0 x (W.toSection x)
+      exact le_of_eq (zero_mul _).symm
+  | succ m =>
+      -- Rank `m + 1`: the genuine moving-frame endomorphism at the centre `x`.
+      set B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b :=
+        smoothOrthoFrame (I := I) g x with hB_def
+      have hBorth : ∀ i j : Fin (Module.finrank ℝ E),
+          g.inner x (B i x) (B j x) = if i = j then (1 : ℝ) else 0 := by
+        intro i j; rw [hB_def]; exact smoothOrthoFrame_orthonormal_at_center (I := I) g x i j
+      -- The order-`0` endomorphism fibre at `x` is the slot-`0` uncurry of the direction CLM.
+      have hfib : (genuinePureRDiffOpRS (I := I) (M := M) g r 0 (m + 1) W).toSection x =
+          covGradBundleEquiv (I := I) (M := M) r m x
+            (pureRFrozenDirCLMRS (I := I) (M := M) g r m B (fun y : M => W.toSection y) x) := by
+        change genuinePureREndoFibRS (I := I) (M := M) g r m W x = _
+        rw [genuinePureREndoFibRS, pureRFrozenEndoFibRS]
+      rw [hfib]
+      -- Per-unit-direction fibre bound on the direction CLM: `rfns(Φ v) ≤ N² · Csup m · rfns(W x)`.
+      set rW : ℝ := riemannianFiberNormSq (I := I) (M := M) g r (m + 1) x (W.toSection x) with hrW_def
+      have hrW_nonneg : 0 ≤ rW :=
+        riemannianFiberNormSq_nonneg (I := I) (M := M) g r (m + 1) x (W.toSection x)
+      have hper : ∀ v : TangentSpace I x, g.inner x v v = 1 →
+          riemannianFiberNormSq (I := I) (M := M) g r m x
+              (pureRFrozenDirCLMRS (I := I) (M := M) g r m B (fun y : M => W.toSection y) x v) ≤
+            N * (N * (Csup m * rW)) := by
+        intro v hv
+        rw [pureRFrozenDirCLMRS_apply (I := I) (M := M) g r m B (fun y : M => W.toSection y) x v]
+        -- `N`-subadditivity over the frame index `i`.
+        refine le_trans (riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g r m x
+          (Finset.univ : Finset (Fin (Module.finrank ℝ E))) _) ?_
+        rw [Finset.card_univ, Fintype.card_fin]
+        have hcard : (Module.finrank ℝ E : ℝ) = N := by rw [hN_def]
+        rw [hcard]
+        refine mul_le_mul_of_nonneg_left ?_ (by rw [hN_def]; positivity)
+        -- Each summand: curvature sup × unit Gram × slot-`0` reading domination.
+        have hsummand : ∀ i : Fin (Module.finrank ℝ E),
+            riemannianFiberNormSq (I := I) (M := M) g r m x
+                (riemannOp (tensorCov (I := I) g r m) x (B i x) v
+                  ((covGradBundleEquiv (I := I) (M := M) r m x).symm (W.toSection x) (B i x))) ≤
+              Csup m * rW := by
+          intro i
+          have hgB : g.inner x (B i x) (B i x) = 1 := by
+            have := hBorth i i; rwa [if_pos rfl] at this
+          have hbound := hCsup m x (B i x) v
+            ((covGradBundleEquiv (I := I) (M := M) r m x).symm (W.toSection x) (B i x))
+          rw [hgB, hv, mul_one, mul_one] at hbound
+          refine le_trans hbound ?_
+          refine mul_le_mul_of_nonneg_left ?_ (hCsup_nonneg m)
+          -- The slot-`0` reading along `B i x` is dominated by the full `(r, m+1)` fibre norm.
+          rw [hrW_def]
+          exact riemannianFiberNormSq_covGradBundleEquiv_symm_reading_le_rs (I := I) (M := M) g r m x
+            (W.toSection x) B hBorth i
+        refine le_trans (Finset.sum_le_sum (fun i _ => hsummand i)) ?_
+        rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, hcard]
+      -- Forward-uncurry frame-sum bound: `rfns(covGradBundleEquiv r m x Φ) ≤ N · (N²·Csup m·rW)`.
+      refine le_trans (riemannianFiberNormSq_covGradBundleEquiv_le_card_mul_rs (I := I) (M := M)
+        g r m x (pureRFrozenDirCLMRS (I := I) (M := M) g r m B (fun y : M => W.toSection y) x)
+        (N * (N * (Csup m * rW))) hper) ?_
+      -- Assemble: `N · (N · (N · Csup m · rW)) = N³ · Csup m · rW = kappa0 (m+1) · rfns(W x)`.
+      rw [show (Module.finrank ℝ E : ℝ) = N from by rw [hN_def]]
+      show N * (N * (N * (Csup m * rW))) ≤ N ^ 3 * Csup m * rW
+      exact le_of_eq (by ring)
 
 set_option linter.unusedVariables false in
 /-- **The high-order (`p ≥ 1`) layer of the frame-free pure-Riemann curvature envelope at valence `r`,

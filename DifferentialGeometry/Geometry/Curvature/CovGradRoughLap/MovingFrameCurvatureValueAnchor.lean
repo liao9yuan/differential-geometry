@@ -4,6 +4,11 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameIntegr
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFramePureRCurvatureTracePairing
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.OperatorFieldPairingIBP
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemainderFrameSumBridge
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientSlotCurvatureSplit
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SecondBianchi
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ContractedBianchi
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.BracketDivergenceForm
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemainderDivergenceForm
 
 /-!
 # The frame-free curvature operator field and the integrated tensor Bochner–Weitzenböck curvature value
