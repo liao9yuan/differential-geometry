@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameGenuineFieldPairingRS
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RankRDiffCurvatureTower
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLocality
 
@@ -312,37 +313,46 @@ private theorem gcurvSectionRS_gradedCurvJet_ofGrid (g : SmoothRiemannianMetric 
   have hg := hgrid s S k x
   simpa only [Nat.add_comm 1 k] using hg
 
-/-- **Posited rank-`r` differentiated-curvature `(∇R) S` graded jet (the genuine operator-field carrier
-core).** The contravariant-rank-`r` analogue of the rank-`0` differentiated-curvature graded jet
-`genuineDiffCurvSection_gradedCurvJet` (`DiffCurvatureGenuineTower`), the `(∇R) S` operator-field tower.
-For a closed smooth Riemannian manifold `(M, g)` and a fixed contravariant rank `r` there is a
-*valence/order-dependent* nonnegative constant family `c : ℕ → ℕ → ℝ` such that, at every covariant rank
-`s` and for every smooth compactly-supported `(r, s)`-tensor `S`, there is a smooth compactly-supported
-differentiated-curvature genuine field `Gcd : SmoothCcTensor g r (s + 1)` — the gauge-glued tensorial
-`(∇R) S` contraction — that is a *graded* curvature jet of `S` of lowest order `0` and width `1`:
-`IsGradedCurvJetRS g S (c s) 0 1 Gcd`.
+/-- **Rank-`r` differentiated-curvature `(∇R) S` graded jet for the concrete carrier `diffCurvSectionRS`
+(proved over the rank-`r` carrier-tower grid).** The contravariant-rank-`r` mirror of the rank-`0`
+differentiated-curvature graded jet `genuineDiffCurvSection_gradedCurvJet` (`DiffCurvatureGenuineTower`),
+the `(∇R) S` operator-field carrier. For a closed smooth Riemannian manifold `(M, g)` and a fixed
+contravariant rank `r` there is a *valence/order-dependent* nonnegative constant family `c : ℕ → ℕ → ℝ`
+such that, at every covariant rank `s` and for every smooth compactly-supported `(r, s)`-tensor `S`, the
+concrete gauge-glued tensorial differentiated-curvature carrier `diffCurvSectionRS g r s S`
+(`RankRDiffCurvatureTower`, the order-`0` base of the `(∇R)·` tower) is a *graded* curvature jet of `S`
+of lowest order `0` and width `1`:
+```
+IsGradedCurvJetRS g S (c s) 0 1 (diffCurvSectionRS g r s S).
+```
+The concrete field `diffCurvSectionRS g r s S` is pinned (no `∃ Gcd`), mirroring the rank-`0`
+`genuineDiffCurvSection_gradedCurvJet` which pins `genuineDiffCurvSection g s S`.
 
-**Why this is TRUE.** This is the contravariant-rank-`r` lift of the rank-`0` `(∇R) S` operator-field
-graded jet `genuineDiffCurvSection_gradedCurvJet`. The differentiated-curvature contraction
-`∑ᵢ ∇_{Bᵢ}(R(Bᵢ, ·) S)` is the gauge-glued tensorial section `Gcd`; each `∇^k Gcd` is, by the iterated
-covariant Leibniz expansion, a sum of contractions of `∇^p R` (`p ≤ k + 1`) against `∇^q S` (`q ≤ k`),
-contracted-order window `0 … k` (the `(p, w) = (0, 1)` graded shape), all curvature coefficients absorbed
-uniformly over the compact `M` into `(c s k)²`. The rank-`r` `(∇R) S` operator-field tower (the rank-`0`
-`genuineDiffCurvSection` uses the rank-`0`-locked operator-field action `appCc`) is absent sorry-free
-below this file, so this graded jet is posited here as one precise true core — the rank-`r` analogue of
-the genuine rank-`0` content.  This carries NO remainder and NO section split (those are
-`exists_pointwiseTensorCurvRS_remainder_afterDiffCurv_gradedCurvJet` below).  Consumers transitively
-depend on `sorryAx`.
+**Proof (over the carrier-tower grid).** `IsGradedCurvJetRS g S (c s) 0 1 (diffCurvSectionRS g r s S)`
+at gradient order `k`, point `x`, is exactly the raw iterated-gradient grid bound
+`exists_diffCurvSectionRS_iteratedCovGrad_grid_bound` (`RankRDiffCurvatureTower`, window `w + k = 1 + k`,
+lowest order `p = 0`, target jets `∇^{i + 0} S`), which is *proved* off the rank-`r` `(∇R)·` carrier
+tower's rank-raising operator-field normal form. Consumers transitively depend on `sorryAx` through the
+carrier tower's single posited node `exists_curvOpFieldRS`.
+This carries NO remainder and NO section split (those are
+`exists_pointwiseTensorCurvRS_remainder_afterDiffCurv_gradedCurvJet` below).
 
-**Non-vacuity.** With `c s 0 = 0` the bound at `k = 0` forces `rfns(Gcd)(x) = 0`, i.e. the
-differentiated-curvature contraction vanishes; *false* on a manifold with `∇R ≠ 0` and `S ≠ 0`. The
-constant family is genuinely positive. -/
+**Non-vacuity.** With `c s 0 = 0` the bound at `k = 0` forces `rfns(diffCurvSectionRS g r s S)(x) = 0`,
+i.e. the differentiated-curvature contraction vanishes; *false* on a manifold with `∇R ≠ 0` and `S ≠ 0`.
+The constant family is genuinely positive. -/
 theorem exists_diffCurvSectionRS_gradedCurvJet (g : SmoothRiemannianMetric I M) (r : ℕ) :
     ∃ c : ℕ → ℕ → ℝ, (∀ s k, 0 ≤ c s k) ∧
       ∀ (s : ℕ) (S : SmoothCcTensor g r s),
-        ∃ Gcd : SmoothCcTensor g r (s + 1),
-          IsGradedCurvJetRS (I := I) (M := M) g S (c s) 0 1 Gcd := by
-  sorry
+        IsGradedCurvJetRS (I := I) (M := M) g S (c s) 0 1
+          (diffCurvSectionRS (I := I) (M := M) g r s S) := by
+  classical
+  obtain ⟨c, hc_nn, hgrid⟩ :=
+    exists_diffCurvSectionRS_iteratedCovGrad_grid_bound (I := I) (M := M) g r
+  refine ⟨c, hc_nn, fun s S => ?_⟩
+  intro k x
+  -- `IsGradedCurvJetRS g S (c s) 0 1 (diffCurvSectionRS …)` at gradient order `k`, point `x`, is exactly
+  -- the carrier-tower grid bound (window `w + k = 1 + k`, lowest order `p = 0`, target jets `∇^{i+0} S`).
+  exact hgrid s S k x
 
 /-- **Posited rank-`r` moving-frame remainder graded jet after the differentiated-curvature peel (the
 genuine remainder core).** The contravariant-rank-`r` analogue of the rank-`0` remainder content of
@@ -434,7 +444,12 @@ theorem exists_pointwiseTensorCurvRS_diffCurvAndRemainder_gradedCurvJet
     exists_pointwiseTensorCurvRS_remainder_afterDiffCurv_gradedCurvJet (I := I) (M := M) g r
   refine ⟨fun s k => max (c₁ s k) (c₂ s k),
     fun s k => le_trans (hc₁_nn s k) (le_max_left _ _), fun s S => ?_⟩
-  obtain ⟨Gcd, hGcd_jet⟩ := hdiff s S
+  -- The concrete `(∇R) S` carrier `diffCurvSectionRS g r s S` is the differentiated-curvature field
+  -- `Gcd`; its `(0, 1)` graded jet `hGcd_jet := hdiff s S` (the restated concrete leaf) feeds the
+  -- remainder split, producing `Grem` with `Curv S = GcurvSectionRS + Gcd + Grem` and `Grem`'s `(2, 1)`
+  -- graded jet.
+  set Gcd : SmoothCcTensor g r (s + 1) := diffCurvSectionRS (I := I) (M := M) g r s S with hGcd_def
+  have hGcd_jet : IsGradedCurvJetRS (I := I) (M := M) g S (c₁ s) 0 1 Gcd := hdiff s S
   obtain ⟨Grem, hsplit, hGrem_jet⟩ := hrem s S Gcd hGcd_jet
   refine ⟨Gcd, Grem, hsplit, ?_, ?_⟩
   · exact hGcd_jet.mono_const (I := I) (M := M) g S (hc₁_nn s) (fun k => le_max_left _ _)
