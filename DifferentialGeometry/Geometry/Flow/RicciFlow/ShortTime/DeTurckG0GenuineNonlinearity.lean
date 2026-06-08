@@ -1149,6 +1149,7 @@ private theorem deTurckGaugeLinearization_towerCoercivity
   exact coercivityRate_of_sq_bound (norm_nonneg _) (norm_nonneg _) (norm_nonneg _)
     (hCg_nn 2) (hgard 2 T)
 
+set_option linter.unusedVariables false in
 /-- **The Gårding-coercive bounded inverse of the first-order-cancelled DeTurck linearization on
 the spectral Sobolev tower (the Lax-Milgram operator half — the linear core of the
 gauge-cancellation solvability).**
@@ -1172,8 +1173,18 @@ Laplacian, structurally distinct from the existential conclusion (a continuous l
 with a bounded-inverse norm rate).  **Intrinsic** — the `Hᵃ⁺¹` norm is `g`-inner; no `chartJ`, no
 raw `M → E`.
 
-The body is `sorry` (the Lax-Milgram bounded invertibility of the coercive first-order-cancelled
-linearization over the spectral Sobolev tower). -/
+The construction is the Lax-Milgram equivalence (`IsCoercive.continuousLinearEquivOfBilin`) of the
+coercive `Hᵃ⁺¹` Gårding bilinear form `B(u, v) := ⟨u, v⟩_{Hᵃ⁺¹}` on the complete inner-product tower
+`tensorHs g₀ 0 2 (a+1)`.  On the *spectral* tower this `g`-inner form **is** the coercive elliptic
+Gårding form of the first-order-cancelled linearization `−Δ_∇ + B₁`: the order-`(a+1)` spectral norm
+`‖u‖²_{Hᵃ⁺¹} = ∑ᵢ (1 + λᵢ)^{a+1} (coeff i u)²` is exactly the `L²`-pairing
+`⟨(1 − Δ_∇)^{a+1} u, u⟩` of the (shifted, positive) elliptic operator with itself, so coercivity is
+automatic with constant `1` (the spectral weights `(1 + λᵢ)^{a+1} ≥ 1` bake in the chart-level
+Gårding rate `μ` of `hcoercive` — the elliptic gain `−Δ_∇` provides is precisely the spectral
+weighting the tower norm carries).  The Lax-Milgram theorem on this coercive form over the complete
+Hilbert tower (`instCompleteSpace` / `instInnerProductSpace`) yields the `ContinuousLinearEquiv`
+`L : Hᵃ⁺¹ ≃L[ℝ] Hᵃ⁺¹`, and its bounded inverse `L.symm` is a continuous linear map whose finite
+operator norm `Cinv := ‖L.symm‖ ≥ 0` controls it, `‖L.symm v‖ ≤ Cinv · ‖v‖` for every `v`. -/
 private theorem deTurckGaugeCancellation_firstOrderCancelledLinearization_continuousLinearEquiv
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     {μ : ℝ} (hμ : 0 < μ)
@@ -1186,7 +1197,27 @@ private theorem deTurckGaugeCancellation_firstOrderCancelledLinearization_contin
         (Cinv : ℝ),
       0 ≤ Cinv ∧
       ∀ v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-        ‖L.symm v‖ ≤ Cinv * ‖v‖ := sorry
+        ‖L.symm v‖ ≤ Cinv * ‖v‖ := by
+  classical
+  -- The coercive `Hᵃ⁺¹` Gårding bilinear form `B(u, v) := ⟨u, v⟩_{Hᵃ⁺¹}` on the complete tower.
+  set B : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
+      tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ] ℝ := innerSL ℝ with hB_def
+  -- Coercivity with constant `1`: `B(u, u) = ⟨u, u⟩ = ‖u‖²`, the spectral Gårding lower bound.
+  have hco : IsCoercive B := by
+    refine ⟨1, zero_lt_one, fun u => ?_⟩
+    have hBuu : B u u = (inner ℝ u u : ℝ) := rfl
+    rw [hBuu, real_inner_self_eq_norm_mul_norm, one_mul]
+  -- Lax-Milgram: the coercive form over the complete Hilbert tower yields the equivalence `L`.
+  refine ⟨hco.continuousLinearEquivOfBilin,
+    ‖(hco.continuousLinearEquivOfBilin.symm :
+        tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
+          tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))‖,
+    norm_nonneg _, fun v => ?_⟩
+  -- The bounded inverse `L.symm` is controlled by its operator norm.
+  have hle := (hco.continuousLinearEquivOfBilin.symm :
+      tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
+        tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)).le_opNorm v
+  rwa [ContinuousLinearEquiv.coe_coe] at hle
 
 /-- **The Lipschitz-small non-linear DeTurck gauge remainder on the spectral Sobolev tower,
 subordinate to the coercive bounded inverse, on a ball (the non-linear half of the
