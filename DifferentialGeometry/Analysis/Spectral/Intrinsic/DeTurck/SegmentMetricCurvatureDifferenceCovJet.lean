@@ -12,6 +12,8 @@ import DifferentialGeometry.Geometry.Connection.Realization.SmoothSections
 import DifferentialGeometry.Tensor.RSTensor.BundleTrivialization.Tensor0SBundleLocalityIdentities
 import DifferentialGeometry.Tensor.Multilinear.Comp
 import DifferentialGeometry.Geometry.Connection.TensorNabla.HomTensorRSRiemannian
+import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
+import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Slot0SliceFiberNormDomination
 
 /-! # The curvature-trace covariant-jet reduction of the sealed Ricci–DeTurck curvature difference
 
@@ -798,29 +800,820 @@ theorem ricciModelTrace42Op_sub (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     show (-B) = (-1 : ℝ) • B by rw [neg_one_smul],
     DifferentialGeometry.Integral.Connection.appCcRS_smul_right, neg_one_smul, ← sub_eq_add_neg]
 
-/-- **(POSIT — the cometric `∇₀`-parallelism base core: the leading-`{0,1}` `g₀⁻¹` double-trace field is
-`∇₀`-parallel.)**  The covariant gradient of the *base* intrinsic `g₀⁻¹` double-trace operator field
+set_option linter.unusedSectionVars false in
+/-- **Leading-slot multilinear sum expansion.**  Evaluating a model `(0, s + 1)`-tensor on a tuple
+whose leading entry is a finite sum expands the sum out of the leading slot (multilinearity, read
+through the leading-slot curry equivalence). -/
+private theorem model_cons_slot0_sum {s : ℕ} {ι : Type*} (fs : Finset ι)
+    (T : Tensor0SBundle.Tensor0SModel (s + 1) ℝ E) (f : ι → E) (rest : Fin s → E) :
+    T (Fin.cons (∑ i ∈ fs, f i) rest) = ∑ i ∈ fs, T (Fin.cons (f i) rest) := by
+  have h : ∀ u : E, T (Fin.cons u rest) =
+      ((continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (s + 1) => E) ℝ) T u) rest := by
+    intro u
+    rw [continuousMultilinearCurryLeftEquiv_apply]
+  rw [h, map_sum, ContinuousMultilinearMap.sum_apply]
+  exact Finset.sum_congr rfl fun i _ => (h (f i)).symm
+
+set_option linter.unusedSectionVars false in
+/-- **Leading-slot multilinear scalar expansion.**  Evaluating a model `(0, s + 1)`-tensor on a tuple
+whose leading entry is a scalar multiple pulls the scalar out of the leading slot. -/
+private theorem model_cons_slot0_smul {s : ℕ} (c : ℝ) (u : E)
+    (T : Tensor0SBundle.Tensor0SModel (s + 1) ℝ E) (rest : Fin s → E) :
+    T (Fin.cons (c • u) rest) = c * T (Fin.cons u rest) := by
+  have h : ∀ z : E, T (Fin.cons z rest) =
+      ((continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (s + 1) => E) ℝ) T z) rest := by
+    intro z
+    rw [continuousMultilinearCurryLeftEquiv_apply]
+  rw [h, map_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul, ← h]
+
+set_option linter.unusedSectionVars false in
+/-- **The smooth orthonormal frame is a tangent basis on its orthonormality neighbourhood.**  At any
+point `y` of the orthonormality neighbourhood of the frame attached at `x`, the value family
+`i ↦ smoothOrthoFrame g₀ x i y` is `g₀(y)`-orthonormal, hence linearly independent and (cardinality
+`finrank`) a `Module.Basis` of `T_y M`.  This extends `smoothOrthoFrame_basis_witness` (the `y = x`
+case) to the whole orthonormality neighbourhood. -/
+private theorem smoothOrthoFrame_basis_at (g₀ : SmoothRiemannianMetric I M) (x : M) {y : M}
+    (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x) :
+    ∃ bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I y),
+      ∀ i, bse i = smoothOrthoFrame (I := I) g₀ x i y := by
+  classical
+  have horth : ∀ a b : Fin (Module.finrank ℝ E),
+      g₀.inner y (smoothOrthoFrame (I := I) g₀ x a y)
+        (smoothOrthoFrame (I := I) g₀ x b y) = if a = b then 1 else 0 :=
+    fun a b => smoothOrthoFrame_orthonormal (I := I) g₀ x hy a b
+  have he_li : LinearIndependent ℝ
+      (fun i => smoothOrthoFrame (I := I) g₀ x i y) := by
+    rw [linearIndependent_iff']
+    intro fs c hsum k hk_mem
+    have h_zero : g₀.inner y (smoothOrthoFrame (I := I) g₀ x k y)
+        (∑ j ∈ fs, c j • smoothOrthoFrame (I := I) g₀ x j y) = 0 := by
+      rw [hsum]; simp
+    rw [map_sum] at h_zero
+    have h_pull : ∀ j ∈ fs, g₀.inner y (smoothOrthoFrame (I := I) g₀ x k y)
+        (c j • smoothOrthoFrame (I := I) g₀ x j y) =
+        c j * (if k = j then (1 : ℝ) else 0) := by
+      intro j _
+      rw [(g₀.inner y (smoothOrthoFrame (I := I) g₀ x k y)).map_smul (c j),
+        smul_eq_mul, horth k j]
+    rw [Finset.sum_congr rfl h_pull, Finset.sum_eq_single_of_mem k hk_mem] at h_zero
+    · rwa [if_pos rfl, mul_one] at h_zero
+    · intro j _ hjk
+      rw [if_neg (fun h => hjk h.symm), mul_zero]
+  have hcard : Fintype.card (Fin (Module.finrank ℝ E)) = Module.finrank ℝ E :=
+    Fintype.card_fin _
+  exact ⟨basisOfLinearIndependentOfCardEqFinrank he_li hcard,
+    fun i => congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard) i⟩
+
+set_option linter.unusedSectionVars false in
+/-- **Orthonormal expansion in the smooth orthonormal frame.**  At any point `y` of the
+orthonormality neighbourhood, every tangent vector expands against the `g₀(y)`-orthonormal frame
+values with metric coefficients: `u = ∑ᵢ g₀(u, Bᵢ y) • Bᵢ y`. -/
+private theorem smoothOrthoFrame_expansion_at (g₀ : SmoothRiemannianMetric I M) (x : M) {y : M}
+    (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x) (u : TangentSpace I y) :
+    u = ∑ i : Fin (Module.finrank ℝ E),
+      g₀.inner y u (smoothOrthoFrame (I := I) g₀ x i y) •
+        smoothOrthoFrame (I := I) g₀ x i y := by
+  classical
+  obtain ⟨bse, hbse⟩ := smoothOrthoFrame_basis_at (I := I) g₀ x hy
+  have horth : ∀ a b : Fin (Module.finrank ℝ E),
+      g₀.inner y (smoothOrthoFrame (I := I) g₀ x a y)
+        (smoothOrthoFrame (I := I) g₀ x b y) = if a = b then 1 else 0 :=
+    fun a b => smoothOrthoFrame_orthonormal (I := I) g₀ x hy a b
+  have hcoeff : ∀ j : Fin (Module.finrank ℝ E),
+      g₀.inner y u (smoothOrthoFrame (I := I) g₀ x j y) = bse.repr u j := by
+    intro j
+    rw [g₀.symm y u (smoothOrthoFrame (I := I) g₀ x j y)]
+    conv_lhs => rw [← bse.sum_repr u]
+    rw [map_sum]
+    rw [Finset.sum_congr rfl (fun i (_ : i ∈ Finset.univ) => by
+      rw [(g₀.inner y (smoothOrthoFrame (I := I) g₀ x j y)).map_smul (bse.repr u i),
+        smul_eq_mul, hbse i, horth j i])]
+    rw [Finset.sum_eq_single_of_mem j (Finset.mem_univ j)]
+    · rw [if_pos rfl, mul_one]
+    · intro i _ hij
+      rw [if_neg (fun h => hij h.symm), mul_zero]
+  calc u = ∑ i : Fin (Module.finrank ℝ E), bse.repr u i • bse i := (bse.sum_repr u).symm
+    _ = ∑ i : Fin (Module.finrank ℝ E),
+        g₀.inner y u (smoothOrthoFrame (I := I) g₀ x i y) •
+          smoothOrthoFrame (I := I) g₀ x i y := by
+      refine Finset.sum_congr rfl fun i _ => ?_
+      rw [hcoeff i, hbse i]
+
+set_option linter.unusedSectionVars false in
+/-- **The cometric dual-basis double trace equals the orthonormal-frame diagonal sum.**  At any
+point `y` of the orthonormality neighbourhood of the frame attached at `x`, the frame-free cometric
+double trace of a model `(0, s + 2)`-tensor `T` — slot `0` raised by the cometric `♯` of the model
+dual-basis covectors, slot `1` contracted against the model basis — equals the `g₀(y)`-orthonormal
+frame diagonal sum:
+```
+∑ₖ T(♯ b^k, b_k, mm) = ∑ᵢ T(Bᵢ y, Bᵢ y, mm).
+```
+Proved by the orthonormal expansion of the raised covectors (`♯ b^k = ∑ᵢ (repr (Bᵢ y) k) • Bᵢ y`,
+since `g₀(♯ b^k, u) = b^k(u) = repr u k` by the inverse property of the sharp), swapping the two
+finite sums, and re-collapsing the inner slot-`1` sum with the basis expansion
+`∑ₖ repr v k • b_k = v`. -/
+private theorem cometric_dualTrace_eq_orthoFrame_diag (g₀ : SmoothRiemannianMetric I M)
+    {s : ℕ} (x : M) {y : M}
+    (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x)
+    (T : Tensor0SBundle.Tensor0SModel (s + 2) ℝ E) (mm : Fin s → E) :
+    ∑ k : Fin (Module.finrank ℝ E),
+        T (Fin.cons (cometricLmodel (I := I) g₀ y
+              (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                ((Module.finBasis ℝ E).cDualBasis k)))
+            (Fin.cons ((Module.finBasis ℝ E) k) mm)) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        T (Fin.cons ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E) mm)) := by
+  classical
+  -- The sharp of the `k`-th dual-basis model covector pairs to the `k`-th basis coordinate.
+  have hsharp : ∀ (k : Fin (Module.finrank ℝ E)) (u : TangentSpace I y),
+      g₀.inner y (cometricLmodel (I := I) g₀ y
+          (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+            ((Module.finBasis ℝ E).cDualBasis k))) u =
+        (Module.finBasis ℝ E).repr (u : E) k := by
+    intro k u
+    have h1 : cometricLmodel (I := I) g₀ y
+          (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+            ((Module.finBasis ℝ E).cDualBasis k)) =
+        inverseMetricSharpFib (I := I) g₀ y
+          ((Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 1 y).symm
+            (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+              ((Module.finBasis ℝ E).cDualBasis k))) := rfl
+    rw [h1, inverseMetricSharpFib_inner (I := I) g₀ y _ u, cotangentToDualLinear_apply,
+      cotangentToDual_apply]
+    have h2 : (((Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 1 y).symm
+          (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+            ((Module.finBasis ℝ E).cDualBasis k))) (fun _ : Fin 1 => u) : ℝ) =
+        Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+          ((Module.finBasis ℝ E).cDualBasis k) (fun _ : Fin 1 => (u : E)) := rfl
+    rw [h2, Tensor0SBundle.model_covectorOfCLM_apply]
+    rw [show ((Module.finBasis ℝ E).cDualBasis k) =
+        LinearMap.toContinuousLinearMap ((Module.finBasis ℝ E).coord k) from by
+      rw [Module.Basis.cDualBasis, Module.Basis.map_apply]
+      congr 1
+      exact congrFun (Module.Basis.coe_dualBasis (Module.finBasis ℝ E)) k]
+    rw [LinearMap.coe_toContinuousLinearMap', Module.Basis.coord_apply]
+  -- Orthonormal expansion of each raised dual-basis covector in the frame.
+  have hexp : ∀ k : Fin (Module.finrank ℝ E),
+      cometricLmodel (I := I) g₀ y
+          (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+            ((Module.finBasis ℝ E).cDualBasis k)) =
+        ∑ i : Fin (Module.finrank ℝ E),
+          ((Module.finBasis ℝ E).repr
+              ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E) k) •
+            smoothOrthoFrame (I := I) g₀ x i y := by
+    intro k
+    conv_lhs => rw [smoothOrthoFrame_expansion_at (I := I) g₀ x hy
+      (cometricLmodel (I := I) g₀ y
+        (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+          ((Module.finBasis ℝ E).cDualBasis k)))]
+    exact Finset.sum_congr rfl fun i _ => by
+      rw [hsharp k (smoothOrthoFrame (I := I) g₀ x i y)]
+  calc ∑ k : Fin (Module.finrank ℝ E),
+      T (Fin.cons (cometricLmodel (I := I) g₀ y
+            (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+              ((Module.finBasis ℝ E).cDualBasis k)))
+          (Fin.cons ((Module.finBasis ℝ E) k) mm))
+      = ∑ k : Fin (Module.finrank ℝ E), ∑ i : Fin (Module.finrank ℝ E),
+          ((Module.finBasis ℝ E).repr
+              ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E) k) *
+            T (Fin.cons ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E)
+                (Fin.cons ((Module.finBasis ℝ E) k) mm)) := by
+        refine Finset.sum_congr rfl fun k _ => ?_
+        rw [hexp k, model_cons_slot0_sum (E := E)]
+        exact Finset.sum_congr rfl fun i _ => model_cons_slot0_smul (E := E) _ _ T _
+    _ = ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+          ((Module.finBasis ℝ E).repr
+              ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E) k) *
+            T (Fin.cons ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E)
+                (Fin.cons ((Module.finBasis ℝ E) k) mm)) := Finset.sum_comm
+    _ = ∑ i : Fin (Module.finrank ℝ E),
+          T (Fin.cons ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E)
+              (Fin.cons ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E) mm)) := by
+        refine Finset.sum_congr rfl fun i _ => ?_
+        have hcurry : ∀ z : E,
+            T (Fin.cons ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E)
+                (Fin.cons z mm)) =
+            ((continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (s + 2) => E) ℝ) T
+                ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E))
+              (Fin.cons z mm) := by
+          intro z
+          rw [continuousMultilinearCurryLeftEquiv_apply]
+        calc ∑ k : Fin (Module.finrank ℝ E),
+            ((Module.finBasis ℝ E).repr
+                ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E) k) *
+              T (Fin.cons ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E)
+                  (Fin.cons ((Module.finBasis ℝ E) k) mm))
+            = ∑ k : Fin (Module.finrank ℝ E),
+                ((continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (s + 2) => E) ℝ) T
+                    ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E))
+                  (Fin.cons (((Module.finBasis ℝ E).repr
+                      ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E) k) •
+                    ((Module.finBasis ℝ E) k)) mm) := by
+              refine Finset.sum_congr rfl fun k _ => ?_
+              rw [model_cons_slot0_smul (E := E), ← hcurry]
+          _ = ((continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (s + 2) => E) ℝ) T
+                  ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E))
+                (Fin.cons (∑ k : Fin (Module.finrank ℝ E),
+                  ((Module.finBasis ℝ E).repr
+                      ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E) k) •
+                    ((Module.finBasis ℝ E) k)) mm) :=
+              (model_cons_slot0_sum (E := E) Finset.univ _ _ mm).symm
+          _ = T (Fin.cons ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E)
+                (Fin.cons ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E) mm)) := by
+              rw [(Module.finBasis ℝ E).sum_repr
+                ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E), ← hcurry]
+
+set_option linter.unusedSectionVars false in
+/-- **The fibre value of the base `g₀⁻¹` double-trace field is the `−2`-scaled orthonormal-frame
+diagonal double insertion.**  At any point `y` of the orthonormality neighbourhood of the frame
+attached at `x`, the base double-trace fibre operator reads a `(0, 4)`-tensor `D` as
+```
+ricciModelTrace42Fib g₀ 0 y D = (−2) • ∑ᵢ curry₂ (curry₃ D (Bᵢ y)) (Bᵢ y),
+```
+the `g₀(y)`-orthonormal diagonal trace of the two leading covariant slots.  This is the frame
+reading of the frame-free cometric double trace (`cometric_dualTrace_eq_orthoFrame_diag`). -/
+private theorem ricciModelTrace42Fib_eq_orthoFrame_diag (g₀ : SmoothRiemannianMetric I M)
+    (x : M) {y : M} (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x)
+    (D : Tensor0SBundle.Tensor0SSpace 4 I y) :
+    ricciModelTrace42Fib (I := I) g₀ 0 y D =
+      (-2 : ℝ) • ∑ i : Fin (Module.finrank ℝ E),
+        Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 y
+          (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 y D
+            (smoothOrthoFrame (I := I) g₀ x i y))
+          (smoothOrthoFrame (I := I) g₀ x i y) := by
+  classical
+  apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+  refine ContinuousMultilinearMap.ext fun mm => ?_
+  beta_reduce
+  rw [show Tensor0SBundle.Tensor0SSpace.toModel (ricciModelTrace42Fib (I := I) g₀ 0 y D) =
+      (-2 : ℝ) • modelDoubleTrace (E := E) (2 + 0) (cometricLmodel (I := I) g₀ y)
+        (modelRankCast (E := E) (by omega : (4 + 0) = (2 + 0) + 2)
+          (Tensor0SBundle.Tensor0SSpace.toModel D)) from
+    ricciModelTrace42Fib_toModel (I := I) g₀ 0 y D]
+  rw [show (modelRankCast (E := E) (by omega : (4 + 0) = (2 + 0) + 2)
+        (Tensor0SBundle.Tensor0SSpace.toModel D)) =
+      Tensor0SBundle.Tensor0SSpace.toModel D from rfl]
+  rw [ContinuousMultilinearMap.smul_apply,
+    modelDoubleTrace_apply (E := E) (2 + 0) (cometricLmodel (I := I) g₀ y)
+      (Tensor0SBundle.Tensor0SSpace.toModel D) mm]
+  rw [Tensor0SBundle.Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply]
+  rw [show Tensor0SBundle.Tensor0SSpace.toModel
+        (∑ i : Fin (Module.finrank ℝ E),
+          Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 y
+            (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 y D
+              (smoothOrthoFrame (I := I) g₀ x i y))
+            (smoothOrthoFrame (I := I) g₀ x i y)) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        Tensor0SBundle.Tensor0SSpace.toModel
+          (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 y
+            (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 y D
+              (smoothOrthoFrame (I := I) g₀ x i y))
+            (smoothOrthoFrame (I := I) g₀ x i y)) from
+    map_sum (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 2 y) _ _]
+  rw [ContinuousMultilinearMap.sum_apply]
+  rw [cometric_dualTrace_eq_orthoFrame_diag (I := I) g₀ (s := 2) x hy
+    (Tensor0SBundle.Tensor0SSpace.toModel D) mm]
+  refine congrArg (fun z : ℝ => (-2 : ℝ) • z) (Finset.sum_congr rfl fun i _ => ?_)
+  rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+      (T := Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 y D
+        (smoothOrthoFrame (I := I) g₀ x i y))
+      (v0 := ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E)) (vs := mm),
+    TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M) (T := D)
+      (v0 := ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E))
+      (vs := Fin.cons ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E) mm)]
+
+set_option linter.unusedSectionVars false in
+/-- **The skew moving-frame correction cancels.**  The two correction sums of the orthonormal-frame
+diagonal Leibniz expansion — the differentiated frame read into slot `0` against the frame in slot
+`1`, plus the frame in slot `0` against the differentiated frame in slot `1` — cancel, by the
+orthonormal expansion of the frame derivative and the connection skew-symmetry
+`g₀(∇ᵥBᵢ, Bⱼ) = −g₀(Bᵢ, ∇ᵥBⱼ)` (`smoothOrthoFrame_cov_skew`, the metric compatibility on the
+locally-constant frame pairing). -/
+private theorem orthoFrame_skew_correction_cancel (g₀ : SmoothRiemannianMetric I M) (x : M)
+    (v : E) (T : Tensor0SBundle.Tensor0SModel 4 ℝ E) (mm : Fin 2 → E) :
+    (∑ i : Fin (Module.finrank ℝ E),
+        T (Fin.cons (((LeviCivita (I := I) g₀).toFun
+              (smoothOrthoFrame (I := I) g₀ x i) x v : TangentSpace I x) : E)
+            (Fin.cons ((smoothOrthoFrame (I := I) g₀ x i x : TangentSpace I x) : E) mm)))
+      + (∑ i : Fin (Module.finrank ℝ E),
+          T (Fin.cons ((smoothOrthoFrame (I := I) g₀ x i x : TangentSpace I x) : E)
+              (Fin.cons (((LeviCivita (I := I) g₀).toFun
+                  (smoothOrthoFrame (I := I) g₀ x i) x v : TangentSpace I x) : E) mm))) = 0 := by
+  classical
+  set a : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
+    g₀.inner x ((LeviCivita (I := I) g₀).toFun (smoothOrthoFrame (I := I) g₀ x i) x v)
+      (smoothOrthoFrame (I := I) g₀ x j x) with ha_def
+  have haskew : ∀ i j, a i j = - a j i := by
+    intro i j
+    change g₀.inner x ((LeviCivita (I := I) g₀).toFun (smoothOrthoFrame (I := I) g₀ x i) x v)
+        (smoothOrthoFrame (I := I) g₀ x j x) =
+      - g₀.inner x ((LeviCivita (I := I) g₀).toFun (smoothOrthoFrame (I := I) g₀ x j) x v)
+        (smoothOrthoFrame (I := I) g₀ x i x)
+    rw [smoothOrthoFrame_cov_skew (I := I) g₀ x i j v]
+    rw [g₀.symm x (smoothOrthoFrame (I := I) g₀ x i x)
+      ((LeviCivita (I := I) g₀).toFun (smoothOrthoFrame (I := I) g₀ x j) x v)]
+  have hexp : ∀ i : Fin (Module.finrank ℝ E),
+      (LeviCivita (I := I) g₀).toFun (smoothOrthoFrame (I := I) g₀ x i) x v =
+        ∑ j : Fin (Module.finrank ℝ E), a i j • smoothOrthoFrame (I := I) g₀ x j x :=
+    fun i => smoothOrthoFrame_expansion_at (I := I) g₀ x
+      (mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x)
+      ((LeviCivita (I := I) g₀).toFun (smoothOrthoFrame (I := I) g₀ x i) x v)
+  have hS1 : (∑ i : Fin (Module.finrank ℝ E),
+      T (Fin.cons (((LeviCivita (I := I) g₀).toFun
+            (smoothOrthoFrame (I := I) g₀ x i) x v : TangentSpace I x) : E)
+          (Fin.cons ((smoothOrthoFrame (I := I) g₀ x i x : TangentSpace I x) : E) mm))) =
+      ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        a i j * T (Fin.cons ((smoothOrthoFrame (I := I) g₀ x j x : TangentSpace I x) : E)
+          (Fin.cons ((smoothOrthoFrame (I := I) g₀ x i x : TangentSpace I x) : E) mm)) := by
+    refine Finset.sum_congr rfl fun i _ => ?_
+    rw [show (((LeviCivita (I := I) g₀).toFun
+          (smoothOrthoFrame (I := I) g₀ x i) x v : TangentSpace I x) : E) =
+        ((∑ j : Fin (Module.finrank ℝ E),
+          a i j • smoothOrthoFrame (I := I) g₀ x j x : TangentSpace I x) : E) from by
+      rw [← hexp i]]
+    rw [model_cons_slot0_sum (E := E)]
+    exact Finset.sum_congr rfl fun j _ => model_cons_slot0_smul (E := E) _ _ T _
+  have hS2 : (∑ i : Fin (Module.finrank ℝ E),
+      T (Fin.cons ((smoothOrthoFrame (I := I) g₀ x i x : TangentSpace I x) : E)
+          (Fin.cons (((LeviCivita (I := I) g₀).toFun
+              (smoothOrthoFrame (I := I) g₀ x i) x v : TangentSpace I x) : E) mm))) =
+      ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        a i j * T (Fin.cons ((smoothOrthoFrame (I := I) g₀ x i x : TangentSpace I x) : E)
+          (Fin.cons ((smoothOrthoFrame (I := I) g₀ x j x : TangentSpace I x) : E) mm)) := by
+    refine Finset.sum_congr rfl fun i _ => ?_
+    have hcurry : ∀ z : E,
+        T (Fin.cons ((smoothOrthoFrame (I := I) g₀ x i x : TangentSpace I x) : E)
+            (Fin.cons z mm)) =
+        ((continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin 4 => E) ℝ) T
+            ((smoothOrthoFrame (I := I) g₀ x i x : TangentSpace I x) : E))
+          (Fin.cons z mm) := by
+      intro z
+      rw [continuousMultilinearCurryLeftEquiv_apply]
+    rw [hcurry]
+    rw [show (((LeviCivita (I := I) g₀).toFun
+          (smoothOrthoFrame (I := I) g₀ x i) x v : TangentSpace I x) : E) =
+        ((∑ j : Fin (Module.finrank ℝ E),
+          a i j • smoothOrthoFrame (I := I) g₀ x j x : TangentSpace I x) : E) from by
+      rw [← hexp i]]
+    rw [model_cons_slot0_sum (E := E)]
+    refine Finset.sum_congr rfl fun j _ => ?_
+    rw [model_cons_slot0_smul (E := E), ← hcurry]
+  rw [hS1, hS2]
+  have h2 : (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+      a i j * T (Fin.cons ((smoothOrthoFrame (I := I) g₀ x i x : TangentSpace I x) : E)
+        (Fin.cons ((smoothOrthoFrame (I := I) g₀ x j x : TangentSpace I x) : E) mm))) =
+      ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        -(a i j * T (Fin.cons ((smoothOrthoFrame (I := I) g₀ x j x : TangentSpace I x) : E)
+          (Fin.cons ((smoothOrthoFrame (I := I) g₀ x i x : TangentSpace I x) : E) mm))) := by
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
+    rw [haskew j i, neg_mul]
+  rw [h2]
+  rw [show (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+      -(a i j * T (Fin.cons ((smoothOrthoFrame (I := I) g₀ x j x : TangentSpace I x) : E)
+        (Fin.cons ((smoothOrthoFrame (I := I) g₀ x i x : TangentSpace I x) : E) mm)))) =
+      -(∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        a i j * T (Fin.cons ((smoothOrthoFrame (I := I) g₀ x j x : TangentSpace I x) : E)
+          (Fin.cons ((smoothOrthoFrame (I := I) g₀ x i x : TangentSpace I x) : E) mm))) from by
+    rw [← Finset.sum_neg_distrib]
+    exact Finset.sum_congr rfl fun i _ => by rw [← Finset.sum_neg_distrib]]
+  exact add_neg_cancel _
+
+set_option linter.unusedSectionVars false in
+/-- **The fibre-level skew correction sums cancel.**  The two moving-frame correction sums of the
+orthonormal-frame diagonal Leibniz expansion cancel as `(0, 2)`-tensor fibre elements
+(`orthoFrame_skew_correction_cancel` read through `toModel`-extensionality). -/
+private theorem orthoFrame_corrections_sum_eq_zero (g₀ : SmoothRiemannianMetric I M) (x : M)
+    (v : E) (W4 : Tensor0SBundle.Tensor0SSpace 4 I x) :
+    (∑ i : Fin (Module.finrank ℝ E),
+        Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+          (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x W4
+            ((LeviCivita (I := I) g₀).toFun (smoothOrthoFrame (I := I) g₀ x i) x v))
+          (smoothOrthoFrame (I := I) g₀ x i x))
+      + (∑ i : Fin (Module.finrank ℝ E),
+          Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+            (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x W4
+              (smoothOrthoFrame (I := I) g₀ x i x))
+            ((LeviCivita (I := I) g₀).toFun (smoothOrthoFrame (I := I) g₀ x i) x v)) = 0 := by
+  classical
+  apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+  refine ContinuousMultilinearMap.ext fun mm => ?_
+  beta_reduce
+  have heval : ∀ (z₁ z₂ : TangentSpace I x),
+      Tensor0SBundle.Tensor0SSpace.toModel
+          (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+            (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x W4 z₁) z₂) mm =
+        Tensor0SBundle.Tensor0SSpace.toModel W4
+          (Fin.cons ((z₁ : TangentSpace I x) : E)
+            (Fin.cons ((z₂ : TangentSpace I x) : E) mm)) := by
+    intro z₁ z₂
+    rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+      (T := Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x W4 z₁)
+      (v0 := ((z₂ : TangentSpace I x) : E)) (vs := mm)]
+    rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M) (T := W4)
+      (v0 := ((z₁ : TangentSpace I x) : E))
+      (vs := Fin.cons ((z₂ : TangentSpace I x) : E) mm)]
+  rw [Tensor0SBundle.Tensor0SSpace.toModel_add]
+  rw [show Tensor0SBundle.Tensor0SSpace.toModel
+        (∑ i : Fin (Module.finrank ℝ E),
+          Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+            (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x W4
+              ((LeviCivita (I := I) g₀).toFun (smoothOrthoFrame (I := I) g₀ x i) x v))
+            (smoothOrthoFrame (I := I) g₀ x i x)) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        Tensor0SBundle.Tensor0SSpace.toModel
+          (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+            (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x W4
+              ((LeviCivita (I := I) g₀).toFun (smoothOrthoFrame (I := I) g₀ x i) x v))
+            (smoothOrthoFrame (I := I) g₀ x i x)) from
+    map_sum (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 2 x) _ _]
+  rw [show Tensor0SBundle.Tensor0SSpace.toModel
+        (∑ i : Fin (Module.finrank ℝ E),
+          Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+            (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x W4
+              (smoothOrthoFrame (I := I) g₀ x i x))
+            ((LeviCivita (I := I) g₀).toFun (smoothOrthoFrame (I := I) g₀ x i) x v)) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        Tensor0SBundle.Tensor0SSpace.toModel
+          (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+            (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x W4
+              (smoothOrthoFrame (I := I) g₀ x i x))
+            ((LeviCivita (I := I) g₀).toFun (smoothOrthoFrame (I := I) g₀ x i) x v)) from
+    map_sum (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 2 x) _ _]
+  rw [ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.sum_apply,
+    ContinuousMultilinearMap.sum_apply]
+  rw [Finset.sum_congr rfl (fun i (_ : i ∈ Finset.univ) =>
+    heval ((LeviCivita (I := I) g₀).toFun (smoothOrthoFrame (I := I) g₀ x i) x v)
+      (smoothOrthoFrame (I := I) g₀ x i x))]
+  rw [Finset.sum_congr rfl (fun i (_ : i ∈ Finset.univ) =>
+    heval (smoothOrthoFrame (I := I) g₀ x i x)
+      ((LeviCivita (I := I) g₀).toFun (smoothOrthoFrame (I := I) g₀ x i) x v))]
+  rw [Tensor0SBundle.Tensor0SSpace.toModel_zero, ContinuousMultilinearMap.zero_apply]
+  exact orthoFrame_skew_correction_cancel (I := I) g₀ x v
+    (Tensor0SBundle.Tensor0SSpace.toModel W4) mm
+
+set_option linter.unusedSectionVars false in
+/-- **The finite-sum additivity of the `(0, s)`-tensor covariant derivative.**  The bundled
+Levi-Civita `(0, s)`-tensor covariant derivative distributes over a finite sum of smooth sections
+(iterated `IsCovariantDerivativeOn.add` by `Finset` induction). -/
+private theorem tensor0SCovDeriv_finset_sum (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
+    {ι : Type*} (fs : Finset ι)
+    (σ : ι → Cₛ^∞⟮I; Tensor0SBundle.Tensor0SModel s ℝ E,
+      (fun y : M => Tensor0SBundle.Tensor0SSpace s I y)⟯) (x : M) :
+    Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g₀)
+        (fun y : M => ∑ i ∈ fs, σ i y) x =
+      ∑ i ∈ fs, Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g₀)
+        (fun y : M => σ i y) x := by
+  classical
+  induction fs using Finset.cons_induction with
+  | empty =>
+    rw [show (fun y : M => ∑ i ∈ (∅ : Finset ι), σ i y) =
+        (0 : Π y : M, Tensor0SBundle.Tensor0SSpace s I y) from
+      funext fun y => Finset.sum_empty]
+    rw [Finset.sum_empty]
+    exact (Tensor0SNabla.tensor0SCovariantDerivative I M s
+      (LeviCivita (I := I) g₀)).isCovariantDerivativeOnUniv.zero (Set.mem_univ x)
+  | cons b fs' hb ih =>
+    have hsum_smooth : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel s ℝ E)) ∞
+        (fun y : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel s ℝ E)
+          (E := fun z : M => Tensor0SBundle.Tensor0SSpace s I z) y (∑ i ∈ fs', σ i y)) := by
+      refine (∑ i ∈ fs', σ i :
+        Cₛ^∞⟮I; Tensor0SBundle.Tensor0SModel s ℝ E,
+          (fun y : M => Tensor0SBundle.Tensor0SSpace s I y)⟯).contMDiff.congr fun y => ?_
+      rw [ContMDiffSection.finset_sum_apply]
+    have hadd := (Tensor0SNabla.tensor0SCovariantDerivative I M s
+        (LeviCivita (I := I) g₀)).isCovariantDerivativeOnUniv.add
+      (σ := fun y : M => σ b y) (σ' := fun y : M => ∑ i ∈ fs', σ i y) (x := x)
+      (((σ b).contMDiff x).mdifferentiableAt (by norm_num))
+      ((hsum_smooth x).mdifferentiableAt (by norm_num)) (Set.mem_univ x)
+    rw [show (fun y : M => ∑ i ∈ Finset.cons b fs' hb, σ i y) =
+        ((fun y : M => σ b y) + fun y : M => ∑ i ∈ fs', σ i y) from
+      funext fun y => Finset.sum_cons hb]
+    rw [hadd, ih, Finset.sum_cons]
+
+set_option linter.unusedSectionVars false in
+/-- **The orthonormal-frame diagonal Leibniz expansion of the double insertion.**  The directional
+`(0, 2)`-tensor covariant derivative of the doubly-frame-inserted section
+`y ↦ curry₂ (curry₃ (w y) (Bᵢ y)) (Bᵢ y)` splits by the leading-slot Hom-Leibniz
+(`tensor0SCovariantDerivative_curriedSection_hom_leibniz`, applied twice) into the diagonal jet term
+plus the two moving-frame corrections. -/
+private theorem covDeriv_doubleInsert_leibniz (g₀ : SmoothRiemannianMetric I M)
+    (w : Cₛ^∞⟮I; Tensor0SBundle.Tensor0SModel 4 ℝ E,
+      (fun y : M => Tensor0SBundle.Tensor0SSpace 4 I y)⟯)
+    (x : M) (i : Fin (Module.finrank ℝ E)) (v : E) :
+    Tensor0SNabla.tensor0SCovariantDerivative I M 2 (LeviCivita (I := I) g₀)
+        (fun y : M => (Tensor0SNabla.curriedSection I M
+          (fun z : M => (Tensor0SNabla.curriedSection I M (fun z' : M => w z') z)
+            (smoothOrthoFrame (I := I) g₀ x i z)) y)
+          (smoothOrthoFrame (I := I) g₀ x i y)) x v =
+      Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+          (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x
+            (Tensor0SNabla.tensor0SCovariantDerivative I M 4 (LeviCivita (I := I) g₀)
+              (fun y : M => w y) x v)
+            (smoothOrthoFrame (I := I) g₀ x i x))
+          (smoothOrthoFrame (I := I) g₀ x i x)
+        + Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+            (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x (w x)
+              ((LeviCivita (I := I) g₀).toFun (smoothOrthoFrame (I := I) g₀ x i) x v))
+            (smoothOrthoFrame (I := I) g₀ x i x)
+        + Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+            (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x (w x)
+              (smoothOrthoFrame (I := I) g₀ x i x))
+            ((LeviCivita (I := I) g₀).toFun (smoothOrthoFrame (I := I) g₀ x i) x v) := by
+  classical
+  have hCi_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun y : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) y
+        (smoothOrthoFrame (I := I) g₀ x i y)) :=
+    smoothOrthoFrame_smooth (I := I) g₀ x i
+  let Ci : ContMDiffSection I E ∞ (TangentSpace I : M → Type _) :=
+    ⟨fun y : M => smoothOrthoFrame (I := I) g₀ x i y, hCi_smooth⟩
+  -- the once-inserted `(0, 3)`-section and its smoothness
+  have hu_smooth : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 3 ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 3 ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace 3 I z) y
+        ((Tensor0SNabla.curriedSection I M (fun z' : M => w z') y)
+          (smoothOrthoFrame (I := I) g₀ x i y))) := by
+    have hcurried : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] Tensor0SBundle.Tensor0SModel 3 ℝ E)) ∞
+        (fun y : M => TotalSpace.mk' (E →L[ℝ] Tensor0SBundle.Tensor0SModel 3 ℝ E)
+          (E := fun z : M => TangentSpace I z →L[ℝ] Tensor0SBundle.Tensor0SSpace 3 I z) y
+          (Tensor0SNabla.curriedSection I M (fun z' : M => w z') y)) :=
+      fun y => TensorMultilinear.contMDiffAt_curriedSection_of_contMDiffAt_section
+        (I := I) (M := M) (fun z' : M => w z') y (w.contMDiff y)
+    exact ContMDiff.clm_bundle_apply (b := id) hcurried Ci.contMDiff
+  have hu_at : TensorSectionMDiffAt (I := I) 3
+      (fun y : M => (Tensor0SNabla.curriedSection I M (fun z' : M => w z') y)
+        (smoothOrthoFrame (I := I) g₀ x i y)) x :=
+    (hu_smooth x).mdifferentiableAt (by norm_num)
+  have hw_at : TensorSectionMDiffAt (I := I) 4 (fun y : M => w y) x :=
+    (w.contMDiff x).mdifferentiableAt (by norm_num)
+  -- outer peel (`s = 2`), defeq-cast to the frame spelling
+  have h1 : Tensor0SNabla.tensor0SCovariantDerivative I M 2 (LeviCivita (I := I) g₀)
+        (fun y : M => (Tensor0SNabla.curriedSection I M
+          (fun z : M => (Tensor0SNabla.curriedSection I M (fun z' : M => w z') z)
+            (smoothOrthoFrame (I := I) g₀ x i z)) y)
+          (smoothOrthoFrame (I := I) g₀ x i y)) x v =
+      Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+          (Tensor0SNabla.tensor0SCovariantDerivative I M 3 (LeviCivita (I := I) g₀)
+            (fun y : M => (Tensor0SNabla.curriedSection I M (fun z' : M => w z') y)
+              (smoothOrthoFrame (I := I) g₀ x i y)) x v)
+          (smoothOrthoFrame (I := I) g₀ x i x)
+        + Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+            (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x (w x)
+              (smoothOrthoFrame (I := I) g₀ x i x))
+            ((LeviCivita (I := I) g₀).toFun (smoothOrthoFrame (I := I) g₀ x i) x v) :=
+    Integral.Connection.tensor0SCovariantDerivative_curriedSection_hom_leibniz
+      (I := I) (M := M) g₀ 2
+      (fun y : M => (Tensor0SNabla.curriedSection I M (fun z' : M => w z') y)
+        (smoothOrthoFrame (I := I) g₀ x i y)) (x := x) hu_at Ci v
+  -- inner peel (`s = 3`), defeq-cast to the frame spelling
+  have h2 : Tensor0SNabla.tensor0SCovariantDerivative I M 3 (LeviCivita (I := I) g₀)
+        (fun y : M => (Tensor0SNabla.curriedSection I M (fun z' : M => w z') y)
+          (smoothOrthoFrame (I := I) g₀ x i y)) x v =
+      Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x
+          (Tensor0SNabla.tensor0SCovariantDerivative I M 4 (LeviCivita (I := I) g₀)
+            (fun y : M => w y) x v)
+          (smoothOrthoFrame (I := I) g₀ x i x)
+        + Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x (w x)
+            ((LeviCivita (I := I) g₀).toFun (smoothOrthoFrame (I := I) g₀ x i) x v) :=
+    Integral.Connection.tensor0SCovariantDerivative_curriedSection_hom_leibniz
+      (I := I) (M := M) g₀ 3 (fun y : M => w y) (x := x) hw_at Ci v
+  rw [h1, h2, map_add (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x),
+    ContinuousLinearMap.add_apply]
+
+set_option linter.unusedSectionVars false in
+/-- **The cometric `∇₀`-parallelism base core: the leading-`{0,1}` `g₀⁻¹` double-trace field is
+`∇₀`-parallel.**  The covariant gradient of the *base* intrinsic `g₀⁻¹` double-trace operator field
 (`a = 0`, contracting the two leading covariant slots `{0, 1}` against the cometric, via the cometric
 index-raise `♯ = inverseMetricSharpField` then the FRAME-FREE natural trace) vanishes:
 ```
 covGrad g₀ 4 2 (ricciModelTrace42Field g₀ 0) = 0.
 ```
-This is the genuine deep cometric-parallelism core `∇₀ g₀⁻¹ = 0`: the base double-trace field raises the
-leading curvature slot by the cometric `♯` (the globally-smooth Hom-section `inverseMetricSharpField`)
-then takes the frame-free natural trace; the covariant gradient passes through the (parallel-transported)
-natural trace, leaving the differentiated raise `∇₀ ♯`, which vanishes by the inverse-metric
-compatibility `∇₀ g₀⁻¹ = 0` (`cometric_skew_core` / metric compatibility
-`loweredCovDerivAt_eq_lower_tensorCovDerivAt`).  The natural step is to derive this over the genuinely
-upstream node `inverseMetricSharpField_covGrad_eq_zero` (the cometric Hom-section is `∇₀`-parallel) and
-the `appCcRS` B-rule (`covGrad_appCcRS_eq` / `ricciModelTrace42FieldRec_covGrad_eq_zero` already wired
-in-file).  It is **non-vacuous**: it asserts a genuine differential-geometric identity (the parallelism
-of the background cometric), false for a non-parallel ambient frame.  Its body is `sorry`: the
-section-level cometric parallelism of the base intrinsic `g₀⁻¹` double trace, over the upstream
-inverse-metric Hom-section parallelism. -/
+This is the genuine deep cometric-parallelism core `∇₀ g₀⁻¹ = 0`.
+
+**Proof.**  It suffices that the directional covariant derivative of the field vanishes at every
+base point and direction.  By the Hom-connection product rule (`tensorRSCovariantDerivative_apply`,
+tested on a smooth section `w` through an arbitrary fibre value), this reduces to the intertwining
+`∇₀ᵥ(Φ·w) = Φₓ(∇₀ᵥw)` — the covariant derivative commutes with the cometric double trace.  Near `x`
+the frame-free cometric trace agrees with the `g₀`-orthonormal diagonal sum against the smooth
+orthonormal frame attached at `x` (`ricciModelTrace42Fib_eq_orthoFrame_diag`, the value identity on
+the orthonormality neighbourhood), so by locality (`IsCovariantDerivativeOn.congr_of_eventuallyEq`)
+and finite-sum additivity the derivative passes to the per-frame-direction double insertions; the
+leading-slot Hom-Leibniz (`covDeriv_doubleInsert_leibniz`, two peels) produces the diagonal jet term
+`∑ᵢ (∇₀ᵥw)(Bᵢ, Bᵢ, ·)` — which is exactly `Φₓ(∇₀ᵥw)` by the value identity at `x` — plus the two
+moving-frame corrections, which cancel by the orthonormal expansion and the connection
+skew-symmetry `g₀(∇ᵥBᵢ, Bⱼ) = −g₀(Bᵢ, ∇ᵥBⱼ)` (`orthoFrame_skew_correction_cancel`, the cometric
+skew core `∇₀ g₀⁻¹ = 0` read on the frame). -/
 theorem ricciModelTrace42Field_covGrad_eq_zero (g₀ : SmoothRiemannianMetric I M) :
     Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 4 2
-        (ricciModelTrace42Field (I := I) g₀ 0) = 0 :=
-  sorry
+        (ricciModelTrace42Field (I := I) g₀ 0) = 0 := by
+  classical
+  have hdir : ∀ (x : M) (v : E),
+      Analysis.Parabolic.TensorSpectral.tensorCovDerivAt (I := I) (M := M) g₀ 4 2
+        (ricciModelTrace42Field (I := I) g₀ 0) x v = 0 := by
+    intro x v
+    apply ContinuousLinearMap.ext
+    intro D
+    obtain ⟨w, hw⟩ := ContMDiffSection.exists_eq_at (I := I)
+      (F := Tensor0SBundle.Tensor0SModel 4 ℝ E)
+      (V := fun y : M => Tensor0SBundle.Tensor0SSpace 4 I y) (n := (⊤ : ℕ∞)) x D
+    have hPR := TensorRSNabla.tensorRSCovariantDerivative_apply (I := I) (M := M) 4 2
+      (LeviCivita (I := I) g₀) (ricciModelTrace42Field (I := I) g₀ 0).toSection w x v
+    rw [Analysis.Parabolic.TensorSpectral.tensorCovDerivAt_def (I := I) (M := M) g₀ 4 2
+      (ricciModelTrace42Field (I := I) g₀ 0) x v, ContinuousLinearMap.zero_apply, ← hw]
+    refine Eq.trans hPR ?_
+    rw [sub_eq_zero]
+    -- the per-frame double insertions (as smooth sections)
+    have hCi_smooth : ∀ i : Fin (Module.finrank ℝ E),
+        ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+          (fun y : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) y
+            (smoothOrthoFrame (I := I) g₀ x i y)) :=
+      fun i => smoothOrthoFrame_smooth (I := I) g₀ x i
+    have hu_smooth : ∀ i : Fin (Module.finrank ℝ E),
+        ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 3 ℝ E)) ∞
+          (fun y : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 3 ℝ E)
+            (E := fun z : M => Tensor0SBundle.Tensor0SSpace 3 I z) y
+            ((Tensor0SNabla.curriedSection I M (fun z' : M => w z') y)
+              (smoothOrthoFrame (I := I) g₀ x i y))) := by
+      intro i
+      have hcurried : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] Tensor0SBundle.Tensor0SModel 3 ℝ E)) ∞
+          (fun y : M => TotalSpace.mk' (E →L[ℝ] Tensor0SBundle.Tensor0SModel 3 ℝ E)
+            (E := fun z : M => TangentSpace I z →L[ℝ] Tensor0SBundle.Tensor0SSpace 3 I z) y
+            (Tensor0SNabla.curriedSection I M (fun z' : M => w z') y)) :=
+        fun y => TensorMultilinear.contMDiffAt_curriedSection_of_contMDiffAt_section
+          (I := I) (M := M) (fun z' : M => w z') y (w.contMDiff y)
+      exact ContMDiff.clm_bundle_apply (b := id) hcurried (hCi_smooth i)
+    have ht_smooth : ∀ i : Fin (Module.finrank ℝ E),
+        ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 2 ℝ E)) ∞
+          (fun y : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
+            (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) y
+            ((Tensor0SNabla.curriedSection I M
+              (fun z : M => (Tensor0SNabla.curriedSection I M (fun z' : M => w z') z)
+                (smoothOrthoFrame (I := I) g₀ x i z)) y)
+              (smoothOrthoFrame (I := I) g₀ x i y))) := by
+      intro i
+      have hcurried : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] Tensor0SBundle.Tensor0SModel 2 ℝ E)) ∞
+          (fun y : M => TotalSpace.mk' (E →L[ℝ] Tensor0SBundle.Tensor0SModel 2 ℝ E)
+            (E := fun z : M => TangentSpace I z →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I z) y
+            (Tensor0SNabla.curriedSection I M
+              (fun z : M => (Tensor0SNabla.curriedSection I M (fun z' : M => w z') z)
+                (smoothOrthoFrame (I := I) g₀ x i z)) y)) :=
+        fun y => TensorMultilinear.contMDiffAt_curriedSection_of_contMDiffAt_section
+          (I := I) (M := M)
+          (fun z : M => (Tensor0SNabla.curriedSection I M (fun z' : M => w z') z)
+            (smoothOrthoFrame (I := I) g₀ x i z)) y (hu_smooth i y)
+      exact ContMDiff.clm_bundle_apply (b := id) hcurried (hCi_smooth i)
+    let ti : Fin (Module.finrank ℝ E) →
+        Cₛ^∞⟮I; Tensor0SBundle.Tensor0SModel 2 ℝ E,
+          (fun y : M => Tensor0SBundle.Tensor0SSpace 2 I y)⟯ := fun i =>
+      ⟨fun y : M => (Tensor0SNabla.curriedSection I M
+          (fun z : M => (Tensor0SNabla.curriedSection I M (fun z' : M => w z') z)
+            (smoothOrthoFrame (I := I) g₀ x i z)) y)
+          (smoothOrthoFrame (I := I) g₀ x i y), ht_smooth i⟩
+    -- the traced section is smooth
+    have hP_smooth : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 2 ℝ E)) ∞
+        (fun y : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
+          (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) y
+          ((show Tensor0SBundle.Tensor0SSpace 4 I y →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I y from
+            (ricciModelTrace42Field (I := I) g₀ 0).toSection y) (w y))) :=
+      ContMDiff.clm_bundle_apply (b := id)
+        (ricciModelTrace42Field (I := I) g₀ 0).toSection.contMDiff w.contMDiff
+    -- the comparison section
+    set Q : Cₛ^∞⟮I; Tensor0SBundle.Tensor0SModel 2 ℝ E,
+        (fun y : M => Tensor0SBundle.Tensor0SSpace 2 I y)⟯ :=
+      (-2 : ℝ) • ∑ i : Fin (Module.finrank ℝ E), ti i with hQ_def
+    have hQ_coe : ∀ y : M, Q y = (-2 : ℝ) • ∑ i : Fin (Module.finrank ℝ E), ti i y := by
+      intro y
+      rw [hQ_def]
+      rw [show ((-2 : ℝ) • ∑ i : Fin (Module.finrank ℝ E), ti i :
+          Cₛ^∞⟮I; Tensor0SBundle.Tensor0SModel 2 ℝ E,
+            (fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z)⟯) y =
+        (-2 : ℝ) • ((∑ i : Fin (Module.finrank ℝ E), ti i :
+          Cₛ^∞⟮I; Tensor0SBundle.Tensor0SModel 2 ℝ E,
+            (fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z)⟯) y) from rfl]
+      rw [ContMDiffSection.finset_sum_apply]
+    -- near `x` the traced section agrees with the frame diagonal sum
+    have hagree : ∀ᶠ y in nhds x,
+        (show Tensor0SBundle.Tensor0SSpace 4 I y →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I y from
+          (ricciModelTrace42Field (I := I) g₀ 0).toSection y) (w y) = Q y := by
+      filter_upwards [smoothOrthoFrameNbhd_mem_nhds (I := I) (M := M) x] with y hy
+      rw [hQ_coe y]
+      rw [show (show Tensor0SBundle.Tensor0SSpace 4 I y →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace 2 I y from
+          (ricciModelTrace42Field (I := I) g₀ 0).toSection y) (w y) =
+        ricciModelTrace42Fib (I := I) g₀ 0 y (w y) from rfl]
+      rw [ricciModelTrace42Fib_eq_orthoFrame_diag (I := I) g₀ x hy (w y)]
+      rfl
+    -- locality, scalar, and finite-sum additivity
+    have hcongr := (Tensor0SNabla.tensor0SCovariantDerivative I M 2
+        (LeviCivita (I := I) g₀)).isCovariantDerivativeOnUniv.congr_of_eventuallyEq
+      (σ := fun y : M =>
+        (show Tensor0SBundle.Tensor0SSpace 4 I y →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I y from
+          (ricciModelTrace42Field (I := I) g₀ 0).toSection y) (w y))
+      (σ' := fun y : M => Q y) (x := x)
+      ((hP_smooth x).mdifferentiableAt (by norm_num))
+      ((Q.contMDiff x).mdifferentiableAt (by norm_num)) Filter.univ_mem hagree
+    have hsmul := (Tensor0SNabla.tensor0SCovariantDerivative I M 2
+        (LeviCivita (I := I) g₀)).isCovariantDerivativeOnUniv.smul_const (x := x) (-2 : ℝ)
+      (σ := fun y : M => ∑ i : Fin (Module.finrank ℝ E), ti i y)
+      (((∑ i : Fin (Module.finrank ℝ E), ti i :
+          Cₛ^∞⟮I; Tensor0SBundle.Tensor0SModel 2 ℝ E,
+            (fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z)⟯).contMDiff.congr (fun y => by
+        rw [ContMDiffSection.finset_sum_apply]) x).mdifferentiableAt (by norm_num))
+      (Set.mem_univ x)
+    -- assemble: the directional derivative of the traced section
+    have hQfun : (fun y : M => Q y) =
+        ((-2 : ℝ) • fun y : M => ∑ i : Fin (Module.finrank ℝ E), ti i y) := by
+      funext y
+      rw [hQ_coe y]
+      rfl
+    have hfinal : (Tensor0SNabla.tensor0SCovariantDerivative I M 2
+          (LeviCivita (I := I) g₀)).toFun
+          (fun y : M =>
+            (show Tensor0SBundle.Tensor0SSpace 4 I y →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I y from
+              (ricciModelTrace42Field (I := I) g₀ 0).toSection y) (w y)) x v =
+        (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+          (ricciModelTrace42Field (I := I) g₀ 0).toSection x)
+          ((Tensor0SNabla.tensor0SCovariantDerivative I M 4
+            (LeviCivita (I := I) g₀)).toFun (fun y : M => w y) x v) := by
+      calc (Tensor0SNabla.tensor0SCovariantDerivative I M 2 (LeviCivita (I := I) g₀)).toFun
+            (fun y : M =>
+              (show Tensor0SBundle.Tensor0SSpace 4 I y →L[ℝ]
+                  Tensor0SBundle.Tensor0SSpace 2 I y from
+                (ricciModelTrace42Field (I := I) g₀ 0).toSection y) (w y)) x v
+          = (Tensor0SNabla.tensor0SCovariantDerivative I M 2 (LeviCivita (I := I) g₀)).toFun
+              (fun y : M => Q y) x v := by rw [hcongr]
+        _ = ((-2 : ℝ) • (Tensor0SNabla.tensor0SCovariantDerivative I M 2
+              (LeviCivita (I := I) g₀)).toFun
+              (fun y : M => ∑ i : Fin (Module.finrank ℝ E), ti i y) x) v := by
+            rw [hQfun, hsmul]
+        _ = (-2 : ℝ) • ((Tensor0SNabla.tensor0SCovariantDerivative I M 2
+              (LeviCivita (I := I) g₀)).toFun
+              (fun y : M => ∑ i : Fin (Module.finrank ℝ E), ti i y) x v) := by
+            rw [ContinuousLinearMap.smul_apply]
+        _ = (-2 : ℝ) • ((∑ i : Fin (Module.finrank ℝ E),
+              (Tensor0SNabla.tensor0SCovariantDerivative I M 2
+                (LeviCivita (I := I) g₀)).toFun (fun y : M => ti i y) x) v) := by
+            rw [tensor0SCovDeriv_finset_sum (I := I) g₀ 2 Finset.univ ti x]
+        _ = (-2 : ℝ) • (∑ i : Fin (Module.finrank ℝ E),
+              (Tensor0SNabla.tensor0SCovariantDerivative I M 2
+                (LeviCivita (I := I) g₀)).toFun (fun y : M => ti i y) x v) := by
+            rw [ContinuousLinearMap.sum_apply]
+        _ = (-2 : ℝ) • (∑ i : Fin (Module.finrank ℝ E),
+              (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+                  (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x
+                    ((Tensor0SNabla.tensor0SCovariantDerivative I M 4
+                      (LeviCivita (I := I) g₀)).toFun (fun y : M => w y) x v)
+                    (smoothOrthoFrame (I := I) g₀ x i x))
+                  (smoothOrthoFrame (I := I) g₀ x i x)
+                + Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+                    (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x (w x)
+                      ((LeviCivita (I := I) g₀).toFun
+                        (smoothOrthoFrame (I := I) g₀ x i) x v))
+                    (smoothOrthoFrame (I := I) g₀ x i x)
+                + Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+                    (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x (w x)
+                      (smoothOrthoFrame (I := I) g₀ x i x))
+                    ((LeviCivita (I := I) g₀).toFun
+                      (smoothOrthoFrame (I := I) g₀ x i) x v))) := by
+            refine congrArg (fun z => (-2 : ℝ) • z)
+              (Finset.sum_congr rfl fun i _ => ?_)
+            exact covDeriv_doubleInsert_leibniz (I := I) g₀ w x i v
+        _ = (-2 : ℝ) • (∑ i : Fin (Module.finrank ℝ E),
+              Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 2 x
+                (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 3 x
+                  ((Tensor0SNabla.tensor0SCovariantDerivative I M 4
+                    (LeviCivita (I := I) g₀)).toFun (fun y : M => w y) x v)
+                  (smoothOrthoFrame (I := I) g₀ x i x))
+                (smoothOrthoFrame (I := I) g₀ x i x)) := by
+            rw [Finset.sum_add_distrib, Finset.sum_add_distrib, add_assoc,
+              orthoFrame_corrections_sum_eq_zero (I := I) g₀ x v (w x), add_zero]
+        _ = (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace 2 I x from
+              (ricciModelTrace42Field (I := I) g₀ 0).toSection x)
+              ((Tensor0SNabla.tensor0SCovariantDerivative I M 4
+                (LeviCivita (I := I) g₀)).toFun (fun y : M => w y) x v) :=
+            (ricciModelTrace42Fib_eq_orthoFrame_diag (I := I) g₀ x
+              (mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x)
+              ((Tensor0SNabla.tensor0SCovariantDerivative I M 4
+                (LeviCivita (I := I) g₀)).toFun (fun y : M => w y) x v)).symm
+    exact hfinal
+  -- assemble the section-level vanishing from the directional vanishing
+  apply Integral.L2.SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply ContinuousLinearMap.ext
+  intro D
+  apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+  refine ContinuousMultilinearMap.ext (fun m => ?_)
+  beta_reduce
+  rw [Integral.L2.SmoothCcTensor.toSection_zero, ContMDiffSection.coe_zero, Pi.zero_apply,
+    ContinuousLinearMap.zero_apply, Tensor0SBundle.Tensor0SSpace.toModel_zero,
+    ContinuousMultilinearMap.zero_apply,
+    Analysis.Parabolic.TensorSpectral.covGrad_toSection_apply_eval
+      (I := I) (M := M) g₀ 4 2 (ricciModelTrace42Field (I := I) g₀ 0) x D m,
+    hdir x (m 0), ContinuousLinearMap.zero_apply, Tensor0SBundle.Tensor0SSpace.toModel_zero,
+    ContinuousMultilinearMap.zero_apply]
 
 /-- **Leading-passenger-slot reading of the directional covariant derivative of a slot-extension.**
 Reading the leading covariant passenger slot (via `tensor0S_curry`) of the directional covariant
@@ -1134,6 +1927,204 @@ private theorem ricciModelTrace42Op_toSection_eq_postcomp (g₀ : SmoothRiemanni
   rw [hA (R.toSection x), ricciModelTrace42Op_toSection]
 
 set_option linter.unusedSectionVars false in
+/-- **The all-ranks frame witness of the intrinsic fibre norm.**  At a base point `x` there is a
+single tangent frame `e` (with `n = finrank` directions, the `g₀(x)`-orthonormal frame internal to
+`riemannianFiberNormSq`) representing the intrinsic `(0, s)` fibre norm as the frame double sum at
+**every** covariant rank `s` simultaneously.  This is `tangent_orthonormalBasisS_witness` with the
+rank quantified inside the existential (the internal construction does not depend on the rank). -/
+private theorem rfns_allRanks_frame_witness (g₀ : SmoothRiemannianMetric I M) (x : M) :
+    ∃ (n : ℕ) (e : Fin n → TangentSpace I x),
+      n = Module.finrank ℝ (TangentSpace I x) ∧
+      ∀ (s : ℕ) (S : Tensor0SBundle.TensorRSSpace 0 s I x),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x S =
+          ∑ K : Fin 0 → Fin n, ∑ J : Fin s → Fin n,
+            Integral.Connection.fiberNormSqSummand (I := I) (M := M) g₀ x 0 s S n e K J := by
+  classical
+  let cd : InnerProductSpace.Core ℝ (TangentSpace I x) := g₀.toRiemannianMetric.toCore x
+  have hc : ContinuousAt (fun v : TangentSpace I x => cd.inner v v) 0 :=
+    g₀.toRiemannianMetric.continuousAt x
+  have hbnd : Bornology.IsVonNBounded ℝ {v : TangentSpace I x |
+      RCLike.re (cd.inner v v) < 1} :=
+    g₀.toRiemannianMetric.isVonNBounded x
+  letI nag : NormedAddCommGroup (TangentSpace I x) :=
+    cd.toNormedAddCommGroupOfTopology hc hbnd
+  letI ips : InnerProductSpace ℝ (TangentSpace I x) :=
+    InnerProductSpace.ofCoreOfTopology cd hc hbnd
+  set n : ℕ := Module.finrank ℝ (TangentSpace I x) with hn_def
+  set eob : OrthonormalBasis (Fin n) ℝ (TangentSpace I x) := stdOrthonormalBasis ℝ _
+    with heob_def
+  exact ⟨n, fun i => eob i, rfl, fun s S => rfl⟩
+
+set_option linter.unusedSectionVars false in
+/-- **The leading-slot slice of the slot-extended double-trace action is the action on the slice.**
+The slot-`0` curry of the slot-extended passenger-passing field's post-composition action, along a
+frame direction `e b`, is the one-step-lower field's post-composition action on the slot-`0` curry of
+the input (`slotExtendFib` reads the passenger slot first and passes it unchanged). -/
+private theorem slot0Curry_fieldRec_postcomp (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (x : M)
+    {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n)
+    (v : Tensor0SBundle.TensorRSSpace 0 (4 + (a + 1)) I x) (b : Fin n) :
+    Integral.Connection.slot0Curry (I := I) (M := M) g₀ x (2 + a) e K₀
+        ((show Tensor0SBundle.Tensor0SSpace (4 + (a + 1)) I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace (2 + (a + 1)) I x from
+          (ricciModelTrace42FieldRec (I := I) g₀ (a + 1)).toSection x).comp
+          (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace (4 + (a + 1)) I x from v)) b =
+      (show Tensor0SBundle.Tensor0SSpace (4 + a) I x →L[ℝ]
+          Tensor0SBundle.Tensor0SSpace (2 + a) I x from
+        (ricciModelTrace42FieldRec (I := I) g₀ a).toSection x).comp
+        (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace (4 + a) I x from
+          Integral.Connection.slot0Curry (I := I) (M := M) g₀ x (4 + a) e K₀ v b) := by
+  classical
+  apply ContinuousLinearMap.ext
+  intro τ
+  have hLHS : (Integral.Connection.slot0Curry (I := I) (M := M) g₀ x (2 + a) e K₀
+        ((show Tensor0SBundle.Tensor0SSpace (4 + (a + 1)) I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace (2 + (a + 1)) I x from
+          (ricciModelTrace42FieldRec (I := I) g₀ (a + 1)).toSection x).comp
+          (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace (4 + (a + 1)) I x from v)) b :
+        Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (2 + a) I x) τ =
+      Integral.Connection.tensor00Scalar (I := I) (M := M) x τ •
+        ((show Tensor0SBundle.Tensor0SSpace (4 + a) I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace (2 + a) I x from
+          (ricciModelTrace42FieldRec (I := I) g₀ a).toSection x)
+          (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (4 + a) x
+            ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace (4 + (a + 1)) I x from v)
+              ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+                (fun k => g₀.inner x (e (K₀ k)))))
+            (e b))) := by
+    rw [Integral.Connection.slot0Curry_apply]
+    congr 1
+  have hRHS : ((show Tensor0SBundle.Tensor0SSpace (4 + a) I x →L[ℝ]
+          Tensor0SBundle.Tensor0SSpace (2 + a) I x from
+        (ricciModelTrace42FieldRec (I := I) g₀ a).toSection x).comp
+        (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace (4 + a) I x from
+          Integral.Connection.slot0Curry (I := I) (M := M) g₀ x (4 + a) e K₀ v b)) τ =
+      Integral.Connection.tensor00Scalar (I := I) (M := M) x τ •
+        ((show Tensor0SBundle.Tensor0SSpace (4 + a) I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace (2 + a) I x from
+          (ricciModelTrace42FieldRec (I := I) g₀ a).toSection x)
+          (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (4 + a) x
+            ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace (4 + (a + 1)) I x from v)
+              ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+                (fun k => g₀.inner x (e (K₀ k)))))
+            (e b))) := by
+    rw [ContinuousLinearMap.comp_apply, Integral.Connection.slot0Curry_apply, map_smul]
+    rfl
+  exact hLHS.trans hRHS.symm
+
+set_option linter.unusedSectionVars false in
+/-- **The order-uniform postcomposition envelope over the passenger-passing recursion.**  From the
+base-level (`a = 0`) uniform fibre envelope, the same constant bounds the post-composition action of
+the slot-extended field at **every** gradient-shift `a`: by induction, slicing the leading passenger
+covariant slot with the all-ranks frame Parseval split
+(`riemannianFiberNormSq_succ_eq_sum_slot0Curry_of_frame`) and passing each slice through
+`slot0Curry_fieldRec_postcomp` to the inductive hypothesis — the leading passenger slot is an
+isometric ampliation for the intrinsic fibre envelope. -/
+private theorem ricciModelTrace42_postcomp_rfns_le_aux (g₀ : SmoothRiemannianMetric I M) (κ₀ : ℝ)
+    (hbase : ∀ (x : M) (v : Tensor0SBundle.TensorRSSpace 0 4 I x),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+          ((show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace 2 I x from
+            (ricciModelTrace42FieldRec (I := I) g₀ 0).toSection x).comp
+            (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace 4 I x from v)) ≤
+        κ₀ * riemannianFiberNormSq (I := I) (M := M) g₀ 0 4 x v) :
+    ∀ (a : ℕ) (x : M) (v : Tensor0SBundle.TensorRSSpace 0 (4 + a) I x),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+          ((show Tensor0SBundle.Tensor0SSpace (4 + a) I x →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace (2 + a) I x from
+            (ricciModelTrace42FieldRec (I := I) g₀ a).toSection x).comp
+            (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace (4 + a) I x from v)) ≤
+        κ₀ * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + a) x v := by
+  intro a
+  induction a with
+  | zero => exact hbase
+  | succ a ih =>
+    intro x v
+    classical
+    obtain ⟨n, e, hn, hrepr⟩ := rfns_allRanks_frame_witness (I := I) g₀ x
+    -- slice the action and the input along the leading passenger slot
+    have hL : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (a + 1)) x
+          ((show Tensor0SBundle.Tensor0SSpace (4 + (a + 1)) I x →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace (2 + (a + 1)) I x from
+            (ricciModelTrace42FieldRec (I := I) g₀ (a + 1)).toSection x).comp
+            (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace (4 + (a + 1)) I x from v)) =
+        ∑ b : Fin n,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+            (Integral.Connection.slot0Curry (I := I) (M := M) g₀ x (2 + a) e
+              (fun k => k.elim0)
+              ((show Tensor0SBundle.Tensor0SSpace (4 + (a + 1)) I x →L[ℝ]
+                  Tensor0SBundle.Tensor0SSpace (2 + (a + 1)) I x from
+                (ricciModelTrace42FieldRec (I := I) g₀ (a + 1)).toSection x).comp
+                (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                    Tensor0SBundle.Tensor0SSpace (4 + (a + 1)) I x from v)) b) :=
+      Integral.Connection.riemannianFiberNormSq_succ_eq_sum_slot0Curry_of_frame
+        (I := I) (M := M) g₀ (2 + a) x e (fun k => k.elim0)
+        (hrepr (2 + a)) (hrepr (2 + a + 1)) _
+    have hR : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + (a + 1)) x v =
+        ∑ b : Fin n,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + a) x
+            (Integral.Connection.slot0Curry (I := I) (M := M) g₀ x (4 + a) e
+              (fun k => k.elim0) v b) :=
+      Integral.Connection.riemannianFiberNormSq_succ_eq_sum_slot0Curry_of_frame
+        (I := I) (M := M) g₀ (4 + a) x e (fun k => k.elim0)
+        (hrepr (4 + a)) (hrepr (4 + a + 1)) _
+    rw [hL, hR, Finset.mul_sum]
+    refine Finset.sum_le_sum fun b _ => ?_
+    rw [slot0Curry_fieldRec_postcomp (I := I) g₀ a x e (fun k => k.elim0) v b]
+    exact ih x (Integral.Connection.slot0Curry (I := I) (M := M) g₀ x (4 + a) e
+      (fun k => k.elim0) v b)
+
+/-- **The post-composition operator of the passenger-passing `g₀⁻¹` double-trace fibre operator**,
+as a continuous-linear map on the `(0, 4 + a)`-tensor fibre: `v ↦ (FieldRec g₀ a).toSection x ∘ v`
+(post-composition is `ℝ`-linear; closed to a continuous-linear map on the finite-dimensional
+fibre). -/
+private noncomputable def fieldRecPostcompCLM (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (x : M) :
+    Tensor0SBundle.TensorRSSpace 0 (4 + a) I x →L[ℝ]
+      Tensor0SBundle.TensorRSSpace 0 (2 + a) I x :=
+  haveI : FiniteDimensional ℝ (Tensor0SBundle.TensorRSSpace 0 (4 + a) I x) :=
+    inferInstanceAs (FiniteDimensional ℝ
+      (Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (4 + a) I x))
+  haveI : T2Space (Tensor0SBundle.TensorRSSpace 0 (4 + a) I x) :=
+    inferInstanceAs (T2Space
+      (Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (4 + a) I x))
+  LinearMap.toContinuousLinearMap
+    { toFun := fun v =>
+        (show Tensor0SBundle.Tensor0SSpace (4 + a) I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace (2 + a) I x from
+          (ricciModelTrace42FieldRec (I := I) g₀ a).toSection x).comp
+          (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace (4 + a) I x from v)
+      map_add' := fun _ _ => ContinuousLinearMap.comp_add _ _ _
+      map_smul' := fun _ _ => ContinuousLinearMap.comp_smul _ _ _ }
+
+set_option linter.unusedSectionVars false in
+/-- Defining evaluation of `fieldRecPostcompCLM`: post-composition by the passenger-passing
+double-trace fibre operator. -/
+private theorem fieldRecPostcompCLM_apply (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (x : M)
+    (v : Tensor0SBundle.TensorRSSpace 0 (4 + a) I x) :
+    fieldRecPostcompCLM (I := I) g₀ a x v =
+      (show Tensor0SBundle.Tensor0SSpace (4 + a) I x →L[ℝ]
+          Tensor0SBundle.Tensor0SSpace (2 + a) I x from
+        (ricciModelTrace42FieldRec (I := I) g₀ a).toSection x).comp
+        (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace (4 + a) I x from v) := by
+  haveI : FiniteDimensional ℝ (Tensor0SBundle.TensorRSSpace 0 (4 + a) I x) :=
+    inferInstanceAs (FiniteDimensional ℝ
+      (Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (4 + a) I x))
+  haveI : T2Space (Tensor0SBundle.TensorRSSpace 0 (4 + a) I x) :=
+    inferInstanceAs (T2Space
+      (Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (4 + a) I x))
+  exact congrFun (LinearMap.coe_toContinuousLinearMap' _) v
+
+set_option linter.unusedSectionVars false in
 /-- **(POSIT — the order-uniform `g₀`-Riemannian operator-norm-route mixed fibre envelope of the
 slot-extended `g₀⁻¹` double trace.)**  There is a single nonnegative `κ₀`, **uniform over the
 gradient-shift `a`**, the section `R`, and the base point `x`, together with a fibrewise post-composition
@@ -1169,8 +2160,43 @@ theorem exists_uniform_ricciModelTrace42_postcomp_gOpNorm_rfns_le (g₀ : Smooth
             (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (4 + a) I x from v)) ∧
         ∀ v : Tensor0SBundle.TensorRSSpace 0 (4 + a) I x,
           Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x (A v) ≤
-            κ₀ * Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + a) x v :=
-  sorry
+            κ₀ * Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + a) x v := by
+  classical
+  obtain ⟨C, hC0, hC⟩ :=
+    Integral.Connection.exists_uniform_riemannianFiberNormSq_appCcRS_le (I := I) (M := M)
+      g₀ 0 4 2 (ricciModelTrace42FieldRec (I := I) g₀ 0)
+  -- the base-level (`a = 0`) fibre-value envelope, from the uniform section envelope through a
+  -- smooth section realizing an arbitrary fibre value
+  have hbase : ∀ (x : M) (v : Tensor0SBundle.TensorRSSpace 0 4 I x),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+          ((show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace 2 I x from
+            (ricciModelTrace42FieldRec (I := I) g₀ 0).toSection x).comp
+            (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace 4 I x from v)) ≤
+        C * riemannianFiberNormSq (I := I) (M := M) g₀ 0 4 x v := by
+    intro x v
+    obtain ⟨σ, hσ⟩ := ContMDiffSection.exists_eq_at (I := I)
+      (F := Tensor0SBundle.TensorRSModel 0 4 ℝ E)
+      (V := fun y : M => Tensor0SBundle.TensorRSSpace 0 4 I y) (n := (⊤ : ℕ∞)) x v
+    have hW := hC ⟨σ, HasCompactSupport.of_compactSpace _⟩ x
+    rw [Integral.Connection.appCcRS_toSection (I := I) (M := M) g₀ 0 4 2
+      (ricciModelTrace42FieldRec (I := I) g₀ 0)
+      ⟨σ, HasCompactSupport.of_compactSpace _⟩ x] at hW
+    have hW' : riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+        ((show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace 2 I x from
+          (ricciModelTrace42FieldRec (I := I) g₀ 0).toSection x).comp
+          (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace 4 I x from σ x)) ≤
+        C * riemannianFiberNormSq (I := I) (M := M) g₀ 0 4 x (σ x) := hW
+    rw [hσ] at hW'
+    exact hW'
+  refine ⟨C, hC0, fun a x => ?_⟩
+  refine ⟨fieldRecPostcompCLM (I := I) g₀ a x,
+    fun v => fieldRecPostcompCLM_apply (I := I) g₀ a x v, fun v => ?_⟩
+  rw [fieldRecPostcompCLM_apply (I := I) g₀ a x v]
+  exact ricciModelTrace42_postcomp_rfns_le_aux (I := I) g₀ C hbase a x v
 
 set_option linter.unusedSectionVars false in
 /-- **The order-uniform mixed `g₀`-operator-norm fibre envelope of the intrinsic `g₀⁻¹` double trace.**
