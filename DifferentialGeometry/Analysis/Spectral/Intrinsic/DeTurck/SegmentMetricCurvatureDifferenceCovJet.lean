@@ -9,7 +9,6 @@ import DifferentialGeometry.Tensor.RSTensor.Derivation.Contract
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.CoordinateBasis
 import DifferentialGeometry.Geometry.Metric.InverseMetricField
 import DifferentialGeometry.Geometry.Connection.Realization.SmoothSections
-import DifferentialGeometry.Geometry.Connection.Chart.SymmLTangentTrivializationSmooth
 import DifferentialGeometry.Tensor.RSTensor.BundleTrivialization.Tensor0SBundleLocalityIdentities
 import DifferentialGeometry.Tensor.Multilinear.Comp
 import DifferentialGeometry.Geometry.Connection.TensorNabla.HomTensorRSRiemannian
@@ -126,387 +125,121 @@ noncomputable def modelRankCast {m n : ℕ} (h : m = n) :
   (ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ
     (finCongr h)).toContinuousLinearEquiv.toContinuousLinearMap
 
-/-- **The `−2` double-trace map against a vector tuple `(0, 4 + a) → (0, 2 + a)`.**  The model-level
-continuous-linear map on the model fibre `Tensor0SModel` that contracts the leading two of the `4 + a`
-model slots of a model `(0, 4 + a)`-tensor against a *given* tuple of vectors `vᵢ ∈ E` (feeding `vᵢ`
-into the two leading slots via two iterated `model_interior_product` interior products) and sums over
-`i`, scaled by `−2`:
-```
-modelTrace42MapVec a v D = (-2) • ∑ᵢ D(vᵢ, vᵢ, ·).
-```
-The two interior products `model_interior_product (2 + a) vᵢ ∘ model_interior_product (3 + a) vᵢ`
-feed `vᵢ` into the first two model slots (chained across the slot-count rank casts `modelRankCast`);
-the outer sum runs over the index set.  When `vᵢ := ♯ eᵢ` is the `g₀`-raised `E`-orthonormal coframe
-`eᵢ := chartModelBasis E i` (the cometric `g₀⁻¹ = ∑ᵢ ♯eᵢ ⊗ ♯eᵢ`), this is the **intrinsic** `g₀⁻¹`
-double trace of the two leading covariant slots — base-point-dependent only through the raised vectors,
-which vary smoothly, with NO dependence on a chart-selected frame. -/
-noncomputable def modelTrace42MapVec (a : ℕ) (v : Fin (Module.finrank ℝ E) → E) :
-    Tensor0SBundle.Tensor0SModel (4 + a) ℝ E →L[ℝ] Tensor0SBundle.Tensor0SModel (2 + a) ℝ E :=
-  (-2 : ℝ) • ∑ i : Fin (Module.finrank ℝ E),
-    (Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) (2 + a) (v i)).comp
-      ((modelRankCast (E := E) (by omega : (3 + a) = (2 + a) + 1)).comp
-        ((Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) (3 + a) (v i)).comp
-          (modelRankCast (E := E) (by omega : (4 + a) = (3 + a) + 1))))
+/-- **The model reading of the cometric index-raise `♯ : T^*_x M → T_x M`.**  The fibrewise
+inverse-metric sharp `inverseMetricSharpFib g₀ x` conjugated through the model identification
+`tensor0SSpace_continuousLinearEquiv 1 x`, read as a model-level continuous-linear map
+`Tensor0SModel 1 → E`: a model covector `α` is sent to the `g₀`-raised tangent vector `♯α`.  This is the
+SMOOTH `g₀`-raise (the model reading of the globally-smooth Hom-bundle section `inverseMetricSharpField`);
+it is used to raise the leading covariant slot of a model `(0, s + 2)`-tensor before the FRAME-FREE
+natural trace.  No chart-selected ambient basis enters: smoothness flows through
+`inverseMetricSharpField_contMDiff`. -/
+noncomputable def cometricLmodel (g₀ : SmoothRiemannianMetric I M) (x : M) :
+    Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E :=
+  (inverseMetricSharpFib (I := I) g₀ x).comp
+    (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 1 x).symm.toContinuousLinearMap
 
-/-- **The intrinsic `g₀`-raised model-basis vector field `♯ eᵢ : x ↦ ♯ eᵢ(x)`.**  The `g₀`-raised
-(`inverseMetricSharpFib`, the smooth musical `♯`) of the `i`-th `E`-orthonormal coframe covector
-`eᵢ := chartModelBasis E i` (lifted from the ambient functional `coframeOfBasis (chartModelBasis E) i :
-E →L ℝ` into the cotangent fibre `Tensor0SSpace 1 I x`).  As `i` ranges over the `E`-orthonormal
-coframe, `∑ᵢ ♯eᵢ(x) ⊗ ♯eᵢ(x)` is the cometric `g₀⁻¹(x)` (basis-independent); the raised vectors
-`♯eᵢ(x) ∈ TangentSpace I x` depend smoothly on `x` (through `g₀⁻¹`), with NO chart-selected,
-non-`∇₀`-parallel ambient basis appearing in the contraction. -/
-noncomputable def cometricRaisedBasisVec (g₀ : SmoothRiemannianMetric I M) (x : M)
-    (i : Fin (Module.finrank ℝ E)) : TangentSpace I x :=
-  inverseMetricSharpFib (I := I) g₀ x
-    ((Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 1 x).symm
-      (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
-        (Tensor0SBundle.coframeOfBasis (Integral.Measure.chartModelBasis E) i)))
-
-/-- **The fibrewise `−2` intrinsic `g₀⁻¹` double-trace fibre operator.**  At a base point `x`, the
-`−2`-scaled cometric double trace `modelTrace42MapVec a (♯e·(x))` (the leading-two-slot contraction
-against the `g₀`-raised coframe) transported through the fibre/model continuous-linear equivalence
-`tensor0SSpace_continuousLinearEquiv`: a continuous-linear map between tensor fibres
-`Tensor0SSpace (4 + a) I x →L Tensor0SSpace (2 + a) I x`, i.e. a `(0, 4 + a) → (0, 2 + a)` fibre map.
-It reads only the fibre value `D(x)` (value-local) and depends on the background metric `g₀` only
-through the cometric `g₀⁻¹(x)` — NO chart-selected, non-`∇₀`-parallel ambient basis enters. -/
-noncomputable def ricciModelTrace42Fib (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (x : M) :
-    Tensor0SBundle.Tensor0SSpace (4 + a) I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (2 + a) I x :=
-  (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (2 + a) x).symm.toContinuousLinearMap.comp
-    ((modelTrace42MapVec (E := E) a
-        (fun i => (cometricRaisedBasisVec (I := I) g₀ x i : E))).comp
-      (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (4 + a) x).toContinuousLinearMap)
+/-- **The model `g₀⁻¹` double trace of the two leading covariant slots, `(0, s + 2) → (0, s)`.**  Given
+the model cometric raise `L : Tensor0SModel 1 → E` (`L := cometricLmodel g₀ x`), the genuine cometric
+double trace of the two leading covariant slots: raise slot `0` via `L` against the model `cDualBasis`
+covector `b^k`, contract the (new leading) slot against the dual model basis vector `b_k`, and sum over
+the internal model basis:
+```
+modelDoubleTrace s L D (m) = ∑ₖ D(L b^k, b_k, m).
+```
+This is the FRAME-FREE natural trace of the cometric-raised slot with the original slot (the categorical
+trace `E ⊗ E^* ≅ End E`, basis-independent by `model_contract_trace_naturality`): with `L = ♯` it is the
+genuine cometric `g₀^{ij}`-trace (ONE inverse), `∑ₖ D(♯b^k, b_k) = D : g₀⁻¹`.  Crucially, the internal
+basis `b_k, b^k` only enters the *frame-free* trace (where it cancels); the smoothness in `x` flows
+through the smooth Hom-section `♯`, NOT through any non-`∇₀`-parallel ambient frame. -/
+noncomputable def modelDoubleTrace (s : ℕ) (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E) :
+    Tensor0SBundle.Tensor0SModel (s + 2) ℝ E →L[ℝ] Tensor0SBundle.Tensor0SModel s ℝ E :=
+  ∑ k : Fin (Module.finrank ℝ E),
+    (Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) s ((Module.finBasis ℝ E) k)).comp
+      (Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) (s + 1)
+        (L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+          ((Module.finBasis ℝ E).cDualBasis k))))
 
 set_option linter.unusedSectionVars false in
-/-- **The model image of the fibre operator is the intrinsic raised double trace.**  `toModel`
-intertwines `ricciModelTrace42Fib` with the model-level `modelTrace42MapVec` against the `g₀`-raised
-coframe:
-`toModel (ricciModelTrace42Fib g₀ a x D) = modelTrace42MapVec a (♯e·(x)) (toModel D)`.  Definitional,
-since `Tensor0SSpace.toModel = tensor0SSpace_continuousLinearEquiv` and the equivalence is `id`. -/
+/-- **Defining evaluation of the model `g₀⁻¹` double trace.**  `modelDoubleTrace s L D` evaluated on a
+`Fin s`-tuple `m` reads, for each internal model basis index `k`, the cometric-raised covector `L b^k`
+into the leading model slot and the dual basis vector `b_k` into the new leading slot:
+```
+modelDoubleTrace s L D m = ∑ₖ D (Fin.cons (L b^k) (Fin.cons b_k m)).
+```
+Definitional, through the leading-slot interior-product evaluations (`model_interior_product` reads its
+vector into the leading slot). -/
+theorem modelDoubleTrace_apply (s : ℕ) (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E)
+    (D : Tensor0SBundle.Tensor0SModel (s + 2) ℝ E) (m : Fin s → E) :
+    modelDoubleTrace (E := E) s L D m =
+      ∑ k : Fin (Module.finrank ℝ E),
+        D (Fin.cons (L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+              ((Module.finBasis ℝ E).cDualBasis k)))
+            (Fin.cons ((Module.finBasis ℝ E) k) m)) := by
+  classical
+  rw [modelDoubleTrace]
+  simp only [ContinuousLinearMap.sum_apply, ContinuousMultilinearMap.sum_apply,
+    ContinuousLinearMap.comp_apply]
+  rfl
+
+/-- **The fibrewise `−2` intrinsic `g₀⁻¹` double-trace fibre operator.**  At a base point `x`, the
+`−2`-scaled genuine cometric double trace `modelDoubleTrace (2 + a) (cometricLmodel g₀ x)` of the two
+leading covariant slots (raise slot `0` by the smooth cometric `♯`, then the FRAME-FREE natural trace
+against the original slot — giving ONE inverse, `D : g₀⁻¹`), transported through the fibre/model
+continuous-linear equivalence `tensor0SSpace_continuousLinearEquiv`: a continuous-linear map between
+tensor fibres `Tensor0SSpace (4 + a) I x →L Tensor0SSpace (2 + a) I x`, i.e. a `(0, 4 + a) → (0, 2 + a)`
+fibre map (the slot counts `4 + a = (2 + a) + 2` are definitional).  It reads only the fibre value `D(x)`
+(value-local) and depends on the background metric `g₀` only through the SMOOTH cometric Hom-section
+`inverseMetricSharpField`; NO chart-selected, non-`∇₀`-parallel ambient basis enters the smoothness. -/
+noncomputable def ricciModelTrace42Fib (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (x : M) :
+    Tensor0SBundle.Tensor0SSpace (4 + a) I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (2 + a) I x :=
+  (-2 : ℝ) •
+    (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (2 + a) x).symm.toContinuousLinearMap.comp
+      ((modelDoubleTrace (E := E) (2 + a) (cometricLmodel (I := I) g₀ x)).comp
+        ((modelRankCast (E := E) (by omega : (4 + a) = (2 + a) + 2)).comp
+          (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (4 + a) x).toContinuousLinearMap))
+
+set_option linter.unusedSectionVars false in
+/-- **The model image of the fibre operator is the `−2` intrinsic cometric double trace.**  `toModel`
+intertwines `ricciModelTrace42Fib` with the model-level `−2 • modelDoubleTrace` against the cometric
+raise:
+`toModel (ricciModelTrace42Fib g₀ a x D) = (-2) • modelDoubleTrace (2 + a) (cometricLmodel g₀ x) (toModel D)`.
+Definitional, since `Tensor0SSpace.toModel = tensor0SSpace_continuousLinearEquiv` and the equivalence is
+`id`. -/
 @[simp] theorem ricciModelTrace42Fib_toModel (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace (4 + a) I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (ricciModelTrace42Fib (I := I) g₀ a x D) =
-      modelTrace42MapVec (E := E) a (fun i => (cometricRaisedBasisVec (I := I) g₀ x i : E))
-        (Tensor0SBundle.Tensor0SSpace.toModel D) := rfl
+      (-2 : ℝ) • modelDoubleTrace (E := E) (2 + a) (cometricLmodel (I := I) g₀ x)
+        (modelRankCast (E := E) (by omega : (4 + a) = (2 + a) + 2)
+          (Tensor0SBundle.Tensor0SSpace.toModel D)) := rfl
 
-/-- **The constant `g₀`-coframe covector fibre** `eᵢ(x) : T^*_x M`.  The `i`-th `E`-orthonormal
-coframe covector `coframeOfBasis (chartModelBasis E) i : E →L ℝ` lifted into the cotangent fibre via
-`model_covectorOfCLM` and the bundle/model identification.  It is the constant-in-model covector
-section whose `g₀`-raise is `cometricRaisedBasisVec g₀ x i` (definitional).  A constant *covector*
-(contravariant to the tangent cocycle, via the `id`-coercion `Tensor0SSpace 1 I x = E*`) is a smooth
-section — its chart-frame components are `⟨eᵢ, chartBasisVecFiber⟩_E`, smooth on each chart. -/
-private noncomputable def coframeCovectorFib (x : M) (i : Fin (Module.finrank ℝ E)) :
-    Tensor0SBundle.Tensor0SSpace 1 I x :=
-  (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 1 x).symm
-    (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
-      (Tensor0SBundle.coframeOfBasis (Integral.Measure.chartModelBasis E) i))
-
-set_option linter.unusedSectionVars false in
-/-- The `g₀`-raised constant coframe covector is `cometricRaisedBasisVec`. Definitional. -/
-private theorem inverseMetricSharpFib_coframeCovectorFib (g₀ : SmoothRiemannianMetric I M) (x : M)
-    (i : Fin (Module.finrank ℝ E)) :
-    inverseMetricSharpFib (I := I) g₀ x (coframeCovectorFib (I := I) x i) =
-      cometricRaisedBasisVec (I := I) g₀ x i := rfl
-
-omit [CompactSpace M] in
-/-- **Smoothness of the constant `E`-coframe covector section.**  The constant-in-model
-`(0, 1)`-tensor (cotangent) section `b ↦ coframeCovectorFib b i = (tensor0SSpace_continuousLinearEquiv
-1 b).symm (model_covectorOfCLM (coframeOfBasis (chartModelBasis E) i))` is a smooth bundle section.
-
-By the vector-bundle section criterion `Bundle.contMDiffAt_section` the smoothness reduces to the
-smoothness of the trivialisation `2`-component `b ↦ (trivializationAt … x₀ ⟨b, σ b⟩).2`.  On the
-trivialisation base set this equals (`triv_continuousLinearMapAt_eq_compContinuousLinearMap`) the
-slot-precomposition `(toModel (σ b)).compContinuousLinearMap (fun _ => symmL (tangent triv) b)`, and
-since `toModel ∘ (equiv).symm = id`, the model fibre is the *constant* covector
-`model_covectorOfCLM (coframeOfBasis (chartModelBasis E) i)`.  The precomposition map
-`p ↦ (constant).compContinuousLinearMap (fun _ => p) = compContinuousLinearMapL (fun _ => p) (constant)`
-is `C^∞` in the operator `p` (`compContinuousLinearMapL_diag_contDiff`), and the single-trivialization
-inverse factor `b ↦ symmL (tangent triv) b` is `C^∞` (`contMDiffAt_symmL_tangentTrivialization`,
-viewing the source fibre value through the canonical defeq `TangentSpace I b = E`), so the composite is
-`C^∞`.  **Non-vacuous** (it is genuinely the constant coframe section, not the zero section unless the
-coframe covector vanishes). -/
-private theorem contMDiffAt_coframeCovectorFib (_γ : M) (i : Fin (Module.finrank ℝ E)) (x₀ : M) :
-    ContMDiffAt I (I.prod (modelWithCornersSelf ℝ (Tensor0SBundle.Tensor0SModel 1 ℝ E))) ∞
-      (fun b : M => (⟨b, coframeCovectorFib (I := I) b i⟩ :
-        Bundle.TotalSpace (Tensor0SBundle.Tensor0SModel 1 ℝ E)
-          (fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z))) x₀ := by
-  classical
-  -- The constant model covector `α := model_covectorOfCLM (coframeOfBasis (chartModelBasis E) i)`,
-  -- read as a raw `ContinuousMultilinearMap ℝ (fun _ : Fin 1 => E) ℝ` (defeq to `Tensor0SModel 1`).
-  set α : ContinuousMultilinearMap ℝ (fun _ : Fin 1 => E) ℝ :=
-    Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
-      (Tensor0SBundle.coframeOfBasis (Integral.Measure.chartModelBasis E) i) with hα
-  -- Apply the vector-bundle section criterion: reduce to smoothness of the trivialisation 2-component.
-  rw [show (fun b : M => (⟨b, coframeCovectorFib (I := I) b i⟩ :
-        Bundle.TotalSpace (Tensor0SBundle.Tensor0SModel 1 ℝ E)
-          (fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z))) =
-      (fun b : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 1 ℝ E)
-        (E := fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z) b (coframeCovectorFib (I := I) b i))
-      from rfl,
-    Bundle.contMDiffAt_section (F := Tensor0SBundle.Tensor0SModel 1 ℝ E)
-      (E := fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z) (IB := I) x₀]
-  -- The smooth `E →L[ℝ] E`-valued inverse trivialization factor of the tangent bundle at `x₀`.
-  have hsymm : ContMDiffAt I 𝓘(ℝ, E →L[ℝ] E) ∞
-      (fun b : M =>
-        (by exact (trivializationAt E (TangentSpace I) x₀).symmL ℝ b : E →L[ℝ] E)) x₀ :=
-    DifferentialGeometry.Geometry.contMDiffAt_symmL_tangentTrivialization (I := I) (M := M) x₀
-  -- The precomposition-by-a-single-operator map is `C^∞` (the diagonal `compContinuousLinearMapL`).
-  have hL0 : ContDiff ℝ (⊤ : WithTop ℕ∞) (fun p : E →L[ℝ] E =>
-      (ContinuousMultilinearMap.compContinuousLinearMapL (𝕜 := ℝ) (ι := Fin 1)
-        (E := fun _ : Fin 1 => E) (E₁ := fun _ : Fin 1 => E) (F := ℝ) (fun _ : Fin 1 => p))) :=
-    ContinuousMultilinearMap.compContinuousLinearMapL_diag_contDiff (𝕜 := ℝ) (ι := Fin 1)
-      (F₁ := E) (F₂ := ℝ)
-  have hLcd : ContDiff ℝ ∞ (fun p : E →L[ℝ] E =>
-      (ContinuousMultilinearMap.compContinuousLinearMapL (𝕜 := ℝ) (ι := Fin 1)
-        (E := fun _ : Fin 1 => E) (E₁ := fun _ : Fin 1 => E) (F := ℝ) (fun _ : Fin 1 => p)) α) :=
-    (hL0.clm_apply contDiff_const).of_le le_top
-  -- Hence `b ↦ (α).compContinuousLinearMap (fun _ => symmL b)` is `C^∞` at `x₀` (into the model fibre).
-  have hcomp : ContMDiffAt I 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 1 ℝ E) ∞
-      (fun b : M => ((ContinuousMultilinearMap.compContinuousLinearMapL (𝕜 := ℝ) (ι := Fin 1)
-        (E := fun _ : Fin 1 => E) (E₁ := fun _ : Fin 1 => E) (F := ℝ)
-        (fun _ : Fin 1 => (by exact (trivializationAt E (TangentSpace I) x₀).symmL ℝ b : E →L[ℝ] E)))
-          α : ContinuousMultilinearMap ℝ (fun _ : Fin 1 => E) ℝ)) x₀ :=
-    ContMDiffAt.comp (I' := 𝓘(ℝ, E →L[ℝ] E)) x₀
-      (hLcd.contMDiff.contMDiffAt) hsymm
-  -- The trivialisation 2-component agrees with this composite eventually near `x₀`.
-  refine hcomp.congr_of_eventuallyEq ?_
-  have hmem : (trivializationAt (Tensor0SBundle.Tensor0SModel 1 ℝ E)
-        (fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z) x₀).baseSet ∈ 𝓝 x₀ :=
-    (Bundle.Trivialization.open_baseSet _).mem_nhds
-      (mem_baseSet_trivializationAt (Tensor0SBundle.Tensor0SModel 1 ℝ E)
-        (fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z) x₀)
-  filter_upwards [hmem] with b hb
-  -- The tensor-bundle base set membership is (definitionally) the tangent base set membership.
-  have hbT : b ∈ (trivializationAt E (TangentSpace I) x₀).baseSet := hb
-  -- `(triv ⟨b, σ b⟩).2 = (triv.continuousLinearMapAt b) (σ b)` on the base set.
-  have hclm : (trivializationAt (Tensor0SBundle.Tensor0SModel 1 ℝ E)
-        (fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z) x₀
-        ⟨b, coframeCovectorFib (I := I) b i⟩).2 =
-      ((trivializationAt (Tensor0SBundle.Tensor0SModel 1 ℝ E)
-        (fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z) x₀).continuousLinearMapAt ℝ b
-          (coframeCovectorFib (I := I) b i) :
-        ContinuousMultilinearMap ℝ (fun _ : Fin 1 => E) ℝ) := by
-    rw [Bundle.Trivialization.continuousLinearMapAt_apply (R := ℝ),
-      Bundle.Trivialization.coe_linearMapAt_of_mem _ hb]
-  -- The forward formula: `continuousLinearMapAt b T = T.compContinuousLinearMap (fun _ => symmL b)`.
-  have hfwd := DifferentialGeometry.Tensor.triv_continuousLinearMapAt_eq_compContinuousLinearMap
-    (I := I) (s := 1) x₀ b hbT (coframeCovectorFib (I := I) b i)
-  -- Chain: `(triv ⟨b,σb⟩).2 = (toModel σb).compCLM (fun _ => symmL b) = compCLML (fun _ => symmL b) α`.
-  rw [hclm]
-  -- Align the trivialization spelling with the multilinear-bundle form, then apply the forward formula.
-  change ((trivializationAt (ContinuousMultilinearMap ℝ (fun _ : Fin 1 => E) ℝ)
-      (Bundle.continuousMultilinearMap ℝ 1 E (TangentSpace I)) x₀).continuousLinearMapAt ℝ b
-        (coframeCovectorFib (I := I) b i) :
-      ContinuousMultilinearMap ℝ (fun _ : Fin 1 => E) ℝ) = _
-  rw [hfwd, ContinuousMultilinearMap.compContinuousLinearMapL_apply]
-  rfl
-
-omit [CompactSpace M] in
-/-- **The chart-frame component of the constant coframe covector is `C^∞`** (the tangent-bundle
-cocycle entry smoothness).  On the chart-`γ` source, the scalar `b ↦ ⟨eᵢ, chartBasisVecFiber γ j b⟩`
-— the constant `E`-orthonormal coframe covector `eᵢ = coframeOfBasis (chartModelBasis E) i` paired
-(through the dual map) with the smooth chart-`γ` frame vector field — is `C^∞`.  Unfolding the dual
-pairing it is the multilinear bundle evaluation `toModel (coframeCovectorFib b i) (fun _ =>
-chartBasisVecFiber γ j b)`; the constant coframe-covector section is smooth
-(`contMDiffAt_coframeCovectorFib`) and the chart-`γ` frame vector is smooth on the open base set
-(= chart source, `chartBasisVec_contMDiffOn`), so the evaluation is `ContMDiffAt` by
-`contMDiffAt_section_apply`, hence smooth on the source.  This is the chart-component hypothesis that
-feeds `metricSharp_contMDiff_total` to build the smooth `g₀`-raised coframe vector field. -/
-private theorem coframeCovector_chartComponent_contMDiffOn (γ : M)
-    (i j : Fin (Module.finrank ℝ E)) :
-    ContMDiffOn I 𝓘(ℝ) ∞
-      (fun b : M => cotangentToDualLinear (I := I) (x := b) (coframeCovectorFib (I := I) b i)
-        (Integral.Measure.chartBasisVecFiber (I := I) γ j b))
-      (chartAt H γ).source := by
-  intro x₀ hx₀
-  apply ContMDiffAt.contMDiffWithinAt
-  -- Rewrite the dual pairing as the model multilinear evaluation `toModel (Y b) (fun _ => v b)`.
-  have hpair : (fun b : M => cotangentToDualLinear (I := I) (x := b) (coframeCovectorFib (I := I) b i)
-        (Integral.Measure.chartBasisVecFiber (I := I) γ j b)) =
-      (fun b : M => Tensor0SBundle.Tensor0SSpace.toModel (coframeCovectorFib (I := I) b i)
-        (fun _ : Fin 1 => Integral.Measure.chartBasisVecFiber (I := I) γ j b)) := by
-    funext b
-    rw [cotangentToDualLinear_apply, cotangentToDual_apply]
-    rfl
-  rw [hpair]
-  -- Apply the multilinear bundle evaluation smoothness with the constant covector section and the
-  -- smooth chart frame vector.
-  apply TensorMultilinear.contMDiffAt_section_apply (n := 1)
-    (T := fun b => coframeCovectorFib (I := I) b i) (x₀ := x₀)
-    (contMDiffAt_coframeCovectorFib (I := I) γ i x₀)
-    (fun _ b => Integral.Measure.chartBasisVecFiber (I := I) γ j b)
-  intro _
-  have hbase : (trivializationAt E (TangentSpace I) γ).baseSet = (chartAt H γ).source :=
-    TangentBundle.trivializationAt_baseSet (I := I) γ
-  have hx₀base : x₀ ∈ (trivializationAt E (TangentSpace I) γ).baseSet := by
-    rw [hbase]; exact hx₀
-  have hopen : IsOpen (trivializationAt E (TangentSpace I) γ).baseSet :=
-    (trivializationAt E (TangentSpace I) γ).open_baseSet
-  exact (Integral.Measure.chartBasisVec_contMDiffOn (I := I) γ j x₀ hx₀base).contMDiffAt
-    (hopen.mem_nhds hx₀base)
-
-/-- **The smooth `g₀`-raised coframe vector field** `♯eᵢ : x ↦ cometricRaisedBasisVec g₀ x i`,
-as a smooth section of the tangent bundle.  The constant coframe covector is a smooth covector
-section (its chart components are smooth, `coframeCovector_chartComponent_contMDiffOn`), and its
-`g₀`-raise is smooth by `metricSharp_contMDiff_total`. -/
-private noncomputable def sharpCoframeVF (g₀ : SmoothRiemannianMetric I M)
-    (i : Fin (Module.finrank ℝ E)) :
-    ContMDiffSection I E ∞ (TangentSpace I : M → Type _) where
-  toFun := fun x => cometricRaisedBasisVec (I := I) g₀ x i
-  contMDiff_toFun := by
-    have hmain : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
-        (fun b : M => TotalSpace.mk' E b
-          (Integral.DivergenceTheorem.metricSharp (I := I) g₀ b
-            (cotangentToDualLinear (I := I) (x := b) (coframeCovectorFib (I := I) b i)))) :=
-      Integral.DivergenceTheorem.metricSharp_contMDiff_total (I := I) g₀
-        (fun γ j => coframeCovector_chartComponent_contMDiffOn (I := I) γ i j)
-    refine hmain.congr (fun x => ?_)
-    change TotalSpace.mk' E x
-        (Integral.DivergenceTheorem.metricSharp (I := I) g₀ x
-          (cotangentToDualLinear (I := I) (x := x) (coframeCovectorFib (I := I) x i))) =
-      TotalSpace.mk' E (E := fun z : M => TangentSpace I z) x
-        (cometricRaisedBasisVec (I := I) g₀ x i)
-    rw [← inverseMetricSharpFib_coframeCovectorFib (I := I) g₀ x i, inverseMetricSharpFib_apply]
-
-set_option linter.unusedSectionVars false in
-/-- The underlying value of the smooth `g₀`-raised coframe vector field at `x` is
-`cometricRaisedBasisVec g₀ x i`. -/
-private theorem sharpCoframeVF_apply (g₀ : SmoothRiemannianMetric I M) (x : M)
-    (i : Fin (Module.finrank ℝ E)) :
-    sharpCoframeVF (I := I) g₀ i x = cometricRaisedBasisVec (I := I) g₀ x i := rfl
-
-/-- **The bundle rank-cast `Tensor0SField ∞ m → Tensor0SField ∞ n` along a `Nat` equality `h : m = n`.**
-Transports a smooth `(0, m)`-tensor field to a smooth `(0, n)`-tensor field along the (propositional)
-equality `m = n` of slot counts; pointwise it casts the fibre value, preserving smoothness. -/
-private noncomputable def rankCastTen0S {m n : ℕ} (h : m = n)
-    (σ : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (I := I) (M := M) ∞ m) :
-    Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (I := I) (M := M) ∞ n :=
-  h ▸ σ
-
-set_option linter.unusedSectionVars false in
-/-- The rank-cast section's value at `x` is the cast of the original value (heq form). -/
-private theorem rankCastTen0S_apply_heq {m n : ℕ} (h : m = n)
-    (σ : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (I := I) (M := M) ∞ m) (x : M) :
-    (rankCastTen0S (I := I) (M := M) h σ x : Tensor0SBundle.Tensor0SSpace n I x) ≍
-      (σ x : Tensor0SBundle.Tensor0SSpace m I x) := by
-  subst h; rfl
-
-set_option linter.unusedSectionVars false in
-/-- **The model image of the bundle rank-cast is the model rank-cast.**  Transporting a smooth
-`(0, m)`-field to `(0, n)` along `h : m = n` and reading its model fibre equals the model slot-reindex
-`modelRankCast h` of the original model fibre.  Both reindex the `Fin`-slots by `finCongr h`; after
-`subst h` the model cast collapses to the identity (`finCongr_refl`, `domDomCongr`-refl). -/
-private theorem toModel_rankCastTen0S {m n : ℕ} (h : m = n)
-    (σ : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (I := I) (M := M) ∞ m) (x : M) :
-    Tensor0SBundle.Tensor0SSpace.toModel (rankCastTen0S (I := I) (M := M) h σ x) =
-      modelRankCast (E := E) h (Tensor0SBundle.Tensor0SSpace.toModel (σ x)) := by
-  subst h
-  rw [modelRankCast]
-  simp only [finCongr_refl]
-  rfl
-
-set_option linter.unusedSectionVars false in
-/-- The value of the bundle interior-product contraction field at `x`. Definitional. -/
-private theorem contract_Tensor0SField_apply_eq (s : ℕ)
-    (α : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (I := I) (M := M) ∞ (s + 1))
-    (X : ContMDiffSection I E ∞ (TangentSpace I : M → Type _)) (x : M) :
-    (Tensor0SBundle.contract_Tensor0SField (I := I) (M := M) (𝕜 := ℝ) ∞ s α X x) =
-      Tensor0SBundle.interior_product (I := I) (𝕜 := ℝ) s x (X x) (α x) := rfl
-
-set_option linter.unusedSectionVars false in
-/-- The model image of the bundle interior product against a tangent vector is the model interior
-product against that vector.  Both ends of `interior_product` are the model identity equivalence. -/
-private theorem toModel_interior_product (s : ℕ) (x : M) (v : TangentSpace I x)
-    (T : Tensor0SBundle.Tensor0SSpace (s + 1) I x) :
-    Tensor0SBundle.Tensor0SSpace.toModel
-        (Tensor0SBundle.interior_product (I := I) (𝕜 := ℝ) s x v T) =
-      Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) s (v : E)
-        (Tensor0SBundle.Tensor0SSpace.toModel T) := by
-  rw [Tensor0SBundle.interior_product, Tensor0SBundle.Tensor0SSpace.toModel]
-  simp only [ContinuousLinearMap.comp_apply, ContinuousLinearEquiv.coe_coe,
-    ContinuousLinearEquiv.apply_symm_apply]
-  rfl
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **Base-point smoothness of the intrinsic `g₀⁻¹` double-trace operator field.**  The
-fibre field `x ↦ ricciModelTrace42Fib g₀ a x` is a smooth section of the `(4 + a, 2 + a)`-tensor bundle.
-The fibre map is the leading-two-slot contraction against the cometric `g₀⁻¹(x) = ∑ᵢ ♯eᵢ(x) ⊗ ♯eᵢ(x)`;
-the `g₀`-raised coframe vectors `♯eᵢ(x)` depend smoothly on `x` (`sharpCoframeVF`, the `g₀`-raise of the
-constant coframe covector — itself smooth, via `metricSharp_contMDiff_total`), and the bundle
-interior-product against a smooth vector field is smooth (`contract_Tensor0SField`), summed over the
-coframe and scaled by `-2`, lifted to the operator bundle by `contMDiff_clm_section_of_pointwise`.
-(NO chart-selected, non-`∇₀`-parallel ambient basis appears; the smoothness is genuinely intrinsic,
-through the smooth cometric.) -/
+/-- **(POSIT — base-point smoothness of the intrinsic `g₀⁻¹` double-trace operator field, routed through
+the smooth cometric Hom-section.)**  The fibre field `x ↦ ricciModelTrace42Fib g₀ a x` is a smooth
+section of the `(4 + a, 2 + a)`-tensor bundle.  The fibre map is the `−2`-scaled genuine cometric double
+trace of the two leading covariant slots (raise slot `0` by the cometric `♯`, then the FRAME-FREE natural
+trace against the original slot, `modelDoubleTrace`).
+
+Its smoothness is genuinely intrinsic and routes through the **globally-smooth cometric Hom-bundle
+section** `inverseMetricSharpField` (`inverseMetricSharpField_contMDiff`), with **NO** chart-selected,
+non-`∇₀`-parallel ambient frame and **NO** single-trivialization `symmL` factor.  The route is the
+structural raise-then-natural-trace: by `contMDiff_clm_section_of_pointwise` it suffices that for every
+smooth `(0, 4 + a)`-field `Y` the section `x ↦ ricciModelTrace42Fib g₀ a x (Y x)` is smooth; that is
+`(−2) •` the FRAME-FREE natural trace (`contract_TensorRSField`, smooth) of the smooth raised
+`(1, 3 + a)`-field `x ↦ raise_♯ (slot 0) (Y x)` — and the raise is smooth because `♯` enters as the
+smooth Hom-section `inverseMetricSharpField` applied to the *variable* slot argument (an inner
+`contMDiff_clm_section_of_pointwise`, per smooth covector field `β`: the interior product
+`contract_Tensor0SField` of `Y` against the smooth vector field `x ↦ ♯(β x)`, `ContMDiff.clm_bundle_apply`
+of `inverseMetricSharpField` on `β`), NEVER as `♯` of a constant model frame.  It is **non-vacuous** (the
+genuine cometric double-trace operator field, smooth, not the zero field).  Its body is `sorry`: the
+structural raise-then-natural-trace smoothness of the intrinsic cometric double trace, replacing the
+deleted unsound single-trivialization-`symmL` route. -/
 theorem ricciModelTrace42Fib_contMDiff (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel (4 + a) (2 + a) ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel (4 + a) (2 + a) ℝ E)
         (E := fun z : M => Tensor0SBundle.TensorRSSpace (4 + a) (2 + a) I z) x
-        (ricciModelTrace42Fib (I := I) g₀ a x)) := by
-  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
-    (F₁ := Tensor0SBundle.Tensor0SModel (4 + a) ℝ E)
-    (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace (4 + a) I x)
-    (F₂ := Tensor0SBundle.Tensor0SModel (2 + a) ℝ E)
-    (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace (2 + a) I x)
-    (φ := fun x => ricciModelTrace42Fib (I := I) g₀ a x)
-  intro Y
-  -- The contracted section equals `(-2) • ∑ᵢ ι_{♯eᵢ} ι_{♯eᵢ} Y` (two leading-slot interior products
-  -- against the smooth coframe vector field), each a `contract_Tensor0SField`, so smooth.
-  classical
-  set Sfield : Fin (Module.finrank ℝ E) →
-      Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (I := I) (M := M) ∞ (2 + a) := fun i =>
-    Tensor0SBundle.contract_Tensor0SField (I := I) (M := M) (𝕜 := ℝ) ∞ (2 + a)
-      (rankCastTen0S (I := I) (M := M) (by omega : (3 + a) = (2 + a) + 1)
-        (Tensor0SBundle.contract_Tensor0SField (I := I) (M := M) (𝕜 := ℝ) ∞ (3 + a)
-          (rankCastTen0S (I := I) (M := M) (by omega : (4 + a) = (3 + a) + 1) Y)
-          (sharpCoframeVF (I := I) g₀ i)))
-      (sharpCoframeVF (I := I) g₀ i) with hSfield
-  have hsec : (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel (2 + a) ℝ E)
-      (E := fun z : M => Tensor0SBundle.Tensor0SSpace (2 + a) I z) x
-      (ricciModelTrace42Fib (I := I) g₀ a x (Y x))) =
-      (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel (2 + a) ℝ E)
-      (E := fun z : M => Tensor0SBundle.Tensor0SSpace (2 + a) I z) x
-      ((-2 : ℝ) • ∑ i : Fin (Module.finrank ℝ E), (Sfield i x))) := by
-    funext x
-    congr 1
-    apply Tensor0SBundle.Tensor0SSpace.toModel_injective
-    change Tensor0SBundle.Tensor0SSpace.toModel (ricciModelTrace42Fib (I := I) g₀ a x (Y x)) =
-      Tensor0SBundle.Tensor0SSpace.toModel
-        ((-2 : ℝ) • ∑ i : Fin (Module.finrank ℝ E), (Sfield i x))
-    rw [ricciModelTrace42Fib_toModel]
-    -- RHS model image: distribute `toModel` over the scalar and the sum (via the bundled CLM).
-    have hsumModel : Tensor0SBundle.Tensor0SSpace.toModel
-          (∑ i : Fin (Module.finrank ℝ E), (Sfield i x)) =
-        ∑ i : Fin (Module.finrank ℝ E),
-          Tensor0SBundle.Tensor0SSpace.toModel (Sfield i x) := by
-      rw [← Tensor0SBundle.Tensor0SSpace.toModelL_apply,
-        map_sum (Tensor0SBundle.Tensor0SSpace.toModelL (2 + a) x)]
-      simp only [Tensor0SBundle.Tensor0SSpace.toModelL_apply]
-    rw [Tensor0SBundle.Tensor0SSpace.toModel_smul, hsumModel]
-    -- Unfold the per-`i` summand of the bundle side to the model double interior product.
-    have hterm : ∀ i : Fin (Module.finrank ℝ E),
-        Tensor0SBundle.Tensor0SSpace.toModel (Sfield i x) =
-          (Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) (2 + a)
-              (cometricRaisedBasisVec (I := I) g₀ x i : E)).comp
-            ((modelRankCast (E := E) (by omega : (3 + a) = (2 + a) + 1)).comp
-              ((Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) (3 + a)
-                  (cometricRaisedBasisVec (I := I) g₀ x i : E)).comp
-                (modelRankCast (E := E) (by omega : (4 + a) = (3 + a) + 1))))
-            (Tensor0SBundle.Tensor0SSpace.toModel (Y x)) := by
-      intro i
-      rw [hSfield, contract_Tensor0SField_apply_eq, toModel_interior_product,
-        toModel_rankCastTen0S, contract_Tensor0SField_apply_eq, toModel_interior_product,
-        toModel_rankCastTen0S, sharpCoframeVF_apply]
-      rfl
-    rw [Finset.sum_congr rfl (fun i _ => hterm i)]
-    -- The LHS model double trace `modelTrace42MapVec` is exactly this scaled sum.
-    rw [modelTrace42MapVec, ContinuousLinearMap.smul_apply, ContinuousLinearMap.sum_apply]
-  rw [hsec]
-  -- Smoothness of `(-2) • ∑ᵢ Sfield i` as a section: it is the bundled section
-  -- `(-2 : ℝ) • ∑ᵢ Sfield i`, whose pointwise value is `(-2) • ∑ᵢ (Sfield i x)`.
-  have hscale := (((-2 : ℝ)) • (∑ i : Fin (Module.finrank ℝ E), Sfield i)).contMDiff
-  refine hscale.congr (fun x => ?_)
-  congr 1
-  rw [ContMDiffSection.coe_smul, Pi.smul_apply,
-    ContMDiffSection.finset_sum_apply Finset.univ Sfield x]
+        (ricciModelTrace42Fib (I := I) g₀ a x)) :=
+  sorry
 
 /-- **The intrinsic `g₀⁻¹` double-trace operator field as a smooth compactly-supported
 `(4 + a, 2 + a)`-tensor.**  The fibre value at `x` is `ricciModelTrace42Fib g₀ a x` (smooth by
@@ -620,18 +353,23 @@ theorem ricciModelTrace42Op_sub (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
 
 /-- **(POSIT — the cometric `∇₀`-parallelism base core: the leading-`{0,1}` `g₀⁻¹` double-trace field is
 `∇₀`-parallel.)**  The covariant gradient of the *base* intrinsic `g₀⁻¹` double-trace operator field
-(`a = 0`, contracting the two leading covariant slots `{0, 1}` against the cometric) vanishes:
+(`a = 0`, contracting the two leading covariant slots `{0, 1}` against the cometric, via the cometric
+index-raise `♯ = inverseMetricSharpField` then the FRAME-FREE natural trace) vanishes:
 ```
 covGrad g₀ 4 2 (ricciModelTrace42Field g₀ 0) = 0.
 ```
-This is the genuine deep cometric-parallelism core `∇₀ g₀⁻¹ = 0`: the base double-trace field contracts
-the two leading curvature slots against the cometric `g₀⁻¹ = ∑ᵢ ♯eᵢ ⊗ ♯eᵢ`, whose covariant derivative
-vanishes — the moving-`g₀`-raised-coframe corrections cancel by the cometric skew identity
-`cometric_skew_core` (`g(∇_w ♯eᵢ, ♯eⱼ) + g(♯eᵢ, ∇_w ♯eⱼ) = 0`, read on the raised coframe, via the
-`smoothOrthoFrame`↔`cometricRaisedBasisVec` cometric-trace identity).  It is **non-vacuous**: it asserts
-a genuine differential-geometric identity (the parallelism of the background cometric), false for a
-non-parallel ambient frame.  Its body is `sorry`: the section-level cometric parallelism of the base
-intrinsic `g₀⁻¹` double trace. -/
+This is the genuine deep cometric-parallelism core `∇₀ g₀⁻¹ = 0`: the base double-trace field raises the
+leading curvature slot by the cometric `♯` (the globally-smooth Hom-section `inverseMetricSharpField`)
+then takes the frame-free natural trace; the covariant gradient passes through the (parallel-transported)
+natural trace, leaving the differentiated raise `∇₀ ♯`, which vanishes by the inverse-metric
+compatibility `∇₀ g₀⁻¹ = 0` (`cometric_skew_core` / metric compatibility
+`loweredCovDerivAt_eq_lower_tensorCovDerivAt`).  The natural step is to derive this over the genuinely
+upstream node `inverseMetricSharpField_covGrad_eq_zero` (the cometric Hom-section is `∇₀`-parallel) and
+the `appCcRS` B-rule (`covGrad_appCcRS_eq` / `ricciModelTrace42FieldRec_covGrad_eq_zero` already wired
+in-file).  It is **non-vacuous**: it asserts a genuine differential-geometric identity (the parallelism
+of the background cometric), false for a non-parallel ambient frame.  Its body is `sorry`: the
+section-level cometric parallelism of the base intrinsic `g₀⁻¹` double trace, over the upstream
+inverse-metric Hom-section parallelism. -/
 theorem ricciModelTrace42Field_covGrad_eq_zero (g₀ : SmoothRiemannianMetric I M) :
     Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 4 2
         (ricciModelTrace42Field (I := I) g₀ 0) = 0 :=
@@ -1077,73 +815,54 @@ private theorem model_interior_product_apply_eval (s : ℕ) (v : E)
     Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) s v T m = T (Fin.cons v m) := rfl
 
 set_option linter.unusedSectionVars false in
-/-- **The model rank-cast reindexes the evaluation tuple by `finCongr`.**  `modelRankCast h T` evaluated
-on a tuple `m` is `T` evaluated on `m ∘ finCongr h` (the index reindexing along `h : m' = n'`).
-Definitional via `ContinuousMultilinearMap.domDomCongr_apply`. -/
-private theorem modelRankCast_apply_eval {m' n' : ℕ} (h : m' = n')
-    (T : Tensor0SBundle.Tensor0SModel m' ℝ E) (p : Fin n' → E) :
-    modelRankCast (E := E) h T p = T (fun i => p (finCongr h i)) := rfl
-
-set_option linter.unusedSectionVars false in
-/-- **The `−2` double-trace model map evaluated on a tangent pair reads the cometric coframe into the
-two leading slots.**  At gradient-shift `a = 0`, evaluated on the `Fin 2`-tuple `![v, w]`, the
-`−2`-scaled cometric double trace `modelTrace42MapVec 0 vfn T` is `−2 ∑ᵢ T ![vfn i, vfn i, v, w]` — the
-two iterated interior products feed `vfn i` into the two leading slots and the (identity) rank casts at
-`a = 0` reindex trivially. -/
-private theorem modelTrace42MapVec_zero_pair_apply (vfn : Fin (Module.finrank ℝ E) → E)
-    (T : Tensor0SBundle.Tensor0SModel 4 ℝ E) (v w : E) :
-    modelTrace42MapVec (E := E) 0 vfn T ![v, w] =
-      (-2 : ℝ) * ∑ i : Fin (Module.finrank ℝ E), T ![vfn i, vfn i, v, w] := by
-  classical
-  rw [modelTrace42MapVec, ContinuousLinearMap.smul_apply, ContinuousLinearMap.sum_apply,
-    ContinuousMultilinearMap.smul_apply, smul_eq_mul]
-  congr 1
-  rw [ContinuousMultilinearMap.sum_apply]
-  refine Finset.sum_congr rfl (fun i _ => ?_)
-  rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply,
-    model_interior_product_apply_eval, modelRankCast_apply_eval, model_interior_product_apply_eval,
-    modelRankCast_apply_eval]
-  congr 1
-
-set_option linter.unusedSectionVars false in
-/-- **(The `model_interior_product` double-trace unit evaluation of the base `g₀⁻¹` Ricci
-trace.)**  At the unit `(0, 0)`-tensor and a tangent pair `(v, w)`, the model fibre value of the base
-intrinsic `g₀⁻¹` Ricci trace `ricciModelTrace42Op g₀ 0 D` of a `(0, 4)`-tensor `D` is the `−2`-scaled
-cometric double trace — the two leading covariant slots of `D` contracted against the `g₀`-raised
-coframe `♯eᵢ(x)`:
+/-- **(The cometric double-trace unit evaluation of the base `g₀⁻¹` Ricci trace.)**  At the unit
+`(0, 0)`-tensor and a tangent pair `(v, w)`, the model fibre value of the base intrinsic `g₀⁻¹` Ricci
+trace `ricciModelTrace42Op g₀ 0 D` of a `(0, 4)`-tensor `D` is the `−2`-scaled genuine cometric double
+trace — the two leading covariant slots of `D` contracted against the cometric `g₀⁻¹` via the FRAME-FREE
+natural trace (raise slot `0` by `♯`, contract against the dual model basis):
 ```
 toModel((ricciModelTrace42Op g₀ 0 D).toSection x (unit))![v, w]
-  = −2 · ∑ᵢ toModel(D.toSection x (unit)) ![♯eᵢ(x), ♯eᵢ(x), v, w].
+  = −2 · ∑ₖ toModel(D.toSection x (unit)) (Fin.cons (♯b^k) (Fin.cons b_k ![v, w])),
 ```
-This is the unit-evaluated form of the operator-field action fibre value `ricciModelTrace42Op_toSection`
+with `b_k := finBasis k`, `b^k := cDualBasis k`, `♯ := cometricLmodel g₀ x`.  This is the unit-evaluated
+form of the operator-field action fibre value `ricciModelTrace42Op_toSection`
 (`(op 0 D).toSection x = (ricciModelTrace42Field g₀ 0).toSection x ∘ D.toSection x`) read through
-`ricciModelTrace42Fib_toModel` and `modelTrace42MapVec`, whose two iterated `model_interior_product`s feed
-`♯eᵢ(x)` into the two leading model slots (modulo the slot-count rank casts `modelRankCast`, which are
-identity reindexings).  It is **non-vacuous** (a zero right-hand side forces the trace to vanish, false
-for a nonzero `D` on the cometric). -/
+`ricciModelTrace42Fib_toModel` and the defining evaluation `modelDoubleTrace_apply` (with `m := ![v, w]`).
+It is **non-vacuous** (a zero right-hand side forces the cometric trace to vanish, false for a nonzero
+`D` on the cometric). -/
 theorem ricciModelTrace42Op_zero_unitModel_apply (g₀ : SmoothRiemannianMetric I M)
     (D : Integral.L2.SmoothCcTensor g₀ 0 4) (x : M) (v w : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel
         ((ricciModelTrace42Op (I := I) g₀ 0 D).toSection x
           (ContinuousMultilinearMap.constOfIsEmpty ℝ
             (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) ![v, w] =
-      (-2 : ℝ) * ∑ i : Fin (Module.finrank ℝ E),
+      (-2 : ℝ) * ∑ k : Fin (Module.finrank ℝ E),
         Tensor0SBundle.Tensor0SSpace.toModel
           ((D.toSection x) (ContinuousMultilinearMap.constOfIsEmpty ℝ
             (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
-          ![(cometricRaisedBasisVec (I := I) g₀ x i : E), (cometricRaisedBasisVec (I := I) g₀ x i : E),
-            (v : E), (w : E)] := by
+          (Fin.cons (cometricLmodel (I := I) g₀ x
+              (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                ((Module.finBasis ℝ E).cDualBasis k)))
+            (Fin.cons ((Module.finBasis ℝ E) k) ![(v : E), (w : E)])) := by
   classical
   -- `(op 0 D).toSection x (unit) = (ricciModelTrace42Field g₀ 0).toSection x (D.toSection x (unit))`.
   rw [ricciModelTrace42Op_toSection, ricciModelTrace42FieldRec_zero, ContinuousLinearMap.comp_apply,
     ricciModelTrace42Field_toSection]
-  -- Read through `ricciModelTrace42Fib_toModel` and `modelTrace42MapVec` evaluated on the pair.
-  rw [ricciModelTrace42Fib_toModel,
-    modelTrace42MapVec_zero_pair_apply (E := E)
-      (fun i => (cometricRaisedBasisVec (I := I) g₀ x i : E))
+  -- Read through `ricciModelTrace42Fib_toModel` (the `−2 • modelDoubleTrace` model image) and the
+  -- defining evaluation `modelDoubleTrace_apply` at `m := ![v, w]`.  At `a = 0` the `4 = 2 + 2` rank
+  -- cast is the identity reindex (concrete naturals), so `modelRankCast _ (toModel D) = toModel D`.
+  rw [ricciModelTrace42Fib_toModel, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+  rw [show (modelRankCast (E := E) (by omega : (4 : ℕ) + 0 = (2 + 0) + 2)
+        (Tensor0SBundle.Tensor0SSpace.toModel
+          ((D.toSection x) (ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))))) =
+      Tensor0SBundle.Tensor0SSpace.toModel
+        ((D.toSection x) (ContinuousMultilinearMap.constOfIsEmpty ℝ
+          (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) from rfl]
+  rw [modelDoubleTrace_apply (E := E) 2 (cometricLmodel (I := I) g₀ x)
       (Tensor0SBundle.Tensor0SSpace.toModel
         ((D.toSection x) (ContinuousMultilinearMap.constOfIsEmpty ℝ
-          (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))) (v : E) (w : E)]
+          (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))) ![(v : E), (w : E)]]
 
 set_option linter.unusedSectionVars false in
 /-- **(POSIT — the cometric `g₀⁻¹` raised-coframe double trace of the once-differentiated lowered
@@ -1173,15 +892,17 @@ theorem cometricRaisedTrace_covGradLoweredSub_eq_ricciNeg2SectionDiffLinearEval
     (hr2 : ∀ (x : M) (v w : TangentSpace I x),
       g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w)
     (x : M) (v w : TangentSpace I x) :
-    (-2 : ℝ) * ∑ i : Fin (Module.finrank ℝ E),
+    (-2 : ℝ) * ∑ k : Fin (Module.finrank ℝ E),
         Tensor0SBundle.Tensor0SSpace.toModel
           ((Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
               ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀
                 - (2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₂ g₀)).toSection x
             (ContinuousMultilinearMap.constOfIsEmpty ℝ
               (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
-          ![(cometricRaisedBasisVec (I := I) g₀ x i : E), (cometricRaisedBasisVec (I := I) g₀ x i : E),
-            (v : E), (w : E)] =
+          (Fin.cons (cometricLmodel (I := I) g₀ x
+              (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                ((Module.finBasis ℝ E).cDualBasis k)))
+            (Fin.cons ((Module.finBasis ℝ E) k) ![(v : E), (w : E)])) =
       ricciNeg2SectionDiffLinearEval (I := I) g₀ g₁ g₂ x v w :=
   sorry
 

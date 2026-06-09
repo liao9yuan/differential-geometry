@@ -99,6 +99,7 @@ namespace Connection
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow
 
@@ -798,42 +799,103 @@ theorem exists_GcurvSectionRS_iteratedCovGrad_grid_bound (g : SmoothRiemannianMe
   refine Finset.sum_congr rfl (fun q _ => ?_)
   exact rfns_iteratedCovGradRS_covGrad_comm_local (I := I) (M := M) g r s q S x
 
-/-- **The rank-`r` moving-frame remainder (after the pure-Riemann peel) fibre order (posited
-general-rank curvature core).** The contravariant-rank-`r` mirror of the rank-`0` moving-frame remainder
-fibre order `exists_pointwiseTensorCurv_subGcurv_obstruction_fiberOrder_bound` (`Order2DefectFiberOrder`,
-the genuine `∇³S`-cancellation content, itself transiting `sorryAx` through the per-direction bracket
-leaf). For a closed smooth Riemannian manifold `(M, g)` and a fixed contravariant rank `r` there is a
-*valence-dependent* nonnegative constant `C : ℕ → ℝ` such that, at every covariant rank `s`, every smooth
-compactly-supported `(r, s)`-tensor `S` and every point `x`, the moving-frame remainder of the order-`2`
-commutator defect past the concrete pure-Riemann section — `Curv S − GcurvSectionRS g r s S`, with
+/-- **The rank-`r` doubly-peeled moving-frame remainder fibre order — the `(0, 3)` graded curvature jet
+at gradient order `0` (posited general-rank curvature core).** The contravariant-rank-`r` upstream atom
+that the downstream genuine `(0, 3)` graded-jet re-derivation
+`exists_pointwiseTensorCurvRS_subGcurvSubDiffCurv_fullSum_gradedCurvJet` (`OrderSeparatedCurvatureJetRS`,
+which *imports this file*, so cannot be cited here) collapses to at gradient order `k = 0`. For a closed
+smooth Riemannian manifold `(M, g)` and a fixed contravariant rank `r` there is a *valence-dependent*
+nonnegative constant `C : ℕ → ℝ` such that, at every covariant rank `s`, every smooth compactly-supported
+`(r, s)`-tensor `S` and every point `x`, the doubly-peeled moving-frame remainder of the order-`2`
+commutator defect — `Grem := Curv S − GcurvSectionRS g r s S − diffCurvSectionRS g r s S`, peeling off
+both the pure-Riemann `R(∇S)` contraction `GcurvSectionRS g r s S` and the gauge-glued differentiated
+`(∇R) S` carrier `diffCurvSectionRS g r s S` (the order-`0` base of the differentiated tower,
+`RankRDiffCurvatureTower`), with `Curv S := pointwiseTensorCurvRS g r s S = Δ_∇(∇S) − ∇(Δ_∇ S)` — has its
+intrinsic fibre norm bounded by the **full-sum** order-`≤ 2` covariant jet of `S`:
+```
+rfns(Curv S − GcurvSectionRS g r s S − diffCurvSectionRS g r s S)(x)
+  ≤ (C s)² · ( rfns(∇²S)(x) + rfns(∇S)(x) + rfns(S)(x) ).
+```
+
+**Why this is TRUE — the iterated Ricci identity controls the doubly-peeled remainder.** This is the
+gradient-order-`0` slice of the contravariant-rank-`r` `(0, 3)` graded curvature jet
+`exists_pointwiseTensorCurvRS_subGcurvSubDiffCurv_fullSum_gradedCurvJet` (at `k = 0` the truncated window
+`∑_{i < 3} rfns(∇^{i} S)` reads exactly `rfns(S) + rfns(∇S) + rfns(∇²S)`), which in turn is *derived*
+downstream from the genuine three-field full-sum base split
+`exists_pointwiseTensorCurvRS_genuineThreeField_fullSum_m0_baseSplit` (the iterated-Ricci deep well). By
+definition `Curv S = Δ_∇(∇S) − ∇(Δ_∇ S)`; commuting the two derivative slots by the rank-`(r, s + 1)`
+Ricci identity `secondCovDeriv_covGrad_antisymm_eq_riemannOp_gen` (lifted to the `(r, s)`-bundle through
+the slot-wise curvature formula `riemannSec_tensorCov_apply_eval` of `TensorSlotwiseCurvatureRS`) cancels
+the top-order `∇³S` terms; subtracting off the two genuine carriers `GcurvSectionRS g r s S` (pure-`R`,
+`rfns(∇S)`-order) and `diffCurvSectionRS g r s S` (`(∇R) S`, `rfns(S)`-order) leaves only the residual
+`∇²S`-order moving-frame / frame-bracket remainder, all curvature coefficients absorbed uniformly over
+the compact `M` into `(C s)²`.
+
+**T1 (intrinsic single-tensor fibre norm only).** The `∇³S`-cancellation is *false term-by-term* through
+the non-tensorial `smoothExtensionTangent` reading (chart-selection-unbounded on `S²`); only the intrinsic
+full-sum frame-summed remainder is order-controlled. The bound is stated for the intrinsic fibre norm
+`rfns` of the single tensor `Curv S − GcurvSectionRS g r s S − diffCurvSectionRS g r s S` throughout — it
+never extracts a per-direction `M → E` quantity — so it is trap-screened. This genuinely general-rank
+doubly-peeled moving-frame remainder content (= the downstream `(0, 3)` graded jet at `k = 0`) is absent
+sorry-free below this file (the `(0, 3)` graded-jet machinery `OrderSeparatedCurvatureJetRS` lives
+*downstream* of this file and imports it, hence cannot be cited), so it is posited here as the single
+precise true upstream atom from which `exists_pointwiseTensorCurvRS_subGcurv_obstruction_fiberOrder_bound`
+is *derived* (`Curv S − GcurvSectionRS = diffCurvSectionRS + Grem`, the diffCurv leg bounded sorry-free by
+`exists_diffCurvSectionRS_iteratedCovGrad_grid_bound` at `k = 0`). Consumers transitively depend on
+`sorryAx`.
+
+**Non-vacuity.** With `C s = 0` the bound forces
+`rfns(Curv S − GcurvSectionRS g r s S − diffCurvSectionRS g r s S)(x) = 0`, i.e.
+`Curv S = GcurvSectionRS g r s S + diffCurvSectionRS g r s S`; *false* on a non-flat manifold — the
+moving-frame bracket discrepancy after both genuine peels is genuinely `∇²S`-order non-zero. The constant
+family is genuinely positive. The body is `sorry`. -/
+theorem exists_pointwiseTensorCurvRS_subGcurvSubDiffCurv_obstruction_fiberOrder_bound
+    (g : SmoothRiemannianMetric I M) (r : ℕ) :
+    ∃ C : ℕ → ℝ, (∀ s, 0 ≤ C s) ∧
+      ∀ (s : ℕ) (S : SmoothCcTensor g r s) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
+            ((pointwiseTensorCurvRS (I := I) (M := M) g r s S -
+              GcurvSectionRS (I := I) (M := M) g r s S -
+              diffCurvSectionRS (I := I) (M := M) g r s S).toSection x) ≤
+          C s ^ 2 *
+            (riemannianFiberNormSq (I := I) (M := M) g r (s + 1 + 1) x
+                ((covGrad (I := I) (M := M) g r (s + 1)
+                  (covGrad (I := I) (M := M) g r s S)).toSection x) +
+              riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
+                  ((covGrad (I := I) (M := M) g r s S).toSection x) +
+              riemannianFiberNormSq (I := I) (M := M) g r s x (S.toSection x)) := by
+  sorry
+
+/-- **The rank-`r` moving-frame remainder (after the pure-Riemann peel) fibre order (proved over the
+doubly-peeled remainder atom and the differentiated-curvature carrier grid).** The contravariant-rank-`r`
+mirror of the rank-`0` moving-frame remainder fibre order
+`exists_pointwiseTensorCurv_subGcurv_obstruction_fiberOrder_bound` (`Order2DefectFiberOrder`, the genuine
+`∇³S`-cancellation content, itself transiting `sorryAx`). For a closed smooth Riemannian manifold
+`(M, g)` and a fixed contravariant rank `r` there is a *valence-dependent* nonnegative constant
+`C : ℕ → ℝ` such that, at every covariant rank `s`, every smooth compactly-supported `(r, s)`-tensor `S`
+and every point `x`, the moving-frame remainder of the order-`2` commutator defect past the concrete
+pure-Riemann section — `Curv S − GcurvSectionRS g r s S`, with
 `Curv S := pointwiseTensorCurvRS g r s S = Δ_∇(∇S) − ∇(Δ_∇ S)` — has its intrinsic fibre norm bounded by
 the order-`≤ 2` covariant jet of `S`:
 ```
 rfns(Curv S − GcurvSectionRS g r s S)(x) ≤ (C s)² · ( rfns(∇²S)(x) + rfns(∇S)(x) + rfns(S)(x) ).
 ```
 
-**Why this is TRUE — the iterated Ricci identity controls the moving-frame remainder.** This is the
-verbatim contravariant-rank-`r` mirror of the rank-`0`
-`exists_pointwiseTensorCurv_subGcurv_obstruction_fiberOrder_bound`. By definition
-`Curv S = Δ_∇(∇S) − ∇(Δ_∇ S)`; reading both as fixed-`g`-orthonormal-frame traces of the second covariant
-derivative and commuting the two derivative slots by the rank-`(r, s + 1)` Ricci identity
-`secondCovDeriv_covGrad_antisymm_eq_riemannOp_gen` (lifted to the `(r, s)`-bundle through the slot-wise
-curvature formula `riemannSec_tensorCov_apply_eval` of `TensorSlotwiseCurvatureRS`), the top-order `∇³S`
-terms cancel. The concrete pure-Riemann section `GcurvSectionRS g r s S` carries the pure-`R` channel
-`R(∇S)` (`genuineCurvPureRFibRS_contMDiff`); subtracting it off leaves the differentiated-curvature
-`(∇R) S` (`rfns(S)`-order) plus the residual `∇²S`-order moving-frame / frame-bracket remainder, all
-curvature coefficients absorbed uniformly over the compact `M` into `(C s)²`.
-
-**T1 (intrinsic single-tensor fibre norm only).** The `∇³S`-cancellation is *false term-by-term* through
-the non-tensorial `smoothExtensionTangent` reading (chart-selection-unbounded on `S²`); only the intrinsic
-frame-summed remainder is `∇²S`-order. The bound is stated for the intrinsic fibre norm `rfns` of the
-single tensor `Curv S − GcurvSectionRS g r s S` throughout — it never extracts a per-direction `M → E`
-quantity — so it is trap-screened. This genuinely general-rank moving-frame remainder content is absent
-sorry-free below this file (the rank-`0` per-direction bracket carriers `remDiffBracketFib` use the
-rank-`0`-locked frame-fibre realisation; the rank-`r` deep moving-frame jet machinery
-`OrderSeparatedCurvatureJetRS` lives *downstream* of this file), so it is posited here as the single
-precise true upstream child — the rank-`r` analogue of the genuine rank-`0` `sorry` leaf. Consumers
-transitively depend on `sorryAx`.
+**Proof (composition over the doubly-peeled remainder atom, peeling the differentiated-curvature channel
+sorry-free).** The single-peel remainder splits as `Curv S − GcurvSectionRS g r s S = diffCurvSectionRS g
+r s S + Grem` with `Grem := Curv S − GcurvSectionRS g r s S − diffCurvSectionRS g r s S` (the section
+identity is `abel`), so by fibre subadditivity `riemannianFiberNormSq_add_le` the fibre norm of
+`Curv S − GcurvSectionRS g r s S` is bounded by twice that of the gauge-glued differentiated `(∇R) S`
+carrier `diffCurvSectionRS g r s S` plus twice that of the doubly-peeled remainder `Grem`. The
+differentiated-curvature carrier fibre norm is bounded *sorry-free* by `(cd s 0)² · rfns(S)(x)` via the
+differentiated-curvature carrier grid `exists_diffCurvSectionRS_iteratedCovGrad_grid_bound` specialised to
+gradient order `k = 0` (where `∇^0(diffCurvSectionRS) = diffCurvSectionRS` and the single-term window reads
+`rfns(S)`), weakened to the wider `rfns(∇²S) + rfns(∇S) + rfns(S)` envelope, and the doubly-peeled
+remainder fibre norm is bounded by the posited genuine doubly-peeled remainder fibre order
+`exists_pointwiseTensorCurvRS_subGcurvSubDiffCurv_obstruction_fiberOrder_bound` (the rank-`r` `(0, 3)`
+graded jet at gradient order `0`). Taking `C s := √(2·(cd s 0)² + 2·(Cobs s)²)` absorbs both
+contributions, since every fibre norm on the right is nonnegative. Consumers transitively depend on the
+posited remainder's `sorryAx`.
 
 **Non-vacuity (the `s = 0` litmus).** With `C s = 0` the bound forces `rfns(Curv S − GcurvSectionRS g r s
 S)(x) = 0`. At `s = 0` the pure-Riemann trace `GcurvSectionRS g r 0 f` reads the curvature of a rank-`(r,
@@ -855,7 +917,78 @@ theorem exists_pointwiseTensorCurvRS_subGcurv_obstruction_fiberOrder_bound
               riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
                   ((covGrad (I := I) (M := M) g r s S).toSection x) +
               riemannianFiberNormSq (I := I) (M := M) g r s x (S.toSection x)) := by
-  sorry
+  classical
+  -- `Curv − Gcurv = diffCurvSectionRS + (Curv − Gcurv − diffCurvSectionRS)`: peel the gauge-glued
+  -- differentiated-curvature carrier sorry-free (the carrier grid at `k = 0`), bound the doubly-peeled
+  -- remainder by the posited `(0, 3)`-graded-jet atom at gradient order `0`, merge by fibre subadditivity.
+  obtain ⟨cd, hcd_nn, hcd⟩ := exists_diffCurvSectionRS_iteratedCovGrad_grid_bound (I := I) (M := M) g r
+  obtain ⟨Cobs, hCobs_nn, hCobs⟩ :=
+    exists_pointwiseTensorCurvRS_subGcurvSubDiffCurv_obstruction_fiberOrder_bound (I := I) (M := M) g r
+  refine ⟨fun s => Real.sqrt (2 * (cd s 0) ^ 2 + 2 * (Cobs s) ^ 2),
+    fun s => Real.sqrt_nonneg _, fun s S x => ?_⟩
+  set A : ℝ := riemannianFiberNormSq (I := I) (M := M) g r (s + 1 + 1) x
+      ((covGrad (I := I) (M := M) g r (s + 1)
+        (covGrad (I := I) (M := M) g r s S)).toSection x) with hA
+  set B : ℝ := riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
+      ((covGrad (I := I) (M := M) g r s S).toSection x) with hB
+  set D : ℝ := riemannianFiberNormSq (I := I) (M := M) g r s x (S.toSection x) with hD
+  have hA_nn : 0 ≤ A := riemannianFiberNormSq_nonneg (I := I) (M := M) g r (s + 1 + 1) x _
+  have hB_nn : 0 ≤ B := riemannianFiberNormSq_nonneg (I := I) (M := M) g r (s + 1) x _
+  have hD_nn : 0 ≤ D := riemannianFiberNormSq_nonneg (I := I) (M := M) g r s x _
+  have hsub1 : (pointwiseTensorCurvRS (I := I) (M := M) g r s S -
+        GcurvSectionRS (I := I) (M := M) g r s S).toSection x =
+      (pointwiseTensorCurvRS (I := I) (M := M) g r s S).toSection x -
+        (GcurvSectionRS (I := I) (M := M) g r s S).toSection x := by
+    rw [SmoothCcTensor.toSection_sub]; rfl
+  have hsub2 : (pointwiseTensorCurvRS (I := I) (M := M) g r s S -
+        GcurvSectionRS (I := I) (M := M) g r s S -
+        diffCurvSectionRS (I := I) (M := M) g r s S).toSection x =
+      ((pointwiseTensorCurvRS (I := I) (M := M) g r s S).toSection x -
+          (GcurvSectionRS (I := I) (M := M) g r s S).toSection x) -
+        (diffCurvSectionRS (I := I) (M := M) g r s S).toSection x := by
+    rw [SmoothCcTensor.toSection_sub, SmoothCcTensor.toSection_sub]; rfl
+  have hsub_apply : (pointwiseTensorCurvRS (I := I) (M := M) g r s S -
+        GcurvSectionRS (I := I) (M := M) g r s S).toSection x =
+      (diffCurvSectionRS (I := I) (M := M) g r s S).toSection x +
+        (pointwiseTensorCurvRS (I := I) (M := M) g r s S -
+          GcurvSectionRS (I := I) (M := M) g r s S -
+          diffCurvSectionRS (I := I) (M := M) g r s S).toSection x := by
+    rw [hsub1, hsub2]; abel
+  have hadd := riemannianFiberNormSq_add_le (I := I) (M := M) g r (s + 1) x
+    ((diffCurvSectionRS (I := I) (M := M) g r s S).toSection x)
+    ((pointwiseTensorCurvRS (I := I) (M := M) g r s S -
+      GcurvSectionRS (I := I) (M := M) g r s S -
+      diffCurvSectionRS (I := I) (M := M) g r s S).toSection x)
+  rw [← hsub_apply] at hadd
+  -- The differentiated-curvature carrier bound, sorry-free, at gradient order `k = 0`.
+  have hdiff := hcd s S 0 x
+  rw [iteratedCovGrad_zero (I := I) (M := M) g r (s + 1)
+    (diffCurvSectionRS (I := I) (M := M) g r s S)] at hdiff
+  rw [Finset.sum_range_one] at hdiff
+  simp only [Nat.add_zero, iteratedCovGrad_zero] at hdiff
+  rw [← hD] at hdiff
+  have hdiffB : riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
+      ((diffCurvSectionRS (I := I) (M := M) g r s S).toSection x) ≤ cd s 0 ^ 2 * D := hdiff
+  -- The doubly-peeled remainder fibre bound (the posited genuine child).
+  have hrem := hCobs s S x
+  rw [← hA, ← hB, ← hD] at hrem
+  have hCsq : (Real.sqrt (2 * (cd s 0) ^ 2 + 2 * (Cobs s) ^ 2)) ^ 2 =
+      2 * (cd s 0) ^ 2 + 2 * (Cobs s) ^ 2 := by
+    rw [Real.sq_sqrt]; positivity
+  rw [hCsq]
+  calc riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
+          ((pointwiseTensorCurvRS (I := I) (M := M) g r s S -
+            GcurvSectionRS (I := I) (M := M) g r s S).toSection x)
+      ≤ 2 * riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
+            ((diffCurvSectionRS (I := I) (M := M) g r s S).toSection x) +
+          2 * riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
+            ((pointwiseTensorCurvRS (I := I) (M := M) g r s S -
+              GcurvSectionRS (I := I) (M := M) g r s S -
+              diffCurvSectionRS (I := I) (M := M) g r s S).toSection x) := hadd
+    _ ≤ 2 * (cd s 0 ^ 2 * D) + 2 * (Cobs s ^ 2 * (A + B + D)) :=
+        add_le_add (by linarith [hdiffB]) (by linarith [hrem])
+    _ ≤ (2 * (cd s 0) ^ 2 + 2 * (Cobs s) ^ 2) * (A + B + D) := by
+        nlinarith [hA_nn, hB_nn, hD_nn, sq_nonneg (cd s 0), sq_nonneg (Cobs s)]
 
 /-- **The rank-`r` bare order-`2` commutator-defect fibre order (proved over the pure-Riemann grid and
 the moving-frame remainder core).** The contravariant-rank-`r` mirror of the rank-`0` bare defect fibre
@@ -1228,11 +1361,68 @@ theorem exists_pointwiseTensorCurvRS_fiberNormSq_bound_upstream
   nlinarith [hadd, hgen_bound, hrem_x, hfS_nn, hfgS_nn, hfg2S_nn, hCsq_nn,
     mul_nonneg hCsq_nn hfg2S_nn]
 
+/-- **The rank-`r` differentiated-curvature moving-frame remainder pointwise divergence datum (the
+genuine rank-`r` total-covariant-divergence content, posited general-rank curvature core).** The
+contravariant-rank-`r` lift of the genuine moving-frame divergence content underlying the rank-`0`
+`tensorL2Inner_movingFrameRemainder_eq_zero_of_pointwise_divergence`
+(`MovingFrameRemainderDivergenceForm`), specialised to the concrete tensorial carrier
+`diffCurvSectionRS g r s S` (the order-`0` base of the differentiated `(∇R)·` tower,
+`RankRDiffCurvatureTower`). For a closed smooth Riemannian manifold `(M, g)`, every contravariant rank
+`r`, covariant rank `s`, and smooth compactly-supported `(r, s)`-tensor `S` there is a smooth tangent
+vector field `X` whose metric divergence `divᵍ X` agrees almost everywhere with the pointwise metric
+inner product of the moving-frame remainder
+`Curv S − GcurvSectionRS g r s S − diffCurvSectionRS g r s S` against `∇S := covGrad g r s S`:
+```
+⟨Curv S − GcurvSectionRS g r s S − diffCurvSectionRS g r s S, ∇S⟩ =ᵐ divᵍ X.
+```
+
+**Why this is TRUE — the moving-frame remainder is a total covariant divergence.** By the iterated Ricci
+identity `secondCovDeriv_covGrad_antisymm_eq_riemannOp_gen` (rank-`(r, ·)` instance, sorry-free, lifted to
+the `(r, s)`-bundle through the slot-wise curvature formula `riemannSec_tensorCov_apply_eval` of
+`TensorSlotwiseCurvatureRS`) the order-`2` commutator defect's gradient-slot reordering produces the
+pure-Riemann `R(∇S)` trace (carried by `GcurvSectionRS`), the differentiated curvature `(∇R) S` (whose
+tensorial content the gauge-glued `diffCurvSectionRS` carries, the second-Bianchi Ricci-fold folded in),
+and a moving-frame / frame-bracket remainder that is a *total covariant divergence* of an `∇S`-order
+field. That remainder is exactly `Curv S − GcurvSectionRS − diffCurvSectionRS`, and the frame-summed
+bracket field, paired against `∇S`, telescopes into the total covariant divergence `divᵍ X` of an honest
+smooth tangent field `X`. The rank-`r` operator-field root machinery (`appCc`, `curvOpField`, `Φ₀`,
+`pureRGenuineDiffOp`, the second-Bianchi fold) producing the divergence current is **rank-`0`-locked** in
+the library (the operator-field action `appCc` carries a literal contravariant `0`), so this rank-`r`
+divergence datum is absent sorry-free below this file and is posited here as the single precise true core —
+the rank-`r` analogue of the genuine moving-frame divergence content that the rank-`0`
+`exists_movingCentreDiffCurvSection_divergenceDatum` constructs. Consumers transitively depend on
+`sorryAx`.
+
+**T1 (pointwise-divergence form is sound, the per-direction split is not).** The differentiated-curvature
+trace `∑ᵢ ∇_{Bᵢ}(R(Bᵢ, ·) S)` is *non-tensorial in the direction* — its per-direction fibre realisation
+reads the `smoothExtensionTangent` jet of the frame direction, chart-selection-unbounded on `S²` (T1) — so
+the `∇³S`-cancellation is *false term-by-term*. The datum is stated as a single `=ᵐ` equality of the
+intrinsic frame-summed pointwise pairing of the single tensor `Curv S − GcurvSectionRS − diffCurvSectionRS`
+with `divᵍ X` (it never extracts a per-direction `M → E` quantity), so it is trap-screened; only the
+intrinsic frame-summed remainder is a total divergence.
+
+**Non-vacuity.** The datum carries a genuine field `X` with `divᵍ X =ᵐ ⟨remainder, ∇S⟩`; it is *false* if
+one drops the differentiated-curvature carrier (e.g. with `diffCurvSectionRS` replaced by `0` the
+remainder gains the entire `(∇R) S` content, whose pointwise pairing with `∇S` is *not* a total divergence
+on a manifold with `∇R ≠ 0` — its integral is the genuine non-zero Weitzenböck value, so no compactly-
+supported `X` can match it). The body is `sorry`. -/
+theorem diffCurvSectionRS_movingFrameRemainder_divergenceDatumRS
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
+    ∃ X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯,
+      (fun x : M => tensorInnerPointwise (I := I) (M := M) g r (s + 1) x
+          ((pointwiseTensorCurvRS (I := I) (M := M) g r s S -
+            GcurvSectionRS (I := I) (M := M) g r s S -
+            diffCurvSectionRS (I := I) (M := M) g r s S).toFun x)
+          ((covGrad (I := I) (M := M) g r s S).toFun x))
+        =ᵐ[riemannianVolumeMeasure (I := I) (M := M) g]
+      (fun x : M => divergence_g (I := I) g X x) := by
+  sorry
+
 /-- **The rank-`r` differentiated-curvature moving-frame remainder integrated nullity (the rank-`r`
-total covariant-divergence fact, posited general-rank curvature core).** The contravariant-rank-`r`
-mirror of the integrated-nullity conjunct of the rank-`0` divergence datum
-`exists_movingCentreDiffCurvSection_divergenceDatum` (`MovingFrameDiffCurvAnchor` /
-`MovingFrameIntegratedNullity`, *whose nullity transits `sorryAx`* at rank `0` through the deep
+total covariant-divergence fact, proved over the rank-`r` divergence datum and the closed-manifold
+divergence theorem).** The contravariant-rank-`r` mirror of the integrated-nullity conjunct of the
+rank-`0` divergence datum `exists_movingCentreDiffCurvSection_divergenceDatum` (`MovingFrameDiffCurvAnchor`
+/ `MovingFrameIntegratedNullity`, *whose nullity transits `sorryAx`* at rank `0` through the deep
 operator-field root `bochnerWeitzenbockCurvatureValue_root`), specialised to the concrete tensorial
 carrier `diffCurvSectionRS g r s S` (the order-`0` base of the differentiated `(∇R)·` tower,
 `RankRDiffCurvatureTower`). For a closed smooth Riemannian manifold `(M, g)`, every contravariant rank
@@ -1243,22 +1433,17 @@ pairing of the moving-frame remainder
 ⟨pointwiseTensorCurvRS g r s S − GcurvSectionRS g r s S − diffCurvSectionRS g r s S, ∇S⟩_{L²} = 0.
 ```
 
-**Why this is TRUE — the rank-`r` total divergence.** This is the verbatim contravariant-rank-`r` lift
-of the integrated nullity inside the rank-`0` `exists_movingCentreDiffCurvSection_divergenceDatum`. By
-the iterated Ricci identity `secondCovDeriv_covGrad_antisymm_eq_riemannOp_gen` (rank-`(r, ·)` instance,
-sorry-free, lifted to the `(r, s)`-bundle through the slot-wise curvature formula
-`riemannSec_tensorCov_apply_eval` of `TensorSlotwiseCurvatureRS`) the order-`2` commutator defect's
-gradient-slot reordering produces the pure-Riemann `R(∇S)` trace (carried by `GcurvSectionRS`), the
-differentiated curvature `(∇R) S` (whose tensorial content the gauge-glued `diffCurvSectionRS` carries,
-the second-Bianchi Ricci-fold folded in), and a moving-frame / frame-bracket remainder that is a total
-covariant divergence of an `∇S`-order field; this remainder is exactly
-`Curv S − GcurvSectionRS − diffCurvSectionRS`, and a total covariant divergence integrates to zero
-against any field over the closed boundaryless manifold (the divergence theorem). The rank-`r`
-operator-field root machinery (`appCc`, `curvOpField`, `Φ₀`, `pureRGenuineDiffOp`, the second-Bianchi
-fold) is **rank-`0`-locked** in the library (the operator-field action `appCc` carries a literal
-contravariant `0`), so the rank-`r` nullity is absent sorry-free below this file and is posited here as
-the single precise true core — the rank-`r` analogue of the deep rank-`0` nullity root. Consumers
-transitively depend on `sorryAx`.
+**Proof (composition over the rank-`r` divergence datum and the closed-manifold divergence theorem).**
+This is the rank-`r` lift of the rank-`0`
+`tensorL2Inner_movingFrameRemainder_eq_zero_of_pointwise_divergence`. The moving-frame remainder
+`Curv S − GcurvSectionRS − diffCurvSectionRS`, paired against `∇S`, equals a total covariant divergence
+`divᵍ X` almost everywhere (the posited divergence datum
+`diffCurvSectionRS_movingFrameRemainder_divergenceDatumRS`). Since `tensorL2Inner` is the integral of the
+pointwise pairing against the Riemannian volume measure, `MeasureTheory.integral_congr_ae` rewrites it to
+`∫ divᵍ X`, which vanishes over the closed boundaryless manifold by the divergence theorem
+`integral_divergence_eq_zero_of_hasCompactSupport` (the manifold's compactness supplies the compact
+support of `X`). The body transits only the posited rank-`r` divergence datum; consumers transitively
+depend on its `sorryAx`.
 
 **T1 (integrated-only).** The differentiated-curvature trace `∑ᵢ ∇_{Bᵢ}(R(Bᵢ, ·) S)` is *non-tensorial
 in the direction* — its per-direction fibre realisation reads the `smoothExtensionTangent` jet of the
@@ -1273,7 +1458,7 @@ term, generically non-zero pointwise (its pointwise pairing carries the non-dive
 only the *global* pairing vanishes. The conclusion is `= 0`, not an inequality, and pins the remainder
 orthogonal to `∇S`; it is *false* if one drops either carrier (e.g. with `diffCurvSectionRS` replaced by
 `0` the remainder gains the entire `(∇R) S` content, whose `L²` pairing with `∇S` is non-zero on a
-manifold with `∇R ≠ 0`). The body is `sorry`. -/
+manifold with `∇R ≠ 0`). -/
 theorem diffCurvSectionRS_movingFrameRemainder_integratedNullityRS
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
     tensorL2Inner (I := I) (M := M) g r (s + 1)
@@ -1281,7 +1466,13 @@ theorem diffCurvSectionRS_movingFrameRemainder_integratedNullityRS
           GcurvSectionRS (I := I) (M := M) g r s S -
           diffCurvSectionRS (I := I) (M := M) g r s S).toFun
         (covGrad (I := I) (M := M) g r s S).toFun = 0 := by
-  sorry
+  classical
+  obtain ⟨X, hdiv⟩ :=
+    diffCurvSectionRS_movingFrameRemainder_divergenceDatumRS (I := I) (M := M) g r s S
+  unfold tensorL2Inner
+  rw [MeasureTheory.integral_congr_ae hdiv]
+  exact integral_divergence_eq_zero_of_hasCompactSupport (I := I) g X
+    (HasCompactSupport.of_compactSpace _)
 
 /-- **The rank-`r` genuine curvature-sections cross-pairing (the rank-`r` classical `(★)` third-order
 tensor Bochner–Weitzenböck curvature-term identity, cross-pairing form — proved sorry-free over the

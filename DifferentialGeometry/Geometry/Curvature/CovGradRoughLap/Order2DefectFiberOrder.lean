@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorBochnerFie
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.IntegratedOrder2WeitzenbockCurvature
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformCurvatureSup
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FrozenFramePureRCurvatureTower
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemainderFrameSumBridge
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.BracketFrameSumFiberOrder
 
 /-!
 # The fibre order of the order-`2` rough-Laplacian / covariant-gradient commutator defect
@@ -133,13 +135,22 @@ non-harmonic `f` (the scalar commutator defect is `Curv f = Ric(∇f, ·)` integ
 curvature is present, `ricTraceSection_zero_apply`, `weitzenbock_integrated_covGrad_l2_normSq`). So `C` is
 genuinely positive, and the remainder genuinely uses `S`.
 
-**Posited leaf.** This is the genuinely-irreducible intrinsic frame-summed moving-frame Weitzenböck
-order-`2` remainder content of the curvature line; the body is `sorry` and consumers transitively depend
-on its `sorryAx`. The downstream rank-`r` development re-derives the same content as the sound full-sum
-`(0, 3)` graded jet `exists_pointwiseTensorCurvRS_subGcurvSubDiffCurv_fullSum_gradedCurvJet`
-(`OrderSeparatedCurvatureJetRS`); the false per-direction `smoothExtensionTangent` /
-recentered-Christoffel-sup decomposition of this remainder (chart-selection-unbounded on `S²`) is *not*
-used. -/
+**Proof (composition over the upstream frame-summed bracket bound).** The moving-frame remainder is the
+intrinsic frame sum of the named bracket fibres: by the sorry-free frame-sum representation
+`pointwiseTensorCurv_toSection_eq_frame_sum` (`Bochner/PointwiseTensorBochner`) the defect's section value
+is `∑ᵢ remDiffFib g s S x i`, each summand splits as `remDiffFib = remDiffGenuineFib + remDiffBracketFib`
+(`remDiffFib_eq_genuine_add_bracket`), and the pure-Riemann genuine fibres frame-sum to the concrete
+pure-Riemann section value `∑ᵢ remDiffGenuineFib = (GcurvSection g s S).toSection x`
+(`remDiffGenuineFib_sum_eq_GcurvSection_toSection`), so
+`(Curv S − GcurvSection g s S).toSection x = ∑ᵢ remDiffBracketFib g s S x i`
+(`MovingFrameRemainderFrameSumBridge`). The fibre norm of that frame sum is bounded by the upstream
+intrinsic frame-summed Weitzenböck bracket remainder fibre order
+`exists_bracketThirdCurvField_frameSum_fiberNormSq_bound` (`BracketFrameSumFiberOrder`, the genuine
+pointwise content: the differentiated-curvature `(∇R) S` channel plus the `∇²S`-order frame-bracket
+discrepancy past the tensorial pure-Riemann fibre, homed above the moving-frame divergence spine so this
+file reads it without an import cycle). Consumers transitively depend on the posited frame-summed bracket
+bound's `sorryAx`. The false per-direction `smoothExtensionTangent` / recentered-Christoffel-sup
+decomposition of this remainder (chart-selection-unbounded on `S²`) is *not* used. -/
 theorem exists_pointwiseTensorCurv_subGcurv_obstruction_fiberOrder_bound
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℕ → ℝ, (∀ s, 0 ≤ C s) ∧
@@ -153,8 +164,22 @@ theorem exists_pointwiseTensorCurv_subGcurv_obstruction_fiberOrder_bound
                   (covGrad (I := I) (M := M) g 0 s S)).toSection x) +
               riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
                   ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
-              riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) :=
-  sorry
+              riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) := by
+  classical
+  obtain ⟨C, hC_nn, hC⟩ :=
+    exists_bracketThirdCurvField_frameSum_fiberNormSq_bound (I := I) (M := M) g
+  refine ⟨C, hC_nn, fun s S x => ?_⟩
+  have hsum : (pointwiseTensorCurv (I := I) (M := M) g s S -
+        GcurvSection (I := I) (M := M) g s S).toSection x =
+      ∑ i : Fin (Module.finrank ℝ E), remDiffBracketFib (I := I) (M := M) g s S x i := by
+    simp only [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
+    rw [pointwiseTensorCurv_toSection_eq_frame_sum (I := I) (M := M) g s S x]
+    rw [← remDiffGenuineFib_sum_eq_GcurvSection_toSection (I := I) (M := M) g s S x]
+    rw [← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rfl
+  rw [hsum]
+  exact hC s S x
 
 /-- **The order-`2` commutator-defect fibre order (the curvature line's irreducible quantitative atom,
 posited upstream of the moving-frame spine).** For a closed smooth Riemannian manifold `(M, g)` there is

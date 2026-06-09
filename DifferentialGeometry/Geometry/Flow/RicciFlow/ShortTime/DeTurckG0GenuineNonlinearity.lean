@@ -1710,26 +1710,118 @@ private lemma radialRetract_nonexpansive (ρ : ℝ) (hρ : 0 ≤ ρ) (x y : F) :
 
 end RadialRetraction
 
+/-- **The spectral `Hᵃ⁺¹`-norm of a gate-realizable perturbation is controlled by the intrinsic
+`H^{2a}` chart-Sobolev norm of its smooth gate representative (the gate-norm bridge).**
+
+For a gate-realizable `u : Hᵃ⁺¹(g₀)` (`realizableAtGate`, `2a > dim M + 4`), there is a single
+constant `C ≥ 0` (uniform in `u`) with
+`‖u‖ ≤ C · ‖toHs (2a) (gateSmoothRep g₀ u …)‖`.
+This is the conversion the gauge-cancellation construction needs: the upper chain gates on the
+intrinsic `H^{2a}` chart norm of the gate representative `gateSmoothRep g₀ u h.choose
+h.choose_spec.choose` (the form in which the headline states the gate), whereas the realized
+parabolic-smoothing fibre bound (child A) needs the spectral `Hᵃ⁺¹` norm `‖u‖` of the perturbation
+itself to be small.  Because the gate representative's `L²` class is exactly `u`'s `L²` class
+(`gateSmoothRep_toL2`), the two carry the **same** spectral `L²` coefficients, so `‖u‖²` is the
+order-`(a+1)` weighted coefficient sum and the chart `H^{2a}` norm dominates the order-`2a` weighted
+coefficient sum (the spectral-`≤`-chart bound `exists_spectralWeightedSq_le_pouHaNorm_sq`); since
+`a + 1 ≤ 2a` (valid as `2a > dim M + 4 ≥ 4` forces `a ≥ 1`), weight monotonicity
+(`tensorSobolevWeight_mono`) gives the order-`(a+1)` sum `≤` the order-`2a` sum, and the chain
+closes.  It is **proven by composition** of those sorry-free spectral facts (no `chartJ`; all
+`g`-inner / spectral).  Reusable banked tool for the gauge construction's gate conversion. -/
+private theorem tensorHs_norm_le_gateSmoothRep_toHs_of_realizableAtGate
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+        (h : realizableAtGate (I := I) g₀ u),
+        ‖u‖ ≤ C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+          (gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose)‖ := by
+  classical
+  obtain ⟨C, hC, hCspec⟩ :=
+    DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.exists_spectralWeightedSq_le_pouHaNorm_sq
+      (I := I) (M := M) g₀ (2 * a)
+  refine ⟨C, hC, fun u h => ?_⟩
+  set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hcompact_def
+  set R : Integral.L2.SmoothCcTensor g₀ 0 2 :=
+    gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose with hR_def
+  obtain ⟨_hsummable, hbound⟩ := hCspec R
+  have hcoeff : ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+      tensorL2Coeff (I := I) (M := M) hcompact (Integral.L2.SmoothCcTensor.toL2 R) i = u.coeff i := by
+    intro i
+    rw [hR_def, gateSmoothRep_toL2 (I := I) g₀ u h.choose h.choose_spec.choose]
+    exact tensorHsToL2_tensorL2Coeff (I := I) (M := M) (h_compact := hcompact) h.choose u i
+  have hle21 : ((a : ℝ) + 1) ≤ ((2 * a : ℕ) : ℝ) := by
+    have ha1 : (1 : ℝ) ≤ (a : ℝ) := by
+      have : 1 ≤ a := by omega
+      exact_mod_cast this
+    push_cast; linarith
+  have hnorm := DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorHs.norm_eq_sqrt_tsum
+    (I := I) (M := M) (g := g₀) (r := 0) (s := 2) (σ := (a : ℝ) + 1) u
+  have hterm : ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+      tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 1) * u.coeff i ^ 2
+        ≤ tensorSobolevWeight (I := I) (M := M) i ((2 * a : ℕ) : ℝ)
+            * tensorL2Coeff (I := I) (M := M) hcompact (Integral.L2.SmoothCcTensor.toL2 R) i ^ 2 := by
+    intro i
+    rw [hcoeff i]
+    apply mul_le_mul_of_nonneg_right (tensorSobolevWeight_mono (I := I) (M := M) i hle21)
+    positivity
+  have hsummable_lhs :
+      Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2 =>
+        tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 1) * u.coeff i ^ 2) :=
+    Summable.of_nonneg_of_le
+      (fun i => mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i _) (sq_nonneg _))
+      hterm _hsummable
+  have htsum_le :
+      ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+          tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 1) * u.coeff i ^ 2
+        ≤ (C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a) R‖) ^ 2 :=
+    le_trans (Summable.tsum_mono hsummable_lhs _hsummable hterm) hbound
+  rw [hnorm]
+  have hrhs_nn : 0 ≤ C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a) R‖ :=
+    mul_nonneg hC (norm_nonneg _)
+  calc √(∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+          tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 1) * u.coeff i ^ 2)
+      ≤ √((C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a) R‖) ^ 2) :=
+        Real.sqrt_le_sqrt htsum_le
+    _ = C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a) R‖ :=
+        Real.sqrt_sq hrhs_nn
+
+set_option linter.unusedVariables false in
 /-- **Fibre-smallness of the heat-corrected datum on the gated locus (the parabolic-smoothing
-sub-fact of the gauge-cancellation match).**
+sub-fact of the gauge-cancellation match) — proven over the heat-output fibre bound.**
+
+This node carries the family's full uniform gauge-data hypothesis block (the coercivity rate, the
+heat synthesis `P`/`hPrealize`, the realized-remainder lift `N`/`hNrealize`, the fixed-point
+equation `hcfix`) for signature parity with its siblings `deTurck_heatCorrected_retagLapForm_…` and
+the input/leaf nodes, even though its own proof — a pure heat-output fibre bound — consumes only the
+corrector facts (`hc0`, `hclip`, `hQsmall`) and the small spectral gate (`hgate`); the
+`unusedVariables` linter is therefore disabled for this declaration (the unused context hypotheses are
+the intentional uniform interface, irrelevant to this fibre estimate).
 
 For the full gauge-cancellation data — the Gårding coercivity `hcoercive`, the heat synthesis `P`
 (`hPrealize`), the realized-remainder lift `N` (`hNrealize`), the fixed-point corrector `c`
-(`hcfix`) — on the gate-realizable locus with unit gate slack `hgate`, the unit-time heat-output
-smooth representative of the corrected datum `u + c u` has a `g₀`-fibre-small `ccTensorBilinSymm`
-form (some `δ < 1`).  This is the input that places the heat-corrected datum inside the
-`dif_pos`/`fibreSmall` branch of `deTurckRealizeRemainderOf`, so that its realized remainder splits
-through `deTurckRealizeRemainderOf_toL2_retagClass_sub`.  Concretely: the gate slack bounds the gate
-representative, the corrector `c u` is controlled by the contraction fixed point, and unit-time heat
-smoothing followed by the supercritical Sobolev embedding (`2a > dim M + 4`) controls the fibre
-sup-norm of `ccTensorBilinSymm g₀ (heatRepr (u + c u))` below `1`.
+(`hcfix`) — together with the corrector facts `c 0 = 0` (`hc0`) and `LipschitzWith Lip c`
+(`hclip`), on the gate-realizable locus with a **small spectral gate** `‖u‖ ≤ Q` (`hgate`, with
+`0 < Q`) whose value is small enough that `Cfib · (1 + Lip) · Q < 1` (`hQsmall`, where `Cfib` is the
+heat-output fibre constant of `tensorHeatSemigroupHs_output_smoothRepr_fibreOpBound`), the unit-time
+heat-output smooth representative of the corrected datum `u + c u` has a `g₀`-fibre-small
+`ccTensorBilinSymm` form (some `δ < 1`).  This is the input that places the heat-corrected datum
+inside the `dif_pos`/`fibreSmall` branch of `deTurckRealizeRemainderOf`, so that its realized
+remainder splits through `deTurckRealizeRemainderOf_toL2_retagClass_sub`.
+
+**Proven by composition.** The heat-output fibre bound
+`tensorHeatSemigroupHs_output_smoothRepr_fibreOpBound` supplies a constant `Cfib ≥ 0` with
+`gFibreOpBound g₀ (ccTensorBilinSymm g₀ (heatRepr v)) (Cfib · ‖v‖)` for every `v`; instantiated at
+`v := u + c u` it gives the witness `δ := Cfib · ‖u + c u‖`.  The corrector facts bound
+`‖c u‖ = ‖c u − c 0‖ ≤ Lip · ‖u‖` (`LipschitzWith.norm_sub_le`, `hc0`), so
+`‖u + c u‖ ≤ (1 + Lip) · ‖u‖ ≤ (1 + Lip) · Q`, whence `δ ≤ Cfib · (1 + Lip) · Q < 1` by `hQsmall`.
 
 **Non-vacuous / genuine.** This is a strict-inequality fibre bound, not a class identity; it is
-*false* without the gate (off the gated locus, or for large `u`, the heat output's bilinear form can
-have fibre operator norm `≥ 1`), so it genuinely uses `hgate` and the corrector construction.
-**Intrinsic** — `gFibreOpBound` and `toHs` are `g`-inner; no `chartJ`.  **The body is `sorry`** — a
-precisely-named parabolic-smoothing sub-frontier of the `/prove` recursion; consumers transitively
-depend on `sorryAx` through it. -/
+*false* without the small gate (for large `u`, or for `Q` not subordinate to `Cfib · (1 + Lip)`, the
+heat output's bilinear form can have fibre operator norm `≥ 1`), so it genuinely uses `hgate`,
+`hQsmall`, and the corrector facts.  **Intrinsic** — `gFibreOpBound` and `toHs` are `g`-inner; no
+`chartJ`.  The body carries no `sorry` of its own (it composes the sorry-free heat-output fibre
+bound). -/
 private theorem deTurck_heatCorrectedDatum_fibreSmall_on_gatedLocus
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -1754,30 +1846,57 @@ private theorem deTurck_heatCorrectedDatum_fibreSmall_on_gatedLocus
           tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
     (hcfix : ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
       c u = - N (radialRetract ρ (u + c u)))
+    (Q : ℝ) (hQ : 0 < Q) (Lip : ℝ≥0) (hc0 : c 0 = 0) (hclip : LipschitzWith Lip c)
+    (hQsmall :
+      (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr_fibreOpBound (I := I) (M := M)
+          g₀ (one_pos) (by positivity : (0 : ℝ) ≤ (a : ℝ) + 1)).choose * ((1 : ℝ) + Lip) * Q < 1)
     (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
     (h : realizableAtGate (I := I) g₀ u)
-    (hgate : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
-          (gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose)‖ ≤ 1) :
+    (hgate : ‖u‖ ≤ Q) :
     ∃ δ : ℝ, δ < 1 ∧
       gFibreOpBound (I := I) (M := M) g₀
         (ccTensorBilinSymm (I := I) g₀
           (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
             g₀ 0 2 (one_pos) (by positivity : (0 : ℝ) ≤ (a : ℝ) + 1) (u + c u))) δ := by
-  sorry
+  classical
+  obtain ⟨hCfib_nn, hCfib⟩ :=
+    (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr_fibreOpBound (I := I) (M := M)
+        g₀ (one_pos) (by positivity : (0 : ℝ) ≤ (a : ℝ) + 1)).choose_spec
+  set Cfib :=
+    (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr_fibreOpBound (I := I) (M := M)
+        g₀ (one_pos) (by positivity : (0 : ℝ) ≤ (a : ℝ) + 1)).choose with hCfib_def
+  refine ⟨Cfib * ‖u + c u‖, ?_, hCfib (u + c u)⟩
+  have hcu : ‖c u‖ ≤ (Lip : ℝ) * ‖u‖ := by
+    have h1 := hclip.norm_sub_le u 0
+    rw [hc0, sub_zero, sub_zero] at h1
+    exact h1
+  have hsum : ‖u + c u‖ ≤ (1 + Lip) * Q := by
+    calc ‖u + c u‖ ≤ ‖u‖ + ‖c u‖ := norm_add_le _ _
+      _ ≤ ‖u‖ + (Lip : ℝ) * ‖u‖ := by linarith [hcu]
+      _ = (1 + Lip) * ‖u‖ := by ring
+      _ ≤ (1 + Lip) * Q := by
+          apply mul_le_mul_of_nonneg_left hgate
+          positivity
+  calc Cfib * ‖u + c u‖ ≤ Cfib * ((1 + Lip) * Q) :=
+        mul_le_mul_of_nonneg_left hsum hCfib_nn
+    _ = Cfib * (1 + Lip) * Q := by ring
+    _ < 1 := hQsmall
 
 /-- **The first-order gauge-defect cancellation of the heat-corrected datum against the gate
 representative, in the re-tagged-RHS-minus-rough-Laplacian form (the irreducible first-order class
 content of the gauge-cancellation match).**
 
-Given the fibre-smallness witness `hHeat` of the heat-corrected datum (child A), this is the
-first-order defect identity at the `L²`-class level: the re-tagged Ricci–DeTurck right-hand side of
-the realized metric of `heatRepr (u + c u)` minus the rough Laplacian of `heatRepr (u + c u)` equals
-the same combination for the canonical gate representative `gateRepOfWitness g₀ u h`.  This is the
-shape that `deTurckRealizeRemainderOf_toL2_retagClass_sub` (sorry-free) reduces each side of the
-parent class identity to; the leading second-order `−λᵢ` rough-Laplacian principal symbol cancels the
-second-order re-tagged-RHS principal symbol (`deTurckNonlinearitySpectral_principalPart_cancels`,
-sorry-free), so the surviving defect is genuinely *first order*, and the fixed-point equation `hcfix`
-repairs it on the gated locus.
+Given the fibre-smallness witness `hHeat` of the heat-corrected datum (child A) — on the
+gate-realizable locus with the **small spectral gate** `‖u‖ ≤ Q` (`hgate`, `0 < Q`) and the corrector
+facts `c 0 = 0` (`hc0`), `LipschitzWith Lip c` (`hclip`) — this is the first-order defect identity at
+the `L²`-class level: the re-tagged Ricci–DeTurck right-hand side of the realized metric of
+`heatRepr (u + c u)` minus the rough Laplacian of `heatRepr (u + c u)` equals the same combination for
+the canonical gate representative `gateRepOfWitness g₀ u h`.  This is the shape that
+`deTurckRealizeRemainderOf_toL2_retagClass_sub` (sorry-free) reduces each side of the parent class
+identity to; the leading second-order `−λᵢ` rough-Laplacian principal symbol cancels the second-order
+re-tagged-RHS principal symbol (`deTurckNonlinearitySpectral_principalPart_cancels`, sorry-free), so
+the surviving defect is genuinely *first order*, and the fixed-point equation `hcfix` repairs it on the
+gated locus.
 
 **Non-vacuous / genuine.** With the degenerate `c ≡ 0` this would read the Lean-refuted naive-heat
 class equality, so the corrector construction (`hcfix`, `hNrealize`, `hPrealize`) genuinely
@@ -1809,10 +1928,10 @@ private theorem deTurck_heatCorrected_retagLapForm_eq_gateRep_on_gatedLocus
           tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
     (hcfix : ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
       c u = - N (radialRetract ρ (u + c u)))
+    (Q : ℝ) (hQ : 0 < Q) (Lip : ℝ≥0) (hc0 : c 0 = 0) (hclip : LipschitzWith Lip c)
     (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
     (h : realizableAtGate (I := I) g₀ u)
-    (hgate : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
-          (gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose)‖ ≤ 1)
+    (hgate : ‖u‖ ≤ Q)
     (hHeat : ∃ δ : ℝ, δ < 1 ∧
       gFibreOpBound (I := I) (M := M) g₀
         (ccTensorBilinSymm (I := I) g₀
@@ -1846,10 +1965,11 @@ heat-output smoothing realization `P` (`hPrealize` — `P w` is the unit-time he
 representative of `t • w`), the *concrete* globalized nonlinearity `N` exhibited as the
 order-`(a+1)` spectral lift of the realized DeTurck remainder of `P` (`hNrealize`), and the
 *concrete* corrector `c` solving the gauge-cancellation fixed-point equation `c u = − N
-(radialRetract ρ (u + c u))` (`hcfix`): on the gate-realizable locus, with the unit-`Hᵃ` gate
-slack `hgate`, the unit-time heat-smoothed corrected datum's realized DeTurck remainder
-identifies, at the `L²`-class level, with the realized DeTurck remainder of the canonical gate
-representative `gateRepOfWitness g₀ u h`,
+(radialRetract ρ (u + c u))` (`hcfix`), with the corrector facts `c 0 = 0` (`hc0`),
+`LipschitzWith Lip c` (`hclip`), and a small spectral gate `Q` (`hQ`, `hQsmall`): on the
+gate-realizable locus, with the **small spectral gate** `‖u‖ ≤ Q` (`hgate`), the unit-time
+heat-smoothed corrected datum's realized DeTurck remainder identifies, at the `L²`-class level, with
+the realized DeTurck remainder of the canonical gate representative `gateRepOfWitness g₀ u h`,
 `toL2 (deTurckRealizeRemainderOf g₀ g_bg (heatRepr (u + c u)))
   = toL2 (deTurckRealizeRemainderOf g₀ g_bg (gateRepOfWitness g₀ u h))`,
 where `heatRepr w := tensorHeatSemigroupHs_output_smoothRepr g₀ 0 2 (t := 1) w`.
@@ -1908,19 +2028,23 @@ private theorem deTurck_gaugeFixing_heatCorrected_realizeRemainder_eq_gateRep_cl
           tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
     (hcfix : ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
       c u = - N (radialRetract ρ (u + c u)))
+    (Q : ℝ) (hQ : 0 < Q) (Lip : ℝ≥0) (hc0 : c 0 = 0) (hclip : LipschitzWith Lip c)
+    (hQsmall :
+      (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr_fibreOpBound (I := I) (M := M)
+          g₀ (one_pos) (by positivity : (0 : ℝ) ≤ (a : ℝ) + 1)).choose * ((1 : ℝ) + Lip) * Q < 1)
     (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
     (h : realizableAtGate (I := I) g₀ u)
-    (hgate : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
-          (gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose)‖ ≤ 1) :
+    (hgate : ‖u‖ ≤ Q) :
     Integral.L2.SmoothCcTensor.toL2
         (deTurckRealizeRemainderOf (I := I) g₀ g_bg
           (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
             g₀ 0 2 (one_pos) (by positivity : (0 : ℝ) ≤ (a : ℝ) + 1) (u + c u)))
       = Integral.L2.SmoothCcTensor.toL2
           (deTurckRealizeRemainderOf (I := I) g₀ g_bg (gateRepOfWitness (I := I) g₀ u h)) := by
-  -- Child (A): the heat-corrected datum is fibre-small on the gated locus.
+  -- Child (A): the heat-corrected datum is fibre-small on the gated locus (small spectral gate).
   have hHeat := deTurck_heatCorrectedDatum_fibreSmall_on_gatedLocus
-    (I := I) (M := M) g₀ g_bg a ha hμ hcoercive ht hρ P hPrealize N hNrealize c hcfix u h hgate
+    (I := I) (M := M) g₀ g_bg a ha hμ hcoercive ht hρ P hPrealize N hNrealize c hcfix
+    Q hQ Lip hc0 hclip hQsmall u h hgate
   -- Both `Φ` sides split (sorry-free) into `toL2 (deTurckRHSRetag …) − toL2 (Δ_∇ …)`; the gate side
   -- uses its own fibre-small witness `gateRepOfWitness_fibreSmall`.
   rw [deTurckRealizeRemainderOf_toL2_retagClass_sub (I := I) g₀ g_bg
@@ -1930,7 +2054,8 @@ private theorem deTurck_gaugeFixing_heatCorrected_realizeRemainder_eq_gateRep_cl
         (gateRepOfWitness (I := I) g₀ u h) (gateRepOfWitness_fibreSmall (I := I) g₀ u h)]
   -- Child (B): the surviving first-order defect identity in re-tagged-RHS-minus-Laplacian form.
   exact deTurck_heatCorrected_retagLapForm_eq_gateRep_on_gatedLocus
-    (I := I) (M := M) g₀ g_bg a ha hμ hcoercive ht hρ P hPrealize N hNrealize c hcfix u h hgate hHeat
+    (I := I) (M := M) g₀ g_bg a ha hμ hcoercive ht hρ P hPrealize N hNrealize c hcfix
+    Q hQ Lip hc0 hclip u h hgate hHeat
 
 /-- **The first-order heat-class repair on the concrete gauge-cancellation fixed point (the genuine
 PDE analytic frontier, pinned to the realized-DeTurck-remainder construction).**
@@ -1996,11 +2121,14 @@ private theorem deTurckGaugeCancellation_concreteCorrector_gateSectionMatch
     (c : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
           tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
     (hcfix : ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-      c u = - N (radialRetract ρ (u + c u))) :
+      c u = - N (radialRetract ρ (u + c u)))
+    (Q : ℝ) (hQ : 0 < Q) (Lip : ℝ≥0) (hc0 : c 0 = 0) (hclip : LipschitzWith Lip c)
+    (hQsmall :
+      (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr_fibreOpBound (I := I) (M := M)
+          g₀ (one_pos) (by positivity : (0 : ℝ) ≤ (a : ℝ) + 1)).choose * ((1 : ℝ) + Lip) * Q < 1) :
     ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
-        (h : realizableAtGate (I := I) g₀ u),
-      ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
-          (gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose)‖ ≤ 1 →
+        (_h : realizableAtGate (I := I) g₀ u),
+      ‖u‖ ≤ Q →
       Integral.L2.SmoothCcTensor.toL2
           (deTurckRealizeRemainderOf (I := I) g₀ g_bg
             (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
@@ -2010,7 +2138,8 @@ private theorem deTurckGaugeCancellation_concreteCorrector_gateSectionMatch
   intro u h hgate
   rw [← deTurckRealizeRemainderOf_gateRepOfWitness (I := I) g₀ g_bg u h]
   exact deTurck_gaugeFixing_heatCorrected_realizeRemainder_eq_gateRep_classMatch
-    (I := I) (M := M) g₀ g_bg a ha hμ hcoercive ht hρ P hPrealize N hNrealize c hcfix u h hgate
+    (I := I) (M := M) g₀ g_bg a ha hμ hcoercive ht hρ P hPrealize N hNrealize c hcfix
+    Q hQ Lip hc0 hclip hQsmall u h hgate
 
 /-- **The fixed-point gauge-cancellation class identity (the genuine PDE analytic frontier): the
 gauge-cancellation Banach fixed point's heat-smoothed corrected datum realizes the gate-based gauge
@@ -2144,16 +2273,19 @@ private theorem exists_deTurckGaugeCancellation_corrector_gateSectionMatch
       _ = Cinv * (κ * ‖w' - w‖) := by rw [hww]
       _ = Cinv * κ * ‖w - w'‖ := by rw [norm_sub_rev w' w]; ring
   have hGcontract : ∀ u, ContractingWith Kc (G u) := fun u => ⟨hKc_lt, hGlip u⟩
-  -- The gauge correction `c u := fixedPoint (G u)` (the gauge-cancellation fixed point), the global
-  -- Lipschitz rate `Lip := (Cinv·κ)/(1 − Cinv·κ)`, and a positive match-gate slack `Q := 1`.
-  refine ⟨fun u => ContractingWith.fixedPoint (G u) (hGcontract u),
-    ⟨(Cinv * κ) / (1 - Cinv * κ), by positivity⟩, 1, one_pos, ?_, ?_, ?_⟩
-  · -- Origin-fixing: `0` is the (unique) fixed point of `G 0`.
+  -- The gauge correction `c u := fixedPoint (G u)` (the gauge-cancellation fixed point), with the
+  -- origin-fixing `c 0 = 0` and the global Lipschitz rate `Lip := (Cinv·κ)/(1 − Cinv·κ)` proven as
+  -- `have`s up front (so they can also feed the leaf's corrector facts in the match arm).
+  set c : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+      tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) :=
+    fun u => ContractingWith.fixedPoint (G u) (hGcontract u) with hc_def
+  have hc0 : c 0 = 0 := by
     have hfix0 : Function.IsFixedPt (G 0) 0 := by
       change - L.symm (Ñ (0 + 0)) = 0
       rw [add_zero, hÑ0, map_zero, neg_zero]
     exact (ContractingWith.fixedPoint_unique (hGcontract 0) hfix0).symm
-  · -- Globally Lipschitz: the maps `G u`, `G u'` are uniformly `Cinv·κ·‖u − u'‖`-close.
+  set Lip : ℝ≥0 := ⟨(Cinv * κ) / (1 - Cinv * κ), by positivity⟩ with hLip_def
+  have hclip : LipschitzWith Lip c := by
     refine LipschitzWith.of_dist_le_mul (fun u u' => ?_)
     have hclose : ∀ w, dist (G u w) (G u' w) ≤ Cinv * κ * dist u u' := by
       intro w
@@ -2172,37 +2304,55 @@ private theorem exists_deTurckGaugeCancellation_corrector_gateSectionMatch
         _ = Cinv * κ * ‖u - u'‖ := by rw [norm_sub_rev u' u]; ring
     have hfp :=
       ContractingWith.fixedPoint_lipschitz_in_map (hGcontract u) (hGcontract u') hclose
-    rw [NNReal.coe_mk]
+    rw [hLip_def, NNReal.coe_mk]
     refine hfp.trans (le_of_eq ?_)
     rw [hKc_def]; push_cast; ring
-  · -- **The `Q`-gated realized-remainder `L²`-class match on the CONCRETE gauge-cancellation fixed
-    -- point `c u := fixedPoint (G u)`.**  The corrector is the Banach fixed point of
-    -- `G u w := − cLin (Ñ (u + w))` built from the Gårding-coercive bounded inverse `cLin = L.symm`
-    -- (child-1, Lax-Milgram, here the identity `hLid`) and the origin-fixing globally-`κ`-Lipschitz
-    -- globalized Nemytskii nonlinearity `Ñ` (child-2), so it solves the gauge-cancellation equation
-    -- `c u = − cLin (Ñ (u + c u))` (`(hGcontract u).fixedPoint_isFixedPt`).  With `cLin = id` and
-    -- `Ñ u = N (radialRetract ρ u)` this is `c u = − N (radialRetract ρ (u + c u))` — exactly the
-    -- concrete fixed-point equation the realized-remainder-pinned frontier
-    -- `deTurckGaugeCancellation_concreteCorrector_gateSectionMatch` consumes (fed `N`'s concrete
-    -- realized-DeTurck-remainder meaning `hNrealize` over the heat synthesis `P`, `hPrealize`), so the
-    -- gated class match forwards from that frontier — NOT a free `(L, Ñ, c)` triple, immune to the
-    -- degenerate `(id, 0, 0)` substitution `hNrealize` excludes.
-    set c : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
-        tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) :=
-      fun u => ContractingWith.fixedPoint (G u) (hGcontract u) with hc_def
-    -- The fixed-point equation, with `cLin = L.symm = id` (`hLid`) and `Ñ = N ∘ radialRetract ρ`.
-    have hcfix : ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-        c u = - N (radialRetract ρ (u + c u)) := by
-      intro u
-      have hfp : G u (c u) = c u := (hGcontract u).fixedPoint_isFixedPt
-      have hGval : G u (c u) = - L.symm (Ñ (u + c u)) := rfl
-      rw [hGval] at hfp
-      rw [hÑ_def] at hfp
-      simp only at hfp
-      rw [hLid (N (radialRetract ρ (u + c u)))] at hfp
-      exact hfp.symm
-    exact deTurckGaugeCancellation_concreteCorrector_gateSectionMatch
-      (I := I) (M := M) g₀ g_bg a ha hμ hcoercive ht hρ P hPrealize N hNrealize c hcfix
+  -- The fixed-point equation, with `cLin = L.symm = id` (`hLid`) and `Ñ = N ∘ radialRetract ρ`.
+  have hcfix : ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+      c u = - N (radialRetract ρ (u + c u)) := by
+    intro u
+    have hfp : G u (c u) = c u := (hGcontract u).fixedPoint_isFixedPt
+    have hGval : G u (c u) = - L.symm (Ñ (u + c u)) := rfl
+    rw [hGval] at hfp
+    rw [hÑ_def] at hfp
+    simp only at hfp
+    rw [hLid (N (radialRetract ρ (u + c u)))] at hfp
+    exact hfp.symm
+  -- The heat-output fibre constant `Cfib`, the gate-norm bridge constant `C`, the **small** leaf gate
+  -- `Qleaf := 1/(2(1+Lip)(Cfib+1))` (so `Cfib·(1+Lip)·Qleaf < 1`), and the outer match-gate slack
+  -- `Q := Qleaf/(C+1)` (so `‖u‖ ≤ C·‖toHs (2a) (gateRep)‖ ≤ C·Q ≤ Qleaf`, converting the headline
+  -- gate to the spectral gate child A needs).
+  obtain ⟨hCfib_nn, _hCfib⟩ :=
+    (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr_fibreOpBound (I := I) (M := M)
+        g₀ (one_pos) (by positivity : (0 : ℝ) ≤ (a : ℝ) + 1)).choose_spec
+  set Cfib :=
+    (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr_fibreOpBound (I := I) (M := M)
+        g₀ (one_pos) (by positivity : (0 : ℝ) ≤ (a : ℝ) + 1)).choose with hCfib_def
+  obtain ⟨C, hC, hbridge⟩ :=
+    tensorHs_norm_le_gateSmoothRep_toHs_of_realizableAtGate (I := I) (M := M) g₀ a ha
+  set Qleaf : ℝ := 1 / (2 * (1 + (Lip : ℝ)) * (Cfib + 1)) with hQleaf_def
+  have hLip_nn : (0 : ℝ) ≤ (Lip : ℝ) := Lip.coe_nonneg
+  have h1L : (0 : ℝ) < 1 + (Lip : ℝ) := by positivity
+  have hC1 : (0 : ℝ) < Cfib + 1 := by positivity
+  have hQleaf_pos : 0 < Qleaf := by rw [hQleaf_def]; positivity
+  have hQleaf_small : Cfib * (1 + (Lip : ℝ)) * Qleaf < 1 := by
+    rw [hQleaf_def, mul_one_div, div_lt_one (by positivity)]
+    nlinarith [mul_pos h1L hC1, mul_nonneg hCfib_nn hLip_nn]
+  set Q : ℝ := Qleaf / (C + 1) with hQ_def
+  have hQ_pos : 0 < Q := by rw [hQ_def]; positivity
+  refine ⟨c, Lip, Q, hQ_pos, hc0, hclip, fun u h hgate => ?_⟩
+  -- Gate-norm bridge: `‖u‖ ≤ C·‖toHs (2a) (gateRep)‖ ≤ C·Q ≤ Qleaf` (the small spectral gate).
+  have hu_le : ‖u‖ ≤ Qleaf := by
+    have hb := hbridge u h
+    have hstep : ‖u‖ ≤ C * Q := hb.trans (mul_le_mul_of_nonneg_left hgate hC)
+    refine hstep.trans ?_
+    rw [hQ_def, mul_div_assoc', div_le_iff₀ (by positivity : (0 : ℝ) < C + 1)]
+    nlinarith [hQleaf_pos.le, hC]
+  -- The realized-remainder-pinned frontier consumes the concrete fixed point with the **small
+  -- spectral** gate `‖u‖ ≤ Qleaf` and the corrector facts (`hc0`, `hclip`, `hQleaf_small`).
+  exact deTurckGaugeCancellation_concreteCorrector_gateSectionMatch
+    (I := I) (M := M) g₀ g_bg a ha hμ hcoercive ht hρ P hPrealize N hNrealize c hcfix
+    Qleaf hQleaf_pos Lip hc0 hclip hQleaf_small u h hu_le
 
 /-- **The origin-fixing, globally `Hᵃ⁺¹`-Lipschitz gauge-cancellation fixed point produced by the
 Gårding-coercive bounded inverse, bundled with its `Q`-gated realized-remainder `L²`-class match
