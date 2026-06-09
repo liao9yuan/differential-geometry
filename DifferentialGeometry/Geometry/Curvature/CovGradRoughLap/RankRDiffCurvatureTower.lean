@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldCovariantCalculusRS
+import DifferentialGeometry.Geometry.Connection.TensorNabla.FullHomCovariantCalculusRS
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RankRPureRCurvatureTower
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RankRDiffCurvatureFactorization
 
 /-!
 # The frame-free differentiated `(∇R)·` curvature tower at contravariant valence `r`
@@ -138,45 +138,83 @@ post-composition is insufficient and the full-Hom `appFullRS` calculus, its Hom-
 rule, the `(∇R)`-endo factorisation, and the `‖∇^{≤ p} R‖_∞` sup are the genuine sub-content (built in the
 `OperatorFieldCovariantCalculusRS` / `HomBundleNabla` / `RankRPureRCurvatureTower` line). -/
 
-/-- **The genuine differentiated `(∇R)·` tower operator at valence `r`, order `p`, base width `rr`.** The
-exact covariant-Leibniz remainder recursion off the genuine order-`1` moving-centre pure-Riemann
-differentiated trace `genuinePureRDiffOpRS g r 1 rr` (the `(∇R) W` contraction `covGrad(R W) − R(∇W)`),
-recast to the rank-raising codomain `rr + 1 + p`:
+/-! ## The fixed order-`0` curvature operator field and the value-local `(∇R)·` carrier
 
-* `p = 0`: the recast genuine `(∇R) W`, `castRankCc_db (genuinePureRDiffOpRS g r 1 rr W)`;
+The order-`0` moving-centre pure-Riemann curvature endomorphism `genuinePureREndo0RS g r rr` is
+value-local and `ℝ`-linear in the contracted section (the *proved* `genuinePureREndo0RS_local/_add/_smul`,
+`RankRPureRCurvatureTower`); by the value-local fibre-operation full-Hom factorisation
+`exists_value_local_appFullSec` (`FullHomCovariantCalculusRS`) it is the full Hom-bundle action
+`appFullSec (curvOpFieldRS g r rr)` of a **fixed** smooth full Hom-bundle field section
+`curvOpFieldRS g r rr : Hom(T^{(r,rr)}, T^{(r,rr)})` — the order-`0` curvature operator field, the rank-`r`
+analogue of the rank-`0` `curvOpField`.
+
+The genuinely-tensorial `(∇R)·` carrier is then the full Hom-bundle action of the *section covariant
+gradient* of that fixed field, `appFullSec (homTensorRSCovGradSec (curvOpFieldRS g r rr))` — manifestly
+**value-local by construction** (an `appFullSec` of a fixed field reads only the fibre value of its
+argument), eliminating any appeal to the value-locality / differential-Bianchi cancellation of the order-`1`
+trace `genuinePureRDiffOpRS g r 1 rr`.  This is the exact rank-`r` mirror of the rank-`0`
+`genuineDiffCurvSection := appCc (covGrad (curvOpField g s)) S` (`MovingFrameDiffCurvTraceSection`). -/
+
+/-- **The fixed order-`0` curvature operator field at valence `r`, width `rr`.** The smooth full
+Hom-bundle field section `Hom(T^{(r,rr)}, T^{(r,rr)})` whose full Hom action is the order-`0` moving-centre
+pure-Riemann curvature endomorphism `genuinePureREndo0RS g r rr` (value-local and `ℝ`-linear, *proved*).
+Extracted via the value-local full-Hom factorisation `exists_value_local_appFullSec`.  The rank-`r`
+analogue of the rank-`0` `curvOpField`. -/
+private noncomputable def curvOpFieldRS (g : SmoothRiemannianMetric I M) (r rr : ℕ) :
+    HomTensorRSField (E := E) (M := M) r (rr + 0) (rr + 0) I :=
+  (exists_value_local_appFullSec (I := I) (M := M) g r (rr + 0) (rr + 0)
+    (genuinePureREndo0RS (I := I) (M := M) g r rr)
+    (fun W₁ W₂ x => genuinePureREndo0RS_add (I := I) (M := M) g r rr W₁ W₂ x)
+    (fun k W x => genuinePureREndo0RS_smul (I := I) (M := M) g r rr k W x)
+    (fun W₁ W₂ x hW => genuinePureREndo0RS_local (I := I) (M := M) g r rr W₁ W₂ x hW)).choose
+
+/-- **The order-`0` curvature endomorphism is the full Hom action of the fixed curvature field.** The
+defining factorisation `genuinePureREndo0RS g r rr W = appFullSec (curvOpFieldRS g r rr) W`. -/
+private theorem genuinePureREndo0RS_eq_appFullSec (g : SmoothRiemannianMetric I M) (r rr : ℕ)
+    (W : SmoothCcTensor g r rr) :
+    genuinePureREndo0RS (I := I) (M := M) g r rr W =
+      appFullSec (I := I) (M := M) g r (rr + 0) (rr + 0) (curvOpFieldRS (I := I) (M := M) g r rr) W :=
+  (exists_value_local_appFullSec (I := I) (M := M) g r (rr + 0) (rr + 0)
+    (genuinePureREndo0RS (I := I) (M := M) g r rr)
+    (fun W₁ W₂ x => genuinePureREndo0RS_add (I := I) (M := M) g r rr W₁ W₂ x)
+    (fun k W x => genuinePureREndo0RS_smul (I := I) (M := M) g r rr k W x)
+    (fun W₁ W₂ x hW => genuinePureREndo0RS_local (I := I) (M := M) g r rr W₁ W₂ x hW)).choose_spec W
+
+/-- **The genuine differentiated `(∇R)·` tower operator at valence `r`, order `p`, base width `rr`.** The
+exact covariant-Leibniz remainder recursion off the **value-local** `(∇R)·` carrier
+`appFullSec (homTensorRSCovGradSec (curvOpFieldRS g r rr))` (the full Hom action of the section gradient of
+the fixed order-`0` curvature field — the rank-`r` analogue of `genuineDiffCurvSection`), recast to the
+rank-raising codomain `rr + 1 + p`:
+
+* `p = 0`: the value-local `(∇R) W` carrier, `appFullSec (homTensorRSCovGradSec (curvOpFieldRS g r rr)) W`;
 * `p + 1`: `∇(op p rr W) − (rank-cast) op p (rr + 1) (∇W)` — the differentiated-coefficient remainder (the
   input section's derivative `∇W` cancels), rank-cast `(rr + 1) + 1 + p = rr + 1 + (p + 1)`.
 
-By construction the single-step covariant Leibniz holds by `sub_add_cancel`; the section enters at order
-`0` (the curvature coefficient `∇R` is fixed and smooth, only it is differentiated up the tower). The
-valence-`r`, rank-raising mirror of `diffCurvGenuineDiffOp` (`DiffCurvatureGenuineTower`). -/
+By construction the single-step covariant Leibniz holds by `sub_add_cancel`; the order-`0` base is
+manifestly value-local and `ℝ`-linear (a fixed-field full Hom action).  The valence-`r`, rank-raising
+mirror of `diffCurvGenuineDiffOp` (`DiffCurvatureGenuineTower`). -/
 private noncomputable def diffCurvGenuineTowerOpRS
     (g : SmoothRiemannianMetric I M) (r : ℕ) :
     ∀ (p rr : ℕ), SmoothCcTensor g r rr → SmoothCcTensor g r (rr + 1 + p)
   | 0, rr => fun W =>
-      castRankCc_db g r (by omega : rr + 1 = rr + 1 + 0)
-        (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W)
+      appFullSec (I := I) (M := M) g r (rr + 0) (rr + 1 + 0)
+        (homTensorRSCovGradSec (I := I) (M := M) g r (rr + 0) (rr + 0)
+          (curvOpFieldRS (I := I) (M := M) g r rr)) W
   | (p + 1), rr => fun W =>
       covGrad (I := I) (M := M) g r (rr + 1 + p)
           (diffCurvGenuineTowerOpRS g r p rr W) -
         castRankCc_db g r (by omega : (rr + 1) + 1 + p = rr + 1 + (p + 1))
           (diffCurvGenuineTowerOpRS g r p (rr + 1) (covGrad (I := I) (M := M) g r rr W))
 
-/-- **The order-`0` base is the recast genuine `(∇R) W` trace.** By definition. -/
+/-- **The order-`0` base is the value-local `(∇R)·` carrier.** By definition. -/
 private theorem diffCurvGenuineTowerOpRS_zero (g : SmoothRiemannianMetric I M) (r rr : ℕ)
     (W : SmoothCcTensor g r rr) :
     diffCurvGenuineTowerOpRS (I := I) (M := M) g r 0 rr W =
-      castRankCc_db g r (by omega : rr + 1 = rr + 1 + 0)
-        (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W) := rfl
+      appFullSec (I := I) (M := M) g r (rr + 0) (rr + 1 + 0)
+        (homTensorRSCovGradSec (I := I) (M := M) g r (rr + 0) (rr + 0)
+          (curvOpFieldRS (I := I) (M := M) g r rr)) W := rfl
 
 set_option linter.unusedSectionVars false in
-/-- **The fibre value of a `+0` rank-cast equals the uncast fibre value.** For the definitionally-trivial
-rank-cast `castRankCc_db g r (h : a = a + 0)` the fibre value at `x` is unchanged (both fibre types
-`TensorRSSpace r (a + 0)` and `TensorRSSpace r a` are definitionally equal). -/
-private theorem castRankCc_db_addZero_toSection_eq (g : SmoothRiemannianMetric I M)
-    (r a : ℕ) (W : SmoothCcTensor g r a) (x : M) :
-    (castRankCc_db g r (by omega : a = a + 0) W).toSection x = W.toSection x := rfl
-
 /-- **The exact single-step covariant Leibniz of the differentiated `(∇R)·` tower at valence `r`.** By the
 recursive definition, `∇(op p rr W)` splits exactly into the higher-order remainder `op (p + 1) rr W` and
 the rank-cast lower-order term applied to `∇W`. Proved by `sub_add_cancel`. -/
@@ -194,72 +232,6 @@ private theorem covGrad_diffCurvGenuineTowerOpRS_eq
         (diffCurvGenuineTowerOpRS (I := I) (M := M) g r p (rr + 1)
           (covGrad (I := I) (M := M) g r rr W))) + _
   rw [sub_add_cancel]
-
-/-- **Child (the `(∇R)`-endo factorisation, `ℝ`-linearity).** The order-`1` moving-centre pure-Riemann
-differentiated trace `genuinePureRDiffOpRS g r 1 rr` (the genuine `(∇R) W`) is `ℝ`-linear in the contracted
-section at the fibre-value level: for scalars `c₁, c₂` and sections `W₁, W₂`,
-```
-(genuinePureRDiffOpRS g r 1 rr (c₁ • W₁ + c₂ • W₂)).toSection x
-  = c₁ • (genuinePureRDiffOpRS g r 1 rr W₁).toSection x + c₂ • (genuinePureRDiffOpRS g r 1 rr W₂).toSection x.
-```
-
-**Why this is TRUE.** The genuine `(∇R) W = covGrad(R W) − R(∇W)` factors, value-locally, through a *fixed*
-smooth full Hom-bundle operator `(∇R)(x) : T^{(r,rr)}_x →L T^{(r,rr+1)}_x` (the curvature jet read at the
-point), `(∇R) W = appFullRS (∇R) W` in the notation of the full-tensor operator-field action; the input
-derivative `∇W` cancels by the Hom-bundle covariant product rule `∇(Φ·W) = (∇Φ)·W + Φ·(∇W)`
-(`covGrad_appFullRS_eq`, the full-fibre analogue of `covGrad_appCcRS_eq`).  A full Hom action `Ψ x (W x)`
-is `ℝ`-linear in `W x`, so the trace is `ℝ`-linear in `W` at the fibre-value level.  This `appFullRS`
-factorisation of the full-tensor `(∇R)·` is absent sorry-free at valence `r` below this file (the
-codomain-only `appCcRS` post-composition does not capture the contravariant curvature branch
-`riemannOp_tensorCovRS_apply_eval`), so it is posited here as one precise true child.  Consumers
-transitively depend on `sorryAx`.
-
-**Non-vacuity.** A nonlinear or non-fibre-value operator is rejected: a generic differentiated tower
-`W ↦ covGrad W` is *not* fibre-value-`ℝ`-bilinear at order `0` (it reads the jet, not the value); only the
-genuine value-local curvature contraction passes, and it is genuinely non-zero (`∇R ≠ 0`) for a
-non-parallel `W`. -/
-private theorem genuinePureRDiffOp_orderOne_linear
-    (g : SmoothRiemannianMetric I M) (r rr : ℕ)
-    (c₁ c₂ : ℝ) (W₁ W₂ : SmoothCcTensor g r rr) (x : M) :
-    (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr (c₁ • W₁ + c₂ • W₂)).toSection x =
-      c₁ • (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₁).toSection x +
-        c₂ • (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₂).toSection x := by
-  rw [genuinePureRDiffOpRS_one_linear (I := I) (M := M) g r rr c₁ c₂ W₁ W₂]
-  rw [show ((c₁ • genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₁ +
-        c₂ • genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₂).toSection x) =
-      (c₁ • genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₁).toSection x +
-        (c₂ • genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₂).toSection x from rfl]
-  rw [show ((c₁ • genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₁).toSection x) =
-      c₁ • (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₁).toSection x from rfl,
-    show ((c₂ • genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₂).toSection x) =
-      c₂ • (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₂).toSection x from rfl]
-
-/-- **Child (the `(∇R)`-endo factorisation, value-locality).** The order-`1` moving-centre pure-Riemann
-differentiated trace `genuinePureRDiffOpRS g r 1 rr` (the genuine `(∇R) W`) is **value-local** in the
-contracted section: its fibre value at `x` depends only on the fibre value `W x`,
-```
-W₁.toSection x = W₂.toSection x →
-  (genuinePureRDiffOpRS g r 1 rr W₁).toSection x = (genuinePureRDiffOpRS g r 1 rr W₂).toSection x.
-```
-
-**Why this is TRUE.** Identical mechanism to `genuinePureRDiffOp_orderOne_linear`: the genuine
-`(∇R) W = covGrad(R W) − R(∇W)` factors value-locally as the full Hom action `appFullRS (∇R) W = (∇R)(x)(W x)`
-of the *fixed* smooth curvature-jet operator `(∇R)(x)` on the fibre value `W x` (the `∇W` contributions of
-`covGrad(R W)` and `R(∇W)` cancelling, `covGrad_appFullRS_eq`); a full Hom action `Ψ x (W x)` reads only
-`W x`, so the trace is value-local.  This `appFullRS` factorisation is absent sorry-free at valence `r`,
-posited as one precise true child.  Consumers transitively depend on `sorryAx`.
-
-**Non-vacuity.** A non-value-local operator (e.g. `W ↦ covGrad W`, reading the derivative jet) is rejected:
-two sections agreeing at `x` but differing in their first jet there give equal fibre values but unequal
-covariant gradients, so only a genuinely value-local fibre contraction satisfies this; the genuine
-curvature trace does, the order-`1` *raw* pure-Riemann tower (before cancellation) would not. -/
-private theorem genuinePureRDiffOp_orderOne_local
-    (g : SmoothRiemannianMetric I M) (r rr : ℕ)
-    (W₁ W₂ : SmoothCcTensor g r rr) (x : M)
-    (hW : W₁.toSection x = W₂.toSection x) :
-    (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₁).toSection x =
-      (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₂).toSection x :=
-  genuinePureRDiffOpRS_one_local (I := I) (M := M) g r rr W₁ W₂ x hW
 
 set_option linter.unusedVariables false in
 set_option backward.isDefEq.respectTransparency false in
@@ -283,20 +255,19 @@ as `normalForm_of_baseRS` — each step differentiates the fixed coefficient (th
 slot-extends it onto the next jet `∇^{k+1}W` — expressing `op p rr W` as a finite sum of full Hom-bundle
 actions of the fixed iterated curvature jets `∇^{≤ p}(∇R)`.
 
-**Precise missing prerequisite (verified).** This node rests on the order-`0` full-Hom factorisation child
-`exists_genuinePureRDiffOpRS_one_appFullRS` AND the section-level full-Hom covariant product rule
-`covGrad_appFullRS_eq` with a `slotExtend` for the abstract second-order Hom-bundle field — both requiring
-the generic Hom-bundle covariant derivative `homBundleCovariantDerivativeGen` instantiated on
-`Hom(TensorRSSpace r (rr + k), TensorRSSpace r (rr + 1 + p))`, which carries **no** bundle instance suite
-(`TopologicalSpace (TotalSpace …)` / `FiberBundle` / `VectorBundle` / `ContMDiffVectorBundle`, nor a
-computable Hom-model normed structure) — the same multi-file second-order-Hom-bundle infrastructure node
-named in `exists_genuinePureRDiffOpRS_one_appFullRS`.  Absent below this file, so the full-Hom normal form
-is posited here as one precise true child.  Consumers transitively depend on `sorryAx`.
+**Proof (over the cycle-free full-Hom normal-form engine).** The order-`0` base is the value-local full Hom
+action `appFullSec (homTensorRSCovGradSec (curvOpFieldRS g r rr))` of the fixed smooth section-gradient of
+the curvature field (`diffCurvGenuineTowerOpRS_zero`), and the single-step covariant Leibniz is the exact
+remainder (`covGrad_diffCurvGenuineTowerOpRS_eq`).  The base-raising full Hom operator-field normal-form
+engine `normalFormFull_of_base` (`FullHomCovariantCalculusRS`, base offset `d = 1`) then runs the
+single-index telescoping induction on `p`, expressing `op p rr W` as a finite sum of full Hom-bundle
+actions of fixed smooth field sections `Q k : Hom(T^{(r,rr+k)}, T^{(r,rr+1+p)})` on the covariant jets
+`∇^k W`; reading each section's underlying field `⇑(Q k)` (smoothness `(Q k).contMDiff`) and noting
+`appFullSec (Q k) V = appFullRS (⇑Q k) (Q k).contMDiff V` gives the claimed `appFullRS` normal form.
 
 **Non-vacuity.** A degenerate normal form (all `Ψ k ≡ 0`) is rejected on any non-flat manifold: at
-`(p, rr) = (0, rr)` the tower value is the recast genuine `(∇R) W` (`diffCurvGenuineTowerOpRS_zero`),
-genuinely non-zero for a non-parallel `W`, so the leading coefficient `Ψ 0` is the non-vanishing curvature
-field `∇R`, not zero. -/
+`(p, rr) = (0, rr)` the tower value is the value-local `(∇R) W` carrier, genuinely non-zero for a
+non-parallel `W`, so the leading coefficient `Ψ 0` is the non-vanishing curvature field `∇R`, not zero. -/
 private theorem exists_diffCurvGenuineTowerOpRS_normalFormFull (g : SmoothRiemannianMetric I M) (r : ℕ)
     (p rr : ℕ) :
     ∃ (Ψ : (k : ℕ) → Π x : M, TensorRSSpace r (rr + k) I x →L[ℝ] TensorRSSpace r (rr + 1 + p) I x)
@@ -310,7 +281,19 @@ private theorem exists_diffCurvGenuineTowerOpRS_normalFormFull (g : SmoothRieman
           ∑ k ∈ Finset.range (p + 1),
             appFullRS (I := I) (M := M) g r (rr + k) (rr + 1 + p) (Ψ k) (hΨ k)
               (iteratedCovGrad g r rr k W) := by
-  sorry
+  classical
+  -- The base-raising (d = 1) full-Hom normal form of the value-local-base tower.
+  have hNF : NormalFormFull (E := E) (I := I) (M := M) g r 1
+      (diffCurvGenuineTowerOpRS (I := I) (M := M) g r) p rr :=
+    normalFormFull_of_base (E := E) (I := I) (M := M) g r 1
+      (diffCurvGenuineTowerOpRS (I := I) (M := M) g r)
+      (fun p rr W => covGrad_diffCurvGenuineTowerOpRS_eq (I := I) (M := M) g r p rr W)
+      (fun rr => homTensorRSCovGradSec (I := I) (M := M) g r (rr + 0) (rr + 0)
+        (curvOpFieldRS (I := I) (M := M) g r rr))
+      (fun rr W => diffCurvGenuineTowerOpRS_zero (I := I) (M := M) g r rr W) p rr
+  obtain ⟨Q, hQ⟩ := hNF
+  refine ⟨fun k => fun x : M => Q k x, fun k => (Q k).contMDiff, fun W => ?_⟩
+  exact hQ W
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
@@ -463,8 +446,9 @@ theorem exists_diffCurvGenuineTowerRS (g : SmoothRiemannianMetric I M) (r : ℕ)
               (op p (rr + 1) (covGrad (I := I) (M := M) g r rr W))) ∧
       (∀ (rr : ℕ) (W : SmoothCcTensor g r rr) (x : M),
         (op 0 rr W).toSection x =
-          (castRankCc_db g r (by omega : rr + 1 = rr + 1 + 0)
-              (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W)).toSection x) ∧
+          (appFullSec (I := I) (M := M) g r (rr + 0) (rr + 1 + 0)
+              (homTensorRSCovGradSec (I := I) (M := M) g r (rr + 0) (rr + 0)
+                (curvOpFieldRS (I := I) (M := M) g r rr)) W).toSection x) ∧
       (∀ (rr : ℕ) (c₁ c₂ : ℝ) (W₁ W₂ : SmoothCcTensor g r rr) (x : M),
         (op 0 rr (c₁ • W₁ + c₂ • W₂)).toSection x =
           c₁ • (op 0 rr W₁).toSection x + c₂ • (op 0 rr W₂).toSection x) ∧
@@ -484,23 +468,26 @@ theorem exists_diffCurvGenuineTowerRS (g : SmoothRiemannianMetric I M) (r : ℕ)
   · -- leibniz: the exact covariant-Leibniz remainder of the recursion.
     intro p rr W
     exact covGrad_diffCurvGenuineTowerOpRS_eq (I := I) (M := M) g r p rr W
-  · -- base_value: the order-`0` base is the recast genuine `(∇R) W`, by definition.
+  · -- base_value: the order-`0` base is the value-local `(∇R)·` carrier, by definition.
     intro rr W x
     rw [diffCurvGenuineTowerOpRS_zero (I := I) (M := M) g r rr W]
-  · -- base_linear: from the `(∇R)`-endo factorisation linearity child.
+  · -- base_linear: the order-`0` base is a fixed-field full Hom action, hence `ℝ`-bilinear in `W` at the
+    -- fibre-value level (the fixed operator `Θ x` is a continuous-linear map of the fibre).
     intro rr c₁ c₂ W₁ W₂ x
     rw [diffCurvGenuineTowerOpRS_zero (I := I) (M := M) g r rr (c₁ • W₁ + c₂ • W₂),
       diffCurvGenuineTowerOpRS_zero (I := I) (M := M) g r rr W₁,
       diffCurvGenuineTowerOpRS_zero (I := I) (M := M) g r rr W₂]
-    rw [castRankCc_db_addZero_toSection_eq, castRankCc_db_addZero_toSection_eq,
-      castRankCc_db_addZero_toSection_eq]
-    exact genuinePureRDiffOp_orderOne_linear (I := I) (M := M) g r rr c₁ c₂ W₁ W₂ x
-  · -- base_local: from the `(∇R)`-endo factorisation value-locality child.
+    rw [appFullSec_toSection, appFullSec_toSection, appFullSec_toSection]
+    have hsec : (c₁ • W₁ + c₂ • W₂).toSection x =
+        c₁ • W₁.toSection x + c₂ • W₂.toSection x := by
+      simp only [SmoothCcTensor.toSection_add, SmoothCcTensor.toSection_smul,
+        ContMDiffSection.coe_add, ContMDiffSection.coe_smul, Pi.add_apply, Pi.smul_apply]
+    rw [hsec, map_add, map_smul, map_smul]
+  · -- base_local: the order-`0` base is a fixed-field full Hom action, hence value-local by construction.
     intro rr W₁ W₂ x hW
     rw [diffCurvGenuineTowerOpRS_zero (I := I) (M := M) g r rr W₁,
       diffCurvGenuineTowerOpRS_zero (I := I) (M := M) g r rr W₂]
-    rw [castRankCc_db_addZero_toSection_eq, castRankCc_db_addZero_toSection_eq]
-    exact genuinePureRDiffOp_orderOne_local (I := I) (M := M) g r rr W₁ W₂ x hW
+    rw [appFullSec_toSection, appFullSec_toSection, hW]
 
 /-- **The order-`p` differentiated `(∇R)·` curvature operator at valence `r`.** The `Classical.choose`
 witness of the posited genuine differentiated curvature tower `exists_diffCurvGenuineTowerRS`: acting on a

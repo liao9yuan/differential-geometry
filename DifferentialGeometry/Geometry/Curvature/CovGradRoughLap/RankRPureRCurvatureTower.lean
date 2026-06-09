@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RankRDiffBilinGrid
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameGenuineFieldPairing
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvatureRS
+import DifferentialGeometry.Geometry.Connection.TensorNabla.FullHomCovariantCalculusRS
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.RankRReadingDominationUniformSup
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.RankRUniformProportionalCurvatureSup
 
@@ -1549,7 +1550,43 @@ theorem exists_genuinePureRDiffOpRS_highOrder (g : SmoothRiemannianMetric I M) (
           kappaHigh p rr * ∑ q ∈ Finset.range (p + 2),
             riemannianFiberNormSq (I := I) (M := M) g r (rr + q) x
               ((iteratedCovGrad g r rr q W).toSection x) := by
-  sorry
+  classical
+  -- The order-`0` endomorphism is the value-local full Hom action of a fixed smooth curvature field.
+  have hbase : ∀ (rr : ℕ) (W : SmoothCcTensor g r rr),
+      genuinePureRDiffOpRS (I := I) (M := M) g r 0 rr W =
+        appFullSec (I := I) (M := M) g r (rr + 0) (rr + 0)
+          ((exists_value_local_appFullSec (I := I) (M := M) g r (rr + 0) (rr + 0)
+            (genuinePureREndo0RS (I := I) (M := M) g r rr)
+            (fun W₁ W₂ x => genuinePureREndo0RS_add (I := I) (M := M) g r rr W₁ W₂ x)
+            (fun k W x => genuinePureREndo0RS_smul (I := I) (M := M) g r rr k W x)
+            (fun W₁ W₂ x hW => genuinePureREndo0RS_local (I := I) (M := M) g r rr W₁ W₂ x hW)).choose) W :=
+    fun rr W =>
+      (exists_value_local_appFullSec (I := I) (M := M) g r (rr + 0) (rr + 0)
+        (genuinePureREndo0RS (I := I) (M := M) g r rr)
+        (fun W₁ W₂ x => genuinePureREndo0RS_add (I := I) (M := M) g r rr W₁ W₂ x)
+        (fun k W x => genuinePureREndo0RS_smul (I := I) (M := M) g r rr k W x)
+        (fun W₁ W₂ x hW => genuinePureREndo0RS_local (I := I) (M := M) g r rr W₁ W₂ x hW)).choose_spec W
+  -- The tower admits the full Hom operator-field normal form at every order/width.
+  have hNF : ∀ (p rr : ℕ),
+      NormalFormFull (E := E) (I := I) (M := M) g r 0 (genuinePureRDiffOpRS (I := I) (M := M) g r) p rr :=
+    fun p rr => normalFormFull_of_base (E := E) (I := I) (M := M) g r 0
+      (genuinePureRDiffOpRS (I := I) (M := M) g r)
+      (fun p rr W => covGrad_genuinePureRDiffOpRS_eq (I := I) (M := M) g r p rr W)
+      (fun rr => (exists_value_local_appFullSec (I := I) (M := M) g r (rr + 0) (rr + 0)
+        (genuinePureREndo0RS (I := I) (M := M) g r rr)
+        (fun W₁ W₂ x => genuinePureREndo0RS_add (I := I) (M := M) g r rr W₁ W₂ x)
+        (fun k W x => genuinePureREndo0RS_smul (I := I) (M := M) g r rr k W x)
+        (fun W₁ W₂ x hW => genuinePureREndo0RS_local (I := I) (M := M) g r rr W₁ W₂ x hW)).choose)
+      hbase p rr
+  -- The per-`(p, rr)` jet-bound constant of the order-`(p + 1)` normal form.
+  refine ⟨fun p rr => (exists_jet_bound_of_normalFormFull (E := E) (I := I) (M := M) g r 0
+      (genuinePureRDiffOpRS (I := I) (M := M) g r) (p + 1) rr (hNF (p + 1) rr)).choose, ?_, ?_⟩
+  · intro p rr
+    exact (exists_jet_bound_of_normalFormFull (E := E) (I := I) (M := M) g r 0
+      (genuinePureRDiffOpRS (I := I) (M := M) g r) (p + 1) rr (hNF (p + 1) rr)).choose_spec.1
+  · intro p rr W x
+    exact (exists_jet_bound_of_normalFormFull (E := E) (I := I) (M := M) g r 0
+      (genuinePureRDiffOpRS (I := I) (M := M) g r) (p + 1) rr (hNF (p + 1) rr)).choose_spec.2 W x
 
 set_option linter.unusedVariables false in
 /-- **The per-order, per-rank frame-free proportional fibre envelope for the differentiated
