@@ -337,6 +337,150 @@ theorem tensorCovDerivAt_appFullRS_eq (g : SmoothRiemannianMetric I M) (r a c : 
   rw [tensorCovDerivAt_def (I := I) (M := M) g r a W x ((Vsec : Π z : M, TangentSpace I z) x)]
   rw [← hprod]
 
+/-! ## Generic full-Hom factorisation of a value-local `ℝ`-linear smooth fibre operation
+
+A fibre operation `F : SmoothCcTensor g r a → SmoothCcTensor g r c` that is (i) **value-local** (its
+fibre value at `x` depends only on the contracted section's fibre value `W x`), (ii) `ℝ`-**linear** at
+the fibre-value level, and (iii) **smooth-coefficient** (sends smooth sections to smooth sections — built
+in to the `SmoothCcTensor` codomain) factors through a *fixed* smooth full Hom-bundle field
+`Θ : Π x, TensorRSSpace r a I x →L TensorRSSpace r c I x`:
+```
+(F W).toSection x = Θ x (W.toSection x).
+```
+The fibrewise operator `Θ x` is the value-local fibre operation read on `W x` (well-defined by
+value-locality, `ℝ`-linear by linearity, continuous on the finite-dimensional fibre via
+`LinearMap.toContinuousLinearMap`); its base-point smoothness is the `contMDiff_clm_section_of_pointwise`
+pointwise bridge, with the pointwise smooth input `x ↦ Θ x (Z x) = (F Z).toSection x` being the smooth
+`SmoothCcTensor` `F Z`.  This is the generic engine behind both the order-`0` and order-`1` valence-`r`
+full-Hom factorisations (the rank-`0` mirror `pureREndoOp_contMDiff` / `pureRGenuineEndoFib_eq_comp` uses
+the codomain-only post-composition because the rank-`0` curvature acts only on the codomain; at valence
+`r ≥ 1` the curvature reads the *whole* fibre, so the generic value-local fibre operation is needed). -/
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- **A chosen smooth compactly-supported `(r, a)`-tensor realising a prescribed fibre value at `x`.**
+The `SmoothCcTensor` wrapper (compact support is automatic on the closed manifold) of the smooth section
+`ContMDiffSection.exists_eq_at` produces with value `v` at `x`. -/
+private noncomputable def chooseSecAt
+    (g : SmoothRiemannianMetric I M) (r a : ℕ) (x : M) (v : TensorRSSpace r a I x) :
+    SmoothCcTensor g r a where
+  toSection :=
+    letI : NormedAddCommGroup (TensorRSModel r a ℝ E) := Tensor0SBundle.tensorRSModel_normedAddCommGroup r a
+    letI : NormedSpace ℝ (TensorRSModel r a ℝ E) := Tensor0SBundle.tensorRSModel_normedSpace r a
+    Classical.choose (ContMDiffSection.exists_eq_at (I := I) (F := TensorRSModel r a ℝ E)
+      (V := fun z : M => TensorRSSpace r a I z) (n := (⊤ : ℕ∞)) x v)
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- The chosen section realises its prescribed fibre value at `x`. -/
+private lemma chooseSecAt_eq
+    (g : SmoothRiemannianMetric I M) (r a : ℕ) (x : M) (v : TensorRSSpace r a I x) :
+    (chooseSecAt (I := I) (M := M) g r a x v).toSection x = v :=
+  letI : NormedAddCommGroup (TensorRSModel r a ℝ E) := Tensor0SBundle.tensorRSModel_normedAddCommGroup r a
+  letI : NormedSpace ℝ (TensorRSModel r a ℝ E) := Tensor0SBundle.tensorRSModel_normedSpace r a
+  Classical.choose_spec (ContMDiffSection.exists_eq_at (I := I) (F := TensorRSModel r a ℝ E)
+    (V := fun z : M => TensorRSSpace r a I z) (n := (⊤ : ℕ∞)) x v)
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **The fibrewise operator extracted from a value-local `ℝ`-linear fibre operation.** For
+`F : SmoothCcTensor g r a → SmoothCcTensor g r c` value-local and `ℝ`-linear at the fibre-value level,
+the linear-map-to-CLM closure on the finite-dimensional fibre `TensorRSSpace r a I x` of the fibre
+operation `v ↦ (F (chooseSecAt v)).toSection x` (`chooseSecAt v` any smooth section with value `v` at
+`x`).  The source fibre carries the `g`-fibre `RiemannianBundle` inner-product normed structure (the
+default model-norm instances suppressed), under which it is finite-dimensional Hausdorff and the linear
+map closes to a continuous-linear map. -/
+private noncomputable def valueLocalLinearHomFib
+    (g : SmoothRiemannianMetric I M) (r a c : ℕ)
+    (F : SmoothCcTensor g r a → SmoothCcTensor g r c)
+    (hadd : ∀ (W₁ W₂ : SmoothCcTensor g r a) (x : M),
+      (F (W₁ + W₂)).toSection x = (F W₁).toSection x + (F W₂).toSection x)
+    (hsmul : ∀ (k : ℝ) (W : SmoothCcTensor g r a) (x : M),
+      (F (k • W)).toSection x = k • (F W).toSection x)
+    (hloc : ∀ (W₁ W₂ : SmoothCcTensor g r a) (x : M),
+      W₁.toSection x = W₂.toSection x → (F W₁).toSection x = (F W₂).toSection x)
+    (x : M) : TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x :=
+  letI instSrc : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r a I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r a
+  haveI : FiniteDimensional ℝ (TensorRSSpace r a I x) := inferInstance
+  haveI : T2Space (TensorRSSpace r a I x) := inferInstance
+  LinearMap.toContinuousLinearMap
+    { toFun := fun v : TensorRSSpace r a I x =>
+        (F (chooseSecAt (I := I) (M := M) g r a x v)).toSection x
+      map_add' := fun v w => by
+        have hsum : (chooseSecAt (I := I) (M := M) g r a x (v + w)).toSection x =
+            (chooseSecAt (I := I) (M := M) g r a x v +
+              chooseSecAt (I := I) (M := M) g r a x w).toSection x := by
+          rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply,
+            chooseSecAt_eq, chooseSecAt_eq, chooseSecAt_eq]
+        rw [hloc _ _ x hsum, hadd]
+      map_smul' := fun k v => by
+        have hsm : (chooseSecAt (I := I) (M := M) g r a x (k • v)).toSection x =
+            (k • chooseSecAt (I := I) (M := M) g r a x v).toSection x := by
+          rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
+            chooseSecAt_eq, chooseSecAt_eq]
+        rw [hloc _ _ x hsm, hsmul]
+        rfl }
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **The fibrewise operator reads the contracted section's value.** `valueLocalLinearHomFib F … x`
+applied to `W.toSection x` returns `(F W).toSection x`, for any smooth section `W` — by value-locality,
+the value at `x` does not depend on which section realises `W.toSection x` (the chosen one or `W`). -/
+private lemma valueLocalLinearHomFib_apply
+    (g : SmoothRiemannianMetric I M) (r a c : ℕ)
+    (F : SmoothCcTensor g r a → SmoothCcTensor g r c)
+    (hadd : ∀ (W₁ W₂ : SmoothCcTensor g r a) (x : M),
+      (F (W₁ + W₂)).toSection x = (F W₁).toSection x + (F W₂).toSection x)
+    (hsmul : ∀ (k : ℝ) (W : SmoothCcTensor g r a) (x : M),
+      (F (k • W)).toSection x = k • (F W).toSection x)
+    (hloc : ∀ (W₁ W₂ : SmoothCcTensor g r a) (x : M),
+      W₁.toSection x = W₂.toSection x → (F W₁).toSection x = (F W₂).toSection x)
+    (W : SmoothCcTensor g r a) (x : M) :
+    valueLocalLinearHomFib (I := I) (M := M) g r a c F hadd hsmul hloc x (W.toSection x) =
+      (F W).toSection x := by
+  letI instSrc : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r a I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r a
+  rw [valueLocalLinearHomFib, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk]
+  exact hloc _ W x (chooseSecAt_eq (I := I) (M := M) g r a x (W.toSection x))
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- **Base-point smoothness of the value-local linear fibre operator field.** Via the pointwise
+`contMDiff_clm_section_of_pointwise` bridge: for any smooth `(r, a)`-section `Z`,
+`x ↦ valueLocalLinearHomFib F … x (Z x) = (F Z).toSection x` is the smooth `SmoothCcTensor` `F Z`. -/
+private theorem valueLocalLinearHomFib_contMDiff
+    (g : SmoothRiemannianMetric I M) (r a c : ℕ)
+    (F : SmoothCcTensor g r a → SmoothCcTensor g r c)
+    (hadd : ∀ (W₁ W₂ : SmoothCcTensor g r a) (x : M),
+      (F (W₁ + W₂)).toSection x = (F W₁).toSection x + (F W₂).toSection x)
+    (hsmul : ∀ (k : ℝ) (W : SmoothCcTensor g r a) (x : M),
+      (F (k • W)).toSection x = k • (F W).toSection x)
+    (hloc : ∀ (W₁ W₂ : SmoothCcTensor g r a) (x : M),
+      W₁.toSection x = W₂.toSection x → (F W₁).toSection x = (F W₂).toSection x) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)
+        (E := fun z : M => TensorRSSpace r a I z →L[ℝ] TensorRSSpace r c I z) x
+        (valueLocalLinearHomFib (I := I) (M := M) g r a c F hadd hsmul hloc x)) := by
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (F₁ := TensorRSModel r a ℝ E) (V₁ := fun z : M => TensorRSSpace r a I z)
+    (F₂ := TensorRSModel r c ℝ E) (V₂ := fun z : M => TensorRSSpace r c I z)
+    (φ := fun x => valueLocalLinearHomFib (I := I) (M := M) g r a c F hadd hsmul hloc x)
+  intro Z
+  set Wσ : SmoothCcTensor g r a := ⟨Z, HasCompactSupport.of_compactSpace _⟩ with hWσ
+  have hpt : ∀ x : M, valueLocalLinearHomFib (I := I) (M := M) g r a c F hadd hsmul hloc x (Z x) =
+      (F Wσ).toSection x := fun x =>
+    valueLocalLinearHomFib_apply (I := I) (M := M) g r a c F hadd hsmul hloc Wσ x
+  refine (F Wσ).toSection.contMDiff.congr ?_
+  intro x
+  exact (congrArg (TotalSpace.mk' (TensorRSModel r c ℝ E)
+    (E := fun z : M => TensorRSSpace r c I z) x) (hpt x)).symm ▸ rfl
+
 /-! ## The `(∇R)·` factorisation of the order-`1` moving-centre pure-Riemann trace (precise child)
 
 The order-`1` moving-centre pure-Riemann differentiated trace `genuinePureRDiffOpRS g r 1 rr` is the
@@ -350,59 +494,72 @@ cancelling by the full Hom-bundle covariant product rule.  This is the exact val
 rank-`0` *proved* `diffCurvGenuineDiffOp_zero_eq_appCc` (`op 0 = appCc Φ₀ W`, where the codomain-only
 `appCc` post-composition suffices because the rank-`0` curvature acts only on the codomain). -/
 
-set_option linter.unusedVariables false in
 set_option backward.isDefEq.respectTransparency false in
-/-- **Child (the `(∇R)·` value-local full-Hom factorisation of the order-`1` trace).** For a closed smooth
-Riemannian manifold `(M, g)` and a fixed contravariant valence `r` there is a *fixed* smooth full
-Hom-bundle curvature-jet field family
-`Θ : (rr : ℕ) → Π x, TensorRSSpace r rr I x →L TensorRSSpace r (rr + 1) I x` such that the order-`1`
-moving-centre pure-Riemann differentiated trace `genuinePureRDiffOpRS g r 1 rr` is its **value-local** full
-Hom-bundle action:
-```
-(genuinePureRDiffOpRS g r 1 rr W).toSection x = Θ rr x (W.toSection x).
-```
-The fibre value at `x` reads only the fibre value `W x` against the fixed smooth curvature-jet operator
-`Θ rr x` (the curvature derivative `∇R(x)` as a full Hom endomorphism).
+/-- **Child (the value-locality of the order-`1` differentiated pure-Riemann trace — the `∇W`
+cancellation / differential-Bianchi content).** For two smooth compactly-supported `(r, rr)`-tensors
+`W₁, W₂` agreeing *only* at the single fibre value `x` (`W₁.toSection x = W₂.toSection x`, not their
+jets), the order-`1` differentiated trace fibre values coincide:
+`(genuinePureRDiffOpRS g r 1 rr W₁).toSection x = (genuinePureRDiffOpRS g r 1 rr W₂).toSection x`.
 
-**Why this is TRUE.** The genuine `(∇R) W = covGrad(R W) − R(∇W)` factors value-locally as the full
-Hom-bundle action `appFullRS Θ W` of the *fixed* smooth full-tensor curvature-jet field `Θ rr x`.  Two
-genuinely-irreducible analytic facts combine: (i) **value-locality + `ℝ`-linearity** of the order-`1`
-trace at the fibre-value level — both `covGrad(op 0 rr W)` and `cast(op 0 (rr + 1)(∇W))` separately read
-the one-jet of `W` at `x`, but their *difference* is the genuine `(∇R) W` in which the input derivative
-`∇W` *cancels* by the full-tensor Hom-bundle covariant product rule `∇(R·W) = (∇R)·W + R·(∇W)` (the
-source/target two-sided Hom Leibniz of the full `(r, rr)`-tensor curvature `riemannOp (tensorCov g r rr)`),
-leaving a fibrewise operator `Θ rr x` reading only `W x` (this is **false for a generic
-order-`0`-value-local tower** — the abstract claim is Lean-refuted at `(p, rr) = (1, 0)`,
-`OperatorFieldEvaluationLeibniz`: with `op 0 0 := 0`, `op 0 1 := id` the recursion forces
-`op 1 0 W = −cast(∇W)`, reading the one-jet, *not* value-local; only the genuine curvature operator, whose
-order-`0` coefficient is the smooth `∇R = ∇(g, R)`, has the cancellation); and (ii) **base-point
-smoothness** of the extracted full-Hom curvature-coefficient field `Θ rr`, the valence-`r` full-Hom
-analogue of the rank-`0` *proved* `pureREndoOp_contMDiff` (the ~600-line unit-scalar-lift reduction to the
-moving-frame endomorphism smoothness `genuinePureREndoFibRS_contMDiff`).  Fact (i) needs the full-tensor
-Hom-bundle covariant product rule for the abstract second-order Hom-bundle
-`Hom(T^{(r,rr)}, T^{(r,rr+1)}) = fun x => TensorRSSpace r rr I x →L TensorRSSpace r (rr + 1) I x`
-(`covGrad_appFullRS_eq`, the `homBundleCovariantDerivativeGen` Leibniz over the two source/target tensor
-connections `tensorCov g r rr`, `tensorCov g r (rr + 1)`), and fact (ii) needs the pointwise smoothness
-route `contMDiff_clm_section_of_pointwise` lifted to that same abstract Hom-bundle.
+**Why this is TRUE (the irreducible content).** The order-`1` trace is the genuine differentiated
+curvature `(∇R) W = covGrad(R W) − R(∇W)`.  Both `covGrad(R W)` (reading the one-jet of `W` through the
+order-`0` curvature endomorphism `R = genuinePureREndo0RS`) and `R(∇W)` (the rank-cast order-`0` curvature
+on the gradient `∇W`) separately read the one-jet of `W` at `x`; in their *difference* the input
+derivative `∇W` **cancels** by the second-order Hom-bundle covariant product rule
+`∇_v(R·W) = (∇^Hom_v R)(W x) + R(∇_v W)` (`tensorCovDerivAt_appFullRS_eq`, proved above): the directional
+reading of `covGrad(R W)` is `(∇^Hom R)(W x)` — value-local in `W x` — plus the spectator `R(∇_v W)`,
+which is exactly the rank-cast `R(∇W)` term subtracted off (the curvature reading of the gradient
+spectator, `genuinePureRDiffOp0_covGrad_fib_eq`).  The remaining `(∇^Hom R)(W x)` reads only the fibre
+value `W x`, so two sections agreeing at `x` give equal order-`1` traces.  This is the differential
+Bianchi / curvature-derivative-is-a-field content at valence `r`; the `∇W` cancellation is the single
+genuinely-irreducible analytic primitive (the rank-`0` mirror is the spectator decomposition
+`covGrad_pureRGenuineDiffOp_unit_eval_eq_genuineDiffCurv_add_spectator`).  Posited here as one precise
+true child; consumers transitively depend on `sorryAx`.
 
-**Prerequisite (now built).** Both facts require the generic Hom-bundle covariant derivative
-`HomConnectionGen.homBundleCovariantDerivativeGen` *instantiated on the second-order Hom-bundle*
-`Hom(TensorRSSpace r rr, TensorRSSpace r (rr + 1))`.  That instance tower — the total-space topology,
-fibre bundle, vector bundle, smooth vector bundle, the induced covariant derivative, and the canonical
-computable Hom-model normed structure — is **now built** in
-`DifferentialGeometry.Geometry.Connection.TensorNabla.SecondOrderHomBundle`
-(`HomTensorRSModel` / `HomTensorRSSpace` + `homTensorRSCovariantDerivative` +
-`homTensorRSCovariantDerivative_apply{,_of_mdifferentiableAt}`), and the directional full-Hom product
-rule `tensorCovDerivAt_appFullRS_eq` (`∇_v(Ψ·W) = (∇^Hom_v Ψ)(W x) + Ψ x (∇_v W)`) is *proved* above over
-it.  Over those, the remaining genuinely-irreducible content is the order-`0` full-Hom factorisation
-`genuinePureREndo0RS = appFullRS Φ₀` with `Φ₀` smooth (the valence-`r` mirror of the *proved* rank-`0`
-`exists_pureRGenuineDiffOp_base_appCc`) and the resulting `∇W` cancellation.  Posited here as one precise
-true child.  Consumers transitively depend on `sorryAx`.
+**Non-vacuity.** A degenerate reading (the order-`1` trace independent of `W x`) is rejected: the trace is
+the genuine `(∇R) W`, nonzero for a non-parallel `W` on a non-flat manifold, so the value at `x` genuinely
+depends on `W x`. -/
+theorem genuinePureRDiffOpRS_one_valueLocal
+    (g : SmoothRiemannianMetric I M) (r rr : ℕ)
+    (W₁ W₂ : SmoothCcTensor g r rr) (x : M)
+    (hW : W₁.toSection x = W₂.toSection x) :
+    (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₁).toSection x =
+      (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₂).toSection x := by
+  sorry
 
-**Non-vacuity.** A degenerate factorisation `Θ ≡ 0` is rejected on any non-flat manifold: the order-`1`
-trace `genuinePureRDiffOpRS g r 1 rr W` is the genuine differentiated curvature `(∇R) W`, genuinely
-non-zero (`∇R ≠ 0`) for a non-parallel `W`, so `Θ rr x` cannot be the zero operator (else the LHS would
-vanish identically). -/
+set_option backward.isDefEq.respectTransparency false in
+/-- **The order-`1` differentiated pure-Riemann trace is additive at the fibre-value level.** Derived
+from the section-level `ℝ`-bilinearity `genuinePureRDiffOpRS_one_linear` (`c₁ = c₂ = 1`). -/
+private lemma genuinePureRDiffOpRS_one_add_fib
+    (g : SmoothRiemannianMetric I M) (r rr : ℕ)
+    (W₁ W₂ : SmoothCcTensor g r rr) (x : M) :
+    (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr (W₁ + W₂)).toSection x =
+      (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₁).toSection x +
+        (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₂).toSection x := by
+  have h := genuinePureRDiffOpRS_one_linear (I := I) (M := M) g r rr 1 1 W₁ W₂
+  rw [one_smul, one_smul, one_smul, one_smul] at h
+  rw [h, SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The order-`1` differentiated pure-Riemann trace is `ℝ`-homogeneous at the fibre-value level.**
+Derived from the section-level `ℝ`-bilinearity `genuinePureRDiffOpRS_one_linear` (second slot zero). -/
+private lemma genuinePureRDiffOpRS_one_smul_fib
+    (g : SmoothRiemannianMetric I M) (r rr : ℕ)
+    (k : ℝ) (W : SmoothCcTensor g r rr) (x : M) :
+    (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr (k • W)).toSection x =
+      k • (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W).toSection x := by
+  have h := genuinePureRDiffOpRS_one_linear (I := I) (M := M) g r rr k 0 W W
+  rw [zero_smul, add_zero, zero_smul, add_zero] at h
+  rw [h, SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The `(∇R)·` value-local full-Hom factorisation of the order-`1` trace (the leaf).** The smooth
+full Hom-bundle curvature-jet field `Θ rr := valueLocalLinearHomFib (genuinePureRDiffOpRS g r 1 rr)` is
+the order-`1` differentiated trace read fibrewise: its fibre value at `x` reads only `W x` (value-locality
+`genuinePureRDiffOpRS_one_valueLocal`, `ℝ`-linearity `genuinePureRDiffOpRS_one_{add,smul}_fib`), closed to
+a continuous-linear endomorphism on the finite-dimensional fibre, smooth in `x` by the pointwise
+`SmoothCcTensor`-section bridge `valueLocalLinearHomFib_contMDiff`.  The factorisation
+`(genuinePureRDiffOpRS g r 1 rr W).toSection x = Θ rr x (W x)` is `valueLocalLinearHomFib_apply`. -/
 theorem exists_genuinePureRDiffOpRS_one_appFullRS (g : SmoothRiemannianMetric I M) (r : ℕ) :
     ∃ (Θ : (rr : ℕ) → Π x : M, TensorRSSpace r rr I x →L[ℝ] TensorRSSpace r (rr + 1) I x),
       (∀ rr : ℕ, ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r rr ℝ E →L[ℝ] TensorRSModel r (rr + 1) ℝ E)) ∞
@@ -411,23 +568,35 @@ theorem exists_genuinePureRDiffOpRS_one_appFullRS (g : SmoothRiemannianMetric I 
       ∀ (rr : ℕ) (W : SmoothCcTensor g r rr) (x : M),
         (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W).toSection x =
           Θ rr x (W.toSection x) := by
-  sorry
+  refine ⟨fun rr => valueLocalLinearHomFib (I := I) (M := M) g r rr (rr + 1)
+      (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr)
+      (genuinePureRDiffOpRS_one_add_fib (I := I) (M := M) g r rr)
+      (genuinePureRDiffOpRS_one_smul_fib (I := I) (M := M) g r rr)
+      (genuinePureRDiffOpRS_one_valueLocal (I := I) (M := M) g r rr), fun rr => ?_, fun rr W x => ?_⟩
+  · exact valueLocalLinearHomFib_contMDiff (I := I) (M := M) g r rr (rr + 1)
+      (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr)
+      (genuinePureRDiffOpRS_one_add_fib (I := I) (M := M) g r rr)
+      (genuinePureRDiffOpRS_one_smul_fib (I := I) (M := M) g r rr)
+      (genuinePureRDiffOpRS_one_valueLocal (I := I) (M := M) g r rr)
+  · exact (valueLocalLinearHomFib_apply (I := I) (M := M) g r rr (rr + 1)
+      (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr)
+      (genuinePureRDiffOpRS_one_add_fib (I := I) (M := M) g r rr)
+      (genuinePureRDiffOpRS_one_smul_fib (I := I) (M := M) g r rr)
+      (genuinePureRDiffOpRS_one_valueLocal (I := I) (M := M) g r rr) W x).symm
 
 set_option linter.unusedSectionVars false in
 /-- **The order-`1` moving-centre pure-Riemann trace is value-local in the contracted section.** For two
 smooth compactly-supported `(r, rr)`-tensors `W₁, W₂` agreeing at `x`, the order-`1` differentiated trace
-fibre values coincide.  **Proof.** By the `(∇R)·` value-local full-Hom factorisation
-`exists_genuinePureRDiffOpRS_one_appFullRS`, both fibre values are `Θ rr x (Wᵢ.toSection x)` of the *same*
-fixed smooth full-Hom curvature-jet field `Θ rr x`; since `W₁.toSection x = W₂.toSection x`, the two are
-equal.  Consumers transitively depend on the factorisation child's `sorryAx`. -/
+fibre values coincide.  The consumer-facing alias of the value-locality child
+`genuinePureRDiffOpRS_one_valueLocal` (the `∇W`-cancellation / differential-Bianchi primitive); consumers
+transitively depend on its `sorryAx`. -/
 theorem genuinePureRDiffOpRS_one_local
     (g : SmoothRiemannianMetric I M) (r rr : ℕ)
     (W₁ W₂ : SmoothCcTensor g r rr) (x : M)
     (hW : W₁.toSection x = W₂.toSection x) :
     (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₁).toSection x =
-      (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₂).toSection x := by
-  obtain ⟨Θ, _hΘ, hfac⟩ := exists_genuinePureRDiffOpRS_one_appFullRS (I := I) (M := M) g r
-  rw [hfac rr W₁ x, hfac rr W₂ x, hW]
+      (genuinePureRDiffOpRS (I := I) (M := M) g r 1 rr W₂).toSection x :=
+  genuinePureRDiffOpRS_one_valueLocal (I := I) (M := M) g r rr W₁ W₂ x hW
 
 /-! ## The uniform full-Hom contraction bound and the differentiated `(∇R)·` tower jet envelope
 
