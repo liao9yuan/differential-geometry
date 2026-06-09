@@ -942,11 +942,49 @@ private theorem covGrad_sub_local (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     Analysis.Parabolic.TensorSpectral.covGrad_smul, neg_one_smul, ← sub_eq_add_neg]
 
 set_option linter.unusedSectionVars false in
-/-- **(POSIT — the `model_interior_product` double-trace unit evaluation of the base `g₀⁻¹` Ricci
-trace.)**  The atomic `model_interior_product` evaluation that is genuinely absent on disk: at the unit
-`(0, 0)`-tensor and a tangent pair `(v, w)`, the model fibre value of the base intrinsic `g₀⁻¹` Ricci
-trace `ricciModelTrace42Op g₀ 0 D` of a `(0, 4)`-tensor `D` is the `−2`-scaled cometric double trace —
-the two leading covariant slots of `D` contracted against the `g₀`-raised coframe `♯eᵢ(x)`:
+/-- **The model interior product reads its vector into the leading slot.**  `model_interior_product s v T`
+evaluated on a `Fin s`-tuple `m` is `T` evaluated on `Fin.cons v m` (the vector `v` prepended into the
+leading slot).  Definitional through the left-currying equivalence `continuousMultilinearCurryLeftEquiv`
+and `ContinuousLinearMap.apply`. -/
+private theorem model_interior_product_apply_eval (s : ℕ) (v : E)
+    (T : Tensor0SBundle.Tensor0SModel (s + 1) ℝ E) (m : Fin s → E) :
+    Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) s v T m = T (Fin.cons v m) := rfl
+
+set_option linter.unusedSectionVars false in
+/-- **The model rank-cast reindexes the evaluation tuple by `finCongr`.**  `modelRankCast h T` evaluated
+on a tuple `m` is `T` evaluated on `m ∘ finCongr h` (the index reindexing along `h : m' = n'`).
+Definitional via `ContinuousMultilinearMap.domDomCongr_apply`. -/
+private theorem modelRankCast_apply_eval {m' n' : ℕ} (h : m' = n')
+    (T : Tensor0SBundle.Tensor0SModel m' ℝ E) (p : Fin n' → E) :
+    modelRankCast (E := E) h T p = T (fun i => p (finCongr h i)) := rfl
+
+set_option linter.unusedSectionVars false in
+/-- **The `−2` double-trace model map evaluated on a tangent pair reads the cometric coframe into the
+two leading slots.**  At gradient-shift `a = 0`, evaluated on the `Fin 2`-tuple `![v, w]`, the
+`−2`-scaled cometric double trace `modelTrace42MapVec 0 vfn T` is `−2 ∑ᵢ T ![vfn i, vfn i, v, w]` — the
+two iterated interior products feed `vfn i` into the two leading slots and the (identity) rank casts at
+`a = 0` reindex trivially. -/
+private theorem modelTrace42MapVec_zero_pair_apply (vfn : Fin (Module.finrank ℝ E) → E)
+    (T : Tensor0SBundle.Tensor0SModel 4 ℝ E) (v w : E) :
+    modelTrace42MapVec (E := E) 0 vfn T ![v, w] =
+      (-2 : ℝ) * ∑ i : Fin (Module.finrank ℝ E), T ![vfn i, vfn i, v, w] := by
+  classical
+  rw [modelTrace42MapVec, ContinuousLinearMap.smul_apply, ContinuousLinearMap.sum_apply,
+    ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+  congr 1
+  rw [ContinuousMultilinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply,
+    model_interior_product_apply_eval, modelRankCast_apply_eval, model_interior_product_apply_eval,
+    modelRankCast_apply_eval]
+  congr 1
+
+set_option linter.unusedSectionVars false in
+/-- **(The `model_interior_product` double-trace unit evaluation of the base `g₀⁻¹` Ricci
+trace.)**  At the unit `(0, 0)`-tensor and a tangent pair `(v, w)`, the model fibre value of the base
+intrinsic `g₀⁻¹` Ricci trace `ricciModelTrace42Op g₀ 0 D` of a `(0, 4)`-tensor `D` is the `−2`-scaled
+cometric double trace — the two leading covariant slots of `D` contracted against the `g₀`-raised
+coframe `♯eᵢ(x)`:
 ```
 toModel((ricciModelTrace42Op g₀ 0 D).toSection x (unit))![v, w]
   = −2 · ∑ᵢ toModel(D.toSection x (unit)) ![♯eᵢ(x), ♯eᵢ(x), v, w].
@@ -956,8 +994,7 @@ This is the unit-evaluated form of the operator-field action fibre value `ricciM
 `ricciModelTrace42Fib_toModel` and `modelTrace42MapVec`, whose two iterated `model_interior_product`s feed
 `♯eᵢ(x)` into the two leading model slots (modulo the slot-count rank casts `modelRankCast`, which are
 identity reindexings).  It is **non-vacuous** (a zero right-hand side forces the trace to vanish, false
-for a nonzero `D` on the cometric); its body is `sorry`: the `model_interior_product` double-trace unit
-evaluation. -/
+for a nonzero `D` on the cometric). -/
 theorem ricciModelTrace42Op_zero_unitModel_apply (g₀ : SmoothRiemannianMetric I M)
     (D : Integral.L2.SmoothCcTensor g₀ 0 4) (x : M) (v w : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel
@@ -969,8 +1006,18 @@ theorem ricciModelTrace42Op_zero_unitModel_apply (g₀ : SmoothRiemannianMetric 
           ((D.toSection x) (ContinuousMultilinearMap.constOfIsEmpty ℝ
             (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
           ![(cometricRaisedBasisVec (I := I) g₀ x i : E), (cometricRaisedBasisVec (I := I) g₀ x i : E),
-            (v : E), (w : E)] :=
-  sorry
+            (v : E), (w : E)] := by
+  classical
+  -- `(op 0 D).toSection x (unit) = (ricciModelTrace42Field g₀ 0).toSection x (D.toSection x (unit))`.
+  rw [ricciModelTrace42Op_toSection, ricciModelTrace42FieldRec_zero, ContinuousLinearMap.comp_apply,
+    ricciModelTrace42Field_toSection]
+  -- Read through `ricciModelTrace42Fib_toModel` and `modelTrace42MapVec` evaluated on the pair.
+  rw [ricciModelTrace42Fib_toModel,
+    modelTrace42MapVec_zero_pair_apply (E := E)
+      (fun i => (cometricRaisedBasisVec (I := I) g₀ x i : E))
+      (Tensor0SBundle.Tensor0SSpace.toModel
+        ((D.toSection x) (ContinuousMultilinearMap.constOfIsEmpty ℝ
+          (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))) (v : E) (w : E)]
 
 set_option linter.unusedSectionVars false in
 /-- **(POSIT — the cometric `g₀⁻¹` raised-coframe double trace of the once-differentiated lowered
