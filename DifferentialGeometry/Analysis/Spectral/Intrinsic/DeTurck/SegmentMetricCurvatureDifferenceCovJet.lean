@@ -12,6 +12,7 @@ import DifferentialGeometry.Geometry.Connection.Realization.SmoothSections
 import DifferentialGeometry.Geometry.Connection.Chart.SymmLTangentTrivializationSmooth
 import DifferentialGeometry.Tensor.RSTensor.BundleTrivialization.Tensor0SBundleLocalityIdentities
 import DifferentialGeometry.Tensor.Multilinear.Comp
+import DifferentialGeometry.Geometry.Connection.TensorNabla.HomTensorRSRiemannian
 
 /-! # The curvature-trace covariant-jet reduction of the sealed Ricci–DeTurck curvature difference
 
@@ -637,27 +638,102 @@ theorem ricciModelTrace42Field_covGrad_eq_zero (g₀ : SmoothRiemannianMetric I 
   sorry
 
 set_option linter.unusedSectionVars false in
-/-- **(POSIT — the covariant gradient annihilates a leading-passenger-slot extension of a parallel
-field.)**  The covariant gradient commutes with the leading-passenger-slot extension `slotExtend` up to a
-slot reindex that preserves vanishing: if a smooth `(r, s)`-operator field `Φ` is `∇₀`-parallel
-(`covGrad g r s Φ = 0`), then its leading-passenger-slot extension `slotExtend g r s Φ` is also
-`∇₀`-parallel:
+/-- **(POSIT — the directional covariant-derivative commutation with the leading-passenger-slot
+extension.)**  The atomic commutation fact beneath the slot-extension parallelism step: the directional
+covariant derivative of the passenger-slot-extended operator field `slotExtend g r s Φ` is the
+slot-extension of the directional covariant derivative of `Φ`:
+```
+tensorCovDerivAt g (r + 1) (s + 1) (slotExtend g r s Φ) x v = slotExtendFib g r s x (tensorCovDerivAt g r s Φ x v).
+```
+The leading passenger covariant slot is read identically on source and target (`slotExtendFib_apply_eval`)
+and is parallel-transported trivially, so differentiating the slot-extended operator commutes with the
+slot insertion: the connection differentiates only the *contraction coefficient*, which `slotExtend`
+relabels without touching the passenger slot.  This is the genuine deep covariant-derivative ×
+slot-insertion commutation (the directional, hence permute-free, form on which the section-level
+parallelism step is built).  It is **non-vacuous**: it is a genuine commutation, false for a connection
+that does not parallel-transport the passenger slot; its body is `sorry`. -/
+theorem tensorCovDerivAt_slotExtend_eq (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : Integral.L2.SmoothCcTensor g₀ r s) (x : M) (v : E) :
+    Analysis.Parabolic.TensorSpectral.tensorCovDerivAt (I := I) (M := M) g₀ (r + 1) (s + 1)
+        (Integral.Connection.slotExtend (I := I) (M := M) g₀ r s Φ) x v =
+      (show Tensor0SBundle.Tensor0SSpace (r + 1) I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (s + 1) I x from
+        Integral.Connection.slotExtendFib (I := I) (M := M) g₀ r s x
+          (show Tensor0SBundle.Tensor0SSpace r I x →L[ℝ] Tensor0SBundle.Tensor0SSpace s I x from
+            Analysis.Parabolic.TensorSpectral.tensorCovDerivAt (I := I) (M := M) g₀ r s Φ x v)) :=
+  sorry
+
+set_option linter.unusedSectionVars false in
+/-- **The covariant gradient annihilates a leading-passenger-slot extension of a parallel field.**  The
+covariant gradient commutes with the leading-passenger-slot extension `slotExtend`: if a smooth
+`(r, s)`-operator field `Φ` is `∇₀`-parallel (`covGrad g r s Φ = 0`), then its leading-passenger-slot
+extension `slotExtend g r s Φ` is also `∇₀`-parallel:
 ```
 covGrad g r s Φ = 0  ⟹  covGrad g (r + 1) (s + 1) (slotExtend g r s Φ) = 0.
 ```
-The slot-extension prepends one passenger covariant slot read identically on source and target
-(`slotExtendFib_apply_eval`); the covariant gradient differentiates the contraction coefficient, which —
-because `slotExtend` only relabels slots and `∇₀` commutes with the passenger insertion (up to the slot
-permute folded away here, since the conclusion is `= 0`) — vanishes exactly when the un-extended
-gradient does.  It is **non-vacuous**: it is a genuine commutation (a nonzero `covGrad Φ` would have a
-nonzero extension), the structural step propagating the cometric parallelism through the passenger-slot
-recursion.  Its body is `sorry`: the covariant-gradient annihilation of a slot-extended parallel field. -/
+
+**Decomposition.**  `covGrad Φ = 0` forces the directional covariant derivative `tensorCovDerivAt g r s Φ
+x v` to vanish at every base point and direction (`covGrad_toSection_apply_eval` reads the gradient slot
+as the directional derivative).  By the directional commutation `tensorCovDerivAt_slotExtend_eq` the
+directional derivative of `slotExtend Φ` is `slotExtendFib` of that vanishing directional derivative, and
+`slotExtendFib` is `ℝ`-linear (it sends the zero fibre operator to the zero fibre operator,
+`map_zero`), so the directional derivative of `slotExtend Φ` vanishes — hence so does its covariant
+gradient.  It is **non-vacuous**: the structural step propagating the cometric parallelism through the
+passenger-slot recursion (a nonzero `covGrad Φ` would have a nonzero extension). -/
 theorem covGrad_slotExtend_eq_zero_of_covGrad_eq_zero (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : Integral.L2.SmoothCcTensor g₀ r s)
     (hΦ : Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ r s Φ = 0) :
     Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ (r + 1) (s + 1)
-        (Integral.Connection.slotExtend (I := I) (M := M) g₀ r s Φ) = 0 :=
-  sorry
+        (Integral.Connection.slotExtend (I := I) (M := M) g₀ r s Φ) = 0 := by
+  classical
+  -- The slot-extended fibre operator sends the zero fibre operator to zero (`slotExtendFib` is the
+  -- conjugation of left-composition by the operator, and `(0).comp _ = 0`).
+  have hslotZero : ∀ (y : M),
+      Integral.Connection.slotExtendFib (I := I) (M := M) g₀ r s y
+          (0 : Tensor0SBundle.Tensor0SSpace r I y →L[ℝ] Tensor0SBundle.Tensor0SSpace s I y) =
+        (0 : Tensor0SBundle.Tensor0SSpace (r + 1) I y →L[ℝ] Tensor0SBundle.Tensor0SSpace (s + 1) I y) := by
+    intro y
+    apply ContinuousLinearMap.ext
+    intro D
+    rw [Integral.Connection.slotExtendFib_apply, ContinuousLinearMap.zero_comp, map_zero,
+      ContinuousLinearMap.zero_apply]
+  -- `covGrad Φ = 0` forces the directional covariant derivative of `Φ` to vanish everywhere.
+  have hdir : ∀ (x : M) (v : E),
+      Analysis.Parabolic.TensorSpectral.tensorCovDerivAt (I := I) (M := M) g₀ r s Φ x v = 0 := by
+    intro x v
+    apply ContinuousLinearMap.ext
+    intro D
+    apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+    refine ContinuousMultilinearMap.ext (fun m => ?_)
+    -- Read the gradient slot of `covGrad Φ = 0` in direction `v` on `D` and the tuple `m`.
+    have heval := Analysis.Parabolic.TensorSpectral.covGrad_toSection_apply_eval
+      (I := I) (M := M) g₀ r s Φ x D (Fin.cons v m)
+    rw [hΦ, Integral.L2.SmoothCcTensor.toSection_zero, ContMDiffSection.coe_zero, Pi.zero_apply,
+      ContinuousLinearMap.zero_apply, Tensor0SBundle.Tensor0SSpace.toModel_zero,
+      ContinuousMultilinearMap.zero_apply] at heval
+    rw [Fin.cons_zero, show (Matrix.vecTail (Fin.cons v m)) = m from funext (fun j => by
+      simp [Matrix.vecTail, Fin.cons_succ])] at heval
+    beta_reduce
+    rw [ContinuousLinearMap.zero_apply, Tensor0SBundle.Tensor0SSpace.toModel_zero,
+      ContinuousMultilinearMap.zero_apply]
+    exact heval.symm
+  -- The directional derivative of `slotExtend Φ` is `slotExtendFib` of the (vanishing) directional
+  -- derivative of `Φ`, hence vanishes; the section-level covariant gradient therefore vanishes.
+  apply Integral.L2.SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply ContinuousLinearMap.ext
+  intro D
+  apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+  refine ContinuousMultilinearMap.ext (fun m => ?_)
+  beta_reduce
+  rw [Integral.L2.SmoothCcTensor.toSection_zero, ContMDiffSection.coe_zero, Pi.zero_apply,
+    ContinuousLinearMap.zero_apply, Tensor0SBundle.Tensor0SSpace.toModel_zero,
+    ContinuousMultilinearMap.zero_apply,
+    Analysis.Parabolic.TensorSpectral.covGrad_toSection_apply_eval
+    (I := I) (M := M) g₀ (r + 1) (s + 1) (Integral.Connection.slotExtend (I := I) (M := M) g₀ r s Φ)
+    x D m, tensorCovDerivAt_slotExtend_eq (I := I) (M := M) g₀ r s Φ x (m 0), hdir x (m 0),
+    hslotZero x, ContinuousLinearMap.zero_apply, Tensor0SBundle.Tensor0SSpace.toModel_zero,
+    ContinuousMultilinearMap.zero_apply]
 
 /-- **The cometric `∇₀`-parallelism core: the passenger-passing `g₀⁻¹` double-trace field is
 `∇₀`-parallel.**  The covariant gradient of the passenger-passing intrinsic `g₀⁻¹` double-trace operator
@@ -727,37 +803,94 @@ theorem ricciModelTrace42Op_covGrad (g₀ : SmoothRiemannianMetric I M) (a : ℕ
       (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 (4 + a) R)))).symm
 
 set_option linter.unusedSectionVars false in
-/-- **(POSIT — the mixed Hilbert–Schmidt × operator-norm slot-extension envelope of the intrinsic
-`g₀⁻¹` double-trace field, order-uniform.)**  For the passenger-passing double-trace field there is a
-single nonnegative `κ₀`, uniform over the gradient-shift `a`, the section `R`, and the base point `x`,
-controlling the intrinsic (Riemannian/Hilbert–Schmidt) squared fibre norm of the composition:
+/-- **The post-composition fibre operator applied to `R.toSection x` is the fibre value of
+`ricciModelTrace42Op` at `x`.**  For any fibrewise operator `A : (0, 4 + a)-tensor →L (0, 2 + a)-tensor`
+that post-composes the passenger-passing `g₀⁻¹` double-trace fibre operator
+`(ricciModelTrace42FieldRec g₀ a).toSection x` after the `(0, 4 + a)`-tensor (i.e.
+`A v = ((ricciModelTrace42FieldRec g₀ a).toSection x).comp v` on every `(0, 4 + a)`-tensor
+`v = Tensor0SSpace 0 →L Tensor0SSpace (4 + a)`), the image `A (R.toSection x)` is the fibre value
+`(ricciModelTrace42Op g₀ a R).toSection x` of the operator-field action (`ricciModelTrace42Op_toSection`).
+This exhibits the operator-field-action fibre value as a `g₀`-fibre Hom-bundle operator's action, the
+bridge feeding the sharp `g`-operator-norm fibre-norm bound. -/
+private theorem ricciModelTrace42Op_toSection_eq_postcomp (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (x : M)
+    (R : Integral.L2.SmoothCcTensor g₀ 0 (4 + a))
+    (A : Tensor0SBundle.TensorRSSpace 0 (4 + a) I x →L[ℝ] Tensor0SBundle.TensorRSSpace 0 (2 + a) I x)
+    (hA : ∀ v : Tensor0SBundle.TensorRSSpace 0 (4 + a) I x,
+      A v = (show Tensor0SBundle.Tensor0SSpace (4 + a) I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (2 + a) I x from
+        (ricciModelTrace42FieldRec (I := I) g₀ a).toSection x).comp
+        (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (4 + a) I x from v)) :
+    A (R.toSection x) = (ricciModelTrace42Op (I := I) g₀ a R).toSection x := by
+  rw [hA (R.toSection x), ricciModelTrace42Op_toSection]
+
+set_option linter.unusedSectionVars false in
+/-- **(POSIT — the order-uniform `g₀`-Riemannian operator-norm-route mixed fibre envelope of the
+slot-extended `g₀⁻¹` double trace.)**  There is a single nonnegative `κ₀`, **uniform over the
+gradient-shift `a`**, the section `R`, and the base point `x`, together with a fibrewise post-composition
+operator `A` (the `g₀`-fibre Hom-bundle operator `v ↦ ((ricciModelTrace42FieldRec g₀ a).toSection x).comp v`,
+the passenger-passing `g₀⁻¹` double-trace fibre operator `(FieldRec g₀ a).toSection x = slotExtendᵃ(base x)`)
+bounding the intrinsic squared fibre norm of the operator-field action through the **`g`-operator norm** of `A`:
 ```
-rfns_{(0,2+a)}((ricciModelTrace42FieldRec g₀ a).toSection x ∘ R.toSection x)(x) ≤ κ₀ · rfns_{(0,4+a)}(R)(x).
+rfns_{(0,2+a)}(A v) ≤ κ₀ · rfns_{(0,4+a)}(v),   A v = ((ricciModelTrace42FieldRec g₀ a).toSection x).comp v.
 ```
-This is the genuinely-missing **mixed-norm** analytic core.  The HS (Riemannian) fibre norm of the
-composition `Φ ∘ R` is bounded by the *`g`-Riemannian operator norm* of `Φ = FieldRec a x` (the
-operator norm measured in the `g`-Riemannian fibre norms on the `(0,4+a)`- and `(0,2+a)`-fibres, via the
-Hom-bundle contraction bound `homTensorRS_riemannianFiberNormSq_clm_apply_le`) times the HS norm of `R`,
-and the `g`-Riemannian operator norm of `FieldRec a x = slotExtendᵃ(base x)` equals that of the fixed
-base field `base x` (a leading passenger covariant slot is an *isometric ampliation* for the operator
-norm in the passenger-`g`-orthonormal directions — independent of the passenger valence `a`), uniformly
-bounded on the compact `M`.  Crucially this is the `g`-OPERATOR-norm route, not the HS route: the HS norm
-of `slotExtendᵃ` grows by a `dim`-factor per passenger slot, so it is *not* `a`-uniform, whereas the
-`g`-operator norm is.  The two genuinely-absent on-disk primitives folded here are (i) the mixed bound
-`rfns(Φ.comp W) ≤ ‖Φ‖²_{g-op} · rfns(W)` for the `Tensor0S`-level post-composition (the `g`-Riemannian
-fibre norm `riemannianFiberNormSq` is distinct from the static carrier op-norm
-`Tensor0SBundle.tensorRSSpace_norm_eq_carrier_opNorm`; `compRS_le_mul` is the HS×HS bound, which grows
-with `a`), and (ii) the `g`-operator-norm preservation of the leading passenger-slot extension
-`slotExtendFib`.  It is **non-vacuous** (a degenerate `κ₀ = 0` is rejected whenever `op a R ≠ 0`); its
-body is `sorry`: the order-uniform mixed-norm value-local fibre envelope of the slot-extended intrinsic
-`g₀⁻¹` double trace. -/
+
+This is the genuine deep **`g`-OPERATOR-norm** content (NOT the HS route, which is *not* `a`-uniform: the
+HS norm of `slotExtendᵃ` grows by a `dim`-factor per passenger slot).  The post-composition operator's
+`g`-operator norm is `≤ ‖(ricciModelTrace42FieldRec g₀ a).toSection x‖_{g-op}` (post-composition
+operator-norm submultiplicativity), and the `g`-operator norm of the passenger-passing fibre operator
+`(ricciModelTrace42FieldRec g₀ a).toSection x = slotExtendᵃ(base x)` equals that of the fixed base field
+`base x` — a leading passenger covariant slot is an **isometric ampliation** for the operator norm (it acts
+as the identity in the passenger-`g`-orthonormal directions, independent of the passenger valence `a`); the
+base field's `g`-operator norm is the cometric trace `≤ 2·∑ᵢ‖♯eᵢ(x)‖²_g`, uniformly bounded on the compact
+`M` by `exists_uniform_cometricBilin_bound`, and the squared fibre-norm bound `rfns(A v) ≤ ‖A‖²·rfns(v)` is
+the sharp intrinsic operator-norm fibre-norm bound `homTensorRS_riemannianFiberNormSq_clm_apply_le` (rank
+`0`, no dimension factor).  The `g₀`-fibre Hom-bundle post-composition operator `A` is exposed here (rather
+than constructed by `compL`) because its `g₀`-fibre normed structure is the installed Riemannian bundle
+norm, distinct from the static carrier operator norm `tensorRSSpace_norm_eq_carrier_opNorm`.  It is
+**non-vacuous** (a degenerate `κ₀ = 0` is rejected whenever `op a R ≠ 0`); its body is `sorry`: the
+order-uniform `g`-operator-norm-route mixed fibre envelope of the slot-extended intrinsic `g₀⁻¹` double
+trace. -/
+theorem exists_uniform_ricciModelTrace42_postcomp_gOpNorm_rfns_le (g₀ : SmoothRiemannianMetric I M) :
+    ∃ κ₀ : ℝ, 0 ≤ κ₀ ∧ ∀ (a : ℕ) (x : M),
+      ∃ A : Tensor0SBundle.TensorRSSpace 0 (4 + a) I x →L[ℝ] Tensor0SBundle.TensorRSSpace 0 (2 + a) I x,
+        (∀ v : Tensor0SBundle.TensorRSSpace 0 (4 + a) I x,
+          A v = (show Tensor0SBundle.Tensor0SSpace (4 + a) I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (2 + a) I x from
+            (ricciModelTrace42FieldRec (I := I) g₀ a).toSection x).comp
+            (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (4 + a) I x from v)) ∧
+        ∀ v : Tensor0SBundle.TensorRSSpace 0 (4 + a) I x,
+          Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x (A v) ≤
+            κ₀ * Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + a) x v :=
+  sorry
+
+set_option linter.unusedSectionVars false in
+/-- **The order-uniform mixed `g₀`-operator-norm fibre envelope of the intrinsic `g₀⁻¹` double trace.**
+For the passenger-passing double-trace field there is a single nonnegative `κ₀`, uniform over the
+gradient-shift `a`, the section `R`, and the base point `x`, controlling the intrinsic squared fibre norm
+of the operator-field action:
+```
+rfns_{(0,2+a)}((ricciModelTrace42Op g₀ a R).toSection x) ≤ κ₀ · rfns_{(0,4+a)}(R)(x).
+```
+
+**Decomposition.**  By the order-uniform `g`-operator-norm-route envelope
+`exists_uniform_ricciModelTrace42_postcomp_gOpNorm_rfns_le` there is a single `κ₀` and, at each `(a, x)`, a
+post-composition fibre operator `A` (acting as `v ↦ (ricciModelTrace42Fib g₀ a x).comp v`) with
+`rfns(A v) ≤ κ₀ · rfns(v)` (the `g`-operator-norm route, the slot-extension being an isometric ampliation
+of the cometric-bounded base operator — crucially *a*-uniform, unlike the HS bound `compRS_le_mul` whose
+norm grows by a `dim`-factor per passenger slot).  The fibre value `(ricciModelTrace42Op g₀ a R).toSection x`
+is exactly `A (R.toSection x)` (`ricciModelTrace42Op_toSection_eq_postcomp`), so the envelope applied at
+`v = R.toSection x` is the claim.  It is **non-vacuous** (a degenerate `κ₀ = 0` is rejected whenever
+`op a R ≠ 0`). -/
 theorem exists_uniform_ricciModelTrace42Op_rfns_le (g₀ : SmoothRiemannianMetric I M) :
     ∃ κ₀ : ℝ, 0 ≤ κ₀ ∧ ∀ (a : ℕ) (R : Integral.L2.SmoothCcTensor g₀ 0 (4 + a)) (x : M),
       Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
           ((ricciModelTrace42Op (I := I) g₀ a R).toSection x) ≤
         κ₀ * Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + a) x
-          (R.toSection x) :=
-  sorry
+          (R.toSection x) := by
+  obtain ⟨κ₀, hκ₀0, hκ₀⟩ := exists_uniform_ricciModelTrace42_postcomp_gOpNorm_rfns_le (I := I) g₀
+  refine ⟨κ₀, hκ₀0, fun a R x => ?_⟩
+  obtain ⟨A, hAdef, hAbound⟩ := hκ₀ a x
+  -- The fibre value is the post-composition operator `A` applied to `R.toSection x`.
+  rw [← ricciModelTrace42Op_toSection_eq_postcomp (I := I) g₀ a x R A hAdef]
+  exact hAbound (R.toSection x)
 
 /-- **The `(0, 4) → (0, 2)` intrinsic `g₀⁻¹` Ricci-trace parallel contraction.**  The parallel
 rank-reducing single-section contraction realising the `−2` intrinsic `g₀⁻¹` Ricci trace `g₀^{ij}·` on
@@ -808,17 +941,91 @@ private theorem covGrad_sub_local (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     show (-B) = (-1 : ℝ) • B by rw [neg_one_smul],
     Analysis.Parabolic.TensorSpectral.covGrad_smul, neg_one_smul, ← sub_eq_add_neg]
 
-/-- **(POSIT — the linearized-Ricci principal-part value identity, the irreducible trace bridge.)**  The
-genuine value content of the linearized-Ricci principal part: the linear-in-difference curvature section
-`linearSection g₀ g₁ g₂` is the `−2` intrinsic `g₀⁻¹` Ricci trace `ricciModelTrace42.op 0` of the
-**once-`∇₀`-differentiated** `g₀`-lowered connection-difference *difference*
-`∇₀ (2·loweredConnDiffSection g₁ g₀ − 2·loweredConnDiffSection g₂ g₀)`.  This is the section-level lift
-of the once-differentiated pointwise lowered-Koszul form `connDiffDiff_g0_lowered_koszul_diffFactor`
-(`ricciNeg2SectionDiffLinearEval = −2 g₀^{ij}` double trace of `∇₀` of the lowered connection-difference
-difference), the genuine reconciliation tying the intrinsic `g₀⁻¹` trace `op` to the linearized-Ricci
-principal part `linearSection` (`linearSection_toModel_apply = ricciNeg2SectionDiffLinearEval`,
-`ricciModelTrace42Op` the `−2 g₀^{ij}` double trace).  Its body is `sorry`: the irreducible
-linearized-Ricci principal-part covariant trace identity. -/
+set_option linter.unusedSectionVars false in
+/-- **(POSIT — the `model_interior_product` double-trace unit evaluation of the base `g₀⁻¹` Ricci
+trace.)**  The atomic `model_interior_product` evaluation that is genuinely absent on disk: at the unit
+`(0, 0)`-tensor and a tangent pair `(v, w)`, the model fibre value of the base intrinsic `g₀⁻¹` Ricci
+trace `ricciModelTrace42Op g₀ 0 D` of a `(0, 4)`-tensor `D` is the `−2`-scaled cometric double trace —
+the two leading covariant slots of `D` contracted against the `g₀`-raised coframe `♯eᵢ(x)`:
+```
+toModel((ricciModelTrace42Op g₀ 0 D).toSection x (unit))![v, w]
+  = −2 · ∑ᵢ toModel(D.toSection x (unit)) ![♯eᵢ(x), ♯eᵢ(x), v, w].
+```
+This is the unit-evaluated form of the operator-field action fibre value `ricciModelTrace42Op_toSection`
+(`(op 0 D).toSection x = (ricciModelTrace42Field g₀ 0).toSection x ∘ D.toSection x`) read through
+`ricciModelTrace42Fib_toModel` and `modelTrace42MapVec`, whose two iterated `model_interior_product`s feed
+`♯eᵢ(x)` into the two leading model slots (modulo the slot-count rank casts `modelRankCast`, which are
+identity reindexings).  It is **non-vacuous** (a zero right-hand side forces the trace to vanish, false
+for a nonzero `D` on the cometric); its body is `sorry`: the `model_interior_product` double-trace unit
+evaluation. -/
+theorem ricciModelTrace42Op_zero_unitModel_apply (g₀ : SmoothRiemannianMetric I M)
+    (D : Integral.L2.SmoothCcTensor g₀ 0 4) (x : M) (v w : TangentSpace I x) :
+    Tensor0SBundle.Tensor0SSpace.toModel
+        ((ricciModelTrace42Op (I := I) g₀ 0 D).toSection x
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) ![v, w] =
+      (-2 : ℝ) * ∑ i : Fin (Module.finrank ℝ E),
+        Tensor0SBundle.Tensor0SSpace.toModel
+          ((D.toSection x) (ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+          ![(cometricRaisedBasisVec (I := I) g₀ x i : E), (cometricRaisedBasisVec (I := I) g₀ x i : E),
+            (v : E), (w : E)] :=
+  sorry
+
+set_option linter.unusedSectionVars false in
+/-- **(POSIT — the cometric `g₀⁻¹` raised-coframe double trace of the once-differentiated lowered
+connection difference equals the model-basis linear order term.)**  The genuine scalar value identity
+beneath the trace bridge: the `−2`-scaled cometric double trace (against the `g₀`-raised coframe `♯eᵢ`)
+of the once-`∇₀`-differentiated `g₀`-lowered connection-difference difference, evaluated on a tangent
+pair `(v, w)`, equals the linear-in-difference order-zero term `ricciNeg2SectionDiffLinearEval`:
+```
+−2 · ∑ᵢ toModel(∇₀(2·lowered₁ − 2·lowered₂) x (unit)) ![♯eᵢ, ♯eᵢ, v, w] = ricciNeg2SectionDiffLinearEval g₀ g₁ g₂ x v w.
+```
+
+This is the genuine reconciliation of the intrinsic cometric `g₀^{ij}` raised-coframe trace with the
+model-basis coordinate trace `ricciNeg2SectionDiffLinearEval` (`= −2 ∑ᵢ repr(linearSummand₁ −
+linearSummand₂)ᵢ`).  The once-differentiated lowered connection difference's unit model on a tangent
+triple is the realized covariant-derivative Koszul combination
+(`covGrad_realizeSymm_unitModel_eq_covDerivRealizeEval`-style), whose `g₀`-raised-coframe double trace —
+through the M1 inverse-metric sharp index-raise `inverseMetricSharpFib_inner` and the lowered-Koszul
+diff-factor formula `connDiffDiff_g0_lowered_koszul_diffFactor` — is the linear order term carrying the
+single connection-difference-cocycle factor.  It is **non-vacuous** (it vanishes at `g₁ = g₂` consistently
+with `ricciNeg2SectionDiffLinearEval_self`); its body is `sorry`: the cometric-raised-coframe ↔
+model-basis-coordinate linear-order trace identity. -/
+theorem cometricRaisedTrace_covGradLoweredSub_eq_ricciNeg2SectionDiffLinearEval
+    (g₀ : SmoothRiemannianMetric I M) (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+    (g₁ g₂ : SmoothRiemannianMetric I M)
+    (hr1 : ∀ (x : M) (v w : TangentSpace I x),
+      g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w)
+    (hr2 : ∀ (x : M) (v w : TangentSpace I x),
+      g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w)
+    (x : M) (v w : TangentSpace I x) :
+    (-2 : ℝ) * ∑ i : Fin (Module.finrank ℝ E),
+        Tensor0SBundle.Tensor0SSpace.toModel
+          ((Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+              ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀
+                - (2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₂ g₀)).toSection x
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ
+              (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+          ![(cometricRaisedBasisVec (I := I) g₀ x i : E), (cometricRaisedBasisVec (I := I) g₀ x i : E),
+            (v : E), (w : E)] =
+      ricciNeg2SectionDiffLinearEval (I := I) g₀ g₁ g₂ x v w :=
+  sorry
+
+/-- **The linearized-Ricci principal-part value identity, the irreducible trace bridge.**  The
+linear-in-difference curvature section `linearSection g₀ g₁ g₂` is the `−2` intrinsic `g₀⁻¹` Ricci trace
+`ricciModelTrace42.op 0` of the **once-`∇₀`-differentiated** `g₀`-lowered connection-difference
+*difference* `∇₀ (2·loweredConnDiffSection g₁ g₀ − 2·loweredConnDiffSection g₂ g₀)`.
+
+**Decomposition.**  By unit-extensionality (`tensor0s_ext_unitZero`) it suffices to match the two fibre
+values at the unit `(0, 0)`-tensor and an arbitrary tangent pair `(v, w)`.  The left side's fibre value is
+the linear order-zero term `ricciNeg2SectionDiffLinearEval g₀ g₁ g₂ x v w` (`linearSection_toModel_apply`).
+The right side's fibre value is the base `g₀⁻¹` Ricci-trace double trace
+(`ricciModelTrace42Op_zero_unitModel_apply`, the `model_interior_product` double-trace evaluation):
+`−2 · ∑ᵢ toModel(∇₀(2·lowered₁ − 2·lowered₂))![♯eᵢ, ♯eᵢ, v, w]`.  The two coincide by the cometric
+raised-coframe ↔ model-basis-coordinate linear-order trace identity
+`cometricRaisedTrace_covGradLoweredSub_eq_ricciNeg2SectionDiffLinearEval` (over the lowered-Koszul
+diff-factor formula and the M1 inverse-metric sharp index-raise). -/
 theorem linearSection_eq_ricciModelTrace42_loweredConnDiffSub
     (g₀ : SmoothRiemannianMetric I M) (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
     (g₁ g₂ : SmoothRiemannianMetric I M)
@@ -830,8 +1037,41 @@ theorem linearSection_eq_ricciModelTrace42_loweredConnDiffSub
       (ricciModelTrace42 (I := I) g₀).op 0
         (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
           ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀
-            - (2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₂ g₀)) :=
-  sorry
+            - (2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₂ g₀)) := by
+  classical
+  apply Integral.L2.SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply DifferentialGeometry.PDE.DeTurck.tensor0s_ext_unitZero (I := I) (M := M) (s := 2)
+  -- It suffices to match the two fibre values on an arbitrary tangent pair, at the unit.
+  apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro p
+  -- The unit `(0,0)`-tensor is the canonical `constOfIsEmpty 1`.
+  have hunit : (Integral.Connection.unitZeroSec (I := I) (M := M) x :
+        Tensor0SBundle.Tensor0SSpace 0 I x) =
+      ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ) := rfl
+  rw [hunit]
+  -- The pair `(p 0, p 1)`; `![p 0, p 1] = p`.
+  have hpair : (![p 0, p 1] : Fin 2 → TangentSpace I x) = p := by
+    funext i; fin_cases i <;> rfl
+  -- LHS = linear order-zero term `ricciNeg2SectionDiffLinearEval` (the fibre value of `linearSection`).
+  rw [← hpair, linearSection_toModel_apply (I := I) g₀ g₁ g₂ x (p 0) (p 1)]
+  -- RHS = base `g₀⁻¹` trace double trace = the same linear order-zero term.
+  rw [show ((ricciModelTrace42 (I := I) g₀).op 0
+        (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+          ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀
+            - (2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₂ g₀))) =
+      ricciModelTrace42Op (I := I) g₀ 0
+        (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+          ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀
+            - (2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₂ g₀)) from rfl,
+    ricciModelTrace42Op_zero_unitModel_apply (I := I) g₀
+      (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+        ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀
+          - (2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₂ g₀)) x (p 0) (p 1),
+    cometricRaisedTrace_covGradLoweredSub_eq_ricciNeg2SectionDiffLinearEval
+      (I := I) g₀ T₁ T₂ g₁ g₂ hr1 hr2 x (p 0) (p 1)]
 
 /-- **The linearized-Ricci principal-part value identity for the model-basis Ricci trace.**  The
 linear-in-difference curvature section `linearSection g₀ g₁ g₂` is the trace of the
