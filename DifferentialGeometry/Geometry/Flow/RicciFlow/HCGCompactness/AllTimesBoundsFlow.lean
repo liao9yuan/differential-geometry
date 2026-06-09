@@ -564,6 +564,36 @@ theorem metricUniformEquivalentOnWindow_of_solutions
     ht0 hC hequiv0
     (metricLogDerivativeInput_of_solutions (I := I) S hS K β ψ t0 A hwin hA hquad hint)
 
+/-- **Lemma 3.11, eq (3.3) — fully discharged producer.** Same as
+`metricUniformEquivalentOnWindow_of_solutions` but with the `log_integrable`
+(`hint`) hypothesis discharged from the flow via `log_integrable_of_sol`. The
+remaining inputs (`hequiv0` from convergence ②, `hquad` from the curvature ①)
+are the genuine geometric content. -/
+theorem metricUniformEquivalentOnWindow_of_solutions'
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : Nat -> DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := M) D)
+    (hS : forall i : Nat, DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) (S i))
+    (K : Set M) (β ψ t0 C A : Real)
+    (gRef : SmoothRiemannianMetric I M)
+    (hwin : Set.Icc β ψ ⊆ D.regular)
+    (ht0 : t0 ∈ Set.Icc β ψ)
+    (hC : 1 <= C)
+    (hA : 0 <= A)
+    (hequiv0 :
+      forall i : Nat,
+        MetricUniformEquivalentOn (I := I) K gRef ((S i).family.metric t0) C)
+    (hquad :
+      forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ -> forall x : M, x ∈ K ->
+        forall v : TangentSpace I x,
+          |(S i).ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)| <=
+            A * ((S i).family.metric t).inner x v v) :
+    MetricUniformEquivalentOnWindow (I := I) K β ψ gRef
+      (fun i s => (S i).family.metric s)
+      (fun t : Real => metricEquivalenceFactor C A t t0) :=
+  metricUniformEquivalentOnWindow_of_solutions S hS K β ψ t0 C A gRef hwin ht0 hC hA hequiv0 hquad
+    (fun i _x _hx v hv t ht => log_integrable_of_sol (S i) (hS i) _x v hv t0 t
+      ((Set.uIcc_subset_Icc ht0 ht).trans (hwin.trans D.regular_subset)))
+
 end FixedDomain
 
 end HCGCompactness

@@ -1,6 +1,10 @@
 import Mathlib.Analysis.Calculus.ContDiff.FaaDiBruno
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.InjectivityRadius
+-- Step A honest inputs (`PointedSeqDistance`, `InjRadiusDecayInput`,
+-- `VolumeComparisonInput`) were relocated to `StepAInputs.lean` so they build
+-- independently of the S6 exp⁻¹ machinery below.
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.StepAInputs
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -32,15 +36,8 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 
-/-- Distance data for a pointed Riemannian sequence.
-
-This is intended to be the Riemannian distance associated to each stored metric.
-It is kept as theorem-facing input here because `PointedRiemannianManifold`
-does not store the emetric/vector-bundle instances needed to make `dist`
-available globally. -/
-abbrev PointedSeqDistance
-    (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) : Type _ :=
-  forall k : Nat, (X.obj k).M -> (X.obj k).M -> Real
+-- `PointedSeqDistance` relocated to `StepAInputs.lean` (re-exported via the
+-- import above).
 
 /-- Normal-chart data for one pointed Riemannian manifold, with the local
 instances unpacked from the stored HCG object. -/
@@ -99,47 +96,8 @@ def NormalTransitionDerivBound
           Ny.data.localChart.source ->
         ‖iteratedFDeriv Real p (normalTransitionMap (I := I) X Nx Ny) z‖ <= C
 
-/-- MSM135 Chapter 4, Proposition `lbl384`:
-Cheeger--Gromov--Taylor injectivity-radius decay from basepoint injectivity
-and curvature control.
-
-The field `decay` is the deep external theorem.  It is consumed by Step A
-covering and good-ball constructions. -/
-structure InjRadiusDecayInput
-    (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) where
-  baseInj : BaseInjBound (I := I) X
-  dist : PointedSeqDistance (I := I) X
-  a : Real
-  C : Real
-  a_pos : 0 < a
-  C_nonneg : 0 <= C
-  decay :
-    forall k : Nat, forall x : (X.obj k).M,
-      HasInjRadiusAt (I := I) (X.obj k) x
-        (a * (min baseInj.ρ 1) ^ Module.finrank Real E *
-          Real.exp (-C * dist k x (X.obj k).basepoint))
-
-/-- MSM135 Chapter 4 volume-comparison input, used after Proposition `lbl384`:
-the Bishop--Gromov comparison estimate gives a bounded intersection
-multiplicity `I(n,C₀)`.
-
-Mathlib may eventually provide a Bishop--Gromov theorem directly; until then,
-`ballMult` is the weakest bounded-overlap form consumed by Step A. -/
-structure VolumeComparisonInput
-    (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) where
-  dist : PointedSeqDistance (I := I) X
-  Imult : Nat
-  /-- Consumed by Step A: in any `r`-separated finite center family, at most
-  `Imult` centers can lie in a fixed controlled ball. -/
-  ballMult :
-    forall k : Nat, forall {α : Type u}, [Fintype α] -> [DecidableEq α] ->
-      forall centers : α -> (X.obj k).M, forall r : Real, 0 < r ->
-        (forall i j : α, i ≠ j ->
-          r <= dist k (centers i) (centers j)) ->
-        forall z : (X.obj k).M, forall J : Finset α,
-          (forall j : α, j ∈ J ->
-            dist k (centers j) z <= 4 * r) ->
-          J.card <= Imult
+-- `InjRadiusDecayInput` (A0) and `VolumeComparisonInput` (A0') relocated to
+-- `StepAInputs.lean` (re-exported via the import above).
 
 /-- MSM135 Chapter 4, section `lbl-2103`:
 Jacobi/Rauch comparison bounds for derivatives of normal-coordinate transition

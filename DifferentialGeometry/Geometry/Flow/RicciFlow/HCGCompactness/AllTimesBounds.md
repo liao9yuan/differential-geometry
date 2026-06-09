@@ -134,6 +134,39 @@ at one time to all times."
   exact-order bound with constant
   `sqrt (exp ((1 + 8 * Cpp^2) * timeRadius) *
     (initC^2 + (8 * Cppp^2 + 1) / (1 + 8 * Cpp^2)))`.
+- **Equation (3.3) is now closed from a Ricci-flow solution sequence.**  The
+  producer chain lives in `AllTimesBoundsFlow.lean` and the new foundational
+  curvature/metric files it leans on:
+  - ① curvature input (`TwoTensorQuadBoundOnWindow`): the general-dimension
+    operator-norm (Rayleigh) Ricci bound `|Rc(t)(V,V)| <= A * g(t)(V,V)` with
+    `A = n^2 * sqrt C`, via `twoTensorQuadBound_of_solutions` →
+    `ricciAt_unitQuad_le_of_sol` → `ricci_unitQuad_le_of_trace`
+    (`Geometry/Curvature/RicciOperatorNormBound{,Flow}.lean`,
+    `Geometry/Curvature/QuadraticFormBound.lean`).  The first factor is the
+    operator norm obtained by homogeneity, not a Hilbert–Schmidt
+    Cauchy–Schwarz factor.
+  - ② time-`0` metric equivalence from Cheeger–Gromov convergence
+    (`exists_uniform_equiv_of_metricCPConv`, now hypothesis-free: the
+    `BddAbove`/`hle` content is discharged internally by the polarization
+    bound `metricDerivNorm_le_metricDerivNormSupOn`).
+  - the fixed-vector metric-derivative identity
+    (`metricDiffCovDerivAt_zero_apply`) and the closed-manifold "all metrics
+    equivalent" head term (A) `metricUniformEquivalentOn_of_compact`, resting
+    on the lifted foundational facts `metric_lower_bound_of_compact`
+    (`Geometry/Metric/CompactMetricLowerBound.lean`) and
+    `posDef_bilin_quadratic_lower_bound`
+    (`Geometry/Metric/TensorInner/PosDefBilinQuadraticLowerBound.lean`).  These
+    generic compactness facts were deliberately lifted *out* of the Ricci-flow
+    `Evolution` layer into the `Geometry/Metric` and `Tensor` layers so the HCG
+    compactness argument does not depend on `Evolution` for non-curvature
+    content.
+  - log-integrability of the scalar `t ↦ log (g(t)(V,V))` derivative
+    (`log_integrable_of_sol`, via the family joint-bundle time-continuity of
+    the Ricci and metric tensors).
+  - The whole chain is wrapped, with no leftover analytic hypothesis, by
+    `metricUniformEquivalentOnWindow_of_solutions'`: a Ricci-flow solution
+    sequence with a uniform Riemann bound and time-`0` Cheeger–Gromov
+    convergence yields whole-window metric equivalence.
 
 ## Frontier
 
@@ -143,10 +176,13 @@ induction from the MSM135 proof, threading smoothness inputs for the higher
 time derivatives, and assembling window bounds for
 `|partial_t^q nabla^p g(t)|` when `q >= 2`.
 
-For equation (3.3), the remaining producer frontier is deriving
-`MetricLogDerivativeInput` from a Ricci-flow solution and the Ricci/Riemann
-quadratic curvature bound, specifically the estimate
-`|Rc(t)(V,V)| <= A * g(t)(V,V)`.
+Equation (3.3) is no longer a frontier: the producer
+`metricUniformEquivalentOnWindow_of_solutions'` derives whole-window metric
+equivalence from a Ricci-flow solution sequence (uniform Riemann bound +
+time-`0` Cheeger–Gromov convergence) with all analytic inputs discharged (see
+the closure bullet in Definitions).  The next equation-level frontier is
+(3.4), the order-`p` covariant-derivative bounds, whose remaining producer gap
+is described below.
 
 For equation (3.4), the screenshots give the right textbook induction.  The
 component algebra for the first Christoffel step is already available:
@@ -372,3 +408,62 @@ Christoffel-difference calculation. Verification passed, and targeted module
 verification completed. The remaining `k = 2` frontier is not this component
 bridge; it is the finite product-rule/norm estimate for the second derivative
 of the Christoffel-difference formula.
+
+2026-06-07 equation (3.3) closure: focused verification passed for
+`AllTimesBoundsFlow.lean` and the new foundational producer files
+(`Geometry/Curvature/QuadraticFormBound.lean`,
+`Geometry/Curvature/RicciOperatorNormBound.lean`,
+`Geometry/Curvature/RicciOperatorNormBoundFlow.lean`,
+`Geometry/Metric/CompactMetricLowerBound.lean`,
+`Geometry/Metric/TensorInner/PosDefBilinQuadraticLowerBound.lean`).  This
+discharges every analytic input of MSM135 equation (3.3) from a Ricci-flow
+solution sequence and packages them into the hypothesis-free producer
+`metricUniformEquivalentOnWindow_of_solutions'`.  The generic compactness
+facts behind the closed-manifold head term (A) were lifted out of the
+Ricci-flow `Evolution` layer into the `Geometry/Metric` and `Tensor` layers,
+per the architectural rule that HCG compactness must not depend on `Evolution`
+for non-curvature content.  The next frontier is the equation-(3.4) producer
+chain (the order-`p` `MetricCovOrderEvolutionInput` from Shi estimates).
+
+2026-06-07 equation (3.4) linearity backbone: focused verification and targeted
+module verification passed for two new files,
+`Tensor/RSTensor/NablaOnTensors/TotalNabla0SLinear.lean` and
+`HCGCompactness/MetricCovDerivLinear.lean`.  The first adds the generic tensor
+fact `totalNabla0SFun_smul` (scalar-homogeneity of the total covariant
+derivative), kept in the `Tensor` layer per the lift-out-of-`Evolution` rule.
+The second adds `covDerivOfField` — the same fixed-`gRef` iterated background
+covariant derivative as `metricCovDeriv`, but applied to an arbitrary covariant
+`(0,2)`-tensor field — together with the bridge
+`metricCovDeriv_eq_covDerivOfField` and the scalar-homogeneity
+`covDerivOfField_smul`.  This is the algebraic backbone of the equation-(3.4)
+evolution `∂_t (∇^p g) = -2 ∇^p Rc`: `covDerivOfField gRef p` realizes the
+`nablaRic` family from the Ricci `(0,2)`-tensor field, and `covDerivOfField_smul`
+factors the constant `-2` through every covariant-derivative step.  The three
+remaining producer pieces for `MetricCovOrderEvolutionInput.hevol`/`ric_bound`
+are: (a) the single-step *parametric* identity that `∂_t` commutes with the
+fixed background covariant derivative (`∂_t totalNabla0SFun = totalNabla0SFun
+∂_t`), the analytic heart of `hevol`; (b) packaging the raw Ricci `(0,2)` field
+`ricciTwoTensorField` as a smooth `Tensor0SField`; and (c) the schematic Shi
+estimate `|∇^p Rc| ≤ C''_p |∇^p g| + C'''_p`, obtained by converting the
+`g`-covariant Bernstein–Bando–Shi tower bound `bernsteinShi_solution_estimate`
+to the `gRef` connection via the connection-difference expansion.
+
+2026-06-07 equation (3.4) parametric Clairaut: focused verification and targeted
+module verification passed for the new file
+`Tensor/RSTensor/NablaOnTensors/TotalNabla0STimeDeriv.lean`, which adds
+`nabla0SFun_hasDerivWithinAt` and `totalNabla0SFun_hasDerivWithinAt` — the
+single-step identity that the time derivative commutes with the fixed background
+covariant derivative (piece (a) above).  The proof reuses the already-checked
+`extDerivFun` time-swap infrastructure (`FixedBaseExtDerivTimeDerivativeOn` and
+its model-space core `fixedBaseFDerivTimeDerivativeAt_of_contDiff` from
+`Bundle/PartialMfderiv`): the directional expansion
+`nabla0SFun_eval_smooth_slots` splits `∇_X α` into the scalar exterior-derivative
+term (whose time derivative is the supplied swap hypothesis) and finitely many
+correction terms evaluated at the fixed base point with parameter-independent
+slots (whose time derivatives are pointwise).  The lemma takes the swap and the
+pointwise time derivatives as hypotheses, isolating the next `hevol` frontier:
+discharging `FixedBaseExtDerivTimeDerivativeOn` for the `k`-fold covariant
+derivative `∇^k g` from the solution's joint spacetime smoothness
+(`IsSolutionOn.smoothMetric`), then the `hevol` induction over `p` (base case
+`ricciFlow_metric_hasDerivAt`, step via this Clairaut plus `covDerivOfField_smul`
+to carry the constant `-2`).
