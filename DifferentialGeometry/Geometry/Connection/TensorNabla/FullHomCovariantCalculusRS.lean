@@ -312,7 +312,65 @@ theorem slotExtendFullFib_contMDiff (g : SmoothRiemannianMetric I M) (r a c : �
       (fun x : M => TotalSpace.mk' (TensorRSModel r (a + 1) ℝ E →L[ℝ] TensorRSModel r (c + 1) ℝ E)
         (E := fun z : M => TensorRSSpace r (a + 1) I z →L[ℝ] TensorRSSpace r (c + 1) I z) x
         (slotExtendFullFib (I := I) (M := M) g r a c x (Ψ x))) := by
-  sorry
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (V₁ := fun z : M => TensorRSSpace r (a + 1) I z)
+    (V₂ := fun z : M => TensorRSSpace r (c + 1) I z)
+    (φ := fun x => slotExtendFullFib (I := I) (M := M) g r a c x (Ψ x))
+  intro D
+  have hG : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] TensorRSModel r c ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (E →L[ℝ] TensorRSModel r c ℝ E)
+        (E := fun z : M => TangentSpace I z →L[ℝ] TensorRSSpace r c I z) x
+        ((Ψ x).comp ((covGradBundleEquiv (I := I) (M := M) r a x).symm (D x)))) := by
+    apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+      (V₁ := TangentSpace I) (V₂ := fun z : M => TensorRSSpace r c I z)
+      (φ := fun x => (Ψ x).comp ((covGradBundleEquiv (I := I) (M := M) r a x).symm (D x)))
+    intro Y
+    have hH : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] TensorRSModel r a ℝ E)) ∞
+        (fun x : M => TotalSpace.mk' (E →L[ℝ] TensorRSModel r a ℝ E)
+          (E := fun z : M => TangentSpace I z →L[ℝ] TensorRSSpace r a I z) x
+          ((covGradBundleEquiv (I := I) (M := M) r a x).symm (D x))) :=
+      (covGradBundleEquiv_symm_contMDiff_totalSpace (I := I) (M := M) r a).comp D.contMDiff
+    have hstep1 : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r a ℝ E)) ∞
+        (fun x : M => TotalSpace.mk' (TensorRSModel r a ℝ E)
+          (E := fun z : M => TensorRSSpace r a I z) x
+          ((covGradBundleEquiv (I := I) (M := M) r a x).symm (D x) (Y x))) :=
+      ContMDiff.clm_bundle_apply (b := id) hH Y.contMDiff
+    have hstep2 : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r c ℝ E)) ∞
+        (fun x : M => TotalSpace.mk' (TensorRSModel r c ℝ E)
+          (E := fun z : M => TensorRSSpace r c I z) x
+          ((Ψ x) ((covGradBundleEquiv (I := I) (M := M) r a x).symm (D x) (Y x)))) :=
+      ContMDiff.clm_bundle_apply (b := id) hΨ hstep1
+    refine hstep2.congr ?_
+    intro x
+    rfl
+  letI : NormedAddCommGroup (TensorRSModel r (c + 1) ℝ E) :=
+    tensorRSModel_normedAddCommGroup r (c + 1)
+  letI : NormedSpace ℝ (TensorRSModel r (c + 1) ℝ E) :=
+    tensorRSModel_normedSpace r (c + 1)
+  letI : TopologicalSpace (TotalSpace (TensorRSModel r (c + 1) ℝ E)
+      (fun y : M => TensorRSSpace r (c + 1) I y)) :=
+    tensorRSBundle_topology r (c + 1)
+  letI : FiberBundle (TensorRSModel r (c + 1) ℝ E)
+      (fun y : M => TensorRSSpace r (c + 1) I y) :=
+    tensorRSBundle_fiber r (c + 1)
+  letI : VectorBundle ℝ (TensorRSModel r (c + 1) ℝ E)
+      (fun y : M => TensorRSSpace r (c + 1) I y) :=
+    tensorRSBundle_vector r (c + 1)
+  letI : ContMDiffVectorBundle (∞ : WithTop ℕ∞) (TensorRSModel r (c + 1) ℝ E)
+      (fun y : M => TensorRSSpace r (c + 1) I y) I := tensorRSBundle_smooth ∞ r (c + 1)
+  have hcomp :
+      ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r (c + 1) ℝ E)) ∞
+        ((covGradBundleSmoothEquiv (I := I) (M := M) r c).toDiffeomorph ∘
+          (fun x : M => (⟨x, (Ψ x).comp ((covGradBundleEquiv (I := I) (M := M) r a x).symm (D x))⟩ :
+            TotalSpace (E →L[ℝ] TensorRSModel r c ℝ E)
+              fun y : M => TangentSpace I y →L[ℝ] TensorRSSpace r c I y))) :=
+    (covGradBundleSmoothEquiv (I := I) (M := M) r c).toDiffeomorph.contMDiff.comp hG
+  refine hcomp.congr ?_
+  intro x
+  rw [Function.comp_apply,
+    covGradBundleSmoothEquiv_toDiffeomorph_apply (I := I) (M := M) r c x
+      ((Ψ x).comp ((covGradBundleEquiv (I := I) (M := M) r a x).symm (D x)))]
+  congr 1
 
 /-! ## The second-order Hom-bundle section covariant gradient field
 
@@ -496,7 +554,80 @@ theorem homTensorRSCovGradField_contMDiff (g : SmoothRiemannianMetric I M) (r a 
       (fun x : M => TotalSpace.mk' (TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r (c + 1) ℝ E)
         (E := fun z : M => TensorRSSpace r a I z →L[ℝ] TensorRSSpace r (c + 1) I z) x
         (homTensorRSCovGradFieldFib (I := I) (M := M) g r a c Ψ x)) := by
-  sorry
+  have hgrad : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] HomTensorRSModel r a c ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (E →L[ℝ] HomTensorRSModel r a c ℝ E)
+        (E := fun z : M => TangentSpace I z →L[ℝ] HomTensorRSSpace r a c I z) x
+        ((homTensorRSCovariantDerivative I M r a c (LeviCivita (I := I) g)).toFun
+          (fun y : M => (Ψ y : HomTensorRSSpace r a c I y)) x)) := by
+    haveI hcov : CovariantDerivative.ContMDiffCovariantDerivative
+        (homTensorRSCovariantDerivative I M r a c (LeviCivita (I := I) g)) ∞ := inferInstance
+    have hΨ' : ContMDiffOn I (I.prod 𝓘(ℝ, HomTensorRSModel r a c ℝ E)) ((∞ : WithTop ℕ∞) + 1)
+        (fun x : M => TotalSpace.mk' (HomTensorRSModel r a c ℝ E)
+          (E := fun z : M => HomTensorRSSpace r a c I z) x
+          ((fun y : M => (Ψ y : HomTensorRSSpace r a c I y)) x)) Set.univ := by
+      have h_le : ((∞ : WithTop ℕ∞) + 1) ≤ (∞ : WithTop ℕ∞) := by rw [ENat.coe_top_add_one]
+      exact (hΨ.of_le h_le).contMDiffOn
+    have hres := hcov.contMDiff.contMDiff
+      (σ := fun y : M => (Ψ y : HomTensorRSSpace r a c I y)) hΨ'
+    intro x
+    exact (hres x (Set.mem_univ x)).contMDiffAt Filter.univ_mem
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (V₁ := fun z : M => TensorRSSpace r a I z) (V₂ := fun z : M => TensorRSSpace r (c + 1) I z)
+    (φ := fun x => homTensorRSCovGradFieldFib (I := I) (M := M) g r a c Ψ x)
+  intro Z
+  have hG : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] TensorRSModel r c ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (E →L[ℝ] TensorRSModel r c ℝ E)
+        (E := fun z : M => TangentSpace I z →L[ℝ] TensorRSSpace r c I z) x
+        (homTensorRSCovGradDirCLM (I := I) (M := M) g r a c Ψ x (Z x))) := by
+    apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+      (V₁ := TangentSpace I) (V₂ := fun z : M => TensorRSSpace r c I z)
+      (φ := fun x => homTensorRSCovGradDirCLM (I := I) (M := M) g r a c Ψ x (Z x))
+    intro Y
+    have hstep1 : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)) ∞
+        (fun x : M => TotalSpace.mk' (TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)
+          (E := fun z : M => TensorRSSpace r a I z →L[ℝ] TensorRSSpace r c I z) x
+          (show TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x from
+            ((homTensorRSCovariantDerivative I M r a c (LeviCivita (I := I) g)).toFun
+              (fun y : M => (Ψ y : HomTensorRSSpace r a c I y)) x) (Y x))) :=
+      ContMDiff.clm_bundle_apply (b := id) hgrad Y.contMDiff
+    have hstep2 : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r c ℝ E)) ∞
+        (fun x : M => TotalSpace.mk' (TensorRSModel r c ℝ E)
+          (E := fun z : M => TensorRSSpace r c I z) x
+          ((show TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x from
+            ((homTensorRSCovariantDerivative I M r a c (LeviCivita (I := I) g)).toFun
+              (fun y : M => (Ψ y : HomTensorRSSpace r a c I y)) x) (Y x)) (Z x))) :=
+      ContMDiff.clm_bundle_apply (b := id) hstep1 Z.contMDiff
+    refine hstep2.congr ?_
+    intro x
+    congr 1
+  letI : NormedAddCommGroup (TensorRSModel r (c + 1) ℝ E) :=
+    tensorRSModel_normedAddCommGroup r (c + 1)
+  letI : NormedSpace ℝ (TensorRSModel r (c + 1) ℝ E) :=
+    tensorRSModel_normedSpace r (c + 1)
+  letI : TopologicalSpace (TotalSpace (TensorRSModel r (c + 1) ℝ E)
+      (fun y : M => TensorRSSpace r (c + 1) I y)) :=
+    tensorRSBundle_topology r (c + 1)
+  letI : FiberBundle (TensorRSModel r (c + 1) ℝ E)
+      (fun y : M => TensorRSSpace r (c + 1) I y) :=
+    tensorRSBundle_fiber r (c + 1)
+  letI : VectorBundle ℝ (TensorRSModel r (c + 1) ℝ E)
+      (fun y : M => TensorRSSpace r (c + 1) I y) :=
+    tensorRSBundle_vector r (c + 1)
+  letI : ContMDiffVectorBundle (∞ : WithTop ℕ∞) (TensorRSModel r (c + 1) ℝ E)
+      (fun y : M => TensorRSSpace r (c + 1) I y) I := tensorRSBundle_smooth ∞ r (c + 1)
+  have hcomp :
+      ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r (c + 1) ℝ E)) ∞
+        ((covGradBundleSmoothEquiv (I := I) (M := M) r c).toDiffeomorph ∘
+          (fun x : M => (⟨x, homTensorRSCovGradDirCLM (I := I) (M := M) g r a c Ψ x (Z x)⟩ :
+            TotalSpace (E →L[ℝ] TensorRSModel r c ℝ E)
+              fun y : M => TangentSpace I y →L[ℝ] TensorRSSpace r c I y))) :=
+    (covGradBundleSmoothEquiv (I := I) (M := M) r c).toDiffeomorph.contMDiff.comp hG
+  refine hcomp.congr ?_
+  intro x
+  rw [Function.comp_apply,
+    covGradBundleSmoothEquiv_toDiffeomorph_apply (I := I) (M := M) r c x
+      (homTensorRSCovGradDirCLM (I := I) (M := M) g r a c Ψ x (Z x))]
+  congr 1
 
 /-! ## The directional and section-level covariant product rule for the full Hom-bundle action
 
