@@ -254,71 +254,29 @@ theorem exists_pointwiseTensorCurvRS_diffCurvAndRemainder_fullSum_gradedCurvJet_
           IsGradedCurvJetRS (I := I) (M := M) g S (c s) 0 1 Gcd ∧
           IsGradedCurvJetRS (I := I) (M := M) g S (c s) 0 3 Grem := by
   classical
-  -- The full-sum seed is read off the `m = 0` graded base split `Curv = Gcurv₀ + GcurvDeriv₀ + Grem₀`
-  -- (`pointwiseTensorCurvRS_gradedCurvJet_field_base`, with `Gcurv₀` of shape `(1, 1)`, `GcurvDeriv₀`
-  -- of shape `(0, 1)`, `Grem₀` of shape `(2, 1)`) together with the rank-`r` pure-Riemann section
-  -- graded jet `GcurvSectionRS_gradedCurvJet` (`GcurvSectionRS` of shape `(1, 1)`):
-  --   `Gcd  := GcurvDeriv₀`                          (already the required `(0, 1)` shape),
-  --   `Grem := Gcurv₀ + Grem₀ − GcurvSectionRS`,     so the section split anchors on `GcurvSectionRS`,
-  -- and `Grem` is a `(0, 3)` jet because every component — `Gcurv₀ (1,1)`, `Grem₀ (2,1)`,
-  -- `−GcurvSectionRS (1,1)` — widens (`IsGradedCurvJetRS_widen`, `_neg`) to the full-sum `(0, 3)` window
-  -- (orders `0 … k + 2`), and the graded family is additive (`IsGradedCurvJetRS.add`).
-  obtain ⟨cBase, hcBase_nn, hbase⟩ :=
-    pointwiseTensorCurvRS_gradedCurvJet_field_base (I := I) (M := M) g r
-  obtain ⟨cS, hcS_nn, hScurv⟩ := GcurvSectionRS_gradedCurvJet (I := I) (M := M) g r
-  -- The combined `(0, 3)` constant family: `Grem` is the sum of three `(0, 3)` jets whose constants are
-  -- the per-`s` widenings of `cBase s` (twice, for `Gcurv₀` and `Grem₀`) and `cS s` (for the negated
-  -- `GcurvSectionRS`); two `.add`s give exactly the family below.
-  refine ⟨fun s k => Real.sqrt (2 * ((Real.sqrt (2 * ((cBase s k) ^ 2 + (cBase s k) ^ 2))) ^ 2 +
-      (cS s k) ^ 2)), fun s k => Real.sqrt_nonneg _, fun s S => ?_⟩
-  obtain ⟨Gcurv₀, GcurvDeriv₀, Grem₀, hsplit, hGcurv₀, hGcurvDeriv₀, hGrem₀⟩ := hbase s S
-  -- The chosen witness family `c s k` dominates `cBase s k` (`8(cBase)² + 2(cS)² ≥ (cBase)²`,
-  -- `cBase ≥ 0`), so the `(0, 1)` differentiated-curvature jet `GcurvDeriv₀` re-enters at family `c s`.
-  have hcmono : ∀ k, cBase s k ≤ Real.sqrt (2 * ((Real.sqrt (2 * ((cBase s k) ^ 2 +
-      (cBase s k) ^ 2))) ^ 2 + (cS s k) ^ 2)) := by
-    intro k
-    have hinner : (Real.sqrt (2 * ((cBase s k) ^ 2 + (cBase s k) ^ 2))) ^ 2 =
-        2 * ((cBase s k) ^ 2 + (cBase s k) ^ 2) := by
-      rw [Real.sq_sqrt]; positivity
-    have hle : cBase s k ^ 2 ≤ 2 * ((Real.sqrt (2 * ((cBase s k) ^ 2 + (cBase s k) ^ 2))) ^ 2 +
-        (cS s k) ^ 2) := by
-      rw [hinner]; nlinarith [sq_nonneg (cBase s k), sq_nonneg (cS s k)]
-    calc cBase s k ≤ |cBase s k| := le_abs_self _
-      _ = Real.sqrt ((cBase s k) ^ 2) := by rw [Real.sqrt_sq_eq_abs]
-      _ ≤ Real.sqrt (2 * ((Real.sqrt (2 * ((cBase s k) ^ 2 + (cBase s k) ^ 2))) ^ 2 +
-            (cS s k) ^ 2)) := Real.sqrt_le_sqrt hle
-  -- `Gcd := GcurvDeriv₀` is the `(0, 1)` differentiated-curvature jet, bumped to the witness family.
-  refine ⟨GcurvDeriv₀, Gcurv₀ + Grem₀ - GcurvSectionRS (I := I) (M := M) g r s S, ?_,
-    IsGradedCurvJetRS.mono_const (I := I) (M := M) g S (hcBase_nn s) hcmono hGcurvDeriv₀, ?_⟩
-  · -- The section split anchors on `GcurvSectionRS`: `GcurvSectionRS + GcurvDeriv₀ + (Gcurv₀ + Grem₀
-    -- − GcurvSectionRS) = Gcurv₀ + GcurvDeriv₀ + Grem₀ = Curv S`.
-    rw [hsplit]; abel
-  · -- `Grem`'s `(0, 3)` graded jet: widen each component to `(0, 3)` and add.
-    have hGcurv₀_03 : IsGradedCurvJetRS (I := I) (M := M) g S (cBase s) 0 3 Gcurv₀ :=
-      IsGradedCurvJetRS_widen (I := I) (M := M) g S (by omega : (0 : ℕ) ≤ 1)
-        (by omega : 1 + 1 ≤ 0 + 3) hGcurv₀
-    have hGrem₀_03 : IsGradedCurvJetRS (I := I) (M := M) g S (cBase s) 0 3 Grem₀ :=
-      IsGradedCurvJetRS_widen (I := I) (M := M) g S (by omega : (0 : ℕ) ≤ 2)
-        (by omega : 2 + 1 ≤ 0 + 3) hGrem₀
-    have hGScurv_03 : IsGradedCurvJetRS (I := I) (M := M) g S (cS s) 0 3
-        (GcurvSectionRS (I := I) (M := M) g r s S) :=
-      IsGradedCurvJetRS_widen (I := I) (M := M) g S (by omega : (0 : ℕ) ≤ 1)
-        (by omega : 1 + 1 ≤ 0 + 3) (hScurv s S)
-    have hNegGScurv_03 : IsGradedCurvJetRS (I := I) (M := M) g S (cS s) 0 3
-        (-(GcurvSectionRS (I := I) (M := M) g r s S)) :=
-      IsGradedCurvJetRS_neg (I := I) (M := M) g S hGScurv_03
-    -- `Gcurv₀ + Grem₀` is a `(0, 3)` jet; adding the negated `GcurvSectionRS` gives the target.
-    have hsum1 : IsGradedCurvJetRS (I := I) (M := M) g S
-        (fun k => Real.sqrt (2 * ((cBase s k) ^ 2 + (cBase s k) ^ 2))) 0 3 (Gcurv₀ + Grem₀) :=
-      IsGradedCurvJetRS.add (I := I) (M := M) g S hGcurv₀_03 hGrem₀_03
-    have hsum2 : IsGradedCurvJetRS (I := I) (M := M) g S
-        (fun k => Real.sqrt (2 * ((Real.sqrt (2 * ((cBase s k) ^ 2 + (cBase s k) ^ 2))) ^ 2 +
-          (cS s k) ^ 2))) 0 3 (Gcurv₀ + Grem₀ + -(GcurvSectionRS (I := I) (M := M) g r s S)) :=
-      IsGradedCurvJetRS.add (I := I) (M := M) g S hsum1 hNegGScurv_03
-    -- Rewrite the literal subtraction as the `+ neg` form; the witnessed family is exactly `hsum2`'s.
-    rw [show Gcurv₀ + Grem₀ - GcurvSectionRS (I := I) (M := M) g r s S =
-        Gcurv₀ + Grem₀ + -(GcurvSectionRS (I := I) (M := M) g r s S) from by abel]
-    exact hsum2
+  -- The full-sum seed reads off the genuine intrinsic split directly: the concrete carriers are
+  --   `Gcd  := diffCurvSectionRS g r s S`                                   (the `(∇R) S` field,
+  --      shape `(0, 1)` sorry-free by `exists_diffCurvSectionRS_gradedCurvJet`), and
+  --   `Grem := Curv S − GcurvSectionRS g r s S − diffCurvSectionRS g r s S` (the moving-frame
+  --      remainder, the SOUND full-sum shape `(0, 3)` by the iterated-Ricci remainder core
+  --      `exists_pointwiseTensorCurvRS_subGcurvSubDiffCurv_fullSum_gradedCurvJet`),
+  -- so the section split `Curv S = GcurvSectionRS + diffCurvSectionRS + (Curv S − GcurvSectionRS −
+  -- diffCurvSectionRS)` is `abel`. No `(2, 1)` order-separated remainder is ever read.
+  obtain ⟨cDiff, hcDiff_nn, hdiff⟩ := exists_diffCurvSectionRS_gradedCurvJet (I := I) (M := M) g r
+  obtain ⟨cRem, hcRem_nn, hrem⟩ :=
+    exists_pointwiseTensorCurvRS_subGcurvSubDiffCurv_fullSum_gradedCurvJet (I := I) (M := M) g r
+  refine ⟨fun s k => max (cDiff s k) (cRem s k),
+    fun s k => le_trans (hcDiff_nn s k) (le_max_left _ _), fun s S => ?_⟩
+  refine ⟨diffCurvSectionRS (I := I) (M := M) g r s S,
+    pointwiseTensorCurvRS (I := I) (M := M) g r s S -
+      GcurvSectionRS (I := I) (M := M) g r s S -
+      diffCurvSectionRS (I := I) (M := M) g r s S, ?_, ?_, ?_⟩
+  · -- The section split anchors on the two concrete carriers; the literal subtraction makes it `abel`.
+    abel
+  · -- `Gcd`'s `(0, 1)` graded jet, bumped to the common per-order family.
+    exact (hdiff s S).mono_const (I := I) (M := M) g S (hcDiff_nn s) (fun k => le_max_left _ _)
+  · -- `Grem`'s `(0, 3)` graded jet, bumped to the common per-order family.
+    exact (hrem s S).mono_const (I := I) (M := M) g S (hcRem_nn s) (fun k => le_max_right _ _)
 
 /-- **The rank-`r` combined differentiated-curvature-and-remainder full-sum graded curvature-jet split
 (posited general-rank curvature child, the sound full-sum form).** The contravariant-rank-`r`,
