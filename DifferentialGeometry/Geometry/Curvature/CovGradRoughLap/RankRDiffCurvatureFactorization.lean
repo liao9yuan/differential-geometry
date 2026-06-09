@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldCovariantCalculusRS
+import DifferentialGeometry.Geometry.Connection.TensorNabla.SecondOrderHomBundle
 import DifferentialGeometry.Geometry.Connection.SingleSlotOperatorFiberNormBound
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RankRPureRCurvatureTower
 
@@ -266,6 +267,76 @@ theorem riemannianFiberNormSq_appFullRS_clm_apply_le
           · exact φg.le_opNorm v
     _ = ‖φg‖ ^ 2 * ‖v‖ ^ 2 := by ring
 
+/-! ## The directional and section-level covariant product rule for the full Hom-bundle action
+
+The covariant derivative of the full Hom-bundle action `appFullRS Ψ W` (fibre value `Ψ x (W x)`) splits
+— directionally and at a point — into the second-order Hom-bundle Leibniz
+```
+∇_v (Ψ · W) = (∇^Hom_v Ψ)(W x) + Ψ x (∇_v W),
+```
+an equation of `(r, c)`-tensors, where `∇^Hom Ψ = homTensorRSCovariantDerivative (LeviCivita g) Ψ`
+(`SecondOrderHomBundle`) is the second-order Hom-bundle covariant derivative of `Ψ` and
+`∇_v W = tensorCovDerivAt g r a W x v` is the `(r, a)`-tensor directional derivative.  This is the exact
+full-fibre analogue of the codomain-only `tensorCovDerivAt_appCcRS_eq`, lifted from the post-composition
+to the genuine full Hom-bundle action through the second-order Hom-bundle covariant derivative built in
+`SecondOrderHomBundle`. -/
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- **The directional covariant product rule for the full Hom-bundle action.** For a smooth full
+Hom-bundle field `Ψ` (smoothness witnessed by `hΨ`) and a smooth `(r, a)`-tensor `W`, the directional
+covariant derivative of the full Hom-bundle action `appFullRS Ψ hΨ W` decomposes as
+```
+∇_v (Ψ · W) = (∇^Hom_v Ψ)(W x) + Ψ x (∇_v W).
+```
+**Proof.** The fibre value of `appFullRS Ψ hΨ W` is `Ψ y (W y)` (`appFullRS_toSection`), so its directional
+covariant derivative is `tensorRSCovariantDerivative … (fun y => Ψ y (W y)) x v`; the raw-section apply of
+the second-order Hom-bundle covariant derivative
+(`homTensorRSCovariantDerivative_apply_of_mdifferentiableAt`) reads this as
+`(∇^Hom_v Ψ)(W x) + Ψ x (∇_v W)` (rearranging the product-rule subtraction). -/
+theorem tensorCovDerivAt_appFullRS_eq (g : SmoothRiemannianMetric I M) (r a c : ℕ)
+    (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x)
+    (hΨ : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)
+        (E := fun z : M => TensorRSSpace r a I z →L[ℝ] TensorRSSpace r c I z) x (Ψ x)))
+    (W : SmoothCcTensor g r a) (x : M) (v : E) :
+    (show TensorRSSpace r c I x from
+        tensorCovDerivAt (I := I) (M := M) g r c (appFullRS (I := I) (M := M) g r a c Ψ hΨ W) x v) =
+      (show TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x from
+          homTensorRSCovariantDerivative I M r a c (LeviCivita (I := I) g) Ψ x v) (W.toSection x) +
+        (show TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x from Ψ x)
+          (show TensorRSSpace r a I x from tensorCovDerivAt (I := I) (M := M) g r a W x v) := by
+  -- The fibre field of `appFullRS Ψ hΨ W` is `y ↦ Ψ y (W y)`.
+  have hval : (fun y : M => (appFullRS (I := I) (M := M) g r a c Ψ hΨ W).toSection y) =
+      (fun y : M => (show TensorRSSpace r a I y →L[ℝ] TensorRSSpace r c I y from Ψ y) (W.toSection y)) := by
+    funext y; rw [appFullRS_toSection (I := I) (M := M) g r a c Ψ hΨ W y]
+  -- Differentiability of `Ψ`, `W`, and the constant-`v` direction field at `x`.
+  have hΨ_diff : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E))
+      (fun y : M => TotalSpace.mk' (TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)
+        (E := fun z : M => TensorRSSpace r a I z →L[ℝ] TensorRSSpace r c I z) y (Ψ y)) x :=
+    hΨ.contMDiffAt.mdifferentiableAt (by simp)
+  have hW_diff : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r a ℝ E))
+      (fun y : M => TotalSpace.mk' (TensorRSModel r a ℝ E)
+        (E := fun z : M => TensorRSSpace r a I z) y (W.toSection y)) x :=
+    W.toSection.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
+  obtain ⟨Vsec, hVx⟩ := ContMDiffSection.exists_eq_at (I := I) (F := E)
+    (V := (TangentSpace I : M → Type _)) (n := (⊤ : ℕ∞)) x v
+  have hV_diff : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun y : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) y (Vsec y)) x :=
+    Vsec.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
+  -- Rewrite the LHS directional derivative through the Hom product rule applied at the direction `v`.
+  rw [tensorCovDerivAt_def (I := I) (M := M) g r c (appFullRS (I := I) (M := M) g r a c Ψ hΨ W) x v,
+    hval]
+  rw [show v = (Vsec : Π z : M, TangentSpace I z) x from hVx.symm]
+  -- `homTensorRSCovariantDerivative … Ψ x (Vsec x) (W x) = ∇^{(r,c)}(Ψ·W) − Ψ(∇^{(r,a)} W)`.
+  have hprod := homTensorRSCovariantDerivative_apply_of_mdifferentiableAt I M r a c
+    (LeviCivita (I := I) g) Ψ (fun y : M => W.toSection y) (fun y : M => Vsec y)
+    hΨ_diff hW_diff hV_diff
+  -- Rearrange `∇^{(r,c)}(Ψ·W) = (∇^Hom Ψ)(W) + Ψ(∇^{(r,a)} W)`.
+  rw [eq_sub_iff_add_eq] at hprod
+  rw [tensorCovDerivAt_def (I := I) (M := M) g r a W x ((Vsec : Π z : M, TangentSpace I z) x)]
+  rw [← hprod]
+
 /-! ## The `(∇R)·` factorisation of the order-`1` moving-centre pure-Riemann trace (precise child)
 
 The order-`1` moving-centre pure-Riemann differentiated trace `genuinePureRDiffOpRS g r 1 rr` is the
@@ -314,18 +385,19 @@ Hom-bundle covariant product rule for the abstract second-order Hom-bundle
 connections `tensorCov g r rr`, `tensorCov g r (rr + 1)`), and fact (ii) needs the pointwise smoothness
 route `contMDiff_clm_section_of_pointwise` lifted to that same abstract Hom-bundle.
 
-**Precise missing prerequisite (verified).** Both facts require the generic Hom-bundle covariant
-derivative `HomConnectionGen.homBundleCovariantDerivativeGen` *instantiated on the second-order Hom-bundle*
-`Hom(TensorRSSpace r rr, TensorRSSpace r (rr + 1))`; but that bundle carries **no** `TopologicalSpace
-(TotalSpace …)` / `FiberBundle` / `VectorBundle` / `ContMDiffVectorBundle` instance, nor a *computable*
-`NormedAddCommGroup`/`NormedSpace` on its model `TensorRSModel r rr ℝ E →L TensorRSModel r (rr + 1) ℝ E`
-(unlike the first-order `Hom(Tensor0S r, Tensor0S s)` carrier `tensorRSCovariantDerivative`, whose
-`Tensor0S` source/target bundles have the full global instance suite).  Building that second-order
-Hom-bundle instance tower (the `Hom(TensorRS, TensorRS)` analogue of the entire `Tensor0SBundle` instance
-suite — total-space topology, fibre bundle, vector bundle, smooth vector bundle, and the canonical
-computable Hom-model normed structure) is the genuine prerequisite, absent below this file; it is a
-multi-file infrastructure node.  Posited here as one precise true child.  Consumers transitively depend on
-`sorryAx`.
+**Prerequisite (now built).** Both facts require the generic Hom-bundle covariant derivative
+`HomConnectionGen.homBundleCovariantDerivativeGen` *instantiated on the second-order Hom-bundle*
+`Hom(TensorRSSpace r rr, TensorRSSpace r (rr + 1))`.  That instance tower — the total-space topology,
+fibre bundle, vector bundle, smooth vector bundle, the induced covariant derivative, and the canonical
+computable Hom-model normed structure — is **now built** in
+`DifferentialGeometry.Geometry.Connection.TensorNabla.SecondOrderHomBundle`
+(`HomTensorRSModel` / `HomTensorRSSpace` + `homTensorRSCovariantDerivative` +
+`homTensorRSCovariantDerivative_apply{,_of_mdifferentiableAt}`), and the directional full-Hom product
+rule `tensorCovDerivAt_appFullRS_eq` (`∇_v(Ψ·W) = (∇^Hom_v Ψ)(W x) + Ψ x (∇_v W)`) is *proved* above over
+it.  Over those, the remaining genuinely-irreducible content is the order-`0` full-Hom factorisation
+`genuinePureREndo0RS = appFullRS Φ₀` with `Φ₀` smooth (the valence-`r` mirror of the *proved* rank-`0`
+`exists_pureRGenuineDiffOp_base_appCc`) and the resulting `∇W` cancellation.  Posited here as one precise
+true child.  Consumers transitively depend on `sorryAx`.
 
 **Non-vacuity.** A degenerate factorisation `Θ ≡ 0` is rejected on any non-flat manifold: the order-`1`
 trace `genuinePureRDiffOpRS g r 1 rr W` is the genuine differentiated curvature `(∇R) W`, genuinely
