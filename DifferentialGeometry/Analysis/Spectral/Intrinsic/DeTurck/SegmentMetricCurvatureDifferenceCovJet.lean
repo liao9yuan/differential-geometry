@@ -6,6 +6,8 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.LiftedSectionCovaria
 import DifferentialGeometry.Geometry.Connection.ConnectionDifferenceQuadraticTraceProduct
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParallelRankReducingContractionGrid
 import DifferentialGeometry.Tensor.RSTensor.Derivation.Contract
+import DifferentialGeometry.Tensor.RSTensor.Coordinates.CoordinateBasis
+import DifferentialGeometry.Geometry.Metric.InverseMetricField
 import DifferentialGeometry.Geometry.Connection.Realization.SmoothSections
 
 /-! # The curvature-trace covariant-jet reduction of the sealed Ricci–DeTurck curvature difference
@@ -120,63 +122,80 @@ noncomputable def modelRankCast {m n : ℕ} (h : m = n) :
   (ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ
     (finCongr h)).toContinuousLinearEquiv.toContinuousLinearMap
 
-/-- **The fixed model-level `−2` model-basis double-trace map `(0, 4 + a) → (0, 2 + a)`.**  The
-base-point-independent continuous-linear map on the model fibre `Tensor0SModel` that contracts the
-leading two of the `4 + a` model slots of a model `(0, 4 + a)`-tensor against the fixed Euclidean model
-basis `eᵢ := chartModelBasis E i` (feeding `eᵢ` into the two leading slots via two iterated
-`model_interior_product` interior products) and sums over `i`, scaled by `−2`:
+/-- **The `−2` double-trace map against a vector tuple `(0, 4 + a) → (0, 2 + a)`.**  The model-level
+continuous-linear map on the model fibre `Tensor0SModel` that contracts the leading two of the `4 + a`
+model slots of a model `(0, 4 + a)`-tensor against a *given* tuple of vectors `vᵢ ∈ E` (feeding `vᵢ`
+into the two leading slots via two iterated `model_interior_product` interior products) and sums over
+`i`, scaled by `−2`:
 ```
-modelTrace42Map a D = (-2) • ∑ᵢ D(eᵢ, eᵢ, ·).
+modelTrace42MapVec a v D = (-2) • ∑ᵢ D(vᵢ, vᵢ, ·).
 ```
-It is a *fixed* model-level CLM — no manifold, no metric — the model image of the `−2` model-basis Ricci
-trace.  The two interior products `model_interior_product (2 + a) eᵢ ∘ model_interior_product (3 + a) eᵢ`
-feed `eᵢ` into the first two model slots (chained across the slot-count rank casts `modelRankCast`);
-the outer sum runs over the fixed model basis. -/
-noncomputable def modelTrace42Map (a : ℕ) :
+The two interior products `model_interior_product (2 + a) vᵢ ∘ model_interior_product (3 + a) vᵢ`
+feed `vᵢ` into the first two model slots (chained across the slot-count rank casts `modelRankCast`);
+the outer sum runs over the index set.  When `vᵢ := ♯ eᵢ` is the `g₀`-raised `E`-orthonormal coframe
+`eᵢ := chartModelBasis E i` (the cometric `g₀⁻¹ = ∑ᵢ ♯eᵢ ⊗ ♯eᵢ`), this is the **intrinsic** `g₀⁻¹`
+double trace of the two leading covariant slots — base-point-dependent only through the raised vectors,
+which vary smoothly, with NO dependence on a chart-selected frame. -/
+noncomputable def modelTrace42MapVec (a : ℕ) (v : Fin (Module.finrank ℝ E) → E) :
     Tensor0SBundle.Tensor0SModel (4 + a) ℝ E →L[ℝ] Tensor0SBundle.Tensor0SModel (2 + a) ℝ E :=
   (-2 : ℝ) • ∑ i : Fin (Module.finrank ℝ E),
-    (Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) (2 + a)
-          (Integral.Measure.chartModelBasis E i)).comp
+    (Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) (2 + a) (v i)).comp
       ((modelRankCast (E := E) (by omega : (3 + a) = (2 + a) + 1)).comp
-        ((Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) (3 + a)
-            (Integral.Measure.chartModelBasis E i)).comp
+        ((Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) (3 + a) (v i)).comp
           (modelRankCast (E := E) (by omega : (4 + a) = (3 + a) + 1))))
 
-/-- **The fibrewise `−2` model-basis double-trace fibre operator.**  At a base point `x`, the
-`−2`-scaled fixed model double trace transported through the fibre/model continuous-linear equivalence
+/-- **The intrinsic `g₀`-raised model-basis vector field `♯ eᵢ : x ↦ ♯ eᵢ(x)`.**  The `g₀`-raised
+(`inverseMetricSharpFib`, the smooth musical `♯`) of the `i`-th `E`-orthonormal coframe covector
+`eᵢ := chartModelBasis E i` (lifted from the ambient functional `coframeOfBasis (chartModelBasis E) i :
+E →L ℝ` into the cotangent fibre `Tensor0SSpace 1 I x`).  As `i` ranges over the `E`-orthonormal
+coframe, `∑ᵢ ♯eᵢ(x) ⊗ ♯eᵢ(x)` is the cometric `g₀⁻¹(x)` (basis-independent); the raised vectors
+`♯eᵢ(x) ∈ TangentSpace I x` depend smoothly on `x` (through `g₀⁻¹`), with NO chart-selected,
+non-`∇₀`-parallel ambient basis appearing in the contraction. -/
+noncomputable def cometricRaisedBasisVec (g₀ : SmoothRiemannianMetric I M) (x : M)
+    (i : Fin (Module.finrank ℝ E)) : TangentSpace I x :=
+  inverseMetricSharpFib (I := I) g₀ x
+    ((Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 1 x).symm
+      (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+        (Tensor0SBundle.coframeOfBasis (Integral.Measure.chartModelBasis E) i)))
+
+/-- **The fibrewise `−2` intrinsic `g₀⁻¹` double-trace fibre operator.**  At a base point `x`, the
+`−2`-scaled cometric double trace `modelTrace42MapVec a (♯e·(x))` (the leading-two-slot contraction
+against the `g₀`-raised coframe) transported through the fibre/model continuous-linear equivalence
 `tensor0SSpace_continuousLinearEquiv`: a continuous-linear map between tensor fibres
 `Tensor0SSpace (4 + a) I x →L Tensor0SSpace (2 + a) I x`, i.e. a `(0, 4 + a) → (0, 2 + a)` fibre map.
-Conjugating the fixed `modelTrace42Map a` by the bundle/model equivalence is the same construction as
-the algebraic trace `Tensor0SBundle.contract_trace` (a fixed model CLM transported through the fibre
-equivalence). -/
+It reads only the fibre value `D(x)` (value-local) and depends on the background metric `g₀` only
+through the cometric `g₀⁻¹(x)` — NO chart-selected, non-`∇₀`-parallel ambient basis enters. -/
 noncomputable def ricciModelTrace42Fib (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (x : M) :
     Tensor0SBundle.Tensor0SSpace (4 + a) I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (2 + a) I x :=
   (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (2 + a) x).symm.toContinuousLinearMap.comp
-    ((modelTrace42Map (E := E) a).comp
+    ((modelTrace42MapVec (E := E) a
+        (fun i => (cometricRaisedBasisVec (I := I) g₀ x i : E))).comp
       (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (4 + a) x).toContinuousLinearMap)
 
 set_option linter.unusedSectionVars false in
-/-- **The model image of the fibre operator is the fixed model double trace.**  `toModel` intertwines
-`ricciModelTrace42Fib` with the fixed model-level `modelTrace42Map`:
-`toModel (ricciModelTrace42Fib g₀ a x D) = modelTrace42Map a (toModel D)`.  Definitional, since
-`Tensor0SSpace.toModel = tensor0SSpace_continuousLinearEquiv` and the equivalence is `id`. -/
+/-- **The model image of the fibre operator is the intrinsic raised double trace.**  `toModel`
+intertwines `ricciModelTrace42Fib` with the model-level `modelTrace42MapVec` against the `g₀`-raised
+coframe:
+`toModel (ricciModelTrace42Fib g₀ a x D) = modelTrace42MapVec a (♯e·(x)) (toModel D)`.  Definitional,
+since `Tensor0SSpace.toModel = tensor0SSpace_continuousLinearEquiv` and the equivalence is `id`. -/
 @[simp] theorem ricciModelTrace42Fib_toModel (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace (4 + a) I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (ricciModelTrace42Fib (I := I) g₀ a x D) =
-      modelTrace42Map (E := E) a (Tensor0SBundle.Tensor0SSpace.toModel D) := rfl
+      modelTrace42MapVec (E := E) a (fun i => (cometricRaisedBasisVec (I := I) g₀ x i : E))
+        (Tensor0SBundle.Tensor0SSpace.toModel D) := rfl
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **(POSIT — base-point smoothness of the fixed model-basis double-trace operator field.)**  The
+/-- **(POSIT — base-point smoothness of the intrinsic `g₀⁻¹` double-trace operator field.)**  The
 fibre field `x ↦ ricciModelTrace42Fib g₀ a x` is a smooth section of the `(4 + a, 2 + a)`-tensor bundle.
-This is the standard smoothness of a *fixed* model-level continuous-linear map transported through the
-bundle/model trivialization — the exact analogue of the on-disk algebraic-trace smoothness
-`Tensor0SBundle.contract_TensorRSField` (which proves precisely this for the fixed model trace
-`model_contract_trace`, via `Bundle.contMDiffAt_section` + the trivialization-frame compatibility
-`contract_trace_trivialization_eq`).  Here the fixed model map is `modelTrace42Map a` (the `−2`
-model-basis double trace, also a finite sum over the fixed Euclidean model basis), so the same
-trivialization-frame argument applies verbatim.  Its body is `sorry`: the genuine
-trivialization-frame smoothness of the fixed model-basis double-trace operator field (the model-basis
-analogue of `contract_TensorRSField`'s smooth-section skeleton). -/
+The fibre map is the leading-two-slot contraction against the cometric `g₀⁻¹(x) = ∑ᵢ ♯eᵢ(x) ⊗ ♯eᵢ(x)`;
+the `g₀`-raised coframe vectors `♯eᵢ(x)` depend smoothly on `x` (`inverseMetricSharpField_contMDiff`,
+the smooth inverse-metric musical), and the model double-interior-product against a *smooth* vector
+tuple is smooth (the `model_interior_bilinear` smooth-bilinear evaluation, the exact mechanism the
+on-disk smooth vector-contraction field `contract_covariantField` uses, lifted to the bundle by
+`contMDiff_clm_section_of_pointwise`).  Its body is `sorry`: the genuine smoothness of the intrinsic
+`g₀⁻¹` double-trace operator field — the cometric-raised analogue of `contract_covariantField`'s
+smooth-section skeleton, summed over the coframe.  (NO chart-selected, non-`∇₀`-parallel ambient basis
+appears; the smoothness is genuinely intrinsic, through the smooth cometric.) -/
 theorem ricciModelTrace42Fib_contMDiff (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel (4 + a) (2 + a) ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel (4 + a) (2 + a) ℝ E)
@@ -184,10 +203,11 @@ theorem ricciModelTrace42Fib_contMDiff (g₀ : SmoothRiemannianMetric I M) (a : 
         (ricciModelTrace42Fib (I := I) g₀ a x)) :=
   sorry
 
-/-- **The fixed double-trace operator field as a smooth compactly-supported `(4 + a, 2 + a)`-tensor.**
-The fibre value at `x` is `ricciModelTrace42Fib g₀ a x` (smooth by `ricciModelTrace42Fib_contMDiff`); on
-the closed manifold it has compact support.  This is the *fixed* smooth operator field whose
-operator-field action contracts the leading two slots against the fixed model basis (scaled by `−2`). -/
+/-- **The intrinsic `g₀⁻¹` double-trace operator field as a smooth compactly-supported
+`(4 + a, 2 + a)`-tensor.**  The fibre value at `x` is `ricciModelTrace42Fib g₀ a x` (smooth by
+`ricciModelTrace42Fib_contMDiff`); on the closed manifold it has compact support.  This is the smooth
+operator field whose operator-field action contracts the leading two covariant slots against the
+cometric `g₀⁻¹(x)` (scaled by `−2`). -/
 noncomputable def ricciModelTrace42Field (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
     Integral.L2.SmoothCcTensor g₀ (4 + a) (2 + a) where
   toSection :=
@@ -205,18 +225,20 @@ set_option linter.unusedSectionVars false in
       (show Tensor0SBundle.TensorRSSpace (4 + a) (2 + a) I x from
         ricciModelTrace42Fib (I := I) g₀ a x) := rfl
 
-/-- **The section-level `−2` model-basis Ricci-trace operator `(0, 4 + a) → (0, 2 + a)`.**  The
-genuine building block of the model-basis Ricci-trace parallel contraction: the operator at
+/-- **The section-level `−2` intrinsic `g₀⁻¹` Ricci-trace operator `(0, 4 + a) → (0, 2 + a)`.**  The
+genuine building block of the intrinsic `g₀⁻¹` Ricci-trace parallel contraction: the operator at
 gradient-shift `a` that contracts the leading two of the `4 + a` covariant slots of a smooth
-`(0, 4 + a)`-tensor against the fixed Euclidean model basis (the model-basis double trace `∑ᵢ D(eᵢ, eᵢ,
-·)`) and scales by `−2`, producing a smooth compactly-supported `(0, 2 + a)`-tensor.  This is the
-rank-reducing metric-trace contraction the Ricci difference arm needs (the `−2` model-basis curvature
-trace lowering rank `4 + a → 2 + a`).
+`(0, 4 + a)`-tensor against the cometric `g₀⁻¹` (the `g₀⁻¹` double trace `∑ᵢ D(♯eᵢ, ♯eᵢ, ·)`, with
+`♯eᵢ` the `g₀`-raised `E`-orthonormal coframe) and scales by `−2`, producing a smooth
+compactly-supported `(0, 2 + a)`-tensor.  This is the rank-reducing metric-trace contraction the Ricci
+difference arm needs (the `−2` `g₀⁻¹` curvature trace lowering rank `4 + a → 2 + a`); it depends on the
+background metric `g₀` only through the cometric, with NO chart-selected ambient basis.
 
-It is constructed concretely as the operator-field action `appCcRS` of the *fixed* smooth double-trace
-operator field `ricciModelTrace42Field g₀ a` (the fixed model CLM `modelTrace42Map a` transported
-through the bundle/model equivalence) on the input `(0, 4 + a)`-tensor — the same smooth-section route
-as the algebraic trace `contractCcTensor` and the curvature operator-field action `appCc`. -/
+It is constructed concretely as the operator-field action `appCcRS` of the smooth `g₀⁻¹` double-trace
+operator field `ricciModelTrace42Field g₀ a` (the cometric-raised model map `modelTrace42MapVec a
+(♯e·(x))` transported through the bundle/model equivalence) on the input `(0, 4 + a)`-tensor — the same
+smooth-section route as the algebraic trace `contractCcTensor` and the curvature operator-field action
+`appCc`. -/
 noncomputable def ricciModelTrace42Op (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
     Integral.L2.SmoothCcTensor g₀ 0 (4 + a) → Integral.L2.SmoothCcTensor g₀ 0 (2 + a) :=
   fun T =>
@@ -252,13 +274,17 @@ theorem ricciModelTrace42Op_sub (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     show (-B) = (-1 : ℝ) • B by rw [neg_one_smul],
     DifferentialGeometry.Integral.Connection.appCcRS_smul_right, neg_one_smul, ← sub_eq_add_neg]
 
-/-- **(POSIT — the exact parallel single-step covariant Leibniz of the model-basis Ricci trace.)**
+/-- **(POSIT — the exact parallel single-step covariant Leibniz of the intrinsic `g₀⁻¹` Ricci trace.)**
 Because the background inverse metric `g₀^{ij}` is `∇₀`-parallel (`∇₀ g₀⁻¹ = 0`, the cometric skew core
-`cometric_skew_core` read on the orthonormal frame), the covariant gradient passes through the `−2`
-model-basis double trace with **no** differentiated-operator cross term:
+`cometric_skew_core`: `g(∇_w ♯eᵢ, ♯eⱼ) + g(♯eᵢ, ∇_w ♯eⱼ) = 0` read on the raised coframe), the
+covariant gradient passes through the `−2` intrinsic `g₀⁻¹` double trace with **no**
+differentiated-operator cross term (the moving-coframe corrections cancel against the cometric
+parallelism):
 `∇₀(ricciModelTrace42Op a R) = (rank-cast) ricciModelTrace42Op (a+1) (∇₀ R)`, the new gradient slot
-carried at the front, rank-cast from `2 + (a + 1)` to `(2 + a) + 1` by `castRankCc_db`.  Its body is
-`sorry`: the cometric-parallelism intertwining of `∇₀` and the model-basis trace. -/
+carried at the front, rank-cast from `2 + (a + 1)` to `(2 + a) + 1` by `castRankCc_db`.  This is now
+genuinely TRUE (the contraction is against the `∇₀`-parallel cometric `g₀⁻¹`, NOT a fixed,
+non-`∇₀`-parallel ambient basis).  Its body is `sorry`: the cometric-parallelism intertwining of `∇₀`
+and the `g₀⁻¹` trace. -/
 theorem ricciModelTrace42Op_covGrad (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (R : Integral.L2.SmoothCcTensor g₀ 0 (4 + a)) :
     Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 (2 + a)
@@ -268,47 +294,60 @@ theorem ricciModelTrace42Op_covGrad (g₀ : SmoothRiemannianMetric I M) (a : ℕ
           (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 (4 + a) R)) :=
   sorry
 
-/-- **(POSIT — the single-value fibre envelope of the model-basis Ricci trace.)**  A parallel metric
-contraction is value-local (it reads only the fibre value `R(x)`, never a jet of `R`), so its intrinsic
-squared fibre norm obeys the strong single-value proportional bound with the concrete envelope constant
-`(2 · dim)²`: contracting the leading two of the `4 + a` slots against the orthonormal frame produces at
-most `dim` diagonal terms, and the `−2`-scaling lands the squared factor `(2 · dim)²`.  Its body is
-`sorry`: the value-local fibre bound of the model-basis trace. -/
-theorem ricciModelTrace42Op_rfns_le (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (R : Integral.L2.SmoothCcTensor g₀ 0 (4 + a)) (x : M) :
-    Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
-        ((ricciModelTrace42Op (I := I) g₀ a R).toSection x) ≤
-      (2 * (Module.finrank ℝ E : ℝ)) ^ 2 *
-        Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + a) x
+/-- **(POSIT — the base-point- and order-uniform single-value fibre envelope of the intrinsic `g₀⁻¹`
+double trace.)**  The intrinsic `g₀⁻¹` double-trace contraction is value-local (it reads only the fibre
+value `R(x)`, never a jet of `R`) and its leading-two-slot fibre operator-norm depends only on the
+cometric `g₀⁻¹` (the passenger `a` slots are untouched), so there is a **single** nonnegative constant
+`κ₀`, uniform over the gradient-shift `a`, the section `R`, and the base point `x`, with
+```
+rfns(ricciModelTrace42Op a R)(x) ≤ κ₀ · rfns(R)(x).
+```
+The honest envelope is `κ₀ = (2 · sup_x ∑ᵢ ‖♯eᵢ(x)‖²)²` (the squared uniform cometric trace, NOT the
+chart-free `(2·dim)²` that would require a `g₀`-orthonormal coframe): each leading-slot interior product
+against `♯eᵢ` has model-operator-norm `≤ ‖♯eᵢ(x)‖`, the two iterated products give `‖♯eᵢ(x)‖²`, the sum
+over the `E`-orthonormal coframe gives the cometric trace `∑ᵢ ‖♯eᵢ(x)‖²` (uniformly bounded on the
+compact `M` by `exists_uniform_cometricBilin_bound`), and the `−2`-scaling squares to the `(2·…)²`
+factor — uniform over `a` because the operator norm of a leading-slot contraction is independent of the
+passenger valence.  Its body is `sorry`: the order-uniform value-local fibre bound of the intrinsic
+`g₀⁻¹` double trace. -/
+theorem exists_uniform_ricciModelTrace42Op_rfns_le (g₀ : SmoothRiemannianMetric I M) :
+    ∃ κ₀ : ℝ, 0 ≤ κ₀ ∧ ∀ (a : ℕ) (R : Integral.L2.SmoothCcTensor g₀ 0 (4 + a)) (x : M),
+      Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+          ((ricciModelTrace42Op (I := I) g₀ a R).toSection x) ≤
+        κ₀ * Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + a) x
           (R.toSection x) :=
   sorry
 
-/-- **The `(0, 4) → (0, 2)` model-basis Ricci-trace parallel contraction.**  The parallel rank-reducing
-single-section contraction realising the `−2` model-basis Ricci trace `g₀^{ij}·` on the
-once-`∇₀`-differentiated rank-`4` Koszul operand, a `ParallelRankReducingContraction g₀ 4 2`, assembled
-from its four genuinely-deep fields: the section-level double trace `ricciModelTrace42Op`, its exact
-parallel single-step covariant Leibniz `ricciModelTrace42Op_covGrad` (the cometric parallelism
-`∇₀ g₀⁻¹ = 0`, carried through `castRankCc_db`), the concrete envelope constant `(2 · dim)²`, and its
-single-value fibre envelope `ricciModelTrace42Op_rfns_le` (value-locality of the trace).
+/-- **The `(0, 4) → (0, 2)` intrinsic `g₀⁻¹` Ricci-trace parallel contraction.**  The parallel
+rank-reducing single-section contraction realising the `−2` intrinsic `g₀⁻¹` Ricci trace `g₀^{ij}·` on
+the once-`∇₀`-differentiated rank-`4` Koszul operand, a `ParallelRankReducingContraction g₀ 4 2`,
+assembled from its four genuinely-deep fields: the section-level intrinsic `g₀⁻¹` double trace
+`ricciModelTrace42Op` (contracting the leading two covariant slots against the cometric `g₀⁻¹`, NOT a
+chart-selected ambient basis), its exact parallel single-step covariant Leibniz
+`ricciModelTrace42Op_covGrad` (the cometric parallelism `∇₀ g₀⁻¹ = 0` via `cometric_skew_core`, carried
+through `castRankCc_db`), the order-uniform envelope constant `κ₀` (the squared uniform cometric trace,
+`exists_uniform_ricciModelTrace42Op_rfns_le`), and its single-value fibre envelope (value-locality of
+the trace).
 
-The contraction is **genuine** (non-degenerate): its envelope `kappa = (2 · dim)²` is strictly positive
-(`dim ≥ 1` since `NeZero (finrank ℝ E)`), so the value-local bound genuinely uses the section; the
-trace is tied to the linearized-Ricci principal part by the section identity
-`linearSection_eq_ricciModelTrace42_koszulTriple_sub_crossCorrTriple` (a degenerate zero trace would
-falsify it whenever the linear part is genuinely present, `linearSection_self_toModel`). -/
+The contraction is **genuine** (non-degenerate): its envelope `kappa = κ₀ ≥ 0` is the value-local bound
+genuinely using the section; the trace is tied to the linearized-Ricci principal part by the section
+identity `linearSection_eq_ricciModelTrace42_koszulTriple_sub_crossCorrTriple` (a degenerate zero trace
+would falsify it whenever the linear part is genuinely present, `linearSection_self_toModel`). -/
 noncomputable def ricciModelTrace42 (g₀ : SmoothRiemannianMetric I M) :
     Integral.Connection.ParallelRankReducingContraction (I := I) (M := M) g₀ 4 2 where
   op := fun a => ricciModelTrace42Op (I := I) g₀ a
   covGrad_op := fun a R => ricciModelTrace42Op_covGrad (I := I) g₀ a R
-  kappa := (2 * (Module.finrank ℝ E : ℝ)) ^ 2
-  kappa_nonneg := by positivity
-  rfns_op_le := fun a R x => ricciModelTrace42Op_rfns_le (I := I) g₀ a R x
+  kappa := (exists_uniform_ricciModelTrace42Op_rfns_le (I := I) g₀).choose
+  kappa_nonneg := (exists_uniform_ricciModelTrace42Op_rfns_le (I := I) g₀).choose_spec.1
+  rfns_op_le := fun a R x =>
+    (exists_uniform_ricciModelTrace42Op_rfns_le (I := I) g₀).choose_spec.2 a R x
 
 set_option linter.unusedSectionVars false in
-/-- **Fibrewise `ℝ`-linearity of the model-basis Ricci trace.**  The `op` of the `(0, 4) → (0, 2)`
-model-basis Ricci-trace contraction `ricciModelTrace42` distributes over a section difference (it is
-fibrewise `ℝ`-linear: a metric contraction is linear in the contracted section).  This is the assembled
-instance's `op` unfolding to `ricciModelTrace42Op`, whose additivity is `ricciModelTrace42Op_sub`. -/
+/-- **Fibrewise `ℝ`-linearity of the intrinsic `g₀⁻¹` Ricci trace.**  The `op` of the `(0, 4) → (0, 2)`
+intrinsic `g₀⁻¹` Ricci-trace contraction `ricciModelTrace42` distributes over a section difference (it
+is fibrewise `ℝ`-linear: a metric contraction is linear in the contracted section).  This is the
+assembled instance's `op` unfolding to `ricciModelTrace42Op`, whose additivity is
+`ricciModelTrace42Op_sub`. -/
 theorem ricciModelTrace42_op_sub (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (A B : Integral.L2.SmoothCcTensor g₀ 0 (4 + a)) :
     (ricciModelTrace42 (I := I) g₀).op a (A - B) =
@@ -330,12 +369,12 @@ private theorem covGrad_sub_local (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
 
 /-- **(POSIT — the linearized-Ricci principal-part value identity, the irreducible trace bridge.)**  The
 genuine value content of the linearized-Ricci principal part: the linear-in-difference curvature section
-`linearSection g₀ g₁ g₂` is the `−2` model-basis Ricci trace `ricciModelTrace42.op 0` of the
+`linearSection g₀ g₁ g₂` is the `−2` intrinsic `g₀⁻¹` Ricci trace `ricciModelTrace42.op 0` of the
 **once-`∇₀`-differentiated** `g₀`-lowered connection-difference *difference*
 `∇₀ (2·loweredConnDiffSection g₁ g₀ − 2·loweredConnDiffSection g₂ g₀)`.  This is the section-level lift
 of the once-differentiated pointwise lowered-Koszul form `connDiffDiff_g0_lowered_koszul_diffFactor`
 (`ricciNeg2SectionDiffLinearEval = −2 g₀^{ij}` double trace of `∇₀` of the lowered connection-difference
-difference), the genuine reconciliation tying the model-basis trace `op` to the linearized-Ricci
+difference), the genuine reconciliation tying the intrinsic `g₀⁻¹` trace `op` to the linearized-Ricci
 principal part `linearSection` (`linearSection_toModel_apply = ricciNeg2SectionDiffLinearEval`,
 `ricciModelTrace42Op` the `−2 g₀^{ij}` double trace).  Its body is `sorry`: the irreducible
 linearized-Ricci principal-part covariant trace identity. -/

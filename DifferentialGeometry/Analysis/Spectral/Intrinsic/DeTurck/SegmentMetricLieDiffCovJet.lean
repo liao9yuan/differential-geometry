@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRHSSectio
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizeSymmIteratedCovGradFiberNormBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqNormBridge
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HilbertSpace
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricLieDifferenceCovJet
 
 /-! # The Lie-deformation-difference covariant-jet split of the sealed Ricci–DeTurck gauge summand
 
@@ -59,11 +60,15 @@ is FALSE for `j ∈ (a, 2a]` — is rejected only by the linear-arm bound).
   the linear and Cross sections cannot be exhibited concretely; the value split and the linear-arm bound are
   also mathematically inseparable (the degenerate `C = 0` reading is rejected only by the linear bound).
 
-* `lieDeriv_crossArm_connLevel_of_valueSplit` — **posited** (`sorry` body): the gauge analogue of the
-  curvature half's quadratic-Cross reduction `ricciCrossSection_covGrad_traceReductionConn_rfns_le`, stated
-  on the value-split's Cross section `C` (since the gauge Cross section is not concrete, `C` enters as a
-  hypothesis, constrained by the value identity `diff = L + C` and the linear bound — the *other* summand of
-  the order-zero split, a genuine constraint wholly different from the conclusion, not hypothesis-packaging).
+* `lieDeriv_crossArm_connLevel_of_valueSplit` — **derived by composition (TRANSIT)**: the gauge analogue
+  of the curvature half's quadratic-Cross reduction `ricciCrossSection_covGrad_traceReductionConn_rfns_le`,
+  stated on the value-split's Cross section `C` (since the gauge Cross section is not concrete, `C` enters
+  as a hypothesis, constrained by the value identity `diff = L + C` and the linear bound — the *other*
+  summand of the order-zero split, a genuine constraint wholly different from the conclusion, not
+  hypothesis-packaging).  Proved over the genuine deeper child `lieCrossArm_iteratedCovGrad_connLevel_split`
+  (`SegmentMetricLieDifferenceCovJet.lean`, the connection-level `Top/Rest` split of `∇^j C`), recombined
+  through the `2·rfns` subadditivity `riemannianFiberNormSq_add_le` — exactly the composition the curvature
+  quadratic-Cross reduction uses over its split child `crossSection_iteratedCovGrad_connLevel_split`.
 
 * `exists_lieDerivDiff_connLevel_split` — **derived by composition (TRANSIT)** over the two children: Child
   A produces the pair `(L, C)`, the value identity, and the connection-level linear-arm bound; Child B,
@@ -237,9 +242,19 @@ endpoints `T₁, T₂` are carried, and the difference arm carries the connectio
 `lieDerivRetagG0 g₁ − lieDerivRetagG0 g₂ = L + C` with `L` connection-level difference-arm bounded is a
 genuine constraint on `C` (it is the *other* summand of the order-zero split), wholly different from the
 conclusion (a per-order jet bound on `∇^j C`) — this is not hypothesis-packaging.  NO value-bounded
-`Φ.op 0 2 w` shape, NO pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, NO Weyl dependence.  Its
-body is `sorry`: the genuine deep covariant-gauge-jet content of the quadratic Cross arm at the connection
-level. -/
+`Φ.op 0 2 w` shape, NO pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, NO Weyl dependence.
+
+**Decomposition (TRANSIT).**  Proved by composition over the genuine deeper Core-II child
+`lieCrossArm_iteratedCovGrad_connLevel_split` (`SegmentMetricLieDifferenceCovJet.lean`, the connection-level
+`Top/Rest` split of `∇^j C`: a difference part `Top` bounded by the connection-level `∑_{p ≤ j+1} rfns(∇^p
+R)` jet sum, plus a fixed-pair cross part `Rest` bounded by the `(1/8)` share of the fixed-pair `C⁰` cross
+piece), recombined through the `2·rfns` subadditivity `riemannianFiberNormSq_add_le`: the doubled `(1/8)`
+cross share lands the conclusion's `(1/4)` cross coefficient, and the doubled difference-arm bound the
+conclusion's `2·Cd` difference coefficient.  This is exactly the composition the curvature half's
+quadratic-Cross reduction `ricciCrossSection_covGrad_traceReductionConn_rfns_le` uses over its split child
+`crossSection_iteratedCovGrad_connLevel_split`; the only remaining genuine content is that
+connection-level `Top/Rest` split.  Consumers transitively depend on `sorryAx` only through that named
+child. -/
 theorem lieDeriv_crossArm_connLevel_of_valueSplit
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
@@ -283,8 +298,24 @@ theorem lieDeriv_crossArm_connLevel_of_valueSplit
                       ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
                     + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
                       ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
-                * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=
-  sorry
+                * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 := by
+  classical
+  -- The connection-level gauge cross-arm `Top/Rest` split (`SegmentMetricLieDifferenceCovJet.lean`),
+  -- with `(1/8)`-cross arm.  Its `Top` arm is the connection-level difference jet sum, its `Rest` arm the
+  -- fixed-pair cross piece.
+  obtain ⟨Cd, hCd0, hsplit⟩ :=
+    lieCrossArm_iteratedCovGrad_connLevel_split (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
+  refine ⟨2 * Cd, by positivity, ?_⟩
+  intro T₁ T₂ g₁ g₂ L C hr1 hr2 hfib1 hfib2 hball1 hball2 hLC hLbd j x
+  obtain ⟨Top, Rest, hsum, hTop, hRest⟩ :=
+    hsplit T₁ T₂ g₁ g₂ L C hr1 hr2 hfib1 hfib2 hball1 hball2 hLC hLbd j x
+  -- Recombine the split via the `2·rfns` subadditivity `riemannianFiberNormSq_add_le`: the doubled
+  -- `(1/8)` cross share lands the conclusion's `(1/4)` cross coefficient, the doubled `Cd` diff bound the
+  -- conclusion's `2·Cd` diff coefficient.
+  rw [hsum]
+  refine le_trans (riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (2 + j) x Top Rest) ?_
+  nlinarith [hTop, hRest, hCd0, riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + j) x Top,
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + j) x Rest]
 
 /-- **(POSIT — the connection-level gauge value-level linear/cross split bundled with both arms'
 covariant-jet bounds: the genuine Core-II value-level leaf of the Lie half, at the rank-`3` `∇w`-level.)**
