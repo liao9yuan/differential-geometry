@@ -9,6 +9,9 @@ import DifferentialGeometry.Tensor.RSTensor.Derivation.Contract
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.CoordinateBasis
 import DifferentialGeometry.Geometry.Metric.InverseMetricField
 import DifferentialGeometry.Geometry.Connection.Realization.SmoothSections
+import DifferentialGeometry.Geometry.Connection.Chart.SymmLTangentTrivializationSmooth
+import DifferentialGeometry.Tensor.RSTensor.BundleTrivialization.Tensor0SBundleLocalityIdentities
+import DifferentialGeometry.Tensor.Multilinear.Comp
 
 /-! # The curvature-trace covariant-jet reduction of the sealed Ricci–DeTurck curvature difference
 
@@ -204,20 +207,97 @@ private theorem inverseMetricSharpFib_coframeCovectorFib (g₀ : SmoothRiemannia
       cometricRaisedBasisVec (I := I) g₀ x i := rfl
 
 omit [CompactSpace M] in
-/-- **(POSIT — smoothness of the constant `E`-coframe covector section.)**  The constant-in-model
+/-- **Smoothness of the constant `E`-coframe covector section.**  The constant-in-model
 `(0, 1)`-tensor (cotangent) section `b ↦ coframeCovectorFib b i = (tensor0SSpace_continuousLinearEquiv
-1 b).symm (model_covectorOfCLM (coframeOfBasis (chartModelBasis E) i))` is a smooth bundle section: in
-the bundle trivialisation (which IS `tensor0SSpace_continuousLinearEquiv`) it is the constant map
-`b ↦ model_covectorOfCLM (coframeOfBasis (chartModelBasis E) i)` (independent of `b`), hence `C^∞`.  A
-constant section of the cotangent bundle in a trivialisation; **non-vacuous** (it is genuinely the
-constant section, not the zero section unless the coframe covector vanishes).  Its body is `sorry`: the
-trivialisation-constant smoothness of the constant model covector section. -/
-private theorem contMDiffAt_coframeCovectorFib (γ : M) (i : Fin (Module.finrank ℝ E)) (x₀ : M) :
+1 b).symm (model_covectorOfCLM (coframeOfBasis (chartModelBasis E) i))` is a smooth bundle section.
+
+By the vector-bundle section criterion `Bundle.contMDiffAt_section` the smoothness reduces to the
+smoothness of the trivialisation `2`-component `b ↦ (trivializationAt … x₀ ⟨b, σ b⟩).2`.  On the
+trivialisation base set this equals (`triv_continuousLinearMapAt_eq_compContinuousLinearMap`) the
+slot-precomposition `(toModel (σ b)).compContinuousLinearMap (fun _ => symmL (tangent triv) b)`, and
+since `toModel ∘ (equiv).symm = id`, the model fibre is the *constant* covector
+`model_covectorOfCLM (coframeOfBasis (chartModelBasis E) i)`.  The precomposition map
+`p ↦ (constant).compContinuousLinearMap (fun _ => p) = compContinuousLinearMapL (fun _ => p) (constant)`
+is `C^∞` in the operator `p` (`compContinuousLinearMapL_diag_contDiff`), and the single-trivialization
+inverse factor `b ↦ symmL (tangent triv) b` is `C^∞` (`contMDiffAt_symmL_tangentTrivialization`,
+viewing the source fibre value through the canonical defeq `TangentSpace I b = E`), so the composite is
+`C^∞`.  **Non-vacuous** (it is genuinely the constant coframe section, not the zero section unless the
+coframe covector vanishes). -/
+private theorem contMDiffAt_coframeCovectorFib (_γ : M) (i : Fin (Module.finrank ℝ E)) (x₀ : M) :
     ContMDiffAt I (I.prod (modelWithCornersSelf ℝ (Tensor0SBundle.Tensor0SModel 1 ℝ E))) ∞
       (fun b : M => (⟨b, coframeCovectorFib (I := I) b i⟩ :
         Bundle.TotalSpace (Tensor0SBundle.Tensor0SModel 1 ℝ E)
-          (fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z))) x₀ :=
-  sorry
+          (fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z))) x₀ := by
+  classical
+  -- The constant model covector `α := model_covectorOfCLM (coframeOfBasis (chartModelBasis E) i)`,
+  -- read as a raw `ContinuousMultilinearMap ℝ (fun _ : Fin 1 => E) ℝ` (defeq to `Tensor0SModel 1`).
+  set α : ContinuousMultilinearMap ℝ (fun _ : Fin 1 => E) ℝ :=
+    Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+      (Tensor0SBundle.coframeOfBasis (Integral.Measure.chartModelBasis E) i) with hα
+  -- Apply the vector-bundle section criterion: reduce to smoothness of the trivialisation 2-component.
+  rw [show (fun b : M => (⟨b, coframeCovectorFib (I := I) b i⟩ :
+        Bundle.TotalSpace (Tensor0SBundle.Tensor0SModel 1 ℝ E)
+          (fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z))) =
+      (fun b : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 1 ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z) b (coframeCovectorFib (I := I) b i))
+      from rfl,
+    Bundle.contMDiffAt_section (F := Tensor0SBundle.Tensor0SModel 1 ℝ E)
+      (E := fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z) (IB := I) x₀]
+  -- The smooth `E →L[ℝ] E`-valued inverse trivialization factor of the tangent bundle at `x₀`.
+  have hsymm : ContMDiffAt I 𝓘(ℝ, E →L[ℝ] E) ∞
+      (fun b : M =>
+        (by exact (trivializationAt E (TangentSpace I) x₀).symmL ℝ b : E →L[ℝ] E)) x₀ :=
+    DifferentialGeometry.Geometry.contMDiffAt_symmL_tangentTrivialization (I := I) (M := M) x₀
+  -- The precomposition-by-a-single-operator map is `C^∞` (the diagonal `compContinuousLinearMapL`).
+  have hL0 : ContDiff ℝ (⊤ : WithTop ℕ∞) (fun p : E →L[ℝ] E =>
+      (ContinuousMultilinearMap.compContinuousLinearMapL (𝕜 := ℝ) (ι := Fin 1)
+        (E := fun _ : Fin 1 => E) (E₁ := fun _ : Fin 1 => E) (F := ℝ) (fun _ : Fin 1 => p))) :=
+    ContinuousMultilinearMap.compContinuousLinearMapL_diag_contDiff (𝕜 := ℝ) (ι := Fin 1)
+      (F₁ := E) (F₂ := ℝ)
+  have hLcd : ContDiff ℝ ∞ (fun p : E →L[ℝ] E =>
+      (ContinuousMultilinearMap.compContinuousLinearMapL (𝕜 := ℝ) (ι := Fin 1)
+        (E := fun _ : Fin 1 => E) (E₁ := fun _ : Fin 1 => E) (F := ℝ) (fun _ : Fin 1 => p)) α) :=
+    (hL0.clm_apply contDiff_const).of_le le_top
+  -- Hence `b ↦ (α).compContinuousLinearMap (fun _ => symmL b)` is `C^∞` at `x₀` (into the model fibre).
+  have hcomp : ContMDiffAt I 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 1 ℝ E) ∞
+      (fun b : M => ((ContinuousMultilinearMap.compContinuousLinearMapL (𝕜 := ℝ) (ι := Fin 1)
+        (E := fun _ : Fin 1 => E) (E₁ := fun _ : Fin 1 => E) (F := ℝ)
+        (fun _ : Fin 1 => (by exact (trivializationAt E (TangentSpace I) x₀).symmL ℝ b : E →L[ℝ] E)))
+          α : ContinuousMultilinearMap ℝ (fun _ : Fin 1 => E) ℝ)) x₀ :=
+    ContMDiffAt.comp (I' := 𝓘(ℝ, E →L[ℝ] E)) x₀
+      (hLcd.contMDiff.contMDiffAt) hsymm
+  -- The trivialisation 2-component agrees with this composite eventually near `x₀`.
+  refine hcomp.congr_of_eventuallyEq ?_
+  have hmem : (trivializationAt (Tensor0SBundle.Tensor0SModel 1 ℝ E)
+        (fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z) x₀).baseSet ∈ 𝓝 x₀ :=
+    (Bundle.Trivialization.open_baseSet _).mem_nhds
+      (mem_baseSet_trivializationAt (Tensor0SBundle.Tensor0SModel 1 ℝ E)
+        (fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z) x₀)
+  filter_upwards [hmem] with b hb
+  -- The tensor-bundle base set membership is (definitionally) the tangent base set membership.
+  have hbT : b ∈ (trivializationAt E (TangentSpace I) x₀).baseSet := hb
+  -- `(triv ⟨b, σ b⟩).2 = (triv.continuousLinearMapAt b) (σ b)` on the base set.
+  have hclm : (trivializationAt (Tensor0SBundle.Tensor0SModel 1 ℝ E)
+        (fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z) x₀
+        ⟨b, coframeCovectorFib (I := I) b i⟩).2 =
+      ((trivializationAt (Tensor0SBundle.Tensor0SModel 1 ℝ E)
+        (fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z) x₀).continuousLinearMapAt ℝ b
+          (coframeCovectorFib (I := I) b i) :
+        ContinuousMultilinearMap ℝ (fun _ : Fin 1 => E) ℝ) := by
+    rw [Bundle.Trivialization.continuousLinearMapAt_apply (R := ℝ),
+      Bundle.Trivialization.coe_linearMapAt_of_mem _ hb]
+  -- The forward formula: `continuousLinearMapAt b T = T.compContinuousLinearMap (fun _ => symmL b)`.
+  have hfwd := DifferentialGeometry.Tensor.triv_continuousLinearMapAt_eq_compContinuousLinearMap
+    (I := I) (s := 1) x₀ b hbT (coframeCovectorFib (I := I) b i)
+  -- Chain: `(triv ⟨b,σb⟩).2 = (toModel σb).compCLM (fun _ => symmL b) = compCLML (fun _ => symmL b) α`.
+  rw [hclm]
+  -- Align the trivialization spelling with the multilinear-bundle form, then apply the forward formula.
+  change ((trivializationAt (ContinuousMultilinearMap ℝ (fun _ : Fin 1 => E) ℝ)
+      (Bundle.continuousMultilinearMap ℝ 1 E (TangentSpace I)) x₀).continuousLinearMapAt ℝ b
+        (coframeCovectorFib (I := I) b i) :
+      ContinuousMultilinearMap ℝ (fun _ : Fin 1 => E) ℝ) = _
+  rw [hfwd, ContinuousMultilinearMap.compContinuousLinearMapL_apply]
+  rfl
 
 omit [CompactSpace M] in
 /-- **The chart-frame component of the constant coframe covector is `C^∞`** (the tangent-bundle
@@ -537,26 +617,76 @@ theorem ricciModelTrace42Op_sub (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     show (-B) = (-1 : ℝ) • B by rw [neg_one_smul],
     DifferentialGeometry.Integral.Connection.appCcRS_smul_right, neg_one_smul, ← sub_eq_add_neg]
 
-/-- **(POSIT — the cometric `∇₀`-parallelism core: the passenger-passing `g₀⁻¹` double-trace field is
-`∇₀`-parallel.)**  The covariant gradient of the passenger-passing intrinsic `g₀⁻¹` double-trace
-operator field vanishes:
+/-- **(POSIT — the cometric `∇₀`-parallelism base core: the leading-`{0,1}` `g₀⁻¹` double-trace field is
+`∇₀`-parallel.)**  The covariant gradient of the *base* intrinsic `g₀⁻¹` double-trace operator field
+(`a = 0`, contracting the two leading covariant slots `{0, 1}` against the cometric) vanishes:
+```
+covGrad g₀ 4 2 (ricciModelTrace42Field g₀ 0) = 0.
+```
+This is the genuine deep cometric-parallelism core `∇₀ g₀⁻¹ = 0`: the base double-trace field contracts
+the two leading curvature slots against the cometric `g₀⁻¹ = ∑ᵢ ♯eᵢ ⊗ ♯eᵢ`, whose covariant derivative
+vanishes — the moving-`g₀`-raised-coframe corrections cancel by the cometric skew identity
+`cometric_skew_core` (`g(∇_w ♯eᵢ, ♯eⱼ) + g(♯eᵢ, ∇_w ♯eⱼ) = 0`, read on the raised coframe, via the
+`smoothOrthoFrame`↔`cometricRaisedBasisVec` cometric-trace identity).  It is **non-vacuous**: it asserts
+a genuine differential-geometric identity (the parallelism of the background cometric), false for a
+non-parallel ambient frame.  Its body is `sorry`: the section-level cometric parallelism of the base
+intrinsic `g₀⁻¹` double trace. -/
+theorem ricciModelTrace42Field_covGrad_eq_zero (g₀ : SmoothRiemannianMetric I M) :
+    Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 4 2
+        (ricciModelTrace42Field (I := I) g₀ 0) = 0 :=
+  sorry
+
+set_option linter.unusedSectionVars false in
+/-- **(POSIT — the covariant gradient annihilates a leading-passenger-slot extension of a parallel
+field.)**  The covariant gradient commutes with the leading-passenger-slot extension `slotExtend` up to a
+slot reindex that preserves vanishing: if a smooth `(r, s)`-operator field `Φ` is `∇₀`-parallel
+(`covGrad g r s Φ = 0`), then its leading-passenger-slot extension `slotExtend g r s Φ` is also
+`∇₀`-parallel:
+```
+covGrad g r s Φ = 0  ⟹  covGrad g (r + 1) (s + 1) (slotExtend g r s Φ) = 0.
+```
+The slot-extension prepends one passenger covariant slot read identically on source and target
+(`slotExtendFib_apply_eval`); the covariant gradient differentiates the contraction coefficient, which —
+because `slotExtend` only relabels slots and `∇₀` commutes with the passenger insertion (up to the slot
+permute folded away here, since the conclusion is `= 0`) — vanishes exactly when the un-extended
+gradient does.  It is **non-vacuous**: it is a genuine commutation (a nonzero `covGrad Φ` would have a
+nonzero extension), the structural step propagating the cometric parallelism through the passenger-slot
+recursion.  Its body is `sorry`: the covariant-gradient annihilation of a slot-extended parallel field. -/
+theorem covGrad_slotExtend_eq_zero_of_covGrad_eq_zero (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : Integral.L2.SmoothCcTensor g₀ r s)
+    (hΦ : Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ r s Φ = 0) :
+    Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ (r + 1) (s + 1)
+        (Integral.Connection.slotExtend (I := I) (M := M) g₀ r s Φ) = 0 :=
+  sorry
+
+/-- **The cometric `∇₀`-parallelism core: the passenger-passing `g₀⁻¹` double-trace field is
+`∇₀`-parallel.**  The covariant gradient of the passenger-passing intrinsic `g₀⁻¹` double-trace operator
+field vanishes:
 ```
 covGrad g₀ (4 + a) (2 + a) (ricciModelTrace42FieldRec g₀ a) = 0.
 ```
-This is the genuine deep cometric-parallelism core `∇₀ g₀⁻¹ = 0`: the double-trace field contracts the
-two passenger-passed curvature slots against the cometric `g₀⁻¹ = ∑ᵢ ♯eᵢ ⊗ ♯eᵢ`, whose covariant
-derivative vanishes — the moving-`g₀`-raised-coframe corrections cancel by the cometric skew identity
-`cometric_skew_core` (`g(∇_w ♯eᵢ, ♯eⱼ) + g(♯eᵢ, ∇_w ♯eⱼ) = 0`, read on the raised coframe).  The
-`slotExtend`-passenger slots are read identically (`∇₀` commutes with the passenger insertion), so the
-vanishing propagates from the base field `ricciModelTrace42Field g₀ 0` to every gradient-shift `a`.  It
-is **non-vacuous**: it asserts a genuine differential-geometric identity (the parallelism of the
-background cometric), false for a non-parallel ambient frame; it is the one honest deep boundary the
-index-bump covariant Leibniz below rests on.  Its body is `sorry`: the section-level cometric
-parallelism of the intrinsic `g₀⁻¹` double trace. -/
+
+**Decomposition.**  Induction on the gradient-shift `a`.  At `a = 0` the field is the base double trace
+`ricciModelTrace42Field g₀ 0`, whose parallelism is the genuine cometric core
+`ricciModelTrace42Field_covGrad_eq_zero` (`∇₀ g₀⁻¹ = 0` via `cometric_skew_core`).  At `a + 1` the field
+is `slotExtend g₀ (4 + a) (2 + a) (ricciModelTrace42FieldRec g₀ a)`
+(`ricciModelTrace42FieldRec_succ`), and the covariant gradient annihilates the slot-extension of the
+inductively-parallel field `ricciModelTrace42FieldRec g₀ a`
+(`covGrad_slotExtend_eq_zero_of_covGrad_eq_zero`), so the vanishing propagates to every `a`.
+
+**Non-vacuity.**  It asserts the genuine differential-geometric identity that the background cometric is
+parallel; false for a non-parallel ambient frame. -/
 theorem ricciModelTrace42FieldRec_covGrad_eq_zero (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
     Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ (4 + a) (2 + a)
-        (ricciModelTrace42FieldRec (I := I) g₀ a) = 0 :=
-  sorry
+        (ricciModelTrace42FieldRec (I := I) g₀ a) = 0 := by
+  induction a with
+  | zero =>
+    rw [ricciModelTrace42FieldRec_zero]
+    exact ricciModelTrace42Field_covGrad_eq_zero (I := I) g₀
+  | succ a ih =>
+    rw [ricciModelTrace42FieldRec_succ]
+    exact covGrad_slotExtend_eq_zero_of_covGrad_eq_zero (I := I) g₀ (4 + a) (2 + a)
+      (ricciModelTrace42FieldRec (I := I) g₀ a) ih
 
 /-- **(POSIT — the exact parallel single-step covariant Leibniz of the intrinsic `g₀⁻¹` Ricci trace.)**
 Because the background inverse metric `g₀^{ij}` is `∇₀`-parallel (`∇₀ g₀⁻¹ = 0`, the cometric skew core
@@ -605,19 +735,22 @@ controlling the intrinsic (Riemannian/Hilbert–Schmidt) squared fibre norm of t
 rfns_{(0,2+a)}((ricciModelTrace42FieldRec g₀ a).toSection x ∘ R.toSection x)(x) ≤ κ₀ · rfns_{(0,4+a)}(R)(x).
 ```
 This is the genuinely-missing **mixed-norm** analytic core.  The HS (Riemannian) fibre norm of the
-composition `Φ ∘ R` is bounded by the *carrier operator norm* of `Φ = FieldRec a x` times the HS norm of
-`R` (`‖ΦR‖_HS ≤ ‖Φ‖_op·‖R‖_HS`), and the carrier operator norm of `FieldRec a x = slotExtendᵃ(base x)`
-equals that of the fixed base field `base x` (a leading passenger covariant slot is an *isometric
-ampliation* for the operator norm — independent of the passenger valence `a`), uniformly bounded on the
-compact `M`.  Crucially this is the OPERATOR-norm route, not the HS route: the HS norm of `slotExtendᵃ`
-grows by a `dim`-factor per passenger slot, so it is *not* `a`-uniform, whereas the operator norm is.
-The two genuinely-absent on-disk primitives folded here are (i) the mixed bound `rfns(Φ.comp W) ≤
-‖Φ‖²_op,carrier · rfns(W)` (the Riemannian fibre norm `riemannianFiberNormSq` and the carrier operator
-norm `Tensor0SBundle.tensorRSSpace_norm_eq_carrier_opNorm` are *distinct norm instances*; `compRS_le_mul`
-is the HS×HS bound, which here grows with `a`), and (ii) the carrier operator-norm preservation of the
-leading passenger-slot extension `slotExtendFib`.  It is **non-vacuous** (a degenerate `κ₀ = 0` is
-rejected whenever `op a R ≠ 0`); its body is `sorry`: the order-uniform mixed-norm value-local fibre
-envelope of the slot-extended intrinsic `g₀⁻¹` double trace. -/
+composition `Φ ∘ R` is bounded by the *`g`-Riemannian operator norm* of `Φ = FieldRec a x` (the
+operator norm measured in the `g`-Riemannian fibre norms on the `(0,4+a)`- and `(0,2+a)`-fibres, via the
+Hom-bundle contraction bound `homTensorRS_riemannianFiberNormSq_clm_apply_le`) times the HS norm of `R`,
+and the `g`-Riemannian operator norm of `FieldRec a x = slotExtendᵃ(base x)` equals that of the fixed
+base field `base x` (a leading passenger covariant slot is an *isometric ampliation* for the operator
+norm in the passenger-`g`-orthonormal directions — independent of the passenger valence `a`), uniformly
+bounded on the compact `M`.  Crucially this is the `g`-OPERATOR-norm route, not the HS route: the HS norm
+of `slotExtendᵃ` grows by a `dim`-factor per passenger slot, so it is *not* `a`-uniform, whereas the
+`g`-operator norm is.  The two genuinely-absent on-disk primitives folded here are (i) the mixed bound
+`rfns(Φ.comp W) ≤ ‖Φ‖²_{g-op} · rfns(W)` for the `Tensor0S`-level post-composition (the `g`-Riemannian
+fibre norm `riemannianFiberNormSq` is distinct from the static carrier op-norm
+`Tensor0SBundle.tensorRSSpace_norm_eq_carrier_opNorm`; `compRS_le_mul` is the HS×HS bound, which grows
+with `a`), and (ii) the `g`-operator-norm preservation of the leading passenger-slot extension
+`slotExtendFib`.  It is **non-vacuous** (a degenerate `κ₀ = 0` is rejected whenever `op a R ≠ 0`); its
+body is `sorry`: the order-uniform mixed-norm value-local fibre envelope of the slot-extended intrinsic
+`g₀⁻¹` double trace. -/
 theorem exists_uniform_ricciModelTrace42Op_rfns_le (g₀ : SmoothRiemannianMetric I M) :
     ∃ κ₀ : ℝ, 0 ≤ κ₀ ∧ ∀ (a : ℕ) (R : Integral.L2.SmoothCcTensor g₀ 0 (4 + a)) (x : M),
       Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
