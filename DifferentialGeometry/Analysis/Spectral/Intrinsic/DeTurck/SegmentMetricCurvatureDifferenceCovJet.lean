@@ -204,21 +204,64 @@ private theorem inverseMetricSharpFib_coframeCovectorFib (g₀ : SmoothRiemannia
       cometricRaisedBasisVec (I := I) g₀ x i := rfl
 
 omit [CompactSpace M] in
+/-- **(POSIT — smoothness of the constant `E`-coframe covector section.)**  The constant-in-model
+`(0, 1)`-tensor (cotangent) section `b ↦ coframeCovectorFib b i = (tensor0SSpace_continuousLinearEquiv
+1 b).symm (model_covectorOfCLM (coframeOfBasis (chartModelBasis E) i))` is a smooth bundle section: in
+the bundle trivialisation (which IS `tensor0SSpace_continuousLinearEquiv`) it is the constant map
+`b ↦ model_covectorOfCLM (coframeOfBasis (chartModelBasis E) i)` (independent of `b`), hence `C^∞`.  A
+constant section of the cotangent bundle in a trivialisation; **non-vacuous** (it is genuinely the
+constant section, not the zero section unless the coframe covector vanishes).  Its body is `sorry`: the
+trivialisation-constant smoothness of the constant model covector section. -/
+private theorem contMDiffAt_coframeCovectorFib (γ : M) (i : Fin (Module.finrank ℝ E)) (x₀ : M) :
+    ContMDiffAt I (I.prod (modelWithCornersSelf ℝ (Tensor0SBundle.Tensor0SModel 1 ℝ E))) ∞
+      (fun b : M => (⟨b, coframeCovectorFib (I := I) b i⟩ :
+        Bundle.TotalSpace (Tensor0SBundle.Tensor0SModel 1 ℝ E)
+          (fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z))) x₀ :=
+  sorry
+
+omit [CompactSpace M] in
 /-- **The chart-frame component of the constant coframe covector is `C^∞`** (the tangent-bundle
 cocycle entry smoothness).  On the chart-`γ` source, the scalar `b ↦ ⟨eᵢ, chartBasisVecFiber γ j b⟩`
 — the constant `E`-orthonormal coframe covector `eᵢ = coframeOfBasis (chartModelBasis E) i` paired
 (through the dual map) with the smooth chart-`γ` frame vector field — is `C^∞`.  Unfolding the dual
-pairing it is `coord i (chartBasisVecFiber γ j b)`, the chart-Jacobian/cocycle matrix entry, smooth on
-the chart overlap by `contMDiffOn_coordChangeL` (the established tangent-bundle transition smoothness,
-e.g. `ChartJacobianMatrixEntrySmoothness`).  This is the chart-component hypothesis that feeds
-`metricSharp_contMDiff_total` to build the smooth `g₀`-raised coframe vector field. -/
+pairing it is the multilinear bundle evaluation `toModel (coframeCovectorFib b i) (fun _ =>
+chartBasisVecFiber γ j b)`; the constant coframe-covector section is smooth
+(`contMDiffAt_coframeCovectorFib`) and the chart-`γ` frame vector is smooth on the open base set
+(= chart source, `chartBasisVec_contMDiffOn`), so the evaluation is `ContMDiffAt` by
+`contMDiffAt_section_apply`, hence smooth on the source.  This is the chart-component hypothesis that
+feeds `metricSharp_contMDiff_total` to build the smooth `g₀`-raised coframe vector field. -/
 private theorem coframeCovector_chartComponent_contMDiffOn (γ : M)
     (i j : Fin (Module.finrank ℝ E)) :
     ContMDiffOn I 𝓘(ℝ) ∞
       (fun b : M => cotangentToDualLinear (I := I) (x := b) (coframeCovectorFib (I := I) b i)
         (Integral.Measure.chartBasisVecFiber (I := I) γ j b))
-      (chartAt H γ).source :=
-  sorry
+      (chartAt H γ).source := by
+  intro x₀ hx₀
+  apply ContMDiffAt.contMDiffWithinAt
+  -- Rewrite the dual pairing as the model multilinear evaluation `toModel (Y b) (fun _ => v b)`.
+  have hpair : (fun b : M => cotangentToDualLinear (I := I) (x := b) (coframeCovectorFib (I := I) b i)
+        (Integral.Measure.chartBasisVecFiber (I := I) γ j b)) =
+      (fun b : M => Tensor0SBundle.Tensor0SSpace.toModel (coframeCovectorFib (I := I) b i)
+        (fun _ : Fin 1 => Integral.Measure.chartBasisVecFiber (I := I) γ j b)) := by
+    funext b
+    rw [cotangentToDualLinear_apply, cotangentToDual_apply]
+    rfl
+  rw [hpair]
+  -- Apply the multilinear bundle evaluation smoothness with the constant covector section and the
+  -- smooth chart frame vector.
+  apply TensorMultilinear.contMDiffAt_section_apply (n := 1)
+    (T := fun b => coframeCovectorFib (I := I) b i) (x₀ := x₀)
+    (contMDiffAt_coframeCovectorFib (I := I) γ i x₀)
+    (fun _ b => Integral.Measure.chartBasisVecFiber (I := I) γ j b)
+  intro _
+  have hbase : (trivializationAt E (TangentSpace I) γ).baseSet = (chartAt H γ).source :=
+    TangentBundle.trivializationAt_baseSet (I := I) γ
+  have hx₀base : x₀ ∈ (trivializationAt E (TangentSpace I) γ).baseSet := by
+    rw [hbase]; exact hx₀
+  have hopen : IsOpen (trivializationAt E (TangentSpace I) γ).baseSet :=
+    (trivializationAt E (TangentSpace I) γ).open_baseSet
+  exact (Integral.Measure.chartBasisVec_contMDiffOn (I := I) γ j x₀ hx₀base).contMDiffAt
+    (hopen.mem_nhds hx₀base)
 
 /-- **The smooth `g₀`-raised coframe vector field** `♯eᵢ : x ↦ cometricRaisedBasisVec g₀ x i`,
 as a smooth section of the tangent bundle.  The constant coframe covector is a smooth covector
@@ -406,6 +449,44 @@ set_option linter.unusedSectionVars false in
       (show Tensor0SBundle.TensorRSSpace (4 + a) (2 + a) I x from
         ricciModelTrace42Fib (I := I) g₀ a x) := rfl
 
+/-- **The PASSENGER-PASSING intrinsic `g₀⁻¹` double-trace operator field at gradient-shift `a`**, a
+smooth `(0, 4 + a) → (0, 2 + a)`-operator field defined as the `a`-fold passenger-slot extension
+`slotExtendᵃ` of the **base** double-trace field `ricciModelTrace42Field g₀ 0` (which contracts the two
+leading covariant slots `{0, 1}` against the cometric `g₀⁻¹`).  Each `slotExtend` prepends one leading
+covariant passenger slot (read first, passed unchanged to the output, `slotExtendFib_apply_eval`), so
+this field contracts the cometric `g₀⁻¹` against slots `{a, a + 1}` (the two curvature slots that sit
+*after* the `a` accumulated leading gradient-passenger slots), passing the leading `a` slots.
+
+The defining feature, **by construction**: `ricciModelTrace42FieldRec g₀ (a + 1) = slotExtend
+(ricciModelTrace42FieldRec g₀ a)` (the `Nat`-equalities `(4 + a) + 1 = 4 + (a + 1)` and
+`(2 + a) + 1 = 2 + (a + 1)` are definitional, as `Nat.add` recurses on the right).  This is what makes
+the index-bump covariant Leibniz `ricciModelTrace42Op_covGrad` genuinely TRUE: the surviving operator
+factor of the `appCcRS` B-rule (`covGrad_appCcRS_eq`), when the gradient differentiates the contracted
+section, is exactly `slotExtend` of the operator field, which here advances `a → a + 1`.  At `a = 0` it
+is `ricciModelTrace42Field g₀ 0` itself (contracting `{0, 1}`), so the order-zero operator `op 0` — and
+the `linearSection` trace bridge that consumes it — is UNCHANGED. -/
+noncomputable def ricciModelTrace42FieldRec (g₀ : SmoothRiemannianMetric I M) :
+    ∀ a : ℕ, Integral.L2.SmoothCcTensor g₀ (4 + a) (2 + a)
+  | 0 => ricciModelTrace42Field (I := I) g₀ 0
+  | (a + 1) =>
+    Integral.Connection.slotExtend (I := I) (M := M) g₀ (4 + a) (2 + a)
+      (ricciModelTrace42FieldRec g₀ a)
+
+set_option linter.unusedSectionVars false in
+/-- The base of the passenger-passing field recursion is the leading-`{0,1}` double trace.  Definitional. -/
+@[simp] theorem ricciModelTrace42FieldRec_zero (g₀ : SmoothRiemannianMetric I M) :
+    ricciModelTrace42FieldRec (I := I) g₀ 0 = ricciModelTrace42Field (I := I) g₀ 0 := rfl
+
+set_option linter.unusedSectionVars false in
+/-- **The successor step of the passenger-passing field recursion is one `slotExtend`.**  This is the
+key structural identity that makes the index-bump covariant Leibniz true: advancing the gradient-shift
+`a → a + 1` is exactly prepending one leading passenger covariant slot.  Definitional (the rank
+equalities `(4 + a) + 1 = 4 + (a + 1)`, `(2 + a) + 1 = 2 + (a + 1)` hold by `Nat.add`-on-the-right). -/
+@[simp] theorem ricciModelTrace42FieldRec_succ (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
+    ricciModelTrace42FieldRec (I := I) g₀ (a + 1) =
+      Integral.Connection.slotExtend (I := I) (M := M) g₀ (4 + a) (2 + a)
+        (ricciModelTrace42FieldRec (I := I) g₀ a) := rfl
+
 /-- **The section-level `−2` intrinsic `g₀⁻¹` Ricci-trace operator `(0, 4 + a) → (0, 2 + a)`.**  The
 genuine building block of the intrinsic `g₀⁻¹` Ricci-trace parallel contraction: the operator at
 gradient-shift `a` that contracts the leading two of the `4 + a` covariant slots of a smooth
@@ -415,30 +496,31 @@ compactly-supported `(0, 2 + a)`-tensor.  This is the rank-reducing metric-trace
 difference arm needs (the `−2` `g₀⁻¹` curvature trace lowering rank `4 + a → 2 + a`); it depends on the
 background metric `g₀` only through the cometric, with NO chart-selected ambient basis.
 
-It is constructed concretely as the operator-field action `appCcRS` of the smooth `g₀⁻¹` double-trace
-operator field `ricciModelTrace42Field g₀ a` (the cometric-raised model map `modelTrace42MapVec a
-(♯e·(x))` transported through the bundle/model equivalence) on the input `(0, 4 + a)`-tensor — the same
-smooth-section route as the algebraic trace `contractCcTensor` and the curvature operator-field action
-`appCc`. -/
+It is constructed concretely as the operator-field action `appCcRS` of the **passenger-passing** smooth
+`g₀⁻¹` double-trace operator field `ricciModelTrace42FieldRec g₀ a = slotExtendᵃ (base)` (contracting
+the cometric `g₀⁻¹` against the slots `{a, a + 1}` after the `a` leading gradient-passenger slots) on the
+input `(0, 4 + a)`-tensor — the same smooth-section route as the algebraic trace `contractCcTensor` and
+the curvature operator-field action `appCc`.  At `a = 0` the field is `ricciModelTrace42Field g₀ 0`
+(contracting `{0, 1}`), so `op 0` is unchanged. -/
 noncomputable def ricciModelTrace42Op (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
     Integral.L2.SmoothCcTensor g₀ 0 (4 + a) → Integral.L2.SmoothCcTensor g₀ 0 (2 + a) :=
   fun T =>
     DifferentialGeometry.Integral.Connection.appCcRS (I := I) (M := M) g₀ 0 (4 + a) (2 + a)
-      (ricciModelTrace42Field (I := I) g₀ a) T
+      (ricciModelTrace42FieldRec (I := I) g₀ a) T
 
 set_option linter.unusedSectionVars false in
-/-- **The fibre value of `ricciModelTrace42Op` is the fibrewise composition of the double-trace fibre
-operator with the input section.**  Definitional via `appCcRS_toSection`. -/
+/-- **The fibre value of `ricciModelTrace42Op` is the fibrewise composition of the passenger-passing
+double-trace fibre operator with the input section.**  Definitional via `appCcRS_toSection`. -/
 @[simp] theorem ricciModelTrace42Op_toSection (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (T : Integral.L2.SmoothCcTensor g₀ 0 (4 + a)) (x : M) :
     (ricciModelTrace42Op (I := I) g₀ a T).toSection x =
       (show Tensor0SBundle.Tensor0SSpace (4 + a) I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (2 + a) I x from
-        ricciModelTrace42Fib (I := I) g₀ a x).comp
+        (ricciModelTrace42FieldRec (I := I) g₀ a).toSection x).comp
         (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (4 + a) I x from
           T.toSection x) := by
   rw [ricciModelTrace42Op,
     DifferentialGeometry.Integral.Connection.appCcRS_toSection (I := I) (M := M) g₀ 0 (4 + a) (2 + a)
-      (ricciModelTrace42Field (I := I) g₀ a) T x, ricciModelTrace42Field_toSection]
+      (ricciModelTrace42FieldRec (I := I) g₀ a) T x]
 
 set_option linter.unusedSectionVars false in
 /-- **Fibrewise `ℝ`-additivity of the section-level model-basis Ricci-trace operator.**  The
@@ -454,6 +536,27 @@ theorem ricciModelTrace42Op_sub (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     DifferentialGeometry.Integral.Connection.appCcRS_add_right,
     show (-B) = (-1 : ℝ) • B by rw [neg_one_smul],
     DifferentialGeometry.Integral.Connection.appCcRS_smul_right, neg_one_smul, ← sub_eq_add_neg]
+
+/-- **(POSIT — the cometric `∇₀`-parallelism core: the passenger-passing `g₀⁻¹` double-trace field is
+`∇₀`-parallel.)**  The covariant gradient of the passenger-passing intrinsic `g₀⁻¹` double-trace
+operator field vanishes:
+```
+covGrad g₀ (4 + a) (2 + a) (ricciModelTrace42FieldRec g₀ a) = 0.
+```
+This is the genuine deep cometric-parallelism core `∇₀ g₀⁻¹ = 0`: the double-trace field contracts the
+two passenger-passed curvature slots against the cometric `g₀⁻¹ = ∑ᵢ ♯eᵢ ⊗ ♯eᵢ`, whose covariant
+derivative vanishes — the moving-`g₀`-raised-coframe corrections cancel by the cometric skew identity
+`cometric_skew_core` (`g(∇_w ♯eᵢ, ♯eⱼ) + g(♯eᵢ, ∇_w ♯eⱼ) = 0`, read on the raised coframe).  The
+`slotExtend`-passenger slots are read identically (`∇₀` commutes with the passenger insertion), so the
+vanishing propagates from the base field `ricciModelTrace42Field g₀ 0` to every gradient-shift `a`.  It
+is **non-vacuous**: it asserts a genuine differential-geometric identity (the parallelism of the
+background cometric), false for a non-parallel ambient frame; it is the one honest deep boundary the
+index-bump covariant Leibniz below rests on.  Its body is `sorry`: the section-level cometric
+parallelism of the intrinsic `g₀⁻¹` double trace. -/
+theorem ricciModelTrace42FieldRec_covGrad_eq_zero (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
+    Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ (4 + a) (2 + a)
+        (ricciModelTrace42FieldRec (I := I) g₀ a) = 0 :=
+  sorry
 
 /-- **(POSIT — the exact parallel single-step covariant Leibniz of the intrinsic `g₀⁻¹` Ricci trace.)**
 Because the background inverse metric `g₀^{ij}` is `∇₀`-parallel (`∇₀ g₀⁻¹ = 0`, the cometric skew core
@@ -472,25 +575,49 @@ theorem ricciModelTrace42Op_covGrad (g₀ : SmoothRiemannianMetric I M) (a : ℕ
         (ricciModelTrace42Op (I := I) g₀ a R) =
       Integral.Connection.castRankCc_db g₀ 0 (by omega : 2 + (a + 1) = (2 + a) + 1)
         (ricciModelTrace42Op (I := I) g₀ (a + 1)
-          (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 (4 + a) R)) :=
-  sorry
+          (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 (4 + a) R)) := by
+  -- The B-rule for the operator-field action splits `∇₀(op a R)` into the differentiated-field cross
+  -- term (which VANISHES by the cometric parallelism `covGrad (FieldRec a) = 0`) plus the surviving
+  -- `slotExtend`-of-field action on `∇₀ R`; `slotExtend (FieldRec a) = FieldRec (a+1)` advances the
+  -- gradient-shift, so the surviving term is exactly `op (a+1) (∇₀ R)` (the rank-cast is the identity,
+  -- the rank equality `2 + (a+1) = (2+a)+1` being definitional).
+  rw [ricciModelTrace42Op,
+    DifferentialGeometry.Integral.Connection.covGrad_appCcRS_eq (I := I) (M := M) g₀ 0 (4 + a) (2 + a)
+      (ricciModelTrace42FieldRec (I := I) g₀ a) R,
+    ricciModelTrace42FieldRec_covGrad_eq_zero (I := I) g₀ a,
+    DifferentialGeometry.Integral.Connection.appCcRS_zero_left (I := I) (M := M) g₀ 0 (4 + a)
+      ((2 + a) + 1) R, zero_add]
+  -- The surviving term, with `slotExtend (FieldRec a) = FieldRec (a+1)` (definitional) and the rank
+  -- casts absorbed: it is `op (a+1) (∇₀ R)`, and the output rank-cast `castRankCc_db` is the identity
+  -- on the definitionally-equal ranks.
+  rw [← ricciModelTrace42FieldRec_succ (I := I) g₀ a]
+  exact (eq_of_heq (Integral.Connection.castRankCc_db_heq g₀ 0
+    (by omega : 2 + (a + 1) = (2 + a) + 1)
+    (ricciModelTrace42Op (I := I) g₀ (a + 1)
+      (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 (4 + a) R)))).symm
 
-/-- **(POSIT — the base-point- and order-uniform single-value fibre envelope of the intrinsic `g₀⁻¹`
-double trace.)**  The intrinsic `g₀⁻¹` double-trace contraction is value-local (it reads only the fibre
-value `R(x)`, never a jet of `R`) and its leading-two-slot fibre operator-norm depends only on the
-cometric `g₀⁻¹` (the passenger `a` slots are untouched), so there is a **single** nonnegative constant
-`κ₀`, uniform over the gradient-shift `a`, the section `R`, and the base point `x`, with
+set_option linter.unusedSectionVars false in
+/-- **(POSIT — the mixed Hilbert–Schmidt × operator-norm slot-extension envelope of the intrinsic
+`g₀⁻¹` double-trace field, order-uniform.)**  For the passenger-passing double-trace field there is a
+single nonnegative `κ₀`, uniform over the gradient-shift `a`, the section `R`, and the base point `x`,
+controlling the intrinsic (Riemannian/Hilbert–Schmidt) squared fibre norm of the composition:
 ```
-rfns(ricciModelTrace42Op a R)(x) ≤ κ₀ · rfns(R)(x).
+rfns_{(0,2+a)}((ricciModelTrace42FieldRec g₀ a).toSection x ∘ R.toSection x)(x) ≤ κ₀ · rfns_{(0,4+a)}(R)(x).
 ```
-The honest envelope is `κ₀ = (2 · sup_x ∑ᵢ ‖♯eᵢ(x)‖²)²` (the squared uniform cometric trace, NOT the
-chart-free `(2·dim)²` that would require a `g₀`-orthonormal coframe): each leading-slot interior product
-against `♯eᵢ` has model-operator-norm `≤ ‖♯eᵢ(x)‖`, the two iterated products give `‖♯eᵢ(x)‖²`, the sum
-over the `E`-orthonormal coframe gives the cometric trace `∑ᵢ ‖♯eᵢ(x)‖²` (uniformly bounded on the
-compact `M` by `exists_uniform_cometricBilin_bound`), and the `−2`-scaling squares to the `(2·…)²`
-factor — uniform over `a` because the operator norm of a leading-slot contraction is independent of the
-passenger valence.  Its body is `sorry`: the order-uniform value-local fibre bound of the intrinsic
-`g₀⁻¹` double trace. -/
+This is the genuinely-missing **mixed-norm** analytic core.  The HS (Riemannian) fibre norm of the
+composition `Φ ∘ R` is bounded by the *carrier operator norm* of `Φ = FieldRec a x` times the HS norm of
+`R` (`‖ΦR‖_HS ≤ ‖Φ‖_op·‖R‖_HS`), and the carrier operator norm of `FieldRec a x = slotExtendᵃ(base x)`
+equals that of the fixed base field `base x` (a leading passenger covariant slot is an *isometric
+ampliation* for the operator norm — independent of the passenger valence `a`), uniformly bounded on the
+compact `M`.  Crucially this is the OPERATOR-norm route, not the HS route: the HS norm of `slotExtendᵃ`
+grows by a `dim`-factor per passenger slot, so it is *not* `a`-uniform, whereas the operator norm is.
+The two genuinely-absent on-disk primitives folded here are (i) the mixed bound `rfns(Φ.comp W) ≤
+‖Φ‖²_op,carrier · rfns(W)` (the Riemannian fibre norm `riemannianFiberNormSq` and the carrier operator
+norm `Tensor0SBundle.tensorRSSpace_norm_eq_carrier_opNorm` are *distinct norm instances*; `compRS_le_mul`
+is the HS×HS bound, which here grows with `a`), and (ii) the carrier operator-norm preservation of the
+leading passenger-slot extension `slotExtendFib`.  It is **non-vacuous** (a degenerate `κ₀ = 0` is
+rejected whenever `op a R ≠ 0`); its body is `sorry`: the order-uniform mixed-norm value-local fibre
+envelope of the slot-extended intrinsic `g₀⁻¹` double trace. -/
 theorem exists_uniform_ricciModelTrace42Op_rfns_le (g₀ : SmoothRiemannianMetric I M) :
     ∃ κ₀ : ℝ, 0 ≤ κ₀ ∧ ∀ (a : ℕ) (R : Integral.L2.SmoothCcTensor g₀ 0 (4 + a)) (x : M),
       Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
