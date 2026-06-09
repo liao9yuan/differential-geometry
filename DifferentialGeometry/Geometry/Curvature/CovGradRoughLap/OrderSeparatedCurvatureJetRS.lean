@@ -53,8 +53,11 @@ downstream full-sum grid (`CurvatureJetGridRS`) and the order-`2` commutator ful
   single-top-order shape `(2, 1)`: the per-direction moving-frame bracket trace is non-tensorial in the
   direction, so only the intrinsic full-sum window is order-controlled). This is the genuinely
   irreducible iterated-Ricci content at rank `r` — the contravariant-rank-`r` analogue of the rank-`0`
-  `pointwiseTensorCurv_movingFrameRemainder_fullSum_gradedCurvJet` — absent sorry-free below this file,
-  so it is posited here as one precise true core. Consumers transitively depend on `sorryAx`.
+  `pointwiseTensorCurv_movingFrameRemainder_fullSum_gradedCurvJet` — *derived* here over the genuine
+  three-field full-sum base split `exists_pointwiseTensorCurvRS_genuineThreeField_fullSum_m0_baseSplit`
+  (the rank-`r` iterated-Ricci deep well, posited once here as one precise true core) by relaxing the two
+  sorry-free concrete sections to the common shape and subtracting. Consumers transitively depend on
+  `sorryAx` through the base split.
 
 The genuine `(0, 3)` remainder jet, together with the pure-Riemann grid `GcurvSectionRS_gradedCurvJet`
 and the `(0, 1)` differentiated-curvature jet above, is exactly what the rank-`r` full-sum seed
@@ -204,6 +207,89 @@ private lemma gradedCurvJetRS_targetSum_nonneg (g : SmoothRiemannianMetric I M) 
           ((iteratedCovGrad g r s (i + p) S).toSection x) :=
   Finset.sum_nonneg fun i _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g r (s + (i + p)) x _
 
+/-- **Order-window domination for an order-shifted truncated sum (file-local).** For a nonnegative
+order-indexed family `f`, the `(p, w)`-windowed sum `∑_{i < w + k} f (i + p)` is dominated by the
+wider `(p', w')`-windowed sum `∑_{i < w' + k} f (i + p')` whenever `p' ≤ p` and `p + w ≤ p' + w'`:
+both reindex (`Finset.sum_Ico_eq_sum_range`) onto `Ico`-sums over the order set, and the former
+order-window is a subset of the latter with all summands `≥ 0`. (A file-local copy of the
+`orderWindow_sum_le` bookkeeping homed in the downstream `CommutatorDefectFullSumJet`, which this file
+may not import; the opaque `f` keeps the reindex free of the dependent rank-index motive.) -/
+private theorem orderWindow_sum_le_local (f : ℕ → ℝ) (hf : ∀ q, 0 ≤ f q) {p w p' w' k : ℕ}
+    (hp : p' ≤ p) (hpw : p + w ≤ p' + w') :
+    ∑ i ∈ Finset.range (w + k), f (i + p) ≤ ∑ i ∈ Finset.range (w' + k), f (i + p') := by
+  have eL : ∑ i ∈ Finset.range (w + k), f (i + p) = ∑ q ∈ Finset.Ico p (p + (w + k)), f q := by
+    rw [Finset.sum_Ico_eq_sum_range]
+    exact Finset.sum_congr (by congr 1; omega) (fun i _ => by rw [Nat.add_comm])
+  have eR : ∑ i ∈ Finset.range (w' + k), f (i + p') = ∑ q ∈ Finset.Ico p' (p' + (w' + k)), f q := by
+    rw [Finset.sum_Ico_eq_sum_range]
+    exact Finset.sum_congr (by congr 1; omega) (fun i _ => by rw [Nat.add_comm])
+  rw [eL, eR]
+  refine Finset.sum_le_sum_of_subset_of_nonneg ?_ (fun q _ _ => hf q)
+  exact Finset.Ico_subset_Ico hp (by omega)
+
+/-- **Order-range monotonicity of the rank-`r` graded curvature-jet predicate (file-local).** A
+graded curvature jet of `S` of lowest order `p` / base width `w` is also a jet of any wider shape
+`(p', w')` with `p' ≤ p` and `p + w ≤ p' + w'`, since the `(p, w)` order-window is a subset of the
+`(p', w')` window with nonnegative summands; the constant family is unchanged. (A file-local copy of
+the public `IsGradedCurvJetRS.le_shape` homed in the downstream `CommutatorDefectFullSumJet`, which
+this file may not import; kept under a distinct private name so it does not collide.) -/
+private theorem IsGradedCurvJetRS_le_shape_local (g : SmoothRiemannianMetric I M) {r s : ℕ}
+    (S : SmoothCcTensor g r s) {c : ℕ → ℝ} {p w p' w' t : ℕ} {G : SmoothCcTensor g r t}
+    (hp : p' ≤ p) (hpw : p + w ≤ p' + w')
+    (hG : IsGradedCurvJetRS (I := I) (M := M) g S c p w G) :
+    IsGradedCurvJetRS (I := I) (M := M) g S c p' w' G := by
+  intro k x
+  refine (hG k x).trans ?_
+  refine mul_le_mul_of_nonneg_left ?_ (sq_nonneg (c k))
+  exact orderWindow_sum_le_local
+    (fun q => riemannianFiberNormSq (I := I) (M := M) g r (s + q) x
+      ((iteratedCovGrad g r s q S).toSection x))
+    (fun q => riemannianFiberNormSq_nonneg (I := I) (M := M) g r (s + q) x _) hp hpw
+
+/-- **The rank-`r` graded curvature-jet predicate is closed under subtraction of two jets of the same
+shape (file-local).** The difference analogue of `IsGradedCurvJetRS.add`: if `G₁`, `G₂` are graded
+curvature jets of `S` of the *same* lowest order `p` and base width `w`, then their difference
+`G₁ − G₂` is a graded curvature jet of the same shape with constant family
+`k ↦ √(2·((c₁ k)² + (c₂ k)²))`, since `∇^k(G₁ − G₂) = ∇^k G₁ − ∇^k G₂` (`iteratedCovGrad_sub`,
+`SmoothCcTensor.toSection_sub`) and the fibre norm is `≤ 2·rfns(∇^k G₁) + 2·rfns(∇^k G₂)`
+(`riemannianFiberNormSq_sub_le`). (A file-local copy of the public `IsGradedCurvJet.sub` /
+`IsGradedCurvJetRS_neg` machinery homed downstream, kept under a distinct private name.) -/
+private theorem IsGradedCurvJetRS_sub_local (g : SmoothRiemannianMetric I M) {r s : ℕ}
+    (S : SmoothCcTensor g r s) {c₁ c₂ : ℕ → ℝ} {p w t : ℕ}
+    {G₁ G₂ : SmoothCcTensor g r t}
+    (hG₁ : IsGradedCurvJetRS (I := I) (M := M) g S c₁ p w G₁)
+    (hG₂ : IsGradedCurvJetRS (I := I) (M := M) g S c₂ p w G₂) :
+    IsGradedCurvJetRS (I := I) (M := M) g S
+      (fun k => Real.sqrt (2 * ((c₁ k) ^ 2 + (c₂ k) ^ 2))) p w (G₁ - G₂) := by
+  intro k x
+  have hsplit : (iteratedCovGrad g r t k (G₁ - G₂)).toSection x =
+      (iteratedCovGrad g r t k G₁).toSection x - (iteratedCovGrad g r t k G₂).toSection x := by
+    rw [iteratedCovGrad_sub, SmoothCcTensor.toSection_sub]
+    simp only [ContMDiffSection.coe_sub, Pi.sub_apply]
+  rw [hsplit]
+  have hsub := riemannianFiberNormSq_sub_le (I := I) (M := M) g r (t + k) x
+    ((iteratedCovGrad g r t k G₁).toSection x) ((iteratedCovGrad g r t k G₂).toSection x)
+  have hcsq : Real.sqrt (2 * ((c₁ k) ^ 2 + (c₂ k) ^ 2)) ^ 2 = 2 * ((c₁ k) ^ 2 + (c₂ k) ^ 2) := by
+    rw [Real.sq_sqrt]
+    positivity
+  rw [hcsq]
+  calc riemannianFiberNormSq (I := I) (M := M) g r (t + k) x
+          ((iteratedCovGrad g r t k G₁).toSection x - (iteratedCovGrad g r t k G₂).toSection x)
+      ≤ 2 * riemannianFiberNormSq (I := I) (M := M) g r (t + k) x
+            ((iteratedCovGrad g r t k G₁).toSection x) +
+          2 * riemannianFiberNormSq (I := I) (M := M) g r (t + k) x
+            ((iteratedCovGrad g r t k G₂).toSection x) := hsub
+    _ ≤ 2 * ((c₁ k) ^ 2 * ∑ i ∈ Finset.range (w + k),
+              riemannianFiberNormSq (I := I) (M := M) g r (s + (i + p)) x
+                ((iteratedCovGrad g r s (i + p) S).toSection x)) +
+          2 * ((c₂ k) ^ 2 * ∑ i ∈ Finset.range (w + k),
+              riemannianFiberNormSq (I := I) (M := M) g r (s + (i + p)) x
+                ((iteratedCovGrad g r s (i + p) S).toSection x)) := by
+        gcongr <;> [exact hG₁ k x; exact hG₂ k x]
+    _ = 2 * ((c₁ k) ^ 2 + (c₂ k) ^ 2) * ∑ i ∈ Finset.range (w + k),
+              riemannianFiberNormSq (I := I) (M := M) g r (s + (i + p)) x
+                ((iteratedCovGrad g r s (i + p) S).toSection x) := by ring
+
 /-- **Monotonicity of the rank-`r` graded curvature-jet predicate in its constant family.** If `G` is
 a graded curvature jet of `S` with nonnegative constant family `c` and `c k ≤ c' k` at every order
 `k`, then `G` is also a graded curvature jet with the larger constant family `c'`. The verbatim mirror
@@ -302,42 +388,119 @@ theorem exists_diffCurvSectionRS_gradedCurvJet (g : SmoothRiemannianMetric I M) 
   -- the carrier-tower grid bound (window `w + k = 1 + k`, lowest order `p = 0`, target jets `∇^{i+0} S`).
   exact hgrid s S k x
 
-/-- **Posited rank-`r` moving-frame remainder full-sum graded jet after the differentiated-curvature
-peel (the genuine iterated-Ricci remainder core, sound full-sum shape `(0, 3)`).** The
-contravariant-rank-`r` analogue of the rank-`0` moving-frame remainder full-sum content
-`pointwiseTensorCurv_movingFrameRemainder_fullSum_gradedCurvJet` (`CommutatorDefectFullSumJet`). For a
-closed smooth Riemannian manifold `(M, g)`, fixed contravariant rank `r`, there is a
+/-- **Posited rank-`r` `m = 0` genuine three-field full-sum graded base split of the order-`2`
+commutator defect (the iterated-Ricci deep well at general rank, sound full-sum remainder).** For a
+closed smooth Riemannian manifold `(M, g)` and a fixed contravariant rank `r` there is a
 *valence/order-dependent* nonnegative constant family `c : ℕ → ℕ → ℝ` such that, at every covariant rank
-`s` and for every smooth compactly-supported `(r, s)`-tensor `S`, peeling off both the concrete
-pure-Riemann section `GcurvSectionRS g r s S` (the `R(∇S)` contraction) and the *concrete* gauge-glued
-differentiated-curvature carrier `diffCurvSectionRS g r s S` (the `(∇R) S` field, the canonical carrier
-pinned by `exists_diffCurvSectionRS_gradedCurvJet`), the surviving moving-frame remainder
-`pointwiseTensorCurvRS g r s S − GcurvSectionRS g r s S − diffCurvSectionRS g r s S` is a **graded**
-curvature jet of the **sound full-sum shape** lowest contracted order `0` and base width `3`:
+`s` and for every smooth compactly-supported `(r, s)`-tensor `S`, the order-`2` commutator defect
+`Curv S := pointwiseTensorCurvRS g r s S` splits into three smooth compactly-supported `(r, s + 1)`-tensor
+fields carried **existentially**
+```
+Curv S = Gcurv + Gdiff + Grem
+```
+each a **graded** curvature jet (`IsGradedCurvJetRS`) of `S` at its genuine shape: the pure-Riemann
+contraction `R(∇S)` jet `Gcurv` of lowest order `1` and width `1`, the differentiated-curvature `(∇R) S`
+jet `Gdiff` of lowest order `0` and width `1`, and the moving-frame remainder `Grem` of the **sound
+full-sum shape** lowest order `0` and width `3` (bounded by the whole window `∇^{≤ k + 2} S`, NOT the
+false single-top-order shape `(2, 1)`).
+
+This is the contravariant-rank-`r` analogue of the audited rank-`0` `m = 0` graded base seed
+`pointwiseTensorCurv_gradedCurvJet_field_base` (`OrderSeparatedCurvatureJet`), upgraded to the sound
+full-sum remainder shape `(0, 3)` (the rank-`0` seed carries the false single-top-order `(2, 1)`
+remainder, which the full-sum route abandoned). It is the genuinely-irreducible iterated-Ricci content of
+the order-`2` commutator defect at general rank, distinct from — and strictly more primitive than — the
+target subtracted remainder jet below: this carries the **whole defect's** existential three-field split
+at the genuine shapes, while the target subtracts the two *concrete* canonical sections
+`GcurvSectionRS g r s S`, `diffCurvSectionRS g r s S` off the defect and asserts only the surviving
+`(0, 3)` remainder.
+
+**Why this is TRUE — and why the full-sum, not order-separated, shape.** Pointwise `Curv S` is the
+genuine third-order Bochner–Weitzenböck field: by the metric-trace reading of the rough Laplacian
+`Δ_∇ = tr_g ∘ ∇²` (`rawTensorConnLap_eq_metricTrace2`, frame-free, rank-generic) the defect
+`Δ_∇(∇S) − ∇(Δ_∇ S)` is the metric trace of the antisymmetrised second covariant derivative of `∇S`,
+which the third-order tensor Ricci identity `secondCovDeriv_covGrad_antisymm_eq_riemannOp_gen` exhibits
+as a `riemannOp`-contraction of `(∇S, S)`, lifted to the `(r, s)`-bundle through the slot-wise curvature
+formula `riemannSec_tensorCov_apply_eval` (`TensorSlotwiseCurvatureRS`). Splitting that contraction into
+its pure-Riemann `R(∇S)` part (`Gcurv`, lowest order `1`), its differentiated-curvature `(∇R) S` part
+(`Gdiff`, lowest order `0`), and the surviving moving-frame / frame-bracket discrepancy (`Grem`,
+genuinely `∇²S`-order, the full-sum window `0 … k + 2` after the iterated-Ricci cancellation of the top
+`∇^{k + 3} S` terms), with every curvature coefficient absorbed uniformly over the compact manifold
+(`exists_uniform_riemannianFiberNormSq_riemannOp_bound`,
+`exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound`). The contracted-order window is the
+**full-sum** `0 … k + 2` (shape `(0, 3)`): the per-direction moving-frame bracket trace is non-tensorial
+in the direction (false term-by-term through `smoothExtensionTangent`, chart-selection-unbounded on
+`S²`), so only the intrinsic full-sum window is order-controlled, and the three fields are carried
+*existentially* (never per-direction `smoothExtensionTangent`-curried). The rank-`r` iterated-Ricci grid
+is absent sorry-free below this file, so this is posited here as the single precise true child.
+Consumers transitively depend on `sorryAx`.
+
+**Strictly more primitive than the target (genuine decomposition, no hypothesis-packaging).** This posits
+the *witnessed* three-field split of the whole defect together with each field's genuine (tighter) graded
+shape; the target subtracted-remainder jet is *derived* from it by relaxing each genuine jet to the
+common shape `(0, 3)` (`IsGradedCurvJetRS_le_shape_local`) and subtracting the two sorry-free concrete
+sections `GcurvSectionRS g r s S` (graded by `GcurvSectionRS_gradedCurvJet`) and `diffCurvSectionRS g r s
+S` (graded by `exists_diffCurvSectionRS_gradedCurvJet`) through `IsGradedCurvJetRS_sub_local`. The
+existential three-field split carries strictly more information than the bare subtracted-remainder jet, so
+the target cannot reconstruct it and this node is not its own conclusion.
+
+**Non-vacuity.** With `c s 0 = 0` the three bounds force `rfns(Gcurv)(x) = rfns(Gdiff)(x) =
+rfns(Grem)(x) = 0` at `k = 0`, hence the section equation gives `Curv S = 0`; *false* on a non-flat
+manifold, where the order-`2` commutator defect carries the genuine curvature contraction of `S`
+(`R ≠ 0`, `∇S ≠ 0`). The constant family is genuinely positive. -/
+theorem exists_pointwiseTensorCurvRS_genuineThreeField_fullSum_m0_baseSplit
+    (g : SmoothRiemannianMetric I M) (r : ℕ) :
+    ∃ c : ℕ → ℕ → ℝ, (∀ s k, 0 ≤ c s k) ∧
+      ∀ (s : ℕ) (S : SmoothCcTensor g r s),
+        ∃ Gcurv Gdiff Grem : SmoothCcTensor g r (s + 1),
+          pointwiseTensorCurvRS (I := I) (M := M) g r s S = Gcurv + Gdiff + Grem ∧
+          IsGradedCurvJetRS (I := I) (M := M) g S (c s) 1 1 Gcurv ∧
+          IsGradedCurvJetRS (I := I) (M := M) g S (c s) 0 1 Gdiff ∧
+          IsGradedCurvJetRS (I := I) (M := M) g S (c s) 0 3 Grem :=
+  sorry
+
+/-- **Rank-`r` moving-frame remainder full-sum graded jet after the differentiated-curvature peel (the
+genuine iterated-Ricci remainder core, sound full-sum shape `(0, 3)`), derived from the genuine
+three-field base split.** The contravariant-rank-`r` analogue of the rank-`0` moving-frame remainder
+full-sum content `pointwiseTensorCurv_movingFrameRemainder_fullSum_gradedCurvJet`
+(`CommutatorDefectFullSumJet`). For a closed smooth Riemannian manifold `(M, g)`, fixed contravariant
+rank `r`, there is a *valence/order-dependent* nonnegative constant family `c : ℕ → ℕ → ℝ` such that, at
+every covariant rank `s` and for every smooth compactly-supported `(r, s)`-tensor `S`, peeling off both
+the concrete pure-Riemann section `GcurvSectionRS g r s S` (the `R(∇S)` contraction) and the *concrete*
+gauge-glued differentiated-curvature carrier `diffCurvSectionRS g r s S` (the `(∇R) S` field, the
+canonical carrier pinned by `exists_diffCurvSectionRS_gradedCurvJet`), the surviving moving-frame
+remainder `pointwiseTensorCurvRS g r s S − GcurvSectionRS g r s S − diffCurvSectionRS g r s S` is a
+**graded** curvature jet of the **sound full-sum shape** lowest contracted order `0` and base width `3`:
 ```
 rfns(∇^k (Curv S − GcurvSectionRS g r s S − diffCurvSectionRS g r s S))(x)
   ≤ (c s k)² · ∑_{i < 3 + k} rfns(∇^{i} S)(x).
 ```
 
-**Why this is TRUE — and why it is the FULL-SUM, not the order-separated `(2, 1)`, shape.** This is the
-contravariant-rank-`r` lift of the rank-`0` moving-frame remainder full-sum content. Pointwise, after
-removing the two genuine curvature contractions — the pure-Riemann `R(∇S)` carried by `GcurvSectionRS`
-and the differentiated-curvature `(∇R) S` carried by `diffCurvSectionRS` — the surviving remainder is
-the frame-bracket discrepancy, genuinely `∇²S`-order; each of its own iterated gradients
-`∇^k(Curv S − GcurvSectionRS − diffCurvSectionRS)` is, after the iterated-Ricci cancellation of the top
+**Proof (over the genuine three-field base split).** This is *derived* from the witnessed genuine
+three-field full-sum base split `exists_pointwiseTensorCurvRS_genuineThreeField_fullSum_m0_baseSplit`
+(the iterated-Ricci deep well): `Curv S = Gcurv + Gdiff + Grem` with `Gcurv` a `(1, 1)` graded jet,
+`Gdiff` a `(0, 1)` graded jet, and `Grem` the sound full-sum `(0, 3)` graded jet. Substituting the split,
+the target remainder regroups as
+`Curv S − GcurvSectionRS − diffCurvSectionRS = (Gcurv − GcurvSectionRS) + ((Gdiff − diffCurvSectionRS) +
+Grem)` (`abel`), and each leg is a `(0, 3)` graded jet: `Gcurv` and the *sorry-free* concrete
+`GcurvSectionRS g r s S` (`GcurvSectionRS_gradedCurvJet`) are both `(1, 1)` jets relaxed to `(0, 3)`
+(`IsGradedCurvJetRS_le_shape_local`), so their difference is `(0, 3)`
+(`IsGradedCurvJetRS_sub_local`); likewise `Gdiff` and the concrete `diffCurvSectionRS g r s S`
+(`exists_diffCurvSectionRS_gradedCurvJet`) are `(0, 1)` jets relaxed to `(0, 3)`; and `Grem` is already
+`(0, 3)`. Summing the three legs (`IsGradedCurvJetRS.add`, twice) gives the remainder as a single
+`(0, 3)` graded jet. The genuinely-irreducible iterated-Ricci content lives entirely in the base split;
+this node is mere graded-jet bookkeeping on top of it. Consumers transitively depend on `sorryAx` through
+the base split.
+
+**Why the base split is TRUE — and why it is the FULL-SUM, not the order-separated `(2, 1)`, shape.**
+Pointwise, after removing the two genuine curvature contractions — the pure-Riemann `R(∇S)` and the
+differentiated-curvature `(∇R) S` — the surviving remainder is the frame-bracket discrepancy, genuinely
+`∇²S`-order; each of its own iterated gradients is, after the iterated-Ricci cancellation of the top
 `∇^{k + 3}S` terms (`secondCovDeriv_covGrad_antisymm_eq_riemannOp_gen`), a curvature contraction of
 `∇^{≤ k + 2}S` (contracted-order window `0 … k + 2`, shape `(0, 3)`), with every curvature coefficient
 absorbed uniformly over the compact manifold. The contracted-order window is the **full-sum** `0 … k + 2`,
 *not* the single top order `k + 2` (the order-separated `(2, 1)` shape): the per-direction moving-frame
 bracket trace is non-tensorial in the direction (false term-by-term through `smoothExtensionTangent`,
-chart-selection-unbounded on `S²`), so only the intrinsic full-sum window is order-controlled. The
-rank-`r` iterated-Ricci moving-frame remainder grid is absent sorry-free below this file (the rank-`0`
-carriers and the field split use the rank-`0`-locked curvature contractions), so it is posited here as
-one precise true core — the rank-`r` analogue of the genuine rank-`0` full-sum remainder content (itself
-a posited `sorry` at rank `0`, `pointwiseTensorCurv_movingFrameRemainder_fullSum_gradedCurvJet`). The
-carrier `diffCurvSectionRS` carries the genuine `(∇R) S` (order-`0`) content, so subtracting it off — and
-the pure-Riemann `GcurvSectionRS` — is exactly what leaves the moving-frame bracket discrepancy.
-Consumers transitively depend on `sorryAx`.
+chart-selection-unbounded on `S²`), so only the intrinsic full-sum window is order-controlled.
 
 **Signature soundness — why both carriers are pinned, not free inputs.** The carriers are the concrete
 `GcurvSectionRS g r s S` and `diffCurvSectionRS g r s S`, *not* universally-quantified inputs. The
@@ -365,7 +528,69 @@ theorem exists_pointwiseTensorCurvRS_subGcurvSubDiffCurv_fullSum_gradedCurvJet
           (pointwiseTensorCurvRS (I := I) (M := M) g r s S -
             GcurvSectionRS (I := I) (M := M) g r s S -
             diffCurvSectionRS (I := I) (M := M) g r s S) := by
-  sorry
+  classical
+  -- The genuine three-field full-sum base split of the whole defect (the iterated-Ricci deep well),
+  -- and the two sorry-free graded jets of the concrete sections subtracted in the target field.
+  obtain ⟨cBase, hcBase_nn, hbase⟩ :=
+    exists_pointwiseTensorCurvRS_genuineThreeField_fullSum_m0_baseSplit (I := I) (M := M) g r
+  -- The pure-Riemann section's `(1, 1)` graded jet is sorry-free: it IS the rank-`r` pure-Riemann grid
+  -- (`exists_GcurvSectionRS_iteratedCovGrad_grid_bound`) unfolded as `IsGradedCurvJetRS g S c 1 1`.
+  obtain ⟨cA, hcA_nn, hAgrid⟩ := exists_GcurvSectionRS_iteratedCovGrad_grid_bound (I := I) (M := M) g r
+  have hAjet : ∀ (s : ℕ) (S : SmoothCcTensor g r s),
+      IsGradedCurvJetRS (I := I) (M := M) g S (cA s) 1 1
+        (GcurvSectionRS (I := I) (M := M) g r s S) := fun s S k x => hAgrid s S k x
+  obtain ⟨cB, hcB_nn, hBjet⟩ := exists_diffCurvSectionRS_gradedCurvJet (I := I) (M := M) g r
+  -- A single per-order constant family dominating all three input families; the subtraction/addition
+  -- closures then square-combine the common constant left-associatively.
+  set C : ℕ → ℕ → ℝ := fun s k => max (max (cBase s k) (cA s k)) (cB s k) with hC_def
+  refine ⟨fun s k =>
+      Real.sqrt (2 * ((Real.sqrt (2 * ((C s k) ^ 2 + (C s k) ^ 2))) ^ 2
+        + Real.sqrt (2 * ((Real.sqrt (2 * ((C s k) ^ 2 + (C s k) ^ 2))) ^ 2 + (C s k) ^ 2)) ^ 2)),
+    fun s k => Real.sqrt_nonneg _, fun s S => ?_⟩
+  obtain ⟨Gcurv, Gdiff, Grem, hsplit, hGcurv, hGdiff, hGrem⟩ := hbase s S
+  -- Promote each genuine jet to the common per-order family `C s`, then relax to the full-sum shape.
+  have hGcurv_C : IsGradedCurvJetRS (I := I) (M := M) g S (C s) 1 1 Gcurv :=
+    hGcurv.mono_const (I := I) (M := M) g S (hcBase_nn s)
+      (fun k => le_trans (le_max_left _ _) (le_max_left _ _))
+  have hGdiff_C : IsGradedCurvJetRS (I := I) (M := M) g S (C s) 0 1 Gdiff :=
+    hGdiff.mono_const (I := I) (M := M) g S (hcBase_nn s)
+      (fun k => le_trans (le_max_left _ _) (le_max_left _ _))
+  have hGrem_C : IsGradedCurvJetRS (I := I) (M := M) g S (C s) 0 3 Grem :=
+    hGrem.mono_const (I := I) (M := M) g S (hcBase_nn s)
+      (fun k => le_trans (le_max_left _ _) (le_max_left _ _))
+  have hA_C : IsGradedCurvJetRS (I := I) (M := M) g S (C s) 1 1
+      (GcurvSectionRS (I := I) (M := M) g r s S) :=
+    (hAjet s S).mono_const (I := I) (M := M) g S (hcA_nn s)
+      (fun k => le_trans (le_max_right _ _) (le_max_left _ _))
+  have hB_C : IsGradedCurvJetRS (I := I) (M := M) g S (C s) 0 1
+      (diffCurvSectionRS (I := I) (M := M) g r s S) :=
+    (hBjet s S).mono_const (I := I) (M := M) g S (hcB_nn s) (fun k => le_max_right _ _)
+  -- Relax all five jets to the common full-sum shape `(0, 3)`.
+  have hGcurv_03 : IsGradedCurvJetRS (I := I) (M := M) g S (C s) 0 3 Gcurv :=
+    IsGradedCurvJetRS_le_shape_local (I := I) (M := M) g S (by omega) (by omega) hGcurv_C
+  have hGdiff_03 : IsGradedCurvJetRS (I := I) (M := M) g S (C s) 0 3 Gdiff :=
+    IsGradedCurvJetRS_le_shape_local (I := I) (M := M) g S (by omega) (by omega) hGdiff_C
+  have hA_03 : IsGradedCurvJetRS (I := I) (M := M) g S (C s) 0 3
+      (GcurvSectionRS (I := I) (M := M) g r s S) :=
+    IsGradedCurvJetRS_le_shape_local (I := I) (M := M) g S (by omega) (by omega) hA_C
+  have hB_03 : IsGradedCurvJetRS (I := I) (M := M) g S (C s) 0 3
+      (diffCurvSectionRS (I := I) (M := M) g r s S) :=
+    IsGradedCurvJetRS_le_shape_local (I := I) (M := M) g S (by omega) (by omega) hB_C
+  -- `Gcurv − GcurvSectionRS` and `Gdiff − diffCurvSectionRS` are `(0, 3)` graded jets.
+  have hsub1 := IsGradedCurvJetRS_sub_local (I := I) (M := M) g S hGcurv_03 hA_03
+  have hsub2 := IsGradedCurvJetRS_sub_local (I := I) (M := M) g S hGdiff_03 hB_03
+  -- Sum the three `(0, 3)` legs: `(Gcurv − GcurvSectionRS) + ((Gdiff − diffCurvSectionRS) + Grem)`.
+  have hpair := hsub2.add (I := I) (M := M) g S hGrem_C
+  have htriple := hsub1.add (I := I) (M := M) g S hpair
+  -- The target field equals that three-leg regrouping (substitute the split, then `abel`).
+  have hfield : pointwiseTensorCurvRS (I := I) (M := M) g r s S -
+        GcurvSectionRS (I := I) (M := M) g r s S -
+        diffCurvSectionRS (I := I) (M := M) g r s S =
+      (Gcurv - GcurvSectionRS (I := I) (M := M) g r s S) +
+        ((Gdiff - diffCurvSectionRS (I := I) (M := M) g r s S) + Grem) := by
+    rw [hsplit]; abel
+  rw [hfield]
+  exact htriple
 
 end Connection
 end Integral
