@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldCovariantCalculusRS
 import DifferentialGeometry.Geometry.Connection.TensorNabla.SecondOrderHomBundle
+import DifferentialGeometry.Geometry.Connection.TensorNabla.HomTensorRSRiemannian
 import DifferentialGeometry.Geometry.Connection.SingleSlotOperatorFiberNormBound
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RankRPureRCurvatureTower
 
@@ -649,8 +650,9 @@ theorem exists_continuous_riemannianFiberNormSq_homSection_clm_le
     ∃ Cop : M → ℝ, Continuous Cop ∧ (∀ x : M, 0 ≤ Cop x) ∧
       ∀ (x : M) (v : TensorRSSpace r a I x),
         riemannianFiberNormSq (I := I) (M := M) g r c x (Ψ x v) ≤
-          Cop x * riemannianFiberNormSq (I := I) (M := M) g r a x v := by
-  sorry
+          Cop x * riemannianFiberNormSq (I := I) (M := M) g r a x v :=
+  exists_continuous_riemannianFiberNormSq_homTensorRS_section_clm_le
+    (g := g) (r := r) (a := a) (c := c) (Ψ := Ψ) (hΨ := hΨ)
 
 set_option linter.unusedVariables false in
 set_option backward.isDefEq.respectTransparency false in
