@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FiberNormSubaddit
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RankRDiffBilinGrid
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RankRPureRCurvatureTower
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RankRDiffCurvatureTower
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemainderFrameSumBridgeRS
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.Algebra
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Integrability
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
@@ -140,6 +141,71 @@ theorem pointwiseTensorCurvRS_toSection_eq_sub
         covGrad (I := I) (M := M) g r s (rawTensorConnLapSmooth (I := I) g r s S) := rfl
   rw [hdef, SmoothCcTensor.toSection_sub]
   rfl
+
+/-- **The rank-`r` order-`2` commutator defect as a fixed-frame sum of per-summand third-order
+differences (sorry-free).** The section value at `x` of the bundled defect `pointwiseTensorCurvRS g r
+s S = Δ_∇(∇S) − ∇(Δ_∇ S)` is the fixed-frame sum of the per-summand third-order difference fields
+`remDiffFibRS g r s S x i` (`MovingFrameRemainderFrameSumBridgeRS`), over the `g_x`-orthonormal frame
+`Bᵢ := smoothOrthoFrame g x i`:
+```
+(pointwiseTensorCurvRS g r s S).toSection x = ∑ᵢ remDiffFibRS g r s S x i.
+```
+The defect's body is definitionally the upstream difference
+`rawTensorConnLapSmooth g r (s + 1) (covGrad g r s S) − covGrad g r s (rawTensorConnLapSmooth g r s
+S)` over which the engine identity `commutatorDefectRS_toSection_eq_frame_sum` is stated, so this is
+its `rfl`-grade re-expression over the named defect. The contravariant-rank-`r` mirror of
+`pointwiseTensorCurv_toSection_eq_frame_sum`. -/
+theorem pointwiseTensorCurvRS_toSection_eq_frame_sum
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) (x : M) :
+    (pointwiseTensorCurvRS (I := I) (M := M) g r s S).toSection x =
+      ∑ i : Fin (Module.finrank ℝ E), remDiffFibRS (I := I) (M := M) g r s S x i :=
+  commutatorDefectRS_toSection_eq_frame_sum (I := I) (M := M) g r s S x
+
+/-- **The rank-`r` frame-summand integrand identity over the bundled defect (sorry-free).** The
+pointwise metric inner product of the rank-`r` order-`2` commutator defect `pointwiseTensorCurvRS g r
+s S` against the gradient field `∇S := covGrad g r s S` — the integrand of the rank-`r` curvature
+cross-pairing — is the fixed-frame sum of the per-summand pairings of the third-order difference
+fields `remDiffFibRS` against `∇S`:
+```
+⟨Curv S, ∇S⟩(x) = ∑ᵢ ⟨remDiffFibRS g r s S x i, ∇S(x)⟩,   Bᵢ := smoothOrthoFrame g x i.
+```
+The `rfl`-grade re-expression of the engine identity `commutatorDefectRS_pairing_eq_frameSum`
+(`MovingFrameRemainderFrameSumBridgeRS`) over the named bundled defect (whose body is definitionally
+the upstream difference). The contravariant-rank-`r` mirror of
+`pointwiseTensorCurvPairing_eq_frameSum`. -/
+theorem pointwiseTensorCurvRS_pairing_eq_frameSum
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) (x : M) :
+    tensorInnerPointwise (I := I) (M := M) g r (s + 1) x
+        ((pointwiseTensorCurvRS (I := I) (M := M) g r s S).toFun x)
+        ((covGrad (I := I) (M := M) g r s S).toFun x) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        tensorInnerPointwise (I := I) (M := M) g r (s + 1) x
+          (TensorRSSpace.toModel (remDiffFibRS (I := I) (M := M) g r s S x i))
+          ((covGrad (I := I) (M := M) g r s S).toFun x) :=
+  commutatorDefectRS_pairing_eq_frameSum (I := I) (M := M) g r s S x
+
+/-- **The rank-`r` curvature cross-pairing as the integral of the frame-summed remainder integrand,
+over the bundled defect (sorry-free).** The global metric `L²` pairing of the rank-`r` order-`2`
+commutator defect `pointwiseTensorCurvRS g r s S` against `∇S := covGrad g r s S` is the integral
+over the closed manifold of the fixed-frame sum of the per-summand pairings `⟨remDiffFibRS …, ∇S⟩`:
+```
+⟨Curv S, ∇S⟩_{L²} = ∫_M ∑ᵢ ⟨remDiffFibRS g r s S x i, ∇S(x)⟩ dvol_g.
+```
+The `rfl`-grade re-expression of the engine identity
+`tensorL2Inner_commutatorDefectRS_covGrad_eq_frameSum_integral`
+(`MovingFrameRemainderFrameSumBridgeRS`) over the named bundled defect. The contravariant-rank-`r`
+mirror of `tensorL2Inner_pointwiseTensorCurv_covGrad_eq_frameSum_integral`. -/
+theorem tensorL2Inner_pointwiseTensorCurvRS_covGrad_eq_frameSum_integral
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
+    tensorL2Inner (I := I) (M := M) g r (s + 1)
+        (pointwiseTensorCurvRS (I := I) (M := M) g r s S).toFun
+        (covGrad (I := I) (M := M) g r s S).toFun =
+      ∫ x, (∑ i : Fin (Module.finrank ℝ E),
+              tensorInnerPointwise (I := I) (M := M) g r (s + 1) x
+                (TensorRSSpace.toModel (remDiffFibRS (I := I) (M := M) g r s S x i))
+                ((covGrad (I := I) (M := M) g r s S).toFun x))
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
+  tensorL2Inner_commutatorDefectRS_covGrad_eq_frameSum_integral (I := I) (M := M) g r s S
 
 /-- **The fixed-frame pure-Riemann genuine curvature trace at `(r, s)`.** For a fixed smooth tangent
 frame `B` and a fixed smooth tangent field `W`, the frame sum at `y` of the pure-Riemann curvature
@@ -616,6 +682,109 @@ noncomputable def GcurvSectionRS
     (GcurvSectionRS (I := I) (M := M) g r s S).toSection x =
       genuineCurvPureRFibRS (I := I) (M := M) g r s S x := rfl
 
+/-- **The order-`0` rank-`r` frame-free pure-Riemann operator on `∇S` is the concrete moving-centre
+pure-Riemann genuine curvature section (file-local concrete-tower equality).** Both sides' fibres are
+the slot-`0` uncurry through `covGradBundleEquiv r s x` of the same pure-Riemann direction CLM
+`v ↦ ∑ᵢ R(Bᵢ x, v)(∇_{Bᵢ} S(x))`: the operator side by the public slot-`0` reading
+`genuinePureRDiffOp0_covGrad_fib_eq` (`RankRPureRCurvatureTower`), the section side by definition of
+`genuineCurvPureRFibRS` through `genuinePureRDirCLMRS`. The equality discharged inside
+`exists_pureRGenuineDiffOpRS_bridge` and consumed by the engine-bridge identities
+`remDiffGenuineFibRS_sum_eq_GcurvSectionRS_toSection` and
+`remDiffFibRS_genuineFrameSum_pairing_eq_GcurvSectionRS` below. -/
+private theorem genuinePureRDiffOp0RS_covGrad_eq_GcurvSectionRS
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
+    genuinePureRDiffOpRS (I := I) (M := M) g r 0 (s + 1)
+        (covGrad (I := I) (M := M) g r s S) =
+      GcurvSectionRS (I := I) (M := M) g r s S := by
+  refine SmoothCcTensor.ext (DFunLike.ext _ _ (fun x => ?_))
+  have hLHS_eq : (genuinePureRDiffOpRS (I := I) (M := M) g r 0 (s + 1)
+      (covGrad (I := I) (M := M) g r s S)).toSection x =
+      covGradBundleEquiv (I := I) (M := M) r s x
+        (pureRDirCLMFixedFrameRS (I := I) (M := M) g r s S (smoothOrthoFrame (I := I) g x) x) := by
+    refine (ContinuousLinearEquiv.symm_apply_eq (covGradBundleEquiv (I := I) (M := M) r s x)).mp ?_
+    refine ContinuousLinearMap.ext (fun v => ?_)
+    rw [genuinePureRDiffOp0_covGrad_fib_eq (I := I) (M := M) g r s S x v]
+    rw [pureRDirCLMFixedFrameRS, ContinuousLinearMap.sum_apply]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [pureRDirCLMSummandFixedFrameRS, LinearMap.coe_toContinuousLinearMap',
+      pureRDirLMSummandFixedFrameRS, LinearMap.coe_mk, AddHom.coe_mk]
+  rw [hLHS_eq, GcurvSectionRS_toSection, genuineCurvPureRFibRS, genuinePureRDirCLMRS]
+
+/-- **The engine's per-direction pure-Riemann genuine curvature direction CLM is the slot-`i`
+fixed-frame summand against the moving frame (sorry-free, by definition).** The frame-bridge object
+`remDiffGenuineDirCLMRS g r s S x i` (`MovingFrameRemainderFrameSumBridgeRS`, the slot-`i` curvature
+direction CLM `v ↦ R(Bᵢ, v)(∇_{Bᵢ} S(x))` with `Bᵢ := smoothOrthoFrame g x i`) coincides with this
+file's fixed-frame summand `pureRDirCLMSummandFixedFrameRS g r s S (smoothOrthoFrame g x) x i`: both
+are the continuous-linear upgrade of the identical curvature-direction linear map read off
+`riemannOp (tensorCov g r s)`. The contravariant-rank-`r` mirror of
+`remDiffGenuineDirCLM_eq_genuinePureRDirCLMSummand`. -/
+theorem remDiffGenuineDirCLMRS_eq_pureRDirCLMSummandFixedFrameRS
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) (x : M)
+    (i : Fin (Module.finrank ℝ E)) :
+    remDiffGenuineDirCLMRS (I := I) (M := M) g r s S x i =
+      pureRDirCLMSummandFixedFrameRS (I := I) (M := M) g r s S
+        (smoothOrthoFrame (I := I) g x) x i := rfl
+
+/-- **The pure-Riemann genuine fibre frame-sum is the concrete pure-Riemann section value, pointwise
+(sorry-free).** For a closed smooth Riemannian manifold `(M, g)`, contravariant rank `r`, covariant
+rank `s`, smooth compactly-supported `(r, s)`-tensor `S`, and point `x`, the fixed-frame sum of the
+per-direction pure-Riemann genuine curvature fibres `remDiffGenuineFibRS`
+(`MovingFrameRemainderFrameSumBridgeRS`) is the fibre value of the concrete moving-centre pure-Riemann
+genuine curvature section `GcurvSectionRS g r s S`:
+```
+∑ᵢ remDiffGenuineFibRS g r s S x i = (GcurvSectionRS g r s S).toSection x.
+```
+
+**Proof (sorry-free).** The engine identity
+`remDiffGenuineFibRS_sum_eq_genuinePureRDiffOp0_toSection` reads the frame sum as the fibre value of
+the order-`0` rank-`r` frame-free pure-Riemann operator on `∇S`, identified with the concrete section
+by the concrete-tower equality `genuinePureRDiffOp0RS_covGrad_eq_GcurvSectionRS` (the equality
+discharged inside `exists_pureRGenuineDiffOpRS_bridge`). The pure-Riemann trace is genuinely
+tensorial (direction-linear, read off `riemannOp`), so this is a sound pointwise frame-sum identity —
+the contravariant-rank-`r` mirror of `remDiffGenuineFib_sum_eq_GcurvSection_toSection`. -/
+theorem remDiffGenuineFibRS_sum_eq_GcurvSectionRS_toSection
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) (x : M) :
+    (∑ i : Fin (Module.finrank ℝ E), remDiffGenuineFibRS (I := I) (M := M) g r s S x i) =
+      (GcurvSectionRS (I := I) (M := M) g r s S).toSection x := by
+  rw [remDiffGenuineFibRS_sum_eq_genuinePureRDiffOp0_toSection (I := I) (M := M) g r s S x,
+    genuinePureRDiffOp0RS_covGrad_eq_GcurvSectionRS (I := I) (M := M) g r s S]
+
+/-- **The rank-`r` pure-Riemann genuine frame-sum pairing equals the concrete pure-Riemann section
+value (sorry-free, integrated form).** For a closed smooth Riemannian manifold `(M, g)`, contravariant
+rank `r`, covariant rank `s`, and smooth compactly-supported `(r, s)`-tensor `S`, the pure-Riemann
+genuine frame-sum integrand is Bochner-integrable against the Riemannian volume measure, and its
+integral over the closed manifold equals the global metric `L²` pairing of the concrete moving-centre
+pure-Riemann genuine curvature section `GcurvSectionRS g r s S` against `∇S := covGrad g r s S`:
+```
+∫_M ∑ᵢ ⟨remDiffGenuineFibRS g r s S x i, ∇S(x)⟩ dvol_g = ⟨GcurvSectionRS g r s S, ∇S⟩_{L²}.
+```
+
+**Proof (sorry-free).** The engine identity `remDiffFibRS_genuineFrameSum_pairing_eq_genuineFields`
+(`MovingFrameRemainderFrameSumBridgeRS`) carries both conjuncts against the order-`0` rank-`r`
+frame-free pure-Riemann operator value on `∇S`, rewritten to the concrete section by the
+concrete-tower equality `genuinePureRDiffOp0RS_covGrad_eq_GcurvSectionRS`. The pure-Riemann trace is
+genuinely tensorial in the direction, so this is a *sound pointwise* frame-sum identity — the
+contravariant-rank-`r` mirror of `remDiffFib_genuineFrameSum_pairing_eq_genuineFields`
+(`MovingFrameRemainderFrameSumBridge`), with the concrete `GcurvSectionRS` on the right. -/
+theorem remDiffFibRS_genuineFrameSum_pairing_eq_GcurvSectionRS
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
+    MeasureTheory.Integrable
+        (fun x => ∑ i : Fin (Module.finrank ℝ E),
+            tensorInnerPointwise (I := I) (M := M) g r (s + 1) x
+              (TensorRSSpace.toModel (remDiffGenuineFibRS (I := I) (M := M) g r s S x i))
+              ((covGrad (I := I) (M := M) g r s S).toFun x))
+        (riemannianVolumeMeasure (I := I) (M := M) g) ∧
+      (∫ x, (∑ i : Fin (Module.finrank ℝ E),
+            tensorInnerPointwise (I := I) (M := M) g r (s + 1) x
+              (TensorRSSpace.toModel (remDiffGenuineFibRS (I := I) (M := M) g r s S x i))
+              ((covGrad (I := I) (M := M) g r s S).toFun x))
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+      tensorL2Inner (I := I) (M := M) g r (s + 1)
+        (GcurvSectionRS (I := I) (M := M) g r s S).toFun
+        (covGrad (I := I) (M := M) g r s S).toFun := by
+  have h := remDiffFibRS_genuineFrameSum_pairing_eq_genuineFields (I := I) (M := M) g r s S
+  rwa [genuinePureRDiffOp0RS_covGrad_eq_GcurvSectionRS (I := I) (M := M) g r s S] at h
+
 /-- **Heterogeneous rank-congruence for `covGrad` at rank `r` (file-local).** If `h : a = b`, then
 `covGrad g r a Y` and `covGrad g r b Z` are heterogeneously equal whenever `Y, Z` are. -/
 private theorem covGradRS_heq_congr_fp (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
@@ -706,26 +875,11 @@ theorem exists_pureRGenuineDiffOpRS_bridge (g : SmoothRiemannianMetric I M) (r :
   -- The frame-free pure-Riemann differentiated curvature tower at valence `r`, packaged as a
   -- `DiffBilinOpRS g r` (`RankRPureRCurvatureTower`): the order-`0` operator is the moving-centre
   -- pure-Riemann endomorphism, the Leibniz field is proved by `sub_add_cancel`, the envelope is the
-  -- single posited frame-free analytic node. Its order-`0` operator on `∇S` is `GcurvSectionRS`.
+  -- single posited frame-free analytic node. Its order-`0` operator on `∇S` is `GcurvSectionRS` by
+  -- the concrete-tower equality.
   refine ⟨genuinePureRDiffOpRS_bilinOp (I := I) (M := M) g r, fun s S => ?_⟩
   rw [genuinePureRDiffOpRS_bilinOp_op]
-  -- Compare the two `SmoothCcTensor` fibrewise; both fibres are the slot-`0` uncurry through
-  -- `covGradBundleEquiv r s x` of the same pure-Riemann direction CLM `∑ᵢ R(Bᵢ, ·)(∇_{Bᵢ} S)`.
-  refine SmoothCcTensor.ext (DFunLike.ext _ _ (fun x => ?_))
-  -- The tower's order-`0`-on-`∇S` fibre, read back through `covGradBundleEquiv.symm`, is exactly the
-  -- frame sum `∑ᵢ R(Bᵢ x, v)(∇_{Bᵢ} S(x))`, the per-`v` value of `pureRDirCLMFixedFrameRS`.
-  have hLHS_eq : (genuinePureRDiffOpRS (I := I) (M := M) g r 0 (s + 1)
-      (covGrad (I := I) (M := M) g r s S)).toSection x =
-      covGradBundleEquiv (I := I) (M := M) r s x
-        (pureRDirCLMFixedFrameRS (I := I) (M := M) g r s S (smoothOrthoFrame (I := I) g x) x) := by
-    refine (ContinuousLinearEquiv.symm_apply_eq (covGradBundleEquiv (I := I) (M := M) r s x)).mp ?_
-    refine ContinuousLinearMap.ext (fun v => ?_)
-    rw [genuinePureRDiffOp0_covGrad_fib_eq (I := I) (M := M) g r s S x v]
-    rw [pureRDirCLMFixedFrameRS, ContinuousLinearMap.sum_apply]
-    refine Finset.sum_congr rfl (fun i _ => ?_)
-    rw [pureRDirCLMSummandFixedFrameRS, LinearMap.coe_toContinuousLinearMap',
-      pureRDirLMSummandFixedFrameRS, LinearMap.coe_mk, AddHom.coe_mk]
-  rw [hLHS_eq, GcurvSectionRS_toSection, genuineCurvPureRFibRS, genuinePureRDirCLMRS]
+  exact genuinePureRDiffOp0RS_covGrad_eq_GcurvSectionRS (I := I) (M := M) g r s S
 
 /-- **The rank-`r` pure-Riemann genuine-section iterated-gradient grid (posited general-rank curvature
 child).** The contravariant-rank-`r` lift of the rank-`0` frame-free pure-Riemann grid headline
@@ -1361,118 +1515,78 @@ theorem exists_pointwiseTensorCurvRS_fiberNormSq_bound_upstream
   nlinarith [hadd, hgen_bound, hrem_x, hfS_nn, hfgS_nn, hfg2S_nn, hCsq_nn,
     mul_nonneg hCsq_nn hfg2S_nn]
 
-/-- **The rank-`r` differentiated-curvature moving-frame remainder pointwise divergence datum (the
-genuine rank-`r` total-covariant-divergence content, posited general-rank curvature core).** The
-contravariant-rank-`r` lift of the genuine moving-frame divergence content underlying the rank-`0`
-`tensorL2Inner_movingFrameRemainder_eq_zero_of_pointwise_divergence`
-(`MovingFrameRemainderDivergenceForm`), specialised to the concrete tensorial carrier
-`diffCurvSectionRS g r s S` (the order-`0` base of the differentiated `(∇R)·` tower,
-`RankRDiffCurvatureTower`). For a closed smooth Riemannian manifold `(M, g)`, every contravariant rank
-`r`, covariant rank `s`, and smooth compactly-supported `(r, s)`-tensor `S` there is a smooth tangent
-vector field `X` whose metric divergence `divᵍ X` agrees almost everywhere with the pointwise metric
-inner product of the moving-frame remainder
-`Curv S − GcurvSectionRS g r s S − diffCurvSectionRS g r s S` against `∇S := covGrad g r s S`:
+/-- **The rank-`r` differentiated-curvature moving-frame remainder integrated nullity (the genuine
+rank-`r` integrated Bochner–Weitzenböck content — the rank-`r` curvature line's irreducible deep
+root).** For a closed smooth Riemannian manifold `(M, g)`, every contravariant rank `r`, covariant
+rank `s`, and smooth compactly-supported `(r, s)`-tensor `S`, the global metric `L²` pairing of the
+moving-frame remainder
+
 ```
-⟨Curv S − GcurvSectionRS g r s S − diffCurvSectionRS g r s S, ∇S⟩ =ᵐ divᵍ X.
+Curv S − GcurvSectionRS g r s S − diffCurvSectionRS g r s S
 ```
 
-**Why this is TRUE — the moving-frame remainder is a total covariant divergence.** By the iterated Ricci
-identity `secondCovDeriv_covGrad_antisymm_eq_riemannOp_gen` (rank-`(r, ·)` instance, sorry-free, lifted to
-the `(r, s)`-bundle through the slot-wise curvature formula `riemannSec_tensorCov_apply_eval` of
-`TensorSlotwiseCurvatureRS`) the order-`2` commutator defect's gradient-slot reordering produces the
-pure-Riemann `R(∇S)` trace (carried by `GcurvSectionRS`), the differentiated curvature `(∇R) S` (whose
-tensorial content the gauge-glued `diffCurvSectionRS` carries, the second-Bianchi Ricci-fold folded in),
-and a moving-frame / frame-bracket remainder that is a *total covariant divergence* of an `∇S`-order
-field. That remainder is exactly `Curv S − GcurvSectionRS − diffCurvSectionRS`, and the frame-summed
-bracket field, paired against `∇S`, telescopes into the total covariant divergence `divᵍ X` of an honest
-smooth tangent field `X`. The rank-`r` operator-field root machinery (`appCc`, `curvOpField`, `Φ₀`,
-`pureRGenuineDiffOp`, the second-Bianchi fold) producing the divergence current is **rank-`0`-locked** in
-the library (the operator-field action `appCc` carries a literal contravariant `0`), so this rank-`r`
-divergence datum is absent sorry-free below this file and is posited here as the single precise true core —
-the rank-`r` analogue of the genuine moving-frame divergence content that the rank-`0`
-`exists_movingCentreDiffCurvSection_divergenceDatum` constructs. Consumers transitively depend on
-`sorryAx`.
+(`Curv S := pointwiseTensorCurvRS g r s S`, the order-`2` rough-Laplacian / covariant-gradient
+commutator defect; `GcurvSectionRS g r s S` the concrete pure-Riemann `R(∇S)` trace section;
+`diffCurvSectionRS g r s S` the gauge-glued differentiated `(∇R) S` carrier, the order-`0` base of
+the differentiated tower `RankRDiffCurvatureTower`) against `∇S := covGrad g r s S` vanishes:
 
-**T1 (pointwise-divergence form is sound, the per-direction split is not).** The differentiated-curvature
-trace `∑ᵢ ∇_{Bᵢ}(R(Bᵢ, ·) S)` is *non-tensorial in the direction* — its per-direction fibre realisation
-reads the `smoothExtensionTangent` jet of the frame direction, chart-selection-unbounded on `S²` (T1) — so
-the `∇³S`-cancellation is *false term-by-term*. The datum is stated as a single `=ᵐ` equality of the
-intrinsic frame-summed pointwise pairing of the single tensor `Curv S − GcurvSectionRS − diffCurvSectionRS`
-with `divᵍ X` (it never extracts a per-direction `M → E` quantity), so it is trap-screened; only the
-intrinsic frame-summed remainder is a total divergence.
-
-**Non-vacuity.** The datum carries a genuine field `X` with `divᵍ X =ᵐ ⟨remainder, ∇S⟩`; it is *false* if
-one drops the differentiated-curvature carrier (e.g. with `diffCurvSectionRS` replaced by `0` the
-remainder gains the entire `(∇R) S` content, whose pointwise pairing with `∇S` is *not* a total divergence
-on a manifold with `∇R ≠ 0` — its integral is the genuine non-zero Weitzenböck value, so no compactly-
-supported `X` can match it). The body is `sorry`. -/
-theorem diffCurvSectionRS_movingFrameRemainder_divergenceDatumRS
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
-    ∃ X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯,
-      (fun x : M => tensorInnerPointwise (I := I) (M := M) g r (s + 1) x
-          ((pointwiseTensorCurvRS (I := I) (M := M) g r s S -
-            GcurvSectionRS (I := I) (M := M) g r s S -
-            diffCurvSectionRS (I := I) (M := M) g r s S).toFun x)
-          ((covGrad (I := I) (M := M) g r s S).toFun x))
-        =ᵐ[riemannianVolumeMeasure (I := I) (M := M) g]
-      (fun x : M => divergence_g (I := I) g X x) := by
-  sorry
-
-/-- **The rank-`r` differentiated-curvature moving-frame remainder integrated nullity (the rank-`r`
-total covariant-divergence fact, proved over the rank-`r` divergence datum and the closed-manifold
-divergence theorem).** The contravariant-rank-`r` mirror of the integrated-nullity conjunct of the
-rank-`0` divergence datum `exists_movingCentreDiffCurvSection_divergenceDatum` (`MovingFrameDiffCurvAnchor`
-/ `MovingFrameIntegratedNullity`, *whose nullity transits `sorryAx`* at rank `0` through the deep
-operator-field root `bochnerWeitzenbockCurvatureValue_root`), specialised to the concrete tensorial
-carrier `diffCurvSectionRS g r s S` (the order-`0` base of the differentiated `(∇R)·` tower,
-`RankRDiffCurvatureTower`). For a closed smooth Riemannian manifold `(M, g)`, every contravariant rank
-`r`, covariant rank `s`, and smooth compactly-supported `(r, s)`-tensor `S`, the global metric `L²`
-pairing of the moving-frame remainder
-`Curv S − GcurvSectionRS g r s S − diffCurvSectionRS g r s S` against `∇S := covGrad g r s S` vanishes:
 ```
-⟨pointwiseTensorCurvRS g r s S − GcurvSectionRS g r s S − diffCurvSectionRS g r s S, ∇S⟩_{L²} = 0.
+⟨Curv S − GcurvSectionRS g r s S − diffCurvSectionRS g r s S, ∇S⟩_{L²} = 0.
 ```
 
-**Proof (composition over the rank-`r` divergence datum and the closed-manifold divergence theorem).**
-This is the rank-`r` lift of the rank-`0`
-`tensorL2Inner_movingFrameRemainder_eq_zero_of_pointwise_divergence`. The moving-frame remainder
-`Curv S − GcurvSectionRS − diffCurvSectionRS`, paired against `∇S`, equals a total covariant divergence
-`divᵍ X` almost everywhere (the posited divergence datum
-`diffCurvSectionRS_movingFrameRemainder_divergenceDatumRS`). Since `tensorL2Inner` is the integral of the
-pointwise pairing against the Riemannian volume measure, `MeasureTheory.integral_congr_ae` rewrites it to
-`∫ divᵍ X`, which vanishes over the closed boundaryless manifold by the divergence theorem
-`integral_divergence_eq_zero_of_hasCompactSupport` (the manifold's compactness supplies the compact
-support of `X`). The body transits only the posited rank-`r` divergence datum; consumers transitively
-depend on its `sorryAx`.
+This is the genuine classical coupled integrated Bochner–Weitzenböck derivation at contravariant
+rank `r` — the contravariant-rank-`r` mirror of the rank-`0` operator-field root
+`movingFrameNullity_diffCurvOpField_leaf` (`DifferentiatedCurvatureOperatorFieldIdentification`),
+specialised to the concrete tensorial carrier `diffCurvSectionRS g r s S`: the frame-summed
+differentiated-curvature trace `∑ᵢ ∇_{Bᵢ}(R(Bᵢ, ·) S)` matches the gauge-glued carrier at the
+integrated level (the second-Bianchi Ricci-fold folded into the carrier), and the residual
+frame-bracket discrepancy is a total covariant divergence integrating to zero over the closed
+manifold. The per-direction differentiated-curvature trace is non-tensorial (it reads the
+`smoothExtensionTangent` frame jet, chart-selection-unbounded on `S²`, T1), so the identity is sound
+only at the *summed, integrated* `L²` level — it never extracts a per-direction `M → E` quantity.
 
-**T1 (integrated-only).** The differentiated-curvature trace `∑ᵢ ∇_{Bᵢ}(R(Bᵢ, ·) S)` is *non-tensorial
-in the direction* — its per-direction fibre realisation reads the `smoothExtensionTangent` jet of the
-frame direction, chart-selection-unbounded on `S²` (T1) — so the `∇³S`-cancellation and divergence form
-are *false term-by-term*. The nullity is stated at the *integrated* frame-free `L²` level (it never
-extracts a per-direction `M → E` quantity), so it is trap-screened; only the summed integrated match is
-sound.
+**Why the INTEGRATED form is the honest primitive (the pointwise-current upgrade was over-strong).**
+An earlier form of this node was glued over a *pointwise* divergence-current datum carrying a smooth
+tangent field `X` with `⟨remainder, ∇S⟩ =ᵐ divᵍ X`. That pointwise form is over-strong (T11):
+producing such an `X` requires a Poisson / Hodge solve onto the mean-zero subspace (absent in the
+library); the moving-frame telescoping produces per-term currents that read the
+chart-selection-dependent jets of the frame (T1 — the frame-sum antisymmetry kills the jet terms
+only in the scalar pairing values, not in the vector-valued current, so no smooth global current
+arises term-wise); and the unique consumer (`weitzenbock_curvature_genuineSections_crossPairingRS`,
+below) reads only the integrated value. This mirrors the identical adjudication recorded at the
+rank-`0` operator-field root (`movingFrameNullity_diffCurvOpField_leaf`) and at the rank-`0`
+four-carrier anchor (`MovingFrameDiffCurvAnchor`): the integrated nullity is the sound primitive, so
+the pointwise datum was deleted and this node is the honest `sorry` leaf.
 
 **Non-vacuity.** The statement is a single `L²` equality with a non-trivial integrand: the remainder
-field `Curv S − GcurvSectionRS − diffCurvSectionRS` is the moving-frame `(∇R)/bracket` total-divergence
-term, generically non-zero pointwise (its pointwise pairing carries the non-divergence Bochner content);
-only the *global* pairing vanishes. The conclusion is `= 0`, not an inequality, and pins the remainder
-orthogonal to `∇S`; it is *false* if one drops either carrier (e.g. with `diffCurvSectionRS` replaced by
-`0` the remainder gains the entire `(∇R) S` content, whose `L²` pairing with `∇S` is non-zero on a
-manifold with `∇R ≠ 0`). -/
+field `Curv S − GcurvSectionRS − diffCurvSectionRS` is the moving-frame `(∇R)/bracket`
+total-divergence term, generically non-zero pointwise (its pointwise pairing carries the
+non-divergence Bochner content); only the *global* pairing vanishes. The conclusion is `= 0`, not an
+inequality, and pins the remainder orthogonal to `∇S`; it is *false* if one drops either carrier
+(e.g. with `diffCurvSectionRS` replaced by `0` the remainder gains the entire `(∇R) S` content,
+whose `L²` pairing with `∇S` is non-zero on a manifold with `∇R ≠ 0`).
+
+**The body is `sorry`** — the genuine rank-`r` coupled integrated content: (i) the integrated
+identification of the frame-summed differentiated-curvature trace `∑ᵢ ∇_{Bᵢ}(R(Bᵢ, ·) S)` with the
+gauge-glued carrier `diffCurvSectionRS g r s S` (the rank-`r` operator-field B-rule), (ii) the
+second-Bianchi / frame-Ricci cyclic fold (`ContractedBianchi`, `DifferentiatedSlotwiseCurvature`),
+and (iii) the residual frame-bracket discrepancy a total covariant divergence integrating to zero
+(`BracketDivergenceForm`, `MovingFrameIntegratedNullity`). A sound reduction route: by the
+sorry-free frame-sum bridges of this file
+(`tensorL2Inner_pointwiseTensorCurvRS_covGrad_eq_frameSum_integral`,
+`remDiffFibRS_eq_genuine_add_bracket`, `remDiffFibRS_genuineFrameSum_pairing_eq_GcurvSectionRS`) the
+nullity reduces to the rank-`r` bracket-channel integrated identification
+`∫_M ∑ᵢ ⟨remDiffBracketFibRS g r s S x i, ∇S(x)⟩ dvol_g = ⟨diffCurvSectionRS g r s S, ∇S⟩_{L²}`
+(the rank-`r` mirror of `bracketChannelFrameSum_integral_eq_diffCurvOpField_ricTrace`). Consumers
+transitively depend on `sorryAx`. -/
 theorem diffCurvSectionRS_movingFrameRemainder_integratedNullityRS
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
     tensorL2Inner (I := I) (M := M) g r (s + 1)
         (pointwiseTensorCurvRS (I := I) (M := M) g r s S -
           GcurvSectionRS (I := I) (M := M) g r s S -
           diffCurvSectionRS (I := I) (M := M) g r s S).toFun
-        (covGrad (I := I) (M := M) g r s S).toFun = 0 := by
-  classical
-  obtain ⟨X, hdiv⟩ :=
-    diffCurvSectionRS_movingFrameRemainder_divergenceDatumRS (I := I) (M := M) g r s S
-  unfold tensorL2Inner
-  rw [MeasureTheory.integral_congr_ae hdiv]
-  exact integral_divergence_eq_zero_of_hasCompactSupport (I := I) g X
-    (HasCompactSupport.of_compactSpace _)
+        (covGrad (I := I) (M := M) g r s S).toFun = 0 :=
+  sorry
 
 /-- **The rank-`r` genuine curvature-sections cross-pairing (the rank-`r` classical `(★)` third-order
 tensor Bochner–Weitzenböck curvature-term identity, cross-pairing form — proved sorry-free over the
@@ -1494,7 +1608,8 @@ defect differ by exactly the moving-frame remainder
 `Curv S − GcurvSectionRS g r s S − diffCurvSectionRS g r s S`, whose `L²` pairing with `∇S` is the
 rank-`r` total covariant-divergence fact
 `diffCurvSectionRS_movingFrameRemainder_integratedNullityRS` (the rank-`r` mirror of the rank-`0`
-divergence-datum nullity). Writing `Curv S = (GcurvSectionRS + diffCurvSectionRS) + (Curv S −
+operator-field root `movingFrameNullity_diffCurvOpField_leaf`, the honest integrated `sorry`
+leaf above). Writing `Curv S = (GcurvSectionRS + diffCurvSectionRS) + (Curv S −
 GcurvSectionRS − diffCurvSectionRS)` (`abel` on `SmoothCcTensor`) and splitting the `L²` pairing of
 `Curv S` against `∇S` by left additivity (`tensorL2Inner_add_left`, the cross-term integrabilities
 supplied by `SmoothCcTensor.integrable_inner_cross`) makes the remainder term vanish by the nullity, so

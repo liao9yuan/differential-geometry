@@ -19,9 +19,10 @@ Ricci–DeTurck right-hand side, `g₀`-retagged as `lieDerivRetagG0 g₀ g_bg g
 `g⁻¹·∂g`-type field, and one further metric derivative produces the Lie deformation, so the gauge
 summand has the **same intrinsic order-`≤2` structure** as the curvature summand (the trace of the
 Levi-Civita curvature operator).  Differenced along the segment metric `g_t = g₂ + t·(g₁ − g₂)`, the
-gauge difference admits the **identical connection-level linear/cross split** as the curvature half: a
-linear-in-difference part `lieLinearSection` whose `g₀`-lowered Koszul form is the connection-level
-once-differentiated realized difference factor `R = ∇₀ w`, `w := realizeSymmCcTensor g₀ (T₁ − T₂)`, plus a
+gauge difference admits the **identical linear/cross split** as the curvature half: a
+linear-in-difference part `lieLinearSection` carrying the difference factor
+`w := realizeSymmCcTensor g₀ (T₁ − T₂)` through its covariant jets — the order-`0` value jet included,
+since the Lie summand depends on the metric at order zero — plus a
 quadratic-in-difference Cross part `lieCrossSection` (the `D∘D`-type quadratic) carrying the top
 coefficient jet on the fixed pair `T₁, T₂`.
 
@@ -48,14 +49,15 @@ existence `lieDerivDiff_connLevel_sectionData`; this file states the Lie-half li
 
 ## What is posited vs. derived
 
-* `lieDerivDiff_connLevel_sectionData` (`SegmentMetricLieSectionDecomposition.lean`) — **posited**, the
-  single genuine deep covariant-gauge leaf: existence of the concrete cross-section family with both arms'
-  connection-level covariant-jet two-arm bounds (the gauge analogue of the *pair* of curvature
-  connection-level reductions, bundled because the determining intrinsic Lie cross value is genuinely absent
-  on disk).
+* `lieDerivDiff_connLevel_sectionData` (`SegmentMetricLieSectionDecomposition.lean`) — the single named
+  deep covariant-gauge section-data node, derived there from the posited top/rest split
+  `lieDerivDiff_connLevel_topRestSplit` (the genuine `sorry` leaf): existence of the concrete
+  cross-section family with both arms' 0-jet-inclusive `w`-jet covariant two-arm bounds (the gauge
+  analogue of the *pair* of curvature connection-level reductions, bundled because the determining
+  intrinsic Lie cross value is genuinely absent on disk).
 
 * `lieLinearSection_iteratedCovGrad_connLevel_rfns_le` — **derived by composition (TRANSIT)** over the
-  section-data leaf: its first arm bound is the connection-level covariant-jet two-arm bound of the concrete
+  section-data leaf: its first arm bound is the 0-jet-inclusive `w`-jet covariant two-arm bound of the concrete
   `lieLinearSection`.
 
 * `lieCrossSection_iteratedCovGrad_connLevel_rfns_le` (`SegmentMetricLieDifferenceCovJet.lean`) —
@@ -66,18 +68,17 @@ existence `lieDerivDiff_connLevel_sectionData`; this file states the Lie-half li
   `lieDerivRetagG0_sub_eq_lieLinear_add_lieCross` (pure `abel`) and the two concrete-section reductions.
   The common constant is `max` of the two reductions' constants, widened on each arm.
 
-Downstream (`SegmentMetricRHSCovJetExpansion.lean`) this connection-level split, composed with the
-**sorry-free** front/back-commutation rank-shift `connLevel_diffArm_to_wJet_le`
-(`rfns(∇^p R) = rfns(∇^{p+1} w)`), discharges the Lie-half value-level node
+Downstream (`SegmentMetricRHSCovJetExpansion.lean`) this split discharges the Lie-half value-level node
 `exists_lieDerivLinearCross_section_connLevel` and the order-zero split assembler
-`lieDerivDiff_order0_linearCross_split` directly — supplying the concrete linear/Cross section pair with
-both `w`-jet arm bounds the order-`a` chart-RHS tower consumes.
+`lieDerivDiff_order0_linearCross_split` verbatim — its arms already carry the `w`-jet shape those
+consumers read (the former rank-`3` connection-level arm, certified false for the Lie half, was
+re-signatured away, and no rank-shift step remains) — supplying the concrete linear/Cross section pair
+with both `w`-jet arm bounds the order-`a` chart-RHS tower consumes.
 
 The split carries **no** value-bounded `Φ.op 0 2 w` shape (the refuted structural split — the
-connection-level `∇^{j+1} R` content rides on the difference arm, the unbounded top coefficient jet on the
+`∇^{j+2} w` content rides on the difference arm, the unbounded top coefficient jet on the
 fixed-pair cross arm), NO pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, NO Weyl dependence.
-Both arm bounds are **coupled and non-vacuous** (in the section-data leaf): the difference arm carries the
-connection-level high derivative `∇^{j+1} R` (a zero `Cd` falsifies it whenever the linear part is genuinely
+Both arm bounds are **coupled and non-vacuous** (in the section-data leaf): the difference arm carries the high derivative `∇^{j+2} w` (a zero `Cd` falsifies it whenever the linear part is genuinely
 present), and the cross arm carries the unbounded top coefficient jet (`L²` mass of order
 `j + 2 ∈ (a + 2, 2a + 2]`, which an `H^{a+2}` ball cannot bound) on the fixed pair `T₁, T₂` against the
 difference's order-`a` chart-Sobolev `C⁰` mass `‖(T₁ − T₂).toHs a‖²`. -/
@@ -113,8 +114,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- **(The connection-level covariant-jet two-arm bound of the concrete Lie linear section, at the rank-`3`
-`∇w`-level — derived by composition (TRANSIT).)**  The gauge analogue of the curvature half's
+/-- **(The 0-jet-inclusive `w`-jet covariant two-arm bound of the concrete Lie linear section —
+derived by composition (TRANSIT).)**  The gauge analogue of the curvature half's
 connection-level linear reduction `ricciLinearSection_covGrad_traceReductionConn_rfns_le`, stated on the
 **concrete** Lie linear section `lieLinearSection g₀ g_bg g₁ g₂`
 (`SegmentMetricLieSectionDecomposition.lean`, the algebraic complement
@@ -125,30 +126,31 @@ For an anchor `g₀`, a flow background `g_bg`, an order `a`, a supercriticality
 over the gradient order `j` and the perturbation family) such that for any two `g₀`-fibre-small
 perturbations `T₁, T₂` with `H^{a+2}` norms `≤ B` and any two realized metrics `g₁, g₂` of `T₁, T₂`, the
 intrinsic squared fibre norm of the order-`j` covariant gradient of the concrete Lie linear section
-`lieLinearSection g₀ g_bg g₁ g₂` is dominated by the **connection-level** Hamilton/Moser two-arm sum, whose
-difference arm is the rank-`3` order-`≤ j+1` covariant jet sum of the once-differentiated realized
-difference factor `R := covGrad g₀ 0 2 w`, `w := realizeSymmCcTensor g₀ (T₁ − T₂)`:
+`lieLinearSection g₀ g_bg g₁ g₂` is dominated by the Hamilton/Moser two-arm sum, whose
+difference arm is the **0-jet-inclusive** order-`≤ j+2` covariant jet sum of the realized
+difference factor `w := realizeSymmCcTensor g₀ (T₁ − T₂)`:
 ```
-rfns(∇^j (lieLinearSection))(x) ≤ Cd · ∑_{p ≤ j+1} rfns(∇^p R)(x)
+rfns(∇^j (lieLinearSection))(x) ≤ Cd · ∑_{i ≤ j+2} rfns(∇^i w)(x)
                                 + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D².
 ```
 
-The Lie field `𝓛_{W(g)} g` has the **same intrinsic order-`≤2` structure** as the curvature half, so the
-linear part's `g₀`-lowered Koszul form is the connection-level once-differentiated realized difference
-factor `R = ∇₀ w` exactly as for the curvature linear part (bounds via the proven realized-Koszul jet
+The Lie field `𝓛_{W(g)} g` has the **same intrinsic order-`≤2` structure** as the curvature half, so the linear part's derivative jets ride, via the `g₀`-lowered Koszul form, on the
+`w`-jets — the order-`0` value jet additionally carried, since the Lie summand depends on the metric
+value — exactly as for the curvature linear part (bounds via the proven realized-Koszul jet
 domination `koszulCombSection_iteratedCovGrad_rfns_le`), and the value-local model-basis trace folds the
-metric-built `≤2`-jet coefficient into the family-uniform `Cd` over the rank-`3` window `j + 1`.
+metric-built `≤2`-jet coefficient into the family-uniform `Cd` over the window `j + 2`.
 
-**Non-vacuity.**  The difference arm carries the connection-level high derivative `∇^{j+1} R` (a zero `Cd`
+**Non-vacuity.**  The difference arm carries the high derivative `∇^{j+2} w` (a zero `Cd`
 falsifies it); coupled with the Cross arm `lieCrossSection_iteratedCovGrad_connLevel_rfns_le` in the
 section-data leaf, the degenerate readings are rejected (with the Cross part `0` the linear complement is
-the full `diff`, whose connection-level bound is FALSE for `j ∈ (a, 2a]`).  At `g₁ = g₂` the Lie-summand
+the full `diff`, whose linear-arm bound is FALSE for `j ∈ (a, 2a]`).  At `g₁ = g₂` the Lie-summand
 difference vanishes and the bound is `0 ≤ 0`.  NO value-bounded `Φ.op 0 2 w` shape, NO pointwise-`C^{>2}`-jet
 claim, NO spectral-nonlinearity, NO Weyl dependence.
 
 **Decomposition (TRANSIT).**  Proved by composition over the single genuine deep section-data leaf
 `lieDerivDiff_connLevel_sectionData` (`SegmentMetricLieSectionDecomposition.lean`): its first arm bound is
-exactly this connection-level covariant-jet two-arm bound of the concrete `lieLinearSection`.  Consumers
+exactly this 0-jet-inclusive `w`-jet covariant two-arm bound of the concrete `lieLinearSection`.
+Consumers
 transitively depend on `sorryAx` only through that named section-data leaf. -/
 theorem lieLinearSection_iteratedCovGrad_connLevel_rfns_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -168,11 +170,10 @@ theorem lieLinearSection_iteratedCovGrad_connLevel_rfns_le
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
               ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
                   (lieLinearSection (I := I) g₀ g_bg g₁ g₂)).toSection x) ≤
-            Cd * ∑ p ∈ Finset.range (j + 1 + 1),
-                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
-                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
-                      (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 2
-                        (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂)))).toSection x)
+            Cd * ∑ i ∈ Finset.range (j + 2 + 1),
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                      (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
               + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
                   (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
                       ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
@@ -191,9 +192,9 @@ theorem lieLinearSection_iteratedCovGrad_connLevel_rfns_le
       (lieDerivRetagG0 (I := I) g₀ g_bg g₁ - lieDerivRetagG0 (I := I) g₀ g_bg g₂)
         - (lieDerivDiff_connLevel_sectionData (I := I) g₀ g_bg).choose g₁ g₂ from rfl]
 
-/-- **(POSIT — bundled into the section-data leaf — the connection-level gauge value-level linear/cross
-split with both arms' covariant-jet bounds: the genuine Core-II value-level node of the Lie half, at the
-rank-`3` `∇w`-level, derived by composition (TRANSIT).)**
+/-- **(POSIT — bundled into the section-data leaf — the gauge value-level linear/cross
+split with both arms' covariant-jet bounds: the genuine Core-II value-level node of the Lie half, with the
+0-jet-inclusive `w`-jet difference arm, derived by composition (TRANSIT).)**
 
 For an anchor `g₀`, a flow background `g_bg`, an order `a`, a supercriticality hypothesis `ha`, a uniform
 `H^{a+2}`-size bound `B ≥ 0`, and fibre-smallness `δ < 1/2`, there is a nonnegative difference-arm constant
@@ -202,13 +203,12 @@ For an anchor `g₀`, a flow background `g_bg`, an order `a`, a supercriticality
 `T₁, T₂`, the `g₀`-retagged Lie-summand difference `lieDerivRetagG0 g₀ g_bg g₁ − lieDerivRetagG0 g₀ g_bg
 g₂` splits as a **linear-in-difference** section `L` plus a **quadratic-in-difference Cross** section `C`
 (genuine smooth `SmoothCcTensor g₀ 0 2`s), with **both** per-order covariant gradients satisfying the
-**connection-level** Hamilton/Moser two-arm bound whose difference arm is the rank-`3` order-`≤ j+1`
-covariant jet sum of the once-differentiated realized difference factor `R := covGrad g₀ 0 2 w`,
-`w := realizeSymmCcTensor g₀ (T₁ − T₂)`:
+Hamilton/Moser two-arm bound whose difference arm is the **0-jet-inclusive** order-`≤ j+2` covariant jet sum of the realized
+difference factor `w := realizeSymmCcTensor g₀ (T₁ − T₂)`:
 ```
 lieDerivRetagG0 g₁ − lieDerivRetagG0 g₂ = L + C,
-rfns(∇^j L)(x) ≤ Cd · ∑_{p ≤ j+1} rfns(∇^p R)(x) + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
-rfns(∇^j C)(x) ≤ Cd · ∑_{p ≤ j+1} rfns(∇^p R)(x) + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
+rfns(∇^j L)(x) ≤ Cd · ∑_{i ≤ j+2} rfns(∇^i w)(x) + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
+rfns(∇^j C)(x) ≤ Cd · ∑_{i ≤ j+2} rfns(∇^i w)(x) + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
 ```
 with `D := ‖(T₁ − T₂).toHs a‖`.
 
@@ -228,12 +228,12 @@ the section-data leaf, with `C = 0`, `L = diff` would have to satisfy the linear
 C⁰`-order (`L²` mass of order `j + 2 ∈ (a + 2, 2a + 2]`, which an `H^{a+2}` ball cannot bound, only the
 fixed-pair *cross* arm can carry it).  So the genuine quadratic top-jet content **must** ride on `C`, and
 `L` is the genuine linear-in-difference part; symmetrically the cross-arm bound rejects `C = diff`.  A zero
-`Cd` is rejected (each difference arm carries the connection-level high derivative `∇^{j+1} R`).  At
+`Cd` is rejected (each difference arm carries the high derivative `∇^{j+2} w`).  At
 `g₁ = g₂` (so `T₁ = T₂` realized) the Lie-summand difference vanishes and the split is `0 = 0 + 0` with
 both bounds `0 ≤ 0`.  NO value-bounded `Φ.op 0 2 w` shape, NO pointwise-`C^{>2}`-jet claim, NO
 spectral-nonlinearity, NO Weyl dependence.
 
-**Decomposition (TRANSIT).**  Proven by composition over the two concrete-section connection-level
+**Decomposition (TRANSIT).**  Proven by composition over the two concrete-section
 reductions `lieLinearSection_iteratedCovGrad_connLevel_rfns_le` (this file, the linear arm on the concrete
 `lieLinearSection`) and `lieCrossSection_iteratedCovGrad_connLevel_rfns_le`
 (`SegmentMetricLieDifferenceCovJet.lean`, the Cross arm on the concrete `lieCrossSection`), with the value
@@ -260,11 +260,10 @@ theorem exists_lieDerivDiff_connLevel_split
           (∀ (j : ℕ) (x : M),
             riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
                 ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j L).toSection x) ≤
-              Cd * ∑ p ∈ Finset.range (j + 1 + 1),
-                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
-                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
-                        (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 2
-                          (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂)))).toSection x)
+              Cd * ∑ i ∈ Finset.range (j + 2 + 1),
+                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                        (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
                 + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
                     (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
                         ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
@@ -274,11 +273,10 @@ theorem exists_lieDerivDiff_connLevel_split
           (∀ (j : ℕ) (x : M),
             riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
                 ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j C).toSection x) ≤
-              Cd * ∑ p ∈ Finset.range (j + 1 + 1),
-                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
-                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
-                        (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 2
-                          (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂)))).toSection x)
+              Cd * ∑ i ∈ Finset.range (j + 2 + 1),
+                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                        (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
                 + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
                     (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
                         ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
@@ -287,10 +285,10 @@ theorem exists_lieDerivDiff_connLevel_split
                   * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) := by
   classical
   -- **Linear reduction** (the genuinely-absent intrinsic content, on the concrete `lieLinearSection`):
-  -- produces the connection-level linear-arm two-arm bound on `∇^j (lieLinearSection)`.
+  -- produces the `w`-jet linear-arm two-arm bound on `∇^j (lieLinearSection)`.
   obtain ⟨CdL, hCdL0, hL⟩ :=
     lieLinearSection_iteratedCovGrad_connLevel_rfns_le (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
-  -- **Cross reduction** (on the concrete `lieCrossSection`): the connection-level cross-arm two-arm bound
+  -- **Cross reduction** (on the concrete `lieCrossSection`): the `w`-jet cross-arm two-arm bound
   -- on `∇^j (lieCrossSection)`.
   obtain ⟨CdC, hCdC0, hC⟩ :=
     lieCrossSection_iteratedCovGrad_connLevel_rfns_le (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
@@ -300,21 +298,19 @@ theorem exists_lieDerivDiff_connLevel_split
     lieDerivRetagG0_sub_eq_lieLinear_add_lieCross (I := I) g₀ g_bg g₁ g₂, fun j x => ?_, fun j x => ?_⟩
   · -- Linear arm: widen `CdL → max CdL CdC` (the difference-arm jet sum is nonnegative).
     refine le_trans (hL T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 j x) ?_
-    have hSRnn : (0 : ℝ) ≤ ∑ p ∈ Finset.range (j + 1 + 1),
-        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
-          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
-              (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 2
-                (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂)))).toSection x) :=
+    have hSRnn : (0 : ℝ) ≤ ∑ i ∈ Finset.range (j + 2 + 1),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+              (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x) :=
       Finset.sum_nonneg fun p _ => riemannianFiberNormSq_nonneg _ _ _ _ _
     gcongr
     exact le_max_left _ _
   · -- Cross arm: widen `CdC → max CdL CdC`.
     refine le_trans (hC T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 j x) ?_
-    have hSRnn : (0 : ℝ) ≤ ∑ p ∈ Finset.range (j + 1 + 1),
-        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
-          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
-              (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 2
-                (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂)))).toSection x) :=
+    have hSRnn : (0 : ℝ) ≤ ∑ i ∈ Finset.range (j + 2 + 1),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+              (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x) :=
       Finset.sum_nonneg fun p _ => riemannianFiberNormSq_nonneg _ _ _ _ _
     gcongr
     exact le_max_right _ _
