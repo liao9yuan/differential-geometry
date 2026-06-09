@@ -26,7 +26,7 @@ The construction proceeds in two steps:
 
 2. **Substitution via the dual iso**: instantiate `homEquivCDualTensor` at
    `V := MLF r at x`, `W := MLF s at x`, then apply
-   `dualMultilinearLinearEquivAt` (from `Multilinear/DualFiber.lean`) to the first
+   `dualMultilinearLinearEquivAt` (from `Multilinear/Dual.lean`) to the first
    tensor factor to convert `(MLF r at x →L[𝕜] 𝕜)` into the multilinear-of-dual fiber.
 
 Crucially, we work entirely at the bundle-fiber level (over `E x`), not at the model
@@ -139,7 +139,7 @@ The construction:
 1. Apply `homEquivCDualTensor` at `V := MLF r at x`, `W := MLF s at x`. This gives
    `((MLF r at x) →L[𝕜] (MLF s at x)) ≃ₗ ((MLF r at x →L[𝕜] 𝕜) ⊗ (MLF s at x))`.
 2. Use `dualMultilinearLinearEquivAt` (the bundle-fiber-level dual iso from
-   `Multilinear/DualFiber.lean`) to convert `(MLF r at x →L[𝕜] 𝕜)` into the
+   `Multilinear/Dual.lean`) to convert `(MLF r at x →L[𝕜] 𝕜)` into the
    multilinear-of-dual fiber `mlf-of-dual r at x`. -/
 noncomputable def multilinearHomTensorEquivAt (r s : ℕ) (x : B) :
     ((ContinuousMultilinearMap 𝕜 (fun _ : Fin r => E x) 𝕜) →L[𝕜]

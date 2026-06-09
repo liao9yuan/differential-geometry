@@ -23,8 +23,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Definitions -/
-
 /-- The forward difference quotient `D_h^i v(x) := (v(x + h e_i) - v(x))/h`
 in coordinate direction `i`. For `h = 0`, defined to be `0` (a junk default,
 chosen so that the operator is total without affecting the `h ≠ 0` regime). -/
@@ -63,8 +61,6 @@ lemma diffQuot_eq_translate_sub_div (i : Fin d) {h : ℝ} (hh : h ≠ 0)
     diffQuot i h v = fun x => (translate i h v x - v x) / h := by
   ext x
   simp [diffQuot, translate, hh]
-
-/-! ## Group A: algebraic / measurability properties -/
 
 omit [NeZero d] in
 @[simp] lemma translate_add (i : Fin d) (h : ℝ) (v w : E → ℝ) :
@@ -243,10 +239,6 @@ lemma tendsto_diffQuot_of_contDiff
     Tendsto (fun h : ℝ => diffQuot i h v x) (𝓝[≠] 0)
       (𝓝 ((fderiv ℝ v x) (EuclideanSpace.single i 1))) := by
   have hdiff : Differentiable ℝ v := hv.differentiable_one
-  -- The function `t ↦ x + t • e_i` has Fréchet derivative
-  -- `s ↦ s • e_i = (1 : ℝ →L[ℝ] ℝ).smulRight e_i`. The composition
-  -- `t ↦ v(x + t • e_i)` therefore has scalar derivative
-  -- `(fderiv ℝ v x)(e_i)` at `0`.
   set e : E := EuclideanSpace.single i (1 : ℝ) with he
   have hLineDiff :
       HasDerivAt (fun t : ℝ => x + t • e) e 0 := by
@@ -255,7 +247,6 @@ lemma tendsto_diffQuot_of_contDiff
     simpa using h_smulRight.const_add x
   have hv_at : HasFDerivAt v (fderiv ℝ v x) x :=
     (hdiff x).hasFDerivAt
-  -- Compose: `HasDerivAt (v ∘ γ) ((fderiv v x) e) 0`.
   have hComp :
       HasDerivAt (fun t : ℝ => v (x + t • e))
         ((fderiv ℝ v x) e) 0 := by
@@ -263,7 +254,6 @@ lemma tendsto_diffQuot_of_contDiff
     have hv_at_at0 : HasFDerivAt v (fderiv ℝ v x) (x + (0 : ℝ) • e) := by
       rw [this]; exact hv_at
     exact hv_at_at0.comp_hasDerivAt 0 hLineDiff
-  -- Slope identity at 0: `t⁻¹ • (φ(0+t) - φ(0)) → φ'(0)`.
   have hpre :
       Tendsto (fun t : ℝ =>
         t⁻¹ • ((fun s : ℝ => v (x + s • e)) (0 + t) -
@@ -271,7 +261,6 @@ lemma tendsto_diffQuot_of_contDiff
         (𝓝[≠] 0)
         (𝓝 ((fderiv ℝ v x) e)) :=
     hComp.tendsto_slope_zero
-  -- Match with `diffQuot`.
   have hCong :
       ∀ᶠ t : ℝ in 𝓝[≠] 0,
         t⁻¹ • ((fun s : ℝ => v (x + s • e)) (0 + t) -
@@ -287,8 +276,6 @@ lemma tendsto_diffQuot_of_contDiff
     simp only [h0, h1, smul_eq_mul, diffQuot, ht0, ↓reduceIte, e]
     rw [div_eq_inv_mul]
   exact hpre.congr' hCong
-
-/-! ## Group B: discrete integration-by-parts identity -/
 
 omit [NeZero d] in
 private lemma measurePreserving_translate (i : Fin d) (h : ℝ) :
@@ -352,10 +339,8 @@ theorem integral_diffQuot_mul_eq_neg_integral_mul_diffQuot
     (hf : MemLp f 2 volume) (hg : MemLp g 2 volume) :
     ∫ x, diffQuot i h f x * g x ∂(volume : Measure E) =
       -∫ x, f x * diffQuot i (-h) g x ∂(volume : Measure E) := by
-  -- Notation
   set e : E := EuclideanSpace.single i (1 : ℝ) with he
   have hnh : (-h) ≠ 0 := neg_ne_zero.mpr hh
-  -- Integrability of basic products.
   have hfg_int : Integrable (fun x => f x * g x) volume :=
     integrable_mul_of_memLp_two (d := d) hf hg
   have hf_translate_memLp : MemLp (translate i h f) 2 volume :=
@@ -368,7 +353,6 @@ theorem integral_diffQuot_mul_eq_neg_integral_mul_diffQuot
   have hg_translate_int :
       Integrable (fun x => f x * translate i (-h) g x) volume :=
     integrable_mul_of_memLp_two (d := d) hf hg_translate_memLp
-  -- Pointwise identifications.
   have hLHS_pointwise : ∀ x : E,
       diffQuot i h f x * g x =
         (translate i h f x * g x - f x * g x) / h := by
@@ -389,7 +373,6 @@ theorem integral_diffQuot_mul_eq_neg_integral_mul_diffQuot
     change f x * ((g (x + (-h) • e) - g x) / (-h)) =
       (f x * g (x + (-h) • e) - f x * g x) / (-h)
     rw [mul_div_assoc', mul_sub]
-  -- Decompositions of integrals.
   have hLHS_decomp :
       ∫ x, diffQuot i h f x * g x ∂(volume : Measure E) =
         ((∫ x, translate i h f x * g x ∂(volume : Measure E)) -
@@ -406,8 +389,6 @@ theorem integral_diffQuot_mul_eq_neg_integral_mul_diffQuot
         (fun x => (f x * translate i (-h) g x - f x * g x) / (-h)) := by
       ext x; exact hRHS_pointwise x
     rw [heq_fun, integral_div, integral_sub hg_translate_int hfg_int]
-  -- Translation identity converting `∫ f(x + h e) g(x)` to
-  -- `∫ f(x) g(x - h e)` via the substitution `x ↦ x + (-h) • e`.
   have h_subst :
       ∫ x, f (x + h • e) * g x ∂(volume : Measure E) =
         ∫ x, f x * g (x + (-h) • e) ∂(volume : Measure E) := by
@@ -430,7 +411,6 @@ theorem integral_diffQuot_mul_eq_neg_integral_mul_diffQuot
           ∂(volume : Measure E) from hint.symm]
     refine integral_congr_ae ?_
     filter_upwards with x using hsimp x
-  -- Translates relate to `translate`.
   have hLHS_subst :
       ∫ x, translate i h f x * g x ∂(volume : Measure E) =
         ∫ x, f x * translate i (-h) g x ∂(volume : Measure E) := by
@@ -450,30 +430,8 @@ theorem integral_diffQuot_mul_eq_neg_integral_mul_diffQuot
         f x * g (x + (-h) • e)
       rfl
     rw [h1, h2, h_subst]
-  -- Combine everything.
   rw [hLHS_decomp, hRHS_decomp, hLHS_subst]
-  -- Now: ((A - B)/h) = -((A - B)/(-h)). Use `div_neg`.
   rw [div_neg, neg_neg]
-
-/-! ## Group C: L² bounds via the fundamental theorem of calculus
-
-For a smooth function `v ∈ C¹`, the difference quotient admits the FTC
-representation
-
-  `(v(x + h e_i) - v(x))/h = ∫₀¹ (∂_i v)(x + s h e_i) ds`,
-
-from which Cauchy-Schwarz / Jensen gives the pointwise estimate
-
-  `(D_h^i v)(x)² ≤ ∫₀¹ ((∂_i v)(x + s h e_i))² ds`.
-
-Integrating over a compactly contained subdomain `Ω'`, swapping integrals
-by Fubini, and translating each slice by `-s h e_i` (which lies in `Ω`
-when `|h|` is sufficiently small), produces the L² bound
-
-  `‖D_h^i v‖_{L²(Ω')} ≤ ‖∂_i v‖_{L²(Ω)}`.
-
-For weak `v ∈ H¹(Ω)`, this lifts via approximation by smooth functions.
--/
 
 omit [NeZero d] in
 /-- FTC representation of the forward difference quotient: for `v ∈ C¹` and
@@ -489,7 +447,6 @@ lemma diffQuot_eq_integral_partialDeriv
           (EuclideanSpace.single i 1) := by
   set e : E := EuclideanSpace.single i (1 : ℝ) with he
   have hdiff : Differentiable ℝ v := hv.differentiable_one
-  -- Path `s ↦ x + s h e_i`. Its derivative is `h e_i`.
   set γ : ℝ → E := fun s => x + (s * h) • e with hγ_def
   have hγ_deriv : ∀ s, HasDerivAt γ (h • e) s := by
     intro s
@@ -500,7 +457,6 @@ lemma diffQuot_eq_integral_partialDeriv
     have hsmul : HasDerivAt (fun t : ℝ => (t * h) • e) (h • e) s := by
       simpa using h_mul.smul_const e
     simpa [γ] using hsmul.const_add x
-  -- Composition has derivative `(fderiv v (γ s))(h e)`.
   have hcomp_deriv : ∀ s, HasDerivAt (v ∘ γ)
       ((fderiv ℝ v (γ s)) (h • e)) s := by
     intro s
@@ -510,7 +466,6 @@ lemma diffQuot_eq_integral_partialDeriv
         ((fderiv ℝ v (γ s)) (h • e)) s :=
       hv_at.comp_hasDerivAt s (hγ_deriv s)
     simpa [Function.comp] using h_comp
-  -- The fderiv applied to `h • e` factors as `h * (fderiv v (γ s))(e)`.
   have hcomp_deriv_factored : ∀ s,
       HasDerivAt (v ∘ γ) (h * (fderiv ℝ v (γ s)) e) s := by
     intro s
@@ -519,7 +474,6 @@ lemma diffQuot_eq_integral_partialDeriv
       rw [(fderiv ℝ v (γ s)).map_smul, smul_eq_mul]
     rw [hfact] at hcd
     exact hcd
-  -- Continuity of the integrand.
   have hfd_cont : Continuous (fun y : E => fderiv ℝ v y) :=
     hv.continuous_fderiv one_ne_zero
   have hγ_cont : Continuous γ :=
@@ -531,7 +485,6 @@ lemma diffQuot_eq_integral_partialDeriv
         (volume : Measure ℝ) 0 1 := by
     refine (Continuous.continuousOn ?_).intervalIntegrable
     exact continuous_const.mul hint_cont
-  -- Apply the FTC.
   have hFTC :
       ∫ s in (0 : ℝ)..1, h * (fderiv ℝ v (γ s)) e =
         (v ∘ γ) 1 - (v ∘ γ) 0 := by
@@ -541,7 +494,6 @@ lemma diffQuot_eq_integral_partialDeriv
   have hγ0 : γ 0 = x := by simp [γ]
   have hγ1 : γ 1 = x + h • e := by
     simp [γ, one_mul]
-  -- Convert intervalIntegral to setIntegral on Ioc.
   have hIoc :
       ∫ s in (0 : ℝ)..1, h * (fderiv ℝ v (γ s)) e =
         ∫ s in Set.Ioc (0 : ℝ) 1, h * (fderiv ℝ v (γ s)) e :=
@@ -550,12 +502,10 @@ lemma diffQuot_eq_integral_partialDeriv
       ∫ s in Set.Ioc (0 : ℝ) 1, h * (fderiv ℝ v (γ s)) e =
         h * ∫ s in Set.Ioc (0 : ℝ) 1, (fderiv ℝ v (γ s)) e := by
     rw [integral_const_mul]
-  -- Combine: `h * ∫ ∂_i v ds = v(x + h e) - v(x)`.
   have hCombined :
       h * ∫ s in Set.Ioc (0 : ℝ) 1, (fderiv ℝ v (γ s)) e =
         v (x + h • e) - v x := by
     rw [← hPullConst, ← hIoc, hFTC, Function.comp, Function.comp, hγ0, hγ1]
-  -- Divide both sides by `h`.
   have hdiv : ∫ s in Set.Ioc (0 : ℝ) 1, (fderiv ℝ v (γ s)) e =
         (v (x + h • e) - v x) / h := by
     have h1 :
@@ -567,7 +517,6 @@ lemma diffQuot_eq_integral_partialDeriv
           ∫ s in Set.Ioc (0 : ℝ) 1, (fderiv ℝ v (γ s)) e := by
       rw [mul_comm, mul_div_assoc, div_self hh, mul_one]
     rw [← h2, h1]
-  -- Rewrite the goal in terms of `γ` and `e`.
   have hrewrite_goal :
       diffQuot i h v x =
         ∫ s in Set.Ioc (0 : ℝ) 1, (fderiv ℝ v (γ s)) e := by
@@ -590,13 +539,11 @@ lemma sq_diffQuot_le_integral_sq_partialDeriv
   set e : E := EuclideanSpace.single i (1 : ℝ) with he
   set γ : ℝ → E := fun s => x + (s * h) • e with hγ_def
   set f : ℝ → ℝ := fun s => (fderiv ℝ v (γ s)) e with hf_def
-  -- The probability measure on `Ioc 0 1`.
   haveI hμprob :
       IsProbabilityMeasure ((volume : Measure ℝ).restrict (Set.Ioc (0 : ℝ) 1)) := by
     refine ⟨?_⟩
     rw [Measure.restrict_apply MeasurableSet.univ]
     simp [Real.volume_Ioc]
-  -- Continuity of `f`.
   have hfd_cont : Continuous (fun y : E => fderiv ℝ v y) :=
     hv.continuous_fderiv one_ne_zero
   have hγ_cont : Continuous γ :=
@@ -604,7 +551,6 @@ lemma sq_diffQuot_le_integral_sq_partialDeriv
   have hf_cont : Continuous f := by
     change Continuous (fun s => (fderiv ℝ v (γ s)) e)
     exact (hfd_cont.comp hγ_cont).clm_apply continuous_const
-  -- Integrability of `f` and `f²` on `Ioc 0 1`.
   have hf_int :
       Integrable f ((volume : Measure ℝ).restrict (Set.Ioc (0 : ℝ) 1)) :=
     hf_cont.integrableOn_Ioc (a := 0) (b := 1)
@@ -613,10 +559,8 @@ lemma sq_diffQuot_le_integral_sq_partialDeriv
         ((volume : Measure ℝ).restrict (Set.Ioc (0 : ℝ) 1)) := by
     have hcont : Continuous (fun s : ℝ => f s ^ 2) := hf_cont.pow 2
     exact hcont.integrableOn_Ioc (a := 0) (b := 1)
-  -- FTC representation.
   have hFTC : diffQuot i h v x = ∫ s in Set.Ioc (0 : ℝ) 1, f s :=
     diffQuot_eq_integral_partialDeriv (d := d) hv i hh x
-  -- Jensen for `t ↦ t²` on the probability measure.
   have hsq_convex : ConvexOn ℝ Set.univ (fun t : ℝ => t ^ 2) := by
     refine Even.convexOn_pow (n := 2) ?_
     exact ⟨1, by ring⟩
@@ -649,15 +593,12 @@ lemma sq_diffQuot_le_integral_indicator
           (x + (s * h) • EuclideanSpace.single i 1) := by
   let _ := hΩ
   let _ := hΩ'
-  -- Bound by the unrestricted integral first.
   have hbase :
       (diffQuot i h v x) ^ 2 ≤
         ∫ s in Set.Ioc (0 : ℝ) 1,
           ((fderiv ℝ v (x + (s * h) • EuclideanSpace.single i 1))
             (EuclideanSpace.single i 1)) ^ 2 :=
     sq_diffQuot_le_integral_sq_partialDeriv (d := d) hv i hh x
-  -- For `s ∈ Ioc 0 1`, the point `x + s h e_i ∈ Ω`, hence the indicator is the
-  -- function value squared.
   have hpt :
       ∀ᵐ s : ℝ ∂((volume : Measure ℝ).restrict (Set.Ioc (0 : ℝ) 1)),
         ((fderiv ℝ v (x + (s * h) • EuclideanSpace.single i 1))
@@ -701,7 +642,6 @@ theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv
         (‖(fderiv ℝ v y) (EuclideanSpace.single i 1)‖ₑ : ℝ≥0∞) ^ 2
         ∂(volume : Measure E) := by
   set e : E := EuclideanSpace.single i (1 : ℝ) with he
-  -- Define `H y := ‖(∂_i v y)‖ₑ²`.
   set H : E → ℝ≥0∞ := fun y => (‖(fderiv ℝ v y) e‖ₑ : ℝ≥0∞) ^ 2 with hH_def
   have hfd_cont : Continuous (fun y : E => fderiv ℝ v y) :=
     hv.continuous_fderiv one_ne_zero
@@ -710,7 +650,6 @@ theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv
   have hH_meas : Measurable H := by
     rw [hH_def]
     exact h_partial_cont.measurable.enorm.pow_const 2
-  -- The pair-measurability of `(x, s) ↦ H(x + s h e)`.
   have hPair_meas :
       Measurable (fun p : E × ℝ => H (p.1 + (p.2 * h) • e)) := by
     have h1 : Measurable (fun p : E × ℝ => p.1) := measurable_fst
@@ -722,20 +661,16 @@ theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv
     have h5 : Measurable (fun p : E × ℝ => p.1 + (p.2 * h) • e) :=
       h1.add h4
     exact hH_meas.comp h5
-  -- Step 1 (pointwise): `‖D_h^i v(x)‖ₑ² ≤ ∫⁻ s in Ioc 0 1, H(x + s h e)`.
   have hpt : ∀ x : E,
       (‖diffQuot i h v x‖ₑ : ℝ≥0∞) ^ 2 ≤
         ∫⁻ s in Set.Ioc (0 : ℝ) 1, H (x + (s * h) • e) := by
     intro x
-    -- Real Jensen bound.
     have hreal := sq_diffQuot_le_integral_sq_partialDeriv (d := d) hv i hh x
-    -- LHS to ENNReal of ofReal.
     have hLHS_eq :
         (‖diffQuot i h v x‖ₑ : ℝ≥0∞) ^ 2 =
           ENNReal.ofReal ((diffQuot i h v x) ^ 2) := by
       rw [Real.enorm_eq_ofReal_abs, ← ENNReal.ofReal_pow (abs_nonneg _) 2,
         sq_abs]
-    -- Real integrand continuity.
     have hgamma_cont : Continuous (fun s : ℝ => x + (s * h) • e) :=
       continuous_const.add
         ((continuous_id.mul continuous_const).smul continuous_const)
@@ -746,7 +681,6 @@ theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv
         Integrable (fun s : ℝ => ((fderiv ℝ v (x + (s * h) • e)) e) ^ 2)
           ((volume : Measure ℝ).restrict (Set.Ioc (0 : ℝ) 1)) :=
       hreal_int_cont.integrableOn_Ioc (a := 0) (b := 1)
-    -- Real → lintegral conversion.
     have hConvert :
         ENNReal.ofReal
             (∫ s in Set.Ioc (0 : ℝ) 1,
@@ -760,10 +694,8 @@ theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv
         (‖(fderiv ℝ v (x + (s * h) • e)) e‖ₑ : ℝ≥0∞) ^ 2
       rw [Real.enorm_eq_ofReal_abs, ← ENNReal.ofReal_pow (abs_nonneg _) 2,
         sq_abs]
-    -- Combine.
     rw [hLHS_eq, ← hConvert]
     exact ENNReal.ofReal_le_ofReal hreal
-  -- Step 2: Integrate over `x` and apply Fubini (Tonelli).
   have h_step12 :
       ∫⁻ x : E, (‖diffQuot i h v x‖ₑ : ℝ≥0∞) ^ 2 ∂(volume : Measure E) ≤
         ∫⁻ x : E,
@@ -771,7 +703,6 @@ theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv
           ∂(volume : Measure E) := by
     refine lintegral_mono ?_
     intro x; exact hpt x
-  -- Step 3: Fubini swap.
   have hAEMeas_pair : AEMeasurable
       (Function.uncurry (fun (x : E) (s : ℝ) => H (x + (s * h) • e)))
       (volume.prod (volume.restrict (Set.Ioc (0 : ℝ) 1))) := by
@@ -779,14 +710,12 @@ theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv
     have : Measurable (Function.uncurry
         (fun (x : E) (s : ℝ) => H (x + (s * h) • e))) := hPair_meas
     exact this
-  -- Apply `lintegral_lintegral_swap` (Tonelli).
   have h_swap :
       ∫⁻ x : E,
           ∫⁻ s in Set.Ioc (0 : ℝ) 1, H (x + (s * h) • e) =
         ∫⁻ s in Set.Ioc (0 : ℝ) 1,
           ∫⁻ x : E, H (x + (s * h) • e) := by
     exact lintegral_lintegral_swap hPair_meas.aemeasurable
-  -- Step 4: For each `s`, translation invariance gives equality of x-integrals.
   have hTrans : ∀ s : ℝ,
       ∫⁻ x : E, H (x + (s * h) • e) ∂(volume : Measure E) =
         ∫⁻ y : E, H y ∂(volume : Measure E) := by
@@ -795,7 +724,6 @@ theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv
         (fun x : E => x + (s * h) • e) volume volume :=
       measurePreserving_add_right volume _
     exact hMP.lintegral_comp hH_meas
-  -- Step 5: combine, using `volume (Ioc 0 1) = 1`.
   have h_inner_eq :
       (fun s : ℝ => ∫⁻ x : E, H (x + (s * h) • e) ∂(volume : Measure E)) =
         fun _ => ∫⁻ y : E, H y ∂(volume : Measure E) := by
@@ -838,7 +766,6 @@ theorem eLpNorm_diffQuot_le_eLpNorm_partialDeriv
     show ENNReal.toReal 2 = 2
     rfl
   rw [h2_toReal]
-  -- Replace `^ (2 : ℝ)` with `^ 2` (natural number exponent).
   have h_pow_eq :
       ∀ a : ℝ≥0∞, a ^ (2 : ℝ) = a ^ (2 : ℕ) := by
     intro a
@@ -865,8 +792,6 @@ theorem eLpNorm_diffQuot_le_eLpNorm_partialDeriv
   refine ENNReal.rpow_le_rpow ?_ (by norm_num : (0 : ℝ) ≤ 1 / 2)
   exact lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_partialDeriv
     (d := d) hv i hh
-
-/-! ## Group C: Converse — identifying the weak partial derivative -/
 
 omit [NeZero d] in
 /-- For `φ ∈ C¹(ℝ^d)` compactly supported, the difference quotients
@@ -904,7 +829,6 @@ private lemma diffQuot_bound_of_lipschitz
       (Real.norm_eq_abs _).symm
     rw [h_lhs_norm]
     exact hLip_apply
-
 
 omit [NeZero d] in
 /-- Identification of the weak partial derivative as the limit of difference
@@ -944,14 +868,12 @@ theorem hasWeakPartialDeriv_of_diffQuot_tendsto_inner
   have hφ_C1 : ContDiff ℝ 1 φ := hφ_smooth.of_le (by norm_cast)
   have hφ_memLp : MemLp φ 2 volume :=
     hφ_smooth.continuous.memLp_of_hasCompactSupport hφ_supp
-  -- IBP for each `n`: `∫ (D_{h_n} v) φ = - ∫ v (D_{-h_n} φ)`.
   have hIBP : ∀ n : ℕ,
       ∫ x, diffQuot i (hₙ n) v x * φ x ∂(volume : Measure E) =
         -∫ x, v x * diffQuot i (-(hₙ n)) φ x ∂(volume : Measure E) := by
     intro n
     exact integral_diffQuot_mul_eq_neg_integral_mul_diffQuot
       (d := d) i (hₙ_ne n) hv_memLp hφ_memLp
-  -- The IBP-RHS sequence converges by `h_dual`.
   have hRHS_inner_tendsto :
       Tendsto (fun n =>
         ∫ x, v x * diffQuot i (-(hₙ n)) φ x ∂(volume : Measure E))
@@ -966,14 +888,12 @@ theorem hasWeakPartialDeriv_of_diffQuot_tendsto_inner
         (𝓝 (-∫ x, v x * (fderiv ℝ φ x) (EuclideanSpace.single i 1)
           ∂(volume : Measure E))) :=
     hRHS_inner_tendsto.neg
-  -- The hypothesis gives: `∫ (D_{h_n} v) φ → ∫ g φ`.
   have hLHS_tendsto :
       Tendsto (fun n =>
         ∫ x, diffQuot i (hₙ n) v x * φ x ∂(volume : Measure E))
         atTop
         (𝓝 (∫ x, g x * φ x ∂(volume : Measure E))) :=
     h_weak φ hφ_smooth hφ_supp
-  -- Combine.
   have hLHS_eq_RHS_tendsto :
       Tendsto (fun n =>
         ∫ x, diffQuot i (hₙ n) v x * φ x ∂(volume : Measure E))
@@ -990,9 +910,6 @@ theorem hasWeakPartialDeriv_of_diffQuot_tendsto_inner
     exact hIBP_RHS_tendsto
   have h_eq_limits :=
     tendsto_nhds_unique hLHS_tendsto hLHS_eq_RHS_tendsto
-  -- Convert to the goal. Since `Set.univ`, `∫ x in Set.univ, f x = ∫ x, f x`.
-  -- `Lean`'s `setIntegral_univ` may apply, or we observe that
-  -- `volume.restrict Set.univ = volume`.
   change ∫ x in Set.univ, v x * (fderiv ℝ φ x) (EuclideanSpace.single i 1) =
     -∫ x in Set.univ, g x * φ x
   rw [setIntegral_univ, setIntegral_univ]

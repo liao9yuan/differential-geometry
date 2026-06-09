@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Laplacian.Spectral.EigenIdx
+import DifferentialGeometry.Analysis.Spectral.Scalar.EigenIdx
 import Mathlib.Analysis.InnerProductSpace.l2Space
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
@@ -77,14 +77,10 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Laplacian.Spectral
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The Sobolev weight `(1 + λᵢ)^σ` -/
 
 /-- The spectral Sobolev weight at eigen-index `i` and exponent `σ`,
 namely `(1 + λᵢ)^σ` with `λᵢ ≥ 0` the Laplacian eigenvalue. For
@@ -136,8 +132,6 @@ lemma sq_sqrt_scalarSobolevWeight {g : SmoothRiemannianMetric I M}
       scalarSobolevWeight (I := I) (M := M) i σ :=
   Real.sq_sqrt (scalarSobolevWeight_nonneg (I := I) (M := M) i σ)
 
-/-! ## The eigenbasis-coordinate functional on `L²` -/
-
 /-- The `i`-th eigenbasis coordinate of an `L²` scalar field `u`, i.e.
 `⟪bᵢ, u⟫` for the eigenbasis `b = resolventHilbertEigenbasisSigma`.
 Concretely this is `(b.repr u) i`. -/
@@ -145,8 +139,6 @@ def scalarL2Coeff {g : SmoothRiemannianMetric I M}
     (u : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
     (i : EigenIdx (I := I) (M := M) g) : ℝ :=
   (resolventHilbertEigenbasisSigma (I := I) (M := M) g).repr u i
-
-/-! ## The spectral `Hˢ` Sobolev space carrier -/
 
 /-- The spectral `Hˢ` Sobolev space of scalar fields, for exponent `σ`.
 
@@ -175,8 +167,6 @@ variable {g : SmoothRiemannianMetric I M} {σ : ℝ}
     (h : S.coeff = T.coeff) : S = T := by
   cases S; cases T; cases h; rfl
 
-/-! ### Additive-group and module structure -/
-
 instance : Zero (scalarHs (I := I) (M := M) g σ) where
   zero := ⟨fun _ => 0, by simp⟩
 
@@ -188,8 +178,6 @@ instance : Add (scalarHs (I := I) (M := M) g σ) where
   add S T :=
     { coeff := fun i => S.coeff i + T.coeff i
       weighted_summable := by
-        -- `(a+b)² ≤ 2a² + 2b²`, so the weighted family is dominated by
-        -- a summable family.
         have hS := S.weighted_summable
         have hT := T.weighted_summable
         have h_dom : Summable
@@ -318,11 +306,6 @@ instance : Module ℝ (scalarHs (I := I) (M := M) g σ) where
   add_smul a b S := by ext i; simp [add_mul]
   zero_smul S := by ext i; simp
 
-/-! ### The weighted inner product
-
-`⟪S, T⟫_{Hˢ} = ∑ᵢ (1 + λᵢ)^σ · (coeff i S) · (coeff i T)`. The series
-is absolutely convergent by Cauchy–Schwarz on the weighted squares. -/
-
 /-- The weighted product family `i ↦ (1+λᵢ)^σ · (coeff i S) · (coeff i T)`
 is summable: it is dominated by the AM–GM bound coming from the two
 weighted-square-summable families. -/
@@ -386,8 +369,6 @@ lemma innerFun_self (T : scalarHs (I := I) (M := M) g σ) :
   refine tsum_congr (fun i => ?_)
   rw [sq]
 
-/-! ### The `InnerProductSpace.Core` -/
-
 /-- The pre-inner-product `Core` underlying the weighted `Hˢ` inner
 product: symmetry, positive-definiteness, additivity and homogeneity in
 the first slot are all immediate from the corresponding `tsum`
@@ -430,8 +411,6 @@ identities. -/
     simp only [smul_coeff]
     ring
   definite T hT := by
-    -- `∑ wᵢ (coeff i)² = 0` with nonnegative summable terms forces each
-    -- term to vanish; since `wᵢ > 0`, every coordinate is `0`.
     rw [show (innerFun (I := I) (M := M) T T) =
       ∑' i, scalarSobolevWeight (I := I) (M := M) i σ *
         (T.coeff i) ^ 2 from innerFun_self (I := I) (M := M) T] at hT
@@ -488,8 +467,6 @@ lemma inner_self_eq (T : scalarHs (I := I) (M := M) g σ) :
         (T.coeff i) ^ 2 :=
   innerFun_self (I := I) (M := M) T
 
-/-! ### The weighted-norm identity -/
-
 /-- The squared `Hˢ` norm equals the weighted sum of squared
 coordinates: `‖T‖² = ∑ᵢ (1 + λᵢ)^σ · (coeff i T)²`. -/
 theorem norm_sq_eq_tsum
@@ -510,12 +487,6 @@ theorem norm_eq_sqrt_tsum
   exact (Real.sqrt_sq (norm_nonneg T)).symm
 
 end scalarHs
-
-/-! ## The rescaling isometry `Hˢ ≃ₗᵢ ℓ²(EigenIdx g, ℝ)`
-
-The diagonal rescaling `cᵢ ↦ √(1+λᵢ)^σ · cᵢ` carries `Hˢ` bijectively
-onto `ℓ²(EigenIdx g, ℝ)`: weighted square-summability of `cᵢ` is exactly
-square-summability of the rescaled family. -/
 
 namespace scalarHs
 
@@ -652,7 +623,6 @@ def rescaleEquivL2 :
       Real.sqrt_pos.mpr (scalarSobolevWeight_pos (I := I) (M := M) i σ)
     rw [← mul_assoc, mul_inv_cancel₀ hsqrt_pos.ne', one_mul]
   norm_map' T := by
-    -- `‖rescale T‖² = ∑ ‖√wᵢ · coeffᵢ‖² = ∑ wᵢ coeffᵢ² = ‖T‖²`.
     have hpr : (2 : ℝ≥0∞).toReal = 2 := by norm_num
     have h_lp_sq :
         ‖rescaleToL2 (I := I) (M := M) T‖ ^ 2 =
@@ -695,25 +665,12 @@ def rescaleEquivL2 :
       (fun i => Real.sqrt (scalarSobolevWeight (I := I) (M := M) i σ) *
         T.coeff i) := rfl
 
-/-! ### Completeness of `Hˢ`
-
-Transported from completeness of `ℓ²(EigenIdx g, ℝ)` along the linear
-isometric equivalence `rescaleEquivL2`. -/
-
 instance instCompleteSpace :
     CompleteSpace (scalarHs (I := I) (M := M) g σ) :=
   (rescaleEquivL2 (I := I) (M := M)
     (g := g) (σ := σ)).toIsometryEquiv.completeSpace
 
 end scalarHs
-
-/-! ## Integer-exponent alias
-
-`HkScalar g k` is the integer-exponent specialisation of `scalarHs g σ`
-at `σ := (k : ℝ)`. The general real-exponent space carries the canonical
-headline name; this abbreviation exists for downstream consumers that
-work with integer regularity (`H¹`, `H²`, …) and prefer to think in
-those terms. -/
 
 /-- Integer-exponent spectral Sobolev space:
 `HkScalar g k := scalarHs g (k : ℝ)`. -/

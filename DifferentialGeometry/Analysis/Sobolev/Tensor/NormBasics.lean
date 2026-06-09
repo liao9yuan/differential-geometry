@@ -64,8 +64,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## Finiteness of the tensor Sobolev norm on a closed manifold -/
-
 /-- The tensor Sobolev norm is finite for any `W^{2k, 2}`-tensor section on a
 closed manifold.
 
@@ -85,26 +83,21 @@ theorem wtwokTwoNorm_lt_top
     wtwokTwoNorm (I := I) (M := M) g k T < ⊤ := by
   classical
   unfold wtwokTwoNorm
-  -- The per-chart contribution: a finite double sum of Euclidean Sobolev norms.
   set f : M → ℝ≥0∞ := fun α =>
     ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
       ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
         wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
           (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
           (chartTargetEuclid (I := I) (M := M) α) with hf_def
-  -- The partition of unity has locally finite supports.
   have hPOU_locFin : LocallyFinite
       (fun α : M => Function.support (chartAtlasPOU I M α : M → ℝ)) :=
     (chartAtlasPOU I M).locallyFinite
-  -- On a compact space, only finitely many supports are nonempty.
   have hSupport_finite :
       {α : M | (Function.support (chartAtlasPOU I M α : M → ℝ)).Nonempty}.Finite :=
     hPOU_locFin.finite_nonempty_of_compact
   set S : Set M :=
     {α : M | (Function.support (chartAtlasPOU I M α : M → ℝ)).Nonempty} with hS_def
   have hS_finite : S.Finite := hSupport_finite
-  -- For `α` with empty partition-of-unity support, every chart component of `T`
-  -- is the zero function, so the per-chart contribution `f α` vanishes.
   have hf_zero_off : ∀ α : M,
       (Function.support (chartAtlasPOU I M α : M → ℝ)) = ∅ → f α = 0 := by
     intro α hα
@@ -113,8 +106,6 @@ theorem wtwokTwoNorm_lt_top
       have hx : x ∉ Function.support (chartAtlasPOU I M α : M → ℝ) := by
         rw [hα]; exact Set.notMem_empty x
       simpa [Function.mem_support] using hx
-    -- Each chart component is `chartPushedRaw α (ρ_α · raw)`; with `ρ_α ≡ 0` it
-    -- is the zero function, hence has vanishing Euclidean Sobolev norm.
     rw [hf_def]
     refine Finset.sum_eq_zero ?_
     intro Idx _
@@ -132,7 +123,6 @@ theorem wtwokTwoNorm_lt_top
     rw [hcomp_zero]
     exact wkpNorm_zero_fun_zero (d := Module.finrank ℝ E) (by norm_num)
       (chartTargetEuclid_isOpen (I := I) (M := M) α)
-  -- The `tsum` over `M` reduces to a finite sum over `S`.
   have htsum_eq : ∑' α : M, f α = ∑ α ∈ hS_finite.toFinset, f α := by
     rw [tsum_eq_sum]
     intro α hα
@@ -141,7 +131,6 @@ theorem wtwokTwoNorm_lt_top
       Set.not_nonempty_iff_eq_empty.mp (fun hne => hαS hne)
     exact hf_zero_off α hempty
   rw [htsum_eq]
-  -- The finite sum is finite: each `f α` is a finite double sum of finite norms.
   refine ENNReal.sum_lt_top.mpr ?_
   intro α _
   rw [hf_def]
@@ -158,8 +147,6 @@ theorem wtwokTwoNorm_ne_top
     (hT : MemWtwokTwo (I := I) (M := M) g k T) :
     wtwokTwoNorm (I := I) (M := M) g k T ≠ ⊤ :=
   (wtwokTwoNorm_lt_top (I := I) (M := M) g hT).ne
-
-/-! ## Vanishing of the chart components from a vanishing norm -/
 
 /-- If the tensor Sobolev norm of a section vanishes, then every scalar chart
 component vanishes identically on its chart target.
@@ -181,7 +168,6 @@ theorem tensorChartComp_eqOn_zero_of_wtwokTwoNorm_zero
     Set.EqOn (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
       (fun _ => (0 : ℝ)) (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- Step 1: the per-chart double sum at `α` vanishes.
   have hchart_zero :
       ∑ Idx' : Fin r → Fin (Module.finrank ℝ E),
         ∑ Jdx' : Fin s → Fin (Module.finrank ℝ E),
@@ -204,7 +190,6 @@ theorem tensorChartComp_eqOn_zero_of_wtwokTwoNorm_zero
                 (chartTargetEuclid (I := I) (M := M) β)) = 0 := by
       rw [← wtwokTwoNorm_eq_tsum (I := I) (M := M) g k T]; exact hnorm
     exact (ENNReal.tsum_eq_zero.mp htsum0) α
-  -- Step 2: the individual scalar Euclidean Sobolev norm vanishes.
   have hwkp_zero :
       wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
         (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
@@ -216,7 +201,6 @@ theorem tensorChartComp_eqOn_zero_of_wtwokTwoNorm_zero
             (chartTargetEuclid (I := I) (M := M) α) = 0 :=
       (Finset.sum_eq_zero_iff.mp hchart_zero) Idx (Finset.mem_univ Idx)
     exact (Finset.sum_eq_zero_iff.mp hJ) Jdx (Finset.mem_univ Jdx)
-  -- Step 3: the order-zero summand of `wkpNorm` is the `L²` norm; it vanishes.
   set u : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
     tensorChartComp (I := I) (M := M) g r s T α Idx Jdx with hu_def
   set Ω : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :=
@@ -225,8 +209,6 @@ theorem tensorChartComp_eqOn_zero_of_wtwokTwoNorm_zero
   have hu_cont : Continuous u :=
     tensorChartComp_continuous (I := I) (M := M) g r s T α Idx Jdx
   have heLp_zero : eLpNorm u 2 (volume.restrict Ω) = 0 := by
-    -- `wkpNorm` is a finite sum of non-negative terms; the `j = 0` term is the
-    -- `L²` norm of `u` itself.
     have hsum :
         wkpNorm (d := Module.finrank ℝ E) (2 * k) 2 u Ω =
           ∑ j ∈ Finset.range (2 * k + 1),
@@ -243,8 +225,6 @@ theorem tensorChartComp_eqOn_zero_of_wtwokTwoNorm_zero
       have h0mem : (0 : ℕ) ∈ Finset.range (2 * k + 1) := by
         rw [Finset.mem_range]; omega
       exact (Finset.sum_eq_zero_iff.mp hzero) 0 h0mem
-    -- The `j = 0` sum ranges over the singleton `Fin 0 → Fin n` and its unique
-    -- term is `eLpNorm u 2 (volume.restrict Ω)`.
     have hUniq : ∀ a : Fin 0 → Fin (Module.finrank ℝ E),
         a = (fun i : Fin 0 => i.elim0) := fun a => by funext i; exact i.elim0
     haveI : Unique (Fin 0 → Fin (Module.finrank ℝ E)) :=
@@ -255,8 +235,6 @@ theorem tensorChartComp_eqOn_zero_of_wtwokTwoNorm_zero
           eLpNorm (iterWeakPartial (d := Module.finrank ℝ E) 2 0 a u Ω) 2
             (volume.restrict Ω))] at hj0
     rwa [iterWeakPartial_zero] at hj0
-  -- Step 4: `eLpNorm = 0` gives a.e.-zero; continuity on the open set upgrades
-  -- this to identical vanishing.
   have hu_aem : AEStronglyMeasurable u (volume.restrict Ω) :=
     hu_cont.aestronglyMeasurable
   have hu_ae : u =ᵐ[volume.restrict Ω] (fun _ => (0 : ℝ)) := by
@@ -264,8 +242,6 @@ theorem tensorChartComp_eqOn_zero_of_wtwokTwoNorm_zero
     simpa [Pi.zero_def] using this
   exact MeasureTheory.Measure.eqOn_open_of_ae_eq hu_ae hΩ_open
     hu_cont.continuousOn continuousOn_const
-
-/-! ## Separation: a vanishing norm forces the zero section -/
 
 /-- The base set of the `TensorRSModel`-trivialization at `α` is the chart
 source at `α`. (The product trivialization of a `(0, r)`- and a
@@ -304,10 +280,8 @@ private lemma toSection_eq_zero_of_tensorTrivProj_eq_zero
   have hx_base : x ∈ e.baseSet := by
     rw [he_def, tensorRS_baseSet_eq_chart_source (I := I) (M := M) α r s]
     exact hx
-  -- `tensorTrivProj S α x = e.continuousLinearMapAt ℝ x (S.toSection x)`.
   have hproj : e.continuousLinearMapAt ℝ x (S.toSection x) = 0 := by
     rw [← hzero]; rfl
-  -- Apply the fibrewise inverse `symmL` and use that it sends `0` to `0`.
   have hrecover : e.symmL ℝ x (e.continuousLinearMapAt ℝ x (S.toSection x)) =
       S.toSection x :=
     Bundle.Trivialization.symmL_continuousLinearMapAt e hx_base (S.toSection x)
@@ -332,19 +306,15 @@ theorem eq_zero_of_wtwokTwoNorm_zero
     (hnorm : wtwokTwoNorm (I := I) (M := M) g k T = 0) :
     T = 0 := by
   classical
-  -- It suffices to show the underlying section vanishes pointwise.
   refine SmoothCcTensor.ext ?_
   refine ContMDiffSection.ext (fun x => ?_)
-  -- The partition of unity sums to one at `x`, so some weight is positive.
   obtain ⟨α, hα_pos⟩ :=
     (chartAtlasPOU I M).exists_pos_of_mem (Set.mem_univ x)
-  -- A positive weight forces `x` into the chart source.
   have hx_supp : x ∈ Function.support (chartAtlasPOU I M α : M → ℝ) := by
     rw [Function.mem_support]; exact ne_of_gt hα_pos
   have hx_chart : x ∈ (chartAt H α).source :=
     tsupport_subset_chartAt_source (chartAtlasPOU I M)
       (chartAtlasPOU_isSubordinate I M) α (subset_tsupport _ hx_supp)
-  -- The Euclidean image of `x` lies in the chart target, and round-trips back.
   have hx_ext : x ∈ (extChartAt I α).source := by
     rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hx_chart
   set y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) :=
@@ -356,7 +326,6 @@ theorem eq_zero_of_wtwokTwoNorm_zero
     rw [hy_def]
     rw [ContinuousLinearEquiv.symm_apply_apply]
     exact (extChartAt I α).left_inv hx_ext
-  -- All chart components of `T` vanish on the chart target.
   have hcomp_zero :
       ∀ (Idx : Fin r → Fin (Module.finrank ℝ E))
         (Jdx : Fin s → Fin (Module.finrank ℝ E)),
@@ -365,7 +334,6 @@ theorem eq_zero_of_wtwokTwoNorm_zero
     have := tensorChartComp_eqOn_zero_of_wtwokTwoNorm_zero
       (I := I) (M := M) g hnorm α Idx Jdx hy_mem
     simpa using this
-  -- Hence the chart-pushed POU-weighted tensor vanishes at `y`.
   have hpushed_zero :
       tensorChartPushed (I := I) (M := M) g r s T α y = 0 := by
     rw [tensorChartPushed_eq_sum_tensorChartComp (I := I) (M := M) g r s T α y]
@@ -374,7 +342,6 @@ theorem eq_zero_of_wtwokTwoNorm_zero
     refine Finset.sum_eq_zero ?_
     intro Jdx _
     rw [hcomp_zero Idx Jdx, zero_smul]
-  -- The chart-pushed tensor at `y` is `ρ_α(x) • tensorTrivProj T α x`.
   have hpushed_eq :
       tensorChartPushed (I := I) (M := M) g r s T α y =
         (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) x •
@@ -382,8 +349,6 @@ theorem eq_zero_of_wtwokTwoNorm_zero
     rw [tensorChartPushed_def (I := I) (M := M) g r s T α y]
     rw [tensorChartPushedRawModel_apply_of_mem (I := I) (M := M) g r s T α hy_mem]
     rw [hround]
-  -- So `ρ_α(x) • tensorTrivProj T α x = 0`; with `ρ_α(x) > 0`, the projection
-  -- vanishes.
   have hweighted_zero :
       (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) x •
         tensorTrivProj (I := I) (M := M) g r s T α x = 0 := by
@@ -391,15 +356,12 @@ theorem eq_zero_of_wtwokTwoNorm_zero
   have hproj_zero : tensorTrivProj (I := I) (M := M) g r s T α x = 0 := by
     have hρ_ne : (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) x ≠ 0 := ne_of_gt hα_pos
     exact (smul_eq_zero.mp hweighted_zero).resolve_left hρ_ne
-  -- Recover the section value, and compare it with the zero section's value.
   have hsection : T.toSection x = 0 :=
     toSection_eq_zero_of_tensorTrivProj_eq_zero
       (I := I) (M := M) g r s T α hx_chart hproj_zero
   rw [SmoothCcTensor.toSection_zero, hsection]
   rw [ContMDiffSection.coe_zero]
   rfl
-
-/-! ## The real-valued tensor Sobolev norm -/
 
 /-- The real-valued (`ℝ≥0∞.toReal`) tensor Sobolev norm. -/
 def wtwokTwoNormReal
@@ -460,8 +422,6 @@ theorem wtwokTwoNormReal_smul
   rw [wtwokTwoNorm_smul (I := I) (M := M) g c h]
   rw [ENNReal.toReal_mul, toReal_enorm]
 
-/-! ## Order monotonicity at the norm level -/
-
 /-- Each per-chart term of the tensor Sobolev norm is monotone in the regularity
 order `k`: the Euclidean iterated Sobolev norm `wkpNorm` is monotone in its
 order, applied componentwise. -/
@@ -503,8 +463,6 @@ theorem wtwokTwoNormReal_le_succ
   have hk_ne : wtwokTwoNorm (I := I) (M := M) g (k + 1) T ≠ ⊤ :=
     wtwokTwoNorm_ne_top (I := I) (M := M) g hT
   exact ENNReal.toReal_mono hk_ne (wtwokTwoNorm_le_succ (I := I) (M := M) g k T)
-
-/-! ## `NormedAddCommGroup` and `NormedSpace ℝ` on `WtwokTwo g r s k` -/
 
 /-- The underlying smooth compactly-supported tensor section of an element of
 `WtwokTwo g r s k`. -/
@@ -588,8 +546,6 @@ lemma wtwokTwo_normedSpace_core
     intro T
     constructor
     · intro hT
-      -- `‖T‖ = 0` means the real-valued norm vanishes; finiteness then forces
-      -- the `ℝ≥0∞`-valued norm to vanish, and separation gives the zero section.
       have hmem := wtwokTwoFun_memWtwokTwo T
       have hne : wtwokTwoNorm (I := I) (M := M) g k (wtwokTwoFun T) ≠ ⊤ :=
         wtwokTwoNorm_ne_top (I := I) (M := M) g hmem

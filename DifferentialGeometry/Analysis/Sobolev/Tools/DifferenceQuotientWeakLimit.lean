@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.SmoothTestPairing
 import DifferentialGeometry.Analysis.Sobolev.Tools.WeakPartialLimit
 import Mathlib.Analysis.Normed.Lp.SmoothApprox
 import Mathlib.Analysis.Normed.Operator.Extend
@@ -34,8 +34,6 @@ namespace Sobolev
 variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
-
-/-! ## Submodule of smooth compactly supported functions -/
 
 omit [NeZero d] in
 private lemma smoothCS_zero_mem :
@@ -79,8 +77,6 @@ omit [NeZero d] in
 private lemma smoothCSSubmodule_smul_coe
     (c : ℝ) (φ : (smoothCSSubmodule (d := d))) :
     ((c • φ : (smoothCSSubmodule (d := d))) : E → ℝ) = c • φ.1 := rfl
-
-/-! ## The toLp embedding from the smooth-compactly-supported subspace -/
 
 omit [NeZero d] in
 /-- A smooth, compactly supported real function on Euclidean space has finite
@@ -162,7 +158,6 @@ lemma denseRange_smoothCSToLp :
         f =ᵐ[volume] g ∧ HasCompactSupport g ∧ ContDiff ℝ (⊤ : ℕ∞) g} := by
     have h0 := Lp.dense_hasCompactSupport_contDiff (μ := (volume : Measure E))
       (F := ℝ) (p := 2) (by norm_num)
-    -- `ContDiff ℝ ∞` is `ContDiff ℝ (⊤ : ℕ∞)`.
     convert h0 using 1
   rw [Metric.mem_closure_iff]
   intro ε hε
@@ -180,8 +175,6 @@ lemma denseRange_smoothCSToLp :
     rw [h_eq_h]
     rw [dist_comm]
     exact mem_ball.mp hh_mem
-
-/-! ## The smooth-test functional `Λ_w(φ) := -∫ w · ∂_k φ` -/
 
 omit [NeZero d] in
 /-- For a smooth compactly supported `φ : E → ℝ` and `w ∈ L²(volume)`, the
@@ -294,8 +287,6 @@ omit [NeZero d] in
     smoothTestFunctional (d := d) hw_l2 k φ =
       -∫ x, w x * (fderiv ℝ φ.1 x) (EuclideanSpace.single k 1) := rfl
 
-/-! ## Discrete-to-classical convergence: ∫ w · D_{-h}^k φ → ∫ w · ∂_k φ -/
-
 omit [NeZero d] in
 omit [NeZero d] in
 /-- For `φ` smooth and compactly supported, and `|h| ≤ h₀`, the
@@ -307,11 +298,8 @@ private lemma diffQuot_eq_zero_of_notMem_cthickening
     ∀ x : E, x ∉ Metric.cthickening h₀ (tsupport φ) →
       diffQuot k h φ x = 0 := by
   intro x hx
-  -- x ∉ tsupport φ.
   have hxnot : x ∉ tsupport φ := fun h => hx (Metric.self_subset_cthickening _ h)
   have hφx : φ x = 0 := image_eq_zero_of_notMem_tsupport hxnot
-  -- (x + h e_k) ∉ tsupport φ. Otherwise, dist(x, x + h e_k) = |h| ≤ h₀ would
-  -- imply x ∈ cthickening h₀ (tsupport φ).
   have hxhe : x + h • EuclideanSpace.single k 1 ∉ tsupport φ := by
     intro hin
     apply hx
@@ -329,7 +317,6 @@ private lemma diffQuot_eq_zero_of_notMem_cthickening
       (x + h • EuclideanSpace.single k 1) h₀ (tsupport φ) hin h_dist_le
   have hφxhe : φ (x + h • EuclideanSpace.single k 1) = 0 :=
     image_eq_zero_of_notMem_tsupport hxhe
-  -- Difference quotient vanishes.
   by_cases hh : h = 0
   · rw [hh]; simp [diffQuot]
   · rw [diffQuot_apply_of_ne (d := d) k hh φ x]
@@ -380,7 +367,6 @@ private lemma abs_partialDeriv_le_lipschitz_bound
     (k : Fin d) :
     ∃ L : ℝ, 0 ≤ L ∧ ∀ x : E,
       |(fderiv ℝ φ x) (EuclideanSpace.single k 1)| ≤ L := by
-  -- Use the bound on the operator norm of fderiv.
   have hfderiv_cont : Continuous (fderiv ℝ φ) :=
     hφ_C1.continuous_fderiv (by simp)
   have hfderiv_compact : HasCompactSupport (fderiv ℝ φ) :=
@@ -458,8 +444,6 @@ private lemma abs_integral_mul_le_norm_lp_mul_norm_lp
   rw [ENNReal.toReal_mul] at h_toReal
   exact h_toReal
 
-/-! ## Convergence ∫ w · D_{-h_n}^k φ → ∫ w · ∂_k φ -/
-
 omit [NeZero d] in
 /-- The volume of the closed thickening of a compact set is finite. -/
 private lemma volume_cthickening_lt_top
@@ -486,10 +470,8 @@ private lemma tendsto_integral_w_diffQuot_phi
       (𝓝 (∫ x, w x * (fderiv ℝ φ x) (EuclideanSpace.single k 1)
         ∂(volume : Measure E))) := by
   have hφ_C1 : ContDiff ℝ 1 φ := hφ_smooth.of_le (by norm_cast)
-  -- Get the Lipschitz / partial-derivative bound `L`.
   obtain ⟨L, _hL_nn, hLip⟩ :=
     abs_diffQuot_le_lipschitz_bound (d := d) hφ_C1 hφ_supp k
-  -- Choose `h_0 = 1`. Since `h_n → 0`, eventually `|h_n| ≤ h_0`.
   set h₀ : ℝ := 1 with h₀_def
   have hh₀_nn : (0 : ℝ) ≤ h₀ := by simp [h₀_def]
   have hN : ∀ᶠ n in atTop, |hₙ n| ≤ h₀ := by
@@ -503,35 +485,28 @@ private lemma tendsto_integral_w_diffQuot_phi
       rw [Real.dist_eq, sub_zero, abs_abs]
     rw [h_dist] at hn
     exact hn.le
-  -- The thickened support.
   set K_thick : Set E := Metric.cthickening h₀ (tsupport φ) with hKt_def
   have hK_compact : IsCompact (tsupport φ) := hφ_supp
   have hK_thick_compact : IsCompact K_thick := hK_compact.cthickening
   have hK_thick_meas : MeasurableSet K_thick :=
     hK_thick_compact.measurableSet
-  -- The dominating function: `L · |w(x)| · 𝟙_{K_thick}(x)`.
   set bound : E → ℝ := fun x => K_thick.indicator (fun y => L * |w y|) x
-  -- Measurability of `bound`.
   have hw_meas : AEStronglyMeasurable w (volume : Measure E) :=
     hw_l2.aestronglyMeasurable
-  -- Integrability of `bound`.
   have h_indicator_memLp_2 :
       MemLp (fun x : E => K_thick.indicator (fun _ => (1 : ℝ)) x) 2
         (volume : Measure E) := by
     have h_finite : (volume : Measure E) K_thick ≠ ∞ :=
       hK_thick_compact.measure_lt_top.ne
     refine memLp_indicator_const _ hK_thick_meas (1 : ℝ) (Or.inr h_finite)
-  -- |w| ∈ L² (since |w x| = ‖w x‖ for real-valued w)
   have h_abs_eq_norm : (fun x => |w x|) = fun x => ‖w x‖ := by
     funext x; rw [Real.norm_eq_abs]
   have h_abs_w_memLp : MemLp (fun x => |w x|) 2 (volume : Measure E) := by
     rw [h_abs_eq_norm]
     exact hw_l2.norm
-  -- L * |w| ∈ L²
   have h_Labsw_memLp :
       MemLp (fun x => L * |w x|) 2 (volume : Measure E) :=
     h_abs_w_memLp.const_mul L
-  -- bound = (L * |w|) * 𝟙_{K_thick}
   have h_bound_eq :
       bound = (fun x => (L * |w x|) *
         K_thick.indicator (fun _ => (1 : ℝ)) x) := by
@@ -540,19 +515,16 @@ private lemma tendsto_integral_w_diffQuot_phi
     by_cases hx : x ∈ K_thick
     · rw [Set.indicator_of_mem hx, Set.indicator_of_mem hx, mul_one]
     · rw [Set.indicator_of_notMem hx, Set.indicator_of_notMem hx, mul_zero]
-  -- bound ∈ L¹ via Hölder.
   have h_bound_int : Integrable bound (volume : Measure E) := by
     rw [h_bound_eq]
     exact MemLp.integrable_mul h_Labsw_memLp h_indicator_memLp_2
-  -- The bound holds: for n with |hₙ n| ≤ h₀, `|w(x) · D_{-hₙ n}^k φ(x)| ≤ bound(x)`.
   have h_pointwise_bound :
       ∀ᶠ n in atTop, ∀ᵐ x ∂(volume : Measure E),
         ‖w x * diffQuot k (-(hₙ n)) φ x‖ ≤ bound x := by
     filter_upwards [hN] with n hn
     refine Filter.Eventually.of_forall fun x => ?_
     by_cases hx : x ∈ K_thick
-    · -- In K_thick: bound x = L * |w x|, and |D_{-hₙ n}^k φ x| ≤ L.
-      simp only [bound, Set.indicator_of_mem hx]
+    · simp only [bound, Set.indicator_of_mem hx]
       rw [Real.norm_eq_abs, abs_mul]
       have hL_dq : |diffQuot k (-(hₙ n)) φ x| ≤ L := hLip _ x
       have h_abs_w_nn : 0 ≤ |w x| := abs_nonneg _
@@ -565,7 +537,6 @@ private lemma tendsto_integral_w_diffQuot_phi
           h_neg_h_bd x hx
       rw [hdq_zero, mul_zero, norm_zero]
       simp [bound, Set.indicator_of_notMem hx]
-  -- Pointwise convergence: for each x, w(x) · D_{-h_n}^k φ(x) → w(x) · ∂_k φ(x).
   have h_pointwise_conv :
       ∀ᵐ x ∂(volume : Measure E),
         Tendsto (fun n => w x * diffQuot k (-(hₙ n)) φ x) atTop
@@ -575,12 +546,10 @@ private lemma tendsto_integral_w_diffQuot_phi
       have := hₙ_tendsto.neg; simpa using this
     have h_minus_ne : ∀ n, -(hₙ n) ≠ 0 := fun n hn =>
       hₙ_ne n (neg_eq_zero.mp hn)
-    -- Use `tendsto_diffQuot_of_contDiff`: `D_h^i v(x) → ∂_i v(x)` along `𝓝[≠] 0`.
     have h_dq_nhdsWithin :
         Tendsto (fun h : ℝ => diffQuot k h φ x) (𝓝[≠] 0)
           (𝓝 ((fderiv ℝ φ x) (EuclideanSpace.single k 1))) :=
       tendsto_diffQuot_of_contDiff (d := d) hφ_C1 k x
-    -- Use `Tendsto.comp` with `tendsto_nhdsWithin_iff`.
     have h_tendsto_within :
         Tendsto (fun n => -(hₙ n)) atTop (𝓝[≠] 0) := by
       rw [tendsto_nhdsWithin_iff]
@@ -590,21 +559,16 @@ private lemma tendsto_integral_w_diffQuot_phi
         Tendsto (fun n => diffQuot k (-(hₙ n)) φ x) atTop
           (𝓝 ((fderiv ℝ φ x) (EuclideanSpace.single k 1))) :=
       h_dq_nhdsWithin.comp h_tendsto_within
-    -- Multiply by w(x).
     exact h_dq_tendsto.const_mul (w x)
-  -- AEStronglyMeasurability for the sequence.
   have h_aesm_seq : ∀ n, AEStronglyMeasurable
       (fun x => w x * diffQuot k (-(hₙ n)) φ x) (volume : Measure E) := by
     intro n
     have hdq_meas : AEStronglyMeasurable (diffQuot k (-(hₙ n)) φ) (volume : Measure E) :=
       aestronglyMeasurable_diffQuot (d := d) k _ hφ_smooth.continuous.aestronglyMeasurable
     exact hw_meas.mul hdq_meas
-  -- Apply dominated convergence (filter form).
   exact tendsto_integral_filter_of_dominated_convergence
     bound (Filter.Eventually.of_forall h_aesm_seq)
     h_pointwise_bound h_bound_int h_pointwise_conv
-
-/-! ## The norm bound on the smooth-test functional -/
 
 omit [NeZero d] in
 /-- The smooth-test functional is bounded by `M · ‖φ‖_{L²}` whenever the
@@ -617,10 +581,8 @@ private lemma abs_smoothTestFunctional_le
     (φ : smoothCSSubmodule (d := d)) :
     |smoothTestFunctional (d := d) hw_l2 k φ| ≤
       M * (eLpNorm φ.1 2 (volume : Measure E)).toReal := by
-  -- The pairing equals `-∫ w · ∂_k φ`.
   rw [smoothTestFunctional_apply]
   rw [abs_neg]
-  -- Define the test sequence h_n = h₀ / (n+1).
   set hₙ : ℕ → ℝ := fun n => h₀ / (n + 1)
   have hₙ_pos : ∀ n, 0 < hₙ n := fun n => by
     apply div_pos hh₀
@@ -637,7 +599,6 @@ private lemma abs_smoothTestFunctional_le
     linarith
   have hₙ_pos_abs : ∀ n, 0 < |hₙ n| := fun n => by
     rw [abs_of_pos (hₙ_pos n)]; exact hₙ_pos n
-  -- h_n → 0.
   have hₙ_tendsto : Tendsto hₙ atTop (𝓝 0) := by
     have hh0 : Tendsto (fun n : ℕ => (1 : ℝ) / (↑n + 1)) atTop (𝓝 (0 : ℝ)) := by
       have := tendsto_one_div_add_atTop_nhds_zero_nat (𝕜 := ℝ)
@@ -647,42 +608,35 @@ private lemma abs_smoothTestFunctional_le
     rw [show hₙ = fun n : ℕ => h₀ * (1 / ((↑n : ℝ) + 1)) from funext h_eq]
     have hmul := hh0.const_mul h₀
     simpa using hmul
-  -- For each n: integrability and the basic bound.
   have hφ_memLp : MemLp φ.1 2 (volume : Measure E) :=
     memLp_two_of_smoothCS (d := d) φ.2.1 φ.2.2
-  -- Lemma: ∫ w · D_{-h_n}^k φ → ∫ w · ∂_k φ.
   have h_conv : Tendsto (fun n =>
       ∫ x, w x * diffQuot k (-(hₙ n)) φ.1 x ∂(volume : Measure E)) atTop
       (𝓝 (∫ x, w x * (fderiv ℝ φ.1 x) (EuclideanSpace.single k 1)
         ∂(volume : Measure E))) :=
     tendsto_integral_w_diffQuot_phi (d := d) hw_l2 φ.2.1 φ.2.2 k hₙ_ne hₙ_tendsto
-  -- For each n, the L² norm bound: ‖D_{h_n}^k w‖_{L²} ≤ M.
   have h_dq_l2_bound : ∀ n,
       eLpNorm (diffQuot k (hₙ n) w) 2 (volume : Measure E) ≤
         ENNReal.ofReal M := fun n =>
     h_bdd (hₙ n) (hₙ_pos_abs n) (hₙ_bd n)
-  -- For each n, the difference quotient is in L².
   have h_dq_memLp : ∀ n, MemLp (diffQuot k (hₙ n) w) 2 (volume : Measure E) := by
     intro n
     refine ⟨aestronglyMeasurable_diffQuot k (hₙ n) hw_l2.aestronglyMeasurable, ?_⟩
     calc eLpNorm (diffQuot k (hₙ n) w) 2 (volume : Measure E)
         ≤ ENNReal.ofReal M := h_dq_l2_bound n
       _ < ∞ := ENNReal.ofReal_lt_top
-  -- IBP for each n: ∫ (D_{h_n}^k w) · φ = -∫ w · D_{-h_n}^k φ.
   have h_IBP : ∀ n,
       ∫ x, diffQuot k (hₙ n) w x * φ.1 x ∂(volume : Measure E) =
         -∫ x, w x * diffQuot k (-(hₙ n)) φ.1 x ∂(volume : Measure E) := by
     intro n
     exact integral_diffQuot_mul_eq_neg_integral_mul_diffQuot
       (d := d) k (hₙ_ne n) hw_l2 hφ_memLp
-  -- Bound: |∫ (D_{h_n}^k w) · φ| ≤ M · ‖φ‖_{L²}.
   have h_lhs_bound : ∀ n,
       |∫ x, diffQuot k (hₙ n) w x * φ.1 x ∂(volume : Measure E)| ≤
         M * (eLpNorm φ.1 2 (volume : Measure E)).toReal := by
     intro n
     have h_cs := abs_integral_mul_le_norm_lp_mul_norm_lp
       (d := d) (h_dq_memLp n) hφ_memLp
-    -- ‖D_{h_n}^k w‖_{L²} ≤ M.
     have h_dq_bound :
         (eLpNorm (diffQuot k (hₙ n) w) 2 (volume : Measure E)).toReal ≤ M := by
       have hMto : (ENNReal.ofReal M).toReal = M := ENNReal.toReal_ofReal hM_nn
@@ -699,18 +653,15 @@ private lemma abs_smoothTestFunctional_le
           M * (eLpNorm φ.1 2 (volume : Measure E)).toReal :=
       mul_le_mul_of_nonneg_right h_dq_bound h_phi_nn
     linarith
-  -- IBP rewrite: |∫ (D_{h_n}^k w) · φ| = |∫ w · D_{-h_n}^k φ|.
   have h_lhs_eq : ∀ n,
       |∫ x, diffQuot k (hₙ n) w x * φ.1 x ∂(volume : Measure E)| =
         |∫ x, w x * diffQuot k (-(hₙ n)) φ.1 x ∂(volume : Measure E)| := by
     intro n
     rw [h_IBP n]; rw [abs_neg]
-  -- Therefore: |∫ w · D_{-h_n}^k φ| ≤ M · ‖φ‖_{L²}.
   have h_dual_bound : ∀ n,
       |∫ x, w x * diffQuot k (-(hₙ n)) φ.1 x ∂(volume : Measure E)| ≤
         M * (eLpNorm φ.1 2 (volume : Measure E)).toReal := by
     intro n; rw [← h_lhs_eq n]; exact h_lhs_bound n
-  -- Pass to the limit.
   have h_abs_conv :
       Tendsto (fun n =>
           |∫ x, w x * diffQuot k (-(hₙ n)) φ.1 x ∂(volume : Measure E)|)
@@ -719,12 +670,9 @@ private lemma abs_smoothTestFunctional_le
           ∂(volume : Measure E)|) := by
     have := h_conv.abs
     simpa using this
-  -- Final: pass the bound through the limit.
   have h_lim_le := le_of_tendsto_of_tendsto'
     h_abs_conv tendsto_const_nhds (fun n => h_dual_bound n)
   exact h_lim_le
-
-/-! ## The bound w.r.t. the L² norm of the embedded `Lp` element -/
 
 omit [NeZero d] in
 /-- The smooth-test functional is bounded by `M · ‖φ_lp‖_{Lp}` (using the
@@ -738,7 +686,6 @@ private lemma abs_smoothTestFunctional_le_lpNorm
     |smoothTestFunctional (d := d) hw_l2 k φ| ≤
       M * ‖smoothCSToLp (d := d) φ‖ := by
   have h := abs_smoothTestFunctional_le (d := d) hw_l2 k hM_nn hh₀ h_bdd φ
-  -- Convert eLpNorm to Lp norm.
   have h_norm_eq :
       ‖smoothCSToLp (d := d) φ‖ =
         (eLpNorm φ.1 2 (volume : Measure E)).toReal := by
@@ -747,8 +694,6 @@ private lemma abs_smoothTestFunctional_le_lpNorm
     exact Lp.norm_toLp _ _
   rw [h_norm_eq]
   exact h
-
-/-! ## The continuous extension to all of `Lp ℝ 2 volume` -/
 
 /-- The continuous linear extension of `smoothTestFunctional` to all of
 `Lp ℝ 2 volume`. The `M`, `h₀`, `h_bdd` data are not used in the definition
@@ -789,8 +734,6 @@ private lemma smoothTestFunctional_ext_apply
   intro ψ
   exact abs_smoothTestFunctional_le_lpNorm (d := d) hw_l2 k hM_nn hh₀ h_bdd ψ
 
-/-! ## The Riesz representation: extracting `g` from the extended functional -/
-
 /-- The Riesz representative of the extended functional. -/
 def smoothTestFunctional_riesz
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E))
@@ -820,8 +763,6 @@ private lemma smoothTestFunctional_ext_eq_inner
   unfold smoothTestFunctional_riesz
   rw [InnerProductSpace.toDual_symm_apply]
 
-/-! ## Headline theorem -/
-
 /-- **From a uniform diffQuot bound to a weak partial derivative.**
 
 If `w : E → ℝ` is in `L²(volume)` (whole space, not restricted), and the
@@ -839,78 +780,57 @@ theorem hasWeakPartialDeriv_of_diffQuot_uniform_bound_univ
       MemLp g 2 (volume : Measure E) ∧
       DeGiorgi.HasWeakPartialDeriv (d := d) k g w (Set.univ) ∧
       eLpNorm g 2 (volume : Measure E) ≤ ENNReal.ofReal M := by
-  -- Construct g_lp via Riesz.
   set g_lp : Lp ℝ 2 (volume : Measure E) :=
     smoothTestFunctional_riesz (d := d) hw_l2 k with hg_lp_def
-  -- Extract a function representative.
   refine ⟨⇑g_lp, ?_, ?_, ?_⟩
-  · -- MemLp g_lp 2 volume.
-    exact Lp.memLp g_lp
-  · -- HasWeakPartialDeriv k g_lp w Set.univ.
-    intro φ hφ_smooth hφ_supp _
-    -- Convert to integrals over E (via setIntegral_univ).
+  · exact Lp.memLp g_lp
+  · intro φ hφ_smooth hφ_supp _
     rw [setIntegral_univ, setIntegral_univ]
-    -- Build the smoothCS representative.
     set φ_cs : smoothCSSubmodule (d := d) := ⟨φ, hφ_smooth, hφ_supp⟩
-    -- Apply the extension property.
     have h_ext_apply :=
       smoothTestFunctional_ext_apply (d := d) hw_l2 k hM_nn hh₀ h_bdd φ_cs
     have h_ext_inner :=
       smoothTestFunctional_ext_eq_inner (d := d) hw_l2 k
         (smoothCSToLp (d := d) φ_cs)
-    -- The functional value: smoothTestFunctional φ = -∫ w · ∂_k φ.
     have h_func_val :
         smoothTestFunctional (d := d) hw_l2 k φ_cs =
           -∫ x, w x * (fderiv ℝ φ x) (EuclideanSpace.single k 1)
             ∂(volume : Measure E) := by
       rw [smoothTestFunctional_apply]
-    -- The inner product on Lp 2 volume: ⟪g_lp, smoothCSToLp φ_cs⟫ =
-    -- ∫ g_lp x * (smoothCSToLp φ_cs) x.
     have h_inner_def := L2.inner_def (𝕜 := ℝ) g_lp (smoothCSToLp (d := d) φ_cs)
-    -- coeFn smoothCSToLp φ_cs =ᵐ φ.
     have h_coeFn_phi :
         ⇑(smoothCSToLp (d := d) φ_cs) =ᵐ[(volume : Measure E)] φ := by
       simp only [smoothCSToLp_apply]
       exact MemLp.coeFn_toLp _
-    -- ∫ g_lp x * (smoothCSToLp φ_cs) x = ∫ g_lp x * φ x.
     have h_int_eq :
         ∫ x, ⟪g_lp x, (smoothCSToLp (d := d) φ_cs) x⟫_ℝ ∂(volume : Measure E) =
           ∫ x, g_lp x * φ x ∂(volume : Measure E) := by
       refine integral_congr_ae ?_
       filter_upwards [h_coeFn_phi] with x hx
-      -- ⟪a, b⟫_ℝ on ℝ equals b * a; we need ‖g_lp x * φ x‖.
       have h_inner_eq :
           ⟪(g_lp x : ℝ), (smoothCSToLp (d := d) φ_cs) x⟫_ℝ =
             (smoothCSToLp (d := d) φ_cs) x * (g_lp x : ℝ) :=
         RCLike.inner_apply (𝕜 := ℝ) (g_lp x) ((smoothCSToLp (d := d) φ_cs) x)
       rw [h_inner_eq, hx]; ring
-    -- Combine.
     have h_chain :
         smoothTestFunctional (d := d) hw_l2 k φ_cs =
           ∫ x, g_lp x * φ x ∂(volume : Measure E) := by
       rw [← h_ext_apply, h_ext_inner, h_inner_def, h_int_eq]
-    -- And the LHS = - ∫ w · ∂_k φ.
     rw [h_func_val] at h_chain
-    -- So: -∫ w · ∂_k φ = ∫ g_lp · φ.
-    -- Reform to: ∫ w · ∂_k φ = - ∫ g_lp · φ.
     linarith [h_chain]
-  · -- ‖g_lp‖_{L²} ≤ ENNReal.ofReal M.
-    have h_norm_eq := norm_smoothTestFunctional_riesz (d := d) hw_l2 k
+  · have h_norm_eq := norm_smoothTestFunctional_riesz (d := d) hw_l2 k
     have h_op_le := opNorm_smoothTestFunctional_ext_le (d := d)
       hw_l2 k hM_nn hh₀ h_bdd
-    -- ‖g_lp‖ ≤ M.
     have h_g_lp_le : ‖g_lp‖ ≤ M := by
       rw [hg_lp_def]
       rw [h_norm_eq]
       exact h_op_le
     have h_g_lp_nn : 0 ≤ ‖g_lp‖ := norm_nonneg _
-    -- ‖g_lp‖ₑ ≤ ENNReal.ofReal M.
     have h_enorm_le : (‖g_lp‖ₑ : ℝ≥0∞) ≤ ENNReal.ofReal M := by
       have hofreal : (‖g_lp‖ₑ : ℝ≥0∞) = ENNReal.ofReal ‖g_lp‖ :=
         (ofReal_norm_eq_enorm _).symm
       rw [hofreal]
       exact ENNReal.ofReal_le_ofReal h_g_lp_le
-    -- eLpNorm g_lp = ‖g_lp‖ₑ (Lp.enorm_def).
     have h_enorm_eq : ‖g_lp‖ₑ = eLpNorm (⇑g_lp) 2 (volume : Measure E) :=
       Lp.enorm_def g_lp
     rw [← h_enorm_eq]

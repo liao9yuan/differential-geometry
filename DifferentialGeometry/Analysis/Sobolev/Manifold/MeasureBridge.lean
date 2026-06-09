@@ -1,8 +1,8 @@
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
 import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
-import DifferentialGeometry.Integral.Measure.Glue
-import DifferentialGeometry.Integral.Measure.ChartDensity
-import DifferentialGeometry.Integral.Measure.Invariance
+import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
+import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
+import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
 import Mathlib.MeasureTheory.Measure.Haar.Unique
 import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
@@ -23,7 +23,8 @@ chart `α`, this file provides quantitative comparisons between
 The chart-pushed function comes in two flavours: a *raw* version
 `chartPushedRaw I α u`, which composes `u` with the inverse chart and
 `toEuclidean.symm`, and the partition-of-unity-weighted version `chartPushed`
-already defined in `Sobolev/Chart.lean`. The raw version is the natural target
+already defined in `Sobolev/Chart/Defs.lean`. The raw version is the natural
+target
 for the chart-target Euclidean integral, since it carries no partition-of-unity
 weight.
 
@@ -48,14 +49,10 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Raw chart pushforward (no partition-of-unity weight) -/
 
 variable (I)
 
@@ -96,15 +93,11 @@ lemma chartPushedRaw_eq_zero_off_chartTargetEuclid (α : M) (u : M → ℝ)
     chartPushedRaw I α u y = 0 :=
   chartPushedRaw_apply_of_notMem α u hy
 
-/-! ## File-local helpers -/
-
 /-- The extended-chart target is Borel-measurable in `E`. -/
 private lemma extChartAt_target_measurableSet (α : M) :
     MeasurableSet (extChartAt I α).target :=
   DifferentialGeometry.Integral.Measure.measurableSet_extChartAt_target
     (I := I) (M := M) α
-
-/-! ## The chart-target image (under `toEuclidean`) is measurable -/
 
 /-- The Euclidean ambient space of dimension `Module.finrank ℝ E`. -/
 private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -165,8 +158,6 @@ lemma continuousOn_symm_toEuclideanSymm (α : M) :
   exact (continuousOn_extChartAt_symm (I := I) α).comp
     (toEuclidean (E := E)).symm.continuous.continuousOn hy_target
 
-/-! ## Pushforward of `modelHaar` along `toEuclidean` -/
-
 /-- The pushforward of `modelHaar` along the continuous linear equivalence
 `toEuclidean : E ≃L[ℝ] EuclN E` is itself an additive Haar measure on `EuclN E`. -/
 private instance modelHaar_map_toEuclidean_isAddHaarMeasure :
@@ -217,8 +208,6 @@ private lemma map_toEuclidean_modelHaar_eq_smul_volume :
   classical
   exact MeasureTheory.Measure.isAddLeftInvariant_eq_smul _ _
 
-/-! ## Lintegral identities tying `modelHaar` to `volume` on Euclidean side -/
-
 /-- Auxiliary lintegral identity: pushing a `modelHaar`-integral on `E`
 through `toEuclidean` to a `Measure.map toEuclidean modelHaar`-integral on
 `EuclN E`. -/
@@ -252,8 +241,6 @@ private lemma lintegral_modelHaar_eq_const_smul_lintegral_volume
   rw [MeasureTheory.lintegral_smul_measure]
   rfl
 
-/-! ## Globalised inverse chart helper -/
-
 /-- Globalisation of `(extChartAt I α).symm`, agreeing with it on the chart
 target and equal to a fixed default value off the target. The resulting function
 is Borel measurable on all of `E`. The default value is `α` itself. -/
@@ -283,8 +270,6 @@ private lemma extChartAtSymmGlob_measurable (α : M) :
     continuousOn_const
     (extChartAt_target_measurableSet (I := I) (M := M) α)
 
-/-! ## Bridge: chart-local lintegral expressed in chart-target Euclidean form -/
-
 /-- The chart-local lintegral of any measurable `F : M → ℝ≥0∞` equals the
 Euclidean integral over the chart target image weighted by the chart density,
 times the Haar scaling factor. -/
@@ -302,7 +287,6 @@ lemma chartLocalMeasure_lintegral_via_chartTargetEuclid
   classical
   rw [DifferentialGeometry.Integral.Measure.chartLocalMeasure_lintegral
     (I := I) (M := M) g α hF]
-  -- Replace symm by symm_glob INSIDE target (pointwise equal there).
   set G_glob : E → ℝ≥0∞ := fun y =>
     ENNReal.ofReal
         (DifferentialGeometry.Integral.Measure.chartDensity g α
@@ -332,7 +316,6 @@ lemma chartLocalMeasure_lintegral_via_chartTargetEuclid
         ∂(DifferentialGeometry.Integral.Measure.modelHaar (E := E))
       from MeasureTheory.setLIntegral_congr_fun hT
         (fun y hy => (hG_glob_eq_on_target y hy).symm)]
-  -- G_glob is measurable on E.
   have hsymm_glob_meas : Measurable (extChartAtSymmGlob (I := I) (M := M) α) :=
     extChartAtSymmGlob_measurable (I := I) (M := M) α
   have hF_glob_meas : Measurable
@@ -341,7 +324,6 @@ lemma chartLocalMeasure_lintegral_via_chartTargetEuclid
       (fun y : E =>
         DifferentialGeometry.Integral.Measure.chartDensity g α
           (extChartAtSymmGlob (I := I) α y)) := by
-    -- Reduce to a piecewise of: dens ∘ symm on target, constant α off target.
     have h_piecewise :
         (fun y : E =>
           DifferentialGeometry.Integral.Measure.chartDensity g α
@@ -379,20 +361,17 @@ lemma chartLocalMeasure_lintegral_via_chartTargetEuclid
       (DifferentialGeometry.Integral.Measure.chartDensity_continuousOn
         (I := I) (M := M) g α).comp hsymm_cont hsubset
     exact ContinuousOn.measurable_piecewise h_orig_cont continuousOn_const hT
-  -- ofReal density ∘ symm_glob is Measurable.
   have hofReal_dens_meas : Measurable
       (fun y : E => ENNReal.ofReal
         (DifferentialGeometry.Integral.Measure.chartDensity g α
           (extChartAtSymmGlob (I := I) α y))) :=
     ENNReal.measurable_ofReal.comp hdens_glob_meas
-  -- G_glob is Measurable.
   have hG_glob_meas : Measurable G_glob := by
     change Measurable (fun y => ENNReal.ofReal
         (DifferentialGeometry.Integral.Measure.chartDensity g α
           (extChartAtSymmGlob (I := I) α y)) *
       F (extChartAtSymmGlob (I := I) α y))
     exact hofReal_dens_meas.mul hF_glob_meas
-  -- target.indicator G_glob is Measurable.
   have hG_glob_indic_meas : Measurable ((extChartAt I α).target.indicator G_glob) :=
     hG_glob_meas.indicator hT
   rw [← MeasureTheory.lintegral_indicator hT (f := G_glob)]
@@ -416,8 +395,6 @@ lemma chartLocalMeasure_lintegral_via_chartTargetEuclid
       rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
       exact hy
     rw [Set.indicator_of_notMem hy_target, Set.indicator_of_notMem hy]
-
-/-! ## Bound for the chart density on a compact subset of the chart target -/
 
 /-- The chart density is strictly positive at points of the chart target. -/
 lemma chartDensity_pos_on_target
@@ -493,8 +470,6 @@ lemma exists_inf_chartDensity_on_compact
     chartDensity_pos_on_target (I := I) (M := M) g α (hK_sub hy₀_mem),
     fun y hy => hy₀_min hy⟩
 
-/-! ## Compact image of `tsupport u` in the chart target -/
-
 /-- If `tsupport u ⊆ chartAt α source`, then `(extChartAt I α) '' (tsupport u)`
 is compact in `E` and contained in the chart target. -/
 lemma image_extChartAt_tsupport_compact_subset_target
@@ -545,8 +520,6 @@ lemma image_toEuclidean_extChartAt_tsupport_subset_chartTargetEuclid
     exact hu_supp hx
   exact (extChartAt I α).map_source hxsrc
 
-/-! ## Chart-pushed raw vanishes outside the toEuclidean image of `(extChartAt I α) '' tsupport u` -/
-
 /-- The raw chart pushforward vanishes (within the chart target) outside
 `toEuclidean '' ((extChartAt I α) '' (tsupport u))`. -/
 lemma chartPushedRaw_eq_zero_off_image_tsupport
@@ -570,8 +543,6 @@ lemma chartPushedRaw_eq_zero_off_image_tsupport
   refine ⟨z, ⟨(extChartAt I α).symm z, ?_, hz_eq⟩, hzy⟩
   exact subset_tsupport _ (Function.mem_support.mpr hu_ne)
 
-/-! ## Chart-source-supported `u`: passage from `riemannianMeasure` to chart-local -/
-
 /-- For `u` supported in `chartAt α source`, the lintegral of `‖u‖ₑ ^ p`
 under `riemannianMeasure g (chartAtlasPOU I M)` agrees with the lintegral
 under `chartLocalMeasure g α`. -/
@@ -594,8 +565,6 @@ lemma lintegral_enorm_pow_riemannianMeasure_eq_chartLocalMeasure_of_supportIn
     have hu_x_zero : u x = 0 := image_eq_zero_of_notMem_tsupport hx_notsupp
     rw [hu_x_zero]
     rw [enorm_zero, ENNReal.zero_rpow_of_pos hp_pos]
-
-/-! ## Bridge identity for the lintegral of `‖u‖ₑ ^ p` -/
 
 /-- Combined bridge identity: for `u : M → ℝ` supported in `chartAt α source`
 on a closed manifold, the lintegral of `‖u‖ₑ ^ p` against the Riemannian
@@ -630,8 +599,6 @@ lemma lintegral_enorm_pow_riemannianMeasure_eq_const_mul_chartTargetEuclid
     ENNReal.ofReal _ * ‖chartPushedRaw I α u y‖ₑ ^ p
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α u hy]
 
-/-! ## Forward bound: lintegral over `μ_g` ≤ const · lintegral over volume -/
-
 /-- Forward bridge inequality at the level of lintegrals:
 `∫⁻ ‖u‖ₑ^p dμ_g ≤ const · ∫⁻ ‖chartPushedRaw u‖ₑ^p dvolume`. -/
 theorem lintegral_riemannianMeasure_le_const_mul_lintegral_chartPushedRaw
@@ -650,8 +617,7 @@ theorem lintegral_riemannianMeasure_le_const_mul_lintegral_chartPushedRaw
               ∂(volume : Measure (EuclN E)) := by
   classical
   by_cases hu_zero_supp : (tsupport u).Nonempty
-  · -- Nonempty support: standard argument.
-    set K : Set E := (extChartAt I α) '' (tsupport u)
+  · set K : Set E := (extChartAt I α) '' (tsupport u)
     have hK_decomp :=
       image_extChartAt_tsupport_compact_subset_target
         (I := I) (M := M) (u := u) (α := α) hu_supp
@@ -739,15 +705,13 @@ theorem lintegral_riemannianMeasure_le_const_mul_lintegral_chartPushedRaw
           · congr 1
             rw [ENNReal.ofReal_coe_nnreal]
           · exact NNReal.coe_nonneg _
-  · -- Empty support: u = 0 ⇒ LHS = 0 ≤ RHS.
-    rw [Set.not_nonempty_iff_eq_empty] at hu_zero_supp
+  · rw [Set.not_nonempty_iff_eq_empty] at hu_zero_supp
     have hu_zero : u = 0 := by
       funext x
       have hx_notsupp : x ∉ tsupport u := by rw [hu_zero_supp]; simp
       exact image_eq_zero_of_notMem_tsupport hx_notsupp
     refine ⟨1, one_pos, ?_⟩
     rw [hu_zero]
-    -- The LHS is `∫⁻ x, (‖0‖ₑ : ℝ≥0∞) ^ p dμ_g = ∫⁻ x, 0 dμ_g = 0` since p > 0.
     have h_pt : (‖(0 : ℝ)‖ₑ : ℝ≥0∞) ^ p = 0 := by
       rw [enorm_zero, ENNReal.zero_rpow_of_pos hp_pos]
     have hLHS_zero : (∫⁻ _ : M, (‖(0 : ℝ)‖ₑ : ℝ≥0∞) ^ p
@@ -762,8 +726,6 @@ theorem lintegral_riemannianMeasure_le_const_mul_lintegral_chartPushedRaw
     rw [show (fun x : M => (‖(0 : M → ℝ) x‖ₑ : ℝ≥0∞) ^ p) =
         fun _ => (‖(0 : ℝ)‖ₑ : ℝ≥0∞) ^ p by funext x; rfl, hLHS_zero]
     exact zero_le _
-
-/-! ## eLpNorm versions of the bridge -/
 
 /-- Bridge inequality at the level of `eLpNorm`s, using the raw chart pushforward
 on the Euclidean side. For `1 ≤ p`, `p ≠ ∞`, and a `u : M → ℝ` supported in the
@@ -789,24 +751,12 @@ theorem eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw
   classical
   have hp_ne_zero : p ≠ 0 := by
     intro h; rw [h] at hp_one; exact absurd hp_one (by norm_num)
-  -- p.toReal > 0.
   have hp_toReal_pos : 0 < p.toReal := ENNReal.toReal_pos hp_ne_zero hp_top
-  -- Apply the lintegral-level bound.
   obtain ⟨C, hC_pos, hbnd⟩ :=
     lintegral_riemannianMeasure_le_const_mul_lintegral_chartPushedRaw
       (I := I) (M := M) g α hu_meas hu_supp hp_toReal_pos
-  -- Convert to eLpNorm form by raising to 1/p.toReal.
-  -- eLpNorm f p μ = (∫⁻ ‖f‖ₑ^p.toReal dμ)^(1/p.toReal).
-  -- LHS_eLpNorm = (LHS_lint)^(1/p.toReal).
-  -- RHS_eLpNorm = (RHS_lint)^(1/p.toReal).
-  -- Bound: LHS_lint ≤ (ENNReal.ofReal C) · RHS_lint.
-  -- Hence LHS_eLpNorm ≤ ((ENNReal.ofReal C)^(1/p.toReal) · RHS_eLpNorm).
-  -- Set C' := C^(1/p.toReal).
   refine ⟨C ^ (1 / p.toReal), Real.rpow_pos_of_pos hC_pos _, ?_⟩
   rw [eLpNorm_eq_lintegral_rpow_enorm_toReal hp_ne_zero hp_top]
-  -- Want: (∫⁻ ‖u‖ₑ^p.toReal dμ_g)^(1/p.toReal) ≤
-  --   ENNReal.ofReal (C^(1/p.toReal)) · eLpNorm chartPushedRaw u p (vol.restrict ...).
-  -- Step 1: apply the lintegral bound, then take p.toReal-th root.
   have h_lint_bound :
       ∫⁻ x, ‖u x‖ₑ ^ p.toReal
           ∂(DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
@@ -815,7 +765,6 @@ theorem eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw
             ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
               ‖chartPushedRaw I α u y‖ₑ ^ p.toReal
               ∂(volume : Measure (EuclN E)) := hbnd
-  -- Convert RHS lintegral over chartTargetEuclid to lintegral over volume.restrict.
   have h_RHS_eq :
       (∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
         ‖chartPushedRaw I α u y‖ₑ ^ p.toReal
@@ -824,8 +773,6 @@ theorem eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw
         ∂((volume : Measure (EuclN E)).restrict
           (chartTargetEuclid (I := I) (M := M) α)) := rfl
   rw [h_RHS_eq] at h_lint_bound
-  -- Now: (LHS_lint)^(1/p.toReal) ≤ (RHS_lint)^(1/p.toReal),
-  -- where RHS_lint = ENNReal.ofReal C * something.
   have h_pow_le :
       (∫⁻ x, ‖u x‖ₑ ^ p.toReal
           ∂(DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
@@ -839,19 +786,10 @@ theorem eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw
     apply ENNReal.rpow_le_rpow h_lint_bound
     positivity
   refine h_pow_le.trans ?_
-  -- (a · b)^r = a^r · b^r in ENNReal (for r ≥ 0).
   rw [ENNReal.mul_rpow_of_nonneg _ _ (by positivity : (0 : ℝ) ≤ 1 / p.toReal)]
-  -- Goal: ENNReal.ofReal C ^ (1/p.toReal) * (∫⁻...)^(1/p.toReal)
-  --     ≤ ENNReal.ofReal (C^(1/p.toReal)) * eLpNorm.
-  -- Recognize the RHS lintegral^(1/p.toReal) as eLpNorm.
   rw [eLpNorm_eq_lintegral_rpow_enorm_toReal hp_ne_zero hp_top]
-  -- Now (a*b ≤ a'*b'), suffices a ≤ a' (and b = b').
   gcongr
-  -- Goal: ENNReal.ofReal C ^ (1/p.toReal) ≤ ENNReal.ofReal (C^(1/p.toReal)).
-  -- Use ENNReal.ofReal_rpow_of_pos.
   rw [← ENNReal.ofReal_rpow_of_pos hC_pos]
-
-/-! ## Reverse direction: lintegral over volume ≤ const · lintegral over μ_g -/
 
 /-- Reverse bridge inequality at the level of lintegrals:
 `∫⁻ ‖chartPushedRaw u‖ₑ^p dvolume ≤ const · ∫⁻ ‖u‖ₑ^p dμ_g`. -/
@@ -871,8 +809,7 @@ theorem lintegral_chartPushedRaw_le_const_mul_lintegral_riemannianMeasure
                   (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)) := by
   classical
   by_cases hu_zero_supp : (tsupport u).Nonempty
-  · -- Nonempty support: standard argument.
-    set K : Set E := (extChartAt I α) '' (tsupport u)
+  · set K : Set E := (extChartAt I α) '' (tsupport u)
     have hK_decomp :=
       image_extChartAt_tsupport_compact_subset_target
         (I := I) (M := M) (u := u) (α := α) hu_supp
@@ -891,20 +828,7 @@ theorem lintegral_chartPushedRaw_le_const_mul_lintegral_riemannianMeasure
     refine ⟨C_α, hC_pos, ?_⟩
     rw [lintegral_enorm_pow_riemannianMeasure_eq_const_mul_chartTargetEuclid
         (I := I) (M := M) g α hu_meas hu_supp hp_pos]
-    -- Need: ∫⁻ ‖chartPushedRaw u‖^p dvol
-    --   ≤ ENNReal.ofReal C * (haarFactor · ∫⁻ density · ‖chartPushedRaw u‖^p dvol).
-    -- = (haarFactor · M_inf)⁻¹ · (haarFactor · ∫⁻ density · ‖chartPushedRaw u‖^p dvol)
-    -- = (haarFactor · M_inf)⁻¹ · haarFactor · ∫⁻ density · ‖chartPushedRaw u‖^p dvol.
-    -- Want this ≥ ∫⁻ ‖chartPushedRaw u‖^p dvol on the chartTarget.
-    -- Since ∫⁻ density · ‖chartPushedRaw u‖^p dvol ≥ M_inf · ∫⁻ ‖chartPushedRaw u‖^p dvol on supp(chartPushedRaw u),
-    -- and chartPushedRaw u vanishes outside K_eucl ⊆ chartTarget, we have
-    -- ∫⁻ density · ‖chartPushedRaw u‖^p dvol = ∫⁻_{K_eucl} density · ‖chartPushedRaw u‖^p dvol
-    --   ≥ M_inf · ∫⁻_{K_eucl} ‖chartPushedRaw u‖^p dvol = M_inf · ∫⁻ ‖chartPushedRaw u‖^p dvol on chartTarget.
     set K_eucl : Set (EuclN E) := toEuclidean '' K with hK_eucl_def
-    -- Pointwise bound on chartTargetEuclid:
-    -- ‖chartPushedRaw u y‖^p
-    --   ≤ density(...)/M_inf · ‖chartPushedRaw u y‖^p (when chartPushedRaw u y ≠ 0, i.e. y ∈ K_eucl).
-    --   = 0 (when chartPushedRaw u y = 0).
     have hpt : ∀ y ∈ chartTargetEuclid (I := I) (M := M) α,
         ENNReal.ofReal (M_inf) * ‖chartPushedRaw I α u y‖ₑ ^ p
           ≤ ENNReal.ofReal
@@ -929,13 +853,11 @@ theorem lintegral_chartPushedRaw_le_const_mul_lintegral_riemannianMeasure
                 ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) :=
           ENNReal.ofReal_le_ofReal hbound
         gcongr
-      · -- y ∉ K_eucl: chartPushedRaw u y = 0.
-        have hpr_zero : chartPushedRaw I α u y = 0 :=
+      · have hpr_zero : chartPushedRaw I α u y = 0 :=
           chartPushedRaw_eq_zero_off_image_tsupport
             (I := I) (M := M) (u := u) α hy_target hy_K
         rw [hpr_zero, enorm_zero, ENNReal.zero_rpow_of_pos hp_pos]
         simp
-    -- Multiply both sides through; LHS over chartTargetEuclid.
     have h_int_le : (∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
           ENNReal.ofReal M_inf * ‖chartPushedRaw I α u y‖ₑ ^ p
           ∂(volume : Measure (EuclN E)))
@@ -948,7 +870,6 @@ theorem lintegral_chartPushedRaw_le_const_mul_lintegral_riemannianMeasure
       MeasureTheory.setLIntegral_mono_ae'
         (chartTargetEuclid_measurableSet (I := I) (M := M) α)
         (Filter.Eventually.of_forall hpt)
-    -- Pull the constant ENNReal.ofReal M_inf out of the LHS.
     have h_LHS_eq : (∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
           ENNReal.ofReal M_inf * ‖chartPushedRaw I α u y‖ₑ ^ p
           ∂(volume : Measure (EuclN E))) =
@@ -959,23 +880,15 @@ theorem lintegral_chartPushedRaw_le_const_mul_lintegral_riemannianMeasure
       rw [MeasureTheory.lintegral_const_mul']
       exact ENNReal.ofReal_ne_top
     rw [h_LHS_eq] at h_int_le
-    -- Now: ofReal M_inf * lhs_int ≤ rhs_int (which has the density factor).
-    -- Hence: lhs_int ≤ (ofReal M_inf)⁻¹ · rhs_int.
-    -- Multiply by haarFactor: rhs of theorem.
     have hM_inf_ennreal_pos : (ENNReal.ofReal M_inf : ℝ≥0∞) ≠ 0 :=
       ENNReal.ofReal_ne_zero_iff.mpr hM_inf_pos
     have hM_inf_ennreal_ne_top : (ENNReal.ofReal M_inf : ℝ≥0∞) ≠ ⊤ :=
       ENNReal.ofReal_ne_top
-    -- Key combined product: D := haarFactor * ENNReal.ofReal M_inf.
     set D : ℝ≥0∞ := (euclideanHaarFactor E : ℝ≥0∞) * ENNReal.ofReal M_inf with hD_def
     have hD_pos : D ≠ 0 := mul_ne_zero euclideanHaarFactor_ennreal_ne_zero
       hM_inf_ennreal_pos
     have hD_ne_top : D ≠ ⊤ := ENNReal.mul_ne_top
       euclideanHaarFactor_ennreal_ne_top hM_inf_ennreal_ne_top
-    -- Step: h_int_le gives ofReal M_inf · LHS ≤ RHS_dens. Multiply by haarFactor:
-    --   D · LHS ≤ haarFactor · RHS_dens.
-    -- Hence LHS · D ≤ haarFactor · RHS_dens, so LHS ≤ D⁻¹ · (haarFactor · RHS_dens).
-    -- ENNReal.ofReal C_α = D⁻¹ (since C_α = (haarFactor · M_inf)⁻¹).
     have hC_eq_D_inv : ENNReal.ofReal C_α = D⁻¹ := by
       rw [hC_α_def, hD_def]
       have h_prod_pos : 0 < (euclideanHaarFactor E : ℝ) * M_inf := by
@@ -990,9 +903,6 @@ theorem lintegral_chartPushedRaw_le_const_mul_lintegral_riemannianMeasure
       rw [ENNReal.ofReal_coe_nnreal]
       rw [one_div]
     rw [hC_eq_D_inv]
-    -- Goal: LHS_int ≤ D⁻¹ · (haarFactor · RHS_dens).
-    -- We have: ofReal M_inf · LHS_int ≤ RHS_dens (= h_int_le).
-    -- Multiply by haarFactor to get D · LHS_int ≤ haarFactor · RHS_dens.
     have h_step : D * (∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
           ‖chartPushedRaw I α u y‖ₑ ^ p ∂(volume : Measure (EuclN E)))
         ≤ (euclideanHaarFactor E : ℝ≥0∞) *
@@ -1004,17 +914,14 @@ theorem lintegral_chartPushedRaw_le_const_mul_lintegral_riemannianMeasure
             ∂(volume : Measure (EuclN E)) := by
       rw [hD_def, mul_assoc]
       gcongr
-    -- Convert: D · LHS ≤ X ⟺ LHS ≤ D⁻¹ · X (using ENNReal.le_inv_mul_iff_mul_le for D ≠ 0, ⊤).
     rwa [ENNReal.mul_le_iff_le_inv hD_pos hD_ne_top] at h_step
-  · -- Empty support: u = 0 ⇒ both sides are 0.
-    rw [Set.not_nonempty_iff_eq_empty] at hu_zero_supp
+  · rw [Set.not_nonempty_iff_eq_empty] at hu_zero_supp
     have hu_zero : u = 0 := by
       funext x
       have hx_notsupp : x ∉ tsupport u := by rw [hu_zero_supp]; simp
       exact image_eq_zero_of_notMem_tsupport hx_notsupp
     refine ⟨1, one_pos, ?_⟩
     rw [hu_zero]
-    -- chartPushedRaw I α 0 y = 0 for all y; so LHS = 0.
     have hLHS_zero : (∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
           ‖chartPushedRaw I α (0 : M → ℝ) y‖ₑ ^ p ∂(volume : Measure (EuclN E))) = 0 := by
       have hcp_zero : ∀ y, chartPushedRaw I α (0 : M → ℝ) y = 0 := by
@@ -1080,8 +987,6 @@ theorem eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure
   gcongr
   rw [← ENNReal.ofReal_rpow_of_pos hC_pos]
 
-/-! ## Forward bridge with a uniform constant determined by a fixed compact set -/
-
 /-- Forward bridge inequality with a uniform constant. The constant `C_K`
 depends only on a fixed compact set `K ⊆ (extChartAt I α).target`, not on the
 particular function `u`. As long as `(extChartAt I α) '' (tsupport u) ⊆ K`,
@@ -1112,7 +1017,6 @@ theorem lintegral_riemannianMeasure_le_const_mul_lintegral_chartPushedRaw_unifor
     · exact hM_sup_pos
   refine ⟨C_K, hC_K_pos, ?_⟩
   intro u hu_meas hu_supp hu_supp_K p hp_pos
-  -- The proof mirrors the per-u version, but using the K-uniform M_sup bound.
   rw [lintegral_enorm_pow_riemannianMeasure_eq_const_mul_chartTargetEuclid
       (I := I) (M := M) g α hu_meas hu_supp hp_pos]
   set K_eucl : Set (EuclN E) :=
@@ -1143,8 +1047,7 @@ theorem lintegral_riemannianMeasure_le_const_mul_lintegral_chartPushedRaw_unifor
             ≤ ENNReal.ofReal M_sup :=
         ENNReal.ofReal_le_ofReal hbound
       gcongr
-    · -- y ∉ K_eucl: chartPushedRaw u y = 0.
-      have hpr_zero : chartPushedRaw I α u y = 0 :=
+    · have hpr_zero : chartPushedRaw I α u y = 0 :=
         chartPushedRaw_eq_zero_off_image_tsupport
           (I := I) (M := M) (u := u) α hy_target hy_K_eucl
       rw [hpr_zero, enorm_zero, ENNReal.zero_rpow_of_pos hp_pos]
@@ -1218,8 +1121,6 @@ theorem eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw_uniform
   refine ⟨C ^ (1 / p.toReal), Real.rpow_pos_of_pos hC_pos _, ?_⟩
   intro u hu_meas hu_supp hu_K
   have h_lint := hC_bnd hu_meas hu_supp hu_K hp_toReal_pos
-  -- Convert RHS lintegral over chartTargetEuclid α to one over (volume.restrict ...).
-  -- These are definitionally equal.
   have h_lint' :
       ∫⁻ x, ‖u x‖ₑ ^ p.toReal
           ∂(DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
@@ -1252,13 +1153,6 @@ end Sobolev
 end Analysis
 end DifferentialGeometry
 
-/-! ## Reverse bridge with a uniform constant determined by a fixed compact subset of `(extChartAt I α).target`
-
-We add the K-uniform reverse-direction lintegral and `eLpNorm` inequalities,
-mirroring the existing forward K-uniform bridge. The constant depends only on
-the compact set `K ⊆ (extChartAt I α).target`, the chart `α`, and the metric
-`g`, and is uniform in `u : M → ℝ` whose chart-image of `tsupport u` lies in `K`. -/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -1273,8 +1167,6 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-
-/-! ### File-local Borel-space instances on `E` and `M` -/
 
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
@@ -1315,7 +1207,6 @@ theorem lintegral_chartPushedRaw_le_const_mul_lintegral_riemannianMeasure_unifor
     · exact hM_inf_pos
   refine ⟨C_K, hC_K_pos, ?_⟩
   intro u hu_meas hu_supp hu_supp_K p hp_pos
-  -- Mirror of the per-`u` reverse-bridge proof, with K-uniform `M_inf`.
   rw [lintegral_enorm_pow_riemannianMeasure_eq_const_mul_chartTargetEuclid
       (I := I) (M := M) g α hu_meas hu_supp hp_pos]
   set K_eucl : Set (EuclN E) := toEuclidean ''
@@ -1345,8 +1236,7 @@ theorem lintegral_chartPushedRaw_le_const_mul_lintegral_riemannianMeasure_unifor
               ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) :=
         ENNReal.ofReal_le_ofReal hbound
       gcongr
-    · -- y ∉ K_eucl: chartPushedRaw u y = 0.
-      have hpr_zero : chartPushedRaw I α u y = 0 :=
+    · have hpr_zero : chartPushedRaw I α u y = 0 :=
         chartPushedRaw_eq_zero_off_image_tsupport
           (I := I) (M := M) (u := u) α hy_target hy_K_eucl
       rw [hpr_zero, enorm_zero, ENNReal.zero_rpow_of_pos hp_pos]
@@ -1467,15 +1357,6 @@ theorem eLpNorm_chartPushedRaw_le_const_mul_eLpNorm_riemannianMeasure_uniform
   gcongr
   rw [← ENNReal.ofReal_rpow_of_pos hC_pos]
 
-/-! ## A.e. equality transfer from the Riemannian measure to the chart-target volume
-
-For two measurable functions `u, v : M → ℝ` that agree almost everywhere with
-respect to the global Riemannian measure `μ_g = riemannianMeasure g (chartAtlasPOU I M)`,
-their chart-pushed images `chartPushedRaw I α u` and `chartPushedRaw I α v` agree
-almost everywhere with respect to the Euclidean volume measure restricted to
-`chartTargetEuclid α`. This is the null-set transfer underlying chart-based
-Sobolev arguments on closed manifolds. -/
-
 /-- Global Borel-measurable extension of `(extChartAt I α).symm` taking the
 fixed default value `α : M` outside the chart target. -/
 private noncomputable def extChartAtSymmGlobal (α : M) : E → M := by
@@ -1575,7 +1456,6 @@ private lemma chartPushedRaw_aeEq_zero_of_ae_zero_riemannianMeasure
           (chartTargetEuclid (I := I) (M := M) α)]
       (fun _ => (0 : ℝ)) := by
   classical
-  -- Step 1: a.e. equality gives ∫⁻ ‖d‖² · indicator(chart src) dμ_g = 0.
   have h_chartSrc_meas : MeasurableSet (chartAt H α).source :=
     (chartAt H α).open_source.measurableSet
   set F : M → ℝ≥0∞ := fun x =>
@@ -1599,7 +1479,6 @@ private lemma chartPushedRaw_aeEq_zero_of_ae_zero_riemannianMeasure
       · rw [Set.indicator_of_notMem hxsrc]
     rw [MeasureTheory.lintegral_congr_ae h_F_ae_zero]
     simp
-  -- Step 2: F is supported in chart α source, so ∫⁻ F dμ_g = ∫⁻ F d(chartLocalMeasure α).
   have h_lint_F_chartLocal_eq :
       ∫⁻ x, F x ∂(DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)) =
@@ -1609,8 +1488,6 @@ private lemma chartPushedRaw_aeEq_zero_of_ae_zero_riemannianMeasure
   have h_lint_F_chartLocal_zero :
       ∫⁻ x, F x ∂(DifferentialGeometry.Integral.Measure.chartLocalMeasure (I := I) g α) = 0 := by
     rw [← h_lint_F_chartLocal_eq]; exact h_lint_F_riemannian_zero
-  -- Step 3: F = ‖d‖² on chart source. So ∫⁻ ‖d‖² d(chartLocalMeasure α) = 0 too,
-  -- since chartLocalMeasure α vanishes off chart α source.
   have h_chartLocal_offSrc_zero :
       (DifferentialGeometry.Integral.Measure.chartLocalMeasure (I := I) g α)
           ((chartAt H α).source)ᶜ = 0 :=
@@ -1635,7 +1512,6 @@ private lemma chartPushedRaw_aeEq_zero_of_ae_zero_riemannianMeasure
           ∂(DifferentialGeometry.Integral.Measure.chartLocalMeasure (I := I) g α) = 0 := by
     rw [← MeasureTheory.lintegral_congr_ae h_F_eq_norm_sq_ae]
     exact h_lint_F_chartLocal_zero
-  -- Step 4: Use chartLocalMeasure_lintegral_via_chartTargetEuclid for ‖d‖².
   have h_norm_sq_meas : Measurable (fun x : M => ‖d x‖ₑ ^ (2 : ℝ)) :=
     (hd_meas.enorm).pow_const _
   have h_bridge :=
@@ -1651,7 +1527,6 @@ private lemma chartPushedRaw_aeEq_zero_of_ae_zero_riemannianMeasure
         ∫⁻ y in chartTargetEuclid (I := I) (M := M) α, GG y
           ∂(volume : Measure (EuclN E)) = 0 :=
     h_bridge.symm
-  -- The Haar factor is positive (as ENNReal), so the inner integral is 0.
   have h_c_E_ne_zero : (euclideanHaarFactor E : ℝ≥0∞) ≠ 0 := euclideanHaarFactor_ennreal_ne_zero
   have h_inner_zero :
       ∫⁻ y in chartTargetEuclid (I := I) (M := M) α, GG y
@@ -1659,15 +1534,12 @@ private lemma chartPushedRaw_aeEq_zero_of_ae_zero_riemannianMeasure
     rcases mul_eq_zero.mp hbr2 with h | h
     · exact absurd h h_c_E_ne_zero
     · exact h
-  -- Step 5: From the inner integral being 0, deduce GG = 0 a.e. on volume.restrict chartTarget.
   have h_chartTarget_meas :
       MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_measurableSet (I := I) (M := M) α
-  -- Measurability of GG against volume.restrict.
   have hGG_aem : AEMeasurable GG
       ((volume : Measure (EuclN E)).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := by
-    -- density ∘ symm ∘ toE.symm is continuous on chartTargetEuclid α.
     have h_density_contOn : ContinuousOn
         (fun y : EuclN E =>
           DifferentialGeometry.Integral.Measure.chartDensity g α
@@ -1699,7 +1571,6 @@ private lemma chartPushedRaw_aeEq_zero_of_ae_zero_riemannianMeasure
     have h_d_global_aem : AEMeasurable (fun y : EuclN E =>
         ‖d (extChartAtSymmGlobal (I := I) (M := M) α ((toEuclidean (E := E)).symm y))‖ₑ
           ^ (2 : ℝ)) := (h_d_symm_meas.enorm.pow_const _).aemeasurable
-    -- On chartTargetEuclid α, d (extChartAtSymmGlobal α (toE.symm y)) = d (symm (toE.symm y)).
     have h_d_norm_aem : AEMeasurable
         (fun y : EuclN E => ‖d ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))‖ₑ
           ^ (2 : ℝ))
@@ -1717,7 +1588,6 @@ private lemma chartPushedRaw_aeEq_zero_of_ae_zero_riemannianMeasure
   have h_GG_ae_zero : ∀ᵐ y ∂((volume : Measure (EuclN E)).restrict
       (chartTargetEuclid (I := I) (M := M) α)), GG y = 0 :=
     (MeasureTheory.lintegral_eq_zero_iff' hGG_aem).mp h_inner_zero
-  -- Step 6: density > 0 on chartTarget, so ‖d ∘ symm ∘ toE.symm y‖ ^ 2 = 0 a.e., so d = 0 a.e.
   have h_density_pos_ae :
       ∀ᵐ y ∂((volume : Measure (EuclN E)).restrict
         (chartTargetEuclid (I := I) (M := M) α)),
@@ -1736,7 +1606,6 @@ private lemma chartPushedRaw_aeEq_zero_of_ae_zero_riemannianMeasure
     rcases mul_eq_zero.mp hy with h | h
     · exact absurd h h_pos.ne'
     · exact h
-  -- Step 7: a.e. ‖d (symm (toE.symm y))‖ = 0, so d (symm (toE.symm y)) = 0 a.e.
   have h_d_zero_ae : ∀ᵐ y ∂((volume : Measure (EuclN E)).restrict
       (chartTargetEuclid (I := I) (M := M) α)),
       d ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) = 0 := by
@@ -1746,12 +1615,9 @@ private lemma chartPushedRaw_aeEq_zero_of_ae_zero_riemannianMeasure
     · exact (enorm_eq_zero (a :=
         d ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))).mp h1
     · exact absurd h2 (by norm_num)
-  -- Step 8: combine with the chartTarget restriction to conclude.
   rw [Filter.EventuallyEq, MeasureTheory.ae_restrict_iff' h_chartTarget_meas]
   rw [MeasureTheory.ae_restrict_iff' h_chartTarget_meas] at h_d_zero_ae
   filter_upwards [h_d_zero_ae] with y hy hy_in
-  -- Goal: chartPushedRaw I α d y = 0 (here `(fun _ => (0 : ℝ)) y = 0`).
-  -- We have d (symm (toE.symm y)) = 0 from hy applied at hy_in.
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α d hy_in]
   exact hy hy_in
 
@@ -1786,8 +1652,6 @@ theorem chartPushedRaw_aeEq_of_ae_eq_riemannianMeasure
   rw [Filter.EventuallyEq, MeasureTheory.ae_restrict_iff' h_chartTarget_meas]
   rw [Filter.EventuallyEq, MeasureTheory.ae_restrict_iff' h_chartTarget_meas] at h_main
   filter_upwards [h_main] with y hy hy_in
-  -- Goal: chartPushedRaw I α u y = chartPushedRaw I α v y.
-  -- We have chartPushedRaw I α d y = 0 from `hy hy_in`.
   rw [chartPushedRaw_sub_pointwise (I := I) (M := M) α u v hy_in] at hy
   have hyz := hy hy_in
   linarith [sub_eq_zero.mp hyz]
@@ -1816,8 +1680,6 @@ theorem chartPushed_aeEq_of_ae_eq_riemannianMeasure
   rw [Filter.EventuallyEq, MeasureTheory.ae_restrict_iff' h_chartTarget_meas]
   rw [Filter.EventuallyEq, MeasureTheory.ae_restrict_iff' h_chartTarget_meas] at h_raw
   filter_upwards [h_raw] with y hy hy_in
-  -- chartPushed ρ α u y = ρ α (symm (toE.symm y)) * u (symm (toE.symm y)).
-  -- On chartTargetEuclid α, chartPushedRaw u y = u (symm (toE.symm y)).
   unfold chartPushed
   have huv := hy hy_in
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α u hy_in] at huv

@@ -62,13 +62,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-  {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
-
-/-! ## The rough Laplacian on the spectral Sobolev scale
-
-The connection Laplacian acts on the `i`-th eigen-coordinate by `-λᵢ`.  Since
-the squared coordinate is weighted by `(1 + λᵢ)^σ`, the bound `λᵢ ≤ 1 + λᵢ`
-shows the rough Laplacian of an element of `H^{τ+2}` lies in `Hᵗ`. -/
 
 variable {τ : ℝ}
 
@@ -203,11 +196,6 @@ coordinate by `-λᵢ`. -/
     (tensorScaleLaplacian (I := I) (M := M) τ v).coeff i =
       -(TensorEigenIdx.lambda (I := I) (M := M) i) * v.coeff i := rfl
 
-/-! ## The rough Laplacian on time-`L²` tensor fields
-
-Acting pointwise in time, the rough Laplacian carries `L²([0,T]; H^{τ+2})` to
-`L²([0,T]; Hᵗ)`. -/
-
 variable {τ : ℝ} {T : ℝ}
 
 /-- **The rough Laplacian on time-`L²` tensor fields**, as a continuous linear
@@ -247,14 +235,11 @@ theorem timeModeCoeff_timeScaleLaplacian
   filter_upwards [hlhs, hΔ, hsmul, hvcoe] with t ht hΔt hsmt hvt
   rw [ht, hΔt, tensorScaleLaplacian_coeff, hsmt, Pi.smul_apply, hvt, smul_eq_mul]
 
-/-! ## The maximal-regularity operator solves the heat equation -/
-
-include h_atlas in
-/-- The per-mode evolution identity: the `i`-th time-mode coordinate of the
-time-derivative field equals `-λᵢ` times the `i`-th coordinate of the solution
-field plus the `i`-th coordinate of the forcing.  This is the per-mode scalar
-ODE `φᵢ' = -λᵢ·φᵢ + fᵢ`, holding by construction of `perModeConvDerivL2`. -/
+/-- Chart-locality-free version of `maximalRegularityOp_solves_perMode`,
+parameterized on resolvent compactness `h_compact`. -/
 theorem maximalRegularityOp_solves_perMode {a : ℝ} (hT : 0 ≤ T)
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     timeModeCoeff (I := I) (M := M)
@@ -264,44 +249,33 @@ theorem maximalRegularityOp_solves_perMode {a : ℝ} (hT : 0 ≤ T)
             (maximalRegularitySolField (I := I) (M := M) a hT f) i +
         timeModeCoeff (I := I) (M := M) f i := by
   rw [maximalRegularityDerivField_timeModeCoeff (I := I) (M := M)
-      (h_atlas := h_atlas) (a := a) hT f i,
+      (h_compact := h_compact) (a := a) hT f i,
     maximalRegularitySolField_timeModeCoeff (I := I) (M := M)
-      (h_atlas := h_atlas) (a := a) hT f i]
-  -- `fᵢ − λᵢ·φᵢ = -λᵢ·φᵢ + fᵢ`, definitionally from `perModeConvDerivL2`.
+      (h_compact := h_compact) (a := a) hT f i]
   rw [derivModeCoeff, perModeConvDerivL2_apply, solModeCoeff, neg_smul,
     ← sub_eq_neg_add]
 
-include h_atlas in
-/-- **The maximal-regularity operator solves the inhomogeneous heat equation.**
-For a forcing term `f ∈ L²([0,T]; Hᵃ)`, the Duhamel solution `u =
-maximalRegularityOp f` satisfies
-
-  `∂_t u = Δ_∇ u + f`
-
-as an identity of `L²([0,T]; Hᵃ)` elements: the time derivative of the solution
-equals the rough Laplacian of the solution (in its `H^{a+2}`-valued regularity)
-plus the forcing.
-
-Mode by mode this is the per-mode scalar ODE `φᵢ' = -λᵢ·φᵢ + fᵢ`; the assembly
-is the injectivity of the time-mode coordinate map. -/
-theorem maximalRegularityOp_solves {a : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+/-- Chart-locality-free version of `maximalRegularityOp_solves`, parameterized
+on resolvent compactness `h_compact`: `∂_t u = Δ_∇ u + f` as an identity in
+`L²([0,T]; Hᵃ)`. -/
+theorem maximalRegularityOp_solves {a : ℝ}
+    (h_compact : IsCompactOperator (tensorResolventL2
+      (I := I) (M := M) g r s))
+    (hT : 0 < T) (hT1 : T ≤ 1)
     (f : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     TimeSobolev.timeH1.timeDeriv _ T
         (maximalRegularityOp (I := I) (M := M) a hT hT1 f) =
       timeScaleLaplacian (I := I) (M := M) a
           (maximalRegularitySolField (I := I) (M := M) a hT.le f) +
         f := by
-  -- The time derivative of the operator's output is the time-derivative field.
   rw [maximalRegularityOp_timeDeriv (I := I) (M := M)
     (a := a) hT hT1 f]
-  -- Two `timeL2(Hᵃ)` elements with identical time-mode coordinates are equal.
-  refine timeModeCoeff_injective (I := I) (M := M) h_atlas (fun i => ?_)
+  refine timeModeCoeff_injective (I := I) (M := M) h_compact (fun i => ?_)
   rw [timeModeCoeff_add (I := I) (M := M),
     timeModeCoeff_timeScaleLaplacian (I := I) (M := M) (τ := a)
       (maximalRegularitySolField (I := I) (M := M) a hT.le f) i]
-  -- Reduce to the per-mode evolution identity.
   exact maximalRegularityOp_solves_perMode (I := I) (M := M)
-    (h_atlas := h_atlas) (a := a) hT.le f i
+    (h_compact := h_compact) (a := a) hT.le f i
 
 end MaximalRegularity
 end Parabolic

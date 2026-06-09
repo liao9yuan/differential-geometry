@@ -33,20 +33,12 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
-
-/-! ## Compact set in chart target containing `tsupport (ρ α)`
-
-We re-introduce a private compact set `chartCompactM α` (the toEuclidean image
-of `(extChartAt I α) '' (tsupport ρ_α)`) and a private open bounded
-neighbourhood `chartNbhdM α` containing it. -/
 
 /-- The compact carrier set in the chart-target Euclidean image: the
 `toEuclidean` image of `(extChartAt I α) '' (tsupport ρ_α)`. -/
@@ -137,8 +129,6 @@ private lemma chartCompactM_subset_chartNbhdM (α : M) :
   Metric.self_subset_thickening
     (chartThickeningRadiusM_pos (I := I) (M := M) α)
     (chartCompactM (I := I) (M := M) α)
-
-/-! ## Compact support of `chartPushedRaw α (ρ_α · u)` inside `chartCompactM α` -/
 
 /-- The raw chart-push of `ρ_α · u` is zero off `chartCompactM α`. -/
 private lemma chartPushedRaw_pou_mul_eq_zero_off_chartCompactM
@@ -237,8 +227,6 @@ private lemma chartPushedRaw_pou_mul_hasCompactSupport_aux
   exact (chartCompactM_isCompact (I := I) (M := M) α).of_isClosed_subset
     isClosed_closure h_tsupp_sub
 
-/-! ## `MemW1p` and `MemW01p` of `chartPushedRaw α (ρ_α · u)` on `chartNbhdM α` -/
-
 private lemma memW1p_chartPushedRaw_pou_mul_chartNbhdM_aux
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     {p : ℝ≥0∞}
@@ -288,8 +276,6 @@ private lemma memW01p_chartPushedRaw_pou_mul_chartNbhdM_aux
   exact DeGiorgi.memW01p_of_memW1p_of_tsupport_subset
     (chartNbhdM_isOpen (I := I) (M := M) α) hp_one h_w1p h_compact h_supp
 
-/-! ## Bounds on the chart side -/
-
 private lemma eLpNorm_chartPushedRaw_pou_mul_chartNbhdM_le
     {p : ℝ≥0∞} (u : M → ℝ) (α : M) :
     eLpNorm (chartPushedRaw (I := I) (M := M) α
@@ -305,8 +291,6 @@ private lemma eLpNorm_chartPushedRaw_pou_mul_chartNbhdM_le
   refine eLpNorm_mono_measure _ ?_
   exact MeasureTheory.Measure.restrict_mono_set _
     (chartNbhdM_subset_chartTargetEuclid (I := I) (M := M) α)
-
-/-! ## Per-chart Rellich extraction (rebuilt for our local `chartNbhdM`) -/
 
 private lemma exists_chart_rellich_subseq_aux_M
     [NeZero (Module.finrank ℝ E)]
@@ -583,8 +567,6 @@ private lemma exists_chart_rellich_subseq_aux_M
     hv_bdd_fun hv_bdd_grad with ⟨σ, hσ_mono, w_α, hw_α_memLp, h_tendsto⟩
   exact ⟨σ, hσ_mono, w_α, hw_α_memLp, h_tendsto⟩
 
-/-! ## Diagonal extraction over the finite POU support set -/
-
 private lemma exists_diagonal_chart_extraction_M
     [NeZero (Module.finrank ℝ E)]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -634,8 +616,6 @@ end Sobolev
 end Analysis
 end DifferentialGeometry
 
-/-! ## Headline assembly: closed-manifold Rellich-Kondrachov sequence -/
-
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function
@@ -657,8 +637,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
-
-/-! ### Measurability and `tsupport` helpers for `ρ_α · u` -/
 
 omit [I.Boundaryless] in
 private lemma chartAtlasPOU_measurable_aux (α : M) :
@@ -756,8 +734,6 @@ private lemma tsupport_pou_mul_sub_subset_tsupport_pou_aux
   · exact tsupport_pou_mul_subset_tsupport_pou_aux (I := I) (M := M) α v
       (subset_tsupport _ hv_supp)
 
-/-! ### `MemLp` of `ρ_α · u` from a chart-Sobolev `u` -/
-
 private lemma memLp_pou_mul_riemannianMeasure_aux
     [NeZero (Module.finrank ℝ E)]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -808,8 +784,6 @@ private lemma memLp_pou_mul_riemannianMeasure_aux
   apply ENNReal.mul_lt_top ENNReal.ofReal_lt_top
   exact h_raw_memLp.2
 
-/-! ### Bridge: per-α uniform constant relating manifold L^p to chart L^p -/
-
 private lemma eLpNorm_pou_mul_diff_riemannianMeasure_le
     [NeZero (Module.finrank ℝ E)]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -853,8 +827,6 @@ private lemma eLpNorm_pou_mul_diff_riemannianMeasure_le
     (I := I) (M := M) α u v
   exact hC_bnd h_diff_meas h_diff_supp
 
-/-! ### Chart-target eLpNorm equals chartNbhdM eLpNorm for chart-pushed-raw POU difference -/
-
 private lemma eLpNorm_chartPushedRaw_diff_chartTarget_eq_chartNbhdM
     {p : ℝ} (_hp_one : 1 < p) (α : M) (u v : M → ℝ) :
     eLpNorm (chartPushedRaw (I := I) (M := M) α
@@ -874,7 +846,6 @@ private lemma eLpNorm_chartPushedRaw_diff_chartTarget_eq_chartNbhdM
         ((volume : Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict
           (chartNbhdM (I := I) (M := M) α)) := by
   classical
-  -- The function vanishes off chartCompactM α (linearity + h_off_compact).
   have h_zero_off_compact : ∀ y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)),
       y ∉ chartCompactM (I := I) (M := M) α →
       chartPushedRaw (I := I) (M := M) α
@@ -905,7 +876,6 @@ private lemma eLpNorm_chartPushedRaw_diff_chartTarget_eq_chartNbhdM
     rw [chartPushedRaw_pou_mul_eq_zero_off_chartCompactM (I := I) (M := M) α u hy]
     rw [chartPushedRaw_pou_mul_eq_zero_off_chartCompactM (I := I) (M := M) α v hy]
     ring
-  -- Use the indicator identity: eLpNorm (A.indicator f) p μ = eLpNorm f p (μ.restrict A).
   have h_indic :
       (chartPushedRaw (I := I) (M := M) α
           (fun x : M =>
@@ -937,13 +907,9 @@ private lemma eLpNorm_chartPushedRaw_diff_chartTarget_eq_chartNbhdM
     (chartNbhdM_isOpen (I := I) (M := M) α).measurableSet]
   rw [MeasureTheory.Measure.restrict_restrict
     (chartNbhdM_isOpen (I := I) (M := M) α).measurableSet]
-  -- Goal: eLpNorm f p (vol.restrict (chartNbhdM ∩ chartTargetEuclid)) =
-  --       eLpNorm f p (vol.restrict (chartNbhdM ∩ chartNbhdM)).
   rw [Set.inter_eq_self_of_subset_left
     (chartNbhdM_subset_chartTargetEuclid (I := I) (M := M) α)]
   rw [Set.inter_self]
-
-/-! ### Manifold-side L^p Cauchy from chart-side L^p convergence -/
 
 private lemma eLpNorm_chartPushed_jk_NbhdM_le_of_tendsto
     [NeZero (Module.finrank ℝ E)]
@@ -981,8 +947,6 @@ private lemma eLpNorm_chartPushed_jk_NbhdM_le_of_tendsto
   rcases h_tendsto (ENNReal.ofReal (ε / 2)) (ENNReal.ofReal_pos.mpr (by linarith))
     with ⟨N, hN⟩
   refine ⟨N, fun j hj k hk => ?_⟩
-  -- `chartPushedRaw α (ρ_α u (φ j))` is `MemLp` on chartNbhdM (since it's `MemW1p`),
-  -- hence `AEStronglyMeasurable`.
   have h_chart_jraw_aestrong : AEStronglyMeasurable (chartPushedRaw (I := I) (M := M) α
       (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) x * u (φ j) x))
@@ -1085,8 +1049,6 @@ private lemma eLpNorm_chartPushed_jk_NbhdM_le_of_tendsto
   rw [← h_sum]
   exact add_le_add hjN hkN
 
-/-! ### Per-α manifold-side L^p limit -/
-
 private lemma exists_riemannianMeasure_limit_pou_mul
     [NeZero (Module.finrank ℝ E)]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
@@ -1122,7 +1084,6 @@ private lemma exists_riemannianMeasure_limit_pou_mul
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)))
         Filter.atTop (𝓝 0) := by
   classical
-  -- Set up the L^p sequence in Lp ℝ p μ_g.
   set μ_g : Measure M :=
     DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) with hμ_g_def
@@ -1135,20 +1096,14 @@ private lemma exists_riemannianMeasure_limit_pou_mul
   haveI hp_fact : Fact (1 ≤ ENNReal.ofReal p) := ⟨by
     simpa using (ENNReal.ofReal_le_ofReal hp_one.le :
       ENNReal.ofReal (1 : ℝ) ≤ ENNReal.ofReal p)⟩
-  -- Map each f_seq n into the Lp space.
   let F : ℕ → MeasureTheory.Lp ℝ (ENNReal.ofReal p) μ_g := fun n =>
     (hf_seq_mem n).toLp (f_seq n)
-  -- Show F is Cauchy.
   have hF_cauchy : CauchySeq F := by
     rw [MeasureTheory.Lp.cauchySeq_Lp_iff_cauchySeq_eLpNorm]
-    -- Goal: Tendsto (fun n => eLpNorm ((F n.fst : M → ℝ) - (F n.snd : M → ℝ)) p μ_g) atTop (𝓝 0)
-    -- We use the manifold-side Cauchy condition derived from chart-side.
-    -- First, state the manifold-side Cauchy condition.
     have hCauchy_manifold : ∀ ε > 0, ∃ N, ∀ j ≥ N, ∀ k ≥ N,
         eLpNorm (fun x : M => f_seq j x - f_seq k x) (ENNReal.ofReal p) μ_g ≤
           ENNReal.ofReal ε := by
       intro ε hε
-      -- Apply the bridge.
       obtain ⟨C, hC_pos, hC_bnd⟩ :=
         eLpNorm_pou_mul_diff_riemannianMeasure_le
           (I := I) (M := M) g hp_one α
@@ -1158,7 +1113,6 @@ private lemma exists_riemannianMeasure_limit_pou_mul
         (I := I) (M := M) g hp_one hu_mem α hw_α_memLp.1 h_tendsto ε₀ hε₀_pos with ⟨N, hN⟩
       refine ⟨N, fun j hj k hk => ?_⟩
       have h_chart_jk_NbhdM := hN j hj k hk
-      -- Convert chartNbhdM eLpNorm to chartTargetEuclid eLpNorm using h_zero_off compact.
       have h_diff_eq_swap :
           chartPushedRaw (I := I) (M := M) α
             (fun x : M =>
@@ -1191,7 +1145,6 @@ private lemma exists_riemannianMeasure_limit_pou_mul
           ENNReal.ofReal ε₀ := by
         rw [h_eq, h_diff_eq_swap]
         exact h_chart_jk_NbhdM
-      -- Apply the bridge.
       have h_bnd := hC_bnd (hu_meas (φ j)) (hu_meas (φ k))
       refine h_bnd.trans ?_
       refine (mul_le_mul' le_rfl h_chart_jk_target).trans ?_
@@ -1203,7 +1156,6 @@ private lemma exists_riemannianMeasure_limit_pou_mul
       calc C * ε₀ = C * (ε / C) := by rw [show ε₀ = ε / C from rfl]
         _ = ε := h_eq
         _ ≤ ε := le_refl _
-    -- Convert hCauchy_manifold (ε : ℝ) to a Tendsto on ℝ≥0∞.
     refine ENNReal.tendsto_atTop_zero.mpr ?_
     intro ε hε
     by_cases hε_top : ε = ⊤
@@ -1226,22 +1178,12 @@ private lemma exists_riemannianMeasure_limit_pou_mul
       rw [h_pi, hx1, hx2]
     rw [eLpNorm_congr_ae h_ae_eq]
     exact h_le.trans (ENNReal.ofReal_toReal hε_top).le
-  -- Lp completeness: F has a limit F_lim in Lp.
   obtain ⟨F_lim, hF_tendsto⟩ := cauchySeq_tendsto_of_complete hF_cauchy
-  -- F_lim is a representative; let v_α = F_lim.
   refine ⟨↑F_lim, MeasureTheory.Lp.memLp F_lim, ?_⟩
-  -- Convert: Tendsto F (𝓝 F_lim) → Tendsto (fun k => eLpNorm (f_seq k - F_lim) p μ_g) atTop (𝓝 0).
   have hF_lim_memLp : MemLp (↑F_lim : M → ℝ) (ENNReal.ofReal p) μ_g :=
     MeasureTheory.Lp.memLp F_lim
   have h_iff := MeasureTheory.Lp.tendsto_Lp_iff_tendsto_eLpNorm
     (fi := Filter.atTop) (f := F) (f_lim := (↑F_lim : M → ℝ)) hF_lim_memLp
-  -- F_lim = (hF_lim_memLp.toLp ↑F_lim) up to coeFn.
-  -- We use the iff version: Tendsto F (𝓝 F_lim) ↔ Tendsto eLpNorm.
-  -- But we need it with the hF_lim_memLp.toLp F_lim as the point of the limit. Let's adjust.
-  -- F_lim is in Lp, but tendsto_Lp_iff_tendsto_eLpNorm takes f_lim as a function.
-  -- Re-map: F_lim is approached by F. We have hF_tendsto : Tendsto F (𝓝 F_lim).
-  -- Apply tendsto_Lp_iff_tendsto_eLpNorm to (F_lim : M → ℝ) with `MemLp.toLp ↑F_lim`.
-  -- BUT MemLp.toLp ↑F_lim = F_lim a.e., so the limits coincide.
   have h_coe_eq : F_lim = hF_lim_memLp.toLp (↑F_lim : M → ℝ) := by
     apply MeasureTheory.Lp.ext
     exact (MemLp.coeFn_toLp hF_lim_memLp).symm
@@ -1249,7 +1191,6 @@ private lemma exists_riemannianMeasure_limit_pou_mul
   have h_eLp_tendsto : Filter.Tendsto
       (fun k => eLpNorm ((F k : M → ℝ) - (↑F_lim : M → ℝ)) (ENNReal.ofReal p) μ_g)
       Filter.atTop (𝓝 0) := h_iff.mp hF_tendsto
-  -- Convert (F k : M → ℝ) to f_seq k via coeFn_toLp.
   have h_eLpFn_eq : (fun k => eLpNorm ((F k : M → ℝ) - (↑F_lim : M → ℝ)) (ENNReal.ofReal p) μ_g) =
       fun k => eLpNorm (fun x => f_seq k x - (↑F_lim : M → ℝ) x) (ENNReal.ofReal p) μ_g := by
     funext k
@@ -1261,16 +1202,12 @@ private lemma exists_riemannianMeasure_limit_pou_mul
   rw [h_eLpFn_eq] at h_eLp_tendsto
   exact h_eLp_tendsto
 
-/-! ### Final assembly: closed-manifold Rellich-Kondrachov sequence -/
-
 set_option maxHeartbeats 1000000 in
--- The headline theorem combines the per-chart Rellich extraction, the diagonal
--- subsequence over the partition-of-unity finset, the manifold-side Cauchy/limit
--- construction via `Lp` completeness, and the Minkowski sum-bound for the global
--- limit. Elaboration of the unified proof body exceeds the default heartbeat
--- budget for a single declaration.
-/-- Compact embedding `W^{1,p}_chart(M) ↪ L^p(M, μ_g)` on a closed Riemannian
-manifold, in subsequence-extraction form. -/
+/-- Rellich-Kondrachov on a closed Riemannian manifold, in subsequence form: if
+`1 < p` and a sequence `u : ℕ → M → ℝ` has chart Sobolev `W^{1,p}` norms
+(`wkpNormChart`) uniformly bounded by `R`, then some subsequence `u ∘ φ` converges
+in `L^p` of the Riemannian measure (built from the chart partition-of-unity atlas)
+to a limit `u_lim ∈ L^p`. Here `M` is compact and boundaryless (hence closed). -/
 theorem rellich_kondrachov_chart_seq
     {E H : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
@@ -1300,7 +1237,6 @@ theorem rellich_kondrachov_chart_seq
     DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset (I := I) (M := M) with hS_def
   rcases exists_diagonal_chart_extraction_M (I := I) (M := M) g hp_one
     hu_mem hu_bdd S with ⟨φ, hφ_mono, hP_S⟩
-  -- For each α ∈ S, extract a manifold-side L^p limit v_α.
   have h_per_α : ∀ α ∈ S, ∃ v_α : M → ℝ,
       MemLp v_α (ENNReal.ofReal p)
         (DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
@@ -1343,14 +1279,10 @@ theorem rellich_kondrachov_chart_seq
   intro ε hε
   set n := S.attach.card
   by_cases hn : n = 0
-  · -- If n = 0 then S.attach = ∅, so S = ∅. In this case ρ_α = 0 for all α (S being empty
-    -- means every α has empty support), so u (φ j) = u_lim = 0 and eLpNorm = 0.
-    -- Note: empty manifold case (M empty) also lands here, similarly trivial.
-    refine ⟨0, fun j _hj => ?_⟩
+  · refine ⟨0, fun j _hj => ?_⟩
     have hS_empty : S = ∅ := by
       rw [Finset.card_eq_zero] at hn
       exact Finset.attach_eq_empty_iff.mp hn
-    -- u (φ j) = ∑ α ∈ S, ρ_α u (φ j) = 0 by empty sum.
     have h_pou_zero : ∀ α : M, ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) : M → ℝ) = 0 := by
       intro α
@@ -1358,9 +1290,6 @@ theorem rellich_kondrachov_chart_seq
       funext x
       exact DifferentialGeometry.Integral.Measure.chartAtlasPOU_weight_zero_of_notMem
         (I := I) (M := M) hα x
-    -- Each ρ_α = 0 implies u_lim = 0 a.e. and the partition-of-unity sum-to-1 implies 0 = 1
-    -- on M which is impossible UNLESS M itself is empty.
-    -- M empty: u (φ j) = u_lim is the constant 0 function (everything is vacuous on M).
     by_cases hM_ne : Nonempty M
     · exfalso
       have h_one := chartAtlasPOU_finset_sum_eq_one (I := I) (M := M)
@@ -1369,8 +1298,7 @@ theorem rellich_kondrachov_chart_seq
           (I := I) (M := M) = ∅ := hS_empty
       rw [h_S] at h_one
       simp at h_one
-    · -- M is empty: every function is identically the zero function (no points to evaluate at).
-      have hM_empty : ¬ Nonempty M := hM_ne
+    · have hM_empty : ¬ Nonempty M := hM_ne
       have h_diff_zero : (fun x : M => u (φ j) x - u_lim x) = 0 := by
         funext x
         exact absurd ⟨x⟩ hM_empty
@@ -1378,7 +1306,6 @@ theorem rellich_kondrachov_chart_seq
       rw [eLpNorm_zero]
       exact zero_le _
   have hn_pos : 0 < n := Nat.pos_of_ne_zero hn
-  -- For each α ∈ S.attach, find N_α such that for k ≥ N_α, eLpNorm ... ≤ ε / n.
   have h_per_α_eLp : ∀ α ∈ S.attach, ∃ N : ℕ, ∀ k ≥ N,
       eLpNorm
           (fun x : M =>
@@ -1402,8 +1329,6 @@ theorem rellich_kondrachov_chart_seq
   refine ⟨N_max, fun j hj => ?_⟩
   have hj_ge_N : ∀ α ∈ S.attach, j ≥ Nfun α := fun α hα =>
     le_trans (Finset.le_sup (f := Nfun) hα) hj
-  -- Inlined: bound the eLpNorm of `u (φ j) - Σ_α v_α` by the sum of eLpNorms of
-  -- the per-α differences via Minkowski.
   have h_diff_eq :
       (fun x : M => u (φ j) x - u_lim x) =
       (fun x => ∑ α ∈ S.attach,
@@ -1433,7 +1358,6 @@ theorem rellich_kondrachov_chart_seq
         (g := fun α => v α.1 α.2 x)
     rw [h_distrib, h_pou_x]
   rw [h_diff_eq]
-  -- Apply Minkowski.
   have h_each_aestrong : ∀ α ∈ S.attach,
       AEStronglyMeasurable
         (fun x : M =>
@@ -1448,7 +1372,6 @@ theorem rellich_kondrachov_chart_seq
   have hp_le : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p := by
     simpa using (ENNReal.ofReal_le_ofReal hp_one.le :
       ENNReal.ofReal (1 : ℝ) ≤ ENNReal.ofReal p)
-  -- Convert `fun x => ∑ α, f α x` to `∑ α, f α` (function-level sum).
   have h_pi_sum : (fun x : M => ∑ α ∈ S.attach,
       ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α.1
         : C^∞⟮I, M; ℝ⟯) x * u (φ j) x - v α.1 α.2 x)) =
@@ -1460,7 +1383,6 @@ theorem rellich_kondrachov_chart_seq
     rw [Finset.sum_apply]
   rw [h_pi_sum]
   refine (eLpNorm_sum_le h_each_aestrong hp_le).trans ?_
-  -- Now: ∑ eLpNorm ≤ ∑ (ε / n) = n * (ε / n) ≤ ε.
   have h_each_le : ∀ α ∈ S.attach,
       eLpNorm (fun x : M => ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α.1
             : C^∞⟮I, M; ℝ⟯) x * u (φ j) x - v α.1 α.2 x)) (ENNReal.ofReal p)

@@ -91,16 +91,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The canonical finite cover
-
-On a compact manifold the canonical chart-atlas partition of unity
-`chartAtlasPOU I M` has locally finite supports, so only finitely many base
-points carry a nonempty partition-of-unity support. That finite set is
-`chartAtlasPOU_finset I M`. Every chart whose base point lies outside it
-contributes a partition-of-unity weight that is identically zero — and hence
-contributes only zero chart components — so the whole `W^{2k, 2}` development
-reduces to this finite family of charts. -/
-
 /-- Off the canonical finite cover the partition-of-unity weight vanishes
 identically; hence every scalar chart component of any tensor section is the
 zero function there. This is the reusable chart-reduction lemma: the
@@ -113,7 +103,6 @@ theorem tensorChartComp_eq_zero_of_notMem_finset
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
     tensorChartComp (I := I) (M := M) g r s T α Idx Jdx = (fun _ => (0 : ℝ)) := by
-  -- Off the finite cover the partition-of-unity weight is identically zero.
   have hρ_zero : ∀ x : M, (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) x = 0 :=
     fun x => chartAtlasPOU_weight_zero_of_notMem (I := I) (M := M) hα x
   funext y
@@ -143,12 +132,6 @@ theorem wtwokTwoNorm_chartTerm_eq_zero_of_notMem_finset
   rw [tensorChartComp_eq_zero_of_notMem_finset (I := I) (M := M) g r s T hα Idx Jdx]
   exact wkpNorm_zero_fun_zero (d := Module.finrank ℝ E) (by norm_num)
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
-
-/-! ## Finite-cover reduction of the membership predicate
-
-The `∀ α : M` quantifier of `MemWtwokTwo` is genuinely a quantifier over the
-finite cover: charts off `chartAtlasPOU_finset I M` contribute only the zero
-function, which is trivially in every Euclidean iterated Sobolev space. -/
 
 /-- For a chart base point off the canonical finite cover, every chart component
 is automatically in `MemWkp (2k) 2` (it is the zero function). -/
@@ -246,13 +229,6 @@ theorem MemWtwokTwo.memWkp_chartComp
       (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
       (chartTargetEuclid (I := I) (M := M) α) :=
   hT α Idx Jdx
-
-/-! ## Finite-cover decomposition of the tensor Sobolev norm
-
-The chart-aggregating `tsum` of `wtwokTwoNorm` reduces to a `Finset` sum over
-the canonical finite cover, because charts off it contribute zero. This is the
-norm-level companion of `MemWtwokTwo_iff_forall_finset` and the form in which
-the downstream elliptic regularity assembles a global norm bound. -/
 
 /-- **Finite-cover decomposition of the tensor Sobolev norm.** The chart-aggregating
 `tsum` of `wtwokTwoNorm g k T` equals the finite sum, over the canonical finite
@@ -361,7 +337,6 @@ theorem wkpNorm_tensorChartComp_le_wtwokTwoNorm
       wtwokTwoNorm (I := I) (M := M) g k T := by
   refine le_trans ?_ (wtwokTwoChartTerm_le_wtwokTwoNorm (I := I) (M := M) g k T hα)
   rw [wtwokTwoChartTerm_def]
-  -- Single out the `Idx`-summand, then the `Jdx`-summand.
   refine le_trans ?_ (Finset.single_le_sum
     (f := fun Idx => ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
       wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
@@ -373,23 +348,6 @@ theorem wkpNorm_tensorChartComp_le_wtwokTwoNorm
       (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
       (chartTargetEuclid (I := I) (M := M) α))
     (fun Jdx _ => zero_le _) (Finset.mem_univ Jdx)
-
-/-! ## Component transition behaviour on chart overlaps
-
-Because `MemWtwokTwo` quantifies over **every** chart of the canonical atlas,
-the chart-local elliptic-regularity development never has to *transport* a
-`W^{2k, 2}` bound from one chart to another via the smooth transition Jacobian:
-each chart is handled in its own right, and the global membership is the
-conjunction over all of them. The full Jacobian-power transition law for
-`(r, s)`-tensor chart components is therefore **not needed** for this file's
-downstream consumer.
-
-What *is* recorded here is the genuine chart-overlap statement at the level of
-the chart components: on a chart overlap the two component families reconstruct
-the *same* chart-pushed POU-weighted tensor. This is the transition statement in
-the form the development actually uses — it follows directly from the
-reconstruction identity `tensorChartPushed_eq_sum_tensorChartComp`, applied at a
-common Euclidean point of the two charts. -/
 
 /-- **Component transition on an overlap.** On the chart target of `α`, the
 chart-pushed POU-weighted tensor `tensorChartPushed g r s T α` is the finite sum
@@ -434,16 +392,6 @@ theorem tensorChartPushed_eqOn_zero_of_tensorChartComp_eqOn_zero
   intro Jdx _
   rw [h Idx Jdx hy, zero_smul]
 
-/-! ## Two-sided comparison of the global norm with the finite-cover sum
-
-The downstream chart-local elliptic regularity produces estimates on the scalar
-component `wkpNorm`s over a finite cover, and needs to convert them to a bound
-on the global real-valued tensor Sobolev norm `wtwokTwoNormReal` (and back). On
-a compact manifold the global `tsum`-defined norm is *exactly* the finite sum
-over the canonical finite cover, so the comparison is an equality at the
-`ℝ≥0∞` level; the genuine content is transporting it to the real-valued norm,
-where finiteness of the summands is needed. -/
-
 /-- The real-valued tensor Sobolev norm equals the real value of the finite sum,
 over the canonical finite cover, of the per-chart contributions. The exact
 `ℝ≥0∞`-level identity `wtwokTwoNorm_eq_finset_sum_chartTerm`, transported through
@@ -473,7 +421,6 @@ theorem wtwokTwoNormReal_le_finset_sum
       ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
         (wtwokTwoChartTerm (I := I) (M := M) g k T α).toReal := by
   rw [wtwokTwoNormReal_eq_finset_sum_toReal (I := I) (M := M) g k T]
-  -- Each summand is finite, so `toReal` distributes over the finite sum.
   rw [ENNReal.toReal_sum]
   intro α _
   exact wtwokTwoChartTerm_ne_top (I := I) (M := M) g hT α
@@ -549,7 +496,6 @@ theorem wtwokTwoNormReal_le_card_mul
     wtwokTwoNormReal (I := I) (M := M) g k T ≤
       (chartAtlasPOU_finset (I := I) (M := M)).card * C := by
   rw [wtwokTwoNormReal_eq_finset_sum (I := I) (M := M) g hT]
-  -- The finite sum of `card` terms, each `≤ C`, is `≤ card · C`.
   refine le_trans (Finset.sum_le_sum hbound) ?_
   rw [Finset.sum_const, nsmul_eq_mul]
 

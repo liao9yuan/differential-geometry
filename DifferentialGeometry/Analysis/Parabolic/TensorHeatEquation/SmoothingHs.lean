@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.FractionalPower
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.FractionalPower
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SemigroupLaw
 import Mathlib.Analysis.SpecialFunctions.Exp
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
@@ -57,8 +57,6 @@ downstream short-time existence theory consumes.
   for `b ≥ a`, `0 < t ≤ 1`.
 * `tensorHeatSemigroupHs_opNorm_le_one` — the contraction
   `‖e^{tΔ}‖_{Hᵃ → Hᵃ} ≤ 1`.
-* `tensorHeatSemigroupHs_zeroEquivL2` — at `a = b = 0` the operator
-  agrees, under `tensorHsZeroEquivL2`, with the `L²` heat semigroup.
 * `tensorHeatSemigroupHs_add` — the semigroup law
   `e^{(t+s)Δ} = e^{tΔ} ∘ e^{sΔ}` on the scale.
 
@@ -90,19 +88,10 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## The scalar smoothing bound
-
-The whole smoothing estimate reduces to a one-variable inequality:
-`(1 + λ)^μ · exp(-2λt)` is bounded, uniformly in `λ ≥ 0`, by
-`C(μ) · t^{-μ}` for `0 < t ≤ 1`. The proof splits on whether the
-exponential decay rate `2t` dominates the polynomial growth rate `μ`. -/
 
 /-- The explicit smoothing constant `C(μ) = max 1 ((μ/2)^μ · e^{-μ} · e²)`,
 depending only on `μ ≥ 0`. The `max 1` term absorbs the `λ = 0` value of
@@ -144,38 +133,29 @@ private lemma rpow_mul_exp_neg_le (μ : ℝ) (hμ : 0 ≤ μ) {c y : ℝ}
     (hc : 0 < c) (hy : 0 < y) :
     y ^ μ * Real.exp (-(c * y)) ≤ (μ / c) ^ μ * Real.exp (-μ) := by
   rcases eq_or_lt_of_le hμ with hμ0 | hμ_pos
-  · -- `μ = 0`: both sides reduce, `exp(-cy) ≤ 1`.
-    subst hμ0
+  · subst hμ0
     rw [Real.rpow_zero, Real.rpow_zero, one_mul, one_mul, neg_zero,
       Real.exp_zero]
     rw [Real.exp_le_one_iff]
     have : 0 ≤ c * y := mul_nonneg hc.le hy.le
     linarith
-  · -- `μ > 0`: set `z := c y / μ`, so `z e^{-z} ≤ e^{-1}` and the
-    -- claim is `(z e^{-z})^μ ≤ (e^{-1})^μ` after factoring `(μ/c)^μ`.
-    set z : ℝ := c * y / μ with hz_def
+  · set z : ℝ := c * y / μ with hz_def
     have hz_nn : 0 ≤ z := by
       rw [hz_def]
       exact div_nonneg (mul_nonneg hc.le hy.le) hμ_pos.le
     have hμ_ne : μ ≠ 0 := hμ_pos.ne'
     have hc_ne : c ≠ 0 := hc.ne'
-    -- `y = (μ/c) · z`.
     have hy_eq : y = (μ / c) * z := by
       rw [hz_def]; field_simp
-    -- `c y = μ z`.
     have hcy_eq : c * y = μ * z := by
       rw [hz_def]; field_simp
-    -- the `z e^{-z}` factor.
     have hzz : z * Real.exp (-z) ≤ Real.exp (-1) :=
       mul_exp_neg_le_exp_neg_one z
     have hzz_nn : 0 ≤ z * Real.exp (-z) :=
       mul_nonneg hz_nn (Real.exp_pos _).le
-    -- raise to the power `μ`.
     have h_pow : (z * Real.exp (-z)) ^ μ ≤ (Real.exp (-1)) ^ μ :=
       Real.rpow_le_rpow hzz_nn hzz hμ
-    -- evaluate both sides.
     have hμc_nn : 0 ≤ μ / c := div_nonneg hμ_pos.le hc.le
-    -- `exp(-(μz)) = (exp(-z))^μ` and `(exp(-1))^μ = exp(-μ)`.
     have h_exp_mz : Real.exp (-(μ * z)) = Real.exp (-z) ^ μ := by
       rw [← Real.exp_mul]
       congr 1
@@ -216,14 +196,10 @@ theorem tensorSmoothingScalarBound {μ : ℝ} (hμ : 0 ≤ μ) {t : ℝ}
       tensorSmoothingConst μ * t ^ (-μ) := by
   have hbase_pos : (0 : ℝ) < 1 + lam := by linarith
   have ht_pow_pos : (0 : ℝ) < t ^ (-μ) := Real.rpow_pos_of_pos ht _
-  -- `t^{-μ} ≥ 1` since `t ∈ (0,1]` and `-μ ≤ 0`.
   have ht_pow_ge_one : (1 : ℝ) ≤ t ^ (-μ) :=
     Real.one_le_rpow_of_pos_of_le_one_of_nonpos ht ht1 (neg_nonpos_of_nonneg hμ)
   rcases le_or_gt μ (2 * t) with hμle | hμgt
-  · -- Regime `μ ≤ 2t`: the exponential decay dominates, the value is
-    -- `≤ 1`, and `1 ≤ tensorSmoothingConst μ · t^{-μ}`.
-    have h_le_one : (1 + lam) ^ μ * Real.exp (-(2 * lam * t)) ≤ 1 := by
-      -- `(1+λ)^μ ≤ exp(μλ) ≤ exp(2tλ)`, cancelling the exponential.
+  · have h_le_one : (1 + lam) ^ μ * Real.exp (-(2 * lam * t)) ≤ 1 := by
       have h_base_le_exp : 1 + lam ≤ Real.exp lam := by
         have := Real.add_one_le_exp lam
         linarith
@@ -254,26 +230,20 @@ theorem tensorSmoothingScalarBound {μ : ℝ} (hμ : 0 ≤ μ) {t : ℝ}
       _ ≤ tensorSmoothingConst μ * t ^ (-μ) :=
             mul_le_mul_of_nonneg_right (one_le_tensorSmoothingConst μ)
               ht_pow_pos.le
-  · -- Regime `μ > 2t`: the polynomial growth wins; the maximum is the
-    -- standard `(μ/(2t))^μ e^{-μ}`, times an `e^{2t} ≤ e²` correction.
-    have h2t_pos : (0 : ℝ) < 2 * t := by linarith
-    -- factor the exponent: `exp(-2λt) = exp(-2(1+λ)t) · exp(2t)`.
+  · have h2t_pos : (0 : ℝ) < 2 * t := by linarith
     have h_exp_split :
         Real.exp (-(2 * lam * t)) =
           Real.exp (-(2 * t * (1 + lam))) * Real.exp (2 * t) := by
       rw [← Real.exp_add]
       congr 1
       ring
-    -- core bound on `y^μ e^{-2ty}` with `y = 1 + λ`.
     have h_core :
         (1 + lam) ^ μ * Real.exp (-(2 * t * (1 + lam))) ≤
           (μ / (2 * t)) ^ μ * Real.exp (-μ) :=
       rpow_mul_exp_neg_le μ hμ h2t_pos hbase_pos
-    -- `exp(2t) ≤ exp 2` since `t ≤ 1`.
     have h_exp2t : Real.exp (2 * t) ≤ Real.exp 2 := by
       apply Real.exp_le_exp.mpr
       linarith
-    -- `(μ/(2t))^μ = (μ/2)^μ · t^{-μ}`.
     have h_rpow_split : (μ / (2 * t)) ^ μ = (μ / 2) ^ μ * t ^ (-μ) := by
       have hμ2t_nn : 0 ≤ μ / (2 * t) := div_nonneg hμ h2t_pos.le
       have hμ2_nn : 0 ≤ μ / 2 := by positivity
@@ -281,9 +251,7 @@ theorem tensorSmoothingScalarBound {μ : ℝ} (hμ : 0 ≤ μ) {t : ℝ}
         field_simp
       rw [h_factor, Real.mul_rpow hμ2_nn (by positivity)]
       congr 1
-      -- `(t⁻¹)^μ = (t^μ)⁻¹ = t^{-μ}`.
       rw [Real.inv_rpow ht.le, ← Real.rpow_neg ht.le]
-    -- assemble.
     have hC2_nn : 0 ≤ (μ / 2) ^ μ * Real.exp (-μ) * Real.exp 2 :=
       mul_nonneg (mul_nonneg (Real.rpow_nonneg (by positivity) μ)
         (Real.exp_pos _).le) (Real.exp_pos _).le
@@ -323,7 +291,6 @@ theorem tensorSmoothingScalarBound_of_pos {μ : ℝ} (hμ : 0 ≤ μ) {t : ℝ}
   have ht'_pos : 0 < t' := lt_min ht one_pos
   have ht'_le_one : t' ≤ 1 := min_le_right _ _
   have ht'_le_t : t' ≤ t := min_le_left _ _
-  -- decreasing in time: `exp(-2λt) ≤ exp(-2λt')`.
   have h_exp_mono :
       Real.exp (-(2 * lam * t)) ≤ Real.exp (-(2 * lam * t')) := by
     apply Real.exp_le_exp.mpr
@@ -338,14 +305,6 @@ theorem tensorSmoothingScalarBound_of_pos {μ : ℝ} (hμ : 0 ≤ μ) {t : ℝ}
           mul_le_mul_of_nonneg_left h_exp_mono hbase_nn
     _ ≤ tensorSmoothingConst μ * t' ^ (-μ) :=
           tensorSmoothingScalarBound hμ ht'_pos ht'_le_one hlam
-
-/-! ## The heat coefficient on the eigenbasis
-
-The heat semigroup multiplies the `i`-th coordinate by `exp(-λᵢ t)`. The
-two facts used to build the `Hᵃ → Hᵇ` operator are: the heat coefficient
-is in `(0, 1]` for `t ≥ 0` (contraction direction), and the squared
-weighted coordinate `(1+λᵢ)^b (exp(-λᵢ t) cᵢ)²` is dominated by a
-multiple of the `Hᵃ` weighted coordinate (smoothing direction). -/
 
 /-- For `0 < t` and any pair of exponents `a`, `b`, the squared `Hᵇ`-weight
 of the heat-rescaled coordinate is bounded by a `λ`-uniform multiple of
@@ -369,7 +328,6 @@ private lemma tensorHeat_weight_term_le {g : SmoothRiemannianMetric I M}
   set K : ℝ :=
     max 1 (tensorSmoothingConst (b - a) * (min t 1) ^ (-(b - a))) with hK_def
   have hK_ge_one : (1 : ℝ) ≤ K := le_max_left _ _
-  -- The Sobolev weight ratio: `(1+λ)^b = (1+λ)^a · (1+λ)^{b-a}`.
   have h_weight_split :
       tensorSobolevWeight (I := I) (M := M) i b =
         tensorSobolevWeight (I := I) (M := M) i a *
@@ -378,18 +336,15 @@ private lemma tensorHeat_weight_term_le {g : SmoothRiemannianMetric I M}
     rw [hlam_def, ← Real.rpow_add hbase_pos]
     congr 1
     ring
-  -- Bound `(1+λ)^{b-a} · exp(-2λt)`.
   have h_pe_le :
       (1 + lam) ^ (b - a) *
           Real.exp (-(lam * t) * 2) ≤ K := by
     rcases le_or_gt 0 (b - a) with hba | hba
-    · -- `b ≥ a`: scalar smoothing bound.
-      have h_arg : -(lam * t) * 2 = -(2 * lam * t) := by ring
+    · have h_arg : -(lam * t) * 2 = -(2 * lam * t) := by ring
       rw [h_arg]
       have h := tensorSmoothingScalarBound_of_pos hba ht hlam_nn
       exact le_trans h (le_max_right _ _)
-    · -- `b < a`: weight `(1+λ)^{b-a} ≤ 1`, heat coeff `≤ 1`.
-      have h_w_le_one : (1 + lam) ^ (b - a) ≤ 1 :=
+    · have h_w_le_one : (1 + lam) ^ (b - a) ≤ 1 :=
         Real.rpow_le_one_of_one_le_of_nonpos (by linarith) hba.le
       have h_exp_le_one : Real.exp (-(lam * t) * 2) ≤ 1 := by
         rw [Real.exp_le_one_iff]
@@ -402,7 +357,6 @@ private lemma tensorHeat_weight_term_le {g : SmoothRiemannianMetric I M}
                 (Real.exp_pos _).le (by norm_num)
         _ = 1 := by norm_num
         _ ≤ K := hK_ge_one
-  -- assemble: `(1+λ)^b (e^{-λt}c)² = (1+λ)^a c² · [(1+λ)^{b-a} e^{-2λt}]`.
   have hwa_nn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i a :=
     tensorSobolevWeight_nonneg (I := I) (M := M) i a
   have hexp_sq :
@@ -426,16 +380,9 @@ private lemma tensorHeat_weight_term_le {g : SmoothRiemannianMetric I M}
           positivity
     _ = K * (tensorSobolevWeight (I := I) (M := M) i a * c ^ 2) := by ring
 
-/-! ## The heat-rescaled coordinate family
-
-For `T ∈ Hᵃ` and `0 < t`, the family `i ↦ exp(-λᵢ t) · T.coeff i` is
-weighted-square-summable at *every* exponent `b`: this is the spectral
-content of "positive time gains derivatives". -/
-
 namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-  {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
 
 /-- For `T ∈ Hᵃ` and `0 < t`, the heat-rescaled coordinate family
 `i ↦ exp(-λᵢ t) · T.coeff i` is weighted-square-summable at the target
@@ -448,7 +395,6 @@ lemma heatHs_weighted_summable {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t)
           T.coeff i) ^ 2) := by
   set K : ℝ :=
     max 1 (tensorSmoothingConst (b - a) * (min t 1) ^ (-(b - a))) with hK_def
-  -- Dominated by `K • (Hᵃ-weighted family)`.
   refine Summable.of_nonneg_of_le ?_ ?_ (T.weighted_summable.mul_left K)
   · intro i
     have hw : 0 ≤ tensorSobolevWeight (I := I) (M := M) i b :=
@@ -502,13 +448,9 @@ lemma norm_heatHsFun_le_smoothing {a b : ℝ} (hab : a ≤ b) {t : ℝ}
     ‖heatHsFun (I := I) (M := M) b ht T‖ ≤
       Real.sqrt (tensorSmoothingConst (b - a)) *
         t ^ (-((b - a) / 2)) * ‖T‖ := by
-  -- Work with squared norms throughout.  The natural constant is
-  -- `tensorSmoothingConst (b - a)`; the half appears only in the
-  -- `t`-exponent, because the squared norm carries `t^{-(b-a)}`.
   have hba_nn : 0 ≤ b - a := by linarith
   have hC_nn : 0 ≤ tensorSmoothingConst (b - a) :=
     tensorSmoothingConst_nonneg (b - a)
-  -- The squared `Hᵇ` norm.
   have h_b_sq : ‖heatHsFun (I := I) (M := M) b ht T‖ ^ 2 =
       ∑' i, tensorSobolevWeight (I := I) (M := M) i b *
         (Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
@@ -516,11 +458,9 @@ lemma norm_heatHsFun_le_smoothing {a b : ℝ} (hab : a ≤ b) {t : ℝ}
     have h := norm_sq_eq_tsum (I := I) (M := M)
       (heatHsFun (I := I) (M := M) b ht T)
     simpa only [heatHsFun_coeff] using h
-  -- The squared `Hᵃ` norm.
   have h_a_sq : ‖T‖ ^ 2 =
       ∑' i, tensorSobolevWeight (I := I) (M := M) i a * (T.coeff i) ^ 2 :=
     norm_sq_eq_tsum (I := I) (M := M) T
-  -- Pointwise: each `Hᵇ`-term `≤ (C · t^{-(b-a)}) · Hᵃ`-term.
   have h_term_le : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
       tensorSobolevWeight (I := I) (M := M) i b *
           (Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
@@ -531,7 +471,6 @@ lemma norm_heatHsFun_le_smoothing {a b : ℝ} (hab : a ≤ b) {t : ℝ}
     set lam := TensorEigenIdx.lambda (I := I) (M := M) i with hlam_def
     have hlam_nn : 0 ≤ lam := tensor_lambda_nonneg (I := I) (M := M) i
     have hbase_pos : (0 : ℝ) < 1 + lam := by linarith
-    -- weight split
     have h_weight_split :
         tensorSobolevWeight (I := I) (M := M) i b =
           tensorSobolevWeight (I := I) (M := M) i a *
@@ -546,7 +485,6 @@ lemma norm_heatHsFun_le_smoothing {a b : ℝ} (hab : a ≤ b) {t : ℝ}
       congr 1
       push_cast
       ring
-    -- The scalar smoothing bound at exponent `b - a`.
     have h_scalar :
         (1 + lam) ^ (b - a) * Real.exp (-(2 * lam * t)) ≤
           tensorSmoothingConst (b - a) * t ^ (-(b - a)) :=
@@ -570,7 +508,6 @@ lemma norm_heatHsFun_le_smoothing {a b : ℝ} (hab : a ≤ b) {t : ℝ}
       _ = (tensorSmoothingConst (b - a) * t ^ (-(b - a))) *
             (tensorSobolevWeight (I := I) (M := M) i a *
               (T.coeff i) ^ 2) := by ring
-  -- Sum the pointwise bound.
   have h_summ_b :
       Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
         tensorSobolevWeight (I := I) (M := M) i b *
@@ -599,7 +536,6 @@ lemma norm_heatHsFun_le_smoothing {a b : ℝ} (hab : a ≤ b) {t : ℝ}
           ∑' i, (tensorSobolevWeight (I := I) (M := M) i a *
             (T.coeff i) ^ 2) :=
     tsum_mul_left
-  -- Squared bound: `‖heat T‖² ≤ (C · t^{-(b-a)}) · ‖T‖²`.
   have h_sq_le : ‖heatHsFun (I := I) (M := M) b ht T‖ ^ 2 ≤
       (tensorSmoothingConst (b - a) * t ^ (-(b - a))) * ‖T‖ ^ 2 := by
     rw [h_b_sq, h_a_sq]
@@ -613,8 +549,6 @@ lemma norm_heatHsFun_le_smoothing {a b : ℝ} (hab : a ≤ b) {t : ℝ}
       _ = (tensorSmoothingConst (b - a) * t ^ (-(b - a))) *
             ∑' i, (tensorSobolevWeight (I := I) (M := M) i a *
               (T.coeff i) ^ 2) := h_tsum_factor
-  -- Take square roots; the RHS squared matches the claimed bound.
-  -- `(√C · t^{-(b-a)/2})² = C · t^{-(b-a)}`.
   have h_rhs_sq :
       (Real.sqrt (tensorSmoothingConst (b - a)) * t ^ (-((b - a) / 2))) ^ 2 =
         tensorSmoothingConst (b - a) * t ^ (-(b - a)) := by
@@ -634,7 +568,6 @@ lemma norm_heatHsFun_le_smoothing {a b : ℝ} (hab : a ≤ b) {t : ℝ}
               (t ^ (-((b - a) / 2))) ^ 2 := by ring
       _ = tensorSmoothingConst (b - a) * t ^ (-(b - a)) := by
             rw [h_sqrt_sq, h_t_sq]
-  -- Conclude `‖heat T‖ ≤ √C · t^{-(b-a)/2} · ‖T‖`.
   have h_final_sq : ‖heatHsFun (I := I) (M := M) b ht T‖ ^ 2 ≤
       (Real.sqrt (tensorSmoothingConst (b - a)) * t ^ (-((b - a) / 2)) *
         ‖T‖) ^ 2 := by
@@ -662,7 +595,6 @@ semigroup is a contraction `Hᵃ → Hᵃ`: `‖heatHsFun a ht T‖ ≤ ‖T‖`
 lemma norm_heatHsFun_le_self {a : ℝ} {t : ℝ} (ht : 0 < t)
     (T : tensorHs (I := I) (M := M) g r s a) :
     ‖heatHsFun (I := I) (M := M) a ht T‖ ≤ ‖T‖ := by
-  -- `(1+λ)^a (e^{-λt}c)² ≤ (1+λ)^a c²` since the heat coefficient `≤ 1`.
   have h_a_sq_heat : ‖heatHsFun (I := I) (M := M) a ht T‖ ^ 2 =
       ∑' i, tensorSobolevWeight (I := I) (M := M) i a *
         (Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
@@ -721,8 +653,6 @@ lemma norm_heatHsFun_le_self {a : ℝ} {t : ℝ} (ht : 0 < t)
 
 end tensorHs
 
-/-! ## The heat semigroup on the spectral Sobolev scale -/
-
 /-- The tensor heat semigroup `e^{t Δ_∇}` as a continuous linear map on
 the spectral Sobolev scale, for `0 < t`.
 
@@ -744,15 +674,12 @@ def tensorHeatSemigroupHs {g : SmoothRiemannianMetric I M} {r s : ℕ}
         tensorHs.heatHsFun_smul (I := I) (M := M) b ht c T }
     (max 1 (tensorSmoothingConst (b - a) * (min t 1) ^ (-(b - a))))
     (fun T => by
-      -- A coarse `λ`-uniform bound suffices to make the operator
-      -- continuous; the sharp short-time gain is proved separately.
       change ‖tensorHs.heatHsFun (I := I) (M := M) b ht T‖ ≤ _
       set K : ℝ :=
         max 1 (tensorSmoothingConst (b - a) * (min t 1) ^ (-(b - a)))
         with hK_def
       have hK_ge_one : (1 : ℝ) ≤ K := le_max_left _ _
       have hK_nn : 0 ≤ K := le_trans zero_le_one hK_ge_one
-      -- Squared-norm comparison via `tensorHeat_weight_term_le`.
       have h_b_sq : ‖tensorHs.heatHsFun (I := I) (M := M) b ht T‖ ^ 2 =
           ∑' i, tensorSobolevWeight (I := I) (M := M) i b *
             (Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
@@ -806,7 +733,6 @@ def tensorHeatSemigroupHs {g : SmoothRiemannianMetric I M} {r s : ℕ}
         rw [h_b_sq, h_a_sq]
         rw [← h_tsum_factor]
         exact h_tsum_le
-      -- `‖heat T‖ ≤ √K · ‖T‖ ≤ K · ‖T‖` (since `K ≥ 1`).
       have h_sqrtK_sq : Real.sqrt K ^ 2 = K := Real.sq_sqrt hK_nn
       have h_final_sq :
           ‖tensorHs.heatHsFun (I := I) (M := M) b ht T‖ ^ 2 ≤
@@ -823,7 +749,6 @@ def tensorHeatSemigroupHs {g : SmoothRiemannianMetric I M} {r s : ℕ}
           ‖tensorHs.heatHsFun (I := I) (M := M) b ht T‖ ≤
             Real.sqrt K * ‖T‖ := by
         nlinarith [h_final_sq, h1, mul_nonneg h_sqrtK_nn h2]
-      -- `√K ≤ K` because `K ≥ 1`.
       have h_sqrtK_le_K : Real.sqrt K ≤ K := by
         have h_K_le_sq : K ≤ K ^ 2 := by nlinarith [hK_ge_one]
         calc Real.sqrt K ≤ Real.sqrt (K ^ 2) :=
@@ -892,138 +817,6 @@ theorem tensorHeatSemigroupHs_opNorm_le_one {g : SmoothRiemannianMetric I M}
   rw [tensorHeatSemigroupHs_apply, one_mul]
   exact tensorHs.norm_heatHsFun_le_self (I := I) (M := M) ht T
 
-/-! ## Consistency with the `L²` heat semigroup
-
-At `a = b = 0`, the spectral Sobolev space `H⁰` is isometrically the
-`L²` Hilbert space `TensorL2 r s g` (`tensorHsZeroEquivL2`), and
-`tensorHeatSemigroupHs` agrees there with the `L²` heat semigroup
-`tensorHeatSemigroup`. The bridge is the diagonal action of both
-operators on the eigenbasis. -/
-
-/-- The `L²` eigenbasis coordinate of `tensorHeatSemigroup g r s h_atlas
-t U` at `i` is `exp(-λᵢ t)` times the `i`-th coordinate of `U`, for
-`t ≥ 0`. -/
-theorem tensorL2Coeff_tensorHeatSemigroup {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    {t : ℝ} (ht : 0 ≤ t) (U : TensorL2 r s g)
-    (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    tensorL2Coeff (I := I) (M := M) h_atlas
-        (tensorHeatSemigroup (I := I) (M := M) g r s h_atlas t U) i =
-      Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
-        tensorL2Coeff (I := I) (M := M) h_atlas U i := by
-  classical
-  set b := tensorResolventHilbertEigenbasisSigma
-    (I := I) (M := M) (g := g) (r := r) (s := s) h_atlas with hb
-  -- Expand the heat semigroup as its eigenbasis series.
-  rw [tensorL2Coeff_eq_inner, tensorL2Coeff_eq_inner,
-    tensorHeatSemigroup_apply_of_nonneg (I := I) (M := M) h_atlas ht U]
-  -- The inner product against `b i` of the series is the `i`-th term.
-  have h_summable := tensorSummable_heatTerm (I := I) (M := M) h_atlas ht U
-  have h_hsum := h_summable.hasSum
-  -- Apply the continuous functional `⟪b i, ·⟫`.
-  have h_inner_hsum := h_hsum.mapL (innerSL ℝ (b i))
-  have h_orthonormal : Orthonormal ℝ b := b.orthonormal
-  have h_inner_eq : ∀ j : TensorEigenIdx (I := I) (M := M) g r s,
-      ⟪b i, b j⟫_ℝ = if j = i then (1 : ℝ) else 0 := by
-    intro j
-    rw [show ⟪b i, b j⟫_ℝ = ⟪b j, b i⟫_ℝ from real_inner_comm _ _]
-    exact (orthonormal_iff_ite (𝕜 := ℝ) (v := b)).mp h_orthonormal j i
-  -- Each mapped term collapses to a Kronecker delta.
-  have h_summand_eq : ∀ j : TensorEigenIdx (I := I) (M := M) g r s,
-      (innerSL ℝ (b i))
-          (Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) j) * t) •
-            ⟪b j, U⟫_ℝ • b j) =
-        if j = i then
-          Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) j) * t) *
-            ⟪b j, U⟫_ℝ
-        else 0 := by
-    intro j
-    change ⟪b i,
-        Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) j) * t) •
-          ⟪b j, U⟫_ℝ • b j⟫_ℝ = _
-    rw [real_inner_smul_right, real_inner_smul_right, h_inner_eq]
-    by_cases hji : j = i
-    · subst hji; simp
-    · simp [hji]
-  have h_inner_hsum' : HasSum (fun j =>
-      if j = i then
-        Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) j) * t) *
-          ⟪b j, U⟫_ℝ
-      else 0)
-      ((innerSL ℝ (b i))
-        (∑' j, Real.exp
-            (-(TensorEigenIdx.lambda (I := I) (M := M) j) * t) •
-          ⟪b j, U⟫_ℝ • b j)) := by
-    convert h_inner_hsum using 1
-    funext j
-    exact (h_summand_eq j).symm
-  -- The Kronecker-delta series sums to the `i`-th term.
-  have h_tsum_ite :
-      ∑' j : TensorEigenIdx (I := I) (M := M) g r s,
-        (if j = i then
-          Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) j) * t) *
-            ⟪b j, U⟫_ℝ
-        else 0) =
-      Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
-        ⟪b i, U⟫_ℝ := by
-    rw [tsum_ite_eq i]
-  -- Identify.
-  have h_eq := h_inner_hsum'.tsum_eq
-  rw [h_tsum_ite] at h_eq
-  exact h_eq.symm
-
-/-- **Consistency with the `L²` heat semigroup.** At `a = b = 0`, the
-spectral-scale heat semigroup `tensorHeatSemigroupHs` agrees, under the
-isometric identification `tensorHsZeroEquivL2 : H⁰ ≃ₗᵢ TensorL2`, with
-the `L²` heat semigroup `tensorHeatSemigroup`. -/
-theorem tensorHeatSemigroupHs_zeroEquivL2 {g : SmoothRiemannianMetric I M}
-    {r s : ℕ} (h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M)
-    {t : ℝ} (ht : 0 < t)
-    (T : tensorHs (I := I) (M := M) g r s 0) :
-    tensorHsZeroEquivL2 (I := I) (M := M) h_atlas
-        (tensorHeatSemigroupHs (I := I) (M := M) (g := g) (r := r) (s := s) ht (a := 0) (b := 0)
-          T) =
-      tensorHeatSemigroup (I := I) (M := M) g r s h_atlas t
-        (tensorHsZeroEquivL2 (I := I) (M := M) h_atlas T) := by
-  classical
-  -- Compare `L²` eigenbasis coordinates; the eigenbasis representation
-  -- is injective.
-  refine (tensorResolventHilbertEigenbasisSigma
-    (I := I) (M := M) h_atlas).repr.injective ?_
-  ext i
-  -- LHS coordinate.
-  have hlhs : ((tensorResolventHilbertEigenbasisSigma
-        (I := I) (M := M) h_atlas).repr
-      (tensorHsZeroEquivL2 (I := I) (M := M) h_atlas
-        (tensorHeatSemigroupHs (I := I) (M := M) (g := g) (r := r) (s := s) ht
-          (a := 0) (b := 0) T))) i =
-      Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
-        T.coeff i := by
-    have h := tensorHsZeroEquivL2_tensorL2Coeff (I := I) (M := M) h_atlas
-      (tensorHeatSemigroupHs (I := I) (M := M) (g := g) (r := r) (s := s) ht
-        (a := 0) (b := 0) T) i
-    rw [tensorHeatSemigroupHs_coeff] at h
-    simpa only [tensorL2Coeff] using h
-  -- RHS coordinate.
-  have hrhs : ((tensorResolventHilbertEigenbasisSigma
-        (I := I) (M := M) h_atlas).repr
-      (tensorHeatSemigroup (I := I) (M := M) g r s h_atlas t
-        (tensorHsZeroEquivL2 (I := I) (M := M) h_atlas T))) i =
-      Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
-        T.coeff i := by
-    have h := tensorL2Coeff_tensorHeatSemigroup (I := I) (M := M) h_atlas
-      ht.le (tensorHsZeroEquivL2 (I := I) (M := M) h_atlas T) i
-    rw [tensorHsZeroEquivL2_tensorL2Coeff] at h
-    simpa only [tensorL2Coeff] using h
-  rw [hlhs, hrhs]
-
-/-! ## The semigroup law on the scale
-
-For `t, s > 0`, the spectral-scale heat semigroup satisfies
-`e^{(t+s)Δ} = e^{tΔ} ∘ e^{sΔ}`, the composition routing through any
-intermediate exponent. Both sides multiply coordinate `i` by
-`exp(-λᵢ(t+s))`, factored as `exp(-λᵢ t) · exp(-λᵢ s)`. -/
-
 /-- **Semigroup law on the spectral Sobolev scale.** For `t, s > 0` and
 any exponents `a`, `c`, `b`, composing the heat semigroup `Hᵃ → Hᶜ` after
 `Hᶜ → Hᵇ`... — concretely, `e^{(t+s)Δ}` as a map `Hᵃ → Hᵇ` equals
@@ -1041,7 +834,6 @@ theorem tensorHeatSemigroupHs_add {g : SmoothRiemannianMetric I M}
   funext i
   rw [tensorHeatSemigroupHs_coeff, tensorHeatSemigroupHs_coeff,
     tensorHeatSemigroupHs_coeff]
-  -- `exp(-λ(t+u)) = exp(-λt) · exp(-λu)`.
   set lam := TensorEigenIdx.lambda (I := I) (M := M) i with hlam_def
   have h_exp_add :
       Real.exp (-lam * (t + u)) =
@@ -1068,8 +860,6 @@ theorem tensorHeatSemigroupHs_add_comp {g : SmoothRiemannianMetric I M}
   rw [ContinuousLinearMap.comp_apply]
   exact tensorHeatSemigroupHs_add (I := I) (M := M) ht hu
     (a := a) (b := a) (c := a) T
-
-/-! ## Sanity tests -/
 
 example {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {t : ℝ} (ht : 0 < t)

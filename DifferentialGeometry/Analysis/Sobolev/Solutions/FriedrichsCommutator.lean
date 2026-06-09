@@ -27,8 +27,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## The commutator and its pointwise integral form -/
-
 /-- The Friedrichs commutator
 `commutatorPointwise a u φ x := a x · (u ⋆ φ) x - ((a · u) ⋆ φ) x`. -/
 def commutatorPointwise (a u φ : E → ℝ) (x : E) : ℝ :=
@@ -176,8 +174,6 @@ lemma commutatorPointwise_eq_integral
   refine integral_congr_ae (Eventually.of_forall fun t => ?_)
   ring
 
-/-! ## Pointwise bound on the commutator -/
-
 omit [NeZero d] in
 /-- Pointwise bound on the commutator integrand: when `φ` has support in
 `closedBall 0 ε` and `a` is `Λ`-Lipschitz, the integrand `φ(x-t)·(a x - a t)·u(t)`
@@ -251,8 +247,6 @@ lemma abs_commutatorPointwise_le
         rw [← integral_const_mul]
         congr 1; funext t; ring
 
-/-! ## Lintegral version and Cauchy–Schwarz -/
-
 omit [NeZero d] in
 /-- Translate-invariance of the lintegral on `E`. -/
 private lemma lintegral_constSub
@@ -306,7 +300,6 @@ private lemma enorm_commutatorPointwise_le_lintegral
       ofReal_integral_eq_lintegral_ofReal h_int_abs' h_int_nn]
   refine lintegral_mono fun t => ?_
   rw [ENNReal.ofReal_mul (hφ_nn _)]
-  -- ENNReal.ofReal |u t| = ‖u t‖ₑ.
   exact le_of_eq (by rw [Real.enorm_eq_ofReal_abs])
 
 omit [NeZero d] in
@@ -369,15 +362,12 @@ private lemma lintegral_phi_norm_u_sq_le
              = ∫⁻ t, Φ t * ‖u t‖ₑ ^ (2 : ℝ) ∂(volume : Measure E) :=
     lintegral_congr fun t => hg_sq t
   rw [hLHS, hRHS1, hRHS2] at hHolder
-  -- Square both sides: (a · b)² with a, b nonneg ≥ in ENNReal works via rpow.
   have hsq := ENNReal.rpow_le_rpow hHolder (by norm_num : (0 : ℝ) ≤ 2)
   rw [ENNReal.mul_rpow_of_nonneg _ _ (by norm_num : (0 : ℝ) ≤ 2)] at hsq
   have hsimp : ∀ a : ℝ≥0∞, (a ^ ((1 : ℝ) / 2)) ^ (2 : ℝ) = a := fun a => by
     rw [← ENNReal.rpow_mul]; norm_num
   rw [hsimp, hsimp] at hsq
   exact hsq
-
-/-! ## L² norm bound on the commutator -/
 
 omit [NeZero d] in
 /-- For continuous compactly supported `φ : E → ℝ`, `∫⁻ ofReal(φ) < ∞`. -/
@@ -423,7 +413,6 @@ private lemma eLpNorm_commutatorPointwise_sq_le_aux
   have hφ_meas : Measurable φ := hφ_cont.measurable
   have hu_meas : AEMeasurable u (volume : Measure E) :=
     hu.aestronglyMeasurable.aemeasurable
-  -- eLpNorm² as a lintegral.
   have h_eLpNorm_sq :
       eLpNorm (commutatorPointwise a u φ) 2 (volume : Measure E) ^ (2 : ℝ)
         = ∫⁻ x, ‖commutatorPointwise a u φ x‖ₑ ^ (2 : ℝ)
@@ -437,7 +426,6 @@ private lemma eLpNorm_commutatorPointwise_sq_le_aux
     rw [← ENNReal.rpow_mul]
     rw [show (1 : ℝ) / 2 * 2 = 1 from by norm_num, ENNReal.rpow_one]
   rw [h_eLpNorm_sq]
-  -- Pointwise bound.
   have h_pt : ∀ x : E,
       ‖commutatorPointwise a u φ x‖ₑ ^ (2 : ℝ)
       ≤ ENNReal.ofReal (Λ * ε) ^ (2 : ℝ)
@@ -457,12 +445,10 @@ private lemma eLpNorm_commutatorPointwise_sq_le_aux
     refine mul_le_mul_of_nonneg_left ?_ (zero_le _)
     exact lintegral_phi_norm_u_sq_le hφ_meas u hu_meas x
   refine (lintegral_mono h_pt).trans ?_
-  -- Pull out the constant `(ofReal (Λε))^2`.
   have hpow_finite : (ENNReal.ofReal (Λ * ε)) ^ (2 : ℝ) ≠ ∞ := by
     refine ENNReal.rpow_ne_top_of_nonneg (by norm_num) ?_
     exact ENNReal.ofReal_ne_top
   rw [lintegral_const_mul' _ _ hpow_finite]
-  -- Translate-invariance: ∫⁻ ofReal(φ(x-t)) ∂t = ∫⁻ ofReal(φ y) ∂y, constant in x.
   have hB : ∀ x : E,
       ∫⁻ t, ENNReal.ofReal (φ (x - t)) ∂(volume : Measure E) =
         ∫⁻ y, ENNReal.ofReal (φ y) ∂(volume : Measure E) :=
@@ -480,7 +466,6 @@ private lemma eLpNorm_commutatorPointwise_sq_le_aux
     refine lintegral_congr fun x => ?_
     rw [hB x]
   rw [h_step1]
-  -- Move ofReal(Λε)^2 past the (∫⁻ φ).
   rw [show ENNReal.ofReal (Λ * ε) ^ (2 : ℝ)
         * ((∫⁻ y, ENNReal.ofReal (φ y) ∂(volume : Measure E))
             * ∫⁻ x, ∫⁻ t, ENNReal.ofReal (φ (x - t)) * ‖u t‖ₑ ^ (2 : ℝ)
@@ -489,24 +474,20 @@ private lemma eLpNorm_commutatorPointwise_sq_le_aux
           * (∫⁻ y, ENNReal.ofReal (φ y) ∂(volume : Measure E))
           * ∫⁻ x, ∫⁻ t, ENNReal.ofReal (φ (x - t)) * ‖u t‖ₑ ^ (2 : ℝ)
               ∂(volume : Measure E) ∂(volume : Measure E) from by ring]
-  -- Apply Tonelli on the inner double-lintegral.
   have h_tonelli :
       ∫⁻ x, ∫⁻ t, ENNReal.ofReal (φ (x - t)) * ‖u t‖ₑ ^ (2 : ℝ)
           ∂(volume : Measure E) ∂(volume : Measure E) =
         ∫⁻ t, ∫⁻ x, ENNReal.ofReal (φ (x - t)) * ‖u t‖ₑ ^ (2 : ℝ)
           ∂(volume : Measure E) ∂(volume : Measure E) := by
     refine lintegral_lintegral_swap ?_
-    -- AE-measurability of (x,t) ↦ ENNReal.ofReal(φ(x-t)) · ‖u t‖ₑ²
     refine AEMeasurable.mul ?_ ?_
     · exact (ENNReal.measurable_ofReal.comp (hφ_cont.measurable.comp
         (measurable_fst.sub measurable_snd))).aemeasurable
-    · -- ‖u t‖ₑ² depends on t = snd
-      have := (hu_meas.enorm).pow_const (2 : ℝ)
+    · have := (hu_meas.enorm).pow_const (2 : ℝ)
       exact this.comp_quasiMeasurePreserving
         (Measure.quasiMeasurePreserving_snd
           (μ := (volume : Measure E)) (ν := (volume : Measure E)))
   rw [h_tonelli]
-  -- For each t, ∫⁻ x ofReal(φ(x-t)) dx = ∫⁻ y ofReal(φ y) dy.
   have h_inner : ∀ t : E,
       ∫⁻ x, ENNReal.ofReal (φ (x - t)) * ‖u t‖ₑ ^ (2 : ℝ)
           ∂(volume : Measure E) =
@@ -518,21 +499,16 @@ private lemma eLpNorm_commutatorPointwise_sq_le_aux
       exact ENNReal.coe_ne_top)]
     rw [mul_comm]
     congr 1
-    -- ∫⁻ x ofReal(φ(x-t)) dx = ∫⁻ y ofReal(φ y) dy by translate-invariance.
     have hMP : MeasurePreserving (fun x : E => x - t) volume volume := by
       have h_addR : MeasurePreserving (fun x : E => x + (-t)) volume volume :=
         measurePreserving_add_right volume (-t)
       have heq : (fun x : E => x - t) = (fun x : E => x + (-t)) := by
         funext x; rw [sub_eq_add_neg]
       rw [heq]; exact h_addR
-    -- (· - t) is a measurable embedding; it's a homeomorphism.
     exact hMP.lintegral_comp_emb (Homeomorph.subRight t).measurableEmbedding
       (fun y : E => ENNReal.ofReal (φ y))
-  -- Substitute.
   conv_lhs => rw [lintegral_congr (fun t => h_inner t)]
-  -- Now ∫⁻ t ‖u t‖ₑ² · (∫⁻ φ) ∂t = (∫⁻ φ) · ∫⁻ ‖u‖ₑ².
   rw [lintegral_mul_const' _ _ (lintegral_ofReal_phi_lt_top hφ_cont hφ_compact).ne]
-  -- Connect ∫⁻ ‖u‖ₑ² to eLpNorm u 2 ^ 2.
   have h_u_sq : ∫⁻ t, ‖u t‖ₑ ^ (2 : ℝ) ∂(volume : Measure E)
       = eLpNorm u 2 (volume : Measure E) ^ (2 : ℝ) := by
     rw [eLpNorm_eq_lintegral_rpow_enorm_toReal
@@ -542,8 +518,6 @@ private lemma eLpNorm_commutatorPointwise_sq_le_aux
     rw [h_2toReal, ← ENNReal.rpow_mul]
     rw [show (1 : ℝ) / 2 * 2 = 1 from by norm_num, ENNReal.rpow_one]
   rw [h_u_sq]
-  -- Goal: A^2 · (B · (E · B)) ≤ A^2 · B^2 · E (= up to commutativity), where
-  -- B = ∫⁻ ofReal(φ) and E = eLpNorm u 2 ^ 2 (and A^2 = ofReal(Λε)^2).
   refine le_of_eq ?_
   set A : ℝ≥0∞ := ENNReal.ofReal (Λ * ε) ^ (2 : ℝ)
   set B : ℝ≥0∞ := ∫⁻ y, ENNReal.ofReal (φ y) ∂(volume : Measure E)
@@ -552,9 +526,6 @@ private lemma eLpNorm_commutatorPointwise_sq_le_aux
     rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) from by norm_cast, ENNReal.rpow_natCast,
       pow_two]
   rw [hBsq]
-  -- Goal: A * B * (Eu * B) = A * (B * B) * Eu.
-  -- LHS = (A * B) * (Eu * B); RHS = (A * (B * B)) * Eu.
-  -- Both equal A * B * B * Eu (in suitable bracketing).
   rw [mul_assoc A B (Eu * B), ← mul_assoc B Eu B, mul_comm B Eu,
     mul_assoc Eu B B, mul_comm Eu (B * B), ← mul_assoc]
 
@@ -578,15 +549,12 @@ theorem eLpNorm_commutatorPointwise_le
   classical
   have h_sq := eLpNorm_commutatorPointwise_sq_le_aux
     hΛ_nn hε_nn ha_cont ha_bd ha_lip hu hφ_cont hφ_compact hφ_nn hφ_supp
-  -- Take square root.
   have h_root := ENNReal.rpow_le_rpow h_sq (by norm_num : (0 : ℝ) ≤ (1 : ℝ) / 2)
-  -- LHS: (eLpNorm^2)^(1/2) = eLpNorm.
   have hLHS : (eLpNorm (commutatorPointwise a u φ) 2 (volume : Measure E)
       ^ (2 : ℝ)) ^ ((1 : ℝ) / 2)
       = eLpNorm (commutatorPointwise a u φ) 2 (volume : Measure E) := by
     rw [← ENNReal.rpow_mul]
     rw [show (2 : ℝ) * ((1 : ℝ) / 2) = 1 from by norm_num, ENNReal.rpow_one]
-  -- RHS: (A^2 * B^2 * C^2)^(1/2) = A * B * C.
   have hRHS :
       (ENNReal.ofReal (Λ * ε) ^ (2 : ℝ) *
         (∫⁻ y, ENNReal.ofReal (φ y) ∂(volume : Measure E)) ^ (2 : ℝ) *
@@ -604,8 +572,6 @@ theorem eLpNorm_commutatorPointwise_le
   rw [hRHS] at h_root
   exact h_root
 
-/-! ## Tendsto: convergence of the commutator to zero -/
-
 /-- For `0 < ε`, the rescaled mollifier `mollifierEps hε` is continuous, has
 compact support in `closedBall 0 ε`, is nonneg, and integrates to `1`. -/
 private lemma mollifierEps_props {ε : ℝ} (hε : 0 < ε) :
@@ -619,8 +585,7 @@ private lemma mollifierEps_props {ε : ℝ} (hε : 0 < ε) :
   refine ⟨mollifierEps_continuous hε, mollifierEps_compactSupport hε,
     mollifierEps_nonneg hε, ?_, ?_⟩
   · exact mollifierEps_support_subset_closedBall_eps hε
-  · -- ∫⁻ ofReal(mollifierEps) = 1 from ∫ mollifierEps = 1.
-    have h_int : ∫ y, mollifierEps (d := d) hε y ∂(volume : Measure E) = 1 :=
+  · have h_int : ∫ y, mollifierEps (d := d) hε y ∂(volume : Measure E) = 1 :=
       mollifierEps_integral_eq_one hε
     have h_integrable : Integrable (mollifierEps (d := d) hε)
         (volume : Measure E) := mollifierEps_integrable hε
@@ -660,27 +625,16 @@ theorem friedrichsCommutator_tendsto_zero
   have ha_lip : ∀ x y : E, |a x - a y| ≤ Λ * ‖x - y‖ := by
     intro x y
     have h_dist := hLip.dist_le_mul x y
-    -- h_dist : dist (a x) (a y) ≤ ↑⟨Λ, hΛ_nn⟩ * dist x y
     rw [Real.dist_eq, dist_eq_norm] at h_dist
     exact h_dist
   rw [ENNReal.tendsto_nhds_zero]
   intro η hη_pos
-  -- We will show: for ε small, eLpNorm(commutator) ≤ ENNReal.ofReal(Λε) · C ≤ η.
   set C : ℝ≥0∞ := eLpNorm u 2 (volume : Measure E) with hC_def
   have hC_top : C ≠ ∞ := hu.eLpNorm_lt_top.ne
-  -- Filter.Eventually: ε ∈ 𝓝[>] 0, so ε > 0 and ε small.
-  -- We need ε such that: ofReal(Λε) · C ≤ η.
-  -- Equivalently: ofReal(Λε) ≤ η / C  (when C ≠ 0, ≠ ∞).
-  -- We do an `Eventually` argument using `eventually_nhdsWithin_iff` etc.
-  -- Simplest: choose δ = (η.toReal / (Λ + 1) / (C.toReal + 1)) > 0.
-  -- Then for 0 < ε < δ: ε · Λ · C ≤ ε · (Λ + 1) · (C.toReal + 1) < δ * (Λ+1) * (C.toReal+1) ≤ η.
-  -- Argue carefully.
   rcases eq_or_ne η ∞ with hη_top | hη_ne_top
-  · -- Trivial case: η = ∞.
-    rw [hη_top]
+  · rw [hη_top]
     refine Filter.Eventually.of_forall fun _ => ?_
     exact le_top
-  -- η is finite. ηtop := η.toReal > 0.
   set ηtop : ℝ := η.toReal with hηtop_def
   have hηtop_pos : 0 < ηtop := by
     rw [hηtop_def]
@@ -694,7 +648,6 @@ theorem friedrichsCommutator_tendsto_zero
     exact mul_pos h1 h2
   set δ : ℝ := ηtop / M with hδ_def
   have hδ_pos : 0 < δ := div_pos hηtop_pos hM_pos
-  -- Eventually for ε ∈ 𝓝[>] 0, |ε| < δ. Use `Filter.eventually_nhdsWithin_iff`.
   have h_eventually : ∀ᶠ ε : ℝ in 𝓝[>] (0 : ℝ),
       0 < ε ∧ ε < δ := by
     have h1 : ∀ᶠ ε : ℝ in 𝓝[>] (0 : ℝ), 0 < ε := by
@@ -713,27 +666,15 @@ theorem friedrichsCommutator_tendsto_zero
       h_cont h_compact h_nn h_supp
   rw [h_intone, mul_one] at h_bound
   refine h_bound.trans ?_
-  -- ofReal(Λε) · C ≤ η.
-  -- We have ε < δ = ηtop / M = ηtop / ((Λ+1)(Ctop+1)).
-  -- So Λ · ε < Λ · δ = Λ · ηtop / ((Λ+1)(Ctop+1)) ≤ ηtop / (Ctop+1).
-  -- Then ofReal(Λε) · C ≤ ENNReal.ofReal(ηtop / (Ctop+1)) · ofReal(Ctop+1) ≤ ofReal(ηtop) = η.
-  -- Let's show: ofReal(Λε) · C ≤ ofReal(ηtop) = η.
-  -- We have `C ≤ ofReal(Ctop) + 1`. (Since C.toReal = Ctop, and ofReal(Ctop) = C if C < ∞.)
-  -- ofReal(Λε) · C = ofReal(Λε * Ctop) ≤ ofReal(η - ?)
   have hC_eq_form : ENNReal.ofReal Ctop = eLpNorm u 2 (volume : Measure E) := by
     change ENNReal.ofReal (eLpNorm u 2 (volume : Measure E)).toReal
       = eLpNorm u 2 (volume : Measure E)
     exact ENNReal.ofReal_toReal hC_top
   have hΛε_nn : 0 ≤ Λ * ε := mul_nonneg hΛ_nn hε_pos.le
-  -- ENNReal.ofReal(Λε) · C = ENNReal.ofReal(Λε * Ctop) using hC_eq_form.
   rw [← hC_eq_form]
   rw [← ENNReal.ofReal_mul hΛε_nn]
-  -- Goal: ENNReal.ofReal (Λ * ε * Ctop) ≤ η.
-  -- Equivalently: Λ * ε * Ctop ≤ ηtop (since both are nonneg, and η = ofReal(ηtop)).
   rw [← ENNReal.ofReal_toReal hη_ne_top]
   refine ENNReal.ofReal_le_ofReal ?_
-  -- Λ · ε · Ctop ≤ ηtop. We have ε < ηtop / M = ηtop / ((Λ+1)(Ctop+1)).
-  -- So Λ · ε · Ctop ≤ (Λ+1) · ε · (Ctop+1) = ε · M < (ηtop/M)·M = ηtop.
   have hCalc : Λ * ε * Ctop ≤ (Λ + 1) * ε * (Ctop + 1) := by
     have h1 : Λ ≤ Λ + 1 := by linarith
     have h2 : Ctop ≤ Ctop + 1 := by linarith
@@ -749,13 +690,10 @@ theorem friedrichsCommutator_tendsto_zero
             have h3 : 0 ≤ (Λ + 1) * ε := mul_nonneg hΛp1_nn hε_nn
             exact mul_le_mul_of_nonneg_left h2 h3
   refine hCalc.trans ?_
-  -- Goal: (Λ + 1) * ε * (Ctop + 1) ≤ η.toReal = ηtop.
   change (Λ + 1) * ε * (Ctop + 1) ≤ ηtop
-  -- Recall hε_lt : ε < δ = ηtop / M = ηtop / ((Λ+1)*(Ctop+1)).
   have hM_pos' : 0 < (Λ + 1) * (Ctop + 1) := hM_pos
   have hε_lt_div : ε < ηtop / ((Λ + 1) * (Ctop + 1)) := hε_lt
   have h_factor_pos : 0 < (Λ + 1) * (Ctop + 1) := hM_pos'
-  -- (Λ+1) * ε * (Ctop+1) = ε * ((Λ+1)*(Ctop+1)).
   have hr : (Λ + 1) * ε * (Ctop + 1) = ε * ((Λ + 1) * (Ctop + 1)) := by ring
   rw [hr]
   have h_lt : ε * ((Λ + 1) * (Ctop + 1)) < (ηtop / ((Λ + 1) * (Ctop + 1)))

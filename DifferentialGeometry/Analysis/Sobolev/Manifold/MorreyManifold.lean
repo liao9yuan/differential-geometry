@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Euclidean.Morrey
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.Morrey
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.Equivalence
 import DifferentialGeometry.Analysis.Sobolev.Manifold.Embedding
 import DifferentialGeometry.Analysis.Sobolev.Manifold.EmbeddingSubcritical
@@ -6,8 +6,8 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridgeUniform
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDense
 import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichManifold
-import DifferentialGeometry.Integral.Measure.Family
-import DifferentialGeometry.Integral.Measure.Glue
+import DifferentialGeometry.Analysis.Integration.Measure.Family
+import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 
 /-!
 # Manifold Morrey embedding `W^{1,p}_chart(M) ↪ C^0(M)` for `p > n`
@@ -53,20 +53,12 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Per-chart smooth extension `chartPushedExtAt` reused from `Equivalence.lean`
-
-`Equivalence.lean` already defines the smooth extension of a chart-pushed
-function as a private definition. We re-introduce it here under a fresh name,
-together with the lemmas we need. -/
 
 /-- The smooth global extension of `f : M → ℝ` to `EuclN`, equal to
 `f ((extChartAt I α).symm (toEuclidean.symm y))` if `(toEuclidean.symm) y` is in
@@ -120,8 +112,6 @@ private lemma chartSmoothExt_apply_of_notMem_chartTargetEuclid
   rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
   exact hy
 
-/-! ## On the chart-target image, `chartSmoothExt` agrees with `chartPushed`. -/
-
 /-- On the chart-target image, `chartSmoothExt α (ρ_α · u)` agrees pointwise with
 `chartPushed ρ α u`. -/
 private lemma chartSmoothExt_eq_chartPushed_on_target
@@ -135,8 +125,6 @@ private lemma chartSmoothExt_eq_chartPushed_on_target
   rw [chartSmoothExt_apply_of_mem_chartTargetEuclid (I := I) (M := M) α _ hy]
   unfold chartPushed
   rfl
-
-/-! ## Smoothness and compact support of `chartSmoothExt` for smooth `f` -/
 
 private lemma image_toEuclidean_chart_tsupport_isCompact
     [CompactSpace M] {f : M → ℝ} {α : M}
@@ -217,8 +205,6 @@ private lemma tsupport_chartSmoothExt_subset
       (I := I) (M := M) α (f := f) hf_supp hyK
   rw [tsupport]
   exact hK_closed.closure_subset_iff.mpr h_supp_sub
-
-/-! ## Smoothness of `chartSmoothExt` for smooth `f` -/
 
 private lemma contDiffOn_chartSmoothExt_formula
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -308,8 +294,6 @@ private lemma contDiff_chartSmoothExt
     exact contDiffAt_chartSmoothExt_of_notMem_image_tsupport
       (I := I) (M := M) α (f := f) hf_supp hf_compact hy_off
 
-/-! ## Smoothness of `chartSmoothExt α (ρ_α · u)` for smooth `u : M → ℝ` -/
-
 omit [IsManifold I ∞ M] in
 private lemma tsupport_pou_mul_subset_chart_source
     (ρ : SmoothPartitionOfUnity M I M Set.univ)
@@ -374,8 +358,6 @@ private lemma tsupport_chartSmoothExt_pou_mul_subset_chart_image
   refine hstep.trans ?_
   intro y ⟨z, ⟨x, hx_supp, hxz⟩, hzy⟩
   refine ⟨z, ⟨x, hsubset_tsupport hx_supp, hxz⟩, hzy⟩
-
-/-! ## Compact support set independent of `u` -/
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 
@@ -469,8 +451,6 @@ lemma chartCarrier_subset_full_ball (α : M) :
   have h := chartRadius_pos (I := I) (M := M) α
   linarith
 
-/-! ## Per-chart smooth sup bound on `chartSmoothExt α (ρ_α · u)` -/
-
 /-- For smooth `u : M → ℝ`, `chartSmoothExt α (ρ_α · u)` is supported in
 `chartCarrier α`. -/
 lemma tsupport_chartSmoothExt_pou_mul_subset_chartCarrier
@@ -494,7 +474,6 @@ private lemma chartSmoothExt_pou_mul_eq_zero_off_half_ball
         : C^∞⟮I, M; ℝ⟯) x * u x) y = 0 := by
   by_contra hne
   apply hy
-  -- y ∈ support → y ∈ tsupport ⊆ chartCarrier α ⊆ ball 0 (R/2).
   have h_in_supp : y ∈ Function.support (chartSmoothExt (I := I) (M := M) α
       (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) x * u x)) := Function.mem_support.mpr hne
@@ -548,11 +527,9 @@ private lemma chartSmoothExt_morrey_sup_uniform
     exact this
   by_cases hy_half : y ∈ Metric.ball (0 : EuclN) (chartRadius (I := I) (M := M) α / 2)
   · exact hbound hf_smooth_top y hy_half
-  · -- f y = 0, so LHS = 0.
-    have hf_y_zero : f y = 0 :=
+  · have hf_y_zero : f y = 0 :=
       chartSmoothExt_pou_mul_eq_zero_off_half_ball (I := I) (M := M) α u hy_half
     rw [hf_y_zero, norm_zero]
-    -- RHS ≥ 0.
     have h_nn1 : 0 ≤ (eLpNorm f (ENNReal.ofReal p)
         (volume.restrict (Metric.ball (0 : EuclN) (chartRadius (I := I) (M := M) α)))).toReal :=
       ENNReal.toReal_nonneg
@@ -567,18 +544,6 @@ private lemma chartSmoothExt_morrey_sup_uniform
       apply mul_nonneg hC_nn
       linarith
     exact h_RHS_nn
-
-/-! ## Indicator-style equalities for the eLpNorm of `chartSmoothExt α (ρ_α · u)`
-
-The strategy: `chartSmoothExt α (ρ_α · u)` has tsupport contained in
-`chartCarrier α`, a closed set inside the open `chartTargetEuclid α`. So:
-- on the open `(chartCarrier α)ᶜ`, the function is 0, hence `fderiv = 0` there;
-- on `(chartTargetEuclid α)ᶜ`, the function is 0 by definition, and since
-  `(chartTargetEuclid α)ᶜ ⊆ (chartCarrier α)ᶜ`, fderiv is also 0.
-
-Hence the eLpNorms of `chartSmoothExt` and its `fderiv` agree under
-`volume`, `volume.restrict (chartTargetEuclid α)`, and even
-`volume.restrict B(0, R_α)` where `chartCarrier α ⊆ B(0, R_α)`. -/
 
 /-- Outside `chartTargetEuclid α`, `chartSmoothExt α f = 0` for any `f`. -/
 private lemma chartSmoothExt_eq_zero_off_target
@@ -650,7 +615,6 @@ private lemma eLpNorm_norm_fderiv_chartSmoothExt_pou_mul_eq_restrict_target
     chartCarrier_subset_chartTargetEuclid (I := I) (M := M) α
   have hΩ_meas : MeasurableSet Ω :=
     chartTargetEuclid_measurableSet (I := I) (M := M) α
-  -- For y ∉ Ω, also y ∉ K (since K ⊆ Ω), so fderiv h y = 0, so ‖fderiv h y‖ = 0.
   set fnNorm : EuclN → ℝ := fun z => ‖fderiv ℝ h z‖ with hfnNorm_def
   have h_eq : fnNorm = Ω.indicator fnNorm := by
     funext y
@@ -697,7 +661,6 @@ private lemma eLpNorm_chartSmoothExt_pou_mul_restrict_ball_eq_restrict_target
   have hBR_meas : MeasurableSet BR := measurableSet_ball
   have hΩ_meas : MeasurableSet Ω :=
     chartTargetEuclid_measurableSet (I := I) (M := M) α
-  -- For y ∉ K, h y = 0. So h has tsupport in K ⊆ BR ∩ Ω.
   have h_eq_BR : h = BR.indicator h := by
     funext y
     by_cases hy : y ∈ BR
@@ -777,8 +740,6 @@ private lemma eLpNorm_norm_fderiv_chartSmoothExt_pou_mul_restrict_ball_eq_restri
     _ = eLpNorm fnNorm q (volume.restrict Ω) :=
         eLpNorm_indicator_eq_eLpNorm_restrict hΩ_meas
 
-/-! ## Bridge between `chartSmoothExt α (ρ_α · u)` and `chartPushed ρ α u` -/
-
 omit [I.Boundaryless] in
 /-- `chartSmoothExt α (ρ_α · u)` and `chartPushed ρ α u` agree a.e. on
 `volume.restrict (chartTargetEuclid α)`. -/
@@ -825,8 +786,6 @@ private lemma eLpNorm_chartSmoothExt_ball_le_wkpNormChart
   rw [eLpNorm_chartSmoothExt_target_eq_eLpNorm_chartPushed_target
     (I := I) (M := M) α u q]
   exact eLpNorm_chartPushed_p_le_wkpNorm_one (I := I) (M := M) g (p := q) u α
-
-/-! ## Per-partial gradient bound for `chartSmoothExt α (ρ_α · u)` -/
 
 /-- `‖w‖ ≤ ∑ i, ‖w i‖` in `EuclideanSpace`. -/
 private lemma euclN_norm_le_sum_components_norms (w : EuclN) :
@@ -944,14 +903,12 @@ private lemma classical_partial_ae_eq_chosenWeakPartial_local
       =ᵐ[volume.restrict Ω]
       DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial' q i f Ω := by
   classical
-  -- f is in MemWkp on Ω.
   have hf_mem : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 1 q f Ω :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_of_smooth_compactSupport_pub
       (d := Module.finrank ℝ E) hΩ_open hf_smooth hf_compact hf_supp hq_one 1
   have hf_W1p : DeGiorgi.MemW1p (d := Module.finrank ℝ E) q f Ω :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p.mp hf_mem
-  -- The classical partial is a weak partial.
   have h_classical_isWeak :
       DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) i
         (fun z : EuclN => (fderiv ℝ f z) (EuclideanSpace.single i 1)) f Ω :=
@@ -989,11 +946,9 @@ private lemma eLpNorm_norm_fderiv_le_d_mul_wkpNorm
         DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
           (d := Module.finrank ℝ E) 1 q f Ω := by
   classical
-  -- Bound by sum of partials.
   have h_grad_le := eLpNorm_norm_fderiv_le_sum_eLpNorm_partials
     (q := q) hq_one (μ := volume.restrict Ω) hf_smooth
   refine h_grad_le.trans ?_
-  -- Each partial eLpNorm equals the chosen weak partial eLpNorm.
   have h_each_eq : ∀ i : Fin (Module.finrank ℝ E),
       eLpNorm (fun z : EuclN => (fderiv ℝ f z) (EuclideanSpace.single i 1)) q
         (volume.restrict Ω) =
@@ -1012,7 +967,6 @@ private lemma eLpNorm_norm_fderiv_le_d_mul_wkpNorm
             q (volume.restrict Ω) :=
     Finset.sum_congr rfl (fun i _ => h_each_eq i)
   rw [h_step1]
-  -- ∑_i eLpNorm chosen ≤ wkpNorm 1 q f Ω.
   have hWkpEq :
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
           (d := Module.finrank ℝ E) 1 q f Ω =
@@ -1077,7 +1031,6 @@ private lemma eLpNorm_norm_fderiv_le_d_mul_wkpNorm
     refine le_add_of_nonneg_left ?_
     exact zero_le _
   refine h_le_wkp.trans ?_
-  -- wkpNorm ≤ d * wkpNorm.
   have hd_pos : 0 < Module.finrank ℝ E := NeZero.pos _
   have hd_one_le : (1 : ℝ≥0∞) ≤ ((Module.finrank ℝ E : ℕ) : ℝ≥0∞) := by
     exact_mod_cast hd_pos
@@ -1087,8 +1040,6 @@ private lemma eLpNorm_norm_fderiv_le_d_mul_wkpNorm
       (d := Module.finrank ℝ E) 1 q f Ω from
     (one_mul _).symm]
   gcongr
-
-/-! ## Bounding `eLpNorm fderiv chartSmoothExt α (ρ_α · u)` by `d · wkpNormChart u` -/
 
 /-- Apply the gradient bound to `chartSmoothExt α (ρ_α · u)`. -/
 private lemma eLpNorm_norm_fderiv_chartSmoothExt_target_le_wkpNormChart
@@ -1190,8 +1141,6 @@ private lemma eLpNorm_norm_fderiv_chartSmoothExt_ball_le_wkpNormChart
   gcongr
   exact wkpNorm_chartPushed_target_le_wkpNormChart (I := I) (M := M) g α u
 
-/-! ## Per-chart smooth Morrey bound on the chart-pushed value -/
-
 /-- For each chart `α`, smooth `u : M → ℝ`, and `p > n`, there is a constant
 `C_α ≥ 0` such that `‖chartSmoothExt α (ρ_α · u) y‖ ≤ C_α · (wkpNormChart u).toReal`
 for ALL `y : EuclN`, uniformly in `u`. -/
@@ -1219,8 +1168,6 @@ private lemma per_chart_smooth_sup_bound
     exact ENNReal.ofReal_le_ofReal hp_one
   obtain ⟨Cmorrey, hCmorrey_nn, hbound⟩ :=
     chartSmoothExt_morrey_sup_uniform (I := I) (M := M) α hp
-  -- Define the final constant. It is `Cmorrey * (1 + d)` so that we can absorb
-  -- the (1 + d) factor coming from the L^p + d * L^p form.
   set d : ℕ := Module.finrank ℝ E
   refine ⟨Cmorrey * (1 + (d : ℝ)), ?_, ?_⟩
   · have hd_nn : 0 ≤ (d : ℝ) := Nat.cast_nonneg _
@@ -1230,14 +1177,10 @@ private lemma per_chart_smooth_sup_bound
     set f : EuclN → ℝ := chartSmoothExt (I := I) (M := M) α
       (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) x * u x) with hf_def
-    -- The L^p part of the chartSmoothExt is bounded by wkpNormChart u.
     have hLp_bd := eLpNorm_chartSmoothExt_ball_le_wkpNormChart
       (I := I) (M := M) g α u (ENNReal.ofReal p)
-    -- The fderiv L^p part of the chartSmoothExt is bounded by d * wkpNormChart u.
     have hgrad_bd := eLpNorm_norm_fderiv_chartSmoothExt_ball_le_wkpNormChart
       (I := I) (M := M) g α hp_enn_one hu
-    -- Need: take .toReal of these inequalities.
-    -- For .toReal monotonicity, need wkpNormChart u ≠ ⊤.
     have hwkp_lt_top : wkpNormChart (I := I) (M := M) g 1 (ENNReal.ofReal p) u < ⊤ :=
       wkpNormChart_lt_top_of_memWkpChart (I := I) (M := M) g hp_enn_one
         (DifferentialGeometry.Analysis.Sobolev.Equivalence.MemWkpChart_of_contMDiff
@@ -1246,7 +1189,6 @@ private lemma per_chart_smooth_sup_bound
       hwkp_lt_top.ne
     set N : ℝ := (wkpNormChart (I := I) (M := M) g 1 (ENNReal.ofReal p) u).toReal with hN_def
     have hN_nn : 0 ≤ N := ENNReal.toReal_nonneg
-    -- LHS bound:
     have hLp_real : (eLpNorm f (ENNReal.ofReal p)
         (volume.restrict (Metric.ball (0 : EuclN) (chartRadius (I := I) (M := M) α)))).toReal
         ≤ N := by
@@ -1279,11 +1221,8 @@ private lemma per_chart_smooth_sup_bound
           ≤ Cmorrey * (N + (d : ℝ) * N) :=
             mul_le_mul_of_nonneg_left h_combined hCmorrey_nn
         _ = Cmorrey * (1 + (d : ℝ)) * N := h1
-    -- Connect h_final with hbound_y.
     rw [hf_def] at h_final
     exact le_trans hbound_y h_final
-
-/-! ## Per-point evaluation: relating `(ρ_α · u)(x)` to `chartSmoothExt α (ρ_α · u)(...)` -/
 
 omit [I.Boundaryless] in
 /-- For `x ∈ chartAt α source`, `(ρ_α · u)(x) = chartSmoothExt α (ρ_α · u) (toEuclidean (extChartAt I α x))`. -/
@@ -1325,12 +1264,10 @@ private lemma norm_pou_mul_le_norm_chartSmoothExt_at_some_point
       : C^∞⟮I, M; ℝ⟯) x * u x‖ ≤ Cmod := by
   classical
   by_cases hx : x ∈ (chartAt H α).source
-  · -- x in chart source: equate (ρ_α · u)(x) to chartSmoothExt at toEuclidean (extChartAt I α x).
-    have h_eq := chartSmoothExt_pou_mul_apply_at_chart_image (I := I) (M := M) α u hx
+  · have h_eq := chartSmoothExt_pou_mul_apply_at_chart_image (I := I) (M := M) α u hx
     rw [← h_eq]
     exact hbound _
-  · -- x ∉ chart source: ρ_α(x) = 0, so (ρ_α · u)(x) = 0.
-    have hρ_zero : (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
+  · have hρ_zero : (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) x = 0 := by
       have hsubord :
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M).IsSubordinate
@@ -1344,8 +1281,6 @@ private lemma norm_pou_mul_le_norm_chartSmoothExt_at_some_point
       exact Function.mem_support.mpr hne
     rw [hρ_zero, zero_mul, norm_zero]
     exact hCmod
-
-/-! ## Smooth manifold-side Morrey sup bound (uniform in `u`) -/
 
 /-- Per-chart constant from `per_chart_smooth_sup_bound`, packaged as a
 function `M → ℝ`. -/
@@ -1428,8 +1363,6 @@ theorem smooth_manifold_morrey_sup_bound_uniform
   intro y
   exact perChartMorreyConst_bound (I := I) (M := M) g hp α hu y
 
-/-! ## L^p convergence inheritance from `wkpNormChart` convergence -/
-
 /-- For `u : M → ℝ` measurable on a closed Riemannian manifold, the manifold
 `L^p` norm with respect to the Riemannian measure `μ_g` is bounded by a constant
 times `wkpNormChart g 1 p u` (for `1 ≤ p < ∞`). -/
@@ -1446,9 +1379,7 @@ private lemma eLpNorm_riemannianMeasure_le_const_mul_wkpNormChart
   set S : Finset M :=
     DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset (I := I) (M := M)
     with hS_def
-  -- Per-chart constants from the uniform bridge.
   set ρ := DifferentialGeometry.Integral.Measure.chartAtlasPOU I M with hρ_def
-  -- For each α, get a constant C_α from the uniform bridge.
   have h_bridge_α : ∀ α : M, ∃ C_α : ℝ, 0 < C_α ∧
       ∀ {u : M → ℝ}, Measurable u → tsupport u ⊆ tsupport (ρ α : M → ℝ) →
         eLpNorm u p
@@ -1466,7 +1397,6 @@ private lemma eLpNorm_riemannianMeasure_le_const_mul_wkpNormChart
       eLpNorm_riemannianMeasure_le_const_mul_eLpNorm_chartPushedRaw_uniform_of_subset
         (I := I) (M := M) g α hKα_compact hKα_sub hp_one hp_top
     exact ⟨C_α, hC_α_pos, hbound⟩
-  -- Take per-chart constants.
   set Cα : M → ℝ := fun α => Classical.choose (h_bridge_α α) with hCα_def
   have hCα_pos : ∀ α : M, 0 < Cα α := fun α => (Classical.choose_spec (h_bridge_α α)).1
   have hCα_bound : ∀ α : M, ∀ {u : M → ℝ}, Measurable u →
@@ -1478,10 +1408,8 @@ private lemma eLpNorm_riemannianMeasure_le_const_mul_wkpNormChart
               ((volume : Measure EuclN).restrict
                 (chartTargetEuclid (I := I) (M := M) α)) := fun α =>
     (Classical.choose_spec (h_bridge_α α)).2
-  -- The total constant is the sum of (Cα α) over S.
   refine ⟨∑ α ∈ S, Cα α, Finset.sum_nonneg (fun α _ => (hCα_pos α).le), ?_⟩
   intro u hu_meas
-  -- u(x) = ∑_α ρ_α (x) · u(x).
   have h_eLpNorm_eq :
       eLpNorm u p (DifferentialGeometry.Integral.Measure.riemannianMeasure
           (I := I) g ρ) =
@@ -1496,7 +1424,6 @@ private lemma eLpNorm_riemannianMeasure_le_const_mul_wkpNormChart
         (I := I) (M := M) x
     rw [← Finset.sum_mul, hsum, one_mul]
   rw [h_eLpNorm_eq]
-  -- Minkowski.
   have h_aesm : ∀ α ∈ S,
       AEStronglyMeasurable (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x)
         (DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g ρ) := by
@@ -1505,7 +1432,6 @@ private lemma eLpNorm_riemannianMeasure_le_const_mul_wkpNormChart
       (ρ α).contMDiff.continuous
     exact (hcont.measurable.mul hu_meas).aestronglyMeasurable
   refine (eLpNorm_sum_le h_aesm hp_one).trans ?_
-  -- For each α, bound by C_α * wkpNormChart u via chartPushed.
   have h_per_α : ∀ α ∈ S,
       eLpNorm (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x) p
         (DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g ρ) ≤
@@ -1522,7 +1448,6 @@ private lemma eLpNorm_riemannianMeasure_le_const_mul_wkpNormChart
       (ρ α).contMDiff.continuous.measurable.mul hu_meas
     have h_bridge := hCα_bound α h_meas h_supp
     refine h_bridge.trans ?_
-    -- chartPushedRaw α (ρα · u) = chartPushed ρ α u a.e. on chart target.
     have h_ae := chartPushed_eq_chartPushedRaw_pou_ae (I := I) (M := M) ρ α u
     have h_eLpNorm_eq :
         eLpNorm (chartPushedRaw I α (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x)) p
@@ -1538,22 +1463,25 @@ private lemma eLpNorm_riemannianMeasure_le_const_mul_wkpNormChart
   refine (Finset.sum_le_sum h_per_α).trans ?_
   rw [← Finset.sum_mul]
   gcongr
-  -- ∑ ofReal (Cα α) ≤ ofReal (∑ Cα α) since Cα ≥ 0.
   rw [show (∑ α ∈ S, ENNReal.ofReal (Cα α)) = ENNReal.ofReal (∑ α ∈ S, Cα α) from ?_]
   refine (ENNReal.ofReal_sum_of_nonneg (fun α _ => (hCα_pos α).le)).symm
 
-/-! ## Headline: Morrey embedding `W^{1,p}_chart(M) ↪ C^0(M)` for `p > n` -/
-
 /-- **Manifold Morrey embedding** `W^{1,p}_chart(M) ↪ C^0(M)` for `p > n` on a
-closed Riemannian manifold. For every measurable `u ∈ W^{1,p}_chart(M)` there is
-a continuous representative `ũ : M → ℝ` (a.e. equal to `u` with respect to the
-Riemannian measure) with the sup-norm bound
+compact (closed) boundaryless Riemannian manifold, where `n = finrank ℝ E` is the
+dimension. For every measurable `u` with `MemWkpChart g 1 (ENNReal.ofReal p) u`
+there exist a constant `C ≥ 0` and a continuous representative `ũ : M → ℝ` such
+that `ũ = u` almost everywhere with respect to the Riemannian measure built from
+the canonical chart-atlas partition of unity, and the sup-norm bound
 
-  `‖ũ(x)‖ ≤ C · (wkpNormChart g 1 p u).toReal`
+  `‖ũ x‖ ≤ C · (wkpNormChart g 1 (ENNReal.ofReal p) u).toReal`
 
-for every `x : M`. The constant `C ≥ 0` depends only on the metric, the
-canonical chart-atlas POU, and the exponent `p`. -/
-theorem morrey_chart_C0_embedding
+holds for every `x : M`. The constant is the uniform smooth-Morrey sup-norm
+constant `Cmorrey` of `smooth_manifold_morrey_sup_bound_uniform`, depending only on
+`g`, the chart atlas, and `p`. The representative is obtained as the uniform limit
+of a sequence of smooth approximations to `u` (which is Cauchy in `C^0` by the
+smooth Morrey bound), with `ũ = u` a.e. coming from an a.e.-convergent subsequence
+of the `L^p` approximation. -/
+theorem morrey_C0_embedding_of_compact
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -1575,7 +1503,6 @@ theorem morrey_chart_C0_embedding
   haveI : BorelSpace E := ⟨rfl⟩
   letI : MeasurableSpace M := borel M
   haveI : BorelSpace M := ⟨rfl⟩
-  -- Step 0: useful bounds on p.
   have hp_pos : 0 < p := lt_of_le_of_lt (Nat.cast_nonneg _) hp
   have hp_one : 1 ≤ p := by
     have hd_one_le : (1 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := by
@@ -1588,7 +1515,6 @@ theorem morrey_chart_C0_embedding
   have hp_enn_top : ENNReal.ofReal p ≠ (⊤ : ℝ≥0∞) := ENNReal.ofReal_ne_top
   have hp_enn_ne_zero : ENNReal.ofReal p ≠ 0 :=
     ENNReal.ofReal_ne_zero_iff.mpr hp_pos
-  -- Step 1: get smooth approximations.
   obtain ⟨Cmorrey, hCmorrey_nn, hMorrey_bd⟩ :=
     smooth_manifold_morrey_sup_bound_uniform (I := I) (M := M) g hp
   have h_pick : ∀ n : ℕ, ∃ v : M → ℝ, ContMDiff I 𝓘(ℝ, ℝ) ∞ v ∧
@@ -1604,20 +1530,16 @@ theorem morrey_chart_C0_embedding
   have hv_close : ∀ n,
       wkpNormChart (I := I) (M := M) g 1 (ENNReal.ofReal p) (fun x => u x - v n x) ≤
         ENNReal.ofReal (1 / (n + 1 : ℝ)) := fun n => (h_pick n).choose_spec.2
-  -- v n in MemWkpChart.
   have hv_mem : ∀ n, MemWkpChart (I := I) (M := M) g 1 (ENNReal.ofReal p) (v n) := fun n =>
     DifferentialGeometry.Analysis.Sobolev.Equivalence.MemWkpChart_of_contMDiff
       (I := I) (M := M) g hp_enn_one (hv_smooth n)
-  -- Step 2: smooth pair-wise sup bound on M (for v n - v m).
   have h_diff_smooth : ∀ n m, ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun x => v n x - v m x) :=
     fun n m => (hv_smooth n).sub (hv_smooth m)
-  -- For each x : M, ‖v n x - v m x‖ ≤ Cmorrey * (wkpNormChart (v n - v m)).toReal.
   have h_pair_sup : ∀ n m (x : M), ‖v n x - v m x‖ ≤
       Cmorrey * (wkpNormChart (I := I) (M := M) g 1 (ENNReal.ofReal p)
         (fun y => v n y - v m y)).toReal := by
     intro n m x
     exact hMorrey_bd (h_diff_smooth n m) x
-  -- The wkpNormChart of v n - v m is bounded by ofReal (1/(n+1) + 1/(m+1)).
   have h_wkp_diff_bound : ∀ n m,
       wkpNormChart (I := I) (M := M) g 1 (ENNReal.ofReal p)
           (fun x => v n x - v m x) ≤
@@ -1636,7 +1558,6 @@ theorem morrey_chart_C0_embedding
       MemWkpChart_sub (I := I) (M := M) g hp_enn_one hu (hv_mem m)
     have h_tri := wkpNormChart_add_le (I := I) (M := M) g hp_enn_one h_diff_m_mem h_diff_n_mem
     refine h_tri.trans ?_
-    -- wkpNormChart (- (u - v n)) = wkpNormChart (u - v n).
     have h_neg_eq :
         wkpNormChart (I := I) (M := M) g 1 (ENNReal.ofReal p)
           (fun x => -(u x - v n x)) =
@@ -1651,8 +1572,6 @@ theorem morrey_chart_C0_embedding
     rw [h_neg_eq]
     rw [add_comm]
     exact add_le_add (hv_close n) (hv_close m)
-  -- Step 3: v_n is uniformly Cauchy on M.
-  -- Define η_n := ENNReal.ofReal (1/(n+1)). η_n → 0.
   have h_decay_to_zero : Tendsto (fun n : ℕ => ENNReal.ofReal (1 / (n + 1 : ℝ)))
       atTop (nhds 0) := by
     have hReal : Tendsto (fun n : ℕ => 1 / (n + 1 : ℝ)) atTop (nhds 0) := by
@@ -1662,13 +1581,11 @@ theorem morrey_chart_C0_embedding
         exact h2.atTop_add tendsto_const_nhds
       simpa using (tendsto_const_nhds (x := (1 : ℝ))).div_atTop h1
     simpa [ENNReal.ofReal_zero] using ENNReal.tendsto_ofReal hReal
-  -- Real-valued Cauchy estimate.
   have h_pair_real : ∀ n m (x : M), ‖v n x - v m x‖ ≤
       Cmorrey * ((1 / (n + 1 : ℝ)) + (1 / (m + 1 : ℝ))) := by
     intro n m x
     refine (h_pair_sup n m x).trans ?_
     apply mul_le_mul_of_nonneg_left _ hCmorrey_nn
-    -- (wkpNormChart (v n - v m)).toReal ≤ 1/(n+1) + 1/(m+1).
     have h_bd := h_wkp_diff_bound n m
     have h_ne_top : ENNReal.ofReal (1 / (n + 1 : ℝ)) +
         ENNReal.ofReal (1 / (m + 1 : ℝ)) ≠ ⊤ :=
@@ -1681,14 +1598,11 @@ theorem morrey_chart_C0_embedding
       rw [ENNReal.toReal_ofReal (by positivity)]
     rw [h_sum_eq] at h_le
     exact h_le
-  -- v is uniformly Cauchy on the whole compact M.
   have h_uniform_cauchy : UniformCauchySeqOn v atTop Set.univ := by
     rw [Metric.uniformCauchySeqOn_iff]
     intro ε hε
-    -- Find N with Cmorrey * (1/(n+1) + 1/(m+1)) < ε for n, m ≥ N.
     by_cases hCm_zero : Cmorrey = 0
-    · -- If Cmorrey = 0, the bound is trivially 0 < ε.
-      refine ⟨0, ?_⟩
+    · refine ⟨0, ?_⟩
       intro n _ m _ x _
       have := h_pair_real n m x
       rw [hCm_zero, zero_mul] at this
@@ -1698,10 +1612,8 @@ theorem morrey_chart_C0_embedding
       rw [hineq]
       linarith
     · have hCm_pos : 0 < Cmorrey := lt_of_le_of_ne hCmorrey_nn (Ne.symm hCm_zero)
-      -- Need: 1/(n+1) + 1/(m+1) < ε / Cmorrey for n, m ≥ N.
       have hε' : 0 < ε / (2 * Cmorrey) := by positivity
       obtain ⟨N, hN⟩ : ∃ N : ℕ, ∀ n ≥ N, (1 / (n + 1 : ℝ)) < ε / (2 * Cmorrey) := by
-        -- 1/(n+1) → 0
         have hReal : Tendsto (fun n : ℕ => 1 / (n + 1 : ℝ)) atTop (nhds 0) := by
           have h1 : Tendsto (fun n : ℕ => (n + 1 : ℝ)) atTop atTop := by
             have h2 : Tendsto (fun n : ℕ => (n : ℝ)) atTop atTop :=
@@ -1732,10 +1644,6 @@ theorem morrey_chart_C0_embedding
       have h_simp : Cmorrey * (ε / Cmorrey) = ε := by
         field_simp
       linarith
-  -- Step 4: define ũ as the uniform limit. Use Cauchy in C(M, ℝ) implicitly via
-  -- pointwise limits + uniform convergence.
-  -- Since M is compact, C(M, ℝ) is complete, so v_n converges to some continuous ũ.
-  -- We construct ũ pointwise and show uniform convergence.
   have h_pw_cauchy : ∀ x : M, CauchySeq (fun n => v n x) := by
     intro x
     rw [Metric.cauchySeq_iff]
@@ -1746,28 +1654,21 @@ theorem morrey_chart_C0_embedding
     refine ⟨N, ?_⟩
     intro n hn m hm
     exact hN n hn m hm x (Set.mem_univ _)
-  -- ũ is the pointwise limit.
   have h_pw_limit : ∀ x : M, ∃ y : ℝ, Tendsto (fun n => v n x) atTop (nhds y) :=
     fun x => cauchySeq_tendsto_of_complete (h_pw_cauchy x)
   set ũ : M → ℝ := fun x => Classical.choose (h_pw_limit x) with hũ_def
   have hũ_tendsto : ∀ x : M, Tendsto (fun n => v n x) atTop (nhds (ũ x)) :=
     fun x => Classical.choose_spec (h_pw_limit x)
-  -- Step 5: v n → ũ uniformly.
   have h_uniform_tendsto : TendstoUniformlyOn v ũ atTop Set.univ :=
     h_uniform_cauchy.tendstoUniformlyOn_of_tendsto (fun x _ => hũ_tendsto x)
   have h_uniform_tendsto' : TendstoUniformly v ũ atTop := by
     rw [show (TendstoUniformly v ũ atTop) ↔ TendstoUniformlyOn v ũ atTop Set.univ from
       tendstoUniformlyOn_univ.symm]
     exact h_uniform_tendsto
-  -- ũ is continuous.
   have hũ_cont : Continuous ũ := by
     refine h_uniform_tendsto'.continuous ?_
     exact Filter.Eventually.frequently (Filter.Eventually.of_forall
       (fun n => (hv_smooth n).continuous))
-  -- Step 6: ũ = u a.e.
-  -- v_n → u in L^p (via bridge), so a subsequence v_{φ(n)} → u a.e.
-  -- v_n → ũ pointwise (uniform), so v_{φ(n)} → ũ pointwise.
-  -- Hence u = ũ a.e.
   set μ_g : Measure M :=
     DifferentialGeometry.Integral.Measure.riemannianMeasure (I := I) g
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) with hμ_g_def
@@ -1776,7 +1677,6 @@ theorem morrey_chart_C0_embedding
     exact DifferentialGeometry.Integral.Measure.riemannianMeasure_isFiniteMeasure_of_compactSpace
       (I := I) (M := M) g _
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M)
-  -- v n → u in L^p, via the bridge eLpNorm ≤ C * wkpNormChart.
   obtain ⟨Cbridge, hCbridge_nn, hbridge⟩ :=
     eLpNorm_riemannianMeasure_le_const_mul_wkpNormChart (I := I) (M := M) g hp_enn_one hp_enn_top
   have h_meas_diff : ∀ n : ℕ, Measurable (fun x : M => u x - v n x) := by
@@ -1801,7 +1701,6 @@ theorem morrey_chart_C0_embedding
     refine tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds h_C_decay
       (Filter.Eventually.of_forall (fun _ => zero_le _))
       (Filter.Eventually.of_forall h_total_le)
-  -- Convert to TendstoInMeasure and extract a.e.-convergent subsequence.
   have hu_aesm : AEStronglyMeasurable u μ_g := hu_meas.aestronglyMeasurable
   have hv_aesm : ∀ n, AEStronglyMeasurable (v n) μ_g :=
     fun n => (hv_smooth n).continuous.aestronglyMeasurable
@@ -1819,18 +1718,11 @@ theorem morrey_chart_C0_embedding
       rw [h_neg_apply, eLpNorm_neg]
     refine (Filter.tendsto_congr h_neg_eq).mpr h_v_to_u_Lp
   obtain ⟨φ, hφ_mono, hφ_ae⟩ := h_tim.exists_seq_tendsto_ae
-  -- The subsequence v_{φ(n)} → u a.e.
-  -- The full sequence v_n → ũ pointwise; so v_{φ(n)} → ũ pointwise.
   have h_subseq_to_ũ : ∀ x : M, Tendsto (fun n => v (φ n) x) atTop (nhds (ũ x)) :=
     fun x => (hũ_tendsto x).comp hφ_mono.tendsto_atTop
-  -- For each x in the a.e. set, both limits exist, so they're equal.
   have h_ae_eq : ∀ᵐ x ∂μ_g, ũ x = u x := by
     filter_upwards [hφ_ae] with x hx
     exact tendsto_nhds_unique (h_subseq_to_ũ x) hx
-  -- Step 7: bound on ũ.
-  -- ‖ũ(x)‖ = lim ‖v_n(x)‖. ‖v_n(x)‖ ≤ Cmorrey · (wkpNormChart v_n).toReal.
-  -- wkpNormChart v_n ≤ wkpNormChart u + wkpNormChart (v_n - u) ≤ wkpNormChart u + 1/(n+1).
-  -- So lim ≤ Cmorrey · (wkpNormChart u).toReal.
   have hwkp_u_ne_top : wkpNormChart (I := I) (M := M) g 1 (ENNReal.ofReal p) u ≠ ⊤ :=
     (wkpNormChart_lt_top_of_memWkpChart (I := I) (M := M) g hp_enn_one hu).ne
   set Nu : ℝ := (wkpNormChart (I := I) (M := M) g 1 (ENNReal.ofReal p) u).toReal with hNu_def
@@ -1854,7 +1746,6 @@ theorem morrey_chart_C0_embedding
     rw [h_decomp]
     have h_tri := wkpNormChart_add_le (I := I) (M := M) g hp_enn_one hu h_diff_n_mem
     refine h_tri.trans ?_
-    -- wkpNormChart (v n - u) = wkpNormChart (u - v n) ≤ 1/(n+1).
     have h_neg_eq : wkpNormChart (I := I) (M := M) g 1 (ENNReal.ofReal p)
         (fun x => v n x - u x) =
           wkpNormChart (I := I) (M := M) g 1 (ENNReal.ofReal p)
@@ -1870,7 +1761,6 @@ theorem morrey_chart_C0_embedding
       rw [h_eq2] at h_smul
       have h' := wkpNormChart_const_smul (I := I) (M := M) g hp_enn_one (-1) hu
       have h_eq3 : (fun x : M => -1 * u x) = -u := by funext x; rw [neg_one_mul]; rfl
-      -- The clean identity: wkpNormChart (-1 • f) = ‖-1‖ · wkpNormChart f = wkpNormChart f.
       rw [h_smul]; simp
     rw [h_neg_eq]
     gcongr
@@ -1888,24 +1778,16 @@ theorem morrey_chart_C0_embedding
     rw [ENNReal.toReal_ofReal (by positivity)] at h_le
     rw [hNu_def]
     exact h_le
-  -- Now bound on ũ.
   refine ⟨ũ, Cmorrey, hũ_cont, hCmorrey_nn, h_ae_eq, ?_⟩
   intro x
-  -- ‖ũ(x)‖ ≤ Cmorrey · Nu.
-  -- ‖v n x‖ ≤ Cmorrey · (Nu + 1/(n+1)).
-  -- v n x → ũ x, so ‖v n x‖ → ‖ũ x‖ (continuous).
-  -- Cmorrey · (Nu + 1/(n+1)) → Cmorrey · Nu.
-  -- Squeeze.
   have h_v_bound : ∀ n, ‖v n x‖ ≤ Cmorrey * (Nu + 1 / (n + 1 : ℝ)) := by
     intro n
     have h := hMorrey_bd (hv_smooth n) x
     refine h.trans ?_
     apply mul_le_mul_of_nonneg_left _ hCmorrey_nn
     exact h_wkp_vn_real n
-  -- Limit of ‖v n x‖ is ‖ũ x‖ (continuous norm).
   have h_norm_tendsto : Tendsto (fun n => ‖v n x‖) atTop (nhds (‖ũ x‖)) :=
     (continuous_norm.tendsto _).comp (hũ_tendsto x)
-  -- Limit of Cmorrey * (Nu + 1/(n+1)) is Cmorrey * Nu.
   have h_rhs_tendsto : Tendsto (fun n : ℕ => Cmorrey * (Nu + 1 / (n + 1 : ℝ)))
       atTop (nhds (Cmorrey * Nu)) := by
     have h1 : Tendsto (fun n : ℕ => 1 / (n + 1 : ℝ)) atTop (nhds 0) := by
@@ -1921,22 +1803,6 @@ theorem morrey_chart_C0_embedding
       tendsto_const_nhds.mul h2
     simpa using h3
   exact le_of_tendsto_of_tendsto' h_norm_tendsto h_rhs_tendsto h_v_bound
-
-/-! ## Smooth Hölder modulus on the partition-of-unity-localized function
-
-For each chart `α`, the smooth Euclidean Hölder modulus
-(`smooth_morrey_pair_bound_uniform` from `EuclideanMorrey.lean`) applied to the
-smooth chart-extended function `chartSmoothExt α (ρ_α · u)` on the half-ball
-`B(0, R_α / 2)` of the chart-radius ball yields a Hölder bound on
-`(ρ_α · u)` over the manifold-side compact `tsupport ρ_α ⊆ (chartAt H α).source`.
-
-The bound has the form
-
-  `‖(ρ_α x · u x) - (ρ_α y · u y)‖ ≤
-      C_α · ‖toEuclidean (extChartAt I α x) - toEuclidean (extChartAt I α y)‖^(1 - n/p) ·
-        (wkpNormChart g 1 p u).toReal`,
-
-uniformly in the smooth `u`. -/
 
 /-- Per-chart smooth Hölder bound on `chartSmoothExt α (ρ_α · u)` on the
 half-ball `B(0, R_α / 2)`. For each chart `α`, smooth `u : M → ℝ`, and
@@ -1977,7 +1843,6 @@ private lemma chartSmoothExt_holder_uniform_half_ball
     exact ENNReal.ofReal_le_ofReal hp_one
   set R : ℝ := chartRadius (I := I) (M := M) α with hR_def
   have hR_pos : 0 < R := chartRadius_pos (I := I) (M := M) α
-  -- The Euclidean smooth pair Hölder bound on B(0, R), with conclusion for points in B(0, R/2).
   obtain ⟨C₀, hC₀_nn, hbound⟩ :=
     DifferentialGeometry.Analysis.Sobolev.EuclideanMorrey.smooth_morrey_pair_bound_uniform
       (d := Module.finrank ℝ E) hp
@@ -1993,9 +1858,7 @@ private lemma chartSmoothExt_holder_uniform_half_ball
     exact contDiff_chartSmoothExt_pou_mul (I := I) (M := M) α
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M)
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M) hu
-  -- Apply the Euclidean pair Hölder bound on B(0, R) to f.
   have h_pair := hbound (u := f) hf_smooth_top hy₁ hy₂
-  -- Bound the gradient eLpNorm on B(0, R) by d · wkpNormChart u.
   have h_grad_bd := eLpNorm_norm_fderiv_chartSmoothExt_ball_le_wkpNormChart
     (I := I) (M := M) g α (q := ENNReal.ofReal p) hp_enn_one hu
   have hwkp_lt_top : wkpNormChart (I := I) (M := M) g 1 (ENNReal.ofReal p) u < ⊤ :=
@@ -2019,7 +1882,6 @@ private lemma chartSmoothExt_holder_uniform_half_ball
   have h_dist_eq : dist y₁ y₂ = ‖y₁ - y₂‖ := dist_eq_norm y₁ y₂
   have h_dist_pow_nn : 0 ≤ dist y₁ y₂ ^ (1 - (d : ℝ) / p) :=
     Real.rpow_nonneg dist_nonneg _
-  -- Combine: ‖f y₁ - f y₂‖ ≤ C₀ · dist^(1-d/p) · (d · N) = (C₀ · d) · ‖y₁-y₂‖^(1-d/p) · N.
   calc ‖f y₁ - f y₂‖
       ≤ C₀ * dist y₁ y₂ ^ (1 - (d : ℝ) / p) *
           (eLpNorm (fun z : EuclN => ‖fderiv ℝ f z‖) (ENNReal.ofReal p)
@@ -2081,14 +1943,12 @@ private lemma pou_mul_holder_chart_uniform_tsupport
     chartSmoothExt_holder_uniform_half_ball (I := I) (M := M) g α hp
   refine ⟨C, hC_nn, ?_⟩
   intro u hu x hx y hy
-  -- x, y in tsupport ρ_α ⊆ (chartAt H α).source.
   have h_subord :
       tsupport ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) : M → ℝ) ⊆ (chartAt H α).source :=
     DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α
   have hx_src : x ∈ (chartAt H α).source := h_subord hx
   have hy_src : y ∈ (chartAt H α).source := h_subord hy
-  -- Apply the Euclidean Hölder bound at y₁ = toEuclidean (extChartAt I α x), etc.
   set y₁ : EuclN := (toEuclidean (E := E)) (extChartAt I α x) with hy₁_def
   set y₂ : EuclN := (toEuclidean (E := E)) (extChartAt I α y) with hy₂_def
   have hy₁_R2 : y₁ ∈ Metric.ball (0 : EuclN)
@@ -2098,7 +1958,6 @@ private lemma pou_mul_holder_chart_uniform_tsupport
       (chartRadius (I := I) (M := M) α / 2) :=
     toEuclidean_extChartAt_mem_half_ball_of_mem_tsupport_pou (I := I) (M := M) α hy
   have h_pair := hbound hu y₁ y₂ hy₁_R2 hy₂_R2
-  -- Translate via `chartSmoothExt_pou_mul_apply_at_chart_image`.
   have h_eq_x :
       chartSmoothExt (I := I) (M := M) α
           (fun z : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
@@ -2165,16 +2024,6 @@ theorem smooth_manifold_morrey_holder_modulus_per_chart
       pou_mul_holder_chart_uniform_tsupport (I := I) (M := M) g α hp
     exact ⟨C, hC_nn, fun {u} hu x hx y hy => hbound hu x hx y hy⟩
 
-/-! ## Manifold-level decomposition: from the per-chart POU Hölder bound to
-a finite-sum bound on `‖u(x) - u(y)‖`
-
-For x, y in M and the canonical chart-atlas POU finset `S`, the triangle
-inequality gives `‖u(x) - u(y)‖ ≤ ∑_{α ∈ S} ‖(ρ_α x · u x) - (ρ_α y · u y)‖`.
-For each `α`, when `x, y ∈ tsupport ρ_α`, the chart-α POU Hölder bound
-`smooth_manifold_morrey_holder_modulus_per_chart` controls each summand. The
-combination yields a manifold-level Hölder modulus when restricted to a
-compact subset where every relevant POU summand is well-behaved. -/
-
 /-- The triangle decomposition: `‖u(x) - u(y)‖ ≤ ∑_α ‖(ρ_α x · u x) -
 (ρ_α y · u y)‖`, with the sum over the canonical chart-atlas POU finset `S`. -/
 theorem norm_sub_le_sum_pou_diff
@@ -2193,7 +2042,6 @@ theorem norm_sub_le_sum_pou_diff
   set S : Finset M :=
     DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset (I := I) (M := M)
     with hS_def
-  -- The pointwise sum of POU values is 1.
   have hsum_x : ∑ α ∈ S,
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : M → ℝ) x = 1 :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartAtlasPOU_finset_sum_eq_one
@@ -2202,7 +2050,6 @@ theorem norm_sub_le_sum_pou_diff
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : M → ℝ) y = 1 :=
     DifferentialGeometry.Analysis.Sobolev.Chart.chartAtlasPOU_finset_sum_eq_one
       (I := I) (M := M) y
-  -- Identity: u(x) - u(y) = ∑_α (ρ_α x · u x - ρ_α y · u y).
   have h_diff_eq : u x - u y =
       ∑ α ∈ S,
         ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α : M → ℝ) x * u x -

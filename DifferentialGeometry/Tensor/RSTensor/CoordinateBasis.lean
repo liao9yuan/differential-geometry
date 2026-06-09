@@ -1,9 +1,56 @@
 import DifferentialGeometry.Tensor.Multilinear.Basis
+import DifferentialGeometry.Tensor.Multilinear.Bundle
+import DifferentialGeometry.Tensor.Alternating.Comp
+import DifferentialGeometry.Tensor.Multilinear.Comp
+import Mathlib.Analysis.Calculus.ContDiff.CPolynomial
+import Mathlib.Analysis.Calculus.ContDiff.Basic
+import Mathlib.Analysis.Calculus.ContDiff.Operations
+import Mathlib.LinearAlgebra.Multilinear.FiniteDimensional
+import DifferentialGeometry.Tensor.Auxiliary.LinearIsometryContDiff
+import Mathlib.Analysis.Calculus.ContDiff.Comp
+import Mathlib.Analysis.Normed.Module.FiniteDimension
+import Mathlib.Analysis.Normed.Module.Alternating.Basic
+import Mathlib.RingTheory.Finiteness.Defs
+import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
+import Mathlib.Geometry.Manifold.VectorBundle.Basic
+import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
+import Mathlib.Geometry.Manifold.VectorBundle.Tangent
+import Mathlib.Data.Bundle
+import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+import Mathlib.LinearAlgebra.Dimension.Free
+import Mathlib.Topology.Algebra.Module.FiniteDimension
 import DifferentialGeometry.Tensor.RSTensor.Defs
+import DifferentialGeometry.Tensor.Multilinear.Fiber
+import DifferentialGeometry.Tensor.Multilinear.Bundle
+import DifferentialGeometry.Tensor.Alternating.Comp
+import DifferentialGeometry.Tensor.Multilinear.Comp
+import Mathlib.Analysis.Calculus.ContDiff.CPolynomial
+import Mathlib.Analysis.Calculus.ContDiff.Basic
+import Mathlib.Analysis.Calculus.ContDiff.Operations
+import Mathlib.LinearAlgebra.Multilinear.FiniteDimensional
+import DifferentialGeometry.Tensor.Auxiliary.LinearIsometryContDiff
+import Mathlib.Analysis.Calculus.ContDiff.Comp
+import Mathlib.Analysis.Normed.Module.FiniteDimension
+import Mathlib.Analysis.Normed.Module.Alternating.Basic
+import Mathlib.RingTheory.Finiteness.Defs
+import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
+import Mathlib.Geometry.Manifold.VectorBundle.Basic
+import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
+import Mathlib.Geometry.Manifold.VectorBundle.Tangent
+import Mathlib.Data.Bundle
+import DifferentialGeometry.Tensor.Multilinear.Basis
+import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+import Mathlib.LinearAlgebra.Dimension.Free
+import Mathlib.Topology.Algebra.Module.FiniteDimension
+import DifferentialGeometry.Tensor.Multilinear.Curry
+import Mathlib.Geometry.Manifold.VectorBundle.Hom
+import DifferentialGeometry.Tensor.RSTensor.Coordinates.CoordinateBasis
 
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
+set_option linter.unusedFintypeInType false
+set_option linter.unusedDecidableInType false
 
 /-!
 # Pointwise tensor coordinates from a tangent basis
@@ -20,106 +67,20 @@ namespace Tensor0SBundle
 open Bundle Module
 open scoped Manifold BigOperators
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E] [FiniteDimensional Real E]
+variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] [CompleteSpace 𝕜]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [FiniteDimensional 𝕜 E]
 variable {H : Type*} [TopologicalSpace H]
-variable {I : ModelWithCorners Real E H}
+variable {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I 1 M]
 
 section ModelBasis
 
-variable {V : Type*} [NormedAddCommGroup V] [NormedSpace Real V] [FiniteDimensional Real V]
+variable {V : Type*} [NormedAddCommGroup V] [NormedSpace 𝕜 V] [FiniteDimensional 𝕜 V]
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 
-/-- The covector dual to a vector-space basis element, as a continuous linear map. -/
-def coframeOfBasis (basis : Module.Basis Idx Real V) (i : Idx) : V →L[Real] Real :=
-  LinearMap.toContinuousLinearMap (basis.coord i)
 
-@[simp]
-theorem coframeOfBasis_apply (basis : Module.Basis Idx Real V) (i : Idx) (v : V) :
-    coframeOfBasis basis i v = basis.coord i v :=
-  rfl
 
-/-- The covariant tensor basis element indexed by `slots : Fin s -> Idx`.
 
-It is the tensor product of the coordinate covectors:
-`v ↦ ∏ a, basis.coord (slots a) (v a)`. -/
-def continuousMultilinearMapBasisElem
-    (basis : Module.Basis Idx Real V) (s : Nat) (slots : Fin s -> Idx) :
-    ContinuousMultilinearMap Real (fun _ : Fin s => V) Real :=
-  (ContinuousMultilinearMap.mkPiRing Real (Fin s) (1 : Real)).compContinuousLinearMap
-    (fun a => coframeOfBasis basis (slots a))
-
-@[simp]
-theorem continuousMultilinearMapBasisElem_apply
-    (basis : Module.Basis Idx Real V) (s : Nat)
-    (slots slots' : Fin s -> Idx) :
-    continuousMultilinearMapBasisElem basis s slots (fun a => basis (slots' a)) =
-      if slots = slots' then 1 else 0 := by
-  classical
-  simp_rw [continuousMultilinearMapBasisElem,
-    ContinuousMultilinearMap.compContinuousLinearMap_apply,
-    ContinuousMultilinearMap.mkPiRing_apply, smul_eq_mul, mul_one,
-    coframeOfBasis_apply, Module.Basis.coord_apply, Module.Basis.repr_self,
-    Finsupp.single_apply]
-  by_cases h : slots = slots'
-  · subst h
-    simp
-  · simp only [h, ite_false]
-    have ⟨a, ha⟩ : ∃ a, slots a ≠ slots' a := by
-      contrapose! h
-      exact funext h
-    exact Finset.prod_eq_zero (Finset.mem_univ a) (if_neg (Ne.symm ha))
-
-/-- Linear independence of the coordinate covariant tensor basis. -/
-theorem continuousMultilinearMapBasisElem_linearIndependent
-    (basis : Module.Basis Idx Real V) (s : Nat) :
-    LinearIndependent Real (continuousMultilinearMapBasisElem basis s) := by
-  classical
-  rw [Fintype.linearIndependent_iff]
-  intro c hc slots'
-  have h1 : (∑ slots : Fin s -> Idx,
-      c slots • continuousMultilinearMapBasisElem basis s slots)
-      (fun a => basis (slots' a)) = 0 := by
-    rw [hc]
-    rfl
-  simp only [ContinuousMultilinearMap.sum_apply, ContinuousMultilinearMap.smul_apply,
-    continuousMultilinearMapBasisElem_apply] at h1
-  simp only [smul_ite, smul_zero, Finset.sum_ite_eq', Finset.mem_univ, ite_true] at h1
-  rwa [smul_eq_mul, mul_one] at h1
-
-/-- The coordinate covariant tensor basis induced by a basis of `V`. -/
-def continuousMultilinearMapBasis
-    (basis : Module.Basis Idx Real V) (s : Nat) :
-    Module.Basis (Fin s -> Idx) Real
-      (ContinuousMultilinearMap Real (fun _ : Fin s => V) Real) :=
-  Module.Basis.mk (continuousMultilinearMapBasisElem_linearIndependent basis s)
-    ((continuousMultilinearMapBasisElem_linearIndependent basis s).span_eq_top_of_card_eq_finrank'
-      (by
-        have hdim : Module.finrank Real V = Fintype.card Idx := by
-          rw [Module.finrank_eq_card_basis basis]
-        rw [Fintype.card_fun, Fintype.card_fin,
-          finrank_continuousMultilinearMap (𝕜 := Real) (F := V), hdim])).ge
-
-theorem continuousMultilinearMapBasis_apply
-    (basis : Module.Basis Idx Real V) (s : Nat) (slots : Fin s -> Idx) :
-    continuousMultilinearMapBasis basis s slots =
-      continuousMultilinearMapBasisElem basis s slots :=
-  congr_fun (Module.Basis.coe_mk
-    (continuousMultilinearMapBasisElem_linearIndependent basis s) _) slots
-
-/-- The coordinate of a multilinear map in the induced tensor basis is evaluation
-on the corresponding tuple of basis vectors. -/
-theorem continuousMultilinearMapBasis_repr
-    (basis : Module.Basis Idx Real V) (s : Nat)
-    (A : ContinuousMultilinearMap Real (fun _ : Fin s => V) Real)
-    (slots : Fin s -> Idx) :
-    (continuousMultilinearMapBasis basis s).repr A slots =
-      A (fun a => basis (slots a)) := by
-  conv_rhs => rw [← (continuousMultilinearMapBasis basis s).sum_repr A]
-  simp only [ContinuousMultilinearMap.sum_apply, ContinuousMultilinearMap.smul_apply,
-    smul_eq_mul, continuousMultilinearMapBasis_apply,
-    continuousMultilinearMapBasisElem_apply, mul_ite, mul_one, mul_zero,
-    Finset.sum_ite_eq', Finset.mem_univ, ite_true]
 
 end ModelBasis
 
@@ -128,90 +89,60 @@ section Tensor0S
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 variable {s : Nat} {x : M}
 
-/-- The pointwise covariant tensor basis induced by a tangent basis. -/
-def tensor0SBasis (basis : Module.Basis Idx Real (TangentSpace I x)) (s : Nat) :
-    Module.Basis (Fin s -> Idx) Real (Tensor0SSpace s I x) :=
-  continuousMultilinearMapBasis basis s
 
-/-- The covariant basis tensor indexed by `slots`. -/
-def basisTensor0S
-    (basis : Module.Basis Idx Real (TangentSpace I x)) (slots : Fin s -> Idx) :
-    Tensor0SSpace s I x :=
-  tensor0SBasis (I := I) basis s slots
+theorem tensor0S_sum_apply {ι : Type*} [Fintype ι]
+    (T : ι -> Tensor0SSpace s I x) (v : Fin s -> TangentSpace I x) :
+    ((∑ i : ι, T i) v) = ∑ i : ι, (T i) v := by
+  classical
+  let S : Finset ι := Finset.univ
+  change ((∑ i ∈ S, T i) v) = ∑ i ∈ S, (T i) v
+  induction S using Finset.induction_on with
+  | empty =>
+      change (0 : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜) v = 0
+      simp
+  | insert a S ha ih =>
+      rw [Finset.sum_insert ha, Finset.sum_insert ha]
+      change (((T a : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜) +
+          (∑ i ∈ S, (T i : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜))) v) =
+        (T a : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜) v +
+          ∑ i ∈ S, (T i : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜) v
+      rw [ContinuousMultilinearMap.add_apply, ih]
 
-/-- Component of a pointwise covariant tensor in a tangent basis. -/
-def component0S
-    (basis : Module.Basis Idx Real (TangentSpace I x))
-    (A : Tensor0SSpace s I x) (slots : Fin s -> Idx) : Real :=
-  A (fun a => basis (slots a))
 
-@[simp]
-theorem component0S_apply
-    (basis : Module.Basis Idx Real (TangentSpace I x))
-    (A : Tensor0SSpace s I x) (slots : Fin s -> Idx) :
-    component0S (I := I) basis A slots = A (fun a => basis (slots a)) :=
-  rfl
 
-@[simp]
-theorem tensor0SBasis_repr
-    (basis : Module.Basis Idx Real (TangentSpace I x))
-    (A : Tensor0SSpace s I x) (slots : Fin s -> Idx) :
-    (tensor0SBasis (I := I) basis s).repr A slots =
-      component0S (I := I) basis A slots := by
-  exact continuousMultilinearMapBasis_repr basis s A slots
 
-/-- Linear coordinate map for a covariant tensor fiber in a tangent basis. -/
-def coordMap0S
-    (basis : Module.Basis Idx Real (TangentSpace I x)) (s : Nat) :
-    Tensor0SSpace s I x →ₗ[Real] ((Fin s -> Idx) -> Real) :=
-  ((tensor0SBasis (I := I) basis s).equivFun).toLinearMap
-
-@[simp]
-theorem coordMap0S_apply
-    (basis : Module.Basis Idx Real (TangentSpace I x))
-    (A : Tensor0SSpace s I x) :
-    coordMap0S (I := I) basis s A = component0S (I := I) basis A := by
-  ext slots
-  change (tensor0SBasis (I := I) basis s).repr A slots =
-    component0S (I := I) basis A slots
-  exact tensor0SBasis_repr (I := I) basis A slots
-
-/-- Linear coordinate equivalence for a covariant tensor fiber in a tangent basis. -/
-def coordEquiv0S
-    (basis : Module.Basis Idx Real (TangentSpace I x)) (s : Nat) :
-    Tensor0SSpace s I x ≃ₗ[Real] ((Fin s -> Idx) -> Real) :=
-  (tensor0SBasis (I := I) basis s).equivFun
-
-@[simp]
-theorem coordEquiv0S_apply
-    (basis : Module.Basis Idx Real (TangentSpace I x))
-    (A : Tensor0SSpace s I x) :
-    coordEquiv0S (I := I) basis s A = component0S (I := I) basis A := by
-  ext slots
-  change (tensor0SBasis (I := I) basis s).repr A slots =
-    component0S (I := I) basis A slots
-  exact tensor0SBasis_repr (I := I) basis A slots
-
-/-- Extensionality for covariant tensors from equality of all basis components. -/
-theorem ext0S_basis
-    (basis : Module.Basis Idx Real (TangentSpace I x))
-    {A B : Tensor0SSpace s I x}
-    (h : ∀ slots : Fin s -> Idx,
-      component0S (I := I) basis A slots = component0S (I := I) basis B slots) :
-    A = B := by
-  apply (coordEquiv0S (I := I) basis s).injective
-  ext slots
-  simpa using h slots
-
-theorem basisTensor0S_component
-    (basis : Module.Basis Idx Real (TangentSpace I x))
-    (slots slots' : Fin s -> Idx) :
-    component0S (I := I) basis (basisTensor0S (I := I) basis slots) slots' =
-      if slots = slots' then 1 else 0 := by
-  change (continuousMultilinearMapBasis basis s slots) (fun a => basis (slots' a)) =
-    if slots = slots' then 1 else 0
+theorem basisTensor0S_apply
+    (basis : Module.Basis Idx 𝕜 (TangentSpace I x))
+    (slots : Fin s -> Idx) (v : Fin s -> TangentSpace I x) :
+    basisTensor0S (I := I) basis slots v =
+      ∏ a : Fin s, basis.coord (slots a) (v a) := by
+  change (continuousMultilinearMapBasis basis s slots) v =
+    ∏ a : Fin s, basis.coord (slots a) (v a)
   rw [continuousMultilinearMapBasis_apply]
-  exact continuousMultilinearMapBasisElem_apply basis s slots slots'
+  simp [continuousMultilinearMapBasisElem]
+
+/-- Expanding a covariant tensor in a tangent basis gives the usual component
+contraction formula. -/
+theorem tensor0S_apply_eq_sum
+    (basis : Module.Basis Idx 𝕜 (TangentSpace I x))
+    (A : Tensor0SSpace s I x) (v : Fin s -> TangentSpace I x) :
+    A v =
+      ∑ slots : Fin s -> Idx,
+        component0S (I := I) basis A slots *
+          ∏ a : Fin s, basis.coord (slots a) (v a) := by
+  conv_lhs => rw [← (tensor0SBasis (I := I) basis s).sum_repr A]
+  rw [tensor0S_sum_apply]
+  refine Finset.sum_congr rfl ?_
+  intro slots _hslots
+  rw [ContinuousMultilinearMap.smul_apply, tensor0SBasis_repr]
+  have hb :
+      ((tensor0SBasis (I := I) basis s) slots) v =
+        ∏ a : Fin s, basis.coord (slots a) (v a) := by
+    change basisTensor0S (I := I) basis slots v =
+      ∏ a : Fin s, basis.coord (slots a) (v a)
+    exact basisTensor0S_apply (I := I) basis slots v
+  rw [hb]
+  simp [smul_eq_mul]
 
 end Tensor0S
 

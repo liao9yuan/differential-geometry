@@ -68,21 +68,10 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Laplacian.Spectral
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Contractive comparison
-
-For `t, t₀ ≥ 0`, the difference
-`heatSemigroupHsExt g σ t u − heatSemigroupHsExt g σ t₀ u`
-has norm bounded by `‖heatSemigroupHsExt g σ |t − t₀| u − u‖`. The proof
-writes the larger of `t, t₀` as the sum of the smaller and `|t − t₀|`,
-applies the semigroup law `heatSemigroupHsExt_add`, and finishes by
-contractivity `heatSemigroupHsExt_opNorm_le_one`. -/
 
 private lemma norm_heatSemigroupHsExt_sub_le_diff
     {g : SmoothRiemannianMetric I M} {σ : ℝ}
@@ -92,8 +81,7 @@ private lemma norm_heatSemigroupHsExt_sub_le_diff
         heatSemigroupHsExt (I := I) (M := M) g σ t₀ u‖ ≤
       ‖heatSemigroupHsExt (I := I) (M := M) g σ |t - t₀| u - u‖ := by
   rcases le_or_gt t₀ t with hle | hlt
-  · -- `t ≥ t₀`. Write `t = t₀ + (t − t₀)`.
-    have h_diff_nn : 0 ≤ t - t₀ := sub_nonneg.mpr hle
+  · have h_diff_nn : 0 ≤ t - t₀ := sub_nonneg.mpr hle
     have h_abs : |t - t₀| = t - t₀ := abs_of_nonneg h_diff_nn
     have h_law :
         heatSemigroupHsExt (I := I) (M := M) g σ t =
@@ -146,8 +134,7 @@ private lemma norm_heatSemigroupHsExt_sub_le_diff
               (I := I) (M := M) g σ (t - t₀) u - u‖ := one_mul _
       _ = ‖heatSemigroupHsExt
               (I := I) (M := M) g σ |t - t₀| u - u‖ := by rw [h_abs]
-  · -- `t < t₀`. Write `t₀ = t + (t₀ − t)`.
-    have h_diff_nn : 0 ≤ t₀ - t := sub_nonneg.mpr hlt.le
+  · have h_diff_nn : 0 ≤ t₀ - t := sub_nonneg.mpr hlt.le
     have h_abs : |t - t₀| = t₀ - t := by
       rw [abs_sub_comm, abs_of_nonneg h_diff_nn]
     have h_law :
@@ -211,18 +198,6 @@ private lemma norm_heatSemigroupHsExt_sub_le_diff
       _ = ‖heatSemigroupHsExt
               (I := I) (M := M) g σ |t - t₀| u - u‖ := by rw [h_abs]
 
-/-! ## Right-continuity at `0` on finitely-supported elements
-
-For `u'` with finite eigenbasis support, the difference
-`heatSemigroupHsExt g σ τ u' − u'` has coordinates
-`(exp(−λᵢ τ) − 1) · u'.coeff i`, supported on the finite set
-`hu'.toFinset`. Its squared norm is the finite sum
-
-  `∑_{i ∈ F} (1 + λᵢ)^σ · ((exp(−λᵢ τ) − 1) · u'.coeff i)²`,
-
-each summand of which is continuous in `τ` and vanishes at `τ = 0`. The
-finite sum therefore tends to `0` as `τ → 0`. -/
-
 /-- For a finitely-supported `u'`, the squared norm of the difference
 `heatSemigroupHsExt g σ τ u' − u'` is a finite sum of squared spectral
 terms. -/
@@ -242,11 +217,9 @@ private lemma sq_norm_heatSemigroupHsExt_sub_self_of_finite
   set hu'fin := (scalarHs.mem_finiteSupportSubmodule
     (I := I) (M := M) u').mp hu'
   set F := hu'fin.toFinset
-  -- Squared norm via the weighted-tsum formula on `scalarHs`.
   have h_norm_sq := scalarHs.norm_sq_eq_tsum
     (I := I) (M := M)
     (heatSemigroupHsExt (I := I) (M := M) g σ τ u' - u')
-  -- Coefficient of the difference at index `i`.
   have h_diff_coeff : ∀ i,
       (heatSemigroupHsExt (I := I) (M := M) g σ τ u' - u').coeff i =
         (Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * τ) - 1) *
@@ -260,7 +233,6 @@ private lemma sq_norm_heatSemigroupHsExt_sub_self_of_finite
     rw [h_sub, heatSemigroupHsExt_coeff (I := I) (M := M)
       (g := g) (σ := σ) hτ u' i]
     ring
-  -- Rewrite the tsum summand using the explicit difference coefficient.
   have h_tsum_eq :
       ∑' i, scalarSobolevWeight (I := I) (M := M) i σ *
           ((heatSemigroupHsExt (I := I) (M := M) g σ τ u' - u').coeff i) ^ 2 =
@@ -270,7 +242,6 @@ private lemma sq_norm_heatSemigroupHsExt_sub_self_of_finite
     refine tsum_congr (fun i => ?_)
     rw [h_diff_coeff]
   rw [h_norm_sq, h_tsum_eq]
-  -- Outside the support `F`, `u'.coeff i = 0`, so the summand vanishes.
   apply tsum_eq_sum
   intro i hi
   have h_zero : u'.coeff i = 0 := by
@@ -293,12 +264,10 @@ private lemma tendsto_heatSemigroupHsExt_of_finite
   set hu'fin := (scalarHs.mem_finiteSupportSubmodule
     (I := I) (M := M) u').mp hu'
   set F := hu'fin.toFinset with hF_def
-  -- Rephrase as `‖difference‖ → 0`.
   suffices h_norm_to_zero :
       Tendsto (fun τ : ℝ =>
           ‖heatSemigroupHsExt (I := I) (M := M) g σ τ u' - u'‖)
         (𝓝[Set.Ici (0 : ℝ)] 0) (𝓝 0) by
-    -- Translate `norm → 0` into the actual `Tendsto` we need.
     have h_diff_to_zero :
         Tendsto (fun τ : ℝ =>
             heatSemigroupHsExt (I := I) (M := M) g σ τ u' - u')
@@ -309,12 +278,10 @@ private lemma tendsto_heatSemigroupHsExt_of_finite
     have h_added :=
       h_diff_to_zero.add (tendsto_const_nhds (x := u'))
     simpa using h_added
-  -- It suffices to show the squared norm tends to `0`.
   have h_sq_to_zero :
       Tendsto (fun τ : ℝ =>
           ‖heatSemigroupHsExt (I := I) (M := M) g σ τ u' - u'‖ ^ 2)
         (𝓝[Set.Ici (0 : ℝ)] 0) (𝓝 0) := by
-    -- Rewrite using the finite-sum identity on `[0, ∞)`.
     have h_rewrite :
         (fun τ : ℝ =>
           ‖heatSemigroupHsExt (I := I) (M := M) g σ τ u' - u'‖ ^ 2) =ᶠ[𝓝[Set.Ici (0 : ℝ)] 0]
@@ -327,7 +294,6 @@ private lemma tendsto_heatSemigroupHsExt_of_finite
       simpa [hF_def] using
         sq_norm_heatSemigroupHsExt_sub_self_of_finite
           (I := I) (M := M) (g := g) (σ := σ) hτ_nn hu'
-    -- Show the RHS finite sum tends to `0` at `τ = 0`.
     have h_each_to_zero :
         ∀ i ∈ F,
           Tendsto (fun τ : ℝ =>
@@ -336,7 +302,6 @@ private lemma tendsto_heatSemigroupHsExt_of_finite
                   u'.coeff i) ^ 2)
             (𝓝[Set.Ici (0 : ℝ)] 0) (𝓝 0) := by
       intro i _
-      -- The continuous map `τ ↦ exp(-λ τ) - 1` vanishes at `τ = 0`.
       have h_exp_cont :
           Continuous (fun τ : ℝ =>
             Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * τ) - 1) := by
@@ -391,7 +356,6 @@ private lemma tendsto_heatSemigroupHsExt_of_finite
             u'.coeff i) ^ 2) F h_each_to_zero
       simpa using h
     exact h_sum_to_zero.congr' h_rewrite.symm
-  -- `norm → 0` from `norm² → 0` and continuity of `√`.
   have h_norm_eq_sqrt :
       ∀ τ : ℝ,
         ‖heatSemigroupHsExt (I := I) (M := M) g σ τ u' - u'‖ =
@@ -412,13 +376,6 @@ private lemma tendsto_heatSemigroupHsExt_of_finite
   exact (Filter.tendsto_congr (fun τ => h_norm_eq_sqrt τ)).mpr
     h_sqrt_to_zero
 
-/-! ## Right-continuity at `0` on all of `scalarHs g σ`
-
-The full right-continuity at `0` follows by a three-term `ε/3` argument:
-approximate `u` by a finitely-supported `u'`, use the finite-rank
-right-continuity above on `u'`, and control the residual `u − u'` by
-contractivity. -/
-
 private lemma tendsto_heatSemigroupHsExt_at_zero
     (g : SmoothRiemannianMetric I M) (σ : ℝ)
     (u : scalarHs (I := I) (M := M) g σ) :
@@ -426,7 +383,6 @@ private lemma tendsto_heatSemigroupHsExt_at_zero
         heatSemigroupHsExt (I := I) (M := M) g σ τ u)
       (𝓝[Set.Ici (0 : ℝ)] 0) (𝓝 u) := by
   classical
-  -- Reduce to `‖heatSemigroupHsExt g σ τ u - u‖ → 0`.
   suffices h_norm_to_zero :
       Tendsto (fun τ : ℝ =>
           ‖heatSemigroupHsExt (I := I) (M := M) g σ τ u - u‖)
@@ -441,21 +397,17 @@ private lemma tendsto_heatSemigroupHsExt_at_zero
     have h_added :=
       h_diff_to_zero.add (tendsto_const_nhds (x := u))
     simpa using h_added
-  -- ε-δ formulation via `Metric.tendsto_nhds`.
   rw [Metric.tendsto_nhds]
   intro ε hε
-  -- Pick `u'` finitely supported with `‖u - u'‖ < ε / 3`.
   have h_eps3_pos : 0 < ε / 3 := by linarith
   have h_close :=
     Metric.mem_closure_iff.mp
       (scalarHs.mem_closure_finiteSupportSubmodule (I := I) (M := M) u)
       (ε / 3) h_eps3_pos
   obtain ⟨u', hu'_mem, hu'_close⟩ := h_close
-  -- `u'` has finite support; right-continuity at `0` for `u'`.
   have hu'_tendsto :=
     tendsto_heatSemigroupHsExt_of_finite
       (I := I) (M := M) (g := g) (σ := σ) hu'_mem
-  -- Reformulate `hu'_tendsto` as a norm-to-zero.
   have hu'_diff_to_zero :
       Tendsto (fun τ : ℝ =>
           heatSemigroupHsExt (I := I) (M := M) g σ τ u' - u')
@@ -468,7 +420,6 @@ private lemma tendsto_heatSemigroupHsExt_at_zero
         (𝓝[Set.Ici (0 : ℝ)] 0) (𝓝 0) := by
     have := hu'_diff_to_zero.norm
     simpa using this
-  -- From `‖S τ u' - u'‖ → 0`: eventually `< ε / 3`.
   have h_eventually :
       ∀ᶠ τ in 𝓝[Set.Ici (0 : ℝ)] 0,
         ‖heatSemigroupHsExt (I := I) (M := M) g σ τ u' - u'‖ < ε / 3 := by
@@ -476,12 +427,9 @@ private lemma tendsto_heatSemigroupHsExt_at_zero
     filter_upwards [h] with τ hτ
     simpa [Real.dist_eq, Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)]
       using hτ
-  -- Combine with `‖u - u'‖ < ε / 3` and contractivity.
   filter_upwards [h_eventually, self_mem_nhdsWithin]
     with τ h_eps3 hτ_mem
   have hτ_nn : 0 ≤ τ := Set.mem_Ici.mp hτ_mem
-  -- `dist (S τ u) u = ‖S τ u - u‖`.
-  -- Triangle: ‖S τ u - u‖ ≤ ‖S τ (u - u')‖ + ‖S τ u' - u'‖ + ‖u' - u‖.
   have h_decomp :
       heatSemigroupHsExt (I := I) (M := M) g σ τ u - u =
         heatSemigroupHsExt (I := I) (M := M) g σ τ (u - u') +
@@ -504,7 +452,6 @@ private lemma tendsto_heatSemigroupHsExt_at_zero
         ≤ ‖heatSemigroupHsExt (I := I) (M := M) g σ τ‖ * ‖u - u'‖ := h_le
       _ ≤ 1 * ‖u - u'‖ := mul_le_mul_of_nonneg_right h_op h_nn
       _ = ‖u - u'‖ := one_mul _
-  -- The residual `‖u - u'‖ = dist u' u < ε/3`.
   have h_uu' : ‖u - u'‖ < ε / 3 := by
     have : dist u u' < ε / 3 := hu'_close
     rwa [dist_eq_norm] at this
@@ -512,7 +459,6 @@ private lemma tendsto_heatSemigroupHsExt_at_zero
     rw [norm_sub_rev]; exact h_uu'
   have h_first_lt : ‖heatSemigroupHsExt (I := I) (M := M) g σ τ (u - u')‖
       < ε / 3 := lt_of_le_of_lt h_first_norm h_uu'
-  -- Final triangle estimate.
   have h_total_norm :
       ‖heatSemigroupHsExt (I := I) (M := M) g σ τ u - u‖ ≤
         ‖heatSemigroupHsExt (I := I) (M := M) g σ τ (u - u')‖ +
@@ -544,14 +490,7 @@ private lemma tendsto_heatSemigroupHsExt_at_zero
           linarith
   have h_sum_eq : ε / 3 + ε / 3 + ε / 3 = ε := by ring
   rw [h_sum_eq] at h_lt
-  -- Convert `‖x‖ < ε` to `dist x 0 < ε`.
   simpa [Real.dist_eq, Real.norm_eq_abs, abs_of_nonneg (norm_nonneg _)] using h_lt
-
-/-! ## Strong continuity on `[0, ∞)`
-
-For `t₀ > 0`, two-sided continuity follows from the contractive
-comparison combined with right-continuity at `0`. For `t₀ = 0`, the
-result is exactly the right-continuity established above. -/
 
 /-- **Strong continuity of the scalar spectral heat semigroup on
 `[0, ∞)`.** For every `u : scalarHs g σ`, the map
@@ -563,9 +502,7 @@ theorem heatSemigroupHsExt_continuousOn (g : SmoothRiemannianMetric I M)
   intro t₀ ht₀
   have ht₀_nn : 0 ≤ t₀ := Set.mem_Ici.mp ht₀
   rcases lt_or_eq_of_le ht₀_nn with ht₀_pos | ht₀_eq
-  · -- `t₀ > 0`: two-sided continuity via the contractive comparison.
-    rw [ContinuousWithinAt]
-    -- Reduce to convergence of the difference to `0`.
+  · rw [ContinuousWithinAt]
     rw [show (𝓝 (heatSemigroupHsExt (I := I) (M := M) g σ t₀ u)) =
         𝓝 (0 +
           heatSemigroupHsExt (I := I) (M := M) g σ t₀ u) by rw [zero_add]]
@@ -574,7 +511,6 @@ theorem heatSemigroupHsExt_continuousOn (g : SmoothRiemannianMetric I M)
             heatSemigroupHsExt (I := I) (M := M) g σ t u -
               heatSemigroupHsExt (I := I) (M := M) g σ t₀ u)
           (𝓝[Set.Ici (0 : ℝ)] t₀) (𝓝 0) := by
-      -- Bound: norm ≤ ‖S |t - t₀| u - u‖.
       have h_pos_nhds : Set.Ioi (0 : ℝ) ∈ 𝓝 t₀ := Ioi_mem_nhds ht₀_pos
       have h_pos_within : Set.Ioi (0 : ℝ) ∈ 𝓝[Set.Ici (0 : ℝ)] t₀ :=
         mem_nhdsWithin_of_mem_nhds h_pos_nhds
@@ -586,7 +522,6 @@ theorem heatSemigroupHsExt_continuousOn (g : SmoothRiemannianMetric I M)
         exact norm_heatSemigroupHsExt_sub_le_diff
           (I := I) (M := M) (g := g) (σ := σ)
           (le_of_lt ht_pos) ht₀_nn u
-      -- `|t - t₀| → 0` in `𝓝[Ici 0] t₀`, and takes nonneg values.
       have h_abs_to_zero :
           Tendsto (fun t : ℝ => |t - t₀|)
             (𝓝[Set.Ici (0 : ℝ)] t₀) (𝓝 0) := by
@@ -606,7 +541,6 @@ theorem heatSemigroupHsExt_continuousOn (g : SmoothRiemannianMetric I M)
         rw [tendsto_nhdsWithin_iff]
         refine ⟨h_abs_to_zero, ?_⟩
         exact Eventually.of_forall (fun _ => Set.mem_Ici.mpr (abs_nonneg _))
-      -- Compose with right-continuity at 0.
       have h_strong :=
         tendsto_heatSemigroupHsExt_at_zero
           (I := I) (M := M) g σ u
@@ -628,13 +562,11 @@ theorem heatSemigroupHsExt_continuousOn (g : SmoothRiemannianMetric I M)
         have := h_diff_to_zero'.norm
         simpa using this
       exact squeeze_zero_norm' h_bound_event h_norm_to_zero
-    -- Add back the constant value at `t₀`.
     have h_added :=
       h_diff_to_zero.add (tendsto_const_nhds
         (x := heatSemigroupHsExt (I := I) (M := M) g σ t₀ u))
     simpa using h_added
-  · -- `t₀ = 0`: use right-continuity at `0`.
-    subst ht₀_eq
+  · subst ht₀_eq
     rw [ContinuousWithinAt]
     have h_at_zero :
         heatSemigroupHsExt (I := I) (M := M) g σ 0 u = u := by

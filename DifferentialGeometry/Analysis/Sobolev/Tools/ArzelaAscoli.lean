@@ -19,8 +19,6 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-/-! ## Auxiliary helpers on a compact subset of E -/
-
 omit [NeZero d] in
 /-- A continuous, uniformly Lipschitz family with sup-norm bound `C` on a
 compact set `K ⊆ E`, viewed as a family of bounded continuous functions on
@@ -39,9 +37,6 @@ omit [NeZero d] in
 /-- The sup-norm bound is non-negative whenever the family is non-empty (which
 will hold automatically when `0 < C`). -/
 private lemma C_nonneg_of_pos {C : ℝ} (hC : 0 < C) : 0 ≤ C := hC.le
-
-/-! ## Sequential Arzelà–Ascoli for uniformly Lipschitz, uniformly bounded
-families on a compact subset of `E`. -/
 
 /-- **Sequential Arzelà–Ascoli.**
 
@@ -62,78 +57,53 @@ theorem tendsto_subseq_of_uniformly_lipschitz_uniformly_bounded
         Continuous fInf ∧
         TendstoUniformlyOn (fun k => f (φ k)) fInf Filter.atTop K := by
   classical
-  -- Use the positivity of C to avoid an unused-variable warning. (The bound
-  -- itself is consumed via `hf_bdd`.)
   have _hC_le : (0 : ℝ) ≤ C := hC_pos.le
-  -- We split into the empty and nonempty cases for `K`.
   by_cases hK_empty : K = ∅
-  · -- If K = ∅, the conclusion is trivial: pick the identity subsequence and
-    -- the zero limit; uniform convergence on the empty set holds vacuously.
-    subst hK_empty
+  · subst hK_empty
     refine ⟨id, strictMono_id, fun _ => 0, continuous_const, ?_⟩
     exact tendstoUniformlyOn_empty
-  · -- K is nonempty.
-    have hK_nonempty : K.Nonempty := Set.nonempty_iff_ne_empty.mpr hK_empty
-    -- Type-class infrastructure: K is a compact space.
+  · have hK_nonempty : K.Nonempty := Set.nonempty_iff_ne_empty.mpr hK_empty
     have h_subtype_K_compact : CompactSpace K := isCompact_iff_compactSpace.mp hK_compact
-    -- K is also nonempty
     have h_subtype_K_nonempty : Nonempty K := hK_nonempty.to_subtype
-    -- Build BCF representations of the restricted functions.
     let f_bcf : ℕ → (K →ᵇ ℝ) :=
       fun n => BoundedContinuousFunction.mkOfCompact
         ⟨fun x : K => f n (x : E), (hf_cont n).comp continuous_subtype_val⟩
-    -- Range of each f n on K lies in [-C, C].
     have h_range_compact : ∀ (g : K →ᵇ ℝ) (x : K),
         g ∈ Set.range f_bcf → g x ∈ Set.Icc (-C) C := by
       rintro g x ⟨n, rfl⟩
       simpa [f_bcf] using bcfRestrict_values_in_compact hf_bdd n x
-    -- The set {-C ≤ y ≤ C} is compact.
     have h_Icc_compact : IsCompact (Set.Icc (-C) C : Set ℝ) := isCompact_Icc
-    -- Build a Lipschitz constant for the restricted family. Each f n is
-    -- L-Lipschitz on E, so its restriction to K is L-Lipschitz on K.
     have h_lip_restrict : ∀ n, LipschitzWith ⟨L, hL_pos⟩ ((f n) ∘ ((↑) : K → E)) := by
       intro n
       have hsubval : LipschitzWith 1 ((↑) : K → E) := LipschitzWith.subtype_val K
       have hcomp := (hf_lip n).comp hsubval
       simpa [show (⟨L, hL_pos⟩ : ℝ≥0) * 1 = ⟨L, hL_pos⟩ by ext; simp] using hcomp
-    -- The family {f_bcf n} is equicontinuous: each member is L-Lipschitz with
-    -- a common constant L.
     have h_equicont : Equicontinuous ((↑) : (Set.range f_bcf) → K → ℝ) := by
-      -- Use Metric.equicontinuous_of_continuity_modulus with `b s = L * s`.
       refine Metric.equicontinuous_of_continuity_modulus
         (fun s => L * s) ?_ _ ?_
-      · -- L * s → 0 as s → 0.
-        have : Tendsto (fun s : ℝ => L * s) (𝓝 0) (𝓝 (L * 0)) :=
+      · have : Tendsto (fun s : ℝ => L * s) (𝓝 0) (𝓝 (L * 0)) :=
           tendsto_const_nhds.mul tendsto_id
         simpa using this
       · rintro x y ⟨g, hg⟩
-        -- g.val = (f_bcf n) for some n.
         rcases hg with ⟨n, rfl⟩
-        -- dist (f_bcf n x) (f_bcf n y) ≤ L * dist (x : E) (y : E) = L * dist x y.
         have h_lip_n := h_lip_restrict n
         have : dist (f n (x : E)) (f n (y : E)) ≤ L * dist (x : E) (y : E) := by
           have := h_lip_n.dist_le_mul x y
           simpa [Function.comp, NNReal.coe_mk] using this
         simpa [f_bcf, BoundedContinuousFunction.mkOfCompact_apply,
           Subtype.dist_eq] using this
-    -- Combine to apply arzela_ascoli₂ to the closure of the range.
     have h_compact_closure :
         IsCompact (closure (Set.range f_bcf : Set (K →ᵇ ℝ))) :=
       BoundedContinuousFunction.arzela_ascoli (Set.Icc (-C) C) h_Icc_compact
         (Set.range f_bcf) (fun g x hg => h_range_compact g x hg) h_equicont
-    -- Each f_bcf n is in the closure, so we can extract a subsequence.
     have h_in_closure : ∀ n, f_bcf n ∈ closure (Set.range f_bcf) := fun n =>
       subset_closure (Set.mem_range_self n)
     rcases h_compact_closure.tendsto_subseq h_in_closure with
       ⟨gInf, _, φ, hφ_mono, h_tendsto⟩
-    -- gInf has values in [-C, C], so in particular |gInf| ≤ C.
-    -- Extract the underlying function `g` of gInf.
     set g : K → ℝ := gInf.toFun with hg_def
     have hg_cont : Continuous g := gInf.continuous
-    -- The convergence in BCF metric implies uniform convergence on K.
     have h_uniform_K :
         TendstoUniformly (fun k => fun x : K => f (φ k) x) g atTop := by
-      -- Cast h_tendsto to TendstoUniformly via tendsto_iff_tendstoUniformly.
       have hTU :
           TendstoUniformly (fun k => fun x : K => (f_bcf (φ k)) x)
             (fun x : K => gInf x) atTop :=
@@ -144,9 +114,7 @@ theorem tendsto_subseq_of_uniformly_lipschitz_uniformly_bounded
         simp [f_bcf]
       rw [hcoe] at hTU
       exact hTU
-    -- Now prove that the limit g is L-Lipschitz on K.
     have h_g_lip : LipschitzWith ⟨L, hL_pos⟩ g := by
-      -- It is a uniform limit of L-Lipschitz functions, so itself L-Lipschitz.
       refine LipschitzWith.of_dist_le_mul fun x y => ?_
       have h_pt_x : Tendsto (fun k => f (φ k) (x : E)) atTop (𝓝 (g x)) :=
         h_uniform_K.tendsto_at x
@@ -168,18 +136,8 @@ theorem tendsto_subseq_of_uniformly_lipschitz_uniformly_bounded
       change dist (g x) (g y) ≤ L * dist x y
       rw [← h_subtype]
       exact h_le
-    -- Now extend g (continuous on K) to all of E via Lipschitz extension.
-    -- We treat g as a function E → ℝ defined by g_E := g ∘ (↑) on K, and use
-    -- the McShane extension.
-    -- First, build a function on K (as a set) defined to equal g on K.
-    -- Since LipschitzOnWith.extend_real wants a function α → ℝ with
-    -- LipschitzOnWith K f s, we need to start from a function E → ℝ that
-    -- happens to satisfy LipschitzOnWith on K.
-    -- Define g_set : E → ℝ by g_set x = g ⟨x, h⟩ if x ∈ K, else 0.
-    -- This satisfies LipschitzOnWith ⟨L, hL_pos⟩ g_set K.
     set g_set : E → ℝ := fun x => if hxK : x ∈ K then g ⟨x, hxK⟩ else 0
       with hg_set_def
-    -- LipschitzOnWith on K
     have h_g_set_lip : LipschitzOnWith ⟨L, hL_pos⟩ g_set K := by
       refine LipschitzOnWith.of_dist_le_mul fun x hx y hy => ?_
       have h_dist :=
@@ -191,18 +149,13 @@ theorem tendsto_subseq_of_uniformly_lipschitz_uniformly_bounded
         rw [h_g_set_x, h_g_set_y, ← h_subtype_dist]
         simpa using h_dist
       simpa using h_real
-    -- Apply Lipschitz extension theorem.
     rcases h_g_set_lip.extend_real with ⟨fInf, h_fInf_lip, h_fInf_eq⟩
     refine ⟨φ, hφ_mono, fInf, h_fInf_lip.continuous, ?_⟩
-    -- Show TendstoUniformlyOn (f ∘ φ) fInf atTop K from TendstoUniformly on K.
     rw [Metric.tendstoUniformlyOn_iff]
     intro ε hε
     rw [Metric.tendstoUniformly_iff] at h_uniform_K
-    -- h_uniform_K : ∀ ε > 0, ∀ᶠ k, ∀ x : K, dist (g x) (f (φ k) x) < ε.
     have h_ev := h_uniform_K ε hε
     filter_upwards [h_ev] with k hk x hx
-    -- We want: dist (fInf x) (f (φ k) x) < ε
-    -- Note: fInf on K agrees with g_set on K, which agrees with g.
     have h_fInf_x : fInf x = g ⟨x, hx⟩ := by
       have h1 : g_set x = g ⟨x, hx⟩ := by simp [g_set, hx]
       have h2 : fInf x = g_set x := by
@@ -211,8 +164,6 @@ theorem tendsto_subseq_of_uniformly_lipschitz_uniformly_bounded
       rw [h2, h1]
     rw [h_fInf_x]
     have hk_at_x := hk ⟨x, hx⟩
-    -- hk_at_x : dist (g ⟨x, hx⟩) (f (φ k) (⟨x, hx⟩ : E)) < ε
-    -- That's exactly what we want.
     simpa using hk_at_x
 
 end DifferentialGeometry.Analysis.Sobolev

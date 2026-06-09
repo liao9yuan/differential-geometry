@@ -1,9 +1,9 @@
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.Defs
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
-import DifferentialGeometry.Integral.DivergenceTheorem.TangentAction
-import DifferentialGeometry.Integral.Measure.Properties
-import DifferentialGeometry.Integral.Measure.Glue
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction
+import DifferentialGeometry.Analysis.Integration.Measure.Properties
+import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
@@ -15,8 +15,9 @@ import Mathlib.MeasureTheory.Function.LpSpace.Basic
 
 For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` and an
 exponent `1 ≤ p ≤ ∞` (`p ≠ ∞`), this file establishes that the chart-based
-predicate `MemWkpChart g 1 p u` (defined in `Sobolev/Chart.lean`) and the
-intrinsic predicate `MemW1pIntrinsic g p u` (defined in `Sobolev/Intrinsic.lean`)
+predicate `MemWkpChart g 1 p u` (defined in `Sobolev/Chart/Defs.lean`) and the
+intrinsic predicate `MemW1pIntrinsic g p u` (defined in
+`Sobolev/Intrinsic/Defs.lean`)
 both hold for every smooth scalar function `u : M → ℝ`. As a consequence, the
 two predicates are equivalent on smooth inputs.
 
@@ -60,8 +61,6 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
@@ -75,13 +74,6 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 `Module.finrank ℝ E`. -/
 private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] := EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
-
-/-! ## Smooth global extension of a chart-pushed function
-
-Given a smooth function `f : M → ℝ` whose `tsupport` is contained in
-`(chartAt H α).source`, we construct a globally smooth, compactly supported
-function on `EuclN E` that pointwise agrees with the chart-pushed expression
-`f ∘ (extChartAt I α).symm ∘ toEuclidean.symm` on the chart-target image. -/
 
 /-- The smooth global extension `chartPushedExt α f` of a function `f : M → ℝ`,
 defined as `f ((extChartAt I α).symm (toEuclidean.symm y))` if
@@ -136,8 +128,6 @@ private lemma chartPushedExt_apply_of_notMem_chartTargetEuclid
   rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
   exact hy
 
-/-! ## Pointwise agreement with `chartPushed` on the chart-target image -/
-
 /-- On the chart-target image, `chartPushed ρ α u` agrees pointwise with
 `chartPushedExt α (ρα * u)`. -/
 private lemma chartPushedExt_eq_chartPushed_on_target
@@ -151,8 +141,6 @@ private lemma chartPushedExt_eq_chartPushed_on_target
   rw [chartPushedExt_apply_of_mem_chartTargetEuclid (I := I) (M := M) α _ hy]
   unfold chartPushed
   rfl
-
-/-! ## Compact support of `chartPushedExt α (ρα * u)` -/
 
 /-- For a smooth chart-source-supported function `f : M → ℝ` with compact
 support, the toEuclidean image of the chart image of `tsupport f` is compact
@@ -188,14 +176,12 @@ private lemma chartPushedExt_eq_zero_off_image_tsupport
     chartPushedExt (I := I) (M := M) α f y = 0 := by
   classical
   by_cases hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α
-  · -- y ∈ chart target. Extract z ∈ chart target with `toEuclidean z = y`.
-    obtain ⟨z, hz_target, hzy⟩ := hy_target
+  · obtain ⟨z, hz_target, hzy⟩ := hy_target
     have hy_target' : y ∈ chartTargetEuclid (I := I) (M := M) α := ⟨z, hz_target, hzy⟩
     have hsymm_source : (extChartAt I α).symm z ∈ (extChartAt I α).source :=
       (extChartAt I α).map_target hz_target
     have hy_symm : (toEuclidean (E := E)).symm y = z := by
       rw [← hzy]; exact (toEuclidean (E := E)).symm_apply_apply z
-    -- Suppose for contradiction f((extChartAt I α).symm z) ≠ 0.
     rw [chartPushedExt_apply_of_mem_chartTargetEuclid (I := I) (M := M) α f hy_target',
       hy_symm]
     by_contra hne
@@ -205,8 +191,7 @@ private lemma chartPushedExt_eq_zero_off_image_tsupport
     have hz_eq : (extChartAt I α) ((extChartAt I α).symm z) = z :=
       (extChartAt I α).right_inv hz_target
     refine ⟨z, ⟨(extChartAt I α).symm z, hsymm_in_supp, hz_eq⟩, hzy⟩
-  · -- y ∉ chart target → chartPushedExt = 0 directly.
-    exact chartPushedExt_apply_of_notMem_chartTargetEuclid (I := I) (M := M) α f hy_target
+  · exact chartPushedExt_apply_of_notMem_chartTargetEuclid (I := I) (M := M) α f hy_target
 
 /-- The function `chartPushedExt α f` has compact support, when `f` is supported
 in the chart source on a compact manifold. -/
@@ -215,22 +200,17 @@ private lemma hasCompactSupport_chartPushedExt
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
     HasCompactSupport (chartPushedExt (I := I) (M := M) α f) := by
   classical
-  -- Define the compact set K = toEuclidean '' (extChartAt I α '' tsupport f).
   set K : Set (EuclN E) :=
     (toEuclidean (E := E)) '' ((extChartAt I α) '' (tsupport f)) with hK_def
   have hK_compact : IsCompact K :=
     image_toEuclidean_chart_tsupport_isCompact
       (I := I) (M := M) (f := f) (α := α) hf_supp
-  -- Function support is contained in K (since outside K, function is 0).
   apply HasCompactSupport.of_support_subset_isCompact hK_compact
   intro y hy_supp
-  -- y ∈ Function.support → chartPushedExt y ≠ 0.
   by_contra hyK
   apply hy_supp
   exact chartPushedExt_eq_zero_off_image_tsupport
     (I := I) (M := M) α (f := f) hf_supp hyK
-
-/-! ## Smoothness of `chartPushedExt α f` for smooth `f` with chart-source support -/
 
 /-- The composition `f ∘ (extChartAt I α).symm ∘ toEuclidean.symm` is smooth
 on `chartTargetEuclid α` when `f` is smooth on `M`. -/
@@ -241,16 +221,13 @@ private lemma contDiffOn_chartPushedExt_formula
           f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
         (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  -- Use scalarOnE α f, which is ContDiffOn ℝ ∞ on (extChartAt I α).target.
   have hscalar : ContDiffOn ℝ ∞
       (fun y : E => f ((extChartAt I α).symm y))
       (extChartAt I α).target := by
     have h := scalarOnE_contDiffOn (I := I) α hf
     exact h
-  -- toEuclidean.symm is smooth (ContinuousLinearEquiv).
   have htoEuc_symm_smooth : ContDiff ℝ ∞ ((toEuclidean (E := E)).symm) :=
     ContinuousLinearEquiv.contDiff _
-  -- Compose: y ∈ chartTargetEuclid α ⟹ toEuclidean.symm y ∈ extChartAt target.
   have hmaps : Set.MapsTo ((toEuclidean (E := E)).symm)
       (chartTargetEuclid (I := I) (M := M) α) (extChartAt I α).target := by
     intro y hy
@@ -267,19 +244,15 @@ private lemma contDiffAt_chartPushedExt_of_mem_target
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     ContDiffAt ℝ ∞ (chartPushedExt (I := I) (M := M) α f) y := by
   classical
-  -- On the chart target, chartPushedExt agrees with the formula.
-  -- The chart target is open.
   have hOpen : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have hContDiffOn := contDiffOn_chartPushedExt_formula (I := I) (M := M) α hf
-  -- A function is ContDiffAt at y if it's ContDiffWithinAt on a nhd of y.
   have hContDiffAt_formula : ContDiffAt ℝ ∞
       (fun y : EuclN E => f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) y := by
     have hwithin : ContDiffWithinAt ℝ ∞
         (fun y : EuclN E => f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
         (chartTargetEuclid (I := I) (M := M) α) y := hContDiffOn y hy
     exact hwithin.contDiffAt (hOpen.mem_nhds hy)
-  -- chartPushedExt agrees with the formula on the chart target — a nhd of y.
   apply hContDiffAt_formula.congr_of_eventuallyEq
   filter_upwards [hOpen.mem_nhds hy] with z hz
   rw [chartPushedExt_apply_of_mem_chartTargetEuclid (I := I) (M := M) α f hz]
@@ -296,7 +269,6 @@ private lemma contDiffAt_chartPushedExt_of_notMem_image_tsupport_compact
         ((extChartAt I α) '' (tsupport f))) :
     ContDiffAt ℝ ∞ (chartPushedExt (I := I) (M := M) α f) y := by
   classical
-  -- The image of tsupport is compact (continuous image of compact).
   set K : Set (EuclN E) :=
     (toEuclidean (E := E)) '' ((extChartAt I α) '' (tsupport f)) with hK_def
   have hK_compact : IsCompact K := by
@@ -312,10 +284,8 @@ private lemma contDiffAt_chartPushedExt_of_notMem_image_tsupport_compact
   have hK_closed : IsClosed K := hK_compact.isClosed
   have hK_compl_open : IsOpen Kᶜ := hK_closed.isOpen_compl
   have hy_compl : y ∈ Kᶜ := hy_off
-  -- Open neighborhood of y in Kᶜ, on which chartPushedExt = 0.
   apply ContDiffAt.congr_of_eventuallyEq (f := fun _ : EuclN E => (0 : ℝ)) contDiffAt_const
   filter_upwards [hK_compl_open.mem_nhds hy_compl] with z hz
-  -- z ∈ Kᶜ ⟹ chartPushedExt z = 0.
   exact chartPushedExt_eq_zero_off_image_tsupport
     (I := I) (M := M) α (f := f) hf_supp hz
 
@@ -331,13 +301,9 @@ private lemma contDiff_chartPushedExt
   classical
   rw [contDiff_iff_contDiffAt]
   intro y
-  -- Case split: y ∈ chartTargetEuclid α or not.
   by_cases hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α
   · exact contDiffAt_chartPushedExt_of_mem_target (I := I) (M := M) α hf hy_target
-  · -- y ∉ chartTargetEuclid α.
-    -- The image of tsupport is contained in chartTargetEuclid α (subset).
-    -- So if y ∉ chartTargetEuclid α, certainly y ∉ image.
-    have hy_off : y ∉ (toEuclidean (E := E)) ''
+  · have hy_off : y ∉ (toEuclidean (E := E)) ''
         ((extChartAt I α) '' (tsupport f)) := by
       intro hy_in
       apply hy_target
@@ -346,10 +312,8 @@ private lemma contDiff_chartPushedExt
     exact contDiffAt_chartPushedExt_of_notMem_image_tsupport_compact
       (I := I) (M := M) α (f := f) hf_supp hf_compact hy_off
 
-/-! ## `MemW1p` for `chartPushedExt α (ρα * u)` on `chartTargetEuclid α` -/
-
 /-- The (private) chart-target image is open in `EuclN E` (re-exported from
-`Sobolev/Chart.lean`). -/
+`Sobolev/Chart/Defs.lean`). -/
 private lemma chartTargetEuclid_isOpen' [I.Boundaryless] (α : M) :
     IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
   chartTargetEuclid_isOpen (I := I) (M := M) α
@@ -366,25 +330,19 @@ private lemma memLp_chartPushedExt
       p (volume.restrict (chartTargetEuclid (I := I) (M := M) α)) := by
   classical
   set f : M → ℝ := fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x with hf_def
-  -- f is smooth on M.
   have hf_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ f :=
     ((ρ α : C^∞⟮I, M; ℝ⟯).contMDiff).mul hu
-  -- tsupport f ⊆ tsupport (ρ α) ⊆ chartAt source.
   have hf_supp : tsupport f ⊆ (chartAt H α).source := by
     have h1 : tsupport f ⊆ tsupport ((ρ α : C^∞⟮I, M; ℝ⟯) : M → ℝ) := by
       apply tsupport_mul_subset_left
     exact h1.trans (hρ α)
-  -- tsupport f compact (closed in compact M).
   have hf_compact : IsCompact (tsupport f) := (isClosed_tsupport _).isCompact
-  -- chartPushedExt α f is globally smooth and compactly supported.
   have hsmooth : ContDiff ℝ ∞ (chartPushedExt (I := I) (M := M) α f) :=
     contDiff_chartPushedExt (I := I) (M := M) α hf_smooth hf_supp hf_compact
   have hcs : HasCompactSupport (chartPushedExt (I := I) (M := M) α f) :=
     hasCompactSupport_chartPushedExt (I := I) (M := M) α hf_supp
-  -- Continuous + compactly supported → MemLp p volume globally.
   have hmemLp_global : MemLp (chartPushedExt (I := I) (M := M) α f) p volume :=
     hsmooth.continuous.memLp_of_hasCompactSupport hcs
-  -- Restrict to the chart-target image.
   exact hmemLp_global.restrict _
 
 /-- The classical fderiv of the smooth extension is itself smooth and
@@ -413,17 +371,14 @@ private lemma fderiv_chartPushedExt_memLp
     contDiff_chartPushedExt (I := I) (M := M) α hf_smooth hf_supp hf_compact
   have hcs : HasCompactSupport (chartPushedExt (I := I) (M := M) α f) :=
     hasCompactSupport_chartPushedExt (I := I) (M := M) α hf_supp
-  -- The fderiv-applied-to-direction function is smooth.
   have hderiv_smooth : ContDiff ℝ ∞
       (fun x => (fderiv ℝ (chartPushedExt (I := I) (M := M) α f) x)
         (EuclideanSpace.single i 1)) :=
     (hsmooth.fderiv_right (m := (⊤ : ℕ∞)) (by norm_cast)).clm_apply contDiff_const
-  -- And has compact support.
   have hderiv_cs : HasCompactSupport
       (fun x => (fderiv ℝ (chartPushedExt (I := I) (M := M) α f) x)
         (EuclideanSpace.single i 1)) :=
     hcs.fderiv_apply (𝕜 := ℝ) _
-  -- MemLp.
   have hmemLp_global : MemLp _ p volume :=
     hderiv_smooth.continuous.memLp_of_hasCompactSupport hderiv_cs
   exact hmemLp_global.restrict _
@@ -448,24 +403,16 @@ private lemma memW1p_chartPushedExt
   have hf_compact : IsCompact (tsupport f) := (isClosed_tsupport _).isCompact
   have hsmooth : ContDiff ℝ ∞ (chartPushedExt (I := I) (M := M) α f) :=
     contDiff_chartPushedExt (I := I) (M := M) α hf_smooth hf_supp hf_compact
-  -- Construct MemW1p directly.
   refine ⟨?_, ?_⟩
-  · -- MemLp condition.
-    exact memLp_chartPushedExt (I := I) (M := M) α ρ hρ hu p
-  · -- Weak partial derivatives.
-    intro i
-    -- Use the classical fderiv as the weak partial.
+  · exact memLp_chartPushedExt (I := I) (M := M) α ρ hρ hu p
+  · intro i
     refine ⟨fun x : EuclN E =>
       (fderiv ℝ (chartPushedExt (I := I) (M := M) α f) x)
         (EuclideanSpace.single i 1), ?_, ?_⟩
-    · -- MemLp of the weak partial.
-      exact fderiv_chartPushedExt_memLp (I := I) (M := M) α ρ hρ hu p i
-    · -- HasWeakPartialDeriv of the fderiv.
-      exact DeGiorgi.HasWeakPartialDeriv.of_contDiff
+    · exact fderiv_chartPushedExt_memLp (I := I) (M := M) α ρ hρ hu p i
+    · exact DeGiorgi.HasWeakPartialDeriv.of_contDiff
         (chartTargetEuclid_isOpen' (I := I) (M := M) α)
         (hsmooth.of_le (by norm_cast))
-
-/-! ## Main theorem: smooth functions are in `MemWkpChart g 1 p` -/
 
 /-- For smooth `u : M → ℝ` on a closed Riemannian manifold, the chart-pushed
 function for chart `α` lies in `MemW1p p` of `chartTargetEuclid α`. -/
@@ -479,18 +426,15 @@ private theorem memW1p_chartPushed_of_contMDiff
   set ρ := chartAtlasPOU I M with hρ_def
   have hρ_sub : ρ.IsSubordinate (fun β : M => (chartAt H β).source) :=
     chartAtlasPOU_isSubordinate I M
-  -- Use chartPushedExt α (ρα * u) which is MemW1p, then transfer via ae-equality.
   have hExt_memW1p : DeGiorgi.MemW1p p
       (chartPushedExt (I := I) (M := M) α
         (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x))
       (chartTargetEuclid (I := I) (M := M) α) :=
     memW1p_chartPushedExt (I := I) (M := M) α ρ hρ_sub hu hp
-  -- Transfer via ae-equality to chartPushed.
   have hae_eq : chartPushedExt (I := I) (M := M) α
       (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x) =ᵐ[volume.restrict
         (chartTargetEuclid (I := I) (M := M) α)]
       chartPushed (I := I) (M := M) ρ α u := by
-    -- Pointwise equality on the chart target → ae-equal on volume.restrict (chart target).
     refine
       (MeasureTheory.ae_restrict_iff' (chartTargetEuclid_measurableSet
         (I := I) (M := M) α)).mpr ?_
@@ -510,14 +454,11 @@ theorem MemWkpChart_of_contMDiff
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
     MemWkpChart (I := I) (M := M) g 1 p u := by
   intro α
-  -- MemWkp 1 p ↔ MemW1p p.
   rw [show (1 : ℕ) = 0 + 1 from rfl,
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_succ]
   refine ⟨?_, ?_⟩
   · exact memW1p_chartPushed_of_contMDiff (I := I) (M := M) α hu hp
-  · -- For each i, the chosen weak partial is in MemWkp 0 p = MemLp.
-    intro i
-    -- chosenWeakPartial' uses MemW1p which we've established.
+  · intro i
     have hMW1p : DeGiorgi.MemW1p p
         (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α u)
         (chartTargetEuclid (I := I) (M := M) α) :=
@@ -525,8 +466,6 @@ theorem MemWkpChart_of_contMDiff
     rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_zero]
     exact DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_memLp_of_mem
       (d := Module.finrank ℝ E) hMW1p i
-
-/-! ## Re-export of the intrinsic smooth bridge -/
 
 /-- **Smooth bridge for `MemW1pIntrinsic`** (re-export). Every smooth function
 on a closed Riemannian manifold lies in `W^{1,p}_{int}` for every exponent `p`. -/
@@ -538,8 +477,6 @@ theorem MemW1pIntrinsic_of_contMDiff_explicit
       (I := I) (M := M) g p u :=
   DifferentialGeometry.Analysis.Sobolev.Intrinsic.MemW1pIntrinsic_of_contMDiff
     (I := I) (M := M) g p hu
-
-/-! ## Main equivalence on smooth functions -/
 
 /-- **Equivalence on smooth inputs.** For a smooth function `u` on a closed
 Riemannian manifold, the chart-based `W^{1,p}` predicate (at order 1) is
@@ -557,8 +494,6 @@ theorem memWkpChart_iff_memW1pIntrinsic_of_contMDiff
   refine ⟨fun _ => ?_, fun _ => ?_⟩
   · exact MemW1pIntrinsic_of_contMDiff_explicit (I := I) (M := M) g p hu_smooth
   · exact MemWkpChart_of_contMDiff (I := I) (M := M) g hp_one hu_smooth
-
-/-! ## Norm-finiteness theorems on smooth inputs -/
 
 /-- The chart-based `W^{1,p}` norm is finite for smooth `u` on a closed
 manifold. -/

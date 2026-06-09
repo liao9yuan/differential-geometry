@@ -14,8 +14,8 @@ This file defines smooth sections of the multilinear bundle
 `Bundle.continuousMultilinearMap 𝕜 s F E` over an arbitrary `C^n` vector bundle `E`,
 and proves basic algebraic and analytic results about them.
 
-These results generalize the `Tensor0SField` API from `RSTensor/Field.lean`, which is
-the special case `E = TangentSpace I`.
+These results generalize the `Tensor0SField` API from `RSTensor/Coordinates/Field.lean`,
+which is the special case `E = TangentSpace I`.
 
 ## Main Definitions
 

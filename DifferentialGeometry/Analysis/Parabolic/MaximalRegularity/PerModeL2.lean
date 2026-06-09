@@ -66,13 +66,6 @@ namespace MaximalRegularity
 
 open TimeSobolev
 
-/-! ## Integrability of the convolution integrand for an `L²` forcing term
-
-The two kernels appearing in the Duhamel convolution — `e^{−lam(t−s)}`, and its
-factored counterpart `e^{lam·s}` — are bounded continuous functions on the
-compact interval `[0,T]`.  Multiplying them by the integrable representative of
-a time-`L²` element therefore yields an integrable function. -/
-
 section Integrability
 
 variable {T : ℝ}
@@ -83,8 +76,7 @@ theorem integrableOn_bdd_mul_timeL2 {k : ℝ → ℝ} (hk : Continuous k)
     (f : timeL2 ℝ T) :
     IntegrableOn (fun s => k s * f s) (Set.Icc (0 : ℝ) T) volume := by
   rcases le_or_gt 0 T with hT | hT
-  · -- A uniform bound for the continuous prefactor on the compact interval.
-    obtain ⟨s₀, _, hs₀max⟩ :=
+  · obtain ⟨s₀, _, hs₀max⟩ :=
       isCompact_Icc.exists_isMaxOn (s := Set.Icc (0 : ℝ) T)
         ⟨0, ⟨le_refl 0, hT⟩⟩ hk.norm.continuousOn
     have hfint : Integrable (fun s => f s) (timeMeasure T) := TimeSobolev.integrable f
@@ -126,13 +118,6 @@ theorem continuousOn_exp_primitive_timeL2 (lam : ℝ) (f : timeL2 ℝ T) (hT : 0
 
 end Integrability
 
-/-! ## The kernel-factoring rewrite for an `L²` forcing term
-
-The convolution kernel `e^{−lam(t−s)}` factors as `e^{−lam·t} · e^{lam·s}`,
-separating the time variable out of the integral.  For a time-`L²` forcing term
-this is again an integral congruence, valid because the two integrands agree
-*everywhere* on the interval of integration. -/
-
 section Factoring
 
 variable {T : ℝ}
@@ -161,11 +146,6 @@ theorem continuousOn_perModeConv_timeL2 (lam : ℝ) (f : timeL2 ℝ T) (hT : 0 �
 
 end Factoring
 
-/-! ## The lifted per-mode convolution on `L²(0,T)`
-
-For a time-`L²` forcing term `f`, the continuous-on-`[0,T]` function
-`t ↦ perModeConv lam ⇑f t` represents an element of `L²(0,T)`. -/
-
 section LiftedConv
 
 variable {T : ℝ}
@@ -192,7 +172,6 @@ theorem perModeConv_timeL2_congr (lam : ℝ) {f₁ f₂ : ℝ → ℝ}
     {t : ℝ} (ht : t ∈ Set.Icc (0 : ℝ) T) :
     perModeConv lam f₁ t = perModeConv lam f₂ t := by
   refine intervalIntegral.integral_congr_ae ?_
-  -- Restate the a.e.-equality on `[0,T]` as an `ae volume` implication.
   have himp : ∀ᵐ x ∂volume, x ∈ Set.Icc (0 : ℝ) T → f₁ x = f₂ x :=
     (ae_restrict_iff' measurableSet_Icc).1 h
   filter_upwards [himp] with x hx
@@ -227,13 +206,11 @@ theorem perModeConvL2Fun_add (lam : ℝ) (hT : 0 ≤ T) (f₁ f₂ : timeL2 ℝ 
   filter_upwards [h12, h1, h2, hadd, hfadd, ae_restrict_mem measurableSet_Icc]
     with t ht1 ht2 ht3 htadd htfadd htmem
   rw [ht1, htadd, Pi.add_apply, ht2, ht3]
-  -- The convolution of `⇑(f₁+f₂)` equals that of the pointwise sum `f₁+f₂`.
   have hcongr : perModeConv lam (fun s => (f₁ + f₂) s) t
       = perModeConv lam (fun s => f₁ s + f₂ s) t :=
     perModeConv_timeL2_congr lam
       (h := by filter_upwards [hfadd] with r hr using hr) htmem
   rw [hcongr]
-  -- Split the convolution of a pointwise sum.
   unfold perModeConv
   rw [← intervalIntegral.integral_add
         (intervalIntegrable_kernel_mul_timeL2 lam t f₁ 0 t
@@ -254,7 +231,6 @@ theorem perModeConvL2Fun_smul (lam : ℝ) (hT : 0 ≤ T) (c : ℝ) (f : timeL2 �
   filter_upwards [hcf, hf, hsmul, hfsmul, ae_restrict_mem measurableSet_Icc]
     with t htcf htf htsmul htfsmul htmem
   rw [htcf, htsmul, Pi.smul_apply, htf, smul_eq_mul]
-  -- The convolution of `⇑(c•f)` equals that of the pointwise scaling `c·f`.
   have hcongr : perModeConv lam (fun s => (c • f) s) t
       = perModeConv lam (fun s => c * f s) t :=
     perModeConv_timeL2_congr lam
@@ -275,7 +251,6 @@ theorem abs_perModeConv_timeL2_le (lam : ℝ) (hlam : 0 ≤ lam) (f : timeL2 ℝ
     {t : ℝ} (ht : t ∈ Set.Icc (0 : ℝ) T) :
     |perModeConv lam (fun s => f s) t| ≤ Real.sqrt T * ‖f‖ := by
   obtain ⟨ht0, htT⟩ := ht
-  -- Estimate the convolution integral by the integral of `|⇑f|` over `[0,t]`.
   have hkernel_le : ∀ s ∈ Set.Ioc (0 : ℝ) t,
       ‖Real.exp (-(lam * (t - s))) * f s‖ ≤ ‖f s‖ := by
     intro s hs
@@ -292,7 +267,6 @@ theorem abs_perModeConv_timeL2_le (lam : ℝ) (hlam : 0 ≤ lam) (f : timeL2 ℝ
   have hint_f : IntegrableOn (fun s => f s) (Set.Ioc (0 : ℝ) t) volume :=
     (TimeSobolev.integrableOn f).mono_set
       (Set.Ioc_subset_Icc_self.trans (Set.Icc_subset_Icc le_rfl htT))
-  -- The convolution, bounded by the `[0,t]`-integral of `|⇑f|`.
   have hconv_le : |perModeConv lam (fun s => f s) t|
       ≤ ∫ s in Set.Ioc (0 : ℝ) t, ‖f s‖ := by
     rw [perModeConv, intervalIntegral.integral_of_le ht0, ← Real.norm_eq_abs]
@@ -300,7 +274,6 @@ theorem abs_perModeConv_timeL2_le (lam : ℝ) (hlam : 0 ≤ lam) (f : timeL2 ℝ
     refine setIntegral_mono_on hint_kernel.norm hint_f.norm measurableSet_Ioc ?_
     intro s hs
     exact hkernel_le s hs
-  -- The `[0,t]`-integral of `|⇑f|` is bounded by `√T · ‖f‖` (Cauchy–Schwarz).
   have hmono : (∫ s in Set.Ioc (0 : ℝ) t, ‖f s‖)
       ≤ ∫ s in Set.Icc (0 : ℝ) T, ‖f s‖ := by
     have hintT : IntegrableOn (fun s => ‖f s‖) (Set.Icc (0 : ℝ) T) volume :=
@@ -352,13 +325,6 @@ theorem perModeConvL2_coeFn (lam : ℝ) (hlam : 0 ≤ lam) (hT : 0 ≤ T) (f : t
 
 end LiftedConv
 
-/-! ## The maximal-regularity estimates on `L²(0,T)`
-
-The two `L²`-norm estimates of `PerMode.lean` — `‖lam·φ‖ ≤ ‖f‖` and
-`‖φ'‖ ≤ 2‖f‖` — extend from continuous forcing terms to all of `L²(0,T)` by
-density.  The set on which a continuous-in-`f` inequality holds is closed, and
-contains the dense range of `BoundedContinuousFunction.toLp`. -/
-
 section DensityExtension
 
 variable {T : ℝ}
@@ -406,7 +372,6 @@ theorem timeL2_le_of_boundedContinuous {T : ℝ} {φ ψ : timeL2 ℝ T → ℝ}
         ψ (BoundedContinuousFunction.toLp 2 (timeMeasure T) ℝ F))
     (f : timeL2 ℝ T) :
     φ f ≤ ψ f := by
-  -- The condition set is closed and contains the dense range of `toLp`.
   set C : Set (timeL2 ℝ T) := {g | φ g ≤ ψ g} with hC_def
   have hC_closed : IsClosed C := isClosed_le hφ hψ
   have hrange : Set.range (BoundedContinuousFunction.toLp 2 (timeMeasure T) ℝ) ⊆ C := by
@@ -442,20 +407,16 @@ theorem perModeConvL2_sq_le (lam : ℝ) (hlam : 0 ≤ lam) (hT : 0 ≤ T)
   refine timeL2_le_of_boundedContinuous
     (φ := fun f => ‖(lam : ℝ) • perModeConvL2 lam hlam hT f‖)
     (ψ := fun f => ‖f‖) (by fun_prop) (by fun_prop) (fun F => ?_) f
-  -- On a bounded continuous forcing term, square both sides and reduce to the
-  -- elementary estimate via the kernel agreement.
   set Ffun : timeL2 ℝ T := BoundedContinuousFunction.toLp 2 (timeMeasure T) ℝ F
   have hsq : ‖(lam : ℝ) • perModeConvL2 lam hlam hT Ffun‖ ^ 2 ≤ ‖Ffun‖ ^ 2 := by
     rw [norm_smul, mul_pow, Real.norm_eq_abs, sq_abs,
       norm_perModeConvL2_sq_eq lam hlam hT Ffun]
-    -- Rewrite the convolution of `⇑Ffun` as that of the genuine function `F`.
     have hcongr : ∫ t in Set.Icc (0 : ℝ) T,
           (perModeConv lam (fun s => Ffun s) t) ^ 2
         = ∫ t in Set.Icc (0 : ℝ) T, (perModeConv lam (fun s => F s) t) ^ 2 := by
       refine setIntegral_congr_fun measurableSet_Icc (fun t ht => ?_)
       rw [perModeConv_boundedContinuous_eq lam F ht]
     rw [hcongr]
-    -- The elementary estimate, transported to set integrals over `[0,T]`.
     have hbase := perModeConv_sq_integral_le lam hlam F.continuous hT
     have hlhs : ∫ t in (0 : ℝ)..T, (lam * perModeConv lam (fun s => F s) t) ^ 2
         = ∫ t in Set.Icc (0 : ℝ) T, (lam * perModeConv lam (fun s => F s) t) ^ 2 :=
@@ -464,7 +425,6 @@ theorem perModeConvL2_sq_le (lam : ℝ) (hlam : 0 ≤ lam) (hT : 0 ≤ T)
         = ∫ t in Set.Icc (0 : ℝ) T, (F t) ^ 2 :=
       integral_zero_to_T_eq_Icc hT _
     rw [hlhs, hrhs] at hbase
-    -- `lam² · ∫ φ² = ∫ (lam·φ)²`.
     have hpull : lam ^ 2 * ∫ t in Set.Icc (0 : ℝ) T,
           (perModeConv lam (fun s => F s) t) ^ 2
         = ∫ t in Set.Icc (0 : ℝ) T, (lam * perModeConv lam (fun s => F s) t) ^ 2 := by
@@ -473,7 +433,6 @@ theorem perModeConvL2_sq_le (lam : ℝ) (hlam : 0 ≤ lam) (hT : 0 ≤ T)
       ring
     rw [hpull, norm_boundedContinuous_toLp_sq_eq F]
     exact hbase
-  -- Take square roots of the squared inequality.
   have h := Real.sqrt_le_sqrt hsq
   rwa [Real.sqrt_sq (norm_nonneg _), Real.sqrt_sq (norm_nonneg _)] at h
 
@@ -518,7 +477,6 @@ theorem perModeConvDerivL2_sq_le (lam : ℝ) (hlam : 0 ≤ lam) (hT : 0 ≤ T)
     (ψ := fun f => 2 * ‖f‖) (by fun_prop) (by fun_prop) (fun F => ?_) f
   set Ffun : timeL2 ℝ T := BoundedContinuousFunction.toLp 2 (timeMeasure T) ℝ F
   have hsq : ‖perModeConvDerivL2 lam hlam hT Ffun‖ ^ 2 ≤ (2 * ‖Ffun‖) ^ 2 := by
-    -- The squared norm of the derivative element, as a set integral.
     have hnormsq : ‖perModeConvDerivL2 lam hlam hT Ffun‖ ^ 2
         = ∫ t in Set.Icc (0 : ℝ) T,
             (F t - lam * perModeConv lam (fun s => F s) t) ^ 2 := by
@@ -530,7 +488,6 @@ theorem perModeConvDerivL2_sq_le (lam : ℝ) (hlam : 0 ≤ lam) (hT : 0 ≤ T)
       rw [ht, Real.norm_eq_abs, sq_abs, htF,
         perModeConv_boundedContinuous_eq lam F htmem]
     rw [hnormsq]
-    -- The elementary derivative estimate, transported to set integrals.
     have hbase := perModeConv_deriv_sq_integral_le lam hlam F.continuous hT
     have hlhs : ∫ t in (0 : ℝ)..T, (F t - lam * perModeConv lam (fun s => F s) t) ^ 2
         = ∫ t in Set.Icc (0 : ℝ) T,
@@ -551,19 +508,6 @@ theorem perModeConvDerivL2_sq_le (lam : ℝ) (hlam : 0 ≤ lam) (hT : 0 ≤ T)
     Real.sqrt_sq (mul_nonneg (by norm_num) (norm_nonneg _))] at h
 
 end DensityExtension
-
-/-! ## The fundamental theorem of calculus for the lifted convolution
-
-The per-mode convolution `perModeConvL2 lam hlam hT f` is the indefinite
-integral of its time derivative `perModeConvDerivL2 lam hlam hT f`, started at
-`0`.  Equivalently — and this is the form consumed by the maximal-regularity
-operator — `perModeConvL2 lam hlam hT f` is the represented function of the
-time-`H¹` element with initial value `0` and `L²` time derivative
-`perModeConvDerivL2 lam hlam hT f`.
-
-For a *continuous* forcing term this is the integrated form of the elementary
-ODE `perModeConv_hasDerivAt` (`φ' = f − lam·φ`, `φ(0) = 0`); it then extends to
-all of `L²(0,T)` by density. -/
 
 section FTC
 
@@ -630,7 +574,6 @@ theorem perModeConvL2_eq_toFunL2_boundedContinuous (lam : ℝ) (hlam : 0 ≤ lam
           (BoundedContinuousFunction.toLp 2 (timeMeasure T) ℝ F))) := by
   set Ffun : timeL2 ℝ T := BoundedContinuousFunction.toLp 2 (timeMeasure T) ℝ F
   refine Lp.ext ?_
-  -- Compare the two representatives a.e. on `[0,T]`.
   have hlhs := perModeConvL2_coeFn lam hlam hT Ffun
   set v : timeL2 ℝ T := perModeConvDerivL2 lam hlam hT Ffun with hv_def
   have hrhs : ⇑(TimeSobolev.timeH1.toFunL2 (TimeSobolev.timeH1.mk (0 : ℝ) v))
@@ -641,13 +584,10 @@ theorem perModeConvL2_eq_toFunL2_boundedContinuous (lam : ℝ) (hlam : 0 ≤ lam
   filter_upwards [hlhs, hrhs, ae_restrict_mem measurableSet_Icc]
     with t ht hrt htmem
   rw [ht, hrt, TimeSobolev.timeH1.toFun_apply, TimeSobolev.timeH1.init_mk, zero_add]
-  -- The indefinite integral of `⇑v` over `[0,t]` equals that of the continuous
-  -- ODE right-hand side.
   have hintcongr : (∫ s in (0 : ℝ)..t, (TimeSobolev.timeH1.mk (0 : ℝ) v).deriv s)
       = ∫ s in (0 : ℝ)..t, (F s - lam * perModeConv lam (fun r => F r) s) := by
     rw [TimeSobolev.timeH1.deriv_mk]
     refine intervalIntegral.integral_congr_ae ?_
-    -- `⇑v =ᵐ (F − lam·perModeConv lam F)` on the integration interval.
     have hae : ∀ᵐ s ∂volume, s ∈ Set.Icc (0 : ℝ) T →
         (v s) = F s - lam * perModeConv lam (fun r => F r) s := by
       have h1 : ∀ᵐ s ∂volume, s ∈ Set.Icc (0 : ℝ) T →
@@ -680,8 +620,6 @@ theorem perModeConvL2_eq_toFunL2 (lam : ℝ) (hlam : 0 ≤ lam) (hT : 0 ≤ T)
     perModeConvL2 lam hlam hT f =
       TimeSobolev.timeH1.toFunL2
         (TimeSobolev.timeH1.mk (0 : ℝ) (perModeConvDerivL2 lam hlam hT f)) := by
-  -- The norm of the difference vanishes: a closed (`≤ 0`) condition holding on
-  -- the dense range of `BoundedContinuousFunction.toLp`.
   have hkey : ‖perModeConvL2 lam hlam hT f -
       TimeSobolev.timeH1.toFunL2
         (TimeSobolev.timeH1.mk (0 : ℝ) (perModeConvDerivL2 lam hlam hT f))‖ ≤ 0 := by

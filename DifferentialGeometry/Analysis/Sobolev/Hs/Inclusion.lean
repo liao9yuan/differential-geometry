@@ -60,14 +60,10 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.Analysis.Laplacian.Spectral
 
-/-! ## File-local Borel-space instances on `E` and `M` -/
-
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
-
-/-! ## Monotonicity of the Sobolev weight in the exponent -/
 
 /-- The Sobolev weight `(1 + λᵢ)^σ` is monotone in the exponent: for
 `τ ≤ σ` the base `1 + λᵢ ≥ 1` gives `(1 + λᵢ)^τ ≤ (1 + λᵢ)^σ`. -/
@@ -78,12 +74,6 @@ lemma scalarSobolevWeight_mono {g : SmoothRiemannianMetric I M}
   unfold scalarSobolevWeight
   exact Real.rpow_le_rpow_of_exponent_le
     (one_le_one_add_lambda (I := I) (M := M) i) hτσ
-
-/-! ## The continuous inclusion `Hˢ → Hᵗ` for `τ ≤ σ`
-
-The inclusion is the identity on coordinate families. Well-definedness
-is exactly weight monotonicity: if `∑ᵢ (1+λᵢ)^σ cᵢ² < ∞` and `τ ≤ σ`,
-then `(1+λᵢ)^τ ≤ (1+λᵢ)^σ` gives `∑ᵢ (1+λᵢ)^τ cᵢ² < ∞`. -/
 
 namespace scalarHs
 
@@ -141,7 +131,6 @@ lemma inclusionFun_smul {τ σ : ℝ} (hτσ : τ ≤ σ) (c : ℝ)
 lemma norm_inclusionFun_le {τ σ : ℝ} (hτσ : τ ≤ σ)
     (T : scalarHs (I := I) (M := M) g σ) :
     ‖inclusionFun (I := I) (M := M) hτσ T‖ ≤ ‖T‖ := by
-  -- Compare squared norms `∑ wᵗ cᵢ² ≤ ∑ wˢ cᵢ²` by weight monotonicity.
   have h_t_sq : ‖inclusionFun (I := I) (M := M) hτσ T‖ ^ 2 =
       ∑' i, scalarSobolevWeight (I := I) (M := M) i τ * (T.coeff i) ^ 2 := by
     have h := norm_sq_eq_tsum (I := I) (M := M)
@@ -234,8 +223,6 @@ theorem scalarHsInclusion_injective {τ σ : ℝ} (hτσ : τ ≤ σ) :
   have h := congrArg (fun U => scalarHs.coeff U i) hST
   simpa only [scalarHsInclusion_coeff] using h
 
-/-! ## Functoriality of the inclusion -/
-
 /-- The inclusion at the reflexive exponent `σ ≤ σ` is the identity
 continuous linear map. -/
 @[simp] theorem scalarHsInclusion_refl {σ : ℝ} :
@@ -275,13 +262,6 @@ theorem scalarHsInclusion_trans_apply {τ₁ σ τ₂ : ℝ}
         (scalarHsInclusion (I := I) (M := M) (g := g) h₂ T) := by
   ext i
   simp only [scalarHsInclusion_coeff]
-
-/-! ## The `L²` inclusion `Hˢ → L²(M, vol_g)` for `σ ≥ 0`
-
-For `σ ≥ 0` the weight is `≥ 1`, so the coordinate family of any
-`Hˢ` element is square-summable; reconstructing an `L²` element from
-this family via the inverse Hilbert-basis representation yields the
-desired continuous linear inclusion. -/
 
 /-- For `σ ≥ 0`, the (unweighted) coordinate family of an `Hˢ` element
 is square-summable. -/
@@ -427,7 +407,6 @@ norm of `T`: the inclusion is norm-non-increasing. -/
 lemma norm_toL2Fun_le {σ : ℝ} (hσ : 0 ≤ σ)
     (T : scalarHs (I := I) (M := M) g σ) :
     ‖toL2Fun (I := I) (M := M) hσ T‖ ≤ ‖T‖ := by
-  -- Compare squared norms: `∑ cᵢ² ≤ ∑ wᵢ cᵢ²` since `wᵢ ≥ 1`.
   have h_l2_sq : ‖toL2Fun (I := I) (M := M) hσ T‖ ^ 2 =
       ∑' i, (T.coeff i) ^ 2 := by
     have h_par := scalarParseval_norm_sq (I := I) (M := M)
@@ -531,8 +510,6 @@ theorem scalarHsToL2_injective {σ : ℝ} (hσ : 0 ≤ σ) :
 
 end scalarHs
 
-/-! ## The `σ = 0` identification `H⁰ ≃ₗᵢ L²(M, vol_g)` -/
-
 /-- The spectral `H⁰` Sobolev space is isometrically isomorphic to
 `L²(M, vol_g)`. -/
 def scalarHsZeroEquivL2 (g : SmoothRiemannianMetric I M) :
@@ -576,13 +553,6 @@ coordinate family. -/
 
 end scalarHs
 
-/-! ## Compatibility of `scalarHsToL2` with `scalarHsInclusion`
-
-For `0 ≤ τ ≤ σ`, the inclusion `Hˢ → L²` factors through any
-intermediate `Hᵗ`: `scalarHsToL2 hτ ∘ scalarHsInclusion hτσ` agrees with
-`scalarHsToL2 (hτ.trans hτσ)`. Both sides are coordinate-preserving, so
-they agree once the `L²` eigenbasis coordinates match. -/
-
 /-- For `0 ≤ τ ≤ σ`, the `L²` inclusion of `Hˢ` factors through `Hᵗ`:
 `scalarHsToL2 hτ ∘ scalarHsInclusion hτσ = scalarHsToL2 (hτ.trans hτσ)`. -/
 theorem scalarHsToL2_comp_scalarHsInclusion
@@ -591,8 +561,6 @@ theorem scalarHsToL2_comp_scalarHsInclusion
     (scalarHsToL2 (I := I) (M := M) (g := g) hτ).comp
         (scalarHsInclusion (I := I) (M := M) (g := g) hτσ) =
       scalarHsToL2 (I := I) (M := M) (g := g) (hτ.trans hτσ) := by
-  -- Both `L²` images have the same eigenbasis coordinates; the
-  -- eigenbasis representation is injective.
   refine ContinuousLinearMap.ext (fun T => ?_)
   refine (resolventHilbertEigenbasisSigma
     (I := I) (M := M) g).repr.injective ?_

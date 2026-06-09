@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Solutions.WeakSolution
-import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity
+import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.SmoothWeakSolutionH2
 import DifferentialGeometry.Analysis.Sobolev.Tools.DifferenceQuotientWeakLimit
 
 /-!
@@ -54,8 +54,6 @@ namespace DifferentialGeometry.Analysis.Sobolev.H2WeakSolution
 variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
-
-/-! ## Smoothness and `MemLp` for `gψ_n := ∂_k ∂_i u_seq n` -/
 
 omit [NeZero d] in
 /-- The classical second partial derivative of a smooth function. -/
@@ -123,8 +121,6 @@ private lemma memLp_two_continuous_compact_support_restrict
     MemLp f 2 (volume.restrict S) :=
   (hf_cont.memLp_of_hasCompactSupport hf_supp).restrict S
 
-/-! ## Smooth weak partial relations -/
-
 omit [NeZero d] in
 /-- For a smooth function `u`, the smooth `k`-partial of its smooth
 `i`-partial is also the weak `k`-partial of the latter, on any open `Ω`. -/
@@ -147,8 +143,6 @@ theorem hasWeakPartialDeriv_kdi_partial_of_smooth
     (i := k)
     (f := fun y : E => (fderiv ℝ u y) (EuclideanSpace.single i 1))
     h_partial_C1
-
-/-! ## Per-`n` Fatou bound: `‖∂_k ∂_i u_seq n‖_{L²(Ω'')} ≤ M` -/
 
 omit [NeZero d] in
 /-- **Per-`n` Fatou bound.** For a smooth function `u` whose forward
@@ -177,7 +171,6 @@ theorem eLpNorm_kdi_partial_le_of_uniform_diffQuot
   have hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ := contDiff_partial_aux hu i
   have hψ_cont : Continuous ψ := hψ_smooth.continuous
   have hψ_C1 : ContDiff ℝ 1 ψ := hψ_smooth.of_le (by norm_cast)
-  -- Sequence h_j = 1/(j+1).
   have h_seq_pos : ∀ j : ℕ, 0 < |((1 : ℝ) / (j + 1))| := fun j => by
     have h_pos : (0 : ℝ) < 1 / (j + 1) := by positivity
     rwa [abs_of_pos h_pos]
@@ -190,7 +183,6 @@ theorem eLpNorm_kdi_partial_le_of_uniform_diffQuot
   have h_seq_ne : ∀ j : ℕ, ((1 : ℝ) / (j + 1)) ≠ 0 := fun j => by
     have h_pos : (0 : ℝ) < 1 / (j + 1) := by positivity
     exact h_pos.ne'
-  -- Pointwise convergence of D_h_j^k ψ to gψ.
   have h_tendsto_pt : ∀ x,
       Tendsto (fun j : ℕ =>
         DifferentialGeometry.Analysis.Sobolev.diffQuot k
@@ -205,13 +197,11 @@ theorem eLpNorm_kdi_partial_le_of_uniform_diffQuot
       DifferentialGeometry.Analysis.Sobolev.tendsto_diffQuot_of_contDiff
         (d := d) hψ_C1 k x
     exact h_dq_tendsto.comp h_seq_tendsto
-  -- Bound: each ‖D_h_j^k ψ‖_{L²(Ω'')} ≤ M.
   have h_dq_bound : ∀ j : ℕ,
       eLpNorm (DifferentialGeometry.Analysis.Sobolev.diffQuot k
         ((1 : ℝ) / (j + 1)) ψ) 2 (volume.restrict Ω'') ≤
       ENNReal.ofReal M := fun j =>
     h_uniform_bound ((1 : ℝ) / (j + 1)) (h_seq_pos j) (h_seq_le_one j)
-  -- Convert to ∫⁻ form.
   have h_2_ne_zero : (2 : ℝ≥0∞) ≠ 0 := by norm_num
   have h_2_ne_top : (2 : ℝ≥0∞) ≠ ∞ := by norm_num
   have h_2toReal : ((2 : ℝ≥0∞).toReal) = (2 : ℝ) := by norm_num
@@ -238,7 +228,6 @@ theorem eLpNorm_kdi_partial_le_of_uniform_diffQuot
       (‖DifferentialGeometry.Analysis.Sobolev.diffQuot k
           ((1 : ℝ) / (j + 1)) ψ x‖ₑ : ℝ≥0∞) ^ (2 : ℝ)) := fun j =>
     ((h_meas_dq j).enorm).pow_const _
-  -- Pointwise convergence in ENNReal.
   have h_enorm_sq_tendsto : ∀ x,
       Tendsto (fun j : ℕ =>
         (‖DifferentialGeometry.Analysis.Sobolev.diffQuot k
@@ -247,7 +236,6 @@ theorem eLpNorm_kdi_partial_le_of_uniform_diffQuot
     intro x
     have h_enorm := (h_tendsto_pt x).enorm
     exact (ENNReal.continuous_rpow_const.tendsto _).comp h_enorm
-  -- Apply Fatou.
   have h_liminf_bound :
       ∫⁻ x in Ω'',
         liminf (fun j : ℕ =>
@@ -274,7 +262,6 @@ theorem eLpNorm_kdi_partial_le_of_uniform_diffQuot
     refine lintegral_congr_ae ?_
     exact Filter.Eventually.of_forall h_liminf_pt
   rw [h_int_eq] at h_liminf_bound
-  -- Connect to eLpNorm.
   have h_eLpNorm_sq_le :
       (eLpNorm gψ 2 (volume.restrict Ω'')) ^ (2 : ℝ) ≤
       (ENNReal.ofReal M) ^ (2 : ℝ) := by
@@ -282,13 +269,6 @@ theorem eLpNorm_kdi_partial_le_of_uniform_diffQuot
     exact h_liminf_bound
   have h_2_pos : (0 : ℝ) < 2 := by norm_num
   exact (ENNReal.rpow_le_rpow_iff h_2_pos).mp h_eLpNorm_sq_le
-
-/-! ## Weak partial of `w_i_func` from a strong-`L²` limit of `gψ_n`
-
-The wrapper below converts an `L²(Ω'')`-convergent smooth approximating
-sequence `(u_seq n, gψ_n := ∂_k ∂_i u_seq n)` of a non-smooth weak
-partial `w_i_func` of `u` (with `∂_i u_seq n → w_i_func` in `L²(Ω'')`)
-into the weak `k`-partial of `w_i_func` on `Ω''`. -/
 
 omit [NeZero d] in
 /-- **Wrapper: weak partial from a strongly-`L²(Ω'')`-convergent
@@ -337,27 +317,20 @@ theorem hasWeakPartialDeriv_of_strong_L2_limit
   have hgψ_supp : ∀ n, HasCompactSupport (gψ n) :=
     fun n => hasCompactSupport_kdi_partial_aux (hu_seq_supp n) i k
   have hgψ_cont : ∀ n, Continuous (gψ n) := fun n => (hgψ_smooth n).continuous
-  -- Each ψ n is in L²(Ω'').
   have hψ_l2 : ∀ n, MemLp (ψ n) 2 (volume.restrict Ω'') := fun n =>
     memLp_two_continuous_compact_support_restrict (hψ_cont n) (hψ_supp n) Ω''
   have hgψ_l2 : ∀ n, MemLp (gψ n) 2 (volume.restrict Ω'') := fun n =>
     memLp_two_continuous_compact_support_restrict (hgψ_cont n) (hgψ_supp n) Ω''
-  -- Each ψ n - w_i_func is in L²(Ω'').
   have hψ_diff_lp : ∀ n, MemLp (fun x : E => ψ n x - w_i_func x) 2
       (volume.restrict Ω'') := fun n => (hψ_l2 n).sub hw_i_l2
-  -- Each gψ n - g is in L²(Ω'').
   have hgψ_diff_lp : ∀ n, MemLp (fun x : E => gψ n x - g x) 2
       (volume.restrict Ω'') := fun n => (hgψ_l2 n).sub hg_l2
-  -- Each ψ n is the smooth (and weak) `k`-partial-target of u_seq n;
-  -- gψ n is its smooth (and weak) `k`-partial.
   have h_weak_n : ∀ n,
       DeGiorgi.HasWeakPartialDeriv (d := d) k (gψ n) (ψ n) Ω'' := by
     intro n
     rw [hgψ_def, hψ_def]
     exact hasWeakPartialDeriv_kdi_partial_of_smooth (d := d)
       (hu_seq_smooth n) hΩ''_open i k
-  -- Apply DeGiorgi.HasWeakPartialDeriv.of_eLpNormApprox_p with p = 2.
-  -- We need to convert the (2 : ℝ≥0∞) hypotheses to (ENNReal.ofReal 2).
   have h_ofReal_2 : ENNReal.ofReal 2 = (2 : ℝ≥0∞) := by
     rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) from by norm_cast]
     rw [show (2 : ℝ≥0∞) = ((2 : ℕ) : ℝ≥0∞) from by norm_cast]

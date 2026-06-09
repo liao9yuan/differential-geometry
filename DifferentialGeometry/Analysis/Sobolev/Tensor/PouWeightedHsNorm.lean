@@ -75,8 +75,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The Hilbert-Schmidt partition-of-unity-weighted chart-Sobolev norm -/
-
 /-- The Hilbert-Schmidt partition-of-unity-weighted chart-Sobolev norm of a
 smooth compactly-supported `(r, s)`-tensor section `T` at regularity order
 `2k`.
@@ -156,8 +154,6 @@ theorem tensorPouSobolevHsNorm_nonneg
     0 ≤ tensorPouSobolevHsNorm (I := I) (M := M) g k T :=
   zero_le _
 
-/-! ## Vanishing at the zero tensor section -/
-
 /-- The composite of the raw chart-frame scalar component of the zero
 tensor section with the Euclidean pull-back map vanishes identically on
 `EuclideanSpace ℝ (Fin n)`. -/
@@ -171,24 +167,17 @@ private lemma tensorChartComponentRaw_comp_euclid_zero_section
       ∘ (toEuclidean (E := E)).symm) =
       (fun _ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) => (0 : ℝ)) := by
   funext y
-  -- Reduce to the M-level identity for the zero section.
   have hM : tensorChartComponentRaw (I := I) (M := M) g r s
       (0 : SmoothCcTensor g r s) α Idx Jdx
       ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) = 0 := by
-    -- Use the auxiliary lemma from PouWeightedNorm: at every M-point,
-    -- the raw component of the zero section is zero.
     have hraw_comp :
         (tensorChartComponentRaw (I := I) (M := M) g r s
             (0 : SmoothCcTensor g r s) α Idx Jdx
           ∘ (extChartAt I α).symm) =
           (fun _ : E => (0 : ℝ)) := by
-      -- This is the existing private lemma's content; rebuild it here.
       funext x
-      -- Reduce to: tensorChartComponentRaw (0) is identically zero on M.
-      -- Strategy: use the same projection argument as in PouWeightedNorm.
       change tensorChartComponentRaw (I := I) (M := M) g r s
           (0 : SmoothCcTensor g r s) α Idx Jdx ((extChartAt I α).symm x) = 0
-      -- Unfold the raw component on `M`.
       classical
       have h0 : (trivializationAt (TensorRSModel r s ℝ E)
             (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ
@@ -206,7 +195,6 @@ private lemma tensorChartComponentRaw_comp_euclid_zero_section
       unfold tensorTrivProj
       rw [h0]
       exact map_zero _
-    -- Apply hraw_comp at `(toEuclidean.symm y)`.
     have := congrFun hraw_comp ((toEuclidean (E := E)).symm y)
     exact this
   exact hM
@@ -219,7 +207,6 @@ theorem tensorPouSobolevHsNorm_zero_section
         (0 : SmoothCcTensor g r s) = 0 := by
   classical
   rw [tensorPouSobolevHsNorm_eq]
-  -- The integrand is identically zero on every chart, so the tsum is zero.
   have htsum :
       (∑' α : M,
         ∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -268,7 +255,6 @@ theorem tensorPouSobolevHsNorm_zero_section
       intro j _
       refine Finset.sum_eq_zero ?_
       intro basisIdx _
-      -- The composite is the zero function, so its iterated derivative is zero.
       have hraw := tensorChartComponentRaw_comp_euclid_zero_section
         (I := I) (M := M) g r s α IJ.1 IJ.2
       have hiter : iteratedFDeriv ℝ j
@@ -301,8 +287,6 @@ theorem tensorPouSobolevHsNorm_zero_section
     exact tsum_zero
   rw [htsum]
   exact ENNReal.zero_rpow_of_pos (by norm_num)
-
-/-! ## Monotonicity in the regularity order `k` -/
 
 /-- The Hilbert-Schmidt partition-of-unity-weighted chart-Sobolev norm is
 monotone in the regularity order: passing from order `2k` to order `2(k+1)`
@@ -404,8 +388,6 @@ theorem tensorPouSobolevHsNorm_le_succ
                       (Fin (Module.finrank ℝ E))))) := by
     exact ENNReal.tsum_le_tsum hper_chart
   exact ENNReal.rpow_le_rpow htsum_le (by norm_num)
-
-/-! ## Homogeneity in the scalar multiplier -/
 
 /-- The raw chart-frame scalar component, post-composed with
 `(extChartAt I α).symm ∘ (toEuclidean.symm)`, of a scaled tensor section
@@ -541,8 +523,6 @@ theorem tensorPouSobolevHsNorm_smul
         tensorPouSobolevHsNorm (I := I) (M := M) g k T := by
   classical
   rw [tensorPouSobolevHsNorm_eq, tensorPouSobolevHsNorm_eq]
-  -- The integrand for `c • T` equals `c² · integrand T` pointwise on
-  -- `chartTargetEuclid α`.
   have h_inner_eq : ∀ α : M,
       (∑ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
           (Fin s → Fin (Module.finrank ℝ E)),
@@ -599,7 +579,6 @@ theorem tensorPouSobolevHsNorm_smul
     refine MeasureTheory.setLIntegral_congr_fun
       (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet ?_
     intro y hy
-    -- Beta-reduce the goal to expose the inner equality.
     change ENNReal.ofReal
         (((chartAtlasPOU I M α : M → ℝ)
             ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) *
@@ -727,8 +706,6 @@ theorem tensorPouSobolevHsNorm_neg
   rw [hsmul]
   have h_abs : |(-1 : ℝ)| = 1 := by simp
   rw [h_abs, ENNReal.ofReal_one, one_mul]
-
-/-! ## Finiteness on smooth compactly-supported sections -/
 
 /-- Bound for the per-`(α, IJ, j, basisIdx)` Lebesgue integral inside
 `tensorPouSobolevHsNorm`. The integrand vanishes off the compact set
@@ -1039,8 +1016,6 @@ theorem tensorPouSobolevHsNorm_lt_top
   exact tensorPouSobolevHsNorm_inner_integral_lt_top'
     (I := I) (M := M) g r s T α IJ.1 IJ.2 j basisIdx
 
-/-! ## Squared norm as a separate definition (convenient for inner product) -/
-
 /-- The square of the Hilbert-Schmidt partition-of-unity-weighted chart-Sobolev
 norm. Equals the explicit double-sum-of-integrals representation without the
 outer square root, the form most convenient for the polarised inner-product
@@ -1092,14 +1067,6 @@ theorem tensorPouSobolevHsNormSq_lt_top
   unfold tensorPouSobolevHsNormSq
   exact ENNReal.pow_lt_top
     (tensorPouSobolevHsNorm_lt_top (I := I) (M := M) g k T)
-
-/-! ## Additional helpers for the inner-product construction
-
-This section exposes additivity of the raw chart-frame scalar component
-post-composed with `(extChartAt I α).symm ∘ (toEuclidean.symm)`, and the
-corresponding additivity for the iterated Fréchet derivative evaluated on the
-basis-`basisIdx`-tuple. These helpers are used to discharge bilinearity of
-the inner product on `SmoothCcTensorHs g r s k`. -/
 
 /-- The raw chart-frame scalar component, post-composed with
 `(extChartAt I α).symm ∘ (toEuclidean.symm)`, of a sum of tensor sections
@@ -1196,17 +1163,6 @@ theorem iteratedFDeriv_basisEval_add_eq
     h_cdAt₂.of_le (by exact_mod_cast le_top)
   rw [iteratedFDeriv_add_apply h_cdAt₁_n h_cdAt₂_n]
   rfl
-
-#print axioms tensorPouSobolevHsNorm
-#print axioms tensorPouSobolevHsNorm_nonneg
-#print axioms tensorPouSobolevHsNorm_zero_section
-#print axioms tensorPouSobolevHsNorm_le_succ
-#print axioms tensorPouSobolevHsNorm_smul
-#print axioms tensorPouSobolevHsNorm_neg
-#print axioms tensorPouSobolevHsNorm_lt_top
-#print axioms tensorPouSobolevHsNormSq
-#print axioms tensorPouSobolevHsNormSq_eq_inner_sum
-#print axioms tensorPouSobolevHsNormSq_lt_top
 
 end Tensor
 end Sobolev

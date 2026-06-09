@@ -72,14 +72,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
-  {h_atlas : DifferentialGeometry.Geometry.HasLocallyConstantChartAt H M}
-
-/-! ## The single-mode embedding `ℝ → Hˢ`
-
-For a fixed eigen-index `i`, the map `c ↦ c · bᵢ` embeds the scalars into the
-spectral Sobolev space `Hˢ`, sending `c` to the scalar multiple of the `i`-th
-spectral basis vector.  It is linear, and its norm is `√((1 + λᵢ)ˢ)` since
-`bᵢ` has `Hˢ`-norm `√((1 + λᵢ)ˢ)` (it is the single-mode coordinate family). -/
 
 /-- The `Hˢ`-norm of the spectral basis vector `tensorHsBasisVec σ i`
 is `√((1 + λᵢ)ˢ) = √(tensorSobolevWeight i σ)`.  Its only nonzero coordinate is
@@ -91,8 +83,6 @@ theorem norm_tensorHsBasisVec {σ : ℝ}
   classical
   rw [tensorHs.norm_eq_sqrt_tsum]
   congr 1
-  -- The weighted-square family of `bᵢ` is supported at `i`, with value the
-  -- weight at `i`.
   have hfun : (fun j => tensorSobolevWeight (I := I) (M := M) j σ *
         ((tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) σ i).coeff j) ^ 2)
       = fun j => if j = i then tensorSobolevWeight (I := I) (M := M) j σ else 0 := by
@@ -138,12 +128,6 @@ otherwise. -/
   · rw [if_pos hj, if_pos hj, mul_one]
   · rw [if_neg hj, if_neg hj, mul_zero]
 
-/-! ## The single-mode time-`L²` embedding
-
-Composing the scalar single-mode embedding with the action on time-`L²` spaces
-(`ContinuousLinearMap.compLpL`) gives, for each eigen-index `i`, a bounded
-linear embedding `L²(0,T) →L[ℝ] L²([0,T]; Hˢ)`. -/
-
 variable {σ : ℝ} {T : ℝ}
 
 /-- The `i`-th single-mode time-`L²` embedding `L²(0,T) →L[ℝ] L²([0,T]; Hˢ)`: a
@@ -178,7 +162,6 @@ theorem timeModeCoeff_singleModeTimeL2
     (singleModeTimeL2 (I := I) (M := M) (σ := σ) i gf) j
   have hsm := singleModeTimeL2_coeFn (I := I) (M := M)
     (σ := σ) i gf
-  -- The coordinate of `(gf t) • bᵢ` at `j` is `(if j = i then gf t else 0)`.
   have hcoord : ∀ t,
       (((gf t) • tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) σ i).coeff j)
         = (if j = i then gf t else 0) := by
@@ -228,12 +211,6 @@ theorem norm_singleModeTimeL2 (i : TensorEigenIdx (I := I) (M := M) g r s)
   rw [hsqrt, Real.sqrt_mul (tensorSobolevWeight_nonneg (I := I) (M := M) i σ),
     Real.sqrt_sq (norm_nonneg _)]
 
-/-! ## Orthogonality of distinct single-mode fields
-
-Two single-mode time-`L²` fields belonging to distinct eigen-indices `i ≠ j` are
-orthogonal in `L²([0,T]; Hˢ)`: at each time their values are scalar multiples
-of the orthogonal spectral basis vectors `bᵢ`, `b_j`. -/
-
 /-- The `Hˢ` inner product of two distinct spectral basis vectors vanishes:
 `⟪bᵢ, b_j⟫ = 0` for `i ≠ j`. -/
 theorem inner_tensorHsBasisVec_eq_zero {i j : TensorEigenIdx (I := I) (M := M) g r s}
@@ -242,7 +219,6 @@ theorem inner_tensorHsBasisVec_eq_zero {i j : TensorEigenIdx (I := I) (M := M) g
       (tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) σ j) : ℝ) = 0 := by
   classical
   rw [tensorHs.inner_def]
-  -- Every term of the weighted coordinate-product series vanishes.
   have hterm : (fun k => tensorSobolevWeight (I := I) (M := M) k σ *
         ((tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) σ i).coeff k *
           (tensorHsBasisVec (I := I) (M := M) (g := g) (r := r) (s := s) σ j).coeff k))
@@ -273,13 +249,6 @@ theorem inner_singleModeTimeL2_eq_zero
       (σ := σ) j hf] with t hit hjt
   rw [hit, hjt, inner_smul_left, inner_smul_right,
     inner_tensorHsBasisVec_eq_zero (I := I) (M := M) hij, mul_zero, mul_zero]
-
-/-! ## The synthesis: assembling a time-`L²` field from its modes
-
-The single-mode embeddings, rescaled to isometries, form an orthogonal family
-indexed by the eigen-index type.  A weighted-square-summable mode family then
-assembles, by `OrthogonalFamily.summable_iff_norm_sq_summable`, into an
-unconditionally convergent sum in `L²([0,T]; Hˢ)`. -/
 
 /-- The rescaled single-mode embedding as a continuous linear map:
 `g ↦ √((1 + λᵢ)ˢ)⁻¹ • singleModeTimeL2 i g`. -/
@@ -358,7 +327,6 @@ theorem summable_singleModeTimeL2
       ‖gFam i‖ ^ 2)) :
     Summable (fun i => singleModeTimeL2 (I := I) (M := M) (σ := σ) i
       (gFam i)) := by
-  -- Re-weight: `singleModeTimeL2 i (gFam i) = V i (√(weight i σ) • gFam i)`.
   have hrw : (fun i => singleModeTimeL2 (I := I) (M := M) (σ := σ) i
         (gFam i))
       = fun i => singleModeIsometry (I := I) (M := M) (g := g) (r := r) (s := s)
@@ -367,10 +335,8 @@ theorem summable_singleModeTimeL2
     funext i
     exact singleModeTimeL2_eq_isometry (I := I) (M := M) i (gFam i)
   rw [hrw]
-  -- Apply the orthogonal-family summability criterion.
   rw [(orthogonalFamily_singleModeIsometry (I := I) (M := M)
     (g := g) (r := r) (s := s) (σ := σ) (T := T)).summable_iff_norm_sq_summable]
-  -- `‖√(weight i σ) • gFam i‖² = weight i σ · ‖gFam i‖²`.
   refine hsum.congr (fun i => ?_)
   rw [norm_smul, mul_pow, Real.norm_eq_abs, sq_abs,
     Real.sq_sqrt (tensorSobolevWeight_nonneg (I := I) (M := M) i σ)]
@@ -399,7 +365,6 @@ theorem timeL2OfModes_timeModeCoeff
         (timeL2OfModes (I := I) (M := M) (σ := σ) gFam) j =
       gFam j := by
   classical
-  -- The coordinate functional commutes with the convergent sum.
   have hsumm := summable_singleModeTimeL2 (I := I) (M := M) gFam hsum
   have hcomm : timeModeCoeff (I := I) (M := M)
         (timeL2OfModes (I := I) (M := M) (σ := σ) gFam) j =
@@ -410,7 +375,6 @@ theorem timeL2OfModes_timeModeCoeff
       ((tensorHsCoeffL (I := I) (M := M) j).compLpL 2 (timeMeasure T))
       hsumm
   rw [hcomm]
-  -- Each term is `if i = j then gFam i else 0`; the sum collapses to `gFam j`.
   have hterm : (fun i => timeModeCoeff (I := I) (M := M)
         (singleModeTimeL2 (I := I) (M := M) (σ := σ) i (gFam i)) j)
       = fun i => if i = j then gFam i else 0 := by

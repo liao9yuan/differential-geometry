@@ -89,8 +89,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The tensor `W^{2k, 2}` membership predicate -/
-
 /-- `MemWtwokTwo g k T`: the smooth compactly-supported `(r, s)`-tensor section
 `T` is in the tensor Sobolev space `W^{2k, 2}`.
 
@@ -140,8 +138,6 @@ theorem MemWtwokTwo_iff
           (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
           (chartTargetEuclid (I := I) (M := M) α) := Iff.rfl
 
-/-! ## `W^{0, 2}` membership is automatic -/
-
 /-- Every smooth compactly-supported `(r, s)`-tensor section lies in the tensor
 Sobolev space `W^{0, 2}`: each scalar chart component is `C^∞` with compact
 support on the Euclidean model space, hence in particular `L²` on the chart
@@ -151,29 +147,22 @@ theorem MemWtwokTwo_zero
     (T : SmoothCcTensor g r s) :
     MemWtwokTwo (I := I) (M := M) g 0 T := by
   intro α Idx Jdx
-  -- `2 * 0 = 0`, so `MemWkp 0 2 = MemLp · 2`.
   have hmul : (2 * 0 : ℕ) = 0 := by norm_num
   rw [hmul, MemWkp_zero]
-  -- The chart component is `C^∞` with compact support, hence `L²` on any set.
   have hcont : Continuous
       (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx) :=
     tensorChartComp_continuous (I := I) (M := M) g r s T α Idx Jdx
   have hcs : HasCompactSupport
       (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx) :=
     tensorChartComp_hasCompactSupport (I := I) (M := M) g r s T α Idx Jdx
-  -- A continuous compactly-supported function is in `L^p` for every measure
-  -- (here the restricted volume measure on the chart target).
   exact (hcont.memLp_of_hasCompactSupport (μ := volume.restrict
     (chartTargetEuclid (I := I) (M := M) α)) hcs)
-
-/-! ## Closure under the vector-space operations -/
 
 /-- The zero tensor section lies in `W^{2k, 2}`. -/
 theorem MemWtwokTwo_zero_section
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (k : ℕ) :
     MemWtwokTwo (I := I) (M := M) g k (0 : SmoothCcTensor g r s) := by
   intro α Idx Jdx
-  -- The chart component of the zero section is the zero function.
   rw [tensorChartComp_zero (I := I) (M := M) g r s α Idx Jdx]
   exact MemWkp_zero_fun (d := Module.finrank ℝ E) (by norm_num)
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
@@ -186,9 +175,7 @@ theorem MemWtwokTwo_add
     (h₂ : MemWtwokTwo (I := I) (M := M) g k T₂) :
     MemWtwokTwo (I := I) (M := M) g k (T₁ + T₂) := by
   intro α Idx Jdx
-  -- The chart component is additive in the section.
   rw [tensorChartComp_add (I := I) (M := M) g r s T₁ T₂ α Idx Jdx]
-  -- `Pi`-level addition of functions agrees with the pointwise lambda.
   have hfun :
       (tensorChartComp (I := I) (M := M) g r s T₁ α Idx Jdx +
         tensorChartComp (I := I) (M := M) g r s T₂ α Idx Jdx) =
@@ -206,9 +193,7 @@ theorem MemWtwokTwo_smul
     (h : MemWtwokTwo (I := I) (M := M) g k T) :
     MemWtwokTwo (I := I) (M := M) g k (c • T) := by
   intro α Idx Jdx
-  -- The chart component is homogeneous in the section.
   rw [tensorChartComp_smul (I := I) (M := M) g r s c T α Idx Jdx]
-  -- `Pi`-level scalar multiplication agrees with the pointwise lambda.
   have hfun :
       (c • tensorChartComp (I := I) (M := M) g r s T α Idx Jdx) =
       (fun y => c * tensorChartComp (I := I) (M := M) g r s T α Idx Jdx y) := by
@@ -238,8 +223,6 @@ theorem MemWtwokTwo_sub
   rw [sub_eq_add_neg]
   exact MemWtwokTwo_add (I := I) (M := M) g h₁ (MemWtwokTwo_neg (I := I) (M := M) g h₂)
 
-/-! ## The tensor Sobolev subspace `WtwokTwo g r s k` -/
-
 /-- The tensor Sobolev space `W^{2k, 2}` as a `Submodule ℝ` of the space of
 smooth compactly-supported `(r, s)`-tensor sections. The carrier is the set of
 sections satisfying `MemWtwokTwo`; closure under `0`, `+` and `•` is provided by
@@ -264,10 +247,6 @@ def WtwokTwo
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ) : Type _ :=
   ↥(wtwokTwoSubmodule (I := I) (M := M) g r s k)
 
-/-! Algebraic structure of `WtwokTwo g r s k` is inherited from the underlying
-`Submodule ℝ (SmoothCcTensor g r s)`. In particular it is an `AddCommGroup` and
-a `Module ℝ`. -/
-
 instance
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ) :
     AddCommGroup (WtwokTwo (I := I) (M := M) g r s k) :=
@@ -277,8 +256,6 @@ instance
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ) :
     Module ℝ (WtwokTwo (I := I) (M := M) g r s k) :=
   inferInstanceAs (Module ℝ ↥(wtwokTwoSubmodule (I := I) (M := M) g r s k))
-
-/-! ## The tensor Sobolev norm -/
 
 /-- The tensor Sobolev norm `wtwokTwoNorm g k T`: the chart-component norms of
 `T`, aggregated over the (countable) chart atlas and the finite component-index
@@ -325,7 +302,6 @@ theorem wtwokTwoNorm_zero_section
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (k : ℕ) :
     wtwokTwoNorm (I := I) (M := M) g k (0 : SmoothCcTensor g r s) = 0 := by
   unfold wtwokTwoNorm
-  -- Each per-chart term is a finite sum of `wkpNorm` of the zero function.
   have hpt : ∀ α : M,
       (∑ Idx : Fin r → Fin (Module.finrank ℝ E),
         ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
@@ -357,14 +333,12 @@ theorem wtwokTwoNorm_add_le
   rw [← ENNReal.tsum_add]
   refine ENNReal.tsum_le_tsum ?_
   intro α
-  -- Per chart: a finite double sum; combine the two finite sums termwise.
   rw [← Finset.sum_add_distrib]
   refine Finset.sum_le_sum ?_
   intro Idx _
   rw [← Finset.sum_add_distrib]
   refine Finset.sum_le_sum ?_
   intro Jdx _
-  -- Componentwise: the chart component of `T₁ + T₂` is the sum of components.
   rw [tensorChartComp_add (I := I) (M := M) g r s T₁ T₂ α Idx Jdx]
   have hfun :
       (tensorChartComp (I := I) (M := M) g r s T₁ α Idx Jdx +
@@ -387,14 +361,12 @@ theorem wtwokTwoNorm_smul
   rw [← ENNReal.tsum_mul_left]
   refine tsum_congr ?_
   intro α
-  -- Pull the scalar `‖c‖ₑ` through the two finite sums.
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl ?_
   intro Idx _
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl ?_
   intro Jdx _
-  -- Componentwise: the chart component of `c • T` is `c •` the component.
   rw [tensorChartComp_smul (I := I) (M := M) g r s c T α Idx Jdx]
   have hfun :
       (c • tensorChartComp (I := I) (M := M) g r s T α Idx Jdx) =
@@ -405,8 +377,6 @@ theorem wtwokTwoNorm_smul
   exact wkpNorm_const_smul (d := Module.finrank ℝ E) (by norm_num)
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     (h α Idx Jdx) c
-
-/-! ## Order monotonicity in the regularity index `k` -/
 
 /-- Membership in `W^{2(k+1), 2}` implies membership in `W^{2k, 2}`: higher
 regularity implies lower regularity. Follows componentwise from the Euclidean

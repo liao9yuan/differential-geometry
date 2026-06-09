@@ -3,7 +3,7 @@ Authors: Jack McCarthy
 -/
 import DifferentialGeometry.Tensor.Auxiliary.Fin
 import DifferentialGeometry.Tensor.Auxiliary.MultiKroneckerDelta
-import DifferentialGeometry.Tensor.Auxiliary.Basis
+import DifferentialGeometry.Tensor.Auxiliary.PredualBasis
 import DifferentialGeometry.Tensor.Alternating.Curry
 import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 import Mathlib.Analysis.Normed.Module.Alternating.Basic

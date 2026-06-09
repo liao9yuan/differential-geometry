@@ -79,17 +79,6 @@ namespace Analysis
 namespace Parabolic
 namespace TimeSobolev
 
-/-! ## A vector-valued Lebesgue differentiation theorem
-
-Mathlib's interval form of the Lebesgue differentiation theorem
-(`LocallyIntegrable.ae_hasDerivAt_integral`) is stated for real-valued
-functions.  The argument is, however, valid for any function valued in a real
-Banach space: the only analytic input is the Lebesgue differentiation theorem
-`VitaliFamily.ae_tendsto_average`, which Mathlib provides for arbitrary
-`NormedSpace ℝ E` with `[CompleteSpace E]`.  The following lemma ports the
-interval form to that generality; it is the engine behind the almost-everywhere
-differentiability of indefinite Bochner integrals used below. -/
-
 section VectorLebesgueDifferentiation
 
 open IsUnifLocDoublingMeasure
@@ -131,22 +120,18 @@ Lebesgue differentiation theorem `VitaliFamily.ae_tendsto_average`. -/
 theorem locallyIntegrable_ae_hasDerivAt_integral
     {f : ℝ → E} (hf : LocallyIntegrable f volume) :
     ∀ᵐ x, ∀ c, HasDerivAt (fun x => ∫ t in c..x, f t) (f x) x := by
-  -- `f` is interval integrable on every interval.
   have hg : ∀ a b : ℝ, IntervalIntegrable f volume a b := fun a b =>
     intervalIntegrable_iff.mpr <|
       (hf.integrableOn_isCompact isCompact_uIcc).mono_set uIoc_subset_uIcc
-  -- The Lebesgue differentiation theorem along the one-dimensional Vitali family.
   have LDT := (vitaliFamily (volume : Measure ℝ) 1).ae_tendsto_average hf
   filter_upwards [LDT] with x hx
   intro c
   rw [hasDerivAt_iff_tendsto_slope_left_right]
   refine ⟨?_, ?_⟩
-  · -- Left derivative: rewrite the slope as an average over `[y, x]`.
-    refine Filter.tendsto_congr' ?_ |>.mpr (hx.comp (Real.tendsto_Icc_vitaliFamily_left x))
+  · refine Filter.tendsto_congr' ?_ |>.mpr (hx.comp (Real.tendsto_Icc_vitaliFamily_left x))
     filter_upwards [self_mem_nhdsWithin] with y hy
     exact slope_integral_eq_average_left hg c x y (le_of_lt hy)
-  · -- Right derivative: rewrite the slope as an average over `[x, y]`.
-    refine Filter.tendsto_congr' ?_ |>.mpr (hx.comp (Real.tendsto_Icc_vitaliFamily_right x))
+  · refine Filter.tendsto_congr' ?_ |>.mpr (hx.comp (Real.tendsto_Icc_vitaliFamily_right x))
     filter_upwards [self_mem_nhdsWithin] with y hy
     exact slope_integral_eq_average_right hg c x y (le_of_lt hy)
 
@@ -154,8 +139,6 @@ end VectorLebesgueDifferentiation
 
 variable {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
 variable {T : ℝ}
-
-/-! ## The space `H¹([0,T]; X)` -/
 
 /-- **The vector-valued time-Sobolev space** `H¹([0,T]; X)`.
 
@@ -229,8 +212,6 @@ theorem init_zero : (0 : timeH1 X T).init = 0 := rfl
 @[simp]
 theorem deriv_zero : (0 : timeH1 X T).deriv = 0 := rfl
 
-/-! ### Components, inner product and norm -/
-
 /-- The inner product on `H¹([0,T]; X)` is the **graph inner product**: the sum
 of the `X`-inner product of the initial values and the `L²`-inner product of
 the derivatives. -/
@@ -252,8 +233,6 @@ theorem norm_init_le (u : timeH1 X T) : ‖u.init‖ ≤ ‖u‖ := by
 theorem norm_deriv_le (u : timeH1 X T) : ‖u.deriv‖ ≤ ‖u‖ := by
   have h := norm_sq_eq u
   nlinarith [norm_nonneg u.init, norm_nonneg u.deriv, norm_nonneg u, sq_nonneg ‖u.init‖]
-
-/-! ### The component projections as continuous linear maps -/
 
 /-- The value at time `0` (the trace at the initial time), as a continuous
 linear map `H¹([0,T]; X) →L[ℝ] X`.  By construction it returns `u.init`. -/
@@ -278,14 +257,6 @@ theorem trace0_mk (u₀ : X) (v : timeL2 X T) : trace0 X T (mk u₀ v) = u₀ :=
 
 @[simp]
 theorem timeDeriv_mk (u₀ : X) (v : timeL2 X T) : timeDeriv X T (mk u₀ v) = v := rfl
-
-/-! ## The represented function
-
-Every element of `H¹([0,T]; X)` represents a genuine function of time: the
-indefinite Bochner integral of its derivative, shifted by the initial value.
-Because this is an indefinite integral, the function is automatically
-(absolutely) continuous and satisfies the fundamental theorem of calculus by
-construction. -/
 
 /-- The function of time represented by an element of `H¹([0,T]; X)`:
 
@@ -316,16 +287,13 @@ theorem intervalIntegrable_deriv {a b : ℝ} (u : timeH1 X T)
   refine MeasureTheory.IntegrableOn.intervalIntegrable ?_
   exact (TimeSobolev.integrableOn u.deriv).mono_set hsub
 
-/-! ### Continuity in time -/
-
 /-- **The represented function is continuous on `[0,T]`.**  Being an indefinite
 Bochner integral of an integrable function, `toFun u` is (absolutely)
 continuous on the time interval. -/
 theorem continuousOn_toFun (u : timeH1 X T) :
     ContinuousOn u.toFun (Icc (0 : ℝ) T) := by
   rcases le_or_gt 0 T with hT | hT
-  · -- `[0,T]` is a genuine interval; the indefinite integral is continuous on it.
-    have hcont : ContinuousOn (fun t => ∫ s in (0 : ℝ)..t, u.deriv s) (Icc (0 : ℝ) T) := by
+  · have hcont : ContinuousOn (fun t => ∫ s in (0 : ℝ)..t, u.deriv s) (Icc (0 : ℝ) T) := by
       have h := continuousOn_primitive_interval (a := (0 : ℝ)) (b := T)
         (f := fun s => u.deriv s) (μ := volume)
         (by
@@ -333,8 +301,7 @@ theorem continuousOn_toFun (u : timeH1 X T) :
           exact TimeSobolev.integrableOn u.deriv)
       rwa [uIcc_of_le hT] at h
     exact continuousOn_const.add hcont
-  · -- `[0,T]` is empty.
-    rw [Icc_eq_empty (by linarith)]
+  · rw [Icc_eq_empty (by linarith)]
     exact continuousOn_empty _
 
 /-- The represented function is continuous on `[0,T]` (continuity-within-at
@@ -342,12 +309,6 @@ form at any point of the interval). -/
 theorem continuousWithinAt_toFun (u : timeH1 X T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     ContinuousWithinAt u.toFun (Icc (0 : ℝ) T) t :=
   u.continuousOn_toFun t ht
-
-/-! ## Fundamental theorem of calculus
-
-By construction the represented function is the indefinite integral of the
-time derivative; the following is therefore a definitional unfolding, but it is
-the form downstream code consumes. -/
 
 /-- **Fundamental theorem of calculus, integral form.**  For `t ∈ [0,T]`,
 
@@ -376,19 +337,6 @@ theorem toFun_sub_toFun (u : timeH1 X T) {t₀ t₁ : ℝ}
   exact intervalIntegral.integral_interval_sub_left
     (u.intervalIntegrable_deriv h0 ht₁) (u.intervalIntegrable_deriv h0 ht₀)
 
-/-! ### Differentiability of the represented function
-
-Two derivative statements are provided.
-
-* If the time derivative possesses a *continuous* representative on `[0,T]`,
-  then `toFun u` is genuinely differentiable everywhere on `[0,T]` with the
-  expected derivative.  This is the strict form of the fundamental theorem of
-  calculus and needs no measure-theoretic hypothesis.
-
-* Without any regularity assumption, `toFun u` is differentiable almost
-  everywhere with derivative `u.deriv t`; this is the vector-valued Lebesgue
-  differentiation theorem. -/
-
 /-- **Differentiability of the represented function under a continuous
 representative.**  If a function `g` continuous on `[0,T]` represents the `L²`
 time derivative of `u`, then for every `t ∈ [0,T]` the represented function
@@ -398,15 +346,10 @@ theorem hasDerivWithinAt_toFun_of_continuousOn (u : timeH1 X T) {g : ℝ → X}
     {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     HasDerivWithinAt u.toFun (g t) (Icc (0 : ℝ) T) t := by
   rcases le_or_gt 0 T with hT | hT
-  · -- `[0,T]` is a genuine interval.
-    have h0 : (0 : ℝ) ∈ Icc (0 : ℝ) T := ⟨le_rfl, hT⟩
-    -- The indefinite integral with the continuous representative `g`.
+  · have h0 : (0 : ℝ) ∈ Icc (0 : ℝ) T := ⟨le_rfl, hT⟩
     have hgIcc : IntegrableOn g (Icc (0 : ℝ) T) volume :=
       (TimeSobolev.memLp_of_continuousOn hg).integrable (by norm_num)
-    -- `u.deriv =ᵐ g` for the time measure, restated as an `ae`-equality of
-    -- functions over the unordered interval used by the interval integral.
     have hrepvol : (fun r => u.deriv r) =ᵐ[volume.restrict (Icc (0 : ℝ) T)] g := hrep
-    -- `u.deriv` and `g` integrate identically over sub-intervals of `[0,T]`.
     have hae : ∀ s ∈ Icc (0 : ℝ) T, (∫ r in (0 : ℝ)..s, u.deriv r)
         = ∫ r in (0 : ℝ)..s, g r := by
       intro s hs
@@ -418,7 +361,6 @@ theorem hasDerivWithinAt_toFun_of_continuousOn (u : timeH1 X T) {g : ℝ → X}
       have hrestr : (fun r => u.deriv r) =ᵐ[volume.restrict (Set.uIoc (0 : ℝ) s)] g :=
         hrepvol.filter_mono (ae_mono (Measure.restrict_mono hsub le_rfl))
       exact ae_imp_of_ae_restrict hrestr
-    -- The indefinite integral of the continuous representative is differentiable.
     have hderiv : HasDerivWithinAt (fun s => ∫ r in (0 : ℝ)..s, g r) (g t)
         (Icc (0 : ℝ) T) t := by
       haveI hfact : Fact (t ∈ Icc (0 : ℝ) T) := ⟨ht⟩
@@ -431,14 +373,12 @@ theorem hasDerivWithinAt_toFun_of_continuousOn (u : timeH1 X T) {g : ℝ → X}
           (hg.aestronglyMeasurable measurableSet_Icc)⟩
       have hcont : ContinuousWithinAt g (Icc (0 : ℝ) T) t := hg t ht
       exact intervalIntegral.integral_hasDerivWithinAt_right hint hmeas hcont
-    -- Transfer the derivative back along the a.e. equality of indefinite integrals.
     have hderiv' : HasDerivWithinAt (fun s => ∫ r in (0 : ℝ)..s, u.deriv r) (g t)
         (Icc (0 : ℝ) T) t :=
       hderiv.congr (fun s hs => hae s hs) (hae t ht)
     have := hderiv'.const_add u.init
     simpa only [toFun] using this
-  · -- `[0,T]` is empty: vacuous.
-    rw [Icc_eq_empty (by linarith)] at ht
+  · rw [Icc_eq_empty (by linarith)] at ht
     exact absurd ht (notMem_empty t)
 
 /-- **Almost-everywhere differentiability of the represented function.**  For
@@ -454,13 +394,9 @@ the interval. -/
 theorem ae_hasDerivWithinAt_toFun (u : timeH1 X T) :
     ∀ᵐ t ∂(timeMeasure T), HasDerivWithinAt u.toFun (u.deriv t) (Icc (0 : ℝ) T) t := by
   rcases le_or_gt 0 T with hT | hT
-  · -- `[0,T]` is a genuine interval.
-    have h0 : (0 : ℝ) ∈ Icc (0 : ℝ) T := ⟨le_rfl, hT⟩
-    -- The time measure is absolutely continuous with respect to Lebesgue measure.
+  · have h0 : (0 : ℝ) ∈ Icc (0 : ℝ) T := ⟨le_rfl, hT⟩
     have hac : timeMeasure T ≪ volume :=
       Measure.absolutelyContinuous_of_le (Measure.restrict_le_self)
-    -- Extend the time derivative by `0` outside `(0,T]` to a locally integrable
-    -- function on all of `ℝ`.
     set v : ℝ → X := fun s => if s ∈ Ioc (0 : ℝ) T then u.deriv s else 0 with hv_def
     have hvint : IntegrableOn v (Ioc (0 : ℝ) T) volume := by
       have hcongr : IntegrableOn (fun s => u.deriv s) (Ioc (0 : ℝ) T) volume :=
@@ -475,10 +411,7 @@ theorem ae_hasDerivWithinAt_toFun (u : timeH1 X T) :
       by_contra hmem
       apply hs
       simp only [hv_def, if_neg hmem]
-    -- The vector-valued Lebesgue differentiation theorem for `v`.
     have hLDT := locallyIntegrable_ae_hasDerivAt_integral hvloc
-    -- Pull the volume-a.e. statement back to the (smaller) time measure, and
-    -- discard the two endpoints, which form a null set.
     have hLDT' : ∀ᵐ t ∂(timeMeasure T), ∀ c, HasDerivAt
         (fun x => ∫ r in c..x, v r) (v t) t := hac hLDT
     have hne0 : ∀ᵐ t ∂(timeMeasure T), t ≠ 0 :=
@@ -488,12 +421,8 @@ theorem ae_hasDerivWithinAt_toFun (u : timeH1 X T) :
     have hmem : ∀ᵐ t ∂(timeMeasure T), t ∈ Icc (0 : ℝ) T :=
       ae_restrict_mem measurableSet_Icc
     filter_upwards [hLDT', hne0, hneT, hmem] with t ht htne0 htneT htmem
-    -- The surviving `t` is interior to `[0,T]`.
     have htIoo : t ∈ Ioo (0 : ℝ) T :=
       ⟨lt_of_le_of_ne htmem.1 (Ne.symm htne0), lt_of_le_of_ne htmem.2 htneT⟩
-    -- On the open interval `(0,T)` the indefinite integrals of `v` and of
-    -- `u.deriv` coincide, because their integration intervals stay inside
-    -- `(0,T]` where `v = u.deriv`.
     have hae : ∀ s ∈ Ioo (0 : ℝ) T,
         (∫ r in (0 : ℝ)..s, v r) = ∫ r in (0 : ℝ)..s, u.deriv r := by
       intro s hs
@@ -503,11 +432,8 @@ theorem ae_hasDerivWithinAt_toFun (u : timeH1 X T) :
       have hrIoc : r ∈ Ioc (0 : ℝ) T :=
         ⟨hr.1, le_trans hr.2 (le_of_lt hs.2)⟩
       simp only [hv_def, if_pos hrIoc]
-    -- Identify the derivative `v t` with `u.deriv t`.
     have htIoc : t ∈ Ioc (0 : ℝ) T := ⟨htIoo.1, le_of_lt htIoo.2⟩
     have hvt : v t = u.deriv t := by simp only [hv_def, if_pos htIoc]
-    -- The derivative of the indefinite integral of `v` at `t`, transferred to
-    -- the indefinite integral of `u.deriv`.
     have hderiv_v : HasDerivAt (fun s => ∫ r in (0 : ℝ)..s, v r) (v t) t := ht 0
     have hderiv_u : HasDerivAt (fun s => ∫ r in (0 : ℝ)..s, u.deriv r)
         (u.deriv t) t := by
@@ -516,19 +442,10 @@ theorem ae_hasDerivWithinAt_toFun (u : timeH1 X T) :
         filter_upwards [Ioo_mem_nhds htIoo.1 htIoo.2] with s hs using (hae s hs).symm
       exact hvt ▸ (hderiv_v.congr_of_eventuallyEq heq)
     exact (hderiv_u.const_add u.init).hasDerivWithinAt
-  · -- `[0,T]` is empty: the time measure is the zero measure, whose
-    -- almost-everywhere filter is the bottom filter.
-    have hbot : ae (timeMeasure T) = ⊥ :=
+  · have hbot : ae (timeMeasure T) = ⊥ :=
       MeasureTheory.ae_eq_bot.mpr (timeMeasure_eq_zero_of_nonpos (le_of_lt hT))
     rw [Filter.eventually_iff, hbot]
     exact Filter.mem_bot
-
-/-! ## The Sobolev embedding `H¹ ↪ C([0,T]; X)`
-
-The fundamental estimate of one-dimensional Sobolev embedding: a uniform-in-time
-bound on the represented function in terms of the `H¹` data.  It expresses that
-`H¹([0,T]; X)` embeds continuously into the space of continuous `X`-valued
-functions of time. -/
 
 /-- **Pointwise Sobolev embedding bound.**  For `t ∈ [0,T]`,
 
@@ -540,13 +457,11 @@ theorem norm_toFun_le (u : timeH1 X T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     ‖u.toFun t‖ ≤ ‖trace0 X T u‖ + Real.sqrt T * ‖timeDeriv X T u‖ := by
   rcases ht with ⟨ht0, htT⟩
   have hTnn : (0 : ℝ) ≤ T := le_trans ht0 htT
-  -- Bound the indefinite integral by the integral of the norm over `[0,t]`.
   have hint_eq : (∫ s in (0 : ℝ)..t, u.deriv s) = ∫ s in Ioc (0 : ℝ) t, u.deriv s :=
     intervalIntegral.integral_of_le ht0
   have hnorm_int : ‖∫ s in (0 : ℝ)..t, u.deriv s‖ ≤ ∫ s in Ioc (0 : ℝ) t, ‖u.deriv s‖ := by
     rw [hint_eq]
     exact norm_integral_le_integral_norm _
-  -- The integral of the norm over `[0,t]` is bounded by that over `[0,T]`.
   have hmono : (∫ s in Ioc (0 : ℝ) t, ‖u.deriv s‖) ≤ ∫ s in Icc (0 : ℝ) T, ‖u.deriv s‖ := by
     have hintT : IntegrableOn (fun s => ‖u.deriv s‖) (Icc (0 : ℝ) T) volume :=
       (TimeSobolev.integrableOn u.deriv).norm
@@ -555,10 +470,8 @@ theorem norm_toFun_le (u : timeH1 X T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     · refine HasSubset.Subset.eventuallyLE ?_
       intro s hs
       exact ⟨le_of_lt hs.1, le_trans hs.2 htT⟩
-  -- The integral of the norm over `[0,T]` is the Cauchy–Schwarz bound `√T · ‖u.deriv‖`.
   have hCS : (∫ s in Icc (0 : ℝ) T, ‖u.deriv s‖) ≤ Real.sqrt T * ‖u.deriv‖ :=
     TimeSobolev.integral_norm_le u.deriv
-  -- Assemble.
   calc ‖u.toFun t‖ = ‖u.init + ∫ s in (0 : ℝ)..t, u.deriv s‖ := rfl
     _ ≤ ‖u.init‖ + ‖∫ s in (0 : ℝ)..t, u.deriv s‖ := norm_add_le _ _
     _ ≤ ‖u.init‖ + ∫ s in Ioc (0 : ℝ) t, ‖u.deriv s‖ := by gcongr
@@ -581,12 +494,6 @@ theorem norm_toFun_le_norm (u : timeH1 X T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) 
         refine add_le_add hinit ?_
         exact mul_le_mul_of_nonneg_left hderiv hsqrt
     _ = (1 + Real.sqrt T) * ‖u‖ := by ring
-
-/-! ## The embedding into `L²([0,T]; X)`
-
-The represented function, being continuous on `[0,T]`, is itself an element of
-`L²([0,T]; X)`.  This realises `H¹([0,T]; X)` as a (continuously embedded)
-subspace of `L²([0,T]; X)`. -/
 
 /-- The represented function `toFun u`, regarded as an element of
 `L²([0,T]; X)`.  This is well defined because `toFun u` is continuous on
@@ -613,7 +520,6 @@ theorem norm_toFunL2_le (u : timeH1 X T) :
 theorem toFun_add (u w : timeH1 X T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     (u + w).toFun t = u.toFun t + w.toFun t := by
   have h0 : (0 : ℝ) ∈ Icc (0 : ℝ) T := ⟨le_rfl, le_trans ht.1 ht.2⟩
-  -- The integrand `(u + w).deriv` is a.e. the sum of `u.deriv` and `w.deriv`.
   have hsplit : ∫ s in (0 : ℝ)..t, ((u + w).deriv) s
       = (∫ s in (0 : ℝ)..t, u.deriv s) + ∫ s in (0 : ℝ)..t, w.deriv s := by
     have hcongr : ∫ s in (0 : ℝ)..t, ((u + w).deriv) s
@@ -642,7 +548,6 @@ theorem toFun_add (u w : timeH1 X T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
   `toFun (c • u) t = c • toFun u t`. -/
 theorem toFun_smul (c : ℝ) (u : timeH1 X T) {t : ℝ} (ht : t ∈ Icc (0 : ℝ) T) :
     (c • u).toFun t = c • u.toFun t := by
-  -- The integrand `(c • u).deriv` is a.e. `c • u.deriv`.
   have hsmul : ∫ s in (0 : ℝ)..t, ((c • u).deriv) s
       = c • ∫ s in (0 : ℝ)..t, u.deriv s := by
     have hcongr : ∫ s in (0 : ℝ)..t, ((c • u).deriv) s
