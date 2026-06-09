@@ -1,4 +1,13 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemainderFrameSumBridge
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatureOperatorField
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.CovGradBundleEquivFiberNormFrameSum
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.IntegratedOrder2WeitzenbockCurvature
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformProportionalCurvatureSup
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FiberNormSubadditivity
+import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvature
+import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradCovDerivCommutation
+import DifferentialGeometry.Geometry.Curvature.Order2Defect.GradientSlotLeibniz
+import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
 
 /-!
 # The intrinsic frame-summed Weitzenböck bracket remainder fibre order
@@ -95,6 +104,269 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+set_option linter.unusedSectionVars false in
+/-- Two `(0, s)`-tensor fibre elements agreeing on every model tuple are equal. -/
+private lemma tensor0S_eq_of_toModel_eq {s : ℕ} {x : M} {T T' : Tensor0SSpace s I x}
+    (h : ∀ v : Fin s → E, Tensor0SSpace.toModel T v = Tensor0SSpace.toModel T' v) : T = T' :=
+  Tensor0SSpace.toModel_injective (ContinuousMultilinearMap.ext h)
+
+set_option linter.unusedSectionVars false in
+/-- `Tensor0SSpace.toModel` commutes with finite sums. -/
+private lemma tensor0S_toModel_sum {s : ℕ} {x : M} {ι : Type*} (t : Finset ι)
+    (f : ι → Tensor0SSpace s I x) :
+    Tensor0SSpace.toModel (∑ i ∈ t, f i) = ∑ i ∈ t, Tensor0SSpace.toModel (f i) := by
+  classical
+  induction t using Finset.induction with
+  | empty => simp
+  | insert a t ha ih =>
+      rw [Finset.sum_insert ha, Finset.sum_insert ha, Tensor0SSpace.toModel_add, ih]
+
+set_option linter.unusedSectionVars false in
+/-- An `(0, t)`-tensor subtraction, read as a continuous linear map, distributes over the
+argument. -/
+private lemma rs_sub_apply {t : ℕ} {x : M} (A B : TensorRSSpace 0 t I x)
+    (τ : Tensor0SSpace 0 I x) :
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from A - B) τ =
+      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from A) τ -
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from B) τ := rfl
+
+set_option linter.unusedSectionVars false in
+/-- A finite sum of `(0, t)`-tensors, read as a continuous linear map, distributes over the
+argument. -/
+private lemma rs_sum_apply {t : ℕ} {x : M} {ι : Type*} (fs : Finset ι)
+    (F : ι → TensorRSSpace 0 t I x) (τ : Tensor0SSpace 0 I x) :
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from ∑ i ∈ fs, F i) τ =
+      ∑ i ∈ fs, (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from F i) τ := by
+  classical
+  induction fs using Finset.induction with
+  | empty => rw [Finset.sum_empty, Finset.sum_empty]; rfl
+  | insert a fs' ha ih =>
+      rw [Finset.sum_insert ha, Finset.sum_insert ha, ← ih]; rfl
+
+set_option linter.unusedSectionVars false in
+/-- Slot-`0` additivity of the model reading on a `cons` tuple. -/
+private lemma toModel_cons_add_slot0 {t : ℕ} {x : M} (W : Tensor0SSpace (t + 1) I x)
+    (u v : E) (rest : Fin t → E) :
+    Tensor0SSpace.toModel W (Fin.cons (u + v) rest) =
+      Tensor0SSpace.toModel W (Fin.cons u rest) + Tensor0SSpace.toModel W (Fin.cons v rest) := by
+  classical
+  have h := ContinuousMultilinearMap.map_update_add (Tensor0SSpace.toModel W)
+    (Fin.cons u rest) (0 : Fin (t + 1)) u v
+  rw [Fin.update_cons_zero, Fin.update_cons_zero, Fin.update_cons_zero] at h
+  exact h
+
+set_option linter.unusedSectionVars false in
+/-- Slot-`0` homogeneity of the model reading on a `cons` tuple. -/
+private lemma toModel_cons_smul_slot0 {t : ℕ} {x : M} (W : Tensor0SSpace (t + 1) I x)
+    (c : ℝ) (u : E) (rest : Fin t → E) :
+    Tensor0SSpace.toModel W (Fin.cons (c • u) rest) =
+      c * Tensor0SSpace.toModel W (Fin.cons u rest) := by
+  classical
+  have h := ContinuousMultilinearMap.map_update_smul (Tensor0SSpace.toModel W)
+    (Fin.cons u rest) (0 : Fin (t + 1)) c u
+  rw [Fin.update_cons_zero, Fin.update_cons_zero] at h
+  rw [h, smul_eq_mul]
+
+set_option linter.unusedSectionVars false in
+/-- Slot-`0` finite linear expansion of the model reading on a `cons` tuple. -/
+private lemma toModel_cons_sum_slot0 {t : ℕ} {x : M} (W : Tensor0SSpace (t + 1) I x)
+    {ι : Type*} (fs : Finset ι) (c : ι → ℝ) (v : ι → E) (rest : Fin t → E) :
+    Tensor0SSpace.toModel W (Fin.cons (∑ j ∈ fs, c j • v j) rest) =
+      ∑ j ∈ fs, c j * Tensor0SSpace.toModel W (Fin.cons (v j) rest) := by
+  classical
+  induction fs using Finset.induction with
+  | empty =>
+      rw [Finset.sum_empty, Finset.sum_empty]
+      exact ContinuousMultilinearMap.map_coord_zero (Tensor0SSpace.toModel W) (0 : Fin (t + 1))
+        (by rw [Fin.cons_zero])
+  | insert a fs' ha ih =>
+      rw [Finset.sum_insert ha, Finset.sum_insert ha, toModel_cons_add_slot0,
+        toModel_cons_smul_slot0, ih]
+
+set_option linter.unusedSectionVars false in
+/-- Slot-`1` additivity of the model reading on a double-`cons` tuple, reduced to slot `0`
+through the leading-slot curry. -/
+private lemma toModel_cons_add_slot1 {t : ℕ} {x : M} (W : Tensor0SSpace (t + 2) I x)
+    (u : E) (a b : E) (rest : Fin t → E) :
+    Tensor0SSpace.toModel W (Fin.cons u (Fin.cons (a + b) rest)) =
+      Tensor0SSpace.toModel W (Fin.cons u (Fin.cons a rest)) +
+        Tensor0SSpace.toModel W (Fin.cons u (Fin.cons b rest)) := by
+  rw [← TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+      (T := W) (v0 := u) (vs := Fin.cons (a + b) rest),
+    ← TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+      (T := W) (v0 := u) (vs := Fin.cons a rest),
+    ← TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+      (T := W) (v0 := u) (vs := Fin.cons b rest)]
+  exact toModel_cons_add_slot0 (I := I) (M := M)
+    (tensor0S_curry (I := I) (M := M) (t + 1) x W u) a b rest
+
+set_option linter.unusedSectionVars false in
+/-- Slot-`1` homogeneity of the model reading on a double-`cons` tuple. -/
+private lemma toModel_cons_smul_slot1 {t : ℕ} {x : M} (W : Tensor0SSpace (t + 2) I x)
+    (u : E) (c : ℝ) (a : E) (rest : Fin t → E) :
+    Tensor0SSpace.toModel W (Fin.cons u (Fin.cons (c • a) rest)) =
+      c * Tensor0SSpace.toModel W (Fin.cons u (Fin.cons a rest)) := by
+  rw [← TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+      (T := W) (v0 := u) (vs := Fin.cons (c • a) rest),
+    ← TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+      (T := W) (v0 := u) (vs := Fin.cons a rest)]
+  exact toModel_cons_smul_slot0 (I := I) (M := M)
+    (tensor0S_curry (I := I) (M := M) (t + 1) x W u) c a rest
+
+set_option linter.unusedSectionVars false in
+/-- Slot-`1` finite linear expansion of the model reading on a double-`cons` tuple. -/
+private lemma toModel_cons_sum_slot1 {t : ℕ} {x : M} (W : Tensor0SSpace (t + 2) I x)
+    (u : E) {ι : Type*} (fs : Finset ι) (c : ι → ℝ) (v : ι → E) (rest : Fin t → E) :
+    Tensor0SSpace.toModel W (Fin.cons u (Fin.cons (∑ j ∈ fs, c j • v j) rest)) =
+      ∑ j ∈ fs, c j * Tensor0SSpace.toModel W (Fin.cons u (Fin.cons (v j) rest)) := by
+  classical
+  induction fs using Finset.induction with
+  | empty =>
+      rw [Finset.sum_empty, Finset.sum_empty]
+      rw [← TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+        (T := W) (v0 := u) (vs := Fin.cons 0 rest)]
+      exact ContinuousMultilinearMap.map_coord_zero
+        (Tensor0SSpace.toModel (tensor0S_curry (I := I) (M := M) (t + 1) x W u))
+        (0 : Fin (t + 1)) (by rw [Fin.cons_zero])
+  | insert a fs' ha ih =>
+      rw [Finset.sum_insert ha, Finset.sum_insert ha, toModel_cons_add_slot1,
+        toModel_cons_smul_slot1, ih]
+
+set_option linter.unusedSectionVars false in
+/-- The scalar-extraction functional evaluates to `1` on the unit `(0, 0)`-tensor. -/
+private lemma tensor00Scalar_unitZeroSec (x : M) :
+    tensor00Scalar (I := I) (M := M) x (unitZeroSec (I := I) (M := M) x) = 1 := by
+  rw [tensor00Scalar_apply (I := I) (M := M) x _ (fun k : Fin 0 => k.elim0)]
+  rw [show ((unitZeroSec (I := I) (M := M) x) (fun k : Fin 0 => k.elim0) : ℝ) =
+      Tensor0SSpace.toModel (unitZeroSec (I := I) (M := M) x) (fun k : Fin 0 => k.elim0) from rfl]
+  rw [unitZeroSec_apply (I := I) (M := M) x, Tensor0SSpace.toModel_ofModel,
+    ContinuousMultilinearMap.constOfIsEmpty_apply]
+
+set_option linter.unusedSectionVars false in
+/-- Every `(0, 0)`-tensor is its unit-scalar multiple of the unit `(0, 0)`-tensor. -/
+private lemma tensor0S_zero_span (x : M) (τ : Tensor0SSpace 0 I x) :
+    τ = tensor00Scalar (I := I) (M := M) x τ • unitZeroSec (I := I) (M := M) x := by
+  apply tensor0S_eq_of_toModel_eq (I := I) (M := M)
+  intro v
+  rw [show v = (fun k : Fin 0 => k.elim0) from funext (fun k => k.elim0)]
+  rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply]
+  rw [show Tensor0SSpace.toModel (unitZeroSec (I := I) (M := M) x)
+      (fun k : Fin 0 => k.elim0) = 1 from by
+    rw [unitZeroSec_apply (I := I) (M := M) x, Tensor0SSpace.toModel_ofModel,
+      ContinuousMultilinearMap.constOfIsEmpty_apply]]
+  rw [show Tensor0SSpace.toModel τ (fun k : Fin 0 => k.elim0) =
+      tensor00Scalar (I := I) (M := M) x τ from
+    (tensor00Scalar_apply (I := I) (M := M) x τ (fun k : Fin 0 => k.elim0)).symm]
+  rw [smul_eq_mul, mul_one]
+
+set_option linter.unusedSectionVars false in
+/-- The `(0, t)`-tensor wrapper of a model tensor evaluates at the unit to the tensor itself. -/
+private lemma tensor0SAsRS_unit_eval (t : ℕ) (x : M) (C : Tensor0SSpace t I x) :
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from
+        tensor0SAsRS (I := I) (M := M) x C)
+      (unitZeroSec (I := I) (M := M) x) = C := by
+  rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from
+        tensor0SAsRS (I := I) (M := M) x C)
+      (unitZeroSec (I := I) (M := M) x) =
+      tensor00Scalar (I := I) (M := M) x (unitZeroSec (I := I) (M := M) x) • C from
+    tensor0SAsRS_apply (I := I) (M := M) x C (unitZeroSec (I := I) (M := M) x)]
+  rw [tensor00Scalar_unitZeroSec (I := I) (M := M) x, one_smul]
+
+set_option linter.unusedSectionVars false in
+/-- Wrapping the unit evaluation of an `(0, t)`-tensor reconstructs the tensor. -/
+private lemma tensor0SAsRS_rs_unit (t : ℕ) (x : M) (W : TensorRSSpace 0 t I x) :
+    tensor0SAsRS (I := I) (M := M) x
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from W)
+          (unitZeroSec (I := I) (M := M) x)) = W := by
+  apply tensorRSSpace_ext (𝕜 := ℝ) 0 t x
+  intro τ
+  rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from
+        tensor0SAsRS (I := I) (M := M) x
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from W)
+            (unitZeroSec (I := I) (M := M) x))) τ =
+      tensor00Scalar (I := I) (M := M) x τ •
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from W)
+          (unitZeroSec (I := I) (M := M) x)) from
+    tensor0SAsRS_apply (I := I) (M := M) x _ τ]
+  conv_rhs => rw [tensor0S_zero_span (I := I) (M := M) x τ]
+  rw [ContinuousLinearMap.map_smul]
+
+set_option linter.unusedSectionVars false in
+/-- The `(0, t)`-tensor wrapper is additive. -/
+private lemma tensor0SAsRS_add (t : ℕ) (x : M) (C D : Tensor0SSpace t I x) :
+    tensor0SAsRS (I := I) (M := M) x (C + D) =
+      tensor0SAsRS (I := I) (M := M) x C + tensor0SAsRS (I := I) (M := M) x D := by
+  have h : (tensor0SAsRS (I := I) (M := M) x (C + D) :
+        Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x) =
+      (tensor0SAsRS (I := I) (M := M) x C :
+        Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x) +
+        (tensor0SAsRS (I := I) (M := M) x D :
+          Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x) := by
+    apply ContinuousLinearMap.ext
+    intro τ
+    change tensor00Scalar (I := I) (M := M) x τ • (C + D) =
+      tensor00Scalar (I := I) (M := M) x τ • C + tensor00Scalar (I := I) (M := M) x τ • D
+    apply tensor0S_eq_of_toModel_eq (I := I) (M := M)
+    intro v
+    rw [Tensor0SSpace.toModel_smul, Tensor0SSpace.toModel_add, Tensor0SSpace.toModel_add,
+      Tensor0SSpace.toModel_smul, Tensor0SSpace.toModel_smul]
+    simp only [ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.add_apply,
+      smul_eq_mul]
+    ring
+  exact h
+
+set_option linter.unusedSectionVars false in
+/-- The `(0, t)`-tensor wrapper distributes over subtraction. -/
+private lemma tensor0SAsRS_sub (t : ℕ) (x : M) (C D : Tensor0SSpace t I x) :
+    tensor0SAsRS (I := I) (M := M) x (C - D) =
+      tensor0SAsRS (I := I) (M := M) x C - tensor0SAsRS (I := I) (M := M) x D := by
+  have h : (tensor0SAsRS (I := I) (M := M) x (C - D) :
+        Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x) =
+      (tensor0SAsRS (I := I) (M := M) x C :
+        Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x) -
+        (tensor0SAsRS (I := I) (M := M) x D :
+          Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x) := by
+    apply ContinuousLinearMap.ext
+    intro τ
+    change tensor00Scalar (I := I) (M := M) x τ • (C - D) =
+      tensor00Scalar (I := I) (M := M) x τ • C - tensor00Scalar (I := I) (M := M) x τ • D
+    apply tensor0S_eq_of_toModel_eq (I := I) (M := M)
+    intro v
+    rw [Tensor0SSpace.toModel_smul, Tensor0SSpace.toModel_sub, Tensor0SSpace.toModel_sub,
+      Tensor0SSpace.toModel_smul, Tensor0SSpace.toModel_smul]
+    simp only [ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.sub_apply,
+      smul_eq_mul]
+    ring
+  exact h
+
+set_option linter.unusedSectionVars false in
+/-- The `(0, t)`-tensor wrapper sends `0` to `0`. -/
+private lemma tensor0SAsRS_zero (t : ℕ) (x : M) :
+    tensor0SAsRS (I := I) (M := M) x (0 : Tensor0SSpace t I x) = 0 := by
+  have h : (tensor0SAsRS (I := I) (M := M) x (0 : Tensor0SSpace t I x) :
+        Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x) = 0 := by
+    apply ContinuousLinearMap.ext
+    intro τ
+    change tensor00Scalar (I := I) (M := M) x τ • (0 : Tensor0SSpace t I x) = 0
+    apply tensor0S_eq_of_toModel_eq (I := I) (M := M)
+    intro v
+    rw [Tensor0SSpace.toModel_smul, Tensor0SSpace.toModel_zero, smul_zero]
+  exact h
+
+set_option linter.unusedSectionVars false in
+/-- The `(0, t)`-tensor wrapper commutes with finite sums. -/
+private lemma tensor0SAsRS_sum (t : ℕ) (x : M) {ι : Type*} (fs : Finset ι)
+    (F : ι → Tensor0SSpace t I x) :
+    tensor0SAsRS (I := I) (M := M) x (∑ i ∈ fs, F i) =
+      ∑ i ∈ fs, tensor0SAsRS (I := I) (M := M) x (F i) := by
+  classical
+  induction fs using Finset.induction with
+  | empty =>
+      rw [Finset.sum_empty, Finset.sum_empty]
+      exact tensor0SAsRS_zero (I := I) (M := M) t x
+  | insert a fs' ha ih =>
+      rw [Finset.sum_insert ha, Finset.sum_insert ha, tensor0SAsRS_add, ih]
 
 /-- **The intrinsic frame-summed Weitzenböck bracket remainder fibre order (posited genuine pointwise
 leaf).** For a closed smooth Riemannian manifold `(M, g)` there is a *valence-dependent* nonnegative

@@ -14,6 +14,7 @@ import DifferentialGeometry.Tensor.Multilinear.Comp
 import DifferentialGeometry.Geometry.Connection.TensorNabla.HomTensorRSRiemannian
 import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Slot0SliceFiberNormDomination
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LoweredConnectionDifferenceCovariantDerivative
 
 /-! # The curvature-trace covariant-jet reduction of the sealed Ricci–DeTurck curvature difference
 
@@ -81,6 +82,7 @@ open DifferentialGeometry.PDE
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
+open DifferentialGeometry.Integral.Measure (chartModelBasis)
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E]
@@ -94,7 +96,7 @@ permuted-`covGrad` combination `R + permute (swap 0 1) R − permute c[0,2,1] R`
 realized difference factor `R := covGrad g₀ 0 2 (realizeSymmCcTensor g₀ (T₁ − T₂))`, i.e. the three slot
 readings of `covDerivRealizeEval g₀ (T₁ − T₂)` (the difference-arm building block of the `g₀`-lowered
 Koszul connection-difference combination, `loweredConnDiffSection_sub_eq_koszulRealizeDiff_sub_crossCorrDiff`).
-A `(0, 3)`-section, the input of the model-basis Ricci trace's difference arm. -/
+A `(0, 3)`-section, the input of the antisymmetrised permuted-trace pair's difference arm. -/
 private def koszulTripleDiff (g₀ : SmoothRiemannianMetric I M)
     (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2) : Integral.L2.SmoothCcTensor g₀ 0 3 :=
   Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 2
@@ -110,7 +112,7 @@ private def koszulTripleDiff (g₀ : SmoothRiemannianMetric I M)
 `2·crossCorrectionSection g₁ g₀ T₁ − 2·crossCorrectionSection g₂ g₀ T₂` of the `g₀`-lowered Koszul
 connection-difference combination (`loweredConnDiffSection_sub_eq_koszulRealizeDiff_sub_crossCorrDiff`),
 the nonlinear correction that rides on the fixed pair `T₁, T₂` and does not cancel pointwise. A
-`(0, 3)`-section, the input of the model-basis Ricci trace's cross arm. -/
+`(0, 3)`-section, the input of the antisymmetrised permuted-trace pair's cross arm. -/
 private def crossCorrTripleDiff (g₀ : SmoothRiemannianMetric I M)
     (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ g₂ : SmoothRiemannianMetric I M) :
     Integral.L2.SmoothCcTensor g₀ 0 3 :=
@@ -138,15 +140,14 @@ set_option linter.unusedSectionVars false in
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
-/-- **(POSIT — C^∞ interior-product field smoothness.)**  At the C^∞ smoothness level, the bundle interior
+/-- **C^∞ interior-product field smoothness.**  At the C^∞ smoothness level, the bundle interior
 product of a smooth `(0, s + 1)`-tensor field `α` with a smooth vector field `X` — `x ↦ interior_product s
 x (X x) (α x)`, reading `X x` into the leading covariant slot — is a smooth `(0, s)`-tensor field.  This is
 the C^∞ analogue of `Tensor0SBundle.contract_Tensor0SField` (which is stated only for analytic `ω`
 manifolds via its section variable, hence unusable in the C^∞ context here); its proof is the *same*
 model-bilinear `clm_apply` argument (`model_interior_bilinear` is continuous, applied to the trivialised
 smooth `X` and `α`), valid at every smoothness level.  It is **non-vacuous**: the genuine smooth interior
-product, NOT the zero field.  Its body is `sorry`: the C^∞-level interior-product field smoothness, the
-weakened-hypothesis form of the analytic `contract_Tensor0SField`. -/
+product, NOT the zero field. -/
 theorem interiorProductField_contMDiff (s : ℕ)
     (α : ∀ x : M, Tensor0SBundle.Tensor0SSpace (s + 1) I x)
     (hα : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel (s + 1) ℝ E)) ∞
@@ -199,15 +200,13 @@ theorem interiorProductField_contMDiff (s : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
-/-- **(POSIT — C^∞ natural-trace field smoothness.)**  At the C^∞ smoothness level, the fibrewise
+/-- **C^∞ natural-trace field smoothness.**  At the C^∞ smoothness level, the fibrewise
 frame-free natural trace of a smooth `(1 + r, s + 1)`-tensor field `T` — `x ↦ contract_trace r s x (T x)`,
 contracting the leading contravariant slot against the leading covariant slot — is a smooth `(r, s)`-tensor
 field.  This is the C^∞ analogue of `Tensor0SBundle.contract_TensorRSField` (stated only for analytic `ω`
 manifolds via its section variable); its proof is the *same* `model_contract_trace`-composition argument
 (`model_contract_trace` is continuous-linear, composed with the trivialised smooth `T`), valid at every
-smoothness level.  It is **non-vacuous** (the genuine smooth natural trace).  Its body is `sorry`: the
-C^∞-level natural-trace field smoothness, the weakened-hypothesis form of the analytic
-`contract_TensorRSField`. -/
+smoothness level.  It is **non-vacuous** (the genuine smooth natural trace). -/
 theorem contractTraceField_contMDiff (r s : ℕ)
     (T : ∀ x : M, Tensor0SBundle.TensorRSSpace (1 + r) (s + 1) I x)
     (hT : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel (1 + r) (s + 1) ℝ E)) ∞
@@ -609,8 +608,8 @@ theorem contract_trace_unitZero_toModel (s : ℕ) (x : M)
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **(POSIT — base-point smoothness of the intrinsic `g₀⁻¹` double-trace operator field, routed through
-the smooth cometric Hom-section.)**  The fibre field `x ↦ ricciModelTrace42Fib g₀ a x` is a smooth
+/-- **Base-point smoothness of the intrinsic `g₀⁻¹` double-trace operator field, routed through
+the smooth cometric Hom-section.**  The fibre field `x ↦ ricciModelTrace42Fib g₀ a x` is a smooth
 section of the `(4 + a, 2 + a)`-tensor bundle.  The fibre map is the `−2`-scaled genuine cometric double
 trace of the two leading covariant slots (raise slot `0` by the cometric `♯`, then the FRAME-FREE natural
 trace against the original slot, `modelDoubleTrace`).
@@ -626,9 +625,7 @@ smooth Hom-section `inverseMetricSharpField` applied to the *variable* slot argu
 `contMDiff_clm_section_of_pointwise`, per smooth covector field `β`: the interior product
 `contract_Tensor0SField` of `Y` against the smooth vector field `x ↦ ♯(β x)`, `ContMDiff.clm_bundle_apply`
 of `inverseMetricSharpField` on `β`), NEVER as `♯` of a constant model frame.  It is **non-vacuous** (the
-genuine cometric double-trace operator field, smooth, not the zero field).  Its body is `sorry`: the
-structural raise-then-natural-trace smoothness of the intrinsic cometric double trace, replacing the
-deleted unsound single-trivialization-`symmL` route. -/
+genuine cometric double-trace operator field, smooth, not the zero field). -/
 theorem ricciModelTrace42Fib_contMDiff (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel (4 + a) (2 + a) ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel (4 + a) (2 + a) ℝ E)
@@ -750,13 +747,16 @@ equalities `(4 + a) + 1 = 4 + (a + 1)`, `(2 + a) + 1 = 2 + (a + 1)` hold by `Nat
       Integral.Connection.slotExtend (I := I) (M := M) g₀ (4 + a) (2 + a)
         (ricciModelTrace42FieldRec (I := I) g₀ a) := rfl
 
-/-- **The section-level `−2` intrinsic `g₀⁻¹` Ricci-trace operator `(0, 4 + a) → (0, 2 + a)`.**  The
-genuine building block of the intrinsic `g₀⁻¹` Ricci-trace parallel contraction: the operator at
+/-- **The section-level `−2` intrinsic `g₀⁻¹` double-trace operator `(0, 4 + a) → (0, 2 + a)`.**  The
+genuine building block of the antisymmetrised permuted-trace parallel contraction: the operator at
 gradient-shift `a` that contracts the leading two of the `4 + a` covariant slots of a smooth
 `(0, 4 + a)`-tensor against the cometric `g₀⁻¹` (the `g₀⁻¹` double trace `∑ᵢ D(♯eᵢ, ♯eᵢ, ·)`, with
 `♯eᵢ` the `g₀`-raised `E`-orthonormal coframe) and scales by `−2`, producing a smooth
-compactly-supported `(0, 2 + a)`-tensor.  This is the rank-reducing metric-trace contraction the Ricci
-difference arm needs (the `−2` `g₀⁻¹` curvature trace lowering rank `4 + a → 2 + a`); it depends on the
+compactly-supported `(0, 2 + a)`-tensor.  This is a **divergence-type single-pattern** cometric
+contraction (NOT by itself the `−2` intrinsic `g₀⁻¹` Ricci trace — that is the `½`-scaled
+antisymmetrised two-pattern combination of its slot-permuted images,
+`linearSection_eq_ricciModelTrace42_loweredConnDiffSub`); it is the rank-reducing parallel
+contraction out of which the Ricci difference arm's trace pair is composed, and it depends on the
 background metric `g₀` only through the cometric, with NO chart-selected ambient basis.
 
 It is constructed concretely as the operator-field action `appCcRS` of the **passenger-passing** smooth
@@ -786,8 +786,8 @@ double-trace fibre operator with the input section.**  Definitional via `appCcRS
       (ricciModelTrace42FieldRec (I := I) g₀ a) T x]
 
 set_option linter.unusedSectionVars false in
-/-- **Fibrewise `ℝ`-additivity of the section-level model-basis Ricci-trace operator.**  The
-`−2` model-basis double trace `ricciModelTrace42Op` distributes over a section difference: it is the
+/-- **Fibrewise `ℝ`-additivity of the section-level cometric double-trace operator.**  The
+`−2` cometric double trace `ricciModelTrace42Op` distributes over a section difference: it is the
 operator-field action `appCcRS` of the fixed double-trace field, and that action is additive in the
 contracted section (via `appCcRS_add_right` / `appCcRS_smul_right`, the operator-field action being
 fibrewise composition, additive in the right factor). -/
@@ -900,6 +900,40 @@ private theorem smoothOrthoFrame_expansion_at (g₀ : SmoothRiemannianMetric I M
       rw [hcoeff i, hbse i]
 
 set_option linter.unusedSectionVars false in
+/-- **The cometric raise of the `k`-th dual-basis model covector pairs to the `k`-th basis
+coordinate.**  `g₀(♯b^k, u) = repr(u)ₖ`: the defining inverse property of the cometric sharp
+(`inverseMetricSharpFib_inner`), read on the model dual basis `b^k := cDualBasis k` of `finBasis`.
+This is the form in which the cometric raise enters every raised-coframe trace — in particular it is
+the `hP` input of the dual-pair trace conversion `sum_inner_dualPair_apply_eq_sum_chartBasis_repr`. -/
+private theorem cometricLmodel_dualBasis_inner (g₀ : SmoothRiemannianMetric I M) (y : M)
+    (k : Fin (Module.finrank ℝ E)) (u : TangentSpace I y) :
+    g₀.inner y (cometricLmodel (I := I) g₀ y
+        (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+          ((Module.finBasis ℝ E).cDualBasis k))) u =
+      (Module.finBasis ℝ E).repr (u : E) k := by
+  have h1 : cometricLmodel (I := I) g₀ y
+        (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+          ((Module.finBasis ℝ E).cDualBasis k)) =
+      inverseMetricSharpFib (I := I) g₀ y
+        ((Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 1 y).symm
+          (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+            ((Module.finBasis ℝ E).cDualBasis k))) := rfl
+  rw [h1, inverseMetricSharpFib_inner (I := I) g₀ y _ u, cotangentToDualLinear_apply,
+    cotangentToDual_apply]
+  have h2 : (((Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 1 y).symm
+        (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+          ((Module.finBasis ℝ E).cDualBasis k))) (fun _ : Fin 1 => u) : ℝ) =
+      Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+        ((Module.finBasis ℝ E).cDualBasis k) (fun _ : Fin 1 => (u : E)) := rfl
+  rw [h2, Tensor0SBundle.model_covectorOfCLM_apply]
+  rw [show ((Module.finBasis ℝ E).cDualBasis k) =
+      LinearMap.toContinuousLinearMap ((Module.finBasis ℝ E).coord k) from by
+    rw [Module.Basis.cDualBasis, Module.Basis.map_apply]
+    congr 1
+    exact congrFun (Module.Basis.coe_dualBasis (Module.finBasis ℝ E)) k]
+  rw [LinearMap.coe_toContinuousLinearMap', Module.Basis.coord_apply]
+
+set_option linter.unusedSectionVars false in
 /-- **The cometric dual-basis double trace equals the orthonormal-frame diagonal sum.**  At any
 point `y` of the orthonormality neighbourhood of the frame attached at `x`, the frame-free cometric
 double trace of a model `(0, s + 2)`-tensor `T` — slot `0` raised by the cometric `♯` of the model
@@ -930,29 +964,8 @@ private theorem cometric_dualTrace_eq_orthoFrame_diag (g₀ : SmoothRiemannianMe
       g₀.inner y (cometricLmodel (I := I) g₀ y
           (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
             ((Module.finBasis ℝ E).cDualBasis k))) u =
-        (Module.finBasis ℝ E).repr (u : E) k := by
-    intro k u
-    have h1 : cometricLmodel (I := I) g₀ y
-          (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
-            ((Module.finBasis ℝ E).cDualBasis k)) =
-        inverseMetricSharpFib (I := I) g₀ y
-          ((Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 1 y).symm
-            (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
-              ((Module.finBasis ℝ E).cDualBasis k))) := rfl
-    rw [h1, inverseMetricSharpFib_inner (I := I) g₀ y _ u, cotangentToDualLinear_apply,
-      cotangentToDual_apply]
-    have h2 : (((Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 1 y).symm
-          (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
-            ((Module.finBasis ℝ E).cDualBasis k))) (fun _ : Fin 1 => u) : ℝ) =
-        Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
-          ((Module.finBasis ℝ E).cDualBasis k) (fun _ : Fin 1 => (u : E)) := rfl
-    rw [h2, Tensor0SBundle.model_covectorOfCLM_apply]
-    rw [show ((Module.finBasis ℝ E).cDualBasis k) =
-        LinearMap.toContinuousLinearMap ((Module.finBasis ℝ E).coord k) from by
-      rw [Module.Basis.cDualBasis, Module.Basis.map_apply]
-      congr 1
-      exact congrFun (Module.Basis.coe_dualBasis (Module.finBasis ℝ E)) k]
-    rw [LinearMap.coe_toContinuousLinearMap', Module.Basis.coord_apply]
+        (Module.finBasis ℝ E).repr (u : E) k :=
+    fun k u => cometricLmodel_dualBasis_inner (I := I) g₀ y k u
   -- Orthonormal expansion of each raised dual-basis covector in the frame.
   have hexp : ∀ k : Fin (Module.finrank ℝ E),
       cometricLmodel (I := I) g₀ y
@@ -1868,17 +1881,16 @@ theorem ricciModelTrace42FieldRec_covGrad_eq_zero (g₀ : SmoothRiemannianMetric
     exact covGrad_slotExtend_eq_zero_of_covGrad_eq_zero (I := I) g₀ (4 + a) (2 + a)
       (ricciModelTrace42FieldRec (I := I) g₀ a) ih
 
-/-- **(POSIT — the exact parallel single-step covariant Leibniz of the intrinsic `g₀⁻¹` Ricci trace.)**
-Because the background inverse metric `g₀^{ij}` is `∇₀`-parallel (`∇₀ g₀⁻¹ = 0`, the cometric skew core
-`cometric_skew_core`: `g(∇_w ♯eᵢ, ♯eⱼ) + g(♯eᵢ, ∇_w ♯eⱼ) = 0` read on the raised coframe), the
-covariant gradient passes through the `−2` intrinsic `g₀⁻¹` double trace with **no**
+/-- **The exact parallel single-step covariant Leibniz of the intrinsic `g₀⁻¹` double trace.**  No
 differentiated-operator cross term (the moving-coframe corrections cancel against the cometric
 parallelism):
 `∇₀(ricciModelTrace42Op a R) = (rank-cast) ricciModelTrace42Op (a+1) (∇₀ R)`, the new gradient slot
-carried at the front, rank-cast from `2 + (a + 1)` to `(2 + a) + 1` by `castRankCc_db`.  This is now
+carried at the front, rank-cast from `2 + (a + 1)` to `(2 + a) + 1` by `castRankCc_db`.  This is
 genuinely TRUE (the contraction is against the `∇₀`-parallel cometric `g₀⁻¹`, NOT a fixed,
-non-`∇₀`-parallel ambient basis).  Its body is `sorry`: the cometric-parallelism intertwining of `∇₀`
-and the `g₀⁻¹` trace. -/
+non-`∇₀`-parallel ambient basis): the B-rule for the operator-field action splits `∇₀(op a R)` into
+the differentiated-field cross term — which VANISHES by the cometric parallelism
+`ricciModelTrace42FieldRec_covGrad_eq_zero` — plus the surviving `slotExtend`-of-field action on
+`∇₀ R`, and `slotExtend (FieldRec a) = FieldRec (a+1)` advances the gradient-shift. -/
 theorem ricciModelTrace42Op_covGrad (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (R : Integral.L2.SmoothCcTensor g₀ 0 (4 + a)) :
     Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 (2 + a)
@@ -2229,21 +2241,22 @@ theorem exists_uniform_ricciModelTrace42Op_rfns_le (g₀ : SmoothRiemannianMetri
   rw [← ricciModelTrace42Op_toSection_eq_postcomp (I := I) g₀ a x R A hAdef]
   exact hAbound (R.toSection x)
 
-/-- **The `(0, 4) → (0, 2)` intrinsic `g₀⁻¹` Ricci-trace parallel contraction.**  The parallel
-rank-reducing single-section contraction realising the `−2` intrinsic `g₀⁻¹` Ricci trace `g₀^{ij}·` on
-the once-`∇₀`-differentiated rank-`4` Koszul operand, a `ParallelRankReducingContraction g₀ 4 2`,
-assembled from its four genuinely-deep fields: the section-level intrinsic `g₀⁻¹` double trace
-`ricciModelTrace42Op` (contracting the leading two covariant slots against the cometric `g₀⁻¹`, NOT a
-chart-selected ambient basis), its exact parallel single-step covariant Leibniz
-`ricciModelTrace42Op_covGrad` (the cometric parallelism `∇₀ g₀⁻¹ = 0` via `cometric_skew_core`, carried
-through `castRankCc_db`), the order-uniform envelope constant `κ₀` (the squared uniform cometric trace,
-`exists_uniform_ricciModelTrace42Op_rfns_le`), and its single-value fibre envelope (value-locality of
-the trace).
+/-- **The `(0, 4) → (0, 2)` intrinsic `g₀⁻¹` double-trace parallel contraction.**  The parallel
+rank-reducing single-section contraction realising the `−2` cometric double trace `g₀^{ij}·` of the
+two leading covariant slots on the once-`∇₀`-differentiated rank-`4` Koszul operand, a
+`ParallelRankReducingContraction g₀ 4 2`, assembled from its four genuinely-deep fields: the
+section-level intrinsic `g₀⁻¹` double trace `ricciModelTrace42Op` (contracting the leading two
+covariant slots against the cometric `g₀⁻¹`, NOT a chart-selected ambient basis), its exact parallel
+single-step covariant Leibniz `ricciModelTrace42Op_covGrad` (the cometric parallelism `∇₀ g₀⁻¹ = 0`
+via `cometric_skew_core`, carried through `castRankCc_db`), the order-uniform envelope constant `κ₀`
+(the squared uniform cometric trace, `exists_uniform_ricciModelTrace42Op_rfns_le`), and its
+single-value fibre envelope (value-locality of the trace).
 
-The contraction is **genuine** (non-degenerate): its envelope `kappa = κ₀ ≥ 0` is the value-local bound
-genuinely using the section; the trace is tied to the linearized-Ricci principal part by the section
-identity `linearSection_eq_ricciModelTrace42_koszulTriple_sub_crossCorrTriple` (a degenerate zero trace
-would falsify it whenever the linear part is genuinely present, `linearSection_self_toModel`). -/
+This single-pattern contraction is a **divergence-type** trace, not by itself the linearized-Ricci
+trace: the Ricci pattern is the `½`-scaled antisymmetrised combination of its two slot-permuted
+images (`ricciAntisymTrace42`, `linearSection_eq_ricciModelTrace42_loweredConnDiffSub`).  The
+contraction is **genuine** (non-degenerate): its envelope `kappa = κ₀ ≥ 0` is the value-local bound
+genuinely using the section. -/
 noncomputable def ricciModelTrace42 (g₀ : SmoothRiemannianMetric I M) :
     Integral.Connection.ParallelRankReducingContraction (I := I) (M := M) g₀ 4 2 where
   op := fun a => ricciModelTrace42Op (I := I) g₀ a
@@ -2254,8 +2267,8 @@ noncomputable def ricciModelTrace42 (g₀ : SmoothRiemannianMetric I M) :
     (exists_uniform_ricciModelTrace42Op_rfns_le (I := I) g₀).choose_spec.2 a R x
 
 set_option linter.unusedSectionVars false in
-/-- **Fibrewise `ℝ`-linearity of the intrinsic `g₀⁻¹` Ricci trace.**  The `op` of the `(0, 4) → (0, 2)`
-intrinsic `g₀⁻¹` Ricci-trace contraction `ricciModelTrace42` distributes over a section difference (it
+/-- **Fibrewise `ℝ`-linearity of the intrinsic `g₀⁻¹` double trace.**  The `op` of the `(0, 4) → (0, 2)`
+intrinsic `g₀⁻¹` double-trace contraction `ricciModelTrace42` distributes over a section difference (it
 is fibrewise `ℝ`-linear: a metric contraction is linear in the contracted section).  This is the
 assembled instance's `op` unfolding to `ricciModelTrace42Op`, whose additivity is
 `ricciModelTrace42Op_sub`. -/
@@ -2288,8 +2301,8 @@ private theorem model_interior_product_apply_eval (s : ℕ) (v : E)
     Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) s v T m = T (Fin.cons v m) := rfl
 
 set_option linter.unusedSectionVars false in
-/-- **(The cometric double-trace unit evaluation of the base `g₀⁻¹` Ricci trace.)**  At the unit
-`(0, 0)`-tensor and a tangent pair `(v, w)`, the model fibre value of the base intrinsic `g₀⁻¹` Ricci
+/-- **(The cometric double-trace unit evaluation of the base `g₀⁻¹` double trace.)**  At the unit
+`(0, 0)`-tensor and a tangent pair `(v, w)`, the model fibre value of the base intrinsic `g₀⁻¹` double
 trace `ricciModelTrace42Op g₀ 0 D` of a `(0, 4)`-tensor `D` is the `−2`-scaled genuine cometric double
 trace — the two leading covariant slots of `D` contracted against the cometric `g₀⁻¹` via the FRAME-FREE
 natural trace (raise slot `0` by `♯`, contract against the dual model basis):
@@ -2338,25 +2351,127 @@ theorem ricciModelTrace42Op_zero_unitModel_apply (g₀ : SmoothRiemannianMetric 
           (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))) ![(v : E), (w : E)]]
 
 set_option linter.unusedSectionVars false in
-/-- **(POSIT — the cometric `g₀⁻¹` raised-coframe double trace of the once-differentiated lowered
-connection difference equals the model-basis linear order term.)**  The genuine scalar value identity
-beneath the trace bridge: the `−2`-scaled cometric double trace (against the `g₀`-raised coframe `♯eᵢ`)
-of the once-`∇₀`-differentiated `g₀`-lowered connection-difference difference, evaluated on a tangent
-pair `(v, w)`, equals the linear-in-difference order-zero term `ricciNeg2SectionDiffLinearEval`:
-```
-−2 · ∑ᵢ toModel(∇₀(2·lowered₁ − 2·lowered₂) x (unit)) ![♯eᵢ, ♯eᵢ, v, w] = ricciNeg2SectionDiffLinearEval g₀ g₁ g₂ x v w.
-```
+/-- **Unit-model evaluation of the once-`∇₀`-differentiated lowered connection-difference
+difference.**  For tangent vectors `(u, a, b, c)` with `u` read into the leading (gradient) slot,
+the `(0, 4)` unit model of `∇₀(2·lowered₁ − 2·lowered₂)` is the `g₀`-pairing of the per-metric
+covariantly differentiated connection differences:
+`T(u, a, b, c) = 2·g₀((∇₀_u D₁)(a, b), c) − 2·g₀((∇₀_u D₂)(a, b), c)`, by the covariant-gradient
+leading-slot reading (`covGrad_toSection_apply_eval`), `ℝ`-linearity of the directional covariant
+derivative in the section (`tensorCovDerivAt_add`/`tensorCovDerivAt_smul`), and the order-one
+lowered-difference bridge `tensorCovDerivAt_loweredConnDiffSection_unitModel_eq` per metric arm. -/
+private theorem covGradLoweredSub_unitModel_eval
+    (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (x : M) (u a b c : TangentSpace I x) :
+    Tensor0SBundle.Tensor0SSpace.toModel
+        ((Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+            ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀
+              - (2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₂ g₀)).toSection x
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+        (Fin.cons ((u : TangentSpace I x) : E)
+          ![((a : TangentSpace I x) : E), ((b : TangentSpace I x) : E),
+            ((c : TangentSpace I x) : E)]) =
+      2 * g₀.inner x
+          (covDerivDiff (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁)
+            (smoothExtensionTangent (I := I) x u) (smoothExtensionTangent (I := I) x a)
+            (smoothExtensionTangent (I := I) x b) x) c
+        - 2 * g₀.inner x
+          (covDerivDiff (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₂)
+            (smoothExtensionTangent (I := I) x u) (smoothExtensionTangent (I := I) x a)
+            (smoothExtensionTangent (I := I) x b) x) c := by
+  classical
+  rw [Analysis.Parabolic.TensorSpectral.covGrad_toSection_apply_eval (I := I) (M := M) g₀ 0 3
+    ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀
+      - (2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₂ g₀) x
+    (ContinuousMultilinearMap.constOfIsEmpty ℝ
+      (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))
+    (Fin.cons ((u : TangentSpace I x) : E)
+      ![((a : TangentSpace I x) : E), ((b : TangentSpace I x) : E),
+        ((c : TangentSpace I x) : E)])]
+  have h0 : (Fin.cons ((u : TangentSpace I x) : E)
+      ![((a : TangentSpace I x) : E), ((b : TangentSpace I x) : E),
+        ((c : TangentSpace I x) : E)] : Fin 4 → TangentSpace I x) 0 = u := rfl
+  have htail : Matrix.vecTail (Fin.cons ((u : TangentSpace I x) : E)
+      ![((a : TangentSpace I x) : E), ((b : TangentSpace I x) : E),
+        ((c : TangentSpace I x) : E)] : Fin 4 → TangentSpace I x) =
+      ![((a : TangentSpace I x) : E), ((b : TangentSpace I x) : E),
+        ((c : TangentSpace I x) : E)] :=
+    Matrix.tail_cons _ _
+  rw [h0, htail]
+  have hsplit : Analysis.Parabolic.TensorSpectral.tensorCovDerivAt (I := I) (M := M) g₀ 0 3
+        ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀
+          - (2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₂ g₀) x (u : E) =
+      (2 : ℝ) • Analysis.Parabolic.TensorSpectral.tensorCovDerivAt (I := I) (M := M) g₀ 0 3
+          (DeTurck.loweredConnDiffSection (I := I) g₁ g₀) x (u : E)
+        + (-2 : ℝ) • Analysis.Parabolic.TensorSpectral.tensorCovDerivAt (I := I) (M := M) g₀ 0 3
+          (DeTurck.loweredConnDiffSection (I := I) g₂ g₀) x (u : E) := by
+    rw [show ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀
+          - (2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₂ g₀) =
+        ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀
+          + (-2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₂ g₀) from by
+      rw [sub_eq_add_neg, ← neg_smul]]
+    rw [Analysis.Parabolic.TensorSpectral.tensorCovDerivAt_add (I := I) (M := M) g₀ 0 3,
+      Analysis.Parabolic.TensorSpectral.tensorCovDerivAt_smul (I := I) (M := M) g₀ 0 3,
+      Analysis.Parabolic.TensorSpectral.tensorCovDerivAt_smul (I := I) (M := M) g₀ 0 3]
+  rw [hsplit]
+  have hdist : Tensor0SBundle.Tensor0SSpace.toModel
+      ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 3 I x from
+        (2 : ℝ) • Analysis.Parabolic.TensorSpectral.tensorCovDerivAt (I := I) (M := M) g₀ 0 3
+            (DeTurck.loweredConnDiffSection (I := I) g₁ g₀) x (u : E)
+          + (-2 : ℝ) • Analysis.Parabolic.TensorSpectral.tensorCovDerivAt (I := I) (M := M) g₀ 0 3
+            (DeTurck.loweredConnDiffSection (I := I) g₂ g₀) x (u : E))
+        (ContinuousMultilinearMap.constOfIsEmpty ℝ
+          (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+      ![((a : TangentSpace I x) : E), ((b : TangentSpace I x) : E),
+        ((c : TangentSpace I x) : E)] =
+      2 * Tensor0SBundle.Tensor0SSpace.toModel
+          ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 3 I x from
+            Analysis.Parabolic.TensorSpectral.tensorCovDerivAt (I := I) (M := M) g₀ 0 3
+              (DeTurck.loweredConnDiffSection (I := I) g₁ g₀) x (u : E))
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ
+              (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+          ![((a : TangentSpace I x) : E), ((b : TangentSpace I x) : E),
+            ((c : TangentSpace I x) : E)]
+        + (-2) * Tensor0SBundle.Tensor0SSpace.toModel
+          ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 3 I x from
+            Analysis.Parabolic.TensorSpectral.tensorCovDerivAt (I := I) (M := M) g₀ 0 3
+              (DeTurck.loweredConnDiffSection (I := I) g₂ g₀) x (u : E))
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ
+              (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+          ![((a : TangentSpace I x) : E), ((b : TangentSpace I x) : E),
+            ((c : TangentSpace I x) : E)] := rfl
+  rw [hdist]
+  rw [DeTurck.tensorCovDerivAt_loweredConnDiffSection_unitModel_eq (I := I) g₁ g₀ x u a b c,
+    DeTurck.tensorCovDerivAt_loweredConnDiffSection_unitModel_eq (I := I) g₂ g₀ x u a b c]
+  ring
 
-This is the genuine reconciliation of the intrinsic cometric `g₀^{ij}` raised-coframe trace with the
-model-basis coordinate trace `ricciNeg2SectionDiffLinearEval` (`= −2 ∑ᵢ repr(linearSummand₁ −
-linearSummand₂)ᵢ`).  The once-differentiated lowered connection difference's unit model on a tangent
-triple is the realized covariant-derivative Koszul combination
-(`covGrad_realizeSymm_unitModel_eq_covDerivRealizeEval`-style), whose `g₀`-raised-coframe double trace —
-through the M1 inverse-metric sharp index-raise `inverseMetricSharpFib_inner` and the lowered-Koszul
-diff-factor formula `connDiffDiff_g0_lowered_koszul_diffFactor` — is the linear order term carrying the
-single connection-difference-cocycle factor.  It is **non-vacuous** (it vanishes at `g₁ = g₂` consistently
-with `ricciNeg2SectionDiffLinearEval_self`); its body is `sorry`: the cometric-raised-coframe ↔
-model-basis-coordinate linear-order trace identity. -/
+set_option linter.unusedVariables false in
+set_option linter.unusedSectionVars false in
+/-- **The antisymmetrised cometric raised-coframe two-pattern trace of the once-differentiated
+lowered connection difference equals the model-basis linear order term.**  The genuine scalar value
+identity beneath the trace bridge: with `T := toModel(∇₀(2·lowered₁ − 2·lowered₂) x (unit))` the
+`(0, 4)` unit model of the once-`∇₀`-differentiated `g₀`-lowered connection-difference difference,
+the `−1`-scaled **antisymmetrised two-pattern** cometric raised-coframe trace — the gradient slot
+paired against the output slot, minus the connection-difference direction slot paired against the
+output slot —
+```
+(−1) · (∑ₖ T(♯b^k, v, w, b_k) − ∑ₖ T(v, ♯b^k, w, b_k)) = ricciNeg2SectionDiffLinearEval g₀ g₁ g₂ x v w
+```
+equals the linear-in-difference order-zero term (`= −2 ∑ᵢ repr(linearSummand₁ − linearSummand₂)ᵢ`).
+This is the linearized-Ricci contracted-Bianchi pattern `∇_i δΓ^i_{vw} − ∇_v δΓ^i_{iw}`: the
+single-pattern `(0,1)`-slot double trace is *not* this combination (it is false on a flat conformal
+torus); the antisymmetrised two-pattern combination is.
+
+**Proof.**  Per metric arm the unit model is the `g₀`-pairing of the covariantly differentiated
+connection difference (`covGradLoweredSub_unitModel_eval`, over the order-one bridge
+`tensorCovDerivAt_loweredConnDiffSection_unitModel_eq`).  The first pattern reads the raised coframe
+through the *direction* slot only, packaged by the direction-linear `covDerivDiffDirCLM`; the second
+reads it through a *multilinear* slot, packaged by the cometric-sharped continuous-bilinear slice of
+`T` (NOT by extension-linearity — the smooth extension is choice-based and not linear in its seed),
+identified against the chart basis through the `♯∘♭` roundtrip (`metricFlatLinear_injective`).  Both
+arms convert to the model-basis coordinate trace by the dual-pair conversion
+`sum_inner_dualPair_apply_eq_sum_chartBasis_repr` over the inverse property
+`cometricLmodel_dualBasis_inner`, landing exactly on the two `ricciDiffLinearSummand` pieces.  It is
+**non-vacuous** (it vanishes at `g₁ = g₂` consistently with `ricciNeg2SectionDiffLinearEval_self`). -/
 theorem cometricRaisedTrace_covGradLoweredSub_eq_ricciNeg2SectionDiffLinearEval
     (g₀ : SmoothRiemannianMetric I M) (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
     (g₁ g₂ : SmoothRiemannianMetric I M)
@@ -2365,34 +2480,255 @@ theorem cometricRaisedTrace_covGradLoweredSub_eq_ricciNeg2SectionDiffLinearEval
     (hr2 : ∀ (x : M) (v w : TangentSpace I x),
       g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w)
     (x : M) (v w : TangentSpace I x) :
-    (-2 : ℝ) * ∑ k : Fin (Module.finrank ℝ E),
-        Tensor0SBundle.Tensor0SSpace.toModel
-          ((Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
-              ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀
-                - (2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₂ g₀)).toSection x
-            (ContinuousMultilinearMap.constOfIsEmpty ℝ
-              (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
-          (Fin.cons (cometricLmodel (I := I) g₀ x
+    (-1 : ℝ) *
+      ((∑ k : Fin (Module.finrank ℝ E),
+          Tensor0SBundle.Tensor0SSpace.toModel
+            ((Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+                ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀
+                  - (2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₂ g₀)).toSection x
+              (ContinuousMultilinearMap.constOfIsEmpty ℝ
+                (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+            (Fin.cons (cometricLmodel (I := I) g₀ x
+                (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                  ((Module.finBasis ℝ E).cDualBasis k)))
+              ![((v : TangentSpace I x) : E), ((w : TangentSpace I x) : E),
+                (((Module.finBasis ℝ E) k : TangentSpace I x) : E)]))
+        - ∑ k : Fin (Module.finrank ℝ E),
+          Tensor0SBundle.Tensor0SSpace.toModel
+            ((Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+                ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀
+                  - (2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₂ g₀)).toSection x
+              (ContinuousMultilinearMap.constOfIsEmpty ℝ
+                (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+            (Fin.cons ((v : TangentSpace I x) : E)
+              ![(cometricLmodel (I := I) g₀ x
+                  (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                    ((Module.finBasis ℝ E).cDualBasis k)) : E),
+                ((w : TangentSpace I x) : E),
+                (((Module.finBasis ℝ E) k : TangentSpace I x) : E)])) =
+      ricciNeg2SectionDiffLinearEval (I := I) g₀ g₁ g₂ x v w := by
+  classical
+  set Tm : Tensor0SBundle.Tensor0SModel 4 ℝ E :=
+    Tensor0SBundle.Tensor0SSpace.toModel
+      ((Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+          ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀
+            - (2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₂ g₀)).toSection x
+        (ContinuousMultilinearMap.constOfIsEmpty ℝ
+          (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) with hTm
+  have hTval : ∀ u a b c : TangentSpace I x,
+      Tm (Fin.cons ((u : TangentSpace I x) : E)
+          ![((a : TangentSpace I x) : E), ((b : TangentSpace I x) : E),
+            ((c : TangentSpace I x) : E)]) =
+        2 * g₀.inner x
+            (covDerivDiff (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁)
+              (smoothExtensionTangent (I := I) x u) (smoothExtensionTangent (I := I) x a)
+              (smoothExtensionTangent (I := I) x b) x) c
+          - 2 * g₀.inner x
+            (covDerivDiff (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₂)
+              (smoothExtensionTangent (I := I) x u) (smoothExtensionTangent (I := I) x a)
+              (smoothExtensionTangent (I := I) x b) x) c :=
+    fun u a b c => covGradLoweredSub_unitModel_eval (I := I) g₀ g₁ g₂ x u a b c
+  set F1 : TangentSpace I x →L[ℝ] TangentSpace I x :=
+    (2 : ℝ) • covDerivDiffDirCLM (I := I)
+        (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁)
+        (smoothExtensionTangent (I := I) x v) (smoothExtensionTangent (I := I) x w) x
+      - (2 : ℝ) • covDerivDiffDirCLM (I := I)
+        (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₂)
+        (smoothExtensionTangent (I := I) x v) (smoothExtensionTangent (I := I) x w) x with hF1
+  have hDir : ∀ (gk : SmoothRiemannianMetric I M) (p : TangentSpace I x),
+      covDerivDiffDirCLM (I := I) (LeviCivita (I := I) g₀) (LeviCivita (I := I) gk)
+          (smoothExtensionTangent (I := I) x v) (smoothExtensionTangent (I := I) x w) x p =
+        covDerivDiff (LeviCivita (I := I) g₀) (LeviCivita (I := I) gk)
+          (smoothExtensionTangent (I := I) x p)
+          (smoothExtensionTangent (I := I) x v) (smoothExtensionTangent (I := I) x w) x := by
+    intro gk p
+    conv_lhs => rw [show p = smoothExtensionTangent (I := I) x p x from
+      (smoothExtensionTangent_eq (I := I) x p).symm]
+    exact covDerivDiffDirCLM_apply (I := I)
+      (LeviCivita (I := I) g₀) (LeviCivita (I := I) gk)
+      (smoothExtensionTangent (I := I) x p)
+      (smoothExtensionTangent (I := I) x v) (smoothExtensionTangent (I := I) x w) x
+  have hF1val : ∀ p : TangentSpace I x,
+      F1 p = (2 : ℝ) • covDerivDiff (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁)
+            (smoothExtensionTangent (I := I) x p)
+            (smoothExtensionTangent (I := I) x v) (smoothExtensionTangent (I := I) x w) x
+          - (2 : ℝ) • covDerivDiff (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₂)
+            (smoothExtensionTangent (I := I) x p)
+            (smoothExtensionTangent (I := I) x v) (smoothExtensionTangent (I := I) x w) x := by
+    intro p
+    rw [hF1, ContinuousLinearMap.sub_apply, ContinuousLinearMap.smul_apply,
+      ContinuousLinearMap.smul_apply, hDir g₁ p, hDir g₂ p]
+  set ψ : E →L[ℝ] Tensor0SBundle.Tensor0SModel 1 ℝ E :=
+    (Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) 1 ((w : TangentSpace I x) : E)).comp
+      ((Tensor0SBundle.model_interior_bilinear ℝ E 2).flip
+        (Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) 3
+          ((v : TangentSpace I x) : E) Tm)) with hψ
+  set F2 : TangentSpace I x →L[ℝ] TangentSpace I x :=
+    (inverseMetricSharpFib (I := I) g₀ x).comp
+      ((Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 1
+          x).symm.toContinuousLinearMap.comp
+        (show TangentSpace I x →L[ℝ] Tensor0SBundle.Tensor0SModel 1 ℝ E from ψ)) with hF2
+  have hF2pair : ∀ (p r : TangentSpace I x),
+      g₀.inner x (F2 p) r = Tm (Fin.cons ((v : TangentSpace I x) : E)
+        ![(p : E), ((w : TangentSpace I x) : E), (r : E)]) := by
+    intro p r
+    have h1 : F2 p = inverseMetricSharpFib (I := I) g₀ x
+        ((Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 1 x).symm
+          (ψ p)) := rfl
+    rw [h1, inverseMetricSharpFib_inner (I := I) g₀ x _ r, cotangentToDualLinear_apply,
+      cotangentToDual_apply]
+    have h2 : (((Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 1 x).symm
+          (ψ p)) (fun _ : Fin 1 => r) : ℝ) = ψ p (fun _ : Fin 1 => (r : E)) := rfl
+    rw [h2]
+    have h3 : ψ p (fun _ : Fin 1 => (r : E)) =
+        Tm (Fin.cons ((v : TangentSpace I x) : E)
+          (Fin.cons (p : E) (Fin.cons ((w : TangentSpace I x) : E)
+            (fun _ : Fin 1 => (r : E))))) := rfl
+    rw [h3]
+    congr 1
+    funext j
+    fin_cases j <;> rfl
+  have harm1 : ∀ k : Fin (Module.finrank ℝ E),
+      Tm (Fin.cons (cometricLmodel (I := I) g₀ x
+            (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+              ((Module.finBasis ℝ E).cDualBasis k)))
+          ![((v : TangentSpace I x) : E), ((w : TangentSpace I x) : E),
+            (((Module.finBasis ℝ E) k : TangentSpace I x) : E)]) =
+        g₀.inner x (F1 (cometricLmodel (I := I) g₀ x
+            (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+              ((Module.finBasis ℝ E).cDualBasis k))))
+          ((Module.finBasis ℝ E) k) := by
+    intro k
+    rw [hTval (cometricLmodel (I := I) g₀ x
+        (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+          ((Module.finBasis ℝ E).cDualBasis k))) v w ((Module.finBasis ℝ E) k)]
+    rw [hF1val (cometricLmodel (I := I) g₀ x
+        (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+          ((Module.finBasis ℝ E).cDualBasis k)))]
+    rw [map_sub, map_smul, map_smul, ContinuousLinearMap.sub_apply,
+      ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply, smul_eq_mul, smul_eq_mul]
+  have harm2 : ∀ k : Fin (Module.finrank ℝ E),
+      Tm (Fin.cons ((v : TangentSpace I x) : E)
+          ![(cometricLmodel (I := I) g₀ x
               (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
-                ((Module.finBasis ℝ E).cDualBasis k)))
-            (Fin.cons ((Module.finBasis ℝ E) k) ![(v : E), (w : E)])) =
-      ricciNeg2SectionDiffLinearEval (I := I) g₀ g₁ g₂ x v w :=
-  sorry
+                ((Module.finBasis ℝ E).cDualBasis k)) : E),
+            ((w : TangentSpace I x) : E),
+            (((Module.finBasis ℝ E) k : TangentSpace I x) : E)]) =
+        g₀.inner x (F2 (cometricLmodel (I := I) g₀ x
+            (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+              ((Module.finBasis ℝ E).cDualBasis k))))
+          ((Module.finBasis ℝ E) k) :=
+    fun k => (hF2pair (cometricLmodel (I := I) g₀ x
+      (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+        ((Module.finBasis ℝ E).cDualBasis k))) ((Module.finBasis ℝ E) k)).symm
+  have hP : ∀ (k : Fin (Module.finrank ℝ E)) (u : TangentSpace I x),
+      g₀.inner x (cometricLmodel (I := I) g₀ x
+          (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+            ((Module.finBasis ℝ E).cDualBasis k))) u =
+        (Module.finBasis ℝ E).repr (u : E) k :=
+    fun k u => cometricLmodel_dualBasis_inner (I := I) g₀ x k u
+  have htrace1 := sum_inner_dualPair_apply_eq_sum_chartBasis_repr (I := I) (M := M) g₀ x
+    (fun k => cometricLmodel (I := I) g₀ x
+      (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+        ((Module.finBasis ℝ E).cDualBasis k))) hP F1
+  have htrace2 := sum_inner_dualPair_apply_eq_sum_chartBasis_repr (I := I) (M := M) g₀ x
+    (fun k => cometricLmodel (I := I) g₀ x
+      (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+        ((Module.finBasis ℝ E).cDualBasis k))) hP F2
+  have hF2val : ∀ i : Fin (Module.finrank ℝ E),
+      F2 ((chartModelBasis E) i) =
+        (2 : ℝ) • covDerivDiff (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁)
+            (smoothExtensionTangent (I := I) x v)
+            (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
+            (smoothExtensionTangent (I := I) x w) x
+          - (2 : ℝ) • covDerivDiff (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₂)
+            (smoothExtensionTangent (I := I) x v)
+            (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
+            (smoothExtensionTangent (I := I) x w) x := by
+    intro i
+    refine Integral.DivergenceTheorem.metricFlatLinear_injective (I := I) g₀ x ?_
+    ext r
+    rw [Integral.DivergenceTheorem.metricFlatLinear_apply,
+      Integral.DivergenceTheorem.metricFlatLinear_apply]
+    rw [hF2pair ((chartModelBasis E) i) r]
+    rw [hTval v ((chartModelBasis E) i) w r]
+    rw [map_sub, map_smul, map_smul, ContinuousLinearMap.sub_apply,
+      ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply, smul_eq_mul, smul_eq_mul]
+  have hfinal : ∀ i : Fin (Module.finrank ℝ E),
+      (chartModelBasis E).repr (F1 ((chartModelBasis E) i)) i
+        - (chartModelBasis E).repr (F2 ((chartModelBasis E) i)) i =
+      2 * (chartModelBasis E).repr
+        (ricciDiffLinearSummand (I := I) g₀ g₁ x v w i
+          - ricciDiffLinearSummand (I := I) g₀ g₂ x v w i) i := by
+    intro i
+    rw [hF1val ((chartModelBasis E) i), hF2val i]
+    rw [← Finsupp.sub_apply, ← map_sub]
+    rw [show ((2 : ℝ) • covDerivDiff (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁)
+            (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
+            (smoothExtensionTangent (I := I) x v) (smoothExtensionTangent (I := I) x w) x
+          - (2 : ℝ) • covDerivDiff (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₂)
+            (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
+            (smoothExtensionTangent (I := I) x v) (smoothExtensionTangent (I := I) x w) x)
+        - ((2 : ℝ) • covDerivDiff (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁)
+            (smoothExtensionTangent (I := I) x v)
+            (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
+            (smoothExtensionTangent (I := I) x w) x
+          - (2 : ℝ) • covDerivDiff (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₂)
+            (smoothExtensionTangent (I := I) x v)
+            (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
+            (smoothExtensionTangent (I := I) x w) x) =
+        (2 : ℝ) • (ricciDiffLinearSummand (I := I) g₀ g₁ x v w i
+          - ricciDiffLinearSummand (I := I) g₀ g₂ x v w i) from by
+      unfold ricciDiffLinearSummand
+      rw [smul_sub, smul_sub, smul_sub]
+      abel]
+    rw [map_smul, Finsupp.smul_apply, smul_eq_mul]
+  rw [Finset.sum_congr rfl (fun k _ => harm1 k), Finset.sum_congr rfl (fun k _ => harm2 k),
+    htrace1, htrace2, ← Finset.sum_sub_distrib]
+  rw [Finset.sum_congr rfl (fun i _ => hfinal i), ← Finset.mul_sum]
+  unfold ricciNeg2SectionDiffLinearEval
+  ring
+
+set_option linter.unusedSectionVars false in
+/-- **Reading a four-slot tuple through the cycle `(1 2 3)`.**  The `domDomCongr`-composed tuple of
+`(y₀, y₁, y₂, y₃)` along `c[1, 2, 3]` is `(y₀, y₂, y₃, y₁)`: the leading slot is fixed and slot `1`
+is sent to the trailing position — the first (gradient-against-output) trace pattern. -/
+private theorem consTuple_read_cycle123 (y₀ y₁ y₂ y₃ : E) :
+    (fun j => (Fin.cons y₀ (Fin.cons y₁ ![y₂, y₃]) : Fin 4 → E)
+        ((c[(1 : Fin 4), 2, 3] : Equiv.Perm (Fin 4)) j)) =
+      Fin.cons y₀ ![y₂, y₃, y₁] := by
+  funext j
+  fin_cases j <;> rfl
+
+set_option linter.unusedSectionVars false in
+/-- **Reading a four-slot tuple through the cycle `(0 2 3 1)`.**  The `domDomCongr`-composed tuple
+of `(y₀, y₁, y₂, y₃)` along `c[0, 2, 3, 1]` is `(y₂, y₀, y₃, y₁)` — the second
+(difference-direction-against-output) trace pattern. -/
+private theorem consTuple_read_cycle0231 (y₀ y₁ y₂ y₃ : E) :
+    (fun j => (Fin.cons y₀ (Fin.cons y₁ ![y₂, y₃]) : Fin 4 → E)
+        ((c[(0 : Fin 4), 2, 3, 1] : Equiv.Perm (Fin 4)) j)) =
+      Fin.cons y₂ ![y₀, y₃, y₁] := by
+  funext j
+  fin_cases j <;> rfl
 
 /-- **The linearized-Ricci principal-part value identity, the irreducible trace bridge.**  The
-linear-in-difference curvature section `linearSection g₀ g₁ g₂` is the `−2` intrinsic `g₀⁻¹` Ricci trace
-`ricciModelTrace42.op 0` of the **once-`∇₀`-differentiated** `g₀`-lowered connection-difference
-*difference* `∇₀ (2·loweredConnDiffSection g₁ g₀ − 2·loweredConnDiffSection g₂ g₀)`.
+linear-in-difference curvature section `linearSection g₀ g₁ g₂` is the `½`-scaled **antisymmetrised
+slot-permuted pair** of `−2` cometric double traces `ricciModelTrace42.op 0` of the
+**once-`∇₀`-differentiated** `g₀`-lowered connection-difference *difference*
+`Q := ∇₀ (2·loweredConnDiffSection g₁ g₀ − 2·loweredConnDiffSection g₂ g₀)`: the double trace of the
+`(x₀, x₂, x₃, x₁)`-reading of `Q` (gradient slot against output slot) minus the double trace of the
+`(x₂, x₀, x₃, x₁)`-reading (difference-direction slot against output slot).  The single-pattern
+`op 0 Q` alone is NOT `linearSection` (false on a flat conformal torus); the antisymmetrised
+two-pattern combination is the linearized-Ricci contracted-Bianchi pattern.
 
-**Decomposition.**  By unit-extensionality (`tensor0s_ext_unitZero`) it suffices to match the two fibre
-values at the unit `(0, 0)`-tensor and an arbitrary tangent pair `(v, w)`.  The left side's fibre value is
-the linear order-zero term `ricciNeg2SectionDiffLinearEval g₀ g₁ g₂ x v w` (`linearSection_toModel_apply`).
-The right side's fibre value is the base `g₀⁻¹` Ricci-trace double trace
-(`ricciModelTrace42Op_zero_unitModel_apply`, the `model_interior_product` double-trace evaluation):
-`−2 · ∑ᵢ toModel(∇₀(2·lowered₁ − 2·lowered₂))![♯eᵢ, ♯eᵢ, v, w]`.  The two coincide by the cometric
-raised-coframe ↔ model-basis-coordinate linear-order trace identity
-`cometricRaisedTrace_covGradLoweredSub_eq_ricciNeg2SectionDiffLinearEval` (over the lowered-Koszul
-diff-factor formula and the M1 inverse-metric sharp index-raise). -/
+**Decomposition.**  By unit-extensionality (`tensor0s_ext_unitZero`) it suffices to match the two
+fibre values at the unit `(0, 0)`-tensor and an arbitrary tangent pair.  The left side's fibre value
+is the linear order-zero term `ricciNeg2SectionDiffLinearEval` (`linearSection_toModel_apply`).  Each
+right-side arm is the `−2` cometric double trace of the slot-permuted operand
+(`ricciModelTrace42Op_zero_unitModel_apply`), whose unit model is the `domDomCongr`-reading of `Q`'s
+(`permuteCcTensor_unitModel`, `consTuple_read_cycle123`/`consTuple_read_cycle0231`); the
+antisymmetrised combination is the proven two-pattern trace identity
+`cometricRaisedTrace_covGradLoweredSub_eq_ricciNeg2SectionDiffLinearEval`. -/
 theorem linearSection_eq_ricciModelTrace42_loweredConnDiffSub
     (g₀ : SmoothRiemannianMetric I M) (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
     (g₁ g₂ : SmoothRiemannianMetric I M)
@@ -2401,10 +2737,17 @@ theorem linearSection_eq_ricciModelTrace42_loweredConnDiffSub
     (hr2 : ∀ (x : M) (v w : TangentSpace I x),
       g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) :
     linearSection (I := I) g₀ g₁ g₂ =
-      (ricciModelTrace42 (I := I) g₀).op 0
-        (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
-          ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀
-            - (2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₂ g₀)) := by
+      (2⁻¹ : ℝ) •
+        ((ricciModelTrace42 (I := I) g₀).op 0
+            (DeTurck.permuteCcTensor (I := I) g₀ c[(1 : Fin 4), 2, 3]
+              (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+                ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀
+                  - (2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₂ g₀)))
+          - (ricciModelTrace42 (I := I) g₀).op 0
+            (DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 4), 2, 3, 1]
+              (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+                ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀
+                  - (2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₂ g₀)))) := by
   classical
   apply Integral.L2.SmoothCcTensor.ext
   apply ContMDiffSection.ext
@@ -2414,6 +2757,7 @@ theorem linearSection_eq_ricciModelTrace42_loweredConnDiffSub
   apply Tensor0SBundle.Tensor0SSpace.toModel_injective
   apply ContinuousMultilinearMap.ext
   intro p
+  beta_reduce
   -- The unit `(0,0)`-tensor is the canonical `constOfIsEmpty 1`.
   have hunit : (Integral.Connection.unitZeroSec (I := I) (M := M) x :
         Tensor0SBundle.Tensor0SSpace 0 I x) =
@@ -2424,35 +2768,217 @@ theorem linearSection_eq_ricciModelTrace42_loweredConnDiffSub
     funext i; fin_cases i <;> rfl
   -- LHS = linear order-zero term `ricciNeg2SectionDiffLinearEval` (the fibre value of `linearSection`).
   rw [← hpair, linearSection_toModel_apply (I := I) g₀ g₁ g₂ x (p 0) (p 1)]
-  -- RHS = base `g₀⁻¹` trace double trace = the same linear order-zero term.
+  -- Abbreviate the once-differentiated rank-`4` operand.
+  set Q : Integral.L2.SmoothCcTensor g₀ 0 4 :=
+    Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+      ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀
+        - (2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₂ g₀) with hQ
+  -- The fibre value of the `½`-scaled difference section (the algebra is definitional).
+  have hsmulsub : Tensor0SBundle.Tensor0SSpace.toModel
+        ((((2⁻¹ : ℝ) •
+          ((ricciModelTrace42 (I := I) g₀).op 0
+              (DeTurck.permuteCcTensor (I := I) g₀ c[(1 : Fin 4), 2, 3] Q)
+            - (ricciModelTrace42 (I := I) g₀).op 0
+              (DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 4), 2, 3, 1] Q))).toSection x)
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) ![p 0, p 1] =
+      2⁻¹ * (Tensor0SBundle.Tensor0SSpace.toModel
+          (((ricciModelTrace42 (I := I) g₀).op 0
+              (DeTurck.permuteCcTensor (I := I) g₀ c[(1 : Fin 4), 2, 3] Q)).toSection x
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ
+              (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) ![p 0, p 1]
+        - Tensor0SBundle.Tensor0SSpace.toModel
+          (((ricciModelTrace42 (I := I) g₀).op 0
+              (DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 4), 2, 3, 1] Q)).toSection x
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ
+              (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) ![p 0, p 1]) := by
+    have h1 : (((2⁻¹ : ℝ) •
+          ((ricciModelTrace42 (I := I) g₀).op 0
+              (DeTurck.permuteCcTensor (I := I) g₀ c[(1 : Fin 4), 2, 3] Q)
+            - (ricciModelTrace42 (I := I) g₀).op 0
+              (DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 4), 2, 3, 1] Q))).toSection x) =
+        (2⁻¹ : ℝ) • (((ricciModelTrace42 (I := I) g₀).op 0
+              (DeTurck.permuteCcTensor (I := I) g₀ c[(1 : Fin 4), 2, 3] Q)).toSection x
+          - ((ricciModelTrace42 (I := I) g₀).op 0
+              (DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 4), 2, 3, 1] Q)).toSection x) := by
+      rw [Integral.L2.SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
+        Integral.L2.SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
+    rw [h1]
+    rfl
+  rw [hsmulsub]
+  -- Each arm: the `−2` cometric double trace of the slot-permuted operand.
   rw [show ((ricciModelTrace42 (I := I) g₀).op 0
-        (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
-          ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀
-            - (2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₂ g₀))) =
+        (DeTurck.permuteCcTensor (I := I) g₀ c[(1 : Fin 4), 2, 3] Q)) =
       ricciModelTrace42Op (I := I) g₀ 0
-        (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
-          ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀
-            - (2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₂ g₀)) from rfl,
+        (DeTurck.permuteCcTensor (I := I) g₀ c[(1 : Fin 4), 2, 3] Q) from rfl,
+    show ((ricciModelTrace42 (I := I) g₀).op 0
+        (DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 4), 2, 3, 1] Q)) =
+      ricciModelTrace42Op (I := I) g₀ 0
+        (DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 4), 2, 3, 1] Q) from rfl,
     ricciModelTrace42Op_zero_unitModel_apply (I := I) g₀
-      (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
-        ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀
-          - (2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₂ g₀)) x (p 0) (p 1),
-    cometricRaisedTrace_covGradLoweredSub_eq_ricciNeg2SectionDiffLinearEval
-      (I := I) g₀ T₁ T₂ g₁ g₂ hr1 hr2 x (p 0) (p 1)]
+      (DeTurck.permuteCcTensor (I := I) g₀ c[(1 : Fin 4), 2, 3] Q) x (p 0) (p 1),
+    ricciModelTrace42Op_zero_unitModel_apply (I := I) g₀
+      (DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 4), 2, 3, 1] Q) x (p 0) (p 1)]
+  -- Per index, the permuted unit model reads `Q`'s unit model on the two-pattern tuples.
+  have hP1 : Tensor0SBundle.Tensor0SSpace.toModel
+        ((DeTurck.permuteCcTensor (I := I) g₀ c[(1 : Fin 4), 2, 3] Q).toSection x
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) =
+      ContinuousMultilinearMap.domDomCongr c[(1 : Fin 4), 2, 3]
+        (Tensor0SBundle.Tensor0SSpace.toModel (Q.toSection x
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))) :=
+    DeTurck.permuteCcTensor_unitModel (I := I) g₀ c[(1 : Fin 4), 2, 3] Q x
+  have hP2 : Tensor0SBundle.Tensor0SSpace.toModel
+        ((DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 4), 2, 3, 1] Q).toSection x
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) =
+      ContinuousMultilinearMap.domDomCongr c[(0 : Fin 4), 2, 3, 1]
+        (Tensor0SBundle.Tensor0SSpace.toModel (Q.toSection x
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))) :=
+    DeTurck.permuteCcTensor_unitModel (I := I) g₀ c[(0 : Fin 4), 2, 3, 1] Q x
+  have harm1C : ∀ k : Fin (Module.finrank ℝ E),
+      Tensor0SBundle.Tensor0SSpace.toModel
+          ((DeTurck.permuteCcTensor (I := I) g₀ c[(1 : Fin 4), 2, 3] Q).toSection x
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ
+              (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+          (Fin.cons (cometricLmodel (I := I) g₀ x
+              (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                ((Module.finBasis ℝ E).cDualBasis k)))
+            (Fin.cons ((Module.finBasis ℝ E) k) ![(p 0 : E), (p 1 : E)])) =
+        Tensor0SBundle.Tensor0SSpace.toModel
+          (Q.toSection x
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ
+              (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+          (Fin.cons (cometricLmodel (I := I) g₀ x
+              (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                ((Module.finBasis ℝ E).cDualBasis k)))
+            ![(p 0 : E), (p 1 : E), ((Module.finBasis ℝ E) k : E)]) := by
+    intro k
+    rw [hP1, ContinuousMultilinearMap.domDomCongr_apply]
+    rw [consTuple_read_cycle123 (cometricLmodel (I := I) g₀ x
+        (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+          ((Module.finBasis ℝ E).cDualBasis k)))
+      ((Module.finBasis ℝ E) k) (p 0 : E) (p 1 : E)]
+  have harm2C : ∀ k : Fin (Module.finrank ℝ E),
+      Tensor0SBundle.Tensor0SSpace.toModel
+          ((DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 4), 2, 3, 1] Q).toSection x
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ
+              (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+          (Fin.cons (cometricLmodel (I := I) g₀ x
+              (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                ((Module.finBasis ℝ E).cDualBasis k)))
+            (Fin.cons ((Module.finBasis ℝ E) k) ![(p 0 : E), (p 1 : E)])) =
+        Tensor0SBundle.Tensor0SSpace.toModel
+          (Q.toSection x
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ
+              (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+          (Fin.cons (p 0 : E)
+            ![(cometricLmodel (I := I) g₀ x
+                (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                  ((Module.finBasis ℝ E).cDualBasis k)) : E),
+              (p 1 : E), ((Module.finBasis ℝ E) k : E)]) := by
+    intro k
+    rw [hP2, ContinuousMultilinearMap.domDomCongr_apply]
+    rw [consTuple_read_cycle0231 (cometricLmodel (I := I) g₀ x
+        (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+          ((Module.finBasis ℝ E).cDualBasis k)))
+      ((Module.finBasis ℝ E) k) (p 0 : E) (p 1 : E)]
+  rw [Finset.sum_congr rfl (fun k _ => harm1C k), Finset.sum_congr rfl (fun k _ => harm2C k)]
+  -- The antisymmetrised two-pattern trace identity closes the value match.
+  have hleaf := cometricRaisedTrace_covGradLoweredSub_eq_ricciNeg2SectionDiffLinearEval
+    (I := I) g₀ T₁ T₂ g₁ g₂ hr1 hr2 x (p 0) (p 1)
+  rw [hQ]
+  linarith [hleaf]
 
-/-- **The linearized-Ricci principal-part value identity for the model-basis Ricci trace.**  The
-linear-in-difference curvature section `linearSection g₀ g₁ g₂` is the trace of the
-**once-`∇₀`-differentiated** connection-difference Koszul **difference arm** `∇₀ koszulTripleDiff` minus
-the trace of the once-`∇₀`-differentiated **cross arm** `∇₀ crossCorrTripleDiff`.
+set_option linter.unusedSectionVars false in
+/-- **Slot permutation distributes over a section difference.**  `permuteCcTensor g₀ σ` is a
+fibrewise slot reindexing, hence additive: its unit model is the `domDomCongr σ` of the operand's
+(`permuteCcTensor_unitModel`), and `domDomCongr` is linear.  Local re-statement at the
+`SmoothCcTensor` level (no subtractivity lemma for `permuteCcTensor` is on disk). -/
+private theorem permuteCcTensor_sub (g₀ : SmoothRiemannianMetric I M) {s : ℕ}
+    (σ : Equiv.Perm (Fin s)) (A B : Integral.L2.SmoothCcTensor g₀ 0 s) :
+    DeTurck.permuteCcTensor (I := I) g₀ σ (A - B) =
+      DeTurck.permuteCcTensor (I := I) g₀ σ A - DeTurck.permuteCcTensor (I := I) g₀ σ B := by
+  classical
+  apply Integral.L2.SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply DifferentialGeometry.PDE.DeTurck.tensor0s_ext_unitZero (I := I) (M := M) (s := s)
+  apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro m
+  beta_reduce
+  have hL : Tensor0SBundle.Tensor0SSpace.toModel
+        ((DeTurck.permuteCcTensor (I := I) g₀ σ (A - B)).toSection x
+          (Integral.Connection.unitZeroSec (I := I) (M := M) x)) =
+      ContinuousMultilinearMap.domDomCongr σ
+        (Tensor0SBundle.Tensor0SSpace.toModel ((A - B).toSection x
+          (Integral.Connection.unitZeroSec (I := I) (M := M) x))) :=
+    DeTurck.permuteCcTensor_unitModel (I := I) g₀ σ (A - B) x
+  have hA : Tensor0SBundle.Tensor0SSpace.toModel
+        ((DeTurck.permuteCcTensor (I := I) g₀ σ A).toSection x
+          (Integral.Connection.unitZeroSec (I := I) (M := M) x)) =
+      ContinuousMultilinearMap.domDomCongr σ
+        (Tensor0SBundle.Tensor0SSpace.toModel (A.toSection x
+          (Integral.Connection.unitZeroSec (I := I) (M := M) x))) :=
+    DeTurck.permuteCcTensor_unitModel (I := I) g₀ σ A x
+  have hB : Tensor0SBundle.Tensor0SSpace.toModel
+        ((DeTurck.permuteCcTensor (I := I) g₀ σ B).toSection x
+          (Integral.Connection.unitZeroSec (I := I) (M := M) x)) =
+      ContinuousMultilinearMap.domDomCongr σ
+        (Tensor0SBundle.Tensor0SSpace.toModel (B.toSection x
+          (Integral.Connection.unitZeroSec (I := I) (M := M) x))) :=
+    DeTurck.permuteCcTensor_unitModel (I := I) g₀ σ B x
+  have hsubval : (A - B).toSection x = A.toSection x - B.toSection x := by
+    rw [Integral.L2.SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
+  have hsubval' : ((DeTurck.permuteCcTensor (I := I) g₀ σ A
+        - DeTurck.permuteCcTensor (I := I) g₀ σ B)).toSection x =
+      (DeTurck.permuteCcTensor (I := I) g₀ σ A).toSection x
+        - (DeTurck.permuteCcTensor (I := I) g₀ σ B).toSection x := by
+    rw [Integral.L2.SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
+  calc Tensor0SBundle.Tensor0SSpace.toModel
+        ((DeTurck.permuteCcTensor (I := I) g₀ σ (A - B)).toSection x
+          (Integral.Connection.unitZeroSec (I := I) (M := M) x)) m
+      = (ContinuousMultilinearMap.domDomCongr σ
+          (Tensor0SBundle.Tensor0SSpace.toModel ((A - B).toSection x
+            (Integral.Connection.unitZeroSec (I := I) (M := M) x)))) m := by rw [hL]
+    _ = (ContinuousMultilinearMap.domDomCongr σ
+            (Tensor0SBundle.Tensor0SSpace.toModel (A.toSection x
+              (Integral.Connection.unitZeroSec (I := I) (M := M) x)))) m
+          - (ContinuousMultilinearMap.domDomCongr σ
+            (Tensor0SBundle.Tensor0SSpace.toModel (B.toSection x
+              (Integral.Connection.unitZeroSec (I := I) (M := M) x)))) m := by
+        rw [hsubval]; rfl
+    _ = Tensor0SBundle.Tensor0SSpace.toModel
+          ((DeTurck.permuteCcTensor (I := I) g₀ σ A).toSection x
+            (Integral.Connection.unitZeroSec (I := I) (M := M) x)) m
+          - Tensor0SBundle.Tensor0SSpace.toModel
+          ((DeTurck.permuteCcTensor (I := I) g₀ σ B).toSection x
+            (Integral.Connection.unitZeroSec (I := I) (M := M) x)) m := by
+        rw [hA, hB]
+    _ = Tensor0SBundle.Tensor0SSpace.toModel
+          ((DeTurck.permuteCcTensor (I := I) g₀ σ A
+            - DeTurck.permuteCcTensor (I := I) g₀ σ B).toSection x
+            (Integral.Connection.unitZeroSec (I := I) (M := M) x)) m := by
+        rw [hsubval']; rfl
+
+/-- **The linearized-Ricci principal-part value identity for the antisymmetrised slot-permuted
+cometric-trace pair.**  The linear-in-difference curvature section `linearSection g₀ g₁ g₂` is the
+`½`-scaled antisymmetrised slot-permuted trace pair of the **once-`∇₀`-differentiated**
+connection-difference Koszul **difference arm** `∇₀ koszulTripleDiff` minus the same trace pair of
+the once-`∇₀`-differentiated **cross arm** `∇₀ crossCorrTripleDiff`.
 
 **Decomposition.**  By the **proven** child-A `loweredConnDiffSection_sub_eq_koszulRealizeDiff_sub_crossCorrDiff`,
 `koszulTripleDiff − crossCorrTripleDiff = 2·loweredConnDiffSection g₁ g₀ − 2·loweredConnDiffSection g₂ g₀`
 (the `koszulTripleDiff` shape `R + perm₁ R − perm₂ R` is the clean realized combination, and
-`crossCorrTripleDiff = 2·crossCorrectionSection g₁ − 2·crossCorrectionSection g₂` is the cross arm).  The
-two traces re-collect over the section difference by the fibrewise-`ℝ`-linearity `ricciModelTrace42_op_sub`
-and the covariant-gradient linearity `covGrad_sub_local`, reducing the goal to the irreducible value
-bridge `linearSection_eq_ricciModelTrace42_loweredConnDiffSub` (the trace of the once-differentiated
-lowered connection-difference difference equals `linearSection`). -/
+`crossCorrTripleDiff = 2·crossCorrectionSection g₁ − 2·crossCorrectionSection g₂` is the cross arm).
+The two trace pairs re-collect over the section difference by the fibrewise-`ℝ`-linearity
+`ricciModelTrace42_op_sub`, the slot-permutation additivity `permuteCcTensor_sub`, and the
+covariant-gradient linearity `covGrad_sub_local`, reducing the goal to the irreducible value bridge
+`linearSection_eq_ricciModelTrace42_loweredConnDiffSub` (the antisymmetrised trace pair of the
+once-differentiated lowered connection-difference difference equals `linearSection`). -/
 theorem linearSection_eq_ricciModelTrace42_koszulTriple_sub_crossCorrTriple
     (g₀ : SmoothRiemannianMetric I M) (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
     (g₁ g₂ : SmoothRiemannianMetric I M)
@@ -2461,21 +2987,30 @@ theorem linearSection_eq_ricciModelTrace42_koszulTriple_sub_crossCorrTriple
     (hr2 : ∀ (x : M) (v w : TangentSpace I x),
       g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) :
     linearSection (I := I) g₀ g₁ g₂ =
-      (ricciModelTrace42 (I := I) g₀).op 0
-          (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
-            (koszulTripleDiff (I := I) g₀ T₁ T₂))
-        - (ricciModelTrace42 (I := I) g₀).op 0
-          (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
-            (crossCorrTripleDiff (I := I) g₀ T₁ T₂ g₁ g₂)) := by
-  -- Re-collect the two traces over the section difference (fibrewise-`ℝ`-linearity of the trace and
-  -- linearity of `∇₀`), reducing to `op 0 (∇₀ (koszulTripleDiff − crossCorrTripleDiff))`.
-  rw [← ricciModelTrace42_op_sub (I := I) g₀ 0
-        (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
-          (koszulTripleDiff (I := I) g₀ T₁ T₂))
-        (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
-          (crossCorrTripleDiff (I := I) g₀ T₁ T₂ g₁ g₂)),
-    ← covGrad_sub_local (I := I) g₀ 3
-      (koszulTripleDiff (I := I) g₀ T₁ T₂) (crossCorrTripleDiff (I := I) g₀ T₁ T₂ g₁ g₂)]
+      (2⁻¹ : ℝ) •
+          ((ricciModelTrace42 (I := I) g₀).op 0
+              (DeTurck.permuteCcTensor (I := I) g₀ c[(1 : Fin 4), 2, 3]
+                (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+                  (koszulTripleDiff (I := I) g₀ T₁ T₂)))
+            - (ricciModelTrace42 (I := I) g₀).op 0
+              (DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 4), 2, 3, 1]
+                (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+                  (koszulTripleDiff (I := I) g₀ T₁ T₂))))
+        - (2⁻¹ : ℝ) •
+          ((ricciModelTrace42 (I := I) g₀).op 0
+              (DeTurck.permuteCcTensor (I := I) g₀ c[(1 : Fin 4), 2, 3]
+                (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+                  (crossCorrTripleDiff (I := I) g₀ T₁ T₂ g₁ g₂)))
+            - (ricciModelTrace42 (I := I) g₀).op 0
+              (DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 4), 2, 3, 1]
+                (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
+                  (crossCorrTripleDiff (I := I) g₀ T₁ T₂ g₁ g₂)))) := by
+  -- Re-collect the two trace pairs over the section difference (trace linearity, permutation
+  -- additivity, and `∇₀`-linearity), reducing to the trace pair of `∇₀ (koszul − cross)`.
+  rw [← smul_sub, sub_sub_sub_comm, ← ricciModelTrace42_op_sub, ← ricciModelTrace42_op_sub,
+    ← permuteCcTensor_sub, ← permuteCcTensor_sub]
+  rw [← covGrad_sub_local (I := I) g₀ 3
+    (koszulTripleDiff (I := I) g₀ T₁ T₂) (crossCorrTripleDiff (I := I) g₀ T₁ T₂ g₁ g₂)]
   -- Child-A: `koszulTripleDiff − crossCorrTripleDiff = 2·loweredConnDiff g₁ − 2·loweredConnDiff g₂`.
   have hchildA :=
     (DeTurck.loweredConnDiffSection_sub_eq_koszulRealizeDiff_sub_crossCorrDiff
@@ -2485,14 +3020,209 @@ theorem linearSection_eq_ricciModelTrace42_koszulTriple_sub_crossCorrTriple
   -- The irreducible value bridge.
   exact linearSection_eq_ricciModelTrace42_loweredConnDiffSub (I := I) g₀ T₁ T₂ g₁ g₂ hr1 hr2
 
-/-- **The linearized-Ricci principal-part section identity: `linearSection` as a parallel model-basis
-Ricci trace of the *once-covariantly-differentiated* connection-difference Koszul combination.**  There
-is a **parallel rank-reducing `(0, 4) → (0, 2)` contraction** `Φ` (the `−2` model-basis Ricci trace
-`g₀^{ij}·`, parallel because `∇₀ g₀⁻¹ = 0`, value-local because it reads only the fibre), **fibrewise
-`ℝ`-linear** (so it distributes over the section difference), with the linear-in-difference curvature
-section `linearSection g₀ g₁ g₂` equal to the trace of the **once-`∇₀`-differentiated**
-connection-difference Koszul **difference arm** minus the trace of the once-`∇₀`-differentiated **cross
-arm**:
+set_option linter.unusedSectionVars false in
+/-- **The covariant gradient commutes with the slot permutation, the new gradient slot fixed at the
+front.**  `∇₀ (permuteCcTensor σ R) = permuteCcTensor (decomposeFin.symm (0, σ)) (∇₀ R)`: the
+extended permutation fixes the new leading (gradient) slot and shifts `σ` onto the trailing slots.
+This is the section-level form of the directional-covariant-derivative slot-permutation naturality
+`tensorCovDerivAt_unit_toModel_domDomCongr_of_section` (a constant slot reindexing is a parallel
+fibre automorphism), read through the leading-slot covariant-gradient evaluation
+`covGrad_toSection_apply_eval` and the unit-model relation `permuteCcTensor_unitModel`. -/
+private theorem covGrad_permuteCcTensor (g₀ : SmoothRiemannianMetric I M) {s : ℕ}
+    (σ : Equiv.Perm (Fin s)) (R : Integral.L2.SmoothCcTensor g₀ 0 s) :
+    Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 s
+        (DeTurck.permuteCcTensor (I := I) g₀ σ R) =
+      DeTurck.permuteCcTensor (I := I) g₀ (Equiv.Perm.decomposeFin.symm (0, σ))
+        (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 s R) := by
+  classical
+  apply Integral.L2.SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply DifferentialGeometry.PDE.DeTurck.tensor0s_ext_unitZero (I := I) (M := M) (s := s + 1)
+  apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro m
+  beta_reduce
+  rw [Analysis.Parabolic.TensorSpectral.covGrad_toSection_apply_eval (I := I) (M := M) g₀ 0 s
+    (DeTurck.permuteCcTensor (I := I) g₀ σ R) x
+    (Integral.Connection.unitZeroSec (I := I) (M := M) x) m]
+  have hnat : Tensor0SBundle.Tensor0SSpace.toModel
+        ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace s I x from
+            Analysis.Parabolic.TensorSpectral.tensorCovDerivAt (I := I) (M := M) g₀ 0 s
+              (DeTurck.permuteCcTensor (I := I) g₀ σ R) x (m 0))
+          (Integral.Connection.unitZeroSec (I := I) (M := M) x)) =
+      ContinuousMultilinearMap.domDomCongr σ
+        (Tensor0SBundle.Tensor0SSpace.toModel
+          ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace s I x from
+              Analysis.Parabolic.TensorSpectral.tensorCovDerivAt (I := I) (M := M) g₀ 0 s R x (m 0))
+            (Integral.Connection.unitZeroSec (I := I) (M := M) x))) :=
+    Analysis.Parabolic.TensorSpectral.tensorCovDerivAt_unit_toModel_domDomCongr_of_section
+      (I := I) (M := M) g₀ s σ R (DeTurck.permuteCcTensor (I := I) g₀ σ R)
+      (fun y => DeTurck.permuteCcTensor_unitModel (I := I) g₀ σ R y) x (m 0)
+  rw [hnat, ContinuousMultilinearMap.domDomCongr_apply]
+  have hR : Tensor0SBundle.Tensor0SSpace.toModel
+        ((DeTurck.permuteCcTensor (I := I) g₀ (Equiv.Perm.decomposeFin.symm (0, σ))
+            (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 s R)).toSection x
+          (Integral.Connection.unitZeroSec (I := I) (M := M) x)) =
+      ContinuousMultilinearMap.domDomCongr (Equiv.Perm.decomposeFin.symm (0, σ))
+        (Tensor0SBundle.Tensor0SSpace.toModel
+          ((Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 s R).toSection x
+            (Integral.Connection.unitZeroSec (I := I) (M := M) x))) :=
+    DeTurck.permuteCcTensor_unitModel (I := I) g₀ (Equiv.Perm.decomposeFin.symm (0, σ))
+      (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 s R) x
+  rw [hR, ContinuousMultilinearMap.domDomCongr_apply]
+  rw [Analysis.Parabolic.TensorSpectral.covGrad_toSection_apply_eval (I := I) (M := M) g₀ 0 s
+    R x (Integral.Connection.unitZeroSec (I := I) (M := M) x)
+    (fun k => m ((Equiv.Perm.decomposeFin.symm (0, σ)) k))]
+  rw [Equiv.Perm.decomposeFin_symm_apply_zero]
+  have htail : Matrix.vecTail (fun k : Fin (s + 1) =>
+        m ((Equiv.Perm.decomposeFin.symm (0, σ)) k)) =
+      fun j : Fin s => Matrix.vecTail m (σ j) := by
+    funext j
+    show m ((Equiv.Perm.decomposeFin.symm (0, σ)) (Fin.succ j)) = m (Fin.succ (σ j))
+    rw [Equiv.Perm.decomposeFin_symm_apply_succ, Equiv.swap_self, Equiv.refl_apply]
+  rw [htail]
+
+/-- **The `a`-shifted slot permutation**: fix the `a` accumulated leading gradient-passenger slots
+and act by `σ` on the trailing four, built recursively by extending with the identity on each new
+leading slot — exactly the extension produced by one covariant gradient
+(`covGrad_permuteCcTensor`). -/
+private def shiftPerm (σ : Equiv.Perm (Fin 4)) : (a : ℕ) → Equiv.Perm (Fin (4 + a))
+  | 0 => σ
+  | a + 1 => Equiv.Perm.decomposeFin.symm (0, shiftPerm σ a)
+
+set_option linter.unusedSectionVars false in
+/-- The rank-cast `castRankCc_db` is subtractive.  Local re-statement (`castRankCc_db_add` lives in
+the curvature tower, not imported here). -/
+private theorem castRankCc_db_sub_local (g₀ : SmoothRiemannianMetric I M) {a b : ℕ} (h : a = b)
+    (W₁ W₂ : Integral.L2.SmoothCcTensor g₀ 0 a) :
+    Integral.Connection.castRankCc_db g₀ 0 h (W₁ - W₂) =
+      Integral.Connection.castRankCc_db g₀ 0 h W₁
+        - Integral.Connection.castRankCc_db g₀ 0 h W₂ := by
+  subst h; rfl
+
+set_option linter.unusedSectionVars false in
+/-- The rank-cast `castRankCc_db` is `ℝ`-homogeneous.  Local re-statement. -/
+private theorem castRankCc_db_smul_local (g₀ : SmoothRiemannianMetric I M) {a b : ℕ} (h : a = b)
+    (c : ℝ) (W : Integral.L2.SmoothCcTensor g₀ 0 a) :
+    Integral.Connection.castRankCc_db g₀ 0 h (c • W) =
+      c • Integral.Connection.castRankCc_db g₀ 0 h W := by
+  subst h; rfl
+
+set_option linter.unusedSectionVars false in
+/-- The intrinsic squared fibre norm is `c²`-homogeneous, via the pointwise-inner bridge
+`riemannianFiberNormSq_eq_tensorInnerPointwise` and the bilinearity of `tensorInnerPointwise`. -/
+private theorem riemannianFiberNormSq_smul_local (g₀ : SmoothRiemannianMetric I M) (n : ℕ) (x : M)
+    (c : ℝ) (T : Tensor0SBundle.TensorRSSpace 0 n I x) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 n x (c • T) =
+      c ^ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 n x T := by
+  rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g₀ 0 n x (c • T),
+    riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g₀ 0 n x T,
+    Tensor0SBundle.TensorRSSpace.toModel_smul,
+    tensorInnerPointwise_smul_left, tensorInnerPointwise_smul_right]
+  ring
+
+/-- **The antisymmetrised slot-permuted cometric-trace pair as a parallel rank-reducing
+contraction.**  At gradient-shift `a` the operator is
+`op a R := ½·(ricciModelTrace42Op a (perm σ₁ᵃ R) − ricciModelTrace42Op a (perm σ₂ᵃ R))`, with
+`σ₁ᵃ, σ₂ᵃ` the `a`-shifted readings `(x₀, x₂, x₃, x₁)` and `(x₂, x₀, x₃, x₁)` of the trailing four
+slots (`shiftPerm`).  This is the genuine linearized-Ricci trace pattern (the contracted-Bianchi
+antisymmetrisation), realised on top of the parallel cometric double trace:
+
+* the exact parallel covariant Leibniz holds because each constituent commutes with `∇₀` — the
+  double trace by the cometric parallelism (`ricciModelTrace42Op_covGrad`) and the slot permutation
+  by the constant-reindexing naturality (`covGrad_permuteCcTensor`, which advances `shiftPerm` by
+  one, fixing the new gradient slot);
+* the single-value fibre envelope holds with the *same* uniform constant `κ₀` as the plain double
+  trace: the slot permutations preserve the intrinsic fibre norm
+  (`riemannianFiberNormSq_iteratedCovGrad_permuteCcTensor` at order `0`), and the `½`-scaled
+  difference is controlled by `2`-subadditivity (`riemannianFiberNormSq_sub_le`) and the
+  `c²`-homogeneity (`riemannianFiberNormSq_smul_local`). -/
+private noncomputable def ricciAntisymTrace42 (g₀ : SmoothRiemannianMetric I M) :
+    Integral.Connection.ParallelRankReducingContraction (I := I) (M := M) g₀ 4 2 where
+  op := fun a R =>
+    (2⁻¹ : ℝ) •
+      (ricciModelTrace42Op (I := I) g₀ a
+          (DeTurck.permuteCcTensor (I := I) g₀ (shiftPerm c[(1 : Fin 4), 2, 3] a) R)
+        - ricciModelTrace42Op (I := I) g₀ a
+          (DeTurck.permuteCcTensor (I := I) g₀ (shiftPerm c[(0 : Fin 4), 2, 3, 1] a) R))
+  covGrad_op := by
+    intro a R
+    rw [Analysis.Parabolic.TensorSpectral.covGrad_smul (I := I) (M := M) g₀ 0 (2 + a)]
+    rw [covGrad_sub_local (I := I) g₀ (2 + a)
+      (ricciModelTrace42Op (I := I) g₀ a
+        (DeTurck.permuteCcTensor (I := I) g₀ (shiftPerm c[(1 : Fin 4), 2, 3] a) R))
+      (ricciModelTrace42Op (I := I) g₀ a
+        (DeTurck.permuteCcTensor (I := I) g₀ (shiftPerm c[(0 : Fin 4), 2, 3, 1] a) R))]
+    rw [ricciModelTrace42Op_covGrad (I := I) g₀ a
+        (DeTurck.permuteCcTensor (I := I) g₀ (shiftPerm c[(1 : Fin 4), 2, 3] a) R),
+      ricciModelTrace42Op_covGrad (I := I) g₀ a
+        (DeTurck.permuteCcTensor (I := I) g₀ (shiftPerm c[(0 : Fin 4), 2, 3, 1] a) R)]
+    rw [covGrad_permuteCcTensor (I := I) g₀ (shiftPerm c[(1 : Fin 4), 2, 3] a) R,
+      covGrad_permuteCcTensor (I := I) g₀ (shiftPerm c[(0 : Fin 4), 2, 3, 1] a) R]
+    rw [← castRankCc_db_sub_local (I := I) g₀ (by omega : 2 + (a + 1) = (2 + a) + 1),
+      ← castRankCc_db_smul_local (I := I) g₀ (by omega : 2 + (a + 1) = (2 + a) + 1)]
+    rfl
+  kappa := (exists_uniform_ricciModelTrace42Op_rfns_le (I := I) g₀).choose
+  kappa_nonneg := (exists_uniform_ricciModelTrace42Op_rfns_le (I := I) g₀).choose_spec.1
+  rfns_op_le := by
+    intro a R x
+    have hval : (((2⁻¹ : ℝ) •
+          (ricciModelTrace42Op (I := I) g₀ a
+              (DeTurck.permuteCcTensor (I := I) g₀ (shiftPerm c[(1 : Fin 4), 2, 3] a) R)
+            - ricciModelTrace42Op (I := I) g₀ a
+              (DeTurck.permuteCcTensor (I := I) g₀
+                (shiftPerm c[(0 : Fin 4), 2, 3, 1] a) R))).toSection x) =
+        (2⁻¹ : ℝ) • ((ricciModelTrace42Op (I := I) g₀ a
+            (DeTurck.permuteCcTensor (I := I) g₀ (shiftPerm c[(1 : Fin 4), 2, 3] a) R)).toSection x
+          - (ricciModelTrace42Op (I := I) g₀ a
+            (DeTurck.permuteCcTensor (I := I) g₀
+              (shiftPerm c[(0 : Fin 4), 2, 3, 1] a) R)).toSection x) := by
+      rw [Integral.L2.SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
+        Integral.L2.SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
+    rw [hval]
+    rw [riemannianFiberNormSq_smul_local (I := I) g₀ (2 + a) x 2⁻¹ _]
+    have hsub := riemannianFiberNormSq_sub_le (I := I) (M := M) g₀ 0 (2 + a) x
+      ((ricciModelTrace42Op (I := I) g₀ a
+        (DeTurck.permuteCcTensor (I := I) g₀ (shiftPerm c[(1 : Fin 4), 2, 3] a) R)).toSection x)
+      ((ricciModelTrace42Op (I := I) g₀ a
+        (DeTurck.permuteCcTensor (I := I) g₀
+          (shiftPerm c[(0 : Fin 4), 2, 3, 1] a) R)).toSection x)
+    have henv := (exists_uniform_ricciModelTrace42Op_rfns_le (I := I) g₀).choose_spec.2
+    have h1 := henv a (DeTurck.permuteCcTensor (I := I) g₀ (shiftPerm c[(1 : Fin 4), 2, 3] a) R) x
+    have h2 := henv a (DeTurck.permuteCcTensor (I := I) g₀
+      (shiftPerm c[(0 : Fin 4), 2, 3, 1] a) R) x
+    have hp1 : Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + a) x
+        ((DeTurck.permuteCcTensor (I := I) g₀
+          (shiftPerm c[(1 : Fin 4), 2, 3] a) R).toSection x) =
+        Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + a) x
+          (R.toSection x) := by
+      have h := DeTurck.riemannianFiberNormSq_iteratedCovGrad_permuteCcTensor (I := I) g₀
+        (shiftPerm c[(1 : Fin 4), 2, 3] a) R 0 x
+      rwa [PDE.RicciFlow.iteratedCovGrad_zero, PDE.RicciFlow.iteratedCovGrad_zero] at h
+    have hp2 : Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + a) x
+        ((DeTurck.permuteCcTensor (I := I) g₀
+          (shiftPerm c[(0 : Fin 4), 2, 3, 1] a) R).toSection x) =
+        Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + a) x
+          (R.toSection x) := by
+      have h := DeTurck.riemannianFiberNormSq_iteratedCovGrad_permuteCcTensor (I := I) g₀
+        (shiftPerm c[(0 : Fin 4), 2, 3, 1] a) R 0 x
+      rwa [PDE.RicciFlow.iteratedCovGrad_zero, PDE.RicciFlow.iteratedCovGrad_zero] at h
+    have hκ0 := (exists_uniform_ricciModelTrace42Op_rfns_le (I := I) g₀).choose_spec.1
+    nlinarith [h1, h2, hsub, hp1, hp2,
+      Integral.Connection.riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (4 + a) x
+        (R.toSection x)]
+
+/-- **The linearized-Ricci principal-part section identity: `linearSection` as a parallel
+antisymmetrised slot-permuted cometric-trace pair of the *once-covariantly-differentiated*
+connection-difference Koszul combination.**  There is a **parallel rank-reducing
+`(0, 4) → (0, 2)` contraction** `Φ` (the `½`-scaled antisymmetrised pair of slot-permuted `−2`
+cometric double traces `ricciAntisymTrace42` — parallel because `∇₀ g₀⁻¹ = 0` and a constant slot
+reindexing is parallel, value-local because it reads only the fibre), **fibrewise `ℝ`-linear** (so
+it distributes over the section difference), with the linear-in-difference curvature section
+`linearSection g₀ g₁ g₂` equal to the trace of the **once-`∇₀`-differentiated**
+connection-difference Koszul **difference arm** minus the trace of the once-`∇₀`-differentiated
+**cross arm**:
 ```
 linearSection g₀ g₁ g₂ = Φ.op 0 (∇₀ koszulTripleDiff) − Φ.op 0 (∇₀ crossCorrTripleDiff),
 ```
@@ -2500,16 +3230,16 @@ where `∇₀ · = covGrad g₀ 0 3 ·`.  Carrying the trace on the **once-diffe
 `∇₀ koszulTripleDiff` supplies the missing derivative (`∇^{j+1} R = ∇^{j+2} w`) that the refuted
 value-local `(0, 3) → (0, 2)` form was one short of.
 
-**Decomposition.**  Assembled from the model-basis Ricci-trace instance `ricciModelTrace42` (witness),
-its linearity `ricciModelTrace42_op_sub`, and the value identity
-`linearSection_eq_ricciModelTrace42_koszulTriple_sub_crossCorrTriple` (the lift of the once-differentiated
-pointwise lowered-Koszul form to the section trace, over the proven child-A
-`loweredConnDiffSection_sub_eq_koszulRealizeDiff_sub_crossCorrDiff`).
+**Decomposition.**  Assembled from the antisymmetrised permuted-trace instance
+`ricciAntisymTrace42` (witness), its linearity (`ricciModelTrace42Op_sub` + `permuteCcTensor_sub`),
+and the value identity `linearSection_eq_ricciModelTrace42_koszulTriple_sub_crossCorrTriple` (the
+lift of the once-differentiated pointwise lowered-Koszul form to the section trace, over the proven
+child-A `loweredConnDiffSection_sub_eq_koszulRealizeDiff_sub_crossCorrDiff`).
 
-**Non-vacuity.**  `Φ` is a *genuine* parallel contraction (its `kappa` envelope rejects the degenerate
-zero witness whenever `op a R ≠ 0`), and the right-hand side genuinely carries the once-differentiated
-rank-`4` jet `∇₀ koszulTripleDiff`; `linearSection` genuinely vanishes only at `g₁ = g₂`
-(`linearSection_self_toModel`). -/
+**Non-vacuity.**  `Φ` is a *genuine* parallel contraction (its `kappa` envelope rejects the
+degenerate zero witness whenever `op a R ≠ 0`), and the right-hand side genuinely carries the
+once-differentiated rank-`4` jet `∇₀ koszulTripleDiff`; `linearSection` genuinely vanishes only at
+`g₁ = g₂` (`linearSection_self_toModel`). -/
 theorem exists_parallelTrace_linearSection_eq_koszulTriple_sub_crossCorrTriple
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ Φ : Integral.Connection.ParallelRankReducingContraction (I := I) (M := M) g₀ 4 2,
@@ -2525,16 +3255,46 @@ theorem exists_parallelTrace_linearSection_eq_koszulTriple_sub_crossCorrTriple
             Φ.op 0 (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
                 (koszulTripleDiff (I := I) g₀ T₁ T₂))
               - Φ.op 0 (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 3
-                (crossCorrTripleDiff (I := I) g₀ T₁ T₂ g₁ g₂)) :=
-  ⟨ricciModelTrace42 (I := I) g₀,
-    fun a A B => ricciModelTrace42_op_sub (I := I) g₀ a A B,
-    fun T₁ T₂ g₁ g₂ hr1 hr2 =>
-      linearSection_eq_ricciModelTrace42_koszulTriple_sub_crossCorrTriple (I := I) g₀ T₁ T₂ g₁ g₂
-        hr1 hr2⟩
+                (crossCorrTripleDiff (I := I) g₀ T₁ T₂ g₁ g₂)) := by
+  refine ⟨ricciAntisymTrace42 (I := I) g₀, fun a A B => ?_, fun T₁ T₂ g₁ g₂ hr1 hr2 => ?_⟩
+  · -- Fibrewise `ℝ`-linearity: permutation additivity, trace additivity, and module algebra.
+    show (2⁻¹ : ℝ) •
+        (ricciModelTrace42Op (I := I) g₀ a
+            (DeTurck.permuteCcTensor (I := I) g₀ (shiftPerm c[(1 : Fin 4), 2, 3] a) (A - B))
+          - ricciModelTrace42Op (I := I) g₀ a
+            (DeTurck.permuteCcTensor (I := I) g₀
+              (shiftPerm c[(0 : Fin 4), 2, 3, 1] a) (A - B))) = _
+    rw [permuteCcTensor_sub (I := I) g₀ (shiftPerm c[(1 : Fin 4), 2, 3] a) A B,
+      permuteCcTensor_sub (I := I) g₀ (shiftPerm c[(0 : Fin 4), 2, 3, 1] a) A B,
+      ricciModelTrace42Op_sub (I := I) g₀ a, ricciModelTrace42Op_sub (I := I) g₀ a]
+    rw [show ((2⁻¹ : ℝ) •
+        ((ricciModelTrace42Op (I := I) g₀ a
+              (DeTurck.permuteCcTensor (I := I) g₀ (shiftPerm c[(1 : Fin 4), 2, 3] a) A)
+            - ricciModelTrace42Op (I := I) g₀ a
+              (DeTurck.permuteCcTensor (I := I) g₀ (shiftPerm c[(1 : Fin 4), 2, 3] a) B))
+          - (ricciModelTrace42Op (I := I) g₀ a
+              (DeTurck.permuteCcTensor (I := I) g₀ (shiftPerm c[(0 : Fin 4), 2, 3, 1] a) A)
+            - ricciModelTrace42Op (I := I) g₀ a
+              (DeTurck.permuteCcTensor (I := I) g₀ (shiftPerm c[(0 : Fin 4), 2, 3, 1] a) B)))) =
+      (2⁻¹ : ℝ) •
+        ((ricciModelTrace42Op (I := I) g₀ a
+              (DeTurck.permuteCcTensor (I := I) g₀ (shiftPerm c[(1 : Fin 4), 2, 3] a) A)
+            - ricciModelTrace42Op (I := I) g₀ a
+              (DeTurck.permuteCcTensor (I := I) g₀ (shiftPerm c[(0 : Fin 4), 2, 3, 1] a) A))
+          - (ricciModelTrace42Op (I := I) g₀ a
+              (DeTurck.permuteCcTensor (I := I) g₀ (shiftPerm c[(1 : Fin 4), 2, 3] a) B)
+            - ricciModelTrace42Op (I := I) g₀ a
+              (DeTurck.permuteCcTensor (I := I) g₀
+                (shiftPerm c[(0 : Fin 4), 2, 3, 1] a) B))) from by
+      rw [sub_sub_sub_comm]]
+    rw [smul_sub]
+    rfl
+  · exact linearSection_eq_ricciModelTrace42_koszulTriple_sub_crossCorrTriple (I := I) g₀
+      T₁ T₂ g₁ g₂ hr1 hr2
 
 /-- **(POSIT — the connection-level top/rest split of the traced once-differentiated cross-correction
-difference.)**  For any parallel rank-reducing `(0, 4) → (0, 2)` contraction `Φ` (the model-basis Ricci
-trace), the order-`j` covariant gradient of the traced once-`∇₀`-differentiated cross-correction
+difference.)**  For any parallel rank-reducing `(0, 4) → (0, 2)` contraction `Φ` (e.g. the antisymmetrised
+slot-permuted cometric-trace pair), the order-`j` covariant gradient of the traced once-`∇₀`-differentiated cross-correction
 difference `Φ.op 0 (∇₀ crossCorrTripleDiff)` (`∇₀ · = covGrad g₀ 0 3 ·`) splits, at each point `x`, into
 a **connection-level difference part** `Top` and a **fixed-pair cross part** `Rest`:
 ```
@@ -2598,8 +3358,8 @@ theorem crossCorrectionDiff_iteratedCovGrad_connLevel_split
   sorry
 
 /-- **(POSIT-DERIVED — the post-trace connection-level cross-correction-difference covariant-jet bound,
-`(1/8)`-cross arm.)**  For any parallel rank-reducing `(0, 4) → (0, 2)` contraction `Φ` (the model-basis
-Ricci trace), the intrinsic squared fibre norm of the order-`j` covariant gradient of the **traced
+`(1/8)`-cross arm.)**  For any parallel rank-reducing `(0, 4) → (0, 2)` contraction `Φ` (e.g. the antisymmetrised
+slot-permuted cometric-trace pair), the intrinsic squared fibre norm of the order-`j` covariant gradient of the **traced
 once-`∇₀`-differentiated** cross-correction difference `Φ.op 0 (∇₀ crossCorrTripleDiff)` is dominated by
 the **connection-level** Hamilton/Moser two-arm sum: a difference arm carried by the order-`≤ j+1`
 covariant jets of the once-differentiated realized difference factor
@@ -2703,8 +3463,8 @@ the antisymmetrised `∇₀`-of-connection-difference summand difference
 covariant-derivative combination `covDerivRealizeEval g₀ (T₁ − T₂)` — the three slot readings of
 `R = ∇₀ w` (the difference arm) — **minus** the nonlinear fixed-pair cross correction
 `2(h₁ ⌟ connDiff g₁ g₀ − h₂ ⌟ connDiff g₂ g₀)` (`h_k = ccTensorBilinSymm g₀ T_k`), which does **not**
-cancel pointwise and rides on the **fixed pair** `T₁, T₂` (the cross arm).  The model-basis Ricci trace
-is a parallel rank-reducing `(0,3) → (0,2)` contraction (`ParallelRankReducingContraction`), and the
+cancel pointwise and rides on the **fixed pair** `T₁, T₂` (the cross arm).  The antisymmetrised slot-permuted cometric-trace pair
+is a parallel rank-reducing `(0,4) → (0,2)` contraction (`ParallelRankReducingContraction`), and the
 order-`j` jet of the trace folds the metric-built `≤ 2`-jet trace coefficient into `Cd` over the window
 `j + 1` (one extra `∇₀` from the `∇₀ D` linear summand shifts the rank-`3` window to `j + 1`).
 
@@ -2713,8 +3473,7 @@ derivative `∇^{j+1} R` (a zero `Cd` falsifies it whenever the linear part is g
 `linearSection_self_toModel` shows it vanishes only when `g₁ = g₂`), and the cross arm carries **both**
 fixed-pair endpoints `T₁, T₂`.  At `g₁ = g₂` (so `T₁ = T₂` realized) the linear section vanishes and the
 bound is `0 ≤ 0`.  NO value-bounded `Φ.op 0 2 w` shape, NO pointwise-`C^{>2}`-jet claim, NO
-spectral-nonlinearity, NO Weyl dependence.  Its body is `sorry`: the genuine deep curvature-trace
-covariant-Leibniz reduction to the connection level. -/
+spectral-nonlinearity, NO Weyl dependence. -/
 theorem ricciLinearSection_covGrad_traceReductionConn_rfns_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (j : ℕ) :
@@ -3106,8 +3865,7 @@ derivative `∇^{j+1} R` (a zero `Cd` falsifies it whenever the Cross part is ge
 `crossSection_self_toModel` shows it vanishes only when `g₁ = g₂`), and the cross arm carries **both**
 fixed-pair endpoints `T₁, T₂`.  At `g₁ = g₂` (so `T₁ = T₂` realized) the Cross section vanishes and the
 bound is `0 ≤ 0`.  NO value-bounded `Φ.op 0 2 w` shape, NO pointwise-`C^{>2}`-jet claim, NO
-spectral-nonlinearity, NO Weyl dependence.  Its body is `sorry`: the genuine deep curvature-trace
-covariant-Leibniz reduction of the quadratic Cross to the connection level. -/
+spectral-nonlinearity, NO Weyl dependence. -/
 theorem ricciCrossSection_covGrad_traceReductionConn_rfns_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (j : ℕ) :
