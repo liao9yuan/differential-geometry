@@ -225,6 +225,87 @@ theorem appFullRSFib_add_left (g : SmoothRiemannianMetric I M) (r a c : ℕ)
         appFullRSFib (I := I) (M := M) g r a c Ψ₂ W x := by
   rw [appFullRSFib, appFullRSFib, appFullRSFib, ContinuousLinearMap.add_apply]
 
+/-! ## The full-Hom slot extension `slotExtendFull` and the section-level covariant product rule
+
+The covariant derivative of the full Hom-bundle action `appFullRS Ψ W` is, at a point, the directional
+two-sided Leibniz `∇_v(Ψ·W) = (∇^Hom_v Ψ)(W x) + Ψ x (∇_v W)` (`tensorCovDerivAt_appFullRS_eq`).
+Packaged at the *section* level it reads
+```
+∇(Ψ·W) = (∇^Hom Ψ)·W (slot-extended on the new gradient slot) + (slotExtendFull Ψ)·(∇W),
+```
+the exact full-fibre analogue of the codomain-only `covGrad_appCcRS_eq`.  Both terms read off the new
+leading covariant gradient slot first; the spectator term `Ψ x (∇_v W)`, uncurried over the gradient
+direction `v`, is the action of the **slot-extended** operator `slotExtendFull Ψ` on the gradient
+`∇W` (an `(r, a + 1)`-tensor).  The slot extension `slotExtendFull` inserts one leading covariant slot
+into a full-fibre operator `T^{(r,a)} →L T^{(r,c)}` through the slot-`0` curry equivalence
+`covGradBundleEquiv` — the full-fibre analogue of the codomain-only `slotExtend` (which uses
+`tensor0S_curry`). -/
+
+set_option linter.unusedVariables false in
+set_option backward.isDefEq.respectTransparency false in
+/-- **The full-fibre slot extension of a fibrewise operator.** For a fibrewise full-fibre operator
+`A : TensorRSSpace r a I x →L TensorRSSpace r c I x`, the slot-extended operator
+`slotExtendFull A : TensorRSSpace r (a + 1) I x →L TensorRSSpace r (c + 1) I x` reads the new leading
+covariant slot of its `(r, a + 1)`-tensor argument `D` off through `(covGradBundleEquiv r a x).symm`
+(turning `D` into a per-direction `(r, a)`-tensor `TM →L T^{(r,a)}`), post-composes the per-direction
+value with `A`, and re-inserts the slot through `covGradBundleEquiv r c x`.  The full-fibre analogue of
+the codomain-only `slotExtendFib` (which uses `tensor0S_curry`).  Built through
+`LinearMap.toContinuousLinearMap` in the primary (operator-norm) fibre topology, where the
+finite-dimensional Hausdorff witnesses are read off the underlying continuous-linear-map fibre type. -/
+noncomputable def slotExtendFullFib (g : SmoothRiemannianMetric I M) (r a c : ℕ) (x : M)
+    (A : TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) :
+    TensorRSSpace r (a + 1) I x →L[ℝ] TensorRSSpace r (c + 1) I x :=
+  haveI : FiniteDimensional ℝ (TensorRSSpace r (a + 1) I x) :=
+    inferInstanceAs (FiniteDimensional ℝ (Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (a + 1) I x))
+  haveI : T2Space (TensorRSSpace r (a + 1) I x) :=
+    inferInstanceAs (T2Space (Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (a + 1) I x))
+  LinearMap.toContinuousLinearMap
+    { toFun := fun D =>
+        covGradBundleEquiv (I := I) (M := M) r c x
+          (A.comp ((covGradBundleEquiv (I := I) (M := M) r a x).symm D))
+      map_add' := fun D₁ D₂ => by
+        rw [map_add (covGradBundleEquiv (I := I) (M := M) r a x).symm,
+          ContinuousLinearMap.comp_add, map_add (covGradBundleEquiv (I := I) (M := M) r c x)]
+      map_smul' := fun k D => by
+        rw [map_smul (covGradBundleEquiv (I := I) (M := M) r a x).symm,
+          ContinuousLinearMap.comp_smul, map_smul (covGradBundleEquiv (I := I) (M := M) r c x)]
+        rfl }
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- The defining formula for `slotExtendFullFib`: the slot-`0` re-insertion of left-composition by `A`
+of the slot-`0` removal of its argument.  True definitionally (`LinearMap.toContinuousLinearMap` is the
+identity on the underlying function). -/
+@[simp] lemma slotExtendFullFib_apply (g : SmoothRiemannianMetric I M) (r a c : ℕ) (x : M)
+    (A : TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) (D : TensorRSSpace r (a + 1) I x) :
+    slotExtendFullFib (I := I) (M := M) g r a c x A D =
+      covGradBundleEquiv (I := I) (M := M) r c x
+        (A.comp ((covGradBundleEquiv (I := I) (M := M) r a x).symm D)) :=
+  rfl
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- **The slot-extended full-fibre operator reads the new slot first.** On a tuple `Fin.cons v0 vs`
+(of tangent vectors) against a lower-input `(0, r)`-tensor `D`, the slot-extended operator reads the
+passenger direction `v0` off the leading covariant slot (of both source and target) and applies `A` to
+the per-direction `(r, a)`-tensor `(covGradBundleEquiv r a x).symm D v0`, evaluating at `vs`. -/
+lemma slotExtendFullFib_apply_eval (g : SmoothRiemannianMetric I M) (r a c : ℕ) (x : M)
+    (A : TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) (D : TensorRSSpace r (a + 1) I x)
+    (Dlow : Tensor0SSpace r I x) (v0 : TangentSpace I x) (vs : Fin c → TangentSpace I x) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (c + 1) I x from
+          slotExtendFullFib (I := I) (M := M) g r a c x A D) Dlow) (Fin.cons v0 vs) =
+      Tensor0SSpace.toModel
+        ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace c I x from
+          A ((covGradBundleEquiv (I := I) (M := M) r a x).symm D v0)) Dlow) vs := by
+  rw [slotExtendFullFib_apply (I := I) (M := M) g r a c x A D]
+  rw [covGradBundleEquiv_apply_eval (I := I) (M := M) r c x
+    (A.comp ((covGradBundleEquiv (I := I) (M := M) r a x).symm D)) Dlow (Fin.cons v0 vs)]
+  have htail : Matrix.vecTail (Fin.cons v0 vs : Fin (c + 1) → TangentSpace I x) = vs := by
+    funext j; simp [Matrix.vecTail, Fin.cons_succ]
+  have hhead : (Fin.cons v0 vs : Fin (c + 1) → TangentSpace I x) 0 = v0 := by simp [Fin.cons_zero]
+  rw [htail, hhead, ContinuousLinearMap.comp_apply]
+
 /-! ## The per-point fibrewise Cauchy–Schwarz for the full Hom-bundle action at valence `r`
 
 The fibre value `Ψ x (W x)` of the full Hom-bundle action is a continuous-linear-map evaluation between

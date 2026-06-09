@@ -474,8 +474,10 @@ private noncomputable def genuinePureREndoSuccRS
 /-- **The order-`0` moving-centre pure-Riemann curvature operator at valence `r`, every rank**
 (totalised). For rank `m + 1 ≥ 1` it is the genuine endomorphism `genuinePureREndoSuccRS`; for rank `0`
 (no slot-`0`) it is the zero operator (never reached — the recursion only increases the rank). The
-valence-`r` mirror of `pureRGenuineEndo0`. -/
-private noncomputable def genuinePureREndo0RS
+valence-`r` mirror of `pureRGenuineEndo0`.  De-privatised so the downstream
+`RankRDiffCurvatureFactorization` can factor the order-`1` differentiated trace
+`covGrad(R W) − R(∇W)` as the full Hom-bundle action of the order-`0` curvature endomorphism. -/
+noncomputable def genuinePureREndo0RS
     (g : SmoothRiemannianMetric I M) (r : ℕ) :
     ∀ (rr : ℕ), SmoothCcTensor g r rr → SmoothCcTensor g r rr
   | 0 => fun _ => 0
