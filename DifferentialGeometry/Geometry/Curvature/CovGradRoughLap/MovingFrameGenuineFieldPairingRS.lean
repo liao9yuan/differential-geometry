@@ -1272,8 +1272,55 @@ is sound, and that sound integrated content is exactly this value.
 ‖∇²S‖²`; *false* on a non-flat manifold (`∇R ≠ 0`) — the pure-Riemann pairing alone does not carry the
 differentiated-curvature `(∇R) S` content (`exists_diffCurvSectionRS_gradedCurvJet`'s non-vacuity: the
 carrier is genuinely `rfns(S)`-order non-zero). So the differentiated-curvature carrier is genuinely
-required and the identity is not vacuous. The body is `sorry` (the genuine rank-`r` `(★)`); consumers
-transitively depend on `sorryAx`. -/
+required and the identity is not vacuous. -/
+theorem weitzenbock_curvature_genuineSections_crossPairingRS
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
+    tensorL2Inner (I := I) (M := M) g r (s + 1)
+        (GcurvSectionRS (I := I) (M := M) g r s S +
+          diffCurvSectionRS (I := I) (M := M) g r s S).toFun
+        (covGrad (I := I) (M := M) g r s S).toFun =
+      tensorL2Inner (I := I) (M := M) g r (s + 1)
+        (pointwiseTensorCurvRS (I := I) (M := M) g r s S).toFun
+        (covGrad (I := I) (M := M) g r s S).toFun := by
+  sorry
+
+/-- **The rank-`r` genuine curvature-sections cross-pairing VALUE (the rank-`r` classical `(★)` third-order
+tensor Bochner–Weitzenböck curvature-term identity, `‖·‖²` form — proved sorry-free over the cross-pairing
+root and the rank-`r` Weitzenböck value).** The contravariant-rank-`r` mirror of the rank-`0` genuine
+cross-pairing value `genuineDiffCurv_crossPairing_value` (`MovingFrameDiffCurvTraceSection`), with the
+gauge-glued `(∇R) S` carrier instantiated to the concrete tensorial section `diffCurvSectionRS g r s S`
+(the order-`0` base of the differentiated `(∇R)·` tower, `RankRDiffCurvatureTower`). For a closed smooth
+Riemannian manifold `(M, g)`, every contravariant rank `r`, covariant rank `s`, and smooth
+compactly-supported `(r, s)`-tensor `S`, the global metric `L²` pairing of the two concrete genuine
+curvature carriers — the pure-Riemann `R(∇S)` trace section `GcurvSectionRS g r s S` and the gauge-glued
+tensorial `(∇R) S` trace section `diffCurvSectionRS g r s S` — against `∇S := covGrad g r s S` equals the
+genuine Weitzenböck curvature integral
+```
+⟨GcurvSectionRS g r s S + diffCurvSectionRS g r s S, ∇S⟩_{L²} = ‖Δ_∇ S‖²_{L²} − ‖∇²S‖²_{L²},
+```
+with `Δ_∇ S := rawTensorConnLapSmooth g r s S` and `∇²S := covGrad g r (s + 1) (covGrad g r s S)`.
+
+**Proof (sorry-free composition over the rank-`r` cross-pairing root).** The genuine-sections cross-pairing
+root `weitzenbock_curvature_genuineSections_crossPairingRS` (the rank-`r` `(★)`, above) records that the
+two genuine carriers paired against `∇S` carry exactly the order-`2` commutator-defect cross-pairing
+`⟨pointwiseTensorCurvRS g r s S, ∇S⟩_{L²}`; the rank-`r` integrated order-`2` Weitzenböck Green chain
+`weitzenbock_integrated_covGrad_l2_normSq_rs` (`IntegratedOrder2WeitzenbockRS`, sorry-free) records
+`‖∇²S‖²_{L²} = ‖Δ_∇ S‖²_{L²} − ⟨Δ_∇(∇S) − ∇(Δ_∇ S), ∇S⟩_{L²}`, whose cross term is the defect cross-pairing
+(`Curv S := pointwiseTensorCurvRS g r s S` is definitionally `Δ_∇(∇S) − ∇(Δ_∇ S)`). Rewriting the
+genuine-carrier pairing by the cross-pairing root and rearranging the Green chain yields the value. The
+body transits only the rank-`r` cross-pairing root; consumers transitively depend on its `sorryAx`.
+
+**T1 (integrated-only).** The differentiated-curvature trace `∑ᵢ ∇_{Bᵢ}(R(Bᵢ, ·) S)` is *non-tensorial
+in the direction* — its per-direction fibre realisation reads the `smoothExtensionTangent` jet of the
+frame direction, chart-selection-unbounded on `S²` (T1) — so the `∇³S`-cancellation and divergence form
+are *false term-by-term*. The identity is stated at the *integrated* frame-free `L²` level throughout (it
+never extracts a per-direction `M → E` quantity), so it is trap-screened.
+
+**Non-vacuity (the value rejects dropping the differentiated-curvature carrier).** Replacing
+`diffCurvSectionRS g r s S` by `0` makes the value read `⟨GcurvSectionRS g r s S, ∇S⟩_{L²} = ‖Δ_∇ S‖² −
+‖∇²S‖²`; *false* on a non-flat manifold (`∇R ≠ 0`) — the pure-Riemann pairing alone does not carry the
+differentiated-curvature `(∇R) S` content. So the differentiated-curvature carrier is genuinely required
+and the identity is not vacuous. -/
 theorem weitzenbock_curvature_genuineSections_valueRS
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
     tensorL2Inner (I := I) (M := M) g r (s + 1)
@@ -1285,7 +1332,20 @@ theorem weitzenbock_curvature_genuineSections_valueRS
         tensorL2Norm (I := I) (M := M) g r (s + 1 + 1)
           (covGrad (I := I) (M := M) g r (s + 1)
             (covGrad (I := I) (M := M) g r s S)).toFun ^ 2 := by
-  sorry
+  rw [weitzenbock_curvature_genuineSections_crossPairingRS (I := I) (M := M) g r s S]
+  have hw := weitzenbock_integrated_covGrad_l2_normSq_rs (I := I) (M := M) g r s S
+  have hCurv :
+      tensorL2Inner (I := I) (M := M) g r (s + 1)
+          (rawTensorConnLapSmooth (I := I) g r (s + 1)
+              (covGrad (I := I) (M := M) g r s S) -
+            covGrad (I := I) (M := M) g r s
+              (rawTensorConnLapSmooth (I := I) g r s S)).toFun
+          (covGrad (I := I) (M := M) g r s S).toFun =
+        tensorL2Inner (I := I) (M := M) g r (s + 1)
+          (pointwiseTensorCurvRS (I := I) (M := M) g r s S).toFun
+          (covGrad (I := I) (M := M) g r s S).toFun := rfl
+  rw [hCurv] at hw
+  linarith [hw]
 
 /-- **The rank-`r` coupled differentiated-curvature `(∇R) S` carrier with its cross-pairing VALUE
 (proved over the rank-`r` genuine-sections value and the carrier grid).** The contravariant-rank-`r`
