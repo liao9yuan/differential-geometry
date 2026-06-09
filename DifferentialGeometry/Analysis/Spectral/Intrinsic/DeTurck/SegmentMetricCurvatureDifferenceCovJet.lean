@@ -184,24 +184,205 @@ since `Tensor0SSpace.toModel = tensor0SSpace_continuousLinearEquiv` and the equi
       modelTrace42MapVec (E := E) a (fun i => (cometricRaisedBasisVec (I := I) g₀ x i : E))
         (Tensor0SBundle.Tensor0SSpace.toModel D) := rfl
 
+/-- **The constant `g₀`-coframe covector fibre** `eᵢ(x) : T^*_x M`.  The `i`-th `E`-orthonormal
+coframe covector `coframeOfBasis (chartModelBasis E) i : E →L ℝ` lifted into the cotangent fibre via
+`model_covectorOfCLM` and the bundle/model identification.  It is the constant-in-model covector
+section whose `g₀`-raise is `cometricRaisedBasisVec g₀ x i` (definitional).  A constant *covector*
+(contravariant to the tangent cocycle, via the `id`-coercion `Tensor0SSpace 1 I x = E*`) is a smooth
+section — its chart-frame components are `⟨eᵢ, chartBasisVecFiber⟩_E`, smooth on each chart. -/
+private noncomputable def coframeCovectorFib (x : M) (i : Fin (Module.finrank ℝ E)) :
+    Tensor0SBundle.Tensor0SSpace 1 I x :=
+  (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 1 x).symm
+    (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+      (Tensor0SBundle.coframeOfBasis (Integral.Measure.chartModelBasis E) i))
+
+set_option linter.unusedSectionVars false in
+/-- The `g₀`-raised constant coframe covector is `cometricRaisedBasisVec`. Definitional. -/
+private theorem inverseMetricSharpFib_coframeCovectorFib (g₀ : SmoothRiemannianMetric I M) (x : M)
+    (i : Fin (Module.finrank ℝ E)) :
+    inverseMetricSharpFib (I := I) g₀ x (coframeCovectorFib (I := I) x i) =
+      cometricRaisedBasisVec (I := I) g₀ x i := rfl
+
+omit [CompactSpace M] in
+/-- **The chart-frame component of the constant coframe covector is `C^∞`** (the tangent-bundle
+cocycle entry smoothness).  On the chart-`γ` source, the scalar `b ↦ ⟨eᵢ, chartBasisVecFiber γ j b⟩`
+— the constant `E`-orthonormal coframe covector `eᵢ = coframeOfBasis (chartModelBasis E) i` paired
+(through the dual map) with the smooth chart-`γ` frame vector field — is `C^∞`.  Unfolding the dual
+pairing it is `coord i (chartBasisVecFiber γ j b)`, the chart-Jacobian/cocycle matrix entry, smooth on
+the chart overlap by `contMDiffOn_coordChangeL` (the established tangent-bundle transition smoothness,
+e.g. `ChartJacobianMatrixEntrySmoothness`).  This is the chart-component hypothesis that feeds
+`metricSharp_contMDiff_total` to build the smooth `g₀`-raised coframe vector field. -/
+private theorem coframeCovector_chartComponent_contMDiffOn (γ : M)
+    (i j : Fin (Module.finrank ℝ E)) :
+    ContMDiffOn I 𝓘(ℝ) ∞
+      (fun b : M => cotangentToDualLinear (I := I) (x := b) (coframeCovectorFib (I := I) b i)
+        (Integral.Measure.chartBasisVecFiber (I := I) γ j b))
+      (chartAt H γ).source :=
+  sorry
+
+/-- **The smooth `g₀`-raised coframe vector field** `♯eᵢ : x ↦ cometricRaisedBasisVec g₀ x i`,
+as a smooth section of the tangent bundle.  The constant coframe covector is a smooth covector
+section (its chart components are smooth, `coframeCovector_chartComponent_contMDiffOn`), and its
+`g₀`-raise is smooth by `metricSharp_contMDiff_total`. -/
+private noncomputable def sharpCoframeVF (g₀ : SmoothRiemannianMetric I M)
+    (i : Fin (Module.finrank ℝ E)) :
+    ContMDiffSection I E ∞ (TangentSpace I : M → Type _) where
+  toFun := fun x => cometricRaisedBasisVec (I := I) g₀ x i
+  contMDiff_toFun := by
+    have hmain : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+        (fun b : M => TotalSpace.mk' E b
+          (Integral.DivergenceTheorem.metricSharp (I := I) g₀ b
+            (cotangentToDualLinear (I := I) (x := b) (coframeCovectorFib (I := I) b i)))) :=
+      Integral.DivergenceTheorem.metricSharp_contMDiff_total (I := I) g₀
+        (fun γ j => coframeCovector_chartComponent_contMDiffOn (I := I) γ i j)
+    refine hmain.congr (fun x => ?_)
+    change TotalSpace.mk' E x
+        (Integral.DivergenceTheorem.metricSharp (I := I) g₀ x
+          (cotangentToDualLinear (I := I) (x := x) (coframeCovectorFib (I := I) x i))) =
+      TotalSpace.mk' E (E := fun z : M => TangentSpace I z) x
+        (cometricRaisedBasisVec (I := I) g₀ x i)
+    rw [← inverseMetricSharpFib_coframeCovectorFib (I := I) g₀ x i, inverseMetricSharpFib_apply]
+
+set_option linter.unusedSectionVars false in
+/-- The underlying value of the smooth `g₀`-raised coframe vector field at `x` is
+`cometricRaisedBasisVec g₀ x i`. -/
+private theorem sharpCoframeVF_apply (g₀ : SmoothRiemannianMetric I M) (x : M)
+    (i : Fin (Module.finrank ℝ E)) :
+    sharpCoframeVF (I := I) g₀ i x = cometricRaisedBasisVec (I := I) g₀ x i := rfl
+
+/-- **The bundle rank-cast `Tensor0SField ∞ m → Tensor0SField ∞ n` along a `Nat` equality `h : m = n`.**
+Transports a smooth `(0, m)`-tensor field to a smooth `(0, n)`-tensor field along the (propositional)
+equality `m = n` of slot counts; pointwise it casts the fibre value, preserving smoothness. -/
+private noncomputable def rankCastTen0S {m n : ℕ} (h : m = n)
+    (σ : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (I := I) (M := M) ∞ m) :
+    Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (I := I) (M := M) ∞ n :=
+  h ▸ σ
+
+set_option linter.unusedSectionVars false in
+/-- The rank-cast section's value at `x` is the cast of the original value (heq form). -/
+private theorem rankCastTen0S_apply_heq {m n : ℕ} (h : m = n)
+    (σ : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (I := I) (M := M) ∞ m) (x : M) :
+    (rankCastTen0S (I := I) (M := M) h σ x : Tensor0SBundle.Tensor0SSpace n I x) ≍
+      (σ x : Tensor0SBundle.Tensor0SSpace m I x) := by
+  subst h; rfl
+
+set_option linter.unusedSectionVars false in
+/-- **The model image of the bundle rank-cast is the model rank-cast.**  Transporting a smooth
+`(0, m)`-field to `(0, n)` along `h : m = n` and reading its model fibre equals the model slot-reindex
+`modelRankCast h` of the original model fibre.  Both reindex the `Fin`-slots by `finCongr h`; after
+`subst h` the model cast collapses to the identity (`finCongr_refl`, `domDomCongr`-refl). -/
+private theorem toModel_rankCastTen0S {m n : ℕ} (h : m = n)
+    (σ : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (I := I) (M := M) ∞ m) (x : M) :
+    Tensor0SBundle.Tensor0SSpace.toModel (rankCastTen0S (I := I) (M := M) h σ x) =
+      modelRankCast (E := E) h (Tensor0SBundle.Tensor0SSpace.toModel (σ x)) := by
+  subst h
+  rw [modelRankCast]
+  simp only [finCongr_refl]
+  rfl
+
+set_option linter.unusedSectionVars false in
+/-- The value of the bundle interior-product contraction field at `x`. Definitional. -/
+private theorem contract_Tensor0SField_apply_eq (s : ℕ)
+    (α : Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (I := I) (M := M) ∞ (s + 1))
+    (X : ContMDiffSection I E ∞ (TangentSpace I : M → Type _)) (x : M) :
+    (Tensor0SBundle.contract_Tensor0SField (I := I) (M := M) (𝕜 := ℝ) ∞ s α X x) =
+      Tensor0SBundle.interior_product (I := I) (𝕜 := ℝ) s x (X x) (α x) := rfl
+
+set_option linter.unusedSectionVars false in
+/-- The model image of the bundle interior product against a tangent vector is the model interior
+product against that vector.  Both ends of `interior_product` are the model identity equivalence. -/
+private theorem toModel_interior_product (s : ℕ) (x : M) (v : TangentSpace I x)
+    (T : Tensor0SBundle.Tensor0SSpace (s + 1) I x) :
+    Tensor0SBundle.Tensor0SSpace.toModel
+        (Tensor0SBundle.interior_product (I := I) (𝕜 := ℝ) s x v T) =
+      Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) s (v : E)
+        (Tensor0SBundle.Tensor0SSpace.toModel T) := by
+  rw [Tensor0SBundle.interior_product, Tensor0SBundle.Tensor0SSpace.toModel]
+  simp only [ContinuousLinearMap.comp_apply, ContinuousLinearEquiv.coe_coe,
+    ContinuousLinearEquiv.apply_symm_apply]
+  rfl
+
 set_option backward.isDefEq.respectTransparency false in
-/-- **(POSIT — base-point smoothness of the intrinsic `g₀⁻¹` double-trace operator field.)**  The
+/-- **Base-point smoothness of the intrinsic `g₀⁻¹` double-trace operator field.**  The
 fibre field `x ↦ ricciModelTrace42Fib g₀ a x` is a smooth section of the `(4 + a, 2 + a)`-tensor bundle.
 The fibre map is the leading-two-slot contraction against the cometric `g₀⁻¹(x) = ∑ᵢ ♯eᵢ(x) ⊗ ♯eᵢ(x)`;
-the `g₀`-raised coframe vectors `♯eᵢ(x)` depend smoothly on `x` (`inverseMetricSharpField_contMDiff`,
-the smooth inverse-metric musical), and the model double-interior-product against a *smooth* vector
-tuple is smooth (the `model_interior_bilinear` smooth-bilinear evaluation, the exact mechanism the
-on-disk smooth vector-contraction field `contract_covariantField` uses, lifted to the bundle by
-`contMDiff_clm_section_of_pointwise`).  Its body is `sorry`: the genuine smoothness of the intrinsic
-`g₀⁻¹` double-trace operator field — the cometric-raised analogue of `contract_covariantField`'s
-smooth-section skeleton, summed over the coframe.  (NO chart-selected, non-`∇₀`-parallel ambient basis
-appears; the smoothness is genuinely intrinsic, through the smooth cometric.) -/
+the `g₀`-raised coframe vectors `♯eᵢ(x)` depend smoothly on `x` (`sharpCoframeVF`, the `g₀`-raise of the
+constant coframe covector — itself smooth, via `metricSharp_contMDiff_total`), and the bundle
+interior-product against a smooth vector field is smooth (`contract_Tensor0SField`), summed over the
+coframe and scaled by `-2`, lifted to the operator bundle by `contMDiff_clm_section_of_pointwise`.
+(NO chart-selected, non-`∇₀`-parallel ambient basis appears; the smoothness is genuinely intrinsic,
+through the smooth cometric.) -/
 theorem ricciModelTrace42Fib_contMDiff (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel (4 + a) (2 + a) ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel (4 + a) (2 + a) ℝ E)
         (E := fun z : M => Tensor0SBundle.TensorRSSpace (4 + a) (2 + a) I z) x
-        (ricciModelTrace42Fib (I := I) g₀ a x)) :=
-  sorry
+        (ricciModelTrace42Fib (I := I) g₀ a x)) := by
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (F₁ := Tensor0SBundle.Tensor0SModel (4 + a) ℝ E)
+    (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace (4 + a) I x)
+    (F₂ := Tensor0SBundle.Tensor0SModel (2 + a) ℝ E)
+    (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace (2 + a) I x)
+    (φ := fun x => ricciModelTrace42Fib (I := I) g₀ a x)
+  intro Y
+  -- The contracted section equals `(-2) • ∑ᵢ ι_{♯eᵢ} ι_{♯eᵢ} Y` (two leading-slot interior products
+  -- against the smooth coframe vector field), each a `contract_Tensor0SField`, so smooth.
+  classical
+  set Sfield : Fin (Module.finrank ℝ E) →
+      Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (I := I) (M := M) ∞ (2 + a) := fun i =>
+    Tensor0SBundle.contract_Tensor0SField (I := I) (M := M) (𝕜 := ℝ) ∞ (2 + a)
+      (rankCastTen0S (I := I) (M := M) (by omega : (3 + a) = (2 + a) + 1)
+        (Tensor0SBundle.contract_Tensor0SField (I := I) (M := M) (𝕜 := ℝ) ∞ (3 + a)
+          (rankCastTen0S (I := I) (M := M) (by omega : (4 + a) = (3 + a) + 1) Y)
+          (sharpCoframeVF (I := I) g₀ i)))
+      (sharpCoframeVF (I := I) g₀ i) with hSfield
+  have hsec : (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel (2 + a) ℝ E)
+      (E := fun z : M => Tensor0SBundle.Tensor0SSpace (2 + a) I z) x
+      (ricciModelTrace42Fib (I := I) g₀ a x (Y x))) =
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel (2 + a) ℝ E)
+      (E := fun z : M => Tensor0SBundle.Tensor0SSpace (2 + a) I z) x
+      ((-2 : ℝ) • ∑ i : Fin (Module.finrank ℝ E), (Sfield i x))) := by
+    funext x
+    congr 1
+    apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+    change Tensor0SBundle.Tensor0SSpace.toModel (ricciModelTrace42Fib (I := I) g₀ a x (Y x)) =
+      Tensor0SBundle.Tensor0SSpace.toModel
+        ((-2 : ℝ) • ∑ i : Fin (Module.finrank ℝ E), (Sfield i x))
+    rw [ricciModelTrace42Fib_toModel]
+    -- RHS model image: distribute `toModel` over the scalar and the sum (via the bundled CLM).
+    have hsumModel : Tensor0SBundle.Tensor0SSpace.toModel
+          (∑ i : Fin (Module.finrank ℝ E), (Sfield i x)) =
+        ∑ i : Fin (Module.finrank ℝ E),
+          Tensor0SBundle.Tensor0SSpace.toModel (Sfield i x) := by
+      rw [← Tensor0SBundle.Tensor0SSpace.toModelL_apply,
+        map_sum (Tensor0SBundle.Tensor0SSpace.toModelL (2 + a) x)]
+      simp only [Tensor0SBundle.Tensor0SSpace.toModelL_apply]
+    rw [Tensor0SBundle.Tensor0SSpace.toModel_smul, hsumModel]
+    -- Unfold the per-`i` summand of the bundle side to the model double interior product.
+    have hterm : ∀ i : Fin (Module.finrank ℝ E),
+        Tensor0SBundle.Tensor0SSpace.toModel (Sfield i x) =
+          (Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) (2 + a)
+              (cometricRaisedBasisVec (I := I) g₀ x i : E)).comp
+            ((modelRankCast (E := E) (by omega : (3 + a) = (2 + a) + 1)).comp
+              ((Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) (3 + a)
+                  (cometricRaisedBasisVec (I := I) g₀ x i : E)).comp
+                (modelRankCast (E := E) (by omega : (4 + a) = (3 + a) + 1))))
+            (Tensor0SBundle.Tensor0SSpace.toModel (Y x)) := by
+      intro i
+      rw [hSfield, contract_Tensor0SField_apply_eq, toModel_interior_product,
+        toModel_rankCastTen0S, contract_Tensor0SField_apply_eq, toModel_interior_product,
+        toModel_rankCastTen0S, sharpCoframeVF_apply]
+      rfl
+    rw [Finset.sum_congr rfl (fun i _ => hterm i)]
+    -- The LHS model double trace `modelTrace42MapVec` is exactly this scaled sum.
+    rw [modelTrace42MapVec, ContinuousLinearMap.smul_apply, ContinuousLinearMap.sum_apply]
+  rw [hsec]
+  -- Smoothness of `(-2) • ∑ᵢ Sfield i` as a section: it is the bundled section
+  -- `(-2 : ℝ) • ∑ᵢ Sfield i`, whose pointwise value is `(-2) • ∑ᵢ (Sfield i x)`.
+  have hscale := (((-2 : ℝ)) • (∑ i : Fin (Module.finrank ℝ E), Sfield i)).contMDiff
+  refine hscale.congr (fun x => ?_)
+  congr 1
+  rw [ContMDiffSection.coe_smul, Pi.smul_apply,
+    ContMDiffSection.finset_sum_apply Finset.univ Sfield x]
 
 /-- **The intrinsic `g₀⁻¹` double-trace operator field as a smooth compactly-supported
 `(4 + a, 2 + a)`-tensor.**  The fibre value at `x` is `ricciModelTrace42Fib g₀ a x` (smooth by
