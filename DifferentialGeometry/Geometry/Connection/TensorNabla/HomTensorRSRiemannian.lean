@@ -1,5 +1,9 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.SecondOrderHomBundle
 import DifferentialGeometry.Geometry.Connection.SingleSlotOperatorFiberNormBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.TensorRSContRiemannianBundle
+import Mathlib.Topology.VectorBundle.Riemannian
+import Mathlib.Topology.VectorBundle.Hom
+import Mathlib.Topology.Order.Compact
 
 /-!
 # The `g`-fibre operator-norm Riemannian calculus on the second-order Hom-bundle `Hom(T^{r,a}, T^{r,c})`
@@ -30,10 +34,11 @@ bounds clean: the curvature reading operator, being a smooth Hom-bundle section,
 
 * `homTensorRS_riemannianFiberNormSq_clm_apply_le` — the **fibrewise** intrinsic operator bound
   `rfns(A v) ≤ ‖A‖² · rfns(v)` for any fibrewise operator `A` and the `g`-fibre operator norm `‖A‖`;
-* `continuous_homTensorRS_opNorm` — the single genuinely-irreducible analytic primitive (posited):
-  for a smooth full Hom-bundle section `Ψ`, the `g`-fibre operator norm `x ↦ ‖Ψ x‖` is continuous (the
-  exact full-Hom analogue of the curvature line's posited frame-energy continuity
-  `exists_continuous_riemannOp_tensorCovS_frameEnergy_bound`);
+* `continuous_homTensorRS_opNorm` — the single genuinely-irreducible analytic core: for a smooth full
+  Hom-bundle section `Ψ`, the `g`-fibre operator norm `x ↦ ‖Ψ x‖` is continuous (the exact full-Hom
+  analogue of the curvature line's frame-energy continuity
+  `exists_continuous_riemannOp_tensorCovS_frameEnergy_bound`), proved by specialising the generic
+  `continuous_homBundle_opNorm_generic` to the tensor bundles via `tensorRS_isContinuousRiemannianBundle`;
 * `exists_uniform_homTensorRS_opNorm_sq` — for a smooth full Hom-bundle section `Ψ`, the squared
   `g`-fibre operator norm `x ↦ ‖Ψ x‖²` admits a single uniform-over-`M` bound `C`, proved on top of
   `continuous_homTensorRS_opNorm` by "continuous on compact ⟹ bounded" (the exact full-Hom analogue of
@@ -56,7 +61,7 @@ set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
-open Bundle Manifold Set IsManifold Tensor0SBundle ContinuousLinearMap
+open Bundle Manifold Set IsManifold Tensor0SBundle ContinuousLinearMap Filter
 open scoped Manifold Topology ContDiff BigOperators InnerProductSpace
 
 namespace DifferentialGeometry.Integral.Connection
@@ -72,6 +77,180 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 variable [CompleteSpace E]
+
+/-! ## Generic operator-norm continuity for a continuous Hom-bundle section
+
+The intrinsic analytic core, proved for an *arbitrary* pair of continuous Riemannian vector bundles
+`E₁`, `E₂` (model fibres `F₁`, `F₂`).  For a continuous section `Ψ` of the Hom bundle
+`x ↦ E₁ x →L E₂ x`, the fibrewise operator norm `x ↦ ‖Ψ x‖` (measured in the per-fibre inner-product
+norms) is continuous.  The proof reads `Ψ` through the local trivialisations at the base point: the
+conjugated operator `Ψ̃ y = S_c(y) ∘ Ψ y ∘ S_a'(y)` into the *fixed* fibre `E₁ x₀ →L E₂ x₀`
+(`S_c`, `S_a'` the trivialisation transports) is continuous and agrees with `Ψ x₀` at `x₀`, while the
+trivialisation transports distort the norm by a factor arbitrarily close to `1`
+(`eventually_norm_symmL_trivializationAt_self_comp_lt` and its companion), giving the two-sided
+multiplicative pinch `‖Ψ̃ y‖ / r² ≤ ‖Ψ y‖ ≤ r² ‖Ψ̃ y‖` for every `r > 1` near `x₀`; the squeeze as
+`r → 1` is `tendsto_order` applied to `x ↦ ‖Ψ̃ x‖ → ‖Ψ x₀‖`.  This is stated generically so the
+`TensorRSModel`/Hom-fibre normed-instance diamond never enters the concrete application below. -/
+
+section GenericHomOpNorm
+
+/-- For `c < L` there is `r > 1` with `c · r² < L`: a one-sided neighbourhood of `1` witness used to
+close the multiplicative squeeze as `r → 1⁺`. -/
+private lemma exists_one_lt_mul_sq_lt {c L : ℝ} (h : c < L) :
+    ∃ r : ℝ, 1 < r ∧ c * r ^ 2 < L := by
+  have htend : Tendsto (fun r : ℝ => c * r ^ 2) (𝓝 1) (𝓝 c) := by
+    have h1 : Tendsto (fun r : ℝ => c * r ^ 2) (𝓝 1) (𝓝 (c * (1 : ℝ) ^ 2)) :=
+      tendsto_const_nhds.mul ((continuous_pow 2).tendsto 1)
+    simpa using h1
+  have hev : ∀ᶠ r in 𝓝 (1 : ℝ), c * r ^ 2 < L := htend.eventually (Iio_mem_nhds h)
+  have hev2 : ∀ᶠ r in 𝓝[>] (1 : ℝ), c * r ^ 2 < L := hev.filter_mono nhdsWithin_le_nhds
+  rcases (hev2.and self_mem_nhdsWithin).exists with ⟨r, hr2, hr1⟩
+  exact ⟨r, hr1, hr2⟩
+
+/-- **Operator-norm continuity of a continuous Hom-bundle section, generic form.**  For continuous
+Riemannian vector bundles `E₁` (model `F₁`), `E₂` (model `F₂`) over a topological base `B` and a
+continuous section `Ψ : Π x, E₁ x →L E₂ x` of the Hom bundle, the fibrewise operator norm
+`x ↦ ‖Ψ x‖` (in the per-fibre inner-product norms) is continuous. -/
+private lemma continuous_homBundle_opNorm_generic
+    {B : Type*} [TopologicalSpace B]
+    {F₁ : Type*} [NormedAddCommGroup F₁] [NormedSpace ℝ F₁]
+    {F₂ : Type*} [NormedAddCommGroup F₂] [NormedSpace ℝ F₂]
+    {E₁ : B → Type*} [TopologicalSpace (TotalSpace F₁ E₁)] [∀ x, NormedAddCommGroup (E₁ x)]
+      [∀ x, InnerProductSpace ℝ (E₁ x)]
+      [FiberBundle F₁ E₁] [VectorBundle ℝ F₁ E₁] [IsContinuousRiemannianBundle F₁ E₁]
+    {E₂ : B → Type*} [TopologicalSpace (TotalSpace F₂ E₂)] [∀ x, NormedAddCommGroup (E₂ x)]
+      [∀ x, InnerProductSpace ℝ (E₂ x)]
+      [FiberBundle F₂ E₂] [VectorBundle ℝ F₂ E₂] [IsContinuousRiemannianBundle F₂ E₂]
+    (Ψ : Π x : B, E₁ x →L[ℝ] E₂ x)
+    (hΨ : Continuous (fun x : B => TotalSpace.mk' (F₁ →L[ℝ] F₂)
+      (E := fun z : B => E₁ z →L[ℝ] E₂ z) x (Ψ x))) :
+    Continuous (fun x : B => ‖Ψ x‖) := by
+  rw [continuous_iff_continuousAt]
+  intro x₀
+  have hx₀a : x₀ ∈ (trivializationAt F₁ E₁ x₀).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt' x₀
+  have hx₀c : x₀ ∈ (trivializationAt F₂ E₂ x₀).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt' x₀
+  have hΦcont : ContinuousAt (fun y : B => ContinuousLinearMap.inCoordinates
+      F₁ E₁ F₂ E₂ x₀ y x₀ y (Ψ y)) x₀ := by
+    have hcont := hΨ.continuousAt (x := x₀)
+    rw [continuousAt_hom_bundle] at hcont
+    exact hcont.2
+  set Ψtil : B → (E₁ x₀ →L[ℝ] E₂ x₀) := fun y =>
+    (((trivializationAt F₂ E₂ x₀).symmL ℝ x₀).comp
+        ((trivializationAt F₂ E₂ x₀).continuousLinearMapAt ℝ y)).comp
+      ((Ψ y).comp (((trivializationAt F₁ E₁ x₀).symmL ℝ y).comp
+        ((trivializationAt F₁ E₁ x₀).continuousLinearMapAt ℝ x₀)))
+    with hΨtil_def
+  have hΨtilcont : ContinuousAt Ψtil x₀ := by
+    rw [hΨtil_def]
+    refine (ContinuousAt.clm_comp (g := fun _ : B => ((trivializationAt F₂ E₂ x₀).symmL ℝ x₀))
+      (f := fun y : B => (((ContinuousLinearMap.inCoordinates F₁ E₁ F₂ E₂ x₀ y x₀ y (Ψ y))).comp
+        ((trivializationAt F₁ E₁ x₀).continuousLinearMapAt ℝ x₀))) continuousAt_const
+      (ContinuousAt.clm_comp
+        (g := fun y : B => ContinuousLinearMap.inCoordinates F₁ E₁ F₂ E₂ x₀ y x₀ y (Ψ y))
+        (f := fun _ : B => (trivializationAt F₁ E₁ x₀).continuousLinearMapAt ℝ x₀)
+        hΦcont continuousAt_const)).congr ?_
+    filter_upwards with y
+    rw [ContinuousLinearMap.inCoordinates]
+    simp only [ContinuousLinearMap.comp_assoc]
+  have hnormtil : ContinuousAt (fun y => ‖Ψtil y‖) x₀ := hΨtilcont.norm
+  have hΨtil_x0 : Ψtil x₀ = Ψ x₀ := by
+    rw [hΨtil_def]
+    ext v
+    simp only [ContinuousLinearMap.comp_apply]
+    rw [(trivializationAt F₁ E₁ x₀).symmL_continuousLinearMapAt hx₀a,
+      (trivializationAt F₂ E₂ x₀).symmL_continuousLinearMapAt hx₀c]
+  have hnormtil_lim : Tendsto (fun y => ‖Ψtil y‖) (𝓝 x₀) (𝓝 ‖Ψ x₀‖) := by
+    have h0 : Tendsto (fun y => ‖Ψtil y‖) (𝓝 x₀) (𝓝 ‖Ψtil x₀‖) := hnormtil
+    rwa [hΨtil_x0] at h0
+  have hbasea : ∀ᶠ y in 𝓝 x₀, y ∈ (trivializationAt F₁ E₁ x₀).baseSet :=
+    (trivializationAt F₁ E₁ x₀).open_baseSet.mem_nhds hx₀a
+  have hbasec : ∀ᶠ y in 𝓝 x₀, y ∈ (trivializationAt F₂ E₂ x₀).baseSet :=
+    (trivializationAt F₂ E₂ x₀).open_baseSet.mem_nhds hx₀c
+  have hfwd : ∀ {r : ℝ}, 1 < r → ∀ᶠ y in 𝓝 x₀, ‖Ψtil y‖ ≤ r ^ 2 * ‖Ψ y‖ := by
+    intro r hr
+    have hSc := eventually_norm_symmL_trivializationAt_self_comp_lt F₂ E₂ x₀ hr
+    have hSa' := eventually_norm_symmL_trivializationAt_comp_self_lt F₁ E₁ x₀ hr
+    filter_upwards [hSc, hSa'] with y hyc hya
+    rw [hΨtil_def]
+    calc ‖(((trivializationAt F₂ E₂ x₀).symmL ℝ x₀).comp
+              ((trivializationAt F₂ E₂ x₀).continuousLinearMapAt ℝ y)).comp
+            ((Ψ y).comp (((trivializationAt F₁ E₁ x₀).symmL ℝ y).comp
+              ((trivializationAt F₁ E₁ x₀).continuousLinearMapAt ℝ x₀)))‖
+        ≤ ‖((trivializationAt F₂ E₂ x₀).symmL ℝ x₀).comp
+              ((trivializationAt F₂ E₂ x₀).continuousLinearMapAt ℝ y)‖ *
+            ‖(Ψ y).comp (((trivializationAt F₁ E₁ x₀).symmL ℝ y).comp
+              ((trivializationAt F₁ E₁ x₀).continuousLinearMapAt ℝ x₀))‖ :=
+          ContinuousLinearMap.opNorm_comp_le _ _
+      _ ≤ ‖((trivializationAt F₂ E₂ x₀).symmL ℝ x₀).comp
+              ((trivializationAt F₂ E₂ x₀).continuousLinearMapAt ℝ y)‖ *
+            (‖Ψ y‖ * ‖((trivializationAt F₁ E₁ x₀).symmL ℝ y).comp
+              ((trivializationAt F₁ E₁ x₀).continuousLinearMapAt ℝ x₀)‖) := by
+          gcongr
+          exact ContinuousLinearMap.opNorm_comp_le _ _
+      _ ≤ r * (‖Ψ y‖ * r) := by gcongr
+      _ = r ^ 2 * ‖Ψ y‖ := by ring
+  have hrev : ∀ {r : ℝ}, 1 < r → ∀ᶠ y in 𝓝 x₀, ‖Ψ y‖ ≤ r ^ 2 * ‖Ψtil y‖ := by
+    intro r hr
+    have hSc' := eventually_norm_symmL_trivializationAt_comp_self_lt F₂ E₂ x₀ hr
+    have hSa := eventually_norm_symmL_trivializationAt_self_comp_lt F₁ E₁ x₀ hr
+    filter_upwards [hSc', hSa, hbasea, hbasec] with y hyc hya hya_mem hyc_mem
+    have hid : Ψ y =
+        (((trivializationAt F₂ E₂ x₀).symmL ℝ y).comp
+            ((trivializationAt F₂ E₂ x₀).continuousLinearMapAt ℝ x₀)).comp
+          ((Ψtil y).comp (((trivializationAt F₁ E₁ x₀).symmL ℝ x₀).comp
+            ((trivializationAt F₁ E₁ x₀).continuousLinearMapAt ℝ y))) := by
+      rw [hΨtil_def]
+      ext v
+      simp only [ContinuousLinearMap.comp_apply]
+      rw [(trivializationAt F₁ E₁ x₀).continuousLinearMapAt_symmL hx₀a,
+        (trivializationAt F₁ E₁ x₀).symmL_continuousLinearMapAt hya_mem,
+        (trivializationAt F₂ E₂ x₀).continuousLinearMapAt_symmL hx₀c,
+        (trivializationAt F₂ E₂ x₀).symmL_continuousLinearMapAt hyc_mem]
+    rw [hid]
+    calc ‖(((trivializationAt F₂ E₂ x₀).symmL ℝ y).comp
+              ((trivializationAt F₂ E₂ x₀).continuousLinearMapAt ℝ x₀)).comp
+            ((Ψtil y).comp (((trivializationAt F₁ E₁ x₀).symmL ℝ x₀).comp
+              ((trivializationAt F₁ E₁ x₀).continuousLinearMapAt ℝ y)))‖
+        ≤ ‖((trivializationAt F₂ E₂ x₀).symmL ℝ y).comp
+              ((trivializationAt F₂ E₂ x₀).continuousLinearMapAt ℝ x₀)‖ *
+            ‖(Ψtil y).comp (((trivializationAt F₁ E₁ x₀).symmL ℝ x₀).comp
+              ((trivializationAt F₁ E₁ x₀).continuousLinearMapAt ℝ y))‖ :=
+          ContinuousLinearMap.opNorm_comp_le _ _
+      _ ≤ ‖((trivializationAt F₂ E₂ x₀).symmL ℝ y).comp
+              ((trivializationAt F₂ E₂ x₀).continuousLinearMapAt ℝ x₀)‖ *
+            (‖Ψtil y‖ * ‖((trivializationAt F₁ E₁ x₀).symmL ℝ x₀).comp
+              ((trivializationAt F₁ E₁ x₀).continuousLinearMapAt ℝ y)‖) := by
+          gcongr
+          exact ContinuousLinearMap.opNorm_comp_le _ _
+      _ ≤ r * (‖Ψtil y‖ * r) := by gcongr
+      _ = r ^ 2 * ‖Ψtil y‖ := by ring
+  change Tendsto (fun y => ‖Ψ y‖) (𝓝 x₀) (𝓝 ‖Ψ x₀‖)
+  rw [tendsto_order]
+  refine ⟨?_, ?_⟩
+  · intro c hc
+    obtain ⟨r, hr1, hrlt⟩ := exists_one_lt_mul_sq_lt hc
+    have hev1 : ∀ᶠ y in 𝓝 x₀, c * r ^ 2 < ‖Ψtil y‖ :=
+      hnormtil_lim.eventually (lt_mem_nhds hrlt)
+    filter_upwards [hev1, hfwd hr1] with y hy1 hy2
+    have hr2pos : (0 : ℝ) < r ^ 2 := by positivity
+    have hchain : c * r ^ 2 < ‖Ψ y‖ * r ^ 2 := by
+      calc c * r ^ 2 < ‖Ψtil y‖ := hy1
+        _ ≤ r ^ 2 * ‖Ψ y‖ := hy2
+        _ = ‖Ψ y‖ * r ^ 2 := by ring
+    exact lt_of_mul_lt_mul_right hchain (le_of_lt hr2pos)
+  · intro c hc
+    obtain ⟨r, hr1, hrlt⟩ := exists_one_lt_mul_sq_lt hc
+    have hlim2 : Tendsto (fun y => r ^ 2 * ‖Ψtil y‖) (𝓝 x₀) (𝓝 (r ^ 2 * ‖Ψ x₀‖)) :=
+      hnormtil_lim.const_mul _
+    have hlt2 : r ^ 2 * ‖Ψ x₀‖ < c := by rw [mul_comm]; exact hrlt
+    have hev1 : ∀ᶠ y in 𝓝 x₀, r ^ 2 * ‖Ψtil y‖ < c :=
+      hlim2.eventually (Iio_mem_nhds hlt2)
+    filter_upwards [hev1, hrev hr1] with y hy1 hy2
+    exact lt_of_le_of_lt hy2 hy1
+
+end GenericHomOpNorm
 
 /-! ## The fibrewise intrinsic operator-norm contraction bound
 
@@ -126,17 +305,16 @@ end FibrewiseBound
 
 /-! ## The continuous `g`-fibre operator norm of a smooth Hom-bundle section
 
-The single genuinely-irreducible analytic content of the payoff: the squared `g`-fibre operator norm
-`x ↦ ‖Ψ x‖²` of a smooth full Hom-bundle section `Ψ` is continuous in the base point.  This is the
-exact full-Hom analogue of the proved curvature-operator frame-energy continuity
+The single genuinely-irreducible analytic content of the payoff: the `g`-fibre operator norm
+`x ↦ ‖Ψ x‖` of a smooth full Hom-bundle section `Ψ` is continuous in the base point.  This is the
+exact full-Hom analogue of the curvature-operator frame-energy continuity
 `exists_continuous_riemannOp_tensorCovS_frameEnergy_bound` (`CurvatureFrameEnergyContinuity`): the
 operator is assembled from the smooth metric `g` and the smooth section `Ψ`, the `g`-fibre inner
 products on the domain / codomain tensor fibres vary continuously with `x`
-(`tensorRSRiemannianInnerCLM_continuous`), and `Ψ` varies continuously in the model trivialisation
-(`hΨ`), so the least proportionality constant of the fibre-energy bound — the intrinsic `g`-fibre
-operator norm `‖Ψ x‖` — is a continuous (never chart-selection-*uniform*) function of `x`.  Posited
-here as the precise atomic continuity primitive of the operator-field calculus, exactly as the
-curvature line posits its frame-energy continuity. -/
+(`tensorRSRiemannianInnerCLM_continuous`, packaged as `tensorRS_isContinuousRiemannianBundle`), and
+`Ψ` varies continuously in the model trivialisation (`hΨ`), so the intrinsic `g`-fibre operator norm
+`‖Ψ x‖` is a continuous (never chart-selection-*uniform*) function of `x`.  Proved by specialising the
+generic continuous-Riemannian-bundle result `continuous_homBundle_opNorm_generic` above. -/
 
 section OpNormContinuity
 
@@ -146,7 +324,7 @@ set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-/-- **Posited `g`-fibre operator-norm continuity of a smooth full Hom-bundle section.**  For a smooth
+/-- **`g`-fibre operator-norm continuity of a smooth full Hom-bundle section.**  For a smooth
 full Hom-bundle field `Ψ : Π x, TensorRSSpace r a I x →L TensorRSSpace r c I x` on a closed Riemannian
 manifold the intrinsic `g`-fibre operator norm `x ↦ ‖Ψ x‖` — the operator norm of `Ψ x` measured in
 the installed `(r, a)` / `(r, c)`-tensor `g`-fibre Riemannian bundle norms — is a *continuous*
@@ -156,21 +334,22 @@ Continuous (fun x => ‖Ψ x‖).
 ```
 
 This is the single genuinely-irreducible analytic content of the Hom-bundle envelope — the exact
-full-Hom analogue of the curvature line's posited frame-energy continuity
+full-Hom analogue of the curvature line's frame-energy continuity
 `exists_continuous_riemannOp_tensorCovS_frameEnergy_bound`; the uniform bound
 `exists_uniform_homTensorRS_opNorm_sq` is proved on top of it by "continuous on compact ⟹ bounded".
 
-**Why this is TRUE.**  The intrinsic `g`-fibre operator norm `‖Ψ x‖` is the least constant for which
-the fibre-energy bound `‖Ψ x v‖_g ≤ ‖Ψ x‖ · ‖v‖_g` holds.  Reading the operator `Ψ` through the local
-trivialisation of the Hom-bundle (`hΨ`), `Ψ` is a continuous operator-valued map into the model
-fibre; the comparison between the model tensor fibre norm and the `g`-fibre tensor norm is itself
-continuous (`tensorRSRiemannianInnerCLM_continuous`) and (positive-definiteness of `g`) locally
-two-sided bounded, so the `g`-fibre operator norm `x ↦ ‖Ψ x‖` is continuous.  This is the
+**Proof.**  This is the specialisation of the generic Hom-bundle operator-norm continuity
+`continuous_homBundle_opNorm_generic` (proved above for an arbitrary pair of continuous Riemannian
+vector bundles) to the `(r, a)`- and `(r, c)`-tensor bundles, whose continuous-Riemannian-bundle
+structure is `tensorRS_isContinuousRiemannianBundle`.  The generic proof reads `Ψ` through the local
+trivialisations at the base point: the conjugated operator into the *fixed* fibre `E₁ x₀ →L E₂ x₀` is
+continuous (`continuousAt_hom_bundle` + composition with the fixed trivialisation maps) and agrees
+with `Ψ x₀` at `x₀`, while the trivialisation transports distort the `g`-fibre norm by a factor
+arbitrarily close to `1` (`eventually_norm_symmL_trivializationAt_self_comp_lt` and its companion),
+giving the two-sided multiplicative pinch and the `r → 1` squeeze via `tendsto_order`.  This is the
 chart-locality-free route: the operator norm is the *intrinsic* `g`-fibre operator norm, never the
 chart-trivialisation operator-norm scalar (unbounded on multi-chart manifolds); the trivialisation
-enters only as the continuity tool.  Posited here as the precise atomic analytic primitive of the
-operator-field calculus, exactly as the curvature line posits its frame-energy continuity.
-Consumers transitively depend on `sorryAx`.
+enters only as the continuity tool.
 
 **Non-vacuity.**  This is a genuine continuity statement about the `g`-fibre operator norm of `Ψ`,
 not a degenerate predicate: it constrains `Ψ` through its operator norm and is *false* for a
@@ -186,7 +365,14 @@ theorem continuous_homTensorRS_opNorm
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r c I b) :=
       Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r c
     Continuous (fun x : M => ‖Ψ x‖) := by
-  sorry
+  letI instA : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r a I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r a
+  letI instC : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r c I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r c
+  exact continuous_homBundle_opNorm_generic
+    (F₁ := TensorRSModel r a ℝ E) (F₂ := TensorRSModel r c ℝ E)
+    (E₁ := fun z : M => TensorRSSpace r a I z) (E₂ := fun z : M => TensorRSSpace r c I z)
+    Ψ hΨ.continuous
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
