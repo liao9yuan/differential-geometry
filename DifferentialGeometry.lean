@@ -783,6 +783,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantTraceCommu
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureContractionCovariantLeibnizGrid
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureContractionLeibnizGridConstruction
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureContractionParallelProduct
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CrossCorrectionParallelContraction
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.Defs
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLocality
