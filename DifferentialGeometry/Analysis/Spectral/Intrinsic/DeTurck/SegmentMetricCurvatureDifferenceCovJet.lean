@@ -2732,6 +2732,76 @@ theorem exists_parallelTrace_linearSection_eq_koszulTriple_sub_crossCorrTriple
   · exact linearSection_eq_ricciModelTrace42_koszulTriple_sub_crossCorrTriple (I := I) g₀
       T₁ T₂ g₁ g₂ hr1 hr2
 
+/-- **(POSIT — the bilinear-difference diagonal product-grid covariant-jet bound of the
+cross-correction SECTION difference.)**  The genuinely-deep reusable bilinear-difference
+covariant-Leibniz content beneath the cross-correction-difference leaf: the intrinsic squared fibre
+norm of the order-`p` covariant gradient of the rank-`3` cross-correction section difference
+`crossCorrectionSection g₁ g₀ T₁ − crossCorrectionSection g₂ g₀ T₂` is dominated, at every point `x`,
+by the **zero-jet-inclusive diagonal product grid** in the realized difference factor
+`w := realizeSymmCcTensor g₀ (T₁ − T₂)` and the fixed-pair endpoints:
+```
+rfns(∇^p (cc(g₁,T₁) − cc(g₂,T₂)))(x)
+  ≤ Cd · ∑_{i ≤ p} rfns(∇^i w)(x) · (∑_{l ≤ p−i} (rfns(∇^l T₁)(x) + rfns(∇^l T₂)(x))).
+```
+
+Each cross-correction section `cc(gₖ,Tₖ) = Φ(realizeSymm Tₖ, permute(loweredConnDiffSection gₖ g₀))`
+is the parallel `g₀`-single contraction `crossCorrParallelContraction` of the realized perturbation
+against the slot-cycled lowered connection difference
+(`crossCorrParallelContraction_eq_crossCorrectionSection`).  Their bilinear difference factorizes
+`Φ(h₁,D₁) − Φ(h₂,D₂) = Φ(h₁−h₂, D₁) + Φ(h₂, D₁−D₂)`, with `h₁−h₂ = realizeSymm(T₁−T₂) = w` the
+difference factor of the **clean arm** (against the fixed `D₁`, whose jets fold into the `T₁`-jets by
+the proven `crossCorrectionSection_iteratedCovGrad_rfns_le` lowered-jet bound), and
+`D₁−D₂ = ½(koszulTriple(w) − crossCorrTripleDiff)` (the lowered-connection-difference cocycle,
+`loweredConnDiffSection_sub_eq_koszulRealizeDiff_sub_crossCorrDiff`) the difference factor of the
+**δ-absorbed arm** `Φ(h₂, D₁−D₂)` (whose order-zero column carries the fibre-small factor
+`‖h₂‖_op ≤ δ` against the recursion term `rfns(∇^· crossCorrTripleDiff)`, closed by the
+`δ < 1/2` strong-induction absorption).  Each covariant Leibniz term puts `i` derivatives on the
+difference factor and the complementary `l` on the fixed factor, so it is bounded by a pointwise
+**product** `rfns(∇^i w) · rfns(∇^l T_k)` on the diagonal `i + l ≤ p` — the structure the proven
+two-section bilinear-product `rfns` jet grid
+(`RfnsBilinearProduct.exists_rfns_iteratedCovGrad_prod_diagGrid_le`) delivers.
+
+The genuinely-missing primitive (no such tensor-product covariant-Leibniz bilinear-DIFFERENCE
+product grid, nor the `crossCorrParallelContraction` bilinearity it requires, exists on disk yet, so
+this is the consumer-minimal posited frontier from which the public `crossCorrTripleDiff` grid
+follows by the section identity `crossCorrTripleDiff = 2 • (cc(g₁,T₁) − cc(g₂,T₂))`).  Its body is
+`sorry`.
+
+**Non-vacuity.**  At `T₁ = T₂` the cross-correction section difference vanishes
+(`ccTensorBilinSymm g₀ 0 = 0`, the two metrics coincide), so both sides are `0`; a zero `Cd` is
+rejected whenever the difference is present.  Carries `w` up to `∇^p w` and both fixed-pair
+endpoints; NO two-arm split, NO `toHs` mass, NO order-`> 2` pointwise jet on either side, NO
+spectral-nonlinearity, NO Weyl dependence. -/
+private theorem crossCorrectionSectionDiff_iteratedCovGrad_diagonalProductGrid_rfns_le
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (p : ℕ) :
+    ∃ Cd : ℝ, 0 ≤ Cd ∧
+      ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+        (g₁ g₂ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+        ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+                  (DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
+                    - DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂)).toSection x) ≤
+            Cd * ∑ i ∈ Finset.range (p + 1),
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                        (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
+                  * ∑ l ∈ Finset.range (p + 1 - i),
+                      (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)
+                        + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂).toSection x)) :=
+  sorry
+
 /-- **(POSIT — the consumer-minimal pre-trace diagonal product-grid covariant-jet bound of the
 cross-correction difference.)**  The genuinely-deep covariant-Faà-di-Bruno content beneath the
 traced cross-correction-difference leaf: the intrinsic squared fibre norm of the order-`p` covariant
@@ -2791,8 +2861,41 @@ private theorem crossCorrTripleDiff_iteratedCovGrad_diagonalProductGrid_rfns_le
                       (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
                           ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)
                         + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
-                          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂).toSection x)) :=
-  sorry
+                          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂).toSection x)) := by
+  classical
+  -- The deep bilinear-difference covariant-Leibniz diagonal product grid for the cross-correction
+  -- SECTION difference `cc(g₁,T₁) − cc(g₂,T₂)` (the genuinely-missing reusable primitive — the
+  -- bilinear difference of the two `crossCorrParallelContraction` products, one difference factor `w`
+  -- against the fixed pair; built downstream from the two-section product-grid engine, the
+  -- `crossCorrParallelContraction` bilinearity, the lowered-jet bound, and the δ-absorbed recursion
+  -- closure).  The public target follows by the section identity
+  -- `crossCorrTripleDiff = 2 • cc(g₁,T₁) − 2 • cc(g₂,T₂)` and `2²·rfns` homogeneity.
+  obtain ⟨Cd, hCd0, hCd⟩ :=
+    crossCorrectionSectionDiff_iteratedCovGrad_diagonalProductGrid_rfns_le (I := I) g₀ a ha B hB
+      δ hδ0 hδ1 p
+  refine ⟨4 * Cd, by positivity, ?_⟩
+  intro T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 x
+  -- `crossCorrTripleDiff = 2 • (cc(g₁,T₁) − cc(g₂,T₂))`.
+  have hsec : crossCorrTripleDiff (I := I) g₀ T₁ T₂ g₁ g₂ =
+      (2 : ℝ) • (DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
+        - DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂) := by
+    rw [crossCorrTripleDiff, smul_sub]
+  rw [hsec, MetricRealization.iteratedCovGrad_smul, Integral.L2.SmoothCcTensor.toSection_smul,
+    ContMDiffSection.coe_smul, Pi.smul_apply, riemannianFiberNormSq_smul_local]
+  have hbase := hCd T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 x
+  have hgrid_nn : 0 ≤ ∑ i ∈ Finset.range (p + 1),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+              (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
+        * ∑ l ∈ Finset.range (p + 1 - i),
+            (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)
+              + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂).toSection x)) :=
+    Finset.sum_nonneg fun i _ => mul_nonneg (riemannianFiberNormSq_nonneg _ _ _ _ _)
+      (Finset.sum_nonneg fun l _ =>
+        add_nonneg (riemannianFiberNormSq_nonneg _ _ _ _ _) (riemannianFiberNormSq_nonneg _ _ _ _ _))
+  nlinarith [hbase, hgrid_nn]
 
 /-- **(POSIT — the diagonal product-grid covariant-jet bound of the traced once-differentiated
 cross-correction difference.)**  For any parallel rank-reducing `(0, 4) → (0, 2)` contraction `Φ`
@@ -3164,6 +3267,70 @@ theorem ricciLinearSection_covGrad_diagonalGrid_rfns_le
   nlinarith [harm1, hcrossarm, hSWnn, hGnn, hCdQ0, Φ.kappa_nonneg,
     mul_nonneg hCdQ0 hSWnn, mul_nonneg (mul_nonneg Φ.kappa_nonneg (by norm_num : (0:ℝ) ≤ 18)) hGnn]
 
+/-- **(POSIT — the quadratic-Cross bilinear-difference diagonal product-grid covariant-jet bound at
+the natural Leibniz window.)**  The genuinely-deep quadratic-Cross covariant-Faà-di-Bruno content
+beneath the Cross-section leaf: the intrinsic squared fibre norm of the order-`j` covariant gradient
+of the quadratic Cross section `crossSection g₀ g₁ g₂` is dominated, at every point `x`, by the
+**zero-jet-inclusive diagonal product grid** at the natural Leibniz window `j + 2` (one tighter than
+the consumer window `j + 2 + 1`) in the realized difference factor
+`w := realizeSymmCcTensor g₀ (T₁ − T₂)` and the fixed-pair endpoints:
+```
+rfns(∇^j crossSection)(x)
+  ≤ Cd · ∑_{i ≤ j+1} rfns(∇^i w)(x) · (∑_{l ≤ j+1−i} (rfns(∇^l T₁)(x) + rfns(∇^l T₂)(x))).
+```
+
+`crossSection`'s fibre value is the `−2` model-basis trace of the quadratic
+`connDiffField ∘ connDiffField` summand difference (`ricciDiffQuad_modelTrace_eq_crossEndoTrace`); the
+bilinear identity `D₁ ∘ D₁ − D₂ ∘ D₂ = (D₁ − D₂) ∘ D₁ + D₂ ∘ (D₁ − D₂)` (`D_k = connDiffField g_k g₀`)
+carries one difference factor (the cocycle `D₁ − D₂ = connDiffField g₁ g₂`, of `∇w` level, whose
+metrically-lowered Koszul form is `covDerivRealizeEval g₀ (T₁ − T₂)`) against one fixed factor (`D_k`,
+of `∇T_k` level), so each covariant Leibniz term of `∇^j` is bounded by a pointwise **product**
+`rfns(∇^i w) · rfns(∇^l T_k)` on the diagonal `i + l ≤ j + 1` — the structure the proven two-section
+bilinear-product `rfns` jet grid (`RfnsBilinearProduct.exists_rfns_iteratedCovGrad_prod_diagGrid_le`)
+delivers, with the cocycle's lowered-connection-difference jets folded into the `T_k`-jets by the
+proven cross-correction lowered-jet bound (`crossCorrectionSection_iteratedCovGrad_rfns_le`) and the
+fibre-small Neumann factors (`δ < 1/2`) absorbed into the family-uniform `Cd`.
+
+The genuinely-missing primitive (no such quadratic tensor-product covariant-Leibniz bilinear-DIFFERENCE
+product grid, nor the section-level structural bridge `crossSection ↔ connDiffField ∘ connDiffField`
+trace difference it requires, exists on disk yet — those belong in the order-zero op-decomposition and
+the quadratic-trace-product files — so this is the consumer-minimal posited frontier; the public
+`crossSection` grid at the consumer window `j + 2 + 1` follows by the trivial window growth
+`range(j+1+1) ⊆ range(j+2+1)`).  Its body is `sorry`.
+
+**Non-vacuity.**  At `g₁ = g₂` the Cross section vanishes (`crossSection_self_toModel`), so both sides
+are `0`; a zero `Cd` is rejected whenever the Cross part is genuinely present.  Carries `w` up to
+`∇^{j+1} w` and both fixed-pair endpoints; NO two-arm split, NO pointwise sup of any order-`> 2` jet,
+NO `toHs` mass on either side, NO spectral-nonlinearity, NO Weyl dependence. -/
+theorem crossSectionDiff_iteratedCovGrad_diagonalProductGrid_rfns_le
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (j : ℕ) :
+    ∃ Cd : ℝ, 0 ≤ Cd ∧
+      ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+        (g₁ g₂ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+        ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+                  (crossSection (I := I) g₀ g₁ g₂)).toSection x) ≤
+            Cd * ∑ i ∈ Finset.range (j + 1 + 1),
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                        (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
+                  * ∑ l ∈ Finset.range (j + 1 + 1 - i),
+                      (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)
+                        + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂).toSection x)) :=
+  sorry
+
 /-- **(POSIT — the diagonal product-grid covariant-jet bound of the quadratic Cross section.)**
 The intrinsic squared fibre norm of the order-`j` covariant gradient of the concrete
 quadratic-in-difference curvature Cross section `crossSection g₀ g₁ g₂` is dominated, at every
@@ -3222,8 +3389,71 @@ theorem crossSection_iteratedCovGrad_diagonalProductGrid_rfns_le
                       (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
                           ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)
                         + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
-                          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂).toSection x)) :=
-  sorry
+                          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂).toSection x)) := by
+  classical
+  -- The genuinely-missing primitive: the deep quadratic-Cross bilinear-difference covariant-Leibniz
+  -- diagonal product grid at the natural Leibniz window `j + 2` (one tighter than the consumer window
+  -- `j + 2 + 1`).  `crossSection`'s fibre is the `−2` model-trace of the quadratic
+  -- `connDiffField ∘ connDiffField` summand difference (`ricciDiffQuad_modelTrace_eq_crossEndoTrace`);
+  -- the bilinear identity `D₁∘D₁ − D₂∘D₂ = (D₁−D₂)∘D₁ + D₂∘(D₁−D₂)` (`D_k = connDiffField g_k g₀`)
+  -- carries one cocycle difference factor `D₁−D₂ = connDiffField g₁ g₂` (of `∇w` level) against one
+  -- fixed factor `D_k` (of `∇T_k` level), giving the diagonal product grid.  The public target follows
+  -- by growing the inner/outer windows `range(j+2) ⊆ range(j+2+1)` (all summands ≥ 0).
+  obtain ⟨Cd, hCd0, hCd⟩ :=
+    crossSectionDiff_iteratedCovGrad_diagonalProductGrid_rfns_le (I := I) g₀ a ha B hB δ hδ0 hδ1 j
+  refine ⟨Cd, hCd0, ?_⟩
+  intro T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 x
+  refine (hCd T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 x).trans ?_
+  -- Window growth `j + 2 → j + 2 + 1`: termwise inner-window growth, then outer index-set growth.
+  have hgrid_nn : ∀ i ∈ Finset.range (j + 2 + 1),
+      0 ≤ riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
+          * ∑ l ∈ Finset.range (j + 2 + 1 - i),
+              (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)
+                + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂).toSection x)) :=
+    fun i _ => mul_nonneg (riemannianFiberNormSq_nonneg _ _ _ _ _)
+      (Finset.sum_nonneg fun l _ =>
+        add_nonneg (riemannianFiberNormSq_nonneg _ _ _ _ _) (riemannianFiberNormSq_nonneg _ _ _ _ _))
+  refine mul_le_mul_of_nonneg_left ?_ hCd0
+  calc (∑ i ∈ Finset.range (j + 1 + 1),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                  (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
+            * ∑ l ∈ Finset.range (j + 1 + 1 - i),
+                (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)
+                  + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂).toSection x)))
+      ≤ ∑ i ∈ Finset.range (j + 1 + 1),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                  (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
+            * ∑ l ∈ Finset.range (j + 2 + 1 - i),
+                (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)
+                  + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂).toSection x)) := by
+        refine Finset.sum_le_sum fun i _ => ?_
+        refine mul_le_mul_of_nonneg_left ?_ (riemannianFiberNormSq_nonneg _ _ _ _ _)
+        exact Finset.sum_le_sum_of_subset_of_nonneg
+          (Finset.range_subset_range.2 (by omega : j + 1 + 1 - i ≤ j + 2 + 1 - i))
+          fun l _ _ => add_nonneg (riemannianFiberNormSq_nonneg _ _ _ _ _)
+            (riemannianFiberNormSq_nonneg _ _ _ _ _)
+    _ ≤ ∑ i ∈ Finset.range (j + 2 + 1),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                  (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
+            * ∑ l ∈ Finset.range (j + 2 + 1 - i),
+                (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)
+                  + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂).toSection x)) :=
+        Finset.sum_le_sum_of_subset_of_nonneg
+          (Finset.range_subset_range.2 (by omega : j + 1 + 1 ≤ j + 2 + 1))
+          fun i hi _ => hgrid_nn i hi
 
 end DeTurck
 end IntrinsicSpectral
