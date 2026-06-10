@@ -195,4 +195,173 @@ theorem akActTerm_eq {q : ℕ} (A : (Fin (2 + 1) → Idx) → Real)
           rfl
         · exact absurd rfl hs
 
+/-! ## Finite-sum tower and norm lemmas -/
+
+private theorem contMDiffOn_finsetSum' {ι : Type*} {u : Set M} (t : Finset ι)
+    (F : ι → M → Real)
+    (hF : ∀ i ∈ t, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (F i) u) :
+    ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => ∑ i ∈ t, F i y) u := by
+  classical
+  induction t using Finset.induction_on with
+  | empty => simpa using contMDiffOn_const (c := (0 : ℝ))
+  | insert a s has ih =>
+    have hsum : (fun y => ∑ i ∈ insert a s, F i y) =
+        fun y => F a y + ∑ i ∈ s, F i y := by
+      funext y
+      rw [Finset.sum_insert has]
+    rw [hsum]
+    exact (hF a (Finset.mem_insert_self a s)).add
+      (ih fun i hi => hF i (Finset.mem_insert_of_mem hi))
+
+/-- The component tower of a finite sum of (smooth) fields is the sum of the towers
+(`iterCovComp_add` iterated over the finset). -/
+theorem iterCovComp_sum {r : ℕ} {u : Set M} (hu : IsOpen u)
+    (frame : Idx → (x : M) → TangentSpace I x)
+    (chr : M → Idx → Idx → Idx → Real)
+    {ι : Type*} (t : Finset ι) (F : ι → M → (Fin r → Idx) → Real)
+    (hframe : ∀ d : Idx, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
+      (fun y => TotalSpace.mk' E (E := TangentSpace I) y (frame d y)) u)
+    (hchr : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chr y d i j) u)
+    (hF : ∀ i ∈ t, ∀ m : Fin r → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => F i y m) u)
+    (a : ℕ) :
+    ∀ y ∈ u, ∀ n : Fin (r + a) → Idx,
+      iterCovComp (I := I) frame chr (fun z k => ∑ i ∈ t, F i z k) a y n =
+        ∑ i ∈ t, iterCovComp (I := I) frame chr (F i) a y n := by
+  classical
+  induction t using Finset.induction_on with
+  | empty =>
+    intro y hy n
+    have hzero : (fun (z : M) (k : Fin r → Idx) => ∑ i ∈ (∅ : Finset ι), F i z k) =
+        fun z k => (0 : ℝ) * (0 : ℝ) := by
+      funext z k
+      simp
+    rw [hzero,
+      iterCovComp_smul hu frame chr 0 (fun _ _ => (0 : ℝ)) hframe hchr
+        (fun m => contMDiffOn_const) a y hy n]
+    simp
+  | insert b s hbs ih =>
+    intro y hy n
+    have hsplit : (fun (z : M) (k : Fin r → Idx) => ∑ i ∈ insert b s, F i z k) =
+        fun z k => F b z k + ∑ i ∈ s, F i z k := by
+      funext z k
+      rw [Finset.sum_insert hbs]
+    rw [hsplit,
+      iterCovComp_add hu frame chr (F b) (fun z k => ∑ i ∈ s, F i z k) hframe hchr
+        (hF b (Finset.mem_insert_self b s))
+        (fun m => contMDiffOn_finsetSum' s (fun i y => F i y m)
+          (fun i hi => hF i (Finset.mem_insert_of_mem hi) m)) a y hy n,
+      ih (fun i hi => hF i (Finset.mem_insert_of_mem hi)) y hy n,
+      Finset.sum_insert hbs]
+
+/-- Triangle inequality for finite sums of component arrays. -/
+theorem compL2_sum_le {r : ℕ} {ι : Type*} (t : Finset ι)
+    (F : ι → (Fin r → Idx) → Real) :
+    compL2 (fun n => ∑ i ∈ t, F i n) ≤ ∑ i ∈ t, compL2 (F i) := by
+  classical
+  induction t using Finset.induction_on with
+  | empty =>
+    simp only [Finset.sum_empty]
+    have : compL2 (fun _ : Fin r → Idx => (0 : ℝ)) = 0 := by
+      simp [compL2, compL2Sq]
+    exact le_of_eq this
+  | insert b s hbs ih =>
+    simp only [Finset.sum_insert hbs]
+    exact le_trans (compL2_add_le (F b) (fun n => ∑ i ∈ s, F i n))
+      (add_le_add le_rfl ih)
+
+/-! ## The m-fold norm bound for the conversion term (`P(m)` reused) -/
+
+/-- **The m-fold bound for the conversion action**: `|∇^a(akAct A B)|` obeys the same
+binomial bound as the natural contraction, slot-multiplied — each of the `q+1` slot
+summands is a reindexed `contrTail` (`akActTerm_eq`), so `P(m)`
+(`compL2_iterCovComp_contrTail_le`) applies verbatim after the reindex norm-invariances. -/
+theorem compL2_akAct_le {q : ℕ} {u : Set M} (hu : IsOpen u)
+    (frame : Idx → (x : M) → TangentSpace I x)
+    (chr : M → Idx → Idx → Idx → Real)
+    (hframe : ∀ d : Idx, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
+      (fun y => TotalSpace.mk' E (E := TangentSpace I) y (frame d y)) u)
+    (hchr : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chr y d i j) u)
+    (A : M → (Fin (2 + 1) → Idx) → Real) (B : M → (Fin (q + 1) → Idx) → Real)
+    (hA : ∀ k : Fin (2 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => A y k) u)
+    (hB : ∀ k : Fin (q + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => B y k) u)
+    (a : ℕ) {y : M} (hy : y ∈ u) :
+    compL2 (iterCovComp (I := I) frame chr (fun z => akAct (A z) (B z)) a y) ≤
+      (q + 1 : ℝ) * ∑ c ∈ Finset.range (a + 1), (a.choose c : Real) *
+        compL2 (iterCovCompU (I := I) frame chr A c y) *
+        compL2 (iterCovComp (I := I) frame chr B (a - c) y) := by
+  classical
+  -- the base field as a finite sum of reindexed contrTails
+  have hbase : (fun z => akAct (A z) (B z)) =
+      fun z (n : Fin (q + 1 + 1) → Idx) => ∑ s : Fin (q + 1),
+        contrTail (A z) (fun w => B z (fun j => w (Equiv.swap s (Fin.last q) j)))
+          (fun j => n (akSlotEquiv s j)) := by
+    funext z n
+    unfold akAct
+    exact Finset.sum_congr rfl fun s _ => akActTerm_eq (A z) (B z) s n
+  -- smoothness of each slot summand
+  have hFsm : ∀ s : Fin (q + 1), ∀ k : Fin (q + 1 + 1) → Idx,
+      ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+        (fun z => contrTail (A z)
+          (fun w => B z (fun j => w (Equiv.swap s (Fin.last q) j)))
+          (fun j => k (akSlotEquiv s j))) u :=
+    fun s k => contMDiffOn_contrTail _ _ hA
+      (fun k' => hB (fun j => k' (Equiv.swap s (Fin.last q) j))) _
+  rw [hbase]
+  -- tower of the finite sum, then triangle
+  have htower := iterCovComp_sum hu frame chr Finset.univ
+    (fun (s : Fin (q + 1)) (z : M) (n : Fin (q + 1 + 1) → Idx) =>
+      contrTail (A z) (fun w => B z (fun j => w (Equiv.swap s (Fin.last q) j)))
+        (fun j => n (akSlotEquiv s j)))
+    hframe hchr (fun s _ => hFsm s) a y hy
+  calc compL2 (iterCovComp (I := I) frame chr
+        (fun z n => ∑ s : Fin (q + 1),
+          contrTail (A z) (fun w => B z (fun j => w (Equiv.swap s (Fin.last q) j)))
+            (fun j => n (akSlotEquiv s j))) a y)
+      = compL2 (fun n : Fin (q + 1 + 1 + a) → Idx => ∑ s : Fin (q + 1),
+          iterCovComp (I := I) frame chr
+            (fun z (nn : Fin (q + 1 + 1) → Idx) =>
+              contrTail (A z) (fun w => B z (fun j => w (Equiv.swap s (Fin.last q) j)))
+                (fun j => nn (akSlotEquiv s j))) a y n) :=
+        congrArg compL2 (funext fun n => htower n)
+    _ ≤ ∑ s : Fin (q + 1), compL2 (iterCovComp (I := I) frame chr
+          (fun z (nn : Fin (q + 1 + 1) → Idx) =>
+            contrTail (A z) (fun w => B z (fun j => w (Equiv.swap s (Fin.last q) j)))
+              (fun j => nn (akSlotEquiv s j))) a y) :=
+        compL2_sum_le Finset.univ _
+    _ ≤ ∑ _s : Fin (q + 1), ∑ c ∈ Finset.range (a + 1), (a.choose c : Real) *
+          compL2 (iterCovCompU (I := I) frame chr A c y) *
+          compL2 (iterCovComp (I := I) frame chr B (a - c) y) := by
+        refine Finset.sum_le_sum fun s _ => ?_
+        -- kill the outer reindex, apply `P(a)`, kill the inner reindex
+        rw [compL2_iterCovComp_compReindex (akSlotEquiv s) frame chr
+          (fun z => contrTail (A z)
+            (fun w => B z (fun j => w (Equiv.swap s (Fin.last q) j)))) a y]
+        refine le_trans (compL2_iterCovComp_contrTail_le hu frame chr hframe hchr a A
+          (fun z (w : Fin (q + 1) → Idx) => B z (fun j => w (Equiv.swap s (Fin.last q) j)))
+          hA (fun k' => hB (fun j => k' (Equiv.swap s (Fin.last q) j))) hy)
+          (le_of_eq ?_)
+        refine Finset.sum_congr rfl fun c _ => ?_
+        rw [compL2_iterCovComp_compReindex (Equiv.swap s (Fin.last q)) frame chr B (a - c) y]
+    _ = (q + 1 : ℝ) * ∑ c ∈ Finset.range (a + 1), (a.choose c : Real) *
+          compL2 (iterCovCompU (I := I) frame chr A c y) *
+          compL2 (iterCovComp (I := I) frame chr B (a - c) y) := by
+        rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+        push_cast
+        ring
+
+/-! ## The field-level conversion -/
+
+/-- **The field-level one-step conversion** (pointwise, no smoothness needed): the first
+`chrR`-tower step of a field equals the first `chrK`-step plus the action of the
+pointwise Christoffel-difference array. -/
+theorem iterCov_chr_convert {q : ℕ}
+    (frame : Idx → (x : M) → TangentSpace I x)
+    (chrR chrK : M → Idx → Idx → Idx → Real)
+    (B : M → (Fin q → Idx) → Real) (y : M) (n : Fin (q + 1) → Idx) :
+    iterCovComp (I := I) frame chrR B 1 y n =
+      iterCovComp (I := I) frame chrK B 1 y n +
+        akAct (fun m => chrK y (m 0) (m 1) (m 2) - chrR y (m 0) (m 1) (m 2)) (B y) n := by
+  simp only [iterCovComp_succ, iterCovComp_zero]
+  exact covStep_chr_convert _ _ _ _ n
+
 end DifferentialGeometry.PDE.RicciFlow
