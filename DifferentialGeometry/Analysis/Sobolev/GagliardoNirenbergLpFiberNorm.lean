@@ -511,6 +511,62 @@ private theorem weightedCovIBP_lpFiberJet_fin
           ∂(Integral.Measure.riemannianVolumeMeasure I M g) := by
   sorry
 
+/-- **(POSIT — child A: the `√n` rough-Laplacian trace bound.)**
+
+The pointwise Cauchy–Schwarz bound for the rough-Laplacian inner product against `w`, with the
+sharp `√(finrank)` trace constant (NOT the naive `finrank·|∇²w|`): reading `Δ_raw w (x) = ∑ᵢ ∇²_{Bᵢ,Bᵢ}
+w (x)` as a diagonal frame trace, the discrete Cauchy–Schwarz on the `n = finrank`-term sum gives the
+`√n`, and the diagonal sub-sum `∑ᵢ |∇²_{Bᵢ,Bᵢ}w|²(x) ≤ |∇²w|²(x) = rfns(∇²w)(x)` bounds the remaining
+factor:
+```
+|⟨Δ_raw w, w⟩(x)| ≤ √(finrank) · (rfns(w)(x))^{1/2} · (rfns(∇²w)(x))^{1/2}.
+```
+Its body is `sorry`: the genuine diagonal-frame-trace Cauchy–Schwarz (the `√n` carrier); consumers
+transitively depend on its `sorryAx`.  **General analytic infrastructure** (rough-Laplacian diagonal
+trace bound) to be promoted to `Analysis/Elliptic/ConnectionLaplacian`. -/
+private theorem rawConnLap_innerWith_sqrt_finrank_bound
+    (g : SmoothRiemannianMetric I M) (m : ℕ)
+    (w : Integral.L2.SmoothCcTensor g 0 m) (x : M) :
+    |Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 m x
+        ((rawTensorConnLapSmooth (I := I) g 0 m w).toFun x) (w.toFun x)| ≤
+      Real.sqrt (Module.finrank ℝ E : ℝ) *
+        Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x)) *
+        Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
+          ((covGrad (I := I) (M := M) g 0 (m + 1)
+            (covGrad (I := I) (M := M) g 0 m w)).toSection x)) := by
+  sorry
+
+/-- **(POSIT — child B: the `2(k-1)` weight cross-term bound.)**
+
+The pointwise bound on the Leibniz cross term `⟨∇w, dζ ⊗ w⟩(x) = tensorCovDerivCrossLeft g 0 m ζ w w x`
+for the weight `ζ = (rfns(∇w))^{k-1}`.  Expanding `dζ = (k-1)(rfns(∇w))^{k-2}·d(rfns(∇w))` and
+`d(rfns(∇w)) = 2⟨∇²w, ∇w⟩` (metric compatibility), then Cauchy–Schwarz on the inverse-Gram double sum
+gives
+```
+|tensorCovDerivCrossLeft g 0 m ζ w w x|
+  ≤ 2·(k-1) · A · (rfns(∇w)(x))^{k-1} · (rfns(∇²w)(x))^{1/2},
+```
+using `rfns(w)(x) ≤ A²`.  Its body is `sorry`: the genuine metric-compatible chain rule plus
+Cauchy–Schwarz on the cross term (the `2(k-1)` carrier); consumers transitively depend on its
+`sorryAx`.  **General analytic infrastructure** (Leibniz weight cross-term bound) to be promoted
+alongside child A. -/
+private theorem covDerivCrossLeft_weight_bound
+    (g : SmoothRiemannianMetric I M) (k m : ℕ) (_hk : 1 ≤ k)
+    (w : Integral.L2.SmoothCcTensor g 0 m) (A : ℝ) (_hA : 0 ≤ A)
+    (_hsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x) ≤ A ^ 2)
+    (ζ : C^∞⟮I, M; ℝ⟯)
+    (hζ : (ζ : M → ℝ) = fun y => (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) y
+        ((covGrad (I := I) (M := M) g 0 m w).toSection y)) ^ (k - 1))
+    (x : M) :
+    |tensorCovDerivCrossLeft (I := I) (M := M) g 0 m ζ w w x| ≤
+      2 * ((k : ℝ) - 1) * A *
+        (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
+          ((covGrad (I := I) (M := M) g 0 m w).toSection x)) ^ ((k : ℝ) - 1) *
+        (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
+          ((covGrad (I := I) (M := M) g 0 (m + 1)
+            (covGrad (I := I) (M := M) g 0 m w)).toSection x)) ^ (1 / 2 : ℝ) := by
+  sorry
+
 /-- **(POSIT — the weighted covariant `Lᵖ` integration-by-parts inequality, `L^∞`-factor form.)**
 
 The order-`0` instance of the covariant IBP engine, where the lowest factor `|w|` is replaced by a
@@ -520,10 +576,14 @@ uniform `L^∞` bound `A ≥ 0` on the fibre norm of `w` (`rfns(w) ≤ A²` poin
 ∫ b^k ≤ (2(k-1) + √(finrank)) · A · ∫ b^{k-1} · c^{1/2},
 ```
 i.e. `∫ |∇w|^{2k} ≤ (2(k-1)+√n)·A·∫ |∇w|^{2k-2}·|∇²w|`, the corrected Hamilton constant (the `√n` is the
-irreducible trace factor `|Δ_raw w| ≤ √n·|∇²w|`, equality at `∇²w = g`).  Its body is `sorry`: the
-genuine closed-manifold weighted covariant divergence theorem with the lowest factor bounded by the
-`L^∞` constant; consumers transitively depend on its `sorryAx`.  **General analytic infrastructure**
-(weighted-`Lᵖ` covariant IBP, `L^∞`-factor) to be promoted alongside the finite form. -/
+irreducible trace factor from the diagonal frame trace of `∇²w`).  It is assembled from the covariant
+Green identity (`tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_gen`) on the weight `v = ζ·w`
+with `ζ = b^{k-1}`, the Dirichlet bridge, the metric Leibniz split of `∫⟨∇w, ∇(ζw)⟩` into `∫ b^k` plus
+the cross term `tensorCovDerivCrossLeft`, and the two pointwise carriers
+`covDerivCrossLeft_weight_bound` (the `2(k-1)` term) and `rawConnLap_innerWith_sqrt_finrank_bound`
+(the `√n` term); consumers transitively depend on the `sorryAx` of those two carriers.  **General
+analytic infrastructure** (weighted-`Lᵖ` covariant IBP, `L^∞`-factor) to be promoted alongside the
+finite form. -/
 private theorem weightedCovIBP_lpFiberJet_sup
     (g : SmoothRiemannianMetric I M) (k m : ℕ) (_hk : 1 ≤ k)
     (w : Integral.L2.SmoothCcTensor g 0 m) (A : ℝ) (_hA : 0 ≤ A)
@@ -538,7 +598,252 @@ private theorem weightedCovIBP_lpFiberJet_sup
               ((covGrad (I := I) (M := M) g 0 (m + 1)
                 (covGrad (I := I) (M := M) g 0 m w)).toSection x)) ^ (1 / 2 : ℝ)
           ∂(Integral.Measure.riemannianVolumeMeasure I M g) := by
-  sorry
+  classical
+  haveI : MeasureTheory.IsFiniteMeasure (Integral.Measure.riemannianVolumeMeasure I M g) :=
+    Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
+  set μ : MeasureTheory.Measure M := Integral.Measure.riemannianVolumeMeasure I M g with hμ
+  -- The gradient tensors and the rough Laplacian.
+  set gw : Integral.L2.SmoothCcTensor g 0 (m + 1) := covGrad (I := I) (M := M) g 0 m w with hgw
+  set ggw : Integral.L2.SmoothCcTensor g 0 (m + 1 + 1) :=
+    covGrad (I := I) (M := M) g 0 (m + 1) gw with hggw
+  set Lw : Integral.L2.SmoothCcTensor g 0 m :=
+    rawTensorConnLapSmooth (I := I) g 0 m w with hLw
+  -- The pointwise fibre norms `b = rfns(∇w)`, `c = rfns(∇²w)`.
+  set b : M → ℝ := fun y => riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) y (gw.toSection y)
+    with hb
+  set c : M → ℝ := fun y =>
+    riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) y (ggw.toSection y) with hc
+  have hb_nonneg : ∀ y, 0 ≤ b y := fun y =>
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (m + 1) y (gw.toSection y)
+  have hc_nonneg : ∀ y, 0 ≤ c y := fun y =>
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (m + 1 + 1) y (ggw.toSection y)
+  -- `b` agrees pointwise with the smooth scalar `tensorInnerScalar g 0 (m+1) (∇w) (∇w)`.
+  have hb_eq_scalar : b = Integral.Connection.tensorInnerScalar (I := I) (M := M) g 0 (m + 1)
+      gw.toSection gw.toSection := by
+    funext y
+    simp only [hb, Integral.Connection.tensorInnerScalar_apply]
+    rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 (m + 1) y
+      (gw.toSection y)]
+  have hb_smooth : ContMDiff I 𝓘(ℝ) ∞ b := by
+    rw [hb_eq_scalar]
+    exact Integral.Connection.tensorInnerScalar_contMDiff (I := I) (M := M) g 0 (m + 1)
+      gw.toSection gw.toSection
+  -- The smooth weight `ζ = b^{k-1}` (natural power; smooth everywhere).
+  set ζ : C^∞⟮I, M; ℝ⟯ := ⟨fun y => b y ^ (k - 1), hb_smooth.pow (k - 1)⟩ with hζ
+  have hζ_apply : (ζ : M → ℝ) = fun y => b y ^ (k - 1) := rfl
+  have hζ_nonneg : ∀ y, 0 ≤ (ζ : M → ℝ) y := by
+    intro y; rw [hζ_apply]; exact pow_nonneg (hb_nonneg y) _
+  -- `ζ y = (b y)^{(k:ℝ)-1}` as a real power.
+  have hζ_rpow : ∀ y, (ζ : M → ℝ) y = (b y) ^ ((k : ℝ) - 1) := by
+    intro y
+    simp only [hζ_apply]
+    rw [← Real.rpow_natCast (b y) (k - 1)]
+    congr 1
+    rw [Nat.cast_sub _hk, Nat.cast_one]
+  -- The weight tensor `v = ζ • w`.
+  set v : Integral.L2.SmoothCcTensor g 0 m :=
+    scalarSmul (I := I) (M := M) g 0 m ζ w with hv
+  -- The diagonal pointwise gradient inner product is `b`.
+  have hdiag : ∀ x, tensorCovDerivPointwiseInner (I := I) (M := M) g 0 m w w x = b x := by
+    intro x
+    rw [tensorCovDerivPointwiseInner_eq_tensorInnerPointwise_grad (I := I) (M := M) g 0 m w w x,
+      ← riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 (m + 1) x
+        ((covGrad (I := I) (M := M) g 0 m w).toSection x)]
+  -- The metric Leibniz split (right slot): `⟨∇w, ∇(ζw)⟩ = ζ·⟨∇w,∇w⟩ + ⟨∇w, dζ⊗w⟩`.
+  have hsplit : ∀ x, tensorCovDerivPointwiseInner (I := I) (M := M) g 0 m w v x =
+      (ζ : M → ℝ) x * b x + tensorCovDerivCrossLeft (I := I) (M := M) g 0 m ζ w w x := by
+    intro x
+    rw [tensorCovDerivPointwiseInner_def, tensorCovDerivCrossLeft_def, ← hdiag,
+      tensorCovDerivPointwiseInner_def, Finset.mul_sum, ← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [Finset.mul_sum, ← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl (fun j _ => ?_)
+    rw [hv, tensorCovDerivAt_scalarSmul (I := I) (M := M) g 0 m ζ w x
+      ((Integral.Measure.chartModelBasis E) j)]
+    have hwx : Tensor0SBundle.TensorRSSpace.toModel (w.toSection x) = w.toFun x := rfl
+    simp only [Tensor0SBundle.TensorRSSpace.toModel_add, Tensor0SBundle.TensorRSSpace.toModel_smul,
+      hwx, Integral.L2.tensorInnerPointwise_add_right, Integral.L2.tensorInnerPointwise_smul_right]
+    ring
+  -- The right-hand scalar pull-out: `⟨Δw, ζw⟩ = ζ·⟨Δw, w⟩` pointwise.
+  have hpull : ∀ x, Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 m x
+        (Lw.toFun x) (v.toFun x) =
+      (ζ : M → ℝ) x * Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 m x
+        (Lw.toFun x) (w.toFun x) := by
+    intro x
+    rw [hv, scalarSmul_toFun_apply, Integral.L2.tensorInnerPointwise_smul_right]
+  -- The Green identity composed with the Dirichlet bridge.
+  have hcentral : ∫ x, tensorCovDerivPointwiseInner (I := I) (M := M) g 0 m w v x ∂μ =
+      - ∫ x, Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 m x
+          (Lw.toFun x) (v.toFun x) ∂μ := by
+    have hgreen := tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_gen
+      (I := I) (M := M) g m w v
+    have hdir := tensorL2Inner_covGrad_eq_integral_tensorCovDerivPointwiseInner
+      (I := I) (M := M) g 0 m w v
+    rw [hdir] at hgreen
+    rw [hgreen, Integral.L2.tensorL2Inner, hLw]
+  -- Continuity of the integrands (everything is continuous on the compact manifold `M`).
+  have hb_cont : Continuous b := hb_smooth.continuous
+  have hc_cont : Continuous c := continuous_rfns_section (I := I) (M := M) g 0 (m + 1 + 1) ggw
+  have hζ_cont : Continuous (ζ : M → ℝ) := by
+    simp only [hζ_apply]; exact hb_cont.pow (k - 1)
+  have htcdpi_cont : Continuous (tensorCovDerivPointwiseInner (I := I) (M := M) g 0 m w v) :=
+    tensorCovDerivPointwiseInner_continuous (I := I) (M := M) g 0 m w v
+  have hζb_cont : Continuous (fun x => (ζ : M → ℝ) x * b x) := hζ_cont.mul hb_cont
+  -- The cross term is continuous (as `tCDPI w v − ζ·b`).
+  have hcrossL_cont : Continuous (tensorCovDerivCrossLeft (I := I) (M := M) g 0 m ζ w w) := by
+    have heq : tensorCovDerivCrossLeft (I := I) (M := M) g 0 m ζ w w =
+        fun x => tensorCovDerivPointwiseInner (I := I) (M := M) g 0 m w v x -
+          (ζ : M → ℝ) x * b x := by
+      funext x; rw [hsplit x]; ring
+    rw [heq]; exact htcdpi_cont.sub hζb_cont
+  -- The diagonal inner product `dw = ⟨Δw, w⟩` is the smooth scalar `tensorInnerScalar g 0 m Δw w`.
+  set dw : M → ℝ := fun x => Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 m x
+    (Lw.toFun x) (w.toFun x) with hdw
+  have hdw_eq : dw = Integral.Connection.tensorInnerScalar (I := I) (M := M) g 0 m
+      Lw.toSection w.toSection := by
+    funext x
+    simp only [hdw, Integral.Connection.tensorInnerScalar_apply]
+    rfl
+  have hdw_cont : Continuous dw := by
+    rw [hdw_eq]
+    exact (Integral.Connection.tensorInnerScalar_contMDiff (I := I) (M := M) g 0 m
+      Lw.toSection w.toSection).continuous
+  have hζdw_cont : Continuous (fun x => (ζ : M → ℝ) x * dw x) := hζ_cont.mul hdw_cont
+  -- Integrability on the closed manifold.
+  have hint : ∀ f : M → ℝ, Continuous f → MeasureTheory.Integrable f μ := by
+    intro f hf
+    exact (hf.memLp_of_hasCompactSupport (HasCompactSupport.of_compactSpace _) (p := 1)).integrable
+      (le_refl 1)
+  -- The target right-hand integrand `F = b^{k-1} · c^{1/2} = ζ · √c`.
+  set F : M → ℝ := fun x => (b x) ^ ((k : ℝ) - 1) * (c x) ^ (1 / 2 : ℝ) with hF
+  have hF_nonneg : ∀ x, 0 ≤ F x := fun x =>
+    mul_nonneg (Real.rpow_nonneg (hb_nonneg x) _) (Real.rpow_nonneg (hc_nonneg x) _)
+  have hk1 : (0 : ℝ) ≤ (k : ℝ) - 1 := by
+    have : (1 : ℝ) ≤ (k : ℝ) := by exact_mod_cast _hk
+    linarith
+  have hF_cont : Continuous F :=
+    (hb_cont.rpow_const (fun x => Or.inr hk1)).mul
+      (hc_cont.rpow_const (fun x => Or.inr (by norm_num)))
+  have hζsqrtc : ∀ x, (ζ : M → ℝ) x * Real.sqrt (c x) = F x := by
+    intro x
+    rw [hF, hζ_rpow x, Real.sqrt_eq_rpow]
+  -- The goal left member is `∫ ζ·b`.
+  have hLHS_eq : (∫ x, (b x) ^ ((k : ℝ) / 1) ∂μ) = ∫ x, (ζ : M → ℝ) x * b x ∂μ := by
+    refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+    simp only [hζ_apply, div_one]
+    rw [Real.rpow_natCast (b x) k]
+    have hkpow : (b x) ^ (k - 1) * b x = (b x) ^ k := by
+      rw [← pow_succ]; congr 1; omega
+    rw [hkpow]
+  -- The master equation: `∫ ζ·b + ∫ crossLeft = − ∫ ζ·dw`.
+  have hLHS_split : (∫ x, tensorCovDerivPointwiseInner (I := I) (M := M) g 0 m w v x ∂μ) =
+      (∫ x, (ζ : M → ℝ) x * b x ∂μ) +
+        ∫ x, tensorCovDerivCrossLeft (I := I) (M := M) g 0 m ζ w w x ∂μ := by
+    rw [← MeasureTheory.integral_add (hint _ hζb_cont) (hint _ hcrossL_cont)]
+    exact MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall hsplit)
+  have hRHS_pull : (∫ x, Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 m x
+        (Lw.toFun x) (v.toFun x) ∂μ) = ∫ x, (ζ : M → ℝ) x * dw x ∂μ :=
+    MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall hpull)
+  have hmaster : (∫ x, (ζ : M → ℝ) x * b x ∂μ) +
+      (∫ x, tensorCovDerivCrossLeft (I := I) (M := M) g 0 m ζ w w x ∂μ) =
+      - ∫ x, (ζ : M → ℝ) x * dw x ∂μ := by
+    rw [← hLHS_split, ← hRHS_pull]; exact hcentral
+  -- The two pointwise carrier bounds, integrated.
+  have hA_nonneg : (0 : ℝ) ≤ A := _hA
+  -- Bound the cross-term integral (child B).
+  have hcrossB : ∀ x, |tensorCovDerivCrossLeft (I := I) (M := M) g 0 m ζ w w x| ≤
+      2 * ((k : ℝ) - 1) * A * F x := by
+    intro x
+    have hb' := covDerivCrossLeft_weight_bound (I := I) (M := M) g k m _hk w A _hA _hsup ζ
+      (by simp only [hζ_apply, hb, hgw]) x
+    calc |tensorCovDerivCrossLeft (I := I) (M := M) g 0 m ζ w w x|
+        ≤ 2 * ((k : ℝ) - 1) * A *
+            (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x (gw.toSection x))
+              ^ ((k : ℝ) - 1) *
+            (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x (ggw.toSection x))
+              ^ (1 / 2 : ℝ) := hb'
+      _ = 2 * ((k : ℝ) - 1) * A * F x := by simp only [hF]; ring
+  -- Bound the Laplacian integral (child A) after the `√a ≤ A` reduction.
+  have hsqrt_a_le : ∀ x, Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g 0 m x
+      (w.toSection x)) ≤ A := by
+    intro x
+    rw [← Real.sqrt_sq _hA]
+    exact Real.sqrt_le_sqrt (_hsup x)
+  have hA_bound : ∀ x, (ζ : M → ℝ) x * |dw x| ≤
+      Real.sqrt (Module.finrank ℝ E : ℝ) * A * F x := by
+    intro x
+    have hcA : |dw x| ≤ Real.sqrt (Module.finrank ℝ E : ℝ) *
+        Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x)) *
+        Real.sqrt (c x) :=
+      rawConnLap_innerWith_sqrt_finrank_bound (I := I) (M := M) g m w x
+    have hsqc_nonneg : (0 : ℝ) ≤ Real.sqrt (c x) := Real.sqrt_nonneg _
+    have hkey : |dw x| ≤ Real.sqrt (Module.finrank ℝ E : ℝ) * A * Real.sqrt (c x) := by
+      calc |dw x| ≤ Real.sqrt (Module.finrank ℝ E : ℝ) *
+              Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x)) *
+              Real.sqrt (c x) := hcA
+        _ ≤ Real.sqrt (Module.finrank ℝ E : ℝ) * A * Real.sqrt (c x) := by
+            apply mul_le_mul_of_nonneg_right _ hsqc_nonneg
+            apply mul_le_mul_of_nonneg_left (hsqrt_a_le x) (Real.sqrt_nonneg _)
+    calc (ζ : M → ℝ) x * |dw x|
+        ≤ (ζ : M → ℝ) x * (Real.sqrt (Module.finrank ℝ E : ℝ) * A * Real.sqrt (c x)) :=
+          mul_le_mul_of_nonneg_left hkey (hζ_nonneg x)
+      _ = Real.sqrt (Module.finrank ℝ E : ℝ) * A * ((ζ : M → ℝ) x * Real.sqrt (c x)) := by ring
+      _ = Real.sqrt (Module.finrank ℝ E : ℝ) * A * F x := by rw [hζsqrtc x]
+  -- Integrate the two carrier bounds.
+  have hintF : MeasureTheory.Integrable F μ := hint _ hF_cont
+  have hcrossL_int_bound :
+      (∫ x, tensorCovDerivCrossLeft (I := I) (M := M) g 0 m ζ w w x ∂μ) ≤
+        2 * ((k : ℝ) - 1) * A * ∫ x, F x ∂μ := by
+    calc (∫ x, tensorCovDerivCrossLeft (I := I) (M := M) g 0 m ζ w w x ∂μ)
+        ≤ ∫ x, 2 * ((k : ℝ) - 1) * A * F x ∂μ := by
+          refine MeasureTheory.integral_mono (hint _ hcrossL_cont)
+            ((hintF.const_mul _)) (fun x => ?_)
+          exact le_trans (le_abs_self _) (hcrossB x)
+      _ = 2 * ((k : ℝ) - 1) * A * ∫ x, F x ∂μ := MeasureTheory.integral_const_mul _ _
+  have hcrossL_int_bound_neg :
+      -(∫ x, tensorCovDerivCrossLeft (I := I) (M := M) g 0 m ζ w w x ∂μ) ≤
+        2 * ((k : ℝ) - 1) * A * ∫ x, F x ∂μ := by
+    calc -(∫ x, tensorCovDerivCrossLeft (I := I) (M := M) g 0 m ζ w w x ∂μ)
+        ≤ |∫ x, tensorCovDerivCrossLeft (I := I) (M := M) g 0 m ζ w w x ∂μ| := neg_le_abs _
+      _ ≤ ∫ x, |tensorCovDerivCrossLeft (I := I) (M := M) g 0 m ζ w w x| ∂μ :=
+          MeasureTheory.abs_integral_le_integral_abs
+      _ ≤ ∫ x, 2 * ((k : ℝ) - 1) * A * F x ∂μ :=
+          MeasureTheory.integral_mono (hint _ hcrossL_cont.abs)
+            ((hintF.const_mul _)) hcrossB
+      _ = 2 * ((k : ℝ) - 1) * A * ∫ x, F x ∂μ := MeasureTheory.integral_const_mul _ _
+  have hLap_int_bound :
+      -(∫ x, (ζ : M → ℝ) x * dw x ∂μ) ≤
+        Real.sqrt (Module.finrank ℝ E : ℝ) * A * ∫ x, F x ∂μ := by
+    calc -(∫ x, (ζ : M → ℝ) x * dw x ∂μ)
+        ≤ |∫ x, (ζ : M → ℝ) x * dw x ∂μ| := neg_le_abs _
+      _ ≤ ∫ x, |(ζ : M → ℝ) x * dw x| ∂μ := MeasureTheory.abs_integral_le_integral_abs
+      _ ≤ ∫ x, Real.sqrt (Module.finrank ℝ E : ℝ) * A * F x ∂μ := by
+          refine MeasureTheory.integral_mono (hint _ hζdw_cont.abs) ((hintF.const_mul _))
+            (fun x => ?_)
+          rw [abs_mul, abs_of_nonneg (hζ_nonneg x)]
+          exact hA_bound x
+      _ = Real.sqrt (Module.finrank ℝ E : ℝ) * A * ∫ x, F x ∂μ :=
+          MeasureTheory.integral_const_mul _ _
+  -- Assemble: rewrite the goal LHS as `∫ ζ·b`, substitute the master equation, and bound.
+  rw [show (∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x (gw.toSection x))
+          ^ ((k : ℝ) / 1) ∂μ) = ∫ x, (b x) ^ ((k : ℝ) / 1) ∂μ from rfl, hLHS_eq]
+  have hζb_eq : (∫ x, (ζ : M → ℝ) x * b x ∂μ) =
+      -(∫ x, (ζ : M → ℝ) x * dw x ∂μ) -
+        (∫ x, tensorCovDerivCrossLeft (I := I) (M := M) g 0 m ζ w w x ∂μ) := by
+    have := hmaster; linarith [this]
+  rw [hζb_eq]
+  have hRHS_eq : (∫ x, (b x) ^ ((k : ℝ) - 1) *
+        (c x) ^ (1 / 2 : ℝ) ∂μ) = ∫ x, F x ∂μ := rfl
+  calc -(∫ x, (ζ : M → ℝ) x * dw x ∂μ) -
+          (∫ x, tensorCovDerivCrossLeft (I := I) (M := M) g 0 m ζ w w x ∂μ)
+      ≤ Real.sqrt (Module.finrank ℝ E : ℝ) * A * (∫ x, F x ∂μ) +
+          2 * ((k : ℝ) - 1) * A * (∫ x, F x ∂μ) := by
+        have h1 := hLap_int_bound
+        have h2 := hcrossL_int_bound_neg
+        linarith [h1, h2]
+    _ = (2 * ((k : ℝ) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ)) * A * (∫ x, F x ∂μ) := by ring
+    _ = (2 * ((k : ℝ) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ)) * A *
+          ∫ x, (b x) ^ ((k : ℝ) - 1) * (c x) ^ (1 / 2 : ℝ) ∂μ := by rw [hRHS_eq]
 
 /-- **(POSIT — the second-order covariant `Lᵖ` interpolation in the sub-unit exponent range.)**
 
