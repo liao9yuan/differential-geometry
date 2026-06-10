@@ -114,4 +114,31 @@ theorem akCompField_mdiffOn
   exact (lcChrist_e_mdiffOn e₀ gK basisE (k 0) (k 1) (k 2)).sub
     (lcChrist_e_mdiffOn e₀ gRef basisE (k 0) (k 1) (k 2))
 
+set_option backward.isDefEq.respectTransparency false in
+/-- **B2 `hg`**: the metric component field in the trivialization frame is `C^∞` on the
+trivialization domain (the smooth `(0,2)` section `metricTensorField g` evaluated on the
+smooth frame slots, via the `(0,s)` evaluation engine). -/
+theorem gCompField_mdiffOn
+    (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
+    [MemTrivializationAtlas e₀]
+    (g : SmoothRiemannianMetric I M) (basisE : Module.Basis Idx Real E)
+    (k : Fin (1 + 1) → Idx) :
+    ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+      (fun y => frameComp0S (I := I) (metricTensorField (I := I) g)
+        (fun a y' => e₀.localFrame basisE a y') y k) e₀.baseSet := by
+  intro y hy
+  have hT : ContMDiffAt I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
+      (fun b : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+        (E := fun x : M => Tensor0SSpace 2 I x) b (metricTensorField (I := I) g b)) y :=
+    (metricTensorField (I := I) g).contMDiff.contMDiffAt
+  have hv : ∀ i : Fin 2,
+      ContMDiffAt I (I.prod 𝓘(ℝ, E)) ∞
+        (fun b : M => TotalSpace.mk' E (E := fun x : M => TangentSpace I x) b
+          (e₀.localFrame basisE (k i) b)) y :=
+    fun i => (frame_e_mdiffOn e₀ basisE (k i)).contMDiffAt (e₀.open_baseSet.mem_nhds hy)
+  have h := TensorMultilinear.contMDiffAt_section_apply_gen
+    (T := fun b : M => metricTensorField (I := I) g b) hT
+    (v := fun (i : Fin 2) (b : M) => e₀.localFrame basisE (k i) b) hv
+  exact h.contMDiffWithinAt
+
 end DifferentialGeometry.PDE.RicciFlow

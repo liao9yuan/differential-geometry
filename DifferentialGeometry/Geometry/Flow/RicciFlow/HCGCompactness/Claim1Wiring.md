@@ -139,9 +139,13 @@ constants (D2b).**
   Effort: 1–1.5 sessions.  Risk: moderate (R1 extraction quality unknown).
 
 **B2 — smoothness wiring (`hA`, `hg`, `hchr`, `hframe`).
-STATUS 2026-06-10: `hchr`/`hframe`/`hA` DONE sorry-free in `Claim1Wiring.lean`
-(`lcChrist_e_mdiffOn`, `frame_e_mdiffOn`, `akCompField` + `akCompField_mdiffOn`);
-only `hg` remains (see TODO in the file).  IMPORTANT: do NOT import
+STATUS 2026-06-10: **B2 COMPLETE sorry-free** in `Claim1Wiring.lean`
+(`lcChrist_e_mdiffOn`, `frame_e_mdiffOn`, `akCompField` + `akCompField_mdiffOn`,
+`gCompField_mdiffOn`).  `hg` gotcha: `Tensor0SModel` instance synthesis needs
+`set_option backward.isDefEq.respectTransparency false in` (the known
+tensor-model-alias lesson); engine = `TensorMultilinear.contMDiffAt_section_apply_gen`
++ `(metricTensorField g).contMDiff` + `frame_e_mdiffOn`, conclusion defeq to
+`frameComp0S` (no simp needed).  IMPORTANT: do NOT import
 `ApproximateIsometry.lean` — it is another session's in-flight edit and currently
 BROKEN (unknown `lcDiffCompInFrame`/`lc_christoffel_contMDiffAt` references, 100+
 errors); B2 instead uses the STABLE upstream `lc_christoffel_contMDiffAt`
