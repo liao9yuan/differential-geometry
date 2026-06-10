@@ -44,7 +44,7 @@ the derived existence `lieDerivDiff_connLevel_sectionData`: the existence of a s
 `lieDerivDiff_connLevel_fullTwoArm` (the **full** Lie-summand difference's two-arm bound),
 which in turn is the `2·rfns`-subadditivity recombination of the single posited primitive
 `lieDerivDiff_connLevel_topRestSplit` (the top/rest split of the full Lie difference, the
-gauge analogue of the curvature half's `crossSection_iteratedCovGrad_connLevel_split`).  From `sectionData`,
+gauge analogue of the curvature half's `crossCorrectionSection_iteratedCovGrad_topRest_split`).  From `sectionData`,
 `lieCrossSection := Cf g₁ g₂` and `lieLinearSection := diff − lieCrossSection` are genuine `def`s, and the
 two Lie-half bound leaves (`SegmentMetricLieDifferenceCovJet.lean`, `SegmentMetricLieDiffCovJet.lean`) are
 stated on these **concrete** sections — never on an arbitrary quadratic section.
@@ -55,7 +55,7 @@ stated on these **concrete** sections — never on an arbitrary quadratic sectio
   covariant-gauge primitive — the 0-jet-inclusive `w`-jet top/rest split of the **full**
   `g₀`-retagged Lie-summand difference (`∇^j diff = Top + Rest`, `Top` carrying the difference-arm jets,
   `Rest` the `(1/8)`-cross fixed-pair jet).  This is the gauge analogue of the curvature half's
-  `crossSection_iteratedCovGrad_connLevel_split`, applied directly to the full Lie difference because the
+  `crossCorrectionSection_iteratedCovGrad_topRest_split`, applied directly to the full Lie difference because the
   intrinsic-vector Lie value-split is genuinely absent on disk.
 
 * `lieDerivDiff_connLevel_fullTwoArm` — **derived**: the full Lie-summand difference's two-arm
@@ -108,7 +108,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 /-- **(POSIT — the top/rest split of the full retagged Lie-summand difference, with the
 0-jet-inclusive `w`-jet difference arm.)**  The genuine deep covariant-gauge content of the Lie half, the gauge analogue of
 the curvature half's connection-level quadratic-Cross top/rest split
-`crossSection_iteratedCovGrad_connLevel_split` (`SegmentMetricCurvatureDifferenceCovJet.lean`), applied
+`crossCorrectionSection_iteratedCovGrad_topRest_split` (`ConnectionDifferenceFieldJets.lean`), applied
 directly to the **full** `g₀`-retagged Lie-summand difference
 `diff := lieDerivRetagG0 g₀ g_bg g₁ − lieDerivRetagG0 g₀ g_bg g₂` rather than to a value-split's pieces.
 
@@ -225,7 +225,7 @@ difference rather than to a value-split's pieces.
 
 **Decomposition.**  Proved by composing the genuine deep top/rest split of the full Lie
 difference `lieDerivDiff_connLevel_topRestSplit` (the gauge analogue of the curvature half's
-`crossSection_iteratedCovGrad_connLevel_split`) with the **sorry-free** `2·rfns` subadditivity
+`crossCorrectionSection_iteratedCovGrad_topRest_split`) with the **sorry-free** `2·rfns` subadditivity
 recombination `riemannianFiberNormSq_add_le`: the split's `(1/8)`-cross share doubles to the consumer's
 `(1/4)` cross coefficient, and its difference-arm constant `Cd` doubles to `2·Cd` — exactly the
 recombination the curvature quadratic-Cross reduction `ricciCrossSection_covGrad_traceReductionConn_rfns_le`
@@ -268,7 +268,7 @@ theorem lieDerivDiff_connLevel_fullTwoArm (g₀ g_bg : SmoothRiemannianMetric I 
   classical
   -- The genuine deep gauge content is the top/rest split of the full Lie-summand
   -- difference `lieDerivDiff_connLevel_topRestSplit` (the gauge analogue of the curvature half's
-  -- `crossSection_iteratedCovGrad_connLevel_split`): at each `j`, `x`, `∇^j diff(x) = Top + Rest` with
+  -- `crossCorrectionSection_iteratedCovGrad_topRest_split`): at each `j`, `x`, `∇^j diff(x) = Top + Rest` with
   -- `Top` carrying the difference-factor `w`-jets (`Cd · ∑ rfns(∇^i w)`) and `Rest` keeping the top
   -- coefficient jet on the fixed pair against the difference's `C⁰` mass (the `(1/8)`-cross share).  The
   -- `2·rfns` subadditivity recombination `riemannianFiberNormSq_add_le` lands the consumer's `(1/4)` cross
