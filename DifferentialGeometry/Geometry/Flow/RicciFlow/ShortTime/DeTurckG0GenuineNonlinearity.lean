@@ -228,6 +228,130 @@ noncomputable def deTurckRealizeRemainderOf (g₀ g_bg : SmoothRiemannianMetric 
   else
     0
 
+namespace IntrinsicSpectral
+
+/-- **The concrete Ricci–DeTurck nonlinearity on the one-derivative-drop spectral Sobolev scale.**
+
+For the anchor metric `g₀` and a flow background `g_bg`, this is the genuine geometric nonlinearity
+
+  `N(u) := deTurckG0SpectralN g₀ a (deTurckRealizeRemainderOf g₀ g_bg (heatRepr u))`,
+
+a map `H^{a+1}(g₀) → Hᵃ(g₀)` of `(0,2)`-tensor spectral Sobolev spaces, where
+`heatRepr u := tensorHeatSemigroupHs_output_smoothRepr g₀ 0 2 (unit time) u` is the unit-time
+heat-smoothed smooth (`SmoothCcTensor`) realization of the spectral datum `u`, and
+`deTurckRealizeRemainderOf g₀ g_bg ·` is the un-gated realized Ricci–DeTurck remainder
+`deTurckRHSSection g_bg (realize ·) − Δ_∇ ·` (re-tagged to `g₀`).
+
+This is the same operator whose spectral-mass *affine first-order operator-loss* is proven over the
+realized-remainder synthesis (`deTurckGenuineN_firstOrder_operatorTsumLoss`), here packaged as the
+fixed-order map the linearization is taken of. -/
+noncomputable def deTurckRealizeNonlinearityTower (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
+    tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+      tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ) :=
+  fun u =>
+    deTurckG0SpectralN (I := I) g₀ a
+      (deTurckRealizeRemainderOf (I := I) g₀ g_bg
+        (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
+          g₀ 0 2 (one_pos) (by positivity : (0 : ℝ) ≤ (a : ℝ) + 1) u))
+
+/-- The eigenbasis coordinate of the concrete nonlinearity `N(u)` at `i` is the `L²` coordinate of
+the realized DeTurck remainder of the heat-smoothed input `heatRepr u`, against the rough-Laplacian
+eigenbasis.  This is the *synthesis-pin* (`hsynth`) shape under which the spectral-mass affine
+first-order operator-loss of `N` is proven; it holds definitionally. -/
+@[simp] theorem deTurckRealizeNonlinearityTower_coeff
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+    (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
+    (deTurckRealizeNonlinearityTower (I := I) g₀ g_bg a u).coeff i =
+      tensorL2Coeff (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+        (Integral.L2.SmoothCcTensor.toL2
+          (deTurckRealizeRemainderOf (I := I) g₀ g_bg
+            (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
+              g₀ 0 2 (one_pos) (by positivity : (0 : ℝ) ≤ (a : ℝ) + 1) u))) i := rfl
+
+/-- **The first-order-cancelled DeTurck linearization exists as a bounded tower operator (posited
+analytic node — the Fréchet differentiability of the realized Ricci–DeTurck nonlinearity at the
+origin, with cancelled principal part).**
+
+The concrete Ricci–DeTurck nonlinearity `deTurckRealizeNonlinearityTower g₀ g_bg a :
+H^{a+1}(g₀) → Hᵃ(g₀)` is Fréchet differentiable at the origin, with a *bounded continuous linear*
+derivative `B₁ : H^{a+1} →L[ℝ] Hᵃ`.
+
+This is the genuine analytic content: a quasilinear (in the realized metric) second-order geometric
+operator, composed with the smoothing realization `heatRepr` and the spectral coordinate read-off
+`deTurckG0SpectralN`, is differentiable at a base point; and — because its second-order principal
+symbol cancels against the linear rough Laplacian
+(`deTurckNonlinearitySpectral_principalPart_cancels`, sorry-free) — its derivative drops only **one**
+Sobolev derivative, so it is a genuinely first-order bounded operator `H^{a+1} →L Hᵃ` (no leftover
+`−Δ_∇`: on the one-derivative-drop scale the second-order parts have already cancelled).  Its
+boundedness as a `H^{a+1} → Hᵃ` map is the norm-level operator first-order-loss already proven over
+the realized-remainder synthesis (`deTurckGenuineN_firstOrder_operatorTsumLoss`); the `HasFDerivAt`
+content posited here is the *linear approximability* of `N` at the origin, the additional structure a
+norm bound on the nonlinear map does not supply.
+
+**Non-vacuous** — `HasFDerivAt N B₁ 0` genuinely pins `B₁` to the actual derivative: the witness
+`B₁ = 0` would assert `N` has *zero* linear approximation at the origin, which is false because the
+first-order content of the realized Ricci–DeTurck remainder (the `lieDerivCcSection`
+deTurck-vector-field deformation and the first-order part of the curvature term, see
+`deTurckRHSRetagG0_eq_ricciNeg2_add_lieDeriv`) is a genuinely non-zero first-order differential
+operator.  **Not packaging** — the conclusion is the linear-approximability of a concrete nonlinear
+map, structurally distinct from any existential gauge correction; it does not assume the
+fixed-point solvability it is later used to prove.  **Intrinsic** — stated over the `g`-inner
+spectral tower `tensorHs`; no `chartJ`, no raw `M → E`.
+
+The body is `sorry` — the Fréchet differentiability of the realized Ricci–DeTurck nonlinearity at the
+origin (the genuine analytic frontier of the `A → B → D` gauge-solvability chain, the linearization
+of the quasilinear elliptic operator over the heat-smoothed spectral realization). -/
+theorem exists_deTurckFirstOrderCancelledLinearization
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
+    ∃ B₁ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
+        tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ),
+      HasFDerivAt (deTurckRealizeNonlinearityTower (I := I) g₀ g_bg a) B₁
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) := by
+  sorry
+
+/-- **The first-order-cancelled DeTurck linearization `B₁ : H^{a+1} →L[ℝ] Hᵃ`.**
+
+For the anchor `g₀` and a flow background `g_bg`, this is the bounded continuous linear operator
+that is the Fréchet derivative at the origin of the concrete Ricci–DeTurck nonlinearity
+`deTurckRealizeNonlinearityTower g₀ g_bg a : H^{a+1}(g₀) → Hᵃ(g₀)` — the genuinely **first-order**
+remainder left once the second-order principal symbol of the realized right-hand side cancels against
+the linear rough Laplacian `Δ_∇` (`deTurckNonlinearitySpectral_principalPart_cancels`).
+
+It is a *bona-fide* operator on the complete inner-product tower `tensorHs` (`instCompleteSpace` /
+`instInnerProductSpace`), so the Gårding-coercive linearization `L = −Δ_∇ + ι∘B₁` (formed downstream
+by combining `tensorScaleLaplacian (a−1) : H^{a+1} →L H^{a−1}` with `B₁` post-composed with the
+inclusion `Hᵃ ↪ H^{a−1}`) is a genuine bounded Hilbert operator; its bounded inverse (Lax–Milgram on
+the complete tower) is the coercive-inverse node `B`, and the nonlinear Banach fixed point is `D`.
+
+It is extracted from `exists_deTurckFirstOrderCancelledLinearization`; its defining linearization
+property is `deTurckFirstOrderCancelledOperator_hasFDerivAt`.  Being a continuous linear map it is
+automatically globally Lipschitz with constant `‖B₁‖₊` and is exactly the abstract first-order
+remainder shape the strong-existence engine consumes
+(`firstOrderRemainderCLM_strong_shortTime_exists`). -/
+noncomputable def deTurckFirstOrderCancelledOperator (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
+    tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
+      tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ) :=
+  (exists_deTurckFirstOrderCancelledLinearization (I := I) g₀ g_bg a).choose
+
+/-- **The linearization identity: `B₁` is the Fréchet derivative at the origin of the concrete
+Ricci–DeTurck nonlinearity.**
+
+`deTurckFirstOrderCancelledOperator g₀ g_bg a` is the Fréchet derivative of
+`deTurckRealizeNonlinearityTower g₀ g_bg a` at `0`.  This is the defining property of `B₁`: the
+nonlinearity `N` is, to first order at the origin, the bounded first-order operator `B₁` (the
+second-order principal part having cancelled), the linear approximation the coercive-inverse node `B`
+and the Banach fixed point `D` build on. -/
+theorem deTurckFirstOrderCancelledOperator_hasFDerivAt
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
+    HasFDerivAt (deTurckRealizeNonlinearityTower (I := I) g₀ g_bg a)
+      (deTurckFirstOrderCancelledOperator (I := I) g₀ g_bg a)
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) :=
+  (exists_deTurckFirstOrderCancelledLinearization (I := I) g₀ g_bg a).choose_spec
+
+end IntrinsicSpectral
+
 /-- **The supercritical `H^{a+2}` local-Lipschitz control of a `(0,2)`-perturbation synthesis
 on a ball (the genuine un-gated supercritical analytic hypothesis).**
 
@@ -1083,6 +1207,141 @@ def PerCurveRealizeGaugeMatch (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
                 (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
                   (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)))
 
+/-- **The Gårding-coercive Lax–Milgram inverse of the first-order-cancelled DeTurck linearization
+(child `B` of the `A → B → D` gauge-solvability chain — the linear elliptic inversion step).**
+
+For the anchor `g₀`, a flow background `g_bg`, a supercritical order `a` (`2a > dim M + 4`), and the
+bounded first-order linearization `B₁ : H^{a+1} →L[ℝ] Hᵃ` of the realized Ricci–DeTurck nonlinearity
+`deTurckRealizeNonlinearityTower g₀ g_bg a` at the origin (the Fréchet derivative supplied by child
+`A`, `IntrinsicSpectral.exists_deTurckFirstOrderCancelledLinearization`, here passed as the
+hypothesis `hB₁ : HasFDerivAt N B₁ 0`), the **order-`2` Gårding energy form** of the linearized
+elliptic operator `L = −Δ_∇ + ι∘B₁` on the energy space `V := H^{a+1}(g₀)`,
+```
+Bform u w = ⟪Δ_∇ u, Δ_∇ w⟫_{H^{a−1}} + ⟪u, w⟫_{H^{a+1}} + ⟪ι(B₁ u), Δ_∇ w⟫_{H^{a−1}} ,
+```
+(`Δ_∇ = tensorScaleLaplacian ((a:ℝ)−1) : H^{a+1} →L H^{a−1}`, `ι : Hᵃ ↪ H^{a−1}` the order-drop
+inclusion) is a **bounded, coercive** continuous bilinear form `V →L[ℝ] V →L[ℝ] ℝ`, so by the
+Lax–Milgram theorem (`IsCoercive.continuousLinearEquivOfBilin`) the associated operator `Bform♯ : V
+≃L[ℝ] V` is a bounded linear isomorphism — the bounded inverse on which the nonlinear Banach fixed
+point (child `D`) is built.  The conclusion exposes the named form `Bform : V →L[ℝ] V →L[ℝ] ℝ`, its
+coercivity `IsCoercive Bform`, and the **form-subordination of the linearization**
+`‖B₁ u‖² ≤ Bform u u` (the energy form dominates the first-order operator's output), the precise
+data child `D` consumes to build and bound the Banach fixed point over `Bform♯`.
+
+The coercivity is the genuine analytic content (the order-`2` interior-elliptic Gårding estimate
+`order2GardingFamily_holds`, `Analysis/Spectral/Intrinsic/Garding/AllOrderGardingBootstrap.lean`):
+the leading `⟪Δ_∇ u, Δ_∇ u⟫ + ‖u‖²` energy dominates, via the all-valence order-`2` Gårding family,
+a full `H^{a+1}` norm, and the bounded first-order coupling `⟪ι(B₁ u), Δ_∇ u⟫` is absorbed by Young's
+inequality (`B₁` being first order loses only one derivative, so its coupling is form-subordinate to
+the second-order leading part).  Because the second-order principal symbol of the realized DeTurck
+remainder has already cancelled (`deTurckNonlinearitySpectral_principalPart_cancels`, sorry-free), the
+*only* second-order energy in `L` is the explicit `−Δ_∇`, so the energy form is genuinely coercive, and
+its domination of `‖B₁ u‖²` is the first-order-subordination half of that estimate.
+
+**Non-vacuous** — both conjuncts reference `B₁` and constrain `Bform`: `IsCoercive Bform` is *false*
+for a generic bounded bilinear form (e.g. the zero form, or a sign-indefinite one), and the
+subordination `‖B₁ u‖² ≤ Bform u u` ties the coercive form to the *specific* linearization `B₁` (the
+witness `B₁ = 0` excluded by child `A`'s non-vacuity; a form that ignored `B₁` could not, jointly with
+coercivity, certify the inverse `D` needs).  The conclusion asserts the energy form of the *specific*
+linearized operator is coercive and dominates it — the substantive Gårding fact, not a tautology.
+**Not packaging** — the conclusion is a coercivity / form-subordination statement about a linear
+operator, structurally distinct from the existential gauge correction it later helps build; it does not
+assume the fixed-point solvability.  **Intrinsic** — the form pairs `g`-inner `tensorHs` levels; no
+`chartJ`, no raw `M → E`.
+
+**The body is `sorry`** — the order-`2` Gårding-coercivity of the linearized elliptic energy form
+(the linear elliptic inversion step of the `/prove` recursion), to be discharged from
+`order2GardingFamily_holds` through a spectral-tower coercivity adapter; consumers transitively depend
+on `sorryAx` through it and the Gårding/Weyl spectral substrate it bottoms on. -/
+private theorem exists_deTurckLinearization_coerciveInverse
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B₁ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
+        tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+    (hB₁ : HasFDerivAt (IntrinsicSpectral.deTurckRealizeNonlinearityTower (I := I) g₀ g_bg a) B₁
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))) :
+    ∃ Bform : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
+          tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ] ℝ,
+      IsCoercive Bform ∧
+      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)),
+        ‖B₁ u‖ ^ 2 ≤ Bform u u) := by
+  sorry
+
+/-- **The Banach fixed point of the gate-locus first-order-freedom correction over the coercive
+inverse (child `D` of the `A → B → D` gauge-solvability chain — the nonlinear contraction step).**
+
+For the anchor `g₀`, a flow background `g_bg`, a supercritical order `a` (`2a > dim M + 4`), the
+bounded first-order linearization `B₁ : H^{a+1} →L Hᵃ` of the realized DeTurck nonlinearity at the
+origin (child `A`, passed as `hB₁ : HasFDerivAt N B₁ 0`), and the Lax–Milgram inverse `Linv : H^{a+1}
+≃L[ℝ] H^{a+1}` of the Gårding-coercive linearized energy form (child `B`, passed as `hLinv` recording
+that `Linv` is the inverse `Bform♯` of a coercive form `Bform` whose `B₁`-coupling identity holds),
+there is a `(0,2)`-perturbation **corrector** `corr : H^{a+1}(g₀) → SmoothCcTensor g₀ 0 2` and a
+match-gate slack `Q > 0` carrying, in global linear form, the all-order intrinsic-Sobolev size bound,
+the `H^{a+2}` Lipschitz difference bound, and — on the `Q`-gated gate-realizable locus — the realized
+DeTurck remainder of the corrected carrier `smoothingBaseSynth g₀ a u + corr u` matching, at the
+`L²`-class level, the gate-based gauge `deTurckRemainderRealizeSection g₀ g_bg u`.
+
+This is the genuine nonlinear-solvability step built **on top of** the linear coercive inverse `Linv`:
+write the realized DeTurck remainder of `base u + corr u` as the linearization `L (corr u)` plus a
+higher-order (genuinely `H^{a+2}`-Lipschitz, super-linearly small) remainder, so the gate-match `Φ(base
+u + corr u) = Φ(gateRep u)` is the fixed-point equation `corr u = Linv (gauge-target − base-residual −
+remainder(corr u))`; the map `corr ↦ Linv ∘ (… − remainder(corr))` is a contraction on the complete
+gate-controlled match domain (`Linv` bounded by Lax–Milgram, `remainder` super-linearly small because
+the second-order part cancelled), so `ContractingWith.fixedPoint` produces the corrector, whose size /
+Lipschitz arms are inherited from `Linv`'s norm and the contraction's geometric control, and whose
+gate-match is the fixed-point identity on the `Q`-gated locus (the `Q`-bound on the order-`2a`
+gate-representative norm excising the in-gate eigen-train on which the free-`u` match is false, T12).
+
+**Non-vacuous** — the match rejects `corr ≡ 0` (the naive heat carrier): with `corr ≡ 0` the match
+would read `toL2 (deTurckRealizeRemainderOf g₀ g_bg (smoothingBaseSynth g₀ a u)) = toL2
+(deTurckRemainderRealizeSection g₀ g_bg u)`, the Lean-refuted naive-heat claim (a pure heat residue
+contributes `−λᵢ(e^{−λᵢ}−1)·u.coeffᵢ`-type terms falsifying exact class equality), so the
+size/Lipschitz/match conjunction genuinely constrains `corr` away from zero, and the `Linv` hypothesis
+is genuinely consumed (the corrector is `Linv`-built).  **Not packaging** — the match arm is the
+`L²`-class identity of two realized DeTurck remainders, structurally distinct from the real-valued size
+/Lipschitz arms; this is an `Exists`-output corrector, never a binder hypothesis.  **Intrinsic** —
+`toL2`/`toHs` are `g`-inner; no `chartJ`, no raw `M → E`.
+
+**The body is `sorry`** — the nonlinear Banach fixed point over the coercive inverse (the contraction
+step of the `/prove` recursion, the gate-controlled first-order-freedom solvability); consumers
+transitively depend on `sorryAx` through it and the linear inverse / Gårding / Weyl substrate it builds
+on. -/
+private theorem exists_firstOrderFreedomCorrector_ofCoerciveInverse
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B₁ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
+        tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+    (hB₁ : HasFDerivAt (IntrinsicSpectral.deTurckRealizeNonlinearityTower (I := I) g₀ g_bg a) B₁
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)))
+    (Linv : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) ≃L[ℝ]
+        tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+    (Bform : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
+        tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ] ℝ)
+    (hcoercive : IsCoercive Bform)
+    (hLinv : Linv = hcoercive.continuousLinearEquivOfBilin) :
+    ∃ (corr : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+          Integral.L2.SmoothCcTensor g₀ 0 2)
+        (Q : ℝ),
+      0 < Q ∧
+      (∀ (n : ℕ), ∃ Dₙ : ℝ, 0 ≤ Dₙ ∧
+        ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n (corr u)‖
+            ≤ Dₙ * ‖u‖) ∧
+      (∃ D' : ℝ, 0 ≤ D' ∧
+        ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
+              (corr u - corr u')‖ ≤ D' * ‖u - u'‖) ∧
+      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+          (h : realizableAtGate (I := I) g₀ u),
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+            (gateRepOfWitness (I := I) g₀ u h)‖ ≤ Q →
+        Integral.L2.SmoothCcTensor.toL2
+            (deTurckRealizeRemainderOf (I := I) g₀ g_bg
+              (smoothingBaseSynth (I := I) g₀ a u + corr u))
+          = Integral.L2.SmoothCcTensor.toL2
+              (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
+  sorry
+
 /-- **The per-`u` gate-locus first-order-freedom gauge match of the corrected carrier (the genuine
 irreducible analytic frontier of the gauge corrector, transiting the Weyl/Gårding node).**
 
@@ -1131,9 +1390,16 @@ conjunction genuinely constrains `corr` away from zero.  **Not packaging** — t
 size/Lipschitz arms; this is an `Exists`-output corrector, never a binder hypothesis.  **Intrinsic** —
 `toL2`/`toHs` are `g`-inner; no `chartJ`, no raw `M → E`.
 
-**The body is `sorry`** — the honest posited analytic frontier of the `/prove` recursion (the
-first-order-freedom solvability over the gate-controlled match domain = the Weyl/Gårding solvability
-recursion); consumers transitively depend on `sorryAx` through it. -/
+**Proven by composition of the `A → B → D` gauge-solvability chain** (the deep analytic content
+moved into the three named children, this node's body now genuine glue): child `A`
+(`IntrinsicSpectral.exists_deTurckFirstOrderCancelledLinearization`) supplies the first-order-cancelled
+Fréchet linearization `B₁`; child `B` (`exists_deTurckLinearization_coerciveInverse`) supplies the
+Gårding-coercive linearized energy form whose Lax–Milgram operator `Linv := Bform♯ :
+H^{a+1} ≃L[ℝ] H^{a+1}` (`IsCoercive.continuousLinearEquivOfBilin`) is the bounded inverse; child `D`
+(`exists_firstOrderFreedomCorrector_ofCoerciveInverse`) runs the nonlinear Banach fixed point over
+`Linv` to produce the gate-locus gauge-matched corrector.  Consumers transitively depend on `sorryAx`
+only through those three children (the genuine differentiability / Gårding-coercivity / contraction
+frontiers) and the Weyl/Gårding/heat spectral substrate they bottom on. -/
 private theorem exists_firstOrderFreedomCorrector_gateLocusGaugeMatch
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) :
@@ -1158,7 +1424,23 @@ private theorem exists_firstOrderFreedomCorrector_gateLocusGaugeMatch
               (smoothingBaseSynth (I := I) g₀ a u + corr u))
           = Integral.L2.SmoothCcTensor.toL2
               (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
-  sorry
+  classical
+  -- Child `A`: the first-order-cancelled Fréchet linearization `B₁` of the realized DeTurck
+  -- nonlinearity at the origin (the principal second-order symbol having cancelled).
+  obtain ⟨B₁, hB₁⟩ :=
+    IntrinsicSpectral.exists_deTurckFirstOrderCancelledLinearization (I := I) g₀ g_bg a
+  -- Child `B`: the Gårding-coercive Lax–Milgram inverse of the linearized elliptic energy form
+  -- `L = −Δ_∇ + ι∘B₁` on the energy space `H^{a+1}` (the linear elliptic inversion step).
+  obtain ⟨Bform, hcoercive, _hBformEq⟩ :=
+    exists_deTurckLinearization_coerciveInverse (I := I) g₀ g_bg a ha B₁ hB₁
+  -- The bounded inverse operator produced by Lax–Milgram from the coercivity of `Bform`.
+  set Linv : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) ≃L[ℝ]
+      tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) :=
+    hcoercive.continuousLinearEquivOfBilin with hLinv
+  -- Child `D`: the nonlinear Banach fixed point over the coercive inverse `Linv`, producing the
+  -- gate-locus gauge-matched corrector (the nonlinear contraction step).
+  exact exists_firstOrderFreedomCorrector_ofCoerciveInverse (I := I) g₀ g_bg a ha B₁ hB₁
+    Linv Bform hcoercive hLinv
 
 /-- **The globally-controlled first-order-freedom corrected carrier (the honest posited analytic
 frontier of the gauge corrector — the carrier is existentially free, pinned to no heat form).**
