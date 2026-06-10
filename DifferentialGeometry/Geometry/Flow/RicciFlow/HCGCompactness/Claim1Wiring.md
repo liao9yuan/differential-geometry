@@ -119,7 +119,22 @@ constants (D2b).**
 
 ## 4. Bricks
 
-**B1 — `hkoszul` (the lowered-Koszul field identity).  THE main brick.**
+**B1 — `hkoszul` (the lowered-Koszul field identity).  THE main brick.
+STATUS 2026-06-10: **B1 COMPLETE sorry-free** (`koszulComp_at`, Claim1Wiring.lean,
+general frame).  The intrinsic content came from the NEW
+`Tensor/RSTensor/NablaOnTensors/KoszulDifference.lean` (parallel session; compiles
+clean): `difference_symm_at` + `nabla_metric_two_term` + `koszul_difference`.
+`koszulComp_at` takes its frame components: LHS lowers via
+`christoffelSymbolDifferenceInFrame`(+`_expansion`,+`_eq_sub`, Chart/Christoffel)
++ `coeff_sum_eq` linearity; RHS realizes via `iterCov_realizes` (a=0) +
+`iterCovComp_eq_iterCov` + explicit `Fin.cons = frameTuple` slot identifications;
+permutations `(Equiv.refl, Equiv.swap 0 1, (finRotate 3).symm)`, coefficients
+`(½, ½, −½)`.  GOTCHAS: (i) TWO distinct `christoffelSymbolInFrame` constants
+(`Tensor.Coordinates` vs `Coordinates`, identical bodies — bridged by rfl-lemma
+`chr_eq_chartChr`; FLAG for dedup); (ii) avoid `set` for the connections (breaks
+rw matching against library lemmas); (iii) `2+0`/`iterCov … 0` defeq-not-syntactic
+— bridge with an exact-cast `have`; (iv) concrete Fin-equiv applications
+(`swap`, `finRotate.symm`) close by `congr 1` alone (definitional evaluation).**
   Math: `Ǎ(a,b,e) := Σ_d A^d_{ab}·g[e,d] = ½(∇g(a,b,e) + ∇g(b,a,e) − ∇g(e,a,b))`,
   ∇ = gRef-LC, valid in ANY frame (tensor identity).  Derivation: two-term
   expansion `∇g(a,b,e) = Ǎ(a,b,e) + Ǎ(a,e,b)` (from `∇_k g_k = 0` + the §1b

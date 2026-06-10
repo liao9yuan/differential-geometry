@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AkMFold
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.MetricFlatBasis
+import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.KoszulDifference
+import DifferentialGeometry.Geometry.Connection.Chart.Christoffel
 import Mathlib.LinearAlgebra.Matrix.PosDef
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 
@@ -263,5 +265,207 @@ theorem ginv_hinv
   rcases eq_or_ne e c with rfl | h
   · simp
   · rw [if_neg h, if_neg fun hce => h hce.symm]
+
+/-! ## B1: the lowered-Koszul field identity (`hkoszul`)
+
+The intrinsic content is `Tensor0SBundle.koszul_difference`
+(`Tensor/RSTensor/NablaOnTensors/KoszulDifference.lean`); here we take its frame
+components: the LHS lowers through `christoffelSymbolDifferenceInFrame`
+(`Chart/Christoffel.lean`), the RHS realizes through `iterCov_realizes` +
+`iterCovComp_eq_iterCov`. -/
+
+/-- The two spellings of the Christoffel coefficient are definitionally equal
+(`Tensor.Coordinates` vs `Coordinates`, identical bodies). -/
+private theorem chr_eq_chartChr {u : Set M}
+    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
+    (frame : Idx → (x : M) → TangentSpace I x)
+    (hframe : IsLocalFrameOn I E 1 frame u) (x : M) (i j k : Idx) :
+    christoffelSymbolInFrame cov frame hframe x i j k =
+      DifferentialGeometry.Coordinates.christoffelSymbolInFrame cov frame hframe x i j k := rfl
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **B1 `hkoszul` (general frame)**: the lowered-Koszul component identity.  On the
+local-frame domain, the `g_K`-lowered connection difference (`contrTail` of the
+Christoffel-difference array against the metric array) is the Koszul combination of the
+first `∇_ref`-covariant-derivative tower of the metric components, with coefficients
+`(+½, +½, −½)` and slot permutations `(id, swap 0 1, (finRotate 3)⁻¹)`. -/
+theorem koszulComp_at
+    (frame : Idx → (x : M) → TangentSpace I x) {u : Set M}
+    (hframe : IsLocalFrameOn I E 1 frame u) (hu : IsOpen u)
+    (gK gRef : SmoothRiemannianMetric I M)
+    {y : M} (hy : y ∈ u) :
+    contrTail
+        (fun m : Fin (2 + 1) → Idx =>
+          christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gK) frame hframe y
+              (m 0) (m 1) (m 2) -
+            christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef) frame hframe y
+              (m 0) (m 1) (m 2))
+        (frameComp0S (I := I) (metricTensorField (I := I) gK) frame y) =
+      fun idx : Fin (2 + 1) → Idx =>
+        (1 / 2 : Real) * iterCovComp (I := I) frame
+            (fun y' => christoffelSymbolInFrame
+              (leviCivitaConnectionOfMetric (I := I) gRef) frame hframe y')
+            (frameComp0S (I := I) (metricTensorField (I := I) gK) frame) 1 y
+            (fun j => idx (Equiv.refl (Fin 3) j)) +
+        ((1 / 2 : Real) * iterCovComp (I := I) frame
+            (fun y' => christoffelSymbolInFrame
+              (leviCivitaConnectionOfMetric (I := I) gRef) frame hframe y')
+            (frameComp0S (I := I) (metricTensorField (I := I) gK) frame) 1 y
+            (fun j => idx (Equiv.swap (0 : Fin 3) 1 j)) +
+          (-(1 / 2) : Real) * iterCovComp (I := I) frame
+            (fun y' => christoffelSymbolInFrame
+              (leviCivitaConnectionOfMetric (I := I) gRef) frame hframe y')
+            (frameComp0S (I := I) (metricTensorField (I := I) gK) frame) 1 y
+            (fun j => idx ((finRotate 3).symm j))) := by
+  classical
+  funext idx
+  -- the three sections through the frame values
+  obtain ⟨X, hX⟩ : ∃ X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _),
+      X y = frame (idx 0) y :=
+    ⟨(ContMDiffSection.exists_eq_at_gen (I := I) (F := E) (V := TangentSpace I)
+        (n := (⊤ : ℕ∞)) y (frame (idx 0) y)).choose,
+      (ContMDiffSection.exists_eq_at_gen (I := I) (F := E) (V := TangentSpace I)
+        (n := (⊤ : ℕ∞)) y (frame (idx 0) y)).choose_spec⟩
+  obtain ⟨Y, hY⟩ : ∃ Y : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _),
+      Y y = frame (idx 1) y :=
+    ⟨(ContMDiffSection.exists_eq_at_gen (I := I) (F := E) (V := TangentSpace I)
+        (n := (⊤ : ℕ∞)) y (frame (idx 1) y)).choose,
+      (ContMDiffSection.exists_eq_at_gen (I := I) (F := E) (V := TangentSpace I)
+        (n := (⊤ : ℕ∞)) y (frame (idx 1) y)).choose_spec⟩
+  obtain ⟨Z, hZ⟩ : ∃ Z : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _),
+      Z y = frame (idx 2) y :=
+    ⟨(ContMDiffSection.exists_eq_at_gen (I := I) (F := E) (V := TangentSpace I)
+        (n := (⊤ : ℕ∞)) y (frame (idx 2) y)).choose,
+      (ContMDiffSection.exists_eq_at_gen (I := I) (F := E) (V := TangentSpace I)
+        (n := (⊤ : ℕ∞)) y (frame (idx 2) y)).choose_spec⟩
+  -- the geometric Koszul identity
+  have hmcK : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen
+      (I := I) (leviCivitaConnectionOfMetric (I := I) gK) gK :=
+    leviCivitaConnectionOfMetric_isMetricCompatible (I := I) gK
+  have htfK : DifferentialGeometry.Integral.Connection.IsTorsionFreeAt (I := I)
+      (leviCivitaConnectionOfMetric (I := I) gK) y :=
+    leviCivitaConnectionOfMetric_isTorsionFree (I := I) gK y
+  have htfR : DifferentialGeometry.Integral.Connection.IsTorsionFreeAt (I := I)
+      (leviCivitaConnectionOfMetric (I := I) gRef) y :=
+    leviCivitaConnectionOfMetric_isTorsionFree (I := I) gRef y
+  have hkos := Tensor0SBundle.koszul_difference (I := I)
+    (leviCivitaConnectionOfMetric (I := I) gK) (leviCivitaConnectionOfMetric (I := I) gRef)
+    gK hmcK htfK htfR X Y Z
+  rw [hX, hY, hZ] at hkos
+  -- LHS: the lowered difference in components
+  have hframe_b : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun z => TotalSpace.mk' E (E := TangentSpace I) z (frame (idx 1) z)) y :=
+    ((hframe.contMDiffOn (idx 1)).contMDiffAt (hu.mem_nhds hy)).mdifferentiableAt (by simp)
+  have hLHS : contrTail
+        (fun m : Fin (2 + 1) → Idx =>
+          christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gK) frame hframe y (m 0) (m 1) (m 2) -
+            christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef) frame hframe y (m 0) (m 1) (m 2))
+        (frameComp0S (I := I) (metricTensorField (I := I) gK) frame y) idx =
+      gK.inner y
+        (((CovariantDerivative.difference (leviCivitaConnectionOfMetric (I := I) gK) (leviCivitaConnectionOfMetric (I := I) gRef) y) (frame (idx 1) y)) (frame (idx 0) y))
+        (frame (idx 2) y) := by
+    rw [contrTail_apply]
+    have hsum : ∀ d : Idx,
+        (fun m : Fin (2 + 1) → Idx =>
+            christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gK) frame hframe y (m 0) (m 1) (m 2) -
+              christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef) frame hframe y (m 0) (m 1) (m 2))
+          (Fin.snoc (fun i : Fin 2 => idx (Fin.castAdd 1 i)) d) *
+          frameComp0S (I := I) (metricTensorField (I := I) gK) frame y
+            (Fin.snoc (fun j : Fin 1 => idx (Fin.natAdd 2 j)) d) =
+        DifferentialGeometry.Coordinates.christoffelSymbolDifferenceInFrame
+            (leviCivitaConnectionOfMetric (I := I) gK) (leviCivitaConnectionOfMetric (I := I) gRef)
+            frame hframe y (idx 0) (idx 1) d *
+          gK.inner y (frame (idx 2) y) (frame d y) := by
+      intro d
+      have e0 : (Fin.snoc (fun i : Fin 2 => idx (Fin.castAdd 1 i)) d : Fin 3 → Idx) 0 =
+          idx 0 := by simp [Fin.snoc]
+      have e1 : (Fin.snoc (fun i : Fin 2 => idx (Fin.castAdd 1 i)) d : Fin 3 → Idx) 1 =
+          idx 1 := by simp [Fin.snoc]
+      have e2 : (Fin.snoc (fun i : Fin 2 => idx (Fin.castAdd 1 i)) d : Fin 3 → Idx) 2 = d := by
+        simp [Fin.snoc]
+      have f0 : (Fin.snoc (fun j : Fin 1 => idx (Fin.natAdd 2 j)) d : Fin 2 → Idx) 0 =
+          idx 2 := by simp [Fin.snoc]
+      have f1 : (Fin.snoc (fun j : Fin 1 => idx (Fin.natAdd 2 j)) d : Fin 2 → Idx) 1 = d := by
+        simp [Fin.snoc]
+      simp only [e0, e1, e2]
+      rw [frameComp0S_apply, metricTensorField_apply, f0, f1,
+        chr_eq_chartChr (leviCivitaConnectionOfMetric (I := I) gK) frame hframe y
+          (idx 0) (idx 1) d,
+        chr_eq_chartChr (leviCivitaConnectionOfMetric (I := I) gRef) frame hframe y
+          (idx 0) (idx 1) d,
+        ← DifferentialGeometry.Coordinates.christoffelSymbolDifferenceInFrame_eq_sub
+          (leviCivitaConnectionOfMetric (I := I) gK) (leviCivitaConnectionOfMetric (I := I) gRef)
+          frame hframe (idx 0) (idx 1) d hframe_b]
+    rw [Finset.sum_congr rfl fun d _ => hsum d]
+    have hlin : (∑ d : Idx,
+          DifferentialGeometry.Coordinates.christoffelSymbolDifferenceInFrame
+              (leviCivitaConnectionOfMetric (I := I) gK) (leviCivitaConnectionOfMetric (I := I) gRef)
+              frame hframe y (idx 0) (idx 1) d *
+            gK.inner y (frame (idx 2) y) (frame d y)) =
+        gK.inner y (frame (idx 2) y)
+          (∑ d : Idx,
+            DifferentialGeometry.Coordinates.christoffelSymbolDifferenceInFrame
+                (leviCivitaConnectionOfMetric (I := I) gK) (leviCivitaConnectionOfMetric (I := I) gRef)
+                frame hframe y (idx 0) (idx 1) d • frame d y) := by
+      rw [map_sum]
+      refine Finset.sum_congr rfl fun d _ => ?_
+      rw [ContinuousLinearMap.map_smul, smul_eq_mul]
+    rw [hlin,
+      ← DifferentialGeometry.Coordinates.christoffelSymbolDifference_expansion
+        (leviCivitaConnectionOfMetric (I := I) gK) (leviCivitaConnectionOfMetric (I := I) gRef)
+        frame hframe hy (idx 0) (idx 1),
+      gK.symm y]
+  -- RHS: the three realization bridges
+  have hreal := iterCov_realizes (I := I) gRef
+    (T := metricTensorField (I := I) gK) 0
+  have hbr : ∀ (W : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+      (v0 v1 v2 : Idx) (w : Fin 3 → Idx),
+      W y = frame v0 y → w 0 = v0 → w 1 = v1 → w 2 = v2 →
+      Tensor0SBundle.nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2
+          (leviCivitaConnectionOfMetric (I := I) gRef) W
+          (metricTensorField (I := I) gK) y
+          (fun q : Fin 2 => if q = 0 then frame v1 y else frame v2 y) =
+        iterCovComp (I := I) frame
+          (fun y' => christoffelSymbolInFrame
+            (leviCivitaConnectionOfMetric (I := I) gRef) frame hframe y')
+          (frameComp0S (I := I) (metricTensorField (I := I) gK) frame) 1 y w := by
+    intro W v0 v1 v2 w hW hw0 hw1 hw2
+    have h1' : iterCov (I := I) gRef 2 (metricTensorField (I := I) gK) 1 y
+        (Fin.cons (W y) (fun q : Fin 2 => if q = 0 then frame v1 y else frame v2 y)) =
+      Tensor0SBundle.nabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2
+          (leviCivitaConnectionOfMetric (I := I) gRef) W
+          (metricTensorField (I := I) gK) y
+          (fun q : Fin 2 => if q = 0 then frame v1 y else frame v2 y) :=
+      hreal W y (fun q : Fin 2 => if q = 0 then frame v1 y else frame v2 y)
+    have hvw : (Fin.cons (frame v0 y) (fun q : Fin 2 =>
+        if q = 0 then frame v1 y else frame v2 y) : Fin 3 → TangentSpace I y) =
+        frameTuple (I := I) frame y w := by
+      funext q
+      refine Fin.cases ?_ (fun q' => ?_) q
+      · show frame v0 y = frame (w 0) y
+        rw [hw0]
+      · refine Fin.cases ?_ (fun q'' => ?_) q'
+        · show (if (0 : Fin 2) = 0 then frame v1 y else frame v2 y) = frame (w 1) y
+          rw [if_pos rfl, hw1]
+        · have hq2 : q'' = 0 := Subsingleton.elim _ _
+          subst hq2
+          show (if (Fin.succ 0 : Fin 2) = 0 then frame v1 y else frame v2 y) =
+            frame (w 2) y
+          rw [if_neg (by decide), hw2]
+    rw [← h1', hW, hvw,
+      ← iterCovComp_eq_iterCov (I := I) gRef (metricTensorField (I := I) gK)
+        frame hframe hu 1 hy w]
+  -- the three instantiations
+  have hb1 := hbr X (idx 0) (idx 1) (idx 2) (fun j => idx (Equiv.refl (Fin 3) j)) hX rfl rfl rfl
+  have hb2 := hbr Y (idx 1) (idx 0) (idx 2) (fun j => idx (Equiv.swap (0 : Fin 3) 1 j)) hY
+    (by show idx (Equiv.swap (0 : Fin 3) 1 0) = idx 1; congr 1)
+    (by show idx (Equiv.swap (0 : Fin 3) 1 1) = idx 0; congr 1)
+    (by show idx (Equiv.swap (0 : Fin 3) 1 2) = idx 2; congr 1)
+  have hb3 := hbr Z (idx 2) (idx 0) (idx 1) (fun j => idx ((finRotate 3).symm j)) hZ
+    (by show idx ((finRotate 3).symm 0) = idx 2; congr 1)
+    (by show idx ((finRotate 3).symm 1) = idx 0; congr 1)
+    (by show idx ((finRotate 3).symm 2) = idx 1; congr 1)
+  rw [hLHS, hkos, hb1, hb2, hb3]
+  ring
 
 end DifferentialGeometry.PDE.RicciFlow
