@@ -143,180 +143,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-! ## The spectral lift as a continuous linear map (sorry-free reusable core)
-
-The coordinate-spectral nonlinearity `deTurckG0SpectralN g₀ a`, read off a smooth `(0,2)`-section's
-`L²` coordinates, is *linear* in the section (its coordinates are `tensorL2Coeff (toL2 ·)`, a
-composition of two linear maps) and `‖·‖_{toHs a}`-bounded (`deTurckG0SpectralN_dist_le_pouHaNorm`
-applied to the difference with the zero section).  It therefore extends, off the dense smooth
-sections, to a genuine **bounded linear map**
-
-  `deTurckG0SpectralLiftCLM g₀ a : TensorPouSobolevHilbert g₀ 0 2 a →L[ℝ] tensorHs g₀ 0 2 a`
-
-from the intrinsic order-`a` chart-Sobolev Hilbert space to the spectral order-`a` scale, agreeing
-on every smooth section with the section-level spectral read-off.  This is the linear post-factor of
-the Nemytskii smoothness `Φ`: composing the (nonlinear) chart-Sobolev-valued realized-remainder map
-with this CLM keeps every derivative order (`ContDiffOn.continuousLinearMap_comp`).  It is the exact
-mirror of `spectralToPouSobolevCLM`, in the opposite (chart-Sobolev → spectral) direction. -/
-
-/-- The section-level spectral read-off `deTurckG0SpectralN g₀ a` as an `ℝ`-linear map
-`SmoothCcTensor g₀ 0 2 →ₗ[ℝ] tensorHs g₀ 0 2 a`.  Linearity is the linearity of `tensorL2Coeff`
-(in its `L²` argument) composed with the continuous linear embedding `SmoothCcTensor.toL2`, exactly
-as for `spectralCoeffLinearMap`. -/
-def deTurckG0SpectralN_linearMap (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
-    Integral.L2.SmoothCcTensor g₀ 0 2 →ₗ[ℝ] tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ) where
-  toFun T := deTurckG0SpectralN (I := I) g₀ a T
-  map_add' S T := by
-    refine tensorHs.ext ?_
-    funext i
-    simp only [tensorHs.add_coeff, deTurckG0SpectralN_coeff]
-    rw [map_add, tensorL2Coeff_add]
-  map_smul' c T := by
-    refine tensorHs.ext ?_
-    funext i
-    simp only [tensorHs.smul_coeff, deTurckG0SpectralN_coeff, RingHom.id_apply]
-    rw [map_smul, tensorL2Coeff_smul]
-
-@[simp] theorem deTurckG0SpectralN_linearMap_apply (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (T : Integral.L2.SmoothCcTensor g₀ 0 2) :
-    deTurckG0SpectralN_linearMap (I := I) g₀ a T = deTurckG0SpectralN (I := I) g₀ a T := rfl
-
-/-- The chart-Sobolev order-`a` completion embedding `T ↦ T.toHs a` as an `ℝ`-linear map
-`SmoothCcTensor g₀ 0 2 →ₗ[ℝ] TensorPouSobolevHilbert g₀ 0 2 a`.  Linearity is
-`SmoothCcTensor.toHs_add` and the completion-coercion `smul` law (`UniformSpace.Completion.coe_smul`). -/
-def toHsHa_linearMap (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
-    Integral.L2.SmoothCcTensor g₀ 0 2 →ₗ[ℝ]
-      IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 a where
-  toFun T := IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a T
-  map_add' S T :=
-    DifferentialGeometry.PDE.RicciFlow.SmoothCcTensor.toHs_add (I := I) (M := M) a S T
-  map_smul' c T := by
-    change IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (c • T)
-      = (RingHom.id ℝ) c • IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a T
-    simp only [RingHom.id_apply]
-    unfold IntrinsicSobolev.SmoothCcTensor.toHs
-    rw [show (⟨c • T⟩ : SmoothCcTensorHs g₀ 0 2 a)
-          = c • (⟨T⟩ : SmoothCcTensorHs g₀ 0 2 a) from rfl]
-    rw [← UniformSpace.Completion.coe_smul]
-
-@[simp] theorem toHsHa_linearMap_apply (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (T : Integral.L2.SmoothCcTensor g₀ 0 2) :
-    toHsHa_linearMap (I := I) g₀ a T =
-      IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a T := rfl
-
-/-- The section-level spectral read-off is `‖·‖_{toHs a}`-dominated: there is `C ≥ 0` with
-`‖deTurckG0SpectralN g₀ a R‖ ≤ C · ‖R.toHs a‖` for every smooth section `R`.  This is
-`deTurckG0SpectralN_dist_le_pouHaNorm` specialized to the difference of `R` with the zero section
-(`deTurckG0SpectralN g₀ a 0 = 0`, `(0).toHs a = 0`). -/
-theorem deTurckG0SpectralN_norm_le_pouHaNorm (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ R : Integral.L2.SmoothCcTensor g₀ 0 2,
-      ‖deTurckG0SpectralN (I := I) g₀ a R‖ ≤
-        C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a R‖ := by
-  obtain ⟨C, hC_nn, hC⟩ := deTurckG0SpectralN_dist_le_pouHaNorm (I := I) g₀ a
-  refine ⟨C, hC_nn, fun R => ?_⟩
-  -- `deTurckG0SpectralN g₀ a 0 = 0` from the linear-map structure.
-  have hSpec0 : deTurckG0SpectralN (I := I) g₀ a (0 : Integral.L2.SmoothCcTensor g₀ 0 2) = 0 := by
-    have := (deTurckG0SpectralN_linearMap (I := I) g₀ a).map_zero
-    rwa [deTurckG0SpectralN_linearMap_apply] at this
-  -- Specialize the dist bound to the difference with the zero section.
-  have hkey := hC R 0
-  rw [hSpec0, dist_zero_right, sub_zero] at hkey
-  exact hkey
-
-/-- **The spectral-lift continuous linear map `H^a → tensorHs a` (sorry-free).**
-
-The dense extension (`LinearMap.extendOfNorm`) of the section-level spectral read-off
-`deTurckG0SpectralN g₀ a` along the dense chart-Sobolev embedding `T ↦ T.toHs a`.  Continuity is the
-`‖·‖_{toHs a}`-domination `deTurckG0SpectralN_norm_le_pouHaNorm`; the dense range is
-`smoothCcTensor_denseRange_toHs`.  Its defining identity on the dense range is
-`deTurckG0SpectralLiftCLM_apply_toHs`. -/
-noncomputable def deTurckG0SpectralLiftCLM (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
-    IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 a →L[ℝ]
-      tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ) :=
-  LinearMap.extendOfNorm
-    (deTurckG0SpectralN_linearMap (I := I) g₀ a)
-    (toHsHa_linearMap (I := I) g₀ a)
-
-/-- **The defining identity of the spectral-lift CLM on the dense range.** For every smooth
-section `R`, the spectral-lift CLM sends `R`'s chart-Sobolev class `R.toHs a` to the section-level
-spectral read-off `deTurckG0SpectralN g₀ a R`. -/
-@[simp] theorem deTurckG0SpectralLiftCLM_apply_toHs (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (R : Integral.L2.SmoothCcTensor g₀ 0 2) :
-    deTurckG0SpectralLiftCLM (I := I) g₀ a
-        (IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a R)
-      = deTurckG0SpectralN (I := I) g₀ a R := by
-  obtain ⟨C, _hC_nn, hC⟩ := deTurckG0SpectralN_norm_le_pouHaNorm (I := I) g₀ a
-  have hnorm : ∃ C : ℝ, ∀ R : Integral.L2.SmoothCcTensor g₀ 0 2,
-      ‖deTurckG0SpectralN_linearMap (I := I) g₀ a R‖ ≤
-        C * ‖toHsHa_linearMap (I := I) g₀ a R‖ := by
-    refine ⟨C, fun R => ?_⟩
-    rw [deTurckG0SpectralN_linearMap_apply, toHsHa_linearMap_apply]
-    exact hC R
-  have hext := LinearMap.extendOfNorm_eq (f := deTurckG0SpectralN_linearMap (I := I) g₀ a)
-    (e := toHsHa_linearMap (I := I) g₀ a)
-    (smoothCcTensor_denseRange_toHs (I := I) g₀ 0 2 a) hnorm R
-  -- `hext : extendOfNorm f e (e R) = f R`, with `e R = R.toHs a` and `f R = deTurckG0SpectralN R`.
-  rw [toHsHa_linearMap_apply, deTurckG0SpectralN_linearMap_apply] at hext
-  rw [deTurckG0SpectralLiftCLM]
-  exact hext
-
-/-! ## The chart-Sobolev-valued realized-remainder map is `C^∞` on the validity ball (the deep
-inverse-Gram Neumann posit, body `sorry`)
-
-This is the genuine analytic frontier isolated out of the full Nemytskii smoothness: the realized
-Ricci–DeTurck remainder, read into the *intrinsic order-`a` chart-Sobolev* Hilbert space (no spectral
-read-off yet), is a `C^∞` map of the order-`q` chart-Sobolev input on a non-degenerate ball.  It is
-strictly more elementary than the full `Φ` (the spectral coordinate analysis is peeled off into the
-CLM above); what remains is exactly the rational-polynomial / inverse-Gram Neumann-series smoothness
-of the retag in the metric `≤ 2`-jet. -/
-
-/-- **`C^∞`-on-the-validity-ball of the chart-Sobolev-valued realized DeTurck remainder (the deep
-inverse-Gram Neumann posit; body `sorry`).**
-
-For supercritical `a` (`2 a > dim M + 4`) and chart-Sobolev input order `q ≥ a + 2`, there is a
-radius `ρ > 0` and a map
-`Ψ : TensorPouSobolevHilbert g₀ 0 2 q → TensorPouSobolevHilbert g₀ 0 2 a` that is `ContDiffOn ℝ ∞`
-on the closed `H^q`-ball of radius `ρ` and factors the chart-Sobolev realized-remainder section:
-for every smooth section `T` whose `H^q` class `(T).toHs q` lies in the ball,
-```
-Ψ ((T).toHs q) = (deTurckRealizeRemainderOf g₀ g_bg T).toHs a .
-```
-
-This is the intrinsic-`H^a` (chart-Sobolev-valued) all-order upgrade of the order-`0` ball-continuity
-node `deTurckRealizeRemainderOf_pouToHs_continuous_of_chartJet2Control` (same `toHs`-factored shape,
-`ContinuousOn` lifted to `ContDiffOn ℝ ∞`, stated at the map level).  The ball radius `ρ` is part of
-the existential payload: it is chosen small enough that the supercritical embedding `H^q ↪ C⁰`
-(`q ≥ a + 2`, `2 a > dim M + 4`) forces every section in the ball to be uniformly fibre-small (uniform
-`δ < 1`), so the realized metric `g₀ + ccTensorBilinSymm g₀ T` stays uniformly non-degenerate, the
-`deTurckRealizeRemainderOf` `dif`-guard is uniformly the genuine branch, and the inverse-Gram Neumann
-series of the retag (`−2 Ric + Lie`, rational in the realized metric `≤ 2`-jet) converges uniformly —
-giving a uniformly-convergent power series in the `H^q` input, hence `C^∞`.
-
-Why the ball restriction is essential (the truncation litmus, see the module docstring): the global
-claim is false (the finite `dif`-truncation jumps the value to `0` across the fibre-small boundary
-`δ ↗ 1`, where the genuine remainder does not vanish — a non-removable first-order kink); the
-radius-`ρ` ball excises that boundary.  T6: purely spatial.  No packaging: the conclusion is an
-existence-of-smooth-extension-with-factoring, structurally distinct from any hypothesis.
-
-The body is `sorry`: the inverse-Gram-Neumann rational-polynomial smoothness grind discharging the
-chart-Sobolev `ContDiffOn` is the irreducible deep analytic content (possibly multi-dispatch). -/
-theorem exists_deTurckRealizeRemainder_toHs_contDiffOn_ball
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (q : ℕ)
-    (ha : 2 * a > Module.finrank ℝ E + 4) (hq : a + 2 ≤ q) :
-    ∃ (ρ : ℝ) (Ψ : IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 q →
-        IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 a),
-      0 < ρ ∧
-      ContDiffOn ℝ (∞ : WithTop ℕ∞) Ψ
-        (Metric.closedBall
-          (0 : IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 q) ρ) ∧
-      ∀ T : Integral.L2.SmoothCcTensor g₀ 0 2,
-        IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) q T ∈
-            Metric.closedBall
-              (0 : IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 q) ρ →
-          Ψ (IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) q T)
-            = IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
-                (deTurckRealizeRemainderOf (I := I) g₀ g_bg T) := sorry
-
 /-- **Map-level all-order Fréchet smoothness of the concrete DeTurck-remainder Nemytskii map on
 the fibre-small validity ball (the spatial posit; body `sorry`).**
 
@@ -360,8 +186,15 @@ chain rule).  T6: it is purely spatial — no time variable, no trajectory regul
 the conclusion is an existence-of-smooth-extension-with-factoring, structurally distinct from any
 hypothesis.
 
-The body is `sorry`: the rational-polynomial / inverse-Gram-Neumann smoothness grind discharging
-the `ContDiffOn` is its own future fill (possibly multi-dispatch). -/
+**R7 re-export.**  This statement is byte-identical to the canonical
+`exists_deTurckRealizeRemainder_spectralN_contDiffOn_ball` in
+`DeTurckG0GenuineNonlinearity.lean`, where the proof lives (the spectral-lift CLM
+`deTurckG0SpectralLiftCLM` and the chart-Sobolev realize-remainder smoothness child
+`exists_deTurckRealizeRemainder_toHs_contDiffOn_ball` reside upstream, since `deTurckG0SpectralN`
+and `deTurckRealizeRemainderOf` are defined there and that file cannot import this one — a cycle).
+The body here is a thin citation of the upstream decl rather than a re-derivation; it transitively
+depends on `sorryAx` exactly through the upstream chart-Sobolev realize-remainder smoothness child
+(the single inverse-Gram-Neumann rational-polynomial smoothness grind, its own future fill). -/
 theorem exists_deTurckRemainderNemytskii_contDiffOn_ball
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (q : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) (hq : a + 2 ≤ q) :
@@ -377,18 +210,13 @@ theorem exists_deTurckRemainderNemytskii_contDiffOn_ball
               (0 : IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 q) ρ →
           Φ (IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) q T)
             = deTurckG0SpectralN (I := I) g₀ a
-                (deTurckRealizeRemainderOf (I := I) g₀ g_bg T) := by
-  -- The deep chart-Sobolev-valued realized-remainder smoothness on the ball.
-  obtain ⟨ρ, Ψ, hρ, hΨ, hΨfactor⟩ :=
-    exists_deTurckRealizeRemainder_toHs_contDiffOn_ball (I := I) g₀ g_bg a q ha hq
-  -- `Φ` is the spectral lift CLM post-composed with the chart-Sobolev realize map `Ψ`.
-  refine ⟨ρ, fun v => deTurckG0SpectralLiftCLM (I := I) g₀ a (Ψ v), hρ, ?_, ?_⟩
-  · -- `C^∞` is preserved by post-composition with the continuous linear `deTurckG0SpectralLiftCLM`.
-    exact ContDiffOn.continuousLinearMap_comp (deTurckG0SpectralLiftCLM (I := I) g₀ a) hΨ
-  · -- The factoring: `Φ (T.toHs q) = spectralLiftCLM (Ψ (T.toHs q))
-    --   = spectralLiftCLM ((realize remainder).toHs a) = deTurckG0SpectralN (realize remainder)`.
-    intro T hT
-    simp only [hΨfactor T hT, deTurckG0SpectralLiftCLM_apply_toHs]
+                (deTurckRealizeRemainderOf (I := I) g₀ g_bg T) :=
+  -- R7 re-export: the canonical proof lives upstream in `DeTurckG0GenuineNonlinearity` (where the
+  -- spectral-lift CLM `deTurckG0SpectralLiftCLM` and the chart-Sobolev realize-remainder smoothness
+  -- child `exists_deTurckRealizeRemainder_toHs_contDiffOn_ball` reside, since `deTurckG0SpectralN`
+  -- and `deTurckRealizeRemainderOf` are defined there and cannot import this file).  This statement
+  -- is byte-identical to that decl; we cite it rather than re-derive it.
+  exists_deTurckRealizeRemainder_spectralN_contDiffOn_ball (I := I) g₀ g_bg a q ha hq
 
 /-- **The chain-rule mechanism (sorry-free reusable core).**
 
