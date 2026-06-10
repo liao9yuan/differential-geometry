@@ -721,7 +721,157 @@ private lemma swapTwoSec_apply (r t : ℕ) (x : M) :
     (show TensorRSSpace r (t + 2) I x →L[ℝ] TensorRSSpace r (t + 2) I x from
       swapTwoSec (I := I) (M := M) (E := E) r t x) = swapTwoFib (I := I) (M := M) r t x := rfl
 
+/-! ## The metric double-trace Hom field `Tr` -/
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The metric double-trace of an `(r, t + 2)`-tensor fibre element.** The diagonal frame sum, over
+the `g_x`-orthonormal frame `Bᵢ := smoothOrthoFrame g x i`, of the two-slot peel reading the two
+leading covariant slots: `metricDoubleTraceFib V := ∑ᵢ V(Bᵢ, Bᵢ, ·)`.  Built as a continuous linear
+map through `LinearMap.toContinuousLinearMap` in the bundle-fibre instance environment, with the
+additive / homogeneous structure carried by `twoSlotPeel_add` / `twoSlotPeel_smul`. -/
+private noncomputable def metricDoubleTraceFib (g : SmoothRiemannianMetric I M) (r t : ℕ) (x : M) :
+    TensorRSSpace r (t + 2) I x →L[ℝ] TensorRSSpace r t I x :=
+  haveI : FiniteDimensional ℝ (TensorRSSpace r (t + 2) I x) :=
+    inferInstanceAs (FiniteDimensional ℝ (Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 2) I x))
+  haveI : T2Space (TensorRSSpace r (t + 2) I x) :=
+    inferInstanceAs (T2Space (Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 2) I x))
+  haveI : T2Space (TensorRSSpace r t I x) :=
+    inferInstanceAs (T2Space (Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x))
+  LinearMap.toContinuousLinearMap
+    { toFun := fun V =>
+        ∑ i : Fin (Module.finrank ℝ E),
+          twoSlotPeel (I := I) (M := M) r t x V
+            (smoothOrthoFrame (I := I) g x i x) (smoothOrthoFrame (I := I) g x i x)
+      map_add' := fun V V' => by
+        rw [← Finset.sum_add_distrib]
+        refine Finset.sum_congr rfl (fun i _ => ?_)
+        rw [twoSlotPeel_add, ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply]
+      map_smul' := fun c V => by
+        rw [RingHom.id_apply, Finset.smul_sum]
+        refine Finset.sum_congr rfl (fun i _ => ?_)
+        rw [twoSlotPeel_smul, ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply] }
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The defining formula for `metricDoubleTraceFib`. -/
+private lemma metricDoubleTraceFib_apply (g : SmoothRiemannianMetric I M) (r t : ℕ) (x : M)
+    (V : TensorRSSpace r (t + 2) I x) :
+    metricDoubleTraceFib (I := I) (M := M) g r t x V =
+      ∑ i : Fin (Module.finrank ℝ E),
+        twoSlotPeel (I := I) (M := M) r t x V
+          (smoothOrthoFrame (I := I) g x i x) (smoothOrthoFrame (I := I) g x i x) := by
+  haveI : FiniteDimensional ℝ (TensorRSSpace r (t + 2) I x) :=
+    inferInstanceAs (FiniteDimensional ℝ (Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 2) I x))
+  haveI : T2Space (TensorRSSpace r (t + 2) I x) :=
+    inferInstanceAs (T2Space (Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 2) I x))
+  haveI : T2Space (TensorRSSpace r t I x) :=
+    inferInstanceAs (T2Space (Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x))
+  rw [metricDoubleTraceFib, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **Base-point smoothness of the metric double-trace field (precise infrastructure child).** On
+every smooth `(r, t + 2)`-section `Z`, the moving-centre double-trace section
+`x ↦ ∑ᵢ Z x (Bᵢ x, Bᵢ x, ·)` against the moving `g_x`-orthonormal frame `Bᵢ := smoothOrthoFrame g x i`
+is smooth.  Frame-independence of the genuine metric double-trace (the two leading slots are
+contracted against the same frame index, `orthonormal_basis_bilin_trace`) freezes the moving frame to
+the fixed `x₀`-centred frame on `smoothOrthoFrameNbhd x₀` — a fixed smooth field, against which the
+two-slot peel of a smooth section is smooth — and `ContMDiffAt.congr_of_eventuallyEq` transfers
+smoothness.  The two-slot-peel mirror of `genuineCurvPureRFibRS_contMDiff`
+(`MovingFrameGenuineFieldPairingRS`).
+
+**Non-vacuity.** The fibre value is the genuine `g`-trace `∑ᵢ V(Bᵢ, Bᵢ, ·)` of the two leading slots,
+non-zero on a tensor whose leading-slot diagonal has non-zero trace; the field carries the actual
+metric double-trace and cannot be replaced by the zero section. -/
+private theorem metricDoubleTraceFib_contMDiff (g : SmoothRiemannianMetric I M) (r t : ℕ) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r (t + 2) ℝ E →L[ℝ] TensorRSModel r t ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (TensorRSModel r (t + 2) ℝ E →L[ℝ] TensorRSModel r t ℝ E)
+        (E := fun z : M => TensorRSSpace r (t + 2) I z →L[ℝ] TensorRSSpace r t I z) x
+        (metricDoubleTraceFib (I := I) (M := M) g r t x)) :=
+  sorry
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The metric double-trace Hom field `Tr t : Hom(T^{(r,t+2)}, T^{(r,t)})`**, as a smooth
+second-order Hom-bundle field section: the metric `g`-contraction of the two leading covariant slots,
+carrying the rough Laplacian on the second iterated covariant gradient. -/
+private noncomputable def metricDoubleTraceField (g : SmoothRiemannianMetric I M) (r : ℕ) :
+    (t : ℕ) → HomTensorRSField (E := E) (M := M) r (t + 2) t I :=
+  fun t =>
+    { toFun := fun x : M => metricDoubleTraceFib (I := I) (M := M) g r t x
+      contMDiff_toFun := metricDoubleTraceFib_contMDiff (I := I) (M := M) g r t }
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The fibre value of the metric double-trace field is `metricDoubleTraceFib`. -/
+private lemma metricDoubleTraceField_apply (g : SmoothRiemannianMetric I M) (r t : ℕ) (x : M) :
+    (show TensorRSSpace r (t + 2) I x →L[ℝ] TensorRSSpace r t I x from
+        metricDoubleTraceField (I := I) (M := M) (E := E) g r t x) =
+      metricDoubleTraceFib (I := I) (M := M) g r t x := rfl
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The rough Laplacian factors through the metric double-trace field on the second iterated
+covariant gradient:** `Δ_∇ W = Tr t · ∇²W`.  Pointwise, the diagonal frame sum reading of the rough
+Laplacian (`rawTensorConnLap_eq_frame_trace_secondCovDeriv`) matches the double-trace of `∇²W` term by
+term through the two-slot evaluation bridge `secondCovGrad_eval_eq_tensorSecondCovDeriv` (read against
+the fixed smooth frame field `Bᵢ := smoothOrthoFrame g x i`). -/
+private theorem roughLap_eq_metricDoubleTrace (g : SmoothRiemannianMetric I M) (r t : ℕ)
+    (W : SmoothCcTensor g r t) :
+    rawTensorConnLapSmooth (I := I) g r t W =
+      appFullSec (I := I) (M := M) g r (t + 2) t (metricDoubleTraceField (I := I) (M := M) (E := E) g r t)
+        (iteratedCovGrad g r t 2 W) := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [rawTensorConnLapSmooth_toSection_apply, appFullSec_toSection, metricDoubleTraceField_apply,
+    metricDoubleTraceFib_apply]
+  rw [rawTensorConnLap_eq_frame_trace_secondCovDeriv (I := I) g r t (fun z : M => W.toSection z) x]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  apply tensorRS_eq_of_toModel_eval_eq (I := I) (M := M)
+  intro D m
+  rw [twoSlotPeel_eval (I := I) (M := M) r t x ((iteratedCovGrad g r t 2 W).toSection x)
+    (smoothOrthoFrame (I := I) g x i x) (smoothOrthoFrame (I := I) g x i x) D m]
+  rw [show (iteratedCovGrad g r t 2 W).toSection x =
+      (covGrad (I := I) (M := M) g r (t + 1)
+        (covGrad (I := I) (M := M) g r t W)).toSection x from rfl]
+  exact (secondCovGrad_eval_eq_tensorSecondCovDeriv (I := I) g r t W
+    (smoothOrthoFrame_smooth (I := I) g x i) (smoothOrthoFrame_smooth (I := I) g x i) x D m).symm
+
 /-! ## The rough-Laplacian / covariant-gradient commutator at operator-field granularity -/
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The order-`3` head difference drops to a `≤ 2`-jet fixed-field action (precise infrastructure
+child).** For the metric double-trace field `Tr := metricDoubleTraceField`, the difference of the two
+ways of tracing the third covariant gradient — `Tr (s+1) · ∇²(∇S)` and `slotExt(Tr s) · ∇(∇²S)` (the
+same `(r, s + 3)`-tensor `∇³S` read with a re-traced leading pair) — is the curvature term born from
+swapping a leading slot pair, and collapses to a fixed smooth Hom-field action on the `≤ 2`-jet
+`(S, ∇S, ∇²S)`.
+
+This is the section-level Ricci identity `tensorSecondCovDeriv_antisymm_eq_riemannOp` read through the
+leading-two-slot transposition field `swapTwoSec` and the two-slot evaluation bridge
+`secondCovGrad_eval_eq_tensorSecondCovDeriv`: with `σ₁₂ := swapTwoSec` and
+`σ₂₃ := slotExtendFullSec σ₁₂`, the fibre-level conjugation `slotExt(Tr s) = Tr(s+1) ∘ σ₂₃ ∘ σ₁₂` (a
+pure multilinear relabelling of which leading pair is traced) turns the difference into
+`Tr(s+1)·(∇³S − σ₂₃∇³S) + Tr(s+1)·σ₂₃·(∇³S − σ₁₂∇³S)`, whose two brackets are the curvature-action
+field `∇²W − σ₁₂∇²W = RActF · W` (the value-local representation of the Ricci identity) at `W := S`
+(differentiated by `covGrad_appFullSec_eq`) and `W := ∇S`; every surviving term is a fixed-field
+action on `S`, `∇S` or `∇²S`, repackaged through the representation theorem
+`exists_value_local_appFullSec`. -/
+private theorem exists_headDifferenceDrop_metricDoubleTrace (g : SmoothRiemannianMetric I M)
+    (r s : ℕ) :
+    ∃ (P₀ : HomTensorRSField (E := E) (M := M) r s (s + 1) I)
+      (P₁ : HomTensorRSField (E := E) (M := M) r (s + 1) (s + 1) I)
+      (P₂ : HomTensorRSField (E := E) (M := M) r (s + 2) (s + 1) I),
+      ∀ S : SmoothCcTensor g r s,
+        appFullSec (I := I) (M := M) g r (s + 1 + 2) (s + 1)
+            (metricDoubleTraceField (I := I) (M := M) (E := E) g r (s + 1))
+            (iteratedCovGrad g r (s + 1) 2 (covGrad (I := I) (M := M) g r s S)) -
+          appFullSec (I := I) (M := M) g r (s + 2 + 1) (s + 1)
+            (slotExtendFullSec (I := I) g r (s + 2) s
+              (metricDoubleTraceField (I := I) (M := M) (E := E) g r s))
+            (covGrad (I := I) (M := M) g r (s + 2) (iteratedCovGrad g r s 2 S)) =
+        appFullSec (I := I) (M := M) g r s (s + 1) P₀ S +
+          appFullSec (I := I) (M := M) g r (s + 1) (s + 1) P₁
+            (covGrad (I := I) (M := M) g r s S) +
+          appFullSec (I := I) (M := M) g r (s + 2) (s + 1) P₂
+            (iteratedCovGrad g r s 2 S) :=
+  sorry
 
 set_option backward.isDefEq.respectTransparency false in
 /-- **The fixed-Hom-field rough-Laplacian / covariant-gradient commutator, at general valence.**
@@ -765,8 +915,12 @@ private theorem exists_roughLapCommutatorTrace_homField
             appFullSec (I := I) (M := M) g r (s + 1) (s + 1) P₁
               (covGrad (I := I) (M := M) g r s S) +
             appFullSec (I := I) (M := M) g r (s + 2) (s + 1) P₂
-              (iteratedCovGrad g r s 2 S) :=
-  sorry
+              (iteratedCovGrad g r s 2 S) := by
+  obtain ⟨P₀, P₁, P₂, hdrop⟩ :=
+    exists_headDifferenceDrop_metricDoubleTrace (I := I) (M := M) (E := E) g r s
+  refine ⟨metricDoubleTraceField (I := I) (M := M) (E := E) g r, P₀, P₁, P₂, ?_, hdrop⟩
+  intro t W
+  exact roughLap_eq_metricDoubleTrace (I := I) (M := M) (E := E) g r t W
 
 /-! ## The fixed-Hom-field curvature jet decomposition of the rank-`r` commutator defect -/
 
