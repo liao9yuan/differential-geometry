@@ -3226,6 +3226,224 @@ private theorem parsevalFrameSum_integratedBochnerExtraction
     (I := I) (M := M) g s S V hV hPar
   linarith [hf5, hf1, hf3, hf24]
 
+set_option linter.unusedSectionVars false in
+/-- **The differentiated-curvature trace carrier is the `(r = 0, s)` Hom-bundle differentiated
+curvature of `S` (the moving-frame, `tensorCov`-world form).** The carrier
+`nablaDiffCurvTraceCc = bochnerGroupElt3IiiIv + bochnerGroupElt2 − bochnerGroupElt1` is, at every
+point, the section-level differentiated Riemann curvature `nablaRiemannSec` of the
+`(r = 0, s)`-tensor connection `tensorCov g 0 s = tensorRSCovariantDerivative 0 s` on the raw
+section `S.toSection`, in the derivation/antisymmetric directions `(V a, V a, V b)`:
+```
+nablaDiffCurvTraceCc g s S (V a) (V b) x
+  = nablaRiemannSec (LeviCivita g) (tensorCov g 0 s) (V a) (V a) (V b) S.toSection x.
+```
+The defining identity is the differentiated-curvature covariant Leibniz unfolding
+`nablaRiemannSec_def` (`(∇_X R)(Y, Z) A = ∇_X(R(Y, Z) A) − R(∇_X Y, Z) A − R(Y, ∇_X Z) A −
+R(Y, Z)(∇_X A)`, with derivation `X = V a`, antisymmetric slots `(Y, Z) = (V a, V b)`), matched to
+the three carriers through the section-level `riemannSec` antisymmetry
+(`R(∇_{V a} V b, V a) S = − R(V a, ∇_{V a} V b) S`, `R(V b, ∇_{V a} V a) S = − R(∇_{V a} V a, V b) S`)
+and `covApply_apply`. -/
+private theorem nablaDiffCurvTraceCc_toSection_eq_nablaRiemannSec
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {Va Vb : Π b : M, TangentSpace I b}
+    (hVa : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Va b⟩ : TotalSpace E (TangentSpace I))))
+    (hVb : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Vb b⟩ : TotalSpace E (TangentSpace I)))) (x : M) :
+    (nablaDiffCurvTraceCc (I := I) (M := M) g s S hVa hVb).toSection x =
+      nablaRiemannSec (I := I) (LeviCivita (I := I) g) (tensorCov (I := I) g 0 s)
+        Va Va Vb (fun y : M => S.toSection y) x := by
+  rw [nablaDiffCurvTraceCc, SmoothCcTensor.toSection_sub, SmoothCcTensor.toSection_add]
+  simp only [ContMDiffSection.coe_sub, ContMDiffSection.coe_add, Pi.sub_apply, Pi.add_apply]
+  rw [show (bochnerGroupElt3IiiIvCc (I := I) (M := M) g s S hVa hVb).toSection x =
+      riemannSec (tensorCov (I := I) g 0 s)
+        (fun b : M => (LeviCivita (I := I) g).toFun Vb b (Va b)) Va
+        (fun y : M => S.toSection y) x +
+      riemannSec (tensorCov (I := I) g 0 s) Vb
+        (fun b : M => (LeviCivita (I := I) g).toFun Va b (Va b))
+        (fun y : M => S.toSection y) x from rfl,
+    show (bochnerGroupElt2Cc (I := I) (M := M) g s S hVa hVb).toSection x =
+      covApply (tensorCov (I := I) g 0 s) Va
+        (fun y : M => riemannSec (tensorCov (I := I) g 0 s) Va Vb
+          (fun z : M => S.toSection z) y) x from rfl,
+    show (bochnerGroupElt1Cc (I := I) (M := M) g s S hVa hVb).toSection x =
+      riemannSec (tensorCov (I := I) g 0 s) Va Vb
+        (covApply (tensorCov (I := I) g 0 s) Va (fun y : M => S.toSection y)) x from rfl]
+  rw [nablaRiemannSec_def]
+  -- (II): R(∇_{Va}Va, Vb) S = − R(Vb, ∇_{Va}Va) S ; (III): R(Va, ∇_{Va}Vb) S = − R(∇_{Va}Vb, Va) S.
+  rw [show riemannSec (tensorCov (I := I) g 0 s) (covApply (LeviCivita (I := I) g) Va Va) Vb
+        (fun y : M => S.toSection y) x =
+      - riemannSec (tensorCov (I := I) g 0 s) Vb
+          (fun b : M => (LeviCivita (I := I) g).toFun Va b (Va b))
+          (fun y : M => S.toSection y) x from by
+    rw [riemannSec_swap (cov := tensorCov (I := I) g 0 s)
+      (covApply (LeviCivita (I := I) g) Va Va) Vb]
+    rfl]
+  rw [show riemannSec (tensorCov (I := I) g 0 s) Va (covApply (LeviCivita (I := I) g) Va Vb)
+        (fun y : M => S.toSection y) x =
+      - riemannSec (tensorCov (I := I) g 0 s)
+          (fun b : M => (LeviCivita (I := I) g).toFun Vb b (Va b)) Va
+          (fun y : M => S.toSection y) x from by
+    rw [riemannSec_swap (cov := tensorCov (I := I) g 0 s) Va
+      (covApply (LeviCivita (I := I) g) Va Vb)]
+    rfl]
+  rw [covApply_apply (tensorCov (I := I) g 0 s) Va
+    (fun y : M => riemannSec (tensorCov (I := I) g 0 s) Va Vb (fun z : M => S.toSection z) y) x]
+  abel
+
+set_option linter.unusedSectionVars false in
+/-- **The unit-read of the `(r = 0, s)` Hom-bundle differentiated curvature is the differentiated
+`(0, s)`-tensor curvature.** Reading the `(r = 0, s)`-tensor differentiated Riemann curvature
+`nablaRiemannSec (LeviCivita g) (tensorCov g 0 s) (V a) (V a) (V b) S.toSection x` (a fibre
+`Tensor0SSpace 0 →L Tensor0SSpace s`) against the unit `(0, 0)`-tensor `unitZeroSec x` recovers the
+differentiated `(0, s)`-tensor curvature `nablaTensor0SCurv g s (V a) (V a) (V b) A x`, where
+`A y := (S.toSection y) (unitZeroSec y)` is the unit-read abstract `(0, s)`-tensor section.
+This is the differentiated (`nabla`) lift of the Hom-bundle curvature–Leibniz unit-read bridge: the
+`(r = 0, s)`-tensor bundle is the Hom-bundle `Tensor0SSpace 0 →L Tensor0SSpace s`
+(`tensorRSCovariantDerivative` is `homBundleCovariantDerivativeGen (tensor0SCov 0) (tensor0SCov s)`,
+by definition), so `nablaRiemannSec_homBundleGen_apply_eq` splits the unit-read into the target
+differentiated curvature on the paired section `pairedSection S.toSection unitZeroSec = A` minus the
+source `(0, 0)`-scalar differentiated curvature on `unitZeroSec`, which vanishes
+(`nablaTensor0SCurv_zero_eq_zero`, the scalar connection is flat). -/
+private theorem nablaRiemannSec_tensorCov_unit_eq_nablaTensor0SCurv
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {Va Vb : Π b : M, TangentSpace I b}
+    (hVa : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Va b⟩ : TotalSpace E (TangentSpace I))))
+    (hVb : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Vb b⟩ : TotalSpace E (TangentSpace I)))) (x : M) :
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+        nablaRiemannSec (I := I) (LeviCivita (I := I) g) (tensorCov (I := I) g 0 s)
+          Va Va Vb (fun y : M => S.toSection y) x)
+        (unitZeroSec (I := I) (M := M) x) =
+      nablaTensor0SCurv (I := I) g s ⟨fun b => Va b, hVa⟩ ⟨fun b => Va b, hVa⟩
+        ⟨fun b => Vb b, hVb⟩
+        (fun y : M =>
+          (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
+            (unitZeroSec (I := I) (M := M) y)) x := by
+  classical
+  have hbridge := nablaRiemannSec_homBundleGen_apply_eq
+    (cov_U := Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g))
+    (cov_V := Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+    (covT := LeviCivita (I := I) g)
+    ⟨fun b => Va b, hVa⟩ ⟨fun b => Va b, hVa⟩ ⟨fun b => Vb b, hVb⟩
+    S.toSection
+    ⟨fun y : M => unitZeroSec (I := I) (M := M) y, contMDiff_unitZeroSection (I := I) (M := M)⟩ x
+  rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+        nablaRiemannSec (I := I) (LeviCivita (I := I) g) (tensorCov (I := I) g 0 s)
+          Va Va Vb (fun y : M => S.toSection y) x)
+        (unitZeroSec (I := I) (M := M) x) =
+      nablaRiemannSec (I := I) (LeviCivita (I := I) g)
+          (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+          (fun b => Va b) (fun b => Va b) (fun b => Vb b)
+          (HomConnectionGen.pairedSection (M := M)
+            (U := fun z : M => Tensor0SSpace 0 I z) (V := fun z : M => Tensor0SSpace s I z)
+            (fun b => S.toSection b) (fun b => unitZeroSec (I := I) (M := M) b)) x -
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from S.toSection x)
+          (nablaRiemannSec (I := I) (LeviCivita (I := I) g)
+            (Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g))
+            (fun b => Va b) (fun b => Va b) (fun b => Vb b)
+            (fun b => unitZeroSec (I := I) (M := M) b) x) from hbridge]
+  -- The source-bundle differentiated curvature is the scalar `(0, 0)` differentiated curvature `= 0`.
+  rw [show nablaRiemannSec (I := I) (LeviCivita (I := I) g)
+        (Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g))
+        (fun b => Va b) (fun b => Va b) (fun b => Vb b)
+        (fun b => unitZeroSec (I := I) (M := M) b) x =
+      nablaTensor0SCurv (I := I) g 0 ⟨fun b => Va b, hVa⟩ ⟨fun b => Va b, hVa⟩
+        ⟨fun b => Vb b, hVb⟩ (fun b => unitZeroSec (I := I) (M := M) b) x from rfl,
+    nablaTensor0SCurv_zero_eq_zero (I := I) g ⟨fun b => Va b, hVa⟩ ⟨fun b => Va b, hVa⟩
+      ⟨fun b => Vb b, hVb⟩ (fun b => unitZeroSec (I := I) (M := M) b)
+      (contMDiff_unitZeroSection (I := I) (M := M)) x]
+  rw [map_zero, sub_zero]
+  -- The target-bundle differentiated curvature on the paired section is `nablaTensor0SCurv g s A`.
+  rfl
+
+set_option linter.unusedSectionVars false in
+/-- **Representation identification (the connector bridge): the differentiated-curvature trace
+carrier is the `tensor0SAsRS`-wrap of the differentiated `(0, s)`-tensor curvature.** For a fixed
+Parseval frame family, the moving-frame carrier `nablaDiffCurvTraceCc g s S (V a) (V b)` — built in
+the `(r = 0, s)`-tensor (`tensorCov g 0 s`) world on the raw section `S.toSection`, read on the unit
+through `bochnerGroupElt*` — equals the `tensor0SAsRS`-wrap of the differentiated `(0, s)`-tensor
+curvature operator object `nablaTensor0SCurv g s (V a) (V a) (V b) A`, built in the
+`Tensor0SSpace s` (`tensor0SCovariantDerivative s`) world on the unit-read abstract section
+`A y := (S.toSection y) (unitZeroSec y)`:
+```
+nablaDiffCurvTraceCc g s S (V a) (V b) x
+  = tensor0SAsRS x (nablaTensor0SCurv g s (V a) (V a) (V b) (fun y => S.toSection y (unit)) x).
+```
+This is the pure representation bridge between the two `(0, s)`-covariant-derivative worlds — the
+carrier's `tensorRSCovariantDerivative 0 s` Hom-bundle world and the div-`R` curvature bridge's
+`tensor0SCovariantDerivative s` world — through which the rank-`0` Bochner tension-field nullity root
+consumes the diagonal-divergence curvature bridge `frame_sum_nablaTensor0SCurv_diag_baseSlot_eval`.
+The carrier is the `(r = 0, s)`-Hom-bundle differentiated curvature `nablaRiemannSec` of `S.toSection`
+(`nablaDiffCurvTraceCc_toSection_eq_nablaRiemannSec`), whose `tensor0SAsRS`-rewrap of its unit-read
+(`tensor0SAsRS_rs_unit'`) is, by the Hom-bundle curvature–Leibniz unit-read bridge
+(`nablaRiemannSec_tensorCov_unit_eq_nablaTensor0SCurv`), exactly the wrapped differentiated
+`(0, s)`-tensor curvature on `A`. -/
+private theorem nablaDiffCurvTraceCc_toSection_eq_tensor0SAsRS_nablaTensor0SCurv
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {Va Vb : Π b : M, TangentSpace I b}
+    (hVa : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Va b⟩ : TotalSpace E (TangentSpace I))))
+    (hVb : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Vb b⟩ : TotalSpace E (TangentSpace I)))) (x : M) :
+    (nablaDiffCurvTraceCc (I := I) (M := M) g s S hVa hVb).toSection x =
+      tensor0SAsRS (I := I) (M := M) x
+        (nablaTensor0SCurv (I := I) g s ⟨fun b => Va b, hVa⟩ ⟨fun b => Va b, hVa⟩
+          ⟨fun b => Vb b, hVb⟩
+          (fun y : M =>
+            (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
+              (unitZeroSec (I := I) (M := M) y)) x) := by
+  rw [nablaDiffCurvTraceCc_toSection_eq_nablaRiemannSec (I := I) (M := M) g s S hVa hVb x]
+  rw [← nablaRiemannSec_tensorCov_unit_eq_nablaTensor0SCurv (I := I) (M := M) g s S hVa hVb x]
+  exact (tensor0SAsRS_rs_unit' (I := I) (M := M) s x
+    (nablaRiemannSec (I := I) (LeviCivita (I := I) g) (tensorCov (I := I) g 0 s)
+      Va Va Vb (fun y : M => S.toSection y) x)).symm
+
+set_option linter.unusedSectionVars false in
+/-- **Inner↔curvature-object bridge: the carrier inner-scalar pairing is the `(0, s)` fibre pairing of
+the differentiated `(0, s)`-tensor curvature object against `∇S`.** Reading the differentiated-curvature
+trace carrier `nablaDiffCurvTraceCc g s S (V a) (V b)` against the slot-`0` directional gradient
+`∇_{V b} S = bochnerGradSlot0Cc g s S (V b)` through the `(0, s)` metric inner scalar `tensorInnerScalar`
+is, at every point `x`, the `(0, s)` fibre pairing `tensorInnerPointwise g 0 s` of the `tensor0SAsRS`-wrap
+of the differentiated `(0, s)`-tensor curvature object `nablaTensor0SCurv g s (V a) (V a) (V b) A`
+(`A y := S.toSection y (unit)`) against `∇_{V b} S`:
+```
+tensorInnerScalar g 0 s (nablaDiffCurvTraceCc g s S (V a) (V b)) (bochnerGradSlot0Cc g s S (V b)) x
+  = tensorInnerPointwise g 0 s x
+      (toModel (tensor0SAsRS x (nablaTensor0SCurv g s (V a) (V a) (V b) A x)))
+      (toModel (bochnerGradSlot0 g s S (V b) x)).
+```
+This lands the differentiated-curvature pairing — the integrand of the contracted-second-Bianchi
+tension-field nullity root `parsevalFrameSum_nablaDiffCurvTrace_add_group1_eq_residue` — onto the
+`Tensor0SSpace s`-world curvature object `nablaTensor0SCurv` that the diagonal-divergence curvature
+bridge `frame_sum_nablaTensor0SCurv_diag_baseSlot_eval` and its slot-wise tuple form
+`nablaTensor0SCurv_apply_eval` act on.  It is `tensorInnerScalar_apply` followed by the representation
+identification `nablaDiffCurvTraceCc_toSection_eq_tensor0SAsRS_nablaTensor0SCurv` and the definitional
+`bochnerGradSlot0Cc_toSection_apply`. -/
+private theorem tensorInnerScalar_nablaDiffCurvTrace_eq_tensorInnerPointwise_nablaTensor0SCurv
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {Va Vb : Π b : M, TangentSpace I b}
+    (hVa : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Va b⟩ : TotalSpace E (TangentSpace I))))
+    (hVb : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Vb b⟩ : TotalSpace E (TangentSpace I)))) (x : M) :
+    tensorInnerScalar (I := I) (M := M) g 0 s
+        (nablaDiffCurvTraceCc (I := I) (M := M) g s S hVa hVb).toSection
+        (bochnerGradSlot0Cc (I := I) (M := M) g s S hVb).toSection x =
+      tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel
+          (tensor0SAsRS (I := I) (M := M) x
+            (nablaTensor0SCurv (I := I) g s ⟨fun b => Va b, hVa⟩ ⟨fun b => Va b, hVa⟩
+              ⟨fun b => Vb b, hVb⟩
+              (fun y : M =>
+                (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
+                  (unitZeroSec (I := I) (M := M) y)) x)))
+        (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S Vb x)) := by
+  rw [tensorInnerScalar_apply (I := I) (M := M) g 0 s,
+    nablaDiffCurvTraceCc_toSection_eq_tensor0SAsRS_nablaTensor0SCurv (I := I) (M := M) g s S hVa hVb x,
+    bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S hVb x]
+
 end Connection
 end Integral
 end DifferentialGeometry
