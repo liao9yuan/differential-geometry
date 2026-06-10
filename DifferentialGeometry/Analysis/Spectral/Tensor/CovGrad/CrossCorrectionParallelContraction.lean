@@ -5,6 +5,7 @@ import DifferentialGeometry.Tensor.RSTensor.Coordinates.CoordinateBasis
 import DifferentialGeometry.Geometry.Connection.ConnectionDifferenceFieldJets
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LoweredConnectionDifferenceCovariantDerivative
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTraceField
+import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldCovariantCalculusRS
 
 /-! # The cross-correction parallel two-section contraction `h ⌟ D`
 
@@ -763,12 +764,167 @@ theorem crossCorrParallelContraction_eq_crossCorrectionSection
     rfl
   rw [hLHS, hRHS]
 
+/-! ## The operator-field bridge: the parallel contraction as a fixed-cometric post-composition
+
+The cross-correction `g₀`-single contraction `crossCorrParallelContraction g₀ S T` factors, fibrewise,
+as the post-composition of a **fixed** smooth cometric double-trace operator field
+`crossCorrCometricOp g₀ a b` (a `((3 + b) + (2 + a), 3 + a + b)`-operator field, reading `g₀` only
+through the `∇₀`-parallel cometric `g₀⁻¹`) after the **frame-free** slot-permuted model tensor-product
+section `crossCorrProdSection g₀ S T` (a `(0, (3 + b) + (2 + a))`-tensor, carrying NO cometric).  This is
+the bilinear analogue of the operator-field action route used by `ricciModelTrace42Op`: it reduces both
+`∇`-compatibility facts to the operator-field B-rule `covGrad_appCcRS_eq` (the cometric being parallel,
+the differentiated-field cross term vanishes) and the partial-contraction Cauchy–Schwarz
+`riemannianFiberNormSq_compRS_le_mul`, with the genuine two-section content carried by the product
+section `crossCorrProdSection` (its own two-section covariant Leibniz and operator bound) and the
+slot-permuted reconciliation of the operator field. -/
+
+/-- **The frame-free slot-permuted model tensor-product section** `(0, (3 + b) + (2 + a))` of the unit
+fibres of `T`, `S`: `x ↦ ofModel (domDomCongr (crossCorrPerm a b) (modelProduct (ccUnitModel T x)
+(ccUnitModel S x)))`, the pure tensor product carrying NO cometric (the cometric enters only through the
+post-composed operator field).  Smooth by `crossCorrProdField_contMDiff`; compact support automatic. -/
+noncomputable def crossCorrProdField (g₀ : SmoothRiemannianMetric I M) {a b : ℕ}
+    (S : SmoothCcTensor g₀ 0 (2 + a)) (T : SmoothCcTensor g₀ 0 (3 + b)) :
+    Tensor0SBundle.Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) ∞ ((3 + b) + (2 + a)) :=
+  letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) ((3 + b) + (2 + a))
+  letI := TangentBundle.contMDiffVectorBundle (I := I) (M := M) (n := ∞)
+  ⟨fun x => Tensor0SBundle.Tensor0SSpace.ofModel
+      (ContinuousMultilinearMap.domDomCongr (crossCorrPerm a b)
+        (Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+          (ccUnitModel (I := I) g₀ T x) (ccUnitModel (I := I) g₀ S x))),
+    crossCorrProdField_contMDiff (I := I) g₀ S T⟩
+
+noncomputable def crossCorrProdSection (g₀ : SmoothRiemannianMetric I M) {a b : ℕ}
+    (S : SmoothCcTensor g₀ 0 (2 + a)) (T : SmoothCcTensor g₀ 0 (3 + b)) :
+    SmoothCcTensor g₀ 0 ((3 + b) + (2 + a)) where
+  toSection :=
+    MixedSection.fromMultilinearSection (𝕜 := ℝ) (F := E) (IB := I)
+      (E := (TangentSpace I : M → Type _)) ∞ (crossCorrProdField (I := I) g₀ S T)
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+/-- The fibre value of the cometric double-trace operator field at `x`: the raise-then-trace cometric
+single contraction `D ↦ ofModel (modelDoubleTrace (3 + a + b) (cometricLmodel g₀ x) (modelRankCast
+(toModel D)))`, mapping a `(0, (3 + b) + (2 + a))`-tensor to a `(0, 3 + a + b)`-tensor.  Concretely the
+composition of the fibre rank-cast `(3 + b) + (2 + a) = (3 + a + b) + 2`, the cometric leading-slot raise
+`cometricRaiseSlot0Fib g₀ (3 + a + b) x`, and the frame-free natural trace `contract_trace 0 (3 + a + b)
+x` at the unit — the SAME raise-then-trace calculus as the unit-applied `crossCorrField`.  POSITED fibre
+child: the explicit `Tensor0SSpace`/`TensorRSSpace` topology-instance bridge between the
+`contract_trace`/`cometricRaiseSlot0Fib` codomains (canonical multilinear-map topology) and the
+`Tensor0SSpace` operator topology is the codebase's standard `tensor0SSpace_topology_eq` plumbing
+(packaged for the unit-applied form in `crossCorrField_contMDiff`); it is the only remaining gap. -/
+private noncomputable def crossCorrCometricOpFib (g₀ : SmoothRiemannianMetric I M) (a b : ℕ) (x : M) :
+    Tensor0SBundle.TensorRSSpace ((3 + b) + (2 + a)) (3 + a + b) I x :=
+  sorry
+
+/-- **Base-point smoothness of the cometric double-trace operator field.**  Mirrors
+`crossCorrField_contMDiff`: the field is the fibre rank-cast followed by the cometric raise
+(`cometricRaiseSlot0Fib_section_contMDiff`, smooth through the globally smooth cometric Hom-section
+`inverseMetricSharpField`) and the frame-free natural trace (`contractTraceField_contMDiff`), lifted
+from per-vector to operator smoothness by `contMDiff_clm_section_of_pointwise`.  POSITED child paired
+with the fibre value `crossCorrCometricOpFib`. -/
+private theorem crossCorrCometricOpFib_contMDiff (g₀ : SmoothRiemannianMetric I M) (a b : ℕ) :
+    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel ((3 + b) + (2 + a)) (3 + a + b) ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel ((3 + b) + (2 + a)) (3 + a + b) ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace ((3 + b) + (2 + a)) (3 + a + b) I z) x
+        (crossCorrCometricOpFib (I := I) g₀ a b x)) := by
+  sorry
+
+/-- **The fixed smooth cometric double-trace operator field** as a `SmoothCcTensor`, packaging the
+fibre value `crossCorrCometricOpFib` (smooth by `crossCorrCometricOpFib_contMDiff`); compact support
+automatic on the closed manifold. -/
+private noncomputable def crossCorrCometricOp (g₀ : SmoothRiemannianMetric I M) (a b : ℕ) :
+    SmoothCcTensor g₀ ((3 + b) + (2 + a)) (3 + a + b) where
+  toSection :=
+    { toFun := fun x : M => crossCorrCometricOpFib (I := I) g₀ a b x
+      contMDiff_toFun := crossCorrCometricOpFib_contMDiff (I := I) g₀ a b }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+/-- **The parallel contraction is the operator-field action of the fixed cometric double-trace field
+on the frame-free product section** (POSITED bridge child).  `crossCorrParallelContraction g₀ S T =
+appCcRS g₀ 0 ((3 + b) + (2 + a)) (3 + a + b) (crossCorrCometricOp g₀ a b) (crossCorrProdSection g₀ S T)`:
+the fibre value of the contraction (`crossCorrModelFun = modelDoubleTrace ∘ modelRankCast ∘ perm ∘
+modelProduct`, `crossCorrModelFun_eq_modelDoubleTrace_perm`) is the post-composition of the fixed
+cometric trace operator after the slot-permuted model product, fibrewise. -/
+private theorem crossCorrParallelContraction_eq_appCcRS (g₀ : SmoothRiemannianMetric I M) {a b : ℕ}
+    (S : SmoothCcTensor g₀ 0 (2 + a)) (T : SmoothCcTensor g₀ 0 (3 + b)) :
+    crossCorrParallelContraction (I := I) g₀ S T =
+      appCcRS (I := I) (M := M) g₀ 0 ((3 + b) + (2 + a)) (3 + a + b)
+        (crossCorrCometricOp (I := I) g₀ a b) (crossCorrProdSection (I := I) g₀ S T) := by
+  sorry
+
+/-- **The fixed cometric double-trace operator field is `∇₀`-parallel** (POSITED parallelism child):
+`covGrad g₀ ((3 + b) + (2 + a)) (3 + a + b) (crossCorrCometricOp g₀ a b) = 0`.  The operator field is
+the cometric single trace; the cometric `g₀⁻¹` is `∇₀`-parallel by Levi-Civita metric compatibility
+(`inverseMetricSharpField_covGrad_eq_zero`), and the model-product/permutation/rank-cast wrapping is
+constant, so the whole field has vanishing covariant gradient. -/
+private theorem crossCorrCometricOp_covGrad_eq_zero (g₀ : SmoothRiemannianMetric I M) (a b : ℕ) :
+    covGrad (I := I) (M := M) g₀ ((3 + b) + (2 + a)) (3 + a + b)
+        (crossCorrCometricOp (I := I) g₀ a b) = 0 := by
+  sorry
+
+/-- **The two-section covariant Leibniz of the frame-free product section** (POSITED product-Leibniz
+child).  The operator-field slot-extension of the parallel cometric field, applied to the covariant
+gradient of the slot-permuted model product, reconciles with the two shifted-order contractions:
+```
+appCcRS (slotExtend (crossCorrCometricOp g₀ a b)) (covGrad (crossCorrProdSection g₀ S T)) =
+  castRankCc_db ... (crossCorrParallelContraction g₀ (a := a + 1) (b := b) (covGrad S) T)
+  + crossCorrParallelContraction g₀ (a := a) (b := b + 1) S (covGrad T).
+```
+The covariant gradient of the model tensor product `modelProduct` splits by the slot-correction Leibniz
+`covariantSlotCorrection_modelProduct` (`∇ g = 0` killing the cross term) into the `S`-gradient and the
+`T`-gradient pieces, each re-wrapped by the slot-extended cometric field into the corresponding
+shifted-rank cross-correction contraction. -/
+private theorem appCcRS_slotExtend_crossCorrProd_covGrad_eq (g₀ : SmoothRiemannianMetric I M)
+    {a b : ℕ} (S : SmoothCcTensor g₀ 0 (2 + a)) (T : SmoothCcTensor g₀ 0 (3 + b)) :
+    appCcRS (I := I) (M := M) g₀ 0 (((3 + b) + (2 + a)) + 1) ((3 + a + b) + 1)
+        (slotExtend (I := I) (M := M) g₀ ((3 + b) + (2 + a)) (3 + a + b)
+          (crossCorrCometricOp (I := I) g₀ a b))
+        (covGrad (I := I) (M := M) g₀ 0 ((3 + b) + (2 + a))
+          (crossCorrProdSection (I := I) g₀ S T)) =
+      castRankCc_db g₀ 0 (by omega : 3 + (a + 1) + b = 3 + a + b + 1)
+          (crossCorrParallelContraction (I := I) g₀ (a := a + 1) (b := b)
+            (covGrad g₀ 0 (2 + a) S) T) +
+        crossCorrParallelContraction (I := I) g₀ (a := a) (b := b + 1) S
+          (covGrad g₀ 0 (3 + b) T) := by
+  sorry
+
+/-- **The pointwise `rfns` bilinear bound of the cross-correction contraction at a single base point**
+(POSITED pointwise-bound child).  `rfns(prod S T)(x) ≤ μ x · rfns(S)(x) · rfns(T)(x)`, where `μ x` is
+the fibrewise operator norm of the cometric pairing at `x`.  The contraction is the post-composition of
+the fixed cometric trace operator after the model product; the operator-field Cauchy–Schwarz
+`riemannianFiberNormSq_compRS_le_mul` bounds it by `rfns(crossCorrCometricOp g₀ a b)(x)` times
+`rfns(crossCorrProdSection)(x)`, and the model product's fibre norm is the product of the factor fibre
+norms.  Packaged with the uniform sup over the compact manifold in
+`exists_uniform_crossCorrParallelContraction_rfns_le`. -/
+private theorem crossCorrParallelContraction_rfns_le_pointwise (g₀ : SmoothRiemannianMetric I M)
+    {a b : ℕ} (S : SmoothCcTensor g₀ 0 (2 + a)) (T : SmoothCcTensor g₀ 0 (3 + b)) (x : M)
+    (μx : ℝ) (hμx : riemannianFiberNormSq (I := I) (M := M) g₀ ((3 + b) + (2 + a)) (3 + a + b) x
+        ((crossCorrCometricOp (I := I) g₀ a b).toSection x) ≤ μx) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + a + b) x
+        ((crossCorrParallelContraction (I := I) g₀ S T).toSection x) ≤
+      μx * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x (S.toSection x) *
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + b) x (T.toSection x) := by
+  sorry
+
+/-- **A single uniform fibre-norm bound on the cometric trace operator field, over all rank shifts and
+base points** (POSITED uniform-sup child).  There is one nonnegative constant `μ` with
+`rfns(crossCorrCometricOp g₀ a b)(x) ≤ μ` for every `(a, b, x)`.  The cometric single-trace operator
+field reads `g₀` only through the cometric `g₀⁻¹`, whose fibrewise operator norm `‖g₀⁻¹(x)‖` is
+rank-independent and bounded on the compact manifold `M` (smoothness of `inverseMetricSharpField` +
+`IsCompact M`); the model-product/permutation/rank-cast wrapping is an isometry, so the bound is uniform
+over `(a, b)` as well as over `x`.  This is the rank-independent constant the assembled instance needs
+(the `(a, b)` slots ride along). -/
+private theorem exists_uniform_crossCorrCometricOp_rfns_bound (g₀ : SmoothRiemannianMetric I M) :
+    ∃ μ : ℝ, 0 ≤ μ ∧ ∀ (a b : ℕ) (x : M),
+      riemannianFiberNormSq (I := I) (M := M) g₀ ((3 + b) + (2 + a)) (3 + a + b) x
+          ((crossCorrCometricOp (I := I) g₀ a b).toSection x) ≤ μ := by
+  sorry
+
 /-! ## The two genuine `∇`-compatibility fields, and the assembled `RfnsBilinearProduct`
 
 The two `RfnsBilinearProduct g₀ 2 3 3` fields below are the genuine deep covariant-calculus content of
 the cross-correction product (the dispatch's "two fields, both genuine new covariant calculus").  They
-are posited here as the deep children and discharged in dedicated builds; the parent — the assembled
-instance `crossCorrRfnsBilinearProduct` and its diagonal `rfns` jet grid — is real composition on top. -/
+are discharged here through the operator-field bridge above; the parent — the assembled instance
+`crossCorrRfnsBilinearProduct` and its diagonal `rfns` jet grid — is real composition on top. -/
 
 /-- **The exact two-section parallel covariant Leibniz of the cross-correction `g₀`-single contraction**
 (POSITED deep covariant-calculus child).  `∇₀(prod S T) = (rank-cast) prod (∇₀S) T + prod S (∇₀T)`: the
@@ -784,7 +940,19 @@ theorem crossCorrParallelContraction_covGrad_prod (g₀ : SmoothRiemannianMetric
             (covGrad g₀ 0 (2 + a) S) T) +
         crossCorrParallelContraction (I := I) g₀ (a := a) (b := b + 1) S
           (covGrad g₀ 0 (3 + b) T) := by
-  sorry
+  -- Bridge: the parallel contraction is the operator-field action of the fixed parallel cometric
+  -- double-trace field on the frame-free product section.
+  rw [crossCorrParallelContraction_eq_appCcRS (I := I) g₀ S T]
+  -- B-rule: ∇₀(appCcRS Ψ P) = appCcRS (∇₀Ψ) P + appCcRS (slotExtend Ψ) (∇₀P); the first term
+  -- vanishes because the cometric field Ψ is ∇₀-parallel (∇₀ g₀⁻¹ = 0).
+  rw [covGrad_appCcRS_eq (I := I) (M := M) g₀ 0 ((3 + b) + (2 + a)) (3 + a + b)
+    (crossCorrCometricOp (I := I) g₀ a b) (crossCorrProdSection (I := I) g₀ S T),
+    crossCorrCometricOp_covGrad_eq_zero (I := I) g₀ a b,
+    appCcRS_zero_left (I := I) (M := M) g₀ 0 ((3 + b) + (2 + a)) ((3 + a + b) + 1)
+      (crossCorrProdSection (I := I) g₀ S T), zero_add]
+  -- The surviving slot-extended term reconciles, through the product Leibniz, with the two
+  -- shifted-order cross-correction contractions.
+  exact appCcRS_slotExtend_crossCorrProd_covGrad_eq (I := I) g₀ S T
 
 /-- **The base-point-uniform `rfns` operator bound of the cross-correction `g₀`-single contraction**
 (POSITED deep covariant-calculus child).  There is a nonnegative constant `μ`, uniform over the two
@@ -801,7 +969,12 @@ theorem exists_uniform_crossCorrParallelContraction_rfns_le (g₀ : SmoothRieman
           ((crossCorrParallelContraction (I := I) g₀ S T).toSection x) ≤
         μ * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x (S.toSection x) *
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + b) x (T.toSection x) := by
-  sorry
+  -- The uniform constant is a single fibrewise cometric-operator-norm sup, uniform over the rank
+  -- shifts `(a, b)` and the base point `x` (the cometric trace operator has rank-independent fibre
+  -- norm `‖g₀⁻¹(x)‖`, bounded on the compact manifold).
+  obtain ⟨μ, hμ_nn, hμ⟩ := exists_uniform_crossCorrCometricOp_rfns_bound (I := I) g₀
+  refine ⟨μ, hμ_nn, fun {a b} S T x => ?_⟩
+  exact crossCorrParallelContraction_rfns_le_pointwise (I := I) g₀ S T x μ (hμ a b x)
 
 /-- **The assembled `RfnsBilinearProduct g₀ 2 3 3` for the cross-correction `g₀`-single contraction
 `h ⌟ D`.**  The parallel fibrewise bilinear product `prod (realizeSymm Tₖ) (loweredConnDiff gₖ g₀)`
