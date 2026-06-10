@@ -111,6 +111,70 @@ the trace; only Weyl=0 makes the trace invertible).*
 - **THEN B3b:** apply `rm04_kn_gform` at fixed coordinate-frame `e_a,e_b,e_c,e_d` ⇒
   `Rm04(t)(e_a,e_b,e_c,e_d) = KN(Ric(t),S(t),g(t))` (scalar identity in `t`); differentiate by the
   product rule.
+
+### GPT Pro consult — VALIDATED (2026-06-08). Route is sound; refinements:
+
+- **Stay on the 3D route.** It is the dim-3 specialization of Hamilton's evolution via Weyl=0,
+  not a bad shortcut. Do NOT switch to general Bianchi (longer, duplicates the proved Ricci/scalar
+  evolutions). Do NOT re-architect BBS around Ricci (replaceable mathematically, worse
+  architecturally — needs a whole new ∇ᵏRic tower; downstream already consumes the Rm base).
+- **THE trap = sign convention.** `traceDataOfFirst` produces `RiemannFromRicci3DTraceDataAt g
+  (−Ric) (−scalar) Rm04 basis` (displayed-slot vs geometric). Isolate the sign in ONE wrapper.
+- **Lemma sequence (revised, build in THIS order):**
+  1. ✅ **`solution_traceDataOfFirst_at` = `traceData_can` ALREADY BANKED**
+     (`ImprovedPinching/BookData.lean:275`): `traceData_can S horth : RiemannFromRicci3DTraceDataAt
+     (S.base.metric t)(−(S.ricciAt t x))(−(S.scalar t x))(S.base.rm04 t x) basis` — only needs `S`
+     + a `g t`-orthonormal `Fin 3` basis (realizations proven internally from Levi-Civita). Big
+     de-risking: no realization discharge to build.
+  2. ✅ **`solution_rm04_kn_firstTrace_gform_at` DONE** (`UhlenbeckBaseProducer.lean`, GREEN 3730,
+     axiom-clean): `rm04_kn_gform (traceData_can S horth)` + `simp [ContinuousMultilinearMap.neg_apply]`
+     + `ring` ⇒ sign-correct geometric KN for the solution:
+     `Rm04 t x (X,Y,Z,W) = −Ric(X,Z)g(Y,W)+Ric(Y,Z)g(X,W)+Ric(X,W)g(Y,Z)−Ric(Y,W)g(X,Z)
+     +(S/2)(g(X,Z)g(Y,W)−g(Y,Z)g(X,W))` (geometric `S.ricciAt`/`S.scalar`/`S.base.metric`).
+     The sign bridge lives ONLY here; basis is invisible (basis-free conclusion).
+  - ✅ **Step 1 DONE** `exists_orthonormalBasisAt` (`RicciControlsRm.lean`, GREEN, axiom-clean):
+    `∃ basis, OrthonormalBasisAt g x basis` via `ricciEigenBasis3` at the ZERO Ricci tensor.
+  - ✅ **Step 2 DONE** `solution_rm04_kn_field` (`UhlenbeckBaseProducer.lean`, GREEN 3730,
+    axiom-clean): the `s`-pointwise geometric KN identity, basis hidden (uses step 1).
+  - ✅ **Step 4 time-deriv (B3b) DONE** `solution_rm04_timeDeriv_kn` (GREEN 3730, axiom-clean):
+    `∂ₜRm04(X,Y,Z,W)` = product rule on the KN field (Ric/scalar `∂ₜ` as hyps, `∂ₜg=−2Ric`
+    internal via `hS.equation`). Lean: combinator derivative carries `Pi.neg`/`Pi.mul` atoms →
+    `convert hd using 1; simp only [Pi.neg_apply, Pi.mul_apply, Pi.sub_apply]; ring`.
+  - **REMAINING (the multi-session geometric core):**
+    - **3. DIFFUSION SPLIT** `roughLapRm04 = KN(roughLapRic, roughLapScalar, g)`: needs the
+      tensor-FIELD KN section identity (lift step 2 to `Tensor0SField` sections) + `∇²`-of-KN via
+      `nabla0S_product_realizes` (twice) + `nabla_metric_zero` (`∇g=0`) + trace (`roughLap0STensor`).
+      Substantial formalism-A computation.
+    - **4 remainder. REACTION MATCH + PACKAGE**: substitute the Lichnerowicz Ricci evolution +
+      scalar evolution (`∂ₜS=ΔS+2|Ric|²`) into B3b's `ricXZ'`/`sc'`; identify diffusion via step 3;
+      match reaction `= 2(B…)−drift` to the SPECIFIC `uhlenbeckBTensorInFrame` (slot order `i?j?/k?l?`)
+      + `riemann04RicciDriftInFrame` (4 one-up contractions, minus). 3D algebra: prove in an
+      orthonormal `Fin 3` basis (g=δ, `ring`) → export tensorial → coordinate `FourComp`. Then
+      package `Riemann04BTensorWithRicciDriftEvolutionInFrameOn`. Carries the Lichnerowicz
+      regularity hypotheses.
+
+### REACTION-MATCH `ring` — ATTEMPTED 3× (stuck on the convention/sign trap, 2026-06-09)
+Tested the crux as a self-contained orthonormal `Fin 3` `ring` identity (R symmetric matrix,
+`rm04 = KN(R)`, `B_{abcd}=Σ_{ef} rm_{aebf}rm_{cedf}`, `drift=Σ R·rm04` (4 terms),
+`Q_Ric = −2·Σ rm_{ikjl}R_{kl} − 2(R²)`, `Q_S = 2|Ric|²`, `b3bReac` from B3b):
+claim `KN(Q_Ric,Q_S,δ)+b3bReac = 2(B−B+B−B)−drift`.
+- ✅ `ring` machinery WORKS over `Fin 3` (verified the KN trace `Σₖ rm_{ikjk}=−R_{ij}` cleanly).
+- ✗ Wall 1: full `∀ a b c d` → `whnf` timeout (81 cases × big `B` polys). Need single-component
+  or `maxHeartbeats`↑ + leaner tactic (`simp only [Fin.sum_univ_three, Fin.reduceEq, reduceIte]; ring`).
+- ✗ Wall 2: single component `(0,1,0,1)`, original curv-action sign `−2` → messy mismatch.
+- ✗ Wall 3: flipped curv-action `+2` → **clean mismatch `LHS−RHS = 2|Ric|²`**.
+**DIAGNOSIS for next session:** the structure is right (off by a single Ricci-invariant `2|Ric|²`),
+so the bug is ONE convention: most likely (a) the `Q_S` scalar-reaction slot in `KN(Q_Ric,Q_S,δ)`
+(maybe the displayed-vs-geometric `S.scalar` sign, or it double-counts vs the diffusion split),
+or (b) the diffusion-split `ΔS = trace(ΔRic)` vs independent-`ΔS` treatment introducing the
+`|Ric|²`. **Fix: nail the exact `S.scalar` evolution sign + the `Q_S` KN-slot, OR push to `offsyn`
+and have GPT Pro check the exact `lichnerowiczRHSInFrame`/scalar-evolution/`uhlenbeckBTensorInFrame`
+conventions against the actual files** (the consult anticipated this trap precisely).
+- **ABANDON-3D-route signals** (else stay): (a) can't state `solution_rm04_kn_firstTrace_gform_at`
+  in the proved-evolution Ric/scalar convention; (b) the `Δ`-through-KN lemma becomes as hard as
+  general Bianchi because `roughLapRm04` API isn't tensorial enough to express `∇g=0`;
+  (c) the reaction only closes in an orthonormal frame with no tensorial bridge to `FourComp`.
+- Full consult prompt + answer context: `UhlenbeckBase_consult.md`.
 - B3b: differentiate (product rule on the multilinear KN): `∂ₜRm04 = KN(∂ₜRic,∂ₜS,g) + KN(Ric,S,∂ₜg)`.
 - B3c: substitute the three built evolutions + `Δ`-through-`g`:
   `∂ₜRm04 = ΔRm04 + [KN(Ric-reaction, scalar-reaction, g) + KN(Ric, S, −2Ric)]`.

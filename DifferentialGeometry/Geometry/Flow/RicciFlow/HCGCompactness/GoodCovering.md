@@ -97,23 +97,29 @@ multiplicity** `net_multiplicity` (`lbl383` item 5): centers of the net in `B(O,
 `↥J`, `Fintype.card_coe`). Lean: `le_of_le_of_eq` + `ENNReal.ofReal_le_ofReal_iff` for the bridge.
 
 **ROUTE A — done on the Zorn route, VERIFIED + axiom-clean (2026-06-08):**
-A1 (λ) · A2 net · A3 cover · separation · dist-bridge · **A10** multiplicity (`net_multiplicity`) ·
-**A8** scaled radii (`lambdaBallC` = `lbl391` B̃/B̂/B/B̄/B⃗) · **A9-disjointness** (`lambdaBallC_pairwiseDisjoint`,
-smaller balls disjoint by monotonicity) · **A14 metric-core** capstone (`GoodCovering` + `exists_goodCovering`).
-`#print axioms` clean throughout.
+A1 (λ) · A2 net (`exists_lambdaNet`) · A3 cover (`lambdaNet_cover`) · separation (`lambdaNet_separated`) ·
+**dist=pseudometric bridge** (`RealizesEdist` + `dist_comm`/`dist_triangle`/`distO_sub_le`) ·
+**λ-ratio** (`lambda_eq`, `lambda_ratio_le` — the `e^{cC}` mechanism) · dist-level membership
+(`mem_lambdaBallC_dist`) · **A10** multiplicity (`net_multiplicity`) · **A8** scaled radii (`lambdaBallC`
+= `lbl391` B̃/B̂/B/B̄/B⃗) · **A9-disjointness** (`lambdaBallC_pairwiseDisjoint`) · **A13 nesting**
+(`lambdaBallC_subset_of_inter`, item 7) · **A14 metric-core** capstone (`GoodCovering` + `exists_goodCovering`).
+`#print axioms` clean throughout (`[propext, Classical.choice, Quot.sound]`).
 
-**STRUCTURAL BOUNDARY (honest — NOT all of A1–A14; the rest is blocked, not "stuck"):**
-- **Traded away by the Zorn route (user's choice over "discharge Hopf–Rinow"):** A5/A6 (`r^α↗`, ordered net),
-  and the *tuned-radii* cover/nesting A9-cover (B(O,r)⊂⋃B̂) / A13 — these are coupled to the book's
-  distance-ordered net (needs **properness = Hopf–Rinow**, 9 sorries). A9-cover by 4λ needs `λ_z ≤ 3λ_x`
-  (the ordering / λ-ratio); the Zorn cover only gives the point-dependent `λ_z+λ_x`.
-- **Needs a new honest input:** A3's A(r) total-count (needs a *total* Bishop volume bound; `ballMult`
-  only gives local multiplicity), hence A4, A7.
-- **Needs subsequence machinery:** A11 (intersection stability), A12 (K(r)).
-- **Needs §5 (Hopf–Rinow-blocked):** A14's geodesic convexity (`lbl417`) + exp-diffeo (item 3).
-So full faithful A1–A14 requires discharging Hopf–Rinow (the route NOT chosen) and/or more honest inputs;
-on the chosen route the achievable content is complete. Making the blocked items honest inputs would
-*hide* difficulty (they're book-internal, not book-external) — so they stay as visible frontiers.
+**OPTION 2 DONE (2026-06-08, user chose "往2走" = add honest inputs):** A3 + A4 completed via the
+`PackingBound` honest input (Bishop–Gromov total packing, book-external since Mathlib has no Riemannian
+volume): `net_count_le` (A3 `A(r)` ball-number bound), `net_finite_in_ball` (net locally finite), and
+`exists_finite_cover` (**A4 `lbl388`** finite cover of `B(O,r)` by net balls). All verified, axiom-clean.
+
+**HONEST CORRECTION:** A7/A11/A12 are NOT reachable by option 2 after all — they need cross-`k` center
+MATCHING (the distance-ORDERED net / the comparison maps), i.e. they too need **option 1 (Hopf–Rinow)**,
+not just "subsequence machinery". So option 2's clean reach was exactly A3 + A4.
+
+**REMAINING A1–A14 — ALL need option 1 (Hopf–Rinow ordered net) or §5 (also Hopf–Rinow):**
+A5/A6 (`r^α↗`), A7 (K'(r)), A9-cover (B(O,r)⊂⋃B̂ by the tuned radii), A11/A12 (cross-`k` stability),
+A14-convexity (`lbl417`). Done so far: **A1,A2,A3,A4,A8,A10,A13 fully (7/14)** + A9-disjoint + A14-metric-core;
+infra = dist-pseudometric bridge, λ-ratio, `mem_lambdaBallC_dist`, `PackingBound`. To finish Route A:
+discharge `HopfRinow.lean` (9 sorries) for the ordered net + §5 convexity. Making the rest honest inputs
+would hide book-internal difficulty (forbidden), so they stay visible frontiers.
 
 ## Earlier note (pre-relocation)
 

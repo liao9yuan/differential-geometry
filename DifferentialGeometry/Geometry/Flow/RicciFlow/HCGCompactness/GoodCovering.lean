@@ -341,6 +341,85 @@ theorem net_multiplicity (hd : InjRadiusDecayInput (I := I) X) (D : Real) (k : N
     (fun j _ => by rw [hvc]; exact hJz j j.2)
   rwa [Finset.card_univ, Fintype.card_coe] at hmul
 
+/-- Book-external Bishop--Gromov total packing bound (companion to A0'): for each `r`
+a uniform integer `A r` bounds the cardinality of any `λ[r]`-separated set of points in
+`B(O,r)`.  Mathlib has no Riemannian volume, so the total-volume packing count behind
+MSM135 `lbl387`'s `A(r)` is carried as this honest input. -/
+structure PackingBound (hd : InjRadiusDecayInput (I := I) X) (D : Real) where
+  A : Real → Nat
+  card_le : ∀ (k : Nat) (r : Real) (J : Finset ((X.obj k).M)),
+    (∀ x ∈ J, hd.dist k x (X.obj k).basepoint ≤ r) →
+    (∀ x ∈ J, ∀ y ∈ J, x ≠ y → hd.lambda D r ≤ hd.dist k x y) →
+    J.card ≤ A r
+
+/-- MSM135 `lbl387` ball-number bound `A(r)` / A3 count: any finite set of net centers
+in `B(O,r)` has at most `A(r)` elements, from the `λ[r]`-separation of the net (`λ`
+antitone + `lambdaNet_dist_separated`) and the Bishop--Gromov packing input. -/
+theorem net_count_le (hd : InjRadiusDecayInput (I := I) X) (hre : hd.RealizesEdist)
+    (D : Real) (k : Nat) (hD : 0 < D) (pb : hd.PackingBound D)
+    {S : Set ((X.obj k).M)} (hS : S.PairwiseDisjoint (hd.lambdaBall D k))
+    (r : Real) (J : Finset ((X.obj k).M)) (hJS : ↑J ⊆ S)
+    (hJr : ∀ x ∈ J, hd.dist k x (X.obj k).basepoint ≤ r) :
+    J.card ≤ pb.A r := by
+  refine pb.card_le k r J hJr (fun x hx y hy hxy => ?_)
+  calc hd.lambda D r
+      ≤ hd.lambda D (hd.dist k x (X.obj k).basepoint) :=
+        hd.lambda_antitone hD (hJr x hx)
+    _ ≤ hd.dist k x y :=
+        hd.lambdaNet_dist_separated D k hD hre hS (hJS (Finset.mem_coe.mpr hx))
+          (hJS (Finset.mem_coe.mpr hy)) hxy
+
+/-- A4 core: the net is locally finite — `S ∩ B(O,r)` is finite (at most `A(r)`
+centers), since otherwise it would contain an `(A(r)+1)`-element subset contradicting
+`net_count_le`. -/
+theorem net_finite_in_ball (hd : InjRadiusDecayInput (I := I) X) (hre : hd.RealizesEdist)
+    (D : Real) (k : Nat) (hD : 0 < D) (pb : hd.PackingBound D)
+    {S : Set ((X.obj k).M)} (hS : S.PairwiseDisjoint (hd.lambdaBall D k)) (r : Real) :
+    (S ∩ {x | hd.dist k x (X.obj k).basepoint ≤ r}).Finite := by
+  by_contra hinf
+  have hinf' : (S ∩ {x | hd.dist k x (X.obj k).basepoint ≤ r}).Infinite := hinf
+  obtain ⟨t, hts, htcard⟩ := hinf'.exists_subset_card_eq (pb.A r + 1)
+  have hcard := net_count_le hd hre D k hD pb hS r t
+    (hts.trans Set.inter_subset_left)
+    (fun x hx => (hts (Finset.mem_coe.mpr hx)).2)
+  omega
+
+/-- MSM135 `lbl388` / A4 good cover: `B(O,r)` is covered by a FINITE subfamily of net
+balls.  The covering centers all lie in `B(O, r+2λ[0])` (triangle inequality + `λ ≤ λ[0]`),
+which is finite by `net_finite_in_ball`. -/
+theorem exists_finite_cover (hd : InjRadiusDecayInput (I := I) X) (hre : hd.RealizesEdist)
+    (D : Real) (k : Nat) (hD : 0 < D) (pb : hd.PackingBound D)
+    {S : Set ((X.obj k).M)} (hSdisj : S.PairwiseDisjoint (hd.lambdaBall D k))
+    (hSmax : ∀ T : Set ((X.obj k).M),
+      S ⊆ T → T.PairwiseDisjoint (hd.lambdaBall D k) → T ⊆ S) (r : Real) :
+    ∃ J ⊆ S, J.Finite ∧
+      ∀ z : (X.obj k).M, hd.dist k z (X.obj k).basepoint ≤ r →
+        ∃ x ∈ J,
+          (letI : EMetricSpace (X.obj k).M := (X.obj k).emetricSpace
+           edist z x <
+             ENNReal.ofReal (hd.lambda D (hd.dist k z (X.obj k).basepoint)) +
+             ENNReal.ofReal (hd.lambda D (hd.dist k x (X.obj k).basepoint))) := by
+  letI : EMetricSpace (X.obj k).M := (X.obj k).emetricSpace
+  refine ⟨S ∩ {x | hd.dist k x (X.obj k).basepoint ≤ r + 2 * hd.lambda D 0},
+    Set.inter_subset_left,
+    hd.net_finite_in_ball hre D k hD pb hSdisj _, ?_⟩
+  intro z hz
+  obtain ⟨x, hxS, hcov⟩ := hd.lambdaNet_cover D k hD hSdisj hSmax z
+  have hcov_dist : hd.dist k z x <
+      hd.lambda D (hd.dist k z (X.obj k).basepoint) +
+      hd.lambda D (hd.dist k x (X.obj k).basepoint) := by
+    have h := hcov
+    rw [hre.edist_eq k z x,
+        ← ENNReal.ofReal_add (hd.lambda_pos hD _).le (hd.lambda_pos hD _).le] at h
+    exact (ENNReal.ofReal_lt_ofReal_iff_of_nonneg (hre.dist_nonneg k z x)).mp h
+  refine ⟨x, ⟨hxS, ?_⟩, hcov⟩
+  have ht := hre.dist_triangle k x z (X.obj k).basepoint
+  have hcomm := hre.dist_comm k x z
+  have hlz := hd.lambda_antitone hD (hre.dist_nonneg k z (X.obj k).basepoint)
+  have hlx := hd.lambda_antitone hD (hre.dist_nonneg k x (X.obj k).basepoint)
+  simp only [Set.mem_setOf_eq]
+  linarith
+
 /-- The achievable metric core of MSM135 `lbl383` (good covering) on the Zorn λ-net:
 a maximal λ-separated net whose λ-balls are pairwise disjoint (item 2), whose doubled
 balls cover (item 4, `lbl387`), and which is λ-separated (the packing property).  The
@@ -398,6 +477,42 @@ theorem lambdaBallC_pairwiseDisjoint (hd : InjRadiusDecayInput (I := I) X) (D : 
     (hS : S.PairwiseDisjoint (hd.lambdaBall D k)) :
     S.PairwiseDisjoint (hd.lambdaBallC D k c) :=
   hS.mono (fun x => hd.lambdaBallC_subset D k hD hc x)
+
+/-- Under `RealizesEdist`, membership in the scaled λ-ball is the real inequality
+`dist z x < c·λ[d(x,O)]`.  This takes the nesting/cover arguments (A9-cover, A13) out
+of `ℝ≥0∞` and into ordinary real arithmetic with `dist_triangle` and `lambda_ratio_le`. -/
+theorem mem_lambdaBallC_dist (hd : InjRadiusDecayInput (I := I) X) (hre : hd.RealizesEdist)
+    (D : Real) (k : Nat) (c : Real) (x z : (X.obj k).M) :
+    z ∈ hd.lambdaBallC D k c x ↔
+      hd.dist k z x < c * hd.lambda D (hd.dist k x (X.obj k).basepoint) := by
+  letI : EMetricSpace (X.obj k).M := (X.obj k).emetricSpace
+  show edist z x < ENNReal.ofReal (c * hd.lambda D (hd.dist k x (X.obj k).basepoint)) ↔ _
+  rw [hre.edist_eq k z x]
+  exact ENNReal.ofReal_lt_ofReal_iff_of_nonneg (hre.dist_nonneg k z x)
+
+/-- MSM135 `lbl383` item 7 / A13 nesting on intersection: if the `c₁`-balls around
+`x` and `y` meet, then `B(x, c₁λ_x) ⊆ B(y, c₂λ_y)` whenever the radii satisfy
+`2c₁λ_x + c₁λ_y ≤ c₂λ_y`.  Pure triangle inequality; the radius condition is
+discharged uniformly by `lambda_ratio_le` (giving the book's `e^{cC}` factors). -/
+theorem lambdaBallC_subset_of_inter (hd : InjRadiusDecayInput (I := I) X)
+    (hre : hd.RealizesEdist) (D : Real) (k : Nat) {c₁ c₂ : Real} (x y : (X.obj k).M)
+    (hinter : (hd.lambdaBallC D k c₁ x ∩ hd.lambdaBallC D k c₁ y).Nonempty)
+    (hc : 2 * (c₁ * hd.lambda D (hd.dist k x (X.obj k).basepoint)) +
+          c₁ * hd.lambda D (hd.dist k y (X.obj k).basepoint)
+        ≤ c₂ * hd.lambda D (hd.dist k y (X.obj k).basepoint)) :
+    hd.lambdaBallC D k c₁ x ⊆ hd.lambdaBallC D k c₂ y := by
+  obtain ⟨w, hwx, hwy⟩ := hinter
+  rw [hd.mem_lambdaBallC_dist hre] at hwx hwy
+  have hxy : hd.dist k x y <
+      c₁ * hd.lambda D (hd.dist k x (X.obj k).basepoint) +
+      c₁ * hd.lambda D (hd.dist k y (X.obj k).basepoint) := by
+    have ht := hre.dist_triangle k x w y
+    have hcomm := hre.dist_comm k x w
+    linarith
+  intro z hz
+  rw [hd.mem_lambdaBallC_dist hre] at hz ⊢
+  have ht := hre.dist_triangle k z x y
+  linarith
 
 end InjRadiusDecayInput
 

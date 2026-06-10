@@ -7,7 +7,6 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 800000
-set_option maxHeartbeats 800000
 
 /-!
 # The metric index-lowering is a fiber-norm isometry
@@ -110,7 +109,7 @@ theorem normSqRS_eq_normSq0S_lowerAllSpace
     apply ext0S_basis (I := I) basis
     intro jdx
     rw [basisTensor0S_component]
-    simp only [component0S_apply, separableFormAt_apply]
+    change (∏ i : Fin r, g.inner x (basis (up i)) (basis (jdx i))) = if up = jdx then (1 : Real) else 0
     rw [Finset.prod_congr rfl (fun i _ => hgram (up i) (jdx i))]
     by_cases h : up = jdx
     · subst h; simp
@@ -129,6 +128,7 @@ theorem normSqRS_eq_normSq0S_lowerAllSpace
   rw [lowerAllUpperIndices_apply]
   simp only [Fin.append_left, Fin.append_right]
   rw [hsep]
+  rfl
 
 end Connection
 end Integral
