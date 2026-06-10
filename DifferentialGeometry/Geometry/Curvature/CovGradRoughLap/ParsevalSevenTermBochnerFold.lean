@@ -364,6 +364,22 @@ private lemma tensor0SAsRS_finsetSum (t : ℕ) (x : M) {ι : Type*} (fs : Finset
   | insert i fs hi ih =>
     rw [Finset.sum_insert hi, Finset.sum_insert hi, ← ih, tensor0SAsRS_add]
 
+set_option linter.unusedSectionVars false in
+/-- The `(0, t)`-tensor wrapper negates. -/
+private lemma tensor0SAsRS_neg (t : ℕ) (x : M) (C : Tensor0SSpace t I x) :
+    tensor0SAsRS (I := I) (M := M) x (- C) = - tensor0SAsRS (I := I) (M := M) x C := by
+  have h : tensor0SAsRS (I := I) (M := M) x (- C) +
+      tensor0SAsRS (I := I) (M := M) x C = 0 := by
+    rw [← tensor0SAsRS_add, neg_add_cancel, tensor0SAsRS_zero]
+  linear_combination (norm := module) h
+
+set_option linter.unusedSectionVars false in
+/-- The `(0, t)`-tensor wrapper distributes over a difference. -/
+private lemma tensor0SAsRS_sub (t : ℕ) (x : M) (C D : Tensor0SSpace t I x) :
+    tensor0SAsRS (I := I) (M := M) x (C - D) =
+      tensor0SAsRS (I := I) (M := M) x C - tensor0SAsRS (I := I) (M := M) x D := by
+  rw [sub_eq_add_neg, sub_eq_add_neg, tensor0SAsRS_add, tensor0SAsRS_neg]
+
 set_option backward.isDefEq.respectTransparency false in
 /-- The `(0, s)`-fibre value summing the four group carriers' wrapped values (the seven-term sum of the
 per-fixed-field carrier identity, `V := V a`, `X := V b`), read on the unit. -/
@@ -514,6 +530,599 @@ private lemma bochnerSlot0Curv_eq_groupSum
   rw [groupSevenTermFib]
   abel
 
+/-- The packaged covariant directional derivative `∇_X S` as a smooth compactly-supported
+`(0, s)`-tensor (`covApply (tensorCov g 0 s) X S`), used to feed the curvature/second-order
+carrier packagings. -/
+private def covApplyCc (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {X : Π b : M, TangentSpace I b}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, X b⟩ : TotalSpace E (TangentSpace I)))) : SmoothCcTensor g 0 s where
+  toSection :=
+    { toFun := fun y : M => covApply (tensorCov (I := I) g 0 s) X
+        (fun z : M => S.toSection z) y
+      contMDiff_toFun := covApplyRS_contMDiff (I := I) g 0 s S.toSection.contMDiff hX }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+set_option linter.unusedSectionVars false in
+@[simp] private lemma covApplyCc_toSection_apply (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : SmoothCcTensor g 0 s) {X : Π b : M, TangentSpace I b}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, X b⟩ : TotalSpace E (TangentSpace I)))) (y : M) :
+    (covApplyCc (I := I) (M := M) g s S hX).toSection y =
+      covApply (tensorCov (I := I) g 0 s) X (fun z : M => S.toSection z) y := rfl
+
+/-- Group `1` carrier packaged as a smooth compactly-supported `(0, s)`-tensor:
+`x ↦ R(V a, V b)(∇_{V a} S)` (via `riemannSec`, with the `tensor0SAsRS`-wrap collapsed). -/
+private def bochnerGroupElt1Cc (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {Va Vb : Π b : M, TangentSpace I b}
+    (hVa : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Va b⟩ : TotalSpace E (TangentSpace I))))
+    (hVb : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Vb b⟩ : TotalSpace E (TangentSpace I)))) : SmoothCcTensor g 0 s where
+  toSection :=
+    { toFun := fun x : M => riemannSec (tensorCov (I := I) g 0 s) Va Vb
+        (covApply (tensorCov (I := I) g 0 s) Va (fun y : M => S.toSection y)) x
+      contMDiff_toFun := riemannSec_contMDiff (cov := tensorCov (I := I) g 0 s) hVa hVb
+        (covApplyRS_contMDiff (I := I) g 0 s S.toSection.contMDiff hVa) }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+set_option linter.unusedSectionVars false in
+private lemma bochnerGroupElt1Cc_toSection_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : SmoothCcTensor g 0 s) {Va Vb : Π b : M, TangentSpace I b}
+    (hVa : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Va b⟩ : TotalSpace E (TangentSpace I))))
+    (hVb : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Vb b⟩ : TotalSpace E (TangentSpace I)))) (x : M) :
+    (bochnerGroupElt1Cc (I := I) (M := M) g s S hVa hVb).toSection x =
+      bochnerGroupElt1 (I := I) (M := M) g s S Va Vb x := by
+  rw [bochnerGroupElt1]
+  exact (tensor0SAsRS_rs_unit' (I := I) (M := M) s x _).symm
+
+/-- Group `2` carrier packaged as a smooth compactly-supported `(0, s)`-tensor:
+`x ↦ ∇_{V a}(R(V a, V b) S)`. -/
+private def bochnerGroupElt2Cc (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {Va Vb : Π b : M, TangentSpace I b}
+    (hVa : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Va b⟩ : TotalSpace E (TangentSpace I))))
+    (hVb : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Vb b⟩ : TotalSpace E (TangentSpace I)))) : SmoothCcTensor g 0 s where
+  toSection :=
+    { toFun := fun x : M => covApply (tensorCov (I := I) g 0 s) Va
+        (fun y : M => riemannSec (tensorCov (I := I) g 0 s) Va Vb
+          (fun z : M => S.toSection z) y) x
+      contMDiff_toFun := covApplyRS_contMDiff (I := I) g 0 s
+        (riemannSec_contMDiff (cov := tensorCov (I := I) g 0 s) hVa hVb S.toSection.contMDiff)
+        hVa }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+set_option linter.unusedSectionVars false in
+private lemma bochnerGroupElt2Cc_toSection_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : SmoothCcTensor g 0 s) {Va Vb : Π b : M, TangentSpace I b}
+    (hVa : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Va b⟩ : TotalSpace E (TangentSpace I))))
+    (hVb : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Vb b⟩ : TotalSpace E (TangentSpace I)))) (x : M) :
+    (bochnerGroupElt2Cc (I := I) (M := M) g s S hVa hVb).toSection x =
+      bochnerGroupElt2 (I := I) (M := M) g s S Va Vb x := by
+  rw [bochnerGroupElt2]
+  exact (tensor0SAsRS_rs_unit' (I := I) (M := M) s x _).symm
+
+/-- **Total-space smoothness of the off-diagonal second covariant derivative section.** For smooth
+tangent fields `X, Y` and a smooth `(0, s)`-tensor section `T`, the section
+`x ↦ ∇²_{X, Y} T (x)` is smooth: it is the difference of the iterated covariant section
+`∇_X(∇_Y T)` and the Christoffel-correction section `∇_{∇_X Y} T`
+(`tensorSecondCovDeriv_def`). -/
+private lemma tensorSecondCovDeriv_offDiag_section_contMDiff (g : SmoothRiemannianMetric I M)
+    (s : ℕ) {T : Π b : M, TensorRSSpace 0 s I b}
+    (hT : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
+      (fun y : M => (⟨y, T y⟩ : TotalSpace (TensorRSModel 0 s ℝ E)
+        (fun z : M => TensorRSSpace 0 s I z))))
+    {X Y : Π b : M, TangentSpace I b}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, X b⟩ : TotalSpace E (TangentSpace I))))
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Y b⟩ : TotalSpace E (TangentSpace I)))) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
+      (fun x : M => (⟨x, tensorSecondCovDeriv (I := I) g 0 s X Y T x⟩ :
+        TotalSpace (TensorRSModel 0 s ℝ E) (fun z : M => TensorRSSpace 0 s I z))) := by
+  have h1 := covApplyRS_contMDiff (I := I) g 0 s
+    (covApplyRS_contMDiff (I := I) g 0 s hT hY) hX
+  have h2 := covApplyRS_contMDiff (I := I) g 0 s hT
+    (covApply_contMDiff (cov := LeviCivita (I := I) g) hX hY)
+  refine (h1.sub_section h2).congr fun x => ?_
+  rw [tensorSecondCovDeriv_def (I := I) g 0 s X Y T x]
+  rfl
+
+/-- Group `3` carrier packaged as a smooth compactly-supported `(0, s)`-tensor:
+`x ↦ R(∇_{V a} V b, V a) S + R(V b, ∇_{V a} V a) S − ∇_{R(V a, V b) V a} S` (the first two
+curvature terms read through `riemannSec`, the third through `covApply` of the smooth direction
+field `x ↦ R(V a, V b) V a`). -/
+private def bochnerGroupElt3Cc (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {Va Vb : Π b : M, TangentSpace I b}
+    (hVa : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Va b⟩ : TotalSpace E (TangentSpace I))))
+    (hVb : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Vb b⟩ : TotalSpace E (TangentSpace I)))) : SmoothCcTensor g 0 s where
+  toSection :=
+    { toFun := fun x : M =>
+        riemannSec (tensorCov (I := I) g 0 s)
+          (fun b : M => (LeviCivita (I := I) g).toFun Vb b (Va b)) Va
+          (fun y : M => S.toSection y) x +
+        riemannSec (tensorCov (I := I) g 0 s) Vb
+          (fun b : M => (LeviCivita (I := I) g).toFun Va b (Va b))
+          (fun y : M => S.toSection y) x -
+        covApply (tensorCov (I := I) g 0 s)
+          (fun b : M => riemannOp (LeviCivita (I := I) g) b (Va b) (Vb b) (Va b))
+          (fun y : M => S.toSection y) x
+      contMDiff_toFun := by
+        have hNbVa : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+            (fun b : M => (⟨b, (LeviCivita (I := I) g).toFun Vb b (Va b)⟩ :
+              TotalSpace E (TangentSpace I))) :=
+          covApply_contMDiff (cov := LeviCivita (I := I) g) hVa hVb
+        have hNaVa : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+            (fun b : M => (⟨b, (LeviCivita (I := I) g).toFun Va b (Va b)⟩ :
+              TotalSpace E (TangentSpace I))) :=
+          covApply_contMDiff (cov := LeviCivita (I := I) g) hVa hVa
+        have hRfield : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+            (fun b : M => (⟨b, riemannOp (LeviCivita (I := I) g) b (Va b) (Vb b) (Va b)⟩ :
+              TotalSpace E (TangentSpace I))) :=
+          ContMDiff.clm_bundle_apply (b := id)
+            (ContMDiff.clm_bundle_apply (b := id)
+              (ContMDiff.clm_bundle_apply (b := id)
+                (riemannOp_section_contMDiff (I := I) (M := M) g) hVa) hVb) hVa
+        have hT1 := riemannSec_contMDiff (cov := tensorCov (I := I) g 0 s) hNbVa hVa
+          S.toSection.contMDiff
+        have hT2 := riemannSec_contMDiff (cov := tensorCov (I := I) g 0 s) hVb hNaVa
+          S.toSection.contMDiff
+        have hT3 := covApplyRS_contMDiff (I := I) g 0 s S.toSection.contMDiff hRfield
+        exact (hT1.add_section hT2).sub_section hT3 }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+set_option linter.unusedSectionVars false in
+private lemma bochnerGroupElt3Cc_toSection_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : SmoothCcTensor g 0 s) {Va Vb : Π b : M, TangentSpace I b}
+    (hVa : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Va b⟩ : TotalSpace E (TangentSpace I))))
+    (hVb : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Vb b⟩ : TotalSpace E (TangentSpace I)))) (x : M) :
+    (bochnerGroupElt3Cc (I := I) (M := M) g s S hVa hVb).toSection x =
+      bochnerGroupElt3 (I := I) (M := M) g s S Va Vb x := by
+  have hd1 : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, (LeviCivita (I := I) g).toFun Vb b (Va b)⟩ :
+        TotalSpace E (TangentSpace I))) :=
+    covApply_contMDiff (cov := LeviCivita (I := I) g) hVa hVb
+  have hd2 : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, (LeviCivita (I := I) g).toFun Va b (Va b)⟩ :
+        TotalSpace E (TangentSpace I))) :=
+    covApply_contMDiff (cov := LeviCivita (I := I) g) hVa hVa
+  change riemannSec (tensorCov (I := I) g 0 s)
+      (fun b : M => (LeviCivita (I := I) g).toFun Vb b (Va b)) Va
+      (fun y : M => S.toSection y) x +
+    riemannSec (tensorCov (I := I) g 0 s) Vb
+      (fun b : M => (LeviCivita (I := I) g).toFun Va b (Va b))
+      (fun y : M => S.toSection y) x -
+    covApply (tensorCov (I := I) g 0 s)
+      (fun b : M => riemannOp (LeviCivita (I := I) g) b (Va b) (Vb b) (Va b))
+      (fun y : M => S.toSection y) x = _
+  rw [riemannSec_eq_riemannOp_smooth (cov := tensorCov (I := I) g 0 s)
+      hd1 hVa S.toSection.contMDiff,
+    riemannSec_eq_riemannOp_smooth (cov := tensorCov (I := I) g 0 s) hVb
+      hd2 S.toSection.contMDiff,
+    covApply_apply (cov := tensorCov (I := I) g 0 s)]
+  rw [bochnerGroupElt3, tensor0SAsRS_sub, tensor0SAsRS_add,
+    tensor0SAsRS_rs_unit' (I := I) (M := M) s x _,
+    tensor0SAsRS_rs_unit' (I := I) (M := M) s x _,
+    tensor0SAsRS_rs_unit' (I := I) (M := M) s x _]
+
+/-- Group `4` carrier packaged as a smooth compactly-supported `(0, s)`-tensor:
+`x ↦ −∇²_{∇_{V b} V a, V a} S − ∇²_{V a, ∇_{V b} V a} S`. -/
+private def bochnerGroupElt4Cc (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {Va Vb : Π b : M, TangentSpace I b}
+    (hVa : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Va b⟩ : TotalSpace E (TangentSpace I))))
+    (hVb : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Vb b⟩ : TotalSpace E (TangentSpace I)))) : SmoothCcTensor g 0 s where
+  toSection :=
+    { toFun := fun x : M =>
+        - tensorSecondCovDeriv (I := I) g 0 s
+            (fun y : M => (LeviCivita (I := I) g).toFun Va y (Vb y)) Va
+            (fun y : M => S.toSection y) x -
+          tensorSecondCovDeriv (I := I) g 0 s Va
+            (fun y : M => (LeviCivita (I := I) g).toFun Va y (Vb y))
+            (fun y : M => S.toSection y) x
+      contMDiff_toFun := by
+        have hNbVa : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+            (fun b : M => (⟨b, covApply (LeviCivita (I := I) g) Vb Va b⟩ :
+              TotalSpace E (TangentSpace I))) :=
+          covApply_contMDiff (cov := LeviCivita (I := I) g) hVb hVa
+        have h1 := tensorSecondCovDeriv_offDiag_section_contMDiff (I := I) g s
+          S.toSection.contMDiff hNbVa hVa
+        have h2 := tensorSecondCovDeriv_offDiag_section_contMDiff (I := I) g s
+          S.toSection.contMDiff hVa hNbVa
+        refine ((h1.neg_section).sub_section h2).congr fun x => ?_
+        rfl }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+set_option linter.unusedSectionVars false in
+private lemma bochnerGroupElt4Cc_toSection_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : SmoothCcTensor g 0 s) {Va Vb : Π b : M, TangentSpace I b}
+    (hVa : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Va b⟩ : TotalSpace E (TangentSpace I))))
+    (hVb : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Vb b⟩ : TotalSpace E (TangentSpace I)))) (x : M) :
+    (bochnerGroupElt4Cc (I := I) (M := M) g s S hVa hVb).toSection x =
+      bochnerGroupElt4 (I := I) (M := M) g s S Va Vb x := by
+  change - tensorSecondCovDeriv (I := I) g 0 s
+        (fun y : M => (LeviCivita (I := I) g).toFun Va y (Vb y)) Va
+        (fun y : M => S.toSection y) x -
+      tensorSecondCovDeriv (I := I) g 0 s Va
+        (fun y : M => (LeviCivita (I := I) g).toFun Va y (Vb y))
+        (fun y : M => S.toSection y) x = _
+  rw [bochnerGroupElt4, tensor0SAsRS_sub, tensor0SAsRS_neg,
+    tensor0SAsRS_rs_unit' (I := I) (M := M) s x _,
+    tensor0SAsRS_rs_unit' (I := I) (M := M) s x _]
+
+set_option linter.unusedSectionVars false in
+/-- The scalar read of a smooth `(0, 0)`-tensor section is a smooth real function (file-local
+copy of the private `Slot0CurryCovariantLeibniz` helper). -/
+private lemma contMDiff_tensor00Scalar_read'
+    (Y : Cₛ^∞⟮I; Tensor0SModel 0 ℝ E, (fun z : M => Tensor0SSpace 0 I z)⟯) :
+    ContMDiff I 𝓘(ℝ, ℝ) ∞
+      (fun y : M => tensor00Scalar (I := I) (M := M) y (Y y)) := by
+  have heq : (fun y : M => tensor00Scalar (I := I) (M := M) y (Y y)) =
+      Tensor0SNabla.scalarFn I M (fun y : M => Y y) := by
+    funext y; rfl
+  rw [heq]
+  exact (Tensor0SNabla.contMDiff_scalarFn_iff_section I M (fun y : M => Y y)).mpr Y.contMDiff
+
+set_option linter.unusedSectionVars false in
+/-- **Smoothness of the `tensor0SAsRS`-wrapped section** (file-local copy). -/
+private lemma contMDiff_tensor0SAsRS_wrap' (t : ℕ) {C : Π y : M, Tensor0SSpace t I y}
+    (hC : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel t ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (Tensor0SModel t ℝ E)
+        (E := fun z : M => Tensor0SSpace t I z) y (C y))) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 t ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel 0 t ℝ E)
+        (E := fun z : M => TensorRSSpace 0 t I z) y
+        (tensor0SAsRS (I := I) (M := M) y (C y))) := by
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (F₁ := Tensor0SModel 0 ℝ E) (V₁ := fun z : M => Tensor0SSpace 0 I z)
+    (F₂ := Tensor0SModel t ℝ E) (V₂ := fun z : M => Tensor0SSpace t I z)
+    (φ := fun y : M => tensor0SAsRS (I := I) (M := M) y (C y))
+  intro Y
+  have hsmul := ContMDiff.smul_section (n := (∞ : WithTop ℕ∞))
+    (contMDiff_tensor00Scalar_read' (I := I) (M := M) Y) hC
+  refine hsmul.congr fun y => ?_
+  rw [show ((fun z : M => tensor00Scalar (I := I) (M := M) z (Y z)) • C) y =
+      tensor00Scalar (I := I) (M := M) y (Y y) • C y from rfl]
+  rw [← tensor0SAsRS_apply (I := I) (M := M) y (C y) (Y y)]
+
+set_option linter.unusedSectionVars false in
+/-- **Smoothness of the unit-evaluated section of a smooth compactly-supported `(0, k)`-tensor**
+(file-local copy). -/
+private lemma contMDiff_unitEvalSection' (g : SmoothRiemannianMetric I M) (k : ℕ)
+    (Z : SmoothCcTensor g 0 k) :
+    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel k ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (Tensor0SModel k ℝ E)
+        (E := fun z : M => Tensor0SSpace k I z) y
+        ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace k I y from Z.toSection y)
+          (unitZeroSec (I := I) (M := M) y))) :=
+  ContMDiff.clm_bundle_apply (b := fun y : M => y)
+    (E₁ := fun z : M => Tensor0SSpace 0 I z) (E₂ := fun z : M => Tensor0SSpace k I z)
+    (F₁ := Tensor0SModel 0 ℝ E) (F₂ := Tensor0SModel k ℝ E)
+    Z.toSection.contMDiff (contMDiff_unitZeroSection (I := I) (M := M))
+
+set_option linter.unusedSectionVars false in
+/-- **Smoothness of the slot-`0` `X`-read of a smooth compactly-supported `(0, s + 1)`-tensor**,
+in `tensor0SAsRS`-wrapped Hom-bundle form (file-local copy of the `Slot0CurryCovariantLeibniz`
+private helper). -/
+private lemma contMDiff_slot0Read' (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (Z : SmoothCcTensor g 0 (s + 1)) {X : Π b : M, TangentSpace I b}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, X b⟩ : TotalSpace E (TangentSpace I)))) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
+        (E := fun z : M => TensorRSSpace 0 s I z) y
+        (tensor0SAsRS (I := I) (M := M) y
+          ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s y
+            ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace (s + 1) I y from
+              Z.toSection y) (unitZeroSec (I := I) (M := M) y))) (X y)))) := by
+  have hUzS := contMDiff_unitEvalSection' (I := I) (M := M) g (s + 1) Z
+  have hcur : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] Tensor0SModel s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (E →L[ℝ] Tensor0SModel s ℝ E)
+        (E := fun z : M => TangentSpace I z →L[ℝ] Tensor0SSpace s I z) y
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s y
+          ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace (s + 1) I y from
+            Z.toSection y) (unitZeroSec (I := I) (M := M) y)))) :=
+    fun y => TensorMultilinear.contMDiffAt_curriedSection_of_contMDiffAt_section
+      (I := I) (M := M)
+      (fun z : M => (show Tensor0SSpace 0 I z →L[ℝ] Tensor0SSpace (s + 1) I z from
+        Z.toSection z) (unitZeroSec (I := I) (M := M) z)) y (hUzS y)
+  have hCs : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (Tensor0SModel s ℝ E)
+        (E := fun z : M => Tensor0SSpace s I z) y
+        ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s y
+          ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace (s + 1) I y from
+            Z.toSection y) (unitZeroSec (I := I) (M := M) y))) (X y))) :=
+    ContMDiff.clm_bundle_apply (b := fun y : M => y)
+      (E₁ := TangentSpace I) (E₂ := fun z : M => Tensor0SSpace s I z)
+      (F₁ := E) (F₂ := Tensor0SModel s ℝ E) hcur hX
+  exact contMDiff_tensor0SAsRS_wrap' (I := I) (M := M) s hCs
+
+/-- The slot-`0` `V b`-read of `∇S` packaged as a smooth compactly-supported `(0, s)`-tensor
+(`bochnerGradSlot0 g s S V b`). -/
+private def bochnerGradSlot0Cc (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {Vb : Π b : M, TangentSpace I b}
+    (hVb : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Vb b⟩ : TotalSpace E (TangentSpace I)))) : SmoothCcTensor g 0 s where
+  toSection :=
+    { toFun := fun x : M => bochnerGradSlot0 (I := I) (M := M) g s S Vb x
+      contMDiff_toFun := contMDiff_slot0Read' (I := I) (M := M) g s
+        (covGrad (I := I) (M := M) g 0 s S) hVb }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+set_option linter.unusedSectionVars false in
+@[simp] private lemma bochnerGradSlot0Cc_toSection_apply (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : SmoothCcTensor g 0 s) {Vb : Π b : M, TangentSpace I b}
+    (hVb : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Vb b⟩ : TotalSpace E (TangentSpace I)))) (x : M) :
+    (bochnerGradSlot0Cc (I := I) (M := M) g s S hVb).toSection x =
+      bochnerGradSlot0 (I := I) (M := M) g s S Vb x := rfl
+
+/-- The slot-`0` `V b`-read of a named smooth `(0, s + 1)`-tensor section `Named`, packaged as a
+smooth compactly-supported `(0, s)`-tensor (`tensor0SAsRS x ((curry (Named(unit)))(V b x))`). -/
+private def namedSlot0Cc (g : SmoothRiemannianMetric I M) (s : ℕ) (Named : SmoothCcTensor g 0 (s + 1))
+    {Vb : Π b : M, TangentSpace I b}
+    (hVb : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Vb b⟩ : TotalSpace E (TangentSpace I)))) : SmoothCcTensor g 0 s where
+  toSection :=
+    { toFun := fun x : M => tensor0SAsRS (I := I) (M := M) x
+        ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from Named.toSection x)
+            (unitZeroSec (I := I) (M := M) x))) (Vb x))
+      contMDiff_toFun := contMDiff_slot0Read' (I := I) (M := M) g s Named hVb }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+set_option linter.unusedSectionVars false in
+/-- **The unified group→carrier fold assembly.** For a fixed Parseval frame family and a named
+smooth `(0, s + 1)`-tensor section `Named`, if the slot-`0` `V b`-read of `Named` is, at every
+point, the Parseval-family sum over `a` of the carrier `Elt (V a) (V b)` (the genuine content), and
+every per-`(a, b)` carrier pairing is integrable, then the `L²` pairing of `Named` against `∇S`
+equals the group double sum `bochnerFoldGroupSum`. The proof is the slot-`0` fixed-family Parseval
+expansion of the `(0, s + 1)` pairing (`tensorInnerPointwise_succ_eq_parseval_sum_slot0`), the
+pointwise carrier split (`tensorInnerPointwise_sum_left`), the finite integral/sum interchanges
+(`MeasureTheory.integral_finset_sum`), and `Finset.sum_comm`. -/
+private lemma fold_assembly
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u)
+    (Named : SmoothCcTensor g 0 (s + 1))
+    (Elt : (Π b : M, TangentSpace I b) → (Π b : M, TangentSpace I b) → (x : M) →
+      TensorRSSpace 0 s I x)
+    (hslot0 : ∀ (b : Fin N) (x : M),
+      tensor0SAsRS (I := I) (M := M) x
+          ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+            ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from Named.toSection x)
+              (unitZeroSec (I := I) (M := M) x))) (V b x)) =
+        ∑ a : Fin N, Elt (V a) (V b) x)
+    (hint : ∀ (a b : Fin N), Integrable
+      (fun x : M => tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel (Elt (V a) (V b) x))
+        (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)))
+      (riemannianVolumeMeasure (I := I) (M := M) g)) :
+    tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Named).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun =
+      bochnerFoldGroupSum (I := I) (M := M) g s S V Elt := by
+  classical
+  -- Unfold the `L²` pairing and apply the slot-`0` Parseval expansion pointwise.
+  rw [show tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Named).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun =
+      ∫ x, (∑ b : Fin N,
+          tensorInnerPointwise (I := I) (M := M) g 0 s x
+            ((namedSlot0Cc (I := I) (M := M) g s Named (hV b)).toFun x)
+            ((bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toFun x))
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g) from ?_]
+  · -- Interchange the outer integral with the `∑ b`, then split each summand by the carrier sum.
+    rw [MeasureTheory.integral_finset_sum Finset.univ
+      (fun b _ => SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+        (namedSlot0Cc (I := I) (M := M) g s Named (hV b))
+        (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)))]
+    rw [show bochnerFoldGroupSum (I := I) (M := M) g s S V Elt =
+        ∑ b : Fin N, ∑ a : Fin N,
+          ∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+              (TensorRSSpace.toModel (Elt (V a) (V b) x))
+              (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g) from by
+      rw [bochnerFoldGroupSum, Finset.sum_comm]]
+    refine Finset.sum_congr rfl (fun b _ => ?_)
+    rw [← MeasureTheory.integral_finset_sum Finset.univ (fun a _ => hint a b)]
+    refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+    change tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel (tensor0SAsRS (I := I) (M := M) x
+          ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+            ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from Named.toSection x)
+              (unitZeroSec (I := I) (M := M) x))) (V b x))))
+        (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)) = _
+    rw [hslot0 b x]
+    have hsumModel : ∀ (fs : Finset (Fin N)),
+        TensorRSSpace.toModel (∑ a ∈ fs, Elt (V a) (V b) x) =
+        ∑ a ∈ fs, (1 : ℝ) • TensorRSSpace.toModel (Elt (V a) (V b) x) := by
+      intro fs
+      induction fs using Finset.induction with
+      | empty => rw [Finset.sum_empty, Finset.sum_empty, TensorRSSpace.toModel_zero]
+      | insert i fs hi ih =>
+        rw [Finset.sum_insert hi, Finset.sum_insert hi, TensorRSSpace.toModel_add, ih, one_smul]
+    rw [hsumModel Finset.univ,
+      tensorInnerPointwise_sum_left (I := I) (M := M) g 0 s x Finset.univ
+        (fun a => TensorRSSpace.toModel (Elt (V a) (V b) x)) (fun _ => (1 : ℝ))
+        (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))]
+    simp
+  · -- The slot-`0` Parseval expansion of the integrand, pushed under the integral.
+    refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+    change tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x (Named.toFun x)
+        ((covGrad (I := I) (M := M) g 0 s S).toFun x) = _
+    rw [show (Named).toFun x = TensorRSSpace.toModel (Named.toSection x) from rfl,
+      show (covGrad (I := I) (M := M) g 0 s S).toFun x =
+        TensorRSSpace.toModel ((covGrad (I := I) (M := M) g 0 s S).toSection x) from rfl]
+    rw [tensorInnerPointwise_succ_eq_parseval_sum_slot0 (I := I) (M := M) g V hPar s x
+      (Named.toSection x) ((covGrad (I := I) (M := M) g 0 s S).toSection x)]
+    refine Finset.sum_congr rfl (fun b _ => ?_)
+    rfl
+
+/-- The slot-`0` `u'`-read value of `∇S` as a `(0, s)`-fibre element `slot0_{u'}(∇S) :=
+tensor0S_curry s x (∇S(x)(unit)) u'`, used as the curvature operand. -/
+private noncomputable def gradCurry0 (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : SmoothCcTensor g 0 s) (x : M) (u' : TangentSpace I x) : Tensor0SSpace s I x :=
+  (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+    ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+      (covGrad (I := I) (M := M) g 0 s S).toSection x)
+      (unitZeroSec (I := I) (M := M) x))) u'
+
+set_option linter.unusedSectionVars false in
+/-- `unitScalarRSLift x (W(unit)) = W` for any `(0, s)`-Hom tensor `W`: a `(0, s)`-Hom is
+determined by its unit-evaluation. -/
+private lemma unitScalarRSLift_unitEval_self {s : ℕ} (x : M) (W : TensorRSSpace 0 s I x) :
+    unitScalarRSLift (I := I) (M := M) x
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from W)
+          (unitZeroSec (I := I) (M := M) x)) = W := by
+  apply tensorRSSpace_ext (𝕜 := ℝ) 0 s x
+  intro D
+  rw [unitScalarRSLift_apply (I := I) (M := M) x _ D]
+  conv_rhs => rw [zeroTensor_eq_smul_unit (I := I) (M := M) x D]
+  rw [ContinuousLinearMap.map_smul]
+
+set_option linter.unusedSectionVars false in
+/-- **The genuine fold-`1` slot-`0` identity (pure-Riemann frame trace, Parseval form).** The
+slot-`0` `V b`-read of the concrete pure-Riemann section `GcurvSection g s S` is the
+Parseval-family sum over `a` of the group-`1` carrier `R(V a, V b)(∇_{V a} S)`. The orthonormal
+moving-frame trace value of the order-`0` pure-Riemann curvature operator
+(`pureRGenuineDiffOp_zero_succ_toSection_unit_eval`, folded back to the section through
+`pureRGenuineDiffOp0_eq_GcurvSection`) is converted to the fixed family by
+`parseval_family_sum_bilin_eq` applied to the slot-`0`-read curvature bilinear, then identified
+with the carrier through `riemannOp_tensorCov_unitScalarRSLift_unitEval` and the directional
+slot-`0` curry `curry_covGrad_unit_eval_genVal`. -/
+private lemma gcurv_slot0_eq_parseval_sum_elt1
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) (b : Fin N) (x : M) :
+    tensor0SAsRS (I := I) (M := M) x
+        ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+            (GcurvSection (I := I) (M := M) g s S).toSection x)
+            (unitZeroSec (I := I) (M := M) x))) (V b x)) =
+      ∑ a : Fin N, bochnerGroupElt1 (I := I) (M := M) g s S (V a) (V b) x := by
+  classical
+  -- Push the family sum and the wrapper out; reduce to a `Tensor0SSpace s` identity.
+  rw [show (∑ a : Fin N, bochnerGroupElt1 (I := I) (M := M) g s S (V a) (V b) x) =
+      tensor0SAsRS (I := I) (M := M) x
+        (∑ a : Fin N,
+          (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+            riemannSec (tensorCov (I := I) g 0 s) (V a) (V b)
+              (covApply (tensorCov (I := I) g 0 s) (V a) (fun y : M => S.toSection y)) x)
+            (unitZeroSec (I := I) (M := M) x)) from by
+    rw [tensor0SAsRS_finsetSum (I := I) (M := M) s x Finset.univ]
+    rfl]
+  rw [tensor0SAsRS_eq_iff]
+  -- Both sides are `Tensor0SSpace s`; compare on every model tuple `m`.
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro m
+  simp only []
+  -- LHS value: the curry reads slot 0 at `V b x` of the unit-evaluated section.
+  rw [TensorMultilinear.tensor0S_curry_apply_eval]
+  -- Replace `GcurvSection` by the order-`0` pure-Riemann operator on `∇S`.
+  rw [show (GcurvSection (I := I) (M := M) g s S).toSection x =
+      (pureRGenuineDiffOp (I := I) (M := M) g 0 (s + 1)
+        (covGrad (I := I) (M := M) g 0 s S)).toSection x from by
+    rw [pureRGenuineDiffOp0_eq_GcurvSection (I := I) (M := M) g s S]]
+  rw [pureRGenuineDiffOp_zero_succ_toSection_unit_eval (I := I) (M := M) g s
+    (covGrad (I := I) (M := M) g 0 s S) x (Fin.cons (V b x) m)]
+  simp only [Fin.cons_zero, Matrix.vecTail]
+  -- RHS value: pull `toModel` through the family sum, read on the tuple `m`.
+  rw [show Tensor0SSpace.toModel
+        (∑ a : Fin N,
+          (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+            riemannSec (tensorCov (I := I) g 0 s) (V a) (V b)
+              (covApply (tensorCov (I := I) g 0 s) (V a) (fun y : M => S.toSection y)) x)
+            (unitZeroSec (I := I) (M := M) x)) m =
+      ∑ a : Fin N, Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+          riemannSec (tensorCov (I := I) g 0 s) (V a) (V b)
+            (covApply (tensorCov (I := I) g 0 s) (V a) (fun y : M => S.toSection y)) x)
+          (unitZeroSec (I := I) (M := M) x)) m from by
+    induction (Finset.univ : Finset (Fin N)) using Finset.induction with
+    | empty => simp [Tensor0SSpace.toModel_zero]
+    | insert i fs hi ih =>
+      rw [Finset.sum_insert hi, Finset.sum_insert hi, Tensor0SSpace.toModel_add,
+        ContinuousMultilinearMap.add_apply, ih]]
+  -- Express the RHS carrier value through the abstract `(0, s)`-curvature operator.
+  rw [show (fun a : Fin N => Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+          riemannSec (tensorCov (I := I) g 0 s) (V a) (V b)
+            (covApply (tensorCov (I := I) g 0 s) (V a) (fun y : M => S.toSection y)) x)
+          (unitZeroSec (I := I) (M := M) x)) m) =
+      (fun a : Fin N => Tensor0SSpace.toModel
+        (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) x
+          (V a x) (V b x)
+          (gradCurry0 (I := I) (M := M) g s S x (V a x))) m) from by
+    funext a
+    rw [riemannSec_eq_riemannOp_smooth (cov := tensorCov (I := I) g 0 s) (hV a) (hV b)
+      (covApplyRS_contMDiff (I := I) g 0 s S.toSection.contMDiff (hV a))]
+    rw [show covApply (tensorCov (I := I) g 0 s) (V a) (fun y : M => S.toSection y) x =
+        unitScalarRSLift (I := I) (M := M) x (gradCurry0 (I := I) (M := M) g s S x (V a x)) from by
+      rw [gradCurry0, curry_covGrad_unit_eval_genVal (I := I) (M := M) g s S x (V a x)]
+      rw [show (tensorCovDerivAt (I := I) (M := M) g 0 s S x (V a x))
+            (unitZeroSec (I := I) (M := M) x) =
+          (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+            covApply (tensorCov (I := I) g 0 s) (V a) (fun y : M => S.toSection y) x)
+            (unitZeroSec (I := I) (M := M) x) from by
+        rw [covApply_apply]; rfl]
+      rw [unitScalarRSLift_unitEval_self (I := I) (M := M) x _]]
+    rw [riemannOp_tensorCov_unitScalarRSLift_unitEval (I := I) (M := M) g s x (V a x) (V b x)
+      (gradCurry0 (I := I) (M := M) g s S x (V a x))]]
+  -- Both sides are now `∑ … toModel (riemannOp(tensor0SCov) x · (V b x) (slot0_·(∇S))) m`;
+  -- convert the orthonormal frame trace to the Parseval family by the bilinear trace identity.
+  set Bform : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ :=
+    LinearMap.mk₂ ℝ
+      (fun u u' => Tensor0SSpace.toModel
+        (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) x
+          u (V b x)
+          ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+            ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+              (covGrad (I := I) (M := M) g 0 s S).toSection x)
+              (unitZeroSec (I := I) (M := M) x))) u')) m)
+      (fun u₁ u₂ u' => by
+        simp only [map_add, ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add,
+          ContinuousMultilinearMap.add_apply])
+      (fun c u u' => by
+        simp only [map_smul, ContinuousLinearMap.smul_apply, Tensor0SSpace.toModel_smul,
+          ContinuousMultilinearMap.smul_apply, smul_eq_mul])
+      (fun u u₁' u₂' => by
+        simp only [map_add, Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply])
+      (fun c u u' => by
+        simp only [map_smul, Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply,
+          smul_eq_mul]) with hBform_def
+  have hBval : ∀ u u' : TangentSpace I x, Bform u u' =
+      Tensor0SSpace.toModel
+        (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) x
+          u (V b x)
+          ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+            ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+              (covGrad (I := I) (M := M) g 0 s S).toSection x)
+              (unitZeroSec (I := I) (M := M) x))) u')) m :=
+    fun u u' => rfl
+  have hparse := parseval_family_sum_bilin_eq (I := I) (M := M) g x (fun a => V a x)
+    (fun u => hPar x u) (fun i => smoothOrthoFrame (I := I) g x i x)
+    (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g x i j) Bform
+  simp only [hBval] at hparse
+  exact hparse.symm
+
 /-- **Fold 1 (term i → pure-Riemann genuine curvature trace pairing).** For a fixed Parseval frame family,
 the group-`1` double sum (the slot-`0` carrier `R(V a, V b)(∇_{V a} S)`) equals the `L²` pairing of the
 concrete pure-Riemann genuine curvature section `GcurvSection g s S` against `∇S`:
@@ -522,8 +1131,8 @@ concrete pure-Riemann genuine curvature section `GcurvSection g s S` against `�
 ```
 The genuine content is the fixed-family Parseval reproduction of the moving-frame pure-Riemann trace value
 (`pureRGenuineDiffOp_zero_succ_toSection_unit_eval`), folded back to the concrete section through
-`pureRGenuineDiffOp0_eq_GcurvSection` (`pureRGenuineDiffOp g 0 (s + 1) (∇S) = GcurvSection g s S`).  The
-body is `sorry`; consumers transitively depend on its `sorryAx`. -/
+`pureRGenuineDiffOp0_eq_GcurvSection` (`pureRGenuineDiffOp g 0 (s + 1) (∇S) = GcurvSection g s S`) and
+converted to the fixed family by `parseval_family_sum_bilin_eq`. -/
 theorem bochnerFold_group1_eq_GcurvSection
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
@@ -535,8 +1144,18 @@ theorem bochnerFold_group1_eq_GcurvSection
         (bochnerGroupElt1 (I := I) (M := M) g s S) =
       tensorL2Inner (I := I) (M := M) g 0 (s + 1)
         (GcurvSection (I := I) (M := M) g s S).toFun
-        (covGrad (I := I) (M := M) g 0 s S).toFun :=
-  sorry
+        (covGrad (I := I) (M := M) g 0 s S).toFun := by
+  rw [(fold_assembly (I := I) (M := M) g s S V hV hPar (GcurvSection (I := I) (M := M) g s S)
+    (bochnerGroupElt1 (I := I) (M := M) g s S)
+    (fun b x => gcurv_slot0_eq_parseval_sum_elt1 (I := I) (M := M) g s S V hV hPar b x)
+    (fun a b => by
+      have hib := SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+        (bochnerGroupElt1Cc (I := I) (M := M) g s S (hV a) (hV b))
+        (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))
+      refine hib.congr (Filter.Eventually.of_forall (fun x => ?_))
+      simp only [SmoothCcTensor.toFun_apply,
+        bochnerGroupElt1Cc_toSection_eq (I := I) (M := M) g s S (hV a) (hV b) x,
+        bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S (hV b) x])).symm]
 
 /-- **Fold 3 (terms iii + iv − v → leading-slot Ricci trace).** For a fixed Parseval frame family, the
 group-`3` double sum equals the `L²` pairing of the leading-slot Ricci-trace carrier `ricTraceSection g s S`
@@ -636,8 +1255,151 @@ theorem bochnerFold_sevenTermSum_eq_pointwiseTensorCurvPairing
         bochnerFoldGroupSum (I := I) (M := M) g s S V
           (bochnerGroupElt3 (I := I) (M := M) g s S) +
         bochnerFoldGroupSum (I := I) (M := M) g s S V
-          (bochnerGroupElt4 (I := I) (M := M) g s S) :=
-  sorry
+          (bochnerGroupElt4 (I := I) (M := M) g s S) := by
+  classical
+  -- Per-carrier integrability of every group pairing against the slot-`0` read of `∇S`.
+  have hint : ∀ (Eltk : (Π b : M, TangentSpace I b) → (Π b : M, TangentSpace I b) → (x : M) →
+        TensorRSSpace 0 s I x)
+      (EltkCc : ∀ (a b : Fin N), SmoothCcTensor g 0 s),
+      (∀ (a b : Fin N) (x : M), (EltkCc a b).toSection x = Eltk (V a) (V b) x) →
+      ∀ (a b : Fin N), Integrable
+        (fun x : M => tensorInnerPointwise (I := I) (M := M) g 0 s x
+          (TensorRSSpace.toModel (Eltk (V a) (V b) x))
+          (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)))
+        (riemannianVolumeMeasure (I := I) (M := M) g) := by
+    intro Eltk EltkCc hEltkCc a b
+    have hib := SmoothCcTensor.integrable_inner_cross (I := I) (M := M) (EltkCc a b)
+      (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))
+    refine hib.congr (Filter.Eventually.of_forall (fun x => ?_))
+    simp only [SmoothCcTensor.toFun_apply, hEltkCc a b x,
+      bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S (hV b) x]
+  have hint1 := hint (bochnerGroupElt1 (I := I) (M := M) g s S)
+    (fun a b => bochnerGroupElt1Cc (I := I) (M := M) g s S (hV a) (hV b))
+    (fun a b x => bochnerGroupElt1Cc_toSection_eq (I := I) (M := M) g s S (hV a) (hV b) x)
+  have hint2 := hint (bochnerGroupElt2 (I := I) (M := M) g s S)
+    (fun a b => bochnerGroupElt2Cc (I := I) (M := M) g s S (hV a) (hV b))
+    (fun a b x => bochnerGroupElt2Cc_toSection_eq (I := I) (M := M) g s S (hV a) (hV b) x)
+  have hint3 := hint (bochnerGroupElt3 (I := I) (M := M) g s S)
+    (fun a b => bochnerGroupElt3Cc (I := I) (M := M) g s S (hV a) (hV b))
+    (fun a b x => bochnerGroupElt3Cc_toSection_eq (I := I) (M := M) g s S (hV a) (hV b) x)
+  have hint4 := hint (bochnerGroupElt4 (I := I) (M := M) g s S)
+    (fun a b => bochnerGroupElt4Cc (I := I) (M := M) g s S (hV a) (hV b))
+    (fun a b x => bochnerGroupElt4Cc_toSection_eq (I := I) (M := M) g s S (hV a) (hV b) x)
+  -- The slot-`0` read of the defect splits into the four carriers (`bochnerSlot0Curv_eq_groupSum`),
+  -- so the unified fold assembly produces the combined group double sum.
+  rw [fold_assembly (I := I) (M := M) g s S V hV hPar (pointwiseTensorCurv (I := I) (M := M) g s S)
+    (fun Va Vb x =>
+      bochnerGroupElt1 (I := I) (M := M) g s S Va Vb x +
+        bochnerGroupElt2 (I := I) (M := M) g s S Va Vb x +
+        bochnerGroupElt3 (I := I) (M := M) g s S Va Vb x +
+        bochnerGroupElt4 (I := I) (M := M) g s S Va Vb x)
+    (fun b x => bochnerSlot0Curv_eq_groupSum (I := I) (M := M) g s S V hV hPar b x)
+    (fun a b => by
+      have h12 := (hint1 a b).add (hint2 a b)
+      have h123 := h12.add (hint3 a b)
+      have h1234 := h123.add (hint4 a b)
+      refine h1234.congr (Filter.Eventually.of_forall (fun x => ?_))
+      simp only [Pi.add_apply]
+      rw [← tensorInnerPointwise_add_left, ← tensorInnerPointwise_add_left,
+        ← tensorInnerPointwise_add_left,
+        ← TensorRSSpace.toModel_add, ← TensorRSSpace.toModel_add, ← TensorRSSpace.toModel_add])]
+  -- Distribute the combined carrier double sum into the four group double sums via a
+  -- `Fin 4`-indexed carrier family and `∫∑ = ∑∫`.
+  set carr : Fin 4 → (Π b : M, TangentSpace I b) → (Π b : M, TangentSpace I b) → (x : M) →
+      TensorRSSpace 0 s I x :=
+    ![bochnerGroupElt1 (I := I) (M := M) g s S, bochnerGroupElt2 (I := I) (M := M) g s S,
+      bochnerGroupElt3 (I := I) (M := M) g s S, bochnerGroupElt4 (I := I) (M := M) g s S]
+    with hcarr_def
+  have hcarrint : ∀ (k : Fin 4) (a b : Fin N), Integrable
+      (fun x : M => tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel (carr k (V a) (V b) x))
+        (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)))
+      (riemannianVolumeMeasure (I := I) (M := M) g) := by
+    intro k a b
+    fin_cases k
+    · exact hint1 a b
+    · exact hint2 a b
+    · exact hint3 a b
+    · exact hint4 a b
+  -- The combined per-`(a, b)` integrand is the `Fin 4`-sum of the carrier pairings.
+  have hsplit : ∀ a b : Fin N,
+      (∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+          (TensorRSSpace.toModel
+            (bochnerGroupElt1 (I := I) (M := M) g s S (V a) (V b) x +
+              bochnerGroupElt2 (I := I) (M := M) g s S (V a) (V b) x +
+              bochnerGroupElt3 (I := I) (M := M) g s S (V a) (V b) x +
+              bochnerGroupElt4 (I := I) (M := M) g s S (V a) (V b) x))
+          (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+      ∑ k : Fin 4,
+        ∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+            (TensorRSSpace.toModel (carr k (V a) (V b) x))
+            (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
+    intro a b
+    rw [← MeasureTheory.integral_finset_sum Finset.univ (fun k _ => hcarrint k a b)]
+    refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+    change tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel
+          (bochnerGroupElt1 (I := I) (M := M) g s S (V a) (V b) x +
+            bochnerGroupElt2 (I := I) (M := M) g s S (V a) (V b) x +
+            bochnerGroupElt3 (I := I) (M := M) g s S (V a) (V b) x +
+            bochnerGroupElt4 (I := I) (M := M) g s S (V a) (V b) x))
+        (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)) =
+      ∑ k : Fin 4, tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel (carr k (V a) (V b) x))
+        (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+    rw [Fin.sum_univ_four]
+    simp only [hcarr_def, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+      Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three]
+    rw [TensorRSSpace.toModel_add, TensorRSSpace.toModel_add, TensorRSSpace.toModel_add,
+      tensorInnerPointwise_add_left, tensorInnerPointwise_add_left,
+      tensorInnerPointwise_add_left]
+  -- Reassemble: the combined double sum equals `∑_k` of the group double sums.
+  rw [show bochnerFoldGroupSum (I := I) (M := M) g s S V
+        (bochnerGroupElt1 (I := I) (M := M) g s S) +
+        bochnerFoldGroupSum (I := I) (M := M) g s S V
+          (bochnerGroupElt2 (I := I) (M := M) g s S) +
+        bochnerFoldGroupSum (I := I) (M := M) g s S V
+          (bochnerGroupElt3 (I := I) (M := M) g s S) +
+        bochnerFoldGroupSum (I := I) (M := M) g s S V
+          (bochnerGroupElt4 (I := I) (M := M) g s S) =
+      ∑ k : Fin 4, bochnerFoldGroupSum (I := I) (M := M) g s S V (carr k) from by
+    rw [Fin.sum_univ_four]
+    simp only [hcarr_def, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+      Matrix.cons_val_two, Matrix.tail_cons, Matrix.cons_val_three]]
+  -- LHS combined double sum, split per `(a, b)` into the `Fin 4`-sum, reordered to the outside.
+  rw [show bochnerFoldGroupSum (I := I) (M := M) g s S V
+        (fun Va Vb x =>
+          bochnerGroupElt1 (I := I) (M := M) g s S Va Vb x +
+            bochnerGroupElt2 (I := I) (M := M) g s S Va Vb x +
+            bochnerGroupElt3 (I := I) (M := M) g s S Va Vb x +
+            bochnerGroupElt4 (I := I) (M := M) g s S Va Vb x) =
+      ∑ a : Fin N, ∑ b : Fin N, ∑ k : Fin 4,
+        ∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+            (TensorRSSpace.toModel (carr k (V a) (V b) x))
+            (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) from by
+    rw [bochnerFoldGroupSum]
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    refine Finset.sum_congr rfl (fun b _ => ?_)
+    exact hsplit a b]
+  rw [show (∑ k : Fin 4, bochnerFoldGroupSum (I := I) (M := M) g s S V (carr k)) =
+      ∑ k : Fin 4, ∑ a : Fin N, ∑ b : Fin N,
+        ∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+            (TensorRSSpace.toModel (carr k (V a) (V b) x))
+            (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) from by
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    rw [bochnerFoldGroupSum]]
+  -- The triple sum reorder `∑_a ∑_b ∑_k = ∑_k ∑_a ∑_b`.
+  rw [Finset.sum_congr rfl (fun a (_ : a ∈ (Finset.univ : Finset (Fin N))) =>
+    Finset.sum_comm (s := (Finset.univ : Finset (Fin N))) (t := (Finset.univ : Finset (Fin 4)))
+      (f := fun b k => ∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel (carr k (V a) (V b) x))
+        (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)))]
+  rw [Finset.sum_comm]
 
 end Connection
 end Integral
