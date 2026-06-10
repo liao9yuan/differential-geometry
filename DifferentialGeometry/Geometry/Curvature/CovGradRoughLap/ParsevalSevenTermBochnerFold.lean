@@ -1284,6 +1284,303 @@ theorem bochnerFold_group3_eq_ricTrace
         (covGrad (I := I) (M := M) g 0 s S).toFun :=
   sorry
 
+/-- **The group-`2` IBP residual integrand** (in `tensorInnerPointwise` form): the lower-order
+two-term residue `−(⟨R(V a, V b) S, ∇_{V a}(∇_{V b} S)⟩ + ⟨R(V a, V b) S, ∇_{V b} S⟩ · divᵍ (V a))` of
+the frame-summed covariant integration by parts of the group-`2` carrier `∇_{V a}(R(V a, V b) S)`
+against the slot-`0` carrier `∇_{V b} S`.  `∇_{V a}(∇_{V b} S) := covApply (V a)(covApply (V b) S)`,
+and `divᵍ (V a)` reads the bundled frame field `Vfield`. -/
+private noncomputable def bochnerGroup2Residue (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : SmoothCcTensor g 0 s) (Va Vb : Π b : M, TangentSpace I b)
+    (Vfield : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : ℝ :=
+  - (tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel
+          (riemannSec (tensorCov (I := I) g 0 s) Va Vb (fun z : M => S.toSection z) x))
+        (TensorRSSpace.toModel
+          (covApply (tensorCov (I := I) g 0 s) Va
+            (fun z : M => covApply (tensorCov (I := I) g 0 s) Vb
+              (fun w : M => S.toSection w) z) x))
+      + tensorInnerPointwise (I := I) (M := M) g 0 s x
+          (TensorRSSpace.toModel
+            (riemannSec (tensorCov (I := I) g 0 s) Va Vb (fun z : M => S.toSection z) x))
+          (TensorRSSpace.toModel
+            (covApply (tensorCov (I := I) g 0 s) Vb (fun z : M => S.toSection z) x))
+        * DifferentialGeometry.Integral.DivergenceTheorem.divergence_g (I := I) g Vfield x)
+
+set_option linter.unusedSectionVars false in
+/-- **The engine first-slot term equals the group-`2` carrier pairing integrand.** For the
+once-derived inner section `W' := R(V a, V b) S` (`riemannSecCc`), the bundled frame field
+`⟨V a, hV a⟩`, and the slot-`0` carrier `Z := ∇_{V b} S` (`bochnerGradSlot0Cc`), the engine
+first slot `⟨∇_{V a}(R(V a, V b) S), ∇_{V b} S⟩` (`loweredFirstSlot_eq_covApply_inner`) is exactly the
+group-`2` `bochnerFoldGroupSum` integrand `⟨bochnerGroupElt2, bochnerGradSlot0⟩`. -/
+private lemma engineFirstSlot_eq_group2_integrand (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : SmoothCcTensor g 0 s) {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I)))) (a b : Fin N) (x : M) :
+    tensorInnerPointwise_0s (I := I) (M := M) (0 + s) g x
+        (Tensor0SSpace.toModel
+          (loweredCovDerivAlongVF (I := I) (M := M) g 0 s
+            (riemannSecCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+            ⟨fun y : M => V a y, hV a⟩ x))
+        (Tensor0SSpace.toModel
+          (liftedTensorSection (I := I) (M := M) g 0 s
+            (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x)) =
+      tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel (bochnerGroupElt2 (I := I) (M := M) g s S (V a) (V b) x))
+        (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)) := by
+  classical
+  rw [loweredFirstSlot_eq_covApply_inner (I := I) (M := M) g s
+    (riemannSecCc (I := I) (M := M) g s S (hV a) (hV b))
+    (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)) (V := V a) (hV a) x]
+  -- The first slot: `covApplyGenCc (riemannSecCc) (V a) = bochnerGroupElt2`; the second is `rfl`.
+  rw [show (covApplyGenCc (I := I) (M := M) g s
+        (riemannSecCc (I := I) (M := M) g s S (hV a) (hV b)) (hV a)).toSection x =
+      (bochnerGroupElt2Cc (I := I) (M := M) g s S (hV a) (hV b)).toSection x from rfl,
+    bochnerGroupElt2Cc_toSection_eq (I := I) (M := M) g s S (hV a) (hV b) x,
+    bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S (hV b) x]
+
+set_option linter.unusedSectionVars false in
+/-- **The engine residual two terms equal the negated group-`2` IBP residue integrand.** The engine's
+second slot `⟨R(V a, V b) S, ∇_{V a}(∇_{V b} S)⟩` (via `loweredFirstSlot_eq_covApply_inner` flipped by
+`tensorInnerPointwise_symm`, with `∇_{V b} S = bochnerGradSlot0 = covApply (V b) S`) plus the divergence
+term `⟨R(V a, V b) S, ∇_{V b} S⟩ · divᵍ (V a)` (via `tensorInnerScalar_apply`) is exactly
+`−bochnerGroup2Residue`. -/
+private lemma engineRest_eq_neg_group2Residue (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : SmoothCcTensor g 0 s) {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I)))) (a b : Fin N) (x : M) :
+    tensorInnerPointwise_0s (I := I) (M := M) (0 + s) g x
+        (Tensor0SSpace.toModel
+          (liftedTensorSection (I := I) (M := M) g 0 s
+            (riemannSecCc (I := I) (M := M) g s S (hV a) (hV b)).toSection x))
+        (Tensor0SSpace.toModel
+          (loweredCovDerivAlongVF (I := I) (M := M) g 0 s
+            (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection
+            ⟨fun y : M => V a y, hV a⟩ x))
+      + tensorInnerScalar (I := I) (M := M) g 0 s
+          (riemannSecCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+          (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+        * DifferentialGeometry.Integral.DivergenceTheorem.divergence_g (I := I) g
+            ⟨fun y : M => V a y, hV a⟩ x =
+      - bochnerGroup2Residue (I := I) (M := M) g s S (V a) (V b) ⟨fun y : M => V a y, hV a⟩ x := by
+  classical
+  -- The `gradSlot0Cc` section is the directional derivative `∇_{V b} S`, as a function.
+  have hgrad : (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection =
+      fun z : M => covApply (tensorCov (I := I) g 0 s) (V b) (fun w : M => S.toSection w) z := by
+    funext z
+    rw [bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S (hV b) z,
+      bochnerGradSlot0_eq_covApply (I := I) (M := M) g s S (V b) z]
+  rw [bochnerGroup2Residue]
+  -- Term `T3` (divergence scalar) via `tensorInnerScalar_apply`.
+  rw [tensorInnerScalar_apply (I := I) (M := M) g 0 s]
+  rw [show (riemannSecCc (I := I) (M := M) g s S (hV a) (hV b)).toSection x =
+      riemannSec (tensorCov (I := I) g 0 s) (V a) (V b) (fun z : M => S.toSection z) x from rfl]
+  rw [bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S (hV b) x,
+    bochnerGradSlot0_eq_covApply (I := I) (M := M) g s S (V b) x]
+  -- Term `T2` (second-slot covariant derivative): flip, first-slot bridge, flip back.
+  rw [tensorInnerPointwise_0s_symm (I := I) (M := M) g x (0 + s) _ _]
+  rw [loweredFirstSlot_eq_covApply_inner (I := I) (M := M) g s
+    (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))
+    (riemannSecCc (I := I) (M := M) g s S (hV a) (hV b)) (V := V a) (hV a) x]
+  rw [tensorInnerPointwise_symm (I := I) (M := M) g 0 s x _ _]
+  rw [show (covApplyGenCc (I := I) (M := M) g s
+        (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)) (hV a)).toSection x =
+      covApply (tensorCov (I := I) g 0 s) (V a)
+        (fun z : M => (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection z) x from rfl]
+  rw [show (riemannSecCc (I := I) (M := M) g s S (hV a) (hV b)).toSection x =
+      riemannSec (tensorCov (I := I) g 0 s) (V a) (V b) (fun z : M => S.toSection z) x from rfl]
+  rw [hgrad]
+  ring
+
+/-- The packaged second covariant directional derivative `∇_{V a}(∇_{V b} S)` as a smooth
+compactly-supported `(0, s)`-tensor (`covApply (V a)(covApply (V b) S)`), the inner section paired
+against `R(V a, V b) S` in the group-`2` IBP residue. -/
+private def secondCovApplyCc (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {Va Vb : Π b : M, TangentSpace I b}
+    (hVa : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Va b⟩ : TotalSpace E (TangentSpace I))))
+    (hVb : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Vb b⟩ : TotalSpace E (TangentSpace I)))) : SmoothCcTensor g 0 s :=
+  covApplyCc (I := I) (M := M) g s (covApplyCc (I := I) (M := M) g s S hVb) hVa
+
+set_option linter.unusedSectionVars false in
+/-- The group-`2` IBP residue integrand is integrable: it is `−(⟨R(V a, V b) S, ∇_{V a}(∇_{V b} S)⟩ +
+⟨R(V a, V b) S, ∇_{V b} S⟩ · divᵍ (V a))`, a continuous function (sum of smooth inner-product scalars,
+the divergence factor smooth by `divergence_g_contMDiff`) on the compact manifold. -/
+private lemma integrable_bochnerGroup2Residue (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : SmoothCcTensor g 0 s) {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I)))) (a b : Fin N) :
+    Integrable
+      (fun x : M =>
+        bochnerGroup2Residue (I := I) (M := M) g s S (V a) (V b) ⟨fun y : M => V a y, hV a⟩ x)
+      (riemannianVolumeMeasure (I := I) (M := M) g) := by
+  classical
+  have hcont1 : Continuous
+      (fun x : M => tensorInnerScalar (I := I) (M := M) g 0 s
+        (riemannSecCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+        (secondCovApplyCc (I := I) (M := M) g s S (hV a) (hV b)).toSection x) :=
+    (tensorInnerScalar_contMDiff (I := I) (M := M) g 0 s
+      (riemannSecCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+      (secondCovApplyCc (I := I) (M := M) g s S (hV a) (hV b)).toSection).continuous
+  have hcont2 : Continuous
+      (fun x : M => tensorInnerScalar (I := I) (M := M) g 0 s
+        (riemannSecCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+        (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x) :=
+    (tensorInnerScalar_contMDiff (I := I) (M := M) g 0 s
+      (riemannSecCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+      (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection).continuous
+  have hdiv : Continuous
+      (DifferentialGeometry.Integral.DivergenceTheorem.divergence_g (I := I) g
+        ⟨fun y : M => V a y, hV a⟩) :=
+    (DifferentialGeometry.Integral.DivergenceTheorem.divergence_g_contMDiff (I := I) g
+      ⟨fun y : M => V a y, hV a⟩).continuous
+  refine integrable_of_continuous_compactSpace (I := I) (M := M) g ?_
+  refine Continuous.neg (Continuous.add ?_ (Continuous.mul ?_ hdiv))
+  · refine hcont1.congr (fun x => ?_)
+    rw [tensorInnerScalar_apply (I := I) (M := M) g 0 s]
+    rw [show (secondCovApplyCc (I := I) (M := M) g s S (hV a) (hV b)).toSection x =
+        covApply (tensorCov (I := I) g 0 s) (V a)
+          (fun z : M => covApply (tensorCov (I := I) g 0 s) (V b)
+            (fun w : M => S.toSection w) z) x from rfl]
+    rfl
+  · refine hcont2.congr (fun x => ?_)
+    rw [tensorInnerScalar_apply (I := I) (M := M) g 0 s]
+    rw [bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S (hV b) x,
+      bochnerGradSlot0_eq_covApply (I := I) (M := M) g s S (V b) x]
+    rfl
+
+set_option linter.unusedSectionVars false in
+/-- **The group-`2` frame-summed covariant integration by parts.** For a fixed Parseval frame family,
+the group-`2` double sum (the slot-`0` carrier `∇_{V a}(R(V a, V b) S)` paired against `∇_{V b} S`)
+equals the frame double sum of the IBP residue integrals:
+```
+bochnerFoldGroupSum g s S V (bochnerGroupElt2) = ∑_b ∑_a ∫ bochnerGroup2Residue.
+```
+For each fixed `b`, the frame-summed covariant integration-by-parts engine
+`integral_frameSummed_covDeriv_combined_eq_zero` (`W a := R(V a, V b) S`, `Z := ∇_{V b} S`, direction
+`V a`) gives `∑_a ∫ (⟨∇_{V a}(R(V a, V b) S), ∇_{V b} S⟩ + ⟨R(V a, V b) S, ∇_{V a}(∇_{V b} S)⟩ +
+⟨R(V a, V b) S, ∇_{V b} S⟩ · divᵍ (V a)) = 0`; the first term is the group-`2` integrand
+(`engineFirstSlot_eq_group2_integrand`) and the remaining two are `−bochnerGroup2Residue`
+(`engineRest_eq_neg_group2Residue`), so the group-`2` integral equals the residue integral. -/
+private lemma bochnerFoldGroupSum_elt2_eq_residueSum (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : SmoothCcTensor g 0 s) {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I)))) :
+    bochnerFoldGroupSum (I := I) (M := M) g s S V
+        (bochnerGroupElt2 (I := I) (M := M) g s S) =
+      ∑ b : Fin N, ∑ a : Fin N,
+        ∫ x, bochnerGroup2Residue (I := I) (M := M) g s S (V a) (V b)
+            ⟨fun y : M => V a y, hV a⟩ x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
+  classical
+  rw [bochnerFoldGroupSum, Finset.sum_comm]
+  refine Finset.sum_congr rfl (fun b _ => ?_)
+  -- Integrability of the group-`2` integrand for each `a` (the Cc cross-pairing).
+  have hintG2 : ∀ a : Fin N, Integrable
+      (fun x : M => tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel (bochnerGroupElt2 (I := I) (M := M) g s S (V a) (V b) x))
+        (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)))
+      (riemannianVolumeMeasure (I := I) (M := M) g) := by
+    intro a
+    refine (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+      (bochnerGroupElt2Cc (I := I) (M := M) g s S (hV a) (hV b))
+      (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))).congr
+      (Filter.Eventually.of_forall (fun x => ?_))
+    simp only [SmoothCcTensor.toFun_apply,
+      bochnerGroupElt2Cc_toSection_eq (I := I) (M := M) g s S (hV a) (hV b) x,
+      bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S (hV b) x]
+  -- The engine identity for fixed `b`.
+  have heng := integral_frameSummed_covDeriv_combined_eq_zero (I := I) (M := M) g 0 s
+    (fun a : Fin N => (⟨fun y : M => V a y, hV a⟩ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯))
+    (fun a : Fin N => riemannSecCc (I := I) (M := M) g s S (hV a) (hV b))
+    (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))
+  -- Rewrite the engine's per-`a` integrand pointwise as `group2integrand − residue`.
+  have hpt : ∀ a : Fin N, ∀ x : M,
+      tensorInnerPointwise_0s (I := I) (M := M) (0 + s) g x
+            (Tensor0SSpace.toModel
+              (loweredCovDerivAlongVF (I := I) (M := M) g 0 s
+                (riemannSecCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+                ⟨fun y : M => V a y, hV a⟩ x))
+            (Tensor0SSpace.toModel
+              (liftedTensorSection (I := I) (M := M) g 0 s
+                (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x))
+          + tensorInnerPointwise_0s (I := I) (M := M) (0 + s) g x
+              (Tensor0SSpace.toModel
+                (liftedTensorSection (I := I) (M := M) g 0 s
+                  (riemannSecCc (I := I) (M := M) g s S (hV a) (hV b)).toSection x))
+              (Tensor0SSpace.toModel
+                (loweredCovDerivAlongVF (I := I) (M := M) g 0 s
+                  (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection
+                  ⟨fun y : M => V a y, hV a⟩ x))
+          + tensorInnerScalar (I := I) (M := M) g 0 s
+              (riemannSecCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+              (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+            * DifferentialGeometry.Integral.DivergenceTheorem.divergence_g (I := I) g
+                ⟨fun y : M => V a y, hV a⟩ x =
+        tensorInnerPointwise (I := I) (M := M) g 0 s x
+            (TensorRSSpace.toModel (bochnerGroupElt2 (I := I) (M := M) g s S (V a) (V b) x))
+            (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+          - bochnerGroup2Residue (I := I) (M := M) g s S (V a) (V b)
+              ⟨fun y : M => V a y, hV a⟩ x := by
+    intro a x
+    have h1 := engineFirstSlot_eq_group2_integrand (I := I) (M := M) g s S V hV a b x
+    have h2 := engineRest_eq_neg_group2Residue (I := I) (M := M) g s S V hV a b x
+    linarith [h1, h2]
+  -- Rewrite each engine integral via `hpt`, split into the difference of integrals.
+  rw [Finset.sum_congr rfl (fun a _ =>
+    MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (hpt a)))] at heng
+  rw [Finset.sum_congr rfl (fun a _ =>
+    MeasureTheory.integral_sub (hintG2 a)
+      (integrable_bochnerGroup2Residue (I := I) (M := M) g s S V hV a b))] at heng
+  rw [Finset.sum_sub_distrib] at heng
+  linarith [heng]
+
+/-- **The genuine differentiated-curvature reorganization of the group-`2` IBP residue plus the
+group-`4` second-order pair (the curvature-commutator root).** For a fixed Parseval frame family, the
+frame double sum of the group-`2` integration-by-parts residue `bochnerGroup2Residue` (`= −(⟨R(V a, V b)
+S, ∇_{V a}(∇_{V b} S)⟩ + ⟨R(V a, V b) S, ∇_{V b} S⟩ · divᵍ (V a))`) plus the group-`4` double sum (the
+symmetric second-order pair `−∇²_{∇_{V b} V a, V a} S − ∇²_{V a, ∇_{V b} V a} S` read against `∇_{V b} S`)
+equals the single `L²` pairing of the differentiated curvature operator-field action against `∇S`:
+```
+(∑_b ∑_a ∫ bochnerGroup2Residue) + bochnerFoldGroupSum g s S V (bochnerGroupElt4)
+  = ⟨appCc (covGrad (curvOpField g s)) S, ∇S⟩_{L²}.
+```
+
+This is the genuinely-deep curvature content of the rank-`0` Bochner divergence root, *more primitive*
+than its consumer: the group-`2` covariant derivative `∇_{V a}(·)` has already been integrated by parts
+off into the residue `bochnerGroup2Residue` by the frame-summed engine
+(`bochnerFoldGroupSum_elt2_eq_residueSum`, `integral_frameSummed_covDeriv_combined_eq_zero`).  Its content
+is the *frame-summed differentiated-curvature trace* identification: the operator-field covariant Leibniz
+`covGrad_appCc_eq` (`OperatorFieldCovariantCalculus`) writes `∇(appCc (curvOpField g s) S) =
+appCc (covGrad (curvOpField g s)) S + appCc (slotExtend (curvOpField g s)) (∇S)`, whose frame-trace of the
+order-`0` curvature operator action `appCc (curvOpField g s) S = pureRGenuineDiffOp g 0 s S`
+(`exists_pureRGenuineDiffOp_base_appCc`, `appCc_curvOpField_eq_pureRGenuineDiffOp`) is the moving-frame
+pure-Riemann trace `∑_i R(B_i, ·) S`; the second covariant derivative `∇_{V a}(∇_{V b} S)` of the residue
+is reorganized against `R(V a, V b) S` through the second-Bianchi / `riemannOp`-symmetry curvature
+commutator into the symmetric group-`4` pattern plus the differentiated curvature coefficient `(∇R) S`,
+summed over the Parseval frame.  It is *false* for an arbitrary section in place of the differentiated
+curvature trace (the `(∇R) S` content is genuinely present), so it genuinely uses `R`, the Parseval
+reproduction `hPar`, and the second-order frame structure.  The body is `sorry`; consumers transitively
+depend on its `sorryAx`. -/
+private theorem parsevalFrameSum_group2Residue_add_group4_eq_appCc_covGrad_curvOpField
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
+    (∑ b : Fin N, ∑ a : Fin N,
+        ∫ x, bochnerGroup2Residue (I := I) (M := M) g s S (V a) (V b)
+            ⟨fun y : M => V a y, hV a⟩ x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
+      bochnerFoldGroupSum (I := I) (M := M) g s S V
+        (bochnerGroupElt4 (I := I) (M := M) g s S) =
+      tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (appCc (I := I) (M := M) g s (s + 1)
+          (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun :=
+  sorry
+
 /-- **The genuine rank-`0` divergence root of the combined group-`2` + group-`4` fold.** For a fixed
 Parseval frame family, the sum of the group-`2` double sum (the slot-`0` carrier `∇_{V a}(R(V a, V b) S)`)
 and the group-`4` double sum (the symmetric second-order pair `−∇²_{∇_{V b} V a, V a} S −
@@ -1293,15 +1590,15 @@ action against `∇S`:
 ∑_a ∑_b ∫ ⟨[∇_{V a}(R(V a, V b) S) − ∇²_{∇_{V b} V a, V a} S − ∇²_{V a, ∇_{V b} V a} S]·slot0, slot0_{V b}(∇S)⟩
   = ⟨appCc (covGrad (curvOpField g s)) S, ∇S⟩_{L²}.
 ```
-This is the genuine deep root of the combined fold: the group-`2` covariant divergence of
-`R(V a, V b) S` along `V a` is *not* pointwise null (the fixed Parseval frame is not covariantly
-divergence-free, `div_g V a ≠ 0` pointwise), so the single-slot divergence engine
-`integral_tensorInner_covDeriv_combined_eq_zero` kills only the *combined* three-term
-`∫(⟨∇_V W', Z⟩ + ⟨W', ∇_V Z⟩ + ⟨W', Z⟩ div_g V)`.  The residual `−(⟨W', ∇_V Z⟩ + ⟨W', Z⟩ div_g V)` is
-exactly absorbed by the group-`4` symmetric second-order pair, leaving the frame-summed trace of the
-operator-field covariant Leibniz `∇(appCc (curvOpField g s) S) = appCc (covGrad (curvOpField g s)) S +
-appCc (curvOpField g s)(∇S)` — the differentiated-curvature `(∇R) S` content.  The body is `sorry`;
-consumers transitively depend on its `sorryAx`. -/
+The group-`2` covariant divergence of `R(V a, V b) S` along `V a` is *not* pointwise null, so the
+single-slot divergence engine `integral_tensorInner_covDeriv_combined_eq_zero` kills only the combined
+three-term `∫(⟨∇_V W', Z⟩ + ⟨W', ∇_V Z⟩ + ⟨W', Z⟩ div_g V)`.  This body composes the two genuine steps:
+the frame-summed integration by parts `bochnerFoldGroupSum_elt2_eq_residueSum`
+(via `integral_frameSummed_covDeriv_combined_eq_zero`) turns the group-`2` double sum into the frame
+double sum of the residue `bochnerGroup2Residue`, and the curvature-commutator reorganization
+`parsevalFrameSum_group2Residue_add_group4_eq_appCc_covGrad_curvOpField` adds the group-`4` symmetric
+second-order pair to obtain the differentiated-curvature operator-field action.  Consumers transitively
+depend on the latter's `sorryAx`. -/
 private theorem parsevalFrameSum_diffCurvBracket_integral_eq_appCc_covGrad_curvOpField
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
@@ -1316,8 +1613,11 @@ private theorem parsevalFrameSum_diffCurvBracket_integral_eq_appCc_covGrad_curvO
       tensorL2Inner (I := I) (M := M) g 0 (s + 1)
         (appCc (I := I) (M := M) g s (s + 1)
           (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S).toFun
-        (covGrad (I := I) (M := M) g 0 s S).toFun :=
-  sorry
+        (covGrad (I := I) (M := M) g 0 s S).toFun := by
+  classical
+  rw [bochnerFoldGroupSum_elt2_eq_residueSum (I := I) (M := M) g s S V hV]
+  exact parsevalFrameSum_group2Residue_add_group4_eq_appCc_covGrad_curvOpField
+    (I := I) (M := M) g s S V hV hPar
 
 /-- **Combined fold 2 + 4 (term ii together with − term vi − term vii → operator-field IBP residue).** For
 a fixed Parseval frame family, the sum of the group-`2` double sum (the slot-`0` carrier
