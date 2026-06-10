@@ -143,6 +143,13 @@ constants (D2b).**
   (exists in coordinate/AllTimesBounds machinery); `hA` = componentRS of
   connectionDifferenceTensorAt smooth = difference of two smooth Christoffel
   arrays (F3 twice).  Effort: 0.5 session.  Risk: low.
+  ENTRY POINTS (located 2026-06-10): frame-level Christoffel smoothness in
+  `ContMDiffAt I 𝓘(ℝ,ℝ) ∞` form at `HCGCompactness/ApproximateIsometry.lean`
+  ~:1515 and ~:3742 (chart-model layer underneath:
+  `Connection/LeviCivita/Smooth/Christoffel.lean`, `leviCivitaChristoffelModelRHS_*`).
+  Start B2 by reading those two theorem statements and adapting to the
+  `∀ d i j, ContMDiffOn I 𝓘(ℝ,ℝ) ∞ (fun y => chr y d i j) u` shape that
+  `claim1`/the tower machinery consume.
 
 **B3 — `hinv` + the `Ginv` field.**
   Define `Ginv y` := inverse Gram array of g_k at y in the frame (pointwise
