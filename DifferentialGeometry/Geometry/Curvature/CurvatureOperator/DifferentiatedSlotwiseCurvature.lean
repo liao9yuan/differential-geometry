@@ -443,6 +443,98 @@ lemma nablaBaseSlotCurv_eq_nablaCurvSec
       nablaCurvSec (LeviCivita (I := I) g) (fun b => X b) (fun b => Y b) (fun b => Z b)
         (fun b => smoothExtensionTangent (I := I) x u b) x := rfl
 
+/-- **The inner cyclic differentiated base-tangent curvature vanishes (the tangent second Bianchi on a
+slot vector).** For smooth tangent fields `X, Y, Z` and a fixed slot vector `u`, the cyclic sum of the
+differentiated base-tangent curvature `nablaBaseSlotCurv g · · · x u = (∇_· R^{TM})(·, ·) u` over the
+three antisymmetric-slot/derivative arrangements vanishes:
+$$
+  (\nabla_X R)(Y, Z) u + (\nabla_Y R)(Z, X) u + (\nabla_Z R)(X, Y) u = 0 .
+$$
+This is the second (differential) Bianchi identity `second_bianchi_levi_civita_metric` (`SecondBianchi`)
+read on the smooth extension `ext u = smoothExtensionTangent x u` of the slot vector, through the
+definitional identification `nablaBaseSlotCurv g X Y Z x u = nablaCurvSec (LeviCivita g) X Y Z (ext u) x`
+(`nablaBaseSlotCurv_eq_nablaCurvSec`). It is the per-slot tangent-curvature ingredient that, summed
+across the tensor slots, yields the tensor-level second Bianchi. -/
+private lemma nablaBaseSlotCurv_cyclic_eq_zero
+    (g : SmoothRiemannianMetric I M)
+    (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
+    nablaBaseSlotCurv (I := I) g X Y Z x u
+      + nablaBaseSlotCurv (I := I) g Y Z X x u
+      + nablaBaseSlotCurv (I := I) g Z X Y x u = 0 := by
+  rw [nablaBaseSlotCurv_eq_nablaCurvSec, nablaBaseSlotCurv_eq_nablaCurvSec,
+      nablaBaseSlotCurv_eq_nablaCurvSec]
+  exact second_bianchi_levi_civita_metric (I := I) g X.contMDiff Y.contMDiff Z.contMDiff
+    (smoothExtensionTangent_contMDiff (I := I) x u)
+
+/-- **The second (differential) Bianchi identity for the `(0, s)`-tensor connection.** For the induced
+`(0, s)`-tensor covariant derivative `tensor0SCovariantDerivative s (LeviCivita g)` of a smooth
+Riemannian metric `g` on a closed manifold, smooth tangent fields `X, Y, Z`, and a smooth `(0, s)`-tensor
+section `A`, the cyclic sum of the differentiated tensor Riemann curvature `nablaTensor0SCurv g s` in its
+derivative slot and its two antisymmetric vector-field slots vanishes:
+$$
+  (\nabla_X R^{(s)})(Y, Z) A + (\nabla_Y R^{(s)})(Z, X) A + (\nabla_Z R^{(s)})(X, Y) A = 0 .
+$$
+
+This is the tensor-bundle lift of the tangent-bundle second Bianchi `second_bianchi_levi_civita`
+(`SecondBianchi`), the genuine bedrock of the rank-`0` Bochner curvature line. Through the definitional
+identification `nablaTensor0SCurv g s X Y Z A x = nablaTensorCurvSec g (tensor0SCovariantDerivative s
+(LeviCivita g)) X Y Z A x` (both unfold to the same four Leibniz terms, the vector-field slots
+differentiated by the tangent Levi-Civita connection and the section slot by the tensor connection), it
+also gives the cyclic Bianchi for the abstract differentiated curvature `nablaTensorCurvSec` of the
+`(0, s)`-tensor connection that the moving-frame curvature-class pairing consumes.
+
+**Proof (the slot-wise peel).** The `(0, s)`-tensor curvature acts *slot-wise* through the base-tangent
+curvature: by the differentiated slot-wise transfer `nablaTensorCov_baseSlot_eval`,
+`toModel(nablaTensor0SCurv g s X Y Z A x)(u) = − ∑ₖ toModel(A x)(update u k (nablaBaseSlotCurv g X Y Z x
+(u k)))`. Reading the cyclic sum on any tuple `u` (through the injective `Tensor0SSpace.toModel`,
+`ContinuousMultilinearMap.ext`), the three terms share the same negated slot sum; collecting them slot by
+slot (the multilinearity of `toModel(A x)` in each argument, `ContinuousMultilinearMap.map_update_add`)
+replaces the `k`-th slot vector by the inner cyclic differentiated tangent curvature
+`nablaBaseSlotCurv g X Y Z x (u k) + nablaBaseSlotCurv g Y Z X x (u k) + nablaBaseSlotCurv g Z X Y x
+(u k)`, which is `0` by the tangent second Bianchi `nablaBaseSlotCurv_cyclic_eq_zero`. A multilinear map
+with a zero argument vanishes (`ContinuousMultilinearMap.map_coord_zero`), so every slot summand is `0`
+and the whole cyclic sum is the zero `(0, s)`-tensor.
+
+**s = 0 litmus.** At rank `0` the section slot is a scalar with flat connection, so `nablaTensor0SCurv g
+0 = 0` (`nablaTensor0SCurv_zero_eq_zero`); the cyclic sum is `0 + 0 + 0 = 0`, the scalar third-order
+Bianchi that holds vacuously because the scalar bundle carries no Riemann curvature. -/
+theorem nablaTensor0SCurv_cyclic_eq_zero
+    (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (A : Π b : M, Tensor0SSpace s I b) (hA : TensorSmooth (I := I) s A) (x : M) :
+    nablaTensor0SCurv (I := I) g s X Y Z A x
+      + nablaTensor0SCurv (I := I) g s Y Z X A x
+      + nablaTensor0SCurv (I := I) g s Z X Y A x = 0 := by
+  classical
+  apply Tensor0SSpace.toModel_injective
+  simp only [Tensor0SSpace.toModel_add, Tensor0SSpace.toModel_zero]
+  apply ContinuousMultilinearMap.ext
+  intro u
+  rw [ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.add_apply,
+      ContinuousMultilinearMap.zero_apply]
+  rw [nablaTensorCov_baseSlot_eval (I := I) g s X Y Z A hA x u,
+      nablaTensorCov_baseSlot_eval (I := I) g s Y Z X A hA x u,
+      nablaTensorCov_baseSlot_eval (I := I) g s Z X Y A hA x u]
+  have hkey : ∀ k : Fin s,
+      Tensor0SSpace.toModel (A x)
+          (Function.update u k (nablaBaseSlotCurv (I := I) g X Y Z x (u k)))
+        + Tensor0SSpace.toModel (A x)
+          (Function.update u k (nablaBaseSlotCurv (I := I) g Y Z X x (u k)))
+        + Tensor0SSpace.toModel (A x)
+          (Function.update u k (nablaBaseSlotCurv (I := I) g Z X Y x (u k))) = 0 := by
+    intro k
+    rw [← (Tensor0SSpace.toModel (A x)).map_update_add u k
+          (nablaBaseSlotCurv (I := I) g X Y Z x (u k))
+          (nablaBaseSlotCurv (I := I) g Y Z X x (u k))]
+    rw [← (Tensor0SSpace.toModel (A x)).map_update_add u k
+          (nablaBaseSlotCurv (I := I) g X Y Z x (u k)
+            + nablaBaseSlotCurv (I := I) g Y Z X x (u k))
+          (nablaBaseSlotCurv (I := I) g Z X Y x (u k))]
+    rw [nablaBaseSlotCurv_cyclic_eq_zero (I := I) g X Y Z x (u k)]
+    exact (Tensor0SSpace.toModel (A x)).map_coord_zero k (by rw [Function.update_self])
+  rw [← neg_add, ← neg_add, ← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+  rw [Finset.sum_eq_zero (fun k _ => hkey k), neg_zero]
+
 /-- **The frame-traced corollary — the Ricci fold at the tensor level.** The orthonormal-frame trace of
 the differentiated base-slot curvature in its first antisymmetric slot, metric-paired against the same
 frame, folds into the covariant derivative of the Ricci tensor: for smooth tangent fields `X, V`, the
