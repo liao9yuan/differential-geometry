@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.MoserTameProduct
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.CovGradBundleEquivFiberNormFrameSum
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradCrossBridge
 
 /-! # The Lᵖ-fibre-norm Gagliardo–Nirenberg interpolation for iterated covariant gradients
 
@@ -511,6 +513,163 @@ private theorem weightedCovIBP_lpFiberJet_fin
           ∂(Integral.Measure.riemannianVolumeMeasure I M g) := by
   sorry
 
+/-- **Diagonal frame-trace sub-sum bound for the second covariant derivative.** With
+`B_i := smoothOrthoFrame g x i` the `g_x`-orthonormal smooth frame at `x`, the sum over the
+diagonal directions `(B_i, B_i)` of the fibre norms of the second covariant derivatives is
+dominated by the full fibre norm of the second iterated covariant gradient:
+```
+∑ᵢ rfns(∇²_{Bᵢ, Bᵢ} w)(x) ≤ rfns(∇²w)(x).
+```
+The full fibre norm `rfns(∇²w)` is the slot-`0` double Parseval frame-sum
+`∑_{a,b,J} (component(∇²w)(a :: b :: J))²` in the `g_x`-orthonormal frame `e a := B_a x`
+(`riemannianFiberNormSq_eq_sum_componentS_sq` with two `Fin.consEquiv` re-indexings); each
+diagonal term `rfns(∇²_{Bᵢ, Bᵢ}w)` is the `(a = b = i)` slice `∑_J (component(∇²w)(i :: i :: J))²`,
+the per-component identity reading the two leftmost slots of `∇²w` at `(Bᵢ x, Bᵢ x)`
+(`tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal`); the diagonal sub-sum of the
+non-negative double sum is bounded by the whole. -/
+private theorem secondCovDeriv_frame_diag_fiberNormSq_sum_le
+    (g : SmoothRiemannianMetric I M) (m : ℕ)
+    (w : Integral.L2.SmoothCcTensor g 0 m) (x : M) :
+    ∑ i : Fin (Module.finrank ℝ E),
+        riemannianFiberNormSq (I := I) (M := M) g 0 m x
+          (Integral.Connection.tensorSecondCovDeriv (I := I) g 0 m
+            (Integral.Connection.smoothOrthoFrame (I := I) g x i)
+            (Integral.Connection.smoothOrthoFrame (I := I) g x i)
+            (fun y : M => w.toSection y) x) ≤
+      riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
+        ((covGrad (I := I) (M := M) g 0 (m + 1)
+            (covGrad (I := I) (M := M) g 0 m w)).toSection x) := by
+  classical
+  set n : ℕ := Module.finrank ℝ E with hn_def
+  -- The `g_x`-orthonormal moving frame, read at the centre `x`.
+  set e : Fin n → TangentSpace I x :=
+    fun a => Integral.Connection.smoothOrthoFrame (I := I) g x a x with he_def
+  have hnTan : n = Module.finrank ℝ (TangentSpace I x) := hn_def
+  have horth : ∀ a b : Fin n, g.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0 := by
+    intro a b
+    rw [he_def]
+    exact Integral.Connection.smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
+  set K₀ : Fin 0 → Fin n := fun k => k.elim0 with hK₀
+  -- The second iterated covariant gradient as a `(0, m+1+1)`-tensor at `x`.
+  set T2 : Tensor0SBundle.TensorRSSpace 0 (m + 1 + 1) I x :=
+    (covGrad (I := I) (M := M) g 0 (m + 1)
+      (covGrad (I := I) (M := M) g 0 m w)).toSection x with hT2_def
+  -- The frame Parseval representations at ranks `m` and `m + 1 + 1` in the moving frame `e`.
+  have hreprS : ∀ S : Tensor0SBundle.TensorRSSpace 0 m I x,
+      riemannianFiberNormSq (I := I) (M := M) g 0 m x S =
+        ∑ K : Fin 0 → Fin n, ∑ J : Fin m → Fin n,
+          Integral.Connection.fiberNormSqSummand (I := I) (M := M) g x 0 m S n e K J :=
+    fun S => Integral.Connection.rfns_eq_sum_fiberNormSqSummand_of_orthoFrame
+      (I := I) (M := M) g m x S e hnTan horth
+  have hreprT2 : ∀ S : Tensor0SBundle.TensorRSSpace 0 (m + 1 + 1) I x,
+      riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x S =
+        ∑ K : Fin 0 → Fin n, ∑ J : Fin (m + 1 + 1) → Fin n,
+          Integral.Connection.fiberNormSqSummand (I := I) (M := M) g x 0 (m + 1 + 1) S n e K J :=
+    fun S => Integral.Connection.rfns_eq_sum_fiberNormSqSummand_of_orthoFrame
+      (I := I) (M := M) g (m + 1 + 1) x S e hnTan horth
+  -- The per-component identity: each diagonal second-derivative component reads off `T2`
+  -- at the two leftmost slots `(e i, e i)` via the two-slot evaluation bridge.
+  have hcomp : ∀ (i : Fin n) (J : Fin m → Fin n),
+      Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x 0 m
+          (Integral.Connection.tensorSecondCovDeriv (I := I) g 0 m
+            (Integral.Connection.smoothOrthoFrame (I := I) g x i)
+            (Integral.Connection.smoothOrthoFrame (I := I) g x i)
+            (fun y : M => w.toSection y) x) n e K₀ J =
+        Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x 0 (m + 1 + 1) T2 n e K₀
+          (Fin.cons i (Fin.cons i J)) := by
+    intro i J
+    -- The empty coframe covector at `K₀` is the unit `(0, 0)`-tensor.
+    have hco : ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+        (fun k => g.inner x (e (K₀ k))) : Tensor0SBundle.Tensor0SSpace 0 I x) =
+        unitZeroSec (I := I) (M := M) x := by
+      rw [show ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+          (fun k => g.inner x (e (K₀ k))) : Tensor0SBundle.Tensor0SSpace 0 I x) =
+          Integral.Connection.coframeS (I := I) (M := M) g x 0 e K₀ from rfl]
+      exact Integral.Connection.coframeS_zero_eq_unitZeroSec (I := I) (M := M) g x e K₀
+    -- Tuple identity: `fun k => e ((i :: i :: J) k) = e i :: e i :: (fun k => e (J k))`.
+    have htuple : (fun k : Fin (m + 1 + 1) =>
+          e ((Fin.cons i (Fin.cons i J) : Fin (m + 1 + 1) → Fin n) k)) =
+        Fin.cons (e i) (Fin.cons (e i) (fun k : Fin m => e (J k))) := by
+      funext k
+      refine Fin.cases ?_ ?_ k
+      · simp
+      · intro j
+        refine Fin.cases ?_ ?_ j
+        · simp
+        · intro l; simp
+    -- Unfold both components and match through the two-slot bridge.
+    rw [Integral.Connection.fiberNormSqComponent, Integral.Connection.fiberNormSqComponent,
+      hco, htuple]
+    rw [he_def]
+    exact (Integral.Connection.tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal
+      (I := I) (M := M) g m w
+      (X := Integral.Connection.smoothOrthoFrame (I := I) g x i)
+      (Y := Integral.Connection.smoothOrthoFrame (I := I) g x i)
+      (Integral.Connection.smoothOrthoFrame_smooth (I := I) g x i)
+      (Integral.Connection.smoothOrthoFrame_smooth (I := I) g x i) x
+      (fun k : Fin m => e (J k))).symm
+  -- Each diagonal fibre norm is the `(a = b = i)` slice of the `T2` component double sum.
+  have hdiag_term : ∀ i : Fin n,
+      riemannianFiberNormSq (I := I) (M := M) g 0 m x
+          (Integral.Connection.tensorSecondCovDeriv (I := I) g 0 m
+            (Integral.Connection.smoothOrthoFrame (I := I) g x i)
+            (Integral.Connection.smoothOrthoFrame (I := I) g x i)
+            (fun y : M => w.toSection y) x) =
+        ∑ J : Fin m → Fin n,
+          (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x 0 (m + 1 + 1) T2 n e K₀
+            (Fin.cons i (Fin.cons i J))) ^ 2 := by
+    intro i
+    rw [Integral.Connection.riemannianFiberNormSq_eq_sum_componentS_sq
+      (I := I) (M := M) g x m e hreprS _ K₀]
+    refine Finset.sum_congr rfl (fun J _ => ?_)
+    rw [hcomp i J]
+  -- The full fibre norm of `T2` is the slot-`0` double Parseval frame sum over `(a, b, J)`.
+  have hfull : riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x T2 =
+      ∑ a : Fin n, ∑ b : Fin n, ∑ J : Fin m → Fin n,
+        (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x 0 (m + 1 + 1) T2 n e K₀
+          (Fin.cons a (Fin.cons b J))) ^ 2 := by
+    rw [Integral.Connection.riemannianFiberNormSq_eq_sum_componentS_sq
+      (I := I) (M := M) g x (m + 1 + 1) e hreprT2 T2 K₀]
+    rw [← Fintype.sum_equiv (Fin.consEquiv (fun _ : Fin (m + 1 + 1) => Fin n))
+          (fun pr : Fin n × (Fin (m + 1) → Fin n) =>
+            (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x 0 (m + 1 + 1) T2 n e K₀
+              (Fin.cons pr.1 pr.2)) ^ 2)
+          (fun J'' : Fin (m + 1 + 1) → Fin n =>
+            (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x 0 (m + 1 + 1) T2 n e K₀
+              J'') ^ 2)
+          (fun pr => by simp [Fin.consEquiv])]
+    rw [Fintype.sum_prod_type]
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    rw [← Fintype.sum_equiv (Fin.consEquiv (fun _ : Fin (m + 1) => Fin n))
+          (fun pr : Fin n × (Fin m → Fin n) =>
+            (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x 0 (m + 1 + 1) T2 n e K₀
+              (Fin.cons a (Fin.cons pr.1 pr.2))) ^ 2)
+          (fun J' : Fin (m + 1) → Fin n =>
+            (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x 0 (m + 1 + 1) T2 n e K₀
+              (Fin.cons a J')) ^ 2)
+          (fun pr => by simp [Fin.consEquiv])]
+    rw [Fintype.sum_prod_type]
+  -- Sum the diagonal terms and bound by the full double sum (drop the off-diagonal `b ≠ i`).
+  rw [hfull]
+  have hdiag_sum : ∑ i : Fin n,
+        riemannianFiberNormSq (I := I) (M := M) g 0 m x
+          (Integral.Connection.tensorSecondCovDeriv (I := I) g 0 m
+            (Integral.Connection.smoothOrthoFrame (I := I) g x i)
+            (Integral.Connection.smoothOrthoFrame (I := I) g x i)
+            (fun y : M => w.toSection y) x) =
+      ∑ i : Fin n, ∑ J : Fin m → Fin n,
+        (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x 0 (m + 1 + 1) T2 n e K₀
+          (Fin.cons i (Fin.cons i J))) ^ 2 :=
+    Finset.sum_congr rfl (fun i _ => hdiag_term i)
+  rw [hdiag_sum]
+  refine Finset.sum_le_sum (fun i _ => ?_)
+  -- The diagonal `b = i` term is one non-negative summand of the inner `∑_b` sum.
+  refine Finset.single_le_sum (f := fun b : Fin n =>
+      ∑ J : Fin m → Fin n,
+        (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x 0 (m + 1 + 1) T2 n e K₀
+          (Fin.cons i (Fin.cons b J))) ^ 2)
+    (fun b _ => Finset.sum_nonneg (fun J _ => sq_nonneg _)) (Finset.mem_univ i)
+
 /-- **(POSIT — child A: the `√n` rough-Laplacian trace bound.)**
 
 The pointwise Cauchy–Schwarz bound for the rough-Laplacian inner product against `w`, with the
@@ -521,9 +680,11 @@ factor:
 ```
 |⟨Δ_raw w, w⟩(x)| ≤ √(finrank) · (rfns(w)(x))^{1/2} · (rfns(∇²w)(x))^{1/2}.
 ```
-Its body is `sorry`: the genuine diagonal-frame-trace Cauchy–Schwarz (the `√n` carrier); consumers
-transitively depend on its `sorryAx`.  **General analytic infrastructure** (rough-Laplacian diagonal
-trace bound) to be promoted to `Analysis/Elliptic/ConnectionLaplacian`. -/
+Assembled from the frame trace `rawTensorConnLap_eq_frame_trace_secondCovDeriv`, the per-direction
+pointwise Cauchy–Schwarz `tensorInnerPointwise_sq_le_mul`, the discrete `n`-term Cauchy–Schwarz
+`Finset.sum_mul_sq_le_sq_mul_sq`, and the diagonal frame-trace sub-sum bound
+`secondCovDeriv_frame_diag_fiberNormSq_sum_le`.  **General analytic infrastructure**
+(rough-Laplacian diagonal trace bound) to be promoted to `Analysis/Elliptic/ConnectionLaplacian`. -/
 private theorem rawConnLap_innerWith_sqrt_finrank_bound
     (g : SmoothRiemannianMetric I M) (m : ℕ)
     (w : Integral.L2.SmoothCcTensor g 0 m) (x : M) :
@@ -534,8 +695,379 @@ private theorem rawConnLap_innerWith_sqrt_finrank_bound
         Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
           ((covGrad (I := I) (M := M) g 0 (m + 1)
             (covGrad (I := I) (M := M) g 0 m w)).toSection x)) := by
-  sorry
+  classical
+  set n : ℕ := Module.finrank ℝ E with hn_def
+  -- Abbreviations for the two squared fibre norms appearing on the right.
+  set aw : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x) with haw_def
+  set cw : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
+      ((covGrad (I := I) (M := M) g 0 (m + 1)
+        (covGrad (I := I) (M := M) g 0 m w)).toSection x) with hcw_def
+  have haw_nn : 0 ≤ aw := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 m x _
+  have hcw_nn : 0 ≤ cw := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (m + 1 + 1) x _
+  -- The per-direction diagonal second covariant derivatives.
+  set D : Fin n → Tensor0SBundle.TensorRSSpace 0 m I x :=
+    fun i => Integral.Connection.tensorSecondCovDeriv (I := I) g 0 m
+      (Integral.Connection.smoothOrthoFrame (I := I) g x i)
+      (Integral.Connection.smoothOrthoFrame (I := I) g x i)
+      (fun y : M => w.toSection y) x with hD_def
+  -- The rough Laplacian is the frame trace of the second covariant derivative.
+  have htrace : (rawTensorConnLapSmooth (I := I) g 0 m w).toFun x =
+      Tensor0SBundle.TensorRSSpace.toModel (∑ i : Fin n, D i) := by
+    have h1 : (rawTensorConnLapSmooth (I := I) g 0 m w).toFun x =
+        Tensor0SBundle.TensorRSSpace.toModel
+          ((rawTensorConnLapSmooth (I := I) g 0 m w).toSection x) := rfl
+    rw [h1, Integral.Connection.rawTensorConnLapSmooth_toSection_apply (I := I) (M := M) g 0 m w x,
+      Integral.Connection.rawTensorConnLap_eq_frame_trace_secondCovDeriv (I := I) g 0 m
+        (fun y : M => w.toSection y) x]
+  -- Distribute the pairing over the frame sum (linearity of `toModel` and the left slot).
+  have hsum_aux : ∀ (s' : Finset (Fin n)),
+      Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 m x
+          (Tensor0SBundle.TensorRSSpace.toModel (∑ i ∈ s', D i)) (w.toFun x) =
+        ∑ i ∈ s', Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 m x
+          (Tensor0SBundle.TensorRSSpace.toModel (D i)) (w.toFun x) := by
+    intro s'
+    induction s' using Finset.induction with
+    | empty =>
+        rw [Finset.sum_empty, Finset.sum_empty, Tensor0SBundle.TensorRSSpace.toModel_zero]
+        exact Integral.L2.tensorInnerPointwise_zero_left (I := I) (M := M) g 0 m x (w.toFun x)
+    | insert i₀ s'' hi₀ ih =>
+        rw [Finset.sum_insert hi₀, Finset.sum_insert hi₀, Tensor0SBundle.TensorRSSpace.toModel_add,
+          Integral.L2.tensorInnerPointwise_add_left, ih]
+  -- Read the pairing as the frame sum of per-direction pairings.
+  have hsum : Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 m x
+        ((rawTensorConnLapSmooth (I := I) g 0 m w).toFun x) (w.toFun x) =
+      ∑ i : Fin n, Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 m x
+        (Tensor0SBundle.TensorRSSpace.toModel (D i)) (w.toFun x) := by
+    rw [htrace]
+    exact hsum_aux Finset.univ
+  -- Per-direction pointwise Cauchy–Schwarz: `|⟨D i, w⟩| ≤ √(rfns(D i)) · √(aw)`.
+  set r : Fin n → ℝ := fun i => riemannianFiberNormSq (I := I) (M := M) g 0 m x (D i) with hr_def
+  have hr_nn : ∀ i, 0 ≤ r i := fun i =>
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 m x (D i)
+  have hCSi : ∀ i, |Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 m x
+        (Tensor0SBundle.TensorRSSpace.toModel (D i)) (w.toFun x)| ≤
+      Real.sqrt (r i) * Real.sqrt aw := by
+    intro i
+    have hsq := Integral.L2.tensorInnerPointwise_sq_le_mul (I := I) (M := M) g 0 m x
+      (Tensor0SBundle.TensorRSSpace.toModel (D i)) (w.toFun x)
+    have hDi_self : Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 m x
+        (Tensor0SBundle.TensorRSSpace.toModel (D i))
+        (Tensor0SBundle.TensorRSSpace.toModel (D i)) = r i := by
+      rw [show r i = riemannianFiberNormSq (I := I) (M := M) g 0 m x (D i) from rfl,
+        riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 m x (D i)]
+    have hw_self : Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 m x
+        (w.toFun x) (w.toFun x) = aw := by
+      rw [show aw = riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x) from rfl,
+        riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 m x (w.toSection x)]
+      rfl
+    rw [hDi_self, hw_self] at hsq
+    have habs : |Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 m x
+        (Tensor0SBundle.TensorRSSpace.toModel (D i)) (w.toFun x)| ≤ Real.sqrt (r i * aw) := by
+      rw [← Real.sqrt_sq_eq_abs]
+      exact Real.sqrt_le_sqrt hsq
+    rw [Real.sqrt_mul (hr_nn i)] at habs
+    exact habs
+  -- Bound the pairing by `∑ᵢ √(r i) · √(aw)`, then discrete Cauchy–Schwarz.
+  rw [hsum]
+  have hstep1 : |∑ i : Fin n, Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 m x
+        (Tensor0SBundle.TensorRSSpace.toModel (D i)) (w.toFun x)| ≤
+      ∑ i : Fin n, Real.sqrt (r i) * Real.sqrt aw := by
+    refine le_trans (Finset.abs_sum_le_sum_abs _ _) ?_
+    exact Finset.sum_le_sum (fun i _ => hCSi i)
+  -- Discrete `n`-term Cauchy–Schwarz: `(∑ᵢ √(r i))² ≤ n · ∑ᵢ r i`.
+  have hdiscrete : (∑ i : Fin n, Real.sqrt (r i)) ^ 2 ≤ (n : ℝ) * ∑ i : Fin n, r i := by
+    have hcs := Finset.sum_mul_sq_le_sq_mul_sq (Finset.univ : Finset (Fin n))
+      (fun _ => (1 : ℝ)) (fun i => Real.sqrt (r i))
+    have hone : ∑ _i : Fin n, (1 : ℝ) ^ 2 = (n : ℝ) := by
+      simp only [one_pow, Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul,
+        mul_one]
+    have hsqrt_sq : ∑ i : Fin n, Real.sqrt (r i) ^ 2 = ∑ i : Fin n, r i := by
+      refine Finset.sum_congr rfl (fun i _ => ?_)
+      rw [Real.sq_sqrt (hr_nn i)]
+    have hlhs : (∑ i : Fin n, (1 : ℝ) * Real.sqrt (r i)) = ∑ i : Fin n, Real.sqrt (r i) := by
+      refine Finset.sum_congr rfl (fun i _ => ?_); rw [one_mul]
+    rw [hlhs, hone, hsqrt_sq] at hcs
+    exact hcs
+  -- The diagonal frame-trace sub-sum bound: `∑ᵢ r i ≤ cw`.
+  have hdiag : ∑ i : Fin n, r i ≤ cw :=
+    secondCovDeriv_frame_diag_fiberNormSq_sum_le (I := I) (M := M) g m w x
+  -- Assemble: `∑ᵢ √(r i) ≤ √(n · ∑ᵢ r i) ≤ √n · √(cw)`.
+  have hsum_sqrt_nn : 0 ≤ ∑ i : Fin n, Real.sqrt (r i) :=
+    Finset.sum_nonneg (fun i _ => Real.sqrt_nonneg _)
+  have hn_nn : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
+  have hsum_r_nn : 0 ≤ ∑ i : Fin n, r i := Finset.sum_nonneg (fun i _ => hr_nn i)
+  have hsqrt_bound : ∑ i : Fin n, Real.sqrt (r i) ≤
+      Real.sqrt (Module.finrank ℝ E : ℝ) * Real.sqrt cw := by
+    have h1 : ∑ i : Fin n, Real.sqrt (r i) ≤ Real.sqrt ((n : ℝ) * ∑ i : Fin n, r i) := by
+      rw [← Real.sqrt_sq hsum_sqrt_nn]
+      exact Real.sqrt_le_sqrt hdiscrete
+    have h2 : Real.sqrt ((n : ℝ) * ∑ i : Fin n, r i) ≤ Real.sqrt ((n : ℝ) * cw) :=
+      Real.sqrt_le_sqrt (mul_le_mul_of_nonneg_left hdiag hn_nn)
+    have h3 : Real.sqrt ((n : ℝ) * cw) = Real.sqrt (n : ℝ) * Real.sqrt cw :=
+      Real.sqrt_mul hn_nn cw
+    calc ∑ i : Fin n, Real.sqrt (r i)
+        ≤ Real.sqrt ((n : ℝ) * ∑ i : Fin n, r i) := h1
+      _ ≤ Real.sqrt ((n : ℝ) * cw) := h2
+      _ = Real.sqrt (n : ℝ) * Real.sqrt cw := h3
+      _ = Real.sqrt (Module.finrank ℝ E : ℝ) * Real.sqrt cw := by rw [hn_def]
+  calc |∑ i : Fin n, Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 m x
+          (Tensor0SBundle.TensorRSSpace.toModel (D i)) (w.toFun x)|
+      ≤ ∑ i : Fin n, Real.sqrt (r i) * Real.sqrt aw := hstep1
+    _ = (∑ i : Fin n, Real.sqrt (r i)) * Real.sqrt aw := by rw [← Finset.sum_mul]
+    _ ≤ (Real.sqrt (Module.finrank ℝ E : ℝ) * Real.sqrt cw) * Real.sqrt aw := by
+        exact mul_le_mul_of_nonneg_right hsqrt_bound (Real.sqrt_nonneg _)
+    _ = Real.sqrt (Module.finrank ℝ E : ℝ) * Real.sqrt aw * Real.sqrt cw := by ring
 
+/-- **Frame-sum fibre norm of the covector-prepend section.** For a smooth scalar `ζ`, a smooth
+compactly-supported `(0, t)`-tensor `S`, a point `x`, and the `g_x`-orthonormal moving frame
+`B_a := smoothOrthoFrame g x a`, the fibre norm of the covector-prepend section
+`prependCovGradSlot g 0 t ζ S` at `x` is the frame `g`-norm² of the differential `dζ` times the
+fibre norm of `S`:
+```
+rfns(prependCovGradSlot g 0 t ζ S)(x) = (∑_a (dζ(B_a x))²) · rfns(S)(x).
+```
+The section value is `covGradBundleEquiv((dζ)·smulRight S(x))`
+(`prependCovGradSlot_toSection_apply`); the slot-`0` frame-sum
+`riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame` reads it as `∑_a rfns(dζ(B_a x) • S(x))`,
+and each scalar-multiplied fibre norm factors as `(dζ(B_a x))² · rfns(S(x))`. -/
+private theorem prependCovGradSlot_fiberNormSq_frame_sum
+    (g : SmoothRiemannianMetric I M) (t : ℕ) (ζ : C^∞⟮I, M; ℝ⟯)
+    (S : Integral.L2.SmoothCcTensor g 0 t) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 (t + 1) x
+        ((prependCovGradSlot (I := I) (M := M) g 0 t ζ S).toSection x) =
+      (∑ a : Fin (Module.finrank ℝ E),
+          (extDerivFun (I := I) (ζ : M → ℝ) x
+            (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) *
+        riemannianFiberNormSq (I := I) (M := M) g 0 t x (S.toSection x) := by
+  classical
+  set n : ℕ := Module.finrank ℝ E with hn_def
+  set e : Fin n → TangentSpace I x :=
+    fun a => Integral.Connection.smoothOrthoFrame (I := I) g x a x with he_def
+  have hnTan : n = Module.finrank ℝ (TangentSpace I x) := hn_def
+  have horth : ∀ a b : Fin n, g.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0 := by
+    intro a b
+    rw [he_def]
+    exact Integral.Connection.smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
+  set K₀ : Fin 0 → Fin n := fun k => k.elim0 with hK₀
+  have hreprS : ∀ U : Tensor0SBundle.TensorRSSpace 0 t I x,
+      riemannianFiberNormSq (I := I) (M := M) g 0 t x U =
+        ∑ K : Fin 0 → Fin n, ∑ J : Fin t → Fin n,
+          Integral.Connection.fiberNormSqSummand (I := I) (M := M) g x 0 t U n e K J :=
+    fun U => Integral.Connection.rfns_eq_sum_fiberNormSqSummand_of_orthoFrame
+      (I := I) (M := M) g t x U e hnTan horth
+  have hreprSucc : ∀ U : Tensor0SBundle.TensorRSSpace 0 (t + 1) I x,
+      riemannianFiberNormSq (I := I) (M := M) g 0 (t + 1) x U =
+        ∑ K : Fin 0 → Fin n, ∑ J : Fin (t + 1) → Fin n,
+          Integral.Connection.fiberNormSqSummand (I := I) (M := M) g x 0 (t + 1) U n e K J :=
+    fun U => Integral.Connection.rfns_eq_sum_fiberNormSqSummand_of_orthoFrame
+      (I := I) (M := M) g (t + 1) x U e hnTan horth
+  -- The section value is the covariant-gradient bundle image of `v ↦ dζ(v) • S(x)`.
+  rw [prependCovGradSlot_toSection_apply (I := I) (M := M) g 0 t ζ S x]
+  rw [Integral.Connection.riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame
+    (I := I) (M := M) g t x
+    ((extDerivFun (I := I) (ζ : M → ℝ) x).smulRight (S.toSection x)) e K₀ hreprS hreprSucc]
+  rw [Finset.sum_mul]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  -- Each per-direction slice is `dζ(e a) • S(x)`, whose fibre norm is `(dζ(e a))² · rfns(S(x))`.
+  rw [ContinuousLinearMap.smulRight_apply]
+  -- `rfns(c • T) = c² · rfns(T)` via the inner-product bridge.
+  rw [show ((extDerivFun (I := I) (ζ : M → ℝ) x (e a)) • S.toSection x :
+        Tensor0SBundle.TensorRSSpace 0 t I x) =
+      (extDerivFun (I := I) (ζ : M → ℝ) x (e a)) • S.toSection x from rfl]
+  rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 t x
+    ((extDerivFun (I := I) (ζ : M → ℝ) x (e a)) • S.toSection x),
+    riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 t x (S.toSection x)]
+  rw [Tensor0SBundle.TensorRSSpace.toModel_smul,
+    Integral.L2.tensorInnerPointwise_smul_left, Integral.L2.tensorInnerPointwise_smul_right]
+  rw [he_def]
+  ring
+
+/-- **Directional metric compatibility of the squared fibre norm, in covariant-gradient form.**
+For a smooth compactly-supported `(0, p)`-tensor `Q`, a point `x`, and a tangent vector `v`, the
+manifold derivative of `y ↦ rfns(Q)(y)` in the direction `v` is twice the pointwise inner product
+of the directional covariant derivative `∇_v Q` against `Q(x)`:
+```
+mfderiv(rfns Q) x v = 2 · ⟨∇_v Q, Q⟩(x).
+```
+This is the diagonal `W = S = Q` case of the metric-compatibility identity
+`tensorInnerPointwise_hasMFDerivAt_metricCompatible` (the two Leibniz halves coincide by symmetry
+of the covariant inner product), pushed back from the `loweredCovDerivAt`/`lifted` `(0, 0 + p)`
+form to the un-lowered `(0, p)` covariant-derivative form through the rank-`0` lowering intertwiner
+`loweredCovDerivAt_eq_lower_tensorCovDerivAt_gen` and `toModel_liftedTensorSection`. -/
+private theorem mfderiv_riemannianFiberNormSq_eq_two_mul_covDeriv_inner
+    (g : SmoothRiemannianMetric I M) (p : ℕ)
+    (Q : Integral.L2.SmoothCcTensor g 0 p) (x : M) (v : TangentSpace I x) :
+    extDerivFun (I := I)
+        (fun y : M => riemannianFiberNormSq (I := I) (M := M) g 0 p y (Q.toSection y)) x v =
+      2 * Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 p x
+        (Tensor0SBundle.TensorRSSpace.toModel
+          (tensorCovDerivAt (I := I) (M := M) g 0 p Q x v))
+        (Q.toFun x) := by
+  classical
+  -- `extDerivFun = mfderiv` (definitionally), and `rfns(Q)` is the inner-product scalar.
+  have hfun : (fun y : M => riemannianFiberNormSq (I := I) (M := M) g 0 p y (Q.toSection y)) =
+      fun y : M => Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 p y
+        (Tensor0SBundle.TensorRSSpace.toModel (Q.toSection y))
+        (Tensor0SBundle.TensorRSSpace.toModel (Q.toSection y)) := by
+    funext y
+    rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 p y (Q.toSection y)]
+  rw [hfun]
+  rw [show extDerivFun (I := I)
+        (fun y : M => Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 p y
+          (Tensor0SBundle.TensorRSSpace.toModel (Q.toSection y))
+          (Tensor0SBundle.TensorRSSpace.toModel (Q.toSection y))) x v =
+      mfderiv I 𝓘(ℝ, ℝ)
+        (fun y : M => Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 p y
+          (Tensor0SBundle.TensorRSSpace.toModel (Q.toSection y))
+          (Tensor0SBundle.TensorRSSpace.toModel (Q.toSection y))) x v from rfl]
+  -- The metric-compatibility identity (general `(r, s) = (0, p)`, two equal halves).
+  rw [Integral.Connection.tensorInnerPointwise_hasMFDerivAt_metricCompatible
+    (I := I) (M := M) g 0 p Q.toSection Q.toSection x v]
+  -- Identify each `(0, 0 + p)` lowered/lifted half with the un-lowered `(0, p)` covariant pairing.
+  have hbridge : Integral.L2.tensorInnerPointwise_0s (I := I) (M := M) (0 + p) g x
+        (Tensor0SBundle.Tensor0SSpace.toModel
+          (Integral.Connection.loweredCovDerivAt (I := I) (M := M) g 0 p Q.toSection x v))
+        (Tensor0SBundle.Tensor0SSpace.toModel
+          (Integral.Connection.liftedTensorSection (I := I) (M := M) g 0 p Q.toSection x)) =
+      Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 p x
+        (Tensor0SBundle.TensorRSSpace.toModel
+          (tensorCovDerivAt (I := I) (M := M) g 0 p Q x v))
+        (Q.toFun x) := by
+    rw [show Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 p x
+          (Tensor0SBundle.TensorRSSpace.toModel
+            (tensorCovDerivAt (I := I) (M := M) g 0 p Q x v))
+          (Q.toFun x) =
+        Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 p x
+          (Tensor0SBundle.TensorRSSpace.toModel
+            (tensorCovDerivAt (I := I) (M := M) g 0 p Q x v))
+          (Tensor0SBundle.TensorRSSpace.toModel (Q.toSection x)) from rfl]
+    unfold Integral.L2.tensorInnerPointwise
+    rw [show Integral.L2.lowerAllUpperIndices (I := I) (M := M) g 0 p x
+          (Tensor0SBundle.TensorRSSpace.toModel
+            (tensorCovDerivAt (I := I) (M := M) g 0 p Q x v)) =
+        Tensor0SBundle.Tensor0SSpace.toModel
+          (Integral.Connection.loweredCovDerivAt (I := I) (M := M) g 0 p Q.toSection x v) from
+      (Integral.Connection.loweredCovDerivAt_eq_lower_tensorCovDerivAt_gen
+        (I := I) (M := M) g p Q.toSection x v).symm]
+    rw [show Integral.L2.lowerAllUpperIndices (I := I) (M := M) g 0 p x
+          (Tensor0SBundle.TensorRSSpace.toModel (Q.toSection x)) =
+        Tensor0SBundle.Tensor0SSpace.toModel
+          (Integral.Connection.liftedTensorSection (I := I) (M := M) g 0 p Q.toSection x) from
+      (Integral.Connection.toModel_liftedTensorSection
+        (I := I) (M := M) g 0 p Q.toSection x).symm]
+  rw [hbridge]
+  -- The second metric-compatibility half is the same pairing by symmetry of `⟨·,·⟩_{0s}`.
+  rw [Integral.L2.tensorInnerPointwise_0s_symm (I := I) (M := M) g x (0 + p)
+      (Tensor0SBundle.Tensor0SSpace.toModel
+        (Integral.Connection.liftedTensorSection (I := I) (M := M) g 0 p Q.toSection x))
+      (Tensor0SBundle.Tensor0SSpace.toModel
+        (Integral.Connection.loweredCovDerivAt (I := I) (M := M) g 0 p Q.toSection x v))]
+  rw [hbridge]
+  ring
+
+/-- **The Kato frame-sum bound for the squared-fibre-norm differential.** For a smooth
+compactly-supported `(0, p)`-tensor `Q`, a point `x`, and the `g_x`-orthonormal moving frame
+`B_a := smoothOrthoFrame g x a`, the frame `g`-norm² of the differential of `rfns(Q)` is bounded
+by four times the product of the fibre norm of `Q` and the fibre norm of its covariant gradient:
+```
+∑_a (mfderiv(rfns Q) x (B_a x))² ≤ 4 · rfns(Q)(x) · rfns(∇Q)(x).
+```
+Each `mfderiv(rfns Q) x (B_a x) = 2⟨∇_{B_a} Q, Q⟩(x)`
+(`mfderiv_riemannianFiberNormSq_eq_two_mul_covDeriv_inner`); the per-direction Cauchy–Schwarz
+`tensorInnerPointwise_sq_le_mul` bounds its square by `4 · rfns(∇_{B_a} Q) · rfns(Q)`; and the
+slot-`0` frame-sum `riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame` (applied to
+`∇Q = covGrad g 0 p Q`, whose section value is the bundle image of `v ↦ ∇_v Q`) reassembles
+`∑_a rfns(∇_{B_a} Q) = rfns(∇Q)`. -/
+private theorem kato_mfderiv_riemannianFiberNormSq_frame_sum_le
+    (g : SmoothRiemannianMetric I M) (p : ℕ)
+    (Q : Integral.L2.SmoothCcTensor g 0 p) (x : M) :
+    ∑ a : Fin (Module.finrank ℝ E),
+        (extDerivFun (I := I)
+          (fun y : M => riemannianFiberNormSq (I := I) (M := M) g 0 p y (Q.toSection y)) x
+          (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2 ≤
+      4 * riemannianFiberNormSq (I := I) (M := M) g 0 p x (Q.toSection x) *
+        riemannianFiberNormSq (I := I) (M := M) g 0 (p + 1) x
+          ((covGrad (I := I) (M := M) g 0 p Q).toSection x) := by
+  classical
+  set n : ℕ := Module.finrank ℝ E with hn_def
+  set e : Fin n → TangentSpace I x :=
+    fun a => Integral.Connection.smoothOrthoFrame (I := I) g x a x with he_def
+  have hnTan : n = Module.finrank ℝ (TangentSpace I x) := hn_def
+  have horth : ∀ a b : Fin n, g.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0 := by
+    intro a b
+    rw [he_def]
+    exact Integral.Connection.smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
+  set K₀ : Fin 0 → Fin n := fun k => k.elim0 with hK₀
+  set rQ : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 p x (Q.toSection x) with hrQ_def
+  have hrQ_nn : 0 ≤ rQ := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 p x (Q.toSection x)
+  -- The per-direction covariant derivatives and their fibre norms.
+  set V : Fin n → Tensor0SBundle.TensorRSSpace 0 p I x :=
+    fun a => tensorCovDerivAt (I := I) (M := M) g 0 p Q x (e a) with hV_def
+  set s : Fin n → ℝ := fun a => riemannianFiberNormSq (I := I) (M := M) g 0 p x (V a) with hs_def
+  have hs_nn : ∀ a, 0 ≤ s a := fun a =>
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 p x (V a)
+  -- Each directional differential squared is `≤ 4 · s a · rQ`.
+  have hterm : ∀ a : Fin n,
+      (extDerivFun (I := I)
+        (fun y : M => riemannianFiberNormSq (I := I) (M := M) g 0 p y (Q.toSection y)) x (e a)) ^ 2 ≤
+        4 * s a * rQ := by
+    intro a
+    rw [mfderiv_riemannianFiberNormSq_eq_two_mul_covDeriv_inner (I := I) (M := M) g p Q x (e a)]
+    have hsq := Integral.L2.tensorInnerPointwise_sq_le_mul (I := I) (M := M) g 0 p x
+      (Tensor0SBundle.TensorRSSpace.toModel (V a)) (Q.toFun x)
+    have hVself : Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 p x
+        (Tensor0SBundle.TensorRSSpace.toModel (V a))
+        (Tensor0SBundle.TensorRSSpace.toModel (V a)) = s a := by
+      rw [show s a = riemannianFiberNormSq (I := I) (M := M) g 0 p x (V a) from rfl,
+        riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 p x (V a)]
+    have hQself : Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 p x
+        (Q.toFun x) (Q.toFun x) = rQ := by
+      rw [show rQ = riemannianFiberNormSq (I := I) (M := M) g 0 p x (Q.toSection x) from rfl,
+        riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 p x (Q.toSection x)]
+      rfl
+    rw [hVself, hQself] at hsq
+    have hVa_eq : Tensor0SBundle.TensorRSSpace.toModel (V a) =
+        Tensor0SBundle.TensorRSSpace.toModel
+          (tensorCovDerivAt (I := I) (M := M) g 0 p Q x (e a)) := by
+      rw [hV_def]
+    rw [hVa_eq] at hsq ⊢
+    nlinarith [hsq]
+  -- The frame sum of the per-direction fibre norms reconstructs `rfns(∇Q)`.
+  have hframe : ∑ a : Fin n, s a =
+      riemannianFiberNormSq (I := I) (M := M) g 0 (p + 1) x
+        ((covGrad (I := I) (M := M) g 0 p Q).toSection x) := by
+    rw [covGrad_toSection_apply (I := I) (M := M) g 0 p Q x]
+    have hreprS : ∀ U : Tensor0SBundle.TensorRSSpace 0 p I x,
+        riemannianFiberNormSq (I := I) (M := M) g 0 p x U =
+          ∑ K : Fin 0 → Fin n, ∑ J : Fin p → Fin n,
+            Integral.Connection.fiberNormSqSummand (I := I) (M := M) g x 0 p U n e K J :=
+      fun U => Integral.Connection.rfns_eq_sum_fiberNormSqSummand_of_orthoFrame
+        (I := I) (M := M) g p x U e hnTan horth
+    have hreprSucc : ∀ U : Tensor0SBundle.TensorRSSpace 0 (p + 1) I x,
+        riemannianFiberNormSq (I := I) (M := M) g 0 (p + 1) x U =
+          ∑ K : Fin 0 → Fin n, ∑ J : Fin (p + 1) → Fin n,
+            Integral.Connection.fiberNormSqSummand (I := I) (M := M) g x 0 (p + 1) U n e K J :=
+      fun U => Integral.Connection.rfns_eq_sum_fiberNormSqSummand_of_orthoFrame
+        (I := I) (M := M) g (p + 1) x U e hnTan horth
+    rw [Integral.Connection.riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame
+      (I := I) (M := M) g p x
+      (TensorRSNabla.tensorRSCovariantDerivative I M 0 p (LeviCivita (I := I) g)
+        Q.toSection x) e K₀ hreprS hreprSucc]
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    rw [hs_def, hV_def]
+    rfl
+  -- Assemble.
+  calc ∑ a : Fin n,
+        (extDerivFun (I := I)
+          (fun y : M => riemannianFiberNormSq (I := I) (M := M) g 0 p y (Q.toSection y)) x
+          (e a)) ^ 2
+      ≤ ∑ a : Fin n, 4 * s a * rQ := Finset.sum_le_sum (fun a _ => hterm a)
+    _ = 4 * (∑ a : Fin n, s a) * rQ := by
+        rw [Finset.mul_sum, Finset.sum_mul]
+    _ = 4 * rQ * riemannianFiberNormSq (I := I) (M := M) g 0 (p + 1) x
+          ((covGrad (I := I) (M := M) g 0 p Q).toSection x) := by rw [hframe]; ring
+
+set_option maxHeartbeats 1600000 in
 /-- **(POSIT — child B: the `2(k-1)` weight cross-term bound.)**
 
 The pointwise bound on the Leibniz cross term `⟨∇w, dζ ⊗ w⟩(x) = tensorCovDerivCrossLeft g 0 m ζ w w x`
@@ -546,10 +1078,12 @@ gives
 |tensorCovDerivCrossLeft g 0 m ζ w w x|
   ≤ 2·(k-1) · A · (rfns(∇w)(x))^{k-1} · (rfns(∇²w)(x))^{1/2},
 ```
-using `rfns(w)(x) ≤ A²`.  Its body is `sorry`: the genuine metric-compatible chain rule plus
-Cauchy–Schwarz on the cross term (the `2(k-1)` carrier); consumers transitively depend on its
-`sorryAx`.  **General analytic infrastructure** (Leibniz weight cross-term bound) to be promoted
-alongside child A. -/
+using `rfns(w)(x) ≤ A²`.  Assembled from the cross-left metric-isometry bridge
+`tensorCovDerivCrossLeft_eq_tensorInnerPointwise_grad`, the pointwise Cauchy–Schwarz
+`tensorInnerPointwise_sq_le_mul`, the frame-sum prepend fibre norm
+`prependCovGradSlot_fiberNormSq_frame_sum`, the metric-compatible chain rule for the weight
+differential, and the Kato frame-sum bound `kato_mfderiv_rfns_frame_sum_le`.  **General analytic
+infrastructure** (Leibniz weight cross-term bound) to be promoted alongside child A. -/
 private theorem covDerivCrossLeft_weight_bound
     (g : SmoothRiemannianMetric I M) (k m : ℕ) (_hk : 1 ≤ k)
     (w : Integral.L2.SmoothCcTensor g 0 m) (A : ℝ) (_hA : 0 ≤ A)
@@ -565,7 +1099,199 @@ private theorem covDerivCrossLeft_weight_bound
         (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
           ((covGrad (I := I) (M := M) g 0 (m + 1)
             (covGrad (I := I) (M := M) g 0 m w)).toSection x)) ^ (1 / 2 : ℝ) := by
-  sorry
+  classical
+  set n : ℕ := Module.finrank ℝ E with hn_def
+  -- The gradient `Q = ∇w`, its squared fibre norm `b = rfns(∇w)(x)`, and `c = rfns(∇²w)(x)`.
+  set Q : Integral.L2.SmoothCcTensor g 0 (m + 1) := covGrad (I := I) (M := M) g 0 m w with hQ_def
+  set bfun : M → ℝ := fun y =>
+    riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) y (Q.toSection y) with hbfun_def
+  set b : ℝ := bfun x with hb_def
+  set c : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
+      ((covGrad (I := I) (M := M) g 0 (m + 1) Q).toSection x) with hc_def
+  have hb_nn : 0 ≤ b := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (m + 1) x (Q.toSection x)
+  have hc_nn : 0 ≤ c := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (m + 1 + 1) x _
+  have hAsq : riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x) ≤ A ^ 2 := _hsup x
+  -- Step 1 — the cross term as the genuine `(0, m+1)`-tensor pairing `⟨∇w, P⟩`.
+  set P : Integral.L2.SmoothCcTensor g 0 (m + 1) :=
+    prependCovGradSlot (I := I) (M := M) g 0 m ζ w with hP_def
+  have hcross_eq : tensorCovDerivCrossLeft (I := I) (M := M) g 0 m ζ w w x =
+      Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 (m + 1) x
+        (Tensor0SBundle.TensorRSSpace.toModel (Q.toSection x))
+        (Tensor0SBundle.TensorRSSpace.toModel (P.toSection x)) :=
+    tensorCovDerivCrossLeft_eq_tensorInnerPointwise_grad (I := I) (M := M) g 0 m ζ w w x
+  -- Step 2 — pointwise Cauchy–Schwarz: `|⟨∇w, P⟩| ≤ √b · √(rfns P)`.
+  set rP : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x (P.toSection x) with hrP_def
+  have hrP_nn : 0 ≤ rP := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (m + 1) x _
+  have hCS2 : |tensorCovDerivCrossLeft (I := I) (M := M) g 0 m ζ w w x| ≤
+      Real.sqrt b * Real.sqrt rP := by
+    rw [hcross_eq]
+    have hsq := Integral.L2.tensorInnerPointwise_sq_le_mul (I := I) (M := M) g 0 (m + 1) x
+      (Tensor0SBundle.TensorRSSpace.toModel (Q.toSection x))
+      (Tensor0SBundle.TensorRSSpace.toModel (P.toSection x))
+    have hQself : Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 (m + 1) x
+        (Tensor0SBundle.TensorRSSpace.toModel (Q.toSection x))
+        (Tensor0SBundle.TensorRSSpace.toModel (Q.toSection x)) = b := by
+      rw [show b = riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x (Q.toSection x) from rfl,
+        riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 (m + 1) x (Q.toSection x)]
+    have hPself : Integral.L2.tensorInnerPointwise (I := I) (M := M) g 0 (m + 1) x
+        (Tensor0SBundle.TensorRSSpace.toModel (P.toSection x))
+        (Tensor0SBundle.TensorRSSpace.toModel (P.toSection x)) = rP := by
+      rw [show rP = riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x (P.toSection x) from rfl,
+        riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 (m + 1) x (P.toSection x)]
+    rw [hQself, hPself] at hsq
+    rw [← Real.sqrt_sq_eq_abs, ← Real.sqrt_mul hb_nn]
+    exact Real.sqrt_le_sqrt hsq
+  -- Step 3 — the prepend fibre norm `rfns(P) = (∑_a (dζ(B_a x))²) · rfns(w)`.
+  have hrP_eq : rP = (∑ a : Fin n,
+        (extDerivFun (I := I) (ζ : M → ℝ) x
+          (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) *
+        riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x) :=
+    prependCovGradSlot_fiberNormSq_frame_sum (I := I) (M := M) g m ζ w x
+  -- Step 4 — the chain rule: `dζ(v) = (k-1) · b^{k-2} · mfderiv(bfun) x v`.
+  have hbfun_mdiff : MDifferentiableAt I 𝓘(ℝ, ℝ) bfun x := by
+    have hb_eq_scalar : bfun = Integral.Connection.tensorInnerScalar (I := I) (M := M) g 0 (m + 1)
+        Q.toSection Q.toSection := by
+      funext y
+      simp only [hbfun_def, Integral.Connection.tensorInnerScalar_apply]
+      rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 (m + 1) y
+        (Q.toSection y)]
+    rw [hb_eq_scalar]
+    exact (Integral.Connection.tensorInnerScalar_contMDiff (I := I) (M := M) g 0 (m + 1)
+      Q.toSection Q.toSection).mdifferentiableAt (by norm_num)
+  have hchain : ∀ v : TangentSpace I x,
+      extDerivFun (I := I) (ζ : M → ℝ) x v =
+        ((k : ℝ) - 1) * b ^ (k - 2) * extDerivFun (I := I) bfun x v := by
+    intro v
+    have hinner : HasMFDerivAt I 𝓘(ℝ, ℝ) bfun x (mfderiv I 𝓘(ℝ, ℝ) bfun x) :=
+      hbfun_mdiff.hasMFDerivAt
+    have houter : HasMFDerivAt 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) (fun t : ℝ => t ^ (k - 1)) (bfun x)
+        ((ContinuousLinearMap.smulRight (1 : ℝ →L[ℝ] ℝ)
+          (((k - 1 : ℕ) : ℝ) * (bfun x) ^ (k - 1 - 1)))) :=
+      ((hasDerivAt_pow (k - 1) (bfun x)).hasFDerivAt).hasMFDerivAt
+    have hcomp : HasMFDerivAt I 𝓘(ℝ, ℝ) ((fun t : ℝ => t ^ (k - 1)) ∘ bfun) x
+        ((ContinuousLinearMap.smulRight (1 : ℝ →L[ℝ] ℝ)
+            (((k - 1 : ℕ) : ℝ) * (bfun x) ^ (k - 1 - 1))).comp
+          (mfderiv I 𝓘(ℝ, ℝ) bfun x)) :=
+      HasMFDerivAt.comp x houter hinner
+    have hζeq : (ζ : M → ℝ) = (fun t : ℝ => t ^ (k - 1)) ∘ bfun := by
+      rw [hζ]; rfl
+    have hext : extDerivFun (I := I) (ζ : M → ℝ) x v = mfderiv I 𝓘(ℝ, ℝ) (ζ : M → ℝ) x v := rfl
+    have hCLM : (mfderiv I 𝓘(ℝ, ℝ) ((fun t : ℝ => t ^ (k - 1)) ∘ bfun) x) v =
+        (((k - 1 : ℕ) : ℝ) * (bfun x) ^ (k - 1 - 1)) * extDerivFun (I := I) bfun x v := by
+      rw [hcomp.mfderiv]
+      change extDerivFun (I := I) bfun x v * (((k - 1 : ℕ) : ℝ) * (bfun x) ^ (k - 1 - 1)) =
+        (((k - 1 : ℕ) : ℝ) * (bfun x) ^ (k - 1 - 1)) * extDerivFun (I := I) bfun x v
+      ring
+    have hmfζ : extDerivFun (I := I) (ζ : M → ℝ) x v =
+        (((k - 1 : ℕ) : ℝ) * (bfun x) ^ (k - 1 - 1)) * extDerivFun (I := I) bfun x v := by
+      rw [hext, hζeq]
+      exact hCLM
+    rw [hmfζ]
+    have hkcast : ((k - 1 : ℕ) : ℝ) = (k : ℝ) - 1 := by
+      rw [Nat.cast_sub _hk, Nat.cast_one]
+    have hexp : k - 1 - 1 = k - 2 := by omega
+    rw [show (bfun x) = b from rfl, hkcast, hexp]
+  -- Step 5 — Kato bound on `∑_a (db(B_a x))² ≤ 4 · b · c`.
+  have hkato : ∑ a : Fin n,
+      (extDerivFun (I := I) bfun x (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2 ≤
+        4 * b * c :=
+    kato_mfderiv_riemannianFiberNormSq_frame_sum_le (I := I) (M := M) g (m + 1) Q x
+  -- Step 6 — bound `∑_a (dζ(B_a x))² ≤ (k-1)² b^{2(k-2)} · 4 b c`.
+  have hdζsum : (∑ a : Fin n,
+      (extDerivFun (I := I) (ζ : M → ℝ) x
+        (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) ≤
+        ((k : ℝ) - 1) ^ 2 * (b ^ (k - 2)) ^ 2 * (4 * b * c) := by
+    have hrw : (∑ a : Fin n,
+        (extDerivFun (I := I) (ζ : M → ℝ) x
+          (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) =
+        ((k : ℝ) - 1) ^ 2 * (b ^ (k - 2)) ^ 2 *
+          ∑ a : Fin n,
+            (extDerivFun (I := I) bfun x
+              (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2 := by
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl (fun a _ => ?_)
+      rw [hchain (Integral.Connection.smoothOrthoFrame (I := I) g x a x)]
+      ring
+    rw [hrw]
+    have hcoeff_nn : (0 : ℝ) ≤ ((k : ℝ) - 1) ^ 2 * (b ^ (k - 2)) ^ 2 := by positivity
+    exact mul_le_mul_of_nonneg_left hkato hcoeff_nn
+  -- Step 7 — assemble the bound on `rfns(P)`, then on `|crossLeft|`.
+  have hrP_bound : rP ≤ ((k : ℝ) - 1) ^ 2 * (b ^ (k - 2)) ^ 2 * (4 * b * c) * A ^ 2 := by
+    rw [hrP_eq]
+    have hrfnsw_le : riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x) ≤ A ^ 2 := hAsq
+    have hrfnsw_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x) :=
+      riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 m x (w.toSection x)
+    have hsum_nn : (0 : ℝ) ≤ ∑ a : Fin n,
+        (extDerivFun (I := I) (ζ : M → ℝ) x
+          (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2 :=
+      Finset.sum_nonneg (fun a _ => sq_nonneg _)
+    have hbound_nn : (0 : ℝ) ≤ ((k : ℝ) - 1) ^ 2 * (b ^ (k - 2)) ^ 2 * (4 * b * c) := by
+      have : (0 : ℝ) ≤ 4 * b * c := by positivity
+      positivity
+    calc (∑ a : Fin n,
+            (extDerivFun (I := I) (ζ : M → ℝ) x
+              (Integral.Connection.smoothOrthoFrame (I := I) g x a x)) ^ 2) *
+            riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x)
+        ≤ (((k : ℝ) - 1) ^ 2 * (b ^ (k - 2)) ^ 2 * (4 * b * c)) *
+            riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x) :=
+          mul_le_mul_of_nonneg_right hdζsum hrfnsw_nn
+      _ ≤ (((k : ℝ) - 1) ^ 2 * (b ^ (k - 2)) ^ 2 * (4 * b * c)) * A ^ 2 :=
+          mul_le_mul_of_nonneg_left hrfnsw_le hbound_nn
+      _ = ((k : ℝ) - 1) ^ 2 * (b ^ (k - 2)) ^ 2 * (4 * b * c) * A ^ 2 := by ring
+  -- The final numeric assembly through `√b · √(rfns P)`.
+  have hk1 : (0 : ℝ) ≤ (k : ℝ) - 1 := by
+    have : (1 : ℝ) ≤ (k : ℝ) := by exact_mod_cast _hk
+    linarith
+  -- Bridge the natural power `b^{k-1}` to the real power `b^{(k:ℝ)-1}`.
+  have hbnat_rpow : b ^ (k - 1) = b ^ ((k : ℝ) - 1) := by
+    rw [← Real.rpow_natCast b (k - 1)]
+    congr 1
+    rw [Nat.cast_sub _hk, Nat.cast_one]
+  -- The goal right-hand side is already in `b`, `c` form (the `set`s fold the fibre norms).
+  change |tensorCovDerivCrossLeft (I := I) (M := M) g 0 m ζ w w x| ≤
+      2 * ((k : ℝ) - 1) * A * b ^ ((k : ℝ) - 1) * c ^ (1 / 2 : ℝ)
+  have hRHS_nn : (0 : ℝ) ≤ 2 * ((k : ℝ) - 1) * A * b ^ ((k : ℝ) - 1) * c ^ (1 / 2 : ℝ) := by
+    have hbrpow : (0 : ℝ) ≤ b ^ ((k : ℝ) - 1) := Real.rpow_nonneg hb_nn _
+    have hcrpow : (0 : ℝ) ≤ c ^ (1 / 2 : ℝ) := Real.rpow_nonneg hc_nn _
+    positivity
+  -- Reduce to the squared inequality `b · rP ≤ (RHS)²`.
+  refine le_trans hCS2 ?_
+  rw [← Real.sqrt_mul hb_nn rP,
+    show 2 * ((k : ℝ) - 1) * A * b ^ ((k : ℝ) - 1) * c ^ (1 / 2 : ℝ) =
+      Real.sqrt ((2 * ((k : ℝ) - 1) * A * b ^ ((k : ℝ) - 1) * c ^ (1 / 2 : ℝ)) ^ 2) from
+    (Real.sqrt_sq hRHS_nn).symm]
+  refine Real.sqrt_le_sqrt ?_
+  -- Rewrite the squared target through the natural-power identity `(b^{k-1})² = b^{k-1}·b^{k-1}`.
+  have hcrpow_sq : (c ^ (1 / 2 : ℝ)) ^ 2 = c := by
+    rw [← Real.rpow_natCast (c ^ (1 / 2 : ℝ)) 2, ← Real.rpow_mul hc_nn]
+    norm_num
+  have htarget_eq : (2 * ((k : ℝ) - 1) * A * b ^ ((k : ℝ) - 1) * c ^ (1 / 2 : ℝ)) ^ 2 =
+      ((k : ℝ) - 1) ^ 2 * (4 * A ^ 2) * (b ^ (k - 1) * b ^ (k - 1)) * c := by
+    rw [hbnat_rpow]
+    rw [mul_pow, mul_pow, mul_pow, mul_pow, hcrpow_sq]
+    ring
+  rw [htarget_eq]
+  -- The `(k-1)²`-weighted natural-power core (handles `k = 1` via the vanishing `(k-1)²` factor).
+  have hb_core : ((k : ℝ) - 1) ^ 2 * (b * (b ^ (k - 2)) ^ 2 * b) =
+      ((k : ℝ) - 1) ^ 2 * (b ^ (k - 1) * b ^ (k - 1)) := by
+    rcases Nat.lt_or_ge k 2 with hk2 | hk2
+    · -- `k = 1`: the `(k - 1) = 0` real factor makes both members vanish.
+      have hk1' : k = 1 := by omega
+      subst hk1'
+      norm_num
+    · -- `k ≥ 2`: `b^{k-1} = b^{k-2}·b`, so both sides are products of `b` and `b^{k-2}`.
+      have hbk1 : b ^ (k - 1) = b ^ (k - 2) * b := by
+        rw [← pow_succ]
+        congr 1
+        omega
+      rw [hbk1, sq]
+      ring
+  calc b * rP
+      ≤ b * (((k : ℝ) - 1) ^ 2 * (b ^ (k - 2)) ^ 2 * (4 * b * c) * A ^ 2) :=
+        mul_le_mul_of_nonneg_left hrP_bound hb_nn
+    _ = (4 * A ^ 2) * c * (((k : ℝ) - 1) ^ 2 * (b * (b ^ (k - 2)) ^ 2 * b)) := by ring
+    _ = (4 * A ^ 2) * c * (((k : ℝ) - 1) ^ 2 * (b ^ (k - 1) * b ^ (k - 1))) := by rw [hb_core]
+    _ = ((k : ℝ) - 1) ^ 2 * (4 * A ^ 2) * (b ^ (k - 1) * b ^ (k - 1)) * c := by ring
 
 /-- **(POSIT — the weighted covariant `Lᵖ` integration-by-parts inequality, `L^∞`-factor form.)**
 
