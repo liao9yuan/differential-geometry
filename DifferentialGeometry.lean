@@ -1409,6 +1409,7 @@ import DifferentialGeometry.Tensor.Multilinear.Field
 import DifferentialGeometry.Tensor.Multilinear.Flip
 import DifferentialGeometry.Tensor.Multilinear.HsBoundOp
 import DifferentialGeometry.Tensor.Multilinear.MetricLowering
+import DifferentialGeometry.Tensor.Multilinear.ModelProductContinuousBilinear
 import DifferentialGeometry.Tensor.Multilinear.Tensor
 import DifferentialGeometry.Tensor.Product.Basis
 import DifferentialGeometry.Tensor.Product.Bundle
