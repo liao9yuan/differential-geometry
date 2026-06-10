@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AkMFold
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Claim1Wiring
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -505,5 +506,75 @@ theorem claim2core {u : Set M} (hu : IsOpen u)
               _ ≤ (a'.choose c : ℝ) * CA c * Cm c :=
                   mul_le_mul_of_nonneg_left h2
                     (mul_nonneg (Nat.cast_nonneg _) (hCA0 c))
+
+/-! ## Claim 2, geometric form -/
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **Claim 2, geometric form**: on a tangent-trivialization domain, if the gRef-tower of
+`g_K` is bounded up to order `L` and the inverse-array norm is bounded, then any component
+field `B` whose `g_K`-Christoffel towers are bounded up to order `a ≤ L` has a bounded
+gRef-Christoffel tower of order `a`.  Instantiates `claim2core` with the two Levi-Civita
+Christoffels in the frame; the `A_k`-tower bounds come from `claim1_geom`
+(`|∇_U^c A_k| ≤ C_c(1+|∇^{c+1}g_K|) ≤ C_c(1+K)`). -/
+theorem claim2_geom
+    (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
+    [MemTrivializationAtlas e₀]
+    (gK gRef : SmoothRiemannianMetric I M) (basisE : Module.Basis Idx Real E)
+    (C0 K : Real) (hK0 : 0 ≤ K)
+    (hGinv : ∀ y ∈ e₀.baseSet, compL2 (ginvCompField (I := I) e₀ gK basisE y) ≤ C0)
+    (L : ℕ)
+    (hgK : ∀ y ∈ e₀.baseSet, ∀ j, 1 ≤ j → j ≤ L →
+      compL2 (iterCovComp (I := I) (fun a y' => e₀.localFrame basisE a y')
+        (fun y' => christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef)
+          (fun a y'' => e₀.localFrame basisE a y'')
+          (e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE) y')
+        (frameComp0S (I := I) (metricTensorField (I := I) gK)
+          (fun a y' => e₀.localFrame basisE a y')) j y) ≤ K)
+    {Q : ℕ} (B : M → (Fin (Q + 1) → Idx) → Real)
+    (hB : ∀ k : Fin (Q + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => B y k) e₀.baseSet)
+    (a : ℕ) (haL : a ≤ L) (S : ℕ → ℝ)
+    (hBk : ∀ j, j ≤ a → ∀ y ∈ e₀.baseSet,
+      compL2 (iterCovComp (I := I) (fun a' y' => e₀.localFrame basisE a' y')
+        (fun y' => christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gK)
+          (fun a'' y'' => e₀.localFrame basisE a'' y'')
+          (e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE) y') B j y) ≤ S j) :
+    ∃ C, 0 ≤ C ∧ ∀ y ∈ e₀.baseSet,
+      compL2 (iterCovComp (I := I) (fun a' y' => e₀.localFrame basisE a' y')
+        (fun y' => christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef)
+          (fun a'' y'' => e₀.localFrame basisE a'' y'')
+          (e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE) y') B a y) ≤ C := by
+  classical
+  set frame : Idx → (x : M) → TangentSpace I x :=
+    fun a' y' => e₀.localFrame basisE a' y' with hframedef
+  set chrRf : M → Idx → Idx → Idx → Real := fun y' =>
+    christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef) frame
+      (e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE) y' with hchrRdef
+  set chrKf : M → Idx → Idx → Idx → Real := fun y' =>
+    christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gK) frame
+      (e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE) y' with hchrKdef
+  have hframeSm : ∀ d : Idx, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
+      (fun y => TotalSpace.mk' E (E := TangentSpace I) y (frame d y)) e₀.baseSet :=
+    fun d => frame_e_mdiffOn e₀ basisE d
+  have hchrRsm : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chrRf y d i j) e₀.baseSet :=
+    fun d i j => lcChrist_e_mdiffOn e₀ gRef basisE d i j
+  have hchrKsm : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chrKf y d i j) e₀.baseSet :=
+    fun d i j => lcChrist_e_mdiffOn e₀ gK basisE d i j
+  -- the `A_k`-tower constant bounds from `claim1_geom`
+  have hCAex : ∀ c, c < L → ∃ Cc, 0 ≤ Cc ∧ ∀ y ∈ e₀.baseSet,
+      compL2 (iterCovCompU (I := I) frame chrRf
+        (fun z (m : Fin (2 + 1) → Idx) =>
+          chrKf z (m 0) (m 1) (m 2) - chrRf z (m 0) (m 1) (m 2)) c y) ≤ Cc := by
+    intro c hcL
+    obtain ⟨Cc, hCc0, hCc⟩ := claim1_geom e₀ gK gRef basisE C0 K hGinv c
+      (fun y' hy' j h1 h2 => hgK y' hy' j h1 (by omega))
+    refine ⟨Cc * (1 + K), mul_nonneg hCc0 (by linarith), fun y hy => ?_⟩
+    refine le_trans (hCc y hy) ?_
+    refine mul_le_mul_of_nonneg_left ?_ hCc0
+    have hgkc := hgK y hy (c + 1) (by omega) (by omega)
+    linarith
+  choose! CA hCA0 hCA using hCAex
+  exact claim2core e₀.open_baseSet frame chrRf chrKf hframeSm hchrRsm hchrKsm
+    L (fun c => max (CA c) 0) (fun c => le_max_right _ _)
+    (fun c hc y hy => le_trans (hCA c hc y hy) (le_max_left _ _)) a haL B hB S hBk
 
 end DifferentialGeometry.PDE.RicciFlow
