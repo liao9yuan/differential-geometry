@@ -191,11 +191,11 @@ theorem movingFrameNullity_diffCurvOpField_leaf
         (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S +
       ricTraceSection (I := I) (M := M) g s S with hGcd
   refine movingFrameNullity_of_genuineCrossPairingValue (I := I) (M := M) g s S Gcd ?_
-  -- The five folds (fixed-Parseval-family group→carrier identities).
+  -- The four folds (fixed-Parseval-family group→carrier identities): groups `2` and `4` combine into a
+  -- single operator-field IBP residue (the group-`2` summand is not separately divergence-free).
   have hf1 := bochnerFold_group1_eq_GcurvSection (I := I) (M := M) g s S V hV hPar
-  have hf2 := bochnerFold_group2_eq_zero (I := I) (M := M) g s S V hV hPar
   have hf3 := bochnerFold_group3_eq_ricTrace (I := I) (M := M) g s S V hV hPar
-  have hf4 := bochnerFold_group4_eq_slotExtend_residue (I := I) (M := M) g s S V hV hPar
+  have hf24 := bochnerFold_group2_add_group4_eq_operatorResidue (I := I) (M := M) g s S V hV hPar
   have hf5 := bochnerFold_sevenTermSum_eq_pointwiseTensorCurvPairing
     (I := I) (M := M) g s S V hV hPar
   -- The operator-field B-rule integration-by-parts residue (with `appCc Φ₀ S = pureRGenuineDiffOp g 0 s S`).
@@ -259,7 +259,7 @@ theorem movingFrameNullity_diffCurvOpField_leaf
           (ricTraceSection (I := I) (M := M) g s S).toFun from SmoothCcTensor.toFun_add _ _]
     rw [hsplitB]
   rw [hsplit]
-  linarith [hf1, hf2, hf3, hf4, hf5, hIBP, hGreen, hwz]
+  linarith [hf1, hf3, hf24, hf5, hIBP, hGreen, hwz]
 
 /-- **The frame-bracket remainder frame-sum integral carries the differentiated-curvature operator-field
 trace plus the leading-slot Ricci trace (the curvature line's single irreducible integrated deep root —
