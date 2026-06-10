@@ -6,6 +6,7 @@ import DifferentialGeometry.Geometry.Connection.ConnectionDifferenceFieldJets
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LoweredConnectionDifferenceCovariantDerivative
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTraceField
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldCovariantCalculusRS
+import DifferentialGeometry.Geometry.Connection.MetricCompatibility.InverseMetricFieldParallel
 
 /-! # The cross-correction parallel two-section contraction `h ⌟ D`
 
@@ -801,19 +802,39 @@ noncomputable def crossCorrProdSection (g₀ : SmoothRiemannianMetric I M) {a b 
       (E := (TangentSpace I : M → Type _)) ∞ (crossCorrProdField (I := I) g₀ S T)
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-/-- The fibre value of the cometric double-trace operator field at `x`: the raise-then-trace cometric
-single contraction `D ↦ ofModel (modelDoubleTrace (3 + a + b) (cometricLmodel g₀ x) (modelRankCast
-(toModel D)))`, mapping a `(0, (3 + b) + (2 + a))`-tensor to a `(0, 3 + a + b)`-tensor.  Concretely the
-composition of the fibre rank-cast `(3 + b) + (2 + a) = (3 + a + b) + 2`, the cometric leading-slot raise
-`cometricRaiseSlot0Fib g₀ (3 + a + b) x`, and the frame-free natural trace `contract_trace 0 (3 + a + b)
-x` at the unit — the SAME raise-then-trace calculus as the unit-applied `crossCorrField`.  POSITED fibre
-child: the explicit `Tensor0SSpace`/`TensorRSSpace` topology-instance bridge between the
-`contract_trace`/`cometricRaiseSlot0Fib` codomains (canonical multilinear-map topology) and the
-`Tensor0SSpace` operator topology is the codebase's standard `tensor0SSpace_topology_eq` plumbing
-(packaged for the unit-applied form in `crossCorrField_contMDiff`); it is the only remaining gap. -/
+/-- The fibre value of the cometric double-trace operator field at `x`: the model-level cometric double
+trace `D ↦ ofModel (modelDoubleTrace (3 + a + b) (cometricLmodel g₀ x) (modelRankCast (toModel D)))`,
+mapping a `(0, (3 + b) + (2 + a))`-tensor to a `(0, 3 + a + b)`-tensor.  Built — exactly as the
+operator-field sibling `ricciModelTrace42Fib` — as the single model continuous-linear map
+`modelDoubleTrace (3 + a + b) (cometricLmodel g₀ x) ∘ modelRankCast` sandwiched by the identity
+`tensor0SSpace_continuousLinearEquiv` fibre/model bridge (which carries the canonical multilinear-map
+topology to the `Tensor0SSpace` operator topology, the standard `tensor0SSpace_topology_eq` plumbing).
+The frame-free cometric raise of slot `0` then the natural trace against the original slot are folded into
+`modelDoubleTrace`; `g₀` enters only through the SMOOTH cometric reading `cometricLmodel`.  Non-vacuous:
+the genuine single cometric trace. -/
 private noncomputable def crossCorrCometricOpFib (g₀ : SmoothRiemannianMetric I M) (a b : ℕ) (x : M) :
     Tensor0SBundle.TensorRSSpace ((3 + b) + (2 + a)) (3 + a + b) I x :=
-  sorry
+  (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (3 + a + b) x).symm.toContinuousLinearMap.comp
+    ((DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.modelDoubleTrace (E := E) (3 + a + b)
+        (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.cometricLmodel (I := I) g₀ x)).comp
+      ((DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.modelRankCast (E := E)
+          (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2)).comp
+        (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) ((3 + b) + (2 + a)) x).toContinuousLinearMap))
+
+set_option linter.unusedSectionVars false in
+/-- The model image of the cometric double-trace fibre operator is the model `modelDoubleTrace` against
+the cometric reading on the rank-cast model input.  Definitional, since `Tensor0SSpace.toModel =
+tensor0SSpace_continuousLinearEquiv` is the identity. -/
+private theorem crossCorrCometricOpFib_toModel (g₀ : SmoothRiemannianMetric I M) (a b : ℕ) (x : M)
+    (P : Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x) :
+    Tensor0SBundle.Tensor0SSpace.toModel
+        ((show Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace (3 + a + b) I x from crossCorrCometricOpFib (I := I) g₀ a b x) P) =
+      DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.modelDoubleTrace (E := E) (3 + a + b)
+          (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.cometricLmodel (I := I) g₀ x)
+        (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.modelRankCast (E := E)
+          (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2)
+          (Tensor0SBundle.Tensor0SSpace.toModel P)) := rfl
 
 /-- **Base-point smoothness of the cometric double-trace operator field.**  Mirrors
 `crossCorrField_contMDiff`: the field is the fibre rank-cast followed by the cometric raise
@@ -826,7 +847,54 @@ private theorem crossCorrCometricOpFib_contMDiff (g₀ : SmoothRiemannianMetric 
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel ((3 + b) + (2 + a)) (3 + a + b) ℝ E)
         (E := fun z : M => Tensor0SBundle.TensorRSSpace ((3 + b) + (2 + a)) (3 + a + b) I z) x
         (crossCorrCometricOpFib (I := I) g₀ a b x)) := by
-  sorry
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (F₁ := Tensor0SBundle.Tensor0SModel ((3 + b) + (2 + a)) ℝ E)
+    (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x)
+    (F₂ := Tensor0SBundle.Tensor0SModel (3 + a + b) ℝ E)
+    (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace (3 + a + b) I x)
+    (φ := fun x => crossCorrCometricOpFib (I := I) g₀ a b x)
+  intro Y
+  -- The rank-cast of `Y` to a `(0, (3 + a + b) + 2)`-field (a fixed model CLM, smoothness-preserving).
+  let Y' : ∀ x : M, Tensor0SBundle.Tensor0SSpace ((3 + a + b) + 2) I x :=
+    fun x => Tensor0SBundle.Tensor0SSpace.ofModel
+      (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.modelRankCast (E := E)
+        (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2)
+        (Tensor0SBundle.Tensor0SSpace.toModel (Y x)))
+  have hY' : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel ((3 + a + b) + 2) ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel ((3 + a + b) + 2) ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace ((3 + a + b) + 2) I z) x (Y' x)) :=
+    DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.tensor0SField_castRank_contMDiff
+      (I := I) (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2) (fun x => Y x) Y.contMDiff
+  -- The smooth cometric raise of `Y'`'s leading slot.
+  have hraise := cometricRaiseSlot0Fib_section_contMDiff (I := I) g₀ (3 + a + b) Y' hY'
+  -- The frame-free natural trace of the raise (smooth `(0, 3 + a + b)`-field).
+  have htrace := contractTraceField_contMDiff (I := I) 0 (3 + a + b)
+    (fun x => cometricRaiseSlot0Fib (I := I) g₀ (3 + a + b) x (Y' x)) hraise
+  have htraceUnit : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel (3 + a + b) ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel (3 + a + b) ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace (3 + a + b) I z) x
+        ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (3 + a + b) I x from
+          Tensor0SBundle.contract_trace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 0 (3 + a + b) x
+            (cometricRaiseSlot0Fib (I := I) g₀ (3 + a + b) x (Y' x)))
+          (Integral.Connection.unitZeroSec (I := I) (M := M) x))) :=
+    ContMDiff.clm_bundle_apply (b := id) htrace
+      (Integral.Connection.unitZeroSec (I := I) (M := M)).contMDiff
+  refine htraceUnit.congr (fun x => ?_)
+  -- the matching fibre identity: crossCorrCometricOpFib g₀ a b x (Y x) = trace(raise Y')(unit)
+  congr 1
+  apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+  beta_reduce
+  rw [crossCorrCometricOpFib_toModel]
+  -- modelDoubleTrace (3+a+b) (cometricLmodel g₀ x) (modelRankCast (toModel (Y x)))
+  --   = toModel ((contract_trace 0 (3+a+b) x (raise (Y' x))) (unit0))
+  rw [← DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.model_contract_trace_raiseSlot0ModelL
+    (E := E) (3 + a + b) (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.cometricLmodel (I := I) g₀ x)
+    (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.modelRankCast (E := E)
+      (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2)
+      (Tensor0SBundle.Tensor0SSpace.toModel (Y x)))]
+  rw [contract_trace_unitZero_toModel (I := I) (3 + a + b) x
+    (cometricRaiseSlot0Fib (I := I) g₀ (3 + a + b) x (Y' x))]
+  congr 1
 
 /-- **The fixed smooth cometric double-trace operator field** as a `SmoothCcTensor`, packaging the
 fibre value `crossCorrCometricOpFib` (smooth by `crossCorrCometricOpFib_contMDiff`); compact support
@@ -849,7 +917,75 @@ private theorem crossCorrParallelContraction_eq_appCcRS (g₀ : SmoothRiemannian
     crossCorrParallelContraction (I := I) g₀ S T =
       appCcRS (I := I) (M := M) g₀ 0 ((3 + b) + (2 + a)) (3 + a + b)
         (crossCorrCometricOp (I := I) g₀ a b) (crossCorrProdSection (I := I) g₀ S T) := by
-  sorry
+  classical
+  apply Integral.L2.SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply tensor0s_ext_unitZero (I := I) (M := M) (s := 3 + a + b)
+  apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+  beta_reduce
+  -- LHS at the unit: the model value `crossCorrModelFun (cometricReadingModel g₀ x) a b (ccUnit S)(ccUnit T)`.
+  have hLHS : Tensor0SBundle.Tensor0SSpace.toModel
+      ((crossCorrParallelContraction (I := I) g₀ S T).toSection x
+        (Integral.Connection.unitZeroSec (I := I) (M := M) x)) =
+      crossCorrModelFun (E := E) (cometricReadingModel (I := I) g₀ x) a b
+        (ccUnitModel (I := I) g₀ S x) (ccUnitModel (I := I) g₀ T x) := by
+    change Tensor0SBundle.Tensor0SSpace.toModel
+        ((MixedSection.eval₀ (F := E) (E := (TangentSpace I : M → Type _)) x).smulRight
+            (crossCorrField (I := I) g₀ S T x)
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) = _
+    rw [ContinuousLinearMap.smulRight_apply, MixedSection.eval₀_apply,
+      ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
+    change Tensor0SBundle.Tensor0SSpace.toModel
+      (Tensor0SBundle.Tensor0SSpace.ofModel
+        (crossCorrModelFun (E := E) (cometricReadingModel (I := I) g₀ x) a b
+          (ccUnitModel (I := I) g₀ S x) (ccUnitModel (I := I) g₀ T x))) = _
+    rw [Tensor0SBundle.Tensor0SSpace.toModel_ofModel]
+  -- RHS at the unit: the post-composition of the fixed cometric trace operator on the product fibre.
+  have hRHS : Tensor0SBundle.Tensor0SSpace.toModel
+      ((appCcRS (I := I) (M := M) g₀ 0 ((3 + b) + (2 + a)) (3 + a + b)
+          (crossCorrCometricOp (I := I) g₀ a b) (crossCorrProdSection (I := I) g₀ S T)).toSection x
+        (Integral.Connection.unitZeroSec (I := I) (M := M) x)) =
+      DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.modelDoubleTrace (E := E) (3 + a + b)
+          (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.cometricLmodel (I := I) g₀ x)
+        (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.modelRankCast (E := E)
+          (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2)
+          (ContinuousMultilinearMap.domDomCongr (crossCorrPerm a b)
+            (Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+              (ccUnitModel (I := I) g₀ T x) (ccUnitModel (I := I) g₀ S x)))) := by
+    rw [appCcRS_toSection (I := I) (M := M) g₀ 0 ((3 + b) + (2 + a)) (3 + a + b)
+      (crossCorrCometricOp (I := I) g₀ a b) (crossCorrProdSection (I := I) g₀ S T) x]
+    rw [ContinuousLinearMap.comp_apply]
+    rw [show (crossCorrCometricOp (I := I) g₀ a b).toSection x
+        = crossCorrCometricOpFib (I := I) g₀ a b x from rfl]
+    rw [crossCorrCometricOpFib_toModel]
+    -- the product section's fibre value at the unit, read to the model.
+    have hP : Tensor0SBundle.Tensor0SSpace.toModel
+        ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x from
+          (crossCorrProdSection (I := I) g₀ S T).toSection x)
+          (Integral.Connection.unitZeroSec (I := I) (M := M) x)) =
+        ContinuousMultilinearMap.domDomCongr (crossCorrPerm a b)
+          (Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+            (ccUnitModel (I := I) g₀ T x) (ccUnitModel (I := I) g₀ S x)) := by
+      change Tensor0SBundle.Tensor0SSpace.toModel
+          ((MixedSection.eval₀ (F := E) (E := (TangentSpace I : M → Type _)) x).smulRight
+              (crossCorrProdField (I := I) g₀ S T x)
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) = _
+      rw [ContinuousLinearMap.smulRight_apply, MixedSection.eval₀_apply,
+        ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
+      change Tensor0SBundle.Tensor0SSpace.toModel
+        (Tensor0SBundle.Tensor0SSpace.ofModel
+          (ContinuousMultilinearMap.domDomCongr (crossCorrPerm a b)
+            (Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+              (ccUnitModel (I := I) g₀ T x) (ccUnitModel (I := I) g₀ S x)))) = _
+      rw [Tensor0SBundle.Tensor0SSpace.toModel_ofModel]
+    rw [hP]
+  rw [hLHS, hRHS,
+    crossCorrModelFun_eq_modelDoubleTrace_perm (cometricReadingModel (I := I) g₀ x) a b
+      (ccUnitModel (I := I) g₀ S x) (ccUnitModel (I := I) g₀ T x),
+    show cometricReadingModel (I := I) g₀ x
+        = DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.cometricLmodel (I := I) g₀ x from rfl]
 
 /-- **The fixed cometric double-trace operator field is `∇₀`-parallel** (POSITED parallelism child):
 `covGrad g₀ ((3 + b) + (2 + a)) (3 + a + b) (crossCorrCometricOp g₀ a b) = 0`.  The operator field is
