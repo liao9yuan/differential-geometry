@@ -63,19 +63,32 @@ The group-`3` Ricci fold is an **integral** identity (the pointwise carrier iden
 (tension-field) part `bochnerGroupElt3IiiIv` (terms `iii + iv`, whose frame double-sum integral *vanishes*
 by the frame-summed second-Bianchi covariant integration by parts).  The two genuine more-primitive curvature
 sub-identities of the rank-`0` Bochner deep root — the only `sorry` bodies in this file — are the named,
-bedrock-near, frame-free Parseval-frame curvature cores `parsevalFrameSum_tensionFieldCurvature_integral_eq_zero`
-(the tension-field frame-summed second-Bianchi covariant-divergence nullity in `(0, s)`-inner-scalar form,
-the curvature core of ATOM A's `bochnerGroupElt3IiiIv_frameSum_integral_eq_zero`) and
-`parsevalFrameSum_group2Residue_add_group4_eq_diffCurvSplit_core` (the group-`2` IBP residue plus group-`4`
-second-order pair re-organized into the differentiated-curvature operator-field action, pre-split B-rule
-normal form, the curvature core of ATOM B's
-`parsevalFrameSum_group2Residue_add_group4_eq_appCc_covGrad_curvOpField_BRIDGE`).  Both ATOM bridges are
-PROVEN on top of their cores (ATOM A by the raw-carrier-to-section inner-scalar bridge; ATOM B by the
-operator-field B-rule re-collection `tensorL2Inner_covGrad_appCc_eq_add` /
-`appCc_curvOpField_eq_pureRGenuineDiffOp`).  Both cores are GENERAL Parseval-frame curvature content that
-should be promoted to a curvature file.  The integrated nullity `movingFrameNullity_diffCurvOpField_leaf`
-(`DifferentiatedCurvatureOperatorFieldIdentification`) assembles over the folds; consumers transitively depend
-on the two cores' `sorryAx`.
+contracted-second-Bianchi Parseval-frame curvature cores reached after the covariant-Leibniz and B-rule
+*system bridges* (both PROVEN):
+
+* `parsevalFrameSum_nablaDiffCurvTrace_add_group1_eq_residue` — the **tension-field nullity core**: the
+  differentiated-curvature trace double sum `∑ ⟨nablaDiffCurvTrace, ∇S⟩` plus the group-`1` double sum
+  equals the group-`2` covariant integration-by-parts residue `∑ bochnerGroup2Residue`.  The tension-field
+  nullity `parsevalFrameSum_tensionFieldCurvature_integral_eq_zero` (ATOM A's curvature content) is PROVEN
+  on top of it through the covariant-Leibniz regrouping system bridge
+  `bochnerFoldGroupSum_elt3IiiIv_eq_nablaDiffCurvTrace_split` (the carrier identity `nablaDiffCurvTrace =
+  bochnerGroupElt3IiiIv + bochnerGroupElt2 − bochnerGroupElt1`, `nablaTensor0SCurv_def`) and the frame-summed
+  covariant IBP `bochnerFoldGroupSum_elt2_eq_residueSum`.
+* `parsevalFrameSum_group2Residue_add_group4_eq_appCc_nablaCurvOpField_core` — the **`∇R`-trace core**: the
+  group-`2` IBP residue double sum plus the group-`4` double sum equals the differentiated-curvature
+  operator-field action `⟨appCc (∇Φ₀) S, ∇S⟩` (`Φ₀ := curvOpField g s`), the compact operator-field form.
+  The pre-split B-rule normal form `parsevalFrameSum_group2Residue_add_group4_eq_diffCurvSplit_core` (ATOM B's
+  curvature content) is PROVEN on top of it through the operator-field B-rule re-collection
+  `tensorL2Inner_covGrad_appCc_eq_add` / `appCc_curvOpField_eq_pureRGenuineDiffOp`.
+
+Both cores are the genuinely-deep, frame-free, contracted-second-Bianchi `∇R`-trace content (the residue's
+second covariant derivative `∇_{V a}(∇_{V b} S)` reorganized against `R(V a, V b) S` through the section-level
+Ricci identity `tensorSecondCovDeriv_antisymm_eq_riemannOp` and the frame-summed differentiated tensor-curvature
+transfer `frame_sum_nablaTensor0SCurv_baseSlot_eval` / `contracted_second_bianchi` into the differentiated
+curvature coefficient `(∇R) S`); they are *coupled* through the shared group-`2` residue double sum.  Both are
+GENERAL Parseval-frame curvature content that should be promoted to a curvature file.  The integrated nullity
+`movingFrameNullity_diffCurvOpField_leaf` (`DifferentiatedCurvatureOperatorFieldIdentification`) assembles over
+the folds; consumers transitively depend on the two cores' `sorryAx`.
 -/
 
 noncomputable section
@@ -1590,197 +1603,6 @@ private theorem parsevalFrameSum_ricSlot0_eq_sum_negV
         (covGrad (I := I) (M := M) g 0 s S).toSection x)
         (unitZeroSec (I := I) (M := M) x)) (ricEndoRaisedFib (I := I) g x (V b x)) m]
 
-/-- **The frame-summed tension-field curvature pairing integrates to zero (the genuine second-Bianchi
-tension-field covariant-divergence nullity, `(0, s)`-inner-scalar form).** For a fixed Parseval frame
-family `V a`, the frame double sum of the integral over the closed manifold of the `(0, s)`-metric inner
-product of the packaged tension-field curvature carrier
-`bochnerGroupElt3IiiIvCc = R(∇_{V a} V b, V a) S + R(V b, ∇_{V a} V a) S` against the directional gradient
-`∇_{V b} S = bochnerGradSlot0Cc` vanishes:
-```
-∑_a ∑_b ∫ ⟨R(∇_{V a} V b, V a) S + R(V b, ∇_{V a} V a) S, ∇_{V b} S⟩_g ∂μ = 0.
-```
-
-This is the genuinely-deep, frame-free curvature core of the group-`3` Ricci fold (the only curvature
-content of `bochnerGroupElt3IiiIv_frameSum_integral_eq_zero`, exposed at the section/inner-scalar level,
-stripped of the `tensor0SAsRS`/`bochnerGradSlot0` curry wrappers).  The two tension-field curvature
-carriers are generally nonzero and frame-dependent pointwise (the fixed Parseval frame is not pointwise
-covariantly divergence-free), so the `a`-sum does not vanish at a point; they cancel only after
-integration.  The cancellation is the frame-summed second Bianchi identity: writing the tension-field
-curvature `R(∇_{V a} V b, V a) S + R(V b, ∇_{V a} V a) S` as the covariant Leibniz remainder
-`∇_{V a}(R(V b, V a) S) − R(V b, V a)(∇_{V a} S) − (∇_{V a} R^{(s)})(V b, V a) S`
-(`nablaTensor0SCurv_def`), the leading total-covariant-divergence term integrates against `∇_{V b} S`
-to its frame-summed integration-by-parts residue (`integral_frameSummed_covDeriv_combined_eq_zero`), the
-differentiated-curvature trace `∑_a (∇_{V a} R^{(s)})(V b, V a)` collapses through the contracted second
-Bianchi (`nablaTensorCurv_frame_trace_eq_nablaRicci`, `contracted_second_bianchi`) summed over the
-Parseval frame (`parseval_family_sum_bilin_eq`), and the residual curvature pairings cancel.  It is *false*
-for an arbitrary section in place of the tension-field curvature trace, so it genuinely uses `R`, `∇R`, the
-Parseval reproduction `hPar`, and the frame's second-order (`∇V`) structure.  This is GENERAL
-Parseval-frame curvature content that should be promoted to a curvature file; the body is `sorry` and
-consumers transitively depend on its `sorryAx`. -/
-private theorem parsevalFrameSum_tensionFieldCurvature_integral_eq_zero
-    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
-    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
-    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
-      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
-    (hPar : ∀ (x : M) (u : TangentSpace I x),
-      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
-    ∑ a : Fin N, ∑ b : Fin N,
-        ∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
-            (bochnerGroupElt3IiiIvCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
-            (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
-          ∂(riemannianVolumeMeasure (I := I) (M := M) g) = 0 :=
-  sorry
-
-/-- **The frame-derivative (tension-field) part of the group-`3` carrier integrates to zero (the
-frame-summed second-Bianchi covariant divergence).** For a fixed Parseval frame family, the frame double
-sum of the integral of the `(iii + iv)` carrier `bochnerGroupElt3IiiIv`
-(`= R(∇_{V a} V b, V a) S + R(V b, ∇_{V a} V a) S`) paired against the slot-`0` carrier `∇_{V b} S`
-vanishes:
-```
-∑_a ∑_b ∫ ⟨bochnerGroupElt3IiiIv g s S (V a) (V b), slot0_{V b}(∇S)⟩ ∂μ = 0.
-```
-
-**Why integrated, not pointwise.** The two carriers carry a frame derivative `∇V` in a curvature slot;
-they are generally nonzero and frame-dependent pointwise (the fixed Parseval frame is not pointwise
-covariantly divergence-free, so `∑_a` of the tension-field curvature terms does not vanish at a point).
-They cancel only after integration: the frame-summed second Bianchi identity rewrites the `(a)`-sum of the
-two tension-field curvature terms as a total covariant divergence, whose integral over the closed manifold
-is `0` (the frame-summed covariant integration-by-parts engine
-`integral_frameSummed_covDeriv_combined_eq_zero`).  This is GENERAL Parseval-frame curvature content; the
-body is `sorry` and consumers transitively depend on its `sorryAx`. -/
-private theorem bochnerGroupElt3IiiIv_frameSum_integral_eq_zero
-    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
-    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
-    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
-      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
-    (hPar : ∀ (x : M) (u : TangentSpace I x),
-      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
-    ∑ a : Fin N, ∑ b : Fin N,
-        ∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
-            (TensorRSSpace.toModel (bochnerGroupElt3IiiIv (I := I) (M := M) g s S (V a) (V b) x))
-            (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
-          ∂(riemannianVolumeMeasure (I := I) (M := M) g) = 0 := by
-  classical
-  -- The raw carrier double sum is the section/inner-scalar double sum of the bedrock-near curvature
-  -- core `parsevalFrameSum_tensionFieldCurvature_integral_eq_zero`, term-by-term (`tensorInnerScalar`
-  -- unfolds definitionally; the `Cc` packagings reproduce the raw carriers pointwise).
-  refine Eq.trans ?_ (parsevalFrameSum_tensionFieldCurvature_integral_eq_zero
-    (I := I) (M := M) g s S V hV hPar)
-  refine Finset.sum_congr rfl (fun a _ => ?_)
-  refine Finset.sum_congr rfl (fun b _ => ?_)
-  refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
-  rw [tensorInnerScalar_apply (I := I) (M := M) g 0 s,
-    bochnerGroupElt3IiiIvCc_toSection_eq (I := I) (M := M) g s S (hV a) (hV b) x,
-    bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S (hV b) x]
-
-/-- **The group-`3` Ricci-trace fold (terms iii + iv − v → leading-slot Ricci trace).** For a fixed
-Parseval frame family, the group-`3` double sum equals the `L²` pairing of the leading-slot Ricci-trace
-carrier `ricTraceSection g s S` against `∇S`:
-```
-bochnerFoldGroupSum g s S V (bochnerGroupElt3) = ⟨ricTraceSection g s S, ∇S⟩_{L²}.
-```
-
-This is an **integral** identity, NOT a pointwise carrier identity: the group-`3` carrier
-`bochnerGroupElt3 = (iii + iv) − v` splits into the Ricci-direction part `bochnerGroupElt3NegV` (term `−v`,
-whose frame sum over `a` is *pointwise* the leading-slot Ricci trace of `∇S`,
-`parsevalFrameSum_ricSlot0_eq_sum_negV`) and the frame-derivative (tension-field) part
-`bochnerGroupElt3IiiIv` (terms `iii + iv`, whose frame double-sum integral *vanishes* only after the
-frame-summed second-Bianchi covariant integration by parts,
-`bochnerGroupElt3IiiIv_frameSum_integral_eq_zero`).  The pointwise carrier split is `false` for `s > 0`
-(the tension-field terms do not cancel at a point), so the fold must be routed through the integral.
-
-Assembly: the carrier double sum splits by `tensorInnerPointwise` additivity and `integral_sub` into the
-`iii + iv` integral (`= 0`) plus the `−v` double sum, which `fold_assembly` (`Named := ricTraceSection
-g s S`, `Elt := bochnerGroupElt3NegV`) collapses to `⟨ricTraceSection g s S, ∇S⟩_{L²}` over the *pointwise*
-Ricci-direction hook `parsevalFrameSum_ricSlot0_eq_sum_negV`.  Consumers transitively depend on the
-tension-field nullity's `sorryAx`. -/
-private theorem bochnerFoldGroupSum_elt3_eq_ricTraceSection
-    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
-    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
-    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
-      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
-    (hPar : ∀ (x : M) (u : TangentSpace I x),
-      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
-    bochnerFoldGroupSum (I := I) (M := M) g s S V
-        (bochnerGroupElt3 (I := I) (M := M) g s S) =
-      tensorL2Inner (I := I) (M := M) g 0 (s + 1)
-        (ricTraceSection (I := I) (M := M) g s S).toFun
-        (covGrad (I := I) (M := M) g 0 s S).toFun := by
-  classical
-  -- Per-`(a, b)` integrability of the two sub-carrier integrands (the Cc cross-pairings).
-  have hintIiiIv : ∀ a b : Fin N, Integrable
-      (fun x : M => tensorInnerPointwise (I := I) (M := M) g 0 s x
-        (TensorRSSpace.toModel (bochnerGroupElt3IiiIv (I := I) (M := M) g s S (V a) (V b) x))
-        (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)))
-      (riemannianVolumeMeasure (I := I) (M := M) g) := by
-    intro a b
-    refine (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
-      (bochnerGroupElt3IiiIvCc (I := I) (M := M) g s S (hV a) (hV b))
-      (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))).congr
-      (Filter.Eventually.of_forall (fun x => ?_))
-    simp only [SmoothCcTensor.toFun_apply,
-      bochnerGroupElt3IiiIvCc_toSection_eq (I := I) (M := M) g s S (hV a) (hV b) x,
-      bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S (hV b) x]
-  have hintNegV : ∀ a b : Fin N, Integrable
-      (fun x : M => tensorInnerPointwise (I := I) (M := M) g 0 s x
-        (TensorRSSpace.toModel (bochnerGroupElt3NegV (I := I) (M := M) g s S (V a) (V b) x))
-        (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)))
-      (riemannianVolumeMeasure (I := I) (M := M) g) := by
-    intro a b
-    refine (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
-      (bochnerGroupElt3NegVCc (I := I) (M := M) g s S (hV a) (hV b))
-      (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))).congr
-      (Filter.Eventually.of_forall (fun x => ?_))
-    simp only [SmoothCcTensor.toFun_apply,
-      bochnerGroupElt3NegVCc_toSection_eq (I := I) (M := M) g s S (hV a) (hV b) x,
-      bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S (hV b) x]
-  -- The pointwise carrier split, turned into a per-`(a, b)` integral split.
-  have hintegral : ∀ a b : Fin N,
-      (∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
-            (TensorRSSpace.toModel (bochnerGroupElt3 (I := I) (M := M) g s S (V a) (V b) x))
-            (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
-          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
-        (∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
-              (TensorRSSpace.toModel
-                (bochnerGroupElt3IiiIv (I := I) (M := M) g s S (V a) (V b) x))
-              (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
-            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
-        (∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
-              (TensorRSSpace.toModel
-                (bochnerGroupElt3NegV (I := I) (M := M) g s S (V a) (V b) x))
-              (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
-            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
-    intro a b
-    rw [← MeasureTheory.integral_add (hintIiiIv a b) (hintNegV a b)]
-    refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
-    simp only []
-    rw [bochnerGroupElt3_eq_iiiIv_add_negV (I := I) (M := M) g s S (V a) (V b) x,
-      TensorRSSpace.toModel_add, tensorInnerPointwise_add_left (I := I) (M := M) g 0 s x]
-  -- The full group-`3` double sum splits as the `iii + iv` double sum plus the `−v` double sum.
-  have hsplit : bochnerFoldGroupSum (I := I) (M := M) g s S V
-        (bochnerGroupElt3 (I := I) (M := M) g s S) =
-      (∑ a : Fin N, ∑ b : Fin N,
-          ∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
-              (TensorRSSpace.toModel
-                (bochnerGroupElt3IiiIv (I := I) (M := M) g s S (V a) (V b) x))
-              (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
-            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
-        bochnerFoldGroupSum (I := I) (M := M) g s S V
-          (bochnerGroupElt3NegV (I := I) (M := M) g s S) := by
-    rw [bochnerFoldGroupSum, bochnerFoldGroupSum, ← Finset.sum_add_distrib]
-    refine Finset.sum_congr rfl (fun a _ => ?_)
-    rw [← Finset.sum_add_distrib]
-    refine Finset.sum_congr rfl (fun b _ => ?_)
-    exact hintegral a b
-  rw [hsplit, bochnerGroupElt3IiiIv_frameSum_integral_eq_zero (I := I) (M := M) g s S V hV hPar,
-    zero_add]
-  -- The `−v` double sum collapses to the Ricci-trace pairing via the pointwise fold assembly.
-  refine (fold_assembly (I := I) (M := M) g s S V hV hPar
-    (ricTraceSection (I := I) (M := M) g s S)
-    (bochnerGroupElt3NegV (I := I) (M := M) g s S)
-    (fun b x => parsevalFrameSum_ricSlot0_eq_sum_negV (I := I) (M := M) g s S V hPar b x)
-    (fun a b => hintNegV a b)).symm
-
 /-- **The group-`2` IBP residual integrand** (in `tensorInnerPointwise` form): the lower-order
 two-term residue `−(⟨R(V a, V b) S, ∇_{V a}(∇_{V b} S)⟩ + ⟨R(V a, V b) S, ∇_{V b} S⟩ · divᵍ (V a))` of
 the frame-summed covariant integration by parts of the group-`2` carrier `∇_{V a}(R(V a, V b) S)`
@@ -2032,35 +1854,572 @@ private lemma bochnerFoldGroupSum_elt2_eq_residueSum (g : SmoothRiemannianMetric
   rw [Finset.sum_sub_distrib] at heng
   linarith [heng]
 
+
+/-- **The differentiated-curvature trace carrier (the `(∇R) S` content of the tension-field carrier),
+packaged as a smooth compactly-supported `(0, s)`-tensor.** For a fixed Parseval frame family this is the
+section value of the differentiated `(0, s)`-tensor curvature `(∇_{V a} R^{(s)})(V a, V b) S`
+(`nablaTensor0SCurv g s (V a) (V a) (V b)` read on the unit), packaged through the *covariant-Leibniz
+regrouping* as the sum of the tension-field curvature carrier `bochnerGroupElt3IiiIv` (terms iii + iv,
+`R(∇_{V a} V b, V a) S + R(V b, ∇_{V a} V a) S`), the group-`2` carrier `bochnerGroupElt2`
+(`∇_{V a}(R(V a, V b) S)`), minus the group-`1` carrier `bochnerGroupElt1` (`R(V a, V b)(∇_{V a} S)`).
+The defining identity is the differentiated-curvature covariant Leibniz rule `nablaTensor0SCurv_def`
+(`(∇_X R)(Y, Z) A = ∇_X(R(Y, Z) A) − R(∇_X Y, Z) A − R(Y, ∇_X Z) A − R(Y, Z)(∇_X A)`) at the derivation
+slot `V a` with antisymmetric slots `(V a, V b)`, read through the section-level `riemannSec` antisymmetry;
+this combination is smooth by construction (a finite sum of the three smooth carriers).  It is the carrier
+whose Parseval-frame double-sum pairing against `∇S` collapses (through the contracted second Bianchi) to
+the IBP residue that the tension-field nullity needs. -/
+private def nablaDiffCurvTraceCc (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {Va Vb : Π b : M, TangentSpace I b}
+    (hVa : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Va b⟩ : TotalSpace E (TangentSpace I))))
+    (hVb : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Vb b⟩ : TotalSpace E (TangentSpace I)))) : SmoothCcTensor g 0 s :=
+  (bochnerGroupElt3IiiIvCc (I := I) (M := M) g s S hVa hVb +
+      bochnerGroupElt2Cc (I := I) (M := M) g s S hVa hVb) -
+    bochnerGroupElt1Cc (I := I) (M := M) g s S hVa hVb
+
+set_option linter.unusedSectionVars false in
+/-- The differentiated-curvature trace carrier section value is the named regrouping
+`bochnerGroupElt3IiiIv + bochnerGroupElt2 − bochnerGroupElt1`, pointwise. -/
+private lemma nablaDiffCurvTraceCc_toSection_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : SmoothCcTensor g 0 s) {Va Vb : Π b : M, TangentSpace I b}
+    (hVa : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Va b⟩ : TotalSpace E (TangentSpace I))))
+    (hVb : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Vb b⟩ : TotalSpace E (TangentSpace I)))) (x : M) :
+    (nablaDiffCurvTraceCc (I := I) (M := M) g s S hVa hVb).toSection x =
+      bochnerGroupElt3IiiIv (I := I) (M := M) g s S Va Vb x +
+        bochnerGroupElt2 (I := I) (M := M) g s S Va Vb x -
+        bochnerGroupElt1 (I := I) (M := M) g s S Va Vb x := by
+  rw [nablaDiffCurvTraceCc, SmoothCcTensor.toSection_sub, SmoothCcTensor.toSection_add]
+  simp only [ContMDiffSection.coe_sub, ContMDiffSection.coe_add, Pi.sub_apply, Pi.add_apply]
+  rw [bochnerGroupElt3IiiIvCc_toSection_eq (I := I) (M := M) g s S hVa hVb x,
+    bochnerGroupElt2Cc_toSection_eq (I := I) (M := M) g s S hVa hVb x,
+    bochnerGroupElt1Cc_toSection_eq (I := I) (M := M) g s S hVa hVb x]
+
+set_option linter.unusedSectionVars false in
+/-- **The covariant-Leibniz regrouping of the tension-field carrier double sum (the system bridge).**
+For a fixed Parseval frame family, the group-`3` tension-field double sum
+`bochnerFoldGroupSum (bochnerGroupElt3IiiIv)` equals the differentiated-curvature trace double sum
+`∑_a ∑_b ∫ ⟨nablaDiffCurvTrace, ∇_{V b} S⟩`, minus the group-`2` double sum
+`bochnerFoldGroupSum (bochnerGroupElt2)`, plus the group-`1` double sum
+`bochnerFoldGroupSum (bochnerGroupElt1)`:
+```
+bochnerFoldGroupSum (bochnerGroupElt3IiiIv)
+  = (∑_a ∑_b ∫ ⟨nablaDiffCurvTrace, ∇_{V b} S⟩) − bochnerFoldGroupSum (bochnerGroupElt2)
+      + bochnerFoldGroupSum (bochnerGroupElt1).
+```
+This is the integrated form of the pointwise covariant-Leibniz regrouping
+`bochnerGroupElt3IiiIv = nablaDiffCurvTrace − bochnerGroupElt2 + bochnerGroupElt1`
+(`nablaDiffCurvTraceCc_toSection_eq`, `nablaTensor0SCurv_def`), distributed over the per-`(a, b)` integral
+by the pointwise left-additivity of the `(0, s)` inner product (`tensorInnerPointwise_add_left`) and the
+per-carrier integrability of the cross pairings (`SmoothCcTensor.integrable_inner_cross`).  It re-expresses
+the frame-derivative (`∇V`-in-a-curvature-slot) carrier in terms of the genuinely differentiated curvature
+`∇R` (`nablaDiffCurvTrace`) plus the undifferentiated curvature carriers, the algebraic backbone of the
+tension-field nullity.  It is general Parseval-frame curvature content. -/
+private lemma bochnerFoldGroupSum_elt3IiiIv_eq_nablaDiffCurvTrace_split
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I)))) :
+    bochnerFoldGroupSum (I := I) (M := M) g s S V
+        (bochnerGroupElt3IiiIv (I := I) (M := M) g s S) =
+      (∑ a : Fin N, ∑ b : Fin N,
+          ∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+              (nablaDiffCurvTraceCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+              (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) -
+        bochnerFoldGroupSum (I := I) (M := M) g s S V
+          (bochnerGroupElt2 (I := I) (M := M) g s S) +
+        bochnerFoldGroupSum (I := I) (M := M) g s S V
+          (bochnerGroupElt1 (I := I) (M := M) g s S) := by
+  classical
+  -- Per-`(a, b)` integrability of the tension-field, differentiated-curvature trace, group-`2`,
+  -- group-`1` cross pairings.
+  have hintIiiIv : ∀ a b : Fin N, Integrable
+      (fun x : M => tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel (bochnerGroupElt3IiiIv (I := I) (M := M) g s S (V a) (V b) x))
+        (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)))
+      (riemannianVolumeMeasure (I := I) (M := M) g) := by
+    intro a b
+    refine (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+      (bochnerGroupElt3IiiIvCc (I := I) (M := M) g s S (hV a) (hV b))
+      (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))).congr
+      (Filter.Eventually.of_forall (fun x => ?_))
+    simp only [SmoothCcTensor.toFun_apply,
+      bochnerGroupElt3IiiIvCc_toSection_eq (I := I) (M := M) g s S (hV a) (hV b) x,
+      bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S (hV b) x]
+  have hintD : ∀ a b : Fin N, Integrable
+      (fun x : M => tensorInnerScalar (I := I) (M := M) g 0 s
+        (nablaDiffCurvTraceCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+        (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x)
+      (riemannianVolumeMeasure (I := I) (M := M) g) := fun a b =>
+    SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+      (nablaDiffCurvTraceCc (I := I) (M := M) g s S (hV a) (hV b))
+      (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))
+  have hint2 : ∀ a b : Fin N, Integrable
+      (fun x : M => tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel (bochnerGroupElt2 (I := I) (M := M) g s S (V a) (V b) x))
+        (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)))
+      (riemannianVolumeMeasure (I := I) (M := M) g) := by
+    intro a b
+    refine (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+      (bochnerGroupElt2Cc (I := I) (M := M) g s S (hV a) (hV b))
+      (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))).congr
+      (Filter.Eventually.of_forall (fun x => ?_))
+    simp only [SmoothCcTensor.toFun_apply,
+      bochnerGroupElt2Cc_toSection_eq (I := I) (M := M) g s S (hV a) (hV b) x,
+      bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S (hV b) x]
+  have hint1 : ∀ a b : Fin N, Integrable
+      (fun x : M => tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel (bochnerGroupElt1 (I := I) (M := M) g s S (V a) (V b) x))
+        (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)))
+      (riemannianVolumeMeasure (I := I) (M := M) g) := by
+    intro a b
+    refine (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+      (bochnerGroupElt1Cc (I := I) (M := M) g s S (hV a) (hV b))
+      (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))).congr
+      (Filter.Eventually.of_forall (fun x => ?_))
+    simp only [SmoothCcTensor.toFun_apply,
+      bochnerGroupElt1Cc_toSection_eq (I := I) (M := M) g s S (hV a) (hV b) x,
+      bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S (hV b) x]
+  -- The pointwise integrand identity: `⟨group3IiiIv, ∇_{V b} S⟩ = ⟨nablaDiffCurvTrace, ∇_{V b} S⟩
+  -- − ⟨group2, ∇_{V b} S⟩ + ⟨group1, ∇_{V b} S⟩`, from the carrier regrouping
+  -- `nablaDiffCurvTrace = group3IiiIv + group2 − group1` and left-additivity of the inner product.
+  have hpt : ∀ a b : Fin N, ∀ x : M,
+      tensorInnerPointwise (I := I) (M := M) g 0 s x
+          (TensorRSSpace.toModel (bochnerGroupElt3IiiIv (I := I) (M := M) g s S (V a) (V b) x))
+          (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)) =
+        tensorInnerScalar (I := I) (M := M) g 0 s
+            (nablaDiffCurvTraceCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+            (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x -
+          tensorInnerPointwise (I := I) (M := M) g 0 s x
+            (TensorRSSpace.toModel (bochnerGroupElt2 (I := I) (M := M) g s S (V a) (V b) x))
+            (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)) +
+          tensorInnerPointwise (I := I) (M := M) g 0 s x
+            (TensorRSSpace.toModel (bochnerGroupElt1 (I := I) (M := M) g s S (V a) (V b) x))
+            (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)) := by
+    intro a b x
+    rw [tensorInnerScalar_apply (I := I) (M := M) g 0 s,
+      bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S (hV b) x,
+      nablaDiffCurvTraceCc_toSection_eq (I := I) (M := M) g s S (hV a) (hV b) x]
+    rw [show (bochnerGroupElt3IiiIv (I := I) (M := M) g s S (V a) (V b) x +
+            bochnerGroupElt2 (I := I) (M := M) g s S (V a) (V b) x -
+            bochnerGroupElt1 (I := I) (M := M) g s S (V a) (V b) x) =
+        (bochnerGroupElt3IiiIv (I := I) (M := M) g s S (V a) (V b) x +
+            bochnerGroupElt2 (I := I) (M := M) g s S (V a) (V b) x) +
+          (- bochnerGroupElt1 (I := I) (M := M) g s S (V a) (V b) x) from by abel,
+      TensorRSSpace.toModel_add, TensorRSSpace.toModel_add, TensorRSSpace.toModel_neg,
+      tensorInnerPointwise_add_left (I := I) (M := M) g 0 s x,
+      tensorInnerPointwise_add_left (I := I) (M := M) g 0 s x,
+      show (- TensorRSSpace.toModel (bochnerGroupElt1 (I := I) (M := M) g s S (V a) (V b) x)) =
+          (-1 : ℝ) • TensorRSSpace.toModel (bochnerGroupElt1 (I := I) (M := M) g s S (V a) (V b) x) from by
+        rw [neg_one_smul],
+      tensorInnerPointwise_smul_left (I := I) (M := M) g 0 s x]
+    ring
+  -- Assemble: `bochnerFoldGroupSum` of each carrier is its double-sum integral; split each `(a, b)`
+  -- integral additively (no `integral_sub`) by the regrouping `group3IiiIv + group2 = nablaDiffCurv
+  -- + group1`, then reassociate the finite sums.
+  -- Per-`(a, b)` additive integral identity: `∫⟨group3IiiIv⟩ + ∫⟨group2⟩ = ∫⟨nablaDiffCurv⟩ + ∫⟨group1⟩`.
+  have hsplit : ∀ a b : Fin N,
+      (∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+            (TensorRSSpace.toModel (bochnerGroupElt3IiiIv (I := I) (M := M) g s S (V a) (V b) x))
+            (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
+        (∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+              (TensorRSSpace.toModel (bochnerGroupElt2 (I := I) (M := M) g s S (V a) (V b) x))
+              (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+        (∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+              (nablaDiffCurvTraceCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+              (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
+          (∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+              (TensorRSSpace.toModel (bochnerGroupElt1 (I := I) (M := M) g s S (V a) (V b) x))
+              (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
+    intro a b
+    rw [← MeasureTheory.integral_add (hintIiiIv a b) (hint2 a b),
+      ← MeasureTheory.integral_add (hintD a b) (hint1 a b)]
+    refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+    -- `⟨group3IiiIv⟩ + ⟨group2⟩ = ⟨nablaDiffCurv⟩ + ⟨group1⟩` from `hpt` (which gives
+    -- `⟨group3IiiIv⟩ = ⟨nablaDiffCurv⟩ − ⟨group2⟩ + ⟨group1⟩`).
+    show tensorInnerPointwise (I := I) (M := M) g 0 s x
+          (TensorRSSpace.toModel (bochnerGroupElt3IiiIv (I := I) (M := M) g s S (V a) (V b) x))
+          (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)) +
+        tensorInnerPointwise (I := I) (M := M) g 0 s x
+          (TensorRSSpace.toModel (bochnerGroupElt2 (I := I) (M := M) g s S (V a) (V b) x))
+          (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)) = _
+    rw [hpt a b x]
+    ring
+  -- The group-`3` (iii + iv) double sum: rearrange `hsplit` to `∫⟨group3IiiIv⟩ = ∫⟨nablaDiffCurv⟩
+  -- − ∫⟨group2⟩ + ∫⟨group1⟩`, sum over `(a, b)`, and identify the `bochnerFoldGroupSum`s.
+  have hsplit' : ∀ a b : Fin N,
+      (∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+            (TensorRSSpace.toModel (bochnerGroupElt3IiiIv (I := I) (M := M) g s S (V a) (V b) x))
+            (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+        (∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+              (nablaDiffCurvTraceCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+              (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) -
+          (∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+              (TensorRSSpace.toModel (bochnerGroupElt2 (I := I) (M := M) g s S (V a) (V b) x))
+              (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
+          (∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+              (TensorRSSpace.toModel (bochnerGroupElt1 (I := I) (M := M) g s S (V a) (V b) x))
+              (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) :=
+    fun a b => by linarith [hsplit a b]
+  rw [bochnerFoldGroupSum, bochnerFoldGroupSum, bochnerFoldGroupSum]
+  rw [Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => hsplit' a b))]
+  simp only [Finset.sum_add_distrib, Finset.sum_sub_distrib]
+
+/-- **The differentiated-curvature trace plus group-`1` pairing equals the group-`2` integration-by-parts
+residue (the genuine contracted-second-Bianchi curvature core of the tension-field nullity).** For a fixed
+Parseval frame family, the differentiated-curvature trace double sum
+`∑_a ∑_b ∫ ⟨nablaDiffCurvTrace, ∇_{V b} S⟩` plus the group-`1` double sum
+`bochnerFoldGroupSum (bochnerGroupElt1)` equals the group-`2` covariant integration-by-parts residue
+`∑_b ∑_a ∫ bochnerGroup2Residue`:
+```
+(∑_a ∑_b ∫ ⟨nablaDiffCurvTrace, ∇_{V b} S⟩) + bochnerFoldGroupSum (bochnerGroupElt1)
+  = ∑_b ∑_a ∫ bochnerGroup2Residue.
+```
+
+This is the genuinely-deep, frame-free curvature content of the tension-field nullity: the
+differentiated-curvature trace `∑_a (∇_{V a} R^{(s)})(V a, V b)` collapses — through the frame-summed
+differentiated tensor-curvature transfer (`frame_sum_nablaTensor0SCurv_baseSlot_eval`,
+`nablaTensorCurv_frame_trace_eq_nablaRicci`) and the contracted second Bianchi (`contracted_second_bianchi`,
+`div Ric = ½ d scal`) read over the Parseval frame (`parseval_family_sum_bilin_eq`) — onto exactly the
+lower-order content that the group-`2` covariant derivative `∇_{V a}(R(V a, V b) S)` sheds when it is
+integrated by parts off into the residue `bochnerGroup2Residue`.  It is *false* for an arbitrary section in
+place of the differentiated-curvature trace (it genuinely uses `R`, `∇R`, the Parseval reproduction `hPar`,
+and the frame's second-order `∇V` structure).  This is GENERAL Parseval-frame curvature content that should
+be promoted to a curvature file; the body is `sorry` and consumers transitively depend on its `sorryAx`. -/
+private theorem parsevalFrameSum_nablaDiffCurvTrace_add_group1_eq_residue
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
+    (∑ a : Fin N, ∑ b : Fin N,
+        ∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+            (nablaDiffCurvTraceCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+            (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
+      bochnerFoldGroupSum (I := I) (M := M) g s S V
+        (bochnerGroupElt1 (I := I) (M := M) g s S) =
+      ∑ b : Fin N, ∑ a : Fin N,
+        ∫ x, bochnerGroup2Residue (I := I) (M := M) g s S (V a) (V b)
+            ⟨fun y : M => V a y, hV a⟩ x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
+  sorry
+
+/-- **The frame-summed tension-field curvature pairing integrates to zero (the genuine second-Bianchi
+tension-field covariant-divergence nullity, `(0, s)`-inner-scalar form).** For a fixed Parseval frame
+family `V a`, the frame double sum of the integral over the closed manifold of the `(0, s)`-metric inner
+product of the packaged tension-field curvature carrier
+`bochnerGroupElt3IiiIvCc = R(∇_{V a} V b, V a) S + R(V b, ∇_{V a} V a) S` against the directional gradient
+`∇_{V b} S = bochnerGradSlot0Cc` vanishes:
+```
+∑_a ∑_b ∫ ⟨R(∇_{V a} V b, V a) S + R(V b, ∇_{V a} V a) S, ∇_{V b} S⟩_g ∂μ = 0.
+```
+
+This is the genuinely-deep, frame-free curvature core of the group-`3` Ricci fold (the only curvature
+content of `bochnerGroupElt3IiiIv_frameSum_integral_eq_zero`, exposed at the section/inner-scalar level,
+stripped of the `tensor0SAsRS`/`bochnerGradSlot0` curry wrappers).  The two tension-field curvature
+carriers are generally nonzero and frame-dependent pointwise (the fixed Parseval frame is not pointwise
+covariantly divergence-free), so the `a`-sum does not vanish at a point; they cancel only after
+integration.  The cancellation is the frame-summed second Bianchi identity: writing the tension-field
+curvature `R(∇_{V a} V b, V a) S + R(V b, ∇_{V a} V a) S` as the covariant Leibniz remainder
+`∇_{V a}(R(V b, V a) S) − R(V b, V a)(∇_{V a} S) − (∇_{V a} R^{(s)})(V b, V a) S`
+(`nablaTensor0SCurv_def`), the leading total-covariant-divergence term integrates against `∇_{V b} S`
+to its frame-summed integration-by-parts residue (`integral_frameSummed_covDeriv_combined_eq_zero`), the
+differentiated-curvature trace `∑_a (∇_{V a} R^{(s)})(V b, V a)` collapses through the contracted second
+Bianchi (`nablaTensorCurv_frame_trace_eq_nablaRicci`, `contracted_second_bianchi`) summed over the
+Parseval frame (`parseval_family_sum_bilin_eq`), and the residual curvature pairings cancel.  It is *false*
+for an arbitrary section in place of the tension-field curvature trace, so it genuinely uses `R`, `∇R`, the
+Parseval reproduction `hPar`, and the frame's second-order (`∇V`) structure.  This is GENERAL
+Parseval-frame curvature content that should be promoted to a curvature file; the body is `sorry` and
+consumers transitively depend on its `sorryAx`. -/
+private theorem parsevalFrameSum_tensionFieldCurvature_integral_eq_zero
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
+    ∑ a : Fin N, ∑ b : Fin N,
+        ∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+            (bochnerGroupElt3IiiIvCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+            (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) = 0 := by
+  classical
+  -- The inner-scalar double sum is the `bochnerFoldGroupSum` of the tension-field carrier
+  -- `bochnerGroupElt3IiiIv` (`tensorInnerScalar` unfolds to the `tensorInnerPointwise (0, s)` pairing
+  -- of the `Cc`-packaged carriers, reproduced pointwise).
+  rw [show (∑ a : Fin N, ∑ b : Fin N,
+        ∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+            (bochnerGroupElt3IiiIvCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+            (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+      bochnerFoldGroupSum (I := I) (M := M) g s S V
+        (bochnerGroupElt3IiiIv (I := I) (M := M) g s S) from by
+    refine Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => ?_))
+    refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+    rw [tensorInnerScalar_apply (I := I) (M := M) g 0 s,
+      bochnerGroupElt3IiiIvCc_toSection_eq (I := I) (M := M) g s S (hV a) (hV b) x,
+      bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S (hV b) x]]
+  -- The covariant-Leibniz regrouping (system bridge): the tension-field carrier `bochnerGroupElt3IiiIv`
+  -- equals the differentiated-curvature trace `nablaDiffCurvTrace` minus the group-`2` carrier
+  -- `∇_{V a}(R(V a, V b) S)` plus the group-`1` carrier `R(V a, V b)(∇_{V a} S)` (`nablaTensor0SCurv_def`,
+  -- through the `nablaDiffCurvTraceCc` regrouping).  So the group-`3` (iii + iv) double sum is the
+  -- differentiated-curvature trace double sum, minus the group-`2` double sum, plus the group-`1` double
+  -- sum.
+  have hbridge : bochnerFoldGroupSum (I := I) (M := M) g s S V
+        (bochnerGroupElt3IiiIv (I := I) (M := M) g s S) =
+      (∑ a : Fin N, ∑ b : Fin N,
+          ∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+              (nablaDiffCurvTraceCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+              (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) -
+        bochnerFoldGroupSum (I := I) (M := M) g s S V
+          (bochnerGroupElt2 (I := I) (M := M) g s S) +
+        bochnerFoldGroupSum (I := I) (M := M) g s S V
+          (bochnerGroupElt1 (I := I) (M := M) g s S) :=
+    bochnerFoldGroupSum_elt3IiiIv_eq_nablaDiffCurvTrace_split
+      (I := I) (M := M) g s S V hV
+  rw [hbridge]
+  -- The group-`2` double sum is its frame-summed covariant integration-by-parts residue
+  -- (`bochnerFoldGroupSum_elt2_eq_residueSum`).
+  rw [bochnerFoldGroupSum_elt2_eq_residueSum (I := I) (M := M) g s S V hV]
+  -- The genuine second-Bianchi / contracted-Bianchi core: the differentiated-curvature trace double sum
+  -- plus the group-`1` double sum equals the group-`2` integration-by-parts residue.  This is the
+  -- frame-summed contracted second Bianchi (`div Ric = ½ d scal`) collapse of the differentiated curvature
+  -- trace, the genuine curvature content of the tension-field nullity.
+  have hbianchi := parsevalFrameSum_nablaDiffCurvTrace_add_group1_eq_residue
+    (I := I) (M := M) g s S V hV hPar
+  linarith [hbianchi]
+
+/-- **The frame-derivative (tension-field) part of the group-`3` carrier integrates to zero (the
+frame-summed second-Bianchi covariant divergence).** For a fixed Parseval frame family, the frame double
+sum of the integral of the `(iii + iv)` carrier `bochnerGroupElt3IiiIv`
+(`= R(∇_{V a} V b, V a) S + R(V b, ∇_{V a} V a) S`) paired against the slot-`0` carrier `∇_{V b} S`
+vanishes:
+```
+∑_a ∑_b ∫ ⟨bochnerGroupElt3IiiIv g s S (V a) (V b), slot0_{V b}(∇S)⟩ ∂μ = 0.
+```
+
+**Why integrated, not pointwise.** The two carriers carry a frame derivative `∇V` in a curvature slot;
+they are generally nonzero and frame-dependent pointwise (the fixed Parseval frame is not pointwise
+covariantly divergence-free, so `∑_a` of the tension-field curvature terms does not vanish at a point).
+They cancel only after integration: the frame-summed second Bianchi identity rewrites the `(a)`-sum of the
+two tension-field curvature terms as a total covariant divergence, whose integral over the closed manifold
+is `0` (the frame-summed covariant integration-by-parts engine
+`integral_frameSummed_covDeriv_combined_eq_zero`).  This is GENERAL Parseval-frame curvature content; the
+body is `sorry` and consumers transitively depend on its `sorryAx`. -/
+private theorem bochnerGroupElt3IiiIv_frameSum_integral_eq_zero
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
+    ∑ a : Fin N, ∑ b : Fin N,
+        ∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+            (TensorRSSpace.toModel (bochnerGroupElt3IiiIv (I := I) (M := M) g s S (V a) (V b) x))
+            (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) = 0 := by
+  classical
+  -- The raw carrier double sum is the section/inner-scalar double sum of the bedrock-near curvature
+  -- core `parsevalFrameSum_tensionFieldCurvature_integral_eq_zero`, term-by-term (`tensorInnerScalar`
+  -- unfolds definitionally; the `Cc` packagings reproduce the raw carriers pointwise).
+  refine Eq.trans ?_ (parsevalFrameSum_tensionFieldCurvature_integral_eq_zero
+    (I := I) (M := M) g s S V hV hPar)
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  refine Finset.sum_congr rfl (fun b _ => ?_)
+  refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+  rw [tensorInnerScalar_apply (I := I) (M := M) g 0 s,
+    bochnerGroupElt3IiiIvCc_toSection_eq (I := I) (M := M) g s S (hV a) (hV b) x,
+    bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S (hV b) x]
+
+/-- **The group-`3` Ricci-trace fold (terms iii + iv − v → leading-slot Ricci trace).** For a fixed
+Parseval frame family, the group-`3` double sum equals the `L²` pairing of the leading-slot Ricci-trace
+carrier `ricTraceSection g s S` against `∇S`:
+```
+bochnerFoldGroupSum g s S V (bochnerGroupElt3) = ⟨ricTraceSection g s S, ∇S⟩_{L²}.
+```
+
+This is an **integral** identity, NOT a pointwise carrier identity: the group-`3` carrier
+`bochnerGroupElt3 = (iii + iv) − v` splits into the Ricci-direction part `bochnerGroupElt3NegV` (term `−v`,
+whose frame sum over `a` is *pointwise* the leading-slot Ricci trace of `∇S`,
+`parsevalFrameSum_ricSlot0_eq_sum_negV`) and the frame-derivative (tension-field) part
+`bochnerGroupElt3IiiIv` (terms `iii + iv`, whose frame double-sum integral *vanishes* only after the
+frame-summed second-Bianchi covariant integration by parts,
+`bochnerGroupElt3IiiIv_frameSum_integral_eq_zero`).  The pointwise carrier split is `false` for `s > 0`
+(the tension-field terms do not cancel at a point), so the fold must be routed through the integral.
+
+Assembly: the carrier double sum splits by `tensorInnerPointwise` additivity and `integral_sub` into the
+`iii + iv` integral (`= 0`) plus the `−v` double sum, which `fold_assembly` (`Named := ricTraceSection
+g s S`, `Elt := bochnerGroupElt3NegV`) collapses to `⟨ricTraceSection g s S, ∇S⟩_{L²}` over the *pointwise*
+Ricci-direction hook `parsevalFrameSum_ricSlot0_eq_sum_negV`.  Consumers transitively depend on the
+tension-field nullity's `sorryAx`. -/
+private theorem bochnerFoldGroupSum_elt3_eq_ricTraceSection
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
+    bochnerFoldGroupSum (I := I) (M := M) g s S V
+        (bochnerGroupElt3 (I := I) (M := M) g s S) =
+      tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (ricTraceSection (I := I) (M := M) g s S).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun := by
+  classical
+  -- Per-`(a, b)` integrability of the two sub-carrier integrands (the Cc cross-pairings).
+  have hintIiiIv : ∀ a b : Fin N, Integrable
+      (fun x : M => tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel (bochnerGroupElt3IiiIv (I := I) (M := M) g s S (V a) (V b) x))
+        (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)))
+      (riemannianVolumeMeasure (I := I) (M := M) g) := by
+    intro a b
+    refine (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+      (bochnerGroupElt3IiiIvCc (I := I) (M := M) g s S (hV a) (hV b))
+      (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))).congr
+      (Filter.Eventually.of_forall (fun x => ?_))
+    simp only [SmoothCcTensor.toFun_apply,
+      bochnerGroupElt3IiiIvCc_toSection_eq (I := I) (M := M) g s S (hV a) (hV b) x,
+      bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S (hV b) x]
+  have hintNegV : ∀ a b : Fin N, Integrable
+      (fun x : M => tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel (bochnerGroupElt3NegV (I := I) (M := M) g s S (V a) (V b) x))
+        (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)))
+      (riemannianVolumeMeasure (I := I) (M := M) g) := by
+    intro a b
+    refine (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+      (bochnerGroupElt3NegVCc (I := I) (M := M) g s S (hV a) (hV b))
+      (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))).congr
+      (Filter.Eventually.of_forall (fun x => ?_))
+    simp only [SmoothCcTensor.toFun_apply,
+      bochnerGroupElt3NegVCc_toSection_eq (I := I) (M := M) g s S (hV a) (hV b) x,
+      bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S (hV b) x]
+  -- The pointwise carrier split, turned into a per-`(a, b)` integral split.
+  have hintegral : ∀ a b : Fin N,
+      (∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+            (TensorRSSpace.toModel (bochnerGroupElt3 (I := I) (M := M) g s S (V a) (V b) x))
+            (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+        (∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+              (TensorRSSpace.toModel
+                (bochnerGroupElt3IiiIv (I := I) (M := M) g s S (V a) (V b) x))
+              (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
+        (∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+              (TensorRSSpace.toModel
+                (bochnerGroupElt3NegV (I := I) (M := M) g s S (V a) (V b) x))
+              (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
+    intro a b
+    rw [← MeasureTheory.integral_add (hintIiiIv a b) (hintNegV a b)]
+    refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+    simp only []
+    rw [bochnerGroupElt3_eq_iiiIv_add_negV (I := I) (M := M) g s S (V a) (V b) x,
+      TensorRSSpace.toModel_add, tensorInnerPointwise_add_left (I := I) (M := M) g 0 s x]
+  -- The full group-`3` double sum splits as the `iii + iv` double sum plus the `−v` double sum.
+  have hsplit : bochnerFoldGroupSum (I := I) (M := M) g s S V
+        (bochnerGroupElt3 (I := I) (M := M) g s S) =
+      (∑ a : Fin N, ∑ b : Fin N,
+          ∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+              (TensorRSSpace.toModel
+                (bochnerGroupElt3IiiIv (I := I) (M := M) g s S (V a) (V b) x))
+              (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
+        bochnerFoldGroupSum (I := I) (M := M) g s S V
+          (bochnerGroupElt3NegV (I := I) (M := M) g s S) := by
+    rw [bochnerFoldGroupSum, bochnerFoldGroupSum, ← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    rw [← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl (fun b _ => ?_)
+    exact hintegral a b
+  rw [hsplit, bochnerGroupElt3IiiIv_frameSum_integral_eq_zero (I := I) (M := M) g s S V hV hPar,
+    zero_add]
+  -- The `−v` double sum collapses to the Ricci-trace pairing via the pointwise fold assembly.
+  refine (fold_assembly (I := I) (M := M) g s S V hV hPar
+    (ricTraceSection (I := I) (M := M) g s S)
+    (bochnerGroupElt3NegV (I := I) (M := M) g s S)
+    (fun b x => parsevalFrameSum_ricSlot0_eq_sum_negV (I := I) (M := M) g s S V hPar b x)
+    (fun a b => hintNegV a b)).symm
+
+/-- **The group-`2` IBP residue plus group-`4` second-order pair equals the differentiated-curvature
+operator-field action (the genuine `∇R`-trace curvature-commutator core, compact operator-field form).**
+For a fixed Parseval frame family, the frame double sum of the group-`2` integration-by-parts residue
+`bochnerGroup2Residue` plus the group-`4` double sum equals the single `L²` pairing of the differentiated
+curvature operator-field action `appCc (∇Φ₀) S` (`Φ₀ := curvOpField g s`) against `∇S`:
+```
+(∑_b ∑_a ∫ bochnerGroup2Residue) + bochnerFoldGroupSum (bochnerGroupElt4)
+  = ⟨appCc (covGrad (curvOpField g s)) S, ∇S⟩_{L²}.
+```
+
+This is the genuinely-deep curvature-commutator content of the rank-`0` Bochner divergence root, the
+compact operator-field core of which the pre-split B-rule form
+`parsevalFrameSum_group2Residue_add_group4_eq_diffCurvSplit_core` is the thin re-collection.  The group-`2`
+covariant derivative `∇_{V a}(·)` has already been integrated by parts off into the residue
+`bochnerGroup2Residue` by the frame-summed engine (`bochnerFoldGroupSum_elt2_eq_residueSum`,
+`integral_frameSummed_covDeriv_combined_eq_zero`); what remains is the genuine curvature-commutator
+reorganization, *strictly closer to the tensor-bundle bedrock*: the residue's second covariant derivative
+`∇_{V a}(∇_{V b} S)`, paired against `R(V a, V b) S`, plus the group-`4` symmetric pair, is reorganized
+through the section-level Ricci identity `tensorSecondCovDeriv_antisymm_eq_riemannOp` and the frame-summed
+differentiated tensor curvature transfer `frame_sum_nablaTensor0SCurv_baseSlot_eval` (the frame-independent
+second Bianchi `nablaTensor0SCurv_cyclic_eq_zero` traced against the Parseval frame
+`parseval_family_sum_bilin_eq`, `∑_a V_a ⊗ V_a = g⁻¹`) into the differentiated curvature coefficient
+`(∇R) S` (`appCc_curvOpField_eq_pureRGenuineDiffOp`, `nablaTensor0SCurv_apply_eval`).  It is *false* for an
+arbitrary section in place of the differentiated curvature trace (the `(∇R) S` content is genuinely
+present), so it genuinely uses `R`, `∇R`, the Parseval reproduction `hPar`, and the second-order frame
+structure.  This is GENERAL Parseval-frame curvature content that should be promoted to a curvature file;
+the body is `sorry` and consumers transitively depend on its `sorryAx`. -/
+private theorem parsevalFrameSum_group2Residue_add_group4_eq_appCc_nablaCurvOpField_core
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
+    (∑ b : Fin N, ∑ a : Fin N,
+        ∫ x, bochnerGroup2Residue (I := I) (M := M) g s S (V a) (V b)
+            ⟨fun y : M => V a y, hV a⟩ x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
+      bochnerFoldGroupSum (I := I) (M := M) g s S V
+        (bochnerGroupElt4 (I := I) (M := M) g s S) =
+      tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (appCc (I := I) (M := M) g s (s + 1)
+          (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun :=
+  sorry
+
 /-- **The group-`2` IBP residue plus group-`4` second-order pair, pre-split into the two operator-field
-pairings (the genuine differentiated-curvature reorganization core, B-rule normal form).** For a fixed
-Parseval frame family, the frame double sum of the group-`2` integration-by-parts residue
-`bochnerGroup2Residue` (`= −(⟨R(V a, V b) S, ∇_{V a}(∇_{V b} S)⟩ + ⟨R(V a, V b) S, ∇_{V b} S⟩ · divᵍ (V a))`)
-plus the group-`4` double sum (the symmetric second-order pair `−∇²_{∇_{V b} V a, V a} S − ∇²_{V a, ∇_{V b}
-V a} S` read against `∇_{V b} S`) equals the differentiated-curvature operator-field action, pre-split by the
+pairings (the differentiated-curvature reorganization, B-rule normal form).** For a fixed Parseval frame
+family, the frame double sum of the group-`2` integration-by-parts residue `bochnerGroup2Residue`
+(`= −(⟨R(V a, V b) S, ∇_{V a}(∇_{V b} S)⟩ + ⟨R(V a, V b) S, ∇_{V b} S⟩ · divᵍ (V a))`) plus the group-`4`
+double sum (the symmetric second-order pair `−∇²_{∇_{V b} V a, V a} S − ∇²_{V a, ∇_{V b} V a} S` read
+against `∇_{V b} S`) equals the differentiated-curvature operator-field action, pre-split by the
 operator-field covariant Leibniz B-rule into the gradient-of-base pairing minus the passenger-slot pairing:
 ```
 (∑_b ∑_a ∫ bochnerGroup2Residue) + bochnerFoldGroupSum g s S V (bochnerGroupElt4)
   = ⟨∇(pureRGenuineDiffOp g 0 s S), ∇S⟩_{L²} − ⟨appCc (slotExtend Φ₀) (∇S), ∇S⟩_{L²},   Φ₀ := curvOpField g s.
 ```
 
-This is the genuinely-deep `∇R`-trace content of the rank-`0` Bochner divergence root, in the bedrock-near
-pre-split form (the `appCc (covGrad Φ₀)`-collapsed compact form is the thin B-rule re-collection
-`…_eq_appCc_covGrad_curvOpField_BRIDGE` on top of this).  The group-`2` covariant derivative `∇_{V a}(·)`
-has already been integrated by parts off into the residue `bochnerGroup2Residue` by the frame-summed engine
-(`bochnerFoldGroupSum_elt2_eq_residueSum`, `integral_frameSummed_covDeriv_combined_eq_zero`); what remains is
-the genuine curvature-commutator reorganization, *strictly closer to the tensor-bundle bedrock*: the
-residue's second covariant derivative `∇_{V a}(∇_{V b} S)`, paired against `R(V a, V b) S`, plus the group-`4`
-symmetric pair, is reorganized through the section-level Ricci identity `tensorSecondCovDeriv_antisymm_eq_riemannOp`
-and the frame-summed differentiated tensor curvature transfer `frame_sum_nablaTensor0SCurv_baseSlot_eval` (the
-frame-independent second Bianchi `nablaTensor0SCurv_cyclic_eq_zero` traced against the Parseval frame
-`parseval_family_sum_bilin_eq`, `∑_a V_a ⊗ V_a = g⁻¹`) into the differentiated curvature coefficient
-`(∇R) S` (`appCc_curvOpField_eq_pureRGenuineDiffOp`, `nablaTensor0SCurv_apply_eval`), and the operator-field
-B-rule (`tensorL2Inner_covGrad_appCc_eq_add`) pre-splits it.  It is *false* for an arbitrary section in place
-of the differentiated curvature trace (the `(∇R) S` content is genuinely present), so it genuinely uses `R`,
-`∇R`, the Parseval reproduction `hPar`, and the second-order frame structure.  The body is `sorry`; it is
-GENERAL Parseval-frame curvature content that should be promoted to a curvature file.  Consumers transitively
-depend on its `sorryAx`. -/
+This is the public pre-split form of the more-primitive compact operator-field core
+`parsevalFrameSum_group2Residue_add_group4_eq_appCc_nablaCurvOpField_core` (which carries the genuine
+curvature-commutator `∇R`-trace content); the pre-split is the thin B-rule re-collection of the same core.
+The operator-field covariant Leibniz pairing split `tensorL2Inner_covGrad_appCc_eq_add` (`Φ := Φ₀`,
+`W := S`, `T := ∇S`) reads `⟨∇(appCc Φ₀ S), ∇S⟩ = ⟨appCc (∇Φ₀) S, ∇S⟩ + ⟨appCc (slotExtend Φ₀)(∇S), ∇S⟩`,
+and the order-`0` action `appCc Φ₀ S = pureRGenuineDiffOp g 0 s S` (`appCc_curvOpField_eq_pureRGenuineDiffOp`)
+identifies the gradient-of-base term, so the core's `⟨appCc (∇Φ₀) S, ∇S⟩` re-collects to
+`⟨∇(pureRᵍ S), ∇S⟩ − ⟨appCc (slotExtend Φ₀)(∇S), ∇S⟩`.  Consumers transitively depend on the core's
+`sorryAx`. -/
 private theorem parsevalFrameSum_group2Residue_add_group4_eq_diffCurvSplit_core
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
@@ -2082,8 +2441,21 @@ private theorem parsevalFrameSum_group2Residue_add_group4_eq_diffCurvSplit_core
         (appCc (I := I) (M := M) g (s + 1) (s + 1)
           (slotExtend (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s))
           (covGrad (I := I) (M := M) g 0 s S)).toFun
-        (covGrad (I := I) (M := M) g 0 s S).toFun :=
-  sorry
+        (covGrad (I := I) (M := M) g 0 s S).toFun := by
+  classical
+  -- B-rule re-collection of the compact operator-field core.  The operator-field covariant Leibniz split
+  -- (`tensorL2Inner_covGrad_appCc_eq_add`) reads `⟨∇(appCc Φ₀ S), ∇S⟩` as the differentiated-action pairing
+  -- `⟨appCc (∇Φ₀) S, ∇S⟩` plus the passenger-slot pairing; the order-`0` action `appCc Φ₀ S = pureRᵍ S`
+  -- (`appCc_curvOpField_eq_pureRGenuineDiffOp`) supplies the gradient-of-base term.
+  have hcore := parsevalFrameSum_group2Residue_add_group4_eq_appCc_nablaCurvOpField_core
+    (I := I) (M := M) g s S V hV hPar
+  have hbase : appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s) S =
+      pureRGenuineDiffOp (I := I) (M := M) g 0 s S :=
+    appCc_curvOpField_eq_pureRGenuineDiffOp (I := I) (M := M) g s S
+  have hsplit := tensorL2Inner_covGrad_appCc_eq_add (I := I) (M := M) g s s
+    (curvOpField (I := I) (M := M) g s) S (covGrad (I := I) (M := M) g 0 s S)
+  rw [hbase] at hsplit
+  linarith [hcore, hsplit]
 
 /-- **The group-`2` IBP residue plus group-`4` second-order pair equals the differentiated-curvature
 operator-field action (the genuine `∇R`-trace leaf, compact operator-field form).** For a fixed Parseval
