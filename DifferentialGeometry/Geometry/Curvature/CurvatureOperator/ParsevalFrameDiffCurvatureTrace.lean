@@ -530,30 +530,424 @@ private lemma nablaBaseSlotCurv_add_right
     (ContMDiffSection.mk (smoothExtensionTangent (I := I) x u)
       (smoothExtensionTangent_contMDiff (I := I) x u)) x
 
+/-! ### Value-determinacy of the tangent-level differentiated curvature `nablaCurvSec`
+
+The differentiated tangent curvature `nablaCurvSec (LeviCivita g) X Y Z W x` depends on its derivation
+slot `X` and its first antisymmetric slot `Y` only through their point values `X x, Y x`.  For `X`
+this is immediate (each of the four Leibniz terms reads `X` only through the value `X x`, as a
+continuous-linear-map application or through the value-determined Riemann tensor `riemannSec`).  For
+`Y` it is the genuine tensoriality of `∇R`: the leading section-derivative term `∇_X(R(Y,Z)W)` is
+*not* value-local in `Y` (it differentiates the curvature section, hence the germ of `Y`), and neither
+is the Leibniz correction `R(∇_X Y, Z) W`; only their combination is value-local, the jet-dependence
+cancelling.  We prove the `Y`-determinacy by the standard local-frame argument: reduce, through the
+proven additivity, to the vanishing of `nablaCurvSec` on a section vanishing at `x`, and prove that
+vanishing by expanding the section in a local frame (a bump-cut-off global frame with coefficients
+vanishing at `x`) and the proven `ℝ`-homogeneity.  The germ-locality of `nablaCurvSec` in `Y` glues
+the local-frame expansion (valid only near `x`) to the value at `x`. -/
+
+/-- The tangent-level differentiated curvature vanishes when its first antisymmetric slot is the zero
+section, read from the additivity `nablaCurvSec_add_right` (`a = a + a ⟹ a = 0`). -/
+private lemma nablaCurvSec_zero_right
+    (g : SmoothRiemannianMetric I M)
+    (X Z W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
+    nablaCurvSec (LeviCivita (I := I) g) (fun b => X b)
+        (fun b => (0 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) b) (fun b => Z b)
+        (fun b => W b) x = 0 := by
+  have h := nablaCurvSec_add_right (g := g) X
+    (0 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (0 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) Z W x
+  have hfun : (fun b => ((0 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+        + (0 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)) b) =
+      (fun b => (0 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) b) := by
+    funext b; simp
+  rw [hfun] at h
+  exact add_eq_left.mp h.symm
+
+/-- Finite additivity of the tangent-level differentiated curvature in its first antisymmetric slot:
+`(∇_X R)(∑ᵢ Yᵢ, Z) W = ∑ᵢ (∇_X R)(Yᵢ, Z) W`, by induction over the index finset using
+`nablaCurvSec_add_right` and `nablaCurvSec_zero_right`. -/
+private lemma nablaCurvSec_finsetSum_right
+    (g : SmoothRiemannianMetric I M) {ι : Type*} (s : Finset ι)
+    (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (Y : ι → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (Z W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
+    nablaCurvSec (LeviCivita (I := I) g) (fun b => X b)
+        (fun b => (∑ i ∈ s, Y i) b) (fun b => Z b) (fun b => W b) x =
+      ∑ i ∈ s, nablaCurvSec (LeviCivita (I := I) g) (fun b => X b)
+        (fun b => Y i b) (fun b => Z b) (fun b => W b) x := by
+  classical
+  induction s using Finset.induction_on with
+  | empty =>
+      simp only [Finset.sum_empty]
+      exact nablaCurvSec_zero_right (g := g) X Z W x
+  | insert a t ha ih =>
+      have hfun : (fun b => (∑ i ∈ insert a t, Y i) b) =
+          (fun b => (Y a + ∑ i ∈ t, Y i) b) := by
+        funext b
+        rw [ContMDiffSection.finset_sum_apply, Finset.sum_insert ha,
+          ContMDiffSection.coe_add, Pi.add_apply, ContMDiffSection.finset_sum_apply]
+      rw [hfun, nablaCurvSec_add_right (g := g) X (Y a) (∑ i ∈ t, Y i) Z W x, ih,
+        Finset.sum_insert ha]
+
+/-! ### Germ-locality of `nablaCurvSec` in its first antisymmetric slot -/
+
+/-- **Germ-locality of `riemannSec` in its first slot.** For a `C^∞` covariant derivative and smooth
+fields, if `X =ᶠ X'` near `x`, then `riemannSec cov X Y Z x = riemannSec cov X' Y Z x`.  In
+`riemannSec_def` the first slot enters: through its value `X x` in the leading term (equal by the
+eventual equality at `x`), through `covApply X Z` in the second term (eventually equal — `covApply`
+reads `X` only pointwise), and through the bracket `[X, Y]` in the third (eventually equal — the Lie
+bracket is germ-local). -/
+private lemma riemannSec_eq_of_X_eventuallyEq
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [FiniteDimensional ℝ F]
+    {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
+    [∀ x, AddCommGroup (V x)] [∀ x, Module ℝ (V x)] [∀ x : M, TopologicalSpace (V x)]
+    [∀ x, IsTopologicalAddGroup (V x)] [∀ x, ContinuousSMul ℝ (V x)]
+    [FiberBundle F V] [VectorBundle ℝ F V] [ContMDiffVectorBundle ∞ F V I]
+    (cov : CovariantDerivative I F V) [CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
+    {X X' Y : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X))
+    (hX' : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X'))
+    (hZ : ContMDiff I (I.prod 𝓘(ℝ, F)) ∞ (T% Z))
+    (hXX' : ∀ᶠ b in 𝓝 x, X b = X' b) :
+    riemannSec cov X Y Z x = riemannSec cov X' Y Z x := by
+  classical
+  have hXx : X x = X' x := hXX'.self_of_nhds
+  unfold riemannSec
+  -- Term 1: leading slot enters through the value `X x = X' x`.
+  rw [hXx]
+  -- Term 2: `covApply X Z =ᶠ covApply X' Z` (pointwise in `X`), then `congr_of_eventuallyEq`.
+  have hev_cXZ : ∀ᶠ b in 𝓝 x, covApply cov X Z b = covApply cov X' Z b := by
+    filter_upwards [hXX'] with b hb
+    simp only [covApply_apply, hb]
+  have hcXZ_at : MDiffAt (T% (covApply cov X Z)) x :=
+    covApply_mdifferentiableAt (cov := cov) hX (by
+      rw [show ((∞ : WithTop ℕ∞) + 1) = (∞ : WithTop ℕ∞) from by rw [ENat.coe_top_add_one]]; exact hZ)
+  have hcX'Z_at : MDiffAt (T% (covApply cov X' Z)) x :=
+    covApply_mdifferentiableAt (cov := cov) hX' (by
+      rw [show ((∞ : WithTop ℕ∞) + 1) = (∞ : WithTop ℕ∞) from by rw [ENat.coe_top_add_one]]; exact hZ)
+  have hT2 : cov.toFun (covApply cov X Z) x = cov.toFun (covApply cov X' Z) x :=
+    cov.isCovariantDerivativeOnUniv.congr_of_eventuallyEq hcXZ_at hcX'Z_at Filter.univ_mem hev_cXZ
+  rw [hT2]
+  -- Term 3: `[X, Y] =ᶠ [X', Y]`, hence `[X, Y] x = [X', Y] x` (the bracket is germ-local).
+  have hbr_x : VectorField.mlieBracket I X Y x = VectorField.mlieBracket I X' Y x :=
+    Filter.EventuallyEq.mlieBracket_vectorField_eq hXX' (Filter.EventuallyEq.refl _ Y)
+  rw [hbr_x]
+
+/-- **Germ-locality of the differentiated tangent curvature `nablaCurvSec` in its first antisymmetric
+slot.** For smooth fields with `Y =ᶠ Y'` near `x`, `(∇_X R)(Y, Z) W x = (∇_X R)(Y', Z) W x`.  Each of
+the four Leibniz terms is germ-local in `Y`: the leading connection-derivative term, because the
+curvature section `b ↦ R(Y, Z) W b` is eventually equal to `b ↦ R(Y', Z) W b` near `x`
+(`riemannSec_eq_of_X_eventuallyEq` at every nearby base point), so the covariant derivatives agree
+(`congr_of_eventuallyEq`); the three correction curvatures by `riemannSec_eq_of_X_eventuallyEq`
+directly (in the first slot for the leading correction, through `covApply X Y =ᶠ covApply X Y'` for
+the others). -/
+private lemma nablaCurvSec_eq_of_Y_eventuallyEq
+    (g : SmoothRiemannianMetric I M)
+    {X Y Y' Z W : Π b : M, TangentSpace I b} {x : M}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X))
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y))
+    (hY' : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y'))
+    (hZ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Z))
+    (hW : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% W))
+    (hYY' : ∀ᶠ b in 𝓝 x, Y b = Y' b) :
+    nablaCurvSec (LeviCivita (I := I) g) X Y Z W x =
+      nablaCurvSec (LeviCivita (I := I) g) X Y' Z W x := by
+  classical
+  set cov := LeviCivita (I := I) g with hcov_def
+  rw [nablaCurvSec_def, nablaCurvSec_def]
+  -- Term 1: the curvature section is eventually equal near `x`, so `cov.toFun` agrees.
+  have hsec_ev : ∀ᶠ b in 𝓝 x,
+      riemannSec cov Y Z W b = riemannSec cov Y' Z W b := by
+    -- On the open neighbourhood where `Y = Y'`, the germ-locality of `riemannSec` in its first slot
+    -- gives the pointwise equality at every base point of that neighbourhood.
+    rw [Filter.eventually_iff_exists_mem] at hYY' ⊢
+    obtain ⟨U, hU, hYeq⟩ := hYY'
+    obtain ⟨V', hV'U, hV'_open, hpV'⟩ := mem_nhds_iff.mp hU
+    refine ⟨V', hV'_open.mem_nhds hpV', fun b hbV' => ?_⟩
+    refine riemannSec_eq_of_X_eventuallyEq (cov := cov) hY hY' hW ?_
+    exact Filter.eventually_of_mem (hV'_open.mem_nhds hbV')
+      (fun b' hb'V' => hYeq b' (hV'U hb'V'))
+  have hRYZW_sm : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (fun b => riemannSec cov Y Z W b)) :=
+    riemannSec_contMDiff cov hY hZ hW
+  have hRY'ZW_sm : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (fun b => riemannSec cov Y' Z W b)) :=
+    riemannSec_contMDiff cov hY' hZ hW
+  have hT1 : cov.toFun (fun b => riemannSec cov Y Z W b) x =
+      cov.toFun (fun b => riemannSec cov Y' Z W b) x :=
+    cov.isCovariantDerivativeOnUniv.congr_of_eventuallyEq
+      (hRYZW_sm.mdifferentiableAt (by simp)) (hRY'ZW_sm.mdifferentiableAt (by simp))
+      Filter.univ_mem hsec_ev
+  rw [hT1]
+  -- Term 2: `covApply X Y =ᶠ covApply X Y'` (pointwise in the section slot of `covApply`), so
+  -- `riemannSec cov (covApply X Y) Z W x = riemannSec cov (covApply X Y') Z W x` by germ-locality.
+  have hcXY := covApply_contMDiff (cov := cov) hX hY
+  have hcXY' := covApply_contMDiff (cov := cov) hX hY'
+  have hev_cXY : ∀ᶠ b in 𝓝 x, covApply cov X Y b = covApply cov X Y' b := by
+    -- `covApply cov X Y b = cov.toFun Y b (X b)`; with `Y =ᶠ Y'`, the covariant derivatives agree.
+    rw [Filter.eventually_iff_exists_mem] at hYY' ⊢
+    obtain ⟨U, hU, hYeq⟩ := hYY'
+    obtain ⟨V', hV'U, hV'_open, hpV'⟩ := mem_nhds_iff.mp hU
+    refine ⟨V', hV'_open.mem_nhds hpV', fun b hbV' => ?_⟩
+    have hYeq_b : ∀ᶠ b' in 𝓝 b, Y b' = Y' b' :=
+      Filter.eventually_of_mem (hV'_open.mem_nhds hbV') (fun b' hb'V' => hYeq b' (hV'U hb'V'))
+    have hcov_b : cov.toFun Y b = cov.toFun Y' b :=
+      cov.isCovariantDerivativeOnUniv.congr_of_eventuallyEq
+        ((hY b).mdifferentiableAt (by simp)) ((hY' b).mdifferentiableAt (by simp))
+        Filter.univ_mem hYeq_b
+    simp only [covApply_apply, hcov_b]
+  have hT2 : riemannSec cov (covApply cov X Y) Z W x =
+      riemannSec cov (covApply cov X Y') Z W x :=
+    riemannSec_eq_of_X_eventuallyEq (cov := cov) hcXY hcXY' hW hev_cXY
+  rw [hT2]
+  -- Term 3: first slot is `Y` directly.
+  have hT3 : riemannSec cov Y (covApply cov X Z) W x =
+      riemannSec cov Y' (covApply cov X Z) W x :=
+    riemannSec_eq_of_X_eventuallyEq (cov := cov) hY hY' hW hYY'
+  rw [hT3]
+  -- Term 4: first slot is `Y` directly.
+  have hT4 : riemannSec cov Y Z (covApply cov X W) x =
+      riemannSec cov Y' Z (covApply cov X W) x :=
+    riemannSec_eq_of_X_eventuallyEq (cov := cov) hY hY'
+      (covApply_contMDiff (cov := cov) hX hW) hYY'
+  rw [hT4]
+
+/-- **Globalization of a scalar function smooth on a neighbourhood.** A function `f : M → ℝ` that is
+`C^∞` on an open neighbourhood `U` of `x` admits a global `C^∞` function `F` agreeing with `f` near
+`x`: cut off `f` by a smooth bump `χ` (`= 1` near `x`, `tsupport χ ⊆ U`) and glue the product
+`χ · f` (smooth on `U`) with `0` (smooth off `tsupport χ`) across the open cover. -/
+private lemma exists_global_smooth_eqOn_nhd_scalar
+    {f : M → ℝ} {U : Set M} {x : M} (hU : IsOpen U) (hxU : x ∈ U)
+    (hf : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ f U) :
+    ∃ F : M → ℝ, ContMDiff I 𝓘(ℝ, ℝ) ∞ F ∧ F =ᶠ[𝓝 x] f := by
+  classical
+  obtain ⟨χ, -, hχ⟩ :=
+    (SmoothBumpFunction.nhds_basis_tsupport (I := I) x).mem_iff.mp (hU.mem_nhds hxU)
+  refine ⟨fun b => χ b * f b, ?_, ?_⟩
+  · -- Glue `χ · f` (smooth on `U`) with `0` (smooth off `tsupport χ`).
+    have hχ_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun b => (χ : M → ℝ) b) :=
+      χ.contMDiff.of_le (by exact_mod_cast le_top)
+    have hU_part : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun b => χ b * f b) U :=
+      (hχ_smooth.contMDiffOn).mul hf
+    have hcompl_part : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun b => χ b * f b) (tsupport χ)ᶜ := by
+      apply (contMDiffOn_const (c := (0 : ℝ))).congr
+      intro b hb
+      rw [image_eq_zero_of_notMem_tsupport hb, zero_mul]
+    refine contMDiff_of_contMDiffOn_union_of_isOpen hU_part hcompl_part ?_ hU
+      (isOpen_compl_iff.mpr (isClosed_tsupport χ))
+    rw [Set.eq_univ_iff_forall]
+    intro b
+    by_cases hb : b ∈ tsupport χ
+    · exact Or.inl (hχ hb)
+    · exact Or.inr hb
+  · filter_upwards [χ.eventuallyEq_one] with b hb
+    rw [hb, Pi.one_apply, one_mul]
+
+/-- **Vanishing of the differentiated tangent curvature on a section vanishing at the basepoint.** For
+smooth fields with `Δ x = 0`, the differentiated tangent curvature `(∇_X R)(Δ, Z) W x = 0`.  This is
+the value-locality of `∇R` in its first antisymmetric slot phrased as a vanishing.  In a chart
+trivialization `e` at `x` with model basis `bE`, the section `Δ` expands near `x` as
+`Δ = ∑ᵢ cᵢ • sᵢ` over the local frame `sᵢ = e.localFrame bE i` with coefficients
+`cᵢ = e.localFrame_coeff bE i · Δ` vanishing at `x` (`cᵢ x = (linear)(Δ x = 0) = 0`).  Extending the
+local frame to global smooth sections `Sᵢ` (`exists_contMDiffSection_eqOn_nhd`) and the coefficients to
+global smooth functions `fᵢ` (`exists_global_smooth_eqOn_nhd_scalar`), `Δ = ∑ᵢ fᵢ • Sᵢ` near `x`, so by
+the germ-locality of `nablaCurvSec` in its first antisymmetric slot, finite additivity, and the proven
+`ℝ`-homogeneity, `(∇_X R)(Δ, Z) W x = ∑ᵢ fᵢ x • (∇_X R)(Sᵢ, Z) W x = ∑ᵢ 0 • … = 0`. -/
+private lemma nablaCurvSec_vanish_secondSlot
+    (g : SmoothRiemannianMetric I M)
+    (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    {Δ : Π b : M, TangentSpace I b}
+    (Z W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {x : M}
+    (hΔ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Δ)) (hΔx : Δ x = 0) :
+    nablaCurvSec (LeviCivita (I := I) g) (fun b => X b) Δ (fun b => Z b) (fun b => W b) x = 0 := by
+  classical
+  set e : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I) → M) :=
+    trivializationAt E (TangentSpace I) x with he_def
+  have hx_base : x ∈ e.baseSet := mem_baseSet_trivializationAt E (TangentSpace I) x
+  have hbase_open : IsOpen e.baseSet := e.open_baseSet
+  set bE : Module.Basis (Module.Basis.ofVectorSpaceIndex ℝ E) ℝ E := Module.Basis.ofVectorSpace ℝ E with hbE_def
+  -- The local frame, its coefficients on `Δ`, and the eventual expansion of `Δ` near `x`.
+  set sLoc : Module.Basis.ofVectorSpaceIndex ℝ E → Π b : M, TangentSpace I b :=
+    fun i => e.localFrame bE i with hsLoc_def
+  set cLoc : Module.Basis.ofVectorSpaceIndex ℝ E → M → ℝ :=
+    fun i b => e.localFrame_coeff I bE i b (Δ b) with hcLoc_def
+  have hexpand : ∀ᶠ b in 𝓝 x, Δ b = ∑ i, cLoc i b • sLoc i b :=
+    e.eventually_eq_localFrame_sum_coeff_smul bE hx_base
+  -- Smoothness of the local frame and coefficients on the base set.
+  have hsLoc_on : ∀ i, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞ (T% (sLoc i)) e.baseSet :=
+    fun i => e.contMDiffOn_localFrame_baseSet (n := ∞) (b := bE) i
+  have hcLoc_on : ∀ i, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (cLoc i) e.baseSet := by
+    intro i b hb
+    exact (contMDiffAt_localFrame_coeff bE hb (hΔ b) i).contMDiffWithinAt
+  -- Globalize the frame: `S i` global smooth, agreeing with `s i` near `x`.
+  obtain ⟨Sglob, hSglob_eq⟩ := exists_contMDiffSection_eqOn_nhd (I := I)
+    (V := fun z : M => TangentSpace I z) (n := (⊤ : ℕ∞)) (s := sLoc)
+    (fun i => (hsLoc_on i).of_le (by exact_mod_cast le_top)) hbase_open hx_base
+  -- Globalize each coefficient: `f i` global smooth, agreeing with `c i` near `x`.
+  have hfglob : ∀ i, ∃ F : M → ℝ, ContMDiff I 𝓘(ℝ, ℝ) ∞ F ∧ F =ᶠ[𝓝 x] cLoc i :=
+    fun i => exists_global_smooth_eqOn_nhd_scalar hbase_open hx_base (hcLoc_on i)
+  choose fglob hfglob_smooth hfglob_eq using hfglob
+  -- Bundle the global frame as `Cₛ^∞` sections and the global coefficients as `C^∞⟮I, M; ℝ⟯` maps.
+  set Ssec : Module.Basis.ofVectorSpaceIndex ℝ E → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    fun i => Sglob i with hSsec_def
+  set fbun : Module.Basis.ofVectorSpaceIndex ℝ E → C^∞⟮I, M; ℝ⟯ :=
+    fun i => ⟨fglob i, hfglob_smooth i⟩ with hfbun_def
+  have hfbun_coe : ∀ i, (fbun i : M → ℝ) = fglob i := fun i => rfl
+  -- The global combination `∑ᵢ fᵢ • Sᵢ` agrees with `Δ` near `x`.
+  have hYY' : ∀ᶠ b in 𝓝 x, Δ b = (∑ i, fbun i • Ssec i) b := by
+    filter_upwards [hexpand, hSglob_eq, Filter.eventually_all.mpr hfglob_eq] with b hbexp hbS hbf
+    rw [hbexp, ContMDiffSection.finset_sum_apply]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    have hval : (fbun i • Ssec i) b = fglob i b • (Ssec i : Π z : M, TangentSpace I z) b := rfl
+    rw [hval, hbf i]
+    have hSb : (Ssec i : Π z : M, TangentSpace I z) b = sLoc i b := hbS i
+    rw [hSb]
+  -- The global combination is smooth.
+  have hcomb_smooth : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% ((∑ i, fbun i • Ssec i :
+      Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) : Π b : M, TangentSpace I b)) :=
+    (∑ i, fbun i • Ssec i).contMDiff
+  -- Germ-locality of `nablaCurvSec` in its first antisymmetric slot.
+  rw [nablaCurvSec_eq_of_Y_eventuallyEq (g := g) X.contMDiff hΔ hcomb_smooth
+    Z.contMDiff W.contMDiff hYY']
+  -- Finite additivity, then `ℝ`-homogeneity, with each coefficient vanishing at `x`.
+  rw [nablaCurvSec_finsetSum_right (g := g) Finset.univ X
+    (fun i => fbun i • Ssec i) Z W x]
+  apply Finset.sum_eq_zero
+  intro i _
+  rw [show (fun b => (fbun i • Ssec i) b) =
+      ((fbun i : M → ℝ) • fun b => (Ssec i : Π z : M, TangentSpace I z) b) from rfl,
+    nablaCurvSec_smul_right (g := g) (by rw [hfbun_coe]; exact hfglob_smooth i) X (Ssec i) Z W x]
+  have hfix : (fbun i : M → ℝ) x = 0 := by
+    rw [hfbun_coe, (hfglob_eq i).self_of_nhds, hcLoc_def]
+    simp only [hΔx, map_zero]
+  rw [hfix, zero_smul]
+
+/-- **Value-determinacy of the differentiated tangent curvature in its first antisymmetric slot.** For
+smooth fields with `Y x = Y' x`, `(∇_X R)(Y, Z) W x = (∇_X R)(Y', Z) W x`.  Write `Y = Y' + (Y - Y')`;
+the additivity `nablaCurvSec_add_right` splits the value into `(∇_X R)(Y', Z) W x + (∇_X R)(Y - Y', Z) W x`,
+and the second summand vanishes by `nablaCurvSec_vanish_secondSlot` since `(Y - Y') x = 0`. -/
+private lemma nablaCurvSec_eq_of_secondSlot_eq
+    (g : SmoothRiemannianMetric I M)
+    (X Y Y' Z W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
+    (hYY' : (Y : Π b : M, TangentSpace I b) x = Y' x) :
+    nablaCurvSec (LeviCivita (I := I) g) (fun b => X b) (fun b => Y b) (fun b => Z b)
+        (fun b => W b) x =
+      nablaCurvSec (LeviCivita (I := I) g) (fun b => X b) (fun b => Y' b) (fun b => Z b)
+        (fun b => W b) x := by
+  classical
+  have hsplit := nablaCurvSec_add_right (g := g) X Y' (Y - Y') Z W x
+  have hfun : (fun b => (Y' + (Y - Y')) b) = (fun b => Y b) := by
+    funext b
+    simp only [ContMDiffSection.coe_add, ContMDiffSection.coe_sub, Pi.add_apply, Pi.sub_apply]
+    abel
+  rw [hfun] at hsplit
+  have hvanish : nablaCurvSec (LeviCivita (I := I) g) (fun b => X b) (fun b => (Y - Y') b)
+      (fun b => Z b) (fun b => W b) x = 0 := by
+    refine nablaCurvSec_vanish_secondSlot (g := g) X Z W (Δ := fun b => (Y - Y') b)
+      (Y - Y').contMDiff ?_
+    simp only [ContMDiffSection.coe_sub, Pi.sub_apply, hYY', sub_self]
+  rw [hsplit, hvanish, add_zero]
+
+/-- **Value-determinacy of the differentiated tangent curvature in its derivation slot.** For smooth
+fields with `X x = X' x`, `(∇_X R)(Y, Z) W x = (∇_{X'} R)(Y, Z) W x`.  Each of the four Leibniz terms
+reads `X` only through `X x`: the leading connection-derivative term as a continuous-linear-map
+application, and the three correction curvatures through the value `(covApply X ·) x = ∇_X · (x)` (a
+continuous-linear-map application) carried by the value-determined Riemann tensor `riemannOp`. -/
+private lemma nablaCurvSec_eq_of_firstSlot_eq
+    (g : SmoothRiemannianMetric I M)
+    (X X' Y Z W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
+    (hXX' : (X : Π b : M, TangentSpace I b) x = X' x) :
+    nablaCurvSec (LeviCivita (I := I) g) (fun b => X b) (fun b => Y b) (fun b => Z b)
+        (fun b => W b) x =
+      nablaCurvSec (LeviCivita (I := I) g) (fun b => X' b) (fun b => Y b) (fun b => Z b)
+        (fun b => W b) x := by
+  classical
+  set cov := LeviCivita (I := I) g with hcov_def
+  rw [nablaCurvSec_def, nablaCurvSec_def]
+  -- T1: the leading term reads `X` only through `X x`.
+  rw [show (X : Π b : M, TangentSpace I b) x = X' x from hXX']
+  -- The three correction curvatures: through `riemannOp` (value-determined), reading
+  -- `covApply X · (x) = cov.toFun · x (X x)`, which agrees for `X, X'` at `x`.
+  have hcov_eq : ∀ (V : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
+      (covApply cov (fun b => X b) (fun b => V b)) x =
+        (covApply cov (fun b => X' b) (fun b => V b)) x := by
+    intro V
+    simp only [covApply_apply, hXX']
+  -- T2.
+  have hT2 : riemannSec cov (covApply cov (fun b => X b) (fun b => Y b)) (fun b => Z b)
+        (fun b => W b) x =
+      riemannSec cov (covApply cov (fun b => X' b) (fun b => Y b)) (fun b => Z b)
+        (fun b => W b) x := by
+    rw [← riemannOp_apply_smooth (cov := cov)
+        (covApply_contMDiff (cov := cov) X.contMDiff Y.contMDiff) Z.contMDiff W.contMDiff,
+      ← riemannOp_apply_smooth (cov := cov)
+        (covApply_contMDiff (cov := cov) X'.contMDiff Y.contMDiff) Z.contMDiff W.contMDiff,
+      hcov_eq Y]
+  -- T3.
+  have hT3 : riemannSec cov (fun b => Y b) (covApply cov (fun b => X b) (fun b => Z b))
+        (fun b => W b) x =
+      riemannSec cov (fun b => Y b) (covApply cov (fun b => X' b) (fun b => Z b))
+        (fun b => W b) x := by
+    rw [← riemannOp_apply_smooth (cov := cov) Y.contMDiff
+        (covApply_contMDiff (cov := cov) X.contMDiff Z.contMDiff) W.contMDiff,
+      ← riemannOp_apply_smooth (cov := cov) Y.contMDiff
+        (covApply_contMDiff (cov := cov) X'.contMDiff Z.contMDiff) W.contMDiff,
+      hcov_eq Z]
+  -- T4.
+  have hT4 : riemannSec cov (fun b => Y b) (fun b => Z b) (covApply cov (fun b => X b) (fun b => W b)) x =
+      riemannSec cov (fun b => Y b) (fun b => Z b) (covApply cov (fun b => X' b) (fun b => W b)) x := by
+    rw [← riemannOp_apply_smooth (cov := cov) Y.contMDiff Z.contMDiff
+        (covApply_contMDiff (cov := cov) X.contMDiff W.contMDiff),
+      ← riemannOp_apply_smooth (cov := cov) Y.contMDiff Z.contMDiff
+        (covApply_contMDiff (cov := cov) X'.contMDiff W.contMDiff),
+      hcov_eq W]
+  rw [hT2, hT3, hT4]
+
+/-- **Value-determinacy of the differentiated base-slot curvature in its two leading slots.** For
+smooth fields with `X x = X' x` and `Y x = Y' x`, the differentiated base-slot curvature
+`nablaBaseSlotCurv g X Y Z x u = nablaBaseSlotCurv g X' Y' Z x u`, by the value-determinacy of
+`nablaCurvSec` in its derivation slot and first antisymmetric slot, read through the definitional
+`nablaBaseSlotCurv_eq_nablaCurvSec`. -/
+private lemma nablaBaseSlotCurv_eq_of_leftMid
+    (g : SmoothRiemannianMetric I M)
+    (X X' Y Y' Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
+    (hXX' : (X : Π b : M, TangentSpace I b) x = X' x)
+    (hYY' : (Y : Π b : M, TangentSpace I b) x = Y' x) (u : TangentSpace I x) :
+    nablaBaseSlotCurv (I := I) g X Y Z x u = nablaBaseSlotCurv (I := I) g X' Y' Z x u := by
+  rw [nablaBaseSlotCurv_eq_nablaCurvSec, nablaBaseSlotCurv_eq_nablaCurvSec]
+  exact (nablaCurvSec_eq_of_firstSlot_eq (g := g) X X' Y Z
+      (ContMDiffSection.mk (smoothExtensionTangent (I := I) x u)
+        (smoothExtensionTangent_contMDiff (I := I) x u)) x hXX').trans
+    (nablaCurvSec_eq_of_secondSlot_eq (g := g) X' Y Y' Z
+      (ContMDiffSection.mk (smoothExtensionTangent (I := I) x u)
+        (smoothExtensionTangent_contMDiff (I := I) x u)) x hYY')
+
 /-- **Well-definedness of the differentiated tensor curvature in its two leading slots, modulo pointwise
-agreement at `x`** (posited deep leaf; the body is `sorry`). For smooth fields `X, X', Y, Y'` with
+agreement at `x`.** For smooth fields `X, X', Y, Y'` with
 `X x = X' x` and `Y x = Y' x`, the values of `nablaTensor0SCurv` at `x` coincide: the four-term Leibniz
 combination `(∇_X R^{(s)})(Y, Z) A` is the genuine differentiated curvature *tensor*, so it is
 extension-independent in `X, Y` and depends on them only through `X x, Y x`.
 
-This is the value-determination half of the tensoriality of `(∇R)^{(s)}` in its two leading slots; it
-is independent of (and not derivable from) the value-additivity and `ℝ`-homogeneity proved above
-(`nablaTensor0SCurv_add_left/_smul_left/_add_mid/_smul_mid`, together with the full `nablaCurvSec`
-value-bilinearity `nablaCurvSec_add_left/_smul_left/_add_right/_smul_right`). The standard
-value-determination route — Mathlib's `TensorialAt.pointwise`, a local-frame expansion with a bump
-cutoff — is unavailable here: `TensorialAt` demands the tensoriality fields hold for sections merely
-`MDifferentiableAt x`, but `nablaCurvSec` is a *second-order* operator (its `∇_X(R(Y,Z)A)` term and the
-inner `∇_X A` correction each differentiate a section once *more*), so its value at `x` requires the
-field to be `C^1` in a neighbourhood, not just differentiable at `x`. Discharging this leaf needs the
-value-determination of the differentiated *bundle* curvature `nablaRiemannSec` as a genuine bundle map
-(a localization staying within `C^∞` sections), which is missing from the library. -/
+This is the value-determination half of the tensoriality of `(∇R)^{(s)}` in its two leading slots.  It
+reduces, through the differentiated slot-wise transfer `nablaTensorCov_baseSlot_eval`, to the
+value-determinacy of the tangent-level differentiated curvature `nablaCurvSec` in its derivation slot
+`X` and its first antisymmetric slot `Y`.  The `X`-determinacy is immediate (each Leibniz term reads
+`X` only through `X x`).  The `Y`-determinacy is the genuine tensoriality of `∇R`: it follows from the
+proven additivity `nablaCurvSec_add_right` reducing `Y` vs `Y'` (agreeing at `x`) to a section
+vanishing at `x`, and the vanishing `nablaCurvSec_vanish_secondSlot` of `nablaCurvSec` on such a
+section (a local-frame argument over the proven `ℝ`-homogeneity). -/
 theorem nablaTensor0SCurv_eq_of_pointwise_eq_leftMid
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X X' Y Y' Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (A : Π b : M, Tensor0SSpace s I b) (hA : TensorSmooth (I := I) s A)
     (x : M) (hX_eq : X x = X' x) (hY_eq : Y x = Y' x) :
     nablaTensor0SCurv (I := I) g s X Y Z A x = nablaTensor0SCurv (I := I) g s X' Y' Z A x := by
-  sorry
+  classical
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro u
+  rw [nablaTensorCov_baseSlot_eval (I := I) g s X Y Z A hA x u,
+      nablaTensorCov_baseSlot_eval (I := I) g s X' Y' Z A hA x u]
+  refine congrArg Neg.neg (Finset.sum_congr rfl (fun k _ => ?_))
+  rw [nablaBaseSlotCurv_eq_of_leftMid (I := I) g X X' Y Y' Z x hX_eq hY_eq (u k)]
 
 /-- **Additivity of the differentiated tensor curvature in its derivation slot.** For smooth fields
 `X, X', Y, Z` whose first slot is the sum `X + X'`, the differentiated tensor curvature splits
