@@ -1259,18 +1259,82 @@ private lemma loweredFirstSlot_eq_covApply_inner (g : SmoothRiemannianMetric I M
     (covApplyGenCc (I := I) (M := M) g s W' hV).toSection x, Tensor0SSpace.toModel_ofModel]
   rfl
 
-/-- **Fold 3 (terms iii + iv − v → leading-slot Ricci trace).** For a fixed Parseval frame family, the
-group-`3` double sum equals the `L²` pairing of the leading-slot Ricci-trace carrier `ricTraceSection g s S`
-against `∇S`:
+/-- **The integrated tensor Bochner–Weitzenböck extraction (the genuine deep root, in the file's own
+operator-field primitives).** For a fixed Parseval frame family, the global metric `L²` pairing of the
+order-`2` commutator defect `Curv S := pointwiseTensorCurv g s S` against `∇S := covGrad g 0 s S` splits
+into the pure-Riemann curvature trace, the Bochner–Lichnerowicz Ricci trace, and the
+differentiated-curvature (`∇R`) operator-field content:
 ```
-∑_a ∑_b ∫ ⟨[R(∇_{V a} V b, V a) S + R(V b, ∇_{V a} V a) S − ∇_{R(V a, V b) V a} S]·slot0, slot0_{V b}(∇S)⟩
-  = ⟨ricTraceSection g s S, ∇S⟩_{L²}.
+⟨Curv S, ∇S⟩_{L²}
+  = ⟨GcurvSection g s S, ∇S⟩_{L²} + ⟨ricTraceSection g s S, ∇S⟩_{L²}
+      + ⟨∇(pureRGenuineDiffOp g 0 s S), ∇S⟩_{L²}
+      − ⟨appCc (slotExtend Φ₀) (∇S), ∇S⟩_{L²},   Φ₀ := curvOpField g s.
 ```
-The genuine content is the second-Bianchi / frame-Ricci cyclic fold of the contracted slot into the raised
-Ricci endomorphism (`contracted_second_bianchi`, `ricEndoRaisedFib_inner_eq_frame_trace`,
-`ricTraceSection_apply_leadingSlot`, with the `riemannOp` symmetries) collapsed through the Parseval
-reproduction.  The body is `sorry`; consumers transitively depend on its `sorryAx`. -/
-theorem bochnerFold_group3_eq_ricTrace
+
+This is the rank-`0` curvature line's **genuine integrated deep root**: it is unproven on every existing
+route (every realization sits in the circular fenced moving-frame-differentiated-curvature cluster, where
+it is itself posited as `sorry`). It is the genuine frame-summed covariant integration by parts: the
+defect cross-pairing, paired against `∇S` and summed over the `g_x`-orthonormal rough-Laplacian frame
+`Bᵢ := smoothOrthoFrame g x i`, telescopes — through `integral_frameSummed_covDeriv_combined_eq_zero`
+(the moving-frame remainder is a total covariant divergence, integrating to zero over the closed
+manifold), the tangent/tensor second Bianchi identities (`second_bianchi_levi_civita`,
+`nablaTensor0SCurv_cyclic_eq_zero`), the contracted second Bianchi `contracted_second_bianchi`, and the
+Ricci-trace fold (`ricEndoRaisedFib_inner_eq_frame_trace`, `ricTraceSection_apply_leadingSlot`, the
+`riemannOp` metric skews) — into the three frame-free carriers.  It is *false* for an arbitrary section
+in place of the curvature carriers (the `s = 0` Bochner–Lichnerowicz litmus `∫ Ric(∇f, ∇f) =
+‖Δ_∇ f‖² − ‖∇²f‖²` is nonzero on a non-flat manifold, so the Ricci carrier is genuinely required), so it
+genuinely uses `R`, `∇R`, the Parseval reproduction `hPar`, and the second-order frame structure.  The
+body is `sorry`; consumers transitively depend on its `sorryAx`. -/
+private theorem parsevalFrameSum_integratedBochnerExtraction
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
+    tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (pointwiseTensorCurv (I := I) (M := M) g s S).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun =
+      tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+          (GcurvSection (I := I) (M := M) g s S).toFun
+          (covGrad (I := I) (M := M) g 0 s S).toFun +
+        tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+          (ricTraceSection (I := I) (M := M) g s S).toFun
+          (covGrad (I := I) (M := M) g 0 s S).toFun +
+        tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+          (covGrad (I := I) (M := M) g 0 s
+            (pureRGenuineDiffOp (I := I) (M := M) g 0 s S)).toFun
+          (covGrad (I := I) (M := M) g 0 s S).toFun -
+        tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+          (appCc (I := I) (M := M) g (s + 1) (s + 1)
+            (slotExtend (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s))
+            (covGrad (I := I) (M := M) g 0 s S)).toFun
+          (covGrad (I := I) (M := M) g 0 s S).toFun :=
+  sorry
+
+/-- **The group-`2` + group-`4` differentiated-curvature operator-field fold value (the `∇R`-trace fold,
+canonical operator-field form).** For a fixed Parseval frame family, the sum of the group-`2` double sum
+(the slot-`0` carrier `∇_{V a}(R(V a, V b) S)`) and the group-`4` double sum (the symmetric second-order
+pair `−∇²_{∇_{V b} V a, V a} S − ∇²_{V a, ∇_{V b} V a} S`) equals the single `L²` pairing of the
+differentiated curvature operator-field action against `∇S`:
+```
+bochnerFoldGroupSum g s S V (bochnerGroupElt2) + bochnerFoldGroupSum g s S V (bochnerGroupElt4)
+  = ⟨appCc (covGrad (curvOpField g s)) S, ∇S⟩_{L²}.
+```
+
+This is the genuinely-deep `∇R`-trace content of the rank-`0` Bochner divergence root, in the canonical
+differentiated-curvature operator-field form `⟨appCc (∇Φ₀) S, ∇S⟩` (`Φ₀ := curvOpField g s`).  The
+group-`2` covariant derivative `∇_{V a}(·)` is integrated by parts off into the residue by the frame-summed
+engine (`bochnerFoldGroupSum_elt2_eq_residueSum`, `integral_frameSummed_covDeriv_combined_eq_zero`); the
+residual second covariant derivative `∇_{V a}(∇_{V b} S)` is reorganized against `R(V a, V b) S` through the
+second-Bianchi / `riemannOp`-symmetry curvature commutator (`second_bianchi_levi_civita`,
+`nablaTensor0SCurv_cyclic_eq_zero`, `riemannOp_inner_pair_symm`) into the symmetric group-`4` pattern plus
+the differentiated curvature coefficient `(∇R) S` (`frame_sum_nablaTensor0SCurv_baseSlot_eval`,
+`nablaTensorCurv_frame_trace_eq_nablaRicci`, `contracted_second_bianchi`), summed over the Parseval frame.
+It is *false* for an arbitrary section in place of the differentiated curvature trace, so it genuinely uses
+`R`, `∇R`, `hPar`, and the second-order frame structure.  The body is `sorry`; consumers transitively
+depend on its `sorryAx`. -/
+private theorem parsevalFrameSum_group2_add_group4_eq_appCc_nablaCurvOpField
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
     (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -1278,9 +1342,12 @@ theorem bochnerFold_group3_eq_ricTrace
     (hPar : ∀ (x : M) (u : TangentSpace I x),
       (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
     bochnerFoldGroupSum (I := I) (M := M) g s S V
-        (bochnerGroupElt3 (I := I) (M := M) g s S) =
+        (bochnerGroupElt2 (I := I) (M := M) g s S) +
+      bochnerFoldGroupSum (I := I) (M := M) g s S V
+        (bochnerGroupElt4 (I := I) (M := M) g s S) =
       tensorL2Inner (I := I) (M := M) g 0 (s + 1)
-        (ricTraceSection (I := I) (M := M) g s S).toFun
+        (appCc (I := I) (M := M) g s (s + 1)
+          (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S).toFun
         (covGrad (I := I) (M := M) g 0 s S).toFun :=
   sorry
 
@@ -1546,20 +1613,22 @@ operator field `Φ₀ := curvOpField g s`:
 (∑_b ∑_a ∫ bochnerGroup2Residue) + bochnerFoldGroupSum g s S V (bochnerGroupElt4)
   = ⟨∇(pureRGenuineDiffOp g 0 s S), ∇S⟩_{L²} − ⟨appCc (slotExtend Φ₀) (∇S), ∇S⟩_{L²}.
 ```
-This is the operator-field B-rule *normal form* of
-`parsevalFrameSum_group2Residue_add_group4_eq_appCc_covGrad_curvOpField`: the operator-field covariant
-Leibniz pairing split `tensorL2Inner_covGrad_appCc_eq_add` (`OperatorFieldPairingIBP`) writes
-`⟨∇(appCc Φ₀ S), ∇S⟩ = ⟨appCc (∇Φ₀) S, ∇S⟩ + ⟨appCc (slotExtend Φ₀) (∇S), ∇S⟩`, and the order-`0` curvature
-operator action `appCc Φ₀ S = pureRGenuineDiffOp g 0 s S` (`appCc_curvOpField_eq_pureRGenuineDiffOp`)
-rewrites the left side, so the differentiated-action pairing `⟨appCc (∇Φ₀) S, ∇S⟩` (the
-`…_eq_appCc_covGrad_curvOpField` right side) is exactly this gradient-of-base minus passenger-slot
-difference.  The genuinely-deep curvature content is unchanged: the group-`2` second covariant derivative
-`∇_{V a}(∇_{V b} S)` of the residue is reorganized against `R(V a, V b) S` through the second-Bianchi /
-`riemannOp`-symmetry curvature commutator into the symmetric group-`4` pattern plus the differentiated
-curvature coefficient `(∇R) S`, summed over the Parseval frame; it is *false* for an arbitrary section in
-place of the differentiated curvature trace, so it genuinely uses `R`, the Parseval reproduction `hPar`,
-and the second-order frame structure.  The body is `sorry`; consumers transitively depend on its
-`sorryAx`. -/
+This is the operator-field B-rule *normal form* of the canonical differentiated-curvature operator-field
+value `parsevalFrameSum_group2_add_group4_eq_appCc_nablaCurvOpField` (`G₂ + G₄ = ⟨appCc (∇Φ₀) S, ∇S⟩`),
+which carries the genuinely-deep `∇R`-trace content.
+
+**Assembly (TRANSIT, non-circular).** The group-`2` IBP `bochnerFoldGroupSum_elt2_eq_residueSum` rewrites
+the residue double sum back as `G₂`; the posited `∇R`-trace value gives `G₂ + G₄ = ⟨appCc (∇Φ₀) S, ∇S⟩`;
+and the operator-field covariant Leibniz pairing split `tensorL2Inner_covGrad_appCc_eq_add`
+(`OperatorFieldPairingIBP`) writes `⟨∇(appCc Φ₀ S), ∇S⟩ = ⟨appCc (∇Φ₀) S, ∇S⟩ + ⟨appCc (slotExtend Φ₀)(∇S),
+∇S⟩` with the order-`0` action `appCc Φ₀ S = pureRGenuineDiffOp g 0 s S`
+(`appCc_curvOpField_eq_pureRGenuineDiffOp`), so the differentiated-action pairing `⟨appCc (∇Φ₀) S, ∇S⟩` is
+exactly this gradient-of-base minus passenger-slot difference.  The genuinely-deep curvature content lives
+in the posited value: the group-`2` second covariant derivative `∇_{V a}(∇_{V b} S)` of the residue is
+reorganized against `R(V a, V b) S` through the second-Bianchi / `riemannOp`-symmetry curvature commutator
+into the symmetric group-`4` pattern plus the differentiated curvature coefficient `(∇R) S`, summed over
+the Parseval frame; it is *false* for an arbitrary section in place of the differentiated curvature trace.
+Consumers transitively depend on the posited value's `sorryAx`. -/
 private theorem parsevalFrameSum_group2Residue_add_group4_eq_diffCurvTracePairing
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
@@ -1581,8 +1650,22 @@ private theorem parsevalFrameSum_group2Residue_add_group4_eq_diffCurvTracePairin
         (appCc (I := I) (M := M) g (s + 1) (s + 1)
           (slotExtend (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s))
           (covGrad (I := I) (M := M) g 0 s S)).toFun
-        (covGrad (I := I) (M := M) g 0 s S).toFun :=
-  sorry
+        (covGrad (I := I) (M := M) g 0 s S).toFun := by
+  classical
+  -- The group-`2` IBP rewrites the residue double sum back as the group-`2` double sum `G₂`.
+  rw [← bochnerFoldGroupSum_elt2_eq_residueSum (I := I) (M := M) g s S V hV]
+  -- The posited ∇R-trace value: G₂ + G₄ = ⟨appCc (∇Φ₀) S, ∇S⟩.
+  have hdR := parsevalFrameSum_group2_add_group4_eq_appCc_nablaCurvOpField
+    (I := I) (M := M) g s S V hV hPar
+  -- The B-rule split for the operator-field action of `Φ₀ := curvOpField g s` on `S`.
+  have hbase : appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s) S =
+      pureRGenuineDiffOp (I := I) (M := M) g 0 s S :=
+    appCc_curvOpField_eq_pureRGenuineDiffOp (I := I) (M := M) g s S
+  have hsplit := tensorL2Inner_covGrad_appCc_eq_add (I := I) (M := M) g s s
+    (curvOpField (I := I) (M := M) g s) S (covGrad (I := I) (M := M) g 0 s S)
+  rw [hbase] at hsplit
+  -- hsplit : ⟨∇(pureRᵍ S), ∇S⟩ = ⟨appCc (∇Φ₀) S, ∇S⟩ + ⟨appCc (slotExtend Φ₀)(∇S), ∇S⟩.
+  linarith [hdR, hsplit]
 
 /-- **The genuine differentiated-curvature reorganization of the group-`2` IBP residue plus the
 group-`4` second-order pair (the curvature-commutator root).** For a fixed Parseval frame family, the
@@ -1907,6 +1990,63 @@ theorem bochnerFold_sevenTermSum_eq_pointwiseTensorCurvPairing
         (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
         ∂(riemannianVolumeMeasure (I := I) (M := M) g)))]
   rw [Finset.sum_comm]
+
+/-- **Fold 3 (terms iii + iv − v → leading-slot Ricci trace).** For a fixed Parseval frame family, the
+group-`3` double sum equals the `L²` pairing of the leading-slot Ricci-trace carrier `ricTraceSection g s S`
+against `∇S`:
+```
+∑_a ∑_b ∫ ⟨[R(∇_{V a} V b, V a) S + R(V b, ∇_{V a} V a) S − ∇_{R(V a, V b) V a} S]·slot0, slot0_{V b}(∇S)⟩
+  = ⟨ricTraceSection g s S, ∇S⟩_{L²}.
+```
+The genuine content is the second-Bianchi / frame-Ricci cyclic fold of the contracted slot into the raised
+Ricci endomorphism (`contracted_second_bianchi`, `ricEndoRaisedFib_inner_eq_frame_trace`,
+`ricTraceSection_apply_leadingSlot`, with the `riemannOp` symmetries) collapsed through the Parseval
+reproduction.
+
+**Assembly (TRANSIT, non-circular).** The genuine integrated content lives in two more-primitive posited
+folds: the integrated Bochner extraction `parsevalFrameSum_integratedBochnerExtraction`
+(`⟨Curv S, ∇S⟩ = ⟨Gcurv, ∇S⟩ + ⟨ric, ∇S⟩ + ⟨∇(pureRᵍ S), ∇S⟩ − ⟨appCc (slotExtend Φ₀)(∇S), ∇S⟩`) and the
+`∇R`-trace value `parsevalFrameSum_group2_add_group4_eq_appCc_nablaCurvOpField`
+(`G₂ + G₄ = ⟨appCc (∇Φ₀) S, ∇S⟩`).  The seven-term bridge
+`bochnerFold_sevenTermSum_eq_pointwiseTensorCurvPairing` gives `⟨Curv S, ∇S⟩ = G₁ + G₂ + G₃ + G₄`, the
+pure-Riemann fold `bochnerFold_group1_eq_GcurvSection` gives `G₁ = ⟨Gcurv, ∇S⟩`, and the B-rule wiring
+(`tensorL2Inner_covGrad_appCc_eq_add`, `appCc_curvOpField_eq_pureRGenuineDiffOp`) converts the `∇R` value
+into the gradient-of-base minus passenger-slot residue `G₂ + G₄ = ⟨∇(pureRᵍ S), ∇S⟩ −
+⟨appCc (slotExtend Φ₀)(∇S), ∇S⟩`, so the extraction isolates `G₃ = ⟨ric, ∇S⟩`.  Consumers transitively
+depend on the two posited folds' `sorryAx`. -/
+theorem bochnerFold_group3_eq_ricTrace
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
+    bochnerFoldGroupSum (I := I) (M := M) g s S V
+        (bochnerGroupElt3 (I := I) (M := M) g s S) =
+      tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (ricTraceSection (I := I) (M := M) g s S).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun := by
+  classical
+  -- The seven-term bridge: ⟨Curv S, ∇S⟩ = G₁ + G₂ + G₃ + G₄.
+  have hf5 := bochnerFold_sevenTermSum_eq_pointwiseTensorCurvPairing
+    (I := I) (M := M) g s S V hV hPar
+  -- The pure-Riemann fold: G₁ = ⟨Gcurv, ∇S⟩.
+  have hf1 := bochnerFold_group1_eq_GcurvSection (I := I) (M := M) g s S V hV hPar
+  -- The integrated Bochner extraction (deep root, posited).
+  have hext := parsevalFrameSum_integratedBochnerExtraction
+    (I := I) (M := M) g s S V hV hPar
+  -- The ∇R-trace operator-field value: G₂ + G₄ = ⟨appCc (∇Φ₀) S, ∇S⟩ (posited).
+  have hdR := parsevalFrameSum_group2_add_group4_eq_appCc_nablaCurvOpField
+    (I := I) (M := M) g s S V hV hPar
+  -- Convert the ∇R value into the operator-field residue form via the B-rule.
+  have hbase : appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s) S =
+      pureRGenuineDiffOp (I := I) (M := M) g 0 s S :=
+    appCc_curvOpField_eq_pureRGenuineDiffOp (I := I) (M := M) g s S
+  have hsplit := tensorL2Inner_covGrad_appCc_eq_add (I := I) (M := M) g s s
+    (curvOpField (I := I) (M := M) g s) S (covGrad (I := I) (M := M) g 0 s S)
+  rw [hbase] at hsplit
+  -- hsplit : ⟨∇(pureRᵍ S), ∇S⟩ = ⟨appCc (∇Φ₀) S, ∇S⟩ + ⟨appCc (slotExtend Φ₀)(∇S), ∇S⟩.
+  linarith [hf5, hf1, hext, hdR, hsplit]
 
 end Connection
 end Integral
