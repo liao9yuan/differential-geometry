@@ -154,22 +154,6 @@ theorem deturck_metric_pde_interior_at_initial_with_carrier
               (deTurckRealizeRemainderOf (I := I) g₀ g_bg (P v))) i := by
     intro v i
     simp only [hN_cont_def, deTurckG0SpectralN_coeff]
-  have hcoeff : ∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
-      (h : realizableAtGate (I := I) g₀ u),
-      u ∈ Metric.closedBall
-          (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith)
-            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) R →
-      ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
-          (gateSmoothRep (I := I) g₀ u h.choose h.choose_spec.choose)‖ ≤ Q →
-        ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2,
-          (N_cont u).coeff i =
-            tensorL2Coeff (I := I) (M := M)
-              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-              (Integral.L2.SmoothCcTensor.toL2
-                (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) i := by
-    intro u h hball hgateQ i
-    rw [hsynth u i, hcarrier u h ⟨hball, hgateQ⟩]
   have hloss : FirstOrderOperatorLoss (I := I) (M := M) g₀ a N_cont R :=
     deTurckGenuineN_firstOrder_operatorLoss (I := I) g₀ g_bg a ha N_cont P K hR hctrl hall hsynth
   obtain ⟨T₀, g_DT, u₂, T_s, hT₀, h0, hreal₀, hcont₀, hreg₀, hsmall₀, hsmoothrepr₀,
@@ -207,9 +191,52 @@ theorem deturck_metric_pde_interior_at_initial_with_carrier
     htend.eventually (Iic_mem_nhds hQ)
   rw [eventually_nhdsWithin_iff, Metric.eventually_nhds_iff] at hev
   obtain ⟨η, hη_pos, hη⟩ := hev
-  set T : ℝ := min T₀ (η / 2) with hT_def
-  have hT : 0 < T := lt_min hT₀ (by linarith)
-  have hT_le : T ≤ T₀ := min_le_left _ _
+  -- The `Q`-shrunk horizon on which the carrier's order-`2a` Sobolev norm stays `≤ Q`.
+  set Tmid : ℝ := min T₀ (η / 2) with hTmid_def
+  have hTmid_pos : 0 < Tmid := lt_min hT₀ (by linarith)
+  have hTmid_le : Tmid ≤ T₀ := min_le_left _ _
+  -- On `[0, Tmid)` the carrier inclusion `ι (u₂ s)` is gate-realizable.
+  have hgate_pre : ∀ s ∈ Set.Ico (0 : ℝ) Tmid,
+      realizableAtGate (I := I) g₀
+        (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) := by
+    intro s hs
+    have hsIcc : s ∈ Set.Icc (0 : ℝ) T₀ :=
+      ⟨hs.1, le_of_lt (lt_of_lt_of_le hs.2 hTmid_le)⟩
+    refine realizableAtGate_carrierInclusion (I := I) g₀ a u₂ T_s
+      (hsmoothrepr₀ s hsIcc) ?_
+    rcases eq_or_lt_of_le hs.1 with hs0 | hs0
+    · refine ⟨0, by norm_num, ?_⟩
+      intro x v w
+      have hz : ccTensorBilinSymm (I := I) g₀ (T_s s) x v w = 0 := by
+        have hre := hreal₀ s hsIcc x v w
+        have hg0 : (g_DT s).inner x v w = g₀.inner x v w := by rw [← hs0, h0]
+        rw [hg0] at hre; linarith [hre]
+      rw [hz]; simp
+    · exact hsmall₀ s ⟨hs0, lt_of_lt_of_le hs.2 hTmid_le⟩
+  -- On `[0, Tmid)` the gate representative's order-`2a` norm is `≤ Q` (it equals `‖T_s s‖_{2a}`).
+  have hQ_pre : ∀ s (hs : s ∈ Set.Ico (0 : ℝ) Tmid),
+      ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+          (gateRepOfWitness (I := I) g₀
+            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (hgate_pre s hs))‖ ≤ Q := by
+    intro s hs
+    have hsIcc : s ∈ Set.Icc (0 : ℝ) T₀ :=
+      ⟨hs.1, le_of_lt (lt_of_lt_of_le hs.2 hTmid_le)⟩
+    rw [gateRepOfWitness, gateSmoothRep_carrierInclusion_eq (I := I) g₀ a u₂ T_s
+      (hsmoothrepr₀ s hsIcc) (hgate_pre s hs)]
+    exact hη (by
+        rw [Real.dist_eq, sub_zero, abs_of_nonneg hs.1]
+        exact lt_of_lt_of_le hs.2 (le_of_lt (lt_of_le_of_lt (min_le_right _ _) (by linarith)))) hsIcc
+  -- The per-curve gauge match on this curve supplies a sub-horizon `Tleaf ≤ Tmid` on which the
+  -- realized DeTurck remainder of `P (ι (u₂ s))` reproduces the gate-based gauge's `L²` class.
+  obtain ⟨Tleaf, hTleaf_pos, hTleaf_le, hmatch_leaf⟩ :=
+    hcarrier Tmid hTmid_pos u₂ N_cont R _
+      (hduhamel₀.mono hTmid_le hTmid_pos) hgate_pre hQ_pre
+  set T : ℝ := min Tmid Tleaf with hT_def
+  have hT : 0 < T := lt_min hTmid_pos hTleaf_pos
+  have hT_le : T ≤ T₀ := le_trans (min_le_left _ _) hTmid_le
+  have hT_le_leaf : T ≤ Tleaf := min_le_right _ _
   have hIcc_sub : Set.Icc (0 : ℝ) T ⊆ Set.Icc (0 : ℝ) T₀ := Set.Icc_subset_Icc le_rfl hT_le
   have hIco_sub : Set.Ico (0 : ℝ) T ⊆ Set.Ico (0 : ℝ) T₀ := Set.Ico_subset_Ico le_rfl hT_le
   have hIoo_sub : Set.Ioo (0 : ℝ) T ⊆ Set.Ioo (0 : ℝ) T₀ := Set.Ioo_subset_Ioo le_rfl hT_le
@@ -265,7 +292,8 @@ theorem deturck_metric_pde_interior_at_initial_with_carrier
     intro s hs
     exact hη (by
         rw [Real.dist_eq, sub_zero, abs_of_nonneg hs.1]
-        exact lt_of_le_of_lt hs.2 (lt_of_le_of_lt (min_le_right _ _) (by linarith)))
+        exact lt_of_le_of_lt (le_trans hs.2 (le_trans (min_le_left _ _) (min_le_right _ _)))
+          (by linarith))
       (hIcc_sub hs)
   have hC2_chart := deTurck_g0_chartGram_continuity (I := I) g₀ a ha hT g_DT u₂ T_s N_cont
     hreal hcont hreg h0 hcanon hHk'
@@ -295,18 +323,13 @@ theorem deturck_metric_pde_interior_at_initial_with_carrier
             (Nsec (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
               (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)))) i := by
     intro s hs i
-    have hgateQ : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
-        (gateSmoothRep (I := I) g₀
-          (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))
-          (hgate s hs).choose (hgate s hs).choose_spec.choose)‖ ≤ Q := by
-      rw [gateSmoothRep_carrierInclusion_eq (I := I) g₀ a u₂ T_s
-        (hsmoothrepr s (Set.Ico_subset_Icc_self hs)) (hgate s hs)]
-      exact hQcarrier s (Set.Ico_subset_Icc_self hs)
-    exact hcoeff
+    -- `N_cont (ι u₂ s)`'s coordinates are the `L²` coordinates of `deTurckRealizeRemainderOf P`,
+    -- whose `L²` class equals that of the gate-based gauge `Nsec (ι u₂ s)` on `[0, Tleaf) ⊇ [0, T)`
+    -- by the per-curve match `hmatch_leaf`.
+    rw [hsynth
       (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-        (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (hgate s hs)
-      (hcarrier_inball s hs) hgateQ i
+        (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) i,
+      hmatch_leaf s ⟨hs.1, lt_of_lt_of_le hs.2 hT_le_leaf⟩]
   have hNsec_geom : ∀ s ∈ Set.Ico (0 : ℝ) T, ∀ (x' : M) (v' w' : TangentSpace I x'),
       ccTensorBilinSymm (I := I) g₀
           (rawTensorConnLapSmooth (I := I) g₀ 0 2 (T_s s)) x' v' w'
