@@ -178,20 +178,9 @@ theorem normSq0S_iterCov_shift {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   exact normSq0S_domDomCongr (I := I) gRef x basis hinv (shiftEquiv r m)
     (iterCov (I := I) gRef (r + 1) (covStep (I := I) gRef r T) m x)
 
-/-- **Pascal convolution identity** (the combinatorial heart of the binomial induction):
-shifting one factor's index combines two `\binom m ·` sums into a `\binom{m+1} ·` sum. -/
-theorem pascal_sum (m : ℕ) (g : ℕ → ℝ) :
-    (∑ c ∈ Finset.range (m + 1), (m.choose c : ℝ) * g (c + 1)) +
-        (∑ c ∈ Finset.range (m + 1), (m.choose c : ℝ) * g c)
-      = ∑ c ∈ Finset.range (m + 2), ((m + 1).choose c : ℝ) * g c := by
-  rw [Finset.sum_range_succ' (fun c => ((m + 1).choose c : ℝ) * g c) (m + 1),
-    Finset.sum_range_succ' (fun c => (m.choose c : ℝ) * g c) m]
-  simp only [Nat.choose_succ_succ, Nat.cast_add, Nat.choose_zero_right, Nat.cast_one,
-    add_mul, one_mul, Finset.sum_add_distrib]
-  rw [Finset.sum_range_succ (fun c => (m.choose (c + 1) : ℝ) * g (c + 1)) m,
-    Nat.choose_eq_zero_of_lt (Nat.lt_succ_self m)]
-  simp only [Nat.cast_zero, zero_mul, add_zero]
-  ring
+-- `pascal_sum` (the binomial convolution identity) now lives in the shared ancestor
+-- `Evolution.CovDerivStepCompContrNorm` (used by both this bundled m-fold and the component
+-- `AkMFold`), and is in scope here via that import + the `HCGCompactness` namespace.
 
 /-- `∇¹ T = covStep T` (definitional). -/
 theorem iterCov_one (gRef : SmoothRiemannianMetric I M) {r : ℕ}

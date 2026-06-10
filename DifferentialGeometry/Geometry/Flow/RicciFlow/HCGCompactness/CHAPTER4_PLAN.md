@@ -254,25 +254,54 @@ from *Norms of covariant derivatives of tensors, I*.
 - [ ] F3-hi-kge2 — higher connection-difference derivative controls for
       `ConnDiffEpsBoundOn ... k C` with `2 <= k`, after the `k = 2` producer
       route is checked and generalized.
-- [ ] F3 — final inequality from *Norms of covariant derivatives of tensors, I*:
-      `|∇_g^r T|_g <= |∇_h^r T|_g + eps*C*Σ_{k<r}|∇_h^k T|_g`
-      for all `0 < r <= p` and mixed `(r,s)` tensors ⟸ F3-p1,F3-hi
+- [~] F3 — final inequality from *Norms of covariant derivatives of tensors, I*:
+      `|∇_g^r T|_g <= |∇_h^r T|_g + eps*C*Σ_{k<r}|∇_h^k T|_g`.
+      **Norm-level induction COMPLETE (2026-06-09): `lemma45ScalarBdd` + `lemma45Double`**
+      (Lemma45CovariantAbstract.lean) — the book's double induction with `hLift`
+      DISCHARGED (strong induction over the doubly-indexed family
+      `W i k = |∇_h^k ∇_g^i T|`).  Remaining = the one-step interface `hOne`
+      (`|∇_h^k ∇_g X| ≤ |∇_h^{k+1} X| + ε·oneStepConst·Σ`), i.e. Phases 4–6
+      (action identity + iterated Leibniz) = the component contraction-Leibniz
+      ENGINE — same engine as ric_bound Claim 1 (parallel track); per user decision
+      (2026-06-09) F3 interfaces at `hOne` and waits for/adapts that engine, plus the
+      Phase 9 `hA` input (`connDiffEpsBound_{zero,one,two}` are its k≤2 instances).
 - [ ] F4 — Corollary *Norms of covariant derivatives of tensors, II*
       → covariant (`q₁=0`) per-order constants used downstream ⟸ F3
 - [x] F5-const — constants for *Composition of approximate isometries, I*
       → `compApproxConst`, `compApproxConst_pos`, `compApproxConst_nonneg`
       (Lemma45Constants.lean) ⟸ F4 constants
-- [ ] F5 — Prop *Composition of approximate isometries, I* ⟸ F1–F4,F5-const
-- [ ] F6 — Cor *Composition of approximate isometries, II* ⟸ F5
+- [~] F5 — Prop *Composition of approximate isometries, I*:
+      **`C⁰` part DONE (2026-06-09)**: `metricInner_nonneg`, `metricEquiv_mono`,
+      `metricEquiv_trans` (product constants), `metricEquiv_comp_eps` (the book's
+      additive form, `(1+ε₀)(1+ε₁) ≤ 1+3(ε₀+ε₁)`) — ApproxIsometryComp.lean,
+      sorry-free, axiom-clean.  Derivative (`C^p`) part = the Lemma 4.5 consumer
+      (book applies `lbl370` to `T := Φ₁*g₂−g₁`) — gated on the `hOne` engine
+      interface of `lemma45Double`, like F3/F4.
+- [~] F6 — Cor *Composition of approximate isometries, II*:
+      **scalar accumulation core DONE**: `compEpsAccum` (`e n ≤ C·Σ δᵢ` from
+      per-step costs; ApproxIsometryComp.lean).  Full version ⟸ F5-full.
+- **⚠ STATE (2026-06-09): `ApproximateIsometry.lean` is currently STALE-BROKEN**
+  against the in-flight tensor-layer relocation (`Tensor0SBundle.normRS`,
+  `abs_quad02_le_norm`, `normSqRS_le_of_metric_equiv`, `abs_component0S_le_sqrt_normSq0S`
+  unknown — the parallel `ric_bound` track is moving these, cf. `RSLoweringNorm.lean`
+  in its working set).  `ApproxIsometryComp.lean` deliberately imports
+  `AllTimesBounds` (healthy) instead.  F4 (Cor `lbl370`) is BLOCKED on both this
+  breakage (its inputs `bookNormRS_compare`/`normSqRS_compare` live there) and the
+  F3 interface; revisit after the tensor relocation settles.
 - [ ] F7 — Def *Cᵖ-convergence of maps* + Def *C^∞-conv. uniformly on compacts*
       → 2 defs (reconcile with existing `PointedConvergence` names) ⟸ —
 - [x] F8tool — abstract sequential Arzelà–Ascoli (Lemma 3.14) → `arzelaAscoli_subseq_…` (ArzelaAscoli.lean)
 - [ ] F8 — Cor *Compactness of sequence of isometries* (L537) → apply F8tool ⟸ F7, F8tool
-- [ ] F9 — Def *Direct limit* (L628) + Lemma *Iₗ injective* (L660) → directed-system colimit of spaces ⟸ —
-- [ ] F10 — Lemma *open cover for the direct limit* (L679) ⟸ F9
-- [ ] F11 — Cor `lbl379` *compact sets in the direct limit* ⟸ F9,F10
-- [ ] F12 — Cor `lbl380` *second-countable direct limits* ⟸ F9
-- [ ] F13 — Lemma `lbl381` *direct limit of Hausdorff is Hausdorff* ⟸ F9
+- [x] F9 — Def *Direct limit* (L628) + Lemma *Iₗ injective* (L660) → `SeqSystem`, `Lim`,
+      `incl`, `incl_comp`, `incl_injective`, `exists_incl_eq`
+      (Geometry/Topology/DirectLimit.lean, 2026-06-09, sorry-free)
+- [x] F10 — Lemma *open cover for the direct limit* (L679) → `incl_isOpenMap`,
+      `incl_isOpenEmb`, `range_incl_mono`, `iUnion_range_incl` (DirectLimit.lean)
+- [x] F11 — Cor `lbl379` *compact sets in the direct limit* → `isCompact_exists` (DirectLimit.lean)
+- [x] F12 — Cor `lbl380` σ-compact direct limits → `sigmaCompact` (DirectLimit.lean;
+      second-countability glue deferred to the manifold layer)
+- [x] F13 — Lemma `lbl381` *direct limit of Hausdorff is Hausdorff* → `t2Space`
+      (DirectLimit.lean; also the universal property `lift`/`continuous_lift`)
 
 ## §5 Supporting: distance / exp⁻¹ derivatives (needed by A-convexity and Step B)
 
@@ -314,8 +343,24 @@ A-convexity (`lbl417`) and Step C center-of-mass that depend on §5 wait on that
 
 ## §3 Step B: local metrics & transition maps (L1370–1882)
 
-- [x] B0 — Prop (L1413) *|∇ᵉRm|≤Cₑ ⟹ |∂ᵐg|≤C̃ₘ in normal coords* = **Lemma 3.11** (`MetricAllTimesConclusion`)
-- [x] B0' — smooth exponential local diffeo → `expAt_localDiffeomorph` / `NormalChartData`
+- [ ] B0 — Prop (L1413) *|∇ᵉRm|≤Cₑ ⟹ |∂ᵐg|≤C̃ₘ in normal coords*.
+      **AUDIT CORRECTION (2026-06-09): does NOT exist** — the old "[x] = Lemma 3.11
+      (`MetricAllTimesConclusion`)" conflated it with the TIME-window AllTimesBounds
+      machinery.  Spatial B0 is genuine remaining work (B1's main missing producer).
+      Staged route + status: `B0NormalCoordBounds.md`.  Stage 1 (2nd-order Grönwall
+      engine) DONE; stage 2 core DONE 2026-06-10: **`exists_radial_jacobi_radius`**
+      (`Exponential/JacobiVariation.lean`, green) — the radial `expMap` variation
+      field is Jacobi on `(0,1)`; used the de-privatized `commute_ds_dt_curvature`
+      (the W=∂_t commutation EXISTED, was private/unused) + smooth clamps
+      (`Analysis/Calculus/SmoothClamp.lean`).  Stage-2 tail (J(0)=0, D_tJ(0)=w,
+      endpoint J(1)=d(exp)ₓw, g_{ij}=⟨J_i,J_j⟩(1)) + stages 3–5 remain.
+- [x] B0' — smooth exponential local diffeo → native `Geometry.Riemannian.
+      NormalCoordinates.expMapDiffeo`/`normalChartAt` (0-sorry).  NOTE: its source is
+      *some* nhd of 0; widening to the λ-ball scale (`injRadius` gives only injectivity
+      on the eball) = the `lbl383` item-3 frontier.
+- S6 input rebuilt natively (2026-06-09): `StepBInputs.lean` (`normalTransition`,
+  `NormalTransitionDerivBound`, `ExpInverseDerivBoundInput`); `GeometricInputs.lean`
+  healed into a pure umbrella import (the dangling `NormalChartData` section removed).
 - [ ] B1 — Prop `lbl397` *approx isometry on a large ball* ⟸ A14, S6/A0', B0', F1
 - [ ] B2 — Prop `lbl399` *local maps → id* ⟸ B1
 - [ ] B3 — Prop `lbl402` *F_{kℓ;r} → id* ⟸ B1,B2

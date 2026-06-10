@@ -170,4 +170,65 @@ theorem compL2_add_le {r : ℕ} (T U : (Fin r → Idx) → Real) :
     _ = compL2 T + compL2 U :=
           Real.sqrt_sq (add_nonneg (compL2_nonneg T) (compL2_nonneg U))
 
+/-- Negation preserves the component `ℓ²`-norm (`(-T)² = T²`). -/
+theorem compL2_neg {r : ℕ} (T : (Fin r → Idx) → Real) :
+    compL2 (fun idx => -T idx) = compL2 T := by
+  simp only [compL2, compL2Sq]
+  congr 1
+  exact Finset.sum_congr rfl fun idx _ => by ring
+
+/-- **Minkowski for a difference**: `|T - U| ≤ |T| + |U|` (triangle inequality, the `-` form
+used by the residual `D_m` bound). -/
+theorem compL2_sub_le {r : ℕ} (T U : (Fin r → Idx) → Real) :
+    compL2 (fun idx => T idx - U idx) ≤ compL2 T + compL2 U := by
+  have h := compL2_add_le T (fun idx => -U idx)
+  rw [compL2_neg] at h
+  simpa only [sub_eq_add_neg] using h
+
+/-- The component `ℓ²`-norm is absolutely homogeneous: `|c • T| = |c|·|T|`. -/
+theorem compL2_smul {r : ℕ} (c : Real) (T : (Fin r → Idx) → Real) :
+    compL2 (fun idx => c * T idx) = |c| * compL2 T := by
+  rw [compL2, compL2,
+    show compL2Sq (fun idx => c * T idx) = c ^ 2 * compL2Sq T from by
+      simp only [compL2Sq, Finset.mul_sum]
+      exact Finset.sum_congr rfl fun idx _ => by ring,
+    Real.sqrt_mul (sq_nonneg c), Real.sqrt_sq_eq_abs]
+
 end DifferentialGeometry.PDE.RicciFlow
+
+namespace DifferentialGeometry.HCGCompactness
+
+open scoped BigOperators
+
+/-- **Pascal convolution identity** (the combinatorial heart of the binomial induction):
+shifting one factor's index combines two `\binom m ·` sums into a `\binom{m+1} ·` sum.
+Shared by the bundled (`ProductMFoldNorm`) and component (`AkMFold`) m-fold norm bounds. -/
+theorem pascal_sum (m : ℕ) (g : ℕ → ℝ) :
+    (∑ c ∈ Finset.range (m + 1), (m.choose c : ℝ) * g (c + 1)) +
+        (∑ c ∈ Finset.range (m + 1), (m.choose c : ℝ) * g c)
+      = ∑ c ∈ Finset.range (m + 2), ((m + 1).choose c : ℝ) * g c := by
+  rw [Finset.sum_range_succ' (fun c => ((m + 1).choose c : ℝ) * g c) (m + 1),
+    Finset.sum_range_succ' (fun c => (m.choose c : ℝ) * g c) m]
+  simp only [Nat.choose_succ_succ, Nat.cast_add, Nat.choose_zero_right, Nat.cast_one,
+    add_mul, one_mul, Finset.sum_add_distrib]
+  rw [Finset.sum_range_succ (fun c => (m.choose (c + 1) : ℝ) * g (c + 1)) m,
+    Nat.choose_eq_zero_of_lt (Nat.lt_succ_self m)]
+  simp only [Nat.cast_zero, zero_mul, add_zero]
+  ring
+
+/-- **Pascal convolution WITHOUT the top term** (the `ISO` isolation shape): when the
+shifted sum stops at `m - 1`, the assembled `\binom{m+1}` sum stops at `m` — its
+`c = m + 1` top term is absent.  Subtract the matching top terms from `pascal_sum`. -/
+theorem pascal_sum_notop (m : ℕ) (g : ℕ → ℝ) :
+    (∑ c ∈ Finset.range m, (m.choose c : ℝ) * g (c + 1)) +
+        (∑ c ∈ Finset.range (m + 1), (m.choose c : ℝ) * g c)
+      = ∑ c ∈ Finset.range (m + 1), ((m + 1).choose c : ℝ) * g c := by
+  have h := pascal_sum m g
+  rw [Finset.sum_range_succ (fun c => (m.choose c : ℝ) * g (c + 1)) m,
+    show m + 2 = m + 1 + 1 from rfl,
+    Finset.sum_range_succ (fun c => ((m + 1).choose c : ℝ) * g c) (m + 1),
+    Nat.choose_self, Nat.choose_self] at h
+  simp only [Nat.cast_one, one_mul] at h
+  linarith
+
+end DifferentialGeometry.HCGCompactness

@@ -75,22 +75,25 @@ the Bishop--Gromov comparison estimate gives a bounded intersection
 multiplicity `I(n,C₀)`.
 
 Mathlib may eventually provide a Bishop--Gromov theorem directly; until then,
-`ballMult` is the weakest bounded-overlap form consumed by Step A. -/
+`ballMult` is the weakest bounded-overlap form consumed by Step A.  The
+containment-to-separation ratio `m` is a parameter (with multiplicity `Imult m`):
+the Zorn-net multiplicity uses `m = 4`, while the `lbl383` item-5 intersecting-ball
+count needs a larger `λ`-ratio-dependent constant. -/
 structure VolumeComparisonInput
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) where
   dist : PointedSeqDistance (I := I) X
-  Imult : Nat
+  Imult : Real -> Nat
   /-- Consumed by Step A: in any `r`-separated finite center family, at most
-  `Imult` centers can lie in a fixed controlled ball. -/
+  `Imult m` centers can lie within `m·r` of a fixed point. -/
   ballMult :
-    forall k : Nat, forall {α : Type u}, [Fintype α] -> [DecidableEq α] ->
+    forall (m : Real), forall k : Nat, forall {α : Type u}, [Fintype α] -> [DecidableEq α] ->
       forall centers : α -> (X.obj k).M, forall r : Real, 0 < r ->
         (forall i j : α, i ≠ j ->
           r <= dist k (centers i) (centers j)) ->
         forall z : (X.obj k).M, forall J : Finset α,
           (forall j : α, j ∈ J ->
-            dist k (centers j) z <= 4 * r) ->
-          J.card <= Imult
+            dist k (centers j) z <= m * r) ->
+          J.card <= Imult m
 
 end HCGCompactness
 end DifferentialGeometry

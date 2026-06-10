@@ -561,7 +561,7 @@ private lemma radialCurve_hasGeodesicEquationAt
 /-- **Launch velocity of the central radial curve.**
 `mfderiv (fun u => expMap g p (u • a)) 0 1 = a` (under the identification
 `TangentSpace I p = E`). -/
-private lemma radialCurve_launch_velocity
+lemma radialCurve_launch_velocity
     (g : SmoothRiemannianMetric I M) (p : M) (a : E) :
     mfderiv 𝓘(ℝ, ℝ) I
         (fun u : ℝ => (expMap (I := I) g p (show TangentSpace I p from (u • a)) : M)) 0 (1 : ℝ)

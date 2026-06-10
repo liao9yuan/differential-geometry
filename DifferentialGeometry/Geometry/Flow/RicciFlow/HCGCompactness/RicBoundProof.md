@@ -400,14 +400,124 @@ So `iterCov_product_sqrtNormSq_le` (route-ii bundled ⊗ core) and G1 are correc
   at array level). Isolation works because the all-A word `w=AAA…` is UNIQUE → its term is exactly `(∇^m A_k)∗g_k`;
   `(∇^m A_k)∗g_k = ∇^{m+1}g_k − Σ_{w≠allA}(…)`, and `|Σ_{w≠allA}(…)| ≤ Σ_{c<m} binom(m,c)|∇^cA_k||∇^{m-c}g_k|`
   (triangle + per-word `compL2_contrTail_le` + group-by-weight at the NORM level).
-- **BLOCKER — tower differentiability is MISSING.** Piece 4's induction applies Piece 3 at each level, whose
-  `hA`/`hB` require each tower level `iterCovCompU A c` / `iterCovComp B (m-c)` (of a smooth field) to be
-  `MDifferentiableAt I 𝓘(ℝ,ℝ) (fun y => … y m) x`. NO such lemma exists (greps for `iterCovComp`/`covDerivStepComp`
-  contMDiff/MDifferentiable are empty). **SMALLEST NEXT BRIDGE = the tower-differentiability API**:
-  `iterCovComp`/`iterCovCompU` of a `C^∞` field have `MDifferentiableAt` components at each level (induction on the
-  level; each `covDerivStepComp` step is differentiable from the previous level's `C²` + `frameExtData`'s mfderiv +
-  smooth `chr`; likely cleanest via `iterCovComp_eq_iterCov` + the bundled `iterCov`'s smoothness). This is a real
-  analytic sub-piece (the "tower DIFFERENTIABILITY infra" flagged in PROGRESS-8 notes). Classify: missing analytic API.
+- **BLOCKER DISCHARGED (2026-06-09) — the tower-differentiability API is BUILT, sorry-free, in oleans.**
+  Two-layer construction (NOT via the bundled `iterCov` bridge — a direct component-level induction):
+  * `Geometry/Connection/Realization/SmoothSectionsLocal.lean` (NEW) — the analytic input:
+    `contMDiffOn_dual_apply` (global smooth dual section ⊗ `ContMDiffOn u` vector field → `ContMDiffOn u` scalar;
+    local mirror of `contMDiff_dual_apply_section` via `ContMDiffOn.clm_bundle_apply` + `contMDiffWithinAt_section`)
+    and **`contMDiffAt_extDerivFun_apply`** (f `C^∞` on open u, V `C^∞` on u ⇒ `y ↦ df_y(V y)` ContMDiffAt on u).
+    Proof = `SmoothBumpFunction` localization: bump χ (tsupport ⊆ u via `nhds_basis_tsupport`), f̃ = χ·f globally
+    smooth (`contMDiff_of_locally_contMDiffOn`, cover u ∪ (tsupport χ)ᶜ), global `contMDiff_extDerivFun_section`,
+    pair, transfer back by germ equality (`extDerivFun_real_eq_mfderiv` + `Filter.EventuallyEq.mfderiv_eq`;
+    χ ≡ 1 near x via `eventuallyEq_one`). KEY TRICK: localize ONLY the scalar f — the vector field stays local
+    (the pairing lemma handles it), avoiding section-extension machinery.
+  * `AkMFold.lean` — `iterCovComp_contMDiffOn` + `iterCovCompU_contMDiffOn` (every tower level `C^∞` on u, by
+    induction: step = extDerivFun(prev) along frame − Γ-sums; `∞` loses nothing per derivative) + corollaries
+    `iterCovComp_mdiffAt`/`iterCovCompU_mdiffAt` (exactly Piece 3's `hA`/`hB` at every level) + private
+    `contMDiffOn_finsetSum`. Hypotheses: frame `ContMDiffOn u` (T%-form), chr components `C^∞` on u, base
+    components `C^∞` on u — discharge for the concrete chart frame/gRef-Christoffel/A_k,g_k bases is later wiring.
+  GOTCHA (recorded): induction over tower level with the multi-index n must keep `∀ n` INSIDE the motive (n's type
+  depends on the level). `iterCovComp_succ`+`rfl` unfolds the step to the explicit extDerivFun/Γ-sum form.
 **THEN (all DONE blocks):** norm (`compL2_contrTail_le` + `compL2_add_le` + triangle) → relation `∇g_k=A_k∗g_k`
 = `connDiffCompEq` (eq 3.7) → isolate the all-A word → invert `|g_k⁻¹|≤C` (eq 3.3) → (A_N)/(B_N) double induction
 → **Claim 1**.
+
+## PROGRESS 11 (2026-06-09) — Piece 4 DE-RISKED: bottom-pull ⇒ NO explicit `2^m`/permutations; it is TEMPLATED
+KEY REALIZATION: do the m-fold induction by pulling the BOTTOM (first-applied) derivative, exactly as the proven
+bundled `iterCov_product_sqrtNormSq_le`: `∇^{m+1}(A∗B) = ∇^m(∇(A∗B)) = ∇^m(∇_U A ∗ B) + ∇^m(A ∗ ∇B)`, recurse by
+IH on each half (with `A→∇_U A` / `B→∇B`), Pascal. The slot permutations are ABSORBED into the shift's norm
+invariance (`compL2_comp_equiv`, DONE) — never materialized. So Piece 4 mirrors `iterCov_product` (already done,
+incl. the hard `iterCov_shift` cast) — NOT a fresh combinatorial frontier.
+WHY norm-bound alone is insufficient (must prove BOTH): the residual `D_m := ∇^m(A∗g) − (∇^m A_k)∗g` cannot be
+bounded by a recursion on `|D_m|` (its `|∇D_m|` is uncontrolled); but the bottom-pull proves
+`ISO(m): |D_m| ≤ Σ_{c<m} C(m,c)|∇^c A_k||∇^{m-c}g_k|` directly by recursion `D_{m+1} = −D_m[∇_U A_k] −
+∇^m(A_k∗∇g_k)` (IH/ISO on `∇_U A_k` + full norm-bound `P(m)` on `A_k∗∇g_k`; the algebra closes by Pascal with
+the `c=m+1` term ABSENT — exactly the isolation). So need `P(m)` (full binom norm bound) AND `ISO(m)` (residual),
+both bottom-pull.
+LEMMA SEQUENCE (all templated from `iterCov_product`; `compL2_*` + `covDerivStepComp_add/_smul` + tower-diff DONE):
+1. `frameExtData_add` (field-level `∂`-linearity) — **DONE (2026-06-09, AkMFold.lean)**, via `mfderiv_add`.
+2. `iterCovComp_add` (field-eq on `u`; per-level via `frameExtData_add` germ-congruence + `covDerivStepComp_add`
+   + tower-diff `_mdiffAt`). The field single-step (Piece 3) as a field equality on `u`.
+3. **`iterCovComp_shift` DONE (2026-06-09, AkMFold.lean)** — the bottom=top tower shift with the
+   `(r+1)+m ≃ r+(m+1)` cast (the HARDEST technical lemma; mirror of `iterCov_shift`). Built on NEW
+   **`covDerivStepComp_compReindex`** (DONE) = the component `covStep_domDomCongr` (step commutes with a free-slot
+   reindex `e`; new derivative slot fixed by `frontExtendEquiv e`, Christoffel sum reindexed by `e` via
+   `Equiv.sum_comp` + `Function.update`-precompose) + local `shiftEquivC` (recursive `frontExtendEquiv`). The
+   `frameExtData` reindex is DEFINITIONAL (`rfl`). Induction one-shot. **`compL2_iterCovComp_shift` DONE**
+   (= `iterCovComp_shift` + `compL2_comp_equiv`, 2 lines). **`iterCovComp_compReindex` DONE** (= the component
+   `iterCov_domDomCongr`: `iterCovComp` commutes with a free-slot reindex `e`, via `frontExtendIterC` + same
+   induction). **`iterCovComp_add` DONE** (field-level linearity, via `frameExtData_add` germ-congruence +
+   `covDerivStepComp_add` + tower-diff). So the (0,s)-tower structural layer is COMPLETE.
+   **UPPER-tower shift DONE (2026-06-09):** `iterCovCompU_shift` + `compL2_iterCovCompU_shift`, built on NEW
+   `covDerivStepCompU_compReindex` (the `+Γ` upper slot fixed via `extendLastEquiv`, the `−Γ` first-`p` sum
+   reindexed) + `extendLastEquiv` (via `finSuccEquivLast`/`optionCongr`) + `extendLast_frontExtend_comm` (the
+   commute of front/last extensions — fiddly nested `Fin` casing, DONE) + `extendLastEquiv_refl`. So BOTH tower
+   shifts (the A-side `∇_U` upper tower and the B-side `∇` tower) and their norm forms are now COMPLETE — the
+   hardest cast/shift obstacles of the whole m-fold are solved.
+   **REMAINING for P(m)/ISO(m) and Claim 1:** (i) the field single-step in `compReindex` form
+   `∇(contrTail A B) = compReindex e₁ (contrTail (∇_U A) B) + compReindex e₂ (contrTail A (∇B))` — `e₁ = finCongr`
+   (the index `[d,a,b]` is the SAME sequence, just regrouped `(rA+1)+rB ↔ (rA+rB)+1`); `e₂` = the rotation
+   `[d,a,b]↦[a,d,b]` (move slot 0 to position `rA`) — a fiddly explicit `Fin` permutation (~50 lines, the next piece);
+   (ii) `P(m)` bottom-pull (uses both shifts + add + compReindex + the field step + Pascal); (iii) `ISO(m)`;
+   (iv) the geometric wiring (`connDiffCompEq` relation, invert `|g_k⁻¹|≤C`, `(A_N)/(B_N)` double induction).
+   The remaining is templated/tractable but genuinely MULTI-SESSION (~250 more lines).
+4. `P(m)` (full binom `compL2` bound) + `ISO(m)` (residual bound), both bottom-pull inductions (universally
+   quantified over the two fields). `pascal_sum` reusable from `ProductMFoldNorm`.
+5. relation `∇^m(contrTail A_k g_k) = ∇^{m+1}g_k` (`connDiffCompEq` + tower composition) → isolate + invert
+   `|g_k⁻¹|≤C` → (A_N)/(B_N) double induction → **Claim 1**.
+Estimate: ~300 lines of TEMPLATED work (no new frontier). Difficulty concentrated in step 3 (the cast), already
+solved once for the bundled tower.
+
+## PROGRESS 12 (2026-06-09) — `P(m)` DONE sorry-free; `ISO(m)` scoped (the remaining engine frontier)
+**`P(m)` = `compL2_iterCovComp_contrTail_le` (AkMFold.lean, sorry-free, oleans):** the full binomial NORM bound
+`|∇^m(A∗B)| ≤ ∑_{c≤m} C(m,c)|∇_U^c A||∇^{m-c}B|`, bottom-pull, ∀ two fields. Built en route (all sorry-free):
+`slotId1`/`slotId2` (slot identities for the single-step's A/B terms), `rotEquiv` (`[d,a,b]↦[a,d,b]`),
+`covStep_contrTail_field` (field single-step in compReindex form; reindexes are `finCongr`/`rotEquiv` EQUIVS so
+`iterCovComp_compReindex` applies), wrappers `compL2_iterCovComp_compReindex`/`iterCovComp_congr_on`/
+`contMDiffOn_contrTail`. `pascal_sum` MOVED to shared `Evolution/CovDerivStepCompContrNorm.lean` (namespace
+`HCGCompactness`; both bundled+component use it). **GOTCHA: inline calc terms timed out even at 4M heartbeats →
+`set HL/HR/LF/RF` to keep every calc step small-term (the fix; no `set_option` bump needed after).**
+
+**`ISO(m)` = the residual bound, NEXT frontier.** Define `D_m[A] := ∇^m(A∗g) − (∇_U^m A)∗g` (pointwise array).
+**KEY INSIGHT (de-risks ISO): `∇^m(A∗g)` and `(∇_U^m A)∗g` have the SAME slot layout `[d_m..d_1][a_1..a_p][b_1..b_q]`
+(rank `m+p+q`) — NO reindex between them**, because `iterCovComp` prepends each derivative at slot 0, `iterCovCompU`
+prepends derivs at 0 and keeps the upper slot LAST, and `contrTail` lists A-free then B-free. So `D_m` is a clean
+subtraction. Target: `|D_m[A]| ≤ ∑_{c<m} C(m,c)|∇_U^c A||∇^{m-c}g|` (top term `c=m` ABSENT = the isolation).
+- Base `m=0`: `D_0 = A∗g − A∗g = 0`, sum over `range 0` empty ⇒ `0 ≤ 0`.
+- Recursion (bottom-pull, the work): `D_{m+1}[A] = reindex(D_m[∇_U A]) + reindex(∇^m(A∗∇g))` after the
+  `(∇_U^{m+1}A)∗g` terms CANCEL. The cancellation needs the array identity
+  `∇^{m+1}(A∗g) = reindex_L(∇^m((∇_U A)∗g)) + reindex_R(∇^m(A∗∇g))` (= P(m)'s calc steps 1–5 at the IDENTITY
+  level, NOT norm — extract as `iterCovComp_contrTail_succ`) PLUS the U-shift-commutes-with-∗g lemma
+  `contrTail(∇_U^m(∇_U A))(g) = reindex(contrTail(∇_U^{m+1}A)(g))` (from `iterCovCompU_shift` lifted through
+  `contrTail`'s first factor). Then `|D_{m+1}| ≤ |D_m[∇_U A]| + |∇^m(A∗∇g)|` (triangle + compL2 reindex-inv)
+  `≤ ISO(m)[∇_U A] + P(m)[A,∇g]` → Pascal with the top term absent ⇒ `ISO(m+1)`.
+- THE crux is the array identity + cancellation (P(m) avoided ALL identities — norm-only). ~100 lines, reuses the
+  whole P(m) engine. Suggested brick order: (i) `iterCovComp_contrTail_succ` (the L+R array identity), (ii)
+  `contrTail_iterCovCompU_shift` (U-shift through ∗g), (iii) `ISO(m)` induction.
+
+**After ISO(m): inversion + wiring → Claim 1.** (a) inversion `|∇_U^m A| ≤ |g⁻¹|·|(∇_U^m A)∗g|` (contract back
+with `g⁻¹`; `|g_k⁻¹|≤C` from inverting `∇g_k=A_k∗g_k`); (b) `(∇_U^m A)∗g = ∇^m(A∗g) − R_m`, `|R_m|≤ISO(m)`,
+`|∇^m(A∗g)|=|∇^{m+1}g|` (since `∇g=A∗g`); (c) `connDiffCompEq` (eq 3.7) to pin A_k's base; (d) (A_N)/(B_N)
+double induction. Still 1–2 sessions.
+
+HONEST %: **Claim 1 theorem = 0% (unstated/unproven in Lean).** Its route-(i) machinery ~70–75% (single-step,
+shifts, towers, differentiability, **P(m) binomial bound** all DONE sorry-free; ISO(m) residual + inversion +
+wiring + double induction remain). This lemma ~ small fraction of `ric_bound` (P2/eq 3.4), itself ~15-20% of
+Lemma 3.11, itself part of the whole HCG compactness project (~15-20% theorem-weighted).
+
+## PROGRESS 13 (2026-06-10) — **ABSTRACT CLAIM 1 PROVEN sorry-free** (`claim1_abstract`, AkMFold.lean)
+The full abstract chain is DONE and in oleans: `iterCovComp_contrTail_succ` (bottom-pull ARRAY identity) →
+`isoTop` (recursive isolated top — the recursion BUILDS IN the L-reindex, dissolving the reindex-matching) →
+**`compL2_isoResidual_le` = ISO(m)** (no-top binomial residual bound; `pascal_sum_notop` added to shared norm
+file) → `compL2_isoTop_eq` (`|isoTop| = |(∇_U^m A)∗g|`, via `blockLeftEquiv`+`contrTail_extendLast`) →
+`compL2_contrTail_topU_le` (isolated-top ≤ tower + no-top binomial) → `contrTail_contrTail_inv` +
+`compL2_le_contrTail_inv` (the invert: pointwise inverse-array property ONLY, `∇g⁻¹` never appears) →
+**`claim1_abstract`**: `|∇_U^m A| ≤ C(m,C0,KR,K)·(1+|∇^{m+1}g|)` (strong induction, explicit constant).
+MATH CORRECTION caught: `A∗g = ∇g` as a single-contraction EQUALITY is false (A hits BOTH lower slots of g);
+the honest input is the KOSZUL norm bound `hrelB : |∇^{m'}(A∗g)| ≤ KR·|∇^{m'+1}g|` (KR = 3/2 geometrically).
+**REMAINING for geometric Claim 1** (see AkMFold.md): (1) hrelB discharge = component Koszul identity +
+`iterCovComp_smul` (new, mirror `_add`) + compReindex/shift norm bounds; (2) hinv/hGinv/hK wiring from
+`InverseMetricComponentsInFrame` + eq-3.3; (3) the (1,2) UPPER tower realization bridge
+(`iterCovCompU ↔ tensorRSCovariantDerivative` tower of A_k, upper analogue of `iterCovComp_eq_iterCov`) +
+norm bridges compL2 ↔ √normSq. Claim-1 machinery now **~85%**; the geometric statement itself still 0%
+(unstated). Whole HCG project theorem-weighted ~15-20%.

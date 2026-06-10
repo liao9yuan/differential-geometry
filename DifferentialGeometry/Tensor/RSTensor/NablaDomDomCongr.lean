@@ -100,7 +100,7 @@ theorem nabla0SFun_domDomCongr [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
     rw [MultilinearSection.domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply]
     congr 1
     funext i
-    simp only [Function.comp_apply, Function.update_apply, Equiv.apply_symm_apply,
+    simp only [Function.update_apply, Equiv.apply_symm_apply,
       Equiv.apply_eq_iff_eq_symm_apply]
 
 /-- **Naturality of the total covariant derivative under slot reindexing.**
@@ -144,5 +144,62 @@ theorem totalNabla0SFun_domDomCongr [T2Space M] [IsManifold I 1 M] [IsManifold I
     ContinuousMultilinearMap.domDomCongr_apply]
   simp only [cons_apply_frontExtendEquiv]
   rw [totalNabla0SFun_apply_section]
+
+/-- **`TotalNabla0SRealizes` is closed under slot reindexing.**  If `nablaZ` realizes
+`∇Z`, then `(∇Z)·(frontExtendEquiv e)` realizes `∇(Z·e)` — the realizer-level form of
+`totalNabla0SFun_domDomCongr`, used to push covariant derivatives through the slot
+permutations of Kulkarni–Nomizu-type combinations. -/
+theorem totalNabla0SRealizes_domDomCongr [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M] {s s' : ℕ}
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (e : Fin s ≃ Fin s')
+    (Z : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) s)
+    (nablaZ : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (s + 1))
+    (hZ : TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      s cov Z nablaZ) :
+    TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      s' cov
+      (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+        (E := TangentSpace I) (∞ : WithTop ℕ∞) e Z)
+      (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+        (E := TangentSpace I) (∞ : WithTop ℕ∞) (frontExtendEquiv e) nablaZ) := by
+  intro X x slots
+  rw [MultilinearSection.domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply]
+  simp only [cons_apply_frontExtendEquiv]
+  exact (hZ X x (slots ∘ e)).trans
+    (nabla0SFun_domDomCongr (I := I) cov X e Z x slots).symm
+
+/-- **Realization uniqueness**: two fields that both realize the total covariant
+derivative of `α` are equal.  `TotalNabla0SRealizes` pins the value on every
+`Fin.cons (X x) slots`, and every `(s+1)`-tuple is `cons (v 0) (tail v)` with `v 0`
+realizable as a smooth-section value (`exists_eq_at_gen`); multilinear extensionality
+then forces equality.  Canonical Tensor-layer home; the local copy in
+`HCGCompactness/ProductMFoldNorm.lean` should redirect here once that thread lands. -/
+theorem totalNabla0SRealizes_unique [T2Space M] {s : ℕ}
+    {cov : CovariantDerivative I E (TangentSpace I : M -> Type _)}
+    {α : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) s}
+    {n1 n2 : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (s + 1)}
+    (h1 : TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s cov α n1)
+    (h2 : TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s cov α n2) :
+    n1 = n2 := by
+  refine DFunLike.ext _ _ (fun x => ?_)
+  refine ContinuousMultilinearMap.ext (fun v => ?_)
+  obtain ⟨X, hX⟩ :
+      ∃ X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _),
+        X x = v 0 :=
+    ⟨(ContMDiffSection.exists_eq_at_gen (I := I) (F := E) (V := TangentSpace I)
+        (n := (⊤ : ℕ∞)) x (v 0)).choose,
+      (ContMDiffSection.exists_eq_at_gen (I := I) (F := E) (V := TangentSpace I)
+        (n := (⊤ : ℕ∞)) x (v 0)).choose_spec⟩
+  have hcons : Fin.cons (X x) (Fin.tail v) = v := by
+    rw [hX]; exact Fin.cons_self_tail v
+  have e1 := h1 X x (Fin.tail v)
+  have e2 := h2 X x (Fin.tail v)
+  rw [hcons] at e1 e2
+  rw [e1, e2]
 
 end Tensor0SBundle
