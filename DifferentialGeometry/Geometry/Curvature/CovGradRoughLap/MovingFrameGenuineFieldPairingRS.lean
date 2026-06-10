@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvatureRS
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseTensorCurvatureRS
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.HomFieldCurvatureJetDecomposition
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameCurvatureTraceSmooth
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameGenuineFieldPairing
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FiberNormSubadditivity
@@ -112,21 +114,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
-
-/-- **The rank-`r` order-`2` commutator defect.** The difference of the rough Laplacian of the
-`(r, s + 1)`-tensor gradient field `∇S` and the covariant gradient of the rough Laplacian of `S`, as a
-smooth compactly-supported `(r, s + 1)`-tensor field:
-```
-pointwiseTensorCurvRS g r s S := Δ_∇(∇S) − ∇(Δ_∇ S).
-```
-This is the contravariant-rank-`r` lift of `pointwiseTensorCurv` (`PointwiseTensorBochner`); at `r = 0`
-it is definitionally `pointwiseTensorCurv g s`. Its body matches the inline defect form the rank-`r`
-leaf-`C` consumers (`LocalWeylReproducingKernel`) state. -/
-noncomputable def pointwiseTensorCurvRS
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
-    SmoothCcTensor g r (s + 1) :=
-  rawTensorConnLapSmooth (I := I) g r (s + 1) (covGrad (I := I) (M := M) g r s S) -
-    covGrad (I := I) (M := M) g r s (rawTensorConnLapSmooth (I := I) g r s S)
 
 /-- The section value of the rank-`r` defect as a pointwise difference. -/
 theorem pointwiseTensorCurvRS_toSection_eq_sub
@@ -979,22 +966,21 @@ fixed field action on the `≤ 2`-jet `(S, ∇S, ∇²S)`; the two `∇²S` summ
 
 **This is the genuinely-missing-upstream rank-`r` curvature primitive.** The full proof of this
 decomposition is developed *sorry-free* in `HomFieldCurvatureJetDecomposition`
-(`exists_pointwiseTensorCurvRS_homField_jetDecomposition`), but that file *imports this one* (it reads the
-named defect `pointwiseTensorCurvRS`) and its reduction machinery — the metric-double-trace field
+(`exists_pointwiseTensorCurvRS_homField_jetDecomposition`), through the metric-double-trace field
 `metricDoubleTraceField`, the trace factorisation `roughLap_eq_metricDoubleTrace`, and the head-difference
-drop `headDifferenceDrop_bracket` / `exists_headDifferenceDrop_metricDoubleTrace` — is `private` there, so
-the decomposition is neither importable nor citable here (a file-level import cycle). It is therefore
-posited here as the single precise true upstream atom from which this file's doubly-peeled fibre-order
-bound `exists_pointwiseTensorCurvRS_subGcurvSubDiffCurv_obstruction_fiberOrder_bound` is *derived* over the
-sorry-free operator-field iterated-gradient window envelope
-`exists_appFullSec_on_jet_iteratedCovGrad_window_bound` and the two sorry-free concrete carrier grids.
-Consumers transitively depend on `sorryAx`.
+drop `headDifferenceDrop_bracket` / `exists_headDifferenceDrop_metricDoubleTrace`. The shared defect
+`pointwiseTensorCurvRS` now lives in the thin upstream `PointwiseTensorCurvatureRS`, so both that file and
+this one import it without a file-level cycle, and `HomFieldCurvatureJetDecomposition` is importable here.
+This node is therefore the verbatim re-export of the proven downstream decomposition (no `sorry`), from
+which this file's doubly-peeled fibre-order bound
+`exists_pointwiseTensorCurvRS_subGcurvSubDiffCurv_obstruction_fiberOrder_bound` is *derived* over the
+operator-field iterated-gradient window envelope `exists_appFullSec_on_jet_iteratedCovGrad_window_bound`
+and the two concrete carrier grids.
 
 **Non-vacuity.** A degenerate triple `Q₀ = Q₁ = Q₂ = 0` would force `pointwiseTensorCurvRS g r s S = 0` at
 every `s`, `S`; but the order-`2` commutator defect `Δ_∇(∇S) − ∇(Δ_∇ S)` is the genuine third-order
 curvature contraction of `S`, non-zero on a non-flat manifold (`R ≠ 0`) for a non-parallel `S` — so the
-zero triple is rejected and the operator fields genuinely carry the curvature content. The body is
-`sorry`. -/
+zero triple is rejected and the operator fields genuinely carry the curvature content. -/
 theorem exists_pointwiseTensorCurvRS_homFieldJetDecompositionRS
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ (Q₀ : HomTensorRSField (E := E) (M := M) r s (s + 1) I)
@@ -1007,7 +993,7 @@ theorem exists_pointwiseTensorCurvRS_homFieldJetDecompositionRS
               (covGrad (I := I) (M := M) g r s S) +
             appFullSec (I := I) (M := M) g r (s + 2) (s + 1) Q₂
               (iteratedCovGrad g r s 2 S) := by
-  sorry
+  exact exists_pointwiseTensorCurvRS_homField_jetDecomposition (I := I) (M := M) g r s
 
 /-- **The rank-`r` doubly-peeled moving-frame remainder fibre order — the `(0, 3)` graded curvature jet
 at gradient order `0` (posited general-rank curvature core).** The contravariant-rank-`r` upstream atom
