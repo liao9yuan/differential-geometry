@@ -370,3 +370,44 @@ Then Claim 2 (`∇=∇_k+A_k` expansion → mixed-curvature bound), then Step 4
 then Step 5 (time derivatives). All raw frame components; bridge final `(0,s)`
 `∇^N Rc`/`∇^N g` to `normSq0S` via `normSq0S_identity_eq_sum_sq` at the end.
 Need to locate first: the `∇g_k = A_k∗g_k` component identity + `|g_k⁻¹| ≤ C` accessor.
+
+## ROUTE FINALISED + PROGRESS 9 (2026-06-08, user-prompted realignment): COMPONENT (route i) is THE path
+After a digression onto an abstract `(r,s)` LOWERING route (G1 isometry `normSqRS=normSq0S(lowerAll)`,
+`RSLoweringNorm.lean` — DONE sorry-free, a CORRECT but OFF-critical-path norm bridge; the "∇-commutes-lowering"
+I framed as a frontier is actually the already-proven component `nabla_metricPow_zero`/
+`nabla0SFun_metricPow_contraction_eval`, see `important_lesson.md`), the route is FIRMLY back to COMPONENT (i),
+the user's original twice-emphatic resolution. WHY: `A_k` is `(1,2)`; its tower is the purpose-built UPPER step
+`covDerivStepCompU` (`+Γ` on the contracted upper slot), NOT the `(0,s)` `iterCov`. The `∗g_k` contraction is the
+NATURAL `starAg`/`contrTail` pairing (no metric); its Leibniz has BOTH terms (g_k not gRef-parallel) → the binomial.
+So `iterCov_product_sqrtNormSq_le` (route-ii bundled ⊗ core) and G1 are correct but OFF this path.
+**DONE this session in `HCGCompactness/AkMFold.lean` (sorry-free, oleans) — 3 m-fold pieces:**
+- **Piece 1 `iterCovCompU`** — the field-level UPPER tower `∇_U^c A_k` (`covDerivStepCompU` analogue of
+  `iterCovComp`; `ext` per level = `frameExtData` of the running field; `+1` upper slot kept LAST so ranks
+  `(r+a)+1` stay defeq).
+- **Piece 2 `frameExtData_contrTail`** — the frameExtData product rule for the natural contraction (the
+  field-level `hext`): `∂(A∗B) = Σ_c (∂A·B + A·∂B)`, via `extDerivFun_finset_sum_mul_at`
+  (`Bundle/PartialMfderiv/Basic.lean:416` — the ∂ of a Finset sum-of-products, EXACT match for `contrTail`).
+  Needs component-wise `MDifferentiableAt` of the two fields (threaded as hyps `hA`/`hB`).
+- **Piece 3 `covDerivStepComp_frameExtData_contrTail`** — the field-level single-step Leibniz
+  `∇(A∗B)=(∇_U A)∗B + A∗(∇B)`: `covDerivStepCompU_contrTail_leibniz` (DONE) with `hext` = Piece 2. The
+  inductive engine of the m-fold.
+**NEXT — Piece 4: the m-fold expansion of `∇^m(A_k∗g_k)`.** Two load-bearing findings from scoping it:
+- **CRITICAL — `binom` is a NORM-level fact, NOT an identity.** The m derivative indices are DISTINCT, so each
+  `∇` (Piece 3) sends the new derivative to A (`∇_U`) OR B (`∇`); after m steps the IDENTITY is a **`2^m` subset
+  sum** `∇^m(A∗B) = Σ_{w∈{A,B}^m} contrTail(∇_U^{|wA|}A …)(∇^{|wB|}B …)`, where the `binom(m,c)` words of weight
+  `c` are PERMUTATIONS of each other (different which derivative-slots), EQUAL only after `compL2_comp_equiv`
+  (permutation-invariant norm). So: do NOT state `∇^m(A∗B)=Σ_c binom(m,c)(∇^cA)∗(∇^{m-c}B)` as an identity (FALSE
+  at array level). Isolation works because the all-A word `w=AAA…` is UNIQUE → its term is exactly `(∇^m A_k)∗g_k`;
+  `(∇^m A_k)∗g_k = ∇^{m+1}g_k − Σ_{w≠allA}(…)`, and `|Σ_{w≠allA}(…)| ≤ Σ_{c<m} binom(m,c)|∇^cA_k||∇^{m-c}g_k|`
+  (triangle + per-word `compL2_contrTail_le` + group-by-weight at the NORM level).
+- **BLOCKER — tower differentiability is MISSING.** Piece 4's induction applies Piece 3 at each level, whose
+  `hA`/`hB` require each tower level `iterCovCompU A c` / `iterCovComp B (m-c)` (of a smooth field) to be
+  `MDifferentiableAt I 𝓘(ℝ,ℝ) (fun y => … y m) x`. NO such lemma exists (greps for `iterCovComp`/`covDerivStepComp`
+  contMDiff/MDifferentiable are empty). **SMALLEST NEXT BRIDGE = the tower-differentiability API**:
+  `iterCovComp`/`iterCovCompU` of a `C^∞` field have `MDifferentiableAt` components at each level (induction on the
+  level; each `covDerivStepComp` step is differentiable from the previous level's `C²` + `frameExtData`'s mfderiv +
+  smooth `chr`; likely cleanest via `iterCovComp_eq_iterCov` + the bundled `iterCov`'s smoothness). This is a real
+  analytic sub-piece (the "tower DIFFERENTIABILITY infra" flagged in PROGRESS-8 notes). Classify: missing analytic API.
+**THEN (all DONE blocks):** norm (`compL2_contrTail_le` + `compL2_add_le` + triangle) → relation `∇g_k=A_k∗g_k`
+= `connDiffCompEq` (eq 3.7) → isolate the all-A word → invert `|g_k⁻¹|≤C` (eq 3.3) → (A_N)/(B_N) double induction
+→ **Claim 1**.

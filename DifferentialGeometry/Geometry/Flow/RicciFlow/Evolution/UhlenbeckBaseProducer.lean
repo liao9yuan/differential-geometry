@@ -1,6 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Rm13DerivProducer
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRaisingBridge
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.BookData
+import DifferentialGeometry.Geometry.Curvature.DimensionThree.RiemannFromRicci
+import DifferentialGeometry.Geometry.Curvature.DimensionThree.RicciControlsRm
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -196,5 +199,147 @@ theorem realizedRmBase_timeDeriv
   exact (HasDerivWithinAt.sum hterm).congr
     (fun y hy => by rw [Finset.sum_apply]; exact hbase y hy)
     (by rw [Finset.sum_apply]; exact hbase (t : Real) (D.regular_subset t.2))
+
+/-- **B3a′+B3b-input: the sign-correct 3D Kulkarni–Nomizu identity for the solution.**
+For a Ricci-flow solution in dim 3, the lowered Riemann tensor is the metric KN combination
+of the *geometric* Ricci/scalar fields (the convention used by the proved `∂ₜRic`/`∂ₜS`).
+The displayed-vs-geometric sign bridge is isolated here (via the banked `traceData_can`, which
+produces the trace data with `−Ric`/`−scalar`), so downstream differentiation works purely in
+the geometric convention.  The orthonormal basis is only a proof device — the conclusion is
+basis-free. -/
+theorem solution_rm04_kn_firstTrace_gform_at
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) (x : M)
+    {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
+    (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt
+      (I := I) (S.base.metric t) x basis)
+    (X Y Z W : TangentSpace I x) :
+    S.base.rm04 t x (DifferentialGeometry.Integral.Connection.vec4 (I := I) X Y Z W) =
+      -(S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) X Z))
+          * (S.base.metric t).inner x Y W
+        + S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) Y Z)
+          * (S.base.metric t).inner x X W
+        + S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) X W)
+          * (S.base.metric t).inner x Y Z
+        - S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) Y W)
+          * (S.base.metric t).inner x X Z
+        + (S.scalar t x / 2)
+          * ((S.base.metric t).inner x X Z * (S.base.metric t).inner x Y W
+              - (S.base.metric t).inner x Y Z * (S.base.metric t).inner x X W) := by
+  have h :=
+    DifferentialGeometry.Integral.Connection.rm04_kn_gform (I := I)
+      (traceData_can (I := I) S horth) X Y Z W
+  simp only [ContinuousMultilinearMap.neg_apply] at h
+  rw [h]; ring
+
+/-- **Step 2 — the KN identity as a pointwise field (basis hidden).**  At any time `s`
+and point `x` of a dim-3 solution, the lowered Riemann tensor is the geometric KN
+combination of `Ric`/`scalar`/`g`.  The orthonormal basis is produced internally by
+`exists_orthonormalBasisAt`, so this is differentiable in `s` (for B3b) and in `x`. -/
+theorem solution_rm04_kn_field
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (s : Real) (x : M)
+    (hdim : Module.finrank Real (TangentSpace I x) = 3)
+    (X Y Z W : TangentSpace I x) :
+    S.base.rm04 s x (DifferentialGeometry.Integral.Connection.vec4 (I := I) X Y Z W) =
+      -(S.ricciAt s x (DifferentialGeometry.Integral.Connection.vec2 (I := I) X Z))
+          * (S.base.metric s).inner x Y W
+        + S.ricciAt s x (DifferentialGeometry.Integral.Connection.vec2 (I := I) Y Z)
+          * (S.base.metric s).inner x X W
+        + S.ricciAt s x (DifferentialGeometry.Integral.Connection.vec2 (I := I) X W)
+          * (S.base.metric s).inner x Y Z
+        - S.ricciAt s x (DifferentialGeometry.Integral.Connection.vec2 (I := I) Y W)
+          * (S.base.metric s).inner x X Z
+        + (S.scalar s x / 2)
+          * ((S.base.metric s).inner x X Z * (S.base.metric s).inner x Y W
+              - (S.base.metric s).inner x Y Z * (S.base.metric s).inner x X W) := by
+  obtain ⟨basis, horth⟩ :=
+    DifferentialGeometry.Integral.Connection.exists_orthonormalBasisAt (I := I)
+      (S.base.metric s) x hdim
+  exact solution_rm04_kn_firstTrace_gform_at (I := I) S s x horth X Y Z W
+
+/-- **Step 4 (B3b) — time derivative of `Rm04` via the KN identity.**  Differentiate the
+pointwise KN field `solution_rm04_kn_field` in `t`: the product rule on the `Ric`/`scalar`/`g`
+scalar factors, with `∂ₜg = −2Ric` supplied internally by the PDE (`hS.equation`) and the
+`Ric`/`scalar` time-derivatives taken as hypotheses (to be discharged from the proved
+Ricci/scalar evolutions in the final assembly).  The derivative is the full 3D reaction–diffusion
+right-hand side prior to the diffusion-split and reaction normalization. -/
+theorem solution_rm04_timeDeriv_kn
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
+    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (hdim : Module.finrank Real (TangentSpace I x) = 3)
+    (X Y Z W : TangentSpace I x)
+    {ricXZ' ricYZ' ricXW' ricYW' sc' : Real}
+    (hXZ : HasDerivWithinAt
+      (fun σ : Real => S.ricciAt σ x (DifferentialGeometry.Integral.Connection.vec2 (I := I) X Z))
+      ricXZ' D.carrier (t : Real))
+    (hYZ : HasDerivWithinAt
+      (fun σ : Real => S.ricciAt σ x (DifferentialGeometry.Integral.Connection.vec2 (I := I) Y Z))
+      ricYZ' D.carrier (t : Real))
+    (hXW : HasDerivWithinAt
+      (fun σ : Real => S.ricciAt σ x (DifferentialGeometry.Integral.Connection.vec2 (I := I) X W))
+      ricXW' D.carrier (t : Real))
+    (hYW : HasDerivWithinAt
+      (fun σ : Real => S.ricciAt σ x (DifferentialGeometry.Integral.Connection.vec2 (I := I) Y W))
+      ricYW' D.carrier (t : Real))
+    (hSc : HasDerivWithinAt (fun σ : Real => S.scalar σ x) sc' D.carrier (t : Real)) :
+    HasDerivWithinAt
+      (fun σ : Real => S.base.rm04 σ x (DifferentialGeometry.Integral.Connection.vec4 (I := I) X Y Z W))
+      (-(ricXZ' * (S.base.metric (t : Real)).inner x Y W
+          + S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) X Z)
+            * (-2 * S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) Y W)))
+        + (ricYZ' * (S.base.metric (t : Real)).inner x X W
+            + S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) Y Z)
+              * (-2 * S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) X W)))
+        + (ricXW' * (S.base.metric (t : Real)).inner x Y Z
+            + S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) X W)
+              * (-2 * S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) Y Z)))
+        - (ricYW' * (S.base.metric (t : Real)).inner x X Z
+            + S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) Y W)
+              * (-2 * S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) X Z)))
+        + (sc' / 2
+            * ((S.base.metric (t : Real)).inner x X Z * (S.base.metric (t : Real)).inner x Y W
+                - (S.base.metric (t : Real)).inner x Y Z * (S.base.metric (t : Real)).inner x X W)
+          + S.scalar (t : Real) x / 2
+            * ((-2 * S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) X Z))
+                  * (S.base.metric (t : Real)).inner x Y W
+                + (S.base.metric (t : Real)).inner x X Z
+                  * (-2 * S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) Y W))
+                - ((-2 * S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) Y Z))
+                      * (S.base.metric (t : Real)).inner x X W
+                    + (S.base.metric (t : Real)).inner x Y Z
+                      * (-2 * S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) X W))))))
+      D.carrier (t : Real) := by
+  have hfield :
+      (fun σ : Real => S.base.rm04 σ x (DifferentialGeometry.Integral.Connection.vec4 (I := I) X Y Z W))
+        = fun σ : Real =>
+          -(S.ricciAt σ x (DifferentialGeometry.Integral.Connection.vec2 (I := I) X Z))
+              * (S.base.metric σ).inner x Y W
+            + S.ricciAt σ x (DifferentialGeometry.Integral.Connection.vec2 (I := I) Y Z)
+              * (S.base.metric σ).inner x X W
+            + S.ricciAt σ x (DifferentialGeometry.Integral.Connection.vec2 (I := I) X W)
+              * (S.base.metric σ).inner x Y Z
+            - S.ricciAt σ x (DifferentialGeometry.Integral.Connection.vec2 (I := I) Y W)
+              * (S.base.metric σ).inner x X Z
+            + (S.scalar σ x / 2)
+              * ((S.base.metric σ).inner x X Z * (S.base.metric σ).inner x Y W
+                  - (S.base.metric σ).inner x Y Z * (S.base.metric σ).inner x X W) :=
+    funext fun σ => solution_rm04_kn_field (I := I) S σ x hdim X Y Z W
+  rw [hfield]
+  have hg : ∀ P Q : TangentSpace I x,
+      HasDerivWithinAt (fun σ : Real => (S.base.metric σ).inner x P Q)
+        (-2 * S.ricciAt (t : Real) x (DifferentialGeometry.Integral.Connection.vec2 (I := I) P Q))
+        D.carrier (t : Real) := by
+    intro P Q
+    have h := hS.equation t x P Q
+    simpa [RicciAtFamily.toTensorField_apply] using h
+  have hd :=
+    ((((((hXZ.neg.mul (hg Y W)).add ((hYZ.mul (hg X W)))).add (hXW.mul (hg Y Z))).sub
+      (hYW.mul (hg X Z))).add
+      (((hSc.div_const 2).mul (((hg X Z).mul (hg Y W)).sub ((hg Y Z).mul (hg X W)))))))
+  convert hd using 1
+  simp only [Pi.neg_apply, Pi.mul_apply, Pi.sub_apply]
+  ring
 
 end DifferentialGeometry.PDE.RicciFlow
