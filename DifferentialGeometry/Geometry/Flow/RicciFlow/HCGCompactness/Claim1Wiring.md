@@ -183,11 +183,15 @@ localFrame_coeff`).**
     upper-slot input `β` built from the frame's DUAL basis (check `hframe.toBasisAt`
     / coordinate-dual plumbing in `Tensor/RSTensor/Coordinates/`).
 
-**B3 — `hinv` + the `Ginv` field.**
-  Define `Ginv y` := inverse Gram array of g_k at y in the frame (pointwise
-  `Matrix.inv` or the existing inverse-components predicate).  `hinv` is its
-  defining property + g-symmetry.  No smoothness needed (engine fact).
-  Effort: 0.5 session.  Risk: low.
+**B3 — `hinv` + the `Ginv` field.
+STATUS 2026-06-10: **B3 COMPLETE sorry-free** in `Claim1Wiring.lean`: `gramE`
+(frame Gram matrix), `gramE_herm`, `gramE_dotVec` (quadratic-form expansion),
+`gramE_posDef` (via `Matrix.PosDef.of_dotProduct_mulVec_pos` + frame linear
+independence + `g.pos` — mirrored from `BoundaryGramMatrix.lean`'s template;
+gotcha: the PosDef hypothesis carries `star c`, bridge with `star_trivial`),
+`ginvCompField` (= `(gramE)⁻¹` entries, junk off `baseSet`), **`ginv_hinv`**
+(the exact `claim1` `hinv` shape, via `Matrix.nonsing_inv_mul` + entry
+extraction).  No smoothness of `Ginv` anywhere, as designed.**
 
 **B4 — `hGinv` : `compL2 (Ginv x) ≤ C0` + (D2b) the frame-Gram comparison.**
   From the two-sided equivalence `c·gRef ≤ g_k ≤ C·gRef` (eq 3.3 output) and the

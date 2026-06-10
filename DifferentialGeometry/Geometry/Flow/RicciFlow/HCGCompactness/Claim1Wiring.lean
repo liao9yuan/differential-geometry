@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AkMFold
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.MetricFlatBasis
+import Mathlib.LinearAlgebra.Matrix.PosDef
+import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -140,5 +142,126 @@ theorem gCompField_mdiffOn
     (T := fun b : M => metricTensorField (I := I) g b) hT
     (v := fun (i : Fin 2) (b : M) => e₀.localFrame basisE (k i) b) hv
   exact h.contMDiffWithinAt
+
+/-! ## B3: the pointwise inverse metric array (`Ginv` + `hinv`)
+
+No smoothness of the inverse is needed anywhere (the `claim1` engine never
+differentiates `g⁻¹`) — only the pointwise inverse property and, later (B4), a
+norm bound. -/
+
+/-- The Gram matrix of `g` in the trivialization frame at `y`. -/
+def gramE
+    (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
+    [MemTrivializationAtlas e₀]
+    (g : SmoothRiemannianMetric I M) (basisE : Module.Basis Idx Real E) (y : M) :
+    Matrix Idx Idx Real :=
+  Matrix.of fun i j => g.inner y (e₀.localFrame basisE i y) (e₀.localFrame basisE j y)
+
+theorem gramE_herm
+    (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
+    [MemTrivializationAtlas e₀]
+    (g : SmoothRiemannianMetric I M) (basisE : Module.Basis Idx Real E) (y : M) :
+    (gramE (I := I) e₀ g basisE y).IsHermitian := by
+  ext i j
+  simp only [Matrix.conjTranspose_apply, star_trivial, gramE, Matrix.of_apply]
+  exact g.symm y _ _
+
+/-- Quadratic-form expansion of the Gram matrix: `c ⬝ᵥ (G *ᵥ c) = g(W, W)` with
+`W = Σ cᵢ • frameᵢ`. -/
+theorem gramE_dotVec
+    (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
+    [MemTrivializationAtlas e₀]
+    (g : SmoothRiemannianMetric I M) (basisE : Module.Basis Idx Real E) (y : M)
+    (c : Idx → Real) :
+    c ⬝ᵥ (gramE (I := I) e₀ g basisE y).mulVec c =
+      g.inner y (∑ i, c i • e₀.localFrame basisE i y)
+        (∑ j, c j • e₀.localFrame basisE j y) := by
+  have hexpand : g.inner y (∑ i, c i • e₀.localFrame basisE i y)
+        (∑ j, c j • e₀.localFrame basisE j y) =
+      ∑ i, ∑ j, c i * c j *
+        g.inner y (e₀.localFrame basisE i y) (e₀.localFrame basisE j y) := by
+    have hL : g.inner y (∑ i, c i • e₀.localFrame basisE i y) =
+        ∑ i, c i • g.inner y (e₀.localFrame basisE i y) := by
+      rw [map_sum]
+      exact Finset.sum_congr rfl fun i _ => ContinuousLinearMap.map_smul _ _ _
+    rw [hL, ContinuousLinearMap.sum_apply]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    rw [ContinuousLinearMap.smul_apply, map_sum, smul_eq_mul, Finset.mul_sum]
+    refine Finset.sum_congr rfl fun j _ => ?_
+    rw [ContinuousLinearMap.map_smul, smul_eq_mul]
+    ring
+  rw [hexpand]
+  simp only [dotProduct, Matrix.mulVec, gramE, Matrix.of_apply]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl fun j _ => ?_
+  ring
+
+/-- The Gram matrix is positive-definite on the trivialization domain (the frame is a
+basis there and `g` is positive). -/
+theorem gramE_posDef
+    (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
+    [MemTrivializationAtlas e₀]
+    (g : SmoothRiemannianMetric I M) (basisE : Module.Basis Idx Real E)
+    {y : M} (hy : y ∈ e₀.baseSet) :
+    (gramE (I := I) e₀ g basisE y).PosDef := by
+  refine Matrix.PosDef.of_dotProduct_mulVec_pos (gramE_herm (I := I) e₀ g basisE y) ?_
+  intro c hc
+  rw [show (star c : Idx → Real) = c from funext fun i => star_trivial _, gramE_dotVec]
+  have hwnz : (∑ i, c i • e₀.localFrame basisE i y) ≠ 0 := by
+    intro hw0
+    have hli := (e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE).linearIndependent hy
+    rw [Fintype.linearIndependent_iff] at hli
+    exact hc (funext (hli c hw0))
+  exact g.pos y _ hwnz
+
+/-- The pointwise inverse-metric array in the `(Fin 2 → Idx)`-shape `claim1` consumes
+(the matrix inverse of the Gram matrix; junk off the trivialization domain). -/
+def ginvCompField
+    (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
+    [MemTrivializationAtlas e₀]
+    (g : SmoothRiemannianMetric I M) (basisE : Module.Basis Idx Real E) :
+    M → (Fin (1 + 1) → Idx) → Real :=
+  fun y m => (gramE (I := I) e₀ g basisE y)⁻¹ (m 0) (m 1)
+
+/-- **B3 `hinv`**: the defining inverse property, in the exact shape of `claim1`'s
+`hinv` hypothesis. -/
+theorem ginv_hinv
+    (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
+    [MemTrivializationAtlas e₀]
+    (g : SmoothRiemannianMetric I M) (basisE : Module.Basis Idx Real E)
+    {y : M} (hy : y ∈ e₀.baseSet) (c e : Idx) :
+    (∑ l : Idx,
+      frameComp0S (I := I) (metricTensorField (I := I) g)
+          (fun a y' => e₀.localFrame basisE a y') y (Fin.snoc (fun _ : Fin 1 => l) c) *
+        ginvCompField (I := I) e₀ g basisE y (Fin.snoc (fun _ : Fin 1 => e) l)) =
+      if c = e then 1 else 0 := by
+  classical
+  have hdet : IsUnit (gramE (I := I) e₀ g basisE y).det :=
+    isUnit_iff_ne_zero.mpr (ne_of_gt (gramE_posDef (I := I) e₀ g basisE hy).det_pos)
+  have hentry := congrArg (fun A : Matrix Idx Idx Real => A e c)
+    (Matrix.nonsing_inv_mul (gramE (I := I) e₀ g basisE y) hdet)
+  simp only [Matrix.mul_apply, Matrix.one_apply] at hentry
+  have hterm : ∀ l : Idx,
+      frameComp0S (I := I) (metricTensorField (I := I) g)
+          (fun a y' => e₀.localFrame basisE a y') y (Fin.snoc (fun _ : Fin 1 => l) c) *
+        ginvCompField (I := I) e₀ g basisE y (Fin.snoc (fun _ : Fin 1 => e) l) =
+      (gramE (I := I) e₀ g basisE y)⁻¹ e l * gramE (I := I) e₀ g basisE y l c := by
+    intro l
+    have h0 : (Fin.snoc (fun _ : Fin 1 => l) c : Fin 2 → Idx) 0 = l := by simp [Fin.snoc]
+    have h1 : (Fin.snoc (fun _ : Fin 1 => l) c : Fin 2 → Idx) 1 = c := by simp [Fin.snoc]
+    have h0' : (Fin.snoc (fun _ : Fin 1 => e) l : Fin 2 → Idx) 0 = e := by simp [Fin.snoc]
+    have h1' : (Fin.snoc (fun _ : Fin 1 => e) l : Fin 2 → Idx) 1 = l := by simp [Fin.snoc]
+    rw [frameComp0S_apply, metricTensorField_apply, h0, h1,
+      show ginvCompField (I := I) e₀ g basisE y (Fin.snoc (fun _ : Fin 1 => e) l) =
+        (gramE (I := I) e₀ g basisE y)⁻¹ e l from by
+        rw [ginvCompField, h0', h1'],
+      show g.inner y (e₀.localFrame basisE l y) (e₀.localFrame basisE c y) =
+        gramE (I := I) e₀ g basisE y l c from rfl]
+    ring
+  rw [Finset.sum_congr rfl fun l _ => hterm l, hentry]
+  rcases eq_or_ne e c with rfl | h
+  · simp
+  · rw [if_neg h, if_neg fun hce => h hce.symm]
 
 end DifferentialGeometry.PDE.RicciFlow
