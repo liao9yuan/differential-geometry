@@ -501,7 +501,7 @@ private theorem weightedCovIBP_lpFiberJet_fin
     (∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
             ((covGrad (I := I) (M := M) g 0 m w).toSection x)) ^ ((k : ℝ) / (i + 1))
         ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ≤
-      (2 * ((k : ℝ) / (i + 1)) - 1) *
+      (2 * ((k : ℝ) / (i + 1) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ)) *
         ∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x)) ^ (1 / 2 : ℝ) *
             (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
               ((covGrad (I := I) (M := M) g 0 m w).toSection x)) ^ ((k : ℝ) / (i + 1) - 1) *
@@ -517,13 +517,13 @@ The order-`0` instance of the covariant IBP engine, where the lowest factor `|w|
 uniform `L^∞` bound `A ≥ 0` on the fibre norm of `w` (`rfns(w) ≤ A²` pointwise).  With `∇ = covGrad`,
 `b := rfns(∇w)`, `c := rfns(∇²w)`, at the top exponent `p := k ≥ 1`,
 ```
-∫ b^k ≤ (2k - 1) · A · ∫ b^{k-1} · c^{1/2},
+∫ b^k ≤ (2(k-1) + √(finrank)) · A · ∫ b^{k-1} · c^{1/2},
 ```
-i.e. `∫ |∇w|^{2k} ≤ (2k-1)·A·∫ |∇w|^{2k-2}·|∇²w|` (using `|w| ≤ A` pointwise after the covariant IBP).
-Its body is `sorry`: the same weighted covariant divergence theorem with the lowest factor bounded by
-the `L^∞` constant; consumers transitively depend on its `sorryAx`.  **General analytic
-infrastructure** (weighted-`Lᵖ` covariant IBP, `L^∞`-factor) to be promoted alongside the finite
-form. -/
+i.e. `∫ |∇w|^{2k} ≤ (2(k-1)+√n)·A·∫ |∇w|^{2k-2}·|∇²w|`, the corrected Hamilton constant (the `√n` is the
+irreducible trace factor `|Δ_raw w| ≤ √n·|∇²w|`, equality at `∇²w = g`).  Its body is `sorry`: the
+genuine closed-manifold weighted covariant divergence theorem with the lowest factor bounded by the
+`L^∞` constant; consumers transitively depend on its `sorryAx`.  **General analytic infrastructure**
+(weighted-`Lᵖ` covariant IBP, `L^∞`-factor) to be promoted alongside the finite form. -/
 private theorem weightedCovIBP_lpFiberJet_sup
     (g : SmoothRiemannianMetric I M) (k m : ℕ) (_hk : 1 ≤ k)
     (w : Integral.L2.SmoothCcTensor g 0 m) (A : ℝ) (_hA : 0 ≤ A)
@@ -531,7 +531,7 @@ private theorem weightedCovIBP_lpFiberJet_sup
     (∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
             ((covGrad (I := I) (M := M) g 0 m w).toSection x)) ^ ((k : ℝ) / 1)
         ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ≤
-      (2 * (k : ℝ) - 1) * A *
+      (2 * ((k : ℝ) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ)) * A *
         ∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
               ((covGrad (I := I) (M := M) g 0 m w).toSection x)) ^ ((k : ℝ) - 1) *
             (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
@@ -615,15 +615,16 @@ private theorem secondOrderInterp_lpFiberJet_fin
   classical
   obtain ⟨K'', hK''1, hlowExp⟩ := secondOrderInterp_lpFiberJet_fin_lowExp (I := I) (M := M) g k _hk
   have hkR : (0 : ℝ) < (k : ℝ) := by exact_mod_cast (lt_of_lt_of_le Nat.zero_lt_one _hk)
-  -- The uniform multiplier dominates the standard-regime IBP constant `2k`, `1`, and the sub-unit
-  -- engine `K''`.
-  refine ⟨max (max (2 * (k : ℝ)) 1) K'', ?_, ?_⟩
+  -- The uniform multiplier dominates the standard-regime IBP constant `2(k-1)+√n` (an `i`-uniform
+  -- upper bound for the order-`i` constant `2(k/(i+1)-1)+√n`), `1`, and the sub-unit engine `K''`.
+  refine ⟨max (max (2 * ((k : ℝ) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ)) 1) K'', ?_, ?_⟩
   · exact le_trans (le_max_right _ _) (le_max_left _ _)
   intro m w i hi1
   set μ : MeasureTheory.Measure M := Integral.Measure.riemannianVolumeMeasure I M g with hμ
   haveI : MeasureTheory.IsFiniteMeasure μ :=
     Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
-  set K' : ℝ := max (max (2 * (k : ℝ)) 1) K'' with hK'def
+  set K' : ℝ := max (max (2 * ((k : ℝ) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ)) 1) K''
+    with hK'def
   -- Abbreviations for the three squared fibre norms (nonnegative continuous functions).
   set a : M → ℝ := fun x => riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x)
     with ha_def
@@ -735,13 +736,13 @@ private theorem secondOrderInterp_lpFiberJet_fin
     have hinvα : (1 : ℝ) / α = (i : ℝ) / (2 * k) := by rw [hα_def]; rw [one_div_div]
     have hinvγ : (1 : ℝ) / γ = ((i : ℝ) + 2) / (2 * k) := by rw [hγ_def]; rw [one_div_div]
     -- `hHolder` now reads `∫ f₁f₂f₃ ≤ Ia^{1/α}·(Ib^{1/β}·Ic^{1/γ})`.
-    -- Combine with IBP: `Ib ≤ (2p-1)·Ia^{1/α}·Ib^{1/β}·Ic^{1/γ}`.
-    have hIb_bound : Ib ≤ (2 * p - 1) * (Aw * (Ib ^ (1 / β) * C)) := by
-      have hcoef_nn : 0 ≤ 2 * p - 1 := by linarith
-      have hstep : Ib ≤ (2 * p - 1) * (∫ x, f₁ x * f₂ x * f₃ x ∂μ) := by
-        rw [hIb_def]; rw [show ((2 : ℝ) * ((k : ℝ) / (i + 1)) - 1) = 2 * p - 1 from by rw [hp_def]]
-          at hIBP
-        exact hIBP
+    -- The corrected Hamilton IBP constant at this order, `D = 2(p-1)+√n` (with `p = k/(i+1)`).
+    set D : ℝ := 2 * (p - 1) + Real.sqrt (Module.finrank ℝ E : ℝ) with hD_def
+    have hsqrt_nn : (0 : ℝ) ≤ Real.sqrt (Module.finrank ℝ E : ℝ) := Real.sqrt_nonneg _
+    -- Combine with IBP: `Ib ≤ D·Ia^{1/α}·Ib^{1/β}·Ic^{1/γ}`.
+    have hIb_bound : Ib ≤ D * (Aw * (Ib ^ (1 / β) * C)) := by
+      have hcoef_nn : 0 ≤ D := by rw [hD_def]; nlinarith [hp1m, hsqrt_nn]
+      have hstep : Ib ≤ D * (∫ x, f₁ x * f₂ x * f₃ x ∂μ) := hIBP
       refine le_trans hstep ?_
       apply mul_le_mul_of_nonneg_left _ hcoef_nn
       rw [hinvα, hinvγ] at hHolder
@@ -761,13 +762,14 @@ private theorem secondOrderInterp_lpFiberJet_fin
       have hexp : ((i : ℝ) + 1) / (2 * k) * ((2 : ℕ) : ℝ) = (1 : ℝ) / p := by
         rw [hinvp]; push_cast; ring
       rw [← Real.rpow_natCast (Ib ^ (((i : ℝ) + 1) / (2 * k))) 2, ← Real.rpow_mul hIb_nn, hexp]
-    -- `2p - 1 ≤ K'` since `2p - 1 < 2k ≤ K'`.
-    have hcoef_le : 2 * p - 1 ≤ K' := by
+    -- `D = 2(p-1)+√n ≤ 2(k-1)+√n ≤ K'` since `p ≤ k` (as `i + 1 ≥ 2`).
+    have hcoef_le : D ≤ K' := by
       have hp_le_k : p ≤ (k : ℝ) := by
         rw [hp_def, div_le_iff₀ hi1R]
         nlinarith [hkR, hiR]
-      have : 2 * p - 1 ≤ 2 * (k : ℝ) := by linarith
-      exact le_trans this (le_trans (le_max_left _ _) (le_max_left _ _))
+      have hDk : D ≤ 2 * ((k : ℝ) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ) := by
+        rw [hD_def]; linarith
+      exact le_trans hDk (le_trans (le_max_left _ _) (le_max_left _ _))
     -- Conclude by dividing the IBP+Hölder bound by `Ib^{1/β}`.
     rw [hLHS_sq]
     rcases eq_or_lt_of_le hIb_nn with hIb0 | hIbpos
@@ -779,14 +781,14 @@ private theorem secondOrderInterp_lpFiberJet_fin
       -- `Ib = Ib^{1/p}·Ib^{1/β}`.
       have hIb_split : Ib = Ib ^ ((1 : ℝ) / p) * Ib ^ (1 / β) := by
         rw [← Real.rpow_add hIbpos, hsum_pβ, Real.rpow_one]
-      -- From `hIb_bound`: `Ib^{1/p}·Ib^{1/β} ≤ (2p-1)·Aw·C·Ib^{1/β}`.
-      have hkey : Ib ^ ((1 : ℝ) / p) * Ib ^ (1 / β) ≤ ((2 * p - 1) * (Aw * C)) * Ib ^ (1 / β) := by
+      -- From `hIb_bound`: `Ib^{1/p}·Ib^{1/β} ≤ D·Aw·C·Ib^{1/β}`.
+      have hkey : Ib ^ ((1 : ℝ) / p) * Ib ^ (1 / β) ≤ (D * (Aw * C)) * Ib ^ (1 / β) := by
         rw [← hIb_split]
-        calc Ib ≤ (2 * p - 1) * (Aw * (Ib ^ (1 / β) * C)) := hIb_bound
-          _ = ((2 * p - 1) * (Aw * C)) * Ib ^ (1 / β) := by ring
-      have hcancel : Ib ^ ((1 : ℝ) / p) ≤ (2 * p - 1) * (Aw * C) :=
+        calc Ib ≤ D * (Aw * (Ib ^ (1 / β) * C)) := hIb_bound
+          _ = (D * (Aw * C)) * Ib ^ (1 / β) := by ring
+      have hcancel : Ib ^ ((1 : ℝ) / p) ≤ D * (Aw * C) :=
         le_of_mul_le_mul_right hkey hIbβ_pos
-      calc Ib ^ ((1 : ℝ) / p) ≤ (2 * p - 1) * (Aw * C) := hcancel
+      calc Ib ^ ((1 : ℝ) / p) ≤ D * (Aw * C) := hcancel
         _ ≤ K' * (Aw * C) := by
             apply mul_le_mul_of_nonneg_right hcoef_le (mul_nonneg hAw_nn hC_nn)
         _ = K' * Aw * C := by ring
@@ -841,12 +843,12 @@ private theorem secondOrderInterp_lpFiberJet_sup
                 ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((2 : ℝ) / (2 * k))) := by
   classical
   have hkR : (0 : ℝ) < (k : ℝ) := by exact_mod_cast (lt_of_lt_of_le Nat.zero_lt_one _hk)
-  refine ⟨max (2 * (k : ℝ)) 1, le_max_right _ _, ?_⟩
+  refine ⟨max (2 * ((k : ℝ) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ)) 1, le_max_right _ _, ?_⟩
   intro m w A hA hsup
   set μ : MeasureTheory.Measure M := Integral.Measure.riemannianVolumeMeasure I M g with hμ
   haveI : MeasureTheory.IsFiniteMeasure μ :=
     Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
-  set K' : ℝ := max (2 * (k : ℝ)) 1 with hK'def
+  set K' : ℝ := max (2 * ((k : ℝ) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ)) 1 with hK'def
   set b : M → ℝ := fun x => riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
     ((covGrad (I := I) (M := M) g 0 m w).toSection x) with hb_def
   set c : M → ℝ := fun x => riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
@@ -882,9 +884,16 @@ private theorem secondOrderInterp_lpFiberJet_sup
   set J : ℝ := ∫ x, b x ^ ((k : ℝ) - 1) * c x ^ (1 / 2 : ℝ) ∂μ with hJ_def
   have hJ_nn : 0 ≤ J := MeasureTheory.integral_nonneg (fun x =>
     mul_nonneg (Real.rpow_nonneg (hb0 x) _) (Real.rpow_nonneg (hc0 x) _))
-  -- `hIBP : Ib ≤ (2k-1)·A·J`.
-  have hIBP' : Ib ≤ (2 * (k : ℝ) - 1) * A * J := by
-    rw [hIb_def, hJ_def]; exact hIBP
+  -- The corrected Hamilton IBP constant `D = 2(k-1)+√n` (the `i = 0`, `p = k` order).
+  set D : ℝ := 2 * ((k : ℝ) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ) with hD_def
+  have hsqrt_nn : (0 : ℝ) ≤ Real.sqrt (Module.finrank ℝ E : ℝ) := Real.sqrt_nonneg _
+  have hkm1_nn : (0 : ℝ) ≤ (k : ℝ) - 1 := by
+    have : (1 : ℝ) ≤ (k : ℝ) := by exact_mod_cast _hk
+    linarith
+  have hD_nn : 0 ≤ D := by rw [hD_def]; nlinarith [hkm1_nn, hsqrt_nn]
+  -- `hIBP : Ib ≤ D·A·J`.
+  have hIBP' : Ib ≤ D * A * J := by
+    rw [hIb_def, hJ_def, hD_def]; exact hIBP
   -- Two-function Hölder on `J` (for `k ≥ 2`); for `k = 1` the factor `b^{k-1} = 1` is handled
   -- directly.  In both cases we obtain `J ≤ Ib^{(k-1)/k}·C`.
   have hJ_bound : J ≤ Ib ^ (((k : ℝ) - 1) / k) * C := by
@@ -946,9 +955,8 @@ private theorem secondOrderInterp_lpFiberJet_sup
           ← hC_def] at hH
       rw [hJ_def]
       exact hH
-  -- Conclude: `Ib ≤ (2k-1)·A·Ib^{(k-1)/k}·C`, then cancel `Ib^{(k-1)/k}`.
-  have hcoef_le : (2 * (k : ℝ) - 1) ≤ K' :=
-    le_trans (by linarith) (le_max_left _ _)
+  -- Conclude: `Ib ≤ D·A·Ib^{(k-1)/k}·C`, then cancel `Ib^{(k-1)/k}`.
+  have hcoef_le : D ≤ K' := by rw [hD_def]; exact le_max_left _ _
   have hAC_nn : 0 ≤ A * C := mul_nonneg hA hC_nn
   -- `1/k + (k-1)/k = 1`.
   have hsum_k : (1 : ℝ) / k + ((k : ℝ) - 1) / k = 1 := by
@@ -962,17 +970,16 @@ private theorem secondOrderInterp_lpFiberJet_sup
     have hIb_split : Ib = Ib ^ ((1 : ℝ) / k) * Ib ^ (((k : ℝ) - 1) / k) := by
       rw [← Real.rpow_add hIbpos, hsum_k, Real.rpow_one]
     have hchain : Ib ^ ((1 : ℝ) / k) * Ib ^ (((k : ℝ) - 1) / k)
-        ≤ ((2 * (k : ℝ) - 1) * (A * C)) * Ib ^ (((k : ℝ) - 1) / k) := by
+        ≤ (D * (A * C)) * Ib ^ (((k : ℝ) - 1) / k) := by
       rw [← hIb_split]
-      calc Ib ≤ (2 * (k : ℝ) - 1) * A * J := hIBP'
-        _ ≤ (2 * (k : ℝ) - 1) * A * (Ib ^ (((k : ℝ) - 1) / k) * C) := by
+      calc Ib ≤ D * A * J := hIBP'
+        _ ≤ D * A * (Ib ^ (((k : ℝ) - 1) / k) * C) := by
             apply mul_le_mul_of_nonneg_left hJ_bound
-            have hk1R : (1 : ℝ) ≤ (k : ℝ) := by exact_mod_cast _hk
-            apply mul_nonneg (by linarith) hA
-        _ = ((2 * (k : ℝ) - 1) * (A * C)) * Ib ^ (((k : ℝ) - 1) / k) := by ring
-    have hcancel : Ib ^ ((1 : ℝ) / k) ≤ (2 * (k : ℝ) - 1) * (A * C) :=
+            exact mul_nonneg hD_nn hA
+        _ = (D * (A * C)) * Ib ^ (((k : ℝ) - 1) / k) := by ring
+    have hcancel : Ib ^ ((1 : ℝ) / k) ≤ D * (A * C) :=
       le_of_mul_le_mul_right hchain hIbβ_pos
-    calc Ib ^ ((1 : ℝ) / k) ≤ (2 * (k : ℝ) - 1) * (A * C) := hcancel
+    calc Ib ^ ((1 : ℝ) / k) ≤ D * (A * C) := hcancel
       _ ≤ K' * (A * C) := mul_le_mul_of_nonneg_right hcoef_le hAC_nn
       _ = K' * A * C := by ring
 
