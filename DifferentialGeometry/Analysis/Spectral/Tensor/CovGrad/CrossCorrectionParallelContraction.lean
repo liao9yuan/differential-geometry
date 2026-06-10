@@ -4,6 +4,7 @@ import DifferentialGeometry.Tensor.RSTensor.Derivation.Contract
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.CoordinateBasis
 import DifferentialGeometry.Geometry.Connection.ConnectionDifferenceFieldJets
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LoweredConnectionDifferenceCovariantDerivative
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricCurvatureDifferenceCovJet
 
 /-! # The cross-correction parallel two-section contraction `h ⌟ D`
 
@@ -67,6 +68,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.DeTurck
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.Integral.Measure (chartModelBasis)
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -122,6 +124,17 @@ noncomputable def crossCorrModelFun (L : Tensor0SBundle.Tensor0SModel 1 ℝ E �
             ((Module.finBasis ℝ E).cDualBasis i)))
           (modelRankCastCc (E := E) (by omega : 2 + a = (1 + a) + 1) Sm)))
 
+set_option linter.unusedSectionVars false in
+/-- **Defining evaluation of the model-fibre rank reindex.**  `modelRankCastCc h T` evaluated on a
+`Fin n`-tuple `v` reads `T` on the rank-`m` reindexed tuple `i ↦ v (finCongr h i)`. -/
+theorem modelRankCastCc_apply' {m n : ℕ} (h : m = n) (T : Tensor0SBundle.Tensor0SModel m ℝ E)
+    (v : Fin n → E) :
+    modelRankCastCc (E := E) h T v = T (fun i => v (finCongr h i)) := by
+  change (ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ (finCongr h)) T v = _
+  rw [show (ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ (finCongr h)) T
+      = ContinuousMultilinearMap.domDomCongr (finCongr h) T from rfl,
+    ContinuousMultilinearMap.domDomCongr_apply]
+
 /-- **The model cometric reading at `x`** `Tensor0SModel 1 ℝ E →L[ℝ] E`: the fibrewise cometric
 (inverse-metric sharp) `inverseMetricSharpFib g₀ x` read through the model identification
 `tensor0SSpace_continuousLinearEquiv 1 x` (a model covector `α ↦ ♯α`).  The model reading of the
@@ -139,14 +152,300 @@ noncomputable def ccUnitModel {s : ℕ} (g₀ : SmoothRiemannianMetric I M)
   Tensor0SBundle.Tensor0SSpace.toModel
     ((S.toSection x) (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) 1))
 
-/-- **Base-point smoothness of the cross-correction model fibre field** (POSITED deep construction
-child).  The `Tensor0SModel (3 + a + b)`-valued total-space map `x ↦ ofModel (crossCorrModelFun
-(cometricReadingModel g₀ x) a b (ccUnitModel S x) (ccUnitModel T x))` is smooth: the model contraction is
-a finite sum over the model basis of continuous-bilinear `modelProduct`s of `model_interior_product`s of
-the (trivialised, smooth) unit fibres of `S`, `T` against the globally smooth cometric Hom-section
-`inverseMetricSharpField`, so the value is a smooth section — the same `clm_apply` model-bilinear
-smoothness argument as `interiorProductField_contMDiff`, valid at the C^∞ level.  The fibre value is the
-genuine non-vacuous single cometric trace `crossCorrModelFun`, not a packaged conclusion. -/
+/-- **The cross-correction slot permutation** `Fin ((3 + b) + (2 + a)) ≃ Fin ((3 + b) + (2 + a))`.
+On the model product `Tm ⊗ Sm` (the `Tm`-block leading) it rotates the leading `4 + b` slots
+cyclically — sending the `Sm`-leading slot (model-product index `3 + b`) to position `0`, the
+`Tm`-leading slot (index `0`) to position `1`, the remaining `Tm` slots to positions `2 … 3 + b`,
+and fixing the trailing `Sm` slots — so that after `domDomCongr` the two slots to be contracted
+through the cometric (`Sm`-slot-`0`, `Tm`-slot-`0`) become the leading adjacent pair, matching the
+slot convention of the model double trace `modelDoubleTrace`/`cometricRaiseSlot0Fib`.  Built as
+`finRotate ((3 + b) + 1)` on the leading block and the identity on the trailing `1 + a` block. -/
+noncomputable def crossCorrPerm (a b : ℕ) : Equiv.Perm (Fin ((3 + b) + (2 + a))) :=
+  (finCongr (by omega : ((3 + b) + 1) + (1 + a) = (3 + b) + (2 + a))).permCongr
+    (finSumFinEquiv.permCongr (Equiv.sumCongr (finRotate ((3 + b) + 1)) (Equiv.refl (Fin (1 + a)))))
+
+set_option linter.unusedSectionVars false in
+/-- The cross-correction permutation reads a `Tm`-block slot `castAdd (2 + a) j` to model-product
+position `1 + j` (the `Tm`-leading slot moves to position `1`, the remaining `Tm` slots shift up by one). -/
+theorem crossCorrPerm_castAdd (a b : ℕ) (j : Fin (3 + b)) :
+    ((crossCorrPerm a b) (Fin.castAdd (2 + a) j)).val = 1 + j.val := by
+  unfold crossCorrPerm
+  simp only [Equiv.permCongr_apply, finCongr_symm, finCongr_apply, Equiv.sumCongr_apply]
+  rw [show (Fin.cast (by omega : (3 + b) + (2 + a) = ((3 + b) + 1) + (1 + a)) (Fin.castAdd (2 + a) j))
+      = Fin.castAdd (1 + a) (Fin.castSucc j) from by
+    apply Fin.ext; simp only [Fin.val_cast, Fin.val_castAdd, Fin.val_castSucc]]
+  rw [finSumFinEquiv_symm_apply_castAdd]
+  simp only [Sum.map_inl, finSumFinEquiv_apply_left, Fin.val_cast, Fin.val_castAdd,
+    finRotate_succ_apply, Fin.val_add_one_of_lt (Fin.castSucc_lt_last j), Fin.val_castSucc]
+  omega
+
+set_option linter.unusedSectionVars false in
+/-- The cross-correction permutation reads an `Sm`-block slot `natAdd (3 + b) k` to model-product
+position `0` when `k = 0` (the `Sm`-leading slot moves to position `0`) and to position `(3 + b) + k`
+otherwise (the remaining `Sm` slots are fixed). -/
+theorem crossCorrPerm_natAdd (a b : ℕ) (k : Fin (2 + a)) :
+    ((crossCorrPerm a b) (Fin.natAdd (3 + b) k)).val
+      = if k.val = 0 then 0 else (3 + b) + k.val := by
+  unfold crossCorrPerm
+  simp only [Equiv.permCongr_apply, finCongr_symm, finCongr_apply, Equiv.sumCongr_apply]
+  rcases Nat.eq_zero_or_pos k.val with hk | hk
+  · rw [show (Fin.cast (by omega : (3 + b) + (2 + a) = ((3 + b) + 1) + (1 + a)) (Fin.natAdd (3 + b) k))
+        = Fin.castAdd (1 + a) (Fin.last (3 + b)) from by
+      apply Fin.ext; simp only [Fin.val_cast, Fin.val_natAdd, Fin.val_castAdd, Fin.val_last]; omega]
+    rw [finSumFinEquiv_symm_apply_castAdd]
+    simp only [Sum.map_inl, finSumFinEquiv_apply_left, finRotate_last, Fin.val_cast, Fin.val_castAdd]
+    simp [hk]
+  · rw [show (Fin.cast (by omega : (3 + b) + (2 + a) = ((3 + b) + 1) + (1 + a)) (Fin.natAdd (3 + b) k))
+        = Fin.natAdd ((3 + b) + 1) (⟨k.val - 1, by omega⟩ : Fin (1 + a)) from by
+      apply Fin.ext; simp only [Fin.val_cast, Fin.val_natAdd]; omega]
+    rw [finSumFinEquiv_symm_apply_natAdd]
+    simp only [Sum.map_inr, Equiv.refl_apply, finSumFinEquiv_apply_right, Fin.val_cast, Fin.val_natAdd]
+    rw [if_neg (by omega)]; omega
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+/-- **`domDomCongr` of a smooth `(0, n)`-tensor field is smooth.**  Permuting the slots of a smooth
+`(0, n)`-tensor field by a fixed index permutation `σ` reindexes only the trivialised basis coordinate
+(the trivialisation commutes with `domDomCongr`, both acting through the fibre `symmL`); so the permuted
+field is smooth by the basis-coordinate criterion `contMDiff_multilinearSection_iff_coord` (its coordinate
+at `τ` is the original field's coordinate at `τ ∘ σ`).  A generic covariant-calculus byproduct. -/
+theorem tensor0SField_domDomCongr_contMDiff {n : ℕ} (σ : Equiv.Perm (Fin n))
+    (Y : ∀ x : M, Tensor0SBundle.Tensor0SSpace n I x)
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel n ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel n ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace n I z) x (Y x))) :
+    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel n ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel n ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace n I z) x
+        (Tensor0SBundle.Tensor0SSpace.ofModel
+          (ContinuousMultilinearMap.domDomCongr σ (Tensor0SBundle.Tensor0SSpace.toModel (Y x))))) := by
+  classical
+  refine (contMDiff_multilinearSection_iff_coord (𝕜 := ℝ) (F := E)
+    (E := (TangentSpace I : M → Type _)) (IB := I) (n := (∞ : WithTop ℕ∞)) (Module.finBasis ℝ E)
+    (fun x => (Tensor0SBundle.Tensor0SSpace.ofModel
+      (ContinuousMultilinearMap.domDomCongr σ (Tensor0SBundle.Tensor0SSpace.toModel (Y x))) :
+        Tensor0SBundle.Tensor0SSpace n I x))).mpr ?_
+  have hY' := (contMDiff_multilinearSection_iff_coord (𝕜 := ℝ) (F := E)
+    (E := (TangentSpace I : M → Type _)) (IB := I) (n := (∞ : WithTop ℕ∞)) (Module.finBasis ℝ E)
+    (fun x => (Y x : Tensor0SBundle.Tensor0SSpace n I x))).mp hY
+  intro τ x₀
+  refine (hY' (τ ∘ σ) x₀).congr_of_eventuallyEq ?_
+  have hbase := (trivializationAt (Tensor0SBundle.Tensor0SModel n ℝ E)
+    (Bundle.continuousMultilinearMap ℝ n E (TangentSpace I)) x₀).open_baseSet.mem_nhds
+    (mem_baseSet_trivializationAt _ _ x₀)
+  filter_upwards [hbase] with x _
+  rw [continuousMultilinearMap_basis_repr, continuousMultilinearMap_basis_repr]
+  rfl
+
+/-- **The cross-correction permuted model product field** `x ↦ ofModel (domDomCongr (crossCorrPerm)
+(modelProduct (ccUnitModel T x) (ccUnitModel S x)))`, a smooth `(0, (3 + b) + (2 + a))`-tensor field.
+The model product of the smooth unit fibres of `T`, `S` is a smooth field (its trivialised coordinate
+factors, by `triv_coord_product`, into a product of a `T`-coordinate and an `S`-coordinate), and the
+slot permutation preserves smoothness (`tensor0SField_domDomCongr_contMDiff`).  Frame-free: the field
+carries NO cometric — the cometric enters only later through the parallel raise. -/
+theorem crossCorrProdField_contMDiff (g₀ : SmoothRiemannianMetric I M) {a b : ℕ}
+    (S : SmoothCcTensor g₀ 0 (2 + a)) (T : SmoothCcTensor g₀ 0 (3 + b)) :
+    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel ((3 + b) + (2 + a)) ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel ((3 + b) + (2 + a)) ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I z) x
+        (Tensor0SBundle.Tensor0SSpace.ofModel
+          (ContinuousMultilinearMap.domDomCongr (crossCorrPerm a b)
+            (Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+              (ccUnitModel (I := I) g₀ T x) (ccUnitModel (I := I) g₀ S x))))) := by
+  letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) ((3 + b) + (2 + a))
+  classical
+  -- the plain model product field is smooth (basis-coordinate product), then permute the slots.
+  have hTfield : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel (3 + b) ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel (3 + b) ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace (3 + b) I z) x
+        (Tensor0SBundle.Tensor0SSpace.ofModel (ccUnitModel (I := I) g₀ T x))) := by
+    simpa only [Tensor0SBundle.Tensor0SSpace.ofModel_toModel] using
+      (contMDiff_unitEvalSection (I := I) g₀ (3 + b) T)
+  have hSfield : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel (2 + a) ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel (2 + a) ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace (2 + a) I z) x
+        (Tensor0SBundle.Tensor0SSpace.ofModel (ccUnitModel (I := I) g₀ S x))) := by
+    simpa only [Tensor0SBundle.Tensor0SSpace.ofModel_toModel] using
+      (contMDiff_unitEvalSection (I := I) g₀ (2 + a) S)
+  have hprod : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel ((3 + b) + (2 + a)) ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel ((3 + b) + (2 + a)) ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I z) x
+        ((Tensor0SBundle.Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
+            (Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+              (ccUnitModel (I := I) g₀ T x) (ccUnitModel (I := I) g₀ S x)) :
+            Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x))) := by
+    refine (contMDiff_multilinearSection_iff_coord (𝕜 := ℝ) (F := E)
+      (E := (TangentSpace I : M → Type _)) (IB := I) (n := (∞ : WithTop ℕ∞)) (Module.finBasis ℝ E)
+      (fun x => (Tensor0SBundle.Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
+          (Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+            (ccUnitModel (I := I) g₀ T x) (ccUnitModel (I := I) g₀ S x)) :
+            Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x))).mpr ?_
+    have hT := (contMDiff_multilinearSection_iff_coord (𝕜 := ℝ) (F := E)
+      (E := (TangentSpace I : M → Type _)) (IB := I) (n := (∞ : WithTop ℕ∞)) (Module.finBasis ℝ E)
+      (fun x => (Tensor0SBundle.Tensor0SSpace.ofModel (ccUnitModel (I := I) g₀ T x) :
+        Tensor0SBundle.Tensor0SSpace (3 + b) I x))).mp hTfield
+    have hS := (contMDiff_multilinearSection_iff_coord (𝕜 := ℝ) (F := E)
+      (E := (TangentSpace I : M → Type _)) (IB := I) (n := (∞ : WithTop ℕ∞)) (Module.finBasis ℝ E)
+      (fun x => (Tensor0SBundle.Tensor0SSpace.ofModel (ccUnitModel (I := I) g₀ S x) :
+        Tensor0SBundle.Tensor0SSpace (2 + a) I x))).mp hSfield
+    intro τ x₀
+    refine (((contMDiffAt_const (I := I) (x := x₀) (n := ∞)
+      (c := ContinuousLinearMap.mul ℝ ℝ)).clm_apply
+        (hT (τ ∘ Fin.castAdd (2 + a)) x₀)).clm_apply
+          (hS (τ ∘ Fin.natAdd (3 + b)) x₀)).congr_of_eventuallyEq ?_
+    filter_upwards [Filter.univ_mem] with x _
+    rw [continuousMultilinearMap_basis_repr, continuousMultilinearMap_basis_repr,
+      continuousMultilinearMap_basis_repr]
+    change (Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+        (ccUnitModel (I := I) g₀ T x) (ccUnitModel (I := I) g₀ S x))
+        (fun j => (Bundle.Trivialization.symmL ℝ (trivializationAt E (TangentSpace I) x₀) x)
+          ((Module.finBasis ℝ E) (τ j))) = _
+    rw [Bundle.continuousMultilinearMap.modelProduct_apply]
+    rfl
+  -- the permuted product field smoothness; the target's model product matches `toModel (ofModel _)`.
+  refine (tensor0SField_domDomCongr_contMDiff (crossCorrPerm a b)
+    (fun x => (Tensor0SBundle.Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
+        (Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+          (ccUnitModel (I := I) g₀ T x) (ccUnitModel (I := I) g₀ S x)) :
+          Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x)) hprod).congr (fun x => ?_)
+  simp only [Tensor0SBundle.Tensor0SSpace.toModel_ofModel]
+
+set_option linter.unusedSectionVars false in
+/-- The `Tm`-factor tuple identity: the leading `Tm`-block of the cometric-raised slot-permuted product,
+read off the double-trace cons-tuple, coincides with the `Tm` interior-product argument tuple of
+`crossCorrModelFun`. -/
+private theorem crossCorrTm_tuple (a b : ℕ) (p q : E) (m : Fin (3 + a + b) → E) :
+    (fun j : Fin (3 + b) => (Fin.cons p (Fin.cons q m) : Fin ((3 + a + b) + 2) → E)
+        (Fin.cast (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2)
+          ((crossCorrPerm a b) (Fin.castAdd (2 + a) j))))
+      = (Fin.cons q (fun i : Fin (2 + b) => m (Fin.cast (by omega : (2 + b) + (1 + a) = 3 + a + b)
+            (Fin.castAdd (1 + a) i))) : Fin ((2 + b) + 1) → E)
+          ∘ Fin.cast (by omega : 3 + b = (2 + b) + 1) := by
+  funext j
+  rw [show (Fin.cast (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2)
+        ((crossCorrPerm a b) (Fin.castAdd (2 + a) j)))
+      = (⟨1 + j.val, by omega⟩ : Fin ((3 + a + b) + 2)) from by
+    apply Fin.ext; rw [Fin.val_cast, crossCorrPerm_castAdd]]
+  rw [show (⟨1 + j.val, by omega⟩ : Fin ((3 + a + b) + 2)) = Fin.succ ⟨j.val, by omega⟩ from by
+    apply Fin.ext; simp only [Fin.val_succ]; omega]
+  rw [Fin.cons_succ]
+  simp only [Function.comp_apply]
+  rcases Nat.eq_zero_or_pos j.val with hj | hj
+  · rw [show (⟨j.val, by omega⟩ : Fin ((3 + a + b) + 1)) = (0 : Fin ((3 + a + b) + 1)) from
+      Fin.ext (by rw [Fin.val_zero]; exact hj)]
+    rw [Fin.cons_zero]
+    rw [show (Fin.cast (by omega : 3 + b = (2 + b) + 1) j) = (0 : Fin ((2 + b) + 1)) from
+      Fin.ext (by rw [Fin.val_cast, Fin.val_zero]; exact hj)]
+    rw [Fin.cons_zero]
+  · rw [show (⟨j.val, by omega⟩ : Fin ((3 + a + b) + 1)) = Fin.succ ⟨j.val - 1, by omega⟩ from by
+      apply Fin.ext; simp only [Fin.val_succ]; omega]
+    rw [Fin.cons_succ]
+    rw [show (Fin.cast (by omega : 3 + b = (2 + b) + 1) j) = Fin.succ (⟨j.val - 1, by omega⟩ : Fin (2 + b)) from by
+      apply Fin.ext; simp only [Fin.val_cast, Fin.val_succ]; omega]
+    rw [Fin.cons_succ]
+    rfl
+
+set_option linter.unusedSectionVars false in
+/-- The `Sm`-factor tuple identity: the trailing `Sm`-block of the cometric-raised slot-permuted product,
+read off the double-trace cons-tuple, coincides with the `Sm` interior-product argument tuple of
+`crossCorrModelFun`. -/
+private theorem crossCorrSm_tuple (a b : ℕ) (Lc q : E) (m : Fin (3 + a + b) → E) :
+    (fun l : Fin (2 + a) => (Fin.cons Lc (Fin.cons q m) : Fin ((3 + a + b) + 2) → E)
+        (Fin.cast (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2)
+          ((crossCorrPerm a b) (Fin.natAdd (3 + b) l))))
+      = (Fin.cons Lc (fun i : Fin (1 + a) => m (Fin.cast (by omega : (2 + b) + (1 + a) = 3 + a + b)
+            (Fin.natAdd (2 + b) i))) : Fin ((1 + a) + 1) → E)
+          ∘ Fin.cast (by omega : 2 + a = (1 + a) + 1) := by
+  funext l
+  simp only [Function.comp_apply]
+  rcases Nat.eq_zero_or_pos l.val with hl | hl
+  · rw [show (Fin.cast (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2)
+          ((crossCorrPerm a b) (Fin.natAdd (3 + b) l)))
+        = (0 : Fin ((3 + a + b) + 2)) from by
+      apply Fin.ext; rw [Fin.val_cast, crossCorrPerm_natAdd, Fin.val_zero, if_pos hl]]
+    rw [Fin.cons_zero]
+    rw [show (Fin.cast (by omega : 2 + a = (1 + a) + 1) l) = (0 : Fin ((1 + a) + 1)) from
+      Fin.ext (by rw [Fin.val_cast, Fin.val_zero]; exact hl)]
+    rw [Fin.cons_zero]
+  · rw [show (Fin.cast (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2)
+          ((crossCorrPerm a b) (Fin.natAdd (3 + b) l)))
+        = Fin.succ (Fin.succ (⟨(1 + b) + l.val, by omega⟩ : Fin (3 + a + b))) from by
+      apply Fin.ext; rw [Fin.val_cast, crossCorrPerm_natAdd, if_neg (by omega)]
+      simp only [Fin.val_succ]; omega]
+    rw [Fin.cons_succ, Fin.cons_succ]
+    rw [show (Fin.cast (by omega : 2 + a = (1 + a) + 1) l) = Fin.succ (⟨l.val - 1, by omega⟩ : Fin (1 + a)) from by
+      apply Fin.ext; simp only [Fin.val_cast, Fin.val_succ]; omega]
+    rw [Fin.cons_succ]
+    exact congrArg m (Fin.ext (by simp only [Fin.val_cast, Fin.val_natAdd]; omega))
+
+set_option linter.unusedSectionVars false in
+/-- **The cross-correction single cometric trace is the model double trace of the permuted product.**
+The genuine single `g₀⁻¹` contraction `crossCorrModelFun L a b Sm Tm` equals the FRAME-FREE model double
+trace `modelDoubleTrace (3 + a + b) L` (raise the leading slot by `L`, natural-trace it against the next)
+of the rank-cast slot-permuted model product `Tm ⊗ Sm` (`crossCorrPerm` brings the two slots to be
+contracted to the leading adjacent pair).  This re-presents the two-factor cometric contraction as a
+single-tensor leading-slot raise-and-trace, the form whose smoothness is the parallel-raise/natural-trace
+field calculus. -/
+theorem crossCorrModelFun_eq_modelDoubleTrace_perm
+    (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E) (a b : ℕ)
+    (Sm : Tensor0SBundle.Tensor0SModel (2 + a) ℝ E) (Tm : Tensor0SBundle.Tensor0SModel (3 + b) ℝ E) :
+    crossCorrModelFun (E := E) L a b Sm Tm =
+      DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.modelDoubleTrace (E := E) (3 + a + b) L
+        (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.modelRankCast (E := E)
+            (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2)
+          (ContinuousMultilinearMap.domDomCongr (crossCorrPerm a b)
+            (Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a) Tm Sm))) := by
+  classical
+  apply ContinuousMultilinearMap.ext
+  intro m
+  rw [DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.modelDoubleTrace_apply]
+  unfold crossCorrModelFun
+  rw [modelRankCastCc_apply', ContinuousMultilinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun k _ => ?_)
+  rw [Bundle.continuousMultilinearMap.modelProduct_apply]
+  -- reduce the double-trace summand `D (cons (L cᵏ) (cons eₖ m))` to `Tm(tupleT) * Sm(tupleS)`.
+  have hDsummand : (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.modelRankCast (E := E)
+          (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2)
+        (ContinuousMultilinearMap.domDomCongr (crossCorrPerm a b)
+          (Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a) Tm Sm)))
+        (Fin.cons (L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+            ((Module.finBasis ℝ E).cDualBasis k)))
+          (Fin.cons ((Module.finBasis ℝ E) k) m))
+      = Tm ((fun j : Fin (3 + b) => (Fin.cons (L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+              ((Module.finBasis ℝ E).cDualBasis k)))
+            (Fin.cons ((Module.finBasis ℝ E) k) m) : Fin ((3 + a + b) + 2) → E)
+            (Fin.cast (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2)
+              ((crossCorrPerm a b) (Fin.castAdd (2 + a) j)))))
+          * Sm ((fun l : Fin (2 + a) => (Fin.cons (L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+              ((Module.finBasis ℝ E).cDualBasis k)))
+            (Fin.cons ((Module.finBasis ℝ E) k) m) : Fin ((3 + a + b) + 2) → E)
+            (Fin.cast (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2)
+              ((crossCorrPerm a b) (Fin.natAdd (3 + b) l))))) := by
+    change (ContinuousMultilinearMap.domDomCongr
+          (finCongr (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2))
+          (ContinuousMultilinearMap.domDomCongr (crossCorrPerm a b)
+            (Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a) Tm Sm))) _ = _
+    rw [ContinuousMultilinearMap.domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply,
+      Bundle.continuousMultilinearMap.modelProduct_apply]
+    rfl
+  rw [hDsummand]
+  -- the `crossCorrModelFun` summand is `Tm(tupleT) * Sm(tupleS)` for the SAME tuples (interior products
+  -- reduce to the rank-cast cons-tuples, matched by the tuple identities `crossCorrTm/Sm_tuple`).
+  rw [crossCorrTm_tuple a b _ ((Module.finBasis ℝ E) k) m,
+    crossCorrSm_tuple a b (L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+      ((Module.finBasis ℝ E).cDualBasis k))) ((Module.finBasis ℝ E) k) m]
+  rfl
+
+
+/-- **Base-point smoothness of the cross-correction model fibre field**.  The `Tensor0SModel (3 + a + b)`-
+valued total-space map `x ↦ ofModel (crossCorrModelFun (cometricReadingModel g₀ x) a b (ccUnitModel S x)
+(ccUnitModel T x))` is smooth.  Frame-free route: by `crossCorrModelFun_eq_modelDoubleTrace_perm` the
+fibre value is the model double trace `modelDoubleTrace (3 + a + b) (cometricLmodel g₀ x)` of the smooth
+rank-cast slot-permuted product field `crossCorrProdField`; that double trace is realized as the
+leading-slot cometric raise (`cometricRaiseSlot0Fib`, smooth through the globally-smooth cometric
+Hom-section `inverseMetricSharpField` on the *variable* covector) followed by the FRAME-FREE natural trace
+(`contractTraceField`) at the unit — the SAME raise-then-trace calculus as `ricciModelTrace42Fib_contMDiff`,
+with NO chart-selected ambient frame.  Non-vacuous: the genuine single cometric trace `crossCorrModelFun`. -/
 theorem crossCorrField_contMDiff (g₀ : SmoothRiemannianMetric I M) {a b : ℕ}
     (S : SmoothCcTensor g₀ 0 (2 + a)) (T : SmoothCcTensor g₀ 0 (3 + b)) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel (3 + a + b) ℝ E)) ∞
@@ -155,7 +454,59 @@ theorem crossCorrField_contMDiff (g₀ : SmoothRiemannianMetric I M) {a b : ℕ}
         (Tensor0SBundle.Tensor0SSpace.ofModel
           (crossCorrModelFun (E := E) (cometricReadingModel (I := I) g₀ x) a b
             (ccUnitModel (I := I) g₀ S x) (ccUnitModel (I := I) g₀ T x)))) := by
-  sorry
+  -- the rank-cast slot-permuted product field `D`, a smooth `(0, (3 + a + b) + 2)`-tensor field.
+  set D : ∀ x : M, Tensor0SBundle.Tensor0SSpace ((3 + a + b) + 2) I x :=
+    fun x => Tensor0SBundle.Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
+      (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.modelRankCast (E := E)
+        (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2)
+        (ContinuousMultilinearMap.domDomCongr (crossCorrPerm a b)
+          (Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+            (ccUnitModel (I := I) g₀ T x) (ccUnitModel (I := I) g₀ S x)))) with hD
+  have hDsmooth : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel ((3 + a + b) + 2) ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel ((3 + a + b) + 2) ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace ((3 + a + b) + 2) I z) x (D x)) := by
+    refine (tensor0SField_castRank_contMDiff (I := I) (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2)
+      (fun x => (Tensor0SBundle.Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
+        (ContinuousMultilinearMap.domDomCongr (crossCorrPerm a b)
+          (Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+            (ccUnitModel (I := I) g₀ T x) (ccUnitModel (I := I) g₀ S x))) :
+              Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x))
+      (crossCorrProdField_contMDiff (I := I) g₀ S T)).congr (fun x => ?_)
+    rw [hD]
+    simp only [Tensor0SBundle.Tensor0SSpace.toModel_ofModel]
+  -- the smooth cometric raise of `D`'s leading slot.
+  have hraise := cometricRaiseSlot0Fib_section_contMDiff (I := I) g₀ (3 + a + b) D hDsmooth
+  -- the FRAME-FREE natural trace of the raise, then evaluate at the unit `(0, 0)`-tensor.
+  have htrace := contractTraceField_contMDiff (I := I) 0 (3 + a + b)
+    (fun x => cometricRaiseSlot0Fib (I := I) g₀ (3 + a + b) x (D x)) hraise
+  have htraceUnit : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel (3 + a + b) ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel (3 + a + b) ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace (3 + a + b) I z) x
+        ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (3 + a + b) I x from
+          Tensor0SBundle.contract_trace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 0 (3 + a + b) x
+            (cometricRaiseSlot0Fib (I := I) g₀ (3 + a + b) x (D x)))
+          (Integral.Connection.unitZeroSec (I := I) (M := M) x))) :=
+    ContMDiff.clm_bundle_apply (b := id) htrace
+      (Integral.Connection.unitZeroSec (I := I) (M := M)).contMDiff
+  refine htraceUnit.congr (fun x => ?_)
+  congr 1
+  apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+  beta_reduce
+  rw [Tensor0SBundle.Tensor0SSpace.toModel_ofModel,
+    crossCorrModelFun_eq_modelDoubleTrace_perm (cometricReadingModel (I := I) g₀ x) a b
+      (ccUnitModel (I := I) g₀ S x) (ccUnitModel (I := I) g₀ T x)]
+  rw [show cometricReadingModel (I := I) g₀ x
+      = DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.cometricLmodel (I := I) g₀ x from rfl]
+  rw [← DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.model_contract_trace_raiseSlot0ModelL
+    (E := E) (3 + a + b) (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.cometricLmodel (I := I) g₀ x)
+    (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.modelRankCast (E := E)
+      (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2)
+      (ContinuousMultilinearMap.domDomCongr (crossCorrPerm a b)
+        (Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+          (ccUnitModel (I := I) g₀ T x) (ccUnitModel (I := I) g₀ S x))))]
+  rw [contract_trace_unitZero_toModel (I := I) (3 + a + b) x
+    (cometricRaiseSlot0Fib (I := I) g₀ (3 + a + b) x (D x))]
+  congr 1
 
 /-- **The cross-correction model fibre field** of the single `g₀`-contraction of two factor sections
 `S`, `T`: the `Tensor0SSpace (3 + a + b)`-valued fibre `x ↦ ofModel (crossCorrModelFun
@@ -197,15 +548,6 @@ rank-`1` specialization of the dual-pair coordinate-trace `sum_inner_dualPair_ap
 This certifies that `crossCorrRfnsBilinearProduct` is instantiated at the correct contraction (the
 slot-`2` lowered output index, matching `crossCorrectionSection`), not the slot-`0` connection-difference
 input index. -/
-
-set_option linter.unusedSectionVars false in
-theorem modelRankCastCc_apply' {m n : ℕ} (h : m = n) (T : Tensor0SBundle.Tensor0SModel m ℝ E)
-    (v : Fin n → E) :
-    modelRankCastCc (E := E) h T v = T (fun i => v (finCongr h i)) := by
-  change (ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ (finCongr h)) T v = _
-  rw [show (ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ (finCongr h)) T
-      = ContinuousMultilinearMap.domDomCongr (finCongr h) T from rfl,
-    ContinuousMultilinearMap.domDomCongr_apply]
 
 set_option linter.unusedSectionVars false in
 theorem crossCorrModelFun_eval00 (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E)
