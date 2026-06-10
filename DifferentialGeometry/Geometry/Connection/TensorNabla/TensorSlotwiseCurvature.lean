@@ -192,7 +192,7 @@ Both sides are CLMs `T_x M →L[ℝ] Tensor0SSpace s I x`; testing on the value 
 vector field `Y`, the left side expands by `tensor0SCovariantDerivative_curriedSection_hom_leibniz`
 and the right by `homBundleCovariantDerivativeGen_apply_of_mdifferentiableAt` into the **same**
 product-rule difference `∇^{(0,s)}_v (curry S · Y) x − curry S x (∇^{TM}_v Y)`. -/
-private lemma tensor0S_curry_tensor0SCov_succ_eq_homGenS
+lemma tensor0S_curry_tensor0SCov_succ_eq_homGenS
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S : Π b : M, Tensor0SSpace (s + 1) I b)
     {x : M} (hS : TensorSectionMDiffAt (I := I) (s + 1) S x) (v : TangentSpace I x) :
@@ -257,7 +257,7 @@ tensor0S_curry s x (R^{(s+1)}(X, W) A x) = R^{homGenS}(X, W) (curriedSection A) 
 This conjugates the curvature operator term-by-term through `riemannSec_def`, each term reduced by
 the section conjugation `tensor0S_curry_tensor0SCov_succ_eq_homGenS` (the inner covariant-derivative
 sections `∇_W A`, `∇_X A`, `A` are all differentiable at `x`). -/
-private lemma tensor0S_curry_riemannSec_tensor0SCov_succ_eq
+lemma tensor0S_curry_riemannSec_tensor0SCov_succ_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (A : Π b : M, Tensor0SSpace (s + 1) I b) (hA : TensorSmooth (I := I) (s + 1) A) (x : M) :
