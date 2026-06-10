@@ -138,7 +138,17 @@ constants (D2b).**
   B1.1 from the ConnectionDifference API + `IsLeviCivita` compatibility directly.
   Effort: 1–1.5 sessions.  Risk: moderate (R1 extraction quality unknown).
 
-**B2 — smoothness wiring (`hA`, `hg`, `hchr`, `hframe`).**
+**B2 — smoothness wiring (`hA`, `hg`, `hchr`, `hframe`).
+STATUS 2026-06-10: `hchr`/`hframe`/`hA` DONE sorry-free in `Claim1Wiring.lean`
+(`lcChrist_e_mdiffOn`, `frame_e_mdiffOn`, `akCompField` + `akCompField_mdiffOn`);
+only `hg` remains (see TODO in the file).  IMPORTANT: do NOT import
+`ApproximateIsometry.lean` — it is another session's in-flight edit and currently
+BROKEN (unknown `lcDiffCompInFrame`/`lc_christoffel_contMDiffAt` references, 100+
+errors); B2 instead uses the STABLE upstream `lc_christoffel_contMDiffAt`
+(`LeviCivita/Smooth/MetricFlatBasis.lean`) + an `IsLocalFrameOn.coeff ↔
+localFrame_coeff` eventuallyEq bridge (same simp set as the old ApproximateIsometry
+proof: `IsLocalFrameOn.toBasisAt/coeff`, `Trivialization.localFrame/basisAt/
+localFrame_coeff`).**
   `hchr` from F3; `hg` = smoothness of metric components in a smooth frame
   (exists in coordinate/AllTimesBounds machinery); `hA` = componentRS of
   connectionDifferenceTensorAt smooth = difference of two smooth Christoffel
