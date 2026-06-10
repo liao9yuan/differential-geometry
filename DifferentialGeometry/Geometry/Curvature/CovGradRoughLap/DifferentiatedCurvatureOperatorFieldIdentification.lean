@@ -1,3 +1,4 @@
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.ParsevalSevenTermBochnerFold
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FrozenFramePureRCurvatureTower
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RicciTraceCarrier
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemainderFrameSumBridge
@@ -7,28 +8,18 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFramePureRC
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.OperatorFieldPairingIBP
 
 /-!
-# The frame-free curvature operator field and the differentiated-curvature operator-field identification
+# The differentiated-curvature operator-field identification
 
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` this is the **most-upstream node**
-of the rank-generic tensor Bochner–Weitzenböck curvature line. It homes the **frame-free curvature
-operator field** `Φ₀ s := curvOpField g s` together with the single genuinely-irreducible
-**differentiated-curvature operator-field identification** of the curvature line — the `(∇R) S` value
-identity bridging the three concrete genuine curvature carriers to the integrated Weitzenböck Dirichlet
-defect. Both are homed here, *above* the bracket-channel divergence-engine node
-`BracketChannelEngineIdentification`, so the whole curvature line shares `curvOpField` and bottoms out at
-this single clean classical value identity without any downstream forward reference.
-
-* `curvOpField g s` — the fixed smooth `(s, s)`-operator field whose operator-field action recovers the
-  order-`0` moving-frame pure-Riemann curvature endomorphism `pureRGenuineDiffOp g 0 s W = appCc (Φ₀ s) W`
-  (`exists_pureRGenuineDiffOp_base_appCc`). It is the curvature coefficient whose covariant derivative
-  carries the differentiated-curvature `(∇R)` content; a pure `Classical.choose` definition with no
-  downstream dependency, homed at the most-upstream curvature node so the whole curvature line shares it.
-
-* `appCc_curvOpField_eq_pureRGenuineDiffOp` — the defining `Classical.choose` spec of `curvOpField`: the
-  operator-field action of `Φ₀ s` on a smooth compactly-supported `(0, s)`-tensor `S` recovers the
-  order-`0` moving-frame pure-Riemann curvature trace `pureRGenuineDiffOp g 0 s S`. This is the identity
-  through which the differentiated operator field `covGrad (Φ₀ s)` and its passenger-slot extension
-  `slotExtend (Φ₀ s)` are identified with the curvature-derivative content.
+For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` this is the **integrated
+Bochner–Weitzenböck nullity / value node** of the rank-generic tensor Bochner–Weitzenböck curvature line. It
+carries the single genuinely-irreducible **differentiated-curvature operator-field identification** of the
+curvature line — the `(∇R) S` value identity bridging the three concrete genuine curvature carriers to the
+integrated Weitzenböck Dirichlet defect. The **frame-free curvature operator field** `Φ₀ s := curvOpField g
+s` and its defining base spec `appCc_curvOpField_eq_pureRGenuineDiffOp` are now homed one level upstream at
+the seven-term Bochner fold node `ParsevalSevenTermBochnerFold` (the most-upstream node of the curvature
+nullity line, where the fold carriers already need them) and are re-used here, *above* the bracket-channel
+divergence-engine node `BracketChannelEngineIdentification`, so the whole curvature line shares `curvOpField`
+and bottoms out at this single clean classical value identity without any downstream forward reference.
 
 * `bochnerWeitzenbockCurvatureValue_diffCurvOpField_leaf` — the **differentiated-curvature operator-field
   value identification** (the curvature line's single irreducible genuine-math leaf, in its cleanest
@@ -126,29 +117,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-/-- **The frame-free curvature operator field `Φ₀ s`.** The fixed smooth `(s, s)`-operator field whose
-operator-field action recovers the order-`0` moving-frame pure-Riemann curvature endomorphism
-`pureRGenuineDiffOp g 0 s W = appCc (Φ₀ s) W` (`exists_pureRGenuineDiffOp_base_appCc`); its fibre value
-is the genuine `g`-metric curvature trace `W ↦ ∑ᵢ R(Bᵢ, ·) W`, frame-free (built from `g, R` alone). It
-is the curvature coefficient whose covariant derivative carries the differentiated-curvature `(∇R)`
-content. It is a pure `Classical.choose` definition (no downstream dependency), homed at the most-upstream
-curvature node so the curvature line shares it. -/
-noncomputable def curvOpField (g : SmoothRiemannianMetric I M) (s : ℕ) :
-    SmoothCcTensor g (s + 0) (s + 0) :=
-  (Classical.choose (exists_pureRGenuineDiffOp_base_appCc (I := I) (M := M) g)) s
-
-/-- **The order-`0` curvature operator base spec for `curvOpField`.** The defining `Classical.choose`
-specification: the operator-field action of the frame-free curvature operator field `Φ₀ s := curvOpField
-g s` on a smooth compactly-supported `(0, s)`-tensor `S` recovers the order-`0` moving-frame pure-Riemann
-curvature trace `pureRGenuineDiffOp g 0 s S`. This is the identity through which the differentiated
-operator field `covGrad (Φ₀ s)` and its passenger-slot extension `slotExtend (Φ₀ s)` are identified with
-the curvature-derivative content. -/
-theorem appCc_curvOpField_eq_pureRGenuineDiffOp
-    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
-    appCc (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s) S =
-      pureRGenuineDiffOp (I := I) (M := M) g 0 s S :=
-  (Classical.choose_spec (exists_pureRGenuineDiffOp_base_appCc (I := I) (M := M) g) s S).symm
-
 /-- **The moving-frame remainder nullity for the three-section differentiated-curvature operator-field
 carrier (the genuine integrated Bochner–Weitzenböck content — the curvature line's single irreducible
 deep root).** For a closed smooth Riemannian manifold `(M, g)`, every covariant rank `s`, and every
@@ -213,8 +181,85 @@ theorem movingFrameNullity_diffCurvOpField_leaf
           (appCc (I := I) (M := M) g s (s + 1)
               (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S +
             ricTraceSection (I := I) (M := M) g s S)).toFun
-        (covGrad (I := I) (M := M) g 0 s S).toFun = 0 :=
-  sorry
+        (covGrad (I := I) (M := M) g 0 s S).toFun = 0 := by
+  classical
+  -- Fix a global smooth Parseval frame family.
+  obtain ⟨N, V, hV, hPar⟩ := exists_smooth_parseval_frame_family (I := I) (M := M) g
+  -- The gauge carrier `Gcd = appCc (∇Φ₀) S + ricTraceSection g s S`.
+  set Gcd : SmoothCcTensor g 0 (s + 1) :=
+    appCc (I := I) (M := M) g s (s + 1)
+        (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S +
+      ricTraceSection (I := I) (M := M) g s S with hGcd
+  refine movingFrameNullity_of_genuineCrossPairingValue (I := I) (M := M) g s S Gcd ?_
+  -- The five folds (fixed-Parseval-family group→carrier identities).
+  have hf1 := bochnerFold_group1_eq_GcurvSection (I := I) (M := M) g s S V hV hPar
+  have hf2 := bochnerFold_group2_eq_zero (I := I) (M := M) g s S V hV hPar
+  have hf3 := bochnerFold_group3_eq_ricTrace (I := I) (M := M) g s S V hV hPar
+  have hf4 := bochnerFold_group4_eq_slotExtend_residue (I := I) (M := M) g s S V hV hPar
+  have hf5 := bochnerFold_sevenTermSum_eq_pointwiseTensorCurvPairing
+    (I := I) (M := M) g s S V hV hPar
+  -- The operator-field B-rule integration-by-parts residue (with `appCc Φ₀ S = pureRGenuineDiffOp g 0 s S`).
+  have hbase : appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s) S =
+      pureRGenuineDiffOp (I := I) (M := M) g 0 s S := by
+    have := appCc_curvOpField_eq_pureRGenuineDiffOp (I := I) (M := M) g s S
+    simpa using this
+  have hIBP := tensorL2Inner_appCc_covGrad_covGrad_eq_neg (I := I) (M := M) g s
+    (curvOpField (I := I) (M := M) g s) S
+  rw [hbase] at hIBP
+  -- The connection-Laplacian Green identity for the pure-Riemann gradient pairing.
+  have hGreen := tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_gen (I := I) (M := M) g s
+    (pureRGenuineDiffOp (I := I) (M := M) g 0 s S) S
+  -- The integrated Weitzenböck curvature value.
+  have hwz := weitzenbock_curvature_crossPairing_value (I := I) (M := M) g s S
+  -- Split the genuine-fields pairing by left additivity.
+  have hsplitA := tensorL2Inner_add_left (I := I) (M := M) g 0 (s + 1)
+      (GcurvSection (I := I) (M := M) g s S).toFun
+      (appCc (I := I) (M := M) g s (s + 1)
+          (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S +
+        ricTraceSection (I := I) (M := M) g s S).toFun
+      (covGrad (I := I) (M := M) g 0 s S).toFun
+      (SmoothCcTensor.integrable_inner_cross (I := I) (M := M) _ _)
+      (SmoothCcTensor.integrable_inner_cross (I := I) (M := M) _ _)
+  have hsplitB := tensorL2Inner_add_left (I := I) (M := M) g 0 (s + 1)
+      (appCc (I := I) (M := M) g s (s + 1)
+          (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S).toFun
+      (ricTraceSection (I := I) (M := M) g s S).toFun
+      (covGrad (I := I) (M := M) g 0 s S).toFun
+      (SmoothCcTensor.integrable_inner_cross (I := I) (M := M) _ _)
+      (SmoothCcTensor.integrable_inner_cross (I := I) (M := M) _ _)
+  have hsplit : tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (GcurvSection (I := I) (M := M) g s S + Gcd).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun =
+      tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (GcurvSection (I := I) (M := M) g s S).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun
+      + (tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+          (appCc (I := I) (M := M) g s (s + 1)
+            (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S).toFun
+          (covGrad (I := I) (M := M) g 0 s S).toFun
+        + tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+          (ricTraceSection (I := I) (M := M) g s S).toFun
+          (covGrad (I := I) (M := M) g 0 s S).toFun) := by
+    rw [hGcd]
+    rw [show (GcurvSection (I := I) (M := M) g s S +
+          (appCc (I := I) (M := M) g s (s + 1)
+              (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S +
+            ricTraceSection (I := I) (M := M) g s S)).toFun =
+        (GcurvSection (I := I) (M := M) g s S).toFun +
+          (appCc (I := I) (M := M) g s (s + 1)
+              (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S +
+            ricTraceSection (I := I) (M := M) g s S).toFun from
+      SmoothCcTensor.toFun_add _ _]
+    rw [hsplitA]
+    rw [show (appCc (I := I) (M := M) g s (s + 1)
+              (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S +
+            ricTraceSection (I := I) (M := M) g s S).toFun =
+        (appCc (I := I) (M := M) g s (s + 1)
+              (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S).toFun +
+          (ricTraceSection (I := I) (M := M) g s S).toFun from SmoothCcTensor.toFun_add _ _]
+    rw [hsplitB]
+  rw [hsplit]
+  linarith [hf1, hf2, hf3, hf4, hf5, hIBP, hGreen, hwz]
 
 /-- **The frame-bracket remainder frame-sum integral carries the differentiated-curvature operator-field
 trace plus the leading-slot Ricci trace (the curvature line's single irreducible integrated deep root —
