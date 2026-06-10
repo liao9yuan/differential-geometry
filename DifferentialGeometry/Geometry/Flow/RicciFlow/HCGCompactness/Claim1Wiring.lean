@@ -468,4 +468,60 @@ theorem koszulComp_at
   rw [hLHS, hkos, hb1, hb2, hb3]
   ring
 
+/-! ## B6: the assembled geometric Claim 1 -/
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **Claim 1, geometric form** (MSM135 Lemma 3.11 bookkeeping, first assembly).
+On a tangent-trivialization domain, the `m`-fold upper covariant tower of the
+connection-difference components `A_k = Γ(g_K) − Γ(g_ref)` is controlled by the
+`(m+1)`-st metric-derivative tower: `|∇_U^m A_k| ≤ C·(1 + |∇^{m+1} g_K|)`, given the
+window bounds `|g_K⁻¹-array| ≤ C0` and `|∇^j g_K| ≤ K (1 ≤ j ≤ m)`.  All structural
+hypotheses of `claim1` are discharged by B1–B3 (`koszulComp_at`, `ginv_hinv`, the B2
+smoothness producers); only the numeric window bounds remain as inputs (B4/B5). -/
+theorem claim1_geom
+    (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
+    [MemTrivializationAtlas e₀]
+    (gK gRef : SmoothRiemannianMetric I M) (basisE : Module.Basis Idx Real E)
+    (C0 K : Real)
+    (hGinv : ∀ y ∈ e₀.baseSet, compL2 (ginvCompField (I := I) e₀ gK basisE y) ≤ C0)
+    (m : ℕ)
+    (hK : ∀ y ∈ e₀.baseSet, ∀ j, 1 ≤ j → j ≤ m →
+      compL2 (iterCovComp (I := I) (fun a y' => e₀.localFrame basisE a y')
+        (fun y' => christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef)
+          (fun a y'' => e₀.localFrame basisE a y'')
+          (e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE) y')
+        (frameComp0S (I := I) (metricTensorField (I := I) gK)
+          (fun a y' => e₀.localFrame basisE a y')) j y) ≤ K) :
+    ∃ C, 0 ≤ C ∧ ∀ y ∈ e₀.baseSet,
+      compL2 (iterCovCompU (I := I) (fun a y' => e₀.localFrame basisE a y')
+          (fun y' => christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef)
+            (fun a y'' => e₀.localFrame basisE a y'')
+            (e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE) y')
+          (akCompField (I := I) e₀ gK gRef basisE) m y) ≤
+        C * (1 + compL2 (iterCovComp (I := I) (fun a y' => e₀.localFrame basisE a y')
+          (fun y' => christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef)
+            (fun a y'' => e₀.localFrame basisE a y'')
+            (e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE) y')
+          (frameComp0S (I := I) (metricTensorField (I := I) gK)
+            (fun a y' => e₀.localFrame basisE a y')) (m + 1) y)) := by
+  refine claim1 e₀.open_baseSet
+    (fun a y' => e₀.localFrame basisE a y')
+    (fun y' => christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef)
+      (fun a y'' => e₀.localFrame basisE a y'')
+      (e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE) y')
+    (fun d => frame_e_mdiffOn e₀ basisE d)
+    (fun d i j => lcChrist_e_mdiffOn e₀ gRef basisE d i j)
+    (frameComp0S (I := I) (metricTensorField (I := I) gK)
+      (fun a y' => e₀.localFrame basisE a y'))
+    (fun k => gCompField_mdiffOn e₀ gK basisE k)
+    (ginvCompField (I := I) e₀ gK basisE)
+    (akCompField (I := I) e₀ gK gRef basisE)
+    (fun k => akCompField_mdiffOn e₀ gK gRef basisE k)
+    (fun y hy c e => ginv_hinv e₀ gK basisE hy c e)
+    (1 / 2) (1 / 2) (-(1 / 2))
+    (Equiv.refl (Fin 3)) (Equiv.swap (0 : Fin 3) 1) ((finRotate 3).symm)
+    (fun y hy => koszulComp_at (fun a y' => e₀.localFrame basisE a y')
+      (e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE) e₀.open_baseSet gK gRef hy)
+    C0 K hGinv m hK
+
 end DifferentialGeometry.PDE.RicciFlow

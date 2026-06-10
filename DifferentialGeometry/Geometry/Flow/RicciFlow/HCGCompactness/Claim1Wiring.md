@@ -222,9 +222,17 @@ extraction).  No smoothness of `Ginv` anywhere, as designed.**
   (metricCovDeriv g_k gRef j x)` via F5 (`iterCovComp_eq_iterCov`) + F4/ON-bridge.
   Effort: 0.5 session.  Risk: low.
 
-**B6 — assembly `claim1_geom`.**
-  Instantiate `claim1` with B1–B5; restate with geometric norms per §2.
-  Effort: 0.5 session.  Risk: low once B1–B5 land.
+**B6 — assembly `claim1_geom`.
+STATUS 2026-06-10: **FIRST ASSEMBLY COMPLETE sorry-free** (`claim1_geom`,
+Claim1Wiring.lean): the geometric Claim 1 on a trivialization domain —
+`|∇_U^m (Γ(g_K)−Γ(g_ref))| ≤ C·(1+|∇^{m+1}g_K|)` in `compL2` — with ALL structural
+hypotheses discharged (B1 `koszulComp_at`, B3 `ginv_hinv`, B2 smoothness ×4) and
+only the numeric window bounds (`hGinv : |Ginv|≤C0`, `hK : |∇^j g_K|≤K`) as inputs.
+Instantiation: `c=(½,½,−½)`, `P=(refl, swap 0 1, (finRotate 3).symm)`.
+REMAINING REFINEMENTS: B4 (produce `hGinv` from the eq-3.3 two-sided metric
+equivalence — finite-dim linear algebra on `gramE⁻¹`) and B5 (restate the
+conclusion through `√normSq0S` via `iterCovComp_eq_iterCov` + the ON/Gram
+comparison — D2b constants).**
 
 **B7 (DEFERRED, Route F) — (1,2) upper realization.**
   `frameCompRS` + `(r,s)` realization predicate + `covDerivStepCompU_frameCompRS_eq`
