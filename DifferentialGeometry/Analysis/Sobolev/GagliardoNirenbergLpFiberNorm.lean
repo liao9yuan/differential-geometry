@@ -481,22 +481,119 @@ private noncomputable def lpFiberJetLadder
 
 section SecondOrderInterpCore
 
-/-- **(POSIT — the weighted covariant `Lᵖ` integration-by-parts inequality, finite-factor form.)**
+/-! ### The finite-factor weighted covariant `Lᵖ` integration-by-parts
 
 The genuine covariant integration-by-parts engine of the second-order interpolation, isolated to a
 single smooth compactly-supported tensor `w`.  Writing `∇ = covGrad`, `a := rfns(w)`,
-`b := rfns(∇w)`, `c := rfns(∇²w)` and the exponent `p := k/(i+1)` (with `1 ≤ p`, i.e. `i + 1 ≤ k`),
-moving one covariant derivative off the right factor `∇w` of `∫ |∇w|^{2p} = ∫ |∇w|^{2p-2}·⟨∇w,∇w⟩`
-through the divergence theorem (rigorously: against the regularised weight `(|∇w|²+ε)^{p-1}` and an
-`ε → 0` dominated limit) yields the pointwise Cauchy–Schwarz bound
+`b := rfns(∇w)`, `c := rfns(∇²w)` and the exponent `p := k/(i+1)` (with `1 < p`, i.e. `i + 1 < k` in
+the finite regime), moving one covariant derivative off the right factor `∇w` of
+`∫ |∇w|^{2p} = ∫ |∇w|^{2p-2}·⟨∇w,∇w⟩` through the divergence theorem yields
 ```
-∫ b^p ≤ (2p - 1) · ∫ a^{1/2} · b^{p-1} · c^{1/2},
+∫ b^p ≤ (2(p-1) + √(finrank)) · ∫ a^{1/2} · b^{p-1} · c^{1/2}.
 ```
-i.e. `∫ |∇w|^{2p} ≤ (2p-1) ∫ |w|·|∇w|^{2p-2}·|∇²w|`.  Its body is `sorry`: the genuine covariant
-divergence theorem against the regularised weight plus the `ε → 0` limit — content the project does
-not yet carry (it has only the *unweighted* covariant IBP and the divergence theorem); consumers
-transitively depend on its `sorryAx`.  **General analytic infrastructure** (weighted-`Lᵖ` covariant
-IBP) to be promoted to a dedicated `Analysis/Sobolev` file. -/
+Because the weight `b^{p-1}` is not smooth where `b = 0` (for `1 < p < 2`), this is reached through
+the smooth *regularised* weight `(b + ε)^{p-1}` and an `ε → 0` dominated limit; accordingly the
+headline `weightedCovIBP_lpFiberJet_fin` is assembled as honest limit-glue over the two posited
+analytic children `weightedCovIBP_lpFiberJet_fin_regIneq` (the regularised inequality at each `ε`)
+and `weightedCovIBP_lpFiberJet_fin_regLimit` (the `ε → 0` dominated-convergence limits).  Consumers
+transitively depend on the `sorryAx` of those two children.  **General analytic infrastructure**
+(regularised weighted-`Lᵖ` covariant IBP) to be promoted to a dedicated `Analysis/Sobolev` file. -/
+
+/-- **(POSIT — child A of the finite-factor weighted IBP: the ε-regularised inequality.)**
+
+The weighted covariant integration-by-parts inequality *at a fixed regularising level* `ε > 0`,
+against the smooth regularised weight `(b + ε)^{p-1}` (`b := rfns(∇w)`, `p := k/(i+1) > 1` in the
+finite regime `i + 1 < k`).  Because `b + ε ≥ ε > 0` everywhere the weight is a genuine smooth
+function on the closed manifold, so the covariant Green identity
+`tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_gen` applies to `v = (b+ε)^{p-1} • w`; the
+metric Leibniz split, the regularised cross-term bound
+(`|crossLeft| ≤ 2(p-1)·(b+ε)^{p-1}·(rfns w)^{1/2}·(rfns ∇²w)^{1/2}` via the chain rule
+`d((b+ε)^{p-1}) = (p-1)(b+ε)^{p-2}·db`, the Kato bound, and `b·(b+ε)^{p-2} ≤ (b+ε)^{p-1}`), and the
+rough-Laplacian `√(finrank)` trace bound `rawConnLap_innerWith_sqrt_finrank_bound` assemble to
+```
+∫ b·(b+ε)^{p-1} ≤ (2(p-1) + √(finrank)) · ∫ (rfns w)^{1/2}·(b+ε)^{p-1}·(rfns ∇²w)^{1/2}.
+```
+Its body is `sorry`: the regularised covariant divergence theorem against the smooth weight
+`(b+ε)^{p-1}` plus the regularised cross-carrier — content the project does not yet carry (it has
+only the *unweighted* covariant IBP); consumers transitively depend on its `sorryAx`.  **General
+analytic infrastructure** (regularised weighted-`Lᵖ` covariant IBP) to be promoted alongside the
+`ε → 0` limit. -/
+private theorem weightedCovIBP_lpFiberJet_fin_regIneq
+    (g : SmoothRiemannianMetric I M) (k m i : ℕ) (_hk : 1 ≤ k) (_hi : 1 ≤ i) (_hik : i + 1 < k)
+    (w : Integral.L2.SmoothCcTensor g 0 m) (ε : ℝ) (_hε : 0 < ε) :
+    (∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
+            ((covGrad (I := I) (M := M) g 0 m w).toSection x)) *
+          ((riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
+            ((covGrad (I := I) (M := M) g 0 m w).toSection x)) + ε) ^ ((k : ℝ) / (i + 1) - 1)
+        ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ≤
+      (2 * ((k : ℝ) / (i + 1) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ)) *
+        ∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x)) ^ (1 / 2 : ℝ) *
+            ((riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
+              ((covGrad (I := I) (M := M) g 0 m w).toSection x)) + ε) ^ ((k : ℝ) / (i + 1) - 1) *
+            (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
+              ((covGrad (I := I) (M := M) g 0 (m + 1)
+                (covGrad (I := I) (M := M) g 0 m w)).toSection x)) ^ (1 / 2 : ℝ)
+          ∂(Integral.Measure.riemannianVolumeMeasure I M g) := by
+  sorry
+
+/-- **(POSIT — child B of the finite-factor weighted IBP: the `ε → 0` controlled limit.)**
+
+The two dominated-convergence limits, along the regularising sequence `εₙ = 1/(n+1) → 0⁺`, that
+pass the regularised inequality (child A) to the unregularised conclusion.  On the closed manifold
+the integrands are continuous and uniformly dominated for `n` large (`(b + εₙ)^{p-1} ≤ (b + 1)^{p-1}`
+since `p - 1 > 0` and `εₙ ≤ 1`, and `(b + εₙ)^{p-1} → b^{p-1}` pointwise), so
+```
+∫ b·(b + εₙ)^{p-1} → ∫ b^p  and
+∫ (rfns w)^{1/2}·(b + εₙ)^{p-1}·(rfns ∇²w)^{1/2} → ∫ (rfns w)^{1/2}·b^{p-1}·(rfns ∇²w)^{1/2}.
+```
+Its body is `sorry`: the dominated-convergence theorem for the `εₙ`-family — content the project does
+not yet carry for these covariant integrands; consumers transitively depend on its `sorryAx`.
+**General analytic infrastructure** (regularised `Lᵖ` covariant integrand `ε → 0` limit) to be
+promoted alongside child A. -/
+private theorem weightedCovIBP_lpFiberJet_fin_regLimit
+    (g : SmoothRiemannianMetric I M) (k m i : ℕ) (_hk : 1 ≤ k) (_hi : 1 ≤ i) (_hik : i + 1 < k)
+    (w : Integral.L2.SmoothCcTensor g 0 m) :
+    Filter.Tendsto
+        (fun n : ℕ => ∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
+              ((covGrad (I := I) (M := M) g 0 m w).toSection x)) *
+            ((riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
+              ((covGrad (I := I) (M := M) g 0 m w).toSection x)) + 1 / ((n : ℝ) + 1))
+              ^ ((k : ℝ) / (i + 1) - 1)
+          ∂(Integral.Measure.riemannianVolumeMeasure I M g))
+        Filter.atTop
+        (𝓝 (∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
+              ((covGrad (I := I) (M := M) g 0 m w).toSection x)) ^ ((k : ℝ) / (i + 1))
+          ∂(Integral.Measure.riemannianVolumeMeasure I M g))) ∧
+      Filter.Tendsto
+        (fun n : ℕ => ∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x))
+              ^ (1 / 2 : ℝ) *
+            ((riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
+              ((covGrad (I := I) (M := M) g 0 m w).toSection x)) + 1 / ((n : ℝ) + 1))
+              ^ ((k : ℝ) / (i + 1) - 1) *
+            (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
+              ((covGrad (I := I) (M := M) g 0 (m + 1)
+                (covGrad (I := I) (M := M) g 0 m w)).toSection x)) ^ (1 / 2 : ℝ)
+          ∂(Integral.Measure.riemannianVolumeMeasure I M g))
+        Filter.atTop
+        (𝓝 (∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x)) ^ (1 / 2 : ℝ) *
+            (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
+              ((covGrad (I := I) (M := M) g 0 m w).toSection x)) ^ ((k : ℝ) / (i + 1) - 1) *
+            (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
+              ((covGrad (I := I) (M := M) g 0 (m + 1)
+                (covGrad (I := I) (M := M) g 0 m w)).toSection x)) ^ (1 / 2 : ℝ)
+          ∂(Integral.Measure.riemannianVolumeMeasure I M g))) := by
+  sorry
+
+/-- **The finite-factor weighted covariant `Lᵖ` integration-by-parts inequality.**  With
+`∇ = covGrad`, `a := rfns(w)`, `b := rfns(∇w)`, `c := rfns(∇²w)` and `p := k/(i+1) > 1` (finite
+regime `i + 1 < k`),
+```
+∫ b^p ≤ (2(p-1) + √(finrank)) · ∫ a^{1/2}·b^{p-1}·c^{1/2}.
+```
+This is honest limit-glue: the regularised inequality `weightedCovIBP_lpFiberJet_fin_regIneq` at the
+sequence `εₙ = 1/(n+1) > 0` is passed through the `ε → 0` dominated-convergence limits
+`weightedCovIBP_lpFiberJet_fin_regLimit` by `le_of_tendsto_of_tendsto'`; consumers therefore depend
+transitively on the `sorryAx` of those two posited analytic children. -/
 private theorem weightedCovIBP_lpFiberJet_fin
     (g : SmoothRiemannianMetric I M) (k m i : ℕ) (_hk : 1 ≤ k) (_hi : 1 ≤ i) (_hik : i + 1 < k)
     (w : Integral.L2.SmoothCcTensor g 0 m) :
@@ -511,7 +608,31 @@ private theorem weightedCovIBP_lpFiberJet_fin
               ((covGrad (I := I) (M := M) g 0 (m + 1)
                 (covGrad (I := I) (M := M) g 0 m w)).toSection x)) ^ (1 / 2 : ℝ)
           ∂(Integral.Measure.riemannianVolumeMeasure I M g) := by
-  sorry
+  -- The corrected Hamilton IBP constant at this order, `D' = 2(p-1)+√n` with `p = k/(i+1)`.
+  set D' : ℝ := 2 * ((k : ℝ) / (i + 1) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ) with hD'
+  obtain ⟨hLlim, hRlim⟩ :=
+    weightedCovIBP_lpFiberJet_fin_regLimit (I := I) (M := M) g k m i _hk _hi _hik w
+  -- The regularised inequality `child A` at each `εₙ = 1/(n+1) > 0`.
+  have hreg : ∀ n : ℕ, (∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
+              ((covGrad (I := I) (M := M) g 0 m w).toSection x)) *
+            ((riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
+              ((covGrad (I := I) (M := M) g 0 m w).toSection x)) + 1 / ((n : ℝ) + 1))
+              ^ ((k : ℝ) / (i + 1) - 1)
+          ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ≤
+        D' * ∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x)) ^ (1 / 2 : ℝ) *
+            ((riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
+              ((covGrad (I := I) (M := M) g 0 m w).toSection x)) + 1 / ((n : ℝ) + 1))
+              ^ ((k : ℝ) / (i + 1) - 1) *
+            (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
+              ((covGrad (I := I) (M := M) g 0 (m + 1)
+                (covGrad (I := I) (M := M) g 0 m w)).toSection x)) ^ (1 / 2 : ℝ)
+          ∂(Integral.Measure.riemannianVolumeMeasure I M g) := by
+    intro n
+    have hεpos : (0 : ℝ) < 1 / ((n : ℝ) + 1) := by positivity
+    exact weightedCovIBP_lpFiberJet_fin_regIneq (I := I) (M := M) g k m i _hk _hi _hik w
+      (1 / ((n : ℝ) + 1)) hεpos
+  -- Pass the inequality through the `n → ∞` limit: LHS → `∫ b^p`, RHS → `D'·∫ a^{1/2}b^{p-1}c^{1/2}`.
+  exact le_of_tendsto_of_tendsto' hLlim (hRlim.const_mul D') hreg
 
 /-- **Diagonal frame-trace sub-sum bound for the second covariant derivative.** With
 `B_i := smoothOrthoFrame g x i` the `g_x`-orthonormal smooth frame at `x`, the sum over the
@@ -1571,21 +1692,45 @@ private theorem weightedCovIBP_lpFiberJet_sup
     _ = (2 * ((k : ℝ) - 1) + Real.sqrt (Module.finrank ℝ E : ℝ)) * A *
           ∫ x, (b x) ^ ((k : ℝ) - 1) * (c x) ^ (1 / 2 : ℝ) ∂μ := by rw [hRHS_eq]
 
-/-- **(POSIT — the second-order covariant `Lᵖ` interpolation in the sub-unit exponent range.)**
+/-- **(POSIT — the sub-unit second-order `Lᵖ` log-convexity bound, with a nonnegative constant.)**
 
-The continuation of the finite second-order interpolation step into the *sub-unit* range
-`k < i + 1` (where the target exponent `q₁ = 2k/(i+1) < 2` and the standard covariant
-integration-by-parts is no longer available).  Here the inequality
+The genuine analytic kernel of the sub-unit interpolation step: the Gagliardo–Nirenberg
+second-order interpolation in the *sub-unit* range `k ≤ i + 1` (where the target exponent
+`q₁ = 2k/(i+1) ≤ 2` and the standard covariant integration-by-parts is no longer available), here
+with a single nonnegative multiplier `K_sub ≥ 0` uniform in `(m, w, i)`:
 ```
-‖∇w‖_{L^{2k/(i+1)}}² ≤ K' · ‖w‖_{L^{2k/i}} · ‖∇²w‖_{L^{2k/(i+2)}}
+‖∇w‖_{L^{2k/(i+1)}}² ≤ K_sub · ‖w‖_{L^{2k/i}} · ‖∇²w‖_{L^{2k/(i+2)}}
 ```
-(written through the squared fibre norms with the ladder exponents) is the Gagliardo–Nirenberg
-interpolation in the regime where it follows from the convexity of `p ↦ log‖f‖_{L^{1/p}}` (Lyapunov /
-log-convexity of `Lᵖ` norms) rather than from IBP; it is tight, attaining equality on a single
-Fourier mode of the flat torus.  The multiplier `K'' ≥ 1` is uniform in `(m, w, i)`.  Its body is
-`sorry`: the genuine sub-unit-exponent `Lᵖ` interpolation (the log-convexity frontier), which the
-project does not carry; consumers transitively depend on its `sorryAx`.  **General analytic
-infrastructure** (sub-unit `Lᵖ` interpolation) to be promoted to a dedicated file. -/
+(written through the squared fibre norms with the ladder exponents).  In this regime the inequality
+follows from the convexity of `p ↦ log‖f‖_{L^{1/p}}` (Lyapunov / log-convexity of `Lᵖ` norms) rather
+than from IBP — the pointwise bound `|∇w|² ≤ |w|·|∇²w|` is *false* on a curved manifold, so it must
+be the integral/convexity inequality; it is tight, attaining equality on a single Fourier mode of the
+flat torus.  Its body is `sorry`: the genuine sub-unit-exponent `Lᵖ` interpolation (the
+log-convexity frontier), which the project does not carry; consumers transitively depend on its
+`sorryAx`.  **General analytic infrastructure** (`Lᵖ` log-convexity / sub-unit interpolation) to be
+promoted to a dedicated `Analysis/Sobolev` or `Analysis/Integration` file. -/
+private theorem lpFiberJet_secondOrder_subunit_logConvex_bound
+    (g : SmoothRiemannianMetric I M) (k : ℕ) (_hk : 1 ≤ k) :
+    ∃ K_sub : ℝ, 0 ≤ K_sub ∧
+      ∀ (m : ℕ) (w : Integral.L2.SmoothCcTensor g 0 m) (i : ℕ), 1 ≤ i → k ≤ i + 1 →
+        ((∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
+              ((covGrad (I := I) (M := M) g 0 m w).toSection x)) ^ ((k : ℝ) / (i + 1))
+            ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ (((i : ℝ) + 1) / (2 * k))) ^ 2 ≤
+          K_sub *
+            ((∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x)) ^ ((k : ℝ) / i)
+                ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((i : ℝ) / (2 * k))) *
+            ((∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
+                  ((covGrad (I := I) (M := M) g 0 (m + 1)
+                    (covGrad (I := I) (M := M) g 0 m w)).toSection x)) ^ ((k : ℝ) / (i + 2))
+                ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ (((i : ℝ) + 2) / (2 * k))) := by
+  sorry
+
+/-- **The sub-unit second-order covariant `Lᵖ` interpolation step.**  The continuation of the
+finite second-order interpolation into the sub-unit range `k ≤ i + 1`, with a multiplier `K'' ≥ 1`
+uniform in `(m, w, i)`.  This is the constant-normalisation glue over the genuine analytic kernel
+`lpFiberJet_secondOrder_subunit_logConvex_bound`: its nonnegative multiplier `K_sub` is upgraded to
+`max K_sub 1 ≥ 1`, the inequality surviving the upgrade by nonnegativity of the two right factors.
+Consumers transitively depend on the `sorryAx` of that kernel. -/
 private theorem secondOrderInterp_lpFiberJet_fin_lowExp
     (g : SmoothRiemannianMetric I M) (k : ℕ) (_hk : 1 ≤ k) :
     ∃ K'' : ℝ, 1 ≤ K'' ∧
@@ -1600,7 +1745,41 @@ private theorem secondOrderInterp_lpFiberJet_fin_lowExp
                   ((covGrad (I := I) (M := M) g 0 (m + 1)
                     (covGrad (I := I) (M := M) g 0 m w)).toSection x)) ^ ((k : ℝ) / (i + 2))
                 ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ (((i : ℝ) + 2) / (2 * k))) := by
-  sorry
+  obtain ⟨K_sub, hK_sub0, hbound⟩ :=
+    lpFiberJet_secondOrder_subunit_logConvex_bound (I := I) (M := M) g k _hk
+  refine ⟨max K_sub 1, le_max_right _ _, fun m w i hi1 hik => ?_⟩
+  -- Nonnegativity of the two right `rpow` factors `Ia^{i/(2k)}`, `Ic^{(i+2)/(2k)}`.
+  have hIa_nn : (0 : ℝ) ≤ (∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x))
+        ^ ((k : ℝ) / i) ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((i : ℝ) / (2 * k)) :=
+    Real.rpow_nonneg (MeasureTheory.integral_nonneg
+      (fun x => Real.rpow_nonneg (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 m x _) _)) _
+  have hIc_nn : (0 : ℝ) ≤ (∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
+        ((covGrad (I := I) (M := M) g 0 (m + 1) (covGrad (I := I) (M := M) g 0 m w)).toSection x))
+        ^ ((k : ℝ) / (i + 2)) ∂(Integral.Measure.riemannianVolumeMeasure I M g))
+        ^ (((i : ℝ) + 2) / (2 * k)) :=
+    Real.rpow_nonneg (MeasureTheory.integral_nonneg
+      (fun x => Real.rpow_nonneg (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (m + 1 + 1) x _)
+        _)) _
+  calc ((∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
+              ((covGrad (I := I) (M := M) g 0 m w).toSection x)) ^ ((k : ℝ) / (i + 1))
+            ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ (((i : ℝ) + 1) / (2 * k))) ^ 2
+      ≤ K_sub *
+            ((∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x)) ^ ((k : ℝ) / i)
+                ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((i : ℝ) / (2 * k))) *
+            ((∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
+                  ((covGrad (I := I) (M := M) g 0 (m + 1)
+                    (covGrad (I := I) (M := M) g 0 m w)).toSection x)) ^ ((k : ℝ) / (i + 2))
+                ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ (((i : ℝ) + 2) / (2 * k))) :=
+        hbound m w i hi1 hik
+    _ ≤ max K_sub 1 *
+            ((∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x)) ^ ((k : ℝ) / i)
+                ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((i : ℝ) / (2 * k))) *
+            ((∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
+                  ((covGrad (I := I) (M := M) g 0 (m + 1)
+                    (covGrad (I := I) (M := M) g 0 m w)).toSection x)) ^ ((k : ℝ) / (i + 2))
+                ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ (((i : ℝ) + 2) / (2 * k))) := by
+        apply mul_le_mul_of_nonneg_right _ hIc_nn
+        exact mul_le_mul_of_nonneg_right (le_max_left _ _) hIa_nn
 
 end SecondOrderInterpCore
 
