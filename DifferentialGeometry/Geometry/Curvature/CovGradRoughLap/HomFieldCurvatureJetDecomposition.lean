@@ -721,6 +721,112 @@ private lemma swapTwoSec_apply (r t : ℕ) (x : M) :
     (show TensorRSSpace r (t + 2) I x →L[ℝ] TensorRSSpace r (t + 2) I x from
       swapTwoSec (I := I) (M := M) (E := E) r t x) = swapTwoFib (I := I) (M := M) r t x := rfl
 
+/-! ## The rough-Laplacian / covariant-gradient commutator at operator-field granularity -/
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The fixed-Hom-field rough-Laplacian / covariant-gradient commutator, at general valence.**
+There is a smooth full Hom-bundle field family `Tr t : Hom(T^{(r,t+2)}, T^{(r,t)})` — the metric
+double-trace of the two leading covariant slots — such that:
+
+* the rough tensor Laplacian factors through it on the second iterated covariant gradient,
+  `Δ_∇ W = Tr t · ∇²W` for every smooth compactly-supported `(r, t)`-tensor `W` (the frame-trace
+  reading `rawTensorConnLap_eq_frame_trace_secondCovDeriv` packaged as a fixed-field action through
+  the value-local representation theorem); and
+* the order-`3` head difference `Tr (s+1) · ∇³S − slotExt(Tr s) · ∇³S` — the curvature term born
+  from re-tracing a different leading pair of the third covariant gradient — collapses to a fixed
+  field action on the `≤ 2`-jet `(S, ∇S, ∇²S)` through fixed smooth Hom fields
+  `P₀ : Hom(T^{(r,s)}, T^{(r,s+1)})`, `P₁ : Hom(T^{(r,s+1)}, T^{(r,s+1)})`,
+  `P₂ : Hom(T^{(r,s+2)}, T^{(r,s+1)})` (the section-level Ricci identity
+  `tensorSecondCovDeriv_antisymm_eq_riemannOp`, read through the leading-two-slot transposition field
+  `swapTwoSec` and the two-slot evaluation bridge `secondCovGrad_eval_eq_tensorSecondCovDeriv`,
+  packaged by the same representation theorem).
+
+This is the operator-field formulation of the classical first-order commutator `[Δ_∇, ∇]`: the trace
+family carries the rough Laplacian, and the curvature enters exactly through the head difference.  The
+named-defect decomposition `exists_pointwiseTensorCurvRS_homField_jetDecomposition` is its pure
+`appFullSec`-algebra consequence. -/
+private theorem exists_roughLapCommutatorTrace_homField
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    ∃ (Tr : (t : ℕ) → HomTensorRSField (E := E) (M := M) r (t + 2) t I)
+      (P₀ : HomTensorRSField (E := E) (M := M) r s (s + 1) I)
+      (P₁ : HomTensorRSField (E := E) (M := M) r (s + 1) (s + 1) I)
+      (P₂ : HomTensorRSField (E := E) (M := M) r (s + 2) (s + 1) I),
+      (∀ (t : ℕ) (W : SmoothCcTensor g r t),
+          rawTensorConnLapSmooth (I := I) g r t W =
+            appFullSec (I := I) (M := M) g r (t + 2) t (Tr t)
+              (iteratedCovGrad g r t 2 W)) ∧
+        ∀ S : SmoothCcTensor g r s,
+          appFullSec (I := I) (M := M) g r (s + 1 + 2) (s + 1) (Tr (s + 1))
+              (iteratedCovGrad g r (s + 1) 2 (covGrad (I := I) (M := M) g r s S)) -
+            appFullSec (I := I) (M := M) g r (s + 2 + 1) (s + 1)
+              (slotExtendFullSec (I := I) g r (s + 2) s (Tr s))
+              (covGrad (I := I) (M := M) g r (s + 2) (iteratedCovGrad g r s 2 S)) =
+          appFullSec (I := I) (M := M) g r s (s + 1) P₀ S +
+            appFullSec (I := I) (M := M) g r (s + 1) (s + 1) P₁
+              (covGrad (I := I) (M := M) g r s S) +
+            appFullSec (I := I) (M := M) g r (s + 2) (s + 1) P₂
+              (iteratedCovGrad g r s 2 S) :=
+  sorry
+
+/-! ## The fixed-Hom-field curvature jet decomposition of the rank-`r` commutator defect -/
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The fixed smooth Hom-field curvature jet decomposition of the rank-`r` order-`2` commutator
+defect.** There are three fixed smooth full Hom-bundle field sections
+`Q₀ : Hom(T^{(r,s)}, T^{(r,s+1)})`, `Q₁ : Hom(T^{(r,s+1)}, T^{(r,s+1)})`,
+`Q₂ : Hom(T^{(r,s+2)}, T^{(r,s+1)})` such that, for every smooth compactly-supported `(r, s)`-tensor
+`S`,
+```
+pointwiseTensorCurvRS g r s S = Q₀ · S + Q₁ · ∇S + Q₂ · ∇²S,
+```
+where `Curv S := Δ_∇(∇S) − ∇(Δ_∇ S)` and `·` is the full Hom-bundle action `appFullSec`.  The classical
+first-order rough-Laplacian / covariant-gradient commutator identity
+`[Δ_∇, ∇] = (∇R)·S + R·∇S + (trace-gradient)·∇²S` at a generic contravariant valence `r`, in fixed
+smooth Hom-field form.
+
+This is the pure `appFullSec`-algebra assembly of the operator-field commutator
+`exists_roughLapCommutatorTrace_homField`: the defect's body
+`Δ_∇(∇S) − ∇(Δ_∇ S)` is read through the trace factorisation `Δ_∇ W = Tr · ∇²W` at valences `s + 1`
+and `s` (the latter differentiated by the covariant product rule `covGrad_appFullSec_eq`, splitting
+off the trace-gradient field `∇Tr s` on `∇²S`), leaving exactly the order-`3` head difference
+`Tr (s+1) · ∇³S − slotExt(Tr s) · ∇³S`, which the commutator supplies as a fixed field action on the
+`≤ 2`-jet; the two `∇²S` summands merge through `appFullSec_sub_left`. -/
+theorem exists_pointwiseTensorCurvRS_homField_jetDecomposition
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    ∃ (Q₀ : HomTensorRSField (E := E) (M := M) r s (s + 1) I)
+      (Q₁ : HomTensorRSField (E := E) (M := M) r (s + 1) (s + 1) I)
+      (Q₂ : HomTensorRSField (E := E) (M := M) r (s + 2) (s + 1) I),
+      ∀ S : SmoothCcTensor g r s,
+        pointwiseTensorCurvRS (I := I) (M := M) g r s S =
+          appFullSec (I := I) (M := M) g r s (s + 1) Q₀ S +
+            appFullSec (I := I) (M := M) g r (s + 1) (s + 1) Q₁
+              (covGrad (I := I) (M := M) g r s S) +
+            appFullSec (I := I) (M := M) g r (s + 2) (s + 1) Q₂
+              (iteratedCovGrad g r s 2 S) := by
+  obtain ⟨Tr, P₀, P₁, P₂, hfac, hhead⟩ :=
+    exists_roughLapCommutatorTrace_homField (I := I) (M := M) (E := E) g r s
+  refine ⟨P₀, P₁,
+    P₂ - homTensorRSCovGradSec (I := I) g r (s + 2) s (Tr s), fun S => ?_⟩
+  have hdef : pointwiseTensorCurvRS (I := I) (M := M) g r s S =
+      rawTensorConnLapSmooth (I := I) g r (s + 1) (covGrad (I := I) (M := M) g r s S) -
+        covGrad (I := I) (M := M) g r s (rawTensorConnLapSmooth (I := I) g r s S) := rfl
+  rw [hdef]
+  -- term 1: the rough Laplacian of `∇S` factors through `Tr (s+1)`.
+  rw [hfac (s + 1) (covGrad (I := I) (M := M) g r s S)]
+  -- term 2: differentiate the trace factorisation of `Δ_∇ S`.
+  rw [show covGrad (I := I) (M := M) g r s (rawTensorConnLapSmooth (I := I) g r s S) =
+      covGrad (I := I) (M := M) g r s
+        (appFullSec (I := I) (M := M) g r (s + 2) s (Tr s) (iteratedCovGrad g r s 2 S)) from
+    congrArg (covGrad (I := I) (M := M) g r s) (hfac s S)]
+  rw [covGrad_appFullSec_eq (I := I) (M := M) g r (s + 2) s (Tr s) (iteratedCovGrad g r s 2 S)]
+  -- expand the merged trace-gradient field on `∇²S`.
+  rw [appFullSec_sub_left (I := I) (M := M) g r (s + 2) (s + 1) P₂
+    (homTensorRSCovGradSec (I := I) g r (s + 2) s (Tr s)) (iteratedCovGrad g r s 2 S)]
+  -- isolate the order-`3` head difference `Tr (s+1)·∇³S − slotExt(Tr s)·∇³S`
+  -- (the two towers coincide definitionally), then substitute the commutator identity.
+  rw [sub_add_eq_sub_sub, sub_right_comm, hhead S]
+  abel
+
 end Connection
 end Integral
 end DifferentialGeometry
