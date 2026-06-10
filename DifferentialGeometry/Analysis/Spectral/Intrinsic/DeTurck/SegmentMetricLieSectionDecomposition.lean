@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Realiz
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqNormBridge
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HilbertSpace
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FiberNormSubadditivity
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricLieDiffCovJetExpansion
 
 /-! # The concrete section decomposition of the sealed Ricci–DeTurck Lie difference
 
@@ -105,12 +106,22 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- **(POSIT — the top/rest split of the full retagged Lie-summand difference, with the
-0-jet-inclusive `w`-jet difference arm.)**  The genuine deep covariant-gauge content of the Lie half, the gauge analogue of
-the curvature half's connection-level quadratic-Cross top/rest split
-`crossCorrectionSection_iteratedCovGrad_topRest_split` (`ConnectionDifferenceFieldJets.lean`), applied
-directly to the **full** `g₀`-retagged Lie-summand difference
-`diff := lieDerivRetagG0 g₀ g_bg g₁ − lieDerivRetagG0 g₀ g_bg g₂` rather than to a value-split's pieces.
+/-- **(GLUE over the intrinsic Cartan bridge — the top/rest split of the full retagged Lie-summand
+difference, with the 0-jet-inclusive `w`-jet difference arm.)**  The genuine deep covariant-gauge
+content of the Lie half, the gauge analogue of the curvature half's connection-level quadratic-Cross
+top/rest split `crossCorrectionSection_iteratedCovGrad_topRest_split`
+(`ConnectionDifferenceFieldJets.lean`), applied directly to the **full** `g₀`-retagged Lie-summand
+difference `diff := lieDerivRetagG0 g₀ g_bg g₁ − lieDerivRetagG0 g₀ g_bg g₂` rather than to a
+value-split's pieces.
+
+**Now discharged through the chart-free intrinsic Cartan route**
+`lieDerivDiff_intrinsic_covFdB_section_expansion`
+(`SegmentMetricLieDiffCovJetExpansion.lean`): the sealed Lie difference is re-expressed by the
+section-level Cartan identity (`lieDerivRetagG0_eq_symLoweredRetagG0`, lifted from the axiom-clean
+`cartan_formula_for_lie_deriv_metric`) as the symmetrised covariant lowering of the DeTurck vector
+field, whose top/rest split is the deep gauge primitive
+`symLoweredDeTurckVF_iteratedCovGrad_topRest_split` (the genuine `sorry` leaf this now transits, the
+intrinsic replacement of the banned chart-witness route).
 
 For an anchor `g₀`, a flow background `g_bg`, an order `a`, a supercriticality hypothesis `ha`, a uniform
 `H^{a+2}`-size bound `B ≥ 0`, and fibre-smallness `δ < 1/2`, there is a nonnegative constant `Cd` (uniform
@@ -165,9 +176,9 @@ retained in the difference arm.
 `∇^{j+2} w`, and the `Rest` part carries **both** fixed-pair endpoints `T₁, T₂`.  At `g₁ = g₂` (so `T₁ = T₂` realized) the Lie-summand
 difference vanishes (`lieDerivRetagG0_sub_toModel_eq`), `w = 0` and `‖(T₁ − T₂).toHs a‖ = 0`, so the split
 is `0 = 0 + 0`.  NO value-bounded `Φ.op 0 2 w` shape, NO pointwise-`C^{>2}`-jet claim, NO
-spectral-nonlinearity, NO Weyl dependence.  Its body is `sorry`: the genuine deep
-covariant-Leibniz top/rest split of the full Lie-summand difference, with the 0-jet-inclusive
-difference arm. -/
+spectral-nonlinearity, NO Weyl dependence.  Proved by the intrinsic Cartan bridge
+`lieDerivDiff_intrinsic_covFdB_section_expansion`; consumers transitively depend on `sorryAx` only
+through the chart-free deep gauge primitive `symLoweredDeTurckVF_iteratedCovGrad_topRest_split`. -/
 theorem lieDerivDiff_connLevel_topRestSplit (g₀ g_bg : SmoothRiemannianMetric I M)
     (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
@@ -199,7 +210,7 @@ theorem lieDerivDiff_connLevel_topRestSplit (g₀ g_bg : SmoothRiemannianMetric 
                       + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
                         ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
                   * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=
-  sorry
+  lieDerivDiff_intrinsic_covFdB_section_expansion (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
 
 /-- **(DERIVED — the full retagged Lie-summand difference's two-arm covariant-jet bound.)**
 

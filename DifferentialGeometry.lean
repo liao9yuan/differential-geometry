@@ -701,6 +701,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricJet
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricCurvatureDifferenceCovJet
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricCurvatureDifferenceOpDecomposition
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricLieDiffCovJet
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricLieDiffCovJetExpansion
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricLieDifferenceCovJet
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricLieSectionDecomposition
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricRHSCovJetExpansion
@@ -1013,6 +1014,7 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.Laplacian
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Ricci
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Riemann
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisBracket
+import DifferentialGeometry.Geometry.Connection.DeTurckVFCovGradTopRestSplit
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentity
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentityOffCentre
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartLieBracket
@@ -1258,6 +1260,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationFo
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationFormChainRule
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationFormProducer
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.Formula
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.LieDerivSectionCartan
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ChainRule
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Conjugation.LeviCivita
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Conjugation.RicciTrace
