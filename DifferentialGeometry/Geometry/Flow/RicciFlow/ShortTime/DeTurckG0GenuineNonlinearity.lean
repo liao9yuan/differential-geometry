@@ -1361,6 +1361,94 @@ private theorem exists_deTurckLinearization_coerciveInverse
     nlinarith [sq_nonneg ‖u‖, norm_nonneg u, norm_nonneg (B₁ u), norm_nonneg B₁,
       mul_le_mul_of_nonneg_left hb (norm_nonneg (B₁ u)), sq_nonneg ‖B₁‖]
 
+/-- **The energy-coordinate Banach fixed-point solution of the gate-locus first-order-freedom
+gauge equation over the coercive inverse (the genuine nonlinear-contraction frontier of child
+`D`, returned in the `H^{a+1}` energy coordinate before its smoothing realization).**
+
+For the anchor `g₀`, a flow background `g_bg`, a supercritical order `a` (`2a > dim M + 4`), the
+bounded first-order linearization `B₁ : H^{a+1} →L Hᵃ` of the realized DeTurck nonlinearity at the
+origin (child `A`), and the Lax–Milgram inverse `Linv : H^{a+1} ≃L[ℝ] H^{a+1}` of the
+Gårding-coercive linearized energy form (child `B`, with its coercive form `Bform` recorded by
+`hLinv`), there is an **energy-coordinate solution map** `w : H^{a+1}(g₀) → H^{a+1}(g₀)` and a
+match-gate slack `Q > 0` carrying, in global linear form:
+
+* the linear `H^{a+1}` size bound `‖w u‖ ≤ Λ · ‖u‖` (the contraction's geometric size control,
+  over **all** of `H^{a+1}`);
+* the `H^{a+1}` Lipschitz bound `‖w u − w u'‖ ≤ Λ' · ‖u − u'‖` (the contraction's geometric
+  Lipschitz control, over **all** of `H^{a+1}`); and
+* the **per-`u` gate-locus gauge match of the smoothing-realized corrected carrier**: for every
+  gate-realizable `u` whose order-`2a` gate representative has Sobolev norm `≤ Q`, the realized
+  DeTurck remainder of the corrected carrier `smoothingBaseSynth g₀ a u + smoothingBaseSynth g₀ a
+  (w u)` coincides, at the `L²`-class level (through `SmoothCcTensor.toL2`), with the gate-based
+  gauge `deTurckRemainderRealizeSection g₀ g_bg u`.
+
+This is the **genuine analytic content** of child `D`, exposed in the energy coordinate `H^{a+1}`
+(the natural carrier of the static Banach fixed point): `w u` is the fixed point of the
+coercive-inverse contraction `v ↦ Linv (gaugeTarget u − baseResidual u − superlinearRemainder v)`
+(`Linv` bounded by Lax–Milgram; the super-linear remainder small because the second-order
+principal symbol of the realized DeTurck remainder has cancelled,
+`deTurckNonlinearitySpectral_principalPart_cancels`), and the smoothing realization
+`smoothingBaseSynth g₀ a (w u)` of that fixed point is the corrector value `corr u` that child `D`
+returns.  The size/Lipschitz arms are the geometric control of the Banach iteration; the gate
+match is the fixed-point identity on the `Q`-gated locus (the `Q`-bound on the order-`2a`
+gate-representative norm excising the in-gate eigen-train on which the free-`u` match is false,
+T12).  It is **strictly distinct from `D`**: it bounds the *energy-coordinate* solution `w` (a
+`H^{a+1} → H^{a+1}` map) and matches the smoothing-realized corrected carrier, whereas `D` bounds
+the realized `SmoothCcTensor` corrector `corr = smoothingBaseSynth g₀ a ∘ w` at every order and
+returns it as an existential output; the smoothing-realization step (deriving `D`'s all-order
+size / `H^{a+2}` Lipschitz arms from `w`'s size / Lipschitz through `smoothingBaseSynth_spec`) is
+the genuine glue `D` provides on top of this node.
+
+**Non-vacuous** — the match rejects the degenerate witness `w ≡ 0`: with `w ≡ 0`,
+`smoothingBaseSynth g₀ a (w u) = smoothingBaseSynth g₀ a 0 = 0` (the unit-time heat output of the
+zero datum), so the corrected carrier collapses to the naive heat base `smoothingBaseSynth g₀ a u`
+and the match would read `toL2 (deTurckRealizeRemainderOf g₀ g_bg (smoothingBaseSynth g₀ a u)) =
+toL2 (deTurckRemainderRealizeSection g₀ g_bg u)`, the Lean-refuted naive-heat claim (a pure heat
+residue contributes `−λᵢ(e^{−λᵢ}−1)·u.coeffᵢ`-type terms falsifying exact class equality), so the
+size/Lipschitz/match conjunction genuinely constrains `w` away from zero, and the `Linv`
+hypothesis is genuinely consumed (the solution is `Linv`-built).  **Not packaging** — the match
+arm is the `L²`-class identity of two realized DeTurck remainders, structurally distinct from the
+real-valued size / Lipschitz arms; this is an `Exists`-output solution map, never a binder
+hypothesis.  **Intrinsic** — `toL2` / `‖·‖_{H^{a+1}}` are `g`-inner; no `chartJ`, no raw `M → E`.
+
+**The body is `sorry`** — the energy-coordinate nonlinear Banach fixed point over the coercive
+inverse (the contraction step of the `/prove` recursion, the gate-controlled first-order-freedom
+solvability); consumers transitively depend on `sorryAx` through it and the linear inverse /
+Gårding / Weyl substrate it builds on. -/
+private theorem exists_gateGaugeEnergyFixedPoint
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B₁ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
+        tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+    (hB₁ : HasFDerivAt (IntrinsicSpectral.deTurckRealizeNonlinearityTower (I := I) g₀ g_bg a) B₁
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)))
+    (Linv : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) ≃L[ℝ]
+        tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+    (Bform : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
+        tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ] ℝ)
+    (hcoercive : IsCoercive Bform)
+    (hLinv : Linv = hcoercive.continuousLinearEquivOfBilin) :
+    ∃ (w : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+          tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+        (Q : ℝ),
+      0 < Q ∧
+      (∃ Λ : ℝ, 0 ≤ Λ ∧
+        ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1), ‖w u‖ ≤ Λ * ‖u‖) ∧
+      (∃ Λ' : ℝ, 0 ≤ Λ' ∧
+        ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+          ‖w u - w u'‖ ≤ Λ' * ‖u - u'‖) ∧
+      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+          (h : realizableAtGate (I := I) g₀ u),
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+            (gateRepOfWitness (I := I) g₀ u h)‖ ≤ Q →
+        Integral.L2.SmoothCcTensor.toL2
+            (deTurckRealizeRemainderOf (I := I) g₀ g_bg
+              (smoothingBaseSynth (I := I) g₀ a u
+                + smoothingBaseSynth (I := I) g₀ a (w u)))
+          = Integral.L2.SmoothCcTensor.toL2
+              (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
+  sorry
+
 /-- **The Banach fixed point of the gate-locus first-order-freedom correction over the coercive
 inverse (child `D` of the `A → B → D` gauge-solvability chain — the nonlinear contraction step).**
 
@@ -1396,10 +1484,22 @@ is genuinely consumed (the corrector is `Linv`-built).  **Not packaging** — th
 /Lipschitz arms; this is an `Exists`-output corrector, never a binder hypothesis.  **Intrinsic** —
 `toL2`/`toHs` are `g`-inner; no `chartJ`, no raw `M → E`.
 
-**The body is `sorry`** — the nonlinear Banach fixed point over the coercive inverse (the contraction
-step of the `/prove` recursion, the gate-controlled first-order-freedom solvability); consumers
-transitively depend on `sorryAx` through it and the linear inverse / Gårding / Weyl substrate it builds
-on. -/
+**Proven by smoothing realization of the energy-coordinate Banach fixed point.**  The genuine
+nonlinear contraction is carried by the strictly-deeper energy-coordinate node
+`exists_gateGaugeEnergyFixedPoint`: it supplies the `H^{a+1}` solution map `w` (the fixed point of
+the coercive-inverse contraction `v ↦ Linv (gaugeTarget u − baseResidual u − superlinearRemainder
+v)`) with the linear `H^{a+1}` size bound `‖w u‖ ≤ Λ‖u‖`, the `H^{a+1}` Lipschitz bound `‖w u − w
+u'‖ ≤ Λ'‖u − u'‖`, and the per-`u` gate match of the smoothing-realized corrected carrier
+`smoothingBaseSynth g₀ a u + smoothingBaseSynth g₀ a (w u)`.  The corrector is then the smoothing
+realization of that solution, `corr u := smoothingBaseSynth g₀ a (w u)`: its all-order size arm is
+`smoothingBaseSynth`'s order-`n` linear size (`smoothingBaseSynth_spec`) at the argument `w u`
+composed with `w`'s `H^{a+1}` size (`Dₙ := Cₙ · Λ`), its `H^{a+2}` Lipschitz arm is
+`smoothingBaseSynth`'s `H^{a+2}` Lipschitz composed with `w`'s `H^{a+1}` Lipschitz (`D' := Cb' ·
+Λ'`), and its gate match is the energy node's match verbatim (the corrected carrier
+`smoothingBaseSynth g₀ a u + corr u` being definitionally `smoothingBaseSynth g₀ a u +
+smoothingBaseSynth g₀ a (w u)`).  Consumers transitively depend on `sorryAx` only through that
+energy-coordinate fixed-point node (the genuine nonlinear contraction) and the linear inverse /
+Gårding / Weyl substrate it builds on. -/
 private theorem exists_firstOrderFreedomCorrector_ofCoerciveInverse
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -1434,7 +1534,42 @@ private theorem exists_firstOrderFreedomCorrector_ofCoerciveInverse
               (smoothingBaseSynth (I := I) g₀ a u + corr u))
           = Integral.L2.SmoothCcTensor.toL2
               (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
-  sorry
+  classical
+  -- The energy-coordinate Banach fixed-point solution map `w : H^{a+1} → H^{a+1}` of the
+  -- gate-locus gauge equation over the coercive inverse, with its linear size / Lipschitz control
+  -- and the per-`u` gate match of the smoothing-realized corrected carrier.
+  obtain ⟨w, Q, hQ, ⟨Λ, hΛ_nn, hΛ⟩, ⟨Λ', hΛ'_nn, hΛ'⟩, hwmatch⟩ :=
+    exists_gateGaugeEnergyFixedPoint (I := I) g₀ g_bg a ha B₁ hB₁ Linv Bform hcoercive hLinv
+  -- The heat-smoothing base carrier's defining all-order size bound and `H^{a+2}` Lipschitz.
+  obtain ⟨hbsize, ⟨Cb', hCb'_nn, hCb'lip⟩⟩ := smoothingBaseSynth_spec (I := I) g₀ a ha
+  -- The corrector is the smoothing realization of the energy-coordinate solution:
+  -- `corr u := smoothingBaseSynth g₀ a (w u)`.
+  refine ⟨fun u => smoothingBaseSynth (I := I) g₀ a (w u), Q, hQ, ?_, ?_, ?_⟩
+  · -- All-order linear size: `Dₙ := Cₙ · Λ`, the base's order-`n` size at `w u` composed with
+    -- the energy solution's linear `H^{a+1}` size `‖w u‖ ≤ Λ · ‖u‖`.
+    intro n
+    obtain ⟨Cbn, hCbn_nn, hCbn⟩ := hbsize n
+    refine ⟨Cbn * Λ, by positivity, fun u => ?_⟩
+    calc ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n
+            (smoothingBaseSynth (I := I) g₀ a (w u))‖
+        ≤ Cbn * ‖w u‖ := hCbn (w u)
+      _ ≤ Cbn * (Λ * ‖u‖) := by
+          exact mul_le_mul_of_nonneg_left (hΛ u) hCbn_nn
+      _ = Cbn * Λ * ‖u‖ := by ring
+  · -- `H^{a+2}` Lipschitz: `D' := Cb' · Λ'`, the base's `H^{a+2}` Lipschitz at `w u, w u'` composed
+    -- with the energy solution's `H^{a+1}` Lipschitz `‖w u − w u'‖ ≤ Λ' · ‖u − u'‖`.
+    refine ⟨Cb' * Λ', by positivity, fun u u' => ?_⟩
+    calc ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
+            (smoothingBaseSynth (I := I) g₀ a (w u) - smoothingBaseSynth (I := I) g₀ a (w u'))‖
+        ≤ Cb' * ‖w u - w u'‖ := hCb'lip (w u) (w u')
+      _ ≤ Cb' * (Λ' * ‖u - u'‖) := by
+          exact mul_le_mul_of_nonneg_left (hΛ' u u') hCb'_nn
+      _ = Cb' * Λ' * ‖u - u'‖ := by ring
+  · -- Gate match: the corrected carrier `smoothingBaseSynth g₀ a u + corr u` is definitionally
+    -- `smoothingBaseSynth g₀ a u + smoothingBaseSynth g₀ a (w u)`, so the energy node's match
+    -- `hwmatch` forwards verbatim.
+    intro u h hQbnd
+    exact hwmatch u h hQbnd
 
 /-- **The per-`u` gate-locus first-order-freedom gauge match of the corrected carrier (the genuine
 irreducible analytic frontier of the gauge corrector, transiting the Weyl/Gårding node).**
