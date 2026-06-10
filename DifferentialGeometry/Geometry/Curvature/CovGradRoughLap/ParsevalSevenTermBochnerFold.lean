@@ -1535,6 +1535,55 @@ private lemma bochnerFoldGroupSum_elt2_eq_residueSum (g : SmoothRiemannianMetric
   rw [Finset.sum_sub_distrib] at heng
   linarith [heng]
 
+/-- **The differentiated-curvature reorganization, pre-split into the two operator-field pairings (the
+curvature-commutator root, B-rule normal form).** For a fixed Parseval frame family, the frame double sum
+of the group-`2` integration-by-parts residue `bochnerGroup2Residue` (`= −(⟨R(V a, V b) S, ∇_{V a}(∇_{V b}
+S)⟩ + ⟨R(V a, V b) S, ∇_{V b} S⟩ · divᵍ (V a))`) plus the group-`4` double sum (the symmetric second-order
+pair `−∇²_{∇_{V b} V a, V a} S − ∇²_{V a, ∇_{V b} V a} S` read against `∇_{V b} S`) equals the
+gradient-of-base curvature pairing minus the passenger-slot extension pairing of the frame-free curvature
+operator field `Φ₀ := curvOpField g s`:
+```
+(∑_b ∑_a ∫ bochnerGroup2Residue) + bochnerFoldGroupSum g s S V (bochnerGroupElt4)
+  = ⟨∇(pureRGenuineDiffOp g 0 s S), ∇S⟩_{L²} − ⟨appCc (slotExtend Φ₀) (∇S), ∇S⟩_{L²}.
+```
+This is the operator-field B-rule *normal form* of
+`parsevalFrameSum_group2Residue_add_group4_eq_appCc_covGrad_curvOpField`: the operator-field covariant
+Leibniz pairing split `tensorL2Inner_covGrad_appCc_eq_add` (`OperatorFieldPairingIBP`) writes
+`⟨∇(appCc Φ₀ S), ∇S⟩ = ⟨appCc (∇Φ₀) S, ∇S⟩ + ⟨appCc (slotExtend Φ₀) (∇S), ∇S⟩`, and the order-`0` curvature
+operator action `appCc Φ₀ S = pureRGenuineDiffOp g 0 s S` (`appCc_curvOpField_eq_pureRGenuineDiffOp`)
+rewrites the left side, so the differentiated-action pairing `⟨appCc (∇Φ₀) S, ∇S⟩` (the
+`…_eq_appCc_covGrad_curvOpField` right side) is exactly this gradient-of-base minus passenger-slot
+difference.  The genuinely-deep curvature content is unchanged: the group-`2` second covariant derivative
+`∇_{V a}(∇_{V b} S)` of the residue is reorganized against `R(V a, V b) S` through the second-Bianchi /
+`riemannOp`-symmetry curvature commutator into the symmetric group-`4` pattern plus the differentiated
+curvature coefficient `(∇R) S`, summed over the Parseval frame; it is *false* for an arbitrary section in
+place of the differentiated curvature trace, so it genuinely uses `R`, the Parseval reproduction `hPar`,
+and the second-order frame structure.  The body is `sorry`; consumers transitively depend on its
+`sorryAx`. -/
+private theorem parsevalFrameSum_group2Residue_add_group4_eq_diffCurvTracePairing
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
+    (∑ b : Fin N, ∑ a : Fin N,
+        ∫ x, bochnerGroup2Residue (I := I) (M := M) g s S (V a) (V b)
+            ⟨fun y : M => V a y, hV a⟩ x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
+      bochnerFoldGroupSum (I := I) (M := M) g s S V
+        (bochnerGroupElt4 (I := I) (M := M) g s S) =
+      tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (covGrad (I := I) (M := M) g 0 s
+          (pureRGenuineDiffOp (I := I) (M := M) g 0 s S)).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun -
+      tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (appCc (I := I) (M := M) g (s + 1) (s + 1)
+          (slotExtend (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s))
+          (covGrad (I := I) (M := M) g 0 s S)).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun :=
+  sorry
+
 /-- **The genuine differentiated-curvature reorganization of the group-`2` IBP residue plus the
 group-`4` second-order pair (the curvature-commutator root).** For a fixed Parseval frame family, the
 frame double sum of the group-`2` integration-by-parts residue `bochnerGroup2Residue` (`= −(⟨R(V a, V b)
@@ -1549,19 +1598,19 @@ equals the single `L²` pairing of the differentiated curvature operator-field a
 This is the genuinely-deep curvature content of the rank-`0` Bochner divergence root, *more primitive*
 than its consumer: the group-`2` covariant derivative `∇_{V a}(·)` has already been integrated by parts
 off into the residue `bochnerGroup2Residue` by the frame-summed engine
-(`bochnerFoldGroupSum_elt2_eq_residueSum`, `integral_frameSummed_covDeriv_combined_eq_zero`).  Its content
-is the *frame-summed differentiated-curvature trace* identification: the operator-field covariant Leibniz
-`covGrad_appCc_eq` (`OperatorFieldCovariantCalculus`) writes `∇(appCc (curvOpField g s) S) =
-appCc (covGrad (curvOpField g s)) S + appCc (slotExtend (curvOpField g s)) (∇S)`, whose frame-trace of the
-order-`0` curvature operator action `appCc (curvOpField g s) S = pureRGenuineDiffOp g 0 s S`
-(`exists_pureRGenuineDiffOp_base_appCc`, `appCc_curvOpField_eq_pureRGenuineDiffOp`) is the moving-frame
-pure-Riemann trace `∑_i R(B_i, ·) S`; the second covariant derivative `∇_{V a}(∇_{V b} S)` of the residue
-is reorganized against `R(V a, V b) S` through the second-Bianchi / `riemannOp`-symmetry curvature
-commutator into the symmetric group-`4` pattern plus the differentiated curvature coefficient `(∇R) S`,
-summed over the Parseval frame.  It is *false* for an arbitrary section in place of the differentiated
-curvature trace (the `(∇R) S` content is genuinely present), so it genuinely uses `R`, the Parseval
-reproduction `hPar`, and the second-order frame structure.  The body is `sorry`; consumers transitively
-depend on its `sorryAx`. -/
+(`bochnerFoldGroupSum_elt2_eq_residueSum`, `integral_frameSummed_covDeriv_combined_eq_zero`).  It is the
+B-rule *paired-and-collected* form of the operator-field normal form
+`parsevalFrameSum_group2Residue_add_group4_eq_diffCurvTracePairing`: the operator-field covariant Leibniz
+pairing split `tensorL2Inner_covGrad_appCc_eq_add` (`OperatorFieldPairingIBP`) and the order-`0` action
+`appCc (curvOpField g s) S = pureRGenuineDiffOp g 0 s S` (`appCc_curvOpField_eq_pureRGenuineDiffOp`)
+re-collect the gradient-of-base minus passenger-slot difference into the single differentiated-action
+pairing `⟨appCc (covGrad (curvOpField g s)) S, ∇S⟩_{L²}`.  The genuine curvature content lives in the
+normal form: the second covariant derivative `∇_{V a}(∇_{V b} S)` of the residue is reorganized against
+`R(V a, V b) S` through the second-Bianchi / `riemannOp`-symmetry curvature commutator into the symmetric
+group-`4` pattern plus the differentiated curvature coefficient `(∇R) S`, summed over the Parseval frame.
+It is *false* for an arbitrary section in place of the differentiated curvature trace (the `(∇R) S` content
+is genuinely present), so it genuinely uses `R`, the Parseval reproduction `hPar`, and the second-order
+frame structure.  Consumers transitively depend on the normal form's `sorryAx`. -/
 private theorem parsevalFrameSum_group2Residue_add_group4_eq_appCc_covGrad_curvOpField
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
@@ -1578,8 +1627,18 @@ private theorem parsevalFrameSum_group2Residue_add_group4_eq_appCc_covGrad_curvO
       tensorL2Inner (I := I) (M := M) g 0 (s + 1)
         (appCc (I := I) (M := M) g s (s + 1)
           (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S).toFun
-        (covGrad (I := I) (M := M) g 0 s S).toFun :=
-  sorry
+        (covGrad (I := I) (M := M) g 0 s S).toFun := by
+  classical
+  rw [parsevalFrameSum_group2Residue_add_group4_eq_diffCurvTracePairing
+    (I := I) (M := M) g s S V hV hPar]
+  have hbase : appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s) S =
+      pureRGenuineDiffOp (I := I) (M := M) g 0 s S :=
+    appCc_curvOpField_eq_pureRGenuineDiffOp (I := I) (M := M) g s S
+  have hsplit := tensorL2Inner_covGrad_appCc_eq_add (I := I) (M := M) g s s
+    (curvOpField (I := I) (M := M) g s) S (covGrad (I := I) (M := M) g 0 s S)
+  rw [hbase] at hsplit
+  rw [hsplit]
+  ring
 
 /-- **The genuine rank-`0` divergence root of the combined group-`2` + group-`4` fold.** For a fixed
 Parseval frame family, the sum of the group-`2` double sum (the slot-`0` carrier `∇_{V a}(R(V a, V b) S)`)
