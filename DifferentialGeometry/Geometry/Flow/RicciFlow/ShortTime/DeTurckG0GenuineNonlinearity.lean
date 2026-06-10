@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSHighOrderSobo
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizedCovGradJetInput
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.HeatOutputContinuousRepr
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralToPouSobolevCLM
 
 /-! # The genuine, un-gated coordinate-spectral DeTurck nonlinearity and its Lipschitz
 
@@ -228,6 +229,64 @@ noncomputable def deTurckRealizeRemainderOf (g₀ g_bg : SmoothRiemannianMetric 
   else
     0
 
+/-- **`C^∞`-on-the-validity-ball of the spectral-valued realized DeTurck remainder Nemytskii map
+(the deep inverse-Gram Neumann smoothness posit, body `sorry`).**
+
+For a supercritical spectral order `a` (`2 a > dim M + 4`) and an intrinsic chart-Sobolev input
+order `q` at least the honest two-derivative loss `q ≥ a + 2`, there is a validity radius `ρ > 0`
+and a map
+```
+Φ : TensorPouSobolevHilbert g₀ 0 2 q → tensorHs g₀ 0 2 (a : ℝ)
+```
+that is `ContDiffOn ℝ ∞` (`C^∞`) on the closed `H^q`-ball of radius `ρ` about the origin and factors
+the concrete section-level Nemytskii composite through `SmoothCcTensor.toHs q`: for every smooth
+compactly-supported `(0,2)`-section `T` whose intrinsic `H^q` class `(T).toHs q` lies in the ball,
+```
+Φ ((T).toHs q) = deTurckG0SpectralN g₀ a (deTurckRealizeRemainderOf g₀ g_bg T) .
+```
+
+The ball radius `ρ` is part of the existential payload — it is chosen small enough that the
+supercritical embedding `H^q ↪ C⁰` makes every section in the ball uniformly fibre-small (uniform
+`δ < 1`), so the realized metric `g₀ + ccTensorBilinSymm g₀ T` stays uniformly non-degenerate, the
+`deTurckRealizeRemainderOf` `dif`-guard is uniformly the genuine branch, and the inverse-Gram Neumann
+series of the retag (`−2 Ric + Lie`, rational in the realized metric `≤ 2`-jet) converges uniformly;
+the genuine remainder is then a uniformly-convergent power series in the `H^q` input, and
+post-composing the *linear continuous* spectral read-off `deTurckG0SpectralN` yields a `C^∞` map into
+the order-`a` spectral scale.
+
+**Why the ball restriction is essential (the truncation litmus).**  The analogous *global* claim
+(`Set.univ`) is **false**: the finite `dif`-truncation switches the value to `0` across the
+fibre-small boundary `δ ↗ 1`, where the genuine remainder does not vanish (the inverse-Gram blows
+up) — a value jump and hence a non-removable first-order kink, so the map is not even `C¹` globally.
+The radius-`ρ` ball restriction excises that boundary.
+
+This is the all-order map-level upgrade of the on-disk order-`0` ball-continuity node
+`deTurckRealizeRemainderOf_spectralN_continuous_of_chartJet2Control` (same ball, same `toHs`-factored
+shape, `ContinuousOn` lifted to `ContDiffOn ℝ ∞` and stated at the map level for the chain rule).  T6:
+it is purely spatial — no time variable, no trajectory regularity.  No packaging: the conclusion is an
+existence-of-smooth-extension-with-factoring, structurally distinct from any hypothesis.
+
+The body is `sorry`: the inverse-Gram-Neumann rational-polynomial smoothness grind discharging the
+chart-Sobolev `ContDiffOn` is the irreducible deep analytic frontier (the order-`a` chart-Sobolev
+realize-remainder smoothness, post-composed with the continuous spectral read-off). -/
+theorem exists_deTurckRealizeRemainder_spectralN_contDiffOn_ball
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (q : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4) (hq : a + 2 ≤ q) :
+    ∃ (ρ : ℝ) (Φ : IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 q →
+        tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)),
+      0 < ρ ∧
+      ContDiffOn ℝ (∞ : WithTop ℕ∞) Φ
+        (Metric.closedBall
+          (0 : IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 q) ρ) ∧
+      ∀ T : Integral.L2.SmoothCcTensor g₀ 0 2,
+        IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) q T ∈
+            Metric.closedBall
+              (0 : IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 q) ρ →
+          Φ (IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) q T)
+            = deTurckG0SpectralN (I := I) g₀ a
+                (deTurckRealizeRemainderOf (I := I) g₀ g_bg T) := by
+  sorry
+
 namespace IntrinsicSpectral
 
 /-- **The concrete Ricci–DeTurck nonlinearity on the one-derivative-drop spectral Sobolev scale.**
@@ -312,7 +371,8 @@ principal-cancelled linearization (linearized `−2 Ric` + linearized deTurck-ve
 deformation, the second-order parts cancelling against `Δ_∇`), and the little-`o` bound is its
 Taylor remainder estimate over the all-order-smoothing heat realization. -/
 theorem exists_deTurckFirstOrderCancelledLinearization_isLittleO
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4) :
     ∃ B₁ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
         tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ),
       (fun u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) =>
@@ -322,7 +382,119 @@ theorem exists_deTurckFirstOrderCancelledLinearization_isLittleO
             - B₁ u)
         =o[nhds (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))]
           (fun u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) => u) := by
-  sorry
+  classical
+  -- The supercriticality bookkeeping: chart-Sobolev input order `q := 2(a+1)` (≥ a+2) and spectral
+  -- source order `4(a+1)` of the heat-smoothing transfer CLM.
+  set q : ℕ := 2 * (a + 1) with hq_def
+  have hq : a + 2 ≤ q := by rw [hq_def]; omega
+  -- The deep spectral-valued realized-remainder Nemytskii smoothness on the validity ball.
+  obtain ⟨ρ, Φ, hρ, hΦ, hfactor⟩ :=
+    exists_deTurckRealizeRemainder_spectralN_contDiffOn_ball (I := I) g₀ g_bg a q ha hq
+  -- The inner map `G u := (heatRepr u).toHs q` realized as a *continuous linear* map: the
+  -- spectral-`H^{4(a+1)}`-to-chart-`H^{2(a+1)}` transfer CLM post-composed with the unit-time heat
+  -- semigroup `H^{a+1} →L H^{4(a+1)}`.
+  set G : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
+      IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 q :=
+    (Analysis.Parabolic.TensorSpectral.SobolevScale.spectralToPouSobolevCLM (I := I) (M := M)
+        g₀ (a + 1)).comp
+      (tensorHeatSemigroupHs (I := I) (M := M) (g := g₀) (r := 0) (s := 2) (one_pos)
+        (a := (a : ℝ) + 1) (b := ((2 * (2 * (a + 1)) : ℕ) : ℝ)))
+    with hG_def
+  -- The defining identity of `G`: `G u = (heatRepr u).toHs q` for every `u`.  The heat-output
+  -- smooth representative and the spectral heat semigroup share eigenbasis coordinates
+  -- `exp(-λᵢ) · u.coeff i`, so `spectralCoeffElement (heatRepr u) = heat u` (at order `4(a+1)`), and
+  -- the transfer CLM realizes the chart-Sobolev class of `heatRepr u` (at order `2(a+1) = q`).
+  have hGeq : ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+      G u = IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) q
+        (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
+          g₀ 0 2 (one_pos) (by positivity : (0 : ℝ) ≤ (a : ℝ) + 1) u) := by
+    intro u
+    have hcoeff :
+        Analysis.Parabolic.TensorSpectral.SobolevScale.spectralCoeffLinearMap (I := I) (M := M)
+            g₀ (a + 1)
+            (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
+              g₀ 0 2 (one_pos) (by positivity : (0 : ℝ) ≤ (a : ℝ) + 1) u)
+          = tensorHeatSemigroupHs (I := I) (M := M) (g := g₀) (r := 0) (s := 2) (one_pos)
+              (a := (a : ℝ) + 1) (b := ((2 * (2 * (a + 1)) : ℕ) : ℝ)) u := by
+      refine tensorHs.ext ?_
+      funext i
+      rw [Analysis.Parabolic.TensorSpectral.SobolevScale.spectralCoeffLinearMap_apply,
+        Analysis.Parabolic.TensorSpectral.SobolevScale.spectralCoeffElement_coeff,
+        tensorHeatSemigroupHs_coeff]
+      rw [show Integral.L2.SmoothCcTensor.toL2
+            (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
+              g₀ 0 2 (one_pos) (by positivity : (0 : ℝ) ≤ (a : ℝ) + 1) u)
+          = ((MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
+              g₀ 0 2 (one_pos) (by positivity : (0 : ℝ) ≤ (a : ℝ) + 1) u :
+              Integral.L2.TensorL2 0 2 g₀)) from
+          Integral.L2.SmoothCcTensor.toL2_apply _]
+      rw [MetricRealization.tensorHeatSemigroupHs_output_smoothRepr_coeff (I := I) (M := M)
+        g₀ 0 2 (one_pos) (by positivity : (0 : ℝ) ≤ (a : ℝ) + 1) u i]
+    rw [hG_def, ContinuousLinearMap.comp_apply, ← hcoeff,
+      Analysis.Parabolic.TensorSpectral.SobolevScale.spectralToPouSobolevCLM_apply_spectralCoeff]
+  -- `G 0 = 0`, hence `0 ∈ closedBall 0 ρ`, hence `Φ` is `C^∞` (so differentiable) at `0 = G 0`.
+  have hG0 : G 0 = 0 := by rw [hG_def, map_zero]
+  have hball0 : (0 : IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 q)
+      ∈ Metric.closedBall
+        (0 : IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 q) ρ := by
+    simp [Metric.mem_closedBall, hρ.le]
+  have hΦdiff : HasFDerivAt Φ (fderiv ℝ Φ (0 :
+      IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 q)) 0 :=
+    ((hΦ.contDiffAt (Metric.closedBall_mem_nhds 0 hρ)).differentiableAt
+      (by simp)).hasFDerivAt
+  -- The tower `N = Φ ∘ G` near `0` (where `G u ∈ ball`); the chain rule gives `HasFDerivAt`.
+  set B₁ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
+      tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ) :=
+    (fderiv ℝ Φ (0 : IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 q)).comp G
+    with hB₁_def
+  refine ⟨B₁, ?_⟩
+  -- `HasFDerivAt (Φ ∘ G) B₁ 0`: `Φ` differentiable at `G 0 = 0`, `G` linear continuous.
+  have hcompFD : HasFDerivAt (fun u => Φ (G u)) B₁
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) := by
+    have hGFD : HasFDerivAt (fun u => G u) G
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) := G.hasFDerivAt
+    -- `Φ` differentiable at the image point `G 0` (which equals `0`).
+    have hΦdiff' : HasFDerivAt Φ (fderiv ℝ Φ
+          (0 : IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 q)) (G 0) := by
+      rw [hG0]; exact hΦdiff
+    have hcomp := hΦdiff'.comp (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) hGFD
+    rw [hB₁_def]
+    exact hcomp
+  -- `N =ᶠ[𝓝 0] Φ ∘ G`: on a neighbourhood of `0`, `G u ∈ ball` (continuity + `G 0 = 0` interior),
+  -- so the factoring `Φ (G u) = N u` applies (with `T := heatRepr u`).
+  have heventEq :
+      deTurckRealizeNonlinearityTower (I := I) g₀ g_bg a
+        =ᶠ[nhds (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))]
+          (fun u => Φ (G u)) := by
+    have hballnhds : G ⁻¹' (Metric.closedBall
+          (0 : IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 q) ρ)
+        ∈ nhds (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) := by
+      refine G.continuous.continuousAt.preimage_mem_nhds ?_
+      rw [hG0]
+      exact Metric.closedBall_mem_nhds 0 hρ
+    filter_upwards [hballnhds] with u hu
+    -- `G u ∈ ball`, and `G u = (heatRepr u).toHs q`, so `Φ (G u) = N u` by the factoring.
+    have hmem : IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) q
+        (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
+          g₀ 0 2 (one_pos) (by positivity : (0 : ℝ) ≤ (a : ℝ) + 1) u) ∈
+        Metric.closedBall
+          (0 : IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 q) ρ := by
+      rwa [← hGeq u]
+    have hfac := hfactor _ hmem
+    change deTurckRealizeNonlinearityTower (I := I) g₀ g_bg a u = Φ (G u)
+    rw [hGeq u]
+    exact hfac.symm
+  -- Bundle: `HasFDerivAt N B₁ 0` via the eventual equality, then extract the little-`o`.
+  have hNFD : HasFDerivAt (deTurckRealizeNonlinearityTower (I := I) g₀ g_bg a) B₁
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) :=
+    hcompFD.congr_of_eventuallyEq heventEq
+  -- `HasFDerivAt.isLittleO` gives `(N · − N 0 − B₁ (· − 0)) =o[𝓝 0] (· − 0)`; simplify `· − 0`.
+  have hlo := hNFD.isLittleO
+  refine hlo.congr' ?_ ?_
+  · filter_upwards with u
+    simp only [sub_zero]
+  · filter_upwards with u
+    simp only [sub_zero]
 
 /-- **The first-order-cancelled DeTurck linearization exists as a bounded tower operator (the
 Fréchet differentiability of the realized Ricci–DeTurck nonlinearity at the origin, with cancelled
@@ -361,13 +533,14 @@ little-`o` remainder estimate `exists_deTurckFirstOrderCancelledLinearization_is
 and the base argument `u − 0` simplifying to `B₁ u` and `u` at the origin).  Consumers transitively
 depend on `sorryAx` through the analytic remainder primitive. -/
 theorem exists_deTurckFirstOrderCancelledLinearization
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4) :
     ∃ B₁ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
         tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ),
       HasFDerivAt (deTurckRealizeNonlinearityTower (I := I) g₀ g_bg a) B₁
         (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) := by
   obtain ⟨B₁, hlittleO⟩ :=
-    exists_deTurckFirstOrderCancelledLinearization_isLittleO (I := I) g₀ g_bg a
+    exists_deTurckFirstOrderCancelledLinearization_isLittleO (I := I) g₀ g_bg a ha
   refine ⟨B₁, HasFDerivAt.of_isLittleO ?_⟩
   refine hlittleO.congr' ?_ ?_
   · filter_upwards with u
@@ -394,10 +567,11 @@ property is `deTurckFirstOrderCancelledOperator_hasFDerivAt`.  Being a continuou
 automatically globally Lipschitz with constant `‖B₁‖₊` and is exactly the abstract first-order
 remainder shape the strong-existence engine consumes
 (`firstOrderRemainderCLM_strong_shortTime_exists`). -/
-noncomputable def deTurckFirstOrderCancelledOperator (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
+noncomputable def deTurckFirstOrderCancelledOperator (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4) :
     tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ) :=
-  (exists_deTurckFirstOrderCancelledLinearization (I := I) g₀ g_bg a).choose
+  (exists_deTurckFirstOrderCancelledLinearization (I := I) g₀ g_bg a ha).choose
 
 /-- **The linearization identity: `B₁` is the Fréchet derivative at the origin of the concrete
 Ricci–DeTurck nonlinearity.**
@@ -408,11 +582,12 @@ nonlinearity `N` is, to first order at the origin, the bounded first-order opera
 second-order principal part having cancelled), the linear approximation the coercive-inverse node `B`
 and the Banach fixed point `D` build on. -/
 theorem deTurckFirstOrderCancelledOperator_hasFDerivAt
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4) :
     HasFDerivAt (deTurckRealizeNonlinearityTower (I := I) g₀ g_bg a)
-      (deTurckFirstOrderCancelledOperator (I := I) g₀ g_bg a)
+      (deTurckFirstOrderCancelledOperator (I := I) g₀ g_bg a ha)
       (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) :=
-  (exists_deTurckFirstOrderCancelledLinearization (I := I) g₀ g_bg a).choose_spec
+  (exists_deTurckFirstOrderCancelledLinearization (I := I) g₀ g_bg a ha).choose_spec
 
 end IntrinsicSpectral
 
@@ -1349,7 +1524,7 @@ private theorem exists_deTurckLinearization_coerciveInverse
       ((‖B₁‖ ^ 2 + 1) • B0) u u = (‖B₁‖ ^ 2 + 1) * ‖u‖ ^ 2 := by
     intro u
     rw [ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply, smul_eq_mul, hB0]
-    show (‖B₁‖ ^ 2 + 1) * (inner ℝ u u : ℝ) = (‖B₁‖ ^ 2 + 1) * ‖u‖ ^ 2
+    change (‖B₁‖ ^ 2 + 1) * (inner ℝ u u : ℝ) = (‖B₁‖ ^ 2 + 1) * ‖u‖ ^ 2
     rw [real_inner_self_eq_norm_sq]
   refine ⟨(‖B₁‖ ^ 2 + 1) • B0, ⟨1, zero_lt_one, fun u => ?_⟩, fun u => ?_⟩
   · -- Coercivity with `C = 1`: `(‖B₁‖² + 1)‖u‖² ≥ 1 · ‖u‖ · ‖u‖`.
@@ -1360,6 +1535,96 @@ private theorem exists_deTurckLinearization_coerciveInverse
     have hb : ‖B₁ u‖ ≤ ‖B₁‖ * ‖u‖ := B₁.le_opNorm u
     nlinarith [sq_nonneg ‖u‖, norm_nonneg u, norm_nonneg (B₁ u), norm_nonneg B₁,
       mul_le_mul_of_nonneg_left hb (norm_nonneg (B₁ u)), sq_nonneg ‖B₁‖]
+
+/-- **The per-base-point gate-locus first-order-freedom correction contraction family over the
+coercive inverse (the genuine nonlinear-contraction frontier of child `D`, exposed as a
+parametrised Banach contraction with its fixed-point gate identity — body `sorry`).**
+
+For the anchor `g₀`, a flow background `g_bg`, a supercritical order `a` (`2a > dim M + 4`), the
+bounded first-order linearization `B₁` of the realized DeTurck nonlinearity at the origin (child
+`A`), and the Lax–Milgram inverse `Linv` of the Gårding-coercive linearized energy form (child `B`),
+there is a **family of energy-coordinate self-maps** `Ψ : H^{a+1} → (H^{a+1} → H^{a+1})` — for each
+base point `u`, the coercive-inverse correction map `Ψ u : v ↦ Linv (gaugeTarget u − baseResidual u
+− superlinearRemainder v)` — a uniform contraction constant `κ < 1`, a match-gate slack `Q > 0`, a
+base-size constant `S` and a base-Lipschitz constant `Lp`, carrying:
+
+* (`hΨ0`) the base-value size bound `‖Ψ u 0‖ ≤ S · ‖u‖` (the gauge target / base residual grow at
+  most linearly in the base datum `u`);
+* (`hΨlip`) the parameter-Lipschitz bound `dist (Ψ u z) (Ψ u' z) ≤ Lp · ‖u − u'‖` (uniform in the
+  iterate `z`: the gauge target / base residual are `Lp`-Lipschitz in the base datum);
+* (`hc`) the **uniform contraction** `∀ u, ContractingWith κ (Ψ u)` (the super-linear remainder
+  `superlinearRemainder` is genuinely a contraction with the *same* `κ < 1` for every base point,
+  because the second-order principal symbol of the realized DeTurck remainder has cancelled,
+  `deTurckNonlinearitySpectral_principalPart_cancels`, so only the bounded `Linv`-precomposed
+  super-linear part remains, with `‖Linv‖ · (Lipschitz of remainder) ≤ κ < 1`); and
+* the **per-`u` gate-locus gauge match at the fixed point**: for every gate-realizable `u` whose
+  order-`2a` gate representative has Sobolev norm `≤ Q`, the realized DeTurck remainder of the
+  corrected carrier `smoothingBaseSynth g₀ a u + smoothingBaseSynth g₀ a (fixedPoint (Ψ u) (hc u))`
+  coincides, at the `L²`-class level, with the gate-based gauge `deTurckRemainderRealizeSection g₀
+  g_bg u` (the fixed-point identity: at `w u := fixedPoint (Ψ u) (hc u)`, `Ψ u (w u) = w u` is
+  exactly the gauge-cancellation equation `Φ(base u + smoothing(w u)) = Φ(gateRep u)`).
+
+This is the **genuine analytic frontier** of the static gauge-solvability: it isolates the
+parametrised Banach *contraction operator* `Ψ` (with its per-iterate bounds and the fixed-point gate
+identity) from the fixed-point *assembly*.  The companion node `exists_gateGaugeEnergyFixedPoint`
+assembles `w u := fixedPoint (Ψ u) (hc u)` and reads off the `H^{a+1}` size / Lipschitz arms from
+the contraction's geometric control (`ContractingWith.dist_fixedPoint_le` and
+`ContractingWith.fixedPoint_lipschitz_in_map`), so this node is structurally distinct from it: this
+exposes the *contraction operator's* per-`z` bounds, the assembly derives the *fixed point's*
+`w`-level bounds.
+
+**Non-vacuous** — the gate match at the fixed point rejects the degenerate `Ψ u ≡ id` (whose fixed
+points are everything, with `w u = 0` a fixed point) and the naive-heat collapse `w ≡ 0`: with `w u
+= 0` the corrected carrier collapses to the naive heat base `smoothingBaseSynth g₀ a u` and the
+match becomes the Lean-refuted naive-heat claim (a pure heat residue contributes
+`−λᵢ(e^{−λᵢ}−1)·u.coeffᵢ`-type terms falsifying exact class equality), so the contraction/match
+conjunction genuinely constrains `Ψ` away from the trivial map; the `Linv` hypothesis is genuinely
+consumed (the correction map is `Linv`-built).  **Not packaging** — the conclusion exposes a
+*contraction operator* with real-valued per-iterate bounds and an `L²`-class fixed-point identity,
+structurally distinct from the binder hypotheses (which are about `B₁` and `Linv`, not about `Ψ`).
+**Intrinsic** — `toL2` / `‖·‖_{H^{a+1}}` are `g`-inner; no `chartJ`, no raw `M → E`.
+
+**The body is `sorry`** — the construction of the coercive-inverse gauge-correction contraction
+operator `Ψ` (the gauge target, the base residual, the super-linearly-small remainder, and the
+`Linv ∘ (…)` contraction estimate `κ < 1`, together with the Q-gated fixed-point gauge-cancellation
+identity) is the irreducible deep analytic content of the static gauge-solvability; consumers
+transitively depend on `sorryAx` through it and the linear inverse / Gårding / Weyl substrate it
+builds on. -/
+private theorem exists_gaugeCorrectionContractionFamily
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B₁ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
+        tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+    (hB₁ : HasFDerivAt (IntrinsicSpectral.deTurckRealizeNonlinearityTower (I := I) g₀ g_bg a) B₁
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)))
+    (Linv : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) ≃L[ℝ]
+        tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+    (Bform : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
+        tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ] ℝ)
+    (hcoercive : IsCoercive Bform)
+    (hLinv : Linv = hcoercive.continuousLinearEquivOfBilin) :
+    ∃ (Ψ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+          tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+            tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+        (κ : ℝ≥0) (Q S Lp : ℝ)
+        (hc : ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+          ContractingWith κ (Ψ u)),
+      0 < Q ∧ 0 ≤ S ∧ 0 ≤ Lp ∧
+      (∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1), ‖Ψ u 0‖ ≤ S * ‖u‖) ∧
+      (∀ u u' z : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+        dist (Ψ u z) (Ψ u' z) ≤ Lp * ‖u - u'‖) ∧
+      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+          (h : realizableAtGate (I := I) g₀ u),
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+            (gateRepOfWitness (I := I) g₀ u h)‖ ≤ Q →
+        Integral.L2.SmoothCcTensor.toL2
+            (deTurckRealizeRemainderOf (I := I) g₀ g_bg
+              (smoothingBaseSynth (I := I) g₀ a u
+                + smoothingBaseSynth (I := I) g₀ a
+                    (ContractingWith.fixedPoint (Ψ u) (hc u))))
+          = Integral.L2.SmoothCcTensor.toL2
+              (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
+  sorry
 
 /-- **The energy-coordinate Banach fixed-point solution of the gate-locus first-order-freedom
 gauge equation over the coercive inverse (the genuine nonlinear-contraction frontier of child
@@ -1411,10 +1676,19 @@ arm is the `L²`-class identity of two realized DeTurck remainders, structurally
 real-valued size / Lipschitz arms; this is an `Exists`-output solution map, never a binder
 hypothesis.  **Intrinsic** — `toL2` / `‖·‖_{H^{a+1}}` are `g`-inner; no `chartJ`, no raw `M → E`.
 
-**The body is `sorry`** — the energy-coordinate nonlinear Banach fixed point over the coercive
-inverse (the contraction step of the `/prove` recursion, the gate-controlled first-order-freedom
-solvability); consumers transitively depend on `sorryAx` through it and the linear inverse /
-Gårding / Weyl substrate it builds on. -/
+**Proven by Banach fixed-point assembly of the contraction family.**  The genuine nonlinear
+contraction operator is carried by the strictly-deeper node
+`exists_gaugeCorrectionContractionFamily`: it supplies the parametrised correction self-map family
+`Ψ : H^{a+1} → (H^{a+1} → H^{a+1})`, a uniform contraction constant `κ < 1` (`hc : ∀ u,
+ContractingWith κ (Ψ u)`), the base-size bound `‖Ψ u 0‖ ≤ S · ‖u‖`, the parameter-Lipschitz bound
+`dist (Ψ u z) (Ψ u' z) ≤ Lp · ‖u − u'‖`, and the per-`u` gate match at the fixed point.  The
+solution map is the fixed point `w u := ContractingWith.fixedPoint (Ψ u) (hc u)`: its `H^{a+1}` size
+arm is read off from `ContractingWith.dist_fixedPoint_le` (`‖w u‖ = dist 0 (w u) ≤ ‖Ψ u 0‖/(1−κ) ≤
+(S/(1−κ))‖u‖`), its `H^{a+1}` Lipschitz arm from `ContractingWith.fixedPoint_lipschitz_in_map`
+(`‖w u − w u'‖ = dist (w u) (w u') ≤ (Lp · ‖u − u'‖)/(1−κ)`), and its gate match is the contraction
+family's fixed-point gate identity verbatim.  Consumers transitively depend on `sorryAx` only
+through that contraction-family node (the genuine nonlinear contraction operator with its
+fixed-point gate identity) and the linear inverse / Gårding / Weyl substrate it builds on. -/
 private theorem exists_gateGaugeEnergyFixedPoint
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -1447,7 +1721,47 @@ private theorem exists_gateGaugeEnergyFixedPoint
                 + smoothingBaseSynth (I := I) g₀ a (w u)))
           = Integral.L2.SmoothCcTensor.toL2
               (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
-  sorry
+  classical
+  -- The parametrised gauge-correction contraction family `Ψ` (per base point `u`, the
+  -- coercive-inverse correction self-map), its uniform contraction constant `κ < 1`, the base-size
+  -- and parameter-Lipschitz constants, and the per-`u` gate identity at the fixed point.
+  obtain ⟨Ψ, κ, Q, S, Lp, hc, hQ, hS, hLp, hΨ0, hΨlip, hΨmatch⟩ :=
+    exists_gaugeCorrectionContractionFamily (I := I) g₀ g_bg a ha B₁ hB₁ Linv Bform hcoercive hLinv
+  -- The energy-coordinate solution map is the Banach fixed point of `Ψ u`.
+  set w : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+      tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) :=
+    fun u => ContractingWith.fixedPoint (Ψ u) (hc u) with hw_def
+  -- `0 < 1 − κ`, the contraction denominator.
+  have hone_sub : (0 : ℝ) < 1 - (κ : ℝ) := (hc (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))).one_sub_K_pos
+  refine ⟨w, Q, hQ, ⟨S / (1 - (κ : ℝ)), by positivity, fun u => ?_⟩,
+    ⟨Lp / (1 - (κ : ℝ)), by positivity, fun u u' => ?_⟩, fun u h hQbnd => ?_⟩
+  · -- Size: `‖w u‖ = dist 0 (w u) ≤ ‖Ψ u 0‖/(1−κ) ≤ (S/(1−κ))‖u‖`.
+    have hfp : dist (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) (w u)
+        ≤ dist (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) (Ψ u 0) / (1 - (κ : ℝ)) :=
+      (hc u).dist_fixedPoint_le 0
+    have h1 : ‖w u‖ = dist (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) (w u) := by
+      rw [dist_comm, dist_zero_right]
+    have h2 : dist (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) (Ψ u 0) = ‖Ψ u 0‖ := by
+      rw [dist_comm, dist_zero_right]
+    rw [h2] at hfp
+    calc ‖w u‖ = dist (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) (w u) := h1
+      _ ≤ ‖Ψ u 0‖ / (1 - (κ : ℝ)) := hfp
+      _ ≤ (S * ‖u‖) / (1 - (κ : ℝ)) := by gcongr; exact hΨ0 u
+      _ = S / (1 - (κ : ℝ)) * ‖u‖ := by ring
+  · -- Lipschitz: `‖w u − w u'‖ = dist (w u) (w u') ≤ (Lp‖u−u'‖)/(1−κ)`.
+    have hlip : dist (w u) (w u')
+        ≤ (Lp * ‖u - u'‖) / (1 - (κ : ℝ)) := by
+      rw [hw_def]
+      exact (hc u).fixedPoint_lipschitz_in_map (hc u') (fun z => hΨlip u u' z)
+    have h3 : ‖w u - w u'‖ = dist (w u) (w u') := (dist_eq_norm _ _).symm
+    rw [h3]
+    calc dist (w u) (w u') ≤ (Lp * ‖u - u'‖) / (1 - (κ : ℝ)) := hlip
+      _ = Lp / (1 - (κ : ℝ)) * ‖u - u'‖ := by ring
+  · -- Gate match: the contraction family's fixed-point gate identity verbatim (the corrected
+    -- carrier `base u + smoothing (w u)` being definitionally `base u + smoothing (fixedPoint (Ψ u)
+    -- (hc u))`).
+    rw [hw_def]
+    exact hΨmatch u h hQbnd
 
 /-- **The Banach fixed point of the gate-locus first-order-freedom correction over the coercive
 inverse (child `D` of the `A → B → D` gauge-solvability chain — the nonlinear contraction step).**
@@ -1657,7 +1971,7 @@ private theorem exists_firstOrderFreedomCorrector_gateLocusGaugeMatch
   -- Child `A`: the first-order-cancelled Fréchet linearization `B₁` of the realized DeTurck
   -- nonlinearity at the origin (the principal second-order symbol having cancelled).
   obtain ⟨B₁, hB₁⟩ :=
-    IntrinsicSpectral.exists_deTurckFirstOrderCancelledLinearization (I := I) g₀ g_bg a
+    IntrinsicSpectral.exists_deTurckFirstOrderCancelledLinearization (I := I) g₀ g_bg a ha
   -- Child `B`: the Gårding-coercive Lax–Milgram inverse of the linearized elliptic energy form
   -- `L = −Δ_∇ + ι∘B₁` on the energy space `H^{a+1}` (the linear elliptic inversion step).
   obtain ⟨Bform, hcoercive, _hBformEq⟩ :=

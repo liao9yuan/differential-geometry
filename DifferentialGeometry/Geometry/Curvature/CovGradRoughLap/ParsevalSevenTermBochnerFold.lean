@@ -12,6 +12,7 @@ import DifferentialGeometry.Geometry.Curvature.Order2Defect.GradientSlotLeibniz
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.OperatorFieldPairingIBP
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ContractedBianchi
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedSlotwiseCurvature
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ParsevalFrameDiffCurvatureTrace
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorRSMetricCompatible
 
 /-!
@@ -2478,6 +2479,50 @@ private theorem tensorInnerScalar_nablaDiffCurvTrace_eq_tensorInnerPointwise_nab
   rw [tensorInnerScalar_apply (I := I) (M := M) g 0 s,
     nablaDiffCurvTraceCc_toSection_eq_tensor0SAsRS_nablaTensor0SCurv (I := I) (M := M) g s S hVa hVb x,
     bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S hVb x]
+
+set_option linter.unusedSectionVars false in
+/-- **The Parseval-frame → orthonormal-frame conversion of the diagonal differentiated-curvature trace,
+at the `tensor0SAsRS`-section level.** For a fixed Parseval frame family `V a`, a fixed read direction
+`V b`, and the unit-read section `A y := S.toSection y (unit)`, the family sum over `a` of the
+`tensor0SAsRS`-wrap of the diagonal differentiated `(0, s)`-tensor curvature object
+`nablaTensor0SCurv g s ⟨V a⟩ ⟨V a⟩ ⟨V b⟩ A` equals the orthonormal-frame sum over `i` of the
+`tensor0SAsRS`-wrap of `nablaTensor0SCurv g s ⟨B_i⟩ ⟨B_i⟩ ⟨V b⟩ A`
+(`B_i := smoothOrthoFrame g x i`).  This is the now-committed Parseval = orthonormal diagonal-trace
+bridge `parsevalFrame_eq_orthoFrame_diag_nablaTensor0SCurv` pushed through the additive
+`tensor0SAsRS` wrap (`tensor0SAsRS_finsetSum`). -/
+private lemma parsevalFrameSum_diag_nablaTensor0SCurv_tensor0SAsRS_eq_ortho
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) (b : Fin N) (x : M) :
+    (∑ a : Fin N, tensor0SAsRS (I := I) (M := M) x
+        (nablaTensor0SCurv (I := I) g s ⟨fun y => V a y, hV a⟩ ⟨fun y => V a y, hV a⟩
+          ⟨fun y => V b y, hV b⟩
+          (fun y : M =>
+            (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
+              (unitZeroSec (I := I) (M := M) y)) x)) =
+      ∑ i : Fin (Module.finrank ℝ E), tensor0SAsRS (I := I) (M := M) x
+        (nablaTensor0SCurv (I := I) g s
+          (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+            (smoothOrthoFrame_smooth (I := I) g x i))
+          (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+            (smoothOrthoFrame_smooth (I := I) g x i))
+          ⟨fun y => V b y, hV b⟩
+          (fun y : M =>
+            (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
+              (unitZeroSec (I := I) (M := M) y)) x) := by
+  classical
+  rw [← tensor0SAsRS_finsetSum (I := I) (M := M) s x Finset.univ,
+    ← tensor0SAsRS_finsetSum (I := I) (M := M) s x Finset.univ]
+  rw [tensor0SAsRS_eq_iff]
+  exact parsevalFrame_eq_orthoFrame_diag_nablaTensor0SCurv (I := I) (M := M) g s
+    ⟨fun y => V b y, hV b⟩
+    (fun y : M =>
+      (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
+        (unitZeroSec (I := I) (M := M) y))
+    (contMDiff_unitEvalSection' (I := I) (M := M) g s S) V hV hPar x
 
 /-- **The integrated Parseval-frame diagonal differentiated-curvature trace pairing equals the
 group-`2` minus group-`1` double sum (the genuine `nablaTensor0SCurv`-form curvature kernel of the

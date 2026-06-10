@@ -786,6 +786,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureContractio
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureContractionParallelProduct
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CrossCorrectionParallelContraction
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckCartanDiffBilinOp
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckCartanRfnsBilinearProduct
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.Defs
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLocality

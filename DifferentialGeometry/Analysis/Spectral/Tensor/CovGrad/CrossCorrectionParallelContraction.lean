@@ -1019,6 +1019,269 @@ private theorem crossCorrParallelContraction_eq_appCcRS (g₀ : SmoothRiemannian
     show cometricReadingModel (I := I) g₀ x
         = DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.cometricLmodel (I := I) g₀ x from rfl]
 
+/-! ## Bilinearity of the cross-correction parallel contraction
+
+The cross-correction parallel `g₀`-single contraction `crossCorrParallelContraction g₀ S T` is the
+operator-field action `appCcRS (crossCorrCometricOp g₀ a b)` of a **fixed** (`S, T`-independent)
+cometric double-trace field on the model tensor-product section `crossCorrProdSection g₀ S T`
+(`crossCorrParallelContraction_eq_appCcRS`).  The action is `ℝ`-linear in the contracted section
+(`appCcRS_add_right`, `appCcRS_smul_right`), and the product section is fibrewise `ℝ`-bilinear in the
+two factors (`crossCorrProdSection` reads to `domDomCongr (modelProduct (ccUnit T) (ccUnit S))`, and
+`modelProduct` is bilinear, `ccUnitModel` additive in its section).  Hence the contraction is
+fibrewise `ℝ`-bilinear in `(S, T)` — the bilinearity the bilinear-difference factorization
+`Φ(h₁, D₁) − Φ(h₂, D₂) = Φ(h₁ − h₂, D₁) + Φ(h₂, D₁ − D₂)` of the cross-correction section
+difference consumes. -/
+
+set_option linter.unusedSectionVars false in
+/-- **The unit-model value of the cross-correction product section** is the slot-permuted model tensor
+product of the unit fibres of `T`, `S`. -/
+private theorem crossCorrProdSection_unitModel (g₀ : SmoothRiemannianMetric I M) {a b : ℕ}
+    (S : Integral.L2.SmoothCcTensor g₀ 0 (2 + a)) (T : Integral.L2.SmoothCcTensor g₀ 0 (3 + b))
+    (x : M) :
+    Tensor0SBundle.Tensor0SSpace.toModel
+        ((crossCorrProdSection (I := I) g₀ S T).toSection x
+          (Integral.Connection.unitZeroSec (I := I) (M := M) x)) =
+      ContinuousMultilinearMap.domDomCongr (crossCorrPerm a b)
+        (Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+          (ccUnitModel (I := I) g₀ T x) (ccUnitModel (I := I) g₀ S x)) := by
+  change Tensor0SBundle.Tensor0SSpace.toModel
+      ((MixedSection.eval₀ (F := E) (E := (TangentSpace I : M → Type _)) x).smulRight
+          (crossCorrProdField (I := I) g₀ S T x)
+        (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) = _
+  rw [ContinuousLinearMap.smulRight_apply, MixedSection.eval₀_apply,
+    ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
+  change Tensor0SBundle.Tensor0SSpace.toModel
+    (Tensor0SBundle.Tensor0SSpace.ofModel
+      (ContinuousMultilinearMap.domDomCongr (crossCorrPerm a b)
+        (Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+          (ccUnitModel (I := I) g₀ T x) (ccUnitModel (I := I) g₀ S x)))) = _
+  rw [Tensor0SBundle.Tensor0SSpace.toModel_ofModel]
+
+set_option linter.unusedSectionVars false in
+/-- **`ccUnitModel` is additive in the section.**  `ccUnitModel g₀ (S₁ + S₂) x = ccUnitModel g₀ S₁ x +
+ccUnitModel g₀ S₂ x` — the unit fibre value is additive, since `toSection` and `toModel` are. -/
+private theorem ccUnitModel_add {s : ℕ} (g₀ : SmoothRiemannianMetric I M)
+    (S₁ S₂ : Integral.L2.SmoothCcTensor g₀ 0 s) (x : M) :
+    ccUnitModel (I := I) g₀ (S₁ + S₂) x = ccUnitModel (I := I) g₀ S₁ x + ccUnitModel (I := I) g₀ S₂ x := by
+  unfold ccUnitModel
+  rw [show (S₁ + S₂).toSection x = S₁.toSection x + S₂.toSection x from by
+    rw [Integral.L2.SmoothCcTensor.toSection_add]; rfl]
+  rw [ContinuousLinearMap.add_apply, Tensor0SBundle.Tensor0SSpace.toModel_add]
+
+set_option linter.unusedSectionVars false in
+/-- **The cross-correction product section is additive in the second factor `T`.** -/
+private theorem crossCorrProdSection_add_right (g₀ : SmoothRiemannianMetric I M) {a b : ℕ}
+    (S : Integral.L2.SmoothCcTensor g₀ 0 (2 + a))
+    (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 (3 + b)) :
+    crossCorrProdSection (I := I) g₀ S (T₁ + T₂) =
+      crossCorrProdSection (I := I) g₀ S T₁ + crossCorrProdSection (I := I) g₀ S T₂ := by
+  classical
+  apply Integral.L2.SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply tensor0s_ext_unitZero (I := I) (M := M) (s := (3 + b) + (2 + a))
+  apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+  beta_reduce
+  rw [crossCorrProdSection_unitModel (I := I) g₀ S (T₁ + T₂) x]
+  rw [show ((crossCorrProdSection (I := I) g₀ S T₁ + crossCorrProdSection (I := I) g₀ S T₂).toSection x
+        (Integral.Connection.unitZeroSec (I := I) (M := M) x)) =
+      (crossCorrProdSection (I := I) g₀ S T₁).toSection x
+          (Integral.Connection.unitZeroSec (I := I) (M := M) x) +
+        (crossCorrProdSection (I := I) g₀ S T₂).toSection x
+          (Integral.Connection.unitZeroSec (I := I) (M := M) x) from by
+    rw [Integral.L2.SmoothCcTensor.toSection_add]; rfl]
+  rw [Tensor0SBundle.Tensor0SSpace.toModel_add,
+    crossCorrProdSection_unitModel (I := I) g₀ S T₁ x,
+    crossCorrProdSection_unitModel (I := I) g₀ S T₂ x, ccUnitModel_add]
+  apply ContinuousMultilinearMap.ext; intro v
+  rw [ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    ContinuousMultilinearMap.domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    show (Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+        (ccUnitModel (I := I) g₀ T₁ x + ccUnitModel (I := I) g₀ T₂ x)
+        (ccUnitModel (I := I) g₀ S x)) =
+        Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+            (ccUnitModel (I := I) g₀ T₁ x) (ccUnitModel (I := I) g₀ S x)
+          + Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+            (ccUnitModel (I := I) g₀ T₂ x) (ccUnitModel (I := I) g₀ S x) from by
+      apply ContinuousMultilinearMap.ext; intro w
+      rw [ContinuousMultilinearMap.add_apply, Bundle.continuousMultilinearMap.modelProduct_apply,
+        Bundle.continuousMultilinearMap.modelProduct_apply,
+        Bundle.continuousMultilinearMap.modelProduct_apply,
+        ContinuousMultilinearMap.add_apply, add_mul],
+    ContinuousMultilinearMap.add_apply]
+
+set_option linter.unusedSectionVars false in
+/-- **The cross-correction product section is additive in the first factor `S`.** -/
+private theorem crossCorrProdSection_add_left (g₀ : SmoothRiemannianMetric I M) {a b : ℕ}
+    (S₁ S₂ : Integral.L2.SmoothCcTensor g₀ 0 (2 + a))
+    (T : Integral.L2.SmoothCcTensor g₀ 0 (3 + b)) :
+    crossCorrProdSection (I := I) g₀ (S₁ + S₂) T =
+      crossCorrProdSection (I := I) g₀ S₁ T + crossCorrProdSection (I := I) g₀ S₂ T := by
+  classical
+  apply Integral.L2.SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply tensor0s_ext_unitZero (I := I) (M := M) (s := (3 + b) + (2 + a))
+  apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+  beta_reduce
+  rw [crossCorrProdSection_unitModel (I := I) g₀ (S₁ + S₂) T x]
+  rw [show ((crossCorrProdSection (I := I) g₀ S₁ T + crossCorrProdSection (I := I) g₀ S₂ T).toSection x
+        (Integral.Connection.unitZeroSec (I := I) (M := M) x)) =
+      (crossCorrProdSection (I := I) g₀ S₁ T).toSection x
+          (Integral.Connection.unitZeroSec (I := I) (M := M) x) +
+        (crossCorrProdSection (I := I) g₀ S₂ T).toSection x
+          (Integral.Connection.unitZeroSec (I := I) (M := M) x) from by
+    rw [Integral.L2.SmoothCcTensor.toSection_add]; rfl]
+  rw [Tensor0SBundle.Tensor0SSpace.toModel_add,
+    crossCorrProdSection_unitModel (I := I) g₀ S₁ T x,
+    crossCorrProdSection_unitModel (I := I) g₀ S₂ T x, ccUnitModel_add]
+  apply ContinuousMultilinearMap.ext; intro v
+  rw [ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    ContinuousMultilinearMap.domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    show (Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+        (ccUnitModel (I := I) g₀ T x)
+        (ccUnitModel (I := I) g₀ S₁ x + ccUnitModel (I := I) g₀ S₂ x)) =
+        Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+            (ccUnitModel (I := I) g₀ T x) (ccUnitModel (I := I) g₀ S₁ x)
+          + Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+            (ccUnitModel (I := I) g₀ T x) (ccUnitModel (I := I) g₀ S₂ x) from by
+      apply ContinuousMultilinearMap.ext; intro w
+      rw [ContinuousMultilinearMap.add_apply, Bundle.continuousMultilinearMap.modelProduct_apply,
+        Bundle.continuousMultilinearMap.modelProduct_apply,
+        Bundle.continuousMultilinearMap.modelProduct_apply,
+        ContinuousMultilinearMap.add_apply, mul_add],
+    ContinuousMultilinearMap.add_apply]
+
+set_option linter.unusedSectionVars false in
+/-- **The cross-correction parallel contraction is additive in the second factor `T`.**  Via the
+operator-field bridge `crossCorrParallelContraction_eq_appCcRS` and the additivity of the action in
+the contracted section (`appCcRS_add_right`) over the additive product section. -/
+theorem crossCorrParallelContraction_add_right (g₀ : SmoothRiemannianMetric I M) {a b : ℕ}
+    (S : Integral.L2.SmoothCcTensor g₀ 0 (2 + a))
+    (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 (3 + b)) :
+    crossCorrParallelContraction (I := I) g₀ S (T₁ + T₂) =
+      crossCorrParallelContraction (I := I) g₀ S T₁ + crossCorrParallelContraction (I := I) g₀ S T₂ := by
+  rw [crossCorrParallelContraction_eq_appCcRS, crossCorrParallelContraction_eq_appCcRS,
+    crossCorrParallelContraction_eq_appCcRS, crossCorrProdSection_add_right,
+    appCcRS_add_right]
+
+set_option linter.unusedSectionVars false in
+/-- **The cross-correction parallel contraction is additive in the first factor `S`.** -/
+theorem crossCorrParallelContraction_add_left (g₀ : SmoothRiemannianMetric I M) {a b : ℕ}
+    (S₁ S₂ : Integral.L2.SmoothCcTensor g₀ 0 (2 + a))
+    (T : Integral.L2.SmoothCcTensor g₀ 0 (3 + b)) :
+    crossCorrParallelContraction (I := I) g₀ (S₁ + S₂) T =
+      crossCorrParallelContraction (I := I) g₀ S₁ T + crossCorrParallelContraction (I := I) g₀ S₂ T := by
+  rw [crossCorrParallelContraction_eq_appCcRS, crossCorrParallelContraction_eq_appCcRS,
+    crossCorrParallelContraction_eq_appCcRS, crossCorrProdSection_add_left,
+    appCcRS_add_right]
+
+set_option linter.unusedSectionVars false in
+/-- **The cross-correction parallel contraction is `ℝ`-homogeneous in the second factor `T`.** -/
+theorem crossCorrParallelContraction_smul_right (g₀ : SmoothRiemannianMetric I M) {a b : ℕ}
+    (k : ℝ) (S : Integral.L2.SmoothCcTensor g₀ 0 (2 + a))
+    (T : Integral.L2.SmoothCcTensor g₀ 0 (3 + b)) :
+    crossCorrParallelContraction (I := I) g₀ S (k • T) =
+      k • crossCorrParallelContraction (I := I) g₀ S T := by
+  classical
+  rw [crossCorrParallelContraction_eq_appCcRS, crossCorrParallelContraction_eq_appCcRS]
+  rw [show crossCorrProdSection (I := I) g₀ S (k • T) = k • crossCorrProdSection (I := I) g₀ S T from ?_,
+    appCcRS_smul_right]
+  apply Integral.L2.SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply tensor0s_ext_unitZero (I := I) (M := M) (s := (3 + b) + (2 + a))
+  apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+  beta_reduce
+  rw [crossCorrProdSection_unitModel (I := I) g₀ S (k • T) x]
+  rw [show ((k • crossCorrProdSection (I := I) g₀ S T).toSection x
+        (Integral.Connection.unitZeroSec (I := I) (M := M) x)) =
+      k • ((crossCorrProdSection (I := I) g₀ S T).toSection x
+        (Integral.Connection.unitZeroSec (I := I) (M := M) x)) from by
+    rw [Integral.L2.SmoothCcTensor.toSection_smul]; rfl]
+  rw [Tensor0SBundle.Tensor0SSpace.toModel_smul,
+    crossCorrProdSection_unitModel (I := I) g₀ S T x,
+    show ccUnitModel (I := I) g₀ (k • T) x = k • ccUnitModel (I := I) g₀ T x from by
+      unfold ccUnitModel
+      rw [show (k • T).toSection x = k • T.toSection x from by
+          rw [Integral.L2.SmoothCcTensor.toSection_smul]; rfl,
+        ContinuousLinearMap.smul_apply, Tensor0SBundle.Tensor0SSpace.toModel_smul]]
+  apply ContinuousMultilinearMap.ext; intro v
+  rw [ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    ContinuousMultilinearMap.domDomCongr_apply,
+    show (Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+        (k • ccUnitModel (I := I) g₀ T x) (ccUnitModel (I := I) g₀ S x)) =
+        k • Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+            (ccUnitModel (I := I) g₀ T x) (ccUnitModel (I := I) g₀ S x) from by
+      apply ContinuousMultilinearMap.ext; intro w
+      rw [ContinuousMultilinearMap.smul_apply, Bundle.continuousMultilinearMap.modelProduct_apply,
+        Bundle.continuousMultilinearMap.modelProduct_apply,
+        ContinuousMultilinearMap.smul_apply, smul_eq_mul, smul_eq_mul, mul_assoc],
+    ContinuousMultilinearMap.smul_apply]
+
+set_option linter.unusedSectionVars false in
+/-- **The cross-correction parallel contraction is subtractive in the second factor `T`.** -/
+theorem crossCorrParallelContraction_sub_right (g₀ : SmoothRiemannianMetric I M) {a b : ℕ}
+    (S : Integral.L2.SmoothCcTensor g₀ 0 (2 + a))
+    (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 (3 + b)) :
+    crossCorrParallelContraction (I := I) g₀ S (T₁ - T₂) =
+      crossCorrParallelContraction (I := I) g₀ S T₁ - crossCorrParallelContraction (I := I) g₀ S T₂ := by
+  rw [sub_eq_add_neg, ← neg_one_smul ℝ T₂, crossCorrParallelContraction_add_right,
+    crossCorrParallelContraction_smul_right, neg_one_smul, ← sub_eq_add_neg]
+
+set_option linter.unusedSectionVars false in
+/-- **The cross-correction parallel contraction is `ℝ`-homogeneous in the first factor `S`.** -/
+theorem crossCorrParallelContraction_smul_left (g₀ : SmoothRiemannianMetric I M) {a b : ℕ}
+    (k : ℝ) (S : Integral.L2.SmoothCcTensor g₀ 0 (2 + a))
+    (T : Integral.L2.SmoothCcTensor g₀ 0 (3 + b)) :
+    crossCorrParallelContraction (I := I) g₀ (k • S) T =
+      k • crossCorrParallelContraction (I := I) g₀ S T := by
+  classical
+  rw [crossCorrParallelContraction_eq_appCcRS, crossCorrParallelContraction_eq_appCcRS]
+  rw [show crossCorrProdSection (I := I) g₀ (k • S) T = k • crossCorrProdSection (I := I) g₀ S T from ?_,
+    appCcRS_smul_right]
+  apply Integral.L2.SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply tensor0s_ext_unitZero (I := I) (M := M) (s := (3 + b) + (2 + a))
+  apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+  beta_reduce
+  rw [crossCorrProdSection_unitModel (I := I) g₀ (k • S) T x]
+  rw [show ((k • crossCorrProdSection (I := I) g₀ S T).toSection x
+        (Integral.Connection.unitZeroSec (I := I) (M := M) x)) =
+      k • ((crossCorrProdSection (I := I) g₀ S T).toSection x
+        (Integral.Connection.unitZeroSec (I := I) (M := M) x)) from by
+    rw [Integral.L2.SmoothCcTensor.toSection_smul]; rfl]
+  rw [Tensor0SBundle.Tensor0SSpace.toModel_smul,
+    crossCorrProdSection_unitModel (I := I) g₀ S T x,
+    show ccUnitModel (I := I) g₀ (k • S) x = k • ccUnitModel (I := I) g₀ S x from by
+      unfold ccUnitModel
+      rw [show (k • S).toSection x = k • S.toSection x from by
+          rw [Integral.L2.SmoothCcTensor.toSection_smul]; rfl,
+        ContinuousLinearMap.smul_apply, Tensor0SBundle.Tensor0SSpace.toModel_smul]]
+  apply ContinuousMultilinearMap.ext; intro v
+  rw [ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    ContinuousMultilinearMap.domDomCongr_apply,
+    show (Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+        (ccUnitModel (I := I) g₀ T x) (k • ccUnitModel (I := I) g₀ S x)) =
+        k • Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+            (ccUnitModel (I := I) g₀ T x) (ccUnitModel (I := I) g₀ S x) from by
+      apply ContinuousMultilinearMap.ext; intro w
+      rw [ContinuousMultilinearMap.smul_apply, Bundle.continuousMultilinearMap.modelProduct_apply,
+        Bundle.continuousMultilinearMap.modelProduct_apply,
+        ContinuousMultilinearMap.smul_apply, smul_eq_mul, smul_eq_mul, mul_left_comm],
+    ContinuousMultilinearMap.smul_apply]
+
+set_option linter.unusedSectionVars false in
+/-- **The cross-correction parallel contraction is subtractive in the first factor `S`.** -/
+theorem crossCorrParallelContraction_sub_left (g₀ : SmoothRiemannianMetric I M) {a b : ℕ}
+    (S₁ S₂ : Integral.L2.SmoothCcTensor g₀ 0 (2 + a))
+    (T : Integral.L2.SmoothCcTensor g₀ 0 (3 + b)) :
+    crossCorrParallelContraction (I := I) g₀ (S₁ - S₂) T =
+      crossCorrParallelContraction (I := I) g₀ S₁ T - crossCorrParallelContraction (I := I) g₀ S₂ T := by
+  rw [sub_eq_add_neg, ← neg_one_smul ℝ S₂, crossCorrParallelContraction_add_left,
+    crossCorrParallelContraction_smul_left, neg_one_smul, ← sub_eq_add_neg]
+
 set_option linter.unusedVariables false in
 /-- **The fixed source-rank reindex operator field** `(0, (3 + b) + (2 + a)) → (0, (3 + a + b) + 2)`,
 the pure `Nat`-rank reindex of the source covariant slots along `(3 + b) + (2 + a) = (3 + a + b) + 2`

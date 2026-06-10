@@ -953,6 +953,62 @@ theorem exists_GcurvSectionRS_iteratedCovGrad_grid_bound (g : SmoothRiemannianMe
   refine Finset.sum_congr rfl (fun q _ => ?_)
   exact rfns_iteratedCovGradRS_covGrad_comm_local (I := I) (M := M) g r s q S x
 
+/-- **The rank-`r` fixed-Hom-field curvature jet decomposition of the order-`2` commutator defect
+(posited general-rank operator-field primitive — the single missing-upstream curvature atom).** For a
+closed smooth Riemannian manifold `(M, g)` and a fixed contravariant rank `r`, at every covariant rank
+`s` there are three fixed smooth full Hom-bundle field sections
+`Q₀ : Hom(T^{(r,s)}, T^{(r,s+1)})`, `Q₁ : Hom(T^{(r,s+1)}, T^{(r,s+1)})`,
+`Q₂ : Hom(T^{(r,s+2)}, T^{(r,s+1)})` such that, for every smooth compactly-supported `(r, s)`-tensor `S`,
+```
+pointwiseTensorCurvRS g r s S = Q₀ · S + Q₁ · ∇S + Q₂ · ∇²S,
+```
+where `Curv S := Δ_∇(∇S) − ∇(Δ_∇ S)`, `∇S := covGrad g r s S`, `∇²S := iteratedCovGrad g r s 2 S`, and
+`·` is the full Hom-bundle action `appFullSec`. The classical first-order rough-Laplacian /
+covariant-gradient commutator identity `[Δ_∇, ∇] = (∇R)·S + R·∇S + (trace-gradient)·∇²S` at a generic
+contravariant valence `r`, in fixed smooth Hom-field form.
+
+**Why this is TRUE.** Reading the rough Laplacian as the metric double-trace of the two leading covariant
+slots (`Δ_∇ W = Tr · ∇²W`, the frame-trace reading `rawTensorConnLap_eq_frame_trace_secondCovDeriv`
+packaged as a fixed-field action through the value-local representation theorem) at valences `s + 1` and
+`s` (the latter differentiated by the covariant product rule `covGrad_appFullSec_eq`, splitting off the
+trace-gradient field `∇Tr s` on `∇²S`), the defect's body `Δ_∇(∇S) − ∇(Δ_∇ S)` leaves exactly the
+order-`3` head difference `Tr (s+1) · ∇³S − slotExt(Tr s) · ∇³S` — the curvature term born from re-tracing
+a different leading pair of the third covariant gradient — which the section-level Ricci identity
+`tensorSecondCovDeriv_antisymm_eq_riemannOp` (`TensorRicciCommutator`, at arbitrary `(r, s)`) supplies as a
+fixed field action on the `≤ 2`-jet `(S, ∇S, ∇²S)`; the two `∇²S` summands merge by `appFullSec_sub_left`.
+
+**This is the genuinely-missing-upstream rank-`r` curvature primitive.** The full proof of this
+decomposition is developed *sorry-free* in `HomFieldCurvatureJetDecomposition`
+(`exists_pointwiseTensorCurvRS_homField_jetDecomposition`), but that file *imports this one* (it reads the
+named defect `pointwiseTensorCurvRS`) and its reduction machinery — the metric-double-trace field
+`metricDoubleTraceField`, the trace factorisation `roughLap_eq_metricDoubleTrace`, and the head-difference
+drop `headDifferenceDrop_bracket` / `exists_headDifferenceDrop_metricDoubleTrace` — is `private` there, so
+the decomposition is neither importable nor citable here (a file-level import cycle). It is therefore
+posited here as the single precise true upstream atom from which this file's doubly-peeled fibre-order
+bound `exists_pointwiseTensorCurvRS_subGcurvSubDiffCurv_obstruction_fiberOrder_bound` is *derived* over the
+sorry-free operator-field iterated-gradient window envelope
+`exists_appFullSec_on_jet_iteratedCovGrad_window_bound` and the two sorry-free concrete carrier grids.
+Consumers transitively depend on `sorryAx`.
+
+**Non-vacuity.** A degenerate triple `Q₀ = Q₁ = Q₂ = 0` would force `pointwiseTensorCurvRS g r s S = 0` at
+every `s`, `S`; but the order-`2` commutator defect `Δ_∇(∇S) − ∇(Δ_∇ S)` is the genuine third-order
+curvature contraction of `S`, non-zero on a non-flat manifold (`R ≠ 0`) for a non-parallel `S` — so the
+zero triple is rejected and the operator fields genuinely carry the curvature content. The body is
+`sorry`. -/
+theorem exists_pointwiseTensorCurvRS_homFieldJetDecompositionRS
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    ∃ (Q₀ : HomTensorRSField (E := E) (M := M) r s (s + 1) I)
+      (Q₁ : HomTensorRSField (E := E) (M := M) r (s + 1) (s + 1) I)
+      (Q₂ : HomTensorRSField (E := E) (M := M) r (s + 2) (s + 1) I),
+      ∀ S : SmoothCcTensor g r s,
+        pointwiseTensorCurvRS (I := I) (M := M) g r s S =
+          appFullSec (I := I) (M := M) g r s (s + 1) Q₀ S +
+            appFullSec (I := I) (M := M) g r (s + 1) (s + 1) Q₁
+              (covGrad (I := I) (M := M) g r s S) +
+            appFullSec (I := I) (M := M) g r (s + 2) (s + 1) Q₂
+              (iteratedCovGrad g r s 2 S) := by
+  sorry
+
 /-- **The rank-`r` doubly-peeled moving-frame remainder fibre order — the `(0, 3)` graded curvature jet
 at gradient order `0` (posited general-rank curvature core).** The contravariant-rank-`r` upstream atom
 that the downstream genuine `(0, 3)` graded-jet re-derivation
@@ -1018,7 +1074,157 @@ theorem exists_pointwiseTensorCurvRS_subGcurvSubDiffCurv_obstruction_fiberOrder_
               riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
                   ((covGrad (I := I) (M := M) g r s S).toSection x) +
               riemannianFiberNormSq (I := I) (M := M) g r s x (S.toSection x)) := by
-  sorry
+  classical
+  -- The operator-field decomposition `Curv = Q₀·S + Q₁·∇S + Q₂·∇²S` (the posited rank-`r` curvature
+  -- atom) and the per-rank window envelopes of its three pieces. The doubly-peeled remainder is the
+  -- `abel`-rearrangement `(Q₀·S − diffCurv) + (Q₁·∇S − Gcurv) + Q₂·∇²S`; each leg is bounded at gradient
+  -- order `0` by the matching jet (`Q₀·S`, `diffCurv` → `rfns(S)`; `Q₁·∇S`, `Gcurv` → `rfns(∇S)`;
+  -- `Q₂·∇²S` → `rfns(∇²S)`), merged by fibre subadditivity. The per-rank window constants depend on the
+  -- rank `s`, so the per-`s` bound is established first and the valence family extracted by choice.
+  suffices hstep : ∀ s : ℕ, ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (S : SmoothCcTensor g r s) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
+            ((pointwiseTensorCurvRS (I := I) (M := M) g r s S -
+              GcurvSectionRS (I := I) (M := M) g r s S -
+              diffCurvSectionRS (I := I) (M := M) g r s S).toSection x) ≤
+          C ^ 2 *
+            (riemannianFiberNormSq (I := I) (M := M) g r (s + 1 + 1) x
+                ((covGrad (I := I) (M := M) g r (s + 1)
+                  (covGrad (I := I) (M := M) g r s S)).toSection x) +
+              riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
+                  ((covGrad (I := I) (M := M) g r s S).toSection x) +
+              riemannianFiberNormSq (I := I) (M := M) g r s x (S.toSection x)) by
+    refine ⟨fun s => Classical.choose (hstep s), fun s => (Classical.choose_spec (hstep s)).1,
+      fun s S x => (Classical.choose_spec (hstep s)).2 S x⟩
+  intro s
+  obtain ⟨Q₀, Q₁, Q₂, hdecomp⟩ :=
+    exists_pointwiseTensorCurvRS_homFieldJetDecompositionRS (I := I) (M := M) g r s
+  obtain ⟨cc₀, hcc₀_nn, hcc₀⟩ :=
+    exists_appFullSec_on_jet_iteratedCovGrad_window_bound (I := I) (M := M) g r s 0 (s + 1) Q₀
+  obtain ⟨cc₁, hcc₁_nn, hcc₁⟩ :=
+    exists_appFullSec_on_jet_iteratedCovGrad_window_bound (I := I) (M := M) g r s 1 (s + 1) Q₁
+  obtain ⟨cc₂, hcc₂_nn, hcc₂⟩ :=
+    exists_appFullSec_on_jet_iteratedCovGrad_window_bound (I := I) (M := M) g r s 2 (s + 1) Q₂
+  obtain ⟨cd, hcd_nn, hcd⟩ := exists_diffCurvSectionRS_iteratedCovGrad_grid_bound (I := I) (M := M) g r
+  obtain ⟨cg, hcg_nn, hcg⟩ := exists_GcurvSectionRS_iteratedCovGrad_grid_bound (I := I) (M := M) g r
+  refine ⟨Real.sqrt (8 * cc₀ 0 + 8 * (cd s 0) ^ 2 + 8 * cc₁ 0 + 8 * (cg s 0) ^ 2 +
+      4 * cc₂ 0),
+    Real.sqrt_nonneg _, fun S x => ?_⟩
+  -- Abbreviate the three target fibre norms and the five leg pieces.
+  set A : ℝ := riemannianFiberNormSq (I := I) (M := M) g r (s + 1 + 1) x
+      ((covGrad (I := I) (M := M) g r (s + 1) (covGrad (I := I) (M := M) g r s S)).toSection x) with hA
+  set B : ℝ := riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
+      ((covGrad (I := I) (M := M) g r s S).toSection x) with hB
+  set D : ℝ := riemannianFiberNormSq (I := I) (M := M) g r s x (S.toSection x) with hD
+  have hA_nn : 0 ≤ A := riemannianFiberNormSq_nonneg (I := I) (M := M) g r (s + 1 + 1) x _
+  have hB_nn : 0 ≤ B := riemannianFiberNormSq_nonneg (I := I) (M := M) g r (s + 1) x _
+  have hD_nn : 0 ≤ D := riemannianFiberNormSq_nonneg (I := I) (M := M) g r s x _
+  -- The defect's doubly-peeled remainder, rearranged to the three Hom-field legs.
+  set G₀ : SmoothCcTensor g r (s + 1) :=
+    appFullSec (I := I) (M := M) g r s (s + 1) Q₀ S -
+      diffCurvSectionRS (I := I) (M := M) g r s S with hG₀
+  set G₁ : SmoothCcTensor g r (s + 1) :=
+    appFullSec (I := I) (M := M) g r (s + 1) (s + 1) Q₁
+        (covGrad (I := I) (M := M) g r s S) -
+      GcurvSectionRS (I := I) (M := M) g r s S with hG₁
+  set G₂ : SmoothCcTensor g r (s + 1) :=
+    appFullSec (I := I) (M := M) g r (s + 2) (s + 1) Q₂ (iteratedCovGrad g r s 2 S) with hG₂
+  have hrem_eq : pointwiseTensorCurvRS (I := I) (M := M) g r s S -
+      GcurvSectionRS (I := I) (M := M) g r s S -
+      diffCurvSectionRS (I := I) (M := M) g r s S = G₀ + G₁ + G₂ := by
+    rw [hG₀, hG₁, hG₂, hdecomp S]; abel
+  -- The section value of the remainder as the pointwise sum of the three leg section values.
+  have hrem_sec : (pointwiseTensorCurvRS (I := I) (M := M) g r s S -
+        GcurvSectionRS (I := I) (M := M) g r s S -
+        diffCurvSectionRS (I := I) (M := M) g r s S).toSection x =
+      (G₀.toSection x + G₁.toSection x) + G₂.toSection x := by
+    rw [hrem_eq, SmoothCcTensor.toSection_add, SmoothCcTensor.toSection_add]
+    simp only [ContMDiffSection.coe_add, Pi.add_apply]
+  -- Fibre subadditivity: split off `G₂`, then split `G₀ + G₁`.
+  have hsplit1 := riemannianFiberNormSq_add_le (I := I) (M := M) g r (s + 1) x
+    (G₀.toSection x + G₁.toSection x) (G₂.toSection x)
+  have hsplit2 := riemannianFiberNormSq_add_le (I := I) (M := M) g r (s + 1) x
+    (G₀.toSection x) (G₁.toSection x)
+  -- Each leg's fibre norm: split the subtraction, then bound the Hom-field action and the carrier.
+  have hG₀sec : G₀.toSection x =
+      (appFullSec (I := I) (M := M) g r s (s + 1) Q₀ S).toSection x -
+        (diffCurvSectionRS (I := I) (M := M) g r s S).toSection x := by
+    rw [hG₀, SmoothCcTensor.toSection_sub]; rfl
+  have hG₁sec : G₁.toSection x =
+      (appFullSec (I := I) (M := M) g r (s + 1) (s + 1) Q₁
+          (covGrad (I := I) (M := M) g r s S)).toSection x -
+        (GcurvSectionRS (I := I) (M := M) g r s S).toSection x := by
+    rw [hG₁, SmoothCcTensor.toSection_sub]; rfl
+  have hG₀sub := riemannianFiberNormSq_sub_le (I := I) (M := M) g r (s + 1) x
+    ((appFullSec (I := I) (M := M) g r s (s + 1) Q₀ S).toSection x)
+    ((diffCurvSectionRS (I := I) (M := M) g r s S).toSection x)
+  have hG₁sub := riemannianFiberNormSq_sub_le (I := I) (M := M) g r (s + 1) x
+    ((appFullSec (I := I) (M := M) g r (s + 1) (s + 1) Q₁
+        (covGrad (I := I) (M := M) g r s S)).toSection x)
+    ((GcurvSectionRS (I := I) (M := M) g r s S).toSection x)
+  -- The five at-point envelope bounds, each collapsed at gradient order `k = 0`.
+  -- (i) `Q₀ · S` reads `rfns(S)`.
+  have hQ₀ := hcc₀ S 0 x
+  rw [iteratedCovGrad_zero, iteratedCovGrad_zero, Finset.sum_range_one] at hQ₀
+  simp only [Nat.add_zero] at hQ₀
+  rw [iteratedCovGrad_zero, ← hD] at hQ₀
+  have hQ₀B : riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
+      ((appFullSec (I := I) (M := M) g r s (s + 1) Q₀ S).toSection x) ≤ cc₀ 0 * D := hQ₀
+  -- (ii) `diffCurv` reads `rfns(S)`.
+  have hdiff := hcd s S 0 x
+  rw [iteratedCovGrad_zero, Finset.sum_range_one] at hdiff
+  simp only [Nat.add_zero, iteratedCovGrad_zero] at hdiff
+  rw [← hD] at hdiff
+  have hdiffB : riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
+      ((diffCurvSectionRS (I := I) (M := M) g r s S).toSection x) ≤ cd s 0 ^ 2 * D := hdiff
+  -- (iii) `Q₁ · ∇S` reads `rfns(∇S)`.
+  have hQ₁ := hcc₁ S 0 x
+  rw [iteratedCovGrad_zero, Finset.sum_range_one] at hQ₁
+  simp only [Nat.add_zero] at hQ₁
+  rw [show iteratedCovGrad g r s 1 S = covGrad (I := I) (M := M) g r s S from rfl] at hQ₁
+  rw [← hB] at hQ₁
+  have hQ₁B : riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
+      ((appFullSec (I := I) (M := M) g r (s + 1) (s + 1) Q₁
+        (covGrad (I := I) (M := M) g r s S)).toSection x) ≤ cc₁ 0 * B := hQ₁
+  -- (iv) `Gcurv` reads `rfns(∇S)`.
+  have hgcurv := hcg s S 0 x
+  rw [iteratedCovGrad_zero, Finset.sum_range_one] at hgcurv
+  simp only [Nat.add_zero, iteratedCovGrad_succ, iteratedCovGrad_zero] at hgcurv
+  rw [← hB] at hgcurv
+  have hgcurvB : riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
+      ((GcurvSectionRS (I := I) (M := M) g r s S).toSection x) ≤ cg s 0 ^ 2 * B := hgcurv
+  -- (v) `Q₂ · ∇²S` reads `rfns(∇²S)`.
+  have hQ₂ := hcc₂ S 0 x
+  rw [iteratedCovGrad_zero, Finset.sum_range_one] at hQ₂
+  simp only [Nat.add_zero] at hQ₂
+  rw [show iteratedCovGrad g r s 2 S =
+      covGrad (I := I) (M := M) g r (s + 1) (covGrad (I := I) (M := M) g r s S) from rfl] at hQ₂
+  rw [← hA] at hQ₂
+  have hQ₂B : riemannianFiberNormSq (I := I) (M := M) g r (s + 1) x
+      ((appFullSec (I := I) (M := M) g r (s + 2) (s + 1) Q₂
+        (iteratedCovGrad g r s 2 S)).toSection x) ≤ cc₂ 0 * A := by
+    rw [show iteratedCovGrad g r s 2 S =
+        covGrad (I := I) (M := M) g r (s + 1) (covGrad (I := I) (M := M) g r s S) from rfl]
+    exact hQ₂
+  have hCsq : (Real.sqrt (8 * cc₀ 0 + 8 * (cd s 0) ^ 2 + 8 * cc₁ 0 + 8 * (cg s 0) ^ 2 +
+        4 * cc₂ 0)) ^ 2 =
+      8 * cc₀ 0 + 8 * (cd s 0) ^ 2 + 8 * cc₁ 0 + 8 * (cg s 0) ^ 2 + 4 * cc₂ 0 := by
+    rw [Real.sq_sqrt]
+    have h0 := hcc₀_nn 0; have h1 := hcc₁_nn 0; have h2 := hcc₂_nn 0
+    positivity
+  rw [hrem_sec, hCsq]
+  -- Fold the `≤` chain. `rfns(rem) ≤ 2(rfns(G₀+G₁)) + 2 rfns(G₂)`, then `rfns(G₀+G₁) ≤ 2 rfns(G₀)+2 rfns(G₁)`,
+  -- and each `rfns(Gⱼ) ≤ 2 rfns(action) + 2 rfns(carrier)`; substitute the five envelopes.
+  rw [← hG₀sec] at hG₀sub
+  rw [← hG₁sec] at hG₁sub
+  nlinarith [hsplit1, hsplit2, hG₀sub, hG₁sub, hQ₀B, hdiffB, hQ₁B, hgcurvB, hQ₂B,
+    hA_nn, hB_nn, hD_nn, hcc₀_nn 0, hcc₁_nn 0, hcc₂_nn 0, sq_nonneg (cd s 0), sq_nonneg (cg s 0),
+    mul_nonneg (hcc₀_nn 0) hD_nn, mul_nonneg (sq_nonneg (cd s 0)) hD_nn,
+    mul_nonneg (hcc₁_nn 0) hB_nn, mul_nonneg (sq_nonneg (cg s 0)) hB_nn,
+    mul_nonneg (hcc₂_nn 0) hA_nn,
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g r (s + 1) x (G₀.toSection x),
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g r (s + 1) x (G₁.toSection x),
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g r (s + 1) x (G₂.toSection x)]
 
 /-- **The rank-`r` moving-frame remainder (after the pure-Riemann peel) fibre order (proved over the
 doubly-peeled remainder atom and the differentiated-curvature carrier grid).** The contravariant-rank-`r`
@@ -1515,6 +1721,73 @@ theorem exists_pointwiseTensorCurvRS_fiberNormSq_bound_upstream
   nlinarith [hadd, hgen_bound, hrem_x, hfS_nn, hfgS_nn, hfg2S_nn, hCsq_nn,
     mul_nonneg hCsq_nn hfg2S_nn]
 
+/-- **The rank-`r` bracket-channel integrated identity (posited general-rank curvature deep root — the
+single missing-upstream integrated curvature atom).** For a closed smooth Riemannian manifold `(M, g)`,
+every contravariant rank `r`, covariant rank `s`, and smooth compactly-supported `(r, s)`-tensor `S`, the
+fixed-frame sum of the per-direction frame-bracket remainder fibres `remDiffBracketFibRS`
+(`MovingFrameRemainderFrameSumBridgeRS`, the frame summand `remDiffFibRS` minus its pure-Riemann genuine
+curvature fibre `remDiffGenuineFibRS`) is Bochner-integrable against the Riemannian volume measure, and
+its integral over the closed manifold, paired against `∇S := covGrad g r s S`, equals the global metric
+`L²` pairing of the gauge-glued differentiated-curvature tensorial carrier `diffCurvSectionRS g r s S`
+(the order-`0` base of the differentiated `(∇R)·` tower, `RankRDiffCurvatureTower`) against `∇S`:
+```
+∫_M ∑ᵢ ⟨remDiffBracketFibRS g r s S x i, ∇S(x)⟩ dvol_g = ⟨diffCurvSectionRS g r s S, ∇S⟩_{L²}.
+```
+
+**This is the genuine new integrated mathematical content of the rank-`r` curvature line — the
+contravariant-rank-`r` mirror of the rank-`0` bracket-channel deep root
+`bracketChannelFrameSum_integral_eq_diffCurvOpField_ricTrace`
+(`DifferentiatedCurvatureOperatorFieldIdentification`), specialised to the concrete tensorial carrier
+`diffCurvSectionRS g r s S`.** Its three-fold coupled content is (i) the integrated identification of the
+frame-summed differentiated-curvature trace `∑ᵢ ∇_{Bᵢ}(R(Bᵢ, ·) S)` with the gauge-glued carrier
+`diffCurvSectionRS g r s S` (the rank-`r` operator-field B-rule), (ii) the second-Bianchi / frame-Ricci
+cyclic fold folded into the carrier (`ContractedBianchi`, `DifferentiatedSlotwiseCurvature`), and (iii)
+the residual frame-bracket discrepancy being a total covariant divergence integrating to zero over the
+closed manifold (`BracketDivergenceForm`, `MovingFrameIntegratedNullity`).
+
+**Why the INTEGRATED value is the honest primitive (the per-direction match is false).** The
+differentiated-curvature trace is *non-tensorial in the direction* — its per-direction fibre reads the
+`smoothExtensionTangent` jet of the frame direction, chart-selection-unbounded on `S²` (T1) — so the
+`∇³S`-cancellation and divergence form are *false term-by-term*. The three pieces are mathematically
+*coupled* (the per-direction trace differs from the operator-field carrier by exactly the bracket
+discrepancy of the third piece, which integrates to zero only when summed), so only their joint
+*integrated* value is sound, and that single joint value is exactly this identity. The identity is stated
+at the *integrated* frame-free `L²` level throughout — it never extracts a per-direction `M → E` quantity
+— so it is trap-screened.
+
+**This is the genuinely-missing-upstream rank-`r` curvature primitive.** At rank `0` this content is
+*proved* over the moving-frame remainder nullity `movingFrameNullity_diffCurvOpField_leaf`, itself proved
+over the rank-`0`-coded Parseval seven-term Bochner fold (`ParsevalSevenTermBochnerFold`,
+`bochnerFold_group*`), whose operator family carries a literal contravariant `0`; that entire fold engine
+and the rank-`0` divergence/Bianchi spine are stated **only at contravariant rank `0`**, so the rank-`r`
+bracket-channel identity is absent sorry-free in this file's import closure and is posited here as the
+single precise true upstream atom from which the rank-`r` integrated nullity
+`diffCurvSectionRS_movingFrameRemainder_integratedNullityRS` is *derived* over the sorry-free frame-sum
+bridges of this file. Consumers transitively depend on `sorryAx`.
+
+**Non-vacuity (the `s = 0` Bochner litmus).** At `s = 0` the bracket frame sum carries the scalar
+Bochner–Lichnerowicz content `∫ Ric(∇f, ∇f)`, genuinely nonzero on a non-flat manifold; replacing
+`diffCurvSectionRS g r s S` by `0` makes the identity read `∫_M ∑ᵢ ⟨remDiffBracketFibRS g 0 f i, ∇f⟩ = 0`,
+*false* on a manifold with `∇R ≠ 0` (the `(∇R) S` content is genuinely `rfns(S)`-order). So the carrier is
+genuinely required and the identity is not vacuous. The body is `sorry`. -/
+theorem bracketChannelFrameSumRS_integral_eq_diffCurvSectionRS
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
+    MeasureTheory.Integrable
+        (fun x => ∑ i : Fin (Module.finrank ℝ E),
+            tensorInnerPointwise (I := I) (M := M) g r (s + 1) x
+              (TensorRSSpace.toModel (remDiffBracketFibRS (I := I) (M := M) g r s S x i))
+              ((covGrad (I := I) (M := M) g r s S).toFun x))
+        (riemannianVolumeMeasure (I := I) (M := M) g) ∧
+      (∫ x, (∑ i : Fin (Module.finrank ℝ E),
+            tensorInnerPointwise (I := I) (M := M) g r (s + 1) x
+              (TensorRSSpace.toModel (remDiffBracketFibRS (I := I) (M := M) g r s S x i))
+              ((covGrad (I := I) (M := M) g r s S).toFun x))
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+      tensorL2Inner (I := I) (M := M) g r (s + 1)
+        (diffCurvSectionRS (I := I) (M := M) g r s S).toFun
+        (covGrad (I := I) (M := M) g r s S).toFun := by
+  sorry
+
 /-- **The rank-`r` differentiated-curvature moving-frame remainder integrated nullity (the genuine
 rank-`r` integrated Bochner–Weitzenböck content — the rank-`r` curvature line's irreducible deep
 root).** For a closed smooth Riemannian manifold `(M, g)`, every contravariant rank `r`, covariant
@@ -1585,8 +1858,71 @@ theorem diffCurvSectionRS_movingFrameRemainder_integratedNullityRS
         (pointwiseTensorCurvRS (I := I) (M := M) g r s S -
           GcurvSectionRS (I := I) (M := M) g r s S -
           diffCurvSectionRS (I := I) (M := M) g r s S).toFun
-        (covGrad (I := I) (M := M) g r s S).toFun = 0 :=
-  sorry
+        (covGrad (I := I) (M := M) g r s S).toFun = 0 := by
+  classical
+  -- The genuine frame sum integrand is integrable and integrates to `⟨Gcurv, ∇S⟩` (sorry-free bridge).
+  obtain ⟨hG_int, hG_val⟩ :=
+    remDiffFibRS_genuineFrameSum_pairing_eq_GcurvSectionRS (I := I) (M := M) g r s S
+  -- The bracket frame sum integrand is integrable and integrates to `⟨diffCurv, ∇S⟩` (posited atom).
+  obtain ⟨hB_int, hB_val⟩ := bracketChannelFrameSumRS_integral_eq_diffCurvSectionRS (I := I) (M := M) g r s S
+  -- Abbreviate the genuine / bracket / full frame-sum integrands AFTER the obtains, so the bridge
+  -- statements fold into the abbreviations.
+  set μ := riemannianVolumeMeasure (I := I) (M := M) g with hμ
+  set fG : M → ℝ := fun x => ∑ i : Fin (Module.finrank ℝ E),
+      tensorInnerPointwise (I := I) (M := M) g r (s + 1) x
+        (TensorRSSpace.toModel (remDiffGenuineFibRS (I := I) (M := M) g r s S x i))
+        ((covGrad (I := I) (M := M) g r s S).toFun x) with hfG
+  set fB : M → ℝ := fun x => ∑ i : Fin (Module.finrank ℝ E),
+      tensorInnerPointwise (I := I) (M := M) g r (s + 1) x
+        (TensorRSSpace.toModel (remDiffBracketFibRS (I := I) (M := M) g r s S x i))
+        ((covGrad (I := I) (M := M) g r s S).toFun x) with hfB
+  set fR : M → ℝ := fun x => ∑ i : Fin (Module.finrank ℝ E),
+      tensorInnerPointwise (I := I) (M := M) g r (s + 1) x
+        (TensorRSSpace.toModel (remDiffFibRS (I := I) (M := M) g r s S x i))
+        ((covGrad (I := I) (M := M) g r s S).toFun x) with hfR
+  -- The full frame summand splits genuine + bracket pointwise.
+  have hRsplit : fR = fun x => fG x + fB x := by
+    funext x
+    rw [hfR, hfG, hfB, ← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [remDiffFibRS_eq_genuine_add_bracket (I := I) (M := M) g r s S x i,
+      TensorRSSpace.toModel_add, tensorInnerPointwise_add_left]
+  -- The full frame sum integrates to `⟨Curv, ∇S⟩` (sorry-free bridge).
+  have hfRint : (∫ x, fR x ∂μ) =
+      tensorL2Inner (I := I) (M := M) g r (s + 1)
+        (pointwiseTensorCurvRS (I := I) (M := M) g r s S).toFun
+        (covGrad (I := I) (M := M) g r s S).toFun :=
+    (tensorL2Inner_pointwiseTensorCurvRS_covGrad_eq_frameSum_integral (I := I) (M := M) g r s S).symm
+  -- Hence `⟨Curv, ∇S⟩ = ⟨Gcurv, ∇S⟩ + ⟨diffCurv, ∇S⟩`.
+  have hsum : (∫ x, fR x ∂μ) = (∫ x, fG x ∂μ) + (∫ x, fB x ∂μ) := by
+    rw [hRsplit, MeasureTheory.integral_add hG_int hB_int]
+  rw [hfRint, hG_val, hB_val] at hsum
+  -- Reassemble: `⟨Curv − Gcurv − diffCurv, ∇S⟩ = ⟨Curv,∇S⟩ − ⟨Gcurv,∇S⟩ − ⟨diffCurv,∇S⟩ = 0`.
+  set Curv : SmoothCcTensor g r (s + 1) := pointwiseTensorCurvRS (I := I) (M := M) g r s S with hCurv
+  set Gc : SmoothCcTensor g r (s + 1) := GcurvSectionRS (I := I) (M := M) g r s S with hGc
+  set Dc : SmoothCcTensor g r (s + 1) := diffCurvSectionRS (I := I) (M := M) g r s S with hDc
+  set gradS : SmoothCcTensor g r (s + 1) := covGrad (I := I) (M := M) g r s S with hgrad
+  have hCurv_eq : Curv = (Gc + Dc) + (Curv - Gc - Dc) := by abel
+  have hfun : ((Gc + Dc) + (Curv - Gc - Dc)).toFun =
+      (Gc + Dc).toFun + (Curv - Gc - Dc).toFun := SmoothCcTensor.toFun_add _ _
+  have hsplitL := tensorL2Inner_add_left (I := I) (M := M) g r (s + 1)
+    (Gc + Dc).toFun (Curv - Gc - Dc).toFun gradS.toFun
+    (SmoothCcTensor.integrable_inner_cross (I := I) (M := M) (Gc + Dc) gradS)
+    (SmoothCcTensor.integrable_inner_cross (I := I) (M := M) (Curv - Gc - Dc) gradS)
+  have hsplitGD := tensorL2Inner_add_left (I := I) (M := M) g r (s + 1)
+    Gc.toFun Dc.toFun gradS.toFun
+    (SmoothCcTensor.integrable_inner_cross (I := I) (M := M) Gc gradS)
+    (SmoothCcTensor.integrable_inner_cross (I := I) (M := M) Dc gradS)
+  have hGDfun : (Gc + Dc).toFun = Gc.toFun + Dc.toFun := SmoothCcTensor.toFun_add _ _
+  have hbig : tensorL2Inner (I := I) (M := M) g r (s + 1) Curv.toFun gradS.toFun =
+      (tensorL2Inner (I := I) (M := M) g r (s + 1) Gc.toFun gradS.toFun +
+        tensorL2Inner (I := I) (M := M) g r (s + 1) Dc.toFun gradS.toFun) +
+        tensorL2Inner (I := I) (M := M) g r (s + 1) (Curv - Gc - Dc).toFun gradS.toFun := by
+    nth_rewrite 1 [hCurv_eq]
+    rw [hfun, hsplitL, hGDfun, hsplitGD]
+  -- `hsum` is now `⟨Curv,∇S⟩ = ⟨Gcurv,∇S⟩ + ⟨diffCurv,∇S⟩`; substitute into `hbig` and cancel.
+  rw [hbig] at hsum
+  linarith [hsum]
 
 /-- **The rank-`r` genuine curvature-sections cross-pairing (the rank-`r` classical `(★)` third-order
 tensor Bochner–Weitzenböck curvature-term identity, cross-pairing form — proved sorry-free over the

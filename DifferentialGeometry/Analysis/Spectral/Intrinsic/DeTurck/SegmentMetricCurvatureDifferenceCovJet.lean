@@ -2732,6 +2732,52 @@ theorem exists_parallelTrace_linearSection_eq_koszulTriple_sub_crossCorrTriple
   · exact linearSection_eq_ricciModelTrace42_koszulTriple_sub_crossCorrTriple (I := I) g₀
       T₁ T₂ g₁ g₂ hr1 hr2
 
+/-- **The bilinear-difference factorization of the cross-correction section difference.**  Each
+cross-correction section is the parallel `g₀`-single contraction `cc(gₖ,Tₖ) = Φ(hₖ, Dₖ)` of the
+realized perturbation `hₖ = realizeSymmCcTensor g₀ Tₖ` against the slot-cycled lowered connection
+difference `Dₖ = permuteCcTensor g₀ c[0,1,2] (loweredConnDiffSection gₖ g₀)`
+(`crossCorrParallelContraction_eq_crossCorrectionSection`).  The bilinear difference of two such
+products telescopes onto a **clean arm** carrying the realized difference factor
+`h₁ − h₂ = realizeSymmCcTensor g₀ (T₁ − T₂) = w` against the fixed `D₁`, plus a **δ-absorbed arm**
+carrying the fixed `h₂` against the lowered-connection-difference cocycle `D₁ − D₂`:
+```
+cc(g₁,T₁) − cc(g₂,T₂) = Φ(w, D₁) + Φ(h₂, D₁ − D₂).
+```
+This is the structural decomposition the cross-correction-difference covariant-jet bound consumes (the
+first arm by the diagonal product grid with the lowered-jet fold, the second by the δ-recursive
+absorption).  Proved from the contraction's bilinearity (`crossCorrParallelContraction_sub_left`,
+`_sub_right`) and the subtractivity of `realizeSymmCcTensor` (`realizeSymmCcTensor_sub`) and the slot
+permutation (`permuteCcTensor_sub`). -/
+private theorem crossCorrectionSectionDiff_eq_bilinearFactorization
+    (g₀ g₁ g₂ : SmoothRiemannianMetric I M) (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2) :
+    DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
+        - DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂ =
+      Integral.Connection.crossCorrParallelContraction (I := I) g₀ (a := 0) (b := 0)
+          (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))
+          (DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2]
+            (DeTurck.loweredConnDiffSection (I := I) g₁ g₀))
+        + Integral.Connection.crossCorrParallelContraction (I := I) g₀ (a := 0) (b := 0)
+          (realizeSymmCcTensor (I := I) g₀ T₂)
+          (DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2]
+              (DeTurck.loweredConnDiffSection (I := I) g₁ g₀)
+            - DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2]
+              (DeTurck.loweredConnDiffSection (I := I) g₂ g₀)) := by
+  -- Rewrite each cross-correction section as the parallel contraction `Φ(hₖ, Dₖ)`.
+  rw [← crossCorrParallelContraction_eq_crossCorrectionSection (I := I) g₀ g₁ T₁,
+    ← crossCorrParallelContraction_eq_crossCorrectionSection (I := I) g₀ g₂ T₂]
+  -- `h₁ − h₂ = realizeSymm(T₁ − T₂)`; reduce the goal to the abstract bilinear telescoping identity.
+  rw [realizeSymmCcTensor_sub (I := I) g₀ T₁ T₂]
+  set h₁ := realizeSymmCcTensor (I := I) g₀ T₁
+  set h₂ := realizeSymmCcTensor (I := I) g₀ T₂
+  set D₁ := DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2]
+    (DeTurck.loweredConnDiffSection (I := I) g₁ g₀)
+  set D₂ := DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2]
+    (DeTurck.loweredConnDiffSection (I := I) g₂ g₀)
+  -- Bilinear telescoping `Φ(h₁,D₁) − Φ(h₂,D₂) = Φ(h₁−h₂,D₁) + Φ(h₂,D₁−D₂)`.
+  conv_rhs => rw [crossCorrParallelContraction_sub_left (I := I) g₀ (a := 0) (b := 0) h₁ h₂ D₁,
+    crossCorrParallelContraction_sub_right (I := I) g₀ (a := 0) (b := 0) h₂ D₁ D₂]
+  abel
+
 /-- **(POSIT — the bilinear-difference diagonal product-grid covariant-jet bound of the
 cross-correction SECTION difference.)**  The genuinely-deep reusable bilinear-difference
 covariant-Leibniz content beneath the cross-correction-difference leaf: the intrinsic squared fibre
