@@ -463,12 +463,12 @@ private noncomputable def tangentBilinFlip {r t : ℕ} {x : M}
           map_smul' := fun c b => by rw [map_smul, ContinuousLinearMap.smul_apply]; rfl }
       map_add' := fun a a' => by
         refine ContinuousLinearMap.ext (fun b => ?_)
-        show P b (a + a') = _
+        change P b (a + a') = _
         rw [map_add (P b), ContinuousLinearMap.add_apply]
         rfl
       map_smul' := fun c a => by
         refine ContinuousLinearMap.ext (fun b => ?_)
-        show P b (c • a) = _
+        change P b (c • a) = _
         rw [map_smul (P b), ContinuousLinearMap.smul_apply]
         rfl }
 
@@ -768,6 +768,227 @@ private lemma metricDoubleTraceFib_apply (g : SmoothRiemannianMetric I M) (r t :
   rw [metricDoubleTraceFib, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk]
 
 set_option backward.isDefEq.respectTransparency false in
+/-- **The fixed-frame metric double-trace of an `(r, t + 2)`-tensor fibre element.** The diagonal frame
+sum, over a *general* smooth frame `B`, of the two-slot peel reading the two leading covariant slots:
+`metricDoubleTraceFibFixedFrame r t B x V := ∑ᵢ V(Bᵢ x, Bᵢ x, ·)`.  The general-frame companion of
+`metricDoubleTraceFib`; `metricDoubleTraceFib = metricDoubleTraceFibFixedFrame` against the moving frame
+`smoothOrthoFrame g x` (by `rfl`). -/
+private noncomputable def metricDoubleTraceFibFixedFrame (r t : ℕ)
+    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M) :
+    TensorRSSpace r (t + 2) I x →L[ℝ] TensorRSSpace r t I x :=
+  haveI : FiniteDimensional ℝ (TensorRSSpace r (t + 2) I x) :=
+    inferInstanceAs (FiniteDimensional ℝ (Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 2) I x))
+  haveI : T2Space (TensorRSSpace r (t + 2) I x) :=
+    inferInstanceAs (T2Space (Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 2) I x))
+  haveI : T2Space (TensorRSSpace r t I x) :=
+    inferInstanceAs (T2Space (Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x))
+  LinearMap.toContinuousLinearMap
+    { toFun := fun V =>
+        ∑ i : Fin (Module.finrank ℝ E),
+          twoSlotPeel (I := I) (M := M) r t x V (B i x) (B i x)
+      map_add' := fun V V' => by
+        rw [← Finset.sum_add_distrib]
+        refine Finset.sum_congr rfl (fun i _ => ?_)
+        rw [twoSlotPeel_add, ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply]
+      map_smul' := fun c V => by
+        rw [RingHom.id_apply, Finset.smul_sum]
+        refine Finset.sum_congr rfl (fun i _ => ?_)
+        rw [twoSlotPeel_smul, ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply] }
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The defining formula for `metricDoubleTraceFibFixedFrame`. -/
+private lemma metricDoubleTraceFibFixedFrame_apply (r t : ℕ)
+    (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
+    (V : TensorRSSpace r (t + 2) I x) :
+    metricDoubleTraceFibFixedFrame (I := I) (M := M) r t B x V =
+      ∑ i : Fin (Module.finrank ℝ E),
+        twoSlotPeel (I := I) (M := M) r t x V (B i x) (B i x) := by
+  haveI : FiniteDimensional ℝ (TensorRSSpace r (t + 2) I x) :=
+    inferInstanceAs (FiniteDimensional ℝ (Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 2) I x))
+  haveI : T2Space (TensorRSSpace r (t + 2) I x) :=
+    inferInstanceAs (T2Space (Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 2) I x))
+  haveI : T2Space (TensorRSSpace r t I x) :=
+    inferInstanceAs (T2Space (Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x))
+  rw [metricDoubleTraceFibFixedFrame, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk,
+    AddHom.coe_mk]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The moving-centre double-trace is the fixed-frame double-trace against the moving frame
+`smoothOrthoFrame g x` (definitionally). -/
+private lemma metricDoubleTraceFib_eq_fixedFrame_moving (g : SmoothRiemannianMetric I M) (r t : ℕ)
+    (x : M) :
+    metricDoubleTraceFib (I := I) (M := M) g r t x =
+      metricDoubleTraceFibFixedFrame (I := I) (M := M) r t (smoothOrthoFrame (I := I) g x) x := rfl
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **Base-point smoothness of the fixed-frame metric double-trace field.** Via the nested pointwise
+smoothness criterion `contMDiff_clm_section_of_pointwise`: on every smooth `(r, t + 2)`-section `Z`, the
+fixed-frame double-trace section `x ↦ ∑ᵢ Z x (Bᵢ x, Bᵢ x, ·)` is a finite frame sum (`ContMDiff.sum_section`)
+of two-slot peels of a smooth section against the smooth frame fields `B i` (each smooth by the same
+`covGradBundleEquiv`-inverse plus `ContMDiff.clm_bundle_apply` chain as `swapTwoFib_contMDiff`). -/
+private theorem metricDoubleTraceFibFixedFrame_contMDiff (r t : ℕ)
+    {B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b}
+    (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i))) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r (t + 2) ℝ E →L[ℝ] TensorRSModel r t ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (TensorRSModel r (t + 2) ℝ E →L[ℝ] TensorRSModel r t ℝ E)
+        (E := fun z : M => TensorRSSpace r (t + 2) I z →L[ℝ] TensorRSSpace r t I z) x
+        (metricDoubleTraceFibFixedFrame (I := I) (M := M) r t B x)) := by
+  classical
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (V₁ := fun z : M => TensorRSSpace r (t + 2) I z)
+    (V₂ := fun z : M => TensorRSSpace r t I z)
+    (φ := fun x => metricDoubleTraceFibFixedFrame (I := I) (M := M) r t B x)
+  intro Z
+  have hsum : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r t ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (TensorRSModel r t ℝ E)
+        (E := fun z : M => TensorRSSpace r t I z) x
+        (∑ i : Fin (Module.finrank ℝ E),
+          twoSlotPeel (I := I) (M := M) r t x (Z x) (B i x) (B i x))) := by
+    refine ContMDiff.sum_section (s := Finset.univ) (fun i _ => ?_)
+    -- the `i`-th summand `x ↦ twoSlotPeel (Z x) (B i x) (B i x)` is smooth.
+    have hA : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] TensorRSModel r (t + 1) ℝ E)) ∞
+        (fun x : M => TotalSpace.mk' (E →L[ℝ] TensorRSModel r (t + 1) ℝ E)
+          (E := fun z : M => TangentSpace I z →L[ℝ] TensorRSSpace r (t + 1) I z) x
+          ((covGradBundleEquiv (I := I) (M := M) r (t + 1) x).symm (Z x))) :=
+      (covGradBundleEquiv_symm_contMDiff_totalSpace (I := I) (M := M) r (t + 1)).comp Z.contMDiff
+    have h1 : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r (t + 1) ℝ E)) ∞
+        (fun x : M => TotalSpace.mk' (TensorRSModel r (t + 1) ℝ E)
+          (E := fun z : M => TensorRSSpace r (t + 1) I z) x
+          ((covGradBundleEquiv (I := I) (M := M) r (t + 1) x).symm (Z x) (B i x))) :=
+      ContMDiff.clm_bundle_apply (b := id) hA (hB i)
+    have h2 : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] TensorRSModel r t ℝ E)) ∞
+        (fun x : M => TotalSpace.mk' (E →L[ℝ] TensorRSModel r t ℝ E)
+          (E := fun z : M => TangentSpace I z →L[ℝ] TensorRSSpace r t I z) x
+          ((covGradBundleEquiv (I := I) (M := M) r t x).symm
+            ((covGradBundleEquiv (I := I) (M := M) r (t + 1) x).symm (Z x) (B i x)))) :=
+      (covGradBundleEquiv_symm_contMDiff_totalSpace (I := I) (M := M) r t).comp h1
+    have h3 : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r t ℝ E)) ∞
+        (fun x : M => TotalSpace.mk' (TensorRSModel r t ℝ E)
+          (E := fun z : M => TensorRSSpace r t I z) x
+          ((covGradBundleEquiv (I := I) (M := M) r t x).symm
+            ((covGradBundleEquiv (I := I) (M := M) r (t + 1) x).symm (Z x) (B i x)) (B i x))) :=
+      ContMDiff.clm_bundle_apply (b := id) h2 (hB i)
+    refine h3.congr ?_
+    intro x
+    rfl
+  refine hsum.congr ?_
+  intro x
+  exact congrArg (TotalSpace.mk' (TensorRSModel r t ℝ E)
+    (E := fun z : M => TensorRSSpace r t I z) x)
+    (metricDoubleTraceFibFixedFrame_apply (I := I) (M := M) r t B x (Z x)).symm
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The fixed-frame metric double-trace at `(r, t)` is frame-independent among `g_y`-orthonormal
+frames.** For two smooth tangent frames `B`, `C` both `g_y`-orthonormal at `y`,
+`metricDoubleTraceFibFixedFrame g r t B y = metricDoubleTraceFibFixedFrame g r t C y`.  The trace summand
+is the diagonal `V ↦ ∑ᵢ twoSlotPeel V (Bᵢ, Bᵢ)` of a continuous bilinear form; evaluating against an
+arbitrary input `V`, lower-input `D` and tail tuple `m`, the scalar diagonal trace `∑ᵢ Hb(Bᵢ, Bᵢ)` (with
+`Hb(u, w) := toModel (twoSlotPeel V u w D) m`) is frame-independent by `orthonormal_basis_bilin_trace`,
+so the `(r, t)`-tensors agree on every `V`, `D`, `m`.  The two-slot-peel mirror of
+`genuineCurvTraceFixedFramePureRRS_frame_independent`. -/
+private theorem metricDoubleTraceFibFixedFrame_frame_independent (g : SmoothRiemannianMetric I M)
+    (r t : ℕ)
+    {B C : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b} (y : M)
+    (hB_orth : ∀ i j : Fin (Module.finrank ℝ E),
+      g.inner y (B i y) (B j y) = if i = j then (1 : ℝ) else 0)
+    (hC_orth : ∀ i j : Fin (Module.finrank ℝ E),
+      g.inner y (C i y) (C j y) = if i = j then (1 : ℝ) else 0) :
+    metricDoubleTraceFibFixedFrame (I := I) (M := M) r t B y =
+      metricDoubleTraceFibFixedFrame (I := I) (M := M) r t C y := by
+  classical
+  refine ContinuousLinearMap.ext (fun V => ?_)
+  apply tensorRS_eq_of_toModel_eval_eq (I := I) (M := M)
+  intro D m
+  have hexpand : ∀ F : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b,
+      Tensor0SSpace.toModel
+          ((show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace t I y from
+            metricDoubleTraceFibFixedFrame (I := I) (M := M) r t F y V) D) m =
+        ∑ i : Fin (Module.finrank ℝ E),
+          Tensor0SSpace.toModel
+            ((show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace t I y from
+              twoSlotPeel (I := I) (M := M) r t y V (F i y) (F i y)) D) m := by
+    intro F
+    rw [show (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace t I y from
+          metricDoubleTraceFibFixedFrame (I := I) (M := M) r t F y V) =
+        ∑ i : Fin (Module.finrank ℝ E),
+          (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace t I y from
+            twoSlotPeel (I := I) (M := M) r t y V (F i y) (F i y)) from
+      metricDoubleTraceFibFixedFrame_apply (I := I) (M := M) r t F y V]
+    rw [ContinuousLinearMap.sum_apply, toModel_sum_eval]
+  rw [hexpand B, hexpand C]
+  haveI : T2Space (TangentSpace I y) := inferInstanceAs (T2Space E)
+  haveI : FiniteDimensional ℝ (TangentSpace I y) := inferInstanceAs (FiniteDimensional ℝ E)
+  set Hb : TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ :=
+    LinearMap.toContinuousLinearMap
+      { toFun := fun u =>
+          LinearMap.toContinuousLinearMap
+            { toFun := fun w => Tensor0SSpace.toModel
+                ((show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace t I y from
+                  twoSlotPeel (I := I) (M := M) r t y V u w) D) m
+              map_add' := fun w w' => by
+                rw [map_add (twoSlotPeel (I := I) (M := M) r t y V u), ContinuousLinearMap.add_apply,
+                  Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
+              map_smul' := fun c w => by
+                rw [map_smul (twoSlotPeel (I := I) (M := M) r t y V u),
+                  ContinuousLinearMap.smul_apply, Tensor0SSpace.toModel_smul,
+                  ContinuousMultilinearMap.smul_apply]; rfl }
+        map_add' := fun u u' => by
+          refine ContinuousLinearMap.ext (fun w => ?_)
+          change Tensor0SSpace.toModel
+              ((twoSlotPeel (I := I) (M := M) r t y V (u + u') w) D) m =
+            Tensor0SSpace.toModel ((twoSlotPeel (I := I) (M := M) r t y V u w) D) m +
+              Tensor0SSpace.toModel ((twoSlotPeel (I := I) (M := M) r t y V u' w) D) m
+          rw [map_add (twoSlotPeel (I := I) (M := M) r t y V), ContinuousLinearMap.add_apply,
+            ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add,
+            ContinuousMultilinearMap.add_apply]
+        map_smul' := fun c u => by
+          refine ContinuousLinearMap.ext (fun w => ?_)
+          change Tensor0SSpace.toModel
+              ((twoSlotPeel (I := I) (M := M) r t y V (c • u) w) D) m =
+            c • Tensor0SSpace.toModel ((twoSlotPeel (I := I) (M := M) r t y V u w) D) m
+          rw [map_smul (twoSlotPeel (I := I) (M := M) r t y V), ContinuousLinearMap.smul_apply,
+            ContinuousLinearMap.smul_apply, Tensor0SSpace.toModel_smul,
+            ContinuousMultilinearMap.smul_apply] }
+    with hHb_def
+  have hHb_apply : ∀ u w : TangentSpace I y,
+      Hb u w = Tensor0SSpace.toModel
+        ((show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace t I y from
+          twoSlotPeel (I := I) (M := M) r t y V u w) D) m := by
+    intro u w
+    rw [hHb_def, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk,
+      LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk]
+  rw [show (∑ i : Fin (Module.finrank ℝ E),
+        Tensor0SSpace.toModel
+          ((show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace t I y from
+            twoSlotPeel (I := I) (M := M) r t y V (B i y) (B i y)) D) m) =
+      ∑ i : Fin (Module.finrank ℝ E), Hb (B i y) (B i y) from
+    Finset.sum_congr rfl (fun i _ => (hHb_apply (B i y) (B i y)).symm)]
+  rw [show (∑ i : Fin (Module.finrank ℝ E),
+        Tensor0SSpace.toModel
+          ((show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace t I y from
+            twoSlotPeel (I := I) (M := M) r t y V (C i y) (C i y)) D) m) =
+      ∑ i : Fin (Module.finrank ℝ E), Hb (C i y) (C i y) from
+    Finset.sum_congr rfl (fun i _ => (hHb_apply (C i y) (C i y)).symm)]
+  rw [orthonormal_basis_bilin_trace (I := I) (M := M) g (x := y) Hb (fun i => B i y) hB_orth,
+    orthonormal_basis_bilin_trace (I := I) (M := M) g (x := y) Hb (fun i => C i y) hC_orth]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **On `smoothOrthoFrameNbhd x₀`, the moving-centre metric double-trace equals the frozen-frame
+double-trace against `smoothOrthoFrame g x₀`.** Both are fixed-frame double-traces against frames
+orthonormal at `y` (the moving frame `smoothOrthoFrame g y` at its centre, the frozen frame
+`smoothOrthoFrame g x₀` for `y ∈ smoothOrthoFrameNbhd x₀`), which agree by frame-independence
+`metricDoubleTraceFibFixedFrame_frame_independent`. -/
+private lemma metricDoubleTraceFib_eq_fixedFrame_smoothOrthoFrame_on_nbhd
+    (g : SmoothRiemannianMetric I M) (r t : ℕ) (x₀ : M)
+    {y : M} (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x₀) :
+    metricDoubleTraceFib (I := I) (M := M) g r t y =
+      metricDoubleTraceFibFixedFrame (I := I) (M := M) r t (smoothOrthoFrame (I := I) g x₀) y := by
+  rw [metricDoubleTraceFib_eq_fixedFrame_moving]
+  exact metricDoubleTraceFibFixedFrame_frame_independent (I := I) (M := M) g r t y
+    (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g y i j)
+    (fun i j => smoothOrthoFrame_orthonormal (I := I) g x₀ hy i j)
+
+set_option backward.isDefEq.respectTransparency false in
 /-- **Base-point smoothness of the metric double-trace field (precise infrastructure child).** On
 every smooth `(r, t + 2)`-section `Z`, the moving-centre double-trace section
 `x ↦ ∑ᵢ Z x (Bᵢ x, Bᵢ x, ·)` against the moving `g_x`-orthonormal frame `Bᵢ := smoothOrthoFrame g x i`
@@ -785,8 +1006,22 @@ private theorem metricDoubleTraceFib_contMDiff (g : SmoothRiemannianMetric I M) 
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r (t + 2) ℝ E →L[ℝ] TensorRSModel r t ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel r (t + 2) ℝ E →L[ℝ] TensorRSModel r t ℝ E)
         (E := fun z : M => TensorRSSpace r (t + 2) I z →L[ℝ] TensorRSSpace r t I z) x
-        (metricDoubleTraceFib (I := I) (M := M) g r t x)) :=
-  sorry
+        (metricDoubleTraceFib (I := I) (M := M) g r t x)) := by
+  classical
+  intro x₀
+  have h_fixed_at : ContMDiffAt I
+      (I.prod 𝓘(ℝ, TensorRSModel r (t + 2) ℝ E →L[ℝ] TensorRSModel r t ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (TensorRSModel r (t + 2) ℝ E →L[ℝ] TensorRSModel r t ℝ E)
+        (E := fun z : M => TensorRSSpace r (t + 2) I z →L[ℝ] TensorRSSpace r t I z) x
+        (metricDoubleTraceFibFixedFrame (I := I) (M := M) r t
+          (smoothOrthoFrame (I := I) g x₀) x)) x₀ :=
+    metricDoubleTraceFibFixedFrame_contMDiff (I := I) (M := M) r t
+      (fun i => smoothOrthoFrame_smooth (I := I) g x₀ i) x₀
+  refine h_fixed_at.congr_of_eventuallyEq ?_
+  filter_upwards [smoothOrthoFrameNbhd_mem_nhds (I := I) (M := M) x₀] with y hy
+  exact congrArg (TotalSpace.mk' (TensorRSModel r (t + 2) ℝ E →L[ℝ] TensorRSModel r t ℝ E)
+    (E := fun z : M => TensorRSSpace r (t + 2) I z →L[ℝ] TensorRSSpace r t I z) y)
+    (metricDoubleTraceFib_eq_fixedFrame_smoothOrthoFrame_on_nbhd (I := I) (M := M) g r t x₀ hy)
 
 set_option backward.isDefEq.respectTransparency false in
 /-- **The metric double-trace Hom field `Tr t : Hom(T^{(r,t+2)}, T^{(r,t)})`**, as a smooth
@@ -833,9 +1068,517 @@ private theorem roughLap_eq_metricDoubleTrace (g : SmoothRiemannianMetric I M) (
   exact (secondCovGrad_eval_eq_tensorSecondCovDeriv (I := I) g r t W
     (smoothOrthoFrame_smooth (I := I) g x i) (smoothOrthoFrame_smooth (I := I) g x i) x D m).symm
 
-/-! ## The rough-Laplacian / covariant-gradient commutator at operator-field granularity -/
+/-! ## The section-level Ricci identity as a fixed Hom-field action -/
 
 set_option backward.isDefEq.respectTransparency false in
+/-- **The Ricci antisymmetric second-gradient functional reads only the value (value-locality is the
+Ricci identity).** For two smooth compactly-supported `(r, t)`-tensors `W₁`, `W₂` agreeing at `x`, the
+antisymmetric leading-two-slot second iterated covariant gradients agree at `x`:
+`(∇²W₁ − σ₁₂·∇²W₁)(x) = (∇²W₂ − σ₁₂·∇²W₂)(x)`.  Evaluated on any tuple `Fin.cons v0 (Fin.cons v1 m)`,
+the two leading slots read `tensorSecondCovDeriv X Y W − tensorSecondCovDeriv Y X W` against the smooth
+extensions `X, Y` of `v0, v1` (the two-slot bridge `secondCovGrad_eval_eq_tensorSecondCovDeriv` and the
+slot transposition `swapTwoFib_eval`), which by the Hessian-form Ricci identity
+`tensorSecondCovDeriv_antisymm_eq_riemannOp` equals `riemannOp x v0 v1 (W x)` — a continuous-linear
+function of `W x` alone. -/
+private theorem ricciDefect_eval (g : SmoothRiemannianMetric I M) (r t : ℕ)
+    (W : SmoothCcTensor g r t) (x : M) (D : Tensor0SSpace r I x)
+    (v0 v1 : TangentSpace I x) (m : Fin t → TangentSpace I x) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 2) I x from
+          (iteratedCovGrad g r t 2 W -
+            appFullSec (I := I) (M := M) g r (t + 2) (t + 2)
+              (swapTwoSec (I := I) (M := M) (E := E) r t)
+              (iteratedCovGrad g r t 2 W)).toSection x) D)
+        (Fin.cons v0 (Fin.cons v1 m)) =
+      Tensor0SSpace.toModel
+        ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x from
+          riemannOp (tensorCov (I := I) g r t) x v0 v1 (W.toSection x)) D) m := by
+  classical
+  set X : Π b : M, TangentSpace I b := smoothExtensionTangent (I := I) x v0 with hX_def
+  set Y : Π b : M, TangentSpace I b := smoothExtensionTangent (I := I) x v1 with hY_def
+  have hXx : X x = v0 := smoothExtensionTangent_eq (I := I) x v0
+  have hYx : Y x = v1 := smoothExtensionTangent_eq (I := I) x v1
+  have hXsm : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X) := smoothExtensionTangent_contMDiff x v0
+  have hYsm : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y) := smoothExtensionTangent_contMDiff x v1
+  -- The fibre value of the difference at `x` is the CLM difference.
+  have hfib : (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 2) I x from
+        (iteratedCovGrad g r t 2 W -
+          appFullSec (I := I) (M := M) g r (t + 2) (t + 2)
+            (swapTwoSec (I := I) (M := M) (E := E) r t)
+            (iteratedCovGrad g r t 2 W)).toSection x) =
+      (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 2) I x from
+        (iteratedCovGrad g r t 2 W).toSection x) -
+      (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (t + 2) I x from
+        (appFullSec (I := I) (M := M) g r (t + 2) (t + 2)
+          (swapTwoSec (I := I) (M := M) (E := E) r t)
+          (iteratedCovGrad g r t 2 W)).toSection x) := by
+    rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
+  rw [hfib, ContinuousLinearMap.sub_apply, Tensor0SSpace.toModel_sub,
+    ContinuousMultilinearMap.sub_apply]
+  -- Read the swapped term: `σ₁₂` swaps the two leading slots.
+  rw [appFullSec_toSection, swapTwoSec_apply,
+    swapTwoFib_eval (I := I) (M := M) r t x ((iteratedCovGrad g r t 2 W).toSection x) v0 v1 D m]
+  -- Both terms now read the two leading covariant slots of `∇²W = covGrad (covGrad W)`.
+  rw [show (iteratedCovGrad g r t 2 W).toSection x =
+      (covGrad (I := I) (M := M) g r (t + 1)
+        (covGrad (I := I) (M := M) g r t W)).toSection x from rfl]
+  rw [show v0 = X x from hXx.symm, show v1 = Y x from hYx.symm]
+  rw [secondCovGrad_eval_eq_tensorSecondCovDeriv (I := I) g r t W hXsm hYsm x D m,
+    secondCovGrad_eval_eq_tensorSecondCovDeriv (I := I) g r t W hYsm hXsm x D m]
+  -- The antisymmetric part is the Riemann curvature operator (Ricci identity).
+  rw [← ContinuousMultilinearMap.sub_apply, ← Tensor0SSpace.toModel_sub,
+    ← ContinuousLinearMap.sub_apply]
+  rw [show (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x from
+        tensorSecondCovDeriv (I := I) g r t X Y (fun y : M => W.toSection y) x) -
+      (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x from
+        tensorSecondCovDeriv (I := I) g r t Y X (fun y : M => W.toSection y) x) =
+      (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace t I x from
+        riemannOp (tensorCov (I := I) g r t) x (X x) (Y x) (W.toSection x)) from
+    tensorSecondCovDeriv_antisymm_eq_riemannOp (I := I) g r t hXsm hYsm
+      W.toSection.contMDiff]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The Ricci antisymmetric second-gradient functional reads only the value (value-locality is the
+Ricci identity).** For two smooth compactly-supported `(r, t)`-tensors `W₁`, `W₂` agreeing at `x`, the
+antisymmetric leading-two-slot second iterated covariant gradients agree at `x`:
+`(∇²W₁ − σ₁₂·∇²W₁)(x) = (∇²W₂ − σ₁₂·∇²W₂)(x)`.  Each, evaluated on any tuple, reads
+`riemannOp x v0 v1 (W x)` (`ricciDefect_eval`) — a continuous-linear function of `W x` alone. -/
+private theorem ricciDefect_value_local (g : SmoothRiemannianMetric I M) (r t : ℕ)
+    (W₁ W₂ : SmoothCcTensor g r t) (x : M)
+    (hW : W₁.toSection x = W₂.toSection x) :
+    (iteratedCovGrad g r t 2 W₁ -
+        appFullSec (I := I) (M := M) g r (t + 2) (t + 2)
+          (swapTwoSec (I := I) (M := M) (E := E) r t) (iteratedCovGrad g r t 2 W₁)).toSection x =
+      (iteratedCovGrad g r t 2 W₂ -
+        appFullSec (I := I) (M := M) g r (t + 2) (t + 2)
+          (swapTwoSec (I := I) (M := M) (E := E) r t) (iteratedCovGrad g r t 2 W₂)).toSection x := by
+  classical
+  apply tensorRS_eq_of_toModel_eval_eq (I := I) (M := M)
+  intro D v
+  rw [show v = Fin.cons (v 0) (Fin.cons (Matrix.vecTail v 0) (Matrix.vecTail (Matrix.vecTail v)))
+      from by
+    funext j
+    refine Fin.cases ?_ (fun j => ?_) j
+    · simp [Fin.cons_zero]
+    · refine Fin.cases ?_ (fun k => ?_) j
+      · simp [Matrix.vecTail, Function.comp]
+      · simp [Fin.cons_succ, Matrix.vecTail, Function.comp]]
+  rw [ricciDefect_eval (I := I) (M := M) g r t W₁ x D (v 0) (Matrix.vecTail v 0)
+      (Matrix.vecTail (Matrix.vecTail v)),
+    ricciDefect_eval (I := I) (M := M) g r t W₂ x D (v 0) (Matrix.vecTail v 0)
+      (Matrix.vecTail (Matrix.vecTail v))]
+  rw [hW]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The Ricci-defect functional is additive at the fibre-value level.** -/
+private lemma ricciDefect_toSection_add (g : SmoothRiemannianMetric I M) (r t : ℕ)
+    (W₁ W₂ : SmoothCcTensor g r t) (x : M) :
+    (iteratedCovGrad g r t 2 (W₁ + W₂) -
+        appFullSec (I := I) (M := M) g r (t + 2) (t + 2)
+          (swapTwoSec (I := I) (M := M) (E := E) r t)
+          (iteratedCovGrad g r t 2 (W₁ + W₂))).toSection x =
+      (iteratedCovGrad g r t 2 W₁ -
+          appFullSec (I := I) (M := M) g r (t + 2) (t + 2)
+            (swapTwoSec (I := I) (M := M) (E := E) r t) (iteratedCovGrad g r t 2 W₁)).toSection x +
+        (iteratedCovGrad g r t 2 W₂ -
+          appFullSec (I := I) (M := M) g r (t + 2) (t + 2)
+            (swapTwoSec (I := I) (M := M) (E := E) r t)
+            (iteratedCovGrad g r t 2 W₂)).toSection x := by
+  simp only [iteratedCovGrad_add]
+  rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
+    SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
+    SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
+  rw [appFullSec_toSection, appFullSec_toSection, appFullSec_toSection]
+  rw [show ((iteratedCovGrad g r t 2 W₁ + iteratedCovGrad g r t 2 W₂).toSection x
+        : TensorRSSpace r (t + 2) I x) =
+      (iteratedCovGrad g r t 2 W₁).toSection x + (iteratedCovGrad g r t 2 W₂).toSection x from by
+    rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]]
+  rw [map_add (show TensorRSSpace r (t + 2) I x →L[ℝ] TensorRSSpace r (t + 2) I x from
+    swapTwoSec (I := I) (M := M) (E := E) r t x)]
+  abel
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The Ricci-defect functional is `ℝ`-homogeneous at the fibre-value level.** -/
+private lemma ricciDefect_toSection_smul (g : SmoothRiemannianMetric I M) (r t : ℕ)
+    (k : ℝ) (W : SmoothCcTensor g r t) (x : M) :
+    (iteratedCovGrad g r t 2 (k • W) -
+        appFullSec (I := I) (M := M) g r (t + 2) (t + 2)
+          (swapTwoSec (I := I) (M := M) (E := E) r t)
+          (iteratedCovGrad g r t 2 (k • W))).toSection x =
+      k • (iteratedCovGrad g r t 2 W -
+          appFullSec (I := I) (M := M) g r (t + 2) (t + 2)
+            (swapTwoSec (I := I) (M := M) (E := E) r t)
+            (iteratedCovGrad g r t 2 W)).toSection x := by
+  have hsmul2 : iteratedCovGrad g r t 2 (k • W) = k • iteratedCovGrad g r t 2 W := by
+    change covGrad (I := I) (M := M) g r (t + 1) (covGrad (I := I) (M := M) g r t (k • W)) =
+      k • covGrad (I := I) (M := M) g r (t + 1) (covGrad (I := I) (M := M) g r t W)
+    rw [covGrad_smul, covGrad_smul]
+  rw [hsmul2]
+  rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
+    SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
+  rw [appFullSec_toSection, appFullSec_toSection]
+  rw [show ((k • iteratedCovGrad g r t 2 W).toSection x : TensorRSSpace r (t + 2) I x) =
+      k • (iteratedCovGrad g r t 2 W).toSection x from by
+    rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply]]
+  rw [map_smul (show TensorRSSpace r (t + 2) I x →L[ℝ] TensorRSSpace r (t + 2) I x from
+    swapTwoSec (I := I) (M := M) (E := E) r t x)]
+  rw [smul_sub]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The section-level Ricci identity as a fixed smooth Hom-field action.** The leading-two-slot
+antisymmetric part of the second iterated covariant gradient is the action of a fixed smooth full
+Hom-bundle field `RActF : Hom(T^{(r,t)}, T^{(r,t+2)})`:
+`∇²W − σ₁₂·∇²W = RActF · W` for every smooth compactly-supported `(r, t)`-tensor `W`, where
+`σ₁₂ := swapTwoSec` is the leading-two-slot transposition.  The functional `W ↦ ∇²W − σ₁₂·∇²W` is
+`ℝ`-linear at the fibre-value level (`ricciDefect_toSection_add` / `_smul`) and value-local (its
+value-locality *is* the pointwise Ricci identity `ricciDefect_value_local`), so the representation
+theorem `exists_value_local_appFullSec` supplies `RActF` with smoothness for free. -/
+private theorem exists_ricciDefect_homField (g : SmoothRiemannianMetric I M) (r t : ℕ) :
+    ∃ RActF : HomTensorRSField (E := E) (M := M) r t (t + 2) I,
+      ∀ W : SmoothCcTensor g r t,
+        iteratedCovGrad g r t 2 W -
+            appFullSec (I := I) (M := M) g r (t + 2) (t + 2)
+              (swapTwoSec (I := I) (M := M) (E := E) r t) (iteratedCovGrad g r t 2 W) =
+          appFullSec (I := I) (M := M) g r t (t + 2) RActF W :=
+  exists_value_local_appFullSec (I := I) (M := M) g r t (t + 2)
+    (fun W => iteratedCovGrad g r t 2 W -
+      appFullSec (I := I) (M := M) g r (t + 2) (t + 2)
+        (swapTwoSec (I := I) (M := M) (E := E) r t) (iteratedCovGrad g r t 2 W))
+    (fun W₁ W₂ x => ricciDefect_toSection_add (I := I) (M := M) g r t W₁ W₂ x)
+    (fun k W x => ricciDefect_toSection_smul (I := I) (M := M) g r t k W x)
+    (fun W₁ W₂ x hW => ricciDefect_value_local (I := I) (M := M) g r t W₁ W₂ x hW)
+
+/-! ## The trace-conjugation of the slot-extended double-trace field -/
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **Evaluation of the slot-extended metric double-trace field on the canonical tuple.** With
+`Tr t := metricDoubleTraceFib g r t`, the slot-extended trace `slotExtendFullFib (Tr s)` of an
+`(r, s + 3)`-tensor `V`, read at lower input `D` and tuple `Fin.cons v0 (Fin.cons (Bᵢ x) (Fin.cons
+(Bᵢ x) m))`-summed, reads the two slots `(1, 2)` of `V` against the frame: `∑ᵢ V(v0, Bᵢ, Bᵢ, m)`. -/
+private lemma slotExtTrace_eval (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
+    (V : TensorRSSpace r (s + 1 + 2) I x) (D : Tensor0SSpace r I x)
+    (v0 : TangentSpace I x) (m : Fin s → TangentSpace I x) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+          slotExtendFullFib (I := I) (M := M) g r (s + 2) s x
+            (metricDoubleTraceFib (I := I) (M := M) g r s x) V) D) (Fin.cons v0 m) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        Tensor0SSpace.toModel
+          ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (s + 1 + 2) I x from V) D)
+          (Fin.cons v0 (Fin.cons (smoothOrthoFrame (I := I) g x i x)
+            (Fin.cons (smoothOrthoFrame (I := I) g x i x) m))) := by
+  classical
+  rw [slotExtendFullFib_apply_eval (I := I) (M := M) g r (s + 2) s x
+    (metricDoubleTraceFib (I := I) (M := M) g r s x) V D v0 m]
+  rw [show (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+        metricDoubleTraceFib (I := I) (M := M) g r s x
+          ((covGradBundleEquiv (I := I) (M := M) r (s + 2) x).symm V v0)) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+          twoSlotPeel (I := I) (M := M) r s x
+            ((covGradBundleEquiv (I := I) (M := M) r (s + 2) x).symm V v0)
+            (smoothOrthoFrame (I := I) g x i x) (smoothOrthoFrame (I := I) g x i x)) from
+    metricDoubleTraceFib_apply (I := I) (M := M) g r s x
+      ((covGradBundleEquiv (I := I) (M := M) r (s + 2) x).symm V v0)]
+  rw [ContinuousLinearMap.sum_apply, toModel_sum_eval]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [twoSlotPeel_eval (I := I) (M := M) r s x
+    ((covGradBundleEquiv (I := I) (M := M) r (s + 2) x).symm V v0)
+    (smoothOrthoFrame (I := I) g x i x) (smoothOrthoFrame (I := I) g x i x) D m]
+  exact covGradBundleEquiv_symm_apply_eval (I := I) (M := M) r (s + 2) x V v0 D
+    (Fin.cons (smoothOrthoFrame (I := I) g x i x)
+      (Fin.cons (smoothOrthoFrame (I := I) g x i x) m))
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **Evaluation of the trace-conjugation on the canonical tuple.** The conjugate
+`Tr(s+1) ∘ σ₂₃ ∘ σ₁₂` of an `(r, s + 3)`-tensor `V`, with `σ₁₂ := swapTwoFib r (s+1)`,
+`σ₂₃ := slotExtendFullFib (swapTwoFib r s)` and `Tr(s+1) := metricDoubleTraceFib g r (s+1)`, read at
+`D` and `Fin.cons v0 m`, traces the slots `(1, 2)` of `V` against the frame: `∑ᵢ V(v0, Bᵢ, Bᵢ, m)`. -/
+private lemma traceConj_eval (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
+    (V : TensorRSSpace r (s + 1 + 2) I x) (D : Tensor0SSpace r I x)
+    (v0 : TangentSpace I x) (m : Fin s → TangentSpace I x) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+          metricDoubleTraceFib (I := I) (M := M) g r (s + 1) x
+            (slotExtendFullFib (I := I) (M := M) g r (s + 2) (s + 2) x
+              (swapTwoFib (I := I) (M := M) r s x)
+              (swapTwoFib (I := I) (M := M) r (s + 1) x V))) D) (Fin.cons v0 m) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        Tensor0SSpace.toModel
+          ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (s + 1 + 2) I x from V) D)
+          (Fin.cons v0 (Fin.cons (smoothOrthoFrame (I := I) g x i x)
+            (Fin.cons (smoothOrthoFrame (I := I) g x i x) m))) := by
+  classical
+  set W : TensorRSSpace r (s + 1 + 2) I x :=
+    slotExtendFullFib (I := I) (M := M) g r (s + 2) (s + 2) x
+      (swapTwoFib (I := I) (M := M) r s x) (swapTwoFib (I := I) (M := M) r (s + 1) x V) with hW_def
+  rw [show (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+        metricDoubleTraceFib (I := I) (M := M) g r (s + 1) x W) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+          twoSlotPeel (I := I) (M := M) r (s + 1) x W
+            (smoothOrthoFrame (I := I) g x i x) (smoothOrthoFrame (I := I) g x i x)) from
+    metricDoubleTraceFib_apply (I := I) (M := M) g r (s + 1) x W]
+  rw [ContinuousLinearMap.sum_apply, toModel_sum_eval]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  -- `Tr(s+1)` traces slots `(0,1)` of `W = σ₂₃ (σ₁₂ V)`; tail is the full `(r, s+1)`-tuple.
+  rw [twoSlotPeel_eval (I := I) (M := M) r (s + 1) x W
+    (smoothOrthoFrame (I := I) g x i x) (smoothOrthoFrame (I := I) g x i x) D
+    (Fin.cons v0 m)]
+  -- `σ₂₃` (slotExt of `σ₁₂`) reads slot `0` (= `Bᵢ`) as passenger, swaps the next two.
+  rw [hW_def]
+  rw [slotExtendFullFib_apply_eval (I := I) (M := M) g r (s + 2) (s + 2) x
+    (swapTwoFib (I := I) (M := M) r s x) (swapTwoFib (I := I) (M := M) r (s + 1) x V) D
+    (smoothOrthoFrame (I := I) g x i x)
+    (Fin.cons (smoothOrthoFrame (I := I) g x i x) (Fin.cons v0 m))]
+  -- `σ₁₂` on the `(r, s+2)` per-passenger tensor swaps its leading two slots `(Bᵢ, v0) ↦ (v0, Bᵢ)`.
+  rw [swapTwoFib_eval (I := I) (M := M) r s x
+    ((covGradBundleEquiv (I := I) (M := M) r (s + 2) x).symm
+      (swapTwoFib (I := I) (M := M) r (s + 1) x V) (smoothOrthoFrame (I := I) g x i x))
+    (smoothOrthoFrame (I := I) g x i x) v0 D m]
+  -- the passenger peel reads slot `0` of `σ₁₂ V`.
+  rw [covGradBundleEquiv_symm_apply_eval (I := I) (M := M) r (s + 2) x
+    (swapTwoFib (I := I) (M := M) r (s + 1) x V) (smoothOrthoFrame (I := I) g x i x) D
+    (Fin.cons v0 (Fin.cons (smoothOrthoFrame (I := I) g x i x) m))]
+  -- finally `σ₁₂` on `V` swaps its leading two slots `(Bᵢ, v0) ↦ (v0, Bᵢ)`.
+  rw [swapTwoFib_eval (I := I) (M := M) r (s + 1) x V
+    (smoothOrthoFrame (I := I) g x i x) v0
+    D (Fin.cons (smoothOrthoFrame (I := I) g x i x) m)]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The trace-conjugation identity (fibre form).** The slot-extended metric double-trace
+`slotExtendFullFib (Tr s)` of an `(r, s + 3)`-tensor equals the conjugate `Tr(s+1) ∘ σ₂₃ ∘ σ₁₂`, where
+`σ₁₂ := swapTwoFib r (s+1)` transposes the leading two slots, `σ₂₃ := slotExtendFullFib (swapTwoFib r
+s)` transposes slots `(1, 2)`, and both sides trace the `(1, 2)` slot pair of the original tensor: a
+pure multilinear relabelling of which leading pair is traced (`slotExtTrace_eval` / `traceConj_eval`,
+both reading `∑ᵢ V(v0, Bᵢ, Bᵢ, ·)`). -/
+private lemma slotExtTrace_eq_traceConj (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
+    (V : TensorRSSpace r (s + 1 + 2) I x) :
+    (show TensorRSSpace r (s + 1 + 2) I x →L[ℝ] TensorRSSpace r (s + 1) I x from
+        slotExtendFullFib (I := I) (M := M) g r (s + 2) s x
+          (metricDoubleTraceFib (I := I) (M := M) g r s x)) V =
+      metricDoubleTraceFib (I := I) (M := M) g r (s + 1) x
+        (slotExtendFullFib (I := I) (M := M) g r (s + 2) (s + 2) x
+          (swapTwoFib (I := I) (M := M) r s x)
+          (swapTwoFib (I := I) (M := M) r (s + 1) x V)) := by
+  classical
+  apply tensorRS_eq_of_toModel_eval_eq (I := I) (M := M)
+  intro D v
+  rw [show v = Fin.cons (v 0) (Matrix.vecTail v) from by
+    funext j; refine Fin.cases ?_ (fun k => ?_) j
+    · simp [Fin.cons_zero]
+    · simp [Fin.cons_succ, Matrix.vecTail, Function.comp]]
+  rw [slotExtTrace_eval (I := I) (M := M) g r s x V D (v 0) (Matrix.vecTail v),
+    traceConj_eval (I := I) (M := M) g r s x V D (v 0) (Matrix.vecTail v)]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The trace-conjugation identity (section form).** The section action of the slot-extended metric
+double-trace `slotExtendFullSec (Tr s)` on an `(r, s + 3)`-tensor section `V` equals the action of the
+conjugate `Tr(s+1) ∘ σ₂₃ ∘ σ₁₂`, with `σ₁₂ := swapTwoSec r (s+1)` and
+`σ₂₃ := slotExtendFullSec (swapTwoSec r s)`.  The section repackaging of the fibre identity
+`slotExtTrace_eq_traceConj`. -/
+private theorem appFullSec_slotExtTrace_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (V : SmoothCcTensor g r (s + 1 + 2)) :
+    appFullSec (I := I) (M := M) g r (s + 2 + 1) (s + 1)
+        (slotExtendFullSec (I := I) g r (s + 2) s
+          (metricDoubleTraceField (I := I) (M := M) (E := E) g r s)) V =
+      appFullSec (I := I) (M := M) g r (s + 1 + 2) (s + 1)
+        (metricDoubleTraceField (I := I) (M := M) (E := E) g r (s + 1))
+        (appFullSec (I := I) (M := M) g r (s + 1 + 2) (s + 1 + 2)
+          (slotExtendFullSec (I := I) g r (s + 2) (s + 2)
+            (swapTwoSec (I := I) (M := M) (E := E) r s))
+          (appFullSec (I := I) (M := M) g r (s + 1 + 2) (s + 1 + 2)
+            (swapTwoSec (I := I) (M := M) (E := E) r (s + 1)) V)) := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [appFullSec_toSection, appFullSec_toSection, appFullSec_toSection, appFullSec_toSection]
+  simp only [slotExtendFullSec_apply, metricDoubleTraceField_apply, swapTwoSec_apply]
+  exact slotExtTrace_eq_traceConj (I := I) (M := M) g r s x (V.toSection x)
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The composition of two fixed smooth Hom-field actions is a fixed smooth Hom-field action.**
+For smooth full Hom-bundle fields `Q : Hom(T^{(r,b)}, T^{(r,c)})` and `Q' : Hom(T^{(r,a)}, T^{(r,b)})`
+there is a smooth field `QQ' : Hom(T^{(r,a)}, T^{(r,c)})` with
+`appFullSec Q (appFullSec Q' W) = appFullSec QQ' W`: the composite `W ↦ Q · (Q' · W)` is value-local and
+`ℝ`-linear at the fibre-value level (each factor is), so the representation theorem
+`exists_value_local_appFullSec` supplies `QQ'` with smoothness for free. -/
+private theorem exists_appFullSec_comp (g : SmoothRiemannianMetric I M) (r a b c : ℕ)
+    (Q : HomTensorRSField (E := E) (M := M) r b c I)
+    (Q' : HomTensorRSField (E := E) (M := M) r a b I) :
+    ∃ QQ' : HomTensorRSField (E := E) (M := M) r a c I,
+      ∀ W : SmoothCcTensor g r a,
+        appFullSec (I := I) (M := M) g r b c Q (appFullSec (I := I) (M := M) g r a b Q' W) =
+          appFullSec (I := I) (M := M) g r a c QQ' W :=
+  exists_value_local_appFullSec (I := I) (M := M) g r a c
+    (fun W => appFullSec (I := I) (M := M) g r b c Q (appFullSec (I := I) (M := M) g r a b Q' W))
+    (fun W₁ W₂ x => by
+      simp only [appFullSec_toSection]
+      rw [show ((W₁ + W₂).toSection x : TensorRSSpace r a I x) =
+          W₁.toSection x + W₂.toSection x from by
+        rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]]
+      rw [map_add (show TensorRSSpace r a I x →L[ℝ] TensorRSSpace r b I x from Q' x),
+        map_add (show TensorRSSpace r b I x →L[ℝ] TensorRSSpace r c I x from Q x)])
+    (fun k W x => by
+      simp only [appFullSec_toSection]
+      rw [show ((k • W).toSection x : TensorRSSpace r a I x) = k • W.toSection x from by
+        rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply]]
+      rw [map_smul (show TensorRSSpace r a I x →L[ℝ] TensorRSSpace r b I x from Q' x),
+        map_smul (show TensorRSSpace r b I x →L[ℝ] TensorRSSpace r c I x from Q x)])
+    (fun W₁ W₂ x hW => by
+      simp only [appFullSec_toSection]
+      rw [hW])
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The full Hom-bundle action distributes over subtraction in the contracted tensor.** -/
+private theorem appFullSec_sub_right (g : SmoothRiemannianMetric I M) (r a c : ℕ)
+    (Q : HomTensorRSField (E := E) (M := M) r a c I) (W₁ W₂ : SmoothCcTensor g r a) :
+    appFullSec (I := I) (M := M) g r a c Q (W₁ - W₂) =
+      appFullSec (I := I) (M := M) g r a c Q W₁ - appFullSec (I := I) (M := M) g r a c Q W₂ := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
+  rw [appFullSec_toSection, appFullSec_toSection, appFullSec_toSection]
+  rw [show ((W₁ - W₂).toSection x : TensorRSSpace r a I x) = W₁.toSection x - W₂.toSection x from by
+    rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]]
+  rw [map_sub (show TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x from Q x)]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The full Hom-bundle action distributes over addition in the contracted tensor.** -/
+private theorem appFullSec_add_right (g : SmoothRiemannianMetric I M) (r a c : ℕ)
+    (Q : HomTensorRSField (E := E) (M := M) r a c I) (W₁ W₂ : SmoothCcTensor g r a) :
+    appFullSec (I := I) (M := M) g r a c Q (W₁ + W₂) =
+      appFullSec (I := I) (M := M) g r a c Q W₁ + appFullSec (I := I) (M := M) g r a c Q W₂ :=
+  appFullRS_add_right (I := I) (M := M) g r a c (fun y : M => Q y) Q.contMDiff W₁ W₂
+
+/-! ## The rough-Laplacian / covariant-gradient commutator at operator-field granularity -/
+
+set_option backward.isDefEq.respectTransparency true in
+set_option maxHeartbeats 6400000 in
+/-- **The bracket telescoping of the trace-conjugation difference (auxiliary).** The order-`3`
+head-difference bracket `∇³S − σ₂₃·(σ₁₂·∇³S)` of the trace-conjugation telescopes, through the two
+covariant product rules `covGrad_appFullSec_eq` and the Ricci-defect fields `RActF` at valences `s`
+and `s + 1`, into a sum of fixed Hom-field actions on the `≤ 2`-jet `(S, ∇S, ∇²S)` plus the curvature
+swap term `σ₂₃·(RActF(s+1)·∇S)`.  Stated over the canonical valence `s + 3` so no index-defeq juggling
+enters the proof. -/
+private theorem headDifferenceDrop_bracket (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (RA_s : HomTensorRSField (E := E) (M := M) r s (s + 2) I)
+    (RA_s1 : HomTensorRSField (E := E) (M := M) r (s + 1) (s + 3) I)
+    (hRA_s : ∀ W : SmoothCcTensor g r s,
+      iteratedCovGrad g r s 2 W -
+          appFullSec (I := I) (M := M) g r (s + 2) (s + 2)
+            (swapTwoSec (I := I) (M := M) (E := E) r s) (iteratedCovGrad g r s 2 W) =
+        appFullSec (I := I) (M := M) g r s (s + 2) RA_s W)
+    (hRA_s1 : ∀ W : SmoothCcTensor g r (s + 1),
+      iteratedCovGrad g r (s + 1) 2 W -
+          appFullSec (I := I) (M := M) g r (s + 3) (s + 3)
+            (swapTwoSec (I := I) (M := M) (E := E) r (s + 1)) (iteratedCovGrad g r (s + 1) 2 W) =
+        appFullSec (I := I) (M := M) g r (s + 1) (s + 3) RA_s1 W)
+    (S : SmoothCcTensor g r s) :
+    covGrad (I := I) (M := M) g r (s + 2) (iteratedCovGrad g r s 2 S) -
+        appFullSec (I := I) (M := M) g r (s + 3) (s + 3)
+          (slotExtendFullSec (I := I) g r (s + 2) (s + 2)
+            (swapTwoSec (I := I) (M := M) (E := E) r s))
+          (appFullSec (I := I) (M := M) g r (s + 3) (s + 3)
+            (swapTwoSec (I := I) (M := M) (E := E) r (s + 1))
+            (covGrad (I := I) (M := M) g r (s + 2) (iteratedCovGrad g r s 2 S))) =
+      (appFullSec (I := I) (M := M) g r s (s + 3)
+            (homTensorRSCovGradSec (I := I) g r s (s + 2) RA_s) S +
+          appFullSec (I := I) (M := M) g r (s + 1) (s + 3)
+            (slotExtendFullSec (I := I) g r s (s + 2) RA_s)
+            (covGrad (I := I) (M := M) g r s S) +
+          appFullSec (I := I) (M := M) g r (s + 2) (s + 3)
+            (homTensorRSCovGradSec (I := I) g r (s + 2) (s + 2)
+              (swapTwoSec (I := I) (M := M) (E := E) r s))
+            (iteratedCovGrad g r s 2 S)) +
+        appFullSec (I := I) (M := M) g r (s + 3) (s + 3)
+          (slotExtendFullSec (I := I) g r (s + 2) (s + 2)
+            (swapTwoSec (I := I) (M := M) (E := E) r s))
+          (appFullSec (I := I) (M := M) g r (s + 1) (s + 3) RA_s1
+            (covGrad (I := I) (M := M) g r s S)) := by
+  -- `T3 := ∇³S`, and `∇²S = ∇(∇S)`.
+  have hT3 : iteratedCovGrad g r (s + 1) 2 (covGrad (I := I) (M := M) g r s S) =
+      covGrad (I := I) (M := M) g r (s + 2) (iteratedCovGrad g r s 2 S) := rfl
+  -- the `σ₁₂` bracket at valence `s + 1` is the Ricci defect on `∇S`.
+  have hR1 := hRA_s1 (covGrad (I := I) (M := M) g r s S)
+  rw [hT3] at hR1
+  -- first product rule: `∇(σ₁₂·∇²S) = (∇σ₁₂)·∇²S + σ₂₃·∇³S`.
+  have hcg1 := covGrad_appFullSec_eq (I := I) (M := M) g r (s + 2) (s + 2)
+    (swapTwoSec (I := I) (M := M) (E := E) r s) (iteratedCovGrad g r s 2 S)
+  -- the Ricci defect on `S`: `∇²S − σ₁₂·∇²S = RA_s · S`.
+  have hR0 := hRA_s S
+  -- second product rule: `∇(RA_s · S) = (∇RA_s)·S + extRA_s·∇S`.
+  have hcg2 := covGrad_appFullSec_eq (I := I) (M := M) g r s (s + 2) RA_s S
+  -- assemble: `T3 − σ₂₃(σ₁₂ T3) = (T3 − σ₂₃ T3) + σ₂₃(T3 − σ₁₂ T3)`.
+  have hsplit : ∀ A C : SmoothCcTensor g r (s + 3),
+      A - appFullSec (I := I) (M := M) g r (s + 3) (s + 3)
+            (slotExtendFullSec (I := I) g r (s + 2) (s + 2)
+              (swapTwoSec (I := I) (M := M) (E := E) r s)) A =
+        C →
+      A - appFullSec (I := I) (M := M) g r (s + 3) (s + 3)
+            (slotExtendFullSec (I := I) g r (s + 2) (s + 2)
+              (swapTwoSec (I := I) (M := M) (E := E) r s))
+            (appFullSec (I := I) (M := M) g r (s + 3) (s + 3)
+              (swapTwoSec (I := I) (M := M) (E := E) r (s + 1)) A) =
+        C + appFullSec (I := I) (M := M) g r (s + 3) (s + 3)
+              (slotExtendFullSec (I := I) g r (s + 2) (s + 2)
+                (swapTwoSec (I := I) (M := M) (E := E) r s))
+              (A - appFullSec (I := I) (M := M) g r (s + 3) (s + 3)
+                (swapTwoSec (I := I) (M := M) (E := E) r (s + 1)) A) := by
+    intro A C hC
+    rw [appFullSec_sub_right, ← hC]
+    abel
+  -- the `σ₂₃` bracket telescopes through the two product rules and the Ricci defect on `S`.
+  have hT3sub : covGrad (I := I) (M := M) g r (s + 2) (iteratedCovGrad g r s 2 S) -
+      appFullSec (I := I) (M := M) g r (s + 3) (s + 3)
+        (slotExtendFullSec (I := I) g r (s + 2) (s + 2)
+          (swapTwoSec (I := I) (M := M) (E := E) r s))
+        (covGrad (I := I) (M := M) g r (s + 2) (iteratedCovGrad g r s 2 S)) =
+      appFullSec (I := I) (M := M) g r s (s + 3)
+          (homTensorRSCovGradSec (I := I) g r s (s + 2) RA_s) S +
+        appFullSec (I := I) (M := M) g r (s + 1) (s + 3)
+          (slotExtendFullSec (I := I) g r s (s + 2) RA_s)
+          (covGrad (I := I) (M := M) g r s S) +
+        appFullSec (I := I) (M := M) g r (s + 2) (s + 3)
+          (homTensorRSCovGradSec (I := I) g r (s + 2) (s + 2)
+            (swapTwoSec (I := I) (M := M) (E := E) r s))
+          (iteratedCovGrad g r s 2 S) := by
+    -- `σ₂₃·∇³S = ∇(σ₁₂·∇²S) − (∇σ₁₂)·∇²S` (product rule, `∇G2 = T3`).
+    have hσ₂₃T3 : appFullSec (I := I) (M := M) g r (s + 3) (s + 3)
+          (slotExtendFullSec (I := I) g r (s + 2) (s + 2)
+            (swapTwoSec (I := I) (M := M) (E := E) r s))
+          (covGrad (I := I) (M := M) g r (s + 2) (iteratedCovGrad g r s 2 S)) =
+        covGrad (I := I) (M := M) g r (s + 2)
+            (appFullSec (I := I) (M := M) g r (s + 2) (s + 2)
+              (swapTwoSec (I := I) (M := M) (E := E) r s) (iteratedCovGrad g r s 2 S)) -
+          appFullSec (I := I) (M := M) g r (s + 2) (s + 3)
+            (homTensorRSCovGradSec (I := I) g r (s + 2) (s + 2)
+              (swapTwoSec (I := I) (M := M) (E := E) r s)) (iteratedCovGrad g r s 2 S) := by
+      rw [hcg1]; abel
+    rw [hσ₂₃T3]
+    rw [show covGrad (I := I) (M := M) g r (s + 2) (iteratedCovGrad g r s 2 S) -
+          (covGrad (I := I) (M := M) g r (s + 2)
+            (appFullSec (I := I) (M := M) g r (s + 2) (s + 2)
+              (swapTwoSec (I := I) (M := M) (E := E) r s) (iteratedCovGrad g r s 2 S)) -
+            appFullSec (I := I) (M := M) g r (s + 2) (s + 3)
+              (homTensorRSCovGradSec (I := I) g r (s + 2) (s + 2)
+                (swapTwoSec (I := I) (M := M) (E := E) r s)) (iteratedCovGrad g r s 2 S)) =
+        covGrad (I := I) (M := M) g r (s + 2)
+            (iteratedCovGrad g r s 2 S -
+              appFullSec (I := I) (M := M) g r (s + 2) (s + 2)
+                (swapTwoSec (I := I) (M := M) (E := E) r s) (iteratedCovGrad g r s 2 S)) +
+          appFullSec (I := I) (M := M) g r (s + 2) (s + 3)
+            (homTensorRSCovGradSec (I := I) g r (s + 2) (s + 2)
+              (swapTwoSec (I := I) (M := M) (E := E) r s)) (iteratedCovGrad g r s 2 S) from by
+      rw [covGrad_sub]; abel]
+    rw [hR0, hcg2]
+  -- combine through `hsplit` with the `σ₁₂` Ricci defect on `∇S`.
+  rw [hsplit (covGrad (I := I) (M := M) g r (s + 2) (iteratedCovGrad g r s 2 S)) _ hT3sub]
+  rw [hR1]
+
+set_option backward.isDefEq.respectTransparency true in
+set_option maxHeartbeats 6400000 in
 /-- **The order-`3` head difference drops to a `≤ 2`-jet fixed-field action (precise infrastructure
 child).** For the metric double-trace field `Tr := metricDoubleTraceField`, the difference of the two
 ways of tracing the third covariant gradient — `Tr (s+1) · ∇²(∇S)` and `slotExt(Tr s) · ∇(∇²S)` (the
@@ -870,8 +1613,48 @@ private theorem exists_headDifferenceDrop_metricDoubleTrace (g : SmoothRiemannia
           appFullSec (I := I) (M := M) g r (s + 1) (s + 1) P₁
             (covGrad (I := I) (M := M) g r s S) +
           appFullSec (I := I) (M := M) g r (s + 2) (s + 1) P₂
-            (iteratedCovGrad g r s 2 S) :=
-  sorry
+            (iteratedCovGrad g r s 2 S) := by
+  classical
+  -- The Ricci-defect fields at valences `s` and `s + 1`.
+  obtain ⟨RA_s, hRA_s⟩ := exists_ricciDefect_homField (I := I) (M := M) (E := E) g r s
+  obtain ⟨RA_s1, hRA_s1⟩ := exists_ricciDefect_homField (I := I) (M := M) (E := E) g r (s + 1)
+  -- The composite fixed Hom fields supplying `P₀`, `P₁`, `P₂`.
+  obtain ⟨P₀, hP₀⟩ := exists_appFullSec_comp (I := I) (M := M) g r s (s + 3) (s + 1)
+    (metricDoubleTraceField (I := I) (M := M) (E := E) g r (s + 1))
+    (homTensorRSCovGradSec (I := I) g r s (s + 2) RA_s)
+  obtain ⟨P₂, hP₂⟩ := exists_appFullSec_comp (I := I) (M := M) g r (s + 2) (s + 3) (s + 1)
+    (metricDoubleTraceField (I := I) (M := M) (E := E) g r (s + 1))
+    (homTensorRSCovGradSec (I := I) g r (s + 2) (s + 2)
+      (swapTwoSec (I := I) (M := M) (E := E) r s))
+  obtain ⟨PA, hPA⟩ := exists_appFullSec_comp (I := I) (M := M) g r (s + 1) (s + 3) (s + 1)
+    (metricDoubleTraceField (I := I) (M := M) (E := E) g r (s + 1))
+    (slotExtendFullSec (I := I) g r s (s + 2) RA_s)
+  obtain ⟨Tσ₂₃, hTσ₂₃⟩ := exists_appFullSec_comp (I := I) (M := M) g r (s + 3) (s + 3) (s + 1)
+    (metricDoubleTraceField (I := I) (M := M) (E := E) g r (s + 1))
+    (slotExtendFullSec (I := I) g r (s + 2) (s + 2)
+      (swapTwoSec (I := I) (M := M) (E := E) r s))
+  obtain ⟨PB, hPB⟩ := exists_appFullSec_comp (I := I) (M := M) g r (s + 1) (s + 3) (s + 1)
+    Tσ₂₃ RA_s1
+  refine ⟨P₀, PA + PB, P₂, fun S => ?_⟩
+  -- STEP 1: trace-conjugation of the slot-extended trace term, then factor `Tr (s+1)`.
+  rw [show iteratedCovGrad g r (s + 1) 2 (covGrad (I := I) (M := M) g r s S) =
+      covGrad (I := I) (M := M) g r (s + 2) (iteratedCovGrad g r s 2 S) from rfl]
+  rw [appFullSec_slotExtTrace_eq (I := I) (M := M) (E := E) g r s
+    (covGrad (I := I) (M := M) g r (s + 2) (iteratedCovGrad g r s 2 S))]
+  rw [← appFullSec_sub_right (I := I) (M := M) g r (s + 1 + 2) (s + 1)
+    (metricDoubleTraceField (I := I) (M := M) (E := E) g r (s + 1))
+    (covGrad (I := I) (M := M) g r (s + 2) (iteratedCovGrad g r s 2 S))]
+  -- STEP 2: the bracket telescopes (Ricci identity + product rules).
+  rw [headDifferenceDrop_bracket (I := I) (M := M) (E := E) g r s RA_s RA_s1 hRA_s hRA_s1 S]
+  -- STEP 3: distribute `Tr (s+1)` and repackage each composite through the representation theorem.
+  rw [appFullSec_add_right, appFullSec_add_right, appFullSec_add_right]
+  rw [hP₀ S, hP₂ (iteratedCovGrad g r s 2 S), hPA (covGrad (I := I) (M := M) g r s S)]
+  rw [hTσ₂₃ (appFullSec (I := I) (M := M) g r (s + 1) (s + 3) RA_s1
+    (covGrad (I := I) (M := M) g r s S))]
+  rw [hPB (covGrad (I := I) (M := M) g r s S)]
+  rw [appFullSec_add_left (I := I) (M := M) g r (s + 1) (s + 1) PA PB
+    (covGrad (I := I) (M := M) g r s S)]
+  abel
 
 set_option backward.isDefEq.respectTransparency false in
 /-- **The fixed-Hom-field rough-Laplacian / covariant-gradient commutator, at general valence.**
