@@ -364,4 +364,146 @@ theorem iterCov_chr_convert {q : ℕ}
   simp only [iterCovComp_succ, iterCovComp_zero]
   exact covStep_chr_convert _ _ _ _ n
 
+/-! ## Claim 2: the mixed-derivative bound -/
+
+/-- **Claim 2 (core, mixed derivatives)**: on the smooth frame domain, if the `∇_U`-towers
+of the Christoffel-difference array are bounded up to order `L − 1` (the Claim-1 output),
+then any field `B` whose `chrK`-towers are bounded up to order `a ≤ L` has bounded
+`chrR`-towers up to order `a` — `|∇_ref^a B| ≤ C(a, …)`.  Strong induction on `a`,
+universally quantified over `(Q, B, S)` (the recursion changes the field): bottom shift +
+the one-step conversion (`iterCov_chr_convert`) + tower linearity split the top derivative
+into the `chrK`-stepped instance (`S` shifted, via the `chrK`-norm shift) plus the
+conversion term, whose `a`-fold tower obeys the `P(m)`-corollary `compL2_akAct_le` with
+lower-order instances of the induction. -/
+theorem claim2core {u : Set M} (hu : IsOpen u)
+    (frame : Idx → (x : M) → TangentSpace I x)
+    (chrR chrK : M → Idx → Idx → Idx → Real)
+    (hframe : ∀ d : Idx, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
+      (fun y => TotalSpace.mk' E (E := TangentSpace I) y (frame d y)) u)
+    (hchrR : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chrR y d i j) u)
+    (hchrK : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chrK y d i j) u)
+    (L : ℕ) (CA : ℕ → ℝ) (hCA0 : ∀ c, 0 ≤ CA c)
+    (hCA : ∀ c, c < L → ∀ y ∈ u,
+      compL2 (iterCovCompU (I := I) frame chrR
+        (fun z (m : Fin (2 + 1) → Idx) =>
+          chrK z (m 0) (m 1) (m 2) - chrR z (m 0) (m 1) (m 2)) c y) ≤ CA c)
+    (a : ℕ) :
+    a ≤ L → ∀ {Q : ℕ} (B : M → (Fin (Q + 1) → Idx) → Real),
+      (∀ k : Fin (Q + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => B y k) u) →
+      ∀ (S : ℕ → ℝ),
+      (∀ j, j ≤ a → ∀ y ∈ u, compL2 (iterCovComp (I := I) frame chrK B j y) ≤ S j) →
+      ∃ C, 0 ≤ C ∧ ∀ y ∈ u,
+        compL2 (iterCovComp (I := I) frame chrR B a y) ≤ C := by
+  induction a using Nat.strong_induction_on with
+  | _ a ih =>
+    intro haL Q B hB S hKt
+    classical
+    cases a with
+    | zero =>
+      refine ⟨max (S 0) 0, le_max_right _ _, fun y hy => ?_⟩
+      have h := hKt 0 le_rfl y hy
+      rw [iterCovComp_zero] at h ⊢
+      exact le_trans h (le_max_left _ _)
+    | succ a' =>
+      -- smoothness of the pieces
+      have hakSm : ∀ k : Fin (2 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+          (fun y => chrK y (k 0) (k 1) (k 2) - chrR y (k 0) (k 1) (k 2)) u :=
+        fun k => (hchrK (k 0) (k 1) (k 2)).sub (hchrR (k 0) (k 1) (k 2))
+      have hB'sm : ∀ k : Fin (Q + 1 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+          (fun y => iterCovComp (I := I) frame chrK B 1 y k) u :=
+        iterCovComp_contMDiffOn hu frame chrK B hframe hchrK hB 1
+      have hakActSm : ∀ k : Fin (Q + 1 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+          (fun y => akAct
+            (fun m => chrK y (m 0) (m 1) (m 2) - chrR y (m 0) (m 1) (m 2)) (B y) k) u := by
+        intro k
+        have hexp : (fun y => akAct
+            (fun m => chrK y (m 0) (m 1) (m 2) - chrR y (m 0) (m 1) (m 2)) (B y) k) =
+          fun y => ∑ s : Fin (Q + 1), ∑ p : Idx,
+            (chrK y ((![k 0, Fin.tail k s, p] : Fin 3 → Idx) 0)
+                ((![k 0, Fin.tail k s, p] : Fin 3 → Idx) 1)
+                ((![k 0, Fin.tail k s, p] : Fin 3 → Idx) 2) -
+              chrR y ((![k 0, Fin.tail k s, p] : Fin 3 → Idx) 0)
+                ((![k 0, Fin.tail k s, p] : Fin 3 → Idx) 1)
+                ((![k 0, Fin.tail k s, p] : Fin 3 → Idx) 2)) *
+              B y (Function.update (Fin.tail k) s p) := rfl
+        rw [hexp]
+        exact contMDiffOn_finsetSum' _ _ fun s _ =>
+          contMDiffOn_finsetSum' _ _ fun p _ =>
+            (hakSm ![k 0, Fin.tail k s, p]).mul (hB _)
+      -- (i) the `chrK`-stepped instance of the induction
+      have hKt' : ∀ j, j ≤ a' → ∀ y ∈ u,
+          compL2 (iterCovComp (I := I) frame chrK
+            (fun z => iterCovComp (I := I) frame chrK B 1 z) j y) ≤ S (j + 1) := by
+        intro j hj y hy
+        rw [← compL2_iterCovComp_shift frame chrK B j y]
+        exact hKt (j + 1) (by omega) y hy
+      obtain ⟨C1, hC10, hC1⟩ := ih a' (Nat.lt_succ_self a') (by omega)
+        (fun z => iterCovComp (I := I) frame chrK B 1 z) hB'sm (fun j => S (j + 1)) hKt'
+      -- (ii) the lower-order instances on `B`
+      have hmixc : ∀ c, c ≤ a' → ∃ C, 0 ≤ C ∧ ∀ y ∈ u,
+          compL2 (iterCovComp (I := I) frame chrR B (a' - c) y) ≤ C :=
+        fun c hc => ih (a' - c) (by omega) (by omega) B hB S (fun j hj => hKt j (by omega))
+      choose! Cm hCm0 hCmB using hmixc
+      -- assemble the constant
+      have hsumnn : (0 : ℝ) ≤ ∑ c ∈ Finset.range (a' + 1),
+          (a'.choose c : ℝ) * CA c * Cm c :=
+        Finset.sum_nonneg fun c hc =>
+          mul_nonneg (mul_nonneg (Nat.cast_nonneg _) (hCA0 c))
+            (hCm0 c (Nat.lt_succ_iff.mp (Finset.mem_range.mp hc)))
+      refine ⟨C1 + (Q + 1 : ℝ) * ∑ c ∈ Finset.range (a' + 1),
+        (a'.choose c : ℝ) * CA c * Cm c,
+        add_nonneg hC10 (mul_nonneg (by positivity) hsumnn), fun y hy => ?_⟩
+      calc compL2 (iterCovComp (I := I) frame chrR B (a' + 1) y)
+          = compL2 (iterCovComp (I := I) frame chrR
+              (fun z => iterCovComp (I := I) frame chrR B 1 z) a' y) :=
+            compL2_iterCovComp_shift frame chrR B a' y
+        _ = compL2 (iterCovComp (I := I) frame chrR
+              (fun z (n : Fin (Q + 1 + 1) → Idx) =>
+                iterCovComp (I := I) frame chrK B 1 z n +
+                  akAct (fun m => chrK z (m 0) (m 1) (m 2) - chrR z (m 0) (m 1) (m 2))
+                    (B z) n) a' y) := by
+            refine congrArg compL2 (iterCovComp_congr_on hu frame chrR ?_ a' y hy)
+            intro z _
+            funext n
+            exact iterCov_chr_convert frame chrR chrK B z n
+        _ = compL2 (fun n : Fin (Q + 1 + 1 + a') → Idx =>
+              iterCovComp (I := I) frame chrR
+                (fun z => iterCovComp (I := I) frame chrK B 1 z) a' y n +
+              iterCovComp (I := I) frame chrR
+                (fun z => akAct
+                  (fun m => chrK z (m 0) (m 1) (m 2) - chrR z (m 0) (m 1) (m 2)) (B z))
+                a' y n) :=
+            congrArg compL2 (funext fun n => iterCovComp_add hu frame chrR _ _ hframe hchrR
+              hB'sm hakActSm a' y hy n)
+        _ ≤ compL2 (iterCovComp (I := I) frame chrR
+              (fun z => iterCovComp (I := I) frame chrK B 1 z) a' y) +
+            compL2 (iterCovComp (I := I) frame chrR
+              (fun z => akAct
+                (fun m => chrK z (m 0) (m 1) (m 2) - chrR z (m 0) (m 1) (m 2)) (B z))
+              a' y) := compL2_add_le _ _
+        _ ≤ C1 + (Q + 1 : ℝ) * ∑ c ∈ Finset.range (a' + 1),
+              (a'.choose c : ℝ) * CA c * Cm c := by
+            refine add_le_add (hC1 y hy) ?_
+            refine le_trans (compL2_akAct_le hu frame chrR hframe hchrR
+              (fun z (m : Fin (2 + 1) → Idx) =>
+                chrK z (m 0) (m 1) (m 2) - chrR z (m 0) (m 1) (m 2)) B
+              hakSm hB a' hy) ?_
+            refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+            refine Finset.sum_le_sum fun c hc => ?_
+            have hc' : c ≤ a' := Nat.lt_succ_iff.mp (Finset.mem_range.mp hc)
+            have h1 := hCA c (by omega) y hy
+            have h2 := hCmB c hc' y hy
+            calc (a'.choose c : ℝ) *
+                  compL2 (iterCovCompU (I := I) frame chrR
+                    (fun z (m : Fin (2 + 1) → Idx) =>
+                      chrK z (m 0) (m 1) (m 2) - chrR z (m 0) (m 1) (m 2)) c y) *
+                  compL2 (iterCovComp (I := I) frame chrR B (a' - c) y)
+                ≤ (a'.choose c : ℝ) * CA c *
+                  compL2 (iterCovComp (I := I) frame chrR B (a' - c) y) :=
+                  mul_le_mul_of_nonneg_right
+                    (mul_le_mul_of_nonneg_left h1 (Nat.cast_nonneg _)) (compL2_nonneg _)
+              _ ≤ (a'.choose c : ℝ) * CA c * Cm c :=
+                  mul_le_mul_of_nonneg_left h2
+                    (mul_nonneg (Nat.cast_nonneg _) (hCA0 c))
+
 end DifferentialGeometry.PDE.RicciFlow
