@@ -483,24 +483,36 @@ conventions against the actual files** (the consult anticipated this trap precis
      `metricTraceFirstTwoField_domDomCongr` is now a 6-line corollary (hcompat by double
      `Fin.cases` + `frontExtendEquiv_zero/_succ`).  Lean: `domDomCongr_apply` RHS is eta —
      close the trivial sub-have with `rfl`.
-     REMAINING: (iii) the front-product trace lemma `metricTraceFirstTwoField_product`:
-     `trace₁₂(domDomCongr (finCongr h) (product (s:=k+2) A B)) = product (trace₁₂ A) B`
-     (`h : k+2+q = k+q+2`).  Proof = `_eq_sum` + `tensor0SField_product_apply` + two Fin facts
-     (WORKED OUT, record for fast next round):
-       fact1  `(metricTraceInput (b i)(b j) tail ∘ finCongr h) ∘ castAdd q
-                  = metricTraceInput (b i)(b j) (tail ∘ castAdd q)`  (value-preserving: 0↦b_i,
-                  1↦b_j, (r+2)↦tail⟨r⟩);
-       fact2  `(metricTraceInput (b i)(b j) tail ∘ finCongr h) ∘ natAdd (k+2) = tail ∘ natAdd k`
-                  (value (k+2)+r ↦ tail⟨k+r⟩, i,j-independent so B pulls out of the Σ_ij).
-     Then `Finset.sum_mul` pulls `B x (tail∘natAdd k)` out, leaving `trace₁₂(A) ⊗ B`.
-     The Fin pain: `finCongr/castAdd` don't align with `metricTraceInput`'s `Fin.cons`-`succ`
-     form — prove fact1/fact2 by a `metricTraceInput` VALUE-characterization helper
-     (`= if i.val=0 then X else if i.val=1 then Y else tail ⟨i.val-2,_⟩`) so the casts reduce by
-     `.val` + `omega`, NOT by `Fin.cases_succ` (which won't fire on cast'd indices).
-     Then the producer composition: uniqueness-identification + zero-collapses (`product A 0 = 0`,
-     `domDomCongr e 0 = 0` — NO existing section-level zero-laws found; add two small ones by
-     ext + `_apply` + `mul_zero`/`Pi.zero_apply`) + linearity + `_domDomCongr_gen` + front-product
-     ⟹ `Δrm04 = KN(ΔRic, ΔS, g)` as canonical fields.
+     ✅ **`metricTraceFirstTwoField_product` BANKED (2026-06-10, lake 3555 GREEN):** the
+     front-factor trace `trace₁₂(domDomCongr (finCongr h) (product (s:=k+2) A B)) =
+     product (trace₁₂ A) B` (`h : k+2+q = k+q+2`).  Plus the reusable helper
+     **`metricTraceInput_apply`** (value characterization
+     `= dite i.val=0 X (dite i.val=1 Y (tail ⟨i.val-2,_⟩))`) — the key that lets
+     `finCongr/castAdd/natAdd`-reindexed evaluations reduce by `.val` + `omega` instead of
+     `Fin.cases_succ` (which won't fire on cast indices).  Proof = `_eq_sum` +
+     `tensor0SField_product_apply` (needs `import …ContractionLeibniz`) + fact1/fact2 (value-level)
+     + `Finset.sum_mul` ×2 + `ring`.  **Lean lessons:** (a) the dite tail index is dependent, so
+     `simp only [hv]` (NOT `rw [hv]`, which fails "motive not type correct") to rewrite the index
+     value; (b) `domDomCongr_apply` yields the comp in `fun i_1 => F (e i_1)` lambda form (not
+     `F ∘ ⇑e`), and `← Function.comp_def` does NOT convert it — STATE fact1/fact2's LHS in the
+     `(fun i_1 => metricTraceInput X Y tail ((finCongr h) i_1)) ∘ castAdd q` lambda form so
+     `rw [fact1, fact2]` matches syntactically.
+     ### REMAINING: the producer composition only (no new reusable lemmas)
+     The full trace toolkit is now banked: `_eq_sum`, `_add`, `_smul`, `_domDomCongr_gen`
+     (+ `_domDomCongr` corollary), `_product`, `metricTraceInput_apply`, and
+     `totalNabla0SRealizes_unique`.  Next round = thread `metricTraceFirstTwoField g
+     (rm04DerivsKn.nabla2A)` through them:
+     1. `nabla2A` = signed sum of the 6 `knTerm2Realizes`/`knScal2Realizes` witnesses (the `.add`/
+        `.smul` realizer-field) → split by `_add`/`_smul`.
+     2. each witness `domDomCongr(frontExt² e)(inner)` → `_domDomCongr` peels `frontExt² e`.
+     3. inner `+` of `domDomCongr(frontExt(LL/LR))(...)` → `_add` + `_domDomCongr_gen` (the
+        leibniz equivs are value-casts; their hcompat is a small `metricTraceInput_apply`+`omega`).
+     4. leaves `domDomCongr(LL/LR)(product …)`; bridge `leibnizLeftEquiv s q = finCongr (rfl-proof)`
+        (proof-irrelevant `finCongr`), then `_product` ⟹ `(trace₁₂ ∇²Ric) ⊗ g` = `ΔRic ⊗ g` etc.
+     5. zero-branches (`product … 0`) vanish: need `product A 0 = 0`, `domDomCongr e 0 = 0`,
+        `metricTraceFirstTwoField g 0 = 0` — three small zero-laws (ext + `_apply` + `mul_zero`/
+        `Pi.zero_apply`; the product/domDomCongr ones belong at the MultilinearSection layer).
+     6. assemble ⟹ `Δrm04 = KN(ΔRic, ΔS, g)` as canonical fields; then component form for #44.
      The dim-3 KN-specific layer stays at the SECTION level (knField/knFieldD/rm04DerivsKn);
      only the trace-algebra lives at the Tensor layer where it serves any rank.
   3. Wire the standing `hlich` input: `RicciLichnerowiczEquationInFrame` ←

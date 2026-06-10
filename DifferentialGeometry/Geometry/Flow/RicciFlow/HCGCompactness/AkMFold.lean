@@ -13,11 +13,14 @@ set_option linter.unusedFintypeInType false
 /-!
 # The field-level upper covariant-derivative tower for `A_k` (Claim 1 m-fold, route i)
 
-`ric_bound` (MSM135 Lemma 3.11) Claim 1 `|∇^m A_k| ≤ C_m(1+|∇^{m+1}g_k|)` differentiates
-the relation `∇g_k = A_k ∗ g_k` `m` times (component route, user-resolved). The natural
-last-slot contraction `∗` (`contrTail`) has the proven single-step tower Leibniz
-`covDerivStepCompU_contrTail_leibniz`: `A_k`'s contracted UPPER slot steps by
-`covDerivStepCompU` (`+Γ`), `g_k`'s lower slot by `covDerivStepComp` (`−Γ`).
+`ric_bound` (MSM135 Lemma 3.11) Claim 1 `|∇^m A_k| ≤ C_m(1+|∇^{m+1}g_k|)`, with
+`A_k := connectionDifferenceTensorAt (LC g_k) (LC gRef) = ∇_k − ∇_ref` (so the lowered
+`A_k∗g_k` is the Koszul combination of `∇g_k` with coefficients `+½,+½,−½` — the
+`hkoszul` input of `claim1`).  The route differentiates the lowered relation `m` times
+(component route, user-resolved). The natural last-slot contraction `∗` (`contrTail`)
+has the proven single-step tower Leibniz `covDerivStepCompU_contrTail_leibniz`:
+`A_k`'s contracted UPPER slot steps by `covDerivStepCompU` (`+Γ`), `g_k`'s lower slot
+by `covDerivStepComp` (`−Γ`).
 
 This file builds the FIELD-level iterated upper tower `iterCovCompU` — the
 `covDerivStepCompU` analogue of `iterCovComp` (whose step's `ext` is `frameExtData`

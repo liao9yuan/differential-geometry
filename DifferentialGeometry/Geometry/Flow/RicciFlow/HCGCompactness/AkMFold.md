@@ -1,5 +1,12 @@
 # AkMFold.lean — the Claim-1 m-fold engine (component route i)
 
+SIGN CONVENTION (2026-06-10, authoritative for the wiring phase, see
+`Claim1Wiring.md` §1b): `A_k := connectionDifferenceTensorAt (LC g_k) (LC gRef)
+= ∇_k − ∇_ref` (POSITIVE two-term expansion; lowered-Koszul coefficients
+`(+½,+½,−½)`).  Older notes here and in `RicBoundProof.md` write `A_k = ∇−∇_k`
+(the flipped orientation) — `claim1` is sign-agnostic (free coefficients), but
+new geometric lemmas must use the `∇_k − ∇_ref` orientation.
+
 Spec/route: `RicBoundProof.md` (PROGRESS 9–10).  Status: **all content sorry-free, in oleans.**
 
 ## Contents

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Higher
 import DifferentialGeometry.Tensor.RSTensor.NablaDomDomCongr
+import DifferentialGeometry.Tensor.RSTensor.ContractionLeibniz
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -594,6 +595,28 @@ theorem nabla_metricTraceFirstTwo0S {s : ℕ}
   rw [← hXsec, show tail = (fun b : Fin s => Vtail b x) from (funext hVtailx).symm]
   exact hfreeze
 
+/-- **Value characterization of `metricTraceInput`**: the trace input puts `X, Y` in
+the two leading slots and the tail in the rest, read off by index value.  Lets `finCongr`/
+`castAdd`/`natAdd`-reindexed evaluations reduce by `.val` arithmetic instead of `Fin.cases`
+(which does not fire on cast indices). -/
+theorem metricTraceInput_apply {x : M} {s : ℕ} (X Y : TangentSpace I x)
+    (tail : Fin s -> TangentSpace I x) (i : Fin (s + 2)) :
+    metricTraceInput (I := I) X Y tail i =
+      if h0 : (i : ℕ) = 0 then X
+      else if h1 : (i : ℕ) = 1 then Y
+      else tail ⟨(i : ℕ) - 2, by have := i.isLt; omega⟩ := by
+  unfold metricTraceInput
+  refine Fin.cases ?_ (fun i1 => ?_) i
+  · simp
+  · refine Fin.cases ?_ (fun r => ?_) i1
+    · rw [Fin.cases_succ, Fin.cases_zero,
+        dif_neg (by simp [Fin.val_succ]), dif_pos (by simp [Fin.val_succ])]
+    · rw [Fin.cases_succ, Fin.cases_succ,
+        dif_neg (by simp [Fin.val_succ]), dif_neg (by simp [Fin.val_succ])]
+      apply congrArg tail
+      apply Fin.ext
+      simp [Fin.val_succ]
+
 set_option backward.isDefEq.respectTransparency false in
 /-- Pointwise coordinate formula for the first-two metric trace field, with the
 canonical centred chart inverse metric. -/
@@ -740,6 +763,75 @@ theorem metricTraceFirstTwoField_domDomCongr {s s' : ℕ}
         Tensor0SBundle.frontExtendEquiv_zero, metricTraceInput, Fin.cases_succ, Fin.cases_zero]
     · simp only [Function.comp_apply, Tensor0SBundle.frontExtendEquiv_succ,
         metricTraceInput, Fin.cases_succ]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **First-two metric trace of a front-factor product**: `trace₁₂((A ⊗ B)·finCongr) =
+(trace₁₂ A) ⊗ B`.  The two trace slots live inside the first factor `A`, so the trace
+acts on `A` alone and `B` rides along unchanged.  The `finCongr h` recasts the product's
+rank `(k+2)+q` to the `(k+q)+2` shape the trace expects (value-preserving). -/
+theorem metricTraceFirstTwoField_product {k q : ℕ}
+    [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (g : SmoothRiemannianMetric I M)
+    (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (k + 2))
+    (B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) q)
+    (h : k + 2 + q = k + q + 2) :
+    metricTraceFirstTwoField (I := I) (M := M) g
+        (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (∞ : WithTop ℕ∞) (finCongr h)
+          (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+            (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := k + 2) (q := q) A B))
+      = MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := k) (q := q)
+          (metricTraceFirstTwoField (I := I) (M := M) g A) B := by
+  classical
+  letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (k + q)
+  refine DFunLike.ext _ _ fun x => ?_
+  refine ContinuousMultilinearMap.ext fun tail => ?_
+  have fact1 : forall (X Y : TangentSpace I x),
+      ((fun i_1 => metricTraceInput (I := I) X Y tail ((finCongr h) i_1)) ∘ Fin.castAdd q)
+        = metricTraceInput (I := I) X Y (tail ∘ Fin.castAdd q) := by
+    intro X Y
+    funext p
+    simp only [Function.comp_apply]
+    have hv : ((finCongr h) (Fin.castAdd q p) : ℕ) = (p : ℕ) := by
+      simp [finCongr_apply, Fin.coe_cast, Fin.coe_castAdd]
+    rw [metricTraceInput_apply, metricTraceInput_apply]
+    simp only [hv]
+    by_cases h0 : (p : ℕ) = 0
+    · simp [h0]
+    · by_cases h1 : (p : ℕ) = 1
+      · simp [h0, h1]
+      · rw [dif_neg h0, dif_neg h1, dif_neg h0, dif_neg h1]
+        apply congrArg tail
+        apply Fin.ext
+        simp [Fin.coe_castAdd]
+  have fact2 : forall (X Y : TangentSpace I x),
+      ((fun i_1 => metricTraceInput (I := I) X Y tail ((finCongr h) i_1)) ∘ Fin.natAdd (k + 2))
+        = tail ∘ Fin.natAdd k := by
+    intro X Y
+    funext r
+    simp only [Function.comp_apply]
+    have hv : ((finCongr h) (Fin.natAdd (k + 2) r) : ℕ) = (k + 2) + (r : ℕ) := by
+      simp [finCongr_apply, Fin.coe_cast, Fin.coe_natAdd]
+    rw [metricTraceInput_apply]
+    simp only [hv]
+    rw [dif_neg (by omega), dif_neg (by omega)]
+    apply congrArg tail
+    apply Fin.ext
+    simp only [Fin.coe_natAdd]
+    omega
+  rw [metricTraceFirstTwoField_eq_sum, tensor0SField_product_apply,
+    metricTraceFirstTwoField_eq_sum]
+  unfold metricTrace0S2InBasis
+  rw [Finset.sum_mul]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [Finset.sum_mul]
+  refine Finset.sum_congr rfl fun j _ => ?_
+  rw [MultilinearSection.domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    tensor0SField_product_apply, fact1, fact2]
+  ring
 
 end
 

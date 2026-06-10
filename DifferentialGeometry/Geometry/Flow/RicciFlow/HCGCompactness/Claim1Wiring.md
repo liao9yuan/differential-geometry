@@ -48,6 +48,18 @@ F6. metric-compatibility / LC facts available: `leviCivitaConnectionOfMetric_isL
     `connDiffCompEq` (eq 3.7, g_k-ON pointwise), `metricGammaEquiv` (eq 3.8, the 3/2 & 2
     constants — consistency check: `claim1`'s `KR = |½|+|½|+|−½| = 3/2` matches).
 
+## 1b. SIGN CONVENTION (this phase, authoritative)
+
+`A_k := connectionDifferenceTensorAt (LC g_k) (LC gRef) = ∇_k − ∇_ref`
+(matching the existing `covOneCompDiff`/`connDiffCompEq` orientation, which use
+`connectionDifferenceTensorAt (LC h) (LC gRef)` with POSITIVE two-term expansion).
+Consequences: two-term expansion `∇g(a,b,e) = Ǎ(a,b,e) + Ǎ(a,e,b)` (positive),
+lowered-Koszul coefficients `(+½, +½, −½)`.  NOTE: the spec `RicBoundProof.md`
+writes `A_k = ∇ − ∇_k` (the OPPOSITE orientation, coefficients `(−½,−½,+½)`);
+`claim1` takes the coefficients as free parameters so the estimate is identical,
+but all NEW lemmas in this phase MUST use the `∇_k − ∇_ref` orientation above —
+do not prove the flipped identity.
+
 ## 2. Target statement (end of this phase)
 
 ```text
@@ -110,7 +122,8 @@ constants (D2b).**
 **B1 — `hkoszul` (the lowered-Koszul field identity).  THE main brick.**
   Math: `Ǎ(a,b,e) := Σ_d A^d_{ab}·g[e,d] = ½(∇g(a,b,e) + ∇g(b,a,e) − ∇g(e,a,b))`,
   ∇ = gRef-LC, valid in ANY frame (tensor identity).  Derivation: two-term
-  expansion `∇g(a,b,e) = Ǎ(a,b,e) + Ǎ(a,e,b)` (from `∇_k g_k = 0` + A = ∇−∇_k)
+  expansion `∇g(a,b,e) = Ǎ(a,b,e) + Ǎ(a,e,b)` (from `∇_k g_k = 0` + the §1b
+  convention `A = ∇_k − ∇_ref`, signs POSITIVE)
   + cyclic combination using A's lower-slot symmetry (both connections torsion-free)
   + g-symmetry.  Lean route R1: extract the inner-product-level identities from
   `covOneCompDiff`'s proof body (F1) into a frame-general lemma; then the array
@@ -187,8 +200,10 @@ I am working in a large Lean 4/mathlib project. Do not write code first. Review 
 formalization PLAN for mathematical feasibility and route quality.
 
 Context: MSM135 Ch3 Lemma 3.11, eq (3.4) bookkeeping "Claim 1":
-|∇^m A_k| ≤ C_m(1+|∇^{m+1} g_k|), A_k = ∇ − ∇_k the connection-difference (1,2)
-tensor, ∇ = Levi-Civita of a reference gRef, g_k the flow metric.
+|∇^m A_k| ≤ C_m(1+|∇^{m+1} g_k|), where A_k = connectionDifferenceTensorAt
+(LC g_k) (LC gRef) = ∇_k − ∇_ref is the connection-difference (1,2) tensor
+(this orientation gives lowered-Koszul coefficients +½,+½,−½), ∇ = Levi-Civita
+of the reference gRef, g_k the flow metric.
 
 Already PROVEN sorry-free at the component-array level (file
 DifferentialGeometry/Geometry/Flow/RicciFlow/HCGCompactness/AkMFold.lean):
