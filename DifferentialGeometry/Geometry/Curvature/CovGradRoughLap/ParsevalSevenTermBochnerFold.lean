@@ -2076,6 +2076,191 @@ private lemma bochnerFoldGroupSum_elt3IiiIv_eq_nablaDiffCurvTrace_split
   rw [Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => hsplit' a b))]
   simp only [Finset.sum_add_distrib, Finset.sum_sub_distrib]
 
+/-- **The Parseval-frame covariant-derivative relation (the differentiated cometric, scalar
+bilinear-paired form).** For a fixed smooth Parseval frame family `V a` (`hPar`: the cometric
+reproduction `∑_a ⟨V_a, ·⟩_g V_a = id`, i.e. `∑_a V_a ⊗ V_a = g⁻¹`), smooth tangent fields `U, P`,
+a smooth direction field `W`, and a point `x`, the Parseval frame's covariant-derivative diagonal is
+antisymmetric in the two frame slots:
+```
+∑_a [ ⟨∇_{W} V_a, U⟩_g · ⟨V_a, P⟩_g + ⟨V_a, U⟩_g · ⟨∇_{W} V_a, P⟩_g ] = 0,
+```
+where `∇_{W} V_a = (LeviCivita g).toFun (V a) x (W x)` is the Levi-Civita covariant derivative of the
+frame field `V a` in the direction `W x`.
+
+This is the genuine cometric-parallel core `∇(g⁻¹) = 0` read on the *fixed* Parseval frame: the field
+identity `∑_a ⟨V_a(y), U(y)⟩_g · ⟨V_a(y), P(y)⟩_g = ⟨U(y), P(y)⟩_g` (`parseval_family_inner_mul_sum`,
+the dual-Parseval reproduction at every `y`) differentiated in the direction `W` at `x`; the
+metric-compatibility Leibniz rule (`LeviCivita_isMetricCompatible`) distributes the derivative across
+each inner-product factor, and the two `∇_W U` / `∇_W P` summands recombine — through the same
+dual-Parseval reproduction at `x` — into the derivative of the right side `⟨∇_W U, P⟩_g + ⟨U, ∇_W P⟩_g`,
+which cancels, leaving exactly the frame-derivative antisymmetry above.
+
+It is **non-vacuous**: with `U = P` it asserts `∑_a ⟨∇_W V_a, U⟩_g ⟨V_a, U⟩_g = 0`, the genuine
+statement that the background cometric `∑_a V_a ⊗ V_a` is `∇`-parallel (false for a non-parallel
+ambient frame, e.g. a coordinate frame on a curved torus). This is GENERAL Parseval-frame content that
+should be promoted to a curvature/frame file. -/
+private theorem parsevalFrame_sum_covDeriv_inner_antisymm
+    (g : SmoothRiemannianMetric I M)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u)
+    {U P W : Π b : M, TangentSpace I b}
+    (hU : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, U b⟩ : TotalSpace E (TangentSpace I))))
+    (hP : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, P b⟩ : TotalSpace E (TangentSpace I)))) (x : M) :
+    (∑ a : Fin N,
+        (g.inner x ((LeviCivita (I := I) g).toFun (V a) x (W x)) (U x)
+            * g.inner x (V a x) (P x)
+          + g.inner x (V a x) (U x)
+            * g.inner x ((LeviCivita (I := I) g).toFun (V a) x (W x)) (P x))) = 0 := by
+  classical
+  -- The dual-Parseval reproduction at every point: `∑_a ⟨V_a, U⟩ ⟨V_a, P⟩ = ⟨U, P⟩`, as a field.
+  have hfield : (fun y : M => ∑ a : Fin N,
+        g.inner y (V a y) (U y) * g.inner y (V a y) (P y)) =
+      (fun y : M => g.inner y (U y) (P y)) := by
+    funext y
+    exact parseval_family_inner_mul_sum (I := I) (M := M) g y (fun a => V a y)
+      (fun u => hPar y u) (U y) (P y)
+  -- Smoothness/differentiability of each scalar factor `b ↦ ⟨V_a, U⟩` etc.
+  have hmcU : ∀ a : Fin N,
+      (mfderiv I 𝓘(ℝ, ℝ) (fun b : M => g.inner b (V a b) (U b)) x) (W x) =
+        g.inner x ((LeviCivita (I := I) g).toFun (V a) x (W x)) (U x)
+          + g.inner x (V a x) ((LeviCivita (I := I) g).toFun U x (W x)) := fun a =>
+    (LeviCivita_isMetricCompatible (I := I) g).apply (Y := V a) (Z := U)
+      ((hV a).mdifferentiableAt (by simp)) (hU.mdifferentiableAt (by simp)) (W x)
+  have hmcP : ∀ a : Fin N,
+      (mfderiv I 𝓘(ℝ, ℝ) (fun b : M => g.inner b (V a b) (P b)) x) (W x) =
+        g.inner x ((LeviCivita (I := I) g).toFun (V a) x (W x)) (P x)
+          + g.inner x (V a x) ((LeviCivita (I := I) g).toFun P x (W x)) := fun a =>
+    (LeviCivita_isMetricCompatible (I := I) g).apply (Y := V a) (Z := P)
+      ((hV a).mdifferentiableAt (by simp)) (hP.mdifferentiableAt (by simp)) (W x)
+  have hmcUP :
+      (mfderiv I 𝓘(ℝ, ℝ) (fun b : M => g.inner b (U b) (P b)) x) (W x) =
+        g.inner x ((LeviCivita (I := I) g).toFun U x (W x)) (P x)
+          + g.inner x (U x) ((LeviCivita (I := I) g).toFun P x (W x)) :=
+    (LeviCivita_isMetricCompatible (I := I) g).apply (Y := U) (Z := P)
+      (hU.mdifferentiableAt (by simp)) (hP.mdifferentiableAt (by simp)) (W x)
+  -- Smoothness of the per-`a` scalar factors (for the product rule and the finite-sum rule).
+  have hsmU : ∀ a : Fin N, ContMDiff I 𝓘(ℝ) ∞ (fun b : M => g.inner b (V a b) (U b)) := fun a =>
+    DifferentialGeometry.Integral.DivergenceTheorem.contMDiff_g_inner_of_smooth_sections
+      (I := I) (M := M) g (ContMDiffSection.mk (V a) (hV a)) (ContMDiffSection.mk U hU)
+  have hsmP : ∀ a : Fin N, ContMDiff I 𝓘(ℝ) ∞ (fun b : M => g.inner b (V a b) (P b)) := fun a =>
+    DifferentialGeometry.Integral.DivergenceTheorem.contMDiff_g_inner_of_smooth_sections
+      (I := I) (M := M) g (ContMDiffSection.mk (V a) (hV a)) (ContMDiffSection.mk P hP)
+  -- The explicit per-`a` factor derivatives, ascribed to `ℝ`-codomain CLMs (uniform frame sum).
+  set dU : Fin N → (TangentSpace I x →L[ℝ] ℝ) :=
+    fun a => (mfderiv I 𝓘(ℝ, ℝ) (fun b : M => g.inner b (V a b) (U b)) x :
+      TangentSpace I x →L[ℝ] ℝ) with hdU_def
+  set dP : Fin N → (TangentSpace I x →L[ℝ] ℝ) :=
+    fun a => (mfderiv I 𝓘(ℝ, ℝ) (fun b : M => g.inner b (V a b) (P b)) x :
+      TangentSpace I x →L[ℝ] ℝ) with hdP_def
+  -- The explicit per-`a` Leibniz derivative CLM (typed into `ℝ` to keep the frame sum uniform).
+  set D : Fin N → (TangentSpace I x →L[ℝ] ℝ) :=
+    fun a => g.inner x (V a x) (U x) • dP a + g.inner x (V a x) (P x) • dU a with hD_def
+  have hHasMF : ∀ a : Fin N, HasMFDerivAt I 𝓘(ℝ, ℝ)
+      (fun b : M => g.inner b (V a b) (U b) * g.inner b (V a b) (P b)) x (D a) := fun a => by
+    have hUd : HasMFDerivAt I 𝓘(ℝ, ℝ) (fun b : M => g.inner b (V a b) (U b)) x (dU a) :=
+      ((hsmU a).mdifferentiableAt (by simp)).hasMFDerivAt
+    have hPd : HasMFDerivAt I 𝓘(ℝ, ℝ) (fun b : M => g.inner b (V a b) (P b)) x (dP a) :=
+      ((hsmP a).mdifferentiableAt (by simp)).hasMFDerivAt
+    exact hUd.mul hPd
+  -- The per-`a` factor evaluations via metric compatibility.
+  have hdUapp : ∀ a : Fin N, dU a (W x) =
+      g.inner x ((LeviCivita (I := I) g).toFun (V a) x (W x)) (U x)
+        + g.inner x (V a x) ((LeviCivita (I := I) g).toFun U x (W x)) := fun a => by
+    rw [hdU_def]; exact hmcU a
+  have hdPapp : ∀ a : Fin N, dP a (W x) =
+      g.inner x ((LeviCivita (I := I) g).toFun (V a) x (W x)) (P x)
+        + g.inner x (V a x) ((LeviCivita (I := I) g).toFun P x (W x)) := fun a => by
+    rw [hdP_def]; exact hmcP a
+  -- The per-`a` evaluation `D a (W x)`, metric-compatibility-expanded into reals.
+  have hDapp : ∀ a : Fin N, D a (W x) =
+        (g.inner x ((LeviCivita (I := I) g).toFun (V a) x (W x)) (U x)
+            + g.inner x (V a x) ((LeviCivita (I := I) g).toFun U x (W x)))
+          * g.inner x (V a x) (P x)
+        + g.inner x (V a x) (U x)
+          * (g.inner x ((LeviCivita (I := I) g).toFun (V a) x (W x)) (P x)
+            + g.inner x (V a x) ((LeviCivita (I := I) g).toFun P x (W x))) := by
+    intro a
+    rw [hD_def]
+    simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply, smul_eq_mul]
+    rw [hdUapp a, hdPapp a]
+    ring
+  -- The sum's `HasMFDerivAt` with derivative `∑_a D a` (uniform `ℝ`-codomain CLMs).
+  have hSum : HasMFDerivAt I 𝓘(ℝ, ℝ)
+      (∑ a : Fin N, fun b : M => g.inner b (V a b) (U b) * g.inner b (V a b) (P b)) x
+      (∑ a : Fin N, D a) :=
+    HasMFDerivAt.sum (t := (Finset.univ : Finset (Fin N))) (fun a _ => hHasMF a)
+  have hEqfun : (fun y : M => ∑ a : Fin N,
+        g.inner y (V a y) (U y) * g.inner y (V a y) (P y)) =
+      (∑ a : Fin N, fun b : M => g.inner b (V a b) (U b) * g.inner b (V a b) (P b)) := by
+    funext y; rw [Finset.sum_apply]
+  -- The field identity gives `mfderiv (⟨U,P⟩) x = ∑_a D a`, evaluated at `W x`.
+  have hkey : ∑ a : Fin N, D a (W x) =
+      g.inner x ((LeviCivita (I := I) g).toFun U x (W x)) (P x)
+        + g.inner x (U x) ((LeviCivita (I := I) g).toFun P x (W x)) := by
+    have hUPmf : HasMFDerivAt I 𝓘(ℝ, ℝ)
+        (fun y : M => g.inner y (U y) (P y)) x (∑ a : Fin N, D a) := by
+      rw [← hfield, hEqfun]; exact hSum
+    have hmfeq : (∑ a : Fin N, D a) = mfderiv I 𝓘(ℝ, ℝ)
+        (fun y : M => g.inner y (U y) (P y)) x := hUPmf.mfderiv.symm
+    have hUPmf' : (∑ a : Fin N, D a) (W x) =
+        g.inner x ((LeviCivita (I := I) g).toFun U x (W x)) (P x)
+          + g.inner x (U x) ((LeviCivita (I := I) g).toFun P x (W x)) := by
+      rw [hmfeq]; exact hmcUP
+    rw [← hUPmf']
+    exact (ContinuousLinearMap.sum_apply (Finset.univ : Finset (Fin N)) D (W x)).symm
+  -- `D a (W x) = (antisym summand) + (reproduction summand)`; the reproduction sum collapses to
+  -- `⟨∇_W U, P⟩ + ⟨U, ∇_W P⟩` (dual-Parseval), so `hkey` forces `∑_a (antisym summand) = 0`.
+  have hsplit : ∀ a : Fin N, D a (W x) =
+      (g.inner x ((LeviCivita (I := I) g).toFun (V a) x (W x)) (U x)
+          * g.inner x (V a x) (P x)
+        + g.inner x (V a x) (U x)
+          * g.inner x ((LeviCivita (I := I) g).toFun (V a) x (W x)) (P x))
+      + (g.inner x (V a x) ((LeviCivita (I := I) g).toFun U x (W x))
+          * g.inner x (V a x) (P x)
+        + g.inner x (V a x) (U x)
+          * g.inner x (V a x) ((LeviCivita (I := I) g).toFun P x (W x))) := by
+    intro a; rw [hDapp a]; ring
+  have hrepU : (∑ a : Fin N,
+        g.inner x (V a x) ((LeviCivita (I := I) g).toFun U x (W x))
+          * g.inner x (V a x) (P x)) =
+      g.inner x ((LeviCivita (I := I) g).toFun U x (W x)) (P x) :=
+    parseval_family_inner_mul_sum (I := I) (M := M) g x (fun a => V a x)
+      (fun u => hPar x u) ((LeviCivita (I := I) g).toFun U x (W x)) (P x)
+  have hrepP : (∑ a : Fin N,
+        g.inner x (V a x) (U x)
+          * g.inner x (V a x) ((LeviCivita (I := I) g).toFun P x (W x))) =
+      g.inner x (U x) ((LeviCivita (I := I) g).toFun P x (W x)) := by
+    rw [show (fun a : Fin N => g.inner x (V a x) (U x)
+          * g.inner x (V a x) ((LeviCivita (I := I) g).toFun P x (W x))) =
+        (fun a : Fin N => g.inner x (V a x) ((LeviCivita (I := I) g).toFun P x (W x))
+          * g.inner x (V a x) (U x)) from by funext a; ring]
+    rw [parseval_family_inner_mul_sum (I := I) (M := M) g x (fun a => V a x)
+      (fun u => hPar x u) ((LeviCivita (I := I) g).toFun P x (W x)) (U x)]
+    exact g.symm x ((LeviCivita (I := I) g).toFun P x (W x)) (U x)
+  -- `∑_a D a (W x) = (antisym sum) + (∑_a repro) = (antisym sum) + ⟨∇U,P⟩ + ⟨U,∇P⟩`.
+  have hDsum : ∑ a : Fin N, D a (W x) =
+      (∑ a : Fin N,
+          (g.inner x ((LeviCivita (I := I) g).toFun (V a) x (W x)) (U x)
+              * g.inner x (V a x) (P x)
+            + g.inner x (V a x) (U x)
+              * g.inner x ((LeviCivita (I := I) g).toFun (V a) x (W x)) (P x)))
+        + (∑ a : Fin N,
+            g.inner x (V a x) ((LeviCivita (I := I) g).toFun U x (W x))
+              * g.inner x (V a x) (P x))
+        + (∑ a : Fin N,
+            g.inner x (V a x) (U x)
+              * g.inner x (V a x) ((LeviCivita (I := I) g).toFun P x (W x))) := by
+    rw [Finset.sum_congr rfl (fun a _ => hsplit a)]
+    rw [← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl (fun a _ => ?_); ring
+  rw [hrepU, hrepP] at hDsum
+  linarith [hkey, hDsum]
+
 /-- **The frame-summed tension-field curvature pairing integrates to zero (the genuine deep curvature
 root of the rank-`0` Bochner divergence: the integrated second-Bianchi covariant-divergence nullity).**
 For a fixed Parseval frame family `V a`, the group-`3` tension-field carrier double sum vanishes:
@@ -2092,14 +2277,15 @@ the Hessian-form Ricci identity `tensorSecondCovDeriv_antisymm_eq_riemannOp`
 (`R(X, Y) S = ∇²_{X, Y} S − ∇²_{Y, X} S`), the `a`-sum of the tension-field curvature terms is exhibited as
 a total covariant divergence whose integral over the closed manifold is `0` by the frame-summed covariant
 integration-by-parts engine `integral_frameSummed_covDeriv_combined_eq_zero`; the residual differentiated
-curvature trace `∑_a (∇_{V a} R^{(s)})(V a, V b)` collapses through the frame-summed differentiated tensor
-curvature transfer (`frame_sum_nablaTensor0SCurv_baseSlot_eval`, `nablaTensorCurv_frame_trace_eq_nablaRicci`)
-and the contracted second Bianchi identity (`contracted_second_bianchi`, `div Ric = ½ d scal`), read over
-the Parseval frame (`parseval_family_sum_bilin_eq`, `∑_a V_a ⊗ V_a = g⁻¹`).  It is *false* for an arbitrary
-section in place of the tension-field curvature trace, so it genuinely uses `R`, `∇R`, the Parseval
-reproduction `hPar`, and the frame's second-order (`∇V`) structure.  This is GENERAL Parseval-frame
-curvature content that should be promoted to a curvature file; the body is `sorry` and consumers
-transitively depend on its `sorryAx`. -/
+curvature trace `∑_a (∇_{V a} R^{(s)})(V a, V b)` is the *diagonal* divergence of the tensor Riemann
+curvature `div R^{(s)}` (the same `V a` in the derivation and the first antisymmetric curvature slot),
+which the contracted second Bianchi identity (`contracted_second_bianchi`, `div Ric = ½ d scal`) collapses
+to the differentiated Ricci/scalar content; the tension terms reorganize through the Parseval-frame
+covariant-derivative antisymmetry `parsevalFrame_sum_covDeriv_inner_antisymm` (`∑_a (∇_W V_a) ⊗ V_a` is
+antisymmetric, the differentiated cometric, PROVEN above).  It is *false* for an arbitrary section in place
+of the tension-field curvature trace, so it genuinely uses `R`, `∇R`, the Parseval reproduction `hPar`, and
+the frame's second-order (`∇V`) structure.  This is GENERAL Parseval-frame curvature content that should be
+promoted to a curvature file; the body is `sorry` and consumers transitively depend on its `sorryAx`. -/
 private theorem parsevalFrameSum_tensionFieldCurvatureDivergence_eq_zero
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
