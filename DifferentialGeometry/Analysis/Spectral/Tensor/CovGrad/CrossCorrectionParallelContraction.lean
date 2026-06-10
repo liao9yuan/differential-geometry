@@ -1259,21 +1259,167 @@ private theorem appCcRS_slotExtend_crossCorrProd_covGrad_eq (g₀ : SmoothRieman
           (covGrad g₀ 0 (3 + b) T) := by
   sorry
 
-/-- **The frame-free UNPERMUTED model tensor-product section's fibre norm is bounded by the product of
-the factor fibre norms** (POSITED NAMED general-infra child — to be homed in
-`Geometry/Curvature/FiberNormParseval` as the generic "`rfns` of a model tensor product is `≤` the
-product of the factor `rfns`" fact).  `rfns(crossCorrProdUnpermSection g₀ S T)(x) ≤ rfns(T)(x) ·
-rfns(S)(x)`: the model tensor product `modelProduct (ccUnitModel T x) (ccUnitModel S x)` splits the
-orthonormal-frame fibre-norm double sum into the `T`-block sum times the `S`-block sum
-(`modelProduct_apply` separates the tuple), and the unit-fibre extraction `ccUnitModel` matches each
-factor's own fibre norm (value-locality at the canonical unit). -/
+/-- **An all-ranks `g₀(x)`-orthonormal frame Parseval witness.**  At `x` there is a single tangent
+frame `e : Fin n → T_xM` (`n = finrank ℝ E`) representing the intrinsic `(0, s)` fibre norm as the
+frame double sum at *every* rank `s` simultaneously — the standard `g₀(x)`-orthonormal basis, for which
+the frame Parseval representation is definitional (`rfl`).  (The cross-rank local re-statement of
+`tangent_orthonormalBasisS_witness`, which fixes a single rank.) -/
+private theorem ccAllRanksFrameWitness (g₀ : SmoothRiemannianMetric I M) (x : M) :
+    ∃ (n : ℕ) (e : Fin n → TangentSpace I x),
+      n = Module.finrank ℝ E ∧
+      ∀ (s : ℕ) (S : Tensor0SBundle.TensorRSSpace 0 s I x),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x S =
+          ∑ K : Fin 0 → Fin n, ∑ J : Fin s → Fin n,
+            fiberNormSqSummand (I := I) (M := M) g₀ x 0 s S n e K J := by
+  classical
+  let cd : InnerProductSpace.Core ℝ (TangentSpace I x) := g₀.toRiemannianMetric.toCore x
+  have hc : ContinuousAt (fun v : TangentSpace I x => cd.inner v v) 0 :=
+    g₀.toRiemannianMetric.continuousAt x
+  have hbnd : Bornology.IsVonNBounded ℝ {v : TangentSpace I x |
+      RCLike.re (cd.inner v v) < 1} :=
+    g₀.toRiemannianMetric.isVonNBounded x
+  letI nag : NormedAddCommGroup (TangentSpace I x) :=
+    cd.toNormedAddCommGroupOfTopology hc hbnd
+  letI ips : InnerProductSpace ℝ (TangentSpace I x) :=
+    InnerProductSpace.ofCoreOfTopology cd hc hbnd
+  set n : ℕ := Module.finrank ℝ (TangentSpace I x) with hn_def
+  set eob : OrthonormalBasis (Fin n) ℝ (TangentSpace I x) := stdOrthonormalBasis ℝ _ with heob_def
+  refine ⟨n, fun i => eob i, ?_, fun s S => rfl⟩
+  rfl
+
+/-- **The rank-`0` frame component reads the operator at the canonical unit.**  For a `(0, s)`-fibre
+operator `op` and the empty multi-index, the frame component `fiberNormSqComponent g₀ x 0 s op n e ∅ J`
+is the model value of the unit-evaluated `(0, s)`-form `toModel(op unit)` on the frame tuple
+`fun k => e (J k)` (the rank-`0` cometric weight `coframeS` is the canonical unit `(0, 0)`-tensor). -/
+private theorem ccFiberNormSqComponent_zero_eq_unit (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
+    {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n) (J : Fin s → Fin n)
+    (op : Tensor0SBundle.TensorRSSpace 0 s I x) :
+    fiberNormSqComponent (I := I) (M := M) g₀ x 0 s op n e K₀ J =
+      Tensor0SBundle.Tensor0SSpace.toModel
+          ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace s I x from op)
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+          (fun k => e (J k)) := by
+  classical
+  have hcoframe :
+      ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+          (fun k => g₀.inner x (e (K₀ k))) : Tensor0SBundle.Tensor0SSpace 0 I x) =
+        ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ) := by
+    apply Tensor0SBundle.tensor0SSpace_ext
+    intro v
+    rw [show ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+          (fun k => g₀.inner x (e (K₀ k))) : Tensor0SBundle.Tensor0SSpace 0 I x) =
+        coframeS (I := I) (M := M) g₀ x 0 e K₀ from rfl,
+      coframeS_apply, Finset.prod_of_isEmpty]
+    rfl
+  unfold fiberNormSqComponent
+  rw [hcoframe]
+  rw [Tensor0SBundle.Tensor0SSpace.toModel, Tensor0SBundle.tensor0SSpace_continuousLinearEquiv_apply]
+  rfl
+
+/-- **The rank-`0` intrinsic fibre norm as the frame sum of squared unit values.**  In any all-ranks
+`g₀(x)`-orthonormal Parseval frame `e`, the intrinsic `(0, s)` fibre norm of a fibre operator `op` is
+the frame sum, over the slot multi-index `J`, of the squared model value of the unit-evaluated
+`(0, s)`-form `toModel(op unit)` on the frame tuple `fun k => e (J k)`. -/
+private theorem ccRfns_zero_eq_sum_unit (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
+    {n : ℕ} (e : Fin n → TangentSpace I x)
+    (hrepr : ∀ S : Tensor0SBundle.TensorRSSpace 0 s I x,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x S =
+        ∑ K : Fin 0 → Fin n, ∑ J : Fin s → Fin n,
+          fiberNormSqSummand (I := I) (M := M) g₀ x 0 s S n e K J)
+    (op : Tensor0SBundle.TensorRSSpace 0 s I x) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x op =
+      ∑ J : Fin s → Fin n,
+        (Tensor0SBundle.Tensor0SSpace.toModel
+            ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace s I x from op)
+              (ContinuousMultilinearMap.constOfIsEmpty ℝ
+                (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+            (fun k => e (J k))) ^ 2 := by
+  classical
+  rw [riemannianFiberNormSq_eq_sum_componentS_sq (I := I) (M := M) g₀ x s e hrepr op (fun k => k.elim0)]
+  refine Finset.sum_congr rfl (fun J _ => ?_)
+  rw [ccFiberNormSqComponent_zero_eq_unit (I := I) g₀ s x e (fun k => k.elim0) J op]
+
+/-- **The frame-free UNPERMUTED model tensor-product section's fibre norm is the product of the factor
+fibre norms** (POSITED NAMED general-infra child — to be homed in `Geometry/Curvature/FiberNormParseval`
+as the generic "`rfns` of a model tensor product is the product of the factor `rfns`" fact).
+`rfns(crossCorrProdUnpermSection g₀ S T)(x) = rfns(T)(x) · rfns(S)(x)` (in particular `≤`): in a
+`g₀(x)`-orthonormal Parseval frame `e`, the unit value of the product section is the model product
+`modelProduct (ccUnitModel T x) (ccUnitModel S x)`, whose value on a frame tuple `e ∘ J` splits — by
+`modelProduct_apply` along `J = (J_T, J_S)` — into `αT(e ∘ J_T) · αS(e ∘ J_S)` (the `T`-block tuple
+times the `S`-block tuple).  Squaring and reindexing the slot sum over `Fin ((3 + b) + (2 + a)) → Fin n`
+as a product over `(Fin (3 + b) → Fin n) × (Fin (2 + a) → Fin n)` (`Fin.appendEquiv`) factors the double
+sum into the `T`-block sum times the `S`-block sum, i.e. `rfns(T) · rfns(S)`. -/
 private theorem crossCorrProdUnpermSection_rfns_le (g₀ : SmoothRiemannianMetric I M)
     {a b : ℕ} (S : SmoothCcTensor g₀ 0 (2 + a)) (T : SmoothCcTensor g₀ 0 (3 + b)) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((3 + b) + (2 + a)) x
         ((crossCorrProdUnpermSection (I := I) g₀ S T).toSection x) ≤
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + b) x (T.toSection x) *
         riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x (S.toSection x) := by
-  sorry
+  classical
+  obtain ⟨n, e, _hn, hrepr⟩ := ccAllRanksFrameWitness (I := I) g₀ x
+  -- the unit value of the product section, read to the model, is the model product of the two factor
+  -- units (the unit-evaluation of the packaged `fromMultilinearSection` field).
+  have hunit : Tensor0SBundle.Tensor0SSpace.toModel
+        ((crossCorrProdUnpermSection (I := I) g₀ S T).toSection x
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) =
+      Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+        (ccUnitModel (I := I) g₀ T x) (ccUnitModel (I := I) g₀ S x) := by
+    rw [show (crossCorrProdUnpermSection (I := I) g₀ S T).toSection x
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) =
+        (MixedSection.eval₀ (F := E) (E := (TangentSpace I : M → Type _)) x).smulRight
+            (crossCorrProdUnpermField (I := I) g₀ S T x)
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))
+        from rfl]
+    rw [ContinuousLinearMap.smulRight_apply, MixedSection.eval₀_apply,
+      ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
+    change Tensor0SBundle.Tensor0SSpace.toModel
+        (Tensor0SBundle.Tensor0SSpace.ofModel
+          (Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) (3 + b) (2 + a)
+            (ccUnitModel (I := I) g₀ T x) (ccUnitModel (I := I) g₀ S x))) = _
+    rw [Tensor0SBundle.Tensor0SSpace.toModel_ofModel]
+  -- model value of the product unit on a frame tuple splits into the two block evaluations.
+  have hsplit : ∀ J : Fin ((3 + b) + (2 + a)) → Fin n,
+      Tensor0SBundle.Tensor0SSpace.toModel
+          ((crossCorrProdUnpermSection (I := I) g₀ S T).toSection x
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+          (fun k => e (J k)) =
+        (ccUnitModel (I := I) g₀ T x) (fun k => e (J (Fin.castAdd (2 + a) k))) *
+          (ccUnitModel (I := I) g₀ S x) (fun k => e (J (Fin.natAdd (3 + b) k))) := by
+    intro J
+    rw [hunit, Bundle.continuousMultilinearMap.modelProduct_apply]
+    rfl
+  rw [ccRfns_zero_eq_sum_unit (I := I) g₀ ((3 + b) + (2 + a)) x e (hrepr ((3 + b) + (2 + a)))
+      ((crossCorrProdUnpermSection (I := I) g₀ S T).toSection x),
+    ccRfns_zero_eq_sum_unit (I := I) g₀ (3 + b) x e (hrepr (3 + b)) (T.toSection x),
+    ccRfns_zero_eq_sum_unit (I := I) g₀ (2 + a) x e (hrepr (2 + a)) (S.toSection x)]
+  -- reindex the slot sum by `Fin.appendEquiv`, then split into a product of block sums.
+  rw [← Fintype.sum_equiv (Fin.appendEquiv (3 + b) (2 + a))
+      (fun pr : (Fin (3 + b) → Fin n) × (Fin (2 + a) → Fin n) =>
+        ((ccUnitModel (I := I) g₀ T x) (fun k => e (pr.1 k)) *
+          (ccUnitModel (I := I) g₀ S x) (fun k => e (pr.2 k))) ^ 2)
+      (fun J : Fin ((3 + b) + (2 + a)) → Fin n =>
+        (Tensor0SBundle.Tensor0SSpace.toModel
+            ((crossCorrProdUnpermSection (I := I) g₀ S T).toSection x
+              (ContinuousMultilinearMap.constOfIsEmpty ℝ
+                (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+            (fun k => e (J k))) ^ 2) ?_]
+  · refine le_of_eq ?_
+    rw [Fintype.sum_prod_type, Finset.sum_mul_sum]
+    refine Finset.sum_congr rfl (fun JT _ => Finset.sum_congr rfl (fun JS _ => ?_))
+    rw [mul_pow]
+    rfl
+  · intro pr
+    simp only
+    rw [hsplit ((Fin.appendEquiv (3 + b) (2 + a)) pr)]
+    have hT : (fun k => e (((Fin.appendEquiv (3 + b) (2 + a)) pr) (Fin.castAdd (2 + a) k))) =
+        (fun k => e (pr.1 k)) := by
+      funext k
+      simp only [Fin.appendEquiv_apply, Fin.append_left]
+    have hS : (fun k => e (((Fin.appendEquiv (3 + b) (2 + a)) pr) (Fin.natAdd (3 + b) k))) =
+        (fun k => e (pr.2 k)) := by
+      funext k
+      simp only [Fin.appendEquiv_apply, Fin.append_right]
+    rw [hT, hS]
 
 /-- **The unit-evaluated model form of the (un)permuted product section.**  At `x`, the
 unit-evaluated model `(0, (3 + b) + (2 + a))`-form of the slot-permuted product section
@@ -1390,6 +1536,85 @@ private theorem crossCorrParallelContraction_rfns_le_pointwise (g₀ : SmoothRie
     _ = μx * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x (S.toSection x) *
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + b) x (T.toSection x) := by ring
 
+/-- **The post-composition operator of the rank-generic cometric double-trace fibre operator**, as a
+continuous-linear map on the `(0, p + 2)`-tensor fibre: `w ↦ (cometricDoubleTraceField g₀ p).toSection x
+∘ w` (post-composition is `ℝ`-linear; closed to a continuous-linear map on the finite-dimensional
+fibre).  The `p`-passenger analogue of the sibling `fieldRecPostcompCLM`. -/
+private noncomputable def cometricDoubleTracePostcompCLM (g₀ : SmoothRiemannianMetric I M) (p : ℕ)
+    (x : M) :
+    Tensor0SBundle.TensorRSSpace 0 (p + 2) I x →L[ℝ] Tensor0SBundle.TensorRSSpace 0 p I x :=
+  haveI : FiniteDimensional ℝ (Tensor0SBundle.TensorRSSpace 0 (p + 2) I x) :=
+    inferInstanceAs (FiniteDimensional ℝ
+      (Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (p + 2) I x))
+  haveI : T2Space (Tensor0SBundle.TensorRSSpace 0 (p + 2) I x) :=
+    inferInstanceAs (T2Space
+      (Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (p + 2) I x))
+  LinearMap.toContinuousLinearMap
+    { toFun := fun w =>
+        (show Tensor0SBundle.Tensor0SSpace (p + 2) I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace p I x from
+          (cometricDoubleTraceField (I := I) g₀ p).toSection x).comp
+          (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace (p + 2) I x from w)
+      map_add' := fun _ _ => ContinuousLinearMap.comp_add _ _ _
+      map_smul' := fun _ _ => ContinuousLinearMap.comp_smul _ _ _ }
+
+set_option linter.unusedSectionVars false in
+/-- Defining evaluation of `cometricDoubleTracePostcompCLM`: post-composition by the cometric
+double-trace fibre operator. -/
+private theorem cometricDoubleTracePostcompCLM_apply (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (x : M)
+    (w : Tensor0SBundle.TensorRSSpace 0 (p + 2) I x) :
+    cometricDoubleTracePostcompCLM (I := I) g₀ p x w =
+      (show Tensor0SBundle.Tensor0SSpace (p + 2) I x →L[ℝ]
+          Tensor0SBundle.Tensor0SSpace p I x from
+        (cometricDoubleTraceField (I := I) g₀ p).toSection x).comp
+        (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace (p + 2) I x from w) := by
+  haveI : FiniteDimensional ℝ (Tensor0SBundle.TensorRSSpace 0 (p + 2) I x) :=
+    inferInstanceAs (FiniteDimensional ℝ
+      (Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (p + 2) I x))
+  haveI : T2Space (Tensor0SBundle.TensorRSSpace 0 (p + 2) I x) :=
+    inferInstanceAs (T2Space
+      (Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (p + 2) I x))
+  exact congrFun (LinearMap.coe_toContinuousLinearMap' _) w
+
+set_option linter.unusedSectionVars false in
+/-- **(POSIT — the order-uniform passenger ampliation of the rank-generic cometric double-trace fibre
+envelope; NAMED general-infra child, to be homed in `Geometry/Curvature/FiberNormParseval`.)**  From the
+base passenger-count (`p = 0`) uniform fibre envelope `hbase`, the SAME constant `κ` bounds the
+post-composition action of the cometric double-trace fibre operator at *every* passenger count `p`:
+```
+rfns_{(0,p)}((cometricDoubleTraceField g₀ p).toSection x ∘ w) ≤ κ · rfns_{(0,p+2)}(w).
+```
+
+This is the genuine deep **`g`-operator-norm** content (NOT the HS route, which is *not* `p`-uniform: the
+cometric double trace acts as the identity on the `p` passed-through covariant slots, so its HS fibre
+norm grows by a `dim`-factor per passenger slot).  The leading passenger covariant slot is an isometric
+ampliation for the intrinsic fibre envelope: slicing it with the all-ranks frame Parseval split
+(`riemannianFiberNormSq_succ_eq_sum_slot0Curry_of_frame`) and passing each slot-`0` slice of the action
+through the passenger-passing slice identity for the cometric double trace reduces the passenger-`(p+1)`
+bound to the passenger-`p` bound (the `p`-analogue of `ricciModelTrace42_postcomp_rfns_le_aux`).  It is
+**non-vacuous** (a degenerate `κ = 0` is rejected whenever the cometric trace is nonzero); its body is
+the posited per-`p` ampliation core. -/
+private theorem cometricDoubleTrace_postcomp_rfns_le_aux (g₀ : SmoothRiemannianMetric I M) (κ : ℝ)
+    (hbase : ∀ (x : M) (w : Tensor0SBundle.TensorRSSpace 0 2 I x),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 0 x
+          ((show Tensor0SBundle.Tensor0SSpace 2 I x →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace 0 I x from
+            (cometricDoubleTraceField (I := I) g₀ 0).toSection x).comp
+            (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace 2 I x from w)) ≤
+        κ * riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x w) :
+    ∀ (p : ℕ) (x : M) (w : Tensor0SBundle.TensorRSSpace 0 (p + 2) I x),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 p x
+          ((show Tensor0SBundle.Tensor0SSpace (p + 2) I x →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace p I x from
+            (cometricDoubleTraceField (I := I) g₀ p).toSection x).comp
+            (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace (p + 2) I x from w)) ≤
+        κ * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (p + 2) x w := by
+  sorry
+
 /-- **The rank-generic order-uniform `g₀`-operator-norm-route post-composition fibre envelope of the
 intrinsic `g₀⁻¹` double-trace field** (POSITED NAMED general-infra child — to be homed in
 `Geometry/Curvature/FiberNormParseval`, the rank-generic foundation of the cometric trace's `g`-operator
@@ -1400,12 +1625,12 @@ bounding the intrinsic squared fibre norm of the cometric-trace operator-field a
 
 This is the genuine `g`-operator-norm core (NOT the Hilbert–Schmidt route, which is *not* `p`-uniform:
 the double trace acts as the identity on the `p` passed-through covariant slots, so its HS fibre norm
-grows like `dim^p`).  The cometric trace's `g`-operator norm is the cometric trace
-`≤ 2·∑ᵢ‖♯eᵢ(x)‖²_g` (`exists_uniform_cometricBilin_bound`, rank-independent), the `p` passenger slots are
-isometric ampliations for the operator norm (a leading passenger covariant slot acts as the identity in
-the passenger-`g`-orthonormal directions, independent of `p`), and the squared fibre-norm bound is the
-sharp intrinsic operator-norm fibre-norm bound `homTensorRS_riemannianFiberNormSq_clm_apply_le` (no
-dimension factor).  Non-vacuous (`κ = 0` is rejected whenever the cometric trace is nonzero). -/
+grows like `dim^p`).  Assembled from the base passenger-count (`p = 0`) section envelope
+`exists_uniform_riemannianFiberNormSq_appCcRS_le` (lifted to a fibre-value envelope through a smooth
+section realizing an arbitrary fibre value, `ContMDiffSection.exists_eq_at`) and the order-uniform
+passenger ampliation `cometricDoubleTrace_postcomp_rfns_le_aux` (the leading passenger slot is an
+isometric ampliation for the intrinsic fibre envelope).  Non-vacuous (`κ = 0` is rejected whenever the
+cometric trace is nonzero). -/
 private theorem exists_uniform_cometricDoubleTraceField_postcomp_gOpNorm_rfns_le
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ κ : ℝ, 0 ≤ κ ∧ ∀ (p : ℕ) (x : M),
@@ -1420,7 +1645,37 @@ private theorem exists_uniform_cometricDoubleTraceField_postcomp_gOpNorm_rfns_le
         ∀ w : Tensor0SBundle.TensorRSSpace 0 (p + 2) I x,
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 p x (A w) ≤
             κ * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (p + 2) x w := by
-  sorry
+  classical
+  -- The uniform constant is the base passenger-count (`p = 0`) section envelope of the fixed cometric
+  -- double-trace field `cometricDoubleTraceField g₀ 0 : SmoothCcTensor g₀ 2 0`.
+  obtain ⟨C, hC0, hC⟩ :=
+    exists_uniform_riemannianFiberNormSq_appCcRS_le (I := I) (M := M)
+      g₀ 0 2 0 (cometricDoubleTraceField (I := I) g₀ 0)
+  -- Lift the section envelope to a fibre-value envelope through a smooth section realizing any fibre
+  -- value at `x` (`ContMDiffSection.exists_eq_at`).
+  have hbase : ∀ (x : M) (w : Tensor0SBundle.TensorRSSpace 0 2 I x),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 0 x
+          ((show Tensor0SBundle.Tensor0SSpace 2 I x →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace 0 I x from
+            (cometricDoubleTraceField (I := I) g₀ 0).toSection x).comp
+            (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace 2 I x from w)) ≤
+        C * riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x w := by
+    intro x w
+    obtain ⟨σ, hσ⟩ := ContMDiffSection.exists_eq_at (I := I)
+      (F := Tensor0SBundle.TensorRSModel 0 2 ℝ E)
+      (V := fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) (n := (⊤ : ℕ∞)) x w
+    have hW := hC ⟨σ, HasCompactSupport.of_compactSpace _⟩ x
+    rw [appCcRS_toSection (I := I) (M := M) g₀ 0 2 0
+      (cometricDoubleTraceField (I := I) g₀ 0)
+      ⟨σ, HasCompactSupport.of_compactSpace _⟩ x] at hW
+    rw [hσ] at hW
+    exact hW
+  refine ⟨C, hC0, fun p x => ?_⟩
+  refine ⟨cometricDoubleTracePostcompCLM (I := I) g₀ p x,
+    fun w => cometricDoubleTracePostcompCLM_apply (I := I) g₀ p x w, fun w => ?_⟩
+  rw [cometricDoubleTracePostcompCLM_apply (I := I) g₀ p x w]
+  exact cometricDoubleTrace_postcomp_rfns_le_aux (I := I) g₀ C hbase p x w
 
 /-- **The fixed source-rank reindex is an `rfns`-isometric ampliation** (POSITED NAMED general-infra
 child — to be homed in `Geometry/Curvature/FiberNormParseval` as the generic "a fixed `Nat`-rank
@@ -1438,7 +1693,107 @@ private theorem crossCorrSourceReindex_postcomp_rfns_le (g₀ : SmoothRiemannian
           (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
               Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x from v)) ≤
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((3 + b) + (2 + a)) x v := by
-  sorry
+  classical
+  obtain ⟨n, e, _hn, hrepr⟩ := ccAllRanksFrameWitness (I := I) g₀ x
+  set H : (3 + b) + (2 + a) = (3 + a + b) + 2 := by omega with hH_def
+  -- the unit value of `reindex ∘ v` is `reindexFib (v unit)`; its model value on a frame tuple is
+  -- the model value of `v unit` on the `finCongr H`-reindexed tuple (a parallel fibre isometry).
+  have hmodel : ∀ J : Fin ((3 + a + b) + 2) → Fin n,
+      Tensor0SBundle.Tensor0SSpace.toModel
+          (((show Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace ((3 + a + b) + 2) I x from
+              (crossCorrSourceReindex (I := I) g₀ a b).toSection x).comp
+              (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                  Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x from v))
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+          (fun k => e (J k)) =
+        Tensor0SBundle.Tensor0SSpace.toModel
+            ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x from v)
+              (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+            (fun k => e (J (Fin.cast (by omega) k))) := by
+    intro J
+    rw [ContinuousLinearMap.comp_apply]
+    rw [show (crossCorrSourceReindex (I := I) g₀ a b).toSection x =
+        crossCorrSourceReindexFib (I := I) g₀ a b x from rfl]
+    rw [crossCorrSourceReindexFib_toModel (I := I) g₀ a b x]
+    -- `modelRankCast H D` evaluated on a tuple `m` reads `D` on the `finCongr H`-reindexed tuple.
+    rw [show (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.modelRankCast (E := E)
+            (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2)
+            (Tensor0SBundle.Tensor0SSpace.toModel
+              ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                  Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x from v)
+                (ContinuousMultilinearMap.constOfIsEmpty ℝ
+                  (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))))
+          (fun k => e (J k)) =
+        (Tensor0SBundle.Tensor0SSpace.toModel
+            ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x from v)
+              (ContinuousMultilinearMap.constOfIsEmpty ℝ
+                (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))))
+          (fun i => (fun k => e (J k)) (finCongr (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2) i)) from by
+        change (ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ
+            (finCongr (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2)))
+            (Tensor0SBundle.Tensor0SSpace.toModel
+              ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                  Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x from v)
+                (ContinuousMultilinearMap.constOfIsEmpty ℝ
+                  (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))))
+            (fun k => e (J k)) = _
+        rw [show (ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ
+              (finCongr (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2)))
+              (Tensor0SBundle.Tensor0SSpace.toModel
+                ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                    Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x from v)
+                  (ContinuousMultilinearMap.constOfIsEmpty ℝ
+                    (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))) =
+            ContinuousMultilinearMap.domDomCongr
+              (finCongr (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2))
+              (Tensor0SBundle.Tensor0SSpace.toModel
+                ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                    Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x from v)
+                  (ContinuousMultilinearMap.constOfIsEmpty ℝ
+                    (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))) from rfl,
+          ContinuousMultilinearMap.domDomCongr_apply]]
+    rfl
+  rw [ccRfns_zero_eq_sum_unit (I := I) g₀ ((3 + a + b) + 2) x e (hrepr ((3 + a + b) + 2))
+      ((show Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x →L[ℝ]
+          Tensor0SBundle.Tensor0SSpace ((3 + a + b) + 2) I x from
+        (crossCorrSourceReindex (I := I) g₀ a b).toSection x).comp
+        (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x from v)),
+    ccRfns_zero_eq_sum_unit (I := I) g₀ ((3 + b) + (2 + a)) x e (hrepr ((3 + b) + (2 + a))) v]
+  refine le_of_eq ?_
+  rw [Finset.sum_congr rfl (fun J _ => by rw [hmodel J])]
+  -- reindex the slot sum over `Fin ((3 + a + b) + 2) → Fin n` by `finCongr H` to the source rank.
+  rw [← Fintype.sum_equiv
+      (Equiv.arrowCongr (finCongr (by omega : (3 + a + b) + 2 = (3 + b) + (2 + a))) (Equiv.refl (Fin n)))
+      (fun J : Fin ((3 + a + b) + 2) → Fin n =>
+        (Tensor0SBundle.Tensor0SSpace.toModel
+            ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x from v)
+              (ContinuousMultilinearMap.constOfIsEmpty ℝ
+                (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+            (fun k => e (J (Fin.cast (by omega) k)))) ^ 2)
+      (fun J' : Fin ((3 + b) + (2 + a)) → Fin n =>
+        (Tensor0SBundle.Tensor0SSpace.toModel
+            ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x from v)
+              (ContinuousMultilinearMap.constOfIsEmpty ℝ
+                (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+            (fun k => e (J' k))) ^ 2) ?_]
+  intro J
+  beta_reduce
+  have htuple : (fun k => e (J (Fin.cast (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2) k))) =
+      (fun k => e (((Equiv.arrowCongr
+          (finCongr (by omega : (3 + a + b) + 2 = (3 + b) + (2 + a))) (Equiv.refl (Fin n))) J) k)) := by
+    funext k
+    rw [show ((Equiv.arrowCongr
+          (finCongr (by omega : (3 + a + b) + 2 = (3 + b) + (2 + a))) (Equiv.refl (Fin n))) J) k =
+        J (Fin.cast (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2) k) from by
+      simp only [Equiv.arrowCongr_apply, Equiv.coe_refl, Function.comp_apply, id_eq, finCongr_symm,
+        finCongr_apply]]
+  rw [htuple]
 
 /-- **The order-uniform `g₀`-operator-norm-route post-composition fibre envelope of the cometric
 trace operator field** (the `(a, b)`-uniform `g`-operator-norm route, the bilinear twin of
