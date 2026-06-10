@@ -1578,6 +1578,200 @@ private theorem cometricDoubleTracePostcompCLM_apply (g₀ : SmoothRiemannianMet
       (Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (p + 2) I x))
   exact congrFun (LinearMap.coe_toContinuousLinearMap' _) w
 
+/-- **The trailing-slot curried `(0, 0) → (0, s)` fibre operator.**  Reads the trailing covariant slot
+of a `(0, s + 1)` fibre operator `w` (i.e. of its unit value `w(⋆)`) at a tangent direction `v`,
+producing a `(0, 0) → (0, s)` fibre operator whose unit value, on a model tuple `m : Fin s → E`, is
+`toModel(w ⋆) (Fin.snoc m v)`.  Packaged through `ofModel`/`smulRight` exactly as `slot0Curry`, so it is
+a genuine fibre tensor consumable by the passenger ampliation induction; metric-free (the trailing slot
+insertion uses no frame). -/
+private noncomputable def tailCurryUnitFib {s : ℕ} {x : M}
+    (w : Tensor0SBundle.TensorRSSpace 0 (s + 1) I x) (v : E) :
+    Tensor0SBundle.TensorRSSpace 0 s I x :=
+  (tensor00Scalar (I := I) (M := M) x).smulRight
+    (Tensor0SBundle.Tensor0SSpace.ofModel
+      ((ContinuousLinearMap.apply ℝ ℝ v).compContinuousMultilinearMap
+        (Tensor0SBundle.Tensor0SSpace.toModel
+            ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace (s + 1) I x from w)
+              (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x)
+                (1 : ℝ)))).curryRight))
+
+set_option linter.unusedSectionVars false in
+/-- **The defining unit-tuple value of the trailing-slot curry.**  The model value of the unit of
+`tailCurryUnitFib w v`, on a tuple `m : Fin s → E`, reads `w`'s unit on the tuple `m` with `v` appended
+as the trailing covariant slot (`Fin.snoc m v`). -/
+private theorem tailCurryUnitFib_unit_toModel {s : ℕ} {x : M}
+    (w : Tensor0SBundle.TensorRSSpace 0 (s + 1) I x) (v : E) (m : Fin s → E) :
+    Tensor0SBundle.Tensor0SSpace.toModel
+        ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace s I x from
+          tailCurryUnitFib (I := I) (M := M) w v)
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+        m =
+      Tensor0SBundle.Tensor0SSpace.toModel
+          ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (s + 1) I x
+              from w)
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+          (Fin.snoc m v) := by
+  classical
+  rw [tailCurryUnitFib, ContinuousLinearMap.smulRight_apply]
+  have hscalar : tensor00Scalar (I := I) (M := M) x
+      (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) =
+      (1 : ℝ) := by
+    rw [tensor00Scalar_apply (I := I) (M := M) x
+      (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))
+      (fun k : Fin 0 => k.elim0)]
+    rw [ContinuousMultilinearMap.constOfIsEmpty_apply]
+  rw [hscalar, one_smul, Tensor0SBundle.Tensor0SSpace.toModel_ofModel]
+  rw [ContinuousLinearMap.compContinuousMultilinearMap_coe, Function.comp_apply,
+    ContinuousLinearMap.apply_apply, ContinuousMultilinearMap.curryRight_apply]
+
+set_option linter.unusedSectionVars false in
+/-- **The cometric double-trace passenger passthrough (the genuine cometric-specific ingredient).**  The
+unit value of the one-passenger-lower cometric post-composition `cometric(p) ∘ wⱼ`, where
+`wⱼ = tailCurryUnitFib w (vlast)` is the trailing-curried input, read on a model tuple `m : Fin p → E`,
+equals the unit value of the full cometric post-composition `cometric(p+1) ∘ w` read on `Fin.snoc m
+vlast` (the same passenger appended as the trailing covariant slot).  The cometric contracts the two
+leading slots `{0, 1}` and passes the trailing passenger unchanged; concretely this is the model-tuple
+identity `modelDoubleTrace_apply` together with two applications of `Fin.cons_snoc_eq_snoc_cons` (the
+trailing append commutes past the two leading cometric-trace insertions). -/
+private theorem cometric_postcomp_tailCurry_unit_eq (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (x : M)
+    (w : Tensor0SBundle.TensorRSSpace 0 (p + 1 + 2) I x) (vlast : E) (m : Fin p → E) :
+    Tensor0SBundle.Tensor0SSpace.toModel
+        (((show Tensor0SBundle.Tensor0SSpace (p + 2) I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace p I x from
+          (cometricDoubleTraceField (I := I) g₀ p).toSection x).comp
+          (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace (p + 2) I x from
+            tailCurryUnitFib (I := I) (M := M) w vlast))
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+        m =
+      Tensor0SBundle.Tensor0SSpace.toModel
+          (((show Tensor0SBundle.Tensor0SSpace (p + 1 + 2) I x →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace (p + 1) I x from
+            (cometricDoubleTraceField (I := I) g₀ (p + 1)).toSection x).comp
+            (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace (p + 1 + 2) I x from w))
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+          (Fin.snoc m vlast) := by
+  classical
+  rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
+  rw [cometricDoubleTraceField_toSection, cometricDoubleTraceField_toSection]
+  rw [cometricDoubleTraceFib_toModel (I := I) g₀ p x _,
+    cometricDoubleTraceFib_toModel (I := I) g₀ (p + 1) x _]
+  rw [DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.modelDoubleTrace_apply
+      (E := E) p (cometricLmodel (I := I) g₀ x) _ m,
+    DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.modelDoubleTrace_apply
+      (E := E) (p + 1) (cometricLmodel (I := I) g₀ x) _ (Fin.snoc m vlast)]
+  refine Finset.sum_congr rfl fun k _ => ?_
+  rw [tailCurryUnitFib_unit_toModel (I := I) (M := M) w vlast]
+  congr 1
+  rw [Fin.cons_snoc_eq_snoc_cons, Fin.cons_snoc_eq_snoc_cons]
+
+set_option linter.unusedSectionVars false in
+/-- **The per-trailing-direction slice bound powering the passenger ampliation.**  In an all-ranks
+`g₀(x)`-orthonormal Parseval frame `e`, the trailing-slot slice (the passenger covariant slot the
+cometric double trace passes through unchanged) of the post-composition's output frame sum is the
+one-passenger-lower cometric post-composition's fibre norm acting on the trailing-curried input
+`tailCurryUnitFib w (e j)`, bounded — by the inductive hypothesis `ih` at passenger count `p` — by `κ`
+times the trailing-curried input's frame sum, i.e. the `j`-slice of `κ · rfns_{(0,p+3)}(w)`.  The
+cometric passthrough (slot-`p+2` passenger commutes with the leading `{0,1}` cometric trace) is the
+model-tuple identity `Fin.cons_snoc_eq_snoc_cons`. -/
+private theorem cometricDoubleTrace_postcomp_rfns_slice_le (g₀ : SmoothRiemannianMetric I M) (κ : ℝ)
+    (p : ℕ)
+    (ih : ∀ (x : M) (w : Tensor0SBundle.TensorRSSpace 0 (p + 2) I x),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 p x
+          ((show Tensor0SBundle.Tensor0SSpace (p + 2) I x →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace p I x from
+            (cometricDoubleTraceField (I := I) g₀ p).toSection x).comp
+            (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace (p + 2) I x from w)) ≤
+        κ * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (p + 2) x w)
+    (x : M) {n : ℕ} (e : Fin n → TangentSpace I x)
+    (w : Tensor0SBundle.TensorRSSpace 0 (p + 1 + 2) I x)
+    (unit0 : Tensor0SBundle.Tensor0SSpace 0 I x)
+    (hunit0 : unit0 =
+      ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))
+    (j : Fin n)
+    (hrepr : ∀ (s : ℕ) (S : Tensor0SBundle.TensorRSSpace 0 s I x),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x S =
+        ∑ K : Fin 0 → Fin n, ∑ J : Fin s → Fin n,
+          fiberNormSqSummand (I := I) (M := M) g₀ x 0 s S n e K J) :
+    ∑ J : Fin p → Fin n,
+        (Tensor0SBundle.Tensor0SSpace.toModel
+            ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace (p + 1) I x from
+              (show Tensor0SBundle.Tensor0SSpace (p + 1 + 2) I x →L[ℝ]
+                  Tensor0SBundle.Tensor0SSpace (p + 1) I x from
+                (cometricDoubleTraceField (I := I) g₀ (p + 1)).toSection x).comp
+                (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                    Tensor0SBundle.Tensor0SSpace (p + 1 + 2) I x from w))
+              unit0)
+            (fun k => e ((Fin.snoc J j : Fin (p + 1) → Fin n) k))) ^ 2 ≤
+      ∑ J : Fin (p + 2) → Fin n,
+        κ * (Tensor0SBundle.Tensor0SSpace.toModel
+            ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace (p + 1 + 2) I x from w) unit0)
+            (fun k => e ((Fin.snoc J j : Fin (p + 1 + 2) → Fin n) k))) ^ 2 := by
+  classical
+  subst hunit0
+  -- The trailing-curried input fibre tensor `wⱼ := tailCurryUnitFib w (e j)`.
+  set wj : Tensor0SBundle.TensorRSSpace 0 (p + 2) I x :=
+    tailCurryUnitFib (I := I) (M := M) w ((e j : TangentSpace I x) : E) with hwj_def
+  -- LHS slice frame sum = `rfns_{(0,p)}(cometric(p) ∘ wⱼ)`, RHS slice frame sum = `κ · rfns_{(0,p+2)}(wⱼ)`.
+  have hLHS : ∑ J : Fin p → Fin n,
+        (Tensor0SBundle.Tensor0SSpace.toModel
+            ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace (p + 1) I x from
+              (show Tensor0SBundle.Tensor0SSpace (p + 1 + 2) I x →L[ℝ]
+                  Tensor0SBundle.Tensor0SSpace (p + 1) I x from
+                (cometricDoubleTraceField (I := I) g₀ (p + 1)).toSection x).comp
+                (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                    Tensor0SBundle.Tensor0SSpace (p + 1 + 2) I x from w))
+              (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x)
+                (1 : ℝ)))
+            (fun k => e ((Fin.snoc J j : Fin (p + 1) → Fin n) k))) ^ 2 =
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 p x
+          ((show Tensor0SBundle.Tensor0SSpace (p + 2) I x →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace p I x from
+            (cometricDoubleTraceField (I := I) g₀ p).toSection x).comp
+            (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace (p + 2) I x from wj)) := by
+    rw [ccRfns_zero_eq_sum_unit (I := I) g₀ p x e (hrepr p)
+      ((show Tensor0SBundle.Tensor0SSpace (p + 2) I x →L[ℝ]
+          Tensor0SBundle.Tensor0SSpace p I x from
+        (cometricDoubleTraceField (I := I) g₀ p).toSection x).comp
+        (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace (p + 2) I x from wj))]
+    refine Finset.sum_congr rfl fun J _ => ?_
+    have htuple : (fun k => e ((Fin.snoc J j : Fin (p + 1) → Fin n) k)) =
+        Fin.snoc (fun k => e (J k)) ((e j : TangentSpace I x)) := by
+      have := Fin.comp_snoc (fun a : Fin n => e a) J j
+      simpa [Function.comp] using this
+    rw [htuple]
+    congr 1
+    exact (cometric_postcomp_tailCurry_unit_eq (I := I) g₀ p x w ((e j : TangentSpace I x) : E)
+      (fun k => e (J k))).symm
+  have hRHS : ∑ J : Fin (p + 2) → Fin n,
+        κ * (Tensor0SBundle.Tensor0SSpace.toModel
+            ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace (p + 1 + 2) I x from w)
+              (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x)
+                (1 : ℝ)))
+            (fun k => e ((Fin.snoc J j : Fin (p + 1 + 2) → Fin n) k))) ^ 2 =
+      κ * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (p + 2) x wj := by
+    rw [ccRfns_zero_eq_sum_unit (I := I) g₀ (p + 2) x e (hrepr (p + 2)) wj, Finset.mul_sum]
+    refine Finset.sum_congr rfl fun J _ => ?_
+    have htuple : (fun k => e ((Fin.snoc J j : Fin (p + 1 + 2) → Fin n) k)) =
+        Fin.snoc (fun k => e (J k)) ((e j : TangentSpace I x)) := by
+      have := Fin.comp_snoc (fun a : Fin n => e a) J j
+      simpa [Function.comp] using this
+    rw [htuple]
+    congr 2
+    rw [hwj_def, tailCurryUnitFib_unit_toModel (I := I) (M := M) w ((e j : TangentSpace I x) : E)
+      (fun k => e (J k))]
+  rw [hLHS, hRHS]
+  exact ih x wj
+
 set_option linter.unusedSectionVars false in
 /-- **(POSIT — the order-uniform passenger ampliation of the rank-generic cometric double-trace fibre
 envelope; NAMED general-infra child, to be homed in `Geometry/Curvature/FiberNormParseval`.)**  From the
@@ -1613,7 +1807,84 @@ private theorem cometricDoubleTrace_postcomp_rfns_le_aux (g₀ : SmoothRiemannia
             (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
                 Tensor0SBundle.Tensor0SSpace (p + 2) I x from w)) ≤
         κ * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (p + 2) x w := by
-  sorry
+  intro p
+  induction p with
+  | zero => exact hbase
+  | succ p ih =>
+    intro x w
+    classical
+    obtain ⟨n, e, _hn, hrepr⟩ := ccAllRanksFrameWitness (I := I) g₀ x
+    -- Abbreviations for the two model-unit values (`w unit` and the postcomposed `cometric(p+1) ∘ w`
+    -- unit), as plain `(0, ·)` model multilinear forms.
+    set unit0 : Tensor0SBundle.Tensor0SSpace 0 I x :=
+      ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)
+      with hunit0
+    set Dw : Tensor0SBundle.Tensor0SModel (p + 1 + 2) ℝ E :=
+      Tensor0SBundle.Tensor0SSpace.toModel
+        ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace (p + 1 + 2) I x from w) unit0) with hDw_def
+    -- The trailing-slot Parseval split of the *output* fibre norm, peeling the trailing passenger
+    -- covariant slot via `Fin.snocEquiv`.  Per trailing direction `j`, the slice fibre norm is the
+    -- one-passenger-lower cometric postcomposition acting on the trailing-curried input.
+    -- LHS (output) frame sum.
+    rw [ccRfns_zero_eq_sum_unit (I := I) g₀ (p + 1) x e (hrepr (p + 1))
+      ((show Tensor0SBundle.Tensor0SSpace (p + 1 + 2) I x →L[ℝ]
+          Tensor0SBundle.Tensor0SSpace (p + 1) I x from
+        (cometricDoubleTraceField (I := I) g₀ (p + 1)).toSection x).comp
+        (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace (p + 1 + 2) I x from w))]
+    -- RHS (input) frame sum, split off the leading-passenger nothing — we rewrite the whole `rfns w`
+    -- as the frame sum and peel its trailing index too.
+    rw [ccRfns_zero_eq_sum_unit (I := I) g₀ (p + 1 + 2) x e (hrepr (p + 1 + 2)) w]
+    -- Peel the trailing index `Fin.snocEquiv` on the output frame sum.
+    rw [← Fintype.sum_equiv
+        (Fin.snocEquiv (fun _ : Fin (p + 1) => Fin n))
+        (fun jJ : Fin n × (Fin p → Fin n) =>
+          (Tensor0SBundle.Tensor0SSpace.toModel
+              ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                  Tensor0SBundle.Tensor0SSpace (p + 1) I x from
+                (show Tensor0SBundle.Tensor0SSpace (p + 1 + 2) I x →L[ℝ]
+                    Tensor0SBundle.Tensor0SSpace (p + 1) I x from
+                  (cometricDoubleTraceField (I := I) g₀ (p + 1)).toSection x).comp
+                  (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                      Tensor0SBundle.Tensor0SSpace (p + 1 + 2) I x from w))
+                unit0)
+              (fun k => e ((Fin.snoc jJ.2 jJ.1 : Fin (p + 1) → Fin n) k))) ^ 2)
+        (fun J : Fin (p + 1) → Fin n =>
+          (Tensor0SBundle.Tensor0SSpace.toModel
+              ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                  Tensor0SBundle.Tensor0SSpace (p + 1) I x from
+                (show Tensor0SBundle.Tensor0SSpace (p + 1 + 2) I x →L[ℝ]
+                    Tensor0SBundle.Tensor0SSpace (p + 1) I x from
+                  (cometricDoubleTraceField (I := I) g₀ (p + 1)).toSection x).comp
+                  (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                      Tensor0SBundle.Tensor0SSpace (p + 1 + 2) I x from w))
+                unit0)
+              (fun k => e (J k))) ^ 2)
+        (fun jJ => by rfl)]
+    -- Distribute `κ` through the input frame sum, then peel its trailing index.
+    rw [Finset.mul_sum]
+    rw [← Fintype.sum_equiv
+        (Fin.snocEquiv (fun _ : Fin (p + 1 + 2) => Fin n))
+        (fun jJ : Fin n × (Fin (p + 2) → Fin n) =>
+          κ * (Tensor0SBundle.Tensor0SSpace.toModel
+              ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                  Tensor0SBundle.Tensor0SSpace (p + 1 + 2) I x from w) unit0)
+              (fun k => e ((Fin.snoc jJ.2 jJ.1 : Fin (p + 1 + 2) → Fin n) k))) ^ 2)
+        (fun J : Fin (p + 1 + 2) → Fin n =>
+          κ * (Tensor0SBundle.Tensor0SSpace.toModel
+              ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                  Tensor0SBundle.Tensor0SSpace (p + 1 + 2) I x from w) unit0)
+              (fun k => e (J k))) ^ 2)
+        (fun jJ => by rfl)]
+    -- Now both sides are `∑_{(j, J)}`; reduce `(j, J)` to `j` and `J` via `Fintype.sum_prod_type`,
+    -- and bound termwise.  Per trailing direction `j`, the output slice frame sum is the one-lower
+    -- cometric postcomposition's fibre norm, bounded by `κ ·` the input slice frame sum by `ih`.
+    rw [Fintype.sum_prod_type, Fintype.sum_prod_type]
+    refine Finset.sum_le_sum fun j _ => ?_
+    -- the per-`j` trailing slice: this is `rfns_{(0,p)}(cometric(p) ∘ wⱼ) ≤ κ · rfns_{(0,p+2)}(wⱼ)`
+    -- with `wⱼ` the trailing-curried (slot `p+2` fixed to `e j`) input, supplied by `ih`.
+    exact cometricDoubleTrace_postcomp_rfns_slice_le (I := I) g₀ κ p ih x e w unit0 hunit0 j hrepr
 
 /-- **The rank-generic order-uniform `g₀`-operator-norm-route post-composition fibre envelope of the
 intrinsic `g₀⁻¹` double-trace field** (POSITED NAMED general-infra child — to be homed in
