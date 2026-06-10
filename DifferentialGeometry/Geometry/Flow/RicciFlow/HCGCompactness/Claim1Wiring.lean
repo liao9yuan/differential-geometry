@@ -468,6 +468,128 @@ theorem koszulComp_at
   rw [hLHS, hkos, hb1, hb2, hb3]
   ring
 
+/-! ## B4: the inverse-array norm bound -/
+
+/-- **B4 core**: a quadratic lower bound `c·‖v‖² ≤ vᵀ(Gram)v` forces the inverse Gram
+array's `ℓ²` norm to be at most `√(card Idx)/c`.  Elementary: the `l`-th column
+`w = G⁻¹eₗ` satisfies `c·‖w‖² ≤ wᵀGw = wₗ ≤ ‖w‖`, so `‖w‖ ≤ 1/c`; no spectral theory. -/
+theorem ginv_compL2_le
+    (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
+    [MemTrivializationAtlas e₀]
+    (g : SmoothRiemannianMetric I M) (basisE : Module.Basis Idx Real E) {y : M}
+    (c : Real) (hc : 0 < c)
+    (hquad : ∀ v : Idx → Real,
+      c * (v ⬝ᵥ v) ≤ v ⬝ᵥ (gramE (I := I) e₀ g basisE y).mulVec v) :
+    compL2 (ginvCompField (I := I) e₀ g basisE y) ≤
+      Real.sqrt (Fintype.card Idx) / c := by
+  classical
+  -- positivity (hence invertibility) from the quadratic bound
+  have hpos : (gramE (I := I) e₀ g basisE y).PosDef := by
+    refine Matrix.PosDef.of_dotProduct_mulVec_pos (gramE_herm (I := I) e₀ g basisE y) ?_
+    intro v hv
+    rw [show (star v : Idx → Real) = v from funext fun i => star_trivial _]
+    have hvv : 0 < v ⬝ᵥ v := by
+      obtain ⟨i, hi⟩ := Function.ne_iff.mp hv
+      exact Finset.sum_pos' (fun e _ => mul_self_nonneg _)
+        ⟨i, Finset.mem_univ i, mul_self_pos.mpr hi⟩
+    exact lt_of_lt_of_le (mul_pos hc hvv) (hquad v)
+  have hdet : IsUnit (gramE (I := I) e₀ g basisE y).det :=
+    isUnit_iff_ne_zero.mpr (ne_of_gt hpos.det_pos)
+  -- the column bound `‖G⁻¹eₗ‖² ≤ 1/c²`
+  have hcol : ∀ l : Idx,
+      ((fun e => (gramE (I := I) e₀ g basisE y)⁻¹ e l) ⬝ᵥ
+        (fun e => (gramE (I := I) e₀ g basisE y)⁻¹ e l)) ≤ (1 / c) ^ 2 := by
+    intro l
+    set w : Idx → Real := fun e => (gramE (I := I) e₀ g basisE y)⁻¹ e l with hw
+    have hGw : (gramE (I := I) e₀ g basisE y).mulVec w = Pi.single l 1 := by
+      have h1 : w = (gramE (I := I) e₀ g basisE y)⁻¹.mulVec (Pi.single l 1) := by
+        funext e
+        simp [hw, Matrix.mulVec_single]
+      rw [h1, Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _ hdet, Matrix.one_mulVec]
+    have hq := hquad w
+    rw [hGw, show w ⬝ᵥ Pi.single l 1 = w l from by
+      simp [dotProduct, Pi.single_apply]] at hq
+    have hself : (w l) ^ 2 ≤ w ⬝ᵥ w := by
+      have h := Finset.single_le_sum (f := fun e => w e * w e)
+        (fun e _ => mul_self_nonneg _) (Finset.mem_univ l)
+      simpa [dotProduct, sq] using h
+    have hS0 : (0 : Real) ≤ w ⬝ᵥ w :=
+      Finset.sum_nonneg fun e _ => mul_self_nonneg _
+    have h1 : (c * (w ⬝ᵥ w)) * (c * (w ⬝ᵥ w)) ≤ (w l) * (w l) :=
+      mul_self_le_mul_self (mul_nonneg hc.le hS0) hq
+    have h3 : c ^ 2 * (w ⬝ᵥ w) ^ 2 ≤ w ⬝ᵥ w := by nlinarith [h1, hself]
+    rcases hS0.lt_or_eq with hSpos | hS0'
+    · rw [div_pow, one_pow, le_div_iff₀ (by positivity)]
+      nlinarith [h3, hSpos]
+    · rw [← hS0']
+      positivity
+  -- assemble: `compL2Sq = Σₗ ‖column l‖² ≤ card/c²`
+  have hsq : compL2Sq (ginvCompField (I := I) e₀ g basisE y) ≤
+      (Real.sqrt (Fintype.card Idx) / c) ^ 2 := by
+    have hre : compL2Sq (ginvCompField (I := I) e₀ g basisE y) =
+        ∑ p : Idx × Idx, ((gramE (I := I) e₀ g basisE y)⁻¹ p.1 p.2) ^ 2 := by
+      simp only [compL2Sq]
+      exact Fintype.sum_equiv (piFinTwoEquiv (fun _ : Fin 2 => Idx))
+        _ _ (fun m => rfl)
+    rw [hre, div_pow, Real.sq_sqrt (Nat.cast_nonneg _)]
+    calc (∑ p : Idx × Idx, ((gramE (I := I) e₀ g basisE y)⁻¹ p.1 p.2) ^ 2)
+        = ∑ l : Idx, ∑ e : Idx, ((gramE (I := I) e₀ g basisE y)⁻¹ e l) ^ 2 := by
+          rw [Fintype.sum_prod_type]
+          exact Finset.sum_comm
+      _ ≤ ∑ _l : Idx, (1 / c) ^ 2 := by
+          refine Finset.sum_le_sum fun l _ => ?_
+          have h := hcol l
+          calc (∑ e : Idx, ((gramE (I := I) e₀ g basisE y)⁻¹ e l) ^ 2)
+              = (fun e => (gramE (I := I) e₀ g basisE y)⁻¹ e l) ⬝ᵥ
+                (fun e => (gramE (I := I) e₀ g basisE y)⁻¹ e l) := by
+                simp [dotProduct, sq]
+            _ ≤ (1 / c) ^ 2 := h
+      _ = (Fintype.card Idx : Real) * (1 / c) ^ 2 := by
+          rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
+      _ = (Fintype.card Idx : Real) / c ^ 2 := by ring
+  calc compL2 (ginvCompField (I := I) e₀ g basisE y)
+      = Real.sqrt (compL2Sq (ginvCompField (I := I) e₀ g basisE y)) := rfl
+    _ ≤ Real.sqrt ((Real.sqrt (Fintype.card Idx) / c) ^ 2) := Real.sqrt_le_sqrt hsq
+    _ = Real.sqrt (Fintype.card Idx) / c := Real.sqrt_sq
+        (div_nonneg (Real.sqrt_nonneg _) hc.le)
+
+/-! ## B5: the pointwise norm bridge (component tower ↔ geometric tower) -/
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **B5**: at a point where the frame is `gRef`-orthonormal (the pointwise
+`MetricInverseInBasis … identityInvMetric` condition), the `compL2` of the component
+tower equals the geometric `√normSq0S` of the `iterCov` tower — both sides of `claim1`'s
+conclusion convert to the textbook geometric norms. -/
+theorem compL2_tower_eq
+    (gRef : SmoothRiemannianMetric I M) {r : ℕ}
+    (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) r)
+    (frame : Idx → (x : M) → TangentSpace I x) {u : Set M}
+    (hframe : IsLocalFrameOn I E 1 frame u) (hu : IsOpen u)
+    {y : M} (hy : y ∈ u)
+    (hinv : Tensor0SBundle.MetricInverseInBasis (I := I) gRef y (hframe.toBasisAt hy)
+      (Tensor0SBundle.identityInvMetric (Idx := Idx)))
+    (j : ℕ) :
+    compL2 (iterCovComp (I := I) frame
+        (fun y' => christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef)
+          frame hframe y')
+        (frameComp0S (I := I) T frame) j y) =
+      Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef y (r + j)
+        (iterCov (I := I) gRef r T j y)) := by
+  rw [compL2]
+  congr 1
+  rw [Tensor0SBundle.normSq0S_identity_eq_sum_sq (I := I) gRef y (r + j)
+    (hframe.toBasisAt hy) hinv (iterCov (I := I) gRef r T j y)]
+  simp only [compL2Sq]
+  refine Finset.sum_congr rfl fun n _ => ?_
+  rw [iterCovComp_eq_iterCov (I := I) gRef T frame hframe hu j hy n]
+  congr 1
+  rw [Tensor0SBundle.component0S_apply]
+  congr 1
+  funext q
+  rw [IsLocalFrameOn.toBasisAt_coe]
+  rfl
+
 /-! ## B6: the assembled geometric Claim 1 -/
 
 set_option backward.isDefEq.respectTransparency false in

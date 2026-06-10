@@ -208,7 +208,15 @@ gotcha: the PosDef hypothesis carries `star c`, bridge with `star_trivial`),
 (the exact `claim1` `hinv` shape, via `Matrix.nonsing_inv_mul` + entry
 extraction).  No smoothness of `Ginv` anywhere, as designed.**
 
-**B4 — `hGinv` : `compL2 (Ginv x) ≤ C0` + (D2b) the frame-Gram comparison.**
+**B4 — `hGinv` : `compL2 (Ginv x) ≤ C0` + (D2b) the frame-Gram comparison.
+STATUS 2026-06-10: **B4 COMPLETE sorry-free** (`ginv_compL2_le`, Claim1Wiring.lean):
+`c·‖v‖² ≤ vᵀ(gramE)v  ⟹  compL2(ginvCompField) ≤ √(card Idx)/c`.  Elementary
+column bound (`w = G⁻¹eₗ`: `c‖w‖² ≤ wᵀGw = wₗ ≤ ‖w‖`), NO spectral theory;
+posdef/invertibility derived from `hquad` itself.  The geometric `hquad` comes
+from the eq-3.3 equivalence composed with the frame's gRef-Gram lower bound via
+`gramE_dotVec` (consumer-side one-liner).  GOTCHAS: `dotProduct_self_nonneg/_eq_zero`
+do NOT exist — inline `Finset.sum_pos'`/`sum_nonneg` + `Function.ne_iff`; nlinarith
+needs the explicit `mul_self_le_mul_self` product chain + `le_div_iff₀` split.**
   From the two-sided equivalence `c·gRef ≤ g_k ≤ C·gRef` (eq 3.3 output) and the
   frame's gRef-Gram bounds: matrix eigen/Rayleigh bounds ⇒ entries of the inverse
   Gram are bounded ⇒ `compL2(Ginv) ≤ C0(c,n,frame)`.  Reuse the Rayleigh
@@ -217,10 +225,18 @@ extraction).  No smoothness of `Ginv` anywhere, as designed.**
   Effort: 0.5–1 session.  Risk: moderate-low (pure linear algebra, tools partly
   present).
 
-**B5 — `hK` and the conclusion bridge (g-side norms).**
-  `compL2 (iterCovComp … g j x)` = (D2b: comparable to) `√normSq0S gRef x (j+2)
-  (metricCovDeriv g_k gRef j x)` via F5 (`iterCovComp_eq_iterCov`) + F4/ON-bridge.
-  Effort: 0.5 session.  Risk: low.
+**B5 — `hK` and the conclusion bridge (g-side norms).
+STATUS 2026-06-10: **B5 COMPLETE sorry-free** (`compL2_tower_eq`, Claim1Wiring.lean):
+at any point where the frame is gRef-ON (the pointwise
+`MetricInverseInBasis … identityInvMetric` condition, the established
+AllTimesBounds pattern), `compL2 (iterCovComp … (frameComp0S T) j y) =
+√(normSq0S gRef y (r+j) (iterCov gRef r T j y))` — an EQUALITY, both directions
+usable (convert `hK` inputs and the conclusion).  Proof:
+`normSq0S_identity_eq_sum_sq` + `iterCovComp_eq_iterCov` + `component0S_apply` +
+`toBasisAt_coe`.  The full non-ON Gram-comparison (two-sided constants) is NOT
+built — deferred to the eq-3.4 endpoint phase if a consumer needs the whole-window
+norm conversion in a single non-ON frame (Route-P discipline: Step 4 consumes
+`compL2` directly).**
 
 **B6 — assembly `claim1_geom`.
 STATUS 2026-06-10: **FIRST ASSEMBLY COMPLETE sorry-free** (`claim1_geom`,
