@@ -67,6 +67,174 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+private local instance : MeasurableSpace E := borel E
+private local instance : BorelSpace E := ⟨rfl⟩
+private local instance : MeasurableSpace M := borel M
+private local instance : BorelSpace M := ⟨rfl⟩
+
+section SecondOrderInterpInfra
+
+set_option linter.unusedSectionVars false in
+/-- Continuity of `x ↦ rfns(S)(x)` for a smooth compactly-supported tensor section, read
+through the fibre-norm bridge `riemannianFiberNormSq = tensorInnerPointwise (·,·)` and the
+continuity of the diagonal pointwise inner product on smooth sections. -/
+private theorem continuous_rfns_section
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (S : Integral.L2.SmoothCcTensor g r s) :
+    Continuous (fun x => riemannianFiberNormSq (I := I) (M := M) g r s x (S.toSection x)) := by
+  have hc := Integral.L2.SmoothCcTensor.continuous_inner_self (I := I) (M := M) S
+  refine hc.congr (fun x => ?_)
+  rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x (S.toSection x),
+    ← Integral.L2.SmoothCcTensor.toFun_apply (I := I) (M := M) S x]
+
+set_option linter.unusedSectionVars false in
+/-- `MemLp` of `x ↦ rfns(S)(x) ^ a` for any nonnegative exponent `a`, on a closed manifold: a
+continuous compactly-supported function on a compact space lies in every `Lᵖ`. -/
+private theorem memLp_rfns_rpow
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (S : Integral.L2.SmoothCcTensor g r s) (a : ℝ) (ha : 0 ≤ a) (p : ℝ≥0∞) :
+    MeasureTheory.MemLp
+      (fun x => (riemannianFiberNormSq (I := I) (M := M) g r s x (S.toSection x)) ^ a) p
+      (Integral.Measure.riemannianVolumeMeasure I M g) := by
+  haveI : MeasureTheory.IsFiniteMeasure (Integral.Measure.riemannianVolumeMeasure I M g) :=
+    Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+      (I := I) (M := M) g
+  have hcont : Continuous
+      (fun x => (riemannianFiberNormSq (I := I) (M := M) g r s x (S.toSection x)) ^ a) :=
+    (continuous_rfns_section (I := I) (M := M) g r s S).rpow_const (fun _ => Or.inr ha)
+  exact hcont.memLp_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+
+set_option linter.unusedSectionVars false in
+/-- **Three-function Hölder for nonnegative continuous functions** on the (finite) Riemannian
+volume of a closed manifold, in integral form: for `α⁻¹ + β⁻¹ + γ⁻¹ = 1` with all positive,
+```
+∫ f₁·f₂·f₃ ≤ (∫ f₁^α)^{1/α} · (∫ f₂^β)^{1/β} · (∫ f₃^γ)^{1/γ},
+```
+obtained by two applications of the two-function Hölder
+`MeasureTheory.integral_mul_le_Lp_mul_Lq_of_nonneg`.  The first split is `f₁·(f₂·f₃)` at the
+conjugate pair `(α, α')` with `α' := (β⁻¹ + γ⁻¹)⁻¹`; the inner split is `f₂^{α'}·f₃^{α'}` at the
+conjugate pair `(β/α', γ/α')`. -/
+private theorem real_holder_three_nonneg
+    (g : SmoothRiemannianMetric I M) (f₁ f₂ f₃ : M → ℝ)
+    (hf₁c : Continuous f₁) (hf₂c : Continuous f₂) (hf₃c : Continuous f₃)
+    (hf₁0 : ∀ x, 0 ≤ f₁ x) (hf₂0 : ∀ x, 0 ≤ f₂ x) (hf₃0 : ∀ x, 0 ≤ f₃ x)
+    {α β γ : ℝ} (hα : 0 < α) (hβ : 0 < β) (hγ : 0 < γ)
+    (hABC : α⁻¹ + β⁻¹ + γ⁻¹ = 1) :
+    ∫ x, f₁ x * f₂ x * f₃ x ∂(Integral.Measure.riemannianVolumeMeasure I M g) ≤
+      (∫ x, f₁ x ^ α ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ (1 / α) *
+        ((∫ x, f₂ x ^ β ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ (1 / β) *
+          (∫ x, f₃ x ^ γ ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ (1 / γ)) := by
+  classical
+  set μ : MeasureTheory.Measure M := Integral.Measure.riemannianVolumeMeasure I M g with hμ
+  haveI : MeasureTheory.IsFiniteMeasure μ :=
+    Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
+  -- The intermediate conjugate exponent `α' = (β⁻¹+γ⁻¹)⁻¹`, conjugate to `α`.
+  set α' : ℝ := (β⁻¹ + γ⁻¹)⁻¹ with hα'def
+  have hβγpos : 0 < β⁻¹ + γ⁻¹ := by positivity
+  have hα'pos : 0 < α' := by rw [hα'def]; positivity
+  have hα'inv : α'⁻¹ = β⁻¹ + γ⁻¹ := by rw [hα'def, inv_inv]
+  have hγinv_pos : (0 : ℝ) < γ⁻¹ := by positivity
+  have hβinv_pos : (0 : ℝ) < β⁻¹ := by positivity
+  -- `α` and `α'` are Hölder conjugate: `α⁻¹ + α'⁻¹ = 1`.
+  have hconj1 : α.HolderConjugate α' := by
+    refine Real.holderConjugate_iff.mpr ⟨?_, ?_⟩
+    · -- `1 < α`: from `α⁻¹ = 1 - (β⁻¹+γ⁻¹) < 1` and `0 < α`.
+      have hαinv_lt : α⁻¹ < 1 := by
+        have hαeq : α⁻¹ = 1 - (β⁻¹ + γ⁻¹) := by linarith [hABC]
+        rw [hαeq]; linarith [hβγpos]
+      have hαinv_pos : (0 : ℝ) < α⁻¹ := by positivity
+      rw [← inv_inv α]
+      exact one_lt_inv_iff₀.mpr ⟨hαinv_pos, hαinv_lt⟩
+    · rw [hα'inv]; linarith [hABC]
+  -- The product `f₂·f₃` is nonnegative and continuous (hence in every Lᵖ).
+  have hf23_0 : ∀ x, 0 ≤ f₂ x * f₃ x := fun x => mul_nonneg (hf₂0 x) (hf₃0 x)
+  have hf1_mem : MeasureTheory.MemLp f₁ (ENNReal.ofReal α) μ :=
+    hf₁c.memLp_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+  have hf23_mem : MeasureTheory.MemLp (fun x => f₂ x * f₃ x) (ENNReal.ofReal α') μ :=
+    (hf₂c.mul hf₃c).memLp_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+  -- First Hölder split: `∫ f₁·(f₂f₃) ≤ (∫f₁^α)^{1/α}·(∫(f₂f₃)^{α'})^{1/α'}`.
+  have hstep1 := MeasureTheory.integral_mul_le_Lp_mul_Lq_of_nonneg (μ := μ) hconj1
+    (f := f₁) (g := fun x => f₂ x * f₃ x)
+    (MeasureTheory.ae_of_all _ hf₁0) (MeasureTheory.ae_of_all _ hf23_0) hf1_mem hf23_mem
+  -- The inner conjugate pair `(β/α', γ/α')`.
+  have hβα' : 0 < β / α' := by positivity
+  have hγα' : 0 < γ / α' := by positivity
+  have hf2α'_mem : MeasureTheory.MemLp (fun x => f₂ x ^ α') (ENNReal.ofReal (β / α')) μ :=
+    ((hf₂c.rpow_const (fun _ => Or.inr hα'pos.le)).memLp_of_hasCompactSupport
+      (HasCompactSupport.of_compactSpace _))
+  have hf3α'_mem : MeasureTheory.MemLp (fun x => f₃ x ^ α') (ENNReal.ofReal (γ / α')) μ :=
+    ((hf₃c.rpow_const (fun _ => Or.inr hα'pos.le)).memLp_of_hasCompactSupport
+      (HasCompactSupport.of_compactSpace _))
+  have hα'ne : α' ≠ 0 := ne_of_gt hα'pos
+  have hconj2 : (β / α').HolderConjugate (γ / α') := by
+    refine Real.holderConjugate_iff.mpr ⟨?_, ?_⟩
+    · -- `1 < β/α'`: equivalently `α' < β`, from `β⁻¹ < β⁻¹+γ⁻¹ = α'⁻¹`.
+      rw [one_lt_div hα'pos]
+      have hlt : β⁻¹ < α'⁻¹ := by rw [hα'inv]; linarith [hγinv_pos]
+      exact (inv_lt_inv₀ hβ hα'pos).mp hlt
+    · -- `(β/α')⁻¹ + (γ/α')⁻¹ = α'/β + α'/γ = α'·(β⁻¹+γ⁻¹) = α'·α'⁻¹ = 1`.
+      have hsplit : α' / β + α' / γ = α' * (β⁻¹ + γ⁻¹) := by
+        rw [div_eq_mul_inv, div_eq_mul_inv, ← mul_add]
+      rw [inv_div, inv_div, hsplit, ← hα'inv, mul_inv_cancel₀ hα'ne]
+  -- Second Hölder split on `f₂^{α'}·f₃^{α'}` at `(β/α', γ/α')`.
+  have hstep2 := MeasureTheory.integral_mul_le_Lp_mul_Lq_of_nonneg (μ := μ) hconj2
+    (f := fun x => f₂ x ^ α') (g := fun x => f₃ x ^ α')
+    (MeasureTheory.ae_of_all _ (fun x => Real.rpow_nonneg (hf₂0 x) _))
+    (MeasureTheory.ae_of_all _ (fun x => Real.rpow_nonneg (hf₃0 x) _)) hf2α'_mem hf3α'_mem
+  -- Identify `(f₂f₃)^{α'} = f₂^{α'}·f₃^{α'}` (nonneg bases) so the two splits chain.
+  have hprod_rpow : ∀ x, (f₂ x * f₃ x) ^ α' = f₂ x ^ α' * f₃ x ^ α' :=
+    fun x => Real.mul_rpow (hf₂0 x) (hf₃0 x)
+  -- `(f₂^{α'})^{β/α'} = f₂^β`, `(f₃^{α'})^{γ/α'} = f₃^γ`.
+  have hmulcancel : ∀ t : ℝ, α' * (t / α') = t := by
+    intro t; rw [mul_comm, div_mul_cancel₀ t hα'ne]
+  have hpow2 : ∀ x, (f₂ x ^ α') ^ (β / α') = f₂ x ^ β := by
+    intro x
+    rw [← Real.rpow_mul (hf₂0 x), hmulcancel]
+  have hpow3 : ∀ x, (f₃ x ^ α') ^ (γ / α') = f₃ x ^ γ := by
+    intro x
+    rw [← Real.rpow_mul (hf₃0 x), hmulcancel]
+  -- Rewrite the integrals in `hstep2`.
+  rw [MeasureTheory.integral_congr_ae (MeasureTheory.ae_of_all _ hpow2),
+      MeasureTheory.integral_congr_ae (MeasureTheory.ae_of_all _ hpow3)] at hstep2
+  -- The intermediate factor: `(∫ (f₂f₃)^{α'})^{1/α'} ≤ (∫f₂^β)^{1/β}·(∫f₃^γ)^{1/γ}`.
+  set Iβ : ℝ := ∫ x, f₂ x ^ β ∂μ with hIβ
+  set Iγ : ℝ := ∫ x, f₃ x ^ γ ∂μ with hIγ
+  have hIβ_nn : 0 ≤ Iβ := MeasureTheory.integral_nonneg (fun x => Real.rpow_nonneg (hf₂0 x) _)
+  have hIγ_nn : 0 ≤ Iγ := MeasureTheory.integral_nonneg (fun x => Real.rpow_nonneg (hf₃0 x) _)
+  have hI23 : (∫ x, (f₂ x * f₃ x) ^ α' ∂μ) = ∫ x, f₂ x ^ α' * f₃ x ^ α' ∂μ :=
+    MeasureTheory.integral_congr_ae (MeasureTheory.ae_of_all _ hprod_rpow)
+  have hmid : (∫ x, (f₂ x * f₃ x) ^ α' ∂μ) ^ (1 / α') ≤ Iβ ^ (1 / β) * Iγ ^ (1 / γ) := by
+    rw [hI23]
+    have hbase_nn : 0 ≤ ∫ x, f₂ x ^ α' * f₃ x ^ α' ∂μ :=
+      MeasureTheory.integral_nonneg (fun x =>
+        mul_nonneg (Real.rpow_nonneg (hf₂0 x) _) (Real.rpow_nonneg (hf₃0 x) _))
+    have hα'inv_pos : 0 < 1 / α' := by positivity
+    calc (∫ x, f₂ x ^ α' * f₃ x ^ α' ∂μ) ^ (1 / α')
+        ≤ (Iβ ^ (1 / (β / α')) * Iγ ^ (1 / (γ / α'))) ^ (1 / α') :=
+          Real.rpow_le_rpow hbase_nn hstep2 (le_of_lt hα'inv_pos)
+      _ = Iβ ^ (1 / β) * Iγ ^ (1 / γ) := by
+          rw [Real.mul_rpow (by positivity) (by positivity),
+            ← Real.rpow_mul hIβ_nn, ← Real.rpow_mul hIγ_nn]
+          have he2 : (1 / (β / α')) * (1 / α') = 1 / β := by
+            rw [one_div_div]
+            field_simp
+          have he3 : (1 / (γ / α')) * (1 / α') = 1 / γ := by
+            rw [one_div_div]
+            field_simp
+          rw [he2, he3]
+  -- Chain the two splits.
+  calc ∫ x, f₁ x * f₂ x * f₃ x ∂μ
+      = ∫ x, f₁ x * (f₂ x * f₃ x) ∂μ := by
+        refine MeasureTheory.integral_congr_ae (MeasureTheory.ae_of_all _ (fun x => ?_))
+        ring
+    _ ≤ (∫ x, f₁ x ^ α ∂μ) ^ (1 / α) * (∫ x, (f₂ x * f₃ x) ^ α' ∂μ) ^ (1 / α') := hstep1
+    _ ≤ (∫ x, f₁ x ^ α ∂μ) ^ (1 / α) * (Iβ ^ (1 / β) * Iγ ^ (1 / γ)) := by
+        apply mul_le_mul_of_nonneg_left hmid
+        exact Real.rpow_nonneg (MeasureTheory.integral_nonneg (fun x => Real.rpow_nonneg (hf₁0 x) _)) _
+
+end SecondOrderInterpInfra
+
 section LpDiscreteLogConvex
 
 /-- One-step "slope-defect" iterated (bounded form): if `Δ i ≤ Δ (i+1) + d` for all
@@ -309,6 +477,103 @@ private noncomputable def lpFiberJetLadder
             ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s i u).toSection x)) ^ ((k : ℝ) / i)
         ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((i : ℝ) / (2 * k))
 
+section SecondOrderInterpCore
+
+/-- **(POSIT — the weighted covariant `Lᵖ` integration-by-parts inequality, finite-factor form.)**
+
+The genuine covariant integration-by-parts engine of the second-order interpolation, isolated to a
+single smooth compactly-supported tensor `w`.  Writing `∇ = covGrad`, `a := rfns(w)`,
+`b := rfns(∇w)`, `c := rfns(∇²w)` and the exponent `p := k/(i+1)` (with `1 ≤ p`, i.e. `i + 1 ≤ k`),
+moving one covariant derivative off the right factor `∇w` of `∫ |∇w|^{2p} = ∫ |∇w|^{2p-2}·⟨∇w,∇w⟩`
+through the divergence theorem (rigorously: against the regularised weight `(|∇w|²+ε)^{p-1}` and an
+`ε → 0` dominated limit) yields the pointwise Cauchy–Schwarz bound
+```
+∫ b^p ≤ (2p - 1) · ∫ a^{1/2} · b^{p-1} · c^{1/2},
+```
+i.e. `∫ |∇w|^{2p} ≤ (2p-1) ∫ |w|·|∇w|^{2p-2}·|∇²w|`.  Its body is `sorry`: the genuine covariant
+divergence theorem against the regularised weight plus the `ε → 0` limit — content the project does
+not yet carry (it has only the *unweighted* covariant IBP and the divergence theorem); consumers
+transitively depend on its `sorryAx`.  **General analytic infrastructure** (weighted-`Lᵖ` covariant
+IBP) to be promoted to a dedicated `Analysis/Sobolev` file. -/
+private theorem weightedCovIBP_lpFiberJet_fin
+    (g : SmoothRiemannianMetric I M) (k m i : ℕ) (_hk : 1 ≤ k) (_hi : 1 ≤ i) (_hik : i + 1 < k)
+    (w : Integral.L2.SmoothCcTensor g 0 m) :
+    (∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
+            ((covGrad (I := I) (M := M) g 0 m w).toSection x)) ^ ((k : ℝ) / (i + 1))
+        ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ≤
+      (2 * ((k : ℝ) / (i + 1)) - 1) *
+        ∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x)) ^ (1 / 2 : ℝ) *
+            (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
+              ((covGrad (I := I) (M := M) g 0 m w).toSection x)) ^ ((k : ℝ) / (i + 1) - 1) *
+            (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
+              ((covGrad (I := I) (M := M) g 0 (m + 1)
+                (covGrad (I := I) (M := M) g 0 m w)).toSection x)) ^ (1 / 2 : ℝ)
+          ∂(Integral.Measure.riemannianVolumeMeasure I M g) := by
+  sorry
+
+/-- **(POSIT — the weighted covariant `Lᵖ` integration-by-parts inequality, `L^∞`-factor form.)**
+
+The order-`0` instance of the covariant IBP engine, where the lowest factor `|w|` is replaced by a
+uniform `L^∞` bound `A ≥ 0` on the fibre norm of `w` (`rfns(w) ≤ A²` pointwise).  With `∇ = covGrad`,
+`b := rfns(∇w)`, `c := rfns(∇²w)`, at the top exponent `p := k ≥ 1`,
+```
+∫ b^k ≤ (2k - 1) · A · ∫ b^{k-1} · c^{1/2},
+```
+i.e. `∫ |∇w|^{2k} ≤ (2k-1)·A·∫ |∇w|^{2k-2}·|∇²w|` (using `|w| ≤ A` pointwise after the covariant IBP).
+Its body is `sorry`: the same weighted covariant divergence theorem with the lowest factor bounded by
+the `L^∞` constant; consumers transitively depend on its `sorryAx`.  **General analytic
+infrastructure** (weighted-`Lᵖ` covariant IBP, `L^∞`-factor) to be promoted alongside the finite
+form. -/
+private theorem weightedCovIBP_lpFiberJet_sup
+    (g : SmoothRiemannianMetric I M) (k m : ℕ) (_hk : 1 ≤ k)
+    (w : Integral.L2.SmoothCcTensor g 0 m) (A : ℝ) (_hA : 0 ≤ A)
+    (_hsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x) ≤ A ^ 2) :
+    (∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
+            ((covGrad (I := I) (M := M) g 0 m w).toSection x)) ^ ((k : ℝ) / 1)
+        ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ≤
+      (2 * (k : ℝ) - 1) * A *
+        ∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
+              ((covGrad (I := I) (M := M) g 0 m w).toSection x)) ^ ((k : ℝ) - 1) *
+            (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
+              ((covGrad (I := I) (M := M) g 0 (m + 1)
+                (covGrad (I := I) (M := M) g 0 m w)).toSection x)) ^ (1 / 2 : ℝ)
+          ∂(Integral.Measure.riemannianVolumeMeasure I M g) := by
+  sorry
+
+/-- **(POSIT — the second-order covariant `Lᵖ` interpolation in the sub-unit exponent range.)**
+
+The continuation of the finite second-order interpolation step into the *sub-unit* range
+`k < i + 1` (where the target exponent `q₁ = 2k/(i+1) < 2` and the standard covariant
+integration-by-parts is no longer available).  Here the inequality
+```
+‖∇w‖_{L^{2k/(i+1)}}² ≤ K' · ‖w‖_{L^{2k/i}} · ‖∇²w‖_{L^{2k/(i+2)}}
+```
+(written through the squared fibre norms with the ladder exponents) is the Gagliardo–Nirenberg
+interpolation in the regime where it follows from the convexity of `p ↦ log‖f‖_{L^{1/p}}` (Lyapunov /
+log-convexity of `Lᵖ` norms) rather than from IBP; it is tight, attaining equality on a single
+Fourier mode of the flat torus.  The multiplier `K'' ≥ 1` is uniform in `(m, w, i)`.  Its body is
+`sorry`: the genuine sub-unit-exponent `Lᵖ` interpolation (the log-convexity frontier), which the
+project does not carry; consumers transitively depend on its `sorryAx`.  **General analytic
+infrastructure** (sub-unit `Lᵖ` interpolation) to be promoted to a dedicated file. -/
+private theorem secondOrderInterp_lpFiberJet_fin_lowExp
+    (g : SmoothRiemannianMetric I M) (k : ℕ) (_hk : 1 ≤ k) :
+    ∃ K'' : ℝ, 1 ≤ K'' ∧
+      ∀ (m : ℕ) (w : Integral.L2.SmoothCcTensor g 0 m) (i : ℕ), 1 ≤ i → k ≤ i + 1 →
+        ((∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
+              ((covGrad (I := I) (M := M) g 0 m w).toSection x)) ^ ((k : ℝ) / (i + 1))
+            ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ (((i : ℝ) + 1) / (2 * k))) ^ 2 ≤
+          K'' *
+            ((∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x)) ^ ((k : ℝ) / i)
+                ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((i : ℝ) / (2 * k))) *
+            ((∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
+                  ((covGrad (I := I) (M := M) g 0 (m + 1)
+                    (covGrad (I := I) (M := M) g 0 m w)).toSection x)) ^ ((k : ℝ) / (i + 2))
+                ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ (((i : ℝ) + 2) / (2 * k))) := by
+  sorry
+
+end SecondOrderInterpCore
+
+set_option maxHeartbeats 1600000 in
 /-- **(POSIT — the generic single-tensor second-order covariant `L^p` interpolation step, finite
 lower factor.)**
 
@@ -347,8 +612,201 @@ private theorem secondOrderInterp_lpFiberJet_fin
                   ((covGrad (I := I) (M := M) g 0 (m + 1)
                     (covGrad (I := I) (M := M) g 0 m w)).toSection x)) ^ ((k : ℝ) / (i + 2))
                 ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ (((i : ℝ) + 2) / (2 * k))) := by
-  sorry
+  classical
+  obtain ⟨K'', hK''1, hlowExp⟩ := secondOrderInterp_lpFiberJet_fin_lowExp (I := I) (M := M) g k _hk
+  have hkR : (0 : ℝ) < (k : ℝ) := by exact_mod_cast (lt_of_lt_of_le Nat.zero_lt_one _hk)
+  -- The uniform multiplier dominates the standard-regime IBP constant `2k`, `1`, and the sub-unit
+  -- engine `K''`.
+  refine ⟨max (max (2 * (k : ℝ)) 1) K'', ?_, ?_⟩
+  · exact le_trans (le_max_right _ _) (le_max_left _ _)
+  intro m w i hi1
+  set μ : MeasureTheory.Measure M := Integral.Measure.riemannianVolumeMeasure I M g with hμ
+  haveI : MeasureTheory.IsFiniteMeasure μ :=
+    Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
+  set K' : ℝ := max (max (2 * (k : ℝ)) 1) K'' with hK'def
+  -- Abbreviations for the three squared fibre norms (nonnegative continuous functions).
+  set a : M → ℝ := fun x => riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x)
+    with ha_def
+  set b : M → ℝ := fun x => riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
+    ((covGrad (I := I) (M := M) g 0 m w).toSection x) with hb_def
+  set c : M → ℝ := fun x => riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
+    ((covGrad (I := I) (M := M) g 0 (m + 1) (covGrad (I := I) (M := M) g 0 m w)).toSection x)
+    with hc_def
+  have ha0 : ∀ x, 0 ≤ a x := fun x => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 m x _
+  have hb0 : ∀ x, 0 ≤ b x := fun x =>
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (m + 1) x _
+  have hc0 : ∀ x, 0 ≤ c x := fun x =>
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (m + 1 + 1) x _
+  have hac : Continuous a := continuous_rfns_section (I := I) (M := M) g 0 m w
+  have hbc : Continuous b :=
+    continuous_rfns_section (I := I) (M := M) g 0 (m + 1) (covGrad (I := I) (M := M) g 0 m w)
+  have hcc : Continuous c :=
+    continuous_rfns_section (I := I) (M := M) g 0 (m + 1 + 1)
+      (covGrad (I := I) (M := M) g 0 (m + 1) (covGrad (I := I) (M := M) g 0 m w))
+  rcases lt_or_ge (i + 1) k with hreg | hreg
+  · -- **Standard regime `i + 1 < k`**: covariant IBP + three-function Hölder.
+    have hiR : (0 : ℝ) < (i : ℝ) := by exact_mod_cast hi1
+    have hi1R : (0 : ℝ) < (i : ℝ) + 1 := by positivity
+    have hi2R : (0 : ℝ) < (i : ℝ) + 2 := by positivity
+    -- The IBP exponent `p = k/(i+1) > 1`.
+    set p : ℝ := (k : ℝ) / (i + 1) with hp_def
+    have hp1 : 1 < p := by
+      rw [hp_def, lt_div_iff₀ hi1R, one_mul]; exact_mod_cast hreg
+    have hp0 : 0 < p := lt_trans one_pos hp1
+    have hp1m : 0 < p - 1 := by linarith
+    -- The three Hölder exponents `α = 2k/i`, `β = k/(k-i-1)`, `γ = 2k/(i+2)`.
+    set α : ℝ := 2 * (k : ℝ) / i with hα_def
+    set β : ℝ := (k : ℝ) / ((k : ℝ) - ((i : ℝ) + 1)) with hβ_def
+    set γ : ℝ := 2 * (k : ℝ) / (i + 2) with hγ_def
+    have hkmi : 0 < (k : ℝ) - ((i : ℝ) + 1) := by
+      have : ((i : ℝ) + 1) < (k : ℝ) := by exact_mod_cast hreg
+      linarith
+    have hα0 : 0 < α := by rw [hα_def]; positivity
+    have hβ0 : 0 < β := by rw [hβ_def]; positivity
+    have hγ0 : 0 < γ := by rw [hγ_def]; positivity
+    -- Hölder balance `α⁻¹ + β⁻¹ + γ⁻¹ = 1`.
+    have hbalance : α⁻¹ + β⁻¹ + γ⁻¹ = 1 := by
+      rw [hα_def, hβ_def, hγ_def]
+      rw [inv_div, inv_div, inv_div]
+      field_simp
+      ring
+    -- The continuous nonnegative Hölder factors `f₁ = a^{1/2}`, `f₂ = b^{p-1}`, `f₃ = c^{1/2}`.
+    set f₁ : M → ℝ := fun x => a x ^ (1 / 2 : ℝ) with hf₁_def
+    set f₂ : M → ℝ := fun x => b x ^ (p - 1) with hf₂_def
+    set f₃ : M → ℝ := fun x => c x ^ (1 / 2 : ℝ) with hf₃_def
+    have hf₁c : Continuous f₁ := hac.rpow_const (fun _ => Or.inr (by norm_num))
+    have hf₂c : Continuous f₂ := hbc.rpow_const (fun _ => Or.inr (le_of_lt hp1m))
+    have hf₃c : Continuous f₃ := hcc.rpow_const (fun _ => Or.inr (by norm_num))
+    have hf₁0 : ∀ x, 0 ≤ f₁ x := fun x => Real.rpow_nonneg (ha0 x) _
+    have hf₂0 : ∀ x, 0 ≤ f₂ x := fun x => Real.rpow_nonneg (hb0 x) _
+    have hf₃0 : ∀ x, 0 ≤ f₃ x := fun x => Real.rpow_nonneg (hc0 x) _
+    -- The three-function Hölder bound.
+    have hHolder := real_holder_three_nonneg (I := I) (M := M) g f₁ f₂ f₃
+      hf₁c hf₂c hf₃c hf₁0 hf₂0 hf₃0 hα0 hβ0 hγ0 hbalance
+    -- Identify the three Hölder integrals with `Aw`, `Ib^{1-1/p}`, `C`.
+    -- `(f₁ x)^α = a x^{(1/2)·α} = a x^{k/i}`.
+    have hαexp : (1 / 2 : ℝ) * α = (k : ℝ) / i := by
+      rw [hα_def]; field_simp
+    have he1 : ∀ x, f₁ x ^ α = a x ^ ((k : ℝ) / i) := by
+      intro x; rw [hf₁_def, ← Real.rpow_mul (ha0 x), hαexp]
+    -- `(f₃ x)^γ = c x^{(1/2)·γ} = c x^{k/(i+2)}`.
+    have hγexp : (1 / 2 : ℝ) * γ = (k : ℝ) / (i + 2) := by
+      rw [hγ_def]; field_simp
+    have he3 : ∀ x, f₃ x ^ γ = c x ^ ((k : ℝ) / (i + 2)) := by
+      intro x; rw [hf₃_def, ← Real.rpow_mul (hc0 x), hγexp]
+    -- `(f₂ x)^β = b x^{(p-1)·β} = b x^p`.
+    have hβexp : (p - 1) * β = p := by
+      have hpm1 : p - 1 = ((k : ℝ) - ((i : ℝ) + 1)) / ((i : ℝ) + 1) := by
+        rw [hp_def, div_sub_one (ne_of_gt hi1R)]
+      rw [hpm1, hβ_def, hp_def, div_mul_div_comm, mul_comm ((k : ℝ) - ((i : ℝ) + 1)) (k : ℝ),
+        mul_div_mul_right _ _ (ne_of_gt hkmi)]
+    have he2 : ∀ x, f₂ x ^ β = b x ^ p := by
+      intro x; rw [hf₂_def, ← Real.rpow_mul (hb0 x), hβexp]
+    rw [MeasureTheory.integral_congr_ae (MeasureTheory.ae_of_all _ he1),
+        MeasureTheory.integral_congr_ae (MeasureTheory.ae_of_all _ he2),
+        MeasureTheory.integral_congr_ae (MeasureTheory.ae_of_all _ he3)] at hHolder
+    -- The pointwise integrand of the IBP RHS is `f₁·f₂·f₃`.
+    have hprod_pt : ∀ x, a x ^ (1 / 2 : ℝ) * b x ^ (p - 1) * c x ^ (1 / 2 : ℝ)
+        = f₁ x * f₂ x * f₃ x := fun x => by rw [hf₁_def, hf₂_def, hf₃_def]
+    -- The covariant IBP inequality (child).
+    have hIBP := weightedCovIBP_lpFiberJet_fin (I := I) (M := M) g k m i _hk hi1 hreg w
+    -- Rewrite the IBP RHS integrand into `f₁·f₂·f₃` and fold the abbreviations `a, b, c`.
+    rw [show (∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x)) ^ (1 / 2 : ℝ) *
+              (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
+                ((covGrad (I := I) (M := M) g 0 m w).toSection x)) ^ ((k : ℝ) / (i + 1) - 1) *
+              (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
+                ((covGrad (I := I) (M := M) g 0 (m + 1)
+                  (covGrad (I := I) (M := M) g 0 m w)).toSection x)) ^ (1 / 2 : ℝ) ∂μ)
+            = ∫ x, f₁ x * f₂ x * f₃ x ∂μ from by
+        refine MeasureTheory.integral_congr_ae (MeasureTheory.ae_of_all _ (fun x => ?_))
+        rw [hf₁_def, hf₂_def, hf₃_def, ha_def, hb_def, hc_def, hp_def]] at hIBP
+    -- Abbreviate the three target integrals.
+    set Ia : ℝ := ∫ x, a x ^ ((k : ℝ) / i) ∂μ with hIa_def
+    set Ib : ℝ := ∫ x, b x ^ p ∂μ with hIb_def
+    set Ic : ℝ := ∫ x, c x ^ ((k : ℝ) / (i + 2)) ∂μ with hIc_def
+    have hIa_nn : 0 ≤ Ia := MeasureTheory.integral_nonneg (fun x => Real.rpow_nonneg (ha0 x) _)
+    have hIb_nn : 0 ≤ Ib := MeasureTheory.integral_nonneg (fun x => Real.rpow_nonneg (hb0 x) _)
+    have hIc_nn : 0 ≤ Ic := MeasureTheory.integral_nonneg (fun x => Real.rpow_nonneg (hc0 x) _)
+    set Aw : ℝ := Ia ^ ((i : ℝ) / (2 * k)) with hAw_def
+    set C : ℝ := Ic ^ (((i : ℝ) + 2) / (2 * k)) with hC_def
+    have hAw_nn : 0 ≤ Aw := Real.rpow_nonneg hIa_nn _
+    have hC_nn : 0 ≤ C := Real.rpow_nonneg hIc_nn _
+    -- The Hölder factor exponents: `1/α = i/(2k)`, `1/β = (k-i-1)/k = 1 - 1/p`, `1/γ = (i+2)/(2k)`.
+    have hinvα : (1 : ℝ) / α = (i : ℝ) / (2 * k) := by rw [hα_def]; rw [one_div_div]
+    have hinvγ : (1 : ℝ) / γ = ((i : ℝ) + 2) / (2 * k) := by rw [hγ_def]; rw [one_div_div]
+    -- `hHolder` now reads `∫ f₁f₂f₃ ≤ Ia^{1/α}·(Ib^{1/β}·Ic^{1/γ})`.
+    -- Combine with IBP: `Ib ≤ (2p-1)·Ia^{1/α}·Ib^{1/β}·Ic^{1/γ}`.
+    have hIb_bound : Ib ≤ (2 * p - 1) * (Aw * (Ib ^ (1 / β) * C)) := by
+      have hcoef_nn : 0 ≤ 2 * p - 1 := by linarith
+      have hstep : Ib ≤ (2 * p - 1) * (∫ x, f₁ x * f₂ x * f₃ x ∂μ) := by
+        rw [hIb_def]; rw [show ((2 : ℝ) * ((k : ℝ) / (i + 1)) - 1) = 2 * p - 1 from by rw [hp_def]]
+          at hIBP
+        exact hIBP
+      refine le_trans hstep ?_
+      apply mul_le_mul_of_nonneg_left _ hcoef_nn
+      rw [hinvα, hinvγ] at hHolder
+      rw [hAw_def, hC_def]
+      exact hHolder
+    -- Key exponent identities: `1/p = (i+1)/k`, `1/β = (k-(i+1))/k`, and `1/p + 1/β = 1`.
+    have hinvp : (1 : ℝ) / p = ((i : ℝ) + 1) / k := by
+      rw [hp_def, one_div_div]
+    have hinvβ : (1 : ℝ) / β = ((k : ℝ) - ((i : ℝ) + 1)) / k := by
+      rw [hβ_def, one_div_div]
+    have hsum_pβ : (1 : ℝ) / p + 1 / β = 1 := by
+      rw [hinvp, hinvβ, ← add_div]
+      rw [show ((i : ℝ) + 1) + ((k : ℝ) - ((i : ℝ) + 1)) = (k : ℝ) from by ring,
+        div_self (ne_of_gt hkR)]
+    -- The leaf LHS squared equals `Ib^{1/p}` (since `2·(i+1)/(2k) = (i+1)/k = 1/p`).
+    have hLHS_sq : (Ib ^ (((i : ℝ) + 1) / (2 * k))) ^ 2 = Ib ^ ((1 : ℝ) / p) := by
+      have hexp : ((i : ℝ) + 1) / (2 * k) * ((2 : ℕ) : ℝ) = (1 : ℝ) / p := by
+        rw [hinvp]; push_cast; ring
+      rw [← Real.rpow_natCast (Ib ^ (((i : ℝ) + 1) / (2 * k))) 2, ← Real.rpow_mul hIb_nn, hexp]
+    -- `2p - 1 ≤ K'` since `2p - 1 < 2k ≤ K'`.
+    have hcoef_le : 2 * p - 1 ≤ K' := by
+      have hp_le_k : p ≤ (k : ℝ) := by
+        rw [hp_def, div_le_iff₀ hi1R]
+        nlinarith [hkR, hiR]
+      have : 2 * p - 1 ≤ 2 * (k : ℝ) := by linarith
+      exact le_trans this (le_trans (le_max_left _ _) (le_max_left _ _))
+    -- Conclude by dividing the IBP+Hölder bound by `Ib^{1/β}`.
+    rw [hLHS_sq]
+    rcases eq_or_lt_of_le hIb_nn with hIb0 | hIbpos
+    · -- `Ib = 0`: LHS = `0^{1/p} = 0 ≤ RHS`.
+      rw [← hIb0, Real.zero_rpow (by rw [hinvp]; positivity)]
+      positivity
+    · -- `Ib > 0`: cancel the positive factor `Ib^{1/β}`.
+      have hIbβ_pos : 0 < Ib ^ (1 / β) := Real.rpow_pos_of_pos hIbpos _
+      -- `Ib = Ib^{1/p}·Ib^{1/β}`.
+      have hIb_split : Ib = Ib ^ ((1 : ℝ) / p) * Ib ^ (1 / β) := by
+        rw [← Real.rpow_add hIbpos, hsum_pβ, Real.rpow_one]
+      -- From `hIb_bound`: `Ib^{1/p}·Ib^{1/β} ≤ (2p-1)·Aw·C·Ib^{1/β}`.
+      have hkey : Ib ^ ((1 : ℝ) / p) * Ib ^ (1 / β) ≤ ((2 * p - 1) * (Aw * C)) * Ib ^ (1 / β) := by
+        rw [← hIb_split]
+        calc Ib ≤ (2 * p - 1) * (Aw * (Ib ^ (1 / β) * C)) := hIb_bound
+          _ = ((2 * p - 1) * (Aw * C)) * Ib ^ (1 / β) := by ring
+      have hcancel : Ib ^ ((1 : ℝ) / p) ≤ (2 * p - 1) * (Aw * C) :=
+        le_of_mul_le_mul_right hkey hIbβ_pos
+      calc Ib ^ ((1 : ℝ) / p) ≤ (2 * p - 1) * (Aw * C) := hcancel
+        _ ≤ K' * (Aw * C) := by
+            apply mul_le_mul_of_nonneg_right hcoef_le (mul_nonneg hAw_nn hC_nn)
+        _ = K' * Aw * C := by ring
+  · -- **Sub-unit regime `k ≤ i + 1`**: the log-convexity engine, constant `K'' ≤ K'`.
+    have hstep := hlowExp m w i hi1 hreg
+    have hK''_le : K'' ≤ K' := le_max_right _ _
+    -- Nonnegativity of the two right factors.
+    have hAw_nn : 0 ≤ (∫ x, a x ^ ((k : ℝ) / i) ∂μ) ^ ((i : ℝ) / (2 * k)) :=
+      Real.rpow_nonneg (MeasureTheory.integral_nonneg (fun x => Real.rpow_nonneg (ha0 x) _)) _
+    have hC_nn : 0 ≤ (∫ x, c x ^ ((k : ℝ) / (i + 2)) ∂μ) ^ (((i : ℝ) + 2) / (2 * k)) :=
+      Real.rpow_nonneg (MeasureTheory.integral_nonneg (fun x => Real.rpow_nonneg (hc0 x) _)) _
+    calc ((∫ x, b x ^ ((k : ℝ) / (i + 1)) ∂μ) ^ (((i : ℝ) + 1) / (2 * k))) ^ 2
+        ≤ K'' * (∫ x, a x ^ ((k : ℝ) / i) ∂μ) ^ ((i : ℝ) / (2 * k)) *
+            (∫ x, c x ^ ((k : ℝ) / (i + 2)) ∂μ) ^ (((i : ℝ) + 2) / (2 * k)) := hstep
+      _ ≤ K' * (∫ x, a x ^ ((k : ℝ) / i) ∂μ) ^ ((i : ℝ) / (2 * k)) *
+            (∫ x, c x ^ ((k : ℝ) / (i + 2)) ∂μ) ^ (((i : ℝ) + 2) / (2 * k)) := by
+          apply mul_le_mul_of_nonneg_right _ hC_nn
+          exact mul_le_mul_of_nonneg_right hK''_le hAw_nn
 
+set_option maxHeartbeats 1600000 in
 /-- **(POSIT — the generic single-tensor second-order covariant `L^p` interpolation step,
 `L^∞` lower factor, the order-zero endpoint.)**
 
@@ -381,7 +839,142 @@ private theorem secondOrderInterp_lpFiberJet_sup
                   ((covGrad (I := I) (M := M) g 0 (m + 1)
                     (covGrad (I := I) (M := M) g 0 m w)).toSection x)) ^ ((k : ℝ) / 2)
                 ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((2 : ℝ) / (2 * k))) := by
-  sorry
+  classical
+  have hkR : (0 : ℝ) < (k : ℝ) := by exact_mod_cast (lt_of_lt_of_le Nat.zero_lt_one _hk)
+  refine ⟨max (2 * (k : ℝ)) 1, le_max_right _ _, ?_⟩
+  intro m w A hA hsup
+  set μ : MeasureTheory.Measure M := Integral.Measure.riemannianVolumeMeasure I M g with hμ
+  haveI : MeasureTheory.IsFiniteMeasure μ :=
+    Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace (I := I) (M := M) g
+  set K' : ℝ := max (2 * (k : ℝ)) 1 with hK'def
+  set b : M → ℝ := fun x => riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
+    ((covGrad (I := I) (M := M) g 0 m w).toSection x) with hb_def
+  set c : M → ℝ := fun x => riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
+    ((covGrad (I := I) (M := M) g 0 (m + 1) (covGrad (I := I) (M := M) g 0 m w)).toSection x)
+    with hc_def
+  have hb0 : ∀ x, 0 ≤ b x := fun x =>
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (m + 1) x _
+  have hc0 : ∀ x, 0 ≤ c x := fun x =>
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (m + 1 + 1) x _
+  have hbc : Continuous b :=
+    continuous_rfns_section (I := I) (M := M) g 0 (m + 1) (covGrad (I := I) (M := M) g 0 m w)
+  have hcc : Continuous c :=
+    continuous_rfns_section (I := I) (M := M) g 0 (m + 1 + 1)
+      (covGrad (I := I) (M := M) g 0 (m + 1) (covGrad (I := I) (M := M) g 0 m w))
+  set Ib : ℝ := ∫ x, b x ^ ((k : ℝ) / 1) ∂μ with hIb_def
+  set Ic : ℝ := ∫ x, c x ^ ((k : ℝ) / 2) ∂μ with hIc_def
+  have hIb_nn : 0 ≤ Ib := MeasureTheory.integral_nonneg (fun x => Real.rpow_nonneg (hb0 x) _)
+  have hIc_nn : 0 ≤ Ic := MeasureTheory.integral_nonneg (fun x => Real.rpow_nonneg (hc0 x) _)
+  set C : ℝ := Ic ^ ((2 : ℝ) / (2 * k)) with hC_def
+  have hC_nn : 0 ≤ C := Real.rpow_nonneg hIc_nn _
+  -- The covariant IBP inequality with the `L^∞` factor (child).
+  have hIBP := weightedCovIBP_lpFiberJet_sup (I := I) (M := M) g k m _hk w A hA hsup
+  -- The leaf LHS squared equals `Ib^{1/k}`.
+  have hk1 : (k : ℝ) / 1 = (k : ℝ) := by norm_num
+  have hLHS_sq : (Ib ^ ((1 : ℝ) / (2 * k))) ^ 2 = Ib ^ ((1 : ℝ) / k) := by
+    have hexp : (1 : ℝ) / (2 * k) * ((2 : ℕ) : ℝ) = (1 : ℝ) / k := by push_cast; ring
+    rw [← Real.rpow_natCast (Ib ^ ((1 : ℝ) / (2 * k))) 2, ← Real.rpow_mul hIb_nn, hexp]
+  -- `C = Ic^{1/k}`.
+  have hC_eq : C = Ic ^ ((1 : ℝ) / k) := by
+    rw [hC_def]; congr 1; rw [eq_div_iff (by positivity)]; field_simp
+  rw [hLHS_sq]
+  -- Bound the IBP RHS integral `∫ b^{k-1}·c^{1/2}` and chain to `Ib^{1/k} ≤ (2k-1)·A·C`.
+  set J : ℝ := ∫ x, b x ^ ((k : ℝ) - 1) * c x ^ (1 / 2 : ℝ) ∂μ with hJ_def
+  have hJ_nn : 0 ≤ J := MeasureTheory.integral_nonneg (fun x =>
+    mul_nonneg (Real.rpow_nonneg (hb0 x) _) (Real.rpow_nonneg (hc0 x) _))
+  -- `hIBP : Ib ≤ (2k-1)·A·J`.
+  have hIBP' : Ib ≤ (2 * (k : ℝ) - 1) * A * J := by
+    rw [hIb_def, hJ_def]; exact hIBP
+  -- Two-function Hölder on `J` (for `k ≥ 2`); for `k = 1` the factor `b^{k-1} = 1` is handled
+  -- directly.  In both cases we obtain `J ≤ Ib^{(k-1)/k}·C`.
+  have hJ_bound : J ≤ Ib ^ (((k : ℝ) - 1) / k) * C := by
+    rcases eq_or_lt_of_le _hk with hk_eq | hk_gt
+    · -- `k = 1`: `b^{k-1} = b^0 = 1`, so `J = ∫ c^{1/2} = Ic^{...}`, and `(k-1)/k = 0`.
+      have hk1' : (k : ℝ) = 1 := by exact_mod_cast hk_eq.symm
+      have hb0pow : ∀ x, b x ^ ((k : ℝ) - 1) = 1 := by
+        intro x; rw [hk1']; norm_num
+      rw [hJ_def]
+      simp_rw [hb0pow, one_mul]
+      rw [hk1']
+      simp only [sub_self, zero_div, Real.rpow_zero, one_mul]
+      -- `∫ c^{1/2} ≤ Ic^{1/1} = ∫ c^{1/2}`; here `C = Ic^{2/(2·1)} = Ic^1 = ∫ c^{1/2}`.
+      have hCeq1 : C = ∫ x, c x ^ (1 / 2 : ℝ) ∂μ := by
+        rw [hC_def, hIc_def, hk1']
+        norm_num
+      rw [hCeq1]
+    · -- `k ≥ 2`: two-function Hölder at the conjugate pair `(k/(k-1), k)`.
+      have hk2R : (2 : ℝ) ≤ (k : ℝ) := by exact_mod_cast hk_gt
+      have hkm1 : 0 < (k : ℝ) - 1 := by linarith
+      set β : ℝ := (k : ℝ) / ((k : ℝ) - 1) with hβ_def
+      have hβ0 : 0 < β := by rw [hβ_def]; positivity
+      have hconj : β.HolderConjugate (k : ℝ) := by
+        refine Real.holderConjugate_iff.mpr ⟨?_, ?_⟩
+        · rw [hβ_def, one_lt_div hkm1]; linarith
+        · rw [hβ_def, inv_div, inv_eq_one_div, div_add_div _ _ (ne_of_gt hkR) (ne_of_gt hkR),
+            div_eq_one_iff_eq (by positivity)]
+          ring
+      -- The two Hölder factors `b^{k-1}` and `c^{1/2}` (continuous, nonneg, in the relevant Lᵖ).
+      have hf2c : Continuous (fun x => b x ^ ((k : ℝ) - 1)) :=
+        hbc.rpow_const (fun _ => Or.inr (le_of_lt hkm1))
+      have hf3c : Continuous (fun x => c x ^ (1 / 2 : ℝ)) :=
+        hcc.rpow_const (fun _ => Or.inr (by norm_num))
+      have hf2mem : MeasureTheory.MemLp (fun x => b x ^ ((k : ℝ) - 1)) (ENNReal.ofReal β) μ :=
+        hf2c.memLp_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+      have hf3mem : MeasureTheory.MemLp (fun x => c x ^ (1 / 2 : ℝ)) (ENNReal.ofReal (k : ℝ)) μ :=
+        hf3c.memLp_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+      have hH := MeasureTheory.integral_mul_le_Lp_mul_Lq_of_nonneg (μ := μ) hconj
+        (f := fun x => b x ^ ((k : ℝ) - 1)) (g := fun x => c x ^ (1 / 2 : ℝ))
+        (MeasureTheory.ae_of_all _ (fun x => Real.rpow_nonneg (hb0 x) _))
+        (MeasureTheory.ae_of_all _ (fun x => Real.rpow_nonneg (hc0 x) _)) hf2mem hf3mem
+      -- `(b^{k-1})^β = b^{k/1}`, `(c^{1/2})^k = c^{k/2}`.
+      have hβcancel : ((k : ℝ) - 1) * β = (k : ℝ) := by
+        rw [hβ_def, ← mul_div_assoc, mul_comm, mul_div_assoc, div_self (ne_of_gt hkm1), mul_one]
+      have hpow2 : ∀ x, (b x ^ ((k : ℝ) - 1)) ^ β = b x ^ ((k : ℝ) / 1) := by
+        intro x; rw [← Real.rpow_mul (hb0 x), hβcancel, hk1]
+      have hpow3 : ∀ x, (c x ^ (1 / 2 : ℝ)) ^ (k : ℝ) = c x ^ ((k : ℝ) / 2) := by
+        intro x; rw [← Real.rpow_mul (hc0 x)]; congr 1; ring
+      rw [MeasureTheory.integral_congr_ae (MeasureTheory.ae_of_all _ hpow2),
+          MeasureTheory.integral_congr_ae (MeasureTheory.ae_of_all _ hpow3)] at hH
+      -- `hH : ∫b^{k-1}c^{1/2} ≤ (∫b^{k/1})^{1/β}·(∫c^{k/2})^{1/k}`; identify each factor.
+      have hinvβ : (1 : ℝ) / β = ((k : ℝ) - 1) / k := by rw [hβ_def, one_div_div]
+      have hinvk : (1 : ℝ) / (k : ℝ) = (2 : ℝ) / (2 * k) := by
+        rw [eq_div_iff (by positivity)]; field_simp
+      rw [hinvβ, hinvk] at hH
+      -- Fold `∫b^{k/1} = Ib`, `∫c^{k/2} = Ic`, `Ic^{2/(2k)} = C`, `∫b^{k-1}c^{1/2} = J`.
+      rw [show (∫ x, b x ^ ((k : ℝ) / 1) ∂μ) = Ib from hIb_def.symm,
+          show (∫ x, c x ^ ((k : ℝ) / 2) ∂μ) = Ic from hIc_def.symm,
+          ← hC_def] at hH
+      rw [hJ_def]
+      exact hH
+  -- Conclude: `Ib ≤ (2k-1)·A·Ib^{(k-1)/k}·C`, then cancel `Ib^{(k-1)/k}`.
+  have hcoef_le : (2 * (k : ℝ) - 1) ≤ K' :=
+    le_trans (by linarith) (le_max_left _ _)
+  have hAC_nn : 0 ≤ A * C := mul_nonneg hA hC_nn
+  -- `1/k + (k-1)/k = 1`.
+  have hsum_k : (1 : ℝ) / k + ((k : ℝ) - 1) / k = 1 := by
+    rw [← add_div, show (1 : ℝ) + ((k : ℝ) - 1) = (k : ℝ) from by ring, div_self (ne_of_gt hkR)]
+  rcases eq_or_lt_of_le hIb_nn with hIb0 | hIbpos
+  · -- `Ib = 0`: LHS = `0^{1/k} = 0 ≤ RHS`.
+    rw [← hIb0, Real.zero_rpow (by positivity)]
+    positivity
+  · -- `Ib > 0`: cancel `Ib^{(k-1)/k}`.
+    have hIbβ_pos : 0 < Ib ^ (((k : ℝ) - 1) / k) := Real.rpow_pos_of_pos hIbpos _
+    have hIb_split : Ib = Ib ^ ((1 : ℝ) / k) * Ib ^ (((k : ℝ) - 1) / k) := by
+      rw [← Real.rpow_add hIbpos, hsum_k, Real.rpow_one]
+    have hchain : Ib ^ ((1 : ℝ) / k) * Ib ^ (((k : ℝ) - 1) / k)
+        ≤ ((2 * (k : ℝ) - 1) * (A * C)) * Ib ^ (((k : ℝ) - 1) / k) := by
+      rw [← hIb_split]
+      calc Ib ≤ (2 * (k : ℝ) - 1) * A * J := hIBP'
+        _ ≤ (2 * (k : ℝ) - 1) * A * (Ib ^ (((k : ℝ) - 1) / k) * C) := by
+            apply mul_le_mul_of_nonneg_left hJ_bound
+            have hk1R : (1 : ℝ) ≤ (k : ℝ) := by exact_mod_cast _hk
+            apply mul_nonneg (by linarith) hA
+        _ = ((2 * (k : ℝ) - 1) * (A * C)) * Ib ^ (((k : ℝ) - 1) / k) := by ring
+    have hcancel : Ib ^ ((1 : ℝ) / k) ≤ (2 * (k : ℝ) - 1) * (A * C) :=
+      le_of_mul_le_mul_right hchain hIbβ_pos
+    calc Ib ^ ((1 : ℝ) / k) ≤ (2 * (k : ℝ) - 1) * (A * C) := hcancel
+      _ ≤ K' * (A * C) := mul_le_mul_of_nonneg_right hcoef_le hAC_nn
+      _ = K' * A * C := by ring
 
 /-- **The single-step Gagliardo–Nirenberg log-convexity of the mixed-`L^p` fibre jets.**
 
