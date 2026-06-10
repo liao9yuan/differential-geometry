@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameGenuineFieldPairingRS
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RankRDiffCurvatureTower
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.HomFieldCurvatureJetDecomposition
+import DifferentialGeometry.Geometry.Connection.TensorNabla.HomFieldActionIteratedCovGradWindow
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLocality
 
@@ -88,6 +90,7 @@ set_option linter.style.setOption false
 set_option linter.unusedSectionVars false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
+set_option backward.isDefEq.respectTransparency false
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -388,6 +391,31 @@ theorem exists_diffCurvSectionRS_gradedCurvJet (g : SmoothRiemannianMetric I M) 
   -- the carrier-tower grid bound (window `w + k = 1 + k`, lowest order `p = 0`, target jets `∇^{i+0} S`).
   exact hgrid s S k x
 
+/-- **A fixed smooth full-Hom-field action on the `j`-th covariant jet of `S` is a graded curvature jet
+of `S` of shape `(j, 1)` (file-local).** For a fixed smooth full-Hom field
+`Q : Hom(T^{(r, s + j)}, T^{(r, s + 1)})` on the closed manifold there is a nonnegative per-gradient-order
+constant family `c : ℕ → ℝ` — depending only on `Q` — such that, for every smooth compactly-supported
+`(r, s)`-tensor `S`, the action `appFullSec Q (∇^j S)` is a graded curvature jet
+`IsGradedCurvJetRS g S c j 1`. This is the order-shifted windowed fibre bound
+`exists_appFullSec_on_jet_iteratedCovGrad_window_bound` (window shape `(j, 1)`) repackaged through the
+`(c k)² = cc k` reading with `c k := √(cc k)`, matching the `IsGradedCurvJetRS` constant convention. The
+bridge that turns the rank-`r` Hom-field curvature-jet decomposition into the order-resolved graded
+split. -/
+private theorem appFullSec_on_jet_isGradedCurvJetRS_local (g : SmoothRiemannianMetric I M)
+    (r s j : ℕ) (Q : HomTensorRSField (E := E) (M := M) r (s + j) (s + 1) I) :
+    ∃ c : ℕ → ℝ, (∀ k, 0 ≤ c k) ∧
+      ∀ (S : SmoothCcTensor g r s),
+        IsGradedCurvJetRS (I := I) (M := M) g S c j 1
+          (appFullSec (I := I) (M := M) g r (s + j) (s + 1) Q (iteratedCovGrad g r s j S)) := by
+  classical
+  obtain ⟨cc, hcc_nn, hcc⟩ :=
+    exists_appFullSec_on_jet_iteratedCovGrad_window_bound (I := I) (M := M) g r s j (s + 1) Q
+  refine ⟨fun k => Real.sqrt (cc k), fun k => Real.sqrt_nonneg _, fun S k x => ?_⟩
+  have hsq : (Real.sqrt (cc k)) ^ 2 = cc k := by
+    rw [Real.sq_sqrt]; exact hcc_nn k
+  rw [hsq]
+  exact hcc S k x
+
 /-- **The rank-`r` iterated-Ricci order-resolved three-field split of the doubly-peeled moving-frame
 remainder (the single genuinely-irreducible structural curvature primitive at general rank, sound
 full-sum-compatible shapes).** For a closed smooth Riemannian manifold `(M, g)` and a fixed
@@ -475,8 +503,76 @@ theorem exists_movingFrameRemainderRS_iteratedRicci_orderResolved_threeField_spl
               diffCurvSectionRS (I := I) (M := M) g r s S = G₀ + G₁ + G₂ ∧
           IsGradedCurvJetRS (I := I) (M := M) g S (c s) 0 1 G₀ ∧
           IsGradedCurvJetRS (I := I) (M := M) g S (c s) 1 1 G₁ ∧
-          IsGradedCurvJetRS (I := I) (M := M) g S (c s) 2 1 G₂ :=
-  sorry
+          IsGradedCurvJetRS (I := I) (M := M) g S (c s) 2 1 G₂ := by
+  classical
+  -- The two subtracted carriers are the sorry-free concrete grids; the three Hom-field actions come
+  -- from the rank-`r` first-order commutator decomposition
+  -- `pointwiseTensorCurvRS = Q₀·S + Q₁·∇S + Q₂·∇²S`. Set `G₀ := Q₀·S − diffCurv`,
+  -- `G₁ := Q₁·∇S − Gcurv`, `G₂ := Q₂·∇²S`; the split is `abel` on the decomposition and each `Gⱼ`'s
+  -- shape is the window bound `(j, 1)` (subtracted against the matching concrete carrier for `j = 0, 1`).
+  obtain ⟨cDiff, hcDiff_nn, hdiff⟩ := exists_diffCurvSectionRS_gradedCurvJet (I := I) (M := M) g r
+  obtain ⟨cGcurv, hcGcurv_nn, hgcurv⟩ :=
+    exists_GcurvSectionRS_iteratedCovGrad_grid_bound (I := I) (M := M) g r
+  -- The per-rank constant family is chosen by `Classical.choose` over the rank `s`, since the Hom-field
+  -- actions' window constants depend on the rank-`s`-dependent operator fields `Q₀ s, Q₁ s, Q₂ s`.
+  have hstep : ∀ s : ℕ, ∃ cs : ℕ → ℝ, (∀ k, 0 ≤ cs k) ∧
+      ∀ (S : SmoothCcTensor g r s),
+        ∃ G₀ G₁ G₂ : SmoothCcTensor g r (s + 1),
+          pointwiseTensorCurvRS (I := I) (M := M) g r s S -
+              GcurvSectionRS (I := I) (M := M) g r s S -
+              diffCurvSectionRS (I := I) (M := M) g r s S = G₀ + G₁ + G₂ ∧
+          IsGradedCurvJetRS (I := I) (M := M) g S cs 0 1 G₀ ∧
+          IsGradedCurvJetRS (I := I) (M := M) g S cs 1 1 G₁ ∧
+          IsGradedCurvJetRS (I := I) (M := M) g S cs 2 1 G₂ := by
+    intro s
+    obtain ⟨Q₀, Q₁, Q₂, hdecomp⟩ :=
+      exists_pointwiseTensorCurvRS_homField_jetDecomposition (I := I) (M := M) (E := E) g r s
+    -- The window-bound graded shapes of the three Hom-field actions (`(0, 1)`, `(1, 1)`, `(2, 1)`).
+    obtain ⟨cc₀, hcc₀_nn, hjet₀⟩ :=
+      appFullSec_on_jet_isGradedCurvJetRS_local (I := I) (M := M) g r s 0 Q₀
+    obtain ⟨cc₁, hcc₁_nn, hjet₁⟩ :=
+      appFullSec_on_jet_isGradedCurvJetRS_local (I := I) (M := M) g r s 1 Q₁
+    obtain ⟨cc₂, hcc₂_nn, hjet₂⟩ :=
+      appFullSec_on_jet_isGradedCurvJetRS_local (I := I) (M := M) g r s 2 Q₂
+    -- The two subtracted-carrier families (`G₀`, `G₁`) and the bare top-order family (`G₂`).
+    refine ⟨fun k => max (max (Real.sqrt (2 * ((cc₀ k) ^ 2 + (cDiff s k) ^ 2)))
+        (Real.sqrt (2 * ((cc₁ k) ^ 2 + (cGcurv s k) ^ 2)))) (cc₂ k),
+      fun k => le_trans (le_trans (Real.sqrt_nonneg _) (le_max_left _ _)) (le_max_left _ _),
+      fun S => ?_⟩
+    -- The three pieces, in the syntactic form of the decomposition (so the split is `abel`).
+    have hjet₀S : IsGradedCurvJetRS (I := I) (M := M) g S cc₀ 0 1
+        (appFullSec (I := I) (M := M) g r s (s + 1) Q₀ S) := hjet₀ S
+    have hjet₁S : IsGradedCurvJetRS (I := I) (M := M) g S cc₁ 1 1
+        (appFullSec (I := I) (M := M) g r (s + 1) (s + 1) Q₁
+          (covGrad (I := I) (M := M) g r s S)) := hjet₁ S
+    have hjet₂S : IsGradedCurvJetRS (I := I) (M := M) g S cc₂ 2 1
+        (appFullSec (I := I) (M := M) g r (s + 2) (s + 1) Q₂
+          (iteratedCovGrad g r s 2 S)) := hjet₂ S
+    have hgcurvS : IsGradedCurvJetRS (I := I) (M := M) g S (cGcurv s) 1 1
+        (GcurvSectionRS (I := I) (M := M) g r s S) := fun k x => hgcurv s S k x
+    -- `G₀ := Q₀·S − diffCurv` (a `(0, 1)` jet), `G₁ := Q₁·∇S − Gcurv` (a `(1, 1)` jet),
+    -- `G₂ := Q₂·∇²S` (a `(2, 1)` jet).
+    refine ⟨appFullSec (I := I) (M := M) g r s (s + 1) Q₀ S -
+          diffCurvSectionRS (I := I) (M := M) g r s S,
+        appFullSec (I := I) (M := M) g r (s + 1) (s + 1) Q₁
+            (covGrad (I := I) (M := M) g r s S) -
+          GcurvSectionRS (I := I) (M := M) g r s S,
+        appFullSec (I := I) (M := M) g r (s + 2) (s + 1) Q₂
+          (iteratedCovGrad g r s 2 S), ?_, ?_, ?_, ?_⟩
+    · -- Split: substitute the decomposition; the carriers cancel by `abel`.
+      rw [hdecomp S]; abel
+    · -- `G₀` is the `(0, 1)` difference of the two `(0, 1)` jets, bumped to the per-rank family.
+      refine (IsGradedCurvJetRS_sub_local (I := I) (M := M) g S hjet₀S (hdiff s S)).mono_const
+        (I := I) (M := M) g S (fun k => Real.sqrt_nonneg _) ?_
+      exact fun k => le_trans (le_max_left _ _) (le_max_left _ _)
+    · -- `G₁` is the `(1, 1)` difference of the two `(1, 1)` jets, bumped to the per-rank family.
+      refine (IsGradedCurvJetRS_sub_local (I := I) (M := M) g S hjet₁S hgcurvS).mono_const
+        (I := I) (M := M) g S (fun k => Real.sqrt_nonneg _) ?_
+      exact fun k => le_trans (le_max_right _ _) (le_max_left _ _)
+    · -- `G₂` is the bare `(2, 1)` window jet, bumped to the per-rank family.
+      exact hjet₂S.mono_const (I := I) (M := M) g S (hcc₂_nn) (fun k => le_max_right _ _)
+  refine ⟨fun s => (hstep s).choose, fun s k => (hstep s).choose_spec.1 k,
+    fun s S => (hstep s).choose_spec.2 S⟩
 
 /-- **The rank-`r` iterated-Ricci moving-frame remainder full-sum graded jet (the genuinely-irreducible
 deep-well core at general rank), derived from the order-resolved three-field split.** For a closed smooth
