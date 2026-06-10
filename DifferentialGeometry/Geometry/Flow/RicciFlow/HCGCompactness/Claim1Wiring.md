@@ -143,13 +143,31 @@ constants (D2b).**
   (exists in coordinate/AllTimesBounds machinery); `hA` = componentRS of
   connectionDifferenceTensorAt smooth = difference of two smooth Christoffel
   arrays (F3 twice).  Effort: 0.5 session.  Risk: low.
-  ENTRY POINTS (located 2026-06-10): frame-level Christoffel smoothness in
-  `ContMDiffAt I 𝓘(ℝ,ℝ) ∞` form at `HCGCompactness/ApproximateIsometry.lean`
-  ~:1515 and ~:3742 (chart-model layer underneath:
-  `Connection/LeviCivita/Smooth/Christoffel.lean`, `leviCivitaChristoffelModelRHS_*`).
-  Start B2 by reading those two theorem statements and adapting to the
-  `∀ d i j, ContMDiffOn I 𝓘(ℝ,ℝ) ∞ (fun y => chr y d i j) u` shape that
-  `claim1`/the tower machinery consume.
+  ENTRY POINTS (all verified in-repo 2026-06-10; B2 = adapt these to the
+  `ContMDiffOn … u` shapes `claim1` consumes; canonical setting: a tangent
+  trivialization `e₀` + `basisE`, `frame := e₀.localFrame basisE`,
+  `u := e₀.baseSet`, `hframe∞ := e₀.isLocalFrameOn_localFrame_baseSet I ∞ basisE`):
+  - `hchr`: **`lcChrist_e_contMDiffAt`** (`ApproximateIsometry.lean` ~:1490) —
+    `ContMDiffAt 𝓘(ℝ,ℝ) ∞` of `christoffelSymbolInFrame (LC g) frame hframe1 · i j k`
+    at every `x ∈ e₀.baseSet` (general `e₀`, exactly the per-point form; wrap with
+    `.contMDiffWithinAt` to get `ContMDiffOn … e₀.baseSet`).  `IsLocalFrameOn` is a
+    Prop, so any `hframe1` proof matches up to proof irrelevance.
+    (Variant pinned at `trivializationAt … x`: `lcChrist_triv_contMDiffAt` ~:3729.)
+  - `hframe` (tower input `∀ d, ContMDiffOn … (fun y => TotalSpace.mk' E y (frame d y)) u`):
+    from `hframe∞.contMDiffOn d`.
+  - `hg`/`hA` (component-field smoothness): **`tensorRS_eval_contMDiffAt`**
+    (`Tensor/RSTensor/LocalFrameRegularity.lean:150`) — smooth section `T`, smooth
+    `β`, smooth slots `V` ⇒ `fun p => T p (β p) (fun a => V a p)` is `ContMDiffAt ∞`.
+    For `hg`: the `(0,2)` specialization on `frame`-slots applied to
+    `frameComp0S (metricTensorField g_k) frame` (`frameComp0S` def:
+    `Evolution/RmRealizationBridge.lean:81`, `= fun x m => A x (frameTuple frame x m)`).
+    For `hA`: same on the `(1,2)` `connectionDifferenceTensorAt` SECTION — REMAINING
+    sub-gap: smoothness of `y ↦ connectionDifferenceTensorAt (LC g_k) (LC gRef) y` as
+    a section (= difference of two smooth-Christoffel objects; check
+    `ConnectionDifference.lean` for an existing `contMDiff` producer, else derive from
+    `lcChrist_e_contMDiffAt` twice through the component basis), plus the
+    upper-slot input `β` built from the frame's DUAL basis (check `hframe.toBasisAt`
+    / coordinate-dual plumbing in `Tensor/RSTensor/Coordinates/`).
 
 **B3 — `hinv` + the `Ginv` field.**
   Define `Ginv y` := inverse Gram array of g_k at y in the frame (pointwise
