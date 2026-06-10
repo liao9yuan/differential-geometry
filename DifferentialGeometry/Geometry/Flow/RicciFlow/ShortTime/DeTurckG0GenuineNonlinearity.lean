@@ -270,9 +270,63 @@ first-order operator-loss of `N` is proven; it holds definitionally. -/
             (MetricRealization.tensorHeatSemigroupHs_output_smoothRepr (I := I) (M := M)
               g₀ 0 2 (one_pos) (by positivity : (0 : ℝ) ≤ (a : ℝ) + 1) u))) i := rfl
 
-/-- **The first-order-cancelled DeTurck linearization exists as a bounded tower operator (posited
-analytic node — the Fréchet differentiability of the realized Ricci–DeTurck nonlinearity at the
-origin, with cancelled principal part).**
+/-- **The explicit first-order Fréchet-remainder estimate of the realized Ricci–DeTurck
+nonlinearity at the origin (the genuine analytic primitive — the bounded first-order linearization
+together with its little-`o` approximation).**
+
+There is a *bounded continuous linear* operator `B₁ : H^{a+1} →L[ℝ] Hᵃ` — the genuinely
+**first-order** linearization of the realized Ricci–DeTurck nonlinearity
+`N := deTurckRealizeNonlinearityTower g₀ g_bg a` at the origin (the second-order principal symbol
+of the quasilinear right-hand side having cancelled against the linear rough Laplacian `Δ_∇`,
+`deTurckNonlinearitySpectral_principalPart_cancels`) — for which the Fréchet remainder
+`u ↦ N u − N 0 − B₁ u` is little-`o` of `‖u‖` along the neighbourhood filter of the origin:
+```
+(fun u => N u − N 0 − B₁ u) =o[𝓝 0] (fun u => u) .
+```
+
+This is the genuine analytic content of the linearization: the explicit *quantitative* statement
+that the bounded first-order operator `B₁` approximates the nonlinear `N` to first order at the
+base point.  It is structurally the asymptotic remainder estimate `‖N u − N 0 − B₁ u‖ / ‖u‖ → 0`
+— the analyst's working form of differentiability — from which the bundled `HasFDerivAt N B₁ 0`
+is *assembled* (downstream, via `HasFDerivAt.of_isLittleO`).  Its content is **additional** to the
+norm-level operator first-order-loss already proven over the realized-remainder synthesis
+(`deTurckGenuineN_firstOrder_operatorTsumLoss`, an `‖N u‖_{Hᵃ} ≤ C₁ + C₂‖u‖_{H^{a+1}}` size bound):
+a size bound on the nonlinear map does not supply linear approximability, which is the genuine
+extra structure isolated here.
+
+**Non-vacuous** — the witness `B₁ = 0` is excluded: it would force `u ↦ N u − N 0` to be
+little-`o` of `‖u‖`, i.e. `N` to have *zero* first-order content at the origin, which is false
+because the first-order content of the realized Ricci–DeTurck remainder (the `lieDerivCcSection`
+deTurck-vector-field deformation and the first-order part of the curvature term, see
+`deTurckRHSRetagG0_eq_ricciNeg2_add_lieDeriv`) is a genuinely non-zero first-order differential
+operator.  **Not packaging** — the existence asserted is of a *concrete bounded operator with an
+explicit asymptotic remainder bound* on a named nonlinear map, structurally distinct from the
+existential gauge correction it later helps build; it does not assume the fixed-point solvability
+it is downstream used to prove.  **Intrinsic** — stated over the `g`-inner spectral tower
+`tensorHs`; no `chartJ`, no raw `M → E`.
+
+The body is `sorry` — the explicit first-order linearization-with-remainder of the quasilinear
+elliptic operator over the heat-smoothed spectral realization (the genuine analytic frontier of the
+`A → B → D` gauge-solvability chain): the bounded first-order operator `B₁` is the
+principal-cancelled linearization (linearized `−2 Ric` + linearized deTurck-vector-field Lie
+deformation, the second-order parts cancelling against `Δ_∇`), and the little-`o` bound is its
+Taylor remainder estimate over the all-order-smoothing heat realization. -/
+theorem exists_deTurckFirstOrderCancelledLinearization_isLittleO
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
+    ∃ B₁ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
+        tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ),
+      (fun u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) =>
+          deTurckRealizeNonlinearityTower (I := I) g₀ g_bg a u
+            - deTurckRealizeNonlinearityTower (I := I) g₀ g_bg a
+                (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+            - B₁ u)
+        =o[nhds (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))]
+          (fun u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) => u) := by
+  sorry
+
+/-- **The first-order-cancelled DeTurck linearization exists as a bounded tower operator (the
+Fréchet differentiability of the realized Ricci–DeTurck nonlinearity at the origin, with cancelled
+principal part — assembled from the explicit little-`o` remainder primitive).**
 
 The concrete Ricci–DeTurck nonlinearity `deTurckRealizeNonlinearityTower g₀ g_bg a :
 H^{a+1}(g₀) → Hᵃ(g₀)` is Fréchet differentiable at the origin, with a *bounded continuous linear*
@@ -287,8 +341,8 @@ Sobolev derivative, so it is a genuinely first-order bounded operator `H^{a+1} �
 `−Δ_∇`: on the one-derivative-drop scale the second-order parts have already cancelled).  Its
 boundedness as a `H^{a+1} → Hᵃ` map is the norm-level operator first-order-loss already proven over
 the realized-remainder synthesis (`deTurckGenuineN_firstOrder_operatorTsumLoss`); the `HasFDerivAt`
-content posited here is the *linear approximability* of `N` at the origin, the additional structure a
-norm bound on the nonlinear map does not supply.
+content is the *linear approximability* of `N` at the origin, the additional structure a norm bound
+on the nonlinear map does not supply.
 
 **Non-vacuous** — `HasFDerivAt N B₁ 0` genuinely pins `B₁` to the actual derivative: the witness
 `B₁ = 0` would assert `N` has *zero* linear approximation at the origin, which is false because the
@@ -300,16 +354,26 @@ map, structurally distinct from any existential gauge correction; it does not as
 fixed-point solvability it is later used to prove.  **Intrinsic** — stated over the `g`-inner
 spectral tower `tensorHs`; no `chartJ`, no raw `M → E`.
 
-The body is `sorry` — the Fréchet differentiability of the realized Ricci–DeTurck nonlinearity at the
-origin (the genuine analytic frontier of the `A → B → D` gauge-solvability chain, the linearization
-of the quasilinear elliptic operator over the heat-smoothed spectral realization). -/
+**Proven by assembly** — it is the bundled `HasFDerivAt` form of the explicit first-order
+little-`o` remainder estimate `exists_deTurckFirstOrderCancelledLinearization_isLittleO`: the
+`HasFDerivAt`/little-`o` bridge (`HasFDerivAt.of_isLittleO`) converts the asymptotic remainder bound
+`(N · − N 0 − B₁ ·) =o[𝓝 0] (·)` into `HasFDerivAt N B₁ 0` (the linearization argument `B₁ (u − 0)`
+and the base argument `u − 0` simplifying to `B₁ u` and `u` at the origin).  Consumers transitively
+depend on `sorryAx` through the analytic remainder primitive. -/
 theorem exists_deTurckFirstOrderCancelledLinearization
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
     ∃ B₁ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
         tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ),
       HasFDerivAt (deTurckRealizeNonlinearityTower (I := I) g₀ g_bg a) B₁
         (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) := by
-  sorry
+  obtain ⟨B₁, hlittleO⟩ :=
+    exists_deTurckFirstOrderCancelledLinearization_isLittleO (I := I) g₀ g_bg a
+  refine ⟨B₁, HasFDerivAt.of_isLittleO ?_⟩
+  refine hlittleO.congr' ?_ ?_
+  · filter_upwards with u
+    simp only [sub_zero]
+  · filter_upwards with u
+    simp only [sub_zero]
 
 /-- **The first-order-cancelled DeTurck linearization `B₁ : H^{a+1} →L[ℝ] Hᵃ`.**
 
