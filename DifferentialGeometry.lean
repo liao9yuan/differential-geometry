@@ -1015,6 +1015,7 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.Ricci
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Riemann
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisBracket
 import DifferentialGeometry.Geometry.Connection.DeTurckVFCovGradTopRestSplit
+import DifferentialGeometry.Geometry.Connection.DeTurckVFFaaDiBrunoDecomposition
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentity
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentityOffCentre
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartLieBracket
