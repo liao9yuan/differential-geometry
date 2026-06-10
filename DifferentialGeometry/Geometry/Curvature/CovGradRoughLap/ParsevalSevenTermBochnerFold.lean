@@ -9,6 +9,9 @@ import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.ParsevalFrameFi
 import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorBochner
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorConnLapGreenIntertwiner
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.GradientSlotLeibniz
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.OperatorFieldPairingIBP
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ContractedBianchi
+import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorRSMetricCompatible
 
 /-!
 # The seven-term Bochner fold: fixed-Parseval-family group carriers of the rank-`0` Bochner–Weitzenböck assembly
@@ -1156,6 +1159,105 @@ theorem bochnerFold_group1_eq_GcurvSection
       simp only [SmoothCcTensor.toFun_apply,
         bochnerGroupElt1Cc_toSection_eq (I := I) (M := M) g s S (hV a) (hV b) x,
         bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S (hV b) x])).symm]
+
+/-- The packaged directional covariant derivative `∇_X T` of a smooth compactly-supported
+`(0, s)`-tensor `T` along a smooth field `X`, as a smooth compactly-supported `(0, s)`-tensor
+(`covApply (tensorCov g 0 s) X T`).  The general-`T` packaging through which the divergence
+engine consumes the once-derived sections of the seven-term carriers. -/
+private def covApplyGenCc (g : SmoothRiemannianMetric I M) (s : ℕ) (T : SmoothCcTensor g 0 s)
+    {X : Π b : M, TangentSpace I b}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, X b⟩ : TotalSpace E (TangentSpace I)))) : SmoothCcTensor g 0 s where
+  toSection :=
+    { toFun := fun y : M => covApply (tensorCov (I := I) g 0 s) X
+        (fun z : M => T.toSection z) y
+      contMDiff_toFun := covApplyRS_contMDiff (I := I) g 0 s T.toSection.contMDiff hX }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+set_option linter.unusedSectionVars false in
+@[simp] private lemma covApplyGenCc_toSection_apply (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (T : SmoothCcTensor g 0 s) {X : Π b : M, TangentSpace I b}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, X b⟩ : TotalSpace E (TangentSpace I)))) (y : M) :
+    (covApplyGenCc (I := I) (M := M) g s T hX).toSection y =
+      covApply (tensorCov (I := I) g 0 s) X (fun z : M => T.toSection z) y := rfl
+
+/-- The packaged section-level Riemann curvature `R(X, Y) S` of a smooth compactly-supported
+`(0, s)`-tensor `S` along smooth fields `X, Y`, as a smooth compactly-supported `(0, s)`-tensor
+(`riemannSec (tensorCov g 0 s) X Y S`).  The group-`2` inner section the divergence engine
+differentiates. -/
+private def riemannSecCc (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {X Y : Π b : M, TangentSpace I b}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, X b⟩ : TotalSpace E (TangentSpace I))))
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Y b⟩ : TotalSpace E (TangentSpace I)))) : SmoothCcTensor g 0 s where
+  toSection :=
+    { toFun := fun x : M => riemannSec (tensorCov (I := I) g 0 s) X Y
+        (fun z : M => S.toSection z) x
+      contMDiff_toFun := riemannSec_contMDiff (cov := tensorCov (I := I) g 0 s) hX hY
+        S.toSection.contMDiff }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+set_option linter.unusedSectionVars false in
+@[simp] private lemma riemannSecCc_toSection_apply (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : SmoothCcTensor g 0 s) {X Y : Π b : M, TangentSpace I b}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, X b⟩ : TotalSpace E (TangentSpace I))))
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Y b⟩ : TotalSpace E (TangentSpace I)))) (x : M) :
+    (riemannSecCc (I := I) (M := M) g s S hX hY).toSection x =
+      riemannSec (tensorCov (I := I) g 0 s) X Y (fun z : M => S.toSection z) x := rfl
+
+set_option linter.unusedSectionVars false in
+/-- **The slot-`0` `V b`-read of `∇S` is the directional covariant derivative `∇_{V b} S`.** As a
+`TensorRSSpace 0 s` value, `bochnerGradSlot0 g s S V b x` collapses through the gradient-slot read
+`slotRead_covGrad_dir` to `covApply (tensorCov g 0 s) (V b) (S) (x)`, the section value of the
+packaged directional derivative `covApplyGenCc g s S (hVb)`. -/
+private lemma bochnerGradSlot0_eq_covApply (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (S : SmoothCcTensor g 0 s) (Vb : Π b : M, TangentSpace I b) (x : M) :
+    bochnerGradSlot0 (I := I) (M := M) g s S Vb x =
+      covApply (tensorCov (I := I) g 0 s) Vb (fun z : M => S.toSection z) x := by
+  rw [bochnerGradSlot0, curry_covGrad_unit_eval_genVal (I := I) (M := M) g s S x (Vb x)]
+  rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+        tensorCovDerivAt (I := I) (M := M) g 0 s S x (Vb x))
+        (unitZeroSec (I := I) (M := M) x) =
+      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+        covApply (tensorCov (I := I) g 0 s) Vb (fun z : M => S.toSection z) x)
+        (unitZeroSec (I := I) (M := M) x) from by
+    rw [covApply_apply]; rfl]
+  exact tensor0SAsRS_rs_unit' (I := I) (M := M) s x _
+
+set_option linter.unusedSectionVars false in
+/-- **The engine first-slot bridge (rank `(0, s)`).** For smooth compactly-supported `(0, s)`-tensors
+`W'`, `Z` and a smooth field `V`, the engine's metric-lowered first-slot pairing
+`⟨loweredCovDerivAlongVF g 0 s W' V, lifted Z⟩₀` equals the un-lowered directional covariant derivative
+pairing `⟨∇_V W', Z⟩` in `tensorInnerPointwise (0, s)` form.  This is
+`loweredCovDerivAlongVF_firstSlot_eq_lower_covApply` (`BracketDivergenceForm`) re-read against the
+`(0, s)`-inner product through the lifted-section metric bridge
+`tensorInnerPointwise_eq_liftedTensorSection_inner`, the `r = 0` index-lowering being the identity lift
+`liftedTensorSection_apply`. -/
+private lemma loweredFirstSlot_eq_covApply_inner (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (W' Z : SmoothCcTensor g 0 s) {V : Π b : M, TangentSpace I b}
+    (hV : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V b⟩ : TotalSpace E (TangentSpace I)))) (x : M) :
+    tensorInnerPointwise_0s (I := I) (M := M) (0 + s) g x
+        (Tensor0SSpace.toModel
+          (loweredCovDerivAlongVF (I := I) (M := M) g 0 s W'.toSection ⟨fun y => V y, hV⟩ x))
+        (Tensor0SSpace.toModel
+          (liftedTensorSection (I := I) (M := M) g 0 s Z.toSection x)) =
+      tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel
+          ((covApplyGenCc (I := I) (M := M) g s W' hV).toSection x))
+        (TensorRSSpace.toModel (Z.toSection x)) := by
+  classical
+  rw [loweredCovDerivAlongVF_firstSlot_eq_lower_covApply (I := I) (M := M) g 0 s W' Z
+    ⟨fun y => V y, hV⟩ x]
+  rw [tensorInnerPointwise_eq_liftedTensorSection_inner (I := I) (M := M) g 0 s
+    (covApplyGenCc (I := I) (M := M) g s W' hV).toSection Z.toSection x]
+  rw [liftedTensorSection_apply (I := I) (M := M) g 0 s
+    (covApplyGenCc (I := I) (M := M) g s W' hV).toSection x, Tensor0SSpace.toModel_ofModel]
+  rfl
 
 /-- **Fold 3 (terms iii + iv − v → leading-slot Ricci trace).** For a fixed Parseval frame family, the
 group-`3` double sum equals the `L²` pairing of the leading-slot Ricci-trace carrier `ricTraceSection g s S`
