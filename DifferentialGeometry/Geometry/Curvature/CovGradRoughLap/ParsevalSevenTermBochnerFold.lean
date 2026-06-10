@@ -1284,6 +1284,41 @@ theorem bochnerFold_group3_eq_ricTrace
         (covGrad (I := I) (M := M) g 0 s S).toFun :=
   sorry
 
+/-- **The genuine rank-`0` divergence root of the combined group-`2` + group-`4` fold.** For a fixed
+Parseval frame family, the sum of the group-`2` double sum (the slot-`0` carrier `∇_{V a}(R(V a, V b) S)`)
+and the group-`4` double sum (the symmetric second-order pair `−∇²_{∇_{V b} V a, V a} S −
+∇²_{V a, ∇_{V b} V a} S`) equals the single `L²` pairing of the differentiated curvature operator-field
+action against `∇S`:
+```
+∑_a ∑_b ∫ ⟨[∇_{V a}(R(V a, V b) S) − ∇²_{∇_{V b} V a, V a} S − ∇²_{V a, ∇_{V b} V a} S]·slot0, slot0_{V b}(∇S)⟩
+  = ⟨appCc (covGrad (curvOpField g s)) S, ∇S⟩_{L²}.
+```
+This is the genuine deep root of the combined fold: the group-`2` covariant divergence of
+`R(V a, V b) S` along `V a` is *not* pointwise null (the fixed Parseval frame is not covariantly
+divergence-free, `div_g V a ≠ 0` pointwise), so the single-slot divergence engine
+`integral_tensorInner_covDeriv_combined_eq_zero` kills only the *combined* three-term
+`∫(⟨∇_V W', Z⟩ + ⟨W', ∇_V Z⟩ + ⟨W', Z⟩ div_g V)`.  The residual `−(⟨W', ∇_V Z⟩ + ⟨W', Z⟩ div_g V)` is
+exactly absorbed by the group-`4` symmetric second-order pair, leaving the frame-summed trace of the
+operator-field covariant Leibniz `∇(appCc (curvOpField g s) S) = appCc (covGrad (curvOpField g s)) S +
+appCc (curvOpField g s)(∇S)` — the differentiated-curvature `(∇R) S` content.  The body is `sorry`;
+consumers transitively depend on its `sorryAx`. -/
+private theorem parsevalFrameSum_diffCurvBracket_integral_eq_appCc_covGrad_curvOpField
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
+    bochnerFoldGroupSum (I := I) (M := M) g s S V
+        (bochnerGroupElt2 (I := I) (M := M) g s S) +
+      bochnerFoldGroupSum (I := I) (M := M) g s S V
+        (bochnerGroupElt4 (I := I) (M := M) g s S) =
+      tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (appCc (I := I) (M := M) g s (s + 1)
+          (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun :=
+  sorry
+
 /-- **Combined fold 2 + 4 (term ii together with − term vi − term vii → operator-field IBP residue).** For
 a fixed Parseval frame family, the sum of the group-`2` double sum (the slot-`0` carrier
 `∇_{V a}(R(V a, V b) S)`) and the group-`4` double sum (the symmetric second-order pair
@@ -1326,8 +1361,19 @@ theorem bochnerFold_group2_add_group4_eq_operatorResidue
       + tensorL2Inner (I := I) (M := M) g 0 (s + 1)
           (covGrad (I := I) (M := M) g 0 s
             (pureRGenuineDiffOp (I := I) (M := M) g 0 s S)).toFun
-          (covGrad (I := I) (M := M) g 0 s S).toFun :=
-  sorry
+          (covGrad (I := I) (M := M) g 0 s S).toFun := by
+  classical
+  have hbase : appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s) S =
+      pureRGenuineDiffOp (I := I) (M := M) g 0 s S :=
+    appCc_curvOpField_eq_pureRGenuineDiffOp (I := I) (M := M) g s S
+  rw [parsevalFrameSum_diffCurvBracket_integral_eq_appCc_covGrad_curvOpField
+    (I := I) (M := M) g s S V hV hPar]
+  rw [tensorL2Inner_appCc_covGrad_covGrad_eq_neg (I := I) (M := M) g s
+    (curvOpField (I := I) (M := M) g s) S]
+  rw [hbase]
+  rw [tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawTensorConnLapSmooth_rs (I := I) (M := M) g 0 s
+    (pureRGenuineDiffOp (I := I) (M := M) g 0 s S) S]
+  ring
 
 /-- **Fold 5 (the fixed-Parseval-family bridge).** For a fixed Parseval frame family, the sum of the four
 group double-sums equals the curvature cross-pairing
