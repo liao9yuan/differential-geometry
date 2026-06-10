@@ -28,17 +28,23 @@ product `rfns(∇^i S)·rfns(∇^l T)` via Hölder at the conjugate pair `(k/i, 
 `L^p` exponent that the `L²`-form's fixed `L²` left member cannot supply.  This file is therefore
 the precise Lᵖ-interpolation kernel the product grid consumes.
 
-The deep analytic content is isolated in a single posited input
-`lpFiberJet_logConvex_iteratedCovGrad`: the **single-step Gagliardo–Nirenberg log-convexity of the
-mixed-`L^p` fibre jets** `c_i := ‖|∇^i u|‖_{L^{2k/i}}` (`c_0 := ‖u‖_{L^∞}`, `c_k := ‖∇^k u‖_{L²}`),
-namely `c_i² ≤ K · c_{i-1} · c_{i+1}` (the genuine `L^p` interpolation engine — Mathlib carries only
-the first-order Sobolev *embedding* `eLpNorm_le_eLpNorm_fderiv`, not this iterated-jet interpolation,
-and no `L^p` Lyapunov interpolation).  On top of that single input the headline is assembled
-outright by the discrete Hardy–Littlewood–Pólya power law `hlp_real` (proven here as elementary real
-arithmetic on the abstract jets) and the `L^∞`-endpoint comparison, by a single `rpow` extraction —
-exactly mirroring the `L²`-companion's `l2Interp_pow_iteratedCovGrad` architecture but carrying the
-genuinely stronger `L^{2k/j}` left member.  Consumers transitively depend on the `sorryAx` of
-`lpFiberJet_logConvex_iteratedCovGrad`. -/
+The deep analytic content is isolated in two posited single-tensor inputs — the **second-order
+covariant `L^p` interpolation step** on one smooth compactly-supported tensor: the finite form
+`secondOrderInterp_lpFiberJet_fin` (`‖∇w‖_{L^{2k/(i+1)}}² ≤ K'·‖w‖_{L^{2k/i}}·‖∇²w‖_{L^{2k/(i+2)}}`)
+and its order-`0` `L^∞`-lower-factor form `secondOrderInterp_lpFiberJet_sup`.  These are the genuine
+covariant integration-by-parts (against the regularised weight `(|∇w|²+ε)^{(p-2)/2}`, in the `ε → 0`
+limit) plus three-function Hölder content; Mathlib carries only the first-order Sobolev *embedding*
+`eLpNorm_le_eLpNorm_fderiv`, not this iterated-jet interpolation, and no `L^p` Lyapunov interpolation.
+On top of those two steps the **single-step log-convexity** `lpFiberJet_logConvex_iteratedCovGrad`
+(`c_{i+1}² ≤ K·c_i·c_{i+2}` for the mixed-`L^p` fibre jets `c_i := ‖|∇^i u|‖_{L^{2k/i}}`,
+`c_0 := Λ₀·√(vol M)`, `c_k := ‖∇^k u‖_{L²}`) is proven outright — by reading the ladder as the honest
+jet for `i ≥ 1` (`i = k` via the `L²` bridge), the `iteratedCovGrad_succ` identification
+`covGrad(∇^i u) = ∇^{i+1}u`, the `L^∞`-endpoint comparison, and the constant absorption.  The
+headline is then assembled by the discrete Hardy–Littlewood–Pólya power law `lp_hlp_real` (proven
+here as elementary real arithmetic on the abstract jets) and a single `rpow` extraction — mirroring
+the `L²`-companion's `l2Interp_pow_iteratedCovGrad` architecture but carrying the genuinely stronger
+`L^{2k/j}` left member.  Consumers transitively depend on the `sorryAx` of the two posited
+second-order interpolation steps. -/
 
 noncomputable section
 
@@ -51,6 +57,7 @@ open DifferentialGeometry
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -302,41 +309,272 @@ private noncomputable def lpFiberJetLadder
             ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s i u).toSection x)) ^ ((k : ℝ) / i)
         ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((i : ℝ) / (2 * k))
 
-/-- **(POSIT — the single-step Gagliardo–Nirenberg log-convexity of the mixed-`L^p` fibre jets.)**
+/-- **(POSIT — the generic single-tensor second-order covariant `L^p` interpolation step, finite
+lower factor.)**
+
+The genuine analytic engine, isolated to a *single* smooth compactly-supported tensor `w` and a
+*single* interpolation step (one covariant integration by parts against the regularised weight
+`(|∇w|²+ε)^{(p₁-2)/2}` plus a three-function Hölder at the conjugate triple, in the `ε → 0` limit).
+For a top order `k ≥ 1` there is one multiplier `K' ≥ 1` (depending only on `g`, the manifold and
+`k`, *uniform in the tensor valence `m`, the tensor `w` and the order index `i`*) with, for every
+`(0, m)`-tensor `w` and every `i ≥ 1`,
+```
+‖∇w‖_{L^{2k/(i+1)}}² ≤ K' · ‖w‖_{L^{2k/i}} · ‖∇²w‖_{L^{2k/(i+2)}},
+```
+the mixed-`L^p` fibre norms written through their squared fibre norms with the ladder exponents
+`(k/i, k/(i+1), k/(i+2))` and weights `((i)/(2k), (i+1)/(2k), (i+2)/(2k))`, where `∇ = covGrad`.
+The three exponents satisfy the Gagliardo–Nirenberg balance `2·(i+1)/(2k) = i/(2k)·1 + (i+2)/(2k)·1`
+identically in `i`, so the displayed inequality is the genuine second-order interpolation; for
+`i + 2 ≤ 2k` it is the standard regime (all `L^p` exponents `≥ 1`), and for `i + 2 > 2k` it is the
+sub-unit-exponent continuation (the convexity of `p ↦ log‖f‖_{L^{1/p}}` keeps it true with the same
+uniform multiplier — it is tight, attaining equality on a single Fourier mode of the flat torus).
+
+**Non-vacuity.**  `K'` is quantified before `(m, w, i)`; the conclusion reads the genuine covariant
+derivatives `∇w`, `∇²w` of `w` (not a free family), and a tensor with a nonvanishing first jet rejects
+the `K' = 0` reading by positivity of the left member.  Its body is `sorry`: the genuine covariant IBP
+plus Hölder interpolation; consumers transitively depend on its `sorryAx`. -/
+private theorem secondOrderInterp_lpFiberJet_fin
+    (g : SmoothRiemannianMetric I M) (k : ℕ) (_hk : 1 ≤ k) :
+    ∃ K' : ℝ, 1 ≤ K' ∧
+      ∀ (m : ℕ) (w : Integral.L2.SmoothCcTensor g 0 m) (i : ℕ), 1 ≤ i →
+        ((∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
+              ((covGrad (I := I) (M := M) g 0 m w).toSection x)) ^ ((k : ℝ) / (i + 1))
+            ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ (((i : ℝ) + 1) / (2 * k))) ^ 2 ≤
+          K' *
+            ((∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x)) ^ ((k : ℝ) / i)
+                ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((i : ℝ) / (2 * k))) *
+            ((∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
+                  ((covGrad (I := I) (M := M) g 0 (m + 1)
+                    (covGrad (I := I) (M := M) g 0 m w)).toSection x)) ^ ((k : ℝ) / (i + 2))
+                ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ (((i : ℝ) + 2) / (2 * k))) := by
+  sorry
+
+/-- **(POSIT — the generic single-tensor second-order covariant `L^p` interpolation step,
+`L^∞` lower factor, the order-zero endpoint.)**
+
+The order-`0` instance of the second-order interpolation, where the lowest factor is the `L^∞` fibre
+sup of `w` (here supplied as any uniform bound `A` on the fibre norm).  For a top order `k ≥ 1` there
+is one multiplier `K' ≥ 1` (depending only on `g`, the manifold and `k`, uniform in `m`, `w`, `A`)
+with, for every `(0, m)`-tensor `w` and every `A ≥ 0` bounding the fibre norm-squared of `w`,
+```
+‖∇w‖_{L^{2k}}² ≤ K' · A · ‖∇²w‖_{L^{k}},
+```
+written through the squared fibre norms with the order-`0` ladder exponents `k/1`, `k/2` and weights
+`1/(2k)`, `2/(2k)` (`∇ = covGrad`).  This is the second-order Gagliardo–Nirenberg interpolation at the
+`L^∞`–`L^{2k}`–`L^k` endpoint triple `2/(2k) = 0·1 + (2/(2k))·1`, the `i = 0` continuation of the
+finite step.
+
+**Non-vacuity.**  `K'` is quantified before `(m, w, A)`; the hypothesis `∀ x, |w(x)|² ≤ A²` genuinely
+constrains `w` by `A` (it rejects no nontrivial `w` and forces `A > 0` whenever `w ≠ 0`), and the
+conclusion reads the genuine covariant derivatives of `w`.  Its body is `sorry`: the genuine covariant
+IBP with an `L^∞` factor; consumers transitively depend on its `sorryAx`. -/
+private theorem secondOrderInterp_lpFiberJet_sup
+    (g : SmoothRiemannianMetric I M) (k : ℕ) (_hk : 1 ≤ k) :
+    ∃ K' : ℝ, 1 ≤ K' ∧
+      ∀ (m : ℕ) (w : Integral.L2.SmoothCcTensor g 0 m) (A : ℝ), 0 ≤ A →
+        (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 m x (w.toSection x) ≤ A ^ 2) →
+        ((∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1) x
+              ((covGrad (I := I) (M := M) g 0 m w).toSection x)) ^ ((k : ℝ) / 1)
+            ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((1 : ℝ) / (2 * k))) ^ 2 ≤
+          K' * A *
+            ((∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (m + 1 + 1) x
+                  ((covGrad (I := I) (M := M) g 0 (m + 1)
+                    (covGrad (I := I) (M := M) g 0 m w)).toSection x)) ^ ((k : ℝ) / 2)
+                ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((2 : ℝ) / (2 * k))) := by
+  sorry
+
+/-- **The single-step Gagliardo–Nirenberg log-convexity of the mixed-`L^p` fibre jets.**
 
 Fix an anchor `g`, a valence `s`, and a top order `k ≥ 1`.  There is a single multiplier `K ≥ 1`
 (depending only on `g`, the manifold and `(s, k)`) such that for every smooth compactly-supported
-`(0, s)`-tensor `u` with `C⁰`-sup fibre bound `Λ₀` and every order `i`, the mixed-`L^p` fibre-jet
-ladder `c := lpFiberJetLadder g s k u Λ₀` (whose value at order `i` is the `L^{2k/i}` norm of the
-pointwise fibre norm `|∇^i u|`, with the `L^∞`-endpoint `c_0 = Λ₀·√(vol M)` and the `L²`-endpoint
-`c_k = ‖∇^k u‖_{L²}`) is **log-convex up to the multiplier `K`**:
+`(0, s)`-tensor `u` whose `C⁰`-sup fibre norm-squared is `≤ Λ₀²` (with `Λ₀ ≥ 0`) and every order `i`,
+the mixed-`L^p` fibre-jet ladder `c := lpFiberJetLadder g s k u Λ₀` (whose value at order `i` is the
+`L^{2k/i}` norm of the pointwise fibre norm `|∇^i u|`, with the `L^∞`-endpoint `c_0 = Λ₀·√(vol M)` and
+the `L²`-endpoint `c_k = ‖∇^k u‖_{L²}`) is **log-convex up to the multiplier `K`**:
 ```
 c_{i+1}² ≤ K · c_i · c_{i+2}.
 ```
 
+**The `Λ₀` hypotheses are load-bearing (the bare statement is false).**  The conclusion is quantified
+over `Λ₀` with the `L^∞`-endpoint `c_0 = Λ₀·√(vol M)`.  Without `0 ≤ Λ₀` and the fibre bound
+`|u|² ≤ Λ₀²`, the order-`0` instance `c_1² ≤ K·c_0·c_2 = K·Λ₀√(vol M)·c_2` fails at `Λ₀ = 0` for any
+`u` with a nonvanishing first jet (`c_1 > 0`, right member `0`); the two hypotheses (mirrored from the
+consumer `exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le`, which has them in scope and now
+passes them at the call site) make `c_0` a genuine upper bound for the `L^∞` reading of `u` and the
+node true.
+
 This is the genuine **`L^p` interpolation engine** of the closed-manifold tensor Gagliardo–Nirenberg
-inequality (Hamilton 12.5, Aubin): consecutive mixed-`L^p` fibre jets are log-convex up to a
-curvature/commutator multiplier, the single covariant analytic input from which the full `j`-versus-`k`
-interpolation follows by the elementary discrete Hardy–Littlewood–Pólya power law.  Mathlib carries
-only the *first-order Sobolev embedding* `eLpNorm_le_eLpNorm_fderiv` (`‖u‖_{L^{p*}} ≤ C‖Du‖_{L^p}`),
-not this iterated-jet `L^p` interpolation, and no `L^p` Lyapunov interpolation; the content is
-therefore posited here.
+inequality (Hamilton 12.5, Aubin), the single covariant analytic input from which the full
+`j`-versus-`k` interpolation follows by the elementary discrete Hardy–Littlewood–Pólya power law
+`lp_hlp_real`.  Because `iteratedCovGrad` is the *straight* covariant iterate (`∇^{i+2}u =
+covGrad (covGrad (∇^i u))` by `iteratedCovGrad_succ = rfl`), there is **no curvature commutator** to
+absorb: setting `v := ∇^i u` the step is the pure second-order interpolation `‖∇v‖_{q₁}² ≤
+K·‖v‖_{q₀}·‖∇²v‖_{q₂}` at `q_m = 2k/(i+m)`.
+
+The proof is glue over two posited deep analytic inputs — the second-order covariant `L^p`
+interpolation step on a single tensor, finite (`secondOrderInterp_lpFiberJet_fin`) and `L^∞`-lower-
+factor (`secondOrderInterp_lpFiberJet_sup`) — composed with: the honest-jet reading of the ladder
+(`c_i = ‖∇^i u‖_{L^{2k/i}}` for `i ≥ 1`, the `L²`-endpoint via `tensorL2Norm_sq_toFun_eq_integral_
+riemannianFiberNormSq`), the `iteratedCovGrad_succ` identification `covGrad(∇^i u) = ∇^{i+1}u`, the
+`L^∞`-endpoint comparison `c_0 = Λ₀√(vol M)` against the sup bound, and the volume/finite/sup constant
+absorption.  Mathlib carries only the *first-order Sobolev embedding* `eLpNorm_le_eLpNorm_fderiv`, not
+this iterated-jet `L^p` interpolation; consumers therefore transitively depend on the `sorryAx` of the
+two posited steps.
 
 **Non-vacuity.**  `K` is quantified before `(u, Λ₀, i)`; the conclusion is the consecutive-jet square
 bound on the *intrinsically defined* ladder `lpFiberJetLadder` (its order-`i` value genuinely reads
 the `i`-th covariant jet of `u`), not a free sequence, so no degenerate witness is asserted (a tensor
-with a nonvanishing intermediate jet rejects the `K = 0` reading by positivity of `c_i`).  Its body is
-`sorry`: the genuine closed-manifold covariant `L^p` interpolation content; consumers transitively
-depend on its `sorryAx`. -/
+with a nonvanishing intermediate jet rejects the `K = 0` reading by positivity of `c_i`). -/
 private theorem lpFiberJet_logConvex_iteratedCovGrad
-    (g : SmoothRiemannianMetric I M) (s k : ℕ) (_hk : 1 ≤ k) :
+    (g : SmoothRiemannianMetric I M) (s k : ℕ) (hk : 1 ≤ k) :
     ∃ K : ℝ, 1 ≤ K ∧
-      ∀ (u : Integral.L2.SmoothCcTensor g 0 s) (Λ₀ : ℝ),
+      ∀ (u : Integral.L2.SmoothCcTensor g 0 s) (Λ₀ : ℝ), 0 ≤ Λ₀ →
+        (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 s x (u.toSection x) ≤ Λ₀ ^ 2) →
         ∀ i : ℕ,
           (lpFiberJetLadder (I := I) (M := M) g s k u Λ₀ (i + 1)) ^ 2 ≤
             K * lpFiberJetLadder (I := I) (M := M) g s k u Λ₀ i *
-              lpFiberJetLadder (I := I) (M := M) g s k u Λ₀ (i + 2) :=
-  sorry
+              lpFiberJetLadder (I := I) (M := M) g s k u Λ₀ (i + 2) := by
+  classical
+  obtain ⟨Kf, hKf1, hfin⟩ := secondOrderInterp_lpFiberJet_fin (I := I) (M := M) g k hk
+  obtain ⟨Ks, hKs1, hsupc⟩ := secondOrderInterp_lpFiberJet_sup (I := I) (M := M) g k hk
+  have hk0 : (k : ℕ) ≠ 0 := by omega
+  have hkR : (k : ℝ) ≠ 0 := by exact_mod_cast hk0
+  have hkRpos : (0 : ℝ) < (k : ℝ) := by positivity
+  set V : ℝ := Real.sqrt ((Integral.Measure.riemannianVolumeMeasure I M g) Set.univ).toReal with hV
+  have hVnn : 0 ≤ V := Real.sqrt_nonneg _
+  -- The uniform multiplier: dominates the finite engine, the sup engine reweighted by `1/V`, and `1`.
+  refine ⟨max (max Kf 1) (Ks * (1 / V) + Ks), ?_, ?_⟩
+  · exact le_trans (le_max_right _ _) (le_max_left _ _)
+  intro u Λ₀ hΛ₀ hsup
+  set K : ℝ := max (max Kf 1) (Ks * (1 / V) + Ks) with hKdef
+  have hKf_le : Kf ≤ K := le_trans (le_max_left _ _) (le_max_left _ _)
+  have hKsV_le : Ks * (1 / V) + Ks ≤ K := le_max_right _ _
+  -- The honest mixed-`L^p` fibre jet at order `i` (the interior/`L²`-endpoint reading of the ladder).
+  set J : ℕ → ℝ := fun i =>
+    (∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (s + i) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s i u).toSection x)) ^ ((k : ℝ) / i)
+        ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((i : ℝ) / (2 * k)) with hJdef
+  have hJnn : ∀ i, 0 ≤ J i := by
+    intro i; rw [hJdef]
+    exact Real.rpow_nonneg (integral_nonneg (fun x =>
+      Real.rpow_nonneg (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + i) x _) _)) _
+  -- Reading: for `i ≥ 1`, the ladder value equals the honest jet (`i = k` via the `L²` bridge).
+  have hread : ∀ i, 1 ≤ i → lpFiberJetLadder (I := I) (M := M) g s k u Λ₀ i = J i := by
+    intro i hi1
+    rcases eq_or_ne i k with hik | hik
+    · -- `i = k`: the `L²`-endpoint branch equals the honest jet via the fibre-norm bridge.
+      subst hik
+      rw [hJdef]
+      simp only [lpFiberJetLadder, if_neg (show i ≠ 0 by omega), if_true]
+      set t : ℝ := Integral.L2.tensorL2Norm (I := I) g 0 (s + i)
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s i u).toFun with ht
+      have htnn : 0 ≤ t := Integral.L2.tensorL2Norm_nonneg (I := I) (M := M) g 0 (s + i) _
+      have hbridge : (∫ x, riemannianFiberNormSq (I := I) (M := M) g 0 (s + i) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s i u).toSection x)
+          ∂(Integral.Measure.riemannianVolumeMeasure I M g)) = t ^ 2 := by
+        rw [ht, tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g (s + i)
+          (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s i u)]
+      have hii : (i : ℝ) / i = 1 := by
+        rw [div_self]; exact_mod_cast (show i ≠ 0 by omega)
+      symm
+      calc (∫ x, (riemannianFiberNormSq (I := I) (M := M) g 0 (s + i) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s i u).toSection x)) ^ ((i : ℝ) / i)
+              ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((i : ℝ) / (2 * i))
+          = (∫ x, riemannianFiberNormSq (I := I) (M := M) g 0 (s + i) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s i u).toSection x)
+              ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((1 : ℝ) / 2) := by
+              rw [hii]
+              simp only [Real.rpow_one]
+              rw [show (i : ℝ) / (2 * i) = 1 / 2 by field_simp]
+        _ = (t ^ 2) ^ ((1 : ℝ) / 2) := by rw [hbridge]
+        _ = t := by
+              rw [← Real.rpow_natCast t 2, ← Real.rpow_mul htnn]
+              norm_num
+    · -- `i ≠ k`, `i ≥ 1`: the interior branch is literally the honest jet.
+      rw [hJdef]
+      simp only [lpFiberJetLadder, if_neg (show i ≠ 0 by omega), if_neg hik]
+  -- Either the volume vanishes (the empty/degenerate manifold: every jet is `0`) or `V > 0`.
+  rcases eq_or_lt_of_le hVnn with hV0 | hVpos
+  · -- `V = 0`: the measure is null, so every honest jet and the `c_0` endpoint vanish.
+    have hmuzero : (Integral.Measure.riemannianVolumeMeasure I M g) = 0 := by
+      have hfin : (Integral.Measure.riemannianVolumeMeasure I M g) Set.univ ≠ ⊤ := by
+        haveI := Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+          (I := I) (M := M) g
+        exact (MeasureTheory.measure_ne_top _ _)
+      have htoReal0 : ((Integral.Measure.riemannianVolumeMeasure I M g) Set.univ).toReal = 0 := by
+        have hsqrt0 : Real.sqrt ((Integral.Measure.riemannianVolumeMeasure I M g) Set.univ).toReal
+            = 0 := by rw [← hV]; exact hV0.symm
+        have hle := Real.sqrt_eq_zero'.mp hsqrt0
+        exact le_antisymm hle ENNReal.toReal_nonneg
+      have huniv0 : (Integral.Measure.riemannianVolumeMeasure I M g) Set.univ = 0 := by
+        rwa [ENNReal.toReal_eq_zero_iff, or_iff_left hfin] at htoReal0
+      exact MeasureTheory.Measure.measure_univ_eq_zero.mp huniv0
+    have hJ0 : ∀ i, 1 ≤ i → J i = 0 := by
+      intro i hi
+      simp only [hJdef, hmuzero, MeasureTheory.integral_zero_measure]
+      apply Real.zero_rpow
+      have hiR : (0 : ℝ) < (i : ℝ) := by exact_mod_cast hi
+      positivity
+    intro i
+    have h1 : lpFiberJetLadder (I := I) (M := M) g s k u Λ₀ (i + 1) = 0 := by
+      rw [hread (i + 1) (by omega), hJ0 (i + 1) (by omega)]
+    have h3 : lpFiberJetLadder (I := I) (M := M) g s k u Λ₀ (i + 2) = 0 := by
+      rw [hread (i + 2) (by omega), hJ0 (i + 2) (by omega)]
+    rw [h1, h3]; ring_nf
+    positivity
+  · -- `V > 0`: the interior steps use the finite engine, the order-`0` step the `L^∞` engine.
+    have hVne : V ≠ 0 := ne_of_gt hVpos
+    intro i
+    rcases Nat.eq_zero_or_pos i with hi0 | hipos
+    · -- Order-zero step `c₁² ≤ K · c₀ · c₂` via the `L^∞` engine.
+      subst hi0
+      rw [hread 1 (by omega), hread 2 (by omega)]
+      have hc0eq : lpFiberJetLadder (I := I) (M := M) g s k u Λ₀ 0 = Λ₀ * V := by
+        rw [show lpFiberJetLadder (I := I) (M := M) g s k u Λ₀ 0
+              = Λ₀ * Real.sqrt ((Integral.Measure.riemannianVolumeMeasure I M g) Set.univ).toReal
+            from by unfold lpFiberJetLadder; rw [if_pos rfl], ← hV]
+      rw [hc0eq]
+      -- The sup engine on `u` with the fibre bound `Λ₀`.
+      have hstep := hsupc s u Λ₀ hΛ₀ hsup
+      -- Reconcile the literal `1`, `2` casts of the sup engine to `↑1`, `↑2` of `J`.
+      have e1 : (1 : ℝ) = ((1 : ℕ) : ℝ) := by norm_num
+      have e2 : (2 : ℝ) = ((2 : ℕ) : ℝ) := by norm_num
+      rw [show ((k : ℝ) / 1) = ((k : ℝ) / ((1 : ℕ) : ℝ)) by norm_num,
+          show ((1 : ℝ) / (2 * k)) = (((1 : ℕ) : ℝ) / (2 * k)) by norm_num,
+          show ((k : ℝ) / 2) = ((k : ℝ) / ((2 : ℕ) : ℝ)) by norm_num,
+          show ((2 : ℝ) / (2 * k)) = (((2 : ℕ) : ℝ) / (2 * k)) by norm_num] at hstep
+      -- The sup engine's terms are now defeq to `J 1` and `J 2`; reconcile the constant.
+      have hstep' : (J 1) ^ 2 ≤ Ks * Λ₀ * J 2 := hstep
+      refine le_trans hstep' ?_
+      have hJ2nn : 0 ≤ J 2 := hJnn 2
+      have hreconc : Ks * Λ₀ ≤ K * (Λ₀ * V) := by
+        have hKsKV : Ks ≤ K * V := by
+          have hKsdivV : Ks / V ≤ K := by
+            have hKsle : Ks ≤ Ks * (1 / V) + Ks := by
+              have : 0 ≤ Ks * (1 / V) := by positivity
+              linarith
+            have : Ks * (1 / V) ≤ K := le_trans (by linarith) hKsV_le
+            rw [div_eq_mul_one_div]; exact le_trans this (le_refl _)
+          calc Ks = (Ks / V) * V := by field_simp
+            _ ≤ K * V := mul_le_mul_of_nonneg_right hKsdivV hVnn
+        nlinarith [hKsKV, hΛ₀, mul_nonneg (le_trans zero_le_one hKs1) hΛ₀]
+      exact mul_le_mul_of_nonneg_right hreconc hJ2nn
+    · -- Interior step `c_{i+1}² ≤ K · c_i · c_{i+2}` via the finite engine, `i ≥ 1`.
+      rw [hread (i + 1) (by omega), hread i hipos, hread (i + 2) (by omega)]
+      have hstep := hfin (s + i) (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s i u) i hipos
+      -- Reconcile the `↑i + 1`, `↑i + 2` casts of the finite engine to `↑(i+1)`, `↑(i+2)` of `J`.
+      have e1 : ((i : ℝ) + 1) = ((i + 1 : ℕ) : ℝ) := by push_cast; ring
+      have e2 : ((i : ℝ) + 2) = ((i + 2 : ℕ) : ℝ) := by push_cast; ring
+      rw [e1, e2] at hstep
+      -- The finite engine's terms are now defeq to `J (i+1)`, `J i`, `J (i+2)` (the tensors agree by
+      -- `iteratedCovGrad_succ = rfl`); chain through `Kf ≤ K`.
+      refine le_trans hstep ?_
+      have hJinn : 0 ≤ J i := hJnn i
+      have hJi2nn : 0 ≤ J (i + 2) := hJnn (i + 2)
+      have hbase : Kf * J i * J (i + 2) ≤ K * J i * J (i + 2) := by
+        apply mul_le_mul_of_nonneg_right _ hJi2nn
+        apply mul_le_mul_of_nonneg_right hKf_le hJinn
+      exact le_trans (le_of_eq (by rfl)) hbase
 
 /-- **(POSIT — the Lᵖ-fibre-norm Gagliardo–Nirenberg interpolation for iterated covariant
 gradients; Hamilton 12.5.)**
@@ -422,7 +660,7 @@ theorem exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le
         Real.rpow_nonneg (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + i) x _) _)) _
   -- Log-convexity for this ladder (from the posited child).
   have hc_lc : ∀ i, (c (i + 1)) ^ 2 ≤ K * c i * c (i + 2) := by
-    intro i; rw [hc_def]; exact hlc u Λ₀ i
+    intro i; rw [hc_def]; exact hlc u Λ₀ hΛ₀ hsup i
   -- The HLP power law on the ladder.
   have hpow : (c j) ^ k ≤ K ^ (k ^ 3) * (c 0) ^ (k - j) * (c k) ^ j :=
     lp_hlp_real c hc_nn K hK1 hc_lc j k hj0 hjk
