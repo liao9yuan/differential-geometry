@@ -1017,6 +1017,175 @@ theorem frame_sum_nablaTensor0SCurv_baseSlot_eval
       (smoothOrthoFrame_smooth (I := I) g x i)) Z A hA x u)]
   rw [Finset.sum_neg_distrib, Finset.sum_comm]
 
+/-- **The once-contracted second Bianchi identity (the first-slot divergence of the Riemann tensor,
+paired form).** For the smooth `g_x`-orthonormal frame `B_i := smoothOrthoFrame g x i` and smooth
+tangent fields `Y, W, U`, the orthonormal-frame trace of the differentiated tangent curvature
+`(∇_{B_i} R^{TM})(B_i, Y) W` over the **diagonal** derivative-and-first-antisymmetric-slot pair
+`(B_i, B_i)`, metric-paired against `U`, equals the differentiated-Ricci difference
+$$
+  \sum_i g_x\bigl((\nabla_{B_i} R)(B_i, Y) W,\, U\bigr)
+    = (\nabla_U \mathrm{Ric})(Y, W) - (\nabla_W \mathrm{Ric})(U, Y) .
+$$
+
+This is the divergence-form contraction `div R = δ R` of the second Bianchi identity, one contraction
+shallower than `contracted_second_bianchi` (`div Ric = ½ d scal`): tracing the second Bianchi identity
+over the derivation index against the first antisymmetric slot collapses the differentiated full Riemann
+curvature onto the differentiated Ricci tensor.
+
+**Proof (the single contraction of the paired second Bianchi).** The diagonal trace `Φ(Y, W, U) :=
+∑_i g_x((∇_{B_i} R)(B_i, Y) W, U)` is first re-expressed, by the value-level differentiated-curvature
+symmetries (`nablaCurvSec_metric_skew45`, `nablaCurvSec_inner_pair_symm` — no derivative is taken), as
+the conjugate trace `S(U, W, Y) := ∑_i g_x((∇_{B_i} R)(U, W) Y, B_i)` with the frame in the derivation
+and pairing slots. For that trace the paired second Bianchi `nablaCurvSec_bianchi_paired` (cyclic in the
+derivation and two antisymmetric slots) applied to `(B_i, U, W)` acting on `Y`, paired against `B_i`,
+summed over `i`, has its three cyclic terms collapse through the metric antisymmetry
+(`nablaCurvSec_metric_skew45`), the pair symmetry (`nablaCurvSec_inner_pair_symm`), and the frame-trace
+Ricci bridge `nablaRicci_eq_frame_trace_nablaCurvSec` (`∑_i g_x((∇_X R)(B_i, V) Z, B_i) = ∇_X Ric(V, Z)`)
+into the two differentiated-Ricci traces, giving `S(U, W, Y) = ∇_U Ric(Y, W) − ∇_W Ric(U, Y)`. -/
+theorem nablaCurvSec_diag_frame_trace_eq_nablaRicci_sub
+    (g : SmoothRiemannianMetric I M)
+    {Y W U : Π b : M, TangentSpace I b} {x : M}
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y))
+    (hW : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% W))
+    (hU : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% U)) :
+    ∑ i : Fin (Module.finrank ℝ E),
+        g.inner x (nablaCurvSec (LeviCivita (I := I) g)
+          (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i) Y W x) (U x) =
+      nablaRicci (I := I) g U Y W x - nablaRicci (I := I) g W U Y x := by
+  classical
+  set cov := LeviCivita (I := I) g with hcov_def
+  set B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b :=
+    fun i => smoothOrthoFrame (I := I) g x i with hB_def
+  have hBsm : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i)) :=
+    fun i => smoothOrthoFrame_smooth (I := I) g x i
+  -- Step 1 (value-level): rewrite the diagonal trace `∑_i g((∇_{B_i}R)(B_i,Y)W, U)` as the conjugate
+  -- trace `∑_i g((∇_{B_i}R)(U,W)Y, B_i)` using only the metric antisymmetry and the pair symmetry.
+  have hconj : ∀ i,
+      g.inner x (nablaCurvSec cov (B i) (B i) Y W x) (U x) =
+        g.inner x (nablaCurvSec cov (B i) U W Y x) (B i x) := by
+    intro i
+    -- swap acted slot `W` and pairing `U`: g((∇R)(B_i,Y)W, U) = −g((∇R)(B_i,Y)U, W)
+    have hsk1 : g.inner x (nablaCurvSec cov (B i) (B i) Y W x) (U x) =
+        - g.inner x (nablaCurvSec cov (B i) (B i) Y U x) (W x) := by
+      have h := nablaCurvSec_metric_skew45 (I := I) g (X := B i) (Y := B i) (Z := Y) (W := W)
+        (U := U) (x := x) (hBsm i) (hBsm i) hY hW hU
+      linarith [h]
+    -- pair symmetry: g((∇R)(B_i,Y)U, W) = g((∇R)(U,W)B_i, Y)
+    have hps : g.inner x (nablaCurvSec cov (B i) (B i) Y U x) (W x) =
+        g.inner x (nablaCurvSec cov (B i) U W (B i) x) (Y x) := by
+      exact nablaCurvSec_inner_pair_symm (I := I) g (X := B i) (Y := B i) (Z := Y) (W := U)
+        (U := W) (hBsm i) (hBsm i) hY hU hW
+    -- swap acted slot `B_i` and pairing `Y`: g((∇R)(U,W)B_i, Y) = −g((∇R)(U,W)Y, B_i)
+    have hsk2 : g.inner x (nablaCurvSec cov (B i) U W (B i) x) (Y x) =
+        - g.inner x (nablaCurvSec cov (B i) U W Y x) (B i x) := by
+      have h := nablaCurvSec_metric_skew45 (I := I) g (X := B i) (Y := U) (Z := W) (W := B i)
+        (U := Y) (x := x) (hBsm i) hU hW (hBsm i) hY
+      linarith [h]
+    rw [hsk1, hps, hsk2]; ring
+  rw [Finset.sum_congr rfl (fun i _ => hconj i)]
+  -- Step 2 (the contraction): the conjugate trace `S(U,W,Y) := ∑_i g((∇_{B_i}R)(U,W)Y, B_i)`
+  -- collapses via the paired second Bianchi `(B_i, U, W)` acting on `Y`, paired against `B_i`.
+  have hbi : ∀ i,
+      g.inner x (nablaCurvSec cov (B i) U W Y x) (B i x)
+        + g.inner x (nablaCurvSec cov U W (B i) Y x) (B i x)
+        + g.inner x (nablaCurvSec cov W (B i) U Y x) (B i x) = 0 := by
+    intro i
+    exact nablaCurvSec_bianchi_paired (I := I) g (X := B i) (Y := U) (Z := W) (W := Y)
+      (U := B i) (x := x) (hBsm i) hU hW hY
+  -- Rearrange each summand: S_i = −(term2_i) − (term3_i).
+  have hrew : ∀ i,
+      g.inner x (nablaCurvSec cov (B i) U W Y x) (B i x) =
+        - g.inner x (nablaCurvSec cov U W (B i) Y x) (B i x)
+        - g.inner x (nablaCurvSec cov W (B i) U Y x) (B i x) := by
+    intro i; linarith [hbi i]
+  rw [Finset.sum_congr rfl (fun i _ => hrew i)]
+  rw [Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+  -- term3 trace: ∑_i g((∇_W R)(B_i, U) Y, B_i) = ∇_W Ric(U, Y).
+  have hterm3 : ∑ i : Fin (Module.finrank ℝ E),
+      g.inner x (nablaCurvSec cov W (B i) U Y x) (B i x) =
+      nablaRicci (I := I) g W U Y x := by
+    rw [nablaRicci_eq_frame_trace_nablaCurvSec (I := I) g hW hU hY]
+  -- term2 trace: ∑_i g((∇_U R)(W, B_i) Y, B_i) = −∇_U Ric(Y, W). Reorganize the inner curvature to
+  -- the bridge form by pair symmetry then the first-slot antisymmetry of `∇R`.
+  have hterm2 : ∑ i : Fin (Module.finrank ℝ E),
+      g.inner x (nablaCurvSec cov U W (B i) Y x) (B i x) =
+      - nablaRicci (I := I) g U Y W x := by
+    have hconv : ∀ i,
+        g.inner x (nablaCurvSec cov U W (B i) Y x) (B i x) =
+          - g.inner x (nablaCurvSec cov U (B i) Y W x) (B i x) := by
+      intro i
+      -- pair symmetry: g((∇_U R)(W, B_i) Y, B_i) = g((∇_U R)(Y, B_i) W, B_i)
+      have hps : g.inner x (nablaCurvSec cov U W (B i) Y x) (B i x) =
+          g.inner x (nablaCurvSec cov U Y (B i) W x) (B i x) :=
+        nablaCurvSec_inner_pair_symm (I := I) g (X := U) (Y := W) (Z := B i) (W := Y)
+          (U := B i) hU hW (hBsm i) hY (hBsm i)
+      -- swap antisymmetric slots: g((∇_U R)(Y, B_i) W, B_i) = −g((∇_U R)(B_i, Y) W, B_i)
+      rw [hps, nablaCurvSec_swap23 (I := I) g (X := U) (Y := Y) (Z := B i) (W := W) (x := x)
+        hY (hBsm i) hW, map_neg, ContinuousLinearMap.neg_apply]
+    rw [Finset.sum_congr rfl (fun i _ => hconv i), Finset.sum_neg_distrib,
+      nablaRicci_eq_frame_trace_nablaCurvSec (I := I) g hU hY hW]
+  rw [hterm2, hterm3]
+  ring
+
+/-- **The diagonal divergence of the `(0, s)`-tensor Riemann curvature, slot-wise (the divergence of
+curvature `div R^{(s)}`).** Tracing the differentiated `(0, s)`-tensor curvature `nablaTensor0SCurv g s`
+over the orthonormal frame `B_i := smoothOrthoFrame g x i` placed simultaneously in the **derivation**
+direction and the **first antisymmetric** curvature slot — the genuine *diagonal* trace, in contrast to
+the fixed-derivation-direction trace `frame_sum_nablaTensor0SCurv_baseSlot_eval` — acts slot-wise as the
+negated slot sum of the *frame-summed differentiated base-tangent curvature* `∑_i (∇_{B_i} R)(B_i, Y)(·)`,
+the first-slot divergence of the tangent Riemann curvature:
+```
+∑_i toModel(nablaTensor0SCurv g s B_i B_i Y A x)(u)
+  = − ∑_k toModel(A_x)(Function.update u k (∑_i nablaBaseSlotCurv g B_i B_i Y x (u k))).
+```
+
+This is the tensor-level lift of the divergence-of-curvature identity: each covariant slot of the diagonal
+divergence is contracted into the frame-summed differentiated tangent curvature `∑_i (∇_{B_i} R)(B_i, Y) v`,
+whose metric pairing collapses, through the once-contracted second Bianchi identity
+`nablaCurvSec_diag_frame_trace_eq_nablaRicci_sub` (`∑_i g((∇_{B_i} R)(B_i, Y) v, U) = ∇_U Ric(Y, v) −
+∇_v Ric(U, Y)`), onto the differentiated Ricci content. It is `nablaTensorCov_baseSlot_eval` (the per-frame
+transfer) summed over the diagonal frame, with the finite slot/frame sums interchanged
+(`Finset.sum_comm`) and the inner frame sum pulled through the multilinear update slot
+(`MultilinearMap.map_update_sum`). It is the diagonal companion to
+`frame_sum_nablaTensor0SCurv_baseSlot_eval`, the shape the rank-`0` Bochner tension-field
+covariant-divergence nullity consumes. -/
+theorem frame_sum_nablaTensor0SCurv_diag_baseSlot_eval
+    (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (A : Π b : M, Tensor0SSpace s I b) (hA : TensorSmooth (I := I) s A)
+    (x : M) (u : Fin s → TangentSpace I x) :
+    ∑ i : Fin (Module.finrank ℝ E),
+        Tensor0SSpace.toModel
+          (nablaTensor0SCurv (I := I) g s
+            (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+              (smoothOrthoFrame_smooth (I := I) g x i))
+            (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+              (smoothOrthoFrame_smooth (I := I) g x i)) Y A x) u =
+      - ∑ k : Fin s,
+          Tensor0SSpace.toModel (A x)
+            (Function.update u k
+              (∑ i : Fin (Module.finrank ℝ E),
+                nablaBaseSlotCurv (I := I) g
+                  (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+                    (smoothOrthoFrame_smooth (I := I) g x i))
+                  (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+                    (smoothOrthoFrame_smooth (I := I) g x i)) Y x (u k))) := by
+  classical
+  rw [Finset.sum_congr rfl (fun i _ => nablaTensorCov_baseSlot_eval (I := I) g s
+    (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+      (smoothOrthoFrame_smooth (I := I) g x i))
+    (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+      (smoothOrthoFrame_smooth (I := I) g x i)) Y A hA x u)]
+  rw [Finset.sum_neg_distrib, Finset.sum_comm]
+  congr 1
+  refine Finset.sum_congr rfl (fun k _ => ?_)
+  exact ((Tensor0SSpace.toModel (A x)).toMultilinearMap.map_update_sum Finset.univ k
+    (fun i => nablaBaseSlotCurv (I := I) g
+      (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+        (smoothOrthoFrame_smooth (I := I) g x i))
+      (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+        (smoothOrthoFrame_smooth (I := I) g x i)) Y x (u k)) u).symm
+
 end TensorTransfer
 
 end Connection
