@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatureOperatorField
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizedCovGradJetGeneralOrder
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.SharpOrderRealizedJetEmbedding
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SupercriticalProductEstimate
 import DifferentialGeometry.Geometry.Operator.MetricSharpSmooth
 
@@ -338,6 +339,57 @@ theorem ccTensorBilinFibreEndo_contMDiff (g₀ : SmoothRiemannianMetric I M)
 /-! ## The supercritical `toHs` fibre bound -/
 
 set_option linter.unusedSectionVars false in
+/-- **The `T`-uniform cross-valence raise+slot operator bound (the genuine new analytic content).**
+
+For a closed Riemannian manifold `(M, g₀)` there is a single nonnegative constant `Cop`, uniform over
+`M` AND over `T`, such that the leading-slot insertion endomorphism `ccTensorBilinSlotEndo g₀ T x` of
+the raised symmetric realized perturbation form has its `(2, 2)`-fibre norm bounded by `Cop` times the
+`(0, 2)`-fibre norm of the realized form's `(0, 2)`-packing `(realizeSymmCcTensor g₀ T).toSection x`:
+
+  `rfns g₀ 2 2 x (ofCLM (ccTensorBilinSlotEndo g₀ T x)) ≤
+      Cop · rfns g₀ 0 2 x ((realizeSymmCcTensor g₀ T).toSection x)`.
+
+This is the precise reusable inverse-Gram raise primitive carrying the genuine `T`-uniform content of
+the keystone field.  The slot-insertion endomorphism `ccTensorBilinSlotEndo g₀ T x =
+slotInsertEndoFib 2 0 x (ccTensorBilinRaisedEndo g₀ T x)` is a *fixed* (`T`-independent)
+`g₀⁻¹`-raise-then-slot-insert linear operation applied to the `(0, 2)`-fibre value
+`(realizeSymmCcTensor g₀ T).toSection x` (`ccTensorBilinRaisedEndo g₀ T x` is the metric raise of the
+fibre bilinear reading of that value, `inner_ccTensorBilinRaisedEndo` /
+`realizeSymmCcTensor_ccTensorBilin_apply`).  Packaging this `g₀⁻¹`-raise-then-slot-insert operation as
+a *single* `T`-independent smooth Hom-bundle field `Φ : (x : M) → TensorRSSpace 0 2 I x →L
+TensorRSSpace 2 2 I x` (raise `(0, 2)` → `(1, 1)` endo, then `slotInsertEndoFib 2 0` →
+`ofCLM` → `(2, 2)`), the bound is the uniform-over-`M` `g₀`-fibre operator-norm contraction
+`exists_uniform_riemannianFiberNormSq_homTensorRS_section_clm_le` of that smooth field, with `Cop`
+the squared uniform `g₀`-fibre operator-norm sup of `Φ`; the identity `Φ x ((realizeSymmCcTensor g₀ T).
+toSection x) = ofCLM (ccTensorBilinSlotEndo g₀ T x)` is the `T`-instance of the field's definition.
+
+**The genuinely-missing on-disk primitive.**  No
+`ricEndoRaisedFib`/`metricSharp`/`inverseMetricSharpFib`/slot-insertion uniform operator-norm lemma is
+on disk yet, and the `T`-independent raise+slot Hom-field `Φ` (whose smoothness over an arbitrary smooth
+`(0, 2)`-section is the obstruction — `ccTensorBilin_contMDiff` is stated for `SmoothCcTensor`, not for
+an arbitrary `ContMDiffSection`) is not constructed; only the bilinear-evaluated
+`exists_uniform_cometricBilin_bound` and the per-`T` slot field smoothness
+`ccTensorBilinSlotEndo_contMDiff` exist.  This bound is therefore isolated here as the single posited
+consumer-minimal child of the keystone field; the supercritical-`toHs` tail it composes with is fully
+on disk (`riemannianFiberNormSq_le_sq_iteratedCovGradJetSum` ∘ `exists_realizedJetSum_le_toHs_sharpOrder`).
+
+**Non-vacuity.**  A degenerate `Cop < 0` is rejected: the conclusion at any `T`, `x` with
+`rfns g₀ 0 2 x ((realizeSymmCcTensor g₀ T).toSection x) > 0` and `ofCLM (ccTensorBilinSlotEndo g₀ T x)
+≠ 0` forces `Cop > 0`; the smallest valid value is the genuine squared `g₀`-fibre operator-norm sup of
+the raise+slot field `Φ`, positive whenever `Φ` is nonzero (e.g. on `g₀` itself the raise is the
+identity endomorphism). -/
+theorem exists_riemannianFiberNormSq_ofCLM_ccTensorBilinSlotEndo_le_realizeSection
+    (g₀ : SmoothRiemannianMetric I M) :
+    ∃ Cop : ℝ, 0 ≤ Cop ∧
+      ∀ (T : Integral.L2.SmoothCcTensor g₀ 0 2) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+            (show TensorRSSpace 2 2 I x from
+              TensorRSSpace.ofCLM (ccTensorBilinSlotEndo (I := I) g₀ T x)) ≤
+          Cop * riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+            ((realizeSymmCcTensor (I := I) g₀ T).toSection x) :=
+  sorry
+
+set_option linter.unusedSectionVars false in
 /-- **The uniform `toHs` fibre bound on the leading-slot insertion field (the realized-perturbation
 inverse-Gram raise bound composed with the supercritical Sobolev embedding).**
 
@@ -382,8 +434,45 @@ theorem exists_riemannianFiberNormSq_ccTensorBilinSlotEndo_le_toHs_sq
         riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
             (show TensorRSSpace 2 2 I x from
               TensorRSSpace.ofCLM (ccTensorBilinSlotEndo (I := I) g₀ T x)) ≤
-          (C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) q T‖) ^ 2 :=
-  sorry
+          (C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) q T‖) ^ 2 := by
+  -- Step (1): the `T`-uniform cross-valence raise+slot operator bound (the genuine new content,
+  -- isolated as the single posited consumer-minimal child of this keystone field).
+  obtain ⟨Cop, hCop_nn, hCop⟩ :=
+    exists_riemannianFiberNormSq_ofCLM_ccTensorBilinSlotEndo_le_realizeSection
+      (I := I) (M := M) g₀
+  -- Step (2): the supercritical-`toHs` tail (fully on disk).
+  obtain ⟨Cj, hCj_pos, hCj⟩ :=
+    exists_realizedJetSum_le_toHs_sharpOrder (I := I) g₀ q hq
+  -- Assemble `C := Cop.sqrt · Cj`.
+  refine ⟨Real.sqrt Cop * Cj, mul_nonneg (Real.sqrt_nonneg _) hCj_pos.le, fun T x => ?_⟩
+  set N : ℝ := ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) q T‖ with hN
+  -- The realized-section fibre norm is bounded by `(Cj · N)²` (step 2 chain).
+  have hsection_le :
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+          ((realizeSymmCcTensor (I := I) g₀ T).toSection x) ≤ (Cj * N) ^ 2 := by
+    have h1 := riemannianFiberNormSq_le_sq_iteratedCovGradJetSum (I := I) (M := M) g₀
+      (realizeSymmCcTensor (I := I) g₀ T) x
+    have h2 := hCj T x
+    have hjet_nn : 0 ≤ iteratedCovGradJetSum (I := I) g₀
+        (realizeSymmCcTensor (I := I) g₀ T) x :=
+      iteratedCovGradJetSum_nonneg (I := I) g₀ (realizeSymmCcTensor (I := I) g₀ T) x
+    have hCjN_nn : 0 ≤ Cj * N := mul_nonneg hCj_pos.le (norm_nonneg _)
+    refine h1.trans ?_
+    exact pow_le_pow_left₀ hjet_nn h2 2
+  -- Combine step (1) `rfns(slotEndo) ≤ Cop · rfns(section)` with step (2).
+  have hslot_le := hCop T x
+  have hsec_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+      ((realizeSymmCcTensor (I := I) g₀ T).toSection x) :=
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 2 x _
+  calc riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+          (show TensorRSSpace 2 2 I x from
+            TensorRSSpace.ofCLM (ccTensorBilinSlotEndo (I := I) g₀ T x))
+      ≤ Cop * riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+            ((realizeSymmCcTensor (I := I) g₀ T).toSection x) := hslot_le
+    _ ≤ Cop * (Cj * N) ^ 2 := mul_le_mul_of_nonneg_left hsection_le hCop_nn
+    _ = (Real.sqrt Cop * Cj * N) ^ 2 := by
+        have hsq : Real.sqrt Cop ^ 2 = Cop := Real.sq_sqrt hCop_nn
+        linear_combination (-(Cj * N) ^ 2) * hsq
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
