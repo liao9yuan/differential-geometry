@@ -8,6 +8,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradSlotPermutat
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Slot0SliceFiberNormDomination
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradCovDerivCommutation
 import DifferentialGeometry.Geometry.Connection.TensorNabla.LiftedSectionCovariantRealizeBridge
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.BareTensorProductCovariantLeibniz
 
 /-! # The cross-correction parallel two-section cometric contraction `h ⌟ D`
 
@@ -1332,6 +1333,87 @@ with the gradient direction a spectator passenger on the differentiated factor; 
 re-posited in that form only when a consumer materialises (none exists today: the deleted jet grid
 had no consumers library-wide).  The slot bookkeeping (`crossCorrCovGradPerm` and its value lemmas)
 is retained for that future form. -/
+
+/-! ### The two-section parallel covariant Leibniz (operator-reduced TRUE form)
+
+The cross-correction `g₀`-single contraction `crossCorrParallelContraction g₀ S T` factors as the
+operator-field action `appCcRS (crossCorrCometricOp g₀ a b) (crossCorrProdSection g₀ S T)` of the
+**fixed** `∇₀`-parallel cometric double-trace field after the frame-free product section
+(`crossCorrParallelContraction_eq_appCcRS`).  The operator-field B-rule `covGrad_appCcRS_eq` therefore
+splits its covariant gradient into the differentiated-field action (which **vanishes** because the
+cometric is `∇₀`-parallel, `crossCorrCometricOp_covGrad_eq_zero`) plus the **slot-extended** field
+acting on the gradient of the frame-free product section:
+
+```
+∇₀(h ⌟ D) = appCcRS (slotExtend (crossCorrCometricOp g₀ a b)) (∇₀ (crossCorrProdSection g₀ S T)).
+```
+
+This is the exact two-section parallel covariant Leibniz of the contraction, the bilinear lift of the
+single-section trace fact `ricciModelTrace42Op_covGrad`.  Crucially, `slotExtend` inserts the new
+gradient direction as a **leading passenger** read first and passed UNCONTRACTED
+(`slotExtendFib_apply_eval`), while the cometric pair `crossCorrCometricOp` continues to trace the two
+ORIGINAL product slots (`modelDoubleTrace` traces the two LEADING slots, which `crossCorrPerm` placed
+at the slots-to-be-contracted) — so the gradient direction is a **free spectator** over the original
+traced slots.
+
+This is the TRUE form named in the removal note above; it is NOT (and does not reduce to) the
+Lean-refuted shifted-rank shape `crossCorrParallelContraction (a+1) b (covGrad S) T + …`, whose first
+arm feeds `covGrad S` (gradient slot leading) into the contraction at rank `a+1`, where
+`crossCorrModelFun L (a+1) b` raises that gradient slot through the cometric `L = g₀⁻¹` and traces it —
+contracting the gradient direction OUT, not leaving it a spectator.  No slot reindexing of the output
+can reconcile the two (a slot summed through `g₀⁻¹` is rank-reduced away and cannot become a spectator
+slot), so the `RfnsBilinearProduct.covGrad_prod` structure field — which demands exactly that
+shifted-rank shape — is NOT realizable for this contraction; the Leibniz lands here as a first-class
+standalone theorem (the diagonal `rfns` jet grid, when a consumer materialises, derives directly from
+this operator-reduced form via `slotExtend`'s `rfns`-isometry, not through the structure). -/
+theorem crossCorrParallelContraction_covGrad (g₀ : SmoothRiemannianMetric I M) {a b : ℕ}
+    (S : SmoothCcTensor g₀ 0 (2 + a)) (T : SmoothCcTensor g₀ 0 (3 + b)) :
+    covGrad (I := I) (M := M) g₀ 0 (3 + a + b)
+        (crossCorrParallelContraction (I := I) g₀ S T) =
+      appCcRS (I := I) (M := M) g₀ 0 (((3 + b) + (2 + a)) + 1) ((3 + a + b) + 1)
+        (slotExtend (I := I) (M := M) g₀ ((3 + b) + (2 + a)) (3 + a + b)
+          (crossCorrCometricOp (I := I) g₀ a b))
+        (covGrad (I := I) (M := M) g₀ 0 ((3 + b) + (2 + a))
+          (crossCorrProdSection (I := I) g₀ S T)) := by
+  rw [crossCorrParallelContraction_eq_appCcRS (I := I) g₀ S T,
+    covGrad_appCcRS_eq (I := I) (M := M) g₀ 0 ((3 + b) + (2 + a)) (3 + a + b)
+      (crossCorrCometricOp (I := I) g₀ a b) (crossCorrProdSection (I := I) g₀ S T),
+    crossCorrCometricOp_covGrad_eq_zero (I := I) g₀ a b,
+    appCcRS_zero_left (I := I) (M := M) g₀ 0 ((3 + b) + (2 + a)) ((3 + a + b) + 1)
+      (crossCorrProdSection (I := I) g₀ S T), zero_add]
+
+set_option linter.unusedSectionVars false in
+/-- **The frame-free product section is a slot-permuted bare tensor product** of the unit fibres of `T`,
+`S`.  `crossCorrProdSection g₀ S T = permuteCcTensor (crossCorrPerm a b) (unitModelProdSection g₀ T S)`:
+both are the `(0, (3 + b) + (2 + a))`-section whose unit fibre is the slot-permuted model product
+`domDomCongr (crossCorrPerm a b) (modelProduct (ccUnit T) (ccUnit S))` (`crossCorrProdSection_unitModel`
+for the left, `permuteCcTensor_unitModel` ∘ `unitModelProdSection_unitModel` for the right, with
+`ccUnitModel = unitModel` definitionally).  This exposes the product section — whose covariant gradient
+the operator-reduced Leibniz `crossCorrParallelContraction_covGrad` carries — as the bare two-section
+tensor product (`unitModelProdSection`, whose own two-section covariant Leibniz is
+`unitModelProdSection_covGrad_unitModel_pub`), pre-composed with the constant slot reindexing
+`crossCorrPerm` (a parallel fibre isometry). -/
+theorem crossCorrProdSection_eq_permute_unitModelProdSection (g₀ : SmoothRiemannianMetric I M)
+    {a b : ℕ} (S : SmoothCcTensor g₀ 0 (2 + a)) (T : SmoothCcTensor g₀ 0 (3 + b)) :
+    crossCorrProdSection (I := I) g₀ S T =
+      permuteCcTensor g₀ (crossCorrPerm a b)
+        (unitModelProdSection (I := I) g₀ T S) := by
+  classical
+  apply Integral.L2.SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply tensor0s_ext_unitZero (I := I) (M := M) (s := (3 + b) + (2 + a))
+  apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+  beta_reduce
+  rw [crossCorrProdSection_unitModel (I := I) g₀ S T x]
+  rw [show Tensor0SBundle.Tensor0SSpace.toModel
+        ((permuteCcTensor g₀ (crossCorrPerm a b) (unitModelProdSection (I := I) g₀ T S)).toSection x
+          (Integral.Connection.unitZeroSec (I := I) (M := M) x))
+      = unitModel (I := I) (M := M) g₀ ((3 + b) + (2 + a))
+          (permuteCcTensor g₀ (crossCorrPerm a b) (unitModelProdSection (I := I) g₀ T S)) x from rfl]
+  rw [permuteCcTensor_unitModel (I := I) g₀ (crossCorrPerm a b) (unitModelProdSection (I := I) g₀ T S) x,
+    unitModelProdSection_unitModel (I := I) g₀ T S x]
+  rfl
 
 /-- **An all-ranks `g₀(x)`-orthonormal frame Parseval witness.**  At `x` there is a single tangent
 frame `e : Fin n → T_xM` (`n = finrank ℝ E`) representing the intrinsic `(0, s)` fibre norm as the
