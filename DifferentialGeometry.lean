@@ -662,6 +662,7 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.Rellich
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SmoothCcDense
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SupercriticalSobolevAlgebra
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SobolevProductBilinear
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SobolevProductContDiffOn
 import DifferentialGeometry.Analysis.Sobolev.Tools.ArzelaAscoli
 import DifferentialGeometry.Analysis.Sobolev.Tools.Convolution
 import DifferentialGeometry.Analysis.Sobolev.Tools.DiffQuotFKNonSmooth
