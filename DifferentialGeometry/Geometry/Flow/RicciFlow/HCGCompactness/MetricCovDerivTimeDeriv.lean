@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Sections
 import DifferentialGeometry.Bundle.PartialMfderiv.Basic
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Connection.Tangent
+import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.Tensor0S
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -301,6 +302,138 @@ theorem covDerivOfField_eval_contMDiffAt
       rw [hfun]
       exact h1.sub h2
 
+/-- **Spatial smoothness of the tower scalars** (fixed-field form): if every
+slot evaluation of the `(0,2)` field `A0` is `C^∞` at `x`, then so is every
+slot evaluation of every tower level `covDerivOfField gRef A0 p`.  The same
+induction as `covDerivOfField_eval_contMDiffAt`, with the spatial engine
+`extDerivFun_apply_contMDiffAt`. -/
+theorem covDerivOfField_eval_smoothAt
+    (gRef : SmoothRiemannianMetric I M)
+    (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    {x : M}
+    (hbase : ∀ V : Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _),
+      ContMDiffAt I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+        (fun y : M => A0 y (fun a : Fin 2 => V a y)) x) :
+    ∀ p : ℕ, ∀ V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _),
+      ContMDiffAt I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+        (fun y : M =>
+          (covDerivOfField (I := I) gRef A0 p) y
+            (fun a : Fin (p + 2) => V a y)) x := by
+  intro p
+  induction p with
+  | zero => intro V; exact hbase V
+  | succ p ih =>
+      intro V
+      have hcov : CovariantDerivative.ContMDiffCovariantDerivative
+          (leviCivitaConnectionOfMetric (I := I) gRef) (∞ : WithTop ℕ∞) :=
+        ⟨leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+          (I := I) gRef isOpen_univ⟩
+      have hWsec : ∀ a : Fin (p + 2),
+          ContMDiff I (I.prod 𝓘(Real, E)) (∞ : WithTop ℕ∞)
+            (fun y : M =>
+              (⟨y, ((leviCivitaConnectionOfMetric (I := I) gRef)
+                  (fun q : M => V a.succ q) y) ((V 0) y)⟩ :
+                Bundle.TotalSpace E (TangentSpace I : M → Type _))) := by
+        intro a
+        simpa [TensorLieDeriv.covariantDeriv_vectorField] using
+          TensorLieDeriv.covariantDeriv_vectorField_contMDiff (I := I)
+            (leviCivitaConnectionOfMetric (I := I) gRef) hcov (V 0) (V a.succ)
+      let W : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+          (TangentSpace I : M → Type _) := fun a =>
+        ⟨fun y : M =>
+          ((leviCivitaConnectionOfMetric (I := I) gRef)
+            (fun q : M => V a.succ q) y) ((V 0) y), hWsec a⟩
+      have hdec : ∀ y : M,
+          (covDerivOfField (I := I) gRef A0 (p + 1)) y
+              (fun a : Fin (p + 3) => V a y)
+            = extDerivFun (I := I)
+                (fun z : M => (covDerivOfField (I := I) gRef A0 p) z
+                  (fun a : Fin (p + 2) => V a.succ z)) y ((V 0) y)
+              - ∑ a : Fin (p + 2),
+                  (covDerivOfField (I := I) gRef A0 p) y
+                    (fun b : Fin (p + 2) =>
+                      (Function.update (fun c : Fin (p + 2) => V c.succ) a (W a))
+                        b y) := by
+        intro y
+        have hv : (fun a : Fin (p + 3) => V a y)
+            = Fin.cons ((V 0) y) (fun a : Fin (p + 2) => V a.succ y) := by
+          funext b
+          refine Fin.cases ?_ ?_ b
+          · simp
+          · intro a
+            simp
+        have hupd : ∀ a : Fin (p + 2),
+            (fun b : Fin (p + 2) =>
+              (Function.update (fun c : Fin (p + 2) => V c.succ) a (W a)) b y)
+              = Function.update (fun b : Fin (p + 2) => V b.succ y) a
+                  (((leviCivitaConnectionOfMetric (I := I) gRef)
+                    (fun z : M => V a.succ z) y) ((V 0) y)) := by
+          intro a
+          funext b
+          by_cases hba : b = a
+          · subst hba
+            simp [W]
+          · simp [Function.update_of_ne hba]
+        rw [covDerivOfField_succ, metricCovDerivStep_apply, hv,
+          Tensor0SBundle.totalNabla0SFun_apply_section,
+          Tensor0SBundle.nabla0SFun_eval_smooth_slots]
+        congr 1
+        refine Finset.sum_congr rfl fun a _ => ?_
+        rw [hupd a]
+      have h1 := extDerivFun_apply_contMDiffAt I
+        (f := fun z : M => (covDerivOfField (I := I) gRef A0 p) z
+          (fun a : Fin (p + 2) => V a.succ z))
+        (x₀ := x)
+        (ih (fun a : Fin (p + 2) => V a.succ))
+        (V 0)
+      have h2 : ContMDiffAt I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+          (fun y : M =>
+            ∑ a : Fin (p + 2),
+              (covDerivOfField (I := I) gRef A0 p) y
+                (fun b : Fin (p + 2) =>
+                  (Function.update (fun c : Fin (p + 2) => V c.succ) a (W a))
+                    b y)) x :=
+        ContMDiffAt.sum fun a _ =>
+          ih (Function.update (fun c : Fin (p + 2) => V c.succ) a (W a))
+      have hfun : (fun y : M =>
+          (covDerivOfField (I := I) gRef A0 (p + 1)) y
+            (fun a : Fin (p + 3) => V a y))
+          = fun y : M =>
+              extDerivFun (I := I)
+                (fun z : M => (covDerivOfField (I := I) gRef A0 p) z
+                  (fun a : Fin (p + 2) => V a.succ z)) y ((V 0) y)
+              - ∑ a : Fin (p + 2),
+                  (covDerivOfField (I := I) gRef A0 p) y
+                    (fun b : Fin (p + 2) =>
+                      (Function.update (fun c : Fin (p + 2) => V c.succ) a (W a))
+                        b y) :=
+        funext hdec
+      rw [hfun]
+      exact h1.sub h2
+
+/-- **Spatial differentiability of every tower level** for any `(0,2)` field:
+`tensor0SField_eval_smooth_slots_contMDiffAt` supplies the level-0 base of
+`covDerivOfField_eval_smoothAt`. -/
+theorem covDerivOfField_eval_mdiffAt
+    (gRef : SmoothRiemannianMetric I M)
+    (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    (p : ℕ)
+    (V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _))
+    (x : M) :
+    MDifferentiableAt I 𝓘(Real, Real)
+      (fun y : M =>
+        (covDerivOfField (I := I) gRef A0 p) y
+          (fun a : Fin (p + 2) => V a y)) x :=
+  (covDerivOfField_eval_smoothAt (I := I) gRef A0
+    (fun W => Tensor0SBundle.tensor0SField_eval_smooth_slots_contMDiffAt
+      (I := I) A0 W x)
+    p V).mdifferentiableAt (by simp)
+
 /-! ## The flow wrapper: tower evolution from a Ricci-flow solution -/
 
 /-- The moving metric of a flow solution as a `(0,2)` tensor-field family. -/
@@ -456,6 +589,39 @@ theorem solnTowerSwap_of_smooth
     D.carrier D.regular D.regular_subset
     (fun ht => D.regular_mem_nhds ht) N
     (solnMetricDeriv (I := I) S hS) hSmooth hFdiff hFtdiff
+
+/-- **The solution tower swap from joint smoothness alone.**  The two spatial
+differentiability inputs of `solnTowerSwap_of_smooth` are discharged by
+`covDerivOfField_eval_mdiffAt` (smooth fields on smooth slots); the joint
+`(t, x)` `C²` smoothness of the metric tower scalars is the single remaining
+regularity input. -/
+theorem solnTowerSwap_of_joint
+    {D : RealTimeInterval}
+    (gRef : SmoothRiemannianMetric I M)
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (N : ℕ)
+    (hSmooth : ∀ p : ℕ, p < N →
+      ∀ V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _), ∀ t ∈ D.regular, ∀ x : M,
+      ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) 2
+        (fun q : Real × M =>
+          (covDerivOfField (I := I) gRef (solnMetricField (I := I) S q.1) p) q.2
+            (fun a : Fin (p + 2) => V a q.2)) (t, x)) :
+    ∀ p : ℕ, p < N →
+      ∀ V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _), ∀ x₀ : M,
+      FixedBaseExtDerivTimeDerivativeOnRegular (I := I) D.carrier D.regular
+        ({x₀} : Set M)
+        (fun r p' => (covDerivOfField (I := I) gRef (solnMetricField (I := I) S r) p) p'
+          (fun a : Fin (p + 2) => V a p'))
+        (fun r p' => (covDerivOfField (I := I) gRef (solnEvolField (I := I) S r) p) p'
+          (fun a : Fin (p + 2) => V a p')) :=
+  solnTowerSwap_of_smooth (I := I) gRef S hS N hSmooth
+    (fun p _ V s _ x =>
+      covDerivOfField_eval_mdiffAt (I := I) gRef (solnMetricField (I := I) S s) p V x)
+    (fun p _ V t _ x =>
+      covDerivOfField_eval_mdiffAt (I := I) gRef (solnEvolField (I := I) S t) p V x)
 
 end HCGCompactness
 end DifferentialGeometry
