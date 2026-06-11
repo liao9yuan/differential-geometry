@@ -2226,6 +2226,60 @@ private theorem exists_uniform_crossCorrCometricOp_postcomp_gOpNorm_rfns_le
     rw [hPre_apply v]
     exact mul_le_mul_of_nonneg_left (crossCorrSourceReindex_postcomp_rfns_le (I := I) g₀ a b x v) hκ0
 
+/-! ## The cross-correction parallel contraction as an `RfnsBilinearProduct`
+
+The cross-correction `g₀`-single contraction `crossCorrParallelContraction g₀` is a *parallel*
+fibrewise bilinear bundle map `(0, 2 + a) ⊗ (0, 3 + b) → (0, 3 + a + b)` (parallel because the cometric
+`g₀⁻¹` it contracts through is `∇₀`-parallel, `crossCorrCometricOp_covGrad_eq_zero`).  It therefore
+realizes the `rfns`-currency two-section bilinear-product abstraction `RfnsBilinearProduct g₀ 2 3 3` of
+`QuadraticProductRfnsGrid`, whose binomial covariant-Leibniz `rfns` diagonal grid
+`exists_rfns_iteratedCovGrad_prod_diagGrid_le` is the order-`p` jet control the cross-correction
+top/rest split consumes.
+
+The two genuine `∇`-compatibility fields:
+
+* `rfns_prod_le` — the `g`-fibre-norm operator bound `rfns(prod S T)(x) ≤ κ · rfns(S)(x) · rfns(T)(x)`,
+  with `κ` the order-`(a, b)`-uniform `g`-operator-norm envelope of the cometric trace operator field
+  (`exists_uniform_crossCorrCometricOp_postcomp_gOpNorm_rfns_le`) and `crossCorrProdSection_rfns_le` for
+  the product-section factor;
+* `covGrad_prod` — the exact two-section covariant Leibniz `∇(prod S T) = (rank-cast) prod (∇S) T +
+  (slot-reindex) prod S (∇T)`, the differentiated-operator cross term vanishing by the cometric
+  parallelism (`crossCorrCometricOp_covGrad_eq_zero`), the second summand's interior gradient slot
+  relocated to the leading slot by the constant reindexing `crossCorrCovGradPerm` (a parallel fibre
+  isometry the grid engine strips freely). -/
+
+/-- **The uniform `rfns` bilinear bound of the cross-correction contraction.**  There is a single
+order-`(a, b)`-uniform nonnegative constant `κ` with `rfns(prod S T)(x) ≤ κ · rfns(S)(x) · rfns(T)(x)`
+for every gradient shift `(a, b)`, factor pair `S, T` and point `x`.  Through the operator-field
+factorisation `crossCorrParallelContraction = appCcRS (crossCorrCometricOp) (crossCorrProdSection)`, the
+fibre value is the cometric trace operator post-composed after the product section's fibre; the uniform
+post-composition `g`-operator-norm envelope `exists_uniform_crossCorrCometricOp_postcomp_gOpNorm_rfns_le`
+bounds it by `κ · rfns(crossCorrProdSection)(x) ≤ κ · rfns(S)(x) · rfns(T)(x)`
+(`crossCorrProdSection_rfns_le`). -/
+private theorem exists_uniform_crossCorrParallelContraction_rfns_le (g₀ : SmoothRiemannianMetric I M) :
+    ∃ κ : ℝ, 0 ≤ κ ∧ ∀ {a b : ℕ} (S : SmoothCcTensor g₀ 0 (2 + a)) (T : SmoothCcTensor g₀ 0 (3 + b))
+      (x : M),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + a + b) x
+          ((crossCorrParallelContraction (I := I) g₀ S T).toSection x) ≤
+        κ * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x (S.toSection x) *
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + b) x (T.toSection x) := by
+  classical
+  obtain ⟨κ, hκ0, hκ⟩ := exists_uniform_crossCorrCometricOp_postcomp_gOpNorm_rfns_le (I := I) g₀
+  refine ⟨κ, hκ0, fun {a b} S T x => ?_⟩
+  obtain ⟨A, hAdef, hAbound⟩ := hκ a b x
+  -- The contraction's fibre value is `A (crossCorrProdSection.toSection x)` (the operator-field action).
+  have hfib : (crossCorrParallelContraction (I := I) g₀ S T).toSection x =
+      A (show Tensor0SBundle.TensorRSSpace 0 ((3 + b) + (2 + a)) I x from
+        (crossCorrProdSection (I := I) g₀ S T).toSection x) := by
+    rw [hAdef ((crossCorrProdSection (I := I) g₀ S T).toSection x),
+      crossCorrParallelContraction_eq_appCcRS (I := I) g₀ S T,
+      appCcRS_toSection (I := I) (M := M) g₀ 0 ((3 + b) + (2 + a)) (3 + a + b)
+        (crossCorrCometricOp (I := I) g₀ a b) (crossCorrProdSection (I := I) g₀ S T) x]
+  rw [hfib]
+  refine le_trans (hAbound ((crossCorrProdSection (I := I) g₀ S T).toSection x)) ?_
+  rw [mul_assoc]
+  exact mul_le_mul_of_nonneg_left (crossCorrProdSection_rfns_le (I := I) g₀ S T x) hκ0
+
 end Connection
 end Integral
 end DifferentialGeometry
