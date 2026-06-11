@@ -1,3 +1,4 @@
+import Mathlib.Algebra.Order.Chebyshev
 import Mathlib.Analysis.Matrix.Spectrum
 import Mathlib.Analysis.Matrix.PosDef
 import Mathlib.LinearAlgebra.Matrix.PosDef
@@ -365,6 +366,84 @@ theorem quadForm_id_le_pow
         _ ≤ ∑ k : Idx, ∑ l : Idx, Q k l * S k l := hdiag_le
         _ = ∑ I0 : Fin (s + 1) → Idx, ∑ J0 : Fin (s + 1) → Idx,
               (∏ a, Q (I0 a) (J0 a)) * (c I0 * c J0) := hRHS.symm
+
+/-- **Quadratic-form lower bound for a kernel entrywise near the identity.**
+If every entry of `Q` is within `ε` of the identity kernel and
+`card·ε ≤ 1/2`, the quadratic form of `Q` dominates `(1/2)·Id`.  This is the
+elementary producer of `quadForm_id_le_pow`'s lower-bound hypothesis near a
+point where the frame is orthonormal (inverse Gram = Id at the centre,
+entrywise continuity nearby) — no eigenvalue analysis needed. -/
+theorem quad_lb_of_near_id {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (Q : ι → ι → ℝ) (ε : ℝ) (hε0 : 0 ≤ ε)
+    (hnear : ∀ i j, |Q i j - (if i = j then (1 : ℝ) else 0)| ≤ ε)
+    (hsmall : (Fintype.card ι : ℝ) * ε ≤ 1 / 2) :
+    ∀ w : ι → ℝ, (1 / 2) * ∑ i, w i ^ 2 ≤ ∑ i, ∑ j, Q i j * (w i * w j) := by
+  intro w
+  have hsq_nonneg : (0 : ℝ) ≤ ∑ i, w i ^ 2 :=
+    Finset.sum_nonneg fun i _ => sq_nonneg (w i)
+  -- split off the identity part
+  have hsplit : (∑ i, ∑ j, Q i j * (w i * w j))
+      = (∑ i, w i ^ 2)
+        + ∑ i, ∑ j, (Q i j - (if i = j then (1 : ℝ) else 0)) * (w i * w j) := by
+    have hid : (∑ i, ∑ j,
+          ((1 : ℝ) * (if i = j then (1 : ℝ) else 0)) * (w i * w j))
+        = (1 : ℝ) * ∑ i, w i * w i :=
+      diag_pairing 1 (fun i j => w i * w j)
+    calc (∑ i, ∑ j, Q i j * (w i * w j))
+        = ∑ i, ∑ j,
+            (((1 : ℝ) * (if i = j then (1 : ℝ) else 0)) * (w i * w j)
+              + (Q i j - (if i = j then (1 : ℝ) else 0)) * (w i * w j)) :=
+          Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring
+      _ = (∑ i, ∑ j, ((1 : ℝ) * (if i = j then (1 : ℝ) else 0)) * (w i * w j))
+            + ∑ i, ∑ j, (Q i j - (if i = j then (1 : ℝ) else 0)) * (w i * w j) := by
+          rw [← Finset.sum_add_distrib]
+          refine Finset.sum_congr rfl fun i _ => ?_
+          rw [Finset.sum_add_distrib]
+      _ = (∑ i, w i ^ 2)
+            + ∑ i, ∑ j, (Q i j - (if i = j then (1 : ℝ) else 0)) * (w i * w j) := by
+          rw [hid, one_mul]
+          congr 1
+          exact Finset.sum_congr rfl fun i _ => (pow_two (w i)).symm
+  -- bound the error term by `ε·(∑|w|)²`
+  have herr : |∑ i, ∑ j, (Q i j - (if i = j then (1 : ℝ) else 0)) * (w i * w j)|
+      ≤ ε * ((∑ i, |w i|) * (∑ j, |w j|)) := by
+    calc |∑ i, ∑ j, (Q i j - (if i = j then (1 : ℝ) else 0)) * (w i * w j)|
+        ≤ ∑ i, |∑ j, (Q i j - (if i = j then (1 : ℝ) else 0)) * (w i * w j)| :=
+          Finset.abs_sum_le_sum_abs _ _
+      _ ≤ ∑ i, ∑ j, |(Q i j - (if i = j then (1 : ℝ) else 0)) * (w i * w j)| :=
+          Finset.sum_le_sum fun i _ => Finset.abs_sum_le_sum_abs _ _
+      _ ≤ ∑ i, ∑ j, ε * (|w i| * |w j|) := by
+          refine Finset.sum_le_sum fun i _ => Finset.sum_le_sum fun j _ => ?_
+          rw [abs_mul, abs_mul]
+          exact mul_le_mul (hnear i j) le_rfl
+            (mul_nonneg (abs_nonneg _) (abs_nonneg _)) hε0
+      _ = ε * ((∑ i, |w i|) * (∑ j, |w j|)) := by
+          rw [Finset.sum_mul_sum, Finset.mul_sum]
+          refine Finset.sum_congr rfl fun i _ => ?_
+          rw [Finset.mul_sum]
+  -- Cauchy–Schwarz, card form
+  have hCS : ((∑ i, |w i|) * (∑ j, |w j|)) ≤ (Fintype.card ι : ℝ) * ∑ i, w i ^ 2 := by
+    have h := sq_sum_le_card_mul_sum_sq (s := (Finset.univ : Finset ι))
+      (f := fun i => |w i|)
+    calc (∑ i, |w i|) * (∑ j, |w j|)
+        = (∑ i, |w i|) ^ 2 := (pow_two _).symm
+      _ ≤ (Finset.univ : Finset ι).card * ∑ i, |w i| ^ 2 := by simpa using h
+      _ = (Fintype.card ι : ℝ) * ∑ i, w i ^ 2 := by
+          rw [Finset.card_univ]
+          congr 1
+          exact Finset.sum_congr rfl fun i _ => sq_abs (w i)
+  -- assemble
+  have hEbound : ε * ((∑ i, |w i|) * (∑ j, |w j|))
+      ≤ (1 / 2) * ∑ i, w i ^ 2 := by
+    calc ε * ((∑ i, |w i|) * (∑ j, |w j|))
+        ≤ ε * ((Fintype.card ι : ℝ) * ∑ i, w i ^ 2) :=
+          mul_le_mul_of_nonneg_left hCS hε0
+      _ = ((Fintype.card ι : ℝ) * ε) * ∑ i, w i ^ 2 := by ring
+      _ ≤ (1 / 2) * ∑ i, w i ^ 2 :=
+          mul_le_mul_of_nonneg_right hsmall hsq_nonneg
+  have hElb := (abs_le.mp herr).1
+  rw [hsplit]
+  linarith
 
 end KroneckerPow
 

@@ -43,12 +43,24 @@ olean is NOT built in this checkout — import `Mathlib.Analysis.Matrix.Spectrum
   `∑_slots comp² ≤ C^s · normSq0S g x s A` given `MetricInverseInBasis_gen g x basis Q`
   + `Q` symmetric + quad-form lower bound.  Via `normSq0S_eq_coord`.
 
+## ✅ hQlb PRODUCER DONE (2026-06-11): `quad_lb_of_near_id` sorry-free
+
+`|Q i j − δᵢⱼ| ≤ ε` entrywise + `card·ε ≤ 1/2` ⟹ quad form of `Q` ≥ `(1/2)·Id`.
+ELEMENTARY (identity-split + `Finset.abs_sum_le_sum_abs` + `Finset.sum_mul_sum` +
+Chebyshev `sq_sum_le_card_mul_sum_sq` — needs `import Mathlib.Algebra.Order.Chebyshev`,
+root-level name).  This REPLACES the planned eigenvalue route entirely: near the
+keystone gRef-ON point the inverse Gram is entrywise near Id by continuity, so
+C := 2 suffices in `quadForm_id_le_pow`/`sum_comp_sq_le_pow_normSq0S`.
+
 ## REMAINING to consume brick 2 (not this file)
 
-1. hQlb producer: "frame Gram ≤ CG·Id (quad form)" ⟹ inverse-Gram `Q` symmetric +
-   quad form ≥ (1/CG)·Id at each z (pointwise linear algebra on the gramE/ginv
-   machinery in Claim1Wiring).
-2. Bounded-Gram-on-small-domain producer (continuity from the keystone ON point).
+1. ~~hQlb producer~~ DONE (`quad_lb_of_near_id`; consumer must also check `Q` symm —
+   inverse Gram of symmetric Gram, available from the gramE machinery).
+2. Entrywise-continuity producer (geometry layer): for the keystone frame, an open
+   `u' ∋ x` on which the inverse-Gram entries `Q z i j` are within `ε := 1/(2n)` of
+   `δᵢⱼ` (the entries are continuous on the trivialization domain — gramE entries
+   smooth, inverse via det/adjugate or `ginvCompField` regularity — and equal `δ` at
+   `x` by ON-ness), plus `MetricInverseInBasis_gen gRef z basis(z) (Q z)` per z.
 3. Tower application: `compL2(iterCovComp …) ≤ √(CG^{2+j})·√normSq0S(iterCov …)` via
    `iterCovComp_eq_iterCov` + `sum_comp_sq_le_pow_normSq0S` (+ component0S ↔
    tensor0SComponent bridge).
