@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.QuadraticProductRfnsGrid
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.BareTensorProductCovariantLeibniz
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.RiemannianFiberNormSqRiemannOpHigherRankParseval
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradCovDerivCommutation
 import DifferentialGeometry.Tensor.Multilinear.Tensor
@@ -387,29 +388,50 @@ theorem bareProd_rfns_le (g₀ : SmoothRiemannianMetric I M) (s₁ s₂ : ℕ) {
   rw [bareProd_rfns_eq (I := I) g₀ s₁ s₂ S T x]
   exact bareTensorProdSection_rfns_le (I := I) g₀ S T x
 
+/-- **The bare-product second-summand slot reindexing** `Fin ((s₁ + s₂) + a + b + 1) ≃ itself`.  On
+the bare product `S ⊗ (∇T)` (the `S`-block leading, then the `∇T`-block whose own leading slot is the
+new gradient direction) it rotates the leading `(s₁ + a) + 1` slots cyclically — sending the `∇T`-block
+leading slot (model-product index `s₁ + a`, the gradient direction) to position `0`, and shifting the
+`S`-block slots `0 … (s₁ + a) − 1` up to positions `1 … s₁ + a` — and fixes the trailing `∇T`-passenger
+slots, so that after `domDomCongr` the gradient direction the second Leibniz summand reads at the
+interior slot `s₁ + a` becomes the leading slot `0`, matching the slot convention of the LHS
+`∇(S ⊗ T)`.  Built as `finRotate ((s₁ + a) + 1)` on the leading block and the identity on the trailing
+`s₂ + b` block (the `crossCorrPerm` idiom). -/
+noncomputable def bareProdCovGradPerm (s₁ s₂ : ℕ) {a b : ℕ} :
+    Equiv.Perm (Fin ((s₁ + s₂) + a + b + 1)) :=
+  (finCongr (by omega : (((s₁ + a) + 1) + (s₂ + b)) = (s₁ + s₂) + a + b + 1)).permCongr
+    (finSumFinEquiv.permCongr
+      (Equiv.sumCongr (finRotate ((s₁ + a) + 1)) (Equiv.refl (Fin (s₂ + b)))))
+
 /-- **The exact two-section covariant Leibniz of the bare model tensor product** (POSITED deep
 covariant-calculus child — to be homed in `Geometry/Connection/TensorNabla` as the generic "covariant
 gradient of a bare model tensor product obeys the exact two-section Leibniz" fact, the parallel-bundle-
-map analogue of the metric-contraction single-step Leibniz; the precedent's cometric-route analogue
-`appCcRS_slotExtend_crossCorrProd_covGrad_eq` is likewise posited there).
+map analogue of the metric-contraction single-step Leibniz).
 
-`∇₀(bareProd S T) = (rank-cast) bareProd (∇₀S) T + bareProd S (∇₀T)`: the cross term differentiating
-the bilinear tensor-product map itself **vanishes**, because the model tensor-product bundle map is
-parallel (it carries no metric — `∇₀` of the constant tensor-product structure is `0`).  This is the
-genuine deep covariant-calculus content of the quadratic arm: the binomial covariant Leibniz of the
-two-section product, the high derivative landing on either factor.  The left summand carries covariant
-rank `(s₁ + s₂) + (a + 1) + b`, rank-cast to `((s₁ + s₂) + a + b) + 1` by `castRankCc_db`.
+`∇₀(bareProd S T) = (rank-cast) bareProd (∇₀S) T + (slot-reindex) bareProd S (∇₀T)`: the cross term
+differentiating the bilinear tensor-product map itself **vanishes**, because the model tensor-product
+bundle map is parallel (it carries no metric — `∇₀` of the constant tensor-product structure is `0`).
+This is the genuine deep covariant-calculus content of the quadratic arm: the binomial covariant Leibniz
+of the two-section product, the high derivative landing on either factor.  The left summand carries
+covariant rank `(s₁ + s₂) + (a + 1) + b`, rank-cast to `((s₁ + s₂) + a + b) + 1` by `castRankCc_db`; the
+second summand's gradient slot is interior (the bare product reads the second factor's new gradient
+direction at the start of the second factor block, index `s₁ + a`, NOT at the leading slot
+`∇(S ⊗ T)` carries it at — `unitModel_unitModelProdSection_covGrad_right`), so it is relocated to the
+leading slot by the constant slot reindexing `bareProdCovGradPerm` (a parallel fibre isometry leaving
+every iterated-gradient `rfns` invariant).  The slot-0 two-section Leibniz at the unit fibre is
+`unitModelProdSection_covGrad_unitModel`.
 
 Non-vacuity: at a parallel pair the identity is the genuine product Leibniz (both summands present), not
-a tautology; at `S = 0` (or `T = 0`) both sides vanish through `bareProd`'s `ℝ`-bilinearity, consistent
-with the operator bound. -/
+a tautology; at `S = 0` (or `T = 0`) both sides vanish through `bareProd`'s `ℝ`-bilinearity. -/
 theorem bareProd_covGrad (g₀ : SmoothRiemannianMetric I M) (s₁ s₂ : ℕ) {a b : ℕ}
     (S : SmoothCcTensor g₀ 0 (s₁ + a)) (T : SmoothCcTensor g₀ 0 (s₂ + b)) :
     covGrad g₀ 0 ((s₁ + s₂) + a + b) (bareProd (I := I) g₀ s₁ s₂ S T) =
       castRankCc_db g₀ 0 (by omega : (s₁ + s₂) + (a + 1) + b = (s₁ + s₂) + a + b + 1)
           (bareProd (I := I) g₀ s₁ s₂ (a := a + 1) (b := b)
             (covGrad g₀ 0 (s₁ + a) S) T) +
-        bareProd (I := I) g₀ s₁ s₂ (a := a) (b := b + 1) S (covGrad g₀ 0 (s₂ + b) T) :=
+        PDE.DeTurck.permuteCcTensor g₀ (bareProdCovGradPerm s₁ s₂ (a := a) (b := b))
+          (castRankCc_db g₀ 0 (by omega : (s₁ + s₂) + a + (b + 1) = (s₁ + s₂) + a + b + 1)
+            (bareProd (I := I) g₀ s₁ s₂ (a := a) (b := b + 1) S (covGrad g₀ 0 (s₂ + b) T))) :=
   sorry
 
 /-! ## The assembled `RfnsBilinearProduct` instances -/
@@ -428,6 +450,7 @@ factor sections.  Reusable (R1), decoupled from any specific factors. -/
 noncomputable def bareTensorRfnsBilinearProduct (g₀ : SmoothRiemannianMetric I M) (s₁ s₂ : ℕ) :
     RfnsBilinearProduct g₀ s₁ s₂ (s₁ + s₂) where
   prod := fun S T => bareProd (I := I) g₀ s₁ s₂ S T
+  covGradPerm := bareProdCovGradPerm s₁ s₂
   covGrad_prod := fun S T => bareProd_covGrad (I := I) g₀ s₁ s₂ S T
   mu := 1
   mu_nonneg := zero_le_one

@@ -1496,18 +1496,40 @@ private theorem crossCorrCometricOp_covGrad_eq_zero (g₀ : SmoothRiemannianMetr
       (slotExtend (I := I) (M := M) g₀ ((3 + a + b) + 2) (3 + a + b)
         (cometricDoubleTraceField (I := I) g₀ (3 + a + b)))]
 
+/-- **The cross-correction second-summand slot reindexing** `Fin (3 + a + b + 1) ≃ itself`.  In the
+second Leibniz summand `prod S (∇T)` of the `g₀`-single contraction `h ⌟ D`, the high covariant
+derivative of the second factor `T` enters the contraction output at the interior slot where the second
+factor's surviving block begins, NOT at the leading slot the LHS `∇(prod S T)` carries it at (`covGrad`
+inserts its new slot at index `0`).  This constant slot reindexing relocates that interior gradient slot
+to the leading slot, so that the exact two-section Leibniz holds; being a constant (point-independent)
+reindex it is a parallel fibre isometry, leaving every iterated-gradient `rfns` of the second summand
+invariant (`riemannianFiberNormSq_iteratedCovGrad_permuteCcTensor`), so the grid engine strips it freely.
+Built as `finRotate ((2 + a) + 1)` on the leading block and the identity on the trailing `1 + b` block
+(the `crossCorrPerm` idiom); the precise prefix length is the surviving-output relocation of the
+contracted product's gradient slot, verified together with the cometric Leibniz discharge below. -/
+noncomputable def crossCorrCovGradPerm {a b : ℕ} : Equiv.Perm (Fin (3 + a + b + 1)) :=
+  (finCongr (by omega : (((2 + a) + 1) + (1 + b)) = 3 + a + b + 1)).permCongr
+    (finSumFinEquiv.permCongr
+      (Equiv.sumCongr (finRotate ((2 + a) + 1)) (Equiv.refl (Fin (1 + b)))))
+
 /-- **The two-section covariant Leibniz of the frame-free product section** (POSITED product-Leibniz
 child).  The operator-field slot-extension of the parallel cometric field, applied to the covariant
 gradient of the slot-permuted model product, reconciles with the two shifted-order contractions:
 ```
 appCcRS (slotExtend (crossCorrCometricOp g₀ a b)) (covGrad (crossCorrProdSection g₀ S T)) =
   castRankCc_db ... (crossCorrParallelContraction g₀ (a := a + 1) (b := b) (covGrad S) T)
-  + crossCorrParallelContraction g₀ (a := a) (b := b + 1) S (covGrad T).
+  + (slot-reindex) crossCorrParallelContraction g₀ (a := a) (b := b + 1) S (covGrad T).
 ```
 The covariant gradient of the model tensor product `modelProduct` splits by the slot-correction Leibniz
 `covariantSlotCorrection_modelProduct` (`∇ g = 0` killing the cross term) into the `S`-gradient and the
 `T`-gradient pieces, each re-wrapped by the slot-extended cometric field into the corresponding
-shifted-rank cross-correction contraction. -/
+shifted-rank cross-correction contraction; the second (`T`-gradient) summand carries its new gradient
+slot in the interior of the contraction output, relocated to the leading slot by `crossCorrCovGradPerm`.
+
+NARROWED open obligation (the genuine cometric-plumbing stratum): the section identity through the
+`appCcRS`/`slotExtend`/`covGrad`-commutation and the contraction's surviving-slot relocation
+(`crossCorrCovGradPerm`), strictly weaker than the former exact-equality body which was Lean-proven
+*false* (the second summand reads its gradient at the interior slot, never slot `0`). -/
 private theorem appCcRS_slotExtend_crossCorrProd_covGrad_eq (g₀ : SmoothRiemannianMetric I M)
     {a b : ℕ} (S : SmoothCcTensor g₀ 0 (2 + a)) (T : SmoothCcTensor g₀ 0 (3 + b)) :
     appCcRS (I := I) (M := M) g₀ 0 (((3 + b) + (2 + a)) + 1) ((3 + a + b) + 1)
@@ -1518,8 +1540,10 @@ private theorem appCcRS_slotExtend_crossCorrProd_covGrad_eq (g₀ : SmoothRieman
       castRankCc_db g₀ 0 (by omega : 3 + (a + 1) + b = 3 + a + b + 1)
           (crossCorrParallelContraction (I := I) g₀ (a := a + 1) (b := b)
             (covGrad g₀ 0 (2 + a) S) T) +
-        crossCorrParallelContraction (I := I) g₀ (a := a) (b := b + 1) S
-          (covGrad g₀ 0 (3 + b) T) := by
+        PDE.DeTurck.permuteCcTensor g₀ (crossCorrCovGradPerm)
+          (castRankCc_db g₀ 0 (by omega : 3 + a + (b + 1) = 3 + a + b + 1)
+            (crossCorrParallelContraction (I := I) g₀ (a := a) (b := b + 1) S
+              (covGrad g₀ 0 (3 + b) T))) := by
   sorry
 
 /-- **An all-ranks `g₀(x)`-orthonormal frame Parseval witness.**  At `x` there is a single tangent
@@ -2423,19 +2447,24 @@ are discharged here through the operator-field bridge above; the parent — the 
 `crossCorrRfnsBilinearProduct` and its diagonal `rfns` jet grid — is real composition on top. -/
 
 /-- **The exact two-section parallel covariant Leibniz of the cross-correction `g₀`-single contraction**
-(POSITED deep covariant-calculus child).  `∇₀(prod S T) = (rank-cast) prod (∇₀S) T + prod S (∇₀T)`: the
-cross term differentiating the contraction itself vanishes because the cometric is `∇₀`-parallel
-(`∇₀ g₀⁻¹ = 0`).  This is the **two-section** bilinear analogue of the single-section trace Leibniz
-`ricciModelTrace42Op_covGrad`; the left summand carries covariant rank `(3 + (a + 1)) + b`, rank-cast to
-`(3 + a + b) + 1` by `castRankCc_db`. -/
+(POSITED deep covariant-calculus child).  `∇₀(prod S T) = (rank-cast) prod (∇₀S) T +
+(slot-reindex) prod S (∇₀T)`: the cross term differentiating the contraction itself vanishes because the
+cometric is `∇₀`-parallel (`∇₀ g₀⁻¹ = 0`).  This is the **two-section** bilinear analogue of the
+single-section trace Leibniz `ricciModelTrace42Op_covGrad`; the left summand carries covariant rank
+`(3 + (a + 1)) + b`, rank-cast to `(3 + a + b) + 1` by `castRankCc_db`; the second summand's gradient
+slot is interior (the contraction reads the second factor's new gradient direction at the start of its
+surviving block, not at the leading slot), relocated to the leading slot by the constant slot reindexing
+`crossCorrCovGradPerm` (a parallel fibre isometry leaving every iterated-gradient `rfns` invariant). -/
 theorem crossCorrParallelContraction_covGrad_prod (g₀ : SmoothRiemannianMetric I M) {a b : ℕ}
     (S : SmoothCcTensor g₀ 0 (2 + a)) (T : SmoothCcTensor g₀ 0 (3 + b)) :
     covGrad g₀ 0 (3 + a + b) (crossCorrParallelContraction (I := I) g₀ S T) =
       castRankCc_db g₀ 0 (by omega : 3 + (a + 1) + b = 3 + a + b + 1)
           (crossCorrParallelContraction (I := I) g₀ (a := a + 1) (b := b)
             (covGrad g₀ 0 (2 + a) S) T) +
-        crossCorrParallelContraction (I := I) g₀ (a := a) (b := b + 1) S
-          (covGrad g₀ 0 (3 + b) T) := by
+        PDE.DeTurck.permuteCcTensor g₀ (crossCorrCovGradPerm)
+          (castRankCc_db g₀ 0 (by omega : 3 + a + (b + 1) = 3 + a + b + 1)
+            (crossCorrParallelContraction (I := I) g₀ (a := a) (b := b + 1) S
+              (covGrad g₀ 0 (3 + b) T))) := by
   -- Bridge: the parallel contraction is the operator-field action of the fixed parallel cometric
   -- double-trace field on the frame-free product section.
   rw [crossCorrParallelContraction_eq_appCcRS (I := I) g₀ S T]
@@ -2510,6 +2539,7 @@ factor sections; the consumer instantiates `prod` at `realizeSymmCcTensor g₀ T
 noncomputable def crossCorrRfnsBilinearProduct (g₀ : SmoothRiemannianMetric I M) :
     RfnsBilinearProduct g₀ 2 3 3 where
   prod := fun S T => crossCorrParallelContraction (I := I) g₀ S T
+  covGradPerm := crossCorrCovGradPerm
   covGrad_prod := fun S T => crossCorrParallelContraction_covGrad_prod (I := I) g₀ S T
   mu := (exists_uniform_crossCorrParallelContraction_rfns_le (I := I) g₀).choose
   mu_nonneg := (exists_uniform_crossCorrParallelContraction_rfns_le (I := I) g₀).choose_spec.1

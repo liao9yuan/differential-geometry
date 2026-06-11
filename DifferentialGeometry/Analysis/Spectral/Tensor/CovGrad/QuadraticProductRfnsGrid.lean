@@ -88,10 +88,14 @@ The map sends a smooth compactly-supported `(0, s₁ + a)`-tensor section and a 
 section to a `(0, s₀ + a + b)`-tensor section, for every pair of extra-slot counts `a, b`.  Its two
 genuine `∇`-compatibility fields:
 
-* `covGrad_prod` — the **exact two-section covariant Leibniz** `∇(prod S T) = (rank-cast) prod (∇S) T +
-  prod S (∇T)`.  The cross term vanishes precisely because the bilinear map is parallel (`∇g = 0`); the
-  left summand carries covariant rank `(s₀ + (a+1)) + b`, rank-cast to `(s₀ + a + b) + 1` by
-  `castRankCc_db`.
+* `covGradPerm`, `covGrad_prod` — the **exact two-section covariant Leibniz** `∇(prod S T) =
+  (rank-cast) prod (∇S) T + (slot-reindex) prod S (∇T)`.  The cross term vanishes precisely because the
+  bilinear map is parallel (`∇g = 0`); the left summand carries covariant rank `(s₀ + (a+1)) + b`,
+  rank-cast to `(s₀ + a + b) + 1` by `castRankCc_db`.  The second summand's gradient slot is interior
+  (`prod S (∇T)` reads the second factor's new gradient direction at the start of the second factor
+  block, not at the leading slot `∇(prod S T)` carries it at), so it is relocated to the leading slot by
+  the constant slot reindexing `covGradPerm` (`permuteCcTensor`), a parallel fibre isometry leaving every
+  iterated-gradient `rfns` invariant.
 * `mu`, `mu_nonneg`, `rfns_prod_le` — the **`g`-fibre-norm operator bound** in `rfns` form
   `rfns(prod S T)(x) ≤ mu · rfns(S)(x) · rfns(T)(x)`.  This is the genuine continuity/boundedness of the
   bilinear map; in particular it forces `prod 0 T = 0` and `prod S 0 = 0`, so a degenerate nonzero
@@ -104,13 +108,27 @@ structure RfnsBilinearProduct (g : SmoothRiemannianMetric I M) (s₁ s₂ s₀ :
   /-- The section-level bilinear product, at every shifted gradient order `(a, b)`. -/
   prod : ∀ {a b : ℕ}, SmoothCcTensor g 0 (s₁ + a) → SmoothCcTensor g 0 (s₂ + b) →
     SmoothCcTensor g 0 (s₀ + a + b)
-  /-- The exact two-section covariant Leibniz (parallel: no cross term).  The left summand is rank-cast
-  from `(s₀ + (a+1)) + b` to `(s₀ + a + b) + 1`. -/
+  /-- The slot reindexing relating the **new gradient slot of the second summand** (the high covariant
+  derivative of the *second* factor, which the product `prod S (∇T)` reads at the start of the second
+  factor block, NOT at the leading slot) back to the leading slot the LHS `∇(prod S T)` carries it at.
+  `covGrad` inserts its new slot at index `0`, but the bilinear product `prod S (∇T)` reads the second
+  factor's gradient direction at the interior slot where the second factor block begins, so the exact
+  two-section Leibniz can only hold after this constant slot reindexing is applied to the second
+  summand.  Being a constant (point-independent) slot reindexing it is a parallel fibre isometry,
+  so it leaves every iterated-gradient `rfns` of the second summand invariant
+  (`riemannianFiberNormSq_iteratedCovGrad_permuteCcTensor`); the grid engine strips it freely. -/
+  covGradPerm : ∀ {a b : ℕ}, Equiv.Perm (Fin (s₀ + a + b + 1))
+  /-- The exact two-section covariant Leibniz (parallel: no cross term).  The left summand carries its
+  gradient at the leading slot already (the first factor block starts at index `0`) and is rank-cast
+  from `(s₀ + (a+1)) + b` to `(s₀ + a + b) + 1`; the second summand's gradient slot is relocated to the
+  leading slot by the constant reindexing `covGradPerm` (`permuteCcTensor`). -/
   covGrad_prod : ∀ {a b : ℕ} (S : SmoothCcTensor g 0 (s₁ + a)) (T : SmoothCcTensor g 0 (s₂ + b)),
     covGrad g 0 (s₀ + a + b) (prod S T) =
       castRankCc_db g 0 (by omega : s₀ + (a + 1) + b = s₀ + a + b + 1)
           (prod (a := a + 1) (b := b) (covGrad g 0 (s₁ + a) S) T) +
-        prod (a := a) (b := b + 1) S (covGrad g 0 (s₂ + b) T)
+        PDE.DeTurck.permuteCcTensor g covGradPerm
+          (castRankCc_db g 0 (by omega : s₀ + a + (b + 1) = s₀ + a + b + 1)
+            (prod (a := a) (b := b + 1) S (covGrad g 0 (s₂ + b) T)))
   /-- The `g`-fibre-norm operator-bound constant of the bilinear map. -/
   mu : ℝ
   /-- The operator-bound constant is nonnegative. -/
@@ -135,6 +153,17 @@ private lemma rfns_iteratedCovGrad_castRankCc {a b : ℕ} (h : a = b)
       riemannianFiberNormSq (I := I) (M := M) g 0 (a + j) x
         ((iteratedCovGrad g 0 a j Y).toSection x) :=
   rfns_iteratedCovGrad_castRankCc_db g 0 h Y j x
+
+/-- **`rfns` slot-reindex invariance.**  The `rfns` of the `j`-fold iterated covariant gradient of a
+constant slot-reindexed section equals that of the section: the reindexing is a parallel fibre isometry
+(`riemannianFiberNormSq_iteratedCovGrad_permuteCcTensor`). -/
+private lemma rfns_iteratedCovGrad_permuteCcTensor {s : ℕ} (σ : Equiv.Perm (Fin s))
+    (Y : SmoothCcTensor g 0 s) (j : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 (s + j) x
+        ((iteratedCovGrad g 0 s j (PDE.DeTurck.permuteCcTensor g σ Y)).toSection x) =
+      riemannianFiberNormSq (I := I) (M := M) g 0 (s + j) x
+        ((iteratedCovGrad g 0 s j Y).toSection x) :=
+  PDE.DeTurck.riemannianFiberNormSq_iteratedCovGrad_permuteCcTensor (I := I) (M := M) g σ Y j x
 
 /-- **`rfns` front-commutation.**  `rfns(∇^m (∇S))(x) = rfns(∇^{m+1} S)(x)`. -/
 private lemma rfns_iteratedCovGrad_covGrad_comm (s m : ℕ) (S : SmoothCcTensor g 0 s) (x : M) :
@@ -307,6 +336,14 @@ theorem rfns_iteratedCovGrad_prod_le_jetGrid (Φ : RfnsBilinearProduct g s₁ s�
       rw [rfns_iteratedCovGrad_castRankCc (g := g)
         (by omega : s₀ + (a + 1) + b = s₀ + a + b + 1)
         (Φ.prod (a := a + 1) (b := b) (covGrad g 0 (s₁ + a) S) T) j x]
+      -- Strip the second summand's constant slot reindexing (a parallel fibre isometry) and its
+      -- rank-cast: both leave every iterated-gradient `rfns` invariant.
+      rw [rfns_iteratedCovGrad_permuteCcTensor (g := g) (Φ.covGradPerm (a := a) (b := b))
+        (castRankCc_db g 0 (by omega : s₀ + a + (b + 1) = s₀ + a + b + 1)
+          (Φ.prod (a := a) (b := b + 1) S (covGrad g 0 (s₂ + b) T))) j x]
+      rw [rfns_iteratedCovGrad_castRankCc (g := g)
+        (by omega : s₀ + a + (b + 1) = s₀ + a + b + 1)
+        (Φ.prod (a := a) (b := b + 1) S (covGrad g 0 (s₂ + b) T)) j x]
       -- IH on each shifted piece, then dominate by the common grid.
       have hL := ih (a := a + 1) (b := b) (covGrad g 0 (s₁ + a) S) T x
       have hR := ih (a := a) (b := b + 1) S (covGrad g 0 (s₂ + b) T) x
@@ -566,6 +603,14 @@ theorem rfns_iteratedCovGrad_prod_le_diagGrid (Φ : RfnsBilinearProduct g s₁ s
       rw [rfns_iteratedCovGrad_castRankCc (g := g)
         (by omega : s₀ + (a + 1) + b = s₀ + a + b + 1)
         (Φ.prod (a := a + 1) (b := b) (covGrad g 0 (s₁ + a) S) T) j x]
+      -- Strip the second summand's constant slot reindexing (a parallel fibre isometry) and its
+      -- rank-cast: both leave every iterated-gradient `rfns` invariant.
+      rw [rfns_iteratedCovGrad_permuteCcTensor (g := g) (Φ.covGradPerm (a := a) (b := b))
+        (castRankCc_db g 0 (by omega : s₀ + a + (b + 1) = s₀ + a + b + 1)
+          (Φ.prod (a := a) (b := b + 1) S (covGrad g 0 (s₂ + b) T))) j x]
+      rw [rfns_iteratedCovGrad_castRankCc (g := g)
+        (by omega : s₀ + a + (b + 1) = s₀ + a + b + 1)
+        (Φ.prod (a := a) (b := b + 1) S (covGrad g 0 (s₂ + b) T)) j x]
       -- IH on each shifted piece, then dominate by the common diagonal.
       have hL := ih (a := a + 1) (b := b) (covGrad g 0 (s₁ + a) S) T x
       have hR := ih (a := a) (b := b + 1) S (covGrad g 0 (s₂ + b) T) x
