@@ -641,6 +641,15 @@ theorem metricUniformEquivalentOn_of_le
     · exact le_trans (hEq.2 x hx v).2
         (mul_le_mul_of_nonneg_right hCC' hgin_nonneg)
 
+/-- Uniform window equivalence restricts to subsets. -/
+theorem metricUniformEquivalentOnWindow_mono
+    {K K' : Set M} {β ψ : Real} {gRef : SmoothRiemannianMetric I M}
+    {gSeq : Nat -> Real -> SmoothRiemannianMetric I M} {B : Real -> Real}
+    (hKK : K' ⊆ K)
+    (h : MetricUniformEquivalentOnWindow (I := I) K β ψ gRef gSeq B) :
+    MetricUniformEquivalentOnWindow (I := I) K' β ψ gRef gSeq B :=
+  fun i t ht => ⟨(h i t ht).1, fun x hx v => (h i t ht).2 x (hKK hx) v⟩
+
 /-- The exponential factor appearing in MSM135 Lemma 3.11, equation (3.3),
 once a Ricci quadratic bound with coefficient `A` is available. -/
 def metricEquivalenceFactor (C A t t0 : Real) : Real :=
@@ -768,6 +777,16 @@ def MetricCovDerivOrderBoundOnWindow
     (a : Nat) (C : Real) : Prop :=
   forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ ->
     MetricCovDerivOrderBoundOn (I := I) K a (gSeq i t) gRef C
+
+/-- Exact-order window bounds restrict to subsets. -/
+theorem metricCovOrderWindow_mono
+    {K K' : Set M} {β ψ : Real}
+    {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
+    {gRef : SmoothRiemannianMetric I M} {a : Nat} {C : Real}
+    (hKK : K' ⊆ K)
+    (h : MetricCovDerivOrderBoundOnWindow (I := I) K β ψ gSeq gRef a C) :
+    MetricCovDerivOrderBoundOnWindow (I := I) K' β ψ gSeq gRef a C :=
+  fun i t ht x hx => h i t ht x (hKK hx)
 
 /-- Pointwise exact-order estimates imply the corresponding exact-order window
 predicate. -/

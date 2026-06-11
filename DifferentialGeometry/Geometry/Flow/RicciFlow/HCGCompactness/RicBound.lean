@@ -1082,5 +1082,81 @@ theorem covOrderBound_stage
       timeRadius := timeRadius
       time_abs_le := htime }
 
+/-- **The `(B_r)` tower** (MSM135 Lemma 3.11, Step 4, all stages).  From the
+window inputs on a single open `U ⊇ K` — eq. (3.3) equivalence with majorant,
+the moving Shi bounds up to order `N`, the evolution families at every order,
+and the initial-time bounds — every exact order `1 ≤ r ≤ N` admits a window
+bound on `K`.  Each stage is `covOrderBound_stage` on an interpolated pair
+`K' ⊆ interior L ⊆ L ⊆ U'` (`exists_compact_between`, local compactness of
+`M`), with the lower-order `(B_q)` constants supplied by strong induction on
+the compact `L`. -/
+theorem covOrderBound_tower
+    {K U : Set M} {β ψ t0 : Real}
+    {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
+    {gRef : SmoothRiemannianMetric I M}
+    (hKc : IsCompact K) (hU : IsOpen U) (hKU : K ⊆ U)
+    (N : Nat)
+    (B : Real -> Real)
+    (hequiv : MetricUniformEquivalentOnWindow (I := I) U β ψ gRef gSeq B)
+    (Bmax : Real) (hBmax1 : 1 ≤ Bmax)
+    (hBmax : ∀ t ∈ Set.Icc β ψ, B t ≤ Bmax)
+    (KShi : Real) (hKShi0 : 0 ≤ KShi)
+    (hShi : forall s : Nat, s <= N -> forall i : Nat,
+      forall t : Real, t ∈ Set.Icc β ψ -> forall x : M, x ∈ U ->
+        Real.sqrt
+          (Tensor0SBundle.normSq0S (I := I) (gSeq i t) x (2 + s)
+            (ricCovTower (I := I) (gSeq i t) (gSeq i t) s x)) <= KShi)
+    (ht0 : t0 ∈ Set.Icc β ψ)
+    (hev : ∀ r : Nat, 1 ≤ r → r ≤ N → ∀ i : Nat, ∀ x ∈ U, ∀ s ∈ Set.Icc β ψ,
+      ∀ v : Fin (r + 2) → TangentSpace I x,
+        HasDerivAt
+          (fun r' : Real => metricCovDeriv (I := I) (gSeq i r') gRef r x v)
+          (((-2 : Real) • nablaRicReal (I := I) gSeq gRef r i s x) v) s)
+    (initC : Nat -> Real) (hinitC0 : ∀ r : Nat, 0 ≤ initC r)
+    (hinit : ∀ r : Nat, 1 ≤ r → r ≤ N → ∀ i : Nat, ∀ x ∈ U,
+      metricCovDerivNorm (I := I) r (gSeq i t0) gRef x <= initC r)
+    (timeRadius : Real)
+    (htime : forall t : Real, t ∈ Set.Icc β ψ -> |t - t0| <= timeRadius) :
+    ∀ r : Nat, 1 ≤ r → r ≤ N →
+      exists Cw : Real,
+        MetricCovDerivOrderBoundOnWindow (I := I) K β ψ gSeq gRef r Cw := by
+  haveI : LocallyCompactSpace H := I.locallyCompactSpace
+  haveI : LocallyCompactSpace M := ChartedSpace.locallyCompactSpace H M
+  suffices hmain : ∀ r : Nat, 1 ≤ r → r ≤ N →
+      ∀ K' : Set M, IsCompact K' → ∀ U' : Set M, IsOpen U' → K' ⊆ U' → U' ⊆ U →
+        exists Cw : Real,
+          MetricCovDerivOrderBoundOnWindow (I := I) K' β ψ gSeq gRef r Cw by
+    intro r h1 hrN
+    exact hmain r h1 hrN K hKc U hU hKU (subset_refl U)
+  intro r
+  induction r using Nat.strong_induction_on with
+  | _ r ihr =>
+    intro h1 hrN K' hK'c U' hU' hK'U' hU'U
+    obtain ⟨L, hLc, hKL, hLU⟩ := exists_compact_between hK'c hU' hK'U'
+    have hLsubU : (interior L : Set M) ⊆ U := fun x hx =>
+      hU'U (hLU (interior_subset hx))
+    -- the lower-order `(B_q)` constants on `interior L`, by strong induction
+    have hex : ∀ q : Nat, ∃ Cq : Real, 1 ≤ q → q < r →
+        MetricCovDerivOrderBoundOnWindow (I := I) (interior L) β ψ gSeq gRef q Cq := by
+      intro q
+      by_cases hq : 1 ≤ q ∧ q < r
+      · obtain ⟨Cq, hCq⟩ := ihr q hq.2 hq.1 (le_trans (le_of_lt hq.2) hrN)
+          L hLc U' hU' hLU hU'U
+        exact ⟨Cq, fun _ _ =>
+          metricCovOrderWindow_mono (I := I) interior_subset hCq⟩
+      · exact ⟨0, fun ha hb => absurd ⟨ha, hb⟩ hq⟩
+    choose Cg hCg using hex
+    exact covOrderBound_stage (I := I) hK'c isOpen_interior hKL r h1 B
+      (metricUniformEquivalentOnWindow_mono (I := I) hLsubU hequiv)
+      Bmax hBmax1 hBmax Cg
+      (fun q hq1 hqr => hCg q hq1 hqr)
+      KShi hKShi0
+      (fun s hs i t ht x hx => hShi s (le_trans hs hrN) i t ht x (hLsubU hx))
+      ht0
+      (fun i x hx s hs v => hev r h1 hrN i x (hU'U (hK'U' hx)) s hs v)
+      (initC r) (hinitC0 r)
+      (fun i x hx => hinit r h1 hrN i x (hU'U (hK'U' hx)))
+      timeRadius htime
+
 end HCGCompactness
 end DifferentialGeometry
