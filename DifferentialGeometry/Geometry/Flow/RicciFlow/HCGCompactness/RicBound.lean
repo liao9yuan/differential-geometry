@@ -1158,5 +1158,75 @@ theorem covOrderBound_tower
       (fun i x hx => hinit r h1 hrN i x (hU'U (hK'U' hx)))
       timeRadius htime
 
+set_option backward.isDefEq.respectTransparency false in
+/-- **The P2 capstone: all `(B_r)` window bounds from a sequence of Ricci-flow
+solutions** (MSM135 Lemma 3.11, eq. (3.4) → Step 4 output).  The evolution
+families are produced internally (`hevComp_of_solutions` from the flow
+equations, with the mixed-derivative swaps discharged from the tower
+regularity by `solnTowerSwap_of_smooth`); the remaining hypotheses are the
+honest analytic inputs: eq. (3.3) equivalence with majorant (P1), the moving
+Shi bounds (the BBS realization track), the tower regularity
+(`hSmoothT`/`hFdiffT`/`hFtdiffT` — joint `C²` and spatial differentiability of
+the tower scalars), and the initial-time bounds. -/
+theorem covOrderBound_of_soln
+    {K U : Set M} {β ψ t0 : Real}
+    {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
+    {gRef : SmoothRiemannianMetric I M}
+    (hKc : IsCompact K) (hU : IsOpen U) (hKU : K ⊆ U)
+    (N : Nat)
+    (D : Nat -> RealTimeInterval)
+    (S : (i : Nat) -> SolutionOn (I := I) (M := M) (D i))
+    (hS : ∀ i : Nat, IsSolutionOn (I := I) (S i))
+    (hmet : ∀ (i : Nat) (r : Real), (S i).family.metric r = gSeq i r)
+    (hreg : ∀ i : Nat, Set.Icc β ψ ⊆ (D i).regular)
+    (B : Real -> Real)
+    (hequiv : MetricUniformEquivalentOnWindow (I := I) U β ψ gRef gSeq B)
+    (Bmax : Real) (hBmax1 : 1 ≤ Bmax)
+    (hBmax : ∀ t ∈ Set.Icc β ψ, B t ≤ Bmax)
+    (KShi : Real) (hKShi0 : 0 ≤ KShi)
+    (hShi : forall s : Nat, s <= N -> forall i : Nat,
+      forall t : Real, t ∈ Set.Icc β ψ -> forall x : M, x ∈ U ->
+        Real.sqrt
+          (Tensor0SBundle.normSq0S (I := I) (gSeq i t) x (2 + s)
+            (ricCovTower (I := I) (gSeq i t) (gSeq i t) s x)) <= KShi)
+    (ht0 : t0 ∈ Set.Icc β ψ)
+    (hSmoothT : ∀ i : Nat, ∀ p : ℕ, p < N →
+      ∀ V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _), ∀ t ∈ (D i).regular, ∀ x : M,
+      ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) 2
+        (fun q : Real × M =>
+          (covDerivOfField (I := I) gRef (solnMetricField (I := I) (S i) q.1) p) q.2
+            (fun a : Fin (p + 2) => V a q.2)) (t, x))
+    (hFdiffT : ∀ i : Nat, ∀ p : ℕ, p < N →
+      ∀ V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _), ∀ s ∈ (D i).carrier, ∀ x : M,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M =>
+          (covDerivOfField (I := I) gRef (solnMetricField (I := I) (S i) s) p) y
+            (fun a : Fin (p + 2) => V a y)) x)
+    (hFtdiffT : ∀ i : Nat, ∀ p : ℕ, p < N →
+      ∀ V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _), ∀ t ∈ (D i).regular, ∀ x : M,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M =>
+          (covDerivOfField (I := I) gRef (solnEvolField (I := I) (S i) t) p) y
+            (fun a : Fin (p + 2) => V a y)) x)
+    (initC : Nat -> Real) (hinitC0 : ∀ r : Nat, 0 ≤ initC r)
+    (hinit : ∀ r : Nat, 1 ≤ r → r ≤ N → ∀ i : Nat, ∀ x ∈ U,
+      metricCovDerivNorm (I := I) r (gSeq i t0) gRef x <= initC r)
+    (timeRadius : Real)
+    (htime : forall t : Real, t ∈ Set.Icc β ψ -> |t - t0| <= timeRadius) :
+    ∀ r : Nat, 1 ≤ r → r ≤ N →
+      exists Cw : Real,
+        MetricCovDerivOrderBoundOnWindow (I := I) K β ψ gSeq gRef r Cw := by
+  refine covOrderBound_tower (I := I) hKc hU hKU N B hequiv Bmax hBmax1 hBmax
+    KShi hKShi0 hShi ht0 ?_ initC hinitC0 hinit timeRadius htime
+  intro r h1 hrN
+  exact hevComp_of_solutions (I := I) (K := U) D S hS hmet hreg
+    (fun i p hp V x₀ =>
+      solnTowerSwap_of_smooth (I := I) gRef (S i) (hS i) N
+        (hSmoothT i) (hFdiffT i) (hFtdiffT i)
+        p (lt_of_lt_of_le hp hrN) V x₀)
+
 end HCGCompactness
 end DifferentialGeometry
