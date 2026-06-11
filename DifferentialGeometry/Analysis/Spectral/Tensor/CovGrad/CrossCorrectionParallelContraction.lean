@@ -1139,17 +1139,32 @@ set_option linter.unusedSectionVars false in
 /-- **(LEAF — the cross-correction order-`p` covariant jet top/rest split, δ-separated, integrated
 `L²` two-arm form.)**  The squared metric `L²` norm of the order-`p` covariant gradient of the
 cross-correction `h ⌟ D` (`h = ccTensorBilinSymm g₀ T₁`, `D = connDiff g₁ g₀`) is dominated by a
-**δ²-arm** carrying the single high derivative on the `g₀`-lowered connection difference,
-`δ² · ‖∇^p loweredConnDiffSection‖²`, plus a constant times the lower covariant gradients of the
+**`2 δ²`-arm** carrying the single high derivative on the `g₀`-lowered connection difference,
+`2 δ² · ‖∇^p loweredConnDiffSection‖²`, plus a constant times the lower covariant gradients of the
 connection difference `∑_{q < p} ‖∇^q loweredConnDiffSection‖²` and the `≤ (p+1)`-jet of `T₁`
 `∑_{l ≤ p+1} ‖∇^l T₁‖²`:
 ```
 ‖∇^p crossCorrectionSection g₁ g₀ T₁‖²
-  ≤ δ² · ‖∇^p loweredConnDiffSection g₁ g₀‖²
+  ≤ 2 δ² · ‖∇^p loweredConnDiffSection g₁ g₀‖²
     + Crest · (∑_{q < p} ‖∇^q loweredConnDiffSection g₁ g₀‖² + ∑_{l ≤ p+1} ‖∇^l T₁‖²),
 ```
 with `Crest ≥ 0` uniform over the fibre-small (`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`,
 `δ < 1/2`) supercritically-`H^{p+3}`-bounded (`‖T₁.toHs (p+3)‖ ≤ B`) perturbation family.
+
+**Why the principal coefficient is `2 δ²`, not `δ²`.**  The order-`p` jet splits at the section level
+`∇^p cc = Top_p + Rest_p`, where `Top_p = crossCorrParallelContraction g₀ (realizeSymm T₁) (∇^p T)` is
+the i=0 binomial cell (all `p` derivatives on the connection-difference factor `T = permute (lowered)`),
+whose squared `L²` mass is **sharply** `‖Top_p‖² ≤ δ² · ‖∇^p loweredConnDiffSection‖²` by the
+frame-Riesz passenger template `crossCorrParallelContraction_rfns_le_sq_passenger` (the cometric is the
+parallel `g₀⁻¹`, the `p` gradient directions ride as spectators), and `Rest_p` (the `i ≥ 1` cells) is
+the Gagliardo–Nirenberg two-arm grid.  At the `L²` level the cross term `2 ⟪Top_p, Rest_p⟫` is **not**
+absorbable into `Crest · (lower)`: it is bounded only by `2 δ ‖∇^p lowered‖ · ‖Rest_p‖`, carrying the
+**top** order `‖∇^p lowered‖` which the lower-order grid `Crest · (…)` does not contain, so an exactly-`δ²`
+principal is **false for `p ≥ 1`** (a positively-correlated `Top_p, Rest_p` with `‖∇^p lowered‖ ≫ grid`
+violates it).  The `2`-subadditivity `‖Top_p + Rest_p‖² ≤ 2 ‖Top_p‖² + 2 ‖Rest_p‖²`
+(`iteratedCovGrad_norm_sq_sub_le`) absorbs the cross term into the `2`-factor, giving the honest
+`2 δ²` principal; the single consumer `crossCorrectionSection_iteratedCovGrad_grid_le` relaxes it to the
+load-bearing `δ` via `2 δ² ≤ δ` (from `2 δ < 1`), so the downstream `4 − 8 δ` terminus is unchanged.
 
 **Why INTEGRATED, not pointwise (the former statement was false for `p ≥ 3`).**  The earlier
 *pointwise* per-`x` `rfns` top/rest split — `∃ Top Rest, (∇^p cc) x = Top + Rest`, with
@@ -1212,7 +1227,7 @@ theorem crossCorrectionSection_iteratedCovGrad_topRest_split
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (p + 3) T₁‖ ≤ B →
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
               (crossCorrectionSection (I := I) g₁ g₀ T₁)‖ ^ 2 ≤
-          δ ^ 2 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+          2 * δ ^ 2 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
               (loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2
           + Crest * (∑ q ∈ Finset.range p,
                 ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
@@ -1275,11 +1290,11 @@ theorem crossCorrectionSection_iteratedCovGrad_grid_le
       + ∑ l ∈ Finset.range (p + 1 + 1),
           ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2) with hGdef
   have hLnn : 0 ≤ L := by rw [hLdef]; positivity
-  -- The integrated split, then relax `δ² · L ≤ δ · L` since `δ² ≤ δ` and `0 ≤ L`.
+  -- The integrated split, then relax `2 · δ² · L ≤ δ · L` since `2 δ ≤ 1` (`δ < 1/2`) and `0 ≤ L`.
   have hsp := hsplit T₁ g₁ hr hfib hball
   rw [← hLdef, ← hGdef] at hsp
-  have hδsq : δ ^ 2 * L ≤ δ * L := by
-    have h1 : 0 ≤ δ * ((1 - δ) * L) :=
+  have hδsq : 2 * δ ^ 2 * L ≤ δ * L := by
+    have h1 : 0 ≤ δ * ((1 - 2 * δ) * L) :=
       mul_nonneg hδ0 (mul_nonneg (by linarith) hLnn)
     nlinarith [h1]
   linarith [hsp, hδsq]
