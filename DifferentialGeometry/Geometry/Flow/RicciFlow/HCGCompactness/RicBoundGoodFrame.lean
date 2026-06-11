@@ -583,4 +583,109 @@ theorem sqrt_tower_le_compL2
               frame hframe y')
             (frameComp0S (I := I) T frame) j y)) from rfl, hsq]
 
+set_option backward.isDefEq.respectTransparency false in
+/-- **The Ricci-component smoothness producer** (the `hRicSm`/`hT` input of the
+`ric_bound` engine): the frame components of the realized Ricci section of
+`LC g` are `C^∞` on the trivialization domain.  Same engine as
+`gCompField_mdiffOn` (B2). -/
+theorem ricCompField_mdiffOn
+    (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
+    [MemTrivializationAtlas e₀]
+    (g : SmoothRiemannianMetric I M) (basisE : Module.Basis Idx Real E)
+    (k : Fin 2 → Idx) :
+    ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+      (fun y => frameComp0S (I := I)
+        (DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection
+          (I := I) (M := M) (leviCivitaConnectionOfMetric (I := I) g)
+          (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally (I := I) (M := M) g))
+        (fun a y' => e₀.localFrame basisE a y') y k) e₀.baseSet := by
+  intro y hy
+  have hT : ContMDiffAt I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
+      (fun b : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+        (E := fun x : M => Tensor0SSpace 2 I x) b
+        ((DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection
+          (I := I) (M := M) (leviCivitaConnectionOfMetric (I := I) g)
+          (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally (I := I) (M := M) g))
+          b)) y :=
+    (DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection
+      (I := I) (M := M) (leviCivitaConnectionOfMetric (I := I) g)
+      (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+        (I := I) (M := M) g)).contMDiff.contMDiffAt
+  have hv : ∀ i : Fin 2,
+      ContMDiffAt I (I.prod 𝓘(ℝ, E)) ∞
+        (fun b : M => TotalSpace.mk' E (E := fun x : M => TangentSpace I x) b
+          (e₀.localFrame basisE (k i) b)) y :=
+    fun i => (frame_e_mdiffOn e₀ basisE (k i)).contMDiffAt (e₀.open_baseSet.mem_nhds hy)
+  have h := TensorMultilinear.contMDiffAt_section_apply_gen
+    (T := fun b : M =>
+      (DifferentialGeometry.Integral.Connection.CovariantDerivative.ricciSection
+        (I := I) (M := M) (leviCivitaConnectionOfMetric (I := I) g)
+        (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+          (I := I) (M := M) g)) b) hT
+    (v := fun (i : Fin 2) (b : M) => e₀.localFrame basisE (k i) b) hv
+  exact h.contMDiffWithinAt
+
+/-- **The moving-metric inverse-Gram bound** (the uniform `C0` producer): if `g`
+dominates `Beq⁻¹·gRef` pointwise at `z` (eq. 3.3) and the `gRef`-Gram is
+entrywise within `ε` of the identity with `card·ε ≤ 1/2`, then the inverse-Gram
+array of `g` has `ℓ²` norm at most `√card·(2·Beq)`. -/
+theorem movingGinv_le
+    (e₀ : Trivialization E (TotalSpace.proj : TotalSpace E (TangentSpace I : M → Type _) → M))
+    [MemTrivializationAtlas e₀]
+    (g gRef : SmoothRiemannianMetric I M) (basisE : Module.Basis Idx Real E)
+    {z : M}
+    (Beq : Real) (hBeq : 0 < Beq)
+    (hlow : ∀ v : TangentSpace I z, Beq⁻¹ * gRef.inner z v v ≤ g.inner z v v)
+    (ε : Real) (hε0 : 0 ≤ ε)
+    (hsmall : (Fintype.card Idx : Real) * ε ≤ 1 / 2)
+    (hGnear : ∀ i j : Idx,
+      |gramE (I := I) e₀ gRef basisE z i j - (if i = j then 1 else 0)| ≤ ε) :
+    compL2 (ginvCompField (I := I) e₀ g basisE z) ≤
+      Real.sqrt (Fintype.card Idx) * (2 * Beq) := by
+  classical
+  have hdot : ∀ (G : Matrix Idx Idx Real) (w : Idx → Real),
+      w ⬝ᵥ G.mulVec w = ∑ i : Idx, ∑ j : Idx, G i j * (w i * w j) := by
+    intro G w
+    simp only [dotProduct, Matrix.mulVec, Finset.mul_sum]
+    exact Finset.sum_congr rfl fun i _ =>
+      Finset.sum_congr rfl fun j _ => by ring
+  have hquadRef := DifferentialGeometry.HCGCompactness.quad_lb_of_near_id
+    (fun i j => gramE (I := I) e₀ gRef basisE z i j) ε hε0 hGnear hsmall
+  have hquadG : ∀ v : Idx → Real,
+      (1 / (2 * Beq)) * (v ⬝ᵥ v) ≤
+        v ⬝ᵥ (gramE (I := I) e₀ g basisE z).mulVec v := by
+    intro v
+    have hsq : v ⬝ᵥ v = ∑ i : Idx, v i ^ 2 := by
+      simp only [dotProduct]
+      exact Finset.sum_congr rfl fun i _ => (pow_two (v i)).symm
+    have hRef : (1 / 2) * ∑ i : Idx, v i ^ 2 ≤
+        v ⬝ᵥ (gramE (I := I) e₀ gRef basisE z).mulVec v := by
+      rw [hdot]
+      exact hquadRef v
+    have hg : v ⬝ᵥ (gramE (I := I) e₀ g basisE z).mulVec v =
+        g.inner z (∑ i, v i • e₀.localFrame basisE i z)
+          (∑ j, v j • e₀.localFrame basisE j z) :=
+      gramE_dotVec (I := I) e₀ g basisE z v
+    have hgRef : v ⬝ᵥ (gramE (I := I) e₀ gRef basisE z).mulVec v =
+        gRef.inner z (∑ i, v i • e₀.localFrame basisE i z)
+          (∑ j, v j • e₀.localFrame basisE j z) :=
+      gramE_dotVec (I := I) e₀ gRef basisE z v
+    have hlow' := hlow (∑ i, v i • e₀.localFrame basisE i z)
+    have hBeqinv : (0 : Real) < Beq⁻¹ := inv_pos.mpr hBeq
+    rw [hsq, hg]
+    calc (1 / (2 * Beq)) * ∑ i : Idx, v i ^ 2
+        = Beq⁻¹ * ((1 / 2) * ∑ i : Idx, v i ^ 2) := by
+          field_simp
+      _ ≤ Beq⁻¹ * (v ⬝ᵥ (gramE (I := I) e₀ gRef basisE z).mulVec v) :=
+          mul_le_mul_of_nonneg_left hRef hBeqinv.le
+      _ = Beq⁻¹ * gRef.inner z (∑ i, v i • e₀.localFrame basisE i z)
+            (∑ j, v j • e₀.localFrame basisE j z) := by rw [hgRef]
+      _ ≤ g.inner z (∑ i, v i • e₀.localFrame basisE i z)
+            (∑ j, v j • e₀.localFrame basisE j z) := hlow'
+  have h := ginv_compL2_le (I := I) e₀ g basisE (1 / (2 * Beq)) (by positivity) hquadG
+  calc compL2 (ginvCompField (I := I) e₀ g basisE z)
+      ≤ Real.sqrt (Fintype.card Idx) / (1 / (2 * Beq)) := h
+    _ = Real.sqrt (Fintype.card Idx) * (2 * Beq) := by
+        rw [one_div, div_eq_mul_inv, inv_inv]
+
 end DifferentialGeometry.PDE.RicciFlow
