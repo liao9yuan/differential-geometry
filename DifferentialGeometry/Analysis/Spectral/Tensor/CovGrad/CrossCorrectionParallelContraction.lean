@@ -1136,6 +1136,62 @@ private theorem crossCorrectionSection_iteratedCovGrad_eq_appCcRS_slotExtendPow
       (permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2] (loweredConnDiffSection (I := I) g₁ g₀))) p
 
 set_option linter.unusedSectionVars false in
+/-- **(POSITED CHILD — the Gagliardo–Nirenberg two-arm `L²` bound on the cross-correction `Rest` arm.)**
+The squared metric `L²` mass of the section-level **rest** cell of the order-`p` cross-correction jet —
+the difference `∇^p (crossCorrectionSection g₁ g₀ T₁) − Top_p`, where the **top** cell
+`Top_p = crossCorrParallelContraction g₀ (a := 0) (b := p) (realizeSymm T₁)
+(∇^p (permute c[0,1,2] loweredConnDiffSection))` is the `i = 0` binomial cell (all `p` derivatives on
+the connection-difference factor, none on the realized perturbation `h = ccTensorBilinSymm g₀ T₁`) —
+is dominated, uniformly over the fibre-small (`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, `δ < 1/2`)
+supercritically `H^{p+3+a}`-bounded (`2a > finrank + 4`) perturbation family, by the
+Gagliardo–Nirenberg grid: a constant times the **lower** covariant gradients of the connection
+difference `∑_{q < p} ‖∇^q loweredConnDiffSection‖²` (kept as themselves, the lower-order jets) plus the
+`≤ (p+1)`-jet of `T₁` `∑_{l ≤ p+1} ‖∇^l T₁‖²`.
+
+This is the genuine **deep frontier content** of the decomposition: the `i ≥ 1` binomial cells
+`∇^i h ⊛ ∇^l D` (`i ≥ 1`) of the operator-reduced covariant Leibniz of the parallel cometric
+contraction `h ⌟ D` (`crossCorrParallelContraction_covGrad`), each a genuine *product* of two
+independently varying factors that funds only pointwise the order-`≤ 2` jet of `h`
+(`exists_realizeSymm_iteratedCovGradJet2_sup_le`) against the unbounded jets of `D`, hence integrable
+only after Gagliardo–Nirenberg interpolation (`exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le`)
+with the supercritical `C⁰` sup of the realized perturbation (`exists_realizedJetSum_le_toHs_sharpOrder`).
+The top cell `Top_p`, peeled at the **section level** here so the sharp `δ²` op-norm passenger bound
+(`crossCorrParallelContraction_rfns_le_sq_passenger`, NO dimension factor) applies to it directly, is
+NOT part of this `Rest` bound — it is carried by the decomposition's `Top` arm.
+
+**Non-vacuity.**  The bound carries genuine content on both the lower connection-difference jets and the
+`T₁`-jets (a zero coefficient falsifies it whenever a lower cell is genuinely present).  At `T₁ = 0`,
+`ccTensorBilinSymm g₀ 0 = 0`, so `crossCorrectionSection = 0` and `Top_p = 0` (the contraction of the
+zero realized perturbation), the difference is `0`, and the bound is `0 ≤ 0`.
+
+Its body is `sorry`: the GN two-arm interpolation grid for the `i ≥ 1` cells (the section-level
+peeling of the top cell as the passenger contraction `Top_p` makes the `slotExtendPow`-vs-
+`crossCorrCometricOp 0 p` operator re-wiring of the appCcRS factorisation unnecessary — the
+twin `crossCorrectionDiff_iteratedCovGrad_topRest_split` posits the analogous frontier). -/
+theorem crossCorrectionSection_iteratedCovGrad_rest_grid_le
+    (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ Crest : ℝ, 0 ≤ Crest ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+        (∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (p + 3 + a) T₁‖ ≤ B →
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+                (crossCorrectionSection (I := I) g₁ g₀ T₁)
+              - crossCorrParallelContraction (I := I) g₀ (a := 0) (b := p)
+                  (realizeSymmCcTensor (I := I) g₀ T₁)
+                  (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+                    (permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2]
+                      (loweredConnDiffSection (I := I) g₁ g₀)))‖ ^ 2 ≤
+          Crest * (∑ q ∈ Finset.range p,
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+                    (loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2
+              + ∑ l ∈ Finset.range (p + 1 + 1),
+                  ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2) := by
+  sorry
+
+set_option linter.unusedSectionVars false in
 /-- **(POSITED CHILD — the section-level top/rest decomposition of the cross-correction order-`p`
 covariant jet, with its two sharp arm bounds.)**  The order-`p` covariant jet of the cross-correction
 splits at the **section level** as `∇^p (crossCorrectionSection g₁ g₀ T₁) = Top + Rest`, where:
@@ -1191,7 +1247,69 @@ theorem crossCorrectionSection_iteratedCovGrad_topRest_decomp
                     (loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2
               + ∑ l ∈ Finset.range (p + 1 + 1),
                   ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2) := by
-  sorry
+  classical
+  -- The `Rest` arm constant from the posited Gagliardo–Nirenberg two-arm child.
+  obtain ⟨Crest, hCrest0, hRest⟩ :=
+    crossCorrectionSection_iteratedCovGrad_rest_grid_le (I := I) g₀ p δ hδ0 hδ1 B a ha
+  refine ⟨Crest, hCrest0, ?_⟩
+  intro T₁ g₁ hr hfib hball
+  -- The section-level **top** cell: the `i = 0` binomial cell, a passenger-rank-`p` cross-correction
+  -- contraction of the realized perturbation against the order-`p` jet of the slot-cycled lowered
+  -- connection difference, so the sharp `δ²` op-norm passenger bound applies to it directly.
+  set Top : Integral.L2.SmoothCcTensor g₀ 0 (3 + p) :=
+    crossCorrParallelContraction (I := I) g₀ (a := 0) (b := p)
+      (realizeSymmCcTensor (I := I) g₀ T₁)
+      (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+        (permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2]
+          (loweredConnDiffSection (I := I) g₁ g₀))) with hTop_def
+  refine ⟨Top, PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+      (crossCorrectionSection (I := I) g₁ g₀ T₁) - Top, ?_, ?_, ?_⟩
+  · -- The decomposition arm: `∇^p cc = Top + (∇^p cc − Top)`.
+    rw [add_sub_cancel]
+  · -- The **top** arm: `‖Top‖² ≤ δ² · ‖∇^p loweredConnDiffSection‖²`.
+    -- `‖Top‖² = ∫ rfns(Top)` and `‖∇^p lowered‖² = ∫ rfns(∇^p lowered)`; the pointwise passenger
+    -- bound `rfns(Top)(x) ≤ δ²·rfns(∇^p permute lowered)(x) = δ²·rfns(∇^p lowered)(x)` integrates.
+    set μ := riemannianVolumeMeasure (I := I) (M := M) g₀ with hμ
+    rw [hTop_def, norm_sq_eq_integral_riemannianFiberNormSq, norm_sq_eq_integral_riemannianFiberNormSq]
+    -- Pointwise passenger bound at `Y = ∇^p (permute c[0,1,2] lowered)`.
+    have hpt : ∀ x : M,
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + 0 + p) x
+            ((crossCorrParallelContraction (I := I) g₀ (a := 0) (b := p)
+                (realizeSymmCcTensor (I := I) g₀ T₁)
+                (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+                  (permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2]
+                    (loweredConnDiffSection (I := I) g₁ g₀)))).toSection x) ≤
+          δ ^ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+              (loweredConnDiffSection (I := I) g₁ g₀)).toSection x) := by
+      intro x
+      refine le_trans (crossCorrParallelContraction_rfns_le_sq_passenger (I := I) g₀ p T₁ hfib
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+          (permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2]
+            (loweredConnDiffSection (I := I) g₁ g₀))) x) ?_
+      -- `rfns(∇^p permute lowered)(x) = rfns(∇^p lowered)(x)` (slot-reindex invariance).
+      exact le_of_eq (by rw [PDE.DeTurck.riemannianFiberNormSq_iteratedCovGrad_permuteCcTensor
+        (I := I) (M := M) g₀ c[(0 : Fin 3), 1, 2] (loweredConnDiffSection (I := I) g₁ g₀) p x])
+    -- Integrate the pointwise bound.
+    have hintTop : MeasureTheory.Integrable (fun x =>
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + 0 + p) x
+          ((crossCorrParallelContraction (I := I) g₀ (a := 0) (b := p)
+              (realizeSymmCcTensor (I := I) g₀ T₁)
+              (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+                (permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2]
+                  (loweredConnDiffSection (I := I) g₁ g₀)))).toSection x)) μ :=
+      integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g₀ 0 (3 + 0 + p) _
+    have hintLow : MeasureTheory.Integrable (fun x =>
+        δ ^ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+            (loweredConnDiffSection (I := I) g₁ g₀)).toSection x)) μ :=
+      (integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g₀ 0 (3 + p) _).const_mul (δ ^ 2)
+    rw [← MeasureTheory.integral_const_mul]
+    refine MeasureTheory.integral_mono_of_nonneg (Eventually.of_forall (fun x => ?_))
+      hintLow (Eventually.of_forall hpt)
+    exact riemannianFiberNormSq_nonneg _ _ _ _ _
+  · -- The **rest** arm: the posited Gagliardo–Nirenberg two-arm bound, verbatim.
+    exact hRest T₁ g₁ hr hfib hball
 
 set_option linter.unusedSectionVars false in
 /-- **(LEAF — the cross-correction order-`p` covariant jet top/rest split, δ-separated, integrated
