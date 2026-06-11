@@ -630,7 +630,7 @@ set_option linter.unusedSectionVars false in
 /-- The model image of the cometric double-trace fibre operator is the model `modelDoubleTrace` against
 the cometric reading on the rank-cast model input.  Definitional, since `Tensor0SSpace.toModel =
 tensor0SSpace_continuousLinearEquiv` is the identity. -/
-private theorem crossCorrCometricOpFib_toModel (g₀ : SmoothRiemannianMetric I M) (a b : ℕ) (x : M)
+theorem crossCorrCometricOpFib_toModel (g₀ : SmoothRiemannianMetric I M) (a b : ℕ) (x : M)
     (P : Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x) :
     Tensor0SBundle.Tensor0SSpace.toModel
         ((show Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x →L[ℝ]
