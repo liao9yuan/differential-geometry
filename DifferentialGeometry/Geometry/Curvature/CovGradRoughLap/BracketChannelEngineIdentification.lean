@@ -104,7 +104,7 @@ summed (`pointwiseTensorCurvPairing_eq_frameSum`), the genuine fibres `remDiffGe
 `⟨GcurvSection g s S, ∇S⟩(x)` (`genuineFrameSum_pairing_pointwise_eq_GcurvSection`), and the bracket fibre
 is their difference (`remDiffFib_eq_genuine_add_bracket`, `tensorInnerPointwise_add_left`). No moving-frame
 derivative and no curvature input survives. -/
-private theorem frameSumBracketFib_pairing_pointwise_eq_movingFrameRemainder
+private theorem frameSumBracketFib_pairing_pointwise_eq_movingFrameRemainder_engineLocal
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) :
     (∑ i : Fin (Module.finrank ℝ E),
         tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x
@@ -410,7 +410,7 @@ theorem bracketChannelRemainder_integral_eq_diffCurvOpField_ricTrace
     rw [hμ, tensorL2Inner]
     refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
     rw [hgradS]
-    exact frameSumBracketFib_pairing_pointwise_eq_movingFrameRemainder (I := I) (M := M) g s S x
+    exact frameSumBracketFib_pairing_pointwise_eq_movingFrameRemainder_engineLocal (I := I) (M := M) g s S x
   rw [hLHS]
   -- Step 2 (split the LHS cross-pairing): `⟨Curv − Gcurv, ∇S⟩ = ⟨Curv, ∇S⟩ − ⟨Gcurv, ∇S⟩`.
   have hintC := SmoothCcTensor.integrable_inner_cross (I := I) (M := M) (Curv - Gcurv) gradS
