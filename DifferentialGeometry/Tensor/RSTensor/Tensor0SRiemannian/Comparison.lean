@@ -393,6 +393,36 @@ theorem sum_comp_sq_le_pow_normSq0S
     ← coordInner0S_identity_eq_sum_sq (I := I) (x := x) s A basis]
   exact coordInner0S_identity_le_pow_quad (I := I) (x := x) s Q C hC hQsymm hQlb A basis
 
+/-- **Intrinsic norm versus component `ℓ²` under a near-identity inverse Gram**
+(the reverse of `sum_comp_sq_le_pow_normSq0S`): if `Q` realizes the inverse
+metric of `g` in `basis` and is entrywise within `ε` of the identity, the
+intrinsic squared `g`-norm of a `(0,s)` tensor is bounded by
+`((1+ε)·card)^s` times the raw component `ℓ²`. -/
+theorem normSq0S_le_pow_sum_comp_sq
+    (g : SmoothMetric_gen I M) (x : M) (s : Nat)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (Q : Idx -> Idx -> Real) (ε : Real) (hε0 : 0 <= ε)
+    (hginv : MetricInverseInBasis_gen (I := I) g x basis Q)
+    (hnear : forall i j : Idx, |Q i j - (if i = j then (1 : Real) else 0)| <= ε)
+    (A : Tensor0SSpace s I x) :
+    normSq0S (I := I) g x s A <=
+      ((1 + ε) * (Fintype.card Idx : Real)) ^ s *
+        ∑ I0 : Fin s -> Idx,
+          tensor0SComponent (I := I) A (fun i => basis i) I0 ^ 2 := by
+  classical
+  rw [normSq0S_eq_coord (I := I) g x s basis Q hginv A]
+  have hQform : coordInner0S (I := I) (x := x) s Q A A basis
+      = ∑ I0 : Fin s -> Idx, ∑ J0 : Fin s -> Idx,
+          (∏ a : Fin s, Q (I0 a) (J0 a)) *
+            (tensor0SComponent (I := I) A (fun i => basis i) I0 *
+              tensor0SComponent (I := I) A (fun i => basis i) J0) := by
+    unfold coordInner0S
+    exact Finset.sum_congr rfl fun I0 _ => Finset.sum_congr rfl fun J0 _ =>
+      mul_assoc _ _ _
+  rw [hQform]
+  exact DifferentialGeometry.HCGCompactness.quad_ub_of_near_id Q ε hε0 hnear s
+    (fun I0 => tensor0SComponent (I := I) A (fun i => basis i) I0)
+
 end DiagonalCoordinate
 
 section MetricEquiv

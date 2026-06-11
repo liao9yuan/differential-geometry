@@ -132,7 +132,8 @@ theorem gramInv_near_id
     {ε : Real} (hε : 0 < ε) :
     ∃ u' : Set M, IsOpen u' ∧ x ∈ u' ∧ u' ⊆ e₀.baseSet ∧
       ∀ z ∈ u', ∀ i j : Idx,
-        |(gramE (I := I) e₀ g basisE z)⁻¹ i j - (if i = j then 1 else 0)| ≤ ε := by
+        |(gramE (I := I) e₀ g basisE z)⁻¹ i j - (if i = j then 1 else 0)| ≤ ε ∧
+        |gramE (I := I) e₀ g basisE z i j - (if i = j then 1 else 0)| ≤ ε := by
   classical
   -- entrywise continuity of the Gram on the trivialization domain
   have hentry : ∀ i j : Idx, ContinuousWithinAt
@@ -193,14 +194,28 @@ theorem gramInv_near_id
       refine Filter.eventually_of_mem hball fun t ht => ?_
       simpa [Metric.mem_closedBall, Real.dist_eq] using ht
     exact hcwa.eventually hb
+  -- the Gram entries themselves are also eventually near the identity
+  have hevG1 : ∀ i j : Idx, ∀ᶠ z in nhdsWithin x e₀.baseSet,
+      |gramE (I := I) e₀ g basisE z i j - (if i = j then 1 else 0)| ≤ ε := by
+    intro i j
+    have hval : gramE (I := I) e₀ g basisE x i j = (if i = j then (1 : Real) else 0) := by
+      rw [hONx, Matrix.one_apply]
+    have hb : ∀ᶠ t in nhds (gramE (I := I) e₀ g basisE x i j),
+        |t - (if i = j then (1 : Real) else 0)| ≤ ε := by
+      rw [hval]
+      have hball := Metric.closedBall_mem_nhds (x := (if i = j then (1 : Real) else 0)) hε
+      refine Filter.eventually_of_mem hball fun t ht => ?_
+      simpa [Metric.mem_closedBall, Real.dist_eq] using ht
+    exact (hentry i j).eventually hb
   -- combine the finitely many entries and extract an open neighborhood
   have hev : ∀ᶠ z in nhdsWithin x e₀.baseSet, ∀ i j : Idx,
-      |(gramE (I := I) e₀ g basisE z)⁻¹ i j - (if i = j then 1 else 0)| ≤ ε := by
+      |(gramE (I := I) e₀ g basisE z)⁻¹ i j - (if i = j then 1 else 0)| ≤ ε ∧
+      |gramE (I := I) e₀ g basisE z i j - (if i = j then 1 else 0)| ≤ ε := by
     rw [Filter.eventually_all]
     intro i
     rw [Filter.eventually_all]
     intro j
-    exact hev1 i j
+    exact (hev1 i j).and (hevG1 i j)
   obtain ⟨t, htopen, hxt, hsub⟩ := mem_nhdsWithin.mp hev
   exact ⟨t ∩ e₀.baseSet, htopen.inter e₀.open_baseSet, ⟨hxt, hx⟩,
     Set.inter_subset_right, fun z hz => hsub hz⟩
@@ -311,13 +326,21 @@ theorem exists_goodFrame_compBound
             ((trivializationAt E (TangentSpace I : M → Type _) x).localFrame basisE i x)
             ((trivializationAt E (TangentSpace I : M → Type _) x).localFrame basisE j x) =
           if i = j then 1 else 0) ∧
-        ∀ z, ∀ hz : z ∈ (trivializationAt E (TangentSpace I : M → Type _) x).baseSet,
+        (∀ z, ∀ hz : z ∈ (trivializationAt E (TangentSpace I : M → Type _) x).baseSet,
           z ∈ u' → ∀ (s : ℕ) (A : Tensor0SSpace s I z),
             (∑ I0 : Fin s → Fin (Module.finrank Real E),
               Tensor0SBundle.component0S (I := I)
                 (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
                     I 1 basisE).toBasisAt hz) A I0 ^ 2) ≤
-              2 ^ s * Tensor0SBundle.normSq0S (I := I) gRef z s A := by
+              2 ^ s * Tensor0SBundle.normSq0S (I := I) gRef z s A) ∧
+        ∀ z, ∀ hz : z ∈ (trivializationAt E (TangentSpace I : M → Type _) x).baseSet,
+          z ∈ u' → ∀ (s : ℕ) (A : Tensor0SSpace s I z),
+            Tensor0SBundle.normSq0S (I := I) gRef z s A ≤
+              ((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ s *
+              (∑ I0 : Fin s → Fin (Module.finrank Real E),
+                Tensor0SBundle.component0S (I := I)
+                  (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+                      I 1 basisE).toBasisAt hz) A I0 ^ 2) := by
   classical
   obtain ⟨basisE, hONraw⟩ := exists_trivONBasis (I := I) gRef x
   set e₀ := trivializationAt E (TangentSpace I : M → Type _) x with he₀
@@ -336,30 +359,79 @@ theorem exists_goodFrame_compBound
     linarith
   obtain ⟨u', hopen, hxu', hsub, hnear⟩ :=
     gramInv_near_id (I := I) e₀ gRef basisE hxbase hONx hε
-  refine ⟨basisE, u', hopen, hxu', hsub, hONraw, ?_⟩
-  intro z hz hzu' s A
-  -- the quadratic-form lower bound for the inverse Gram at `z`
-  have hQlb := quad_lb_of_near_id
-    (fun i j => (gramE (I := I) e₀ gRef basisE z)⁻¹ i j) ε hε.le
-    (fun i j => hnear z hzu' i j) hsmall
-  -- the component-versus-norm bound from `Comparison.lean`
-  have hkey := Tensor0SBundle.sum_comp_sq_le_pow_normSq0S (I := I) gRef z s
-    (((e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE)).toBasisAt hz)
-    (fun i j => (gramE (I := I) e₀ gRef basisE z)⁻¹ i j) 2 two_pos
-    (gramInv_inverse (I := I) e₀ gRef basisE hz)
-    (fun i j => gramInv_symm (I := I) e₀ gRef basisE z i j)
-    hQlb A
-  -- bridge `component0S` ↔ `tensor0SComponent`
-  calc (∑ I0 : Fin s → Fin (Module.finrank Real E),
-        Tensor0SBundle.component0S (I := I)
-          (((e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE)).toBasisAt hz) A I0 ^ 2)
-      = ∑ I0 : Fin s → Fin (Module.finrank Real E),
+  refine ⟨basisE, u', hopen, hxu', hsub, hONraw, ?_, ?_⟩
+  · intro z hz hzu' s A
+    -- the quadratic-form lower bound for the inverse Gram at `z`
+    have hQlb := quad_lb_of_near_id
+      (fun i j => (gramE (I := I) e₀ gRef basisE z)⁻¹ i j) ε hε.le
+      (fun i j => (hnear z hzu' i j).1) hsmall
+    -- the component-versus-norm bound from `Comparison.lean`
+    have hkey := Tensor0SBundle.sum_comp_sq_le_pow_normSq0S (I := I) gRef z s
+      (((e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE)).toBasisAt hz)
+      (fun i j => (gramE (I := I) e₀ gRef basisE z)⁻¹ i j) 2 two_pos
+      (gramInv_inverse (I := I) e₀ gRef basisE hz)
+      (fun i j => gramInv_symm (I := I) e₀ gRef basisE z i j)
+      hQlb A
+    -- bridge `component0S` ↔ `tensor0SComponent`
+    calc (∑ I0 : Fin s → Fin (Module.finrank Real E),
+          Tensor0SBundle.component0S (I := I)
+            (((e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE)).toBasisAt hz) A I0 ^ 2)
+        = ∑ I0 : Fin s → Fin (Module.finrank Real E),
+            Tensor0SBundle.tensor0SComponent (I := I) A
+              (fun i => ((e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE)).toBasisAt hz i)
+              I0 ^ 2 := by
+          refine Finset.sum_congr rfl fun I0 _ => ?_
+          rw [Tensor0SBundle.component0S_apply, Tensor0SBundle.tensor0SComponent_apply]
+      _ ≤ 2 ^ s * Tensor0SBundle.normSq0S (I := I) gRef z s A := hkey
+  · intro z hz hzu' s A
+    have hε12 : ε ≤ 1 / 2 := by
+      rw [hε_def]
+      have h2 : (2 : Real) ≤ 2 * ((n : Real) + 1) := by
+        have hn0 : (0 : Real) ≤ (n : Real) := Nat.cast_nonneg n
+        linarith
+      exact one_div_le_one_div_of_le two_pos h2
+    have hub := Tensor0SBundle.normSq0S_le_pow_sum_comp_sq (I := I) gRef z s
+      (((e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE)).toBasisAt hz)
+      (fun i j => (gramE (I := I) e₀ gRef basisE z)⁻¹ i j) ε hε.le
+      (gramInv_inverse (I := I) e₀ gRef basisE hz)
+      (fun i j => (hnear z hzu' i j).1) A
+    have hbridge : (∑ I0 : Fin s → Fin (Module.finrank Real E),
           Tensor0SBundle.tensor0SComponent (I := I) A
             (fun i => ((e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE)).toBasisAt hz i)
-            I0 ^ 2 := by
-        refine Finset.sum_congr rfl fun I0 _ => ?_
-        rw [Tensor0SBundle.component0S_apply, Tensor0SBundle.tensor0SComponent_apply]
-    _ ≤ 2 ^ s * Tensor0SBundle.normSq0S (I := I) gRef z s A := hkey
+            I0 ^ 2)
+        = ∑ I0 : Fin s → Fin (Module.finrank Real E),
+            Tensor0SBundle.component0S (I := I)
+              (((e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE)).toBasisAt hz) A I0 ^ 2 := by
+      refine Finset.sum_congr rfl fun I0 _ => ?_
+      rw [Tensor0SBundle.component0S_apply, Tensor0SBundle.tensor0SComponent_apply]
+    have hcomp0 : (0 : Real) ≤ ∑ I0 : Fin s → Fin (Module.finrank Real E),
+        Tensor0SBundle.component0S (I := I)
+          (((e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE)).toBasisAt hz) A I0 ^ 2 :=
+      Finset.sum_nonneg fun I0 _ => sq_nonneg _
+    have hmono : ((1 + ε) * (Fintype.card (Fin (Module.finrank Real E)) : Real)) ^ s
+        ≤ ((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ s := by
+      have hcard0 : (0 : Real) ≤ (Fintype.card (Fin (Module.finrank Real E)) : Real) :=
+        Nat.cast_nonneg _
+      have hbase : (1 + ε) * (Fintype.card (Fin (Module.finrank Real E)) : Real)
+          ≤ (3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1) := by
+        nlinarith [hε.le, hε12]
+      exact pow_le_pow_left₀ (by positivity) hbase s
+    calc Tensor0SBundle.normSq0S (I := I) gRef z s A
+        ≤ ((1 + ε) * (Fintype.card (Fin (Module.finrank Real E)) : Real)) ^ s *
+            ∑ I0 : Fin s → Fin (Module.finrank Real E),
+              Tensor0SBundle.tensor0SComponent (I := I) A
+                (fun i => ((e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE)).toBasisAt hz i)
+                I0 ^ 2 := hub
+      _ = ((1 + ε) * (Fintype.card (Fin (Module.finrank Real E)) : Real)) ^ s *
+            ∑ I0 : Fin s → Fin (Module.finrank Real E),
+              Tensor0SBundle.component0S (I := I)
+                (((e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE)).toBasisAt hz) A I0 ^ 2 := by
+          rw [hbridge]
+      _ ≤ ((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ s *
+            ∑ I0 : Fin s → Fin (Module.finrank Real E),
+              Tensor0SBundle.component0S (I := I)
+                (((e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE)).toBasisAt hz) A I0 ^ 2 :=
+          mul_le_mul_of_nonneg_right hmono hcomp0
 
 set_option backward.isDefEq.respectTransparency false in
 /-- **The tower bound at a good-frame point** (the non-orthonormal sibling of
@@ -434,5 +506,81 @@ theorem compL2_tower_le
           Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef y (r + j)
             (iterCov (I := I) gRef r T j y)) :=
         mul_le_mul_of_nonneg_right hs (Real.sqrt_nonneg _)
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The reverse tower bound at a good-frame point**: from the
+norm-versus-component upper bound (`exists_goodFrame_compBound`'s second
+output, with constant `Cu ≥ 1`), the intrinsic norm of the `iterCov` tower is
+bounded by `Cu^{r+j}` times the component `ℓ²` of the tower. -/
+theorem sqrt_tower_le_compL2
+    (gRef : SmoothRiemannianMetric I M) {r : ℕ}
+    (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) r)
+    (frame : Idx → (x : M) → TangentSpace I x) {u : Set M}
+    (hframe : IsLocalFrameOn I E 1 frame u) (hu : IsOpen u)
+    {y : M} (hy : y ∈ u)
+    (Cu : Real) (hCu : 1 ≤ Cu)
+    (hub : ∀ (s : ℕ) (A : Tensor0SSpace s I y),
+      Tensor0SBundle.normSq0S (I := I) gRef y s A ≤
+        Cu ^ s * (∑ I0 : Fin s → Idx,
+          Tensor0SBundle.component0S (I := I) (hframe.toBasisAt hy) A I0 ^ 2))
+    (j : ℕ) :
+    Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef y (r + j)
+        (iterCov (I := I) gRef r T j y)) ≤
+      Cu ^ (r + j) * compL2 (iterCovComp (I := I) frame
+        (fun y' => christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef)
+          frame hframe y')
+        (frameComp0S (I := I) T frame) j y) := by
+  have hsq : compL2Sq (iterCovComp (I := I) frame
+      (fun y' => christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef)
+        frame hframe y')
+      (frameComp0S (I := I) T frame) j y) =
+      ∑ I0 : Fin (r + j) → Idx,
+        Tensor0SBundle.component0S (I := I) (hframe.toBasisAt hy)
+          (iterCov (I := I) gRef r T j y) I0 ^ 2 := by
+    simp only [compL2Sq]
+    refine Finset.sum_congr rfl fun n _ => ?_
+    rw [iterCovComp_eq_iterCov (I := I) gRef T frame hframe hu j hy n]
+    congr 1
+    rw [Tensor0SBundle.component0S_apply]
+    congr 1
+    funext q
+    rw [IsLocalFrameOn.toBasisAt_coe]
+    rfl
+  have hbound := hub (r + j) (iterCov (I := I) gRef r T j y)
+  have hCp : (1 : Real) ≤ Cu ^ (r + j) := one_le_pow₀ hCu
+  have hs : Real.sqrt (Cu ^ (r + j)) ≤ Cu ^ (r + j) := by
+    have h2 : (Cu ^ (r + j)) ≤ (Cu ^ (r + j)) ^ 2 := by nlinarith
+    calc Real.sqrt (Cu ^ (r + j))
+        ≤ Real.sqrt ((Cu ^ (r + j)) ^ 2) := Real.sqrt_le_sqrt h2
+      _ = Cu ^ (r + j) := Real.sqrt_sq (by linarith)
+  calc Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef y (r + j)
+        (iterCov (I := I) gRef r T j y))
+      ≤ Real.sqrt (Cu ^ (r + j) *
+          ∑ I0 : Fin (r + j) → Idx,
+            Tensor0SBundle.component0S (I := I) (hframe.toBasisAt hy)
+              (iterCov (I := I) gRef r T j y) I0 ^ 2) := Real.sqrt_le_sqrt hbound
+    _ = Real.sqrt (Cu ^ (r + j)) *
+          Real.sqrt (∑ I0 : Fin (r + j) → Idx,
+            Tensor0SBundle.component0S (I := I) (hframe.toBasisAt hy)
+              (iterCov (I := I) gRef r T j y) I0 ^ 2) :=
+        Real.sqrt_mul (by positivity) _
+    _ ≤ Cu ^ (r + j) *
+          Real.sqrt (∑ I0 : Fin (r + j) → Idx,
+            Tensor0SBundle.component0S (I := I) (hframe.toBasisAt hy)
+              (iterCov (I := I) gRef r T j y) I0 ^ 2) :=
+        mul_le_mul_of_nonneg_right hs (Real.sqrt_nonneg _)
+    _ = Cu ^ (r + j) * compL2 (iterCovComp (I := I) frame
+          (fun y' => christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef)
+            frame hframe y')
+          (frameComp0S (I := I) T frame) j y) := by
+        rw [show compL2 (iterCovComp (I := I) frame
+            (fun y' => christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef)
+              frame hframe y')
+            (frameComp0S (I := I) T frame) j y) =
+          Real.sqrt (compL2Sq (iterCovComp (I := I) frame
+            (fun y' => christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef)
+              frame hframe y')
+            (frameComp0S (I := I) T frame) j y)) from rfl, hsq]
 
 end DifferentialGeometry.PDE.RicciFlow

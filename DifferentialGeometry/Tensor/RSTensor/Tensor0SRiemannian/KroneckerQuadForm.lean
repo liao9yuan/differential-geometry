@@ -445,6 +445,73 @@ theorem quad_lb_of_near_id {ι : Type*} [Fintype ι] [DecidableEq ι]
   rw [hsplit]
   linarith
 
+/-- **Quadratic-form upper bound for a kernel entrywise near the identity**
+(the mirror of `quad_lb_of_near_id`, in the `s`-fold Kronecker form).  If every
+entry of `Q` is within `ε` of the identity kernel, the `s`-fold `Q`-form is
+bounded by `((1+ε)·card)^s` times the raw `ℓ²`. -/
+theorem quad_ub_of_near_id {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (Q : ι → ι → ℝ) (ε : ℝ) (hε0 : 0 ≤ ε)
+    (hnear : ∀ i j, |Q i j - (if i = j then (1 : ℝ) else 0)| ≤ ε)
+    (s : ℕ) (c : (Fin s → ι) → ℝ) :
+    (∑ I0 : Fin s → ι, ∑ J0 : Fin s → ι,
+        (∏ a, Q (I0 a) (J0 a)) * (c I0 * c J0)) ≤
+      ((1 + ε) * (Fintype.card ι : ℝ)) ^ s * ∑ I0 : Fin s → ι, c I0 ^ 2 := by
+  classical
+  have hQabs : ∀ i j, |Q i j| ≤ 1 + ε := by
+    intro i j
+    have h := hnear i j
+    have habs : |if i = j then (1 : ℝ) else 0| ≤ 1 := by
+      by_cases hij : i = j <;> simp [hij]
+    calc |Q i j|
+        = |(Q i j - (if i = j then (1 : ℝ) else 0)) + (if i = j then (1 : ℝ) else 0)| := by
+          congr 1
+          ring
+      _ ≤ |Q i j - (if i = j then (1 : ℝ) else 0)| + |if i = j then (1 : ℝ) else 0| :=
+          abs_add_le _ _
+      _ ≤ ε + 1 := add_le_add h habs
+      _ = 1 + ε := by ring
+  have hprod : ∀ I0 J0 : Fin s → ι, |∏ a, Q (I0 a) (J0 a)| ≤ (1 + ε) ^ s := by
+    intro I0 J0
+    rw [Finset.abs_prod]
+    calc (∏ a, |Q (I0 a) (J0 a)|)
+        ≤ ∏ _a : Fin s, (1 + ε) :=
+          Finset.prod_le_prod (fun a _ => abs_nonneg _) (fun a _ => hQabs _ _)
+      _ = (1 + ε) ^ s := by simp
+  calc (∑ I0 : Fin s → ι, ∑ J0 : Fin s → ι,
+        (∏ a, Q (I0 a) (J0 a)) * (c I0 * c J0))
+      ≤ ∑ I0 : Fin s → ι, ∑ J0 : Fin s → ι,
+          (1 + ε) ^ s * (|c I0| * |c J0|) := by
+        refine Finset.sum_le_sum fun I0 _ => Finset.sum_le_sum fun J0 _ => ?_
+        calc (∏ a, Q (I0 a) (J0 a)) * (c I0 * c J0)
+            ≤ |(∏ a, Q (I0 a) (J0 a)) * (c I0 * c J0)| := le_abs_self _
+          _ = |∏ a, Q (I0 a) (J0 a)| * (|c I0| * |c J0|) := by
+              rw [abs_mul, abs_mul]
+          _ ≤ (1 + ε) ^ s * (|c I0| * |c J0|) :=
+              mul_le_mul_of_nonneg_right (hprod I0 J0)
+                (mul_nonneg (abs_nonneg _) (abs_nonneg _))
+    _ = (1 + ε) ^ s * ((∑ I0 : Fin s → ι, |c I0|) * (∑ J0 : Fin s → ι, |c J0|)) := by
+        rw [Finset.sum_mul_sum, Finset.mul_sum]
+        refine Finset.sum_congr rfl fun I0 _ => ?_
+        rw [Finset.mul_sum]
+    _ ≤ (1 + ε) ^ s * ((Fintype.card (Fin s → ι) : ℝ) * ∑ I0 : Fin s → ι, c I0 ^ 2) := by
+        refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+        calc (∑ I0 : Fin s → ι, |c I0|) * (∑ J0 : Fin s → ι, |c J0|)
+            = (∑ I0 : Fin s → ι, |c I0|) ^ 2 := (pow_two _).symm
+          _ ≤ (Finset.univ : Finset (Fin s → ι)).card * ∑ I0 : Fin s → ι, |c I0| ^ 2 := by
+              simpa using sq_sum_le_card_mul_sum_sq
+                (s := (Finset.univ : Finset (Fin s → ι))) (f := fun I0 => |c I0|)
+          _ = (Fintype.card (Fin s → ι) : ℝ) * ∑ I0 : Fin s → ι, c I0 ^ 2 := by
+              rw [Finset.card_univ]
+              congr 1
+              exact Finset.sum_congr rfl fun I0 _ => sq_abs (c I0)
+    _ = ((1 + ε) * (Fintype.card ι : ℝ)) ^ s * ∑ I0 : Fin s → ι, c I0 ^ 2 := by
+        have hcard : (Fintype.card (Fin s → ι) : ℝ) = ((Fintype.card ι : ℝ)) ^ s := by
+          rw [Fintype.card_fun, Fintype.card_fin]
+          push_cast
+          ring
+        rw [hcard, mul_pow]
+        ring
+
 end KroneckerPow
 
 end DifferentialGeometry.HCGCompactness

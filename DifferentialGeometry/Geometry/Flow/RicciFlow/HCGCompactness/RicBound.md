@@ -1,5 +1,59 @@
 # RicBound.lean — THE `ric_bound` endpoint (MSM135 Lemma 3.11, Step 4 (A_N))
 
+## ⚡ ASSEMBLY DESIGN (2026-06-11, ACTIVE — the /goal "finish ric_bound" run)
+
+**Uniformization wave DONE (commit af9eeb83, all green):** claim1_abstract/claim1
+(AkMFold), claim1_LC/claim2_component/mixed_descent/aN_component (RicBoundClaims)
+are now CONSTANTS-FIRST (∃C before the varying field data: metric, moving
+Christoffels, T, gComp, Ginv + their bound hypotheses; frame/chrH(gRef)/numerics
+stay before ∃).  This was REQUIRED: ric_bound's Cpp/Cppp must be uniform over
+(i,t), and the old per-invocation ∃ hid the (numeric-only) constant formulas.
+claim1_geom call site updated.  Each proof = same script, intros moved past the
+refine ⟨formula,…⟩.
+
+**Route change: BYPASS aN_intrinsic_point (U7 skipped).** Its hinvON-at-the-
+eval-point only holds at cover centers.  Instead assemble at COMPONENT level
+with aN_component-uniform per cover domain, converting both sides with the
+TWO-SIDED goodFrame bounds valid at EVERY z ∈ u′:
+- forward (done): `exists_goodFrame_compBound` + `compL2_tower_le`
+  (compL2 tower ≤ 2^{r+j}·√normSq0S).
+- reverse (W1–W3 below): √normSq0S ≤ ((1+ε)·card)^{s}-ish · compL2.
+
+**Statement fix: hypotheses on open U ⊇ K** (book's nested sets).  The engine
+needs bounds on open frame domains; hBprev/hequiv/hShi only on K is not enough
+when K has empty interior.  Change ric_bound: add (U : Set M) (hU : IsOpen U)
+(hKU : K ⊆ U), state hequiv/hBprev/hShi over U, conclude on K.  Stage-N
+induction wrapper will thread U (record in AllTimesBounds consumer later).
+
+**Remaining work list:**
+- W1 `quad_ub_of_near_id` (KroneckerQuadForm): |Q−δ|≤ε entrywise ⟹
+  ∑∑(∏Q)c_Ic_J ≤ ((1+ε)·card)^s·∑c² (abs-triangle + ∏|Q| ≤ (1+ε)^s +
+  (∑|c|)² ≤ card^s·∑c² via sq_sum_le_card_mul_sum_sq over (Fin s → Idx)).
+- W2 Comparison upper adapter: normSq0S g x s A = coordInner0S Q ≤ … ∑comp²
+  (via normSq0S_eq_coord + W1).
+- W3 RicBoundGoodFrame: (a) extend `gramInv_near_id` to also return Gram-entry
+  closeness |gramE z i j − δ| ≤ ε (same hentry continuity, trivial); (b) reverse
+  tower bound √normSq0S(iterCov tower) ≤ Cu^{r+j}·compL2(tower) at goodFrame
+  points (mirror of compL2_tower_le via W2); (c) extend exists_goodFrame_compBound
+  to return BOTH directions + the Gram closeness; (d) moving-metric C0 bound:
+  vᵀGram_{g}v = g(W,W) ≥ Beq⁻¹·gRef(W,W) = Beq⁻¹·vᵀGramRef v ≥ (1/(2Beq))‖v‖²
+  (quad_lb_of_near_id on GramRef-entries + hequiv pointwise) → B4
+  `ginv_compL2_le` ⟹ compL2(ginvCompField e₀ g basisE) ≤ √card·2Beq on u′.
+- W4 hgB producer: hBprev (MetricCovDerivOrderBoundOn U) + R4f
+  `metricCovDerivNorm_eq_iterCov` (check signature; needs pointwise ON basis —
+  available pointwise everywhere) + `compL2_tower_le` ⟹ compL2(gRef-tower of
+  g-comps, j ≤ N−1) ≤ Kg uniform.
+- W5 hShi producer: hShi (moving norm of ricCovTower g g s) +
+  `normSq0S_le_of_metric_equiv` (Comparison:614, pointwise hequiv from
+  MetricUniformEquivalentOn) + moving-Christoffel `iterCovComp_eq_iterCov` +
+  goodFrame forward bound ⟹ compL2(moving Ricci tower) ≤ KShi uniform.
+  ALSO Ricci-component smoothness producer (B2 pattern for ricciSection (LC g))
+  — check for a generic frameComp0S-smoothness lemma first.
+- W6 assembly in RicBound.lean: per x ∈ K goodFrame u′_x ∩ U; finite subcover;
+  per domain aN_component-uniform constants; max over the cover; per (i,t,x)
+  apply component conclusion + reverse bound (LHS) + compL2_tower_le + R4f (RHS).
+  LHS defeq: ricCovTower g gRef N = iterCov gRef 2 (ricciSection (LC g)) N.
+
 ## Status (2026-06-10): STATED, verified to elaborate; proof = ONE precise `sorry`
 
 `theorem ric_bound` is the intrinsic (A_N) endpoint, stated per the user's
