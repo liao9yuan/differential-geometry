@@ -946,6 +946,110 @@ noncomputable def slotExtendPow (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) 
   | 0 => fun Φ => Φ
   | (p + 1) => fun Φ => slotExtend (I := I) (M := M) g₀ (r + p) (s + p) (slotExtendPow g₀ r s p Φ)
 
+/-- **The `p`-fold leading-slot curry of a `(0, r + p)`-fibre tensor.**  Peels the `p` passenger
+directions `q : Fin p → E` off the leading slots one at a time (newest-passenger first, matching the
+`slotExtendPow` recursion order), returning the inner `(0, r)`-fibre tensor.  The fibre-level partner of
+`slotExtendPow`'s passenger reading. -/
+private noncomputable def passengerCurry (g₀ : SmoothRiemannianMetric I M) (r : ℕ) (x : M) :
+    ∀ (p : ℕ), Tensor0SBundle.Tensor0SSpace (r + p) I x → (Fin p → E) →
+      Tensor0SBundle.Tensor0SSpace r I x
+  | 0, D, _ => D
+  | (p + 1), D, q =>
+      passengerCurry g₀ r x p
+        ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (r + p) x)
+          (show Tensor0SBundle.Tensor0SSpace ((r + p) + 1) I x from D) (q 0))
+        (fun j : Fin p => q (Fin.succ j))
+
+set_option linter.unusedSectionVars false in
+/-- **The `p`-fold slot extension reads its `p` leading slots as passengers.**  For a `(r, s)`-operator
+field `Φ` and a `(0, r + p)`-fibre tensor `D`, the model value of `slotExtendPow p Φ x` applied to `D`
+on the tuple `vecAppend q vs` (the `p` passenger directions `q` in the leading slots, the inner `s`-tuple
+`vs` in the trailing slots) reads the `p` passenger directions off the leading slots (of both source and
+target), leaving `Φ x` to act on the `p`-fold leading-slot curry `passengerCurry p D q`, evaluated on the
+trailing `s`-tuple `vs`.  Proved by induction on `p` through `slotExtendFib_apply_eval` (the single-slot
+leading-passenger reading) and `tensor0S_curry_apply_eval`. -/
+private theorem slotExtendPow_toModel_consSlots (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
+    (Φ : Integral.L2.SmoothCcTensor g₀ r s) :
+    ∀ (p : ℕ) (D : Tensor0SBundle.Tensor0SSpace (r + p) I x) (q : Fin p → E) (vs : Fin s → E),
+      Tensor0SBundle.Tensor0SSpace.toModel
+          ((show Tensor0SBundle.Tensor0SSpace (r + p) I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace (s + p) I x from
+              (slotExtendPow (I := I) (M := M) g₀ r s p Φ).toSection x) D)
+          (Matrix.vecAppend (by omega : s + p = p + s) q vs) =
+        Tensor0SBundle.Tensor0SSpace.toModel
+          ((show Tensor0SBundle.Tensor0SSpace r I x →L[ℝ] Tensor0SBundle.Tensor0SSpace s I x from
+              Φ.toSection x)
+            (passengerCurry (I := I) (M := M) g₀ r x p D q)) vs := by
+  intro p
+  induction p with
+  | zero =>
+    intro D q vs
+    show Tensor0SBundle.Tensor0SSpace.toModel
+        ((show Tensor0SBundle.Tensor0SSpace r I x →L[ℝ] Tensor0SBundle.Tensor0SSpace s I x from
+          Φ.toSection x) D) (Matrix.vecAppend (by omega : s + 0 = 0 + s) q vs) = _
+    congr 1
+    funext k
+    rw [Matrix.vecAppend_eq_ite]
+    simp only [Nat.not_lt_zero, dif_neg, not_false_iff]
+    apply congrArg
+    apply Fin.ext
+    simp
+  | succ p ih =>
+    intro D q vs
+    -- The input tuple `vecAppend q vs : Fin (s + (p+1)) = Fin ((s+p)+1)` is `Fin.cons (q 0) (rest)`.
+    set m : Fin ((s + p) + 1) → E :=
+      (Matrix.vecAppend (by omega : s + (p + 1) = (p + 1) + s) q vs :
+        Fin (s + (p + 1)) → E) with hm_def
+    have hm0 : m 0 = q 0 := by
+      rw [hm_def]
+      exact Matrix.vecAppend_apply_zero (by omega : s + (p + 1) = (p + 1) + s) q vs
+    have hmtail : Matrix.vecTail m
+        = Matrix.vecAppend (by omega : s + p = p + s) (fun j : Fin p => q (Fin.succ j)) vs := by
+      funext k
+      have hL : Matrix.vecTail m k = m k.succ := rfl
+      rw [hL, hm_def]
+      rw [Matrix.vecAppend_eq_ite (by omega : s + (p + 1) = (p + 1) + s) q vs,
+        Matrix.vecAppend_eq_ite (by omega : s + p = p + s) (fun j : Fin p => q (Fin.succ j)) vs]
+      simp only []
+      by_cases hk : (k : ℕ) < p
+      · rw [dif_pos (by simpa [Fin.val_succ] using hk : (k.succ : ℕ) < p + 1), dif_pos hk]
+        apply congrArg
+        apply Fin.ext
+        simp [Fin.val_succ]
+      · rw [dif_neg (by simpa [Fin.val_succ] using hk : ¬ (k.succ : ℕ) < p + 1), dif_neg hk]
+        apply congrArg
+        apply Fin.ext
+        simp only [Fin.val_succ]
+        omega
+    rw [show m = Fin.cons (m 0) (Matrix.vecTail m) from (Fin.cons_self_tail m).symm]
+    -- `slotExtendPow (p+1) Φ = slotExtend (slotExtendPow p Φ)`; its toSection is `slotExtendFib …`.
+    -- Restate the LHS operator through `slotExtendFib` (all defeq) so `slotExtendFib_apply_eval` fires.
+    rw [hm0]
+    rw [show Tensor0SBundle.Tensor0SSpace.toModel
+          ((show Tensor0SBundle.Tensor0SSpace (r + (p + 1)) I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace (s + (p + 1)) I x from
+              (slotExtendPow (I := I) (M := M) g₀ r s (p + 1) Φ).toSection x) D)
+            (Fin.cons (q 0) (Matrix.vecTail m))
+        = Tensor0SBundle.Tensor0SSpace.toModel
+            (slotExtendFib (I := I) (M := M) g₀ (r + p) (s + p) x
+              (show Tensor0SBundle.Tensor0SSpace (r + p) I x →L[ℝ]
+                  Tensor0SBundle.Tensor0SSpace (s + p) I x from
+                (slotExtendPow (I := I) (M := M) g₀ r s p Φ).toSection x) D)
+            (Fin.cons (q 0) (Matrix.vecTail m)) from rfl]
+    rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ (r + p) (s + p) x
+      (show Tensor0SBundle.Tensor0SSpace (r + p) I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (s + p) I x from
+        (slotExtendPow (I := I) (M := M) g₀ r s p Φ).toSection x)
+      D (q 0) (Matrix.vecTail m)]
+    rw [hmtail]
+    rw [show passengerCurry (I := I) (M := M) g₀ r x (p + 1) D q
+          = passengerCurry (I := I) (M := M) g₀ r x p
+              ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (r + p) x)
+                (show Tensor0SBundle.Tensor0SSpace ((r + p) + 1) I x from D) (q 0))
+              (fun j : Fin p => q (Fin.succ j)) from rfl]
+    exact ih ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (r + p) x)
+        (show Tensor0SBundle.Tensor0SSpace ((r + p) + 1) I x from D) (q 0))
+      (fun j : Fin p => q (Fin.succ j)) vs
+
 set_option linter.unusedSectionVars false in
 /-- The `p`-fold passenger-slot extension of a `∇₀`-parallel operator field is `∇₀`-parallel:
 `slotExtend` preserves parallelism (`covGrad_slotExtend_eq_zero_of_covGrad_eq_zero`). -/
@@ -991,6 +1095,45 @@ private theorem iteratedCovGrad_appCcRS_of_parallel (g₀ : SmoothRiemannianMetr
       (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ a b p W), zero_add]
     rw [PDE.RicciFlow.iteratedCovGrad_succ]
     rfl
+
+set_option linter.unusedSectionVars false in
+/-- **The order-`p` covariant jet of the cross-correction is the slot-extended cometric action on the
+order-`p` jet of the frame-free product section.**  Writing the cross correction as the parallel
+cometric contraction `crossCorrParallelContraction g₀ S T` (`S = realizeSymm T₁`,
+`T = permute (loweredConnDiff g₁ g₀)`, the section identity
+`crossCorrParallelContraction_eq_crossCorrectionSection`), the operator-field factorisation
+`crossCorrParallelContraction_eq_appCcRS` exhibits it as `appCcRS (crossCorrCometricOp g₀ 0 0)
+(crossCorrProdSection g₀ S T)` of the `∇₀`-parallel cometric double-trace field
+(`crossCorrCometricOp_covGrad_eq_zero`); the iterated parallel operator-field Leibniz
+`iteratedCovGrad_appCcRS_of_parallel` then carries `∇^p` through as the `p`-fold passenger extension:
+```
+∇^p (crossCorrectionSection g₁ g₀ T₁)
+  = appCcRS (slotExtendPow p (crossCorrCometricOp g₀ 0 0)) (∇^p (crossCorrProdSection g₀ S T)).
+```
+The cometric pair traces the two ORIGINAL product slots throughout; the `p` gradient directions ride as
+leading spectators (`slotExtendPow_toModel_consSlots`). -/
+private theorem crossCorrectionSection_iteratedCovGrad_eq_appCcRS_slotExtendPow
+    (g₀ g₁ : SmoothRiemannianMetric I M) (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (p : ℕ) :
+    PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+        (crossCorrectionSection (I := I) g₁ g₀ T₁) =
+      appCcRS (I := I) (M := M) g₀ 0 (((3 + 0) + (2 + 0)) + p) ((3 + 0 + 0) + p)
+        (slotExtendPow (I := I) (M := M) g₀ ((3 + 0) + (2 + 0)) (3 + 0 + 0) p
+          (crossCorrCometricOp (I := I) g₀ 0 0))
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 ((3 + 0) + (2 + 0)) p
+          (crossCorrProdSection (I := I) g₀ (a := 0) (b := 0)
+            (realizeSymmCcTensor (I := I) g₀ T₁)
+            (permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2]
+              (loweredConnDiffSection (I := I) g₁ g₀)))) := by
+  rw [← crossCorrParallelContraction_eq_crossCorrectionSection (I := I) g₀ g₁ T₁]
+  rw [crossCorrParallelContraction_eq_appCcRS (I := I) g₀ (a := 0) (b := 0)
+    (realizeSymmCcTensor (I := I) g₀ T₁)
+    (permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2] (loweredConnDiffSection (I := I) g₁ g₀))]
+  exact iteratedCovGrad_appCcRS_of_parallel (I := I) g₀ 0 ((3 + 0) + (2 + 0)) (3 + 0 + 0)
+    (crossCorrCometricOp (I := I) g₀ 0 0)
+    (crossCorrCometricOp_covGrad_eq_zero (I := I) g₀ 0 0)
+    (crossCorrProdSection (I := I) g₀ (a := 0) (b := 0)
+      (realizeSymmCcTensor (I := I) g₀ T₁)
+      (permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2] (loweredConnDiffSection (I := I) g₁ g₀))) p
 
 set_option linter.unusedSectionVars false in
 /-- **(LEAF — the cross-correction order-`p` covariant jet top/rest split, δ-separated, integrated
