@@ -614,6 +614,223 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le
     rw [hc]
     ring
 
+/-- **The asymmetric pair two-arm integral bound for a section dominated by a difference-factor /
+fixed-pair diagonal product grid.**
+
+Fix an anchor `g`, the difference-factor valence `s₁`, the fixed-pair valence `s₂`, a window `k`,
+and a gradient order `j`.  There is a single nonnegative constant `Cd`, uniform over the section
+`U`, the difference factor `W`, the fixed pair `(T₁, T₂)`, the leading grid constant `Cmid`, and the
+two `C⁰` fibre-sup levels `Λ_W, Λ_T`, such that whenever
+
+* `U` is dominated *pointwise* by the diagonal product grid of `W` against the **pair** `(T₁, T₂)`,
+  `rfns(∇^j U)(x) ≤ Cmid · ∑_{i ≤ k} rfns(∇^i W)(x) · ∑_{l ≤ k−i} (rfns(∇^l T₁)(x)+rfns(∇^l T₂)(x))`,
+* `W` has `C⁰` fibre sup `√rfns(W) ≤ Λ_W` and each `T_p` has `C⁰` fibre sup `√rfns(T_p) ≤ Λ_T`,
+
+then the `L²`-norm-squared of `∇^j U` is bounded by the **two-arm** sum
+
+  `‖∇^j U‖² ≤ Cd·Cmid·Λ_T² · ∑_{i ≤ k} ‖∇^i W‖²  +  Cd·Cmid·Λ_W² · ∑_{l ≤ k} (‖∇^l T₁‖²+‖∇^l T₂‖²)`,
+
+the **difference arm** carrying the full `L²`-jet scale of the difference factor `W` against the
+fixed pair's `C⁰` sup `Λ_T`, and the **cross arm** carrying the full `L²`-jet scale of the fixed pair
+`(T₁, T₂)` against the difference factor's `C⁰` sup `Λ_W`.
+
+This is the asymmetric, pair-second-factor companion of
+`exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le`: the grid hypothesis is consumed
+*pointwise* (the honest covariant-Leibniz shape its difference-jet consumers deliver) and the bound
+is the integrated `L²`-norm-squared of the dominated section `U`.  It is proven sorry-free by
+integrating the pointwise grid (`‖∇^j U‖² = ∫ rfns(∇^j U) ≤ ∫ grid` via the squared-fibre-norm
+bridge `tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq`), splitting the pair grid by
+linearity into the `T₁`- and `T₂`-grids, and applying the symmetric integrated engine to each — so it
+depends transitively only on the `Lᵖ`-interpolation `sorry` of that engine, which `#print axioms`
+records as `sorryAx`.
+
+**Non-vacuity.**  `Cd` is uniform over `(U, W, T₁, T₂, Cmid, Λ_W, Λ_T)` (quantified before them);
+the difference arm carries `W`'s full jet scale (a degenerate `Cd = 0` is rejected whenever the grid
+genuinely reads a `W`-jet), the cross arm carries **both** fixed-pair endpoints `T₁, T₂`; at
+`Cmid = 0` (or `W = 0`, `T₁ = T₂ = 0`) the grid vanishes and the bound is `0 ≤ 0`.  The fixed-pair
+factor is genuinely a **pair**, summed, never a single tensor. -/
+theorem exists_integrated_diagonalProductGrid_twoArm_pair_le
+    (g : SmoothRiemannianMetric I M) (s₁ s₂ k j : ℕ) :
+    ∃ Cd : ℝ, 0 ≤ Cd ∧
+      ∀ (U W : Integral.L2.SmoothCcTensor g 0 s₁)
+        (T₁ T₂ : Integral.L2.SmoothCcTensor g 0 s₂) (Cmid ΛW ΛT : ℝ),
+        0 ≤ Cmid → 0 ≤ ΛW → 0 ≤ ΛT →
+        (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 s₁ x (W.toSection x) ≤ ΛW ^ 2) →
+        (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 s₂ x (T₁.toSection x) ≤ ΛT ^ 2) →
+        (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 s₂ x (T₂.toSection x) ≤ ΛT ^ 2) →
+        (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 (s₁ + j) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ j U).toSection x) ≤
+            Cmid * ∑ i ∈ Finset.range (k + 1),
+              riemannianFiberNormSq (I := I) (M := M) g 0 (s₁ + i) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ i W).toSection x)
+                * ∑ l ∈ Finset.range (k + 1 - i),
+                    (riemannianFiberNormSq (I := I) (M := M) g 0 (s₂ + l) x
+                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T₁).toSection x)
+                      + riemannianFiberNormSq (I := I) (M := M) g 0 (s₂ + l) x
+                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T₂).toSection x))) →
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ j U‖ ^ 2 ≤
+            Cd * Cmid * ΛT ^ 2 * ∑ i ∈ Finset.range (k + 1),
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ i W‖ ^ 2
+          + Cd * Cmid * ΛW ^ 2 * ∑ l ∈ Finset.range (k + 1),
+                (‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T₁‖ ^ 2
+                  + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T₂‖ ^ 2) := by
+  classical
+  haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g) :=
+    riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g
+  set μ : Measure M := riemannianVolumeMeasure (I := I) (M := M) g with hμ
+  -- The single symmetric engine constant (one valence pair, window `k`).
+  obtain ⟨C, hC0, hsym⟩ :=
+    exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le (I := I) (M := M) g s₁ s₂ k
+  refine ⟨2 * C, by positivity, ?_⟩
+  intro U W T₁ T₂ Cmid ΛW ΛT hCmid hΛW hΛT hWsup hT₁sup hT₂sup hgrid
+  -- Abbreviations for the difference-factor and fixed-pair jet squared fibre norms.
+  set Wj : ℕ → M → ℝ := fun a x =>
+    riemannianFiberNormSq (I := I) (M := M) g 0 (s₁ + a) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ a W).toSection x) with hWj
+  set T1j : ℕ → M → ℝ := fun b x =>
+    riemannianFiberNormSq (I := I) (M := M) g 0 (s₂ + b) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ b T₁).toSection x) with hT1j
+  set T2j : ℕ → M → ℝ := fun b x =>
+    riemannianFiberNormSq (I := I) (M := M) g 0 (s₂ + b) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ b T₂).toSection x) with hT2j
+  -- Continuity / nonnegativity / integrability of the jet squared fibre norms.
+  have hWj_cont : ∀ a, Continuous (Wj a) := fun a => by
+    rw [hWj]; exact continuous_rfns g 0 (s₁ + a) _
+  have hT1j_cont : ∀ b, Continuous (T1j b) := fun b => by
+    rw [hT1j]; exact continuous_rfns g 0 (s₂ + b) _
+  have hT2j_cont : ∀ b, Continuous (T2j b) := fun b => by
+    rw [hT2j]; exact continuous_rfns g 0 (s₂ + b) _
+  have hWj_nn : ∀ a x, 0 ≤ Wj a x := fun a x => by
+    rw [hWj]; exact riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s₁ + a) x _
+  have hT1j_nn : ∀ b x, 0 ≤ T1j b x := fun b x => by
+    rw [hT1j]; exact riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s₂ + b) x _
+  have hT2j_nn : ∀ b x, 0 ≤ T2j b x := fun b x => by
+    rw [hT2j]; exact riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s₂ + b) x _
+  -- The two pair grids (one per fixed endpoint).
+  set grid : (ℕ → M → ℝ) → M → ℝ := fun Tj x =>
+    ∑ i ∈ Finset.range (k + 1), Wj i x * ∑ l ∈ Finset.range (k + 1 - i), Tj l x with hgridDef
+  have hgrid_cont : ∀ Tj : ℕ → M → ℝ, (∀ b, Continuous (Tj b)) → Continuous (grid Tj) := by
+    intro Tj hTj; rw [hgridDef]
+    exact continuous_finset_sum _ (fun i _ => (hWj_cont i).mul
+      (continuous_finset_sum _ (fun l _ => hTj l)))
+  have hgrid_int : ∀ Tj : ℕ → M → ℝ, (∀ b, Continuous (Tj b)) → Integrable (grid Tj) μ := by
+    intro Tj hTj; rw [hμ]
+    exact (hgrid_cont Tj hTj).integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+  -- LHS = ‖∇^j U‖² = ∫ rfns(∇^j U).
+  have hUbridge : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ j U‖ ^ 2 =
+      ∫ x, riemannianFiberNormSq (I := I) (M := M) g 0 (s₁ + j) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ j U).toSection x) ∂μ := by
+    rw [hμ, Integral.L2.SmoothCcTensor.norm_def
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ j U),
+      tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g (s₁ + j)
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ j U)]
+  -- The pointwise grid splits over the pair: grid(T₁+T₂) = grid(T₁) + grid(T₂).
+  have hgrid_split : ∀ x,
+      (∑ i ∈ Finset.range (k + 1), Wj i x *
+          ∑ l ∈ Finset.range (k + 1 - i), (T1j l x + T2j l x)) = grid T1j x + grid T2j x := by
+    intro x; rw [hgridDef]; dsimp only
+    rw [← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [Finset.sum_add_distrib, mul_add]
+  -- Integrand domination: rfns(∇^j U)(x) ≤ Cmid·(grid T1j x + grid T2j x).
+  have hUgrid_int : Integrable
+      (fun x => riemannianFiberNormSq (I := I) (M := M) g 0 (s₁ + j) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ j U).toSection x)) μ := by
+    rw [hμ]
+    exact (continuous_rfns g 0 (s₁ + j) _).integrable_of_hasCompactSupport
+      (HasCompactSupport.of_compactSpace _)
+  -- Integrate the pointwise grid: ∫ rfns(∇^j U) ≤ Cmid·(∫ grid T1j + ∫ grid T2j).
+  have hintU_le : ∫ x, riemannianFiberNormSq (I := I) (M := M) g 0 (s₁ + j) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ j U).toSection x) ∂μ ≤
+      Cmid * ((∫ x, grid T1j x ∂μ) + ∫ x, grid T2j x ∂μ) := by
+    have hstep : ∫ x, riemannianFiberNormSq (I := I) (M := M) g 0 (s₁ + j) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ j U).toSection x) ∂μ ≤
+        ∫ x, Cmid * (grid T1j x + grid T2j x) ∂μ := by
+      refine integral_mono_of_nonneg (Eventually.of_forall (fun x => ?_))
+        (((hgrid_int T1j hT1j_cont).add (hgrid_int T2j hT2j_cont)).const_mul _)
+        (Eventually.of_forall (fun x => ?_))
+      · exact riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s₁ + j) x _
+      · change riemannianFiberNormSq (I := I) (M := M) g 0 (s₁ + j) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ j U).toSection x) ≤
+            Cmid * (grid T1j x + grid T2j x)
+        rw [← hgrid_split x]; exact hgrid x
+    refine le_trans hstep (le_of_eq ?_)
+    rw [integral_const_mul, integral_add (hgrid_int T1j hT1j_cont) (hgrid_int T2j hT2j_cont)]
+  -- Each grid integral is bounded by the symmetric engine's two arms (S := W, T := T_p).
+  have harm : ∀ (T : Integral.L2.SmoothCcTensor g 0 s₂) (Tj : ℕ → M → ℝ),
+      (Tj = fun b x => riemannianFiberNormSq (I := I) (M := M) g 0 (s₂ + b) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ b T).toSection x)) →
+      (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 s₂ x (T.toSection x) ≤ ΛT ^ 2) →
+      ∫ x, grid Tj x ∂μ ≤
+        C * (ΛT ^ 2 * ∑ i ∈ Finset.range (k + 1),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ i W‖ ^ 2
+            + ΛW ^ 2 * ∑ l ∈ Finset.range (k + 1),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T‖ ^ 2) := by
+    intro T Tj hTjdef hTsup
+    have he := hsym W T ΛW ΛT hΛW hΛT hWsup hTsup
+    -- Identify ∫ grid Tj with the symmetric engine's grid integral.
+    have hgrideq : ∫ x, grid Tj x ∂μ =
+        ∫ x, ∑ i ∈ Finset.range (k + 1),
+            riemannianFiberNormSq (I := I) (M := M) g 0 (s₁ + i) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ i W).toSection x)
+              * ∑ l ∈ Finset.range (k + 1 - i),
+                  riemannianFiberNormSq (I := I) (M := M) g 0 (s₂ + l) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T).toSection x) ∂μ := by
+      refine integral_congr_ae (Eventually.of_forall (fun x => ?_))
+      rw [hgridDef]; dsimp only; rw [hWj, hTjdef]
+    rw [hgrideq]
+    -- The engine's `ΛT²·∑‖∇W‖² + ΛW²·∑‖∇T‖²` (S := W, T := T) — its first arm carries ΛT on W.
+    exact he.2
+  have harm1 := harm T₁ T1j hT1j hT₁sup
+  have harm2 := harm T₂ T2j hT2j hT₂sup
+  -- Assemble: ‖∇^j U‖² = ∫ rfns ≤ Cmid·(∫g₁ + ∫g₂) ≤ Cmid·C·(two pair arms).
+  rw [hUbridge]
+  refine le_trans hintU_le ?_
+  have hWsum_nn : (0 : ℝ) ≤ ∑ i ∈ Finset.range (k + 1),
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ i W‖ ^ 2 := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
+  have hT1sum_nn : (0 : ℝ) ≤ ∑ l ∈ Finset.range (k + 1),
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T₁‖ ^ 2 := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
+  have hT2sum_nn : (0 : ℝ) ≤ ∑ l ∈ Finset.range (k + 1),
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T₂‖ ^ 2 := Finset.sum_nonneg (fun _ _ => sq_nonneg _)
+  calc Cmid * ((∫ x, grid T1j x ∂μ) + ∫ x, grid T2j x ∂μ)
+      ≤ Cmid * ((C * (ΛT ^ 2 * ∑ i ∈ Finset.range (k + 1),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ i W‖ ^ 2
+            + ΛW ^ 2 * ∑ l ∈ Finset.range (k + 1),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T₁‖ ^ 2))
+          + (C * (ΛT ^ 2 * ∑ i ∈ Finset.range (k + 1),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ i W‖ ^ 2
+            + ΛW ^ 2 * ∑ l ∈ Finset.range (k + 1),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T₂‖ ^ 2))) :=
+        mul_le_mul_of_nonneg_left (add_le_add harm1 harm2) hCmid
+    _ = Cmid * (C * (2 * (ΛT ^ 2 * ∑ i ∈ Finset.range (k + 1),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ i W‖ ^ 2)
+            + ΛW ^ 2 * ∑ l ∈ Finset.range (k + 1),
+              (‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T₁‖ ^ 2
+                + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T₂‖ ^ 2))) := by
+        rw [Finset.sum_add_distrib]; ring
+    _ = (2 * C * Cmid * ΛT ^ 2 * ∑ i ∈ Finset.range (k + 1),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ i W‖ ^ 2
+          + 2 * C * Cmid * ΛW ^ 2 * ∑ l ∈ Finset.range (k + 1),
+              (‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T₁‖ ^ 2
+                + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T₂‖ ^ 2))
+        - C * Cmid * ΛW ^ 2 * ∑ l ∈ Finset.range (k + 1),
+              (‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T₁‖ ^ 2
+                + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T₂‖ ^ 2) := by ring
+    _ ≤ 2 * C * Cmid * ΛT ^ 2 * ∑ i ∈ Finset.range (k + 1),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ i W‖ ^ 2
+          + 2 * C * Cmid * ΛW ^ 2 * ∑ l ∈ Finset.range (k + 1),
+              (‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T₁‖ ^ 2
+                + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T₂‖ ^ 2) := by
+        have hcross_extra : 0 ≤ C * Cmid * ΛW ^ 2 * ∑ l ∈ Finset.range (k + 1),
+            (‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T₁‖ ^ 2
+              + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T₂‖ ^ 2) := by
+          have : 0 ≤ ∑ l ∈ Finset.range (k + 1),
+              (‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T₁‖ ^ 2
+                + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T₂‖ ^ 2) :=
+            Finset.sum_nonneg (fun _ _ => by positivity)
+          positivity
+        linarith
+
 end DifferentialGeometry.Analysis.Sobolev.Tensor
 
 end
