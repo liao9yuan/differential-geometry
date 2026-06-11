@@ -2524,6 +2524,164 @@ private lemma parsevalFrameSum_diag_nablaTensor0SCurv_tensor0SAsRS_eq_ortho
         (unitZeroSec (I := I) (M := M) y))
     (contMDiff_unitEvalSection' (I := I) (M := M) g s S) V hV hPar x
 
+set_option linter.unusedSectionVars false in
+/-- **The `(0, s)` frame component of a `tensor0SAsRS`-wrap is the model evaluation.** At a frame `e`,
+the rank-`0` frame component `fiberNormSqComponent g x 0 s (tensor0SAsRS x C) n e K₀ J` of the
+`tensor0SAsRS`-wrapped model `(0, s)`-tensor `C` equals `Tensor0SSpace.toModel C (e ∘ J)` (the unit
+scalar `tensor00Scalar` of the empty coframe covector is `1`). -/
+private lemma fiberNormSqComponent_tensor0SAsRS
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (C : Tensor0SSpace s I x)
+    {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n) (J : Fin s → Fin n) :
+    fiberNormSqComponent (I := I) (M := M) g x 0 s (tensor0SAsRS (I := I) (M := M) x C) n e K₀ J =
+      Tensor0SSpace.toModel C (fun k => e (J k)) := by
+  classical
+  have hscalar : tensor00Scalar (I := I) (M := M) x
+      ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+        (fun k => g.inner x (e (K₀ k)))) = 1 := by
+    rw [show ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+          (fun k => g.inner x (e (K₀ k))) : Tensor0SSpace 0 I x) =
+        coframeS (I := I) (M := M) g x 0 e K₀ from rfl,
+      tensor00Scalar_apply (I := I) (M := M) x _ (fun k : Fin 0 => k.elim0),
+      coframeS_apply (I := I) (M := M) g x 0 e K₀]
+    simp
+  change Tensor0SSpace.toModel
+      ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from tensor0SAsRS (I := I) (M := M) x C)
+        ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+          (fun k => g.inner x (e (K₀ k))))) (fun k => e (J k)) = _
+  rw [tensor0SAsRS_apply (I := I) (M := M) x C, hscalar, one_smul]
+
+set_option linter.unusedSectionVars false in
+/-- **The `(0, s)` metric pairing of two `tensor0SAsRS`-wraps is the diagonal frame product sum.** For a
+`g(x)`-orthonormal frame `e` (basis `bse`, `n = finrank`), the pointwise `(0, s)` inner product of the
+`tensor0SAsRS`-wraps of model `(0, s)`-tensors `C, D` is the diagonal frame double sum of their model
+evaluations.  This is `tensorInnerPointwise_eq_sum_componentS_mul` at `r = 0` (the empty leading
+`K`-index collapses) followed by the `tensor0SAsRS` component evaluation `fiberNormSqComponent_tensor0SAsRS`. -/
+private lemma tensorInnerPointwise_tensor0SAsRS_eq_frameSum
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (C D : Tensor0SSpace s I x)
+    {n : ℕ} (e : Fin n → TangentSpace I x)
+    (bse : Module.Basis (Fin n) ℝ (TangentSpace I x))
+    (hn : n = Module.finrank ℝ E) (hbse : ∀ i : Fin n, bse i = e i)
+    (horth : ∀ a b : Fin n, g.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0) :
+    tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel (tensor0SAsRS (I := I) (M := M) x C))
+        (TensorRSSpace.toModel (tensor0SAsRS (I := I) (M := M) x D)) =
+      ∑ J : Fin s → Fin n,
+        Tensor0SSpace.toModel C (fun k => e (J k)) * Tensor0SSpace.toModel D (fun k => e (J k)) := by
+  classical
+  rw [tensorInnerPointwise_eq_sum_componentS_mul (I := I) (M := M) g 0 s x e bse hn hbse horth
+    (tensor0SAsRS (I := I) (M := M) x C) (tensor0SAsRS (I := I) (M := M) x D)]
+  rw [Finset.sum_eq_single (fun k : Fin 0 => k.elim0)]
+  · refine Finset.sum_congr rfl (fun J _ => ?_)
+    rw [fiberNormSqComponent_tensor0SAsRS (I := I) (M := M) g s x C e _ J,
+      fiberNormSqComponent_tensor0SAsRS (I := I) (M := M) g s x D e _ J]
+  · intro K _ hK; exact absurd (funext fun a => a.elim0) hK
+  · intro h; exact absurd (Finset.mem_univ _) h
+
+set_option linter.unusedSectionVars false in
+/-- **The smooth orthonormal frame at the centre packages as a `Module.Basis`.** The `finrank`-many
+`g(x)`-orthonormal vectors `smoothOrthoFrame g x i x` form a basis of `T_x M` (orthonormality gives
+linear independence, and the cardinality equals the rank).  This is the basis the slot-`0` Parseval and
+model-Parseval decompositions consume; a live re-derivation (it depends only on
+`smoothOrthoFrame_orthonormal_at_center`). -/
+private theorem smoothOrthoFrame_center_basis
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    ∃ bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x),
+      ∀ i, bse i = smoothOrthoFrame (I := I) g x i x := by
+  classical
+  have horth : ∀ a b : Fin (Module.finrank ℝ E),
+      g.inner x (smoothOrthoFrame (I := I) g x a x) (smoothOrthoFrame (I := I) g x b x)
+        = if a = b then 1 else 0 :=
+    fun a b => smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
+  have he_li : LinearIndependent ℝ (fun i => smoothOrthoFrame (I := I) g x i x) := by
+    rw [linearIndependent_iff']
+    intro fs c hsum k hk_mem
+    have h_zero : g.inner x (smoothOrthoFrame (I := I) g x k x)
+        (∑ j ∈ fs, c j • smoothOrthoFrame (I := I) g x j x) = 0 := by rw [hsum]; simp
+    rw [map_sum] at h_zero
+    have h_pull : ∀ j ∈ fs, g.inner x (smoothOrthoFrame (I := I) g x k x)
+        (c j • smoothOrthoFrame (I := I) g x j x) = c j * (if k = j then (1 : ℝ) else 0) := by
+      intro j _
+      rw [(g.inner x (smoothOrthoFrame (I := I) g x k x)).map_smul (c j), smul_eq_mul, horth k j]
+    rw [Finset.sum_congr rfl h_pull, Finset.sum_eq_single_of_mem k hk_mem] at h_zero
+    · rwa [if_pos rfl, mul_one] at h_zero
+    · intro j _ hjk; rw [if_neg (fun h => hjk h.symm), mul_zero]
+  have hcard : Fintype.card (Fin (Module.finrank ℝ E)) = Module.finrank ℝ E := Fintype.card_fin _
+  exact ⟨basisOfLinearIndependentOfCardEqFinrank he_li hcard,
+    fun i => congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard) i⟩
+
+set_option linter.unusedSectionVars false in
+/-- **The orthonormal-frame diagonal `nablaTensor0SCurv` trace, metric-paired against a `tensor0SAsRS`-wrap,
+is the slot-substitution frame double sum (the metric-trace opening of the differentiated curvature).** For
+the orthonormal frame `B_i := smoothOrthoFrame g x i` (basis `bse`), the `(0, s)` pointwise pairing of the
+orthonormal-frame diagonal differentiated-curvature trace `∑_i tensor0SAsRS (nablaTensor0SCurv g s B_i B_i Vb A)`
+against the `tensor0SAsRS`-wrap of `D` equals the frame double sum, over multi-indices `J`, of the slot-wise
+divergence-of-curvature substitution of `A` paired with `D`'s `J`-component:
+```
+⟨∑_i tensor0SAsRS (nablaTensor0SCurv g s B_i B_i Vb A), tensor0SAsRS D⟩_g
+  = ∑_J [ − ∑_k A(update (B∘J) k (∑_i nablaBaseSlotCurv g B_i B_i Vb (B_{J k}))) ] · D(B∘J).
+```
+This is the `tensor0SAsRS` collapse `tensorInnerPointwise_tensor0SAsRS_eq_frameSum` (H1) on the
+frame-summed wrap, with the diagonal divergence-of-curvature transfer
+`frame_sum_nablaTensor0SCurv_diag_baseSlot_eval` (Theorem B) folding the inner frame sum slot-wise.  It
+opens the metric trace of the differentiated curvature onto exactly the shape the once-contracted second
+Bianchi `nablaCurvSec_diag_frame_trace_eq_nablaRicci_sub` (Theorem A) acts on. -/
+private lemma diagDiffCurv_pair_eq_slotSubstSum
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
+    (A : Π b : M, Tensor0SSpace s I b)
+    (hA : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel s ℝ E)) ∞
+      (fun b => TotalSpace.mk' (Tensor0SModel s ℝ E)
+        (E := fun z : M => Tensor0SSpace s I z) b (A b)))
+    (Vb : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (D : Tensor0SSpace s I x)
+    (bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x))
+    (hbse : ∀ i, bse i = smoothOrthoFrame (I := I) g x i x) :
+    tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel (∑ i : Fin (Module.finrank ℝ E), tensor0SAsRS (I := I) (M := M) x
+          (nablaTensor0SCurv (I := I) g s
+            (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+              (smoothOrthoFrame_smooth (I := I) g x i))
+            (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+              (smoothOrthoFrame_smooth (I := I) g x i)) Vb A x)))
+        (TensorRSSpace.toModel (tensor0SAsRS (I := I) (M := M) x D)) =
+      ∑ J : Fin s → Fin (Module.finrank ℝ E),
+        (- ∑ k : Fin s,
+            Tensor0SSpace.toModel (A x)
+              (Function.update (fun j => smoothOrthoFrame (I := I) g x (J j) x) k
+                (∑ i : Fin (Module.finrank ℝ E),
+                  nablaBaseSlotCurv (I := I) g
+                    (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+                      (smoothOrthoFrame_smooth (I := I) g x i))
+                    (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+                      (smoothOrthoFrame_smooth (I := I) g x i)) Vb x
+                    (smoothOrthoFrame (I := I) g x (J k) x)))) *
+          Tensor0SSpace.toModel D (fun j => smoothOrthoFrame (I := I) g x (J j) x) := by
+  classical
+  have horth : ∀ a b : Fin (Module.finrank ℝ E),
+      g.inner x (smoothOrthoFrame (I := I) g x a x) (smoothOrthoFrame (I := I) g x b x)
+        = if a = b then 1 else 0 :=
+    fun a b => smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
+  rw [← tensor0SAsRS_finsetSum (I := I) (M := M) s x Finset.univ,
+    tensorInnerPointwise_tensor0SAsRS_eq_frameSum (I := I) (M := M) g s x _ D
+      (fun j => smoothOrthoFrame (I := I) g x j x) bse rfl hbse horth]
+  refine Finset.sum_congr rfl (fun J _ => ?_)
+  congr 1
+  rw [show Tensor0SSpace.toModel (∑ i : Fin (Module.finrank ℝ E),
+        nablaTensor0SCurv (I := I) g s
+          (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+            (smoothOrthoFrame_smooth (I := I) g x i))
+          (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+            (smoothOrthoFrame_smooth (I := I) g x i)) Vb A x)
+      = ∑ i : Fin (Module.finrank ℝ E), Tensor0SSpace.toModel
+          (nablaTensor0SCurv (I := I) g s
+            (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+              (smoothOrthoFrame_smooth (I := I) g x i))
+            (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+              (smoothOrthoFrame_smooth (I := I) g x i)) Vb A x) from by
+    rw [← Tensor0SSpace.toModelL_apply, map_sum]
+    exact Finset.sum_congr rfl (fun i _ => Tensor0SSpace.toModelL_apply _)]
+  rw [ContinuousMultilinearMap.sum_apply]
+  exact frame_sum_nablaTensor0SCurv_diag_baseSlot_eval (I := I) g s Vb A hA x
+    (fun j => smoothOrthoFrame (I := I) g x (J j) x)
+
 /-- **The integrated Parseval-frame diagonal differentiated-curvature trace pairing equals the
 group-`2` minus group-`1` double sum (the genuine `nablaTensor0SCurv`-form curvature kernel of the
 tension-field nullity).** For a fixed Parseval frame family `V a`, the frame double sum of the integral
