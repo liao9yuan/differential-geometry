@@ -11,6 +11,38 @@ sorry'd version (downstream consumers must adapt):
 - added `hKShi0 : 0 ≤ KShi`; variable block gained `[I.Boundaryless]`,
   `[IsManifold I 1/2/(∞+1) M]`, `[VectorBundle ℝ E (TangentSpace I)]`,
   `[ContMDiffVectorBundle 1 E (TangentSpace I) I]`.
+## ✅ P2 GRÖNWALL WIRING DONE (2026-06-11, post-ric_bound, commit 90001ab2; all sorry-free)
+
+- `nablaRicReal` (ricCovTower reindexed to the `p+2` Grönwall arity via `acEquiv`)
+  + `nablaRicReal_normSq` + **`ric_bound_field`** (the exact
+  `MetricCovOrderEvolutionInput.ric_bound` field shape).
+- **`normsq_evol_of_comp`**: the `normsq_evol` field from POINTWISE-EVALUATED
+  evolution data (`∀ v, HasDerivAt (r ↦ ∇ᵖg_r(x)(v)) ((-2•nablaRic)(v))`, ℝ-valued).
+  DESIGN NOTE: Mathlib's CLM-composition (`comp_hasDerivAt`/`clm_apply`/slope) is
+  normed-only while the Tensor0SSpace `HasDerivAt` elaborates on the TVS instance
+  path — do NOT try to consume the tensor-valued `HasDerivAt`; take the evaluated
+  family as the input form (the flow-side producer naturally emits it).
+- **`covOrderBound_stage`**: the full stage-`N` `(B_N)` assembly — ric_bound
+  inputs + `hevol` + evaluated evolution + init bound + window data ⟹
+  `MetricCovDerivOrderBoundOnWindow K β ψ gSeq gRef N (Grönwall constant)`,
+  by constructing the `MetricCovOrderEvolutionInput` record and applying
+  `metricCovOrderWindow_of_evolution`.
+
+## REMAINING for P2 (the honest frontier list)
+
+1. **`hevol` producer** — `∂ₜ∇ᵖ_{gRef} g_t = -2∇ᵖ_{gRef}Rc(g_t)` (the tensor
+   field form and the evaluated `hevComp` form) from the Ricci-flow equation:
+   the time/space derivative INTERCHANGE.  ⚠ Same standing open analytic input
+   as the BBS track's `hswap` (`NablaKRmTimeDeriv.lean`: "the swap (hswap) are
+   the standing analytic inputs") — a PROJECT-WIDE shared frontier.  Route when
+   attacked: induct on `p` through `covStep` with joint (t,x) smoothness of the
+   flow (`SolutionOn`/`IsSolutionOn`) + Schwarz.
+2. Stage-`N` induction wrapper: thread nested opens `K ⊂ U_N ⊂ … ⊂ U₀` (locally
+   compact `M`), feed each stage's `(B_r)` output into the next `hBprev`; init
+   bounds from the `t0`-time data; equivalence majorant from eq 3.3.
+3. Base stages `(B_0)`/`(B_1)` and the Shi-input realization from the flow's
+   curvature bounds (`bernsteinShi_solution_estimate` realization layer).
+
 Architecture: `perDomain` (constants-first per-good-frame-domain engine:
 uniform `claim1_LC` → `aN_component` + `compL2_tower_le` + `movingGinv_le` +
 moving-Shi conversion + smoothness producers w/ `chrInFrame_mono`), then finite
