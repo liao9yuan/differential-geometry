@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.DeTurckVFCovGradTopRestSplit
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricRicciSectionIdentity
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CrossCorrectionParallelContraction
 
 /-! # The intrinsic covariant top/rest expansion of the sealed Ricci–DeTurck Lie difference
 

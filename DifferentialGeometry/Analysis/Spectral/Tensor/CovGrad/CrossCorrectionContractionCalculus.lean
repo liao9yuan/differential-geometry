@@ -1653,7 +1653,7 @@ fibre value is the fixed cometric trace operator post-composed after the product
 partial-contraction Cauchy–Schwarz `riemannianFiberNormSq_compRS_le_mul` bounds it by
 `rfns(crossCorrCometricOp g₀ a b)(x) · rfns(crossCorrProdSection)(x) ≤ μx · rfns(S)(x) · rfns(T)(x)`
 (`crossCorrProdSection_rfns_le` for the second factor). -/
-private theorem crossCorrParallelContraction_rfns_le_pointwise (g₀ : SmoothRiemannianMetric I M)
+theorem crossCorrParallelContraction_rfns_le_pointwise (g₀ : SmoothRiemannianMetric I M)
     {a b : ℕ} (S : SmoothCcTensor g₀ 0 (2 + a)) (T : SmoothCcTensor g₀ 0 (3 + b)) (x : M)
     (μx : ℝ) (hμx : riemannianFiberNormSq (I := I) (M := M) g₀ ((3 + b) + (2 + a)) (3 + a + b) x
         ((crossCorrCometricOp (I := I) g₀ a b).toSection x) ≤ μx) :
@@ -2238,7 +2238,7 @@ fixed source reindex is an `rfns`-isometric ampliation (`crossCorrSourceReindex_
 is the `g`-OPERATOR-norm route, NOT the HS route, which is *not* `(a, b)`-uniform (the cometric double
 trace acts as the identity on the `3 + a + b` passed-through slots, so its HS fibre norm grows like
 `dim^{3 + a + b}`).  Non-vacuous (`κ = 0` is rejected whenever the cometric trace is nonzero). -/
-private theorem exists_uniform_crossCorrCometricOp_postcomp_gOpNorm_rfns_le
+theorem exists_uniform_crossCorrCometricOp_postcomp_gOpNorm_rfns_le
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ κ : ℝ, 0 ≤ κ ∧ ∀ (a b : ℕ) (x : M),
       ∃ A : Tensor0SBundle.TensorRSSpace 0 ((3 + b) + (2 + a)) I x →L[ℝ]
@@ -2338,7 +2338,7 @@ fibre value is the cometric trace operator post-composed after the product secti
 post-composition `g`-operator-norm envelope `exists_uniform_crossCorrCometricOp_postcomp_gOpNorm_rfns_le`
 bounds it by `κ · rfns(crossCorrProdSection)(x) ≤ κ · rfns(S)(x) · rfns(T)(x)`
 (`crossCorrProdSection_rfns_le`). -/
-private theorem exists_uniform_crossCorrParallelContraction_rfns_le (g₀ : SmoothRiemannianMetric I M) :
+theorem exists_uniform_crossCorrParallelContraction_rfns_le (g₀ : SmoothRiemannianMetric I M) :
     ∃ κ : ℝ, 0 ≤ κ ∧ ∀ {a b : ℕ} (S : SmoothCcTensor g₀ 0 (2 + a)) (T : SmoothCcTensor g₀ 0 (3 + b))
       (x : M),
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + a + b) x
