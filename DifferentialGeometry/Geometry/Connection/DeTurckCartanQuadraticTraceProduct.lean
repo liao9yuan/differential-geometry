@@ -61,42 +61,41 @@ g₀ = 0`).  The two concrete, independently-defined `(0, 2)`-summands are:
   `deTurckCartanRfnsBilinearProduct`) delivers the convolution `≤ j`-jet of both factors.  Defined
   independently of the carrier difference.
 
-The headline `symLoweredDeTurckVFRetagG0_sub_eq_topSec_add_restSec` exhibits the section identity
-`carrier_difference = cartanDiffTopSec + cartanDiffRestSec`, the gauge analogue of the curvature half's
-`exists_parallelTrace_linearSection_eq_koszulTriple_sub_crossCorrTriple`
-(`SegmentMetricCurvatureDifferenceCovJet.lean`) and of the pairwise structural Koszul identity
-`loweredConnDiffSection_sub_eq_koszulRealizeDiff_sub_crossCorrDiff`
-(`ConnectionDifferenceQuadraticTraceProduct.lean`).
+A previously-posited clean section identity `cartanDiffSecFactorization` (and its consumer wrapper
+`symLoweredDeTurckVFRetagG0_sub_eq_topSec_add_restSec`) asserting the carrier difference EQUALS
+`cartanDiffTopSec + cartanDiffRestSec` was **Lean-certified FALSE and removed** (see the tombstone
+section at the foot of this file): its right-hand side is `g_bg`-free while the carrier difference
+depends on `g_bg` essentially.  What this file therefore supplies is the family of **reusable concrete
+quadratic-trace carriers** (`cartanKoszulTripleDiff`, `cartanDiffTopSec`, `cartanCrossProductDiff`,
+`cartanDiffRestSec`) together with their value / bilinearity / structure / degeneracy lemmas (all
+sorry-free); the quantitative integrated two-arm jet bound P1b
+(`symLoweredDeTurckVF_iteratedCovGrad_topRest_split`, `DeTurckVFCovGradTopRestSplit.lean`) is proven
+directly on the `g_bg`-dependent carrier difference, NOT through a `g_bg`-free section split.
 
-## What is posited vs. derived
+## Why no clean `g_bg`-free section split exists
 
 Unlike the curvature half — where the connection-difference **cocycle** `connDiff g₁ g₂ = connDiff g₁
 g₀ − connDiff g₂ g₀` and the `g₀`-fixed Koszul re-expression `connDiff_koszul_realize_g0` collapse the
-two-metric lowered difference onto a single difference factor, making the section identity provable by
+two-metric lowered difference onto a single difference factor, making a section identity provable by
 unit-extensionality — the Cartan carrier difference `cartanRHSBilin g₁ W₁ − cartanRHSBilin g₂ W₂`
 varies the inner product `g₁.inner`, the Levi-Civita connection `LeviCivita g₁`, **and** the field
-`W₁ = deTurckVF g₁ g_bg` simultaneously, and there is **no `cartanRHSBilin` slot-difference lemma** and
-**no `deTurckVF` difference lemma** on disk (the carrier difference is taken at the Cartan-bilinear
-level, where no cocycle re-expression exists).  The single genuine deep covariant-gauge Faà-di-Bruno
-content — the fibre-level telescope of `cartanRHSBilin g₁ W₁ − cartanRHSBilin g₂ W₂` onto the three
-difference-factor-carrying slots, identified with the two concrete summands — is therefore **posited**
-here as `cartanDiffSecFactorization`: a bare section equality (NO covariant-jet bounds, NO fibre norms,
-NO family-uniform constant), strictly weaker than the quantitative jet-bound split P1b
-(`symLoweredDeTurckVF_iteratedCovGrad_topRest_split`) it feeds.  The headline
-`symLoweredDeTurckVFRetagG0_sub_eq_topSec_add_restSec` is then the same equality re-stated; all the
-supporting concrete objects (`cartanKoszulTripleDiff`, `cartanCrossProductDiff`, the two summands) and
-their value / bilinearity / structure / degeneracy lemmas are sorry-free.
+`W₁ = deTurckVF g₁ g_bg` simultaneously, and there is **no `cartanRHSBilin` slot-difference lemma** on
+disk.  The field difference itself is `g_bg`-carrying: `deTurckVF_sub_apply_eq_trace_connDiff`
+(`VectorFieldCovariantGradientSection.lean`, sorry-free) gives
+`W₁ − W₂ = ∑ G₁⁻¹ · connDiff g₁ g₂ + ∑ (G₁⁻¹ − G₂⁻¹) · connDiff g₂ g_bg`, whose second summand
+retains the **background** connection difference `connDiff g₂ g_bg` weighted by the inverse-Gram
+difference `G₁⁻¹ − G₂⁻¹` (which is `(T₁ − T₂)`-controlled, so the bound P1b claims is true — the
+`g_bg`-content is bounded, not cancelled — but it is NOT representable by any `g_bg`-free section).
 
-**Non-vacuity / degenerate-correctness.**  Both summands are concrete and defined independently of the
-carrier difference (NOT `carrier − topSec` nor `topSec, restSec := 0`): `cartanDiffTopSec` is the
-genuine value-local linear member on the difference factor `w` (`= w`, carrying the order-`0` value jet
-and `∇^{j+2} w`), and `cartanDiffRestSec` is the genuine `g₀`-cometric double trace of the bare
-**difference-of-products** `Φ(L₁, L₂) − Φ(L₂, L₂)` carrying the connection-difference difference
-`L₁ − L₂` against the endpoint `L₂`.  At `T₁ = T₂` realized (so `g₁ = g₂`, `L₁ = L₂`) the carrier
-difference vanishes, `w = 0`, and **both summands vanish** (`cartanDiffTopSec_self`,
-`cartanDiffRestSec_self`), so the posited identity is `0 = 0 + 0` — degenerate-correct.  NO
-value-bounded operator shape, NO pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, NO Weyl
-dependence. -/
+**Non-vacuity / degenerate-correctness of the retained carriers.**  Both summand carriers are concrete
+and defined independently of the carrier difference (NOT `carrier − topSec` nor `topSec, restSec := 0`):
+`cartanDiffTopSec` is the genuine value-local linear member on the difference factor `w` (`= w`,
+carrying the order-`0` value jet and `∇^{j+2} w`), and `cartanDiffRestSec` is the genuine `g₀`-cometric
+double trace of the bare **difference-of-products** `Φ(L₁, L₂) − Φ(L₂, L₂)` carrying the
+connection-difference difference `L₁ − L₂` against the endpoint `L₂`.  At `T₁ = T₂` realized (so
+`g₁ = g₂`, `L₁ = L₂`) `w = 0` and **both summands vanish** (`cartanDiffTopSec_self`,
+`cartanDiffRestSec_self`).  NO value-bounded operator shape, NO pointwise-`C^{>2}`-jet claim, NO
+spectral-nonlinearity, NO Weyl dependence. -/
 
 noncomputable section
 
