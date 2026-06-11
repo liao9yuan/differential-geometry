@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatureOperatorField
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizedCovGradJetGeneralOrder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.SharpOrderRealizedJetEmbedding
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.CcTensorFibreCauchySchwarz
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SupercriticalProductEstimate
 import DifferentialGeometry.Geometry.Operator.MetricSharpSmooth
 
@@ -339,7 +340,129 @@ theorem ccTensorBilinFibreEndo_contMDiff (g₀ : SmoothRiemannianMetric I M)
 /-! ## The supercritical `toHs` fibre bound -/
 
 set_option linter.unusedSectionVars false in
-/-- **The `T`-uniform cross-valence raise+slot operator bound (the genuine new analytic content).**
+/-- **A combined `g₀`-orthonormal tangent frame representing the `(0, 2)` and `(2, 2)` fibre norms.**
+Mirrors `tangent_frame_expansion` (`stdOrthonormalBasis` of the `g₀`-inner core), additionally
+exposing the `(2, 2)`-valence frame-sum representation so the slot-insertion `(2, 2)`-fibre norm and
+the realized `(0, 2)`-fibre norm can be expanded in a *single* frame: the rank-`(p, q)` representation
+is `rfl` for the `stdOrthonormalBasis` frame at every valence. -/
+private lemma orthoFrame_repr_02_22 (g₀ : SmoothRiemannianMetric I M) (x : M) :
+    ∃ (n : ℕ) (e : Fin n → TangentSpace I x),
+      n = Module.finrank ℝ (TangentSpace I x) ∧
+      (∀ i j : Fin n, g₀.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0) ∧
+      (∀ S : TensorRSSpace 0 2 I x,
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x S =
+          ∑ K : Fin 0 → Fin n, ∑ J : Fin 2 → Fin n,
+            fiberNormSqSummand (I := I) (M := M) g₀ x 0 2 S n e K J) ∧
+      (∀ S : TensorRSSpace 2 2 I x,
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x S =
+          ∑ K : Fin 2 → Fin n, ∑ J : Fin 2 → Fin n,
+            fiberNormSqSummand (I := I) (M := M) g₀ x 2 2 S n e K J) := by
+  classical
+  let cd : InnerProductSpace.Core ℝ (TangentSpace I x) := g₀.toRiemannianMetric.toCore x
+  have hc : ContinuousAt (fun v : TangentSpace I x => cd.inner v v) 0 :=
+    g₀.toRiemannianMetric.continuousAt x
+  have hbnd : Bornology.IsVonNBounded ℝ {v : TangentSpace I x |
+      RCLike.re (cd.inner v v) < 1} :=
+    g₀.toRiemannianMetric.isVonNBounded x
+  letI nag : NormedAddCommGroup (TangentSpace I x) :=
+    cd.toNormedAddCommGroupOfTopology hc hbnd
+  letI ips : InnerProductSpace ℝ (TangentSpace I x) :=
+    InnerProductSpace.ofCoreOfTopology cd hc hbnd
+  set n : ℕ := Module.finrank ℝ (TangentSpace I x) with hn_def
+  set eob : OrthonormalBasis (Fin n) ℝ (TangentSpace I x) := stdOrthonormalBasis ℝ _ with heob_def
+  have hinner_eq : ∀ u v : TangentSpace I x, (inner ℝ u v : ℝ) = g₀.inner x u v :=
+    fun u v => rfl
+  refine ⟨n, fun i => eob i, rfl, ?_, ?_, ?_⟩
+  · intro i j
+    have horth : Orthonormal ℝ (fun i : Fin n => eob i) := eob.orthonormal
+    have hite := (orthonormal_iff_ite (𝕜 := ℝ) (E := TangentSpace I x)).mp horth i j
+    rw [← hinner_eq (eob i) (eob j)]; exact hite
+  · intro S; rfl
+  · intro S; rfl
+
+set_option linter.unusedSectionVars false in
+/-- **The leading-slot square-sum dimension identity.**  For a `g₀`-orthonormal frame the squared
+frame-component sum of `ofCLM (slotInsertEndoFib 2 0 x Λ)` factors as `n` (the tangent dimension) times
+the squared frame-component sum of the raised endomorphism's bilinear form: the passenger covariant slot
+contributes the Kronecker indicator `g₀(e_{K₁}, e_{J₁}) = δ_{K₁J₁}` whose square-sum over the passenger
+index pair is exactly `n`. -/
+private lemma slotInsert_sqsum_eq_dim_mul (n : ℕ) (f : Fin n → Fin n → ℝ) :
+    (∑ K : Fin 2 → Fin n, ∑ J : Fin 2 → Fin n,
+      (f (J 0) (K 0) * (if K 1 = J 1 then (1 : ℝ) else 0)) ^ 2)
+      = (n : ℝ) * ∑ J : Fin 2 → Fin n, (f (J 0) (J 1)) ^ 2 := by
+  classical
+  have key : ∀ g : (Fin 2 → Fin n) → ℝ,
+      (∑ p : Fin 2 → Fin n, g p) = ∑ a : Fin n, ∑ b : Fin n, g ![a, b] := by
+    intro g
+    rw [← (finTwoArrowEquiv (Fin n)).symm.sum_comp g, Fintype.sum_prod_type]; rfl
+  have hL : (∑ K : Fin 2 → Fin n, ∑ J : Fin 2 → Fin n,
+      (f (J 0) (K 0) * (if K 1 = J 1 then (1 : ℝ) else 0)) ^ 2)
+      = ∑ k0 : Fin n, ∑ k1 : Fin n, ∑ j0 : Fin n, ∑ j1 : Fin n,
+          (f j0 k0 * (if k1 = j1 then (1 : ℝ) else 0)) ^ 2 := by
+    rw [key]
+    refine Finset.sum_congr rfl (fun k0 _ => Finset.sum_congr rfl (fun k1 _ => ?_))
+    rw [key]; rfl
+  have hR : ((n : ℝ) * ∑ J : Fin 2 → Fin n, (f (J 0) (J 1)) ^ 2)
+      = (n : ℝ) * ∑ j0 : Fin n, ∑ j1 : Fin n, (f j0 j1) ^ 2 := by
+    rw [key]; rfl
+  rw [hL, hR]
+  have hcollapse : ∀ (a : ℝ) (k1 j1 : Fin n),
+      (a * (if k1 = j1 then (1 : ℝ) else 0)) ^ 2 = a ^ 2 * (if k1 = j1 then (1 : ℝ) else 0) := by
+    intro a k1 j1; by_cases h : k1 = j1 <;> simp [h]
+  have step1 : ∑ k0 : Fin n, ∑ k1 : Fin n, ∑ j0 : Fin n, ∑ j1 : Fin n,
+          (f j0 k0 * (if k1 = j1 then (1 : ℝ) else 0)) ^ 2
+        = ∑ k0 : Fin n, ∑ j0 : Fin n, ∑ j1 : Fin n, (f j0 k0) ^ 2 := by
+    refine Finset.sum_congr rfl (fun k0 _ => ?_)
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl (fun j0 _ => ?_)
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl (fun j1 _ => ?_)
+    rw [Finset.sum_congr rfl (fun k1 _ => hcollapse (f j0 k0) k1 j1),
+      ← Finset.mul_sum, Finset.sum_ite_eq' Finset.univ j1 (fun _ => (1 : ℝ))]
+    simp
+  rw [step1]
+  have step2 : ∀ k0 j0 : Fin n, (∑ _j1 : Fin n, (f j0 k0) ^ 2) = (n : ℝ) * (f j0 k0) ^ 2 := by
+    intro k0 j0; rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin]; ring
+  rw [Finset.sum_congr rfl (fun k0 _ => Finset.sum_congr rfl (fun j0 _ => step2 k0 j0))]
+  rw [Finset.mul_sum, Finset.sum_comm]
+  refine Finset.sum_congr rfl (fun j0 _ => ?_)
+  rw [Finset.mul_sum]
+
+set_option linter.unusedSectionVars false in
+/-- **The `(2, 2)`-fibre frame-component of the slot-insertion endomorphism.**  At a `g₀`-orthonormal
+frame the `(K, J)`-component of `ofCLM (ccTensorBilinSlotEndo g₀ T x)` reads the raised symmetric
+perturbation `ccTensorBilinSymm g₀ T x (e_{J₀}, e_{K₀})` off the leading slot (the metric raise's
+defining identity `inner_ccTensorBilinRaisedEndo`) times the passenger Kronecker indicator
+`g₀(e_{K₁}, e_{J₁}) = δ_{K₁J₁}` (`slotInsertEndoFib_apply_eval`). -/
+private lemma slotEndo_fiberComponent_eq (g₀ : SmoothRiemannianMetric I M)
+    (T : Integral.L2.SmoothCcTensor g₀ 0 2) (x : M)
+    {n : ℕ} (e : Fin n → TangentSpace I x)
+    (horth : ∀ i j : Fin n, g₀.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0)
+    (K J : Fin 2 → Fin n) :
+    fiberNormSqComponent (I := I) (M := M) g₀ x 2 2
+        (show TensorRSSpace 2 2 I x from
+          TensorRSSpace.ofCLM (ccTensorBilinSlotEndo (I := I) g₀ T x)) n e K J =
+      ccTensorBilinSymm (I := I) g₀ T x (e (J 0)) (e (K 0)) * (if K 1 = J 1 then (1 : ℝ) else 0) := by
+  have hcomp : fiberNormSqComponent (I := I) (M := M) g₀ x 2 2
+      (show TensorRSSpace 2 2 I x from
+        TensorRSSpace.ofCLM (ccTensorBilinSlotEndo (I := I) g₀ T x)) n e K J =
+      Tensor0SSpace.toModel
+        ((ccTensorBilinSlotEndo (I := I) g₀ T x) (coframeS (I := I) (M := M) g₀ x 2 e K))
+        (fun k => e (J k)) := by
+    unfold fiberNormSqComponent coframeS; rfl
+  rw [hcomp, ccTensorBilinSlotEndo, slotInsertEndoFib_apply_eval]
+  rw [show (coframeS (I := I) (M := M) g₀ x 2 e K).toModel
+        (Function.update (fun k => e (J k)) 0 (ccTensorBilinRaisedEndo (I := I) g₀ T x (e (J 0))))
+      = coframeS (I := I) (M := M) g₀ x 2 e K
+        (Function.update (fun k => e (J k)) 0
+          (ccTensorBilinRaisedEndo (I := I) g₀ T x (e (J 0)))) from rfl]
+  rw [coframeS_apply, Fin.prod_univ_two, Function.update_self,
+    Function.update_of_ne (by decide : (1 : Fin 2) ≠ 0)]
+  rw [g₀.symm x (e (K 0)) (ccTensorBilinRaisedEndo (I := I) g₀ T x (e (J 0)))]
+  rw [inner_ccTensorBilinRaisedEndo, horth (K 1) (J 1)]
+
+set_option linter.unusedSectionVars false in
+/-- **The `T`-uniform cross-valence raise+slot operator bound: an exact dimension identity.**
 
 For a closed Riemannian manifold `(M, g₀)` there is a single nonnegative constant `Cop`, uniform over
 `M` AND over `T`, such that the leading-slot insertion endomorphism `ccTensorBilinSlotEndo g₀ T x` of
@@ -349,35 +472,27 @@ the raised symmetric realized perturbation form has its `(2, 2)`-fibre norm boun
   `rfns g₀ 2 2 x (ofCLM (ccTensorBilinSlotEndo g₀ T x)) ≤
       Cop · rfns g₀ 0 2 x ((realizeSymmCcTensor g₀ T).toSection x)`.
 
-This is the precise reusable inverse-Gram raise primitive carrying the genuine `T`-uniform content of
-the keystone field.  The slot-insertion endomorphism `ccTensorBilinSlotEndo g₀ T x =
-slotInsertEndoFib 2 0 x (ccTensorBilinRaisedEndo g₀ T x)` is a *fixed* (`T`-independent)
-`g₀⁻¹`-raise-then-slot-insert linear operation applied to the `(0, 2)`-fibre value
-`(realizeSymmCcTensor g₀ T).toSection x` (`ccTensorBilinRaisedEndo g₀ T x` is the metric raise of the
-fibre bilinear reading of that value, `inner_ccTensorBilinRaisedEndo` /
-`realizeSymmCcTensor_ccTensorBilin_apply`).  Packaging this `g₀⁻¹`-raise-then-slot-insert operation as
-a *single* `T`-independent smooth Hom-bundle field `Φ : (x : M) → TensorRSSpace 0 2 I x →L
-TensorRSSpace 2 2 I x` (raise `(0, 2)` → `(1, 1)` endo, then `slotInsertEndoFib 2 0` →
-`ofCLM` → `(2, 2)`), the bound is the uniform-over-`M` `g₀`-fibre operator-norm contraction
-`exists_uniform_riemannianFiberNormSq_homTensorRS_section_clm_le` of that smooth field, with `Cop`
-the squared uniform `g₀`-fibre operator-norm sup of `Φ`; the identity `Φ x ((realizeSymmCcTensor g₀ T).
-toSection x) = ofCLM (ccTensorBilinSlotEndo g₀ T x)` is the `T`-instance of the field's definition.
+The optimal constant is `Cop = dim M = Module.finrank ℝ E`, and the bound is in fact an *exact equality*
+`rfns g₀ 2 2 x (ofCLM (ccTensorBilinSlotEndo g₀ T x)) = dim M · rfns g₀ 0 2 x
+((realizeSymmCcTensor g₀ T).toSection x)`.  Expanding both sides in one `g₀`-orthonormal tangent frame
+(`orthoFrame_repr_02_22`), the `(2, 2)`-fibre component of the slot endomorphism factors as the leading
+raised-form component `ccTensorBilinSymm g₀ T x (e_{J₀}, e_{K₀})` times the passenger Kronecker indicator
+`δ_{K₁J₁}` (`slotEndo_fiberComponent_eq`, the metric raise's defining identity
+`inner_ccTensorBilinRaisedEndo` and the slot-`0` insertion evaluation `slotInsertEndoFib_apply_eval`),
+so its square-sum is `dim M` times the raised-form square-sum (`slotInsert_sqsum_eq_dim_mul`, the
+passenger indicator's square-sum being the dimension); the raised-form square-sum is exactly the
+realized `(0, 2)`-fibre norm (`ccTensorBilin_eq_fiberNormSqComponent` /
+`realizeSymmCcTensor_ccTensorBilin_apply`).  No compactness, operator norm, or `T`-independent Hom-field
+is required — the slot insertion is a fixed multilinear precomposition whose `g₀`-fibre Hilbert–Schmidt
+norm picks up exactly one dimension factor per passenger slot.
 
-**The genuinely-missing on-disk primitive.**  No
-`ricEndoRaisedFib`/`metricSharp`/`inverseMetricSharpFib`/slot-insertion uniform operator-norm lemma is
-on disk yet, and the `T`-independent raise+slot Hom-field `Φ` (whose smoothness over an arbitrary smooth
-`(0, 2)`-section is the obstruction — `ccTensorBilin_contMDiff` is stated for `SmoothCcTensor`, not for
-an arbitrary `ContMDiffSection`) is not constructed; only the bilinear-evaluated
-`exists_uniform_cometricBilin_bound` and the per-`T` slot field smoothness
-`ccTensorBilinSlotEndo_contMDiff` exist.  This bound is therefore isolated here as the single posited
-consumer-minimal child of the keystone field; the supercritical-`toHs` tail it composes with is fully
-on disk (`riemannianFiberNormSq_le_sq_iteratedCovGradJetSum` ∘ `exists_realizedJetSum_le_toHs_sharpOrder`).
+This is the precise reusable inverse-Gram raise primitive carrying the `T`-uniform content of the
+keystone field; the supercritical-`toHs` tail it composes with is fully on disk
+(`riemannianFiberNormSq_le_sq_iteratedCovGradJetSum` ∘ `exists_realizedJetSum_le_toHs_sharpOrder`).
 
-**Non-vacuity.**  A degenerate `Cop < 0` is rejected: the conclusion at any `T`, `x` with
-`rfns g₀ 0 2 x ((realizeSymmCcTensor g₀ T).toSection x) > 0` and `ofCLM (ccTensorBilinSlotEndo g₀ T x)
-≠ 0` forces `Cop > 0`; the smallest valid value is the genuine squared `g₀`-fibre operator-norm sup of
-the raise+slot field `Φ`, positive whenever `Φ` is nonzero (e.g. on `g₀` itself the raise is the
-identity endomorphism). -/
+**Non-vacuity.**  A degenerate `Cop < 0` is rejected: with `dim M ≥ 1` (`NeZero (Module.finrank ℝ E)`)
+the exact identity forces `Cop ≥ dim M > 0` at any `T`, `x` with the realized `(0, 2)`-fibre norm
+positive; the constant `dim M` is the genuine Hilbert–Schmidt slot-ampliation factor. -/
 theorem exists_riemannianFiberNormSq_ofCLM_ccTensorBilinSlotEndo_le_realizeSection
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ Cop : ℝ, 0 ≤ Cop ∧
@@ -386,8 +501,50 @@ theorem exists_riemannianFiberNormSq_ofCLM_ccTensorBilinSlotEndo_le_realizeSecti
             (show TensorRSSpace 2 2 I x from
               TensorRSSpace.ofCLM (ccTensorBilinSlotEndo (I := I) g₀ T x)) ≤
           Cop * riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
-            ((realizeSymmCcTensor (I := I) g₀ T).toSection x) :=
-  sorry
+            ((realizeSymmCcTensor (I := I) g₀ T).toSection x) := by
+  classical
+  refine ⟨(Module.finrank ℝ E : ℝ), by positivity, fun T x => ?_⟩
+  obtain ⟨n, e, hn, horth, hrepr02, hrepr22⟩ := orthoFrame_repr_02_22 (I := I) g₀ x
+  have h22 : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+      (show TensorRSSpace 2 2 I x from
+        TensorRSSpace.ofCLM (ccTensorBilinSlotEndo (I := I) g₀ T x))
+      = ∑ K : Fin 2 → Fin n, ∑ J : Fin 2 → Fin n,
+          (fiberNormSqComponent (I := I) (M := M) g₀ x 2 2
+            (show TensorRSSpace 2 2 I x from
+              TensorRSSpace.ofCLM (ccTensorBilinSlotEndo (I := I) g₀ T x)) n e K J) ^ 2 :=
+    riemannianFiberNormSq_eq_sum_componentRS_sq (I := I) (M := M) g₀ x 2 2 e hrepr22 _
+  have h22' : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+      (show TensorRSSpace 2 2 I x from
+        TensorRSSpace.ofCLM (ccTensorBilinSlotEndo (I := I) g₀ T x))
+      = ∑ K : Fin 2 → Fin n, ∑ J : Fin 2 → Fin n,
+          (ccTensorBilinSymm (I := I) g₀ T x (e (J 0)) (e (K 0)) *
+            (if K 1 = J 1 then (1 : ℝ) else 0)) ^ 2 := by
+    rw [h22]
+    refine Finset.sum_congr rfl (fun K _ => Finset.sum_congr rfl (fun J _ => ?_))
+    rw [slotEndo_fiberComponent_eq (I := I) g₀ T x e horth K J]
+  rw [h22', slotInsert_sqsum_eq_dim_mul n (fun a b => ccTensorBilinSymm (I := I) g₀ T x (e a) (e b))]
+  have h02 : riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+      ((realizeSymmCcTensor (I := I) g₀ T).toSection x)
+      = ∑ K : Fin 0 → Fin n, ∑ J : Fin 2 → Fin n,
+          (fiberNormSqComponent (I := I) (M := M) g₀ x 0 2
+            ((realizeSymmCcTensor (I := I) g₀ T).toSection x) n e K J) ^ 2 :=
+    riemannianFiberNormSq_eq_sum_componentRS_sq (I := I) (M := M) g₀ x 0 2 e hrepr02 _
+  have h02' : riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+      ((realizeSymmCcTensor (I := I) g₀ T).toSection x)
+      = ∑ J : Fin 2 → Fin n, (ccTensorBilinSymm (I := I) g₀ T x (e (J 0)) (e (J 1))) ^ 2 := by
+    rw [h02]
+    rw [Fintype.sum_subsingleton
+      (fun K : Fin 0 → Fin n => ∑ J : Fin 2 → Fin n,
+        (fiberNormSqComponent (I := I) (M := M) g₀ x 0 2
+          ((realizeSymmCcTensor (I := I) g₀ T).toSection x) n e K J) ^ 2)
+      (fun k : Fin 0 => k.elim0)]
+    refine Finset.sum_congr rfl (fun J _ => ?_)
+    rw [ccTensorBilin_eq_fiberNormSqComponent (I := I) g₀ (realizeSymmCcTensor (I := I) g₀ T) x e
+      (fun k : Fin 0 => k.elim0) J]
+    rw [realizeSymmCcTensor_ccTensorBilin_apply]
+  rw [h02']
+  have hnE : (n : ℝ) = (Module.finrank ℝ E : ℝ) := by rw [hn]; rfl
+  rw [hnE]
 
 set_option linter.unusedSectionVars false in
 /-- **The uniform `toHs` fibre bound on the leading-slot insertion field (the realized-perturbation
