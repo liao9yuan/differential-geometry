@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CrossCorrectionContractionCalculus
+import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotExtendCovariantParallelism
 import DifferentialGeometry.Geometry.Connection.ConnectionDifferenceFieldJets
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LoweredConnectionDifferenceCovariantDerivative
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.CcTensorFibreCauchySchwarz
@@ -934,6 +935,62 @@ private lemma norm_sq_eq_integral_riemannianFiberNormSq (g₀ : SmoothRiemannian
   rw [Integral.L2.SmoothCcTensor.norm_def]
   exact Integral.Connection.tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq
     (I := I) (M := M) g₀ s S
+
+/-- **The `p`-fold passenger-slot extension of an operator field.**  `slotExtendPow p Φ` extends the
+`(r, s)`-operator field `Φ` to the `(r + p, s + p)`-operator field obtained by inserting `p` leading
+spectator slots one at a time.  It is the operator tower that the iterated parallel covariant Leibniz of
+`appCcRS Φ` produces (each covariant gradient inserts one leading gradient direction as a spectator,
+left uncontracted, `slotExtendFib_apply_eval`). -/
+noncomputable def slotExtendPow (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) :
+    ∀ p : ℕ, Integral.L2.SmoothCcTensor g₀ r s → Integral.L2.SmoothCcTensor g₀ (r + p) (s + p)
+  | 0 => fun Φ => Φ
+  | (p + 1) => fun Φ => slotExtend (I := I) (M := M) g₀ (r + p) (s + p) (slotExtendPow g₀ r s p Φ)
+
+set_option linter.unusedSectionVars false in
+/-- The `p`-fold passenger-slot extension of a `∇₀`-parallel operator field is `∇₀`-parallel:
+`slotExtend` preserves parallelism (`covGrad_slotExtend_eq_zero_of_covGrad_eq_zero`). -/
+private theorem covGrad_slotExtendPow_eq_zero (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : Integral.L2.SmoothCcTensor g₀ r s)
+    (hΦ : Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ r s Φ = 0) (p : ℕ) :
+    Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ (r + p) (s + p)
+        (slotExtendPow (I := I) (M := M) g₀ r s p Φ) = 0 := by
+  induction p with
+  | zero => exact hΦ
+  | succ p ih =>
+    exact DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.covGrad_slotExtend_eq_zero_of_covGrad_eq_zero
+      (I := I) (M := M) g₀ (r + p) (s + p) (slotExtendPow (I := I) (M := M) g₀ r s p Φ) ih
+
+set_option linter.unusedSectionVars false in
+/-- **The iterated parallel operator-field covariant Leibniz.**  For a `∇₀`-parallel operator field `Φ`
+(`covGrad Φ = 0`), the order-`p` covariant gradient of the operator action `appCcRS Φ W` is the action
+of the `p`-fold passenger extension on the order-`p` gradient of the contracted section:
+```
+∇^p (appCcRS Φ W) = appCcRS (slotExtendPow p Φ) (∇^p W).
+```
+Each covariant gradient splits by `covGrad_appCcRS_eq` into the differentiated-coefficient action (which
+vanishes since `Φ` and its slot extensions are parallel) plus the slot-extended action on the gradient. -/
+private theorem iteratedCovGrad_appCcRS_of_parallel (g₀ : SmoothRiemannianMetric I M) (a b c : ℕ)
+    (Φ : Integral.L2.SmoothCcTensor g₀ b c)
+    (hΦ : Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ b c Φ = 0)
+    (W : Integral.L2.SmoothCcTensor g₀ a b) (p : ℕ) :
+    PDE.RicciFlow.iteratedCovGrad (I := I) g₀ a c p (appCcRS (I := I) (M := M) g₀ a b c Φ W) =
+      appCcRS (I := I) (M := M) g₀ a (b + p) (c + p)
+        (slotExtendPow (I := I) (M := M) g₀ b c p Φ)
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ a b p W) := by
+  induction p with
+  | zero =>
+    rw [PDE.RicciFlow.iteratedCovGrad_zero, PDE.RicciFlow.iteratedCovGrad_zero]
+    rfl
+  | succ p ih =>
+    rw [PDE.RicciFlow.iteratedCovGrad_succ, ih]
+    rw [covGrad_appCcRS_eq (I := I) (M := M) g₀ a (b + p) (c + p)
+      (slotExtendPow (I := I) (M := M) g₀ b c p Φ)
+      (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ a b p W)]
+    rw [covGrad_slotExtendPow_eq_zero (I := I) (M := M) g₀ b c Φ hΦ p]
+    rw [appCcRS_zero_left (I := I) (M := M) g₀ a (b + p) (c + p + 1)
+      (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ a b p W), zero_add]
+    rw [PDE.RicciFlow.iteratedCovGrad_succ]
+    rfl
 
 set_option linter.unusedSectionVars false in
 /-- **(LEAF — the cross-correction order-`p` covariant jet top/rest split, δ-separated, integrated
