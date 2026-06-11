@@ -1512,6 +1512,38 @@ noncomputable def crossCorrCovGradPerm {a b : ℕ} : Equiv.Perm (Fin (3 + a + b 
     (finSumFinEquiv.permCongr
       (Equiv.sumCongr (finRotate ((2 + a) + 1)) (Equiv.refl (Fin (1 + b)))))
 
+/-- Value of `crossCorrCovGradPerm` on the leading block interior `j < 2 + a`: `j ↦ j + 1`. -/
+private lemma crossCorrCovGradPerm_val_lt {a b : ℕ} (i : Fin (3 + a + b + 1)) (hi : (i : ℕ) < 2 + a) :
+    ((crossCorrCovGradPerm (a := a) (b := b)) i : ℕ) = (i : ℕ) + 1 := by
+  simp only [crossCorrCovGradPerm, Equiv.permCongr_apply, finCongr_symm, finCongr_apply]
+  rw [show (Fin.cast (by omega : 3 + a + b + 1 = ((2 + a) + 1) + (1 + b)) i) =
+      Fin.castAdd (1 + b) ⟨(i : ℕ), by omega⟩ from by apply Fin.ext; simp]
+  rw [finSumFinEquiv_symm_apply_castAdd, Equiv.sumCongr_apply, Sum.map_inl, finRotate_succ_apply,
+    finSumFinEquiv_apply_left, Fin.val_cast, Fin.val_castAdd]
+  rw [Fin.val_add_one_of_lt (by exact Fin.mk_lt_mk.mpr (by omega : (i:ℕ) < 2 + a))]
+
+/-- Value of `crossCorrCovGradPerm` at the gradient slot `i = 2 + a`: `2 + a ↦ 0`. -/
+private lemma crossCorrCovGradPerm_val_eq {a b : ℕ} (i : Fin (3 + a + b + 1)) (hi : (i : ℕ) = 2 + a) :
+    ((crossCorrCovGradPerm (a := a) (b := b)) i : ℕ) = 0 := by
+  simp only [crossCorrCovGradPerm, Equiv.permCongr_apply, finCongr_symm, finCongr_apply]
+  rw [show (Fin.cast (by omega : 3 + a + b + 1 = ((2 + a) + 1) + (1 + b)) i) =
+      Fin.castAdd (1 + b) ⟨(i : ℕ), by omega⟩ from by apply Fin.ext; simp]
+  rw [finSumFinEquiv_symm_apply_castAdd, Equiv.sumCongr_apply, Sum.map_inl]
+  rw [show (⟨(i : ℕ), by omega⟩ : Fin ((2 + a) + 1)) = Fin.last (2 + a) from by
+    apply Fin.ext; simp [hi]]
+  rw [finRotate_last, finSumFinEquiv_apply_left, Fin.val_cast, Fin.val_castAdd, Fin.val_zero]
+
+/-- Value of `crossCorrCovGradPerm` on the trailing passenger block `i > 2 + a`: fixed. -/
+private lemma crossCorrCovGradPerm_val_gt {a b : ℕ} (i : Fin (3 + a + b + 1)) (hi : 2 + a < (i : ℕ)) :
+    ((crossCorrCovGradPerm (a := a) (b := b)) i : ℕ) = (i : ℕ) := by
+  simp only [crossCorrCovGradPerm, Equiv.permCongr_apply, finCongr_symm, finCongr_apply]
+  rw [show (Fin.cast (by omega : 3 + a + b + 1 = ((2 + a) + 1) + (1 + b)) i) =
+      Fin.natAdd ((2 + a) + 1) ⟨(i : ℕ) - ((2 + a) + 1), by omega⟩ from by
+    apply Fin.ext; simp; omega]
+  rw [finSumFinEquiv_symm_apply_natAdd, Equiv.sumCongr_apply, Sum.map_inr, Equiv.refl_apply,
+    finSumFinEquiv_apply_right, Fin.val_cast, Fin.val_natAdd, Fin.val_mk]
+  omega
+
 /-- **The two-section covariant Leibniz of the frame-free product section** (POSITED product-Leibniz
 child).  The operator-field slot-extension of the parallel cometric field, applied to the covariant
 gradient of the slot-permuted model product, reconciles with the two shifted-order contractions:

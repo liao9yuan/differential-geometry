@@ -403,6 +403,254 @@ noncomputable def bareProdCovGradPerm (s₁ s₂ : ℕ) {a b : ℕ} :
     (finSumFinEquiv.permCongr
       (Equiv.sumCongr (finRotate ((s₁ + a) + 1)) (Equiv.refl (Fin (s₂ + b)))))
 
+/-- Value of `bareProdCovGradPerm` on the leading `S`-block interior `j < s₁ + a`: `j ↦ j + 1`. -/
+private lemma bareProdCovGradPerm_val_lt (s₁ s₂ : ℕ) {a b : ℕ}
+    (i : Fin ((s₁ + s₂) + a + b + 1)) (hi : (i : ℕ) < s₁ + a) :
+    ((bareProdCovGradPerm s₁ s₂ (a := a) (b := b)) i : ℕ) = (i : ℕ) + 1 := by
+  simp only [bareProdCovGradPerm, Equiv.permCongr_apply, finCongr_symm, finCongr_apply]
+  rw [show (Fin.cast (by omega : (s₁ + s₂) + a + b + 1 = ((s₁ + a) + 1) + (s₂ + b)) i) =
+      Fin.castAdd (s₂ + b) ⟨(i : ℕ), by omega⟩ from by apply Fin.ext; simp]
+  rw [finSumFinEquiv_symm_apply_castAdd, Equiv.sumCongr_apply, Sum.map_inl, finRotate_succ_apply,
+    finSumFinEquiv_apply_left, Fin.val_cast, Fin.val_castAdd]
+  rw [Fin.val_add_one_of_lt (by exact Fin.mk_lt_mk.mpr (by omega : (i:ℕ) < s₁ + a))]
+
+/-- Value of `bareProdCovGradPerm` at the gradient slot `i = s₁ + a`: `s₁ + a ↦ 0`. -/
+private lemma bareProdCovGradPerm_val_eq (s₁ s₂ : ℕ) {a b : ℕ}
+    (i : Fin ((s₁ + s₂) + a + b + 1)) (hi : (i : ℕ) = s₁ + a) :
+    ((bareProdCovGradPerm s₁ s₂ (a := a) (b := b)) i : ℕ) = 0 := by
+  simp only [bareProdCovGradPerm, Equiv.permCongr_apply, finCongr_symm, finCongr_apply]
+  rw [show (Fin.cast (by omega : (s₁ + s₂) + a + b + 1 = ((s₁ + a) + 1) + (s₂ + b)) i) =
+      Fin.castAdd (s₂ + b) ⟨(i : ℕ), by omega⟩ from by apply Fin.ext; simp]
+  rw [finSumFinEquiv_symm_apply_castAdd, Equiv.sumCongr_apply, Sum.map_inl]
+  rw [show (⟨(i : ℕ), by omega⟩ : Fin ((s₁ + a) + 1)) = Fin.last (s₁ + a) from by
+    apply Fin.ext; simp [hi]]
+  rw [finRotate_last, finSumFinEquiv_apply_left, Fin.val_cast, Fin.val_castAdd, Fin.val_zero]
+
+/-- Value of `bareProdCovGradPerm` on the trailing passenger block `i > s₁ + a`: fixed. -/
+private lemma bareProdCovGradPerm_val_gt (s₁ s₂ : ℕ) {a b : ℕ}
+    (i : Fin ((s₁ + s₂) + a + b + 1)) (hi : s₁ + a < (i : ℕ)) :
+    ((bareProdCovGradPerm s₁ s₂ (a := a) (b := b)) i : ℕ) = (i : ℕ) := by
+  simp only [bareProdCovGradPerm, Equiv.permCongr_apply, finCongr_symm, finCongr_apply]
+  rw [show (Fin.cast (by omega : (s₁ + s₂) + a + b + 1 = ((s₁ + a) + 1) + (s₂ + b)) i) =
+      Fin.natAdd ((s₁ + a) + 1) ⟨(i : ℕ) - ((s₁ + a) + 1), by omega⟩ from by
+    apply Fin.ext; simp; omega]
+  rw [finSumFinEquiv_symm_apply_natAdd, Equiv.sumCongr_apply, Sum.map_inr, Equiv.refl_apply,
+    finSumFinEquiv_apply_right, Fin.val_cast, Fin.val_natAdd, Fin.val_mk]
+  omega
+
+/-- The bare unit-model value coincides with the canonical unit-model value (the rank-`0` input slot
+`constOfIsEmpty 1` is the model image of `unitTensor`). -/
+private theorem bareUnitModel_eq_unitModel (g₀ : SmoothRiemannianMetric I M) {s : ℕ}
+    (S : SmoothCcTensor g₀ 0 s) (x : M) :
+    bareUnitModel (I := I) g₀ S x = unitModel (I := I) (M := M) g₀ s S x := by
+  rfl
+
+/-- The bare model tensor-product section coincides with the unit-model product section
+(`unitModelProdSection`), so its proven unit-fibre covariant Leibniz transfers. -/
+private theorem bareTensorProdSection_eq_unitModelProdSection (g₀ : SmoothRiemannianMetric I M)
+    {s₁ s₂ : ℕ} (S : SmoothCcTensor g₀ 0 s₁) (T : SmoothCcTensor g₀ 0 s₂) :
+    bareTensorProdSection (I := I) g₀ S T = unitModelProdSection (I := I) g₀ S T := by
+  rfl
+
+/-- The `s + (k + 1)`-rank shape of `unitModel_covGrad_unitForm` (the gradient of an `(0, s + k)`
+section).  Defeq-equal to the `((s + k) + 1)`-rank statement, restated so the rank is `s + (k + 1)` —
+the shape the rank-normalised bare product carries (`bareProd (a := a + 1)`). -/
+private theorem unitModel_covGrad_unitForm_addAssoc (g₀ : SmoothRiemannianMetric I M) {s k : ℕ}
+    (W : SmoothCcTensor g₀ 0 (s + k)) (x : M) (v : Fin (s + (k + 1)) → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ (s + (k + 1)) (covGrad g₀ 0 (s + k) W) x v =
+      Tensor0SBundle.Tensor0SSpace.toModel
+        (Tensor0SNabla.tensor0SCovariantDerivative I M (s + k) (LeviCivita (I := I) g₀)
+          (fun y : M => (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace (s + k) I y from
+            W.toSection y) (unitTensor (I := I) (M := M) y)) x (v 0))
+        (Matrix.vecTail v) :=
+  unitModel_covGrad_unitForm (I := I) (s := s + k) g₀ W x v
+
+/-- Two successive rank-casts collapse to one (transport composition). -/
+private theorem castRankCc_db_castRankCc_db (g₀ : SmoothRiemannianMetric I M) {a b c : ℕ}
+    (h1 : a = b) (h2 : b = c) (W : SmoothCcTensor g₀ 0 a) :
+    castRankCc_db g₀ 0 h2 (castRankCc_db g₀ 0 h1 W) =
+      castRankCc_db g₀ 0 (h1.trans h2) W := by
+  subst h1; subst h2; rfl
+
+/-- The rank-normalised bare product is the rank-cast of the unit-model product section. -/
+private theorem bareProd_eq_castRankCc_unitModelProdSection (g₀ : SmoothRiemannianMetric I M)
+    (s₁ s₂ : ℕ) {a b : ℕ} (S : SmoothCcTensor g₀ 0 (s₁ + a)) (T : SmoothCcTensor g₀ 0 (s₂ + b)) :
+    bareProd (I := I) g₀ s₁ s₂ S T =
+      castRankCc_db g₀ 0 (by omega : (s₁ + a) + (s₂ + b) = (s₁ + s₂) + a + b)
+        (unitModelProdSection (I := I) g₀ S T) := by
+  rfl
+
+/-- The unit-model value of a rank-cast section reads `W`'s unit-model value on the `finCongr`-cast
+tuple (the cast `h ▸ W` collapses by `subst`). -/
+private theorem unitModel_castRankCc_db (g₀ : SmoothRiemannianMetric I M) {a b : ℕ} (h : a = b)
+    (W : SmoothCcTensor g₀ 0 a) (x : M) (v : Fin b → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ b (castRankCc_db g₀ 0 h W) x v =
+      unitModel (I := I) (M := M) g₀ a W x (fun i => v (Fin.cast h i)) := by
+  subst h
+  rfl
+
+/-- The unit-model value of the covariant gradient of a rank-cast section reads `covGrad W`'s
+unit-model value on the `finCongr`-cast tuple (the cast collapses by `subst`). -/
+private theorem unitModel_covGrad_castRankCc_db (g₀ : SmoothRiemannianMetric I M) {a b : ℕ}
+    (h : a = b) (W : SmoothCcTensor g₀ 0 a) (x : M) (v : Fin (b + 1) → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ (b + 1) (covGrad g₀ 0 b (castRankCc_db g₀ 0 h W)) x v =
+      unitModel (I := I) (M := M) g₀ (a + 1) (covGrad g₀ 0 a W) x
+        (fun i => v (Fin.cast (by omega) i)) := by
+  subst h
+  rfl
+
+/-- Reading the unit-model value of a section at the unit recovers `unitModel`. -/
+private theorem toModel_toSection_unitZero_eq_unitModel (g₀ : SmoothRiemannianMetric I M) {s : ℕ}
+    (W : SmoothCcTensor g₀ 0 s) (x : M) (v : Fin s → TangentSpace I x) :
+    Tensor0SBundle.Tensor0SSpace.toModel
+        ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace s I x from
+          W.toSection x) (unitZeroSec (I := I) (M := M) x)) v =
+      unitModel (I := I) (M := M) g₀ s W x v := by
+  rfl
+
+/-- **The product covariant-Leibniz second-summand slot reindexing** `Fin ((p + q) + 1) ≃ itself`:
+`finRotate (p + 1)` on the leading `p + 1` slots, identity on the trailing `q` slots.  Relocates the
+interior gradient slot (model-product index `p`) of the second summand `S ⊗ (∇T)` to the leading slot,
+matching `∇(S ⊗ T)`. -/
+def prodCovGradPerm (p q : ℕ) : Equiv.Perm (Fin ((p + q) + 1)) :=
+  (finCongr (by omega : ((p + 1) + q) = (p + q) + 1)).permCongr
+    (finSumFinEquiv.permCongr
+      (Equiv.sumCongr (finRotate (p + 1)) (Equiv.refl (Fin q))))
+
+/-- **Value of `prodCovGradPerm` on the leading-block interior** `j < p`: `j ↦ j + 1`
+(`finRotate (p + 1)` shifts the `S`-block slots up). -/
+private lemma prodCovGradPerm_val_lt (p q : ℕ) (i : Fin ((p + q) + 1)) (hi : (i : ℕ) < p) :
+    ((prodCovGradPerm p q) i : ℕ) = (i : ℕ) + 1 := by
+  simp only [prodCovGradPerm, Equiv.permCongr_apply, finCongr_symm, finCongr_apply]
+  rw [show (Fin.cast (by omega : (p + q) + 1 = (p + 1) + q) i) =
+      Fin.castAdd q ⟨(i : ℕ), by omega⟩ from by apply Fin.ext; simp]
+  rw [finSumFinEquiv_symm_apply_castAdd, Equiv.sumCongr_apply, Sum.map_inl, finRotate_succ_apply,
+    finSumFinEquiv_apply_left, Fin.val_cast, Fin.val_castAdd]
+  rw [Fin.val_add_one_of_lt (by exact Fin.mk_lt_mk.mpr (by omega : (i:ℕ) < p))]
+
+/-- **Value of `prodCovGradPerm` at the gradient slot** `i = p`: `p ↦ 0`
+(`finRotate (p + 1)` wraps the last `S`-block slot to the front). -/
+private lemma prodCovGradPerm_val_eq (p q : ℕ) (i : Fin ((p + q) + 1)) (hi : (i : ℕ) = p) :
+    ((prodCovGradPerm p q) i : ℕ) = 0 := by
+  simp only [prodCovGradPerm, Equiv.permCongr_apply, finCongr_symm, finCongr_apply]
+  rw [show (Fin.cast (by omega : (p + q) + 1 = (p + 1) + q) i) =
+      Fin.castAdd q ⟨(i : ℕ), by omega⟩ from by apply Fin.ext; simp]
+  rw [finSumFinEquiv_symm_apply_castAdd, Equiv.sumCongr_apply, Sum.map_inl]
+  rw [show (⟨(i : ℕ), by omega⟩ : Fin (p + 1)) = Fin.last p from by apply Fin.ext; simp [hi]]
+  rw [finRotate_last, finSumFinEquiv_apply_left, Fin.val_cast, Fin.val_castAdd, Fin.val_zero]
+
+/-- **Value of `prodCovGradPerm` on the trailing passenger block** `i > p`: fixed
+(the identity on the `∇T`-passenger `Fin q` block). -/
+private lemma prodCovGradPerm_val_gt (p q : ℕ) (i : Fin ((p + q) + 1)) (hi : p < (i : ℕ)) :
+    ((prodCovGradPerm p q) i : ℕ) = (i : ℕ) := by
+  simp only [prodCovGradPerm, Equiv.permCongr_apply, finCongr_symm, finCongr_apply]
+  rw [show (Fin.cast (by omega : (p + q) + 1 = (p + 1) + q) i) =
+      Fin.natAdd (p + 1) ⟨(i : ℕ) - (p + 1), by omega⟩ from by apply Fin.ext; simp; omega]
+  rw [finSumFinEquiv_symm_apply_natAdd, Equiv.sumCongr_apply, Sum.map_inr, Equiv.refl_apply,
+    finSumFinEquiv_apply_right, Fin.val_cast, Fin.val_natAdd, Fin.val_mk]
+  omega
+
+/-- **The exact two-section covariant Leibniz of the bare model tensor-product section** at every rank
+`p`, `q` (the section-level form).  The cross term differentiating the parallel tensor-product map
+vanishes; the left summand is rank-cast from `(p + 1) + q`; the second summand's interior gradient slot
+(index `p`) is relocated to the leading slot by `prodCovGradPerm`.  Proved at the unit fibre through
+`unitModelProdSection_covGrad_unitModel_pub` (LHS) and `unitModelProdSection_unitModel` +
+`permuteCcTensor_unitModel` + `unitModel_covGrad_unitForm` (the two RHS summands), matched by the
+`modelProduct` slot-block structure. -/
+theorem unitModelProdSection_covGrad (g₀ : SmoothRiemannianMetric I M) {p q : ℕ}
+    (S : SmoothCcTensor g₀ 0 p) (T : SmoothCcTensor g₀ 0 q) :
+    covGrad g₀ 0 (p + q) (unitModelProdSection (I := I) g₀ S T) =
+      castRankCc_db g₀ 0 (by omega : (p + 1) + q = (p + q) + 1)
+          (unitModelProdSection (I := I) g₀ (covGrad g₀ 0 p S) T) +
+        PDE.DeTurck.permuteCcTensor g₀ (prodCovGradPerm p q)
+          (castRankCc_db g₀ 0 (by omega : p + (q + 1) = (p + q) + 1)
+            (unitModelProdSection (I := I) g₀ S (covGrad g₀ 0 q T))) := by
+  classical
+  apply Integral.L2.SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply PDE.DeTurck.tensor0s_ext_unitZero (I := I) (M := M)
+  apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+  refine ContinuousMultilinearMap.ext (fun v => ?_)
+  beta_reduce
+  -- RHS: split the section sum, distribute the unit evaluation and `toModel`.
+  rw [show ((castRankCc_db g₀ 0 (by omega : (p + 1) + q = (p + q) + 1)
+            (unitModelProdSection (I := I) g₀ (covGrad g₀ 0 p S) T) +
+          PDE.DeTurck.permuteCcTensor g₀ (prodCovGradPerm p q)
+            (castRankCc_db g₀ 0 (by omega : p + (q + 1) = (p + q) + 1)
+              (unitModelProdSection (I := I) g₀ S (covGrad g₀ 0 q T)))).toSection x) =
+        (castRankCc_db g₀ 0 (by omega : (p + 1) + q = (p + q) + 1)
+            (unitModelProdSection (I := I) g₀ (covGrad g₀ 0 p S) T)).toSection x +
+          (PDE.DeTurck.permuteCcTensor g₀ (prodCovGradPerm p q)
+            (castRankCc_db g₀ 0 (by omega : p + (q + 1) = (p + q) + 1)
+              (unitModelProdSection (I := I) g₀ S (covGrad g₀ 0 q T)))).toSection x from rfl]
+  rw [ContinuousLinearMap.add_apply, Tensor0SBundle.Tensor0SSpace.toModel_add,
+    ContinuousMultilinearMap.add_apply]
+  rw [toModel_toSection_unitZero_eq_unitModel (I := I) g₀
+    (covGrad g₀ 0 (p + q) (unitModelProdSection (I := I) g₀ S T)) x v]
+  -- Summand 1: strip cast, read unit-model product.
+  rw [toModel_toSection_unitZero_eq_unitModel (I := I) g₀
+    (castRankCc_db g₀ 0 (by omega : (p + 1) + q = (p + q) + 1)
+      (unitModelProdSection (I := I) g₀ (covGrad g₀ 0 p S) T)) x v]
+  rw [unitModel_castRankCc_db (I := I) g₀ (by omega : (p + 1) + q = (p + q) + 1)
+    (unitModelProdSection (I := I) g₀ (covGrad g₀ 0 p S) T) x]
+  rw [unitModelProdSection_unitModel (I := I) g₀ (covGrad g₀ 0 p S) T x]
+  -- Summand 2: read permuteCcTensor (domDomCongr), strip cast, read unit-model product.
+  rw [toModel_toSection_unitZero_eq_unitModel (I := I) g₀
+    (PDE.DeTurck.permuteCcTensor g₀ (prodCovGradPerm p q)
+      (castRankCc_db g₀ 0 (by omega : p + (q + 1) = (p + q) + 1)
+        (unitModelProdSection (I := I) g₀ S (covGrad g₀ 0 q T)))) x v]
+  rw [PDE.DeTurck.permuteCcTensor_unitModel (I := I) g₀ (prodCovGradPerm p q)
+    (castRankCc_db g₀ 0 (by omega : p + (q + 1) = (p + q) + 1)
+      (unitModelProdSection (I := I) g₀ S (covGrad g₀ 0 q T))) x]
+  rw [ContinuousMultilinearMap.domDomCongr_apply]
+  rw [unitModel_castRankCc_db (I := I) g₀ (by omega : p + (q + 1) = (p + q) + 1)
+    (unitModelProdSection (I := I) g₀ S (covGrad g₀ 0 q T)) x]
+  rw [unitModelProdSection_unitModel (I := I) g₀ S (covGrad g₀ 0 q T) x]
+  -- LHS via the public unit-fibre Leibniz; then split every model product to scalars and
+  -- convert every covariant-gradient unit-model to the directional form, leaving pure slot arithmetic.
+  rw [unitModelProdSection_covGrad_unitModel_pub (I := I) g₀ S T x v]
+  simp only [Bundle.continuousMultilinearMap.modelProduct_apply]
+  rw [unitModel_covGrad_unitForm (I := I) g₀ S x, unitModel_covGrad_unitForm (I := I) g₀ T x]
+  -- Rewrite each of the six RHS slot-tuples / directions to its LHS counterpart, via the value
+  -- characterisation of `prodCovGradPerm` (and the plain casts for the first summand).
+  have hS1dir : ((fun i : Fin ((p + 1) + q) =>
+        v (Fin.cast (by omega : (p + 1) + q = (p + q) + 1) i)) ∘ Fin.castAdd q) 0 = v 0 := by
+    simp only [Function.comp_apply]; apply congrArg; apply Fin.ext; simp
+  have hS1tup : Matrix.vecTail ((fun i : Fin ((p + 1) + q) =>
+        v (Fin.cast (by omega : (p + 1) + q = (p + q) + 1) i)) ∘ Fin.castAdd q) =
+      Matrix.vecTail v ∘ Fin.castAdd q := by
+    funext j; simp only [Matrix.vecTail, Function.comp_apply]
+    apply congrArg; apply Fin.ext
+    simp only [Fin.val_succ, Fin.val_cast, Fin.val_castAdd]
+  have hS1pass : ((fun i : Fin ((p + 1) + q) =>
+        v (Fin.cast (by omega : (p + 1) + q = (p + q) + 1) i)) ∘ Fin.natAdd (p + 1)) =
+      Matrix.vecTail v ∘ Fin.natAdd p := by
+    funext k; simp only [Matrix.vecTail, Function.comp_apply]
+    apply congrArg; apply Fin.ext
+    simp only [Fin.val_succ, Fin.val_cast, Fin.val_natAdd]; omega
+  have hS2pass : ((fun i : Fin (p + (q + 1)) =>
+        v ((prodCovGradPerm p q) (Fin.cast (by omega : p + (q + 1) = (p + q) + 1) i))) ∘
+        Fin.castAdd (q + 1)) = Matrix.vecTail v ∘ Fin.castAdd q := by
+    funext j; simp only [Matrix.vecTail, Function.comp_apply]
+    apply congrArg; apply Fin.ext
+    rw [prodCovGradPerm_val_lt p q _ (by simp only [Fin.val_cast, Fin.val_castAdd]; omega)]
+    simp only [Fin.val_succ, Fin.val_cast, Fin.val_castAdd]
+  have hS2dir : ((fun i : Fin (p + (q + 1)) =>
+        v ((prodCovGradPerm p q) (Fin.cast (by omega : p + (q + 1) = (p + q) + 1) i))) ∘
+        Fin.natAdd p) 0 = v 0 := by
+    simp only [Function.comp_apply]; apply congrArg; apply Fin.ext
+    rw [prodCovGradPerm_val_eq p q _ (by simp only [Fin.val_cast, Fin.val_natAdd, Fin.val_zero]; omega)]
+    simp
+  have hS2tup : Matrix.vecTail ((fun i : Fin (p + (q + 1)) =>
+        v ((prodCovGradPerm p q) (Fin.cast (by omega : p + (q + 1) = (p + q) + 1) i))) ∘
+        Fin.natAdd p) = Matrix.vecTail v ∘ Fin.natAdd p := by
+    funext k; simp only [Matrix.vecTail, Function.comp_apply]
+    apply congrArg; apply Fin.ext
+    rw [prodCovGradPerm_val_gt p q _ (by simp only [Fin.val_cast, Fin.val_natAdd, Fin.val_succ]; omega)]
+    simp only [Fin.val_succ, Fin.val_cast, Fin.val_natAdd]; omega
+  rw [hS1dir, hS1tup, hS1pass, hS2pass, hS2dir, hS2tup]
+
 /-- **The exact two-section covariant Leibniz of the bare model tensor product** (POSITED deep
 covariant-calculus child — to be homed in `Geometry/Connection/TensorNabla` as the generic "covariant
 gradient of a bare model tensor product obeys the exact two-section Leibniz" fact, the parallel-bundle-
@@ -431,8 +679,137 @@ theorem bareProd_covGrad (g₀ : SmoothRiemannianMetric I M) (s₁ s₂ : ℕ) {
             (covGrad g₀ 0 (s₁ + a) S) T) +
         PDE.DeTurck.permuteCcTensor g₀ (bareProdCovGradPerm s₁ s₂ (a := a) (b := b))
           (castRankCc_db g₀ 0 (by omega : (s₁ + s₂) + a + (b + 1) = (s₁ + s₂) + a + b + 1)
-            (bareProd (I := I) g₀ s₁ s₂ (a := a) (b := b + 1) S (covGrad g₀ 0 (s₂ + b) T))) :=
-  sorry
+            (bareProd (I := I) g₀ s₁ s₂ (a := a) (b := b + 1) S (covGrad g₀ 0 (s₂ + b) T))) := by
+  classical
+  -- Reduce to the rank-`p,q` section-level Leibniz `unitModelProdSection_covGrad` (with
+  -- `p = s₁ + a`, `q = s₂ + b`); `bareProd` is the rank-cast of `unitModelProdSection`, the summands'
+  -- casts compose, and `bareProdCovGradPerm` is `prodCovGradPerm` transported along the equal rank.
+  rw [bareProd_eq_castRankCc_unitModelProdSection (I := I) g₀ s₁ s₂ S T,
+    bareProd_eq_castRankCc_unitModelProdSection (I := I) g₀ s₁ s₂ (a := a + 1)
+      (covGrad g₀ 0 (s₁ + a) S) T,
+    bareProd_eq_castRankCc_unitModelProdSection (I := I) g₀ s₁ s₂ (b := b + 1) S
+      (covGrad g₀ 0 (s₂ + b) T)]
+  apply Integral.L2.SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply PDE.DeTurck.tensor0s_ext_unitZero (I := I) (M := M)
+  apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+  refine ContinuousMultilinearMap.ext (fun v => ?_)
+  beta_reduce
+  -- Collapse the two nested rank-casts in each summand to a single cast.
+  rw [castRankCc_db_castRankCc_db (I := I) g₀
+      (by omega : (s₁ + (a + 1)) + (s₂ + b) = (s₁ + s₂) + (a + 1) + b)
+      (by omega : (s₁ + s₂) + (a + 1) + b = (s₁ + s₂) + a + b + 1)
+      (unitModelProdSection (I := I) g₀ (covGrad g₀ 0 (s₁ + a) S) T),
+    castRankCc_db_castRankCc_db (I := I) g₀
+      (by omega : (s₁ + a) + (s₂ + (b + 1)) = (s₁ + s₂) + a + (b + 1))
+      (by omega : (s₁ + s₂) + a + (b + 1) = (s₁ + s₂) + a + b + 1)
+      (unitModelProdSection (I := I) g₀ S (covGrad g₀ 0 (s₂ + b) T))]
+  -- RHS: split the section sum, distribute the unit evaluation and `toModel`.
+  rw [show ((castRankCc_db g₀ 0 (by omega : (s₁ + (a + 1)) + (s₂ + b) = (s₁ + s₂) + a + b + 1)
+            (unitModelProdSection (I := I) g₀ (covGrad g₀ 0 (s₁ + a) S) T) +
+          PDE.DeTurck.permuteCcTensor g₀ (bareProdCovGradPerm s₁ s₂ (a := a) (b := b))
+            (castRankCc_db g₀ 0 (by omega : (s₁ + a) + (s₂ + (b + 1)) = (s₁ + s₂) + a + b + 1)
+              (unitModelProdSection (I := I) g₀ S (covGrad g₀ 0 (s₂ + b) T)))).toSection x) =
+        (castRankCc_db g₀ 0 (by omega : (s₁ + (a + 1)) + (s₂ + b) = (s₁ + s₂) + a + b + 1)
+            (unitModelProdSection (I := I) g₀ (covGrad g₀ 0 (s₁ + a) S) T)).toSection x +
+          (PDE.DeTurck.permuteCcTensor g₀ (bareProdCovGradPerm s₁ s₂ (a := a) (b := b))
+            (castRankCc_db g₀ 0 (by omega : (s₁ + a) + (s₂ + (b + 1)) = (s₁ + s₂) + a + b + 1)
+              (unitModelProdSection (I := I) g₀ S (covGrad g₀ 0 (s₂ + b) T)))).toSection x
+      from rfl]
+  rw [ContinuousLinearMap.add_apply, Tensor0SBundle.Tensor0SSpace.toModel_add,
+    ContinuousMultilinearMap.add_apply]
+  -- LHS: strip the outer cast, then the public unit-fibre Leibniz.
+  rw [toModel_toSection_unitZero_eq_unitModel (I := I) g₀
+    (covGrad g₀ 0 ((s₁ + s₂) + a + b)
+      (castRankCc_db g₀ 0 (by omega : (s₁ + a) + (s₂ + b) = (s₁ + s₂) + a + b)
+        (unitModelProdSection (I := I) g₀ S T))) x v]
+  rw [unitModel_covGrad_castRankCc_db (I := I) g₀ (by omega : (s₁ + a) + (s₂ + b) = (s₁ + s₂) + a + b)
+    (unitModelProdSection (I := I) g₀ S T) x v]
+  -- Summand 1: strip the cast, read unit-model product.
+  rw [toModel_toSection_unitZero_eq_unitModel (I := I) g₀
+    (castRankCc_db g₀ 0 (by omega : (s₁ + (a + 1)) + (s₂ + b) = (s₁ + s₂) + a + b + 1)
+      (unitModelProdSection (I := I) g₀ (covGrad g₀ 0 (s₁ + a) S) T)) x v]
+  rw [unitModel_castRankCc_db (I := I) g₀ (by omega : (s₁ + (a + 1)) + (s₂ + b) = (s₁ + s₂) + a + b + 1)
+    (unitModelProdSection (I := I) g₀ (covGrad g₀ 0 (s₁ + a) S) T) x]
+  rw [unitModelProdSection_unitModel (I := I) (p := s₁ + (a + 1)) g₀
+    (covGrad g₀ 0 (s₁ + a) S) T x]
+  -- Summand 2: permuteCcTensor (domDomCongr), strip the cast, read unit-model product.
+  rw [toModel_toSection_unitZero_eq_unitModel (I := I) g₀
+    (PDE.DeTurck.permuteCcTensor g₀ (bareProdCovGradPerm s₁ s₂ (a := a) (b := b))
+      (castRankCc_db g₀ 0 (by omega : (s₁ + a) + (s₂ + (b + 1)) = (s₁ + s₂) + a + b + 1)
+        (unitModelProdSection (I := I) g₀ S (covGrad g₀ 0 (s₂ + b) T)))) x v]
+  rw [PDE.DeTurck.permuteCcTensor_unitModel (I := I) g₀ (bareProdCovGradPerm s₁ s₂ (a := a) (b := b))
+    (castRankCc_db g₀ 0 (by omega : (s₁ + a) + (s₂ + (b + 1)) = (s₁ + s₂) + a + b + 1)
+      (unitModelProdSection (I := I) g₀ S (covGrad g₀ 0 (s₂ + b) T))) x]
+  rw [ContinuousMultilinearMap.domDomCongr_apply]
+  rw [unitModel_castRankCc_db (I := I) g₀ (by omega : (s₁ + a) + (s₂ + (b + 1)) = (s₁ + s₂) + a + b + 1)
+    (unitModelProdSection (I := I) g₀ S (covGrad g₀ 0 (s₂ + b) T)) x]
+  rw [unitModelProdSection_unitModel (I := I) (q := s₂ + (b + 1)) g₀ S
+    (covGrad g₀ 0 (s₂ + b) T) x]
+  -- LHS via the public unit-fibre Leibniz; then split all model products to scalars.
+  rw [unitModelProdSection_covGrad_unitModel_pub (I := I) g₀ S T x
+    (fun i => v (Fin.cast (by omega) i))]
+  simp only [Bundle.continuousMultilinearMap.modelProduct_apply]
+  -- Convert each gradient unit-model (`s₁ + (a+1)` / `s₂ + (b+1)` shape) to the directional form.
+  rw [unitModel_covGrad_unitForm_addAssoc (I := I) (s := s₁) (k := a) g₀ S x,
+    unitModel_covGrad_unitForm_addAssoc (I := I) (s := s₂) (k := b) g₀ T x]
+  -- Match the six RHS slot-tuples / directions to their LHS counterparts (all casts are
+  -- value-preserving; the perm is value-characterised by `bareProdCovGradPerm_val_*`).
+  have hS1dir : ((fun i : Fin ((s₁ + (a + 1)) + (s₂ + b)) =>
+        v (Fin.cast (by omega : (s₁ + (a + 1)) + (s₂ + b) = (s₁ + s₂) + a + b + 1) i)) ∘
+        Fin.castAdd (s₂ + b)) 0 =
+      (fun i : Fin (((s₁ + a) + (s₂ + b)) + 1) =>
+        v (Fin.cast (by omega : ((s₁ + a) + (s₂ + b)) + 1 = (s₁ + s₂) + a + b + 1) i)) 0 := by
+    simp only [Function.comp_apply]; apply congrArg; apply Fin.ext; simp
+  have hS1tup : Matrix.vecTail ((fun i : Fin ((s₁ + (a + 1)) + (s₂ + b)) =>
+        v (Fin.cast (by omega : (s₁ + (a + 1)) + (s₂ + b) = (s₁ + s₂) + a + b + 1) i)) ∘
+        Fin.castAdd (s₂ + b)) =
+      Matrix.vecTail (fun i : Fin (((s₁ + a) + (s₂ + b)) + 1) =>
+        v (Fin.cast (by omega : ((s₁ + a) + (s₂ + b)) + 1 = (s₁ + s₂) + a + b + 1) i)) ∘
+        Fin.castAdd (s₂ + b) := by
+    funext j; simp only [Matrix.vecTail, Function.comp_apply]
+    apply congrArg; apply Fin.ext; simp [Fin.val_succ]
+  have hS1pass : ((fun i : Fin ((s₁ + (a + 1)) + (s₂ + b)) =>
+        v (Fin.cast (by omega : (s₁ + (a + 1)) + (s₂ + b) = (s₁ + s₂) + a + b + 1) i)) ∘
+        Fin.natAdd (s₁ + (a + 1))) =
+      Matrix.vecTail (fun i : Fin (((s₁ + a) + (s₂ + b)) + 1) =>
+        v (Fin.cast (by omega : ((s₁ + a) + (s₂ + b)) + 1 = (s₁ + s₂) + a + b + 1) i)) ∘
+        Fin.natAdd (s₁ + a) := by
+    funext k; simp only [Matrix.vecTail, Function.comp_apply]
+    apply congrArg; apply Fin.ext; simp [Fin.val_succ]; omega
+  have hS2pass : ((fun i : Fin ((s₁ + a) + (s₂ + (b + 1))) =>
+        v ((bareProdCovGradPerm s₁ s₂ (a := a) (b := b))
+          (Fin.cast (by omega : (s₁ + a) + (s₂ + (b + 1)) = (s₁ + s₂) + a + b + 1) i))) ∘
+        Fin.castAdd (s₂ + (b + 1))) =
+      Matrix.vecTail (fun i : Fin (((s₁ + a) + (s₂ + b)) + 1) =>
+        v (Fin.cast (by omega : ((s₁ + a) + (s₂ + b)) + 1 = (s₁ + s₂) + a + b + 1) i)) ∘
+        Fin.castAdd (s₂ + b) := by
+    funext j; simp only [Matrix.vecTail, Function.comp_apply]
+    apply congrArg; apply Fin.ext
+    rw [bareProdCovGradPerm_val_lt s₁ s₂ _ (by simp only [Fin.val_cast, Fin.val_castAdd]; omega)]
+    simp [Fin.val_succ]
+  have hS2dir : ((fun i : Fin ((s₁ + a) + (s₂ + (b + 1))) =>
+        v ((bareProdCovGradPerm s₁ s₂ (a := a) (b := b))
+          (Fin.cast (by omega : (s₁ + a) + (s₂ + (b + 1)) = (s₁ + s₂) + a + b + 1) i))) ∘
+        Fin.natAdd (s₁ + a)) 0 =
+      (fun i : Fin (((s₁ + a) + (s₂ + b)) + 1) =>
+        v (Fin.cast (by omega : ((s₁ + a) + (s₂ + b)) + 1 = (s₁ + s₂) + a + b + 1) i)) 0 := by
+    simp only [Function.comp_apply]; apply congrArg; apply Fin.ext
+    rw [bareProdCovGradPerm_val_eq s₁ s₂ _ (by simp only [Fin.val_cast, Fin.val_natAdd, Fin.val_zero]; omega)]
+    simp
+  have hS2tup : Matrix.vecTail ((fun i : Fin ((s₁ + a) + (s₂ + (b + 1))) =>
+        v ((bareProdCovGradPerm s₁ s₂ (a := a) (b := b))
+          (Fin.cast (by omega : (s₁ + a) + (s₂ + (b + 1)) = (s₁ + s₂) + a + b + 1) i))) ∘
+        Fin.natAdd (s₁ + a)) =
+      Matrix.vecTail (fun i : Fin (((s₁ + a) + (s₂ + b)) + 1) =>
+        v (Fin.cast (by omega : ((s₁ + a) + (s₂ + b)) + 1 = (s₁ + s₂) + a + b + 1) i)) ∘
+        Fin.natAdd (s₁ + a) := by
+    funext k; simp only [Matrix.vecTail, Function.comp_apply]
+    apply congrArg; apply Fin.ext
+    rw [bareProdCovGradPerm_val_gt s₁ s₂ _ (by simp only [Fin.val_cast, Fin.val_natAdd, Fin.val_succ]; omega)]
+    simp only [Fin.val_succ, Fin.val_cast, Fin.val_natAdd]; omega
+  rw [hS1dir, hS1tup, hS1pass, hS2pass, hS2dir, hS2tup]
 
 /-! ## The assembled `RfnsBilinearProduct` instances -/
 

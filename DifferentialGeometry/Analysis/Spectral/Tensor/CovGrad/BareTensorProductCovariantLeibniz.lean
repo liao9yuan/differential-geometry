@@ -664,6 +664,49 @@ private lemma toModel_chartTensor0SSlotCorrection_sum_prodUnitEval (g : SmoothRi
 
 /-! ## The chart-frame and abstract covariant-derivative Leibniz, and the headline -/
 
+/-- **The chart-frame covariant derivative of any smooth `(0, n)`-tensor section splits, read to the
+model, as the intrinsic Fréchet piece minus the per-slot Christoffel-correction sum — at every rank
+`n` (including `n = 0`).**  For `n = m + 1` this is the explicit `chartTensor0SCovariantDerivative_succ`
+decomposition; for `n = 0` the correction sum is empty, and the scalar `mfderiv` body coincides with
+the intrinsic chart Fréchet piece at the unique empty tuple (`tensor0SIntrinsicChartCLM_zero_apply_empty_eq_mfderiv`,
+on the chart-`x` Levi-Civita good set, using the section's manifold-differentiability). -/
+private lemma toModel_chartTensor0SCovariantDerivative_eq_intrinsic_sub_slotSum
+    (g : SmoothRiemannianMetric I M) {n : ℕ} (Y : Π b' : M, Tensor0SSpace n I b')
+    (X : Π b' : M, TangentSpace I b') (x : M) (hY : TensorSectionMDiffAt (I := I) n Y x) :
+    Tensor0SSpace.toModel
+        (chartTensor0SCovariantDerivative (I := I) n g x Y X x) =
+      Tensor0SSpace.toModel
+          (tensor0SIntrinsicChartCLM (I := I) n x Y x (X x)) -
+        Tensor0SSpace.toModel
+          (∑ k : Fin n, chartTensor0SSlotCorrection (I := I) n g x Y X x k) := by
+  classical
+  cases n with
+  | succ m =>
+      rw [chartTensor0SCovariantDerivative_succ (I := I) m g x Y X x]
+      exact map_sub (tensor0SSpace_continuousLinearEquiv (m + 1) x) _ _
+  | zero =>
+      have hx_good : x ∈ chartLeviCivitaGoodSet (I := I) x := self_mem_chartLeviCivitaGoodSet x
+      rw [Finset.univ_eq_empty, Finset.sum_empty, Tensor0SSpace.toModel_zero, sub_zero]
+      apply ContinuousMultilinearMap.ext
+      intro m
+      have hm : m = (fun i : Fin 0 => Fin.elim0 i) := by funext i; exact i.elim0
+      subst hm
+      rw [show Tensor0SSpace.toModel
+              (chartTensor0SCovariantDerivative (I := I) 0 g x Y X x)
+              (fun i : Fin 0 => Fin.elim0 i) =
+            (show ContinuousMultilinearMap ℝ (fun _ : Fin 0 => TangentSpace I x) ℝ from
+              chartTensor0SCovariantDerivative (I := I) 0 g x Y X x)
+              (fun i : Fin 0 => Fin.elim0 i) from rfl]
+      rw [chartTensor0SCovariantDerivative_zero_apply (I := I) g x Y X x
+        (fun i : Fin 0 => Fin.elim0 i)]
+      rw [show Tensor0SSpace.toModel
+              (tensor0SIntrinsicChartCLM (I := I) 0 x Y x (X x))
+              (fun i : Fin 0 => Fin.elim0 i) =
+            (show ContinuousMultilinearMap ℝ (fun _ : Fin 0 => TangentSpace I x) ℝ from
+              tensor0SIntrinsicChartCLM (I := I) 0 x Y x (X x))
+              (fun i : Fin 0 => Fin.elim0 i) from rfl]
+      rw [tensor0SIntrinsicChartCLM_zero_apply_empty_eq_mfderiv (I := I) x Y hx_good hY (X x)]
+
 /-- The chart-center value of the chart-frame covariant derivative of a `(0, s')`-tensor unit-eval
 section (`s' = s + 1`), read to the model: the intrinsic Fréchet piece minus the per-slot
 Christoffel-correction sum. -/
@@ -771,6 +814,102 @@ private lemma toModel_chartTensor0SCovariantDerivative_prodUnitEval_succ
     rw [map_sub]]
   abel
 
+/-- **The chart-frame covariant derivative of the bare product splits over the model product, at
+every factor rank `p`, `q`** (no `+1` restriction; at the chart center, read to the model).  Combines
+the general-rank decomposition `toModel_chartTensor0SCovariantDerivative_eq_intrinsic_sub_slotSum`
+(applied to the product unit-eval section and to each factor), the general-rank intrinsic-piece
+Leibniz `toModel_tensor0SIntrinsicChartCLM_prodUnitEval_self`, and the general-rank
+Christoffel-correction split `toModel_chartTensor0SSlotCorrection_sum_prodUnitEval`, with `modelProduct`
+bilinearity distributing the two subtractions. -/
+private lemma toModel_chartTensor0SCovariantDerivative_prodUnitEval
+    (g : SmoothRiemannianMetric I M) {p q : ℕ}
+    (S : SmoothCcTensor g 0 p) (T : SmoothCcTensor g 0 q)
+    (X : Π b' : M, TangentSpace I b') (x : M) :
+    Tensor0SSpace.toModel
+        (chartTensor0SCovariantDerivative (I := I) (p + q) g x
+          (prodUnitEval (I := I) g S T) X x) =
+      Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) p q
+          (Tensor0SSpace.toModel
+            (chartTensor0SCovariantDerivative (I := I) p g x (factorUnitEval (I := I) g S) X x))
+          (unitModel (I := I) (M := M) g q T x) +
+        Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) p q
+          (unitModel (I := I) (M := M) g p S x)
+          (Tensor0SSpace.toModel
+            (chartTensor0SCovariantDerivative (I := I) q g x
+              (factorUnitEval (I := I) g T) X x)) := by
+  classical
+  rw [toModel_chartTensor0SCovariantDerivative_eq_intrinsic_sub_slotSum (I := I) g
+    (prodUnitEval (I := I) g S T) X x (prodUnitEval_tensorSectionMDiffAt (I := I) g S T x)]
+  rw [toModel_tensor0SIntrinsicChartCLM_prodUnitEval_self (I := I) g S T x (X x)]
+  rw [toModel_chartTensor0SSlotCorrection_sum_prodUnitEval (I := I) g S T X x]
+  rw [toModel_chartTensor0SCovariantDerivative_eq_intrinsic_sub_slotSum (I := I) g
+    (factorUnitEval (I := I) g S) X x (factorUnitEval_tensorSectionMDiffAt (I := I) g S x),
+    toModel_chartTensor0SCovariantDerivative_eq_intrinsic_sub_slotSum (I := I) g
+    (factorUnitEval (I := I) g T) X x (factorUnitEval_tensorSectionMDiffAt (I := I) g T x)]
+  rw [show Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) p q
+        (Tensor0SSpace.toModel
+            (tensor0SIntrinsicChartCLM (I := I) p x (factorUnitEval (I := I) g S) x (X x)) -
+          Tensor0SSpace.toModel
+            (∑ k : Fin p,
+              chartTensor0SSlotCorrection (I := I) p g x (factorUnitEval (I := I) g S) X x k))
+        (unitModel (I := I) (M := M) g q T x) =
+      Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) p q
+          (Tensor0SSpace.toModel
+            (tensor0SIntrinsicChartCLM (I := I) p x (factorUnitEval (I := I) g S) x (X x)))
+          (unitModel (I := I) (M := M) g q T x) -
+        Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) p q
+          (Tensor0SSpace.toModel
+            (∑ k : Fin p,
+              chartTensor0SSlotCorrection (I := I) p g x (factorUnitEval (I := I) g S) X x k))
+          (unitModel (I := I) (M := M) g q T x) from by
+    rw [← Bundle.continuousMultilinearMap.modelProductₗ_apply,
+      ← Bundle.continuousMultilinearMap.modelProductₗ_apply,
+      ← Bundle.continuousMultilinearMap.modelProductₗ_apply]
+    rw [map_sub, LinearMap.sub_apply]]
+  rw [show Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) p q
+        (unitModel (I := I) (M := M) g p S x)
+        (Tensor0SSpace.toModel
+            (tensor0SIntrinsicChartCLM (I := I) q x (factorUnitEval (I := I) g T) x (X x)) -
+          Tensor0SSpace.toModel
+            (∑ k : Fin q,
+              chartTensor0SSlotCorrection (I := I) q g x (factorUnitEval (I := I) g T) X x k)) =
+      Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) p q
+          (unitModel (I := I) (M := M) g p S x)
+          (Tensor0SSpace.toModel
+            (tensor0SIntrinsicChartCLM (I := I) q x (factorUnitEval (I := I) g T) x (X x))) -
+        Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) p q
+          (unitModel (I := I) (M := M) g p S x)
+          (Tensor0SSpace.toModel
+            (∑ k : Fin q,
+              chartTensor0SSlotCorrection (I := I) q g x (factorUnitEval (I := I) g T) X x k))
+        from by
+    rw [← Bundle.continuousMultilinearMap.modelProductₗ_apply,
+      ← Bundle.continuousMultilinearMap.modelProductₗ_apply,
+      ← Bundle.continuousMultilinearMap.modelProductₗ_apply]
+    rw [map_sub]]
+  abel
+
+/-- **Chart-frame and bundled covariant derivative agree at every rank `n`** (at the chart-`x`
+Levi-Civita good-set point `x`, for a manifold-differentiable section `Y` and direction `X`).  By
+`cases n`: the `n = m + 1` case is `chartTensor0SCovariantDerivative_eq_abstract_succ_aux`; the `n = 0`
+case is `chartTensor0SCovariantDerivative_eq_abstract_zero` (whose good-set/differentiability
+hypotheses are vacuous). -/
+private lemma chartTensor0SCovariantDerivative_eq_abstract_gen
+    (g : SmoothRiemannianMetric I M) {n : ℕ} (Y : Π b' : M, Tensor0SSpace n I b')
+    (X : Π b' : M, TangentSpace I b') (x : M)
+    (hY : TensorSectionMDiffAt (I := I) n Y x)
+    (hX_at : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun b' : M => TotalSpace.mk' E (E := fun y : M => TangentSpace I y) b' (X b')) x) :
+    chartTensor0SCovariantDerivative (I := I) n g x Y X x =
+      Tensor0SNabla.tensor0SCovariantDerivative I M n (LeviCivita (I := I) g) Y x (X x) := by
+  have hx_good : x ∈ chartLeviCivitaGoodSet (I := I) x := self_mem_chartLeviCivitaGoodSet x
+  cases n with
+  | succ m =>
+      exact chartTensor0SCovariantDerivative_eq_abstract_succ_aux (I := I) (M := M) g x m Y X
+        hx_good hY hX_at
+  | zero =>
+      exact chartTensor0SCovariantDerivative_eq_abstract_zero (I := I) (M := M) g x Y X hx_good
+
 /-- The model value of the abstract bundled covariant derivative of a `(0, s' )`-tensor unit-eval
 section, read at the unit on a frame vector `X`, equals the chart-frame value (at `α = x`, on the
 good set). -/
@@ -831,6 +970,66 @@ private lemma covDerivUnitModel_prodUnitEval_frame (g : SmoothRiemannianMetric I
   rw [toModel_chartTensor0SCovariantDerivative_prodUnitEval_succ (I := I) g S T Xf x]
   rw [toModel_tensor0SCovariantDerivative_factorUnitEval_frame (I := I) g S Xf x hX_at,
     toModel_tensor0SCovariantDerivative_factorUnitEval_frame (I := I) g T Xf x hX_at]
+
+/-- The model value of the abstract bundled covariant derivative of a `(0, s)`-tensor unit-eval
+section (any rank `s`, including `0`), read at the unit on a direction `X`, equals the chart-frame
+value (at `α = x`, on the good set).  The general-rank companion of
+`toModel_tensor0SCovariantDerivative_factorUnitEval_frame`. -/
+private lemma toModel_tensor0SCovariantDerivative_factorUnitEval_frame_gen
+    (g : SmoothRiemannianMetric I M) {s : ℕ} (W : SmoothCcTensor g 0 s)
+    (X : Π b' : M, TangentSpace I b') (x : M)
+    (hX_at : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun b' : M => TotalSpace.mk' E (E := fun y : M => TangentSpace I y) b' (X b')) x) :
+    Tensor0SSpace.toModel
+        (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)
+          (factorUnitEval (I := I) g W) x (X x)) =
+      Tensor0SSpace.toModel
+        (chartTensor0SCovariantDerivative (I := I) s g x (factorUnitEval (I := I) g W) X x) := by
+  rw [chartTensor0SCovariantDerivative_eq_abstract_gen (I := I) g
+    (factorUnitEval (I := I) g W) X x (factorUnitEval_tensorSectionMDiffAt (I := I) g W x) hX_at]
+
+/-- **The directional covariant-derivative Leibniz for the bare model tensor product, read at the
+unit on a frame vector, at every factor rank `p`, `q`** (no `+1` restriction).  The general-rank
+companion of `covDerivUnitModel_prodUnitEval_frame`, via the general-rank agreement bridge
+`chartTensor0SCovariantDerivative_eq_abstract_gen`, the general-rank product chart-decomposition
+`toModel_chartTensor0SCovariantDerivative_prodUnitEval`, and the general-rank factor frame
+`toModel_tensor0SCovariantDerivative_factorUnitEval_frame_gen`. -/
+private lemma covDerivUnitModel_prodUnitEval_frame_gen (g : SmoothRiemannianMetric I M) {p q : ℕ}
+    (S : SmoothCcTensor g 0 p) (T : SmoothCcTensor g 0 q) (x : M)
+    (i : Fin (Module.finrank ℝ E)) :
+    Tensor0SSpace.toModel
+        (Tensor0SNabla.tensor0SCovariantDerivative I M (p + q) (LeviCivita (I := I) g)
+          (prodUnitEval (I := I) g S T) x
+          (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x i x)) =
+      Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) p q
+          (Tensor0SSpace.toModel
+            (Tensor0SNabla.tensor0SCovariantDerivative I M p (LeviCivita (I := I) g)
+              (factorUnitEval (I := I) g S) x
+              (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x i x)))
+          (unitModel (I := I) (M := M) g q T x) +
+        Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) p q
+          (unitModel (I := I) (M := M) g p S x)
+          (Tensor0SSpace.toModel
+            (Tensor0SNabla.tensor0SCovariantDerivative I M q (LeviCivita (I := I) g)
+              (factorUnitEval (I := I) g T) x
+              (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x i x))) := by
+  classical
+  have hx_good : x ∈ chartLeviCivitaGoodSet (I := I) x := self_mem_chartLeviCivitaGoodSet x
+  have hX_at := chartBasisVec_alpha_mdifferentiableAt (I := I) x i hx_good
+  set Xf : Π b' : M, TangentSpace I b' :=
+    DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x i with hXf
+  set P : Π b' : M, Tensor0SSpace (p + q) I b' := prodUnitEval (I := I) g S T with hP
+  have hP_mdiff : TensorSectionMDiffAt (I := I) (p + q) P x := by
+    rw [hP]; exact prodUnitEval_tensorSectionMDiffAt (I := I) g S T x
+  have hprodaux : chartTensor0SCovariantDerivative (I := I) (p + q) g x P Xf x =
+      Tensor0SNabla.tensor0SCovariantDerivative I M (p + q) (LeviCivita (I := I) g)
+        P x (Xf x) :=
+    chartTensor0SCovariantDerivative_eq_abstract_gen (I := I) g P Xf x hP_mdiff hX_at
+  rw [hP] at hprodaux
+  rw [← hprodaux]
+  rw [toModel_chartTensor0SCovariantDerivative_prodUnitEval (I := I) g S T Xf x]
+  rw [toModel_tensor0SCovariantDerivative_factorUnitEval_frame_gen (I := I) g S Xf x hX_at,
+    toModel_tensor0SCovariantDerivative_factorUnitEval_frame_gen (I := I) g T Xf x hX_at]
 
 /-- **The unit-model of the covariant gradient through the bundled `(0, s)`-tensor covariant
 derivative.**  Reading the covariant gradient `covGrad g 0 s W` at the unit and on a `Fin (s + 1)`
@@ -922,6 +1121,51 @@ private lemma covDerivUnitModel_prodUnitEval (g : SmoothRiemannianMetric I M) {p
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [← smul_add, covDerivUnitModel_prodUnitEval_frame (I := I) g S T x i]
 
+/-- **The directional covariant-derivative Leibniz for the bare model tensor product, at an arbitrary
+direction, at every factor rank `p`, `q`** (no `+1` restriction).  The general-rank companion of
+`covDerivUnitModel_prodUnitEval`: identical chart-frame decomposition, closed by the general-rank
+frame Leibniz `covDerivUnitModel_prodUnitEval_frame_gen`. -/
+private lemma covDerivUnitModel_prodUnitEval_gen (g : SmoothRiemannianMetric I M) {p q : ℕ}
+    (S : SmoothCcTensor g 0 p) (T : SmoothCcTensor g 0 q) (x : M)
+    (w : TangentSpace I x) :
+    Tensor0SSpace.toModel
+        (Tensor0SNabla.tensor0SCovariantDerivative I M (p + q) (LeviCivita (I := I) g)
+          (prodUnitEval (I := I) g S T) x w) =
+      Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) p q
+          (Tensor0SSpace.toModel
+            (Tensor0SNabla.tensor0SCovariantDerivative I M p (LeviCivita (I := I) g)
+              (factorUnitEval (I := I) g S) x w))
+          (unitModel (I := I) (M := M) g q T x) +
+        Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) p q
+          (unitModel (I := I) (M := M) g p S x)
+          (Tensor0SSpace.toModel
+            (Tensor0SNabla.tensor0SCovariantDerivative I M q (LeviCivita (I := I) g)
+              (factorUnitEval (I := I) g T) x w)) := by
+  classical
+  have hx_good : x ∈ chartLeviCivitaGoodSet (I := I) x := self_mem_chartLeviCivitaGoodSet x
+  have hxE : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
+    chartLeviCivitaGoodSet_mem_baseSet (I := I) hx_good
+  set c : Fin (Module.finrank ℝ E) → ℝ :=
+    fun i => ((DifferentialGeometry.Integral.Measure.chartModelBasis E).repr
+      ((trivializationAt E (TangentSpace I) x).continuousLinearMapAt ℝ x w)) i with hc
+  have hdecomp : ∀ (n : ℕ) (Y : Π b' : M, Tensor0SSpace n I b'),
+      Tensor0SSpace.toModel
+        (Tensor0SNabla.tensor0SCovariantDerivative I M n (LeviCivita (I := I) g) Y x w) =
+      ∑ i, c i • Tensor0SSpace.toModel
+        (Tensor0SNabla.tensor0SCovariantDerivative I M n (LeviCivita (I := I) g) Y x
+          (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) x i x)) := by
+    intro n Y
+    conv_lhs => rw [chartBasisVecFiber_recompose (I := I) x hxE w]
+    rw [map_sum (Tensor0SNabla.tensor0SCovariantDerivative I M n (LeviCivita (I := I) g) Y x)]
+    rw [← Tensor0SSpace.toModelL_apply, map_sum]
+    simp only [map_smul, Tensor0SSpace.toModelL_apply, hc]
+  rw [hdecomp (p + q) (prodUnitEval (I := I) g S T),
+    hdecomp p (factorUnitEval (I := I) g S),
+    hdecomp q (factorUnitEval (I := I) g T)]
+  rw [modelProduct_finsum_smul_left, modelProduct_finsum_smul_right, ← Finset.sum_add_distrib]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [← smul_add, covDerivUnitModel_prodUnitEval_frame_gen (I := I) g S T x i]
+
 /-- **The covariant Leibniz rule for the bare model tensor product, in unit-model form.**
 
 For two smooth compactly-carried `(0, p' + 1)`- and `(0, q' + 1)`-tensor sections `S`, `T`, the unit
@@ -961,6 +1205,40 @@ theorem unitModelProdSection_covGrad_unitModel (g : SmoothRiemannianMetric I M) 
   rw [covDerivUnitModel_prodUnitEval (I := I) g S T x (v 0)]
   rw [ContinuousMultilinearMap.add_apply]
 
+/-- **The covariant Leibniz rule for the bare model tensor product, in unit-model form, at every
+factor rank `p`, `q`** (no `+1` restriction — including rank-`0` scalar factors).  The general-rank
+companion of `unitModelProdSection_covGrad_unitModel`: the unit fibre of the covariant gradient of the
+bare product, evaluated on a `Fin ((p + q) + 1)`-tuple `v`, is the two-section model-product Leibniz
+with no cross term (the high covariant derivative on the leading slot `v 0` lands on either factor,
+against the unit fibre of the other).  Proved through the general-rank directional Leibniz
+`covDerivUnitModel_prodUnitEval_gen` and the general-rank unit-model/covariant-gradient bridge
+`unitModel_covGrad_eq_tensor0SCovariantDerivative`. -/
+theorem unitModelProdSection_covGrad_unitModel_gen (g : SmoothRiemannianMetric I M) {p q : ℕ}
+    (S : SmoothCcTensor g 0 p) (T : SmoothCcTensor g 0 q) (x : M)
+    (v : Fin ((p + q) + 1) → TangentSpace I x) :
+    unitModel (I := I) (M := M) g ((p + q) + 1)
+        (covGrad (I := I) (M := M) g 0 (p + q) (unitModelProdSection (I := I) g S T))
+        x v =
+      Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) p q
+          (Tensor0SSpace.toModel
+            (Tensor0SNabla.tensor0SCovariantDerivative I M p (LeviCivita (I := I) g)
+              (factorUnitEval (I := I) g S) x (v 0)))
+          (unitModel (I := I) (M := M) g q T x)
+          (Matrix.vecTail v) +
+        Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) p q
+          (unitModel (I := I) (M := M) g p S x)
+          (Tensor0SSpace.toModel
+            (Tensor0SNabla.tensor0SCovariantDerivative I M q (LeviCivita (I := I) g)
+              (factorUnitEval (I := I) g T) x (v 0)))
+          (Matrix.vecTail v) := by
+  classical
+  rw [unitModel_covGrad_eq_tensor0SCovariantDerivative (I := I) g
+    (unitModelProdSection (I := I) g S T) x v]
+  rw [show (factorUnitEval (I := I) g (unitModelProdSection (I := I) g S T)) =
+      prodUnitEval (I := I) g S T from rfl]
+  rw [covDerivUnitModel_prodUnitEval_gen (I := I) g S T x (v 0)]
+  rw [ContinuousMultilinearMap.add_apply]
+
 /-- **Slot reconciliation, second factor (the gradient slot lands MID, not leading).**  Evaluating
 the unit fibre of the gradient-shifted bare product `unitModelProdSection S (covGrad T)` (ranks `p`,
 `q + 1`) on a `Fin (p + (q + 1))`-tuple `v` reads the covariant-derivative direction off the slot at
@@ -983,6 +1261,49 @@ private lemma unitModel_unitModelProdSection_covGrad_right (g : SmoothRiemannian
   congr 1
   rw [unitModel_covGrad_eq_tensor0SCovariantDerivative (I := I) g T x (v ∘ Fin.natAdd p)]
   rfl
+
+/-- **Public `factorUnitEval`-free reading of the unit-model of a covariant gradient.**  Reading
+`covGrad g 0 s W` at the unit and on a `Fin (s + 1)`-tuple `v` is the model value of the bundled
+`tensor0SCovariantDerivative` of the unit-evaluated section `y ↦ (W.toSection y) (unitTensor y)`, in
+the direction `v 0`, on `Matrix.vecTail v`.  The `factorUnitEval`-unfolded restatement of
+`unitModel_covGrad_eq_tensor0SCovariantDerivative`, exposed for downstream files (which cannot name the
+private `factorUnitEval`). -/
+theorem unitModel_covGrad_unitForm (g : SmoothRiemannianMetric I M)
+    {s : ℕ} (W : SmoothCcTensor g 0 s) (x : M) (v : Fin (s + 1) → TangentSpace I x) :
+    unitModel (I := I) (M := M) g (s + 1) (covGrad (I := I) (M := M) g 0 s W) x v =
+      Tensor0SSpace.toModel
+        (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)
+          (fun y : M => (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from
+            W.toSection y) (unitTensor (I := I) (M := M) y)) x (v 0))
+        (Matrix.vecTail v) :=
+  unitModel_covGrad_eq_tensor0SCovariantDerivative (I := I) g W x v
+
+/-- **Public `factorUnitEval`-free reading of the unit-model two-section covariant Leibniz** (general
+rank `p`, `q`).  The `_gen` headline with both factor-gradient summands re-expressed through the
+`factorUnitEval`-unfolded `unitModel_covGrad_unitForm` shape, so downstream files (which cannot name the
+private `factorUnitEval`) can consume it directly.  The high covariant derivative on the leading slot
+`v 0` lands on either factor, against the unit fibre of the other. -/
+theorem unitModelProdSection_covGrad_unitModel_pub (g : SmoothRiemannianMetric I M) {p q : ℕ}
+    (S : SmoothCcTensor g 0 p) (T : SmoothCcTensor g 0 q) (x : M)
+    (v : Fin ((p + q) + 1) → TangentSpace I x) :
+    unitModel (I := I) (M := M) g ((p + q) + 1)
+        (covGrad (I := I) (M := M) g 0 (p + q) (unitModelProdSection (I := I) g S T)) x v =
+      Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) p q
+          (Tensor0SSpace.toModel
+            (Tensor0SNabla.tensor0SCovariantDerivative I M p (LeviCivita (I := I) g)
+              (fun y : M => (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace p I y from
+                S.toSection y) (unitTensor (I := I) (M := M) y)) x (v 0)))
+          (unitModel (I := I) (M := M) g q T x)
+          (Matrix.vecTail v) +
+        Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) p q
+          (unitModel (I := I) (M := M) g p S x)
+          (Tensor0SSpace.toModel
+            (Tensor0SNabla.tensor0SCovariantDerivative I M q (LeviCivita (I := I) g)
+              (fun y : M => (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace q I y from
+                T.toSection y) (unitTensor (I := I) (M := M) y)) x (v 0)))
+          (Matrix.vecTail v) :=
+  unitModelProdSection_covGrad_unitModel_gen (I := I) g S T x v
+
 
 end TensorSpectral
 end Parabolic
