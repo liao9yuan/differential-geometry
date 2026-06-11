@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSHighOrderSobo
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizedCovGradJetInput
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.HeatOutputContinuousRepr
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RealizedRetagChartSobolevSmoothness
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralToPouSobolevCLM
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.L2Operator.L2PMap
 
@@ -570,9 +571,17 @@ Why the ball restriction is essential (the truncation litmus): the global claim 
 retag does not vanish — a non-removable first-order kink); the radius-`ρ` ball excises that boundary.
 T6: purely spatial.
 
-The body is `sorry`: the inverse-Gram-Neumann rational-polynomial smoothness grind discharging the
-chart-Sobolev `ContDiffOn` of the retag is the irreducible deep analytic content (its own future
-fill, possibly multi-dispatch). -/
+This is **proven glue** over the upstream chart-Sobolev retag-smoothness posit
+`exists_deTurckRHSRetag_toHs_contDiffOn_ball`
+(`RealizedRetagChartSobolevSmoothness.lean`), which supplies `ρ`, `Ξ`, the ball `ContDiffOn`, and —
+for every smooth section `T` whose `H^q` class lies in the ball — a fibre-small witness `hfib`
+together with the factoring `Ξ ((T).toHs q) = (deTurckRHSRetag g₀ g_bg g₁).toHs a` against the
+realized retag of `g₁ = tensorSectionRealizeMetric g₀ T hfib.choose_spec.1 hfib.choose_spec.2`.  The
+only work here is the section identity `deTurckRealizeRemainderOf g₀ g_bg T + Δ_∇ T =
+deTurckRHSRetag g₀ g_bg g₁`: on the fibre-small locus `deTurckRealizeRemainderOf` reduces (via
+`dif_pos hfib`) to `deTurckRHSRetag g₀ g_bg g₁ − Δ_∇ T`, and `sub_add_cancel` adds the linear arm
+back.  It transitively depends on `sorryAx` exactly through that upstream retag-smoothness posit (the
+irreducible inverse-Gram-Neumann rational-polynomial smoothness grind, its own future fill). -/
 theorem exists_deTurckRealizeRemainderRetag_toHs_contDiffOn_ball
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (q : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) (hq : a + 2 ≤ q) :
@@ -589,7 +598,29 @@ theorem exists_deTurckRealizeRemainderRetag_toHs_contDiffOn_ball
           Ξ (IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) q T)
             = IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
                 (deTurckRealizeRemainderOf (I := I) g₀ g_bg T
-                  + rawTensorConnLapSmooth (I := I) g₀ 0 2 T) := sorry
+                  + rawTensorConnLapSmooth (I := I) g₀ 0 2 T) := by
+  classical
+  obtain ⟨ρ, Ξ, hρ, hΞ, hfactor⟩ :=
+    exists_deTurckRHSRetag_toHs_contDiffOn_ball (I := I) g₀ g_bg a q ha hq
+  refine ⟨ρ, Ξ, hρ, hΞ, fun T hT => ?_⟩
+  obtain ⟨hfib, heq⟩ := hfactor T hT
+  rw [heq]
+  congr 1
+  have hred : deTurckRealizeRemainderOf (I := I) g₀ g_bg T
+      = { toSection := (deTurckRHSSection (I := I) g_bg
+            (tensorSectionRealizeMetric (I := I) g₀ T hfib.choose_spec.1
+              hfib.choose_spec.2)).toSection
+          hasCompactSupport := (deTurckRHSSection (I := I) g_bg
+            (tensorSectionRealizeMetric (I := I) g₀ T hfib.choose_spec.1
+              hfib.choose_spec.2)).hasCompactSupport }
+        - rawTensorConnLapSmooth (I := I) g₀ 0 2 T := by
+    rw [deTurckRealizeRemainderOf, dif_pos hfib]
+  rw [hred]
+  change (deTurckRHSRetag (I := I) g₀ g_bg
+        (tensorSectionRealizeMetric (I := I) g₀ T hfib.choose_spec.1 hfib.choose_spec.2))
+      = _ - rawTensorConnLapSmooth (I := I) g₀ 0 2 T + rawTensorConnLapSmooth (I := I) g₀ 0 2 T
+  rw [sub_add_cancel]
+  rfl
 
 /-- **`C^∞`-on-the-validity-ball of the chart-Sobolev-valued realized DeTurck remainder (the deep
 inverse-Gram Neumann posit; body `sorry`).**

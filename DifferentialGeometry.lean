@@ -649,6 +649,7 @@ import DifferentialGeometry.Analysis.Sobolev.Tensor.NormBasics
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNorm
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedHsNormReverseOrderZero
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedNorm
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.BanachAlgebraSmoothness
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CompactInclusionIntrinsic
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HilbertSpace
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.Inclusion
@@ -694,6 +695,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSAbstractJet2B
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSChartCoverJet2
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSHighOrderSobolevLipschitz
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSPointwiseLipschitz
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RealizedRetagChartSobolevSmoothness
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderNemytskiiSmoothness
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LoweredConnectionDifferenceCovariantDerivative
