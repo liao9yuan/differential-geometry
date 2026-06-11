@@ -521,3 +521,79 @@ the honest input is the KOSZUL norm bound `hrelB : |∇^{m'}(A∗g)| ≤ KR·|�
 (`iterCovCompU ↔ tensorRSCovariantDerivative` tower of A_k, upper analogue of `iterCovComp_eq_iterCov`) +
 norm bridges compL2 ↔ √normSq. Claim-1 machinery now **~85%**; the geometric statement itself still 0%
 (unstated). Whole HCG project theorem-weighted ~15-20%.
+
+## PROGRESS 14 (2026-06-10) — **CLAIMS 1+2 GEOMETRIC, sorry-free** (RicBoundClaims.lean)
+
+DAG items 3 (Claim 1) and 4 (Claim 2) DONE as theorems: `claim1_LC` (= `claim1` +
+`hkoszul_of_leviCivita`, the F3 producer reused verbatim — Phase W paid off) and
+`claim2_component` (mixed `|nabla^a nabla_k^b T| <= C` for `a+b <= L` from Shi rows +
+Claim-1 D-bounds; new `mixed_oneStep_rev` + abstract `claim2Double` with
+exists-C-before-forall-W).  Orientation: chrG = moving, chrH = fixed; no sign glue.
+See RicBoundClaims.md.  NEXT: R3a `mixed_oneStep_top` (split c=k top term, carries
+the `|nabla^N g|` of (A_N)), then R3b (A_N) descent + R3c (B_N) Gronwall (item 5).
+
+## PROGRESS 15 (2026-06-10) — (A_N) component core GREEN + `ric_bound` STATED
+
+RicBoundClaims.lean fully sorry-free: + `mixed_oneStep_top` (top-split one-step,
+the `|nabla^N g|`-carrying term isolated) and `mixed_descent` (the (A_N) analytic
+core: `|nabla_H^N T| <= C(1+|nabla_HU^{N-1}D|)` pointwise from hDlow/hmix/hShiN by
+an N-step constant-cost descent).  NEW FILE RicBound.lean: `theorem ric_bound`
+STATED intrinsically (ricCovTower = iterCov of ricciSection; hypotheses = IsCompact
+K + eq3.3 + (B_r) r<N + moving Shi <= N; conclusion = the
+MetricCovOrderEvolutionInput.ric_bound field shape) with ONE precise sorry.
+Remaining discharge: frame covering of K, component<->intrinsic ON-frame bridge
+(Parseval EXISTS: normSq0S_identity_eq_sum_sq), moving<->fixed norm via eq3.3,
+ricciSection component identification, finite-cover maxima.  See RicBound.md.
+
+## COORDINATION (2026-06-10, ~16:20) — TWO TRACKS CONVERGED; do NOT duplicate Step 4
+
+Two concurrent sessions both closed the Claim-1/2 layer today in different shapes.
+MAP (all sorry-free, focused-checked):
+
+- Claim1Wiring.lean (track A): `claim1_geom` (trivialization-frame geometric Claim 1,
+  B1-B3 producers discharged, numeric window bounds as inputs) + **B5 `compL2_tower_eq`**
+  (component tower = sqrt normSq0S of `iterCov` at pointwise-gRef-ON frame points —
+  THE component<->intrinsic bridge).
+- Claim2Mixed.lean (track A): `claim2core` (pure-`chrR`-tower bound, field-quantified
+  strong induction; mixed wrapper = instantiate at `B := iterCovComp chrK T b`).
+- RicBoundClaims.lean (track B): `claim1_LC` (frame-general Claim 1 via
+  `hkoszul_of_leviCivita`), `claim2_component` (the MIXED `|∇_H^a ∇_G^b T|` bound
+  directly — equivalent to claim2core+wrapper; redundant pair, both settled API),
+  **`mixed_oneStep_top`** (top-split one-step, hDbound only `c<k`, conclusion carries
+  `r·|∇_U^k D|·|X|`) and **`mixed_descent` = THE (A_N) ANALYTIC CORE**:
+  `|∇_H^N T| ≤ C(1 + |∇_{H,U}^{N-1}D|)` pointwise from hDlow (`c+1<N` uniform) +
+  hmix (Claim 2 at `L=N-1`) + hShiN.  **Step 4's (A_N) descent is DONE — do not
+  rebuild the telescoping.**
+- RicBound.lean (track B): **`theorem ric_bound` STATED** (intrinsic (A_N) endpoint:
+  `ricCovTower := iterCov gRef 2 (ricciSection (LC g))`; hyps = IsCompact K + eq3.3 +
+  (B_r) r<N + moving-Shi ≤ N; conclusion = the MetricCovOrderEvolutionInput.ric_bound
+  field shape), ONE sorry.  See RicBound.md for the discharge plan.
+
+CONSOLIDATED REMAINING for the ric_bound sorry (either session; claim the files):
+(1) a covering of compact K by frame domains where the descent constants uniformize —
+    either gRef-ON frames (then B5 gives norm EQUALITY) or bounded-Gram equivalence;
+(2) moving<->fixed norm conversion of the Shi inputs via eq(3.3) (hequiv);
+(3) ricciSection component smoothness (`hT` for the descent) — frameComp0S of
+    ricciSection is ContMDiffOn (B2-pattern producer);
+(4) instantiate `mixed_descent` + `claim1_LC`(or claim1_geom) per domain; finite-cover
+    maxima; arity reindex `2+N <-> N+2` for the Gronwall consumption.
+ORIENTATION GUARD: both tracks use D = Γ_moving − Γ_fixed lowered/towered in the FIXED
+connection (chrG/chrK = moving, chrH/chrR = fixed) — consistent, no sign flips.
+
+## PROGRESS 16 (2026-06-10) — ric_bound POINTWISE CORE green + arity bridge
+
+Four new sorry-free bricks (focus-checked): `aN_component` (RicBoundClaims; component
+(A_N) = claim2_component+mixed_descent+compose), `tower_bound_to_intrinsic` +
+`aN_intrinsic_point` (RicBoundAssembly.lean; the B5-lift and the per-frame-point
+intrinsic (A_N): √normSq0S gRef (∇^N Ric) ≤ Cpp·√normSq0S gRef (∇^N g) + Cppp at a
+gRef-ON point — the WHOLE geometric inequality pointwise), and
+`metricCovDerivNorm_eq_iterCov` (MetricCovDerivArityBridge.lean; the 2+N↔N+2 cast via
+acEquiv + covStep_domDomCongr + normSq0S_domDomCongr — connects to the textbook
+metricCovDerivNorm). See RicBoundAssembly.md.
+REMAINING for the ric_bound sorry = ONE intertwined analytic brick (R4d+R4e): a good
+gRef-ON-centered smooth frame on a small domain with bounded Gram (constant Gram-Schmidt
+of the trivialization frame, NOT a global ON frame); convert the intrinsic (B_r)/Shi/
+inverse bounds to aN_intrinsic_point's component (compL2) form via normSq0S_le_of_metric_equiv
+(Comparison.lean:520, EXISTS) + iterCovComp_eq_iterCov + the bounded Gram; apply per x∈K;
+uniformize over a finite subcover; assemble in RicBound.lean (R4f for RHS, ricCovTower defeq
+for LHS). This frame-analysis + compactness packaging is the genuine remaining frontier.

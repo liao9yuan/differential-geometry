@@ -7,6 +7,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Lichnerowicz
 import DifferentialGeometry.Tensor.RSTensor.ProductNablaLeibniz
 import DifferentialGeometry.Tensor.RSTensor.NablaDomDomCongr
 import DifferentialGeometry.Tensor.RSTensor.MetricCompatibility
+import DifferentialGeometry.Tensor.RSTensor.MetricTrace.NablaTraceGen
 import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 import DifferentialGeometry.Geometry.Curvature.DimensionThree.RiemannFromRicci
 import DifferentialGeometry.Geometry.Curvature.DimensionThree.RicciControlsRm
@@ -1230,6 +1231,244 @@ private noncomputable def rm04DerivsKn
           ((knTerm2Realizes (I := I) S t knE4).smul (-1 : Real)))) |>.add
       (((knScal2Realizes (I := I) S t knE1).smul (1 / 2 : Real)).add
         ((knScal2Realizes (I := I) S t knE2).smul (-(1 / 2) : Real)))⟩
+
+/-! ### B3c-2 trace step: the rough Laplacian `ΔRm04 = KN(ΔRic, ΔS, g)` (dim 3)
+
+`metricTraceFirstTwoField g` contracts the two leading covariant-derivative slots of the
+second covariant derivative `∇²Rm04` — the rough Laplacian `Δ = gⁱʲ∇ᵢ∇ⱼ`.  Applied termwise
+to the KN-form package `rm04DerivsKn` (whose `nabla2A` is the signed six-term combination of
+the explicit level-2 witnesses) each Leibniz tree collapses: the `∇g = 0`/`∇0 = 0` branches
+vanish (`product_zero`/`domDomCongr_zero`), the value-preserving `frontExt`-of-`leibnizLeft`
+layers are the identity (`domDomCongr_id_of_valPres`), and the front-factor trace lands on
+`∇²Ric` (resp. `∇²S`) by `metricTraceFirstTwoField_product`.  The result is the
+Kulkarni–Nomizu combination of the Laplacians. -/
+
+open DifferentialGeometry.Integral.Connection in
+/-- Trace of the generic `Ric⊗g` level-2 KN witness (the `knTerm2Realizes` target shape):
+the three `∇g = 0`/`∇0 = 0` Leibniz branches vanish and the surviving `∇²Ric ⊗ g` front
+factor traces to `(ΔRic) ⊗ g`. -/
+private theorem traceRicWit
+    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (gm : SmoothRiemannianMetric I M)
+    (e : Fin (2 + 2) ≃ Fin (2 + 2))
+    (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (2 + 1 + 1))
+    (B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (2 + 1))
+    (C : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2)
+    (gf : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2) :
+    metricTraceFirstTwoField (I := I) (M := M) gm
+        (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (∞ : WithTop ℕ∞)
+          (frontExtendEquiv (frontExtendEquiv e))
+          (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+              (E := TangentSpace I) (∞ : WithTop ℕ∞)
+              (frontExtendEquiv (leibnizLeftEquiv 2 2))
+              (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                  (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizLeftEquiv (2 + 1) 2)
+                  (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                    (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1 + 1) (q := 2)
+                    A gf)
+                + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                  (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizRightEquiv (2 + 1) 2)
+                  (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                    (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1) (q := 2 + 1)
+                    B 0))
+            + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+              (E := TangentSpace I) (∞ : WithTop ℕ∞)
+              (frontExtendEquiv (leibnizRightEquiv 2 2))
+              (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                  (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizLeftEquiv 2 (2 + 1))
+                  (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                    (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1) (q := 2 + 1)
+                    B 0)
+                + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                  (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizRightEquiv 2 (2 + 1))
+                  (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                    (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2 + 1 + 1)
+                    C 0))))
+      = MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (∞ : WithTop ℕ∞) e
+          (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+            (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2)
+            (metricTraceFirstTwoField (I := I) (M := M) gm A) gf) := by
+  rw [metricTraceFirstTwoField_domDomCongr]
+  congr 1
+  simp only [MultilinearSection.product_zero, MultilinearSection.domDomCongr_zero,
+    add_zero]
+  rw [MultilinearSection.domDomCongr_id_of_valPres (∞ : WithTop ℕ∞)
+      (frontExtendEquiv (leibnizLeftEquiv 2 2)) (by
+    intro i
+    refine Fin.cases ?_ (fun j => ?_) i
+    · simp
+    · rw [frontExtendEquiv_succ]
+      simp only [leibnizLeftEquiv, finCongr_apply, Fin.val_succ, Fin.val_cast])]
+  simp only [leibnizLeftEquiv]
+  rw [metricTraceFirstTwoField_product]
+
+open DifferentialGeometry.Integral.Connection in
+/-- Trace of the generic `(S·g)⊗g` level-2 KN witness (the `knScal2Realizes` target shape):
+all `∇g = 0`/`∇0 = 0` branches vanish and the two nested front-factor traces land on `∇²S`,
+giving `((ΔS·g)⊗g)` in the `product (ΔS) g ⊗ g` (rank-0 leading factor) form. -/
+private theorem traceScalWit
+    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (gm : SmoothRiemannianMetric I M)
+    (e : Fin (2 + 2) ≃ Fin (2 + 2))
+    (Hess : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (1 + 1))
+    (D1 : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 1)
+    (Sg : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2)
+    (gf : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2) :
+    metricTraceFirstTwoField (I := I) (M := M) gm
+        (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (∞ : WithTop ℕ∞)
+          (frontExtendEquiv (frontExtendEquiv e))
+          (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+              (E := TangentSpace I) (∞ : WithTop ℕ∞)
+              (frontExtendEquiv (leibnizLeftEquiv 2 2))
+              (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                  (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizLeftEquiv (2 + 1) 2)
+                  (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                    (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1 + 1) (q := 2)
+                    (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                        (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizLeftEquiv 1 2)
+                        (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                          (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1 + 1) (q := 2)
+                          Hess gf)
+                      + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                        (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizRightEquiv 1 2)
+                        (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                          (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1) (q := 2 + 1)
+                          D1 0))
+                    gf)
+                + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                  (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizRightEquiv (2 + 1) 2)
+                  (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                    (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1) (q := 2 + 1)
+                    (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                      (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1) (q := 2)
+                      D1 gf)
+                    0))
+            + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+              (E := TangentSpace I) (∞ : WithTop ℕ∞)
+              (frontExtendEquiv (leibnizRightEquiv 2 2))
+              (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                  (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizLeftEquiv 2 (2 + 1))
+                  (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                    (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1) (q := 2 + 1)
+                    (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                      (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1) (q := 2)
+                      D1 gf)
+                    0)
+                + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                  (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizRightEquiv 2 (2 + 1))
+                  (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                    (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2 + 1 + 1)
+                    Sg 0))))
+      = MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (∞ : WithTop ℕ∞) e
+          (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+            (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2)
+            (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+              (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 0) (q := 2)
+              (metricTraceFirstTwoField (I := I) (M := M) gm Hess) gf)
+            gf) := by
+  rw [metricTraceFirstTwoField_domDomCongr]
+  congr 1
+  simp only [MultilinearSection.product_zero, MultilinearSection.domDomCongr_zero,
+    add_zero]
+  rw [MultilinearSection.domDomCongr_id_of_valPres (∞ : WithTop ℕ∞)
+      (frontExtendEquiv (leibnizLeftEquiv 2 2)) (by
+    intro i
+    refine Fin.cases ?_ (fun j => ?_) i
+    · simp
+    · rw [frontExtendEquiv_succ]
+      simp only [leibnizLeftEquiv, finCongr_apply, Fin.val_succ, Fin.val_cast])]
+  simp only [leibnizLeftEquiv]
+  rw [metricTraceFirstTwoField_product, metricTraceFirstTwoField_product]
+
+open DifferentialGeometry.Integral.Connection in
+/-- The KN `Ric⊗g` term with `Ric` replaced by its rough Laplacian `ΔRic = trace₁₂ ∇²Ric`. -/
+private noncomputable def knRicLapT
+    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real)
+    (e : Fin (2 + 2) ≃ Fin (2 + 2)) :
+    Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (2 + 2) :=
+  MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+    (E := TangentSpace I) (∞ : WithTop ℕ∞) e
+    (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+      (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2)
+      (metricTraceFirstTwoField (I := I) (M := M) (S.family.metric t)
+        (totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          (2 + 1) (S.family.connection t)
+          (totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+            2 (S.family.connection t) (S.ricci t)
+            (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+              2 (S.family.connection t) (connSmoothSol (I := I) S t) (S.ricci t)))
+          (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+            (2 + 1) (S.family.connection t) (connSmoothSol (I := I) S t) _)))
+      (metricTensorField (I := I) (S.family.metric t)))
+
+open DifferentialGeometry.Integral.Connection in
+/-- The KN `(S·g)⊗g` term with `S` replaced by `ΔS = trace₁₂ ∇²S` (rank-0 leading factor). -/
+private noncomputable def knScalLapT
+    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real)
+    (e : Fin (2 + 2) ≃ Fin (2 + 2)) :
+    Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (2 + 2) :=
+  MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+    (E := TangentSpace I) (∞ : WithTop ℕ∞) e
+    (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+      (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2)
+      (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+        (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 0) (q := 2)
+        (metricTraceFirstTwoField (I := I) (M := M) (S.family.metric t)
+          (totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+            1 (S.family.connection t)
+            (DifferentialGeometry.Integral.Connection.duSec (I := I)
+              (S.scalar t) (scalarSmoothOfSol (I := I) S t))
+            (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+              1 (S.family.connection t) (connSmoothSol (I := I) S t) _)))
+        (metricTensorField (I := I) (S.family.metric t)))
+      (metricTensorField (I := I) (S.family.metric t)))
+
+/-- **The dim-3 Kulkarni–Nomizu field of the Laplacians** `KN(ΔRic, ΔS, g)`, mirroring
+`knField` with `Ric ↦ ΔRic`, `S ↦ ΔS`. -/
+private noncomputable def lapRm04Kn
+    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) :
+    Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (2 + 2) :=
+  ((-1 : Real) • knRicLapT (I := I) S t knE1 + knRicLapT (I := I) S t knE2)
+    + (knRicLapT (I := I) S t knE3 + (-1 : Real) • knRicLapT (I := I) S t knE4)
+    + ((1 / 2 : Real) • knScalLapT (I := I) S t knE1
+        + (-(1 / 2) : Real) • knScalLapT (I := I) S t knE2)
+
+set_option maxHeartbeats 1000000 in
+open DifferentialGeometry.Integral.Connection in
+/-- **B3c-2 ENDPOINT: the rough Laplacian of `Rm04` is the Kulkarni–Nomizu combination of
+the Laplacians** (dim 3): `ΔRm04 = trace₁₂ ∇²Rm04 = KN(ΔRic, ΔS, g)`.  This is the diffusion
+half of the Uhlenbeck base evolution `∂ₜRm04 = ΔRm04 − 2B# − drift`; the six explicit
+level-2 witnesses of `rm04DerivsKn.nabla2A` each trace through `traceRicWit`/`traceScalWit`
+into the corresponding `Δ`-of-leaf KN term. -/
+theorem traceRm04Kn
+    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real)
+    (hdim : forall x : M, Module.finrank Real (TangentSpace I x) = 3) :
+    metricTraceFirstTwoField (I := I) (M := M) (S.family.metric t)
+        (rm04DerivsKn (I := I) S t hdim).nabla2A
+      = lapRm04Kn (I := I) S t := by
+  simp only [rm04DerivsKn]
+  simp only [metricTraceFirstTwoField_add, metricTraceFirstTwoField_smul]
+  rw [traceRicWit, traceRicWit, traceRicWit, traceRicWit, traceScalWit, traceScalWit]
+  rfl
 
 end KnField
 

@@ -509,10 +509,35 @@ conventions against the actual files** (the consult anticipated this trap precis
         leibniz equivs are value-casts; their hcompat is a small `metricTraceInput_apply`+`omega`).
      4. leaves `domDomCongr(LL/LR)(product …)`; bridge `leibnizLeftEquiv s q = finCongr (rfl-proof)`
         (proof-irrelevant `finCongr`), then `_product` ⟹ `(trace₁₂ ∇²Ric) ⊗ g` = `ΔRic ⊗ g` etc.
-     5. zero-branches (`product … 0`) vanish: need `product A 0 = 0`, `domDomCongr e 0 = 0`,
-        `metricTraceFirstTwoField g 0 = 0` — three small zero-laws (ext + `_apply` + `mul_zero`/
-        `Pi.zero_apply`; the product/domDomCongr ones belong at the MultilinearSection layer).
+     5. zero-branches (`product … 0`) vanish.  ✅ `metricTraceFirstTwoField_zero` BANKED
+        (2026-06-10, lake 3555).  **Instance wrinkle (recorded):** the generic
+        `domDomCongr e 0 = 0` / `product A 0 = 0` FAIL `OfNat 0` synthesis at statement time —
+        the bundle topology/`Zero` instance is only pinned once a concrete-rank function fixes
+        it (a bare `(0 : Tensor0SField s)` in a generic-`s` MultilinearSection statement has no
+        anchor; `metricTraceFirstTwoField g (0 …)` works because the function pins it, and so
+        does `zero_realizes_nabla` because its `0` is anchored by `TotalNabla0SRealizes`).  So
+        handle those two collapses INLINE in the producer at the concrete witness ranks
+        (where `0` is anchored), not as generic Tensor-layer lemmas.  Needs
+        `[IsManifold I 2 M]` in scope for the `0` to resolve at all.
      6. assemble ⟹ `Δrm04 = KN(ΔRic, ΔS, g)` as canonical fields; then component form for #44.
+     **TRACE TOOLKIT NOW COMPLETE** (`NablaTraceGen.lean`): `_eq_sum`, `_add`, `_smul`,
+     `_domDomCongr_gen` (+ `_domDomCongr`), `_product`, `metricTraceInput_apply`, `_zero`;
+     plus `totalNabla0SRealizes_unique` (`NablaDomDomCongr.lean`).  Lean lessons banked:
+     deprecated `Fin.coe_cast/_castAdd/_natAdd` → `Fin.val_cast/_castAdd/_natAdd`.
+     ### ✅ COMPOSITION FEASIBILITY CONFIRMED (2026-06-10, producer GREEN lake 3737)
+     The one non-obvious composition step — the **leibniz-layer hcompat** for
+     `_domDomCongr_gen` — was PROVED by a throwaway probe (now removed): for the
+     value-preserving `frontExtendEquiv (leibnizLeftEquiv 2 2)`, the tail reindex `e'` is
+     `Equiv.refl` and hcompat closes by `funext q; …metricTraceInput_apply ×2; hval; simp`
+     where `hval : (frontExt(LL 2 2) q).val = q.val` is a 2-line `Fin.cases` +
+     `frontExtendEquiv_zero/_succ` + `leibnizLeftEquiv`/`finCongr_apply`/`Fin.val_cast`.
+     So EVERY leibniz/LR layer peels the same way (all value-preserving ⟹ `e' = refl`,
+     identical hcompat). The producer now imports `…MetricTrace.NablaTraceGen`.
+     **All composition pieces are now verified-feasible** (frontExt² peel ✓, leibniz peel ✓,
+     `_product` ✓, `_add`/`_smul` ✓, zero-collapse inline ✓).  Next round = write the full
+     `metricTraceFirstTwoField g (rm04DerivsKn.nabla2A) = KN(ΔRic, ΔS, g)` assembly
+     (mechanical, ~150 lines: 6 terms × {outer peel, 2 leibniz peels via the refl-hcompat,
+     product/zero}, then the rank-4 KN-shape identity collapsing the residual value-casts).
      The dim-3 KN-specific layer stays at the SECTION level (knField/knFieldD/rm04DerivsKn);
      only the trace-algebra lives at the Tensor layer where it serves any rank.
   3. Wire the standing `hlich` input: `RicciLichnerowiczEquationInFrame` ←
@@ -538,6 +563,44 @@ of `∂ₜRm04` but is NOT on this route — the 3D route differentiates the KN 
 
 - Downstream already built: pullback (`uhlenbeckCurvatureEvolution_of_solution_components`) +
   `∂ₜ∇ᵏRm` assembly (`nablaKRm_timeDeriv_of_solution`).
+
+## B3c-2 TRACE STEP — DONE + VERIFIED (2026-06-10, targeted build 3737 jobs, 0 sorry)
+
+The diffusion identity `ΔRm04 = trace₁₂ ∇²Rm04 = KN(ΔRic, ΔS, g)` (dim 3) is now a proved
+theorem `traceRm04Kn`:
+`metricTraceFirstTwoField g (rm04DerivsKn S t hdim).nabla2A = lapRm04Kn S t`.
+
+Architecture (all structural, NO component brute force):
+- **Foundational MLS lemmas** (added to `Tensor/Multilinear/DomDomCongrSection.lean` +
+  `Tensor/Multilinear/Tensor.lean`, generic bundle layer, `@[simp]`):
+  `domDomCongr_refl`, `domDomCongr_zero`, `product_zero`, and
+  `domDomCongr_id_of_valPres` (a value-preserving reindex `(e i).val = i.val` forces
+  `e = Equiv.refl` by `Fin` ext, so the section is unchanged).  **Gotcha:** the MLS namespace
+  has an EXPLICIT `variable (n : WithTop ℕ∞)`, so `domDomCongr_id_of_valPres` takes `n` as its
+  first explicit arg — call it as `… (∞ : WithTop ℕ∞) (frontExtendEquiv …) (by …)`, not with
+  the equiv first (else "expected WithTop ℕ∞" mismatch).
+- **Generic shape lemmas** `traceRicWit` / `traceScalWit` (private, variables `A,B,C,gf` /
+  `Hess,D1,Sg,gf` for the leaves): trace the explicit `knTerm2Realizes` / `knScal2Realizes`
+  witness shapes.  Proof skeleton (≈8 lines each): `metricTraceFirstTwoField_domDomCongr`
+  peels `frontExt(frontExt e)`; `congr 1`; `simp only [product_zero, domDomCongr_zero,
+  add_zero]` collapses the three `∇g=0`/`∇0=0` Leibniz branches; `domDomCongr_id_of_valPres`
+  kills the value-preserving `frontExt(leibnizLeftEquiv 2 2)` layer; `simp only
+  [leibnizLeftEquiv]` exposes the `finCongr` so `metricTraceFirstTwoField_product` fires
+  (×1 Ric, ×2 scalar for the nested `(∇²S⊗g)⊗g`).
+- **Target defs** `knRicLapT e` = `domDomCongr e (product ΔRic g)`, `knScalLapT e` =
+  `domDomCongr e (product (product ΔS₀ g) g)` (ΔRic = `trace₁₂ ∇²Ric` rank 2, ΔS₀ =
+  `trace₁₂ ∇²S` rank 0), `lapRm04Kn` = the signed six-term KN combination mirroring `knField`.
+- **Endpoint** `traceRm04Kn`: `simp only [rm04DerivsKn]` exposes `nabla2A` as the `•`/`+`
+  combination of the six explicit witnesses; `simp only [metricTraceFirstTwoField_add,
+  _smul]` distributes the trace; `rw [traceRicWit ×4, traceScalWit ×2]; rfl`.
+
+NOTE on namespace: producer is in `DifferentialGeometry.PDE.RicciFlow`; the trace toolkit is
+in `DifferentialGeometry.Integral.Connection` — used via `open … in` per declaration.
+
+REMAINING to wire this into the capstone `rm04HrmProducer` (separate brick): bridge the
+bundled `metricTraceFirstTwoField g (∇²Ric)` to the component `roughLapRic` in the
+orthonormal frame (RoughLaplacian realization), discharging the `hlich`/`roughLapRic`
+hypotheses the capstone currently assumes.
 
 ## TODO (deferred) — B GENERAL-DIMENSION route (un-traced second Bianchi)
 

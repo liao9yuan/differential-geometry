@@ -610,7 +610,7 @@ theorem metricTraceInput_apply {x : M} {s : ℕ} (X Y : TangentSpace I x)
   · simp
   · refine Fin.cases ?_ (fun r => ?_) i1
     · rw [Fin.cases_succ, Fin.cases_zero,
-        dif_neg (by simp [Fin.val_succ]), dif_pos (by simp [Fin.val_succ])]
+        dif_neg (by simp), dif_pos (by simp)]
     · rw [Fin.cases_succ, Fin.cases_succ,
         dif_neg (by simp [Fin.val_succ]), dif_neg (by simp [Fin.val_succ])]
       apply congrArg tail
@@ -796,17 +796,17 @@ theorem metricTraceFirstTwoField_product {k q : ℕ}
     funext p
     simp only [Function.comp_apply]
     have hv : ((finCongr h) (Fin.castAdd q p) : ℕ) = (p : ℕ) := by
-      simp [finCongr_apply, Fin.coe_cast, Fin.coe_castAdd]
+      simp [finCongr_apply, Fin.val_cast, Fin.val_castAdd]
     rw [metricTraceInput_apply, metricTraceInput_apply]
     simp only [hv]
     by_cases h0 : (p : ℕ) = 0
     · simp [h0]
     · by_cases h1 : (p : ℕ) = 1
-      · simp [h0, h1]
+      · simp [h1]
       · rw [dif_neg h0, dif_neg h1, dif_neg h0, dif_neg h1]
         apply congrArg tail
         apply Fin.ext
-        simp [Fin.coe_castAdd]
+        simp
   have fact2 : forall (X Y : TangentSpace I x),
       ((fun i_1 => metricTraceInput (I := I) X Y tail ((finCongr h) i_1)) ∘ Fin.natAdd (k + 2))
         = tail ∘ Fin.natAdd k := by
@@ -814,13 +814,13 @@ theorem metricTraceFirstTwoField_product {k q : ℕ}
     funext r
     simp only [Function.comp_apply]
     have hv : ((finCongr h) (Fin.natAdd (k + 2) r) : ℕ) = (k + 2) + (r : ℕ) := by
-      simp [finCongr_apply, Fin.coe_cast, Fin.coe_natAdd]
+      simp [finCongr_apply, Fin.val_cast, Fin.val_natAdd]
     rw [metricTraceInput_apply]
     simp only [hv]
     rw [dif_neg (by omega), dif_neg (by omega)]
     apply congrArg tail
     apply Fin.ext
-    simp only [Fin.coe_natAdd]
+    simp only [Fin.val_natAdd]
     omega
   rw [metricTraceFirstTwoField_eq_sum, tensor0SField_product_apply,
     metricTraceFirstTwoField_eq_sum]
@@ -832,6 +832,34 @@ theorem metricTraceFirstTwoField_product {k q : ℕ}
   rw [MultilinearSection.domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply,
     tensor0SField_product_apply, fact1, fact2]
   ring
+
+/-! ### Zero laws for the trace-step composition
+
+`MultilinearSection.product`/`domDomCongr` zero laws genuinely belong at the Multilinear
+layer; they are stated here only because the diffusion-split composition consumes them and
+no lower-layer versions exist yet. -/
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The metric trace of the zero field is zero. -/
+theorem metricTraceFirstTwoField_zero {s : ℕ}
+    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (g : SmoothRiemannianMetric I M) :
+    metricTraceFirstTwoField (I := I) (M := M) g
+        (0 : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          (n := (∞ : WithTop ℕ∞)) (s + 2))
+      = 0 := by
+  classical
+  letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s
+  refine DFunLike.ext _ _ fun x => ?_
+  refine ContinuousMultilinearMap.ext fun tail => ?_
+  rw [metricTraceFirstTwoField_eq_sum]
+  unfold metricTrace0S2InBasis
+  simp [ContMDiffSection.coe_zero]
+
+-- NOTE: generic `domDomCongr e 0 = 0` and `product A 0 = 0` at the MultilinearSection
+-- layer fail `OfNat 0` synthesis at statement time (the bundle topology/`Zero` instance
+-- is only pinned once a concrete-rank function fixes it).  They are handled inline at the
+-- concrete witness ranks in the producer composition instead.
 
 end
 

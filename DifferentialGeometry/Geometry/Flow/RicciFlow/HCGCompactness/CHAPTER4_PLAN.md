@@ -254,17 +254,40 @@ from *Norms of covariant derivatives of tensors, I*.
 - [ ] F3-hi-kge2 — higher connection-difference derivative controls for
       `ConnDiffEpsBoundOn ... k C` with `2 <= k`, after the `k = 2` producer
       route is checked and generalized.
-- [~] F3 — final inequality from *Norms of covariant derivatives of tensors, I*:
+- [x] F3 — final inequality from *Norms of covariant derivatives of tensors, I*:
       `|∇_g^r T|_g <= |∇_h^r T|_g + eps*C*Σ_{k<r}|∇_h^k T|_g`.
+      **PROVEN (2026-06-11): `lemma45_F3`** (Lemma45Engine.lean, green, sorry-free) —
+      the book-facing endpoint at component-`compL2` level over a local frame, all
+      geometric inputs discharged (`hkoszul_of_leviCivita` → `claim1_eps_koszul` →
+      `lemma45_component_bdd` → `lemma45DoubleBdd`); hypotheses = frame/Christoffel/
+      metric-component smoothness (producer-dischargeable) + `|g⁻¹|≤C0` +
+      `|∇_H^j g|≤ε (j≤p)`, faithful to the book's finitely-many-orders form.
+      Optional upgrade: intrinsic-`normSq0S` statement wrapper (not gating F4).
       **Norm-level induction COMPLETE (2026-06-09): `lemma45ScalarBdd` + `lemma45Double`**
-      (Lemma45CovariantAbstract.lean) — the book's double induction with `hLift`
-      DISCHARGED (strong induction over the doubly-indexed family
-      `W i k = |∇_h^k ∇_g^i T|`).  Remaining = the one-step interface `hOne`
-      (`|∇_h^k ∇_g X| ≤ |∇_h^{k+1} X| + ε·oneStepConst·Σ`), i.e. Phases 4–6
-      (action identity + iterated Leibniz) = the component contraction-Leibniz
-      ENGINE — same engine as ric_bound Claim 1 (parallel track); per user decision
-      (2026-06-09) F3 interfaces at `hOne` and waits for/adapts that engine, plus the
-      Phase 9 `hA` input (`connDiffEpsBound_{zero,one,two}` are its k≤2 instances).
+      (Lemma45CovariantAbstract.lean).
+      **hOne DISCHARGED + COMPONENT LEMMA 4.5 PROVEN (2026-06-10/11, sorry-free,
+      built 3688): `Lemma45Engine.lean`** — consumes the parallel track's Claim-1
+      engine (`AkMFold.lean`: `P(m)`, towers, `claim1_abstract`) via import, no
+      modification.  `claim1_eps` (ε-homogeneous A-bound), `iterCov_one_chr_change`
+      (connection-change one-step, general two-Christoffel — ALSO the Step-4
+      telescoping engine for ric_bound), `mixed_oneStep_le` (the hOne engine; the
+      slot sum produces exactly `oneStepConst B k r`'s rank factor),
+      **`lemma45_component`/`lemma45_component₀`** (Lemma 4.5, component-tower form).
+      See `Lemma45Engine.md`.  **W4 DONE (2026-06-11, green):** the (1,2)-upper
+      bridge turned out UNNECESSARY (upper towers are internal-only; both endpoint
+      statements are (0,s)); the genuinely needed piece was the frame-general
+      Koszul, now built in two layers: the intrinsic
+      **`Tensor0SBundle.koszul_difference`**
+      (`Tensor/RSTensor/NablaOnTensors/KoszulDifference.lean`:
+      `difference_symm_at` + `nabla_metric_two_term` + the ½/½/−½ formula) and the
+      frame-component producer **`hkoszul_of_leviCivita`** (Lemma45Engine.lean) —
+      EXACTLY `claim1`'s `hkoszul` shape (P₁ = refl, P₂ = swap 0 1,
+      P₃ = (finRotate 3).symm), any local frame, any two LC connections.
+      Remaining for the BOOK-facing F3: the `claim1_eps`-from-`hkoszul` wrapper
+      (~40 lines, mirror AkMFold's claim1 derivation) ⟹ `hDbound`; then the
+      (0,s) norm bridge wiring (`iterCovComp_eq_iterCov` + `normSq0S` lift, both
+      exist) for the statement conversion.  The SAME producer feeds ric_bound's
+      `claim1` instantiation directly (Phase R unblocked).
 - [ ] F4 — Corollary *Norms of covariant derivatives of tensors, II*
       → covariant (`q₁=0`) per-order constants used downstream ⟸ F3
 - [x] F5-const — constants for *Composition of approximate isometries, I*
@@ -280,14 +303,21 @@ from *Norms of covariant derivatives of tensors, I*.
 - [~] F6 — Cor *Composition of approximate isometries, II*:
       **scalar accumulation core DONE**: `compEpsAccum` (`e n ≤ C·Σ δᵢ` from
       per-step costs; ApproxIsometryComp.lean).  Full version ⟸ F5-full.
-- **⚠ STATE (2026-06-09): `ApproximateIsometry.lean` is currently STALE-BROKEN**
-  against the in-flight tensor-layer relocation (`Tensor0SBundle.normRS`,
-  `abs_quad02_le_norm`, `normSqRS_le_of_metric_equiv`, `abs_component0S_le_sqrt_normSq0S`
-  unknown — the parallel `ric_bound` track is moving these, cf. `RSLoweringNorm.lean`
-  in its working set).  `ApproxIsometryComp.lean` deliberately imports
-  `AllTimesBounds` (healthy) instead.  F4 (Cor `lbl370`) is BLOCKED on both this
-  breakage (its inputs `bookNormRS_compare`/`normSqRS_compare` live there) and the
-  F3 interface; revisit after the tensor relocation settles.
+- **⚠ STATE — DIAGNOSIS CORRECTED (2026-06-11): `ApproximateIsometry.lean` was
+  NEVER green against THIS tree.**  `git grep` at HEAD: `def normRS` exists NOWHERE;
+  `Tensor0SBundle.normRS`/`normRS_eq_sqrt_normSqRS`/`abs_quad02_le_norm`/
+  `normSqRS_le_of_metric_equiv`/`HCGCompactness.connDiff_le_approx` are referenced
+  ONLY by ApproximateIsometry.lean itself (+ the old ApproxIsometryComp) — the file
+  was written against an API layer that was never ported (the earlier "5925L 0-sorry"
+  audit was a sorry-count, not a compile; the earlier "stale-broken by the tensor
+  relocation" framing was wrong).  Current compile: 101 errors (normRS family,
+  `LeviCivita.leviCivitaConnectionOfMetric` → now `Integral.Connection.…`, whnf
+  timeouts).  Pieces that DO exist: `innerRS`/`normSqRS`
+  (`Tensor/RSTensor/FiberMetric/TensorRSMetric.lean`), `abs_component0S_le_sqrt_normSq0S`
+  (RicciOperatorNormBound.lean, `_gen` hypothesis), `normSqRS_eq_normSq0S_lowerAllSpace`
+  (RSLoweringNorm.lean).  **Strategy decision for F4 (next session): extract what F4
+  needs into a fresh healthy file (the ApproxIsometryComp pattern) rather than
+  repairing the 6k-line monolith; or repair the monolith section-by-section.**
 - [ ] F7 — Def *Cᵖ-convergence of maps* + Def *C^∞-conv. uniformly on compacts*
       → 2 defs (reconcile with existing `PointedConvergence` names) ⟸ —
 - [x] F8tool — abstract sequential Arzelà–Ascoli (Lemma 3.14) → `arzelaAscoli_subseq_…` (ArzelaAscoli.lean)

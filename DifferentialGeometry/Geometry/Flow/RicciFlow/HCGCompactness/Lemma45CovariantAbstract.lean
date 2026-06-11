@@ -249,5 +249,42 @@ theorem lemma45Double
       · intro k _
         exact hOne i k
 
+/-- **Bounded-hypothesis variant of `lemma45Double`**: the one-step input is only
+required on the finite envelope `i + k < P` actually consumed by the double
+induction (the inner-base index and the derivative order trade off one-for-one).
+This is the shape matching the book's Lemma 4.5, whose ε-hypotheses are bounds on
+finitely many derivative orders. -/
+theorem lemma45DoubleBdd
+    {eps : Real} {B : Nat -> Real} {s : Nat}
+    (heps0 : 0 <= eps)
+    (heps1 : eps <= 1)
+    (hB : forall i : Nat, 0 <= B i)
+    (P : Nat)
+    (W : Nat -> Nat -> Real)
+    (hW : forall i k : Nat, 0 <= W i k)
+    (hOne : forall i k : Nat, i + k < P ->
+      W (i + 1) k <= W i (k + 1) + eps * oneStepConst B k (s + i) *
+        Finset.sum (Finset.range (k + 1)) (fun j => W i j)) :
+    forall p i r : Nat, 0 < r -> r <= p -> i + p <= P ->
+      W (i + r) 0 <= W i r + eps * lemma45Const B p (s + i) *
+        Finset.sum (Finset.range r) (fun j => W i j) := by
+  intro p
+  induction p using Nat.strong_induction_on with
+  | _ p ihp =>
+      intro i r hr0 hrp hiP
+      refine lemma45ScalarBdd (eps := eps) (B := B)
+        (N := W i) (G := W (i + 1)) (D := fun a => W (i + a) 0)
+        (s := s + i) (P := p) heps0 heps1 hB (hW i) ?_ ?_ r hr0 hrp
+      · intro p' hp'
+        rcases Nat.eq_zero_or_pos p' with rfl | hp'0
+        · simp
+        · have h := ihp p' hp' (i + 1) p' hp'0 (le_refl p') (by omega)
+          have hidx : i + (p' + 1) = (i + 1) + p' := by omega
+          change W (i + (p' + 1)) 0 ≤ _
+          rw [hidx]
+          exact h
+      · intro k hk
+        exact hOne i k (by omega)
+
 end HCGCompactness
 end DifferentialGeometry

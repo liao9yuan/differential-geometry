@@ -590,6 +590,16 @@ noncomputable def product
     exact (contMDiffAt_const (c := ContinuousLinearMap.mul 𝕜 𝕜).clm_apply
       (hα (σ ∘ Fin.castAdd q) x₀)).clm_apply (hβ (σ ∘ Fin.natAdd s) x₀)⟩
 
+/-- The tensor product with the zero section on the right is zero. -/
+@[simp] theorem product_zero (α : MultilinearSection 𝕜 F IB E n s) :
+    product (IB := IB) n α (0 : MultilinearSection 𝕜 F IB E n q)
+      = (0 : MultilinearSection 𝕜 F IB E n (s + q)) := by
+  refine DFunLike.ext _ _ fun x => ?_
+  ext V
+  change Bundle.continuousMultilinearMap.product_fun (α x)
+    ((0 : MultilinearSection 𝕜 F IB E n q) x) V = _
+  simp [Bundle.continuousMultilinearMap.product_fun_apply, ContMDiffSection.coe_zero]
+
 end Product
 
 /-!

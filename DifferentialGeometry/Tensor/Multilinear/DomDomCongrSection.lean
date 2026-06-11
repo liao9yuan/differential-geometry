@@ -95,4 +95,29 @@ noncomputable def domDomCongr {s s' : ℕ} (e : Fin s ≃ Fin s')
     (domDomCongr (IB := IB) n e α) x = ContinuousMultilinearMap.domDomCongr e (α x) :=
   rfl
 
+/-- Reindexing by the identity equivalence leaves a section unchanged. -/
+@[simp] theorem domDomCongr_refl {s : ℕ} (α : MultilinearSection 𝕜 F IB E n s) :
+    domDomCongr (IB := IB) n (Equiv.refl (Fin s)) α = α := by
+  refine DFunLike.ext _ _ fun x => ?_
+  ext V
+  simp [domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply]
+
+/-- Reindexing the zero section is zero. -/
+@[simp] theorem domDomCongr_zero {s s' : ℕ} (e : Fin s ≃ Fin s') :
+    domDomCongr (IB := IB) n e (0 : MultilinearSection 𝕜 F IB E n s)
+      = (0 : MultilinearSection 𝕜 F IB E n s') := by
+  refine DFunLike.ext _ _ fun x => ?_
+  ext V
+  simp [domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    ContMDiffSection.coe_zero]
+
+/-- A value-preserving slot reindexing (`(e i).val = i.val` for all `i`) is the identity
+on sections: `e` is forced to be `Equiv.refl` by `Fin` extensionality. -/
+theorem domDomCongr_id_of_valPres {s : ℕ} (e : Fin s ≃ Fin s)
+    (he : ∀ i, ((e i : Fin s) : ℕ) = (i : ℕ))
+    (α : MultilinearSection 𝕜 F IB E n s) :
+    domDomCongr (IB := IB) n e α = α := by
+  have hee : e = Equiv.refl (Fin s) := Equiv.ext fun i => Fin.ext (he i)
+  rw [hee, domDomCongr_refl]
+
 end MultilinearSection
