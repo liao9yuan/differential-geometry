@@ -850,5 +850,130 @@ theorem prodExtDerivAt
         (e.symmL Real p.2 (Xcoord p))
   rw [hcancel]
 
+/-- Graded version of `prodExtDerivAt`: the spatial directional derivative of a
+jointly `C^{m+1}` function along a smooth field is jointly `C^m`. -/
+theorem prodExtDerivAt_gen
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    {F : Real × M -> Real} {X : (x : M) -> TangentSpace I x}
+    {t : Real} {x : M} {m : WithTop ℕ∞} (hm : m ≤ (∞ : WithTop ℕ∞))
+    (hF : ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) (m + 1) F (t, x))
+    (hX : ContMDiffAt I (I.prod 𝓘(Real, E))
+      (∞ : WithTop ℕ∞) (T% X) x) :
+    ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) m
+      (fun p : Real × M =>
+        extDerivFun (I := I) (fun y : M => F (p.1, y)) p.2 (X p.2))
+      (t, x) := by
+  let e := trivializationAt E (TangentSpace I : M -> Type _) x
+  let XcoordM : M -> E := fun y => e.continuousLinearMapAt Real y (X y)
+  let Xcoord : Real × M -> E := fun p => XcoordM p.2
+  have hXcoordM :
+      ContMDiffAt I 𝓘(Real, E) m XcoordM x := by
+    have hXTopInf :
+        ContMDiffAt I 𝓘(Real, E) (∞ : WithTop ℕ∞)
+          (fun y : M => (e ⟨y, X y⟩).2) x := by
+      simpa [e] using
+        (e.contMDiffAt_section_iff
+          (s := fun y : M => X y)
+          (x₀ := x)
+          (by
+            simp [e])).mp hX
+    have hXTop :
+        ContMDiffAt I 𝓘(Real, E) m
+          (fun y : M => (e ⟨y, X y⟩).2) x :=
+      hXTopInf.of_le hm
+    refine hXTop.congr_of_eventuallyEq ?_
+    filter_upwards [e.open_baseSet.mem_nhds (by
+        simp [e])] with y hy
+    have hcoe : ⇑(e.linearMapAt Real y) = fun z => (e ⟨y, z⟩).2 :=
+      e.coe_linearMapAt_of_mem (R := Real) hy
+    simp [XcoordM, Bundle.Trivialization.continuousLinearMapAt_apply, hcoe]
+  have hXcoord :
+      ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, E) m Xcoord (t, x) := by
+    exact hXcoordM.comp (t, x)
+      (contMDiffAt_snd (I := 𝓘(Real, Real)) (J := I) (p := (t, x)))
+  have harg :
+      ContMDiffAt ((𝓘(Real, Real).prod I).prod I)
+        (𝓘(Real, Real).prod I) (m + 1)
+        (fun q : (Real × M) × M => (q.1.1, q.2)) ((t, x), x) := by
+    exact contMDiffAt_fst.fst.prodMk contMDiffAt_snd
+  have hFprod :
+      ContMDiffAt ((𝓘(Real, Real).prod I).prod I) 𝓘(Real, Real)
+        (m + 1)
+        (fun q : (Real × M) × M => F (q.1.1, q.2)) ((t, x), x) :=
+    hF.comp ((t, x), x) harg
+  have hApply :=
+    ContMDiffAt.mfderiv_apply
+      (I := I) (I' := 𝓘(Real, Real))
+      (f := fun (p : Real × M) (y : M) => F (p.1, y))
+      (g := fun p : Real × M => p.2)
+      (g₁ := fun p : Real × M => p)
+      (g₂ := Xcoord)
+      (x₀ := (t, x))
+      (m := m)
+      hFprod
+      contMDiffAt_snd
+      contMDiffAt_id
+      hXcoord
+      le_rfl
+  refine hApply.congr_of_eventuallyEq ?_
+  have hbase :
+      {p : Real × M | p.2 ∈ e.baseSet} ∈ 𝓝 (t, x) := by
+    exact (continuous_snd.tendsto (t, x)).eventually
+      (e.open_baseSet.mem_nhds (by simp [e]))
+  filter_upwards [hbase] with p hp
+  have hp_src : p.2 ∈ (chartAt H x).source := by
+    simpa [e, TangentBundle.trivializationAt_baseSet] using hp
+  have hf_src : F (p.1, p.2) ∈ (chartAt Real (F (t, x))).source := by
+    simp
+  rw [inTangentCoordinates_eq (I := I) (I' := 𝓘(Real, Real))
+    (f := fun p : Real × M => p.2) (g := fun p : Real × M => F (p.1, p.2))
+    (ϕ := fun p : Real × M =>
+      mfderiv I 𝓘(Real, Real) (fun y : M => F (p.1, y)) p.2)
+    hp_src hf_src]
+  have htarget :
+      (tangentBundleCore 𝓘(Real, Real) Real).coordChange
+        (achart Real (F (p.1, p.2))) (achart Real (F (t, x))) (F (p.1, p.2)) =
+          (1 : Real →L[Real] Real) := by
+    simp
+  have hsource :
+      (tangentBundleCore I M).coordChange (achart H x) (achart H p.2) p.2 =
+        e.symmL Real p.2 := by
+    simpa [e] using
+      (TangentBundle.symmL_trivializationAt_eq_core
+        (𝕜 := Real) (I := I) (b₀ := x) (b := p.2) hp_src).symm
+  have hcancel :
+      e.symmL Real p.2 (Xcoord p) = X p.2 := by
+    exact e.symmL_continuousLinearMapAt (R := Real) hp (X p.2)
+  rw [htarget, hsource]
+  change
+    (mfderiv I 𝓘(Real, Real) (fun y : M => F (p.1, y)) p.2) (X p.2) =
+      (mfderiv I 𝓘(Real, Real) (fun y : M => F (p.1, y)) p.2)
+        (e.symmL Real p.2 (Xcoord p))
+  rw [hcancel]
+
+/-- `∞` version of `prodExtDerivAt`: the spatial directional derivative of a
+jointly `C^∞` function along a smooth field stays jointly `C^∞`.  This is the
+iterable engine behind covariant-derivative tower regularity. -/
+theorem prodExtDerivAt_inf
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    {F : Real × M -> Real} {X : (x : M) -> TangentSpace I x}
+    {t : Real} {x : M}
+    (hF : ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real)
+      (∞ : WithTop ℕ∞) F (t, x))
+    (hX : ContMDiffAt I (I.prod 𝓘(Real, E))
+      (∞ : WithTop ℕ∞) (T% X) x) :
+    ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+      (fun p : Real × M =>
+        extDerivFun (I := I) (fun y : M => F (p.1, y)) p.2 (X p.2))
+      (t, x) := by
+  rw [contMDiffAt_infty]
+  intro n
+  exact prodExtDerivAt_gen (m := (n : WithTop ℕ∞))
+    (by exact_mod_cast le_top : ((n : WithTop ℕ∞)) ≤ ∞)
+    (hF.of_le (by exact_mod_cast le_top : ((n : WithTop ℕ∞) + 1) ≤ ∞)) hX
 
 end DifferentialGeometry
