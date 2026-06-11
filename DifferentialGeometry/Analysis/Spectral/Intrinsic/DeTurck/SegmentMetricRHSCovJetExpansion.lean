@@ -129,6 +129,63 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+/-- **The two-arm `√`-domination of a squared sum.**  An elementary real-arithmetic step: a
+nonnegative `n` whose square is dominated by the integrated two-arm sum
+`Λ² · ∑ nwᵢ² + (∑ (nc₁ᵢ² + nc₂ᵢ²)) · D²` is itself dominated by the two-arm sum
+`Λ · ∑ nwᵢ + D · ∑ (nc₁ᵢ + nc₂ᵢ)`, with the two constants kept on their *separate* arms.  The
+`L²`-norm-squared → `L²`-norm step of the integrated two-product domination, via the finite
+Cauchy–Schwarz collapse `∑ aᵢ² ≤ (∑ aᵢ)²` (for nonnegative `aᵢ`) on each arm.  Proved outright. -/
+private theorem twoArm_le_of_sq_le (N : ℕ) (nw nc₁ nc₂ : ℕ → ℝ)
+    (hnw : ∀ i, 0 ≤ nw i) (hnc₁ : ∀ i, 0 ≤ nc₁ i) (hnc₂ : ∀ i, 0 ≤ nc₂ i)
+    (n Λ D : ℝ) (_hn : 0 ≤ n) (hΛ : 0 ≤ Λ) (hD : 0 ≤ D)
+    (hsq : n ^ 2 ≤ Λ ^ 2 * ∑ i ∈ Finset.range N, nw i ^ 2
+        + (∑ i ∈ Finset.range N, (nc₁ i ^ 2 + nc₂ i ^ 2)) * D ^ 2) :
+    n ≤ Λ * ∑ i ∈ Finset.range N, nw i + D * ∑ i ∈ Finset.range N, (nc₁ i + nc₂ i) := by
+  classical
+  set Sw : ℝ := ∑ i ∈ Finset.range N, nw i with hSw_def
+  set Sc : ℝ := ∑ i ∈ Finset.range N, (nc₁ i + nc₂ i) with hSc_def
+  have hSw_nn : 0 ≤ Sw := Finset.sum_nonneg fun i _ => hnw i
+  have hSc_nn : 0 ≤ Sc := Finset.sum_nonneg fun i _ => add_nonneg (hnc₁ i) (hnc₂ i)
+  -- `∑ nwᵢ² ≤ Sw²` (the squared-sum dominates the sum-of-squares for nonnegative terms).
+  have hwsq : ∑ i ∈ Finset.range N, nw i ^ 2 ≤ Sw ^ 2 := by
+    rw [hSw_def, sq, Finset.sum_mul_sum]
+    refine Finset.sum_le_sum fun i hi => ?_
+    rw [sq]
+    exact Finset.single_le_sum (f := fun j => nw i * nw j)
+      (fun j _ => mul_nonneg (hnw i) (hnw j)) hi
+  -- `∑ (nc₁ᵢ² + nc₂ᵢ²) ≤ ∑ (nc₁ᵢ + nc₂ᵢ)² ≤ Sc²`.
+  have hcsq : ∑ i ∈ Finset.range N, (nc₁ i ^ 2 + nc₂ i ^ 2) ≤ Sc ^ 2 := by
+    have hstep1 : (∑ i ∈ Finset.range N, (nc₁ i ^ 2 + nc₂ i ^ 2))
+        ≤ ∑ i ∈ Finset.range N, (nc₁ i + nc₂ i) ^ 2 := by
+      refine Finset.sum_le_sum fun i _ => ?_
+      nlinarith [mul_nonneg (hnc₁ i) (hnc₂ i)]
+    have hstep2 : (∑ i ∈ Finset.range N, (nc₁ i + nc₂ i) ^ 2) ≤ Sc ^ 2 := by
+      rw [hSc_def, sq, Finset.sum_mul_sum]
+      refine Finset.sum_le_sum fun i hi => ?_
+      rw [sq]
+      exact Finset.single_le_sum (f := fun j => (nc₁ i + nc₂ i) * (nc₁ j + nc₂ j))
+        (fun j _ => mul_nonneg (add_nonneg (hnc₁ i) (hnc₂ i)) (add_nonneg (hnc₁ j) (hnc₂ j))) hi
+    exact le_trans hstep1 hstep2
+  -- Combine: `n² ≤ (Λ·Sw)² + (D·Sc)² ≤ (Λ·Sw + D·Sc)²`, hence `n ≤ Λ·Sw + D·Sc`.
+  have hΛSw_nn : 0 ≤ Λ * Sw := mul_nonneg hΛ hSw_nn
+  have hDSc_nn : 0 ≤ D * Sc := mul_nonneg hD hSc_nn
+  have harm1 : Λ ^ 2 * ∑ i ∈ Finset.range N, nw i ^ 2 ≤ (Λ * Sw) ^ 2 := by
+    calc Λ ^ 2 * ∑ i ∈ Finset.range N, nw i ^ 2 ≤ Λ ^ 2 * Sw ^ 2 :=
+          mul_le_mul_of_nonneg_left hwsq (sq_nonneg _)
+      _ = (Λ * Sw) ^ 2 := by ring
+  have harm2 : (∑ i ∈ Finset.range N, (nc₁ i ^ 2 + nc₂ i ^ 2)) * D ^ 2 ≤ (D * Sc) ^ 2 := by
+    calc (∑ i ∈ Finset.range N, (nc₁ i ^ 2 + nc₂ i ^ 2)) * D ^ 2 ≤ Sc ^ 2 * D ^ 2 :=
+          mul_le_mul_of_nonneg_right hcsq (sq_nonneg _)
+      _ = (D * Sc) ^ 2 := by ring
+  have hcombine : n ^ 2 ≤ (Λ * Sw + D * Sc) ^ 2 := by
+    have hcross : (Λ * Sw) ^ 2 + (D * Sc) ^ 2 ≤ (Λ * Sw + D * Sc) ^ 2 := by
+      nlinarith [mul_nonneg hΛSw_nn hDSc_nn]
+    calc n ^ 2 ≤ Λ ^ 2 * ∑ i ∈ Finset.range N, nw i ^ 2
+          + (∑ i ∈ Finset.range N, (nc₁ i ^ 2 + nc₂ i ^ 2)) * D ^ 2 := hsq
+      _ ≤ (Λ * Sw) ^ 2 + (D * Sc) ^ 2 := add_le_add harm1 harm2
+      _ ≤ (Λ * Sw + D * Sc) ^ 2 := hcross
+  nlinarith [hcombine, add_nonneg hΛSw_nn hDSc_nn, sq_nonneg (n - (Λ * Sw + D * Sc))]
+
 /-! ### The order-zero linear/cross split of the Lie-summand difference
 
 The Lie/gauge analogue of the curvature half's `linearSection` / `crossSection` decomposition
@@ -222,23 +279,20 @@ theorem exists_lieDerivLinearCross_section_connLevel
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
         ∃ L C : Integral.L2.SmoothCcTensor g₀ 0 2,
           lieDerivRetagG0 (I := I) g₀ g_bg g₁ - lieDerivRetagG0 (I := I) g₀ g_bg g₂ = L + C ∧
-          (∀ (j : ℕ) (x : M),
-            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
-                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j L).toSection x) ≤
+          (∀ (j : ℕ),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j L‖ ^ 2 ≤
               Cd * ∑ i ∈ Finset.range (j + 2 + 1),
-                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                        (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
+                  ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                      (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
                 + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
-                    (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
-                      + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
+                    (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
+                      + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                   * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) := by
   classical
   -- The connection-level gauge value-level split (`SegmentMetricLieDiffCovJet.lean`), which produces the
   -- intrinsic linear/Cross section pair `(L, C)` with `diff = L + C` and BOTH arms' 0-jet-inclusive
-  -- `w`-jet two-arm bounds.  The Lie value-level leaf is its first projection (the linear-arm half).
+  -- `w`-jet INTEGRATED two-arm bounds.  The Lie value-level leaf is its first projection (the linear-arm
+  -- half).
   obtain ⟨Cd, hCd0, hsplit⟩ :=
     exists_lieDerivDiff_connLevel_split (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
   refine ⟨Cd, hCd0, fun T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 => ?_⟩
@@ -305,22 +359,19 @@ theorem exists_lieDerivLinearCross_diffArm
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
         ∃ L C : Integral.L2.SmoothCcTensor g₀ 0 2,
           lieDerivRetagG0 (I := I) g₀ g_bg g₁ - lieDerivRetagG0 (I := I) g₀ g_bg g₂ = L + C ∧
-          (∀ (j : ℕ) (x : M),
-            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
-                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j L).toSection x) ≤
+          (∀ (j : ℕ),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j L‖ ^ 2 ≤
               Cd * ∑ i ∈ Finset.range (j + 2 + 1),
-                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                        (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
+                  ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                      (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
                 + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
-                    (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
-                      + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
+                    (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
+                      + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                   * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) :=
-  -- The value-level split + linear-arm child now carries the 0-jet-inclusive `w`-jet difference arm
-  -- directly (the certified-false rank-`3` connection-level arm was re-signatured away), so this node
-  -- is the child verbatim — no rank-shift step remains.
+  -- The value-level split + linear-arm child now carries the 0-jet-inclusive `w`-jet INTEGRATED
+  -- difference arm directly (the pointwise per-`x` form being false for the middle covariant-Leibniz
+  -- terms at high frequency — Gagliardo–Nirenberg interpolation content), so this node is the child
+  -- verbatim — no rank-shift step remains.
   exists_lieDerivLinearCross_section_connLevel (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
 
 /-- **(The order-zero linear/cross split of the Lie-summand difference, with per-order jet bounds —
@@ -364,36 +415,28 @@ theorem lieDerivDiff_order0_linearCross_split
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
         ∃ L C : Integral.L2.SmoothCcTensor g₀ 0 2,
           lieDerivRetagG0 (I := I) g₀ g_bg g₁ - lieDerivRetagG0 (I := I) g₀ g_bg g₂ = L + C ∧
-          (∀ (j : ℕ) (x : M),
-            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
-                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j L).toSection x) ≤
+          (∀ (j : ℕ),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j L‖ ^ 2 ≤
               Cd * ∑ i ∈ Finset.range (j + 2 + 1),
-                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                        (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
+                  ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                      (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
                 + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
-                    (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
-                      + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
+                    (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
+                      + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                   * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) ∧
-          (∀ (j : ℕ) (x : M),
-            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
-                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j C).toSection x) ≤
+          (∀ (j : ℕ),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j C‖ ^ 2 ≤
               Cd * ∑ i ∈ Finset.range (j + 2 + 1),
-                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                        (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
+                  ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                      (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
                 + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
-                    (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
-                      + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
+                    (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
+                      + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                   * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) :=
   -- The gauge value-level split (`SegmentMetricLieDiffCovJet.lean`) produces the intrinsic linear/Cross
-  -- section pair `(L, C)` with `diff = L + C` and BOTH arms' 0-jet-inclusive `w`-jet two-arm bounds
-  -- (the certified-false rank-`3` connection-level arm was re-signatured away), so this node is the
-  -- split verbatim — no rank-shift step remains.
+  -- section pair `(L, C)` with `diff = L + C` and BOTH arms' 0-jet-inclusive `w`-jet INTEGRATED two-arm
+  -- bounds (the pointwise per-`x` form being false for the middle covariant-Leibniz terms at high
+  -- frequency — Gagliardo–Nirenberg interpolation content), so this node is the split verbatim.
   exists_lieDerivDiff_connLevel_split (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
 
 /-- **The per-field covariant-Faà-di-Bruno Moser-tame `L²` domination of the segment-metric
@@ -1164,29 +1207,21 @@ theorem lieDerivDiff_covFdB_section_split
           PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
               (lieDerivRetagG0 (I := I) g₀ g_bg g₁ - lieDerivRetagG0 (I := I) g₀ g_bg g₂)
             = Adiff + Cross ∧
-          (∀ x : M,
-            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x (Adiff.toSection x) ≤
+          (‖Adiff‖ ^ 2 ≤
               Cd * ∑ i ∈ Finset.range (j + 2 + 1),
-                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                        (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
+                  ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                      (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
                 + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
-                    (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
-                      + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
+                    (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
+                      + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                   * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) ∧
-          (∀ x : M,
-            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x (Cross.toSection x) ≤
+          (‖Cross‖ ^ 2 ≤
               Cd * ∑ i ∈ Finset.range (j + 2 + 1),
-                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                        (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
+                  ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                      (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
                 + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
-                    (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
-                      + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
+                    (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
+                      + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                   * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) :=
   by
   classical
@@ -1261,7 +1296,7 @@ over the identity, with the coefficient `Λ = √(2 Cd)` and the cross-piece `1/
 structural split posit, which carries the genuine deep covariant-gauge-jet content — the covariant
 Faà-di-Bruno expansion of the sealed Lie/`deTurckVF` nonlinearity, with NO pointwise-`C^{>2}`-jet
 claim, NO spectral-nonlinearity, and NO Weyl dependence. -/
-theorem lieDerivDiff_covFdB_pointwise_twoProduct_rfns_le
+theorem lieDerivDiff_covFdB_integrated_twoProduct_l2NormSq_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (j : ℕ) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧
@@ -1275,50 +1310,45 @@ theorem lieDerivDiff_covFdB_pointwise_twoProduct_rfns_le
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
-        ∀ x : M,
-          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
-              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
-                  (lieDerivRetagG0 (I := I) g₀ g_bg g₁
-                    - lieDerivRetagG0 (I := I) g₀ g_bg g₂)).toSection x) ≤
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+                (lieDerivRetagG0 (I := I) g₀ g_bg g₁
+                  - lieDerivRetagG0 (I := I) g₀ g_bg g₂)‖ ^ 2 ≤
             Λ ^ 2 * ∑ i ∈ Finset.range (j + 2 + 1),
-                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                      (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                    (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
               + (∑ i ∈ Finset.range (j + 2 + 1),
-                  (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
-                    + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
+                  (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
+                    + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 := by
   classical
   -- The covariant Faà-di-Bruno difference/cross split of the Lie-summand difference: a uniform
   -- difference-arm constant `Cd` and, per perturbation, the structural identity `∇^j(Lie-diff) =
-  -- Adiff + Cross` with the difference-arm grid bound and the cross-piece fixed-pair bound.
+  -- Adiff + Cross` with the integrated difference-arm grid bound and the cross-piece fixed-pair bound.
   obtain ⟨Cd, hCd_nn, hsplit⟩ :=
     lieDerivDiff_covFdB_section_split (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1 j
-  -- The two-product coefficient `Λ = √(4 Cd)`: each piece's two-arm bound carries `Cd·W + (1/4)·F·D²`,
-  -- so the squared-fibre-norm subadditivity factor `2` over `Adiff + Cross` accumulates the difference
-  -- arms into `Λ² = 4 Cd` and the two `(1/4)·F·D²` fixed-pair pieces into the coefficient-`1` cross arm.
+  -- The two-product coefficient `Λ = √(4 Cd)`: each piece's integrated two-arm bound carries
+  -- `Cd·W + (1/4)·F·D²`, so the `L²`-norm subadditivity factor `2` over `Adiff + Cross` accumulates the
+  -- difference arms into `Λ² = 4 Cd` and the two `(1/4)·F·D²` fixed-pair pieces into the coefficient-`1`
+  -- cross arm.
   refine ⟨Real.sqrt (4 * Cd), Real.sqrt_nonneg _,
-    fun T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ x => ?_⟩
+    fun T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ => ?_⟩
   obtain ⟨Adiff, Cross, heq, hAdiff, hCross⟩ := hsplit T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂
-  -- The squared-fibre-norm subadditivity over the structural identity `∇^j(Lie-diff) = Adiff + Cross`.
+  -- The `L²`-norm subadditivity over the structural identity `∇^j(Lie-diff) = Adiff + Cross`:
+  -- `‖a + b‖² ≤ 2‖a‖² + 2‖b‖²` (triangle + the elementary `(p+q)² ≤ 2(p²+q²)`).
   have hsplit_norm :
-      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
-          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
-              (lieDerivRetagG0 (I := I) g₀ g_bg g₁
-                - lieDerivRetagG0 (I := I) g₀ g_bg g₂)).toSection x) ≤
-        2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x (Adiff.toSection x)
-          + 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x (Cross.toSection x) := by
-    rw [heq, Integral.L2.SmoothCcTensor.toSection_add]
-    exact riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (2 + j) x
-      (Adiff.toSection x) (Cross.toSection x)
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+            (lieDerivRetagG0 (I := I) g₀ g_bg g₁
+              - lieDerivRetagG0 (I := I) g₀ g_bg g₂)‖ ^ 2 ≤
+        2 * ‖Adiff‖ ^ 2 + 2 * ‖Cross‖ ^ 2 := by
+    rw [heq]
+    have htri := norm_add_le Adiff Cross
+    have hAn : 0 ≤ ‖Adiff‖ := norm_nonneg _
+    have hCn : 0 ≤ ‖Cross‖ := norm_nonneg _
+    nlinarith [htri, hAn, hCn, norm_nonneg (Adiff + Cross), sq_nonneg (‖Adiff‖ - ‖Cross‖)]
   -- `Λ² = (√(4 Cd))² = 4 Cd`: the subadditivity factor `2` over the two `Cd·W` difference arms gives
   -- `4 Cd·W`, and the two `(1/4)·F·D²` fixed-pair pieces sum (after the factor `2`) to `1·F·D²`.
   rw [show Real.sqrt (4 * Cd) ^ 2 = 4 * Cd from Real.sq_sqrt (by positivity)]
-  have hA := hAdiff x
-  have hC := hCross x
-  nlinarith [hsplit_norm, hA, hC]
+  nlinarith [hsplit_norm, hAdiff, hCross]
 
 /-- **The per-field covariant-Faà-di-Bruno Moser-tame `L²` domination of the segment-metric
 *Lie-derivative* summand difference (the gauge half of the geometric nonlinearity, stated at the
@@ -1386,10 +1416,10 @@ theorem exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le
                       + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
                   * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ := by
   classical
-  -- The deep covariant-gauge-jet posit: a per-order coefficient sup `Λ j` with the pointwise
-  -- Hamilton/Moser two-product domination of `∇^j(Lie-diff)`.
+  -- The deep covariant-gauge-jet posit: a per-order coefficient sup `Λ j` with the **integrated**
+  -- Hamilton/Moser two-product domination `‖∇^j(Lie-diff)‖² ≤ Λj²·∑‖∇^i w‖² + (∑(‖∇^i T₁‖²+‖∇^i T₂‖²))·D²`.
   choose Λ hΛ_nn hΛ using
-    fun j => lieDerivDiff_covFdB_pointwise_twoProduct_rfns_le (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1 j
+    fun j => lieDerivDiff_covFdB_integrated_twoProduct_l2NormSq_le (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1 j
   -- The per-order realize-difference covariant `L²`-jet constant: `‖∇^i realizeSymm S‖ ≤ Cr i · ∑_{l≤i}
   -- ‖∇^l S‖` (the realization gains no derivatives).
   choose Cr hCr_nn hCr using
@@ -1414,7 +1444,7 @@ theorem exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le
         + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖) with hcrossSum_def
   have hcrossSum_nn : 0 ≤ crossSum :=
     Finset.sum_nonneg fun i _ => add_nonneg (norm_nonneg _) (norm_nonneg _)
-  -- Apply the two-product pointwise-to-`L²` lift to the deep posit's pointwise bound, with the
+  -- Apply the two-arm `√`-domination to the deep posit's **integrated** squared bound, with the
   -- difference factor `w = realizeSymm (T₁ − T₂)` on the regular arm (coefficient `Λ j`) and the
   -- fixed-pair endpoints `T₁, T₂` on the cross arm (coefficient `D₀ = ‖(T₁ − T₂).toHs a‖`).
   have hlift :
@@ -1426,17 +1456,17 @@ theorem exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le
           + D₀ * ∑ i ∈ Finset.range (j + 2 + 1),
               (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
                 + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖) := by
-    refine tensorL2Norm_le_of_pointwise_twoProduct_rfns_bound (I := I) (M := M) g₀ (j + 2 + 1)
-      (fun i => 2 + i) (fun i => 2 + i)
-      (fun i => PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-        (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂)))
-      (fun i => PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁)
-      (fun i => PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂)
-      (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
-        (lieDerivRetagG0 (I := I) g₀ g_bg g₁ - lieDerivRetagG0 (I := I) g₀ g_bg g₂))
-      (Λ j) D₀ (hΛ_nn j) hD₀_nn (fun x => ?_)
+    refine twoArm_le_of_sq_le (j + 2 + 1)
+      (fun i => ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+        (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖)
+      (fun i => ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖)
+      (fun i => ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖)
+      (fun i => norm_nonneg _) (fun i => norm_nonneg _) (fun i => norm_nonneg _)
+      (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+        (lieDerivRetagG0 (I := I) g₀ g_bg g₁ - lieDerivRetagG0 (I := I) g₀ g_bg g₂)‖)
+      (Λ j) D₀ (norm_nonneg _) (hΛ_nn j) hD₀_nn ?_
     rw [hD₀_def]
-    exact hΛ j T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ x
+    exact hΛ j T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂
   -- The realize-difference covariant `L²`-jet bound on the regular arm: each `‖∇^i realizeSymm
   -- (T₁ − T₂)‖ ≤ Cr i · ∑_{l ≤ i} ‖∇^l (T₁ − T₂)‖ ≤ Cr i · diffSum` (since `i ≤ j + 2`).
   have hrealize_termwise : ∀ i ∈ Finset.range (j + 2 + 1),

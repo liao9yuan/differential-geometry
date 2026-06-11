@@ -130,27 +130,24 @@ theorem lieCrossSection_iteratedCovGrad_connLevel_rfns_le
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
-        ∀ (j : ℕ) (x : M),
-          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
-              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
-                  (lieCrossSection (I := I) g₀ g_bg g₁ g₂)).toSection x) ≤
+        ∀ (j : ℕ),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+                (lieCrossSection (I := I) g₀ g_bg g₁ g₂)‖ ^ 2 ≤
             Cd * ∑ i ∈ Finset.range (j + 2 + 1),
-                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                      (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                    (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
               + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
-                  (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
-                    + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
+                  (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
+                    + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 := by
   classical
   obtain ⟨Cd, hCd0, hbound⟩ :=
     (lieDerivDiff_connLevel_sectionData (I := I) g₀ g_bg).choose_spec a ha B hB δ hδ0 hδ1
   refine ⟨Cd, hCd0, ?_⟩
-  intro T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 j x
-  -- The second arm bound of the section-data leaf is exactly the bound on the concrete `lieCrossSection`.
-  exact (hbound T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2).2 j x
+  intro T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 j
+  -- The second arm bound of the section-data leaf is exactly the integrated bound on the concrete
+  -- `lieCrossSection`.
+  exact (hbound T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2).2 j
 
 end DeTurck
 end IntrinsicSpectral

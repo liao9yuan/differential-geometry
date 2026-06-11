@@ -166,28 +166,24 @@ theorem lieLinearSection_iteratedCovGrad_connLevel_rfns_le
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
-        ∀ (j : ℕ) (x : M),
-          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
-              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
-                  (lieLinearSection (I := I) g₀ g_bg g₁ g₂)).toSection x) ≤
+        ∀ (j : ℕ),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+                (lieLinearSection (I := I) g₀ g_bg g₁ g₂)‖ ^ 2 ≤
             Cd * ∑ i ∈ Finset.range (j + 2 + 1),
-                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                      (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                    (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
               + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
-                  (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
-                    + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
+                  (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
+                    + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 := by
   classical
   obtain ⟨Cd, hCd0, hbound⟩ :=
     (lieDerivDiff_connLevel_sectionData (I := I) g₀ g_bg).choose_spec a ha B hB δ hδ0 hδ1
   refine ⟨Cd, hCd0, ?_⟩
-  intro T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 j x
-  -- The first arm bound of the section-data leaf is the bound on the algebraic complement `diff − Cf`,
-  -- which is definitionally `lieLinearSection`.
-  have h := (hbound T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2).1 j x
+  intro T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 j
+  -- The first arm bound of the section-data leaf is the integrated bound on the algebraic complement
+  -- `diff − Cf`, which is definitionally `lieLinearSection`.
+  have h := (hbound T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2).1 j
   rwa [show (lieLinearSection (I := I) g₀ g_bg g₁ g₂) =
       (lieDerivRetagG0 (I := I) g₀ g_bg g₁ - lieDerivRetagG0 (I := I) g₀ g_bg g₂)
         - (lieDerivDiff_connLevel_sectionData (I := I) g₀ g_bg).choose g₁ g₂ from rfl]
@@ -257,61 +253,51 @@ theorem exists_lieDerivDiff_connLevel_split
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
         ∃ L C : Integral.L2.SmoothCcTensor g₀ 0 2,
           lieDerivRetagG0 (I := I) g₀ g_bg g₁ - lieDerivRetagG0 (I := I) g₀ g_bg g₂ = L + C ∧
-          (∀ (j : ℕ) (x : M),
-            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
-                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j L).toSection x) ≤
+          (∀ (j : ℕ),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j L‖ ^ 2 ≤
               Cd * ∑ i ∈ Finset.range (j + 2 + 1),
-                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                        (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
+                  ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                      (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
                 + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
-                    (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
-                      + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
+                    (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
+                      + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                   * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) ∧
-          (∀ (j : ℕ) (x : M),
-            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
-                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j C).toSection x) ≤
+          (∀ (j : ℕ),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j C‖ ^ 2 ≤
               Cd * ∑ i ∈ Finset.range (j + 2 + 1),
-                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                        (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
+                  ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                      (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
                 + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
-                    (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
-                      + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
+                    (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
+                      + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                   * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) := by
   classical
   -- **Linear reduction** (the genuinely-absent intrinsic content, on the concrete `lieLinearSection`):
-  -- produces the `w`-jet linear-arm two-arm bound on `∇^j (lieLinearSection)`.
+  -- produces the integrated `w`-jet linear-arm two-arm bound on `∇^j (lieLinearSection)`.
   obtain ⟨CdL, hCdL0, hL⟩ :=
     lieLinearSection_iteratedCovGrad_connLevel_rfns_le (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
-  -- **Cross reduction** (on the concrete `lieCrossSection`): the `w`-jet cross-arm two-arm bound
-  -- on `∇^j (lieCrossSection)`.
+  -- **Cross reduction** (on the concrete `lieCrossSection`): the integrated `w`-jet cross-arm two-arm
+  -- bound on `∇^j (lieCrossSection)`.
   obtain ⟨CdC, hCdC0, hC⟩ :=
     lieCrossSection_iteratedCovGrad_connLevel_rfns_le (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
   refine ⟨max CdL CdC, le_trans hCdL0 (le_max_left _ _), ?_⟩
   intro T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2
   refine ⟨lieLinearSection (I := I) g₀ g_bg g₁ g₂, lieCrossSection (I := I) g₀ g_bg g₁ g₂,
-    lieDerivRetagG0_sub_eq_lieLinear_add_lieCross (I := I) g₀ g_bg g₁ g₂, fun j x => ?_, fun j x => ?_⟩
+    lieDerivRetagG0_sub_eq_lieLinear_add_lieCross (I := I) g₀ g_bg g₁ g₂, fun j => ?_, fun j => ?_⟩
   · -- Linear arm: widen `CdL → max CdL CdC` (the difference-arm jet sum is nonnegative).
-    refine le_trans (hL T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 j x) ?_
+    refine le_trans (hL T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 j) ?_
     have hSRnn : (0 : ℝ) ≤ ∑ i ∈ Finset.range (j + 2 + 1),
-        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-              (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x) :=
-      Finset.sum_nonneg fun p _ => riemannianFiberNormSq_nonneg _ _ _ _ _
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+            (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2 :=
+      Finset.sum_nonneg fun p _ => sq_nonneg _
     gcongr
     exact le_max_left _ _
   · -- Cross arm: widen `CdC → max CdL CdC`.
-    refine le_trans (hC T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 j x) ?_
+    refine le_trans (hC T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 j) ?_
     have hSRnn : (0 : ℝ) ≤ ∑ i ∈ Finset.range (j + 2 + 1),
-        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-              (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x) :=
-      Finset.sum_nonneg fun p _ => riemannianFiberNormSq_nonneg _ _ _ _ _
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+            (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2 :=
+      Finset.sum_nonneg fun p _ => sq_nonneg _
     gcongr
     exact le_max_right _ _
 
