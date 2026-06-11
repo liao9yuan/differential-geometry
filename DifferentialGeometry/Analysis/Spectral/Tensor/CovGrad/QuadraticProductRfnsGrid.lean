@@ -682,6 +682,400 @@ theorem exists_rfns_iteratedCovGrad_prod_diagGrid_le (Φ : RfnsBilinearProduct g
   simp only [Nat.add_zero] at hgrid
   exact hgrid
 
+set_option linter.unusedSectionVars false in
+/-- **`castRankCc_db` is additive.**  Local restatement (`castRankCc_db_add` lives in the curvature
+tower, not imported here). -/
+private lemma castRankCc_db_add_local {a b : ℕ} (h : a = b)
+    (W₁ W₂ : SmoothCcTensor g 0 a) :
+    castRankCc_db g 0 h (W₁ + W₂) = castRankCc_db g 0 h W₁ + castRankCc_db g 0 h W₂ := by
+  subst h; rfl
+
+set_option linter.unusedSectionVars false in
+/-- **The rank-cast is heq-trivial.**  `castRankCc_db g 0 h W ≍ W` (the cast is `h ▸ W`, transported
+back by `eqRec_heq`).  Local restatement (`castRankCc_db_heq` of the curvature tower is not imported). -/
+private lemma castRankCc_db_heq' {a b : ℕ} {h : a = b} (W : SmoothCcTensor g 0 a) :
+    castRankCc_db g 0 h W ≍ W := by
+  subst h; rfl
+
+/-- **The cast-form front-commutation of the iterated covariant gradient.**  `∇^{m+1} X` equals the
+rank-cast of `∇^m (∇ X)`: the iterated gradient may be peeled from the *front* (innermost slot) at the
+cost of the rank reindexing `(s+1)+m = s+(m+1)`.  The cast-free version is the `≍`-form
+`iteratedCovGrad_covGrad_comm_heq`; this packages it as a genuine equation by `eq_of_heq` (both sides
+live at rank `s + (m+1)`). -/
+private lemma iteratedCovGrad_succ_front_cast (s m : ℕ) (X : SmoothCcTensor g 0 s) :
+    iteratedCovGrad g 0 s (m + 1) X =
+      castRankCc_db g 0 (by omega : (s + 1) + m = s + (m + 1))
+        (iteratedCovGrad g 0 (s + 1) m (covGrad g 0 s X)) := by
+  have hcast : castRankCc_db g 0 (by omega : (s + 1) + m = s + (m + 1))
+      (iteratedCovGrad g 0 (s + 1) m (covGrad g 0 s X)) ≍
+        iteratedCovGrad g 0 (s + 1) m (covGrad g 0 s X) := by
+    rw [show castRankCc_db g 0 (by omega : (s + 1) + m = s + (m + 1))
+        (iteratedCovGrad g 0 (s + 1) m (covGrad g 0 s X)) =
+        (by omega : (s + 1) + m = s + (m + 1)) ▸
+          (iteratedCovGrad g 0 (s + 1) m (covGrad g 0 s X)) from rfl]
+    exact eqRec_heq _ _
+  refine eq_of_heq (HEq.trans ?_ hcast.symm)
+  exact (PDE.DeTurck.iteratedCovGrad_covGrad_comm_heq_local g s m X).symm
+
+/-- **Left shift of the `rfns` covariant-jet *peeled* diagonal grid.**  The peeled diagonal window
+`{i + l ≤ j, i ≤ j-1}` of the once-left-differentiated factor (`∇^i (∇S)`, inner window `range (j+1-i)`)
+is dominated by the peeled diagonal window `{i + l ≤ j+1, i ≤ j}` of the undifferentiated factors:
+front-commutation `∇^i(∇S) ↦ ∇^{i+1}S` reindexes the left axis `i ↦ i+1` (the inner `l`-window
+`range (j+1-i) = range (j+2-(i+1))` is preserved), so the shifted grid sits inside the larger peeled
+diagonal as rows `i' ∈ {1, …, j}` (the `i' = 0` row omitted, all summands nonnegative). -/
+private lemma shift_left_peeledDiagGrid_rfns_le {a b : ℕ} (S : SmoothCcTensor g 0 (s₁ + a))
+    (T : SmoothCcTensor g 0 (s₂ + b)) (x : M) (j : ℕ) :
+    (∑ i ∈ Finset.range j,
+        riemannianFiberNormSq (I := I) (M := M) g 0 ((s₁ + a + 1) + i) x
+            ((iteratedCovGrad g 0 (s₁ + a + 1) i (covGrad g 0 (s₁ + a) S)).toSection x) *
+          ∑ l ∈ Finset.range (j + 1 - i),
+            riemannianFiberNormSq (I := I) (M := M) g 0 ((s₂ + b) + l) x
+              ((iteratedCovGrad g 0 (s₂ + b) l T).toSection x)) ≤
+      ∑ i ∈ Finset.range (j + 1),
+        riemannianFiberNormSq (I := I) (M := M) g 0 ((s₁ + a) + i) x
+            ((iteratedCovGrad g 0 (s₁ + a) i S).toSection x) *
+          ∑ l ∈ Finset.range (j + 1 + 1 - i),
+            riemannianFiberNormSq (I := I) (M := M) g 0 ((s₂ + b) + l) x
+              ((iteratedCovGrad g 0 (s₂ + b) l T).toSection x) := by
+  have hstep1 : (∑ i ∈ Finset.range j,
+        riemannianFiberNormSq (I := I) (M := M) g 0 ((s₁ + a + 1) + i) x
+            ((iteratedCovGrad g 0 (s₁ + a + 1) i (covGrad g 0 (s₁ + a) S)).toSection x) *
+          ∑ l ∈ Finset.range (j + 1 - i),
+            riemannianFiberNormSq (I := I) (M := M) g 0 ((s₂ + b) + l) x
+              ((iteratedCovGrad g 0 (s₂ + b) l T).toSection x)) =
+      ∑ i ∈ Finset.range j,
+        riemannianFiberNormSq (I := I) (M := M) g 0 ((s₁ + a) + (i + 1)) x
+            ((iteratedCovGrad g 0 (s₁ + a) (i + 1) S).toSection x) *
+          ∑ l ∈ Finset.range (j + 1 + 1 - (i + 1)),
+            riemannianFiberNormSq (I := I) (M := M) g 0 ((s₂ + b) + l) x
+              ((iteratedCovGrad g 0 (s₂ + b) l T).toSection x) := by
+    refine Finset.sum_congr rfl fun i _ => ?_
+    rw [rfns_iteratedCovGrad_covGrad_comm (g := g) (s₁ + a) i S x]
+    congr 1
+    rw [show j + 1 + 1 - (i + 1) = j + 1 - i from by omega]
+  rw [hstep1]
+  rw [Finset.sum_range_succ' (n := j)
+    (f := fun i => riemannianFiberNormSq (I := I) (M := M) g 0 ((s₁ + a) + i) x
+        ((iteratedCovGrad g 0 (s₁ + a) i S).toSection x) *
+      ∑ l ∈ Finset.range (j + 1 + 1 - i),
+        riemannianFiberNormSq (I := I) (M := M) g 0 ((s₂ + b) + l) x
+          ((iteratedCovGrad g 0 (s₂ + b) l T).toSection x))]
+  exact le_add_of_nonneg_right
+    (mul_nonneg (riemannianFiberNormSq_nonneg _ _ _ _ _)
+      (Finset.sum_nonneg fun l _ => riemannianFiberNormSq_nonneg _ _ _ _ _))
+
+/-- **Right shift of the `rfns` covariant-jet diagonal grid into the *peeled* diagonal.**  The *full*
+diagonal window `{i + l ≤ j}` of the once-right-differentiated factor (`∇^l (∇T)`, outer window
+`range (j+1)`) is dominated by the peeled diagonal window `{i + l ≤ j+1, i ≤ j}` of the undifferentiated
+factors: every cell already carries a derivative on the second factor, so front-commutation
+`∇^l(∇T) ↦ ∇^{l+1}T` reindexes the inner axis `l ↦ l+1` into `{1, …, j+1-i} ⊆ range (j+2-i)`, and the
+outer `i`-axis `range (j+1)` already matches the peeled outer window (all summands nonnegative). -/
+private lemma shift_right_fullDiagGrid_into_peeled_rfns_le {a b : ℕ}
+    (S : SmoothCcTensor g 0 (s₁ + a)) (T : SmoothCcTensor g 0 (s₂ + b)) (x : M) (j : ℕ) :
+    (∑ i ∈ Finset.range (j + 1),
+        riemannianFiberNormSq (I := I) (M := M) g 0 ((s₁ + a) + i) x
+            ((iteratedCovGrad g 0 (s₁ + a) i S).toSection x) *
+          ∑ l ∈ Finset.range (j + 1 - i),
+            riemannianFiberNormSq (I := I) (M := M) g 0 ((s₂ + b + 1) + l) x
+              ((iteratedCovGrad g 0 (s₂ + b + 1) l (covGrad g 0 (s₂ + b) T)).toSection x)) ≤
+      ∑ i ∈ Finset.range (j + 1),
+        riemannianFiberNormSq (I := I) (M := M) g 0 ((s₁ + a) + i) x
+            ((iteratedCovGrad g 0 (s₁ + a) i S).toSection x) *
+          ∑ l ∈ Finset.range (j + 1 + 1 - i),
+            riemannianFiberNormSq (I := I) (M := M) g 0 ((s₂ + b) + l) x
+              ((iteratedCovGrad g 0 (s₂ + b) l T).toSection x) := by
+  refine Finset.sum_le_sum fun i hi => ?_
+  rw [Finset.mem_range] at hi
+  refine mul_le_mul_of_nonneg_left ?_ (riemannianFiberNormSq_nonneg _ _ _ _ _)
+  rw [show (∑ l ∈ Finset.range (j + 1 - i),
+        riemannianFiberNormSq (I := I) (M := M) g 0 ((s₂ + b + 1) + l) x
+          ((iteratedCovGrad g 0 (s₂ + b + 1) l (covGrad g 0 (s₂ + b) T)).toSection x)) =
+      ∑ l ∈ Finset.range (j + 1 - i),
+        riemannianFiberNormSq (I := I) (M := M) g 0 ((s₂ + b) + (l + 1)) x
+          ((iteratedCovGrad g 0 (s₂ + b) (l + 1) T).toSection x) from by
+    refine Finset.sum_congr rfl fun l _ => ?_
+    rw [rfns_iteratedCovGrad_covGrad_comm (g := g) (s₂ + b) l T x]]
+  rw [show j + 1 + 1 - i = (j + 1 - i) + 1 from by omega]
+  rw [Finset.sum_range_succ' (n := j + 1 - i)
+    (f := fun l => riemannianFiberNormSq (I := I) (M := M) g 0 ((s₂ + b) + l) x
+      ((iteratedCovGrad g 0 (s₂ + b) l T).toSection x))]
+  exact le_add_of_nonneg_right (riemannianFiberNormSq_nonneg _ _ _ _ _)
+
+set_option linter.unusedSectionVars false in
+/-- **Heq congruence for a subtraction of tensor sections.**  If the rank changes by `n = n'` and the
+two summands transport heq-wise, so does their difference. -/
+private lemma sub_heq_congr {n n' : ℕ} (hn : n = n')
+    {A B : SmoothCcTensor g 0 n} {A' B' : SmoothCcTensor g 0 n'}
+    (hA : A ≍ A') (hB : B ≍ B') : (A - B) ≍ (A' - B') := by
+  subst hn
+  obtain rfl := eq_of_heq hA
+  obtain rfl := eq_of_heq hB
+  rfl
+
+set_option linter.unusedSectionVars false in
+/-- **Heq congruence for the bilinear product field `Φ.prod`** under a change of the two extra-slot
+counts.  When the slot counts agree (`a₁ = a₂`, `b₁ = b₂`) and the two factor sections transport
+heq-wise, the products transport heq-wise. -/
+private lemma prod_heq_congr (Φ : RfnsBilinearProduct g s₁ s₂ s₀) {a₁ a₂ b₁ b₂ : ℕ}
+    (ha : a₁ = a₂) (hb : b₁ = b₂)
+    {S₁ : SmoothCcTensor g 0 (s₁ + a₁)} {S₂ : SmoothCcTensor g 0 (s₁ + a₂)}
+    {T₁ : SmoothCcTensor g 0 (s₂ + b₁)} {T₂ : SmoothCcTensor g 0 (s₂ + b₂)}
+    (hS : S₁ ≍ S₂) (hT : T₁ ≍ T₂) :
+    Φ.prod (a := a₁) (b := b₁) S₁ T₁ ≍ Φ.prod (a := a₂) (b := b₂) S₂ T₂ := by
+  cases ha
+  cases hb
+  obtain rfl := eq_of_heq hS
+  obtain rfl := eq_of_heq hT
+  rfl
+
+set_option linter.unusedSectionVars false in
+/-- **Heq congruence for the iterated covariant gradient** under a change of the base covariant rank.
+When the base ranks agree (`s = s'`) and the sections transport heq-wise, the `j`-fold iterated
+gradients transport heq-wise. -/
+private lemma iteratedCovGrad_heq_congr {s s' : ℕ} (hs : s = s') (j : ℕ)
+    {X : SmoothCcTensor g 0 s} {X' : SmoothCcTensor g 0 s'} (hX : X ≍ X') :
+    iteratedCovGrad g 0 s j X ≍ iteratedCovGrad g 0 s' j X' := by
+  subst hs
+  obtain rfl := eq_of_heq hX
+  rfl
+
+/-- **The peeled binomial covariant-Leibniz `rfns` grid (general gradient shift).**  For every gradient
+order `j` and shift `(a, b)`, the `rfns` of the **binomial remainder**
+`∇^j (prod_{a,b} S T) − (rank-cast) prod_{a+j,b}(∇^j S, T)` — the difference of the full `j`-fold jet of
+the product and the *top cell* with all `j` derivatives landed on the first factor — is at most
+`mu · 4^j` times the **peeled diagonal** grid: the diagonal-convolution double sum over pairs
+`i + l ≤ j` with the first-factor order *strictly below* `j` (`i ∈ range j`).  Every surviving Leibniz
+cell carries at least one derivative on the second factor.
+
+Proved by induction on `j` mirroring `rfns_iteratedCovGrad_prod_le_diagGrid`, tracking the top cell so
+it cancels: the base case is `D_0 = prod S T − cast (prod S T) = 0` (empty grid); the successor step
+front-commutes the innermost gradient (cast form, `iteratedCovGrad_succ_front_cast`), expands by the
+exact two-section Leibniz `covGrad_prod`, distributes `∇^j` (`iteratedCovGrad_add`), rearranges so the
+new top cell pairs with the differentiated-first-factor branch, and applies the `2`-subadditivity
+`riemannianFiberNormSq_add_le`.  The **left** (differentiated-first-factor) piece is the level-`j`
+remainder of the once-left-differentiated product — bounded by the *induction hypothesis* and dominated
+by the larger peeled diagonal (`shift_left_peeledDiagGrid_rfns_le`); the **right**
+(differentiated-second-factor) piece is the *full* level-`j` diagonal jet of the once-right-
+differentiated product — bounded by the **full** engine `rfns_iteratedCovGrad_prod_le_diagGrid` (every
+cell already carries a derivative on the second factor) and dominated by the peeled diagonal after the
+inner shift (`shift_right_fullDiagGrid_into_peeled_rfns_le`); the per-step `2` and the IH/engine `4^j`
+combine into `4^{j+1}`. -/
+theorem rfns_iteratedCovGrad_prod_topRest_le_peeledDiagGrid
+    (Φ : RfnsBilinearProduct g s₁ s₂ s₀) (j : ℕ) :
+    ∀ {a b : ℕ} (S : SmoothCcTensor g 0 (s₁ + a)) (T : SmoothCcTensor g 0 (s₂ + b)) (x : M),
+      riemannianFiberNormSq (I := I) (M := M) g 0 ((s₀ + a + b) + j) x
+          ((iteratedCovGrad g 0 (s₀ + a + b) j (Φ.prod S T)
+            - castRankCc_db g 0 (by omega : (s₀ + (a + j) + b) = (s₀ + a + b) + j)
+                (Φ.prod (a := a + j) (b := b)
+                  (castRankCc_db g 0 (by omega : (s₁ + a) + j = s₁ + (a + j))
+                    (iteratedCovGrad g 0 (s₁ + a) j S)) T)).toSection x) ≤
+        Φ.mu * (4 : ℝ) ^ j * ∑ i ∈ Finset.range j,
+          riemannianFiberNormSq (I := I) (M := M) g 0 ((s₁ + a) + i) x
+              ((iteratedCovGrad g 0 (s₁ + a) i S).toSection x) *
+            ∑ l ∈ Finset.range (j + 1 - i),
+              riemannianFiberNormSq (I := I) (M := M) g 0 ((s₂ + b) + l) x
+                ((iteratedCovGrad g 0 (s₂ + b) l T).toSection x) := by
+  induction j with
+  | zero =>
+      intro a b S T x
+      -- `D_0 = prod S T − cast (prod S T) = 0`: the casts over the reflexive rank equations are the
+      -- identity, so the difference vanishes; the right grid is the empty sum `0`.
+      have hcast0 : castRankCc_db g 0 (by omega : (s₀ + (a + 0) + b) = (s₀ + a + b) + 0)
+            (Φ.prod (a := a + 0) (b := b)
+              (castRankCc_db g 0 (by omega : (s₁ + a) + 0 = s₁ + (a + 0))
+                (iteratedCovGrad g 0 (s₁ + a) 0 S)) T) =
+          iteratedCovGrad g 0 (s₀ + a + b) 0 (Φ.prod S T) := by
+        rw [iteratedCovGrad_zero, iteratedCovGrad_zero]
+        rfl
+      rw [hcast0, sub_self]
+      rw [SmoothCcTensor.toSection_zero, ContMDiffSection.coe_zero, Pi.zero_apply,
+        riemannianFiberNormSq_zero]
+      simp only [Finset.range_zero, Finset.sum_empty, mul_zero, le_refl]
+  | succ j ih =>
+      intro a b S T x
+      -- Abbreviations for the two differentiated factors and the two Leibniz summands of `∇(prod S T)`.
+      -- The clean section identity: `∇^{j+1}(prod S T)` front-commutes and expands by the exact
+      -- two-section Leibniz into the (rank-cast) left `j`-jet `A` plus the (perm-rank-cast) right
+      -- `j`-jet `B`.
+      have hexpand : iteratedCovGrad g 0 (s₀ + a + b) (j + 1) (Φ.prod S T) =
+          castRankCc_db g 0 (by omega : (s₀ + a + b + 1) + j = (s₀ + a + b) + (j + 1))
+              (iteratedCovGrad g 0 (s₀ + a + b + 1) j
+                (castRankCc_db g 0 (by omega : s₀ + (a + 1) + b = s₀ + a + b + 1)
+                  (Φ.prod (a := a + 1) (b := b) (covGrad g 0 (s₁ + a) S) T)))
+            + castRankCc_db g 0 (by omega : (s₀ + a + b + 1) + j = (s₀ + a + b) + (j + 1))
+              (iteratedCovGrad g 0 (s₀ + a + b + 1) j
+                (PDE.DeTurck.permuteCcTensor g (Φ.covGradPerm (a := a) (b := b))
+                  (castRankCc_db g 0 (by omega : s₀ + a + (b + 1) = s₀ + a + b + 1)
+                    (Φ.prod (a := a) (b := b + 1) S (covGrad g 0 (s₂ + b) T))))) := by
+        rw [iteratedCovGrad_succ_front_cast (s₀ + a + b) j (Φ.prod S T),
+          Φ.covGrad_prod S T, iteratedCovGrad_add, castRankCc_db_add_local]
+      -- Rewrite the difference, pairing the new top cell with the left `j`-jet:
+      -- `(A + B) − Ctop = (A − Ctop) + B`.
+      rw [hexpand, add_sub_right_comm]
+      rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
+      refine (riemannianFiberNormSq_add_le (I := I) (M := M) g 0 ((s₀ + a + b) + (j + 1)) x _ _).trans ?_
+      have hmuNN : 0 ≤ Φ.mu := Φ.mu_nonneg
+      have hpowNN : (0 : ℝ) ≤ (4 : ℝ) ^ j := by positivity
+      have hcoeffNN : 0 ≤ Φ.mu * (4 : ℝ) ^ j := mul_nonneg hmuNN hpowNN
+      set P : ℝ := ∑ i ∈ Finset.range (j + 1),
+        riemannianFiberNormSq (I := I) (M := M) g 0 ((s₁ + a) + i) x
+            ((iteratedCovGrad g 0 (s₁ + a) i S).toSection x) *
+          ∑ l ∈ Finset.range (j + 1 + 1 - i),
+            riemannianFiberNormSq (I := I) (M := M) g 0 ((s₂ + b) + l) x
+              ((iteratedCovGrad g 0 (s₂ + b) l T).toSection x) with hP_def
+      -- LEFT piece `A − Ctop`: the level-`j` remainder of the once-left-differentiated product, by IH.
+      have hLeft : riemannianFiberNormSq (I := I) (M := M) g 0 ((s₀ + a + b) + (j + 1)) x
+            ((castRankCc_db g 0 (by omega : (s₀ + a + b + 1) + j = (s₀ + a + b) + (j + 1))
+                (iteratedCovGrad g 0 (s₀ + a + b + 1) j
+                  (castRankCc_db g 0 (by omega : s₀ + (a + 1) + b = s₀ + a + b + 1)
+                    (Φ.prod (a := a + 1) (b := b) (covGrad g 0 (s₁ + a) S) T)))
+              - castRankCc_db g 0 (by omega : (s₀ + (a + (j + 1)) + b) = (s₀ + a + b) + (j + 1))
+                  (Φ.prod (a := a + (j + 1)) (b := b)
+                    (castRankCc_db g 0 (by omega : (s₁ + a) + (j + 1) = s₁ + (a + (j + 1)))
+                      (iteratedCovGrad g 0 (s₁ + a) (j + 1) S)) T)).toSection x) ≤
+          Φ.mu * (4 : ℝ) ^ j * P := by
+        -- Transport the `rfns` across the heq to the IH difference at shift `(a+1, b)`.
+        have hheq : riemannianFiberNormSq (I := I) (M := M) g 0 ((s₀ + a + b) + (j + 1)) x
+              ((castRankCc_db g 0 (by omega : (s₀ + a + b + 1) + j = (s₀ + a + b) + (j + 1))
+                  (iteratedCovGrad g 0 (s₀ + a + b + 1) j
+                    (castRankCc_db g 0 (by omega : s₀ + (a + 1) + b = s₀ + a + b + 1)
+                      (Φ.prod (a := a + 1) (b := b) (covGrad g 0 (s₁ + a) S) T)))
+                - castRankCc_db g 0 (by omega : (s₀ + (a + (j + 1)) + b) = (s₀ + a + b) + (j + 1))
+                    (Φ.prod (a := a + (j + 1)) (b := b)
+                      (castRankCc_db g 0 (by omega : (s₁ + a) + (j + 1) = s₁ + (a + (j + 1)))
+                        (iteratedCovGrad g 0 (s₁ + a) (j + 1) S)) T)).toSection x) =
+            riemannianFiberNormSq (I := I) (M := M) g 0 ((s₀ + (a + 1) + b) + j) x
+              ((iteratedCovGrad g 0 (s₀ + (a + 1) + b) j (Φ.prod (a := a + 1) (b := b) (covGrad g 0 (s₁ + a) S) T)
+                - castRankCc_db g 0 (by omega : (s₀ + ((a + 1) + j) + b) = (s₀ + (a + 1) + b) + j)
+                    (Φ.prod (a := (a + 1) + j) (b := b)
+                      (castRankCc_db g 0 (by omega : (s₁ + (a + 1)) + j = s₁ + ((a + 1) + j))
+                        (iteratedCovGrad g 0 (s₁ + (a + 1)) j (covGrad g 0 (s₁ + a) S))) T)).toSection x) := by
+          apply PDE.DeTurck.riemannianFiberNormSq_toSection_heq (I := I) (M := M) g (by omega)
+          refine sub_heq_congr (by omega) ?_ ?_
+          · -- left `j`-jet: strip the outer cast then the inner cast.
+            exact HEq.trans (castRankCc_db_heq' _)
+              (iteratedCovGrad_heq_congr (by omega) j (castRankCc_db_heq' _))
+          · -- top cell: strip both outer casts, align `∇^{j+1}S ≍ ∇^j(∇S)` (front-commutation).
+            refine HEq.trans (castRankCc_db_heq' _) (HEq.symm (HEq.trans (castRankCc_db_heq' _) ?_))
+            refine prod_heq_congr Φ (by omega) (by omega) ?_ HEq.rfl
+            exact HEq.trans (castRankCc_db_heq' _) (HEq.symm (HEq.trans (castRankCc_db_heq' _)
+              (PDE.DeTurck.iteratedCovGrad_covGrad_comm_heq_local g (s₁ + a) j S).symm))
+        rw [hheq]
+        refine (ih (a := a + 1) (b := b) (covGrad g 0 (s₁ + a) S) T x).trans ?_
+        rw [hP_def]
+        refine mul_le_mul_of_nonneg_left ?_ hcoeffNN
+        exact shift_left_peeledDiagGrid_rfns_le (g := g) (s₁ := s₁) (s₂ := s₂) (a := a) (b := b) S T x j
+      -- RIGHT piece `B`: the FULL level-`j` diagonal jet of the once-right-differentiated product, by
+      -- the full engine `rfns_iteratedCovGrad_prod_le_diagGrid`.
+      have hRight : riemannianFiberNormSq (I := I) (M := M) g 0 ((s₀ + a + b) + (j + 1)) x
+            ((castRankCc_db g 0 (by omega : (s₀ + a + b + 1) + j = (s₀ + a + b) + (j + 1))
+                (iteratedCovGrad g 0 (s₀ + a + b + 1) j
+                  (PDE.DeTurck.permuteCcTensor g (Φ.covGradPerm (a := a) (b := b))
+                    (castRankCc_db g 0 (by omega : s₀ + a + (b + 1) = s₀ + a + b + 1)
+                      (Φ.prod (a := a) (b := b + 1) S (covGrad g 0 (s₂ + b) T)))))).toSection x) ≤
+          Φ.mu * (4 : ℝ) ^ j * P := by
+        -- Strip the outer cast (heq), the slot reindexing, and the inner cast under `rfns`.
+        have hBval : riemannianFiberNormSq (I := I) (M := M) g 0 ((s₀ + a + b) + (j + 1)) x
+              ((castRankCc_db g 0 (by omega : (s₀ + a + b + 1) + j = (s₀ + a + b) + (j + 1))
+                  (iteratedCovGrad g 0 (s₀ + a + b + 1) j
+                    (PDE.DeTurck.permuteCcTensor g (Φ.covGradPerm (a := a) (b := b))
+                      (castRankCc_db g 0 (by omega : s₀ + a + (b + 1) = s₀ + a + b + 1)
+                        (Φ.prod (a := a) (b := b + 1) S (covGrad g 0 (s₂ + b) T)))))).toSection x) =
+            riemannianFiberNormSq (I := I) (M := M) g 0 ((s₀ + a + (b + 1)) + j) x
+              ((iteratedCovGrad g 0 (s₀ + a + (b + 1)) j
+                (Φ.prod (a := a) (b := b + 1) S (covGrad g 0 (s₂ + b) T))).toSection x) := by
+          rw [show riemannianFiberNormSq (I := I) (M := M) g 0 ((s₀ + a + b) + (j + 1)) x
+                ((castRankCc_db g 0 (by omega : (s₀ + a + b + 1) + j = (s₀ + a + b) + (j + 1))
+                  (iteratedCovGrad g 0 (s₀ + a + b + 1) j
+                    (PDE.DeTurck.permuteCcTensor g (Φ.covGradPerm (a := a) (b := b))
+                      (castRankCc_db g 0 (by omega : s₀ + a + (b + 1) = s₀ + a + b + 1)
+                        (Φ.prod (a := a) (b := b + 1) S (covGrad g 0 (s₂ + b) T)))))).toSection x) =
+              riemannianFiberNormSq (I := I) (M := M) g 0 ((s₀ + a + b + 1) + j) x
+                ((iteratedCovGrad g 0 (s₀ + a + b + 1) j
+                    (PDE.DeTurck.permuteCcTensor g (Φ.covGradPerm (a := a) (b := b))
+                      (castRankCc_db g 0 (by omega : s₀ + a + (b + 1) = s₀ + a + b + 1)
+                        (Φ.prod (a := a) (b := b + 1) S (covGrad g 0 (s₂ + b) T))))).toSection x) from
+            PDE.DeTurck.riemannianFiberNormSq_toSection_heq (I := I) (M := M) g (by omega)
+              (castRankCc_db_heq' _) x]
+          rw [rfns_iteratedCovGrad_permuteCcTensor (g := g) (Φ.covGradPerm (a := a) (b := b))
+            (castRankCc_db g 0 (by omega : s₀ + a + (b + 1) = s₀ + a + b + 1)
+              (Φ.prod (a := a) (b := b + 1) S (covGrad g 0 (s₂ + b) T))) j x]
+          rw [rfns_iteratedCovGrad_castRankCc (g := g)
+            (by omega : s₀ + a + (b + 1) = s₀ + a + b + 1)
+            (Φ.prod (a := a) (b := b + 1) S (covGrad g 0 (s₂ + b) T)) j x]
+        rw [hBval]
+        refine (Φ.rfns_iteratedCovGrad_prod_le_diagGrid j (a := a) (b := b + 1) S (covGrad g 0 (s₂ + b) T) x).trans ?_
+        rw [hP_def]
+        refine mul_le_mul_of_nonneg_left ?_ hcoeffNN
+        exact shift_right_fullDiagGrid_into_peeled_rfns_le (g := g) (s₁ := s₁) (s₂ := s₂)
+          (a := a) (b := b) S T x j
+      -- Combine the two piece bounds and collapse `2·(μ·4^j·P)+2·(μ·4^j·P) = μ·4^{j+1}·P`.
+      have hkey := add_le_add (mul_le_mul_of_nonneg_left hLeft (by norm_num : (0 : ℝ) ≤ 2))
+        (mul_le_mul_of_nonneg_left hRight (by norm_num : (0 : ℝ) ≤ 2))
+      have hcollapse : (2 : ℝ) * (Φ.mu * (4 : ℝ) ^ j * P) + 2 * (Φ.mu * (4 : ℝ) ^ j * P) =
+          Φ.mu * (4 : ℝ) ^ (j + 1) * P := by rw [pow_succ]; ring
+      rw [hcollapse] at hkey
+      exact hkey
+
+/-- **The peeled binomial covariant-Leibniz `rfns` grid (consumer existence form, top cell peeled).**
+
+For a parallel fibrewise bilinear product `Φ : RfnsBilinearProduct g s₁ s₂ s₀`, every gradient order
+`j`, and the two undifferentiated factor sections `S`, `T`, there is a nonnegative order-dependent
+constant `C : ℕ → ℝ`, uniform over `S`, `T`, and the base point `x`, bounding the `rfns` of the
+**binomial remainder** `∇^j (prod S T) − prod(∇^j S, T)` (the full product jet minus the all-on-the-
+first-factor top cell) by the **peeled** diagonal-convolution grid, the first-factor order running
+*strictly below* `j` (`i ∈ range j`):
+```
+rfns(∇^j (prod S T) − prod(∇^j S, T))(x)
+  ≤ C j · ∑_{i < j} rfns(∇^i S)(x) · (∑_{l ≤ j − i} rfns(∇^l T)(x)).
+```
+
+This is the **binomial-remainder** sibling of `exists_rfns_iteratedCovGrad_prod_diagGrid_le`: the top
+cell `i = j` (all `j` derivatives on the first factor) is cancelled by the subtracted
+`prod(∇^j S, T)`, so the surviving grid carries only cells with at least one derivative on the second
+factor.  It is the abstract covariant-calculus brick a cross-correction top/rest split consumes for the
+`Rest_p` arm (the `Top_p = prod(∇^j S, T)` arm carrying the single high derivative on the first factor
+is handled separately by the fibre operator bound), with `C j := mu · 4^j`.
+
+**Non-vacuity.**  The constant is genuinely `mu`-scaled; at `j = 0` the grid is the empty sum, matching
+`D_0 = 0`.  For `j ≥ 1` the surviving diagonal carries the `(i, l) = (0, 1)`-cell `rfns(S) · rfns(∇T)`,
+rejecting a degenerate `C ≡ 0` whenever the product reads a nonzero derivative on the second factor. -/
+theorem exists_rfns_iteratedCovGrad_prod_topRest_diagGrid_le (Φ : RfnsBilinearProduct g s₁ s₂ s₀)
+    (S : SmoothCcTensor g 0 s₁) (T : SmoothCcTensor g 0 s₂) :
+    ∃ C : ℕ → ℝ, (∀ j, 0 ≤ C j) ∧ ∀ (x : M) (j : ℕ),
+      riemannianFiberNormSq (I := I) (M := M) g 0 (s₀ + j) x
+          ((iteratedCovGrad g 0 s₀ j (Φ.prod (a := 0) (b := 0) S T)
+            - castRankCc_db g 0 (by omega : (s₀ + j) + 0 = s₀ + j)
+                (Φ.prod (a := j) (b := 0) (iteratedCovGrad g 0 s₁ j S) T)).toSection x) ≤
+        C j * ∑ i ∈ Finset.range j,
+          riemannianFiberNormSq (I := I) (M := M) g 0 (s₁ + i) x
+              ((iteratedCovGrad g 0 s₁ i S).toSection x) *
+            ∑ l ∈ Finset.range (j + 1 - i),
+              riemannianFiberNormSq (I := I) (M := M) g 0 (s₂ + l) x
+                ((iteratedCovGrad g 0 s₂ l T).toSection x) := by
+  refine ⟨fun j => Φ.mu * (4 : ℝ) ^ j, fun j => mul_nonneg Φ.mu_nonneg (by positivity), fun x j => ?_⟩
+  have hgrid := Φ.rfns_iteratedCovGrad_prod_topRest_le_peeledDiagGrid j (a := 0) (b := 0) S T x
+  -- The general grid at `(a, b) = (0, 0)`; the `+ 0` shifts and the `0 + j` reindexings are cast-only,
+  -- stripped freely under `rfns`.  Transport the consumer-form difference's `rfns` to the general one.
+  have hsec :
+      (iteratedCovGrad g 0 s₀ j (Φ.prod (a := 0) (b := 0) S T)
+        - castRankCc_db g 0 (by omega : (s₀ + j) + 0 = s₀ + j)
+            (Φ.prod (a := j) (b := 0) (iteratedCovGrad g 0 s₁ j S) T)) ≍
+      (iteratedCovGrad g 0 (s₀ + 0 + 0) j (Φ.prod (a := 0) (b := 0) S T)
+        - castRankCc_db g 0 (by omega : (s₀ + (0 + j) + 0) = (s₀ + 0 + 0) + j)
+            (Φ.prod (a := 0 + j) (b := 0)
+              (castRankCc_db g 0 (by omega : (s₁ + 0) + j = s₁ + (0 + j))
+                (iteratedCovGrad g 0 (s₁ + 0) j S)) T)) := by
+    refine sub_heq_congr (by omega) HEq.rfl ?_
+    refine HEq.trans (castRankCc_db_heq' _) (HEq.symm (HEq.trans (castRankCc_db_heq' _) ?_))
+    refine prod_heq_congr Φ (by omega) (by omega) ?_ HEq.rfl
+    exact castRankCc_db_heq' (iteratedCovGrad g 0 (s₁ + 0) j S)
+  have hLHS := PDE.DeTurck.riemannianFiberNormSq_toSection_heq (I := I) (M := M) g
+    (by omega : s₀ + j = (s₀ + 0 + 0) + j) hsec x
+  rw [hLHS]
+  -- The right-hand grid matches `hgrid`'s (the `+ 0` shifts are definitionally equal).
+  exact hgrid
+
 end RfnsBilinearProduct
 
 end Connection
