@@ -127,6 +127,61 @@ theorem covDerivOfField_eval_hasDerivWithinAt
       rw [hv] at hcl
       exact hcl
 
+/-- **The tower swap from joint regularity** (generic two-set form).  The
+`hswap` input of `covDerivOfField_eval_hasDerivWithinAt`, produced from the
+joint `(t, x)` `C²` smoothness and spatial differentiability of the tower
+scalars via `fixedBaseOnReg_of_timeDerivWithin`; the `hTime` input of the
+discharger at level `p` is the chain's own conclusion at level `p`, supplied by
+strong induction (the swaps below `p` are the inductive hypothesis). -/
+theorem covDerivOfField_swapReg
+    (gRef : SmoothRiemannianMetric I M)
+    (A B : Real → Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    (T R : Set Real) (hRT : R ⊆ T)
+    (hRnhds : ∀ {t : Real}, t ∈ R → T ∈ 𝓝 t)
+    (N : ℕ)
+    (hbase : ∀ t ∈ R, ∀ x : M, ∀ v : Fin 2 → TangentSpace I x,
+      HasDerivWithinAt (fun r : Real => (A r) x v) ((B t) x v) T t)
+    (hSmooth : ∀ p : ℕ, p < N →
+      ∀ V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _), ∀ t ∈ R, ∀ x : M,
+      ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) 2
+        (fun q : Real × M => (covDerivOfField (I := I) gRef (A q.1) p) q.2
+          (fun a : Fin (p + 2) => V a q.2)) (t, x))
+    (hFdiff : ∀ p : ℕ, p < N →
+      ∀ V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _), ∀ s ∈ T, ∀ x : M,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M => (covDerivOfField (I := I) gRef (A s) p) y
+          (fun a : Fin (p + 2) => V a y)) x)
+    (hFtdiff : ∀ p : ℕ, p < N →
+      ∀ V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _), ∀ t ∈ R, ∀ x : M,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M => (covDerivOfField (I := I) gRef (B t) p) y
+          (fun a : Fin (p + 2) => V a y)) x) :
+    ∀ p : ℕ, p < N →
+      ∀ V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _), ∀ x₀ : M,
+      FixedBaseExtDerivTimeDerivativeOnRegular (I := I) T R ({x₀} : Set M)
+        (fun r p' => (covDerivOfField (I := I) gRef (A r) p) p'
+          (fun a : Fin (p + 2) => V a p'))
+        (fun r p' => (covDerivOfField (I := I) gRef (B r) p) p'
+          (fun a : Fin (p + 2) => V a p')) := by
+  intro p
+  induction p using Nat.strong_induction_on with
+  | _ p ihp =>
+    intro hpN V x₀
+    refine fixedBaseOnReg_of_timeDerivWithin (I := I) hRT
+      (fun {t} ht => hRnhds ht)
+      (fun t ht x _ => hSmooth p hpN V t ht x)
+      (fun s hs x _ => hFdiff p hpN V s hs x)
+      (fun t ht x _ => hFtdiff p hpN V t ht x) ?_
+    intro t ht x'
+    exact covDerivOfField_eval_hasDerivWithinAt (I := I) gRef A B T R p hbase
+      (fun q hq => ihp q hq (lt_trans hq hpN))
+      p le_rfl t ht x' (fun a : Fin (p + 2) => V a x')
+
 /-! ## The flow wrapper: tower evolution from a Ricci-flow solution -/
 
 /-- The moving metric of a flow solution as a `(0,2)` tensor-field family. -/
@@ -234,6 +289,54 @@ theorem solnTower_hasDerivAt
     D.carrier D.regular N
     (solnMetricDeriv (I := I) S hS) hswap p hp t ht x v
   exact h.hasDerivAt (D.regular_mem_nhds ht)
+
+/-- **The solution tower swap from joint regularity.**  The `hswap` input of
+`solnTower_hasDerivAt` / `hevComp_of_solutions`, discharged from the joint
+`(t, x)` `C²` smoothness of the metric tower scalars and the spatial
+differentiability of the metric/evolution tower scalars (the natural
+regularity statements; the swap itself carries no further analytic content). -/
+theorem solnTowerSwap_of_smooth
+    {D : RealTimeInterval}
+    (gRef : SmoothRiemannianMetric I M)
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (N : ℕ)
+    (hSmooth : ∀ p : ℕ, p < N →
+      ∀ V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _), ∀ t ∈ D.regular, ∀ x : M,
+      ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) 2
+        (fun q : Real × M =>
+          (covDerivOfField (I := I) gRef (solnMetricField (I := I) S q.1) p) q.2
+            (fun a : Fin (p + 2) => V a q.2)) (t, x))
+    (hFdiff : ∀ p : ℕ, p < N →
+      ∀ V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _), ∀ s ∈ D.carrier, ∀ x : M,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M =>
+          (covDerivOfField (I := I) gRef (solnMetricField (I := I) S s) p) y
+            (fun a : Fin (p + 2) => V a y)) x)
+    (hFtdiff : ∀ p : ℕ, p < N →
+      ∀ V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _), ∀ t ∈ D.regular, ∀ x : M,
+      MDifferentiableAt I 𝓘(Real, Real)
+        (fun y : M =>
+          (covDerivOfField (I := I) gRef (solnEvolField (I := I) S t) p) y
+            (fun a : Fin (p + 2) => V a y)) x) :
+    ∀ p : ℕ, p < N →
+      ∀ V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _), ∀ x₀ : M,
+      FixedBaseExtDerivTimeDerivativeOnRegular (I := I) D.carrier D.regular
+        ({x₀} : Set M)
+        (fun r p' => (covDerivOfField (I := I) gRef (solnMetricField (I := I) S r) p) p'
+          (fun a : Fin (p + 2) => V a p'))
+        (fun r p' => (covDerivOfField (I := I) gRef (solnEvolField (I := I) S r) p) p'
+          (fun a : Fin (p + 2) => V a p')) :=
+  covDerivOfField_swapReg (I := I) gRef
+    (fun r => solnMetricField (I := I) S r)
+    (fun t => solnEvolField (I := I) S t)
+    D.carrier D.regular D.regular_subset
+    (fun ht => D.regular_mem_nhds ht) N
+    (solnMetricDeriv (I := I) S hS) hSmooth hFdiff hFtdiff
 
 end HCGCompactness
 end DifferentialGeometry
