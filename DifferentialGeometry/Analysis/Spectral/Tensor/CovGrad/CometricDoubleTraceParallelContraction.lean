@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTraceField
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParallelRankReducingContractionGrid
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CrossCorrectionParallelContraction
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldDifferentiatedTowerNormalForm
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricCurvatureDifferenceCovJet
 
@@ -203,6 +204,314 @@ theorem cometricDoubleTraceRecOp_covGrad (g₀ : SmoothRiemannianMetric I M) (p 
     (by omega : p + (a + 1) = (p + a) + 1)
     (cometricDoubleTraceRecOp (I := I) g₀ p (a + 1)
       (Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 ((p + 2) + a) R)))).symm
+
+set_option linter.unusedSectionVars false in
+/-- **The post-composition fibre operator applied to `R.toSection x` is the fibre value of
+`cometricDoubleTraceRecOp` at `x`.**  For any fibrewise operator `A : (0, (p + 2) + a)-tensor →L
+(0, p + a)-tensor` that post-composes the passenger-passing cometric `g₀⁻¹` double-trace fibre operator
+`(cometricDoubleTraceFieldRec g₀ p a).toSection x` after the `(0, (p + 2) + a)`-tensor, the image
+`A (R.toSection x)` is the fibre value `(cometricDoubleTraceRecOp g₀ p a R).toSection x` of the
+operator-field action (`cometricDoubleTraceRecOp_toSection`).  This exhibits the operator-field-action
+fibre value as a `g₀`-fibre Hom-bundle operator's action, the bridge feeding the sharp `g`-operator-norm
+fibre-norm bound. -/
+private theorem cometricDoubleTraceRecOp_toSection_eq_postcomp (g₀ : SmoothRiemannianMetric I M)
+    (p a : ℕ) (x : M) (R : Integral.L2.SmoothCcTensor g₀ 0 ((p + 2) + a))
+    (A : Tensor0SBundle.TensorRSSpace 0 ((p + 2) + a) I x →L[ℝ]
+      Tensor0SBundle.TensorRSSpace 0 (p + a) I x)
+    (hA : ∀ v : Tensor0SBundle.TensorRSSpace 0 ((p + 2) + a) I x,
+      A v = (show Tensor0SBundle.Tensor0SSpace ((p + 2) + a) I x →L[ℝ]
+          Tensor0SBundle.Tensor0SSpace (p + a) I x from
+        (cometricDoubleTraceFieldRec (I := I) g₀ p a).toSection x).comp
+        (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace ((p + 2) + a) I x from v)) :
+    A (R.toSection x) = (cometricDoubleTraceRecOp (I := I) g₀ p a R).toSection x := by
+  rw [hA (R.toSection x), cometricDoubleTraceRecOp_toSection]
+
+set_option linter.unusedSectionVars false in
+/-- **The all-ranks frame witness of the intrinsic fibre norm.**  At a base point `x` there is a single
+tangent frame `e` (with `n = finrank` directions, the `g₀(x)`-orthonormal frame internal to
+`riemannianFiberNormSq`) representing the intrinsic `(0, s)` fibre norm as the frame double sum at
+**every** covariant rank `s` simultaneously.  This is `tangent_orthonormalBasisS_witness` with the rank
+quantified inside the existential (the internal construction does not depend on the rank). -/
+private theorem cometric_rfns_allRanks_frame_witness (g₀ : SmoothRiemannianMetric I M) (x : M) :
+    ∃ (n : ℕ) (e : Fin n → TangentSpace I x),
+      n = Module.finrank ℝ (TangentSpace I x) ∧
+      ∀ (s : ℕ) (S : Tensor0SBundle.TensorRSSpace 0 s I x),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x S =
+          ∑ K : Fin 0 → Fin n, ∑ J : Fin s → Fin n,
+            Integral.Connection.fiberNormSqSummand (I := I) (M := M) g₀ x 0 s S n e K J := by
+  classical
+  let cd : InnerProductSpace.Core ℝ (TangentSpace I x) := g₀.toRiemannianMetric.toCore x
+  have hc : ContinuousAt (fun v : TangentSpace I x => cd.inner v v) 0 :=
+    g₀.toRiemannianMetric.continuousAt x
+  have hbnd : Bornology.IsVonNBounded ℝ {v : TangentSpace I x |
+      RCLike.re (cd.inner v v) < 1} :=
+    g₀.toRiemannianMetric.isVonNBounded x
+  letI nag : NormedAddCommGroup (TangentSpace I x) :=
+    cd.toNormedAddCommGroupOfTopology hc hbnd
+  letI ips : InnerProductSpace ℝ (TangentSpace I x) :=
+    InnerProductSpace.ofCoreOfTopology cd hc hbnd
+  set n : ℕ := Module.finrank ℝ (TangentSpace I x) with hn_def
+  set eob : OrthonormalBasis (Fin n) ℝ (TangentSpace I x) := stdOrthonormalBasis ℝ _
+    with heob_def
+  exact ⟨n, fun i => eob i, rfl, fun s S => rfl⟩
+
+set_option linter.unusedSectionVars false in
+/-- **The leading-slot slice of the slot-extended cometric double-trace action is the action on the
+slice.**  The slot-`0` curry of the slot-extended passenger-passing field's post-composition action,
+along a frame direction `e b`, is the one-step-lower field's post-composition action on the slot-`0`
+curry of the input (`slotExtendFib` reads the passenger slot first and passes it unchanged). -/
+private theorem slot0Curry_cometricFieldRec_postcomp (g₀ : SmoothRiemannianMetric I M) (p a : ℕ)
+    (x : M) {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n)
+    (v : Tensor0SBundle.TensorRSSpace 0 ((p + 2) + (a + 1)) I x) (b : Fin n) :
+    Integral.Connection.slot0Curry (I := I) (M := M) g₀ x (p + a) e K₀
+        ((show Tensor0SBundle.Tensor0SSpace ((p + 2) + (a + 1)) I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace (p + (a + 1)) I x from
+          (cometricDoubleTraceFieldRec (I := I) g₀ p (a + 1)).toSection x).comp
+          (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace ((p + 2) + (a + 1)) I x from v)) b =
+      (show Tensor0SBundle.Tensor0SSpace ((p + 2) + a) I x →L[ℝ]
+          Tensor0SBundle.Tensor0SSpace (p + a) I x from
+        (cometricDoubleTraceFieldRec (I := I) g₀ p a).toSection x).comp
+        (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace ((p + 2) + a) I x from
+          Integral.Connection.slot0Curry (I := I) (M := M) g₀ x ((p + 2) + a) e K₀ v b) := by
+  classical
+  apply ContinuousLinearMap.ext
+  intro τ
+  have hLHS : (Integral.Connection.slot0Curry (I := I) (M := M) g₀ x (p + a) e K₀
+        ((show Tensor0SBundle.Tensor0SSpace ((p + 2) + (a + 1)) I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace (p + (a + 1)) I x from
+          (cometricDoubleTraceFieldRec (I := I) g₀ p (a + 1)).toSection x).comp
+          (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace ((p + 2) + (a + 1)) I x from v)) b :
+        Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (p + a) I x) τ =
+      Integral.Connection.tensor00Scalar (I := I) (M := M) x τ •
+        ((show Tensor0SBundle.Tensor0SSpace ((p + 2) + a) I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace (p + a) I x from
+          (cometricDoubleTraceFieldRec (I := I) g₀ p a).toSection x)
+          (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) ((p + 2) + a) x
+            ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace ((p + 2) + (a + 1)) I x from v)
+              ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+                (fun k => g₀.inner x (e (K₀ k)))))
+            (e b))) := by
+    rw [Integral.Connection.slot0Curry_apply]
+    congr 1
+  have hRHS : ((show Tensor0SBundle.Tensor0SSpace ((p + 2) + a) I x →L[ℝ]
+          Tensor0SBundle.Tensor0SSpace (p + a) I x from
+        (cometricDoubleTraceFieldRec (I := I) g₀ p a).toSection x).comp
+        (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace ((p + 2) + a) I x from
+          Integral.Connection.slot0Curry (I := I) (M := M) g₀ x ((p + 2) + a) e K₀ v b)) τ =
+      Integral.Connection.tensor00Scalar (I := I) (M := M) x τ •
+        ((show Tensor0SBundle.Tensor0SSpace ((p + 2) + a) I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace (p + a) I x from
+          (cometricDoubleTraceFieldRec (I := I) g₀ p a).toSection x)
+          (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) ((p + 2) + a) x
+            ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace ((p + 2) + (a + 1)) I x from v)
+              ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+                (fun k => g₀.inner x (e (K₀ k)))))
+            (e b))) := by
+    rw [ContinuousLinearMap.comp_apply, Integral.Connection.slot0Curry_apply, map_smul]
+    rfl
+  exact hLHS.trans hRHS.symm
+
+set_option linter.unusedSectionVars false in
+/-- **The order-uniform postcomposition envelope over the passenger-passing recursion.**  From the
+base-level (`a = 0`) uniform fibre envelope, the same constant bounds the post-composition action of the
+slot-extended field at **every** gradient-shift `a`: by induction, slicing the leading passenger
+covariant slot with the all-ranks frame Parseval split
+(`riemannianFiberNormSq_succ_eq_sum_slot0Curry_of_frame`) and passing each slice through
+`slot0Curry_cometricFieldRec_postcomp` to the inductive hypothesis — the leading passenger slot is an
+isometric ampliation for the intrinsic fibre envelope. -/
+private theorem cometricDoubleTrace_postcomp_rfns_le_aux (g₀ : SmoothRiemannianMetric I M) (p : ℕ)
+    (κ₀ : ℝ)
+    (hbase : ∀ (x : M) (v : Tensor0SBundle.TensorRSSpace 0 (p + 2) I x),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 p x
+          ((show Tensor0SBundle.Tensor0SSpace (p + 2) I x →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace p I x from
+            (cometricDoubleTraceFieldRec (I := I) g₀ p 0).toSection x).comp
+            (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace (p + 2) I x from v)) ≤
+        κ₀ * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (p + 2) x v) :
+    ∀ (a : ℕ) (x : M) (v : Tensor0SBundle.TensorRSSpace 0 ((p + 2) + a) I x),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (p + a) x
+          ((show Tensor0SBundle.Tensor0SSpace ((p + 2) + a) I x →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace (p + a) I x from
+            (cometricDoubleTraceFieldRec (I := I) g₀ p a).toSection x).comp
+            (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace ((p + 2) + a) I x from v)) ≤
+        κ₀ * riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((p + 2) + a) x v := by
+  intro a
+  induction a with
+  | zero => exact hbase
+  | succ a ih =>
+    intro x v
+    classical
+    obtain ⟨n, e, hn, hrepr⟩ := cometric_rfns_allRanks_frame_witness (I := I) g₀ x
+    have hL : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (p + (a + 1)) x
+          ((show Tensor0SBundle.Tensor0SSpace ((p + 2) + (a + 1)) I x →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace (p + (a + 1)) I x from
+            (cometricDoubleTraceFieldRec (I := I) g₀ p (a + 1)).toSection x).comp
+            (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace ((p + 2) + (a + 1)) I x from v)) =
+        ∑ b : Fin n,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (p + a) x
+            (Integral.Connection.slot0Curry (I := I) (M := M) g₀ x (p + a) e
+              (fun k => k.elim0)
+              ((show Tensor0SBundle.Tensor0SSpace ((p + 2) + (a + 1)) I x →L[ℝ]
+                  Tensor0SBundle.Tensor0SSpace (p + (a + 1)) I x from
+                (cometricDoubleTraceFieldRec (I := I) g₀ p (a + 1)).toSection x).comp
+                (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                    Tensor0SBundle.Tensor0SSpace ((p + 2) + (a + 1)) I x from v)) b) :=
+      Integral.Connection.riemannianFiberNormSq_succ_eq_sum_slot0Curry_of_frame
+        (I := I) (M := M) g₀ (p + a) x e (fun k => k.elim0)
+        (hrepr (p + a)) (hrepr (p + a + 1)) _
+    have hR : riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((p + 2) + (a + 1)) x v =
+        ∑ b : Fin n,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((p + 2) + a) x
+            (Integral.Connection.slot0Curry (I := I) (M := M) g₀ x ((p + 2) + a) e
+              (fun k => k.elim0) v b) :=
+      Integral.Connection.riemannianFiberNormSq_succ_eq_sum_slot0Curry_of_frame
+        (I := I) (M := M) g₀ ((p + 2) + a) x e (fun k => k.elim0)
+        (hrepr ((p + 2) + a)) (hrepr ((p + 2) + a + 1)) _
+    rw [hL, hR, Finset.mul_sum]
+    refine Finset.sum_le_sum fun b _ => ?_
+    rw [slot0Curry_cometricFieldRec_postcomp (I := I) g₀ p a x e (fun k => k.elim0) v b]
+    exact ih x (Integral.Connection.slot0Curry (I := I) (M := M) g₀ x ((p + 2) + a) e
+      (fun k => k.elim0) v b)
+
+/-- **The post-composition operator of the passenger-passing cometric `g₀⁻¹` double-trace fibre
+operator**, as a continuous-linear map on the `(0, (p + 2) + a)`-tensor fibre:
+`v ↦ (cometricDoubleTraceFieldRec g₀ p a).toSection x ∘ v` (post-composition is `ℝ`-linear; closed to a
+continuous-linear map on the finite-dimensional fibre). -/
+private noncomputable def cometricFieldRecPostcompCLM (g₀ : SmoothRiemannianMetric I M) (p a : ℕ)
+    (x : M) :
+    Tensor0SBundle.TensorRSSpace 0 ((p + 2) + a) I x →L[ℝ]
+      Tensor0SBundle.TensorRSSpace 0 (p + a) I x :=
+  haveI : FiniteDimensional ℝ (Tensor0SBundle.TensorRSSpace 0 ((p + 2) + a) I x) :=
+    inferInstanceAs (FiniteDimensional ℝ
+      (Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace ((p + 2) + a) I x))
+  haveI : T2Space (Tensor0SBundle.TensorRSSpace 0 ((p + 2) + a) I x) :=
+    inferInstanceAs (T2Space
+      (Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace ((p + 2) + a) I x))
+  LinearMap.toContinuousLinearMap
+    { toFun := fun v =>
+        (show Tensor0SBundle.Tensor0SSpace ((p + 2) + a) I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace (p + a) I x from
+          (cometricDoubleTraceFieldRec (I := I) g₀ p a).toSection x).comp
+          (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace ((p + 2) + a) I x from v)
+      map_add' := fun _ _ => ContinuousLinearMap.comp_add _ _ _
+      map_smul' := fun _ _ => ContinuousLinearMap.comp_smul _ _ _ }
+
+set_option linter.unusedSectionVars false in
+/-- Defining evaluation of `cometricFieldRecPostcompCLM`: post-composition by the passenger-passing
+cometric double-trace fibre operator. -/
+private theorem cometricFieldRecPostcompCLM_apply (g₀ : SmoothRiemannianMetric I M) (p a : ℕ) (x : M)
+    (v : Tensor0SBundle.TensorRSSpace 0 ((p + 2) + a) I x) :
+    cometricFieldRecPostcompCLM (I := I) g₀ p a x v =
+      (show Tensor0SBundle.Tensor0SSpace ((p + 2) + a) I x →L[ℝ]
+          Tensor0SBundle.Tensor0SSpace (p + a) I x from
+        (cometricDoubleTraceFieldRec (I := I) g₀ p a).toSection x).comp
+        (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace ((p + 2) + a) I x from v) := by
+  haveI : FiniteDimensional ℝ (Tensor0SBundle.TensorRSSpace 0 ((p + 2) + a) I x) :=
+    inferInstanceAs (FiniteDimensional ℝ
+      (Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace ((p + 2) + a) I x))
+  haveI : T2Space (Tensor0SBundle.TensorRSSpace 0 ((p + 2) + a) I x) :=
+    inferInstanceAs (T2Space
+      (Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace ((p + 2) + a) I x))
+  exact congrFun (LinearMap.coe_toContinuousLinearMap' _) v
+
+set_option linter.unusedSectionVars false in
+/-- **The order-uniform `g₀`-operator-norm fibre envelope of the rank-generic cometric `g₀⁻¹` double
+trace.**  For the passenger-passing double-trace field there is a single nonnegative `κ`, uniform over
+the gradient-shift `a`, the section `R`, and the base point `x`, controlling the intrinsic squared fibre
+norm of the operator-field action:
+```
+rfns_{(0, p + a)}((cometricDoubleTraceRecOp g₀ p a R).toSection x) ≤ κ · rfns_{(0, (p + 2) + a)}(R)(x).
+```
+
+**Decomposition.**  The base passenger-count uniform `g`-operator-norm envelope
+`exists_uniform_cometricDoubleTraceField_postcomp_gOpNorm_rfns_le` is itself uniform over the cometric
+field's own passenger count, so at the recursion base `cometricDoubleTraceFieldRec g₀ p 0 =
+cometricDoubleTraceField g₀ p` it supplies the base-level (`a = 0`) fibre-value envelope `hbase`.  The
+order-uniform passenger ampliation `cometricDoubleTrace_postcomp_rfns_le_aux` then carries that single
+constant to every gradient-shift `a` (the leading passenger slot is an isometric ampliation for the
+intrinsic fibre envelope — the `g`-operator-norm route, *a*-uniform unlike the HS route which grows by a
+`dim`-factor per passenger slot).  The fibre value `(cometricDoubleTraceRecOp g₀ p a R).toSection x` is
+exactly the post-composition action `A (R.toSection x)`
+(`cometricDoubleTraceRecOp_toSection_eq_postcomp`), so the envelope at `v = R.toSection x` is the claim.
+It is **non-vacuous** (a degenerate `κ = 0` is rejected whenever `op a R ≠ 0`). -/
+theorem exists_uniform_cometricDoubleTraceRecOp_rfns_le (g₀ : SmoothRiemannianMetric I M) (p : ℕ) :
+    ∃ κ : ℝ, 0 ≤ κ ∧ ∀ (a : ℕ) (R : Integral.L2.SmoothCcTensor g₀ 0 ((p + 2) + a)) (x : M),
+      Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (p + a) x
+          ((cometricDoubleTraceRecOp (I := I) g₀ p a R).toSection x) ≤
+        κ * Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((p + 2) + a) x
+          (R.toSection x) := by
+  classical
+  obtain ⟨κ, hκ0, hκ⟩ :=
+    exists_uniform_cometricDoubleTraceField_postcomp_gOpNorm_rfns_le (I := I) g₀
+  -- The base-level (`a = 0`) fibre-value envelope, from the passenger-count-uniform base envelope at
+  -- the recursion base `cometricDoubleTraceFieldRec g₀ p 0 = cometricDoubleTraceField g₀ p`.
+  have hbase : ∀ (x : M) (v : Tensor0SBundle.TensorRSSpace 0 (p + 2) I x),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 p x
+          ((show Tensor0SBundle.Tensor0SSpace (p + 2) I x →L[ℝ]
+              Tensor0SBundle.Tensor0SSpace p I x from
+            (cometricDoubleTraceFieldRec (I := I) g₀ p 0).toSection x).comp
+            (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+                Tensor0SBundle.Tensor0SSpace (p + 2) I x from v)) ≤
+        κ * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (p + 2) x v := by
+    intro x v
+    obtain ⟨A, hAdef, hAbound⟩ := hκ p x
+    have hb := hAbound v
+    rw [hAdef v] at hb
+    rw [cometricDoubleTraceFieldRec_zero]
+    exact hb
+  refine ⟨κ, hκ0, fun a R x => ?_⟩
+  rw [← cometricDoubleTraceRecOp_toSection_eq_postcomp (I := I) g₀ p a x R
+    (cometricFieldRecPostcompCLM (I := I) g₀ p a x)
+    (fun v => cometricFieldRecPostcompCLM_apply (I := I) g₀ p a x v)]
+  rw [cometricFieldRecPostcompCLM_apply (I := I) g₀ p a x (R.toSection x)]
+  exact cometricDoubleTrace_postcomp_rfns_le_aux (I := I) g₀ p κ hbase a x (R.toSection x)
+
+/-- **The `(0, p + 2) → (0, p)` intrinsic `g₀⁻¹` double-trace parallel rank-reducing contraction.**  The
+parallel rank-reducing single-section contraction realising the cometric double trace `g₀^{ij}·` of the
+two leading covariant slots, a `ParallelRankReducingContraction g₀ (p + 2) p`, assembled from its five
+fields: the section-level cometric `g₀⁻¹` double trace `cometricDoubleTraceRecOp` (contracting the
+leading two covariant slots against the cometric `g₀⁻¹`, NOT a chart-selected ambient basis), its exact
+parallel single-step covariant Leibniz `cometricDoubleTraceRecOp_covGrad` (the cometric parallelism
+`∇₀ g₀⁻¹ = 0`, carried through `castRankCc_db`), the order-uniform envelope constant `κ` (the squared
+uniform cometric trace, `exists_uniform_cometricDoubleTraceRecOp_rfns_le`), and its single-value fibre
+envelope (value-locality of the trace).  The contraction is **genuine** (non-degenerate): its envelope
+`kappa = κ ≥ 0` is the value-local bound genuinely using the section. -/
+noncomputable def cometricDoubleTraceContraction (g₀ : SmoothRiemannianMetric I M) (p : ℕ) :
+    Integral.Connection.ParallelRankReducingContraction (I := I) (M := M) g₀ (p + 2) p where
+  op := fun a => cometricDoubleTraceRecOp (I := I) g₀ p a
+  covGrad_op := fun a R => cometricDoubleTraceRecOp_covGrad (I := I) g₀ p a R
+  kappa := (exists_uniform_cometricDoubleTraceRecOp_rfns_le (I := I) g₀ p).choose
+  kappa_nonneg := (exists_uniform_cometricDoubleTraceRecOp_rfns_le (I := I) g₀ p).choose_spec.1
+  rfns_op_le := fun a R x =>
+    (exists_uniform_cometricDoubleTraceRecOp_rfns_le (I := I) g₀ p).choose_spec.2 a R x
+
+/-- **The `(0, 6) → (0, 4)` cometric `g₀⁻¹` double-trace parallel rank-reducing contraction**
+(`p = 4`).  The outer cometric double trace of the Lie-half P1b quadratic Rest arm's
+double-cometric-trace jet analysis, contracting the two leading covariant slots of the rank-`6` operand
+against the cometric `g₀⁻¹`. -/
+noncomputable def cometricDoubleTraceContraction64 (g₀ : SmoothRiemannianMetric I M) :
+    Integral.Connection.ParallelRankReducingContraction (I := I) (M := M) g₀ 6 4 :=
+  cometricDoubleTraceContraction (I := I) g₀ 4
+
+/-- **The `(0, 4) → (0, 2)` cometric `g₀⁻¹` double-trace parallel rank-reducing contraction**
+(`p = 2`).  The inner cometric double trace of the Lie-half P1b quadratic Rest arm's
+double-cometric-trace jet analysis, contracting the two leading covariant slots of the rank-`4` operand
+against the cometric `g₀⁻¹`. -/
+noncomputable def cometricDoubleTraceContraction42 (g₀ : SmoothRiemannianMetric I M) :
+    Integral.Connection.ParallelRankReducingContraction (I := I) (M := M) g₀ 4 2 :=
+  cometricDoubleTraceContraction (I := I) g₀ 2
 
 end Connection
 end Integral
