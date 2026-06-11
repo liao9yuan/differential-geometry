@@ -305,11 +305,38 @@ theorem deTurck_g0_realize_data
     exact hη (by
         rw [Real.dist_eq, sub_zero, abs_of_nonneg hs.1]
         exact lt_of_lt_of_le hs.2 (le_of_lt (lt_of_le_of_lt (min_le_right _ _) (by linarith)))) hsIcc
+  -- **The order-`2a` gate-rep window certificate `hwin` for this carrier.**  The gate
+  -- representative equals the carrier's smooth representative `T_s s` (witness-independently, by
+  -- `gateSmoothRep_carrierInclusion_eq`), whose order-`2a` Sobolev norm vanishes at `t = 0`
+  -- (`hval0`) and is continuous up to `0` (`htend`), so for every `ε > 0` it stays `≤ ε` on a
+  -- positive sub-horizon `Tε ≤ Tmid` about `0` — exactly the window the per-curve match consumes.
+  have hwin_disch : ∀ ε : ℝ, 0 < ε → ∃ (Tε : ℝ), 0 < Tε ∧ ∃ (hTεle : Tε ≤ Tmid),
+      ∀ s (hs : s ∈ Set.Ico (0 : ℝ) Tε),
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+            (gateRepOfWitness (I := I) g₀
+              (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s))
+              (hgate_pre s (Set.Ico_subset_Ico_right hTεle hs)))‖ ≤ ε := by
+    intro ε hε
+    have hevε : ∀ᶠ s in nhdsWithin (0 : ℝ) (Set.Icc 0 T₀),
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+          (2 * a) (T_s s)‖ ≤ ε :=
+      htend.eventually (Iic_mem_nhds hε)
+    rw [eventually_nhdsWithin_iff, Metric.eventually_nhds_iff] at hevε
+    obtain ⟨ηε, hηε_pos, hηε⟩ := hevε
+    refine ⟨min Tmid (ηε / 2), lt_min hTmid_pos (by linarith), min_le_left _ _, fun s hs => ?_⟩
+    have hsIcc : s ∈ Set.Icc (0 : ℝ) T₀ :=
+      ⟨hs.1, le_of_lt (lt_of_lt_of_le (lt_of_lt_of_le hs.2 (min_le_left _ _)) hTmid_le)⟩
+    rw [gateRepOfWitness, gateSmoothRep_carrierInclusion_eq (I := I) g₀ a u₂ T_s
+      (hsmoothrepr₀ s hsIcc) (hgate_pre s (Set.Ico_subset_Ico_right (min_le_left _ _) hs))]
+    exact hηε (by
+        rw [Real.dist_eq, sub_zero, abs_of_nonneg hs.1]
+        exact lt_of_lt_of_le hs.2 (le_of_lt (lt_of_le_of_lt (min_le_right _ _) (by linarith)))) hsIcc
   -- The per-curve gauge match on this curve supplies a sub-horizon `Tleaf ≤ Tmid` on which the
   -- realized DeTurck remainder of `P (ι (u₂ s))` reproduces the gate-based gauge's `L²` class.
   obtain ⟨Tleaf, hTleaf_pos, hTleaf_le, hmatch_leaf⟩ :=
     hcarrier Tmid hTmid_pos u₂ N_cont R _
-      (hduhamel₀.mono hTmid_le hTmid_pos) hgate_pre hQ_pre
+      (hduhamel₀.mono hTmid_le hTmid_pos) hgate_pre hQ_pre hwin_disch
   set T : ℝ := min Tmid Tleaf with hT_def
   have hT : 0 < T := lt_min hTmid_pos hTleaf_pos
   have hT_le : T ≤ T₀ := le_trans (min_le_left _ _) hTmid_le
