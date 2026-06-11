@@ -3356,7 +3356,30 @@ Stated integrated + frame-summed throughout (the two differentiated-Ricci arms e
 chart-unbounded `smoothExtensionTangent` ext-jet, so only this combined integrated object is sound).  It
 is *false* for an arbitrary section in place of the differentiated-curvature content, so it genuinely
 uses `R`, `∇R`, the Parseval reproduction `hPar`, and the frame's `∇V` structure.  Body `sorry`: the
-single strictly-more-primitive transit posit of the rank-`0` Bochner tension-field divergence root. -/
+single strictly-more-primitive transit posit of the rank-`0` Bochner tension-field divergence root.
+
+**Exhaustively verified irreducibility (the precise sub-obstruction).**  This identity is *exactly
+equivalent* to the integrated tension-field nullity `bochnerFoldGroupSum (bochnerGroupElt3IiiIv) = 0`:
+chaining the two sorry-free lemmas `bochnerFoldGroupSum_elt3IiiIv_eq_nablaDiffCurvTrace_split`
+(`group3IiiIv_sum = D − group2 + group1`) and `nablaDiffCurvTrace_doubleSum_eq_neg_tripleSum_bSum`
+(`D = −∑_b∫tripleSum`) gives `∑_b∫tripleSum = −group3IiiIv_sum − group2 + group1`, so this identity holds
+iff `group3IiiIv_sum = 0`.  It is *independent* of the sibling operator-field atom
+`parsevalFrameSum_bochnerFold_operatorFieldIdentification_root` (`group2 + group4 = ⟨appCc (∇Φ₀) S, ∇S⟩`):
+that arm folds the order-`2` carriers via the second-covariant-derivative commutator
+`tensorSecondCovDeriv_antisymm_eq_riemannOp` onto the operator-field action, whereas this arm is the
+divergence-of-curvature itself — neither transits the other.  Every composition route to it is circular:
+the only handle on the `∇V`-in-a-curvature-slot carrier `bochnerGroupElt3IiiIv` is the covariant Leibniz
+`nablaTensor0SCurv_def`, and unwinding through it returns `group3IiiIv_sum = D − group2 + group1`, i.e.
+back to this same identity.  The frame side is fully sorry-free (Theorems A/B
+`nablaCurvSec_diag_frame_trace_eq_nablaRicci_sub`, `frame_sum_nablaTensor0SCurv_diag_baseSlot_eval`, the
+Parseval→orthonormal bridge `parsevalFrame_eq_orthoFrame_diag_nablaTensor0SCurv`, and
+`contracted_second_bianchi`); what is genuinely missing is the *integrated* step, a covariant integration
+by parts of the **differentiated curvature** `∇R` (not of a directional covariant derivative `∇_V W` of a
+tensor — that is the existing engine `integral_tensorInner_covDeriv_combined_eq_zero`, which does not
+apply, since the frame-explicit `tripleSum` is chart-unbounded and not a smooth `SmoothCcTensor` section
+the engine can consume).  Supplying it requires building the frame-free differentiated-curvature IBP
+`∫ ⟨∇_X Ric · T, ∇S⟩ = −∫ ⟨Ric · T, ∇²S⟩ − (div correction)` from the `nablaRicciEndo` /
+`genuineDiffCurvSection` frame-free sections — the genuinely-new analytic primitive of this round. -/
 private lemma parsevalFrameSum_tripleSum_bSum_eq_group1_sub_group2
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
