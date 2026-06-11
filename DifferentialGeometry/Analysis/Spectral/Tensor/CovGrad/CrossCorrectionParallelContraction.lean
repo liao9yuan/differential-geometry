@@ -103,6 +103,71 @@ theorem crossCorrModelFun_eval00 (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[
   rw [hT, hS]
 
 set_option linter.unusedSectionVars false in
+/-- **The fibrewise model value of the single `g₀`-contraction at `(a, b) = (0, p)`.**  For a
+`(0, 2)`-factor `Sm` and a `(0, 3 + p)`-factor `Tm`, the contraction's value at a `(3 + p)`-tuple `m`
+sums, over the model-basis index `i`, the product of `Tm` read with `eᵢ` in its leading slot then the
+first `2 + p` slots of `m`, against `Sm` read with the cometric-raised dual `♯eⁱ = L(eⁱ)` in its leading
+slot then the trailing slot `m (last)`.  The `(0, p)` analogue of `crossCorrModelFun_eval00`. -/
+theorem crossCorrModelFun_eval0p (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E) (p : ℕ)
+    (Sm : Tensor0SBundle.Tensor0SModel (2 + 0) ℝ E) (Tm : Tensor0SBundle.Tensor0SModel (3 + p) ℝ E)
+    (m : Fin (3 + 0 + p) → E) :
+    crossCorrModelFun (E := E) L 0 p Sm Tm m =
+      ∑ i : Fin (Module.finrank ℝ E),
+        Tm (fun k : Fin (3 + p) => (Fin.cons ((Module.finBasis ℝ E) i)
+              (fun j : Fin (2 + p) => m ⟨j.val, by omega⟩) : Fin ((2 + p) + 1) → E)
+              (finCongr (by omega : 3 + p = (2 + p) + 1) k)) *
+          Sm ![L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+            ((Module.finBasis ℝ E).cDualBasis i)),
+            m ⟨2 + p, by omega⟩] := by
+  classical
+  unfold crossCorrModelFun
+  rw [modelRankCastCc_apply', ContinuousMultilinearMap.sum_apply]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [Bundle.continuousMultilinearMap.modelProduct_apply]
+  have hT : ((Tensor0SBundle.model_interior_product (2 + p) ((Module.finBasis ℝ E) i))
+        ((modelRankCastCc (E := E) (by omega : 3 + p = (2 + p) + 1) Tm)))
+        ((fun j => m (finCongr (by omega : (2+p)+(1+0) = 3+0+p) j)) ∘ Fin.castAdd (1 + 0))
+      = Tm (fun k : Fin (3 + p) => (Fin.cons ((Module.finBasis ℝ E) i)
+          (fun j : Fin (2 + p) => m ⟨j.val, by omega⟩) : Fin ((2 + p) + 1) → E)
+          (finCongr (by omega : 3 + p = (2 + p) + 1) k)) := by
+    have hLHS : ((Tensor0SBundle.model_interior_product (2 + p) ((Module.finBasis ℝ E) i))
+          ((modelRankCastCc (E := E) (by omega : 3 + p = (2 + p) + 1) Tm)))
+          ((fun j => m (finCongr (by omega : (2+p)+(1+0) = 3+0+p) j)) ∘ Fin.castAdd (1 + 0))
+        = (modelRankCastCc (E := E) (by omega : 3 + p = (2 + p) + 1) Tm)
+            (Fin.cons ((Module.finBasis ℝ E) i)
+              ((fun j => m (finCongr (by omega : (2+p)+(1+0) = 3+0+p) j)) ∘ Fin.castAdd (1 + 0))) := rfl
+    rw [hLHS, modelRankCastCc_apply']
+    have hRHS : Tm (fun k : Fin (3 + p) => (Fin.cons ((Module.finBasis ℝ E) i)
+            (fun j : Fin (2 + p) => m ⟨j.val, by omega⟩) : Fin ((2 + p) + 1) → E)
+            (finCongr (by omega : 3 + p = (2 + p) + 1) k))
+        = (modelRankCastCc (E := E) (by omega : 3 + p = (2 + p) + 1) Tm)
+            (Fin.cons ((Module.finBasis ℝ E) i)
+              (fun j : Fin (2 + p) => m ⟨j.val, by omega⟩)) := by
+      rw [modelRankCastCc_apply']
+    rw [hRHS, modelRankCastCc_apply']
+    apply congrArg
+    funext k
+    refine Fin.cases ?_ (fun k' => ?_) (finCongr (by omega : 3 + p = (2 + p) + 1) k)
+    · simp only [Fin.cons_zero]
+    · simp only [Fin.cons_succ, Function.comp_apply]
+      congr 1
+  have hS : ((Tensor0SBundle.model_interior_product (1 + 0)
+        (L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E) ((Module.finBasis ℝ E).cDualBasis i))))
+        ((modelRankCastCc (E := E) (by omega : 2 + 0 = (1 + 0) + 1) Sm)))
+        ((fun j => m (finCongr (by omega : (2+p)+(1+0) = 3+0+p) j)) ∘ Fin.natAdd (2 + p))
+      = Sm ![L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E) ((Module.finBasis ℝ E).cDualBasis i)),
+          m ⟨2 + p, by omega⟩] := by
+    change (modelRankCastCc (E := E) (by omega : 2 + 0 = (1 + 0) + 1) Sm)
+        (Fin.cons (L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E) ((Module.finBasis ℝ E).cDualBasis i))) _) = _
+    rw [modelRankCastCc_apply']
+    congr 1
+    funext j
+    fin_cases j
+    · rfl
+    · rfl
+  rw [hT, hS]
+
+set_option linter.unusedSectionVars false in
 theorem cometricReadingModel_dualBasis_inner (g₀ : SmoothRiemannianMetric I M) (y : M)
     (k : Fin (Module.finrank ℝ E)) (u : TangentSpace I y) :
     g₀.inner y (cometricReadingModel (I := I) g₀ y
@@ -316,6 +381,232 @@ private lemma rfns_smul (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (c 
     TensorRSSpace.toModel_smul, Integral.L2.tensorInnerPointwise_smul_left,
     Integral.L2.tensorInnerPointwise_smul_right]
   ring
+
+/-- **The sharp `g₀`-operator dual-frame squared sum.**  For a `g₀`-orthonormal tangent frame `e` at `x`
+(with `g₀(e_i, e_j) = δ_{ij}` and Parseval `∑_i g₀(e_i, v)² = g₀(v, v)`), a symmetric bilinear fibre
+form `h` with the `g₀`-fibre operator bound `gFibreOpBound g₀ h δ`, and any tangent vector `u`, the
+dual-frame squared sum of the covector `h x u` is bounded *sharply* by `δ² · g₀(u, u)`:
+`∑_k (h x u (e k))² ≤ δ² · g₀(u, u)`.  This is the operator-norm (not Hilbert–Schmidt) control: the
+covector `h x u` is reconstructed as `P = ∑_k h x u (e k) • e k`, whose squared `g₀`-norm equals the
+squared sum (frame Parseval), and `‖P‖²_{g₀} = h x u P ≤ δ · √(g₀ u u) · √(‖P‖²_{g₀})`, giving the
+sharp `δ²` after dividing out `√(‖P‖²_{g₀})`. -/
+private lemma gFibreOpBound_dualFrame_sq_sum_le
+    (g₀ : SmoothRiemannianMetric I M) (x : M)
+    {n : ℕ} (e : Fin n → TangentSpace I x)
+    (horth : ∀ i j : Fin n, g₀.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0)
+    (hpars : ∀ v : TangentSpace I x, ∑ i : Fin n, g₀.inner x (e i) v ^ 2 = g₀.inner x v v)
+    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) g₀ h δ) (u : TangentSpace I x) :
+    ∑ k : Fin n, (h x u (e k)) ^ 2 ≤ δ ^ 2 * g₀.inner x u u := by
+  classical
+  set Q : ℝ := ∑ k : Fin n, (h x u (e k)) ^ 2 with hQ_def
+  -- The frame-reconstructed vector of the covector `h x u`.
+  set P : TangentSpace I x := ∑ k : Fin n, (h x u (e k)) • e k with hP_def
+  -- `h x u P = Q`: applying `h x u` to `P` reconstructs the squared sum.
+  have hhuP : h x u P = Q := by
+    rw [hP_def, map_sum]
+    simp only [map_smul, smul_eq_mul]
+    rw [hQ_def]
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    rw [sq]
+  -- The frame coordinates of `P` are the values `h x u (e k)`: `g₀(e_k, P) = h x u (e k)`.
+  have hcoord : ∀ k : Fin n, g₀.inner x (e k) P = h x u (e k) := by
+    intro k
+    rw [hP_def, map_sum]
+    rw [Finset.sum_eq_single k]
+    · rw [ContinuousLinearMap.map_smul, smul_eq_mul, horth k k, if_pos rfl, mul_one]
+    · intro l _ hl
+      rw [ContinuousLinearMap.map_smul, smul_eq_mul, horth k l, if_neg (fun he => hl he.symm),
+        mul_zero]
+    · intro hk; exact absurd (Finset.mem_univ k) hk
+  -- `g₀(P, P) = Q`: Parseval in the frame, with the coordinates `g₀(e_k, P) = h x u (e k)`.
+  have hPP : g₀.inner x P P = Q := by
+    rw [← hpars P, hQ_def]
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    rw [hcoord k]
+  -- `Q = h x u P ≤ δ · √(g₀ u u) · √(g₀ P P) = δ · √(g₀ u u) · √Q`.
+  have hQnn : 0 ≤ Q := by
+    rw [hQ_def]; exact Finset.sum_nonneg (fun k _ => sq_nonneg _)
+  have huu_nn : 0 ≤ g₀.inner x u u :=
+    DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg (I := I) (M := M) g₀ x u
+  have hbound : Q ≤ δ * Real.sqrt (g₀.inner x u u) * Real.sqrt Q := by
+    have hb := hδ x u P
+    rw [hhuP, hPP] at hb
+    calc Q = |Q| := (abs_of_nonneg hQnn).symm
+      _ ≤ δ * Real.sqrt (g₀.inner x u u) * Real.sqrt Q := hb
+  -- Divide out `√Q`: either `Q = 0` (done) or `√Q ≤ δ √(g₀ u u)`, squaring gives the result.
+  rcases eq_or_lt_of_le hQnn with hQ0 | hQpos
+  · rw [← hQ0]; positivity
+  · have hsqQ_pos : 0 < Real.sqrt Q := Real.sqrt_pos.mpr hQpos
+    have hQ_sqrt : Q = Real.sqrt Q * Real.sqrt Q := (Real.mul_self_sqrt hQnn).symm
+    have hstep : Real.sqrt Q ≤ δ * Real.sqrt (g₀.inner x u u) := by
+      have hb2 : Real.sqrt Q * Real.sqrt Q ≤ (δ * Real.sqrt (g₀.inner x u u)) * Real.sqrt Q := by
+        rw [← hQ_sqrt]; linarith [hbound]
+      exact le_of_mul_le_mul_right hb2 hsqQ_pos
+    have hsqrtuu : Real.sqrt (g₀.inner x u u) * Real.sqrt (g₀.inner x u u) = g₀.inner x u u :=
+      Real.mul_self_sqrt huu_nn
+    have hstep_nn : 0 ≤ δ * Real.sqrt (g₀.inner x u u) :=
+      le_trans (Real.sqrt_nonneg Q) hstep
+    calc Q = Real.sqrt Q * Real.sqrt Q := hQ_sqrt
+      _ ≤ (δ * Real.sqrt (g₀.inner x u u)) * (δ * Real.sqrt (g₀.inner x u u)) :=
+          mul_le_mul hstep hstep (Real.sqrt_nonneg _) hstep_nn
+      _ = δ ^ 2 * (Real.sqrt (g₀.inner x u u) * Real.sqrt (g₀.inner x u u)) := by ring
+      _ = δ ^ 2 * g₀.inner x u u := by rw [hsqrtuu]
+
+/-- **The rank-`0` frame component reads a `(0, s)` operator at the canonical unit.**  For the empty
+multi-index `K₀`, `fiberNormSqComponent g₀ x 0 s op n e K₀ J = toModel(op unit) (fun k => e (J k))`
+(the rank-`0` cometric weight `coframeS` is the canonical unit `(0, 0)`-tensor). -/
+private theorem componentS_zero_eq_unit_local (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
+    {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n) (J : Fin s → Fin n)
+    (op : Tensor0SBundle.TensorRSSpace 0 s I x) :
+    Integral.Connection.fiberNormSqComponent (I := I) (M := M) g₀ x 0 s op n e K₀ J =
+      Tensor0SBundle.Tensor0SSpace.toModel
+          ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace s I x from op)
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+          (fun k => e (J k)) := by
+  classical
+  have hcoframe :
+      ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+          (fun k => g₀.inner x (e (K₀ k))) : Tensor0SBundle.Tensor0SSpace 0 I x) =
+        ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ) := by
+    apply Tensor0SBundle.tensor0SSpace_ext
+    intro v
+    rw [show ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+          (fun k => g₀.inner x (e (K₀ k))) : Tensor0SBundle.Tensor0SSpace 0 I x) =
+        Integral.Connection.coframeS (I := I) (M := M) g₀ x 0 e K₀ from rfl,
+      Integral.Connection.coframeS_apply, Finset.prod_of_isEmpty]
+    rfl
+  unfold Integral.Connection.fiberNormSqComponent
+  rw [hcoframe]
+  rw [Tensor0SBundle.Tensor0SSpace.toModel, Tensor0SBundle.tensor0SSpace_continuousLinearEquiv_apply]
+  rfl
+
+/-- **The sharp `δ²` order-`0` fibre bound of the cross-correction section.**  Under the `g₀`-fibre
+operator bound `gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, the intrinsic squared fibre norm of
+the cross-correction section `crossCorrectionSection g₁ g₀ T₁` is dominated *sharply* — with the
+operator-norm constant `δ²`, no dimension factor — by that of the `g₀`-lowered connection difference:
+`rfns(crossCorrectionSection g₁ g₀ T₁)(x) ≤ δ² · rfns(loweredConnDiffSection g₁ g₀)(x)`.
+
+Proved by Parseval in a `g₀`-orthonormal frame: the cross-correction's frame component at `(j₀, j₁, j₂)`
+is `h(connDiff (e_{j₁}) (e_{j₀}), e_{j₂})` (`crossCorrectionSection_toModel_apply`), grouped over the
+trailing slot `j₂` it is the dual-frame squared sum `∑_{j₂} h(u, e_{j₂})²` (`u := connDiff (e_{j₁})
+(e_{j₀})`), bounded sharply by `δ² · g₀(u, u)` (`gFibreOpBound_dualFrame_sq_sum_le`); and `g₀(u, u) =
+∑_{j₂} g₀(u, e_{j₂})²` (Parseval) is exactly the `(j₀, j₁)`-slice squared sum of the lowered
+connection difference's frame components (`loweredConnDiffSection_toModel_apply`). -/
+theorem crossCorrectionSection_rfns_le_sq_loweredConnDiff
+    (g₀ g₁ : SmoothRiemannianMetric I M) (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
+        ((crossCorrectionSection (I := I) g₁ g₀ T₁).toSection x) ≤
+      δ ^ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
+        ((loweredConnDiffSection (I := I) g₁ g₀).toSection x) := by
+  classical
+  obtain ⟨n, e, bse, hn, hbse, horth, hpars, hexpand, hreprS⟩ :=
+    Integral.Connection.tangent_orthonormalBasisS_witness (I := I) (M := M) g₀ 3 x
+  set K₀ : Fin 0 → Fin n := fun k => k.elim0 with hK₀
+  -- Frame expansion of both sides at rank `3`, with the components read at the canonical unit.
+  rw [Integral.Connection.riemannianFiberNormSq_eq_sum_componentS_sq (I := I) (M := M) g₀ x 3 e
+      hreprS ((crossCorrectionSection (I := I) g₁ g₀ T₁).toSection x) K₀,
+    Integral.Connection.riemannianFiberNormSq_eq_sum_componentS_sq (I := I) (M := M) g₀ x 3 e
+      hreprS ((loweredConnDiffSection (I := I) g₁ g₀).toSection x) K₀]
+  -- The cross-correction and lowered frame components at a tuple `J`.
+  have hcrossC : ∀ J : Fin 3 → Fin n,
+      Integral.Connection.fiberNormSqComponent (I := I) (M := M) g₀ x 0 3
+          ((crossCorrectionSection (I := I) g₁ g₀ T₁).toSection x) n e K₀ J =
+        ccTensorBilinSymm (I := I) g₀ T₁ x
+          (connDiff (I := I) g₁ g₀ x (e (J 1)) (e (J 0))) (e (J 2)) := by
+    intro J
+    rw [componentS_zero_eq_unit_local (I := I) g₀ 3 x e K₀ J
+      ((crossCorrectionSection (I := I) g₁ g₀ T₁).toSection x)]
+    rw [show (fun k => e (J k)) = ![e (J 0), e (J 1), e (J 2)] from by
+      funext k; fin_cases k <;> rfl]
+    exact crossCorrectionSection_toModel_apply (I := I) g₁ g₀ T₁ x (e (J 0)) (e (J 1)) (e (J 2))
+  have hlowC : ∀ J : Fin 3 → Fin n,
+      Integral.Connection.fiberNormSqComponent (I := I) (M := M) g₀ x 0 3
+          ((loweredConnDiffSection (I := I) g₁ g₀).toSection x) n e K₀ J =
+        g₀.inner x (connDiff (I := I) g₁ g₀ x (e (J 1)) (e (J 0))) (e (J 2)) := by
+    intro J
+    rw [componentS_zero_eq_unit_local (I := I) g₀ 3 x e K₀ J
+      ((loweredConnDiffSection (I := I) g₁ g₀).toSection x)]
+    rw [show (fun k => e (J k)) = ![e (J 0), e (J 1), e (J 2)] from by
+      funext k; fin_cases k <;> rfl]
+    exact loweredConnDiffSection_toModel_apply (I := I) g₁ g₀ x (e (J 0)) (e (J 1)) (e (J 2))
+  simp only [hcrossC, hlowC]
+  -- Split off the LAST slot (slot 2, `c`) of the `Fin 3 → Fin n` sum via `Fin.snocEquiv`,
+  -- leaving slots `0, 1` as a `Fin 2 → Fin n` index `J01`.
+  have hsnoc1 : ∀ pr : Fin n × (Fin 2 → Fin n),
+      (Fin.snoc pr.2 pr.1 : Fin 3 → Fin n) (1 : Fin 3) = pr.2 1 := by
+    intro pr
+    rw [show (1 : Fin 3) = (1 : Fin 2).castSucc from by apply Fin.ext; rfl, Fin.snoc_castSucc]
+  have hsnoc0 : ∀ pr : Fin n × (Fin 2 → Fin n),
+      (Fin.snoc pr.2 pr.1 : Fin 3 → Fin n) (0 : Fin 3) = pr.2 0 := by
+    intro pr
+    rw [show (0 : Fin 3) = (0 : Fin 2).castSucc from by apply Fin.ext; rfl, Fin.snoc_castSucc]
+  have hsnoc2 : ∀ pr : Fin n × (Fin 2 → Fin n),
+      (Fin.snoc pr.2 pr.1 : Fin 3 → Fin n) (2 : Fin 3) = pr.1 := by
+    intro pr
+    rw [show (2 : Fin 3) = Fin.last 2 from by apply Fin.ext; rfl, Fin.snoc_last]
+  rw [← Fintype.sum_equiv (Fin.snocEquiv (fun _ : Fin 3 => Fin n))
+        (fun pr : Fin n × (Fin 2 → Fin n) =>
+          ccTensorBilinSymm (I := I) g₀ T₁ x
+            (connDiff (I := I) g₁ g₀ x (e (pr.2 1)) (e (pr.2 0))) (e pr.1) ^ 2)
+        (fun J : Fin 3 → Fin n =>
+          ccTensorBilinSymm (I := I) g₀ T₁ x
+            (connDiff (I := I) g₁ g₀ x (e (J 1)) (e (J 0))) (e (J 2)) ^ 2)
+        (fun pr => by
+          simp only [Fin.snocEquiv_apply]
+          rw [hsnoc1 pr, hsnoc0 pr, hsnoc2 pr])]
+  rw [← Fintype.sum_equiv (Fin.snocEquiv (fun _ : Fin 3 => Fin n))
+        (fun pr : Fin n × (Fin 2 → Fin n) =>
+          g₀.inner x (connDiff (I := I) g₁ g₀ x (e (pr.2 1)) (e (pr.2 0))) (e pr.1) ^ 2)
+        (fun J : Fin 3 → Fin n =>
+          g₀.inner x (connDiff (I := I) g₁ g₀ x (e (J 1)) (e (J 0))) (e (J 2)) ^ 2)
+        (fun pr => by
+          simp only [Fin.snocEquiv_apply]
+          rw [hsnoc1 pr, hsnoc0 pr, hsnoc2 pr])]
+  -- Group by `J01` (slots `0, 1`); the inner sum over `c` is the dual-frame squared sum.
+  rw [Fintype.sum_prod_type_right, Fintype.sum_prod_type_right, Finset.mul_sum]
+  refine Finset.sum_le_sum (fun J01 _ => ?_)
+  set u : TangentSpace I x := connDiff (I := I) g₁ g₀ x (e (J01 1)) (e (J01 0)) with hu_def
+  -- The cross inner sum is `∑_c h(u, e c)²`; the lowered inner sum is `∑_c g₀(u, e c)² = g₀(u, u)`.
+  have hcross_inner :
+      (∑ c : Fin n, ccTensorBilinSymm (I := I) g₀ T₁ x u (e c) ^ 2) ≤
+        δ ^ 2 * g₀.inner x u u :=
+    gFibreOpBound_dualFrame_sq_sum_le (I := I) g₀ x e horth hpars
+      (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) hδ u
+  have hlow_inner : (∑ c : Fin n, g₀.inner x u (e c) ^ 2) = g₀.inner x u u := by
+    have := hpars u
+    rw [← this]
+    refine Finset.sum_congr rfl (fun c _ => ?_)
+    rw [g₀.symm x u (e c)]
+  rw [hlow_inner]
+  exact hcross_inner
+
+set_option linter.unusedSectionVars false in
+/-- **The unit fibre value of the `(a, b) = (0, p)` cross-correction contraction**, read to the model:
+`toModel((crossCorrParallelContraction g₀ (b:=p) S T) unit) = crossCorrModelFun (cometric) 0 p
+(ccUnitModel S) (ccUnitModel T)`.  The general-`b` analogue of `crossCorrParallelContraction_toModel_apply`,
+through the same `crossCorrField` packaging chain. -/
+theorem crossCorrParallelContraction_toModel_apply0p (g₀ : SmoothRiemannianMetric I M) (p : ℕ)
+    (S : Integral.L2.SmoothCcTensor g₀ 0 (2 + 0)) (T : Integral.L2.SmoothCcTensor g₀ 0 (3 + p)) (x : M)
+    (v : Fin (3 + 0 + p) → TangentSpace I x) :
+    Tensor0SSpace.toModel
+        ((crossCorrParallelContraction (I := I) g₀ (a := 0) (b := p) S T).toSection x
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) v =
+      crossCorrModelFun (E := E) (cometricReadingModel (I := I) g₀ x) 0 p
+        (ccUnitModel (I := I) g₀ S x) (ccUnitModel (I := I) g₀ T x) v := by
+  classical
+  change Tensor0SSpace.toModel
+      ((MixedSection.eval₀ (F := E) (E := (TangentSpace I : M → Type _)) x).smulRight
+          (crossCorrField (I := I) g₀ (a := 0) (b := p) S T x)
+        (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) v = _
+  rw [ContinuousLinearMap.smulRight_apply, MixedSection.eval₀_apply,
+    ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
+  change Tensor0SSpace.toModel
+    (Tensor0SSpace.ofModel
+      (crossCorrModelFun (E := E) (cometricReadingModel (I := I) g₀ x) 0 p
+        (ccUnitModel (I := I) g₀ S x) (ccUnitModel (I := I) g₀ T x))) v = _
+  rw [Tensor0SSpace.toModel_ofModel]
 
 /-- **(POSIT — the cross-correction order-`p` covariant jet top/rest split, δ-separated.)**  The
 genuine *contraction-algebra* content underlying the cross-correction's order-`p` covariant jet: the
