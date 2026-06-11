@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameCurvatureTraceSmooth
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameIntegratedNullity
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFramePureRCurvatureTracePairing
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.FrameInvariance
 
 /-!
@@ -420,6 +422,172 @@ theorem remDiffFib_genuineFrameSum_pairing_eq_genuineFields
   refine ⟨hpoint ▸ hint, ?_⟩
   rw [tensorL2Inner]
   exact hpoint ▸ rfl
+
+/-- **The pure-Riemann peel of the bracket-channel integrand (sorry-free, structural).** For a closed
+smooth Riemannian manifold `(M, g)`, covariant rank `s`, smooth compactly-supported `(0, s)`-tensor `S`,
+and point `x`, the fixed-frame sum of the per-direction frame-bracket remainder fibres `remDiffBracketFib`
+(`remDiffFib − remDiffGenuineFib`), paired against `∇S := covGrad g 0 s S`, is the pointwise metric inner
+product of the concrete moving-frame remainder `pointwiseTensorCurv g s S − GcurvSection g s S` against
+`∇S`:
+```
+∑ᵢ ⟨remDiffBracketFib g s S x i, ∇S(x)⟩ = ⟨(Curv S − Gcurv)(x), ∇S(x)⟩.
+```
+
+This is the purely structural integrand reading, sorry-free: the bracket fibre frame-sum is the moving-frame
+remainder section value (the frame summand frame-sum is `pointwiseTensorCurv` by
+`pointwiseTensorCurv_toSection_eq_frame_sum`, the genuine fibre frame-sum is `GcurvSection` by
+`remDiffGenuineFib_sum_eq_GcurvSection_toSection`, and the bracket fibre is their difference), then the
+pointwise metric inner product distributes over the frame sum (`tensorInnerPointwise_sum_left`, weights
+`1`). No moving-frame derivative and no curvature input survives — it lives upstream so the bracket-channel
+assembly imports it directly (it was previously trapped as a `private` reproduction downstream). -/
+theorem frameSumBracketFib_pairing_pointwise_eq_movingFrameRemainder
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) :
+    (∑ i : Fin (Module.finrank ℝ E),
+        tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x
+          (TensorRSSpace.toModel (remDiffBracketFib (I := I) (M := M) g s S x i))
+          ((covGrad (I := I) (M := M) g 0 s S).toFun x)) =
+      tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x
+        ((pointwiseTensorCurv (I := I) (M := M) g s S -
+          GcurvSection (I := I) (M := M) g s S).toFun x)
+        ((covGrad (I := I) (M := M) g 0 s S).toFun x) := by
+  classical
+  have hfib : (∑ i : Fin (Module.finrank ℝ E), remDiffBracketFib (I := I) (M := M) g s S x i) =
+      (pointwiseTensorCurv (I := I) (M := M) g s S -
+        GcurvSection (I := I) (M := M) g s S).toSection x := by
+    have hbr : ∀ i, remDiffBracketFib (I := I) (M := M) g s S x i =
+        remDiffFib (I := I) (M := M) g s S x i -
+          remDiffGenuineFib (I := I) (M := M) g s S x i := fun _ => rfl
+    rw [Finset.sum_congr rfl (fun i _ => hbr i), Finset.sum_sub_distrib]
+    rw [remDiffGenuineFib_sum_eq_GcurvSection_toSection (I := I) (M := M) g s S x]
+    rw [SmoothCcTensor.toSection_sub]
+    congr 1
+    rw [pointwiseTensorCurv_toSection_eq_frame_sum (I := I) (M := M) g s S x]
+    rfl
+  have htoM : TensorRSSpace.toModel
+        (∑ i : Fin (Module.finrank ℝ E), remDiffBracketFib (I := I) (M := M) g s S x i) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        TensorRSSpace.toModel (remDiffBracketFib (I := I) (M := M) g s S x i) := by
+    induction (Finset.univ : Finset (Fin (Module.finrank ℝ E))) using Finset.induction with
+    | empty => simp [TensorRSSpace.toModel_zero]
+    | insert i₀ s'' hi₀ ih =>
+        rw [Finset.sum_insert hi₀, TensorRSSpace.toModel_add, ih, Finset.sum_insert hi₀]
+  rw [show (pointwiseTensorCurv (I := I) (M := M) g s S -
+        GcurvSection (I := I) (M := M) g s S).toFun x =
+      TensorRSSpace.toModel ((pointwiseTensorCurv (I := I) (M := M) g s S -
+        GcurvSection (I := I) (M := M) g s S).toSection x) from rfl]
+  rw [← hfib, htoM]
+  rw [show (∑ i : Fin (Module.finrank ℝ E),
+        TensorRSSpace.toModel (remDiffBracketFib (I := I) (M := M) g s S x i)) =
+      ∑ i : Fin (Module.finrank ℝ E), (1 : ℝ) •
+        TensorRSSpace.toModel (remDiffBracketFib (I := I) (M := M) g s S x i) from by
+    refine Finset.sum_congr rfl (fun i _ => ?_); rw [one_smul]]
+  rw [tensorInnerPointwise_sum_left (I := I) (M := M) g 0 (s + 1) x Finset.univ]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [one_mul]
+
+/-- **The bracket-channel frame-sum integral as the Weitzenböck energy minus the pure-Riemann gradient
+bilinear (sorry-free, the upstream Bochner reduction).** For a closed smooth Riemannian manifold `(M, g)`,
+covariant rank `s`, and smooth compactly-supported `(0, s)`-tensor `S`, the integral over the closed
+manifold of the fixed-frame sum of the per-direction frame-bracket remainder fibres `remDiffBracketFib`,
+paired against `∇S := covGrad g 0 s S`, equals the genuine Weitzenböck curvature integral minus the
+gradient-field pure-Riemann curvature bilinear:
+```
+∫_M ∑ᵢ ⟨remDiffBracketFib g s S x i, ∇S(x)⟩ dvol_g
+  = (‖Δ_∇ S‖²_{L²} − ‖∇²S‖²_{L²}) − ⟨pureRGenuineDiffOp g 0 (s + 1) (∇S), ∇S⟩_{L²},
+```
+with `Δ_∇ S := rawTensorConnLapSmooth g 0 s S` and `∇²S := covGrad g 0 (s + 1) (covGrad g 0 s S)`.
+
+This is the sorry-free *upstream* Bochner reduction of the bracket-channel integral: the integrand pure-`R`
+peel `frameSumBracketFib_pairing_pointwise_eq_movingFrameRemainder` reads the integral as the moving-frame
+remainder cross-pairing `⟨Curv S − GcurvSection g s S, ∇S⟩_{L²}`; splitting by left additivity
+(`tensorL2Inner_add_left`, the cross-integrabilities `integrable_inner_cross`) gives `⟨Curv S, ∇S⟩_{L²} −
+⟨GcurvSection g s S, ∇S⟩_{L²}`; the defect cross-pairing is the integrated order-`2` Weitzenböck value
+`‖Δ_∇ S‖²_{L²} − ‖∇²S‖²_{L²}` (`weitzenbock_curvature_crossPairing_value`) and the pure-Riemann pairing is
+the gradient-field bilinear `⟨pureRGenuineDiffOp g 0 (s + 1) (∇S), ∇S⟩_{L²}`
+(`tensorL2Inner_GcurvSection_covGrad_eq_pureRGenuineDiffOp`).
+
+It isolates the entire genuine integrated curvature content of the bracket channel into the single
+frame-free cross-pairing *value* `⟨pureRGenuineDiffOp g 0 (s + 1) (∇S), ∇S⟩_{L²} + ⟨(∇R) S +
+ricTraceSection g s S, ∇S⟩_{L²} = ‖Δ_∇ S‖²_{L²} − ‖∇²S‖²_{L²}` (the classical tensor Bochner–Weitzenböck
+curvature-term identity), strictly below which sit the differentiated-curvature operator-field
+identification, the second-Bianchi Ricci fold, and the bracket-discrepancy divergence nullity. -/
+theorem bracketChannelRemainder_integral_eq_weitzenbock_sub_pureRBilin
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
+    (∫ x, (∑ i : Fin (Module.finrank ℝ E),
+            tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x
+              (TensorRSSpace.toModel (remDiffBracketFib (I := I) (M := M) g s S x i))
+              ((covGrad (I := I) (M := M) g 0 s S).toFun x))
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+      (tensorL2Norm (I := I) (M := M) g 0 s
+            (rawTensorConnLapSmooth (I := I) g 0 s S).toFun ^ 2 -
+          tensorL2Norm (I := I) (M := M) g 0 (s + 1 + 1)
+            (covGrad (I := I) (M := M) g 0 (s + 1)
+              (covGrad (I := I) (M := M) g 0 s S)).toFun ^ 2) -
+        tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+          (pureRGenuineDiffOp (I := I) (M := M) g 0 (s + 1)
+            (covGrad (I := I) (M := M) g 0 s S)).toFun
+          (covGrad (I := I) (M := M) g 0 s S).toFun := by
+  classical
+  -- Step 1 (pure-`R` peel, integrated). The bracket frame-sum integral is the moving-frame remainder
+  -- cross-pairing `⟨Curv S − GcurvSection, ∇S⟩_{L²}`.
+  have hLHS : (∫ x, (∑ i : Fin (Module.finrank ℝ E),
+            tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x
+              (TensorRSSpace.toModel (remDiffBracketFib (I := I) (M := M) g s S x i))
+              ((covGrad (I := I) (M := M) g 0 s S).toFun x))
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+      tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (pointwiseTensorCurv (I := I) (M := M) g s S -
+          GcurvSection (I := I) (M := M) g s S).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun := by
+    rw [tensorL2Inner]
+    refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+    exact frameSumBracketFib_pairing_pointwise_eq_movingFrameRemainder (I := I) (M := M) g s S x
+  rw [hLHS]
+  -- Step 2 (split the cross-pairing by left additivity): `⟨Curv − Gcurv, ∇S⟩ = ⟨Curv, ∇S⟩ − ⟨Gcurv, ∇S⟩`.
+  have hintC := DifferentialGeometry.Integral.L2.SmoothCcTensor.integrable_inner_cross
+    (I := I) (M := M)
+    (pointwiseTensorCurv (I := I) (M := M) g s S - GcurvSection (I := I) (M := M) g s S)
+    (covGrad (I := I) (M := M) g 0 s S)
+  have hintGc := DifferentialGeometry.Integral.L2.SmoothCcTensor.integrable_inner_cross
+    (I := I) (M := M)
+    (GcurvSection (I := I) (M := M) g s S) (covGrad (I := I) (M := M) g 0 s S)
+  have hLsplit : tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (pointwiseTensorCurv (I := I) (M := M) g s S -
+          GcurvSection (I := I) (M := M) g s S).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun =
+      tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (pointwiseTensorCurv (I := I) (M := M) g s S).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun -
+      tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (GcurvSection (I := I) (M := M) g s S).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun := by
+    have heq : pointwiseTensorCurv (I := I) (M := M) g s S =
+        (pointwiseTensorCurv (I := I) (M := M) g s S - GcurvSection (I := I) (M := M) g s S) +
+          GcurvSection (I := I) (M := M) g s S := by abel
+    have hsum :
+        tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+            (pointwiseTensorCurv (I := I) (M := M) g s S).toFun
+            (covGrad (I := I) (M := M) g 0 s S).toFun =
+          tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+            (pointwiseTensorCurv (I := I) (M := M) g s S -
+              GcurvSection (I := I) (M := M) g s S).toFun
+            (covGrad (I := I) (M := M) g 0 s S).toFun +
+            tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+              (GcurvSection (I := I) (M := M) g s S).toFun
+              (covGrad (I := I) (M := M) g 0 s S).toFun := by
+      nth_rewrite 1 [heq]
+      rw [SmoothCcTensor.toFun_add,
+        tensorL2Inner_add_left (I := I) (M := M) g 0 (s + 1)
+          (pointwiseTensorCurv (I := I) (M := M) g s S -
+            GcurvSection (I := I) (M := M) g s S).toFun
+          (GcurvSection (I := I) (M := M) g s S).toFun
+          (covGrad (I := I) (M := M) g 0 s S).toFun hintC hintGc]
+    linarith [hsum]
+  rw [hLsplit]
+  -- Step 3 (the Weitzenböck value of the defect cross-pairing).
+  rw [weitzenbock_curvature_crossPairing_value (I := I) (M := M) g s S]
+  -- Step 4 (the pure-Riemann pairing is the gradient-field pure-`R` bilinear).
+  rw [tensorL2Inner_GcurvSection_covGrad_eq_pureRGenuineDiffOp (I := I) (M := M) g s S]
 
 end Connection
 end Integral
