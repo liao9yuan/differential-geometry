@@ -626,13 +626,17 @@ theorem claim1_geom
             (e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE) y')
           (frameComp0S (I := I) (metricTensorField (I := I) gK)
             (fun a y' => e₀.localFrame basisE a y')) (m + 1) y)) := by
-  refine claim1 e₀.open_baseSet
+  obtain ⟨C, hC0, hCb⟩ := claim1 e₀.open_baseSet
     (fun a y' => e₀.localFrame basisE a y')
     (fun y' => christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef)
       (fun a y'' => e₀.localFrame basisE a y'')
       (e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE) y')
     (fun d => frame_e_mdiffOn e₀ basisE d)
     (fun d i j => lcChrist_e_mdiffOn e₀ gRef basisE d i j)
+    (1 / 2) (1 / 2) (-(1 / 2))
+    (Equiv.refl (Fin 3)) (Equiv.swap (0 : Fin 3) 1) ((finRotate 3).symm)
+    C0 K m
+  exact ⟨C, hC0, hCb
     (frameComp0S (I := I) (metricTensorField (I := I) gK)
       (fun a y' => e₀.localFrame basisE a y'))
     (fun k => gCompField_mdiffOn e₀ gK basisE k)
@@ -640,10 +644,8 @@ theorem claim1_geom
     (akCompField (I := I) e₀ gK gRef basisE)
     (fun k => akCompField_mdiffOn e₀ gK gRef basisE k)
     (fun y hy c e => ginv_hinv e₀ gK basisE hy c e)
-    (1 / 2) (1 / 2) (-(1 / 2))
-    (Equiv.refl (Fin 3)) (Equiv.swap (0 : Fin 3) 1) ((finRotate 3).symm)
     (fun y hy => koszulComp_at (fun a y' => e₀.localFrame basisE a y')
       (e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE) e₀.open_baseSet gK gRef hy)
-    C0 K hGinv m hK
+    hGinv hK⟩
 
 end DifferentialGeometry.PDE.RicciFlow

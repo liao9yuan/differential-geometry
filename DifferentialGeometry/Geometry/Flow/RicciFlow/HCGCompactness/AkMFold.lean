@@ -1351,36 +1351,32 @@ theorem claim1_abstract {u : Set M} (hu : IsOpen u)
     (hframe : ∀ d : Idx, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
       (fun y => TotalSpace.mk' E (E := TangentSpace I) y (frame d y)) u)
     (hchr : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chr y d i j) u)
-    (g : M → (Fin (1 + 1) → Idx) → Real)
-    (hg : ∀ k : Fin (1 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => g y k) u)
-    (Ginv : M → (Fin (1 + 1) → Idx) → Real)
-    {p : ℕ} (A : M → (Fin (p + 1) → Idx) → Real)
-    (hA : ∀ k : Fin (p + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => A y k) u)
-    (hinv : ∀ x ∈ u, ∀ c e : Idx,
-      (∑ l : Idx, g x (Fin.snoc (fun _ : Fin 1 => l) c) *
-        Ginv x (Fin.snoc (fun _ : Fin 1 => e) l)) = if c = e then 1 else 0)
-    (C0 KR K : Real)
-    (hGinv : ∀ x ∈ u, compL2 (Ginv x) ≤ C0)
-    (m : ℕ) :
-    (∀ x ∈ u, ∀ j, 1 ≤ j → j ≤ m → compL2 (iterCovComp (I := I) frame chr g j x) ≤ K) →
-    (∀ x ∈ u, ∀ m', m' ≤ m →
-      compL2 (iterCovComp (I := I) frame chr (fun z => contrTail (A z) (g z)) m' x) ≤
-        KR * compL2 (iterCovComp (I := I) frame chr g (m' + 1) x)) →
-    ∃ C, 0 ≤ C ∧ ∀ x ∈ u,
-      compL2 (iterCovCompU (I := I) frame chr A m x) ≤
-        C * (1 + compL2 (iterCovComp (I := I) frame chr g (m + 1) x)) := by
+    {p : ℕ} (C0 KR K : Real) (m : ℕ) :
+    ∃ C, 0 ≤ C ∧
+      ∀ (g : M → (Fin (1 + 1) → Idx) → Real),
+        (∀ k : Fin (1 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => g y k) u) →
+      ∀ (Ginv : M → (Fin (1 + 1) → Idx) → Real)
+        (A : M → (Fin (p + 1) → Idx) → Real),
+        (∀ k : Fin (p + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => A y k) u) →
+        (∀ x ∈ u, ∀ c e : Idx,
+          (∑ l : Idx, g x (Fin.snoc (fun _ : Fin 1 => l) c) *
+            Ginv x (Fin.snoc (fun _ : Fin 1 => e) l)) = if c = e then 1 else 0) →
+        (∀ x ∈ u, compL2 (Ginv x) ≤ C0) →
+        (∀ x ∈ u, ∀ j, 1 ≤ j → j ≤ m →
+          compL2 (iterCovComp (I := I) frame chr g j x) ≤ K) →
+        (∀ x ∈ u, ∀ m', m' ≤ m →
+          compL2 (iterCovComp (I := I) frame chr (fun z => contrTail (A z) (g z)) m' x) ≤
+            KR * compL2 (iterCovComp (I := I) frame chr g (m' + 1) x)) →
+        ∀ x ∈ u,
+          compL2 (iterCovCompU (I := I) frame chr A m x) ≤
+            C * (1 + compL2 (iterCovComp (I := I) frame chr g (m + 1) x)) := by
   induction m using Nat.strong_induction_on with
   | _ m ih =>
-    intro hK hrelB
     classical
     have hK'0 : (0 : Real) ≤ max K 0 := le_max_right K 0
     have hKR0 : (0 : Real) ≤ max KR 0 := le_max_right KR 0
-    -- the IH constants for every lower order
-    have hCc : ∀ c, c < m → ∃ C, 0 ≤ C ∧ ∀ x ∈ u,
-        compL2 (iterCovCompU (I := I) frame chr A c x) ≤
-          C * (1 + compL2 (iterCovComp (I := I) frame chr g (c + 1) x)) := fun c hc =>
-      ih c hc (fun x hx j h1 h2 => hK x hx j h1 (le_trans h2 (le_of_lt hc)))
-        (fun x hx m' h' => hrelB x hx m' (le_trans h' (le_of_lt hc)))
+    -- the IH constants for every lower order (now data-free)
+    have hCc := fun c (hc : c < m) => ih c hc
     choose! Cc hCc0 hCcB using hCc
     -- the uniform lower-order block
     refine ⟨max C0 0 * (max KR 0 + ∑ c ∈ Finset.range m,
@@ -1392,7 +1388,7 @@ theorem claim1_abstract {u : Set M} (hu : IsOpen u)
           mul_nonneg (mul_nonneg (Nat.cast_nonneg _)
             (mul_nonneg (hCc0 c (Finset.mem_range.mp hc)) (by linarith))) hK'0
       linarith
-    intro x hx
+    intro g hg Ginv A hA hinv hGinv hK hrelB x hx
     set S := ∑ c ∈ Finset.range m,
       (m.choose c : Real) * (Cc c * (1 + max K 0)) * max K 0 with hSdef
     have hS0 : 0 ≤ S := Finset.sum_nonneg fun c hc =>
@@ -1443,7 +1439,9 @@ theorem claim1_abstract {u : Set M} (hu : IsOpen u)
       have hgc1 : compL2 (iterCovComp (I := I) frame chr g (c + 1) x) ≤ max K 0 :=
         le_trans (hK x hx (c + 1) (by omega) (by omega)) (le_max_left K 0)
       have hAc : compL2 (iterCovCompU (I := I) frame chr A c x) ≤ Cc c * (1 + max K 0) := by
-        refine le_trans (hCcB c hc' x hx) ?_
+        refine le_trans (hCcB c hc' g hg Ginv A hA hinv hGinv
+          (fun x' hx' j h1 h2 => hK x' hx' j h1 (by omega))
+          (fun x' hx' m' h' => hrelB x' hx' m' (by omega)) x hx) ?_
         exact mul_le_mul_of_nonneg_left (by linarith) (hCc0 c hc')
       have hgmc : compL2 (iterCovComp (I := I) frame chr g (m - c) x) ≤ max K 0 :=
         le_trans (hK x hx (m - c) (by omega) (by omega)) (le_max_left K 0)
@@ -1498,29 +1496,33 @@ theorem claim1 {u : Set M} (hu : IsOpen u)
     (hframe : ∀ d : Idx, ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
       (fun y => TotalSpace.mk' E (E := TangentSpace I) y (frame d y)) u)
     (hchr : ∀ d i j : Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => chr y d i j) u)
-    (g : M → (Fin (1 + 1) → Idx) → Real)
-    (hg : ∀ k : Fin (1 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => g y k) u)
-    (Ginv : M → (Fin (1 + 1) → Idx) → Real)
-    (A : M → (Fin (2 + 1) → Idx) → Real)
-    (hA : ∀ k : Fin (2 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => A y k) u)
-    (hinv : ∀ x ∈ u, ∀ c e : Idx,
-      (∑ l : Idx, g x (Fin.snoc (fun _ : Fin 1 => l) c) *
-        Ginv x (Fin.snoc (fun _ : Fin 1 => e) l)) = if c = e then 1 else 0)
     (c₁ c₂ c₃ : Real) (P₁ P₂ P₃ : Fin 3 ≃ Fin 3)
-    (hkoszul : ∀ y ∈ u, contrTail (A y) (g y) =
-      fun idx : Fin 3 → Idx =>
-        c₁ * iterCovComp (I := I) frame chr g 1 y (fun j => idx (P₁ j)) +
-        (c₂ * iterCovComp (I := I) frame chr g 1 y (fun j => idx (P₂ j)) +
-          c₃ * iterCovComp (I := I) frame chr g 1 y (fun j => idx (P₃ j))))
-    (C0 K : Real)
-    (hGinv : ∀ x ∈ u, compL2 (Ginv x) ≤ C0)
-    (m : ℕ)
-    (hK : ∀ x ∈ u, ∀ j, 1 ≤ j → j ≤ m → compL2 (iterCovComp (I := I) frame chr g j x) ≤ K) :
-    ∃ C, 0 ≤ C ∧ ∀ x ∈ u,
-      compL2 (iterCovCompU (I := I) frame chr A m x) ≤
-        C * (1 + compL2 (iterCovComp (I := I) frame chr g (m + 1) x)) := by
-  refine claim1_abstract hu frame chr hframe hchr g hg Ginv A hA hinv C0
-    (|c₁| + |c₂| + |c₃|) K hGinv m hK ?_
+    (C0 K : Real) (m : ℕ) :
+    ∃ C, 0 ≤ C ∧
+      ∀ (g : M → (Fin (1 + 1) → Idx) → Real),
+        (∀ k : Fin (1 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => g y k) u) →
+      ∀ (Ginv : M → (Fin (1 + 1) → Idx) → Real)
+        (A : M → (Fin (2 + 1) → Idx) → Real),
+        (∀ k : Fin (2 + 1) → Idx, ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (fun y => A y k) u) →
+        (∀ x ∈ u, ∀ c e : Idx,
+          (∑ l : Idx, g x (Fin.snoc (fun _ : Fin 1 => l) c) *
+            Ginv x (Fin.snoc (fun _ : Fin 1 => e) l)) = if c = e then 1 else 0) →
+        (∀ y ∈ u, contrTail (A y) (g y) =
+          fun idx : Fin 3 → Idx =>
+            c₁ * iterCovComp (I := I) frame chr g 1 y (fun j => idx (P₁ j)) +
+            (c₂ * iterCovComp (I := I) frame chr g 1 y (fun j => idx (P₂ j)) +
+              c₃ * iterCovComp (I := I) frame chr g 1 y (fun j => idx (P₃ j)))) →
+        (∀ x ∈ u, compL2 (Ginv x) ≤ C0) →
+        (∀ x ∈ u, ∀ j, 1 ≤ j → j ≤ m →
+          compL2 (iterCovComp (I := I) frame chr g j x) ≤ K) →
+        ∀ x ∈ u,
+          compL2 (iterCovCompU (I := I) frame chr A m x) ≤
+            C * (1 + compL2 (iterCovComp (I := I) frame chr g (m + 1) x)) := by
+  obtain ⟨C, hC0, hCb⟩ := claim1_abstract (p := 2) hu frame chr hframe hchr C0
+    (|c₁| + |c₂| + |c₃|) K m
+  refine ⟨C, hC0, ?_⟩
+  intro g hg Ginv A hA hinv hkoszul hGinv hK
+  refine hCb g hg Ginv A hA hinv hGinv hK ?_
   intro x hx m' _
   -- the single-term norm: |∇^{m'}(c • (∇g ∘ P))| = |c| · |∇^{m'+1}g|
   have hterm : ∀ (ci : Real) (Pi : Fin 3 ≃ Fin 3),
