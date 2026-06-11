@@ -1990,6 +1990,90 @@ theorem deTurckRealizeRemainderOf_toL2_retag_sub
   -- Push `toL2` through the section split `realizedRHSRemainderSection = deTurckRHSRetag − Δ_∇`.
   rw [hsec, realizedRHSRemainderSection_eq_sub, Integral.L2.SmoothCcTensor.toL2_sub]
 
+/-- **Trajectory localization: along a genuine mild Duhamel carrier the included carrier norm is
+arbitrarily small on a positive sub-horizon (sorry-free).**
+
+For a genuine mild Duhamel solution datum `DuhamelMildSolutionData g₀ a T₀ u₂ N_cont R gtraj` and any
+target `ε > 0`, there is a positive sub-horizon `T ≤ T₀` on which the order-`a` included carrier
+`tensorHsInclusion (a ≤ a+2) (u₂ s)` has norm `< ε` for every `s ∈ [0, T)`.
+
+This is the genuine, self-contained localization the Duhamel structure supplies: the carrier
+identity conjunct of `DuhamelMildSolutionData` ties the included carrier to the **zero-datum**
+Duhamel `timeH1.toFun` on `[0, T₀]`,
+`ι (u₂ s) = timeH1.toFun (maxRegDuhamelMap … 0 gforce) s`, whose value at `s = 0` is the initial
+datum `ι 0 = 0` (`maxRegDuhamelMap_init` + `timeH1.toFun_zero` + `map_zero`) and which is continuous
+on `[0, T₀]` (`timeH1.continuousWithinAt_toFun`).  Continuity at `0` of the (genuinely curved)
+trajectory inclusion therefore forces the norm below any `ε > 0` on a shrunk horizon — the carrier
+is uniformly small near the start because it *starts at the zero perturbation*.
+
+**Non-vacuous** — the conclusion genuinely constrains the carrier through the Duhamel datum: it is
+*false* for a carrier whose inclusion is bounded away from `0` at the start (e.g. a constant
+nonzero curve), and is recovered only because `DuhamelMildSolutionData` pins `ι ∘ u₂` to a
+zero-initialised Duhamel trajectory.  It is the trajectory-localization arm any per-curve
+sub-horizon construction over this datum first discharges. -/
+private theorem perCurveCarrierInclusion_norm_lt_on_subhorizon
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (T₀ : ℝ)
+    (u₂ : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
+    (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+      tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+    (R : ℝ) (gtraj : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+    (hduh : DuhamelMildSolutionData (I := I) (M := M) g₀ (a : ℝ) T₀ u₂ N_cont R gtraj)
+    {ε : ℝ} (hε : 0 < ε) :
+    ∃ (T : ℝ), 0 < T ∧ T ≤ T₀ ∧
+      ∀ s ∈ Set.Ico (0 : ℝ) T,
+        ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s)‖ < ε := by
+  classical
+  obtain ⟨Te, hT₀, hTe, hTe1, gforce, _hN_cont, hid, _hforce, _hball, _htraj⟩ := hduh
+  -- The included carrier is, on `[0, T₀]`, the zero-datum Duhamel `toFun`; abbreviate the latter.
+  set u : Analysis.Parabolic.TimeSobolev.timeH1
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) Te :=
+    Analysis.Parabolic.QuasiLinear.maxRegDuhamelMap (I := I) (M := M) a
+      (lt_of_lt_of_le hT₀ hTe) hTe1
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce with hu_def
+  -- The carrier identity: `ι (u₂ s) = u.toFun s` on `[0, T₀]`.
+  have hbridge : ∀ s ∈ Set.Icc (0 : ℝ) T₀,
+      tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s)
+        = u.toFun s := hid
+  -- `u.toFun 0 = 0`: the zero-datum Duhamel map starts at the zero perturbation's inclusion.
+  have hzero : u.toFun 0 = 0 := by
+    rw [hu_def, Analysis.Parabolic.TimeSobolev.timeH1.toFun_zero,
+      Analysis.Parabolic.QuasiLinear.maxRegDuhamelMap_init, map_zero]
+  -- `u.toFun` is continuous within `[0, Te]` at `0`, and `0 ∈ [0, Te]`.
+  have hTe0 : (0 : ℝ) < Te := lt_of_lt_of_le hT₀ hTe
+  have h0Te : (0 : ℝ) ∈ Set.Icc (0 : ℝ) Te := ⟨le_rfl, hTe0.le⟩
+  have hcont : ContinuousWithinAt u.toFun (Set.Icc (0 : ℝ) Te) 0 :=
+    Analysis.Parabolic.TimeSobolev.timeH1.continuousWithinAt_toFun u h0Te
+  -- Pull back the `ε`-ball around `u.toFun 0 = 0` to a neighbourhood-within of `0`.
+  have hball_mem : Metric.ball (0 : tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) ε ∈ nhds (0 : tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) :=
+    Metric.ball_mem_nhds _ hε
+  have hpre : u.toFun ⁻¹' (Metric.ball (0 : tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) ε)
+      ∈ nhdsWithin (0 : ℝ) (Set.Icc (0 : ℝ) Te) := by
+    have := hcont
+    rw [ContinuousWithinAt, hzero] at this
+    exact this hball_mem
+  -- Convert the `nhdsWithin` membership into a positive sub-horizon `δ`.
+  rw [Metric.mem_nhdsWithin_iff] at hpre
+  obtain ⟨δ, hδ_pos, hδ_sub⟩ := hpre
+  refine ⟨min δ T₀, lt_min hδ_pos hT₀, min_le_right _ _, fun s hs => ?_⟩
+  -- `s ∈ [0, min δ T₀)`, so `s ∈ [0, T₀] ⊆ [0, Te]` and `s` is within `δ` of `0`.
+  have hs0 : 0 ≤ s := hs.1
+  have hsδ : s < δ := lt_of_lt_of_le hs.2 (min_le_left _ _)
+  have hsT₀ : s < T₀ := lt_of_lt_of_le hs.2 (min_le_right _ _)
+  have hs_icc₀ : s ∈ Set.Icc (0 : ℝ) T₀ := ⟨hs0, hsT₀.le⟩
+  have hs_iccTe : s ∈ Set.Icc (0 : ℝ) Te := ⟨hs0, le_trans hsT₀.le hTe⟩
+  -- `s` lies in the pulled-back ball: `u.toFun s ∈ ball 0 ε`.
+  have hs_mem_ball : s ∈ Metric.ball (0 : ℝ) δ ∩ Set.Icc (0 : ℝ) Te := by
+    refine ⟨?_, hs_iccTe⟩
+    rw [Metric.mem_ball, Real.dist_eq, sub_zero, abs_of_nonneg hs0]; exact hsδ
+  have hfun_ball : u.toFun s ∈ Metric.ball (0 : tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) ε :=
+    hδ_sub hs_mem_ball
+  -- Translate back through the carrier identity to the included carrier norm.
+  rw [hbridge s hs_icc₀]
+  rw [Metric.mem_ball, dist_zero_right] at hfun_ball
+  exact hfun_ball
+
 set_option linter.unusedVariables false in
 /-- **The per-curve Duhamel-horizon realized-remainder cancellation residue of a globally-controlled
 corrector against the gate representative's *own* realized remainder (the irreducible deep
