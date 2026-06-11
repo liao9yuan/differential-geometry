@@ -4342,9 +4342,11 @@ def MetricCovOrderNormSqEvolutionOn
 /-- Honest-input package for the order-`p` analytic assembly in MSM135 Lemma
 3.11.
 
-The fields `hevol` and `ric_bound` are the intended future producers from the
-higher-order Ricci-flow calculation and the schematic induction estimate.  This
-record only packages the analytic Gronwall inputs. -/
+The evolution content enters through `normsq_evol` (produced from the
+pointwise-evaluated `∂ₜ∇ᵖg = -2·nablaRic` family by `normsq_evol_of_comp`,
+`RicBound.lean`); `ric_bound` is the schematic induction estimate (proved as
+`ric_bound`/`ric_bound_field`, `RicBound.lean`).  This record only packages the
+analytic Gronwall inputs. -/
 structure MetricCovOrderEvolutionInput
     (K : Set M) (β ψ t0 : Real)
     (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
@@ -4354,8 +4356,6 @@ structure MetricCovOrderEvolutionInput
     Nat -> Real -> (x : M) ->
       Tensor0SBundle.Tensor0SSpace
         (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (p + 2) x
-  hevol :
-    MetricCovOrderEvolutionOn (I := I) K β ψ gSeq gRef p nablaRic
   normsq_evol :
     MetricCovOrderNormSqEvolutionOn (I := I) K β ψ gSeq gRef p nablaRic
   Cpp : Real

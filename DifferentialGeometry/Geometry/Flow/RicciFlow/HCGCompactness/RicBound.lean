@@ -960,11 +960,11 @@ theorem normsq_evol_of_comp
 
 /-- **The stage-`N` `(B_N)` assembly** (MSM135 Lemma 3.11, Step 4, one stage).
 From the `ric_bound` inputs (eq. 3.3 on `U ⊇ K`, the `(B_r)` bounds for
-`r < N`, the moving Shi bounds), the evolution data for the realized
-`nablaRicReal` (the `hevol` field — the `∂ₜ∇ᵖg = -2∇ᵖRc` interchange, a
-standing analytic input as in the BBS track — plus its pointwise-evaluated
-form), and the initial-time bound, the order-`N` window bound `(B_N)` follows
-by the Grönwall assembly. -/
+`r < N`, the moving Shi bounds), the pointwise-evaluated evolution data for the
+realized `nablaRicReal` (`hevComp` — the `∂ₜ∇ᵖg = -2∇ᵖRc` family, produced by
+the `covDerivOfField_eval_hasDerivWithinAt` induction from the flow equation
+and the per-level swaps), and the initial-time bound, the order-`N` window
+bound `(B_N)` follows by the Grönwall assembly. -/
 theorem covOrderBound_stage
     {K U : Set M} {β ψ t0 : Real}
     {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
@@ -985,8 +985,6 @@ theorem covOrderBound_stage
           (Tensor0SBundle.normSq0S (I := I) (gSeq i t) x (2 + s)
             (ricCovTower (I := I) (gSeq i t) (gSeq i t) s x)) <= KShi)
     (ht0 : t0 ∈ Set.Icc β ψ)
-    (hevol : MetricCovOrderEvolutionOn (I := I) K β ψ gSeq gRef N
-      (nablaRicReal (I := I) gSeq gRef N))
     (hevComp : ∀ i : Nat, ∀ x ∈ K, ∀ s ∈ Set.Icc β ψ,
       ∀ v : Fin (N + 2) → TangentSpace I x,
         HasDerivAt
@@ -1005,7 +1003,6 @@ theorem covOrderBound_stage
   exact metricCovOrderWindow_of_evolution (I := I)
     { t0_mem := ht0
       nablaRic := nablaRicReal (I := I) gSeq gRef N
-      hevol := hevol
       normsq_evol := normsq_evol_of_comp (I := I) hevComp
       Cpp := Cpp
       Cppp := Cppp
