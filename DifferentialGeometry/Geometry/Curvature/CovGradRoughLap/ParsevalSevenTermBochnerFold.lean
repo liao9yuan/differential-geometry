@@ -3307,6 +3307,68 @@ private lemma nablaDiffCurvTrace_doubleSum_eq_neg_tripleSum_bSum
   rw [parsevalDiagDiffCurv_pair_eq_nablaRicci_tripleSum (I := I) (M := M) g s S V hV hPar b x]
 
 set_option linter.unusedSectionVars false in
+/-- **The integrated differentiated-curvature trace covariant integration-by-parts bottom (the genuine
+`∇R`-against-`∇S` covariant IBP, in `nablaRicTraceSection`-engine currency).**  For a fixed smooth
+Parseval frame family, the diagonal differentiated-curvature trace double sum
+`D := ∑_a ∑_b ∫ ⟨nablaDiffCurvTraceCc, ∇_{V b} S⟩` (the frame-free global-section pairing of the
+once-contracted second-Bianchi differentiated-curvature trace against the slot-`0` gradient) equals
+the group-`2` covariant integration-by-parts residue double sum minus the group-`1` curvature double
+sum:
+```
+D = bochnerFoldGroupSum (bochnerGroupElt2) − bochnerFoldGroupSum (bochnerGroupElt1).
+```
+
+**This is the single genuinely-missing analytic primitive of the rank-`0` Bochner tension-field
+nullity, stated NON-CIRCULARLY (its proof depends on no tension-field-nullity lemma).**  It is the
+integrated covariant integration by parts of the *differentiated curvature* `∇R` against `∇S`, the
+step `∫ ⟨(∇_X Ric) · T, ∇S⟩ = − ∫ ⟨Ric · T, ∇²S⟩ − (div correction)` specialised to the contracted
+second-Bianchi differentiated-Ricci content the diagonal trace `D` carries.  The full descent route is
+sorry-free *down to this step*: the connector
+`tensorInnerScalar_nablaDiffCurvTrace_eq_tensorInnerPointwise_nablaTensor0SCurv` and the Parseval =
+orthonormal diagonal bridge `parsevalFrame_eq_orthoFrame_diag_nablaTensor0SCurv` rewrite `D` as the
+orthonormal-frame diagonal differentiated-curvature trace; the slotwise transfer
+`frame_sum_nablaTensor0SCurv_diag_baseSlot_eval` and Theorem A
+`nablaCurvSec_diag_frame_trace_eq_nablaRicci_sub` (`∑_i g((∇_{B_i} R)(B_i, Y) v, U) = ∇_U Ric(Y, v) −
+∇_v Ric(U, Y)`, sorry-free) collapse it onto the differentiated-Ricci content carried by the global
+smooth section `nablaRicTraceSection g X s S` (`NablaRicciTraceCarrier`, `appCc (nablaRicSlotOpField g
+X s) (∇S)`, sorry-free); and the group-`2` arm is the sorry-free frame-summed covariant IBP residue
+`bochnerFoldGroupSum_elt2_eq_residueSum` (`integral_frameSummed_covDeriv_combined_eq_zero`).  What
+genuinely remains is the *integrated* divergence step: feeding the differentiated-Ricci-trace section
+`nablaRicTraceSection` (the global `SmoothCcTensor` carrier the engine consumes) into the frame-summed
+covariant IBP engine and matching the resulting lower-order residue with the group-`2` residue minus
+the group-`1` curvature pairing, the residual `∇V`-frame terms telescoping through the Parseval
+covariant-derivative antisymmetry `parsevalFrame_sum_covDeriv_inner_antisymm`.  This `∇R`-vs-`∇S`
+covariant IBP occurs nowhere in `DifferentialGeometry/` nor in Mathlib (full-tree decl search for
+`nablaRicci` co-occurring with an integral / `tensorL2Inner`; every sibling stating it is downstream of
+this file across an import cycle and circular through this same bottom).
+
+**Soundness (stated frame-free + integrated throughout).**  `D` pairs the *global smooth section*
+`nablaDiffCurvTraceCc` against `∇_{V b} S`, so no per-direction chart-jet of the differentiated
+curvature is extracted (the directional read is non-tensorial and chart-unbounded on `S²`).  It is
+*false* with an arbitrary section in place of the differentiated-curvature trace, so it genuinely uses
+`R`, `∇R`, the Parseval reproduction `hPar`, and the frame's `∇V` structure.  At `s = 0` it degenerates
+(both sides `0`) but the carrier remains the differentiated curvature.  Body `sorry`: the genuine
+integrated `∇R`-vs-`∇S` covariant IBP, the strictly-more-primitive bottom of the rank-`0` Bochner
+tension-field nullity; consumers transitively depend on its `sorryAx`. -/
+private lemma nablaDiffCurvTrace_doubleSum_eq_group2_sub_group1_IBP
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
+    (∑ a : Fin N, ∑ b : Fin N,
+        ∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+            (nablaDiffCurvTraceCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+            (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+      bochnerFoldGroupSum (I := I) (M := M) g s S V
+          (bochnerGroupElt2 (I := I) (M := M) g s S) -
+        bochnerFoldGroupSum (I := I) (M := M) g s S V
+          (bochnerGroupElt1 (I := I) (M := M) g s S) := by
+  sorry
+
+set_option linter.unusedSectionVars false in
 /-- **The integrated differentiated-Ricci covariant integration-by-parts identity (the resisting
 analytic residue of the rank-`0` tension-field nullity, with the curvature-carrier machinery peeled
 off).**  For a fixed smooth Parseval frame family, the single sum over `b` of the integral of the
@@ -3378,7 +3440,18 @@ private lemma nablaRicci_frameTripleSum_bSum_eq_group1_sub_group2
           (bochnerGroupElt1 (I := I) (M := M) g s S) -
         bochnerFoldGroupSum (I := I) (M := M) g s S V
           (bochnerGroupElt2 (I := I) (M := M) g s S) := by
-  sorry
+  classical
+  -- The differentiated-Ricci (`ν₁`-arm) read of the diagonal trace double sum `D`:
+  -- `D = − ∑_b ∫ tripleSum(b, x)` (sorry-free), so `∑_b ∫ tripleSum = − D`.
+  have hD := nablaDiffCurvTrace_doubleSum_eq_neg_tripleSum_bSum
+    (I := I) (M := M) g s S V hV hPar
+  -- The genuine non-circular `∇R`-vs-`∇S` covariant IBP bottom: `D = group2 − group1`.  (Its proof
+  -- depends on no tension-field-nullity lemma, so this does not transit `bochnerFoldGroupSum_elt3IiiIv`
+  -- and is non-circular.)
+  have hIBP := nablaDiffCurvTrace_doubleSum_eq_group2_sub_group1_IBP
+    (I := I) (M := M) g s S V hV hPar
+  -- `∑_b ∫ tripleSum = − D = − (group2 − group1) = group1 − group2`.
+  linarith [hD, hIBP]
 
 set_option linter.unusedSectionVars false in
 /-- **The integrated tension-field divergence-of-curvature nullity (independent derivation).**  For a
