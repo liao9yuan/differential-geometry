@@ -653,6 +653,7 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.BanachAlgebraSmoothne
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CompactInclusionIntrinsic
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HilbertSpace
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.Inclusion
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.JetReadoffContDiff
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.L2BanachIso
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.Rellich
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SmoothCcDense
