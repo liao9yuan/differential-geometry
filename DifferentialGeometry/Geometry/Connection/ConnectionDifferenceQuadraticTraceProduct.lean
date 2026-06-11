@@ -273,37 +273,64 @@ theorem loweredConnDiffSection_sub_eq_koszulRealizeDiff_sub_crossCorrDiff
 
 The genuine deep shared bottom: the pair-generalization of the single-metric
 `crossCorrectionSection_iteratedCovGrad_topRest_split`, in the consumer-minimal Hamilton/Moser two-arm
-form.  Its body is `sorry` — a new frontier leaf. -/
+form.  **Restated to the integrated `L²`-norm-squared two-arm shape** (the pointwise per-`x` form is
+false; see below) and matched to the Lie-half consumer `symLoweredDeTurckVF_iteratedCovGrad_topRest_split`
+(`DeTurckVFCovGradTopRestSplit.lean`).  Its body is `sorry` — a new frontier leaf. -/
 
-/-- **(Child B — the pairwise δ-separated cross-correction difference jet bound, frontier leaf.)**  For
-the two fibre-small `H^{a+2}`-bounded perturbations `T₁, T₂` realized by `g₁, g₂` over `g₀`, the
-intrinsic squared fibre norm of the order-`j` covariant gradient of the cross-correction *difference*
-`2·crossCorrectionSection g₁ g₀ T₁ − 2·crossCorrectionSection g₂ g₀ T₂` is dominated by the
-**Hamilton/Moser two-arm sum** — a difference-arm piece carrying the single high derivative on the
-realized difference factor `w := realizeSymmCcTensor g₀ (T₁ − T₂)` up to `∇^{j+2}w`, plus a fixed-pair
-cross piece carrying the endpoint jets against the difference's order-`a` chart-Sobolev `C⁰` mass — with
-a nonnegative constant `Cd` **uniform** over the family:
+/-- **(Child B — the pairwise δ-separated cross-correction difference jet bound, integrated two-arm
+form, frontier leaf.)**  For the two fibre-small `H^{a+2}`-bounded perturbations `T₁, T₂` realized by
+`g₁, g₂` over `g₀`, the squared metric `L²` norm of the order-`j` covariant gradient of the
+cross-correction *difference* `2·crossCorrectionSection g₁ g₀ T₁ − 2·crossCorrectionSection g₂ g₀ T₂`
+is dominated by the **integrated Hamilton/Moser two-arm sum** — a difference-arm piece carrying the
+single high derivative on the realized difference factor `w := realizeSymmCcTensor g₀ (T₁ − T₂)` up to
+`∇^{j+2}w`, plus a fixed-pair cross piece carrying the endpoint jets against the difference's order-`a`
+chart-Sobolev `C⁰` mass — with a nonnegative `j`-indexed constant `Cd j` uniform over the perturbation
+family:
 ```
-rfns(∇^j (2·crossCorrectionSection g₁ g₀ T₁ − 2·crossCorrectionSection g₂ g₀ T₂))(x)
-  ≤ Cd · ∑_{i ≤ j+2} rfns(∇^i w)(x)
-    + (1/4) · (∑_{i ≤ j+2} (rfns(∇^i T₁)(x) + rfns(∇^i T₂)(x))) · ‖(T₁ − T₂).toHs a‖².
+‖∇^j (2·crossCorrectionSection g₁ g₀ T₁ − 2·crossCorrectionSection g₂ g₀ T₂)‖²
+  ≤ Cd j · ∑_{i ≤ j+2} ‖∇^i w‖²
+    + (1/4) · (∑_{i ≤ j+2} (‖∇^i T₁‖² + ‖∇^i T₂‖²)) · ‖(T₁ − T₂).toHs a‖²,
 ```
+where `‖·‖` is the metric `L²` (semi)norm (`‖S‖² = ∫ rfns(S) dμ`).  This is the form the single
+consumer — the Lie-half assembly `symLoweredDeTurckVF_iteratedCovGrad_topRest_split` — actually reads.
 
-This is the pair-generalization of the single-metric `crossCorrectionSection_iteratedCovGrad_topRest_split`
-(the δ-separated contraction-Leibniz of `h ⌟ D`, `h = ccTensorBilinSymm g₀ Tₖ`, `D = connDiff gₖ g₀`),
-collected onto the single difference factor with the supercritical Sobolev embedding `H^{a+2} ↪ C⁰`
-(`ha`) keeping the top coefficient jet on the fixed pair `T₁, T₂` against the difference's `C⁰` mass.
+**Why INTEGRATED, not pointwise (the former statement was false).**  An earlier *pointwise* per-`x`
+`rfns` two-arm form (`rfns(∇^j diff)(x) ≤ Cd·∑ rfns(∇^i w)(x) + (1/4)·(∑(rfns(∇^i T₁)+rfns(∇^i T₂)))·
+‖(T₁−T₂).toHs a‖²`) shares the exact disease Lean-refuted in the Lie half: at a joint high-frequency
+concentration the middle covariant-Leibniz terms `∇^p w ⊛ ∇^{j+2−p}(fixed)` (both factors of order
+`≈ j/2`) are covered by neither arm — for `j > 2a` the left side carries frequency content `|ξ|^j`
+against a right side capped at `|ξ|^{2a}`.  This is Gagliardo–Nirenberg interpolation content, true only
+after integration.  The bound is therefore stated at the integrated `L²`-norm-squared level (the form
+its consumer reads); the honest covariant-Leibniz shape is a pointwise *diagonal product grid*
+`rfns(∇^j diff)(x) ≤ Cd·∑_{i+l≤j+2} rfns(∇^i w)(x)·(rfns(∇^l T₁)(x)+rfns(∇^l T₂)(x))`, converted to the
+two `L²` arms by the integrated engine `exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le`.
+
+**Decomposition (the engine the proof rides).**  The cross-correction
+`cc(gₖ,Tₖ) = crossCorrParallelContraction g₀ (realizeSymm Tₖ) (loweredConnDiff gₖ g₀)` is the parallel
+`g₀`-single cometric contraction `hₖ ⌟ Dₖ` (`crossCorrParallelContraction_eq_crossCorrectionSection`,
+`CrossCorrectionParallelContraction.lean`); its bilinear difference factorizes
+`cc₁ − cc₂ = (h₁−h₂) ⌟ D₁ + h₂ ⌟ (D₁−D₂)` (`crossCorrParallelContraction_sub_left/_right`, sorry-free),
+with `h₁−h₂ = w` the difference factor.  Each arm's `∇^{j}` covariant-Leibniz diagonal product grid is
+delivered by the cross-correction contraction's diagonal `rfns` jet grid (the
+`RfnsBilinearProduct g₀ 2 3 3` instance assembled in `CrossCorrectionParallelContraction.lean`); the
+fixed factors `D₁, D₂` fold into the `T₁, T₂` jets by `exists_riemannianFiberNormSq_iteratedCovGrad_
+loweredConnDiff_le_jetSum`, and the difference factor's `C⁰` mass is the supercritical embedding `ha`.
+The two diagonal grids are then integrated by the GN two-arm engine into the difference arm `Cd j·∑
+‖∇^i w‖²` and the cross arm `(1/4)·(∑(‖∇^i T₁‖²+‖∇^i T₂‖²))·‖(T₁−T₂).toHs a‖²`.
 
 **Non-vacuity.**  Both arms carry genuine content: the difference arm carries `∇^{j+2}w` (a zero `Cd`
 falsifies it whenever the cross-correction difference is genuinely present), and the cross arm carries
 **both** fixed-pair endpoints `T₁, T₂`.  At `T₁ = T₂` the cross-correction difference vanishes
-(`ccTensorBilinSymm g₀ 0 = 0`) and the bound is `0 ≤ 0`.  NO value-bounded operator shape, NO
-pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, NO Weyl dependence.  Its body is `sorry`: the
-genuine deep cross-correction-difference covariant-Leibniz two-arm content. -/
+(`ccTensorBilinSymm g₀ 0 = 0`), `w = 0` and `‖(T₁ − T₂).toHs a‖ = 0`, so the bound is `0 ≤ 0`.  NO
+value-bounded operator shape, NO pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, NO Weyl
+dependence.  Its body is `sorry`: BLOCKED on the public cross-correction-contraction diagonal `rfns`
+jet grid (the in-progress `RfnsBilinearProduct g₀ 2 3 3` deliverable of
+`CrossCorrectionParallelContraction.lean`); given that grid, the proof is the telescope above plus the
+GN two-arm engine. -/
 theorem crossCorrectionDiff_iteratedCovGrad_topRest_split
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (j : ℕ) :
-    ∃ Cd : ℝ, 0 ≤ Cd ∧
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
+    ∃ Cd : ℕ → ℝ, (∀ j, 0 ≤ Cd j) ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
         (∀ (x : M) (v w : TangentSpace I x),
@@ -314,20 +341,16 @@ theorem crossCorrectionDiff_iteratedCovGrad_topRest_split
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
-        ∀ x : M,
-          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + j) x
-              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 j
-                  ((2 : ℝ) • crossCorrectionSection (I := I) g₁ g₀ T₁
-                    - (2 : ℝ) • crossCorrectionSection (I := I) g₂ g₀ T₂)).toSection x) ≤
-            Cd * ∑ i ∈ Finset.range (j + 2 + 1),
-                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                      (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
+        ∀ j : ℕ,
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 j
+                ((2 : ℝ) • crossCorrectionSection (I := I) g₁ g₀ T₁
+                  - (2 : ℝ) • crossCorrectionSection (I := I) g₂ g₀ T₂)‖ ^ 2 ≤
+            Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                    (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
               + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
-                  (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁).toSection x)
-                    + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂).toSection x)))
+                  (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
+                    + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=
   sorry
 
