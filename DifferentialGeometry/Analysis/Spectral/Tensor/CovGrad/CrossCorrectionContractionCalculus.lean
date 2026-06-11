@@ -704,7 +704,7 @@ private theorem crossCorrCometricOpFib_contMDiff (g₀ : SmoothRiemannianMetric 
 /-- **The fixed smooth cometric double-trace operator field** as a `SmoothCcTensor`, packaging the
 fibre value `crossCorrCometricOpFib` (smooth by `crossCorrCometricOpFib_contMDiff`); compact support
 automatic on the closed manifold. -/
-private noncomputable def crossCorrCometricOp (g₀ : SmoothRiemannianMetric I M) (a b : ℕ) :
+noncomputable def crossCorrCometricOp (g₀ : SmoothRiemannianMetric I M) (a b : ℕ) :
     SmoothCcTensor g₀ ((3 + b) + (2 + a)) (3 + a + b) where
   toSection :=
     { toFun := fun x : M => crossCorrCometricOpFib (I := I) g₀ a b x
@@ -717,7 +717,7 @@ appCcRS g₀ 0 ((3 + b) + (2 + a)) (3 + a + b) (crossCorrCometricOp g₀ a b) (c
 the fibre value of the contraction (`crossCorrModelFun = modelDoubleTrace ∘ modelRankCast ∘ perm ∘
 modelProduct`, `crossCorrModelFun_eq_modelDoubleTrace_perm`) is the post-composition of the fixed
 cometric trace operator after the slot-permuted model product, fibrewise. -/
-private theorem crossCorrParallelContraction_eq_appCcRS (g₀ : SmoothRiemannianMetric I M) {a b : ℕ}
+theorem crossCorrParallelContraction_eq_appCcRS (g₀ : SmoothRiemannianMetric I M) {a b : ℕ}
     (S : SmoothCcTensor g₀ 0 (2 + a)) (T : SmoothCcTensor g₀ 0 (3 + b)) :
     crossCorrParallelContraction (I := I) g₀ S T =
       appCcRS (I := I) (M := M) g₀ 0 ((3 + b) + (2 + a)) (3 + a + b)
@@ -1255,7 +1255,7 @@ the operator-field B-rule `covGrad_appCcRS_eq` splits the gradient into the rank
 (zero by `cometricDoubleTraceField_covGrad_eq_zero`, the cometric `∇₀ g₀⁻¹ = 0`) post-composed after the
 reindex, plus the slot-extended field post-composed after the reindex's gradient (zero by
 `crossCorrSourceReindex_covGrad_eq_zero`, the fixed slot reindex being parallel). -/
-private theorem crossCorrCometricOp_covGrad_eq_zero (g₀ : SmoothRiemannianMetric I M) (a b : ℕ) :
+theorem crossCorrCometricOp_covGrad_eq_zero (g₀ : SmoothRiemannianMetric I M) (a b : ℕ) :
     covGrad (I := I) (M := M) g₀ ((3 + b) + (2 + a)) (3 + a + b)
         (crossCorrCometricOp (I := I) g₀ a b) = 0 := by
   rw [crossCorrCometricOp_eq_appCcRS_cometricDoubleTraceField (I := I) g₀ a b]
