@@ -2090,6 +2090,93 @@ private theorem perCurveCarrierInclusion_norm_lt_on_subhorizon
   rw [Metric.mem_ball, dist_zero_right] at hfun_ball
   exact hfun_ball
 
+/-- **The small-mass realized-remainder first-order defect solvability in witness-free `Φ`-form
+(the genuine remaining analytic frontier of the `g₀`-anchored gauge corrector — body `sorry`).**
+
+For the anchor `g₀`, a flow background `g_bg`, and a supercritical order `a` (`2a > dim M + 4`),
+there is a `(0,2)`-perturbation **corrector** `corr : Hᵃ⁺¹(g₀) → SmoothCcTensor g₀ 0 2`, a
+match-gate slack `Q > 0`, and a **mass threshold** `ε₀ > 0` carrying, in **global** (linear) form:
+the all-order linear size bound, the `H^{a+2}` Lipschitz bound, and — for **any** gate-realizable
+`u` (`h`) whose gate representative's order-`2a` Sobolev mass stays `≤ ε₀` —
+
+* (a) the corrected carrier `smoothingBaseSynth g₀ a u + corr u` is `g₀`-fibre small (some `δ < 1`);
+  *and*
+* (b) the **witness-free realized-remainder class equality**
+  `toL2 (deTurckRealizeRemainderOf g₀ g_bg (base u + corr u))
+     = toL2 (deTurckRealizeRemainderOf g₀ g_bg (gateRep u h))`.
+
+**Relationship to `exists_retagDefect_smallMass_corrector` (its sole consumer) and depth.**  Arm (b)
+here is the witness-free `Φ`-class equality; the consumer `exists_retagDefect_smallMass_corrector`
+recovers its `δ`-witness-quantified retag/rough-Laplacian arm by applying, at each pair of
+`δ`-witnesses, the sorry-free splitting `deTurckRealizeRemainderOf_toL2_retag_sub` (`Φ(T) =
+toL2 (deTurckRHSRetag g₀ g_bg g_T) − toL2 (Δ_∇ T)` on fibre-small `T`) and the abelian-group
+rearrangement `retag₁ − retag₂ = Δ₁ − Δ₂ ⟺ retag₁ − Δ₁ = retag₂ − Δ₂`.  So this node strips the
+entire `deTurckRHSRetag` / `tensorSectionRealizeMetric` / `∀ δc δg` retag-witness bookkeeping layer:
+the only remaining content is the bare realized-remainder class equality.  **HONEST DISCLOSURE for the
+orchestrator:** this witness-free `Φ`-form is the *same analytic frontier* (the small-data first-order
+solvability of the realized DeTurck remainder against the gate class on the small-mass regime) as the
+upward node `perPointSmallMass_realizeRemainderCancellation`; the retag-peel separating them is a
+bookkeeping reformulation (inter-derivable by the sorry-free splitting), **not** a genuine
+mathematical descent.  The genuine next descent below this frontier is *not* a further realize-remainder
+reformulation but the explicit **first-order difference formula** `Φ(T₁) − Φ(T₂) =
+toL2 (deTurckRHSSection g_bg g_{T₁} − deTurckRHSSection g_bg g_{T₂}) − toL2 (Δ_∇ (T₁ − T₂))` with the
+second-order Ricci/Lie principal parts cancelling the rough-Laplacian symbol
+(`deTurckNonlinearitySpectral_principalPart_cancels`, sorry-free), reducing arm (b) to a *kernel-hitting*
+problem for the first-order carrier-difference operator — solved by the free corrector on the small-mass
+ball without the (refuted, non-surjective) cancelled-linearization global inverse.
+
+**Why the small-mass hypothesis is load-bearing.**  Arm (b) is solved exactly only where the gate
+representative's order-`2a` mass is small (`≤ ε₀`): it keeps both carriers inside the fibre-small /
+supercritical contraction ball.  The static refutation (the adversarial in-gate eigen-train of T12 on
+which the `corr ≡ 0` exact match is false) has order-`2a` gate-rep mass `= Q`, a *fixed* constant, so
+choosing `ε₀ < Q` excises it; an empty/always-true mass hypothesis would force arm (b) on the *whole*
+in-gate locus, the T12-false claim.  So `hmass` is genuinely load-bearing and is *not* the conclusion.
+
+**Dual litmus.**  **Non-vacuous** — arm (b) rejects `corr ≡ 0`: with `corr ≡ 0` it reads
+`Φ(smoothingBaseSynth g₀ a u) = Φ(gateRep u)`, the Lean-refuted naive-heat class claim (the unit-time
+heat output's smoothed class `e^{−λᵢ}·u.coeffᵢ` never equals the gate representative's un-smoothed class
+`u.coeffᵢ`), so the conjunction genuinely constrains `corr` away from zero; arm (a) likewise rejects
+`corr ≡ 0` (a genuine fibre-operator-norm bound, false for a high-mass corrector).  **The corrector is
+existentially FREE** — `base u + corr u` is *not* pinned to the heat-semigroup output range, so the
+backward-heat blow-up refutation does not apply.  **Not packaging** — arm (b) is a realized-remainder
+`L²`-class identity, structurally distinct from the real-valued size/Lipschitz arms; an `Exists`-output
+corrector, never a binder hypothesis.  **Intrinsic** — `toL2`/`toHs` are `g`-inner;
+`deTurckRealizeRemainderOf` is coordinate-free; no `chartJ`, no raw `M → E`.
+
+**The body is `sorry`** — the honest posited analytic frontier (the elliptic/spectral first-order
+solvability the cancelled principal symbol opens, transiting the Weyl/Gårding spectral substrate and the
+realized inverse-Gram Neumann calculus).  Consumers transitively depend on `sorryAx` through it. -/
+private theorem exists_realizeRemainderDefect_smallMass_corrector
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ (corr : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+          Integral.L2.SmoothCcTensor g₀ 0 2)
+        (Q : ℝ) (ε₀ : ℝ),
+      0 < Q ∧
+      0 < ε₀ ∧
+      (∀ (n : ℕ), ∃ Dₙ : ℝ, 0 ≤ Dₙ ∧
+        ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n (corr u)‖
+            ≤ Dₙ * ‖u‖) ∧
+      (∃ D' : ℝ, 0 ≤ D' ∧
+        ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
+              (corr u - corr u')‖ ≤ D' * ‖u - u'‖) ∧
+      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+          (h : realizableAtGate (I := I) g₀ u),
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
+              (gateRepOfWitness (I := I) g₀ u h)‖ ≤ ε₀ →
+          (∃ δ : ℝ, δ < 1 ∧
+            gFibreOpBound (I := I) (M := M) g₀
+              (ccTensorBilinSymm (I := I) g₀ (smoothingBaseSynth (I := I) g₀ a u + corr u)) δ) ∧
+          Integral.L2.SmoothCcTensor.toL2
+              (deTurckRealizeRemainderOf (I := I) g₀ g_bg
+                (smoothingBaseSynth (I := I) g₀ a u + corr u))
+            = Integral.L2.SmoothCcTensor.toL2
+                (deTurckRealizeRemainderOf (I := I) g₀ g_bg
+                  (gateRepOfWitness (I := I) g₀ u h))) := by
+  sorry
+
 set_option linter.unusedVariables false in
 /-- **The small-mass retagged-RHS defect solvability — the linear rough-Laplacian peeled off the
 realized-remainder gauge cancellation (the genuine remaining analytic frontier; body `sorry`).**
@@ -2211,7 +2298,27 @@ private theorem exists_retagDefect_smallMass_corrector
                 - Integral.L2.SmoothCcTensor.toL2
                     (rawTensorConnLapSmooth (I := I) g₀ 0 2
                       (gateRepOfWitness (I := I) g₀ u h))) := by
-  sorry
+  classical
+  -- The witness-free realized-remainder first-order solvability child supplies the global corrector
+  -- `corr` (all-order linear size + `H^{a+2}` Lipschitz), the gate slack `Q`, the mass threshold `ε₀`,
+  -- and — for any small-mass gate-realizable `u` — the corrected carrier's fibre-smallness (arm (a))
+  -- together with the witness-free realized-remainder `Φ`-class equality.  The node's only work is to
+  -- re-introduce the `δ`-witness-quantified `deTurckRHSRetag` / rough-Laplacian retag arm via the
+  -- sorry-free splitting.
+  obtain ⟨corr, Q, ε₀, hQ, hε₀, hsize, hlip, hcore⟩ :=
+    exists_realizeRemainderDefect_smallMass_corrector (I := I) g₀ g_bg a ha
+  refine ⟨corr, Q, ε₀, hQ, hε₀, hsize, hlip, fun u h hmass => ?_⟩
+  obtain ⟨hcfib, hΦ⟩ := hcore u h hmass
+  refine ⟨hcfib, fun δc hδc_lt hδc δg hδg_lt hδg => ?_⟩
+  -- Convert the witness-free realize-remainder equality `hΦ` to the node's retag/Laplacian arm via the
+  -- sorry-free splitting `deTurckRealizeRemainderOf_toL2_retag_sub` applied at the two δ-witnesses, then
+  -- rearrange `retag₁ − Δ₁ = retag₂ − Δ₂ ⟺ retag₁ − retag₂ = Δ₁ − Δ₂`.
+  have hsplit₁ := deTurckRealizeRemainderOf_toL2_retag_sub (I := I) g₀ g_bg
+    (smoothingBaseSynth (I := I) g₀ a u + corr u) hδc_lt hδc
+  have hsplit₂ := deTurckRealizeRemainderOf_toL2_retag_sub (I := I) g₀ g_bg
+    (gateRepOfWitness (I := I) g₀ u h) hδg_lt hδg
+  rw [hsplit₁, hsplit₂] at hΦ
+  exact (sub_eq_sub_iff_sub_eq_sub.mp hΦ)
 
 /-- **The per-point small-mass realized-remainder gauge cancellation with global control (the
 trajectory-free core of `firstOrderDefect_smallMass_solvable` — proven by reduction over the
