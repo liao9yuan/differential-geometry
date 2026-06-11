@@ -3307,6 +3307,80 @@ private lemma nablaDiffCurvTrace_doubleSum_eq_neg_tripleSum_bSum
   rw [parsevalDiagDiffCurv_pair_eq_nablaRicci_tripleSum (I := I) (M := M) g s S V hV hPar b x]
 
 set_option linter.unusedSectionVars false in
+/-- **The per-direction integrated differentiated-Ricci covariant integration by parts (the genuine
+analytic bottom, isolated per slot-`0` direction `b`).**  For a fixed smooth Parseval frame family and
+each fixed `b`, the integral of the once-contracted second-Bianchi differentiated-Ricci frame triple
+sum `tripleSum(b, x)` (the `ν₁ − ν₂` content, `B_i := smoothOrthoFrame g x i`,
+`ν₁ = (∇_{ext B_m} Ric)(V b, ext B_{J k})`, `ν₂ = (∇_{ext B_{J k}} Ric)(ext B_m, V b)`) equals the
+direction-`b` slice of the group-`1` curvature pairing double sum minus the direction-`b` slice of the
+group-`2` covariant integration-by-parts residue double sum:
+```
+∫ tripleSum(b, x) ∂μ = (∑_a ∫ ⟨R(V a, V b)(∇_{V a} S), ∇_{V b} S⟩ ∂μ)
+                       − (∑_a ∫ bochnerGroup2Residue (V a)(V b) ⟨V a⟩ ∂μ).
+```
+
+**This is the single genuinely-missing analytic primitive (the integrated divergence-of-Ricci IBP),
+stated in the consumer-minimal per-`b` form.**  It is the integrated covariant integration by parts of
+the differentiated curvature `∇R` (carried frame-free by the global smooth section
+`nablaRicTraceSection g (ext B_m) s S` — `appCc (nablaRicSlotOpField …) (∇S)`, `NablaRicciTraceCarrier`,
+sorry-free — whose leading-slot read is the differentiated-Ricci contraction `(∇ Ric)`,
+`nablaRicTraceSection_apply_leadingSlot` + `inner_nablaRicciEndo`) against `∇_{V b} S`, the step
+`∫ ⟨(∇_X Ric) · T, ∇S⟩ = − ∫ ⟨Ric · T, ∇²S⟩ − (div correction)` specialised to the contracted
+second-Bianchi `ν₁ − ν₂` content.  The frame-summed covariant IBP engine
+`integral_frameSummed_covDeriv_combined_eq_zero` (`MovingFrameIntegratedNullity`) supplies the closed-
+manifold total-divergence vanishing the carrier feeds into; the group-`2` residue
+`bochnerGroup2Residue` is precisely the lower-order content the group-`2` covariant derivative sheds
+(matched by `bochnerFoldGroupSum_elt2_eq_residueSum`), and the residual `∇V`-frame terms telescope
+through the Parseval covariant-derivative antisymmetry `parsevalFrame_sum_covDeriv_inner_antisymm`.  This
+`∇R`-vs-`∇S` covariant IBP occurs nowhere in `DifferentialGeometry/` nor in Mathlib (full-tree decl
+search for `nablaRicci` co-occurring with an integral; the carrier just landed with no IBP lemma
+attached), and re-expanding `tripleSum` through `nablaTensor0SCurv_def` lands back on the tension-field
+double sum (circular).  Stated integrated + frame-summed (each `ν`-arm carries the chart-unbounded
+`smoothExtensionTangent` ext-jet, so only the combined integrated object is sound).  Non-circular: its
+proof depends on no tension-field-nullity lemma.  At `s = 0` both sides degenerate to `0`.  Body
+`sorry`: the strictly-more-primitive integrated `∇R`-vs-`∇S` covariant IBP; consumers transitively
+depend on its `sorryAx`. -/
+private lemma nablaRicciTripleSum_perB_eq_group1Elt_sub_group2Residue
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) (b : Fin N) :
+    (∫ x, (∑ k : Fin s, ∑ J : Fin s → Fin (Module.finrank ℝ E),
+          (∑ m : Fin (Module.finrank ℝ E),
+            (nablaRicci (I := I) g
+                (fun c => smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g x m x) c)
+                (fun c => (⟨fun y => V b y, hV b⟩ :
+                  Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) c)
+                (fun c => smoothExtensionTangent (I := I) x
+                  (smoothOrthoFrame (I := I) g x (J k) x) c) x -
+              nablaRicci (I := I) g
+                (fun c => smoothExtensionTangent (I := I) x
+                  (smoothOrthoFrame (I := I) g x (J k) x) c)
+                (fun c => smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g x m x) c)
+                (fun c => (⟨fun y => V b y, hV b⟩ :
+                  Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) c) x) *
+            Tensor0SSpace.toModel
+              ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from S.toSection x)
+                (unitZeroSec (I := I) (M := M) x))
+              (Function.update (fun j => smoothOrthoFrame (I := I) g x (J j) x) k
+                (smoothOrthoFrame (I := I) g x m x))) *
+          Tensor0SSpace.toModel (gradCurry0 (I := I) (M := M) g s S x (V b x))
+            (fun j => smoothOrthoFrame (I := I) g x (J j) x))
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+      (∑ a : Fin N,
+          ∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+              (TensorRSSpace.toModel (bochnerGroupElt1 (I := I) (M := M) g s S (V a) (V b) x))
+              (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) -
+        (∑ a : Fin N,
+          ∫ x, bochnerGroup2Residue (I := I) (M := M) g s S (V a) (V b)
+              ⟨fun y : M => V a y, hV a⟩ x
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
+  sorry
+
+set_option linter.unusedSectionVars false in
 /-- **The integrated differentiated-curvature trace covariant integration-by-parts bottom (the genuine
 `∇R`-against-`∇S` covariant IBP, in `nablaRicTraceSection`-engine currency).**  For a fixed smooth
 Parseval frame family, the diagonal differentiated-curvature trace double sum
@@ -3366,7 +3440,59 @@ private lemma nablaDiffCurvTrace_doubleSum_eq_group2_sub_group1_IBP
           (bochnerGroupElt2 (I := I) (M := M) g s S) -
         bochnerFoldGroupSum (I := I) (M := M) g s S V
           (bochnerGroupElt1 (I := I) (M := M) g s S) := by
-  sorry
+  classical
+  -- `ν₁`-arm read of `D` (sorry-free): `D = − ∑_b ∫ tripleSum(b, x)`.
+  rw [nablaDiffCurvTrace_doubleSum_eq_neg_tripleSum_bSum (I := I) (M := M) g s S V hV hPar]
+  -- group-`2` frame-summed covariant IBP residue (sorry-free): `group2 = ∑_b ∑_a ∫ residue`.
+  rw [bochnerFoldGroupSum_elt2_eq_residueSum (I := I) (M := M) g s S V hV]
+  -- group-`1` curvature double sum as `∑_b ∑_a ∫ ⟨R(V a, V b)(∇_{V a} S), ∇_{V b} S⟩` (def + `sum_comm`).
+  rw [show bochnerFoldGroupSum (I := I) (M := M) g s S V
+          (bochnerGroupElt1 (I := I) (M := M) g s S) =
+        ∑ b : Fin N, ∑ a : Fin N,
+          ∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+              (TensorRSSpace.toModel (bochnerGroupElt1 (I := I) (M := M) g s S (V a) (V b) x))
+              (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g) from by
+    rw [bochnerFoldGroupSum, Finset.sum_comm]]
+  -- The per-`b` differentiated-Ricci IBP primitive collapses each `b`-slice.
+  rw [show (∑ b : Fin N,
+        ∫ x, (∑ k : Fin s, ∑ J : Fin s → Fin (Module.finrank ℝ E),
+            (∑ m : Fin (Module.finrank ℝ E),
+              (nablaRicci (I := I) g
+                  (fun c => smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g x m x) c)
+                  (fun c => (⟨fun y => V b y, hV b⟩ :
+                    Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) c)
+                  (fun c => smoothExtensionTangent (I := I) x
+                    (smoothOrthoFrame (I := I) g x (J k) x) c) x -
+                nablaRicci (I := I) g
+                  (fun c => smoothExtensionTangent (I := I) x
+                    (smoothOrthoFrame (I := I) g x (J k) x) c)
+                  (fun c => smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g x m x) c)
+                  (fun c => (⟨fun y => V b y, hV b⟩ :
+                    Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) c) x) *
+              Tensor0SSpace.toModel
+                ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from S.toSection x)
+                  (unitZeroSec (I := I) (M := M) x))
+                (Function.update (fun j => smoothOrthoFrame (I := I) g x (J j) x) k
+                  (smoothOrthoFrame (I := I) g x m x))) *
+            Tensor0SSpace.toModel (gradCurry0 (I := I) (M := M) g s S x (V b x))
+              (fun j => smoothOrthoFrame (I := I) g x (J j) x))
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+      ∑ b : Fin N,
+        ((∑ a : Fin N,
+            ∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+                (TensorRSSpace.toModel (bochnerGroupElt1 (I := I) (M := M) g s S (V a) (V b) x))
+                (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+              ∂(riemannianVolumeMeasure (I := I) (M := M) g)) -
+          (∑ a : Fin N,
+            ∫ x, bochnerGroup2Residue (I := I) (M := M) g s S (V a) (V b)
+                ⟨fun y : M => V a y, hV a⟩ x
+              ∂(riemannianVolumeMeasure (I := I) (M := M) g))) from
+    Finset.sum_congr rfl (fun b _ =>
+      nablaRicciTripleSum_perB_eq_group1Elt_sub_group2Residue
+        (I := I) (M := M) g s S V hV hPar b)]
+  rw [Finset.sum_sub_distrib]
+  abel
 
 set_option linter.unusedSectionVars false in
 /-- **The integrated differentiated-Ricci covariant integration-by-parts identity (the resisting
