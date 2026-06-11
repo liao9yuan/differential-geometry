@@ -2,7 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTrace
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParallelRankReducingContractionGrid
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CrossCorrectionParallelContraction
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldDifferentiatedTowerNormalForm
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricCurvatureDifferenceCovJet
+import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotExtendCovariantParallelism
 
 /-! # The rank-generic cometric `g₀⁻¹` double trace as a parallel rank-reducing contraction
 
@@ -39,7 +39,7 @@ covariant jet through the parallel rank-reducing `rfns` grid `ParallelRankReduci
 * `cometricDoubleTraceRecOp_covGrad` — the **exact parallel single-step covariant Leibniz** (no
   differentiated-operator cross term, since the cometric is parallel): `∇₀(op a R) = (rank-cast)
   op (a + 1) (∇₀ R)`.  This is the `covGrad_op` field of `ParallelRankReducingContraction`, and the
-  rank-generic, `−2`-unscaled twin of the curvature-side `ricciModelTrace42Op_covGrad`.
+  rank-generic, `−2`-unscaled twin of the curvature-side single-trace operator's parallel Leibniz.
 
 These are the `op` and `covGrad_op` fields of `ParallelRankReducingContraction g₀ (p + 2) p`.  The
 remaining `kappa` / `rfns_op_le` fields are the order-uniform `g`-operator-norm fibre envelope of the
@@ -186,7 +186,7 @@ the new gradient slot carried at the front, rank-cast from `p + (a + 1)` to `(p 
 the cometric parallelism `cometricDoubleTraceFieldRec_covGrad_eq_zero` — plus the surviving
 `slotExtend`-of-field action on `∇₀ R`, and `slotExtend (FieldRec a) = FieldRec (a + 1)` advances the
 gradient-shift.  This is the `covGrad_op` field of `ParallelRankReducingContraction g₀ (p + 2) p`, the
-rank-generic, `−2`-unscaled twin of the curvature-side `ricciModelTrace42Op_covGrad`. -/
+rank-generic, `−2`-unscaled twin of the curvature-side single-trace operator's parallel Leibniz. -/
 theorem cometricDoubleTraceRecOp_covGrad (g₀ : SmoothRiemannianMetric I M) (p a : ℕ)
     (R : SmoothCcTensor g₀ 0 ((p + 2) + a)) :
     Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 (p + a)
