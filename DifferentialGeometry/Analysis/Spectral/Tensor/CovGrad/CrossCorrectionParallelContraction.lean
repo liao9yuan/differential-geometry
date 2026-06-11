@@ -1136,6 +1136,64 @@ private theorem crossCorrectionSection_iteratedCovGrad_eq_appCcRS_slotExtendPow
       (permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2] (loweredConnDiffSection (I := I) g₁ g₀))) p
 
 set_option linter.unusedSectionVars false in
+/-- **(POSITED CHILD — the section-level top/rest decomposition of the cross-correction order-`p`
+covariant jet, with its two sharp arm bounds.)**  The order-`p` covariant jet of the cross-correction
+splits at the **section level** as `∇^p (crossCorrectionSection g₁ g₀ T₁) = Top + Rest`, where:
+
+* the **top** section `Top` is the `i = 0` binomial cell (all `p` derivatives on the connection-
+  difference factor), whose squared metric `L²` mass is **sharply** `‖Top‖² ≤ δ² · ‖∇^p
+  loweredConnDiffSection‖²` — the genuine δ²-spectator content: the cometric is the parallel `g₀⁻¹`,
+  the `p` gradient directions ride as leading spectators, and the `g₀`-operator norm of the realized
+  perturbation `h = ccTensorBilinSymm g₀ T₁` is `≤ δ` (`gFibreOpBound … δ`).  Built by mirroring the
+  passenger-rank δ² template `crossCorrParallelContraction_rfns_le_sq_passenger` (the `p = 0` base
+  `crossCorrectionSection_rfns_le_sq_loweredConnDiff`) through the `p`-fold leading slot extension
+  (`slotExtendPow`, an isometric ampliation), exactly as
+  `CometricDoubleTraceParallelContraction.cometricDoubleTrace_postcomp_rfns_le_aux` propagates a single
+  operator-norm constant `κ₀` to every passenger order.  This δ²-spectator bound is **shared with the
+  curvature difference twin** `crossCorrectionDiff_iteratedCovGrad_topRest_split`
+  (`ConnectionDifferenceQuadraticTraceProduct.lean`).
+
+* the **rest** section `Rest` (the `i ≥ 1` binomial cells) is the Gagliardo–Nirenberg two-arm grid:
+  the bare product peel `exists_rfns_iteratedCovGrad_prod_topRest_diagGrid_le` of
+  `crossCorrProdSection = permute (unitModelProdSection)` against the `appCcRS` fibre envelope
+  `exists_uniform_riemannianFiberNormSq_appCcRS_le`, integrated by the GN two-arm engine
+  `exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le` with the realized perturbation's
+  supercritical `C⁰` sup (`exists_realizedJetSum_le_toHs_sharpOrder`, needing `2 a > finrank + 4`)
+  and the fibre-small connection difference's `C⁰` sup; its squared `L²` mass is `≤ Crest · (∑_{q < p}
+  ‖∇^q loweredConnDiffSection‖² + ∑_{l ≤ p+1} ‖∇^l T₁‖²)`, the lower connection-difference jets kept as
+  themselves (no fold into `T₁`, avoiding the circular `loweredConnDiff` jet bound, which is downstream).
+
+The two arms are then combined by the `2`-subadditivity `‖Top + Rest‖² ≤ 2 ‖Top‖² + 2 ‖Rest‖²` in the
+leaf below, giving the honest `2 δ²` principal.
+
+**Non-vacuity.**  Both bounds carry genuine content: the top bound carries the single high derivative
+`‖∇^p lowered‖` (a zero coefficient falsifies it whenever the cross correction is genuinely present),
+and the rest bound carries both the lower connection-difference jets and the `T₁`-jets.  At `T₁ = 0`,
+`ccTensorBilinSymm g₀ 0 = 0` so `crossCorrectionSection = 0`, `Top = Rest = 0`, and both bounds are
+`0 ≤ 0`.  Its body is `sorry`: the genuine deep contraction-Leibniz frontier (the δ²-spectator top
+cell shared with the difference twin, plus the GN two-arm rest grid). -/
+theorem crossCorrectionSection_iteratedCovGrad_topRest_decomp
+    (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ Crest : ℝ, 0 ≤ Crest ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+        (∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (p + 3 + a) T₁‖ ≤ B →
+        ∃ Top Rest : Integral.L2.SmoothCcTensor g₀ 0 (3 + p),
+          PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+              (crossCorrectionSection (I := I) g₁ g₀ T₁) = Top + Rest ∧
+          ‖Top‖ ^ 2 ≤ δ ^ 2 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+              (loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2 ∧
+          ‖Rest‖ ^ 2 ≤ Crest * (∑ q ∈ Finset.range p,
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+                    (loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2
+              + ∑ l ∈ Finset.range (p + 1 + 1),
+                  ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2) := by
+  sorry
+
+set_option linter.unusedSectionVars false in
 /-- **(LEAF — the cross-correction order-`p` covariant jet top/rest split, δ-separated, integrated
 `L²` two-arm form.)**  The squared metric `L²` norm of the order-`p` covariant gradient of the
 cross-correction `h ⌟ D` (`h = ccTensorBilinSymm g₀ T₁`, `D = connDiff g₁ g₀`) is dominated by a
@@ -1218,13 +1276,14 @@ Leibniz `rfns` grid for the cross-correction contraction (the deep frontier cont
 twin `crossCorrectionDiff_iteratedCovGrad_topRest_split` carries as its own frontier `sorry`).  Its
 body is `sorry`; given the grid above plus the GN two-arm engine, the proof is the telescope. -/
 theorem crossCorrectionSection_iteratedCovGrad_topRest_split
-    (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ) :
+    (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
     ∃ Crest : ℝ, 0 ≤ Crest ∧
       ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
         (∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
-        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (p + 3) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (p + 3 + a) T₁‖ ≤ B →
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
               (crossCorrectionSection (I := I) g₁ g₀ T₁)‖ ^ 2 ≤
           2 * δ ^ 2 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
@@ -1234,7 +1293,30 @@ theorem crossCorrectionSection_iteratedCovGrad_topRest_split
                     (loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2
               + ∑ l ∈ Finset.range (p + 1 + 1),
                   ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2) := by
-  sorry
+  classical
+  -- Obtain the section-level top/rest decomposition with its two sharp arm bounds.
+  obtain ⟨Crest, hCrest0, hdecomp⟩ :=
+    crossCorrectionSection_iteratedCovGrad_topRest_decomp (I := I) g₀ p δ hδ0 hδ1 B a ha
+  refine ⟨2 * Crest, by positivity, ?_⟩
+  intro T₁ g₁ hr hfib hball
+  obtain ⟨Top, Rest, hsum, hTop, hRest⟩ := hdecomp T₁ g₁ hr hfib hball
+  -- `2`-subadditivity of the squared norm on the sum `∇^p cc = Top + Rest`.
+  have h2sub : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+        (crossCorrectionSection (I := I) g₁ g₀ T₁)‖ ^ 2 ≤ 2 * ‖Top‖ ^ 2 + 2 * ‖Rest‖ ^ 2 := by
+    rw [hsum]
+    have hns := norm_add_sq_real Top Rest
+    have hcs := abs_real_inner_le_norm Top Rest
+    have hcs' := le_abs_self (@inner ℝ _ _ Top Rest)
+    nlinarith [hns, hcs, hcs', sq_nonneg (‖Top‖ - ‖Rest‖), norm_nonneg Top, norm_nonneg Rest]
+  -- Combine: `2 ‖Top‖² ≤ 2 δ² ‖∇^p lowered‖²` and `2 ‖Rest‖² ≤ 2 Crest · grid`.
+  set L := ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+      (loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2 with hLdef
+  set G := (∑ q ∈ Finset.range p,
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+            (loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2
+      + ∑ l ∈ Finset.range (p + 1 + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2) with hGdef
+  nlinarith [h2sub, hTop, hRest]
 
 set_option linter.unusedSectionVars false in
 /-- **The cross-correction covariant-Leibniz contraction grid, δ-separated, integrated `L²` form.**
@@ -1260,13 +1342,14 @@ right.  The full cross-correction bound then folds these lower `loweredConnDiffS
   `‖crossCorrectionSection‖² ≤ δ·‖loweredConnDiffSection‖² + Cgrid·∑_{l ≤ 1} ‖∇^l T₁‖²`.
 * **self-zero litmus.**  At `T₁ = 0`, `crossCorrectionSection = 0` and the bound is `0 ≤ 0`. -/
 theorem crossCorrectionSection_iteratedCovGrad_grid_le
-    (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ) :
+    (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
     ∃ Cgrid : ℝ, 0 ≤ Cgrid ∧
       ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
         (∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
-        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (p + 3) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (p + 3 + a) T₁‖ ≤ B →
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
               (crossCorrectionSection (I := I) g₁ g₀ T₁)‖ ^ 2 ≤
           δ * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
@@ -1278,7 +1361,7 @@ theorem crossCorrectionSection_iteratedCovGrad_grid_le
                   ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2) := by
   classical
   obtain ⟨Crest, hCrest0, hsplit⟩ :=
-    crossCorrectionSection_iteratedCovGrad_topRest_split (I := I) g₀ p δ hδ0 hδ1 B
+    crossCorrectionSection_iteratedCovGrad_topRest_split (I := I) g₀ p δ hδ0 hδ1 B a ha
   refine ⟨Crest, hCrest0, ?_⟩
   intro T₁ g₁ hr hfib hball
   -- Abbreviate the principal jet term `L` and the lower-order grid `G`.
@@ -1401,13 +1484,14 @@ difference.  It is strictly smaller than `T1` (it bounds the **cross correction*
 * **self-zero litmus.**  At `T₁ = 0`, `ccTensorBilinSymm g₀ 0 = 0`, so `crossCorrectionSection = 0`
   and the bound is `0 ≤ 0`. -/
 theorem crossCorrectionSection_iteratedCovGrad_rfns_le
-    (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ) :
+    (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
     ∃ Ccross : ℝ, 0 ≤ Ccross ∧
       ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
         (∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
-        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (p + 3) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (p + 3 + a) T₁‖ ≤ B →
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
               (crossCorrectionSection (I := I) g₁ g₀ T₁)‖ ^ 2 ≤
           δ * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
@@ -1424,13 +1508,13 @@ theorem crossCorrectionSection_iteratedCovGrad_rfns_le
         (∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
-        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (q + 3) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (q + 3 + a) T₁‖ ≤ B →
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
               (loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2 ≤
           Clow * ∑ l ∈ Finset.range (q + 1 + 1),
             ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2 by
     obtain ⟨Cgrid, hCgrid0, hCgrid⟩ :=
-      crossCorrectionSection_iteratedCovGrad_grid_le (I := I) g₀ p δ hδ0 hδ1 B
+      crossCorrectionSection_iteratedCovGrad_grid_le (I := I) g₀ p δ hδ0 hδ1 B a ha
     choose Clow hClow0 hClow using haux
     have hClowsum_nn : 0 ≤ ∑ q ∈ Finset.range p, Clow q :=
       Finset.sum_nonneg fun q _ => hClow0 q
@@ -1445,8 +1529,8 @@ theorem crossCorrectionSection_iteratedCovGrad_rfns_le
             (loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2 ≤ Clow q * S := by
       intro q hq
       have hqp : q ≤ p := Nat.le_of_lt (Finset.mem_range.mp hq)
-      have hball_q : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (q + 3) T₁‖
-          ≤ B := le_trans (toHs_norm_mono (I := I) (M := M) g₀ (by omega : q + 3 ≤ p + 3) T₁) hball
+      have hball_q : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (q + 3 + a) T₁‖
+          ≤ B := le_trans (toHs_norm_mono (I := I) (M := M) g₀ (by omega : q + 3 + a ≤ p + 3 + a) T₁) hball
       have h := hClow q T₁ g₁ hr hfib hball_q
       refine le_trans h ?_
       have hsub : (∑ l ∈ Finset.range (q + 1 + 1),
@@ -1479,14 +1563,14 @@ theorem crossCorrectionSection_iteratedCovGrad_rfns_le
   induction q using Nat.strong_induction_on with
   | _ q ih =>
     obtain ⟨Ck, hCk0, hCk⟩ := koszulCombSection_iteratedCovGrad_norm_sq_le (I := I) g₀ q
-    obtain ⟨Cg, hCg0, hCg⟩ := crossCorrectionSection_iteratedCovGrad_grid_le (I := I) g₀ q δ hδ0 hδ1 B
+    obtain ⟨Cg, hCg0, hCg⟩ := crossCorrectionSection_iteratedCovGrad_grid_le (I := I) g₀ q δ hδ0 hδ1 B a ha
     -- Collect the IH constants for the strictly-lower orders `i < q`.
     have hih : ∀ i ∈ Finset.range q, ∃ Ci : ℝ, 0 ≤ Ci ∧
         ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
           (∀ (y : M) (v w : TangentSpace I y),
             g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
           gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
-          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (i + 3) T₁‖ ≤ B →
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (i + 3 + a) T₁‖ ≤ B →
           ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i
                 (loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2 ≤
             Ci * ∑ l ∈ Finset.range (i + 1 + 1),
@@ -1547,9 +1631,9 @@ theorem crossCorrectionSection_iteratedCovGrad_rfns_le
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i
             (loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2 ≤ Ci i * S := by
       intro i hi
-      have hball_i : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (i + 3) T₁‖
+      have hball_i : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (i + 3 + a) T₁‖
           ≤ B := le_trans (toHs_norm_mono (I := I) (M := M) g₀
-            (by have := Finset.mem_range.mp hi; omega : i + 3 ≤ q + 3) T₁) hball
+            (by have := Finset.mem_range.mp hi; omega : i + 3 + a ≤ q + 3 + a) T₁) hball
       have h := hCi i hi T₁ g₁ hr hfib hball_i
       refine le_trans h ?_
       have hsub2 : (∑ l ∈ Finset.range (i + 1 + 1),
@@ -1609,13 +1693,14 @@ section minus the cross correction, `koszulCombSection`): the squared-`L²`-norm
 `δ·‖∇^p loweredConnDiffSection‖²` recursion term moved to the left and divided out (`4 − 8δ > 0`
 since `δ < 1/2`). -/
 theorem exists_riemannianFiberNormSq_iteratedCovGrad_loweredConnDiff_le_jetSum
-    (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ) :
+    (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
         (∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
-        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (p + 3) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (p + 3 + a) T₁‖ ≤ B →
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
               (loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2 ≤
           C * ∑ l ∈ Finset.range (p + 1 + 1),
@@ -1623,7 +1708,7 @@ theorem exists_riemannianFiberNormSq_iteratedCovGrad_loweredConnDiff_le_jetSum
   classical
   obtain ⟨Ck, hCk0, hCk⟩ := koszulCombSection_iteratedCovGrad_norm_sq_le (I := I) g₀ p
   obtain ⟨Cc, hCc0, hCc⟩ :=
-    crossCorrectionSection_iteratedCovGrad_rfns_le (I := I) g₀ p δ hδ0 hδ1 B
+    crossCorrectionSection_iteratedCovGrad_rfns_le (I := I) g₀ p δ hδ0 hδ1 B a ha
   refine ⟨(2 * Ck + 8 * Cc) / (4 - 8 * δ), ?_, ?_⟩
   · have hden : 0 < 4 - 8 * δ := by linarith
     positivity
