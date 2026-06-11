@@ -37,19 +37,17 @@ This file supplies the missing instance for that contraction.
   model tensor product `Bundle.continuousMultilinearMap.modelProduct` followed by the cometric
   `g₀⁻¹` single trace of the two contracted leading slots (frame-free, depending on `g₀` only through
   the smooth cometric Hom-section `inverseMetricSharpField`, NO chart-selected ambient frame).
-* `crossCorrParallelContraction_covGrad_prod` — the **exact two-section parallel covariant Leibniz**
-  `∇₀(prod S T) = (rank-cast) prod (∇₀S) T + prod S (∇₀T)`: the cross term differentiating the bilinear
-  contraction itself vanishes because the cometric is parallel.
 * `crossCorrParallelContraction_rfns_prod_le` — the fibrewise **`rfns` operator bound**
   `rfns(prod S T)(x) ≤ μ · rfns(S)(x) · rfns(T)(x)` with a base-point-uniform constant.
-* `crossCorrRfnsBilinearProduct` — the assembled `RfnsBilinearProduct g₀ 2 3 3`, on which the diagonal
-  `rfns` jet grid `RfnsBilinearProduct.exists_rfns_iteratedCovGrad_prod_diagGrid_le` is instantiated
-  for the cross-correction product.
+* the cross-correction bilinearity primitives, the slot bookkeeping (`crossCorrCovGradPerm` and its
+  value lemmas), and the frame/Parseval witnesses serving the cross-correction jet analysis.
+
+(A previously-assembled `RfnsBilinearProduct` instance, its two-section slot-extension Leibniz, and
+its diagonal jet grid were Lean-refuted as stated and removed — see the removal note before the
+retained slot-bookkeeping section below.)
 
 A reusable covariant-calculus byproduct (R1 — its own first-class home in the covariant-gradient API),
-decoupled from the specific factor sections `realizeSymm Tₖ` / `loweredConnDiff gₖ g₀`: the instance is
-generic over the two factors; the consumer (the difference-arm covariant-jet bound) instantiates it at
-the realized perturbation and the lowered connection difference. -/
+decoupled from the specific factor sections `realizeSymm Tₖ` / `loweredConnDiff gₖ g₀`. -/
 
 noncomputable section
 
@@ -1544,39 +1542,22 @@ private lemma crossCorrCovGradPerm_val_gt {a b : ℕ} (i : Fin (3 + a + b + 1)) 
     finSumFinEquiv_apply_right, Fin.val_cast, Fin.val_natAdd, Fin.val_mk]
   omega
 
-/-- **The two-section covariant Leibniz of the frame-free product section** (POSITED product-Leibniz
-child).  The operator-field slot-extension of the parallel cometric field, applied to the covariant
-gradient of the slot-permuted model product, reconciles with the two shifted-order contractions:
-```
-appCcRS (slotExtend (crossCorrCometricOp g₀ a b)) (covGrad (crossCorrProdSection g₀ S T)) =
-  castRankCc_db ... (crossCorrParallelContraction g₀ (a := a + 1) (b := b) (covGrad S) T)
-  + (slot-reindex) crossCorrParallelContraction g₀ (a := a) (b := b + 1) S (covGrad T).
-```
-The covariant gradient of the model tensor product `modelProduct` splits by the slot-correction Leibniz
-`covariantSlotCorrection_modelProduct` (`∇ g = 0` killing the cross term) into the `S`-gradient and the
-`T`-gradient pieces, each re-wrapped by the slot-extended cometric field into the corresponding
-shifted-rank cross-correction contraction; the second (`T`-gradient) summand carries its new gradient
-slot in the interior of the contraction output, relocated to the leading slot by `crossCorrCovGradPerm`.
+/-! ### The cometric slot-extension Leibniz (REMOVED — Lean-refuted as previously stated)
 
-NARROWED open obligation (the genuine cometric-plumbing stratum): the section identity through the
-`appCcRS`/`slotExtend`/`covGrad`-commutation and the contraction's surviving-slot relocation
-(`crossCorrCovGradPerm`), strictly weaker than the former exact-equality body which was Lean-proven
-*false* (the second summand reads its gradient at the interior slot, never slot `0`). -/
-private theorem appCcRS_slotExtend_crossCorrProd_covGrad_eq (g₀ : SmoothRiemannianMetric I M)
-    {a b : ℕ} (S : SmoothCcTensor g₀ 0 (2 + a)) (T : SmoothCcTensor g₀ 0 (3 + b)) :
-    appCcRS (I := I) (M := M) g₀ 0 (((3 + b) + (2 + a)) + 1) ((3 + a + b) + 1)
-        (slotExtend (I := I) (M := M) g₀ ((3 + b) + (2 + a)) (3 + a + b)
-          (crossCorrCometricOp (I := I) g₀ a b))
-        (covGrad (I := I) (M := M) g₀ 0 ((3 + b) + (2 + a))
-          (crossCorrProdSection (I := I) g₀ S T)) =
-      castRankCc_db g₀ 0 (by omega : 3 + (a + 1) + b = 3 + a + b + 1)
-          (crossCorrParallelContraction (I := I) g₀ (a := a + 1) (b := b)
-            (covGrad g₀ 0 (2 + a) S) T) +
-        PDE.DeTurck.permuteCcTensor g₀ (crossCorrCovGradPerm)
-          (castRankCc_db g₀ 0 (by omega : 3 + a + (b + 1) = 3 + a + b + 1)
-            (crossCorrParallelContraction (I := I) g₀ (a := a) (b := b + 1) S
-              (covGrad g₀ 0 (3 + b) T))) := by
-  sorry
+A previously-posited two-section covariant Leibniz for the slot-extended cometric contraction —
+asserting `appCcRS (slotExtend (crossCorrCometricOp)) (covGrad (crossCorrProdSection S T))` equals
+the two SHIFTED contractions `crossCorrParallelContraction (a+1) b (covGrad S) T` +
+`permuteCcTensor crossCorrCovGradPerm (crossCorrParallelContraction a (b+1) S (covGrad T))` — was
+Lean-certified FALSE and deleted together with its dependent field proof, instance, and jet grid:
+the left side keeps the new gradient direction a FREE SPECTATOR (the slot-extended cometric pair
+traces the two ORIGINAL product slots), while the shifted right side traces the GRADIENT slot of
+the differentiated factor; the cometric completeness closure identifying the two holds only when
+the undifferentiated factor is itself an inner-product form (the `a = b = 0` instance), not at
+general ranks (numeric model-fibre witness).  The TRUE identity keeps both arms at ranks `(a, b)`
+with the gradient direction a spectator passenger on the differentiated factor; it should be
+re-posited in that form only when a consumer materialises (none exists today: the deleted jet grid
+had no consumers library-wide).  The slot bookkeeping (`crossCorrCovGradPerm` and its value lemmas)
+is retained for that future form. -/
 
 /-- **An all-ranks `g₀(x)`-orthonormal frame Parseval witness.**  At `x` there is a single tangent
 frame `e : Fin n → T_xM` (`n = finrank ℝ E`) representing the intrinsic `(0, s)` fibre norm as the
@@ -2478,129 +2459,6 @@ the cross-correction product (the dispatch's "two fields, both genuine new covar
 are discharged here through the operator-field bridge above; the parent — the assembled instance
 `crossCorrRfnsBilinearProduct` and its diagonal `rfns` jet grid — is real composition on top. -/
 
-/-- **The exact two-section parallel covariant Leibniz of the cross-correction `g₀`-single contraction**
-(POSITED deep covariant-calculus child).  `∇₀(prod S T) = (rank-cast) prod (∇₀S) T +
-(slot-reindex) prod S (∇₀T)`: the cross term differentiating the contraction itself vanishes because the
-cometric is `∇₀`-parallel (`∇₀ g₀⁻¹ = 0`).  This is the **two-section** bilinear analogue of the
-single-section trace Leibniz `ricciModelTrace42Op_covGrad`; the left summand carries covariant rank
-`(3 + (a + 1)) + b`, rank-cast to `(3 + a + b) + 1` by `castRankCc_db`; the second summand's gradient
-slot is interior (the contraction reads the second factor's new gradient direction at the start of its
-surviving block, not at the leading slot), relocated to the leading slot by the constant slot reindexing
-`crossCorrCovGradPerm` (a parallel fibre isometry leaving every iterated-gradient `rfns` invariant). -/
-theorem crossCorrParallelContraction_covGrad_prod (g₀ : SmoothRiemannianMetric I M) {a b : ℕ}
-    (S : SmoothCcTensor g₀ 0 (2 + a)) (T : SmoothCcTensor g₀ 0 (3 + b)) :
-    covGrad g₀ 0 (3 + a + b) (crossCorrParallelContraction (I := I) g₀ S T) =
-      castRankCc_db g₀ 0 (by omega : 3 + (a + 1) + b = 3 + a + b + 1)
-          (crossCorrParallelContraction (I := I) g₀ (a := a + 1) (b := b)
-            (covGrad g₀ 0 (2 + a) S) T) +
-        PDE.DeTurck.permuteCcTensor g₀ (crossCorrCovGradPerm)
-          (castRankCc_db g₀ 0 (by omega : 3 + a + (b + 1) = 3 + a + b + 1)
-            (crossCorrParallelContraction (I := I) g₀ (a := a) (b := b + 1) S
-              (covGrad g₀ 0 (3 + b) T))) := by
-  -- Bridge: the parallel contraction is the operator-field action of the fixed parallel cometric
-  -- double-trace field on the frame-free product section.
-  rw [crossCorrParallelContraction_eq_appCcRS (I := I) g₀ S T]
-  -- B-rule: ∇₀(appCcRS Ψ P) = appCcRS (∇₀Ψ) P + appCcRS (slotExtend Ψ) (∇₀P); the first term
-  -- vanishes because the cometric field Ψ is ∇₀-parallel (∇₀ g₀⁻¹ = 0).
-  rw [covGrad_appCcRS_eq (I := I) (M := M) g₀ 0 ((3 + b) + (2 + a)) (3 + a + b)
-    (crossCorrCometricOp (I := I) g₀ a b) (crossCorrProdSection (I := I) g₀ S T),
-    crossCorrCometricOp_covGrad_eq_zero (I := I) g₀ a b,
-    appCcRS_zero_left (I := I) (M := M) g₀ 0 ((3 + b) + (2 + a)) ((3 + a + b) + 1)
-      (crossCorrProdSection (I := I) g₀ S T), zero_add]
-  -- The surviving slot-extended term reconciles, through the product Leibniz, with the two
-  -- shifted-order cross-correction contractions.
-  exact appCcRS_slotExtend_crossCorrProd_covGrad_eq (I := I) g₀ S T
-
-/-- **The base-point-uniform `rfns` operator bound of the cross-correction `g₀`-single contraction**
-(POSITED deep covariant-calculus child).  There is a nonnegative constant `μ`, uniform over the two
-factors `S`, `T`, the shifts `a`, `b`, and the base point `x`, with `rfns(prod S T)(x) ≤ μ · rfns(S)(x) ·
-rfns(T)(x)` — the fibrewise continuity/boundedness of the parallel bilinear `g₀`-contraction in the
-intrinsic squared fibre-norm currency.  This is the **two-section** bilinear analogue of the
-single-section partial-trace Cauchy–Schwarz `riemannianFiberNormSq_compRS_le_mul` (the contraction is
-fibrewise bounded by the operator norm of the cometric pairing).  The existence form yields the constant
-`mu` and the bound together for the assembled instance. -/
-theorem exists_uniform_crossCorrParallelContraction_rfns_le (g₀ : SmoothRiemannianMetric I M) :
-    ∃ μ : ℝ, 0 ≤ μ ∧ ∀ {a b : ℕ} (S : SmoothCcTensor g₀ 0 (2 + a))
-      (T : SmoothCcTensor g₀ 0 (3 + b)) (x : M),
-      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + a + b) x
-          ((crossCorrParallelContraction (I := I) g₀ S T).toSection x) ≤
-        μ * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x (S.toSection x) *
-          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + b) x (T.toSection x) := by
-  -- The uniform constant is the single `(a, b)`-uniform `g`-operator-norm-route envelope `κ` of the
-  -- cometric trace operator field (the passenger slots are isometric ampliations for the operator
-  -- norm, unlike the HS norm which grows by a `dim`-factor per passenger slot).  The contraction's
-  -- fibre value is the operator's post-composition action on the product section
-  -- (`crossCorrParallelContraction = appCcRS (crossCorrCometricOp) (crossCorrProdSection)`), so the
-  -- envelope bounds it by `κ · rfns(crossCorrProdSection) ≤ κ · rfns(S) · rfns(T)`.
-  obtain ⟨κ, hκ_nn, hκ⟩ := exists_uniform_crossCorrCometricOp_postcomp_gOpNorm_rfns_le (I := I) g₀
-  refine ⟨κ, hκ_nn, fun {a b} S T x => ?_⟩
-  obtain ⟨A, hAdef, hAbound⟩ := hκ a b x
-  -- The contraction's fibre value is `A (crossCorrProdSection.toSection x)`.
-  have hfib : (crossCorrParallelContraction (I := I) g₀ S T).toSection x =
-      A (show Tensor0SBundle.TensorRSSpace 0 ((3 + b) + (2 + a)) I x from
-        (crossCorrProdSection (I := I) g₀ S T).toSection x) := by
-    rw [hAdef (show Tensor0SBundle.TensorRSSpace 0 ((3 + b) + (2 + a)) I x from
-      (crossCorrProdSection (I := I) g₀ S T).toSection x)]
-    rw [crossCorrParallelContraction_eq_appCcRS (I := I) g₀ S T,
-      appCcRS_toSection (I := I) (M := M) g₀ 0 ((3 + b) + (2 + a)) (3 + a + b)
-        (crossCorrCometricOp (I := I) g₀ a b) (crossCorrProdSection (I := I) g₀ S T) x]
-  rw [hfib]
-  -- `g`-operator-norm action bound, then the product-section fibre-norm bound.
-  refine le_trans (hAbound (show Tensor0SBundle.TensorRSSpace 0 ((3 + b) + (2 + a)) I x from
-    (crossCorrProdSection (I := I) g₀ S T).toSection x)) ?_
-  calc κ * riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((3 + b) + (2 + a)) x
-          ((crossCorrProdSection (I := I) g₀ S T).toSection x)
-      ≤ κ * (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x (S.toSection x) *
-          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + b) x (T.toSection x)) :=
-        mul_le_mul_of_nonneg_left (crossCorrProdSection_rfns_le (I := I) g₀ S T x) hκ_nn
-    _ = κ * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x (S.toSection x) *
-          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + b) x (T.toSection x) := by ring
-
-/-- **The assembled `RfnsBilinearProduct g₀ 2 3 3` for the cross-correction `g₀`-single contraction
-`h ⌟ D`.**  The parallel fibrewise bilinear product `prod (realizeSymm Tₖ) (loweredConnDiff gₖ g₀)`
-packaged as a `RfnsBilinearProduct`, assembled from the concrete contraction `crossCorrParallelContraction`
-and its two genuine `∇`-compatibility fields (the exact two-section parallel covariant Leibniz
-`crossCorrParallelContraction_covGrad_prod` and the uniform `rfns` operator bound
-`exists_uniform_crossCorrParallelContraction_rfns_le`).
-
-On this instance the cross-correction-difference and quadratic-Cross covariant-Faà-di-Bruno arms cite the
-diagonal `rfns` jet grid `RfnsBilinearProduct.exists_rfns_iteratedCovGrad_prod_diagGrid_le` (the exact
-pointwise shape the integrated Gagliardo–Nirenberg two-arm engine consumes).  Decoupled from the specific
-factor sections; the consumer instantiates `prod` at `realizeSymmCcTensor g₀ Tₖ` and
-`loweredConnDiffSection gₖ g₀`. -/
-noncomputable def crossCorrRfnsBilinearProduct (g₀ : SmoothRiemannianMetric I M) :
-    RfnsBilinearProduct g₀ 2 3 3 where
-  prod := fun S T => crossCorrParallelContraction (I := I) g₀ S T
-  covGradPerm := crossCorrCovGradPerm
-  covGrad_prod := fun S T => crossCorrParallelContraction_covGrad_prod (I := I) g₀ S T
-  mu := (exists_uniform_crossCorrParallelContraction_rfns_le (I := I) g₀).choose
-  mu_nonneg := (exists_uniform_crossCorrParallelContraction_rfns_le (I := I) g₀).choose_spec.1
-  rfns_prod_le := fun S T x =>
-    (exists_uniform_crossCorrParallelContraction_rfns_le (I := I) g₀).choose_spec.2 S T x
-
-/-- **The diagonal `rfns` jet grid for the cross-correction `g₀`-single contraction `h ⌟ D`.**  The
-consumer-facing specialisation of `RfnsBilinearProduct.exists_rfns_iteratedCovGrad_prod_diagGrid_le` at
-the assembled cross-correction instance `crossCorrRfnsBilinearProduct`: for the two factors `h`, `D`
-(here a rank-`2` factor `S` and a rank-`3` factor `T`), there is a nonnegative order-dependent constant
-`C`, uniform over the factors and the base point, with the diagonal (convolution) product grid
-```
-rfns(∇^j (h ⌟ D))(x) ≤ C j · ∑_{i ≤ j} rfns(∇^i h)(x) · (∑_{l ≤ j − i} rfns(∇^l D)(x)).
-```
-This is exactly the pointwise shape the integrated Gagliardo–Nirenberg two-arm engine consumes; P1/LEAF2
-instantiate `S := realizeSymmCcTensor g₀ Tₖ`, `T := loweredConnDiffSection gₖ g₀`. -/
-theorem exists_rfns_iteratedCovGrad_crossCorrProd_diagGrid_le (g₀ : SmoothRiemannianMetric I M)
-    (S : SmoothCcTensor g₀ 0 2) (T : SmoothCcTensor g₀ 0 3) :
-    ∃ C : ℕ → ℝ, (∀ j, 0 ≤ C j) ∧ ∀ (x : M) (j : ℕ),
-      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + j) x
-          ((iteratedCovGrad g₀ 0 3 j
-            ((crossCorrRfnsBilinearProduct (I := I) g₀).prod (a := 0) (b := 0) S T)).toSection x) ≤
-        C j * ∑ i ∈ Finset.range (j + 1),
-          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-              ((iteratedCovGrad g₀ 0 2 i S).toSection x) *
-            ∑ l ∈ Finset.range (j + 1 - i),
-              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + l) x
-                ((iteratedCovGrad g₀ 0 3 l T).toSection x) :=
-  (crossCorrRfnsBilinearProduct (I := I) g₀).exists_rfns_iteratedCovGrad_prod_diagGrid_le S T
 
 end Connection
 end Integral
