@@ -608,36 +608,323 @@ theorem crossCorrParallelContraction_toModel_apply0p (g₀ : SmoothRiemannianMet
         (ccUnitModel (I := I) g₀ S x) (ccUnitModel (I := I) g₀ T x))) v = _
   rw [Tensor0SSpace.toModel_ofModel]
 
+/-- **Last-slot grouping of a `Fin (3 + 0 + p)` index sum.**  A sum of `f` over all index tuples
+`J : Fin (3 + 0 + p) → Fin n` regroups as a double sum over the last-slot value `c : Fin n` and the
+leading `Fin (2 + p)`-slice `J'`, with the reconstituted tuple inserting `c` at the last slot
+(`Fin.snoc` after the rank cast `3 + 0 + p = (2 + p) + 1`).  This is the symbolic-rank replacement for
+the concrete-`Fin 3` `Fin.snocEquiv` regrouping (where `(2 + p) + 1` is not defeq `3 + 0 + p`). -/
+private lemma sum_index_lastSlot_group {n p : ℕ} (f : (Fin (3 + 0 + p) → Fin n) → ℝ) :
+    (∑ J : Fin (3 + 0 + p) → Fin n, f J) =
+      ∑ c : Fin n, ∑ J' : Fin (2 + p) → Fin n,
+        f (fun k : Fin (3 + 0 + p) =>
+          (Fin.snoc J' c : Fin ((2 + p) + 1) → Fin n)
+            (finCongr (by omega : 3 + 0 + p = (2 + p) + 1) k)) := by
+  classical
+  rw [← Fintype.sum_prod_type']
+  refine (Fintype.sum_equiv
+    ((Fin.snocEquiv (fun _ : Fin ((2 + p) + 1) => Fin n)).trans
+      (Equiv.arrowCongr (finCongr (by omega : (2 + p) + 1 = 3 + 0 + p)) (Equiv.refl (Fin n))))
+    _ _ ?_).symm
+  intro pr
+  simp only [Equiv.trans_apply, Equiv.arrowCongr_apply, Equiv.refl_symm, Equiv.coe_refl,
+    Function.comp, id_eq, Fin.snocEquiv_apply, finCongr_symm, finCongr_apply]
+  congr 1
+
+/-- **Leading-slot grouping of a `Fin (3 + p)` index sum.**  A sum of `f` over all index tuples
+`J : Fin (3 + p) → Fin n` regroups as a double sum over the leading-slot value `c : Fin n` and the
+trailing `Fin (2 + p)`-slice `J'`, with the reconstituted tuple inserting `c` at the leading slot
+(`Fin.cons` after the rank cast `3 + p = (2 + p) + 1`). -/
+private lemma sum_index_leadSlot_group {n p : ℕ} (f : (Fin (3 + p) → Fin n) → ℝ) :
+    (∑ J : Fin (3 + p) → Fin n, f J) =
+      ∑ c : Fin n, ∑ J' : Fin (2 + p) → Fin n,
+        f (fun k : Fin (3 + p) =>
+          (Fin.cons c J' : Fin ((2 + p) + 1) → Fin n)
+            (finCongr (by omega : 3 + p = (2 + p) + 1) k)) := by
+  classical
+  rw [← Fintype.sum_prod_type']
+  refine (Fintype.sum_equiv
+    ((Fin.consEquiv (fun _ : Fin ((2 + p) + 1) => Fin n)).trans
+      (Equiv.arrowCongr (finCongr (by omega : (2 + p) + 1 = 3 + p)) (Equiv.refl (Fin n))))
+    _ _ ?_).symm
+  intro pr
+  simp only [Equiv.trans_apply, Equiv.arrowCongr_apply, Equiv.refl_symm, Equiv.coe_refl,
+    Function.comp, id_eq, Fin.consEquiv_apply, finCongr_symm, finCongr_apply]
+  congr 1
+
+/-- **Frame-Riesz reconstruction of a tangent functional.**  For a `g₀`-orthonormal tangent frame `e`
+at `x` (with `g₀(e_i, e_j) = δ_{ij}` and the frame expansion `u = ∑_i g₀(e_i, u) • e_i`) and any
+continuous tangent functional `ψ`, the frame-reconstructed vector `W = ∑_c ψ(e c) • e c` represents
+`ψ` through the metric pairing — `g₀(W, u) = ψ u` for all `u` — and its squared `g₀`-norm is the
+squared sum of the frame values, `g₀(W, W) = ∑_c (ψ (e c))²`. -/
+private lemma frameRiesz_pair_and_normSq
+    (g₀ : SmoothRiemannianMetric I M) (x : M)
+    {n : ℕ} (e : Fin n → TangentSpace I x)
+    (horth : ∀ i j : Fin n, g₀.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0)
+    (hexpand : ∀ v : TangentSpace I x, v = ∑ i : Fin n, g₀.inner x (e i) v • e i)
+    (ψ : TangentSpace I x →L[ℝ] ℝ) :
+    (∀ u : TangentSpace I x,
+        g₀.inner x (∑ c : Fin n, ψ (e c) • e c) u = ψ u) ∧
+      g₀.inner x (∑ c : Fin n, ψ (e c) • e c) (∑ c : Fin n, ψ (e c) • e c)
+        = ∑ c : Fin n, (ψ (e c)) ^ 2 := by
+  classical
+  set W : TangentSpace I x := ∑ c : Fin n, ψ (e c) • e c with hW_def
+  have hpair : ∀ u : TangentSpace I x, g₀.inner x W u = ψ u := by
+    intro u
+    rw [hW_def]
+    rw [map_sum (g₀.inner x) (fun c : Fin n => ψ (e c) • e c) Finset.univ,
+      ContinuousLinearMap.sum_apply]
+    rw [show (∑ c : Fin n, (g₀.inner x (ψ (e c) • e c)) u) = ∑ c : Fin n, ψ (e c) * g₀.inner x (e c) u
+        from by
+      refine Finset.sum_congr rfl (fun c _ => ?_)
+      rw [map_smul (g₀.inner x) (ψ (e c)) (e c), ContinuousLinearMap.smul_apply, smul_eq_mul]]
+    conv_rhs => rw [hexpand u, map_sum]
+    refine Finset.sum_congr rfl (fun c _ => ?_)
+    rw [map_smul, smul_eq_mul, g₀.symm x (e c) u, mul_comm]
+  refine ⟨hpair, ?_⟩
+  rw [hpair W, hW_def, map_sum]
+  refine Finset.sum_congr rfl (fun c _ => ?_)
+  rw [map_smul, smul_eq_mul, sq]
+
+/-- **The sharp `δ²` passenger-rank fibre bound of the cross-correction contraction (Lemma B).**
+Under the `g₀`-fibre operator bound `gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, the intrinsic
+squared fibre norm of the order-`(0, p)` cross-correction contraction
+`crossCorrParallelContraction g₀ (realizeSymmCcTensor g₀ T₁) Y` (the symmetric realized perturbation
+`h = ccTensorBilinSymm g₀ T₁` contracted against the `(0, 3 + p)`-factor `Y` through the `g₀`-cometric)
+is dominated *sharply* — with the operator-norm constant `δ²`, no dimension factor — by that of `Y`:
+`rfns(crossCorrParallelContraction g₀ (realizeSymm T₁) Y)(x) ≤ δ² · rfns(Y)(x)`.
+
+This is the passenger-rank `p` generalization of `crossCorrectionSection_rfns_le_sq_loweredConnDiff`
+(the `p = 0` instance).  Proved by Parseval in a `g₀`-orthonormal frame `e`: the contraction's frame
+component at a tuple `J` is, through `crossCorrParallelContraction_toModel_apply0p` and the model eval
+`crossCorrModelFun_eval0p`, the cometric-collapsed pairing `h(W_{J'}, e (J last))`, where the
+slice-Riesz vector `W_{J'}` (`frameRiesz_pair_and_normSq` of the leading-slot functional of `Y` at the
+slice `e ∘ J'`) reconstructs the value of `Y`'s leading-slot functional through frame Parseval and
+`sum_phi_cometric_inner_basis`; grouped over the last slot it is the dual-frame squared sum
+`∑_c h(W_{J'}, e c)²`, bounded sharply by `δ² · g₀(W_{J'}, W_{J'})`
+(`gFibreOpBound_dualFrame_sq_sum_le`); and `g₀(W_{J'}, W_{J'}) = ∑_c (Y-model with `e c` leading)²`
+(frame-Riesz) is exactly the `J'`-slice squared sum of `Y`'s frame components, summing to `rfns(Y)`. -/
+theorem crossCorrParallelContraction_rfns_le_sq_passenger
+    (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ)
+    (Y : Integral.L2.SmoothCcTensor g₀ 0 (3 + p)) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + 0 + p) x
+        ((crossCorrParallelContraction (I := I) g₀ (a := 0) (b := p)
+            (realizeSymmCcTensor (I := I) g₀ T₁) Y).toSection x) ≤
+      δ ^ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x (Y.toSection x) := by
+  classical
+  obtain ⟨n, e, bse, hn, hbse, horth, hpars, hexpand, hreprS⟩ :=
+    Integral.Connection.tangent_orthonormalBasisS_witness (I := I) (M := M) g₀ (3 + p) x
+  set K₀ : Fin 0 → Fin n := fun k => k.elim0 with hK₀
+  -- The leading-slot functional of `Y` at the `Fin (2 + p)` slice-index `J'`, as a CLM.
+  set Yunit : Tensor0SBundle.Tensor0SModel (3 + p) ℝ E := Tensor0SBundle.Tensor0SSpace.toModel
+      (Y.toSection x (ContinuousMultilinearMap.constOfIsEmpty ℝ
+        (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) with hYunit_def
+  set leadFun : (Fin (2 + p) → Fin n) → (TangentSpace I x →L[ℝ] ℝ) := fun J' =>
+    ContinuousMultilinearMap.toContinuousLinearMap Yunit
+      (fun k : Fin (3 + p) => (Fin.cons (0 : TangentSpace I x)
+          (fun j : Fin (2 + p) => e (J' j)) : Fin ((2 + p) + 1) → E)
+          (finCongr (by omega : 3 + p = (2 + p) + 1) k))
+      (finCongr (by omega : (2 + p) + 1 = 3 + p) 0) with hleadFun_def
+  have hleadFun_apply : ∀ (J' : Fin (2 + p) → Fin n) (u : TangentSpace I x),
+      leadFun J' u = Yunit (fun k : Fin (3 + p) => (Fin.cons u
+          (fun j : Fin (2 + p) => e (J' j)) : Fin ((2 + p) + 1) → E)
+          (finCongr (by omega : 3 + p = (2 + p) + 1) k)) := by
+    intro J' u
+    rw [hleadFun_def]
+    show (ContinuousMultilinearMap.toContinuousLinearMap Yunit
+        (fun k : Fin (3 + p) => (Fin.cons (0 : TangentSpace I x)
+            (fun j : Fin (2 + p) => e (J' j)) : Fin ((2 + p) + 1) → E)
+            (finCongr (by omega : 3 + p = (2 + p) + 1) k))
+        (finCongr (by omega : (2 + p) + 1 = 3 + p) 0)) u = _
+    rw [ContinuousMultilinearMap.toContinuousLinearMap_apply]
+    congr 1
+    funext k
+    rcases eq_or_ne k (finCongr (by omega : (2 + p) + 1 = 3 + p) 0) with hk | hk
+    · subst hk
+      rw [Function.update_self]
+      rw [show (finCongr (by omega : 3 + p = (2 + p) + 1)
+            (finCongr (by omega : (2 + p) + 1 = 3 + p) 0)) = (0 : Fin ((2 + p) + 1)) from by
+        apply Fin.ext; simp, Fin.cons_zero]
+    · rw [Function.update_of_ne hk]
+      -- off the leading slot: both `cons u` and `cons 0` agree.
+      have hkne : (finCongr (by omega : 3 + p = (2 + p) + 1) k) ≠ (0 : Fin ((2 + p) + 1)) := by
+        intro hc
+        apply hk
+        apply Fin.ext
+        have := congrArg (Fin.val) hc
+        simpa using this
+      obtain ⟨k', hk'⟩ := Fin.exists_succ_eq.mpr hkne
+      rw [← hk', Fin.cons_succ, Fin.cons_succ]
+  -- The slice-Riesz vector and its two reconstruction facts.
+  set W : (Fin (2 + p) → Fin n) → TangentSpace I x := fun J' =>
+    ∑ c : Fin n, leadFun J' (e c) • e c with hW_def
+  have hWfacts : ∀ J' : Fin (2 + p) → Fin n,
+      (∀ u : TangentSpace I x, g₀.inner x (W J') u = leadFun J' u) ∧
+        g₀.inner x (W J') (W J') = ∑ c : Fin n, (leadFun J' (e c)) ^ 2 := by
+    intro J'
+    rw [hW_def]
+    exact frameRiesz_pair_and_normSq (I := I) g₀ x e horth hexpand (leadFun J')
+  -- Frame expansion of both sides (the rank `3 + 0 + p` is defeq `3 + p`, same frame `e`).
+  rw [Integral.Connection.riemannianFiberNormSq_eq_sum_componentS_sq (I := I) (M := M) g₀ x (3 + 0 + p)
+      e hreprS ((crossCorrParallelContraction (I := I) g₀ (a := 0) (b := p)
+          (realizeSymmCcTensor (I := I) g₀ T₁) Y).toSection x) K₀,
+    Integral.Connection.riemannianFiberNormSq_eq_sum_componentS_sq (I := I) (M := M) g₀ x (3 + p)
+      e hreprS (Y.toSection x) K₀]
+  -- The contraction's frame component at a tuple `J`.
+  have hCcomp : ∀ J : Fin (3 + 0 + p) → Fin n,
+      Integral.Connection.fiberNormSqComponent (I := I) (M := M) g₀ x 0 (3 + 0 + p)
+          ((crossCorrParallelContraction (I := I) g₀ (a := 0) (b := p)
+              (realizeSymmCcTensor (I := I) g₀ T₁) Y).toSection x) n e K₀ J =
+        ccTensorBilinSymm (I := I) g₀ T₁ x
+          (W (fun j : Fin (2 + p) => J ⟨j.val, by omega⟩)) (e (J ⟨2 + p, by omega⟩)) := by
+    intro J
+    rw [componentS_zero_eq_unit_local (I := I) g₀ (3 + 0 + p) x e K₀ J
+      ((crossCorrParallelContraction (I := I) g₀ (a := 0) (b := p)
+          (realizeSymmCcTensor (I := I) g₀ T₁) Y).toSection x)]
+    rw [show (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace (3 + 0 + p) I x from
+          (crossCorrParallelContraction (I := I) g₀ (a := 0) (b := p)
+            (realizeSymmCcTensor (I := I) g₀ T₁) Y).toSection x)
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))
+        = (crossCorrParallelContraction (I := I) g₀ (a := 0) (b := p)
+            (realizeSymmCcTensor (I := I) g₀ T₁) Y).toSection x
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))
+        from rfl]
+    rw [crossCorrParallelContraction_toModel_apply0p (I := I) g₀ p
+      (realizeSymmCcTensor (I := I) g₀ T₁) Y x (fun k => e (J k))]
+    rw [crossCorrModelFun_eval0p (E := E) (cometricReadingModel (I := I) g₀ x) p
+      (ccUnitModel (I := I) g₀ (realizeSymmCcTensor (I := I) g₀ T₁) x)
+      (ccUnitModel (I := I) g₀ Y x) (fun k => e (J k))]
+    -- Identify the `S = h` factor.
+    have hSfac : ∀ i : Fin (Module.finrank ℝ E),
+        ccUnitModel (I := I) g₀ (realizeSymmCcTensor (I := I) g₀ T₁) x
+          ![cometricReadingModel (I := I) g₀ x
+              (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                ((Module.finBasis ℝ E).cDualBasis i)),
+            (fun k => e (J k)) ⟨2 + p, by omega⟩]
+          = ccTensorBilinSymm (I := I) g₀ T₁ x
+              (cometricReadingModel (I := I) g₀ x
+                (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                  ((Module.finBasis ℝ E).cDualBasis i))) (e (J ⟨2 + p, by omega⟩)) := by
+      intro i
+      rw [← realizeSymmCcTensor_ccTensorBilin_apply, ccTensorBilin_apply]; rfl
+    -- Identify the `T = Y` factor as `leadFun J' (finBasis i)`.
+    have hTfac : ∀ i : Fin (Module.finrank ℝ E),
+        ccUnitModel (I := I) g₀ Y x
+            (fun k : Fin (3 + p) => (Fin.cons ((Module.finBasis ℝ E) i)
+              (fun j : Fin (2 + p) => (fun k => e (J k)) ⟨j.val, by omega⟩) :
+                Fin ((2 + p) + 1) → E)
+              (finCongr (by omega : 3 + p = (2 + p) + 1) k))
+          = leadFun (fun j : Fin (2 + p) => J ⟨j.val, by omega⟩) ((Module.finBasis ℝ E) i) := by
+      intro i
+      rw [hleadFun_apply (fun j : Fin (2 + p) => J ⟨j.val, by omega⟩) ((Module.finBasis ℝ E) i)]
+      rfl
+    simp only [hSfac, hTfac]
+    -- Collapse the cometric sum via `sum_phi_cometric_inner_basis`.
+    set φ : TangentSpace I x →L[ℝ] ℝ := (ccTensorBilinSymm (I := I) g₀ T₁ x).flip
+      (e (J ⟨2 + p, by omega⟩)) with hφ_def
+    rw [show (∑ i : Fin (Module.finrank ℝ E),
+          leadFun (fun j : Fin (2 + p) => J ⟨j.val, by omega⟩) ((Module.finBasis ℝ E) i)
+            * ccTensorBilinSymm (I := I) g₀ T₁ x
+                (cometricReadingModel (I := I) g₀ x
+                  (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                    ((Module.finBasis ℝ E).cDualBasis i))) (e (J ⟨2 + p, by omega⟩)))
+        = ∑ i : Fin (Module.finrank ℝ E),
+            φ (cometricReadingModel (I := I) g₀ x
+                (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                  ((Module.finBasis ℝ E).cDualBasis i)))
+              * g₀.inner x (W (fun j : Fin (2 + p) => J ⟨j.val, by omega⟩))
+                  ((Module.finBasis ℝ E) i) from ?_]
+    · rw [sum_phi_cometric_inner_basis (I := I) g₀ x
+        (fun i => cometricReadingModel (I := I) g₀ x
+          (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+            ((Module.finBasis ℝ E).cDualBasis i)))
+        (fun k u => cometricReadingModel_dualBasis_inner (I := I) g₀ x k u)
+        φ (W (fun j : Fin (2 + p) => J ⟨j.val, by omega⟩))]
+      rfl
+    · refine Finset.sum_congr rfl (fun i _ => ?_)
+      rw [hφ_def, ContinuousLinearMap.flip_apply, mul_comm]
+      congr 1
+      rw [(hWfacts (fun j : Fin (2 + p) => J ⟨j.val, by omega⟩)).1 ((Module.finBasis ℝ E) i)]
+  simp only [hCcomp]
+  -- Group the LHS by the LAST slot.
+  rw [sum_index_lastSlot_group (n := n) (p := p)
+    (fun J : Fin (3 + 0 + p) → Fin n =>
+      ccTensorBilinSymm (I := I) g₀ T₁ x
+        (W (fun j : Fin (2 + p) => J ⟨j.val, by omega⟩)) (e (J ⟨2 + p, by omega⟩)) ^ 2)]
+  have hLslice : ∀ (c : Fin n) (J' : Fin (2 + p) → Fin n),
+      ccTensorBilinSymm (I := I) g₀ T₁ x
+          (W (fun j : Fin (2 + p) =>
+            (Fin.snoc J' c : Fin ((2 + p) + 1) → Fin n)
+              (finCongr (by omega : 3 + 0 + p = (2 + p) + 1) ⟨j.val, by omega⟩)))
+          (e ((Fin.snoc J' c : Fin ((2 + p) + 1) → Fin n)
+            (finCongr (by omega : 3 + 0 + p = (2 + p) + 1) ⟨2 + p, by omega⟩))) ^ 2
+        = ccTensorBilinSymm (I := I) g₀ T₁ x (W J') (e c) ^ 2 := by
+    intro c J'
+    have hsliceArg : (fun j : Fin (2 + p) =>
+          (Fin.snoc J' c : Fin ((2 + p) + 1) → Fin n)
+            (finCongr (by omega : 3 + 0 + p = (2 + p) + 1) ⟨j.val, by omega⟩)) = J' := by
+      funext j
+      rw [show (finCongr (by omega : 3 + 0 + p = (2 + p) + 1) (⟨j.val, by omega⟩ : Fin (3 + 0 + p)))
+            = Fin.castSucc (n := 2 + p) j from by apply Fin.ext; simp, Fin.snoc_castSucc]
+    have hsliceLast : ((Fin.snoc J' c : Fin ((2 + p) + 1) → Fin n)
+          (finCongr (by omega : 3 + 0 + p = (2 + p) + 1) ⟨2 + p, by omega⟩)) = c := by
+      rw [show (finCongr (by omega : 3 + 0 + p = (2 + p) + 1) (⟨2 + p, by omega⟩ : Fin (3 + 0 + p)))
+            = Fin.last (2 + p) from by apply Fin.ext; simp, Fin.snoc_last]
+    rw [hsliceArg, hsliceLast]
+  rw [Finset.sum_congr rfl (fun c _ => Finset.sum_congr rfl (fun J' _ => hLslice c J'))]
+  rw [Finset.sum_comm]
+  -- Group the RHS (`Y`'s frame components) by the LEADING slot.
+  have hYcomp : ∀ J : Fin (3 + p) → Fin n,
+      Integral.Connection.fiberNormSqComponent (I := I) (M := M) g₀ x 0 (3 + p)
+          (Y.toSection x) n e K₀ J = Yunit (fun k => e (J k)) := by
+    intro J
+    rw [componentS_zero_eq_unit_local (I := I) g₀ (3 + p) x e K₀ J (Y.toSection x), hYunit_def]
+  simp only [hYcomp]
+  rw [sum_index_leadSlot_group (n := n) (p := p)
+    (fun J : Fin (3 + p) → Fin n => (Yunit (fun k => e (J k))) ^ 2)]
+  have hRslice : ∀ (c : Fin n) (J' : Fin (2 + p) → Fin n),
+      (Yunit (fun k => e ((fun k : Fin (3 + p) =>
+          (Fin.cons c J' : Fin ((2 + p) + 1) → Fin n)
+            (finCongr (by omega : 3 + p = (2 + p) + 1) k)) k))) ^ 2
+        = (leadFun J' (e c)) ^ 2 := by
+    intro c J'
+    rw [hleadFun_apply J' (e c)]
+    have hsliceArg : (fun k : Fin (3 + p) => e ((Fin.cons c J' : Fin ((2 + p) + 1) → Fin n)
+          (finCongr (by omega : 3 + p = (2 + p) + 1) k)))
+        = (fun k : Fin (3 + p) => (Fin.cons (e c)
+            (fun j : Fin (2 + p) => e (J' j)) : Fin ((2 + p) + 1) → E)
+            (finCongr (by omega : 3 + p = (2 + p) + 1) k)) := by
+      funext k
+      refine Fin.cases ?_ (fun k' => ?_) (finCongr (by omega : 3 + p = (2 + p) + 1) k)
+      · rw [Fin.cons_zero, Fin.cons_zero]
+      · rw [Fin.cons_succ, Fin.cons_succ]
+    rw [hsliceArg]
+  rw [show (∑ c : Fin n, ∑ J' : Fin (2 + p) → Fin n,
+        (Yunit (fun k => e ((fun k : Fin (3 + p) =>
+          (Fin.cons c J' : Fin ((2 + p) + 1) → Fin n)
+            (finCongr (by omega : 3 + p = (2 + p) + 1) k)) k))) ^ 2)
+      = ∑ J' : Fin (2 + p) → Fin n, ∑ c : Fin n, (leadFun J' (e c)) ^ 2 from by
+    rw [Finset.sum_comm]
+    exact Finset.sum_congr rfl (fun J' _ => Finset.sum_congr rfl (fun c _ => hRslice c J'))]
+  -- Both sides now grouped by `J'`; sum over `J'`, bound each slice sharply.
+  rw [Finset.mul_sum]
+  refine Finset.sum_le_sum (fun J' _ => ?_)
+  have hcross_inner :
+      (∑ c : Fin n, ccTensorBilinSymm (I := I) g₀ T₁ x (W J') (e c) ^ 2) ≤
+        δ ^ 2 * g₀.inner x (W J') (W J') :=
+    gFibreOpBound_dualFrame_sq_sum_le (I := I) g₀ x e horth hpars
+      (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) hδ (W J')
+  rw [(hWfacts J').2] at hcross_inner
+  exact hcross_inner
+
 /-- **(POSIT — the cross-correction order-`p` covariant jet top/rest split, δ-separated.)**  The
-genuine *contraction-algebra* content underlying the cross-correction's order-`p` covariant jet: the
 section-level value `(∇^p crossCorrectionSection) x` splits, fibrewise at every base point `x`, into a
 **top** fibre tensor `Top` and a **rest** fibre tensor `Rest` (the order-`0` term and the strictly
 lower-order terms of the binomial covariant Leibniz expansion of the metric/evaluation contraction
-`h ⌟ D`, `h = ccTensorBilinSymm g₀ T₁`, `D = connDiff g₁ g₀`), with:
-
-* the **top** term `Top = ∇^0 h ⌟ ∇^p D` controlled by the fibre-smallness in *squared* form
-  `rfns(Top)(x) ≤ δ² · rfns(∇^p loweredConnDiffSection)(x)` — the `g₀`-fibre operator norm of `h` is
-  `≤ δ` (`gFibreOpBound … δ`), and the `g₀`-lowering of the connection difference is a parallel fibre
-  isometry (`∇₀ g₀ = 0`), so `‖h ⌟ ∇^p D‖²_{g₀} ≤ δ² · ‖∇^p D‖²_{g₀} = δ² · rfns(∇^p lowered)`; and
-
-* the **rest** term `Rest = ∑_{i ≥ 1, i + q = p} C(p, i) ∇^i h ⌟ ∇^q D` controlled, uniformly over the
-  fibre-small `H^{p+3}` ball, by `rfns(Rest)(x) ≤ Crest · (∑_{q < p} rfns(∇^q loweredConnDiffSection)(x)
-  + ∑_{l ≤ p+1} rfns(∇^l T₁)(x))` — each lower factor `∇^i h` (`i ≥ 1`) is the jet of the fibrewise
-  *linear* realized perturbation `h`, whose `g₀`-fibre operator norm is bounded pointwise and uniformly
-  on the compact `M` by the `H^{p+3}` Sobolev ball through the supercritical Sobolev embedding
-  `H^{p+3} ↪ C^{p+1}`, leaving the surviving connection-difference jet factor `rfns(∇^q lowered)` (`q <
-  p`); the `∑_{l ≤ p+1} rfns(∇^l T₁)` carrier is the perturbation-jet slack absorbing the boundary terms.
-
-This is the genuine **shared bottom** of the cross-correction tower: the δ-separated contraction
-Leibniz, carrying the lower covariant gradients of the connection difference *as themselves* on the
-right.  It contains no fibre-small `g₁^{-1}` recursion and no strong induction over the order; the full
-cross-correction bound `crossCorrectionSection_iteratedCovGrad_rfns_le` folds these lower
-`loweredConnDiffSection` jets into the `T₁`-jets by its own route-(a) strong induction.
-
-* **j = 0 collapse litmus.**  At `p = 0` the lower-order Leibniz terms are empty, so `Rest = 0` and the
-  split is `(crossCorrectionSection) x = Top` with `rfns(Top)(x) ≤ δ² · rfns(loweredConnDiffSection)(x)`.
-* **self-zero litmus.**  At `T₁ = 0`, `ccTensorBilinSymm g₀ 0 = 0`, so `crossCorrectionSection = 0` and
-  both `Top` and `Rest` vanish (`0 ≤ 0`). -/
+`h ⌟ D`, `h = ccTensorBilinSymm g₀ T₁`, `D = connDiff g₁ g₀`), with the **top** term controlled by the
+fibre-smallness in *squared* form (`δ²`) and the **rest** term by the lower covariant gradients of the
+connection difference plus the `≤ (p+1)`-jet of `T₁`. -/
 theorem crossCorrectionSection_iteratedCovGrad_topRest_split
     (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ) :
     ∃ Crest : ℝ, 0 ≤ Crest ∧
