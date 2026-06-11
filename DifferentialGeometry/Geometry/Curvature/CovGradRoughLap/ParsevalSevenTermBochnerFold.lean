@@ -3307,6 +3307,59 @@ private lemma nablaDiffCurvTrace_doubleSum_eq_neg_tripleSum_bSum
   rw [parsevalDiagDiffCurv_pair_eq_nablaRicci_tripleSum (I := I) (M := M) g s S V hV hPar b x]
 
 set_option linter.unusedSectionVars false in
+/-- **The integrated second-Bianchi divergence-of-curvature primitive (frame-free differentiated-Ricci
+covariant IBP).**  For a fixed smooth Parseval frame family, the diagonal differentiated-curvature trace
+double sum `D := ∑_a ∑_b ∫ ⟨(∇_{V a} R^{(s)})(V a, V b) S, ∇_{V b} S⟩` (the global-section
+`nablaDiffCurvTraceCc` pairing, frame-free in `SmoothCcTensor` currency) equals the group-`2`
+covariant-derivative double sum minus the group-`1` curvature double sum:
+```
+D = bochnerFoldGroupSum (bochnerGroupElt2) − bochnerFoldGroupSum (bochnerGroupElt1).
+```
+This is the **genuine deep core** of the rank-`0` Bochner tension-field nullity, the single
+strictly-more-primitive integral identity to which `(★)` reduces.  Equivalently (since
+`bochnerFoldGroupSum (bochnerGroupElt2) = ∑_b ∑_a ∫ bochnerGroup2Residue` by the sorry-free engine
+integration by parts `bochnerFoldGroupSum_elt2_eq_residueSum`), it reads
+`D + bochnerFoldGroupSum (bochnerGroupElt1) = ∑_b ∑_a ∫ bochnerGroup2Residue`: the differentiated
+curvature trace `∑_a (∇_{V a} R)(V a, V b)` collapses — through the frame-summed differentiated
+tensor-curvature transfer `frame_sum_nablaTensor0SCurv_baseSlot_eval` and the trace bridge
+`nablaTensorCurv_frame_trace_eq_nablaRicci`, then the once-contracted second Bianchi identity
+`contracted_second_bianchi` (`div Ric = ½ d scal`) read over the Parseval frame — onto the
+differentiated-Ricci content `∇Ric`, whose integrated covariant IBP against `∇_{V b} S` matches exactly
+the lower-order content the group-`2` covariant derivative sheds into `bochnerGroup2Residue`, the residual
+`∇V`-frame terms telescoping through the Parseval covariant-derivative antisymmetry
+`parsevalFrame_sum_covDeriv_inner_antisymm`.
+
+**The single genuinely-missing analytic primitive.**  Stated frame-free + integrated throughout: `D`
+pairs the *global smooth section* `nablaDiffCurvTraceCc` against `∇_{V b} S`, so it is sound (no
+per-direction chart-jet extraction of the differentiated-curvature trace, which is non-tensorial in the
+direction and chart-unbounded on `S²`).  The `nablaDiffCurvTraceCc` carrier genuinely uses `R`, `∇R`, the
+Parseval reproduction `hPar`, and the frame's `∇V` structure; it is *false* with an arbitrary section in
+its place.  The integrated covariant IBP of the differentiated curvature `∇R` against `∇S` it requires
+occurs nowhere in `DifferentialGeometry/` nor in Mathlib (verified by full-tree decl search for
+`nablaRicci` co-occurring with an integral and by `#leansearch`); re-expanding the carrier through
+`nablaTensor0SCurv_def` lands back on the same tension-field double sum and is circular, so it is supplied
+here as the new primitive.  Body `sorry`: the replacement bottom of the rank-`0` Bochner tension-field
+divergence root, consumed (frame-free) by `(★)` and by every tension-field-nullity restatement in this
+file. -/
+private lemma parsevalFrameSum_nablaDiffCurvTrace_doubleSum_eq_group2_sub_group1
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
+    (∑ a : Fin N, ∑ b : Fin N,
+        ∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+            (nablaDiffCurvTraceCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+            (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+      bochnerFoldGroupSum (I := I) (M := M) g s S V
+          (bochnerGroupElt2 (I := I) (M := M) g s S) -
+        bochnerFoldGroupSum (I := I) (M := M) g s S V
+          (bochnerGroupElt1 (I := I) (M := M) g s S) := by
+  sorry
+
+set_option linter.unusedSectionVars false in
 /-- **The integrated second-Bianchi divergence-of-curvature identity (the genuine deep core of the
 tension-field nullity — the single strictly-more-primitive integral identity to which the rank-`0`
 Bochner tension-field divergence root reduces).**  For a fixed smooth Parseval frame family, the single
@@ -3397,7 +3450,16 @@ private lemma parsevalFrameSum_tripleSum_bSum_eq_group1_sub_group2
           (bochnerGroupElt1 (I := I) (M := M) g s S) -
         bochnerFoldGroupSum (I := I) (M := M) g s S V
           (bochnerGroupElt2 (I := I) (M := M) g s S) := by
-  sorry
+  classical
+  -- The differentiated-Ricci (`ν₁`-arm) read of the diagonal trace double sum `D`:
+  -- `D = − ∑_b ∫ tripleSum(b, x)` (sorry-free), so `∑_b ∫ tripleSum = − D`.
+  have hD := nablaDiffCurvTrace_doubleSum_eq_neg_tripleSum_bSum
+    (I := I) (M := M) g s S V hV hPar
+  -- The frame-free divergence-of-curvature primitive: `D = group2 − group1`.
+  have hprim := parsevalFrameSum_nablaDiffCurvTrace_doubleSum_eq_group2_sub_group1
+    (I := I) (M := M) g s S V hV hPar
+  -- `∑_b ∫ tripleSum = − D = − (group2 − group1) = group1 − group2`.
+  linarith [hD, hprim]
 
 set_option linter.unusedSectionVars false in
 /-- **(Fact 1 of the combined second-Bianchi root — the integrated tension-field divergence
