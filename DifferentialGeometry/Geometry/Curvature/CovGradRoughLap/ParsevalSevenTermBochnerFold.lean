@@ -2682,6 +2682,124 @@ private lemma diagDiffCurv_pair_eq_slotSubstSum
   exact frame_sum_nablaTensor0SCurv_diag_baseSlot_eval (I := I) g s Vb A hA x
     (fun j => smoothOrthoFrame (I := I) g x (J j) x)
 
+set_option linter.unusedSectionVars false in
+/-- **The Parseval-frame diagonal differentiated-curvature trace pairing equals the orthonormal-frame
+slot-substitution double sum (the Parseval bridge into the metric-trace opening).** For a fixed Parseval
+frame family `V a`, a read direction `V b`, the family sum over `a` of the `(0, s)` fibre pairing of the
+`tensor0SAsRS`-wrap of `nablaTensor0SCurv g s (V a) (V a) (V b) A` against the slot-`0` gradient
+`∇_{V b} S` (`A y := S.toSection y (unit)`) equals the orthonormal-frame slot-substitution double sum:
+```
+∑_a ⟨tensor0SAsRS (nablaTensor0SCurv g s (V a)(V a)(V b) A), ∇_{V b} S⟩_g
+  = ∑_J [ − ∑_k A(update (B∘J) k (∑_i nablaBaseSlotCurv B_i B_i (V b) (B_{J k}))) ] · gradCurry0(B∘J).
+```
+The family sum is pushed inside the inner product (`tensor0SAsRS` additivity + `tensorInnerPointwise`
+left-additivity), the diagonal Parseval trace is converted to the orthonormal-frame trace
+(`parsevalFrameSum_diag_nablaTensor0SCurv_tensor0SAsRS_eq_ortho`), and the metric-trace opening
+`diagDiffCurv_pair_eq_slotSubstSum` reads it off as the slot-substitution sum (with
+`bochnerGradSlot0 = tensor0SAsRS (gradCurry0 (V b))`). -/
+private lemma parsevalDiagDiffCurv_pair_eq_orthoSlotSubstSum
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) (b : Fin N) (x : M)
+    (bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x))
+    (hbse : ∀ i, bse i = smoothOrthoFrame (I := I) g x i x) :
+    (∑ a : Fin N, tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel
+          (tensor0SAsRS (I := I) (M := M) x
+            (nablaTensor0SCurv (I := I) g s ⟨fun b => V a b, hV a⟩ ⟨fun b => V a b, hV a⟩
+              ⟨fun y => V b y, hV b⟩
+              (fun y : M =>
+                (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
+                  (unitZeroSec (I := I) (M := M) y)) x)))
+        (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))) =
+      ∑ J : Fin s → Fin (Module.finrank ℝ E),
+        (- ∑ k : Fin s,
+            Tensor0SSpace.toModel
+              ((fun y : M =>
+                (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
+                  (unitZeroSec (I := I) (M := M) y)) x)
+              (Function.update (fun j => smoothOrthoFrame (I := I) g x (J j) x) k
+                (∑ i : Fin (Module.finrank ℝ E),
+                  nablaBaseSlotCurv (I := I) g
+                    (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+                      (smoothOrthoFrame_smooth (I := I) g x i))
+                    (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+                      (smoothOrthoFrame_smooth (I := I) g x i)) ⟨fun y => V b y, hV b⟩ x
+                    (smoothOrthoFrame (I := I) g x (J k) x)))) *
+          Tensor0SSpace.toModel (gradCurry0 (I := I) (M := M) g s S x (V b x))
+            (fun j => smoothOrthoFrame (I := I) g x (J j) x) := by
+  classical
+  -- The slot-`0` gradient carrier is the `tensor0SAsRS`-wrap of `gradCurry0 (V b)`.
+  have hgrad : bochnerGradSlot0 (I := I) (M := M) g s S (V b) x =
+      tensor0SAsRS (I := I) (M := M) x (gradCurry0 (I := I) (M := M) g s S x (V b x)) := rfl
+  rw [hgrad]
+  -- Push the family sum inside the inner product (left-additivity + `tensor0SAsRS` additivity).
+  rw [show (∑ a : Fin N, tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel
+          (tensor0SAsRS (I := I) (M := M) x
+            (nablaTensor0SCurv (I := I) g s ⟨fun b => V a b, hV a⟩ ⟨fun b => V a b, hV a⟩
+              ⟨fun y => V b y, hV b⟩
+              (fun y : M =>
+                (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
+                  (unitZeroSec (I := I) (M := M) y)) x)))
+        (TensorRSSpace.toModel
+          (tensor0SAsRS (I := I) (M := M) x (gradCurry0 (I := I) (M := M) g s S x (V b x))))) =
+      tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel
+          (∑ a : Fin N, tensor0SAsRS (I := I) (M := M) x
+            (nablaTensor0SCurv (I := I) g s ⟨fun b => V a b, hV a⟩ ⟨fun b => V a b, hV a⟩
+              ⟨fun y => V b y, hV b⟩
+              (fun y : M =>
+                (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
+                  (unitZeroSec (I := I) (M := M) y)) x)))
+        (TensorRSSpace.toModel
+          (tensor0SAsRS (I := I) (M := M) x (gradCurry0 (I := I) (M := M) g s S x (V b x)))) from by
+    rw [show (TensorRSSpace.toModel
+          (∑ a : Fin N, tensor0SAsRS (I := I) (M := M) x
+            (nablaTensor0SCurv (I := I) g s ⟨fun b => V a b, hV a⟩ ⟨fun b => V a b, hV a⟩
+              ⟨fun y => V b y, hV b⟩
+              (fun y : M =>
+                (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
+                  (unitZeroSec (I := I) (M := M) y)) x))) =
+        ∑ a : Fin N, (1 : ℝ) • TensorRSSpace.toModel
+          (tensor0SAsRS (I := I) (M := M) x
+            (nablaTensor0SCurv (I := I) g s ⟨fun b => V a b, hV a⟩ ⟨fun b => V a b, hV a⟩
+              ⟨fun y => V b y, hV b⟩
+              (fun y : M =>
+                (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
+                  (unitZeroSec (I := I) (M := M) y)) x)) from by
+      rw [show (∑ a : Fin N, (1 : ℝ) • TensorRSSpace.toModel
+            (tensor0SAsRS (I := I) (M := M) x
+              (nablaTensor0SCurv (I := I) g s ⟨fun b => V a b, hV a⟩ ⟨fun b => V a b, hV a⟩
+                ⟨fun y => V b y, hV b⟩
+                (fun y : M =>
+                  (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
+                    (unitZeroSec (I := I) (M := M) y)) x))) =
+          ∑ a : Fin N, TensorRSSpace.toModel
+            (tensor0SAsRS (I := I) (M := M) x
+              (nablaTensor0SCurv (I := I) g s ⟨fun b => V a b, hV a⟩ ⟨fun b => V a b, hV a⟩
+                ⟨fun y => V b y, hV b⟩
+                (fun y : M =>
+                  (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
+                    (unitZeroSec (I := I) (M := M) y)) x)) from by
+        simp only [one_smul]]
+      exact map_sum (TensorRSSpace.toModelL (I := I) 0 s x) _ Finset.univ,
+      tensorInnerPointwise_sum_left (I := I) (M := M) g 0 s x Finset.univ _ _ _]
+    simp]
+  -- Convert the diagonal Parseval trace to the orthonormal-frame trace.
+  rw [parsevalFrameSum_diag_nablaTensor0SCurv_tensor0SAsRS_eq_ortho
+    (I := I) (M := M) g s S V hV hPar b x]
+  -- Open the metric trace via the slot-substitution expansion.
+  exact diagDiffCurv_pair_eq_slotSubstSum (I := I) (M := M) g s x
+    (fun y : M =>
+      (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
+        (unitZeroSec (I := I) (M := M) y))
+    (contMDiff_unitEvalSection' (I := I) (M := M) g s S) ⟨fun y => V b y, hV b⟩
+    (gradCurry0 (I := I) (M := M) g s S x (V b x)) bse hbse
+
 /-- **The integrated Parseval-frame diagonal differentiated-curvature trace pairing equals the
 group-`2` minus group-`1` double sum (the genuine `nablaTensor0SCurv`-form curvature kernel of the
 tension-field nullity).** For a fixed Parseval frame family `V a`, the frame double sum of the integral
