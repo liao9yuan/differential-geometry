@@ -962,6 +962,114 @@ theorem crossSection_eq_cometricDoubleDoubleTrace_loweredProductDiff
   rw [hdist _ _, hdist _ _, ht11, ht12, ht21, ht22]
   ring
 
+/-! ### The polarized (genuinely bilinear) cross-product carrier
+
+The bare cross-product **difference** `crossProductDiff g₀ g₁ g₂ = bareProd L₁ L₁ − bareProd L₂ L₂`
+(`L_k := loweredConnDiffSection gₖ g₀`) is **degree three** in the perturbation when its difference
+factor is unfolded through the lowered-`L` Koszul combination
+(`loweredConnDiffSection_sub_eq_koszulRealizeDiff_sub_crossCorrDiff` carries `2(L₁ − L₂)` against the
+`∇w`-reading minus the `crossCorrTripleDiff`): the SUB2 jet grid cannot fold it onto a single
+`∇w`-level difference factor.  The bilinear **telescope** of the bare product
+`bareProd L₁ L₁ − bareProd L₂ L₂ = bareProd (L₁ − L₂) L₁ + bareProd L₂ (L₁ − L₂)`
+(`bareProd_sub_left`, `bareProd_sub_right`) exposes instead the **genuinely degree-two** carrier: each
+arm has exactly one **cocycle** factor `L₁ − L₂` and one **fixed-endpoint** factor `L_k`.  Crucially
+`L₁ − L₂` is the `g₀`-lowering of the connection-difference cocycle
+`connDiff g₁ g₂ = connDiff g₁ g₀ − connDiff g₂ g₀` (`connDiff_cocycle`): its fibre
+`g₀(connDiff g₁ g₀ · b a, c) − g₀(connDiff g₂ g₀ · b a, c) = g₀(connDiff g₁ g₂ · b a, c)` is exactly
+the `∇w`-level difference factor (`loweredConnDiffSection_toModel_apply`, `g₀.inner` additivity), the
+factor on which `crossSectionDiff_iteratedCovGrad_diagonalProductGrid_rfns_le` folds the cocycle's
+lowered-connection-difference jets into the `T_k`-jets.  This subsection's identity
+`crossProductDiff = crossProductPolarized` carries the existing double-double-trace bridge over to the
+polarized carrier without re-deriving the trace bookkeeping. -/
+
+/-- **The polarized bare cross-product carrier of the two endpoints' lowered connection differences.**
+The two-arm bilinear telescope
+`bareProd g₀ 3 3 (L₁ − L₂) L₁ + bareProd g₀ 3 3 L₂ (L₁ − L₂)` with `L_k := loweredConnDiffSection gₖ g₀`,
+a `(0, 6)`-section.  The genuinely degree-two carrier of the order-zero Cross part: each arm has exactly
+one **cocycle** difference factor `L₁ − L₂` (the `g₀`-lowering of `connDiff g₁ g₂`, the `∇w`-level
+factor) and one **fixed-endpoint** factor `L_k`.  Equal to the bare cross-product difference
+`crossProductDiff g₀ g₁ g₂` (`crossProductPolarized_eq_crossProductDiff`) — the polarized sibling that
+the quadratic jet grid consumes.  Frame-free.  **Vanishes at `g₁ = g₂`** (`L₁ = L₂`, so the cocycle
+factor `L₁ − L₂` is `0` and both arms vanish, `crossProductPolarized_self`). -/
+def crossProductPolarized (g₀ g₁ g₂ : SmoothRiemannianMetric I M) :
+    Integral.L2.SmoothCcTensor g₀ 0 6 :=
+  Integral.Connection.bareProd (I := I) g₀ 3 3 (a := 0) (b := 0)
+      (DeTurck.loweredConnDiffSection (I := I) g₁ g₀
+        - DeTurck.loweredConnDiffSection (I := I) g₂ g₀)
+      (DeTurck.loweredConnDiffSection (I := I) g₁ g₀)
+    + Integral.Connection.bareProd (I := I) g₀ 3 3 (a := 0) (b := 0)
+      (DeTurck.loweredConnDiffSection (I := I) g₂ g₀)
+      (DeTurck.loweredConnDiffSection (I := I) g₁ g₀
+        - DeTurck.loweredConnDiffSection (I := I) g₂ g₀)
+
+set_option linter.unusedSectionVars false in
+/-- **The polarized carrier equals the bare cross-product difference.**  The pure bilinear telescope of
+the bare product: `bareProd (L₁ − L₂) L₁ = bareProd L₁ L₁ − bareProd L₂ L₁` (`bareProd_sub_left`) and
+`bareProd L₂ (L₁ − L₂) = bareProd L₂ L₁ − bareProd L₂ L₂` (`bareProd_sub_right`), whose sum collapses to
+`bareProd L₁ L₁ − bareProd L₂ L₂ = crossProductDiff g₀ g₁ g₂`.  No metric/trace content — the algebraic
+identity that re-routes the difference factor onto the cocycle. -/
+theorem crossProductPolarized_eq_crossProductDiff (g₀ g₁ g₂ : SmoothRiemannianMetric I M) :
+    crossProductPolarized (I := I) g₀ g₁ g₂ = crossProductDiff (I := I) g₀ g₁ g₂ := by
+  rw [crossProductPolarized, crossProductDiff,
+    Integral.Connection.bareProd_sub_left (I := I) g₀ 3 3 (a := 0) (b := 0)
+      (DeTurck.loweredConnDiffSection (I := I) g₁ g₀)
+      (DeTurck.loweredConnDiffSection (I := I) g₂ g₀)
+      (DeTurck.loweredConnDiffSection (I := I) g₁ g₀),
+    Integral.Connection.bareProd_sub_right (I := I) g₀ 3 3 (a := 0) (b := 0)
+      (DeTurck.loweredConnDiffSection (I := I) g₂ g₀)
+      (DeTurck.loweredConnDiffSection (I := I) g₁ g₀)
+      (DeTurck.loweredConnDiffSection (I := I) g₂ g₀)]
+  abel
+
+set_option linter.unusedSectionVars false in
+/-- **The polarized cross-product carrier vanishes when the metrics coincide.**  At `g₁ = g₂` the
+cocycle factor `L₁ − L₂` is `0`, so both telescope arms vanish.  The non-vacuity certificate (it
+genuinely tracks the cocycle difference factor, not a constant). -/
+theorem crossProductPolarized_self (g₀ g : SmoothRiemannianMetric I M) :
+    crossProductPolarized (I := I) g₀ g g = 0 := by
+  rw [crossProductPolarized_eq_crossProductDiff, crossProductDiff_self]
+
+set_option linter.unusedSectionVars false in
+/-- **The Cross section as a cometric double-double-trace of the polarized lowered cocycle product**
+(the genuinely-bilinear section-level structural bridge SUB2 consumes).  The quadratic-in-difference
+Cross section `crossSection g₀ g₁ g₂` is the `−2`-scaled antisymmetrised slot-permuted pair of cometric
+double-double-traces of the **polarized** bare cross-product carrier `crossProductPolarized g₀ g₁ g₂`:
+```
+crossSection g₀ g₁ g₂
+  = (-2 : ℝ) • ( cometricDoubleDoubleTrace g₀ (permuteCcTensor g₀ crossTracePerm1 (crossProductPolarized g₀ g₁ g₂))
+               − cometricDoubleDoubleTrace g₀ (permuteCcTensor g₀ crossTracePerm2 (crossProductPolarized g₀ g₁ g₂)) ).
+```
+
+The polarized sibling of `crossSection_eq_cometricDoubleDoubleTrace_loweredProductDiff`: the carrier
+`crossProductPolarized g₀ g₁ g₂ = bareProd (L₁ − L₂) L₁ + bareProd L₂ (L₁ − L₂)` (`L_k :=
+loweredConnDiffSection gₖ g₀`) is the bilinear telescope of `crossProductDiff`
+(`crossProductPolarized_eq_crossProductDiff`), exposing in **each arm** exactly one cocycle difference
+factor `L₁ − L₂` (the `g₀`-lowering of `connDiff g₁ g₂`, the `∇w`-level factor, `connDiff_cocycle`) and
+one fixed-endpoint factor `L_k` — the genuinely degree-two bilinear product structure on which the
+proven two-section diagonal product jet grid
+(`RfnsBilinearProduct.exists_rfns_iteratedCovGrad_prod_diagGrid_le`) fires, with the cocycle's
+lowered-connection-difference jets folded into the `T_k`-jets.  Proved by rewriting the difference
+bridge `crossSection_eq_cometricDoubleDoubleTrace_loweredProductDiff` through
+`crossProductPolarized_eq_crossProductDiff` (no trace bookkeeping re-derivation).
+
+**Non-vacuity.**  At `g₁ = g₂` the cocycle factor `L₁ − L₂` vanishes, so the polarized carrier is `0`
+(`crossProductPolarized_self`) and both sides are `0` (`crossSection_self_toModel` matches
+`0 = -2 • (0 − 0)`); the identity is degenerate-correct.  NO free quantifier dropped (the right-hand
+side depends on exactly `g₀, g₁, g₂`, the same as the left), NO value-bounded operator shape, NO
+`toHs` mass, NO spectral-nonlinearity, NO Weyl dependence. -/
+theorem crossSection_eq_cometricDoubleDoubleTrace_loweredCocycleProduct
+    (g₀ g₁ g₂ : SmoothRiemannianMetric I M) :
+    crossSection (I := I) g₀ g₁ g₂ =
+      (-2 : ℝ) •
+        (cometricDoubleDoubleTrace (I := I) g₀
+            (DeTurck.permuteCcTensor (I := I) g₀ crossTracePerm1
+              (crossProductPolarized (I := I) g₀ g₁ g₂))
+          - cometricDoubleDoubleTrace (I := I) g₀
+            (DeTurck.permuteCcTensor (I := I) g₀ crossTracePerm2
+              (crossProductPolarized (I := I) g₀ g₁ g₂))) := by
+  rw [crossProductPolarized_eq_crossProductDiff,
+    crossSection_eq_cometricDoubleDoubleTrace_loweredProductDiff]
+
 end DeTurck
 end IntrinsicSpectral
 end RicciFlow
