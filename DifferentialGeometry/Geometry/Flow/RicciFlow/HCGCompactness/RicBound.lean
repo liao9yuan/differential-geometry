@@ -958,5 +958,65 @@ theorem normsq_evol_of_comp
     rw [hUs, hnablaSq] at habs
     exact habs
 
+/-- **The stage-`N` `(B_N)` assembly** (MSM135 Lemma 3.11, Step 4, one stage).
+From the `ric_bound` inputs (eq. 3.3 on `U ⊇ K`, the `(B_r)` bounds for
+`r < N`, the moving Shi bounds), the evolution data for the realized
+`nablaRicReal` (the `hevol` field — the `∂ₜ∇ᵖg = -2∇ᵖRc` interchange, a
+standing analytic input as in the BBS track — plus its pointwise-evaluated
+form), and the initial-time bound, the order-`N` window bound `(B_N)` follows
+by the Grönwall assembly. -/
+theorem covOrderBound_stage
+    {K U : Set M} {β ψ t0 : Real}
+    {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
+    {gRef : SmoothRiemannianMetric I M}
+    (hKc : IsCompact K) (hU : IsOpen U) (hKU : K ⊆ U)
+    (N : Nat) (hN : 1 <= N)
+    (B : Real -> Real)
+    (hequiv : MetricUniformEquivalentOnWindow (I := I) U β ψ gRef gSeq B)
+    (Bmax : Real) (hBmax1 : 1 ≤ Bmax)
+    (hBmax : ∀ t ∈ Set.Icc β ψ, B t ≤ Bmax)
+    (Cg : Nat -> Real)
+    (hBprev : forall r : Nat, 1 <= r -> r < N ->
+      MetricCovDerivOrderBoundOnWindow (I := I) U β ψ gSeq gRef r (Cg r))
+    (KShi : Real) (hKShi0 : 0 ≤ KShi)
+    (hShi : forall s : Nat, s <= N -> forall i : Nat,
+      forall t : Real, t ∈ Set.Icc β ψ -> forall x : M, x ∈ U ->
+        Real.sqrt
+          (Tensor0SBundle.normSq0S (I := I) (gSeq i t) x (2 + s)
+            (ricCovTower (I := I) (gSeq i t) (gSeq i t) s x)) <= KShi)
+    (ht0 : t0 ∈ Set.Icc β ψ)
+    (hevol : MetricCovOrderEvolutionOn (I := I) K β ψ gSeq gRef N
+      (nablaRicReal (I := I) gSeq gRef N))
+    (hevComp : ∀ i : Nat, ∀ x ∈ K, ∀ s ∈ Set.Icc β ψ,
+      ∀ v : Fin (N + 2) → TangentSpace I x,
+        HasDerivAt
+          (fun r : Real => metricCovDeriv (I := I) (gSeq i r) gRef N x v)
+          (((-2 : Real) • nablaRicReal (I := I) gSeq gRef N i s x) v) s)
+    (initC : Real) (hinitC0 : 0 ≤ initC)
+    (hinit : forall i : Nat, forall x : M, x ∈ K ->
+      metricCovDerivNorm (I := I) N (gSeq i t0) gRef x <= initC)
+    (timeRadius : Real)
+    (htime : forall t : Real, t ∈ Set.Icc β ψ -> |t - t0| <= timeRadius) :
+    exists Cw : Real,
+      MetricCovDerivOrderBoundOnWindow (I := I) K β ψ gSeq gRef N Cw := by
+  obtain ⟨Cpp, Cppp, hpp0, hppp0, hfield⟩ := ric_bound_field (I := I) hKc hU hKU
+    N hN B hequiv Bmax hBmax1 hBmax Cg hBprev KShi hKShi0 hShi
+  refine ⟨metricCovOrderEvolutionConstant Cpp Cppp timeRadius initC, ?_⟩
+  exact metricCovOrderWindow_of_evolution (I := I)
+    { t0_mem := ht0
+      nablaRic := nablaRicReal (I := I) gSeq gRef N
+      hevol := hevol
+      normsq_evol := normsq_evol_of_comp (I := I) hevComp
+      Cpp := Cpp
+      Cppp := Cppp
+      Cpp_nonneg := hpp0
+      Cppp_nonneg := hppp0
+      ric_bound := hfield
+      initC := initC
+      initC_nonneg := hinitC0
+      init_bound := hinit
+      timeRadius := timeRadius
+      time_abs_le := htime }
+
 end HCGCompactness
 end DifferentialGeometry
