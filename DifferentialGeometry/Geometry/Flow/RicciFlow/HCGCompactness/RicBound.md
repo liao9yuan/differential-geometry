@@ -30,8 +30,36 @@ sorry'd version (downstream consumers must adapt):
 
 ## REMAINING for P2 (the honest frontier list)
 
-1. **`hevol` producer — CORRECTION (2026-06-11, user remembered right): the
-   interchange IS largely proved in-tree.**  Found:
+1. **`hevol` producer — ✅ INDUCTION CORE DONE (2026-06-11, commit 145b75d7,
+   sorry-free): `covDerivOfField_eval_hasDerivWithinAt`**
+   (`HCGCompactness/MetricCovDerivTimeDeriv.lean`): for a `(0,2)` time-family
+   `A` with pointwise-evaluated derivative `B` (`hbase`) and per-level scalar
+   swaps (`hswap`, ∀ slot-section tuples — the regularity input), every tower
+   level `covDerivOfField gRef (A r) p` has evaluated derivative the `B`-tower.
+   Engine: `totalNabla0SFun_hasDerivWithinAt` with the ∀-slot-tuple IH filling
+   the frozen-vector inputs; slots extended via
+   `ContMDiffSection.exists_eq_at_gen`; `Fin.cons`-tuple identified by
+   `Fin.cases` + the extension equations.
+   **REMAINING for hevol (two well-scoped pieces):**
+   (W-a) the FLOW WRAPPER: instantiate `A r := metricTensorField (S.family.metric r)`,
+   `B t := (-2) • ricciSection-field`; hbase = `hS.equation` (BILINEAR `v w` ✓,
+   within `D.carrier`) + `metricTensorField_apply` + the ricciSection ↔
+   `S.ricciAt` canonical-Ricci bridge (P1 used it; locate the exact lemma) +
+   smul-eval; upgrade Within→At via `D.regular_mem_nhds` (the
+   `ricciFlow_metric_hasDerivAt` pattern, AllTimesBoundsFlow:41); land in
+   `covOrderBound_stage`'s `hevComp` shape via `metricCovDeriv_eq_covDerivOfField`
+   (rfl) + `covDerivOfField_smul` + `covDerivOfField_eq_iterCov` +
+   domDomCongr-eval (= `nablaRicReal`); the `hevol` (tensor-valued TVS) field:
+   construct FORWARD from the evaluated family (finite basis sum) or check
+   whether the Grönwall consumer can take the evaluated form instead.
+   (W-b) the REGULARITY discharge of `hswap`: joint `(t,x)` `C²`-smoothness of
+   the evaluated tower at each level, from `IsSolutionOn.smoothMetric`
+   (`MetricFamilySmoothOn`) via
+   `fixedBaseExtDerivTimeDerivativeOn_singleton_of_chart_contDiff`
+   (FixedBase.lean:327) — a joint-regularity induction over `p` (the `(a')`
+   track; the level-0 case is `metricFrameComp_fixedBaseSwap_of_solution`'s
+   `hSmooth` input pattern).
+   Background (the engines found, user remembered right):
    - `Bundle/PartialMfderiv/FixedBase.lean`: `FixedBaseExtDerivTimeDerivativeOn`
      (the swap predicate: `∂ₛ(extDerivFun (F s) x V) = extDerivFun (Ft t) x V`).
    - `Evolution/Connection/MetricCovDerivProducer.lean`:
