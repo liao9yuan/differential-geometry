@@ -51,12 +51,18 @@ is not in the regular build closure, so nothing caught it.  The keystone region
 (≈4790–4910) itself is clean — only its neighbors break.  Ch4/Thm 3.9 notes
 claiming "ApproximateIsometry 5925L 0-sorry" describe a STALE state.
 
-## REMAINING for ric_bound (next bricks)
+## ✅ TOWER APPLICATION DONE (2026-06-11): `compL2_tower_le` sorry-free
 
-1. **Tower application**: `compL2(iterCovComp frame chr (frameComp0S T) j z)² =
-   ∑ component0S(toBasisAt hz)(iterCov … j z)²` (via `iterCovComp_eq_iterCov`,
-   the B5-proof pattern) → feed `exists_goodFrame_compBound` ⟹
-   `compL2(tower) ≤ √(2^{r+j}) · √normSq0S gRef z (iterCov tower)` on u'.
+The non-ON sibling of B5: at a good-frame point (`hcomp` = the
+`exists_goodFrame_compBound` output at `y`),
+`compL2(iterCovComp frame chrRef (frameComp0S T) j y) ≤ 2^{r+j} ·
+√normSq0S gRef y (iterCov gRef r T j y)`.  Proof: the ON-free half of B5's
+proof (`compL2Sq = ∑ component0S(iterCov)²` via `iterCovComp_eq_iterCov` +
+`component0S_apply` + `toBasisAt_coe`), then `hcomp` + `√(2^s·N) = √(2^s)·√N ≤
+2^s·√N`.  Needs the same `set_option backward.isDefEq.respectTransparency false`
+as B5.  This converts intrinsic (B_r) bounds into the `hgB` compL2 form on u'.
+
+## REMAINING for ric_bound (next bricks)
 2. Shi moving→fixed: `normSq0S_le_of_metric_equiv` (Comparison.lean) through
    eq 3.3 + the moving-Christoffel `iterCovComp_eq_iterCov`.
 3. Ricci-component smoothness producer (B2 pattern for `ricciSection (LC g)`).

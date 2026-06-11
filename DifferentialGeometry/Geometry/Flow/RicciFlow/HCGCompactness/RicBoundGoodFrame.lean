@@ -361,4 +361,78 @@ theorem exists_goodFrame_compBound
         rw [Tensor0SBundle.component0S_apply, Tensor0SBundle.tensor0SComponent_apply]
     _ ≤ 2 ^ s * Tensor0SBundle.normSq0S (I := I) gRef z s A := hkey
 
+set_option backward.isDefEq.respectTransparency false in
+/-- **The tower bound at a good-frame point** (the non-orthonormal sibling of
+`B5 = compL2_tower_eq`).  At a point `y` of the frame domain where the raw
+frame-component `ℓ²` of `(0,s)`-tensors is bounded by `2^s` times the intrinsic
+squared `gRef`-norm (the `exists_goodFrame_compBound` output), the component
+`ℓ²` of the order-`j` `gRef`-derivative tower of a `(0,r)` field is bounded by
+`2^(r+j)` times the intrinsic norm of the `iterCov` tower. -/
+theorem compL2_tower_le
+    (gRef : SmoothRiemannianMetric I M) {r : ℕ}
+    (T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) r)
+    (frame : Idx → (x : M) → TangentSpace I x) {u : Set M}
+    (hframe : IsLocalFrameOn I E 1 frame u) (hu : IsOpen u)
+    {y : M} (hy : y ∈ u)
+    (hcomp : ∀ (s : ℕ) (A : Tensor0SSpace s I y),
+      (∑ I0 : Fin s → Idx,
+        Tensor0SBundle.component0S (I := I) (hframe.toBasisAt hy) A I0 ^ 2) ≤
+        2 ^ s * Tensor0SBundle.normSq0S (I := I) gRef y s A)
+    (j : ℕ) :
+    compL2 (iterCovComp (I := I) frame
+        (fun y' => christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef)
+          frame hframe y')
+        (frameComp0S (I := I) T frame) j y) ≤
+      2 ^ (r + j) *
+        Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef y (r + j)
+          (iterCov (I := I) gRef r T j y)) := by
+  -- the component-sum restatement of the tower `ℓ²` (the ON-free half of B5)
+  have hsq : compL2Sq (iterCovComp (I := I) frame
+      (fun y' => christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef)
+        frame hframe y')
+      (frameComp0S (I := I) T frame) j y) =
+      ∑ I0 : Fin (r + j) → Idx,
+        Tensor0SBundle.component0S (I := I) (hframe.toBasisAt hy)
+          (iterCov (I := I) gRef r T j y) I0 ^ 2 := by
+    simp only [compL2Sq]
+    refine Finset.sum_congr rfl fun n _ => ?_
+    rw [iterCovComp_eq_iterCov (I := I) gRef T frame hframe hu j hy n]
+    congr 1
+    rw [Tensor0SBundle.component0S_apply]
+    congr 1
+    funext q
+    rw [IsLocalFrameOn.toBasisAt_coe]
+    rfl
+  -- apply the good-frame component bound and absorb the `√(2^s)` factor
+  have hbound := hcomp (r + j) (iterCov (I := I) gRef r T j y)
+  have hs : Real.sqrt ((2 : Real) ^ (r + j)) ≤ (2 : Real) ^ (r + j) := by
+    have h2 : ((2 : Real) ^ (r + j)) ≤ ((2 : Real) ^ (r + j)) ^ 2 := by
+      have h1 : (1 : Real) ≤ (2 : Real) ^ (r + j) := one_le_pow₀ one_le_two
+      nlinarith
+    calc Real.sqrt ((2 : Real) ^ (r + j))
+        ≤ Real.sqrt (((2 : Real) ^ (r + j)) ^ 2) := Real.sqrt_le_sqrt h2
+      _ = (2 : Real) ^ (r + j) := Real.sqrt_sq (by positivity)
+  calc compL2 (iterCovComp (I := I) frame
+        (fun y' => christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef)
+          frame hframe y')
+        (frameComp0S (I := I) T frame) j y)
+      = Real.sqrt (compL2Sq (iterCovComp (I := I) frame
+          (fun y' => christoffelSymbolInFrame (leviCivitaConnectionOfMetric (I := I) gRef)
+            frame hframe y')
+          (frameComp0S (I := I) T frame) j y)) := rfl
+    _ = Real.sqrt (∑ I0 : Fin (r + j) → Idx,
+          Tensor0SBundle.component0S (I := I) (hframe.toBasisAt hy)
+            (iterCov (I := I) gRef r T j y) I0 ^ 2) := by rw [hsq]
+    _ ≤ Real.sqrt (2 ^ (r + j) *
+          Tensor0SBundle.normSq0S (I := I) gRef y (r + j)
+            (iterCov (I := I) gRef r T j y)) := Real.sqrt_le_sqrt hbound
+    _ = Real.sqrt ((2 : Real) ^ (r + j)) *
+          Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef y (r + j)
+            (iterCov (I := I) gRef r T j y)) := Real.sqrt_mul (by positivity) _
+    _ ≤ 2 ^ (r + j) *
+          Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef y (r + j)
+            (iterCov (I := I) gRef r T j y)) :=
+        mul_le_mul_of_nonneg_right hs (Real.sqrt_nonneg _)
+
 end DifferentialGeometry.PDE.RicciFlow
