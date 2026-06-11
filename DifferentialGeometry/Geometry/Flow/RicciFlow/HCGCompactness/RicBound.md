@@ -1,5 +1,26 @@
 # RicBound.lean — THE `ric_bound` endpoint (MSM135 Lemma 3.11, Step 4 (A_N))
 
+## ✅✅ PROVED SORRY-FREE (2026-06-11, commit c35998f4; targeted build green, 3850 jobs)
+
+`theorem ric_bound` is fully discharged.  STATEMENT CHANGES vs the original
+sorry'd version (downstream consumers must adapt):
+- hypotheses now live on an OPEN `U ⊇ K` (`hU : IsOpen U`, `hKU : K ⊆ U`) —
+  the book's nested-set shape; the engine needs bounds on open frame domains.
+- eq-3.3 needs a window-uniform majorant: `(Bmax) (hBmax1 : 1 ≤ Bmax)
+  (hBmax : ∀ t ∈ Icc β ψ, B t ≤ Bmax)`.
+- added `hKShi0 : 0 ≤ KShi`; variable block gained `[I.Boundaryless]`,
+  `[IsManifold I 1/2/(∞+1) M]`, `[VectorBundle ℝ E (TangentSpace I)]`,
+  `[ContMDiffVectorBundle 1 E (TangentSpace I) I]`.
+Architecture: `perDomain` (constants-first per-good-frame-domain engine:
+uniform `claim1_LC` → `aN_component` + `compL2_tower_le` + `movingGinv_le` +
+moving-Shi conversion + smoothness producers w/ `chrInFrame_mono`), then finite
+subcover of `K`, per-centre constants, two-sided conversions at each `x`
+(`sqrt_tower_le_compL2` LHS / `compL2_tower_le`+`mcdNorm_eq_at` RHS), constants
+= nonneg sums over the cover.  NEXT (separate task): feed this into
+`MetricCovOrderEvolutionInput.ric_bound` (the `2+N ↔ N+2` reindex via R4f) +
+the hevol/normsq_evol producer track → `metricCovOrderWindow_of_evolution`
+(B_N) → stage-N induction (threading the nested `U`).
+
 ## ⚡ ASSEMBLY DESIGN (2026-06-11, ACTIVE — the /goal "finish ric_bound" run)
 
 **Uniformization wave DONE (commit af9eeb83, all green):** claim1_abstract/claim1
@@ -24,6 +45,64 @@ needs bounds on open frame domains; hBprev/hequiv/hShi only on K is not enough
 when K has empty interior.  Change ric_bound: add (U : Set M) (hU : IsOpen U)
 (hKU : K ⊆ U), state hequiv/hBprev/hShi over U, conclude on K.  Stage-N
 induction wrapper will thread U (record in AllTimesBounds consumer later).
+
+**PROGRESS (2026-06-11, commits af9eeb83 + 0ddfb145, ALL GREEN):** U-wave done
+(constants-first chain); W1 `quad_ub_of_near_id`, W2 `normSq0S_le_pow_sum_comp_sq`,
+W3 `gramInv_near_id` (now also Gram-entry closeness), `exists_goodFrame_compBound`
+(BOTH directions: `∑comp² ≤ 2^s·normSq0S` and `normSq0S ≤ ((3/2)(card+1))^s·∑comp²`),
+`sqrt_tower_le_compL2` (reverse tower, abstract `Cu ≥ 1`) — all sorry-free.
+KEY SIGNATURES (verified): `MetricCovDerivOrderBoundOn K a h gRef C = ∀ x ∈ K,
+metricCovDerivNorm a h gRef x ≤ C` (pointwise-on-K); R4f
+`metricCovDerivNorm_eq_iterCov h gRef N basis (hinv : MetricInverseInBasis_gen gRef
+x basis identityInvMetric) : metricCovDerivNorm N h gRef x = √normSq0S gRef x (2+N)
+(iterCov gRef 2 (metricTensorField h) N x)` — needs pointwise ON basis; producer
+pattern = RicciOperatorNormBound.lean:204-209 (`exists_gOrthonormalBasis` +
+`metricInverseInBasis_of_orthonormal` + simpa to identityInvMetric).
+Lean gotchas this wave: `abs_add` → `abs_add_le`; `pow_le_pow_left` →
+`pow_le_pow_left₀`; stale-olean errors whenever a downstream check follows an
+upstream edit (targeted build first).
+
+**G1+G2 DONE (sorry-free): `ricCompField_mdiffOn` (Ricci comps smooth, B2
+engine) + `movingGinv_le` (moving inverse-Gram ≤ √card·2Beq from eq3.3 pointwise
+lower + gRef-Gram near Id, via `gramE_dotVec` + `quad_lb_of_near_id` + B4).**
+
+**W6 ASSEMBLY BLUEPRINT (exact; remaining gaps marked ⊙):**
+ric_bound NEW statement: add `(U : Set M) (hU : IsOpen U) (hKU : K ⊆ U)`;
+hequiv/hBprev/hShi over U; ⊙ add `(Bmax : Real) (hBmax1 : 1 ≤ Bmax)
+(hBmax : ∀ t ∈ Set.Icc β ψ, B t ≤ Bmax)` (the per-t equivalence constants need a
+window-uniform majorant; MetricUniformEquivalentOn C = ⟨1 ≤ C, pointwise
+two-sided⟩).  Proof skeleton:
+1. `choose` per-point goodFrame data from `exists_goodFrame_compBound gRef x`
+   (⊙ FIRST extend it with a 4th output: the ε with 0 ≤ ε, card·ε ≤ 1/2, and
+   ∀ z hz∈u', ∀ i j, |gramE gRef z i j − δ| ≤ ε — needed by movingGinv_le; the
+   data is already inside its proof (hnear .2), just expose it).
+2. Finite subcover: `hKc.elim_finite_subcover (fun x => u' x ∩ U)` (open ✓,
+   covers via hxu' + hKU) → centers `t : Finset M`; domains w_k := u' x_k ∩ U.
+3. Per center k numerics: C0 := √card·(2·Bmax); Kg := ∑_{j<N} 2^{2+j+2}·max (Cg (j+1)) 0
+   -style nonneg sum ≥ each 2^{2+j}·Cg j (1≤j≤N−1); KShi′ := 2^{2+N}·Bmax^{2+N}·max KShi 0-ish.
+4. Per center k, data-free constants: CL c from claim1_LC-uniform (u := w_k;
+   ⊙ needs IsLocalFrameOn restriction to w_k ⊆ baseSet — check `IsLocalFrameOn.mono`
+   exists, else add 5-line restriction lemma; ContMDiffOn.mono ✓ standard);
+   B c := CL c·(1+Kg); Ctop := CL (N−1); then ⟨Cpp_k, Cppp_k⟩ :=
+   aN_component-uniform (chrH := gRef-LC-frame-Christoffels on w_k).
+5. Cpp := max over k (Finset.sup'), similarly Cppp, times the conversion factors:
+   final chain at (i,t,x∈K): pick k with x ∈ w_k; instantiate aN's ∀-data with
+   g := gSeq i t: chrG := lcChrist (g) [lcChrist_e_mdiffOn], T := Ricci comps
+   [ricCompField_mdiffOn], gComp := metric comps [gCompField_mdiffOn], Ginv :=
+   ginvCompField [ginv_hinv, movingGinv_le], hDlow/hDtop := claim1_LC-uniform
+   applied to g + hgB, hgB := per-z: ⊙ `compL2_movingTower_le` (generalize
+   compL2_tower_le to decouple the tower metric gM from the norm metric gRef —
+   its proof already separates them; gM := gRef here) + R4f at z (pointwise ON
+   basis producer: RicciOperatorNormBound:204 pattern) + hBprev z; hShi-comp :=
+   per-z: moving-tower version (gM := g) + goodFrame fwd + swapped
+   `normSq0S_le_of_metric_equiv` (gRef ≤ Bt·g from hequiv inverted) + hShi z.
+6. Conclusion at x: component (A_N) from aN_component; LHS:
+   √normSq0S gRef x (2+N) (ricCovTower g gRef N x) — ricCovTower g gRef N =
+   iterCov gRef 2 (ricciSection (LC g)) N DEFEQ — ≤ Cu^{2+N}·compL2(Ric tower)
+   [sqrt_tower_le_compL2, Cu := (3/2)(card+1), hub := goodFrame rev at x] ≤
+   Cu^{2+N}·(Cpp_k·compL2(g tower N) + Cppp_k) ≤ Cu^{2+N}·(Cpp_k·2^{2+N}·
+   metricCovDerivNorm N g gRef x [compL2_tower_le + R4f at x] + Cppp_k) — final
+   constants Cpp := max_k Cu^{2+N}·Cpp_k·2^{2+N}, Cppp := max_k Cu^{2+N}·Cppp_k.
 
 **Remaining work list:**
 - W1 `quad_ub_of_near_id` (KroneckerQuadForm): |Q−δ|≤ε entrywise ⟹
