@@ -786,5 +786,177 @@ theorem ric_bound_field
   rw [nablaRicReal_normSq]
   exact hb i s hs x hx
 
+/-- **The `normsq_evol` field from pointwise-evaluated evolution data**: if the
+order-`p` metric derivative tower evolves by `-2·nablaRic` under every fixed
+slot evaluation (an ℝ-valued `HasDerivAt` family — the natural output of the
+componentwise flow-evolution producer), then the squared-norm evolution bound
+holds.  Proof: componentwise differentiation in a fixed pointwise
+`gRef`-orthonormal basis; no fibre calculus is needed. -/
+theorem normsq_evol_of_comp
+    {K : Set M} {β ψ : Real}
+    {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
+    {gRef : SmoothRiemannianMetric I M} {p : Nat}
+    {nablaRic : Nat -> Real -> (x : M) ->
+      Tensor0SBundle.Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
+        (I := I) (M := M) (p + 2) x}
+    (hev : ∀ i : Nat, ∀ x ∈ K, ∀ s ∈ Set.Icc β ψ,
+      ∀ v : Fin (p + 2) → TangentSpace I x,
+        HasDerivAt
+          (fun r : Real => metricCovDeriv (I := I) (gSeq i r) gRef p x v)
+          (((-2 : Real) • nablaRic i s x) v) s) :
+    MetricCovOrderNormSqEvolutionOn (I := I) K β ψ gSeq gRef p nablaRic := by
+  intro i x hx s hs
+  classical
+  obtain ⟨basis, hON⟩ := exists_gOrthonormalBasis (I := I) gRef x
+  have hinv : Tensor0SBundle.MetricInverseInBasis_gen (I := I) gRef x basis
+      (Tensor0SBundle.identityInvMetric
+        (Idx := Fin (Module.finrank Real (TangentSpace I x)))) := by
+    have h' := metricInverseInBasis_of_orthonormal (I := I) gRef basis hON
+    intro i' j'
+    simpa [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric] using h' i' j'
+  -- componentwise differentiation through the fixed-slot evaluation CLM
+  have hcomp : ∀ I0 : Fin (p + 2) → Fin (Module.finrank Real (TangentSpace I x)),
+      HasDerivAt
+        (fun r => Tensor0SBundle.component0S (I := I) basis
+          (metricCovDeriv (I := I) (gSeq i r) gRef p x) I0)
+        (Tensor0SBundle.component0S (I := I) basis
+          ((-2 : Real) • nablaRic i s x) I0) s := by
+    intro I0
+    have happ := hev i x hx s hs (fun q => basis (I0 q))
+    simpa [Tensor0SBundle.component0S_apply] using happ
+  -- the squared norm as a fixed finite sum of squared components
+  have hU_eq : (fun r : Real => metricCovDerivNorm (I := I) p (gSeq i r) gRef x ^ 2) =
+      (fun r : Real => ∑ I0 : Fin (p + 2) → Fin (Module.finrank Real (TangentSpace I x)),
+        Tensor0SBundle.component0S (I := I) basis
+          (metricCovDeriv (I := I) (gSeq i r) gRef p x) I0 ^ 2) := by
+    funext r
+    have hnn := normSq0S_nonneg' (I := I) gRef x (p + 2)
+      (metricCovDeriv (I := I) (gSeq i r) gRef p x)
+    rw [metricCovDerivNorm, Real.sq_sqrt hnn,
+      Tensor0SBundle.normSq0S_identity_eq_sum_sq (I := I) gRef x (p + 2) basis hinv]
+  -- the derivative of the sum of squares
+  have hders : HasDerivAt
+      (fun r : Real => ∑ I0 : Fin (p + 2) → Fin (Module.finrank Real (TangentSpace I x)),
+        Tensor0SBundle.component0S (I := I) basis
+          (metricCovDeriv (I := I) (gSeq i r) gRef p x) I0 ^ 2)
+      (∑ I0 : Fin (p + 2) → Fin (Module.finrank Real (TangentSpace I x)),
+        2 * Tensor0SBundle.component0S (I := I) basis
+          (metricCovDeriv (I := I) (gSeq i s) gRef p x) I0 *
+        Tensor0SBundle.component0S (I := I) basis
+          ((-2 : Real) • nablaRic i s x) I0) s := by
+    have hterms : ∀ I0 ∈ (Finset.univ :
+        Finset (Fin (p + 2) → Fin (Module.finrank Real (TangentSpace I x)))),
+        HasDerivAt
+          (fun r => Tensor0SBundle.component0S (I := I) basis
+            (metricCovDeriv (I := I) (gSeq i r) gRef p x) I0 ^ 2)
+          (2 * Tensor0SBundle.component0S (I := I) basis
+            (metricCovDeriv (I := I) (gSeq i s) gRef p x) I0 *
+           Tensor0SBundle.component0S (I := I) basis
+            ((-2 : Real) • nablaRic i s x) I0) s := by
+      intro I0 _
+      simpa [pow_one] using (hcomp I0).pow 2
+    have hsum := HasDerivAt.sum hterms
+    have hfn : (∑ I0 : Fin (p + 2) → Fin (Module.finrank Real (TangentSpace I x)),
+        fun r : Real => Tensor0SBundle.component0S (I := I) basis
+          (metricCovDeriv (I := I) (gSeq i r) gRef p x) I0 ^ 2) =
+        (fun r : Real =>
+          ∑ I0 : Fin (p + 2) → Fin (Module.finrank Real (TangentSpace I x)),
+            Tensor0SBundle.component0S (I := I) basis
+              (metricCovDeriv (I := I) (gSeq i r) gRef p x) I0 ^ 2) := by
+      funext r
+      simp [Finset.sum_apply]
+    rw [hfn] at hsum
+    exact hsum
+  refine ⟨∑ I0 : Fin (p + 2) → Fin (Module.finrank Real (TangentSpace I x)),
+    2 * Tensor0SBundle.component0S (I := I) basis
+      (metricCovDeriv (I := I) (gSeq i s) gRef p x) I0 *
+    Tensor0SBundle.component0S (I := I) basis
+      ((-2 : Real) • nablaRic i s x) I0, ?_, ?_⟩
+  · rw [hU_eq]
+    exact hders
+  · -- `|∑ 2ab| ≤ ∑ a² + ∑ b² = U s + normSq0S((-2)•nablaRic)`
+    have habs : |∑ I0 : Fin (p + 2) → Fin (Module.finrank Real (TangentSpace I x)),
+        2 * Tensor0SBundle.component0S (I := I) basis
+          (metricCovDeriv (I := I) (gSeq i s) gRef p x) I0 *
+        Tensor0SBundle.component0S (I := I) basis
+          ((-2 : Real) • nablaRic i s x) I0| ≤
+        (∑ I0 : Fin (p + 2) → Fin (Module.finrank Real (TangentSpace I x)),
+          Tensor0SBundle.component0S (I := I) basis
+            (metricCovDeriv (I := I) (gSeq i s) gRef p x) I0 ^ 2) +
+        ∑ I0 : Fin (p + 2) → Fin (Module.finrank Real (TangentSpace I x)),
+          Tensor0SBundle.component0S (I := I) basis
+            ((-2 : Real) • nablaRic i s x) I0 ^ 2 := by
+      calc |∑ I0 : Fin (p + 2) → Fin (Module.finrank Real (TangentSpace I x)),
+            2 * Tensor0SBundle.component0S (I := I) basis
+              (metricCovDeriv (I := I) (gSeq i s) gRef p x) I0 *
+            Tensor0SBundle.component0S (I := I) basis
+              ((-2 : Real) • nablaRic i s x) I0|
+          ≤ ∑ I0 : Fin (p + 2) → Fin (Module.finrank Real (TangentSpace I x)),
+            |2 * Tensor0SBundle.component0S (I := I) basis
+              (metricCovDeriv (I := I) (gSeq i s) gRef p x) I0 *
+            Tensor0SBundle.component0S (I := I) basis
+              ((-2 : Real) • nablaRic i s x) I0| :=
+            Finset.abs_sum_le_sum_abs _ _
+        _ ≤ ∑ I0 : Fin (p + 2) → Fin (Module.finrank Real (TangentSpace I x)),
+            (Tensor0SBundle.component0S (I := I) basis
+              (metricCovDeriv (I := I) (gSeq i s) gRef p x) I0 ^ 2 +
+             Tensor0SBundle.component0S (I := I) basis
+              ((-2 : Real) • nablaRic i s x) I0 ^ 2) := by
+            refine Finset.sum_le_sum fun I0 _ => ?_
+            refine abs_le.mpr ⟨?_, ?_⟩
+            · nlinarith [sq_nonneg (Tensor0SBundle.component0S (I := I) basis
+                (metricCovDeriv (I := I) (gSeq i s) gRef p x) I0 +
+              Tensor0SBundle.component0S (I := I) basis
+                ((-2 : Real) • nablaRic i s x) I0)]
+            · nlinarith [sq_nonneg (Tensor0SBundle.component0S (I := I) basis
+                (metricCovDeriv (I := I) (gSeq i s) gRef p x) I0 -
+              Tensor0SBundle.component0S (I := I) basis
+                ((-2 : Real) • nablaRic i s x) I0)]
+        _ = (∑ I0 : Fin (p + 2) → Fin (Module.finrank Real (TangentSpace I x)),
+              Tensor0SBundle.component0S (I := I) basis
+                (metricCovDeriv (I := I) (gSeq i s) gRef p x) I0 ^ 2) +
+            ∑ I0 : Fin (p + 2) → Fin (Module.finrank Real (TangentSpace I x)),
+              Tensor0SBundle.component0S (I := I) basis
+                ((-2 : Real) • nablaRic i s x) I0 ^ 2 :=
+            Finset.sum_add_distrib
+    have hUs : (∑ I0 : Fin (p + 2) → Fin (Module.finrank Real (TangentSpace I x)),
+        Tensor0SBundle.component0S (I := I) basis
+          (metricCovDeriv (I := I) (gSeq i s) gRef p x) I0 ^ 2) =
+        metricCovDerivNorm (I := I) p (gSeq i s) gRef x ^ 2 := by
+      have := congrFun hU_eq s
+      exact this.symm
+    have hnablaSq : (∑ I0 : Fin (p + 2) → Fin (Module.finrank Real (TangentSpace I x)),
+        Tensor0SBundle.component0S (I := I) basis
+          ((-2 : Real) • nablaRic i s x) I0 ^ 2) =
+        (2 * Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef x (p + 2)
+          (nablaRic i s x))) ^ 2 := by
+      have hnn := normSq0S_nonneg' (I := I) gRef x (p + 2) (nablaRic i s x)
+      have hsum : (∑ I0 : Fin (p + 2) → Fin (Module.finrank Real (TangentSpace I x)),
+          Tensor0SBundle.component0S (I := I) basis
+            ((-2 : Real) • nablaRic i s x) I0 ^ 2) =
+          Tensor0SBundle.normSq0S (I := I) gRef x (p + 2)
+            ((-2 : Real) • nablaRic i s x) :=
+        (Tensor0SBundle.normSq0S_identity_eq_sum_sq (I := I) gRef x (p + 2)
+          basis hinv _).symm
+      have hsmul : Tensor0SBundle.normSq0S (I := I) gRef x (p + 2)
+          ((-2 : Real) • nablaRic i s x) =
+          4 * Tensor0SBundle.normSq0S (I := I) gRef x (p + 2) (nablaRic i s x) := by
+        rw [Tensor0SBundle.normSq0S_identity_eq_sum_sq (I := I) gRef x (p + 2) basis hinv,
+          Tensor0SBundle.normSq0S_identity_eq_sum_sq (I := I) gRef x (p + 2) basis hinv,
+          Finset.mul_sum]
+        refine Finset.sum_congr rfl fun I0 _ => ?_
+        have hc : Tensor0SBundle.component0S (I := I) basis
+            ((-2 : Real) • nablaRic i s x) I0 =
+            (-2 : Real) * Tensor0SBundle.component0S (I := I) basis
+              (nablaRic i s x) I0 := by
+          rw [Tensor0SBundle.component0S_apply, Tensor0SBundle.component0S_apply]
+          simp
+        rw [hc]
+        ring
+      rw [hsum, hsmul, mul_pow, Real.sq_sqrt hnn]
+      norm_num
+    rw [hUs, hnablaSq] at habs
+    exact habs
+
 end HCGCompactness
 end DifferentialGeometry
