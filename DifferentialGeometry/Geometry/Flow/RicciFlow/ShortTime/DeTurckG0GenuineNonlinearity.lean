@@ -1931,8 +1931,9 @@ private theorem exists_deTurckLinearization_coerciveInverse
     nlinarith [sq_nonneg ‖u‖, norm_nonneg u, norm_nonneg (B₁ u), norm_nonneg B₁,
       mul_le_mul_of_nonneg_left hb (norm_nonneg (B₁ u)), sq_nonneg ‖B₁‖]
 
-/-- **The gate-locus first-order-freedom solvability of the realized DeTurck-remainder operator
-(the irreducible analytic frontier of the `g₀`-anchored gauge corrector — body `sorry`).**
+/-- **The per-curve Duhamel-horizon first-order-freedom gauge match of the realized DeTurck-remainder
+operator (the consumer-minimal analytic frontier of the `g₀`-anchored gauge corrector — body
+`sorry`).**
 
 For the anchor `g₀`, a flow background `g_bg`, and a supercritical order `a` (`2a > dim M + 4`),
 there is a `(0,2)`-perturbation **corrector** `corr : Hᵃ⁺¹(g₀) → SmoothCcTensor g₀ 0 2` and a
@@ -1942,63 +1943,72 @@ match-gate slack `Q > 0` carrying, in **global** (un-ball-restricted, linear) fo
   order `n`, over **all** of `Hᵃ⁺¹`);
 * the `H^{a+2}` Lipschitz difference bound `‖(corr u − corr u').toHs (a+2)‖ ≤ D' · ‖u − u'‖`
   (over **all** of `Hᵃ⁺¹`); and
-* the **per-`u` gate-locus operator-value solvability**: for every `u` that is gate-realizable
-  (`realizableAtGate g₀ u`) and whose canonical gate representative `gateRepOfWitness g₀ u h` has
-  order-`2a` intrinsic Sobolev norm `≤ Q`, the realized DeTurck-remainder operator `Φ := toL2 ∘
-  deTurckRealizeRemainderOf g₀ g_bg` takes the **same `L²`-class** at the corrected carrier
-  `smoothingBaseSynth g₀ a u + corr u` as at the gate representative `gateRepOfWitness g₀ u h`:
-  ```
-  toL2 (deTurckRealizeRemainderOf g₀ g_bg (smoothingBaseSynth g₀ a u + corr u))
-    = toL2 (deTurckRealizeRemainderOf g₀ g_bg (gateRepOfWitness g₀ u h)) .
-  ```
+* the **per-curve Duhamel-horizon gauge match** `PerCurveRealizeGaugeMatch g₀ g_bg a Q
+  (fun u => smoothingBaseSynth g₀ a u + corr u)`: along any genuine mild Duhamel carrier trajectory
+  `ι ∘ u₂` (certified by `DuhamelMildSolutionData`) whose inclusion is gate-realizable with
+  order-`2a` gate-rep norm `≤ Q` on `[0, T₀)`, there is a positive sub-horizon `T ≤ T₀` on which the
+  realized DeTurck remainder of the corrected carrier `smoothingBaseSynth g₀ a (ι (u₂ s)) +
+  corr (ι (u₂ s))` reproduces, at the `L²`-class level (through `SmoothCcTensor.toL2`), the
+  gate-based gauge `deTurckRemainderRealizeSection g₀ g_bg (ι (u₂ s))`.
 
-This is the **strictly-more-primitive** operator-value form of the corrector-value node
-`exists_gateGaugeEnergyCorrectorValue`: that node matches against the gate-based gauge *section*
-`deTurckRemainderRealizeSection g₀ g_bg u`, whereas this node states the bare **`Φ`-class-hitting
-solvability** `Φ(base u + corr u) = Φ(gateRep u)` — a solvability equation of the realized-remainder
-*operator* along the gate-representative trajectory.  The corrector-value node is **proven by
-composition** over this primitive by converting its right-hand side through the *sorry-free* gate
-identity `deTurckRealizeRemainderOf_gateRepOfWitness` (the realized remainder of the gate
-representative *is* the gauge section: `deTurckRealizeRemainderOf g₀ g_bg (gateRepOfWitness g₀ u h) =
-deTurckRemainderRealizeSection g₀ g_bg u`); the conversion is the genuine glue contributed there,
-not stated here.  This node carries **no** linearization / Lax–Milgram-inverse coupling: it is a
-clean `(g₀, g_bg, a, ha)` statement, reflecting that the bounded first-order linearization `B₁` and
-its coercive inverse `Linv` (the vestigial `exists_gateGaugeEnergyCorrectorValue` binders) do *not*
-by themselves produce the gate-gated `L²`-class match — the range/solvability of `Φ` on the gate
-locus is the irreducible analytic content, posited here directly.
+This is the **consumer-minimal** form of the first-order-freedom solvability.  A previous
+formulation posited the **static per-`u`** operator-value match `Φ(base u + corr u) = Φ(gateRep u)`
+(for *every* gate-realizable `u` with `Q`-bounded gate-rep norm); that static intermediate band was
+T11 *over-strength* (and unfillable: an O(1)-residue certificate refutes the exact static class
+equality on an adversarial in-gate eigenmode family) and existed only to feed a per-`u`
+instantiation that never used its strength.  The genuine consumed form is the **per-curve** match:
+the sole downstream consumer instantiates the match only along the filler's *own* self-bounded
+Duhamel carrier trajectory `ι ∘ u₂` (`DuhamelMildSolutionData` — the carrier-transport's last
+conjunct), so the `∃ T`-inside-the-binder sub-horizon freedom is exactly what the consumer carries.
+The static per-`u` arm has been excised; the per-curve form pins `ι ∘ u₂` to a genuine self-bounded
+flow trajectory, excising the adversarial eigen-train on which the static exact match is false (T12),
+so the per-curve match is the fillable, consumer-minimal frontier.
 
 **Why the match is genuinely first order.**  The leading second-order `−λᵢ` rough-Laplacian
 principal symbol of the realized DeTurck remainder cancels the second-order re-tagged-RHS principal
-symbol (`deTurckNonlinearitySpectral_principalPart_cancels`, sorry-free), so the class quantity the
-corrected carrier must reproduce is a *first-order* freedom — rich enough to be hit by a
-globally-controlled continuous corrector without forcing `smoothingBaseSynth g₀ a u + corr u` to
-coincide, as a section, with the (discontinuous) gate representative `gateRepOfWitness g₀ u h`.
+symbol (`deTurckNonlinearitySpectral_principalPart_cancels`, sorry-free,
+`Analysis/Spectral/Intrinsic/DeTurck/NonlinearitySpectral.lean`), so the class quantity the corrected
+carrier must reproduce is a *first-order* freedom — rich enough to be hit by a globally-controlled
+continuous corrector without forcing `smoothingBaseSynth g₀ a u + corr u` to coincide, as a section,
+with the (discontinuous) gate representative.
 
-**Non-vacuous** — the solvability rejects the degenerate witness `corr ≡ 0` (the naive heat
-carrier): with `corr ≡ 0` the match would read `toL2 (deTurckRealizeRemainderOf g₀ g_bg
-(smoothingBaseSynth g₀ a u)) = toL2 (deTurckRealizeRemainderOf g₀ g_bg (gateRepOfWitness g₀ u h))`,
-i.e. the naive heat output's realized remainder matches the gate representative's — the Lean-refuted
-naive-heat claim (a pure heat residue contributes `−λᵢ(e^{−λᵢ}−1)·u.coeffᵢ`-type terms falsifying
-exact class equality) — so the size/Lipschitz/solvability conjunction genuinely constrains `corr`
-away from zero.  The quantitative gate `‖gateRepOfWitness g₀ u h‖_{H^{2a}} ≤ Q` is **load-bearing**
-(T12), not packaging: `realizableAtGate` places no bound on the gate representative's high-order
-Sobolev norm, which is *unbounded* on an in-gate eigenmode train (order-`2a` gate-rep norm `= Q` but
-`Hᵃ⁺¹`-norm `→ 0`); the `Q`-bound excises exactly that obstruction, on which the *free*-`u` exact
-solvability is false.  **The corrector is existentially FREE — pinned to no heat form**: the matched
-carrier `smoothingBaseSynth g₀ a u + corr u` is *not* forced into the unit-time heat-semigroup output
-range, so the backward-heat blow-up (`toL2`-injectivity, `e^{+λᵢ}` growth) refutation of the
-heat-pinned shape does *not* apply (the eigen-coordinate test passes: no unsuppressed-vs-heat-range
-pinning).  **Not packaging** — the solvability arm is the `L²`-class identity of two realized DeTurck
+**Fill route** (the honest new frontier — the per-curve realized-remainder gauge-cancellation
+residue along the Duhamel trajectory): build `corr` from the forward engine's mild Duhamel
+trajectory (`maxRegDuhamelSolFieldHa1`, `Analysis/Spectral/Intrinsic/DeTurck/RemainderShortTimeExistence.lean`),
+whose `gforce =ᵐ gtraj` carrier tie (`DuhamelMildSolutionData`, ibid. ~174) supplies the
+trajectory-coordinate identity; convert the corrected carrier's realized remainder to the gate
+representative's *own* realized remainder, then close to the gauge section through the **sorry-free**
+gate identity `deTurckRealizeRemainderOf_gateRepOfWitness` (the realized remainder of the gate
+representative *is* the gauge section, proven in-file above), the principal-symbol cancellation
+(`deTurckNonlinearitySpectral_principalPart_cancels`) reducing the residual class difference
+`Φ(base u + corr u) − Φ(gateRep u)` to a first-order quantity along the trajectory (the
+realized-remainder-to-retag splitting identity `Φ(T) = toL2 (deTurckRHSRetag g₀ g_bg g_T) −
+toL2 (Δ_∇ T)` to be established on fibre-small `T`, *not* yet on disk as a named lemma).
+
+**Dual litmus.**  **Non-vacuous** — the per-curve match rejects the degenerate witness `corr ≡ 0`
+(equivalently the carrier `S ≡ smoothingBaseSynth g₀ a`, the naive heat carrier): with `corr ≡ 0`
+the match would read `toL2 (deTurckRealizeRemainderOf g₀ g_bg (smoothingBaseSynth g₀ a (ι (u₂ s)))) =
+toL2 (deTurckRemainderRealizeSection g₀ g_bg (ι (u₂ s)))`, the Lean-refuted naive-heat claim (a pure
+heat residue contributes `−λᵢ(e^{−λᵢ}−1)·u.coeffᵢ`-type terms falsifying exact class equality), so
+the size/Lipschitz/match conjunction genuinely constrains `corr` away from zero.  The `∃ T`-inside-
+the-binder sub-horizon quantifier does **not** imply the static per-`u` form (a sub-horizon-existential
+gauge match along a self-bounded carrier is strictly weaker than the static exact class equality for
+*every* in-gate `u`).  The background `g_bg` appears on both sides of the match (the realized
+remainder and the gauge section are both `deTurck…g₀ g_bg …`), so neither side packages the other.
+The `DuhamelMildSolutionData` hypothesis is **load-bearing** (T12), not packaging: it restricts
+`ι ∘ u₂` to a genuine self-bounded flow trajectory, exactly what excises the in-gate eigen-train on
+which the *free*-`u` exact match is false.  **The corrector is existentially FREE — pinned to no heat
+form**: the matched carrier `smoothingBaseSynth g₀ a u + corr u` is *not* forced into the unit-time
+heat-semigroup output range, so the backward-heat blow-up refutation of the heat-pinned shape does
+*not* apply.  **Not packaging** — the match arm is the `L²`-class identity of two realized DeTurck
 remainders, structurally distinct from the real-valued size/Lipschitz arms; this is an
 `Exists`-output corrector, never a binder hypothesis.  **Intrinsic** — `toL2`/`toHs` are `g`-inner;
 no `chartJ`, no raw `M → E`.
 
 **The body is `sorry`** — the honest posited analytic frontier of the `/prove` recursion: the
-first-order-freedom solvability of the realized DeTurck-remainder operator `Φ` on the `Q`-gated
-gate-realizable locus (the operator's range covering the gate representative's `Φ`-class by a
-uniformly `Hᵃ⁺¹`-controlled, `H^{a+2}`-Lipschitz continuous corrector — the elliptic/spectral
-content the cancelled principal symbol opens, transiting the Weyl/Gårding spectral substrate).
-Consumers transitively depend on `sorryAx` through it. -/
+per-curve realized-remainder gauge-cancellation residue along the Duhamel trajectory (the
+elliptic/spectral content the cancelled principal symbol opens, transiting the Weyl/Gårding spectral
+substrate).  Consumers transitively depend on `sorryAx` through it. -/
 private theorem exists_gateLocusFirstOrderFreedomSolvable
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) :
@@ -2014,473 +2024,9 @@ private theorem exists_gateLocusFirstOrderFreedomSolvable
         ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
           ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
               (corr u - corr u')‖ ≤ D' * ‖u - u'‖) ∧
-      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
-          (h : realizableAtGate (I := I) g₀ u),
-        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
-            (gateRepOfWitness (I := I) g₀ u h)‖ ≤ Q →
-        Integral.L2.SmoothCcTensor.toL2
-            (deTurckRealizeRemainderOf (I := I) g₀ g_bg
-              (smoothingBaseSynth (I := I) g₀ a u + corr u))
-          = Integral.L2.SmoothCcTensor.toL2
-              (deTurckRealizeRemainderOf (I := I) g₀ g_bg
-                (gateRepOfWitness (I := I) g₀ u h))) := by
+      PerCurveRealizeGaugeMatch (I := I) g₀ g_bg a Q
+        (fun u => smoothingBaseSynth (I := I) g₀ a u + corr u) := by
   sorry
-
-set_option linter.unusedVariables false in
-/-- **The gate-locus first-order-freedom corrector over the coercive inverse, in FREE-corrector form
-(the irreducible static-gauge-solvability frontier — proven by composition over the operator-value
-solvability node).**
-
-For the anchor `g₀`, a flow background `g_bg`, a supercritical order `a` (`2a > dim M + 4`), the
-bounded first-order linearization `B₁ : H^{a+1} →L Hᵃ` of the realized DeTurck nonlinearity at the
-origin (child `A`), and the Lax–Milgram inverse `Linv : H^{a+1} ≃L[ℝ] H^{a+1}` of the
-Gårding-coercive linearized energy form (child `B`, with its coercive form `Bform` recorded by
-`hLinv`), there is a **free corrector** `corr : H^{a+1}(g₀) → SmoothCcTensor g₀ 0 2` — pinned to no
-heat-synthesis form whatsoever — and a match-gate slack `Q > 0` carrying, in global linear form:
-
-* the **all-order** linear intrinsic-Sobolev size bound `‖(corr u).toHs n‖ ≤ Dₙ · ‖u‖` (at every
-  order `n`, over **all** of `H^{a+1}`);
-* the `H^{a+2}` Lipschitz difference bound `‖(corr u − corr u').toHs (a+2)‖ ≤ D' · ‖u − u'‖` (over
-  **all** of `H^{a+1}`); and
-* the **per-`u` gate-locus gauge match of the corrected carrier**: for every gate-realizable `u`
-  whose order-`2a` gate representative has Sobolev norm `≤ Q`, the realized DeTurck remainder of the
-  corrected carrier `smoothingBaseSynth g₀ a u + corr u` coincides, at the `L²`-class level (through
-  `SmoothCcTensor.toL2`), with the gate-based gauge `deTurckRemainderRealizeSection g₀ g_bg u`.
-
-**The corrector is existentially FREE — pinned to no heat form.**  The conclusion commits `corr u`
-to no synthesis; in particular it does *not* place `corr u` in the unit-time heat-semigroup output
-range.  A previous formulation of this node returned an *energy-coordinate* value map `c : H^{a+1} →
-H^{a+1}` and matched the **heat-realized** corrected carrier `smoothingBaseSynth g₀ a u +
-smoothingBaseSynth g₀ a (c u)` — both summands in the unit-time heat output range
-(`tensorHeatSemigroupHs_output_smoothRepr_coeff`: the `i`-th `L²`-coordinate is `e^{−λᵢ}·(·).coeffᵢ`,
-a strict eigen-suppression) — against `deTurckRemainderRealizeSection g₀ g_bg u`, whose gate-rep
-realized remainder carries *unsuppressed* coordinates.  Reproducing those unsuppressed coordinates
-from a heat-suppressed carrier needs backward-heat `e^{+λᵢ}` growth, impossible for `c u ∈ H^{a+1}`
-(through `toL2`-injectivity): that shape was Lean-certified UNSATISFIABLE and has been removed.  The
-project already excised this exact pinning once (the deleted heat-corrected corrector tower); any
-fill of this node must exercise the freedom of `corr` (its realization need *not* be a unit-time heat
-output), never re-pin `corr` to `smoothingBaseSynth ∘ (·)`.
-
-The genuine analytic content is the **first-order-freedom solvability of the realized
-DeTurck-remainder operator** on the `Q`-gated gate locus, isolated in the strictly-deeper
-operator-value node `exists_gateLocusFirstOrderFreedomSolvable` (the `Φ`-class-hitting solvability
-`Φ(base u + corr u) = Φ(gateRep u)`, with the matched carrier an existentially-free
-`SmoothCcTensor`, not a heat realization).  Routing through that primitive resolves the
-binder-level dead end: the bounded first-order linearization `B₁` and its coercive Lax–Milgram
-inverse `Linv` (the binders below) do *not* by themselves produce the gate-gated `L²`-class match —
-no mechanism in `{B₁, hB₁, Linv, Bform}` supplies the `Q`-gated `toL2`-class range condition (the
-linearization data carries no gauge/operator-range information) — so the binders are consumed
-**vacuously** here and the genuine solvability is supplied by the clean operator-value child.
-
-**Non-vacuous** — the match rejects the degenerate `corr ≡ 0` (the naive heat carrier): with `corr ≡
-0` the corrected carrier collapses to `smoothingBaseSynth g₀ a u` and the match becomes the
-Lean-refuted naive-heat claim `toL2 (deTurckRealizeRemainderOf g₀ g_bg (smoothingBaseSynth g₀ a u)) =
-toL2 (deTurckRemainderRealizeSection g₀ g_bg u)` (a pure heat residue contributes
-`−λᵢ(e^{−λᵢ}−1)·u.coeffᵢ`-type terms falsifying exact class equality), so the size/Lipschitz/match
-conjunction genuinely constrains `corr` away from zero.  **Not packaging** — the match arm is the
-`L²`-class identity of two realized DeTurck remainders, structurally distinct from the real-valued
-size/Lipschitz arms; this is an `Exists`-output corrector, never a binder hypothesis.  **Intrinsic**
-— `toL2`/`toHs` are `g`-inner; no `chartJ`, no raw `M → E`.
-
-**Proven by composition** over the strictly-more-primitive operator-value solvability node
-`exists_gateLocusFirstOrderFreedomSolvable`: that node supplies the corrector with its all-order
-linear size / `H^{a+2}` Lipschitz control and the `Φ`-class-hitting solvability `Φ(base u + corr u) =
-Φ(gateRep u)`; this node's gate match then follows by converting the right-hand side through the
-*sorry-free* gate identity `deTurckRealizeRemainderOf_gateRepOfWitness` (the realized remainder of
-the gate representative *is* the gauge section).  The body carries no `sorry` of its own; consumers
-transitively depend on `sorryAx` only through that operator-value solvability node (the genuine
-first-order-freedom analytic frontier) and the Weyl/Gårding/heat spectral substrate it bottoms on. -/
-private theorem exists_gateGaugeEnergyCorrectorValue
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B₁ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
-        tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
-    (hB₁ : HasFDerivAt (IntrinsicSpectral.deTurckRealizeNonlinearityTower (I := I) g₀ g_bg a) B₁
-        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)))
-    (Linv : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) ≃L[ℝ]
-        tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
-    (Bform : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
-        tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ] ℝ)
-    (hcoercive : IsCoercive Bform)
-    (hLinv : Linv = hcoercive.continuousLinearEquivOfBilin) :
-    ∃ (corr : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
-          Integral.L2.SmoothCcTensor g₀ 0 2)
-        (Q : ℝ),
-      0 < Q ∧
-      (∀ (n : ℕ), ∃ Dₙ : ℝ, 0 ≤ Dₙ ∧
-        ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n (corr u)‖
-            ≤ Dₙ * ‖u‖) ∧
-      (∃ D' : ℝ, 0 ≤ D' ∧
-        ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
-              (corr u - corr u')‖ ≤ D' * ‖u - u'‖) ∧
-      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
-          (h : realizableAtGate (I := I) g₀ u),
-        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
-            (gateRepOfWitness (I := I) g₀ u h)‖ ≤ Q →
-        Integral.L2.SmoothCcTensor.toL2
-            (deTurckRealizeRemainderOf (I := I) g₀ g_bg
-              (smoothingBaseSynth (I := I) g₀ a u + corr u))
-          = Integral.L2.SmoothCcTensor.toL2
-              (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
-  classical
-  -- The strictly-more-primitive operator-value solvability node: a corrector with all-order linear
-  -- size / `H^{a+2}` Lipschitz control and the `Φ`-class-hitting solvability `Φ(base u + corr u) =
-  -- Φ(gateRep u)` on the `Q`-gated gate-realizable locus.  (The binders `B₁`/`hB₁`/`Linv`/`Bform`
-  -- carry no gauge/operator-range data, so they are consumed vacuously: the genuine solvability is
-  -- supplied by this clean operator-value child.)
-  obtain ⟨corr, Q, hQ, hcsize, ⟨D', hD'_nn, hD'lip⟩, hcmatch⟩ :=
-    exists_gateLocusFirstOrderFreedomSolvable (I := I) g₀ g_bg a ha
-  refine ⟨corr, Q, hQ, hcsize, ⟨D', hD'_nn, hD'lip⟩, fun u h hQu => ?_⟩
-  -- Convert the operator-value match `Φ(base u + corr u) = Φ(gateRep u)` to the gauge-section match
-  -- through the sorry-free gate identity `deTurckRealizeRemainderOf (gateRepOfWitness u h) =
-  -- deTurckRemainderRealizeSection u`.
-  rw [hcmatch u h hQu, deTurckRealizeRemainderOf_gateRepOfWitness]
-
-/-- **The gate-locus first-order-freedom corrector over the coercive inverse, free-corrector form
-(re-exposing the corrector-value frontier through the contraction-family vehicle the chain reads).**
-
-For the anchor `g₀`, a flow background `g_bg`, a supercritical order `a` (`2a > dim M + 4`), the
-bounded first-order linearization `B₁` of the realized DeTurck nonlinearity at the origin (child
-`A`), and the Lax–Milgram inverse `Linv` of the Gårding-coercive linearized energy form (child `B`),
-there is a **free corrector** `corr : H^{a+1}(g₀) → SmoothCcTensor g₀ 0 2` — pinned to no
-heat-synthesis form — and a match-gate slack `Q > 0` carrying, in global linear form, the all-order
-intrinsic-Sobolev size bound, the `H^{a+2}` Lipschitz difference bound, and — on the `Q`-gated
-gate-realizable locus — the realized DeTurck remainder of the corrected carrier `smoothingBaseSynth
-g₀ a u + corr u` matching, at the `L²`-class level, the gate-based gauge
-`deTurckRemainderRealizeSection g₀ g_bg u`.
-
-This node previously exposed an *energy-coordinate contraction family* `Ψ : H^{a+1} → (H^{a+1} →
-H^{a+1})` whose fixed-point gate identity matched the **heat-realized** corrected carrier
-`smoothingBaseSynth g₀ a u + smoothingBaseSynth g₀ a (fixedPoint (Ψ u) (hc u))` — both summands in
-the unit-time heat range — which backward-heat blow-up refutes (`toL2`-injectivity); that pinned
-energy-coordinate shape has been removed in favour of the free corrector below.  The genuine
-contraction is still built over `Linv` (bounded by Lax–Milgram; the super-linear remainder small
-because the second-order principal symbol of the realized DeTurck remainder has cancelled,
-`deTurckNonlinearitySpectral_principalPart_cancels`), but the matched carrier it produces is now an
-existentially-free `SmoothCcTensor`, not a heat realization.
-
-**Non-vacuous** — the match rejects the degenerate `corr ≡ 0` (the naive heat carrier): with `corr ≡
-0` the corrected carrier collapses to `smoothingBaseSynth g₀ a u` and the match becomes the
-Lean-refuted naive-heat claim (a pure heat residue contributes `−λᵢ(e^{−λᵢ}−1)·u.coeffᵢ`-type terms
-falsifying exact class equality), so the size/Lipschitz/match conjunction genuinely constrains `corr`
-away from zero; the `Linv` hypothesis is genuinely consumed (the corrector is `Linv`-built).  **Not
-packaging** — the match arm is the `L²`-class identity of two realized DeTurck remainders,
-structurally distinct from the real-valued size/Lipschitz arms; this is an `Exists`-output corrector,
-never a binder hypothesis.  **Intrinsic** — `toL2`/`toHs` are `g`-inner; no `chartJ`, no raw `M → E`.
-
-**Proven by forwarding the strictly-deeper free-corrector value node**
-`exists_gateGaugeEnergyCorrectorValue`, which produces the corrector with its all-order size /
-`H^{a+2}` Lipschitz control and the `Q`-gated gate match in exactly this form.  Consumers
-transitively depend on `sorryAx` only through that corrector value node (the genuine static
-gauge-solvability frontier) and the linear inverse / Gårding / Weyl substrate it builds on. -/
-private theorem exists_gaugeCorrectionContractionFamily
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B₁ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
-        tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
-    (hB₁ : HasFDerivAt (IntrinsicSpectral.deTurckRealizeNonlinearityTower (I := I) g₀ g_bg a) B₁
-        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)))
-    (Linv : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) ≃L[ℝ]
-        tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
-    (Bform : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
-        tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ] ℝ)
-    (hcoercive : IsCoercive Bform)
-    (hLinv : Linv = hcoercive.continuousLinearEquivOfBilin) :
-    ∃ (corr : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
-          Integral.L2.SmoothCcTensor g₀ 0 2)
-        (Q : ℝ),
-      0 < Q ∧
-      (∀ (n : ℕ), ∃ Dₙ : ℝ, 0 ≤ Dₙ ∧
-        ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n (corr u)‖
-            ≤ Dₙ * ‖u‖) ∧
-      (∃ D' : ℝ, 0 ≤ D' ∧
-        ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
-              (corr u - corr u')‖ ≤ D' * ‖u - u'‖) ∧
-      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
-          (h : realizableAtGate (I := I) g₀ u),
-        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
-            (gateRepOfWitness (I := I) g₀ u h)‖ ≤ Q →
-        Integral.L2.SmoothCcTensor.toL2
-            (deTurckRealizeRemainderOf (I := I) g₀ g_bg
-              (smoothingBaseSynth (I := I) g₀ a u + corr u))
-          = Integral.L2.SmoothCcTensor.toL2
-              (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
-  classical
-  -- The free-corrector value node solving the static gauge-cancellation equation, with its all-order
-  -- linear size / `H^{a+2}` Lipschitz control and the `Q`-gated gate match on the corrected carrier.
-  exact exists_gateGaugeEnergyCorrectorValue (I := I) g₀ g_bg a ha B₁ hB₁ Linv Bform hcoercive hLinv
-
-/-- **The gate-locus first-order-freedom corrector over the coercive inverse, free-corrector form
-(the nonlinear-contraction frontier of child `D`, returned as a free `SmoothCcTensor` corrector).**
-
-For the anchor `g₀`, a flow background `g_bg`, a supercritical order `a` (`2a > dim M + 4`), the
-bounded first-order linearization `B₁ : H^{a+1} →L Hᵃ` of the realized DeTurck nonlinearity at the
-origin (child `A`), and the Lax–Milgram inverse `Linv : H^{a+1} ≃L[ℝ] H^{a+1}` of the
-Gårding-coercive linearized energy form (child `B`, with its coercive form `Bform` recorded by
-`hLinv`), there is a **free corrector** `corr : H^{a+1}(g₀) → SmoothCcTensor g₀ 0 2` — pinned to no
-heat-synthesis form — and a match-gate slack `Q > 0` carrying, in global linear form, the all-order
-intrinsic-Sobolev size bound, the `H^{a+2}` Lipschitz difference bound, and — on the `Q`-gated
-gate-realizable locus — the realized DeTurck remainder of the corrected carrier `smoothingBaseSynth
-g₀ a u + corr u` matching, at the `L²`-class level, the gate-based gauge
-`deTurckRemainderRealizeSection g₀ g_bg u`.
-
-This node previously returned an *energy-coordinate* solution map `w : H^{a+1} → H^{a+1}` and matched
-the **heat-realized** corrected carrier `smoothingBaseSynth g₀ a u + smoothingBaseSynth g₀ a (w u)` —
-both summands in the unit-time heat range — which backward-heat blow-up refutes
-(`toL2`-injectivity); that pinned energy-coordinate shape has been removed in favour of the free
-corrector below.  The genuine fixed point is still the Banach fixed point of the coercive-inverse
-contraction over `Linv` (bounded by Lax–Milgram; the super-linear remainder small because the
-second-order principal symbol of the realized DeTurck remainder has cancelled,
-`deTurckNonlinearitySpectral_principalPart_cancels`), but the corrector the fixed point produces is
-now an existentially-free `SmoothCcTensor`, not the heat realization `smoothingBaseSynth g₀ a (w u)`.
-
-**Non-vacuous** — the match rejects the degenerate `corr ≡ 0` (the naive heat carrier): with `corr ≡
-0` the corrected carrier collapses to `smoothingBaseSynth g₀ a u` and the match would read `toL2
-(deTurckRealizeRemainderOf g₀ g_bg (smoothingBaseSynth g₀ a u)) = toL2 (deTurckRemainderRealizeSection
-g₀ g_bg u)`, the Lean-refuted naive-heat claim (a pure heat residue contributes
-`−λᵢ(e^{−λᵢ}−1)·u.coeffᵢ`-type terms falsifying exact class equality), so the size/Lipschitz/match
-conjunction genuinely constrains `corr` away from zero, and the `Linv` hypothesis is genuinely
-consumed (the corrector is `Linv`-built).  **Not packaging** — the match arm is the `L²`-class
-identity of two realized DeTurck remainders, structurally distinct from the real-valued size /
-Lipschitz arms; this is an `Exists`-output corrector, never a binder hypothesis.  **Intrinsic** —
-`toL2`/`toHs` are `g`-inner; no `chartJ`, no raw `M → E`.
-
-**Proven by forwarding the strictly-deeper contraction-family node**
-`exists_gaugeCorrectionContractionFamily`, which produces the corrector with its all-order size /
-`H^{a+2}` Lipschitz control and the `Q`-gated gate match in exactly this form.  Consumers
-transitively depend on `sorryAx` only through that node (the genuine nonlinear-contraction frontier)
-and the linear inverse / Gårding / Weyl substrate it builds on. -/
-private theorem exists_gateGaugeEnergyFixedPoint
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B₁ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
-        tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
-    (hB₁ : HasFDerivAt (IntrinsicSpectral.deTurckRealizeNonlinearityTower (I := I) g₀ g_bg a) B₁
-        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)))
-    (Linv : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) ≃L[ℝ]
-        tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
-    (Bform : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
-        tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ] ℝ)
-    (hcoercive : IsCoercive Bform)
-    (hLinv : Linv = hcoercive.continuousLinearEquivOfBilin) :
-    ∃ (corr : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
-          Integral.L2.SmoothCcTensor g₀ 0 2)
-        (Q : ℝ),
-      0 < Q ∧
-      (∀ (n : ℕ), ∃ Dₙ : ℝ, 0 ≤ Dₙ ∧
-        ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n (corr u)‖
-            ≤ Dₙ * ‖u‖) ∧
-      (∃ D' : ℝ, 0 ≤ D' ∧
-        ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
-              (corr u - corr u')‖ ≤ D' * ‖u - u'‖) ∧
-      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
-          (h : realizableAtGate (I := I) g₀ u),
-        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
-            (gateRepOfWitness (I := I) g₀ u h)‖ ≤ Q →
-        Integral.L2.SmoothCcTensor.toL2
-            (deTurckRealizeRemainderOf (I := I) g₀ g_bg
-              (smoothingBaseSynth (I := I) g₀ a u + corr u))
-          = Integral.L2.SmoothCcTensor.toL2
-              (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
-  classical
-  -- The free-corrector contraction-family node, with its all-order linear size / `H^{a+2}` Lipschitz
-  -- control and the `Q`-gated gate match on the corrected carrier.
-  exact exists_gaugeCorrectionContractionFamily (I := I) g₀ g_bg a ha B₁ hB₁ Linv Bform hcoercive
-    hLinv
-
-/-- **The Banach fixed point of the gate-locus first-order-freedom correction over the coercive
-inverse (child `D` of the `A → B → D` gauge-solvability chain — the nonlinear contraction step).**
-
-For the anchor `g₀`, a flow background `g_bg`, a supercritical order `a` (`2a > dim M + 4`), the
-bounded first-order linearization `B₁ : H^{a+1} →L Hᵃ` of the realized DeTurck nonlinearity at the
-origin (child `A`, passed as `hB₁ : HasFDerivAt N B₁ 0`), and the Lax–Milgram inverse `Linv : H^{a+1}
-≃L[ℝ] H^{a+1}` of the Gårding-coercive linearized energy form (child `B`, passed as `hLinv` recording
-that `Linv` is the inverse `Bform♯` of a coercive form `Bform` whose `B₁`-coupling identity holds),
-there is a `(0,2)`-perturbation **corrector** `corr : H^{a+1}(g₀) → SmoothCcTensor g₀ 0 2` and a
-match-gate slack `Q > 0` carrying, in global linear form, the all-order intrinsic-Sobolev size bound,
-the `H^{a+2}` Lipschitz difference bound, and — on the `Q`-gated gate-realizable locus — the realized
-DeTurck remainder of the corrected carrier `smoothingBaseSynth g₀ a u + corr u` matching, at the
-`L²`-class level, the gate-based gauge `deTurckRemainderRealizeSection g₀ g_bg u`.
-
-This is the genuine nonlinear-solvability step built **on top of** the linear coercive inverse `Linv`:
-write the realized DeTurck remainder of `base u + corr u` as the linearization `L (corr u)` plus a
-higher-order (genuinely `H^{a+2}`-Lipschitz, super-linearly small) remainder, so the gate-match `Φ(base
-u + corr u) = Φ(gateRep u)` is the fixed-point equation `corr u = Linv (gauge-target − base-residual −
-remainder(corr u))`; the map `corr ↦ Linv ∘ (… − remainder(corr))` is a contraction on the complete
-gate-controlled match domain (`Linv` bounded by Lax–Milgram, `remainder` super-linearly small because
-the second-order part cancelled), so `ContractingWith.fixedPoint` produces the corrector, whose size /
-Lipschitz arms are inherited from `Linv`'s norm and the contraction's geometric control, and whose
-gate-match is the fixed-point identity on the `Q`-gated locus (the `Q`-bound on the order-`2a`
-gate-representative norm excising the in-gate eigen-train on which the free-`u` match is false, T12).
-
-**Non-vacuous** — the match rejects `corr ≡ 0` (the naive heat carrier): with `corr ≡ 0` the match
-would read `toL2 (deTurckRealizeRemainderOf g₀ g_bg (smoothingBaseSynth g₀ a u)) = toL2
-(deTurckRemainderRealizeSection g₀ g_bg u)`, the Lean-refuted naive-heat claim (a pure heat residue
-contributes `−λᵢ(e^{−λᵢ}−1)·u.coeffᵢ`-type terms falsifying exact class equality), so the
-size/Lipschitz/match conjunction genuinely constrains `corr` away from zero, and the `Linv` hypothesis
-is genuinely consumed (the corrector is `Linv`-built).  **Not packaging** — the match arm is the
-`L²`-class identity of two realized DeTurck remainders, structurally distinct from the real-valued size
-/Lipschitz arms; this is an `Exists`-output corrector, never a binder hypothesis.  **Intrinsic** —
-`toL2`/`toHs` are `g`-inner; no `chartJ`, no raw `M → E`.
-
-**Proven by forwarding the free-corrector fixed-point node.**  The genuine nonlinear contraction is
-carried by the strictly-deeper node `exists_gateGaugeEnergyFixedPoint`, which now returns the free
-corrector `corr : H^{a+1} → SmoothCcTensor g₀ 0 2` directly (the Banach fixed point of the
-coercive-inverse contraction `v ↦ Linv (gaugeTarget u − baseResidual u − superlinearRemainder v)`)
-with its all-order linear size bound, its `H^{a+2}` Lipschitz bound, and the per-`u` gate match of
-the corrected carrier `smoothingBaseSynth g₀ a u + corr u` — in exactly this form, so this node
-forwards it verbatim.  A previous formulation matched the *heat-realized* carrier `smoothingBaseSynth
-g₀ a u + smoothingBaseSynth g₀ a (w u)` (`w` the energy-coordinate fixed point), pinning both summands
-to the unit-time heat range, which backward-heat blow-up refutes (`toL2`-injectivity); that pinning
-has been removed, and the corrector is no longer the heat realization `smoothingBaseSynth g₀ a (w u)`
-but an existentially-free `SmoothCcTensor`.  Consumers transitively depend on `sorryAx` only through
-that fixed-point node (the genuine nonlinear contraction) and the linear inverse / Gårding / Weyl
-substrate it builds on. -/
-private theorem exists_firstOrderFreedomCorrector_ofCoerciveInverse
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B₁ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
-        tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
-    (hB₁ : HasFDerivAt (IntrinsicSpectral.deTurckRealizeNonlinearityTower (I := I) g₀ g_bg a) B₁
-        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)))
-    (Linv : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) ≃L[ℝ]
-        tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
-    (Bform : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ]
-        tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →L[ℝ] ℝ)
-    (hcoercive : IsCoercive Bform)
-    (hLinv : Linv = hcoercive.continuousLinearEquivOfBilin) :
-    ∃ (corr : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
-          Integral.L2.SmoothCcTensor g₀ 0 2)
-        (Q : ℝ),
-      0 < Q ∧
-      (∀ (n : ℕ), ∃ Dₙ : ℝ, 0 ≤ Dₙ ∧
-        ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n (corr u)‖
-            ≤ Dₙ * ‖u‖) ∧
-      (∃ D' : ℝ, 0 ≤ D' ∧
-        ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
-              (corr u - corr u')‖ ≤ D' * ‖u - u'‖) ∧
-      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
-          (h : realizableAtGate (I := I) g₀ u),
-        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
-            (gateRepOfWitness (I := I) g₀ u h)‖ ≤ Q →
-        Integral.L2.SmoothCcTensor.toL2
-            (deTurckRealizeRemainderOf (I := I) g₀ g_bg
-              (smoothingBaseSynth (I := I) g₀ a u + corr u))
-          = Integral.L2.SmoothCcTensor.toL2
-              (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
-  classical
-  -- The free-corrector fixed-point node, returning the corrector `corr : H^{a+1} → SmoothCcTensor`
-  -- with its all-order linear size / `H^{a+2}` Lipschitz control and the `Q`-gated gate match on the
-  -- corrected carrier `smoothingBaseSynth g₀ a u + corr u`, in exactly this form.
-  exact exists_gateGaugeEnergyFixedPoint (I := I) g₀ g_bg a ha B₁ hB₁ Linv Bform hcoercive hLinv
-
-/-- **The per-`u` gate-locus first-order-freedom gauge match of the corrected carrier (the genuine
-irreducible analytic frontier of the gauge corrector, transiting the Weyl/Gårding node).**
-
-For the anchor `g₀`, a flow background `g_bg`, and a supercritical order `a` (`2a > dim M + 4`),
-there is a `(0,2)`-perturbation **corrector** `corr : Hᵃ⁺¹(g₀) → SmoothCcTensor g₀ 0 2` and a
-match-gate slack `Q > 0` carrying, in **global** (un-ball-restricted, linear) form:
-
-* the all-order linear intrinsic-Sobolev size bound `‖(corr u).toHs n‖ ≤ Dₙ · ‖u‖` (at every
-  order `n`, over **all** of `Hᵃ⁺¹`);
-* the `H^{a+2}` Lipschitz difference bound `‖(corr u − corr u').toHs (a+2)‖ ≤ D' · ‖u − u'‖`
-  (over **all** of `Hᵃ⁺¹`); and
-* the **per-`u` gate-locus gauge match**: for every `u` that is gate-realizable
-  (`realizableAtGate g₀ u`) and whose canonical gate representative `gateRepOfWitness g₀ u h` has
-  order-`2a` intrinsic Sobolev norm `≤ Q`, the realized DeTurck remainder of the corrected carrier
-  `smoothingBaseSynth g₀ a u + corr u` coincides, **at the `L²`-class level** (through
-  `SmoothCcTensor.toL2`), with the gate-based gauge `deTurckRemainderRealizeSection g₀ g_bg u`:
-  ```
-  toL2 (deTurckRealizeRemainderOf g₀ g_bg (smoothingBaseSynth g₀ a u + corr u))
-    = toL2 (deTurckRemainderRealizeSection g₀ g_bg u) .
-  ```
-
-This is the **consumer-minimal** form of the first-order-freedom solvability: it is exactly the
-per-point datum the per-curve consumer `exists_firstOrderFreedomCorrectedCarrier` requires — along a
-genuine Duhamel carrier trajectory `ι ∘ u₂`, the `hgate`/`_hQ` hypotheses of
-`PerCurveRealizeGaugeMatch` supply, for each interior time `s`, precisely the gate-realizability and
-the order-`2a` `Q`-bound this per-`u` match consumes (at `u := ι (u₂ s)`).  The quantitative gate
-`‖gateRepOfWitness g₀ u h‖_{H^{2a}} ≤ Q` is **load-bearing** (T12), not packaging: `realizableAtGate`
-places no bound on the gate representative's high-order Sobolev norm, which is *unbounded* on an
-in-gate eigenmode train (order-`2a` gate-rep norm `= Q` but `Hᵃ⁺¹`-norm `→ 0`); the `Q`-bound excises
-exactly that obstruction, on which the *free*-`u` exact match is false.
-
-**Why the match is genuinely first order.**  The leading second-order `−λᵢ` rough-Laplacian
-principal symbol of the realized DeTurck remainder cancels the second-order re-tagged-RHS principal
-symbol (`deTurckNonlinearitySpectral_principalPart_cancels`, sorry-free), so the class quantity the
-corrected carrier must reproduce is a *first-order* freedom — rich enough to be hit by a
-globally-controlled continuous corrector without forcing `smoothingBaseSynth g₀ a u + corr u` to
-coincide, as a section, with the (discontinuous) gate representative.
-
-**Non-vacuous** — the match rejects the degenerate witness `corr ≡ 0` (the naive heat carrier): with
-`corr ≡ 0` the match would read `toL2 (deTurckRealizeRemainderOf g₀ g_bg (smoothingBaseSynth g₀ a u))
-= toL2 (deTurckRemainderRealizeSection g₀ g_bg u)`, i.e. the naive heat output's realized remainder
-matches the gauge — the Lean-refuted naive-heat claim (a pure heat residue contributes
-`−λᵢ(e^{−λᵢ}−1)·u.coeffᵢ`-type terms falsifying exact class equality) — so the size/Lipschitz/match
-conjunction genuinely constrains `corr` away from zero.  **Not packaging** — the match arm is the
-`L²`-class identity of two realized DeTurck remainders, structurally distinct from the real-valued
-size/Lipschitz arms; this is an `Exists`-output corrector, never a binder hypothesis.  **Intrinsic** —
-`toL2`/`toHs` are `g`-inner; no `chartJ`, no raw `M → E`.
-
-**Proven by composition of the `A → B → D` gauge-solvability chain** (the deep analytic content
-moved into the three named children, this node's body now genuine glue): child `A`
-(`IntrinsicSpectral.exists_deTurckFirstOrderCancelledLinearization`) supplies the first-order-cancelled
-Fréchet linearization `B₁`; child `B` (`exists_deTurckLinearization_coerciveInverse`) supplies the
-Gårding-coercive linearized energy form whose Lax–Milgram operator `Linv := Bform♯ :
-H^{a+1} ≃L[ℝ] H^{a+1}` (`IsCoercive.continuousLinearEquivOfBilin`) is the bounded inverse; child `D`
-(`exists_firstOrderFreedomCorrector_ofCoerciveInverse`) runs the nonlinear Banach fixed point over
-`Linv` to produce the gate-locus gauge-matched corrector.  Consumers transitively depend on `sorryAx`
-only through those three children (the genuine differentiability / Gårding-coercivity / contraction
-frontiers) and the Weyl/Gårding/heat spectral substrate they bottom on. -/
-private theorem exists_firstOrderFreedomCorrector_gateLocusGaugeMatch
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha : 2 * a > Module.finrank ℝ E + 4) :
-    ∃ (corr : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
-          Integral.L2.SmoothCcTensor g₀ 0 2)
-        (Q : ℝ),
-      0 < Q ∧
-      (∀ (n : ℕ), ∃ Dₙ : ℝ, 0 ≤ Dₙ ∧
-        ∀ u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) n (corr u)‖
-            ≤ Dₙ * ‖u‖) ∧
-      (∃ D' : ℝ, 0 ≤ D' ∧
-        ∀ u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2)
-              (corr u - corr u')‖ ≤ D' * ‖u - u'‖) ∧
-      (∀ (u : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
-          (h : realizableAtGate (I := I) g₀ u),
-        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * a)
-            (gateRepOfWitness (I := I) g₀ u h)‖ ≤ Q →
-        Integral.L2.SmoothCcTensor.toL2
-            (deTurckRealizeRemainderOf (I := I) g₀ g_bg
-              (smoothingBaseSynth (I := I) g₀ a u + corr u))
-          = Integral.L2.SmoothCcTensor.toL2
-              (deTurckRemainderRealizeSection (I := I) g₀ g_bg u)) := by
-  classical
-  -- Child `A`: the first-order-cancelled Fréchet linearization `B₁` of the realized DeTurck
-  -- nonlinearity at the origin (the principal second-order symbol having cancelled).
-  obtain ⟨B₁, hB₁⟩ :=
-    IntrinsicSpectral.exists_deTurckFirstOrderCancelledLinearization (I := I) g₀ g_bg a ha
-  -- Child `B`: the Gårding-coercive Lax–Milgram inverse of the linearized elliptic energy form
-  -- `L = −Δ_∇ + ι∘B₁` on the energy space `H^{a+1}` (the linear elliptic inversion step).
-  obtain ⟨Bform, hcoercive, _hBformEq⟩ :=
-    exists_deTurckLinearization_coerciveInverse (I := I) g₀ g_bg a ha B₁ hB₁
-  -- The bounded inverse operator produced by Lax–Milgram from the coercivity of `Bform`.
-  set Linv : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) ≃L[ℝ]
-      tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) :=
-    hcoercive.continuousLinearEquivOfBilin with hLinv
-  -- Child `D`: the nonlinear Banach fixed point over the coercive inverse `Linv`, producing the
-  -- gate-locus gauge-matched corrector (the nonlinear contraction step).
-  exact exists_firstOrderFreedomCorrector_ofCoerciveInverse (I := I) g₀ g_bg a ha B₁ hB₁
-    Linv Bform hcoercive hLinv
 
 /-- **The globally-controlled first-order-freedom corrected carrier (the honest posited analytic
 frontier of the gauge corrector — the carrier is existentially free, pinned to no heat form).**
@@ -2552,11 +2098,12 @@ private theorem exists_firstOrderFreedomCorrectedCarrier
               (S u - S u')‖ ≤ C' * ‖u - u'‖) ∧
       PerCurveRealizeGaugeMatch (I := I) g₀ g_bg a Q S := by
   classical
-  -- The per-`u` gate-locus first-order-freedom corrector: a corrector `corr` with all-order linear
+  -- The per-curve first-order-freedom solvability node: a corrector `corr` with all-order linear
   -- size bound and `H^{a+2}` Lipschitz, whose corrected carrier `smoothingBaseSynth g₀ a u + corr u`
-  -- reproduces the gauge's realized-remainder `L²`-class on the `Q`-gated gate-realizable locus.
+  -- reproduces the gauge's realized-remainder `L²`-class along any genuine Duhamel carrier
+  -- trajectory (the per-curve match is in exactly the carrier shape this node returns).
   obtain ⟨corr, Q, hQ, hcsize, ⟨D', hD'_nn, hD'lip⟩, hcmatch⟩ :=
-    exists_firstOrderFreedomCorrector_gateLocusGaugeMatch (I := I) g₀ g_bg a ha
+    exists_gateLocusFirstOrderFreedomSolvable (I := I) g₀ g_bg a ha
   -- The heat-smoothing base carrier's defining all-order size bound and `H^{a+2}` Lipschitz.
   obtain ⟨hbsize, ⟨Cb', hCb'_nn, hCb'lip⟩⟩ := smoothingBaseSynth_spec (I := I) g₀ a ha
   -- The corrected carrier `S u := smoothingBaseSynth g₀ a u + corr u`.
@@ -2599,14 +2146,9 @@ private theorem exists_firstOrderFreedomCorrectedCarrier
               (corr u - corr u')‖ := norm_add_le _ _
       _ ≤ Cb' * ‖u - u'‖ + D' * ‖u - u'‖ := add_le_add (hCb'lip u u') (hD'lip u u')
       _ = (Cb' + D') * ‖u - u'‖ := by ring
-  · -- The per-curve gauge match: along the Duhamel carrier `ι ∘ u₂`, the `hgate`/`_hQ` hypotheses
-    -- supply, for each interior time `s`, exactly the gate-realizability and order-`2a` `Q`-bound the
-    -- per-`u` gate-locus match `hcmatch` consumes (at `u := ι (u₂ s)`); take `T := T₀`.
-    intro T₀ hT₀ u₂ N_cont R gtraj _hduh hgate hQbnd
-    refine ⟨T₀, hT₀, le_refl _, fun s hs => ?_⟩
+  · -- The per-curve gauge match passes through verbatim: the gate-locus solvability node's
+    -- matched carrier is definitionally the corrected carrier `S` this node returns.
     exact hcmatch
-      (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-        (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ s)) (hgate s hs) (hQbnd s hs)
 
 /-- **The first-order-freedom gauge corrector against the gate representative's own realized
 remainder (proven by composition over the globally-controlled corrected carrier).**
