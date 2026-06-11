@@ -144,6 +144,234 @@ theorem appCc_curvOpField_eq_pureRGenuineDiffOp
       pureRGenuineDiffOp (I := I) (M := M) g 0 s S :=
   (Classical.choose_spec (exists_pureRGenuineDiffOp_base_appCc (I := I) (M := M) g) s S).symm
 
+/-- **The gauge-glued tensorial differentiated-curvature section `(∇R) S`.** For a smooth
+compactly-supported `(0, s)`-tensor `S`, the operator-field action of the covariant derivative of the
+frame-free curvature operator field `Φ₀ s` (`curvOpField`) on `S`:
+```
+genuineDiffCurvSection g s S := appCc (covGrad g s s (Φ₀ s)) S,
+```
+the differentiated-curvature contraction `∑ᵢ (∇R)(Bᵢ, ·) S` (the `(∇R) S` field), a smooth
+compactly-supported `(0, s + 1)`-tensor. It is the covariant-derivative counterpart of the pure-Riemann
+genuine section `GcurvSection g s S`: where the pure-Riemann trace is the action `appCc (Φ₀ s) S` of the
+order-`0` curvature operator, the differentiated trace is the action `appCc (∇Φ₀ s) S` of its covariant
+derivative (the operator-field product rule `covGrad_appCc_eq` separates the `(∇R) S` summand from the
+`R(∇S)` spectator). It is constructed tensorially and smoothly through the operator-field calculus, never
+extension-curried. -/
+noncomputable def genuineDiffCurvSection
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
+    SmoothCcTensor g 0 (s + 1) :=
+  appCc (I := I) (M := M) g (s + 0) (s + 0 + 1)
+    (covGrad (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s)) S
+
+/-- **The fibre value of `genuineDiffCurvSection` is the fibrewise composition `(∇Φ₀ s).comp S`.**
+Definitional: the operator-field action `appCc` evaluates fibrewise as the composition of the
+differentiated curvature operator with the section value (`appCc_toSection`). -/
+@[simp] lemma genuineDiffCurvSection_toSection
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) :
+    (genuineDiffCurvSection (I := I) (M := M) g s S).toSection x =
+      (show Tensor0SSpace (s + 0) I x →L[ℝ] Tensor0SSpace (s + 0 + 1) I x from
+        (covGrad (I := I) (M := M) g (s + 0) (s + 0)
+          (curvOpField (I := I) (M := M) g s)).toSection x).comp
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0) I x from S.toSection x) := by
+  rw [genuineDiffCurvSection,
+    appCc_toSection (I := I) (M := M) g (s + 0) (s + 0 + 1)
+      (covGrad (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s)) S x]
+  rfl
+
+/-- **The covariant-derivative spec of the frame-free curvature operator field (the section-level
+B-rule inversion).** For a closed smooth Riemannian manifold `(M, g)`, covariant rank `s`, and smooth
+compactly-supported `(0, s)`-tensor `S`, the gauge-glued tensorial differentiated-curvature section
+`genuineDiffCurvSection g s S` (the operator-field action `appCc (covGrad (Φ₀ s)) S` of the covariant
+derivative of the frame-free curvature operator field `Φ₀ s := curvOpField g s`) equals the covariant
+gradient of the order-`0` pure-Riemann curvature trace minus the passenger-slot extension of `Φ₀ s`
+acting on `∇S`:
+```
+genuineDiffCurvSection g s S
+  = covGrad g 0 s (pureRGenuineDiffOp g 0 s S)
+    − appCc (slotExtend (Φ₀ s)) (covGrad g 0 s S).
+```
+Both right-hand terms are concrete: `pureRGenuineDiffOp g 0 s S = appCc (Φ₀ s) S` is the order-`0`
+moving-frame pure-Riemann curvature trace (the `Classical.choose` base spec defining `curvOpField`), and
+`slotExtend (Φ₀ s)` is the passenger-slot extension of the frame-free curvature operator. This is the
+covariant-derivative spec of `curvOpField`: it characterises the action of `covGrad (curvOpField g s)` as
+the differentiated-curvature trace `(∇R) S`, the `(∇R)`-on-`S` summand isolated from the `R(∇S)`
+spectator.
+
+**Proof.** The operator-field covariant product rule `covGrad_appCc_eq` (the B-rule) at the square field
+`Φ₀ s` and the tensor `S` reads `covGrad g 0 s (appCc (Φ₀ s) S) = appCc (covGrad (Φ₀ s)) S +
+appCc (slotExtend (Φ₀ s)) (∇S)`, whose first summand is `genuineDiffCurvSection g s S` by definition.
+Rearranging by `eq_sub_of_add_eq` isolates that summand, and rewriting `appCc (Φ₀ s) S =
+pureRGenuineDiffOp g 0 s S` by the base spec `exists_pureRGenuineDiffOp_base_appCc` makes the first
+right-hand term the concrete order-`0` curvature trace. -/
+theorem genuineDiffCurvSection_eq_covGrad_sub_slotExtend
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
+    genuineDiffCurvSection (I := I) (M := M) g s S =
+      covGrad (I := I) (M := M) g 0 (s + 0)
+          (pureRGenuineDiffOp (I := I) (M := M) g 0 s S) -
+        appCc (I := I) (M := M) g (s + 0 + 1) (s + 0 + 1)
+          (slotExtend (I := I) (M := M) g (s + 0) (s + 0)
+            (curvOpField (I := I) (M := M) g s))
+          (covGrad (I := I) (M := M) g 0 (s + 0) S) := by
+  classical
+  have hbase : appCc (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s) S =
+      pureRGenuineDiffOp (I := I) (M := M) g 0 s S :=
+    (Classical.choose_spec (exists_pureRGenuineDiffOp_base_appCc (I := I) (M := M) g) s S).symm
+  have hB := covGrad_appCc_eq (I := I) (M := M) g (s + 0) (s + 0)
+    (curvOpField (I := I) (M := M) g s) S
+  have hgds : appCc (I := I) (M := M) g (s + 0) (s + 0 + 1)
+        (covGrad (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s)) S =
+      genuineDiffCurvSection (I := I) (M := M) g s S := rfl
+  rw [hgds] at hB
+  have hB' := eq_sub_of_add_eq (hB.symm)
+  rw [hB', hbase]
+
+/-- **The passenger-slot action of the curvature operator field on `∇S` reads the gradient direction
+first (the spectator-term unit-evaluation).** For a closed smooth Riemannian manifold `(M, g)`, covariant
+rank `s`, smooth compactly-supported `(0, s)`-tensor `S`, point `x`, base `(0, 0)`-tensor `d`, gradient
+direction `v0`, and trailing tuple `vs`, the passenger-slot operator-field action
+`appCc (slotExtend (Φ₀ s)) (∇S)` evaluated on the tuple `Fin.cons v0 vs` reads the leading gradient
+direction `v0` off the passenger slot and applies the frame-free curvature operator `Φ₀ s = curvOpField
+g s` to the directional covariant derivative `∇_{v0} S`:
+```
+(appCc (slotExtend (Φ₀ s)) (∇S))(x)(d)(Fin.cons v0 vs)
+  = (Φ₀ s)(x)((∇_{v0} S)(x)(d))(vs).
+```
+This is the spectator `R(∇S)` term of the differentiated curvature trace in unit-evaluated form: the
+passenger slot carries the gradient direction, and the curvature endomorphism `Φ₀ s` acts on the
+trailing slots of the directional derivative of `S` — never the next-rank curvature operator
+`Φ₀ (s + 1)`.
+
+**Proof.** Expand the operator-field action (`appCc_toSection`, the fibrewise composition) and the
+slot-extended fibre operator (`slotExtend_toSection`), then read the leading slot by
+`slotExtendFib_apply_eval` (the new slot is read first, the rest curried through `tensor0S_curry`), and
+identify the curried gradient with the directional covariant derivative by
+`tensor0S_curry_covGrad_appCc_eq`. -/
+theorem appCc_slotExtend_curvOpField_covGrad_unit_eval
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
+    (d : Tensor0SSpace 0 I x) (v0 : E) (vs : Fin (s + 0) → E) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0 + 1) I x from
+          (appCc (I := I) (M := M) g (s + 0 + 1) (s + 0 + 1)
+            (slotExtend (I := I) (M := M) g (s + 0) (s + 0)
+              (curvOpField (I := I) (M := M) g s))
+            (covGrad (I := I) (M := M) g 0 (s + 0) S)).toSection x) d)
+        (Fin.cons v0 vs) =
+      Tensor0SSpace.toModel
+        ((show Tensor0SSpace (s + 0) I x →L[ℝ] Tensor0SSpace (s + 0) I x from
+          (curvOpField (I := I) (M := M) g s).toSection x)
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0) I x from
+            tensorCovDerivAt (I := I) (M := M) g 0 (s + 0) S x v0) d))
+        vs := by
+  classical
+  rw [appCc_toSection (I := I) (M := M) g (s + 0 + 1) (s + 0 + 1)
+      (slotExtend (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s))
+      (covGrad (I := I) (M := M) g 0 (s + 0) S) x,
+    ContinuousLinearMap.comp_apply,
+    slotExtend_toSection (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s) x]
+  rw [slotExtendFib_apply_eval (I := I) (M := M) g (s + 0) (s + 0) x
+    (show Tensor0SSpace (s + 0) I x →L[ℝ] Tensor0SSpace (s + 0) I x from
+      (curvOpField (I := I) (M := M) g s).toSection x)
+    ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0 + 1) I x from
+      (covGrad (I := I) (M := M) g 0 (s + 0) S).toSection x) d) v0 vs]
+  rw [tensor0S_curry_covGrad_appCc_eq (I := I) (M := M) g (s + 0) S x d v0]
+
+set_option maxHeartbeats 3200000 in
+set_option backward.isDefEq.respectTransparency false in
+/-- **The full unit-evaluated differentiated-curvature trace identity (the frame-free
+`∇R`-trace pointwise characterization).** For a closed smooth Riemannian manifold `(M, g)`, covariant
+rank `s`, smooth compactly-supported `(0, s)`-tensor `S`, point `x`, base `(0, 0)`-tensor `d`, gradient
+direction `v0`, and trailing tuple `vs`, the directional covariant derivative of the order-`0`
+pure-Riemann curvature trace decomposes, in unit-evaluated form, as the differentiated-curvature section
+`genuineDiffCurvSection g s S` (the `(∇R) S` field) plus the passenger-slot curvature spectator
+`(Φ₀ s)(∇_{v0} S)`:
+```
+(∇_{v0}(pureRGenuineDiffOp g 0 s S))(x)(d)(vs)
+  = (genuineDiffCurvSection g s S)(x)(d)(Fin.cons v0 vs)
+    + (Φ₀ s)(x)((∇_{v0} S)(x)(d))(vs).
+```
+Equivalently, `genuineDiffCurvSection = ∇(R-trace) − R(∇S)` pointwise: the differentiated-curvature
+trace is the covariant derivative of the curvature trace with the spectator `R(∇S)` removed. This is the
+frame-free unit-evaluated form of the `(∇R)`-trace, the foundation against which the
+frame-summed-to-frame-free transfer compares the moving-frame frame sum.
+
+**Proof.** The operator-field covariant product rule `covGrad_appCc_eq` (the B-rule) at the square field
+`Φ₀ s` and `S`, rewritten by the base spec `exists_pureRGenuineDiffOp_base_appCc`
+(`appCc (Φ₀ s) S = pureRGenuineDiffOp g 0 s S`), gives the section identity
+`covGrad g 0 s (pureRGenuineDiffOp g 0 s S) = genuineDiffCurvSection g s S +
+appCc (slotExtend (Φ₀ s)) (∇S)`. Reading it at `x`, applying to `d`, distributing the additive fibre
+value (`ContinuousLinearMap.add_apply`, `Tensor0SSpace.toModel_add`), and unit-evaluating the left-hand
+gradient by `covGrad_toSection_apply_eval` and the spectator by
+`appCc_slotExtend_curvOpField_covGrad_unit_eval` gives the pointwise identity. -/
+theorem covGrad_pureRGenuineDiffOp_unit_eval_eq_genuineDiffCurv_add_spectator
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
+    (d : Tensor0SSpace 0 I x) (v0 : E) (vs : Fin (s + 0) → E) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0) I x from
+          tensorCovDerivAt (I := I) (M := M) g 0 (s + 0)
+            (pureRGenuineDiffOp (I := I) (M := M) g 0 s S) x v0) d)
+        vs =
+      Tensor0SSpace.toModel
+          ((genuineDiffCurvSection (I := I) (M := M) g s S).toSection x d)
+          (Fin.cons v0 vs) +
+        Tensor0SSpace.toModel
+          ((show Tensor0SSpace (s + 0) I x →L[ℝ] Tensor0SSpace (s + 0) I x from
+            (curvOpField (I := I) (M := M) g s).toSection x)
+            ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0) I x from
+              tensorCovDerivAt (I := I) (M := M) g 0 (s + 0) S x v0) d))
+          vs := by
+  classical
+  have hbase : appCc (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s) S =
+      pureRGenuineDiffOp (I := I) (M := M) g 0 s S :=
+    (Classical.choose_spec (exists_pureRGenuineDiffOp_base_appCc (I := I) (M := M) g) s S).symm
+  have hB := covGrad_appCc_eq (I := I) (M := M) g (s + 0) (s + 0)
+    (curvOpField (I := I) (M := M) g s) S
+  rw [hbase] at hB
+  have hsec := congrArg (fun T : SmoothCcTensor g 0 (s + 0 + 1) => T.toSection x) hB
+  simp only at hsec
+  rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply] at hsec
+  have happ :
+      (covGrad (I := I) (M := M) g 0 (s + 0)
+          (pureRGenuineDiffOp (I := I) (M := M) g 0 s S)).toSection x d =
+        (genuineDiffCurvSection (I := I) (M := M) g s S).toSection x d +
+          (appCc (I := I) (M := M) g (s + 0 + 1) (s + 0 + 1)
+            (slotExtend (I := I) (M := M) g (s + 0) (s + 0)
+              (curvOpField (I := I) (M := M) g s))
+            (covGrad (I := I) (M := M) g 0 (s + 0) S)).toSection x d := by
+    rw [hsec, ContinuousLinearMap.add_apply]
+    rfl
+  have hlhs :
+      Tensor0SSpace.toModel
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0) I x from
+            tensorCovDerivAt (I := I) (M := M) g 0 (s + 0)
+              (pureRGenuineDiffOp (I := I) (M := M) g 0 s S) x v0) d)
+          vs =
+        Tensor0SSpace.toModel
+          ((covGrad (I := I) (M := M) g 0 (s + 0)
+            (pureRGenuineDiffOp (I := I) (M := M) g 0 s S)).toSection x d)
+          (Fin.cons v0 vs) := by
+    have h := covGrad_toSection_apply_eval (I := I) (M := M) g 0 (s + 0)
+      (pureRGenuineDiffOp (I := I) (M := M) g 0 s S) x d (Fin.cons v0 vs)
+    refine Eq.symm (h.trans ?_)
+    have htail : Matrix.vecTail (Fin.cons v0 vs : Fin (s + 0 + 1) → E) = vs := by
+      funext j; simp [Matrix.vecTail, Fin.cons_succ]
+    have hhead : (Fin.cons v0 vs : Fin (s + 0 + 1) → E) 0 = v0 := by simp [Fin.cons_zero]
+    rw [htail, hhead]
+  have hterm2 :
+      Tensor0SSpace.toModel
+          ((appCc (I := I) (M := M) g (s + 0 + 1) (s + 0 + 1)
+            (slotExtend (I := I) (M := M) g (s + 0) (s + 0)
+              (curvOpField (I := I) (M := M) g s))
+            (covGrad (I := I) (M := M) g 0 (s + 0) S)).toSection x d)
+          (Fin.cons v0 vs) =
+        Tensor0SSpace.toModel
+          ((show Tensor0SSpace (s + 0) I x →L[ℝ] Tensor0SSpace (s + 0) I x from
+            (curvOpField (I := I) (M := M) g s).toSection x)
+            ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0) I x from
+              tensorCovDerivAt (I := I) (M := M) g 0 (s + 0) S x v0) d))
+          vs :=
+    appCc_slotExtend_curvOpField_covGrad_unit_eval (I := I) (M := M) g s S x d v0 vs
+  rw [hlhs, happ, Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply, hterm2]
+
 set_option backward.isDefEq.respectTransparency false in
 /-- The slot-`0` curry read of `∇S = covGrad g 0 s S` in the fixed Parseval direction `V b`, as a
 `TensorRSSpace 0 s`. -/
