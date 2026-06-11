@@ -30,13 +30,31 @@ sorry'd version (downstream consumers must adapt):
 
 ## REMAINING for P2 (the honest frontier list)
 
-1. **`hevol` producer** — `∂ₜ∇ᵖ_{gRef} g_t = -2∇ᵖ_{gRef}Rc(g_t)` (the tensor
-   field form and the evaluated `hevComp` form) from the Ricci-flow equation:
-   the time/space derivative INTERCHANGE.  ⚠ Same standing open analytic input
-   as the BBS track's `hswap` (`NablaKRmTimeDeriv.lean`: "the swap (hswap) are
-   the standing analytic inputs") — a PROJECT-WIDE shared frontier.  Route when
-   attacked: induct on `p` through `covStep` with joint (t,x) smoothness of the
-   flow (`SolutionOn`/`IsSolutionOn`) + Schwarz.
+1. **`hevol` producer — CORRECTION (2026-06-11, user remembered right): the
+   interchange IS largely proved in-tree.**  Found:
+   - `Bundle/PartialMfderiv/FixedBase.lean`: `FixedBaseExtDerivTimeDerivativeOn`
+     (the swap predicate: `∂ₛ(extDerivFun (F s) x V) = extDerivFun (Ft t) x V`).
+   - `Evolution/Connection/MetricCovDerivProducer.lean`:
+     `metricFrameComp_fixedBaseSwap_of_solution` — the swap PROVED for the
+     metric frame components from the solution's joint `C²` smoothness
+     (`hSmooth : ContMDiffAt (𝓘(ℝ).prod I) 2 (fun (t,x) => g_t(e_a,e_b)(x))`),
+     and `metricCovDerivDeriv_of_solution` — the ORDER-1 producer
+     `∂ₛ(∇g)-components = −2·(∇Ric)-components`
+     (`MetricCovDerivDerivativeComponentsInFrameOnLocal`), plus the packaged
+     `connectionVariationBlackBox_of_solution`.
+   - `Tensor/RSTensor/NablaOnTensors/TotalNabla0STimeDeriv.lean`:
+     `nabla0SFun_hasDerivWithinAt` / `totalNabla0SFun_hasDerivWithinAt` — the
+     ARBITRARY-RANK single-step parametric Clairaut (time derivative through one
+     covariant-derivative step), taking the swap predicate + per-slot
+     frozen-vector derivatives as inputs.  Since `covStep = totalNabla0SFun`
+     (ArityBridge `metricCovDerivStep_eq_covStep`), the `p`-fold `hevol` is a
+     `p`-INDUCTION over this engine — assembly, NOT open math.
+   REMAINING gap (the actual work): (i) the `p`-induction wrapper
+   (each step: `totalNabla0SFun_hasDerivWithinAt` with the IH as `hpt`-input and
+   a tower-component swap discharged à la `metricFrameComp_fixedBaseSwap`);
+   (ii) the format bridge: solution-track components/`HasDerivWithinAt`/
+   `D.carrier` ↔ HCG `metricCovDeriv` tower/`HasDerivAt`/`Icc β ψ`/`gSeq`-
+   sequence, ending in `hevol` + `hevComp` shapes of `covOrderBound_stage`.
 2. Stage-`N` induction wrapper: thread nested opens `K ⊂ U_N ⊂ … ⊂ U₀` (locally
    compact `M`), feed each stage's `(B_r)` output into the next `hBprev`; init
    bounds from the `t0`-time data; equivalence majorant from eq 3.3.
