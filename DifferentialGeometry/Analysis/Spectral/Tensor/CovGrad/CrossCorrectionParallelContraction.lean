@@ -7,6 +7,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.CcTens
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.GagliardoNirenbergProductTwoArm
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckCartanRfnsBilinearProduct
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricJetBound
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizeSymmIteratedCovGradFiberNormBound
 
 /-! # The cross-correction contraction realizes `crossCorrectionSection`
 
@@ -1136,6 +1137,73 @@ private theorem crossCorrectionSection_iteratedCovGrad_eq_appCcRS_slotExtendPow
       (permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2] (loweredConnDiffSection (I := I) g₁ g₀))) p
 
 set_option linter.unusedSectionVars false in
+/-- **(POSITED CHILD — the Gagliardo–Nirenberg integrated *peeled* two-arm bound on the cross-correction
+`Rest` arm, in the realized-perturbation factor.)**  The squared metric `L²` mass of the section-level
+**rest** cell of the order-`p` cross-correction jet — the difference
+`∇^p (crossCorrectionSection g₁ g₀ T₁) − Top_p`, with `Top_p` the `i = 0` binomial cell (all `p`
+derivatives on the connection-difference factor) — is dominated by the Gagliardo–Nirenberg **peeled**
+two-arm grid in the two genuinely-independent factors of the contraction: the `g₀`-lowered connection
+difference `D = loweredConnDiffSection g₁ g₀` (rank `3`) and the realized symmetric perturbation
+`w = realizeSymmCcTensor g₀ T₁` (rank `2`):
+```
+‖∇^p crossCorrectionSection − Top_p‖²
+  ≤ Cpk · (∑_{q < p} ‖∇^q loweredConnDiffSection‖² + ∑_{i ≤ p+1} ‖∇^i (realizeSymm T₁)‖²),
+```
+uniformly over the fibre-small (`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, `δ < 1/2`)
+supercritically `H^{p+3+a}`-bounded (`2a > finrank + 4`) perturbation family.
+
+This is the genuine **deep frontier content** the leaf below consumes.  It assembles from three pieces,
+each of which is *not* available off-the-shelf at the required strictness (verified absent
+library-wide): (1) the operator-reduced covariant Leibniz of the parallel cometric contraction
+`crossCorrParallelContraction_covGrad` — its `i = 0` cell is the peeled `Top_p`, its `i ≥ 1` cells form
+the bare product `crossCorrProdSection = permute (unitModelProdSection D w)` whose covariant-Leibniz
+*peeled* `rfns` grid (`exists_rfns_iteratedCovGrad_prod_topRest_diagGrid_le` for the bare product, pushed
+through the parallel `appCcRS` cometric envelope `exists_uniform_riemannianFiberNormSq_appCcRS_le`) keeps
+the lowered-connection-difference order **strictly below `p`** (`i < p`); (2) the supercritical `C⁰` sup
+of `D` (the order-0 fibre sup of `loweredConnDiffSection`, gated by `2a > finrank + 4` through the
+realized-jet sharp-order embedding and a `δ < 1/2` Neumann absorption of the self-referential Koszul
+correction `connDiff_g0_fibre_abs_bound` — itself absent library-wide and **non-circular** with the
+downstream `loweredConnDiff` jet bound) and of `w`
+(`exists_realizeSymm_iteratedCovGradJet2_sup_le`); (3) the **strict-range** integrated Gagliardo–
+Nirenberg interpolation of the resulting `i < p` peeled diagonal grid (the strict-output companion of
+`exists_integrated_diagonalProductGrid_twoArm_pair_le`, whose off-the-shelf `i ≤ k` output would
+reintroduce the peeled `∇^p D` top term).  The realized factor `w = realizeSymm T₁` is kept here (not yet
+folded into `T₁`) so this child is genuinely *upstream* of the realize-jet `L²` conversion
+`realizeSymm_iteratedCovGrad_l2Norm_le_jetSum`, which the leaf applies as glue.
+
+**Non-vacuity.**  The bound carries genuine content on both the strictly-lower connection-difference
+jets `∑_{q<p}` and the realized-perturbation jets (a zero coefficient falsifies it whenever an `i ≥ 1`
+cell is genuinely present).  At `T₁ = 0`, `ccTensorBilinSymm g₀ 0 = 0`, so `crossCorrectionSection = 0`
+and `Top_p = 0`, the difference is `0`, and the bound is `0 ≤ 0`.
+
+Its body is `sorry`: the genuine strict-range peeled Gagliardo–Nirenberg interpolation of the
+contraction's `i ≥ 1` covariant-Leibniz cells, with the supercritical fibre sups of the two factors.
+The leaf consuming it discharges the realized-factor jet sum to the `T₁` jet sum sorry-free. -/
+theorem crossCorrectionSection_iteratedCovGrad_rest_peel_realizeSymm_le
+    (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ Cpk : ℝ, 0 ≤ Cpk ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+        (∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (p + 3 + a) T₁‖ ≤ B →
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+                (crossCorrectionSection (I := I) g₁ g₀ T₁)
+              - crossCorrParallelContraction (I := I) g₀ (a := 0) (b := p)
+                  (realizeSymmCcTensor (I := I) g₀ T₁)
+                  (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+                    (permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2]
+                      (loweredConnDiffSection (I := I) g₁ g₀)))‖ ^ 2 ≤
+          Cpk * (∑ q ∈ Finset.range p,
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+                    (loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2
+              + ∑ i ∈ Finset.range (p + 1 + 1),
+                  ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                    (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2) := by
+  sorry
+
+set_option linter.unusedSectionVars false in
 /-- **(POSITED CHILD — the Gagliardo–Nirenberg two-arm `L²` bound on the cross-correction `Rest` arm.)**
 The squared metric `L²` mass of the section-level **rest** cell of the order-`p` cross-correction jet —
 the difference `∇^p (crossCorrectionSection g₁ g₀ T₁) − Top_p`, where the **top** cell
@@ -1189,7 +1257,99 @@ theorem crossCorrectionSection_iteratedCovGrad_rest_grid_le
                     (loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2
               + ∑ l ∈ Finset.range (p + 1 + 1),
                   ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2) := by
-  sorry
+  classical
+  -- The peeled GN bound supplies `‖Rest‖² ≤ Cpk · (∑_{q<p} ‖∇^q lowered‖² + ∑_{i≤p+1} ‖∇^i w‖²)`,
+  -- `w = realizeSymm T₁`.  The per-order realize-jet `rfns` bound
+  -- `exists_riemannianFiberNormSq_iteratedCovGrad_realizeSymm_le_jetSum`
+  -- (`rfns(∇^i w)(x) ≤ Ci · ∑_{l≤i} rfns(∇^l T₁)(x)`) integrates to the `L²` jet conversion
+  -- `‖∇^i w‖² ≤ Ci · ∑_{l≤i} ‖∇^l T₁‖²`, converting the realized-factor arm to the `T₁` arm sorry-free.
+  obtain ⟨Cpk, hCpk0, hCpk⟩ :=
+    crossCorrectionSection_iteratedCovGrad_rest_peel_realizeSymm_le (I := I) g₀ p δ hδ0 hδ1 B a ha
+  set μ := riemannianVolumeMeasure (I := I) (M := M) g₀ with hμ
+  -- The order-`i` realize-jet `L²` conversion (one constant per `i`), integrated from the pointwise rfns.
+  have hconv : ∀ i : ℕ, ∃ Ci : ℝ, 0 ≤ Ci ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2),
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+            (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2 ≤
+          Ci * ∑ l ∈ Finset.range (i + 1),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2 := by
+    intro i
+    obtain ⟨C, hC0, hC⟩ :=
+      DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.exists_riemannianFiberNormSq_iteratedCovGrad_realizeSymm_le_jetSum
+        (I := I) g₀ i
+    refine ⟨C, hC0, fun T₁ => ?_⟩
+    rw [norm_sq_eq_integral_riemannianFiberNormSq]
+    have hpt := hC T₁
+    have hintRl : ∀ l, MeasureTheory.Integrable (fun x =>
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)) μ :=
+      fun l => integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g₀ 0 (2 + l) _
+    have hintRsum : MeasureTheory.Integrable (fun x => C * ∑ l ∈ Finset.range (i + 1),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)) μ :=
+      (MeasureTheory.integrable_finset_sum (Finset.range (i + 1)) (fun l _ => hintRl l)).const_mul C
+    calc ∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x) ∂μ
+        ≤ ∫ x, (C * ∑ l ∈ Finset.range (i + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)) ∂μ := by
+            refine MeasureTheory.integral_mono_of_nonneg (Eventually.of_forall (fun x => ?_))
+              hintRsum (Eventually.of_forall (fun x => ?_))
+            · exact riemannianFiberNormSq_nonneg _ _ _ _ _
+            · exact hpt x
+      _ = C * ∑ l ∈ Finset.range (i + 1),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2 := by
+            rw [MeasureTheory.integral_const_mul,
+              MeasureTheory.integral_finset_sum _ (fun l _ => hintRl l)]
+            congr 1
+            refine Finset.sum_congr rfl (fun l _ => ?_)
+            rw [norm_sq_eq_integral_riemannianFiberNormSq]
+  choose Ci hCi0 hCi using hconv
+  set Cmax := (∑ i ∈ Finset.range (p + 1 + 1), Ci i) with hCmax
+  have hCmax0 : 0 ≤ Cmax := Finset.sum_nonneg fun i _ => hCi0 i
+  refine ⟨Cpk * (1 + Cmax), by positivity, ?_⟩
+  intro T₁ g₁ hr hfib hball
+  set Slow := ∑ q ∈ Finset.range p,
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+          (loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2 with hSlow
+  set ST := ∑ l ∈ Finset.range (p + 1 + 1),
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2 with hST
+  have hSlow_nn : 0 ≤ Slow := Finset.sum_nonneg fun q _ => by positivity
+  have hST_nn : 0 ≤ ST := Finset.sum_nonneg fun l _ => by positivity
+  have hpk := hCpk T₁ g₁ hr hfib hball
+  rw [← hSlow] at hpk
+  have hwconv : (∑ i ∈ Finset.range (p + 1 + 1),
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+            (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2) ≤ Cmax * ST := by
+    rw [hCmax, Finset.sum_mul]
+    refine Finset.sum_le_sum (fun i hi => ?_)
+    refine le_trans (hCi i T₁) ?_
+    have hsub : (∑ l ∈ Finset.range (i + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2) ≤ ST := by
+      rw [hST]
+      exact Finset.sum_le_sum_of_subset_of_nonneg
+        (Finset.range_subset_range.2 (by have := Finset.mem_range.mp hi; omega : i + 1 ≤ p + 1 + 1))
+        fun l _ _ => by positivity
+    exact mul_le_mul_of_nonneg_left hsub (hCi0 i)
+  set Sw := ∑ i ∈ Finset.range (p + 1 + 1),
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+          (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2 with hSw
+  have hSw_nn : 0 ≤ Sw := Finset.sum_nonneg fun i _ => by positivity
+  -- `‖Rest‖² ≤ Cpk·(Slow + Sw) ≤ Cpk·(Slow + Cmax·ST) ≤ Cpk·(1+Cmax)·(Slow + ST)`.
+  calc ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+                (crossCorrectionSection (I := I) g₁ g₀ T₁)
+              - crossCorrParallelContraction (I := I) g₀ (a := 0) (b := p)
+                  (realizeSymmCcTensor (I := I) g₀ T₁)
+                  (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+                    (permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2]
+                      (loweredConnDiffSection (I := I) g₁ g₀)))‖ ^ 2
+      ≤ Cpk * (Slow + Sw) := hpk
+    _ ≤ Cpk * (Slow + Cmax * ST) := by
+        gcongr
+    _ ≤ Cpk * (1 + Cmax) * (Slow + ST) := by
+        nlinarith [mul_nonneg (mul_nonneg hCpk0 hCmax0) hSlow_nn, mul_nonneg hCpk0 hST_nn,
+          hSlow_nn, hST_nn, hCpk0, hCmax0]
 
 set_option linter.unusedSectionVars false in
 /-- **(POSITED CHILD — the section-level top/rest decomposition of the cross-correction order-`p`
