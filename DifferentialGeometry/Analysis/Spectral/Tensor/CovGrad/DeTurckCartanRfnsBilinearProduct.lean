@@ -388,6 +388,245 @@ theorem bareProd_rfns_le (g₀ : SmoothRiemannianMetric I M) (s₁ s₂ : ℕ) {
   rw [bareProd_rfns_eq (I := I) g₀ s₁ s₂ S T x]
   exact bareTensorProdSection_rfns_le (I := I) g₀ S T x
 
+/-! ## Bilinearity of the bare tensor product
+
+The bare fibrewise model tensor product is `ℝ`-bilinear: additive over a section difference and
+`ℝ`-homogeneous, in **both** factor slots.  This is the fibrewise bilinearity of the model tensor
+product `modelProduct` (`modelProduct_apply` is `f(v∘castAdd) · g(v∘natAdd)`, multiplicative, hence
+linear in each factor) read through the unit fibre (`bareTensorProdSection_unitModel`), the unit value
+of a section being itself `ℝ`-linear in the section.  Stated for the natural product
+`bareTensorProdSection` and for the rank-normalised `bareProd` (the rank-cast is `ℝ`-linear,
+`castRankCc_db_add` / `castRankCc_db_smul`).  These are the laws by which the consumer distributes a
+difference of connection-difference gauge factors through the quadratic `D∘D` arm. -/
+
+set_option linter.unusedSectionVars false in
+/-- The model tensor product is additive over a difference in the **left** factor (the fibrewise
+`modelProduct` is bilinear, here `sub_mul` in the first slot). -/
+private theorem modelProduct_sub_left (s q : ℕ)
+    (f₁ f₂ : Tensor0SBundle.Tensor0SModel s ℝ E) (g : Tensor0SBundle.Tensor0SModel q ℝ E) :
+    Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) s q (f₁ - f₂) g =
+      Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) s q f₁ g -
+        Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) s q f₂ g := by
+  apply ContinuousMultilinearMap.ext
+  intro v
+  rw [ContinuousMultilinearMap.sub_apply,
+    Bundle.continuousMultilinearMap.modelProduct_apply,
+    Bundle.continuousMultilinearMap.modelProduct_apply,
+    Bundle.continuousMultilinearMap.modelProduct_apply,
+    ContinuousMultilinearMap.sub_apply, sub_mul]
+
+set_option linter.unusedSectionVars false in
+/-- The model tensor product is additive over a difference in the **right** factor (`mul_sub`). -/
+private theorem modelProduct_sub_right (s q : ℕ)
+    (f : Tensor0SBundle.Tensor0SModel s ℝ E) (g₁ g₂ : Tensor0SBundle.Tensor0SModel q ℝ E) :
+    Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) s q f (g₁ - g₂) =
+      Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) s q f g₁ -
+        Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) s q f g₂ := by
+  apply ContinuousMultilinearMap.ext
+  intro v
+  rw [ContinuousMultilinearMap.sub_apply,
+    Bundle.continuousMultilinearMap.modelProduct_apply,
+    Bundle.continuousMultilinearMap.modelProduct_apply,
+    Bundle.continuousMultilinearMap.modelProduct_apply,
+    ContinuousMultilinearMap.sub_apply, mul_sub]
+
+set_option linter.unusedSectionVars false in
+/-- The model tensor product is `ℝ`-homogeneous in the **left** factor. -/
+private theorem modelProduct_smul_left (s q : ℕ) (c : ℝ)
+    (f : Tensor0SBundle.Tensor0SModel s ℝ E) (g : Tensor0SBundle.Tensor0SModel q ℝ E) :
+    Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) s q (c • f) g =
+      c • Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) s q f g := by
+  apply ContinuousMultilinearMap.ext
+  intro v
+  rw [ContinuousMultilinearMap.smul_apply,
+    Bundle.continuousMultilinearMap.modelProduct_apply,
+    Bundle.continuousMultilinearMap.modelProduct_apply,
+    ContinuousMultilinearMap.smul_apply, smul_eq_mul, smul_eq_mul, mul_assoc]
+
+set_option linter.unusedSectionVars false in
+/-- The model tensor product is `ℝ`-homogeneous in the **right** factor. -/
+private theorem modelProduct_smul_right (s q : ℕ) (c : ℝ)
+    (f : Tensor0SBundle.Tensor0SModel s ℝ E) (g : Tensor0SBundle.Tensor0SModel q ℝ E) :
+    Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) s q f (c • g) =
+      c • Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) s q f g := by
+  apply ContinuousMultilinearMap.ext
+  intro v
+  rw [ContinuousMultilinearMap.smul_apply,
+    Bundle.continuousMultilinearMap.modelProduct_apply,
+    Bundle.continuousMultilinearMap.modelProduct_apply,
+    ContinuousMultilinearMap.smul_apply, smul_eq_mul, smul_eq_mul, mul_left_comm]
+
+set_option linter.unusedSectionVars false in
+/-- The unit fibre value `bareUnitModel` is additive over a section difference (the unit evaluation
+and `toModel` are `ℝ`-linear). -/
+private theorem bareUnitModel_sub (g₀ : SmoothRiemannianMetric I M) {s : ℕ}
+    (S₁ S₂ : SmoothCcTensor g₀ 0 s) (x : M) :
+    bareUnitModel (I := I) g₀ (S₁ - S₂) x =
+      bareUnitModel (I := I) g₀ S₁ x - bareUnitModel (I := I) g₀ S₂ x := by
+  rw [bareUnitModel, bareUnitModel, bareUnitModel]
+  rw [show (S₁ - S₂).toSection x = S₁.toSection x - S₂.toSection x from by
+    rw [SmoothCcTensor.toSection_sub]; rfl]
+  rw [ContinuousLinearMap.sub_apply, Tensor0SBundle.Tensor0SSpace.toModel_sub]
+
+set_option linter.unusedSectionVars false in
+/-- The unit fibre value `bareUnitModel` is `ℝ`-homogeneous in the section. -/
+private theorem bareUnitModel_smul (g₀ : SmoothRiemannianMetric I M) {s : ℕ} (c : ℝ)
+    (S : SmoothCcTensor g₀ 0 s) (x : M) :
+    bareUnitModel (I := I) g₀ (c • S) x = c • bareUnitModel (I := I) g₀ S x := by
+  rw [bareUnitModel, bareUnitModel]
+  rw [show (c • S).toSection x = c • S.toSection x from by
+    rw [SmoothCcTensor.toSection_smul]; rfl]
+  rw [ContinuousLinearMap.smul_apply, Tensor0SBundle.Tensor0SSpace.toModel_smul]
+
+set_option linter.unusedSectionVars false in
+/-- **The bare model tensor product distributes over a difference in the left factor.**
+`(S₁ − S₂) ⊗ T = S₁ ⊗ T − S₂ ⊗ T` (the fibrewise bilinearity of `modelProduct`, read at the unit
+fibre). -/
+theorem bareTensorProdSection_sub_left (g₀ : SmoothRiemannianMetric I M) {s₁ s₂ : ℕ}
+    (S₁ S₂ : SmoothCcTensor g₀ 0 s₁) (T : SmoothCcTensor g₀ 0 s₂) :
+    bareTensorProdSection (I := I) g₀ (S₁ - S₂) T =
+      bareTensorProdSection (I := I) g₀ S₁ T - bareTensorProdSection (I := I) g₀ S₂ T := by
+  apply Integral.L2.SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply PDE.DeTurck.tensor0s_ext_unitZero (I := I) (M := M)
+  apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+  refine ContinuousMultilinearMap.ext (fun v => ?_)
+  beta_reduce
+  rw [show (bareTensorProdSection (I := I) g₀ S₁ T - bareTensorProdSection (I := I) g₀ S₂ T).toSection x =
+      (bareTensorProdSection (I := I) g₀ S₁ T).toSection x -
+        (bareTensorProdSection (I := I) g₀ S₂ T).toSection x from by
+    rw [SmoothCcTensor.toSection_sub]; rfl]
+  rw [ContinuousLinearMap.sub_apply, Tensor0SBundle.Tensor0SSpace.toModel_sub,
+    ContinuousMultilinearMap.sub_apply]
+  rw [show (unitZeroSec (I := I) (M := M) x : Tensor0SBundle.Tensor0SSpace 0 I x) =
+      (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) from rfl]
+  rw [bareTensorProdSection_unitModel, bareTensorProdSection_unitModel, bareTensorProdSection_unitModel]
+  rw [bareUnitModel_sub, modelProduct_sub_left, ContinuousMultilinearMap.sub_apply]
+
+set_option linter.unusedSectionVars false in
+/-- **The bare model tensor product distributes over a difference in the right factor.**
+`S ⊗ (T₁ − T₂) = S ⊗ T₁ − S ⊗ T₂`. -/
+theorem bareTensorProdSection_sub_right (g₀ : SmoothRiemannianMetric I M) {s₁ s₂ : ℕ}
+    (S : SmoothCcTensor g₀ 0 s₁) (T₁ T₂ : SmoothCcTensor g₀ 0 s₂) :
+    bareTensorProdSection (I := I) g₀ S (T₁ - T₂) =
+      bareTensorProdSection (I := I) g₀ S T₁ - bareTensorProdSection (I := I) g₀ S T₂ := by
+  apply Integral.L2.SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply PDE.DeTurck.tensor0s_ext_unitZero (I := I) (M := M)
+  apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+  refine ContinuousMultilinearMap.ext (fun v => ?_)
+  beta_reduce
+  rw [show (bareTensorProdSection (I := I) g₀ S T₁ - bareTensorProdSection (I := I) g₀ S T₂).toSection x =
+      (bareTensorProdSection (I := I) g₀ S T₁).toSection x -
+        (bareTensorProdSection (I := I) g₀ S T₂).toSection x from by
+    rw [SmoothCcTensor.toSection_sub]; rfl]
+  rw [ContinuousLinearMap.sub_apply, Tensor0SBundle.Tensor0SSpace.toModel_sub,
+    ContinuousMultilinearMap.sub_apply]
+  rw [show (unitZeroSec (I := I) (M := M) x : Tensor0SBundle.Tensor0SSpace 0 I x) =
+      (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) from rfl]
+  rw [bareTensorProdSection_unitModel, bareTensorProdSection_unitModel, bareTensorProdSection_unitModel]
+  rw [bareUnitModel_sub, modelProduct_sub_right, ContinuousMultilinearMap.sub_apply]
+
+set_option linter.unusedSectionVars false in
+/-- **The bare model tensor product is `ℝ`-homogeneous in the left factor.**
+`(c • S) ⊗ T = c • (S ⊗ T)`. -/
+theorem bareTensorProdSection_smul_left (g₀ : SmoothRiemannianMetric I M) {s₁ s₂ : ℕ} (c : ℝ)
+    (S : SmoothCcTensor g₀ 0 s₁) (T : SmoothCcTensor g₀ 0 s₂) :
+    bareTensorProdSection (I := I) g₀ (c • S) T =
+      c • bareTensorProdSection (I := I) g₀ S T := by
+  apply Integral.L2.SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply PDE.DeTurck.tensor0s_ext_unitZero (I := I) (M := M)
+  apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+  refine ContinuousMultilinearMap.ext (fun v => ?_)
+  beta_reduce
+  rw [show (c • bareTensorProdSection (I := I) g₀ S T).toSection x =
+      c • (bareTensorProdSection (I := I) g₀ S T).toSection x from by
+    rw [SmoothCcTensor.toSection_smul]; rfl]
+  rw [ContinuousLinearMap.smul_apply, Tensor0SBundle.Tensor0SSpace.toModel_smul,
+    ContinuousMultilinearMap.smul_apply]
+  rw [show (unitZeroSec (I := I) (M := M) x : Tensor0SBundle.Tensor0SSpace 0 I x) =
+      (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) from rfl]
+  rw [bareTensorProdSection_unitModel, bareTensorProdSection_unitModel]
+  rw [bareUnitModel_smul, modelProduct_smul_left, ContinuousMultilinearMap.smul_apply]
+
+set_option linter.unusedSectionVars false in
+/-- **The bare model tensor product is `ℝ`-homogeneous in the right factor.**
+`S ⊗ (c • T) = c • (S ⊗ T)`. -/
+theorem bareTensorProdSection_smul_right (g₀ : SmoothRiemannianMetric I M) {s₁ s₂ : ℕ} (c : ℝ)
+    (S : SmoothCcTensor g₀ 0 s₁) (T : SmoothCcTensor g₀ 0 s₂) :
+    bareTensorProdSection (I := I) g₀ S (c • T) =
+      c • bareTensorProdSection (I := I) g₀ S T := by
+  apply Integral.L2.SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply PDE.DeTurck.tensor0s_ext_unitZero (I := I) (M := M)
+  apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+  refine ContinuousMultilinearMap.ext (fun v => ?_)
+  beta_reduce
+  rw [show (c • bareTensorProdSection (I := I) g₀ S T).toSection x =
+      c • (bareTensorProdSection (I := I) g₀ S T).toSection x from by
+    rw [SmoothCcTensor.toSection_smul]; rfl]
+  rw [ContinuousLinearMap.smul_apply, Tensor0SBundle.Tensor0SSpace.toModel_smul,
+    ContinuousMultilinearMap.smul_apply]
+  rw [show (unitZeroSec (I := I) (M := M) x : Tensor0SBundle.Tensor0SSpace 0 I x) =
+      (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) from rfl]
+  rw [bareTensorProdSection_unitModel, bareTensorProdSection_unitModel]
+  rw [bareUnitModel_smul, modelProduct_smul_right, ContinuousMultilinearMap.smul_apply]
+
+set_option linter.unusedSectionVars false in
+/-- The rank-cast `castRankCc_db` distributes over a section difference (local re-statement; the
+`subst`-collapse). -/
+private theorem castRankCc_db_sub_db (g₀ : SmoothRiemannianMetric I M) {a b : ℕ} (h : a = b)
+    (W₁ W₂ : SmoothCcTensor g₀ 0 a) :
+    castRankCc_db g₀ 0 h (W₁ - W₂) = castRankCc_db g₀ 0 h W₁ - castRankCc_db g₀ 0 h W₂ := by
+  subst h; rfl
+
+set_option linter.unusedSectionVars false in
+/-- The rank-cast `castRankCc_db` is `ℝ`-homogeneous (local re-statement; the `subst`-collapse). -/
+private theorem castRankCc_db_smul_db (g₀ : SmoothRiemannianMetric I M) {a b : ℕ} (h : a = b)
+    (c : ℝ) (W : SmoothCcTensor g₀ 0 a) :
+    castRankCc_db g₀ 0 h (c • W) = c • castRankCc_db g₀ 0 h W := by
+  subst h; rfl
+
+set_option linter.unusedSectionVars false in
+/-- **The rank-normalised bare product distributes over a difference in the left factor.**
+`bareProd (S₁ − S₂) T = bareProd S₁ T − bareProd S₂ T` (the rank-cast is `ℝ`-linear,
+`bareTensorProdSection` is left-additive). -/
+theorem bareProd_sub_left (g₀ : SmoothRiemannianMetric I M) (s₁ s₂ : ℕ) {a b : ℕ}
+    (S₁ S₂ : SmoothCcTensor g₀ 0 (s₁ + a)) (T : SmoothCcTensor g₀ 0 (s₂ + b)) :
+    bareProd (I := I) g₀ s₁ s₂ (S₁ - S₂) T =
+      bareProd (I := I) g₀ s₁ s₂ S₁ T - bareProd (I := I) g₀ s₁ s₂ S₂ T := by
+  rw [bareProd, bareProd, bareProd, bareTensorProdSection_sub_left, castRankCc_db_sub_db]
+
+set_option linter.unusedSectionVars false in
+/-- **The rank-normalised bare product distributes over a difference in the right factor.**
+`bareProd S (T₁ − T₂) = bareProd S T₁ − bareProd S T₂`. -/
+theorem bareProd_sub_right (g₀ : SmoothRiemannianMetric I M) (s₁ s₂ : ℕ) {a b : ℕ}
+    (S : SmoothCcTensor g₀ 0 (s₁ + a)) (T₁ T₂ : SmoothCcTensor g₀ 0 (s₂ + b)) :
+    bareProd (I := I) g₀ s₁ s₂ S (T₁ - T₂) =
+      bareProd (I := I) g₀ s₁ s₂ S T₁ - bareProd (I := I) g₀ s₁ s₂ S T₂ := by
+  rw [bareProd, bareProd, bareProd, bareTensorProdSection_sub_right, castRankCc_db_sub_db]
+
+set_option linter.unusedSectionVars false in
+/-- **The rank-normalised bare product is `ℝ`-homogeneous in the left factor.**
+`bareProd (c • S) T = c • bareProd S T`. -/
+theorem bareProd_smul_left (g₀ : SmoothRiemannianMetric I M) (s₁ s₂ : ℕ) {a b : ℕ} (c : ℝ)
+    (S : SmoothCcTensor g₀ 0 (s₁ + a)) (T : SmoothCcTensor g₀ 0 (s₂ + b)) :
+    bareProd (I := I) g₀ s₁ s₂ (c • S) T = c • bareProd (I := I) g₀ s₁ s₂ S T := by
+  rw [bareProd, bareProd, bareTensorProdSection_smul_left, castRankCc_db_smul_db]
+
+set_option linter.unusedSectionVars false in
+/-- **The rank-normalised bare product is `ℝ`-homogeneous in the right factor.**
+`bareProd S (c • T) = c • bareProd S T`. -/
+theorem bareProd_smul_right (g₀ : SmoothRiemannianMetric I M) (s₁ s₂ : ℕ) {a b : ℕ} (c : ℝ)
+    (S : SmoothCcTensor g₀ 0 (s₁ + a)) (T : SmoothCcTensor g₀ 0 (s₂ + b)) :
+    bareProd (I := I) g₀ s₁ s₂ S (c • T) = c • bareProd (I := I) g₀ s₁ s₂ S T := by
+  rw [bareProd, bareProd, bareTensorProdSection_smul_right, castRankCc_db_smul_db]
+
 /-- **The bare-product second-summand slot reindexing** `Fin ((s₁ + s₂) + a + b + 1) ≃ itself`.  On
 the bare product `S ⊗ (∇T)` (the `S`-block leading, then the `∇T`-block whose own leading slot is the
 new gradient direction) it rotates the leading `(s₁ + a) + 1` slots cyclically — sending the `∇T`-block

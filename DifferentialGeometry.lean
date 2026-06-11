@@ -782,6 +782,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBounds.Inn
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBounds.InnerUpperBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.BareTensorProductCovariantLeibniz
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTraceField
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTraceParallelContraction
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradCrossBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradL2
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradMetricBridge

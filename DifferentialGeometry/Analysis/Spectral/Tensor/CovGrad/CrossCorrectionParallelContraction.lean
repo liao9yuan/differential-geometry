@@ -2202,7 +2202,7 @@ section realizing an arbitrary fibre value, `ContMDiffSection.exists_eq_at`) and
 passenger ampliation `cometricDoubleTrace_postcomp_rfns_le_aux` (the leading passenger slot is an
 isometric ampliation for the intrinsic fibre envelope).  Non-vacuous (`κ = 0` is rejected whenever the
 cometric trace is nonzero). -/
-private theorem exists_uniform_cometricDoubleTraceField_postcomp_gOpNorm_rfns_le
+theorem exists_uniform_cometricDoubleTraceField_postcomp_gOpNorm_rfns_le
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ κ : ℝ, 0 ≤ κ ∧ ∀ (p : ℕ) (x : M),
       ∃ A : Tensor0SBundle.TensorRSSpace 0 (p + 2) I x →L[ℝ]
