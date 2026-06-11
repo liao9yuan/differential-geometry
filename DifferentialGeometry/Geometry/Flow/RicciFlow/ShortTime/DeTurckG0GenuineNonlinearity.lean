@@ -1931,6 +1931,65 @@ private theorem exists_deTurckLinearization_coerciveInverse
     nlinarith [sq_nonneg ‖u‖, norm_nonneg u, norm_nonneg (B₁ u), norm_nonneg B₁,
       mul_le_mul_of_nonneg_left hb (norm_nonneg (B₁ u)), sq_nonneg ‖B₁‖]
 
+/-- **The realized DeTurck remainder of a fibre-small perturbation splits, at the `L²`-class
+level, as its re-tagged Ricci–DeTurck right-hand side minus its linear rough-Laplacian class.**
+
+For a `g₀`-fibre-small `(0,2)`-perturbation `T` (`hδ_lt`/`hδ` the `δ < 1` witness), with realized
+metric `g_T := tensorSectionRealizeMetric g₀ T hδ_lt hδ` (the genuine smooth metric `g₀ +
+ccTensorBilinSymm g₀ T`),
+```
+toL2 (deTurckRealizeRemainderOf g₀ g_bg T)
+  = toL2 (deTurckRHSRetag g₀ g_bg g_T) − toL2 (Δ_∇ T) ,
+```
+where `Δ_∇ = rawTensorConnLapSmooth g₀ 0 2` and `deTurckRHSRetag g₀ g_bg g_T` is the `g₀`-re-tagged
+DeTurck right-hand side of `g_T`.  This is the named realization of the splitting the deep
+first-order-freedom analysis works through (the `−λᵢ` rough-Laplacian principal symbol of the
+realized remainder is the `toL2 (Δ_∇ T)` summand, and the second-order re-tagged-RHS principal symbol
+is inside `toL2 (deTurckRHSRetag g₀ g_bg g_T)`, the two cancelling at the symbol level by
+`deTurckNonlinearitySpectral_principalPart_cancels`, sorry-free).
+
+It is the section-level coincidence `deTurckRealizeRemainderOf g₀ g_bg T = realizedRHSRemainderSection
+g₀ g_bg g_T T` (both reduce, through the `dif_pos` branch and the witness-irrelevance of the realized
+metric, to `{deTurckRHSSection g_bg g_T} − Δ_∇ T`), pushed through the linear `SmoothCcTensor.toL2`
+(`toL2_sub`) after the sorry-free section split `realizedRHSRemainderSection_eq_sub`. -/
+theorem deTurckRealizeRemainderOf_toL2_retag_sub
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T : Integral.L2.SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
+    Integral.L2.SmoothCcTensor.toL2 (deTurckRealizeRemainderOf (I := I) g₀ g_bg T)
+      = Integral.L2.SmoothCcTensor.toL2
+          (deTurckRHSRetag (I := I) g₀ g_bg
+            (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ))
+        - Integral.L2.SmoothCcTensor.toL2
+            (rawTensorConnLapSmooth (I := I) g₀ 0 2 T) := by
+  classical
+  -- The realized remainder coincides, as a section, with `realizedRHSRemainderSection` at the
+  -- realized metric `g_T` (the `dif_pos` branch's metric is witness-irrelevantly `g_T`).  The
+  -- two metrics differ only in the `δ`-witness, so the `deTurckRHSSection`-built section data
+  -- agree; we close by `congrArg` on the realized metric (mirroring
+  -- `deTurckRealizeRemainderOf_gateRepOfWitness`) rather than `rw`, which `whnf`-explodes here.
+  have hex : ∃ δ : ℝ, δ < 1 ∧
+      gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ :=
+    ⟨δ, hδ_lt, hδ⟩
+  have hmetric :
+      tensorSectionRealizeMetric (I := I) g₀ T hex.choose_spec.1 hex.choose_spec.2
+        = tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ :=
+    tensorSectionRealizeMetric_witness_irrel (I := I) g₀ T _ _ _ _
+  have hsec :
+      deTurckRealizeRemainderOf (I := I) g₀ g_bg T
+        = realizedRHSRemainderSection (I := I) g₀ g_bg
+            (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) T := by
+    rw [deTurckRealizeRemainderOf, dif_pos hex]
+    exact congrArg
+      (fun g => ({ toSection := (deTurckRHSSection (I := I) g_bg g).toSection
+                   hasCompactSupport := (deTurckRHSSection (I := I) g_bg g).hasCompactSupport } :
+                  Integral.L2.SmoothCcTensor g₀ 0 2)
+                - rawTensorConnLapSmooth (I := I) g₀ 0 2 T)
+      hmetric
+  -- Push `toL2` through the section split `realizedRHSRemainderSection = deTurckRHSRetag − Δ_∇`.
+  rw [hsec, realizedRHSRemainderSection_eq_sub, Integral.L2.SmoothCcTensor.toL2_sub]
+
 set_option linter.unusedVariables false in
 /-- **The per-curve Duhamel-horizon realized-remainder cancellation residue of a globally-controlled
 corrector against the gate representative's *own* realized remainder (the irreducible deep
