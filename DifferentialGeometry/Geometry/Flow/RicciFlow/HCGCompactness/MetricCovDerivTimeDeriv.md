@@ -87,7 +87,20 @@ calculus for `totalNabla0SFun` applied to time families — a missing-API track,
 not deep mathematics.  Order-0 precedent: `metricInner_mdiffAt`
 (`Evolution/Connection/MetricCovDerivProducer.lean`).
 
-### Regularity-track progress (2026-06-11 late): BOTH tower inductions DONE
+### ✅ REGULARITY TRACK COMPLETE (2026-06-11, commit 0619be60)
+
+`solnMetricJointAt` (level-0 joint smoothness from
+`MetricFamilySmoothOn.frameCompSmooth`: localFrame coefficient expansion via
+`eventually_eq_localFrame_sum_coeff_smul` + `contMDiffAt_localFrame_coeff`
+(ROOT namespace, not `Bundle.Trivialization`!) + bilinear double-sum expansion
+— expand only the inner-product slots with an auxiliary `hexp`-rewrite, NOT a
+global `rw [h0, h1]` which also hits the coefficient arguments; finish with
+`Finset.sum_comm` + per-term `ring`) → `solnTowerSwap_reg` (the swap fully
+discharged; single input `hDreg : t ∈ D.regular → D.regular ∈ 𝓝 t`) →
+`covOrderBound_of_soln` (RicBound.lean) now consumes `hDreg` instead of the
+three tower-regularity hypotheses.  Verification green.
+
+### Historical: regularity-track progress (2026-06-11 late): BOTH tower inductions DONE
 
 * `covDerivOfField_eval_contMDiffAt` (this file, ✅ green): joint C^∞ of every
   tower-level slot evaluation from level-0 joint smoothness (engine
