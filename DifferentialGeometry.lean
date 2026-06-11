@@ -333,6 +333,7 @@ import DifferentialGeometry.Analysis.Integration.L2.Hilbert.DenseSubset
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.Inherited
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.Operators
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.SimpLemmas
+import DifferentialGeometry.Analysis.Integration.L2.MultiplicationOperator
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.Algebra
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.CauchySchwarz
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.Defs
@@ -1051,6 +1052,7 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartT
 import DifferentialGeometry.Geometry.Connection.ConnectionDifferenceField
 import DifferentialGeometry.Geometry.Connection.ConnectionDifferenceFieldJets
 import DifferentialGeometry.Geometry.Connection.ConnectionDifferenceQuadraticTraceProduct
+import DifferentialGeometry.Geometry.Connection.DeTurckCartanQuadraticTraceProduct
 import DifferentialGeometry.Geometry.Connection.CovApplyCovRSChartBasisExtension
 import DifferentialGeometry.Geometry.Connection.SingleSlotOperatorFiberNormBound
 import DifferentialGeometry.Geometry.Connection.DivergenceCovariantTrace
