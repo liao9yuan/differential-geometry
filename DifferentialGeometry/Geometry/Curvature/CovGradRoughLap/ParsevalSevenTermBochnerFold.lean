@@ -12,6 +12,7 @@ import DifferentialGeometry.Geometry.Curvature.Order2Defect.GradientSlotLeibniz
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.OperatorFieldPairingIBP
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ContractedBianchi
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedSlotwiseCurvature
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedRicciEndomorphism
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ParsevalFrameDiffCurvatureTrace
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorRSMetricCompatible
 
@@ -2799,6 +2800,144 @@ private lemma parsevalDiagDiffCurv_pair_eq_orthoSlotSubstSum
         (unitZeroSec (I := I) (M := M) y))
     (contMDiff_unitEvalSection' (I := I) (M := M) g s S) ⟨fun y => V b y, hV b⟩
     (gradCurry0 (I := I) (M := M) g s S x (V b x)) bse hbse
+
+/-- **The frame-summed differentiated base-tangent curvature, metric-paired against a smooth field, is
+the contracted-second-Bianchi differentiated-Ricci difference (the divergence of curvature, value form).**
+For the orthonormal frame `B_i := smoothOrthoFrame g x i`, smooth fields `Vb, U`, and a tangent value `w`,
+the metric pairing of the frame-summed inserted vector `∑_i nablaBaseSlotCurv g B_i B_i Vb x w` against
+`U x` collapses, through the definitional `nablaBaseSlotCurv_eq_nablaCurvSec` and the once-contracted
+second Bianchi `nablaCurvSec_diag_frame_trace_eq_nablaRicci_sub` (Theorem A, with the acted slot the smooth
+extension `ext w`), onto the differentiated-Ricci difference:
+```
+g(∑_i nablaBaseSlotCurv g B_i B_i Vb x w, U) = ∇_U Ric(Vb, ext w) − ∇_{ext w} Ric(U, Vb).
+```
+This is the metric read-off of the divergence-of-curvature `div R = δ R` identity at a point. -/
+private lemma inner_nablaBaseSlotCurvFrameSum_eq_nablaRicci_sub
+    (g : SmoothRiemannianMetric I M) {x : M}
+    {Vb U : Π b : M, TangentSpace I b}
+    (hVb : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Vb))
+    (hU : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% U)) (w : TangentSpace I x) :
+    g.inner x (∑ i : Fin (Module.finrank ℝ E),
+        nablaBaseSlotCurv (I := I) g
+          (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+            (smoothOrthoFrame_smooth (I := I) g x i))
+          (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+            (smoothOrthoFrame_smooth (I := I) g x i))
+          ⟨fun b => Vb b, hVb⟩ x w) (U x) =
+      nablaRicci (I := I) g U (fun b => Vb b)
+          (fun b => smoothExtensionTangent (I := I) x w b) x -
+        nablaRicci (I := I) g (fun b => smoothExtensionTangent (I := I) x w b) U
+          (fun b => Vb b) x := by
+  classical
+  have hA := nablaCurvSec_diag_frame_trace_eq_nablaRicci_sub (I := I) g
+    (Y := fun b => Vb b) (W := fun b => smoothExtensionTangent (I := I) x w b) (U := U) (x := x)
+    hVb (smoothExtensionTangent_contMDiff (I := I) x w) hU
+  rw [map_sum, ContinuousLinearMap.sum_apply]
+  refine Eq.trans ?_ hA
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [nablaBaseSlotCurv_eq_nablaCurvSec]
+  simp only [ContMDiffSection.coeFn_mk]
+
+/-- **The slot-`k` substituted tensor evaluates by updating the slot-`k` argument through the CLM.** For
+a continuous endomorphism `Φ` of `T_x M`, a `(0, s)`-tensor `C`, and a tangent tuple `m`, the model
+evaluation of `tensorSlotSubstCLM (tangentSlotCLM k Φ) C` at `m` is `C` evaluated on the tuple with its
+`k`-th entry replaced by `Φ (m k)`:
+```
+toModel (tensorSlotSubstCLM (tangentSlotCLM k Φ) C) m = toModel C (Function.update m k (Φ (m k))).
+```
+This is `tensorSlotSubstCLM_apply` followed by the pointwise identification of
+`fun i => (tangentSlotCLM k Φ i) (m i)` with `Function.update m k (Φ (m k))` (`tangentSlotCLM_self`/
+`tangentSlotCLM_other` against `Function.update_apply`). -/
+private lemma toModel_tensorSlotSubst_tangentSlot_apply
+    {s : ℕ} {x : M} (k : Fin s) (Φ : TangentSpace I x →L[ℝ] TangentSpace I x)
+    (C : Tensor0SSpace s I x) (m : Fin s → TangentSpace I x) :
+    Tensor0SSpace.toModel (tensorSlotSubstCLM (I := I) s x (tangentSlotCLM (I := I) s k Φ) C) m =
+      Tensor0SSpace.toModel C (Function.update m k (Φ (m k))) := by
+  classical
+  have hupd : (fun i => (tangentSlotCLM (I := I) s k Φ i) (m i)) =
+      Function.update m k (Φ (m k)) := by
+    funext i
+    by_cases hik : i = k
+    · subst hik; rw [tangentSlotCLM_self, Function.update_self]
+    · rw [tangentSlotCLM_other (I := I) s k Φ hik, ContinuousLinearMap.id_apply,
+        Function.update_of_ne hik]
+  have hsubst : (show ContinuousMultilinearMap ℝ (fun _ : Fin s => TangentSpace I x) ℝ from
+        tensorSlotSubstCLM (I := I) s x (tangentSlotCLM (I := I) s k Φ) C) m =
+      (show ContinuousMultilinearMap ℝ (fun _ : Fin s => TangentSpace I x) ℝ from C)
+        (Function.update m k (Φ (m k))) := by
+    rw [tensorSlotSubstCLM_apply (I := I) s x (tangentSlotCLM (I := I) s k Φ) C m, hupd]
+  change Tensor0SSpace.toModel
+      (tensorSlotSubstCLM (I := I) s x (tangentSlotCLM (I := I) s k Φ) C) m =
+    Tensor0SSpace.toModel C (Function.update m k (Φ (m k)))
+  rw [Tensor0SSpace.toModel, Tensor0SSpace.toModel]
+  exact hsubst
+
+/-- **The orthonormal-frame slot-substitution double sum is the negated folded slot-substitution metric
+pairing (the metric-trace opening as a curvature-commutator inner product).** For the orthonormal frame
+`B_i := smoothOrthoFrame g x i` and the frame-summed differentiated-curvature endomorphism
+`T_x := nablaBaseSlotCurvFrameSumCLM g B Vb x`, the slot-substitution double sum produced by the bridges
+equals the negated sum over slots `k` of the `(0, s)` metric pairing of the slot-`k` substitution of `A_x`
+by `T_x` against `D`:
+```
+∑_J [−∑_k toModel(A_x)(update (B∘J) k (T_x (B_{Jk})))] · toModel(D)(B∘J)
+  = −∑_k ⟨tensor0SAsRS (tensorSlotSubstCLM (tangentSlotCLM k T_x) A_x), tensor0SAsRS D⟩_g.
+```
+This is the frame double-sum collapse `tensorInnerPointwise_tensor0SAsRS_eq_frameSum` (H1) on the
+slot-substituted wrap, with `toModel_tensorSlotSubst_tangentSlot_apply` naming the per-slot inserted
+endomorphism and `nablaBaseSlotCurvFrameSumCLM_apply` identifying `T_x`. -/
+private lemma orthoSlotSubstSum_eq_neg_folded_pairing
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
+    (A : Tensor0SSpace s I x) (D : Tensor0SSpace s I x)
+    (B : Fin (Module.finrank ℝ E) → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (hB : ∀ i, B i = ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+      (smoothOrthoFrame_smooth (I := I) g x i))
+    (Vb : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x))
+    (hbse : ∀ i, bse i = smoothOrthoFrame (I := I) g x i x) :
+    ∑ J : Fin s → Fin (Module.finrank ℝ E),
+        (- ∑ k : Fin s,
+            Tensor0SSpace.toModel A
+              (Function.update (fun j => smoothOrthoFrame (I := I) g x (J j) x) k
+                (nablaBaseSlotCurvFrameSumCLM (I := I) g B Vb x
+                  (smoothOrthoFrame (I := I) g x (J k) x)))) *
+          Tensor0SSpace.toModel D (fun j => smoothOrthoFrame (I := I) g x (J j) x) =
+      - ∑ k : Fin s,
+          tensorInnerPointwise (I := I) (M := M) g 0 s x
+            (TensorRSSpace.toModel
+              (tensor0SAsRS (I := I) (M := M) x
+                (tensorSlotSubstCLM (I := I) s x
+                  (tangentSlotCLM (I := I) s k (nablaBaseSlotCurvFrameSumCLM (I := I) g B Vb x)) A)))
+            (TensorRSSpace.toModel (tensor0SAsRS (I := I) (M := M) x D)) := by
+  classical
+  have horth : ∀ a b : Fin (Module.finrank ℝ E),
+      g.inner x (smoothOrthoFrame (I := I) g x a x) (smoothOrthoFrame (I := I) g x b x)
+        = if a = b then 1 else 0 :=
+    fun a b => smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
+  -- Each slot-`k` metric pairing is the frame double sum of the slot-substituted tensor's components.
+  have hpslot : ∀ k : Fin s,
+      tensorInnerPointwise (I := I) (M := M) g 0 s x
+          (TensorRSSpace.toModel
+            (tensor0SAsRS (I := I) (M := M) x
+              (tensorSlotSubstCLM (I := I) s x
+                (tangentSlotCLM (I := I) s k (nablaBaseSlotCurvFrameSumCLM (I := I) g B Vb x)) A)))
+          (TensorRSSpace.toModel (tensor0SAsRS (I := I) (M := M) x D)) =
+        ∑ J : Fin s → Fin (Module.finrank ℝ E),
+          Tensor0SSpace.toModel A
+            (Function.update (fun j => smoothOrthoFrame (I := I) g x (J j) x) k
+              (nablaBaseSlotCurvFrameSumCLM (I := I) g B Vb x
+                (smoothOrthoFrame (I := I) g x (J k) x))) *
+            Tensor0SSpace.toModel D (fun j => smoothOrthoFrame (I := I) g x (J j) x) := by
+    intro k
+    rw [tensorInnerPointwise_tensor0SAsRS_eq_frameSum (I := I) (M := M) g s x _ D
+      (fun j => smoothOrthoFrame (I := I) g x j x) bse rfl hbse horth]
+    refine Finset.sum_congr rfl (fun J _ => ?_)
+    rw [toModel_tensorSlotSubst_tangentSlot_apply (I := I) k
+      (nablaBaseSlotCurvFrameSumCLM (I := I) g B Vb x) A
+      (fun j => smoothOrthoFrame (I := I) g x (J j) x)]
+  symm
+  rw [Finset.sum_congr rfl (fun k _ => hpslot k), Finset.sum_comm, ← Finset.sum_neg_distrib]
+  refine Finset.sum_congr rfl (fun J _ => ?_)
+  conv_rhs => rw [neg_mul, Finset.sum_mul]
 
 /-- **The integrated Parseval-frame diagonal differentiated-curvature trace pairing equals the
 group-`2` minus group-`1` double sum (the genuine `nablaTensor0SCurv`-form curvature kernel of the
