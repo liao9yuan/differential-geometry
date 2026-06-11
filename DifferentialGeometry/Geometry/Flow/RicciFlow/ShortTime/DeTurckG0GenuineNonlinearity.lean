@@ -5,6 +5,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Realiz
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.HeatOutputContinuousRepr
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralToPouSobolevCLM
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.L2Operator.L2PMap
 
 /-! # The genuine, un-gated coordinate-spectral DeTurck nonlinearity and its Lipschitz
 
@@ -432,6 +433,164 @@ strictly more elementary than the full `Φ` (the spectral coordinate analysis is
 CLM above); what remains is exactly the rational-polynomial / inverse-Gram Neumann-series smoothness
 of the retag in the metric `≤ 2`-jet. -/
 
+/-- The bundled rough connection Laplacian `Δ_∇ = rawTensorConnLapSmooth g₀ 0 2` on smooth
+compactly-supported `(0,2)`-tensor sections, packaged as an `ℝ`-linear map.  Additivity is
+derived from the on-disk subtraction-linearity `rawTensorConnLapSmooth_sub` (so it needs no
+smoothness-witness bookkeeping); scalar-homogeneity mirrors that lemma's `smul` half, built from
+the pointwise `tensorConnLaplacian_of_contMDiff_smul` with the section's unconditional smoothness
+witness `rawTensorConnLap_contMDiff`.  This is the linear (rough-Laplacian) summand of the realized
+DeTurck remainder, isolated so its chart-Sobolev order-dropping bound makes it a continuous linear
+map. -/
+private noncomputable def rawConnLapSmoothLinearMap (g₀ : SmoothRiemannianMetric I M) :
+    Integral.L2.SmoothCcTensor g₀ 0 2 →ₗ[ℝ] Integral.L2.SmoothCcTensor g₀ 0 2 where
+  toFun T := rawTensorConnLapSmooth (I := I) g₀ 0 2 T
+  map_add' S T := by
+    -- `Δ_∇ 0 = 0` and `Δ_∇ (-X) = -Δ_∇ X` from `rawTensorConnLapSmooth_sub`, hence additivity.
+    have hzero : rawTensorConnLapSmooth (I := I) g₀ 0 2 (0 : Integral.L2.SmoothCcTensor g₀ 0 2)
+        = 0 := by
+      have h := rawTensorConnLapSmooth_sub (I := I) g₀ 0 2
+        (0 : Integral.L2.SmoothCcTensor g₀ 0 2) (0 : Integral.L2.SmoothCcTensor g₀ 0 2)
+      rwa [sub_zero, sub_self] at h
+    have hneg : ∀ X : Integral.L2.SmoothCcTensor g₀ 0 2,
+        rawTensorConnLapSmooth (I := I) g₀ 0 2 (-X)
+          = -rawTensorConnLapSmooth (I := I) g₀ 0 2 X := by
+      intro X
+      have h := rawTensorConnLapSmooth_sub (I := I) g₀ 0 2
+        (0 : Integral.L2.SmoothCcTensor g₀ 0 2) X
+      rwa [zero_sub, hzero, zero_sub] at h
+    have h := rawTensorConnLapSmooth_sub (I := I) g₀ 0 2 S (-T)
+    rwa [sub_neg_eq_add, hneg T, sub_neg_eq_add] at h
+  map_smul' c T := by
+    -- Scalar-homogeneity, derived through the `L²`-embedding (which is injective on smooth
+    -- compactly-supported sections) from the proven `map_smul'` of `connLaplacianL2Action`,
+    -- avoiding any bundle-section extensionality bookkeeping.
+    simp only [RingHom.id_apply]
+    refine smoothCcTensor_toL2_injective (I := I) g₀ 0 2 ?_
+    have hact : ConnectionLaplacian.connLaplacianL2Action (I := I) g₀ 0 2 (c • T)
+        = c • ConnectionLaplacian.connLaplacianL2Action (I := I) g₀ 0 2 T :=
+      (ConnectionLaplacian.connLaplacianL2Action (I := I) g₀ 0 2).map_smul c T
+    rw [ConnectionLaplacian.connLaplacianL2Action_apply,
+      ConnectionLaplacian.connLaplacianL2Action_apply] at hact
+    rw [hact, Integral.L2.SmoothCcTensor.toL2_smul]
+
+@[simp] theorem rawConnLapSmoothLinearMap_apply (g₀ : SmoothRiemannianMetric I M)
+    (T : Integral.L2.SmoothCcTensor g₀ 0 2) :
+    rawConnLapSmoothLinearMap (I := I) g₀ T = rawTensorConnLapSmooth (I := I) g₀ 0 2 T := rfl
+
+/-- The chart-Sobolev order-`a` class of the rough-Laplacian image is dominated by the order-`q`
+class of the input whenever `a + 2 ≤ q`: there is `C ≥ 0` with `‖(Δ_∇ T).toHs a‖ ≤ C · ‖T.toHs q‖`
+for every smooth section `T`.  The rough Laplacian drops one `toHs`-order
+(`exists_rawConnLapSmooth_toHs_le_toHs_succ`: `‖(Δ_∇ T).toHs a‖ ≤ C · ‖T.toHs (a+1)‖`), and the
+`toHs`-norm is monotone in the order (`toHs_norm_mono_order`, `a + 1 ≤ q`), so the order-`(a+1)`
+norm is dominated by the order-`q` norm.  This is the boundedness that upgrades the rough-Laplacian
+linear map to a continuous linear map `H^q → H^a`. -/
+theorem exists_rawConnLapSmooth_toHs_le_toHs_of_le (g₀ : SmoothRiemannianMetric I M) (a q : ℕ)
+    (hq : a + 2 ≤ q) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ T : Integral.L2.SmoothCcTensor g₀ 0 2,
+      ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
+          (rawTensorConnLapSmooth (I := I) g₀ 0 2 T)‖ ≤
+        C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) q T‖ := by
+  obtain ⟨C, hC_nn, hC⟩ := exists_rawConnLapSmooth_toHs_le_toHs_succ (I := I) g₀ a
+  refine ⟨C, hC_nn, fun T => ?_⟩
+  refine (hC T).trans ?_
+  exact mul_le_mul_of_nonneg_left
+    (toHs_norm_mono_order (I := I) (M := M) g₀ (by omega : a + 1 ≤ q) T) hC_nn
+
+set_option linter.unusedVariables false in
+/-- **The rough-Laplacian chart-Sobolev continuous linear map `H^q → H^a` (`a + 2 ≤ q`,
+sorry-free).**
+
+The dense extension (`LinearMap.extendOfNorm`) of the section-level map `T ↦ (Δ_∇ T).toHs a` along
+the dense chart-Sobolev embedding `T ↦ T.toHs q`, where `Δ_∇ = rawTensorConnLapSmooth g₀ 0 2`.  Its
+linearity is `rawConnLapSmoothLinearMap` composed with the order-`a` completion embedding
+`toHsHa_linearMap`; its `‖·‖_{H^q}`-domination is the order-dropping bound
+`exists_rawConnLapSmooth_toHs_le_toHs_of_le`; the dense range is `smoothCcTensor_denseRange_toHs`.
+This is the linear summand of the realized-remainder smooth map `Ψ`: subtracting it from the
+(nonlinear) retag arm reconstitutes the full remainder, and as a continuous linear map it is itself
+`C^∞`.  Its defining identity on the dense smooth sections is `rawConnLapToHsCLM_apply_toHs`. -/
+noncomputable def rawConnLapToHsCLM (g₀ : SmoothRiemannianMetric I M) (a q : ℕ) (hq : a + 2 ≤ q) :
+    IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 q →L[ℝ]
+      IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 a :=
+  LinearMap.extendOfNorm
+    ((toHsHa_linearMap (I := I) g₀ a).comp (rawConnLapSmoothLinearMap (I := I) g₀))
+    (toHsHa_linearMap (I := I) g₀ q)
+
+/-- **The defining identity of the rough-Laplacian chart-Sobolev CLM on the dense range.**  For
+every smooth section `T`, `rawConnLapToHsCLM g₀ a q hq (T.toHs q) = (Δ_∇ T).toHs a`. -/
+@[simp] theorem rawConnLapToHsCLM_apply_toHs (g₀ : SmoothRiemannianMetric I M) (a q : ℕ)
+    (hq : a + 2 ≤ q) (T : Integral.L2.SmoothCcTensor g₀ 0 2) :
+    rawConnLapToHsCLM (I := I) g₀ a q hq
+        (IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) q T)
+      = IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
+          (rawTensorConnLapSmooth (I := I) g₀ 0 2 T) := by
+  obtain ⟨C, _hC_nn, hC⟩ := exists_rawConnLapSmooth_toHs_le_toHs_of_le (I := I) g₀ a q hq
+  have hnorm : ∃ C : ℝ, ∀ R : Integral.L2.SmoothCcTensor g₀ 0 2,
+      ‖((toHsHa_linearMap (I := I) g₀ a).comp (rawConnLapSmoothLinearMap (I := I) g₀)) R‖ ≤
+        C * ‖toHsHa_linearMap (I := I) g₀ q R‖ := by
+    refine ⟨C, fun R => ?_⟩
+    rw [LinearMap.comp_apply, toHsHa_linearMap_apply, rawConnLapSmoothLinearMap_apply,
+      toHsHa_linearMap_apply]
+    exact hC R
+  have hext := LinearMap.extendOfNorm_eq
+    (f := (toHsHa_linearMap (I := I) g₀ a).comp (rawConnLapSmoothLinearMap (I := I) g₀))
+    (e := toHsHa_linearMap (I := I) g₀ q)
+    (smoothCcTensor_denseRange_toHs (I := I) g₀ 0 2 q) hnorm T
+  rw [toHsHa_linearMap_apply, LinearMap.comp_apply, rawConnLapSmoothLinearMap_apply,
+    toHsHa_linearMap_apply] at hext
+  rw [rawConnLapToHsCLM]
+  exact hext
+
+/-- **`C^∞`-on-the-validity-ball of the chart-Sobolev-valued realized DeTurck remainder *retag arm*
+(the deep inverse-Gram Neumann posit; body `sorry`).**
+
+For supercritical `a` (`2 a > dim M + 4`) and chart-Sobolev input order `q ≥ a + 2`, there is a
+radius `ρ > 0` and a map
+`Ξ : TensorPouSobolevHilbert g₀ 0 2 q → TensorPouSobolevHilbert g₀ 0 2 a` that is `ContDiffOn ℝ ∞`
+on the closed `H^q`-ball of radius `ρ` and factors the chart-Sobolev *retag* of the realized DeTurck
+remainder — i.e. the realized remainder *plus its linear rough-Laplacian summand* — through
+`SmoothCcTensor.toHs q`: for every smooth section `T` whose `H^q` class `(T).toHs q` lies in the
+ball,
+```
+Ξ ((T).toHs q) = (deTurckRealizeRemainderOf g₀ g_bg T + rawTensorConnLapSmooth g₀ 0 2 T).toHs a .
+```
+
+On the ball the radius `ρ` is small enough (supercritical `H^q ↪ C⁰`) that every section is
+uniformly fibre-small, so the `dif`-guard of `deTurckRealizeRemainderOf` is the genuine branch and
+`deTurckRealizeRemainderOf g₀ g_bg T + Δ_∇ T` equals the pure DeTurck right-hand-side *retag*
+`deTurckRHSRetag g₀ g_bg g₁` (`= −2 Ric + Lie` of the realized metric `g₁`).  This is the genuinely
+**nonlinear** (rational-polynomial / inverse-Gram-Neumann) content of the realized-remainder
+smoothness: the linear summand `Δ_∇ T` has been cancelled, leaving exactly the quasilinear retag
+whose smoothness is the inverse-Gram Neumann-series convergence on the non-degenerate ball.  It is
+*strictly weaker than* the full realized-remainder smoothness `exists_deTurckRealizeRemainder_toHs_…`
+(it omits the `−Δ_∇` arm, which is a genuinely non-zero second-order operator), so it is structurally
+distinct from that statement; no packaging.
+
+Why the ball restriction is essential (the truncation litmus): the global claim is false (the finite
+`dif`-truncation jumps the value to `0` across the fibre-small boundary `δ ↗ 1`, where the genuine
+retag does not vanish — a non-removable first-order kink); the radius-`ρ` ball excises that boundary.
+T6: purely spatial.
+
+The body is `sorry`: the inverse-Gram-Neumann rational-polynomial smoothness grind discharging the
+chart-Sobolev `ContDiffOn` of the retag is the irreducible deep analytic content (its own future
+fill, possibly multi-dispatch). -/
+theorem exists_deTurckRealizeRemainderRetag_toHs_contDiffOn_ball
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (q : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4) (hq : a + 2 ≤ q) :
+    ∃ (ρ : ℝ) (Ξ : IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 q →
+        IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 a),
+      0 < ρ ∧
+      ContDiffOn ℝ (∞ : WithTop ℕ∞) Ξ
+        (Metric.closedBall
+          (0 : IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 q) ρ) ∧
+      ∀ T : Integral.L2.SmoothCcTensor g₀ 0 2,
+        IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) q T ∈
+            Metric.closedBall
+              (0 : IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 q) ρ →
+          Ξ (IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) q T)
+            = IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
+                (deTurckRealizeRemainderOf (I := I) g₀ g_bg T
+                  + rawTensorConnLapSmooth (I := I) g₀ 0 2 T) := sorry
+
 /-- **`C^∞`-on-the-validity-ball of the chart-Sobolev-valued realized DeTurck remainder (the deep
 inverse-Gram Neumann posit; body `sorry`).**
 
@@ -477,7 +636,28 @@ theorem exists_deTurckRealizeRemainder_toHs_contDiffOn_ball
               (0 : IntrinsicSobolev.TensorPouSobolevHilbert (I := I) (M := M) g₀ 0 2 q) ρ →
           Ψ (IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) q T)
             = IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
-                (deTurckRealizeRemainderOf (I := I) g₀ g_bg T) := sorry
+                (deTurckRealizeRemainderOf (I := I) g₀ g_bg T) := by
+  -- The deep nonlinear *retag* smooth extension `Ξ` and the linear rough-Laplacian CLM `L`; the
+  -- realized-remainder smooth map is `Ψ := Ξ − L` (the linear arm subtracted back out).
+  classical
+  obtain ⟨ρ, Ξ, hρ, hΞ, hΞfactor⟩ :=
+    exists_deTurckRealizeRemainderRetag_toHs_contDiffOn_ball (I := I) g₀ g_bg a q ha hq
+  refine ⟨ρ, fun v => Ξ v - rawConnLapToHsCLM (I := I) g₀ a q hq v, hρ, ?_, ?_⟩
+  · -- `C^∞` of a difference of `C^∞` maps: the retag extension and the (continuous-linear, hence
+    -- `C^∞`) rough-Laplacian CLM.
+    exact hΞ.sub
+      (((rawConnLapToHsCLM (I := I) g₀ a q hq).contDiff (n := (∞ : WithTop ℕ∞))).contDiffOn)
+  · -- The factoring: subtracting the linear arm reconstitutes the full realized remainder.
+    intro T hT
+    change Ξ (IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) q T)
+        - rawConnLapToHsCLM (I := I) g₀ a q hq
+            (IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) q T)
+      = IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
+          (deTurckRealizeRemainderOf (I := I) g₀ g_bg T)
+    rw [hΞfactor T hT, rawConnLapToHsCLM_apply_toHs,
+      SmoothCcTensor.toHs_add (I := I) (M := M) a (deTurckRealizeRemainderOf (I := I) g₀ g_bg T)
+        (rawTensorConnLapSmooth (I := I) g₀ 0 2 T)]
+    abel
 
 /-- **`C^∞`-on-the-validity-ball of the spectral-valued realized DeTurck remainder Nemytskii map
 (the deep inverse-Gram Neumann smoothness posit, body `sorry`).**
