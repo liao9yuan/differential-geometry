@@ -15,7 +15,47 @@ raw frame-component `ℓ²` when the frame Gram's inverse-eigenvalues are bounde
 - (sibling, in Comparison.lean) **`coordInner0S_identity_le_pow_diagonal`** — the
   diagonal case `coordInner0S Id ≤ (1/m)^s coordInner0S (diagInv μ)` for `μ ≥ m`.
 
-## REMAINING capstone — `quadForm_id_le_pow` (the induction)
+## ✅ CAPSTONE DONE (2026-06-11): `quadForm_id_le_pow` verified sorry-free
+
+Built via GPT Pro consult (induction design below was sent; answer integrated with
+local hardening) + 3 fix iterations.  Final structure: `sum_fin_succ_fun`/`_₂`
+(head-tail reindex via `Fin.consEquiv` + `Equiv.sum_comp` + `rw [Fintype.sum_prod_type]`
+— NOT `Finset.sum_bij`, whose goal order is fragile), `prod_fin_succ_Q` (needs
+`(Fin.cons k I : Fin (s+1) → Idx)` ascriptions — bare `Fin.cons k I a` fails to
+elaborate), `diag_pairing`, `matrix_posSemidef_of_quad_nonneg`
+(`Matrix.PosSemidef.of_dotProduct_mulVec_nonneg` + `Matrix.IsHermitian.ext`),
+`shifted_posSemidef` (`Q - α·Id` PSD), `kron_kernel_posSemidef_of_ih`,
+`sandwich_entry` (entries of `Vᴴ*P*V`; over ℝ the first factor-split is DEFEQ —
+`congr 1` closes it, do NOT add rw steps after), Gram-PSD via
+`PosSemidef.conjTranspose_mul_mul_same` (the matrix-sandwich idiom — far more
+robust than proving bilinearity `∑∑ aₖaₗB(vₖ,vₗ) = B(Σav,Σav)` directly).
+GOTCHAS: `Fintype.sum_prod_type`/`Finset.sum_sub_distrib` have explicit function
+args — use `rw`, not term-mode `exact`; `Mathlib.LinearAlgebra.Matrix.Spectrum`
+olean is NOT built in this checkout — import `Mathlib.Analysis.Matrix.Spectrum`
+(as MaximumPrinciple.lean does); `omit ... in` must precede the docstring.
+
+## ✅ ADAPTERS DONE (Comparison.lean, 2026-06-11, sorry-free)
+
+- `coordInner0S_identity_le_pow_quad`: `coordInner0S Id A A ≤ C^s · coordInner0S Q A A`
+  for symmetric `Q` with quad form ≥ (1/C)·Id (one `mul_assoc` reassociation —
+  `coordInner0S` is left-assoc `(∏)*cA*cB`).
+- **`sum_comp_sq_le_pow_normSq0S`** — THE pointwise brick-2 inequality:
+  `∑_slots comp² ≤ C^s · normSq0S g x s A` given `MetricInverseInBasis_gen g x basis Q`
+  + `Q` symmetric + quad-form lower bound.  Via `normSq0S_eq_coord`.
+
+## REMAINING to consume brick 2 (not this file)
+
+1. hQlb producer: "frame Gram ≤ CG·Id (quad form)" ⟹ inverse-Gram `Q` symmetric +
+   quad form ≥ (1/CG)·Id at each z (pointwise linear algebra on the gramE/ginv
+   machinery in Claim1Wiring).
+2. Bounded-Gram-on-small-domain producer (continuity from the keystone ON point).
+3. Tower application: `compL2(iterCovComp …) ≤ √(CG^{2+j})·√normSq0S(iterCov …)` via
+   `iterCovComp_eq_iterCov` + `sum_comp_sq_le_pow_normSq0S` (+ component0S ↔
+   tensor0SComponent bridge).
+4. Shi moving→fixed (`normSq0S_le_of_metric_equiv`), Ricci-component smoothness,
+   finite-subcover uniformization, RicBound.lean assembly.
+
+## ORIGINAL design notes — `quadForm_id_le_pow` (the induction)
 
 `(1/C)^s · ∑_I c_I² ≤ ∑_{I,J} (∏_a Q(I_a,J_a)) c_I c_J` for symmetric `Q ≥ (1/C)Id`,
 any `c : (Fin s→Idx)→ℝ`.  Induction on `s`:

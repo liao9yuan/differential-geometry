@@ -62,6 +62,7 @@ private lemma isHermitian_entry
   · intro hk
     exact absurd (Finset.mem_univ k) hk
 
+omit [DecidableEq n] in
 /-- **PSD-pairing.** For positive semi-definite real matrices `M` and `G`, the
 contracted sum `∑ i j, M i j * G i j` is non-negative. -/
 theorem sum_posSemidef_mul_posSemidef_nonneg
@@ -103,5 +104,268 @@ theorem sum_posSemidef_mul_posSemidef_nonneg
       Finset.sum_congr rfl fun j _ => by ring
   rw [hquad]
   exact hG.dotProduct_mulVec_nonneg _
+
+/-! ## The Kronecker-power quadratic-form bound -/
+
+section KroneckerPow
+
+variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+
+omit [DecidableEq Idx] in
+/-- Reindex a sum over `(Fin (s+1) → Idx)` by head and tail. -/
+private lemma sum_fin_succ_fun {R : Type*} [AddCommMonoid R] (s : ℕ)
+    (f : (Fin (s + 1) → Idx) → R) :
+    (∑ I : Fin (s + 1) → Idx, f I)
+      = ∑ k : Idx, ∑ I : Fin s → Idx, f (Fin.cons k I) := by
+  classical
+  calc (∑ I : Fin (s + 1) → Idx, f I)
+      = ∑ p : Idx × (Fin s → Idx),
+          f ((Fin.consEquiv (fun _ : Fin (s + 1) => Idx)) p) :=
+        ((Fin.consEquiv (fun _ : Fin (s + 1) => Idx)).sum_comp f).symm
+    _ = ∑ k : Idx, ∑ I : Fin s → Idx, f (Fin.cons k I) := by
+        rw [Fintype.sum_prod_type]
+        rfl
+
+omit [DecidableEq Idx] in
+/-- Double version of `sum_fin_succ_fun`. -/
+private lemma sum_fin_succ_fun₂ {R : Type*} [AddCommMonoid R] (s : ℕ)
+    (f : (Fin (s + 1) → Idx) → (Fin (s + 1) → Idx) → R) :
+    (∑ I : Fin (s + 1) → Idx, ∑ J : Fin (s + 1) → Idx, f I J)
+      = ∑ k : Idx, ∑ I : Fin s → Idx, ∑ l : Idx, ∑ J : Fin s → Idx,
+          f (Fin.cons k I) (Fin.cons l J) := by
+  rw [sum_fin_succ_fun (s := s) (f := fun I => ∑ J, f I J)]
+  exact Finset.sum_congr rfl fun k _ => Finset.sum_congr rfl fun I _ =>
+    sum_fin_succ_fun (s := s) (f := fun J => f (Fin.cons k I) J)
+
+omit [Fintype Idx] [DecidableEq Idx] in
+/-- Product split after writing tuples as `Fin.cons head tail`. -/
+private lemma prod_fin_succ_Q (s : ℕ) (Q : Idx → Idx → ℝ)
+    (k l : Idx) (I J : Fin s → Idx) :
+    (∏ a : Fin (s + 1),
+        Q ((Fin.cons k I : Fin (s + 1) → Idx) a)
+          ((Fin.cons l J : Fin (s + 1) → Idx) a))
+      = Q k l * ∏ a : Fin s, Q (I a) (J a) := by
+  rw [Fin.prod_univ_succ]
+  simp
+
+/-- Diagonal contraction of the scaled identity kernel. -/
+private lemma diag_pairing {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (α : ℝ) (G : ι → ι → ℝ) :
+    (∑ i : ι, ∑ j : ι, (α * (if i = j then (1 : ℝ) else 0)) * G i j)
+      = α * ∑ i : ι, G i i := by
+  rw [Finset.mul_sum]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [Finset.sum_eq_single i]
+  · simp
+  · intro j _ hj
+    simp [Ne.symm hj]
+  · intro h
+    exact absurd (Finset.mem_univ i) h
+
+/-- A symmetric real kernel with nonnegative quadratic form is PSD. -/
+private lemma matrix_posSemidef_of_quad_nonneg {ι : Type*} [Fintype ι]
+    (A : ι → ι → ℝ)
+    (hsymm : ∀ i j, A i j = A j i)
+    (hquad : ∀ x : ι → ℝ, 0 ≤ ∑ i : ι, ∑ j : ι, A i j * (x i * x j)) :
+    (Matrix.of A).PosSemidef := by
+  refine Matrix.PosSemidef.of_dotProduct_mulVec_nonneg ?_ ?_
+  · refine Matrix.IsHermitian.ext fun i j => ?_
+    simpa using hsymm j i
+  · intro x
+    have hstar : star x = x := funext fun i => star_trivial _
+    have hexp : x ⬝ᵥ (Matrix.of A *ᵥ x) = ∑ i : ι, ∑ j : ι, A i j * (x i * x j) := by
+      simp only [dotProduct, mulVec, Matrix.of_apply, Finset.mul_sum]
+      exact Finset.sum_congr rfl fun i _ =>
+        Finset.sum_congr rfl fun j _ => by ring
+    rw [hstar, hexp]
+    exact hquad x
+
+/-- If `Q ≥ α·Id` as a quadratic form (and `Q` is symmetric), `Q - α·Id` is PSD. -/
+private lemma shifted_posSemidef
+    (Q : Idx → Idx → ℝ) (α : ℝ)
+    (hQsymm : ∀ i j, Q i j = Q j i)
+    (hQlb : ∀ w : Idx → ℝ, α * ∑ i, w i ^ 2 ≤ ∑ i, ∑ j, Q i j * (w i * w j)) :
+    (Matrix.of fun i j : Idx =>
+      Q i j - α * (if i = j then (1 : ℝ) else 0)).PosSemidef := by
+  refine matrix_posSemidef_of_quad_nonneg _ ?_ ?_
+  · intro i j
+    by_cases hij : i = j
+    · subst hij; rfl
+    · simp [hij, Ne.symm hij, hQsymm i j]
+  · intro x
+    have hsplit : (∑ i : Idx, ∑ j : Idx,
+          (Q i j - α * (if i = j then (1 : ℝ) else 0)) * (x i * x j))
+        = (∑ i : Idx, ∑ j : Idx, Q i j * (x i * x j)) - α * ∑ i : Idx, x i ^ 2 := by
+      calc (∑ i : Idx, ∑ j : Idx,
+            (Q i j - α * (if i = j then (1 : ℝ) else 0)) * (x i * x j))
+          = ∑ i : Idx, ∑ j : Idx,
+              (Q i j * (x i * x j)
+                - (α * (if i = j then (1 : ℝ) else 0)) * (x i * x j)) :=
+            Finset.sum_congr rfl fun i _ =>
+              Finset.sum_congr rfl fun j _ => by ring
+        _ = (∑ i : Idx, ∑ j : Idx, Q i j * (x i * x j))
+              - ∑ i : Idx, ∑ j : Idx,
+                  (α * (if i = j then (1 : ℝ) else 0)) * (x i * x j) := by
+            rw [← Finset.sum_sub_distrib]
+            refine Finset.sum_congr rfl fun i _ => ?_
+            rw [Finset.sum_sub_distrib]
+        _ = (∑ i : Idx, ∑ j : Idx, Q i j * (x i * x j)) - α * ∑ i : Idx, x i * x i := by
+            rw [diag_pairing α (fun i j => x i * x j)]
+        _ = (∑ i : Idx, ∑ j : Idx, Q i j * (x i * x j)) - α * ∑ i : Idx, x i ^ 2 := by
+            have h : (∑ i : Idx, x i * x i) = ∑ i : Idx, x i ^ 2 :=
+              Finset.sum_congr rfl fun i _ => (pow_two (x i)).symm
+            rw [h]
+    rw [hsplit]
+    exact sub_nonneg.mpr (hQlb x)
+
+omit [DecidableEq Idx] in
+/-- The induction hypothesis makes the `s`-fold product kernel PSD. -/
+private lemma kron_kernel_posSemidef_of_ih (s : ℕ) (Q : Idx → Idx → ℝ) (α : ℝ)
+    (hαnonneg : 0 ≤ α)
+    (hQsymm : ∀ i j, Q i j = Q j i)
+    (ih : ∀ w : (Fin s → Idx) → ℝ,
+      α ^ s * ∑ I : Fin s → Idx, w I ^ 2 ≤
+        ∑ I : Fin s → Idx, ∑ J : Fin s → Idx,
+          (∏ a : Fin s, Q (I a) (J a)) * (w I * w J)) :
+    (Matrix.of fun I J : Fin s → Idx =>
+      ∏ a : Fin s, Q (I a) (J a)).PosSemidef := by
+  refine matrix_posSemidef_of_quad_nonneg _ ?_ ?_
+  · intro I J
+    exact Finset.prod_congr rfl fun a _ => hQsymm (I a) (J a)
+  · intro w
+    exact le_trans
+      (mul_nonneg (pow_nonneg hαnonneg s)
+        (Finset.sum_nonneg fun I _ => sq_nonneg (w I)))
+      (ih w)
+
+/-- Entries of the sandwich `Vᴴ * P * V` over `ℝ`. -/
+private lemma sandwich_entry {ι κ : Type*} [Fintype ι]
+    (P : Matrix ι ι ℝ) (V : Matrix ι κ ℝ) (k l : κ) :
+    (Vᴴ * P * V) k l = ∑ I : ι, ∑ J : ι, P I J * (V I k * V J l) := by
+  rw [Matrix.mul_apply]
+  calc (∑ J : ι, (Vᴴ * P) k J * V J l)
+      = ∑ J : ι, (∑ I : ι, V I k * P I J) * V J l := by
+        refine Finset.sum_congr rfl fun J _ => ?_
+        congr 1
+    _ = ∑ J : ι, ∑ I : ι, P I J * (V I k * V J l) := by
+        refine Finset.sum_congr rfl fun J _ => ?_
+        rw [Finset.sum_mul]
+        exact Finset.sum_congr rfl fun I _ => by ring
+    _ = ∑ I : ι, ∑ J : ι, P I J * (V I k * V J l) := Finset.sum_comm
+
+omit [DecidableEq Idx] in
+/-- **The Kronecker-power quadratic-form bound** (brick 2 capstone).  If the
+symmetric kernel `Q` dominates `(1/C)·Id` as a quadratic form, then its `s`-fold
+product kernel dominates `(1/C)^s · Id`: for every component family `c`,
+`(1/C)^s ∑_I c_I² ≤ ∑_{I,J} (∏_a Q(I_a,J_a)) c_I c_J`.  Applied with `Q` the
+inverse Gram of a frame, this converts the intrinsic `(0,s)`-tensor norm into the
+raw frame-component `ℓ²` under a bounded-below Gram. -/
+theorem quadForm_id_le_pow
+    (Q : Idx → Idx → ℝ) (C : ℝ) (hC : 0 < C)
+    (hQsymm : ∀ i j, Q i j = Q j i)
+    (hQlb : ∀ w : Idx → ℝ, (1 / C) * ∑ i, w i ^ 2 ≤
+      ∑ i, ∑ j, Q i j * (w i * w j)) :
+    ∀ (s : ℕ) (c : (Fin s → Idx) → ℝ),
+      (1 / C) ^ s * ∑ I0 : Fin s → Idx, c I0 ^ 2 ≤
+        ∑ I0 : Fin s → Idx, ∑ J0 : Fin s → Idx,
+          (∏ a, Q (I0 a) (J0 a)) * (c I0 * c J0) := by
+  classical
+  have hαnonneg : (0 : ℝ) ≤ 1 / C := le_of_lt (one_div_pos.mpr hC)
+  intro s
+  induction s with
+  | zero =>
+      intro c
+      simp [pow_two]
+  | succ s ih =>
+      intro c
+      set W : Matrix (Fin s → Idx) Idx ℝ :=
+        Matrix.of fun I k => c (Fin.cons k I) with hW
+      set P : Matrix (Fin s → Idx) (Fin s → Idx) ℝ :=
+        Matrix.of fun I J => ∏ a : Fin s, Q (I a) (J a) with hP
+      set S : Matrix Idx Idx ℝ := Wᴴ * P * W with hS
+      have hMpsd := shifted_posSemidef Q (1 / C) hQsymm hQlb
+      have hPpsd : P.PosSemidef := by
+        rw [hP]
+        exact kron_kernel_posSemidef_of_ih s Q (1 / C) hαnonneg hQsymm ih
+      have hSpsd : S.PosSemidef := by
+        rw [hS]
+        exact hPpsd.conjTranspose_mul_mul_same W
+      have hSentry : ∀ k l : Idx, S k l
+          = ∑ I : Fin s → Idx, ∑ J : Fin s → Idx,
+              (∏ a : Fin s, Q (I a) (J a))
+                * (c (Fin.cons k I) * c (Fin.cons l J)) := by
+        intro k l
+        rw [hS, sandwich_entry]
+        refine Finset.sum_congr rfl fun I _ => Finset.sum_congr rfl fun J _ => ?_
+        rw [hP, hW]
+        simp only [Matrix.of_apply]
+      -- the PSD pairing isolates the diagonal: `(1/C)·∑ S kk ≤ ∑∑ Q kl S kl`
+      have hexpand : (∑ i : Idx, ∑ j : Idx,
+            (Matrix.of fun i j : Idx =>
+              Q i j - 1 / C * (if i = j then (1 : ℝ) else 0)) i j * S i j)
+          = (∑ k : Idx, ∑ l : Idx, Q k l * S k l) - 1 / C * ∑ k : Idx, S k k := by
+        calc (∑ i : Idx, ∑ j : Idx,
+              (Matrix.of fun i j : Idx =>
+                Q i j - 1 / C * (if i = j then (1 : ℝ) else 0)) i j * S i j)
+            = ∑ i : Idx, ∑ j : Idx,
+                (Q i j * S i j
+                  - (1 / C * (if i = j then (1 : ℝ) else 0)) * S i j) := by
+              refine Finset.sum_congr rfl fun i _ =>
+                Finset.sum_congr rfl fun j _ => ?_
+              rw [Matrix.of_apply]
+              ring
+          _ = (∑ i : Idx, ∑ j : Idx, Q i j * S i j)
+                - ∑ i : Idx, ∑ j : Idx,
+                    (1 / C * (if i = j then (1 : ℝ) else 0)) * S i j := by
+              rw [← Finset.sum_sub_distrib]
+              refine Finset.sum_congr rfl fun i _ => ?_
+              rw [Finset.sum_sub_distrib]
+          _ = (∑ k : Idx, ∑ l : Idx, Q k l * S k l) - 1 / C * ∑ k : Idx, S k k := by
+              rw [diag_pairing (1 / C) (fun i j => S i j)]
+      have hdiag_le : 1 / C * ∑ k : Idx, S k k
+          ≤ ∑ k : Idx, ∑ l : Idx, Q k l * S k l := by
+        have h0 := sum_posSemidef_mul_posSemidef_nonneg hMpsd hSpsd
+        rw [hexpand] at h0
+        linarith
+      -- the inductive bound on each diagonal entry
+      have hdiagIH : ∀ k : Idx,
+          (1 / C) ^ s * ∑ I : Fin s → Idx, c (Fin.cons k I) ^ 2 ≤ S k k := by
+        intro k
+        rw [hSentry k k]
+        exact ih (fun I => c (Fin.cons k I))
+      have hsum_ih : (1 / C) ^ s
+            * (∑ k : Idx, ∑ I : Fin s → Idx, c (Fin.cons k I) ^ 2)
+          ≤ ∑ k : Idx, S k k := by
+        rw [Finset.mul_sum]
+        exact Finset.sum_le_sum fun k _ => hdiagIH k
+      have hNorm : (∑ I0 : Fin (s + 1) → Idx, c I0 ^ 2)
+          = ∑ k : Idx, ∑ I : Fin s → Idx, c (Fin.cons k I) ^ 2 :=
+        sum_fin_succ_fun s (fun I0 => c I0 ^ 2)
+      have hRHS : (∑ I0 : Fin (s + 1) → Idx, ∑ J0 : Fin (s + 1) → Idx,
+            (∏ a, Q (I0 a) (J0 a)) * (c I0 * c J0))
+          = ∑ k : Idx, ∑ l : Idx, Q k l * S k l := by
+        rw [sum_fin_succ_fun₂ s
+          (f := fun I0 J0 => (∏ a, Q (I0 a) (J0 a)) * (c I0 * c J0))]
+        refine Finset.sum_congr rfl fun k _ => ?_
+        rw [Finset.sum_comm]
+        refine Finset.sum_congr rfl fun l _ => ?_
+        rw [hSentry k l, Finset.mul_sum]
+        refine Finset.sum_congr rfl fun I _ => ?_
+        rw [Finset.mul_sum]
+        refine Finset.sum_congr rfl fun J _ => ?_
+        rw [prod_fin_succ_Q s Q k l I J]
+        ring
+      calc (1 / C) ^ (s + 1) * ∑ I0 : Fin (s + 1) → Idx, c I0 ^ 2
+          = (1 / C) * ((1 / C) ^ s
+              * ∑ k : Idx, ∑ I : Fin s → Idx, c (Fin.cons k I) ^ 2) := by
+            rw [hNorm, pow_succ]
+            ring
+        _ ≤ (1 / C) * ∑ k : Idx, S k k :=
+            mul_le_mul_of_nonneg_left hsum_ih hαnonneg
+        _ ≤ ∑ k : Idx, ∑ l : Idx, Q k l * S k l := hdiag_le
+        _ = ∑ I0 : Fin (s + 1) → Idx, ∑ J0 : Fin (s + 1) → Idx,
+              (∏ a, Q (I0 a) (J0 a)) * (c I0 * c J0) := hRHS.symm
+
+end KroneckerPow
 
 end DifferentialGeometry.HCGCompactness

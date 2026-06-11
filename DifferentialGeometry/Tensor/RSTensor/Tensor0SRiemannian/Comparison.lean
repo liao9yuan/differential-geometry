@@ -1,5 +1,6 @@
 import Mathlib.Analysis.InnerProductSpace.Spectrum
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Coordinate
+import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.KroneckerQuadForm
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -330,6 +331,67 @@ theorem normSq0S_diag_le
   rw [normSq0S_eq_coord (I := I) h x s basis (diagonalInvMetric μ) hhinv A,
     normSq0S_eq_coord (I := I) g x s basis (identityInvMetric (Idx := Idx)) hginv A]
   exact coordInner0S_diagonal_le_pow_identity (I := I) (x := x) s μ C hμ_nonneg hμ_le A basis
+
+/-- **Non-diagonal coordinate norm comparison.**  If the symmetric inverse-metric
+kernel `Q` dominates `(1/C)·Id` as a quadratic form on index vectors, the raw
+component `ℓ²` (the identity-coordinate squared norm) is bounded by `C^s` times
+the `Q`-coordinate squared norm.  The non-diagonal generalization of
+`coordInner0S_identity_le_pow_diagonal`, via the Kronecker-power PSD bound
+`quadForm_id_le_pow`. -/
+theorem coordInner0S_identity_le_pow_quad
+    (s : Nat) (Q : Idx -> Idx -> Real) (C : Real) (hC : 0 < C)
+    (hQsymm : forall i j : Idx, Q i j = Q j i)
+    (hQlb : forall w : Idx -> Real,
+      (1 / C) * ∑ i : Idx, w i ^ 2 <= ∑ i : Idx, ∑ j : Idx, Q i j * (w i * w j))
+    (A : Tensor0SSpace s I x)
+    (basis : Module.Basis Idx Real (TangentSpace I x)) :
+    coordInner0S (I := I) (x := x) s identityInvMetric A A basis <=
+      C ^ s * coordInner0S (I := I) (x := x) s Q A A basis := by
+  classical
+  have hkey := DifferentialGeometry.HCGCompactness.quadForm_id_le_pow Q C hC hQsymm hQlb s
+    (fun I0 => tensor0SComponent (I := I) A (fun i => basis i) I0)
+  have hQform : coordInner0S (I := I) (x := x) s Q A A basis
+      = ∑ I0 : Fin s -> Idx, ∑ J0 : Fin s -> Idx,
+          (∏ a : Fin s, Q (I0 a) (J0 a)) *
+            (tensor0SComponent (I := I) A (fun i => basis i) I0 *
+              tensor0SComponent (I := I) A (fun i => basis i) J0) := by
+    unfold coordInner0S
+    exact Finset.sum_congr rfl fun I0 _ => Finset.sum_congr rfl fun J0 _ =>
+      mul_assoc _ _ _
+  rw [coordInner0S_identity_eq_sum_sq (I := I) (x := x) s A basis, hQform]
+  have hmul : (C * (1 / C)) ^ s = 1 := by
+    rw [mul_one_div, div_self hC.ne', one_pow]
+  calc (∑ I0 : Fin s -> Idx,
+        tensor0SComponent (I := I) A (fun i => basis i) I0 ^ 2)
+      = C ^ s * ((1 / C) ^ s * ∑ I0 : Fin s -> Idx,
+          tensor0SComponent (I := I) A (fun i => basis i) I0 ^ 2) := by
+        rw [← mul_assoc, ← mul_pow, hmul, one_mul]
+    _ <= C ^ s * (∑ I0 : Fin s -> Idx, ∑ J0 : Fin s -> Idx,
+          (∏ a : Fin s, Q (I0 a) (J0 a)) *
+            (tensor0SComponent (I := I) A (fun i => basis i) I0 *
+              tensor0SComponent (I := I) A (fun i => basis i) J0)) :=
+        mul_le_mul_of_nonneg_left hkey (le_of_lt (pow_pos hC s))
+
+/-- **Component `ℓ²` versus intrinsic norm under a bounded-below inverse Gram**
+(the pointwise core of the `ric_bound` component↔intrinsic bridge at non-ON
+points).  If `Q` realizes the inverse metric of `g` in `basis`, is symmetric,
+and dominates `(1/C)·Id` as a quadratic form, then the raw component `ℓ²` of any
+`(0,s)` tensor is bounded by `C^s` times its intrinsic squared `g`-norm. -/
+theorem sum_comp_sq_le_pow_normSq0S
+    (g : SmoothMetric_gen I M) (x : M) (s : Nat)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (Q : Idx -> Idx -> Real) (C : Real) (hC : 0 < C)
+    (hginv : MetricInverseInBasis_gen (I := I) g x basis Q)
+    (hQsymm : forall i j : Idx, Q i j = Q j i)
+    (hQlb : forall w : Idx -> Real,
+      (1 / C) * ∑ i : Idx, w i ^ 2 <= ∑ i : Idx, ∑ j : Idx, Q i j * (w i * w j))
+    (A : Tensor0SSpace s I x) :
+    (∑ I0 : Fin s -> Idx,
+        tensor0SComponent (I := I) A (fun i => basis i) I0 ^ 2) <=
+      C ^ s * normSq0S (I := I) g x s A := by
+  rw [normSq0S_eq_coord (I := I) g x s basis Q hginv A,
+    ← coordInner0S_identity_eq_sum_sq (I := I) (x := x) s A basis]
+  exact coordInner0S_identity_le_pow_quad (I := I) (x := x) s Q C hC hQsymm hQlb A basis
 
 end DiagonalCoordinate
 
