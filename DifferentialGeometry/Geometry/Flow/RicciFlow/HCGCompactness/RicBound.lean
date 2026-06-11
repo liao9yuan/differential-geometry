@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivLinear
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDerivTimeDeriv
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Sections
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBoundClaims
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBoundGoodFrame
@@ -957,6 +958,72 @@ theorem normsq_evol_of_comp
       norm_num
     rw [hUs, hnablaSq] at habs
     exact habs
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The `hevComp` family from Ricci-flow solutions.**  If each `gSeq i` is
+the moving metric of a flow solution `S i` whose regular times contain the
+window, and the per-level mixed-derivative swaps hold (the regularity input,
+`hswap`), then the realized evolution family `∂ₜ∇ᴺg = -2·∇ᴺRc` consumed by
+`covOrderBound_stage` holds: the solution-level tower evolution
+`solnTower_hasDerivAt`, with the value identified through
+`covDerivOfField_smul` + `covDerivOfField_eq_iterCov`. -/
+theorem hevComp_of_solutions
+    {K : Set M} {β ψ : Real}
+    {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
+    {gRef : SmoothRiemannianMetric I M} {N : Nat}
+    (D : Nat -> RealTimeInterval)
+    (S : (i : Nat) -> SolutionOn (I := I) (M := M) (D i))
+    (hS : ∀ i : Nat, IsSolutionOn (I := I) (S i))
+    (hmet : ∀ (i : Nat) (r : Real), (S i).family.metric r = gSeq i r)
+    (hreg : ∀ i : Nat, Set.Icc β ψ ⊆ (D i).regular)
+    (hswap : ∀ i : Nat, ∀ p : ℕ, p < N →
+      ∀ V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _), ∀ x₀ : M,
+      FixedBaseExtDerivTimeDerivativeOnRegular (I := I) (D i).carrier (D i).regular
+        ({x₀} : Set M)
+        (fun r p' => (covDerivOfField (I := I) gRef (solnMetricField (I := I) (S i) r) p) p'
+          (fun a : Fin (p + 2) => V a p'))
+        (fun r p' => (covDerivOfField (I := I) gRef (solnEvolField (I := I) (S i) r) p) p'
+          (fun a : Fin (p + 2) => V a p'))) :
+    ∀ i : Nat, ∀ x ∈ K, ∀ s ∈ Set.Icc β ψ,
+      ∀ v : Fin (N + 2) → TangentSpace I x,
+        HasDerivAt
+          (fun r : Real => metricCovDeriv (I := I) (gSeq i r) gRef N x v)
+          (((-2 : Real) • nablaRicReal (I := I) gSeq gRef N i s x) v) s := by
+  intro i x hx s hs v
+  have h := solnTower_hasDerivAt (I := I) gRef (S i) (hS i) N (hswap i)
+    N le_rfl s (hreg i hs) x v
+  have hfun : (fun r : Real =>
+      (covDerivOfField (I := I) gRef (solnMetricField (I := I) (S i) r) N) x v)
+      = fun r : Real => metricCovDeriv (I := I) (gSeq i r) gRef N x v := by
+    funext r
+    simp only [solnMetricField, hmet i r]
+    rfl
+  have hsolng : solnRicField (I := I) (S i) s
+      = CovariantDerivative.ricciSection (I := I) (M := M)
+          (leviCivitaConnectionOfMetric (I := I) (gSeq i s))
+          (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+            (I := I) (M := M) (gSeq i s)) := by
+    simp only [solnRicField, hmet i s]
+  have hric : ricCovTower (I := I) (gSeq i s) gRef N
+      = iterCov (I := I) gRef 2
+          (CovariantDerivative.ricciSection (I := I) (M := M)
+            (leviCivitaConnectionOfMetric (I := I) (gSeq i s))
+            (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+              (I := I) (M := M) (gSeq i s))) N := rfl
+  have hsec : (covDerivOfField (I := I) gRef (solnRicField (I := I) (S i) s) N) x
+      = nablaRicReal (I := I) gSeq gRef N i s x := by
+    rw [hsolng, covDerivOfField_eq_iterCov, ← hric]
+    show ContinuousMultilinearMap.domDomCongr (acEquiv N)
+        (ricCovTower (I := I) (gSeq i s) gRef N x)
+      = nablaRicReal (I := I) gSeq gRef N i s x
+    simp only [nablaRicReal]
+  have hval : (covDerivOfField (I := I) gRef (solnEvolField (I := I) (S i) s) N) x v
+      = ((-2 : Real) • nablaRicReal (I := I) gSeq gRef N i s x) v := by
+    simp only [solnEvolField]
+    rw [covDerivOfField_smul, ContMDiffSection.coe_smul, Pi.smul_apply, hsec]
+  rw [hfun, hval] at h
+  exact h
 
 /-- **The stage-`N` `(B_N)` assembly** (MSM135 Lemma 3.11, Step 4, one stage).
 From the `ric_bound` inputs (eq. 3.3 on `U ⊇ K`, the `(B_r)` bounds for
