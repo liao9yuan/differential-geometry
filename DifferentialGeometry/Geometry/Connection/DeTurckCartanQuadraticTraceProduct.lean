@@ -410,94 +410,18 @@ theorem cartanDiffRestSec_self (g₀ g : SmoothRiemannianMetric I M) :
     cartanDiffRestSec (I := I) g₀ g g = 0 := by
   rw [cartanDiffRestSec, cartanCrossProductDiff_self, cartanDiffRestSec_appCc_zero]
 
-/-! ### The posited section factorization (the genuine deep covariant-gauge content) and the headline
+/-! ### The refuted section factorization (REMOVED)
 
-The single genuine deep covariant-gauge Faà-di-Bruno content: the section identity that the carrier
-difference equals the sum of the two concrete independently-defined difference-carrying summands.  The
-Cartan carrier difference varies inner product, connection, and field simultaneously and has no
-slot-difference re-expression on disk, so the fibre-level telescope onto the difference factors is
-posited; it is strictly weaker than the quantitative jet-bound split P1b it feeds. -/
-
-set_option linter.unusedSectionVars false in
-/-- **(POSIT — the Cartan-difference section factorization, the single genuine deep covariant-gauge
-Faà-di-Bruno content.)**  The `g₀`-retagged symmetrised-lowered DeTurck-field difference
-`symLoweredDeTurckVFRetagG0 g₀ g₁ g_bg − symLoweredDeTurckVFRetagG0 g₀ g₂ g_bg` equals the sum of the
-two concrete, independently-defined **difference-carrying** `(0, 2)`-summands: the
-**linear-in-difference** Cartan `Top` summand `cartanDiffTopSec g₀ T₁ T₂` (the value-local linear-arm
-member on the realized difference factor `w := realizeSymmCcTensor g₀ (T₁ − T₂)`, `= w`) plus the
-**difference-carrying quadratic** Cartan `Rest` summand `cartanDiffRestSec g₀ g₁ g₂` (the `g₀`-cometric
-double trace of the bare cross-product **difference** `Φ(L₁, L₂) − Φ(L₂, L₂)`,
-`Lₖ = loweredConnDiffSection gₖ g₀`).
-
-**Why posited (and why the OLD posit was wrong).**  The carrier difference fibre value
-`cartanRHSBilin g₁ W₁ − cartanRHSBilin g₂ W₂` (`symLoweredDeTurckVFRetagG0_unitModel_eq`) varies the
-inner product `g₁.inner`, the Levi-Civita connection `LeviCivita g₁`, **and** the DeTurck field
-`W₁ = deTurckVF g₁ g_bg` simultaneously.  It does **not** equal a single difference factor `w` plus a
-`w`-free quadratic: the old posit (`carrier_diff = w + doubletrace²(bareProd L₁ L₂)`) is **false** —
-at `T₁ = T₂ ≠ T₀` the left side is `0` but `doubletrace²(bareProd L L)` is generically nonzero
-(`L = loweredConnDiffSection g g₀ ≠ 0`), so it failed the degenerate check.  The corrected
-decomposition telescopes one difference factor per slot (`Φ(a, b) − Φ(c, d) = Φ(a − c, b) +
-Φ(c, b − d)`): the Δinner slot contributes the realized difference factor `w` (the linear arm), and the
-ΔΓ + ΔW slots contribute the connection-difference **difference** `L₁ − L₂` against the endpoint `L₂`
-(the bilinear-difference quadratic arm), each vanishing at `T₁ = T₂`.  There is **no `cartanRHSBilin`
-slot-difference lemma** and **no `deTurckVF` difference lemma** on disk (the difference is taken at the
-Cartan-bilinear level, where the curvature half's secret weapon `connDiff_koszul_realize_g0` has no
-analog), so this fibre telescope is the genuine deep covariant-gauge Faà-di-Bruno content and is
-**posited**: a bare section equality (NO covariant-jet bound, NO fibre norm, NO family-uniform
-constant), strictly weaker than the quantitative jet-bound split
-`symLoweredDeTurckVF_iteratedCovGrad_topRest_split` (P1b, `DeTurckVFCovGradTopRestSplit.lean`) it feeds.
-
-**Non-vacuity / degenerate-correctness.**  Both summands are concrete and defined **independently** of
-the carrier difference (NOT `carrier − Top`, NOT `Rest := 0`): `cartanDiffTopSec` is the genuine
-value-local linear member on `w` (`cartanDiffTopSec_eq`: `= w`, carrying the order-`0` value jet and
-`∇^{j+2} w`), and `cartanDiffRestSec` is the genuine `g₀`-cometric double trace of the bare
-**difference-of-products** carrying the connection-difference difference `L₁ − L₂` against the endpoint
-`L₂`.  At `T₁ = T₂` realized (so `g₁ = g₂`, `L₁ = L₂`) the carrier difference vanishes
-(`lieDerivRetagG0_eq_symLoweredRetagG0` reduces it to the sealed Lie difference, which vanishes),
-`w = 0`, and **both summands vanish** (`cartanDiffTopSec_self`, `cartanDiffRestSec_self`), so the
-identity is `0 = 0 + 0` — degenerate-correct.  NO value-bounded operator shape, NO
-pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, NO Weyl dependence.  Its body is `sorry`: the
-genuine deep covariant-gauge Faà-di-Bruno content of the Cartan-difference factorization. -/
-theorem cartanDiffSecFactorization (g₀ g_bg g₁ g₂ : SmoothRiemannianMetric I M)
-    (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
-    (hr1 : ∀ (y : M) (v w : TangentSpace I y),
-      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w)
-    (hr2 : ∀ (y : M) (v w : TangentSpace I y),
-      g₂.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₂ y v w) :
-    symLoweredDeTurckVFRetagG0 (I := I) g₀ g₁ g_bg
-        - symLoweredDeTurckVFRetagG0 (I := I) g₀ g₂ g_bg =
-      cartanDiffTopSec (I := I) g₀ T₁ T₂ + cartanDiffRestSec (I := I) g₀ g₁ g₂ :=
-  sorry
-
-/-- **The Cartan-difference factorization headline (consumer-facing form).**  The `g₀`-retagged
-symmetrised-lowered DeTurck-field difference splits, as a section identity, into the concrete
-linear-in-difference Cartan `Top` summand `cartanDiffTopSec g₀ T₁ T₂` plus the concrete
-difference-carrying quadratic Cartan `Rest` summand `cartanDiffRestSec g₀ g₁ g₂`:
-```
-symLoweredDeTurckVFRetagG0 g₀ g₁ g_bg − symLoweredDeTurckVFRetagG0 g₀ g₂ g_bg
-  = cartanDiffTopSec g₀ T₁ T₂ + cartanDiffRestSec g₀ g₁ g₂.
-```
-
-This is the section-level prerequisite the Lie-half deep gauge top/rest split
-`symLoweredDeTurckVF_iteratedCovGrad_topRest_split` (P1b, `DeTurckVFCovGradTopRestSplit.lean`) consumes:
-its `Top` part is read off `cartanDiffTopSec` (`= w`, `cartanDiffTopSec_eq`) through the linear engine's
-single-sum jet grid `DiffBilinOp.exists_rfns_iteratedCovGrad_singleSum_le` (`∑_{q ≤ j} rfns(∇^q w)`),
-and its `Rest` part off `cartanDiffRestSec` through the quadratic engine's diagonal product grid
-`RfnsBilinearProduct.exists_rfns_iteratedCovGrad_prod_diagGrid_le` (the convolution `≤ j`-jet of both
-connection-difference factors, the bilinear-difference `Φ(L₁, L₂) − Φ(L₂, L₂)` on each bare product).
-Re-stated from the posited section identity `cartanDiffSecFactorization`; transits `sorryAx` only
-through that single named deep content. -/
-theorem symLoweredDeTurckVFRetagG0_sub_eq_topSec_add_restSec
-    (g₀ g_bg g₁ g₂ : SmoothRiemannianMetric I M)
-    (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
-    (hr1 : ∀ (y : M) (v w : TangentSpace I y),
-      g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w)
-    (hr2 : ∀ (y : M) (v w : TangentSpace I y),
-      g₂.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₂ y v w) :
-    symLoweredDeTurckVFRetagG0 (I := I) g₀ g₁ g_bg
-        - symLoweredDeTurckVFRetagG0 (I := I) g₀ g₂ g_bg =
-      cartanDiffTopSec (I := I) g₀ T₁ T₂ + cartanDiffRestSec (I := I) g₀ g₁ g₂ :=
-  cartanDiffSecFactorization (I := I) g₀ g_bg g₁ g₂ T₁ T₂ hr1 hr2
+A previously-posited clean section identity `cartanDiffSecFactorization` — asserting the carrier
+difference `symLoweredDeTurckVFRetagG0 g₀ g₁ g_bg − symLoweredDeTurckVFRetagG0 g₀ g₂ g_bg` equals
+`cartanDiffTopSec + cartanDiffRestSec` — was Lean-certified FALSE and deleted, together with its
+consumer-facing wrapper: its right-hand side was independent of the background `g_bg` while the
+left-hand side depends on it essentially (instantiating the identity at `g_bg = g₂` and `g_bg = g₁`
+and subtracting forces `cartanRHSBilin g₁ (deTurckVF g₁ g₂) + cartanRHSBilin g₂ (deTurckVF g₂ g₁) = 0`
+identically, which is generically false), and its linear summand `cartanDiffTopSec = w` lacks the
+`∇W₁` data the genuine Δinner slot carries.  The quantitative integrated two-arm jet bound consumed
+by `symLoweredDeTurckVF_iteratedCovGrad_topRest_split` (P1b) must be proven directly on the carrier
+difference; the summand definitions above are retained as reusable quadratic-trace carriers. -/
 
 end DeTurck
 end PDE
