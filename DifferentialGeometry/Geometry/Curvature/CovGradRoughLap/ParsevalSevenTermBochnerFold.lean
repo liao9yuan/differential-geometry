@@ -3220,59 +3220,73 @@ private lemma parsevalDiagDiffCurv_pair_eq_nablaRicci_tripleSum
       (smoothOrthoFrame_smooth (I := I) g x i)) (fun _ => rfl) m (J k)]
 
 set_option linter.unusedSectionVars false in
-/-- **The combined integrated second-Bianchi root of the rank-`0` Bochner fold (the single genuine deep
-curvature posit both `nablaTensor0SCurv`-form kernels rest on).** For a fixed global smooth Parseval frame
-family `V a`, the two genuinely-deep integrated curvature facts of the seven-term Bochner fold hold
-*jointly*:
-
-1. **(Integrated second-Bianchi divergence nullity.)** The frame double sum of the integral over the
-   closed manifold of the `(0, s)` pairing of the tension-field curvature carrier
-   `bochnerGroupElt3IiiIv = R(∇_{V a} V b, V a) S + R(V b, ∇_{V a} V a) S` against the slot-`0` gradient
-   `∇_{V b} S` vanishes:
-   ```
-   ∑_a ∑_b ∫ ⟨R(∇_{V a} V b, V a) S + R(V b, ∇_{V a} V a) S, ∇_{V b} S⟩_g ∂μ = 0.
-   ```
-
-2. **(Differentiated-curvature operator-field identification.)** The group-`2` double sum
-   `∑_a ∑_b ∫ ⟨∇_{V a}(R(V a, V b) S), ∇_{V b} S⟩` plus the symmetric second-order group-`4` double sum
-   `∑_a ∑_b ∫ ⟨−∇²_{∇_{V b} V a, V a} S − ∇²_{V a, ∇_{V b} V a} S, ∇_{V b} S⟩` equals the single `L²`
-   pairing of the differentiated curvature operator-field action `appCc (covGrad Φ₀) S`
-   (`Φ₀ := curvOpField g s`, the frame-free `(∇R) S` field) against `∇S`:
-   ```
-   bochnerFoldGroupSum g s S V (bochnerGroupElt2) + bochnerFoldGroupSum g s S V (bochnerGroupElt4)
-     = ⟨appCc (covGrad (curvOpField g s)) S, ∇S⟩_{L²}.
-   ```
-
-**Why ONE combined integrated whole-tensor object (the structural law).** The pointwise per-direction
-differentiated-curvature trace `∑_a (∇_{V a} R^{(s)})(V a, V b) S` is **non-tensorial in the direction**:
-its fibre realisation reads the `smoothExtensionTangent` jet of the frame direction, which is
-chart-selection-unbounded on `S²`.  The diagonal `nablaTensor0SCurv` trace opens (via the sorry-free
-substrate `parsevalDiagDiffCurv_pair_eq_nablaRicci_tripleSum`) into the explicit once-contracted
-second-Bianchi frame triple sum of the differentiated-Ricci difference
-`ν₁(m, p) − ν₂(m, p) = (∇_{ext B_m} Ric)(V b, ext B_p) − (∇_{ext B_p} Ric)(ext B_m, V b)`; the two arms
-`ν₁` (the `∇_{ext B_m}`-derivation carrier-identification arm) and `ν₂` (the `∇_{ext B_p}`-derivation
-integration-by-parts arm) each *separately* carry the chart-unbounded `ext`-jet, so neither arm — and
-neither fact (1) / (2) split per-arm — is a sound free-standing integral identity.  Only the *combined,
-frame-summed, integrated* object is sound, and that single sound object is exactly this conjunction: fact
-(1) is the integrated divergence-of-curvature `div R` nullity (the `ν₁`-arm contracted second Bianchi
-`nablaCurvSec_diag_frame_trace_eq_nablaRicci_sub` cancelling the `ν₂`-arm frame-summed covariant
-integration by parts `integral_frameSummed_covDeriv_combined_eq_zero`, the residual `∇V` terms
+/-- **(Fact 1 of the combined second-Bianchi root — the integrated tension-field divergence
+nullity.)**  For a fixed smooth Parseval frame family, the frame double sum of the integral of the
+`(0, s)` pairing of the tension-field curvature carrier `bochnerGroupElt3IiiIv = R(∇_{V a} V b, V a) S
++ R(V b, ∇_{V a} V a) S` against the slot-`0` gradient `∇_{V b} S` vanishes — the integrated
+divergence-of-curvature `div R` nullity: the `ν₁`-arm contracted second Bianchi
+(`nablaCurvSec_diag_frame_trace_eq_nablaRicci_sub`) cancelling the `ν₂`-arm frame-summed covariant
+integration by parts (`integral_frameSummed_covDeriv_combined_eq_zero`), the residual `∇V` terms
 telescoping through the Parseval covariant-derivative antisymmetry
-`parsevalFrame_sum_covDeriv_inner_antisymm`), and fact (2) is the same combined object read as the
-operator-field `(∇R) S` action.  Both facts are stated at the *integrated* frame-free `L²` / whole-tensor
-level throughout (a `bochnerFoldGroupSum` of a whole-tensor carrier, an `L²` pairing of whole tensors) —
-they never extract a per-direction `M → E` quantity — so they are trap-screened.
+(`parsevalFrame_sum_covDeriv_inner_antisymm`).  Stated integrated + frame-summed + whole-tensor
+throughout (the two differentiated-Ricci arms each separately carry the chart-unbounded
+`smoothExtensionTangent` ext-jet, so only this combined integrated object is sound — the structural
+law on the sibling combined root's docstring).  Non-vacuity: at `s = 0` the carrier reads the
+curvature of a scalar and the fact degenerates to `0 = 0`, but the fact genuinely uses the carrier's
+curvature antisymmetry, `hPar`, and the frame's `∇V` structure (an arbitrary non-curvature carrier
+in its place does not integrate to zero).  Body `sorry`: one of the two independent deep atoms of
+the rank-`0` Bochner curvature line. -/
+private theorem parsevalFrameSum_bochnerFold_tensionFieldDivergence_root
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
+    bochnerFoldGroupSum (I := I) (M := M) g s S V
+        (bochnerGroupElt3IiiIv (I := I) (M := M) g s S) = 0 :=
+  sorry
 
-**Non-vacuity (the `s = 0` Bochner–Lichnerowicz litmus).** At `s = 0` the curvature carriers degenerate:
-the tension-field carrier `bochnerGroupElt3IiiIv` reads the curvature of a scalar (which vanishes), so
-fact (1) is the trivial `0 = 0`; and `appCc (covGrad g 0 0 (Φ₀ 0)) f` acts as the zero operator on the
-empty curvature slot, so fact (2) reads `group2 + group4 = 0`, which the genuine seven-term fold and the
-classical scalar Bochner–Lichnerowicz identity `∫ Ric(∇f, ∇f) = ‖Δ_∇ f‖² − ‖∇²f‖²` force at exactly the
-ricTrace value — nonzero on a non-flat manifold.  Both facts are *false* for an arbitrary section in place
-of the curvature carriers (dropping the curvature content, the degenerate witness, breaks the `s = 0`
-litmus), so the posit genuinely uses `R`, `∇R`, the Parseval reproduction `hPar`, and the frame's
-second-order (`∇V`) structure.  The body is `sorry` (the single genuine integrated second-Bianchi deep
-root of the entire rank-`0` Bochner curvature line); consumers transitively depend on its `sorryAx`. -/
+set_option linter.unusedSectionVars false in
+/-- **(Fact 2 of the combined second-Bianchi root — the differentiated-curvature operator-field
+identification.)**  For a fixed smooth Parseval frame family, the group-`2` double sum
+`∑_a ∑_b ∫ ⟨∇_{V a}(R(V a, V b) S), ∇_{V b} S⟩` plus the symmetric second-order group-`4` double sum
+equals the single `L²` pairing of the differentiated curvature operator-field action
+`appCc (covGrad Φ₀) S` (`Φ₀ := curvOpField g s`, the frame-free `(∇R) S` field) against `∇S` — the
+same combined integrated whole-tensor object as Fact 1 read as the operator-field action (Theorem B
+`frame_sum_nablaTensor0SCurv_diag_baseSlot_eval`, the group-`4` second-order recombination
+`tensorSecondCovDeriv_antisymm_eq_riemannOp`, and the operator-field Green pairing engines); stated
+integrated + frame-summed throughout, never extracting a per-direction `M → E` quantity.
+Non-vacuity (the `s = 0` Bochner–Lichnerowicz litmus): at `s = 0` the right side vanishes and the
+fact forces `group2 + group4 = 0` at exactly the ricTrace value the classical scalar
+Bochner–Lichnerowicz identity demands — nonzero on a non-flat manifold; dropping the curvature
+content breaks the litmus.  Body `sorry`: the second independent deep atom of the rank-`0` Bochner
+curvature line. -/
+private theorem parsevalFrameSum_bochnerFold_operatorFieldIdentification_root
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
+    bochnerFoldGroupSum (I := I) (M := M) g s S V
+        (bochnerGroupElt2 (I := I) (M := M) g s S) +
+      bochnerFoldGroupSum (I := I) (M := M) g s S V
+        (bochnerGroupElt4 (I := I) (M := M) g s S) =
+      tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (appCc (I := I) (M := M) g s (s + 1)
+          (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun :=
+  sorry
+
+set_option linter.unusedSectionVars false in
+/-- **The combined integrated second-Bianchi root of the rank-`0` Bochner fold**, assembled as the
+pair of its two independent deep atoms `parsevalFrameSum_bochnerFold_tensionFieldDivergence_root`
+(the integrated tension-field divergence nullity) and
+`parsevalFrameSum_bochnerFold_operatorFieldIdentification_root` (the differentiated-curvature
+operator-field identification); the structural law (why only combined, integrated, frame-summed
+whole-tensor objects are sound here) and the non-vacuity litmuses live on the two atoms'
+docstrings.  Consumers transitively depend on the two atoms' `sorryAx`. -/
 private theorem parsevalFrameSum_bochnerFold_combined_secondBianchi_root
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
@@ -3290,7 +3304,8 @@ private theorem parsevalFrameSum_bochnerFold_combined_secondBianchi_root
           (appCc (I := I) (M := M) g s (s + 1)
             (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S).toFun
           (covGrad (I := I) (M := M) g 0 s S).toFun :=
-  sorry
+  ⟨parsevalFrameSum_bochnerFold_tensionFieldDivergence_root (I := I) (M := M) g s S V hV hPar,
+    parsevalFrameSum_bochnerFold_operatorFieldIdentification_root (I := I) (M := M) g s S V hV hPar⟩
 
 /-- **The integrated Parseval-frame diagonal differentiated-curvature trace pairing equals the
 group-`2` minus group-`1` double sum (the genuine `nablaTensor0SCurv`-form curvature kernel of the
