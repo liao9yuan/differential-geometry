@@ -3,6 +3,8 @@ import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.TotalNabla0STimeDeriv
 import DifferentialGeometry.Bundle.SectionRealized
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
 import DifferentialGeometry.Geometry.Curvature.Riemann.Basic.Sections
+import DifferentialGeometry.Bundle.PartialMfderiv.Basic
+import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Connection.Tangent
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -181,6 +183,123 @@ theorem covDerivOfField_swapReg
     exact covDerivOfField_eval_hasDerivWithinAt (I := I) gRef A B T R p hbase
       (fun q hq => ihp q hq (lt_trans hq hpN))
       p le_rfl t ht x' (fun a : Fin (p + 2) => V a x')
+
+/-- **Joint smoothness of the tower scalars.**  If every slot evaluation of the
+`(0,2)` time-family `A` is jointly `C^∞` at `(t, x)`, then so is every slot
+evaluation of every tower level `covDerivOfField gRef (A r) p`.  The step
+decomposes the level-`p+1` scalar through `nabla0SFun_eval_smooth_slots`: the
+leading `extDerivFun` term is `prodExtDerivAt_inf` of the level-`p` scalar, and
+the correction terms are level-`p` scalars at slot tuples updated by the smooth
+sections `∇_{V 0}(V a)`. -/
+theorem covDerivOfField_eval_contMDiffAt
+    (gRef : SmoothRiemannianMetric I M)
+    (A : Real → Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    {t : Real} {x : M}
+    (hbase : ∀ V : Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _),
+      ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+        (fun q : Real × M => (A q.1) q.2 (fun a : Fin 2 => V a q.2)) (t, x)) :
+    ∀ p : ℕ, ∀ V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _),
+      ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+        (fun q : Real × M =>
+          (covDerivOfField (I := I) gRef (A q.1) p) q.2
+            (fun a : Fin (p + 2) => V a q.2)) (t, x) := by
+  intro p
+  induction p with
+  | zero => intro V; exact hbase V
+  | succ p ih =>
+      intro V
+      have hcov : CovariantDerivative.ContMDiffCovariantDerivative
+          (leviCivitaConnectionOfMetric (I := I) gRef) (∞ : WithTop ℕ∞) :=
+        ⟨leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+          (I := I) gRef isOpen_univ⟩
+      -- the slot-update sections `∇_{V 0}(V a.succ)`
+      have hWsec : ∀ a : Fin (p + 2),
+          ContMDiff I (I.prod 𝓘(Real, E)) (∞ : WithTop ℕ∞)
+            (fun y : M =>
+              (⟨y, ((leviCivitaConnectionOfMetric (I := I) gRef)
+                  (fun q : M => V a.succ q) y) ((V 0) y)⟩ :
+                Bundle.TotalSpace E (TangentSpace I : M → Type _))) := by
+        intro a
+        simpa [TensorLieDeriv.covariantDeriv_vectorField] using
+          TensorLieDeriv.covariantDeriv_vectorField_contMDiff (I := I)
+            (leviCivitaConnectionOfMetric (I := I) gRef) hcov (V 0) (V a.succ)
+      let W : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+          (TangentSpace I : M → Type _) := fun a =>
+        ⟨fun y : M =>
+          ((leviCivitaConnectionOfMetric (I := I) gRef)
+            (fun q : M => V a.succ q) y) ((V 0) y), hWsec a⟩
+      -- the level-(p+1) scalar decomposed through the level-p scalars
+      have hdec : ∀ q : Real × M,
+          (covDerivOfField (I := I) gRef (A q.1) (p + 1)) q.2
+              (fun a : Fin (p + 3) => V a q.2)
+            = extDerivFun (I := I)
+                (fun y : M => (covDerivOfField (I := I) gRef (A q.1) p) y
+                  (fun a : Fin (p + 2) => V a.succ y)) q.2 ((V 0) q.2)
+              - ∑ a : Fin (p + 2),
+                  (covDerivOfField (I := I) gRef (A q.1) p) q.2
+                    (fun b : Fin (p + 2) =>
+                      (Function.update (fun c : Fin (p + 2) => V c.succ) a (W a))
+                        b q.2) := by
+        intro q
+        have hv : (fun a : Fin (p + 3) => V a q.2)
+            = Fin.cons ((V 0) q.2) (fun a : Fin (p + 2) => V a.succ q.2) := by
+          funext b
+          refine Fin.cases ?_ ?_ b
+          · simp
+          · intro a
+            simp
+        have hupd : ∀ a : Fin (p + 2),
+            (fun b : Fin (p + 2) =>
+              (Function.update (fun c : Fin (p + 2) => V c.succ) a (W a)) b q.2)
+              = Function.update (fun b : Fin (p + 2) => V b.succ q.2) a
+                  (((leviCivitaConnectionOfMetric (I := I) gRef)
+                    (fun z : M => V a.succ z) q.2) ((V 0) q.2)) := by
+          intro a
+          funext b
+          by_cases hba : b = a
+          · subst hba
+            simp [W]
+          · simp [Function.update_of_ne hba]
+        rw [covDerivOfField_succ, metricCovDerivStep_apply, hv,
+          Tensor0SBundle.totalNabla0SFun_apply_section,
+          Tensor0SBundle.nabla0SFun_eval_smooth_slots]
+        congr 1
+        refine Finset.sum_congr rfl fun a _ => ?_
+        rw [hupd a]
+      have h1 := prodExtDerivAt_inf (I := I)
+        (F := fun q : Real × M =>
+          (covDerivOfField (I := I) gRef (A q.1) p) q.2
+            (fun a : Fin (p + 2) => V a.succ q.2))
+        (X := fun y : M => (V 0) y) (t := t) (x := x)
+        (ih (fun a : Fin (p + 2) => V a.succ))
+        ((V 0).contMDiff.contMDiffAt)
+      have h2 : ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+          (fun q : Real × M =>
+            ∑ a : Fin (p + 2),
+              (covDerivOfField (I := I) gRef (A q.1) p) q.2
+                (fun b : Fin (p + 2) =>
+                  (Function.update (fun c : Fin (p + 2) => V c.succ) a (W a))
+                    b q.2)) (t, x) :=
+        ContMDiffAt.sum fun a _ =>
+          ih (Function.update (fun c : Fin (p + 2) => V c.succ) a (W a))
+      have hfun : (fun q : Real × M =>
+          (covDerivOfField (I := I) gRef (A q.1) (p + 1)) q.2
+            (fun a : Fin (p + 3) => V a q.2))
+          = fun q : Real × M =>
+              extDerivFun (I := I)
+                (fun y : M => (covDerivOfField (I := I) gRef (A q.1) p) y
+                  (fun a : Fin (p + 2) => V a.succ y)) q.2 ((V 0) q.2)
+              - ∑ a : Fin (p + 2),
+                  (covDerivOfField (I := I) gRef (A q.1) p) q.2
+                    (fun b : Fin (p + 2) =>
+                      (Function.update (fun c : Fin (p + 2) => V c.succ) a (W a))
+                        b q.2) :=
+        funext hdec
+      rw [hfun]
+      exact h1.sub h2
 
 /-! ## The flow wrapper: tower evolution from a Ricci-flow solution -/
 
