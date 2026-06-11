@@ -2939,6 +2939,216 @@ private lemma orthoSlotSubstSum_eq_neg_folded_pairing
   refine Finset.sum_congr rfl (fun J _ => ?_)
   conv_rhs => rw [neg_mul, Finset.sum_mul]
 
+set_option linter.unusedSectionVars false in
+/-- **The Parseval-frame diagonal differentiated-curvature trace pairing, at a point, is the negated
+slot-folded differentiated-curvature operator pairing (the inner-vector reading of the metric-trace
+opening).** Combining the Parseval-bridge metric-trace opening
+`parsevalDiagDiffCurv_pair_eq_orthoSlotSubstSum` with the folded-pairing collapse
+`orthoSlotSubstSum_eq_neg_folded_pairing` (over the explicit orthonormal frame
+`B_i := smoothOrthoFrame g x i`, basis `bse := smoothOrthoFrame_center_basis`), the family sum over `a`
+of the `(0, s)` fibre pairing of `tensor0SAsRS (nablaTensor0SCurv g s (V a) (V a) (V b) A)` against
+`∇_{V b} S` equals the negated sum over slots `k` of the metric pairing of the slot-`k` substitution of
+`A_x` by the frame-summed differentiated-curvature endomorphism `T_x := nablaBaseSlotCurvFrameSumCLM`. -/
+private lemma parsevalDiagDiffCurv_pair_eq_neg_folded
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) (b : Fin N) (x : M) :
+    (∑ a : Fin N, tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel
+          (tensor0SAsRS (I := I) (M := M) x
+            (nablaTensor0SCurv (I := I) g s ⟨fun b => V a b, hV a⟩ ⟨fun b => V a b, hV a⟩
+              ⟨fun y => V b y, hV b⟩
+              (fun y : M =>
+                (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
+                  (unitZeroSec (I := I) (M := M) y)) x)))
+        (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))) =
+      - ∑ k : Fin s,
+          tensorInnerPointwise (I := I) (M := M) g 0 s x
+            (TensorRSSpace.toModel
+              (tensor0SAsRS (I := I) (M := M) x
+                (tensorSlotSubstCLM (I := I) s x
+                  (tangentSlotCLM (I := I) s k
+                    (nablaBaseSlotCurvFrameSumCLM (I := I) g
+                      (fun i => ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+                        (smoothOrthoFrame_smooth (I := I) g x i))
+                      ⟨fun y => V b y, hV b⟩ x))
+                  ((fun y : M =>
+                    (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
+                      (unitZeroSec (I := I) (M := M) y)) x))))
+            (TensorRSSpace.toModel
+              (tensor0SAsRS (I := I) (M := M) x
+                (gradCurry0 (I := I) (M := M) g s S x (V b x)))) := by
+  classical
+  obtain ⟨bse, hbse⟩ := smoothOrthoFrame_center_basis (I := I) (M := M) g x
+  rw [parsevalDiagDiffCurv_pair_eq_orthoSlotSubstSum (I := I) (M := M) g s S V hV hPar b x bse hbse]
+  exact orthoSlotSubstSum_eq_neg_folded_pairing (I := I) (M := M) g s x
+    ((fun y : M =>
+      (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
+        (unitZeroSec (I := I) (M := M) y)) x)
+    (gradCurry0 (I := I) (M := M) g s S x (V b x))
+    (fun i => ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+      (smoothOrthoFrame_smooth (I := I) g x i)) (fun _ => rfl)
+    ⟨fun y => V b y, hV b⟩ bse hbse
+
+set_option linter.unusedSectionVars false in
+/-- **The slot-`k` substituted differentiated-curvature operator pairing, opened in the orthonormal
+frame (the explicit metric-trace form).** For the orthonormal frame `B_i := smoothOrthoFrame g x i`,
+the frame-summed differentiated-curvature endomorphism `T_x := nablaBaseSlotCurvFrameSumCLM g B Vb x`,
+and `(0, s)`-tensors `A, D`, the `(0, s)` metric pairing of the slot-`k` substitution of `A` by `T_x`
+against `D` expands as the explicit triple frame sum
+```
+⟨tensor0SAsRS (slotSubst_k T_x A), tensor0SAsRS D⟩_g
+  = ∑_J ∑_m g(B_m, T_x B_{Jk}) · toModel(A)(update (B∘J) k B_m) · toModel(D)(B∘J).
+```
+This is `tensorInnerPointwise_tensor0SAsRS_eq_frameSum` (H1) opening the pairing into the frame double
+sum, `toModel_tensorSlotSubst_tangentSlot_apply` naming the slot-`k` insertion `T_x B_{Jk}`, and the
+orthonormal expansion `T_x B_{Jk} = ∑_m g(B_m, T_x B_{Jk}) • B_m`
+(`orthonormal_tangent_expansion`) pushed through the slot-`k` multilinearity of `toModel A`
+(`map_update_sum`, `map_update_smul`). -/
+private lemma slotSubstPairing_eq_frameTripleSum
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
+    (A D : Tensor0SSpace s I x) (k : Fin s)
+    (B : Fin (Module.finrank ℝ E) → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (hB : ∀ i, B i = ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+      (smoothOrthoFrame_smooth (I := I) g x i))
+    (Vb : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x))
+    (hbse : ∀ i, bse i = smoothOrthoFrame (I := I) g x i x) :
+    tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel
+          (tensor0SAsRS (I := I) (M := M) x
+            (tensorSlotSubstCLM (I := I) s x
+              (tangentSlotCLM (I := I) s k (nablaBaseSlotCurvFrameSumCLM (I := I) g B Vb x)) A)))
+        (TensorRSSpace.toModel (tensor0SAsRS (I := I) (M := M) x D)) =
+      ∑ J : Fin s → Fin (Module.finrank ℝ E),
+        (∑ m : Fin (Module.finrank ℝ E),
+          g.inner x (smoothOrthoFrame (I := I) g x m x)
+              (nablaBaseSlotCurvFrameSumCLM (I := I) g B Vb x
+                (smoothOrthoFrame (I := I) g x (J k) x)) *
+            Tensor0SSpace.toModel A
+              (Function.update (fun j => smoothOrthoFrame (I := I) g x (J j) x) k
+                (smoothOrthoFrame (I := I) g x m x))) *
+          Tensor0SSpace.toModel D (fun j => smoothOrthoFrame (I := I) g x (J j) x) := by
+  classical
+  have horth : ∀ a b : Fin (Module.finrank ℝ E),
+      g.inner x (smoothOrthoFrame (I := I) g x a x) (smoothOrthoFrame (I := I) g x b x)
+        = if a = b then 1 else 0 :=
+    fun a b => smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
+  rw [tensorInnerPointwise_tensor0SAsRS_eq_frameSum (I := I) (M := M) g s x _ D
+    (fun j => smoothOrthoFrame (I := I) g x j x) bse rfl hbse horth]
+  refine Finset.sum_congr rfl (fun J _ => ?_)
+  rw [toModel_tensorSlotSubst_tangentSlot_apply (I := I) k
+    (nablaBaseSlotCurvFrameSumCLM (I := I) g B Vb x) A
+    (fun j => smoothOrthoFrame (I := I) g x (J j) x)]
+  congr 1
+  -- Expand the inserted vector `T_x B_{Jk}` over the orthonormal frame and push through slot `k`.
+  have hexp : (nablaBaseSlotCurvFrameSumCLM (I := I) g B Vb x
+        ((fun j => smoothOrthoFrame (I := I) g x (J j) x) k)) =
+      ∑ m : Fin (Module.finrank ℝ E),
+        g.inner x (smoothOrthoFrame (I := I) g x m x)
+            (nablaBaseSlotCurvFrameSumCLM (I := I) g B Vb x
+              (smoothOrthoFrame (I := I) g x (J k) x)) •
+          smoothOrthoFrame (I := I) g x m x :=
+    (orthonormal_tangent_expansion (I := I) (M := M) g x
+      (fun m => smoothOrthoFrame (I := I) g x m x) horth
+      (nablaBaseSlotCurvFrameSumCLM (I := I) g B Vb x
+        (smoothOrthoFrame (I := I) g x (J k) x))).symm
+  conv_lhs => rw [hexp]
+  have hsum := (Tensor0SSpace.toModel A).toMultilinearMap.map_update_sum
+    (Finset.univ : Finset (Fin (Module.finrank ℝ E))) k
+    (fun m => g.inner x (smoothOrthoFrame (I := I) g x m x)
+        (nablaBaseSlotCurvFrameSumCLM (I := I) g B Vb x
+          (smoothOrthoFrame (I := I) g x (J k) x)) •
+      smoothOrthoFrame (I := I) g x m x)
+    (fun j => smoothOrthoFrame (I := I) g x (J j) x)
+  have hsmul : ∀ m : Fin (Module.finrank ℝ E),
+      (Tensor0SSpace.toModel A).toMultilinearMap
+          (Function.update (fun j => smoothOrthoFrame (I := I) g x (J j) x) k
+            (g.inner x (smoothOrthoFrame (I := I) g x m x)
+                (nablaBaseSlotCurvFrameSumCLM (I := I) g B Vb x
+                  (smoothOrthoFrame (I := I) g x (J k) x)) •
+              smoothOrthoFrame (I := I) g x m x)) =
+        g.inner x (smoothOrthoFrame (I := I) g x m x)
+            (nablaBaseSlotCurvFrameSumCLM (I := I) g B Vb x
+              (smoothOrthoFrame (I := I) g x (J k) x)) *
+          Tensor0SSpace.toModel A
+            (Function.update (fun j => smoothOrthoFrame (I := I) g x (J j) x) k
+              (smoothOrthoFrame (I := I) g x m x)) := by
+    intro m
+    rw [(Tensor0SSpace.toModel A).toMultilinearMap.map_update_smul, smul_eq_mul]
+    rfl
+  rw [show Tensor0SSpace.toModel A
+        (Function.update (fun j => smoothOrthoFrame (I := I) g x (J j) x) k
+          (∑ m : Fin (Module.finrank ℝ E),
+            g.inner x (smoothOrthoFrame (I := I) g x m x)
+                (nablaBaseSlotCurvFrameSumCLM (I := I) g B Vb x
+                  (smoothOrthoFrame (I := I) g x (J k) x)) •
+              smoothOrthoFrame (I := I) g x m x)) =
+      (Tensor0SSpace.toModel A).toMultilinearMap
+        (Function.update (fun j => smoothOrthoFrame (I := I) g x (J j) x) k
+          (∑ m : Fin (Module.finrank ℝ E),
+            g.inner x (smoothOrthoFrame (I := I) g x m x)
+                (nablaBaseSlotCurvFrameSumCLM (I := I) g B Vb x
+                  (smoothOrthoFrame (I := I) g x (J k) x)) •
+              smoothOrthoFrame (I := I) g x m x)) from rfl, hsum]
+  exact Finset.sum_congr rfl (fun m _ => hsmul m)
+
+set_option linter.unusedSectionVars false in
+/-- **The frame-summed differentiated-curvature inner factor, split into the differentiated-Ricci
+difference (the once-contracted second Bianchi, value form at the frame).** For the orthonormal frame
+`B_i := smoothOrthoFrame g x i`, the frame-summed differentiated-curvature endomorphism
+`T_x := nablaBaseSlotCurvFrameSumCLM g B Vb x` (`Vb := V b`), and frame indices `m, p`, the metric
+factor `g(B_m, T_x B_p)` equals the differentiated-Ricci difference
+```
+g(B_m, T_x B_p) = ∇_{ext B_m} Ric(Vb, ext B_p) − ∇_{ext B_p} Ric(ext B_m, Vb),
+```
+where `ext` is the smooth tangent extension `smoothExtensionTangent`.  This is the metric symmetry
+`g.symm` followed by the once-contracted second Bianchi `inner_nablaBaseSlotCurvFrameSum_eq_nablaRicci_sub`
+(with the smooth extensions `ext B_m`, `ext B_p` of the frame values as the acted and pairing fields). -/
+private lemma innerFrame_nablaBaseSlotCurvFrameSum_eq_nablaRicci_sub
+    (g : SmoothRiemannianMetric I M) {x : M}
+    (Vb : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (B : Fin (Module.finrank ℝ E) → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (hB : ∀ i, B i = ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+      (smoothOrthoFrame_smooth (I := I) g x i)) (m p : Fin (Module.finrank ℝ E)) :
+    g.inner x (smoothOrthoFrame (I := I) g x m x)
+        (nablaBaseSlotCurvFrameSumCLM (I := I) g B Vb x
+          (smoothOrthoFrame (I := I) g x p x)) =
+      nablaRicci (I := I) g
+          (fun b => smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g x m x) b)
+          (fun b => Vb b)
+          (fun b => smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g x p x) b) x -
+        nablaRicci (I := I) g
+          (fun b => smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g x p x) b)
+          (fun b => smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g x m x) b)
+          (fun b => Vb b) x := by
+  classical
+  rw [g.symm x (smoothOrthoFrame (I := I) g x m x) _]
+  have hT : (nablaBaseSlotCurvFrameSumCLM (I := I) g B Vb x
+        (smoothOrthoFrame (I := I) g x p x)) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        nablaBaseSlotCurv (I := I) g
+          (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+            (smoothOrthoFrame_smooth (I := I) g x i))
+          (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+            (smoothOrthoFrame_smooth (I := I) g x i))
+          ⟨fun b => Vb b, Vb.contMDiff⟩ x (smoothOrthoFrame (I := I) g x p x) := by
+    rw [nablaBaseSlotCurvFrameSumCLM_apply]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [hB i]
+    rfl
+  rw [hT]
+  have hkey := inner_nablaBaseSlotCurvFrameSum_eq_nablaRicci_sub (I := I) g
+    (Vb := fun b => Vb b)
+    (U := fun b => smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g x m x) b)
+    Vb.contMDiff (smoothExtensionTangent_contMDiff (I := I) x (smoothOrthoFrame (I := I) g x m x))
+    (smoothOrthoFrame (I := I) g x p x)
+  rw [smoothExtensionTangent_eq (I := I) x (smoothOrthoFrame (I := I) g x m x)] at hkey
+  rw [hkey]
+
 /-- **The integrated Parseval-frame diagonal differentiated-curvature trace pairing equals the
 group-`2` minus group-`1` double sum (the genuine `nablaTensor0SCurv`-form curvature kernel of the
 tension-field nullity).** For a fixed Parseval frame family `V a`, the frame double sum of the integral
