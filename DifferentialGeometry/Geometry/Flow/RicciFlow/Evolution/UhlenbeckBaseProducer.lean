@@ -2,8 +2,16 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Rm13Der
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRaisingBridge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.BookData
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Uhlenbeck
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Lichnerowicz
+import DifferentialGeometry.Tensor.RSTensor.ProductNablaLeibniz
+import DifferentialGeometry.Tensor.RSTensor.NablaDomDomCongr
+import DifferentialGeometry.Tensor.RSTensor.MetricCompatibility
+import DifferentialGeometry.Tensor.RSTensor.MetricTrace.NablaTraceGen
+import DifferentialGeometry.Geometry.Operator.HessianTraceRealization
 import DifferentialGeometry.Geometry.Curvature.DimensionThree.RiemannFromRicci
 import DifferentialGeometry.Geometry.Curvature.DimensionThree.RicciControlsRm
+import DifferentialGeometry.Geometry.Curvature.DimensionThree.UhlReaction3
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -341,5 +349,1258 @@ theorem solution_rm04_timeDeriv_kn
   convert hd using 1
   simp only [Pi.neg_apply, Pi.mul_apply, Pi.sub_apply]
   ring
+
+/-- **Scalar = Ricci trace at an orthonormal basis (htr discharger).**  Combines the
+intrinsic trace identity `scalar_eq_metricTrace` with the banked `scalarTrace_delta`,
+collapsing the `delta3` weights.  Discharges the `htr` input of `rm04BaseEvolution_at`
+(`sc (R t) = R t 0 0 + R t 1 1 + R t 2 2` after identifying `R` via `hR`). -/
+theorem scalar_eq_trace_ortho
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) (x : M)
+    {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
+    (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt
+      (I := I) (S.base.metric t) x basis) :
+    S.scalar t x =
+      S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 0) (basis 0))
+        + S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 1) (basis 1))
+        + S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis 2) (basis 2)) := by
+  classical
+  have h : DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I)
+        (S.base.metric t) (S.ricciAt t x) =
+      ∑ i : Fin 3, ∑ j : Fin 3,
+        DifferentialGeometry.Integral.Connection.delta3 i j *
+          S.ricciAt t x
+            (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis i) (basis j)) :=
+    scalarTrace_delta (I := I) (S.base.metric t) (S.ricciAt t x) horth
+  rw [show S.scalar t x =
+        DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I)
+          (S.base.metric t) (S.ricciAt t x) from
+      SolutionOn.scalar_eq_metricTrace (I := I) S t x, h]
+  simp [DifferentialGeometry.Integral.Connection.delta3, Fin.sum_univ_three]
+
+open DifferentialGeometry.Dim3Reaction in
+/-- **Scalar evolution in `normSq` form (hScDot discharger).**  Converts the banked
+`ScalarEvolutionEquationOn` (`∂ₜS = ΔS + 2|Ric|²`, produced by `scalarEvolOfSmooth`) to the
+`rm04BaseEvolution_at` input shape `∂ₜS = lapS + 2·normSq R` at a `g_t`-orthonormal basis,
+via `ricciNorm_inner` (orthonormal `|Ric|²` = component square sum). -/
+theorem scalarDot_ortho
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (scalarLap : Real -> M -> Real)
+    (hsc : ScalarEvolutionEquationOn (D := D) S.scalar scalarLap (ricciNorm (I := I) S))
+    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    {basis : Module.Basis (Fin 3) Real (TangentSpace I x)}
+    (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt
+      (I := I) (S.base.metric (t : Real)) x basis)
+    (R : Fin 3 -> Fin 3 -> Real)
+    (hRdef : forall i j : Fin 3,
+      R i j = S.ricciAt (t : Real) x
+        (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis i) (basis j))) :
+    HasDerivWithinAt (fun s : Real => S.scalar s x)
+      (scalarLap (t : Real) x + 2 * normSq R)
+      D.carrier (t : Real) := by
+  classical
+  refine (hsc t x).congr_deriv ?_
+  have hinv := DifferentialGeometry.Integral.Connection.orthonormal_invBasis3
+    (I := I) (S.base.metric (t : Real)) basis horth
+  have hnorm :
+      ricciNormAt (I := I) (S.base.ricciAt (t : Real) x) basis =
+        ricciNorm (I := I) S (t : Real) x := by
+    simpa [ricciNorm, SolutionOn.ricci, SolutionOn.ricciAt] using
+      (ricciNorm_inner (I := I) (S.base.metric (t : Real))
+        (S.base.ricciAt (t : Real) x) basis hinv)
+  rw [← hnorm]
+  have hcomp : forall i j : Fin 3,
+      DifferentialGeometry.Integral.Connection.ricciCompAt (I := I) basis
+          (S.base.ricciAt (t : Real) x) i j = R i j := by
+    intro i j
+    rw [DifferentialGeometry.Integral.Connection.ricciCompAt_apply, hRdef]
+    rfl
+  unfold ricciNormAt normSq
+  simp only [hcomp]
+
+open DifferentialGeometry.Dim3Reaction in
+/-- **Dim-3 KN realization of supplied `Rm04` components (hkn discharger).**  At `(t,x)`
+with the supplied `Rm04` section realizing the solution's lowered Riemann tensor and a
+`g_t`-orthonormal frame, the `rm04Comp` component array is the bare KN array `rm R` of
+the frame Ricci components.  From `solution_rm04_kn_field` (dim 3, Weyl = 0). -/
+theorem rm04CompknOrtho
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
+    (frame : Fin 3 -> (x : M) -> TangentSpace I x)
+    (t : Real) (x : M)
+    (hdim : Module.finrank Real (TangentSpace I x) = 3)
+    (hsec : forall v : Fin 4 -> TangentSpace I x, Rm04 t x v = S.base.rm04 t x v)
+    (horthf : forall i j : Fin 3,
+      (S.base.metric t).inner x (frame i x) (frame j x) = (if i = j then (1 : Real) else 0))
+    (R : Fin 3 -> Fin 3 -> Real)
+    (hRdef : forall i j : Fin 3,
+      R i j = S.ricciAt t x
+        (DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame i x) (frame j x)))
+    (htr : S.scalar t x = sc R)
+    (i k j l : Fin 3) :
+    DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 t) frame x i k j l
+      = rm R i k j l := by
+  have hR' : forall a b : Fin 3,
+      S.ricciAt t x
+          (DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame a x) (frame b x))
+        = R a b := fun a b => (hRdef a b).symm
+  unfold DifferentialGeometry.Integral.Connection.rm04Comp
+  rw [hsec, solution_rm04_kn_field (I := I) S t x hdim, htr]
+  simp only [horthf, hR']
+  unfold rm kd
+  ring
+
+open DifferentialGeometry.Dim3Reaction in
+/-- **Lichnerowicz evolution in `Cc`/`Rsq` form (hRicDot discharger).**  Converts the
+banked `RicciLichnerowiczEquationInFrame` instance at `(t,x)` to the
+`rm04BaseEvolution_at` input shape `∂ₜR_ij = lap_ij − 2·Cc − 2·Rsq`, given a
+`δ`-orthonormal inverse metric at `(t,x)` and the dim-3 KN realization `hkn` of the
+supplied `Rm04` components.  The raised/one-up Ricci components collapse to the plain
+components, the curvature contraction becomes `Cc`, and the two Ricci actions become
+`2·Rsq` (using `R`-symmetry). -/
+theorem ricDot_ortho
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M (Fin 3))
+    (frame : Fin 3 -> (x : M) -> TangentSpace I x)
+    (roughLapRic : Real -> M -> Fin 3 -> Fin 3 -> Real)
+    (hlich : RicciLichnerowiczEquationInFrame (D := D) (I := I) S Rm04 gInv frame roughLapRic)
+    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (hginv : forall i j : Fin 3, gInv (t : Real) x i j = (if i = j then (1 : Real) else 0))
+    (R : Real -> Fin 3 -> Fin 3 -> Real)
+    (hRdef : forall (s : Real) (i j : Fin 3),
+      R s i j = ricciCompInFrame (I := I) S frame s x i j)
+    (hsym : forall i j : Fin 3, R (t : Real) i j = R (t : Real) j i)
+    (hkn : forall i k j l : Fin 3,
+      DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 (t : Real)) frame x i k j l
+        = rm (R (t : Real)) i k j l)
+    (i j : Fin 3) :
+    HasDerivWithinAt (fun s : Real => R s i j)
+      (roughLapRic (t : Real) x i j - 2 * Cc (R (t : Real)) i j - 2 * Rsq (R (t : Real)) i j)
+      D.carrier (t : Real) := by
+  classical
+  have h := hlich t x i j
+  have h' := h.congr (fun s _ => (hRdef s i j)) (hRdef (t : Real) i j)
+  refine h'.congr_deriv ?_
+  have hR' : forall (s : Real) (a b : Fin 3),
+      S.ricciAt s x
+          (DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame a x) (frame b x))
+        = R s a b := fun s a b => (hRdef s a b).symm
+  unfold lichnerowiczRHSInFrame ricciLeftActionCompInFrame ricciRightActionCompInFrame
+    ricciOneUpCompInFrame raisedRicciCompInFrame
+    DifferentialGeometry.Integral.Connection.raisedRicciComponentsInFrame
+    ricciTwoTensorField ricciCompInFrame Cc Rsq
+  simp only [hginv, hkn, hR', Fin.sum_univ_three, Fin.isValue,
+    Fin.reduceEq, reduceIte, ite_mul, mul_ite, one_mul, zero_mul, mul_zero, mul_one,
+    add_zero, zero_add]
+  simp only [hsym j 0, hsym j 1, hsym j 2, hsym 0 i, hsym 1 i, hsym 2 i]
+  ring
+
+set_option maxHeartbeats 1000000 in
+open DifferentialGeometry.Dim3Reaction in
+/-- **Pointwise Uhlenbeck-base packaging (B3e core).**  At a `g_t`-orthonormal frame
+`e` at `(t,x)` of a dim-3 solution, with the Ricci/scalar time-derivatives supplied in
+diffusion-plus-reaction form (`∂ₜRic = lap + Q_Ric`, `∂ₜS = lapS + Q_S`, the proved
+Lichnerowicz/scalar shapes), the lowered Riemann components satisfy the corrected-sign
+pre-Uhlenbeck evolution `∂ₜRm04 = KN(lap,lapS,δ) − 2·B# − drift`, with `B#`/`drift` the
+bare dim-3 reaction algebra of `UhlReaction3` (identified with the
+`uhlenbeckBTensorInFrame`/`riemann04RicciDriftInFrame` arrays by `uhlBt_eq_bt` /
+`uhlDrift_eq_drift`).  Combines the KN time derivative `solution_rm04_timeDeriv_kn`
+with the reaction match `reaction_match` and Ricci symmetry `ricciSym_can`. -/
+theorem rm04BaseEvolution_at
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
+    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (hdim : Module.finrank Real (TangentSpace I x) = 3)
+    (e : Fin 3 -> TangentSpace I x)
+    (horth : forall i j : Fin 3,
+      (S.base.metric (t : Real)).inner x (e i) (e j) = (if i = j then (1 : Real) else 0))
+    (R : Real -> Fin 3 -> Fin 3 -> Real)
+    (hR : forall (s : Real) (i j : Fin 3),
+      R s i j = S.ricciAt s x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (e i) (e j)))
+    (lap : Fin 3 -> Fin 3 -> Real) (lapS : Real)
+    (hRicDot : forall i j : Fin 3, HasDerivWithinAt (fun s : Real => R s i j)
+      (lap i j - 2 * Cc (R (t : Real)) i j - 2 * Rsq (R (t : Real)) i j)
+      D.carrier (t : Real))
+    (hScDot : HasDerivWithinAt (fun s : Real => S.scalar s x)
+      (lapS + 2 * normSq (R (t : Real))) D.carrier (t : Real))
+    (htr : S.scalar (t : Real) x = sc (R (t : Real)))
+    (a b c d : Fin 3) :
+    HasDerivWithinAt
+      (fun s : Real => S.base.rm04 s x
+        (DifferentialGeometry.Integral.Connection.vec4 (I := I) (e a) (e b) (e c) (e d)))
+      (-(lap a c) * kd b d + lap b c * kd a d + lap a d * kd b c - lap b d * kd a c
+          + lapS / 2 * (kd a c * kd b d - kd b c * kd a d)
+        - 2 * (Bt (R (t : Real)) a b c d - Bt (R (t : Real)) a b d c
+            + Bt (R (t : Real)) a c b d - Bt (R (t : Real)) a d b c)
+        - drift (R (t : Real)) a b c d)
+      D.carrier (t : Real) := by
+  classical
+  have hsym : forall i j : Fin 3, R (t : Real) i j = R (t : Real) j i := by
+    intro i j
+    rw [hR, hR]
+    exact ricciSym_can (I := I) S (t : Real) x (e i) (e j)
+  have horthk : forall i j : Fin 3,
+      (S.base.metric (t : Real)).inner x (e i) (e j) = kd i j := horth
+  have hXZ := (hRicDot a c).congr (fun s _ => (hR s a c).symm) ((hR (t : Real) a c).symm)
+  have hYZ := (hRicDot b c).congr (fun s _ => (hR s b c).symm) ((hR (t : Real) b c).symm)
+  have hXW := (hRicDot a d).congr (fun s _ => (hR s a d).symm) ((hR (t : Real) a d).symm)
+  have hYW := (hRicDot b d).congr (fun s _ => (hR s b d).symm) ((hR (t : Real) b d).symm)
+  have hbig :=
+    solution_rm04_timeDeriv_kn (I := I) S hS t x hdim
+      (e a) (e b) (e c) (e d) hXZ hYZ hXW hYW hScDot
+  refine hbig.congr_deriv ?_
+  have hmatch := DifferentialGeometry.Dim3Reaction.reaction_match hsym a b c d
+  simp only [DifferentialGeometry.Dim3Reaction.KNQ, DifferentialGeometry.Dim3Reaction.QRic,
+    DifferentialGeometry.Dim3Reaction.QS, DifferentialGeometry.Dim3Reaction.Gg,
+    DifferentialGeometry.Dim3Reaction.Bsharp] at hmatch
+  simp only [horthk, htr]
+  simp only [show forall (s : Real) (i j : Fin 3),
+      S.ricciAt s x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (e i) (e j))
+        = R s i j from fun s i j => (hR s i j).symm]
+  linear_combination hmatch
+
+/-- **Fixed-frame Ricci symmetry for any frame (hlich wiring input).**  Instantiates the
+metric-derived pointwise symmetry `ricciSym_can`; with the standing
+`h_ricci : RicciEvolutionEquationInFrame` and a symmetric `gInv`, this feeds
+`ricciLichnerowiczEquationInFrame_of_ricciEvolution_and_symm` to produce the
+`hlich` input of `ricDot_ortho` — no further new code is needed on that wire. -/
+theorem ricciSymFrame_can
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    {Idx : Type*} (frame : Idx -> (x : M) -> TangentSpace I x) :
+    RicciSymmetricInFrameOn (I := I) S frame :=
+  fun t x i j => ricciSym_can (I := I) S t x (frame i x) (frame j x)
+
+/-- **The dim-3 KN identity at arbitrary multilinear inputs (B3c step 0).**  The
+all-slots form of `solution_rm04_kn_field`, turning the `vec4`-tuple statement into an
+identity of the full multilinear maps — the shape needed to push the rough Laplacian
+through the Kulkarni–Nomizu combination (`∇g = 0` diffusion split). -/
+theorem solution_rm04_kn_all
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (s : Real) (x : M)
+    (hdim : Module.finrank Real (TangentSpace I x) = 3)
+    (v : Fin 4 -> TangentSpace I x) :
+    S.base.rm04 s x v =
+      -(S.ricciAt s x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (v 0) (v 2)))
+          * (S.base.metric s).inner x (v 1) (v 3)
+        + S.ricciAt s x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (v 1) (v 2))
+          * (S.base.metric s).inner x (v 0) (v 3)
+        + S.ricciAt s x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (v 0) (v 3))
+          * (S.base.metric s).inner x (v 1) (v 2)
+        - S.ricciAt s x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (v 1) (v 3))
+          * (S.base.metric s).inner x (v 0) (v 2)
+        + (S.scalar s x / 2)
+          * ((S.base.metric s).inner x (v 0) (v 2) * (S.base.metric s).inner x (v 1) (v 3)
+              - (S.base.metric s).inner x (v 1) (v 2) * (S.base.metric s).inner x (v 0) (v 3)) := by
+  have hv : v = DifferentialGeometry.Integral.Connection.vec4 (I := I) (v 0) (v 1) (v 2) (v 3) := by
+    funext q
+    fin_cases q <;> rfl
+  rw [hv]
+  exact solution_rm04_kn_field (I := I) S s x hdim (v 0) (v 1) (v 2) (v 3)
+
+set_option maxHeartbeats 1000000 in
+/-- **(45a) Coordinate-frame `hrm` from orthonormal-frame derivatives.**  The tower's
+`hrm` input (`realizedRmBase` time derivative at the centre `x₀`, coordinate frame) follows
+from the per-component derivatives in any tangent basis (the `rm04BaseEvolution_at`
+outputs at an orthonormal basis) by the time-independent change of basis:
+`realizedRmBase s x₀ m = Σ_slots rm04(s)(basis∘slots)·K(slots,m)` for ALL `s` by
+4-multilinearity, with constant coefficients `K = ∏ₐ basis.coord (slots a) (∂_{m a})`.
+No frame redesign is needed: the tower consumes `hrm` per regular time. -/
+theorem rmBaseDeriv_basis
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (x₀ : M)
+    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (basis : Module.Basis (Fin 3) Real (TangentSpace I x₀))
+    (V : Fin 3 -> Fin 3 -> Fin 3 -> Fin 3 -> Real)
+    (hD : forall a b c d : Fin 3, HasDerivWithinAt
+      (fun s : Real => S.base.rm04 s x₀
+        (DifferentialGeometry.Integral.Connection.vec4 (I := I)
+          (basis a) (basis b) (basis c) (basis d)))
+      (V a b c d) D.carrier (t : Real))
+    (m : Fin 4 -> DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E) :
+    HasDerivWithinAt
+      (fun s : Real => realizedRmBase (I := I) S x₀ s x₀ m)
+      (∑ slots : Fin 4 -> Fin 3,
+        V (slots 0) (slots 1) (slots 2) (slots 3) *
+          ∏ a : Fin 4, basis.coord (slots a)
+            (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x₀ (m a) x₀))
+      D.carrier (t : Real) := by
+  classical
+  have hexp : (fun s : Real => realizedRmBase (I := I) S x₀ s x₀ m)
+      = fun s : Real =>
+        ∑ slots : Fin 4 -> Fin 3,
+          S.base.rm04 s x₀
+              (DifferentialGeometry.Integral.Connection.vec4 (I := I)
+                (basis (slots 0)) (basis (slots 1)) (basis (slots 2)) (basis (slots 3))) *
+            ∏ a : Fin 4, basis.coord (slots a)
+              (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x₀ (m a) x₀) := by
+    funext s
+    rw [realizedRmBase_apply,
+      tensor0S_apply_eq_sum (I := I) basis (S.base.rm04 s x₀)
+        (fun q => DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x₀ (m q) x₀)]
+    refine Finset.sum_congr rfl fun slots _ => ?_
+    have hvec :
+        (fun a : Fin 4 => basis (slots a)) =
+          DifferentialGeometry.Integral.Connection.vec4 (I := I)
+            (basis (slots 0)) (basis (slots 1)) (basis (slots 2)) (basis (slots 3)) := by
+      funext q
+      fin_cases q <;> rfl
+    rw [component0S_apply, hvec]
+  rw [hexp]
+  refine HasDerivWithinAt.fun_sum ?_
+  intro slots _
+  exact (hD (slots 0) (slots 1) (slots 2) (slots 3)).mul_const _
+
+/-- The solution's connection at time `t` is `∞`-smooth (Levi-Civita). -/
+theorem connSmoothSol
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) :
+    CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (S.family.connection t) (∞ : WithTop ℕ∞) := by
+  simpa [SolutionFamily.connection, metricCov] using
+    metricCov_smooth (I := I) (M := M) (S.base.metric t)
+
+/-- Metric compatibility of the solution's connection at time `t` (Levi-Civita). -/
+theorem metricCompatSol
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) :
+    DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I)
+      (S.family.connection t) (S.family.metric t) := by
+  simpa [SolutionFamily.connection, SolutionOn.family_metric] using
+    DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_isMetricCompatible
+      (I := I) (S.base.metric t)
+
+/-- **The canonical `∇Ric` realizer for the solution (B3c-1 input).**  The canonical
+total covariant derivative of the time-`t` Ricci field realizes `∇Ric` in the
+`TotalNabla0SRealizes` sense — the Ricci-side input of the KN diffusion split, to be
+combined with `zero_realizes_metric`/`nabla_smul_metric`/`nabla0S_product_realizes`/
+`totalNabla0SRealizes_domDomCongr`. -/
+theorem ricNablaRealizes
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) :
+    TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      2 (S.family.connection t) (S.ricci t)
+      (totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 (S.family.connection t) (S.ricci t)
+        (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+          2 (S.family.connection t) (connSmoothSol (I := I) S t) (S.ricci t))) :=
+  totalNabla0S_realizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+    2 (S.family.connection t) (S.ricci t) _
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **B3c-1, generic Ric⊗g KN term:** any slot-permuted product `(Ric ⊗ g)·e` — the
+T1–T4 terms of the Kulkarni–Nomizu combination are the instances `e = swap(1,2)`,
+`(swap 1 2).trans (swap 0 1)`, `(swap 2 3).trans (swap 1 3)`, and
+`((swap 3 2).trans (swap 1 3)).trans (swap 0 1)` — has its covariant derivative
+realized by the permuted product-Leibniz right-hand side (the `∇g`-half is the zero
+field).  Composes `nabla0S_product_realizes` (with `ricNablaRealizes` and
+`zero_realizes_metric`) with `totalNabla0SRealizes_domDomCongr`. -/
+theorem knTermRealizes
+    [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (t : Real)
+    (e : Fin (2 + 2) ≃ Fin (2 + 2)) :
+    TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (2 + 2) (S.family.connection t)
+      (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+        (E := TangentSpace I) (∞ : WithTop ℕ∞) e
+        (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2)
+          (S.ricci t) (metricTensorField (I := I) (S.family.metric t))))
+      (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+        (E := TangentSpace I) (∞ : WithTop ℕ∞)
+        (frontExtendEquiv e)
+        (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+            (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizLeftEquiv 2 2)
+            (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+              (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1) (q := 2)
+              (totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+                2 (S.family.connection t) (S.ricci t)
+                (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+                  2 (S.family.connection t) (connSmoothSol (I := I) S t) (S.ricci t)))
+              (metricTensorField (I := I) (S.family.metric t)))
+          + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+            (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizRightEquiv 2 2)
+            (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+              (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2 + 1)
+              (S.ricci t) 0))) :=
+  totalNabla0SRealizes_domDomCongr (I := I)
+    (S.family.connection t) e _ _
+    (nabla0S_product_realizes (I := I) (S.family.connection t)
+      (S.ricci t) (metricTensorField (I := I) (S.family.metric t)) _ 0
+      (ricNablaRealizes (I := I) S t)
+      (zero_realizes_metric (I := I) (S.family.connection t)
+        (S.family.metric t) (metricCompatSol (I := I) S t)))
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **B3c-1, generic scalar KN term:** any slot-permuted product `((S·g) ⊗ g)·e` — the
+two `(S/2)·δδ`-terms of the Kulkarni–Nomizu combination are (half of) the instances
+`e = swap 1 2` and `e = (swap 1 2).trans (swap 0 1)` — has its covariant derivative
+realized by the permuted product-Leibniz right-hand side, with the `∇(S·g)`-half given
+by `nabla_smul_metric` (`∇(S·g) = dS⊗g`, `dS = duSec`) and the `∇g`-half zero. -/
+theorem knScalRealizes
+    [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (t : Real)
+    (e : Fin (2 + 2) ≃ Fin (2 + 2)) :
+    TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (2 + 2) (S.family.connection t)
+      (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+        (E := TangentSpace I) (∞ : WithTop ℕ∞) e
+        (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2)
+          (tensor0SField_smulByFun (𝕜 := Real) (E := E) (H := H)
+            (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (s := 2)
+            (S.scalar t) (scalarSmoothOfSol (I := I) S t)
+            (metricTensorField (I := I) (S.family.metric t)))
+          (metricTensorField (I := I) (S.family.metric t))))
+      (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+        (E := TangentSpace I) (∞ : WithTop ℕ∞)
+        (frontExtendEquiv e)
+        (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+            (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizLeftEquiv 2 2)
+            (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+              (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1) (q := 2)
+              (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1) (q := 2)
+                (DifferentialGeometry.Integral.Connection.duSec (I := I)
+                  (S.scalar t) (scalarSmoothOfSol (I := I) S t))
+                (metricTensorField (I := I) (S.family.metric t)))
+              (metricTensorField (I := I) (S.family.metric t)))
+          + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+            (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizRightEquiv 2 2)
+            (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+              (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2 + 1)
+              (tensor0SField_smulByFun (𝕜 := Real) (E := E) (H := H)
+                (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (s := 2)
+                (S.scalar t) (scalarSmoothOfSol (I := I) S t)
+                (metricTensorField (I := I) (S.family.metric t)))
+              0))) :=
+  totalNabla0SRealizes_domDomCongr (I := I)
+    (S.family.connection t) e _ _
+    (nabla0S_product_realizes (I := I) (S.family.connection t)
+      _ (metricTensorField (I := I) (S.family.metric t)) _ 0
+      (nabla_smul_metric (I := I) (M := M) (S.family.connection t)
+        (S.family.metric t) (metricCompatSol (I := I) S t)
+        (S.scalar t) (scalarSmoothOfSol (I := I) S t)
+        (DifferentialGeometry.Integral.Connection.duSec (I := I)
+          (S.scalar t) (scalarSmoothOfSol (I := I) S t))
+        (fun x v => by
+          rw [DifferentialGeometry.Integral.Connection.duSec_apply]
+          exact DifferentialGeometry.Integral.Connection.differential1FormFun_apply_eq_extDerivFun
+            (I := I) (S.scalar t) x v))
+      (zero_realizes_metric (I := I) (S.family.connection t)
+        (S.family.metric t) (metricCompatSol (I := I) S t)))
+
+section KnField
+
+set_option backward.isDefEq.respectTransparency false
+
+variable {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+
+/-- The generic Ric⊗g KN term as a field. -/
+private noncomputable def knRicT
+    (S : SolutionOn (I := I) (M := M) D) (t : Real)
+    (e : Fin (2 + 2) ≃ Fin (2 + 2)) :
+    Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (2 + 2) :=
+  MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+    (E := TangentSpace I) (∞ : WithTop ℕ∞) e
+    (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+      (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2)
+      (S.ricci t) (metricTensorField (I := I) (S.family.metric t)))
+
+/-- The generic (S·g)⊗g KN term as a field. -/
+private noncomputable def knScalT
+    (S : SolutionOn (I := I) (M := M) D) (t : Real)
+    (e : Fin (2 + 2) ≃ Fin (2 + 2)) :
+    Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (2 + 2) :=
+  MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+    (E := TangentSpace I) (∞ : WithTop ℕ∞) e
+    (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+      (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2)
+      (tensor0SField_smulByFun (𝕜 := Real) (E := E) (H := H)
+        (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (s := 2)
+        (S.scalar t) (scalarSmoothOfSol (I := I) S t)
+        (metricTensorField (I := I) (S.family.metric t)))
+      (metricTensorField (I := I) (S.family.metric t)))
+
+/-- The slot permutations of the four Ric⊗g KN terms and the two scalar terms:
+`e₁` realizes `A(v₀,v₂)·B(v₁,v₃)`, `e₂` realizes `A(v₁,v₂)·B(v₀,v₃)`,
+`e₃` realizes `A(v₀,v₃)·B(v₁,v₂)`, `e₄` realizes `A(v₁,v₃)·B(v₀,v₂)`. -/
+private def knE1 : Fin (2 + 2) ≃ Fin (2 + 2) := Equiv.swap 1 2
+private def knE2 : Fin (2 + 2) ≃ Fin (2 + 2) := (Equiv.swap (1 : Fin (2 + 2)) 2).trans (Equiv.swap 0 1)
+private def knE3 : Fin (2 + 2) ≃ Fin (2 + 2) := (Equiv.swap (2 : Fin (2 + 2)) 3).trans (Equiv.swap 1 3)
+private def knE4 : Fin (2 + 2) ≃ Fin (2 + 2) :=
+  ((Equiv.swap (3 : Fin (2 + 2)) 2).trans (Equiv.swap 1 3)).trans (Equiv.swap 0 1)
+
+/-- **The dim-3 Kulkarni–Nomizu field** `KN(Ric, S, g)` as a signed combination of the
+slot-permuted products: `−T₁ + T₂ + T₃ − T₄ + (1/2)·T₅ₐ − (1/2)·T₅ᵦ`. -/
+private noncomputable def knField
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) :
+    Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (2 + 2) :=
+  ((-1 : Real) • knRicT (I := I) S t knE1 + knRicT (I := I) S t knE2)
+    + (knRicT (I := I) S t knE3 + (-1 : Real) • knRicT (I := I) S t knE4)
+    + ((1 / 2 : Real) • knScalT (I := I) S t knE1
+        + (-(1 / 2) : Real) • knScalT (I := I) S t knE2)
+
+set_option maxHeartbeats 1000000 in
+/-- **B3c-1 sum step: the KN field's covariant derivative is realized** by the
+corresponding signed combination of the term realizers (`knTermRealizes` ×4,
+`knScalRealizes` ×2, combined by `TotalNabla0SRealizes.add`/`.smul`).  The realizer is
+the underscore-elaborated combination; its KN-shape normal form is the ext-transport
+step's concern, not this lemma's. -/
+private theorem knFieldRealizes
+    [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) :
+    ∃ knField' : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := (∞ : WithTop ℕ∞)) (2 + 2 + 1),
+      TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (2 + 2) (S.family.connection t) (knField (I := I) S t) knField' :=
+  ⟨_, (((knTermRealizes (I := I) S t knE1).smul (-1 : Real)).add
+        (knTermRealizes (I := I) S t knE2)).add
+      (((knTermRealizes (I := I) S t knE3).add
+          ((knTermRealizes (I := I) S t knE4).smul (-1 : Real)))) |>.add
+      (((knScalRealizes (I := I) S t knE1).smul (1 / 2 : Real)).add
+        ((knScalRealizes (I := I) S t knE2).smul (-(1 / 2) : Real)))⟩
+
+/-- **The canonical `∇²Ric` realizer (B3c-2 input):** the canonical total covariant
+derivative of the canonical `∇Ric` field realizes the second Ricci derivative. -/
+theorem ric2NablaRealizes
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) :
+    TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (2 + 1) (S.family.connection t)
+      (totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 (S.family.connection t) (S.ricci t)
+        (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+          2 (S.family.connection t) (connSmoothSol (I := I) S t) (S.ricci t)))
+      (totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (2 + 1) (S.family.connection t)
+        (totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          2 (S.family.connection t) (S.ricci t)
+          (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+            2 (S.family.connection t) (connSmoothSol (I := I) S t) (S.ricci t)))
+        (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+          (2 + 1) (S.family.connection t) (connSmoothSol (I := I) S t) _)) :=
+  totalNabla0S_realizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+    (2 + 1) (S.family.connection t) _ _
+
+/-- **The canonical `∇(dS)` (Hessian) realizer (B3c-2 input).** -/
+theorem duNablaRealizes
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) :
+    TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      1 (S.family.connection t)
+      (DifferentialGeometry.Integral.Connection.duSec (I := I)
+        (S.scalar t) (scalarSmoothOfSol (I := I) S t))
+      (totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        1 (S.family.connection t)
+        (DifferentialGeometry.Integral.Connection.duSec (I := I)
+          (S.scalar t) (scalarSmoothOfSol (I := I) S t))
+        (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+          1 (S.family.connection t) (connSmoothSol (I := I) S t) _)) :=
+  totalNabla0S_realizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+    1 (S.family.connection t) _ _
+
+/-- The realizer of a generic Ric⊗g KN term (the `knTermRealizes` witness). -/
+private noncomputable def knRicD
+    (S : SolutionOn (I := I) (M := M) D) (t : Real)
+    (e : Fin (2 + 2) ≃ Fin (2 + 2)) :
+    Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (2 + 2 + 1) :=
+  MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+    (E := TangentSpace I) (∞ : WithTop ℕ∞) (frontExtendEquiv e)
+    (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+        (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizLeftEquiv 2 2)
+        (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1) (q := 2)
+          (totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+            2 (S.family.connection t) (S.ricci t)
+            (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+              2 (S.family.connection t) (connSmoothSol (I := I) S t) (S.ricci t)))
+          (metricTensorField (I := I) (S.family.metric t)))
+      + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+        (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizRightEquiv 2 2)
+        (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2 + 1)
+          (S.ricci t) 0))
+
+/-- The realizer of a generic (S·g)⊗g KN term (the `knScalRealizes` witness). -/
+private noncomputable def knScalD
+    (S : SolutionOn (I := I) (M := M) D) (t : Real)
+    (e : Fin (2 + 2) ≃ Fin (2 + 2)) :
+    Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (2 + 2 + 1) :=
+  MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+    (E := TangentSpace I) (∞ : WithTop ℕ∞) (frontExtendEquiv e)
+    (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+        (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizLeftEquiv 2 2)
+        (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1) (q := 2)
+          (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+            (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1) (q := 2)
+            (DifferentialGeometry.Integral.Connection.duSec (I := I)
+              (S.scalar t) (scalarSmoothOfSol (I := I) S t))
+            (metricTensorField (I := I) (S.family.metric t)))
+          (metricTensorField (I := I) (S.family.metric t)))
+      + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+        (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizRightEquiv 2 2)
+        (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2 + 1)
+          (tensor0SField_smulByFun (𝕜 := Real) (E := E) (H := H)
+            (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (s := 2)
+            (S.scalar t) (scalarSmoothOfSol (I := I) S t)
+            (metricTensorField (I := I) (S.family.metric t)))
+          0))
+
+/-- **The explicit KN-form realizer of `∇Rm04`** (dim 3): the signed combination of the
+six term realizers, mirroring `knField`. -/
+private noncomputable def knFieldD
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) :
+    Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (2 + 2 + 1) :=
+  ((-1 : Real) • knRicD (I := I) S t knE1 + knRicD (I := I) S t knE2)
+    + (knRicD (I := I) S t knE3 + (-1 : Real) • knRicD (I := I) S t knE4)
+    + ((1 / 2 : Real) • knScalD (I := I) S t knE1
+        + (-(1 / 2) : Real) • knScalD (I := I) S t knE2)
+
+set_option maxHeartbeats 1000000 in
+/-- **B3c-2, generic second derivative of a Ric⊗g KN term:** `∇(knRicD e)` is realized
+by the one-rank-up closure stack — outer `frontExtendEquiv (frontExtendEquiv e)`, the
+two Leibniz branches differentiated again (`∇²Ric`, `∇g = 0`, `∇0 = 0`). -/
+private theorem knTerm2Realizes
+    [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real)
+    (e : Fin (2 + 2) ≃ Fin (2 + 2)) :
+    TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (2 + 2 + 1) (S.family.connection t)
+      (knRicD (I := I) S t e)
+      (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+        (E := TangentSpace I) (∞ : WithTop ℕ∞)
+        (frontExtendEquiv (frontExtendEquiv e))
+        (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+            (E := TangentSpace I) (∞ : WithTop ℕ∞)
+            (frontExtendEquiv (leibnizLeftEquiv 2 2))
+            (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizLeftEquiv (2 + 1) 2)
+                (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                  (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1 + 1) (q := 2)
+                  (totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+                    (2 + 1) (S.family.connection t)
+                    (totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+                      2 (S.family.connection t) (S.ricci t)
+                      (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+                        2 (S.family.connection t) (connSmoothSol (I := I) S t) (S.ricci t)))
+                    (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+                      (2 + 1) (S.family.connection t) (connSmoothSol (I := I) S t) _))
+                  (metricTensorField (I := I) (S.family.metric t)))
+              + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizRightEquiv (2 + 1) 2)
+                (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                  (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1) (q := 2 + 1)
+                  (totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+                    2 (S.family.connection t) (S.ricci t)
+                    (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+                      2 (S.family.connection t) (connSmoothSol (I := I) S t) (S.ricci t)))
+                  0))
+          + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+            (E := TangentSpace I) (∞ : WithTop ℕ∞)
+            (frontExtendEquiv (leibnizRightEquiv 2 2))
+            (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizLeftEquiv 2 (2 + 1))
+                (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                  (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1) (q := 2 + 1)
+                  (totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+                    2 (S.family.connection t) (S.ricci t)
+                    (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+                      2 (S.family.connection t) (connSmoothSol (I := I) S t) (S.ricci t)))
+                  0)
+              + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizRightEquiv 2 (2 + 1))
+                (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                  (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2 + 1 + 1)
+                  (S.ricci t) 0)))) :=
+  totalNabla0SRealizes_domDomCongr (I := I)
+    (S.family.connection t) (frontExtendEquiv e) _ _
+    ((totalNabla0SRealizes_domDomCongr (I := I)
+        (S.family.connection t) (leibnizLeftEquiv 2 2) _ _
+        (nabla0S_product_realizes (I := I) (S.family.connection t)
+          _ (metricTensorField (I := I) (S.family.metric t)) _ 0
+          (ric2NablaRealizes (I := I) S t)
+          (zero_realizes_metric (I := I) (S.family.connection t)
+            (S.family.metric t) (metricCompatSol (I := I) S t)))).add
+      (totalNabla0SRealizes_domDomCongr (I := I)
+        (S.family.connection t) (leibnizRightEquiv 2 2) _ _
+        (nabla0S_product_realizes (I := I) (S.family.connection t)
+          (S.ricci t) 0 _ 0
+          (ricNablaRealizes (I := I) S t)
+          (zero_realizes_nabla (I := I) (2 + 1) (S.family.connection t)))))
+
+set_option maxHeartbeats 1000000 in
+/-- **B3c-2, generic second derivative of a scalar KN term:** `∇(knScalD e)` is
+realized by the one-rank-up closure stack, with the `∇((dS⊗g)⊗g)`-branch supplied by
+the Hessian handle `duNablaRealizes` and the `∇((S·g)⊗0)`-branch by
+`nabla_smul_metric` and the zero realizers. -/
+private theorem knScal2Realizes
+    [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real)
+    (e : Fin (2 + 2) ≃ Fin (2 + 2)) :
+    TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (2 + 2 + 1) (S.family.connection t)
+      (knScalD (I := I) S t e)
+      (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+        (E := TangentSpace I) (∞ : WithTop ℕ∞)
+        (frontExtendEquiv (frontExtendEquiv e))
+        (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+            (E := TangentSpace I) (∞ : WithTop ℕ∞)
+            (frontExtendEquiv (leibnizLeftEquiv 2 2))
+            (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizLeftEquiv (2 + 1) 2)
+                (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                  (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1 + 1) (q := 2)
+                  (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                      (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizLeftEquiv 1 2)
+                      (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                        (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1 + 1) (q := 2)
+                        (totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+                          1 (S.family.connection t)
+                          (DifferentialGeometry.Integral.Connection.duSec (I := I)
+                            (S.scalar t) (scalarSmoothOfSol (I := I) S t))
+                          (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+                            1 (S.family.connection t) (connSmoothSol (I := I) S t) _))
+                        (metricTensorField (I := I) (S.family.metric t)))
+                    + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                      (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizRightEquiv 1 2)
+                      (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                        (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1) (q := 2 + 1)
+                        (DifferentialGeometry.Integral.Connection.duSec (I := I)
+                          (S.scalar t) (scalarSmoothOfSol (I := I) S t))
+                        0))
+                  (metricTensorField (I := I) (S.family.metric t)))
+              + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizRightEquiv (2 + 1) 2)
+                (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                  (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1) (q := 2 + 1)
+                  (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                    (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1) (q := 2)
+                    (DifferentialGeometry.Integral.Connection.duSec (I := I)
+                      (S.scalar t) (scalarSmoothOfSol (I := I) S t))
+                    (metricTensorField (I := I) (S.family.metric t)))
+                  0))
+          + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+            (E := TangentSpace I) (∞ : WithTop ℕ∞)
+            (frontExtendEquiv (leibnizRightEquiv 2 2))
+            (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizLeftEquiv 2 (2 + 1))
+                (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                  (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1) (q := 2 + 1)
+                  (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                    (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1) (q := 2)
+                    (DifferentialGeometry.Integral.Connection.duSec (I := I)
+                      (S.scalar t) (scalarSmoothOfSol (I := I) S t))
+                    (metricTensorField (I := I) (S.family.metric t)))
+                  0)
+              + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizRightEquiv 2 (2 + 1))
+                (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                  (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2 + 1 + 1)
+                  (tensor0SField_smulByFun (𝕜 := Real) (E := E) (H := H)
+                    (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (s := 2)
+                    (S.scalar t) (scalarSmoothOfSol (I := I) S t)
+                    (metricTensorField (I := I) (S.family.metric t)))
+                  0)))) :=
+  totalNabla0SRealizes_domDomCongr (I := I)
+    (S.family.connection t) (frontExtendEquiv e) _ _
+    ((totalNabla0SRealizes_domDomCongr (I := I)
+        (S.family.connection t) (leibnizLeftEquiv 2 2) _ _
+        (nabla0S_product_realizes (I := I) (S.family.connection t)
+          _ (metricTensorField (I := I) (S.family.metric t)) _ 0
+          (nabla0S_product_realizes (I := I) (S.family.connection t)
+            (DifferentialGeometry.Integral.Connection.duSec (I := I)
+              (S.scalar t) (scalarSmoothOfSol (I := I) S t))
+            (metricTensorField (I := I) (S.family.metric t)) _ 0
+            (duNablaRealizes (I := I) S t)
+            (zero_realizes_metric (I := I) (S.family.connection t)
+              (S.family.metric t) (metricCompatSol (I := I) S t)))
+          (zero_realizes_metric (I := I) (S.family.connection t)
+            (S.family.metric t) (metricCompatSol (I := I) S t)))).add
+      (totalNabla0SRealizes_domDomCongr (I := I)
+        (S.family.connection t) (leibnizRightEquiv 2 2) _ _
+        (nabla0S_product_realizes (I := I) (S.family.connection t)
+          _ 0 _ 0
+          (nabla_smul_metric (I := I) (M := M) (S.family.connection t)
+            (S.family.metric t) (metricCompatSol (I := I) S t)
+            (S.scalar t) (scalarSmoothOfSol (I := I) S t)
+            (DifferentialGeometry.Integral.Connection.duSec (I := I)
+              (S.scalar t) (scalarSmoothOfSol (I := I) S t))
+            (fun x v => by
+              rw [DifferentialGeometry.Integral.Connection.duSec_apply]
+              exact DifferentialGeometry.Integral.Connection.differential1FormFun_apply_eq_extDerivFun
+                (I := I) (S.scalar t) x v))
+          (zero_realizes_nabla (I := I) (2 + 1) (S.family.connection t)))))
+
+set_option maxHeartbeats 2000000 in
+/-- **B3c-1 ext-transport: the KN field IS the lowered Riemann tensor** (dim 3,
+Weyl = 0).  Pointwise from `solution_rm04_kn_all`; the slot-permuted product fields
+evaluate to exactly the KN formula's six terms. -/
+private theorem knField_eq_rm04
+    [IsManifold I 2 M]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real)
+    (hdim : forall x : M, Module.finrank Real (TangentSpace I x) = 3) :
+    knField (I := I) S t = S.base.rm04 t := by
+  classical
+  letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+    (s := 2 + 2)
+  apply DFunLike.ext
+  intro x
+  apply ContinuousMultilinearMap.ext
+  intro v
+  have hric : forall (w : Fin 2 -> TangentSpace I x) (a b : Fin 4),
+      w 0 = v a -> w 1 = v b ->
+      S.ricci t x w =
+        S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) (v a) (v b)) := by
+    intro w a b h0 h1
+    change S.ricci t x w = S.ricci t x
+      (DifferentialGeometry.Integral.Connection.vec2 (I := I) (v a) (v b))
+    congr 1
+    funext j
+    fin_cases j
+    · simpa [DifferentialGeometry.Integral.Connection.vec2] using h0
+    · simpa [DifferentialGeometry.Integral.Connection.vec2] using h1
+  rw [solution_rm04_kn_all (I := I) S t x (hdim x) v]
+  simp only [knField, knRicT, knScalT,
+    ContMDiffSection.coe_add, Pi.add_apply, ContinuousMultilinearMap.add_apply,
+    ContMDiffSection.coe_smul, Pi.smul_apply, ContinuousMultilinearMap.smul_apply,
+    smul_eq_mul,
+    MultilinearSection.domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    tensor0SField_product_apply, tensor0SField_smulByFun_apply,
+    metricTensorField_apply, Function.comp_apply]
+  rw [hric _ 0 2 (by simp [knE1, Equiv.swap_apply_def])
+        (by simp [knE1, Equiv.swap_apply_def]),
+      hric _ 1 2 (by simp [knE2, Equiv.swap_apply_def])
+        (by simp [knE2, Equiv.swap_apply_def]),
+      hric _ 0 3 (by simp [knE3, Equiv.swap_apply_def])
+        (by simp [knE3, Equiv.swap_apply_def]),
+      hric _ 1 3 (by simp [knE4, Equiv.swap_apply_def])
+        (by simp [knE4, Equiv.swap_apply_def])]
+  simp [knE1, knE2, knE3, knE4, Equiv.trans_apply, Equiv.swap_apply_def, Fin.ext_iff]
+  ring
+
+set_option maxHeartbeats 1000000 in
+/-- **B3c-1 ENDPOINT: `∇Rm04` is realized in Kulkarni–Nomizu form** (dim 3).  The
+covariant derivative of the solution's lowered Riemann tensor is realized by the
+explicit signed combination `knFieldD` of slot-permuted products of `∇Ric`, `dS`, and
+`g` — the input that B3c-2 differentiates once more and traces into
+`ΔRm04 = KN(ΔRic, ΔS, g)`. -/
+private theorem nablaRm04Kn
+    [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real)
+    (hdim : forall x : M, Module.finrank Real (TangentSpace I x) = 3) :
+    TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (2 + 2) (S.family.connection t) (S.base.rm04 t) (knFieldD (I := I) S t) := by
+  rw [← knField_eq_rm04 (I := I) S t hdim]
+  exact (((knTermRealizes (I := I) S t knE1).smul (-1 : Real)).add
+        (knTermRealizes (I := I) S t knE2)).add
+      (((knTermRealizes (I := I) S t knE3).add
+          ((knTermRealizes (I := I) S t knE4).smul (-1 : Real)))) |>.add
+      (((knScalRealizes (I := I) S t knE1).smul (1 / 2 : Real)).add
+        ((knScalRealizes (I := I) S t knE2).smul (-(1 / 2) : Real)))
+
+set_option maxHeartbeats 2000000 in
+/-- **B3c-2 PACKAGE: the full first- and second-derivative KN package for `Rm04`**
+(dim 3): `∇Rm04` realized by `knFieldD` (KN of `∇Ric`, `dS`, `g`) and `∇(knFieldD)`
+realized by the signed combination of the six explicit level-2 witnesses.  This is the
+`CanonicalSpatialDerivs0S`-shaped input for the trace step
+(`ΔRm04 = KN(ΔRic, ΔS, g)`), mirroring `metricDerivsZero`. -/
+private noncomputable def rm04DerivsKn
+    [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real)
+    (hdim : forall x : M, Module.finrank Real (TangentSpace I x) = 3) :
+    CanonicalSpatialDerivs0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (S.family.connection t) (S.base.rm04 t) :=
+  ⟨knFieldD (I := I) S t, _,
+    nablaRm04Kn (I := I) S t hdim,
+    (((knTerm2Realizes (I := I) S t knE1).smul (-1 : Real)).add
+        (knTerm2Realizes (I := I) S t knE2)).add
+      (((knTerm2Realizes (I := I) S t knE3).add
+          ((knTerm2Realizes (I := I) S t knE4).smul (-1 : Real)))) |>.add
+      (((knScal2Realizes (I := I) S t knE1).smul (1 / 2 : Real)).add
+        ((knScal2Realizes (I := I) S t knE2).smul (-(1 / 2) : Real)))⟩
+
+/-! ### B3c-2 trace step: the rough Laplacian `ΔRm04 = KN(ΔRic, ΔS, g)` (dim 3)
+
+`metricTraceFirstTwoField g` contracts the two leading covariant-derivative slots of the
+second covariant derivative `∇²Rm04` — the rough Laplacian `Δ = gⁱʲ∇ᵢ∇ⱼ`.  Applied termwise
+to the KN-form package `rm04DerivsKn` (whose `nabla2A` is the signed six-term combination of
+the explicit level-2 witnesses) each Leibniz tree collapses: the `∇g = 0`/`∇0 = 0` branches
+vanish (`product_zero`/`domDomCongr_zero`), the value-preserving `frontExt`-of-`leibnizLeft`
+layers are the identity (`domDomCongr_id_of_valPres`), and the front-factor trace lands on
+`∇²Ric` (resp. `∇²S`) by `metricTraceFirstTwoField_product`.  The result is the
+Kulkarni–Nomizu combination of the Laplacians. -/
+
+open DifferentialGeometry.Integral.Connection in
+/-- Trace of the generic `Ric⊗g` level-2 KN witness (the `knTerm2Realizes` target shape):
+the three `∇g = 0`/`∇0 = 0` Leibniz branches vanish and the surviving `∇²Ric ⊗ g` front
+factor traces to `(ΔRic) ⊗ g`. -/
+private theorem traceRicWit
+    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (gm : SmoothRiemannianMetric I M)
+    (e : Fin (2 + 2) ≃ Fin (2 + 2))
+    (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (2 + 1 + 1))
+    (B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (2 + 1))
+    (C : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2)
+    (gf : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2) :
+    metricTraceFirstTwoField (I := I) (M := M) gm
+        (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (∞ : WithTop ℕ∞)
+          (frontExtendEquiv (frontExtendEquiv e))
+          (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+              (E := TangentSpace I) (∞ : WithTop ℕ∞)
+              (frontExtendEquiv (leibnizLeftEquiv 2 2))
+              (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                  (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizLeftEquiv (2 + 1) 2)
+                  (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                    (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1 + 1) (q := 2)
+                    A gf)
+                + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                  (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizRightEquiv (2 + 1) 2)
+                  (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                    (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1) (q := 2 + 1)
+                    B 0))
+            + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+              (E := TangentSpace I) (∞ : WithTop ℕ∞)
+              (frontExtendEquiv (leibnizRightEquiv 2 2))
+              (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                  (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizLeftEquiv 2 (2 + 1))
+                  (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                    (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1) (q := 2 + 1)
+                    B 0)
+                + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                  (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizRightEquiv 2 (2 + 1))
+                  (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                    (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2 + 1 + 1)
+                    C 0))))
+      = MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (∞ : WithTop ℕ∞) e
+          (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+            (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2)
+            (metricTraceFirstTwoField (I := I) (M := M) gm A) gf) := by
+  rw [metricTraceFirstTwoField_domDomCongr]
+  congr 1
+  simp only [MultilinearSection.product_zero, MultilinearSection.domDomCongr_zero,
+    add_zero]
+  rw [MultilinearSection.domDomCongr_id_of_valPres (∞ : WithTop ℕ∞)
+      (frontExtendEquiv (leibnizLeftEquiv 2 2)) (by
+    intro i
+    refine Fin.cases ?_ (fun j => ?_) i
+    · simp
+    · rw [frontExtendEquiv_succ]
+      simp only [leibnizLeftEquiv, finCongr_apply, Fin.val_succ, Fin.val_cast])]
+  simp only [leibnizLeftEquiv]
+  rw [metricTraceFirstTwoField_product]
+
+open DifferentialGeometry.Integral.Connection in
+/-- Trace of the generic `(S·g)⊗g` level-2 KN witness (the `knScal2Realizes` target shape):
+all `∇g = 0`/`∇0 = 0` branches vanish and the two nested front-factor traces land on `∇²S`,
+giving `((ΔS·g)⊗g)` in the `product (ΔS) g ⊗ g` (rank-0 leading factor) form. -/
+private theorem traceScalWit
+    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (gm : SmoothRiemannianMetric I M)
+    (e : Fin (2 + 2) ≃ Fin (2 + 2))
+    (Hess : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (1 + 1))
+    (D1 : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 1)
+    (Sg : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2)
+    (gf : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2) :
+    metricTraceFirstTwoField (I := I) (M := M) gm
+        (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (∞ : WithTop ℕ∞)
+          (frontExtendEquiv (frontExtendEquiv e))
+          (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+              (E := TangentSpace I) (∞ : WithTop ℕ∞)
+              (frontExtendEquiv (leibnizLeftEquiv 2 2))
+              (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                  (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizLeftEquiv (2 + 1) 2)
+                  (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                    (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1 + 1) (q := 2)
+                    (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                        (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizLeftEquiv 1 2)
+                        (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                          (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1 + 1) (q := 2)
+                          Hess gf)
+                      + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                        (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizRightEquiv 1 2)
+                        (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                          (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1) (q := 2 + 1)
+                          D1 0))
+                    gf)
+                + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                  (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizRightEquiv (2 + 1) 2)
+                  (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                    (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1) (q := 2 + 1)
+                    (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                      (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1) (q := 2)
+                      D1 gf)
+                    0))
+            + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+              (E := TangentSpace I) (∞ : WithTop ℕ∞)
+              (frontExtendEquiv (leibnizRightEquiv 2 2))
+              (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                  (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizLeftEquiv 2 (2 + 1))
+                  (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                    (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2 + 1) (q := 2 + 1)
+                    (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                      (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 1) (q := 2)
+                      D1 gf)
+                    0)
+                + MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+                  (E := TangentSpace I) (∞ : WithTop ℕ∞) (leibnizRightEquiv 2 (2 + 1))
+                  (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+                    (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2 + 1 + 1)
+                    Sg 0))))
+      = MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (∞ : WithTop ℕ∞) e
+          (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+            (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2)
+            (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+              (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 0) (q := 2)
+              (metricTraceFirstTwoField (I := I) (M := M) gm Hess) gf)
+            gf) := by
+  rw [metricTraceFirstTwoField_domDomCongr]
+  congr 1
+  simp only [MultilinearSection.product_zero, MultilinearSection.domDomCongr_zero,
+    add_zero]
+  rw [MultilinearSection.domDomCongr_id_of_valPres (∞ : WithTop ℕ∞)
+      (frontExtendEquiv (leibnizLeftEquiv 2 2)) (by
+    intro i
+    refine Fin.cases ?_ (fun j => ?_) i
+    · simp
+    · rw [frontExtendEquiv_succ]
+      simp only [leibnizLeftEquiv, finCongr_apply, Fin.val_succ, Fin.val_cast])]
+  simp only [leibnizLeftEquiv]
+  rw [metricTraceFirstTwoField_product, metricTraceFirstTwoField_product]
+
+open DifferentialGeometry.Integral.Connection in
+/-- The KN `Ric⊗g` term with `Ric` replaced by its rough Laplacian `ΔRic = trace₁₂ ∇²Ric`. -/
+private noncomputable def knRicLapT
+    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real)
+    (e : Fin (2 + 2) ≃ Fin (2 + 2)) :
+    Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (2 + 2) :=
+  MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+    (E := TangentSpace I) (∞ : WithTop ℕ∞) e
+    (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+      (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2)
+      (metricTraceFirstTwoField (I := I) (M := M) (S.family.metric t)
+        (totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          (2 + 1) (S.family.connection t)
+          (totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+            2 (S.family.connection t) (S.ricci t)
+            (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+              2 (S.family.connection t) (connSmoothSol (I := I) S t) (S.ricci t)))
+          (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+            (2 + 1) (S.family.connection t) (connSmoothSol (I := I) S t) _)))
+      (metricTensorField (I := I) (S.family.metric t)))
+
+open DifferentialGeometry.Integral.Connection in
+/-- The KN `(S·g)⊗g` term with `S` replaced by `ΔS = trace₁₂ ∇²S` (rank-0 leading factor). -/
+private noncomputable def knScalLapT
+    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real)
+    (e : Fin (2 + 2) ≃ Fin (2 + 2)) :
+    Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (2 + 2) :=
+  MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+    (E := TangentSpace I) (∞ : WithTop ℕ∞) e
+    (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+      (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 2) (q := 2)
+      (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+        (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := 0) (q := 2)
+        (metricTraceFirstTwoField (I := I) (M := M) (S.family.metric t)
+          (totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+            1 (S.family.connection t)
+            (DifferentialGeometry.Integral.Connection.duSec (I := I)
+              (S.scalar t) (scalarSmoothOfSol (I := I) S t))
+            (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+              1 (S.family.connection t) (connSmoothSol (I := I) S t) _)))
+        (metricTensorField (I := I) (S.family.metric t)))
+      (metricTensorField (I := I) (S.family.metric t)))
+
+/-- **The dim-3 Kulkarni–Nomizu field of the Laplacians** `KN(ΔRic, ΔS, g)`, mirroring
+`knField` with `Ric ↦ ΔRic`, `S ↦ ΔS`. -/
+private noncomputable def lapRm04Kn
+    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) :
+    Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (2 + 2) :=
+  ((-1 : Real) • knRicLapT (I := I) S t knE1 + knRicLapT (I := I) S t knE2)
+    + (knRicLapT (I := I) S t knE3 + (-1 : Real) • knRicLapT (I := I) S t knE4)
+    + ((1 / 2 : Real) • knScalLapT (I := I) S t knE1
+        + (-(1 / 2) : Real) • knScalLapT (I := I) S t knE2)
+
+set_option maxHeartbeats 1000000 in
+open DifferentialGeometry.Integral.Connection in
+/-- **B3c-2 ENDPOINT: the rough Laplacian of `Rm04` is the Kulkarni–Nomizu combination of
+the Laplacians** (dim 3): `ΔRm04 = trace₁₂ ∇²Rm04 = KN(ΔRic, ΔS, g)`.  This is the diffusion
+half of the Uhlenbeck base evolution `∂ₜRm04 = ΔRm04 − 2B# − drift`; the six explicit
+level-2 witnesses of `rm04DerivsKn.nabla2A` each trace through `traceRicWit`/`traceScalWit`
+into the corresponding `Δ`-of-leaf KN term. -/
+theorem traceRm04Kn
+    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real)
+    (hdim : forall x : M, Module.finrank Real (TangentSpace I x) = 3) :
+    metricTraceFirstTwoField (I := I) (M := M) (S.family.metric t)
+        (rm04DerivsKn (I := I) S t hdim).nabla2A
+      = lapRm04Kn (I := I) S t := by
+  simp only [rm04DerivsKn]
+  simp only [metricTraceFirstTwoField_add, metricTraceFirstTwoField_smul]
+  rw [traceRicWit, traceRicWit, traceRicWit, traceRicWit, traceScalWit, traceScalWit]
+  rfl
+
+end KnField
+
+set_option maxHeartbeats 1000000 in
+open DifferentialGeometry.Dim3Reaction in
+/-- **Capstone: the tower's `hrm` input from the standing analytic layer (dim 3).**
+Composes the whole banked per-point pipeline at a regular time `t` and the frame
+centre `x₀`: a `g_t`-orthonormal basis (with a frame family matching it at `x₀` and a
+`δ` inverse there), the standing Lichnerowicz input `hlich` (from the `h_ricci`
+conditional layer via `ricciLichnerowiczEquationInFrame_of_ricciEvolution_and_symm` +
+`ricciSymFrame_can`), and the proven scalar evolution `hsc`, yield the time derivative
+of `realizedRmBase` at the coordinate frame — exactly the `hrm` consumed by
+`nablaKRm_timeDeriv_of_solution` — with the explicit corrected-sign value
+`C⁴-transform of (KN(ΔRic, ΔS, δ) − 2·B# − drift)`. -/
+theorem rm04HrmProducer
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
+    (x₀ : M)
+    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (hdim : Module.finrank Real (TangentSpace I x₀) = 3)
+    (basis : Module.Basis (Fin 3) Real (TangentSpace I x₀))
+    (horthB : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt
+      (I := I) (S.base.metric (t : Real)) x₀ basis)
+    (frame : Fin 3 -> (x : M) -> TangentSpace I x)
+    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M (Fin 3))
+    (hframe0 : forall i : Fin 3, frame i x₀ = basis i)
+    (hginv : forall i j : Fin 3, gInv (t : Real) x₀ i j = (if i = j then (1 : Real) else 0))
+    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
+    (hsec : forall v : Fin 4 -> TangentSpace I x₀, Rm04 (t : Real) x₀ v = S.base.rm04 (t : Real) x₀ v)
+    (roughLapRic : Real -> M -> Fin 3 -> Fin 3 -> Real)
+    (hlich : RicciLichnerowiczEquationInFrame (D := D) (I := I) S Rm04 gInv frame roughLapRic)
+    (scalarLap : Real -> M -> Real)
+    (hsc : ScalarEvolutionEquationOn (D := D) S.scalar scalarLap (ricciNorm (I := I) S))
+    (R : Real -> Fin 3 -> Fin 3 -> Real)
+    (hRdef : forall (s : Real) (i j : Fin 3),
+      R s i j = ricciCompInFrame (I := I) S frame s x₀ i j)
+    (m : Fin 4 -> DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E) :
+    HasDerivWithinAt
+      (fun s : Real => realizedRmBase (I := I) S x₀ s x₀ m)
+      (∑ slots : Fin 4 -> Fin 3,
+        (-(roughLapRic (t : Real) x₀ (slots 0) (slots 2)) * kd (slots 1) (slots 3)
+            + roughLapRic (t : Real) x₀ (slots 1) (slots 2) * kd (slots 0) (slots 3)
+            + roughLapRic (t : Real) x₀ (slots 0) (slots 3) * kd (slots 1) (slots 2)
+            - roughLapRic (t : Real) x₀ (slots 1) (slots 3) * kd (slots 0) (slots 2)
+            + scalarLap (t : Real) x₀ / 2 *
+              (kd (slots 0) (slots 2) * kd (slots 1) (slots 3)
+                - kd (slots 1) (slots 2) * kd (slots 0) (slots 3))
+          - 2 * (Bt (R (t : Real)) (slots 0) (slots 1) (slots 2) (slots 3)
+              - Bt (R (t : Real)) (slots 0) (slots 1) (slots 3) (slots 2)
+              + Bt (R (t : Real)) (slots 0) (slots 2) (slots 1) (slots 3)
+              - Bt (R (t : Real)) (slots 0) (slots 3) (slots 1) (slots 2))
+          - drift (R (t : Real)) (slots 0) (slots 1) (slots 2) (slots 3)) *
+          ∏ a : Fin 4, basis.coord (slots a)
+            (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x₀ (m a) x₀))
+      D.carrier (t : Real) := by
+  classical
+  have horthf : forall i j : Fin 3,
+      (S.base.metric (t : Real)).inner x₀ (frame i x₀) (frame j x₀)
+        = (if i = j then (1 : Real) else 0) := by
+    intro i j
+    rw [hframe0 i, hframe0 j]
+    exact horthB i j
+  have hsym : forall i j : Fin 3, R (t : Real) i j = R (t : Real) j i := by
+    intro i j
+    rw [hRdef, hRdef]
+    exact ricciSym_can (I := I) S (t : Real) x₀ (frame i x₀) (frame j x₀)
+  have hRdefB : forall i j : Fin 3,
+      R (t : Real) i j = S.ricciAt (t : Real) x₀
+        (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis i) (basis j)) := by
+    intro i j
+    rw [hRdef]
+    unfold ricciCompInFrame
+    rw [hframe0 i, hframe0 j]
+  have htr : S.scalar (t : Real) x₀ = sc (R (t : Real)) := by
+    rw [scalar_eq_trace_ortho (I := I) S (t : Real) x₀ horthB]
+    unfold sc
+    rw [hRdefB 0 0, hRdefB 1 1, hRdefB 2 2]
+  have hkn : forall i k j l : Fin 3,
+      DifferentialGeometry.Integral.Connection.rm04Comp (I := I) (Rm04 (t : Real)) frame x₀ i k j l
+        = rm (R (t : Real)) i k j l :=
+    rm04CompknOrtho (I := I) S Rm04 frame (t : Real) x₀ hdim hsec horthf (R (t : Real))
+      (fun a b => by rw [hRdef]; rfl) htr
+  have hRicDot := fun i j : Fin 3 =>
+    ricDot_ortho (I := I) S Rm04 gInv frame roughLapRic hlich t x₀ hginv R hRdef hsym hkn i j
+  have hScDot :=
+    scalarDot_ortho (I := I) S scalarLap hsc t x₀ horthB (R (t : Real)) hRdefB
+  have hD := fun a b c d : Fin 3 =>
+    rm04BaseEvolution_at (I := I) S hS t x₀ hdim (fun i => basis i)
+      (fun i j => horthB i j) R
+      (fun s i j => by rw [hRdef]; unfold ricciCompInFrame; rw [hframe0 i, hframe0 j])
+      (fun i j => roughLapRic (t : Real) x₀ i j) (scalarLap (t : Real) x₀)
+      hRicDot hScDot htr a b c d
+  exact rmBaseDeriv_basis (I := I) S x₀ t basis _ hD m
+
+section Dim3Bridges
+
+/-! ### Bridges from the bare `Fin 3` reaction algebra to the Uhlenbeck component API
+
+At an orthonormal frame (`gInv = δ`) with the lowered Riemann components in the dim-3
+Kulkarni–Nomizu form `rm R` (`R` = frame Ricci components), the Uhlenbeck `B`-tensor and
+Ricci-drift component arrays are the corresponding `Dim3Reaction` algebra objects.  These
+identify the reaction algebra (whose match `reaction_match` is proved in `UhlReaction3`)
+inside the target predicate `Riemann04BTensorWithRicciDriftEvolutionInFrameOn`. -/
+
+open DifferentialGeometry.Dim3Reaction
+
+variable {N : Type*}
+
+/-- At an orthonormal inverse metric, `uhlenbeckBTensorInFrame` is the bare `Bt`. -/
+theorem uhlBt_eq_bt
+    (gInv : MatrixComp N (Fin 3)) (Rm04c : FourComp N (Fin 3))
+    (R : Fin 3 -> Fin 3 -> Real) (t : Real) (x : N)
+    (horth : forall i j, gInv t x i j = (if i = j then (1 : Real) else 0))
+    (hcomp : forall a b c d, Rm04c t x a b c d = rm R a b c d)
+    (a b c d : Fin 3) :
+    uhlenbeckBTensorInFrame gInv Rm04c t x a b c d = Bt R a b c d := by
+  unfold uhlenbeckBTensorInFrame Bt
+  simp only [horth, hcomp, Fin.sum_univ_three, Fin.isValue, Fin.reduceEq, reduceIte,
+    one_mul, zero_mul, mul_zero, mul_one, add_zero, zero_add]
+
+/-- The Ricci-drift component array is the bare `drift`. -/
+theorem uhlDrift_eq_drift
+    (Rup : MatrixComp N (Fin 3)) (Rm04c : FourComp N (Fin 3))
+    (R : Fin 3 -> Fin 3 -> Real) (t : Real) (x : N)
+    (hup : forall i j, Rup t x i j = R i j)
+    (hcomp : forall a b c d, Rm04c t x a b c d = rm R a b c d)
+    (i j k l : Fin 3) :
+    riemann04RicciDriftInFrame Rup Rm04c t x i j k l = drift R i j k l := by
+  unfold riemann04RicciDriftInFrame drift
+  simp only [hup, hcomp, Fin.sum_univ_three]
+  ring
+
+end Dim3Bridges
 
 end DifferentialGeometry.PDE.RicciFlow

@@ -755,8 +755,14 @@ two-parameter variation `f`, the commutator of the transverse and longitudinal
 covariant derivatives of the longitudinal velocity field `∂_t f`, evaluated at the
 central curve `s = 0`, equals the Riemann curvature operator of the Levi-Civita
 connection applied to the transverse velocity `V := ∂_s f|_{s = 0}`, the
-longitudinal velocity `γ' := ∂_t f|_{s = 0}`, and `γ'`. -/
-private theorem commute_ds_dt_curvature
+longitudinal velocity `γ' := ∂_t f|_{s = 0}`, and `γ'`.
+
+The two regularity hypotheses `houterL`/`houterR` are chart-rep differentiability of
+the inner covariant-derivative fields; in the Jacobi-field application (radial
+geodesic variations of `expMap`) `houterL` is discharged by the geodesic equation
+(the inner field vanishes near `s = 0`) and `houterR` by the mixed-commutation
+symmetry plus `variationField_covDeriv_chartRep_differentiableAt`. -/
+theorem commute_ds_dt_curvature
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t : ℝ)
     (houterL : DifferentiableAt ℝ (chartRepAt (I := I) (fun s : ℝ => f s t)

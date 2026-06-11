@@ -254,25 +254,96 @@ from *Norms of covariant derivatives of tensors, I*.
 - [ ] F3-hi-kge2 — higher connection-difference derivative controls for
       `ConnDiffEpsBoundOn ... k C` with `2 <= k`, after the `k = 2` producer
       route is checked and generalized.
-- [ ] F3 — final inequality from *Norms of covariant derivatives of tensors, I*:
-      `|∇_g^r T|_g <= |∇_h^r T|_g + eps*C*Σ_{k<r}|∇_h^k T|_g`
-      for all `0 < r <= p` and mixed `(r,s)` tensors ⟸ F3-p1,F3-hi
-- [ ] F4 — Corollary *Norms of covariant derivatives of tensors, II*
-      → covariant (`q₁=0`) per-order constants used downstream ⟸ F3
+- [x] F3 — final inequality from *Norms of covariant derivatives of tensors, I*:
+      `|∇_g^r T|_g <= |∇_h^r T|_g + eps*C*Σ_{k<r}|∇_h^k T|_g`.
+      **PROVEN (2026-06-11): `lemma45_F3`** (Lemma45Engine.lean, green, sorry-free) —
+      the book-facing endpoint at component-`compL2` level over a local frame, all
+      geometric inputs discharged (`hkoszul_of_leviCivita` → `claim1_eps_koszul` →
+      `lemma45_component_bdd` → `lemma45DoubleBdd`); hypotheses = frame/Christoffel/
+      metric-component smoothness (producer-dischargeable) + `|g⁻¹|≤C0` +
+      `|∇_H^j g|≤ε (j≤p)`, faithful to the book's finitely-many-orders form.
+      Optional upgrade: intrinsic-`normSq0S` statement wrapper (not gating F4).
+      **Norm-level induction COMPLETE (2026-06-09): `lemma45ScalarBdd` + `lemma45Double`**
+      (Lemma45CovariantAbstract.lean).
+      **hOne DISCHARGED + COMPONENT LEMMA 4.5 PROVEN (2026-06-10/11, sorry-free,
+      built 3688): `Lemma45Engine.lean`** — consumes the parallel track's Claim-1
+      engine (`AkMFold.lean`: `P(m)`, towers, `claim1_abstract`) via import, no
+      modification.  `claim1_eps` (ε-homogeneous A-bound), `iterCov_one_chr_change`
+      (connection-change one-step, general two-Christoffel — ALSO the Step-4
+      telescoping engine for ric_bound), `mixed_oneStep_le` (the hOne engine; the
+      slot sum produces exactly `oneStepConst B k r`'s rank factor),
+      **`lemma45_component`/`lemma45_component₀`** (Lemma 4.5, component-tower form).
+      See `Lemma45Engine.md`.  **W4 DONE (2026-06-11, green):** the (1,2)-upper
+      bridge turned out UNNECESSARY (upper towers are internal-only; both endpoint
+      statements are (0,s)); the genuinely needed piece was the frame-general
+      Koszul, now built in two layers: the intrinsic
+      **`Tensor0SBundle.koszul_difference`**
+      (`Tensor/RSTensor/NablaOnTensors/KoszulDifference.lean`:
+      `difference_symm_at` + `nabla_metric_two_term` + the ½/½/−½ formula) and the
+      frame-component producer **`hkoszul_of_leviCivita`** (Lemma45Engine.lean) —
+      EXACTLY `claim1`'s `hkoszul` shape (P₁ = refl, P₂ = swap 0 1,
+      P₃ = (finRotate 3).symm), any local frame, any two LC connections.
+      Remaining for the BOOK-facing F3: the `claim1_eps`-from-`hkoszul` wrapper
+      (~40 lines, mirror AkMFold's claim1 derivation) ⟹ `hDbound`; then the
+      (0,s) norm bridge wiring (`iterCovComp_eq_iterCov` + `normSq0S` lift, both
+      exist) for the statement conversion.  The SAME producer feeds ric_bound's
+      `claim1` instantiation directly (Phase R unblocked).
+- [~] F4 — Corollary *Norms of covariant derivatives of tensors, II* (`lbl370`)
+      → covariant (`q₁=0`) per-order constants used downstream ⟸ F3.
+      **STRUCTURE DONE (2026-06-10, green, `Lemma45Covariant.lean`):**
+      `lemma45_cor_II_of_intrinsic` — Cor II from the INTRINSIC Lemma I (`hF3`,
+      `normSq0S`-form, taken as hyp): per-term `sqrt_normSq0S_le_of_metric_equiv`
+      (NEW, Comparison.lean — the book's `(1+ε)^{(r+q₂)/2}` factor = `√(C^{q₂+k})`)
+      + factor-out `√(C^{q₂+r})` over `0≤k≤r` (`pow_le_pow_right₀`).  SAME-DOMAIN
+      formulation: `Φ*h = gRef`, `∇_{Φ*h} = ∇_gRef`, `Φ*T = T'` a domain tensor,
+      `|·|_h = |·|_gRef` — so pullback-naturality (ABSENT in repo) is AUTOMATIC.
+      **Remaining frontier = the intrinsic Lemma I lift**: `lemma45_F3` is the
+      COMPONENT (`compL2`) form; lifting it to `hF3`'s `normSq0S` form is the `B5`
+      bridge (`compL2_tower_eq`) at a `gRef`-ON frame point = the **good
+      gRef-ON-centered smooth frame** producer (constant Gram–Schmidt of a
+      trivialization frame), SAME gate as ric_bound R4d/e.  See `Lemma45Covariant.md`.
 - [x] F5-const — constants for *Composition of approximate isometries, I*
       → `compApproxConst`, `compApproxConst_pos`, `compApproxConst_nonneg`
       (Lemma45Constants.lean) ⟸ F4 constants
-- [ ] F5 — Prop *Composition of approximate isometries, I* ⟸ F1–F4,F5-const
-- [ ] F6 — Cor *Composition of approximate isometries, II* ⟸ F5
+- [~] F5 — Prop *Composition of approximate isometries, I*:
+      **`C⁰` part DONE (2026-06-09)**: `metricInner_nonneg`, `metricEquiv_mono`,
+      `metricEquiv_trans` (product constants), `metricEquiv_comp_eps` (the book's
+      additive form, `(1+ε₀)(1+ε₁) ≤ 1+3(ε₀+ε₁)`) — ApproxIsometryComp.lean,
+      sorry-free, axiom-clean.  Derivative (`C^p`) part = the Lemma 4.5 consumer
+      (book applies `lbl370` to `T := Φ₁*g₂−g₁`) — gated on the `hOne` engine
+      interface of `lemma45Double`, like F3/F4.
+- [~] F6 — Cor *Composition of approximate isometries, II*:
+      **scalar accumulation core DONE**: `compEpsAccum` (`e n ≤ C·Σ δᵢ` from
+      per-step costs; ApproxIsometryComp.lean).  Full version ⟸ F5-full.
+- **⚠ STATE — DIAGNOSIS CORRECTED (2026-06-11): `ApproximateIsometry.lean` was
+  NEVER green against THIS tree.**  `git grep` at HEAD: `def normRS` exists NOWHERE;
+  `Tensor0SBundle.normRS`/`normRS_eq_sqrt_normSqRS`/`abs_quad02_le_norm`/
+  `normSqRS_le_of_metric_equiv`/`HCGCompactness.connDiff_le_approx` are referenced
+  ONLY by ApproximateIsometry.lean itself (+ the old ApproxIsometryComp) — the file
+  was written against an API layer that was never ported (the earlier "5925L 0-sorry"
+  audit was a sorry-count, not a compile; the earlier "stale-broken by the tensor
+  relocation" framing was wrong).  Current compile: 101 errors (normRS family,
+  `LeviCivita.leviCivitaConnectionOfMetric` → now `Integral.Connection.…`, whnf
+  timeouts).  Pieces that DO exist: `innerRS`/`normSqRS`
+  (`Tensor/RSTensor/FiberMetric/TensorRSMetric.lean`), `abs_component0S_le_sqrt_normSq0S`
+  (RicciOperatorNormBound.lean, `_gen` hypothesis), `normSqRS_eq_normSq0S_lowerAllSpace`
+  (RSLoweringNorm.lean).  **Strategy decision for F4 (next session): extract what F4
+  needs into a fresh healthy file (the ApproxIsometryComp pattern) rather than
+  repairing the 6k-line monolith; or repair the monolith section-by-section.**
 - [ ] F7 — Def *Cᵖ-convergence of maps* + Def *C^∞-conv. uniformly on compacts*
       → 2 defs (reconcile with existing `PointedConvergence` names) ⟸ —
 - [x] F8tool — abstract sequential Arzelà–Ascoli (Lemma 3.14) → `arzelaAscoli_subseq_…` (ArzelaAscoli.lean)
 - [ ] F8 — Cor *Compactness of sequence of isometries* (L537) → apply F8tool ⟸ F7, F8tool
-- [ ] F9 — Def *Direct limit* (L628) + Lemma *Iₗ injective* (L660) → directed-system colimit of spaces ⟸ —
-- [ ] F10 — Lemma *open cover for the direct limit* (L679) ⟸ F9
-- [ ] F11 — Cor `lbl379` *compact sets in the direct limit* ⟸ F9,F10
-- [ ] F12 — Cor `lbl380` *second-countable direct limits* ⟸ F9
-- [ ] F13 — Lemma `lbl381` *direct limit of Hausdorff is Hausdorff* ⟸ F9
+- [x] F9 — Def *Direct limit* (L628) + Lemma *Iₗ injective* (L660) → `SeqSystem`, `Lim`,
+      `incl`, `incl_comp`, `incl_injective`, `exists_incl_eq`
+      (Geometry/Topology/DirectLimit.lean, 2026-06-09, sorry-free)
+- [x] F10 — Lemma *open cover for the direct limit* (L679) → `incl_isOpenMap`,
+      `incl_isOpenEmb`, `range_incl_mono`, `iUnion_range_incl` (DirectLimit.lean)
+- [x] F11 — Cor `lbl379` *compact sets in the direct limit* → `isCompact_exists` (DirectLimit.lean)
+- [x] F12 — Cor `lbl380` σ-compact direct limits → `sigmaCompact` (DirectLimit.lean;
+      second-countability glue deferred to the manifold layer)
+- [x] F13 — Lemma `lbl381` *direct limit of Hausdorff is Hausdorff* → `t2Space`
+      (DirectLimit.lean; also the universal property `lift`/`continuous_lift`)
 
 ## §5 Supporting: distance / exp⁻¹ derivatives (needed by A-convexity and Step B)
 
@@ -314,8 +385,24 @@ A-convexity (`lbl417`) and Step C center-of-mass that depend on §5 wait on that
 
 ## §3 Step B: local metrics & transition maps (L1370–1882)
 
-- [x] B0 — Prop (L1413) *|∇ᵉRm|≤Cₑ ⟹ |∂ᵐg|≤C̃ₘ in normal coords* = **Lemma 3.11** (`MetricAllTimesConclusion`)
-- [x] B0' — smooth exponential local diffeo → `expAt_localDiffeomorph` / `NormalChartData`
+- [ ] B0 — Prop (L1413) *|∇ᵉRm|≤Cₑ ⟹ |∂ᵐg|≤C̃ₘ in normal coords*.
+      **AUDIT CORRECTION (2026-06-09): does NOT exist** — the old "[x] = Lemma 3.11
+      (`MetricAllTimesConclusion`)" conflated it with the TIME-window AllTimesBounds
+      machinery.  Spatial B0 is genuine remaining work (B1's main missing producer).
+      Staged route + status: `B0NormalCoordBounds.md`.  Stage 1 (2nd-order Grönwall
+      engine) DONE; stage 2 core DONE 2026-06-10: **`exists_radial_jacobi_radius`**
+      (`Exponential/JacobiVariation.lean`, green) — the radial `expMap` variation
+      field is Jacobi on `(0,1)`; used the de-privatized `commute_ds_dt_curvature`
+      (the W=∂_t commutation EXISTED, was private/unused) + smooth clamps
+      (`Analysis/Calculus/SmoothClamp.lean`).  Stage-2 tail (J(0)=0, D_tJ(0)=w,
+      endpoint J(1)=d(exp)ₓw, g_{ij}=⟨J_i,J_j⟩(1)) + stages 3–5 remain.
+- [x] B0' — smooth exponential local diffeo → native `Geometry.Riemannian.
+      NormalCoordinates.expMapDiffeo`/`normalChartAt` (0-sorry).  NOTE: its source is
+      *some* nhd of 0; widening to the λ-ball scale (`injRadius` gives only injectivity
+      on the eball) = the `lbl383` item-3 frontier.
+- S6 input rebuilt natively (2026-06-09): `StepBInputs.lean` (`normalTransition`,
+  `NormalTransitionDerivBound`, `ExpInverseDerivBoundInput`); `GeometricInputs.lean`
+  healed into a pure umbrella import (the dangling `NormalChartData` section removed).
 - [ ] B1 — Prop `lbl397` *approx isometry on a large ball* ⟸ A14, S6/A0', B0', F1
 - [ ] B2 — Prop `lbl399` *local maps → id* ⟸ B1
 - [ ] B3 — Prop `lbl402` *F_{kℓ;r} → id* ⟸ B1,B2

@@ -1,4 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Higher
+import DifferentialGeometry.Tensor.RSTensor.NablaDomDomCongr
+import DifferentialGeometry.Tensor.RSTensor.ContractionLeibniz
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -592,6 +594,272 @@ theorem nabla_metricTraceFirstTwo0S {s : ℕ}
       (fun b => hVtailcov b Xsec) (basis i) (basis j)
   rw [← hXsec, show tail = (fun b : Fin s => Vtail b x) from (funext hVtailx).symm]
   exact hfreeze
+
+/-- **Value characterization of `metricTraceInput`**: the trace input puts `X, Y` in
+the two leading slots and the tail in the rest, read off by index value.  Lets `finCongr`/
+`castAdd`/`natAdd`-reindexed evaluations reduce by `.val` arithmetic instead of `Fin.cases`
+(which does not fire on cast indices). -/
+theorem metricTraceInput_apply {x : M} {s : ℕ} (X Y : TangentSpace I x)
+    (tail : Fin s -> TangentSpace I x) (i : Fin (s + 2)) :
+    metricTraceInput (I := I) X Y tail i =
+      if h0 : (i : ℕ) = 0 then X
+      else if h1 : (i : ℕ) = 1 then Y
+      else tail ⟨(i : ℕ) - 2, by have := i.isLt; omega⟩ := by
+  unfold metricTraceInput
+  refine Fin.cases ?_ (fun i1 => ?_) i
+  · simp
+  · refine Fin.cases ?_ (fun r => ?_) i1
+    · rw [Fin.cases_succ, Fin.cases_zero,
+        dif_neg (by simp), dif_pos (by simp)]
+    · rw [Fin.cases_succ, Fin.cases_succ,
+        dif_neg (by simp [Fin.val_succ]), dif_neg (by simp [Fin.val_succ])]
+      apply congrArg tail
+      apply Fin.ext
+      simp [Fin.val_succ]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Pointwise coordinate formula for the first-two metric trace field, with the
+canonical centred chart inverse metric. -/
+theorem metricTraceFirstTwoField_eq_sum {s : ℕ}
+    [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (g : SmoothRiemannianMetric I M)
+    (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (s + 2))
+    (x : M) (tail : Fin s -> TangentSpace I x) :
+    (metricTraceFirstTwoField (I := I) (M := M) g A) x tail =
+      metricTrace0S2InBasis (I := I)
+        (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x)
+        (fun k l : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E =>
+          DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component
+            (I := I) g x k l (extChartAt I x x))
+        (A x) tail := by
+  rw [metricTraceFirstTwoField_apply, metricTraceFirstTwo0STensor_apply,
+    metricTraceFirstTwo0SAt_eq_sum_basis (I := I) g
+      (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x)
+      (fun k l : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E =>
+        DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component
+          (I := I) g x k l (extChartAt I x x))
+      (DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+        (I := I) g x)
+      (A x) tail]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The first-two metric trace field is additive.** -/
+theorem metricTraceFirstTwoField_add {s : ℕ}
+    [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (g : SmoothRiemannianMetric I M)
+    (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (s + 2)) :
+    metricTraceFirstTwoField (I := I) (M := M) g (A + B)
+      = metricTraceFirstTwoField (I := I) (M := M) g A
+        + metricTraceFirstTwoField (I := I) (M := M) g B := by
+  classical
+  letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s
+  refine DFunLike.ext _ _ fun x => ?_
+  refine ContinuousMultilinearMap.ext fun tail => ?_
+  have hsplit :
+      ((metricTraceFirstTwoField (I := I) (M := M) g A
+          + metricTraceFirstTwoField (I := I) (M := M) g B) x) tail
+        = (metricTraceFirstTwoField (I := I) (M := M) g A x) tail
+          + (metricTraceFirstTwoField (I := I) (M := M) g B x) tail := rfl
+  rw [hsplit, metricTraceFirstTwoField_eq_sum, metricTraceFirstTwoField_eq_sum,
+    metricTraceFirstTwoField_eq_sum]
+  have hAB : (A + B) x = A x + B x := rfl
+  rw [hAB]
+  unfold metricTrace0S2InBasis
+  simp only [ContinuousMultilinearMap.add_apply, mul_add, Finset.sum_add_distrib]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The first-two metric trace field is homogeneous.** -/
+theorem metricTraceFirstTwoField_smul {s : ℕ}
+    [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (g : SmoothRiemannianMetric I M) (c : Real)
+    (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (s + 2)) :
+    metricTraceFirstTwoField (I := I) (M := M) g (c • A)
+      = c • metricTraceFirstTwoField (I := I) (M := M) g A := by
+  classical
+  letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s
+  refine DFunLike.ext _ _ fun x => ?_
+  refine ContinuousMultilinearMap.ext fun tail => ?_
+  have hsplit :
+      ((c • metricTraceFirstTwoField (I := I) (M := M) g A) x) tail
+        = c * (metricTraceFirstTwoField (I := I) (M := M) g A x) tail := rfl
+  rw [hsplit, metricTraceFirstTwoField_eq_sum, metricTraceFirstTwoField_eq_sum]
+  have hcA : (c • A) x = c • A x := rfl
+  rw [hcA]
+  unfold metricTrace0S2InBasis
+  simp only [ContinuousMultilinearMap.smul_apply, smul_eq_mul, Finset.mul_sum]
+  refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
+  ring
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The first-two metric trace commutes with tail reindexing**: tracing the two
+leading slots of `A · (frontExtendEquiv (frontExtendEquiv e))` (which fixes those two
+slots and permutes the tail by `e`) is the `e`-reindexing of the trace of `A`. -/
+theorem metricTraceFirstTwoField_domDomCongr_gen {s s' : ℕ}
+    [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (g : SmoothRiemannianMetric I M)
+    (e : Fin (s + 2) ≃ Fin (s' + 2)) (e' : Fin s ≃ Fin s')
+    (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (s + 2))
+    (hcompat : forall (x : M) (X Y : TangentSpace I x)
+        (tail : Fin s' -> TangentSpace I x),
+      metricTraceInput (I := I) X Y tail ∘ e = metricTraceInput (I := I) X Y (tail ∘ e')) :
+    metricTraceFirstTwoField (I := I) (M := M) g
+        (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (∞ : WithTop ℕ∞) e A)
+      = MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (∞ : WithTop ℕ∞) e'
+          (metricTraceFirstTwoField (I := I) (M := M) g A) := by
+  classical
+  letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s'
+  refine DFunLike.ext _ _ fun x => ?_
+  refine ContinuousMultilinearMap.ext fun tail => ?_
+  have hrhs :
+      ((MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (∞ : WithTop ℕ∞) e'
+          (metricTraceFirstTwoField (I := I) (M := M) g A)) x) tail
+        = ((metricTraceFirstTwoField (I := I) (M := M) g A) x) (tail ∘ e') := by
+    rw [MultilinearSection.domDomCongr_apply,
+      ContinuousMultilinearMap.domDomCongr_apply]
+    rfl
+  have hL := metricTraceFirstTwoField_eq_sum (I := I) (M := M) g
+    (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+      (E := TangentSpace I) (∞ : WithTop ℕ∞) e A) x tail
+  have hR := metricTraceFirstTwoField_eq_sum (I := I) (M := M) g A x (tail ∘ e')
+  rw [hL, hrhs, hR]
+  unfold metricTrace0S2InBasis
+  refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
+  congr 1
+  rw [MultilinearSection.domDomCongr_apply,
+    ContinuousMultilinearMap.domDomCongr_apply]
+  exact congrArg (A x) (hcompat x _ _ tail)
+
+/-- **First-two metric trace commutes with tail reindexing** (the `frontExtendEquiv²`
+case): tracing the two leading slots of `A · frontExt(frontExt e)` is the `e`-reindex of
+the trace of `A`.  Special case of `_gen`. -/
+theorem metricTraceFirstTwoField_domDomCongr {s s' : ℕ}
+    [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (g : SmoothRiemannianMetric I M) (e : Fin s ≃ Fin s')
+    (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (s + 2)) :
+    metricTraceFirstTwoField (I := I) (M := M) g
+        (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (∞ : WithTop ℕ∞)
+          (Tensor0SBundle.frontExtendEquiv (Tensor0SBundle.frontExtendEquiv e)) A)
+      = MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (∞ : WithTop ℕ∞) e
+          (metricTraceFirstTwoField (I := I) (M := M) g A) := by
+  refine metricTraceFirstTwoField_domDomCongr_gen (I := I) (M := M) g
+    (Tensor0SBundle.frontExtendEquiv (Tensor0SBundle.frontExtendEquiv e)) e A ?_
+  intro x X Y tail
+  funext q
+  refine Fin.cases ?_ (fun q1 => ?_) q
+  · simp only [Function.comp_apply, Tensor0SBundle.frontExtendEquiv_zero, metricTraceInput,
+      Fin.cases_zero]
+  · refine Fin.cases ?_ (fun r => ?_) q1
+    · simp only [Function.comp_apply, Tensor0SBundle.frontExtendEquiv_succ,
+        Tensor0SBundle.frontExtendEquiv_zero, metricTraceInput, Fin.cases_succ, Fin.cases_zero]
+    · simp only [Function.comp_apply, Tensor0SBundle.frontExtendEquiv_succ,
+        metricTraceInput, Fin.cases_succ]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **First-two metric trace of a front-factor product**: `trace₁₂((A ⊗ B)·finCongr) =
+(trace₁₂ A) ⊗ B`.  The two trace slots live inside the first factor `A`, so the trace
+acts on `A` alone and `B` rides along unchanged.  The `finCongr h` recasts the product's
+rank `(k+2)+q` to the `(k+q)+2` shape the trace expects (value-preserving). -/
+theorem metricTraceFirstTwoField_product {k q : ℕ}
+    [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (g : SmoothRiemannianMetric I M)
+    (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (k + 2))
+    (B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) q)
+    (h : k + 2 + q = k + q + 2) :
+    metricTraceFirstTwoField (I := I) (M := M) g
+        (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (∞ : WithTop ℕ∞) (finCongr h)
+          (MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+            (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := k + 2) (q := q) A B))
+      = MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := k) (q := q)
+          (metricTraceFirstTwoField (I := I) (M := M) g A) B := by
+  classical
+  letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) (k + q)
+  refine DFunLike.ext _ _ fun x => ?_
+  refine ContinuousMultilinearMap.ext fun tail => ?_
+  have fact1 : forall (X Y : TangentSpace I x),
+      ((fun i_1 => metricTraceInput (I := I) X Y tail ((finCongr h) i_1)) ∘ Fin.castAdd q)
+        = metricTraceInput (I := I) X Y (tail ∘ Fin.castAdd q) := by
+    intro X Y
+    funext p
+    simp only [Function.comp_apply]
+    have hv : ((finCongr h) (Fin.castAdd q p) : ℕ) = (p : ℕ) := by
+      simp [finCongr_apply, Fin.val_cast, Fin.val_castAdd]
+    rw [metricTraceInput_apply, metricTraceInput_apply]
+    simp only [hv]
+    by_cases h0 : (p : ℕ) = 0
+    · simp [h0]
+    · by_cases h1 : (p : ℕ) = 1
+      · simp [h1]
+      · rw [dif_neg h0, dif_neg h1, dif_neg h0, dif_neg h1]
+        apply congrArg tail
+        apply Fin.ext
+        simp
+  have fact2 : forall (X Y : TangentSpace I x),
+      ((fun i_1 => metricTraceInput (I := I) X Y tail ((finCongr h) i_1)) ∘ Fin.natAdd (k + 2))
+        = tail ∘ Fin.natAdd k := by
+    intro X Y
+    funext r
+    simp only [Function.comp_apply]
+    have hv : ((finCongr h) (Fin.natAdd (k + 2) r) : ℕ) = (k + 2) + (r : ℕ) := by
+      simp [finCongr_apply, Fin.val_cast, Fin.val_natAdd]
+    rw [metricTraceInput_apply]
+    simp only [hv]
+    rw [dif_neg (by omega), dif_neg (by omega)]
+    apply congrArg tail
+    apply Fin.ext
+    simp only [Fin.val_natAdd]
+    omega
+  rw [metricTraceFirstTwoField_eq_sum, tensor0SField_product_apply,
+    metricTraceFirstTwoField_eq_sum]
+  unfold metricTrace0S2InBasis
+  rw [Finset.sum_mul]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [Finset.sum_mul]
+  refine Finset.sum_congr rfl fun j _ => ?_
+  rw [MultilinearSection.domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    tensor0SField_product_apply, fact1, fact2]
+  ring
+
+/-! ### Zero laws for the trace-step composition
+
+`MultilinearSection.product`/`domDomCongr` zero laws genuinely belong at the Multilinear
+layer; they are stated here only because the diffusion-split composition consumes them and
+no lower-layer versions exist yet. -/
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The metric trace of the zero field is zero. -/
+theorem metricTraceFirstTwoField_zero {s : ℕ}
+    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (g : SmoothRiemannianMetric I M) :
+    metricTraceFirstTwoField (I := I) (M := M) g
+        (0 : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          (n := (∞ : WithTop ℕ∞)) (s + 2))
+      = 0 := by
+  classical
+  letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s
+  refine DFunLike.ext _ _ fun x => ?_
+  refine ContinuousMultilinearMap.ext fun tail => ?_
+  rw [metricTraceFirstTwoField_eq_sum]
+  unfold metricTrace0S2InBasis
+  simp [ContMDiffSection.coe_zero]
+
+-- NOTE: generic `domDomCongr e 0 = 0` and `product A 0 = 0` at the MultilinearSection
+-- layer fail `OfNat 0` synthesis at statement time (the bundle topology/`Zero` instance
+-- is only pinned once a concrete-rank function fixes it).  They are handled inline at the
+-- concrete witness ranks in the producer composition instead.
 
 end
 

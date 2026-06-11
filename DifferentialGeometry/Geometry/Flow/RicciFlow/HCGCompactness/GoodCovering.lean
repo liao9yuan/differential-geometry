@@ -77,6 +77,13 @@ theorem lambda_le_mu (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 1 �
     (r : Real) : hd.lambda D r ≤ hd.mu r :=
   div_le_self (hd.mu_nonneg r) hD
 
+/-- `λ` is continuous in the radius (it is `const · exp(−Cr) / D`).  This is the
+`hlam` input of the ordered-net layer. -/
+theorem lambda_continuous (hd : InjRadiusDecayInput (I := I) X) (D : Real) :
+    Continuous (hd.lambda D) := by
+  unfold InjRadiusDecayInput.lambda InjRadiusDecayInput.mu
+  fun_prop
+
 /-- MSM135 chooses `D` large so that `λ[0] ≤ 1`.  This holds once
 `D ≥ a·min(ι₀,1)ⁿ`. -/
 theorem lambda_le_one_at_zero (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -276,6 +283,25 @@ theorem lambda_eq (hd : InjRadiusDecayInput (I := I) X) (D r : Real) :
   unfold InjRadiusDecayInput.lambda InjRadiusDecayInput.mu
   ring
 
+/-- Pure-radius ratio bound: `λ[t] ≤ e^{C·d}·λ[s]` whenever `s − t ≤ d`, since `λ`
+decays like `e^{−Cr}`.  Radius-level form of `lambda_ratio_le`; the engine behind the
+`lbl391` constants `e^{10cC}`, `e^{20cC}`. -/
+theorem lambda_exp_le (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
+    {s t d : Real} (h : s - t ≤ d) :
+    hd.lambda D t ≤ Real.exp (hd.C * d) * hd.lambda D s := by
+  rw [hd.lambda_eq D, hd.lambda_eq D]
+  have hP : 0 ≤ hd.a * (min hd.baseInj.ρ 1) ^ (Module.finrank Real E) / D :=
+    le_of_lt (div_pos (mul_pos hd.a_pos (pow_pos (lt_min hd.baseInj.pos one_pos) _)) hD)
+  rw [show Real.exp (hd.C * d) *
+        (hd.a * (min hd.baseInj.ρ 1) ^ (Module.finrank Real E) / D *
+          Real.exp (-hd.C * s))
+      = hd.a * (min hd.baseInj.ρ 1) ^ (Module.finrank Real E) / D *
+          Real.exp (hd.C * d + -hd.C * s) from by
+        rw [Real.exp_add]; ring]
+  apply mul_le_mul_of_nonneg_left _ hP
+  apply Real.exp_le_exp.mpr
+  nlinarith [mul_le_mul_of_nonneg_left h hd.C_nonneg]
+
 /-- λ-ratio bound (the mechanism behind `lbl391`'s `e^{cC}` factors): for nearby
 points `λ[d(x,O)] ≤ e^{C·dist(x,y)}·λ[d(y,O)]`, since `λ` decays like `e^{−Cr}` and
 `d(y,O) − d(x,O) ≤ dist(x,y)`. -/
@@ -321,7 +347,7 @@ theorem net_multiplicity (hd : InjRadiusDecayInput (I := I) X) (D : Real) (k : N
     (hSR : ∀ x ∈ S, hd.dist k x (X.obj k).basepoint ≤ R)
     (z : (X.obj k).M) (J : Finset ((X.obj k).M)) (hJS : ↑J ⊆ S)
     (hJz : ∀ x ∈ J, hd.dist k x z ≤ 4 * hd.lambda D R) :
-    J.card ≤ vc.Imult := by
+    J.card ≤ vc.Imult 4 := by
   classical
   have hr : 0 < hd.lambda D R := hd.lambda_pos hD R
   have hsep : ∀ i ∈ J, ∀ j ∈ J, i ≠ j → hd.lambda D R ≤ hd.dist k i j := by
@@ -333,7 +359,7 @@ theorem net_multiplicity (hd : InjRadiusDecayInput (I := I) X) (D : Real) (k : N
           hd.lambda_antitone hD (hSR i hiS)
       _ ≤ hd.dist k i j :=
           hd.lambdaNet_dist_separated D k hD hre hS hiS hjS hij
-  have hmul := vc.ballMult k
+  have hmul := vc.ballMult 4 k
     (centers := fun i : {x // x ∈ J} => (i : (X.obj k).M)) (r := hd.lambda D R) hr
     (fun i j hij => by
       rw [hvc]; exact hsep i i.2 j j.2 (fun h => hij (Subtype.ext h)))
