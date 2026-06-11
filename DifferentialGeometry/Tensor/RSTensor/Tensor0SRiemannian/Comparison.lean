@@ -275,6 +275,38 @@ theorem coordInner0S_diagonal_le_pow_identity
     (prod_mu_le_pow (μ := μ) (C := C) hμ_nonneg hμ_le I0)
     (sq_nonneg _)
 
+/-- **Reverse** diagonal-coordinate norm comparison.  If every diagonal inverse
+component `μ_i` is bounded **below** by `m > 0`, then the identity-coordinate
+(raw component `ℓ²`) squared norm is bounded by `(1/m)^s` times the diagonal one.
+The mirror of `coordInner0S_diagonal_le_pow_identity`; used to pass from an
+intrinsic `gRef`-norm to the raw frame-component `ℓ²` when the frame Gram (hence
+the inverse-metric eigenvalues) is bounded below. -/
+theorem coordInner0S_identity_le_pow_diagonal
+    (s : Nat) (μ : Idx -> Real) (m : Real) (hm : 0 < m)
+    (hμ_lb : forall i : Idx, m <= μ i)
+    (A : Tensor0SSpace s I x)
+    (basis : Module.Basis Idx Real (TangentSpace I x)) :
+    coordInner0S (I := I) (x := x) s identityInvMetric A A basis <=
+      (1 / m) ^ s *
+        coordInner0S (I := I) (x := x) s (diagonalInvMetric μ) A A basis := by
+  classical
+  rw [coordInner0S_diagonal_eq_sum (I := I) (x := x) s μ A basis,
+    coordInner0S_identity_eq_sum_sq (I := I) (x := x) s A basis,
+    Finset.mul_sum]
+  apply Finset.sum_le_sum
+  intro I0 _
+  have hprod : m ^ s <= ∏ a : Fin s, μ (I0 a) := by
+    calc m ^ s = ∏ _a : Fin s, m := by simp
+      _ <= ∏ a : Fin s, μ (I0 a) :=
+          Finset.prod_le_prod (fun a _ => hm.le) (fun a _ => hμ_lb (I0 a))
+  have hge1 : (1 : Real) <= (1 / m) ^ s * ∏ a : Fin s, μ (I0 a) := by
+    have hms : (1 / m) ^ s * m ^ s = 1 := by
+      rw [← mul_pow, one_div, inv_mul_cancel₀ hm.ne', one_pow]
+    calc (1 : Real) = (1 / m) ^ s * m ^ s := hms.symm
+      _ <= (1 / m) ^ s * ∏ a : Fin s, μ (I0 a) :=
+          mul_le_mul_of_nonneg_left hprod (by positivity)
+  nlinarith [hge1, sq_nonneg (tensor0SComponent (I := I) A (fun i => basis i) I0)]
+
 /-- Squared norm comparison for covariant tensors in a basis where the first
 metric has identity inverse components and the second has diagonal inverse
 components.
@@ -538,6 +570,28 @@ theorem normSq0S_le_of_metric_equiv
   constructor
   · simpa using hlower
   · simpa using hupper
+
+/-- **Square-root form of the upper covariant-tensor norm comparison.**  Under
+pointwise metric equivalence `C⁻¹ g ≤ h ≤ C g`, the covariant-tensor norm
+`√normSq0S h` is bounded by `√(C^s)` times `√normSq0S g`.  This is the book's
+`(1+ε)^{(r+q₂)/2}` factor in MSM135 Corollary *Norms of covariant derivatives of
+tensors, II* (`lbl370`), where `C = 1+ε` and `s = r + q₂`. -/
+theorem sqrt_normSq0S_le_of_metric_equiv
+    (g h : SmoothMetric_gen I M) (x : M) (s : Nat) {C : Real}
+    (hC : 1 <= C)
+    (hequiv :
+      forall v : TangentSpace I x,
+        C⁻¹ * g.inner x v v <= h.inner x v v /\
+          h.inner x v v <= C * g.inner x v v)
+    (T : Tensor0SSpace s I x) :
+    Real.sqrt (normSq0S (I := I) h x s T) <=
+      Real.sqrt (C ^ s) * Real.sqrt (normSq0S (I := I) g x s T) := by
+  have hub := normSq0S_upper_le_of_equiv (I := I) g h x s hC hequiv T
+  have hCs_nonneg : (0 : Real) <= C ^ s := pow_nonneg (le_trans zero_le_one hC) s
+  calc Real.sqrt (normSq0S (I := I) h x s T)
+      <= Real.sqrt (C ^ s * normSq0S (I := I) g x s T) := Real.sqrt_le_sqrt hub
+    _ = Real.sqrt (C ^ s) * Real.sqrt (normSq0S (I := I) g x s T) :=
+        Real.sqrt_mul hCs_nonneg _
 
 end MetricEquiv
 

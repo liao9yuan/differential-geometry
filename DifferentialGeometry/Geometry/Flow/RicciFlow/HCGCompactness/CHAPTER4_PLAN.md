@@ -288,8 +288,20 @@ from *Norms of covariant derivatives of tensors, I*.
       (0,s) norm bridge wiring (`iterCovComp_eq_iterCov` + `normSq0S` lift, both
       exist) for the statement conversion.  The SAME producer feeds ric_bound's
       `claim1` instantiation directly (Phase R unblocked).
-- [ ] F4 — Corollary *Norms of covariant derivatives of tensors, II*
-      → covariant (`q₁=0`) per-order constants used downstream ⟸ F3
+- [~] F4 — Corollary *Norms of covariant derivatives of tensors, II* (`lbl370`)
+      → covariant (`q₁=0`) per-order constants used downstream ⟸ F3.
+      **STRUCTURE DONE (2026-06-10, green, `Lemma45Covariant.lean`):**
+      `lemma45_cor_II_of_intrinsic` — Cor II from the INTRINSIC Lemma I (`hF3`,
+      `normSq0S`-form, taken as hyp): per-term `sqrt_normSq0S_le_of_metric_equiv`
+      (NEW, Comparison.lean — the book's `(1+ε)^{(r+q₂)/2}` factor = `√(C^{q₂+k})`)
+      + factor-out `√(C^{q₂+r})` over `0≤k≤r` (`pow_le_pow_right₀`).  SAME-DOMAIN
+      formulation: `Φ*h = gRef`, `∇_{Φ*h} = ∇_gRef`, `Φ*T = T'` a domain tensor,
+      `|·|_h = |·|_gRef` — so pullback-naturality (ABSENT in repo) is AUTOMATIC.
+      **Remaining frontier = the intrinsic Lemma I lift**: `lemma45_F3` is the
+      COMPONENT (`compL2`) form; lifting it to `hF3`'s `normSq0S` form is the `B5`
+      bridge (`compL2_tower_eq`) at a `gRef`-ON frame point = the **good
+      gRef-ON-centered smooth frame** producer (constant Gram–Schmidt of a
+      trivialization frame), SAME gate as ric_bound R4d/e.  See `Lemma45Covariant.md`.
 - [x] F5-const — constants for *Composition of approximate isometries, I*
       → `compApproxConst`, `compApproxConst_pos`, `compApproxConst_nonneg`
       (Lemma45Constants.lean) ⟸ F4 constants

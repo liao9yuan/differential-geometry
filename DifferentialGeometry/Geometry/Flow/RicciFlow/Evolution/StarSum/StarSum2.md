@@ -58,30 +58,43 @@ Diagnostic facts:
 - `Tensor0SField` is an `abbrev` carrying `letI := tensor0SBundle_topology s` internally; the
   module also needs `tensor0SBundle_smooth` (needs `[IsManifold I (∞+1) M]`, present).
 
-**ROOT CAUSE — ISOLATED by minimal repro (2026-06-10).** A throwaway test file `def diag (s) :
-Tensor0SField (s+2) := 0` (since deleted) pins it down:
-- WRONG guesses (each ruled out by the repro): the `[InnerProductSpace Real E]` diamond (removing
-  it does NOT fix it); the rank shape `s+2` vs `4+k` (both fail equally); instances-in-scope
-  (adding `[IsManifold I 1/2/(∞+1) M]` explicitly to the `def` signature does NOT fix it).
-- **CONFIRMED**: it is the **import context**. `metricTraceFirstTwoField_zero` — the *identical*
-  `(0 : Tensor0SField (s+2))` with the same explicit instances — compiles inside `NablaTraceGen`.
-  The repro file differs only by `import …StarSum.NablaReactionAllK`.  So **some instance in the
-  `NablaReactionAllK` import chain breaks generic-rank `Tensor0SField` `Zero`/module synthesis**
-  (a shadowing/orphan/`local instance` that escaped its section, or a competing bundle instance).
-  The light `NablaTraceGen` context is healthy; the heavy BBS context is not.
+**ROOT CAUSE — fully isolated by minimal repros (2026-06-10).** Throwaway test files (deleted)
+walked it down to the real cause.  WRONG guesses, each ruled out by repro:
+- `[InnerProductSpace Real E]` diamond — removing it does NOT fix it;
+- rank shape `s+2` vs `4+k` — both fail equally;
+- instances-in-scope — explicit `[IsManifold I 1/2/(∞+1) M]` in the signature does NOT fix it;
+- theorem-vs-def — a *theorem* with `(0 : Tensor0SField (s+2))` ALSO fails in the importing file
+  (while the identical `metricTraceFirstTwoField_zero` compiles *inside* `NablaTraceGen`);
+- `open`s — adding `open DifferentialGeometry.Tensor.Coordinates` does NOT fix it.
+
+**CONFIRMED CAUSE = instance-synthesis PERFORMANCE pathology.** With `set_option maxHeartbeats
+1000000` + `synthInstance.maxHeartbeats 1000000`, synthesizing `OfNat (Tensor0SField (s+2)) 0`
+gives **`(deterministic) timeout at whnf, maximum number of heartbeats (1000000)`** — i.e. the
+search does *pathologically expensive `whnf` reductions* (unfolding the bundle/`ContMDiffSection`
+definitions) and runs out of fuel; it is NOT a missing instance.  Inside `NablaTraceGen` (low in
+the import tree) the same search is fast; once the BBS chain (`RmRealizationBridgeAllK` and below)
+is imported, some candidate instance makes the search explode.  A bigger heartbeat is not a real
+fix (1M already overshoots; `maxHeartbeats 4000000` per declaration would make the file
+uncompilable).
 
 ## Fix routes for next attempt (in priority order)
-A. **Find the culprit import.** Bisect: a file importing only `NablaTraceGen` + `RmRealizationBridgeAllK`
-   (for `nablaKRm04Field`) — does `(0 : Tensor0SField (s+2))` still compile?  Walk the
-   `NablaReactionAllK` import list until `0` breaks; the last-added import is the culprit.  Then run
-   `set_option trace.Meta.synthInstance true` on `(0 : Tensor0SField (s+2))` there to see which bad
-   instance is chosen, and fix it (likely a `local instance`/`attribute [instance]` that should be
-   scoped, or a `letI` leaking a non-canonical bundle topology).
-B. **Avoid raw module ops in the heavy context.** Host `StarSum2` so it never writes `0`/`+`/`•` on
-   `Tensor0SField` directly in the broken context: state the closures through the realizer
-   `TotalNabla0SRealizes` (whose `+`/`•` are already elaborated in the healthy `HigherOrder` layer),
-   or carry an explicit finite `List`/`Finset` of base terms summed via a helper proved in the light
-   layer.  This sidesteps the broken environment without first finding the culprit.
+A. **Find & fix the pathological instance.** In a file importing `RmRealizationBridgeAllK`, run
+   `set_option trace.Meta.synthInstance true in example : Tensor0SField (s+2) := 0` and read the
+   trace to see which candidate instance the search keeps unfolding (the loop/blowup).  Likely a
+   bundle `local instance`/`letI` that escaped a section and now offers a non-canonical
+   `TopologicalSpace`/`VectorBundle` path the synthesizer keeps trying.  Fix = scope it, lower its
+   priority, or give the canonical one higher priority.  This is the clean root fix and likely helps
+   the whole BBS layer's compile times.
+B. **Bypass synthesis: provide the module instance explicitly.** `letI : Zero (Tensor0SField (4+k))
+   := <explicit ContMDiffSection zero>` (and similarly `AddCommGroup`/`Module`) so the `0`/`+`/`•`
+   never trigger the expensive search.  Needs the exact instance path written by hand once; reusable
+   via the `stZeroField`/`stAddField`/`stSmulField` helpers.
+C. **Avoid raw module ops entirely.** Carry the closures through the realizer `TotalNabla0SRealizes`
+   (already elaborated in the healthy `HigherOrder` layer) so `StarSum2` never writes `0`/`+`/`•` on
+   `Tensor0SField` in the heavy context.
+
+This is a Lean-environment performance bug, separable from the (sound) math design above — a good
+candidate for a focused `trace.Meta.synthInstance` session or a Lean-expert/Pro consult.
 
 The verified upstream pieces (`traceRicWit`-style slot algebra, `nabla_metricTraceFirstTwo0S`,
 `spatialComm_nablaKRm_split`, `abs_curvatureAction0SAt_orthoBasis_le`, the orthonormal collapse)
