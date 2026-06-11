@@ -720,5 +720,71 @@ theorem ric_bound
     _ ≤ CppF * metricCovDerivNorm (I := I) N (gSeq i t) gRef x + CpppF :=
         add_le_add (mul_le_mul_of_nonneg_right hppF hmcd0) hpppF
 
+/-- The realized `nablaRic` data of `MetricCovOrderEvolutionInput`: the
+order-`p` background Ricci tower `ricCovTower`, reindexed from its native
+`2 + p` arity to the Grönwall arity `p + 2`. -/
+noncomputable def nablaRicReal
+    (gSeq : Nat → Real → SmoothRiemannianMetric I M)
+    (gRef : SmoothRiemannianMetric I M) (p : Nat) :
+    Nat → Real → (x : M) →
+      Tensor0SBundle.Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
+        (I := I) (M := M) (p + 2) x :=
+  fun i s x =>
+    (ricCovTower (I := I) (gSeq i s) gRef p x).domDomCongr (acEquiv p)
+
+/-- Norm invariance of the `nablaRicReal` reindex. -/
+theorem nablaRicReal_normSq
+    (gSeq : Nat → Real → SmoothRiemannianMetric I M)
+    (gRef : SmoothRiemannianMetric I M) (p i : Nat) (s : Real) (x : M) :
+    Tensor0SBundle.normSq0S (I := I) gRef x (p + 2)
+        (nablaRicReal (I := I) gSeq gRef p i s x) =
+      Tensor0SBundle.normSq0S (I := I) gRef x (2 + p)
+        (ricCovTower (I := I) (gSeq i s) gRef p x) := by
+  classical
+  obtain ⟨basis, hON⟩ := exists_gOrthonormalBasis (I := I) gRef x
+  have hinv : Tensor0SBundle.MetricInverseInBasis_gen (I := I) gRef x basis
+      (Tensor0SBundle.identityInvMetric
+        (Idx := Fin (Module.finrank Real (TangentSpace I x)))) := by
+    have h' := metricInverseInBasis_of_orthonormal (I := I) gRef basis hON
+    intro i' j'
+    simpa [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric] using h' i' j'
+  exact Tensor0SBundle.normSq0S_domDomCongr (I := I) gRef x basis hinv (acEquiv p)
+    (ricCovTower (I := I) (gSeq i s) gRef p x)
+
+/-- **The `ric_bound` field of `MetricCovOrderEvolutionInput`, realized.**  The
+proved `ric_bound`, restated with `nablaRic := nablaRicReal` in the exact
+Grönwall field shape (`p + 2` arity). -/
+theorem ric_bound_field
+    {K U : Set M} {β ψ : Real}
+    {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
+    {gRef : SmoothRiemannianMetric I M}
+    (hKc : IsCompact K) (hU : IsOpen U) (hKU : K ⊆ U)
+    (N : Nat) (hN : 1 <= N)
+    (B : Real -> Real)
+    (hequiv : MetricUniformEquivalentOnWindow (I := I) U β ψ gRef gSeq B)
+    (Bmax : Real) (hBmax1 : 1 ≤ Bmax)
+    (hBmax : ∀ t ∈ Set.Icc β ψ, B t ≤ Bmax)
+    (Cg : Nat -> Real)
+    (hBprev : forall r : Nat, 1 <= r -> r < N ->
+      MetricCovDerivOrderBoundOnWindow (I := I) U β ψ gSeq gRef r (Cg r))
+    (KShi : Real) (hKShi0 : 0 ≤ KShi)
+    (hShi : forall s : Nat, s <= N -> forall i : Nat,
+      forall t : Real, t ∈ Set.Icc β ψ -> forall x : M, x ∈ U ->
+        Real.sqrt
+          (Tensor0SBundle.normSq0S (I := I) (gSeq i t) x (2 + s)
+            (ricCovTower (I := I) (gSeq i t) (gSeq i t) s x)) <= KShi) :
+    exists Cpp Cppp : Real, 0 <= Cpp ∧ 0 <= Cppp ∧
+      forall i : Nat, forall s : Real, s ∈ Set.Icc β ψ ->
+        forall x : M, x ∈ K ->
+          Real.sqrt
+            (Tensor0SBundle.normSq0S (I := I) gRef x (N + 2)
+              (nablaRicReal (I := I) gSeq gRef N i s x)) <=
+            Cpp * metricCovDerivNorm (I := I) N (gSeq i s) gRef x + Cppp := by
+  obtain ⟨Cpp, Cppp, h0, h1, hb⟩ := ric_bound (I := I) hKc hU hKU N hN B hequiv
+    Bmax hBmax1 hBmax Cg hBprev KShi hKShi0 hShi
+  refine ⟨Cpp, Cppp, h0, h1, fun i s hs x hx => ?_⟩
+  rw [nablaRicReal_normSq]
+  exact hb i s hs x hx
+
 end HCGCompactness
 end DifferentialGeometry
