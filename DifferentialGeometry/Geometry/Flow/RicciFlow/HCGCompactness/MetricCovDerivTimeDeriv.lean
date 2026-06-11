@@ -590,6 +590,86 @@ theorem solnTowerSwap_of_smooth
     (fun ht => D.regular_mem_nhds ht) N
     (solnMetricDeriv (I := I) S hS) hSmooth hFdiff hFtdiff
 
+/-- **Joint smoothness of the level-0 metric scalar from the solution data.**
+At a regular time `t` that is interior to the regular set (`hDreg`), the scalar
+`(r, y) ↦ g_r(V₀ y, V₁ y)` is jointly `C^∞` at `(t, x)`: expand `V₀, V₁` in the
+local frame of the tangent trivialization at `x`
+(`eventually_eq_localFrame_sum_coeff_smul`), use the joint smoothness of the
+frame components (`MetricFamilySmoothOn.frameCompSmooth`), the smoothness of
+the frame coefficients (`contMDiffAt_localFrame_coeff`), and bilinearity. -/
+theorem solnMetricJointAt
+    {D : RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    {t : Real} {x : M}
+    (hDreg : D.regular ∈ 𝓝 t)
+    (V : Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _)) :
+    ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+      (fun q : Real × M =>
+        (solnMetricField (I := I) S q.1) q.2 (fun a : Fin 2 => V a q.2))
+      (t, x) := by
+  classical
+  set e := trivializationAt E (TangentSpace I : M → Type _) x with he
+  set b := Module.finBasis Real E with hb
+  have hxe : x ∈ e.baseSet := by simp [he]
+  -- joint smoothness of the frame components at (t, x)
+  have hframe : IsLocalFrameOn I E 1 (e.localFrame b) e.baseSet :=
+    Bundle.Trivialization.isLocalFrameOn_localFrame_baseSet I 1 e b
+  have hcompOn := hS.smoothMetric.frameCompSmooth (e.localFrame b) hframe
+  have hmemProd : (D.regular ×ˢ e.baseSet : Set (Real × M)) ∈ 𝓝 (t, x) :=
+    prod_mem_nhds hDreg (e.open_baseSet.mem_nhds hxe)
+  have hcompAt : ∀ i j, ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real)
+      (∞ : WithTop ℕ∞)
+      (fun q : Real × M =>
+        (S.family.metric q.1).inner q.2 (e.localFrame b i q.2) (e.localFrame b j q.2))
+      (t, x) := fun i j =>
+    ((hcompOn i j).contMDiffAt hmemProd).of_le le_top
+  -- smoothness of the frame coefficients of the slots
+  have hcoeff : ∀ (a : Fin 2) i, ContMDiffAt I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+      (fun y : M => e.localFrame_coeff I b i y ((V a) y)) x := fun a i =>
+    _root_.contMDiffAt_localFrame_coeff (I := I) b hxe
+      ((V a).contMDiff.contMDiffAt) i
+  -- the expanded double sum is jointly smooth
+  have hsum : ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+      (fun q : Real × M =>
+        ∑ i, ∑ j,
+          (e.localFrame_coeff I b i q.2 ((V 0) q.2)) *
+            (e.localFrame_coeff I b j q.2 ((V 1) q.2)) *
+            (S.family.metric q.1).inner q.2 (e.localFrame b i q.2)
+              (e.localFrame b j q.2)) (t, x) := by
+    refine ContMDiffAt.sum fun i _ => ContMDiffAt.sum fun j _ => ?_
+    exact (((hcoeff 0 i).comp (t, x) contMDiffAt_snd).mul
+      ((hcoeff 1 j).comp (t, x) contMDiffAt_snd)).mul (hcompAt i j)
+  -- the eventual identity near (t, x)
+  refine hsum.congr_of_eventuallyEq ?_
+  have hev0 := Bundle.Trivialization.eventually_eq_localFrame_sum_coeff_smul
+    (I := I) e b (s := fun y => (V 0) y) hxe
+  have hev1 := Bundle.Trivialization.eventually_eq_localFrame_sum_coeff_smul
+    (I := I) e b (s := fun y => (V 1) y) hxe
+  have hev : ∀ᶠ q : Real × M in 𝓝 (t, x),
+      ((V 0) q.2 = ∑ i, e.localFrame_coeff I b i q.2 ((V 0) q.2) • e.localFrame b i q.2) ∧
+      ((V 1) q.2 = ∑ i, e.localFrame_coeff I b i q.2 ((V 1) q.2) • e.localFrame b i q.2) :=
+    (continuous_snd.tendsto (t, x)).eventually (hev0.and hev1)
+  filter_upwards [hev] with q hq
+  have h0 := hq.1
+  have h1 := hq.2
+  have happ : (solnMetricField (I := I) S q.1) q.2 (fun a : Fin 2 => V a q.2)
+      = (S.family.metric q.1).inner q.2 ((V 0) q.2) ((V 1) q.2) :=
+    Tensor0SBundle.metricTensorField_apply (I := I) (S.family.metric q.1) q.2 _
+  have hexp : (S.family.metric q.1).inner q.2 ((V 0) q.2) ((V 1) q.2)
+      = (S.family.metric q.1).inner q.2
+          (∑ i, (Trivialization.localFrame_coeff I e b i q.2) ((V 0) q.2)
+            • e.localFrame b i q.2)
+          (∑ j, (Trivialization.localFrame_coeff I e b j q.2) ((V 1) q.2)
+            • e.localFrame b j q.2) := by
+    rw [← h0, ← h1]
+  rw [happ, hexp]
+  simp only [map_sum, map_smul, ContinuousLinearMap.coe_sum', Finset.sum_apply,
+    ContinuousLinearMap.smul_apply, smul_eq_mul, Finset.mul_sum]
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => by ring
+
 /-- **The solution tower swap from joint smoothness alone.**  The two spatial
 differentiability inputs of `solnTowerSwap_of_smooth` are discharged by
 `covDerivOfField_eval_mdiffAt` (smooth fields on smooth slots); the joint
@@ -622,6 +702,37 @@ theorem solnTowerSwap_of_joint
       covDerivOfField_eval_mdiffAt (I := I) gRef (solnMetricField (I := I) S s) p V x)
     (fun p _ V t _ x =>
       covDerivOfField_eval_mdiffAt (I := I) gRef (solnEvolField (I := I) S t) p V x)
+
+/-- **The solution tower swap, fully discharged.**  All regularity inputs of
+the tower swap are produced from the solution data: the joint `C²` smoothness
+of every tower level comes from the level-0 joint smoothness
+(`solnMetricJointAt`, from `MetricFamilySmoothOn.frameCompSmooth`) through the
+joint tower induction `covDerivOfField_eval_contMDiffAt`.  The single remaining
+hypothesis is that regular times are interior to the regular set (`hDreg` —
+true for every concrete flow interval, where `D.regular` is an open
+interval). -/
+theorem solnTowerSwap_reg
+    {D : RealTimeInterval}
+    (gRef : SmoothRiemannianMetric I M)
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (N : ℕ)
+    (hDreg : ∀ {t : Real}, t ∈ D.regular → D.regular ∈ 𝓝 t) :
+    ∀ p : ℕ, p < N →
+      ∀ V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _), ∀ x₀ : M,
+      FixedBaseExtDerivTimeDerivativeOnRegular (I := I) D.carrier D.regular
+        ({x₀} : Set M)
+        (fun r p' => (covDerivOfField (I := I) gRef (solnMetricField (I := I) S r) p) p'
+          (fun a : Fin (p + 2) => V a p'))
+        (fun r p' => (covDerivOfField (I := I) gRef (solnEvolField (I := I) S r) p) p'
+          (fun a : Fin (p + 2) => V a p')) :=
+  solnTowerSwap_of_joint (I := I) gRef S hS N
+    (fun p _ V _t ht _x =>
+      (covDerivOfField_eval_contMDiffAt (I := I) gRef
+        (fun r => solnMetricField (I := I) S r)
+        (fun W => solnMetricJointAt (I := I) S hS (hDreg ht) W)
+        p V).of_le (WithTop.coe_le_coe.2 (le_top : (2 : ℕ∞) ≤ (⊤ : ℕ∞))))
 
 end HCGCompactness
 end DifferentialGeometry
