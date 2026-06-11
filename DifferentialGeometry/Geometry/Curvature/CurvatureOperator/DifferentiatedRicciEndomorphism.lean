@@ -71,7 +71,7 @@ homogeneity and value-determinacy in the acted slot by mirroring the first-antis
 
 /-- Smoothness of `b ↦ extDerivFun f b (X b)` for a smooth function `f` and smooth tangent section
 `X`, as the second component of the composed tangent map `b ↦ Tf(b, X b)`. -/
-private lemma extDerivFunApply_contMDiff
+lemma extDerivFunApply_contMDiff
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     {X : Π b : M, TangentSpace I b} (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X)) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun b => extDerivFun (I := I) f b (X b)) := by
@@ -831,7 +831,7 @@ private lemma nablaRicci_smul_right_raw
 
 /-- `W`-slot value-determinacy of `nablaRicci`: if `W x = W' x` then `(∇_X Ric)(V, W) = (∇_X Ric)(V, W')`,
 via the frame trace and the acted-slot value-determinacy `nablaCurvSec_eq_of_acted_eq`. -/
-private lemma nablaRicci_eq_of_W_eq_raw
+lemma nablaRicci_eq_of_W_eq_raw
     (g : SmoothRiemannianMetric I M)
     (X V W W' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
     (hWW' : (W : Π b : M, TangentSpace I b) x = W' x) :
@@ -852,7 +852,7 @@ private lemma nablaRicci_eq_of_W_eq_raw
 
 /-- `V`-slot value-determinacy of `nablaRicci`, obtained from the `W`-slot determinacy through the slot
 symmetry `nablaRicci_symm`. -/
-private lemma nablaRicci_eq_of_V_eq_raw
+lemma nablaRicci_eq_of_V_eq_raw
     (g : SmoothRiemannianMetric I M)
     (X V V' W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
     (hVV' : (V : Π b : M, TangentSpace I b) x = V' x) :
@@ -865,7 +865,7 @@ private lemma nablaRicci_eq_of_V_eq_raw
 
 /-- Two-slot value-determinacy of `nablaRicci`: if `V x = V₀ x` and `W x = W₀ x` (all smooth sections),
 then the differentiated Ricci tensors agree (chain the `V`- and `W`-slot determinacies). -/
-private lemma nablaRicci_eq_of_VW_eq
+lemma nablaRicci_eq_of_VW_eq
     (g : SmoothRiemannianMetric I M)
     (X V V₀ W W₀ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
     (hVV₀ : (V : Π b : M, TangentSpace I b) x = V₀ x)
