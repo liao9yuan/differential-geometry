@@ -947,5 +947,145 @@ theorem metricComp_iteratedFDeriv_le
   have hbound := hCV (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) y hy b hbnd
   simpa using hbound
 
+/-- **Per-chart bump-extended metric-component sequence** (the `exists_cInf_subseq`
+input).  For a metric sequence with uniform `(B_q)` bounds, a chart `x₀`, a slot
+tuple `V`, and an inner compact `K₀ ⊆ chart source`, there is a bump `χ` (`= 1` on
+the chart image of `K₀`) and the bump-extended components `Φ k = χ · (chart rep of
+the V-component of gSeq k)` which are globally `ContDiff ⊤` and whose order-`r`
+derivatives are uniformly bounded in `k` (constant before `k`). -/
+theorem exists_chart_engineInput
+    (gRef : SmoothRiemannianMetric I M)
+    (gSeq : ℕ → SmoothRiemannianMetric I M)
+    (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
+      metricCovDerivNorm (I := I) q (gSeq k) gRef z ≤ C)
+    (x₀ : M)
+    (V : Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    {K₀ : Set M} (hK₀ : IsCompact K₀) (hK₀chart : K₀ ⊆ (chartAt H x₀).source) :
+    ∃ (Φ : ℕ → E → Real) (χ : E → Real),
+      (∀ k, ContDiff Real (∞ : WithTop ℕ∞) (Φ k)) ∧
+      (∀ r : ℕ, ∃ M : Real, ∀ k : ℕ, ∀ x : E,
+        ‖iteratedFDeriv Real r (Φ k) x‖ ≤ M) ∧
+      (∀ y ∈ K₀, χ (extChartAt I x₀ y) = 1) ∧
+      (∀ k, Φ k = fun x : E => χ x *
+        writtenInExtChartAt I 𝓘(Real, Real) x₀
+          (fun w : M => (covDerivOfField (I := I) gRef
+            (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) 0) w (fun a => V a w)) x) := by
+  classical
+  haveI : NormalSpace E := inferInstance
+  haveI : LocallyCompactSpace E := inferInstance
+  set tgt := (extChartAt I x₀).target with htgt
+  have htgt_open : IsOpen tgt := isOpen_extChartAt_target (I := I) x₀
+  -- the chart image of `K₀`, compact in `tgt`
+  set EK₀ : Set E := extChartAt I x₀ '' K₀ with hEK₀
+  have hEK₀cpt : IsCompact EK₀ :=
+    hK₀.image_of_continuousOn ((continuousOn_extChartAt (I := I) x₀).mono
+      (by rw [extChartAt_source]; exact hK₀chart))
+  have hEK₀tgt : EK₀ ⊆ tgt := by
+    rintro z ⟨y, hy, rfl⟩
+    exact (extChartAt I x₀).map_source (by rw [extChartAt_source]; exact hK₀chart hy)
+  -- outer bump χ : = 1 on a nhd of EK₀, COMPACT support ⊆ tgt
+  obtain ⟨L, hLcpt, hEK₀L, hLt⟩ := exists_compact_between hEK₀cpt htgt_open hEK₀tgt
+  obtain ⟨χM, hχ1, hχ0, -⟩ :=
+    exists_contMDiffMap_one_nhds_of_subset_interior (I := 𝓘(Real, E)) (M := E)
+      (n := (⊤ : ℕ∞)) hEK₀cpt.isClosed hEK₀L
+  set χ : E → Real := (χM : E → Real) with hχdef
+  have hχcd : ContDiff Real (∞ : WithTop ℕ∞) χ :=
+    contMDiff_iff_contDiff.mp (χM.contMDiff.of_le (by exact_mod_cast le_top))
+  have hχLsub : tsupport χ ⊆ L :=
+    closure_minimal (fun x hx => by by_contra hxL; exact hx (hχ0 x hxL)) hLcpt.isClosed
+  have hχcpt : IsCompact (tsupport χ) :=
+    hLcpt.of_isClosed_subset (isClosed_tsupport χ) hχLsub
+  have hχtsupp : tsupport χ ⊆ tgt := subset_trans hχLsub hLt
+  -- inner bump χ₁ : = 1 on a nhd of tsupport χ, tsupport ⊆ tgt
+  obtain ⟨V₂, hV₂o, htsχV₂, hV₂t⟩ :=
+    normal_exists_closure_subset (isClosed_tsupport χ) htgt_open hχtsupp
+  obtain ⟨χ1M, hχ1one, hχ1zero, -⟩ :=
+    exists_contMDiffMap_one_nhds_of_subset_interior (I := 𝓘(Real, E)) (M := E)
+      (n := (⊤ : ℕ∞)) (isClosed_tsupport χ) (by rw [hV₂o.interior_eq]; exact htsχV₂)
+  set χ1 : E → Real := (χ1M : E → Real) with hχ1def
+  have hχ1cd : ContDiff Real (∞ : WithTop ℕ∞) χ1 :=
+    contMDiff_iff_contDiff.mp (χ1M.contMDiff.of_le (by exact_mod_cast le_top))
+  have hχ1tsupp : tsupport χ1 ⊆ tgt := by
+    refine subset_trans (closure_mono ?_) hV₂t
+    intro x hx; by_contra hxV; exact hx (hχ1zero x hxV)
+  -- the chart rep of the V-component of gSeq k
+  set cr : ℕ → E → Real := fun k =>
+    writtenInExtChartAt I 𝓘(Real, Real) x₀
+      (fun w : M => (covDerivOfField (I := I) gRef
+        (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) 0) w (fun a => V a w))
+    with hcr
+  -- `cr k` is ContDiffOn `tgt`
+  have hcrOn : ∀ k, ContDiffOn Real (∞ : WithTop ℕ∞) (cr k) tgt := by
+    intro k z hz
+    have : ContDiffAt Real (∞ : WithTop ℕ∞) (cr k) z := by
+      have hzsrc : (extChartAt I x₀).symm z ∈ (chartAt H x₀).source := by
+        rw [← extChartAt_source (I := I)]; exact (extChartAt I x₀).map_target hz
+      have := contDiffAt_chartRep (I := I) _
+        (covDerivOfField_eval_contMDiff (I := I) gRef
+          (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) 0 V) x₀ hzsrc
+      rwa [(extChartAt I x₀).right_inv hz] at this
+    exact this.contDiffWithinAt
+  -- Φ k := χ · cr k
+  refine ⟨fun k => fun x => χ x * cr k x, χ, ?_, ?_, ?_, fun k => rfl⟩
+  · -- ContDiff
+    exact fun k => bumpMul_contDiff htgt_open hχcd hχtsupp (hcrOn k)
+  · -- uniform bound
+    intro r
+    set Kc : Set M := (extChartAt I x₀).symm '' (tsupport χ) with hKcdef
+    have hKccpt : IsCompact Kc :=
+      hχcpt.image_of_continuousOn
+        ((continuousOn_extChartAt_symm (I := I) x₀).mono hχtsupp)
+    have hKcsrc : Kc ⊆ (chartAt H x₀).source := by
+      rintro w ⟨z, hz, rfl⟩
+      rw [← extChartAt_source (I := I)]
+      exact (extChartAt I x₀).map_target (hχtsupp hz)
+    -- Bχ : χ-derivative bound over `tsupport χ` for orders ≤ r
+    obtain ⟨Bχ, hBχ0, hBχ⟩ : ∃ Bχ : Real, 0 ≤ Bχ ∧ ∀ x ∈ tsupport χ, ∀ i : ℕ, i ≤ r →
+        ‖iteratedFDeriv Real i χ x‖ ≤ Bχ := by
+      have hbd : ∀ i : ℕ, ∃ Bi : Real, ∀ x ∈ tsupport χ,
+          ‖iteratedFDeriv Real i χ x‖ ≤ Bi := by
+        intro i
+        obtain ⟨Bi, hBi⟩ := hχcpt.bddAbove_image
+          ((hχcd.continuous_iteratedFDeriv (by exact_mod_cast le_top)).norm).continuousOn
+        exact ⟨Bi, fun x hx => hBi ⟨x, hx, rfl⟩⟩
+      choose Bi hBi using hbd
+      refine ⟨∑ i ∈ Finset.range (r + 1), max (Bi i) 0,
+        Finset.sum_nonneg (fun i _ => le_max_right _ _), fun x hx i hir => ?_⟩
+      exact le_trans (le_trans (hBi i x hx) (le_max_left _ _))
+        (Finset.single_le_sum (fun ii _ => le_max_right _ _)
+          (Finset.mem_range.2 (Nat.lt_succ_of_le hir)))
+    -- Bg := Σ_{j≤r} Mr j, from the metric → A2 bridge (uniform in k)
+    choose Mr hMr0 hMrb using fun j =>
+      metricComp_iteratedFDeriv_le (I := I) gRef gSeq hbdd x₀ hKccpt hKcsrc V j
+    refine ⟨2 ^ r * Bχ * ∑ j ∈ Finset.range (r + 1), Mr j, fun k x => ?_⟩
+    set ggk : E → Real := fun x => χ1 x * cr k x with hggk
+    have hggcd : ContDiff Real (∞ : WithTop ℕ∞) ggk :=
+      bumpMul_contDiff htgt_open hχ1cd hχ1tsupp (hcrOn k)
+    have hΦeq : (fun x : E => χ x * cr k x) = fun x : E => χ x * ggk x := by
+      funext z
+      by_cases hz : χ z = 0
+      · simp [hz]
+      · have hzts : z ∈ tsupport χ := subset_tsupport _ hz
+        have hχ1z : χ1 z = 1 := hχ1one.self_of_nhdsSet z hzts
+        simp [ggk, hχ1z]
+    have hgbd : ∀ z ∈ tsupport χ, ∀ j : ℕ, j ≤ r →
+        ‖iteratedFDeriv Real j ggk z‖ ≤ ∑ j ∈ Finset.range (r + 1), Mr j := by
+      intro z hz j hjr
+      have hgerm : ggk =ᶠ[nhds z] cr k := by
+        filter_upwards [hχ1one.filter_mono (nhds_le_nhdsSet hz)] with w hw
+        simp [ggk, hw]
+      rw [(hgerm.iteratedFDeriv Real j).eq_of_nhds]
+      have hbnd := hMrb j k ((extChartAt I x₀).symm z) ⟨z, hz, rfl⟩
+      rw [(extChartAt I x₀).right_inv (hχtsupp hz)] at hbnd
+      exact le_trans hbnd
+        (Finset.single_le_sum (fun jj _ => hMr0 jj)
+          (Finset.mem_range.2 (Nat.lt_succ_of_le hjr)))
+    simp only [hΦeq]
+    exact norm_iteratedFDeriv_bumpMul_le (χ := χ) (gg := ggk) r hχcd hggcd
+      hBχ0 (Finset.sum_nonneg (fun j _ => hMr0 j)) hBχ hgbd x
+  · -- χ = 1 on EK₀
+    intro y hy
+    exact hχ1.self_of_nhdsSet _ ⟨y, hy, rfl⟩
+
 end HCGCompactness
 end DifferentialGeometry
