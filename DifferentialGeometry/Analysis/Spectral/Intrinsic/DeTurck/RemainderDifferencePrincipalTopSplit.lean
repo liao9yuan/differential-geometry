@@ -14,9 +14,12 @@ difference is dominated by
 * the generic Hamilton/Moser-tame lower arm `C j · (∑_{i ≤ k₀} ‖∇^i(T₁ − T₂)‖ + ∑_{i ≤ j+1}
   ‖∇^i(T₁ − T₂)‖_{L²})`, anchored at the **fixed low jet sum** of order `k₀` with
   `2 · k₀ ≤ a + 1`; plus
-* the tame fixed-pair cross arm `C j · (∑_{i ≤ j+2} (‖∇^i T₁‖ + ‖∇^i T₂‖)) ·
+* the **order-uniform** fixed-pair cross arm `c₂ · (∑_{i ≤ j+2} (‖∇^i T₁‖ + ‖∇^i T₂‖)) ·
   ∑_{i ≤ k₀} ‖∇^i(T₁ − T₂)‖` carrying the unbounded top coefficient jet on the fixed pair
-  against the same fixed low-jet anchor of the difference,
+  against the same fixed low-jet anchor of the difference — Hamilton-tame top-order terms
+  carry order-uniform constants, and an order-growing cross coefficient would make the
+  Picard class-invariance recursion jointly unsatisfiable; ALL order growth is confined
+  to the generic arm's family `C`,
 
 together with its spectral-mass counterpart (the per-order `(1+λ)^d`-weighted square-sum
 split), the currency the gated Picard pair consumes directly.
@@ -127,10 +130,11 @@ generic+cross rest bound anchored at a fixed low jet sum (the posited analytic i
 per-order quasilinear principal refinement of the symbol-level cancellation).**
 
 For an anchor `g₀`, a flow background `g_bg`, a supercritical order `a` (`2a > dim M + 4`),
-there are a **fixed low anchor order `k₀` with `2 * k₀ ≤ a + 1`** and a top-arm constant
-`c ≥ 0` depending only on `(g₀, g_bg, a)` — both uniform in the order `j`, the ball radius
-`B`, and the margin `δ` — such that for every `H^{a+2}`-ball radius `B ≥ 0`, every fibre
-margin `0 ≤ δ < 1/2`, there is a nonnegative order-indexed tame family `C : ℕ → ℝ` with: for
+there are a **fixed low anchor order `k₀` with `2 * k₀ ≤ a + 1`**, a top-arm constant
+`c ≥ 0`, and a cross-arm constant `c₂ ≥ 0`, all depending only on `(g₀, g_bg, a)` — uniform
+in the order `j`, the ball radius `B`, and the margin `δ` — such that for every
+`H^{a+2}`-ball radius `B ≥ 0`, every fibre margin `0 ≤ δ < 1/2`, there is a nonnegative
+order-indexed tame family `C : ℕ → ℝ` with: for
 any two `g₀`-fibre-`δ`-small perturbations `T₁, T₂` of `H^{a+2}` norm `≤ B`, any two realized
 metrics `g₁, g₂` (tied by the fibrewise `inner`-identities), and **every** gradient order
 `j`, the `j`-th covariant gradient of the realized remainder difference splits as a sum of
@@ -150,7 +154,9 @@ two genuine smooth compactly-supported `(0, 2+j)`-tensor sections `Top + Rest` w
   `≤2`-jet coefficient (the generic Hamilton/Moser-tame arm over `∑_{i ≤ j+1} ‖∇^i(T₁ −
   T₂)‖`, anchored at the fixed low jet sum `∑_{i ≤ k₀} ‖∇^i(T₁ − T₂)‖`), or lands the
   unbounded top coefficient jet on the fixed pair in `L²` against the difference's sup-norm
-  mass (the cross arm `(∑_{i ≤ j+2} (‖∇^i T₁‖ + ‖∇^i T₂‖)) · ∑_{i ≤ k₀} ‖∇^i(T₁ − T₂)‖`) —
+  mass (the cross arm `c₂ · (∑_{i ≤ j+2} (‖∇^i T₁‖ + ‖∇^i T₂‖)) · ∑_{i ≤ k₀} ‖∇^i(T₁ −
+  T₂)‖`, whose Hamilton-tame top-order coefficient `c₂` is **order-uniform**: all order
+  growth stays in the generic family `C`) —
   exactly the differenced-coefficient restriction of the landed tame sibling
   `exists_segmentMetricRHSDiff_faaDiBruno_moserTame_allOrder_l2Norm_le`
   (`SegmentMetricRHSCovJetExpansion.lean`), whose binder discipline this posit mirrors.
@@ -185,7 +191,7 @@ theorem exists_realizedRemainderDiff_covFdB_principalTopCell_split
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) :
     ∃ k₀ : ℕ, 2 * k₀ ≤ a + 1 ∧
-      ∃ c : ℝ, 0 ≤ c ∧
+      ∃ c : ℝ, 0 ≤ c ∧ ∃ c₂ : ℝ, 0 ≤ c₂ ∧
         ∀ (B : ℝ), 0 ≤ B → ∀ (δ : ℝ), 0 ≤ δ → δ < 1 / 2 →
           ∃ C : ℕ → ℝ, (∀ j, 0 ≤ C j) ∧
             ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
@@ -211,7 +217,7 @@ theorem exists_realizedRemainderDiff_covFdB_principalTopCell_split
                             ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖)
                         + ∑ i ∈ Finset.range (j + 1 + 1),
                             ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖)
-                      + C j * (∑ i ∈ Finset.range (j + 2 + 1),
+                      + c₂ * (∑ i ∈ Finset.range (j + 2 + 1),
                             (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
                               + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
                           * ∑ i ∈ Finset.range (k₀ + 1),
@@ -223,9 +229,10 @@ difference, anchored at a fixed low jet sum (the per-order quasilinear principal
 of the symbol-level cancellation).**
 
 For an anchor `g₀`, a flow background `g_bg`, a supercritical order `a`
-(`2a > dim M + 4`), there are a **fixed low anchor order `k₀` with `2 * k₀ ≤ a + 1`** and a
-**top-arm constant `c ≥ 0` depending only on `(g₀, g_bg, a)`** — both uniform in the order
-`j`, the ball radius `B`, and the margin `δ` — such that for every `H^{a+2}`-ball radius
+(`2a > dim M + 4`), there are a **fixed low anchor order `k₀` with `2 * k₀ ≤ a + 1`**, a
+**top-arm constant `c ≥ 0`**, and a **cross-arm constant `c₂ ≥ 0`**, all depending only on
+`(g₀, g_bg, a)` — uniform in the order `j`, the ball radius `B`, and the margin `δ` — such
+that for every `H^{a+2}`-ball radius
 `B ≥ 0` and every fibre margin `0 ≤ δ < 1/2` there is a nonnegative order-indexed tame
 constant family `C : ℕ → ℝ` with: for any two `g₀`-fibre-`δ`-small perturbations `T₁, T₂` of
 `H^{a+2}` norm `≤ B`, any two realized metrics `g₁, g₂` (tied by the fibrewise
@@ -234,7 +241,9 @@ realized remainder difference
 `realizedRHSRemainderSection g₀ g_bg g₁ T₁ − realizedRHSRemainderSection g₀ g_bg g₂ T₂`
 is dominated by the δ-proportional top arm `c · δ · ‖∇^{j+2}(T₁ − T₂)‖`, the generic tame
 lower arm over `∇^{≤ j+1}(T₁ − T₂)` anchored at the fixed low jet sum
-`∑_{i ≤ k₀} ‖∇^i(T₁ − T₂)‖`, and the tame fixed-pair cross arm against the same low anchor.
+`∑_{i ≤ k₀} ‖∇^i(T₁ − T₂)‖`, and the **order-uniform** fixed-pair cross arm `c₂ · (…) ·
+(low anchor)` against the same low anchor (with `c₂` depending only on `(g₀, g_bg, a)`;
+all order growth is confined to the generic family `C`).
 
 The remainder's second-order coefficient is `g_t⁻¹ − g₀⁻¹` (the per-order refinement of
 `deTurckNonlinearitySpectral_principalPart_cancels`), Neumann-bounded by `2δ` under the
@@ -255,14 +264,14 @@ both sides vanish; the δ-arm genuinely carries the top order (the generic arm s
 `exists_realizedRemainderDiff_covFdB_principalTopCell_split` exhibits `∇^j` of the remainder
 difference as `Top + Rest` with `‖Top‖` δ-Neumann-bounded by the top arm and `‖Rest‖`
 bounded by the generic + cross arms; the seminorm triangle inequality `norm_add_le` and the
-two arm bounds assemble the three-arm domination, with the same `k₀`, the same `c`, and the
-same per-order family `C`.  Consumers transitively depend on `sorryAx` only through that
+two arm bounds assemble the three-arm domination, with the same `k₀`, the same `c`, the
+same `c₂`, and the same per-order family `C`.  Consumers transitively depend on `sorryAx` only through that
 posited per-order decomposition. -/
 theorem exists_realizedRemainderDiff_principalTopSplit_allOrder_l2Norm_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) :
     ∃ k₀ : ℕ, 2 * k₀ ≤ a + 1 ∧
-      ∃ c : ℝ, 0 ≤ c ∧
+      ∃ c : ℝ, 0 ≤ c ∧ ∃ c₂ : ℝ, 0 ≤ c₂ ∧
         ∀ (B : ℝ), 0 ≤ B → ∀ (δ : ℝ), 0 ≤ δ → δ < 1 / 2 →
           ∃ C : ℕ → ℝ, (∀ j, 0 ≤ C j) ∧
             ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
@@ -284,15 +293,15 @@ theorem exists_realizedRemainderDiff_principalTopSplit_allOrder_l2Norm_le
                             ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖)
                         + ∑ i ∈ Finset.range (j + 1 + 1),
                             ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖)
-                    + C j * (∑ i ∈ Finset.range (j + 2 + 1),
+                    + c₂ * (∑ i ∈ Finset.range (j + 2 + 1),
                           (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
                             + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
                         * ∑ i ∈ Finset.range (k₀ + 1),
                             ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖ := by
   classical
-  obtain ⟨k₀, hk₀, c, hc_nn, hbody⟩ :=
+  obtain ⟨k₀, hk₀, c, hc_nn, c₂, hc₂_nn, hbody⟩ :=
     exists_realizedRemainderDiff_covFdB_principalTopCell_split (I := I) g₀ g_bg a ha
-  refine ⟨k₀, hk₀, c, hc_nn, fun B hB δ hδ0 hδ1 => ?_⟩
+  refine ⟨k₀, hk₀, c, hc_nn, c₂, hc₂_nn, fun B hB δ hδ0 hδ1 => ?_⟩
   obtain ⟨C, hC_nn, hsplit⟩ := hbody B hB δ hδ0 hδ1
   refine ⟨C, hC_nn, fun T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j => ?_⟩
   obtain ⟨Top, Rest, hdecomp, hTop, hRest⟩ :=
@@ -307,7 +316,7 @@ theorem exists_realizedRemainderDiff_principalTopSplit_allOrder_l2Norm_le
                   ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖)
                 + ∑ i ∈ Finset.range (j + 1 + 1),
                     ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖)
-              + C j * (∑ i ∈ Finset.range (j + 2 + 1),
+              + c₂ * (∑ i ∈ Finset.range (j + 2 + 1),
                     (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
                       + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
                   * ∑ i ∈ Finset.range (k₀ + 1),
@@ -318,7 +327,7 @@ theorem exists_realizedRemainderDiff_principalTopSplit_allOrder_l2Norm_le
                   ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖)
               + ∑ i ∈ Finset.range (j + 1 + 1),
                   ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖)
-          + C j * (∑ i ∈ Finset.range (j + 2 + 1),
+          + c₂ * (∑ i ∈ Finset.range (j + 2 + 1),
                 (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
                   + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
               * ∑ i ∈ Finset.range (k₀ + 1),
@@ -331,9 +340,9 @@ difference (the ε-Young squared form of the principal top-jet split, in the
 input).**
 
 For an anchor `g₀`, a flow background `g_bg`, a supercritical order `a` (`2a > dim M + 4`),
-there are a **fixed low anchor order `k₀` with `2 * k₀ ≤ a + 1`** and a top-arm constant
-`c ≥ 0` depending only on `(g₀, g_bg, a)` — both uniform in the spectral order `d`, the ball
-radius `B`, and the margin `δ` — such that for every `H^{a+2}`-ball radius `B ≥ 0` and every
+there are a **fixed low anchor order `k₀` with `2 * k₀ ≤ a + 1`**, a top-arm constant
+`c ≥ 0`, and a cross-arm constant `c₂ ≥ 0`, all depending only on `(g₀, g_bg, a)` — uniform
+in the spectral order `d`, the ball radius `B`, and the margin `δ` — such that for every `H^{a+2}`-ball radius `B ≥ 0` and every
 fibre margin `0 ≤ δ < 1/2` there is a nonnegative order-indexed family `C : ℝ → ℝ` with: for
 any two `g₀`-fibre-`δ`-small perturbations `T₁, T₂` of `H^{a+2}` norm `≤ B`, any two
 realized metrics `g₁, g₂` (tied by the fibrewise `inner`-identities), and **every** spectral
@@ -344,13 +353,16 @@ order `d ≥ 0`, the order-`d` spectral mass (the `(1+λᵢ)^d`-weighted square-
   δ-proportional principal arm, with `c` independent of `d` (the top covariant-Leibniz cell
   has binomial coefficient `1`, and ε-Young at a FIXED ε absorbs the cross term of the
   square into the two pure arms, so no order growth ever touches the δ²-coefficient); plus
-* the order-indexed lower arm `C d · (mass_{d+1}(T₁ − T₂) + (mass_{d+2}(T₁) +
-  mass_{d+2}(T₂)) · mass_{k₀}(T₁ − T₂))`: the generic Hamilton/Moser-tame arm one full
-  spectral order below the top, plus the fixed-pair (ball) arm carrying the unbounded
-  fixed-pair top mass against the fixed low-anchor mass of the difference.  ALL order
-  growth — in particular the sharp binomial-Leibniz `4^p`-type emissions — is confined to
-  the family `C d`, never to `c` (the `PROVE_REFUTED.md`-ratified ε-Young design: `δ < 1/2`
-  uniform, `4^p` inside `C(p)`).
+* the order-indexed generic lower arm `C d · mass_{d+1}(T₁ − T₂)`: the Hamilton/Moser-tame
+  arm one full spectral order below the top; plus
+* the **order-uniform fixed-pair cross arm** `c₂ · (mass_{d+2}(T₁) + mass_{d+2}(T₂)) ·
+  mass_{k₀}(T₁ − T₂)` carrying the unbounded fixed-pair top mass against the fixed
+  low-anchor mass of the difference — its Hamilton-tame top-order coefficient `c₂` is
+  independent of `d` (an order-growing cross coefficient would make the Picard
+  class-invariance recursion jointly unsatisfiable against the middle arm's forced growth).
+  ALL order growth — in particular the sharp binomial-Leibniz `4^p`-type emissions — is
+  confined to the family `C d`, never to `c` or `c₂` (the `PROVE_REFUTED.md`-ratified
+  ε-Young design: `δ < 1/2` uniform, `4^p` inside `C(p)`).
 
 This is the spectral-mass transcription of the per-order `L²`-jet split
 `exists_realizedRemainderDiff_principalTopSplit_allOrder_l2Norm_le`: the sharp Gårding
@@ -376,7 +388,7 @@ theorem exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) :
     ∃ k₀ : ℕ, 2 * k₀ ≤ a + 1 ∧
-      ∃ c : ℝ, 0 ≤ c ∧
+      ∃ c : ℝ, 0 ≤ c ∧ ∃ c₂ : ℝ, 0 ≤ c₂ ∧
         ∀ (B : ℝ), 0 ≤ B → ∀ (δ : ℝ), 0 ≤ δ → δ < 1 / 2 →
           ∃ C : ℝ → ℝ, (∀ d, 0 ≤ C d) ∧
             ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
@@ -413,12 +425,13 @@ theorem exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le
                               (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
                               (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2)
                     + C d *
+                        (∑' i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+                          tensorSobolevWeight (I := I) (M := M) i (d + 1) *
+                            (tensorL2Coeff (I := I) (M := M)
+                                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                                (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2)
+                    + c₂ *
                         ((∑' i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
-                            tensorSobolevWeight (I := I) (M := M) i (d + 1) *
-                              (tensorL2Coeff (I := I) (M := M)
-                                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-                                  (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2)
-                          + ((∑' i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
                                 tensorSobolevWeight (I := I) (M := M) i (d + 2) *
                                   (tensorL2Coeff (I := I) (M := M)
                                       (tensorResolventL2_isCompactOperator
@@ -430,12 +443,12 @@ theorem exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le
                                         (tensorResolventL2_isCompactOperator
                                           (I := I) (M := M) g₀ 0 2)
                                         (Integral.L2.SmoothCcTensor.toL2 T₂) i) ^ 2))
-                            * (∑' i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
-                                tensorSobolevWeight (I := I) (M := M) i (k₀ : ℝ) *
-                                  (tensorL2Coeff (I := I) (M := M)
-                                      (tensorResolventL2_isCompactOperator
-                                        (I := I) (M := M) g₀ 0 2)
-                                      (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2)) :=
+                        * (∑' i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+                            tensorSobolevWeight (I := I) (M := M) i (k₀ : ℝ) *
+                              (tensorL2Coeff (I := I) (M := M)
+                                  (tensorResolventL2_isCompactOperator
+                                    (I := I) (M := M) g₀ 0 2)
+                                  (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2) :=
   sorry
 
 end DeTurck

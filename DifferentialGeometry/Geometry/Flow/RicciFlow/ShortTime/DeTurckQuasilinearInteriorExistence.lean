@@ -470,7 +470,7 @@ theorem deTurckGatedRemainder_picard_contraction_onGate
   haveI hcount : Countable (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
       (I := I) (M := M) g₀ 0 2) :=
     countable_tensorEigenIdx (I := I) (M := M) hcompact
-  obtain ⟨k₀, hk₀, c, hc_nn, hsplitAll⟩ :=
+  obtain ⟨k₀, hk₀, c, hc_nn, c₂, hc₂_nn, hsplitAll⟩ :=
     DeTurck.exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le
       (I := I) (M := M) g₀ g_bg a ha
   obtain ⟨C_RH, hC_RH_nn, hRH⟩ :=
@@ -491,13 +491,13 @@ theorem deTurckGatedRemainder_picard_contraction_onGate
     refine mul_nonneg hC_RH_nn (Finset.sum_nonneg fun j _ => ?_)
     exact mul_nonneg (hC_G_nn j) (by positivity)
   obtain ⟨C, hC_nn, hsplit⟩ := hsplitAll R hR_nn δ hδ0.le hδ_half
-  have hX_nn : 0 ≤ C (a : ℝ) * (1 + 8 * B ((a : ℝ) + 1)) := by
+  have hX_nn : 0 ≤ C (a : ℝ) + c₂ * (8 * B ((a : ℝ) + 1)) := by
     have := hB ((a : ℝ) + 1)
-    exact mul_nonneg (hC_nn _) (by linarith)
-  refine ⟨min 1 (1 / (32 * (C (a : ℝ) * (1 + 8 * B ((a : ℝ) + 1)) + 1))),
-    lt_min one_pos (by positivity), min_le_left _ _, ?_⟩
+    exact add_nonneg (hC_nn _) (mul_nonneg hc₂_nn (by linarith))
+  refine ⟨min 1 (1 / (32 * (C (a : ℝ) + c₂ * (8 * B ((a : ℝ) + 1)) + 1))),
+    lt_min one_pos (one_div_pos.mpr (by linarith [hX_nn])), min_le_left _ _, ?_⟩
   intro T hT hT1 hTT₁ f f' F F' hf hf' hFpin hF'pin
-  have hT_small : T ≤ 1 / (32 * (C (a : ℝ) * (1 + 8 * B ((a : ℝ) + 1)) + 1)) :=
+  have hT_small : T ≤ 1 / (32 * (C (a : ℝ) + c₂ * (8 * B ((a : ℝ) + 1)) + 1)) :=
     le_trans hTT₁ (min_le_right _ _)
   have hσproof : (0 : ℝ) ≤ (a : ℝ) + 1 := by positivity
   set Φf := Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M)
@@ -514,12 +514,12 @@ theorem deTurckGatedRemainder_picard_contraction_onGate
       (I := I) (M := M) g₀ 0 2 → ℝ := fun i =>
     c * δ ^ 2 * tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2)
       + C (a : ℝ) * tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 1)
-      + C (a : ℝ) * (8 * B ((a : ℝ) + 1)) * tensorSobolevWeight (I := I) (M := M) i (k₀ : ℝ)
+      + c₂ * (8 * B ((a : ℝ) + 1)) * tensorSobolevWeight (I := I) (M := M) i (k₀ : ℝ)
     with hα_def
   have hαexp : ∀ i, α i =
       c * δ ^ 2 * tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2)
         + C (a : ℝ) * tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 1)
-        + C (a : ℝ) * (8 * B ((a : ℝ) + 1)) *
+        + c₂ * (8 * B ((a : ℝ) + 1)) *
             tensorSobolevWeight (I := I) (M := M) i (k₀ : ℝ) := fun i => by
     rw [hα_def]
   have h8B_nn : 0 ≤ 8 * B ((a : ℝ) + 1) := by have := hB ((a : ℝ) + 1); linarith
@@ -531,7 +531,7 @@ theorem deTurckGatedRemainder_picard_contraction_onGate
     have hCnn := hC_nn (a : ℝ)
     exact add_nonneg
       (add_nonneg (mul_nonneg (mul_nonneg hc_nn (sq_nonneg δ)) h1) (mul_nonneg hCnn h2))
-      (mul_nonneg (mul_nonneg hCnn h8B_nn) h3)
+      (mul_nonneg (mul_nonneg hc₂_nn h8B_nn) h3)
   -- the a.e. order-`j` field-mass coupling, for every integer order
   have hM4f : ∀ j : ℕ, ∀ᵐ t ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T),
       Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
@@ -776,14 +776,15 @@ theorem deTurckGatedRemainder_picard_contraction_onGate
         refine le_trans (le_of_eq ?_) h
         rw [hP2_def]
         exact tsum_congr fun i => by rw [hcoeff2 _ i]
-      have hPM0_le : C (a : ℝ) * ((P1 + P2) * M0)
-          ≤ C (a : ℝ) * (8 * B ((a : ℝ) + 1)) * M0 := by
+      have hPM0_le : c₂ * (P1 + P2) * M0
+          ≤ c₂ * (8 * B ((a : ℝ) + 1)) * M0 := by
         have h1 : (P1 + P2) * M0 ≤ (8 * B ((a : ℝ) + 1)) * M0 :=
           mul_le_mul_of_nonneg_right (by linarith) hM0_nn
-        calc C (a : ℝ) * ((P1 + P2) * M0)
-            ≤ C (a : ℝ) * ((8 * B ((a : ℝ) + 1)) * M0) :=
-              mul_le_mul_of_nonneg_left h1 (hC_nn _)
-          _ = C (a : ℝ) * (8 * B ((a : ℝ) + 1)) * M0 := by ring
+        calc c₂ * (P1 + P2) * M0
+            = c₂ * ((P1 + P2) * M0) := by ring
+          _ ≤ c₂ * ((8 * B ((a : ℝ) + 1)) * M0) :=
+              mul_le_mul_of_nonneg_left h1 hc₂_nn
+          _ = c₂ * (8 * B ((a : ℝ) + 1)) * M0 := by ring
       -- per-arm `ENNReal` domination through the per-mode coordinates of `fdiff t`
       have hM2_tsum : ENNReal.ofReal (c * δ ^ 2 * M2)
           ≤ ∑' i, ENNReal.ofReal
@@ -831,12 +832,12 @@ theorem deTurckGatedRemainder_picard_contraction_onGate
         · rw [← ENNReal.tsum_mul_left]
           refine ENNReal.tsum_le_tsum fun i => ?_
           rw [← ENNReal.ofReal_mul (hC_nn _)]
-      have hM0_tsum : ENNReal.ofReal (C (a : ℝ) * (8 * B ((a : ℝ) + 1)) * M0)
+      have hM0_tsum : ENNReal.ofReal (c₂ * (8 * B ((a : ℝ) + 1)) * M0)
           ≤ ∑' i, ENNReal.ofReal
-              (C (a : ℝ) * (8 * B ((a : ℝ) + 1)) *
+              (c₂ * (8 * B ((a : ℝ) + 1)) *
                 (tensorSobolevWeight (I := I) (M := M) i (k₀ : ℝ) *
                   ((fdiff t).coeff i) ^ 2)) := by
-        rw [ENNReal.ofReal_mul (mul_nonneg (hC_nn _) h8B_nn), hM0_def,
+        rw [ENNReal.ofReal_mul (mul_nonneg hc₂_nn h8B_nn), hM0_def,
           show (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
               (I := I) (M := M) g₀ 0 2,
             tensorSobolevWeight (I := I) (M := M) i (k₀ : ℝ) *
@@ -854,35 +855,30 @@ theorem deTurckGatedRemainder_picard_contraction_onGate
           positivity
         · rw [← ENNReal.tsum_mul_left]
           refine ENNReal.tsum_le_tsum fun i => ?_
-          rw [← ENNReal.ofReal_mul (mul_nonneg (hC_nn _) h8B_nn)]
-      calc ENNReal.ofReal (c * δ ^ 2 * M2 + C (a : ℝ) * (M1 + (P1 + P2) * M0))
-          ≤ ENNReal.ofReal (c * δ ^ 2 * M2)
-              + ENNReal.ofReal (C (a : ℝ) * (M1 + (P1 + P2) * M0)) :=
+          rw [← ENNReal.ofReal_mul (mul_nonneg hc₂_nn h8B_nn)]
+      calc ENNReal.ofReal (c * δ ^ 2 * M2 + C (a : ℝ) * M1 + c₂ * (P1 + P2) * M0)
+          ≤ ENNReal.ofReal (c * δ ^ 2 * M2 + C (a : ℝ) * M1)
+              + ENNReal.ofReal (c₂ * (P1 + P2) * M0) :=
             ENNReal.ofReal_add_le
-        _ ≤ ENNReal.ofReal (c * δ ^ 2 * M2)
-              + (ENNReal.ofReal (C (a : ℝ) * M1)
-                + ENNReal.ofReal (C (a : ℝ) * ((P1 + P2) * M0))) := by
-            refine add_le_add le_rfl ?_
-            have hdist : C (a : ℝ) * (M1 + (P1 + P2) * M0)
-                = C (a : ℝ) * M1 + C (a : ℝ) * ((P1 + P2) * M0) := by ring
-            rw [hdist]
-            exact ENNReal.ofReal_add_le
-        _ ≤ ENNReal.ofReal (c * δ ^ 2 * M2)
-              + (ENNReal.ofReal (C (a : ℝ) * M1)
-                + ENNReal.ofReal (C (a : ℝ) * (8 * B ((a : ℝ) + 1)) * M0)) :=
-            add_le_add le_rfl (add_le_add le_rfl
-              (ENNReal.ofReal_le_ofReal hPM0_le))
-        _ ≤ (∑' i, ENNReal.ofReal
+        _ ≤ (ENNReal.ofReal (c * δ ^ 2 * M2)
+              + ENNReal.ofReal (C (a : ℝ) * M1))
+              + ENNReal.ofReal (c₂ * (P1 + P2) * M0) :=
+            add_le_add ENNReal.ofReal_add_le le_rfl
+        _ ≤ (ENNReal.ofReal (c * δ ^ 2 * M2)
+              + ENNReal.ofReal (C (a : ℝ) * M1))
+              + ENNReal.ofReal (c₂ * (8 * B ((a : ℝ) + 1)) * M0) :=
+            add_le_add le_rfl (ENNReal.ofReal_le_ofReal hPM0_le)
+        _ ≤ ((∑' i, ENNReal.ofReal
                 (c * δ ^ 2 * (tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2) *
                   ((fdiff t).coeff i) ^ 2)))
-              + ((∑' i, ENNReal.ofReal
+              + (∑' i, ENNReal.ofReal
                   (C (a : ℝ) * (tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 1) *
-                    ((fdiff t).coeff i) ^ 2)))
-                + ∑' i, ENNReal.ofReal
-                  (C (a : ℝ) * (8 * B ((a : ℝ) + 1)) *
+                    ((fdiff t).coeff i) ^ 2))))
+              + ∑' i, ENNReal.ofReal
+                  (c₂ * (8 * B ((a : ℝ) + 1)) *
                     (tensorSobolevWeight (I := I) (M := M) i (k₀ : ℝ) *
-                      ((fdiff t).coeff i) ^ 2))) :=
-            add_le_add hM2_tsum (add_le_add hM1_tsum hM0_tsum)
+                      ((fdiff t).coeff i) ^ 2)) :=
+            add_le_add (add_le_add hM2_tsum hM1_tsum) hM0_tsum
         _ = ∑' i, ENNReal.ofReal (α i * ((fdiff t).coeff i) ^ 2) := by
             rw [← ENNReal.tsum_add, ← ENNReal.tsum_add]
             refine tsum_congr fun i => ?_
@@ -896,12 +892,12 @@ theorem deTurckGatedRemainder_picard_contraction_onGate
             have ha2 : 0 ≤ C (a : ℝ) * (tensorSobolevWeight (I := I) (M := M) i
                 ((a : ℝ) + 1) * ((fdiff t).coeff i) ^ 2) :=
               mul_nonneg (hC_nn _) (mul_nonneg hw2 (sq_nonneg _))
-            have ha3 : 0 ≤ C (a : ℝ) * (8 * B ((a : ℝ) + 1)) *
+            have ha3 : 0 ≤ c₂ * (8 * B ((a : ℝ) + 1)) *
                 (tensorSobolevWeight (I := I) (M := M) i (k₀ : ℝ) *
                   ((fdiff t).coeff i) ^ 2) :=
-              mul_nonneg (mul_nonneg (hC_nn _) h8B_nn)
+              mul_nonneg (mul_nonneg hc₂_nn h8B_nn)
                 (mul_nonneg hw3 (sq_nonneg _))
-            rw [← ENNReal.ofReal_add ha2 ha3, ← ENNReal.ofReal_add ha1 (add_nonneg ha2 ha3)]
+            rw [← ENNReal.ofReal_add ha1 ha2, ← ENNReal.ofReal_add (add_nonneg ha1 ha2) ha3]
             · refine congrArg ENNReal.ofReal ?_
               rw [hαexp i]
               ring
@@ -910,12 +906,11 @@ theorem deTurckGatedRemainder_picard_contraction_onGate
     have hk : k₀ ≤ a + 1 := by omega
     calc (k₀ : ℝ) ≤ ((a + 1 : ℕ) : ℝ) := Nat.cast_le.mpr hk
       _ = (a : ℝ) + 1 := by push_cast; ring
-  set Q : ℝ := 4 * (c * δ ^ 2) + 4 * T * (C (a : ℝ) * (1 + 8 * B ((a : ℝ) + 1)))
+  set Q : ℝ := 4 * (c * δ ^ 2) + 4 * T * (C (a : ℝ) + c₂ * (8 * B ((a : ℝ) + 1)))
     with hQ_def
   have hQ_nn : 0 ≤ Q := by
     rw [hQ_def]
-    have := mul_nonneg (mul_nonneg (by linarith [hT.le] : (0 : ℝ) ≤ 4 * T) (hC_nn (a : ℝ)))
-      (by linarith [hB ((a : ℝ) + 1)] : (0 : ℝ) ≤ 1 + 8 * B ((a : ℝ) + 1))
+    have := mul_nonneg (by linarith [hT.le] : (0 : ℝ) ≤ 4 * T) hX_nn
     nlinarith [hc_nn, sq_nonneg δ]
   have hper : ∀ i, α i * ‖timeModeCoeff (I := I) (M := M) fdiff i‖ ^ 2
       ≤ Q * (tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
@@ -965,7 +960,7 @@ theorem deTurckGatedRemainder_picard_contraction_onGate
     have t1 := mul_le_mul_of_nonneg_left hb1 (mul_nonneg hc_nn (sq_nonneg δ))
     have t2 := mul_le_mul_of_nonneg_left hb2 (hC_nn (a : ℝ))
     have t3 := mul_le_mul_of_nonneg_left (le_trans hb3 hb2)
-      (mul_nonneg (hC_nn (a : ℝ)) h8B_nn)
+      (mul_nonneg hc₂_nn h8B_nn)
     rw [hQ_def]
     nlinarith [t1, t2, t3]
   have hQsummable : Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
@@ -1035,11 +1030,11 @@ theorem deTurckGatedRemainder_picard_contraction_onGate
       nlinarith [sq_nonneg δ, hc_nn, mul_nonneg hc_nn (sq_nonneg δ),
         mul_nonneg (sq_nonneg c) (sq_nonneg δ)]
     have h1 : 4 * (c * δ ^ 2) ≤ 1 / 16 := by nlinarith
-    have hT32 : T * (32 * (C (a : ℝ) * (1 + 8 * B ((a : ℝ) + 1)) + 1)) ≤ 1 := by
-      have := (le_div_iff₀ (by positivity :
-        (0 : ℝ) < 32 * (C (a : ℝ) * (1 + 8 * B ((a : ℝ) + 1)) + 1))).mp hT_small
+    have hT32 : T * (32 * (C (a : ℝ) + c₂ * (8 * B ((a : ℝ) + 1)) + 1)) ≤ 1 := by
+      have := (le_div_iff₀ (by linarith [hX_nn] :
+        (0 : ℝ) < 32 * (C (a : ℝ) + c₂ * (8 * B ((a : ℝ) + 1)) + 1))).mp hT_small
       linarith
-    have h2 : 4 * T * (C (a : ℝ) * (1 + 8 * B ((a : ℝ) + 1))) ≤ 1 / 8 := by
+    have h2 : 4 * T * (C (a : ℝ) + c₂ * (8 * B ((a : ℝ) + 1))) ≤ 1 / 8 := by
       nlinarith [hT.le, hX_nn]
     rw [hQ_def]
     linarith
