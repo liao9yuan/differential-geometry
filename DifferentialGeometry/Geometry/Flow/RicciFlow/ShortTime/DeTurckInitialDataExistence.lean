@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Metric.Basic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHS
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckInitialAnchorConstruction
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckQuasilinearInteriorExistence
 
 /-! # `g₀`-anchored DeTurck–Ricci interior parabolic existence
 
@@ -477,6 +478,6 @@ theorem deturck_metric_pde_interior_at_initial
       (∀ t ∈ Set.Ioo (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
         HasDerivWithinAt (fun s : ℝ => (g_DT s).inner x v w)
           (deTurckRicciRHS (I := I) g_bg (g_DT t) x v w) (Set.Ici 0) t) :=
-  deturck_metric_pde_interior_at_initial_construction (I := I) g₀ g_bg
+  deturck_metric_pde_interior_at_initial_selfRepresentative (I := I) g₀ g_bg
 
 end DifferentialGeometry.PDE.RicciFlow
