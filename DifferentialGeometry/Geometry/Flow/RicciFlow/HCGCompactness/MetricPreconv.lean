@@ -421,7 +421,5 @@ theorem fderiv_comp_le_tower
       ≤ CV * Cp1 + CV * Cp := add_le_add h1 h2
     _ = CV * (Cp1 + Cp) := by ring
 
-#print axioms fderiv_comp_le_tower
-
 end HCGCompactness
 end DifferentialGeometry
