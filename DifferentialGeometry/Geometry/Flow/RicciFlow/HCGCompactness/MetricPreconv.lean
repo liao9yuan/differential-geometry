@@ -623,13 +623,14 @@ slot data, independent of `A0`) times the sum of the covariant-order norms up to
 `fderiv_comp_le_tower`) as the step. -/
 theorem iteratedFDeriv_comp_le_tower
     (gRef : SmoothRiemannianMetric I M)
-    (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
-      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
     {x₀ : M} {Kc : Set M} (hKc : IsCompact Kc)
     (hKchart : Kc ⊆ (chartAt H x₀).source) (r p : ℕ)
     (V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _)) :
-    ∃ CV : Real, 0 ≤ CV ∧ ∀ y ∈ Kc, ∀ b : ℕ → Real,
+    ∃ CV : Real, 0 ≤ CV ∧
+      ∀ A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+        (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2,
+      ∀ y ∈ Kc, ∀ b : ℕ → Real,
       (∀ q : ℕ, ∀ z ∈ Kc, Real.sqrt
           (normSq0S (I := I) gRef z (q + 2) (covDerivOfField (I := I) gRef A0 q z)) ≤ b q) →
       ‖iteratedFDeriv Real r (writtenInExtChartAt I 𝓘(Real, Real) x₀
@@ -639,7 +640,7 @@ theorem iteratedFDeriv_comp_le_tower
   | zero =>
       obtain ⟨D, hD0, hD⟩ := exists_family_bound (I := I) gRef hKc V
       refine ⟨D ^ (p + 2), pow_nonneg hD0 _, ?_⟩
-      intro y hy b hb
+      intro A0 y hy b hb
       have hbnn : ∀ q, 0 ≤ b q := fun q => le_trans (Real.sqrt_nonneg _) (hb q y hy)
       rw [norm_iteratedFDeriv_zero]
       have hsymm : (extChartAt I x₀).symm (extChartAt I x₀ y) = y :=
@@ -709,7 +710,7 @@ theorem iteratedFDeriv_comp_le_tower
       refine ⟨∑ i : Fin m, ‖c i‖ * (Cf i + ∑ a : Fin (p + 2), Cc i a),
         Finset.sum_nonneg (fun i _ => mul_nonneg (norm_nonneg _)
           (add_nonneg (hCf0 i) (Finset.sum_nonneg (fun a _ => hCc0 i a)))), ?_⟩
-      intro y hy b hb
+      intro A0 y hy b hb
       have hbnn : ∀ q : ℕ, 0 ≤ b q := fun q => le_trans (Real.sqrt_nonneg _) (hb q y hy)
       set z : E := extChartAt I x₀ y with hzdef
       set F : E → Real := writtenInExtChartAt I 𝓘(Real, Real) x₀
@@ -811,7 +812,7 @@ theorem iteratedFDeriv_comp_le_tower
         have hfst : ‖iteratedFDeriv Real r (writtenInExtChartAt I 𝓘(Real, Real) x₀
             (fun w : M => (covDerivOfField (I := I) gRef A0 (p + 1)) w
               (fun a => Vf i a w))) z‖ ≤ Cf i * S := by
-          have := hCfb i y hy b hb
+          have := hCfb i A0 y hy b hb
           rwa [hrange_f] at this
         have hcsum : ‖∑ a : Fin (p + 2), iteratedFDeriv Real r
             (writtenInExtChartAt I 𝓘(Real, Real) x₀
@@ -821,7 +822,7 @@ theorem iteratedFDeriv_comp_le_tower
           refine le_trans (norm_sum_le _ _) ?_
           rw [Finset.sum_mul]
           exact Finset.sum_le_sum (fun a _ =>
-            le_trans (hCcb i a y hy b hb)
+            le_trans (hCcb i a A0 y hy b hb)
               (mul_le_mul_of_nonneg_left hSc (hCc0 i a)))
         calc ‖iteratedFDeriv Real r (writtenInExtChartAt I 𝓘(Real, Real) x₀
               (fun w : M => (covDerivOfField (I := I) gRef A0 (p + 1)) w
