@@ -555,6 +555,42 @@ theorem symLoweredDeTurckVFRetagG0_sub_eq_slotTelescope
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
+/-- **(POSIT — the family-uniform order-`0` fibre value sup of the connection-difference action
+section.)**  For the fibre-small (`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, `δ < 1/2`)
+supercritically `H^{a+2}`-bounded (`2a > finrank + 4`) realized perturbation family, the order-`0`
+intrinsic squared fibre norm of the connection-difference action section
+`connDiffActionSection g₀ g₁ g₀ g_bg` — fibre `g₀(connDiff g₁ g₀ x (W₁ x) v, w)`,
+`W₁ = deTurckVF g₁ g_bg` — is uniformly bounded by a single constant `Λ²` over the manifold and the
+family.
+
+The fibre value is the partial contraction of the `g₀`-lowered connection difference
+`loweredConnDiffSection g₁ g₀` (whose order-`0` fibre sup is the Neumann-absorbed supercritical-`C¹`
+bound `exists_loweredConnDiffSection_rfns_fibre_sup_le`) against the smooth DeTurck field
+`W₁ = deTurckVF g₁ g_bg` (whose realized order-`0` fibre value is supercritically `C⁰`-bounded
+through the `H^{a+2} ↪ C¹` embedding of the metric jet, `2a > finrank + 4`); the contraction
+Cauchy–Schwarz folds the two factor sups into a single family-uniform order-`0` value sup.
+
+**Non-vacuity.**  A genuine fibre sup (a `Λ = 0` witness forces the action section `≡ 0` at every
+point, false whenever `g₁ ≠ g₀` since `connDiff g₁ g₀ ≠ 0` and `W₁ ≠ 0`).  At `T₁ = 0` realized
+(`g₁ = g₀`), `connDiff g₀ g₀ = 0`, the action section is the zero section, and `Λ = 0` works.  Its
+body is `sorry`: the genuine supercritical-`C¹` / Neumann-absorption contraction value sup of the
+connection-difference action section. -/
+theorem exists_connDiffActionSection_rfns_fibre_sup_le
+    (g₀ g_bg : SmoothRiemannianMetric I M) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ Λ : ℝ, 0 ≤ Λ ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ∀ x : M,
+          Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+            ((connDiffActionSection (I := I) g₀ g₁ g₀ g_bg).toSection x) ≤ Λ ^ 2 :=
+  sorry
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
+set_option linter.unusedSectionVars false in
 /-- **(POSIT — the family-uniform order-`0` fibre sup of the connection-slot carrier difference.)**
 For the fibre-small (`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, `δ < 1/2`) supercritically
 `H^{a+2}`-bounded (`2a > finrank + 4`) realized perturbation family, the order-`0` intrinsic squared
@@ -569,8 +605,12 @@ The order-`0` fibre value is the `g₀`-inner of the connection difference `conn
 against `W₁ x`; the connection difference's fibre sup is the Neumann-absorbed supercritical-`C¹`
 bound `exists_loweredConnDiffSection_rfns_fibre_sup_le` and the smooth DeTurck field `W₁` has a
 fibre sup, so the contraction has a family-uniform order-`0` sup.  Vanishes at `T₁ = 0` realized
-(`g₁ = g₀`, the difference is the zero section).  Body `sorry`: a posited deep order-`0` family
-fibre sup of the connection-slot carrier difference. -/
+(`g₁ = g₀`, the difference is the zero section).
+
+Glued: the carrier difference rewrites to the connection-difference action section
+`connDiffActionSection g₀ g₁ g₀ g_bg`
+(`loweredCovGradDeTurckVFMixed_connSlot_sub_eq_connDiffActionSection`), whose family-uniform order-`0`
+fibre value sup is the posited child `exists_connDiffActionSection_rfns_fibre_sup_le`. -/
 theorem exists_riemannianFiberNormSq_loweredCovGradDeTurckVFMixed_connSlot_diff_fibre_sup_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
     (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
@@ -583,8 +623,12 @@ theorem exists_riemannianFiberNormSq_loweredCovGradDeTurckVFMixed_connSlot_diff_
         ∀ x : M,
           Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
             ((loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₁ g₁ g_bg
-                - loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₁ g_bg).toSection x) ≤ Λ ^ 2 :=
-  sorry
+                - loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₁ g_bg).toSection x) ≤ Λ ^ 2 := by
+  obtain ⟨Λ, hΛ0, hΛ⟩ :=
+    exists_connDiffActionSection_rfns_fibre_sup_le (I := I) g₀ g_bg δ hδ0 hδ1 B a ha
+  refine ⟨Λ, hΛ0, fun T₁ g₁ hg₁ hδbnd hB₁ x => ?_⟩
+  rw [loweredCovGradDeTurckVFMixed_connSlot_sub_eq_connDiffActionSection (I := I) g₀ g₁ g_bg]
+  exact hΛ T₁ g₁ hg₁ hδbnd hB₁ x
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
