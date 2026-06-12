@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FrozenFramePureRC
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RicciTraceCarrier
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.NablaRicciTraceCarrier
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.NablaRicciTraceIBP
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemainderFrameSumBridge
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.ParsevalLaplacianSlot0Expansion
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.ParsevalFrameField
 import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorBochner
@@ -68,17 +67,20 @@ pointwise-Parseval (a pointwise slot identity, not an integrated cancellation). 
   re-glued over the primitive: `G₄ − I₂ = ⟨Curv S, ∇S⟩ − ⟨GcurvSection, ∇S⟩ − ⟨ricTraceSection,
   ∇S⟩`, sorry-free over the primitive through the covariant-Leibniz split
   `bochnerFoldGroupSum_elt3IiiIv_eq_nablaDiffCurvTrace_split` and the group-`3` decomposition;
-* `tensorL2Inner_genuineDiffCurv_eq_covGradBase_sub_slotExtend` — the sorry-free `L²` B-rule split
-  of the differentiated-curvature operator-field pairing;
-* `tensorL2Inner_curv_covGrad_eq_gcurvRicOperatorResidue_value` — the frame-free integrated Bochner
-  extraction `⟨Curv S, ∇S⟩ = ⟨GcurvSection, ∇S⟩ + ⟨ricTraceSection, ∇S⟩ + ⟨∇(pureRᵍ S), ∇S⟩ −
-  ⟨appCc (slotExtend Φ₀)(∇S), ∇S⟩`, sorry-free over the healthy upstream three-section value
-  `tensorL2Inner_curv_covGrad_eq_genuineThreeSection_value` (`MovingFrameRemainderFrameSumBridge`,
-  itself sorry-free over the single posit `bochnerWeitzenbock_threeSection_curvatureValue_posit`).
+* `tensorL2Inner_genuineDiffCurv_covGrad_eq_group4_sub_crossPairing` — **the posited
+  differentiated-curvature operator-field identification** (the second `sorry` in this file): the
+  frame-free operator-field pairing `⟨appCc (covGrad Φ₀) S, ∇S⟩_{L²}` (`Φ₀ := curvOpField g s`)
+  equals the gauge-cancelling difference combination `G₄ − I₂` of the Parseval fold;
+* `tensorL2Inner_genuineDiffCurv_covGrad_eq_curv_sub_gcurv_sub_ricTrace` — the frame-free reading of
+  the chain: `⟨appCc (covGrad Φ₀) S, ∇S⟩ = ⟨Curv S, ∇S⟩ − ⟨GcurvSection, ∇S⟩ − ⟨ricTraceSection,
+  ∇S⟩`, sorry-free glue over the two posits through the summed chain endpoint and a Parseval frame
+  family witness (`exists_smooth_parseval_frame_family`).
 
-The downstream integrated nullity `movingFrameNullity_diffCurvOpField_leaf`
-(`DifferentiatedCurvatureOperatorFieldIdentification`) is likewise glued over that upstream
-three-section value; consumers transitively depend on the posits' `sorryAx`.
+The frame-free corollary is what the three-section curvature value
+`bochnerWeitzenbock_threeSection_curvatureValue_posit` (`MovingFrameRemainderFrameSumBridge`, glued
+over this file) consumes; the `L²` B-rule split and the residue-form extraction
+`tensorL2Inner_curv_covGrad_eq_gcurvRicOperatorResidue_value` live downstream in
+`CurvatureCovGradResidueValue`. Consumers transitively depend on the two posits' `sorryAx`.
 -/
 
 noncomputable section
@@ -3788,116 +3790,103 @@ private theorem parsevalFrameSum_group4_sub_crossPairing_eq_curv_sub_gcurv_sub_r
     (I := I) (M := M) g s S V hV hPar
   linarith [hsum, h3, hsplit, hP]
 
-/-- **The differentiated-curvature operator-field pairing equals the gradient-of-base pairing minus the
-passenger-slot pairing (the `L²`-level B-rule split, sorry-free).** The global metric `L²` pairing of the
-differentiated-curvature operator-field section `genuineDiffCurvSection g s S = appCc (covGrad Φ₀) S`
-(`Φ₀ := curvOpField g s`) against `∇S := covGrad g 0 s S` equals the pairing of the covariant gradient of
-the order-`0` pure-Riemann curvature trace `∇(pureRGenuineDiffOp g 0 s S)` against `∇S`, minus the pairing
-of the passenger-slot operator-field action `appCc (slotExtend Φ₀) (∇S)` against `∇S`:
+
+
+
+
+
+set_option linter.unusedSectionVars false in
+/-- **The differentiated-curvature operator-field identification (posited primitive): the frame-free
+operator-field pairing is the gauge-cancelling difference `G₄ − I₂`.**  For a fixed smooth Parseval
+frame family `V a`, the global metric `L²` pairing of the differentiated-curvature operator-field
+section `appCc (covGrad Φ₀) S` (`Φ₀ := curvOpField g s`, definitionally `genuineDiffCurvSection g s
+S`, the `(∇R) S` trace) against `∇S := covGrad g 0 s S` equals the group-`4` double sum minus the
+curvature/second-derivative cross pairing:
 ```
-⟨appCc (covGrad Φ₀) S, ∇S⟩_{L²}
-  = ⟨∇(pureRGenuineDiffOp g 0 s S), ∇S⟩_{L²} − ⟨appCc (slotExtend Φ₀) (∇S), ∇S⟩_{L²}.
+⟨appCc (covGrad Φ₀) S, ∇S⟩_{L²} = G₄ − I₂,
+I₂ := ∑_a ∑_b ∫ ⟨R(V a, V b) S, ∇_{V a}(∇_{V b} S)⟩.
 ```
 
-This is the `L²`-pairing reading of the section-level B-rule inversion
-`genuineDiffCurvSection_eq_covGrad_sub_slotExtend` (`genuineDiffCurvSection g s S =
-∇(pureRGenuineDiffOp g 0 s S) − appCc (slotExtend Φ₀) (∇S)`): rearranged to the additive form
-`∇(pureRGenuineDiffOp g 0 s S) = genuineDiffCurvSection g s S + appCc (slotExtend Φ₀) (∇S)`, the left
-additivity of the `L²` pairing `tensorL2Inner_add_left` (with the cross-integrabilities
-`SmoothCcTensor.integrable_inner_cross`) splits the gradient-of-base pairing into the two summand pairings.
-It is the bridge through which the operator-field atom's right-hand side
-`⟨appCc (covGrad Φ₀) S, ∇S⟩` is identified with the operator residue's right-hand side
-`⟨∇(pureRᵍ S), ∇S⟩ − ⟨appCc (slotExtend Φ₀)(∇S), ∇S⟩`; sorry-free. -/
-private theorem tensorL2Inner_genuineDiffCurv_eq_covGradBase_sub_slotExtend
+**Why this combination is admissible (not in the refuted per-group family).**  The left side is
+frame-free, and by the summed chain endpoint
+`parsevalFrameSum_group4_sub_crossPairing_eq_curv_sub_gcurv_sub_ricTrace` (sorry-free over the
+posited primitive `D = −(G₁ + I₂)`) the right side equals the frame-free value `⟨Curv S, ∇S⟩ −
+⟨GcurvSection, ∇S⟩ − ⟨ricTraceSection, ∇S⟩` — the gauge variations of `G₄` and `I₂` cancel inside
+the difference, unlike the dim-≥-3-refuted per-group value assignments (`G₃ = ⟨ricTrace, ∇S⟩`,
+`G₂ + G₄ = operator residue`; `PROVE_REFUTED.md`, "Kernel per-group VALUE-ASSIGNMENT family"),
+which this statement does not transit.
+
+**Route for the genuine proof (the body is an honest `sorry`).**  Expand the second-order group-`4`
+carrier `−∇²_{∇_{V b} V a, V a} S − ∇²_{V a, ∇_{V b} V a} S` and the cross pairing `I₂` through the
+covariant Leibniz rule along the Parseval family, telescope the `∇V`-frame terms by the covariant
+antisymmetry `parsevalFrame_sum_covDeriv_inner_antisymm`, and identify the surviving content with
+the slot-`0` read of the operator-field trace `appCc (covGrad Φ₀) S` through the carrier laws of
+`SlotOperatorCarrierCalculus` / `ParsevalFrameDiffCurvatureTrace` — the same covariant-IBP genre as
+the `D`-primitive, numerically consistent with it through the chain endpoint.  Consumers (the
+frame-free corollary below, and through it the three-section curvature value of
+`MovingFrameRemainderFrameSumBridge`) transitively depend on its `sorryAx`. -/
+private theorem tensorL2Inner_genuineDiffCurv_covGrad_eq_group4_sub_crossPairing
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
+    tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (appCc (I := I) (M := M) g s (s + 1)
+          (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun =
+      bochnerFoldGroupSum (I := I) (M := M) g s S V
+          (bochnerGroupElt4 (I := I) (M := M) g s S) -
+        (∑ a : Fin N, ∑ b : Fin N,
+          ∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+              (riemannSecCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+              (secondCovApplyCc (I := I) (M := M) g s S (hV a) (hV b)).toSection x
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
+  sorry
+
+/-- **The frame-free differentiated-curvature pairing value: `⟨(∇R) S, ∇S⟩ = ⟨Curv S, ∇S⟩ −
+⟨GcurvSection, ∇S⟩ − ⟨ricTraceSection, ∇S⟩` (sorry-free glue over the two posited primitives).**
+The global metric `L²` pairing of the differentiated-curvature operator-field section
+`appCc (covGrad Φ₀) S` (`Φ₀ := curvOpField g s`) against `∇S := covGrad g 0 s S` equals the
+curvature cross-pairing minus the pure-Riemann and leading-slot Ricci traces:
+```
+⟨appCc (covGrad Φ₀) S, ∇S⟩_{L²}
+  = ⟨pointwiseTensorCurv g s S, ∇S⟩_{L²} − ⟨GcurvSection g s S, ∇S⟩_{L²}
+      − ⟨ricTraceSection g s S, ∇S⟩_{L²}.
+```
+
+Both sides are frame-free; the proof passes through a Parseval frame family witness
+(`exists_smooth_parseval_frame_family`): the posited operator-field identification
+`tensorL2Inner_genuineDiffCurv_covGrad_eq_group4_sub_crossPairing` reads the left side as the
+gauge-cancelling difference `G₄ − I₂`, and the summed chain endpoint
+`parsevalFrameSum_group4_sub_crossPairing_eq_curv_sub_gcurv_sub_ricTrace` (sorry-free over the
+`D = −(G₁ + I₂)` primitive) evaluates that difference to the right side.  No per-group value
+assignment is transited.  Consumers (the three-section curvature value
+`bochnerWeitzenbock_threeSection_curvatureValue_posit` of `MovingFrameRemainderFrameSumBridge`)
+transitively depend on the two primitives' `sorryAx`. -/
+theorem tensorL2Inner_genuineDiffCurv_covGrad_eq_curv_sub_gcurv_sub_ricTrace
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     tensorL2Inner (I := I) (M := M) g 0 (s + 1)
         (appCc (I := I) (M := M) g s (s + 1)
           (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S).toFun
         (covGrad (I := I) (M := M) g 0 s S).toFun =
       tensorL2Inner (I := I) (M := M) g 0 (s + 1)
-          (covGrad (I := I) (M := M) g 0 s
-            (pureRGenuineDiffOp (I := I) (M := M) g 0 s S)).toFun
+          (pointwiseTensorCurv (I := I) (M := M) g s S).toFun
           (covGrad (I := I) (M := M) g 0 s S).toFun -
         tensorL2Inner (I := I) (M := M) g 0 (s + 1)
-          (appCc (I := I) (M := M) g (s + 1) (s + 1)
-            (slotExtend (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s))
-            (covGrad (I := I) (M := M) g 0 s S)).toFun
-          (covGrad (I := I) (M := M) g 0 s S).toFun := by
-  classical
-  -- The section-level B-rule inversion `genuineDiffCurvSection g s S = ∇(pureRᵍ S) − appCc (slotExtend Φ₀)(∇S)`,
-  -- rearranged to the additive form `∇(pureRᵍ S) = genuineDiffCurvSection g s S + appCc (slotExtend Φ₀)(∇S)`.
-  have hsec := genuineDiffCurvSection_eq_covGrad_sub_slotExtend (I := I) (M := M) g s S
-  rw [eq_sub_iff_add_eq] at hsec
-  simp only [Nat.add_zero] at hsec
-  -- The atom-2 right-hand carrier `appCc Φ₀'-form` is the differentiated-curvature section by definition.
-  have hatom : (appCc (I := I) (M := M) g s (s + 1)
-        (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S).toFun =
-      (genuineDiffCurvSection (I := I) (M := M) g s S).toFun := rfl
-  -- Left additivity of the `L²` pairing on the additive form, via the cross-integrabilities.
-  have hadd := tensorL2Inner_add_left (I := I) (M := M) g 0 (s + 1)
-      (genuineDiffCurvSection (I := I) (M := M) g s S).toFun
-      (appCc (I := I) (M := M) g (s + 0 + 1) (s + 0 + 1)
-          (slotExtend (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s))
-          (covGrad (I := I) (M := M) g 0 (s + 0) S)).toFun
-      (covGrad (I := I) (M := M) g 0 s S).toFun
-      (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
-        (genuineDiffCurvSection (I := I) (M := M) g s S)
-        (covGrad (I := I) (M := M) g 0 s S))
-      (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
-        (appCc (I := I) (M := M) g (s + 0 + 1) (s + 0 + 1)
-          (slotExtend (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s))
-          (covGrad (I := I) (M := M) g 0 (s + 0) S))
-        (covGrad (I := I) (M := M) g 0 s S))
-  simp only [Nat.add_zero] at hadd
-  rw [hatom, ← hsec, SmoothCcTensor.toFun_add, hadd]
-  ring
-
-/-- **The integrated tensor Bochner extraction (the frame-free four-pairing value of the curvature
-cross-pairing).**  The global metric `L²` pairing of the order-`2` commutator defect
-`Curv S := pointwiseTensorCurv g s S` against `∇S := covGrad g 0 s S` splits into the pure-Riemann
-curvature trace, the Bochner–Lichnerowicz Ricci trace, and the differentiated-curvature (`∇R`)
-operator-field content in residue form:
-```
-⟨Curv S, ∇S⟩_{L²}
-  = ⟨GcurvSection g s S, ∇S⟩_{L²} + ⟨ricTraceSection g s S, ∇S⟩_{L²}
-      + ⟨∇(pureRGenuineDiffOp g 0 s S), ∇S⟩_{L²}
-      − ⟨appCc (slotExtend Φ₀) (∇S), ∇S⟩_{L²},   Φ₀ := curvOpField g s.
-```
-Sorry-free glue over the healthy upstream three-section value
-`tensorL2Inner_curv_covGrad_eq_genuineThreeSection_value` (`MovingFrameRemainderFrameSumBridge`,
-itself sorry-free over the single posit `bochnerWeitzenbock_threeSection_curvatureValue_posit`) and
-the sorry-free `L²` B-rule split `tensorL2Inner_genuineDiffCurv_eq_covGradBase_sub_slotExtend`.  It
-does NOT transit any per-group Bochner-fold value (the former fold route through `G₃ = ricTrace` and
-`G₂ + G₄ = operator residue` was deleted — those per-group values are FALSE in dim ≥ 3,
-`PROVE_REFUTED.md`); consumers transitively depend on the bridge posit's `sorryAx`. -/
-theorem tensorL2Inner_curv_covGrad_eq_gcurvRicOperatorResidue_value
-    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
-    tensorL2Inner (I := I) (M := M) g 0 (s + 1)
-        (pointwiseTensorCurv (I := I) (M := M) g s S).toFun
-        (covGrad (I := I) (M := M) g 0 s S).toFun =
-      tensorL2Inner (I := I) (M := M) g 0 (s + 1)
           (GcurvSection (I := I) (M := M) g s S).toFun
-          (covGrad (I := I) (M := M) g 0 s S).toFun +
+          (covGrad (I := I) (M := M) g 0 s S).toFun -
         tensorL2Inner (I := I) (M := M) g 0 (s + 1)
           (ricTraceSection (I := I) (M := M) g s S).toFun
-          (covGrad (I := I) (M := M) g 0 s S).toFun +
-        tensorL2Inner (I := I) (M := M) g 0 (s + 1)
-          (covGrad (I := I) (M := M) g 0 s
-            (pureRGenuineDiffOp (I := I) (M := M) g 0 s S)).toFun
-          (covGrad (I := I) (M := M) g 0 s S).toFun -
-        tensorL2Inner (I := I) (M := M) g 0 (s + 1)
-          (appCc (I := I) (M := M) g (s + 1) (s + 1)
-            (slotExtend (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s))
-            (covGrad (I := I) (M := M) g 0 s S)).toFun
           (covGrad (I := I) (M := M) g 0 s S).toFun := by
   classical
-  have hStar := tensorL2Inner_curv_covGrad_eq_genuineThreeSection_value (I := I) (M := M) g s S
-  have hB := tensorL2Inner_genuineDiffCurv_eq_covGradBase_sub_slotExtend (I := I) (M := M) g s S
-  linarith [hStar, hB]
-
-
-
-
+  obtain ⟨N, V, hV, hPar⟩ := exists_smooth_parseval_frame_family (I := I) (M := M) g
+  have hOp := tensorL2Inner_genuineDiffCurv_covGrad_eq_group4_sub_crossPairing
+    (I := I) (M := M) g s S V hV hPar
+  have hChain := parsevalFrameSum_group4_sub_crossPairing_eq_curv_sub_gcurv_sub_ricTrace
+    (I := I) (M := M) g s S V hV hPar
+  linarith [hOp, hChain]
 
 end Connection
 end Integral

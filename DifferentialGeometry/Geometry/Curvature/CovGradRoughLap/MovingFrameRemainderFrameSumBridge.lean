@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameIntegr
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFramePureRCurvatureTracePairing
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FrozenFramePureRCurvatureTower
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RicciTraceCarrier
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.ParsevalSevenTermBochnerFold
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.FrameInvariance
 
 /-!
@@ -591,8 +592,8 @@ theorem bracketChannelRemainder_integral_eq_weitzenbock_sub_pureRBilin
   -- Step 4 (the pure-Riemann pairing is the gradient-field pure-`R` bilinear).
   rw [tensorL2Inner_GcurvSection_covGrad_eq_pureRGenuineDiffOp (I := I) (M := M) g s S]
 
-/-- **The frame-free integrated tensor Bochner–Weitzenböck three-section curvature value (the rank-`0`
-curvature line's single genuine-math posit, in pure-`R` operator-field form).** For a closed smooth
+/-- **The frame-free integrated tensor Bochner–Weitzenböck three-section curvature value (in pure-`R`
+operator-field form, glue over the seven-term Parseval fold chain).** For a closed smooth
 Riemannian manifold `(M, g)`, every covariant rank `s`, and every smooth compactly-supported
 `(0, s)`-tensor `S`, the global metric `L²` pairing of the three concrete frame-free operator-field
 curvature carriers — the gradient-field pure-Riemann trace `pureRGenuineDiffOp g 0 (s + 1) (∇S)`
@@ -633,9 +634,19 @@ Bochner–Lichnerowicz identity, genuinely nonzero on a non-flat manifold. Dropp
 (perturbing the curvature to flat, the degenerate witness) makes the value FALSE at `s = 0`, so the
 carrier is genuinely required and the identity is not vacuous.
 
-This is the single irreducible analytic posit of the curvature line; it is disclosed as a `sorry`, and
-consumers (`tensorL2Inner_curv_covGrad_eq_genuineThreeSection_value` and the operator-field atom that cites
-it) transitively depend on its `sorryAx`. -/
+**Proof (glue over the seven-term Parseval fold chain of `ParsevalSevenTermBochnerFold`).** Left
+additivity of the `L²` pairing (`tensorL2Inner_add_left`, with the cross-integrabilities
+`SmoothCcTensor.integrable_inner_cross`) expands the three-carrier sum-pairing; the gradient-field
+pure-Riemann identification `tensorL2Inner_GcurvSection_covGrad_eq_pureRGenuineDiffOp` reads the
+pure-Riemann summand as `⟨GcurvSection g s S, ∇S⟩`; the frame-free differentiated-curvature value
+`tensorL2Inner_genuineDiffCurv_covGrad_eq_curv_sub_gcurv_sub_ricTrace`
+(`ParsevalSevenTermBochnerFold`) evaluates the operator-field summand to `⟨Curv S, ∇S⟩ −
+⟨GcurvSection, ∇S⟩ − ⟨ricTraceSection, ∇S⟩`; and the Weitzenböck value
+`weitzenbock_curvature_crossPairing_value` closes the telescope.  Consumers
+(`tensorL2Inner_curv_covGrad_eq_genuineThreeSection_value` and the operator-field atom that cites
+it) transitively depend on the `sorryAx` of the two posited fold primitives (`D = −(G₁ + I₂)` and
+the operator-field identification `⟨appCc (covGrad Φ₀) S, ∇S⟩ = G₄ − I₂`, both
+`ParsevalSevenTermBochnerFold`). -/
 theorem bochnerWeitzenbock_threeSection_curvatureValue_posit
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     tensorL2Inner (I := I) (M := M) g 0 (s + 1)
@@ -649,8 +660,39 @@ theorem bochnerWeitzenbock_threeSection_curvatureValue_posit
           (rawTensorConnLapSmooth (I := I) g 0 s S).toFun ^ 2 -
         tensorL2Norm (I := I) (M := M) g 0 (s + 1 + 1)
           (covGrad (I := I) (M := M) g 0 (s + 1)
-            (covGrad (I := I) (M := M) g 0 s S)).toFun ^ 2 :=
-  sorry
+            (covGrad (I := I) (M := M) g 0 s S)).toFun ^ 2 := by
+  classical
+  have hW := weitzenbock_curvature_crossPairing_value (I := I) (M := M) g s S
+  have hGc := tensorL2Inner_GcurvSection_covGrad_eq_pureRGenuineDiffOp (I := I) (M := M) g s S
+  have hOp := tensorL2Inner_genuineDiffCurv_covGrad_eq_curv_sub_gcurv_sub_ricTrace
+    (I := I) (M := M) g s S
+  have hadd1 := tensorL2Inner_add_left (I := I) (M := M) g 0 (s + 1)
+      (pureRGenuineDiffOp (I := I) (M := M) g 0 (s + 1)
+        (covGrad (I := I) (M := M) g 0 s S)).toFun
+      (appCc (I := I) (M := M) g s (s + 1)
+          (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S +
+        ricTraceSection (I := I) (M := M) g s S).toFun
+      (covGrad (I := I) (M := M) g 0 s S).toFun
+      (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+        (pureRGenuineDiffOp (I := I) (M := M) g 0 (s + 1)
+          (covGrad (I := I) (M := M) g 0 s S)) (covGrad (I := I) (M := M) g 0 s S))
+      (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+        (appCc (I := I) (M := M) g s (s + 1)
+            (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S +
+          ricTraceSection (I := I) (M := M) g s S) (covGrad (I := I) (M := M) g 0 s S))
+  have hadd2 := tensorL2Inner_add_left (I := I) (M := M) g 0 (s + 1)
+      (appCc (I := I) (M := M) g s (s + 1)
+        (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S).toFun
+      (ricTraceSection (I := I) (M := M) g s S).toFun
+      (covGrad (I := I) (M := M) g 0 s S).toFun
+      (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+        (appCc (I := I) (M := M) g s (s + 1)
+          (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S)
+        (covGrad (I := I) (M := M) g 0 s S))
+      (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+        (ricTraceSection (I := I) (M := M) g s S) (covGrad (I := I) (M := M) g 0 s S))
+  rw [SmoothCcTensor.toFun_add, hadd1, SmoothCcTensor.toFun_add, hadd2]
+  linarith [hW, hGc, hOp]
 
 /-- **The integrated tensor Bochner–Weitzenböck three-section value, in the curvature cross-pairing
 form (sorry-free over the single posit).** For a closed smooth Riemannian manifold `(M, g)`, covariant
@@ -666,15 +708,17 @@ leading-slot Ricci trace:
 ```
 
 This is the rank-`0` curvature line's deep cross-pairing value in the exact three-term shape the
-operator-field atom consumes. **Assembly (sorry-free over the single posit
-`bochnerWeitzenbock_threeSection_curvatureValue_posit`).** The Weitzenböck value
+operator-field atom consumes. **Assembly (sorry-free over the three-section value
+`bochnerWeitzenbock_threeSection_curvatureValue_posit`, itself glue over the seven-term Parseval
+fold chain of `ParsevalSevenTermBochnerFold`).** The Weitzenböck value
 `weitzenbock_curvature_crossPairing_value` (sorry-free) reads `⟨Curv S, ∇S⟩_{L²} = ‖Δ_∇ S‖²_{L²} −
 ‖∇²S‖²_{L²}`; the posit reads the three-carrier sum-pairing as the same Weitzenböck value; left additivity
 of the `L²` pairing `tensorL2Inner_add_left` (with the cross-integrabilities
 `SmoothCcTensor.integrable_inner_cross`) expands the posited sum into the three summand pairings; and the
 gradient-field pure-Riemann identification `tensorL2Inner_GcurvSection_covGrad_eq_pureRGenuineDiffOp`
 (sorry-free) rewrites the pure-Riemann summand `⟨pureRGenuineDiffOp g 0 (s + 1) (∇S), ∇S⟩` as the genuine
-`⟨GcurvSection g s S, ∇S⟩`. Consumers transitively depend on the posit's `sorryAx`. -/
+`⟨GcurvSection g s S, ∇S⟩`. Consumers transitively depend on the `sorryAx` of the two posited fold
+primitives (`ParsevalSevenTermBochnerFold`). -/
 theorem tensorL2Inner_curv_covGrad_eq_genuineThreeSection_value
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     tensorL2Inner (I := I) (M := M) g 0 (s + 1)
