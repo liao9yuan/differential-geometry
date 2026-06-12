@@ -58,9 +58,14 @@ genuinely carries the top order: the lower arm stops at `i ≤ j + 1`, so for hi
 differences the right side without the `δ`-arm is strictly smaller than the left at large
 `j`.
 
-The body is the posited analytic input (the per-order quasilinear principal refinement of
-the proven symbol-level cancellation); it remains `sorry`, so consumers transitively depend
-on `sorryAx`. -/
+The headline split is **proven by composition** (TRANSIT glue: seminorm triangle inequality)
+over the single posited per-order decomposition
+`exists_realizedRemainderDiff_covFdB_principalTopCell_split`, which materializes, at every
+order `j`, the genuine `Top + Rest` section decomposition of `∇^j` of the remainder
+difference together with the δ-Neumann bound on `Top` and the differentiated-coefficient
+generic+cross bound on `Rest`.  That posit carries the genuine analytic content (the
+per-order quasilinear principal refinement of the proven symbol-level cancellation); its body
+remains `sorry`, so consumers transitively depend on `sorryAx` through it. -/
 
 set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
@@ -91,9 +96,96 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+/-- **The per-order `Top + Rest` covariant-Faà-di-Bruno decomposition of the realized DeTurck
+remainder difference, with the δ-Neumann top-cell bound and the differentiated-coefficient
+generic+cross rest bound (the posited analytic input: the per-order quasilinear principal
+refinement of the symbol-level cancellation).**
+
+For an anchor `g₀`, a flow background `g_bg`, a supercritical order `a` (`2a > dim M + 4`),
+there is a top-arm constant `c ≥ 0` depending only on `(g₀, g_bg, a)` — uniform in the order
+`j`, the ball radius `B`, and the margin `δ` — such that for every `H^{a+2}`-ball radius
+`B ≥ 0`, every fibre margin `0 ≤ δ < 1/2`, there is a nonnegative order-indexed tame family
+`C : ℕ → ℝ` with: for any two `g₀`-fibre-`δ`-small perturbations `T₁, T₂` of `H^{a+2}` norm
+`≤ B`, any two realized metrics `g₁, g₂` (tied by the fibrewise `inner`-identities), and
+**every** gradient order `j`, the `j`-th covariant gradient of the realized remainder
+difference splits as a sum of two genuine smooth compactly-supported `(0, 2+j)`-tensor
+sections `Top + Rest` with
+
+* **the δ-Neumann top-cell bound** `‖Top‖ ≤ c · δ · ‖∇^{j+2}(T₁ − T₂)‖`: `Top` is the unique
+  un-differentiated (`k = 0` covariant-Leibniz, binomial coefficient `1`, hence
+  order-uniform) FdB cell `[(g_t⁻¹ − g₀⁻¹)] · ∇^{j+2}(realize (T₁ − T₂))`, whose coefficient
+  is the inverse-difference fibre operator — Neumann-series bounded by `δ/(1−δ) ≤ 2δ` under
+  the fibre gate `gFibreOpBound … δ` for `δ < 1/2`, the per-order refinement of the proven
+  symbol cancellation `deTurckNonlinearitySpectral_principalPart_cancels`
+  (`NonlinearitySpectral.lean`: the remainder's second-order coefficient is `g⁻¹ − g₀⁻¹`,
+  the `g₀⁻¹∇²` core being subtracted by the `Δ_∇` summand of
+  `realizedRHSRemainderSection_eq_sub`); and
+* **the differentiated-coefficient rest bound**: every other FdB term differentiates the
+  coefficient at least once, dropping the difference jet to `≤ j+1` with a ball-bounded
+  `≤2`-jet coefficient (the generic Hamilton/Moser-tame arm over `∑_{i ≤ j+1} ‖∇^i(T₁ −
+  T₂)‖`, anchored at `‖(T₁ − T₂).toHs a‖`), or lands the unbounded top coefficient jet on
+  the fixed pair in `L²` against the difference's `C⁰` mass (the cross arm `(∑_{i ≤ j+2}
+  (‖∇^i T₁‖ + ‖∇^i T₂‖)) · ‖(T₁ − T₂).toHs a‖`) — exactly the differenced-coefficient
+  restriction of the landed tame sibling
+  `exists_segmentMetricRHSDiff_faaDiBruno_moserTame_allOrder_l2Norm_le`
+  (`SegmentMetricRHSCovJetExpansion.lean`), whose binder discipline this posit mirrors.
+
+The split must be **per-order**: a single section-level (`j = 0`) `Top` section with
+all-order pure-δ bounds does NOT exist — for `j ≥ 1` the covariant derivatives hitting the
+inverse-difference coefficient are ball-sized, not δ-small, so the `j`-dependent top cell is
+re-collected at each order (which is why the two arm bounds are bundled with the
+decomposition witnesses into one posit, exactly as in the on-disk Lie precedent
+`lieDerivDiff_covFdB_section_split`: separate `Top`-bound and `Rest`-bound theorems could
+not share the decomposition witnesses without a concrete named top-cell operator, which
+awaits the contraction-coefficient machinery).
+
+**Non-vacuity.**  The two arm bounds are coupled by the structural identity
+`∇^j(remainder diff) = Top + Rest`: at `T₁ = T₂` the metric ties force `g₁ = g₂`, both sides
+vanish, and the bounds are equalities `0 ≤ 0`; for `T₁ ≠ T₂` a degenerate witness
+`Top = 0` is rejected for `j` large (the `Rest` arm stops at difference order `j+1`, while
+the left side carries genuine order-`(j+2)` difference content), and `Rest = 0` is rejected
+already at `j = 0` whenever the remainders differ beyond the principal cell.  The body is
+the posited analytic input; it remains `sorry`, so consumers transitively depend on
+`sorryAx`. -/
+theorem exists_realizedRemainderDiff_covFdB_principalTopCell_split
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ c : ℝ, 0 ≤ c ∧
+      ∀ (B : ℝ), 0 ≤ B → ∀ (δ : ℝ), 0 ≤ δ → δ < 1 / 2 →
+        ∃ C : ℕ → ℝ, (∀ j, 0 ≤ C j) ∧
+          ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+            (g₁ g₂ : SmoothRiemannianMetric I M),
+            (∀ (x : M) (v w : TangentSpace I x),
+              g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+            (∀ (x : M) (v w : TangentSpace I x),
+              g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+            gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+            gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
+            ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+            ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+            ∀ j : ℕ,
+              ∃ Top Rest : Integral.L2.SmoothCcTensor g₀ 0 (2 + j),
+                PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+                    (realizedRHSRemainderSection (I := I) g₀ g_bg g₁ T₁
+                      - realizedRHSRemainderSection (I := I) g₀ g_bg g₂ T₂)
+                  = Top + Rest ∧
+                ‖Top‖ ≤
+                  c * δ * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 (j + 2) (T₁ - T₂)‖ ∧
+                ‖Rest‖ ≤
+                  C j * (‖IntrinsicSobolev.SmoothCcTensor.toHs
+                        (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
+                      + ∑ i ∈ Finset.range (j + 1 + 1),
+                          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖)
+                    + C j * (∑ i ∈ Finset.range (j + 2 + 1),
+                          (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
+                            + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
+                        * ‖IntrinsicSobolev.SmoothCcTensor.toHs
+                            (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ :=
+  sorry
+
 /-- **The all-order δ-refined principal top-jet split of the realized DeTurck remainder
-difference (posited analytic input: the per-order quasilinear principal refinement of the
-symbol-level cancellation).**
+difference (the per-order quasilinear principal refinement of the symbol-level
+cancellation).**
 
 For an anchor `g₀`, a flow background `g_bg`, a supercritical order `a`
 (`2a > dim M + 4`), there is a **top-arm constant `c ≥ 0` depending only on
@@ -116,8 +208,15 @@ terms drop at least one order and land in the generic arm, exactly as in the lan
 sibling `exists_segmentMetricRHSDiff_faaDiBruno_moserTame_allOrder_l2Norm_le`, whose
 binder discipline (`δ < 1/2`, `H^{a+2}`-ball, fibrewise `inner`-ties) this statement
 mirrors.  Non-vacuity: at `T₁ = T₂` both sides vanish; the δ-arm genuinely carries the
-top order (the generic arm stops at `i ≤ j + 1`).  The body is the posited analytic
-input; it remains `sorry`, so consumers transitively depend on `sorryAx`. -/
+top order (the generic arm stops at `i ≤ j + 1`).
+
+**Proven by composition** (TRANSIT glue): the posited per-order decomposition
+`exists_realizedRemainderDiff_covFdB_principalTopCell_split` exhibits `∇^j` of the remainder
+difference as `Top + Rest` with `‖Top‖` δ-Neumann-bounded by the top arm and `‖Rest‖`
+bounded by the generic + cross arms; the seminorm triangle inequality `norm_add_le` and the
+two arm bounds assemble the three-arm domination, with the same `c` and the same per-order
+family `C`.  Consumers transitively depend on `sorryAx` only through that posited per-order
+decomposition. -/
 theorem exists_realizedRemainderDiff_principalTopSplit_allOrder_l2Norm_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) :
@@ -147,8 +246,42 @@ theorem exists_realizedRemainderDiff_principalTopSplit_allOrder_l2Norm_le
                         (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
                           + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
                       * ‖IntrinsicSobolev.SmoothCcTensor.toHs
-                          (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ :=
-  sorry
+                          (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ := by
+  classical
+  obtain ⟨c, hc_nn, hbody⟩ :=
+    exists_realizedRemainderDiff_covFdB_principalTopCell_split (I := I) g₀ g_bg a ha
+  refine ⟨c, hc_nn, fun B hB δ hδ0 hδ1 => ?_⟩
+  obtain ⟨C, hC_nn, hsplit⟩ := hbody B hB δ hδ0 hδ1
+  refine ⟨C, hC_nn, fun T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j => ?_⟩
+  obtain ⟨Top, Rest, hdecomp, hTop, hRest⟩ :=
+    hsplit T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j
+  calc ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+          (realizedRHSRemainderSection (I := I) g₀ g_bg g₁ T₁
+            - realizedRHSRemainderSection (I := I) g₀ g_bg g₂ T₂)‖
+      = ‖Top + Rest‖ := by rw [hdecomp]
+    _ ≤ ‖Top‖ + ‖Rest‖ := norm_add_le _ _
+    _ ≤ c * δ * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 (j + 2) (T₁ - T₂)‖
+          + (C j * (‖IntrinsicSobolev.SmoothCcTensor.toHs
+                  (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
+                + ∑ i ∈ Finset.range (j + 1 + 1),
+                    ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖)
+              + C j * (∑ i ∈ Finset.range (j + 2 + 1),
+                    (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
+                      + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
+                  * ‖IntrinsicSobolev.SmoothCcTensor.toHs
+                      (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖) :=
+        add_le_add hTop hRest
+    _ = c * δ * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 (j + 2) (T₁ - T₂)‖
+          + C j * (‖IntrinsicSobolev.SmoothCcTensor.toHs
+                  (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
+                + ∑ i ∈ Finset.range (j + 1 + 1),
+                    ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖)
+          + C j * (∑ i ∈ Finset.range (j + 2 + 1),
+                (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
+                  + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
+              * ‖IntrinsicSobolev.SmoothCcTensor.toHs
+                  (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ :=
+        (add_assoc _ _ _).symm
 
 end DeTurck
 end IntrinsicSpectral
