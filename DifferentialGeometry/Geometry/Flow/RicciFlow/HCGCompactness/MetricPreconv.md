@@ -1,11 +1,53 @@
 # MetricPreconv — MSM135 Corollary lbl351 (metrics with bounded derivatives preconverge)
 
-**Status: Bricks A1 + A2 DONE + verified; Brick B IN PROGRESS (Euclidean
-bump-extension foundation done) (2026-06-11).**
+**Status: Bricks A1 + A2 DONE + verified; Brick B PRODUCER + PER-CHART
+CONVERGENCE DONE + verified; atlas×component diagonal REMAINING (2026-06-11).**
 
-## Brick B IN PROGRESS — chart-local extraction (MetricPreconv.lean)
+## Brick B PRODUCER + per-chart convergence DONE (MetricPreconv.lean)
 
-Foundation (generic Euclidean, verified green, producer-ready):
+Producer chain (all `#print axioms` clean = `[propext, Classical.choice,
+Quot.sound]`, targeted build green 3845 jobs, 2026-06-11):
+
+- `metricComp_iteratedFDeriv_le (gRef gSeq) (hbdd : ∀ q K, IsCompact K → ∃ C, ∀ k,
+  ∀ z∈K, metricCovDerivNorm q (gSeq k) gRef z ≤ C) (x₀) {Kc} (hKc hKchart)
+  (V : Fin 2 → section) (r) : ∃ Mr, 0 ≤ Mr ∧ ∀ k, ∀ y∈Kc, ‖∇ʳ (chartRep of the
+  covariant component of gSeq k) (extChartAt y)‖ ≤ Mr` — the **k-uniform** chart
+  bound.  Proof: A2 gives `CV`; `hbdd` gives `C q`; `b q := max (C q) 0`,
+  `Mr := CV·∑_{q≤p+r} b q`; the A2 hypothesis `√normSq ≤ b q` follows by
+  `simp only [metricCovDerivNorm, metricCovDeriv_eq_covDerivOfField]`.  Note
+  `covDerivOfField gRef A0 0 = A0` so p=0 IS the metric component.
+- `exists_chart_engineInput (… V {K₀} hK₀ hK₀chart) : ∃ (Φ : ℕ→E→ℝ) (χ : E→ℝ),
+  (∀k, ContDiff ⊤ (Φ k)) ∧ (∀r, ∃M, ∀k x, ‖∇ʳ(Φ k) x‖ ≤ M) ∧ (∀y∈K₀, χ(extChartAt
+  y)=1) ∧ (∀k, Φ k = fun x => χ x · chartRep(gSeq k) x)` — the literal
+  `exists_cInf_subseq` input: globally smooth maps with `r`-by-`r` K-FREE bounds.
+  Two nested Euclidean bumps `χ ⊆ {χ₁=1} ⊆ source`; `Bχ` from `bddAbove_image` of
+  `(continuous_iteratedFDeriv).norm` on compact `tsupport χ`; `Bg` from
+  `metricComp_iteratedFDeriv_le` on `Kc := (extChartAt x₀).symm '' tsupport χ`,
+  pulled back through the χ₁=1 germ (`χ₁` =1 on a nbhd of `tsupport χ` ⇒
+  `∇ʳ(χ₁·chartRep) = ∇ʳ chartRep` there); assembled by `norm_iteratedFDeriv_bumpMul_le`.
+- `exists_chart_cInfConv (…) : ∃ (φ : ℕ→ℕ) (Φinf : E→ℝ) (χ : E→ℝ), StrictMono φ ∧
+  ContDiff ⊤ Φinf ∧ (∀y∈K₀, χ(extChartAt y)=1) ∧ MapCInfConvOnCompacts univ
+  (fun k => χ · chartRep(gSeq (φ k))) Φinf` — **the stated endpoint** (per-chart
+  subsequence + C^∞ limit component).  Applies `exists_cInf_subseq Φ hΦcd (fun r K
+  _ => …)` (the `hbdd` ignores K and uses the K-free `∀r,∃M` bound), then bridges
+  `fun k => Φ(φ k)` back to `fun k => χ·chartRep(gSeq(φ k))` by `(hΦrel (φ k)).symm`.
+
+Producer gotcha: `rw [hΦeq]` fails (target `(fun k x => …) k` not β-reduced) ⇒
+use `simp only [hΦeq]`.
+
+### REMAINING (atlas × component diagonal — NOT done)
+
+`exists_chart_cInfConv` gives ONE subsequence per (chart, component) pair.  The
+full Corollary needs ONE subsequence working for ALL charts of a σ-compact
+countable atlas × all n² covariant components simultaneously.  `DiagonalSubseq`'s
+`exists_subseq_tendsto_pi` is **reals-only** (Tendsto in `ℝ`), so it does NOT
+combine C^∞ map-convergences.  Route: enumerate the countable family
+`(chartᵢ, component_ab)`, run `exists_chart_cInfConv` on item 0, feed its `φ₀`
+into item 1, …, take the diagonal `n ↦ φ₀∘φ₁∘…∘φₙ (n)` (nested-subsequence
+diagonal, ~100 fiddly lines).  Each tail subsequence preserves earlier charts'
+convergence because `MapCInfConvOnCompacts` is subsequence-stable.  Deferred.
+
+## Brick B foundation (generic Euclidean, verified green, producer-ready)
 - `bumpMul_contDiff` — `χ` (smooth bump, `tsupport ⊆ U` open) `× g` (`ContDiffOn U`)
   is globally `ContDiff ⊤` on `E`.
 - `norm_iteratedFDeriv_bumpMul_le` — `‖∇ʳ(χ·gg)‖ ≤ 2ʳ·Bχ·Bg` EVERYWHERE, given
