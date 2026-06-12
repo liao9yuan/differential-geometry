@@ -122,15 +122,13 @@ lemmas; if curry traffic explodes, the MapConvergence.md note records that the
 Taylor-series field route (`ftaylorSeries.fderiv`) avoided curry rewriting —
 reuse that trick.
 
-### Brick B — chart-local extraction + diagonal
-**STATUS (2026-06-11/12): foundation ACCEPTED (c3d7bc03 + 6c308e3f, sorry-free,
-build green, axiom-clean): `bumpMul_contDiff`, `norm_iteratedFDeriv_bumpMul_le`
-(`∀ i ≤ r` hypothesis shape — matches `exists_cInf_subseq.hbdd`).  ENDPOINT
-NOT STATED (0%).  Remaining = the metric producer (~150-200 lines, route
-fully scouted in MetricPreconv.md: nested Euclidean bumps, `gg_k :=
-χ₁·(chart rep of (gSeq k).inner(E_i,E_j))`, `Φ_k := χ·gg_k`, Bg from the
-FIXED A2 CV via `metricCovDeriv_eq_covDerivOfField` + the `(B_r)` hypothesis)
-+ `exists_cInf_subseq` per chart/component + the atlas × n² diagonal.**
+### Brick B — chart-local extraction ✅ DONE (diagonal reassigned to C)
+**(2026-06-11/12; ACCEPTED: foundation c3d7bc03+6c308e3f, producer chain
+de3a2ace+bf8d994f+14fcbac1; sorry-free, targeted build green 3845 jobs,
+endpoints `exists_chart_engineInput` + `exists_chart_cInfConv` axiom-clean.
+Per-chart subsequence + C^∞ limit component delivered.  The atlas×component
+diagonal was correctly identified as coupled to C's formulation and is
+REASSIGNED to Brick C-I below — see the planner ruling.)**
 
 **File**: same `MetricPreconv.lean`.
 
@@ -145,15 +143,54 @@ charts at a dense sequence; check `SigmaCompactSpace` API) × n² components ×
 one subsequence via `Filter`-free explicit diagonal (the AA file's
 `arzelaAscoli_subseq_*` proofs contain the extraction pattern — mimic).
 
-### Brick C — limit reassembly + norm bridge
+### PLANNER RULING (2026-06-12): B↔C boundary
+
+Brick B ends at the per-chart endpoint `exists_chart_cInfConv` (DONE).  The
+atlas×component diagonal is REASSIGNED to Brick C (the executor's analysis is
+accepted: the diagonal's stability hypotheses are dictated by C's convergence
+formulation, and the global limit object is C1 — one design unit).  Brick C is
+split into two execution units:
+
+### Brick C-I — countable diagonal + global limit object
+**File**: same `MetricPreconv.lean` (split out `MetricPreconvDiag.lean` if the
+file passes ~1500 lines).
+
+C0 (the abstract diagonal — design FIXED by the planner, prove as stated
+modulo naming):
+```lean
+theorem exists_diag_subseq
+    (P : ℕ → (ℕ → ℕ) → Prop)
+    (hstep : ∀ n : ℕ, ∀ φ : ℕ → ℕ, StrictMono φ →
+      ∃ ψ : ℕ → ℕ, StrictMono ψ ∧ P n (φ ∘ ψ))
+    (hsub : ∀ n : ℕ, ∀ φ ψ : ℕ → ℕ, StrictMono ψ → P n φ → P n (φ ∘ ψ))
+    (hextend : ∀ n : ℕ, ∀ φ : ℕ → ℕ, ∀ m : ℕ,
+      P n (fun k => φ (k + m)) → P n φ) :
+    ∃ φ : ℕ → ℕ, StrictMono φ ∧ ∀ n : ℕ, P n φ
+```
+Classical nested construction: refine per item via `hstep`, diagonal
+`ψ k := φ_k k`; item `n` holds on the tail `k ≥ n` (a subsequence of `φ_n`,
+via `hsub`), recover the full sequence by `hextend`.  NOTE the `hextend`
+direction: tail-satisfaction implies full — convergence-type `P`
+(`∀ε ∃k0 ∀k≥k0` shapes, `MapCPConvOn`/`MetricCPConvOn`) satisfies both
+stabilities trivially.  Put C0 in the HCG layer (it is generic order/sequence
+combinatorics; `extraction_forall_of_frequently` is the Mathlib building
+block if useful, but the hand-rolled nested construction is acceptable).
+
+C1a: countable atlas of a σ-compact manifold: countable compact exhaustion
+(`SigmaCompactSpace`) + finite chart subcovers per compact → a countable
+family of (chart, inner-compact) pairs covering `M`.
+C1b: apply C0 over (charts × n² components) with `hstep :=
+exists_chart_cInfConv` (its `(B_r)` inputs restrict to subsequences ✓) →
+ONE subsequence, all chart-components converge; define the global limit
+`(0,2)`-field from the limit components (overlap consistency = uniqueness of
+pointwise limits); symmetry pointwise; positive-definiteness from the `hlow`
+lower bound; package `gInf : SmoothRiemannianMetric I M` (check the
+constructor's smoothness field shape FIRST; the limit components are
+`ContDiff ⊤` from the engine).
+
+### Brick C-II — norm bridge + the P3 endpoints
 **File**: same or split `MetricPreconvBridge.lean` if > ~900 lines.
 
-C1: limit components → a global smooth `(0,2)`-field `gInf`; symmetry from
-pointwise limits of symmetric; positive-definiteness from the lower bound
-`hlow` (∃ δ > 0 per compact, from eq 3.3); package as
-`SmoothRiemannianMetric I M`.  Check the constructor's fields first
-(`SmoothRiemannianMetric` def) — if local-chart construction is awkward,
-build the `Tensor0SField` first and add the metric structure.
 C2: component convergence ⇒ `MetricCPConvOn K hK p (gSeq∘φ) gInf gRef`
 (PointedConvergence.lean:425; norm = `metricDerivNorm` of the DIFFERENCE
 tower).  Bridge: `metricCovDeriv`/`covDerivOfField` is LINEAR in the field
