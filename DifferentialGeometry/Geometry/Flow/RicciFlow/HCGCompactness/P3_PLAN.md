@@ -42,7 +42,10 @@ each brick: focused check green → targeted build → update the same-name `.md
 theorem, STOP and report per CLAUDE.md (theorem, goal, error, tried, suspected
 obstruction) back to the planning session.
 
-### Brick A1 — order-1 covariant→coordinate conversion
+### Brick A1 — order-1 covariant→coordinate conversion ✅ DONE
+**(2026-06-11, commit 5f1da4c3; ACCEPTED by planning session: sorry-free,
+targeted build green, axiom-clean, quantifier discipline verified.  See
+MetricPreconv.md for the as-implemented route + 7 new gotchas.)**
 **File**: NEW `HCGCompactness/MetricPreconv.lean` (import: MetricCovDerivLinear,
 MetricCovDerivTimeDeriv, Tensor0SRiemannian.Comparison, Bundle.PartialMfderiv.FixedBase,
 AllTimesBounds; copy the HCG variable block from MetricCovDerivTimeDeriv.lean,
