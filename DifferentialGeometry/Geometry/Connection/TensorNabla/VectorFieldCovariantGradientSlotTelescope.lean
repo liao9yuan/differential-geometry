@@ -752,6 +752,39 @@ theorem loweredCovGradDeTurckVFMixed_connSlot_iteratedCovGrad_hamiltonTame_le
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
+/-- **(POSIT — the field-difference gradient action value sup.)**  For the fibre-small
+(`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, `δ < 1/2`) supercritically `H^{a+2}`-bounded
+(`2a > finrank + 4`) realized perturbation family, the order-`0` intrinsic squared fibre norm of
+the field-difference gradient section `fieldDiffGradSection g₀ g₁ g₀ g_bg` — fibre
+`g₀(∇^{g₀}_v (W₁ − W₀), w)`, `Wᵢ = deTurckVF gᵢ g_bg` — is uniformly bounded by a single constant
+`Λ²` over the manifold and the family.
+
+The fibre value is the `g₀`-inner of the `g₀`-Levi-Civita covariant gradient of the field
+difference `W₁ − W₀`; the field difference is the inverse-Gram-weighted trace of the pair
+connection difference (`deTurckVF_sub_apply_eq_trace_connDiff`), whose connection-difference fibre
+sup is the Neumann-absorbed supercritical-`C¹` bound, so the covariant gradient of the field
+difference has a family-uniform order-`0` sup.
+
+**Non-vacuity.**  A genuine fibre sup (a `Λ = 0` witness forces the field-difference gradient
+section `≡ 0` at every point, false whenever `g₁ ≠ g₀` since `W₁ ≠ W₀`).  At `T₁ = 0` realized
+(`g₁ = g₀`), `W₁ = W₀`, the field difference is the zero section, and `Λ = 0` works.  Its body is
+`sorry`: the genuine supercritical-`C¹` value sup of the field-difference covariant gradient. -/
+theorem exists_fieldDiffGradSection_rfns_fibre_sup_le
+    (g₀ g_bg : SmoothRiemannianMetric I M) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ Λ : ℝ, 0 ≤ Λ ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ∀ x : M,
+          Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+            ((fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg).toSection x) ≤ Λ ^ 2 :=
+  sorry
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
+set_option linter.unusedSectionVars false in
 /-- **(POSIT — the family-uniform order-`0` fibre sup of the field-slot carrier difference.)**
 For the fibre-small (`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, `δ < 1/2`) supercritically
 `H^{a+2}`-bounded (`2a > finrank + 4`) realized perturbation family, the order-`0` intrinsic squared
@@ -767,8 +800,12 @@ field difference `W₁ − W₀`; the field difference is the inverse-Gram-weigh
 connection difference (`deTurckVF_sub_apply_eq_trace_connDiff`), whose connection-difference fibre
 sup is the Neumann-absorbed supercritical-`C¹` bound, so the covariant gradient of the field
 difference has a family-uniform order-`0` sup.  Vanishes at `T₁ = 0` realized (`g₁ = g₀`, the
-difference is the zero section).  Body `sorry`: a posited deep order-`0` family fibre sup of the
-field-slot carrier difference. -/
+difference is the zero section).
+
+Glued: the carrier difference rewrites to the field-difference gradient section
+`fieldDiffGradSection g₀ g₁ g₀ g_bg`
+(`loweredCovGradDeTurckVFMixed_fldSlot_sub_eq_fieldDiffGradSection`), whose family-uniform order-`0`
+fibre value sup is the posited child `exists_fieldDiffGradSection_rfns_fibre_sup_le`. -/
 theorem exists_riemannianFiberNormSq_loweredCovGradDeTurckVFMixed_fldSlot_diff_fibre_sup_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
     (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
@@ -781,8 +818,12 @@ theorem exists_riemannianFiberNormSq_loweredCovGradDeTurckVFMixed_fldSlot_diff_f
         ∀ x : M,
           Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
             ((loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₁ g_bg
-                - loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₀ g_bg).toSection x) ≤ Λ ^ 2 :=
-  sorry
+                - loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₀ g_bg).toSection x) ≤ Λ ^ 2 := by
+  obtain ⟨Λ, hΛ0, hΛ⟩ :=
+    exists_fieldDiffGradSection_rfns_fibre_sup_le (I := I) g₀ g_bg δ hδ0 hδ1 B a ha
+  refine ⟨Λ, hΛ0, fun T₁ g₁ hg₁ hδbnd hB₁ x => ?_⟩
+  rw [loweredCovGradDeTurckVFMixed_fldSlot_sub_eq_fieldDiffGradSection (I := I) g₀ g₁ g_bg]
+  exact hΛ T₁ g₁ hg₁ hδbnd hB₁ x
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
