@@ -28,7 +28,58 @@ sorry'd version (downstream consumers must adapt):
   by constructing the `MetricCovOrderEvolutionInput` record and applying
   `metricCovOrderWindow_of_evolution`.
 
-## REMAINING for P2 (the honest frontier list)
+## ✅ P2 STRUCTURE COMPLETE (2026-06-11, commits 8a145c45 → 0f42ac11; all sorry-free)
+
+The whole eq.(3.4) assembly is now ONE capstone theorem:
+
+* **`covOrderBound_of_soln`** (end of RicBound.lean) — from a sequence of
+  Ricci-flow solutions `S i` (with `gSeq i = (S i).family.metric`, window in
+  regular times), the eq.(3.3) equivalence (P1), the moving Shi bounds, the
+  tower regularity, and initial-time bounds: **every exact order `1 ≤ r ≤ N`
+  has a `(B_r)` window bound on `K`**.
+* Internal chain (all sorry-free, this session):
+  - `totalNabla0SFun_hasDerivWithinAt_pt` (engine, pointwise swap;
+    TotalNabla0STimeDeriv.lean) — the all-t swap predicate is undischargeable
+    at carrier endpoints, and the engine only consumes the swap at the working t.
+  - `covDerivOfField_eval_hasDerivWithinAt` — chain in the flow two-set shape
+    (within `D.carrier`, at `D.regular`; `regular_mem_nhds` yields
+    `carrier ∈ 𝓝 t`, forcing the within-set to be the carrier).
+  - `solnMetricDeriv` / `solnTower_hasDerivAt` (flow wrapper, W-a) and
+    `covDerivOfField_swapReg` / `solnTowerSwap_of_smooth` (swap from joint
+    regularity, W-b structural part; hTime at level p = the chain at level p,
+    strong induction).  All in MetricCovDerivTimeDeriv.lean (see its .md for
+    the smul-elaboration and `show`-pattern gotchas).
+  - `hevComp_of_solutions` (RicBound.lean) — sequence adapter into
+    `covOrderBound_stage`'s `hevComp` shape (value bridge:
+    `covDerivOfField_smul` + `covDerivOfField_eq_iterCov` + `show`-cast to
+    `ContinuousMultilinearMap.domDomCongr`, rfl with `ricCovTower`).
+  - `covOrderBound_tower` (RicBound.lean) — all stages by strong induction on
+    the order; per stage `exists_compact_between` interpolation
+    `K' ⊆ interior L ⊆ L ⊆ U'` (local compactness:
+    `I.locallyCompactSpace` + `ChartedSpace.locallyCompactSpace`), lower-order
+    constants chosen on the compact `L` via `metricCovOrderWindow_mono` /
+    `metricUniformEquivalentOnWindow_mono` (added in AllTimesBounds.lean).
+
+## REMAINING for P2 (the honest frontier list — now = hypotheses of `covOrderBound_of_soln`)
+
+A. **Tower regularity** (`hSmoothT`/`hFdiffT`/`hFtdiffT`): joint `(t,x)` C² of
+   `(t,x) ↦ (∇ᵖ_gRef g_t)(x)(V·x)` for `p < N`, + spatial differentiability of
+   the metric and `-2Ric` towers.  Source: `IsSolutionOn.smoothMetric`
+   (`MetricFamilySmoothOn`) + a joint-smoothness calculus for the tower step —
+   missing-API track, induction over p in charts; order-0 precedent
+   `metricInner_mdiffAt`.  Likely the next concrete brick.
+B. **Moving Shi bounds** (`hShi`): `√normSq0S (g_{i,t}) (ricCovTower g g s) ≤ KShi`
+   on the window.  `bernsteinShi_solution_estimate`
+   (Evolution/BernsteinShiSolution.lean) gives the COMPONENT-interface
+   Rm-tower bound `w m ≤ C/tᵐ` on `(0,T]`; realizing `hShi` needs the
+   Rm-tower realization layer (`IteratedRmTowerOn` ↔ intrinsic norms — the
+   BBS "norm bound + StarSum2 scaffolding" frontier), the Rc-from-Rm trace
+   bound, and the `(0,T] → [β,ψ], β>0` window conversion.  The BIG remaining
+   frontier; it is a separate track (see bbs-allk-route-status memory).
+C. **Initial bounds** (`hinit`) + window data (`timeRadius`, `ht0`): supplied at
+   the 3.10/3.11 application site (P4 assembly) from the time-0 CG convergence.
+
+Historical detail of the W-a/W-b design (superseded by the above):
 
 1. **`hevol` producer — ✅ INDUCTION CORE DONE (2026-06-11, commit 145b75d7,
    sorry-free): `covDerivOfField_eval_hasDerivWithinAt`**

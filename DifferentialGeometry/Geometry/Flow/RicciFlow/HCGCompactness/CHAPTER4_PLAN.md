@@ -1,444 +1,186 @@
-# MSM135 Chapter 4 (Theorem 3.9 / `metricCompactness`) — book-faithful backlog
+# MSM135 Chapter 4 (Theorem 3.9 / `metricCompactness`) — backlog
+
+**Endpoint:** discharge `metricCompactness` (`MetricCompactness.lean:309`, the lone
+`sorry` = the whole Cheeger–Gromov construction) by assembling Steps A→D.
 
 **Rule:** one Lean declaration per book result, in book order. Honest-input fields
-ONLY where the book itself cites an external theorem (so far: `lbl384`, the Rauch
-comparison inside `lbl387`, the Hessian comparison `lbl413`). Everything the book
-proves, we prove. Each task is sized for one short codex iteration: it must build via
-`& .\scripts\lake-locked.ps1 build +<Module>` (run from `E:\differential-geometry`),
-contain no Lean proof holes, admissions, or axiomatic constants, and (for real
-theorems) be `#print axioms`-clean.
+ONLY where the book itself cites an external theorem (`lbl384`, the Rauch comparison
+in `lbl387`, the Hessian comparison `lbl413`). Everything the book proves, we prove.
+Build via `& .\scripts\lake-locked.ps1 build +<Module>`; no `sorry`/admissions;
+`#print axioms`-clean.
 
-**Splitting discipline:** if a task would need a NEW infrastructure/calculus layer or
-more than ~3–4 sub-lemmas / 2 nesting levels, STOP and report for re-scoping rather
-than recursing. (The earlier F3 micro-split to `F3e1b10` is the anti-pattern.)
+Legend: `[x]` done & verified · `[~]` honest-input (book-external) · `[ ]` todo.
 
-Legend: `[x]` done & verified · `[~]` honest-input field (book-external) · `[ ]` todo.
-Each line: `ID — book label/title → Lean deliverable ⟸ deps`.
+> **Maintenance note (2026-06-11):** done items are collapsed to a one-line
+> `→ file:decl` pointer; full build history lives in each file's same-name `.md`.
+> The old `ApproximateIsometry.lean` monolith was deleted — its green interface is
+> in `ApproxIsometryDefs.lean`, its broken proofs in `ApproximateIsometryArchive.md`.
 
 ---
 
-## §1 Foundations (abstract; no geometry black-boxes; all parallelizable)
+## DONE — where to find it
 
-- [x] F1-def — Def *Approximate isometry* book-facing data
-      → `PullbackMetricTensorData`, `PreApproxIsometryData`, `BookApproxIsometryData`
-      (ApproximateIsometry.lean)
-- [x] F1-metric — same-domain supplied-pullback metric comparison support
-      → `IsApproxIsometryOn`, `IsTwoSidedApproxIsometryOn`,
-      `normSq0S_compare_of_approxIsometry`, `normSqRS_compare_of_approxIsometry`
-      (ApproximateIsometry.lean / Comparison.lean)
-- [x] F1-c0 — Prop *Approximate isometries and norms* (vector metric comparison):
-      from `PreApproxIsometryData` prove the `C^0` tangent/quadratic-form bound
-      and package it as same-domain `MetricUniformEquivalentOn` when the
-      pullback tensor is supplied as a Riemannian metric
-      → `preApprox_quad_error_abs_le`, `preApprox_quad_upper`,
-      `bookApprox_quad_twoSided`, `bookApprox_uniformEquiv_of_pullback`
-      (ApproximateIsometry.lean).
-- [x] F1 — Cor *Norms of tensors* in book-facing map form:
-      derive tensor norm comparison for `Phi^* h` from F1-c0 and F1-metric
-      → `bookNormRS_compare` (ApproximateIsometry.lean).
-- [x] F2 — Prop *Distances*, path-speed form → derive the path-length comparison from
-      a target-path producer with pointwise Riemannian speed comparison
-      → `pathComp_tangent`, `dist_le_tangent`, `image_ball_tangent`
-      (Distances.lean) ⟸ F1-c0,F2c
-- [ ] F2-book — Prop *Distances*, book-facing pre-approximate-isometry form:
-      from `PreApproxIsometryData` plus the supplied pullback-metric and
-      typeclass-Riemannian norm compatibility, produce the path-speed hypothesis
-      consumed by `image_ball_tangent`; do not invent a pullback metric
-      constructor (Distances.lean / ApproximateIsometry.lean) ⟸ F1-c0,F2
-- [x] F2c — Prop *Distances* length-infimum bridge from Riemannian path-length
-      comparison to pointwise distance and ball inclusion → `edist_le_of_path_comp`,
-      `dist_le_of_path_comp`, `image_ball_subset_of_path_comp` (Distances.lean) ⟸ F2b
-- [x] F2b — Prop *Distances* package pointwise distance estimate as Lipschitz
-      → `lipschitz_sqrt_of_dist_le` (Distances.lean) ⟸ F1-metric
-- [x] F2a — Prop *Distances* final ball-inclusion step from the Lipschitz estimate
-      → `image_ball_subset_of_lipschitz_sqrt` (Distances.lean) ⟸ F1-metric
+**Approx-isometry interface (F1-def, F1-metric).** `ApproxIsometryDefs.lean`:
+`PullbackMetricTensorData`, `PreApproxIsometryData`, `BookApproxIsometryData`,
+`IsApproxIsometryOn`, `IsTwoSidedApproxIsometryOn`, `metricCovDerivNormWith`, the
+`ConnDiff*` realization vocabulary, and the dimension constants
+(`connDiffOneConst`/`connDiffTwoConst`/`connDiffEpsConst_two`/`_three`/`connDiffCoeff`).
 
-### F3 / F4 — Lemma *Norms of covariant derivatives of tensors, I* + Cor II
+**F1 norm comparison (Cor *Norms of tensors*).** Superseded by the `(0,s)` metric-
+equivalence factor: `Comparison.lean:sqrt_normSq0S_le_of_metric_equiv` (the book's
+`(1+ε)^{(r+q₂)/2}` = `√(C^s)`) over `normSq0S_le_of_metric_equiv`. The old broken
+`bookNormRS_compare` (needed the never-ported `normRS`) is archived.
 
-**Audit status (2026-06-02):** the old finite-product/DC3 route was removed from
-`ApproximateIsometry.lean` and from this active backlog.  Checked facts stay here
-only when they prove a reusable tensor/coordinate theorem or a book-facing F3
-endpoint.  Conditional scaffolding of the form "if a future Christoffel product
-expansion exists, then packaging works" is not counted as progress.
+**F2 — Prop *Distances*.** `Distances.lean`: `pathComp_tangent`, `dist_le_tangent`,
+`image_ball_tangent`, `edist_le_of_path_comp`, `lipschitz_sqrt_of_dist_le`,
+`image_ball_subset_of_lipschitz_sqrt`.
 
-- [x] F3-norm — RS norm + comparison: `innerRS`/`normSqRS`, `normRS`/`fieldNormRS`,
-      `normSqRS_le_of_metric_equiv`, and the HCG wrappers
-      `IsApproxIsometryOn.normSqRS_compare` / `normSqRS_compare_of_approxIsometry`
-      (TensorRSRiemannian.lean; ApproximateIsometry.lean) ⟸ F1-metric
-- [x] F3-conn — `lbl369` connection-difference base estimate and action formulas:
-      `connDiff_le_approx`, `connDiff_book_le_approx`, `connDiff_book_le_eps_g`,
-      `covDerivRS_sub_apply`, `localCovDeriv0S_sub`, `nablaRSFun_sub_raw`,
-      `connActComp`, and `connAct_le_approx`
-      (Model/TensorRS.lean; Regularity/Derivation.lean;
-      ConnectionDifferenceAction.lean; ApproximateIsometry.lean) ⟸ F1-metric,F3-norm
-- [x] F3-p1 — checked order-one tensor-derivative comparison support:
-      `nablaRS_component_le_approx`, `nablaRS_norm_le_approx_comps`,
-      `metricSubRS`, `nablaRSOneError_of_comps`, `nablaRS_one_le_approx_comps`
-      and the component equality wrapper
-      `nabla_component_eq_base_plus_connAct_components_trivFrame`
-      (ApproximateIsometry.lean) ⟸ F3-norm,F3-conn
-- [x] F3-r1 — book-facing first-order case of *Norms of covariant derivatives
-      of tensors, I*: the estimate for `|nabla_g T|_g` in terms of
-      `|nabla_h T|_g` and the zero-order `|Gamma_g - Gamma_h|_g <= C eps`
-      bound.  This is the `r = 1` case and does not use
-      `nabla_h (Gamma_g - Gamma_h)`.
-      → `hcg_first_order_nabla_norm_estimate` (ApproximateIsometry.lean)
-      ⟸ F3-p1,F3-hi-zero
-- [x] F3-hi-shape — book-facing higher connection-difference target vocabulary:
-      `metricCovDerivNormWith`, `IsTwoSidedApproxIsometryOn`,
-      `ConnDiffFieldRealizes`, `connDiffDerivNorm`, `ConnDiffDerivRealizes`,
-      `ConnDiffDerivBoundOn`, `ConnDiffEpsBoundOn`, `ConnDiffEpsBoundsBelow`
-      (ApproximateIsometry.lean) ⟸ F3-p1
-- [x] F3-hi-zero — checked `k = 0` book-facing bound:
-      `connDiffDerivBound_zero`, `connDiffEpsBound_zero`
-      (ApproximateIsometry.lean) ⟸ F3-hi-shape,F3-conn
-- [x] DC1 — reusable coordinate theorem, not an F3 milestone by itself:
-      Christoffel-difference component equation
-      `lcDiffBasis_symm`, `lcDiff_symm`, `covMetric_lcDiff`, `lcDiff_combo`,
-      `lcDiffComp_eq`, plus `lcDiffCompInFrame` / `lcDiffCompInFrame_eq_component`
-      (Coordinates/ChristoffelTensor.lean)
-- [x] DC2 — reusable coordinate theorem, not an F3 milestone by itself:
-      inverse-metric covariant derivative support
-      `metricCovDerivForMetricCompInFrame`, `metricCovDeriv2ForMetricCompInFrame`,
-      `invDeriv_solve`, `invMetricCovDeriv_eq`
-      (Coordinates/MetricCompatibility/Covariant.lean)
-- [x] DC1-deriv - reusable coordinate producer for the first derivative of the
-      Christoffel-difference equation:
-      `lcDiffCovDerivCompInFrame`, `lcDiffSymMetricCovComp`,
-      `lcDiffCovDerivRHS`, `lcDiffCompInFrame_extDeriv_eq`,
-      `lcDiffSymMetricCovComp_extDeriv_eq`,
-      `lcDiffCovDerivCompInFrame_eq`
-      (Coordinates/ChristoffelTensor.lean) after DC1,DC2
-- [x] DC1-deriv-quad - substituted first-derivative Christoffel-difference
-      producer with only `nabla_h^2 g` and quadratic `(nabla_h g)^2` terms:
-      `lcDiffQuadRHS`, `lcDiffRHS_eq_quad`, `lcDiffDeriv_eq_quad`
-      (Coordinates/ChristoffelTensor.lean) after DC1-deriv,DC2
-- [x] F3-realize-move - realization-level moving-slot component bridge:
-      `TotalNablaRSRealizes.eval_moving_slots`,
-      `TotalNablaRSRealizes.component_moving_slots`
-      (Tensor/RSTensor/NablaOnTensors/HigherOrder.lean).  This is support for
-      reading a realized total mixed covariant derivative in local-frame
-      components; it does not by itself prove the connection-difference
-      epsilon estimate.
-- [x] F3-coframe0 - static local coframe basis bridge:
-      `coframe_eq_basis0S`
-      (Coordinates/Tensor.lean).  This identifies the local-frame coframe
-      covector with the one-slot tensor basis at a point; the derivative of
-      this coframe field remains the active missing producer.
-- [x] F3-coframe1 - local coframe derivative/contraction producer:
-      `nabla0SFun_one_eval_of_pair_eventually_const`,
-      `nabla0SFun_one_eval_localFrame_dual`,
-      `localCovariantDerivTensor0SAt_one_eval_of_pair_eventually_const`,
-      `localCovariantDerivTensor0SAt_one_eval_localFrame_dual`
-      (Coordinates/NablaComponents/OneForm/Smoothness.lean).  This proves the
-      checked local-frame formula `(nabla_X theta^i)(e_j) = -Gamma^i_j(X)` in
-      both bundled and unbundled forms; the remaining task is to feed it into
-      the mixed moving-slot bridge, not to add another coframe assumption.
-- [x] F3-coframe1-expansion - full coframe derivative basis expansion:
-      `localCovariantDerivTensor0SAt_one_localFrame_dual_eq`
-      (Coordinates/NablaComponents/OneForm/Smoothness.lean).  This packages
-      `(nabla_X theta^i) = -sum_p Gamma^i_p(X) theta^p` as a one-form equality.
-- [x] F3-lcDiff-corrections - local-frame moving-slot correction terms:
-      `lcDiffUpperCorr`, `lcDiffLowerCorr0`, `lcDiffLowerCorr1`
-      (Coordinates/ChristoffelTensor.lean).  These are the three correction
-      terms needed by `TotalNablaRSRealizes.component_moving_slots` before the
-      local-frame component bridge can be assembled.
+**F3 — Lemma *Norms of cov. derivs, I*** (`|∇_g^r T|_g ≤ |∇_h^r T|_g + εCΣ_{k<r}|∇_h^k T|_g`).
+`Lemma45Engine.lean:lemma45_F3` (component-`compL2` form, sorry-free). Engine:
+`hkoszul_of_leviCivita`, `claim1_eps_koszul`, `lemma45_component_bdd` (same file);
+`Lemma45CovariantAbstract.lean:lemma45DoubleBdd`; `KoszulDifference.lean:koszul_difference`;
+consumes the Claim-1 machinery in `AkMFold.lean` (`claim1`, `P(m)`).
 
-The abandoned HCG-side finite-product and differentiated-Christoffel route
-scaffolding was removed from the active plan and from `ApproximateIsometry.lean`.
-Some low-level tensor algebra used while exploring that route remains in the
-tensor layer because it is independently meaningful, but it is no longer
-advertised as F3 progress.
+**Good-frame / tower bridge** (the gate for F3→F4's intrinsic lift AND ric_bound R4).
+`RicBoundGoodFrame.lean`: `exists_trivONBasis` (smooth gRef-ON-at-a-point frame),
+`exists_goodFrame_compBound`, **`compL2_tower_le`** (bounded-Gram `compL2 ↔ √normSq0S`
+inequality over a small domain), `gramInv_near_id`;
+`KroneckerQuadForm.lean`: `quad_lb_of_near_id`, `quadForm_id_le_pow`,
+`sum_posSemidef_mul_posSemidef_nonneg`. (Parallel-session, sorry-free, committed.)
 
-**Close-F3 route (2026-06-02, after `Tensor0SSpace.rs0Equiv`):**
+**F5-const / F5 (C⁰) / F6 (scalar).** `Lemma45Constants.lean:compApproxConst`;
+`ApproxIsometryComp.lean`: `metricEquiv_trans`, `metricEquiv_comp_eps` (book additive
+form), `compEpsAccum`.
 
-Use natural equivalences for zero-upper-slot tensors.  In particular, covariant
-special cases must pass through `Tensor0SModel.rs0Equiv` /
-`Tensor0SSpace.rs0Equiv`, with `toRS0` retained only as the forward
-compatibility/application map.  Do not introduce fresh ad hoc wrappers for
-`TensorRSSpace 0 s`.
+**F8tool — Arzelà–Ascoli (Lemma 3.14).** `ArzelaAscoli.lean:arzelaAscoli_subseq_…`;
+now also the vector-target core `arzelaAscoli_isCompact_closure` + sequential
+`arzelaAscoli_subseq_vec` (proper normed target, used by the F8-engine).
 
-The book proof of *Norms of covariant derivatives of tensors, I* has two
-genuinely separate pieces:
+**F9–F13 — direct limit (`lbl379`–`lbl381`).** `Geometry/Topology/DirectLimit.lean`:
+`SeqSystem`, `Lim`, `incl`, `incl_injective`, `incl_isOpenMap`, `isCompact_exists`,
+`sigmaCompact`, `t2Space` (+ universal property `lift`/`continuous_lift`).
 
-1. **Connection-difference epsilon producers.**  For a full approximate
-   isometry on the same supplied pullback domain, prove
-   `ConnDiffEpsBoundsBelow K eps g h (p+1) C`, i.e.
-   `|nabla_h^k (Gamma_g - Gamma_h)|_g <= C_k * eps` for `k <= p`.
-   The checked `k = 0` producer is `connDiffEpsBound_zero`.  For `k = 1`,
-   use DC1/DC2 to prove the differentiated Christoffel-difference bound
-   schematically
-   `|nabla_h D| <= C (|nabla_h^2 g| + |nabla_h g|^2)`, then use
-   `IsTwoSidedApproxIsometryOn`, norm comparison, and `eps < 1` to convert it
-   to `C * eps`.  For `k >= 2`, first introduce a reusable tensor/finite-sum
-   polynomial-control lemma: every monomial in the differentiated Christoffel
-   formula contains at least one positive derivative of `g`, so the approximate
-   isometry derivative bounds make the monomial `O(eps)`.
+**B0 (normal-coord bounds) stages 1–2.** `Exponential/JacobiVariation.lean:exists_radial_jacobi_radius`,
+`Analysis/Calculus/SmoothClamp.lean:exists_smooth_clamp`; smooth exp diffeo
+`NormalCoordinates.expMapDiffeo`/`normalChartAt`. See `B0NormalCoordBounds.md`.
 
-2. **Book induction for *Norms of covariant derivatives of tensors, I*.**
-   Once the connection-difference epsilon producers are available, prove the
-   actual F3 induction separately.  The checked `r = 1` / one-total-derivative
-   case is `hcg_first_order_nabla_norm_estimate` (wrapping
-   `nablaRS_one_le_approx_total`); it consumes only `T`, supplied
-   realizations of `nabla_h T` and `nabla_g T`, and the zero-order
-   connection-difference epsilon bound.  Do not reintroduce the abandoned
-   auxiliary `S = (Gamma_g-Gamma_h) * T` wrapper as a public route.  Higher
-   steps should use the book recurrence plus `ConnDiffEpsBoundsBelow`, not a
-   new consumer-side realization package.
-
-This is the replacement for the old DC3/product-control route: DC1/DC2 are
-allowed only as producers for the connection-difference epsilon estimates, not
-as public F3 milestones.  The public F3 endpoint remains the book inequality
-from *Norms of covariant derivatives of tensors, I*.
-
-- [x] F3-hi-k1-assembly — assembled the checked coframe and lower-slot
-      correction terms with `TotalNablaRSRealizes.component_moving_slots` to
-      identify a realized first `h`-covariant derivative of
-      `Gamma_g - Gamma_h` with the local-frame component formula
-      → `totalNabla_lcDiff_localFrame` (ChristoffelTensor.lean),
-        `connDiffOne_localFrame` (ApproximateIsometry.lean).
-- [x] F3-hi-k1-norm — first positive-order connection-difference support:
-      closed the public `ConnDiffEpsBoundOn K eps g h 1 C` endpoint and the
-      below-two package, with no frame data exposed to callers
-      → `connDiffEpsBound_one`, `connDiffEpsBound_zero_std`,
-        `connDiffEpsConst_two`, `connDiffEpsBounds_two`
-        (ApproximateIsometry.lean).
-- [x] F3-p1-total-support — checked one-total-derivative estimate for supplied
-      `TotalNablaRSRealizes` data, using the zero-order connection-difference
-      bound and the tensor-layer connection-action identity
-      → `nablaRS_one_le_approx_total` (ApproximateIsometry.lean).
-- [x] F3-action-anti0 — antidiagonal `k = 0` component and norm-bound alignment
-      for the connection-action identity
-      → `totalNablaSub_anti0`, `totalNablaAnti0`
-      (ConnectionDifferenceActionIdentity.lean).
-- [x] F3-components-reconstruct — reusable mixed-tensor reconstruction from
-      full `componentRS` coordinate tables, avoiding the failed Hom-basis
-      transport route
-      → `ofComponentsRS`, `componentRS_ofComponentsRS` (Components.lean).
-- [x] F3-action-tensors — actual mixed tensors for the connection-action
-      component formula and its antidiagonal Leibniz-sum component formula
-      → `connActTensorAt`, `connActTensorAt_comp`,
-        `connActAntiTensorAt`, `connActAntiTensorAt_comp`
-      (ConnectionDifferenceAction.lean).
-- [x] F3-action-jets — higher-jet connection-action target tensor and norm
-      algebra, with genuine increasing-valence inputs
-      `A a : TensorRSSpace 1 (a+2)` and `T b : TensorRSSpace r (b+s)`
-      → `connActJetComp`, `connActJetAt`, `connActJetAt_comp`,
-        `connActJetNormConst`, `abs_connActJet_le`,
-        `norm_connActJet_le`, `norm_connActJetAt_le`
-      (ConnectionDifferenceAction.lean).
-- [x] F3-action-tensor-eq — tensor-level form of the supplied total derivative
-      connection-change identity
-      → `totalNablaSub_eq_connActTensor`
-      (ConnectionDifferenceActionIdentity.lean).
-- [x] F3-action-cleanup — removed the abandoned `S` wrapper route from the
-      active backlog and deleted `ConnectionDifferenceActionDerivative.lean`.
-      The generally useful base action identity remains in
-      `ConnectionDifferenceActionIdentity.lean`.
-- [x] F3-hi-kge2-realization — realized order-two connection-difference
-      component bridge:
-      identify a realized `nabla_h^2 (Gamma_g - Gamma_h)` with the
-      trivialization-frame component expression
-      → `lcDiff2Comp`, `lcDiffOneComp_eventually`,
-        `totalNabla_lcDiff2_trivFrame` (ChristoffelTensor.lean),
-        `metricCov3_comp_le`, `ConnDiffDerivRealizes.two`,
-        `connDiffTwo_trivFrame` (ApproximateIsometry.lean).
-- [x] F3-hi-kge2-base — first higher-order connection-difference producer:
-      proved the `k = 2` local norm estimate, schematically bounded by
-      `|nabla_h^3 g|`, `|nabla_h^2 g| |nabla_h g|`, and `|nabla_h g|^3`,
-      and packaged the public order-two epsilon endpoint plus below-three
-      controls
-      → `connDiffTwo_trivON`, `connDiffEpsBound_two`,
-        `connDiffTwoConst`, `connDiffEpsConst_three`,
-        `connDiffEpsBounds_three` (ApproximateIsometry.lean).
-- [ ] F3-hi-kge2 — higher connection-difference derivative controls for
-      `ConnDiffEpsBoundOn ... k C` with `2 <= k`, after the `k = 2` producer
-      route is checked and generalized.
-- [x] F3 — final inequality from *Norms of covariant derivatives of tensors, I*:
-      `|∇_g^r T|_g <= |∇_h^r T|_g + eps*C*Σ_{k<r}|∇_h^k T|_g`.
-      **PROVEN (2026-06-11): `lemma45_F3`** (Lemma45Engine.lean, green, sorry-free) —
-      the book-facing endpoint at component-`compL2` level over a local frame, all
-      geometric inputs discharged (`hkoszul_of_leviCivita` → `claim1_eps_koszul` →
-      `lemma45_component_bdd` → `lemma45DoubleBdd`); hypotheses = frame/Christoffel/
-      metric-component smoothness (producer-dischargeable) + `|g⁻¹|≤C0` +
-      `|∇_H^j g|≤ε (j≤p)`, faithful to the book's finitely-many-orders form.
-      Optional upgrade: intrinsic-`normSq0S` statement wrapper (not gating F4).
-      **Norm-level induction COMPLETE (2026-06-09): `lemma45ScalarBdd` + `lemma45Double`**
-      (Lemma45CovariantAbstract.lean).
-      **hOne DISCHARGED + COMPONENT LEMMA 4.5 PROVEN (2026-06-10/11, sorry-free,
-      built 3688): `Lemma45Engine.lean`** — consumes the parallel track's Claim-1
-      engine (`AkMFold.lean`: `P(m)`, towers, `claim1_abstract`) via import, no
-      modification.  `claim1_eps` (ε-homogeneous A-bound), `iterCov_one_chr_change`
-      (connection-change one-step, general two-Christoffel — ALSO the Step-4
-      telescoping engine for ric_bound), `mixed_oneStep_le` (the hOne engine; the
-      slot sum produces exactly `oneStepConst B k r`'s rank factor),
-      **`lemma45_component`/`lemma45_component₀`** (Lemma 4.5, component-tower form).
-      See `Lemma45Engine.md`.  **W4 DONE (2026-06-11, green):** the (1,2)-upper
-      bridge turned out UNNECESSARY (upper towers are internal-only; both endpoint
-      statements are (0,s)); the genuinely needed piece was the frame-general
-      Koszul, now built in two layers: the intrinsic
-      **`Tensor0SBundle.koszul_difference`**
-      (`Tensor/RSTensor/NablaOnTensors/KoszulDifference.lean`:
-      `difference_symm_at` + `nabla_metric_two_term` + the ½/½/−½ formula) and the
-      frame-component producer **`hkoszul_of_leviCivita`** (Lemma45Engine.lean) —
-      EXACTLY `claim1`'s `hkoszul` shape (P₁ = refl, P₂ = swap 0 1,
-      P₃ = (finRotate 3).symm), any local frame, any two LC connections.
-      Remaining for the BOOK-facing F3: the `claim1_eps`-from-`hkoszul` wrapper
-      (~40 lines, mirror AkMFold's claim1 derivation) ⟹ `hDbound`; then the
-      (0,s) norm bridge wiring (`iterCovComp_eq_iterCov` + `normSq0S` lift, both
-      exist) for the statement conversion.  The SAME producer feeds ric_bound's
-      `claim1` instantiation directly (Phase R unblocked).
-- [~] F4 — Corollary *Norms of covariant derivatives of tensors, II* (`lbl370`)
-      → covariant (`q₁=0`) per-order constants used downstream ⟸ F3.
-      **STRUCTURE DONE (2026-06-10, green, `Lemma45Covariant.lean`):**
-      `lemma45_cor_II_of_intrinsic` — Cor II from the INTRINSIC Lemma I (`hF3`,
-      `normSq0S`-form, taken as hyp): per-term `sqrt_normSq0S_le_of_metric_equiv`
-      (NEW, Comparison.lean — the book's `(1+ε)^{(r+q₂)/2}` factor = `√(C^{q₂+k})`)
-      + factor-out `√(C^{q₂+r})` over `0≤k≤r` (`pow_le_pow_right₀`).  SAME-DOMAIN
-      formulation: `Φ*h = gRef`, `∇_{Φ*h} = ∇_gRef`, `Φ*T = T'` a domain tensor,
-      `|·|_h = |·|_gRef` — so pullback-naturality (ABSENT in repo) is AUTOMATIC.
-      **Remaining frontier = the intrinsic Lemma I lift**: `lemma45_F3` is the
-      COMPONENT (`compL2`) form; lifting it to `hF3`'s `normSq0S` form is the `B5`
-      bridge (`compL2_tower_eq`) at a `gRef`-ON frame point = the **good
-      gRef-ON-centered smooth frame** producer (constant Gram–Schmidt of a
-      trivialization frame), SAME gate as ric_bound R4d/e.  See `Lemma45Covariant.md`.
-- [x] F5-const — constants for *Composition of approximate isometries, I*
-      → `compApproxConst`, `compApproxConst_pos`, `compApproxConst_nonneg`
-      (Lemma45Constants.lean) ⟸ F4 constants
-- [~] F5 — Prop *Composition of approximate isometries, I*:
-      **`C⁰` part DONE (2026-06-09)**: `metricInner_nonneg`, `metricEquiv_mono`,
-      `metricEquiv_trans` (product constants), `metricEquiv_comp_eps` (the book's
-      additive form, `(1+ε₀)(1+ε₁) ≤ 1+3(ε₀+ε₁)`) — ApproxIsometryComp.lean,
-      sorry-free, axiom-clean.  Derivative (`C^p`) part = the Lemma 4.5 consumer
-      (book applies `lbl370` to `T := Φ₁*g₂−g₁`) — gated on the `hOne` engine
-      interface of `lemma45Double`, like F3/F4.
-- [~] F6 — Cor *Composition of approximate isometries, II*:
-      **scalar accumulation core DONE**: `compEpsAccum` (`e n ≤ C·Σ δᵢ` from
-      per-step costs; ApproxIsometryComp.lean).  Full version ⟸ F5-full.
-- **⚠ STATE — DIAGNOSIS CORRECTED (2026-06-11): `ApproximateIsometry.lean` was
-  NEVER green against THIS tree.**  `git grep` at HEAD: `def normRS` exists NOWHERE;
-  `Tensor0SBundle.normRS`/`normRS_eq_sqrt_normSqRS`/`abs_quad02_le_norm`/
-  `normSqRS_le_of_metric_equiv`/`HCGCompactness.connDiff_le_approx` are referenced
-  ONLY by ApproximateIsometry.lean itself (+ the old ApproxIsometryComp) — the file
-  was written against an API layer that was never ported (the earlier "5925L 0-sorry"
-  audit was a sorry-count, not a compile; the earlier "stale-broken by the tensor
-  relocation" framing was wrong).  Current compile: 101 errors (normRS family,
-  `LeviCivita.leviCivitaConnectionOfMetric` → now `Integral.Connection.…`, whnf
-  timeouts).  Pieces that DO exist: `innerRS`/`normSqRS`
-  (`Tensor/RSTensor/FiberMetric/TensorRSMetric.lean`), `abs_component0S_le_sqrt_normSq0S`
-  (RicciOperatorNormBound.lean, `_gen` hypothesis), `normSqRS_eq_normSq0S_lowerAllSpace`
-  (RSLoweringNorm.lean).  **Strategy decision for F4 (next session): extract what F4
-  needs into a fresh healthy file (the ApproxIsometryComp pattern) rather than
-  repairing the 6k-line monolith; or repair the monolith section-by-section.**
-- [ ] F7 — Def *Cᵖ-convergence of maps* + Def *C^∞-conv. uniformly on compacts*
-      → 2 defs (reconcile with existing `PointedConvergence` names) ⟸ —
-- [x] F8tool — abstract sequential Arzelà–Ascoli (Lemma 3.14) → `arzelaAscoli_subseq_…` (ArzelaAscoli.lean)
-- [ ] F8 — Cor *Compactness of sequence of isometries* (L537) → apply F8tool ⟸ F7, F8tool
-- [x] F9 — Def *Direct limit* (L628) + Lemma *Iₗ injective* (L660) → `SeqSystem`, `Lim`,
-      `incl`, `incl_comp`, `incl_injective`, `exists_incl_eq`
-      (Geometry/Topology/DirectLimit.lean, 2026-06-09, sorry-free)
-- [x] F10 — Lemma *open cover for the direct limit* (L679) → `incl_isOpenMap`,
-      `incl_isOpenEmb`, `range_incl_mono`, `iUnion_range_incl` (DirectLimit.lean)
-- [x] F11 — Cor `lbl379` *compact sets in the direct limit* → `isCompact_exists` (DirectLimit.lean)
-- [x] F12 — Cor `lbl380` σ-compact direct limits → `sigmaCompact` (DirectLimit.lean;
-      second-countability glue deferred to the manifold layer)
-- [x] F13 — Lemma `lbl381` *direct limit of Hausdorff is Hausdorff* → `t2Space`
-      (DirectLimit.lean; also the universal property `lift`/`continuous_lift`)
-
-## §5 Supporting: distance / exp⁻¹ derivatives (needed by A-convexity and Step B)
-
-**PARKED (2026-05-31): not now-doable.** S1 spike confirmed §5 is blocked on deep
-GlobalGeometry `sorry`s — minimal geodesics (`HopfRinow.lean:119`, "not in Mathlib") and
-the Gauss lemma (`GaussLemma.lean:687` / `SmoothRadialExp.lean:715`) — plus cut locus;
-Mathlib has no cut-locus / Riemannian-gradient / exp API. Decision: leave §5 as-is and
-merge external global-geometry code later (likely already has these), then revisit. The
-A-convexity (`lbl417`) and Step C center-of-mass that depend on §5 wait on that merge
-(or become honest-input then).
-
-- [ ] S1 — Lemma `lbl411` *gradient of d²* → BLOCKED: Gauss lemma + minimal geodesics
-      both `sorry`; the gradient itself exists (`gradientFun`) ⟸ §5 PARKED
-- [ ] S2 — Lemma `lbl412` *Hessian of d²* ⟸ S1
-- [~] S3 — Lemma `lbl413` *Hessian comparison* ⟸ S2  〔book-external comparison geom → honest-input〕
-- [ ] S4 — Cor *local convexity of d²* ⟸ S3
-- [ ] S5 — Cor `lbl417` *convexity of small enough balls* ⟸ S4
-- [~] S6 — Prop `lbl418` *derivatives of exp⁻¹* → currently `ExpInverseDerivBoundInput` (3.4 honest-input);
-      OPTIONAL later: prove from S1–S5 ⟸ S1–S5
-
-## §2 Step A: good coverings (L783–1369)
-
-- [~] A0 — Prop `lbl384` *Inj-radius decay* → `InjRadiusDecayInput` (GeometricInputs.lean)  〔external CGT/CLY〕
-- [~] A0' — Rauch comparison / volume multiplicity → `VolumeComparisonInput` (GeometricInputs.lean)  〔external Cheeger–Ebin〕
-- [ ] A1 — eq `lbl386` λ[r] → `lambdaRadius` + positive/antitone ⟸ A0
-- [ ] A2 — net construction (L882–955) → greedy λ-separated net + pairwise `B(x^α,λ[r^α])` disjoint ⟸ A1
-- [ ] A3 — Lemma `lbl387` *cover with ball-number bound* → doubled balls cover `B(O,r)`; PROVE net-maximality cover, A(r) bound from A0' ⟸ A1,A2,A0'
-- [ ] A4 — Prop `lbl388` *good cover of a Riemannian manifold* ⟸ A3
-- [ ] A5 — Prop `lbl389` *center-distance bounds* (`r_k^α ≤ 2αλ[0]`) ⟸ A2
-- [ ] A6 — Cor *center-distance convergence* (subsequence) ⟸ A5
-- [ ] A7 — Cor `lbl390` `K'(r)` ⟸ A3
-- [ ] A8 — Def `lbl391` *various size balls* (B̃⊂B̂⊂B⊂B̄⊂B⃗) ⟸ A1
-- [ ] A9 — Prop *disjointness of smaller & covering of larger* (L1170) ⟸ A8,A3
-- [ ] A10 — Prop *index bound `I(α,n)`* (L1187, multiplicity) ⟸ A8,A0'
-- [ ] A11 — Prop *stability of intersections* (L1216, subsequence) ⟸ A8–A10
-- [ ] A12 — Def `K(r)` (L1251) ⟸ A7,A11
-- [ ] A13 — Prop *nesting on intersection* (L1268, triangle ineq.) ⟸ A8,A12
-- [ ] A14 — Lemma `lbl383` *Existence of good coverings* (ASSEMBLY of A1–A13) ⟸ A1–A13
-
-## §3 Step B: local metrics & transition maps (L1370–1882)
-
-- [ ] B0 — Prop (L1413) *|∇ᵉRm|≤Cₑ ⟹ |∂ᵐg|≤C̃ₘ in normal coords*.
-      **AUDIT CORRECTION (2026-06-09): does NOT exist** — the old "[x] = Lemma 3.11
-      (`MetricAllTimesConclusion`)" conflated it with the TIME-window AllTimesBounds
-      machinery.  Spatial B0 is genuine remaining work (B1's main missing producer).
-      Staged route + status: `B0NormalCoordBounds.md`.  Stage 1 (2nd-order Grönwall
-      engine) DONE; stage 2 core DONE 2026-06-10: **`exists_radial_jacobi_radius`**
-      (`Exponential/JacobiVariation.lean`, green) — the radial `expMap` variation
-      field is Jacobi on `(0,1)`; used the de-privatized `commute_ds_dt_curvature`
-      (the W=∂_t commutation EXISTED, was private/unused) + smooth clamps
-      (`Analysis/Calculus/SmoothClamp.lean`).  Stage-2 tail (J(0)=0, D_tJ(0)=w,
-      endpoint J(1)=d(exp)ₓw, g_{ij}=⟨J_i,J_j⟩(1)) + stages 3–5 remain.
-- [x] B0' — smooth exponential local diffeo → native `Geometry.Riemannian.
-      NormalCoordinates.expMapDiffeo`/`normalChartAt` (0-sorry).  NOTE: its source is
-      *some* nhd of 0; widening to the λ-ball scale (`injRadius` gives only injectivity
-      on the eball) = the `lbl383` item-3 frontier.
-- S6 input rebuilt natively (2026-06-09): `StepBInputs.lean` (`normalTransition`,
-  `NormalTransitionDerivBound`, `ExpInverseDerivBoundInput`); `GeometricInputs.lean`
-  healed into a pure umbrella import (the dangling `NormalChartData` section removed).
-- [ ] B1 — Prop `lbl397` *approx isometry on a large ball* ⟸ A14, S6/A0', B0', F1
-- [ ] B2 — Prop `lbl399` *local maps → id* ⟸ B1
-- [ ] B3 — Prop `lbl402` *F_{kℓ;r} → id* ⟸ B1,B2
-- [ ] B4 — Cor `lbl403` *F_{kℓ;r} local diffeo* ⟸ B3
-- [ ] B5 — Lemma `lbl404` *limit of almost-identity pullbacks* ⟸ F1–F6
-- [ ] B6 — Lemma `lbl405` *F_{kℓ,r} is (ε,p)-pre-approx-isometry* ⟸ B1–B5, F1–F6
-
-## §6 Step C: nonlinear averages (L2638–end)
-
-- [ ] C1 — Lemma `lbl429` *existence of center of mass* ⟸ S5
-- [ ] C2 — Prop `lbl430` *cm dependence on weights/points* ⟸ C1
-- [ ] C3 — Prop `lbl434` *averaging maps* ⟸ C1,C2
-- [ ] C4 — Prop `lbl436` *average of →id maps →id* ⟸ C3,B6
-
-## §4 Step D: directed system, limit, assembly (L1883–2102)
-
-- [ ] D1 — Prop `lbl406` *metrics almost isometric on large balls* ⟸ B6,C4
-- [ ] D2 — Prop `lbl407` *almost-isometric limiting metrics* ⟸ D1, F8
-- [ ] D3 — Prop *convergence to a limit* (builds `M_∞`) ⟸ D2, F9–F13
-- [ ] D4 — Prop *the limit is complete* ⟸ D3
-- [ ] D5 — ASSEMBLY: discharge `metricCompactness` (MetricCompactness.lean) → build
-      `MetricCompactnessConclusion` from D1–D4 + maps + convergence ⟸ all above
+**Honest-input fields (book-external).** `GeometricInputs.lean`/`StepAInputs.lean`
+(A0 `lbl384` inj-radius decay, A0' Rauch/volume); `StepBInputs.lean` (S6 `lbl418`
+exp⁻¹ deriv — `ExpInverseDerivBoundInput`, temporary).
 
 ---
 
-## Critical path & parallel tracks
+## ACTIVE FRONTIER (Track α, no §5 geometry)
 
-- **Track α (now, no geometry):** F2-book→F3→F4→F5→F6 ; F7→F8 ; F9→{F10,F11,F12,F13}.
-- **Track β — PARKED (was "now"; over-optimistic):** §5 `S1→S5` blocked on GlobalGeometry `sorry`s, awaiting external merge. Still now-doable here: `A1→A2 ; A8` (no convexity needed).
-- **Then A:** A3,A5,A9,A10,A11,A12,A13 → A14.
-- **Then B:** B1→B2→B3→B4 ; B5 ; → B6.
-- **Then C:** C1→C2→C3→C4.
-- **Then D:** D1→D2→D3→D4→D5.
-- Honest-input boundary (total): A0 `lbl384`, A0' Rauch/volume, S3 `lbl413`, (temp) S6 `lbl418`.
-  Everything else is proved.
+- [~] **F4 — Cor *Norms of cov. derivs, II* (`lbl370`).** STRUCTURE done
+      (`Lemma45Covariant.lean:lemma45_cor_II_of_intrinsic`, Cor II from the intrinsic
+      Lemma I `hF3` + the `√(C^{q₂+r})` factor). **LIFT FRONTIER SOLVED at the lemma
+      level (2026-06-11, green, `Lemma45Intrinsic.lean`):** `compL2_tower_eq_gen` (the
+      decoupled tower-norm identity — the g-norm of the *gRef*-tower, which the
+      parallel matched-metric `B5`/`compL2_tower_le` can't express) + `hF3_term` (one
+      `compL2` Lemma-I ineq → intrinsic `hF3` at a g-ON point). So
+      `lemma45_F3 → hF3_term → hF3 → lemma45_cor_II_of_intrinsic → Cor II` is now all
+      at the lemma level. REMAINING = mechanical assembly (apply `exists_goodFrame_compBound`
+      with `gRef:=g` for the g-ON frame; ∃-collection into `lemma45_cor_II_of_intrinsic`),
+      gated on the lake lock / live parallel session. See `Lemma45Intrinsic.md`. ⟸ F3, good-frame.
+- [~] **F5 (C^p part)** — Prop *Composition of approx isometries, I* derivative side.
+      **GREEN sorry-free (2026-06-11): `ApproxIsometryCompHigher.lean:comp_cov_le`** —
+      `|∇_{g₀}^r(δ₀+δ₁)|_{g₀} ≤ ε₀ + ε₁·C_p` (same-domain). Fiber Minkowski at a g₀-ON
+      basis (`exists_gOrthonormalBasis` + `metricInverseInBasis_of_orthonormal` +
+      `sqrt_normSq0S_add_le`) splits the composed tower; the `δ₁` term via
+      `lemma45_corII` (F4) + `iterCov_add`. (`[~]` because it rests on F4's one
+      assembly-`sorry`; F5 itself is sorry-free.) ⟸ F4.
+- [~] **F6 — Cor *Composition, II* (`lbl372`).** **GREEN sorry-free:
+      `ApproxIsometryCompHigher.lean:comp_cov_accum`** — the `n`-fold accumulation
+      `e n ≤ C·Σ_{i≤n} εᵢ` via the scalar fold `compEpsAccum` (ApproxIsometryComp.lean). ⟸ F5.
+- [ ] **F2-book** — Prop *Distances*, pre-approx-isometry form: feed `image_ball_tangent`
+      from `PreApproxIsometryData` (no invented pullback-metric constructor). ⟸ F1-c0, F2.
+- [x] **F7** — Def *Cᵖ-convergence of maps* + *C^∞-conv. on compacts* (`lbl373`).
+      **GREEN sorry-free (2026-06-11): `MapConvergence.lean`** — `mapDerivNorm`,
+      `MapCPConvOn`, `MapCInfConvOnCompacts` (Euclidean `iteratedFDeriv` form, parallel to
+      `PointedConvergence`'s `Metric*` names) + order/subset/subseq API + the bridges
+      `mapCPConvOn_of_tendstoUniformly`, `tendstoUniformlyOn_of_cPConv`, `tendsto_of_cInf`.
+- [~] **F8** — Cor *Compactness of a sequence of isometries* (`lbl374`).
+      **ASSEMBLED sorry-free (2026-06-11): `IsometryCompactness.lean`** —
+      `isometry_seq_cInf` (convergence core) + `comp_eq_id_of_cInf` (invertibility, fully
+      proved) + `isometry_seq_diffeo` (full `lbl374`, incl. the `C^∞` diffeomorphism limit
+      via the symmetry argument). With the F8-engine now PROVED, `lbl374` is reduced to
+      ONLY the honest-input `IsometryDerivBounds` (the `lbl375`→[H6] §5 derivative
+      bounds). The plan's "apply F8tool" understated it: the scalar `ArzelaAscoli` tool is
+      not directly enough. ⟸ **F8-engine** (done), F8-input.
+- [x] **F8-engine** — *Arzelà–Ascoli for maps* (`MapConvergence.exists_cInf_subseq`).
+      **PROVED sorry-free + axiom-clean (2026-06-11)**: smooth `Φₖ` with all `∇ʳΦₖ`
+      bounded on compacts ⇒ `C^∞`-on-compacts convergent subsequence + smooth limit.
+      Actual route (deviations recorded in `MapConvergence.md`): equicont/MVT →
+      vector AA (`arzelaAscoli_isCompact_closure`, proper target; NEW
+      `cmm_finiteDimensional` fills the Mathlib gap for `ContinuousMultilinearMap`) →
+      diagonal-free compact countable product over all orders →
+      `hasFDerivAt_of_tendstoUniformlyOn` on unit balls assembling a full
+      `HasFTaylorSeriesUpTo ⊤` of the limit. ⟸ F8tool(scalar+vector).
+- [~] **F8-input** — honest-input `IsometryDerivBounds` (`lbl375`→[H6] §5): isometry +
+      bounded uniformly-Euclidean metrics ⇒ all `∇ʳΦₖ` bounded on compacts (book externalizes
+      the polynomial recursion to [H6] §5).
 
-Immediate next task: **F3-hi-kge2** - generalize the checked order-two
-connection-difference producer to all higher orders needed by the book
-induction, using the already checked `k = 0,1,2` endpoints as the base range.
+---
+
+## §5 Supporting: distance / exp⁻¹ derivatives — PARKED
+
+Blocked on GlobalGeometry `sorry`s (minimal geodesics `HopfRinow.lean:119`; Gauss
+lemma `GaussLemma.lean:687`) + no Mathlib cut-locus/Riemannian-gradient/exp API.
+Leave as-is; merge external global-geometry code later, then revisit.
+
+- [ ] S1 `lbl411` ∇d² · S2 `lbl412` Hess d² · [~] S3 `lbl413` Hess comparison (honest-input)
+      · S4 local convexity · S5 `lbl417` convex balls · [~] S6 `lbl418` exp⁻¹ deriv (honest-input).
+
+---
+
+## §2 Step A — good coverings (`L783–1369`) — METRIC CORE DONE
+
+**Done (2026-06-08/09, verified + axiom-clean; see `ch4-thm39-stepA` memory +
+`GoodCovering.md`/`GoodCoveringOrdered.md`):** A1 (λ), A2 Zorn net + the book's
+distance-ORDERED greedy net (`GoodCoveringOrdered.lean`, abstract
+`[MetricSpace][ProperSpace]`), A3 cover/count, A4 finite cover, A5/A6, A7 `lbl390`
+window, A8 `lbl391` radii, A9–A13, and the **capstone
+`GoodCoveringSeq.lean:exists_stableNetData`** = `lbl383` items 1,2,4,5,6,7 on a
+diagonal subsequence. ONE deferred `sorry`: `GoodCoveringOrdered.lean:
+exists_proper_realization` (the user-approved Hopf–Rinow black box). Honest inputs:
+A0 `lbl384` CGT decay, A0' PackingBound/ratio-ballMult (Bishop–Gromov), RealizesEdist.
+
+- [ ] **A-item3 — `lbl383` item 3** (exp∘L diffeo at λ-scale + geodesic convexity):
+      the ONLY remaining Step A content. UN-PARKED 2026-06-11 (user chose full 3a+3b);
+      brick plan + status in `Geometry/Comparison/ConvexBalls.md`. DONE: **B1**
+      (`ConvexBalls.lean:isConvexWith_smallNormalBall` — lbl417 assembly, sorry-free)
+      + **B2** (`ExpBallDiffeo.lean:exists_diffeo_of_injOn` generic glue [a Mathlib
+      TODO] + `exists_expBall_diffeo` — 3a with nonsingularity input, sorry-free).
+      REMAINING: **B3** native nonsingularity (W=∂ₜ commutation → exp-variation-is-
+      Jacobi → Grönwall; B0-shared gate) · **B4** lbl416 producer (S1/S2 Hess-d²
+      interface design pending) · **B5** Step A wiring. Step B's chart scale = B3.
+
+## §3 Step B — local metrics & transition maps (`L1370–1882`)
+
+B0 stages 1–2 done (above); B0 stages 3–5 (x-derivative Grönwall) remain.
+
+- [ ] B1 `lbl397` approx-iso on a large ball ⟸ A14, S6/A0', B0', F1 · B2 `lbl399` ·
+      B3 `lbl402` · B4 `lbl403` · B5 `lbl404` · B6 `lbl405` (`F_{kℓ,r}` is (ε,p)-pre-approx). ⟸ F1–F6.
+
+## §6 Step C — nonlinear averages (`L2638–end`)
+
+- [ ] C1 `lbl429` center of mass ⟸ S5 · C2 `lbl430` · C3 `lbl434` averaging maps ·
+      C4 `lbl436` average-of-→id-maps →id. ⟸ B6.
+
+## §4 Step D — directed system, limit, assembly (`L1883–2102`)
+
+- [ ] D1 `lbl406` · D2 `lbl407` ⟸ F8 · D3 build `M_∞` ⟸ F9–F13 · D4 completeness ·
+      **D5 ASSEMBLY: discharge `metricCompactness`** from D1–D4 + maps + convergence.
+
+---
+
+## Critical path
+
+`F4 (wire lift) → F5 → F6` ; F8: engine DONE, only F8-input left (F7 done) ; then `A1→…→A14` ; `B1→…→B6` ;
+`C1→…→C4` ; `D1→D2→D3→D4→D5`. §5 PARKED (await external geometry merge).
+Honest-input boundary (total): A0 `lbl384`, A0' Rauch/volume, S3 `lbl413`, S6 `lbl418`,
+F8 `lbl375`/[H6] §5 (`IsometryDerivBounds`).
+
+**Shared with Chapter 3:** the good-frame producer (`RicBoundGoodFrame.lean`) is the
+same gate as ric_bound's R4 (`RicBound.lean` endpoint, `RicBoundAssembly.aN_intrinsic_point`).

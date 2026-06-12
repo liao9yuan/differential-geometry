@@ -112,3 +112,82 @@ the whole-route spec and status).
   unification cannot invert `(f x)`).
 - `simp` may refuse (`no progress`) on `(smulRight 1 w) 1 = w` — use the gauss
   pattern `change` + `rw [smulRight_apply, one_apply, one_smul]`.
+
+## NEXT BRICK (2026-06-11, B3 regularity export — blueprint for continuation)
+
+Goal: export, for the CLEAN radial objects (`γ v = expMap p (v•x)`,
+`J v = ∂ₛ|₀ expMap p (v•(x+s•w))`), the chartRep-differentiability needed by
+`covGronwall_ne_zero` (`Variation/CovariantGronwall.lean`):
+`hJdiff`/`hDJdiff` : ∀ t ∈ Icc 0 b (b < 1), DifferentiableAt ℝ (chartRepAt γ J/DJ t) t.
+
+Route (all machinery exists; mimic `exists_radial_jacobi_radius`'s transfer):
+1. Rebuild the clamped variation `F s t = expMap p (ψ t • (x + φ s • w))` with
+   the same norm budget (δ/26); `hJ_eq`-style: clean J = clamped ∂ₛF on the open
+   window `Ioo (-1) 2` ⊇ Icc 0 b (germ argument at each v: `hgerm` +
+   `mfderiv_congr_of_eventuallyEq`-style as in the file).
+2. Clamped `∂ₛF`'s chartRep-diff at each t: `slice_transverseVelocity_chartRep_…`
+   / the `chartCoord_transverseVelocity_contDiffAt` C² lemma
+   (CovariantCommutationCurvature.lean) at the slice `s = 0`, any `t`.
+3. Transfer by `chartRepAt_eventuallyEq_of_eventuallyEq` (ParallelTransport.lean:939)
+   + `Filter.EventuallyEq.differentiableAt_iff`.
+4. Same for `DJ = covDerivAlong γ J`: clamped counterpart's diff =
+   `variationField_covDeriv_chartRep_differentiableAt` (CovariantCommutationCurvature
+   :1193, check it is t-general); equality of fields on the window from `hDJ_ev`
+   (in-file pattern) + `covDerivAlong_congr_of_eventuallyEq` (ParallelTransport:948).
+5. ALSO export `hODE`-side: `D²J(0) = 0` (the t=0 Jacobi-equation endpoint) —
+   needs continuity of `D²J` at `0` (NOT yet available; if hard, leave as the one
+   hypothesis and document).
+
+Consumers after this brick: instantiate `covGronwall_ne_zero` with
+`exists_parallel_frame` (PerpFrame) seeds from `exists_gOrthonormalBasis`,
+ICs `radial_jacobi_zero` + `exists_radial_jacobi_deriv_radius`, hODE from
+`exists_radial_jacobi_radius` (Ioo 0 1) + curvature-norm input + the t=0 point,
+endpoint `radial_jacobi_one` ⟹ `d(exp)_x` injective below the Grönwall scale.
+Then (d) the manifold IFT at `v ≠ 0` ⟹ `IsLocalDiffeomorphOn` ⟹
+`exists_expBall_diffeo`'s `hloc` (Step A item 3a complete modulo B4/B5).
+
+### Brick progress (2026-06-11, live)
+- Step A DONE: `chartCoord_transverseVelocity_contDiffAt` de-privatized
+  (CovariantCommutationCurvature.lean, visibility-only, re-verified green).
+- Step B IN PROGRESS: the regularity-export theorem in JacobiVariation.lean.
+  ACTIVE CLAIM on JacobiVariation.lean: token bca77123-4994-4b4b-88ce-d9c5b2bc4953
+  (release with `./scripts/lake-locked.ps1 release -Token bca77123-...` when done).
+
+### OBSTRUCTION discovered (2026-06-11, before writing the export theorem)
+
+The instantiation plan hits a smoothness-ORDER mismatch:
+- `exists_parallel_transport_on_Icc` / `exists_parallel_frame` demand
+  `hγ : ContMDiff 𝓘(ℝ,ℝ) I ∞ γ`;
+- the radial curve's smoothness comes from `expMap_contMDiffAtN_of_norm_lt`
+  (OffZero.lean:994) — per FINITE order `n` with an `n`-DEPENDENT radius `δ(n)`;
+  no `∞`-order statement on a uniform ball exists, and the clamped variation is
+  only `IsSmoothVariation` (degree 8).
+
+Resolution options (design choice for the next session):
+1. **Weaken the transport producers to finite order** (recommended first check):
+  inspect what order `exists_parallel_transport_on_Icc`'s PROOF actually
+  consumes (parallel-transport ODE plausibly needs only low order, ≤ 8);
+  changing `∞` to that order in the hypothesis is a statement-strengthening
+  (more general) edit, then the clamped/clean curves qualify.
+2. Prove `expMap` is `ContMDiffAt ∞` on a uniform small ball (true — geodesic
+  flow is `C^∞`; the per-`N` radius is a construction artifact) — bigger.
+3. Build an order-8 variant of the frame producer.
+Status: regularity-export theorem NOT started (obstruction precedes it);
+no `sorry` introduced anywhere. Claim on JacobiVariation.lean RELEASED.
+
+### Resolution-1 recon (2026-06-11, order audit of the transport chain)
+
+`hγ : ContMDiff … ∞` is consumed in the chain ONLY as:
+- `hγ.continuous` (chart preimages, overlap consistency) — order-free;
+- ONE composition `hφ.comp hγ.contMDiffOn` (exists_piece_parallel_section,
+  the chart-curve regularity feeding the parallel ODE) — works at ANY order
+  the chart composition supports (the ODE needs low order).
+⟹ weakening `∞ → (n : ℕ∞)` (with `1 ≤ n`, or fixed `8` matching
+`IsSmoothVariation`) across `exists_piece_parallel_section`,
+`parallel_transport_unique_of_eq_at_point`,
+`exists_global_parallel_transport_on_Ioo`, `exists_parallel_transport_on_Icc`,
+`parallel_transport_preserves_inner_product` (check its own hγ uses), and
+`PerpFrame.exists_parallel_frame` is a mechanical signature+proof-order edit —
+the FIRST brick of the next session. Then the clamped radial curve (degree 8)
+qualifies directly, and the regularity-export brick proceeds per the blueprint
+above.

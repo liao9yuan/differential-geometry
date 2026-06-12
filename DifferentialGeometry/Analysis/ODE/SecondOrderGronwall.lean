@@ -68,4 +68,76 @@ theorem norm_le_gronwall_secondOrder
     _ ≤ gronwallBound δ (max K 1) eps (t - 0) := hmain t ht
     _ = gronwallBound δ (max K 1) eps t := by rw [sub_zero]
 
+/-- **Perturbation form of the second-order Grönwall bound.**  A solution of the
+homogeneous Jacobi-type estimate `‖Y''‖ ≤ K‖Y‖` with `Y 0 = 0`, `Y' 0 = w` stays
+`gronwallBound`-close to its linearisation `t ↦ t • w`.  (Apply with
+`Z := Y - t • w`: `Z'' = Y''` and `‖Y‖ ≤ ‖Z‖ + t‖w‖` make the estimate
+inhomogeneous with `ε = K·b·‖w‖` and zero initial data.) -/
+theorem gronwall_sub_linear
+    {Y Y' Y'' : ℝ → E} {K b : ℝ} {w : E}
+    (hK : 0 ≤ K) (hb : 0 ≤ b)
+    (hcY : ContinuousOn Y (Icc 0 b))
+    (hcY' : ContinuousOn Y' (Icc 0 b))
+    (hdY : ∀ t ∈ Ico 0 b, HasDerivWithinAt Y (Y' t) (Ici t) t)
+    (hdY' : ∀ t ∈ Ico 0 b, HasDerivWithinAt Y' (Y'' t) (Ici t) t)
+    (hbound : ∀ t ∈ Ico 0 b, ‖Y'' t‖ ≤ K * ‖Y t‖)
+    (h0 : Y 0 = 0) (h0' : Y' 0 = w) :
+    ∀ t ∈ Icc 0 b,
+      ‖Y t - t • w‖ ≤ gronwallBound 0 (max K 1) (K * (b * ‖w‖)) t := by
+  set Z : ℝ → E := fun t => Y t - t • w with hZ
+  set Z' : ℝ → E := fun t => Y' t - w with hZ'
+  have heps : 0 ≤ K * (b * ‖w‖) :=
+    mul_nonneg hK (mul_nonneg hb (norm_nonneg w))
+  have hlin : ∀ (t : ℝ) (s : Set ℝ),
+      HasDerivWithinAt (fun x : ℝ => x • w) w s t := by
+    intro t s
+    simpa using (hasDerivWithinAt_id t s).smul_const w
+  have hcZ : ContinuousOn Z (Icc 0 b) :=
+    hcY.sub ((continuous_id.smul continuous_const).continuousOn)
+  have hcZ' : ContinuousOn Z' (Icc 0 b) := hcY'.sub continuousOn_const
+  have hdZ : ∀ t ∈ Ico 0 b, HasDerivWithinAt Z (Z' t) (Ici t) t :=
+    fun t ht => (hdY t ht).sub (hlin t (Ici t))
+  have hdZ' : ∀ t ∈ Ico 0 b, HasDerivWithinAt Z' (Y'' t) (Ici t) t :=
+    fun t ht => (hdY' t ht).sub_const w
+  have hZ0 : ‖Z 0‖ ≤ 0 := by simp [hZ, h0]
+  have hZ'0 : ‖Z' 0‖ ≤ 0 := by simp [hZ', h0']
+  have hboundZ : ∀ t ∈ Ico 0 b, ‖Y'' t‖ ≤ K * ‖Z t‖ + K * (b * ‖w‖) := by
+    intro t ht
+    have hYt : Y t = Z t + t • w := by simp [hZ]
+    have htb : |t| ≤ b := by
+      rw [abs_of_nonneg ht.1]; exact ht.2.le
+    calc ‖Y'' t‖ ≤ K * ‖Y t‖ := hbound t ht
+      _ = K * ‖Z t + t • w‖ := by rw [← hYt]
+      _ ≤ K * (‖Z t‖ + ‖t • w‖) :=
+          mul_le_mul_of_nonneg_left (norm_add_le _ _) hK
+      _ = K * ‖Z t‖ + K * (|t| * ‖w‖) := by
+          rw [norm_smul, Real.norm_eq_abs]; ring
+      _ ≤ K * ‖Z t‖ + K * (b * ‖w‖) := by
+          have := mul_le_mul_of_nonneg_right htb (norm_nonneg w)
+          nlinarith
+  exact norm_le_gronwall_secondOrder hK heps hcZ hcZ' hdZ hdZ' hboundZ hZ0 hZ'0
+
+/-- **Nonvanishing of a Jacobi-type solution below the Grönwall scale.**  If the
+linearisation dominates the Grönwall error at the endpoint —
+`gronwallBound 0 (max K 1) (K·b·‖w‖) b < b‖w‖` — then `Y b ≠ 0`.  This is the
+analytic heart of the nonsingularity of `d exp` below the conjugate scale: the
+Jacobi field with initial data `(0, w)` cannot return to zero while the
+curvature-size `K` is small against the window `b`. -/
+theorem gronwall_ne_zero
+    {Y Y' Y'' : ℝ → E} {K b : ℝ} {w : E}
+    (hK : 0 ≤ K) (hb : 0 < b)
+    (hcY : ContinuousOn Y (Icc 0 b))
+    (hcY' : ContinuousOn Y' (Icc 0 b))
+    (hdY : ∀ t ∈ Ico 0 b, HasDerivWithinAt Y (Y' t) (Ici t) t)
+    (hdY' : ∀ t ∈ Ico 0 b, HasDerivWithinAt Y' (Y'' t) (Ici t) t)
+    (hbound : ∀ t ∈ Ico 0 b, ‖Y'' t‖ ≤ K * ‖Y t‖)
+    (h0 : Y 0 = 0) (h0' : Y' 0 = w)
+    (hsmall : gronwallBound 0 (max K 1) (K * (b * ‖w‖)) b < b * ‖w‖) :
+    Y b ≠ 0 := by
+  intro hYb
+  have h := gronwall_sub_linear hK hb.le hcY hcY' hdY hdY' hbound h0 h0' b
+    ⟨hb.le, le_rfl⟩
+  rw [hYb, zero_sub, norm_neg, norm_smul, Real.norm_eq_abs, abs_of_pos hb] at h
+  exact absurd h (not_le.mpr hsmall)
+
 end DifferentialGeometry

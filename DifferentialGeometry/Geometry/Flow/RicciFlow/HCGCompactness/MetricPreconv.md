@@ -1,6 +1,59 @@
 # MetricPreconv — MSM135 Corollary lbl351 (metrics with bounded derivatives preconverge)
 
-**Status: PLAN (2026-06-11). Nothing implemented yet.**
+**Status: Brick A1 IMPLEMENTED + read-only verified (2026-06-11).**
+
+## Brick A1 DONE — `fderiv_comp_le_tower` (MetricPreconv.lean)
+
+The order-1 covariant→coordinate conversion is proved sorry-free.  File
+`HCGCompactness/MetricPreconv.lean` exports (all public, reused by A2/B):
+
+- `fderiv_comp_le_tower` — the endpoint.  `‖fderiv (chart rep of s_p^V)‖ ≤
+  CV·(Cp1+Cp)` on an inner compact `Kc ⊆ chart source`, with `CV` collecting
+  gRef/chart/slot/basis data only (A0-independent — so k-independent on a metric
+  SEQUENCE; the load-bearing quantifier discipline `∃CV … ∀y∀Cp,Cp1`).
+- `opNorm_le_sum_coord` — generic finite-dim `‖L‖ ≤ Σ‖coordᵢ‖·|L(bEᵢ)|`.
+- `exists_ON_tangentBasis` — general-dim gRef-orthonormal tangent basis at a
+  point (repackages `exists_trivONBasis` via `IsLocalFrameOn.toBasisAt`).
+- `exists_section_eqOn_compact` — bump-globalizes `tangentConstInChart x₀ v` to a
+  genuine `ContMDiffSection` agreeing on `Kc`.
+- `exists_sqrtInner_bound` / `exists_family_bound` — compact sup of the
+  gRef-norm of a (family of) smooth section(s).
+
+### Route as implemented (one simplification vs the plan)
+
+Plan's per-slot product bookkeeping was replaced by a **uniform bound `D`**: one
+constant bounding `√gRef(s·,s·)` on `Kc` for every direction `σ i`, slot `V a`,
+and correction `W i a = ∇_{σ i}(V a)`.  Then each Cauchy–Schwarz slot product is
+`≤ D^(p+3)` / `≤ D^(p+2)`, so `|fderiv·(bEᵢ)| ≤ Cp1·D^(p+3)+(p+2)·Cp·D^(p+2)`,
+and `opNorm_le_sum_coord` + `CV := max(Ccoord·D^(p+3), Ccoord·(p+2)·D^(p+2))`
+closes it.  Crude constant, but k-independent and far less bookkeeping.
+
+Otherwise as scouted: chart bridge `extDerivFun_tangentConstInChart_eq_fderiv`
+(per-direction), step decomposition `covDerivOfField_succ` +
+`metricCovDerivStep_apply` + `totalNabla0SFun_apply_section` +
+`nabla0SFun_eval_smooth_slots` (no `Fin.cons` `hv`/`hupd` needed — the cons is
+formed directly), CS `abs_apply_le_sqrt_normSq0S`.
+
+### Lean gotchas hit (record for A2/B)
+
+- `metricInner_mdiffAt` and `cotangentCov_pairing_contMDiff` carry an
+  `[InnerProductSpace ℝ E]` section var the HCG block lacks → **inline** the
+  `g.contMDiff` + `ContMDiff.clm_bundle_apply` (×2) + `contMDiffAt_section`
+  chain instead (no inner product needed; that var is unused in their proofs).
+- Bump `exists_contMDiffMap_one_nhds_of_subset_interior` wants `n : ℕ∞`; pass
+  `(⊤ : ℕ∞)` so `χ.contMDiff` lands at `(∞ : WithTop ℕ∞)` matching the section.
+- `NormalSpace M` is not directly inferred: add
+  `LocallyCompactSpace H := I.locallyCompactSpace`,
+  `LocallyCompactSpace M := ChartedSpace.locallyCompactSpace H M`, then
+  `NormalSpace M := inferInstance` (PouThickening pattern).
+- `abs_add` → `abs_add_le`.
+- `Fin.cons x f a` inside `gRef.inner y (…)` cannot infer its motive → ascribe
+  `(Fin.cons … : Fin (p+3) → TangentSpace I y)`.
+- `Finset.prod_le_prod` cannot infer the upper-bound function `g` under
+  `le_trans` → pass `(g := fun _ => D)` and finish with `le_of_eq`.
+- `Function.update_of_ne` (not `update_noteq`); `Function.update_self`.
+
+**Status: PLAN below (the rest, Bricks A2/B/C/D, 2026-06-11). Brick A1 done.**
 
 ## Where this sits
 

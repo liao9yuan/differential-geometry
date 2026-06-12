@@ -126,3 +126,48 @@ Design settled (2026-06-10): at stage `N` with IH `(B_r), r < N` (so uniform
 - Then R4 (Step 5 time derivatives), R5 (discharge `MetricCovOrderEvolutionInput`).
 
 Verification: focused check PASSED (this file), first structural pass.
+
+## CLEANUP BACKLOG — deferred 2026-06-11 (user: "defer until ric_bound settles")
+
+Audit found duplication / structure / naming issues. Refactor is **build-safe**
+(the R-track chain `Lemma45CovariantAbstract → Lemma45Engine → RicBoundClaims →
+RicBoundAssembly` is imported by nothing else) but the files are stale-locked by
+the dead parallel ric_bound session (token `b6df9d3c`, pid 27508 dead). EXECUTE
+when those files are free. User approved contained scope #1/#2/#5; deferred to
+avoid friction with the active ric_bound discharge.
+
+**#1 — move pure ℕ→ℝ inductions DOWN** to `Lemma45CovariantAbstract.lean`
+(namespace `HCGCompactness`, confirmed pure / no manifold vars; RicBoundClaims
+`open`s HCGCompactness so refs stay unqualified):
+  - `chain_le` (RicBoundClaims:~751, make PUBLIC) — used by `mixed_descent`.
+  - `claim2DoubleAux` (~577, keep private) + `claim2Double` (~633, PUBLIC) —
+    used by `claim2_component`.
+  These have ZERO manifold/tensor content; they violate "algebra below geometry".
+
+**#2a — de-dup the finsetSum helpers** (copied verbatim, `private` in BOTH files):
+  - `contMDiffOn_finsetSum'`  Lemma45Engine:357 & RicBoundClaims:160.
+  - `compL2_finsetSum_le`     Lemma45Engine:429 & RicBoundClaims:172.
+  Promote Lemma45Engine's to public; delete RicBoundClaims's copies (same
+  namespace `PDE.RicciFlow`, imported). (Fuller fix = #3 below, cross-session.)
+
+**#2b — factor the one-step correction block (3 → 1)**. Three ~150-line proofs
+share a ~70-line block (`split base field via iterCov_one_chr_change → per-slot
+P(m) via compL2_iterCov_chrCorr_le → rank factor → assembly`):
+  - `mixed_oneStep_le`  (Lemma45Engine:513)  [mixed ≤ pure + corr]
+  - `mixed_oneStep_rev` (RicBoundClaims:196)  [pure ≤ mixed + corr]
+  - `mixed_oneStep_top` (RicBoundClaims:376)  [top c=k term split out]
+  Extract into Lemma45Engine: `mixed_split_arr` (the `harr` array identity) +
+  `corrSum_le` (`Σ_s |∇_H^k corr_s| ≤ ε·oneStepConst B k r·Σ_{j≤k}|∇_H^j X|`,
+  hyp `hDbound c≤k`) + `corrSum_top_le` (top-split, hyp `hDbound c<k`). The three
+  become ~15-line wrappers (triangle in each orientation + the extracted lemmas).
+
+**#5 — naming** (cosmetic; LOW priority, and renames desync the parallel
+session's `RicBound.md` plan which references these by name): jargon/sentence-y
+→ a consistent local convention. Candidates: `aN_component`, `aN_intrinsic_point`,
+`tower_bound_to_intrinsic`, `mixed_descent`, `claim1_LC`, `chain_le`.
+
+**Cross-session (NOT in this contained backlog — need coordination):**
+  - #3 canonical `compL2_finsetSum_le` in `Evolution/CovDerivStepCompContrNorm.lean`
+    (the compL2 home); also `Claim2Mixed.compL2_sum_le` is a 3rd copy.
+  - #4 `claim2_component` (RicBoundClaims) vs `claim2core` (Claim2Mixed) — two
+    proofs of geometric Claim 2; pick ONE canonical, other → wrapper/delete.

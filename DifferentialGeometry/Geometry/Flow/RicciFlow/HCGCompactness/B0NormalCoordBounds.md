@@ -127,4 +127,22 @@ REMAINING:
   start from `[ε,1]` + continuity, or strengthen the rescale lemma later.)
 - stage 3 residual: x-smooth-dependence of the parallel frame (only if stage 4 needs it).
 - stage 4: the x-derivative Grönwall induction (engine: `norm_le_gronwall_secondOrder`).
+  **Stage-4 BASE (zeroth order) ODE side DONE (2026-06-11, green first try):**
+  `gronwall_sub_linear` (`‖Y(t)−t•w‖ ≤ gronwallBound 0 (max K 1) (K·b·‖w‖) t` for
+  `‖Y''‖ ≤ K‖Y‖`, `Y(0)=0`, `Y'(0)=w`) + `gronwall_ne_zero` (`Y(b) ≠ 0` when the
+  linearisation dominates the Grönwall error) — both in
+  `Analysis/ODE/SecondOrderGronwall.lean`. This is the analytic heart of
+  `d(exp)`-nonsingularity below the conjugate scale (Step A item-3a / B3 of
+  `Comparison/ConvexBalls.md`). REMAINING to consume them geometrically:
+  (a) gauge conjugation — **frame-expansion CORE DONE (2026-06-11, green):**
+  `Connection/ParallelTransport/CovariantDerivativeAlong.lean: chartRepAt_sum /
+  covDerivAlong_sum / covDerivAlong_expand` (`D_t(Σ yᵢ•Fᵢ) = Σ yᵢ'•Fᵢ` for
+  pointwise-parallel `Fᵢ`; 2nd order = apply twice with `y := deriv yᵢ`, no new
+  lemma needed). (a-rest) coefficient extraction `yᵢ := g.inner(J, Fᵢ)` + its
+  differentiability (metric compatibility along curves — cf.
+  `chartGramAlongCurve_hasDerivAt_zero_of_parallel`) + the pointwise ℓ²-norm
+  identity at a g-ON frame (cf. the F4-track `exists_gOrthonormalBasis` fiber
+  machinery); (b) the curvature-norm input `‖R(J,γ')γ'‖_g ≤ C₀‖γ'‖²‖J‖`;
+  (d) the manifold IFT at `v ≠ 0` (mimic `LocalDiffeomorphism.lean`'s at-zero
+  route; a Mathlib TODO).
 - stage 5: wiring to the Step A balls.

@@ -1,3 +1,37 @@
+﻿# ApproximateIsometry.lean — ARCHIVED (never-green broken route, 2026-06-11)
+
+This is the full original `ApproximateIsometry.lean` (5769 lines), preserved as a
+**future reference only**.  The file was **never green** against this tree (~101+
+errors): the never-ported `normRS` tensor family (`normRS`,
+`normRS_eq_sqrt_normSqRS`, `sqrt_normRS_upper/lower_le_of_equiv`,
+`normSqRS_le_of_metric_equiv`, `fieldNormRS`, `abs_quad02_le_norm`,
+`connActConst`/`connActComp`), the `LeviCivita.leviCivitaConnectionOfMetric`
+namespace (renamed to `Integral.Connection.leviCivitaConnectionOfMetric`), plus
+`whnf` timeouts and cascades.
+
+## What was salvaged (do NOT re-extract from here)
+
+- **① book data structures + ② same-domain predicates + ③ bound-predicates &
+  dimension constants** → `ApproxIsometryDefs.lean` (green; the `LeviCivita`
+  rename and `fieldNormRS → √normSqRS` revivals applied there).
+- **Keystone `exists_trivFrame_orthonormal_basis`** (smooth gRef-ON-at-a-point
+  trivialization frame) → `RicBoundGoodFrame.lean` (green).
+- The norm-comparison content (F1) and the `(0,s)` metric-equivalence factor are
+  superseded by `Tensor0SBundle.sqrt_normSq0S_le_of_metric_equiv` (Comparison.lean)
+  and `lemma45_cor_II_of_intrinsic` (Lemma45Covariant.lean).
+
+## Still here (broken; revive only if a future need is concrete)
+
+The F1 norm-comparison proofs (`normSqRS_compare_of_approxIsometry`,
+`bookNormRS_compare`, `sqrt_normRS_upper`, …) and the entire F3 connection-
+difference proof apparatus (`connDiff_*`, `lcDiff*`, `metricCov*`, `connDiffOne*`
+/`connDiffTwo*`, `connDiffEpsBound_*`, `nablaRS_*`, `hcg_first_order_nabla_norm_estimate`).
+Most are superseded by the green `Lemma45Engine` / `RicBoundClaims` machinery; the
+unique surviving value was the interface (now in `ApproxIsometryDefs.lean`).
+
+---
+
+```lean
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
 import DifferentialGeometry.Geometry.Coordinates.ChristoffelTensor
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.MetricFlatBasis
@@ -44,14 +78,14 @@ variable {I : ModelWithCorners Real E H}
 section FixedDomain
 
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
-variable [T2Space M] [IsManifold I ∞ M] [SigmaCompactSpace M]
+variable [T2Space M] [IsManifold I âˆž M] [SigmaCompactSpace M]
 
 section MapLevel
 
 variable {N : Type u} [TopologicalSpace N] [ChartedSpace H N]
-variable [T2Space N] [IsManifold I ∞ N] [SigmaCompactSpace N]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) N]
+variable [T2Space N] [IsManifold I âˆž N] [SigmaCompactSpace N]
+variable [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
+variable [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) N]
 
 /-- Concrete pullback metric tensor data for a smooth map.
 
@@ -62,8 +96,8 @@ and the formula field pins it to the map. -/
 structure PullbackMetricTensorData
     (Phi : M -> N) (h : SmoothRiemannianMetric I N) where
   pullback :
-    Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
-      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2
+    Tensor0SBundle.Tensor0SField (ð•œ := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (âˆž : WithTop â„•âˆž)) 2
   pullback_apply :
     forall x : M, forall v : Fin 2 -> TangentSpace I x,
       pullback x v =
@@ -74,8 +108,8 @@ structure PullbackMetricTensorData
 /-- The pointwise norm of the metric-error tensor `A - g`, measured by `g`. -/
 noncomputable def metricTensorErrorNorm
     (A :
-      Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
-        (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+      Tensor0SBundle.Tensor0SField (ð•œ := Real) (E := E) (H := H)
+        (I := I) (M := M) (n := (âˆž : WithTop â„•âˆž)) 2)
     (g : SmoothRiemannianMetric I M) (x : M) : Real :=
   Real.sqrt
     (Tensor0SBundle.normSq0S (I := I) g x 2
@@ -87,16 +121,16 @@ tensor-field version of `metricCovDeriv`; it is needed because `Phi^* h` is not
 necessarily a Riemannian metric for a general smooth map. -/
 noncomputable def tensor02CovDeriv
     (A :
-      Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
-        (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+      Tensor0SBundle.Tensor0SField (ð•œ := Real) (E := E) (H := H)
+        (I := I) (M := M) (n := (âˆž : WithTop â„•âˆž)) 2)
     (gRef : SmoothRiemannianMetric I M) :
     (a : Nat) ->
-      Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
-        (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (a + 2) :=
+      Tensor0SBundle.Tensor0SField (ð•œ := Real) (E := E) (H := H)
+        (I := I) (M := M) (n := (âˆž : WithTop â„•âˆž)) (a + 2) :=
   Nat.rec
     (motive := fun a : Nat =>
-      Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
-        (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (a + 2))
+      Tensor0SBundle.Tensor0SField (ð•œ := Real) (E := E) (H := H)
+        (I := I) (M := M) (n := (âˆž : WithTop â„•âˆž)) (a + 2))
     A
     (fun a Aprev =>
       metricCovDerivStep (I := I) gRef a Aprev)
@@ -105,8 +139,8 @@ noncomputable def tensor02CovDeriv
 noncomputable def tensor02CovDerivNormWith
     (a : Nat)
     (A :
-      Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
-        (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+      Tensor0SBundle.Tensor0SField (ð•œ := Real) (E := E) (H := H)
+        (I := I) (M := M) (n := (âˆž : WithTop â„•âˆž)) 2)
     (cov norm : SmoothRiemannianMetric I M) (x : M) : Real :=
   Real.sqrt
     (Tensor0SBundle.normSq0S (I := I) norm x (a + 2)
@@ -122,14 +156,14 @@ structure PreApproxIsometryData
     (h : SmoothRiemannianMetric I N) where
   eps_pos : 0 < eps
   eps_lt_one : eps < 1
-  smooth : ContMDiff I I (∞ : WithTop ℕ∞) Phi
+  smooth : ContMDiff I I (âˆž : WithTop â„•âˆž) Phi
   pullbackData : PullbackMetricTensorData (I := I) Phi h
   c0_small :
-    forall x : M, x ∈ K ->
+    forall x : M, x âˆˆ K ->
       metricTensorErrorNorm (I := I) pullbackData.pullback g x <= eps
   cov_deriv_small :
     forall a : Nat, 1 <= a -> a <= p ->
-      forall x : M, x ∈ K ->
+      forall x : M, x âˆˆ K ->
         tensor02CovDerivNormWith (I := I) a pullbackData.pullback g g x <= eps
 
 /-- MSM135 Definition 4.1, localized two-sided data for diffeomorphisms.
@@ -138,7 +172,7 @@ The forward field is the pre-approximate isometry on the source set.  The
 reverse field is the same condition for the inverse map on the target set. -/
 structure BookApproxIsometryData
     (K : Set M) (L : Set N) (eps : Real) (p : Nat)
-    (Phi : M ≃ₘ⟮I, I⟯ N)
+    (Phi : M â‰ƒâ‚˜âŸ®I, IâŸ¯ N)
     (g : SmoothRiemannianMetric I M)
     (h : SmoothRiemannianMetric I N) where
   forward : PreApproxIsometryData (I := I) K eps p (Phi : M -> N) g h
@@ -157,13 +191,13 @@ theorem preApprox_quad_error_abs_le
     {K : Set M} {eps : Real} {p : Nat} {Phi : M -> N}
     {g : SmoothRiemannianMetric I M} {h : SmoothRiemannianMetric I N}
     (H : PreApproxIsometryData (I := I) K eps p Phi g h)
-    {x : M} (hx : x ∈ K) (v : TangentSpace I x) :
+    {x : M} (hx : x âˆˆ K) (v : TangentSpace I x) :
     |quad02 (I := I) (M := M)
         (H.pullbackData.pullback x -
           Tensor0SBundle.metricTensorField (I := I) g x) v| <=
       eps * g.inner x v v := by
   haveI : IsManifold I 1 M :=
-    IsManifold.of_le (I := I) (M := M) (n := ∞)
+    IsManifold.of_le (I := I) (M := M) (n := âˆž)
       (by simp)
   have hcs :=
     abs_quad02_le_norm (I := I) (M := M) g
@@ -174,9 +208,9 @@ theorem preApprox_quad_error_abs_le
     H.c0_small x hx
   have hquad_nonneg : 0 <= g.inner x v v := by
     by_cases hv : v = 0
-    · subst v
+    Â· subst v
       simp
-    · exact le_of_lt (g.pos x v hv)
+    Â· exact le_of_lt (g.pos x v hv)
   calc
     |quad02 (I := I) (M := M)
         (H.pullbackData.pullback x -
@@ -196,7 +230,7 @@ theorem preApprox_quad_upper
     {K : Set M} {eps : Real} {p : Nat} {Phi : M -> N}
     {g : SmoothRiemannianMetric I M} {h : SmoothRiemannianMetric I N}
     (H : PreApproxIsometryData (I := I) K eps p Phi g h)
-    {x : M} (hx : x ∈ K) (v : TangentSpace I x) :
+    {x : M} (hx : x âˆˆ K) (v : TangentSpace I x) :
     quad02 (I := I) (M := M) (H.pullbackData.pullback x) v <=
       (1 + eps) * g.inner x v v := by
   let A := H.pullbackData.pullback x
@@ -230,7 +264,7 @@ theorem preApprox_quad_upper
     _ = (1 + eps) * g.inner x v v := by ring
 
 private theorem mfderiv_symm_apply_mfderiv
-    (Phi : M ≃ₘ⟮I, I⟯ N) (x : M) (v : TangentSpace I x) :
+    (Phi : M â‰ƒâ‚˜âŸ®I, IâŸ¯ N) (x : M) (v : TangentSpace I x) :
     mfderiv I I (Phi.symm : N -> M) (Phi x)
         (mfderiv I I (Phi : M -> N) x v) = v := by
   have hsymm_diff : MDifferentiableAt I I (Phi.symm : N -> M) (Phi x) :=
@@ -263,14 +297,14 @@ inequality comes from the forward pre-approximate condition, and the second
 from the inverse pre-approximate condition evaluated at `Phi x`. -/
 theorem bookApprox_quad_twoSided
     {K : Set M} {L : Set N} {eps : Real} {p : Nat}
-    {Phi : M ≃ₘ⟮I, I⟯ N}
+    {Phi : M â‰ƒâ‚˜âŸ®I, IâŸ¯ N}
     {g : SmoothRiemannianMetric I M} {h : SmoothRiemannianMetric I N}
     (H : BookApproxIsometryData (I := I) K L eps p Phi g h)
     (hMapsTo : Set.MapsTo (Phi : M -> N) K L)
-    {x : M} (hx : x ∈ K) (v : TangentSpace I x) :
-    (1 + eps)⁻¹ *
+    {x : M} (hx : x âˆˆ K) (v : TangentSpace I x) :
+    (1 + eps)â»Â¹ *
         quad02 (I := I) (M := M) (H.forward.pullbackData.pullback x) v <=
-      g.inner x v v ∧
+      g.inner x v v âˆ§
     g.inner x v v <=
       (1 + eps) *
         quad02 (I := I) (M := M) (H.forward.pullbackData.pullback x) v := by
@@ -278,10 +312,10 @@ theorem bookApprox_quad_twoSided
   have hforward :=
     preApprox_quad_upper (I := I) H.forward hx v
   have hleft :
-      (1 + eps)⁻¹ *
+      (1 + eps)â»Â¹ *
           quad02 (I := I) (M := M) (H.forward.pullbackData.pullback x) v <=
         g.inner x v v := by
-    rwa [inv_mul_le_iff₀ hCpos]
+    rwa [inv_mul_le_iffâ‚€ hCpos]
   let w : TangentSpace I (Phi x) :=
     mfderiv I I (Phi : M -> N) x v
   have hrev :=
@@ -311,7 +345,7 @@ theorem bookApprox_quad_twoSided
         (1 + eps) *
           quad02 (I := I) (M := M) (H.forward.pullbackData.pullback x) v := by
     simpa [hrev_eval, hforward_eval] using hrev
-  exact ⟨hleft, hright⟩
+  exact âŸ¨hleft, hrightâŸ©
 
 /-- Same-domain packaging of MSM135 Proposition 4.2 when the pullback tensor is
 already supplied as a Riemannian metric `gh` on the source.  This adapter does
@@ -319,27 +353,27 @@ not construct a pullback metric; it only transfers the checked quadratic-form
 estimate to the existing `MetricUniformEquivalentOn` API. -/
 theorem bookApprox_uniformEquiv_of_pullback
     {K : Set M} {L : Set N} {eps : Real} {p : Nat}
-    {Phi : M ≃ₘ⟮I, I⟯ N}
+    {Phi : M â‰ƒâ‚˜âŸ®I, IâŸ¯ N}
     {g : SmoothRiemannianMetric I M} {h : SmoothRiemannianMetric I N}
     (H : BookApproxIsometryData (I := I) K L eps p Phi g h)
     (hMapsTo : Set.MapsTo (Phi : M -> N) K L)
     (gh : SmoothRiemannianMetric I M)
-    (hgh : forall x : M, x ∈ K -> forall v : TangentSpace I x,
+    (hgh : forall x : M, x âˆˆ K -> forall v : TangentSpace I x,
       gh.inner x v v =
         quad02 (I := I) (M := M) (H.forward.pullbackData.pullback x) v) :
     MetricUniformEquivalentOn (I := I) K g gh (1 + eps) := by
   have hCpos : 0 < 1 + eps := by linarith [H.forward.eps_pos]
-  refine ⟨?_, ?_⟩
-  · linarith [H.forward.eps_pos]
-  · intro x hx v
+  refine âŸ¨?_, ?_âŸ©
+  Â· linarith [H.forward.eps_pos]
+  Â· intro x hx v
     have htwo :=
       bookApprox_quad_twoSided (I := I) H hMapsTo hx v
     have hupper_raw :=
       preApprox_quad_upper (I := I) H.forward hx v
     constructor
-    · rw [inv_mul_le_iff₀ hCpos]
+    Â· rw [inv_mul_le_iffâ‚€ hCpos]
       simpa [hgh x hx v] using htwo.2
-    · simpa [hgh x hx v] using hupper_raw
+    Â· simpa [hgh x hx v] using hupper_raw
 
 end MapLevel
 
@@ -362,7 +396,7 @@ structure IsApproxIsometryOn
   uniform_equiv : MetricUniformEquivalentOn (I := I) K g h (1 + eps)
   cov_deriv_small :
     forall a : Nat, 1 <= a -> a <= p ->
-      forall x : M, x ∈ K ->
+      forall x : M, x âˆˆ K ->
         metricCovDerivNorm (I := I) a h g x <= eps
 
 /-- Same-domain version of the two-sided approximate-isometry hypotheses in
@@ -377,7 +411,7 @@ structure IsTwoSidedApproxIsometryOn
   forward : IsApproxIsometryOn (I := I) K eps p g h
   reverse_cov_deriv_small :
     forall a : Nat, 1 <= a -> a <= p ->
-      forall x : M, x ∈ K ->
+      forall x : M, x âˆˆ K ->
         metricCovDerivNorm (I := I) a g h x <= eps
 
 theorem IsTwoSidedApproxIsometryOn.toApprox
@@ -426,7 +460,7 @@ theorem metricCovDerivNormWith_le_of_equiv
     {K : Set M} {C : Real}
     {h cov norm norm' : SmoothRiemannianMetric I M}
     (hEq : MetricUniformEquivalentOn (I := I) K norm norm' C)
-    {x : M} (hx : x ∈ K) (a : Nat) :
+    {x : M} (hx : x âˆˆ K) (a : Nat) :
     metricCovDerivNormWith (I := I) a h cov norm' x <=
       Real.sqrt (C ^ (a + 2)) *
         metricCovDerivNormWith (I := I) a h cov norm x := by
@@ -458,7 +492,7 @@ theorem IsTwoSidedApproxIsometryOn.metricCovDerivNormWith_book_le
     {K : Set M} {eps : Real} {p a : Nat}
     {g h : SmoothRiemannianMetric I M}
     (Happrox : IsTwoSidedApproxIsometryOn (I := I) K eps p g h)
-    {x : M} (hx : x ∈ K) :
+    {x : M} (hx : x âˆˆ K) :
     metricCovDerivNormWith (I := I) a g h g x <=
       Real.sqrt ((1 + eps) ^ (a + 2)) *
         metricCovDerivNorm (I := I) a g h x := by
@@ -473,9 +507,9 @@ theorem IsApproxIsometryOn.normSq0S_compare
     {K : Set M} {eps : Real} {p : Nat}
     {g h : SmoothRiemannianMetric I M}
     (Happrox : IsApproxIsometryOn (I := I) K eps p g h)
-    {x : M} (hx : x ∈ K) (s : Nat)
+    {x : M} (hx : x âˆˆ K) (s : Nat)
     (T : Tensor0SBundle.Tensor0SSpace
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x) :
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M) s x) :
     (1 + eps) ^ (-(s : Int)) *
         Tensor0SBundle.normSq0S (I := I) g x s T <=
       Tensor0SBundle.normSq0S (I := I) h x s T /\
@@ -491,9 +525,9 @@ theorem normSq0S_compare_of_approxIsometry
     {K : Set M} {eps : Real} {p : Nat}
     {g h : SmoothRiemannianMetric I M}
     (Happrox : IsApproxIsometryOn (I := I) K eps p g h)
-    {x : M} (hx : x ∈ K) (s : Nat)
+    {x : M} (hx : x âˆˆ K) (s : Nat)
     (T : Tensor0SBundle.Tensor0SSpace
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x) :
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M) s x) :
     (1 + eps) ^ (-(s : Int)) *
         Tensor0SBundle.normSq0S (I := I) g x s T <=
       Tensor0SBundle.normSq0S (I := I) h x s T /\
@@ -508,9 +542,9 @@ theorem IsApproxIsometryOn.normSqRS_compare
     {K : Set M} {eps : Real} {p : Nat}
     {g h : SmoothRiemannianMetric I M}
     (Happrox : IsApproxIsometryOn (I := I) K eps p g h)
-    {x : M} (hx : x ∈ K) (r s : Nat)
+    {x : M} (hx : x âˆˆ K) (r s : Nat)
     (T : Tensor0SBundle.TensorRSSpace r s I x) :
-    ((1 + eps) ^ (r + s))⁻¹ *
+    ((1 + eps) ^ (r + s))â»Â¹ *
         Tensor0SBundle.normSqRS (I := I) (g := g) (x := x) r s T <=
       Tensor0SBundle.normSqRS (I := I) (g := h) (x := x) r s T /\
     Tensor0SBundle.normSqRS (I := I) (g := h) (x := x) r s T <=
@@ -525,9 +559,9 @@ theorem normSqRS_compare_of_approxIsometry
     {K : Set M} {eps : Real} {p : Nat}
     {g h : SmoothRiemannianMetric I M}
     (Happrox : IsApproxIsometryOn (I := I) K eps p g h)
-    {x : M} (hx : x ∈ K) (r s : Nat)
+    {x : M} (hx : x âˆˆ K) (r s : Nat)
     (T : Tensor0SBundle.TensorRSSpace r s I x) :
-    ((1 + eps) ^ (r + s))⁻¹ *
+    ((1 + eps) ^ (r + s))â»Â¹ *
         Tensor0SBundle.normSqRS (I := I) (g := g) (x := x) r s T <=
       Tensor0SBundle.normSqRS (I := I) (g := h) (x := x) r s T /\
     Tensor0SBundle.normSqRS (I := I) (g := h) (x := x) r s T <=
@@ -538,9 +572,9 @@ theorem normSqRS_compare_of_approxIsometry
 section BookTensorNorms
 
 variable {N : Type u} [TopologicalSpace N] [ChartedSpace H N]
-variable [T2Space N] [IsManifold I ∞ N] [SigmaCompactSpace N]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) N]
+variable [T2Space N] [IsManifold I âˆž N] [SigmaCompactSpace N]
+variable [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
+variable [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) N]
 
 /-- MSM135 Corollary "Norms of tensors", in the supplied-pullback-metric
 form.  If a Riemannian metric `gh` on the source has the same quadratic form
@@ -548,15 +582,15 @@ as the pullback tensor `Phi^* h` on `K`, then an `(eps,0)` approximate isometry
 compares mixed-tensor norms with the expected factor. -/
 theorem bookNormRS_compare
     {K : Set M} {L : Set N} {eps : Real}
-    {Phi : M ≃ₘ⟮I, I⟯ N}
+    {Phi : M â‰ƒâ‚˜âŸ®I, IâŸ¯ N}
     {g : SmoothRiemannianMetric I M} {h : SmoothRiemannianMetric I N}
     (H : BookApproxIsometryData (I := I) K L eps 0 Phi g h)
     (hMapsTo : Set.MapsTo (Phi : M -> N) K L)
     (gh : SmoothRiemannianMetric I M)
-    (hgh : forall x : M, x ∈ K -> forall v : TangentSpace I x,
+    (hgh : forall x : M, x âˆˆ K -> forall v : TangentSpace I x,
       gh.inner x v v =
         quad02 (I := I) (M := M) (H.forward.pullbackData.pullback x) v)
-    {x : M} (hx : x ∈ K) (r s : Nat)
+    {x : M} (hx : x âˆˆ K) (r s : Nat)
     (T : Tensor0SBundle.TensorRSSpace r s I x) :
     Tensor0SBundle.normRS (I := I) (g := gh) (x := x) r s T <=
         Real.sqrt ((1 + eps) ^ (r + s)) *
@@ -568,10 +602,10 @@ theorem bookNormRS_compare
       MetricUniformEquivalentOn (I := I) K g gh (1 + eps) :=
     bookApprox_uniformEquiv_of_pullback (I := I) H hMapsTo gh hgh
   constructor
-  · simpa [Tensor0SBundle.normRS_eq_sqrt_normSqRS]
+  Â· simpa [Tensor0SBundle.normRS_eq_sqrt_normSqRS]
       using Tensor0SBundle.sqrt_normRS_upper_le_of_equiv
         (I := I) g gh x r s hEq.1 (hEq.2 x hx) T
-  · simpa [Tensor0SBundle.normRS_eq_sqrt_normSqRS]
+  Â· simpa [Tensor0SBundle.normRS_eq_sqrt_normSqRS]
       using Tensor0SBundle.sqrt_normRS_lower_le_of_equiv
         (I := I) g gh x r s hEq.1 (hEq.2 x hx) T
 
@@ -583,7 +617,7 @@ theorem IsApproxIsometryOn.sqrt_normRS_upper
     {K : Set M} {eps : Real} {p : Nat}
     {g h : SmoothRiemannianMetric I M}
     (Happrox : IsApproxIsometryOn (I := I) K eps p g h)
-    {x : M} (hx : x ∈ K) (r s : Nat)
+    {x : M} (hx : x âˆˆ K) (r s : Nat)
     (T : Tensor0SBundle.TensorRSSpace r s I x) :
     Real.sqrt
         (Tensor0SBundle.normSqRS (I := I) (g := h) (x := x) r s T) <=
@@ -606,7 +640,7 @@ theorem connDiff_le_approx
     {K : Set M} {eps : Real} {p : Nat}
     {g h : SmoothRiemannianMetric I M}
     (Happrox : IsApproxIsometryOn (I := I) K eps p g h)
-    {x : M} (hx : x ∈ K) (hp : 1 <= p)
+    {x : M} (hx : x âˆˆ K) (hp : 1 <= p)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (hinv :
@@ -654,7 +688,7 @@ theorem connDiff_book_le_approx
     {K : Set M} {eps : Real} {p : Nat}
     {g h : SmoothRiemannianMetric I M}
     (Happrox : IsTwoSidedApproxIsometryOn (I := I) K eps p g h)
-    {x : M} (hx : x ∈ K) (hp : 1 <= p)
+    {x : M} (hx : x âˆˆ K) (hp : 1 <= p)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (hinv :
@@ -705,7 +739,7 @@ theorem connDiff_le_eps_g
     {K : Set M} {eps : Real} {p : Nat}
     {g h : SmoothRiemannianMetric I M}
     (Happrox : IsApproxIsometryOn (I := I) K eps p g h)
-    {x : M} (hx : x ∈ K) (hp : 1 <= p) (heps_lt : eps < 1)
+    {x : M} (hx : x âˆˆ K) (hp : 1 <= p) (heps_lt : eps < 1)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (hinv :
@@ -732,7 +766,7 @@ theorem connDiff_le_eps_g
   have hpow_le : (1 + eps) ^ 3 <= (8 : Real) := by
     have hbase_le : 1 + eps <= (2 : Real) := by linarith
     have hpow : (1 + eps) ^ 3 <= (2 : Real) ^ 3 :=
-      pow_le_pow_left₀ hC_nonneg hbase_le 3
+      pow_le_pow_leftâ‚€ hC_nonneg hbase_le 3
     norm_num at hpow
     exact hpow
   have hcompare :
@@ -766,7 +800,7 @@ theorem connDiff_le_eps_g
   have hsqrt_sq :
       Real.sqrt ((1 + eps) ^ 3) * Real.sqrt ((1 + eps) ^ 3) =
         (1 + eps) ^ 3 := by
-    rw [← pow_two, Real.sq_sqrt hpow_nonneg]
+    rw [â† pow_two, Real.sq_sqrt hpow_nonneg]
   have hcoef :
       Real.sqrt ((1 + eps) ^ 3) *
           ((3 / 2 : Real) * (Real.sqrt ((1 + eps) ^ 3) * eps)) =
@@ -797,7 +831,7 @@ theorem connDiff_book_le_eps_g
     {K : Set M} {eps : Real} {p : Nat}
     {g h : SmoothRiemannianMetric I M}
     (Happrox : IsTwoSidedApproxIsometryOn (I := I) K eps p g h)
-    {x : M} (hx : x ∈ K) (hp : 1 <= p) (heps_lt : eps < 1)
+    {x : M} (hx : x âˆˆ K) (hp : 1 <= p) (heps_lt : eps < 1)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (hinv :
@@ -818,7 +852,7 @@ theorem connDiff_book_le_eps_g
   have hpow_le : (1 + eps) ^ 3 <= (8 : Real) := by
     have hbase_le : 1 + eps <= (2 : Real) := by linarith
     have hpow : (1 + eps) ^ 3 <= (2 : Real) ^ 3 :=
-      pow_le_pow_left₀ hC_nonneg hbase_le 3
+      pow_le_pow_leftâ‚€ hC_nonneg hbase_le 3
     norm_num at hpow
     exact hpow
   have hsqrt_le : Real.sqrt ((1 + eps) ^ 3) <= (8 : Real) := by
@@ -852,11 +886,11 @@ Levi-Civita connection-difference tensor.  This is the field-level bridge
 needed before taking higher covariant derivatives; it is not an existence
 assertion. -/
 def ConnDiffFieldRealizes
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     (g h : SmoothRiemannianMetric I M)
     (D : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 2) : Prop :=
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 2) : Prop :=
   forall x : M,
     D x =
       Tensor0SBundle.connectionDifferenceTensorAt
@@ -867,106 +901,106 @@ def ConnDiffFieldRealizes
 /-- Pointwise `g`-norm of a supplied `k`-th `h`-covariant derivative of the
 connection-difference tensor. -/
 noncomputable def connDiffDerivNorm
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     (g : SmoothRiemannianMetric I M) (k : Nat)
     (Dk : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 (k + 2))
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 (k + 2))
     (x : M) : Real :=
   Tensor0SBundle.fieldNormRS (I := I) g 1 (k + 2) Dk x
 
 /-- A supplied mixed tensor field realizes the `k`-th `h`-covariant derivative
 of `Gamma_g - Gamma_h`, the orientation used in MSM135 Chapter 4. -/
 def ConnDiffDerivRealizes
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     (g h : SmoothRiemannianMetric I M) (k : Nat)
     (Dk : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 (k + 2)) : Prop :=
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 (k + 2)) : Prop :=
   exists D : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 2,
-    ConnDiffFieldRealizes (I := I) g h D ∧
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 2,
+    ConnDiffFieldRealizes (I := I) g h D âˆ§
       Tensor0SBundle.HigherCovDerivRSRealizes
-        (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
         (LeviCivita.leviCivitaConnectionOfMetric (I := I) h) D k Dk
 
 /-- The first positive-order connection-difference realization is an actual
 total `h`-covariant derivative of the connection-difference field. -/
 theorem ConnDiffDerivRealizes.one
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     {g h : SmoothRiemannianMetric I M}
     {D1 : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 3}
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 3}
     (hD1 : ConnDiffDerivRealizes (I := I) g h 1 D1) :
     exists D : Tensor0SBundle.TensorRSField
-        (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-        (n := (∞ : WithTop ℕ∞)) 1 2,
-      ConnDiffFieldRealizes (I := I) g h D ∧
+        (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := (âˆž : WithTop â„•âˆž)) 1 2,
+      ConnDiffFieldRealizes (I := I) g h D âˆ§
         Tensor0SBundle.TotalNablaRSRealizes
-          (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 2
+          (ð•œ := Real) (E := E) (H := H) (I := I) (M := M) 1 2
           (LeviCivita.leviCivitaConnectionOfMetric (I := I) h) D D1 := by
-  rcases hD1 with ⟨D, hD, hderiv⟩
-  exact ⟨D, hD, Tensor0SBundle.HigherCovDerivRSRealizes.one_12 hderiv⟩
+  rcases hD1 with âŸ¨D, hD, hderivâŸ©
+  exact âŸ¨D, hD, Tensor0SBundle.HigherCovDerivRSRealizes.one_12 hderivâŸ©
 
 /-- The second positive-order connection-difference realization unpacks into
 two successive total `h`-covariant derivatives. -/
 theorem ConnDiffDerivRealizes.two
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     {g h : SmoothRiemannianMetric I M}
     {D2 : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 4}
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 4}
     (hD2 : ConnDiffDerivRealizes (I := I) g h 2 D2) :
     exists D : Tensor0SBundle.TensorRSField
-        (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-        (n := (∞ : WithTop ℕ∞)) 1 2,
-      ConnDiffFieldRealizes (I := I) g h D ∧
+        (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := (âˆž : WithTop â„•âˆž)) 1 2,
+      ConnDiffFieldRealizes (I := I) g h D âˆ§
         exists D1 : Tensor0SBundle.TensorRSField
-          (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-          (n := (∞ : WithTop ℕ∞)) 1 3,
+          (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+          (n := (âˆž : WithTop â„•âˆž)) 1 3,
           Tensor0SBundle.TotalNablaRSRealizes
-            (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 2
-            (LeviCivita.leviCivitaConnectionOfMetric (I := I) h) D D1 ∧
+            (ð•œ := Real) (E := E) (H := H) (I := I) (M := M) 1 2
+            (LeviCivita.leviCivitaConnectionOfMetric (I := I) h) D D1 âˆ§
           Tensor0SBundle.TotalNablaRSRealizes
-            (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 3
+            (ð•œ := Real) (E := E) (H := H) (I := I) (M := M) 1 3
             (LeviCivita.leviCivitaConnectionOfMetric (I := I) h) D1 D2 := by
-  rcases hD2 with ⟨D, hD, hderiv⟩
+  rcases hD2 with âŸ¨D, hD, hderivâŸ©
   exact
     match hderiv with
     | Tensor0SBundle.HigherCovDerivRSRealizes.succ
         (Tensor0SBundle.HigherCovDerivRSRealizes.succ
           Tensor0SBundle.HigherCovDerivRSRealizes.zero hstep1) hstep2 =>
         by
-          exact ⟨D, hD, _, by simpa using hstep1, by simpa using hstep2⟩
+          exact âŸ¨D, hD, _, by simpa using hstep1, by simpa using hstep2âŸ©
 
 /-- Pointwise application form of the first realized connection-difference
 derivative. -/
 theorem ConnDiffDerivRealizes.one_apply
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     {g h : SmoothRiemannianMetric I M}
     {D1 : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 3}
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 3}
     (hD1 : ConnDiffDerivRealizes (I := I) g h 1 D1)
-    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
-    (x : M) (β : Tensor0SBundle.Tensor0SSpace 1 I x)
+    (X : ContMDiffSection I E (âˆž : WithTop â„•âˆž) (TangentSpace I : M -> Type _))
+    (x : M) (Î² : Tensor0SBundle.Tensor0SSpace 1 I x)
     (slots : Fin 2 -> TangentSpace I x) :
     exists D : Tensor0SBundle.TensorRSField
-        (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-        (n := (∞ : WithTop ℕ∞)) 1 2,
-      ConnDiffFieldRealizes (I := I) g h D ∧
-        D1 x β (Fin.cons (X x) slots) =
+        (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := (âˆž : WithTop â„•âˆž)) 1 2,
+      ConnDiffFieldRealizes (I := I) g h D âˆ§
+        D1 x Î² (Fin.cons (X x) slots) =
           Tensor0SBundle.nablaRSFun
-            (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+            (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
             1 2 (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
-            X D x β slots := by
-  rcases hD1 with ⟨D, hD, hderiv⟩
-  exact ⟨D, hD,
+            X D x Î² slots := by
+  rcases hD1 with âŸ¨D, hD, hderivâŸ©
+  exact âŸ¨D, hD,
     Tensor0SBundle.HigherCovDerivRSRealizes.one_apply_12
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      hderiv X x β slots⟩
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      hderiv X x Î² slotsâŸ©
 
 /-- Coordinate-frame component bridge for a realized first derivative of
 `Gamma_g - Gamma_h`.
@@ -976,29 +1010,29 @@ This is the HCG-facing wrapper around the coordinate theorem
 `h`-covariant derivative has components equal to the differentiated
 Christoffel-difference component formula. -/
 theorem connDiffOne_coord
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {g h : SmoothRiemannianMetric I M}
     {D1 : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 3}
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 3}
     (hD1 : ConnDiffDerivRealizes (I := I) g h 1 D1)
-    (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
+    (X : ContMDiffSection I E (âˆž : WithTop â„•âˆž)
       (TangentSpace I : M -> Type _))
-    (x₀ : M) (d a b e : Coordinates.CoordinateIdx (𝕜 := Real) E)
-    (hX : X x₀ = Coordinates.coordinateFrameAt (I := I) x₀ d x₀) :
+    (xâ‚€ : M) (d a b e : Coordinates.CoordinateIdx (ð•œ := Real) E)
+    (hX : X xâ‚€ = Coordinates.coordinateFrameAt (I := I) xâ‚€ d xâ‚€) :
     Tensor0SBundle.componentRS (I := I)
-        (Coordinates.coordinateFrameAt_toBasis (I := I) x₀)
-        (D1 x₀) (Coordinates.upperIdx1 e) (Coordinates.slots3 d a b) =
+        (Coordinates.coordinateFrameAt_toBasis (I := I) xâ‚€)
+        (D1 xâ‚€) (Coordinates.upperIdx1 e) (Coordinates.slots3 d a b) =
       Coordinates.lcDiffCovDerivCompInFrame
-        (I := I) g h (Coordinates.coordinateFrameAt (I := I) x₀)
-        (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀)
-        x₀ d a b e := by
-  rcases ConnDiffDerivRealizes.one (I := I) hD1 with ⟨D, hD, hstep⟩
+        (I := I) g h (Coordinates.coordinateFrameAt (I := I) xâ‚€)
+        (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) xâ‚€)
+        xâ‚€ d a b e := by
+  rcases ConnDiffDerivRealizes.one (I := I) hD1 with âŸ¨D, hD, hstepâŸ©
   exact
     Coordinates.totalNabla_lcDiff_coordFrame
-      (I := I) g h D D1 hD hstep X x₀ d a b e hX
+      (I := I) g h D D1 hD hstep X xâ‚€ d a b e hX
 
 /-- Local-frame component bridge for a realized first derivative of
 `Gamma_g - Gamma_h`.
@@ -1008,40 +1042,40 @@ This is the HCG-facing wrapper around
 `ConnDiffDerivRealizes ... 1` field with the local-frame component formula for
 `nabla_h (Gamma_g - Gamma_h)`. -/
 theorem connDiffOne_localFrame
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     {g h : SmoothRiemannianMetric I M}
     {D1 : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 3}
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 3}
     (hD1 : ConnDiffDerivRealizes (I := I) g h 1 D1)
-    (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
+    (X : ContMDiffSection I E (âˆž : WithTop â„•âˆž)
       (TangentSpace I : M -> Type _))
-    (Z : Idx -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+    (Z : Idx -> ContMDiffSection I E (âˆž : WithTop â„•âˆž)
       (TangentSpace I : M -> Type _))
-    (α : Tensor0SBundle.Tensor0SField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1)
+    (Î± : Tensor0SBundle.Tensor0SField
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
-    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (hu : IsOpen u) {x : M} (hx : x âˆˆ u)
     (d a b e : Idx)
     (hX : X x = frame d x)
-    (hZ : ∀ j : Idx,
-      (fun y : M => Z j y) =ᶠ[nhds x] fun y : M => frame j y)
-    (hpair : ∀ j : Idx,
-      (fun y : M => α y (fun _ : Fin 1 => Z j y)) =ᶠ[nhds x]
+    (hZ : âˆ€ j : Idx,
+      (fun y : M => Z j y) =á¶ [nhds x] fun y : M => frame j y)
+    (hpair : âˆ€ j : Idx,
+      (fun y : M => Î± y (fun _ : Fin 1 => Z j y)) =á¶ [nhds x]
         fun _ : M => if j = e then (1 : Real) else 0) :
     Tensor0SBundle.componentRS (I := I) (hframe.toBasisAt hx)
         (D1 x) (Coordinates.upperIdx1 e) (Coordinates.slots3 d a b) =
       Coordinates.lcDiffCovDerivCompInFrame
         (I := I) g h frame hframe x d a b e := by
-  rcases ConnDiffDerivRealizes.one (I := I) hD1 with ⟨D, hD, hstep⟩
+  rcases ConnDiffDerivRealizes.one (I := I) hD1 with âŸ¨D, hD, hstepâŸ©
   exact
     Coordinates.totalNabla_lcDiff_localFrame
-      (I := I) g h D D1 hD hstep X Z α frame hframe hu hx d a b e
+      (I := I) g h D D1 hD hstep X Z Î± frame hframe hu hx d a b e
       hX hZ hpair
 
 /-- Trivialization-local-frame component bridge for a realized second derivative
@@ -1052,34 +1086,34 @@ This is the HCG wrapper around
 `ConnDiffDerivRealizes ... 2` into two total `h`-covariant derivatives and
 identifies the resulting local-frame component with `lcDiff2Comp`. -/
 theorem connDiffTwo_trivFrame
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {g h : SmoothRiemannianMetric I M}
     {D2 : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 4}
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 4}
     (hD2 : ConnDiffDerivRealizes (I := I) g h 2 D2)
-    (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
+    (X : ContMDiffSection I E (âˆž : WithTop â„•âˆž)
       (TangentSpace I : M -> Type _))
     (basisE : Module.Basis Idx Real E) {x : M}
     (m d a b e : Idx)
     (hX :
       X x =
         (trivializationAt E (TangentSpace I : M -> Type _) x).localFrame basisE m x) :
-    let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+    let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
     let frame : Idx -> (y : M) -> TangentSpace I y :=
-      fun i y => e₀.localFrame basisE i y
-    let u : Set M := e₀.baseSet
+      fun i y => eâ‚€.localFrame basisE i y
+    let u : Set M := eâ‚€.baseSet
     let hframe : IsLocalFrameOn I E 1 frame u :=
-      e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE
-    let hx : x ∈ u := mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
+      eâ‚€.isLocalFrameOn_localFrame_baseSet I 1 basisE
+    let hx : x âˆˆ u := mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
     Tensor0SBundle.componentRS (I := I) (hframe.toBasisAt hx) (D2 x)
         (Coordinates.upperIdx1 e) (Coordinates.slots4 m d a b) =
       Coordinates.lcDiff2Comp (I := I) g h frame hframe x m d a b e := by
   rcases ConnDiffDerivRealizes.two (I := I) hD2 with
-    ⟨D, hD, D1, hstep1, hstep2⟩
+    âŸ¨D, hD, D1, hstep1, hstep2âŸ©
   exact
     Coordinates.totalNabla_lcDiff2_trivFrame
       (I := I) (M := M) (Idx := Idx)
@@ -1091,49 +1125,49 @@ formula.  This is the frame-flexible version of `connDiffOne_quad`: the right
 hand side contains only the book's `nabla_h^2 g` and quadratic
 `(nabla_h g) * (nabla_h g)` terms. -/
 theorem connDiffOne_localFrame_quad
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     {g h : SmoothRiemannianMetric I M}
     {D1 : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 3}
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 3}
     (hD1 : ConnDiffDerivRealizes (I := I) g h 1 D1)
-    (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
+    (X : ContMDiffSection I E (âˆž : WithTop â„•âˆž)
       (TangentSpace I : M -> Type _))
-    (Z : Idx -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+    (Z : Idx -> ContMDiffSection I E (âˆž : WithTop â„•âˆž)
       (TangentSpace I : M -> Type _))
-    (α : Tensor0SBundle.Tensor0SField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1)
+    (Î± : Tensor0SBundle.Tensor0SField
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
-    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (hu : IsOpen u) {x : M} (hx : x âˆˆ u)
     (gInv : M -> Idx -> Idx -> Real)
     (d a b e : Idx)
     (hX : X x = frame d x)
-    (hZ : ∀ j : Idx,
-      (fun y : M => Z j y) =ᶠ[nhds x] fun y : M => frame j y)
-    (hpair : ∀ j : Idx,
-      (fun y : M => α y (fun _ : Fin 1 => Z j y)) =ᶠ[nhds x]
+    (hZ : âˆ€ j : Idx,
+      (fun y : M => Z j y) =á¶ [nhds x] fun y : M => frame j y)
+    (hpair : âˆ€ j : Idx,
+      (fun y : M => Î± y (fun _ : Fin 1 => Z j y)) =á¶ [nhds x]
         fun _ : M => if j = e then (1 : Real) else 0)
     (hinv :
       Coordinates.InverseMetricComponentsForMetricInFrameOn
         (I := I) g gInv frame)
     (hD_mdiff :
-      MDifferentiableAt I 𝓘(Real, Real)
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M => Coordinates.lcDiffCompInFrame
           (I := I) g h frame hframe y a b e) x)
-    (hginv_mdiff : ∀ i j : Idx,
-      MDifferentiableAt I 𝓘(Real, Real) (fun y : M => gInv y i j) x)
-    (hmetric_mdiff : ∀ i j : Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
+    (hginv_mdiff : âˆ€ i j : Idx,
+      MDifferentiableAt I ð“˜(Real, Real) (fun y : M => gInv y i j) x)
+    (hmetric_mdiff : âˆ€ i j : Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           Coordinates.metricCompForMetricInFrame
             (I := I) g frame y i j) x)
-    (hA_mdiff : ∀ i j k : Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
+    (hA_mdiff : âˆ€ i j k : Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           Coordinates.metricCovDerivForMetricCompInFrame
             (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
@@ -1146,7 +1180,7 @@ theorem connDiffOne_localFrame_quad
         frame hframe x d a b e := by
   have hlocal :=
     connDiffOne_localFrame
-      (I := I) hD1 X Z α frame hframe hu hx d a b e hX hZ hpair
+      (I := I) hD1 X Z Î± frame hframe hu hx d a b e hX hZ hpair
   have hquad :=
     Coordinates.lcDiffDeriv_eq_quad
       (I := I) g h gInv frame hframe hu hx hinv d a b e hD_mdiff
@@ -1169,59 +1203,59 @@ This component bridge uses the coordinate-local differentiated Christoffel
 formula, so it does not require a global inverse-metric component package for a
 local frame. -/
 theorem connDiffOne_localFrame_quad_local
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     {g h : SmoothRiemannianMetric I M}
     {D1 : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 3}
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 3}
     (hD1 : ConnDiffDerivRealizes (I := I) g h 1 D1)
-    (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
+    (X : ContMDiffSection I E (âˆž : WithTop â„•âˆž)
       (TangentSpace I : M -> Type _))
-    (Z : Idx -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+    (Z : Idx -> ContMDiffSection I E (âˆž : WithTop â„•âˆž)
       (TangentSpace I : M -> Type _))
-    (α : Tensor0SBundle.Tensor0SField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1)
+    (Î± : Tensor0SBundle.Tensor0SField
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
-    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (hu : IsOpen u) {x : M} (hx : x âˆˆ u)
     (gInv : M -> Idx -> Idx -> Real)
     (d a b e : Idx)
     (hX : X x = frame d x)
-    (hZ : ∀ j : Idx,
-      (fun y : M => Z j y) =ᶠ[nhds x] fun y : M => frame j y)
-    (hpair : ∀ j : Idx,
-      (fun y : M => α y (fun _ : Fin 1 => Z j y)) =ᶠ[nhds x]
+    (hZ : âˆ€ j : Idx,
+      (fun y : M => Z j y) =á¶ [nhds x] fun y : M => frame j y)
+    (hpair : âˆ€ j : Idx,
+      (fun y : M => Î± y (fun _ : Fin 1 => Z j y)) =á¶ [nhds x]
         fun _ : M => if j = e then (1 : Real) else 0)
     (hinvX : forall i j : Idx,
-      (∑ k : Idx, gInv x i k *
+      (âˆ‘ k : Idx, gInv x i k *
           Coordinates.metricCompForMetricInFrame (I := I) g frame x k j) =
-          (if i = j then 1 else 0) ∧
-        (∑ k : Idx,
+          (if i = j then 1 else 0) âˆ§
+        (âˆ‘ k : Idx,
           Coordinates.metricCompForMetricInFrame (I := I) g frame x i k *
             gInv x k j) =
           (if i = j then 1 else 0))
     (hinvLeftN : forall i j : Idx,
-      (fun y : M => ∑ k : Idx,
+      (fun y : M => âˆ‘ k : Idx,
           gInv y i k *
-            Coordinates.metricCompForMetricInFrame (I := I) g frame y k j) =ᶠ[nhds x]
+            Coordinates.metricCompForMetricInFrame (I := I) g frame y k j) =á¶ [nhds x]
         fun _ : M => if i = j then 1 else 0)
     (hD_mdiff :
-      MDifferentiableAt I 𝓘(Real, Real)
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M => Coordinates.lcDiffCompInFrame
           (I := I) g h frame hframe y a b e) x)
-    (hginv_mdiff : ∀ i j : Idx,
-      MDifferentiableAt I 𝓘(Real, Real) (fun y : M => gInv y i j) x)
-    (hmetric_mdiff : ∀ i j : Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
+    (hginv_mdiff : âˆ€ i j : Idx,
+      MDifferentiableAt I ð“˜(Real, Real) (fun y : M => gInv y i j) x)
+    (hmetric_mdiff : âˆ€ i j : Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           Coordinates.metricCompForMetricInFrame
             (I := I) g frame y i j) x)
-    (hA_mdiff : ∀ i j k : Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
+    (hA_mdiff : âˆ€ i j k : Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           Coordinates.metricCovDerivForMetricCompInFrame
             (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
@@ -1234,7 +1268,7 @@ theorem connDiffOne_localFrame_quad_local
         frame hframe x d a b e := by
   have hlocal :=
     connDiffOne_localFrame
-      (I := I) hD1 X Z α frame hframe hu hx d a b e hX hZ hpair
+      (I := I) hD1 X Z Î± frame hframe hu hx d a b e hX hZ hpair
   have hquad :=
     Coordinates.lcDiffDeriv_eq_quad_local
       (I := I) g h gInv frame hframe hu hx hinvX hinvLeftN d a b e
@@ -1258,50 +1292,50 @@ metric covariant-derivative component bridges in `AllTimesBounds` use an
 infinite-smooth local frame.  This wrapper keeps the component basis from the
 infinite frame while downgrading the regularity proof internally. -/
 theorem connDiffOne_frameInf_quad
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     {g h : SmoothRiemannianMetric I M}
     {D1 : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 3}
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 3}
     (hD1 : ConnDiffDerivRealizes (I := I) g h 1 D1)
-    (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
+    (X : ContMDiffSection I E (âˆž : WithTop â„•âˆž)
       (TangentSpace I : M -> Type _))
-    (Z : Idx -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+    (Z : Idx -> ContMDiffSection I E (âˆž : WithTop â„•âˆž)
       (TangentSpace I : M -> Type _))
-    (α : Tensor0SBundle.Tensor0SField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1)
+    (Î± : Tensor0SBundle.Tensor0SField
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1)
     (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
-    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u)
+    (hu : IsOpen u) {x : M} (hx : x âˆˆ u)
     (gInv : M -> Idx -> Idx -> Real)
     (d a b e : Idx)
     (hX : X x = frame d x)
-    (hZ : ∀ j : Idx,
-      (fun y : M => Z j y) =ᶠ[nhds x] fun y : M => frame j y)
-    (hpair : ∀ j : Idx,
-      (fun y : M => α y (fun _ : Fin 1 => Z j y)) =ᶠ[nhds x]
+    (hZ : âˆ€ j : Idx,
+      (fun y : M => Z j y) =á¶ [nhds x] fun y : M => frame j y)
+    (hpair : âˆ€ j : Idx,
+      (fun y : M => Î± y (fun _ : Fin 1 => Z j y)) =á¶ [nhds x]
         fun _ : M => if j = e then (1 : Real) else 0)
     (hinv :
       Coordinates.InverseMetricComponentsForMetricInFrameOn
         (I := I) g gInv frame)
     (hD_mdiff :
-      MDifferentiableAt I 𝓘(Real, Real)
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M => Coordinates.lcDiffCompInFrame
           (I := I) g h frame (localFrameOneOfInf (I := I) frame hframe)
           y a b e) x)
-    (hginv_mdiff : ∀ i j : Idx,
-      MDifferentiableAt I 𝓘(Real, Real) (fun y : M => gInv y i j) x)
-    (hmetric_mdiff : ∀ i j : Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
+    (hginv_mdiff : âˆ€ i j : Idx,
+      MDifferentiableAt I ð“˜(Real, Real) (fun y : M => gInv y i j) x)
+    (hmetric_mdiff : âˆ€ i j : Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           Coordinates.metricCompForMetricInFrame
             (I := I) g frame y i j) x)
-    (hA_mdiff : ∀ i j k : Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
+    (hA_mdiff : âˆ€ i j k : Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           Coordinates.metricCovDerivForMetricCompInFrame
             (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
@@ -1312,11 +1346,11 @@ theorem connDiffOne_frameInf_quad
         (I := I) g gInv
         (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
         frame (localFrameOneOfInf (I := I) frame hframe) x d a b e := by
-  let hframe1 : IsLocalFrameOn I E (1 : WithTop ℕ∞) frame u :=
+  let hframe1 : IsLocalFrameOn I E (1 : WithTop â„•âˆž) frame u :=
     localFrameOneOfInf (I := I) frame hframe
   have hmain :=
     connDiffOne_localFrame_quad
-      (I := I) hD1 X Z α frame hframe1 hu hx gInv d a b e
+      (I := I) hD1 X Z Î± frame hframe1 hu hx gInv d a b e
       hX hZ hpair hinv hD_mdiff hginv_mdiff hmetric_mdiff hA_mdiff
   have hbasis : hframe1.toBasisAt hx = hframe.toBasisAt hx := by
     ext i
@@ -1326,60 +1360,60 @@ theorem connDiffOne_frameInf_quad
 /-- Infinite-smooth local-frame wrapper for
 `connDiffOne_localFrame_quad_local`. -/
 theorem connDiffOne_frameInf_quad_local
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     {g h : SmoothRiemannianMetric I M}
     {D1 : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 3}
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 3}
     (hD1 : ConnDiffDerivRealizes (I := I) g h 1 D1)
-    (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
+    (X : ContMDiffSection I E (âˆž : WithTop â„•âˆž)
       (TangentSpace I : M -> Type _))
-    (Z : Idx -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+    (Z : Idx -> ContMDiffSection I E (âˆž : WithTop â„•âˆž)
       (TangentSpace I : M -> Type _))
-    (α : Tensor0SBundle.Tensor0SField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1)
+    (Î± : Tensor0SBundle.Tensor0SField
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1)
     (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
-    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u)
+    (hu : IsOpen u) {x : M} (hx : x âˆˆ u)
     (gInv : M -> Idx -> Idx -> Real)
     (d a b e : Idx)
     (hX : X x = frame d x)
-    (hZ : ∀ j : Idx,
-      (fun y : M => Z j y) =ᶠ[nhds x] fun y : M => frame j y)
-    (hpair : ∀ j : Idx,
-      (fun y : M => α y (fun _ : Fin 1 => Z j y)) =ᶠ[nhds x]
+    (hZ : âˆ€ j : Idx,
+      (fun y : M => Z j y) =á¶ [nhds x] fun y : M => frame j y)
+    (hpair : âˆ€ j : Idx,
+      (fun y : M => Î± y (fun _ : Fin 1 => Z j y)) =á¶ [nhds x]
         fun _ : M => if j = e then (1 : Real) else 0)
     (hinvX : forall i j : Idx,
-      (∑ k : Idx, gInv x i k *
+      (âˆ‘ k : Idx, gInv x i k *
           Coordinates.metricCompForMetricInFrame (I := I) g frame x k j) =
-          (if i = j then 1 else 0) ∧
-        (∑ k : Idx,
+          (if i = j then 1 else 0) âˆ§
+        (âˆ‘ k : Idx,
           Coordinates.metricCompForMetricInFrame (I := I) g frame x i k *
             gInv x k j) =
           (if i = j then 1 else 0))
     (hinvLeftN : forall i j : Idx,
-      (fun y : M => ∑ k : Idx,
+      (fun y : M => âˆ‘ k : Idx,
           gInv y i k *
-            Coordinates.metricCompForMetricInFrame (I := I) g frame y k j) =ᶠ[nhds x]
+            Coordinates.metricCompForMetricInFrame (I := I) g frame y k j) =á¶ [nhds x]
         fun _ : M => if i = j then 1 else 0)
     (hD_mdiff :
-      MDifferentiableAt I 𝓘(Real, Real)
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M => Coordinates.lcDiffCompInFrame
           (I := I) g h frame (localFrameOneOfInf (I := I) frame hframe)
           y a b e) x)
-    (hginv_mdiff : ∀ i j : Idx,
-      MDifferentiableAt I 𝓘(Real, Real) (fun y : M => gInv y i j) x)
-    (hmetric_mdiff : ∀ i j : Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
+    (hginv_mdiff : âˆ€ i j : Idx,
+      MDifferentiableAt I ð“˜(Real, Real) (fun y : M => gInv y i j) x)
+    (hmetric_mdiff : âˆ€ i j : Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           Coordinates.metricCompForMetricInFrame
             (I := I) g frame y i j) x)
-    (hA_mdiff : ∀ i j k : Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
+    (hA_mdiff : âˆ€ i j k : Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           Coordinates.metricCovDerivForMetricCompInFrame
             (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
@@ -1390,11 +1424,11 @@ theorem connDiffOne_frameInf_quad_local
         (I := I) g gInv
         (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
         frame (localFrameOneOfInf (I := I) frame hframe) x d a b e := by
-  let hframe1 : IsLocalFrameOn I E (1 : WithTop ℕ∞) frame u :=
+  let hframe1 : IsLocalFrameOn I E (1 : WithTop â„•âˆž) frame u :=
     localFrameOneOfInf (I := I) frame hframe
   have hmain :=
     connDiffOne_localFrame_quad_local
-      (I := I) hD1 X Z α frame hframe1 hu hx gInv d a b e
+      (I := I) hD1 X Z Î± frame hframe1 hu hx gInv d a b e
       hX hZ hpair hinvX hinvLeftN hD_mdiff hginv_mdiff hmetric_mdiff hA_mdiff
   have hbasis : hframe1.toBasisAt hx = hframe.toBasisAt hx := by
     ext i
@@ -1405,87 +1439,87 @@ theorem connDiffOne_frameInf_quad_local
 `Gamma_g - Gamma_h` are differentiable.  Unlike `lcDiffComp_triv_mdiff`, this
 keeps the trivialization fixed and varies the point inside its base set. -/
 theorem lcDiffComp_e_mdiff
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-    (e₀ : Bundle.Trivialization E
+    (eâ‚€ : Bundle.Trivialization E
       (TotalSpace.proj : TotalSpace E (TangentSpace I : M -> Type _) -> M))
-    [MemTrivializationAtlas e₀]
+    [MemTrivializationAtlas eâ‚€]
     (g h : SmoothRiemannianMetric I M)
-    (basisE : Module.Basis Idx Real E) {x : M} (hx : x ∈ e₀.baseSet)
+    (basisE : Module.Basis Idx Real E) {x : M} (hx : x âˆˆ eâ‚€.baseSet)
     (a b eIdx : Idx) :
     let frame : Idx -> (y : M) -> TangentSpace I y :=
-      fun i y => e₀.localFrame basisE i y
-    let u : Set M := e₀.baseSet
+      fun i y => eâ‚€.localFrame basisE i y
+    let u : Set M := eâ‚€.baseSet
     let hframe : IsLocalFrameOn I E 1 frame u :=
-      e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE
-    MDifferentiableAt I 𝓘(Real, Real)
+      eâ‚€.isLocalFrameOn_localFrame_baseSet I 1 basisE
+    MDifferentiableAt I ð“˜(Real, Real)
       (fun y : M => Coordinates.lcDiffCompInFrame
         (I := I) g h frame hframe y a b eIdx) x := by
   classical
   let frame : Idx -> (y : M) -> TangentSpace I y :=
-    fun i y => e₀.localFrame basisE i y
-  let u : Set M := e₀.baseSet
-  let hframeInf : IsLocalFrameOn I E ∞ frame u :=
-    e₀.isLocalFrameOn_localFrame_baseSet I ∞ basisE
+    fun i y => eâ‚€.localFrame basisE i y
+  let u : Set M := eâ‚€.baseSet
+  let hframeInf : IsLocalFrameOn I E âˆž frame u :=
+    eâ‚€.isLocalFrameOn_localFrame_baseSet I âˆž basisE
   let hframe1 : IsLocalFrameOn I E 1 frame u :=
-    e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE
+    eâ‚€.isLocalFrameOn_localFrame_baseSet I 1 basisE
   have hg :=
     LeviCivita.lc_christoffel_contMDiffAt
-      (I := I) e₀ basisE g hx a b eIdx
+      (I := I) eâ‚€ basisE g hx a b eIdx
   have hh :=
     LeviCivita.lc_christoffel_contMDiffAt
-      (I := I) e₀ basisE h hx a b eIdx
+      (I := I) eâ‚€ basisE h hx a b eIdx
   have hdiff :
-      ContMDiffAt I 𝓘(Real, Real) ∞
+      ContMDiffAt I ð“˜(Real, Real) âˆž
         (fun y : M =>
-          e₀.localFrame_coeff I basisE eIdx y
+          eâ‚€.localFrame_coeff I basisE eIdx y
               ((LeviCivita.leviCivitaConnectionOfMetric (I := I) g
-                  (e₀.localFrame basisE b) y)
-                (e₀.localFrame basisE a y)) -
-            e₀.localFrame_coeff I basisE eIdx y
+                  (eâ‚€.localFrame basisE b) y)
+                (eâ‚€.localFrame basisE a y)) -
+            eâ‚€.localFrame_coeff I basisE eIdx y
               ((LeviCivita.leviCivitaConnectionOfMetric (I := I) h
-                  (e₀.localFrame basisE b) y)
-                (e₀.localFrame basisE a y))) x :=
+                  (eâ‚€.localFrame basisE b) y)
+                (eâ‚€.localFrame basisE a y))) x :=
     hg.sub hh
   have htarget :
       (fun y : M => Coordinates.lcDiffCompInFrame
-        (I := I) g h frame hframe1 y a b eIdx) =ᶠ[nhds x]
+        (I := I) g h frame hframe1 y a b eIdx) =á¶ [nhds x]
         (fun y : M =>
-          e₀.localFrame_coeff I basisE eIdx y
+          eâ‚€.localFrame_coeff I basisE eIdx y
               ((LeviCivita.leviCivitaConnectionOfMetric (I := I) g
-                  (e₀.localFrame basisE b) y)
-                (e₀.localFrame basisE a y)) -
-            e₀.localFrame_coeff I basisE eIdx y
+                  (eâ‚€.localFrame basisE b) y)
+                (eâ‚€.localFrame basisE a y)) -
+            eâ‚€.localFrame_coeff I basisE eIdx y
               ((LeviCivita.leviCivitaConnectionOfMetric (I := I) h
-                  (e₀.localFrame basisE b) y)
-                (e₀.localFrame basisE a y))) := by
-    filter_upwards [e₀.open_baseSet.mem_nhds hx] with y hy
-    have hyu : y ∈ u := by
+                  (eâ‚€.localFrame basisE b) y)
+                (eâ‚€.localFrame basisE a y))) := by
+    filter_upwards [eâ‚€.open_baseSet.mem_nhds hx] with y hy
+    have hyu : y âˆˆ u := by
       simpa [u] using hy
     have hmdiff : MDiffAt (T% (frame b)) y :=
-      (hframeInf.contMDiffAt e₀.open_baseSet hyu b).mdifferentiableAt
-        (by simp : (∞ : WithTop ℕ∞) ≠ 0)
+      (hframeInf.contMDiffAt eâ‚€.open_baseSet hyu b).mdifferentiableAt
+        (by simp : (âˆž : WithTop â„•âˆž) â‰  0)
     change Coordinates.christoffelSymbolDifferenceInFrame
         (LeviCivita.leviCivitaConnectionOfMetric (I := I) g)
         (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
         frame hframe1 y a b eIdx =
-      e₀.localFrame_coeff I basisE eIdx y
+      eâ‚€.localFrame_coeff I basisE eIdx y
           ((LeviCivita.leviCivitaConnectionOfMetric (I := I) g
-              (e₀.localFrame basisE b) y)
-            (e₀.localFrame basisE a y)) -
-        e₀.localFrame_coeff I basisE eIdx y
+              (eâ‚€.localFrame basisE b) y)
+            (eâ‚€.localFrame basisE a y)) -
+        eâ‚€.localFrame_coeff I basisE eIdx y
           ((LeviCivita.leviCivitaConnectionOfMetric (I := I) h
-              (e₀.localFrame basisE b) y)
-            (e₀.localFrame basisE a y))
+              (eâ‚€.localFrame basisE b) y)
+            (eâ‚€.localFrame basisE a y))
     rw [Coordinates.christoffelSymbolDifferenceInFrame_eq_sub
       (I := I)
       (cov := LeviCivita.leviCivitaConnectionOfMetric (I := I) g)
       (cov' := LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
       (frame := frame) (hframe := hframe1)
       (x := y) (i := a) (j := b) (k := eIdx) hmdiff]
-    have hbasis : hframe1.toBasisAt hyu = e₀.basisAt basisE hy := by
+    have hbasis : hframe1.toBasisAt hyu = eâ‚€.basisAt basisE hy := by
       ext j
       simp [frame, IsLocalFrameOn.toBasisAt,
         Bundle.Trivialization.localFrame, Bundle.Trivialization.basisAt, hy]
@@ -1497,47 +1531,47 @@ theorem lcDiffComp_e_mdiff
 /-- Levi-Civita Christoffel coefficients in a fixed tangent trivialization
 frame are smooth when written through `christoffelSymbolInFrame`. -/
 theorem lcChrist_e_contMDiffAt
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-    (e₀ : Bundle.Trivialization E
+    (eâ‚€ : Bundle.Trivialization E
       (TotalSpace.proj : TotalSpace E (TangentSpace I : M -> Type _) -> M))
-    [MemTrivializationAtlas e₀]
+    [MemTrivializationAtlas eâ‚€]
     (g : SmoothRiemannianMetric I M)
-    (basisE : Module.Basis Idx Real E) {x : M} (hx : x ∈ e₀.baseSet)
+    (basisE : Module.Basis Idx Real E) {x : M} (hx : x âˆˆ eâ‚€.baseSet)
     (i j k : Idx) :
     let frame : Idx -> (y : M) -> TangentSpace I y :=
-      fun a y => e₀.localFrame basisE a y
-    let u : Set M := e₀.baseSet
+      fun a y => eâ‚€.localFrame basisE a y
+    let u : Set M := eâ‚€.baseSet
     let hframe : IsLocalFrameOn I E 1 frame u :=
-      e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE
-    ContMDiffAt I 𝓘(Real, Real) ∞
+      eâ‚€.isLocalFrameOn_localFrame_baseSet I 1 basisE
+    ContMDiffAt I ð“˜(Real, Real) âˆž
       (fun y : M => Coordinates.christoffelSymbolInFrame
         (LeviCivita.leviCivitaConnectionOfMetric (I := I) g)
         frame hframe y i j k) x := by
   classical
   let frame : Idx -> (y : M) -> TangentSpace I y :=
-    fun a y => e₀.localFrame basisE a y
-  let u : Set M := e₀.baseSet
+    fun a y => eâ‚€.localFrame basisE a y
+  let u : Set M := eâ‚€.baseSet
   let hframe1 : IsLocalFrameOn I E 1 frame u :=
-    e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE
+    eâ‚€.isLocalFrameOn_localFrame_baseSet I 1 basisE
   have hraw :=
     LeviCivita.lc_christoffel_contMDiffAt
-      (I := I) e₀ basisE g hx i j k
+      (I := I) eâ‚€ basisE g hx i j k
   have heq :
       (fun y : M => Coordinates.christoffelSymbolInFrame
         (LeviCivita.leviCivitaConnectionOfMetric (I := I) g)
-        frame hframe1 y i j k) =ᶠ[nhds x]
+        frame hframe1 y i j k) =á¶ [nhds x]
         (fun y : M =>
-          e₀.localFrame_coeff I basisE k y
+          eâ‚€.localFrame_coeff I basisE k y
             ((LeviCivita.leviCivitaConnectionOfMetric (I := I) g
-                (e₀.localFrame basisE j) y)
-              (e₀.localFrame basisE i y))) := by
-    filter_upwards [e₀.open_baseSet.mem_nhds hx] with y hy
-    have hyu : y ∈ u := by
+                (eâ‚€.localFrame basisE j) y)
+              (eâ‚€.localFrame basisE i y))) := by
+    filter_upwards [eâ‚€.open_baseSet.mem_nhds hx] with y hy
+    have hyu : y âˆˆ u := by
       simpa [u] using hy
-    have hbasis : hframe1.toBasisAt hyu = e₀.basisAt basisE hy := by
+    have hbasis : hframe1.toBasisAt hyu = eâ‚€.basisAt basisE hy := by
       ext q
       simp [frame, IsLocalFrameOn.toBasisAt,
         Bundle.Trivialization.localFrame, Bundle.Trivialization.basisAt, hy]
@@ -1549,45 +1583,45 @@ theorem lcChrist_e_contMDiffAt
 /-- First metric-covariant-derivative components in a fixed tangent
 trivialization frame are smooth. -/
 theorem metricCov_e_contMDiffAt
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-    (e₀ : Bundle.Trivialization E
+    (eâ‚€ : Bundle.Trivialization E
       (TotalSpace.proj : TotalSpace E (TangentSpace I : M -> Type _) -> M))
-    [MemTrivializationAtlas e₀]
+    [MemTrivializationAtlas eâ‚€]
     (g h : SmoothRiemannianMetric I M)
-    (basisE : Module.Basis Idx Real E) {x : M} (hx : x ∈ e₀.baseSet)
+    (basisE : Module.Basis Idx Real E) {x : M} (hx : x âˆˆ eâ‚€.baseSet)
     (i j k : Idx) :
     let frame : Idx -> (y : M) -> TangentSpace I y :=
-      fun a y => e₀.localFrame basisE a y
-    let u : Set M := e₀.baseSet
+      fun a y => eâ‚€.localFrame basisE a y
+    let u : Set M := eâ‚€.baseSet
     let hframe : IsLocalFrameOn I E 1 frame u :=
-      e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE
-    ContMDiffAt I 𝓘(Real, Real) ∞
+      eâ‚€.isLocalFrameOn_localFrame_baseSet I 1 basisE
+    ContMDiffAt I ð“˜(Real, Real) âˆž
       (fun y : M =>
         Coordinates.metricCovDerivForMetricCompInFrame
           (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
           frame hframe y i j k) x := by
   classical
   let frame : Idx -> (y : M) -> TangentSpace I y :=
-    fun a y => e₀.localFrame basisE a y
-  let u : Set M := e₀.baseSet
-  let hframeInf : IsLocalFrameOn I E ∞ frame u :=
-    e₀.isLocalFrameOn_localFrame_baseSet I ∞ basisE
+    fun a y => eâ‚€.localFrame basisE a y
+  let u : Set M := eâ‚€.baseSet
+  let hframeInf : IsLocalFrameOn I E âˆž frame u :=
+    eâ‚€.isLocalFrameOn_localFrame_baseSet I âˆž basisE
   let hframe1 : IsLocalFrameOn I E 1 frame u :=
-    e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE
-  have hxi : ContMDiffAt I (I.prod 𝓘(Real, E)) ∞ (T% (frame i)) x :=
-    hframeInf.contMDiffAt e₀.open_baseSet (by simpa [u] using hx) i
+    eâ‚€.isLocalFrameOn_localFrame_baseSet I 1 basisE
+  have hxi : ContMDiffAt I (I.prod ð“˜(Real, E)) âˆž (T% (frame i)) x :=
+    hframeInf.contMDiffAt eâ‚€.open_baseSet (by simpa [u] using hx) i
   have hmetric (a b : Idx) :
-      ContMDiffAt I 𝓘(Real, Real) ∞
+      ContMDiffAt I ð“˜(Real, Real) âˆž
         (fun y : M =>
           Coordinates.metricCompForMetricInFrame (I := I) g frame y a b) x := by
     simpa [frame] using
       LeviCivita.localFrame_metricComp_contMDiffAt
-        (I := I) e₀ basisE g hx a b
+        (I := I) eâ‚€ basisE g hx a b
   have hderiv :
-      ContMDiffAt I 𝓘(Real, Real) ∞
+      ContMDiffAt I ð“˜(Real, Real) âˆž
         (fun y : M =>
           extDerivFun (I := I)
             (fun q : M =>
@@ -1599,9 +1633,9 @@ theorem metricCov_e_contMDiffAt
         Coordinates.metricCompForMetricInFrame (I := I) g frame q j k)
       (X := frame i) (hmetric j k) hxi
   have hsum1 :
-      ContMDiffAt I 𝓘(Real, Real) ∞
+      ContMDiffAt I ð“˜(Real, Real) âˆž
         (fun y : M =>
-          ∑ p : Idx,
+          âˆ‘ p : Idx,
             Coordinates.christoffelSymbolInFrame
                 (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
                 frame hframe1 y i j p *
@@ -1609,11 +1643,11 @@ theorem metricCov_e_contMDiffAt
     refine ContMDiffAt.sum fun p _ => ?_
     exact
       (lcChrist_e_contMDiffAt
-        (I := I) e₀ h basisE (x := x) hx i j p).mul (hmetric p k)
+        (I := I) eâ‚€ h basisE (x := x) hx i j p).mul (hmetric p k)
   have hsum2 :
-      ContMDiffAt I 𝓘(Real, Real) ∞
+      ContMDiffAt I ð“˜(Real, Real) âˆž
         (fun y : M =>
-          ∑ p : Idx,
+          âˆ‘ p : Idx,
             Coordinates.christoffelSymbolInFrame
                 (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
                 frame hframe1 y i k p *
@@ -1621,51 +1655,51 @@ theorem metricCov_e_contMDiffAt
     refine ContMDiffAt.sum fun p _ => ?_
     exact
       (lcChrist_e_contMDiffAt
-        (I := I) e₀ h basisE (x := x) hx i k p).mul (hmetric j p)
+        (I := I) eâ‚€ h basisE (x := x) hx i k p).mul (hmetric j p)
   exact (hderiv.sub hsum1).sub hsum2
 
 /-- First metric-covariant-derivative components in a fixed tangent
 trivialization frame are differentiable. -/
 theorem metricCov_e_mdiff
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-    (e₀ : Bundle.Trivialization E
+    (eâ‚€ : Bundle.Trivialization E
       (TotalSpace.proj : TotalSpace E (TangentSpace I : M -> Type _) -> M))
-    [MemTrivializationAtlas e₀]
+    [MemTrivializationAtlas eâ‚€]
     (g h : SmoothRiemannianMetric I M)
-    (basisE : Module.Basis Idx Real E) {x : M} (hx : x ∈ e₀.baseSet)
+    (basisE : Module.Basis Idx Real E) {x : M} (hx : x âˆˆ eâ‚€.baseSet)
     (i j k : Idx) :
     let frame : Idx -> (y : M) -> TangentSpace I y :=
-      fun a y => e₀.localFrame basisE a y
-    let u : Set M := e₀.baseSet
+      fun a y => eâ‚€.localFrame basisE a y
+    let u : Set M := eâ‚€.baseSet
     let hframe : IsLocalFrameOn I E 1 frame u :=
-      e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE
-    MDifferentiableAt I 𝓘(Real, Real)
+      eâ‚€.isLocalFrameOn_localFrame_baseSet I 1 basisE
+    MDifferentiableAt I ð“˜(Real, Real)
       (fun y : M =>
         Coordinates.metricCovDerivForMetricCompInFrame
           (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
           frame hframe y i j k) x := by
   classical
   let frame : Idx -> (y : M) -> TangentSpace I y :=
-    fun a y => e₀.localFrame basisE a y
-  let u : Set M := e₀.baseSet
-  let hframeInf : IsLocalFrameOn I E ∞ frame u :=
-    e₀.isLocalFrameOn_localFrame_baseSet I ∞ basisE
+    fun a y => eâ‚€.localFrame basisE a y
+  let u : Set M := eâ‚€.baseSet
+  let hframeInf : IsLocalFrameOn I E âˆž frame u :=
+    eâ‚€.isLocalFrameOn_localFrame_baseSet I âˆž basisE
   let hframe1 : IsLocalFrameOn I E 1 frame u :=
-    e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE
-  have hxi : ContMDiffAt I (I.prod 𝓘(Real, E)) ∞ (T% (frame i)) x :=
-    hframeInf.contMDiffAt e₀.open_baseSet (by simpa [u] using hx) i
+    eâ‚€.isLocalFrameOn_localFrame_baseSet I 1 basisE
+  have hxi : ContMDiffAt I (I.prod ð“˜(Real, E)) âˆž (T% (frame i)) x :=
+    hframeInf.contMDiffAt eâ‚€.open_baseSet (by simpa [u] using hx) i
   have hmetric (a b : Idx) :
-      ContMDiffAt I 𝓘(Real, Real) ∞
+      ContMDiffAt I ð“˜(Real, Real) âˆž
         (fun y : M =>
           Coordinates.metricCompForMetricInFrame (I := I) g frame y a b) x := by
     simpa [frame] using
       LeviCivita.localFrame_metricComp_contMDiffAt
-        (I := I) e₀ basisE g hx a b
+        (I := I) eâ‚€ basisE g hx a b
   have hderiv :
-      ContMDiffAt I 𝓘(Real, Real) ∞
+      ContMDiffAt I ð“˜(Real, Real) âˆž
         (fun y : M =>
           extDerivFun (I := I)
             (fun q : M =>
@@ -1677,9 +1711,9 @@ theorem metricCov_e_mdiff
         Coordinates.metricCompForMetricInFrame (I := I) g frame q j k)
       (X := frame i) (hmetric j k) hxi
   have hsum1 :
-      ContMDiffAt I 𝓘(Real, Real) ∞
+      ContMDiffAt I ð“˜(Real, Real) âˆž
         (fun y : M =>
-          ∑ p : Idx,
+          âˆ‘ p : Idx,
             Coordinates.christoffelSymbolInFrame
                 (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
                 frame hframe1 y i j p *
@@ -1687,11 +1721,11 @@ theorem metricCov_e_mdiff
     refine ContMDiffAt.sum fun p _ => ?_
     exact
       (lcChrist_e_contMDiffAt
-        (I := I) e₀ h basisE (x := x) hx i j p).mul (hmetric p k)
+        (I := I) eâ‚€ h basisE (x := x) hx i j p).mul (hmetric p k)
   have hsum2 :
-      ContMDiffAt I 𝓘(Real, Real) ∞
+      ContMDiffAt I ð“˜(Real, Real) âˆž
         (fun y : M =>
-          ∑ p : Idx,
+          âˆ‘ p : Idx,
             Coordinates.christoffelSymbolInFrame
                 (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
                 frame hframe1 y i k p *
@@ -1699,7 +1733,7 @@ theorem metricCov_e_mdiff
     refine ContMDiffAt.sum fun p _ => ?_
     exact
       (lcChrist_e_contMDiffAt
-        (I := I) e₀ h basisE (x := x) hx i k p).mul (hmetric j p)
+        (I := I) eâ‚€ h basisE (x := x) hx i k p).mul (hmetric j p)
   have htotal := (hderiv.sub hsum1).sub hsum2
   exact (by
     simpa [Coordinates.metricCovDerivForMetricCompInFrame, hframe1] using
@@ -1708,47 +1742,47 @@ theorem metricCov_e_mdiff
 /-- Second metric-covariant-derivative components in a fixed tangent
 trivialization frame are differentiable. -/
 theorem metricCov2_e_mdiff
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-    (e₀ : Bundle.Trivialization E
+    (eâ‚€ : Bundle.Trivialization E
       (TotalSpace.proj : TotalSpace E (TangentSpace I : M -> Type _) -> M))
-    [MemTrivializationAtlas e₀]
+    [MemTrivializationAtlas eâ‚€]
     (g h : SmoothRiemannianMetric I M)
-    (basisE : Module.Basis Idx Real E) {x : M} (hx : x ∈ e₀.baseSet)
+    (basisE : Module.Basis Idx Real E) {x : M} (hx : x âˆˆ eâ‚€.baseSet)
     (d a b c : Idx) :
     let frame : Idx -> (y : M) -> TangentSpace I y :=
-      fun i y => e₀.localFrame basisE i y
-    let u : Set M := e₀.baseSet
+      fun i y => eâ‚€.localFrame basisE i y
+    let u : Set M := eâ‚€.baseSet
     let hframe : IsLocalFrameOn I E 1 frame u :=
-      e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE
-    MDifferentiableAt I 𝓘(Real, Real)
+      eâ‚€.isLocalFrameOn_localFrame_baseSet I 1 basisE
+    MDifferentiableAt I ð“˜(Real, Real)
       (fun y : M =>
         Coordinates.metricCovDeriv2ForMetricCompInFrame
           (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
           frame hframe y d a b c) x := by
   classical
   let frame : Idx -> (y : M) -> TangentSpace I y :=
-    fun i y => e₀.localFrame basisE i y
-  let u : Set M := e₀.baseSet
-  let hframeInf : IsLocalFrameOn I E ∞ frame u :=
-    e₀.isLocalFrameOn_localFrame_baseSet I ∞ basisE
+    fun i y => eâ‚€.localFrame basisE i y
+  let u : Set M := eâ‚€.baseSet
+  let hframeInf : IsLocalFrameOn I E âˆž frame u :=
+    eâ‚€.isLocalFrameOn_localFrame_baseSet I âˆž basisE
   let hframe1 : IsLocalFrameOn I E 1 frame u :=
-    e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE
-  have hxd : ContMDiffAt I (I.prod 𝓘(Real, E)) ∞ (T% (frame d)) x :=
-    hframeInf.contMDiffAt e₀.open_baseSet (by simpa [u] using hx) d
+    eâ‚€.isLocalFrameOn_localFrame_baseSet I 1 basisE
+  have hxd : ContMDiffAt I (I.prod ð“˜(Real, E)) âˆž (T% (frame d)) x :=
+    hframeInf.contMDiffAt eâ‚€.open_baseSet (by simpa [u] using hx) d
   have hA (i j k : Idx) :
-      ContMDiffAt I 𝓘(Real, Real) ∞
+      ContMDiffAt I ð“˜(Real, Real) âˆž
         (fun y : M =>
           Coordinates.metricCovDerivForMetricCompInFrame
             (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
             frame hframe1 y i j k) x := by
     simpa [frame, u, hframe1] using
       metricCov_e_contMDiffAt
-        (I := I) e₀ g h basisE (x := x) hx i j k
+        (I := I) eâ‚€ g h basisE (x := x) hx i j k
   have hderiv :
-      ContMDiffAt I 𝓘(Real, Real) ∞
+      ContMDiffAt I ð“˜(Real, Real) âˆž
         (fun y : M =>
           extDerivFun (I := I)
             (fun q : M =>
@@ -1765,9 +1799,9 @@ theorem metricCov2_e_mdiff
           frame hframe1 q a b c)
       (X := frame d) (hA a b c) hxd
   have hsum1 :
-      ContMDiffAt I 𝓘(Real, Real) ∞
+      ContMDiffAt I ð“˜(Real, Real) âˆž
         (fun y : M =>
-          ∑ p : Idx,
+          âˆ‘ p : Idx,
             Coordinates.christoffelSymbolInFrame
                 (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
                 frame hframe1 y d a p *
@@ -1778,11 +1812,11 @@ theorem metricCov2_e_mdiff
     refine ContMDiffAt.sum fun p _ => ?_
     exact
       (lcChrist_e_contMDiffAt
-        (I := I) e₀ h basisE (x := x) hx d a p).mul (hA p b c)
+        (I := I) eâ‚€ h basisE (x := x) hx d a p).mul (hA p b c)
   have hsum2 :
-      ContMDiffAt I 𝓘(Real, Real) ∞
+      ContMDiffAt I ð“˜(Real, Real) âˆž
         (fun y : M =>
-          ∑ p : Idx,
+          âˆ‘ p : Idx,
             Coordinates.christoffelSymbolInFrame
                 (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
                 frame hframe1 y d b p *
@@ -1793,11 +1827,11 @@ theorem metricCov2_e_mdiff
     refine ContMDiffAt.sum fun p _ => ?_
     exact
       (lcChrist_e_contMDiffAt
-        (I := I) e₀ h basisE (x := x) hx d b p).mul (hA a p c)
+        (I := I) eâ‚€ h basisE (x := x) hx d b p).mul (hA a p c)
   have hsum3 :
-      ContMDiffAt I 𝓘(Real, Real) ∞
+      ContMDiffAt I ð“˜(Real, Real) âˆž
         (fun y : M =>
-          ∑ p : Idx,
+          âˆ‘ p : Idx,
             Coordinates.christoffelSymbolInFrame
                 (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
                 frame hframe1 y d c p *
@@ -1808,7 +1842,7 @@ theorem metricCov2_e_mdiff
     refine ContMDiffAt.sum fun p _ => ?_
     exact
       (lcChrist_e_contMDiffAt
-        (I := I) e₀ h basisE (x := x) hx d c p).mul (hA a b p)
+        (I := I) eâ‚€ h basisE (x := x) hx d c p).mul (hA a b p)
   have htotal := ((hderiv.sub hsum1).sub hsum2).sub hsum3
   exact (by
     simpa [Coordinates.metricCovDeriv2ForMetricCompInFrame, hframe1] using
@@ -1817,63 +1851,63 @@ theorem metricCov2_e_mdiff
 /-- The substituted first-derivative Christoffel RHS is differentiable in a
 fixed tangent trivialization frame. -/
 theorem lcDiffQuadRHS_e_mdiff
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g h : SmoothRiemannianMetric I M)
     (basisE : Module.Basis Idx Real E) {x : M}
     (d a b eIdx : Idx) :
-    let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+    let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
     let frame : Idx -> (y : M) -> TangentSpace I y :=
-      fun i y => e₀.localFrame basisE i y
-    let u : Set M := e₀.baseSet
+      fun i y => eâ‚€.localFrame basisE i y
+    let u : Set M := eâ‚€.baseSet
     let hframe1 : IsLocalFrameOn I E 1 frame u :=
-      e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE
+      eâ‚€.isLocalFrameOn_localFrame_baseSet I 1 basisE
     let gInv : M -> Idx -> Idx -> Real :=
-      fun y i j => LeviCivita.localInvMetricCoeff (I := I) e₀ basisE g i j y
-    MDifferentiableAt I 𝓘(Real, Real)
+      fun y i j => LeviCivita.localInvMetricCoeff (I := I) eâ‚€ basisE g i j y
+    MDifferentiableAt I ð“˜(Real, Real)
       (fun y : M =>
         Coordinates.lcDiffQuadRHS
           (I := I) g gInv
           (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
           frame hframe1 y d a b eIdx) x := by
   classical
-  let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+  let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
   let frame : Idx -> (y : M) -> TangentSpace I y :=
-    fun i y => e₀.localFrame basisE i y
-  let u : Set M := e₀.baseSet
+    fun i y => eâ‚€.localFrame basisE i y
+  let u : Set M := eâ‚€.baseSet
   let hframe1 : IsLocalFrameOn I E 1 frame u :=
-    e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE
+    eâ‚€.isLocalFrameOn_localFrame_baseSet I 1 basisE
   let gInv : M -> Idx -> Idx -> Real :=
-    fun y i j => LeviCivita.localInvMetricCoeff (I := I) e₀ basisE g i j y
-  have hx : x ∈ u :=
+    fun y i j => LeviCivita.localInvMetricCoeff (I := I) eâ‚€ basisE g i j y
+  have hx : x âˆˆ u :=
     mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
   have hU (i j : Idx) :
-      MDifferentiableAt I 𝓘(Real, Real) (fun y : M => gInv y i j) x :=
+      MDifferentiableAt I ð“˜(Real, Real) (fun y : M => gInv y i j) x :=
     (LeviCivita.localInvMetricCoeff_contMDiffAt
-      (I := I) e₀ basisE g (by simpa [u] using hx) i j).mdifferentiableAt
+      (I := I) eâ‚€ basisE g (by simpa [u] using hx) i j).mdifferentiableAt
         (by simp)
   have hA1 (i j k : Idx) :
-      MDifferentiableAt I 𝓘(Real, Real)
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           Coordinates.metricCovDerivForMetricCompInFrame
             (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
             frame hframe1 y i j k) x := by
     simpa [frame, u, hframe1] using
       metricCov_e_mdiff
-        (I := I) e₀ g h basisE (by simpa [u] using hx) i j k
+        (I := I) eâ‚€ g h basisE (by simpa [u] using hx) i j k
   have hA2 (i j k l : Idx) :
-      MDifferentiableAt I 𝓘(Real, Real)
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           Coordinates.metricCovDeriv2ForMetricCompInFrame
             (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
             frame hframe1 y i j k l) x := by
     simpa [frame, u, hframe1] using
       metricCov2_e_mdiff
-        (I := I) e₀ g h basisE (by simpa [u] using hx) i j k l
+        (I := I) eâ‚€ g h basisE (by simpa [u] using hx) i j k l
   have hS (i j k : Idx) :
-      MDifferentiableAt I 𝓘(Real, Real)
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           Coordinates.lcDiffSymMetricCovComp
             (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
@@ -1881,15 +1915,15 @@ theorem lcDiffQuadRHS_e_mdiff
     simpa [Coordinates.lcDiffSymMetricCovComp] using
       ((hA1 i j k).add (hA1 j i k)).sub (hA1 k i j)
   have hinner (c : Idx) :
-      MDifferentiableAt I 𝓘(Real, Real)
-        (fun y : M => ∑ r : Idx, ∑ q : Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
+        (fun y : M => âˆ‘ r : Idx, âˆ‘ q : Idx,
           gInv y eIdx r * gInv y c q *
             Coordinates.metricCovDerivForMetricCompInFrame
               (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
               frame hframe1 y d r q) x := by
     refine Coordinates.mdiffAt_finset_sum_pointwise_real
       (I := I) (t := (Finset.univ : Finset Idx))
-      (f := fun r y => ∑ q : Idx,
+      (f := fun r y => âˆ‘ q : Idx,
         gInv y eIdx r * gInv y c q *
           Coordinates.metricCovDerivForMetricCompInFrame
             (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
@@ -1905,9 +1939,9 @@ theorem lcDiffQuadRHS_e_mdiff
     intro q _hq
     exact ((hU eIdx r).mul (hU c q)).mul (hA1 d r q)
   have hfirst :
-      MDifferentiableAt I 𝓘(Real, Real)
-        (fun y : M => ∑ c : Idx,
-          (-(∑ r : Idx, ∑ q : Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
+        (fun y : M => âˆ‘ c : Idx,
+          (-(âˆ‘ r : Idx, âˆ‘ q : Idx,
             gInv y eIdx r * gInv y c q *
               Coordinates.metricCovDerivForMetricCompInFrame
                 (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
@@ -1918,7 +1952,7 @@ theorem lcDiffQuadRHS_e_mdiff
     refine Coordinates.mdiffAt_finset_sum_pointwise_real
       (I := I) (t := (Finset.univ : Finset Idx))
       (f := fun c y =>
-        (-(∑ r : Idx, ∑ q : Idx,
+        (-(âˆ‘ r : Idx, âˆ‘ q : Idx,
           gInv y eIdx r * gInv y c q *
             Coordinates.metricCovDerivForMetricCompInFrame
               (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
@@ -1929,8 +1963,8 @@ theorem lcDiffQuadRHS_e_mdiff
     intro c _hc
     exact (hinner c).neg.mul (hS a b c)
   have hsecond :
-      MDifferentiableAt I 𝓘(Real, Real)
-        (fun y : M => ∑ c : Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
+        (fun y : M => âˆ‘ c : Idx,
           gInv y eIdx c *
             (Coordinates.metricCovDeriv2ForMetricCompInFrame
                 (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
@@ -1962,91 +1996,91 @@ theorem lcDiffQuadRHS_e_mdiff
 Christoffel-difference formula holds eventually near the base point.  This is
 the honest producer for the `hquad_ev` input of `lcDiff2_eq_cubic`. -/
 theorem lcDiffQuad_ev_triv
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g h : SmoothRiemannianMetric I M)
     (basisE : Module.Basis Idx Real E) {x : M}
     (d a b eIdx : Idx) :
-    let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+    let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
     let frame : Idx -> (y : M) -> TangentSpace I y :=
-      fun i y => e₀.localFrame basisE i y
-    let u : Set M := e₀.baseSet
+      fun i y => eâ‚€.localFrame basisE i y
+    let u : Set M := eâ‚€.baseSet
     let hframe1 : IsLocalFrameOn I E 1 frame u :=
-      e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE
+      eâ‚€.isLocalFrameOn_localFrame_baseSet I 1 basisE
     let gInv : M -> Idx -> Idx -> Real :=
-      fun y i j => LeviCivita.localInvMetricCoeff (I := I) e₀ basisE g i j y
+      fun y i j => LeviCivita.localInvMetricCoeff (I := I) eâ‚€ basisE g i j y
     (fun y : M =>
       2 * Coordinates.lcDiffCovDerivCompInFrame (I := I) g h frame hframe1
-        y d a b eIdx) =ᶠ[nhds x]
+        y d a b eIdx) =á¶ [nhds x]
       fun y : M =>
         Coordinates.lcDiffQuadRHS
           (I := I) g gInv
           (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
           frame hframe1 y d a b eIdx := by
   classical
-  let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+  let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
   let frame : Idx -> (y : M) -> TangentSpace I y :=
-    fun i y => e₀.localFrame basisE i y
-  let u : Set M := e₀.baseSet
+    fun i y => eâ‚€.localFrame basisE i y
+  let u : Set M := eâ‚€.baseSet
   let hframe1 : IsLocalFrameOn I E 1 frame u :=
-    e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE
+    eâ‚€.isLocalFrameOn_localFrame_baseSet I 1 basisE
   let gInv : M -> Idx -> Idx -> Real :=
-    fun y i j => LeviCivita.localInvMetricCoeff (I := I) e₀ basisE g i j y
-  have hx : x ∈ u :=
+    fun y i j => LeviCivita.localInvMetricCoeff (I := I) eâ‚€ basisE g i j y
+  have hx : x âˆˆ u :=
     mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
-  filter_upwards [e₀.open_baseSet.mem_nhds (by simpa [u] using hx)] with y hy
-  have hyu : y ∈ u := by simpa [u] using hy
+  filter_upwards [eâ‚€.open_baseSet.mem_nhds (by simpa [u] using hx)] with y hy
+  have hyu : y âˆˆ u := by simpa [u] using hy
   have hinvY : forall i j : Idx,
-      (∑ k : Idx, gInv y i k *
+      (âˆ‘ k : Idx, gInv y i k *
           Coordinates.metricCompForMetricInFrame (I := I) g frame y k j) =
-          (if i = j then 1 else 0) ∧
-        (∑ k : Idx,
+          (if i = j then 1 else 0) âˆ§
+        (âˆ‘ k : Idx,
           Coordinates.metricCompForMetricInFrame (I := I) g frame y i k *
             gInv y k j) =
           (if i = j then 1 else 0) := by
     intro i j
     constructor
-    · simpa [gInv, frame, u] using
+    Â· simpa [gInv, frame, u] using
         LeviCivita.localInvMetricCoeff_metricComp_left_inv
-          (I := I) e₀ basisE g hy i j
-    · simpa [gInv, frame, u] using
+          (I := I) eâ‚€ basisE g hy i j
+    Â· simpa [gInv, frame, u] using
         LeviCivita.localInvMetricCoeff_metricComp_right_inv
-          (I := I) e₀ basisE g hy i j
+          (I := I) eâ‚€ basisE g hy i j
   have hinvLeftN : forall i j : Idx,
-      (fun z : M => ∑ k : Idx,
+      (fun z : M => âˆ‘ k : Idx,
           gInv z i k *
-            Coordinates.metricCompForMetricInFrame (I := I) g frame z k j) =ᶠ[nhds y]
+            Coordinates.metricCompForMetricInFrame (I := I) g frame z k j) =á¶ [nhds y]
         fun _ : M => if i = j then 1 else 0 := by
     intro i j
     simpa [gInv, frame, u] using
       LeviCivita.localInvMetricCoeff_metricComp_left_inv_eventually
-        (I := I) e₀ basisE g hy i j
+        (I := I) eâ‚€ basisE g hy i j
   have hD_mdiff :
-      MDifferentiableAt I 𝓘(Real, Real)
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun z : M => Coordinates.lcDiffCompInFrame
           (I := I) g h frame hframe1 z a b eIdx) y := by
     simpa [frame, u, hframe1] using
       lcDiffComp_e_mdiff
-        (I := I) e₀ g h basisE hy a b eIdx
-  have hginv_mdiff : ∀ i j : Idx,
-      MDifferentiableAt I 𝓘(Real, Real) (fun z : M => gInv z i j) y := by
+        (I := I) eâ‚€ g h basisE hy a b eIdx
+  have hginv_mdiff : âˆ€ i j : Idx,
+      MDifferentiableAt I ð“˜(Real, Real) (fun z : M => gInv z i j) y := by
     intro i j
     exact
       (LeviCivita.localInvMetricCoeff_contMDiffAt
-        (I := I) e₀ basisE g hy i j).mdifferentiableAt (by simp)
-  have hmetric_mdiff : ∀ i j : Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
+        (I := I) eâ‚€ basisE g hy i j).mdifferentiableAt (by simp)
+  have hmetric_mdiff : âˆ€ i j : Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun z : M =>
           Coordinates.metricCompForMetricInFrame
             (I := I) g frame z i j) y := by
     intro i j
     simpa [frame] using
       LeviCivita.localFrame_metricComp_mdiff
-        (I := I) e₀ basisE g hy i j
-  have hA_mdiff : ∀ i j k : Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
+        (I := I) eâ‚€ basisE g hy i j
+  have hA_mdiff : âˆ€ i j k : Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun z : M =>
           Coordinates.metricCovDerivForMetricCompInFrame
             (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
@@ -2054,41 +2088,41 @@ theorem lcDiffQuad_ev_triv
     intro i j k
     simpa [frame, u, hframe1] using
       metricCov_e_mdiff
-        (I := I) e₀ g h basisE hy i j k
+        (I := I) eâ‚€ g h basisE hy i j k
   exact
     Coordinates.lcDiffDeriv_eq_quad_local
-      (I := I) g h gInv frame hframe1 e₀.open_baseSet hy hinvY
+      (I := I) g h gInv frame hframe1 eâ‚€.open_baseSet hy hinvY
       hinvLeftN d a b eIdx hD_mdiff hginv_mdiff hmetric_mdiff hA_mdiff
 
 /-- In a fixed tangent trivialization frame, the first covariant derivative
 component of `Gamma_g - Gamma_h` is differentiable. -/
 theorem lcDiffCovDeriv_e_mdiff
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g h : SmoothRiemannianMetric I M)
     (basisE : Module.Basis Idx Real E) {x : M}
     (d a b eIdx : Idx) :
-    let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+    let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
     let frame : Idx -> (y : M) -> TangentSpace I y :=
-      fun i y => e₀.localFrame basisE i y
-    let u : Set M := e₀.baseSet
+      fun i y => eâ‚€.localFrame basisE i y
+    let u : Set M := eâ‚€.baseSet
     let hframe1 : IsLocalFrameOn I E 1 frame u :=
-      e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE
-    MDifferentiableAt I 𝓘(Real, Real)
+      eâ‚€.isLocalFrameOn_localFrame_baseSet I 1 basisE
+    MDifferentiableAt I ð“˜(Real, Real)
       (fun y : M =>
         Coordinates.lcDiffCovDerivCompInFrame
           (I := I) g h frame hframe1 y d a b eIdx) x := by
   classical
-  let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+  let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
   let frame : Idx -> (y : M) -> TangentSpace I y :=
-    fun i y => e₀.localFrame basisE i y
-  let u : Set M := e₀.baseSet
+    fun i y => eâ‚€.localFrame basisE i y
+  let u : Set M := eâ‚€.baseSet
   let hframe1 : IsLocalFrameOn I E 1 frame u :=
-    e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE
+    eâ‚€.isLocalFrameOn_localFrame_baseSet I 1 basisE
   let gInv : M -> Idx -> Idx -> Real :=
-    fun y i j => LeviCivita.localInvMetricCoeff (I := I) e₀ basisE g i j y
+    fun y i j => LeviCivita.localInvMetricCoeff (I := I) eâ‚€ basisE g i j y
   have hRhs :=
     lcDiffQuadRHS_e_mdiff
       (I := I) g h basisE (x := x) d a b eIdx
@@ -2096,7 +2130,7 @@ theorem lcDiffCovDeriv_e_mdiff
     lcDiffQuad_ev_triv
       (I := I) g h basisE (x := x) d a b eIdx
   have hTwo :
-      MDifferentiableAt I 𝓘(Real, Real)
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           2 * Coordinates.lcDiffCovDerivCompInFrame
             (I := I) g h frame hframe1 y d a b eIdx) x := by
@@ -2106,12 +2140,12 @@ theorem lcDiffCovDeriv_e_mdiff
       (fun y : M =>
         Coordinates.lcDiffCovDerivCompInFrame
           (I := I) g h frame hframe1 y d a b eIdx) =
-        ((1 / 2 : Real) • fun y : M =>
+        ((1 / 2 : Real) â€¢ fun y : M =>
           2 * Coordinates.lcDiffCovDerivCompInFrame
             (I := I) g h frame hframe1 y d a b eIdx) := by
     funext y
     simp [Pi.smul_apply, smul_eq_mul]
-  change MDifferentiableAt I 𝓘(Real, Real)
+  change MDifferentiableAt I ð“˜(Real, Real)
     (fun y : M =>
       Coordinates.lcDiffCovDerivCompInFrame
         (I := I) g h frame hframe1 y d a b eIdx) x
@@ -2121,31 +2155,31 @@ theorem lcDiffCovDeriv_e_mdiff
 /-- Trivialization-frame component of a realized second derivative of
 `Gamma_g - Gamma_h`, after the coordinate-layer cubic reassembly. -/
 theorem connDiffTwo_trivFrame_cubic
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {g h : SmoothRiemannianMetric I M}
     {D2 : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 4}
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 4}
     (hD2 : ConnDiffDerivRealizes (I := I) g h 2 D2)
-    (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
+    (X : ContMDiffSection I E (âˆž : WithTop â„•âˆž)
       (TangentSpace I : M -> Type _))
     (basisE : Module.Basis Idx Real E) {x : M}
     (m d a b eIdx : Idx)
     (hX :
       X x =
         (trivializationAt E (TangentSpace I : M -> Type _) x).localFrame basisE m x) :
-    let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+    let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
     let frame : Idx -> (y : M) -> TangentSpace I y :=
-      fun i y => e₀.localFrame basisE i y
-    let u : Set M := e₀.baseSet
+      fun i y => eâ‚€.localFrame basisE i y
+    let u : Set M := eâ‚€.baseSet
     let hframe : IsLocalFrameOn I E 1 frame u :=
-      e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE
-    let hx : x ∈ u := mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
+      eâ‚€.isLocalFrameOn_localFrame_baseSet I 1 basisE
+    let hx : x âˆˆ u := mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
     let gInv : M -> Idx -> Idx -> Real :=
-      fun y i j => LeviCivita.localInvMetricCoeff (I := I) e₀ basisE g i j y
+      fun y i j => LeviCivita.localInvMetricCoeff (I := I) eâ‚€ basisE g i j y
     2 * Tensor0SBundle.componentRS (I := I) (hframe.toBasisAt hx) (D2 x)
         (Coordinates.upperIdx1 eIdx) (Coordinates.slots4 m d a b) =
       Coordinates.lcDiffQuadCubicRHS
@@ -2153,23 +2187,23 @@ theorem connDiffTwo_trivFrame_cubic
         (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
         frame hframe x m d a b eIdx := by
   classical
-  let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+  let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
   let frame : Idx -> (y : M) -> TangentSpace I y :=
-    fun i y => e₀.localFrame basisE i y
-  let u : Set M := e₀.baseSet
+    fun i y => eâ‚€.localFrame basisE i y
+  let u : Set M := eâ‚€.baseSet
   let hframe : IsLocalFrameOn I E 1 frame u :=
-    e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE
-  have hx : x ∈ u :=
+    eâ‚€.isLocalFrameOn_localFrame_baseSet I 1 basisE
+  have hx : x âˆˆ u :=
     mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
   let gInv : M -> Idx -> Idx -> Real :=
-    fun y i j => LeviCivita.localInvMetricCoeff (I := I) e₀ basisE g i j y
+    fun y i j => LeviCivita.localInvMetricCoeff (I := I) eâ‚€ basisE g i j y
   have hcomp :=
     connDiffTwo_trivFrame
       (I := I) hD2 X basisE (x := x) m d a b eIdx hX
   have hquad_ev :
       (fun y : M =>
         2 * Coordinates.lcDiffCovDerivCompInFrame
-          (I := I) g h frame hframe y d a b eIdx) =ᶠ[nhds x]
+          (I := I) g h frame hframe y d a b eIdx) =á¶ [nhds x]
       fun y : M =>
         Coordinates.lcDiffQuadRHS
           (I := I) g gInv
@@ -2177,7 +2211,7 @@ theorem connDiffTwo_trivFrame_cubic
           frame hframe y d a b eIdx := by
     simpa [frame, u, hframe, gInv] using
       lcDiffQuad_ev_triv (I := I) g h basisE (x := x) d a b eIdx
-  have hquad_at : ∀ i j k l : Idx,
+  have hquad_at : âˆ€ i j k l : Idx,
       2 * Coordinates.lcDiffCovDerivCompInFrame (I := I) g h frame hframe x i j k l =
         Coordinates.lcDiffQuadRHS
           (I := I) g gInv
@@ -2188,31 +2222,31 @@ theorem connDiffTwo_trivFrame_cubic
       lcDiffQuad_ev_triv (I := I) g h basisE (x := x) i j k l
     simpa [frame, u, hframe, gInv] using hev.self_of_nhds
   have hD1_mdiff :
-      MDifferentiableAt I 𝓘(Real, Real)
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           Coordinates.lcDiffCovDerivCompInFrame
             (I := I) g h frame hframe y d a b eIdx) x := by
     simpa [frame, u, hframe] using
       lcDiffCovDeriv_e_mdiff
         (I := I) g h basisE (x := x) d a b eIdx
-  have hginv_mdiff : ∀ i j : Idx,
-      MDifferentiableAt I 𝓘(Real, Real) (fun y : M => gInv y i j) x := by
+  have hginv_mdiff : âˆ€ i j : Idx,
+      MDifferentiableAt I ð“˜(Real, Real) (fun y : M => gInv y i j) x := by
     intro i j
     exact
       (LeviCivita.localInvMetricCoeff_contMDiffAt
-        (I := I) e₀ basisE g (by simpa [u] using hx) i j).mdifferentiableAt
+        (I := I) eâ‚€ basisE g (by simpa [u] using hx) i j).mdifferentiableAt
         (by simp)
-  have hmetric_mdiff : ∀ i j : Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
+  have hmetric_mdiff : âˆ€ i j : Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           Coordinates.metricCompForMetricInFrame
             (I := I) g frame y i j) x := by
     intro i j
     simpa [frame] using
       LeviCivita.localFrame_metricComp_mdiff
-        (I := I) e₀ basisE g (by simpa [u] using hx) i j
-  have hA_mdiff : ∀ i j k : Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
+        (I := I) eâ‚€ basisE g (by simpa [u] using hx) i j
+  have hA_mdiff : âˆ€ i j k : Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           Coordinates.metricCovDerivForMetricCompInFrame
             (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
@@ -2220,9 +2254,9 @@ theorem connDiffTwo_trivFrame_cubic
     intro i j k
     simpa [frame, u, hframe] using
       metricCov_e_mdiff
-        (I := I) e₀ g h basisE (by simpa [u] using hx) i j k
-  have hA2_mdiff : ∀ i j k l : Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
+        (I := I) eâ‚€ g h basisE (by simpa [u] using hx) i j k
+  have hA2_mdiff : âˆ€ i j k l : Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           Coordinates.metricCovDeriv2ForMetricCompInFrame
             (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
@@ -2230,42 +2264,42 @@ theorem connDiffTwo_trivFrame_cubic
     intro i j k l
     simpa [frame, u, hframe] using
       metricCov2_e_mdiff
-        (I := I) e₀ g h basisE (by simpa [u] using hx) i j k l
+        (I := I) eâ‚€ g h basisE (by simpa [u] using hx) i j k l
   have hinvX : forall i j : Idx,
-      (∑ k : Idx, gInv x i k *
+      (âˆ‘ k : Idx, gInv x i k *
           Coordinates.metricCompForMetricInFrame (I := I) g frame x k j) =
-          (if i = j then 1 else 0) ∧
-        (∑ k : Idx,
+          (if i = j then 1 else 0) âˆ§
+        (âˆ‘ k : Idx,
           Coordinates.metricCompForMetricInFrame (I := I) g frame x i k *
             gInv x k j) =
           (if i = j then 1 else 0) := by
     intro i j
     constructor
-    · simpa [gInv, frame, u] using
+    Â· simpa [gInv, frame, u] using
         LeviCivita.localInvMetricCoeff_metricComp_left_inv
-          (I := I) e₀ basisE g (by simpa [u] using hx) i j
-    · simpa [gInv, frame, u] using
+          (I := I) eâ‚€ basisE g (by simpa [u] using hx) i j
+    Â· simpa [gInv, frame, u] using
         LeviCivita.localInvMetricCoeff_metricComp_right_inv
-          (I := I) e₀ basisE g (by simpa [u] using hx) i j
+          (I := I) eâ‚€ basisE g (by simpa [u] using hx) i j
   have hinvLeftN : forall i j : Idx,
-      (fun y : M => ∑ k : Idx,
+      (fun y : M => âˆ‘ k : Idx,
           gInv y i k *
-            Coordinates.metricCompForMetricInFrame (I := I) g frame y k j) =ᶠ[nhds x]
+            Coordinates.metricCompForMetricInFrame (I := I) g frame y k j) =á¶ [nhds x]
         fun _ : M => if i = j then 1 else 0 := by
     intro i j
     simpa [gInv, frame, u] using
       LeviCivita.localInvMetricCoeff_metricComp_left_inv_eventually
-        (I := I) e₀ basisE g (by simpa [u] using hx) i j
-  have hExtInv : ∀ i j : Idx,
+        (I := I) eâ‚€ basisE g (by simpa [u] using hx) i j
+  have hExtInv : âˆ€ i j : Idx,
       extDerivFun (I := I) (fun y : M => gInv y i j) x (frame m x) =
         Coordinates.lcDiffInvQuad
           (I := I) g gInv (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
           frame hframe x m i j -
-          (∑ p : Idx,
+          (âˆ‘ p : Idx,
             Coordinates.christoffelSymbolInFrame
               (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
               frame hframe x m p i * gInv x p j) -
-          (∑ p : Idx,
+          (âˆ‘ p : Idx,
             Coordinates.christoffelSymbolInFrame
               (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
               frame hframe x m p j * gInv x i p) := by
@@ -2298,8 +2332,8 @@ theorem gInv_eq_identity_at
     {g : SmoothRiemannianMetric I M}
     (gInv : M -> Idx -> Idx -> Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
-    {x : M} (hx : x ∈ u)
+    (hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u)
+    {x : M} (hx : x âˆˆ u)
     (hinv :
       Coordinates.InverseMetricComponentsForMetricInFrameOn
         (I := I) g gInv frame)
@@ -2314,9 +2348,9 @@ theorem gInv_eq_identity_at
         (I := I) g x (hframe.toBasisAt hx) (fun i j : Idx => gInv x i j) := by
     intro i j
     constructor
-    · simpa [Coordinates.metricCompForMetricInFrame,
+    Â· simpa [Coordinates.metricCompForMetricInFrame,
         IsLocalFrameOn.toBasisAt_coe] using (hinv x i j).1
-    · simpa [Coordinates.metricCompForMetricInFrame,
+    Â· simpa [Coordinates.metricCompForMetricInFrame,
         IsLocalFrameOn.toBasisAt_coe] using (hinv x i j).2
   have hEq :=
     Tensor0SBundle.MetricInverseInBasis.eq_of
@@ -2329,13 +2363,13 @@ theorem gInv_eq_identity_at_local
     {g : SmoothRiemannianMetric I M}
     (gInv : M -> Idx -> Idx -> Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
-    {x : M} (hx : x ∈ u)
+    (hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u)
+    {x : M} (hx : x âˆˆ u)
     (hinvX : forall i j : Idx,
-      (∑ k : Idx, gInv x i k *
+      (âˆ‘ k : Idx, gInv x i k *
           Coordinates.metricCompForMetricInFrame (I := I) g frame x k j) =
-          (if i = j then 1 else 0) ∧
-        (∑ k : Idx,
+          (if i = j then 1 else 0) âˆ§
+        (âˆ‘ k : Idx,
           Coordinates.metricCompForMetricInFrame (I := I) g frame x i k *
             gInv x k j) =
           (if i = j then 1 else 0))
@@ -2350,9 +2384,9 @@ theorem gInv_eq_identity_at_local
         (I := I) g x (hframe.toBasisAt hx) (fun i j : Idx => gInv x i j) := by
     intro i j
     constructor
-    · simpa [Coordinates.metricCompForMetricInFrame,
+    Â· simpa [Coordinates.metricCompForMetricInFrame,
         IsLocalFrameOn.toBasisAt_coe] using (hinvX i j).1
-    · simpa [Coordinates.metricCompForMetricInFrame,
+    Â· simpa [Coordinates.metricCompForMetricInFrame,
         IsLocalFrameOn.toBasisAt_coe] using (hinvX i j).2
   have hEq :=
     Tensor0SBundle.MetricInverseInBasis.eq_of
@@ -2439,16 +2473,16 @@ theorem lcDiffQuad_abs_le
           = |U e r| * |U c q| * |A1 d r q| := by rw [abs_mul, abs_mul]
       _ <= N1 := h123
   have hinner (c : Idx) :
-      |∑ r : Idx, ∑ q : Idx, U e r * U c q * A1 d r q| <=
+      |âˆ‘ r : Idx, âˆ‘ q : Idx, U e r * U c q * A1 d r q| <=
         (Fintype.card Idx : Real) * ((Fintype.card Idx : Real) * N1) := by
     calc
-      |∑ r : Idx, ∑ q : Idx, U e r * U c q * A1 d r q|
-          <= ∑ r : Idx, |∑ q : Idx, U e r * U c q * A1 d r q| :=
+      |âˆ‘ r : Idx, âˆ‘ q : Idx, U e r * U c q * A1 d r q|
+          <= âˆ‘ r : Idx, |âˆ‘ q : Idx, U e r * U c q * A1 d r q| :=
             Finset.abs_sum_le_sum_abs _ _
-      _ <= ∑ r : Idx, ∑ q : Idx, |U e r * U c q * A1 d r q| := by
+      _ <= âˆ‘ r : Idx, âˆ‘ q : Idx, |U e r * U c q * A1 d r q| := by
             exact Finset.sum_le_sum fun r _ =>
               Finset.abs_sum_le_sum_abs _ _
-      _ <= ∑ _r : Idx, ∑ _q : Idx, N1 := by
+      _ <= âˆ‘ _r : Idx, âˆ‘ _q : Idx, N1 := by
             refine Finset.sum_le_sum ?_
             intro r _
             refine Finset.sum_le_sum ?_
@@ -2457,13 +2491,13 @@ theorem lcDiffQuad_abs_le
       _ = (Fintype.card Idx : Real) * ((Fintype.card Idx : Real) * N1) := by
             simp
   have hfirst_term (c : Idx) :
-      |(-(∑ r : Idx, ∑ q : Idx, U e r * U c q * A1 d r q)) * S a b c| <=
+      |(-(âˆ‘ r : Idx, âˆ‘ q : Idx, U e r * U c q * A1 d r q)) * S a b c| <=
         ((Fintype.card Idx : Real) *
             ((Fintype.card Idx : Real) * N1)) * (3 * N1) := by
     calc
-      |(-(∑ r : Idx, ∑ q : Idx, U e r * U c q * A1 d r q)) * S a b c|
+      |(-(âˆ‘ r : Idx, âˆ‘ q : Idx, U e r * U c q * A1 d r q)) * S a b c|
           =
-        |∑ r : Idx, ∑ q : Idx, U e r * U c q * A1 d r q| * |S a b c| := by
+        |âˆ‘ r : Idx, âˆ‘ q : Idx, U e r * U c q * A1 d r q| * |S a b c| := by
           rw [abs_mul, abs_neg]
       _ <=
         ((Fintype.card Idx : Real) *
@@ -2471,19 +2505,19 @@ theorem lcDiffQuad_abs_le
           exact mul_le_mul (hinner c) (hS_bound a b c)
             (abs_nonneg _) hinner_nonneg
   have hfirst :
-      |∑ c : Idx,
-          (-(∑ r : Idx, ∑ q : Idx, U e r * U c q * A1 d r q)) * S a b c| <=
+      |âˆ‘ c : Idx,
+          (-(âˆ‘ r : Idx, âˆ‘ q : Idx, U e r * U c q * A1 d r q)) * S a b c| <=
         (Fintype.card Idx : Real) *
           (((Fintype.card Idx : Real) *
               ((Fintype.card Idx : Real) * N1)) * (3 * N1)) := by
     calc
-      |∑ c : Idx,
-          (-(∑ r : Idx, ∑ q : Idx, U e r * U c q * A1 d r q)) * S a b c|
+      |âˆ‘ c : Idx,
+          (-(âˆ‘ r : Idx, âˆ‘ q : Idx, U e r * U c q * A1 d r q)) * S a b c|
           <=
-        ∑ c : Idx,
-          |(-(∑ r : Idx, ∑ q : Idx, U e r * U c q * A1 d r q)) * S a b c| :=
+        âˆ‘ c : Idx,
+          |(-(âˆ‘ r : Idx, âˆ‘ q : Idx, U e r * U c q * A1 d r q)) * S a b c| :=
             Finset.abs_sum_le_sum_abs _ _
-      _ <= ∑ _c : Idx,
+      _ <= âˆ‘ _c : Idx,
         ((Fintype.card Idx : Real) *
             ((Fintype.card Idx : Real) * N1)) * (3 * N1) := by
             exact Finset.sum_le_sum fun c _ => hfirst_term c
@@ -2523,25 +2557,25 @@ theorem lcDiffQuad_abs_le
             nlinarith [hU e c, hA2_combo c, hU_nonneg, hcombo_abs_nonneg]
       _ = 3 * N2 := by ring
   have hsecond :
-      |∑ c : Idx,
+      |âˆ‘ c : Idx,
           U e c * (A2 d a b c + A2 d b a c - A2 d c a b)| <=
         (Fintype.card Idx : Real) * (3 * N2) := by
     calc
-      |∑ c : Idx,
+      |âˆ‘ c : Idx,
           U e c * (A2 d a b c + A2 d b a c - A2 d c a b)|
           <=
-        ∑ c : Idx,
+        âˆ‘ c : Idx,
           |U e c * (A2 d a b c + A2 d b a c - A2 d c a b)| :=
             Finset.abs_sum_le_sum_abs _ _
-      _ <= ∑ _c : Idx, 3 * N2 := by
+      _ <= âˆ‘ _c : Idx, 3 * N2 := by
             exact Finset.sum_le_sum fun c _ => hsecond_term c
       _ = (Fintype.card Idx : Real) * (3 * N2) := by simp
   have hquad :
       Coordinates.lcDiffQuadRHS
         (I := I) g gInv cov frame hframe x d a b e =
-        (∑ c : Idx,
-          (-(∑ r : Idx, ∑ q : Idx, U e r * U c q * A1 d r q)) * S a b c) +
-        (∑ c : Idx,
+        (âˆ‘ c : Idx,
+          (-(âˆ‘ r : Idx, âˆ‘ q : Idx, U e r * U c q * A1 d r q)) * S a b c) +
+        (âˆ‘ c : Idx,
           U e c * (A2 d a b c + A2 d b a c - A2 d c a b)) := by
     simp [Coordinates.lcDiffQuadRHS, U, A1, A2, S]
   rw [hquad]
@@ -2675,21 +2709,21 @@ theorem lcDiffCubic_abs_le
       _ <= N1 := by nlinarith [h12, hA1 dd rr qq, hN1, hA_nonneg]
   have hIQ (dd ee cc : Idx) : |IQ dd ee cc| <= Q := by
     have hsum :
-        |∑ r : Idx, ∑ q : Idx, U ee r * U cc q * A1 dd r q| <= Q := by
+        |âˆ‘ r : Idx, âˆ‘ q : Idx, U ee r * U cc q * A1 dd r q| <= Q := by
       calc
-        |∑ r : Idx, ∑ q : Idx, U ee r * U cc q * A1 dd r q|
-            <= ∑ r : Idx, |∑ q : Idx, U ee r * U cc q * A1 dd r q| :=
+        |âˆ‘ r : Idx, âˆ‘ q : Idx, U ee r * U cc q * A1 dd r q|
+            <= âˆ‘ r : Idx, |âˆ‘ q : Idx, U ee r * U cc q * A1 dd r q| :=
               Finset.abs_sum_le_sum_abs _ _
-        _ <= ∑ r : Idx, ∑ q : Idx, |U ee r * U cc q * A1 dd r q| := by
+        _ <= âˆ‘ r : Idx, âˆ‘ q : Idx, |U ee r * U cc q * A1 dd r q| := by
               exact Finset.sum_le_sum fun r _ => Finset.abs_sum_le_sum_abs _ _
-        _ <= ∑ _r : Idx, ∑ _q : Idx, N1 := by
+        _ <= âˆ‘ _r : Idx, âˆ‘ _q : Idx, N1 := by
               refine Finset.sum_le_sum ?_
               intro r _
               refine Finset.sum_le_sum ?_
               intro q _
               exact hprodA1 dd ee cc r q
         _ = Q := by simp [Q, n]
-    have hIQ_eq : IQ dd ee cc = -(∑ r : Idx, ∑ q : Idx, U ee r * U cc q * A1 dd r q) := by
+    have hIQ_eq : IQ dd ee cc = -(âˆ‘ r : Idx, âˆ‘ q : Idx, U ee r * U cc q * A1 dd r q) := by
       simp [IQ, U, A1, Coordinates.lcDiffInvQuad]
     rw [hIQ_eq, abs_neg]
     exact hsum
@@ -2749,26 +2783,26 @@ theorem lcDiffCubic_abs_le
       linarith [htri, htri2, hprodA2 ee cc r q, hprodIQ ee cc r q,
         hprodIQ' ee cc r q]
     have hsum :
-        |∑ r : Idx, ∑ q : Idx,
+        |âˆ‘ r : Idx, âˆ‘ q : Idx,
           (U ee r * U cc q * A2 m d r q +
             U ee r * IQ m cc q * A1 d r q +
             IQ m ee r * U cc q * A1 d r q)| <= R := by
       calc
-        |∑ r : Idx, ∑ q : Idx,
+        |âˆ‘ r : Idx, âˆ‘ q : Idx,
           (U ee r * U cc q * A2 m d r q +
             U ee r * IQ m cc q * A1 d r q +
             IQ m ee r * U cc q * A1 d r q)|
-            <= ∑ r : Idx, |∑ q : Idx,
+            <= âˆ‘ r : Idx, |âˆ‘ q : Idx,
               (U ee r * U cc q * A2 m d r q +
                 U ee r * IQ m cc q * A1 d r q +
                 IQ m ee r * U cc q * A1 d r q)| :=
               Finset.abs_sum_le_sum_abs _ _
-        _ <= ∑ r : Idx, ∑ q : Idx,
+        _ <= âˆ‘ r : Idx, âˆ‘ q : Idx,
               |U ee r * U cc q * A2 m d r q +
                 U ee r * IQ m cc q * A1 d r q +
                 IQ m ee r * U cc q * A1 d r q| := by
               exact Finset.sum_le_sum fun r _ => Finset.abs_sum_le_sum_abs _ _
-        _ <= ∑ _r : Idx, ∑ _q : Idx, (N2 + Q * N1 + Q * N1) := by
+        _ <= âˆ‘ _r : Idx, âˆ‘ _q : Idx, (N2 + Q * N1 + Q * N1) := by
               refine Finset.sum_le_sum ?_
               intro r _
               refine Finset.sum_le_sum ?_
@@ -2779,7 +2813,7 @@ theorem lcDiffCubic_abs_le
               ring_nf
     have hIQC_eq :
         IQC m d ee cc =
-          -(∑ r : Idx, ∑ q : Idx,
+          -(âˆ‘ r : Idx, âˆ‘ q : Idx,
             (U ee r * U cc q * A2 m d r q +
               U ee r * IQ m cc q * A1 d r q +
               IQ m ee r * U cc q * A1 d r q)) := by
@@ -2801,13 +2835,13 @@ theorem lcDiffCubic_abs_le
           mul_le_mul (hIQC e c) (hS1 a b c) (abs_nonneg _) hR_nonneg
     exact (abs_add_le _ _).trans (add_le_add hA hB)
   have hfirst :
-      |∑ c : Idx, (IQ d e c * S2 m a b c + IQC m d e c * S1 a b c)| <=
+      |âˆ‘ c : Idx, (IQ d e c * S2 m a b c + IQC m d e c * S1 a b c)| <=
         n * (Q * (3 * N2) + R * (3 * N1)) := by
     calc
-      |∑ c : Idx, (IQ d e c * S2 m a b c + IQC m d e c * S1 a b c)|
-          <= ∑ c : Idx, |IQ d e c * S2 m a b c + IQC m d e c * S1 a b c| :=
+      |âˆ‘ c : Idx, (IQ d e c * S2 m a b c + IQC m d e c * S1 a b c)|
+          <= âˆ‘ c : Idx, |IQ d e c * S2 m a b c + IQC m d e c * S1 a b c| :=
             Finset.abs_sum_le_sum_abs _ _
-      _ <= ∑ _c : Idx, (Q * (3 * N2) + R * (3 * N1)) := by
+      _ <= âˆ‘ _c : Idx, (Q * (3 * N2) + R * (3 * N1)) := by
             exact Finset.sum_le_sum fun c _ => hfirst_term c
       _ = n * (Q * (3 * N2) + R * (3 * N1)) := by
             simp [n]
@@ -2830,13 +2864,13 @@ theorem lcDiffCubic_abs_le
           mul_le_mul (hIQ m e c) (hS2 d a b c) (abs_nonneg _) hQ_nonneg
     exact (abs_add_le _ _).trans (add_le_add hA hB)
   have hlinear :
-      |∑ c : Idx, (U e c * S3 m d a b c + IQ m e c * S2 d a b c)| <=
+      |âˆ‘ c : Idx, (U e c * S3 m d a b c + IQ m e c * S2 d a b c)| <=
         n * (3 * N3 + Q * (3 * N2)) := by
     calc
-      |∑ c : Idx, (U e c * S3 m d a b c + IQ m e c * S2 d a b c)|
-          <= ∑ c : Idx, |U e c * S3 m d a b c + IQ m e c * S2 d a b c| :=
+      |âˆ‘ c : Idx, (U e c * S3 m d a b c + IQ m e c * S2 d a b c)|
+          <= âˆ‘ c : Idx, |U e c * S3 m d a b c + IQ m e c * S2 d a b c| :=
             Finset.abs_sum_le_sum_abs _ _
-      _ <= ∑ _c : Idx, (3 * N3 + Q * (3 * N2)) := by
+      _ <= âˆ‘ _c : Idx, (3 * N3 + Q * (3 * N2)) := by
             exact Finset.sum_le_sum fun c _ => hlinear_term c
       _ = n * (3 * N3 + Q * (3 * N2)) := by
             simp [n]
@@ -2844,8 +2878,8 @@ theorem lcDiffCubic_abs_le
   have hcubic :
       Coordinates.lcDiffQuadCubicRHS
         (I := I) g gInv cov frame hframe x m d a b e =
-        (∑ c : Idx, (IQ d e c * S2 m a b c + IQC m d e c * S1 a b c)) +
-        (∑ c : Idx, (U e c * S3 m d a b c + IQ m e c * S2 d a b c)) := by
+        (âˆ‘ c : Idx, (IQ d e c * S2 m a b c + IQC m d e c * S1 a b c)) +
+        (âˆ‘ c : Idx, (U e c * S3 m d a b c + IQ m e c * S2 d a b c)) := by
     simp [Coordinates.lcDiffQuadCubicRHS, Coordinates.lcDiffLinear2CubicRHS,
       IQ, IQC, U, S1, S2, S3]
   rw [hcubic]
@@ -2857,8 +2891,8 @@ theorem metricCov1_comp_le
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     (g h : SmoothRiemannianMetric I M)
     (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
-    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u)
+    (hu : IsOpen u) {x : M} (hx : x âˆˆ u)
     (hinvBasis :
       Tensor0SBundle.MetricInverseInBasis
         (I := I) g x (hframe.toBasisAt hx)
@@ -2884,8 +2918,8 @@ theorem metricCov2_comp_le
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     (g h : SmoothRiemannianMetric I M)
     (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
-    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u)
+    (hu : IsOpen u) {x : M} (hx : x âˆˆ u)
     (hinvBasis :
       Tensor0SBundle.MetricInverseInBasis
         (I := I) g x (hframe.toBasisAt hx)
@@ -2910,8 +2944,8 @@ theorem metricCov3_comp_le
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     (g h : SmoothRiemannianMetric I M)
     (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
-    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u)
+    (hu : IsOpen u) {x : M} (hx : x âˆˆ u)
     (hinvBasis :
       Tensor0SBundle.MetricInverseInBasis
         (I := I) g x (hframe.toBasisAt hx)
@@ -2938,13 +2972,13 @@ theorem lcDiffCubic_abs_le_norms_local
     (g h : SmoothRiemannianMetric I M)
     (gInv : M -> Idx -> Idx -> Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
-    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u)
+    (hu : IsOpen u) {x : M} (hx : x âˆˆ u)
     (hinvX : forall i j : Idx,
-      (∑ k : Idx, gInv x i k *
+      (âˆ‘ k : Idx, gInv x i k *
           Coordinates.metricCompForMetricInFrame (I := I) g frame x k j) =
-          (if i = j then 1 else 0) ∧
-        (∑ k : Idx,
+          (if i = j then 1 else 0) âˆ§
+        (âˆ‘ k : Idx,
           Coordinates.metricCompForMetricInFrame (I := I) g frame x i k *
             gInv x k j) =
           (if i = j then 1 else 0))
@@ -2969,8 +3003,8 @@ theorem lcDiffCubic_abs_le_norms_local
     intro i j
     rw [gInv_eq_identity_at_local (I := I) gInv frame hframe hx hinvX hinvBasis i j]
     by_cases hij : i = j
-    · simp [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric, hij]
-    · simp [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric, hij]
+    Â· simp [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric, hij]
+    Â· simp [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric, hij]
   exact
     lcDiffCubic_abs_le
       (I := I) g gInv (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
@@ -3000,8 +3034,8 @@ theorem lcDiffQuad_abs_le_norms
     (g h : SmoothRiemannianMetric I M)
     (gInv : M -> Idx -> Idx -> Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
-    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u)
+    (hu : IsOpen u) {x : M} (hx : x âˆˆ u)
     (hinv :
       Coordinates.InverseMetricComponentsForMetricInFrameOn
         (I := I) g gInv frame)
@@ -3025,8 +3059,8 @@ theorem lcDiffQuad_abs_le_norms
     intro i j
     rw [gInv_eq_identity_at (I := I) gInv frame hframe hx hinv hinvBasis i j]
     by_cases hij : i = j
-    · simp [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric, hij]
-    · simp [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric, hij]
+    Â· simp [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric, hij]
+    Â· simp [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric, hij]
   exact
     lcDiffQuad_abs_le
       (I := I) g gInv (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
@@ -3043,13 +3077,13 @@ theorem lcDiffQuad_abs_le_norms_local
     (g h : SmoothRiemannianMetric I M)
     (gInv : M -> Idx -> Idx -> Real)
     (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
-    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u)
+    (hu : IsOpen u) {x : M} (hx : x âˆˆ u)
     (hinvX : forall i j : Idx,
-      (∑ k : Idx, gInv x i k *
+      (âˆ‘ k : Idx, gInv x i k *
           Coordinates.metricCompForMetricInFrame (I := I) g frame x k j) =
-          (if i = j then 1 else 0) ∧
-        (∑ k : Idx,
+          (if i = j then 1 else 0) âˆ§
+        (âˆ‘ k : Idx,
           Coordinates.metricCompForMetricInFrame (I := I) g frame x i k *
             gInv x k j) =
           (if i = j then 1 else 0))
@@ -3073,8 +3107,8 @@ theorem lcDiffQuad_abs_le_norms_local
     intro i j
     rw [gInv_eq_identity_at_local (I := I) gInv frame hframe hx hinvX hinvBasis i j]
     by_cases hij : i = j
-    · simp [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric, hij]
-    · simp [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric, hij]
+    Â· simp [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric, hij]
+    Â· simp [Tensor0SBundle.identityInvMetric, Tensor0SBundle.diagonalInvMetric, hij]
   exact
     lcDiffQuad_abs_le
       (I := I) g gInv (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
@@ -3099,31 +3133,31 @@ with a `g`-orthonormal local frame and the local differentiability data needed
 by `lcDiffDeriv_eq_quad`, the realized tensor `D1` is controlled by
 `|nabla_h g|_g` and `|nabla_h^2 g|_g`. -/
 theorem connDiffOne_local_norm
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     {g h : SmoothRiemannianMetric I M}
     {D1 : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 3}
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 3}
     (hD1 : ConnDiffDerivRealizes (I := I) g h 1 D1)
-    (X : Idx -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+    (X : Idx -> ContMDiffSection I E (âˆž : WithTop â„•âˆž)
       (TangentSpace I : M -> Type _))
-    (Z : Idx -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+    (Z : Idx -> ContMDiffSection I E (âˆž : WithTop â„•âˆž)
       (TangentSpace I : M -> Type _))
-    (α : Idx -> Tensor0SBundle.Tensor0SField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1)
+    (Î± : Idx -> Tensor0SBundle.Tensor0SField
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1)
     (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
-    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u)
+    (hu : IsOpen u) {x : M} (hx : x âˆˆ u)
     (gInv : M -> Idx -> Idx -> Real)
-    (hX : ∀ d : Idx, X d x = frame d x)
-    (hZ : ∀ j : Idx,
-      (fun y : M => Z j y) =ᶠ[nhds x] fun y : M => frame j y)
-    (hpair : ∀ e j : Idx,
-      (fun y : M => α e y (fun _ : Fin 1 => Z j y)) =ᶠ[nhds x]
+    (hX : âˆ€ d : Idx, X d x = frame d x)
+    (hZ : âˆ€ j : Idx,
+      (fun y : M => Z j y) =á¶ [nhds x] fun y : M => frame j y)
+    (hpair : âˆ€ e j : Idx,
+      (fun y : M => Î± e y (fun _ : Fin 1 => Z j y)) =á¶ [nhds x]
         fun _ : M => if j = e then (1 : Real) else 0)
     (hinv :
       Coordinates.InverseMetricComponentsForMetricInFrameOn
@@ -3132,20 +3166,20 @@ theorem connDiffOne_local_norm
       Tensor0SBundle.MetricInverseInBasis
         (I := I) g x (hframe.toBasisAt hx)
         (Tensor0SBundle.identityInvMetric (Idx := Idx)))
-    (hD_mdiff : ∀ a b e : Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
+    (hD_mdiff : âˆ€ a b e : Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M => Coordinates.lcDiffCompInFrame
           (I := I) g h frame (localFrameOneOfInf (I := I) frame hframe)
           y a b e) x)
-    (hginv_mdiff : ∀ i j : Idx,
-      MDifferentiableAt I 𝓘(Real, Real) (fun y : M => gInv y i j) x)
-    (hmetric_mdiff : ∀ i j : Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
+    (hginv_mdiff : âˆ€ i j : Idx,
+      MDifferentiableAt I ð“˜(Real, Real) (fun y : M => gInv y i j) x)
+    (hmetric_mdiff : âˆ€ i j : Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           Coordinates.metricCompForMetricInFrame
             (I := I) g frame y i j) x)
-    (hA_mdiff : ∀ i j k : Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
+    (hA_mdiff : âˆ€ i j k : Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           Coordinates.metricCovDerivForMetricCompInFrame
             (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
@@ -3193,7 +3227,7 @@ theorem connDiffOne_local_norm
       (I := I) g x 1 3 (hframe.toBasisAt hx) hinvBasis (D1 x)
       hB_nonneg
       (fun upper lower => ?_)
-  · simpa [connDiffDerivNorm, B] using hnorm
+  Â· simpa [connDiffDerivNorm, B] using hnorm
   let e : Idx := upper 0
   let d : Idx := lower 0
   let a : Idx := lower 1
@@ -3220,7 +3254,7 @@ theorem connDiffOne_local_norm
       |(2 : Real) * comp| <= B := by
     have hquad_eq :=
       connDiffOne_frameInf_quad
-        (I := I) hD1 (X d) Z (α e) frame hframe hu hx gInv d a b e
+        (I := I) hD1 (X d) Z (Î± e) frame hframe hu hx gInv d a b e
         (hX d) hZ (hpair e) hinv (hD_mdiff a b e)
         hginv_mdiff hmetric_mdiff hA_mdiff
     have hRHS :=
@@ -3239,63 +3273,63 @@ theorem connDiffOne_local_norm
 
 /-- Local-inverse version of `connDiffOne_local_norm`. -/
 theorem connDiffOne_local_norm_local
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {u : Set M}
     {g h : SmoothRiemannianMetric I M}
     {D1 : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 3}
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 3}
     (hD1 : ConnDiffDerivRealizes (I := I) g h 1 D1)
-    (X : Idx -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+    (X : Idx -> ContMDiffSection I E (âˆž : WithTop â„•âˆž)
       (TangentSpace I : M -> Type _))
-    (Z : Idx -> ContMDiffSection I E (∞ : WithTop ℕ∞)
+    (Z : Idx -> ContMDiffSection I E (âˆž : WithTop â„•âˆž)
       (TangentSpace I : M -> Type _))
-    (α : Idx -> Tensor0SBundle.Tensor0SField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1)
+    (Î± : Idx -> Tensor0SBundle.Tensor0SField
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1)
     (frame : Idx -> (x : M) -> TangentSpace I x)
-    (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u)
-    (hu : IsOpen u) {x : M} (hx : x ∈ u)
+    (hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u)
+    (hu : IsOpen u) {x : M} (hx : x âˆˆ u)
     (gInv : M -> Idx -> Idx -> Real)
-    (hX : ∀ d : Idx, X d x = frame d x)
-    (hZ : ∀ j : Idx,
-      (fun y : M => Z j y) =ᶠ[nhds x] fun y : M => frame j y)
-    (hpair : ∀ e j : Idx,
-      (fun y : M => α e y (fun _ : Fin 1 => Z j y)) =ᶠ[nhds x]
+    (hX : âˆ€ d : Idx, X d x = frame d x)
+    (hZ : âˆ€ j : Idx,
+      (fun y : M => Z j y) =á¶ [nhds x] fun y : M => frame j y)
+    (hpair : âˆ€ e j : Idx,
+      (fun y : M => Î± e y (fun _ : Fin 1 => Z j y)) =á¶ [nhds x]
         fun _ : M => if j = e then (1 : Real) else 0)
     (hinvX : forall i j : Idx,
-      (∑ k : Idx, gInv x i k *
+      (âˆ‘ k : Idx, gInv x i k *
           Coordinates.metricCompForMetricInFrame (I := I) g frame x k j) =
-          (if i = j then 1 else 0) ∧
-        (∑ k : Idx,
+          (if i = j then 1 else 0) âˆ§
+        (âˆ‘ k : Idx,
           Coordinates.metricCompForMetricInFrame (I := I) g frame x i k *
             gInv x k j) =
           (if i = j then 1 else 0))
     (hinvLeftN : forall i j : Idx,
-      (fun y : M => ∑ k : Idx,
+      (fun y : M => âˆ‘ k : Idx,
           gInv y i k *
-            Coordinates.metricCompForMetricInFrame (I := I) g frame y k j) =ᶠ[nhds x]
+            Coordinates.metricCompForMetricInFrame (I := I) g frame y k j) =á¶ [nhds x]
         fun _ : M => if i = j then 1 else 0)
     (hinvBasis :
       Tensor0SBundle.MetricInverseInBasis
         (I := I) g x (hframe.toBasisAt hx)
         (Tensor0SBundle.identityInvMetric (Idx := Idx)))
-    (hD_mdiff : ∀ a b e : Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
+    (hD_mdiff : âˆ€ a b e : Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M => Coordinates.lcDiffCompInFrame
           (I := I) g h frame (localFrameOneOfInf (I := I) frame hframe)
           y a b e) x)
-    (hginv_mdiff : ∀ i j : Idx,
-      MDifferentiableAt I 𝓘(Real, Real) (fun y : M => gInv y i j) x)
-    (hmetric_mdiff : ∀ i j : Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
+    (hginv_mdiff : âˆ€ i j : Idx,
+      MDifferentiableAt I ð“˜(Real, Real) (fun y : M => gInv y i j) x)
+    (hmetric_mdiff : âˆ€ i j : Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           Coordinates.metricCompForMetricInFrame
             (I := I) g frame y i j) x)
-    (hA_mdiff : ∀ i j k : Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
+    (hA_mdiff : âˆ€ i j k : Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           Coordinates.metricCovDerivForMetricCompInFrame
             (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
@@ -3343,7 +3377,7 @@ theorem connDiffOne_local_norm_local
       (I := I) g x 1 3 (hframe.toBasisAt hx) hinvBasis (D1 x)
       hB_nonneg
       (fun upper lower => ?_)
-  · simpa [connDiffDerivNorm, B] using hnorm
+  Â· simpa [connDiffDerivNorm, B] using hnorm
   let e : Idx := upper 0
   let d : Idx := lower 0
   let a : Idx := lower 1
@@ -3370,7 +3404,7 @@ theorem connDiffOne_local_norm_local
       |(2 : Real) * comp| <= B := by
     have hquad_eq :=
       connDiffOne_frameInf_quad_local
-        (I := I) hD1 (X d) Z (α e) frame hframe hu hx gInv d a b e
+        (I := I) hD1 (X d) Z (Î± e) frame hframe hu hx gInv d a b e
         (hX d) hZ (hpair e) hinvX hinvLeftN (hD_mdiff a b e)
         hginv_mdiff hmetric_mdiff hA_mdiff
     have hRHS :=
@@ -3397,14 +3431,14 @@ actual local metric inputs: inverse components, center orthonormality, and the
 scalar differentiability witnesses needed to differentiate the Christoffel
 formula. -/
 theorem connDiffOne_trivNorm
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {g h : SmoothRiemannianMetric I M}
     {D1 : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 3}
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 3}
     (hD1 : ConnDiffDerivRealizes (I := I) g h 1 D1)
     (basisE : Module.Basis Idx Real E) {x : M}
     (gInv : M -> Idx -> Idx -> Real)
@@ -3415,49 +3449,49 @@ theorem connDiffOne_trivNorm
           (trivializationAt E (TangentSpace I : M -> Type _) x).localFrame
             basisE i y))
     (hinvBasis :
-      let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+      let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
       let frame : Idx -> (y : M) -> TangentSpace I y :=
-        fun i y => e₀.localFrame basisE i y
-      let u : Set M := e₀.baseSet
-      let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-        e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) basisE
-      let hx : x ∈ u :=
+        fun i y => eâ‚€.localFrame basisE i y
+      let u : Set M := eâ‚€.baseSet
+      let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+        eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) basisE
+      let hx : x âˆˆ u :=
         mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
       Tensor0SBundle.MetricInverseInBasis
         (I := I) g x (hframe.toBasisAt hx)
         (Tensor0SBundle.identityInvMetric (Idx := Idx)))
     (hD_mdiff :
-      let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+      let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
       let frame : Idx -> (y : M) -> TangentSpace I y :=
-        fun i y => e₀.localFrame basisE i y
-      let u : Set M := e₀.baseSet
-      let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-        e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) basisE
-      ∀ a b e : Idx,
-        MDifferentiableAt I 𝓘(Real, Real)
+        fun i y => eâ‚€.localFrame basisE i y
+      let u : Set M := eâ‚€.baseSet
+      let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+        eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) basisE
+      âˆ€ a b e : Idx,
+        MDifferentiableAt I ð“˜(Real, Real)
           (fun y : M => Coordinates.lcDiffCompInFrame
             (I := I) g h frame (localFrameOneOfInf (I := I) frame hframe)
             y a b e) x)
-    (hginv_mdiff : ∀ i j : Idx,
-      MDifferentiableAt I 𝓘(Real, Real) (fun y : M => gInv y i j) x)
+    (hginv_mdiff : âˆ€ i j : Idx,
+      MDifferentiableAt I ð“˜(Real, Real) (fun y : M => gInv y i j) x)
     (hmetric_mdiff :
-      let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+      let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
       let frame : Idx -> (y : M) -> TangentSpace I y :=
-        fun i y => e₀.localFrame basisE i y
-      ∀ i j : Idx,
-        MDifferentiableAt I 𝓘(Real, Real)
+        fun i y => eâ‚€.localFrame basisE i y
+      âˆ€ i j : Idx,
+        MDifferentiableAt I ð“˜(Real, Real)
           (fun y : M =>
             Coordinates.metricCompForMetricInFrame
               (I := I) g frame y i j) x)
     (hA_mdiff :
-      let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+      let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
       let frame : Idx -> (y : M) -> TangentSpace I y :=
-        fun i y => e₀.localFrame basisE i y
-      let u : Set M := e₀.baseSet
-      let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-        e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) basisE
-      ∀ i j k : Idx,
-        MDifferentiableAt I 𝓘(Real, Real)
+        fun i y => eâ‚€.localFrame basisE i y
+      let u : Set M := eâ‚€.baseSet
+      let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+        eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) basisE
+      âˆ€ i j k : Idx,
+        MDifferentiableAt I ð“˜(Real, Real)
           (fun y : M =>
             Coordinates.metricCovDerivForMetricCompInFrame
               (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
@@ -3475,113 +3509,113 @@ theorem connDiffOne_trivNorm
         ((Fintype.card (Fin 1 -> Idx) : Real) *
           ((Fintype.card (Fin 3 -> Idx) : Real) * B ^ 2)) := by
   classical
-  let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+  let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
   let frame : Idx -> (y : M) -> TangentSpace I y :=
-    fun i y => e₀.localFrame basisE i y
-  let u : Set M := e₀.baseSet
-  let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-    e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) basisE
-  have hu : IsOpen u := e₀.open_baseSet
-  have hx : x ∈ u :=
+    fun i y => eâ‚€.localFrame basisE i y
+  let u : Set M := eâ‚€.baseSet
+  let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+    eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) basisE
+  have hu : IsOpen u := eâ‚€.open_baseSet
+  have hx : x âˆˆ u :=
     mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
-  obtain ⟨Z, θ, hZ, _hθ, hpair⟩ :=
+  obtain âŸ¨Z, Î¸, hZ, _hÎ¸, hpairâŸ© :=
     Coordinates.existsTrivFrameCoframePair (J := I) (N := M) x basisE
-  have hX : ∀ d : Idx, Z d x = frame d x := by
+  have hX : âˆ€ d : Idx, Z d x = frame d x := by
     intro d
     exact (hZ d).self_of_nhds
   exact
     connDiffOne_local_norm
-      (I := I) hD1 Z Z θ frame hframe hu hx gInv hX hZ hpair
+      (I := I) hD1 Z Z Î¸ frame hframe hu hx gInv hX hZ hpair
       (by
-        simpa [frame, e₀] using hinv)
+        simpa [frame, eâ‚€] using hinv)
       (by
-        simpa [frame, u, hframe, hx, e₀] using hinvBasis)
+        simpa [frame, u, hframe, hx, eâ‚€] using hinvBasis)
       (by
-        simpa [frame, u, hframe, e₀] using hD_mdiff)
+        simpa [frame, u, hframe, eâ‚€] using hD_mdiff)
       hginv_mdiff
       (by
-        simpa [frame, e₀] using hmetric_mdiff)
+        simpa [frame, eâ‚€] using hmetric_mdiff)
       (by
-        simpa [frame, u, hframe, e₀] using hA_mdiff)
+        simpa [frame, u, hframe, eâ‚€] using hA_mdiff)
 
 /-- Local-inverse trivialization-frame version of `connDiffOne_local_norm`. -/
 theorem connDiffOne_trivNorm_local
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {g h : SmoothRiemannianMetric I M}
     {D1 : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 3}
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 3}
     (hD1 : ConnDiffDerivRealizes (I := I) g h 1 D1)
     (basisE : Module.Basis Idx Real E) {x : M}
     (gInv : M -> Idx -> Idx -> Real)
     (hinvX :
-      let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+      let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
       let frame : Idx -> (y : M) -> TangentSpace I y :=
-        fun i y => e₀.localFrame basisE i y
+        fun i y => eâ‚€.localFrame basisE i y
       forall i j : Idx,
-        (∑ k : Idx, gInv x i k *
+        (âˆ‘ k : Idx, gInv x i k *
             Coordinates.metricCompForMetricInFrame (I := I) g frame x k j) =
-            (if i = j then 1 else 0) ∧
-          (∑ k : Idx,
+            (if i = j then 1 else 0) âˆ§
+          (âˆ‘ k : Idx,
             Coordinates.metricCompForMetricInFrame (I := I) g frame x i k *
               gInv x k j) =
             (if i = j then 1 else 0))
     (hinvLeftN :
-      let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+      let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
       let frame : Idx -> (y : M) -> TangentSpace I y :=
-        fun i y => e₀.localFrame basisE i y
+        fun i y => eâ‚€.localFrame basisE i y
       forall i j : Idx,
-        (fun y : M => ∑ k : Idx,
+        (fun y : M => âˆ‘ k : Idx,
             gInv y i k *
-              Coordinates.metricCompForMetricInFrame (I := I) g frame y k j) =ᶠ[nhds x]
+              Coordinates.metricCompForMetricInFrame (I := I) g frame y k j) =á¶ [nhds x]
           fun _ : M => if i = j then 1 else 0)
     (hinvBasis :
-      let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+      let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
       let frame : Idx -> (y : M) -> TangentSpace I y :=
-        fun i y => e₀.localFrame basisE i y
-      let u : Set M := e₀.baseSet
-      let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-        e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) basisE
-      let hx : x ∈ u :=
+        fun i y => eâ‚€.localFrame basisE i y
+      let u : Set M := eâ‚€.baseSet
+      let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+        eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) basisE
+      let hx : x âˆˆ u :=
         mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
       Tensor0SBundle.MetricInverseInBasis
         (I := I) g x (hframe.toBasisAt hx)
         (Tensor0SBundle.identityInvMetric (Idx := Idx)))
     (hD_mdiff :
-      let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+      let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
       let frame : Idx -> (y : M) -> TangentSpace I y :=
-        fun i y => e₀.localFrame basisE i y
-      let u : Set M := e₀.baseSet
-      let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-        e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) basisE
-      ∀ a b e : Idx,
-        MDifferentiableAt I 𝓘(Real, Real)
+        fun i y => eâ‚€.localFrame basisE i y
+      let u : Set M := eâ‚€.baseSet
+      let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+        eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) basisE
+      âˆ€ a b e : Idx,
+        MDifferentiableAt I ð“˜(Real, Real)
           (fun y : M => Coordinates.lcDiffCompInFrame
             (I := I) g h frame (localFrameOneOfInf (I := I) frame hframe)
             y a b e) x)
-    (hginv_mdiff : ∀ i j : Idx,
-      MDifferentiableAt I 𝓘(Real, Real) (fun y : M => gInv y i j) x)
+    (hginv_mdiff : âˆ€ i j : Idx,
+      MDifferentiableAt I ð“˜(Real, Real) (fun y : M => gInv y i j) x)
     (hmetric_mdiff :
-      let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+      let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
       let frame : Idx -> (y : M) -> TangentSpace I y :=
-        fun i y => e₀.localFrame basisE i y
-      ∀ i j : Idx,
-        MDifferentiableAt I 𝓘(Real, Real)
+        fun i y => eâ‚€.localFrame basisE i y
+      âˆ€ i j : Idx,
+        MDifferentiableAt I ð“˜(Real, Real)
           (fun y : M =>
             Coordinates.metricCompForMetricInFrame
               (I := I) g frame y i j) x)
     (hA_mdiff :
-      let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+      let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
       let frame : Idx -> (y : M) -> TangentSpace I y :=
-        fun i y => e₀.localFrame basisE i y
-      let u : Set M := e₀.baseSet
-      let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-        e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) basisE
-      ∀ i j k : Idx,
-        MDifferentiableAt I 𝓘(Real, Real)
+        fun i y => eâ‚€.localFrame basisE i y
+      let u : Set M := eâ‚€.baseSet
+      let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+        eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) basisE
+      âˆ€ i j k : Idx,
+        MDifferentiableAt I ð“˜(Real, Real)
           (fun y : M =>
             Coordinates.metricCovDerivForMetricCompInFrame
               (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
@@ -3599,123 +3633,123 @@ theorem connDiffOne_trivNorm_local
         ((Fintype.card (Fin 1 -> Idx) : Real) *
           ((Fintype.card (Fin 3 -> Idx) : Real) * B ^ 2)) := by
   classical
-  let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+  let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
   let frame : Idx -> (y : M) -> TangentSpace I y :=
-    fun i y => e₀.localFrame basisE i y
-  let u : Set M := e₀.baseSet
-  let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-    e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) basisE
-  have hu : IsOpen u := e₀.open_baseSet
-  have hx : x ∈ u :=
+    fun i y => eâ‚€.localFrame basisE i y
+  let u : Set M := eâ‚€.baseSet
+  let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+    eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) basisE
+  have hu : IsOpen u := eâ‚€.open_baseSet
+  have hx : x âˆˆ u :=
     mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
-  obtain ⟨Z, θ, hZ, _hθ, hpair⟩ :=
+  obtain âŸ¨Z, Î¸, hZ, _hÎ¸, hpairâŸ© :=
     Coordinates.existsTrivFrameCoframePair (J := I) (N := M) x basisE
-  have hX : ∀ d : Idx, Z d x = frame d x := by
+  have hX : âˆ€ d : Idx, Z d x = frame d x := by
     intro d
     exact (hZ d).self_of_nhds
   exact
     connDiffOne_local_norm_local
-      (I := I) hD1 Z Z θ frame hframe hu hx gInv hX hZ hpair
+      (I := I) hD1 Z Z Î¸ frame hframe hu hx gInv hX hZ hpair
       (by
-        simpa [frame, e₀] using hinvX)
+        simpa [frame, eâ‚€] using hinvX)
       (by
-        simpa [frame, e₀] using hinvLeftN)
+        simpa [frame, eâ‚€] using hinvLeftN)
       (by
-        simpa [frame, u, hframe, hx, e₀] using hinvBasis)
+        simpa [frame, u, hframe, hx, eâ‚€] using hinvBasis)
       (by
-        simpa [frame, u, hframe, e₀] using hD_mdiff)
+        simpa [frame, u, hframe, eâ‚€] using hD_mdiff)
       hginv_mdiff
       (by
-        simpa [frame, e₀] using hmetric_mdiff)
+        simpa [frame, eâ‚€] using hmetric_mdiff)
       (by
-        simpa [frame, u, hframe, e₀] using hA_mdiff)
+        simpa [frame, u, hframe, eâ‚€] using hA_mdiff)
 
 /-- In a fixed tangent trivialization frame, the scalar components of
 `Gamma_g - Gamma_h` are differentiable.  This is just the difference of the
 two checked Levi-Civita Christoffel coefficient smoothness theorems. -/
 theorem lcDiffComp_triv_mdiff
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g h : SmoothRiemannianMetric I M)
     (basisE : Module.Basis Idx Real E) {x : M} (a b eIdx : Idx) :
-    let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+    let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
     let frame : Idx -> (y : M) -> TangentSpace I y :=
-      fun i y => e₀.localFrame basisE i y
-    let u : Set M := e₀.baseSet
-    let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-      e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) basisE
-    MDifferentiableAt I 𝓘(Real, Real)
+      fun i y => eâ‚€.localFrame basisE i y
+    let u : Set M := eâ‚€.baseSet
+    let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+      eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) basisE
+    MDifferentiableAt I ð“˜(Real, Real)
       (fun y : M => Coordinates.lcDiffCompInFrame
         (I := I) g h frame (localFrameOneOfInf (I := I) frame hframe)
         y a b eIdx) x := by
   classical
-  let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+  let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
   let frame : Idx -> (y : M) -> TangentSpace I y :=
-    fun i y => e₀.localFrame basisE i y
-  let u : Set M := e₀.baseSet
-  let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-    e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) basisE
-  have hx : x ∈ e₀.baseSet :=
+    fun i y => eâ‚€.localFrame basisE i y
+  let u : Set M := eâ‚€.baseSet
+  let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+    eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) basisE
+  have hx : x âˆˆ eâ‚€.baseSet :=
     mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
   have hg :=
     LeviCivita.lc_christoffel_contMDiffAt
-      (I := I) e₀ basisE g hx a b eIdx
+      (I := I) eâ‚€ basisE g hx a b eIdx
   have hh :=
     LeviCivita.lc_christoffel_contMDiffAt
-      (I := I) e₀ basisE h hx a b eIdx
+      (I := I) eâ‚€ basisE h hx a b eIdx
   have hdiff :
-      ContMDiffAt I 𝓘(Real, Real) ∞
+      ContMDiffAt I ð“˜(Real, Real) âˆž
         (fun y : M =>
-          e₀.localFrame_coeff I basisE eIdx y
+          eâ‚€.localFrame_coeff I basisE eIdx y
               ((LeviCivita.leviCivitaConnectionOfMetric (I := I) g
-                  (e₀.localFrame basisE b) y)
-                (e₀.localFrame basisE a y)) -
-            e₀.localFrame_coeff I basisE eIdx y
+                  (eâ‚€.localFrame basisE b) y)
+                (eâ‚€.localFrame basisE a y)) -
+            eâ‚€.localFrame_coeff I basisE eIdx y
               ((LeviCivita.leviCivitaConnectionOfMetric (I := I) h
-                  (e₀.localFrame basisE b) y)
-                (e₀.localFrame basisE a y))) x :=
+                  (eâ‚€.localFrame basisE b) y)
+                (eâ‚€.localFrame basisE a y))) x :=
     hg.sub hh
   have htarget :
       (fun y : M => Coordinates.lcDiffCompInFrame
         (I := I) g h frame (localFrameOneOfInf (I := I) frame hframe)
-        y a b eIdx) =ᶠ[nhds x]
+        y a b eIdx) =á¶ [nhds x]
         (fun y : M =>
-          e₀.localFrame_coeff I basisE eIdx y
+          eâ‚€.localFrame_coeff I basisE eIdx y
               ((LeviCivita.leviCivitaConnectionOfMetric (I := I) g
-                  (e₀.localFrame basisE b) y)
-                (e₀.localFrame basisE a y)) -
-            e₀.localFrame_coeff I basisE eIdx y
+                  (eâ‚€.localFrame basisE b) y)
+                (eâ‚€.localFrame basisE a y)) -
+            eâ‚€.localFrame_coeff I basisE eIdx y
               ((LeviCivita.leviCivitaConnectionOfMetric (I := I) h
-                  (e₀.localFrame basisE b) y)
-                (e₀.localFrame basisE a y))) := by
-    filter_upwards [e₀.open_baseSet.mem_nhds hx] with y hy
+                  (eâ‚€.localFrame basisE b) y)
+                (eâ‚€.localFrame basisE a y))) := by
+    filter_upwards [eâ‚€.open_baseSet.mem_nhds hx] with y hy
     let hframe1 := localFrameOneOfInf (I := I) frame hframe
-    have hyu : y ∈ u := by
+    have hyu : y âˆˆ u := by
       simpa [u] using hy
     have hmdiff : MDiffAt (T% (frame b)) y := by
-      exact (hframe.contMDiffAt e₀.open_baseSet hyu b).mdifferentiableAt
-        (by simp : (∞ : WithTop ℕ∞) ≠ 0)
+      exact (hframe.contMDiffAt eâ‚€.open_baseSet hyu b).mdifferentiableAt
+        (by simp : (âˆž : WithTop â„•âˆž) â‰  0)
     change Coordinates.christoffelSymbolDifferenceInFrame
         (LeviCivita.leviCivitaConnectionOfMetric (I := I) g)
         (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
         frame hframe1 y a b eIdx =
-      e₀.localFrame_coeff I basisE eIdx y
+      eâ‚€.localFrame_coeff I basisE eIdx y
           ((LeviCivita.leviCivitaConnectionOfMetric (I := I) g
-              (e₀.localFrame basisE b) y)
-            (e₀.localFrame basisE a y)) -
-        e₀.localFrame_coeff I basisE eIdx y
+              (eâ‚€.localFrame basisE b) y)
+            (eâ‚€.localFrame basisE a y)) -
+        eâ‚€.localFrame_coeff I basisE eIdx y
           ((LeviCivita.leviCivitaConnectionOfMetric (I := I) h
-              (e₀.localFrame basisE b) y)
-            (e₀.localFrame basisE a y))
+              (eâ‚€.localFrame basisE b) y)
+            (eâ‚€.localFrame basisE a y))
     rw [Coordinates.christoffelSymbolDifferenceInFrame_eq_sub
       (I := I)
       (cov := LeviCivita.leviCivitaConnectionOfMetric (I := I) g)
       (cov' := LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
       (frame := frame) (hframe := hframe1)
       (x := y) (i := a) (j := b) (k := eIdx) hmdiff]
-    have hbasis : hframe1.toBasisAt hyu = e₀.basisAt basisE hy := by
+    have hbasis : hframe1.toBasisAt hyu = eâ‚€.basisAt basisE hy := by
       ext j
       simp [frame, IsLocalFrameOn.toBasisAt,
         Bundle.Trivialization.localFrame, Bundle.Trivialization.basisAt, hy]
@@ -3727,48 +3761,48 @@ theorem lcDiffComp_triv_mdiff
 /-- Levi-Civita Christoffel coefficients in a fixed tangent trivialization frame
 are smooth when written through `christoffelSymbolInFrame`. -/
 theorem lcChrist_triv_contMDiffAt
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothRiemannianMetric I M)
     (basisE : Module.Basis Idx Real E) {x : M} (i j k : Idx) :
-    let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+    let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
     let frame : Idx -> (y : M) -> TangentSpace I y :=
-      fun a y => e₀.localFrame basisE a y
-    let u : Set M := e₀.baseSet
-    let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-      e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) basisE
-    ContMDiffAt I 𝓘(Real, Real) ∞
+      fun a y => eâ‚€.localFrame basisE a y
+    let u : Set M := eâ‚€.baseSet
+    let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+      eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) basisE
+    ContMDiffAt I ð“˜(Real, Real) âˆž
       (fun y : M => Coordinates.christoffelSymbolInFrame
         (LeviCivita.leviCivitaConnectionOfMetric (I := I) g)
         frame (localFrameOneOfInf (I := I) frame hframe) y i j k) x := by
   classical
-  let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+  let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
   let frame : Idx -> (y : M) -> TangentSpace I y :=
-    fun a y => e₀.localFrame basisE a y
-  let u : Set M := e₀.baseSet
-  let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-    e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) basisE
+    fun a y => eâ‚€.localFrame basisE a y
+  let u : Set M := eâ‚€.baseSet
+  let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+    eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) basisE
   let hframe1 := localFrameOneOfInf (I := I) frame hframe
-  have hx : x ∈ e₀.baseSet :=
+  have hx : x âˆˆ eâ‚€.baseSet :=
     mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
   have hraw :=
     LeviCivita.lc_christoffel_contMDiffAt
-      (I := I) e₀ basisE g hx i j k
+      (I := I) eâ‚€ basisE g hx i j k
   have heq :
       (fun y : M => Coordinates.christoffelSymbolInFrame
         (LeviCivita.leviCivitaConnectionOfMetric (I := I) g)
-        frame hframe1 y i j k) =ᶠ[nhds x]
+        frame hframe1 y i j k) =á¶ [nhds x]
         (fun y : M =>
-          e₀.localFrame_coeff I basisE k y
+          eâ‚€.localFrame_coeff I basisE k y
             ((LeviCivita.leviCivitaConnectionOfMetric (I := I) g
-                (e₀.localFrame basisE j) y)
-              (e₀.localFrame basisE i y))) := by
-    filter_upwards [e₀.open_baseSet.mem_nhds hx] with y hy
-    have hyu : y ∈ u := by
+                (eâ‚€.localFrame basisE j) y)
+              (eâ‚€.localFrame basisE i y))) := by
+    filter_upwards [eâ‚€.open_baseSet.mem_nhds hx] with y hy
+    have hyu : y âˆˆ u := by
       simpa [u] using hy
-    have hbasis : hframe1.toBasisAt hyu = e₀.basisAt basisE hy := by
+    have hbasis : hframe1.toBasisAt hyu = eâ‚€.basisAt basisE hy := by
       ext q
       simp [frame, IsLocalFrameOn.toBasisAt,
         Bundle.Trivialization.localFrame, Bundle.Trivialization.basisAt, hy]
@@ -3780,44 +3814,44 @@ theorem lcChrist_triv_contMDiffAt
 /-- First metric-covariant-derivative components in a fixed tangent
 trivialization frame are differentiable. -/
 theorem metricCov_triv_mdiff
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g h : SmoothRiemannianMetric I M)
     (basisE : Module.Basis Idx Real E) {x : M} (i j k : Idx) :
-    let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+    let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
     let frame : Idx -> (y : M) -> TangentSpace I y :=
-      fun a y => e₀.localFrame basisE a y
-    let u : Set M := e₀.baseSet
-    let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-      e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) basisE
-    MDifferentiableAt I 𝓘(Real, Real)
+      fun a y => eâ‚€.localFrame basisE a y
+    let u : Set M := eâ‚€.baseSet
+    let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+      eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) basisE
+    MDifferentiableAt I ð“˜(Real, Real)
       (fun y : M =>
         Coordinates.metricCovDerivForMetricCompInFrame
           (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
           frame (localFrameOneOfInf (I := I) frame hframe) y i j k) x := by
   classical
-  let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+  let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
   let frame : Idx -> (y : M) -> TangentSpace I y :=
-    fun a y => e₀.localFrame basisE a y
-  let u : Set M := e₀.baseSet
-  let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-    e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) basisE
+    fun a y => eâ‚€.localFrame basisE a y
+  let u : Set M := eâ‚€.baseSet
+  let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+    eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) basisE
   let hframe1 := localFrameOneOfInf (I := I) frame hframe
-  have hx : x ∈ e₀.baseSet :=
+  have hx : x âˆˆ eâ‚€.baseSet :=
     mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
-  have hxi : ContMDiffAt I (I.prod 𝓘(Real, E)) ∞ (T% (frame i)) x :=
-    hframe.contMDiffAt e₀.open_baseSet (by simpa [u] using hx) i
+  have hxi : ContMDiffAt I (I.prod ð“˜(Real, E)) âˆž (T% (frame i)) x :=
+    hframe.contMDiffAt eâ‚€.open_baseSet (by simpa [u] using hx) i
   have hmetric (a b : Idx) :
-      ContMDiffAt I 𝓘(Real, Real) ∞
+      ContMDiffAt I ð“˜(Real, Real) âˆž
         (fun y : M =>
           Coordinates.metricCompForMetricInFrame (I := I) g frame y a b) x := by
     simpa [frame] using
       LeviCivita.localFrame_metricComp_contMDiffAt
-        (I := I) e₀ basisE g hx a b
+        (I := I) eâ‚€ basisE g hx a b
   have hderiv :
-      ContMDiffAt I 𝓘(Real, Real) ∞
+      ContMDiffAt I ð“˜(Real, Real) âˆž
         (fun y : M =>
           extDerivFun (I := I)
             (fun q : M =>
@@ -3829,9 +3863,9 @@ theorem metricCov_triv_mdiff
         Coordinates.metricCompForMetricInFrame (I := I) g frame q j k)
       (X := frame i) (hmetric j k) hxi
   have hsum1 :
-      ContMDiffAt I 𝓘(Real, Real) ∞
+      ContMDiffAt I ð“˜(Real, Real) âˆž
         (fun y : M =>
-          ∑ p : Idx,
+          âˆ‘ p : Idx,
             Coordinates.christoffelSymbolInFrame
                 (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
                 frame hframe1 y i j p *
@@ -3841,9 +3875,9 @@ theorem metricCov_triv_mdiff
       (lcChrist_triv_contMDiffAt
         (I := I) h basisE (x := x) i j p).mul (hmetric p k)
   have hsum2 :
-      ContMDiffAt I 𝓘(Real, Real) ∞
+      ContMDiffAt I ð“˜(Real, Real) âˆž
         (fun y : M =>
-          ∑ p : Idx,
+          âˆ‘ p : Idx,
             Coordinates.christoffelSymbolInFrame
                 (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
                 frame hframe1 y i k p *
@@ -3879,24 +3913,24 @@ theorem metricInverseInBasis_identity_of_orthonormal
 /-- Trivialization-frame version of `connDiffOne_trivNorm_local` using the
 canonical inverse coefficients of the fixed local-frame Gram matrix. -/
 theorem connDiffOne_trivInv
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {g h : SmoothRiemannianMetric I M}
     {D1 : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 3}
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 3}
     (hD1 : ConnDiffDerivRealizes (I := I) g h 1 D1)
     (basisE : Module.Basis Idx Real E) {x : M}
     (hinvBasis :
-      let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+      let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
       let frame : Idx -> (y : M) -> TangentSpace I y :=
-        fun i y => e₀.localFrame basisE i y
-      let u : Set M := e₀.baseSet
-      let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-        e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) basisE
-      let hx : x ∈ u :=
+        fun i y => eâ‚€.localFrame basisE i y
+      let u : Set M := eâ‚€.baseSet
+      let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+        eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) basisE
+      let hx : x âˆˆ u :=
         mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
       Tensor0SBundle.MetricInverseInBasis
         (I := I) g x (hframe.toBasisAt hx)
@@ -3914,50 +3948,50 @@ theorem connDiffOne_trivInv
         ((Fintype.card (Fin 1 -> Idx) : Real) *
           ((Fintype.card (Fin 3 -> Idx) : Real) * B ^ 2)) := by
   classical
-  let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+  let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
   let frame : Idx -> (y : M) -> TangentSpace I y :=
-    fun i y => e₀.localFrame basisE i y
-  let u : Set M := e₀.baseSet
-  let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-    e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) basisE
-  have hx : x ∈ u :=
+    fun i y => eâ‚€.localFrame basisE i y
+  let u : Set M := eâ‚€.baseSet
+  let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+    eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) basisE
+  have hx : x âˆˆ u :=
     mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
   let gInv : M -> Idx -> Idx -> Real :=
-    fun y i j => LeviCivita.localInvMetricCoeff (I := I) e₀ basisE g i j y
+    fun y i j => LeviCivita.localInvMetricCoeff (I := I) eâ‚€ basisE g i j y
   refine
     connDiffOne_trivNorm_local
       (I := I) (x := x) (gInv := gInv) hD1 basisE ?_ ?_ ?_ ?_ ?_ ?_ ?_
-  · dsimp
+  Â· dsimp
     intro a b
     constructor
-    · simpa [gInv, frame, e₀] using
+    Â· simpa [gInv, frame, eâ‚€] using
         LeviCivita.localInvMetricCoeff_metricComp_left_inv
-          (I := I) e₀ basisE g hx a b
-    · simpa [gInv, frame, e₀] using
+          (I := I) eâ‚€ basisE g hx a b
+    Â· simpa [gInv, frame, eâ‚€] using
         LeviCivita.localInvMetricCoeff_metricComp_right_inv
-          (I := I) e₀ basisE g hx a b
-  · dsimp
+          (I := I) eâ‚€ basisE g hx a b
+  Â· dsimp
     intro a b
-    simpa [gInv, frame, e₀] using
+    simpa [gInv, frame, eâ‚€] using
       LeviCivita.localInvMetricCoeff_metricComp_left_inv_eventually
-        (I := I) e₀ basisE g hx a b
-  · simpa [frame, u, hframe, hx, e₀] using hinvBasis
-  · dsimp
+        (I := I) eâ‚€ basisE g hx a b
+  Â· simpa [frame, u, hframe, hx, eâ‚€] using hinvBasis
+  Â· dsimp
     intro i j k
-    simpa [frame, u, hframe, e₀] using
+    simpa [frame, u, hframe, eâ‚€] using
       lcDiffComp_triv_mdiff
         (I := I) (g := g) (h := h) (basisE := basisE) (x := x) i j k
-  · intro a b
+  Â· intro a b
     exact
       (LeviCivita.localInvMetricCoeff_contMDiffAt
-        (I := I) e₀ basisE g hx a b).mdifferentiableAt (by simp)
-  · dsimp
+        (I := I) eâ‚€ basisE g hx a b).mdifferentiableAt (by simp)
+  Â· dsimp
     intro a b
-    simpa [frame, e₀] using
-      LeviCivita.localFrame_metricComp_mdiff (I := I) e₀ basisE g hx a b
-  · dsimp
+    simpa [frame, eâ‚€] using
+      LeviCivita.localFrame_metricComp_mdiff (I := I) eâ‚€ basisE g hx a b
+  Â· dsimp
     intro i j k
-    simpa [frame, u, hframe, e₀] using
+    simpa [frame, u, hframe, eâ‚€] using
       metricCov_triv_mdiff
         (I := I) (g := g) (h := h) (basisE := basisE) (x := x) i j k
 
@@ -3967,24 +4001,24 @@ inverse-metric matrix from the caller; constructing such a frame is the
 separate local orthonormal-frame producer needed for the public
 `ConnDiffEpsBoundOn ... 1` endpoint. -/
 theorem connDiffOne_trivON
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {g h : SmoothRiemannianMetric I M}
     {D1 : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 3}
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 3}
     (hD1 : ConnDiffDerivRealizes (I := I) g h 1 D1)
     (basisE : Module.Basis Idx Real E) {x : M}
     (hON :
-      let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+      let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
       let frame : Idx -> (y : M) -> TangentSpace I y :=
-        fun i y => e₀.localFrame basisE i y
-      let u : Set M := e₀.baseSet
-      let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-        e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) basisE
-      let hx : x ∈ u :=
+        fun i y => eâ‚€.localFrame basisE i y
+      let u : Set M := eâ‚€.baseSet
+      let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+        eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) basisE
+      let hx : x âˆˆ u :=
         mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
       forall i j : Idx,
         g.inner x (hframe.toBasisAt hx i) (hframe.toBasisAt hx j) =
@@ -4002,13 +4036,13 @@ theorem connDiffOne_trivON
         ((Fintype.card (Fin 1 -> Idx) : Real) *
           ((Fintype.card (Fin 3 -> Idx) : Real) * B ^ 2)) := by
   classical
-  let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+  let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
   let frame : Idx -> (y : M) -> TangentSpace I y :=
-    fun i y => e₀.localFrame basisE i y
-  let u : Set M := e₀.baseSet
-  let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-    e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) basisE
-  have hx : x ∈ u :=
+    fun i y => eâ‚€.localFrame basisE i y
+  let u : Set M := eâ‚€.baseSet
+  let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+    eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) basisE
+  have hx : x âˆˆ u :=
     mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
   have hinvBasis :
       Tensor0SBundle.MetricInverseInBasis
@@ -4016,11 +4050,11 @@ theorem connDiffOne_trivON
         (Tensor0SBundle.identityInvMetric (Idx := Idx)) :=
     metricInverseInBasis_identity_of_orthonormal
       (I := I) g (hframe.toBasisAt hx) (by
-        simpa [e₀, frame, u, hframe, hx] using hON)
+        simpa [eâ‚€, frame, u, hframe, hx] using hON)
   exact
     connDiffOne_trivInv
       (I := I) hD1 basisE (x := x) (by
-        simpa [e₀, frame, u, hframe, hx] using hinvBasis)
+        simpa [eâ‚€, frame, u, hframe, hx] using hinvBasis)
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Trivialization-frame local norm estimate for the second `h`-covariant
@@ -4029,24 +4063,24 @@ derivative of `Gamma_g - Gamma_h`.
 This is the `k = 2` analogue of `connDiffOne_trivON`, using the checked cubic
 coordinate reassembly `connDiffTwo_trivFrame_cubic`. -/
 theorem connDiffTwo_trivON
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {g h : SmoothRiemannianMetric I M}
     {D2 : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 4}
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 4}
     (hD2 : ConnDiffDerivRealizes (I := I) g h 2 D2)
     (basisE : Module.Basis Idx Real E) {x : M}
     (hON :
-      let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+      let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
       let frame : Idx -> (y : M) -> TangentSpace I y :=
-        fun i y => e₀.localFrame basisE i y
-      let u : Set M := e₀.baseSet
-      let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-        e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) basisE
-      let hx : x ∈ u :=
+        fun i y => eâ‚€.localFrame basisE i y
+      let u : Set M := eâ‚€.baseSet
+      let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+        eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) basisE
+      let hx : x âˆˆ u :=
         mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
       forall i j : Idx,
         g.inner x (hframe.toBasisAt hx i) (hframe.toBasisAt hx j) =
@@ -4064,19 +4098,19 @@ theorem connDiffTwo_trivON
         ((Fintype.card (Fin 1 -> Idx) : Real) *
           ((Fintype.card (Fin 4 -> Idx) : Real) * B ^ 2)) := by
   classical
-  let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+  let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
   let frame : Idx -> (y : M) -> TangentSpace I y :=
-    fun i y => e₀.localFrame basisE i y
-  let u : Set M := e₀.baseSet
-  let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-    e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) basisE
+    fun i y => eâ‚€.localFrame basisE i y
+  let u : Set M := eâ‚€.baseSet
+  let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+    eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) basisE
   let hframe1 : IsLocalFrameOn I E 1 frame u :=
-    e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE
-  have hu : IsOpen u := e₀.open_baseSet
-  have hx : x ∈ u :=
+    eâ‚€.isLocalFrameOn_localFrame_baseSet I 1 basisE
+  have hu : IsOpen u := eâ‚€.open_baseSet
+  have hx : x âˆˆ u :=
     mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
   let gInv : M -> Idx -> Idx -> Real :=
-    fun y i j => LeviCivita.localInvMetricCoeff (I := I) e₀ basisE g i j y
+    fun y i j => LeviCivita.localInvMetricCoeff (I := I) eâ‚€ basisE g i j y
   let n : Real := Fintype.card Idx
   let N1 : Real := metricCovDerivNormWith (I := I) 1 g h g x
   let N2 : Real := metricCovDerivNormWith (I := I) 2 g h g x
@@ -4091,23 +4125,23 @@ theorem connDiffTwo_trivON
         (Tensor0SBundle.identityInvMetric (Idx := Idx)) :=
     metricInverseInBasis_identity_of_orthonormal
       (I := I) g (hframe.toBasisAt hx) (by
-        simpa [e₀, frame, u, hframe, hx] using hON)
+        simpa [eâ‚€, frame, u, hframe, hx] using hON)
   have hinvX : forall i j : Idx,
-      (∑ k : Idx, gInv x i k *
+      (âˆ‘ k : Idx, gInv x i k *
           Coordinates.metricCompForMetricInFrame (I := I) g frame x k j) =
-          (if i = j then 1 else 0) ∧
-        (∑ k : Idx,
+          (if i = j then 1 else 0) âˆ§
+        (âˆ‘ k : Idx,
           Coordinates.metricCompForMetricInFrame (I := I) g frame x i k *
             gInv x k j) =
           (if i = j then 1 else 0) := by
     intro i j
     constructor
-    · simpa [gInv, frame, u] using
+    Â· simpa [gInv, frame, u] using
         LeviCivita.localInvMetricCoeff_metricComp_left_inv
-          (I := I) e₀ basisE g (by simpa [u] using hx) i j
-    · simpa [gInv, frame, u] using
+          (I := I) eâ‚€ basisE g (by simpa [u] using hx) i j
+    Â· simpa [gInv, frame, u] using
         LeviCivita.localInvMetricCoeff_metricComp_right_inv
-          (I := I) e₀ basisE g (by simpa [u] using hx) i j
+          (I := I) eâ‚€ basisE g (by simpa [u] using hx) i j
   have hB_nonneg : 0 <= B := by
     dsimp [B, R, Q, N1, N2, N3, n, metricCovDerivNormWith]
     positivity
@@ -4116,7 +4150,7 @@ theorem connDiffTwo_trivON
       (I := I) g x 1 4 (hframe.toBasisAt hx) hinvBasis (D2 x)
       hB_nonneg
       (fun upper lower => ?_)
-  · simpa [connDiffDerivNorm, B, R, Q, N1, N2, N3, n] using hnorm
+  Â· simpa [connDiffDerivNorm, B, R, Q, N1, N2, N3, n] using hnorm
   let e : Idx := upper 0
   let m : Idx := lower 0
   let d : Idx := lower 1
@@ -4139,7 +4173,7 @@ theorem connDiffTwo_trivON
         mul_le_mul_of_nonneg_right (by norm_num : (1 : Real) <= |(2 : Real)|)
           (abs_nonneg comp)
       _ = |(2 : Real) * comp| := by rw [abs_mul]
-  obtain ⟨Z, _θ, hZ, _hθ, _hpair⟩ :=
+  obtain âŸ¨Z, _Î¸, hZ, _hÎ¸, _hpairâŸ© :=
     Coordinates.existsTrivFrameCoframePair (J := I) (N := M) x basisE
   have hquad :
       |(2 : Real) * comp| <= B := by
@@ -4150,20 +4184,20 @@ theorem connDiffTwo_trivON
     have hRHS :=
       lcDiffCubic_abs_le_norms_local
         (I := I) g h gInv frame hframe hu hx hinvX hinvBasis m d a b e
-    have hx0 : x ∈ e₀.baseSet := by
-      simp [e₀, u] at hx ⊢
+    have hx0 : x âˆˆ eâ‚€.baseSet := by
+      simp [eâ‚€, u] at hx âŠ¢
     have hbasis :
-        hframe.toBasisAt hx = e₀.basisAt basisE hx0 := by
+        hframe.toBasisAt hx = eâ‚€.basisAt basisE hx0 := by
       ext i
       simp [frame, IsLocalFrameOn.toBasisAt, Bundle.Trivialization.localFrame,
         Bundle.Trivialization.basisAt, hx0]
     have hbasis1 :
-        hframe1.toBasisAt hx = e₀.basisAt basisE hx0 := by
+        hframe1.toBasisAt hx = eâ‚€.basisAt basisE hx0 := by
       ext i
       simp [frame, IsLocalFrameOn.toBasisAt, Bundle.Trivialization.localFrame,
         Bundle.Trivialization.basisAt, hx0]
     have hquad_eq' :
-        2 * Tensor0SBundle.componentRS (I := I) (e₀.basisAt basisE hx0) (D2 x)
+        2 * Tensor0SBundle.componentRS (I := I) (eâ‚€.basisAt basisE hx0) (D2 x)
             (Coordinates.upperIdx1 e) (Coordinates.slots4 m d a b) =
           Coordinates.lcDiffQuadCubicRHS
             (I := I) g gInv
@@ -4185,96 +4219,96 @@ theorem connDiffTwo_trivON
 
 /-- Coordinate-frame component of a realized first derivative of
 `Gamma_g - Gamma_h`, after substituting the differentiated Christoffel
-formula.  The right-hand side contains the book's `∇_h² g` and
-`(∇_h g) * (∇_h g)` terms. -/
+formula.  The right-hand side contains the book's `âˆ‡_hÂ² g` and
+`(âˆ‡_h g) * (âˆ‡_h g)` terms. -/
 theorem connDiffOne_quad
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {g h : SmoothRiemannianMetric I M}
     {D1 : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 3}
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 3}
     (hD1 : ConnDiffDerivRealizes (I := I) g h 1 D1)
-    (X : ContMDiffSection I E (∞ : WithTop ℕ∞)
+    (X : ContMDiffSection I E (âˆž : WithTop â„•âˆž)
       (TangentSpace I : M -> Type _))
-    (x₀ : M) (gInv : M -> Coordinates.CoordinateIdx (𝕜 := Real) E ->
-      Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)
-    (d a b e : Coordinates.CoordinateIdx (𝕜 := Real) E)
-    (hX : X x₀ = Coordinates.coordinateFrameAt (I := I) x₀ d x₀)
+    (xâ‚€ : M) (gInv : M -> Coordinates.CoordinateIdx (ð•œ := Real) E ->
+      Coordinates.CoordinateIdx (ð•œ := Real) E -> Real)
+    (d a b e : Coordinates.CoordinateIdx (ð•œ := Real) E)
+    (hX : X xâ‚€ = Coordinates.coordinateFrameAt (I := I) xâ‚€ d xâ‚€)
     (hinv :
       Coordinates.InverseMetricComponentsForMetricInFrameOn
-        (I := I) g gInv (Coordinates.coordinateFrameAt (I := I) x₀))
+        (I := I) g gInv (Coordinates.coordinateFrameAt (I := I) xâ‚€))
     (hD_mdiff :
-      MDifferentiableAt I 𝓘(Real, Real)
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           Coordinates.lcDiffCompInFrame
-            (I := I) g h (Coordinates.coordinateFrameAt (I := I) x₀)
-            (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀)
-            y a b e) x₀)
-    (hginv_mdiff : ∀ i j : Coordinates.CoordinateIdx (𝕜 := Real) E,
-      MDifferentiableAt I 𝓘(Real, Real) (fun y : M => gInv y i j) x₀)
-    (hmetric_mdiff : ∀ i j : Coordinates.CoordinateIdx (𝕜 := Real) E,
-      MDifferentiableAt I 𝓘(Real, Real)
+            (I := I) g h (Coordinates.coordinateFrameAt (I := I) xâ‚€)
+            (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) xâ‚€)
+            y a b e) xâ‚€)
+    (hginv_mdiff : âˆ€ i j : Coordinates.CoordinateIdx (ð•œ := Real) E,
+      MDifferentiableAt I ð“˜(Real, Real) (fun y : M => gInv y i j) xâ‚€)
+    (hmetric_mdiff : âˆ€ i j : Coordinates.CoordinateIdx (ð•œ := Real) E,
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           Coordinates.metricCompForMetricInFrame
-            (I := I) g (Coordinates.coordinateFrameAt (I := I) x₀) y i j) x₀)
-    (hA_mdiff : ∀ i j k : Coordinates.CoordinateIdx (𝕜 := Real) E,
-      MDifferentiableAt I 𝓘(Real, Real)
+            (I := I) g (Coordinates.coordinateFrameAt (I := I) xâ‚€) y i j) xâ‚€)
+    (hA_mdiff : âˆ€ i j k : Coordinates.CoordinateIdx (ð•œ := Real) E,
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           Coordinates.metricCovDerivForMetricCompInFrame
             (I := I) g (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
-            (Coordinates.coordinateFrameAt (I := I) x₀)
-            (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀)
-            y i j k) x₀) :
+            (Coordinates.coordinateFrameAt (I := I) xâ‚€)
+            (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) xâ‚€)
+            y i j k) xâ‚€) :
     2 * Tensor0SBundle.componentRS (I := I)
-        (Coordinates.coordinateFrameAt_toBasis (I := I) x₀)
-        (D1 x₀) (Coordinates.upperIdx1 e) (Coordinates.slots3 d a b) =
+        (Coordinates.coordinateFrameAt_toBasis (I := I) xâ‚€)
+        (D1 xâ‚€) (Coordinates.upperIdx1 e) (Coordinates.slots3 d a b) =
       Coordinates.lcDiffQuadRHS
         (I := I) g gInv
         (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
-        (Coordinates.coordinateFrameAt (I := I) x₀)
-        (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀)
-        x₀ d a b e := by
+        (Coordinates.coordinateFrameAt (I := I) xâ‚€)
+        (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) xâ‚€)
+        xâ‚€ d a b e := by
   have hcoord :=
     connDiffOne_coord
-      (I := I) hD1 X x₀ d a b e hX
+      (I := I) hD1 X xâ‚€ d a b e hX
   have hquad :=
     Coordinates.lcDiffDeriv_eq_quad
-      (I := I) g h gInv (Coordinates.coordinateFrameAt (I := I) x₀)
-      (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀)
-      (Coordinates.coordinateFrameSet_open (I := I) x₀)
-      (Coordinates.coordinateFrameAt_mem (I := I) x₀)
+      (I := I) g h gInv (Coordinates.coordinateFrameAt (I := I) xâ‚€)
+      (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) xâ‚€)
+      (Coordinates.coordinateFrameSet_open (I := I) xâ‚€)
+      (Coordinates.coordinateFrameAt_mem (I := I) xâ‚€)
       hinv d a b e hD_mdiff hginv_mdiff hmetric_mdiff hA_mdiff
   calc
     2 * Tensor0SBundle.componentRS (I := I)
-        (Coordinates.coordinateFrameAt_toBasis (I := I) x₀)
-        (D1 x₀) (Coordinates.upperIdx1 e) (Coordinates.slots3 d a b)
+        (Coordinates.coordinateFrameAt_toBasis (I := I) xâ‚€)
+        (D1 xâ‚€) (Coordinates.upperIdx1 e) (Coordinates.slots3 d a b)
         =
       2 * Coordinates.lcDiffCovDerivCompInFrame
-        (I := I) g h (Coordinates.coordinateFrameAt (I := I) x₀)
-        (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀)
-        x₀ d a b e := by
+        (I := I) g h (Coordinates.coordinateFrameAt (I := I) xâ‚€)
+        (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) xâ‚€)
+        xâ‚€ d a b e := by
           rw [hcoord]
     _ = Coordinates.lcDiffQuadRHS
         (I := I) g gInv
         (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
-        (Coordinates.coordinateFrameAt (I := I) x₀)
-        (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) x₀)
-        x₀ d a b e := hquad
+        (Coordinates.coordinateFrameAt (I := I) xâ‚€)
+        (Coordinates.coordinateFrameAt_isLocalFrame_one (I := I) xâ‚€)
+        xâ‚€ d a b e := hquad
 
 /-- Uniform bound predicate for realized higher connection-difference
 derivatives on a set.  The realization field prevents this from becoming an
 arbitrary placeholder predicate. -/
 def ConnDiffDerivBoundOn
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     (K : Set M) (g h : SmoothRiemannianMetric I M) (k : Nat) (C : Real) :
     Prop :=
   forall Dk : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 (k + 2),
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 (k + 2),
     ConnDiffDerivRealizes (I := I) g h k Dk ->
-      forall x : M, x ∈ K ->
+      forall x : M, x âˆˆ K ->
         connDiffDerivNorm (I := I) g k Dk x <= C
 
 /-- Book-facing F3-hi epsilon control for a realized `k`-th `h`-covariant
@@ -4282,19 +4316,19 @@ derivative of `Gamma_g - Gamma_h`.  The constant is independent of `eps`; this
 is the shape consumed in MSM135 Chapter 4, Lemma "Norms of covariant derivatives
 of tensors, I". -/
 def ConnDiffEpsBoundOn
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     (K : Set M) (eps : Real)
     (g h : SmoothRiemannianMetric I M) (k : Nat) (C : Real) : Prop :=
   forall Dk : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) 1 (k + 2),
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) 1 (k + 2),
     ConnDiffDerivRealizes (I := I) g h k Dk ->
-      forall x : M, x ∈ K ->
+      forall x : M, x âˆˆ K ->
         connDiffDerivNorm (I := I) g k Dk x <= C * eps
 
 /-- Uniform book-facing F3-hi epsilon controls for all orders below `m`. -/
 def ConnDiffEpsBoundsBelow
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     (K : Set M) (eps : Real)
     (g h : SmoothRiemannianMetric I M) (m : Nat)
     (C : Nat -> Real) : Prop :=
@@ -4304,21 +4338,21 @@ def ConnDiffEpsBoundsBelow
 /-- The `k = 0` connection-difference derivative bound, packaged in the
 higher-derivative realization vocabulary used by F3e. -/
 theorem connDiffDerivBound_zero
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     {K : Set M} {eps : Real} {p : Nat}
     {g h : SmoothRiemannianMetric I M}
     (Happrox : IsTwoSidedApproxIsometryOn (I := I) K eps p g h)
     (hp : 1 <= p) (heps_lt : eps < 1)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-    (basis : forall x : M, x ∈ K ->
+    (basis : forall x : M, x âˆˆ K ->
       Module.Basis Idx Real (TangentSpace I x))
-    (hinv : forall x : M, forall hx : x ∈ K,
+    (hinv : forall x : M, forall hx : x âˆˆ K,
       Tensor0SBundle.MetricInverseInBasis
         (I := I) g x (basis x hx)
         (Tensor0SBundle.identityInvMetric (Idx := Idx))) :
     ConnDiffDerivBoundOn (I := I) K g h 0 (12 * eps) := by
   intro D0 hD0 x hx
-  rcases hD0 with ⟨D, hD, hderiv⟩
+  rcases hD0 with âŸ¨D, hD, hderivâŸ©
   cases hderiv
   simpa [connDiffDerivNorm, ConnDiffFieldRealizes, hD x] using
     connDiff_book_le_eps_g
@@ -4326,15 +4360,15 @@ theorem connDiffDerivBound_zero
 
 /-- The checked `k = 0` instance of the book-facing F3-hi epsilon control. -/
 theorem connDiffEpsBound_zero
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     {K : Set M} {eps : Real} {p : Nat}
     {g h : SmoothRiemannianMetric I M}
     (Happrox : IsTwoSidedApproxIsometryOn (I := I) K eps p g h)
     (hp : 1 <= p) (heps_lt : eps < 1)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-    (basis : forall x : M, x ∈ K ->
+    (basis : forall x : M, x âˆˆ K ->
       Module.Basis Idx Real (TangentSpace I x))
-    (hinv : forall x : M, forall hx : x ∈ K,
+    (hinv : forall x : M, forall hx : x âˆˆ K,
       Tensor0SBundle.MetricInverseInBasis
         (I := I) g x (basis x hx)
         (Tensor0SBundle.identityInvMetric (Idx := Idx))) :
@@ -4374,7 +4408,7 @@ This closes the numerical approximate-isometry part of the `k = 1` estimate.
 The remaining producer for the public theorem is the pointwise construction of
 such a centered trivialization basis. -/
 theorem connDiffEpsBound_one_of_trivON
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {K : Set M} {eps : Real} {p : Nat}
@@ -4382,15 +4416,15 @@ theorem connDiffEpsBound_one_of_trivON
     (Happrox : IsTwoSidedApproxIsometryOn (I := I) K eps p g h)
     (hp : 2 <= p) (heps_lt : eps < 1)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-    (basisE : forall x : M, x ∈ K -> Module.Basis Idx Real E)
-    (hON : forall x : M, forall hx : x ∈ K,
-      let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+    (basisE : forall x : M, x âˆˆ K -> Module.Basis Idx Real E)
+    (hON : forall x : M, forall hx : x âˆˆ K,
+      let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
       let frame : Idx -> (y : M) -> TangentSpace I y :=
-        fun i y => e₀.localFrame (basisE x hx) i y
-      let u : Set M := e₀.baseSet
-      let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-        e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) (basisE x hx)
-      let hxu : x ∈ u :=
+        fun i y => eâ‚€.localFrame (basisE x hx) i y
+      let u : Set M := eâ‚€.baseSet
+      let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+        eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) (basisE x hx)
+      let hxu : x âˆˆ u :=
         mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
       forall i j : Idx,
         g.inner x (hframe.toBasisAt hxu i) (hframe.toBasisAt hxu j) =
@@ -4413,7 +4447,7 @@ theorem connDiffEpsBound_one_of_trivON
   have hsqrt3_le : Real.sqrt ((1 + eps) ^ 3) <= (8 : Real) := by
     have hpow : (1 + eps) ^ 3 <= (8 : Real) := by
       have hpow' : (1 + eps) ^ 3 <= (2 : Real) ^ 3 :=
-        pow_le_pow_left₀ hbase_nonneg hbase_le 3
+        pow_le_pow_leftâ‚€ hbase_nonneg hbase_le 3
       norm_num at hpow'
       exact hpow'
     have hsqrt : Real.sqrt ((1 + eps) ^ 3) <= Real.sqrt (8 : Real) :=
@@ -4425,7 +4459,7 @@ theorem connDiffEpsBound_one_of_trivON
   have hsqrt4_le : Real.sqrt ((1 + eps) ^ 4) <= (16 : Real) := by
     have hpow : (1 + eps) ^ 4 <= (16 : Real) := by
       have hpow' : (1 + eps) ^ 4 <= (2 : Real) ^ 4 :=
-        pow_le_pow_left₀ hbase_nonneg hbase_le 4
+        pow_le_pow_leftâ‚€ hbase_nonneg hbase_le 4
       norm_num at hpow'
       exact hpow'
     have hsqrt : Real.sqrt ((1 + eps) ^ 4) <= Real.sqrt (16 : Real) :=
@@ -4508,7 +4542,7 @@ theorem connDiffEpsBound_one_of_trivON
       connDiffOne_trivON
         (I := I) hD1 (basisE x hx) (x := x) (hON x hx)
   have hBsq_le : B ^ 2 <= (q * eps) ^ 2 :=
-    (sq_le_sq₀ hB_nonneg (mul_nonneg hq_nonneg heps_nonneg)).2 hB_le
+    (sq_le_sqâ‚€ hB_nonneg (mul_nonneg hq_nonneg heps_nonneg)).2 hB_le
   have hcardUpper_nonneg :
       0 <= (Fintype.card (Fin 1 -> Idx) : Real) := by positivity
   have hcardLower_nonneg :
@@ -4554,7 +4588,7 @@ centered tangent trivialization frame has been chosen `g`-orthonormally.
 This is the `k = 2` numerical endpoint after the cubic Christoffel reassembly:
 the cubic terms are made linear in `eps` by using `eps < 1`. -/
 theorem connDiffEpsBound_two_of_trivON
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {K : Set M} {eps : Real} {p : Nat}
@@ -4562,15 +4596,15 @@ theorem connDiffEpsBound_two_of_trivON
     (Happrox : IsTwoSidedApproxIsometryOn (I := I) K eps p g h)
     (hp : 3 <= p) (heps_lt : eps < 1)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
-    (basisE : forall x : M, x ∈ K -> Module.Basis Idx Real E)
-    (hON : forall x : M, forall hx : x ∈ K,
-      let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+    (basisE : forall x : M, x âˆˆ K -> Module.Basis Idx Real E)
+    (hON : forall x : M, forall hx : x âˆˆ K,
+      let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
       let frame : Idx -> (y : M) -> TangentSpace I y :=
-        fun i y => e₀.localFrame (basisE x hx) i y
-      let u : Set M := e₀.baseSet
-      let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-        e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) (basisE x hx)
-      let hxu : x ∈ u :=
+        fun i y => eâ‚€.localFrame (basisE x hx) i y
+      let u : Set M := eâ‚€.baseSet
+      let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+        eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) (basisE x hx)
+      let hxu : x âˆˆ u :=
         mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
       forall i j : Idx,
         g.inner x (hframe.toBasisAt hxu i) (hframe.toBasisAt hxu j) =
@@ -4601,7 +4635,7 @@ theorem connDiffEpsBound_two_of_trivON
   have hsqrt3_le : Real.sqrt ((1 + eps) ^ 3) <= (8 : Real) := by
     have hpow : (1 + eps) ^ 3 <= (8 : Real) := by
       have hpow' : (1 + eps) ^ 3 <= (2 : Real) ^ 3 :=
-        pow_le_pow_left₀ hbase_nonneg hbase_le 3
+        pow_le_pow_leftâ‚€ hbase_nonneg hbase_le 3
       norm_num at hpow'
       exact hpow'
     have hsqrt : Real.sqrt ((1 + eps) ^ 3) <= Real.sqrt (8 : Real) :=
@@ -4613,7 +4647,7 @@ theorem connDiffEpsBound_two_of_trivON
   have hsqrt4_le : Real.sqrt ((1 + eps) ^ 4) <= (16 : Real) := by
     have hpow : (1 + eps) ^ 4 <= (16 : Real) := by
       have hpow' : (1 + eps) ^ 4 <= (2 : Real) ^ 4 :=
-        pow_le_pow_left₀ hbase_nonneg hbase_le 4
+        pow_le_pow_leftâ‚€ hbase_nonneg hbase_le 4
       norm_num at hpow'
       exact hpow'
     have hsqrt : Real.sqrt ((1 + eps) ^ 4) <= Real.sqrt (16 : Real) :=
@@ -4625,7 +4659,7 @@ theorem connDiffEpsBound_two_of_trivON
   have hsqrt5_le : Real.sqrt ((1 + eps) ^ 5) <= (32 : Real) := by
     have hpow : (1 + eps) ^ 5 <= (32 : Real) := by
       have hpow' : (1 + eps) ^ 5 <= (2 : Real) ^ 5 :=
-        pow_le_pow_left₀ hbase_nonneg hbase_le 5
+        pow_le_pow_leftâ‚€ hbase_nonneg hbase_le 5
       norm_num at hpow'
       exact hpow'
     have hsqrt : Real.sqrt ((1 + eps) ^ 5) <= Real.sqrt (32 : Real) :=
@@ -4756,7 +4790,7 @@ theorem connDiffEpsBound_two_of_trivON
       connDiffTwo_trivON
         (I := I) hD2 (basisE x hx) (x := x) (hON x hx)
   have hBsq_le : B ^ 2 <= (q * eps) ^ 2 :=
-    (sq_le_sq₀ hB_nonneg (mul_nonneg hq_nonneg heps_nonneg)).2 hB_le
+    (sq_le_sqâ‚€ hB_nonneg (mul_nonneg hq_nonneg heps_nonneg)).2 hB_le
   have hcardUpper_nonneg :
       0 <= (Fintype.card (Fin 1 -> Idx) : Real) := by positivity
   have hcardLower_nonneg :
@@ -4800,20 +4834,20 @@ inverse square root of its self-pairing. -/
 private theorem exists_orthonormalBasis_of_posDef
     {V : Type*} [AddCommGroup V] [Module Real V] [FiniteDimensional Real V]
     (B : LinearMap.BilinForm Real V) (hsymm : LinearMap.IsSymm B)
-    (hpos : forall v : V, v ≠ 0 -> 0 < B v v) :
+    (hpos : forall v : V, v â‰  0 -> 0 < B v v) :
     exists b : Module.Basis (Fin (Module.finrank Real V)) Real V,
       forall i j, B (b i) (b j) = if i = j then 1 else 0 := by
   classical
-  obtain ⟨v, hv⟩ := LinearMap.BilinForm.exists_orthogonal_basis (B := B) hsymm
+  obtain âŸ¨v, hvâŸ© := LinearMap.BilinForm.exists_orthogonal_basis (B := B) hsymm
   have hdpos : forall i, 0 < B (v i) (v i) := fun i => hpos (v i) (v.ne_zero i)
   set w : Fin (Module.finrank Real V) -> Real :=
-    fun i => (Real.sqrt (B (v i) (v i)))⁻¹ with hw
+    fun i => (Real.sqrt (B (v i) (v i)))â»Â¹ with hw
   have hwunit : forall i, IsUnit (w i) := by
     intro i
     refine isUnit_iff_ne_zero.mpr ?_
     simp only [hw]
     exact inv_ne_zero (Real.sqrt_pos.mpr (hdpos i)).ne'
-  refine ⟨v.isUnitSMul hwunit, ?_⟩
+  refine âŸ¨v.isUnitSMul hwunit, ?_âŸ©
   intro i j
   have hreduce :
       B ((v.isUnitSMul hwunit) i) ((v.isUnitSMul hwunit) j) =
@@ -4823,16 +4857,16 @@ private theorem exists_orthonormalBasis_of_posDef
     ring
   rw [hreduce]
   by_cases hij : i = j
-  · subst hij
+  Â· subst hij
     rw [if_pos rfl]
     have hd : 0 < B (v i) (v i) := hdpos i
     have hroot :
         Real.sqrt (B (v i) (v i)) * Real.sqrt (B (v i) (v i)) = B (v i) (v i) :=
       Real.mul_self_sqrt hd.le
     simp only [hw]
-    rw [← mul_inv, hroot, inv_mul_cancel₀ hd.ne']
-  · rw [if_neg hij]
-    have horth : B (v i) (v j) = 0 := (LinearMap.isOrthoᵢ_def.mp hv) i j hij
+    rw [â† mul_inv, hroot, inv_mul_cancelâ‚€ hd.ne']
+  Â· rw [if_neg hij]
+    have horth : B (v i) (v j) = 0 := (LinearMap.isOrthoáµ¢_def.mp hv) i j hij
     rw [horth, mul_zero]
 
 /-- Pointwise orthonormal trivialization frame for a Riemannian metric.
@@ -4848,59 +4882,59 @@ theorem exists_trivFrame_orthonormal_basis
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     (g : SmoothRiemannianMetric I M) (x : M) :
     exists basisE : Module.Basis (Fin (Module.finrank Real E)) Real E,
-      let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+      let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
       let frame : Fin (Module.finrank Real E) -> (y : M) -> TangentSpace I y :=
-        fun i y => e₀.localFrame basisE i y
-      let u : Set M := e₀.baseSet
-      let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-        e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) basisE
-      let hxu : x ∈ u :=
+        fun i y => eâ‚€.localFrame basisE i y
+      let u : Set M := eâ‚€.baseSet
+      let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+        eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) basisE
+      let hxu : x âˆˆ u :=
         mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
       forall i j : Fin (Module.finrank Real E),
         g.inner x (hframe.toBasisAt hxu i) (hframe.toBasisAt hxu j) =
           if i = j then 1 else 0 := by
   classical
-  let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
-  have hxu0 : x ∈ e₀.baseSet :=
+  let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
+  have hxu0 : x âˆˆ eâ‚€.baseSet :=
     mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
   -- Pull `g.inner x` back to the model fiber `E` through the trivialization.
   let Q : LinearMap.BilinForm Real E :=
-    LinearMap.mk₂ Real
-      (fun v w => g.inner x (e₀.symmL Real x v) (e₀.symmL Real x w))
+    LinearMap.mkâ‚‚ Real
+      (fun v w => g.inner x (eâ‚€.symmL Real x v) (eâ‚€.symmL Real x w))
       (fun _ _ _ => by simp [map_add, ContinuousLinearMap.add_apply])
       (fun _ _ _ => by simp [map_smul, ContinuousLinearMap.smul_apply])
       (fun _ _ _ => by simp [map_add])
       (fun _ _ _ => by simp [map_smul])
   have hsymm : LinearMap.IsSymm Q :=
-    ⟨fun v w => by
-      simp only [Q, LinearMap.mk₂_apply, RingHom.id_apply]
-      exact g.symm x (e₀.symmL Real x v) (e₀.symmL Real x w)⟩
-  have hpos : forall v : E, v ≠ 0 -> 0 < Q v v := by
+    âŸ¨fun v w => by
+      simp only [Q, LinearMap.mkâ‚‚_apply, RingHom.id_apply]
+      exact g.symm x (eâ‚€.symmL Real x v) (eâ‚€.symmL Real x w)âŸ©
+  have hpos : forall v : E, v â‰  0 -> 0 < Q v v := by
     intro v hv
-    have hSv : e₀.symmL Real x v ≠ 0 := by
+    have hSv : eâ‚€.symmL Real x v â‰  0 := by
       intro h0
       apply hv
-      have hself := e₀.continuousLinearMapAt_symmL (R := Real) hxu0 v
+      have hself := eâ‚€.continuousLinearMapAt_symmL (R := Real) hxu0 v
       rw [h0, map_zero] at hself
       exact hself.symm
-    simp only [Q, LinearMap.mk₂_apply]
-    exact g.pos x (e₀.symmL Real x v) hSv
-  obtain ⟨b, hb⟩ := exists_orthonormalBasis_of_posDef Q hsymm hpos
-  have hsymmL : forall k, e₀.symmL Real x (b k) = e₀.localFrame b k x := fun k => by
-    rw [e₀.localFrame_apply_of_mem_baseSet (b := b) hxu0]
+    simp only [Q, LinearMap.mkâ‚‚_apply]
+    exact g.pos x (eâ‚€.symmL Real x v) hSv
+  obtain âŸ¨b, hbâŸ© := exists_orthonormalBasis_of_posDef Q hsymm hpos
+  have hsymmL : forall k, eâ‚€.symmL Real x (b k) = eâ‚€.localFrame b k x := fun k => by
+    rw [eâ‚€.localFrame_apply_of_mem_baseSet (b := b) hxu0]
     simp [Bundle.Trivialization.basisAt]
   have hgram :
       forall i j,
-        g.inner x (e₀.localFrame b i x) (e₀.localFrame b j x) =
+        g.inner x (eâ‚€.localFrame b i x) (eâ‚€.localFrame b j x) =
           if i = j then 1 else 0 := by
     intro i j
-    rw [← hsymmL i, ← hsymmL j]
-    simpa [Q, LinearMap.mk₂_apply] using hb i j
-  refine ⟨b, ?_⟩
-  intro e₀' frame u' hframe hxu' i j
-  have h1 : hframe.toBasisAt hxu' i = e₀'.localFrame b i x :=
+    rw [â† hsymmL i, â† hsymmL j]
+    simpa [Q, LinearMap.mkâ‚‚_apply] using hb i j
+  refine âŸ¨b, ?_âŸ©
+  intro eâ‚€' frame u' hframe hxu' i j
+  have h1 : hframe.toBasisAt hxu' i = eâ‚€'.localFrame b i x :=
     IsLocalFrameOn.toBasisAt_coe hframe hxu' i
-  have h2 : hframe.toBasisAt hxu' j = e₀'.localFrame b j x :=
+  have h2 : hframe.toBasisAt hxu' j = eâ‚€'.localFrame b j x :=
     IsLocalFrameOn.toBasisAt_coe hframe hxu' j
   rw [h1, h2]
   exact hgram i j
@@ -4912,26 +4946,26 @@ hypothesis of `connDiffEpsBound_one_of_trivON` is discharged pointwise by
 `exists_trivFrame_orthonormal_basis`, so no orthonormal-frame data is exposed to
 the caller. -/
 theorem connDiffEpsBound_one
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {K : Set M} {eps : Real} {p : Nat}
     {g h : SmoothRiemannianMetric I M}
     (Happrox : IsTwoSidedApproxIsometryOn (I := I) K eps p g h)
-    (hp : 2 ≤ p) (heps_lt : eps < 1) :
+    (hp : 2 â‰¤ p) (heps_lt : eps < 1) :
     ConnDiffEpsBoundOn (I := I) K eps g h 1
       (connDiffOneConst (Fin (Module.finrank Real E))) := by
   classical
   have key :
-      forall x : M, x ∈ K ->
+      forall x : M, x âˆˆ K ->
         exists basisE : Module.Basis (Fin (Module.finrank Real E)) Real E,
-          let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+          let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
           let frame : Fin (Module.finrank Real E) -> (y : M) -> TangentSpace I y :=
-            fun i y => e₀.localFrame basisE i y
-          let u : Set M := e₀.baseSet
-          let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-            e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) basisE
-          let hxu : x ∈ u :=
+            fun i y => eâ‚€.localFrame basisE i y
+          let u : Set M := eâ‚€.baseSet
+          let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+            eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) basisE
+          let hxu : x âˆˆ u :=
             mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
           forall i j : Fin (Module.finrank Real E),
             g.inner x (hframe.toBasisAt hxu i) (hframe.toBasisAt hxu j) =
@@ -4946,26 +4980,26 @@ This is the public `k = 2` endpoint.  It chooses the same pointwise
 orthonormal trivialization basis used by the `k = 1` endpoint, so no local-frame
 data is exposed to callers. -/
 theorem connDiffEpsBound_two
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {K : Set M} {eps : Real} {p : Nat}
     {g h : SmoothRiemannianMetric I M}
     (Happrox : IsTwoSidedApproxIsometryOn (I := I) K eps p g h)
-    (hp : 3 ≤ p) (heps_lt : eps < 1) :
+    (hp : 3 â‰¤ p) (heps_lt : eps < 1) :
     ConnDiffEpsBoundOn (I := I) K eps g h 2
       (connDiffTwoConst (Fin (Module.finrank Real E))) := by
   classical
   have key :
-      forall x : M, x ∈ K ->
+      forall x : M, x âˆˆ K ->
         exists basisE : Module.Basis (Fin (Module.finrank Real E)) Real E,
-          let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+          let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
           let frame : Fin (Module.finrank Real E) -> (y : M) -> TangentSpace I y :=
-            fun i y => e₀.localFrame basisE i y
-          let u : Set M := e₀.baseSet
-          let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-            e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) basisE
-          let hxu : x ∈ u :=
+            fun i y => eâ‚€.localFrame basisE i y
+          let u : Set M := eâ‚€.baseSet
+          let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+            eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) basisE
+          let hxu : x âˆˆ u :=
             mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
           forall i j : Fin (Module.finrank Real E),
             g.inner x (hframe.toBasisAt hxu i) (hframe.toBasisAt hxu j) =
@@ -4978,7 +5012,7 @@ theorem connDiffEpsBound_two
 exposed to the caller.  The pointwise orthonormal tangent basis is chosen from
 the canonical tangent trivialization. -/
 theorem connDiffEpsBound_zero_std
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {K : Set M} {eps : Real} {p : Nat}
@@ -4988,34 +5022,34 @@ theorem connDiffEpsBound_zero_std
     ConnDiffEpsBoundOn (I := I) K eps g h 0 12 := by
   classical
   have key :
-      forall x : M, x ∈ K ->
+      forall x : M, x âˆˆ K ->
         exists basisE : Module.Basis (Fin (Module.finrank Real E)) Real E,
-          let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+          let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
           let frame : Fin (Module.finrank Real E) -> (y : M) -> TangentSpace I y :=
-            fun i y => e₀.localFrame basisE i y
-          let u : Set M := e₀.baseSet
-          let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-            e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) basisE
-          let hxu : x ∈ u :=
+            fun i y => eâ‚€.localFrame basisE i y
+          let u : Set M := eâ‚€.baseSet
+          let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+            eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) basisE
+          let hxu : x âˆˆ u :=
             mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
           forall i j : Fin (Module.finrank Real E),
             g.inner x (hframe.toBasisAt hxu i) (hframe.toBasisAt hxu j) =
               if i = j then 1 else 0 :=
     fun x _ => exists_trivFrame_orthonormal_basis (I := I) g x
   choose basisE hON using key
-  let basis : forall x : M, x ∈ K ->
+  let basis : forall x : M, x âˆˆ K ->
       Module.Basis (Fin (Module.finrank Real E)) Real (TangentSpace I x) :=
     fun x hx =>
-      let e₀ := trivializationAt E (TangentSpace I : M -> Type _) x
+      let eâ‚€ := trivializationAt E (TangentSpace I : M -> Type _) x
       let frame : Fin (Module.finrank Real E) -> (y : M) -> TangentSpace I y :=
-        fun i y => e₀.localFrame (basisE x hx) i y
-      let u : Set M := e₀.baseSet
-      let hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u :=
-        e₀.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) (basisE x hx)
-      let hxu : x ∈ u :=
+        fun i y => eâ‚€.localFrame (basisE x hx) i y
+      let u : Set M := eâ‚€.baseSet
+      let hframe : IsLocalFrameOn I E (âˆž : WithTop â„•âˆž) frame u :=
+        eâ‚€.isLocalFrameOn_localFrame_baseSet I (âˆž : WithTop â„•âˆž) (basisE x hx)
+      let hxu : x âˆˆ u :=
         mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x
       hframe.toBasisAt hxu
-  have hinv : forall x : M, forall hx : x ∈ K,
+  have hinv : forall x : M, forall hx : x âˆˆ K,
       Tensor0SBundle.MetricInverseInBasis
         (I := I) g x (basis x hx)
         (Tensor0SBundle.identityInvMetric
@@ -5051,7 +5085,7 @@ def connDiffEpsConst_three
 This is the uniform package consumed before starting the genuine higher-order
 Christoffel/product-rule induction. -/
 theorem connDiffEpsBounds_two
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {K : Set M} {eps : Real} {p : Nat}
@@ -5079,7 +5113,7 @@ theorem connDiffEpsBounds_two
 This packages the checked base range before the genuinely general higher-order
 Christoffel/product-rule induction. -/
 theorem connDiffEpsBounds_three
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     [ContMDiffVectorBundle 1 E (TangentSpace I : M -> Type _) I]
     {K : Set M} {eps : Real} {p : Nat}
@@ -5117,54 +5151,54 @@ tensor identity `totalNablaSub_eq_connActTensor` to Levi-Civita connections of
 `h` and `g`, so the difference of the supplied total covariant derivatives is
 the zeroth-order connection-difference action on `T`. -/
 theorem nabla_component_eq_base_plus_connAct_components_trivFrame
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     {g h : SmoothRiemannianMetric I M}
     {x : M}
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (basis : Module.Basis Idx Real (TangentSpace I x))
     {r s : Nat}
     (T : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) r s)
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) r s)
     (nablaH nablaG : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) r (s + 1))
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) r (s + 1))
     (hrealH : Tensor0SBundle.TotalNablaRSRealizes
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) r s
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M) r s
       (LeviCivita.leviCivitaConnectionOfMetric (I := I) h) T nablaH)
     (hrealG : Tensor0SBundle.TotalNablaRSRealizes
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) r s
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M) r s
       (LeviCivita.leviCivitaConnectionOfMetric (I := I) g) T nablaG)
-    (β : (Fin r -> Idx) -> (y : M) -> Tensor0SBundle.Tensor0SSpace
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) r y)
+    (Î² : (Fin r -> Idx) -> (y : M) -> Tensor0SBundle.Tensor0SSpace
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M) r y)
     (Xfield : Idx ->
-      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+      ContMDiffSection I E (âˆž : WithTop â„•âˆž) (TangentSpace I : M -> Type _))
     (V : Idx -> (y : M) -> TangentSpace I y)
     (hX_at : forall i : Idx, Xfield i x = basis i)
-    (hβ_at : forall upper : Fin r -> Idx,
-      β upper x = Tensor0SBundle.basisTensor0S (I := I) basis upper)
+    (hÎ²_at : forall upper : Fin r -> Idx,
+      Î² upper x = Tensor0SBundle.basisTensor0S (I := I) basis upper)
     (hV_at : forall i : Idx, V i x = basis i)
     (hT_diff : forall upper : Fin r -> Idx, forall lower : Fin (s + 1) -> Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
-        (fun y : M => (T y (β upper y)) (fun a : Fin s => V (lower a.succ) y)) x)
-    (hβ_diff : forall upper : Fin r -> Idx, forall slots : Fin r -> Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
-        (fun y : M => β upper y (fun a : Fin r => V (slots a) y)) x)
-    (hβmodel : forall upper : Fin r -> Idx, DifferentiableWithinAt Real
+      MDifferentiableAt I ð“˜(Real, Real)
+        (fun y : M => (T y (Î² upper y)) (fun a : Fin s => V (lower a.succ) y)) x)
+    (hÎ²_diff : forall upper : Fin r -> Idx, forall slots : Fin r -> Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
+        (fun y : M => Î² upper y (fun a : Fin r => V (slots a) y)) x)
+    (hÎ²model : forall upper : Fin r -> Idx, DifferentiableWithinAt Real
       (TensorLieDeriv.tensor0SModelInChart
-        (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) r x (β upper))
+        (ð•œ := Real) (E := E) (H := H) (I := I) (M := M) r x (Î² upper))
       (Set.range I) (extChartAt I x x))
     (hV : forall i : Idx, MDiffAt (T% (V i)) x)
     (hVmodel : forall i : Idx,
       DifferentiableWithinAt Real
-        (TensorLieDeriv.tangentFieldModelInChart (𝕜 := Real) (I := I) x (V i))
+        (TensorLieDeriv.tangentFieldModelInChart (ð•œ := Real) (I := I) x (V i))
         (Set.range I) (extChartAt I x x))
     (hcoord : forall i : Idx, forall j : Fin (Module.finrank Real E),
-      MDifferentiableAt I 𝓘(Real, Real)
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           (Module.finBasis Real E).coord j
             (TensorLieDeriv.tangentFieldModelInChart
-              (𝕜 := Real) (I := I) x (V i) (extChartAt I x y))) x)
+              (ð•œ := Real) (I := I) x (V i) (extChartAt I x y))) x)
     (upper : Fin r -> Idx) (lower : Fin (s + 1) -> Idx) :
     Tensor0SBundle.componentRS (I := I) basis (nablaH x - nablaG x) upper lower =
       Tensor0SBundle.connActComp
@@ -5188,8 +5222,8 @@ theorem nabla_component_eq_base_plus_connAct_components_trivFrame
           (T x) :=
     Tensor0SBundle.totalNablaSub_eq_connActTensor
       (I := I) (r := r) (s := s) (Idx := Idx)
-      covh covg T nablaH nablaG hrealH hrealG β x basis
-      Xfield V hX_at hβ_at hV_at hT_diff hβ_diff hβmodel hV hVmodel hcoord
+      covh covg T nablaH nablaG hrealH hrealG Î² x basis
+      Xfield V hX_at hÎ²_at hV_at hT_diff hÎ²_diff hÎ²model hV hVmodel hcoord
   calc
     Tensor0SBundle.componentRS (I := I) basis (nablaH x - nablaG x) upper lower
         =
@@ -5223,7 +5257,7 @@ theorem connAct_le_approx
     {K : Set M} {eps : Real} {p : Nat}
     {g h : SmoothRiemannianMetric I M}
     (Happrox : IsApproxIsometryOn (I := I) K eps p g h)
-    {x : M} (hx : x ∈ K) (hp : 1 <= p)
+    {x : M} (hx : x âˆˆ K) (hp : 1 <= p)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (hinv :
@@ -5299,54 +5333,54 @@ connection-difference estimate `connAct_le_approx`.  It is still a local-frame
 component statement: the later F3 induction/norm packaging consumes this
 component estimate and the existing finite-dimensional tensor norm comparison. -/
 theorem nablaRS_component_le_approx
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     {K : Set M} {eps : Real} {p : Nat}
     {g h : SmoothRiemannianMetric I M}
     (Happrox : IsApproxIsometryOn (I := I) K eps p g h)
-    {x : M} (hx : x ∈ K) (hp : 1 <= p)
+    {x : M} (hx : x âˆˆ K) (hp : 1 <= p)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (hinv :
       Tensor0SBundle.MetricInverseInBasis
         (I := I) h x basis (Tensor0SBundle.identityInvMetric (Idx := Idx)))
     {r s : Nat}
-    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+    (X : ContMDiffSection I E (âˆž : WithTop â„•âˆž) (TangentSpace I : M -> Type _))
     (T : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) r s)
-    (β : (y : M) -> Tensor0SBundle.Tensor0SSpace
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) r y)
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) r s)
+    (Î² : (y : M) -> Tensor0SBundle.Tensor0SSpace
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M) r y)
     (V : Idx -> (y : M) -> TangentSpace I y)
     (upper : Fin r -> Idx) (lower : Fin (s + 1) -> Idx)
     (hX_at : X x = basis (lower 0))
-    (hβ_at : β x = Tensor0SBundle.basisTensor0S (I := I) basis upper)
+    (hÎ²_at : Î² x = Tensor0SBundle.basisTensor0S (I := I) basis upper)
     (hV_at : forall i : Idx, V i x = basis i)
-    (hpairT : MDifferentiableAt I 𝓘(Real, Real)
-      (fun y : M => (T y (β y)) (fun a : Fin s => V (lower a.succ) y)) x)
-    (hpairβ : forall slots : Fin r -> Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
-        (fun y : M => β y (fun a : Fin r => V (slots a) y)) x)
-    (hβmodel : DifferentiableWithinAt Real
+    (hpairT : MDifferentiableAt I ð“˜(Real, Real)
+      (fun y : M => (T y (Î² y)) (fun a : Fin s => V (lower a.succ) y)) x)
+    (hpairÎ² : forall slots : Fin r -> Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
+        (fun y : M => Î² y (fun a : Fin r => V (slots a) y)) x)
+    (hÎ²model : DifferentiableWithinAt Real
       (TensorLieDeriv.tensor0SModelInChart
-        (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) r x β)
+        (ð•œ := Real) (E := E) (H := H) (I := I) (M := M) r x Î²)
       (Set.range I) (extChartAt I x x))
     (hV : forall i : Idx, MDiffAt (T% (V i)) x)
     (hVmodel : forall i : Idx,
       DifferentiableWithinAt Real
-        (TensorLieDeriv.tangentFieldModelInChart (𝕜 := Real) (I := I) x (V i))
+        (TensorLieDeriv.tangentFieldModelInChart (ð•œ := Real) (I := I) x (V i))
         (Set.range I) (extChartAt I x x))
     (hcoord : forall i : Idx, forall j : Fin (Module.finrank Real E),
-      MDifferentiableAt I 𝓘(Real, Real)
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           (Module.finBasis Real E).coord j
             (TensorLieDeriv.tangentFieldModelInChart
-              (𝕜 := Real) (I := I) x (V i) (extChartAt I x y))) x) :
+              (ð•œ := Real) (I := I) x (V i) (extChartAt I x y))) x) :
     |Tensor0SBundle.componentRS (I := I) basis
         (Tensor0SBundle.nablaRSFun
-            (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+            (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
             r s (LeviCivita.leviCivitaConnectionOfMetric (I := I) h) X T x -
           Tensor0SBundle.nablaRSFun
-            (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+            (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
             r s (LeviCivita.leviCivitaConnectionOfMetric (I := I) g) X T x)
         upper (fun b : Fin s => lower b.succ)| <=
       Tensor0SBundle.connActConst (Idx := Idx) r s
@@ -5357,16 +5391,16 @@ theorem nablaRS_component_le_approx
   let covh := LeviCivita.leviCivitaConnectionOfMetric (I := I) h
   let covg := LeviCivita.leviCivitaConnectionOfMetric (I := I) g
   have hcomp := Tensor0SBundle.componentRS_nablaRSFun_sub
-    (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-    (r := r) (s := s) covh covg X T β x basis V upper lower
-    hX_at hβ_at hV_at hpairT hpairβ hβmodel hV hVmodel hcoord
+    (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+    (r := r) (s := s) covh covg X T Î² x basis V upper lower
+    hX_at hÎ²_at hV_at hpairT hpairÎ² hÎ²model hV hVmodel hcoord
   have hconn :
       Tensor0SBundle.componentRS (I := I) basis
           (Tensor0SBundle.nablaRSFun
-              (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+              (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
               r s covh X T x -
             Tensor0SBundle.nablaRSFun
-              (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+              (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
               r s covg X T x)
           upper (fun b : Fin s => lower b.succ) =
         Tensor0SBundle.connActComp
@@ -5381,19 +5415,19 @@ theorem nablaRS_component_le_approx
     calc
       Tensor0SBundle.componentRS (I := I) basis
           (Tensor0SBundle.nablaRSFun
-              (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+              (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
               r s covh X T x -
             Tensor0SBundle.nablaRSFun
-              (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+              (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
               r s covg X T x)
           upper (fun b : Fin s => lower b.succ)
           =
-        (∑ a : Fin r, ∑ k : Idx,
+        (âˆ‘ a : Fin r, âˆ‘ k : Idx,
           basis.coord (upper a)
             (((CovariantDerivative.difference covh covg x) (basis k)) (basis (lower 0))) *
             Tensor0SBundle.componentRS (I := I) basis (T x) (Function.update upper a k)
               (fun b : Fin s => lower b.succ)) -
-        (∑ b : Fin s, ∑ k : Idx,
+        (âˆ‘ b : Fin s, âˆ‘ k : Idx,
           basis.coord k
             (((CovariantDerivative.difference covh covg x) (basis (lower b.succ)))
               (basis (lower 0))) *
@@ -5533,7 +5567,7 @@ theorem nablaRSOneError_hpart
     {K : Set M} {eps : Real} {p : Nat}
     {g h : SmoothRiemannianMetric I M}
     (Happrox : IsApproxIsometryOn (I := I) K eps p g h)
-    {x : M} (hx : x ∈ K)
+    {x : M} (hx : x âˆˆ K)
     {Idx : Type*} [Fintype Idx]
     {r s : Nat}
     (T : Tensor0SBundle.TensorRSSpace r s I x) :
@@ -5620,7 +5654,7 @@ theorem nablaRSOneError_hpart
           Real.sqrt
             (Tensor0SBundle.normSqRS
               (I := I) (g := g) (x := x) r s T))) ^ 2 :=
-    (sq_le_sq₀ hB_h_nonneg hB_g_nonneg).2 hB_le
+    (sq_le_sqâ‚€ hB_h_nonneg hB_g_nonneg).2 hB_le
   have hcardUpper_nonneg :
       0 <= (Fintype.card (Fin r -> Idx) : Real) := by
     positivity
@@ -5638,7 +5672,7 @@ theorem nablaRSOneError_of_comps
     {K : Set M} {eps : Real} {p : Nat}
     {g h : SmoothRiemannianMetric I M}
     (Happrox : IsApproxIsometryOn (I := I) K eps p g h)
-    {x : M} (hx : x ∈ K)
+    {x : M} (hx : x âˆˆ K)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (hinv :
@@ -5700,7 +5734,7 @@ theorem nablaRS_one_le_approx_comps
     {K : Set M} {eps : Real} {p : Nat}
     {g h : SmoothRiemannianMetric I M}
     (Happrox : IsApproxIsometryOn (I := I) K eps p g h)
-    {x : M} (hx : x ∈ K)
+    {x : M} (hx : x âˆˆ K)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (basis : Module.Basis Idx Real (TangentSpace I x))
     (hinv :
@@ -5745,11 +5779,11 @@ book estimate with the zero-order connection-difference epsilon bound.  The
 remaining higher-order Lemma 4.5 work is the iterated product-rule realization
 for repeated `h`-derivatives of the connection-difference action. -/
 theorem nablaRS_one_le_approx_total
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     {K : Set M} {eps : Real} {p : Nat}
     {g h : SmoothRiemannianMetric I M}
     (Happrox : IsApproxIsometryOn (I := I) K eps p g h)
-    {x : M} (hx : x ∈ K) (hp : 1 <= p) (heps_lt : eps < 1)
+    {x : M} (hx : x âˆˆ K) (hp : 1 <= p) (heps_lt : eps < 1)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (basisG basisH : Module.Basis Idx Real (TangentSpace I x))
     (hinvG :
@@ -5760,47 +5794,47 @@ theorem nablaRS_one_le_approx_total
         (I := I) h x basisH (Tensor0SBundle.identityInvMetric (Idx := Idx)))
     {r s : Nat}
     (T : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) r s)
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) r s)
     (nablaH nablaG : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) r (s + 1))
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) r (s + 1))
     (hrealH : Tensor0SBundle.TotalNablaRSRealizes
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) r s
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M) r s
       (LeviCivita.leviCivitaConnectionOfMetric (I := I) h) T nablaH)
     (hrealG : Tensor0SBundle.TotalNablaRSRealizes
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) r s
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M) r s
       (LeviCivita.leviCivitaConnectionOfMetric (I := I) g) T nablaG)
-    (β : (Fin r -> Idx) -> (y : M) -> Tensor0SBundle.Tensor0SSpace
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) r y)
+    (Î² : (Fin r -> Idx) -> (y : M) -> Tensor0SBundle.Tensor0SSpace
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M) r y)
     (Xfield : Idx ->
-      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+      ContMDiffSection I E (âˆž : WithTop â„•âˆž) (TangentSpace I : M -> Type _))
     (V : Idx -> (y : M) -> TangentSpace I y)
     (hX_at : forall i : Idx, Xfield i x = basisG i)
-    (hβ_at : forall upper : Fin r -> Idx,
-      β upper x = Tensor0SBundle.basisTensor0S (I := I) basisG upper)
+    (hÎ²_at : forall upper : Fin r -> Idx,
+      Î² upper x = Tensor0SBundle.basisTensor0S (I := I) basisG upper)
     (hV_at : forall i : Idx, V i x = basisG i)
     (hpairT : forall upper : Fin r -> Idx, forall lower : Fin (s + 1) -> Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
-        (fun y : M => (T y (β upper y)) (fun a : Fin s => V (lower a.succ) y)) x)
-    (hpairβ : forall upper : Fin r -> Idx, forall slots : Fin r -> Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
-        (fun y : M => β upper y (fun a : Fin r => V (slots a) y)) x)
-    (hβmodel : forall upper : Fin r -> Idx, DifferentiableWithinAt Real
+      MDifferentiableAt I ð“˜(Real, Real)
+        (fun y : M => (T y (Î² upper y)) (fun a : Fin s => V (lower a.succ) y)) x)
+    (hpairÎ² : forall upper : Fin r -> Idx, forall slots : Fin r -> Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
+        (fun y : M => Î² upper y (fun a : Fin r => V (slots a) y)) x)
+    (hÎ²model : forall upper : Fin r -> Idx, DifferentiableWithinAt Real
       (TensorLieDeriv.tensor0SModelInChart
-        (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) r x (β upper))
+        (ð•œ := Real) (E := E) (H := H) (I := I) (M := M) r x (Î² upper))
       (Set.range I) (extChartAt I x x))
     (hV : forall i : Idx, MDiffAt (T% (V i)) x)
     (hVmodel : forall i : Idx,
       DifferentiableWithinAt Real
-        (TensorLieDeriv.tangentFieldModelInChart (𝕜 := Real) (I := I) x (V i))
+        (TensorLieDeriv.tangentFieldModelInChart (ð•œ := Real) (I := I) x (V i))
         (Set.range I) (extChartAt I x x))
     (hcoord : forall i : Idx, forall j : Fin (Module.finrank Real E),
-      MDifferentiableAt I 𝓘(Real, Real)
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           (Module.finBasis Real E).coord j
             (TensorLieDeriv.tangentFieldModelInChart
-              (𝕜 := Real) (I := I) x (V i) (extChartAt I x y))) x) :
+              (ð•œ := Real) (I := I) x (V i) (extChartAt I x y))) x) :
     Real.sqrt
         (Tensor0SBundle.normSqRS
           (I := I) (g := g) (x := x) r (s + 1)
@@ -5833,8 +5867,8 @@ theorem nablaRS_one_le_approx_total
     (I := I) (M := M) (Idx := Idx) g
     (LeviCivita.leviCivitaConnectionOfMetric (I := I) h)
     (LeviCivita.leviCivitaConnectionOfMetric (I := I) g)
-    T nablaH nablaG hrealH hrealG β x basisG hinvG Xfield V
-    hX_at hβ_at hV_at hpairT hpairβ hβmodel hV hVmodel hcoord
+    T nablaH nablaG hrealH hrealG Î² x basisG hinvG Xfield V
+    hX_at hÎ²_at hV_at hpairT hpairÎ² hÎ²model hV hVmodel hcoord
     heps_nonneg hA le_rfl
 
 /-- Book-facing first-order estimate in MSM135 Chapter 4, Lemma
@@ -5842,14 +5876,14 @@ theorem nablaRS_one_le_approx_total
 
 This is the `r = 1` case of the induction, phrased as an HCG endpoint.  It
 uses only the zero-order connection-difference estimate
-`|Γ_g - Γ_h|_g <= C * eps`; derivatives of `Γ_g - Γ_h` belong to the later
+`|Î“_g - Î“_h|_g <= C * eps`; derivatives of `Î“_g - Î“_h` belong to the later
 higher-order producer. -/
 theorem hcg_first_order_nabla_norm_estimate
-    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I ((âˆž : WithTop â„•âˆž) + 1) M]
     {K : Set M} {eps : Real} {p : Nat}
     {g h : SmoothRiemannianMetric I M}
     (Happrox : IsApproxIsometryOn (I := I) K eps p g h)
-    {x : M} (hx : x ∈ K) (hp : 1 <= p) (heps_lt : eps < 1)
+    {x : M} (hx : x âˆˆ K) (hp : 1 <= p) (heps_lt : eps < 1)
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (basisG basisH : Module.Basis Idx Real (TangentSpace I x))
     (hinvG :
@@ -5860,47 +5894,47 @@ theorem hcg_first_order_nabla_norm_estimate
         (I := I) h x basisH (Tensor0SBundle.identityInvMetric (Idx := Idx)))
     {r s : Nat}
     (T : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) r s)
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) r s)
     (nablaH nablaG : Tensor0SBundle.TensorRSField
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-      (n := (∞ : WithTop ℕ∞)) r (s + 1))
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (âˆž : WithTop â„•âˆž)) r (s + 1))
     (hrealH : Tensor0SBundle.TotalNablaRSRealizes
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) r s
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M) r s
       (LeviCivita.leviCivitaConnectionOfMetric (I := I) h) T nablaH)
     (hrealG : Tensor0SBundle.TotalNablaRSRealizes
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) r s
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M) r s
       (LeviCivita.leviCivitaConnectionOfMetric (I := I) g) T nablaG)
-    (β : (Fin r -> Idx) -> (y : M) -> Tensor0SBundle.Tensor0SSpace
-      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) r y)
+    (Î² : (Fin r -> Idx) -> (y : M) -> Tensor0SBundle.Tensor0SSpace
+      (ð•œ := Real) (E := E) (H := H) (I := I) (M := M) r y)
     (Xfield : Idx ->
-      ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
+      ContMDiffSection I E (âˆž : WithTop â„•âˆž) (TangentSpace I : M -> Type _))
     (V : Idx -> (y : M) -> TangentSpace I y)
     (hX_at : forall i : Idx, Xfield i x = basisG i)
-    (hβ_at : forall upper : Fin r -> Idx,
-      β upper x = Tensor0SBundle.basisTensor0S (I := I) basisG upper)
+    (hÎ²_at : forall upper : Fin r -> Idx,
+      Î² upper x = Tensor0SBundle.basisTensor0S (I := I) basisG upper)
     (hV_at : forall i : Idx, V i x = basisG i)
     (hT_diff : forall upper : Fin r -> Idx, forall lower : Fin (s + 1) -> Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
-        (fun y : M => (T y (β upper y)) (fun a : Fin s => V (lower a.succ) y)) x)
-    (hβ_diff : forall upper : Fin r -> Idx, forall slots : Fin r -> Idx,
-      MDifferentiableAt I 𝓘(Real, Real)
-        (fun y : M => β upper y (fun a : Fin r => V (slots a) y)) x)
-    (hβmodel : forall upper : Fin r -> Idx, DifferentiableWithinAt Real
+      MDifferentiableAt I ð“˜(Real, Real)
+        (fun y : M => (T y (Î² upper y)) (fun a : Fin s => V (lower a.succ) y)) x)
+    (hÎ²_diff : forall upper : Fin r -> Idx, forall slots : Fin r -> Idx,
+      MDifferentiableAt I ð“˜(Real, Real)
+        (fun y : M => Î² upper y (fun a : Fin r => V (slots a) y)) x)
+    (hÎ²model : forall upper : Fin r -> Idx, DifferentiableWithinAt Real
       (TensorLieDeriv.tensor0SModelInChart
-        (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) r x (β upper))
+        (ð•œ := Real) (E := E) (H := H) (I := I) (M := M) r x (Î² upper))
       (Set.range I) (extChartAt I x x))
     (hV : forall i : Idx, MDiffAt (T% (V i)) x)
     (hVmodel : forall i : Idx,
       DifferentiableWithinAt Real
-        (TensorLieDeriv.tangentFieldModelInChart (𝕜 := Real) (I := I) x (V i))
+        (TensorLieDeriv.tangentFieldModelInChart (ð•œ := Real) (I := I) x (V i))
         (Set.range I) (extChartAt I x x))
     (hcoord : forall i : Idx, forall j : Fin (Module.finrank Real E),
-      MDifferentiableAt I 𝓘(Real, Real)
+      MDifferentiableAt I ð“˜(Real, Real)
         (fun y : M =>
           (Module.finBasis Real E).coord j
             (TensorLieDeriv.tangentFieldModelInChart
-              (𝕜 := Real) (I := I) x (V i) (extChartAt I x y))) x) :
+              (ð•œ := Real) (I := I) x (V i) (extChartAt I x y))) x) :
     Real.sqrt
         (Tensor0SBundle.normSqRS
           (I := I) (g := g) (x := x) r (s + 1)
@@ -5916,10 +5950,11 @@ theorem hcg_first_order_nabla_norm_estimate
   exact
     nablaRS_one_le_approx_total
       (I := I) Happrox hx hp heps_lt basisG basisH hinvG hinvH
-      T nablaH nablaG hrealH hrealG β Xfield V hX_at hβ_at hV_at
-      hT_diff hβ_diff hβmodel hV hVmodel hcoord
+      T nablaH nablaG hrealH hrealG Î² Xfield V hX_at hÎ²_at hV_at
+      hT_diff hÎ²_diff hÎ²model hV hVmodel hcoord
 
 end FixedDomain
 
 end HCGCompactness
 end DifferentialGeometry
+```

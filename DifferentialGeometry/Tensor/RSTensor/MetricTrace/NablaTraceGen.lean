@@ -861,6 +861,182 @@ theorem metricTraceFirstTwoField_zero {s : ℕ}
 -- is only pinned once a concrete-rank function fixes it).  They are handled inline at the
 -- concrete witness ranks in the producer composition instead.
 
+/-! ## `∇` through the first-two metric trace, field (realizer) level
+
+`nabla_metricTraceFirstTwo0S` is the *evaluated* commutation; here it is lifted to a
+field-level `TotalNabla0SRealizes` statement (the form `StarSum2.nabla` consumes).  `∇`
+prepends a derivative slot at position `0`; tracing the (shifted) original first-two slots
+requires moving that new slot past the pair, encoded by `traceNablaShuffle`. -/
+
+/-- The slot shuffle for `∇` through `metricTraceFirstTwoField`: the 3-cycle
+`0 ↦ 2, 1 ↦ 0, 2 ↦ 1` on `Fin (s+3)` (identity on the tail). -/
+def traceNablaShuffle (s : ℕ) : Equiv.Perm (Fin (s + 2 + 1)) :=
+  (Equiv.swap 0 2).trans (Equiv.swap 0 1)
+
+private theorem tns_c1 (s : ℕ) : ((1 : Fin (s + 2 + 1)) : ℕ) = 1 := by simp
+private theorem tns_c2 (s : ℕ) : ((2 : Fin (s + 2 + 1)) : ℕ) = 2 := by simp
+
+@[simp] theorem traceNablaShuffle_zero (s : ℕ) : traceNablaShuffle s 0 = 2 := by
+  have h20 : (2 : Fin (s + 2 + 1)) ≠ 0 := by rw [Ne, Fin.ext_iff, tns_c2, Fin.val_zero]; omega
+  have h21 : (2 : Fin (s + 2 + 1)) ≠ 1 := by rw [Ne, Fin.ext_iff, tns_c2, tns_c1]; omega
+  simp only [traceNablaShuffle, Equiv.trans_apply, Equiv.swap_apply_left,
+    Equiv.swap_apply_of_ne_of_ne h20 h21]
+
+@[simp] theorem traceNablaShuffle_one (s : ℕ) : traceNablaShuffle s 1 = 0 := by
+  have h10 : (1 : Fin (s + 2 + 1)) ≠ 0 := by rw [Ne, Fin.ext_iff, tns_c1, Fin.val_zero]; omega
+  have h12 : (1 : Fin (s + 2 + 1)) ≠ 2 := by rw [Ne, Fin.ext_iff, tns_c1, tns_c2]; omega
+  simp only [traceNablaShuffle, Equiv.trans_apply,
+    Equiv.swap_apply_of_ne_of_ne h10 h12, Equiv.swap_apply_right]
+
+@[simp] theorem traceNablaShuffle_two (s : ℕ) : traceNablaShuffle s 2 = 1 := by
+  simp only [traceNablaShuffle, Equiv.trans_apply, Equiv.swap_apply_right, Equiv.swap_apply_left]
+
+theorem traceNablaShuffle_val_ge (s : ℕ) (p : Fin (s + 2 + 1)) (hp : 3 ≤ (p : ℕ)) :
+    traceNablaShuffle s p = p := by
+  have hp0 : p ≠ 0 := by rw [Ne, Fin.ext_iff, Fin.val_zero]; omega
+  have hp1 : p ≠ 1 := by rw [Ne, Fin.ext_iff, tns_c1]; omega
+  have hp2 : p ≠ 2 := by rw [Ne, Fin.ext_iff, tns_c2]; omega
+  simp only [traceNablaShuffle, Equiv.trans_apply,
+    Equiv.swap_apply_of_ne_of_ne hp0 hp2, Equiv.swap_apply_of_ne_of_ne hp0 hp1]
+
+/-- Full `val` description of the shuffle. -/
+theorem traceNablaShuffle_val (s : ℕ) (p : Fin (s + 2 + 1)) :
+    ((traceNablaShuffle s p : Fin (s + 2 + 1)) : ℕ) =
+      if (p : ℕ) = 0 then 2 else if (p : ℕ) = 1 then 0 else if (p : ℕ) = 2 then 1
+        else (p : ℕ) := by
+  rcases eq_or_ne (p : ℕ) 0 with h0 | h0
+  · rw [show p = 0 from Fin.ext (by rw [Fin.val_zero]; exact h0), traceNablaShuffle_zero, tns_c2,
+      Fin.val_zero, if_pos rfl]
+  · rcases eq_or_ne (p : ℕ) 1 with h1 | h1
+    · rw [show p = 1 from Fin.ext (by rw [tns_c1]; exact h1), traceNablaShuffle_one, Fin.val_zero,
+        tns_c1, if_neg (by omega), if_pos rfl]
+    · rcases eq_or_ne (p : ℕ) 2 with h2 | h2
+      · rw [show p = 2 from Fin.ext (by rw [tns_c2]; exact h2), traceNablaShuffle_two, tns_c1,
+          tns_c2, if_neg (by omega), if_neg (by omega), if_pos rfl]
+      · rw [traceNablaShuffle_val_ge s p (by omega), if_neg h0, if_neg h1, if_neg h2]
+
+/-- Hypothesis-form single-`Fin.cons` evaluator with explicit constant motive (bare `Fin.cons`'s
+dependent motive is not inferred in `rw` position). -/
+private theorem consPredVal {V : Type*} {n : ℕ} (c : V) (f : Fin n → V) (q : Fin (n + 1))
+    (hq : q ≠ 0) : @Fin.cons n (fun _ => V) c f q = f (q.pred hq) := by
+  have h := Fin.cons_succ (α := fun _ => V) c f (q.pred hq)
+  rw [Fin.succ_pred] at h
+  exact h
+
+/-- **The slot identity for the `∇`–trace shuffle**: precomposing the trace-input tuple
+`[a, b, Z, tail…]` with the shuffle yields `[Z, a, b, tail…]`. -/
+theorem traceNablaShuffle_metricTraceInput {x : M} {s : ℕ}
+    (a b Z : TangentSpace I x) (tail : Fin s -> TangentSpace I x) :
+    metricTraceInput (I := I) a b (Fin.cons Z tail) ∘ traceNablaShuffle s =
+      Fin.cons Z (metricTraceInput (I := I) a b tail) := by
+  funext p
+  simp only [Function.comp_apply]
+  change (Fin.cons a (Fin.cons b (Fin.cons Z tail)) : Fin (s + 2 + 1) → TangentSpace I x)
+      (traceNablaShuffle s p)
+    = (Fin.cons Z (Fin.cons a (Fin.cons b tail)) : Fin (s + 2 + 1) → TangentSpace I x) p
+  have hv := traceNablaShuffle_val s p
+  rcases eq_or_ne (p : ℕ) 0 with h0 | h0
+  · have hp : p = 0 := Fin.ext (by rw [Fin.val_zero]; exact h0)
+    have hs : traceNablaShuffle s p ≠ 0 := by
+      rw [Ne, Fin.ext_iff, Fin.val_zero, hv, if_pos h0]; omega
+    rw [consPredVal a _ _ hs]
+    have hs1 : (traceNablaShuffle s p).pred hs ≠ 0 := by
+      rw [Ne, Fin.ext_iff, Fin.val_zero, Fin.val_pred, hv, if_pos h0]; omega
+    rw [consPredVal b _ _ hs1]
+    rw [show ((traceNablaShuffle s p).pred hs).pred hs1 = 0 from
+      Fin.ext (by rw [Fin.val_zero, Fin.val_pred, Fin.val_pred, hv, if_pos h0]), Fin.cons_zero]
+    rw [hp, Fin.cons_zero]
+  · have hp0 : p ≠ 0 := by rw [Ne, Fin.ext_iff, Fin.val_zero]; exact h0
+    rw [consPredVal Z _ _ hp0]
+    rcases eq_or_ne (p : ℕ) 1 with h1 | h1
+    · rw [show traceNablaShuffle s p = 0 from
+        Fin.ext (by rw [Fin.val_zero, hv, if_neg h0, if_pos h1]), Fin.cons_zero]
+      rw [show p.pred hp0 = 0 from Fin.ext (by rw [Fin.val_zero, Fin.val_pred]; omega), Fin.cons_zero]
+    · rcases eq_or_ne (p : ℕ) 2 with h2 | h2
+      · have hs : traceNablaShuffle s p ≠ 0 := by
+          rw [Ne, Fin.ext_iff, Fin.val_zero, hv, if_neg h0, if_neg h1, if_pos h2]; omega
+        rw [consPredVal a _ _ hs]
+        rw [show (traceNablaShuffle s p).pred hs = 0 from
+          Fin.ext (by rw [Fin.val_zero, Fin.val_pred, hv, if_neg h0, if_neg h1, if_pos h2]),
+          Fin.cons_zero]
+        have hp1 : p.pred hp0 ≠ 0 := by rw [Ne, Fin.ext_iff, Fin.val_zero, Fin.val_pred]; omega
+        rw [consPredVal a _ _ hp1]
+        rw [show (p.pred hp0).pred hp1 = 0 from
+          Fin.ext (by rw [Fin.val_zero, Fin.val_pred, Fin.val_pred]; omega), Fin.cons_zero]
+      · have hge : 3 ≤ (p : ℕ) := by omega
+        have hs : traceNablaShuffle s p ≠ 0 := by
+          rw [Ne, Fin.ext_iff, Fin.val_zero, traceNablaShuffle_val_ge s p hge]; omega
+        rw [consPredVal a _ _ hs]
+        have hs1 : (traceNablaShuffle s p).pred hs ≠ 0 := by
+          rw [Ne, Fin.ext_iff, Fin.val_zero, Fin.val_pred, traceNablaShuffle_val_ge s p hge]; omega
+        rw [consPredVal b _ _ hs1]
+        have hs2 : ((traceNablaShuffle s p).pred hs).pred hs1 ≠ 0 := by
+          rw [Ne, Fin.ext_iff, Fin.val_zero, Fin.val_pred, Fin.val_pred,
+            traceNablaShuffle_val_ge s p hge]; omega
+        rw [consPredVal Z _ _ hs2]
+        have hp1 : p.pred hp0 ≠ 0 := by rw [Ne, Fin.ext_iff, Fin.val_zero, Fin.val_pred]; omega
+        rw [consPredVal a _ _ hp1]
+        have hp2 : (p.pred hp0).pred hp1 ≠ 0 := by
+          rw [Ne, Fin.ext_iff, Fin.val_zero, Fin.val_pred, Fin.val_pred]; omega
+        rw [consPredVal b _ _ hp2]
+        congr 1
+        have hval : ((traceNablaShuffle s p : Fin (s + 2 + 1)) : ℕ) = (p : ℕ) := by
+          rw [traceNablaShuffle_val_ge s p hge]
+        rw [Fin.ext_iff]
+        simp only [Fin.val_pred, hval]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **Field-level `∇`–trace commutation (realizer form).**  If `nablaA` realizes the total
+covariant derivative of `A`, then `metricTraceFirstTwoField g (domDomCongr (traceNablaShuffle s)
+nablaA)` realizes the total covariant derivative of `metricTraceFirstTwoField g A` — the
+field-level lift of `nabla_metricTraceFirstTwo0S` (uses metric compatibility so `∇` passes
+through the trace, up to the `traceNablaShuffle` slot move).  Consumed by `StarSum2.nabla`. -/
+theorem nablaRealizes_metricTraceFirstTwo {s : ℕ}
+    [T2Space M] [CompleteSpace E] [I.Boundaryless] [IsManifold I 1 M]
+    [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov 1)
+    (g : SmoothRiemannianMetric I M)
+    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I) cov g)
+    (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (s + 2))
+    (nablaA : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (s + 2 + 1))
+    (hnablaA : TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (s + 2) cov A nablaA) :
+    TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      s cov (metricTraceFirstTwoField (I := I) (M := M) g A)
+      (metricTraceFirstTwoField (I := I) (M := M) g
+        (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (∞ : WithTop ℕ∞) (traceNablaShuffle s) nablaA)) := by
+  classical
+  intro X x slots
+  set basis := DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x
+    with hbasis
+  set gInv : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E ->
+      DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E -> Real :=
+    (fun k l => DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component
+      (I := I) g x k l (extChartAt I x x)) with hgInv
+  have hinv : MetricInverseInBasis_gen (I := I) g x basis gInv :=
+    DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+      (I := I) g x
+  rw [← totalNabla0SFun_apply_section (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        s cov X (metricTraceFirstTwoField (I := I) (M := M) g A) x slots,
+    nabla_metricTraceFirstTwo0S (I := I) (M := M) cov hcov g hmc A basis gInv hinv (X x) slots]
+  rw [metricTraceFirstTwoField_eq_sum (I := I) (M := M) g
+        (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (∞ : WithTop ℕ∞) (traceNablaShuffle s) nablaA) x
+        (Fin.cons (X x) slots)]
+  rw [← hbasis, ← hgInv]
+  unfold metricTrace0S2InBasis
+  refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
+  congr 1
+  rw [MultilinearSection.domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply,
+    totalNabla0SFun_apply_section (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (s + 2) cov X A x (metricTraceInput (I := I) (basis i) (basis j) slots),
+    ← hnablaA X x (metricTraceInput (I := I) (basis i) (basis j) slots)]
+  exact congrArg _ (traceNablaShuffle_metricTraceInput (I := I) (basis i) (basis j) (X x) slots)
+
 end
 
 end DifferentialGeometry.Integral.Connection

@@ -369,7 +369,7 @@ coordinate of the transverse velocity `∂_s f`, is `C²` jointly at `(0, t)`. N
 chart-pull `(u, v) ↦ extChartAt (f 0 t) (f u v)`, which is `C^∞`. The slot
 direction is `(1, 0)` (the `u`-partial), the transverse-velocity analogue of
 `chartCoord_longitudinalVelocity_contDiffAt`. -/
-private lemma chartCoord_transverseVelocity_contDiffAt
+lemma chartCoord_transverseVelocity_contDiffAt
     (f : ℝ → ℝ → M) (hf : IsSmoothVariation (I := I) f) (t : ℝ) :
     ContDiffAt ℝ 2 (fun p : ℝ × ℝ =>
         (trivializationAt E (TangentSpace I) (f 0 t)).continuousLinearMapAt ℝ (f p.1 p.2)
