@@ -168,7 +168,17 @@ theorem metricPreconvInf ... :
       MetricCInfConvOnCompacts (I := I) (fun k => gSeq (φ k)) gInf gRef
 ```
 
-### Brick D — window-uniform time upgrade
+### Brick D — window-uniform time upgrade ✅ DONE
+**(2026-06-12, commit ee9d8ab0; ACCEPTED: sorry-free, targeted build green,
+both endpoints axiom-clean.  `windowPreconv` = the 3ε upgrade, conclusion
+verbatim in `SourceMetricCPConvOnWindow` quantifier shape;
+`timeLipschitz_of_hasDerivAt` consumes verbatim the `hevComp_of_solutions`
+output shape (P2→D interface exact).  The abstract `hconv`/`hgLip`/`hInfLip`
+boundaries are Brick C's wiring: dense-time diagonal → hconv; P2
+`ric_bound_field`+(B_a) → the Ev-bound → hgLip; limit continuity → hInfLip.
+Reusable: ℓ²-triangle/vector-MVT lemmas, `metricDerivNorm_triangle`,
+`metricDerivNormSupOn_le_of_forall`.  See WindowPreconv.md.)**
+
 **File**: NEW `HCGCompactness/WindowPreconv.lean`.
 
 Inputs: `gSeq : ℕ → ℝ → SmoothRiemannianMetric I M`, window `[β,ψ]`, the
