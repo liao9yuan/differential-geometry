@@ -1,5 +1,72 @@
 # MetricPreconv — MSM135 Corollary lbl351 (metrics with bounded derivatives preconverge)
 
+**Status: Bricks A1 + A2 IMPLEMENTED, verified (focused+targeted build green,
+#print axioms clean) (2026-06-11).**
+
+## Brick A2 DONE — `iteratedFDeriv_comp_le_tower` (MetricPreconv.lean)
+
+The all-orders covariant→coordinate conversion is proved sorry-free.  For every
+order `r`, level `p`, and `∞`-section tuple `V`:
+`‖iteratedFDeriv ℝ r (chart rep of s_p^V) (extChartAt y)‖ ≤ CV · Σ_{q≤p+r} b q`
+on an inner compact `Kc`, `CV` = gRef/chart/slot/basis data only (A0-independent
+⇒ k-independent on a metric sequence).  This is exactly what `exists_cInf_subseq`
+(MapConvergence) needs as its per-order `hbdd` (Brick B feeds it after a fixed
+bump-Leibniz and the P2 (B_r) uniform bounds).
+
+New public exports (reusable by B/C/D):
+- `iteratedFDeriv_comp_le_tower` — the endpoint.
+- `clm_eq_sum_coord` — `L = Σ_i (L bEᵢ)·coordᵢ` (function-level CLM basis identity).
+- `extDerivFun_tower_step` — pointwise tower step decomposition (the A1 `hdecomp`
+  extracted, for every `q`).
+- `towerStep` (def) — the directional step scalar; `fderiv_chartRep_eq_towerStep`
+  — the germ `fun z'↦ fderiv F z' v =ᶠ[𝓝 z] writtenInExtChartAt (towerStep)`.
+- `contDiffAt_chartRep` — chart-rep `ContDiff` from `ContMDiff`
+  (`contMDiffOn_extChartAt_symm` + `contMDiffOn_iff_contDiffOn`).
+- `writtenInExtChartAt_real_apply` — `writtenInExtChartAt 𝓘(ℝ,ℝ) g z = g (symm z)`.
+- `covDerivOfField_eval_contMDiff` — full `ContMDiff` of a tower scalar.
+- `iteratedFDeriv_smul_const_le` — `‖∇ʳ(g•c)‖ ≤ ‖c‖·‖∇ʳg‖`.
+- `exists_section_eqOn_compact` STRENGTHENED to the `∀ᶠ x in 𝓝ˢ Kc` form (A1's
+  single use updated to `(hσ i).self_of_nhdsSet y hy`).
+
+### Route
+
+Induct on `r` (`generalizing p V`, so the IH is `∀ p V`).  Base `r=0`:
+`‖∇⁰F z‖ = |s_p^V y|`, Cauchy–Schwarz (as A1's base).  Step `r→r+1`:
+`‖∇^{r+1}F z‖ = ‖∇ʳ(fderiv F) z‖` (`norm_iteratedFDeriv_fderiv`); the germ
+`fderiv F =ᶠ Σ_i (chart rep towerStep_i)·coordᵢ` (combine `clm_eq_sum_coord`
+pointwise with the per-direction `fderiv_chartRep_eq_towerStep`); push `∇ʳ`
+through the finite sum + the scalar·const-covector (`iteratedFDeriv_fun_sum_apply`
++ `iteratedFDeriv_smul_const_le`); split each `writtenInExtChartAt towerStep_i`
+into the level-`(p+1)` scalar (tuple `Fin.cons σᵢ V`) + Σ level-`p` scalars
+(tuples `update V a (∇_{σᵢ}Vₐ)`) and apply the IH.  Order bookkeeping:
+`{p..p+r}` at level p and `{p+1..p+1+r}` at level p+1 union to `{p..p+r+1}`.
+
+### Lean gotchas (A2-specific; for B/C/D)
+
+- **Section-tuple coercion**: `(Fin.cons (σ i) V) a w` / `(Function.update V a
+  (W i a)) bb w` do NOT resolve the `ContMDiffSection` `CoeFun` inline ("Function
+  expected") — the `Fin.cons`/`update` motive is a metavar.  Fix: bind a typed
+  `let Vf : Fin m → Fin (p+3) → ContMDiffSection … := fun i => Fin.cons (σ i) V`
+  (and `Vc` for the updates), then `Vf i a w` coerces fine.  Let the IH instances
+  (`ih (p+1) (Vf i)`) INFER the bound statement (don't hand-write the `∃`).
+- `@[to_fun]` PREPENDS `fun_`: the function-form add lemma is
+  `fun_iteratedFDeriv_add_apply` (not `iteratedFDeriv_fun_add_apply`).
+- `Filter.EventuallyEq.iteratedFDeriv` takes `𝕜` EXPLICIT (`variable (𝕜) in`):
+  `hgerm.iteratedFDeriv Real r`.
+- Order-`r` `iteratedFDeriv` linearity lemmas want `ContDiffAt ℝ r`; the chart
+  reps are `ContDiffAt ℝ ∞` → `.of_le hr` with `hr : (r:WithTop ℕ∞) ≤ ∞ :=
+  by exact_mod_cast le_top`.
+- `rw [iteratedFDeriv_fun_sum_apply …]` over a `g•const` summand fails to match
+  (the `.smul` hypothesis is Pi-smul `f•g`, the target is explicit `fun z'↦ f z'•c`)
+  — pass `(f := fun i z' => … z' • c i)` explicitly so the rw pattern is the
+  explicit form (the Pi-smul ContDiffAt is accepted by defeq).
+- `Finset.range_subset.2` would not apply to give the subset from `m ≤ n` here;
+  prove `range m ⊆ range n` directly via `mem_range`.
+- separate `omega` goals from `Finset.range_subset`/`congr` (`omega` saw
+  abstracted vars otherwise).
+
+## Brick A1 DONE — `fderiv_comp_le_tower` (MetricPreconv.lean)
+
 **Status: Brick A1 IMPLEMENTED + read-only verified (2026-06-11).**
 
 ## Brick A1 DONE — `fderiv_comp_le_tower` (MetricPreconv.lean)

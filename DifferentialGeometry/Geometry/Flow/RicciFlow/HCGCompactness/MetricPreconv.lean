@@ -119,7 +119,7 @@ theorem exists_section_eqOn_compact
     (x₀ : M) (v : E) {Kc : Set M} (hKc : IsCompact Kc)
     (hKchart : Kc ⊆ (chartAt H x₀).source) :
     ∃ σ : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _),
-      ∀ x ∈ Kc, σ x = tangentConstInChart (𝕜 := Real) (I := I) x₀ v x := by
+      ∀ᶠ x in 𝓝ˢ Kc, σ x = tangentConstInChart (𝕜 := Real) (I := I) x₀ v x := by
   classical
   haveI : LocallyCompactSpace H := I.locallyCompactSpace
   haveI : LocallyCompactSpace M := ChartedSpace.locallyCompactSpace H M
@@ -151,9 +151,8 @@ theorem exists_section_eqOn_compact
         (n := (∞ : WithTop ℕ∞)) x₀ v
   refine ⟨⟨fun y : M => χ y • tangentConstInChart (𝕜 := Real) (I := I) x₀ v y, ?_⟩, ?_⟩
   · exact hχ_on.smul_section_of_tsupport hUopen htsupp hconst_on
-  · intro x hx
-    have h1 : χ x = 1 := hχ_one.self_of_nhdsSet x hx
-    simp [h1]
+  · filter_upwards [hχ_one] with x hx
+    simp [hx]
 
 /-! ## Compact bound for the `gRef`-norm of a smooth section -/
 
@@ -240,7 +239,7 @@ theorem fderiv_comp_le_tower
   set bE := Module.finBasis Real E with hbE
   -- Globalize each model-basis chart-constant direction to a smooth section.
   have hσex : ∀ i : Fin n, ∃ σ : ContMDiffSection I E (∞ : WithTop ℕ∞)
-      (TangentSpace I : M → Type _), ∀ x ∈ Kc,
+      (TangentSpace I : M → Type _), ∀ᶠ x in 𝓝ˢ Kc,
       σ x = tangentConstInChart (𝕜 := Real) (I := I) x₀ (bE i) x :=
     fun i => exists_section_eqOn_compact (I := I) x₀ (bE i) hKc hKchart
   choose σ hσ using hσex
@@ -307,7 +306,7 @@ theorem fderiv_comp_le_tower
           = extDerivFun (I := I) f y (σ i y) := by
       rw [← extDerivFun_tangentConstInChart_eq_fderiv (I := I) (f := f)
         (x := x₀) (p := y) hychart hfmd (bE i)]
-      rw [hσ i y hy]
+      rw [(hσ i).self_of_nhdsSet y hy]
     -- Step decomposition of the directional derivative.
     have hdecomp :
         extDerivFun (I := I) f y (σ i y)
@@ -420,6 +419,431 @@ theorem fderiv_comp_le_tower
   calc (Ccoord * D ^ (p + 3)) * Cp1 + (Ccoord * ((p + 2 : ℕ) * D ^ (p + 2))) * Cp
       ≤ CV * Cp1 + CV * Cp := add_le_add h1 h2
     _ = CV * (Cp1 + Cp) := by ring
+
+/-! ## Brick A2 — all-orders conversion (the `iteratedFDeriv` induction) -/
+
+/-- A continuous linear functional on a finite-dimensional space equals the sum
+over a basis of its values on the basis times the dual-basis covectors.  The
+function-level identity behind `opNorm_le_sum_coord`; used to express the chart
+`fderiv` as a finite sum of scalar directional derivatives times constant
+covectors. -/
+theorem clm_eq_sum_coord {m : ℕ}
+    (bE : Module.Basis (Fin m) Real E) (L : E →L[Real] Real) :
+    L = ∑ i : Fin m, (L (bE i)) • LinearMap.toContinuousLinearMap (bE.coord i) := by
+  ext w
+  rw [ContinuousLinearMap.sum_apply]
+  simp only [ContinuousLinearMap.smul_apply, LinearMap.coe_toContinuousLinearMap',
+    Module.Basis.coord_apply, smul_eq_mul]
+  conv_lhs => rw [← bE.sum_repr w]
+  rw [map_sum]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [map_smul, smul_eq_mul, mul_comm]
+
+/-- **Pointwise tower step decomposition.**  The directional derivative of the
+level-`p` tower scalar `s_p^V` along a smooth section `X` is the level-`(p+1)`
+scalar (with `X` prepended) plus the level-`p` scalars at the Christoffel-updated
+slot tuples.  This is the engine of the `iteratedFDeriv` induction (`A2`); it is
+the pointwise version of the `hdecomp` used inside `fderiv_comp_le_tower`. -/
+theorem extDerivFun_tower_step
+    (gRef : SmoothRiemannianMetric I M)
+    (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    (p : ℕ)
+    (V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (q : M) :
+    extDerivFun (I := I)
+        (fun z : M => (covDerivOfField (I := I) gRef A0 p) z (fun a => V a z)) q (X q)
+      = (covDerivOfField (I := I) gRef A0 (p + 1)) q
+          (Fin.cons (X q) (fun a : Fin (p + 2) => V a q))
+        + ∑ a : Fin (p + 2),
+            (covDerivOfField (I := I) gRef A0 p) q
+              (Function.update (fun b : Fin (p + 2) => V b q) a
+                (((leviCivitaConnectionOfMetric (I := I) gRef)
+                  (fun r : M => V a r) q) (X q))) := by
+  have key :
+      (covDerivOfField (I := I) gRef A0 (p + 1)) q
+          (Fin.cons (X q) (fun a : Fin (p + 2) => V a q))
+        = extDerivFun (I := I)
+            (fun z : M => (covDerivOfField (I := I) gRef A0 p) z (fun a => V a z)) q (X q)
+          - ∑ a : Fin (p + 2),
+              (covDerivOfField (I := I) gRef A0 p) q
+                (Function.update (fun b : Fin (p + 2) => V b q) a
+                  (((leviCivitaConnectionOfMetric (I := I) gRef)
+                    (fun r : M => V a r) q) (X q))) := by
+    rw [covDerivOfField_succ, metricCovDerivStep_apply,
+      Tensor0SBundle.totalNabla0SFun_apply_section,
+      Tensor0SBundle.nabla0SFun_eval_smooth_slots]
+  linarith [key]
+
+/-- **Chart-representative smoothness.**  The chart model of a smooth manifold
+scalar is `ContDiff` at the chart image of any chart-source point.  Needed for
+the `iteratedFDeriv` linearity/germ lemmas. -/
+theorem contDiffAt_chartRep
+    (f : M → Real) (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f)
+    (x₀ : M) {y : M} (hy : y ∈ (chartAt H x₀).source) :
+    ContDiffAt Real (∞ : WithTop ℕ∞)
+      (writtenInExtChartAt I 𝓘(Real, Real) x₀ f) (extChartAt I x₀ y) := by
+  have hsymm : ContMDiffOn 𝓘(Real, E) I (∞ : WithTop ℕ∞)
+      (extChartAt I x₀).symm (extChartAt I x₀).target := contMDiffOn_extChartAt_symm x₀
+  have hcomp : ContMDiffOn 𝓘(Real, E) 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+      (f ∘ (extChartAt I x₀).symm) (extChartAt I x₀).target :=
+    hf.comp_contMDiffOn hsymm
+  have hcd : ContDiffOn Real (∞ : WithTop ℕ∞)
+      (f ∘ (extChartAt I x₀).symm) (extChartAt I x₀).target :=
+    contMDiffOn_iff_contDiffOn.mp hcomp
+  have hwrite : writtenInExtChartAt I 𝓘(Real, Real) x₀ f
+      = f ∘ (extChartAt I x₀).symm := by
+    funext z; simp [writtenInExtChartAt]
+  rw [hwrite]
+  have hysrc : y ∈ (extChartAt I x₀).source := by rwa [extChartAt_source]
+  have hz : extChartAt I x₀ y ∈ (extChartAt I x₀).target :=
+    (extChartAt I x₀).map_source hysrc
+  exact hcd.contDiffAt ((isOpen_extChartAt_target (I := I) x₀).mem_nhds hz)
+
+/-- The chart representative of a real-valued manifold scalar is the scalar
+composed with the chart inverse (the target model chart is trivial). -/
+theorem writtenInExtChartAt_real_apply (x₀ : M) (g : M → Real) (z : E) :
+    writtenInExtChartAt I 𝓘(Real, Real) x₀ g z = g ((extChartAt I x₀).symm z) := by
+  simp [writtenInExtChartAt]
+
+/-- The level-`p` directional tower step scalar (the value of
+`extDerivFun (s_p^V)` along `X`): the level-`(p+1)` scalar with `X` prepended,
+plus the level-`p` scalars at the Christoffel-updated slot tuples. -/
+noncomputable def towerStep (gRef : SmoothRiemannianMetric I M)
+    (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    (p : ℕ)
+    (V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _)) :
+    M → Real :=
+  fun q => (covDerivOfField (I := I) gRef A0 (p + 1)) q
+      (Fin.cons (X q) (fun a : Fin (p + 2) => V a q))
+    + ∑ a : Fin (p + 2),
+        (covDerivOfField (I := I) gRef A0 p) q
+          (Function.update (fun b : Fin (p + 2) => V b q) a
+            (((leviCivitaConnectionOfMetric (I := I) gRef)
+              (fun r : M => V a r) q) (X q)))
+
+/-- **The chart `fderiv` is the chart representative of the tower step.**  Near
+the chart image of a point of `Kc`, the directional chart derivative of `s_p^V`
+along `v` equals the chart representative of `towerStep` (with the globalized
+direction `σ = tangentConstInChart x₀ v`).  This is the germ form feeding the
+`iteratedFDeriv` induction. -/
+theorem fderiv_chartRep_eq_towerStep
+    (gRef : SmoothRiemannianMetric I M)
+    (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    (p : ℕ)
+    (V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _))
+    (x₀ : M) (v : E)
+    (σ : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    {Kc : Set M}
+    (hσ : ∀ᶠ x in 𝓝ˢ Kc, σ x = tangentConstInChart (𝕜 := Real) (I := I) x₀ v x)
+    (hKchart : Kc ⊆ (chartAt H x₀).source) {y : M} (hy : y ∈ Kc) :
+    (fun z : E => fderiv Real (writtenInExtChartAt I 𝓘(Real, Real) x₀
+        (fun w : M => (covDerivOfField (I := I) gRef A0 p) w (fun a => V a w))) z v)
+      =ᶠ[𝓝 (extChartAt I x₀ y)]
+      writtenInExtChartAt I 𝓘(Real, Real) x₀ (towerStep (I := I) gRef A0 p V σ) := by
+  set f : M → Real := fun w : M => (covDerivOfField (I := I) gRef A0 p) w (fun a => V a w)
+    with hf
+  have hytarget : extChartAt I x₀ y ∈ (extChartAt I x₀).target :=
+    (extChartAt I x₀).map_source (by rw [extChartAt_source]; exact hKchart hy)
+  -- the chart inverse maps a neighbourhood of `extChartAt x₀ y` into where `σ = tgtConst`
+  have hsymm_y : (extChartAt I x₀).symm (extChartAt I x₀ y) = y :=
+    (extChartAt I x₀).left_inv (by rw [extChartAt_source]; exact hKchart hy)
+  have htend : Filter.Tendsto (extChartAt I x₀).symm
+      (𝓝 (extChartAt I x₀ y)) (𝓝 y) := by
+    have h := (continuousAt_extChartAt_symm'' (I := I) (x := x₀) hytarget).tendsto
+    rwa [hsymm_y] at h
+  have hσnhds : ∀ᶠ q in 𝓝 y,
+      σ q = tangentConstInChart (𝕜 := Real) (I := I) x₀ v q :=
+    hσ.filter_mono (nhds_le_nhdsSet hy)
+  have hpull : ∀ᶠ z : E in 𝓝 (extChartAt I x₀ y),
+      σ ((extChartAt I x₀).symm z)
+        = tangentConstInChart (𝕜 := Real) (I := I) x₀ v ((extChartAt I x₀).symm z) :=
+    htend.eventually hσnhds
+  filter_upwards [(isOpen_extChartAt_target (I := I) x₀).mem_nhds hytarget, hpull]
+    with z hztarget hzσ
+  set q : M := (extChartAt I x₀).symm z with hq
+  have hqsource : q ∈ (extChartAt I x₀).source := (extChartAt I x₀).map_target hztarget
+  have hqchart : q ∈ (chartAt H x₀).source := by rwa [← extChartAt_source (I := I)]
+  have hzq : extChartAt I x₀ q = z := (extChartAt I x₀).right_inv hztarget
+  -- chart bridge at `q`
+  have hbridge := extDerivFun_tangentConstInChart_eq_fderiv (I := I) (f := f)
+    (x := x₀) (p := q) hqchart
+    (covDerivOfField_eval_mdiffAt (I := I) gRef A0 p V q) v
+  rw [hzq] at hbridge
+  -- assemble the chain
+  rw [← hbridge, ← hzσ, writtenInExtChartAt_real_apply, ← hq, hf]
+  exact extDerivFun_tower_step (I := I) gRef A0 p V σ q
+
+/-- Full smoothness of a tower-component scalar (`ContMDiff`, not just `…At`),
+needed for the chart-representative `ContDiff` bridge inside the induction. -/
+theorem covDerivOfField_eval_contMDiff
+    (gRef : SmoothRiemannianMetric I M)
+    (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    (p : ℕ)
+    (V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _)) :
+    ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+      (fun q : M => (covDerivOfField (I := I) gRef A0 p) q (fun a => V a q)) :=
+  fun x => covDerivOfField_eval_smoothAt (I := I) gRef A0
+    (fun W => Tensor0SBundle.tensor0SField_eval_smooth_slots_contMDiffAt
+      (I := I) A0 W x) p V
+
+/-- The iterated derivative norm of a scalar function times a constant covector
+is bounded by the covector norm times the scalar's iterated derivative norm. -/
+theorem iteratedFDeriv_smul_const_le {rr : ℕ} {g : E → Real} {z₀ : E}
+    (c : E →L[Real] Real) (hg : ContDiffAt Real (∞ : WithTop ℕ∞) g z₀) :
+    ‖iteratedFDeriv Real rr (fun z : E => g z • c) z₀‖
+      ≤ ‖c‖ * ‖iteratedFDeriv Real rr g z₀‖ := by
+  have h := ContinuousLinearMap.iteratedFDeriv_comp_left
+    ((ContinuousLinearMap.id Real Real).smulRight c) hg (i := rr)
+    (by exact_mod_cast le_top)
+  rw [show (fun z : E => g z • c)
+      = (⇑((ContinuousLinearMap.id Real Real).smulRight c)) ∘ g from rfl, h]
+  refine le_trans
+    (ContinuousLinearMap.norm_compContinuousMultilinearMap_le _ _) ?_
+  refine mul_le_mul_of_nonneg_right ?_ (norm_nonneg _)
+  rw [ContinuousLinearMap.norm_smulRight_apply]
+  exact mul_le_of_le_one_left (norm_nonneg _) ContinuousLinearMap.norm_id_le
+
+/-- **All-orders covariant → coordinate conversion** (MSM135 `lbl351`, P3
+Brick A2).  For every order `r` and every level `p` and `∞`-section slot tuple
+`V`, the order-`r` iterated chart derivative of the tower scalar `s_p^V` is
+bounded on an inner compact `Kc` of the chart source by a constant (gRef/chart/
+slot data, independent of `A0`) times the sum of the covariant-order norms up to
+`p + r`.  Induction on `r` with `fderiv_chartRep_eq_towerStep` (and so
+`fderiv_comp_le_tower`) as the step. -/
+theorem iteratedFDeriv_comp_le_tower
+    (gRef : SmoothRiemannianMetric I M)
+    (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    {x₀ : M} {Kc : Set M} (hKc : IsCompact Kc)
+    (hKchart : Kc ⊆ (chartAt H x₀).source) (r p : ℕ)
+    (V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _)) :
+    ∃ CV : Real, 0 ≤ CV ∧ ∀ y ∈ Kc, ∀ b : ℕ → Real,
+      (∀ q : ℕ, ∀ z ∈ Kc, Real.sqrt
+          (normSq0S (I := I) gRef z (q + 2) (covDerivOfField (I := I) gRef A0 q z)) ≤ b q) →
+      ‖iteratedFDeriv Real r (writtenInExtChartAt I 𝓘(Real, Real) x₀
+          (fun w : M => (covDerivOfField (I := I) gRef A0 p) w (fun a => V a w)))
+        (extChartAt I x₀ y)‖ ≤ CV * ∑ q ∈ Finset.range (p + r + 1), b q := by
+  induction r generalizing p V with
+  | zero =>
+      obtain ⟨D, hD0, hD⟩ := exists_family_bound (I := I) gRef hKc V
+      refine ⟨D ^ (p + 2), pow_nonneg hD0 _, ?_⟩
+      intro y hy b hb
+      have hbnn : ∀ q, 0 ≤ b q := fun q => le_trans (Real.sqrt_nonneg _) (hb q y hy)
+      rw [norm_iteratedFDeriv_zero]
+      have hsymm : (extChartAt I x₀).symm (extChartAt I x₀ y) = y :=
+        (extChartAt I x₀).left_inv (by rw [extChartAt_source]; exact hKchart hy)
+      have hFz : writtenInExtChartAt I 𝓘(Real, Real) x₀
+          (fun w : M => (covDerivOfField (I := I) gRef A0 p) w (fun a => V a w))
+            (extChartAt I x₀ y)
+          = (covDerivOfField (I := I) gRef A0 p) y (fun a => V a y) := by
+        rw [writtenInExtChartAt_real_apply, hsymm]
+      rw [hFz, Real.norm_eq_abs]
+      obtain ⟨bON, hbON⟩ := exists_ON_tangentBasis (I := I) gRef y
+      have hCS := abs_apply_le_sqrt_normSq0S (I := I) gRef y (p + 2) bON hbON
+        (covDerivOfField (I := I) gRef A0 p y) (fun a => V a y)
+      have hprod : (∏ a : Fin (p + 2), Real.sqrt (gRef.inner y (V a y) (V a y)))
+          ≤ D ^ (p + 2) := by
+        refine le_trans (Finset.prod_le_prod (g := fun _ : Fin (p + 2) => D)
+          (fun a _ => Real.sqrt_nonneg _) (fun a _ => hD a y hy)) (le_of_eq ?_)
+        rw [Finset.prod_const, Finset.card_univ, Fintype.card_fin]
+      calc |(covDerivOfField (I := I) gRef A0 p y) (fun a => V a y)|
+          ≤ Real.sqrt (normSq0S (I := I) gRef y (p + 2)
+              (covDerivOfField (I := I) gRef A0 p y))
+            * ∏ a : Fin (p + 2), Real.sqrt (gRef.inner y (V a y) (V a y)) := hCS
+        _ ≤ b p * D ^ (p + 2) :=
+            mul_le_mul (hb p y hy) hprod
+              (Finset.prod_nonneg (fun a _ => Real.sqrt_nonneg _)) (hbnn p)
+        _ = D ^ (p + 2) * b p := by ring
+        _ ≤ D ^ (p + 2) * ∑ q ∈ Finset.range (p + 0 + 1), b q := by
+            refine mul_le_mul_of_nonneg_left ?_ (pow_nonneg hD0 _)
+            exact Finset.single_le_sum (fun q _ => hbnn q)
+              (Finset.mem_range.2 (by omega))
+  | succ r ih =>
+      classical
+      set m := Module.finrank Real E with hm
+      set bE := Module.finBasis Real E with hbE
+      -- globalized model-basis directions
+      have hσex : ∀ i : Fin m, ∃ σ : ContMDiffSection I E (∞ : WithTop ℕ∞)
+          (TangentSpace I : M → Type _), ∀ᶠ x in 𝓝ˢ Kc,
+          σ x = tangentConstInChart (𝕜 := Real) (I := I) x₀ (bE i) x :=
+        fun i => exists_section_eqOn_compact (I := I) x₀ (bE i) hKc hKchart
+      choose σ hσ using hσex
+      have hcov : CovariantDerivative.ContMDiffCovariantDerivative
+          (leviCivitaConnectionOfMetric (I := I) gRef) (∞ : WithTop ℕ∞) :=
+        ⟨leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+          (I := I) gRef isOpen_univ⟩
+      -- correction sections `W i a = ∇_{σ i}(V a)`
+      let W : Fin m → Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+          (TangentSpace I : M → Type _) := fun i a =>
+        ⟨fun q : M =>
+          ((leviCivitaConnectionOfMetric (I := I) gRef) (fun rr : M => V a rr) q)
+            ((σ i) q),
+          by
+            simpa [TensorLieDeriv.covariantDeriv_vectorField] using
+              TensorLieDeriv.covariantDeriv_vectorField_contMDiff (I := I)
+                (leviCivitaConnectionOfMetric (I := I) gRef) hcov (σ i) (V a)⟩
+      -- the grown slot tuples (typed so the section coercion resolves)
+      let Vf : Fin m → Fin (p + 3) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+          (TangentSpace I : M → Type _) := fun i => Fin.cons (σ i) V
+      let Vc : Fin m → Fin (p + 2) → Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+          (TangentSpace I : M → Type _) := fun i a => Function.update V a (W i a)
+      -- IH constants (level `p+1`, tuple `Vf i`; level `p`, tuple `Vc i a`)
+      have hCf := fun i : Fin m => ih (p + 1) (Vf i)
+      choose Cf hCf0 hCfb using hCf
+      have hCc := fun (i : Fin m) (a : Fin (p + 2)) => ih p (Vc i a)
+      choose Cc hCc0 hCcb using hCc
+      set c : Fin m → (E →L[Real] Real) :=
+        fun i => LinearMap.toContinuousLinearMap (bE.coord i) with hc
+      refine ⟨∑ i : Fin m, ‖c i‖ * (Cf i + ∑ a : Fin (p + 2), Cc i a),
+        Finset.sum_nonneg (fun i _ => mul_nonneg (norm_nonneg _)
+          (add_nonneg (hCf0 i) (Finset.sum_nonneg (fun a _ => hCc0 i a)))), ?_⟩
+      intro y hy b hb
+      have hbnn : ∀ q : ℕ, 0 ≤ b q := fun q => le_trans (Real.sqrt_nonneg _) (hb q y hy)
+      set z : E := extChartAt I x₀ y with hzdef
+      set F : E → Real := writtenInExtChartAt I 𝓘(Real, Real) x₀
+        (fun w : M => (covDerivOfField (I := I) gRef A0 p) w (fun a => V a w)) with hFdef
+      set S : Real := ∑ q ∈ Finset.range (p + (r + 1) + 1), b q with hSdef
+      have hSnn : 0 ≤ S := Finset.sum_nonneg (fun q _ => hbnn q)
+      -- slot funexts identifying `towerStep` terms with the IH-form tower scalars
+      have hcons : ∀ (i : Fin m) (q : M),
+          (Fin.cons ((σ i) q) (fun a : Fin (p + 2) => V a q)
+            : Fin (p + 3) → TangentSpace I q) = fun a => Vf i a q := by
+        intro i q; funext a
+        refine Fin.cases ?_ ?_ a
+        · simp [Vf]
+        · intro a'; simp [Vf]
+      have hupd : ∀ (i : Fin m) (a : Fin (p + 2)) (q : M),
+          Function.update (fun bb : Fin (p + 2) => V bb q) a
+              (((leviCivitaConnectionOfMetric (I := I) gRef) (fun rr : M => V a rr) q)
+                ((σ i) q))
+            = fun bb : Fin (p + 2) => Vc i a bb q := by
+        intro i a q; funext bb
+        by_cases hba : bb = a
+        · subst hba; simp [Vc, W]
+        · simp [Vc, Function.update_of_ne hba]
+      -- `towerStep` chart rep splits into IH-form chart reps
+      have hsplit : ∀ i : Fin m,
+          writtenInExtChartAt I 𝓘(Real, Real) x₀ (towerStep (I := I) gRef A0 p V (σ i))
+            = fun z' : E =>
+                (writtenInExtChartAt I 𝓘(Real, Real) x₀
+                  (fun w : M => (covDerivOfField (I := I) gRef A0 (p + 1)) w
+                    (fun a => Vf i a w))) z'
+                + ∑ a : Fin (p + 2),
+                  (writtenInExtChartAt I 𝓘(Real, Real) x₀
+                    (fun w : M => (covDerivOfField (I := I) gRef A0 p) w
+                      (fun bb => Vc i a bb w))) z' := by
+        intro i; funext z'
+        simp only [writtenInExtChartAt_real_apply, towerStep]
+        congr 1
+        · rw [hcons i]
+        · exact Finset.sum_congr rfl (fun a _ => by rw [hupd i a])
+      -- ContDiff of the chart reps
+      have hcd_first : ∀ i : Fin m, ContDiffAt Real (∞ : WithTop ℕ∞)
+          (writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gRef A0 (p + 1)) w
+              (fun a => Vf i a w))) z :=
+        fun i => contDiffAt_chartRep _
+          (covDerivOfField_eval_contMDiff (I := I) gRef A0 (p + 1) (Vf i))
+          x₀ (hKchart hy)
+      have hcd_corr : ∀ (i : Fin m) (a : Fin (p + 2)), ContDiffAt Real (∞ : WithTop ℕ∞)
+          (writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gRef A0 p) w
+              (fun bb => (Function.update V a (W i a)) bb w))) z :=
+        fun i a => contDiffAt_chartRep _
+          (covDerivOfField_eval_contMDiff (I := I) gRef A0 p (Vc i a))
+          x₀ (hKchart hy)
+      have hcd_corrsum : ∀ i : Fin m, ContDiffAt Real (∞ : WithTop ℕ∞)
+          (fun z' : E => ∑ a : Fin (p + 2),
+            (writtenInExtChartAt I 𝓘(Real, Real) x₀
+              (fun w : M => (covDerivOfField (I := I) gRef A0 p) w
+                (fun bb => Vc i a bb w))) z') z :=
+        fun i => ContDiffAt.sum (fun a _ => hcd_corr i a)
+      have hcd_g : ∀ i : Fin m, ContDiffAt Real (∞ : WithTop ℕ∞)
+          (writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (towerStep (I := I) gRef A0 p V (σ i))) z := by
+        intro i; rw [hsplit i]; exact (hcd_first i).add (hcd_corrsum i)
+      -- the `fderiv F` germ
+      have hgerm : fderiv Real F =ᶠ[𝓝 z]
+          fun z' : E => ∑ i : Fin m,
+            (writtenInExtChartAt I 𝓘(Real, Real) x₀
+              (towerStep (I := I) gRef A0 p V (σ i))) z' • c i := by
+        have hperi : ∀ i : Fin m,
+            (fun z' : E => fderiv Real F z' (bE i)) =ᶠ[𝓝 z]
+              writtenInExtChartAt I 𝓘(Real, Real) x₀
+                (towerStep (I := I) gRef A0 p V (σ i)) :=
+          fun i => fderiv_chartRep_eq_towerStep (I := I) gRef A0 p V x₀ (bE i) (σ i)
+            (hσ i) hKchart hy
+        filter_upwards [Filter.eventually_all.mpr (fun i => hperi i)] with z' hz'
+        rw [clm_eq_sum_coord bE (fderiv Real F z')]
+        exact Finset.sum_congr rfl (fun i _ => by rw [hz' i])
+      -- range arithmetic for the sums
+      have hr : (r : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by exact_mod_cast le_top
+      have heqf : p + 1 + r + 1 = p + (r + 1) + 1 := by omega
+      have hlec : p + r + 1 ≤ p + (r + 1) + 1 := by omega
+      have hrange_f : Finset.range (p + 1 + r + 1) = Finset.range (p + (r + 1) + 1) := by
+        rw [heqf]
+      have hrange_c : Finset.range (p + r + 1) ⊆ Finset.range (p + (r + 1) + 1) :=
+        fun x hx => Finset.mem_range.2 (lt_of_lt_of_le (Finset.mem_range.1 hx) hlec)
+      have hSc : ∑ q ∈ Finset.range (p + r + 1), b q ≤ S :=
+        Finset.sum_le_sum_of_subset_of_nonneg hrange_c (fun q _ _ => hbnn q)
+      -- per-direction bound
+      have hgi : ∀ i : Fin m,
+          ‖iteratedFDeriv Real r (writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (towerStep (I := I) gRef A0 p V (σ i))) z‖
+            ≤ (Cf i + ∑ a : Fin (p + 2), Cc i a) * S := by
+        intro i
+        rw [hsplit i,
+          fun_iteratedFDeriv_add_apply ((hcd_first i).of_le hr) ((hcd_corrsum i).of_le hr),
+          iteratedFDeriv_fun_sum_apply (fun a _ => (hcd_corr i a).of_le hr)]
+        refine le_trans (norm_add_le _ _) ?_
+        have hfst : ‖iteratedFDeriv Real r (writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gRef A0 (p + 1)) w
+              (fun a => Vf i a w))) z‖ ≤ Cf i * S := by
+          have := hCfb i y hy b hb
+          rwa [hrange_f] at this
+        have hcsum : ‖∑ a : Fin (p + 2), iteratedFDeriv Real r
+            (writtenInExtChartAt I 𝓘(Real, Real) x₀
+              (fun w : M => (covDerivOfField (I := I) gRef A0 p) w
+                (fun bb => Vc i a bb w))) z‖
+            ≤ (∑ a : Fin (p + 2), Cc i a) * S := by
+          refine le_trans (norm_sum_le _ _) ?_
+          rw [Finset.sum_mul]
+          exact Finset.sum_le_sum (fun a _ =>
+            le_trans (hCcb i a y hy b hb)
+              (mul_le_mul_of_nonneg_left hSc (hCc0 i a)))
+        calc ‖iteratedFDeriv Real r (writtenInExtChartAt I 𝓘(Real, Real) x₀
+              (fun w : M => (covDerivOfField (I := I) gRef A0 (p + 1)) w
+                (fun a => Vf i a w))) z‖
+            + ‖∑ a : Fin (p + 2), iteratedFDeriv Real r
+                (writtenInExtChartAt I 𝓘(Real, Real) x₀
+                  (fun w : M => (covDerivOfField (I := I) gRef A0 p) w
+                    (fun bb => Vc i a bb w))) z‖
+            ≤ Cf i * S + (∑ a : Fin (p + 2), Cc i a) * S := add_le_add hfst hcsum
+          _ = (Cf i + ∑ a : Fin (p + 2), Cc i a) * S := by ring
+      -- assemble
+      rw [← norm_iteratedFDeriv_fderiv, (hgerm.iteratedFDeriv Real r).eq_of_nhds,
+        iteratedFDeriv_fun_sum_apply
+          (f := fun i (z' : E) => (writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (towerStep (I := I) gRef A0 p V (σ i))) z' • c i)
+          (fun i _ => ((hcd_g i).of_le hr).smul contDiffAt_const)]
+      refine le_trans (norm_sum_le _ _) ?_
+      refine le_trans (Finset.sum_le_sum (fun i _ =>
+        iteratedFDeriv_smul_const_le (c i) (hcd_g i))) ?_
+      refine le_trans (Finset.sum_le_sum (fun i _ =>
+        mul_le_mul_of_nonneg_left (hgi i) (norm_nonneg (c i)))) (le_of_eq ?_)
+      rw [Finset.sum_mul]
+      exact Finset.sum_congr rfl (fun i _ => (mul_assoc _ _ _).symm)
 
 end HCGCompactness
 end DifferentialGeometry
