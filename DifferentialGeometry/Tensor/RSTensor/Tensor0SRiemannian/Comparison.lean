@@ -687,6 +687,115 @@ theorem sqrt_normSq0S_le_of_metric_equiv
 
 end MetricEquiv
 
+section PointwiseCS
+
+variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+
+/-- Square roots distribute over finite products of nonnegative reals. -/
+private theorem sqrt_prod {α : Type*} (s : Finset α) (f : α -> Real)
+    (hf : ∀ a ∈ s, 0 <= f a) :
+    Real.sqrt (∏ a ∈ s, f a) = ∏ a ∈ s, Real.sqrt (f a) := by
+  classical
+  induction s using Finset.cons_induction with
+  | empty => simp
+  | cons a s ha ih =>
+      rw [Finset.prod_cons, Finset.prod_cons,
+        Real.sqrt_mul (hf a (Finset.mem_cons_self a s)),
+        ih (fun b hb => hf b (Finset.mem_cons_of_mem hb))]
+
+/-- **Pointwise Cauchy–Schwarz for covariant tensors.**  At a `g`-orthonormal
+basis, a `(0,s)` tensor evaluated on tangent vectors is bounded by its `g`-norm
+times the product of the vectors' `g`-norms.  This is the C⁰ input of the
+covariant→coordinate derivative conversion behind MSM135 Corollary `lbl351`
+(metrics with bounded derivatives preconverge). -/
+theorem abs_apply_le_sqrt_normSq0S
+    (g : SmoothMetric_gen I M) (x : M) (s : Nat)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (hON : forall i j : Idx,
+      g.inner x (basis i) (basis j) = if i = j then (1 : Real) else 0)
+    (T : Tensor0SSpace s I x) (v : Fin s -> TangentSpace I x) :
+    |T v| <=
+      Real.sqrt (normSq0S (I := I) g x s T) *
+        ∏ a : Fin s, Real.sqrt (g.inner x (v a) (v a)) := by
+  classical
+  -- the inverse-metric witness of orthonormality
+  have hinv : MetricInverseInBasis_gen (I := I) g x basis
+      (identityInvMetric (Idx := Idx)) := by
+    intro i j
+    constructor <;> simp [identityInvMetric, diagonalInvMetric, hON]
+  -- multilinear expansion of the evaluation over the basis
+  have hexp : T v = ∑ I0 : Fin s -> Idx,
+      (∏ a : Fin s, basis.repr (v a) (I0 a)) *
+        T (fun a : Fin s => basis (I0 a)) := by
+    calc T v
+        = T (fun a : Fin s => ∑ i : Idx, basis.repr (v a) i • basis i) := by
+          congr 1
+          funext a
+          exact (basis.sum_repr (v a)).symm
+      _ = ∑ I0 : Fin s -> Idx,
+            T (fun a : Fin s => basis.repr (v a) (I0 a) • basis (I0 a)) :=
+          T.map_sum (fun a i => basis.repr (v a) i • basis i)
+      _ = ∑ I0 : Fin s -> Idx,
+            (∏ a : Fin s, basis.repr (v a) (I0 a)) *
+              T (fun a : Fin s => basis (I0 a)) := by
+          refine Finset.sum_congr rfl fun I0 _ => ?_
+          rw [T.map_smul_univ, smul_eq_mul]
+  rw [hexp]
+  -- Cauchy–Schwarz over the slot-index sum
+  have hCS2 : (∑ I0 : Fin s -> Idx,
+        (∏ a : Fin s, basis.repr (v a) (I0 a)) *
+          T (fun a : Fin s => basis (I0 a))) ^ 2 <=
+      (∑ I0 : Fin s -> Idx, (∏ a : Fin s, basis.repr (v a) (I0 a)) ^ 2) *
+        (∑ I0 : Fin s -> Idx, T (fun a : Fin s => basis (I0 a)) ^ 2) :=
+    Finset.sum_mul_sq_le_sq_mul_sq Finset.univ _ _
+  have habs : |∑ I0 : Fin s -> Idx,
+        (∏ a : Fin s, basis.repr (v a) (I0 a)) *
+          T (fun a : Fin s => basis (I0 a))| <=
+      Real.sqrt (∑ I0 : Fin s -> Idx,
+          (∏ a : Fin s, basis.repr (v a) (I0 a)) ^ 2) *
+        Real.sqrt (∑ I0 : Fin s -> Idx,
+          T (fun a : Fin s => basis (I0 a)) ^ 2) := by
+    rw [← Real.sqrt_sq_eq_abs,
+      ← Real.sqrt_mul (Finset.sum_nonneg fun _ _ => sq_nonneg _)]
+    exact Real.sqrt_le_sqrt hCS2
+  refine le_trans habs ?_
+  -- the coefficient factor is the product of the slot Parsevals
+  have hfac1 : (∑ I0 : Fin s -> Idx,
+        (∏ a : Fin s, basis.repr (v a) (I0 a)) ^ 2)
+      = ∏ a : Fin s, ∑ i : Idx, basis.repr (v a) i ^ 2 := by
+    rw [Finset.prod_univ_sum]
+    refine Finset.sum_congr rfl fun I0 _ => ?_
+    rw [← Finset.prod_pow]
+  -- Parseval at the orthonormal basis
+  have hPar : ∀ a : Fin s, (∑ i : Idx, basis.repr (v a) i ^ 2)
+      = g.inner x (v a) (v a) := by
+    intro a
+    conv_rhs =>
+      rw [show v a = ∑ i : Idx, basis.repr (v a) i • basis i from
+        (basis.sum_repr (v a)).symm]
+    simp only [map_sum, map_smul, ContinuousLinearMap.coe_sum',
+      Finset.sum_apply, ContinuousLinearMap.smul_apply, smul_eq_mul, hON,
+      mul_ite, mul_one, mul_zero, Finset.mul_sum]
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    rw [Finset.sum_ite_eq Finset.univ i
+      (fun j => basis.repr (v a) j * basis.repr (v a) i)]
+    simp [sq]
+  -- the tensor factor is the squared norm
+  have hfac2 : (∑ I0 : Fin s -> Idx, T (fun a : Fin s => basis (I0 a)) ^ 2)
+      = normSq0S (I := I) g x s T := by
+    rw [normSq0S_identity_eq_sum_sq (I := I) g x s basis hinv]
+    refine Finset.sum_congr rfl fun I0 _ => ?_
+    rw [component0S_apply]
+  rw [hfac1, hfac2, mul_comm]
+  refine mul_le_mul_of_nonneg_left (le_of_eq ?_) (Real.sqrt_nonneg _)
+  rw [sqrt_prod Finset.univ _ (fun a _ =>
+    Finset.sum_nonneg fun _ _ => sq_nonneg _)]
+  refine Finset.prod_congr rfl fun a _ => ?_
+  rw [hPar a]
+
+end PointwiseCS
+
 end
 
 end Tensor0SBundle
