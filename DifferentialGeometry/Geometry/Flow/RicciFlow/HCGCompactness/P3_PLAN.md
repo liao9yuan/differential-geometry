@@ -152,6 +152,11 @@ formulation, and the global limit object is C1 — one design unit).  Brick C is
 split into two execution units:
 
 ### Brick C-I — countable diagonal + global limit object
+**STATUS (2026-06-12): C0 ✅ ACCEPTED (a36b7933, `exists_diag_subseq` in
+MetricPreconvDiag.lean, proved exactly as design-fixed; sorry-free, build
+green, axiom-clean).  C1a/C1b BLOCKED on the gInf packaging gate → see
+PLANNER RULING 2 below (resolution: Brick C-G + scaffold-mode C-II).
+C1a/C1b resume AFTER C-G lands.**
 **File**: same `MetricPreconv.lean` (split out `MetricPreconvDiag.lean` if the
 file passes ~1500 lines).
 
@@ -188,7 +193,61 @@ lower bound; package `gInf : SmoothRiemannianMetric I M` (check the
 constructor's smoothness field shape FIRST; the limit components are
 `ContDiff ⊤` from the engine).
 
+### PLANNER RULING 2 (2026-06-12): the gInf packaging gate
+
+C-I stopped correctly: the inverse-componentize bridge (chart-component
+limits → `SmoothRiemannianMetric`) does not exist (confirmed: the project
+documents `TensorL2 → SmoothRiemannianMetric` as "the gate, NOT available",
+NonlinearitySpectral.lean:53).  Decision among the executor's three options:
+
+- Option 2 (reformulate the limit object) REJECTED — `SourceDomainMetricData.
+  limitMetric`/`metricPreconvInf` demand `SmoothRiemannianMetric`; these are
+  ported stable interfaces (keep public adapters stable).
+- **Option 1 ACCEPTED as the mainline**: build the bridge as a dedicated
+  foundational brick (C-G below).  It is NOT a detour: mathematically it IS
+  the "we have thus constructed a limit metric" sentence of the lbl351 proof,
+  and it has a SECOND consumer — Ch4 Thm 3.9 (`metricCompactness`) must
+  construct its limit metric the same way.
+- **Option 3 ACCEPTED as the parallel scaffold for C-II only**: C-II's
+  endpoints take `gInf` + component-convergence as hypotheses; when C-G
+  lands, C1b discharges them.  C-G and C-II can run in PARALLEL.
+
+### Brick C-G — the metric realization bridge (foundational, dual-consumer)
+**File**: NEW, at the realization layer — suggest
+`DifferentialGeometry/Geometry/Metric/SmoothMetricFromCoeff.lean` (NOT under
+HCGCompactness; Thm 3.9 will import it too).
+
+Target shape (pointwise data + local component smoothness ⇒ bundled metric;
+do NOT put coordinate transformation laws in the bridge — the consumer
+supplies the intrinsic pointwise object, well-definedness is the consumer's
+limit-uniqueness):
+```lean
+theorem smoothMetric_of_localCoeff
+    (inner : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
+    (hsymm : ∀ x v w, inner x v w = inner x w v)
+    (hpos : ∀ x v, v ≠ 0 → 0 < inner x v v)
+    (hcoeff : ∀ x₀ : M, ∃ u ∈ 𝓝 x₀, ∀ i j,
+      ContMDiffOn I 𝓘(ℝ,ℝ) ∞ (fun y => inner y (frame_u i y) (frame_u j y)) u)
+      -- frame_u = the localFrame of a trivialization/chart at x₀; fix the
+      -- exact phrasing against contMDiffOn_iff_localFrame_coeff
+    : ∃ g : SmoothRiemannianMetric I M, ∀ x v w, g.inner x v w = inner x v w
+```
+Route: the `contMDiff` bundle-section field of `ContMDiffRiemannianMetric`
+(Hom-bundle section) via Mathlib's LocalFrame criterion
+(`contMDiffOn_iff_localFrame_coeff` / `IsLocalFrameOn.contMDiffOn_of_coeff` —
+the CLAUDE.md local-coordinate route, valid for any VectorBundle, Hom bundles
+included); `symm`/`pos` pointwise; the `isVonNBounded` field — CHECK Mathlib's
+`ContMDiffRiemannianMetric` mk-helpers first (finite-dimensional fibres:
+von Neumann bounded = metrically bounded; there may be a constructor that
+derives it — if a genuinely new analytic input appears here, STOP and report).
+First step for the executor: read `Mathlib/Geometry/Manifold/VectorBundle/
+Riemannian.lean` constructor + any `.of_…` helpers BEFORE writing the
+statement, and adjust the target shape to the cheapest faithful form.
+
 ### Brick C-II — norm bridge + the P3 endpoints
+**(SCAFFOLD MODE per Ruling 2: endpoints parameterize
+`gInf : SmoothRiemannianMetric I M` + component-convergence hypotheses;
+C-G + C1b discharge them later.)**
 **File**: same or split `MetricPreconvBridge.lean` if > ~900 lines.
 
 C2: component convergence ⇒ `MetricCPConvOn K hK p (gSeq∘φ) gInf gRef`
