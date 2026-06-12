@@ -35,17 +35,42 @@ Quot.sound]`, targeted build green 3845 jobs, 2026-06-11):
 Producer gotcha: `rw [hΦeq]` fails (target `(fun k x => …) k` not β-reduced) ⇒
 use `simp only [hΦeq]`.
 
-### REMAINING (atlas × component diagonal — NOT done)
+### REMAINING (atlas × component diagonal — NOT done; couples to Brick C)
 
 `exists_chart_cInfConv` gives ONE subsequence per (chart, component) pair.  The
 full Corollary needs ONE subsequence working for ALL charts of a σ-compact
-countable atlas × all n² covariant components simultaneously.  `DiagonalSubseq`'s
-`exists_subseq_tendsto_pi` is **reals-only** (Tendsto in `ℝ`), so it does NOT
-combine C^∞ map-convergences.  Route: enumerate the countable family
-`(chartᵢ, component_ab)`, run `exists_chart_cInfConv` on item 0, feed its `φ₀`
-into item 1, …, take the diagonal `n ↦ φ₀∘φ₁∘…∘φₙ (n)` (nested-subsequence
-diagonal, ~100 fiddly lines).  Each tail subsequence preserves earlier charts'
-convergence because `MapCInfConvOnCompacts` is subsequence-stable.  Deferred.
+countable atlas × all n² covariant components simultaneously.  Scoped 2026-06-11:
+this is genuinely **two frontiers, coupled to Brick C** — flag to planner, do NOT
+bolt onto Brick B in a vacuum.
+
+**Frontier 1 — abstract countable common-subsequence diagonal (NOT in Mathlib).**
+`DiagonalSubseq.exists_subseq_tendsto_pi` uses product-compactness, which needs
+COMPACT metrizable fibers (`Icc`, `Bool`); C^∞ limits are not in a compact fiber,
+so it does NOT apply.  Mathlib has only `Filter.extraction_forall_of_frequently`
+(`{P : ℕ→ℕ→Prop} (∀n, ∃ᶠ k, P n k) → ∃ φ, StrictMono φ ∧ ∀ n, P n (φ n)` —
+`Mathlib/Order/Filter/AtTopBot/Basic.lean:144`), the `∀n, P n (φ n)` diagonal
+*building block*, NOT the "one subsequence along which countably many
+subseq-stable properties ALL hold."  Hand-roll: nested extractions
+`G 0 = id`, `G (n+1) = G n ∘ ρₙ` (ρₙ = extractor for item n along `G n`),
+diagonal `φ n := (G (n+1)).1 n`.  `StrictMono φ` is clean (`ρₙ k ≥ k` +
+`G(n+1)` strict mono).  The friction: `P i φ` needs `φ`-tail = `(G(i+1)).1 ∘ σ`
+(σ strict mono) — a SHIFT, not eventual-equality — so the abstract lemma needs a
+P-stability hypothesis covering tail-subsequence/shift (`hsub` + shift-invariance,
+or expose the witness `ψ_i=(G(i+1)).1` + relation in the conclusion and let the
+instantiation discharge stability).  EXACT hypothesis shape is determined by Brick
+C's convergence formulation (`MetricCInfConvOnCompacts` is tail+subseq invariant
+via `MapCInfConvOnCompacts.comp_subseq` (MapConvergence.lean:103) and the
+asymptotic `∃k₀` in `MapCPConvOn`) — so build the lemma WITH Brick C, not before.
+
+**Frontier 2 — σ-compact countable atlas / compact exhaustion (Mathlib API not yet
+located).** Enumerate `(chartₙ, component_ab)` over a countable atlas (need a
+`SigmaCompactSpace`/`SecondCountableTopology` cover-by-charts lemma — CHECK
+Mathlib manifold API), run `exists_chart_cInfConv` per item as the Frontier-1
+extractor, then assemble `MetricCInfConvOnCompacts` over a compact exhaustion
+`M = ⋃ Kₙ`.  This assembly IS Brick C's C1 (global limit object `gInf`) — the
+diagonal and the limit-object construction are one design unit (`metricPreconvInf`
+endpoint, P3_PLAN §Brick C).  Recommendation: implement the diagonal as the
+opening of Brick C, reusing `exists_chart_cInfConv` as the per-item extractor.
 
 ## Brick B foundation (generic Euclidean, verified green, producer-ready)
 - `bumpMul_contDiff` — `χ` (smooth bump, `tsupport ⊆ U` open) `× g` (`ContDiffOn U`)
