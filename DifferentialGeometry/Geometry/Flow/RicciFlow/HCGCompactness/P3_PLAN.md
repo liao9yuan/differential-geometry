@@ -212,7 +212,18 @@ NonlinearitySpectral.lean:53).  Decision among the executor's three options:
   endpoints take `gInf` + component-convergence as hypotheses; when C-G
   lands, C1b discharges them.  C-G and C-II can run in PARALLEL.
 
-### Brick C-G — the metric realization bridge (foundational, dual-consumer)
+### Brick C-G — the metric realization bridge ✅ DONE
+**(2026-06-12, commit dc003c71; ACCEPTED: sorry-free, build green 2685 jobs,
+`DifferentialGeometry.Geometry.smoothMetric_of_localCoeff` axiom-clean.
+KEY: `isVonNBounded` was discharged by the EXISTING
+`MetricExistence.posDef_isVonNBounded` — no new analytic input; only the
+`contMDiff` field was real content (LocalFrame route, tangent-trivialization
+symm-frame of `Module.finBasis`).  The C-I blocker's "inverse-componentize
+bridge does not exist" was over-scoped: ~210 lines.  C1a/C1b NOW UNBLOCKED.
+Acceptance note on %-reporting: keep "Lemma 3.11 endpoint = 0% (unstated)"
+SEPARATE from its machinery (~70%); whole-HCG ~25-35% theorem-weighted.)**
+
+### Brick C-G — original spec (kept for reference)
 **File**: NEW, at the realization layer — suggest
 `DifferentialGeometry/Geometry/Metric/SmoothMetricFromCoeff.lean` (NOT under
 HCGCompactness; Thm 3.9 will import it too).
