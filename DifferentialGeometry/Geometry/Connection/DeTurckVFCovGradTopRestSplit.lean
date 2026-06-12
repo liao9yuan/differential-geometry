@@ -4,6 +4,12 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.VectorFieldCovariant
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricContractionLeibnizGrid
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.QuadraticProductRfnsGrid
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CrossCorrectionParallelContraction
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckCartanRfnsBilinearProduct
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTraceParallelContraction
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.GagliardoNirenbergProductTwoArm
+import DifferentialGeometry.Geometry.Connection.TensorNabla.VectorFieldCovariantGradientDifference
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.SharpOrderRealizedJetEmbedding
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseToL2Packaging
 
 /-! # The covariant top/rest split of the symmetrised-lowered DeTurck-field difference
 
@@ -82,6 +88,195 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck in
+/-- **The `g₀`-cometric lowering-slot pairing trace** of a `(0,2)`-coefficient `S` against a
+`(0,2)`-carrier `T`: the section with fibre `(v, w) ↦ ∑ₖ S(♯b^k, w) · T(v, b_k)` — the
+`g₀`-cometric single trace pairing `S`'s first slot against `T`'s second slot.  Built from the
+proven parallel calculus: the bare tensor product, a slot permutation, the cometric double-trace
+contraction, and a final slot swap. -/
+private def loweringPairTrace (g₀ : SmoothRiemannianMetric I M)
+    (S T : Integral.L2.SmoothCcTensor g₀ 0 2) : Integral.L2.SmoothCcTensor g₀ 0 2 :=
+  permuteCcTensor (I := I) g₀ (Equiv.swap 0 1)
+    (Integral.Connection.cometricDoubleTraceRecOp (I := I) g₀ 2 0
+      (permuteCcTensor (I := I) g₀ c[(1 : Fin 4), 2, 3]
+        ((Integral.Connection.bareTensorRfnsBilinearProduct (I := I) g₀ 2 2).prod
+          (a := 0) (b := 0) S T)))
+
+set_option linter.unusedSectionVars false in
+/-- **The unit-model fibre value of the lowering-slot pairing trace**: the cometric frame sum
+`∑ₖ Sₘ(♯b^k, v 1) · Tₘ(v 0, b_k)` of the two factors' unit-model values. -/
+private theorem loweringPairTrace_unitModel_apply (g₀ : SmoothRiemannianMetric I M)
+    (S T : Integral.L2.SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
+    Tensor0SBundle.Tensor0SSpace.toModel
+        ((loweringPairTrace (I := I) g₀ S T).toSection x
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) v =
+      ∑ k : Fin (Module.finrank ℝ E),
+        Tensor0SBundle.Tensor0SSpace.toModel
+            ((S.toSection x)
+              (ContinuousMultilinearMap.constOfIsEmpty ℝ
+                (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+            ![(Integral.Connection.cometricReadingModel (I := I) g₀ x
+                (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                  ((Module.finBasis ℝ E).cDualBasis k)) : TangentSpace I x), v 1] *
+          Tensor0SBundle.Tensor0SSpace.toModel
+            ((T.toSection x)
+              (ContinuousMultilinearMap.constOfIsEmpty ℝ
+                (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+            ![v 0, ((Module.finBasis ℝ E) k : TangentSpace I x)] := by
+  classical
+  set U := (Integral.Connection.bareTensorRfnsBilinearProduct (I := I) g₀ 2 2).prod
+    (a := 0) (b := 0) S T with hU
+  set U' := permuteCcTensor (I := I) g₀ c[(1 : Fin 4), 2, 3] U with hU'
+  set X := Integral.Connection.cometricDoubleTraceRecOp (I := I) g₀ 2 0 U' with hX
+  -- Outer swap: read through the permuted unit model.
+  have houter :
+      Tensor0SBundle.Tensor0SSpace.toModel
+          ((loweringPairTrace (I := I) g₀ S T).toSection x
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ
+              (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) v =
+        Tensor0SBundle.Tensor0SSpace.toModel
+          ((X.toSection x)
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ
+              (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) (v ∘ (Equiv.swap 0 1)) := by
+    rw [show loweringPairTrace (I := I) g₀ S T =
+        permuteCcTensor (I := I) g₀ (Equiv.swap 0 1) X from rfl]
+    have hperm := permuteCcTensor_unitModel (I := I) g₀ (Equiv.swap 0 1) X x
+    have happ := congrArg (fun (f : ContinuousMultilinearMap ℝ
+        (fun _ : Fin 2 => TangentSpace I x) ℝ) => f v) hperm
+    simp only [ContinuousMultilinearMap.domDomCongr_apply] at happ
+    exact happ
+  rw [houter]
+  -- The trace fibre: post-composition by the cometric double-trace fibre operator.
+  have htrace :
+      (X.toSection x)
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) =
+        _root_.DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.cometricDoubleTraceFib
+          (I := I) g₀ 2 x
+          ((U'.toSection x)
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ
+              (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) := by
+    rw [hX, Integral.Connection.cometricDoubleTraceRecOp_toSection]
+    rfl
+  rw [htrace,
+    _root_.DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.cometricDoubleTraceFib_toModel]
+  rw [_root_.DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.modelDoubleTrace_apply]
+  refine Finset.sum_congr rfl (fun k _ => ?_)
+  -- The inner permutation and the bare product, at the traced tuple.
+  have hinner :
+      Tensor0SBundle.Tensor0SSpace.toModel
+          ((U'.toSection x)
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ
+              (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) =
+        ContinuousMultilinearMap.domDomCongr c[(1 : Fin 4), 2, 3]
+          (Tensor0SBundle.Tensor0SSpace.toModel
+            ((U.toSection x)
+              (ContinuousMultilinearMap.constOfIsEmpty ℝ
+                (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))) := by
+    exact permuteCcTensor_unitModel (I := I) g₀ c[(1 : Fin 4), 2, 3] U x
+  have hprodU :
+      (U.toSection x)
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) =
+        ((Integral.Connection.bareTensorProdSection (I := I) g₀ S T).toSection x)
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) := by
+    rfl
+  rw [hinner]
+  rw [ContinuousMultilinearMap.domDomCongr_apply]
+  rw [show (Tensor0SBundle.Tensor0SSpace.toModel
+        ((U.toSection x)
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))) =
+      Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) 2 2
+        (Integral.Connection.bareUnitModel (I := I) g₀ S x)
+        (Integral.Connection.bareUnitModel (I := I) g₀ T x) from by
+    rw [hprodU]
+    exact Integral.Connection.bareTensorProdSection_unitModel (I := I) g₀ S T x]
+  rw [Bundle.continuousMultilinearMap.modelProduct_apply]
+  congr 1
+  · rw [Integral.Connection.bareUnitModel]
+    congr 1
+    funext i
+    fin_cases i <;> rfl
+  · rw [Integral.Connection.bareUnitModel]
+    congr 1
+    funext i
+    fin_cases i <;> rfl
+
+set_option linter.unusedSectionVars false in
+/-- **The lowering-slot difference factors through the cometric pairing trace**: for realized
+metrics `g₁, g₂` of `T₁, T₂`, the un-symmetrised half of the lowering-slot difference is the
+`g₀`-cometric pairing trace of the realized metric difference `w = realizeSymm (T₁ − T₂)` against
+the `g₀`-lowered fixed carrier (`gInner_sub_eq_ccTensorBilinSymm_sub` at the fibre, the cometric
+frame reconstruction `sum_phi_cometric_inner_basis` undoing the lowering). -/
+private theorem loweringSlotDiff_half_eq_pairTrace
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ g₂ : SmoothRiemannianMetric I M)
+    (hr1 : ∀ (x : M) (v w : TangentSpace I x),
+      g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w)
+    (hr2 : ∀ (x : M) (v w : TangentSpace I x),
+      g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) :
+    loweredCovGradDeTurckVFMixed (I := I) g₀ g₁ g₁ g₁ g_bg
+        - loweredCovGradDeTurckVFMixed (I := I) g₀ g₂ g₁ g₁ g_bg =
+      loweringPairTrace (I := I) g₀ (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))
+        (loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₁ g₁ g_bg) := by
+  classical
+  set w := realizeSymmCcTensor (I := I) g₀ (T₁ - T₂) with hw
+  refine Integral.L2.SmoothCcTensor.ext ?_
+  refine ContMDiffSection.ext (fun x => ?_)
+  apply tensor0s_ext_unitZero (I := I) (M := M) (s := 2)
+  apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+  refine ContinuousMultilinearMap.ext (fun v => ?_)
+  have hunit : (unitZeroSec (I := I) (M := M) x : Tensor0SBundle.Tensor0SSpace 0 I x) =
+      ContinuousMultilinearMap.constOfIsEmpty ℝ
+        (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ) := rfl
+  rw [hunit]
+  -- LHS: the metric-difference pairing fibre.
+  have hL :
+      Tensor0SBundle.Tensor0SSpace.toModel
+          (((loweredCovGradDeTurckVFMixed (I := I) g₀ g₁ g₁ g₁ g_bg
+              - loweredCovGradDeTurckVFMixed (I := I) g₀ g₂ g₁ g₁ g_bg).toSection x)
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ
+              (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) v =
+        ccTensorBilin (I := I) g₀ w x
+          ((LeviCivita (I := I) g₁)
+            (deTurckVF (I := I) g₁ g_bg : ∀ y : M, TangentSpace I y) x (v 0)) (v 1) := by
+    rw [Integral.L2.SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
+      ContinuousLinearMap.sub_apply, Tensor0SBundle.Tensor0SSpace.toModel_sub,
+      ContinuousMultilinearMap.sub_apply,
+      loweredCovGradDeTurckVFMixed_toModel_apply (I := I) g₀ g₁ g₁ g₁ g_bg x v,
+      loweredCovGradDeTurckVFMixed_toModel_apply (I := I) g₀ g₂ g₁ g₁ g_bg x v,
+      loweredCovGradDeTurckVFMixedBilin_apply, loweredCovGradDeTurckVFMixedBilin_apply]
+    rw [gInner_sub_eq_ccTensorBilinSymm_sub (I := I) g₀ g₁ g₂ T₁ T₂ hr1 hr2 x _ (v 1)]
+    rw [← realizeSymmCcTensor_ccTensorBilin_apply (I := I) g₀ (T₁ - T₂) x _ (v 1)]
+  rw [hL, loweringPairTrace_unitModel_apply (I := I) g₀ w
+    (loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₁ g₁ g_bg) x v]
+  -- RHS: the cometric frame sum reconstructs the raw covariant gradient slot.
+  set D : TangentSpace I x := (LeviCivita (I := I) g₁)
+    (deTurckVF (I := I) g₁ g_bg : ∀ y : M, TangentSpace I y) x (v 0) with hD
+  set P : Fin (Module.finrank ℝ E) → TangentSpace I x := fun k =>
+    Integral.Connection.cometricReadingModel (I := I) g₀ x
+      (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+        ((Module.finBasis ℝ E).cDualBasis k)) with hP
+  have hPdual : ∀ (k : Fin (Module.finrank ℝ E)) (u : TangentSpace I x),
+      g₀.inner x (P k) u = (Module.finBasis ℝ E).repr (u : E) k := fun k u =>
+    Integral.Connection.cometricReadingModel_dualBasis_inner (I := I) g₀ x k u
+  have hsum := Integral.Connection.sum_phi_cometric_inner_basis (I := I) g₀ x P hPdual
+    ((ccTensorBilin (I := I) g₀ w x).flip (v 1)) D
+  simp only [ContinuousLinearMap.flip_apply] at hsum
+  rw [← hsum]
+  refine Finset.sum_congr rfl (fun k _ => ?_)
+  congr 1
+  · rw [ccTensorBilin_apply]
+    rfl
+  · rw [loweredCovGradDeTurckVFMixed_toModel_apply (I := I) g₀ g₀ g₁ g₁ g_bg x
+      ![v 0, ((Module.finBasis ℝ E) k : TangentSpace I x)],
+      loweredCovGradDeTurckVFMixedBilin_apply]
+    simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
+    rw [hD]
 
 /-- **(POSIT — the integrated two-arm `L²` bound of the LOWERING-slot difference.)**  The first
 leg of the slot telescope `symLoweredDeTurckVFRetagG0_sub_eq_slotTelescope`
@@ -313,8 +508,10 @@ theorem symLoweredDeTurckVF_iteratedCovGrad_topRest_split (g₀ g_bg : SmoothRie
   have e₂ := h₂ T₁ T₂ g₁ g₂ hr1 hr2 hf1 hf2 hB1 hB2
   have e₃ := h₃ T₁ T₂ g₁ g₂ hr1 hr2 hf1 hf2 hB1 hB2
   rw [symLoweredDeTurckVFRetagG0_sub_eq_slotTelescope (I := I) g₀ g₁ g₂ g_bg,
-    iteratedCovGrad_add (I := I) g₀ 0 2 j _ (deTurckVFFieldSlotDiff (I := I) g₀ g₁ g₂ g_bg),
-    iteratedCovGrad_add (I := I) g₀ 0 2 j (deTurckVFLoweringSlotDiff (I := I) g₀ g₁ g₂ g_bg)
+    PDE.RicciFlow.iteratedCovGrad_add (I := I) g₀ 0 2 j _
+      (deTurckVFFieldSlotDiff (I := I) g₀ g₁ g₂ g_bg),
+    PDE.RicciFlow.iteratedCovGrad_add (I := I) g₀ 0 2 j
+      (deTurckVFLoweringSlotDiff (I := I) g₀ g₁ g₂ g_bg)
       (deTurckVFConnectionSlotDiff (I := I) g₀ g₁ g₂ g_bg)]
   set X := PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
     (deTurckVFLoweringSlotDiff (I := I) g₀ g₁ g₂ g_bg) with hX

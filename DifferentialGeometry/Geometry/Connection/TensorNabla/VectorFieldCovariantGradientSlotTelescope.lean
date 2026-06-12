@@ -440,6 +440,72 @@ theorem symLoweredDeTurckVFRetagG0_sub_eq_slotTelescope
       (loweredCovGradDeTurckVFMixed (I := I) g₀ g₂ g₂ g₂ g_bg)]
   abel
 
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
+set_option linter.unusedSectionVars false in
+/-- **(POSIT — the family-uniform Hamilton-tame jet engine of the `g₀`-lowered mixed
+DeTurck-gradient carrier.)**  For an anchor `g₀`, a flow background `g_bg`, a supercritical order
+`a` (`2a > dim + 4`), a family bound `B`, fibre-smallness `δ < 1/2`, and a gradient order `l`,
+there is one constant `C = C(g₀, g_bg, a, B, δ, l) ≥ 0` such that
+
+* (**background jet sup**) the FIXED background carrier
+  `F_bg := loweredCovGradDeTurckVFMixed g₀ g₀ g₀ g₀ g_bg` (the `g₀`-lowering of
+  `∇^{g₀} (deTurckVF g₀ g_bg)`, no perturbation) has its order-`l` covariant jet pointwise
+  bounded: `rfns(∇^l F_bg)(x) ≤ C²` — a single smooth section on the compact manifold, all
+  orders legitimate (NOT a family bound); and
+
+* for every realized fibre-small perturbation `(T₁, g₁)` of the family, the
+  **background-subtracted** carrier
+  `F(g₁) − F_bg`, `F(g₁) := loweredCovGradDeTurckVFMixed g₀ g₀ g₁ g₁ g_bg` (the `g₀`-lowering
+  of `∇^{g₁} (deTurckVF g₁ g_bg)`), satisfies
+  - (**value sup**) the order-`0` family-uniform `C⁰` fibre bound
+    `rfns(F(g₁) − F_bg)(x) ≤ C²` (supercritical `C²`-control of the metric jet, order `0`
+    ONLY — pointwise family bounds on `≥ 1`-jets are refuted and not stated); and
+  - (**integrated Hamilton-tame jet bound**)
+    `‖∇^l (F(g₁) − F_bg)‖² ≤ C · ∑_{i ≤ l+1} ‖∇^i T₁‖²` — the carrier difference is a
+    realized-Koszul first-order contraction of the `T₁`-jet, so its order-`l` jet carries at
+    most the order-`(l+1)` jets of `T₁`, with a family-uniform Hamilton-tame constant.
+
+The carrier is `g₀`-LOWERED (`g_low = g₀`): the consumer extracts the raw covariant gradient
+`∇^{g₁} W₁` from the carrier through the `g₀`-cometric trace, which is the unique
+`∇^{g₀}`-parallel un-lowering (a `g₁`-lowered carrier is not parallel-recoverable).  The
+background subtraction is forced by the frozen two-arm shape of the consumer
+`deTurckVFLoweringSlotDiff_iteratedCovGrad_twoArm_le`: the unsubtracted carrier retains the
+`T₁`-independent background mass `∇ W(g₀)`, whose Gagliardo–Nirenberg cross arm would produce a
+bare `‖(T₁ − T₂).toHs a‖²` term with no fixed-pair jet factor, refuted against the frozen
+target by the antisymmetric-perturbation family (`T₁ = εA`, `A` antisymmetric, `T₂ = 0`:
+realized metrics coincide, LHS `= 0`, but the bare term survives).
+
+Vanishes at `T₁ = 0` realized (`g₁ = g₀`, both family clauses `0 ≤ ·`); non-vacuous: the
+background clause carries the genuine nonzero gauge field `∇ (deTurckVF g₀ g_bg)` and the family
+clauses carry the full first-order Koszul content of the carrier difference.  Its body is
+`sorry`: a posited deep child (consumers transitively depend on `sorryAx`), the
+lowering-slot engine of the GN-product two-arm assembly. -/
+theorem loweredCovGradDeTurckVFMixed_diag_iteratedCovGrad_hamiltonTame_le
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (l : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      (∀ x : M,
+        Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l
+              (loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₀ g_bg)).toSection x) ≤ C ^ 2) ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+          (∀ x : M,
+            Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+              ((loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₁ g₁ g_bg
+                  - loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₀ g_bg).toSection x) ≤
+                C ^ 2) ∧
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l
+              (loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₁ g₁ g_bg
+                - loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₀ g_bg)‖ ^ 2 ≤
+            C * ∑ i ∈ Finset.range (l + 2),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2 :=
+  sorry
+
 end Pullback
 end RicciFlow
 end PDE
