@@ -49,10 +49,14 @@ posited analytic primitives plus the existing generic (`N`-free) carrier machine
   Duhamel solution `u = maxRegDuhamelMap … 0 gforce` whose forcing is reproduced a.e. by the
   gated self-representative nonlinearity along the trajectory's own solution field, together
   with the trajectory-native all-order forcing/solution mass coupling (the parabolic
-  bootstrap of the constructed zero-datum solution).  This is the genuine quasilinear
-  strictly-parabolic contraction, funded by the fibre-small δ-smallness of the principal
-  coefficient (`deTurckNonlinearitySpectral_principalPart_cancels`) and small-time gains on
-  the first-order part.
+  bootstrap of the constructed zero-datum solution).  It is itself sorry-free glue over two
+  posited analytic primitives: `deTurckGatedRemainder_duhamel_fixedPoint_exists` — the
+  genuine quasilinear strictly-parabolic contraction, funded by the fibre-small δ-smallness
+  of the principal coefficient (`deTurckNonlinearitySpectral_principalPart_cancels`) and
+  small-time gains on the first-order part (the one-loss maximal-regularity tower does not
+  apply: its `LipschitzOnWith` binders are Lean-refuted for the two-loss gated remainder) —
+  and `deTurckGatedRemainder_fixedPoint_forcing_mass_coupling` — the per-order mass coupling
+  of the constructed fixed-point trajectory.
 * `deTurckGated_carrier_RHS_continuousOn_interior` — the interior continuity of the gated
   carrier right-hand side `r ↦ Δ_∇ (u₂ r) + N_cont (ι (u₂ r))` on a fibre-small sub-horizon
   (the Nemytskii continuity of the gated remainder along the all-order-continuous
@@ -92,8 +96,99 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+/-- **The two-derivative-loss Duhamel fixed point for the gated self-representative DeTurck
+nonlinearity (posited analytic input: the genuine quasilinear strictly-parabolic
+contraction).**
+
+For an anchor metric `g₀`, a flow background `g_bg`, and a supercritical spectral order `a`
+(`2a > dim M + 4`, plus the engine arithmetic `dim M < 2(a − 2)`), there are a positive
+horizon `T ≤ 1` and an `L²`-time forcing `gforce ∈ L²([0,T]; Hᵃ)` reproduced almost
+everywhere by the gated, self-representative nonlinearity evaluated on the `H^{a+1}`-view
+zero-datum Duhamel solution field of `gforce` itself — the fixed-point equation
+`gforce =ᵐ N ∘ field(gforce)` with `N := deTurckG0SpectralN g₀ a ∘
+deTurckRemainderRealizeSection g₀ g_bg`.
+
+This cannot be obtained from the one-derivative-loss maximal-regularity tower
+(`quasilinear_strong_existence_locallyLipschitz_smallTime_stayDischarged_ofCompact` and its
+siblings consume a global or `H^{a+1}`-ball `LipschitzOnWith` binder): the gated remainder
+is a genuine two-derivative-loss nonlinearity `[(g₀+T)⁻¹ − g₀⁻¹]·∇²T`, and an
+`H^{a+1}`-ball Lipschitz bound into `Hᵃ` for it is Lean-refuted (the eigentrain
+counterexample; see `PROVE_REFUTED.md`).  The expected proof is the two-loss small-time
+Banach contraction in `L²([0,T]; Hᵃ)`: the Duhamel field gains two orders
+(maximal regularity), the gated remainder loses them back with a `δ`-small constant on the
+principal term on the fibre-small ball (the principal cancellation
+`deTurckNonlinearitySpectral_principalPart_cancels`) and a small-time-funded constant on
+the first-order part (the `δ`-weighted top/lower split Lipschitz over
+`exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder` and
+`deTurckG0SpectralN_dist_le_pouHaNorm`), with gate-domain persistence of the Picard
+iterates.  The forcing is the remainder of the trajectory's *own* gate representative —
+no smoothing operator, no second representative, no static all-order operator-loss
+hypothesis on the nonlinearity (the `PROVE_REFUTED.md` design invariant).
+
+The existential is non-degenerate, exactly as for the probe-passed consumer
+`deTurckGatedRemainder_maxReg_trajectory_exists` whose statement this is a verbatim
+sub-conjunction of: the fixed-point equation pins `gforce`, and the zero forcing is a
+witness exactly when `g₀` is a DeTurck fixed point of `g_bg` (e.g. the flat torus with
+`g_bg = g₀`), in which case the constant flow is the honest solution.  The body is the
+posited classical parabolic-contraction input; it remains `sorry`, so consumers
+transitively depend on `sorryAx`. -/
+theorem deTurckGatedRemainder_duhamel_fixedPoint_exists
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
+    (ha2 : Module.finrank ℝ E < 2 * (a - 2)) :
+    ∃ (T : ℝ) (hT : 0 < T) (hT1 : T ≤ 1)
+      (gforce : Analysis.Parabolic.TimeSobolev.timeL2
+        (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T),
+      ((gforce : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+          =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T]
+        (fun t => deTurckG0SpectralN (I := I) g₀ a
+          (deTurckRemainderRealizeSection (I := I) g₀ g_bg
+            (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+              (a : ℝ) hT hT1
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))) :=
+  sorry
+
+/-- **The all-order forcing/solution mass coupling of the gated fixed-point trajectory
+(posited analytic input: the parabolic bootstrap of the zero-datum solution).**
+
+For a fixed point `gforce` of the gated self-representative Duhamel map (`hfix` — the
+forcing is reproduced a.e. by the gated nonlinearity on the trajectory's own
+`H^{a+1}`-view zero-datum solution field), the trajectory-native mass coupling holds: for
+every order `d`, summability of the solution-field mass at order `d + 1` implies
+summability of the forcing mass at order `d`.
+
+This is a property of the **constructed** trajectory, not a static operator-loss
+hypothesis on the nonlinearity (`FirstOrderOperatorLoss`-style `∃C∀d` couplings are
+Lean-refuted for the gated gauge; see `PROVE_REFUTED.md`): under `hfix` the forcing at
+a.e. time is the order-`a` spectral read-off of the realized remainder of the field's own
+*smooth* gate representative, and the zero-datum solution of a smooth-in-space forcing on
+a closed manifold is smooth up to `t = 0` (no spatial boundary, hence no compatibility
+obstruction), so the per-order implication is the interior parabolic smoothing of the
+constructed solution with the antecedent supplying the uniform-in-time integrability.
+The hypotheses are the honest fixed-point data, structurally distinct from the
+conclusion; no packaging.  The body is the posited parabolic-bootstrap input; it remains
+`sorry`, so consumers transitively depend on `sorryAx`. -/
+theorem deTurckGatedRemainder_fixedPoint_forcing_mass_coupling
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
+    (ha2 : Module.finrank ℝ E < 2 * (a - 2))
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (gforce : Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hfix : (gforce : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+        =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T]
+      (fun t => deTurckG0SpectralN (I := I) g₀ a
+        (deTurckRemainderRealizeSection (I := I) g₀ g_bg
+          (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+            (a : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))) :
+    ∀ d : ℝ,
+      Summable (solFieldMass (I := I) (M := M) hT.le gforce (d + 1)) →
+        Summable (forcingMass (I := I) (M := M) gforce d) :=
+  sorry
+
 /-- **The trajectory-level two-derivative-loss maximal-regularity fixed point for the gated
-self-representative DeTurck nonlinearity (genuine analytic input).**
+self-representative DeTurck nonlinearity.**
 
 For an anchor metric `g₀`, a flow background `g_bg`, and a supercritical spectral order `a`
 (`2a > dim M + 4`, plus the engine arithmetic `dim M < 2(a − 2)`), there are a positive
@@ -117,26 +212,21 @@ Duhamel solution `u` of the smooth datum `0`, such that:
   hypothesis on the nonlinearity (`FirstOrderOperatorLoss`-style couplings are
   Lean-refuted for the gated gauge; see `PROVE_REFUTED.md`).
 
-This is the standard quasilinear strictly-parabolic short-time existence in spectral
-currency: a contraction in the maximal-regularity trajectory space, where the
-two-order-loss principal term `[(g₀+T)⁻¹ − g₀⁻¹]·∇²T` of the gated remainder carries a
-δ-small coefficient on the fibre-small ball (the principal cancellation
-`deTurckNonlinearitySpectral_principalPart_cancels`), funding the contraction together with
-small-time gains on the one-order part; each Picard iterate is a smooth trajectory (the
-gated gauge of a gate-realizable element is a smooth section, and the zero-datum Duhamel
-image of a smooth forcing trajectory is gate-realizable on a small horizon), and the mass
-coupling is propagated along the iteration.  The expected next-descent split: the
-δ-weighted top/lower-order split Lipschitz of the gated remainder on smooth fibre-small
-balls (over `exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder` and
-`deTurckG0SpectralN_dist_le_pouHaNorm`), the abstract two-loss small-time contraction, and
-the gate-domain persistence of the iterates.
+This is **sorry-free glue** over the two posited analytic primitives: the two-loss
+Duhamel fixed point `deTurckGatedRemainder_duhamel_fixedPoint_exists` (the genuine
+quasilinear strictly-parabolic contraction, funded by the fibre-small δ-smallness of the
+principal coefficient `deTurckNonlinearitySpectral_principalPart_cancels` and small-time
+gains on the first-order part) supplies `T`, `gforce` and `hforce`; the solution `u` is
+*defined* as the Duhamel image of `gforce` (so `hu` is `rfl`); and the trajectory-native
+mass coupling `deTurckGatedRemainder_fixedPoint_forcing_mass_coupling` (the parabolic
+bootstrap of the constructed zero-datum solution) supplies `hcouple` from the fixed-point
+data.
 
 The existential is non-degenerate: `hforce` pins `gforce` to the gated remainder of the
 trajectory, so the zero trajectory is a witness exactly when `deTurckRHSSection g_bg g₀`
 vanishes — i.e. when `g₀` is a DeTurck fixed point (e.g. the flat torus with `g_bg = g₀`),
-in which case the constant flow *is* the honest solution.  The body is the posited
-classical parabolic-existence input; it remains `sorry`, so consumers transitively depend
-on `sorryAx`. -/
+in which case the constant flow *is* the honest solution.  Consumers transitively depend
+on `sorryAx` through the two posited primitives. -/
 theorem deTurckGatedRemainder_maxReg_trajectory_exists
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -156,8 +246,15 @@ theorem deTurckGatedRemainder_maxReg_trajectory_exists
               (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))) ∧
       (∀ d : ℝ,
         Summable (solFieldMass (I := I) (M := M) hT.le gforce (d + 1)) →
-          Summable (forcingMass (I := I) (M := M) gforce d)) :=
-  sorry
+          Summable (forcingMass (I := I) (M := M) gforce d)) := by
+  obtain ⟨T, hT, hT1, gforce, hfix⟩ :=
+    deTurckGatedRemainder_duhamel_fixedPoint_exists (I := I) (M := M) g₀ g_bg a ha ha2
+  exact ⟨T, hT, hT1, gforce,
+    Analysis.Parabolic.QuasiLinear.maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce,
+    rfl, hfix,
+    deTurckGatedRemainder_fixedPoint_forcing_mass_coupling (I := I) (M := M) g₀ g_bg a
+      ha ha2 hT hT1 gforce hfix⟩
 
 /-- **Interior continuity of the gated self-representative carrier right-hand side on a
 fibre-small sub-horizon (posited analytic input).**
