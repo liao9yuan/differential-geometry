@@ -93,11 +93,14 @@ Route (detailed in MetricPreconv.md "Order-1 route in detail"):
    fields' gRef-norms on `Kc` (continuous on compact; `IsCompact.exists_bound`-style).
 
 ### Brick A2 — all-orders conversion (the induction) ✅ DONE
-**(2026-06-11, commit 423b4e1a; ACCEPTED: sorry-free, targeted build green,
-axiom-clean.  Endpoint `iteratedFDeriv_comp_le_tower` — note the improved
-bound shape: order-family `b : ℕ → ℝ` with `CV * ∑_{q ≤ p+r} b q`, which
-plugs directly into the `(B_r)` quantifier shape.  Helpers exported for B:
-`towerStep`, `fderiv_chartRep_eq_towerStep`, `contDiffAt_chartRep`,
+**(2026-06-11, commit 423b4e1a + constants-first FIX 39befdee; ACCEPTED:
+sorry-free, targeted build green, axiom-clean.  Endpoint
+`iteratedFDeriv_comp_le_tower`, FINAL SIGNATURE: `∃ CV, 0 ≤ CV ∧ ∀ A0, ∀ y ∈
+Kc, ∀ b, … ≤ CV * ∑_{q ≤ p+r} b q` — `CV` precedes `∀ A0`, so it is
+k-independent on a metric sequence.  Consumers must apply CV first, then the
+field.  A1 (`fderiv_comp_le_tower`) keeps the per-`A0` shape — no consumers;
+USE A2 (r = 1) instead.  Helpers exported for B: `towerStep`,
+`fderiv_chartRep_eq_towerStep`, `contDiffAt_chartRep`,
 `covDerivOfField_eval_contMDiff`, `writtenInExtChartAt_real_apply`.)**
 **File**: same `MetricPreconv.lean`.
 
@@ -120,6 +123,15 @@ Taylor-series field route (`ftaylorSeries.fderiv`) avoided curry rewriting —
 reuse that trick.
 
 ### Brick B — chart-local extraction + diagonal
+**STATUS (2026-06-11/12): foundation ACCEPTED (c3d7bc03 + 6c308e3f, sorry-free,
+build green, axiom-clean): `bumpMul_contDiff`, `norm_iteratedFDeriv_bumpMul_le`
+(`∀ i ≤ r` hypothesis shape — matches `exists_cInf_subseq.hbdd`).  ENDPOINT
+NOT STATED (0%).  Remaining = the metric producer (~150-200 lines, route
+fully scouted in MetricPreconv.md: nested Euclidean bumps, `gg_k :=
+χ₁·(chart rep of (gSeq k).inner(E_i,E_j))`, `Φ_k := χ·gg_k`, Bg from the
+FIXED A2 CV via `metricCovDeriv_eq_covDerivOfField` + the `(B_r)` hypothesis)
++ `exists_cInf_subseq` per chart/component + the atlas × n² diagonal.**
+
 **File**: same `MetricPreconv.lean`.
 
 For a SEQUENCE `gSeq : ℕ → SmoothRiemannianMetric I M` with `(B_r)`-type
@@ -221,6 +233,14 @@ Endpoint: the window analogue of `MetricCInfConvOnCompacts` with
 - Heartbeat blowups on giant calc terms → `set` small abbreviations.
 
 ## 5. Acceptance criteria (per brick)
+
+- **Constants-first, STRICT form** (lesson from the A2 fix 39befdee): a
+  uniform constant must be `∃`-bound BEFORE every parameter that varies along
+  the sequence — INCLUDING the theorem's own outer parameters.
+  `(A0 : Field) → ∃ C, …` is WRONG for sequence use even when the proof's
+  `C` is morally `A0`-independent: after `choose`, `C` is a function of `A0`.
+  The correct shape is `∃ C, ∀ A0, …`.  Check every `∃`-statement against
+  this before accepting.
 
 - Focused check green; targeted build of the new module green; no new `sorry`
   (an honest precisely-stated `sorry` is acceptable ONLY with a frontier note
