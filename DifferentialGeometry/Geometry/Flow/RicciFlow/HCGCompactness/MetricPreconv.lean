@@ -905,5 +905,47 @@ theorem norm_iteratedFDeriv_bumpMul_le {χ gg : E → Real} (r : ℕ)
   push_cast
   ring
 
+/-- **Metric component chart-derivative bound** (the A2 → metric bridge).  For a
+metric SEQUENCE with uniform `(B_q)` covariant bounds, the order-`r` chart
+derivative of the `(0,2)`-component along a fixed slot tuple `V` is bounded on
+`Kc` by a constant `Mr` that is `∃`-bound BEFORE `k` (strict constants-first:
+the A2 `CV` is uniform in `k`, the `(B_q)` constants are uniform in `k`). -/
+theorem metricComp_iteratedFDeriv_le
+    (gRef : SmoothRiemannianMetric I M)
+    (gSeq : ℕ → SmoothRiemannianMetric I M)
+    (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
+      metricCovDerivNorm (I := I) q (gSeq k) gRef z ≤ C)
+    (x₀ : M) {Kc : Set M} (hKc : IsCompact Kc)
+    (hKchart : Kc ⊆ (chartAt H x₀).source)
+    (V : Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (r : ℕ) :
+    ∃ Mr : Real, 0 ≤ Mr ∧ ∀ k : ℕ, ∀ y ∈ Kc,
+      ‖iteratedFDeriv Real r (writtenInExtChartAt I 𝓘(Real, Real) x₀
+          (fun w : M => (covDerivOfField (I := I) gRef
+            (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) 0) w (fun a => V a w)))
+        (extChartAt I x₀ y)‖ ≤ Mr := by
+  classical
+  obtain ⟨CV, hCV0, hCV⟩ :=
+    iteratedFDeriv_comp_le_tower (I := I) gRef hKc hKchart r 0 V
+  choose C hC using fun q => hbdd q Kc hKc
+  set b : ℕ → Real := fun q => max (C q) 0 with hb
+  have hb0 : ∀ q, 0 ≤ b q := fun q => le_max_right _ _
+  refine ⟨CV * ∑ q ∈ Finset.range (r + 1), b q,
+    mul_nonneg hCV0 (Finset.sum_nonneg (fun q _ => hb0 q)), ?_⟩
+  intro k y hy
+  have hbnd : ∀ q : ℕ, ∀ z ∈ Kc, Real.sqrt (normSq0S (I := I) gRef z (q + 2)
+      (covDerivOfField (I := I) gRef
+        (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) q z)) ≤ b q := by
+    intro q z hz
+    have hcompeq : Real.sqrt (normSq0S (I := I) gRef z (q + 2)
+        (covDerivOfField (I := I) gRef
+          (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) q z))
+        = metricCovDerivNorm (I := I) q (gSeq k) gRef z := by
+      simp only [metricCovDerivNorm, metricCovDeriv_eq_covDerivOfField]
+    rw [hcompeq]
+    exact le_trans (hC q k z hz) (le_max_left _ _)
+  have hbound := hCV (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) y hy b hbnd
+  simpa using hbound
+
 end HCGCompactness
 end DifferentialGeometry
