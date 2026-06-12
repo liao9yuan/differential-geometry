@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.LieDerivSectionCartan
 import DifferentialGeometry.Geometry.Connection.ConnectionDifferenceFieldJets
+import DifferentialGeometry.Geometry.Connection.TensorNabla.VectorFieldCovariantGradientSlotTelescope
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricContractionLeibnizGrid
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.QuadraticProductRfnsGrid
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CrossCorrectionParallelContraction
@@ -82,7 +83,117 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-/-- **(P1b — POSIT — the INTEGRATED two-arm `L²` bound of the symmetrised-lowered DeTurck-field
+/-- **(POSIT — the integrated two-arm `L²` bound of the LOWERING-slot difference.)**  The first
+leg of the slot telescope `symLoweredDeTurckVFRetagG0_sub_eq_slotTelescope`
+(`VectorFieldCovariantGradientSlotTelescope.lean`): the symmetrised section with un-symmetrised
+fibre `(g₁ − g₂)(∇^{g₁}_v W₁, w)`, `W₁ = deTurckVF g₁ g_bg`.  The metric difference
+`g₁ − g₂ = ccTensorBilinSymm g₀ (T₁ − T₂)` (via `hr1`/`hr2`) is **linear in the realized
+difference** `w = realizeSymmCcTensor g₀ (T₁ − T₂)`, paired against the fixed `(g₁, g_bg)`-jet of
+`∇^{g₁} W₁`; its order-`j` covariant gradient obeys the same integrated Hamilton/Moser two-arm
+bound as the parent: a difference arm carrying the 0-jet-inclusive `w`-jets and a cross arm
+keeping the fixed-pair `(T₁, T₂)` jets against the difference's `H^a` mass (supercritical `ha`).
+Vanishes at `T₁ = T₂` realized (both arms `0`), so the bound is non-vacuous with both arms
+genuinely present.  Its body is `sorry`: a posited deep child (consumers transitively depend on
+`sorryAx`), the lowering-slot leg of the GN-product two-arm engine. -/
+theorem deTurckVFLoweringSlotDiff_iteratedCovGrad_twoArm_le
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (j : ℕ) :
+    ∃ Cd : ℝ, 0 ≤ Cd ∧
+      ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+        (g₁ g₂ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+                (deTurckVFLoweringSlotDiff (I := I) g₀ g₁ g₂ g_bg)‖ ^ 2 ≤
+            Cd * ∑ i ∈ Finset.range (j + 2 + 1),
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                    (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
+              + Cd * (∑ i ∈ Finset.range (j + 2 + 1),
+                  (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
+                    + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
+                * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=
+  sorry
+
+/-- **(POSIT — the integrated two-arm `L²` bound of the CONNECTION-slot difference.)**  The second
+leg of the slot telescope `symLoweredDeTurckVFRetagG0_sub_eq_slotTelescope`: the symmetrised
+section with un-symmetrised fibre `g₂((∇^{g₁} − ∇^{g₂})_v W₁, w)`, `W₁ = deTurckVF g₁ g_bg`.  The
+connection difference `∇^{g₁} − ∇^{g₂}` is the tensorial Christoffel-difference field of the pair
+`(g₁, g₂)`, governed by the realized-Koszul jet algebra of `T₁ − T₂` (the `connDiff` engine of
+`ConnectionDifferenceFieldJets.lean`), paired against the fixed field `W₁`; its order-`j`
+covariant gradient obeys the same integrated two-arm bound: a difference arm in the
+0-jet-inclusive `w`-jets and a cross arm on the fixed pair against the `H^a` mass.  Vanishes at
+`T₁ = T₂` realized.  Its body is `sorry`: a posited deep child (consumers transitively depend on
+`sorryAx`), the connection-slot leg of the GN-product two-arm engine. -/
+theorem deTurckVFConnectionSlotDiff_iteratedCovGrad_twoArm_le
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (j : ℕ) :
+    ∃ Cd : ℝ, 0 ≤ Cd ∧
+      ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+        (g₁ g₂ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+                (deTurckVFConnectionSlotDiff (I := I) g₀ g₁ g₂ g_bg)‖ ^ 2 ≤
+            Cd * ∑ i ∈ Finset.range (j + 2 + 1),
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                    (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
+              + Cd * (∑ i ∈ Finset.range (j + 2 + 1),
+                  (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
+                    + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
+                * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=
+  sorry
+
+/-- **(POSIT — the integrated two-arm `L²` bound of the FIELD-slot difference.)**  The third leg
+of the slot telescope `symLoweredDeTurckVFRetagG0_sub_eq_slotTelescope`: the symmetrised section
+with un-symmetrised fibre `g₂(∇^{g₂}_v (W₁ − W₂), w)`, `Wᵢ = deTurckVF gᵢ g_bg`.  The field
+difference `W₁ − W₂` is the inverse-Gram-weighted trace of the pair connection difference
+(`deTurckVF_sub_apply_eq_trace_connDiff`, `VectorFieldCovariantGradientSection.lean`), the
+realized-Koszul trace of `T₁ − T₂`; its `g₂`-covariant gradient lowered by `g₂` obeys the same
+integrated two-arm bound: a 0-jet-inclusive difference arm in the `w`-jets and a cross arm on the
+fixed pair against the `H^a` mass.  Vanishes at `T₁ = T₂` realized.  Its body is `sorry`: a
+posited deep child (consumers transitively depend on `sorryAx`), the field-slot leg of the
+GN-product two-arm engine. -/
+theorem deTurckVFFieldSlotDiff_iteratedCovGrad_twoArm_le
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (j : ℕ) :
+    ∃ Cd : ℝ, 0 ≤ Cd ∧
+      ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+        (g₁ g₂ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+                (deTurckVFFieldSlotDiff (I := I) g₀ g₁ g₂ g_bg)‖ ^ 2 ≤
+            Cd * ∑ i ∈ Finset.range (j + 2 + 1),
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                    (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
+              + Cd * (∑ i ∈ Finset.range (j + 2 + 1),
+                  (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
+                    + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
+                * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=
+  sorry
+
+/-- **(P1b — GLUE over the slot telescope — the INTEGRATED two-arm `L²` bound of the symmetrised-lowered DeTurck-field
 difference, with the 0-jet-inclusive `w`-jet difference arm.)**
 
 The genuine deep covariant-gauge content of the Lie half, the **gauge analogue (parity-depth)** of the
@@ -152,9 +263,19 @@ arm carries **both** fixed-pair endpoints `T₁, T₂`.  At `g₁ = g₂` (so `T
 difference vanishes (`lieDerivRetagG0_eq_symLoweredRetagG0` reduces it to the sealed Lie difference,
 which vanishes by `lieDerivRetagG0_sub_toModel_eq`), `w = 0` and `‖(T₁ − T₂).toHs a‖ = 0`, so the bound
 is `0 ≤ 0`.  NO value-bounded `Φ.op 0 2 w` shape, NO pointwise-`C^{>2}`-jet claim, NO
-spectral-nonlinearity, NO Weyl dependence.  Its body is `sorry`: the genuine deep integrated
-covariant-Leibniz two-arm bound of the symmetrised-lowered DeTurck-field difference, riding the GN
-product two-arm family, with the 0-jet-inclusive difference arm. -/
+spectral-nonlinearity, NO Weyl dependence.
+
+**Proof (glue).**  By the slot-telescope identity
+`symLoweredDeTurckVFRetagG0_sub_eq_slotTelescope`
+(`VectorFieldCovariantGradientSlotTelescope.lean`, PROVEN), the difference is the sum of the three
+single-slot difference sections (lowering / connection / field).  Each slot carries the same
+integrated two-arm bound (the three posited children
+`deTurckVFLoweringSlotDiff_iteratedCovGrad_twoArm_le`,
+`deTurckVFConnectionSlotDiff_iteratedCovGrad_twoArm_le`,
+`deTurckVFFieldSlotDiff_iteratedCovGrad_twoArm_le` above, each `sorry`-posited — this theorem
+transitively depends on their `sorryAx`); the assembly folds the norm-square of the three-term sum
+(`‖X + Y + Z‖² ≤ 3(‖X‖² + ‖Y‖² + ‖Z‖²)`, the covariant gradient distributing by
+`iteratedCovGrad_add`) and absorbs the `3` and the three constants into `Cd = 3(C₁ + C₂ + C₃)`. -/
 theorem symLoweredDeTurckVF_iteratedCovGrad_topRest_split (g₀ g_bg : SmoothRiemannianMetric I M)
     (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (j : ℕ) :
@@ -178,8 +299,52 @@ theorem symLoweredDeTurckVF_iteratedCovGrad_topRest_split (g₀ g_bg : SmoothRie
               + Cd * (∑ i ∈ Finset.range (j + 2 + 1),
                   (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                     + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
-                * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=
-  sorry
+                * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 := by
+  classical
+  obtain ⟨C₁, hC₁, h₁⟩ := deTurckVFLoweringSlotDiff_iteratedCovGrad_twoArm_le (I := I)
+    g₀ g_bg a ha B hB δ hδ0 hδ1 j
+  obtain ⟨C₂, hC₂, h₂⟩ := deTurckVFConnectionSlotDiff_iteratedCovGrad_twoArm_le (I := I)
+    g₀ g_bg a ha B hB δ hδ0 hδ1 j
+  obtain ⟨C₃, hC₃, h₃⟩ := deTurckVFFieldSlotDiff_iteratedCovGrad_twoArm_le (I := I)
+    g₀ g_bg a ha B hB δ hδ0 hδ1 j
+  refine ⟨3 * (C₁ + C₂ + C₃), by positivity, ?_⟩
+  intro T₁ T₂ g₁ g₂ hr1 hr2 hf1 hf2 hB1 hB2
+  have e₁ := h₁ T₁ T₂ g₁ g₂ hr1 hr2 hf1 hf2 hB1 hB2
+  have e₂ := h₂ T₁ T₂ g₁ g₂ hr1 hr2 hf1 hf2 hB1 hB2
+  have e₃ := h₃ T₁ T₂ g₁ g₂ hr1 hr2 hf1 hf2 hB1 hB2
+  rw [symLoweredDeTurckVFRetagG0_sub_eq_slotTelescope (I := I) g₀ g₁ g₂ g_bg,
+    iteratedCovGrad_add (I := I) g₀ 0 2 j _ (deTurckVFFieldSlotDiff (I := I) g₀ g₁ g₂ g_bg),
+    iteratedCovGrad_add (I := I) g₀ 0 2 j (deTurckVFLoweringSlotDiff (I := I) g₀ g₁ g₂ g_bg)
+      (deTurckVFConnectionSlotDiff (I := I) g₀ g₁ g₂ g_bg)]
+  set X := PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+    (deTurckVFLoweringSlotDiff (I := I) g₀ g₁ g₂ g_bg) with hX
+  set Y := PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+    (deTurckVFConnectionSlotDiff (I := I) g₀ g₁ g₂ g_bg) with hY
+  set Z := PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+    (deTurckVFFieldSlotDiff (I := I) g₀ g₁ g₂ g_bg) with hZ
+  have htri : ‖X + Y + Z‖ ^ 2 ≤ 3 * (‖X‖ ^ 2 + ‖Y‖ ^ 2 + ‖Z‖ ^ 2) := by
+    have t₁ : ‖X + Y + Z‖ ≤ ‖X + Y‖ + ‖Z‖ := norm_add_le (X + Y) Z
+    have t₂ : ‖X + Y‖ ≤ ‖X‖ + ‖Y‖ := norm_add_le X Y
+    have t₃ : ‖X + Y + Z‖ ≤ ‖X‖ + ‖Y‖ + ‖Z‖ := by linarith
+    have t₄ : ‖X + Y + Z‖ ^ 2 ≤ (‖X‖ + ‖Y‖ + ‖Z‖) ^ 2 := by
+      have h0 : (0 : ℝ) ≤ ‖X + Y + Z‖ := norm_nonneg _
+      nlinarith
+    nlinarith [t₄, sq_nonneg (‖X‖ - ‖Y‖), sq_nonneg (‖Y‖ - ‖Z‖), sq_nonneg (‖X‖ - ‖Z‖)]
+  have hA : (0 : ℝ) ≤ ∑ i ∈ Finset.range (j + 2 + 1),
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+          (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2 :=
+    Finset.sum_nonneg (fun i _ => sq_nonneg _)
+  have hS : (0 : ℝ) ≤ ∑ i ∈ Finset.range (j + 2 + 1),
+      (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
+        + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2) :=
+    Finset.sum_nonneg (fun i _ => by positivity)
+  have hc : (0 : ℝ) ≤
+      ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=
+    sq_nonneg _
+  refine le_trans htri ?_
+  nlinarith [e₁, e₂, e₃, hA, hS, hc, mul_nonneg hC₁ hA, mul_nonneg hC₂ hA, mul_nonneg hC₃ hA,
+    mul_nonneg (mul_nonneg hC₁ hS) hc, mul_nonneg (mul_nonneg hC₂ hS) hc,
+    mul_nonneg (mul_nonneg hC₃ hS) hc]
 
 end DeTurck
 end PDE
