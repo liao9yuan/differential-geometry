@@ -875,8 +875,8 @@ vanish, so the whole product derivative does).  The `K`-independent bound feedin
 theorem norm_iteratedFDeriv_bumpMul_le {χ gg : E → Real} (r : ℕ)
     (hχ : ContDiff Real (∞ : WithTop ℕ∞) χ) (hgg : ContDiff Real (∞ : WithTop ℕ∞) gg)
     {Bχ Bg : Real} (hBχ0 : 0 ≤ Bχ) (hBg0 : 0 ≤ Bg)
-    (hχbd : ∀ x ∈ tsupport χ, ∀ i : ℕ, ‖iteratedFDeriv Real i χ x‖ ≤ Bχ)
-    (hgbd : ∀ x ∈ tsupport χ, ∀ j : ℕ, ‖iteratedFDeriv Real j gg x‖ ≤ Bg)
+    (hχbd : ∀ x ∈ tsupport χ, ∀ i : ℕ, i ≤ r → ‖iteratedFDeriv Real i χ x‖ ≤ Bχ)
+    (hgbd : ∀ x ∈ tsupport χ, ∀ j : ℕ, j ≤ r → ‖iteratedFDeriv Real j gg x‖ ≤ Bg)
     (x : E) :
     ‖iteratedFDeriv Real r (fun y : E => χ y * gg y) x‖ ≤ 2 ^ r * Bχ * Bg := by
   refine le_trans (norm_iteratedFDeriv_mul_le hχ hgg x (by exact_mod_cast le_top)) ?_
@@ -884,11 +884,13 @@ theorem norm_iteratedFDeriv_bumpMul_le {χ gg : E → Real} (r : ℕ)
       (r.choose i : Real) * ‖iteratedFDeriv Real i χ x‖
           * ‖iteratedFDeriv Real (r - i) gg x‖
         ≤ (r.choose i : Real) * (Bχ * Bg) := by
-    intro i _
+    intro i hi
+    have hir : i ≤ r := Nat.lt_succ_iff.1 (Finset.mem_range.1 hi)
     by_cases hx : x ∈ tsupport χ
     · rw [mul_assoc]
       refine mul_le_mul_of_nonneg_left ?_ (by positivity)
-      exact mul_le_mul (hχbd x hx i) (hgbd x hx (r - i)) (norm_nonneg _) hBχ0
+      exact mul_le_mul (hχbd x hx i hir) (hgbd x hx (r - i) (Nat.sub_le r i))
+        (norm_nonneg _) hBχ0
     · have hχx : iteratedFDeriv Real i χ x = 0 := by
         have heq : χ =ᶠ[nhds x] (fun _ => (0 : Real)) := by
           filter_upwards [(isClosed_tsupport χ).isOpen_compl.mem_nhds hx] with z hz

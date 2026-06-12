@@ -5,13 +5,25 @@ bump-extension foundation done) (2026-06-11).**
 
 ## Brick B IN PROGRESS — chart-local extraction (MetricPreconv.lean)
 
-Foundation (generic Euclidean, verified green):
+Foundation (generic Euclidean, verified green, producer-ready):
 - `bumpMul_contDiff` — `χ` (smooth bump, `tsupport ⊆ U` open) `× g` (`ContDiffOn U`)
   is globally `ContDiff ⊤` on `E`.
-- `norm_iteratedFDeriv_bumpMul_le` — `‖∇ʳ(χ·g̃)‖ ≤ 2ʳ·Bχ·Bg` EVERYWHERE, given
-  `χ`/`g̃` derivative bounds `Bχ`/`Bg` on `tsupport χ` (off `tsupport χ` the
-  χ-derivatives vanish ⇒ the product derivative does).  `K`-independent — exactly
-  `exists_cInf_subseq`'s `hbdd` shape.
+- `norm_iteratedFDeriv_bumpMul_le` — `‖∇ʳ(χ·gg)‖ ≤ 2ʳ·Bχ·Bg` EVERYWHERE, given
+  `χ`/`gg` derivative bounds `Bχ`/`Bg` on `tsupport χ` for orders `≤ r` (off
+  `tsupport χ` the χ-derivatives vanish ⇒ the product derivative does).
+  `K`-independent — exactly `exists_cInf_subseq`'s `hbdd` shape.  (Hyps are
+  `∀ i ≤ r`, not `∀ i`: a fixed smooth function's high-order derivatives grow, so
+  the metric supplies `Bg = max_{j≤r}` of the A2 bounds.)
+
+**A2 constants-first FIX (necessary for Brick B, committed):**
+`iteratedFDeriv_comp_le_tower` was restated `∃ CV, 0 ≤ CV ∧ ∀ A0, …` (A0 moved
+INSIDE the ∀, after `∃CV`) instead of taking `A0` as an outer parameter.  With
+`A0` outer, `(A2 … (metricTensorField (gSeq k)) …).choose` is an opaque
+k-dependent value — `exists_cInf_subseq` needs a k-INDEPENDENT bound.  A2's `CV`
+is genuinely `A0`-independent (base `D^(p+2)`, step preserves), so the restated
+form exposes the single uniform `CV`.  Proof unchanged except `intro A0` +
+threading `A0` through the `hCfb`/`hCcb` IH constants.  **Any future
+`iteratedFDeriv_comp_le_tower` call must apply `CV` first, then `∀ A0`.**
 
 Route for the metric producer (next): two nested Euclidean bumps `χ ⊆ {χ₁=1} ⊆
 target` (via `exists_contMDiffMap_one_nhds_of_subset_interior` at model
