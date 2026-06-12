@@ -153,6 +153,29 @@ order-1 conversion (chart-partials of the component scalars bounded by
 `(B_{p+1})`, `(B_p)` + chart-frame data via the step decomposition + CS),
 then the iteratedFDeriv induction.
 
+Order-1 route in detail:
+- THE pointwise bridge is `extDerivFun_tangentConstInChart_eq_fderiv`
+  (FixedBase.lean:69): for EVERY `p` in the chart source (not only the
+  center), `fderiv ℝ (writtenInExtChartAt I 𝓘 x₀ f) (extChartAt x₀ p) v =
+  extDerivFun f p (tangentConstInChart x₀ v p)`.
+- So `‖fderiv F z‖ ≤ sup over a basis of v's` of `|extDerivFun (s_p^V)
+  along the chart-constant field|`, and the step decomposition + the CS
+  lemma bound that by `(B_{p+1})`/`(B_p)` times `gRef`-norms of the slot
+  fields and the chart-constant direction field on the compact — finite
+  sup of continuous functions.
+- ⚠ SLOT GLOBALIZATION: the step decomposition (`nabla0SFun_eval_smooth_slots`)
+  takes GLOBAL `ContMDiffSection` slots, but `tangentConstInChart` fields are
+  only chart-smooth.  Globalize by bump-truncation (the
+  `SmoothSectionsLocal.lean` bump pattern: `SmoothBumpFunction` supported in
+  the chart, = 1 on the inner compact); on the inner set the truncated
+  section agrees with the chart-constant field, and `extDerivFun` only
+  depends on the germ (`extDerivFun_congr_nhds`).
+- Higher orders: iterate `fderiv` of the chart representative; each step
+  re-enters the same family `s_q` at slot tuples extended by bump-globalized
+  chart-constant fields and Christoffel-update fields — the bound constants
+  pick up sup-norms of those fields' derivatives on the inner compact
+  (finite, gRef/chart data only, k-independent ✓).
+
 ## Open design questions
 
 - Whether to add an `On`-version of `exists_cInf_subseq` vs bump-extension
