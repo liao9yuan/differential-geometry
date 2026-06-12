@@ -115,6 +115,27 @@ C⁰ bounds of `s_q` from `hbdd`: `|s_q(y)| ≤ ‖∇^q g_k‖_{gRef}(y) · Π�
 Cauchy-Schwarz for `normSq0S` against slot vectors (exists in the
 Tensor0SRiemannian layer / `Comparison.lean` two-sided machinery).
 
+## Design decision: Euclidean engine vs equicontinuity-only (2026-06-11)
+
+Considered and REJECTED: skipping the iteratedFDeriv conversion by proving
+manifold-level equicontinuity directly (directional-derivative bounds from the
+step decomposition + CS lemma give C¹ bounds per order; "C¹ bound ⇒ Lipschitz
+on compacts" needs only one chart/MVT lemma) and using the scalar AA per order
++ diagonal.  REJECTED because the limit's smoothness and the
+derivative↔limit interchange (`L_p = ∇ᵖ(g∞)`) would then have to be proved by
+hand on the manifold tower — strictly worse than the iteratedFDeriv
+conversion, which is finite-dimensional scalar calculus and after which
+`exists_cInf_subseq` delivers the smooth limit + all interchanges for free.
+Stick with Brick A as planned.
+
+Brick A progress: first lemma DONE (commit e4e8db5a) —
+`Tensor0SBundle.abs_apply_le_sqrt_normSq0S` (Comparison.lean): pointwise
+tensor Cauchy–Schwarz `|T(v)| ≤ √normSq0S(T)·∏√g(vₐ,vₐ)` at a g-ON basis.
+Proof pattern: `T.map_sum` + `T.map_smul_univ` basis expansion, discrete CS
+`Finset.sum_mul_sq_le_sq_mul_sq`, slot Parseval (simp with `map_sum, map_smul,
+ContinuousLinearMap.coe_sum', Finset.sum_apply, smul_apply, hON` + `sum_comm`
++ `sum_ite_eq`), `Finset.prod_univ_sum`, private `sqrt_prod`.
+
 ## Open design questions
 
 - Whether to add an `On`-version of `exists_cInf_subseq` vs bump-extension
