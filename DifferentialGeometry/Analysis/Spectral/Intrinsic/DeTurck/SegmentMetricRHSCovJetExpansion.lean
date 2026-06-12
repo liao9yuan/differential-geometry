@@ -73,8 +73,8 @@ former cap carried no mathematical content.
   `linearSection + crossSection`; each piece's order-`j` covariant jet is dominated **pointwise by the
   zero-jet-inclusive diagonal product grid** `∑_{i+l ≤ j+2} rfns(∇^i w)·(rfns(∇^l T₁) + rfns(∇^l T₂))`
   in the realized difference factor `w := realizeSymm (T₁ − T₂)` and the fixed-pair endpoints
-  (`ricciLinearSection_covGrad_diagonalGrid_rfns_le` /
-  `crossSection_iteratedCovGrad_diagonalProductGrid_rfns_le`,
+  (`ricciLinearSection_covGrad_twoArm_l2Norm_le` /
+  `crossSection_iteratedCovGrad_twoArm_l2Norm_le`,
   `SegmentMetricCurvatureDifferenceCovJet.lean`); the grid is then **integrated** through the shared
   Gagliardo–Nirenberg two-arm engine
   `exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le` (Hamilton 12.5,
@@ -514,17 +514,14 @@ constant — that deferral is the whole point.  **No jet of order `> 2` is ever 
 contradicting the bound; so `C 0 > 0` and the domination genuinely uses the perturbation difference.
 The cross term's `∑(‖∇^i T₁‖ + ‖∇^i T₂‖)` genuinely uses **both** endpoints, so it is not vacuous.
 
-It is **proven by composition** over the corrected pointwise-grid/integrated-two-arm route: the
-order-zero value split `ricciNeg2RetagG0_sub_eq_linear_add_cross` plus the two diagonal product-grid
-bounds (`ricciLinearSection_covGrad_diagonalGrid_rfns_le`,
-`crossSection_iteratedCovGrad_diagonalProductGrid_rfns_le`), integrated through the shared
-Gagliardo–Nirenberg two-arm engine `exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le`
-with the sharp-order `C⁰` sups `exists_realizedJetSum_le_toHs_sharpOrder` (order `a`, the
-`‖(T₁ − T₂).toHs a‖` arm) and `exists_iteratedCovGradJetSum_le_toHs_sharpOrder` (order `a + 2`, the
-`B` arm), and the realize-jet `L²` conversion `realizeSymm_iteratedCovGrad_l2Norm_le_jetSum`.
-Consumers transitively depend on `sorryAx` only through the four corrected posits (the two grids, the
-integrated engine, the sharp-order embedding), with NO pointwise-`C^{>2}`-jet claim, NO pointwise
-two-arm split, NO spectral-nonlinearity, and NO Weyl dependence. -/
+It is **proven by composition** over the integrated-`L²` two-arm route of the scaled-Young
+redesign: the order-zero value split `ricciNeg2RetagG0_sub_eq_linear_add_cross` plus the two
+**integrated** two-arm bounds (`ricciLinearSection_covGrad_twoArm_l2Norm_le`,
+`crossSection_iteratedCovGrad_twoArm_l2Norm_le`, which already carry the Gagliardo–Nirenberg
+absorption and the sharp-order `C⁰` embeddings inside), and the realize-jet `L²` conversion
+`realizeSymm_iteratedCovGrad_l2Norm_le_jetSum`.  Consumers transitively depend on `sorryAx` only
+through the two integrated SUB posits beneath those bounds, with NO pointwise-`C^{>2}`-jet claim,
+NO pointwise two-arm split, NO spectral-nonlinearity, and NO Weyl dependence. -/
 theorem exists_ricciNeg2Diff_faaDiBruno_moserTame_allOrder_l2Norm_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
@@ -551,471 +548,26 @@ theorem exists_ricciNeg2Diff_faaDiBruno_moserTame_allOrder_l2Norm_le
                       + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
                   * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ := by
   classical
-  -- Per-order diagonal product-grid bounds for the two order-zero pieces of the curvature
+  -- Per-order integrated two-arm `L²` bounds for the two order-zero pieces of the curvature
   -- difference (the linear and Cross sections, `SegmentMetricCurvatureDifferenceCovJet.lean`).
   choose CdL hCdL_nn hCdL using
-    fun j => ricciLinearSection_covGrad_diagonalGrid_rfns_le (I := I) g₀ a ha B hB δ hδ0 hδ1 j
+    fun j => ricciLinearSection_covGrad_twoArm_l2Norm_le (I := I) g₀ a ha B hB δ hδ0 hδ1 j
   choose CdC hCdC_nn hCdC using
-    fun j => crossSection_iteratedCovGrad_diagonalProductGrid_rfns_le (I := I) g₀ a ha B hB
-      δ hδ0 hδ1 j
-  -- The shared integrated Gagliardo–Nirenberg two-arm engine at window `k = j + 2`.
-  choose C2 hC2_nn hC2 using
-    fun j => Analysis.Sobolev.Tensor.exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le
-      (I := I) (M := M) g₀ 2 2 (j + 2)
-  -- The sharp-order `C⁰` sup controls: the realized difference at order `a` (the `Λ_S` arm) and
-  -- the raw fixed-pair endpoints at the amply supercritical order `a + 2` (the `Λ_T` arm).
-  obtain ⟨C3, hC3_pos, hC3⟩ := exists_realizedJetSum_le_toHs_sharpOrder (I := I) g₀ a ha
-  obtain ⟨C4, hC4_pos, hC4⟩ :=
-    exists_iteratedCovGradJetSum_le_toHs_sharpOrder (I := I) g₀ (a + 2) (by omega)
+    fun j => crossSection_iteratedCovGrad_twoArm_l2Norm_le (I := I) g₀ a ha B hB δ hδ0 hδ1 j
   -- The per-order realize-difference covariant `L²`-jet constants.
   choose Cr hCr_nn hCr using
     fun i => realizeSymm_iteratedCovGrad_l2Norm_le_jetSum (I := I) g₀ i
-  refine ⟨fun j =>
-    (Real.sqrt (CdL j * (1 + 2 * C2 j * (C4 * B) ^ 2))
-          + Real.sqrt (CdC j * (1 + 2 * C2 j * (C4 * B) ^ 2)))
-        * ∑ i ∈ Finset.range (j + 2 + 1), Cr i
-      + (Real.sqrt (CdL j * C2 j) + Real.sqrt (CdC j * C2 j)) * C3, fun j => ?_, ?_⟩
+  refine ⟨fun j => (CdL j + CdC j) * (1 + ∑ i ∈ Finset.range (j + 2 + 1), Cr i),
+    fun j => ?_, ?_⟩
   · have h1 : 0 ≤ ∑ i ∈ Finset.range (j + 2 + 1), Cr i :=
       Finset.sum_nonneg fun i _ => hCr_nn i
-    have h2 : 0 ≤ Real.sqrt (CdL j * (1 + 2 * C2 j * (C4 * B) ^ 2))
-        + Real.sqrt (CdC j * (1 + 2 * C2 j * (C4 * B) ^ 2)) :=
-      add_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
-    have h3 : 0 ≤ Real.sqrt (CdL j * C2 j) + Real.sqrt (CdC j * C2 j) :=
-      add_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
-    exact add_nonneg (mul_nonneg h2 h1) (mul_nonneg h3 (le_of_lt hC3_pos))
+    have h2 := hCdL_nn j
+    have h3 := hCdC_nn j
+    positivity
   intro T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j
-  -- `Λ_S`: the pointwise `C⁰` sup of the realized difference factor, from the sharp-order
-  -- embedding at order `a` and the order-`0` jet-sum extraction.
-  have hsupW : ∀ x : M,
-      riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
-          ((realizeSymmCcTensor (I := I) g₀ (T₁ - T₂)).toSection x) ≤
-        (C3 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖) ^ 2 := by
-    intro x
-    refine (riemannianFiberNormSq_le_sq_iteratedCovGradJetSum (I := I) g₀
-      (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂)) x).trans ?_
-    exact pow_le_pow_left₀ (iteratedCovGradJetSum_nonneg (I := I) g₀ _ x)
-      (hC3 (T₁ - T₂) x) 2
-  -- `Λ_T`: the pointwise `C⁰` sups of the raw fixed-pair endpoints at order `a + 2`.
-  have hsupT₁ : ∀ x : M,
-      riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (T₁.toSection x) ≤ (C4 * B) ^ 2 := by
-    intro x
-    refine (riemannianFiberNormSq_le_sq_iteratedCovGradJetSum (I := I) g₀ T₁ x).trans ?_
-    refine pow_le_pow_left₀ (iteratedCovGradJetSum_nonneg (I := I) g₀ T₁ x) ?_ 2
-    exact (hC4 T₁ x).trans (mul_le_mul_of_nonneg_left hsize₁ (le_of_lt hC4_pos))
-  have hsupT₂ : ∀ x : M,
-      riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (T₂.toSection x) ≤ (C4 * B) ^ 2 := by
-    intro x
-    refine (riemannianFiberNormSq_le_sq_iteratedCovGradJetSum (I := I) g₀ T₂ x).trans ?_
-    refine pow_le_pow_left₀ (iteratedCovGradJetSum_nonneg (I := I) g₀ T₂ x) ?_ 2
-    exact (hC4 T₂ x).trans (mul_le_mul_of_nonneg_left hsize₂ (le_of_lt hC4_pos))
-  have hΛS_nn : 0 ≤ C3 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
-      (T₁ - T₂)‖ := mul_nonneg (le_of_lt hC3_pos) (norm_nonneg _)
-  have hΛT_nn : 0 ≤ C4 * B := mul_nonneg (le_of_lt hC4_pos) hB
-  -- The two integrated Gagliardo–Nirenberg grid bounds (`S := w`, `T := T₁` resp. `T₂`).
-  obtain ⟨hint₁, hbound₁⟩ := hC2 j (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂)) T₁
-    (C3 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖)
-    (C4 * B) hΛS_nn hΛT_nn hsupW hsupT₁
-  obtain ⟨hint₂, hbound₂⟩ := hC2 j (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂)) T₂
-    (C3 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖)
-    (C4 * B) hΛS_nn hΛT_nn hsupW hsupT₂
-  -- The pointwise diagonal-grid bounds of the two order-zero pieces at this family member.
-  have hgridL := hCdL j T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂
-  have hgridC := hCdC j T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂
-  -- Integrability and the `L²` bridge of the difference-factor jet-sum integrand.
-  have hint_w : ∀ i : ℕ, MeasureTheory.Integrable
-      (fun x => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-            (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x))
-      (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
-    fun i => Integral.Connection.integrable_riemannianFiberNormSq_toSection (I := I) (M := M)
-      g₀ 0 (2 + i) _
-  have hint_SW : MeasureTheory.Integrable
-      (fun x => ∑ i ∈ Finset.range (j + 2 + 1),
-        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-              (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x))
-      (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
-    MeasureTheory.integrable_finset_sum _ (fun i _ => hint_w i)
-  have hSW_int_eq : (∫ x, (∑ i ∈ Finset.range (j + 2 + 1),
-        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-              (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x))
-        ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) =
-      ∑ i ∈ Finset.range (j + 2 + 1),
-        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-            (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2 := by
-    rw [MeasureTheory.integral_finset_sum _ (fun i _ => hint_w i)]
-    refine Finset.sum_congr rfl fun i _ => ?_
-    rw [Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M)
-      (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-        (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂)))]
-    exact (Integral.Connection.tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq
-      (I := I) (M := M) g₀ (2 + i) _).symm
-  -- The elementary `∑ a² ≤ (∑ a)²` for nonnegative families.
-  have hsum_sq_le : ∀ (f : ℕ → ℝ), (∀ i, 0 ≤ f i) →
-      (∑ i ∈ Finset.range (j + 2 + 1), f i ^ 2) ≤
-        (∑ i ∈ Finset.range (j + 2 + 1), f i) ^ 2 := by
-    intro f hf
-    rw [sq, Finset.sum_mul_sum]
-    refine Finset.sum_le_sum fun i hi => ?_
-    rw [sq]
-    exact Finset.single_le_sum (f := fun k => f i * f k)
-      (fun k _ => mul_nonneg (hf i) (hf k)) hi
-  -- **The generic two-arm `L²` lift**: any `(0, 2 + j)`-tensor pointwise dominated by
-  -- `K · (w-jet sum + diagonal grid)` has metric `L²` norm at most
-  -- `√(K(1 + 2·C2·Λ_T²)) · ∑‖∇^i w‖ + √(K·C2) · Λ_S · ∑(‖∇^l T₁‖ + ‖∇^l T₂‖)`.
-  have hkey : ∀ (P : Integral.L2.SmoothCcTensor g₀ 0 (2 + j)) (K : ℝ), 0 ≤ K →
-      (∀ x : M,
-        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x (P.toSection x) ≤
-          K * ∑ i ∈ Finset.range (j + 2 + 1),
-              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                    (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
-            + K * ∑ i ∈ Finset.range (j + 2 + 1),
-                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                        (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
-                  * ∑ l ∈ Finset.range (j + 2 + 1 - i),
-                      (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
-                          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)
-                        + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
-                          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂).toSection x))) →
-      ‖P‖ ≤ Real.sqrt (K * (1 + 2 * C2 j * (C4 * B) ^ 2)) *
-          ∑ i ∈ Finset.range (j + 2 + 1),
-            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖
-        + Real.sqrt (K * C2 j)
-            * (C3 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖)
-            * ∑ i ∈ Finset.range (j + 2 + 1),
-              (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
-                + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖) := by
-    intro P K hK hpt
-    -- Pointwise: split the diagonal grid into its `T₁` and `T₂` halves.
-    have hpt' : ∀ x : M,
-        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x (P.toSection x) ≤
-          K * (∑ i ∈ Finset.range (j + 2 + 1),
-              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                    (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x))
-            + (K * (∑ i ∈ Finset.range (j + 2 + 1),
-                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                        (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
-                  * ∑ l ∈ Finset.range (j + 2 + 1 - i),
-                      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
-                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x))
-              + K * (∑ i ∈ Finset.range (j + 2 + 1),
-                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                          (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
-                    * ∑ l ∈ Finset.range (j + 2 + 1 - i),
-                        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
-                          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂).toSection x))) := by
-      intro x
-      refine (hpt x).trans_eq ?_
-      have hsplit : (∑ i ∈ Finset.range (j + 2 + 1),
-            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                    (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
-              * ∑ l ∈ Finset.range (j + 2 + 1 - i),
-                  (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
-                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)
-                    + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
-                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂).toSection x))) =
-          (∑ i ∈ Finset.range (j + 2 + 1),
-            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                    (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
-              * ∑ l ∈ Finset.range (j + 2 + 1 - i),
-                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
-                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x))
-            + ∑ i ∈ Finset.range (j + 2 + 1),
-                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                        (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
-                  * ∑ l ∈ Finset.range (j + 2 + 1 - i),
-                      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
-                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂).toSection x) := by
-        rw [← Finset.sum_add_distrib]
-        refine Finset.sum_congr rfl fun i _ => ?_
-        rw [Finset.sum_add_distrib, mul_add]
-      rw [hsplit]
-      ring
-    -- Integrate the pointwise bound and evaluate the right-hand side.
-    have hint_P : MeasureTheory.Integrable
-        (fun x => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x (P.toSection x))
-        (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
-      Integral.Connection.integrable_riemannianFiberNormSq_toSection (I := I) (M := M)
-        g₀ 0 (2 + j) P
-    have hmono : (∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x (P.toSection x)
-          ∂(riemannianVolumeMeasure (I := I) (M := M) g₀)) ≤
-        ∫ x, (K * (∑ i ∈ Finset.range (j + 2 + 1),
-              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                    (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x))
-            + (K * (∑ i ∈ Finset.range (j + 2 + 1),
-                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                        (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
-                  * ∑ l ∈ Finset.range (j + 2 + 1 - i),
-                      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
-                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x))
-              + K * (∑ i ∈ Finset.range (j + 2 + 1),
-                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                          (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
-                    * ∑ l ∈ Finset.range (j + 2 + 1 - i),
-                        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
-                          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂).toSection x))))
-          ∂(riemannianVolumeMeasure (I := I) (M := M) g₀) := by
-      refine MeasureTheory.integral_mono hint_P ?_ hpt'
-      exact (hint_SW.const_mul K).add ((hint₁.const_mul K).add (hint₂.const_mul K))
-    have hfSW : MeasureTheory.Integrable
-        (fun x => K * (∑ i ∈ Finset.range (j + 2 + 1),
-          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)))
-        (riemannianVolumeMeasure (I := I) (M := M) g₀) := hint_SW.const_mul K
-    have hfG₁ : MeasureTheory.Integrable
-        (fun x => K * (∑ i ∈ Finset.range (j + 2 + 1),
-          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                  (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
-            * ∑ l ∈ Finset.range (j + 2 + 1 - i),
-                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
-                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)))
-        (riemannianVolumeMeasure (I := I) (M := M) g₀) := hint₁.const_mul K
-    have hfG₂ : MeasureTheory.Integrable
-        (fun x => K * (∑ i ∈ Finset.range (j + 2 + 1),
-          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                  (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
-            * ∑ l ∈ Finset.range (j + 2 + 1 - i),
-                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
-                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂).toSection x)))
-        (riemannianVolumeMeasure (I := I) (M := M) g₀) := hint₂.const_mul K
-    have hfG : MeasureTheory.Integrable
-        (fun x => K * (∑ i ∈ Finset.range (j + 2 + 1),
-          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                  (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
-            * ∑ l ∈ Finset.range (j + 2 + 1 - i),
-                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
-                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x))
-          + K * (∑ i ∈ Finset.range (j + 2 + 1),
-            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                    (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
-              * ∑ l ∈ Finset.range (j + 2 + 1 - i),
-                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
-                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂).toSection x)))
-        (riemannianVolumeMeasure (I := I) (M := M) g₀) := hfG₁.add hfG₂
-    rw [MeasureTheory.integral_add hfSW hfG,
-      MeasureTheory.integral_add hfG₁ hfG₂,
-      MeasureTheory.integral_const_mul, MeasureTheory.integral_const_mul,
-      MeasureTheory.integral_const_mul, hSW_int_eq] at hmono
-    have hP_sq : ‖P‖ ^ 2 = ∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
-        (P.toSection x) ∂(riemannianVolumeMeasure (I := I) (M := M) g₀) := by
-      rw [Integral.L2.SmoothCcTensor.norm_def (I := I) (M := M) P]
-      exact Integral.Connection.tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq
-        (I := I) (M := M) g₀ (2 + j) P
-    have hb₁ := mul_le_mul_of_nonneg_left hbound₁ hK
-    have hb₂ := mul_le_mul_of_nonneg_left hbound₂ hK
-    -- The squared two-arm bound.
-    have hP_bound : ‖P‖ ^ 2 ≤
-        K * (1 + 2 * C2 j * (C4 * B) ^ 2) *
-            ∑ i ∈ Finset.range (j + 2 + 1),
-              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                  (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-          + K * C2 j *
-              (C3 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
-                (T₁ - T₂)‖) ^ 2 *
-              ((∑ l ∈ Finset.range (j + 2 + 1),
-                  ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2)
-                + ∑ l ∈ Finset.range (j + 2 + 1),
-                  ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖ ^ 2) := by
-      rw [hP_sq]
-      linarith [hmono, hb₁, hb₂]
-    have hA_nn' : 0 ≤ K * (1 + 2 * C2 j * (C4 * B) ^ 2) :=
-      mul_nonneg hK (add_nonneg zero_le_one
-        (mul_nonneg (mul_nonneg (by norm_num) (hC2_nn j)) (sq_nonneg _)))
-    have hB_nn' : 0 ≤ K * C2 j := mul_nonneg hK (hC2_nn j)
-    have hSW2sum_le : (∑ i ∈ Finset.range (j + 2 + 1),
-          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-              (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2) ≤
-        (∑ i ∈ Finset.range (j + 2 + 1),
-          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-              (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖) ^ 2 :=
-      hsum_sq_le _ (fun i => norm_nonneg _)
-    have hST2sum_le : ((∑ l ∈ Finset.range (j + 2 + 1),
-          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2)
-        + ∑ l ∈ Finset.range (j + 2 + 1),
-          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖ ^ 2) ≤
-        (∑ l ∈ Finset.range (j + 2 + 1),
-          (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖
-            + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖)) ^ 2 := by
-      rw [← Finset.sum_add_distrib]
-      refine le_trans (Finset.sum_le_sum fun l _ => ?_)
-        (hsum_sq_le _ (fun l => add_nonneg (norm_nonneg _) (norm_nonneg _)))
-      nlinarith [mul_nonneg (norm_nonneg (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁))
-        (norm_nonneg (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂))]
-    have hA2 : Real.sqrt (K * (1 + 2 * C2 j * (C4 * B) ^ 2)) ^ 2 =
-        K * (1 + 2 * C2 j * (C4 * B) ^ 2) := Real.sq_sqrt hA_nn'
-    have hB2 : Real.sqrt (K * C2 j) ^ 2 = K * C2 j := Real.sq_sqrt hB_nn'
-    have hWn_nn : 0 ≤ ∑ i ∈ Finset.range (j + 2 + 1),
-        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-            (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ :=
-      Finset.sum_nonneg fun i _ => norm_nonneg _
-    have hTn_nn : 0 ≤ ∑ i ∈ Finset.range (j + 2 + 1),
-        (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
-          + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖) :=
-      Finset.sum_nonneg fun i _ => add_nonneg (norm_nonneg _) (norm_nonneg _)
-    have hcross : 0 ≤ 2 * (Real.sqrt (K * (1 + 2 * C2 j * (C4 * B) ^ 2)) *
-          ∑ i ∈ Finset.range (j + 2 + 1),
-            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖)
-        * (Real.sqrt (K * C2 j)
-            * (C3 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖)
-            * ∑ i ∈ Finset.range (j + 2 + 1),
-              (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
-                + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖)) :=
-      mul_nonneg (mul_nonneg (by norm_num) (mul_nonneg (Real.sqrt_nonneg _) hWn_nn))
-        (mul_nonneg (mul_nonneg (Real.sqrt_nonneg _) hΛS_nn) hTn_nn)
-    have hfinal_sq : ‖P‖ ^ 2 ≤
-        (Real.sqrt (K * (1 + 2 * C2 j * (C4 * B) ^ 2)) *
-            ∑ i ∈ Finset.range (j + 2 + 1),
-              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                  (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖
-          + Real.sqrt (K * C2 j)
-              * (C3 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
-                  (T₁ - T₂)‖)
-              * ∑ i ∈ Finset.range (j + 2 + 1),
-                (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
-                  + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖)) ^ 2 := by
-      have h1 : K * (1 + 2 * C2 j * (C4 * B) ^ 2) *
-            (∑ i ∈ Finset.range (j + 2 + 1),
-              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                  (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2) ≤
-          K * (1 + 2 * C2 j * (C4 * B) ^ 2) *
-            (∑ i ∈ Finset.range (j + 2 + 1),
-              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                  (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖) ^ 2 :=
-        mul_le_mul_of_nonneg_left hSW2sum_le hA_nn'
-      have h2 : K * C2 j *
-            (C3 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
-              (T₁ - T₂)‖) ^ 2 *
-            ((∑ l ∈ Finset.range (j + 2 + 1),
-                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2)
-              + ∑ l ∈ Finset.range (j + 2 + 1),
-                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖ ^ 2) ≤
-          K * C2 j *
-            (C3 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
-              (T₁ - T₂)‖) ^ 2 *
-            (∑ l ∈ Finset.range (j + 2 + 1),
-              (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖
-                + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖)) ^ 2 :=
-        mul_le_mul_of_nonneg_left hST2sum_le (mul_nonneg hB_nn' (sq_nonneg _))
-      have hexpand : (Real.sqrt (K * (1 + 2 * C2 j * (C4 * B) ^ 2)) *
-            ∑ i ∈ Finset.range (j + 2 + 1),
-              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                  (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖
-          + Real.sqrt (K * C2 j)
-              * (C3 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
-                  (T₁ - T₂)‖)
-              * ∑ i ∈ Finset.range (j + 2 + 1),
-                (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
-                  + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖)) ^ 2 =
-          K * (1 + 2 * C2 j * (C4 * B) ^ 2) *
-              (∑ i ∈ Finset.range (j + 2 + 1),
-                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                    (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖) ^ 2
-            + K * C2 j *
-                (C3 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
-                  (T₁ - T₂)‖) ^ 2 *
-                (∑ l ∈ Finset.range (j + 2 + 1),
-                  (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖
-                    + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖)) ^ 2
-            + 2 * (Real.sqrt (K * (1 + 2 * C2 j * (C4 * B) ^ 2)) *
-                  ∑ i ∈ Finset.range (j + 2 + 1),
-                    ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                        (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖)
-                * (Real.sqrt (K * C2 j)
-                    * (C3 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
-                        (T₁ - T₂)‖)
-                    * ∑ i ∈ Finset.range (j + 2 + 1),
-                      (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
-                        + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖)) := by
-        linear_combination
-          ((∑ i ∈ Finset.range (j + 2 + 1),
-              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                  (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖) ^ 2) * hA2
-            + ((C3 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
-                  (T₁ - T₂)‖) ^ 2 *
-                (∑ l ∈ Finset.range (j + 2 + 1),
-                  (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖
-                    + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖)) ^ 2) * hB2
-      rw [hexpand]
-      linarith [hP_bound, h1, h2, hcross]
-    have hRHS_nn : 0 ≤ Real.sqrt (K * (1 + 2 * C2 j * (C4 * B) ^ 2)) *
-          ∑ i ∈ Finset.range (j + 2 + 1),
-            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖
-        + Real.sqrt (K * C2 j)
-            * (C3 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖)
-            * ∑ i ∈ Finset.range (j + 2 + 1),
-              (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
-                + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖) :=
-      add_nonneg (mul_nonneg (Real.sqrt_nonneg _) hWn_nn)
-        (mul_nonneg (mul_nonneg (Real.sqrt_nonneg _) hΛS_nn) hTn_nn)
-    calc ‖P‖ = Real.sqrt (‖P‖ ^ 2) := (Real.sqrt_sq (norm_nonneg P)).symm
-      _ ≤ Real.sqrt ((Real.sqrt (K * (1 + 2 * C2 j * (C4 * B) ^ 2)) *
-              ∑ i ∈ Finset.range (j + 2 + 1),
-                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                    (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖
-            + Real.sqrt (K * C2 j)
-                * (C3 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
-                    (T₁ - T₂)‖)
-                * ∑ i ∈ Finset.range (j + 2 + 1),
-                  (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
-                    + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖)) ^ 2) :=
-          Real.sqrt_le_sqrt hfinal_sq
-      _ = _ := Real.sqrt_sq hRHS_nn
-  -- The Cross piece's grid bound, padded with the (nonnegative) `w`-jet-sum arm.
-  have hgridC' : ∀ x : M,
-      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
-          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
-              (crossSection (I := I) g₀ g₁ g₂)).toSection x) ≤
-        CdC j * ∑ i ∈ Finset.range (j + 2 + 1),
-            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                  (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
-          + CdC j * ∑ i ∈ Finset.range (j + 2 + 1),
-              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                      (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x)
-                * ∑ l ∈ Finset.range (j + 2 + 1 - i),
-                    (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
-                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)
-                      + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
-                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂).toSection x)) := by
-    intro x
-    refine (hgridC x).trans ?_
-    have hW_nn : 0 ≤ ∑ i ∈ Finset.range (j + 2 + 1),
-        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-              (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x) :=
-      Finset.sum_nonneg fun i _ => riemannianFiberNormSq_nonneg _ _ _ _ _
-    have h0 : 0 ≤ CdC j * ∑ i ∈ Finset.range (j + 2 + 1),
-        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-              (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x) :=
-      mul_nonneg (hCdC_nn j) hW_nn
-    linarith
-  -- The two-arm `L²` bounds of the two pieces.
-  have hL := hkey (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
-    (linearSection (I := I) g₀ g₁ g₂)) (CdL j) (hCdL_nn j) hgridL
-  have hCc := hkey (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
-    (crossSection (I := I) g₀ g₁ g₂)) (CdC j) (hCdC_nn j) hgridC'
+  -- The two integrated two-arm bounds at this family member.
+  have hL := hCdL j T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂
+  have hCc := hCdC j T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂
   -- The order-zero value split of the curvature difference.
   have hvalue : PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
       (ricciNeg2RetagG0 (I := I) g₀ g₁ - ricciNeg2RetagG0 (I := I) g₀ g₂) =
@@ -1052,59 +604,23 @@ theorem exists_ricciNeg2Diff_faaDiBruno_moserTame_allOrder_l2Norm_le
     refine le_trans (Finset.sum_le_sum hrealize_termwise) ?_
     rw [Finset.sum_mul]
   -- Assemble.
-  have ha1 : 0 ≤ Real.sqrt (CdL j * (1 + 2 * C2 j * (C4 * B) ^ 2)) := Real.sqrt_nonneg _
-  have ha2 : 0 ≤ Real.sqrt (CdC j * (1 + 2 * C2 j * (C4 * B) ^ 2)) := Real.sqrt_nonneg _
-  have hb1 : 0 ≤ Real.sqrt (CdL j * C2 j) := Real.sqrt_nonneg _
-  have hb2 : 0 ≤ Real.sqrt (CdC j * C2 j) := Real.sqrt_nonneg _
-  have hCrS_nn : 0 ≤ ∑ i ∈ Finset.range (j + 2 + 1), Cr i :=
-    Finset.sum_nonneg fun i _ => hCr_nn i
-  have hSDsum_nn : 0 ≤ ∑ l ∈ Finset.range (j + 2 + 1),
-      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l (T₁ - T₂)‖ :=
-    Finset.sum_nonneg fun l _ => norm_nonneg _
-  have hSTsum_nn : 0 ≤ ∑ i ∈ Finset.range (j + 2 + 1),
+  set Dn := ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
+    with hDn
+  set SD := ∑ l ∈ Finset.range (j + 2 + 1),
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l (T₁ - T₂)‖ with hSD
+  set SW := ∑ i ∈ Finset.range (j + 2 + 1),
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+          (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ with hSW
+  set ST := ∑ i ∈ Finset.range (j + 2 + 1),
       (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
-        + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖) :=
-    Finset.sum_nonneg fun i _ => add_nonneg (norm_nonneg _) (norm_nonneg _)
-  have hD_nn : 0 ≤ ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
-      (T₁ - T₂)‖ := norm_nonneg _
-  have hk1 : Real.sqrt (CdL j * (1 + 2 * C2 j * (C4 * B) ^ 2)) *
-        (∑ i ∈ Finset.range (j + 2 + 1),
-          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-              (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖) ≤
-      Real.sqrt (CdL j * (1 + 2 * C2 j * (C4 * B) ^ 2)) *
-        ((∑ i ∈ Finset.range (j + 2 + 1), Cr i) *
-          ∑ l ∈ Finset.range (j + 2 + 1),
-            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l (T₁ - T₂)‖) :=
-    mul_le_mul_of_nonneg_left hSWsum_le ha1
-  have hk2 : Real.sqrt (CdC j * (1 + 2 * C2 j * (C4 * B) ^ 2)) *
-        (∑ i ∈ Finset.range (j + 2 + 1),
-          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-              (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖) ≤
-      Real.sqrt (CdC j * (1 + 2 * C2 j * (C4 * B) ^ 2)) *
-        ((∑ i ∈ Finset.range (j + 2 + 1), Cr i) *
-          ∑ l ∈ Finset.range (j + 2 + 1),
-            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l (T₁ - T₂)‖) :=
-    mul_le_mul_of_nonneg_left hSWsum_le ha2
-  have hp1 : 0 ≤ (Real.sqrt (CdL j * (1 + 2 * C2 j * (C4 * B) ^ 2))
-        + Real.sqrt (CdC j * (1 + 2 * C2 j * (C4 * B) ^ 2)))
-      * (∑ i ∈ Finset.range (j + 2 + 1), Cr i)
-      * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ :=
-    mul_nonneg (mul_nonneg (add_nonneg ha1 ha2) hCrS_nn) hD_nn
-  have hp2 : 0 ≤ (Real.sqrt (CdL j * C2 j) + Real.sqrt (CdC j * C2 j)) * C3
-      * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ :=
-    mul_nonneg (mul_nonneg (add_nonneg hb1 hb2) (le_of_lt hC3_pos)) hD_nn
-  have hp3 : 0 ≤ (Real.sqrt (CdL j * C2 j) + Real.sqrt (CdC j * C2 j)) * C3
-      * ∑ l ∈ Finset.range (j + 2 + 1),
-          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l (T₁ - T₂)‖ :=
-    mul_nonneg (mul_nonneg (add_nonneg hb1 hb2) (le_of_lt hC3_pos)) hSDsum_nn
-  have hp4 : 0 ≤ (Real.sqrt (CdL j * (1 + 2 * C2 j * (C4 * B) ^ 2))
-        + Real.sqrt (CdC j * (1 + 2 * C2 j * (C4 * B) ^ 2)))
-      * (∑ i ∈ Finset.range (j + 2 + 1), Cr i)
-      * ((∑ i ∈ Finset.range (j + 2 + 1),
-          (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
-            + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
-        * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖) :=
-    mul_nonneg (mul_nonneg (add_nonneg ha1 ha2) hCrS_nn) (mul_nonneg hSTsum_nn hD_nn)
+        + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖) with hST
+  set CS := ∑ i ∈ Finset.range (j + 2 + 1), Cr i with hCS
+  have hDn_nn : 0 ≤ Dn := norm_nonneg _
+  have hSD_nn : 0 ≤ SD := Finset.sum_nonneg fun l _ => norm_nonneg _
+  have hST_nn : 0 ≤ ST := Finset.sum_nonneg fun i _ => add_nonneg (norm_nonneg _) (norm_nonneg _)
+  have hCS_nn : 0 ≤ CS := Finset.sum_nonneg fun i _ => hCr_nn i
+  have hCdL0 := hCdL_nn j
+  have hCdC0 := hCdC_nn j
   calc ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
           (ricciNeg2RetagG0 (I := I) g₀ g₁ - ricciNeg2RetagG0 (I := I) g₀ g₂)‖
       = ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j (linearSection (I := I) g₀ g₁ g₂)
@@ -1113,43 +629,21 @@ theorem exists_ricciNeg2Diff_faaDiBruno_moserTame_allOrder_l2Norm_le
     _ ≤ ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j (linearSection (I := I) g₀ g₁ g₂)‖
           + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
               (crossSection (I := I) g₀ g₁ g₂)‖ := norm_add_le _ _
-    _ ≤ (Real.sqrt (CdL j * (1 + 2 * C2 j * (C4 * B) ^ 2)) *
-            ∑ i ∈ Finset.range (j + 2 + 1),
-              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                  (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖
-          + Real.sqrt (CdL j * C2 j)
-              * (C3 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
-                  (T₁ - T₂)‖)
-              * ∑ i ∈ Finset.range (j + 2 + 1),
-                (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
-                  + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
-        + (Real.sqrt (CdC j * (1 + 2 * C2 j * (C4 * B) ^ 2)) *
-            ∑ i ∈ Finset.range (j + 2 + 1),
-              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-                  (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖
-          + Real.sqrt (CdC j * C2 j)
-              * (C3 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
-                  (T₁ - T₂)‖)
-              * ∑ i ∈ Finset.range (j + 2 + 1),
-                (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
-                  + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖)) :=
-        add_le_add hL hCc
-    _ ≤ ((Real.sqrt (CdL j * (1 + 2 * C2 j * (C4 * B) ^ 2))
-              + Real.sqrt (CdC j * (1 + 2 * C2 j * (C4 * B) ^ 2)))
-            * ∑ i ∈ Finset.range (j + 2 + 1), Cr i
-          + (Real.sqrt (CdL j * C2 j) + Real.sqrt (CdC j * C2 j)) * C3)
-          * (‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
-            + ∑ i ∈ Finset.range (j + 2 + 1),
-                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖)
-        + ((Real.sqrt (CdL j * (1 + 2 * C2 j * (C4 * B) ^ 2))
-              + Real.sqrt (CdC j * (1 + 2 * C2 j * (C4 * B) ^ 2)))
-            * ∑ i ∈ Finset.range (j + 2 + 1), Cr i
-          + (Real.sqrt (CdL j * C2 j) + Real.sqrt (CdC j * C2 j)) * C3)
-          * (∑ i ∈ Finset.range (j + 2 + 1),
-              (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
-                + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
-          * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ := by
-        nlinarith [hk1, hk2, hp1, hp2, hp3, hp4]
+    _ ≤ (CdL j * SW + CdL j * Dn * ST) + (CdC j * SW + CdC j * Dn * ST) := add_le_add hL hCc
+    _ = (CdL j + CdC j) * SW + (CdL j + CdC j) * Dn * ST := by ring
+    _ ≤ (CdL j + CdC j) * (1 + CS) * (Dn + SD)
+          + (CdL j + CdC j) * (1 + CS) * ST * Dn := by
+        have hW_le : (CdL j + CdC j) * SW ≤ (CdL j + CdC j) * (CS * SD) :=
+          mul_le_mul_of_nonneg_left hSWsum_le (by linarith)
+        have hpad : (CdL j + CdC j) * (CS * SD) ≤ (CdL j + CdC j) * (1 + CS) * (Dn + SD) := by
+          nlinarith [mul_nonneg (add_nonneg hCdL0 hCdC0) hSD_nn,
+            mul_nonneg (add_nonneg hCdL0 hCdC0) hDn_nn,
+            mul_nonneg (mul_nonneg (add_nonneg hCdL0 hCdC0) hCS_nn) hDn_nn]
+        have hcross_pad : (CdL j + CdC j) * Dn * ST ≤
+            (CdL j + CdC j) * (1 + CS) * ST * Dn := by
+          nlinarith [mul_nonneg (mul_nonneg (mul_nonneg (add_nonneg hCdL0 hCdC0) hCS_nn)
+            hST_nn) hDn_nn]
+        linarith [hW_le, hpad, hcross_pad]
 
 /-- **The per-field covariant-Faà-di-Bruno Moser-tame `L²` domination of the segment-metric
 *Ricci-curvature* summand difference, on the consumer window `j ≤ 2 * a`.**

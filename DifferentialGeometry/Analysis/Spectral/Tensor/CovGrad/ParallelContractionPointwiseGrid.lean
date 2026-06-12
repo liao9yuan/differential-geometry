@@ -154,9 +154,12 @@ the inner sum, on the full `i + l ≤ p` triangle.  It is a **product** of the t
 (never a pointwise two-arm *sum* — that bilinear form is Lean-refuted at `CrossCorrectionContractionTopRest:304`),
 so it stays in the admissible product-grid family.
 
-**Consumers.**  This is the consumer-minimal reusable core beneath
-`crossCorrectionSectionDiff_iteratedCovGrad_diagonalProductGrid_rfns_le` (SUB1,
-`SegmentMetricCurvatureDifferenceCovJet.lean:2599`), whose rank-`3` cross-correction-section
+**Consumers.**  This is the consumer-minimal reusable core beneath the `k = 1` bilinear layer of
+the integrated SUB1 posit `crossCorrectionSectionDiff_iteratedCovGrad_twoArm_l2Norm_le`
+(`SegmentMetricCurvatureDifferenceCovJet.lean`; the former POINTWISE all-`p` grid form of SUB1 is
+CONFIRMED-FALSE — the Neumann `k ≥ 2` layer injects cubic jet monomials, free-jet scaling
+certificate — so this pointwise grid feeds the integrated statement only through the
+Gagliardo–Nirenberg engine), whose rank-`3` cross-correction-section
 difference `cc(g₁,T₁) − cc(g₂,T₂)` is exactly such a contraction difference
 (`crossCorrectionSectionDiff_eq_bilinearFactorization`, with `Sₖ = realizeSymm g₀ Tₖ` and
 `Tₖ = permute c[0,1,2] (loweredConnDiffSection gₖ g₀)`); SUB1's glue specialises the difference
@@ -164,13 +167,14 @@ factors to `realizeSymm(T₁ − T₂)` and the lowered-connection cocycle, then
 lowered-connection jets into the `Tₖ`-jets (`crossCorrectionSection_iteratedCovGrad_rfns_le`) and
 absorbs the order-zero fibre-small Neumann factor (`δ < 1/2`).
 
-The *traced quadratic Cross* consumer
-`crossSectionDiff_iteratedCovGrad_diagonalProductGrid_rfns_le` (SUB2, `…:3129`) does **NOT** reduce to
+The *traced quadratic Cross* consumer (the integrated SUB2 posit
+`crossSection_iteratedCovGrad_twoArm_l2Norm_le`) does **NOT** reduce to
 this contraction grid: its `crossSection` fibre is a quadratic `connDiffField ∘ connDiffField`
 endomorphism-trace difference (`ricciDiffQuad_modelTrace_eq_crossEndoTrace`), a different bilinear
 engine; it needs an analogous quadratic-trace-difference product grid (a separate posit, distinct
 file/object).  Both consumers' holes were extracted and are **pointwise** full-window product grids
-(no integrated-vs-pointwise currency divergence at the consumer interface).
+(the k = 1 layer; the consumer statements themselves are INTEGRATED, the pointwise currency
+serving only this bilinear layer).
 
 **T11 note (pointwise-vs-integrated).**  A prior session warned the `l ≥ 1` cross-correction cells
 may need C⁰-sup / L²-Gagliardo–Nirenberg absorption.  The two consumer holes are pointwise, and the

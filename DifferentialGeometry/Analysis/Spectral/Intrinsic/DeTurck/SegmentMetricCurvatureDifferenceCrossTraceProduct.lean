@@ -977,7 +977,7 @@ arm has exactly one **cocycle** factor `L₁ − L₂` and one **fixed-endpoint*
 `connDiff g₁ g₂ = connDiff g₁ g₀ − connDiff g₂ g₀` (`connDiff_cocycle`): its fibre
 `g₀(connDiff g₁ g₀ · b a, c) − g₀(connDiff g₂ g₀ · b a, c) = g₀(connDiff g₁ g₂ · b a, c)` is exactly
 the `∇w`-level difference factor (`loweredConnDiffSection_toModel_apply`, `g₀.inner` additivity), the
-factor on which `crossSectionDiff_iteratedCovGrad_diagonalProductGrid_rfns_le` folds the cocycle's
+factor on which the integrated SUB2 posit `crossSection_iteratedCovGrad_twoArm_l2Norm_le` folds the cocycle's
 lowered-connection-difference jets into the `T_k`-jets.  This subsection's identity
 `crossProductDiff = crossProductPolarized` carries the existing double-double-trace bridge over to the
 polarized carrier without re-deriving the trace bookkeeping. -/

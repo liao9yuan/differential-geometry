@@ -831,6 +831,387 @@ theorem exists_integrated_diagonalProductGrid_twoArm_pair_le
           positivity
         linarith
 
+/-- **The `t`-scaled interpolation-product → Young arm-split.**  Same input data as
+`young_arm_split` (the two Gagliardo–Nirenberg interpolation bounds at the cell diagonal), but the
+weighted AM–GM is applied to the **rescaled** pair `(t·X, t^{-wi/wl}·Y)` (whose geometric mean is
+unchanged), so the `X`-arm (the top-jet re-emission arm) comes out with the **free scale `t`** while
+the `Y`-arm pays the polynomial factor `(1/t)^k` (using `wi/wl ≤ k` and `t ≤ 1`).  This is the fresh
+ε-Young inequality of the cross-correction recursion redesign: the re-emitted top jet is made
+arbitrarily small at the price of a constant on the lower-order remainder, with no constraint
+relating the fibre-smallness `δ` to the Gagliardo–Nirenberg constants. -/
+private theorem young_arm_split_scaled
+    (wi wl CS CT ΛS ΛT NS NT Iφp Iψq t : ℝ) (k : ℕ)
+    (hwi_pos : 0 < wi) (hwl_pos : 0 < wl) (hwsum : wi + wl = 1) (hwk : wi / wl ≤ (k : ℝ))
+    (hCS : 0 ≤ CS) (hCT : 0 ≤ CT) (hΛS : 0 ≤ ΛS) (hΛT : 0 ≤ ΛT)
+    (hNS : 0 ≤ NS) (hNT : 0 ≤ NT) (_hIφp : 0 ≤ Iφp) (hIψq : 0 ≤ Iψq)
+    (ht0 : 0 < t) (ht1 : t ≤ 1)
+    (hS : Iφp ^ wi ≤ CS * ΛS ^ (2 * (1 - wi)) * NS ^ (2 * wi))
+    (hT : Iψq ^ wl ≤ CT * ΛT ^ (2 * (1 - wl)) * NT ^ (2 * wl)) :
+    Iφp ^ wi * Iψq ^ wl ≤
+      CS * CT * (t * (ΛT ^ 2 * NS ^ 2) + (1 / t) ^ k * (ΛS ^ 2 * NT ^ 2)) := by
+  have hT_nn : 0 ≤ Iψq ^ wl := Real.rpow_nonneg hIψq _
+  have hprod : Iφp ^ wi * Iψq ^ wl ≤
+      (CS * ΛS ^ (2 * (1 - wi)) * NS ^ (2 * wi)) *
+      (CT * ΛT ^ (2 * (1 - wl)) * NT ^ (2 * wl)) :=
+    mul_le_mul hS hT hT_nn (by positivity)
+  have h1wi : (1 : ℝ) - wi = wl := by rw [← hwsum]; ring
+  have h1wl : (1 : ℝ) - wl = wi := by rw [← hwsum]; ring
+  rw [h1wi, h1wl] at hprod
+  have hsq_rpow : ∀ (b : ℝ), 0 ≤ b → ∀ w : ℝ, b ^ (2 * w) = (b ^ 2) ^ w := by
+    intro b hb w
+    rw [Real.rpow_mul hb 2 w, Real.rpow_two]
+  have hregroup :
+      (CS * ΛS ^ (2 * wl) * NS ^ (2 * wi)) * (CT * ΛT ^ (2 * wi) * NT ^ (2 * wl))
+        = CS * CT * ((ΛT ^ 2 * NS ^ 2) ^ wi * (ΛS ^ 2 * NT ^ 2) ^ wl) := by
+    rw [Real.mul_rpow (by positivity) (by positivity),
+      Real.mul_rpow (by positivity) (by positivity),
+      hsq_rpow ΛS hΛS wl, hsq_rpow NS hNS wi, hsq_rpow ΛT hΛT wi, hsq_rpow NT hNT wl]
+    ring
+  rw [hregroup] at hprod
+  set X : ℝ := ΛT ^ 2 * NS ^ 2 with hX
+  set Y : ℝ := ΛS ^ 2 * NT ^ 2 with hY
+  have hX_nn : 0 ≤ X := by rw [hX]; positivity
+  have hY_nn : 0 ≤ Y := by rw [hY]; positivity
+  have hs_pos : (0 : ℝ) < t ^ (-(wi / wl)) := Real.rpow_pos_of_pos ht0 _
+  -- The scaled geometric mean is the unscaled one.
+  have hpow : (t * X) ^ wi * (t ^ (-(wi / wl)) * Y) ^ wl = X ^ wi * Y ^ wl := by
+    rw [Real.mul_rpow ht0.le hX_nn, Real.mul_rpow hs_pos.le hY_nn,
+      ← Real.rpow_mul ht0.le (-(wi / wl)) wl]
+    rw [show (-(wi / wl)) * wl = -wi from by field_simp]
+    rw [show t ^ wi * X ^ wi * (t ^ (-wi) * Y ^ wl) =
+      (t ^ wi * t ^ (-wi)) * (X ^ wi * Y ^ wl) from by ring, ← Real.rpow_add ht0,
+      add_neg_cancel, Real.rpow_zero, one_mul]
+  have hgm := Real.geom_mean_le_arith_mean2_weighted hwi_pos.le hwl_pos.le
+    (mul_nonneg ht0.le hX_nn) (mul_nonneg hs_pos.le hY_nn) hwsum
+  rw [hpow] at hgm
+  -- Relax the weights to `1` and the rescale factor to `(1/t)^k`.
+  have hwi1 : wi ≤ 1 := by linarith
+  have hwl1 : wl ≤ 1 := by linarith
+  have hsk : t ^ (-(wi / wl)) ≤ (1 / t) ^ k := by
+    have h1t : (1 : ℝ) ≤ 1 / t := by rw [le_div_iff₀ ht0]; linarith
+    have heq : t ^ (-(wi / wl)) = (1 / t) ^ (wi / wl) := by
+      rw [Real.rpow_neg ht0.le, one_div, Real.inv_rpow ht0.le]
+    rw [heq, ← Real.rpow_natCast (1 / t) k]
+    exact Real.rpow_le_rpow_of_exponent_le h1t hwk
+  have hXY : X ^ wi * Y ^ wl ≤ t * X + (1 / t) ^ k * Y := by
+    have h1 : wi * (t * X) ≤ t * X := by nlinarith [mul_nonneg ht0.le hX_nn]
+    have h2 : wl * (t ^ (-(wi / wl)) * Y) ≤ (1 / t) ^ k * Y := by
+      have h2a : wl * (t ^ (-(wi / wl)) * Y) ≤ t ^ (-(wi / wl)) * Y := by
+        nlinarith [mul_nonneg hs_pos.le hY_nn]
+      exact h2a.trans (mul_le_mul_of_nonneg_right hsk hY_nn)
+    linarith [hgm]
+  calc Iφp ^ wi * Iψq ^ wl
+      ≤ CS * CT * (X ^ wi * Y ^ wl) := hprod
+    _ ≤ CS * CT * (t * X + (1 / t) ^ k * Y) :=
+        mul_le_mul_of_nonneg_left hXY (by positivity)
+
+/-- **(The `t`-scaled integrated Gagliardo–Nirenberg top-arm bound of the anti-diagonal covariant-jet
+product grid.)**
+
+Fix an anchor `g`, two valences `s₁, s₂`, and a window `k`.  There is a single constant `C ≥ 0` such
+that for any two smooth compactly-supported tensors `S : (0, s₁)`, `T : (0, s₂)`, any `C⁰`-sup bounds
+`Λ_S, Λ_T`, and any **free scale `t ∈ (0, 1]`**, the anti-diagonal product grid
+`∑_{i < k} rfns(∇^i S) · rfns(∇^{k−i} T)` (the cells at the exact diagonal `i + l = k` with the
+`S`-order strictly below the top) is integrable, and
+
+  `∫ antidiag dμ ≤ t · Λ_T² · ‖∇^k S‖² + C · (1/t)^k · Λ_S² · ∑_{l ≤ k} ‖∇^l T‖²`.
+
+This is the **`t`-graded re-emission form** of the two-arm engine on the anti-diagonal cells: the
+Gagliardo–Nirenberg interpolation of each interior cell re-emits the top jet `‖∇^k S‖²` with the
+fractional power `2i/k < 2`, so the `t`-scaled Young split (`young_arm_split_scaled`) makes the
+re-emitted top arm **arbitrarily small** (coefficient exactly `t`, no engine constant), at the price
+of the polynomial factor `(1/t)^k` on the other arm.  Consumers (the cross-correction rest peel)
+choose `t` from their own recursion margin, so the fibre-smallness threshold stays `δ < 1/2`,
+uniformly in the order — no constraint relating `δ` to the engine constants ever forms.
+
+The boundary cell `i = 0` is bounded by the `C⁰` sup of `S` directly (no top emission); the interior
+cells (`1 ≤ i ≤ k−1`) go through Hölder at the diagonal `k`, the `Lᵖ`-interpolation engine
+(`exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le`) on both factors, and the scaled Young
+split.  It therefore depends transitively only on the `Lᵖ`-interpolation engine, as the symmetric
+two-arm engine does.
+
+**Non-vacuity.**  The `t`-arm genuinely carries the top jet (at `t → 0` the constant `C·(1/t)^k`
+blows up — the sharp interpolation trade-off), and the `Λ_S²`-arm genuinely carries `T`'s jets (the
+`i = 0` boundary cell needs it); a `C = 0` witness is rejected by any pair with a nonvanishing
+boundary cell at `t = 1`. -/
+theorem exists_integrated_iteratedCovGrad_antiDiagGrid_topArm_scaled_le
+    (g : SmoothRiemannianMetric I M) (s₁ s₂ k : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (S : Integral.L2.SmoothCcTensor g 0 s₁) (T : Integral.L2.SmoothCcTensor g 0 s₂)
+        (ΛS ΛT : ℝ), 0 ≤ ΛS → 0 ≤ ΛT →
+        (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 s₁ x (S.toSection x) ≤ ΛS ^ 2) →
+        (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 s₂ x (T.toSection x) ≤ ΛT ^ 2) →
+        ∀ t : ℝ, 0 < t → t ≤ 1 →
+        MeasureTheory.Integrable
+            (fun x => ∑ i ∈ Finset.range k,
+              riemannianFiberNormSq (I := I) (M := M) g 0 (s₁ + i) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ i S).toSection x)
+                * riemannianFiberNormSq (I := I) (M := M) g 0 (s₂ + (k - i)) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ (k - i) T).toSection x))
+            (riemannianVolumeMeasure (I := I) (M := M) g) ∧
+          (∫ x, (∑ i ∈ Finset.range k,
+              riemannianFiberNormSq (I := I) (M := M) g 0 (s₁ + i) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ i S).toSection x)
+                * riemannianFiberNormSq (I := I) (M := M) g 0 (s₂ + (k - i)) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ (k - i) T).toSection x))
+              ∂(riemannianVolumeMeasure (I := I) (M := M) g)) ≤
+            t * (ΛT ^ 2 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ k S‖ ^ 2)
+              + C * (1 / t) ^ k *
+                (ΛS ^ 2 * ∑ l ∈ Finset.range (k + 1),
+                  ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T‖ ^ 2) := by
+  classical
+  haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g) :=
+    riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g
+  -- The engine constants at the single diagonal `m = k`.
+  set CS : ℝ :=
+    if h : 1 ≤ k then
+      (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le (I := I) (M := M) g s₁ k h).choose
+    else 0 with hCSdef
+  set CT : ℝ :=
+    if h : 1 ≤ k then
+      (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le (I := I) (M := M) g s₂ k h).choose
+    else 0 with hCTdef
+  have hCS_nn : 0 ≤ CS := by
+    rw [hCSdef]; split
+    · rename_i h
+      exact (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le
+        (I := I) (M := M) g s₁ k h).choose_spec.1
+    · exact le_refl 0
+  have hCT_nn : 0 ≤ CT := by
+    rw [hCTdef]; split
+    · rename_i h
+      exact (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le
+        (I := I) (M := M) g s₂ k h).choose_spec.1
+    · exact le_refl 0
+  set Cbig : ℝ := 1 + CS * CT with hCbig
+  have hCbig1 : (1 : ℝ) ≤ Cbig := by
+    rw [hCbig]; nlinarith [mul_nonneg hCS_nn hCT_nn]
+  have hCbig_nn : (0 : ℝ) ≤ Cbig := le_trans zero_le_one hCbig1
+  have hkC1 : (1 : ℝ) ≤ (k : ℝ) * Cbig + 1 := by
+    have : (0 : ℝ) ≤ (k : ℝ) * Cbig := by positivity
+    linarith
+  refine ⟨(k : ℝ) * Cbig * ((k : ℝ) * Cbig + 1) ^ k + 1, by positivity, ?_⟩
+  intro S T ΛS ΛT hΛS hΛT hSsup hTsup t ht0 ht1
+  set μ : Measure M := riemannianVolumeMeasure (I := I) (M := M) g with hμ
+  set Sj : ℕ → M → ℝ := fun a x =>
+    riemannianFiberNormSq (I := I) (M := M) g 0 (s₁ + a) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ a S).toSection x) with hSj
+  set Tj : ℕ → M → ℝ := fun b x =>
+    riemannianFiberNormSq (I := I) (M := M) g 0 (s₂ + b) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ b T).toSection x) with hTj
+  have hTnorm : ∀ b, ∫ x, Tj b x ∂μ =
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ b T‖ ^ 2 := by
+    intro b
+    rw [hTj, hμ,
+      ← tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g (s₂ + b)
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ b T),
+      ← Integral.L2.SmoothCcTensor.norm_def (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ b T)]
+  have hSj_cont : ∀ a, Continuous (Sj a) := fun a => by
+    rw [hSj]; exact continuous_rfns g 0 (s₁ + a) _
+  have hTj_cont : ∀ b, Continuous (Tj b) := fun b => by
+    rw [hTj]; exact continuous_rfns g 0 (s₂ + b) _
+  have hSj_nn : ∀ a x, 0 ≤ Sj a x := fun a x => by
+    rw [hSj]; exact riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s₁ + a) x _
+  have hTj_nn : ∀ b x, 0 ≤ Tj b x := fun b x => by
+    rw [hTj]; exact riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s₂ + b) x _
+  have hTj_int : ∀ b, Integrable (Tj b) μ := fun b => by
+    rw [hμ]; exact (hTj_cont b).integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+  have hint_cell : ∀ a b, Integrable (fun x => Sj a x * Tj b x) μ := fun a b => by
+    rw [hμ]
+    exact ((hSj_cont a).mul (hTj_cont b)).integrable_of_hasCompactSupport
+      (HasCompactSupport.of_compactSpace _)
+  have hSsup0 : ∀ x, Sj 0 x ≤ ΛS ^ 2 := by
+    intro x; rw [hSj]; dsimp only
+    rw [PDE.RicciFlow.iteratedCovGrad_zero (I := I) g 0 s₁ S]
+    exact hSsup x
+  have hTsup0 : ∀ x, Tj 0 x ≤ ΛT ^ 2 := by
+    intro x; rw [hTj]; dsimp only
+    rw [PDE.RicciFlow.iteratedCovGrad_zero (I := I) g 0 s₂ T]
+    exact hTsup x
+  set NS : ℝ := ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ k S‖ with hNSdef
+  set NT : ℝ := ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ k T‖ with hNTdef
+  have hNT_sum : NT ^ 2 ≤ ∑ l ∈ Finset.range (k + 1),
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T‖ ^ 2 := by
+    rw [hNTdef]
+    exact Finset.single_le_sum
+      (f := fun b => ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ b T‖ ^ 2)
+      (fun b _ => sq_nonneg _) (Finset.mem_range.mpr (Nat.lt_succ_of_le le_rfl))
+  -- The internal rescale.
+  set tt : ℝ := t / ((k : ℝ) * Cbig + 1) with htt
+  have htt0 : 0 < tt := by rw [htt]; positivity
+  have htt1 : tt ≤ 1 := by
+    rw [htt, div_le_one (by linarith)]
+    linarith
+  have htt_le_t : tt ≤ t := by
+    rw [htt, div_le_iff₀ (by linarith)]
+    nlinarith [ht0.le]
+  -- ===== The per-cell bound. =====
+  have hcell : ∀ i, i < k →
+      ∫ x, Sj i x * Tj (k - i) x ∂μ ≤
+        Cbig * tt * (ΛT ^ 2 * NS ^ 2) + Cbig * (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2) := by
+    intro i hik
+    have hk1 : 1 ≤ k := by omega
+    have h1tt : (1 : ℝ) ≤ 1 / tt := by rw [le_div_iff₀ htt0]; linarith
+    have h1ttk : (1 : ℝ) ≤ (1 / tt) ^ k := one_le_pow₀ h1tt
+    rcases Nat.eq_zero_or_pos i with hi0 | hipos
+    · -- Boundary cell `i = 0`: sup on `S`, the whole mass lands in the `Λ_S²`-arm.
+      subst hi0
+      have hbound : ∫ x, Sj 0 x * Tj (k - 0) x ∂μ ≤ ΛS ^ 2 * ∫ x, Tj (k - 0) x ∂μ := by
+        rw [← integral_const_mul]
+        refine integral_mono_of_nonneg (Eventually.of_forall (fun x => ?_)) ?_
+          (Eventually.of_forall (fun x => ?_))
+        · exact mul_nonneg (hSj_nn 0 x) (hTj_nn (k - 0) x)
+        · exact (hTj_int (k - 0)).const_mul _
+        · exact mul_le_mul_of_nonneg_right (hSsup0 x) (hTj_nn (k - 0) x)
+      rw [hTnorm (k - 0)] at hbound
+      have hNT0 : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ (k - 0) T‖ ^ 2 = NT ^ 2 := by
+        rw [hNTdef, Nat.sub_zero]
+      rw [hNT0] at hbound
+      have harm : ΛS ^ 2 * NT ^ 2 ≤ Cbig * (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2) := by
+        have h1 : (1 : ℝ) ≤ Cbig * (1 / tt) ^ k := by nlinarith
+        nlinarith [mul_nonneg (sq_nonneg ΛS) (sq_nonneg NT)]
+      have htop_nn : 0 ≤ Cbig * tt * (ΛT ^ 2 * NS ^ 2) := by positivity
+      linarith [hbound, harm]
+    · -- Interior cell: Hölder at the diagonal `k`, engine, scaled Young.
+      have hl_pos : 0 < k - i := by omega
+      set l : ℕ := k - i with hl
+      have hil : i + l = k := by omega
+      have hmi : i < k := hik
+      have hml : l < k := by omega
+      have hk_posR : 0 < (k : ℝ) := by positivity
+      set wi : ℝ := (i : ℝ) / k with hwi
+      set wl : ℝ := (l : ℝ) / k with hwl
+      have hi_posR : 0 < (i : ℝ) := by exact_mod_cast hipos
+      have hl_posR : 0 < (l : ℝ) := by exact_mod_cast hl_pos
+      have hwi_pos : 0 < wi := by rw [hwi]; positivity
+      have hwl_pos : 0 < wl := by rw [hwl]; positivity
+      have hwsum : wi + wl = 1 := by
+        rw [hwi, hwl, ← add_div, show (i : ℝ) + l = (k : ℝ) by push_cast [← hil]; ring]
+        exact div_self (ne_of_gt hk_posR)
+      have hwk : wi / wl ≤ (k : ℝ) := by
+        have hwiwl : wi / wl = (i : ℝ) / l := by
+          rw [hwi, hwl]
+          field_simp
+        rw [hwiwl, div_le_iff₀ hl_posR]
+        have h1l : (1 : ℝ) ≤ (l : ℝ) := by exact_mod_cast hl_pos
+        have hik' : (i : ℝ) ≤ (k : ℝ) := le_of_lt (by exact_mod_cast hik)
+        nlinarith
+      set p : ℝ := (k : ℝ) / i with hp
+      set q : ℝ := (k : ℝ) / l with hq
+      have hp_one : 1 < p := by rw [hp, lt_div_iff₀ hi_posR, one_mul]; exact_mod_cast hmi
+      have hpq : p.HolderConjugate q := by
+        rw [Real.holderConjugate_iff]
+        refine ⟨hp_one, ?_⟩
+        rw [hp, hq, inv_div, inv_div, ← add_div,
+          show (i : ℝ) + l = (k : ℝ) by push_cast [← hil]; ring]
+        exact div_self (ne_of_gt hk_posR)
+      have hHolder := real_holder_two_nonneg g (Sj i) (Tj l)
+        (hSj_cont i) (hTj_cont l) (hSj_nn i) (hTj_nn l) hpq
+      have h1p : (1 : ℝ) / p = wi := by rw [hp, one_div_div, hwi]
+      have h1q : (1 : ℝ) / q = wl := by rw [hq, one_div_div, hwl]
+      rw [h1p, h1q] at hHolder
+      have hSe := (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le
+        (I := I) (M := M) g s₁ k hk1).choose_spec.2 S ΛS hΛS hSsup i hipos hmi
+      have hTe := (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le
+        (I := I) (M := M) g s₂ k hk1).choose_spec.2 T ΛT hΛT hTsup l hl_pos hml
+      have hCS_m : (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le
+          (I := I) (M := M) g s₁ k hk1).choose = CS := by
+        simp only [hCSdef, dif_pos hk1]
+      have hCT_m : (exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le
+          (I := I) (M := M) g s₂ k hk1).choose = CT := by
+        simp only [hCTdef, dif_pos hk1]
+      rw [hCS_m] at hSe
+      rw [hCT_m] at hTe
+      rw [mul_div_assoc 2 (i : ℝ) k, ← hwi] at hSe
+      rw [mul_div_assoc 2 (l : ℝ) k, ← hwl] at hTe
+      rw [show Integral.L2.tensorL2Norm (I := I) g 0 (s₁ + k)
+            (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ k S).toFun = NS from by
+          rw [hNSdef]
+          exact (Integral.L2.SmoothCcTensor.norm_def
+            (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ k S)).symm] at hSe
+      rw [show Integral.L2.tensorL2Norm (I := I) g 0 (s₂ + k)
+            (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ k T).toFun = NT from by
+          rw [hNTdef]
+          exact (Integral.L2.SmoothCcTensor.norm_def
+            (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ k T)).symm] at hTe
+      set Iφp : ℝ := ∫ x, Sj i x ^ p ∂μ with hIφp
+      set Iψq : ℝ := ∫ x, Tj l x ^ q ∂μ with hIψq
+      have hIφp_nn : 0 ≤ Iφp := by
+        rw [hIφp]; exact integral_nonneg (fun x => Real.rpow_nonneg (hSj_nn i x) _)
+      have hIψq_nn : 0 ≤ Iψq := by
+        rw [hIψq]; exact integral_nonneg (fun x => Real.rpow_nonneg (hTj_nn l x) _)
+      have hys := young_arm_split_scaled wi wl CS CT ΛS ΛT NS NT Iφp Iψq tt k
+        hwi_pos hwl_pos hwsum hwk hCS_nn hCT_nn hΛS hΛT
+        (by rw [hNSdef]; exact norm_nonneg _) (by rw [hNTdef]; exact norm_nonneg _)
+        hIφp_nn hIψq_nn htt0 htt1 hSe hTe
+      have hCSCT_le : CS * CT ≤ Cbig := by rw [hCbig]; linarith
+      calc ∫ x, Sj i x * Tj l x ∂μ
+          ≤ Iφp ^ wi * Iψq ^ wl := hHolder
+        _ ≤ CS * CT * (tt * (ΛT ^ 2 * NS ^ 2) + (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2)) := hys
+        _ ≤ Cbig * (tt * (ΛT ^ 2 * NS ^ 2) + (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2)) := by
+            refine mul_le_mul_of_nonneg_right hCSCT_le ?_
+            positivity
+        _ = Cbig * tt * (ΛT ^ 2 * NS ^ 2) + Cbig * (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2) := by
+            ring
+  -- ===== Assemble. =====
+  refine ⟨?_, ?_⟩
+  · have hcont : Continuous (fun x => ∑ i ∈ Finset.range k, Sj i x * Tj (k - i) x) := by
+      refine continuous_finset_sum _ (fun i _ => (hSj_cont i).mul (hTj_cont (k - i)))
+    rw [hμ]
+    exact hcont.integrable_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
+  · have hrw : (∫ x, ∑ i ∈ Finset.range k, Sj i x * Tj (k - i) x ∂μ)
+        = ∑ i ∈ Finset.range k, ∫ x, Sj i x * Tj (k - i) x ∂μ :=
+      MeasureTheory.integral_finset_sum _ (fun i _ => hint_cell i (k - i))
+    rw [hrw]
+    have hsum_le : (∑ i ∈ Finset.range k, ∫ x, Sj i x * Tj (k - i) x ∂μ) ≤
+        ∑ _i ∈ Finset.range k,
+          (Cbig * tt * (ΛT ^ 2 * NS ^ 2) + Cbig * (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2)) :=
+      Finset.sum_le_sum (fun i hi => hcell i (Finset.mem_range.mp hi))
+    refine le_trans hsum_le ?_
+    rw [Finset.sum_const, nsmul_eq_mul, Finset.card_range]
+    -- `k·Cbig·tt ≤ t` and `k·Cbig·(1/tt)^k ≤ (k·Cbig·(k·Cbig+1)^k)·(1/t)^k`.
+    have htop : (k : ℝ) * (Cbig * tt) ≤ t := by
+      rw [htt]
+      rw [show (k : ℝ) * (Cbig * (t / ((k : ℝ) * Cbig + 1)))
+          = ((k : ℝ) * Cbig * t) / ((k : ℝ) * Cbig + 1) from by ring]
+      rw [div_le_iff₀ (by linarith : (0 : ℝ) < (k : ℝ) * Cbig + 1)]
+      nlinarith [ht0.le,
+        mul_nonneg (mul_nonneg (Nat.cast_nonneg k : (0:ℝ) ≤ (k:ℝ)) hCbig_nn) ht0.le]
+    have hinv_tt : (1 / tt) ^ k = ((k : ℝ) * Cbig + 1) ^ k * (1 / t) ^ k := by
+      rw [htt, one_div_div,
+        show ((k : ℝ) * Cbig + 1) / t = ((k : ℝ) * Cbig + 1) * (1 / t) from by ring,
+        mul_pow]
+    have hlow : (k : ℝ) * (Cbig * (1 / tt) ^ k) ≤
+        ((k : ℝ) * Cbig * ((k : ℝ) * Cbig + 1) ^ k + 1) * (1 / t) ^ k := by
+      rw [hinv_tt]
+      have h1tk : (0 : ℝ) ≤ (1 / t) ^ k := by positivity
+      have hbase : (0 : ℝ) ≤ ((k : ℝ) * Cbig + 1) ^ k := by positivity
+      nlinarith [mul_nonneg (Nat.cast_nonneg k : (0:ℝ) ≤ (k:ℝ)) hCbig_nn]
+    have hXnn : (0 : ℝ) ≤ ΛT ^ 2 * NS ^ 2 := by positivity
+    have hYnn : (0 : ℝ) ≤ ΛS ^ 2 * NT ^ 2 := by positivity
+    have hYsum : ΛS ^ 2 * NT ^ 2 ≤ ΛS ^ 2 * ∑ l ∈ Finset.range (k + 1),
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T‖ ^ 2 :=
+      mul_le_mul_of_nonneg_left hNT_sum (by positivity)
+    have hCfin_nn : (0 : ℝ) ≤ ((k : ℝ) * Cbig * ((k : ℝ) * Cbig + 1) ^ k + 1) * (1 / t) ^ k := by
+      positivity
+    calc (k : ℝ) * (Cbig * tt * (ΛT ^ 2 * NS ^ 2) + Cbig * (1 / tt) ^ k * (ΛS ^ 2 * NT ^ 2))
+        = ((k : ℝ) * (Cbig * tt)) * (ΛT ^ 2 * NS ^ 2)
+            + ((k : ℝ) * (Cbig * (1 / tt) ^ k)) * (ΛS ^ 2 * NT ^ 2) := by ring
+      _ ≤ t * (ΛT ^ 2 * NS ^ 2)
+            + (((k : ℝ) * Cbig * ((k : ℝ) * Cbig + 1) ^ k + 1) * (1 / t) ^ k)
+              * (ΛS ^ 2 * NT ^ 2) := by
+          refine add_le_add (mul_le_mul_of_nonneg_right htop hXnn)
+            (mul_le_mul_of_nonneg_right hlow hYnn)
+      _ ≤ t * (ΛT ^ 2 * NS ^ 2)
+            + (((k : ℝ) * Cbig * ((k : ℝ) * Cbig + 1) ^ k + 1) * (1 / t) ^ k)
+              * (ΛS ^ 2 * ∑ l ∈ Finset.range (k + 1),
+                  ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T‖ ^ 2) := by
+          exact add_le_add le_rfl (mul_le_mul_of_nonneg_left hYsum hCfin_nn)
+      _ = t * (ΛT ^ 2 * NS ^ 2)
+            + ((k : ℝ) * Cbig * ((k : ℝ) * Cbig + 1) ^ k + 1) * (1 / t) ^ k *
+              (ΛS ^ 2 * ∑ l ∈ Finset.range (k + 1),
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ l T‖ ^ 2) := by ring
+
 end DifferentialGeometry.Analysis.Sobolev.Tensor
 
 end
