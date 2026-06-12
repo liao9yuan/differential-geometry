@@ -136,6 +136,23 @@ Proof pattern: `T.map_sum` + `T.map_smul_univ` basis expansion, discrete CS
 ContinuousLinearMap.coe_sum', Finset.sum_apply, smul_apply, hON` + `sum_comm`
 + `sum_ite_eq`), `Finset.prod_univ_sum`, private `sqrt_prod`.
 
+## Brick A base bridges (located, 2026-06-11)
+
+- `extDerivFun_real_eq_mfderiv` (Bundle/PartialMfderiv/FixedBase.lean:22) and
+  `extDerivFun_eq_fderiv` (FixedBase.lean:199, the chart-fderiv form used by
+  the swap constructors) — the scalar directional-derivative ↔ chart-partial
+  bridges for the conversion induction.
+- Step decomposition: `totalNabla0SFun_apply_section` +
+  `nabla0SFun_eval_smooth_slots` (the P2 tower-regularity pattern in
+  `MetricCovDerivTimeDeriv.lean`).
+- C⁰ input: `abs_apply_le_sqrt_normSq0S` (Comparison.lean, e4e8db5a).
+- Euclidean endgame: `exists_cInf_subseq` (MapConvergence.lean).
+
+NEXT concrete step: create `MetricPreconv.lean`; first theorem = the
+order-1 conversion (chart-partials of the component scalars bounded by
+`(B_{p+1})`, `(B_p)` + chart-frame data via the step decomposition + CS),
+then the iteratedFDeriv induction.
+
 ## Open design questions
 
 - Whether to add an `On`-version of `exists_cInf_subseq` vs bump-extension
