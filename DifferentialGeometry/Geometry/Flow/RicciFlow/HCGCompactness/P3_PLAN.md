@@ -92,7 +92,13 @@ Route (detailed in MetricPreconv.md "Order-1 route in detail"):
    (Tensor0SRiemannian/Comparison.lean, end of file) + sup of the slot/direction
    fields' gRef-norms on `Kc` (continuous on compact; `IsCompact.exists_bound`-style).
 
-### Brick A2 — all-orders conversion (the induction)
+### Brick A2 — all-orders conversion (the induction) ✅ DONE
+**(2026-06-11, commit 423b4e1a; ACCEPTED: sorry-free, targeted build green,
+axiom-clean.  Endpoint `iteratedFDeriv_comp_le_tower` — note the improved
+bound shape: order-family `b : ℕ → ℝ` with `CV * ∑_{q ≤ p+r} b q`, which
+plugs directly into the `(B_r)` quantifier shape.  Helpers exported for B:
+`towerStep`, `fderiv_chartRep_eq_towerStep`, `contDiffAt_chartRep`,
+`covDerivOfField_eval_contMDiff`, `writtenInExtChartAt_real_apply`.)**
 **File**: same `MetricPreconv.lean`.
 
 Target: for every `r`, `iteratedFDeriv ℝ r` of the chart representative of
