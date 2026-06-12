@@ -56,13 +56,13 @@ stated on these **concrete** sections — never on an arbitrary quadratic sectio
 * `lieDerivDiff_connLevel_topRestSplit` — **posited** (`sorry` body): the single genuine deep
   covariant-gauge primitive — the 0-jet-inclusive `w`-jet top/rest split of the **full**
   `g₀`-retagged Lie-summand difference (`∇^j diff = Top + Rest`, `Top` carrying the difference-arm jets,
-  `Rest` the `(1/8)`-cross fixed-pair jet).  This is the gauge analogue of the curvature half's
+  `Rest` the `Cd`-cross fixed-pair jet.  This is the gauge analogue of the curvature half's
   `crossCorrectionSection_iteratedCovGrad_topRest_split`, applied directly to the full Lie difference because the
   intrinsic-vector Lie value-split is genuinely absent on disk.
 
 * `lieDerivDiff_connLevel_fullTwoArm` — **derived**: the full Lie-summand difference's two-arm
   bound, the `2·rfns`-subadditivity recombination (`riemannianFiberNormSq_add_le`) of the posited
-  `lieDerivDiff_connLevel_topRestSplit` (the `(1/8)`-cross share doubling to the consumer's `(1/4)`).  The
+  `lieDerivDiff_connLevel_topRestSplit` (the cross share doubling into the consumer's `Cd`).  The
   whole value-split tower (`valueSplitLinear`/`crossWitness`/`sectionData`) is then derived from it by
   `Cf ≡ 0` glue.
 
@@ -134,7 +134,7 @@ splits, at each point `x`, into a **difference-jet** part `Top` and a **fixed-pa
 ```
 ∇^j (diff)(x) = Top + Rest,
 rfns(Top)(x)  ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x),
-rfns(Rest)(x) ≤ (1/8) · (∑_{i ≤ j+2} (rfns(∇^i T₁)(x) + rfns(∇^i T₂)(x))) · ‖(T₁ − T₂).toHs a‖²,
+rfns(Rest)(x) ≤ Cd(j) · (∑_{i ≤ j+2} (rfns(∇^i T₁)(x) + rfns(∇^i T₂)(x))) · ‖(T₁ − T₂).toHs a‖²,
 ```
 where `w := realizeSymmCcTensor g₀ (T₁ − T₂)`; the order-`0` jet `rfns(w)` is included.
 
@@ -159,11 +159,11 @@ trace and the parallel two-section bilinear product grid `RfnsBilinearProduct` (
 may land on either factor, folded with the *fixed* factor sup and the metric-built `≤ 2`-jet trace
 coefficient into the family-uniform `Cd`); the `Rest` part keeps the top coefficient jet on the **fixed
 pair** `T₁, T₂` against the difference's order-`a` chart-Sobolev `C⁰` mass (the supercritical embedding
-`ha`), with the per-recombination share `(1/8)` so that the `2·rfns` `riemannianFiberNormSq_add_le`
-recombination lands the consumer's `(1/4)` cross coefficient — the literal `(1/4)` is pinned by the
-frozen downstream tower (`lieDerivDiff_order0_linearCross_split` → `lieDerivDiff_covFdB_section_split`
-→ `lieDerivDiff_covFdB_pointwise_twoProduct_rfns_le`, which folds `2·(1/4) + 2·(1/4) = 1` into the
-coefficient-`1` cross arm the pointwise-to-`L²` lift consumes).
+`ha`), with the `(g₀, a, j)`-dependent cross coefficient `Cd` — a fixed universal cross constant
+(the former literal `(1/4)`) is REFUTED by the `T²` volume-scaling family (the `H^a → C⁰` embedding
+constant is `g₀`-dependent and unbounded as `vol(M) → 0`; see `PROVE_REFUTED.md`), so the whole
+downstream tower (`lieDerivDiff_order0_linearCross_split` → `lieDerivDiff_covFdB_section_split` →
+`lieDerivDiff_covFdB_integrated_twoProduct_l2NormSq_le`) now carries the `Cd`-cross arm.
 
 Unlike the curvature half, which builds the concrete `crossSection` from the concrete operator-trace value
 `ricciNeg2SectionDiffCrossEval` (determining all jets) and splits its covariant gradient, the
@@ -201,7 +201,7 @@ theorem lieDerivDiff_connLevel_topRestSplit (g₀ g_bg : SmoothRiemannianMetric 
             Cd * ∑ i ∈ Finset.range (j + 2 + 1),
                 ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                     (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-              + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+              + Cd * (∑ i ∈ Finset.range (j + 2 + 1),
                   (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                     + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=
@@ -222,7 +222,7 @@ difference factor `w := realizeSymmCcTensor g₀ (T₁ − T₂)`, and whose cro
 pair `T₁, T₂` against the difference's order-`a` chart-Sobolev `C⁰` mass `D := ‖(T₁ − T₂).toHs a‖`:
 ```
 rfns(∇^j diff)(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x)
-                   + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D².
+                   + Cd(j)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D².
 ```
 
 This is the genuine deep content of the gauge half — the gauge analogue of the *sum* of the curvature
@@ -234,8 +234,8 @@ difference rather than to a value-split's pieces.
 **Decomposition.**  Proved by composing the genuine deep top/rest split of the full Lie
 difference `lieDerivDiff_connLevel_topRestSplit` (the gauge analogue of the curvature half's
 `crossCorrectionSection_iteratedCovGrad_topRest_split`) with the **sorry-free** `2·rfns` subadditivity
-recombination `riemannianFiberNormSq_add_le`: the split's `(1/8)`-cross share doubles to the consumer's
-`(1/4)` cross coefficient, and its difference-arm constant `Cd` doubles to `2·Cd` — exactly the
+recombination `riemannianFiberNormSq_add_le`: the split's cross share doubles into the consumer's
+`Cd` cross coefficient, and its difference-arm constant doubles likewise — exactly the
 recombination the curvature quadratic-Cross reduction `ricciCrossSection_covGrad_traceReductionConn_rfns_le`
 is documented to use.  The only remaining genuine content is the top/rest split itself.
 
@@ -264,7 +264,7 @@ theorem lieDerivDiff_connLevel_fullTwoArm (g₀ g_bg : SmoothRiemannianMetric I 
             Cd * ∑ i ∈ Finset.range (j + 2 + 1),
                 ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                     (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-              + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+              + Cd * (∑ i ∈ Finset.range (j + 2 + 1),
                   (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                     + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=
@@ -291,9 +291,9 @@ whose difference arm is the **0-jet-inclusive** order-`≤ j+2` covariant jet su
 difference factor `w := realizeSymmCcTensor g₀ (T₁ − T₂)`:
 ```
 rfns(∇^j (diff − Cf g₁ g₂))(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x)
-                                + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
+                                + Cd(j)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
 rfns(∇^j (Cf g₁ g₂))(x)        ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x)
-                                + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
+                                + Cd(j)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
 ```
 with `D := ‖(T₁ − T₂).toHs a‖`.
 
@@ -303,7 +303,7 @@ the cross arm on that *very same* chosen section, which can come only from this 
 (a linear-only existence exposes no property of the chosen section's value), and the *full* `diff` itself
 satisfies the two-arm bound — so a separate universal cross-arm node, over an arbitrary complement of a
 two-arm-grid-bounded `Lsec`, is genuinely **false** (the squared fibre norm being only `2`-subadditive,
-`Csec = diff − Lsec` doubles the tight `(1/4)` cross coefficient; e.g. `Lsec := −diff`, `Csec := 2·diff`).
+`Csec = diff − Lsec` doubles a tight cross coefficient; e.g. `Lsec := −diff`, `Csec := 2·diff`).
 Bundling both arms on the one chosen `Cf` is therefore the only sound construction.
 
 **Derivation.**  Both arms ride on the genuine deep gauge primitive `lieDerivDiff_connLevel_fullTwoArm`
@@ -352,7 +352,7 @@ theorem lieDerivDiff_connLevel_valueSplitLinear (g₀ g_bg : SmoothRiemannianMet
                 Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                     ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                         (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-                  + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+                  + Cd j * (∑ i ∈ Finset.range (j + 2 + 1),
                       (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                         + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                     * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) ∧
@@ -361,7 +361,7 @@ theorem lieDerivDiff_connLevel_valueSplitLinear (g₀ g_bg : SmoothRiemannianMet
                 Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                     ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                         (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-                  + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+                  + Cd j * (∑ i ∈ Finset.range (j + 2 + 1),
                       (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                         + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                     * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) := by
@@ -404,11 +404,11 @@ theorem lieDerivDiff_connLevel_valueSplitLinear (g₀ g_bg : SmoothRiemannianMet
     have h1 : (0 : ℝ) ≤ Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
             (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2 := mul_nonneg (hCd0 j) hSRnn
-    have h2 : (0 : ℝ) ≤ (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+    have h2 : (0 : ℝ) ≤ Cd j * (∑ i ∈ Finset.range (j + 2 + 1),
           (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
             + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
         * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=
-      mul_nonneg (mul_nonneg (by norm_num) hSTnn) (sq_nonneg _)
+      mul_nonneg (mul_nonneg (hCd0 j) hSTnn) (sq_nonneg _)
     rw [show ((0 : ℝ) ^ 2) = 0 by norm_num]
     linarith
 
@@ -425,17 +425,17 @@ supercriticality hypothesis `ha`, every uniform `H^{a+2}`-size bound `B ≥ 0`, 
 `T₁, T₂` with `H^{a+2}` norms `≤ B` and any two realized metrics `g₁, g₂` of `T₁, T₂`,
 ```
 rfns(∇^j (Cf g₁ g₂))(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x)
-                         + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
+                         + Cd(j)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
 ```
 with `w := realizeSymmCcTensor g₀ (T₁ − T₂)` and `D := ‖(T₁ − T₂).toHs a‖`.
 
 **Why the concrete section and not a universal `(Lsec, Csec)`.**  A *universal* cross bound — over every
-pair `(Lsec, Csec)` with `diff = Lsec + Csec` and `Lsec` connection-grid-bounded (cross coefficient
-`1/4`) — is **false** at the tight `1/4` conclusion: the squared fibre norm is only `2`-subadditive
-(`‖a − b‖² ≤ 2‖a‖² + 2‖b‖²`), so deriving a bound on `Csec = diff − Lsec` from bounds on `diff` and
-`Lsec` doubles the cross coefficient to `1/2 > 1/4`, and an admissible complement such as `Lsec := −diff`
+pair `(Lsec, Csec)` with `diff = Lsec + Csec` and `Lsec` connection-grid-bounded (a fixed cross
+coefficient) — is **false** at any tight fixed-coefficient conclusion: the squared fibre norm is only
+`2`-subadditive (`‖a − b‖² ≤ 2‖a‖² + 2‖b‖²`), so deriving a bound on `Csec = diff − Lsec` from bounds
+on `diff` and `Lsec` doubles the cross coefficient, and an admissible complement such as `Lsec := −diff`
 (grid-bounded with `CdL = Cd_full`), `Csec := 2·diff` then carries `4×` the difference's fixed-pair cross
-content, which no uniform `Cd` can absorb into `Cd·∑ rfns(∇^i w) + (1/4)·cross` (the fixed-pair jets and
+content, which no uniform `Cd` can absorb into the difference arm alone (the fixed-pair jets and
 the difference jets are genuinely independent — `ha` does not dominate the former by the latter).  The
 curvature sibling avoids this by stating the bound on the *concrete* `crossSection`; this node does the
 same on the concrete Lie `Cf`.
@@ -475,7 +475,7 @@ theorem lieDerivCrossSection_connLevel_crossArm_ofSplit (g₀ g_bg : SmoothRiema
             Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                 ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                     (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-              + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+              + Cd j * (∑ i ∈ Finset.range (j + 2 + 1),
                   (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                     + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 := by
@@ -507,9 +507,9 @@ whose difference arm is the **0-jet-inclusive** order-`≤ j+2` covariant jet su
 difference factor `w := realizeSymmCcTensor g₀ (T₁ − T₂)`:
 ```
 rfns(∇^j (diff − Cf g₁ g₂))(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x)
-                                + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
+                                + Cd(j)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
 rfns(∇^j (Cf g₁ g₂))(x)        ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x)
-                                + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
+                                + Cd(j)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
 ```
 with `D := ‖(T₁ − T₂).toHs a‖`.
 
@@ -582,7 +582,7 @@ theorem lieDerivDiff_connLevel_crossWitness (g₀ g_bg : SmoothRiemannianMetric 
                 Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                     ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                         (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-                  + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+                  + Cd j * (∑ i ∈ Finset.range (j + 2 + 1),
                       (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                         + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                     * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) ∧
@@ -591,7 +591,7 @@ theorem lieDerivDiff_connLevel_crossWitness (g₀ g_bg : SmoothRiemannianMetric 
                 Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                     ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                         (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-                  + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+                  + Cd j * (∑ i ∈ Finset.range (j + 2 + 1),
                       (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                         + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                     * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) := by
@@ -616,8 +616,14 @@ theorem lieDerivDiff_connLevel_crossWitness (g₀ g_bg : SmoothRiemannianMetric 
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
             (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2 :=
       Finset.sum_nonneg fun p _ => sq_nonneg _
-    gcongr
-    exact le_max_left _ _
+    have hSTnn : (0 : ℝ) ≤ ∑ i ∈ Finset.range (j + 2 + 1),
+        (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
+          + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2) :=
+      Finset.sum_nonneg fun i _ => add_nonneg (sq_nonneg _) (sq_nonneg _)
+    exact add_le_add
+      (mul_le_mul_of_nonneg_right (le_max_left _ _) hSRnn)
+      (mul_le_mul_of_nonneg_right
+        (mul_le_mul_of_nonneg_right (le_max_left _ _) hSTnn) (sq_nonneg _))
   · -- Cross arm `Cf`: the integrated `w`-jet cross-arm bound on the concrete cross section
     -- `Cf := (lieDerivDiff_connLevel_valueSplitLinear g₀ g_bg).choose`
     -- (`lieDerivCrossSection_connLevel_crossArm_ofSplit`), widened per order
@@ -627,8 +633,14 @@ theorem lieDerivDiff_connLevel_crossWitness (g₀ g_bg : SmoothRiemannianMetric 
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
             (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2 :=
       Finset.sum_nonneg fun p _ => sq_nonneg _
-    gcongr
-    exact le_max_right _ _
+    have hSTnn : (0 : ℝ) ≤ ∑ i ∈ Finset.range (j + 2 + 1),
+        (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
+          + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2) :=
+      Finset.sum_nonneg fun i _ => add_nonneg (sq_nonneg _) (sq_nonneg _)
+    exact add_le_add
+      (mul_le_mul_of_nonneg_right (le_max_right _ _) hSRnn)
+      (mul_le_mul_of_nonneg_right
+        (mul_le_mul_of_nonneg_right (le_max_right _ _) hSTnn) (sq_nonneg _))
 
 /-- **(DERIVED — the CROSS arm on the `lieDerivDiff_connLevel_crossWitness` cross
 section.)**  The genuine deep covariant-gauge cross-arm content of the Lie half — the gauge analogue of
@@ -645,7 +657,7 @@ Hamilton/Moser two-arm sum whose difference arm is the **0-jet-inclusive** order
 difference factor `w := realizeSymmCcTensor g₀ (T₁ − T₂)`:
 ```
 rfns(∇^j (Cf g₁ g₂))(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x)
-                         + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
+                         + Cd(j)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
 ```
 with `D := ‖(T₁ − T₂).toHs a‖`.
 
@@ -695,7 +707,7 @@ theorem lieDerivDiff_connLevel_crossWitness_crossArm (g₀ g_bg : SmoothRiemanni
             Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                 ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                     (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-              + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+              + Cd j * (∑ i ∈ Finset.range (j + 2 + 1),
                   (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                     + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 := by
@@ -721,9 +733,9 @@ lieDerivRetagG0 g₀ g_bg g₂` have their per-order covariant gradient dominate
 difference factor `w := realizeSymmCcTensor g₀ (T₁ − T₂)`:
 ```
 rfns(∇^j (diff − Cf g₁ g₂))(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x)
-                                + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
+                                + Cd(j)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
 rfns(∇^j (Cf g₁ g₂))(x)        ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x)
-                                + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
+                                + Cd(j)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
 ```
 with `D := ‖(T₁ − T₂).toHs a‖`.
 
@@ -784,7 +796,7 @@ theorem lieDerivDiff_connLevel_sectionData (g₀ g_bg : SmoothRiemannianMetric I
                 Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                     ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                         (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-                  + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+                  + Cd j * (∑ i ∈ Finset.range (j + 2 + 1),
                       (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                         + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                     * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) ∧
@@ -793,7 +805,7 @@ theorem lieDerivDiff_connLevel_sectionData (g₀ g_bg : SmoothRiemannianMetric I
                 Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                     ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                         (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-                  + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+                  + Cd j * (∑ i ∈ Finset.range (j + 2 + 1),
                       (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                         + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                     * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) := by
@@ -817,16 +829,28 @@ theorem lieDerivDiff_connLevel_sectionData (g₀ g_bg : SmoothRiemannianMetric I
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
             (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2 :=
       Finset.sum_nonneg fun p _ => sq_nonneg _
-    gcongr
-    exact le_max_left _ _
+    have hSTnn : (0 : ℝ) ≤ ∑ i ∈ Finset.range (j + 2 + 1),
+        (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
+          + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2) :=
+      Finset.sum_nonneg fun i _ => add_nonneg (sq_nonneg _) (sq_nonneg _)
+    exact add_le_add
+      (mul_le_mul_of_nonneg_right (le_max_left _ _) hSRnn)
+      (mul_le_mul_of_nonneg_right
+        (mul_le_mul_of_nonneg_right (le_max_left _ _) hSTnn) (sq_nonneg _))
   · -- Cross arm `Cf`: widen per order `CdC j → max (CdL j) (CdC j)`.
     refine le_trans (hC T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 j) ?_
     have hSRnn : (0 : ℝ) ≤ ∑ i ∈ Finset.range (j + 2 + 1),
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
             (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2 :=
       Finset.sum_nonneg fun p _ => sq_nonneg _
-    gcongr
-    exact le_max_right _ _
+    have hSTnn : (0 : ℝ) ≤ ∑ i ∈ Finset.range (j + 2 + 1),
+        (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
+          + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2) :=
+      Finset.sum_nonneg fun i _ => add_nonneg (sq_nonneg _) (sq_nonneg _)
+    exact add_le_add
+      (mul_le_mul_of_nonneg_right (le_max_right _ _) hSRnn)
+      (mul_le_mul_of_nonneg_right
+        (mul_le_mul_of_nonneg_right (le_max_right _ _) hSTnn) (sq_nonneg _))
 
 /-- **The concrete quadratic-in-difference Lie Cross section.**  The named cross-section witness of the
 Lie section split `lieDerivDiff_connLevel_sectionData` — the gauge analogue of the

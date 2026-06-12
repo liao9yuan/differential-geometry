@@ -289,13 +289,13 @@ family:
 ```
 ‖∇^j (2·crossCorrectionSection g₁ g₀ T₁ − 2·crossCorrectionSection g₂ g₀ T₂)‖²
   ≤ Cd j · ∑_{i ≤ j+2} ‖∇^i w‖²
-    + (1/4) · (∑_{i ≤ j+2} (‖∇^i T₁‖² + ‖∇^i T₂‖²)) · ‖(T₁ − T₂).toHs a‖²,
+    + Cd j · (∑_{i ≤ j+2} (‖∇^i T₁‖² + ‖∇^i T₂‖²)) · ‖(T₁ − T₂).toHs a‖²,
 ```
 where `‖·‖` is the metric `L²` (semi)norm (`‖S‖² = ∫ rfns(S) dμ`).  This is the form the single
 consumer — the Lie-half assembly `symLoweredDeTurckVF_iteratedCovGrad_topRest_split` — actually reads.
 
 **Why INTEGRATED, not pointwise (the former statement was false).**  An earlier *pointwise* per-`x`
-`rfns` two-arm form (`rfns(∇^j diff)(x) ≤ Cd·∑ rfns(∇^i w)(x) + (1/4)·(∑(rfns(∇^i T₁)+rfns(∇^i T₂)))·
+`rfns` two-arm form (`rfns(∇^j diff)(x) ≤ Cd·∑ rfns(∇^i w)(x) + Cd·(∑(rfns(∇^i T₁)+rfns(∇^i T₂)))·
 ‖(T₁−T₂).toHs a‖²`) shares the exact disease Lean-refuted in the Lie half: at a joint high-frequency
 concentration the middle covariant-Leibniz terms `∇^p w ⊛ ∇^{j+2−p}(fixed)` (both factors of order
 `≈ j/2`) are covered by neither arm — for `j > 2a` the left side carries frequency content `|ξ|^j`
@@ -316,7 +316,10 @@ delivered by the cross-correction contraction's diagonal `rfns` jet grid (the
 fixed factors `D₁, D₂` fold into the `T₁, T₂` jets by `exists_riemannianFiberNormSq_iteratedCovGrad_
 loweredConnDiff_le_jetSum`, and the difference factor's `C⁰` mass is the supercritical embedding `ha`.
 The two diagonal grids are then integrated by the GN two-arm engine into the difference arm `Cd j·∑
-‖∇^i w‖²` and the cross arm `(1/4)·(∑(‖∇^i T₁‖²+‖∇^i T₂‖²))·‖(T₁−T₂).toHs a‖²`.
+‖∇^i w‖²` and the cross arm `Cd j·(∑(‖∇^i T₁‖²+‖∇^i T₂‖²))·‖(T₁−T₂).toHs a‖²` (the cross coefficient
+is the `(g₀, a, j)`-dependent `Cd j`: a fixed universal cross constant — the former literal `(1/4)` —
+is refuted by the `T²` volume-scaling family, the `H^a → C⁰` embedding constant being `g₀`-dependent
+and unbounded as `vol(M) → 0`; see `PROVE_REFUTED.md`).
 
 **Non-vacuity.**  Both arms carry genuine content: the difference arm carries `∇^{j+2}w` (a zero `Cd`
 falsifies it whenever the cross-correction difference is genuinely present), and the cross arm carries
@@ -348,7 +351,7 @@ theorem crossCorrectionDiff_iteratedCovGrad_topRest_split
             Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                 ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                     (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-              + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+              + Cd j * (∑ i ∈ Finset.range (j + 2 + 1),
                   (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                     + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=

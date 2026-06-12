@@ -248,7 +248,7 @@ arm is the **0-jet-inclusive** rank-`2` order-`≤ j+2` covariant jet sum of the
 factor `w := realizeSymmCcTensor g₀ (T₁ − T₂)`:
 ```
 lieDerivRetagG0 g₁ − lieDerivRetagG0 g₂ = L + C,
-rfns(∇^j L)(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x) + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
+rfns(∇^j L)(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x) + Cd(j)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
 ```
 with `D := ‖(T₁ − T₂).toHs a‖`.
 
@@ -298,7 +298,7 @@ theorem exists_lieDerivLinearCross_section_connLevel
               Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                   ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                       (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-                + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+                + Cd j * (∑ i ∈ Finset.range (j + 2 + 1),
                     (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                       + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                   * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) := by
@@ -329,7 +329,7 @@ factor `w := realizeSymmCcTensor g₀ (T₁ − T₂)` up to `∇^{j+2}w`, with 
 coefficient folded into the family-uniform `Cd`):
 ```
 lieDerivRetagG0 g₁ − lieDerivRetagG0 g₂ = L + C,
-rfns(∇^j L)(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x) + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
+rfns(∇^j L)(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x) + Cd(j)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
 ```
 with `D := ‖(T₁ − T₂).toHs a‖`.
 
@@ -344,7 +344,7 @@ the single high derivative on the difference factor `w` exactly as the curvature
 
 **Non-vacuity (the value split and the linear-arm bound are coupled and reject `C = 0`).**  The bundling
 is forced, not cosmetic: with `C = 0`, `L = diff` would have to satisfy the difference-arm bound
-`rfns(∇^j L) ≤ Cd · ∑ rfns(∇^i w) + (1/4)·(∑ fixed-pair)·D²`, which is FALSE for `j ∈ (a, 2a]` — the top
+`rfns(∇^j L) ≤ Cd · ∑ rfns(∇^i w) + Cd·(∑ fixed-pair)·D²`, which is FALSE for `j ∈ (a, 2a]` — the top
 coefficient jet `∇^{j+2}g_t` content of the full Lie difference is genuinely `(∑ fixed-pair) · C⁰`-order
 (`L²` mass of order `j + 2 ∈ (a + 2, 2a + 2]`, which an `H^{a+2}` ball cannot bound, only the *fixed-pair
 cross* arm of the Cross section can carry it), not difference-arm controlled.  So a valid witness `(L, C)`
@@ -380,7 +380,7 @@ theorem exists_lieDerivLinearCross_diffArm
               Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                   ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                       (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-                + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+                + Cd j * (∑ i ∈ Finset.range (j + 2 + 1),
                     (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                       + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                   * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) :=
@@ -400,8 +400,8 @@ per-order, family-uniform constant family `Cd : ℕ → ℝ` — per-order becau
 nonlinearity doubles frequencies) and the fixed-pair Cross bound:
 ```
 lieDerivRetagG0 g₁ − lieDerivRetagG0 g₂ = L + C,
-rfns(∇^j L)(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x) + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
-rfns(∇^j C)(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x) + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
+rfns(∇^j L)(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x) + Cd(j)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
+rfns(∇^j C)(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x) + Cd(j)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
 ```
 with `D := ‖(T₁ − T₂).toHs a‖`.
 
@@ -437,7 +437,7 @@ theorem lieDerivDiff_order0_linearCross_split
               Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                   ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                       (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-                + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+                + Cd j * (∑ i ∈ Finset.range (j + 2 + 1),
                     (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                       + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                   * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) ∧
@@ -446,7 +446,7 @@ theorem lieDerivDiff_order0_linearCross_split
               Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                   ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                       (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-                + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+                + Cd j * (∑ i ∈ Finset.range (j + 2 + 1),
                     (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                       + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                   * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) :=
@@ -702,7 +702,7 @@ Lie-summand difference `lieDerivRetagG0 g₀ g_bg g₁ − lieDerivRetagG0 g₀ 
 ```
 ∇^j (lieDerivRetagG0 g₁ − lieDerivRetagG0 g₂) = Adiff + Cross,
 rfns(Adiff)(x)  ≤ Cd · ∑_{i ≤ j+2} rfns(∇^i w)(x),
-rfns(Cross)(x) ≤ (1/2) · (∑_{i ≤ j+2} (rfns(∇^i T₁)(x) + rfns(∇^i T₂)(x))) · ‖(T₁ − T₂).toHs a‖²,
+rfns(Cross)(x) ≤ Cd · (∑_{i ≤ j+2} (rfns(∇^i T₁)(x) + rfns(∇^i T₂)(x))) · ‖(T₁ − T₂).toHs a‖²,
 ```
 with `w := realizeSymmCcTensor g₀ (T₁ − T₂)` and a nonnegative difference-arm constant `Cd`.
 
@@ -719,8 +719,8 @@ term's unbounded top coefficient jet `∇^{j+2}g_t` on the *fixed pair* `T₁, T
 `C⁰` mass (bounded by `‖(T₁ − T₂).toHs a‖` through the supercritical embedding).  The `j = 0` witness of
 exactly this two-piece structure is the chart-level structural difference identity
 `chartLieDeTurckComp_sub_eq`.  No jet of order `> 2` is ever taken pointwise; the cross coefficient is
-normalised to `1/2` so that after the squared-fibre-norm subadditivity factor `2` it yields the
-coefficient-`1` cross arm the two-product consumer below records.
+the `(g₀, a, j)`-dependent `Cd` (a fixed universal cross constant is refuted by the `T²` volume-scaling
+family, see `PROVE_REFUTED.md`), which the two-product consumer below absorbs into its `Λ²` cross arm.
 
 **Non-vacuity.**  As for the curvature half, the two arm bounds are *coupled* by the structural identity
 `∇^j(summand-diff) = Adiff + Cross`, rejecting both `Adiff = 0` (the cross bound would be false for
@@ -767,7 +767,7 @@ theorem lieDerivDiff_covFdB_section_split
               Cd * ∑ i ∈ Finset.range (j + 2 + 1),
                   ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                       (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-                + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+                + Cd * (∑ i ∈ Finset.range (j + 2 + 1),
                     (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                       + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                   * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) ∧
@@ -775,7 +775,7 @@ theorem lieDerivDiff_covFdB_section_split
               Cd * ∑ i ∈ Finset.range (j + 2 + 1),
                   ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                       (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-                + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+                + Cd * (∑ i ∈ Finset.range (j + 2 + 1),
                     (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                       + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                   * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) :=
@@ -802,7 +802,7 @@ Lie-summand difference `lieDerivRetagG0 g₀ g_bg g₁ − lieDerivRetagG0 g₀ 
 ```
 rfns(∇^j (lieDerivRetagG0 g₁ − lieDerivRetagG0 g₂))(x)
   ≤ Λ² · ∑_{i ≤ j+2} rfns(∇^i w)(x)
-    + (∑_{i ≤ j+2} (rfns(∇^i T₁)(x) + rfns(∇^i T₂)(x))) · ‖(T₁ − T₂).toHs a‖²,
+    + Λ² · (∑_{i ≤ j+2} (rfns(∇^i T₁)(x) + rfns(∇^i T₂)(x))) · ‖(T₁ − T₂).toHs a‖²,
 ```
 with `w := realizeSymmCcTensor g₀ (T₁ − T₂)`.
 
@@ -845,10 +845,10 @@ It is **proven by composition** over the structural covariant Faà-di-Bruno spli
 `lieDerivDiff_covFdB_section_split` (the same assembly as the curvature half): that split provides a
 uniform difference-arm constant `Cd` and, per perturbation, the structural identity
 `∇^j(Lie-diff) = Adiff + Cross` with the difference-arm grid bound `rfns(Adiff) ≤ Cd · ∑ rfns(∇^i w)`
-and the cross-piece fixed-pair bound `rfns(Cross) ≤ (1/2)·(∑ fixed-pair)·‖(T₁ − T₂).toHs a‖²`.  The
+and the cross-piece fixed-pair bound `rfns(Cross) ≤ Cd·(∑ fixed-pair)·‖(T₁ − T₂).toHs a‖²`.  The
 two-product follows by the squared-fibre-norm subadditivity `riemannianFiberNormSq_add_le` (factor `2`)
-over the identity, with the coefficient `Λ = √(2 Cd)` and the cross-piece `1/2` cancelling the factor
-`2` into the coefficient-`1` cross arm.  Consumers transitively depend on `sorryAx` only through the
+over the identity, with the coefficient `Λ = √(4 Cd)` carrying both the accumulated difference arms
+and the accumulated fixed-pair cross arms (`Λ²` on each arm).  Consumers transitively depend on `sorryAx` only through the
 structural split posit, which carries the genuine deep covariant-gauge-jet content — the covariant
 Faà-di-Bruno expansion of the sealed Lie/`deTurckVF` nonlinearity, with NO pointwise-`C^{>2}`-jet
 claim, NO spectral-nonlinearity, and NO Weyl dependence. -/
@@ -872,7 +872,7 @@ theorem lieDerivDiff_covFdB_integrated_twoProduct_l2NormSq_le
             Λ ^ 2 * ∑ i ∈ Finset.range (j + 2 + 1),
                 ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                     (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-              + (∑ i ∈ Finset.range (j + 2 + 1),
+              + Λ ^ 2 * (∑ i ∈ Finset.range (j + 2 + 1),
                   (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                     + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 := by
@@ -883,8 +883,8 @@ theorem lieDerivDiff_covFdB_integrated_twoProduct_l2NormSq_le
   obtain ⟨Cd, hCd_nn, hsplit⟩ :=
     lieDerivDiff_covFdB_section_split (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1 j
   -- The two-product coefficient `Λ = √(4 Cd)`: each piece's integrated two-arm bound carries
-  -- `Cd·W + (1/4)·F·D²`, so the `L²`-norm subadditivity factor `2` over `Adiff + Cross` accumulates the
-  -- difference arms into `Λ² = 4 Cd` and the two `(1/4)·F·D²` fixed-pair pieces into the coefficient-`1`
+  -- `Cd·W + Cd·F·D²`, so the `L²`-norm subadditivity factor `2` over `Adiff + Cross` accumulates the
+  -- difference arms into `Λ² = 4 Cd` and the two `Cd·F·D²` fixed-pair pieces into the `Λ²`-coefficient
   -- cross arm.
   refine ⟨Real.sqrt (4 * Cd), Real.sqrt_nonneg _,
     fun T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ => ?_⟩
@@ -902,7 +902,7 @@ theorem lieDerivDiff_covFdB_integrated_twoProduct_l2NormSq_le
     have hCn : 0 ≤ ‖Cross‖ := norm_nonneg _
     nlinarith [htri, hAn, hCn, norm_nonneg (Adiff + Cross), sq_nonneg (‖Adiff‖ - ‖Cross‖)]
   -- `Λ² = (√(4 Cd))² = 4 Cd`: the subadditivity factor `2` over the two `Cd·W` difference arms gives
-  -- `4 Cd·W`, and the two `(1/4)·F·D²` fixed-pair pieces sum (after the factor `2`) to `1·F·D²`.
+  -- `4 Cd·W`, and the two `Cd·F·D²` fixed-pair pieces sum (after the factor `2`) to `4 Cd·F·D² = Λ²·F·D²`.
   rw [show Real.sqrt (4 * Cd) ^ 2 = 4 * Cd from Real.sq_sqrt (by positivity)]
   nlinarith [hsplit_norm, hAdiff, hCross]
 
@@ -981,7 +981,8 @@ theorem exists_lieDerivDiff_faaDiBruno_moserTame_allOrder_l2Norm_le
                   * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ := by
   classical
   -- The deep covariant-gauge-jet posit: a per-order coefficient sup `Λ j` with the **integrated**
-  -- Hamilton/Moser two-product domination `‖∇^j(Lie-diff)‖² ≤ Λj²·∑‖∇^i w‖² + (∑(‖∇^i T₁‖²+‖∇^i T₂‖²))·D²`.
+  -- Hamilton/Moser two-product domination
+  -- `‖∇^j(Lie-diff)‖² ≤ Λj²·∑‖∇^i w‖² + Λj²·(∑(‖∇^i T₁‖²+‖∇^i T₂‖²))·D²`.
   choose Λ hΛ_nn hΛ using
     fun j => lieDerivDiff_covFdB_integrated_twoProduct_l2NormSq_le (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1 j
   -- The per-order realize-difference covariant `L²`-jet constant: `‖∇^i realizeSymm S‖ ≤ Cr i · ∑_{l≤i}
@@ -989,11 +990,11 @@ theorem exists_lieDerivDiff_faaDiBruno_moserTame_allOrder_l2Norm_le
   choose Cr hCr_nn hCr using
     fun i => realizeSymm_iteratedCovGrad_l2Norm_le_jetSum (I := I) g₀ i
   -- The combined per-order constant: `Λ j · (∑_{i ≤ j+2} Cr i)` (folding the realize-jet constant on
-  -- the difference arm) plus `1` (dominating the cross-term coefficient `1`).
-  refine ⟨fun j => Λ j * (∑ i ∈ Finset.range (j + 2 + 1), Cr i) + 1, fun j => ?_, ?_⟩
+  -- the difference arm) plus `Λ j` (dominating the cross-term coefficient `Λ j`).
+  refine ⟨fun j => Λ j * (∑ i ∈ Finset.range (j + 2 + 1), Cr i) + Λ j, fun j => ?_, ?_⟩
   · have : 0 ≤ Λ j * ∑ i ∈ Finset.range (j + 2 + 1), Cr i :=
       mul_nonneg (hΛ_nn j) (Finset.sum_nonneg fun i _ => hCr_nn i)
-    linarith
+    linarith [hΛ_nn j]
   intro T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j
   set D₀ : ℝ := ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
     with hD₀_def
@@ -1017,7 +1018,7 @@ theorem exists_lieDerivDiff_faaDiBruno_moserTame_allOrder_l2Norm_le
         ≤ Λ j * ∑ i ∈ Finset.range (j + 2 + 1),
               ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                 (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖
-          + D₀ * ∑ i ∈ Finset.range (j + 2 + 1),
+          + (Λ j * D₀) * ∑ i ∈ Finset.range (j + 2 + 1),
               (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
                 + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖) := by
     refine twoArm_le_of_sq_le (j + 2 + 1)
@@ -1028,9 +1029,9 @@ theorem exists_lieDerivDiff_faaDiBruno_moserTame_allOrder_l2Norm_le
       (fun i => norm_nonneg _) (fun i => norm_nonneg _) (fun i => norm_nonneg _)
       (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
         (lieDerivRetagG0 (I := I) g₀ g_bg g₁ - lieDerivRetagG0 (I := I) g₀ g_bg g₂)‖)
-      (Λ j) D₀ (norm_nonneg _) (hΛ_nn j) hD₀_nn ?_
+      (Λ j) (Λ j * D₀) (norm_nonneg _) (hΛ_nn j) (mul_nonneg (hΛ_nn j) hD₀_nn) ?_
     rw [hD₀_def]
-    exact hΛ j T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂
+    exact (hΛ j T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂).trans (le_of_eq (by ring))
   -- The realize-difference covariant `L²`-jet bound on the regular arm: each `‖∇^i realizeSymm
   -- (T₁ − T₂)‖ ≤ Cr i · ∑_{l ≤ i} ‖∇^l (T₁ − T₂)‖ ≤ Cr i · diffSum` (since `i ≤ j + 2`).
   have hrealize_termwise : ∀ i ∈ Finset.range (j + 2 + 1),
@@ -1069,26 +1070,30 @@ theorem exists_lieDerivDiff_faaDiBruno_moserTame_allOrder_l2Norm_le
       ≤ Λ j * ∑ i ∈ Finset.range (j + 2 + 1),
             ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
               (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖
-          + D₀ * crossSum := by rw [hcrossSum_def]; exact hlift
-    _ ≤ Λ j * ((∑ i ∈ Finset.range (j + 2 + 1), Cr i) * diffSum) + D₀ * crossSum :=
+          + (Λ j * D₀) * crossSum := by rw [hcrossSum_def]; exact hlift
+    _ ≤ Λ j * ((∑ i ∈ Finset.range (j + 2 + 1), Cr i) * diffSum) + (Λ j * D₀) * crossSum :=
         add_le_add (mul_le_mul_of_nonneg_left hrealize_sum (hΛ_nn j)) (le_refl _)
-    _ ≤ (Λ j * (∑ i ∈ Finset.range (j + 2 + 1), Cr i) + 1) * (D₀ + diffSum)
-          + (Λ j * (∑ i ∈ Finset.range (j + 2 + 1), Cr i) + 1) * crossSum * D₀ := by
+    _ ≤ (Λ j * (∑ i ∈ Finset.range (j + 2 + 1), Cr i) + Λ j) * (D₀ + diffSum)
+          + (Λ j * (∑ i ∈ Finset.range (j + 2 + 1), Cr i) + Λ j) * crossSum * D₀ := by
         set C : ℝ := Λ j * (∑ i ∈ Finset.range (j + 2 + 1), Cr i) with hC_def
         have hC_nn : 0 ≤ C := mul_nonneg (hΛ_nn j) hCr_sum_nn
         have h1 : Λ j * ((∑ i ∈ Finset.range (j + 2 + 1), Cr i) * diffSum) = C * diffSum := by
           rw [hC_def]; ring
         rw [h1]
-        have he1 : C * diffSum ≤ (C + 1) * (D₀ + diffSum) := by
-          have : (C + 1) * (D₀ + diffSum) = C * diffSum + (C * D₀ + (D₀ + diffSum)) := by ring
-          rw [this]
-          have : 0 ≤ C * D₀ + (D₀ + diffSum) := by positivity
+        have he1 : C * diffSum ≤ (C + Λ j) * (D₀ + diffSum) := by
+          have hexp : (C + Λ j) * (D₀ + diffSum)
+              = C * diffSum + (C * D₀ + Λ j * (D₀ + diffSum)) := by ring
+          rw [hexp]
+          have : 0 ≤ C * D₀ + Λ j * (D₀ + diffSum) :=
+            add_nonneg (mul_nonneg hC_nn hD₀_nn)
+              (mul_nonneg (hΛ_nn j) (add_nonneg hD₀_nn hdiffSum_nn))
           linarith
-        have he2 : D₀ * crossSum ≤ (C + 1) * crossSum * D₀ := by
-          have hCS_nn : 0 ≤ crossSum := hcrossSum_nn
-          have : (C + 1) * crossSum * D₀ = D₀ * crossSum + (C * crossSum * D₀) := by ring
-          rw [this]
-          have : 0 ≤ C * crossSum * D₀ := by positivity
+        have he2 : (Λ j * D₀) * crossSum ≤ (C + Λ j) * crossSum * D₀ := by
+          have hexp : (C + Λ j) * crossSum * D₀
+              = (Λ j * D₀) * crossSum + C * crossSum * D₀ := by ring
+          rw [hexp]
+          have : 0 ≤ C * crossSum * D₀ :=
+            mul_nonneg (mul_nonneg hC_nn hcrossSum_nn) hD₀_nn
           linarith
         linarith [he1, he2]
 

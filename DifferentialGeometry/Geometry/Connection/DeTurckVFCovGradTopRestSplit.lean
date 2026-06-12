@@ -44,7 +44,8 @@ rank-reducing contraction and the two-section bilinear-product grid (the high de
 either factor, folded with the fixed factor sup and the metric-built `≤2`-jet coefficient into the
 family-uniform `Cd`); the **`Rest`** part keeps the top coefficient jet on the *fixed pair* `T₁, T₂`
 against the difference's order-`a` chart-Sobolev `C⁰` mass (the supercritical embedding `ha`), with the
-per-recombination share `(1/8)` landing the consumer's `(1/4)`.
+`(g₀, a, j)`-dependent cross coefficient `Cd` (a fixed universal cross constant is refuted by the `T²`
+volume-scaling family — the embedding constant blows up as `vol(M) → 0`).
 
 Unlike the curvature half — order-zero-immune (Palatini: `Γ(g₁) = Γ(g₂)` near `x` forces
 `Ric(g₁) = Ric(g₂)` near `x`) — the Lie summand depends on the metric at **order zero** (the trace
@@ -104,10 +105,19 @@ metrics `g₁, g₂` of `T₁, T₂`, the squared metric `L²` norm of the order
 `diff` is dominated by the **integrated Hamilton/Moser two-arm sum**
 ```
 ‖∇^j diff‖² ≤ Cd · ∑_{i ≤ j+2} ‖∇^i w‖²
-            + (1/4) · (∑_{i ≤ j+2} (‖∇^i T₁‖² + ‖∇^i T₂‖²)) · ‖(T₁ − T₂).toHs a‖²,
+            + Cd · (∑_{i ≤ j+2} (‖∇^i T₁‖² + ‖∇^i T₂‖²)) · ‖(T₁ − T₂).toHs a‖²,
 ```
 where `w := realizeSymmCcTensor g₀ (T₁ − T₂)` and `‖·‖` is the metric `L²` (semi)norm
 (`‖S‖² = ∫ rfns(S) dμ`); the order-`0` jet `‖w‖²` is included.
+
+**Why the cross arm carries the `(g₀, a, j)`-dependent `Cd`, not a fixed universal constant.**  An
+earlier shape with a UNIVERSAL `(1/4)` cross-arm coefficient was refuted by the `T²` volume-scaling
+family (see `PROVE_REFUTED.md`, "fixed (1/4) cross-arm"): the `H^a → C⁰` embedding constant hiding in
+the boundary FdB cell (the value-level difference factor against the fixed pair's `(j+2)`-jet) is
+`g₀`-dependent and unbounded as `vol(M) → 0`, so no `g₀`-uniform cross coefficient can hold.  The
+corrected shape puts the statement's `(g₀, a, j)`-dependent constant `Cd` on the cross arm, mirroring
+the PROVEN sibling `ricciLinearSection_covGrad_twoArm_l2Norm_le`
+(`SegmentMetricCurvatureDifferenceCovJet.lean`).
 
 **Why INTEGRATED, not pointwise.**  An earlier *pointwise* `rfns` per-`x` top/rest form (a `∇^j diff(x)
 = Top + Rest` split with `rfns(Top)(x) ≤ Cd · ∑ rfns(∇^i w)(x)`) is **false** for the middle terms of
@@ -132,7 +142,7 @@ independently varying gauge fields, whose `∇^j` covariant-Leibniz expansion is
 `exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le`
 (`Analysis/Spectral/Tensor/CovGrad/GagliardoNirenbergProductTwoArm.lean`): the difference-arm `Cd ·
 ∑ ‖∇^i w‖²` collects the high derivative on the difference factor `w` (with the fixed factor's `≤2`-jet
-sup folded into `Cd`), and the cross arm `(1/4) · (∑ (‖∇^i T₁‖² + ‖∇^i T₂‖²)) · ‖(T₁ − T₂).toHs a‖²`
+sup folded into `Cd`), and the cross arm `Cd · (∑ (‖∇^i T₁‖² + ‖∇^i T₂‖²)) · ‖(T₁ − T₂).toHs a‖²`
 keeps the top coefficient jet on the *fixed pair* `T₁, T₂` in `L²` against the difference's order-`a`
 chart-Sobolev `C⁰`/`L^∞` mass (the supercritical embedding `ha`).
 
@@ -165,7 +175,7 @@ theorem symLoweredDeTurckVF_iteratedCovGrad_topRest_split (g₀ g_bg : SmoothRie
             Cd * ∑ i ∈ Finset.range (j + 2 + 1),
                 ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                     (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-              + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+              + Cd * (∑ i ∈ Finset.range (j + 2 + 1),
                   (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                     + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=

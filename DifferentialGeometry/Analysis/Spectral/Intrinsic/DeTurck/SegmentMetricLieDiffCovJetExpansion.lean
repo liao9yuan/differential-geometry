@@ -83,7 +83,9 @@ theorem lieDerivRetagG0_sub_eq_symLoweredRetagG0_sub
 The chart-free, Cartan-route discharge of the sealed Lie difference's integrated covariant two-arm
 bound: the leaf-shaped integrated `L²` bound of the `g₀`-retagged Lie-summand difference
 `diff := lieDerivRetagG0 g₀ g_bg g₁ − lieDerivRetagG0 g₀ g_bg g₂`, with the **0-jet-inclusive** `w`-jet
-difference arm `w := realizeSymmCcTensor g₀ (T₁ − T₂)` and the fixed-pair `(1/4)`-cross arm.
+difference arm `w := realizeSymmCcTensor g₀ (T₁ − T₂)` and the fixed-pair `Cd`-cross arm (the fixed
+universal `(1/4)` cross coefficient was refuted by the `T²` volume-scaling family, see
+`PROVE_REFUTED.md`).
 
 For an anchor `g₀`, a flow background `g_bg`, an order `a`, a supercriticality hypothesis `ha`, a
 uniform `H^{a+2}`-size bound `B ≥ 0`, fibre-smallness `δ < 1/2`, and **each gradient order `j`**,
@@ -93,7 +95,7 @@ such that for any two `g₀`-fibre-small perturbations `T₁, T₂` with `H^{a+2
 realized metrics `g₁, g₂` of `T₁, T₂`,
 ```
 ‖∇^j diff‖² ≤ Cd · ∑_{i ≤ j+2} ‖∇^i w‖²
-            + (1/4) · (∑_{i ≤ j+2} (‖∇^i T₁‖² + ‖∇^i T₂‖²)) · ‖(T₁ − T₂).toHs a‖².
+            + Cd · (∑_{i ≤ j+2} (‖∇^i T₁‖² + ‖∇^i T₂‖²)) · ‖(T₁ − T₂).toHs a‖².
 ```
 
 **Derivation.**  Rewrite the sealed Lie difference into the symmetrised-lowered DeTurck-field
@@ -131,7 +133,7 @@ theorem lieDerivDiff_intrinsic_covFdB_section_expansion (g₀ g_bg : SmoothRiema
             Cd * ∑ i ∈ Finset.range (j + 2 + 1),
                 ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                     (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-              + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+              + Cd * (∑ i ∈ Finset.range (j + 2 + 1),
                   (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                     + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 := by

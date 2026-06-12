@@ -95,7 +95,7 @@ cross piece keeping the top coefficient jet on the fixed pair `T₁, T₂` again
 chart-Sobolev `C⁰` mass:
 ```
 rfns(∇^j (lieCrossSection))(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x)
-                               + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D².
+                               + Cd(j)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D².
 ```
 
 This is the curvature-trace covariant-Leibniz reduction of the quadratic Cross `(0, 2)`-section, its
@@ -138,7 +138,7 @@ theorem lieCrossSection_iteratedCovGrad_connLevel_rfns_le
             Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                 ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                     (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-              + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+              + Cd j * (∑ i ∈ Finset.range (j + 2 + 1),
                   (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                     + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 := by

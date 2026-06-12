@@ -133,7 +133,7 @@ difference arm is the **0-jet-inclusive** order-`≤ j+2` covariant jet sum of t
 difference factor `w := realizeSymmCcTensor g₀ (T₁ − T₂)`:
 ```
 rfns(∇^j (lieLinearSection))(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x)
-                                + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D².
+                                + Cd(j)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D².
 ```
 
 The Lie field `𝓛_{W(g)} g` has the **same intrinsic order-`≤2` structure** as the curvature half, so the linear part's derivative jets ride, via the `g₀`-lowered Koszul form, on the
@@ -174,7 +174,7 @@ theorem lieLinearSection_iteratedCovGrad_connLevel_rfns_le
             Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                 ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                     (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-              + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+              + Cd j * (∑ i ∈ Finset.range (j + 2 + 1),
                   (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                     + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 := by
@@ -207,8 +207,8 @@ Hamilton/Moser two-arm bound whose difference arm is the **0-jet-inclusive** ord
 difference factor `w := realizeSymmCcTensor g₀ (T₁ − T₂)`:
 ```
 lieDerivRetagG0 g₁ − lieDerivRetagG0 g₂ = L + C,
-rfns(∇^j L)(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x) + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
-rfns(∇^j C)(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x) + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
+rfns(∇^j L)(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x) + Cd(j)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
+rfns(∇^j C)(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x) + Cd(j)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
 ```
 with `D := ‖(T₁ − T₂).toHs a‖`.
 
@@ -262,7 +262,7 @@ theorem exists_lieDerivDiff_connLevel_split
               Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                   ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                       (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-                + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+                + Cd j * (∑ i ∈ Finset.range (j + 2 + 1),
                     (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                       + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                   * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) ∧
@@ -271,7 +271,7 @@ theorem exists_lieDerivDiff_connLevel_split
               Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                   ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                       (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
-                + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
+                + Cd j * (∑ i ∈ Finset.range (j + 2 + 1),
                     (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                       + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                   * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) := by
@@ -295,16 +295,28 @@ theorem exists_lieDerivDiff_connLevel_split
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
             (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2 :=
       Finset.sum_nonneg fun p _ => sq_nonneg _
-    gcongr
-    exact le_max_left _ _
+    have hSTnn : (0 : ℝ) ≤ ∑ i ∈ Finset.range (j + 2 + 1),
+        (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
+          + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2) :=
+      Finset.sum_nonneg fun i _ => add_nonneg (sq_nonneg _) (sq_nonneg _)
+    exact add_le_add
+      (mul_le_mul_of_nonneg_right (le_max_left _ _) hSRnn)
+      (mul_le_mul_of_nonneg_right
+        (mul_le_mul_of_nonneg_right (le_max_left _ _) hSTnn) (sq_nonneg _))
   · -- Cross arm: widen per order `CdC j → max (CdL j) (CdC j)`.
     refine le_trans (hC T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 j) ?_
     have hSRnn : (0 : ℝ) ≤ ∑ i ∈ Finset.range (j + 2 + 1),
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
             (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2 :=
       Finset.sum_nonneg fun p _ => sq_nonneg _
-    gcongr
-    exact le_max_right _ _
+    have hSTnn : (0 : ℝ) ≤ ∑ i ∈ Finset.range (j + 2 + 1),
+        (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
+          + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2) :=
+      Finset.sum_nonneg fun i _ => add_nonneg (sq_nonneg _) (sq_nonneg _)
+    exact add_le_add
+      (mul_le_mul_of_nonneg_right (le_max_right _ _) hSRnn)
+      (mul_le_mul_of_nonneg_right
+        (mul_le_mul_of_nonneg_right (le_max_right _ _) hSTnn) (sq_nonneg _))
 
 end DeTurck
 end IntrinsicSpectral
