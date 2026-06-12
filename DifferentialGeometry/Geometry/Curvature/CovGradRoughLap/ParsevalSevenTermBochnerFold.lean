@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.BracketDivergence
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FrozenFramePureRCurvatureTower
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RicciTraceCarrier
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.NablaRicciTraceCarrier
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.NablaRicciTraceIBP
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemainderFrameSumBridge
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.ParsevalLaplacianSlot0Expansion
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.ParsevalFrameField
@@ -3471,8 +3472,206 @@ private lemma nablaRicTrace_perB_diffRicci_IBP
         (∑ a : Fin N,
           ∫ x, bochnerGroup2Residue (I := I) (M := M) g s S (V a) (V b)
               ⟨fun y : M => V a y, hV a⟩ x
-            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) :=
-  sorry
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
+  classical
+  -- Per-`a` integrability of the diagonal differentiated-curvature trace cross pairing.
+  have hintD : ∀ a : Fin N, Integrable
+      (fun x : M => tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel
+          (tensor0SAsRS (I := I) (M := M) x
+            (nablaTensor0SCurv (I := I) g s ⟨fun b => V a b, hV a⟩ ⟨fun b => V a b, hV a⟩
+              ⟨fun y => V b y, hV b⟩
+              (fun y : M =>
+                (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
+                  (unitZeroSec (I := I) (M := M) y)) x)))
+        (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)))
+      (riemannianVolumeMeasure (I := I) (M := M) g) := by
+    intro a
+    refine (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+      (nablaDiffCurvTraceCc (I := I) (M := M) g s S (hV a) (hV b))
+      (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))).congr
+      (Filter.Eventually.of_forall (fun x => ?_))
+    simp only [SmoothCcTensor.toFun_apply,
+      nablaDiffCurvTraceCc_toSection_eq_tensor0SAsRS_nablaTensor0SCurv
+        (I := I) (M := M) g s S (hV a) (hV b) x,
+      bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S (hV b) x]
+  -- The `ν₁`-arm read of the integrand (sorry-free): `∫ tripleSum = − ∑_a ∫ ⟨nablaTensor0SCurv-diag,⟩`.
+  have hLHS : (∫ x, (∑ k : Fin s, ∑ J : Fin s → Fin (Module.finrank ℝ E),
+          (∑ m : Fin (Module.finrank ℝ E),
+            (nablaRicci (I := I) g
+                (fun c => smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g x m x) c)
+                (fun c => (⟨fun y => V b y, hV b⟩ :
+                  Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) c)
+                (fun c => smoothExtensionTangent (I := I) x
+                  (smoothOrthoFrame (I := I) g x (J k) x) c) x -
+              nablaRicci (I := I) g
+                (fun c => smoothExtensionTangent (I := I) x
+                  (smoothOrthoFrame (I := I) g x (J k) x) c)
+                (fun c => smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g x m x) c)
+                (fun c => (⟨fun y => V b y, hV b⟩ :
+                  Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) c) x) *
+            Tensor0SSpace.toModel
+              ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from S.toSection x)
+                (unitZeroSec (I := I) (M := M) x))
+              (Function.update (fun j => smoothOrthoFrame (I := I) g x (J j) x) k
+                (smoothOrthoFrame (I := I) g x m x))) *
+          Tensor0SSpace.toModel (gradCurry0 (I := I) (M := M) g s S x (V b x))
+            (fun j => smoothOrthoFrame (I := I) g x (J j) x))
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+      - ∑ a : Fin N,
+          ∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+              (TensorRSSpace.toModel
+                (tensor0SAsRS (I := I) (M := M) x
+                  (nablaTensor0SCurv (I := I) g s ⟨fun b => V a b, hV a⟩ ⟨fun b => V a b, hV a⟩
+                    ⟨fun y => V b y, hV b⟩
+                    (fun y : M =>
+                      (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
+                        (unitZeroSec (I := I) (M := M) y)) x)))
+              (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
+    rw [← MeasureTheory.integral_finset_sum Finset.univ (fun a _ => hintD a),
+      ← MeasureTheory.integral_neg]
+    refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+    have hpar := parsevalDiagDiffCurv_pair_eq_nablaRicci_tripleSum
+      (I := I) (M := M) g s S V hV hPar b x
+    simp only []
+    linarith [hpar]
+  rw [hLHS]
+  -- Rewrite each `⟨nablaTensor0SCurv-diag,⟩` as `⟨group3IiiIv,⟩ + ⟨group2,⟩ − ⟨group1,⟩` (carrier split).
+  have hcarrier : ∀ a : Fin N,
+      (∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+            (TensorRSSpace.toModel
+              (tensor0SAsRS (I := I) (M := M) x
+                (nablaTensor0SCurv (I := I) g s ⟨fun b => V a b, hV a⟩ ⟨fun b => V a b, hV a⟩
+                  ⟨fun y => V b y, hV b⟩
+                  (fun y : M =>
+                    (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
+                      (unitZeroSec (I := I) (M := M) y)) x)))
+            (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+        (∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+              (TensorRSSpace.toModel (bochnerGroupElt3IiiIv (I := I) (M := M) g s S (V a) (V b) x))
+              (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g))
+          + (∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+              (TensorRSSpace.toModel (bochnerGroupElt2 (I := I) (M := M) g s S (V a) (V b) x))
+              (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g))
+          - (∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+              (TensorRSSpace.toModel (bochnerGroupElt1 (I := I) (M := M) g s S (V a) (V b) x))
+              (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
+    intro a
+    have hpt : ∀ x : M,
+        tensorInnerPointwise (I := I) (M := M) g 0 s x
+            (TensorRSSpace.toModel
+              (tensor0SAsRS (I := I) (M := M) x
+                (nablaTensor0SCurv (I := I) g s ⟨fun b => V a b, hV a⟩ ⟨fun b => V a b, hV a⟩
+                  ⟨fun y => V b y, hV b⟩
+                  (fun y : M =>
+                    (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
+                      (unitZeroSec (I := I) (M := M) y)) x)))
+            (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)) =
+          tensorInnerPointwise (I := I) (M := M) g 0 s x
+              (TensorRSSpace.toModel (bochnerGroupElt3IiiIv (I := I) (M := M) g s S (V a) (V b) x))
+              (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+            + tensorInnerPointwise (I := I) (M := M) g 0 s x
+              (TensorRSSpace.toModel (bochnerGroupElt2 (I := I) (M := M) g s S (V a) (V b) x))
+              (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+            - tensorInnerPointwise (I := I) (M := M) g 0 s x
+              (TensorRSSpace.toModel (bochnerGroupElt1 (I := I) (M := M) g s S (V a) (V b) x))
+              (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)) := by
+      intro x
+      have hsplit : tensor0SAsRS (I := I) (M := M) x
+            (nablaTensor0SCurv (I := I) g s ⟨fun b => V a b, hV a⟩ ⟨fun b => V a b, hV a⟩
+              ⟨fun y => V b y, hV b⟩
+              (fun y : M =>
+                (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
+                  (unitZeroSec (I := I) (M := M) y)) x) =
+          bochnerGroupElt3IiiIv (I := I) (M := M) g s S (V a) (V b) x +
+            bochnerGroupElt2 (I := I) (M := M) g s S (V a) (V b) x -
+            bochnerGroupElt1 (I := I) (M := M) g s S (V a) (V b) x := by
+        rw [← nablaDiffCurvTraceCc_toSection_eq_tensor0SAsRS_nablaTensor0SCurv
+          (I := I) (M := M) g s S (hV a) (hV b) x]
+        exact nablaDiffCurvTraceCc_toSection_eq (I := I) (M := M) g s S (hV a) (hV b) x
+      rw [hsplit]
+      rw [show (bochnerGroupElt3IiiIv (I := I) (M := M) g s S (V a) (V b) x +
+              bochnerGroupElt2 (I := I) (M := M) g s S (V a) (V b) x -
+              bochnerGroupElt1 (I := I) (M := M) g s S (V a) (V b) x) =
+            (bochnerGroupElt3IiiIv (I := I) (M := M) g s S (V a) (V b) x +
+              bochnerGroupElt2 (I := I) (M := M) g s S (V a) (V b) x) +
+              (-1 : ℝ) • bochnerGroupElt1 (I := I) (M := M) g s S (V a) (V b) x from by
+        rw [neg_one_smul]; abel]
+      rw [TensorRSSpace.toModel_add, TensorRSSpace.toModel_add, TensorRSSpace.toModel_smul,
+        tensorInnerPointwise_add_left, tensorInnerPointwise_add_left,
+        tensorInnerPointwise_smul_left]
+      ring
+    have hI3 : Integrable
+        (fun x : M => tensorInnerPointwise (I := I) (M := M) g 0 s x
+          (TensorRSSpace.toModel (bochnerGroupElt3IiiIv (I := I) (M := M) g s S (V a) (V b) x))
+          (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)))
+        (riemannianVolumeMeasure (I := I) (M := M) g) :=
+      (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+        (bochnerGroupElt3IiiIvCc (I := I) (M := M) g s S (hV a) (hV b))
+        (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))).congr
+        (Filter.Eventually.of_forall (fun x => by
+          simp only [SmoothCcTensor.toFun_apply,
+            bochnerGroupElt3IiiIvCc_toSection_eq (I := I) (M := M) g s S (hV a) (hV b) x,
+            bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S (hV b) x]))
+    have hI2 : Integrable
+        (fun x : M => tensorInnerPointwise (I := I) (M := M) g 0 s x
+          (TensorRSSpace.toModel (bochnerGroupElt2 (I := I) (M := M) g s S (V a) (V b) x))
+          (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)))
+        (riemannianVolumeMeasure (I := I) (M := M) g) :=
+      (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+        (bochnerGroupElt2Cc (I := I) (M := M) g s S (hV a) (hV b))
+        (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))).congr
+        (Filter.Eventually.of_forall (fun x => by
+          simp only [SmoothCcTensor.toFun_apply,
+            bochnerGroupElt2Cc_toSection_eq (I := I) (M := M) g s S (hV a) (hV b) x,
+            bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S (hV b) x]))
+    have hI1 : Integrable
+        (fun x : M => tensorInnerPointwise (I := I) (M := M) g 0 s x
+          (TensorRSSpace.toModel (bochnerGroupElt1 (I := I) (M := M) g s S (V a) (V b) x))
+          (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)))
+        (riemannianVolumeMeasure (I := I) (M := M) g) :=
+      (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+        (bochnerGroupElt1Cc (I := I) (M := M) g s S (hV a) (hV b))
+        (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))).congr
+        (Filter.Eventually.of_forall (fun x => by
+          simp only [SmoothCcTensor.toFun_apply,
+            bochnerGroupElt1Cc_toSection_eq (I := I) (M := M) g s S (hV a) (hV b) x,
+            bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S (hV b) x]))
+    have hI32 : Integrable
+        (fun x : M => tensorInnerPointwise (I := I) (M := M) g 0 s x
+            (TensorRSSpace.toModel (bochnerGroupElt3IiiIv (I := I) (M := M) g s S (V a) (V b) x))
+            (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+          + tensorInnerPointwise (I := I) (M := M) g 0 s x
+            (TensorRSSpace.toModel (bochnerGroupElt2 (I := I) (M := M) g s S (V a) (V b) x))
+            (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)))
+        (riemannianVolumeMeasure (I := I) (M := M) g) := hI3.add hI2
+    rw [MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall hpt)]
+    rw [MeasureTheory.integral_sub hI32 hI1, MeasureTheory.integral_add hI3 hI2]
+  rw [Finset.sum_congr rfl (fun a _ => hcarrier a)]
+  -- Distribute the finite sum over the three integral families.
+  rw [Finset.sum_sub_distrib, Finset.sum_add_distrib]
+  -- The group-`3` tension-field nullity and the group-`2` IBP collapse the result to `group1 − residue`.
+  -- The per-`b` tension-field curvature-divergence nullity, supplied by the upstream
+  -- differentiated-Ricci covariant integration-by-parts primitive (`NablaRicciTraceIBP`): the
+  -- `bochnerGroupElt3IiiIv` / `bochnerGradSlot0` carriers are the definitional reads of the
+  -- frame-free `riemannOp` / `tensor0S_curry` currency the primitive is stated in.
+  have hgroup3 :
+      (∑ a : Fin N,
+          ∫ x, tensorInnerPointwise (I := I) (M := M) g 0 s x
+              (TensorRSSpace.toModel (bochnerGroupElt3IiiIv (I := I) (M := M) g s S (V a) (V b) x))
+              (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) = 0 := by
+    simp only [bochnerGroupElt3IiiIv, bochnerGradSlot0]
+    exact parsevalFrameSum_tensionFieldCurvatureDivergence_perB_eq_zero
+      (I := I) (M := M) g s S V hV hPar b
+  rw [hgroup3]
+  rw [bochnerGroupElt2_perB_integral_eq_residueSum (I := I) (M := M) g s S V hV b]
+  ring
 
 set_option linter.unusedSectionVars false in
 /-- **The per-direction differentiated-curvature covariant integration by parts (the genuine analytic
