@@ -7,6 +7,7 @@ import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Analysis.Calculus.ContDiff.Bounds
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MapConvergence
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -1086,6 +1087,41 @@ theorem exists_chart_engineInput
   · -- χ = 1 on EK₀
     intro y hy
     exact hχ1.self_of_nhdsSet _ ⟨y, hy, rfl⟩
+
+/-- **Per-chart `C^∞` convergence of the bump-extended metric components.**  Feeds
+the `exists_chart_engineInput` output to `exists_cInf_subseq`: a subsequence `φ`,
+a `ContDiff ⊤` limit `Φinf`, a bump `χ` (`= 1` on the chart image of `K₀`), with
+the bump-extended components converging `C^∞` on every compact. -/
+theorem exists_chart_cInfConv
+    (gRef : SmoothRiemannianMetric I M)
+    (gSeq : ℕ → SmoothRiemannianMetric I M)
+    (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
+      metricCovDerivNorm (I := I) q (gSeq k) gRef z ≤ C)
+    (x₀ : M)
+    (V : Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    {K₀ : Set M} (hK₀ : IsCompact K₀) (hK₀chart : K₀ ⊆ (chartAt H x₀).source) :
+    ∃ (φ : ℕ → ℕ) (Φinf : E → Real) (χ : E → Real),
+      StrictMono φ ∧ ContDiff Real (∞ : WithTop ℕ∞) Φinf ∧
+      (∀ y ∈ K₀, χ (extChartAt I x₀ y) = 1) ∧
+      MapCInfConvOnCompacts Set.univ
+        (fun k => fun x : E => χ x *
+          writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gRef
+              (Tensor0SBundle.metricTensorField (I := I) (gSeq (φ k))) 0) w
+                (fun a => V a w)) x) Φinf := by
+  obtain ⟨Φ, χ, hΦcd, hΦbd, hχ1, hΦrel⟩ :=
+    exists_chart_engineInput (I := I) gRef gSeq hbdd x₀ V hK₀ hK₀chart
+  obtain ⟨φ, Φinf, hφ, hΦinf, hconv⟩ :=
+    exists_cInf_subseq Φ hΦcd
+      (fun r K _ => by obtain ⟨M, hM⟩ := hΦbd r; exact ⟨M, fun k x _ => hM k x⟩)
+  refine ⟨φ, Φinf, χ, hφ, hΦinf, hχ1, ?_⟩
+  have hseq : (fun k => fun x : E => χ x *
+      writtenInExtChartAt I 𝓘(Real, Real) x₀
+        (fun w : M => (covDerivOfField (I := I) gRef
+          (Tensor0SBundle.metricTensorField (I := I) (gSeq (φ k))) 0) w
+            (fun a => V a w)) x) = fun k => Φ (φ k) := by
+    funext k; exact (hΦrel (φ k)).symm
+  rw [hseq]; exact hconv
 
 end HCGCompactness
 end DifferentialGeometry
