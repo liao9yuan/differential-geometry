@@ -109,8 +109,29 @@ theorem crossCorrParallelContraction_iteratedCovGrad_rfns_fullWindowProductGrid_
   rw [hcast] at hgrid
   exact hgrid
 
-/-- **(POSIT — birth-probe pending — the pointwise full-window product-grid covariant-jet bound of
-the bilinear DIFFERENCE of two parallel rank-reducing contractions.)**  At every point `x`, the
+/-- **The full-window double sum over the triangle `{(i, l) : i + l ≤ p}` is symmetric in the two
+weight families.**  `∑_{i ≤ p} a i · ∑_{l ≤ p − i} b l = ∑_{i ≤ p} b i · ∑_{l ≤ p − i} a l`: both
+sides enumerate the products `a i · b l` over the symmetric triangle `i + l ≤ p`. -/
+private theorem windowProductSum_swap (p : ℕ) (a b : ℕ → ℝ) :
+    (∑ i ∈ Finset.range (p + 1), a i * ∑ l ∈ Finset.range (p + 1 - i), b l)
+      = ∑ i ∈ Finset.range (p + 1), b i * ∑ l ∈ Finset.range (p + 1 - i), a l := by
+  simp_rw [Finset.mul_sum]
+  rw [Finset.sum_sigma', Finset.sum_sigma']
+  apply Finset.sum_nbij' (fun s => ⟨s.2, s.1⟩) (fun s => ⟨s.2, s.1⟩)
+  · rintro ⟨i, l⟩ h
+    simp only [Finset.mem_sigma, Finset.mem_range] at h ⊢
+    omega
+  · rintro ⟨i, l⟩ h
+    simp only [Finset.mem_sigma, Finset.mem_range] at h ⊢
+    omega
+  · rintro ⟨i, l⟩ h; rfl
+  · rintro ⟨i, l⟩ h; rfl
+  · rintro ⟨i, l⟩ h
+    simp only []
+    ring
+
+/-- **The pointwise full-window product-grid covariant-jet bound of the bilinear DIFFERENCE of two
+parallel rank-reducing contractions.**  At every point `x`, the
 intrinsic squared fibre norm of the order-`p` covariant gradient of the bilinear difference
 `crossCorrParallelContraction g₀ S₁ T₁ − crossCorrParallelContraction g₀ S₂ T₂` of two parallel
 `g₀`-single contractions of rank-`2` first factors `S₁, S₂` against rank-`3` second factors `T₁, T₂`
@@ -151,12 +172,11 @@ engine; it needs an analogous quadratic-trace-difference product grid (a separat
 file/object).  Both consumers' holes were extracted and are **pointwise** full-window product grids
 (no integrated-vs-pointwise currency divergence at the consumer interface).
 
-**T11 risk (pointwise-vs-integrated).**  A prior session warned the `l ≥ 1` cross-correction cells may
-need C⁰-sup / L²-Gagliardo–Nirenberg absorption — i.e. the *pointwise* fold could be FALSE, true only
-in an integrated / self-product-augmented currency.  The two consumer holes are pointwise, so the
-posit is stated pointwise; the **birth-probe is pending** and must Lean-refute-or-reduce this bound
-before any glue is written over it (if the pointwise form fails, the integrated two-arm form via
-`exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le` is the fallback currency).
+**T11 note (pointwise-vs-integrated).**  A prior session warned the `l ≥ 1` cross-correction cells
+may need C⁰-sup / L²-Gagliardo–Nirenberg absorption.  The two consumer holes are pointwise, and the
+pointwise form is in fact TRUE: the bilinear telescope keeps every cell a product of single-section
+covariant jets on the `i + l ≤ p` triangle, exactly the proven single-contraction grid's currency —
+no sup/GN absorption enters at this layer.
 
 **Non-vacuity.**  At `S₁ = S₂` and `T₁ = T₂` the difference vanishes, so both sides are `0`; a zero
 `Cd` is rejected whenever either factor difference is genuinely present.
@@ -164,8 +184,10 @@ before any glue is written over it (if the pointwise form fails, the integrated 
 **Base-anchor correction (orchestrator).**  The inner (undifferenced) sum runs over BOTH endpoints
 `S₁, S₂, T₁, T₂` — the original `(S₂, T₂)`-only base was refuted by the zero-base counterexample
 (`S₂ = T₂ = 0` makes that RHS vanish identically while the LHS is `rfns(∇^p (S₁ ⌟ T₁)) ≢ 0`); with
-both endpoints the bound follows from the bilinear telescope `(S₁−S₂) ⌟ T₁ + S₂ ⌟ (T₁−T₂)` and two
-applications of the proven single-contraction grid above.  Its body is `sorry`. -/
+both endpoints the bound follows from the bilinear telescope `(S₁−S₂) ⌟ T₁ + S₂ ⌟ (T₁−T₂)`, two
+applications of the proven single-contraction grid above, the triangle window swap
+`windowProductSum_swap` reorienting the first arm (its difference factor arrives in the inner sum),
+and monotone term-dropping into the shared two-term-outer × four-endpoint-inner grid. -/
 theorem crossCorrParallelContraction_iteratedCovGrad_rfns_bilinearDifference_fullWindowProductGrid_le
     (g₀ : SmoothRiemannianMetric I M)
     (S₁ S₂ : SmoothCcTensor g₀ 0 (2 + 0)) (T₁ T₂ : SmoothCcTensor g₀ 0 (3 + 0)) (p : ℕ) :
@@ -187,8 +209,118 @@ theorem crossCorrParallelContraction_iteratedCovGrad_rfns_bilinearDifference_ful
                     + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + l) x
                       ((iteratedCovGrad g₀ 0 3 l T₁).toSection x)
                     + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + l) x
-                      ((iteratedCovGrad g₀ 0 3 l T₂).toSection x)) :=
-  sorry
+                      ((iteratedCovGrad g₀ 0 3 l T₂).toSection x)) := by
+  obtain ⟨C₁, hC₁0, hC₁⟩ :=
+    crossCorrParallelContraction_iteratedCovGrad_rfns_fullWindowProductGrid_le (I := I) g₀
+      (S₁ - S₂) T₁ p
+  obtain ⟨C₂, hC₂0, hC₂⟩ :=
+    crossCorrParallelContraction_iteratedCovGrad_rfns_fullWindowProductGrid_le (I := I) g₀
+      S₂ (T₁ - T₂) p
+  refine ⟨2 * C₁ + 2 * C₂, by positivity, fun x => ?_⟩
+  have hsplit : crossCorrParallelContraction (I := I) g₀ (a := 0) (b := 0) S₁ T₁
+      - crossCorrParallelContraction (I := I) g₀ (a := 0) (b := 0) S₂ T₂
+      = crossCorrParallelContraction (I := I) g₀ (a := 0) (b := 0) (S₁ - S₂) T₁
+        + crossCorrParallelContraction (I := I) g₀ (a := 0) (b := 0) S₂ (T₁ - T₂) := by
+    rw [crossCorrParallelContraction_sub_left (I := I) g₀ S₁ S₂ T₁,
+      crossCorrParallelContraction_sub_right (I := I) g₀ S₂ T₁ T₂]
+    abel
+  rw [hsplit, PDE.RicciFlow.iteratedCovGrad_add]
+  simp only [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
+  refine le_trans (riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (3 + 0 + 0 + p) x _ _) ?_
+  have h1 := hC₁ x
+  have h2 := hC₂ x
+  have hswap :
+      (∑ i ∈ Finset.range (p + 1),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+              ((iteratedCovGrad g₀ 0 3 i T₁).toSection x)
+            * ∑ l ∈ Finset.range (p + 1 - i),
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                  ((iteratedCovGrad g₀ 0 2 l (S₁ - S₂)).toSection x))
+        = ∑ i ∈ Finset.range (p + 1),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                ((iteratedCovGrad g₀ 0 2 i (S₁ - S₂)).toSection x)
+              * ∑ l ∈ Finset.range (p + 1 - i),
+                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + l) x
+                    ((iteratedCovGrad g₀ 0 3 l T₁).toSection x) :=
+    windowProductSum_swap p _ _
+  rw [hswap] at h1
+  have hA1le :
+      (∑ i ∈ Finset.range (p + 1),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+              ((iteratedCovGrad g₀ 0 2 i (S₁ - S₂)).toSection x)
+            * ∑ l ∈ Finset.range (p + 1 - i),
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + l) x
+                  ((iteratedCovGrad g₀ 0 3 l T₁).toSection x))
+        ≤ ∑ i ∈ Finset.range (p + 1),
+            (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                ((iteratedCovGrad g₀ 0 2 i (S₁ - S₂)).toSection x)
+              + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                ((iteratedCovGrad g₀ 0 3 i (T₁ - T₂)).toSection x))
+              * ∑ l ∈ Finset.range (p + 1 - i),
+                  (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                      ((iteratedCovGrad g₀ 0 2 l S₁).toSection x)
+                    + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                      ((iteratedCovGrad g₀ 0 2 l S₂).toSection x)
+                    + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + l) x
+                      ((iteratedCovGrad g₀ 0 3 l T₁).toSection x)
+                    + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + l) x
+                      ((iteratedCovGrad g₀ 0 3 l T₂).toSection x)) := by
+    refine Finset.sum_le_sum fun i _ => ?_
+    refine mul_le_mul
+      (le_add_of_nonneg_right
+        (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x _))
+      (Finset.sum_le_sum fun l _ => ?_)
+      (Finset.sum_nonneg fun l _ =>
+        riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + l) x _)
+      (add_nonneg (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + i) x _)
+        (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x _))
+    have hs1 := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + l) x
+      ((iteratedCovGrad g₀ 0 2 l S₁).toSection x)
+    have hs2 := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + l) x
+      ((iteratedCovGrad g₀ 0 2 l S₂).toSection x)
+    have ht2 := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + l) x
+      ((iteratedCovGrad g₀ 0 3 l T₂).toSection x)
+    linarith
+  have hA2le :
+      (∑ i ∈ Finset.range (p + 1),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+              ((iteratedCovGrad g₀ 0 3 i (T₁ - T₂)).toSection x)
+            * ∑ l ∈ Finset.range (p + 1 - i),
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                  ((iteratedCovGrad g₀ 0 2 l S₂).toSection x))
+        ≤ ∑ i ∈ Finset.range (p + 1),
+            (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                ((iteratedCovGrad g₀ 0 2 i (S₁ - S₂)).toSection x)
+              + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                ((iteratedCovGrad g₀ 0 3 i (T₁ - T₂)).toSection x))
+              * ∑ l ∈ Finset.range (p + 1 - i),
+                  (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                      ((iteratedCovGrad g₀ 0 2 l S₁).toSection x)
+                    + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                      ((iteratedCovGrad g₀ 0 2 l S₂).toSection x)
+                    + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + l) x
+                      ((iteratedCovGrad g₀ 0 3 l T₁).toSection x)
+                    + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + l) x
+                      ((iteratedCovGrad g₀ 0 3 l T₂).toSection x)) := by
+    refine Finset.sum_le_sum fun i _ => ?_
+    refine mul_le_mul
+      (le_add_of_nonneg_left
+        (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + i) x _))
+      (Finset.sum_le_sum fun l _ => ?_)
+      (Finset.sum_nonneg fun l _ =>
+        riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + l) x _)
+      (add_nonneg (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + i) x _)
+        (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x _))
+    have hs1 := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + l) x
+      ((iteratedCovGrad g₀ 0 2 l S₁).toSection x)
+    have ht1 := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + l) x
+      ((iteratedCovGrad g₀ 0 3 l T₁).toSection x)
+    have ht2 := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + l) x
+      ((iteratedCovGrad g₀ 0 3 l T₂).toSection x)
+    linarith
+  have hb1 := mul_le_mul_of_nonneg_left hA1le hC₁0
+  have hb2 := mul_le_mul_of_nonneg_left hA2le hC₂0
+  linarith
 
 end Connection
 end Integral
