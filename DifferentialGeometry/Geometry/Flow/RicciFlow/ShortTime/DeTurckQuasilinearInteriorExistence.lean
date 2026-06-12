@@ -205,9 +205,59 @@ def DeTurckGatedGradedForcing (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T :
       ∑' i, forcingMass (I := I) (M := M) f d i ≤ B d) ∧
   DeTurckGatedFieldFibreSmall (I := I) g₀ a hT hT1 δ f
 
+/-- **The gated Picard step at a fixed margin (posited analytic input: the per-order
+parabolic ball invariance below the threshold built from the top-arm split constant).**
+
+Fixing the order-uniform top-arm constant `c` of the realized-remainder spectral-mass split
+(`exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le`) and any fibre
+margin `0 < δ ≤ min (1/4) (1/(8(c+1)))`, there are a horizon bound `T₀ ∈ (0, 1]` and per-order
+mass bounds `B : ℝ → ℝ` (nonnegative, growing only in the order, never along the iteration)
+such that on every horizon `T ≤ T₀`, for every forcing `f` in the graded on-gate class
+`DeTurckGatedGradedForcing g₀ a hT hT1 B δ`, the next Picard iterate exists in the same class:
+a time-`L²` forcing `F` reproduced a.e. by the gated self-representative nonlinearity on the
+`H^{a+1}`-view zero-datum Duhamel field of `f`, again graded and on-gate.
+
+This is the genuine analytic content of `deTurckGatedRemainder_picard_forcing_exists` at the
+single margin `δ` (the node assembles the `δ₀`-threshold from the split constant `c` and
+threads this step over the whole sub-threshold interval).  The intended transit is the
+`δ`-refined principal top-jet split of the realized remainder difference instantiated at the
+fixed anchor `T₂ = 0`, `g₂ = g₀` (so the difference is the anchor remainder `N₀`), with the
+budget `B d := T₀ · (Gbase · Φ d)` produced by the order-recursion that absorbs the
+order-growing tame family `C d` downward against the two-order maximal-regularity field gain
+`solFieldMass_le_forcingMass` and the `√T`-funded lower arms; a small `T₀` closes each
+per-order bound and keeps the next field inside the `δ`-fibre gate.  The carrier of `f` is
+extracted through the all-order-continuous zero-datum synthesis, the gated gauge takes its
+honest branch on the fibre-small interior, and the next forcing is built as the time-`L²`
+read-off of the realized remainder of the field's own smooth gate representative.  The
+existential is non-degenerate: `F` is pinned a.e. by the reproduction equation, and `B ≡ 0`
+is not a witness unless `g₀` is a DeTurck fixed point of `g_bg`.  The body is the posited
+parabolic input; it remains `sorry`, so consumers transitively depend on `sorryAx`. -/
+theorem gatedGradedForcing_invariant_step_massBudget
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
+    (ha2 : Module.finrank ℝ E < 2 * (a - 2))
+    (c : ℝ) (hc : 0 ≤ c) (δ : ℝ) (hδ0 : 0 < δ)
+    (hδδ₀ : δ ≤ min (1 / 4) (1 / (8 * (c + 1)))) :
+    ∃ T₀ : ℝ, 0 < T₀ ∧ T₀ ≤ 1 ∧
+      ∃ B : ℝ → ℝ, (∀ d : ℝ, 0 ≤ B d) ∧
+        ∀ (T : ℝ) (hT : 0 < T) (hT1 : T ≤ 1), T ≤ T₀ →
+          ∀ f : Analysis.Parabolic.TimeSobolev.timeL2
+              (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T,
+            DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ f →
+            ∃ F : Analysis.Parabolic.TimeSobolev.timeL2
+                (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T,
+              ((F : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+                  =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T]
+                (fun t => deTurckG0SpectralN (I := I) g₀ a
+                  (deTurckRemainderRealizeSection (I := I) g₀ g_bg
+                    (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1
+                      (I := I) (M := M) (a : ℝ) hT hT1
+                      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) f t)))) ∧
+              DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ F :=
+  sorry
+
 /-- **The gated Picard step: below a fibre-margin threshold, the on-gate graded-forcing
-class is invariant under the gated Duhamel-remainder map on a small horizon (posited
-analytic input: the per-order parabolic ball invariance).**
+class is invariant under the gated Duhamel-remainder map on a small horizon.**
 
 There is a fibre-margin threshold `δ₀ ∈ (0, 1/2]` such that for **every** margin
 `0 < δ ≤ δ₀` there are a horizon bound `T₀ ∈ (0, 1]` and per-order mass bounds
@@ -219,35 +269,17 @@ nonlinearity on the `H^{a+1}`-view zero-datum Duhamel field of `f`, again graded
 on-gate.
 
 The conclusion is quantified over the whole sub-threshold interval `(0, δ₀]` with
-`δ₀ ≤ 1/2`, rather than taking an arbitrary margin `δ < 1` as input: every tame/Nemytskii
-brick of the segment-metric difference calculus demands `δ < 1/2`
-(`exists_segmentMetricRHSDiff_faaDiBruno_moserTame_allOrder_l2Norm_le` and its per-field
-children — the realized-metric Neumann series loses its uniform fibre bound at
-`δ ≥ 1/2`), and the invariance mechanism is downward-monotone in the margin (a smaller
-`δ` shrinks the class and strengthens the `δ`-proportional principal smallness), so a
-free-`δ < 1` binder would be uninvocable by the sibling analytic substrate.  This is the
-certified `δ₀`-restatement of the earlier free-`δ` shape.
+`δ₀ ≤ 1/2` (the certified `δ₀`-restatement of the earlier free-`δ` shape): every
+tame/Nemytskii brick of the segment-metric difference calculus demands `δ < 1/2`, and the
+invariance mechanism is downward-monotone in the margin, so a free-`δ < 1` binder would be
+uninvocable by the sibling analytic substrate.
 
-This is the classical per-order quasilinear ball invariance: under the antecedent the
-field of `f` is a.e. gate-realizable and `δ`-fibre-small, so the gated gauge takes its
-honest branch and `t ↦ N(field f t)` is the realized remainder of the field's own smooth
-gate representative — measurable and per-order square-integrable in time, with order-`d`
-mass at most `T₀ · (c₀(d) + C(d) · θ(B))²` (the remainder is two-derivative-loss tame and
-the field gains two orders per the maximal-regularity mass coupling); choosing `T₀`
-small (depending on `δ` and the order-recursion constants) closes each per-order bound
-and keeps the next field inside the `δ`-fibre gate.  The intended analytic transit for
-the two-derivative loss is the δ-refined principal top-jet split of the realized
-remainder difference,
-`exists_realizedRemainderDiff_principalTopSplit_allOrder_l2Norm_le`
-(`Analysis/Spectral/Intrinsic/DeTurck/RemainderDifferencePrincipalTopSplit.lean`): the
-top jet order carries an order-uniform `δ`-proportional coefficient while the lower
-orders carry the generic tame constant, so a small `δ` absorbs the top order against the
-maximal-regularity gain and a small `T₀` absorbs the rest.  The existential is
-non-degenerate: `F` is pinned a.e. by the reproduction equation, and `B ≡ 0` is *not* a
-witness unless `g₀` is a DeTurck fixed point of `g_bg` (the zero forcing would have to
-reproduce the generically nonzero remainder of `g₀` itself), so the produced `B` must
-contain the honest Picard tube.  The body is the posited parabolic input; it remains
-`sorry`, so consumers transitively depend on `sorryAx`. -/
+This is **sorry-free glue** that fixes the certified threshold from the order-uniform
+top-arm constant `c` of the realized-remainder spectral-mass split
+(`exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le`) — taking
+`δ₀ := min (1/4) (1/(8(c+1)))` — and threads the per-margin parabolic ball-invariance step
+`gatedGradedForcing_invariant_step_massBudget` over the whole sub-threshold interval.
+Consumers transitively depend on `sorryAx` through the posited per-margin step. -/
 theorem deTurckGatedRemainder_picard_forcing_exists
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -269,8 +301,18 @@ theorem deTurckGatedRemainder_picard_forcing_exists
                         (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1
                           (I := I) (M := M) (a : ℝ) hT hT1
                           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) f t)))) ∧
-                  DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ F :=
-  sorry
+                  DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ F := by
+  classical
+  obtain ⟨_k₀, _hk₀, c, hc_nn, _c₂, _hc₂_nn, _hsplitAll⟩ :=
+    DeTurck.exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le
+      (I := I) (M := M) g₀ g_bg a ha
+  refine ⟨min (1 / 4) (1 / (8 * (c + 1))),
+    lt_min (by norm_num) (by positivity),
+    le_trans (min_le_left _ _) (by norm_num), ?_⟩
+  intro δ hδ0 hδδ₀
+  exact gatedGradedForcing_invariant_step_massBudget (I := I) (M := M)
+    g₀ g_bg a ha ha2 c hc_nn δ hδ0 hδδ₀
+
 
 /-- The coordinate of a difference of spectral elements is the difference of the
 coordinates (the additive structure of `tensorHs` is coordinatewise). -/
