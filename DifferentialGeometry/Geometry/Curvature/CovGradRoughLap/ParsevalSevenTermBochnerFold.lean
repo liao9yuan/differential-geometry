@@ -17,6 +17,8 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedS
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedRicciEndomorphism
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ParsevalFrameDiffCurvatureTrace
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorRSMetricCompatible
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientField
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.SlotOperatorCarrierCalculus
 
 /-!
 # The seven-term Bochner fold: fixed-Parseval-family group carriers of the rank-`0` Bochner–Weitzenböck assembly
@@ -68,10 +70,22 @@ pointwise-Parseval (a pointwise slot identity, not an integrated cancellation). 
   the primitive: `G₄ − I₂ = ⟨Curv S, ∇S⟩ − ⟨GcurvSection, ∇S⟩ − ⟨ricTraceSection, ∇S⟩`, sorry-free
   through the covariant-Leibniz split `bochnerFoldGroupSum_elt3IiiIv_eq_nablaDiffCurvTrace_split`
   and the group-`3` decomposition;
+* `bochnerFoldGroupSum_elt4_eq_zero` — **the group-`4` fold vanishes (`G₄ = 0`)**, sorry-free:
+  the genuine Hessian is value-bilinear in its two direction slots
+  (`tensorSecondCovDeriv_unit_eq_twoSlotCurry`), so the symmetric second-order pair is killed
+  pointwise by the cometric-parallel covariant-derivative pair antisymmetry (a pointwise-Parseval
+  value, admissible like the group-`1` fold);
+* `tensorL2Inner_genuineDiffCurv_covGrad_eq_neg_threeTerm` — the sorry-free B-rule/IBP normal
+  form of the operator-field pairing,
+  `⟨appCc (covGrad Φ₀) S, ∇S⟩ = −∑_b ∫ [⟨P, ∇_b∇_b S⟩ + ⟨P, ∇_b S⟩·divᵍ V_b + ⟨Φ₀(∇_b S), ∇_b S⟩]`
+  (`P := appCc Φ₀ S`), through `fold_assembly_perB`, the spectator slot-read
+  `spectatorSlot0_eq_appCc_gradSlot`, and the per-direction IBP `integral_covApplyPair_IBP`;
 * `tensorL2Inner_genuineDiffCurv_covGrad_eq_group4_sub_crossPairing` — **the posited
   differentiated-curvature operator-field identification** (the only `sorry` in this file): the
   frame-free operator-field pairing `⟨appCc (covGrad Φ₀) S, ∇S⟩_{L²}` (`Φ₀ := curvOpField g s`)
-  equals the gauge-cancelling difference combination `G₄ − I₂` of the Parseval fold;
+  equals the gauge-cancelling difference combination `G₄ − I₂` of the Parseval fold; over the
+  proven `G₄ = 0` and the three-term normal form, the remaining content is the integrated
+  second-Bianchi cross pairing (see the posit's docstring for the landed route);
 * `tensorL2Inner_genuineDiffCurv_covGrad_eq_curv_sub_gcurv_sub_ricTrace` — the frame-free reading of
   the chain: `⟨appCc (covGrad Φ₀) S, ∇S⟩ = ⟨Curv S, ∇S⟩ − ⟨GcurvSection, ∇S⟩ − ⟨ricTraceSection,
   ∇S⟩`, sorry-free glue over the operator-field posit through the summed chain endpoint and a
@@ -381,6 +395,27 @@ private lemma tensor0SAsRS_neg (t : ℕ) (x : M) (C : Tensor0SSpace t I x) :
       tensor0SAsRS (I := I) (M := M) x C = 0 := by
     rw [← tensor0SAsRS_add, neg_add_cancel, tensor0SAsRS_zero]
   linear_combination (norm := module) h
+
+set_option linter.unusedSectionVars false in
+/-- The `(0, t)`-tensor wrapper is homogeneous (file-local copy of the private
+`BracketFrameSumFiberOrder` helper). -/
+private lemma tensor0SAsRS_smul (t : ℕ) (x : M) (c : ℝ) (C : Tensor0SSpace t I x) :
+    tensor0SAsRS (I := I) (M := M) x (c • C) = c • tensor0SAsRS (I := I) (M := M) x C := by
+  apply tensorRSSpace_ext (𝕜 := ℝ) 0 t x
+  intro τ
+  rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from
+        tensor0SAsRS (I := I) (M := M) x (c • C)) τ =
+      tensor00Scalar (I := I) (M := M) x τ • (c • C) from
+    tensor0SAsRS_apply (I := I) (M := M) x _ τ]
+  rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from
+        c • tensor0SAsRS (I := I) (M := M) x C) τ =
+      c • (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from
+        tensor0SAsRS (I := I) (M := M) x C) τ from rfl]
+  rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from
+        tensor0SAsRS (I := I) (M := M) x C) τ =
+      tensor00Scalar (I := I) (M := M) x τ • C from
+    tensor0SAsRS_apply (I := I) (M := M) x _ τ]
+  rw [smul_comm]
 
 set_option linter.unusedSectionVars false in
 /-- The `(0, t)`-tensor wrapper distributes over a difference. -/
@@ -4645,6 +4680,545 @@ private theorem parsevalFrameSum_group4_sub_crossPairing_eq_curv_sub_gcurv_sub_r
 
 
 set_option linter.unusedSectionVars false in
+/-- **The two-slot curry value of the genuine Hessian (fibre-bilinear form of
+`tensorSecondCovDeriv`).** For smooth tangent fields `X, Y`, the unit-evaluated genuine second
+covariant derivative `∇²_{X, Y} S (x)(unit)` equals the double leading-slot curry of the
+second covariant gradient `∇²S = covGrad (covGrad S)` read at the *values* `(X x, Y x)`:
+```
+(∇²_{X, Y} S)(x)(unit) = curry (curry (∇²S(x)(unit)) (X x)) (Y x).
+```
+This is `tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal` (`GradientField`) packaged as a
+`Tensor0SSpace s` identity through the leading-slot currying equivalence; it certifies that the
+genuine Hessian is **tensorial (value-bilinear) in both direction slots**, the fact the
+cometric-parallel antisymmetry consumes. -/
+private lemma tensorSecondCovDeriv_unit_eq_twoSlotCurry
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {X Y : Π b : M, TangentSpace I b}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, X b⟩ : TotalSpace E (TangentSpace I))))
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Y b⟩ : TotalSpace E (TangentSpace I)))) (x : M) :
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+        tensorSecondCovDeriv (I := I) g 0 s X Y (fun y : M => S.toSection y) x)
+        (unitZeroSec (I := I) (M := M) x) =
+      tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1 + 1) I x from
+            (covGrad (I := I) (M := M) g 0 (s + 1)
+              (covGrad (I := I) (M := M) g 0 s S)).toSection x)
+            (unitZeroSec (I := I) (M := M) x))
+          (X x))
+        (Y x) := by
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro m
+  rw [← tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal (I := I) (M := M) g s S
+    hX hY x m]
+  rw [TensorMultilinear.tensor0S_curry_apply_eval, TensorMultilinear.tensor0S_curry_apply_eval]
+
+set_option linter.unusedSectionVars false in
+/-- **The group-`4` family sum vanishes pointwise (the cometric-parallel kill of the symmetric
+second-order pair).** For a fixed smooth Parseval frame family `V`, a fixed read direction
+`V b`, and every point `x`, the family sum over `a` of the group-`4` carrier pairing
+`⟨−∇²_{∇_{V b} V a, V a} S − ∇²_{V a, ∇_{V b} V a} S, ∇_{V b} S⟩` vanishes: the genuine Hessian
+is value-bilinear in its two direction slots (`tensorSecondCovDeriv_unit_eq_twoSlotCurry`), so
+the sum is the cometric-parallel covariant-derivative pair antisymmetry
+`parsevalFrame_sum_bilin_covDeriv_pair_antisymm` (`∇(∑_a V_a ⊗ V_a) = ∇ g⁻¹ = 0`) contracted
+against the Hessian/gradient bilinear form. -/
+private lemma bochnerGroupElt4_pairing_familySum_eq_zero
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) (b : Fin N) (x : M) :
+    (∑ a : Fin N,
+        tensorInnerPointwise (I := I) (M := M) g 0 s x
+          (TensorRSSpace.toModel (bochnerGroupElt4 (I := I) (M := M) g s S (V a) (V b) x))
+          (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x))) = 0 := by
+  classical
+  -- The two-slot curry of `∇²S(x)(unit)`, the value-bilinear Hessian kernel at `x`.
+  set T2 : Tensor0SSpace (s + 1 + 1) I x :=
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1 + 1) I x from
+      (covGrad (I := I) (M := M) g 0 (s + 1)
+        (covGrad (I := I) (M := M) g 0 s S)).toSection x)
+      (unitZeroSec (I := I) (M := M) x) with hT2_def
+  -- The Hessian/gradient bilinear form on the tangent fibre.
+  set B : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ :=
+    LinearMap.mk₂ ℝ
+      (fun u p => tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel (tensor0SAsRS (I := I) (M := M) x
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x T2 u) p)))
+        (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)))
+      (fun u₁ u₂ p => by
+        beta_reduce
+        rw [map_add (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x T2) u₁ u₂,
+          show tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+              (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x T2 u₁ +
+                tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x T2 u₂) =
+            tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+                (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x T2 u₁) +
+              tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+                (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x T2 u₂) from
+            map_add (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x) _ _,
+          ContinuousLinearMap.add_apply, tensor0SAsRS_add (I := I) (M := M) s x,
+          TensorRSSpace.toModel_add,
+          tensorInnerPointwise_add_left (I := I) (M := M) g 0 s x])
+      (fun c u p => by
+        beta_reduce
+        rw [map_smul (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x T2) c u,
+          show tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+              (c • tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x T2 u) =
+            c • tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+                (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x T2 u) from
+            map_smul (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x) c _,
+          ContinuousLinearMap.smul_apply, tensor0SAsRS_smul (I := I) (M := M) s x,
+          TensorRSSpace.toModel_smul,
+          tensorInnerPointwise_smul_left (I := I) (M := M) g 0 s x, smul_eq_mul])
+      (fun u p₁ p₂ => by
+        beta_reduce
+        rw [map_add (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x T2 u)) p₁ p₂,
+          tensor0SAsRS_add (I := I) (M := M) s x, TensorRSSpace.toModel_add,
+          tensorInnerPointwise_add_left (I := I) (M := M) g 0 s x])
+      (fun c u p => by
+        beta_reduce
+        rw [map_smul (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x T2 u)) c p,
+          tensor0SAsRS_smul (I := I) (M := M) s x, TensorRSSpace.toModel_smul,
+          tensorInnerPointwise_smul_left (I := I) (M := M) g 0 s x, smul_eq_mul])
+    with hB_def
+  have hBval : ∀ u p : TangentSpace I x, B u p =
+      tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel (tensor0SAsRS (I := I) (M := M) x
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x T2 u) p)))
+        (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)) :=
+    fun u p => rfl
+  -- Each group-`4` carrier pairing is the negated `B`-pair at `(∇_{V b} V a, V a)`.
+  have hpt : ∀ a : Fin N,
+      tensorInnerPointwise (I := I) (M := M) g 0 s x
+          (TensorRSSpace.toModel (bochnerGroupElt4 (I := I) (M := M) g s S (V a) (V b) x))
+          (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)) =
+        - (B ((LeviCivita (I := I) g).toFun (V a) x (V b x)) (V a x) +
+            B (V a x) ((LeviCivita (I := I) g).toFun (V a) x (V b x))) := by
+    intro a
+    -- Smoothness of the frame-derivative field `y ↦ ∇_{V b} V a (y)`.
+    have hNba : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+        (fun y : M => (⟨y, (LeviCivita (I := I) g).toFun (V a) y (V b y)⟩ :
+          TotalSpace E (TangentSpace I))) :=
+      covApply_contMDiff (cov := LeviCivita (I := I) g) (hV b) (hV a)
+    have h1 := tensorSecondCovDeriv_unit_eq_twoSlotCurry (I := I) (M := M) g s S
+      (X := fun y : M => (LeviCivita (I := I) g).toFun (V a) y (V b y)) (Y := V a)
+      hNba (hV a) x
+    have h2 := tensorSecondCovDeriv_unit_eq_twoSlotCurry (I := I) (M := M) g s S
+      (X := V a) (Y := fun y : M => (LeviCivita (I := I) g).toFun (V a) y (V b y))
+      (hV a) hNba x
+    rw [show bochnerGroupElt4 (I := I) (M := M) g s S (V a) (V b) x =
+        tensor0SAsRS (I := I) (M := M) x
+          (- (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+              (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x T2
+                ((LeviCivita (I := I) g).toFun (V a) x (V b x))) (V a x)) -
+            tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+              (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x T2 (V a x))
+              ((LeviCivita (I := I) g).toFun (V a) x (V b x))) from by
+      rw [bochnerGroupElt4, h1, h2]]
+    rw [show (- (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x T2
+              ((LeviCivita (I := I) g).toFun (V a) x (V b x))) (V a x)) -
+          tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x T2 (V a x))
+            ((LeviCivita (I := I) g).toFun (V a) x (V b x))) =
+        (-1 : ℝ) • (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x T2
+              ((LeviCivita (I := I) g).toFun (V a) x (V b x))) (V a x)) +
+          (-1 : ℝ) • (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+            (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x T2 (V a x))
+            ((LeviCivita (I := I) g).toFun (V a) x (V b x))) from by
+      rw [neg_one_smul, neg_one_smul]; abel]
+    rw [tensor0SAsRS_add (I := I) (M := M) s x,
+      tensor0SAsRS_smul (I := I) (M := M) s x, tensor0SAsRS_smul (I := I) (M := M) s x,
+      TensorRSSpace.toModel_add, TensorRSSpace.toModel_smul, TensorRSSpace.toModel_smul,
+      tensorInnerPointwise_add_left (I := I) (M := M) g 0 s x,
+      tensorInnerPointwise_smul_left (I := I) (M := M) g 0 s x,
+      tensorInnerPointwise_smul_left (I := I) (M := M) g 0 s x,
+      hBval ((LeviCivita (I := I) g).toFun (V a) x (V b x)) (V a x),
+      hBval (V a x) ((LeviCivita (I := I) g).toFun (V a) x (V b x))]
+    ring
+  rw [Finset.sum_congr rfl (fun a _ => hpt a), Finset.sum_neg_distrib,
+    parsevalFrame_sum_bilin_covDeriv_pair_antisymm (I := I) (M := M) g V hV hPar
+      (V b) x B, neg_zero]
+
+set_option linter.unusedSectionVars false in
+/-- **The group-`4` double sum vanishes (`G₄ = 0`).** For a fixed smooth Parseval frame family,
+the group-`4` fold `bochnerFoldGroupSum (bochnerGroupElt4)` is zero: the symmetric second-order
+carrier pair `−∇²_{∇_{V b} V a, V a} S − ∇²_{V a, ∇_{V b} V a} S` is built on the genuine
+(value-bilinear) Hessian, so its family sum over `a` is killed pointwise by the
+cometric-parallel covariant-derivative pair antisymmetry
+(`bochnerGroupElt4_pairing_familySum_eq_zero`); the double-sum integral of a pointwise-zero
+family is zero.  This is a frame-free *value* for `G₄` — admissible because it is pointwise
+Parseval (a pointwise antisymmetry kill, not an integrated cancellation), exactly like the
+surviving group-`1` fold. -/
+private theorem bochnerFoldGroupSum_elt4_eq_zero
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
+    bochnerFoldGroupSum (I := I) (M := M) g s S V
+      (bochnerGroupElt4 (I := I) (M := M) g s S) = 0 := by
+  classical
+  have hint : ∀ a b : Fin N, Integrable
+      (fun x : M => tensorInnerPointwise (I := I) (M := M) g 0 s x
+        (TensorRSSpace.toModel (bochnerGroupElt4 (I := I) (M := M) g s S (V a) (V b) x))
+        (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)))
+      (riemannianVolumeMeasure (I := I) (M := M) g) := by
+    intro a b
+    refine (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+      (bochnerGroupElt4Cc (I := I) (M := M) g s S (hV a) (hV b))
+      (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))).congr
+      (Filter.Eventually.of_forall (fun x => ?_))
+    simp only [SmoothCcTensor.toFun_apply,
+      bochnerGroupElt4Cc_toSection_eq (I := I) (M := M) g s S (hV a) (hV b) x,
+      bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s S (hV b) x]
+  rw [bochnerFoldGroupSum, Finset.sum_comm]
+  refine Finset.sum_eq_zero (fun b _ => ?_)
+  rw [← MeasureTheory.integral_finset_sum Finset.univ (fun a _ => hint a b)]
+  rw [show (∫ x, (∑ a : Fin N,
+        tensorInnerPointwise (I := I) (M := M) g 0 s x
+          (TensorRSSpace.toModel (bochnerGroupElt4 (I := I) (M := M) g s S (V a) (V b) x))
+          (TensorRSSpace.toModel (bochnerGradSlot0 (I := I) (M := M) g s S (V b) x)))
+      ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+      ∫ _x, (0 : ℝ) ∂(riemannianVolumeMeasure (I := I) (M := M) g) from
+    MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x =>
+      bochnerGroupElt4_pairing_familySum_eq_zero (I := I) (M := M) g s S V hV hPar b x))]
+  exact MeasureTheory.integral_zero _ _
+
+set_option linter.unusedSectionVars false in
+/-- **The per-`b` fold assembly.** For a fixed Parseval frame family and a named smooth
+`(0, s + 1)`-tensor section `Named` whose slot-`0` `V b`-read is, at every point, the section
+value of the single packaged carrier `Elt b`, the `L²` pairing of `Named` against `∇S` is the
+single frame sum of the per-`b` carrier pairing integrals.  The per-`b` (carrier-sum-free)
+variant of `fold_assembly`: the slot-`0` fixed-family Parseval expansion of the `(0, s + 1)`
+pairing (`tensorInnerPointwise_succ_eq_parseval_sum_slot0`) plus the integral/sum interchange. -/
+private lemma fold_assembly_perB
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u)
+    (Named : SmoothCcTensor g 0 (s + 1)) (Elt : Fin N → SmoothCcTensor g 0 s)
+    (hslot0 : ∀ (b : Fin N) (x : M),
+      tensor0SAsRS (I := I) (M := M) x
+          ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+            ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from Named.toSection x)
+              (unitZeroSec (I := I) (M := M) x))) (V b x)) =
+        (Elt b).toSection x) :
+    tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Named).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun =
+      ∑ b : Fin N,
+        ∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+            (Elt b).toSection (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
+  classical
+  rw [show tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Named).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun =
+      ∫ x, (∑ b : Fin N,
+          tensorInnerScalar (I := I) (M := M) g 0 s
+            (Elt b).toSection (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x)
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g) from ?_]
+  · exact MeasureTheory.integral_finset_sum Finset.univ
+      (fun b _ => SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+        (Elt b) (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)))
+  · refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+    change tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x (Named.toFun x)
+        ((covGrad (I := I) (M := M) g 0 s S).toFun x) = _
+    rw [show (Named).toFun x = TensorRSSpace.toModel (Named.toSection x) from rfl,
+      show (covGrad (I := I) (M := M) g 0 s S).toFun x =
+        TensorRSSpace.toModel ((covGrad (I := I) (M := M) g 0 s S).toSection x) from rfl]
+    rw [tensorInnerPointwise_succ_eq_parseval_sum_slot0 (I := I) (M := M) g V hPar s x
+      (Named.toSection x) ((covGrad (I := I) (M := M) g 0 s S).toSection x)]
+    refine Finset.sum_congr rfl (fun b _ => ?_)
+    rw [tensorInnerScalar_apply (I := I) (M := M) g 0 s, ← hslot0 b x]
+    rfl
+
+set_option linter.unusedSectionVars false in
+/-- **The per-direction covariant integration by parts of a packaged `(0, s)` cross pairing.**
+For smooth compactly-supported `(0, s)`-tensors `W, Z` and a smooth direction field `V b`,
+```
+∫ ⟨∇_{V b} W, Z⟩ = − ∫ ⟨W, ∇_{V b} Z⟩ − ∫ ⟨W, Z⟩ · divᵍ(V b),
+```
+the split of the self-contained per-direction covariant IBP
+`integral_tensorInner_covDeriv_combined_eq_zero` through the first-slot engine bridge
+`loweredFirstSlot_eq_covApply_inner` (both slots, the second through the `(0, s)`-pairing
+symmetry), with each summand integrable as a `Cc` cross pairing or a continuous function on the
+compact manifold. -/
+private lemma integral_covApplyPair_IBP
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (W Z : SmoothCcTensor g 0 s)
+    {Vb : Π b : M, TangentSpace I b}
+    (hVb : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Vb b⟩ : TotalSpace E (TangentSpace I)))) :
+    (∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+        (covApplyGenCc (I := I) (M := M) g s W hVb).toSection Z.toSection x
+      ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+      - (∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+          W.toSection (covApplyGenCc (I := I) (M := M) g s Z hVb).toSection x
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) -
+      (∫ x, tensorInnerScalar (I := I) (M := M) g 0 s W.toSection Z.toSection x *
+          DifferentialGeometry.Integral.DivergenceTheorem.divergence_g (I := I) g
+            ⟨fun y : M => Vb y, hVb⟩ x
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
+  classical
+  have heng := integral_tensorInner_covDeriv_combined_eq_zero (I := I) (M := M) g 0 s
+    W.toSection Z.toSection ⟨fun y : M => Vb y, hVb⟩
+  -- Pointwise identification of the three engine summands.
+  have h1 : ∀ x : M,
+      tensorInnerPointwise_0s (I := I) (M := M) (0 + s) g x
+          (Tensor0SSpace.toModel
+            (loweredCovDerivAlongVF (I := I) (M := M) g 0 s W.toSection
+              ⟨fun y : M => Vb y, hVb⟩ x))
+          (Tensor0SSpace.toModel
+            (liftedTensorSection (I := I) (M := M) g 0 s Z.toSection x)) =
+        tensorInnerScalar (I := I) (M := M) g 0 s
+          (covApplyGenCc (I := I) (M := M) g s W hVb).toSection Z.toSection x := by
+    intro x
+    rw [tensorInnerScalar_apply (I := I) (M := M) g 0 s]
+    exact loweredFirstSlot_eq_covApply_inner (I := I) (M := M) g s W Z hVb x
+  have h2 : ∀ x : M,
+      tensorInnerPointwise_0s (I := I) (M := M) (0 + s) g x
+          (Tensor0SSpace.toModel
+            (liftedTensorSection (I := I) (M := M) g 0 s W.toSection x))
+          (Tensor0SSpace.toModel
+            (loweredCovDerivAlongVF (I := I) (M := M) g 0 s Z.toSection
+              ⟨fun y : M => Vb y, hVb⟩ x)) =
+        tensorInnerScalar (I := I) (M := M) g 0 s
+          W.toSection (covApplyGenCc (I := I) (M := M) g s Z hVb).toSection x := by
+    intro x
+    rw [tensorInnerPointwise_0s_symm (I := I) (M := M) g x (0 + s)]
+    rw [tensorInnerScalar_apply (I := I) (M := M) g 0 s]
+    rw [loweredFirstSlot_eq_covApply_inner (I := I) (M := M) g s Z W hVb x]
+    exact tensorInnerPointwise_symm (I := I) (M := M) g 0 s x _ _
+  have h3 : ∀ x : M,
+      tensorInnerScalar (I := I) (M := M) g 0 s W.toSection Z.toSection x *
+          DifferentialGeometry.Integral.DivergenceTheorem.divergence_g (I := I) g
+            ⟨fun y : M => Vb y, hVb⟩ x =
+        tensorInnerScalar (I := I) (M := M) g 0 s W.toSection Z.toSection x *
+          DifferentialGeometry.Integral.DivergenceTheorem.divergence_g (I := I) g
+            ⟨fun y : M => Vb y, hVb⟩ x := fun _ => rfl
+  -- Integrability of the three summands.
+  have hint1 : Integrable
+      (fun x : M => tensorInnerScalar (I := I) (M := M) g 0 s
+        (covApplyGenCc (I := I) (M := M) g s W hVb).toSection Z.toSection x)
+      (riemannianVolumeMeasure (I := I) (M := M) g) :=
+    SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+      (covApplyGenCc (I := I) (M := M) g s W hVb) Z
+  have hint2 : Integrable
+      (fun x : M => tensorInnerScalar (I := I) (M := M) g 0 s
+        W.toSection (covApplyGenCc (I := I) (M := M) g s Z hVb).toSection x)
+      (riemannianVolumeMeasure (I := I) (M := M) g) :=
+    SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+      W (covApplyGenCc (I := I) (M := M) g s Z hVb)
+  have hint3 : Integrable
+      (fun x : M => tensorInnerScalar (I := I) (M := M) g 0 s W.toSection Z.toSection x *
+        DifferentialGeometry.Integral.DivergenceTheorem.divergence_g (I := I) g
+          ⟨fun y : M => Vb y, hVb⟩ x)
+      (riemannianVolumeMeasure (I := I) (M := M) g) := by
+    refine integrable_of_continuous_compactSpace (I := I) (M := M) g ?_
+    exact ((tensorInnerScalar_contMDiff (I := I) (M := M) g 0 s
+        W.toSection Z.toSection).continuous).mul
+      ((DifferentialGeometry.Integral.DivergenceTheorem.divergence_g_contMDiff (I := I) g
+        ⟨fun y : M => Vb y, hVb⟩).continuous)
+  rw [MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => by
+    rw [h1 x, h2 x]))] at heng
+  have h12 : Integrable
+      (fun x : M => tensorInnerScalar (I := I) (M := M) g 0 s
+          (covApplyGenCc (I := I) (M := M) g s W hVb).toSection Z.toSection x +
+        tensorInnerScalar (I := I) (M := M) g 0 s
+          W.toSection (covApplyGenCc (I := I) (M := M) g s Z hVb).toSection x)
+      (riemannianVolumeMeasure (I := I) (M := M) g) := hint1.add hint2
+  rw [MeasureTheory.integral_add h12 hint3,
+    MeasureTheory.integral_add hint1 hint2] at heng
+  linarith [heng]
+
+set_option linter.unusedSectionVars false in
+/-- **The slot-`0` `V b`-read of the spectator section `appCc (slotExtend Φ₀) (∇S)` is the
+order-`0` curvature-operator action on the packaged directional gradient `∇_{V b} S`.**  This is
+the unit-evaluated spectator law `appCc_slotExtend_curvOpField_covGrad_unit_eval` lifted to the
+packaged carrier equality the per-`b` fold assembly consumes. -/
+private lemma spectatorSlot0_eq_appCc_gradSlot
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {Vb : Π b : M, TangentSpace I b}
+    (hVb : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Vb b⟩ : TotalSpace E (TangentSpace I)))) (x : M) :
+    tensor0SAsRS (I := I) (M := M) x
+        ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+            (appCc (I := I) (M := M) g (s + 1) (s + 1)
+              (slotExtend (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s))
+              (covGrad (I := I) (M := M) g 0 s S)).toSection x)
+            (unitZeroSec (I := I) (M := M) x))) (Vb x)) =
+      (appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)
+        (bochnerGradSlot0Cc (I := I) (M := M) g s S hVb)).toSection x := by
+  classical
+  apply tensorRSSpace_ext (𝕜 := ℝ) 0 s x
+  intro d
+  -- Left side: the wrap evaluates by scalar-rescaling of the curried value.
+  rw [tensor0SAsRS_apply (I := I) (M := M) x _ d]
+  -- Right side: the operator-field action evaluates fibrewise on the wrapped gradient slot.
+  rw [appCc_toSection (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)
+    (bochnerGradSlot0Cc (I := I) (M := M) g s S hVb) x]
+  rw [ContinuousLinearMap.comp_apply]
+  rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+        (bochnerGradSlot0Cc (I := I) (M := M) g s S hVb).toSection x) d =
+      tensor00Scalar (I := I) (M := M) x d •
+        gradCurry0 (I := I) (M := M) g s S x (Vb x) from by
+    rw [show (bochnerGradSlot0Cc (I := I) (M := M) g s S hVb).toSection x =
+        tensor0SAsRS (I := I) (M := M) x
+          (gradCurry0 (I := I) (M := M) g s S x (Vb x)) from rfl]
+    exact tensor0SAsRS_apply (I := I) (M := M) x _ d]
+  rw [ContinuousLinearMap.map_smul]
+  congr 1
+
+set_option linter.unusedSectionVars false in
+/-- **The operator-field pairing three-term reduction (Green/B-rule normal form of the
+differentiated-curvature pairing).** For a fixed smooth Parseval frame family, the frame-free
+operator-field pairing `⟨appCc (covGrad Φ₀) S, ∇S⟩_{L²}` (`Φ₀ := curvOpField g s`) equals the
+negated frame sum
+```
+−∑_b ∫ [ ⟨P, ∇_{V b}(∇_{V b} S)⟩ + ⟨P, ∇_{V b} S⟩·divᵍ(V b) + ⟨Φ₀(∇_{V b} S), ∇_{V b} S⟩ ],
+```
+with `P := appCc Φ₀ S` the order-`0` curvature trace.  This is the operator-field B-rule split
+`tensorL2Inner_covGrad_appCc_eq_add` (isolating the spectator `appCc (slotExtend Φ₀)(∇S)`), the
+per-`b` fold of both summands (`fold_assembly_perB`, the spectator slot-read
+`spectatorSlot0_eq_appCc_gradSlot`), and the per-direction covariant integration by parts
+`integral_covApplyPair_IBP` moving `∇_{V b}` off `P`. -/
+private theorem tensorL2Inner_genuineDiffCurv_covGrad_eq_neg_threeTerm
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
+    tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (appCc (I := I) (M := M) g s (s + 1)
+          (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun =
+      - ∑ b : Fin N,
+        ((∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+            (appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s) S).toSection
+            (covApplyGenCc (I := I) (M := M) g s
+              (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)) (hV b)).toSection x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
+        (∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+            (appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s) S).toSection
+            (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x *
+            DifferentialGeometry.Integral.DivergenceTheorem.divergence_g (I := I) g
+              ⟨fun y : M => V b y, hV b⟩ x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
+        (∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+            (appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)
+              (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))).toSection
+            (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g))) := by
+  classical
+  set Φ₀ : SmoothCcTensor g s s := curvOpField (I := I) (M := M) g s with hΦ₀_def
+  set P : SmoothCcTensor g 0 s := appCc (I := I) (M := M) g s s Φ₀ S with hP_def
+  -- The B-rule split of `⟨∇(appCc Φ₀ S), ∇S⟩`.
+  have hsplit := tensorL2Inner_covGrad_appCc_eq_add (I := I) (M := M) g s s Φ₀ S
+    (covGrad (I := I) (M := M) g 0 s S)
+  -- Fold the gradient-pairing summand per `b`.
+  have hgradfold : tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+      (covGrad (I := I) (M := M) g 0 s P).toFun
+      (covGrad (I := I) (M := M) g 0 s S).toFun =
+      ∑ b : Fin N,
+        ∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+            (bochnerGradSlot0Cc (I := I) (M := M) g s P (hV b)).toSection
+            (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
+    fold_assembly_perB (I := I) (M := M) g s S V hV hPar
+      (covGrad (I := I) (M := M) g 0 s P)
+      (fun b => bochnerGradSlot0Cc (I := I) (M := M) g s P (hV b))
+      (fun b x => rfl)
+  -- Fold the spectator summand per `b`.
+  have hspecfold : tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+      (appCc (I := I) (M := M) g (s + 1) (s + 1)
+        (slotExtend (I := I) (M := M) g s s Φ₀)
+        (covGrad (I := I) (M := M) g 0 s S)).toFun
+      (covGrad (I := I) (M := M) g 0 s S).toFun =
+      ∑ b : Fin N,
+        ∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+            (appCc (I := I) (M := M) g s s Φ₀
+              (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))).toSection
+            (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
+    fold_assembly_perB (I := I) (M := M) g s S V hV hPar
+      (appCc (I := I) (M := M) g (s + 1) (s + 1)
+        (slotExtend (I := I) (M := M) g s s Φ₀)
+        (covGrad (I := I) (M := M) g 0 s S))
+      (fun b => appCc (I := I) (M := M) g s s Φ₀
+        (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)))
+      (fun b x => spectatorSlot0_eq_appCc_gradSlot (I := I) (M := M) g s S (hV b) x)
+  -- Per-`b` IBP on the gradient pairing: `⟨∇_b P, ∇_b S⟩ = −⟨P, ∇_b(∇_b S)⟩ − ⟨P, ∇_b S⟩·div`.
+  have hIBP : ∀ b : Fin N,
+      (∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+          (bochnerGradSlot0Cc (I := I) (M := M) g s P (hV b)).toSection
+          (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+      - (∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+          P.toSection (covApplyGenCc (I := I) (M := M) g s
+            (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)) (hV b)).toSection x
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) -
+      (∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+          P.toSection (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x *
+          DifferentialGeometry.Integral.DivergenceTheorem.divergence_g (I := I) g
+            ⟨fun y : M => V b y, hV b⟩ x
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
+    intro b
+    have hcongr1 : (∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+          (bochnerGradSlot0Cc (I := I) (M := M) g s P (hV b)).toSection
+          (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+        (∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+          (covApplyGenCc (I := I) (M := M) g s P (hV b)).toSection
+          (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
+      refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+      rw [tensorInnerScalar_apply (I := I) (M := M) g 0 s,
+        tensorInnerScalar_apply (I := I) (M := M) g 0 s]
+      congr 1
+      rw [bochnerGradSlot0Cc_toSection_apply (I := I) (M := M) g s P (hV b) x,
+        bochnerGradSlot0_eq_covApply (I := I) (M := M) g s P (V b) x]
+      rfl
+    rw [hcongr1]
+    exact integral_covApplyPair_IBP (I := I) (M := M) g s P
+      (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)) (hV b)
+  -- Assemble.
+  have hmain : tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+      (appCc (I := I) (M := M) g s (s + 1)
+        (covGrad (I := I) (M := M) g s s Φ₀) S).toFun
+      (covGrad (I := I) (M := M) g 0 s S).toFun =
+      (∑ b : Fin N,
+        ∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+            (bochnerGradSlot0Cc (I := I) (M := M) g s P (hV b)).toSection
+            (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) -
+      (∑ b : Fin N,
+        ∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+            (appCc (I := I) (M := M) g s s Φ₀
+              (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))).toSection
+            (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
+    rw [← hgradfold, ← hspecfold]
+    linarith [hsplit]
+  rw [hmain, Finset.sum_congr rfl (fun b _ => hIBP b)]
+  rw [← Finset.sum_neg_distrib, ← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl (fun b _ => ?_)
+  ring
+
+set_option linter.unusedSectionVars false in
 /-- **The differentiated-curvature operator-field identification (posited primitive): the frame-free
 operator-field pairing is the gauge-cancelling difference `G₄ − I₂`.**  For a fixed smooth Parseval
 frame family `V a`, the global metric `L²` pairing of the differentiated-curvature operator-field
@@ -4670,12 +5244,24 @@ the difference, unlike the dim-≥-3-refuted per-group value assignments (`G₃ 
 `G₂ + G₄ = operator residue`; `PROVE_REFUTED.md`, "Kernel per-group VALUE-ASSIGNMENT family"),
 which this statement does not transit.
 
-**Route for the genuine proof (the body is an honest `sorry`).**  Expand the second-order group-`4`
-carrier `−∇²_{∇_{V b} V a, V a} S − ∇²_{V a, ∇_{V b} V a} S` and the cross pairing `I₂` through the
-covariant Leibniz rule along the Parseval family, telescope the `∇V`-frame terms by the covariant
-antisymmetry `parsevalFrame_sum_covDeriv_inner_antisymm`, and identify the surviving content with
-the slot-`0` read of the operator-field trace `appCc (covGrad Φ₀) S` through the carrier laws of
-`SlotOperatorCarrierCalculus` / `ParsevalFrameDiffCurvatureTrace` — the same covariant-IBP genre as
+**Route for the genuine proof (the body is an honest `sorry`; two reductions are PROVEN above).**
+Two of the three legs are landed sorry-free in this file: the group-`4` fold vanishes outright
+(`bochnerFoldGroupSum_elt4_eq_zero` — the genuine Hessian is value-bilinear in its direction
+slots by `tensorSecondCovDeriv_unit_eq_twoSlotCurry`, so the cometric-parallel pair antisymmetry
+kills the `a`-sum pointwise), and the left side reduces by the B-rule split and the per-direction
+covariant IBP to the three-term normal form
+`tensorL2Inner_genuineDiffCurv_covGrad_eq_neg_threeTerm`,
+`LHS = −∑_b ∫ [⟨P, ∇_b(∇_b S)⟩ + ⟨P, ∇_b S⟩·divᵍ V_b + ⟨Φ₀(∇_b S), ∇_b S⟩]` with
+`P := appCc Φ₀ S`.  The remaining content is the single integrated identity
+`∑_b ∫ [⟨P, ∇_b∇_b S⟩ + ⟨P, ∇_b S⟩·divᵍ V_b + ⟨Φ₀(∇_b S), ∇_b S⟩] = I₂`: expand the `Φ₀`-pairings
+through the rank-`s` Parseval value bridge (`pureRGenuineDiffOp_zero_succ_toSection_unit_eval` +
+`parseval_family_sum_bilin_eq`, mirroring `gcurv_slot0_eq_parseval_sum_elt1` one rank down), apply
+the curry-Leibniz law (`tensorCovDerivAt_curryCc_eq`), the cometric antisymmetry
+(`parsevalFrame_sum_bilin_covDeriv_pair_antisymm`), and the tension/divergence kill
+`∑_k [∇_{V_k} V_k + (divᵍ V_k)·V_k] = 0`, reducing to the integrated second-Bianchi cross
+pairing `∑_{a,b,k} ∫ ⟨(∇_{V_b} R̃)(V_a, V_k)(curry_{V_a} S), curry_{V_k}(∇_{V_b} S)⟩ = −I₂`
+(`R̃` the rank-`(s−1)` curvature endomorphism), which is the contracted-Bianchi emission
+(`nablaTensor0SCurv_cyclic_eq_zero` + the per-direction IBP) — the same covariant-IBP genre as
 the `D`-primitive, numerically consistent with it through the chain endpoint.  Consumers (the
 frame-free corollary below, and through it the three-section curvature value of
 `MovingFrameRemainderFrameSumBridge`) transitively depend on its `sorryAx`. -/
