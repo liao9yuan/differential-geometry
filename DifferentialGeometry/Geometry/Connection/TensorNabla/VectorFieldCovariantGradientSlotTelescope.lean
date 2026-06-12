@@ -442,6 +442,82 @@ theorem symLoweredDeTurckVFRetagG0_sub_eq_slotTelescope
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
+/-- **(POSIT — the connection-slot single-leg Hamilton-tame jet engine.)**  The
+connection-slot leg of the `g₀`-lowered mixed DeTurck-gradient carrier difference: only the
+Levi-Civita connection metric is varied `g₀ → g₁` (lowering fixed at `g₀`, field fixed at the
+perturbed `g₁`).  The carrier is `loweredCovGradDeTurckVFMixed g₀ g₀ g₁ g₁ g_bg −
+loweredCovGradDeTurckVFMixed g₀ g₀ g₀ g₁ g_bg`, whose fibre is the connection-difference
+contraction `g₀((∇^{g₁} − ∇^{g₀})_v W₁, w)`, `W₁ = deTurckVF g₁ g_bg`.  Same three-clause shape
+as the diagonal node: a background jet sup of the fixed background carrier, an order-`0` value
+sup, and an integrated Hamilton-tame bound `≤ C · ∑_{i ∈ range(l+3)} ‖∇^i T₁‖²`.  Body `sorry`:
+a posited deep leg (consumers transitively depend on `sorryAx`), discharged by the connDiff jet
+engine `exists_riemannianFiberNormSq_iteratedCovGrad_loweredConnDiff_le_jetSum`. -/
+theorem loweredCovGradDeTurckVFMixed_connSlot_iteratedCovGrad_hamiltonTame_le
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (l : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      (∀ x : M,
+        Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l
+              (loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₀ g_bg)).toSection x) ≤ C ^ 2) ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+          (∀ x : M,
+            Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+              ((loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₁ g₁ g_bg
+                  - loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₁ g_bg).toSection x) ≤
+                C ^ 2) ∧
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l
+              (loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₁ g₁ g_bg
+                - loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₁ g_bg)‖ ^ 2 ≤
+            C * ∑ i ∈ Finset.range (l + 3),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2 :=
+  sorry
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
+set_option linter.unusedSectionVars false in
+/-- **(POSIT — the field-slot single-leg Hamilton-tame jet engine.)**  The field-slot leg of
+the `g₀`-lowered mixed DeTurck-gradient carrier difference: only the DeTurck field metric is
+varied `g₀ → g₁` (lowering and connection both fixed at `g₀`).  The carrier is
+`loweredCovGradDeTurckVFMixed g₀ g₀ g₀ g₁ g_bg − loweredCovGradDeTurckVFMixed g₀ g₀ g₀ g₀ g_bg`,
+whose fibre is the field-difference contraction `g₀(∇^{g₀}_v (W₁ − W₀), w)`,
+`Wᵢ = deTurckVF gᵢ g_bg`.  Same three-clause shape as the diagonal node: a background jet sup of
+the fixed background carrier, an order-`0` value sup, and an integrated Hamilton-tame bound
+`≤ C · ∑_{i ∈ range(l+3)} ‖∇^i T₁‖²`.  Body `sorry`: a posited deep leg (consumers transitively
+depend on `sorryAx`), discharged by the field-difference jet expansion of the DeTurck vector
+field. -/
+theorem loweredCovGradDeTurckVFMixed_fldSlot_iteratedCovGrad_hamiltonTame_le
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (l : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      (∀ x : M,
+        Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l
+              (loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₀ g_bg)).toSection x) ≤ C ^ 2) ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+          (∀ x : M,
+            Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+              ((loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₁ g_bg
+                  - loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₀ g_bg).toSection x) ≤
+                C ^ 2) ∧
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l
+              (loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₁ g_bg
+                - loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₀ g_bg)‖ ^ 2 ≤
+            C * ∑ i ∈ Finset.range (l + 3),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2 :=
+  sorry
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
+set_option linter.unusedSectionVars false in
 /-- **(POSIT — the family-uniform Hamilton-tame jet engine of the `g₀`-lowered mixed
 DeTurck-gradient carrier.)**  For an anchor `g₀`, a flow background `g_bg`, a supercritical order
 `a` (`2a > dim + 4`), a family bound `B`, fibre-smallness `δ < 1/2`, and a gradient order `l`,
@@ -461,9 +537,10 @@ there is one constant `C = C(g₀, g_bg, a, B, δ, l) ≥ 0` such that
     `rfns(F(g₁) − F_bg)(x) ≤ C²` (supercritical `C²`-control of the metric jet, order `0`
     ONLY — pointwise family bounds on `≥ 1`-jets are refuted and not stated); and
   - (**integrated Hamilton-tame jet bound**)
-    `‖∇^l (F(g₁) − F_bg)‖² ≤ C · ∑_{i ≤ l+1} ‖∇^i T₁‖²` — the carrier difference is a
-    realized-Koszul first-order contraction of the `T₁`-jet, so its order-`l` jet carries at
-    most the order-`(l+1)` jets of `T₁`, with a family-uniform Hamilton-tame constant.
+    `‖∇^l (F(g₁) − F_bg)‖² ≤ C · ∑_{i ≤ l+2} ‖∇^i T₁‖²` — the carrier difference is a
+    realized-Koszul second-order contraction of the `T₁`-jet (the carrier is second-order in the
+    metric), so its order-`l` jet carries at most the order-`(l+2)` jets of `T₁`, with a
+    family-uniform Hamilton-tame constant.
 
 The carrier is `g₀`-LOWERED (`g_low = g₀`): the consumer extracts the raw covariant gradient
 `∇^{g₁} W₁` from the carrier through the `g₀`-cometric trace, which is the unique
@@ -502,9 +579,59 @@ theorem loweredCovGradDeTurckVFMixed_diag_iteratedCovGrad_hamiltonTame_le
           ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l
               (loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₁ g₁ g_bg
                 - loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₀ g_bg)‖ ^ 2 ≤
-            C * ∑ i ∈ Finset.range (l + 2),
-              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2 :=
-  sorry
+            C * ∑ i ∈ Finset.range (l + 3),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2 := by
+  classical
+  obtain ⟨C_A, hCA_nn, hbgA, hfamA⟩ :=
+    loweredCovGradDeTurckVFMixed_connSlot_iteratedCovGrad_hamiltonTame_le
+      (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1 l
+  obtain ⟨C_B, hCB_nn, _hbgB, hfamB⟩ :=
+    loweredCovGradDeTurckVFMixed_fldSlot_iteratedCovGrad_hamiltonTame_le
+      (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1 l
+  refine ⟨2 * (C_A + C_B) + 1, by positivity, ?_, ?_⟩
+  · intro x
+    refine le_trans (hbgA x) ?_
+    have hle : C_A ≤ 2 * (C_A + C_B) + 1 := by nlinarith
+    nlinarith [sq_nonneg C_A, sq_nonneg (2 * (C_A + C_B) + 1 - C_A)]
+  · intro T₁ g₁ hg₁ hδbnd hB₁
+    obtain ⟨hvalA, hintA⟩ := hfamA T₁ g₁ hg₁ hδbnd hB₁
+    obtain ⟨hvalB, hintB⟩ := hfamB T₁ g₁ hg₁ hδbnd hB₁
+    set cA : Integral.L2.SmoothCcTensor g₀ 0 2 :=
+      loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₁ g₁ g_bg
+        - loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₁ g_bg with hcA
+    set cB : Integral.L2.SmoothCcTensor g₀ 0 2 :=
+      loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₁ g_bg
+        - loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₀ g_bg with hcB
+    have hPsum : loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₁ g₁ g_bg
+        - loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₀ g_bg = cA + cB := by
+      rw [hcA, hcB]; abel
+    have hSnn : (0 : ℝ) ≤ ∑ i ∈ Finset.range (l + 3),
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2 :=
+      Finset.sum_nonneg fun i _ => sq_nonneg _
+    refine ⟨?_, ?_⟩
+    · intro x
+      rw [hPsum, Integral.L2.SmoothCcTensor.toSection_add]
+      refine le_trans
+        (Integral.Connection.riemannianFiberNormSq_add_le (I := I) g₀ 0 2 x
+          (cA.toSection x) (cB.toSection x)) ?_
+      have hA' := hvalA x
+      have hB' := hvalB x
+      nlinarith [hA', hB', hCA_nn, hCB_nn, sq_nonneg (C_A + C_B), sq_nonneg (C_A - C_B)]
+    · rw [hPsum, PDE.RicciFlow.iteratedCovGrad_add]
+      refine le_trans (sq_le_sq' ?_ (norm_add_le _ _)) ?_
+      · have := norm_nonneg
+          (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l cA
+            + PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l cB)
+        nlinarith [norm_nonneg (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l cA),
+          norm_nonneg (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l cB)]
+      · refine le_trans (add_sq_le_two_mul_sq_add_sq _ _) ?_
+        have hAi : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l cA‖ ^ 2 ≤
+            C_A * ∑ i ∈ Finset.range (l + 3),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2 := hintA
+        have hBi : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l cB‖ ^ 2 ≤
+            C_B * ∑ i ∈ Finset.range (l + 3),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2 := hintB
+        nlinarith [hAi, hBi, hSnn, hCA_nn, hCB_nn]
 
 end Pullback
 end RicciFlow
