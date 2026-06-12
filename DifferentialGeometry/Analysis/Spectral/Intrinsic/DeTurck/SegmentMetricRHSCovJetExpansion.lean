@@ -47,8 +47,19 @@ sup — exactly the **binomial-Leibniz `rfns` domination** the Moser-tame produc
 
 ## What is proved vs. posited
 
+Each of the three Moser-tame `L²` dominations below is stated and proven **j-uncapped** (the
+`allOrder` form, `∀ j : ℕ`, the classical Hamilton-TAME shape: the constant family depends only on
+the fixed `H^{a+2}`-ball data `(g₀, g_bg, a, B, δ)` at every order, with no size threshold rebinding
+to a higher Sobolev space at higher orders — the shape the per-order Picard invariance system needs
+to be downward well-founded); the historical `j ≤ 2 * a` consumer-window forms are kept as verbatim
+specializations.  Every ingredient (the diagonal product grids, the integrated Gagliardo–Nirenberg
+two-arm engine, the sharp-order embeddings at the fixed orders `a` and `a + 2`, the realize-jet `L²`
+conversion, and the integrated gauge two-product posit) takes an unconstrained gradient order, so the
+former cap carried no mathematical content.
+
 * The headline **per-order covariant Faà-di-Bruno Moser-tame `L²` domination** of the retagged DeTurck
-  right-hand-side section difference, `exists_segmentMetricRHSDiff_faaDiBruno_moserTame_l2Norm_le`, is
+  right-hand-side section difference, `exists_segmentMetricRHSDiff_faaDiBruno_moserTame_allOrder_l2Norm_le`
+  (window specialization `exists_segmentMetricRHSDiff_faaDiBruno_moserTame_l2Norm_le`), is
   **proven by composition** here: the second-order Ricci–DeTurck right-hand side `F(g) = -2 • Ric(g) +
   𝓛_{W(g, g_bg)} g` is split additively into its two genuine `SmoothCcTensor` summands — the curvature
   summand `ricciNeg2CcSection` and the Lie-derivative summand `lieDerivCcSection` — via the proven
@@ -440,8 +451,8 @@ theorem lieDerivDiff_order0_linearCross_split
   exists_lieDerivDiff_connLevel_split (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
 
 /-- **The per-field covariant-Faà-di-Bruno Moser-tame `L²` domination of the segment-metric
-*Ricci-curvature* summand difference (the curvature half of the geometric nonlinearity, stated at the
-`L²`-consumable level).**
+*Ricci-curvature* summand difference, at every covariant-gradient order (the curvature half of the
+geometric nonlinearity, stated at the `L²`-consumable level, j-uncapped).**
 
 The Ricci half of the second-order Ricci–DeTurck right-hand side, `-2 • Ric(g)`, is a fibrewise-smooth
 function of the metric `≤2`-jet `(g, ∇g, ∇²g)` and the fibre-inverse `g⁻¹` (schematically
@@ -449,15 +460,23 @@ function of the metric `≤2`-jet `(g, ∇g, ∇²g)` and the fibre-inverse `g�
 of **intrinsic order capped at `2`**.  For an anchor `g₀`, an order `a`, a supercriticality hypothesis
 `ha`, and a uniform `H^{a+2}`-size bound `B ≥ 0`, there is an order-indexed nonnegative constant family
 `C` such that for any two `g₀`-fibre-small perturbations `T₁, T₂` with `H^{a+2}` norms `≤ B`, any two
-realized metrics `g₁, g₂` of `T₁, T₂`, and every order `j ≤ 2 * a`, the metric `L²` (semi)norm of the
+realized metrics `g₁, g₂` of `T₁, T₂`, and **every order `j : ℕ`**, the metric `L²` (semi)norm of the
 `j`-th covariant gradient of the `g₀`-retagged curvature-summand difference
 `ricciNeg2RetagG0 g₀ g₁ − ricciNeg2RetagG0 g₀ g₂` is dominated by the **Hamilton/Moser-tame sum**
 (a difference-redistribution part plus a fixed-pair cross term)
 ```
 ‖∇^j (ricciNeg2RetagG0 g₁ − ricciNeg2RetagG0 g₂)‖_{L²}
   ≤ C j · ( ‖(T₁ − T₂).toHs a‖ + ∑_{i ≤ j + 2} ‖∇^i (T₁ − T₂)‖_{L²} )
-    + C j · ( ∑_{i ≤ j + 2} (‖∇^i T₁‖_{L²} + ‖∇^i T₂‖_{L²}) ) · ‖(T₁ − T₂).toHs a‖   (for j ≤ 2 * a).
+    + C j · ( ∑_{i ≤ j + 2} (‖∇^i T₁‖_{L²} + ‖∇^i T₂‖_{L²}) ) · ‖(T₁ − T₂).toHs a‖   (for every j).
 ```
+
+This is the classical **TAME shape**: the constant `C j` may grow in `j` but depends only on the
+data of the FIXED low-order ball — `(g₀, a, B, δ)` and the order `j` — never on any norm of `T₁, T₂`
+above the `H^{a+2}` ball.  No size threshold rebinds to a higher Sobolev space at higher `j`: every
+ingredient of the proof (the two diagonal product grids, the integrated Gagliardo–Nirenberg two-arm
+engine at window `j + 2`, the sharp-order `C⁰` embeddings at the fixed orders `a` and `a + 2`, and
+the realize-jet `L²` conversion) is available at every order `j`, so the per-order Picard invariance
+system this feeds is downward well-founded.
 
 This is the covariant Faà-di-Bruno expansion of the curvature nonlinearity, lifted to `L²` by the
 intrinsic Moser tame product `exists_moserTameProduct_iteratedCovGrad_l2Norm_le`: the covariant FTC
@@ -506,7 +525,7 @@ with the sharp-order `C⁰` sups `exists_realizedJetSum_le_toHs_sharpOrder` (ord
 Consumers transitively depend on `sorryAx` only through the four corrected posits (the two grids, the
 integrated engine, the sharp-order embedding), with NO pointwise-`C^{>2}`-jet claim, NO pointwise
 two-arm split, NO spectral-nonlinearity, and NO Weyl dependence. -/
-theorem exists_ricciNeg2Diff_faaDiBruno_moserTame_l2Norm_le
+theorem exists_ricciNeg2Diff_faaDiBruno_moserTame_allOrder_l2Norm_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
     ∃ C : ℕ → ℝ, (∀ j, 0 ≤ C j) ∧
@@ -520,7 +539,7 @@ theorem exists_ricciNeg2Diff_faaDiBruno_moserTame_l2Norm_le
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
-        ∀ j : ℕ, j ≤ 2 * a →
+        ∀ j : ℕ,
           ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
               (ricciNeg2RetagG0 (I := I) g₀ g₁
                 - ricciNeg2RetagG0 (I := I) g₀ g₂)‖ ≤
@@ -564,7 +583,7 @@ theorem exists_ricciNeg2Diff_faaDiBruno_moserTame_l2Norm_le
     have h3 : 0 ≤ Real.sqrt (CdL j * C2 j) + Real.sqrt (CdC j * C2 j) :=
       add_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
     exact add_nonneg (mul_nonneg h2 h1) (mul_nonneg h3 (le_of_lt hC3_pos))
-  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j _hj
+  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j
   -- `Λ_S`: the pointwise `C⁰` sup of the realized difference factor, from the sharp-order
   -- embedding at order `a` and the order-`0` jet-sum extraction.
   have hsupW : ∀ x : M,
@@ -1132,6 +1151,43 @@ theorem exists_ricciNeg2Diff_faaDiBruno_moserTame_l2Norm_le
           * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ := by
         nlinarith [hk1, hk2, hp1, hp2, hp3, hp4]
 
+/-- **The per-field covariant-Faà-di-Bruno Moser-tame `L²` domination of the segment-metric
+*Ricci-curvature* summand difference, on the consumer window `j ≤ 2 * a`.**
+
+The specialization of the j-uncapped Hamilton-tame estimate
+`exists_ricciNeg2Diff_faaDiBruno_moserTame_allOrder_l2Norm_le` to the gradient-order window
+`j ≤ 2 * a` of the downstream `2a`-order consumers; the window cap carries no mathematical content
+(the all-order constant family restricts verbatim). -/
+theorem exists_ricciNeg2Diff_faaDiBruno_moserTame_l2Norm_le
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
+    ∃ C : ℕ → ℝ, (∀ j, 0 ≤ C j) ∧
+      ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+        (g₁ g₂ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+        ∀ j : ℕ, j ≤ 2 * a →
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+              (ricciNeg2RetagG0 (I := I) g₀ g₁
+                - ricciNeg2RetagG0 (I := I) g₀ g₂)‖ ≤
+            C j * (‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
+                + ∑ i ∈ Finset.range (j + 2 + 1),
+                    ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖)
+              + C j * (∑ i ∈ Finset.range (j + 2 + 1),
+                    (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
+                      + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
+                  * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ := by
+  obtain ⟨C, hC_nn, hC⟩ :=
+    exists_ricciNeg2Diff_faaDiBruno_moserTame_allOrder_l2Norm_le (I := I) g₀ a ha B hB δ hδ0 hδ1
+  exact ⟨C, hC_nn, fun T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j _ =>
+    hC T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j⟩
+
 /-- **The covariant Faà-di-Bruno difference/cross split of the Lie-derivative summand difference
 (the deep covariant-gauge-jet structural posit).**
 
@@ -1351,8 +1407,8 @@ theorem lieDerivDiff_covFdB_integrated_twoProduct_l2NormSq_le
   nlinarith [hsplit_norm, hAdiff, hCross]
 
 /-- **The per-field covariant-Faà-di-Bruno Moser-tame `L²` domination of the segment-metric
-*Lie-derivative* summand difference (the gauge half of the geometric nonlinearity, stated at the
-`L²`-consumable level).**
+*Lie-derivative* summand difference, at every covariant-gradient order (the gauge half of the
+geometric nonlinearity, stated at the `L²`-consumable level, j-uncapped).**
 
 The Lie half of the second-order Ricci–DeTurck right-hand side, `𝓛_{W(g, g_bg)} g` with `W = deTurckVF`
 the metric-`g`-trace of the connection difference, is a fibrewise-smooth function of the metric `≤2`-jet
@@ -1361,15 +1417,20 @@ Neumann factors carrying intrinsic order `0`), of **intrinsic order capped at `2
 `g₀`, a flow background `g_bg`, an order `a`, a supercriticality hypothesis `ha`, and a uniform
 `H^{a+2}`-size bound `B ≥ 0`, there is an order-indexed nonnegative constant family `C` such that for
 any two `g₀`-fibre-small perturbations `T₁, T₂` with `H^{a+2}` norms `≤ B`, any two realized metrics
-`g₁, g₂` of `T₁, T₂`, and every order `j ≤ 2 * a`, the metric `L²` (semi)norm of the `j`-th covariant
+`g₁, g₂` of `T₁, T₂`, and **every order `j : ℕ`**, the metric `L²` (semi)norm of the `j`-th covariant
 gradient of the `g₀`-retagged Lie-summand difference
 `lieDerivRetagG0 g₀ g_bg g₁ − lieDerivRetagG0 g₀ g_bg g₂` is dominated by the **Hamilton/Moser-tame
 sum** (a difference-redistribution part plus a fixed-pair cross term)
 ```
 ‖∇^j (lieDerivRetagG0 g₁ − lieDerivRetagG0 g₂)‖_{L²}
   ≤ C j · ( ‖(T₁ − T₂).toHs a‖ + ∑_{i ≤ j + 2} ‖∇^i (T₁ − T₂)‖_{L²} )
-    + C j · ( ∑_{i ≤ j + 2} (‖∇^i T₁‖_{L²} + ‖∇^i T₂‖_{L²}) ) · ‖(T₁ − T₂).toHs a‖   (for j ≤ 2 * a).
+    + C j · ( ∑_{i ≤ j + 2} (‖∇^i T₁‖_{L²} + ‖∇^i T₂‖_{L²}) ) · ‖(T₁ − T₂).toHs a‖   (for every j).
 ```
+
+This is the classical **TAME shape**: the constant `C j` may grow in `j` but depends only on the
+data of the FIXED low-order ball — `(g₀, g_bg, a, B, δ)` and the order `j` — never on any norm of
+`T₁, T₂` above the `H^{a+2}` ball, and no size threshold rebinds to a higher Sobolev space at
+higher `j`.
 
 This is the covariant Faà-di-Bruno expansion of the Lie/`deTurckVF` nonlinearity, lifted to `L²` by the
 intrinsic Moser tame product (same Hamilton-tame structure as the curvature half).  The top coefficient
@@ -1387,10 +1448,13 @@ perturbation-difference jets.
 contradicting the bound; so `C 0 > 0` and the domination genuinely uses the perturbation difference.
 The cross term's `∑(‖∇^i T₁‖ + ‖∇^i T₂‖)` genuinely uses **both** endpoints, so it is not vacuous.
 
-Its body is `sorry`: the gauge half of the genuine atomic covariant-Faà-di-Bruno (Nemytskii) `L²`
-expansion — the deep metric-jet analytic content of the Lie/`deTurckVF` nonlinearity, with NO
-pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, and NO Weyl dependence. -/
-theorem exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le
+It is **proven by composition** from the per-order integrated two-product domination
+`lieDerivDiff_covFdB_integrated_twoProduct_l2NormSq_le` (whose order argument `j` is unconstrained)
+via the two-arm `√`-domination `twoArm_le_of_sq_le` and the realize-jet `L²` conversion
+`realizeSymm_iteratedCovGrad_l2Norm_le_jetSum` — the gauge half of the genuine atomic
+covariant-Faà-di-Bruno (Nemytskii) `L²` expansion, with NO pointwise-`C^{>2}`-jet claim, NO
+spectral-nonlinearity, and NO Weyl dependence. -/
+theorem exists_lieDerivDiff_faaDiBruno_moserTame_allOrder_l2Norm_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
     ∃ C : ℕ → ℝ, (∀ j, 0 ≤ C j) ∧
@@ -1404,7 +1468,7 @@ theorem exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
-        ∀ j : ℕ, j ≤ 2 * a →
+        ∀ j : ℕ,
           ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
               (lieDerivRetagG0 (I := I) g₀ g_bg g₁
                 - lieDerivRetagG0 (I := I) g₀ g_bg g₂)‖ ≤
@@ -1430,7 +1494,7 @@ theorem exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le
   · have : 0 ≤ Λ j * ∑ i ∈ Finset.range (j + 2 + 1), Cr i :=
       mul_nonneg (hΛ_nn j) (Finset.sum_nonneg fun i _ => hCr_nn i)
     linarith
-  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j hj
+  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j
   set D₀ : ℝ := ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
     with hD₀_def
   have hD₀_nn : 0 ≤ D₀ := norm_nonneg _
@@ -1528,9 +1592,46 @@ theorem exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le
           linarith
         linarith [he1, he2]
 
+/-- **The per-field covariant-Faà-di-Bruno Moser-tame `L²` domination of the segment-metric
+*Lie-derivative* summand difference, on the consumer window `j ≤ 2 * a`.**
+
+The specialization of the j-uncapped Hamilton-tame estimate
+`exists_lieDerivDiff_faaDiBruno_moserTame_allOrder_l2Norm_le` to the gradient-order window
+`j ≤ 2 * a` of the downstream `2a`-order consumers; the window cap carries no mathematical content
+(the all-order constant family restricts verbatim). -/
+theorem exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
+    ∃ C : ℕ → ℝ, (∀ j, 0 ≤ C j) ∧
+      ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+        (g₁ g₂ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+        ∀ j : ℕ, j ≤ 2 * a →
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+              (lieDerivRetagG0 (I := I) g₀ g_bg g₁
+                - lieDerivRetagG0 (I := I) g₀ g_bg g₂)‖ ≤
+            C j * (‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
+                + ∑ i ∈ Finset.range (j + 2 + 1),
+                    ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖)
+              + C j * (∑ i ∈ Finset.range (j + 2 + 1),
+                    (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
+                      + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
+                  * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ := by
+  obtain ⟨C, hC_nn, hC⟩ :=
+    exists_lieDerivDiff_faaDiBruno_moserTame_allOrder_l2Norm_le (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
+  exact ⟨C, hC_nn, fun T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j _ =>
+    hC T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j⟩
+
 /-- **The per-order covariant-Faà-di-Bruno Moser-tame `L²` domination of the segment-metric
-DeTurck right-hand-side difference (the genuine atomic metric-jet Nemytskii primitive, stated at the
-`L²`-consumable level).**
+DeTurck right-hand-side difference, at every covariant-gradient order (the genuine atomic metric-jet
+Nemytskii primitive, stated at the `L²`-consumable level, j-uncapped).**
 
 For an anchor `g₀`, a flow background `g_bg`, an order `a`, a supercriticality hypothesis
 `ha : 2 * a > Module.finrank ℝ E + 4`, and a uniform `H^{a+2}`-size bound `B ≥ 0`, there is an
@@ -1538,8 +1639,8 @@ order-indexed nonnegative constant family `C : ℕ → ℝ` (absorbing the bound
 coefficient sup `Λ`, the segment-metric `L²`-jet mass, the `C⁰`-embedding constant, the binomial
 covariant-Leibniz factors, and the finitely many contraction-shape constants) such that for any two
 `g₀`-fibre-small perturbations `T₁, T₂` whose `H^{a+2}` norms are `≤ B`, any two realized metrics
-`g₁, g₂` of `T₁, T₂` (tied by the fibrewise `inner`-identities), and every covariant-gradient order
-`j ≤ 2 * a`, the metric `L²` (semi)norm of the `j`-th covariant gradient of the **re-tagged DeTurck
+`g₁, g₂` of `T₁, T₂` (tied by the fibrewise `inner`-identities), and **every covariant-gradient order
+`j : ℕ`**, the metric `L²` (semi)norm of the `j`-th covariant gradient of the **re-tagged DeTurck
 right-hand-side section difference** `deTurckRHSRetagG0 g₀ g_bg g₁ − deTurckRHSRetagG0 g₀ g_bg g₂` is
 dominated by the **Hamilton/Moser-tame sum** — an order-`a` chart-Sobolev `C⁰`-redistribution
 term against the iterated covariant `L²`-gradients of the perturbation difference `T₁ − T₂`, plus a
@@ -1547,8 +1648,16 @@ fixed-pair cross term carrying the unbounded top coefficient jet:
 ```
 ‖∇^j (deTurckRHSRetagG0 g₁ − deTurckRHSRetagG0 g₂)‖_{L²}
   ≤ C j · ( ‖(T₁ − T₂).toHs a‖ + ∑_{i ≤ j + 2} ‖∇^i (T₁ − T₂)‖_{L²} )
-    + C j · ( ∑_{i ≤ j + 2} (‖∇^i T₁‖_{L²} + ‖∇^i T₂‖_{L²}) ) · ‖(T₁ − T₂).toHs a‖   (for j ≤ 2 * a).
+    + C j · ( ∑_{i ≤ j + 2} (‖∇^i T₁‖_{L²} + ‖∇^i T₂‖_{L²}) ) · ‖(T₁ − T₂).toHs a‖   (for every j).
 ```
+
+This is the classical **TAME shape** (Hamilton's category of tame Fréchet estimates): the constant
+`C j` may grow in `j` but depends only on the data of the FIXED low-order ball — `(g₀, g_bg, a, B,
+δ)` and the order `j` — never on any norm of `T₁, T₂` above the `H^{a+2}` ball, and no size
+threshold rebinds to a higher Sobolev space at higher instantiations.  This is exactly what makes
+the per-order Picard invariance system downward well-founded: each order `j` consumes the SAME
+`H^{a+2}`-ball hypotheses, with the unbounded high-order content carried linearly by the fixed-pair
+cross factor, never by the constant.
 
 This is the genuine **covariant Faà-di-Bruno expansion** of the *non-linear* summand `Ric + Lie` of
 the second-order Ricci–DeTurck right-hand side, lifted to `L²` by the intrinsic Moser tame product
@@ -1603,8 +1712,8 @@ distinct curvatures), the left side is `> 0` while `0 · (… ) = 0`, contradict
 
 It is **proven by composition** (TRANSIT glue) of the two **per-field** covariant-Faà-di-Bruno
 Moser-tame `L²` primitives — the curvature-summand difference bound
-`exists_ricciNeg2Diff_faaDiBruno_moserTame_l2Norm_le` and the Lie-summand difference bound
-`exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le` — over the additive `Ric + Lie` split of the
+`exists_ricciNeg2Diff_faaDiBruno_moserTame_allOrder_l2Norm_le` and the Lie-summand difference bound
+`exists_lieDerivDiff_faaDiBruno_moserTame_allOrder_l2Norm_le` — over the additive `Ric + Lie` split of the
 re-tagged DeTurck right-hand-side section `deTurckRHSRetagG0_eq_ricciNeg2_add_lieDeriv` (the section is
 the sum of its genuine `SmoothCcTensor` curvature and Lie summands).  Since the section difference
 `deTurckRHSRetagG0 g₁ − deTurckRHSRetagG0 g₂` splits as `(ricciNeg2RetagG0 g₁ − ricciNeg2RetagG0 g₂) +
@@ -1615,7 +1724,7 @@ analytic content — the covariant Faà-di-Bruno (Nemytskii) `L²` expansion of 
 with NO pointwise-`C^{>2}`-jet claim, NO spectral-nonlinearity, NO perturbation-indexed-remainder, and
 NO Weyl dependence — lives in the two per-field primitives.  Consumers transitively depend on `sorryAx`
 only through those two atomic per-field covariant-Faà-di-Bruno Moser-tame `L²` primitives. -/
-theorem exists_segmentMetricRHSDiff_faaDiBruno_moserTame_l2Norm_le
+theorem exists_segmentMetricRHSDiff_faaDiBruno_moserTame_allOrder_l2Norm_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
     ∃ C : ℕ → ℝ, (∀ j, 0 ≤ C j) ∧
@@ -1629,7 +1738,7 @@ theorem exists_segmentMetricRHSDiff_faaDiBruno_moserTame_l2Norm_le
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
-        ∀ j : ℕ, j ≤ 2 * a →
+        ∀ j : ℕ,
           ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
               (deTurckRHSRetagG0 (I := I) g₀ g_bg g₁
                 - deTurckRHSRetagG0 (I := I) g₀ g_bg g₂)‖ ≤
@@ -1643,12 +1752,12 @@ theorem exists_segmentMetricRHSDiff_faaDiBruno_moserTame_l2Norm_le
   classical
   -- The two per-field covariant-Faà-di-Bruno Moser-tame `L²` primitives (curvature and Lie halves).
   obtain ⟨Cric, hCric_nn, hCric⟩ :=
-    exists_ricciNeg2Diff_faaDiBruno_moserTame_l2Norm_le (I := I) g₀ a ha B hB δ hδ0 hδ1
+    exists_ricciNeg2Diff_faaDiBruno_moserTame_allOrder_l2Norm_le (I := I) g₀ a ha B hB δ hδ0 hδ1
   obtain ⟨Clie, hClie_nn, hClie⟩ :=
-    exists_lieDerivDiff_faaDiBruno_moserTame_l2Norm_le (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
+    exists_lieDerivDiff_faaDiBruno_moserTame_allOrder_l2Norm_le (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
   -- The combined per-order constant.
   refine ⟨fun j => Cric j + Clie j, fun j => add_nonneg (hCric_nn j) (hClie_nn j), ?_⟩
-  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j hj
+  intro T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j
   -- Abbreviate the common difference-redistribution sum and the fixed-pair cross factor.
   set R : ℝ := ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
       + ∑ i ∈ Finset.range (j + 2 + 1),
@@ -1667,9 +1776,9 @@ theorem exists_segmentMetricRHSDiff_faaDiBruno_moserTame_l2Norm_le
     abel
   -- The `j`-th covariant gradient of the difference splits additively.
   rw [hsplit, PDE.RicciFlow.iteratedCovGrad_add]
-  -- The two per-field child bounds, specialized to this `j ≤ 2a`.
-  have hric := hCric T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j hj
-  have hlie := hClie T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j hj
+  -- The two per-field child bounds at this order `j`.
+  have hric := hCric T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j
+  have hlie := hClie T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j
   rw [← hR_def] at hric hlie
   -- Triangle inequality on the `L²` seminorm, then the two child bounds and the constant split.
   calc ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
@@ -1695,6 +1804,46 @@ theorem exists_segmentMetricRHSDiff_faaDiBruno_moserTame_l2Norm_le
                 + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
             * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ := by
         ring
+
+/-- **The per-order covariant-Faà-di-Bruno Moser-tame `L²` domination of the segment-metric
+DeTurck right-hand-side difference, on the consumer window `j ≤ 2 * a`.**
+
+The specialization of the j-uncapped Hamilton-tame estimate
+`exists_segmentMetricRHSDiff_faaDiBruno_moserTame_allOrder_l2Norm_le` to the gradient-order window
+`j ≤ 2 * a` of the downstream `2a`-order consumers; the window cap carries no mathematical content
+(the all-order constant family restricts verbatim).  New consumers — in particular the per-order
+Picard invariance system, whose downward well-foundedness needs constants depending only on the
+fixed `H^{a+2}` ball at EVERY order — should consume the all-order form directly. -/
+theorem exists_segmentMetricRHSDiff_faaDiBruno_moserTame_l2Norm_le
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
+    ∃ C : ℕ → ℝ, (∀ j, 0 ≤ C j) ∧
+      ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+        (g₁ g₂ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+        ∀ j : ℕ, j ≤ 2 * a →
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+              (deTurckRHSRetagG0 (I := I) g₀ g_bg g₁
+                - deTurckRHSRetagG0 (I := I) g₀ g_bg g₂)‖ ≤
+            C j * (‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
+                + ∑ i ∈ Finset.range (j + 2 + 1),
+                    ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖)
+              + C j * (∑ i ∈ Finset.range (j + 2 + 1),
+                    (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖
+                      + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖))
+                  * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ := by
+  obtain ⟨C, hC_nn, hC⟩ :=
+    exists_segmentMetricRHSDiff_faaDiBruno_moserTame_allOrder_l2Norm_le (I := I) g₀ g_bg a ha B hB
+      δ hδ0 hδ1
+  exact ⟨C, hC_nn, fun T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j _ =>
+    hC T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ j⟩
 
 end DeTurck
 end IntrinsicSpectral
