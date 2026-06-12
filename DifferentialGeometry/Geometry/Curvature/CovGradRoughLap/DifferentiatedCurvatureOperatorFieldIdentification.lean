@@ -59,8 +59,10 @@ and bottoms out at this single clean classical value identity without any downst
   the *integrated* frame-free `L²` level throughout — it never extracts a per-direction `M → E` quantity —
   so it is trap-screened. It is proved sorry-free over the moving-frame remainder nullity
   `movingFrameNullity_diffCurvOpField_leaf` (the three-section carrier's remainder is `L²`-orthogonal to
-  `∇S`) — the curvature line's single irreducible genuine deep root, posited with a `sorry` body;
-  consumers transitively depend on its `sorryAx`.
+  `∇S`) — itself sorry-free glue over the upstream three-section value
+  `tensorL2Inner_curv_covGrad_eq_genuineThreeSection_value` (`MovingFrameRemainderFrameSumBridge`),
+  whose single genuine posit is `bochnerWeitzenbock_threeSection_curvatureValue_posit`; consumers
+  transitively depend on that posit's `sorryAx`.
 
 * `bracketChannelFrameSum_integral_eq_diffCurvOpField_ricTrace` — the **bracket-channel integrated deep
   root** (the curvature line's single irreducible genuine content, in its strictly-smaller form). The
@@ -71,8 +73,8 @@ and bottoms out at this single clean classical value identity without any downst
   trace = operator-field carrier identification, (ii) second-Bianchi Ricci fold, and (iii) bracket
   discrepancy = total covariant divergence → 0. It is proved sorry-free over the moving-frame remainder
   nullity `movingFrameNullity_diffCurvOpField_leaf` by the sorry-free pure-Riemann genuine-sum
-  identification and left additivity of the `L²` pairing; consumers transitively depend on the nullity's
-  `sorryAx`.
+  identification and left additivity of the `L²` pairing; consumers transitively depend on the upstream
+  bridge posit's `sorryAx` (`bochnerWeitzenbock_threeSection_curvatureValue_posit`).
 
   **Non-vacuity (the `s = 0` Bochner litmus rejects the degenerate carrier).** At `s = 0` the pure-Riemann
   and differentiated-curvature carriers vanish (`GcurvSection g 0 f` reads the curvature of a scalar, which
@@ -160,19 +162,19 @@ degenerate witness) the moving-frame remainder of a non-flat manifold has genuin
 integral is `∫ Ric(∇f, ∇f)` at `s = 0`, `ricTraceSection_zero_apply`), so the genuine curvature carriers
 are required.
 
-**The body is `sorry`** — the genuine coupled integrated content: (i) the integrated identification of the
-frame-summed differentiated-curvature trace `∑ᵢ ∇_{Bᵢ}(R(Bᵢ, ·) S)` with the operator-field carrier
-`appCc (∇(Φ₀ s)) S` (the operator-field B-rule, `OperatorFieldPairingIBP`), (ii) the second-Bianchi /
-frame-Ricci cyclic fold into the raised Ricci endomorphism `ricTraceSection g s S` (`ContractedBianchi`,
-`DifferentiatedSlotwiseCurvature`), and (iii) the residual frame-bracket discrepancy a total covariant
-divergence integrating to zero (`BracketDivergenceForm`, `MovingFrameIntegratedNullity`). A sound
-reduction route: by the section-level operator-field B-rule `covGrad_appCc_eq`
-(`OperatorFieldCovariantCalculus`) and `appCc_curvOpField_eq_pureRGenuineDiffOp` the carrier
-`appCc (∇(Φ₀ s)) S` rewrites to `covGrad (pureRGenuineDiffOp g 0 s S) − appCc (slotExtend (Φ₀ s)) (∇S)`
-(eliminating the `covGrad`-of-`Classical.choose` object), and the pointwise Green current
-`divergence_dirichletVFRS_eq` (`TensorDirichletCurrentGreenIdentityRS`) converts the `covGrad`-pairing
-into a divergence minus a Laplacian pairing, reducing the genuine content to the frame-free five-pairing
-integrated residue. Consumers transitively depend on `sorryAx`. -/
+**Proof (sorry-free glue over the upstream three-section value).** The required cross-pairing value
+`⟨GcurvSection g s S + Gcd, ∇S⟩_{L²} = ‖Δ_∇ S‖²_{L²} − ‖∇²S‖²_{L²}` is supplied by the upstream
+frame-free three-section value `tensorL2Inner_curv_covGrad_eq_genuineThreeSection_value`
+(`MovingFrameRemainderFrameSumBridge`, itself sorry-free over the single genuine posit
+`bochnerWeitzenbock_threeSection_curvatureValue_posit`) together with the sorry-free Weitzenböck value
+`weitzenbock_curvature_crossPairing_value` and left additivity of the `L²` pairing
+(`tensorL2Inner_add_left`, the cross-integrabilities `SmoothCcTensor.integrable_inner_cross`); the
+nullity then follows by `movingFrameNullity_of_genuineCrossPairingValue`.  The former route through the
+per-group Parseval Bochner folds (`bochnerFold_group3_eq_ricTrace`,
+`bochnerFold_group2_add_group4_eq_operatorResidue`) was DELETED: those per-group value assignments are
+FALSE in dim ≥ 3 (`PROVE_REFUTED.md`, "Kernel per-group VALUE-ASSIGNMENT family") — their `±N` errors
+happened to cancel in this summed conclusion, which is TRUE and is now glued off the healthy posit
+only. Consumers transitively depend on the bridge posit's `sorryAx`. -/
 theorem movingFrameNullity_diffCurvOpField_leaf
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     tensorL2Inner (I := I) (M := M) g 0 (s + 1)
@@ -183,33 +185,15 @@ theorem movingFrameNullity_diffCurvOpField_leaf
             ricTraceSection (I := I) (M := M) g s S)).toFun
         (covGrad (I := I) (M := M) g 0 s S).toFun = 0 := by
   classical
-  -- Fix a global smooth Parseval frame family.
-  obtain ⟨N, V, hV, hPar⟩ := exists_smooth_parseval_frame_family (I := I) (M := M) g
   -- The gauge carrier `Gcd = appCc (∇Φ₀) S + ricTraceSection g s S`.
   set Gcd : SmoothCcTensor g 0 (s + 1) :=
     appCc (I := I) (M := M) g s (s + 1)
         (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S +
       ricTraceSection (I := I) (M := M) g s S with hGcd
   refine movingFrameNullity_of_genuineCrossPairingValue (I := I) (M := M) g s S Gcd ?_
-  -- The four folds (fixed-Parseval-family group→carrier identities): groups `2` and `4` combine into a
-  -- single operator-field IBP residue (the group-`2` summand is not separately divergence-free).
-  have hf1 := bochnerFold_group1_eq_GcurvSection (I := I) (M := M) g s S V hV hPar
-  have hf3 := bochnerFold_group3_eq_ricTrace (I := I) (M := M) g s S V hV hPar
-  have hf24 := bochnerFold_group2_add_group4_eq_operatorResidue (I := I) (M := M) g s S V hV hPar
-  have hf5 := bochnerFold_sevenTermSum_eq_pointwiseTensorCurvPairing
-    (I := I) (M := M) g s S V hV hPar
-  -- The operator-field B-rule integration-by-parts residue (with `appCc Φ₀ S = pureRGenuineDiffOp g 0 s S`).
-  have hbase : appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s) S =
-      pureRGenuineDiffOp (I := I) (M := M) g 0 s S := by
-    have := appCc_curvOpField_eq_pureRGenuineDiffOp (I := I) (M := M) g s S
-    simpa using this
-  have hIBP := tensorL2Inner_appCc_covGrad_covGrad_eq_neg (I := I) (M := M) g s
-    (curvOpField (I := I) (M := M) g s) S
-  rw [hbase] at hIBP
-  -- The connection-Laplacian Green identity for the pure-Riemann gradient pairing.
-  have hGreen := tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_gen (I := I) (M := M) g s
-    (pureRGenuineDiffOp (I := I) (M := M) g 0 s S) S
-  -- The integrated Weitzenböck curvature value.
+  -- The upstream three-section value (sorry-free over the single bridge posit
+  -- `bochnerWeitzenbock_threeSection_curvatureValue_posit`) and the Weitzenböck value.
+  have hStar := tensorL2Inner_curv_covGrad_eq_genuineThreeSection_value (I := I) (M := M) g s S
   have hwz := weitzenbock_curvature_crossPairing_value (I := I) (M := M) g s S
   -- Split the genuine-fields pairing by left additivity.
   have hsplitA := tensorL2Inner_add_left (I := I) (M := M) g 0 (s + 1)
@@ -259,7 +243,7 @@ theorem movingFrameNullity_diffCurvOpField_leaf
           (ricTraceSection (I := I) (M := M) g s S).toFun from SmoothCcTensor.toFun_add _ _]
     rw [hsplitB]
   rw [hsplit]
-  linarith [hf1, hf3, hf24, hf5, hIBP, hGreen, hwz]
+  linarith [hStar, hwz]
 
 /-- **The frame-bracket remainder frame-sum integral carries the differentiated-curvature operator-field
 trace plus the leading-slot Ricci trace (the curvature line's single irreducible integrated deep root —
