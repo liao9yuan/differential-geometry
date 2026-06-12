@@ -82,8 +82,10 @@ on the **concrete** Lie Cross section `lieCrossSection g₀ g_bg g₁ g₂`
 (`SegmentMetricLieSectionDecomposition.lean`).
 
 For an anchor `g₀`, a flow background `g_bg`, an order `a`, a supercriticality hypothesis `ha`, a uniform
-`H^{a+2}`-size bound `B ≥ 0`, and fibre-smallness `δ < 1/2`, there is a nonnegative constant `Cd` (uniform
-over the gradient order `j` and the perturbation family) such that for any two `g₀`-fibre-small
+`H^{a+2}`-size bound `B ≥ 0`, and fibre-smallness `δ < 1/2`, there is a nonnegative **per-order constant
+family** `Cd : ℕ → ℝ` (each `Cd j` uniform over the perturbation family; per-order because the
+Lie-derivative nonlinearity doubles frequencies, so a `j`-uniform constant is refuted on flat `T²`) such
+that for any two `g₀`-fibre-small
 perturbations `T₁, T₂` with `H^{a+2}` norms `≤ B` and any two realized metrics `g₁, g₂` of `T₁, T₂`, the
 intrinsic squared fibre norm of the order-`j` covariant gradient of the concrete Lie Cross section
 `lieCrossSection g₀ g_bg g₁ g₂` is dominated by the Hamilton/Moser two-arm sum, whose
@@ -92,7 +94,7 @@ difference factor `w := realizeSymmCcTensor g₀ (T₁ − T₂)`, plus the fixe
 cross piece keeping the top coefficient jet on the fixed pair `T₁, T₂` against the difference's order-`a`
 chart-Sobolev `C⁰` mass:
 ```
-rfns(∇^j (lieCrossSection))(x) ≤ Cd · ∑_{i ≤ j+2} rfns(∇^i w)(x)
+rfns(∇^j (lieCrossSection))(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x)
                                + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D².
 ```
 
@@ -119,7 +121,7 @@ transitively depend on `sorryAx` only through that named section-data leaf. -/
 theorem lieCrossSection_iteratedCovGrad_connLevel_rfns_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
-    ∃ Cd : ℝ, 0 ≤ Cd ∧
+    ∃ Cd : ℕ → ℝ, (∀ j, 0 ≤ Cd j) ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
         (∀ (x : M) (v w : TangentSpace I x),
@@ -133,7 +135,7 @@ theorem lieCrossSection_iteratedCovGrad_connLevel_rfns_le
         ∀ (j : ℕ),
           ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
                 (lieCrossSection (I := I) g₀ g_bg g₁ g₂)‖ ^ 2 ≤
-            Cd * ∑ i ∈ Finset.range (j + 2 + 1),
+            Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                 ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                     (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
               + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),

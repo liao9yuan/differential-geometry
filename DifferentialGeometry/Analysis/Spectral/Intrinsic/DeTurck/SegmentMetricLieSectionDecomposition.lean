@@ -125,14 +125,15 @@ field, whose top/rest split is the deep gauge primitive
 intrinsic replacement of the banned chart-witness route).
 
 For an anchor `g₀`, a flow background `g_bg`, an order `a`, a supercriticality hypothesis `ha`, a uniform
-`H^{a+2}`-size bound `B ≥ 0`, and fibre-smallness `δ < 1/2`, there is a nonnegative constant `Cd` (uniform
-over the gradient order `j` and the perturbation family) such that for any two `g₀`-fibre-small
-perturbations `T₁, T₂` with `H^{a+2}` norms `≤ B` and any two realized metrics `g₁, g₂` of `T₁, T₂`, the
-order-`j` covariant gradient of the full Lie-summand difference splits, at each point `x`, into a
-**difference-jet** part `Top` and a **fixed-pair cross** part `Rest`,
+`H^{a+2}`-size bound `B ≥ 0`, fibre-smallness `δ < 1/2`, and **each gradient order `j`**, there is a
+nonnegative constant `Cd = Cd(j)` (uniform over the perturbation family, but per-order: the
+Lie-derivative nonlinearity doubles frequencies, so a `j`-uniform constant is refuted on flat `T²`) such
+that for any two `g₀`-fibre-small perturbations `T₁, T₂` with `H^{a+2}` norms `≤ B` and any two realized
+metrics `g₁, g₂` of `T₁, T₂`, the order-`j` covariant gradient of the full Lie-summand difference
+splits, at each point `x`, into a **difference-jet** part `Top` and a **fixed-pair cross** part `Rest`,
 ```
 ∇^j (diff)(x) = Top + Rest,
-rfns(Top)(x)  ≤ Cd · ∑_{i ≤ j+2} rfns(∇^i w)(x),
+rfns(Top)(x)  ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x),
 rfns(Rest)(x) ≤ (1/8) · (∑_{i ≤ j+2} (rfns(∇^i T₁)(x) + rfns(∇^i T₂)(x))) · ‖(T₁ − T₂).toHs a‖²,
 ```
 where `w := realizeSymmCcTensor g₀ (T₁ − T₂)`; the order-`0` jet `rfns(w)` is included.
@@ -182,7 +183,7 @@ spectral-nonlinearity, NO Weyl dependence.  Proved by the intrinsic Cartan bridg
 through the chart-free deep gauge primitive `symLoweredDeTurckVF_iteratedCovGrad_topRest_split`. -/
 theorem lieDerivDiff_connLevel_topRestSplit (g₀ g_bg : SmoothRiemannianMetric I M)
     (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (j : ℕ) :
     ∃ Cd : ℝ, 0 ≤ Cd ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -194,7 +195,6 @@ theorem lieDerivDiff_connLevel_topRestSplit (g₀ g_bg : SmoothRiemannianMetric 
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
-        ∀ (j : ℕ),
           ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
                 (lieDerivRetagG0 (I := I) g₀ g_bg g₁
                     - lieDerivRetagG0 (I := I) g₀ g_bg g₂)‖ ^ 2 ≤
@@ -205,21 +205,23 @@ theorem lieDerivDiff_connLevel_topRestSplit (g₀ g_bg : SmoothRiemannianMetric 
                   (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
                     + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
                 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 :=
-  lieDerivDiff_intrinsic_covFdB_section_expansion (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
+  lieDerivDiff_intrinsic_covFdB_section_expansion (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1 j
 
 /-- **(DERIVED — the full retagged Lie-summand difference's two-arm covariant-jet bound.)**
 
 For an anchor `g₀` and a flow background `g_bg`, every order `a` with the supercriticality hypothesis
-`ha`, every uniform `H^{a+2}`-size bound `B ≥ 0`, and every fibre-smallness `δ < 1/2`, there is a
-nonnegative constant `Cd` (uniform over the gradient order `j` and the perturbation family) such that for
+`ha`, every uniform `H^{a+2}`-size bound `B ≥ 0`, every fibre-smallness `δ < 1/2`, and **each gradient
+order `j`**, there is a nonnegative constant `Cd = Cd(j)` (uniform over the perturbation family, but
+per-order: the Lie-derivative nonlinearity doubles frequencies, so a `j`-uniform constant is refuted on
+flat `T²`) such that for
 any two `g₀`-fibre-small perturbations `T₁, T₂` with `H^{a+2}` norms `≤ B` and any two realized metrics
-`g₁, g₂` of `T₁, T₂`, the per-order covariant gradient of the **full** `g₀`-retagged Lie-summand
+`g₁, g₂` of `T₁, T₂`, the order-`j` covariant gradient of the **full** `g₀`-retagged Lie-summand
 difference `diff := lieDerivRetagG0 g₀ g_bg g₁ − lieDerivRetagG0 g₀ g_bg g₂` is dominated by the
 Hamilton/Moser two-arm sum whose difference arm is the **0-jet-inclusive** order-`≤ j+2` covariant jet sum of the realized
 difference factor `w := realizeSymmCcTensor g₀ (T₁ − T₂)`, and whose cross arm keeps the top coefficient jet on the fixed
 pair `T₁, T₂` against the difference's order-`a` chart-Sobolev `C⁰` mass `D := ‖(T₁ − T₂).toHs a‖`:
 ```
-rfns(∇^j diff)(x) ≤ Cd · ∑_{i ≤ j+2} rfns(∇^i w)(x)
+rfns(∇^j diff)(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x)
                    + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D².
 ```
 
@@ -244,7 +246,7 @@ Lie-summand difference vanishes (`lieDerivRetagG0_sub_toModel_eq`), `w = 0` and 
 NO Weyl dependence. -/
 theorem lieDerivDiff_connLevel_fullTwoArm (g₀ g_bg : SmoothRiemannianMetric I M)
     (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (j : ℕ) :
     ∃ Cd : ℝ, 0 ≤ Cd ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -256,7 +258,6 @@ theorem lieDerivDiff_connLevel_fullTwoArm (g₀ g_bg : SmoothRiemannianMetric I 
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
-        ∀ (j : ℕ),
           ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
                 (lieDerivRetagG0 (I := I) g₀ g_bg g₁
                     - lieDerivRetagG0 (I := I) g₀ g_bg g₂)‖ ^ 2 ≤
@@ -271,16 +272,17 @@ theorem lieDerivDiff_connLevel_fullTwoArm (g₀ g_bg : SmoothRiemannianMetric I 
   -- `lieDerivDiff_connLevel_topRestSplit` is now stated at the integrated `L²`-norm-squared level (the
   -- pointwise per-`x` top/rest split being false for the middle covariant-Leibniz terms at high
   -- frequency — Gagliardo–Nirenberg interpolation content), so no `riemannianFiberNormSq_add_le`
-  -- recombination is needed; this node is the integrated bound verbatim.
-  lieDerivDiff_connLevel_topRestSplit (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
+  -- recombination is needed; this node is the integrated bound verbatim, per order.
+  lieDerivDiff_connLevel_topRestSplit (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1 j
 
 /-- **(DERIVED — the intrinsic Lie value-split bundled with BOTH arms.)**
 
 For an anchor `g₀` and a flow background `g_bg`, there is a smooth cross-section family
 `Cf : g₁ g₂ ↦ Cf g₁ g₂ : SmoothCcTensor g₀ 0 2` — chosen once, independent of the order `a` — such that
 for every order `a` with the supercriticality hypothesis `ha`, every uniform `H^{a+2}`-size bound `B ≥ 0`,
-and every fibre-smallness `δ < 1/2`, there is a nonnegative constant `Cd` (uniform over the gradient order
-`j` and the perturbation family) such that for any two `g₀`-fibre-small perturbations `T₁, T₂` with
+and every fibre-smallness `δ < 1/2`, there is a nonnegative **per-order constant family** `Cd : ℕ → ℝ`
+(each `Cd j` uniform over the perturbation family; per-order because the Lie-derivative nonlinearity
+doubles frequencies, so a `j`-uniform constant is refuted on flat `T²`) such that for any two `g₀`-fibre-small perturbations `T₁, T₂` with
 `H^{a+2}` norms `≤ B` and any two realized metrics `g₁, g₂` of `T₁, T₂`, **both** the algebraic-complement
 linear part `diff − Cf g₁ g₂` of the `g₀`-retagged Lie-summand difference
 `diff := lieDerivRetagG0 g₀ g_bg g₁ − lieDerivRetagG0 g₀ g_bg g₂` **and** the Cross part `Cf g₁ g₂` itself
@@ -288,9 +290,9 @@ have their per-order covariant gradient dominated by the Hamilton/Moser two-arm 
 whose difference arm is the **0-jet-inclusive** order-`≤ j+2` covariant jet sum of the realized
 difference factor `w := realizeSymmCcTensor g₀ (T₁ − T₂)`:
 ```
-rfns(∇^j (diff − Cf g₁ g₂))(x) ≤ Cd · ∑_{i ≤ j+2} rfns(∇^i w)(x)
+rfns(∇^j (diff − Cf g₁ g₂))(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x)
                                 + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
-rfns(∇^j (Cf g₁ g₂))(x)        ≤ Cd · ∑_{i ≤ j+2} rfns(∇^i w)(x)
+rfns(∇^j (Cf g₁ g₂))(x)        ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x)
                                 + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
 ```
 with `D := ‖(T₁ − T₂).toHs a‖`.
@@ -332,7 +334,7 @@ theorem lieDerivDiff_connLevel_valueSplitLinear (g₀ g_bg : SmoothRiemannianMet
         Integral.L2.SmoothCcTensor g₀ 0 2,
       ∀ (a : ℕ), 2 * a > Module.finrank ℝ E + 4 →
       ∀ (B : ℝ), 0 ≤ B → ∀ (δ : ℝ), 0 ≤ δ → δ < 1 / 2 →
-        ∃ Cd : ℝ, 0 ≤ Cd ∧
+        ∃ Cd : ℕ → ℝ, (∀ j, 0 ≤ Cd j) ∧
           ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
             (g₁ g₂ : SmoothRiemannianMetric I M),
             (∀ (x : M) (v w : TangentSpace I x),
@@ -347,7 +349,7 @@ theorem lieDerivDiff_connLevel_valueSplitLinear (g₀ g_bg : SmoothRiemannianMet
               ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
                     ((lieDerivRetagG0 (I := I) g₀ g_bg g₁
                         - lieDerivRetagG0 (I := I) g₀ g_bg g₂) - Cf g₁ g₂)‖ ^ 2 ≤
-                Cd * ∑ i ∈ Finset.range (j + 2 + 1),
+                Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                     ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                         (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
                   + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
@@ -356,7 +358,7 @@ theorem lieDerivDiff_connLevel_valueSplitLinear (g₀ g_bg : SmoothRiemannianMet
                     * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) ∧
             (∀ (j : ℕ),
               ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j (Cf g₁ g₂)‖ ^ 2 ≤
-                Cd * ∑ i ∈ Finset.range (j + 2 + 1),
+                Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                     ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                         (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
                   + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
@@ -371,14 +373,14 @@ theorem lieDerivDiff_connLevel_valueSplitLinear (g₀ g_bg : SmoothRiemannianMet
   -- jet `L²` norm; the intrinsic Lie cross *value* being genuinely absent on disk, the section's higher
   -- jets are unpinned, and the downstream consumers extract only the integrated two-arm jet grids.
   refine ⟨fun _ _ => 0, fun a ha B hB δ hδ0 hδ1 => ?_⟩
-  obtain ⟨Cd, hCd0, hfull⟩ :=
-    lieDerivDiff_connLevel_fullTwoArm (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
+  choose Cd hCd0 hfull using
+    fun j => lieDerivDiff_connLevel_fullTwoArm (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1 j
   refine ⟨Cd, hCd0, fun T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 => ⟨fun j => ?_, fun j => ?_⟩⟩
-  · -- Linear arm `diff − Cf = diff − 0 = diff`: the full integrated two-arm primitive.
+  · -- Linear arm `diff − Cf = diff − 0 = diff`: the full integrated two-arm primitive at order `j`.
     have hzero : (lieDerivRetagG0 (I := I) g₀ g_bg g₁ - lieDerivRetagG0 (I := I) g₀ g_bg g₂) - 0 =
         lieDerivRetagG0 (I := I) g₀ g_bg g₁ - lieDerivRetagG0 (I := I) g₀ g_bg g₂ := sub_zero _
     rw [hzero]
-    exact hfull T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 j
+    exact hfull j T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2
   · -- Cross arm `Cf = 0`: zero jet `L²` norm, below the nonnegative integrated two-arm right-hand side.
     have hCf0 : ((fun _ _ => 0 : SmoothRiemannianMetric I M → SmoothRiemannianMetric I M →
         Integral.L2.SmoothCcTensor g₀ 0 2) g₁ g₂) = 0 := rfl
@@ -399,9 +401,9 @@ theorem lieDerivDiff_connLevel_valueSplitLinear (g₀ g_bg : SmoothRiemannianMet
         (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
           + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2) :=
       Finset.sum_nonneg fun i _ => add_nonneg (sq_nonneg _) (sq_nonneg _)
-    have h1 : (0 : ℝ) ≤ Cd * ∑ i ∈ Finset.range (j + 2 + 1),
+    have h1 : (0 : ℝ) ≤ Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
-            (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2 := mul_nonneg hCd0 hSRnn
+            (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2 := mul_nonneg (hCd0 j) hSRnn
     have h2 : (0 : ℝ) ≤ (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
           (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2
             + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₂‖ ^ 2))
@@ -422,7 +424,7 @@ supercriticality hypothesis `ha`, every uniform `H^{a+2}`-size bound `B ≥ 0`, 
 `δ < 1/2`, there is a nonnegative constant `Cd` such that for any two `g₀`-fibre-small perturbations
 `T₁, T₂` with `H^{a+2}` norms `≤ B` and any two realized metrics `g₁, g₂` of `T₁, T₂`,
 ```
-rfns(∇^j (Cf g₁ g₂))(x) ≤ Cd · ∑_{i ≤ j+2} rfns(∇^i w)(x)
+rfns(∇^j (Cf g₁ g₂))(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x)
                          + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
 ```
 with `w := realizeSymmCcTensor g₀ (T₁ − T₂)` and `D := ‖(T₁ − T₂).toHs a‖`.
@@ -456,7 +458,7 @@ dependence. -/
 theorem lieDerivCrossSection_connLevel_crossArm_ofSplit (g₀ g_bg : SmoothRiemannianMetric I M)
     (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
-    ∃ Cd : ℝ, 0 ≤ Cd ∧
+    ∃ Cd : ℕ → ℝ, (∀ j, 0 ≤ Cd j) ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
         (∀ (x : M) (v w : TangentSpace I x),
@@ -470,7 +472,7 @@ theorem lieDerivCrossSection_connLevel_crossArm_ofSplit (g₀ g_bg : SmoothRiema
         ∀ (j : ℕ),
           ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
                 ((lieDerivDiff_connLevel_valueSplitLinear (I := I) g₀ g_bg).choose g₁ g₂)‖ ^ 2 ≤
-            Cd * ∑ i ∈ Finset.range (j + 2 + 1),
+            Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                 ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                     (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
               + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
@@ -494,8 +496,9 @@ intrinsic-vector Lie value-split, with the 0-jet-inclusive `w`-jet difference ar
 For an anchor `g₀` and a flow background `g_bg`, there is a smooth cross-section family
 `Cf : g₁ g₂ ↦ Cf g₁ g₂ : SmoothCcTensor g₀ 0 2` — chosen once, independent of the order `a` — such that
 for every order `a` with the supercriticality hypothesis `ha`, every uniform `H^{a+2}`-size bound `B ≥ 0`,
-and every fibre-smallness `δ < 1/2`, there is a nonnegative constant `Cd` (uniform over the gradient order
-`j` and the perturbation family) such that for any two `g₀`-fibre-small perturbations `T₁, T₂` with
+and every fibre-smallness `δ < 1/2`, there is a nonnegative **per-order constant family** `Cd : ℕ → ℝ`
+(each `Cd j` uniform over the perturbation family; per-order because the Lie-derivative nonlinearity
+doubles frequencies, so a `j`-uniform constant is refuted on flat `T²`) such that for any two `g₀`-fibre-small perturbations `T₁, T₂` with
 `H^{a+2}` norms `≤ B` and any two realized metrics `g₁, g₂` of `T₁, T₂`, **both** the algebraic-complement
 linear part `diff − Cf g₁ g₂` of the `g₀`-retagged Lie-summand difference
 `diff := lieDerivRetagG0 g₀ g_bg g₁ − lieDerivRetagG0 g₀ g_bg g₂` **and** the Cross part `Cf g₁ g₂` itself
@@ -503,9 +506,9 @@ have their per-order covariant gradient dominated by the Hamilton/Moser two-arm 
 whose difference arm is the **0-jet-inclusive** order-`≤ j+2` covariant jet sum of the realized
 difference factor `w := realizeSymmCcTensor g₀ (T₁ − T₂)`:
 ```
-rfns(∇^j (diff − Cf g₁ g₂))(x) ≤ Cd · ∑_{i ≤ j+2} rfns(∇^i w)(x)
+rfns(∇^j (diff − Cf g₁ g₂))(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x)
                                 + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
-rfns(∇^j (Cf g₁ g₂))(x)        ≤ Cd · ∑_{i ≤ j+2} rfns(∇^i w)(x)
+rfns(∇^j (Cf g₁ g₂))(x)        ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x)
                                 + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
 ```
 with `D := ‖(T₁ − T₂).toHs a‖`.
@@ -561,7 +564,7 @@ theorem lieDerivDiff_connLevel_crossWitness (g₀ g_bg : SmoothRiemannianMetric 
         Integral.L2.SmoothCcTensor g₀ 0 2,
       ∀ (a : ℕ), 2 * a > Module.finrank ℝ E + 4 →
       ∀ (B : ℝ), 0 ≤ B → ∀ (δ : ℝ), 0 ≤ δ → δ < 1 / 2 →
-        ∃ Cd : ℝ, 0 ≤ Cd ∧
+        ∃ Cd : ℕ → ℝ, (∀ j, 0 ≤ Cd j) ∧
           ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
             (g₁ g₂ : SmoothRiemannianMetric I M),
             (∀ (x : M) (v w : TangentSpace I x),
@@ -576,7 +579,7 @@ theorem lieDerivDiff_connLevel_crossWitness (g₀ g_bg : SmoothRiemannianMetric 
               ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
                     ((lieDerivRetagG0 (I := I) g₀ g_bg g₁
                         - lieDerivRetagG0 (I := I) g₀ g_bg g₂) - Cf g₁ g₂)‖ ^ 2 ≤
-                Cd * ∑ i ∈ Finset.range (j + 2 + 1),
+                Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                     ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                         (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
                   + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
@@ -585,7 +588,7 @@ theorem lieDerivDiff_connLevel_crossWitness (g₀ g_bg : SmoothRiemannianMetric 
                     * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) ∧
             (∀ (j : ℕ),
               ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j (Cf g₁ g₂)‖ ^ 2 ≤
-                Cd * ∑ i ∈ Finset.range (j + 2 + 1),
+                Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                     ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                         (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
                   + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
@@ -604,9 +607,10 @@ theorem lieDerivDiff_connLevel_crossWitness (g₀ g_bg : SmoothRiemannianMetric 
     (lieDerivDiff_connLevel_valueSplitLinear (I := I) g₀ g_bg).choose_spec a ha B hB δ hδ0 hδ1
   obtain ⟨CdC, hCdC0, hCross⟩ :=
     lieDerivCrossSection_connLevel_crossArm_ofSplit (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
-  refine ⟨max CdL CdC, le_trans hCdL0 (le_max_left _ _),
+  refine ⟨fun j => max (CdL j) (CdC j), fun j => le_trans (hCdL0 j) (le_max_left _ _),
     fun T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 => ⟨fun j => ?_, fun j => ?_⟩⟩
-  · -- Linear arm `diff − Cf`: the value-split linear bound (`.1`), widened `CdL → max CdL CdC`.
+  · -- Linear arm `diff − Cf`: the value-split linear bound (`.1`), widened per order
+    -- `CdL j → max (CdL j) (CdC j)`.
     refine le_trans ((hLin T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2).1 j) ?_
     have hSRnn : (0 : ℝ) ≤ ∑ i ∈ Finset.range (j + 2 + 1),
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
@@ -616,7 +620,8 @@ theorem lieDerivDiff_connLevel_crossWitness (g₀ g_bg : SmoothRiemannianMetric 
     exact le_max_left _ _
   · -- Cross arm `Cf`: the integrated `w`-jet cross-arm bound on the concrete cross section
     -- `Cf := (lieDerivDiff_connLevel_valueSplitLinear g₀ g_bg).choose`
-    -- (`lieDerivCrossSection_connLevel_crossArm_ofSplit`), widened `CdC → max CdL CdC`.
+    -- (`lieDerivCrossSection_connLevel_crossArm_ofSplit`), widened per order
+    -- `CdC j → max (CdL j) (CdC j)`.
     refine le_trans (hCross T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 j) ?_
     have hSRnn : (0 : ℝ) ≤ ∑ i ∈ Finset.range (j + 2 + 1),
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
@@ -639,7 +644,7 @@ and every fibre-smallness `δ < 1/2`, there is a nonnegative constant `Cd` such 
 Hamilton/Moser two-arm sum whose difference arm is the **0-jet-inclusive** order-`≤ j+2` covariant jet sum of the realized
 difference factor `w := realizeSymmCcTensor g₀ (T₁ − T₂)`:
 ```
-rfns(∇^j (Cf g₁ g₂))(x) ≤ Cd · ∑_{i ≤ j+2} rfns(∇^i w)(x)
+rfns(∇^j (Cf g₁ g₂))(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x)
                          + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
 ```
 with `D := ‖(T₁ − T₂).toHs a‖`.
@@ -673,7 +678,7 @@ NO Weyl dependence. -/
 theorem lieDerivDiff_connLevel_crossWitness_crossArm (g₀ g_bg : SmoothRiemannianMetric I M)
     (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
     (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
-    ∃ Cd : ℝ, 0 ≤ Cd ∧
+    ∃ Cd : ℕ → ℝ, (∀ j, 0 ≤ Cd j) ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
         (∀ (x : M) (v w : TangentSpace I x),
@@ -687,7 +692,7 @@ theorem lieDerivDiff_connLevel_crossWitness_crossArm (g₀ g_bg : SmoothRiemanni
         ∀ (j : ℕ),
           ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
                 ((lieDerivDiff_connLevel_crossWitness (I := I) g₀ g_bg).choose g₁ g₂)‖ ^ 2 ≤
-            Cd * ∑ i ∈ Finset.range (j + 2 + 1),
+            Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                 ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                     (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
               + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
@@ -706,16 +711,18 @@ arms' covariant two-arm bounds, with the 0-jet-inclusive `w`-jet difference arm.
 For an anchor `g₀` and a flow background `g_bg`, there is a smooth cross-section family
 `Cf : g₁ g₂ ↦ Cf g₁ g₂ : SmoothCcTensor g₀ 0 2` such that for every order `a` with the supercriticality
 hypothesis `ha`, every uniform `H^{a+2}`-size bound `B ≥ 0`, and every fibre-smallness `δ < 1/2`, there is
-a nonnegative constant `Cd` (uniform over the gradient order `j` and the perturbation family) such that for
+a nonnegative **per-order constant family** `Cd : ℕ → ℝ` (each `Cd j` uniform over the perturbation
+family; per-order because the Lie-derivative nonlinearity doubles frequencies, so a `j`-uniform constant
+is refuted on flat `T²`) such that for
 any two `g₀`-fibre-small perturbations `T₁, T₂` with `H^{a+2}` norms `≤ B` and any two realized metrics
 `g₁, g₂` of `T₁, T₂`, **both** the algebraic-complement linear part `diff − Cf g₁ g₂` and the Cross part
 `Cf g₁ g₂` of the `g₀`-retagged Lie-summand difference `diff := lieDerivRetagG0 g₀ g_bg g₁ −
 lieDerivRetagG0 g₀ g_bg g₂` have their per-order covariant gradient dominated by the Hamilton/Moser two-arm sum whose difference arm is the **0-jet-inclusive** order-`≤ j+2` covariant jet sum of the realized
 difference factor `w := realizeSymmCcTensor g₀ (T₁ − T₂)`:
 ```
-rfns(∇^j (diff − Cf g₁ g₂))(x) ≤ Cd · ∑_{i ≤ j+2} rfns(∇^i w)(x)
+rfns(∇^j (diff − Cf g₁ g₂))(x) ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x)
                                 + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
-rfns(∇^j (Cf g₁ g₂))(x)        ≤ Cd · ∑_{i ≤ j+2} rfns(∇^i w)(x)
+rfns(∇^j (Cf g₁ g₂))(x)        ≤ Cd(j) · ∑_{i ≤ j+2} rfns(∇^i w)(x)
                                 + (1/4)·(∑_{i ≤ j+2}(rfns(∇^i T₁) + rfns(∇^i T₂)))·D²,
 ```
 with `D := ‖(T₁ − T₂).toHs a‖`.
@@ -759,7 +766,7 @@ theorem lieDerivDiff_connLevel_sectionData (g₀ g_bg : SmoothRiemannianMetric I
         Integral.L2.SmoothCcTensor g₀ 0 2,
       ∀ (a : ℕ), 2 * a > Module.finrank ℝ E + 4 →
       ∀ (B : ℝ), 0 ≤ B → ∀ (δ : ℝ), 0 ≤ δ → δ < 1 / 2 →
-        ∃ Cd : ℝ, 0 ≤ Cd ∧
+        ∃ Cd : ℕ → ℝ, (∀ j, 0 ≤ Cd j) ∧
           ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
             (g₁ g₂ : SmoothRiemannianMetric I M),
             (∀ (x : M) (v w : TangentSpace I x),
@@ -774,7 +781,7 @@ theorem lieDerivDiff_connLevel_sectionData (g₀ g_bg : SmoothRiemannianMetric I
               ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
                     ((lieDerivRetagG0 (I := I) g₀ g_bg g₁
                         - lieDerivRetagG0 (I := I) g₀ g_bg g₂) - Cf g₁ g₂)‖ ^ 2 ≤
-                Cd * ∑ i ∈ Finset.range (j + 2 + 1),
+                Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                     ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                         (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
                   + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
@@ -783,7 +790,7 @@ theorem lieDerivDiff_connLevel_sectionData (g₀ g_bg : SmoothRiemannianMetric I
                     * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2) ∧
             (∀ (j : ℕ),
               ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j (Cf g₁ g₂)‖ ^ 2 ≤
-                Cd * ∑ i ∈ Finset.range (j + 2 + 1),
+                Cd j * ∑ i ∈ Finset.range (j + 2 + 1),
                     ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
                         (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2
                   + (1 / 4 : ℝ) * (∑ i ∈ Finset.range (j + 2 + 1),
@@ -801,9 +808,10 @@ theorem lieDerivDiff_connLevel_sectionData (g₀ g_bg : SmoothRiemannianMetric I
     (lieDerivDiff_connLevel_crossWitness (I := I) g₀ g_bg).choose_spec a ha B hB δ hδ0 hδ1
   obtain ⟨CdC, hCdC0, hC⟩ :=
     lieDerivDiff_connLevel_crossWitness_crossArm (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
-  refine ⟨max CdL CdC, le_trans hCdL0 (le_max_left _ _),
+  refine ⟨fun j => max (CdL j) (CdC j), fun j => le_trans (hCdL0 j) (le_max_left _ _),
     fun T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 => ⟨fun j => ?_, fun j => ?_⟩⟩
-  · -- Linear arm `diff − Cf`: widen `CdL → max CdL CdC` (the difference-arm jet sum is nonnegative).
+  · -- Linear arm `diff − Cf`: widen per order `CdL j → max (CdL j) (CdC j)` (the difference-arm jet
+    -- sum is nonnegative).
     refine le_trans ((hL T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2).1 j) ?_
     have hSRnn : (0 : ℝ) ≤ ∑ i ∈ Finset.range (j + 2 + 1),
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
@@ -811,7 +819,7 @@ theorem lieDerivDiff_connLevel_sectionData (g₀ g_bg : SmoothRiemannianMetric I
       Finset.sum_nonneg fun p _ => sq_nonneg _
     gcongr
     exact le_max_left _ _
-  · -- Cross arm `Cf`: widen `CdC → max CdL CdC`.
+  · -- Cross arm `Cf`: widen per order `CdC j → max (CdL j) (CdC j)`.
     refine le_trans (hC T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 j) ?_
     have hSRnn : (0 : ℝ) ≤ ∑ i ∈ Finset.range (j + 2 + 1),
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i

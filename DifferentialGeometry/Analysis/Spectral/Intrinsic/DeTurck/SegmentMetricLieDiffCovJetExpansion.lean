@@ -86,10 +86,11 @@ bound: the leaf-shaped integrated `L²` bound of the `g₀`-retagged Lie-summand
 difference arm `w := realizeSymmCcTensor g₀ (T₁ − T₂)` and the fixed-pair `(1/4)`-cross arm.
 
 For an anchor `g₀`, a flow background `g_bg`, an order `a`, a supercriticality hypothesis `ha`, a
-uniform `H^{a+2}`-size bound `B ≥ 0`, and fibre-smallness `δ < 1/2`, there is a nonnegative constant
-`Cd` (uniform over the gradient order `j` and the perturbation family) such that for any two
-`g₀`-fibre-small perturbations `T₁, T₂` with `H^{a+2}` norms `≤ B` and any two realized metrics
-`g₁, g₂` of `T₁, T₂`,
+uniform `H^{a+2}`-size bound `B ≥ 0`, fibre-smallness `δ < 1/2`, and **each gradient order `j`**,
+there is a nonnegative constant `Cd = Cd(j)` (uniform over the perturbation family, but per-order: the
+Lie-derivative nonlinearity doubles frequencies, so a `j`-uniform constant is refuted on flat `T²`)
+such that for any two `g₀`-fibre-small perturbations `T₁, T₂` with `H^{a+2}` norms `≤ B` and any two
+realized metrics `g₁, g₂` of `T₁, T₂`,
 ```
 ‖∇^j diff‖² ≤ Cd · ∑_{i ≤ j+2} ‖∇^i w‖²
             + (1/4) · (∑_{i ≤ j+2} (‖∇^i T₁‖² + ‖∇^i T₂‖²)) · ‖(T₁ − T₂).toHs a‖².
@@ -112,7 +113,7 @@ vanishes and the bound is `0 ≤ 0`.  NO value-bounded `Φ.op 0 2 w` shape, NO p
 claim, NO spectral-nonlinearity, NO Weyl dependence. -/
 theorem lieDerivDiff_intrinsic_covFdB_section_expansion (g₀ g_bg : SmoothRiemannianMetric I M)
     (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (j : ℕ) :
     ∃ Cd : ℝ, 0 ≤ Cd ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -124,7 +125,6 @@ theorem lieDerivDiff_intrinsic_covFdB_section_expansion (g₀ g_bg : SmoothRiema
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
-        ∀ (j : ℕ),
           ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
                 (lieDerivRetagG0 (I := I) g₀ g_bg g₁
                     - lieDerivRetagG0 (I := I) g₀ g_bg g₂)‖ ^ 2 ≤
@@ -137,12 +137,12 @@ theorem lieDerivDiff_intrinsic_covFdB_section_expansion (g₀ g_bg : SmoothRiema
                 * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖ ^ 2 := by
   classical
   obtain ⟨Cd, hCd0, hsplit⟩ :=
-    symLoweredDeTurckVF_iteratedCovGrad_topRest_split (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1
-  refine ⟨Cd, hCd0, fun T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 j => ?_⟩
+    symLoweredDeTurckVF_iteratedCovGrad_topRest_split (I := I) g₀ g_bg a ha B hB δ hδ0 hδ1 j
+  refine ⟨Cd, hCd0, fun T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 => ?_⟩
   -- Rewrite the sealed Lie difference into the symmetrised-lowered DeTurck-field difference (P1a
-  -- applied to each metric), then apply the deep gauge integrated two-arm bound P1b.
+  -- applied to each metric), then apply the deep gauge integrated two-arm bound P1b at this order.
   rw [lieDerivRetagG0_sub_eq_symLoweredRetagG0_sub (I := I) g₀ g_bg g₁ g₂]
-  exact hsplit T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 j
+  exact hsplit T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2
 
 end DeTurck
 end IntrinsicSpectral

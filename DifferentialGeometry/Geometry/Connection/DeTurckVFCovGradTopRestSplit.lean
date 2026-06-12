@@ -94,11 +94,14 @@ the DeTurck vector field
 section-level Cartan identity `lieDerivRetagG0_eq_symLoweredRetagG0`).
 
 For an anchor `g₀`, a flow background `g_bg`, an order `a`, a supercriticality hypothesis `ha`, a
-uniform `H^{a+2}`-size bound `B ≥ 0`, and fibre-smallness `δ < 1/2`, there is a nonnegative constant
-`Cd` (uniform over the gradient order `j` and the perturbation family) such that for any two
-`g₀`-fibre-small perturbations `T₁, T₂` with `H^{a+2}` norms `≤ B` and any two realized metrics
-`g₁, g₂` of `T₁, T₂`, the squared metric `L²` norm of the order-`j` covariant gradient of `diff` is
-dominated by the **integrated Hamilton/Moser two-arm sum**
+uniform `H^{a+2}`-size bound `B ≥ 0`, fibre-smallness `δ < 1/2`, and **each gradient order `j`**,
+there is a nonnegative constant `Cd = Cd(j)` (uniform over the perturbation family, but **per-order**:
+the Lie-derivative nonlinearity doubles frequency content, so a `j`-uniform constant is refuted — on
+flat `T²` a frequency-doubling perturbation family makes the left side grow like `2^{2j}ε⁴` against a
+linearly-growing right side; the `4^p` moves into the Hamilton-tame constant family `C(p)`) such that
+for any two `g₀`-fibre-small perturbations `T₁, T₂` with `H^{a+2}` norms `≤ B` and any two realized
+metrics `g₁, g₂` of `T₁, T₂`, the squared metric `L²` norm of the order-`j` covariant gradient of
+`diff` is dominated by the **integrated Hamilton/Moser two-arm sum**
 ```
 ‖∇^j diff‖² ≤ Cd · ∑_{i ≤ j+2} ‖∇^i w‖²
             + (1/4) · (∑_{i ≤ j+2} (‖∇^i T₁‖² + ‖∇^i T₂‖²)) · ‖(T₁ − T₂).toHs a‖²,
@@ -144,7 +147,7 @@ covariant-Leibniz two-arm bound of the symmetrised-lowered DeTurck-field differe
 product two-arm family, with the 0-jet-inclusive difference arm. -/
 theorem symLoweredDeTurckVF_iteratedCovGrad_topRest_split (g₀ g_bg : SmoothRiemannianMetric I M)
     (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4)
-    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) :
+    (B : ℝ) (hB : 0 ≤ B) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (j : ℕ) :
     ∃ Cd : ℝ, 0 ≤ Cd ∧
       ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
         (g₁ g₂ : SmoothRiemannianMetric I M),
@@ -156,7 +159,6 @@ theorem symLoweredDeTurckVF_iteratedCovGrad_topRest_split (g₀ g_bg : SmoothRie
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
-        ∀ (j : ℕ),
           ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
                 (symLoweredDeTurckVFRetagG0 (I := I) g₀ g₁ g_bg
                     - symLoweredDeTurckVFRetagG0 (I := I) g₀ g₂ g_bg)‖ ^ 2 ≤
