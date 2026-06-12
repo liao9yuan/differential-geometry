@@ -19,6 +19,8 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTrace
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CrossCorrectionParallelContraction
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SegmentMetricCurvatureDifferenceCrossTraceProduct
 import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotExtendCovariantParallelism
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.QuadraticTraceDifferencePointwiseGrid
+import Batteries.Tactic.OpenPrivate
 
 /-! # The curvature-trace covariant-jet reduction of the sealed Ricci–DeTurck curvature difference
 
@@ -77,6 +79,13 @@ set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff BigOperators
+
+open private leadExtPerm iteratedCovGrad_appCcRS_of_parallel realizeSymm_rfns_le_of_gFibreOpBound
+  exists_loweredConnDiff_rfns_fibre_sup iteratedCovGrad_permuteCcTensor_eq permuteCcTensor_sub_local
+  appCcRS_sub_right_local rfns_permuteCcTensor_zero rfns_sub_le rfns_smul iteratedCovGrad_norm_sq_smul
+  iteratedCovGrad_norm_sq_sub_le smoothCcTensor_norm_sq_sub_le
+  koszulCombSection_iteratedCovGrad_norm_sq_le
+  from DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CrossCorrectionParallelContraction
 
 namespace DifferentialGeometry
 namespace PDE
@@ -2623,7 +2632,1654 @@ private lemma trace_shift_l2Norm_le (g₀ : SmoothRiemannianMetric I M) (j : ℕ
     _ = Real.sqrt Φ.kappa * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 (j + 1) Y‖ := by
         rw [Real.sqrt_mul hk, Real.sqrt_sq (norm_nonneg _)]
 
-/-- **(POSIT — the integrated two-arm `L²` bound of the cross-correction SECTION difference.)**
+set_option linter.unusedSectionVars false in
+/-- **The section-uniform pointwise full-window product grid of the parallel rank-reducing
+contraction.**  The quantifier-hoisted form of the per-section grid: one constant `Cd` per
+`(g₀, p)`, valid for EVERY rank-`2` first factor `S` and rank-`3` second factor `T` — the
+family-uniformity the integrated two-arm consumers require.  Assembled from the operator-reduced
+iterated Leibniz (`crossCorrParallelContraction_eq_appCcRS` + the parallel iterated Leibniz), the
+`appCcRS` fibre envelope (`crossCorrEnvelopeConst_spec`), the slot-permutation `rfns` invariance,
+and the `∀`-form bare-product diagonal grid (constant `mu·4^p`). -/
+private theorem contraction_rfns_fullWindowGrid_uniform
+    (g₀ : SmoothRiemannianMetric I M) (p : ℕ) :
+    ∃ Cd : ℝ, 0 ≤ Cd ∧
+      ∀ (S : Integral.L2.SmoothCcTensor g₀ 0 (2 + 0))
+        (T : Integral.L2.SmoothCcTensor g₀ 0 (3 + 0)) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + 0 + 0 + p) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (3 + 0 + 0) p
+                (Integral.Connection.crossCorrParallelContraction (I := I) g₀ (a := 0) (b := 0)
+                  S T)).toSection x) ≤
+          Cd * ∑ i ∈ Finset.range (p + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i T).toSection x)
+                * ∑ l ∈ Finset.range (p + 1 - i),
+                    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l S).toSection x) := by
+  classical
+  obtain ⟨hCenv0, hCenvB⟩ := DeTurck.crossCorrEnvelopeConst_spec (I := I) g₀ p
+  set Φb := Integral.Connection.bareTensorRfnsBilinearProduct (I := I) g₀ 3 2 with hΦb
+  refine ⟨DeTurck.crossCorrEnvelopeConst (I := I) g₀ p * (Φb.mu * (4 : ℝ) ^ p),
+    mul_nonneg hCenv0 (mul_nonneg Φb.mu_nonneg (by positivity)), fun S T x => ?_⟩
+  rw [Integral.Connection.crossCorrParallelContraction_eq_appCcRS (I := I) g₀
+    (a := 0) (b := 0) S T]
+  rw [iteratedCovGrad_appCcRS_of_parallel (I := I) g₀ 0 ((3 + 0) + (2 + 0)) (3 + 0 + 0)
+    (Integral.Connection.crossCorrCometricOp (I := I) g₀ 0 0)
+    (Integral.Connection.crossCorrCometricOp_covGrad_eq_zero (I := I) g₀ 0 0)
+    (Integral.Connection.crossCorrProdSection (I := I) g₀ (a := 0) (b := 0) S T) p]
+  refine le_trans (hCenvB _ x) ?_
+  rw [mul_assoc]
+  refine mul_le_mul_of_nonneg_left ?_ hCenv0
+  rw [Integral.Connection.crossCorrProdSection_eq_permute_unitModelProdSection (I := I) g₀ S T,
+    DeTurck.riemannianFiberNormSq_iteratedCovGrad_permuteCcTensor (I := I) (M := M) g₀
+      (Integral.Connection.crossCorrPerm 0 0)
+      (Analysis.Parabolic.TensorSpectral.unitModelProdSection (I := I) (M := M)
+        (p := 3 + 0) (q := 2 + 0) g₀ T S) p x]
+  have hgrid := Φb.rfns_iteratedCovGrad_prod_le_diagGrid p (a := 0) (b := 0) T S x
+  have hcast : riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((3 + 2) + p) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (3 + 2) p
+        (Φb.prod (a := 0) (b := 0) T S)).toSection x)
+      = riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((3 + 0) + (2 + 0) + p) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 ((3 + 0) + (2 + 0)) p
+          (Analysis.Parabolic.TensorSpectral.unitModelProdSection (I := I) (M := M)
+            (p := 3 + 0) (q := 2 + 0) g₀ T S)).toSection x) := by
+    rw [show (Φb.prod (a := 0) (b := 0) T S)
+      = Integral.Connection.castRankCc_db g₀ 0 (by omega : (3 + 0) + (2 + 0) = (3 + 2) + 0 + 0)
+        (Analysis.Parabolic.TensorSpectral.unitModelProdSection (I := I) (M := M)
+          (p := 3 + 0) (q := 2 + 0) g₀ T S) from rfl]
+    rw [Integral.Connection.rfns_iteratedCovGrad_castRankCc_db (I := I) (M := M) g₀ 0
+      (by omega : (3 + 0) + (2 + 0) = (3 + 2) + 0 + 0)
+      (Analysis.Parabolic.TensorSpectral.unitModelProdSection (I := I) (M := M)
+        (p := 3 + 0) (q := 2 + 0) g₀ T S) p x]
+  rw [← hcast]
+  simp only [Nat.add_zero] at hgrid ⊢
+  exact hgrid
+
+set_option linter.unusedSectionVars false in
+/-- **The integrated sharp `δ²` keystone-top bound at an arbitrary jet factor.**  The squared metric
+`L²` norm of the keystone product-level top cell `crossCorrKeystoneTop g₀ p T₂ Z` is at most
+`δ² · ‖Z‖²`, for any `(0, 3 + p)`-jet factor `Z` and any `δ`-fibre-small perturbation `T₂` — the
+pointwise sharp keystone passenger bound (`crossCorrKeystoneTop_rfns_le_sq_passenger`), integrated
+against the Riemannian volume. -/
+private theorem keystoneTop_norm_sq_le (g₀ : SmoothRiemannianMetric I M) (p : ℕ)
+    (T₂ : Integral.L2.SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hfib : gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ)
+    (Z : Integral.L2.SmoothCcTensor g₀ 0 ((3 + 0) + p)) :
+    ‖DeTurck.crossCorrKeystoneTop (I := I) g₀ p T₂ Z‖ ^ 2 ≤ δ ^ 2 * ‖Z‖ ^ 2 := by
+  classical
+  rw [normSq_eq_integral_rfns, normSq_eq_integral_rfns]
+  rw [← MeasureTheory.integral_const_mul]
+  refine MeasureTheory.integral_mono_of_nonneg (Filter.Eventually.of_forall (fun x => ?_))
+    ((Integral.Connection.integrable_riemannianFiberNormSq_toSection (I := I) (M := M)
+      g₀ 0 ((3 + 0) + p) Z).const_mul (δ ^ 2)) (Filter.Eventually.of_forall (fun x => ?_))
+  · exact riemannianFiberNormSq_nonneg _ _ _ _ _
+  · exact DeTurck.crossCorrKeystoneTop_rfns_le_sq_passenger (I := I) g₀ p T₂ hfib Z x
+
+set_option maxHeartbeats 12800000 in
+set_option linter.unusedSectionVars false in
+/-- **The section-uniform `t`-scaled Gagliardo–Nirenberg integrated peeled bound on the
+parallel-contraction `Rest` arm, at an ARBITRARY second factor.**  For the parallel `g₀`-single
+contraction of the realized perturbation `realizeSymm T₂` against an arbitrary rank-`3` section `Y`
+with `C⁰` fibre sup `√rfns(Y) ≤ Λ_Y`, the squared metric `L²` mass of the rest cell — the
+difference `∇^p (Φc(realizeSymm T₂, Y)) − crossCorrKeystoneTop g₀ p T₂ (∇^p Y)` — is dominated,
+for every free scale `t ∈ (0, 1]`, by
+```
+t·δ²·‖∇^p Y‖² + Cpk·(1/t)^p·(∑_{q<p} ‖∇^q Y‖² + Λ_Y²·∑_{i ≤ p+1} ‖∇^i (realizeSymm T₂)‖²),
+```
+with `Cpk` uniform over `(t, T₂, Y)` (only `(g₀, p, δ, Λ_Y-level)`-dependent through the explicit
+`Λ_Y²` factor).  The arbitrary-`Y` generalization of the single-metric rest peel
+(`crossCorrectionSection_iteratedCovGrad_rest_peel_realizeSymm_le`): the second factor needs no
+lowered-connection structure and no Sobolev ball — its only inputs are the `C⁰` sup and its
+`L²`-jet scale, which the bound carries explicitly.  Same assembly: the operator-reduced iterated
+Leibniz, the pointwise peeled binomial-Leibniz grid (constant `4^p`), the `appCcRS` fibre envelope,
+the strictly-sub-diagonal symmetric two-arm engine, and the anti-diagonal `t`-scaled top-arm
+engine with the internal rescale absorbing the envelope and dimension constants into the free
+`t·δ²`. -/
+private theorem contraction_rest_peel_uniform (g₀ : SmoothRiemannianMetric I M) (p : ℕ)
+    (δ : ℝ) (hδ0 : 0 ≤ δ) :
+    ∃ Cpk : ℝ, 0 ≤ Cpk ∧
+      ∀ t : ℝ, 0 < t → t ≤ 1 →
+      ∀ (T₂ : Integral.L2.SmoothCcTensor g₀ 0 2) (Y : Integral.L2.SmoothCcTensor g₀ 0 3)
+        (ΛY : ℝ), 0 ≤ ΛY →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
+        (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x (Y.toSection x) ≤ ΛY ^ 2) →
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (3 + 0 + 0) p
+              (Integral.Connection.crossCorrParallelContraction (I := I) g₀ (a := 0) (b := 0)
+                (realizeSymmCcTensor (I := I) g₀ T₂) Y)
+            - DeTurck.crossCorrKeystoneTop (I := I) g₀ p T₂
+                (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (3 + 0) p Y)‖ ^ 2 ≤
+          t * δ ^ 2 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p Y‖ ^ 2
+            + Cpk * (1 / t) ^ p * (∑ q ∈ Finset.range p,
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q Y‖ ^ 2
+              + ΛY ^ 2 * ∑ i ∈ Finset.range (p + 1 + 1),
+                  ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                    (realizeSymmCcTensor (I := I) g₀ T₂)‖ ^ 2) := by
+  classical
+  set μ := Integral.Measure.riemannianVolumeMeasure I M g₀ with hμ
+  obtain ⟨hCenv0, hCenvB⟩ := DeTurck.crossCorrEnvelopeConst_spec (I := I) g₀ p
+  obtain ⟨cGlow, hcGlow0, hGNlow⟩ :=
+    Analysis.Sobolev.Tensor.exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le
+      (I := I) (M := M) g₀ 3 2 (p - 1)
+  obtain ⟨cAnti, hcAnti0, hAnti⟩ :=
+    Analysis.Sobolev.Tensor.exists_integrated_iteratedCovGrad_antiDiagGrid_topArm_scaled_le
+      (I := I) (M := M) g₀ 3 2 p
+  set nE : ℝ := (Module.finrank ℝ E : ℝ) with hnE
+  have hnE0 : 0 ≤ nE := by rw [hnE]; positivity
+  set cE := DeTurck.crossCorrEnvelopeConst (I := I) g₀ p with hcE
+  set Ar : ℝ := cE * 4 ^ p * nE ^ 2 + 1 with hAr
+  have hAr1 : (1 : ℝ) ≤ Ar := by
+    rw [hAr]
+    have : (0 : ℝ) ≤ cE * 4 ^ p * nE ^ 2 := by positivity
+    linarith
+  have hAr0 : (0 : ℝ) < Ar := lt_of_lt_of_le zero_lt_one hAr1
+  refine ⟨cE * 4 ^ p * (cGlow * (nE ^ 2 * δ ^ 2 + 1) + cAnti * Ar ^ p),
+    by positivity, ?_⟩
+  intro t ht0 ht1 T₂ Y ΛY hΛY0 hfib hYsup
+  set wS := realizeSymmCcTensor (I := I) g₀ T₂ with hwS
+  set Xp := PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (3 + 0 + 0) p
+      (Integral.Connection.crossCorrParallelContraction (I := I) g₀ (a := 0) (b := 0) wS Y)
+    with hXpd
+  set Φb := Integral.Connection.bareTensorRfnsBilinearProduct (I := I) g₀ 3 2 with hΦbd
+  set Φp := DeTurck.slotExtendPow (I := I) (M := M) g₀ ((3 + 0) + (2 + 0)) (3 + 0 + 0) p
+      (Integral.Connection.crossCorrCometricOp (I := I) g₀ 0 0) with hΦpd
+  set U := Analysis.Parabolic.TensorSpectral.unitModelProdSection (I := I) (M := M)
+      (p := 3 + 0) (q := 2 + 0) g₀ Y wS with hUd
+  set TopU := Integral.Connection.castRankCc_db g₀ 0
+      (by omega : ((3 + 2) + (0 + p) + 0) = ((3 + 2) + 0 + 0) + p)
+      (Φb.prod (a := 0 + p) (b := 0)
+        (Integral.Connection.castRankCc_db g₀ 0 (by omega : ((3 + 0) + p) = 3 + (0 + p))
+          (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (3 + 0) p Y)) wS) with hTopUd
+  set σcc := Integral.Connection.crossCorrPerm 0 0 with hσccd
+  set Ztop := DeTurck.permuteCcTensor (I := I) g₀ (leadExtPerm σcc p) TopU with hZtopd
+  set Ap := DeTurck.crossCorrKeystoneTop (I := I) g₀ p T₂
+      (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (3 + 0) p Y) with hApd
+  -- The keystone top is the slot-extended operator on the permuted product-level top cell.
+  have hApeq : Ap =
+      Integral.Connection.appCcRS (I := I) (M := M) g₀ 0 (((3 + 0) + (2 + 0)) + p)
+        ((3 + 0 + 0) + p) Φp Ztop := rfl
+  -- (1) The operator-reduced iterated Leibniz: `∇^p Φc = appCcRS Φp (∇^p P)`.
+  have hXeq : Xp =
+      Integral.Connection.appCcRS (I := I) (M := M) g₀ 0 (((3 + 0) + (2 + 0)) + p)
+        ((3 + 0 + 0) + p) Φp
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 ((3 + 0) + (2 + 0)) p
+          (Integral.Connection.crossCorrProdSection (I := I) g₀ (a := 0) (b := 0) wS Y)) := by
+    rw [hXpd, Integral.Connection.crossCorrParallelContraction_eq_appCcRS (I := I) g₀
+      (a := 0) (b := 0) wS Y]
+    exact iteratedCovGrad_appCcRS_of_parallel (I := I) g₀ 0 ((3 + 0) + (2 + 0)) (3 + 0 + 0)
+      (Integral.Connection.crossCorrCometricOp (I := I) g₀ 0 0)
+      (Integral.Connection.crossCorrCometricOp_covGrad_eq_zero (I := I) g₀ 0 0)
+      (Integral.Connection.crossCorrProdSection (I := I) g₀ (a := 0) (b := 0) wS Y) p
+  -- (2) The product section is the slot-permuted bare product.
+  have hPU : Integral.Connection.crossCorrProdSection (I := I) g₀ (a := 0) (b := 0) wS Y =
+      DeTurck.permuteCcTensor (I := I) g₀ σcc U :=
+    Integral.Connection.crossCorrProdSection_eq_permute_unitModelProdSection (I := I)
+      (a := 0) (b := 0) g₀ wS Y
+  -- The bare-product realization of `U`.
+  have hUb : U = Φb.prod (a := 0) (b := 0) Y wS := rfl
+  -- (3) The iterated gradient commutes with the slot permutation.
+  have hPp : PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 ((3 + 0) + (2 + 0)) p
+        (Integral.Connection.crossCorrProdSection (I := I) g₀ (a := 0) (b := 0) wS Y) =
+      DeTurck.permuteCcTensor (I := I) g₀ (leadExtPerm σcc p)
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 ((3 + 0) + (2 + 0)) p U) := by
+    rw [hPU]
+    exact iteratedCovGrad_permuteCcTensor_eq (I := I) g₀ σcc U p
+  -- (4) `Xp − Ap` as a single operator action on the permuted product-level difference.
+  have hXAeq : Xp - Ap =
+      Integral.Connection.appCcRS (I := I) (M := M) g₀ 0 (((3 + 0) + (2 + 0)) + p)
+        ((3 + 0 + 0) + p) Φp
+        (DeTurck.permuteCcTensor (I := I) g₀ (leadExtPerm σcc p)
+          (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 ((3 + 0) + (2 + 0)) p U - TopU)) := by
+    rw [hApeq, permuteCcTensor_sub_local, appCcRS_sub_right_local, ← hPp, ← hXeq]
+  -- (5) The pointwise peeled binomial-Leibniz grid of the bare product (constant `4^p`).
+  have hpeel : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((3 + 2) + p) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 ((3 + 0) + (2 + 0)) p
+          (Φb.prod (a := 0) (b := 0) Y wS) - TopU).toSection x) ≤
+    (4 : ℝ) ^ p * ∑ i ∈ Finset.range p,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i Y).toSection x) *
+        ∑ l ∈ Finset.range (p + 1 - i),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l wS).toSection x) := by
+    intro x
+    have hgrid := Φb.rfns_iteratedCovGrad_prod_topRest_le_peeledDiagGrid p (a := 0) (b := 0) Y wS x
+    have hmu : Φb.mu = 1 := rfl
+    rw [hmu, one_mul] at hgrid
+    exact hgrid
+  -- (6) The fibre-small `C⁰` sup of the realized factor.
+  have hTsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (wS.toSection x) ≤
+      (nE * δ) ^ 2 := by
+    intro x
+    rw [hwS, hnE]
+    exact realizeSymm_rfns_le_of_gFibreOpBound (I := I) g₀ T₂ hfib x
+  -- (7) The pointwise envelope bound on `rfns(Xp − Ap)` against the PEELED grid (window `i < p`).
+  have hXApt : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((3 + 0 + 0) + p) x
+      ((Xp - Ap).toSection x) ≤
+    cE * (4 : ℝ) ^ p * ∑ i ∈ Finset.range p,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i Y).toSection x) *
+        ∑ l ∈ Finset.range (p + 1 - i),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l wS).toSection x) := by
+    intro x
+    rw [hXAeq]
+    refine le_trans (hCenvB _ x) ?_
+    rw [rfns_permuteCcTensor_zero, hUb]
+    calc cE * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (((3 + 0) + (2 + 0)) + p) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 ((3 + 0) + (2 + 0)) p
+              (Φb.prod (a := 0) (b := 0) Y wS)
+            - TopU).toSection x)
+        ≤ cE * ((4 : ℝ) ^ p * ∑ i ∈ Finset.range p,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i Y).toSection x) *
+              ∑ l ∈ Finset.range (p + 1 - i),
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l wS).toSection x)) :=
+          mul_le_mul_of_nonneg_left (hpeel x) hCenv0
+      _ = cE * (4 : ℝ) ^ p * ∑ i ∈ Finset.range p,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i Y).toSection x) *
+              ∑ l ∈ Finset.range (p + 1 - i),
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l wS).toSection x) := by
+          ring
+  -- (8) The two engine instances.
+  obtain ⟨hint_low, hlow⟩ := hGNlow Y wS ΛY (nE * δ) hΛY0 (by positivity) hYsup hTsup
+  set tt : ℝ := t / Ar with htt
+  have htt0 : 0 < tt := by rw [htt]; positivity
+  have htt1 : tt ≤ 1 := by
+    rw [htt, div_le_one hAr0]
+    linarith
+  obtain ⟨hint_anti, hanti⟩ := hAnti Y wS ΛY (nE * δ) hΛY0 (by positivity) hYsup hTsup tt htt0 htt1
+  -- (9) The named jet sums.
+  set Lp := ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p Y‖ ^ 2 with hLpd
+  set Slow := ∑ q ∈ Finset.range p,
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q Y‖ ^ 2 with hSlowd
+  set Sw := ∑ i ∈ Finset.range (p + 1 + 1),
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i wS‖ ^ 2 with hSwd
+  have hLp_nn : 0 ≤ Lp := by rw [hLpd]; positivity
+  have hSlow_nn : 0 ≤ Slow := by rw [hSlowd]; positivity
+  have hSw_nn : 0 ≤ Sw := by rw [hSwd]; positivity
+  have hSwfold : ∀ N : ℕ, N ≤ p + 1 + 1 → (∑ l ∈ Finset.range N,
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l wS‖ ^ 2) ≤ Sw := by
+    intro N hN
+    rw [hSwd]
+    exact Finset.sum_le_sum_of_subset_of_nonneg
+      (Finset.range_subset_range.2 hN) (fun l _ _ => by positivity)
+  rcases Nat.eq_zero_or_pos p with hp0 | hppos
+  · -- Degenerate order `p = 0`: the peeled grid is empty, so `‖Xp − Ap‖² ≤ 0`.
+    subst hp0
+    have hzero : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((3 + 0 + 0) + 0) x
+        ((Xp - Ap).toSection x) ≤ 0 := by
+      intro x
+      refine le_trans (hXApt x) (le_of_eq ?_)
+      simp only [Finset.range_zero, Finset.sum_empty, mul_zero]
+    have hXA0 : ‖Xp - Ap‖ ^ 2 ≤ 0 := by
+      rw [normSq_eq_integral_rfns]
+      calc (∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + 0) x
+              ((Xp - Ap).toSection x) ∂μ)
+          ≤ ∫ x, (0 : ℝ) ∂μ := by
+            refine MeasureTheory.integral_mono_of_nonneg
+              (Filter.Eventually.of_forall (fun x => ?_))
+              (MeasureTheory.integrable_zero _ _ _)
+              (Filter.Eventually.of_forall (fun x => hzero x))
+            exact riemannianFiberNormSq_nonneg _ _ _ _ _
+        _ = 0 := by simp
+    have hrhs_nn : 0 ≤ t * δ ^ 2 * Lp
+        + cE * 4 ^ 0 * (cGlow * (nE ^ 2 * δ ^ 2 + 1) + cAnti * Ar ^ 0)
+          * (1 / t) ^ 0 * (Slow + ΛY ^ 2 * Sw) := by
+      have h1 : 0 ≤ t * δ ^ 2 * Lp := by positivity
+      have h2 : 0 ≤ cE * (4 : ℝ) ^ 0 * (cGlow * (nE ^ 2 * δ ^ 2 + 1) + cAnti * Ar ^ 0)
+          * (1 / t) ^ 0 * (Slow + ΛY ^ 2 * Sw) := by positivity
+      linarith
+    linarith [hXA0, hrhs_nn]
+  · -- Genuine order `p ≥ 1`.
+    have hp1 : (p - 1) + 1 = p := Nat.succ_pred_eq_of_pos hppos
+    rw [hp1] at hlow hint_low
+    -- The peeled grid splits pointwise as the sub-diagonal window grid plus the anti-diagonal.
+    have hgrid_split : ∀ x : M, (∑ i ∈ Finset.range p,
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i Y).toSection x) *
+          ∑ l ∈ Finset.range (p + 1 - i),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l wS).toSection x)) =
+        (∑ i ∈ Finset.range p,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i Y).toSection x) *
+            ∑ l ∈ Finset.range (p - i),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l wS).toSection x))
+        + ∑ i ∈ Finset.range p,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i Y).toSection x) *
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p - i)) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 (p - i) wS).toSection x) := by
+      intro x
+      rw [← Finset.sum_add_distrib]
+      refine Finset.sum_congr rfl fun i hi => ?_
+      have hip : i < p := Finset.mem_range.mp hi
+      rw [show p + 1 - i = (p - i) + 1 from by omega, Finset.sum_range_succ, mul_add]
+    -- Integrate the pointwise envelope bound through the grid split.
+    have hXAint : ‖Xp - Ap‖ ^ 2 ≤ cE * (4 : ℝ) ^ p *
+        ((∫ x, (∑ i ∈ Finset.range p,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i Y).toSection x) *
+              ∑ l ∈ Finset.range (p - i),
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l wS).toSection x)) ∂μ)
+          + ∫ x, (∑ i ∈ Finset.range p,
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i Y).toSection x) *
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p - i)) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 (p - i) wS).toSection x)) ∂μ) := by
+      rw [normSq_eq_integral_rfns]
+      calc (∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+              ((Xp - Ap).toSection x) ∂μ)
+          ≤ ∫ x, (cE * (4 : ℝ) ^ p * ((∑ i ∈ Finset.range p,
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i Y).toSection x) *
+                ∑ l ∈ Finset.range (p - i),
+                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l wS).toSection x))
+            + ∑ i ∈ Finset.range p,
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i Y).toSection x) *
+                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p - i)) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 (p - i) wS).toSection x))) ∂μ := by
+            refine MeasureTheory.integral_mono_of_nonneg
+              (Filter.Eventually.of_forall (fun x => ?_))
+              ((hint_low.add hint_anti).const_mul _)
+              (Filter.Eventually.of_forall (fun x => ?_))
+            · exact riemannianFiberNormSq_nonneg _ _ _ _ _
+            · refine le_trans (hXApt x) (le_of_eq ?_)
+              rw [hgrid_split x]
+        _ = cE * (4 : ℝ) ^ p * ((∫ x, (∑ i ∈ Finset.range p,
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i Y).toSection x) *
+                ∑ l ∈ Finset.range (p - i),
+                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l wS).toSection x)) ∂μ)
+            + ∫ x, (∑ i ∈ Finset.range p,
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i Y).toSection x) *
+                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p - i)) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 (p - i) wS).toSection x)) ∂μ) := by
+            rw [MeasureTheory.integral_const_mul,
+              MeasureTheory.integral_add hint_low hint_anti]
+    -- The two w-arms fold into `Sw`.
+    have hSw_low : (∑ l ∈ Finset.range p,
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l wS‖ ^ 2) ≤ Sw :=
+      hSwfold p (by omega)
+    have hSw_anti : (∑ l ∈ Finset.range (p + 1),
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l wS‖ ^ 2) ≤ Sw :=
+      hSwfold (p + 1) (by omega)
+    -- The low-window integral bound, folded.
+    have hlow' : (∫ x, (∑ i ∈ Finset.range p,
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i Y).toSection x) *
+          ∑ l ∈ Finset.range (p - i),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l wS).toSection x)) ∂μ) ≤
+        cGlow * ((nE * δ) ^ 2 * Slow + ΛY ^ 2 * Sw) := by
+      refine le_trans hlow ?_
+      have h2 : ΛY ^ 2 * (∑ l ∈ Finset.range p,
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l wS‖ ^ 2) ≤ ΛY ^ 2 * Sw :=
+        mul_le_mul_of_nonneg_left hSw_low (by positivity)
+      nlinarith [hcGlow0, h2]
+    -- The anti-diagonal integral bound, with the internal rescale `tt = t / Ar`.
+    have hanti' : (∫ x, (∑ i ∈ Finset.range p,
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i Y).toSection x) *
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p - i)) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 (p - i) wS).toSection x)) ∂μ) ≤
+        tt * ((nE * δ) ^ 2 * Lp) + cAnti * (1 / tt) ^ p * (ΛY ^ 2 * Sw) := by
+      refine le_trans hanti ?_
+      have h2 : ΛY ^ 2 * (∑ l ∈ Finset.range (p + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l wS‖ ^ 2) ≤ ΛY ^ 2 * Sw :=
+        mul_le_mul_of_nonneg_left hSw_anti (by positivity)
+      have hc : 0 ≤ cAnti * (1 / tt) ^ p := by positivity
+      nlinarith [hc, h2]
+    -- The rescale algebra.
+    have htopscale : cE * (4 : ℝ) ^ p * (tt * ((nE * δ) ^ 2 * Lp)) ≤ t * δ ^ 2 * Lp := by
+      rw [htt]
+      rw [show cE * (4 : ℝ) ^ p * (t / Ar * ((nE * δ) ^ 2 * Lp))
+          = (cE * 4 ^ p * nE ^ 2) / Ar * (t * δ ^ 2 * Lp) from by ring]
+      have hfrac : (cE * 4 ^ p * nE ^ 2) / Ar ≤ 1 := by
+        rw [div_le_one hAr0, hAr]
+        linarith
+      have hmass : 0 ≤ t * δ ^ 2 * Lp := by positivity
+      nlinarith [hfrac, hmass]
+    have hinv_tt : (1 / tt) ^ p = Ar ^ p * (1 / t) ^ p := by
+      rw [htt, one_div_div, show Ar / t = Ar * (1 / t) from by ring, mul_pow]
+    have h1t1 : (1 : ℝ) ≤ (1 / t) ^ p := one_le_pow₀ (by rw [le_div_iff₀ ht0]; linarith)
+    -- Assemble.
+    have hfinal : cE * (4 : ℝ) ^ p *
+        ((∫ x, (∑ i ∈ Finset.range p,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i Y).toSection x) *
+              ∑ l ∈ Finset.range (p - i),
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l wS).toSection x)) ∂μ)
+          + ∫ x, (∑ i ∈ Finset.range p,
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i Y).toSection x) *
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p - i)) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 (p - i) wS).toSection x)) ∂μ) ≤
+        t * δ ^ 2 * Lp
+          + cE * 4 ^ p * (cGlow * (nE ^ 2 * δ ^ 2 + 1) + cAnti * Ar ^ p)
+            * (1 / t) ^ p * (Slow + ΛY ^ 2 * Sw) := by
+      have hcE4 : (0 : ℝ) ≤ cE * 4 ^ p := by positivity
+      have hsum_le := add_le_add hlow' hanti'
+      have hstep : cE * (4 : ℝ) ^ p *
+          ((∫ x, (∑ i ∈ Finset.range p,
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i Y).toSection x) *
+                ∑ l ∈ Finset.range (p - i),
+                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l wS).toSection x)) ∂μ)
+            + ∫ x, (∑ i ∈ Finset.range p,
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i Y).toSection x) *
+                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p - i)) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 (p - i) wS).toSection x)) ∂μ) ≤
+          cE * 4 ^ p * (cGlow * ((nE * δ) ^ 2 * Slow + ΛY ^ 2 * Sw))
+            + cE * 4 ^ p * (tt * ((nE * δ) ^ 2 * Lp))
+            + cE * 4 ^ p * (cAnti * (1 / tt) ^ p * (ΛY ^ 2 * Sw)) := by
+        nlinarith [hsum_le, hcE4]
+      refine le_trans hstep ?_
+      rw [hinv_tt]
+      have hΛSw_nn : 0 ≤ ΛY ^ 2 * Sw := by positivity
+      have hlow_piece : cE * (4 : ℝ) ^ p * (cGlow * ((nE * δ) ^ 2 * Slow + ΛY ^ 2 * Sw)) ≤
+          cE * 4 ^ p * (cGlow * (nE ^ 2 * δ ^ 2 + 1)) * (1 / t) ^ p * (Slow + ΛY ^ 2 * Sw) := by
+        have hbase : cGlow * ((nE * δ) ^ 2 * Slow + ΛY ^ 2 * Sw) ≤
+            cGlow * (nE ^ 2 * δ ^ 2 + 1) * (Slow + ΛY ^ 2 * Sw) := by
+          nlinarith [hcGlow0, hSlow_nn, hΛSw_nn, sq_nonneg (nE * δ),
+            mul_nonneg hcGlow0 (mul_nonneg (sq_nonneg (nE * δ)) hΛSw_nn),
+            mul_nonneg hcGlow0 (mul_nonneg (sq_nonneg ΛY) hSlow_nn),
+            mul_nonneg hcGlow0 hSlow_nn]
+        calc cE * (4 : ℝ) ^ p * (cGlow * ((nE * δ) ^ 2 * Slow + ΛY ^ 2 * Sw))
+            ≤ cE * 4 ^ p * (cGlow * (nE ^ 2 * δ ^ 2 + 1) * (Slow + ΛY ^ 2 * Sw)) :=
+              mul_le_mul_of_nonneg_left hbase hcE4
+          _ = cE * 4 ^ p * (cGlow * (nE ^ 2 * δ ^ 2 + 1)) * (1 : ℝ) * (Slow + ΛY ^ 2 * Sw) := by
+              ring
+          _ ≤ cE * 4 ^ p * (cGlow * (nE ^ 2 * δ ^ 2 + 1)) * (1 / t) ^ p
+                * (Slow + ΛY ^ 2 * Sw) := by
+              have hmono : cE * 4 ^ p * (cGlow * (nE ^ 2 * δ ^ 2 + 1)) * (1 : ℝ) ≤
+                  cE * 4 ^ p * (cGlow * (nE ^ 2 * δ ^ 2 + 1)) * (1 / t) ^ p := by
+                have hc : (0 : ℝ) ≤ cE * 4 ^ p * (cGlow * (nE ^ 2 * δ ^ 2 + 1)) := by
+                  positivity
+                nlinarith [h1t1, hc]
+              exact mul_le_mul_of_nonneg_right hmono (by linarith [hSlow_nn, hΛSw_nn])
+      have hanti_piece : cE * (4 : ℝ) ^ p * (cAnti * (Ar ^ p * (1 / t) ^ p) * (ΛY ^ 2 * Sw)) ≤
+          cE * 4 ^ p * (cAnti * Ar ^ p) * (1 / t) ^ p * (Slow + ΛY ^ 2 * Sw) := by
+        have hc : (0 : ℝ) ≤ cAnti * Ar ^ p * (1 / t) ^ p := by positivity
+        have hbase : cAnti * (Ar ^ p * (1 / t) ^ p) * (ΛY ^ 2 * Sw) ≤
+            cAnti * Ar ^ p * (1 / t) ^ p * (Slow + ΛY ^ 2 * Sw) := by
+          nlinarith [hSlow_nn, hc]
+        calc cE * (4 : ℝ) ^ p * (cAnti * (Ar ^ p * (1 / t) ^ p) * (ΛY ^ 2 * Sw))
+            ≤ cE * 4 ^ p * (cAnti * Ar ^ p * (1 / t) ^ p * (Slow + ΛY ^ 2 * Sw)) :=
+              mul_le_mul_of_nonneg_left hbase hcE4
+          _ = cE * 4 ^ p * (cAnti * Ar ^ p) * (1 / t) ^ p * (Slow + ΛY ^ 2 * Sw) := by ring
+      have hdistr : cE * (4 : ℝ) ^ p * (cGlow * (nE ^ 2 * δ ^ 2 + 1))
+            * (1 / t) ^ p * (Slow + ΛY ^ 2 * Sw)
+          + cE * 4 ^ p * (cAnti * Ar ^ p) * (1 / t) ^ p * (Slow + ΛY ^ 2 * Sw)
+          = cE * 4 ^ p * (cGlow * (nE ^ 2 * δ ^ 2 + 1) + cAnti * Ar ^ p)
+            * (1 / t) ^ p * (Slow + ΛY ^ 2 * Sw) := by ring
+      linarith [hlow_piece, hanti_piece, htopscale, hdistr.le, hdistr.ge]
+    exact le_trans hXAint hfinal
+
+set_option linter.unusedSectionVars false in
+/-- **The squared metric `L²` norm of every iterated covariant jet is slot-permutation
+invariant** — the pointwise fibre isometry
+`riemannianFiberNormSq_iteratedCovGrad_permuteCcTensor`, integrated. -/
+private theorem norm_sq_iteratedCovGrad_permute (g₀ : SmoothRiemannianMetric I M) {s : ℕ}
+    (σ : Equiv.Perm (Fin s)) (W : Integral.L2.SmoothCcTensor g₀ 0 s) (i : ℕ) :
+    ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 s i
+        (DeTurck.permuteCcTensor (I := I) g₀ σ W)‖ ^ 2 =
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 s i W‖ ^ 2 := by
+  rw [normSq_eq_integral_rfns, normSq_eq_integral_rfns]
+  refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall fun x => ?_)
+  exact DeTurck.riemannianFiberNormSq_iteratedCovGrad_permuteCcTensor (I := I) (M := M)
+    g₀ σ W i x
+
+set_option linter.unusedSectionVars false in
+/-- **The order-`i` realize-jet `L²` conversion** — the realization gains no derivatives: the
+squared metric `L²` norm of the order-`i` covariant jet of the realized perturbation is bounded by
+the `≤ i`-jet `L²` sum of the perturbation itself, with a constant uniform over the perturbation
+(the pointwise `exists_riemannianFiberNormSq_iteratedCovGrad_realizeSymm_le_jetSum`, integrated). -/
+private theorem realize_jet_norm_sq_fold (g₀ : SmoothRiemannianMetric I M) (i : ℕ) :
+    ∃ Ci : ℝ, 0 ≤ Ci ∧
+      ∀ T : Integral.L2.SmoothCcTensor g₀ 0 2,
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+            (realizeSymmCcTensor (I := I) g₀ T)‖ ^ 2 ≤
+          Ci * ∑ l ∈ Finset.range (i + 1),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T‖ ^ 2 := by
+  classical
+  set μ := Integral.Measure.riemannianVolumeMeasure I M g₀ with hμ
+  obtain ⟨C, hC0, hC⟩ :=
+    exists_riemannianFiberNormSq_iteratedCovGrad_realizeSymm_le_jetSum (I := I) g₀ i
+  refine ⟨C, hC0, fun T => ?_⟩
+  rw [normSq_eq_integral_rfns]
+  have hintRl : ∀ l, MeasureTheory.Integrable (fun x =>
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x)) μ :=
+    fun l => Integral.Connection.integrable_riemannianFiberNormSq_toSection
+      (I := I) (M := M) g₀ 0 (2 + l) _
+  have hintRsum : MeasureTheory.Integrable (fun x => C * ∑ l ∈ Finset.range (i + 1),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x)) μ :=
+    (MeasureTheory.integrable_finset_sum (Finset.range (i + 1))
+      (fun l _ => hintRl l)).const_mul C
+  calc ∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+              (realizeSymmCcTensor (I := I) g₀ T)).toSection x) ∂μ
+      ≤ ∫ x, (C * ∑ l ∈ Finset.range (i + 1),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x)) ∂μ := by
+          refine MeasureTheory.integral_mono_of_nonneg
+            (Filter.Eventually.of_forall (fun x => ?_)) hintRsum
+            (Filter.Eventually.of_forall (fun x => hC T x))
+          exact riemannianFiberNormSq_nonneg _ _ _ _ _
+    _ = C * ∑ l ∈ Finset.range (i + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T‖ ^ 2 := by
+        rw [MeasureTheory.integral_const_mul,
+          MeasureTheory.integral_finset_sum _ (fun l _ => hintRl l)]
+        congr 1
+        refine Finset.sum_congr rfl (fun l _ => ?_)
+        rw [normSq_eq_integral_rfns]
+
+set_option linter.unusedSectionVars false in
+/-- **The summed realize-jet `L²` conversion at window `N`.**  One constant per `(g₀, N)`, folding
+the whole realized jet sum `∑_{i ≤ N} ‖∇^i (realizeSymm T)‖²` into the perturbation jet sum
+`∑_{l ≤ N} ‖∇^l T‖²`. -/
+private theorem realize_jet_norm_sq_sum_fold (g₀ : SmoothRiemannianMetric I M) (N : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ T : Integral.L2.SmoothCcTensor g₀ 0 2,
+        (∑ i ∈ Finset.range (N + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+              (realizeSymmCcTensor (I := I) g₀ T)‖ ^ 2) ≤
+          C * ∑ l ∈ Finset.range (N + 1),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T‖ ^ 2 := by
+  classical
+  choose Ci hCi0 hCi using fun i => realize_jet_norm_sq_fold (I := I) (M := M) g₀ i
+  refine ⟨∑ i ∈ Finset.range (N + 1), Ci i,
+    Finset.sum_nonneg fun i _ => hCi0 i, fun T => ?_⟩
+  rw [Finset.sum_mul]
+  refine Finset.sum_le_sum fun i hi => ?_
+  refine le_trans (hCi i T) (mul_le_mul_of_nonneg_left ?_ (hCi0 i))
+  exact Finset.sum_le_sum_of_subset_of_nonneg
+    (Finset.range_subset_range.2 (by have := Finset.mem_range.mp hi; omega))
+    (fun l _ _ => by positivity)
+
+set_option linter.unusedSectionVars false in
+/-- **The section-uniform `t`-scaled top/rest split of the parallel contraction at an arbitrary
+second factor.**  Combining the sharp integrated keystone-top bound (`δ²·‖∇^p Y‖²`) with the
+`t`-scaled generic rest peel through the `2`-subadditivity `‖Top + Rest‖² ≤ 2‖Top‖² + 2‖Rest‖²`:
+```
+‖∇^p Φc(realizeSymm T₂, Y)‖²
+  ≤ 2(1+t)·δ²·‖∇^p Y‖² + 2·Cpk·(1/t)^p·(∑_{q<p} ‖∇^q Y‖² + Λ_Y²·∑_{i ≤ p+1} ‖∇^i (realizeSymm T₂)‖²).
+```
+-/
+private theorem contraction_topRest_split_uniform (g₀ : SmoothRiemannianMetric I M) (p : ℕ)
+    (δ : ℝ) (hδ0 : 0 ≤ δ) :
+    ∃ Cpk : ℝ, 0 ≤ Cpk ∧
+      ∀ t : ℝ, 0 < t → t ≤ 1 →
+      ∀ (T₂ : Integral.L2.SmoothCcTensor g₀ 0 2) (Y : Integral.L2.SmoothCcTensor g₀ 0 3)
+        (ΛY : ℝ), 0 ≤ ΛY →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
+        (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x (Y.toSection x) ≤ ΛY ^ 2) →
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (3 + 0 + 0) p
+              (Integral.Connection.crossCorrParallelContraction (I := I) g₀ (a := 0) (b := 0)
+                (realizeSymmCcTensor (I := I) g₀ T₂) Y)‖ ^ 2 ≤
+          2 * (1 + t) * δ ^ 2 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p Y‖ ^ 2
+            + 2 * Cpk * (1 / t) ^ p * (∑ q ∈ Finset.range p,
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q Y‖ ^ 2
+              + ΛY ^ 2 * ∑ i ∈ Finset.range (p + 1 + 1),
+                  ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                    (realizeSymmCcTensor (I := I) g₀ T₂)‖ ^ 2) := by
+  classical
+  obtain ⟨Cpk, hCpk0, hCpk⟩ := contraction_rest_peel_uniform (I := I) (M := M) g₀ p δ hδ0
+  refine ⟨Cpk, hCpk0, ?_⟩
+  intro t ht0 ht1 T₂ Y ΛY hΛY0 hfib hYsup
+  set Xp := PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (3 + 0 + 0) p
+      (Integral.Connection.crossCorrParallelContraction (I := I) g₀ (a := 0) (b := 0)
+        (realizeSymmCcTensor (I := I) g₀ T₂) Y) with hXpd
+  set Ap := DeTurck.crossCorrKeystoneTop (I := I) g₀ p T₂
+      (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (3 + 0) p Y) with hApd
+  have htop : ‖Ap‖ ^ 2 ≤
+      δ ^ 2 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p Y‖ ^ 2 := by
+    rw [hApd]
+    exact keystoneTop_norm_sq_le (I := I) (M := M) g₀ p T₂ hfib
+      (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (3 + 0) p Y)
+  have hrest := hCpk t ht0 ht1 T₂ Y ΛY hΛY0 hfib hYsup
+  rw [← hXpd, ← hApd] at hrest
+  -- `‖Xp‖² ≤ 2‖Ap‖² + 2‖Xp − Ap‖²`.
+  have h2sub : ‖Xp‖ ^ 2 ≤ 2 * ‖Ap‖ ^ 2 + 2 * ‖Xp - Ap‖ ^ 2 := by
+    have hXeq : Xp = Ap + (Xp - Ap) := (add_sub_cancel Ap Xp).symm
+    have hns := norm_add_sq_real Ap (Xp - Ap)
+    have hcs := abs_real_inner_le_norm Ap (Xp - Ap)
+    have hcs' := le_abs_self (inner (𝕜 := ℝ) Ap (Xp - Ap))
+    calc ‖Xp‖ ^ 2 = ‖Ap + (Xp - Ap)‖ ^ 2 := by rw [← hXeq]
+      _ ≤ 2 * ‖Ap‖ ^ 2 + 2 * ‖Xp - Ap‖ ^ 2 := by
+          nlinarith [hns, hcs, hcs', sq_nonneg (‖Ap‖ - ‖Xp - Ap‖), norm_nonneg Ap,
+            norm_nonneg (Xp - Ap)]
+  calc ‖Xp‖ ^ 2 ≤ 2 * ‖Ap‖ ^ 2 + 2 * ‖Xp - Ap‖ ^ 2 := h2sub
+    _ ≤ 2 * (δ ^ 2 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p Y‖ ^ 2)
+        + 2 * (t * δ ^ 2 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p Y‖ ^ 2
+          + Cpk * (1 / t) ^ p * (∑ q ∈ Finset.range p,
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q Y‖ ^ 2
+            + ΛY ^ 2 * ∑ i ∈ Finset.range (p + 1 + 1),
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                  (realizeSymmCcTensor (I := I) g₀ T₂)‖ ^ 2)) := by
+        have := mul_le_mul_of_nonneg_left htop (by norm_num : (0 : ℝ) ≤ 2)
+        have := mul_le_mul_of_nonneg_left hrest (by norm_num : (0 : ℝ) ≤ 2)
+        linarith
+    _ = 2 * (1 + t) * δ ^ 2 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p Y‖ ^ 2
+        + 2 * Cpk * (1 / t) ^ p * (∑ q ∈ Finset.range p,
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q Y‖ ^ 2
+          + ΛY ^ 2 * ∑ i ∈ Finset.range (p + 1 + 1),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                (realizeSymmCcTensor (I := I) g₀ T₂)‖ ^ 2) := by ring
+
+set_option linter.unusedSectionVars false in
+/-- **The δ-separated integrated contraction grid at the LOW (`H^{a+2}`) ball** — the low-ball
+sibling of `crossCorrectionSection_iteratedCovGrad_grid_le`: the `t`-scaled split at the
+margin-chosen scale `t = (1 − 2δ)/(1 + 2δ)`, the scaled-Young absorption
+`crossCorrMarginScale_absorb` relaxing the principal to `δ`, the `C⁰` sup of the lowered
+connection difference funded by the order-`a` ball (`exists_loweredConnDiff_rfns_fibre_sup`,
+mono-down from `a + 2`), and the realize-jet `L²` conversion folding the realized arm into the
+`T₁`-jets. -/
+private theorem cc_grid_le_low (g₀ : SmoothRiemannianMetric I M) (p : ℕ)
+    (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ Cgrid : ℝ, 0 ≤ Cgrid ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+        (∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+              (DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁)‖ ^ 2 ≤
+          δ * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+              (DeTurck.loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2
+          + Cgrid * (∑ q ∈ Finset.range p,
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+                    (DeTurck.loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2
+              + ∑ l ∈ Finset.range (p + 1 + 1),
+                  ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2) := by
+  classical
+  obtain ⟨ΛD, hΛD0, hΛD⟩ := exists_loweredConnDiff_rfns_fibre_sup (I := I) g₀ hδ0 hδ1 B a ha
+  obtain ⟨Cpk, hCpk0, hCpk⟩ := contraction_topRest_split_uniform (I := I) (M := M) g₀ p δ hδ0
+  obtain ⟨Cr, hCr0, hCr⟩ := realize_jet_norm_sq_sum_fold (I := I) (M := M) g₀ (p + 1)
+  obtain ⟨ht0', ht1'⟩ := DeTurck.crossCorrMarginScale_mem (δ := δ) hδ0 hδ1
+  set t : ℝ := (1 - 2 * δ) / (1 + 2 * δ) with htdef
+  refine ⟨2 * Cpk * (1 / t) ^ p * (1 + ΛD ^ 2 * Cr), by positivity, ?_⟩
+  intro T₁ g₁ hr hfib hball
+  have hball_a : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a T₁‖ ≤ B :=
+    le_trans (toHs_norm_mono (I := I) (M := M) g₀ (by omega : a ≤ a + 2) T₁) hball
+  set D := DeTurck.loweredConnDiffSection (I := I) g₁ g₀ with hDd
+  set Y := DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2] D with hYd
+  have hYsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x (Y.toSection x) ≤
+      ΛD ^ 2 := by
+    intro x
+    rw [hYd, rfns_permuteCcTensor_zero, hDd]
+    exact hΛD T₁ g₁ hr hfib hball_a x
+  -- The contraction realization of the cross-correction section.
+  have hccid : DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁ =
+      Integral.Connection.crossCorrParallelContraction (I := I) g₀ (a := 0) (b := 0)
+        (realizeSymmCcTensor (I := I) g₀ T₁) Y :=
+    (Integral.Connection.crossCorrParallelContraction_eq_crossCorrectionSection
+      (I := I) g₀ g₁ T₁).symm
+  have hsplit := hCpk t ht0' ht1' T₁ Y ΛD hΛD0 hfib hYsup
+  -- The permutation `L²`-norm invariances `‖∇^q Y‖² = ‖∇^q D‖²`.
+  have hYD : ∀ q : ℕ, ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q Y‖ ^ 2 =
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q D‖ ^ 2 := by
+    intro q
+    rw [hYd]
+    exact norm_sq_iteratedCovGrad_permute (I := I) (M := M) g₀ c[(0 : Fin 3), 1, 2] D q
+  rw [hccid]
+  -- The margin absorption `2(1+t)δ² ≤ δ`.
+  have habsorb : 2 * (1 + t) * δ ^ 2 ≤ δ := DeTurck.crossCorrMarginScale_absorb hδ0 hδ1
+  -- Assemble.
+  set Lp := ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p D‖ ^ 2 with hLpd
+  set Slow := ∑ q ∈ Finset.range p,
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q D‖ ^ 2 with hSlowd
+  set ST := ∑ l ∈ Finset.range (p + 1 + 1),
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2 with hSTd
+  have hLp_nn : 0 ≤ Lp := by rw [hLpd]; positivity
+  have hSlow_nn : 0 ≤ Slow := by rw [hSlowd]; positivity
+  have hST_nn : 0 ≤ ST := by rw [hSTd]; positivity
+  have hSlowY : (∑ q ∈ Finset.range p,
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q Y‖ ^ 2) = Slow := by
+    rw [hSlowd]
+    exact Finset.sum_congr rfl fun q _ => hYD q
+  have hSw_fold : (∑ i ∈ Finset.range (p + 1 + 1),
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+          (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2) ≤ Cr * ST := by
+    rw [hSTd]
+    exact hCr T₁
+  rw [hYD p, ← hLpd, hSlowY] at hsplit
+  have h1t : (0 : ℝ) ≤ (1 / t) ^ p := by positivity
+  have hprin : 2 * (1 + t) * δ ^ 2 * Lp ≤ δ * Lp :=
+    mul_le_mul_of_nonneg_right habsorb hLp_nn
+  have hrest_fold : 2 * Cpk * (1 / t) ^ p * (Slow + ΛD ^ 2 * ∑ i ∈ Finset.range (p + 1 + 1),
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+          (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2) ≤
+      2 * Cpk * (1 / t) ^ p * (1 + ΛD ^ 2 * Cr) * (Slow + ST) := by
+    have hin : Slow + ΛD ^ 2 * ∑ i ∈ Finset.range (p + 1 + 1),
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+          (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2 ≤
+        (1 + ΛD ^ 2 * Cr) * (Slow + ST) := by
+      have h2 : ΛD ^ 2 * (∑ i ∈ Finset.range (p + 1 + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+            (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2) ≤ ΛD ^ 2 * (Cr * ST) :=
+        mul_le_mul_of_nonneg_left hSw_fold (by positivity)
+      nlinarith [hSlow_nn, hST_nn, sq_nonneg ΛD, mul_nonneg (sq_nonneg ΛD)
+        (mul_nonneg hCr0 hST_nn), mul_nonneg (mul_nonneg (sq_nonneg ΛD) hCr0) hSlow_nn]
+    calc 2 * Cpk * (1 / t) ^ p * (Slow + ΛD ^ 2 * ∑ i ∈ Finset.range (p + 1 + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+            (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2)
+        ≤ 2 * Cpk * (1 / t) ^ p * ((1 + ΛD ^ 2 * Cr) * (Slow + ST)) :=
+          mul_le_mul_of_nonneg_left hin (by positivity)
+      _ = 2 * Cpk * (1 / t) ^ p * (1 + ΛD ^ 2 * Cr) * (Slow + ST) := by ring
+  linarith [hsplit, hprin, hrest_fold]
+
+set_option linter.unusedSectionVars false in
+/-- **T1-LOW — the iterated-covariant-jet `L²` bound of the metrically-lowered connection
+difference at the LOW (`H^{a+2}`) ball.**  The low-ball sibling of
+`exists_riemannianFiberNormSq_iteratedCovGrad_loweredConnDiff_le_jetSum`: the same
+differentiated-Koszul `δ < 1/2` strong-induction recursion (`4 − 8δ > 0`), but every brick funded
+by the FIXED order-`(a+2)` Sobolev ball — the order-uniform Hamilton-tame fold the integrated
+two-arm consumers (whose ball is `a + 2` at every gradient order) require. -/
+private theorem loweredConnDiff_jet_norm_sq_fold_low (g₀ : SmoothRiemannianMetric I M) (p : ℕ)
+    (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+        (∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+              (DeTurck.loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2 ≤
+          C * ∑ l ∈ Finset.range (p + 1 + 1),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2 := by
+  classical
+  induction p using Nat.strong_induction_on with
+  | _ p ih =>
+    obtain ⟨Ck, hCk0, hCk⟩ := koszulCombSection_iteratedCovGrad_norm_sq_le (I := I) g₀ p
+    obtain ⟨Cg, hCg0, hCg⟩ := cc_grid_le_low (I := I) (M := M) g₀ p δ hδ0 hδ1 B a ha
+    have hih : ∀ q ∈ Finset.range p, ∃ Cq : ℝ, 0 ≤ Cq ∧
+        ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+          (∀ (y : M) (v w : TangentSpace I y),
+            g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
+          gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+                (DeTurck.loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2 ≤
+            Cq * ∑ l ∈ Finset.range (q + 1 + 1),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2 :=
+      fun q hq => ih q (Finset.mem_range.mp hq)
+    choose! Cq hCq0 hCq using hih
+    have hden : 0 < 4 - 8 * δ := by linarith
+    refine ⟨(2 * Ck + 8 * Cg + 8 * Cg * ∑ q ∈ Finset.range p, Cq q) / (4 - 8 * δ), ?_, ?_⟩
+    · have : 0 ≤ ∑ q ∈ Finset.range p, Cq q := Finset.sum_nonneg fun q hq => hCq0 q hq
+      positivity
+    intro T₁ g₁ hr hfib hball
+    set S := ∑ l ∈ Finset.range (p + 1 + 1),
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2 with hSdef
+    have hSnn : 0 ≤ S := Finset.sum_nonneg fun l _ => by positivity
+    set L := ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+      (DeTurck.loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2 with hLdef
+    have hLnn : 0 ≤ L := by rw [hLdef]; positivity
+    set Kr := ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+      (DeTurck.koszulCombSection (I := I) g₁ g₀ T₁)‖ ^ 2 with hKrdef
+    set Cr := ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+      (DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁)‖ ^ 2 with hCrdef
+    -- The section-level Koszul identity under `∇^p`: `4L ≤ 2Kr + 8Cr`.
+    have hsub : (4 : ℝ) * L ≤ 2 * Kr + 8 * Cr := by
+      have hid : PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+            ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀) =
+          PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+              (DeTurck.koszulCombSection (I := I) g₁ g₀ T₁) -
+            PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+              ((2 : ℝ) • DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁) := by
+        rw [← PDE.RicciFlow.iteratedCovGrad_sub]
+        congr 1
+        rw [DeTurck.koszulCombSection]
+        abel
+      have h4L : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+            ((2 : ℝ) • DeTurck.loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2 = 4 * L := by
+        rw [iteratedCovGrad_norm_sq_smul, hLdef]; norm_num
+      have h4Cr : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+            ((2 : ℝ) • DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁)‖ ^ 2 = 4 * Cr := by
+        rw [iteratedCovGrad_norm_sq_smul, hCrdef]; norm_num
+      have hle := iteratedCovGrad_norm_sq_sub_le (I := I) g₀ 3 p
+        (DeTurck.koszulCombSection (I := I) g₁ g₀ T₁)
+        ((2 : ℝ) • DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁)
+      rw [PDE.RicciFlow.iteratedCovGrad_sub] at hle
+      rw [hid] at h4L
+      rw [← hKrdef, h4Cr] at hle
+      linarith [hle, h4L]
+    have hKr_le : Kr ≤ Ck * S := hCk T₁ g₁ hr
+    have hCr_le : Cr ≤ δ * L + Cg * ((∑ q ∈ Finset.range p,
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+              (DeTurck.loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2) + S) :=
+      hCg T₁ g₁ hr hfib hball
+    have hlow_le : ∀ q ∈ Finset.range p,
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+            (DeTurck.loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2 ≤ Cq q * S := by
+      intro q hq
+      refine le_trans (hCq q hq T₁ g₁ hr hfib hball) ?_
+      refine mul_le_mul_of_nonneg_left ?_ (hCq0 q hq)
+      rw [hSdef]
+      exact Finset.sum_le_sum_of_subset_of_nonneg
+        (Finset.range_subset_range.2
+          (by have := Finset.mem_range.mp hq; omega))
+        fun l _ _ => by positivity
+    have hsum_low : (∑ q ∈ Finset.range p,
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+              (DeTurck.loweredConnDiffSection (I := I) g₁ g₀)‖ ^ 2) ≤
+        (∑ q ∈ Finset.range p, Cq q) * S := by
+      rw [Finset.sum_mul]; exact Finset.sum_le_sum hlow_le
+    have hsumCq_nn : 0 ≤ ∑ q ∈ Finset.range p, Cq q :=
+      Finset.sum_nonneg fun q hq => hCq0 q hq
+    have hkey : (4 - 8 * δ) * L ≤
+        (2 * Ck + 8 * Cg + 8 * Cg * ∑ q ∈ Finset.range p, Cq q) * S := by
+      nlinarith [hsub, hKr_le, hCr_le, hsum_low, hSnn, hLnn, hCg0, hCk0, hsumCq_nn,
+        mul_le_mul_of_nonneg_left hsum_low hCg0]
+    rw [hLdef] at hkey ⊢
+    rw [div_mul_eq_mul_div, le_div_iff₀ hden]
+    nlinarith [hkey]
+
+set_option linter.unusedSectionVars false in
+/-- **The pointwise `18`-domination of the Koszul-triple jets by the realized-difference jets** —
+the three slot readings of the once-differentiated realized difference factor, with the front/back
+rank shift `∇^p (∇₀ w) ≍ ∇^{p+1} w`. -/
+private theorem koszulTriple_rfns_le' (g₀ : SmoothRiemannianMetric I M)
+    (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2) (p : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+            (koszulTripleDiff (I := I) g₀ T₁ T₂)).toSection x) ≤
+      18 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p + 1)) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 (p + 1)
+            (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x) := by
+  classical
+  set R := Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 2
+    (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂)) with hR
+  set LR := riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p R).toSection x) with hLR
+  have hLRnn : 0 ≤ LR := riemannianFiberNormSq_nonneg _ _ _ _ _
+  have hP1eq : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+        (DeTurck.permuteCcTensor (I := I) g₀ (Equiv.swap (0 : Fin 3) 1) R)).toSection x) = LR := by
+    rw [hLR]
+    exact DeTurck.riemannianFiberNormSq_iteratedCovGrad_permuteCcTensor (I := I) g₀
+      (Equiv.swap (0 : Fin 3) 1) R p x
+  have hP2eq : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+        (DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 2, 1] R)).toSection x) = LR := by
+    rw [hLR]
+    exact DeTurck.riemannianFiberNormSq_iteratedCovGrad_permuteCcTensor (I := I) g₀
+      c[(0 : Fin 3), 2, 1] R p x
+  have hkoszul : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+            (koszulTripleDiff (I := I) g₀ T₁ T₂)).toSection x) ≤ 18 * LR := by
+    rw [koszulTripleDiff, ← hR, PDE.RicciFlow.iteratedCovGrad_sub,
+      PDE.RicciFlow.iteratedCovGrad_add,
+      Integral.L2.SmoothCcTensor.toSection_sub, Integral.L2.SmoothCcTensor.toSection_add,
+      ContMDiffSection.coe_sub, ContMDiffSection.coe_add, Pi.sub_apply, Pi.add_apply]
+    refine le_trans (riemannianFiberNormSq_sub_le (I := I) (M := M) g₀ 0 (3 + p) x _ _) ?_
+    have hadd := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (3 + p) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p R).toSection x)
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+        (DeTurck.permuteCcTensor (I := I) g₀ (Equiv.swap (0 : Fin 3) 1) R)).toSection x)
+    rw [hP1eq] at hadd
+    rw [hP2eq]
+    nlinarith [hadd, hLRnn]
+  have hLR_eq : LR = riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p + 1)) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 (p + 1)
+          (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))).toSection x) := by
+    rw [hLR, hR]
+    exact DifferentialGeometry.PDE.DeTurck.riemannianFiberNormSq_toSection_heq
+      (I := I) (M := M) g₀ (by omega : (3 : ℕ) + p = 2 + (p + 1))
+      (DifferentialGeometry.PDE.DeTurck.iteratedCovGrad_covGrad_comm_heq_local
+        (I := I) (M := M) g₀ 2 p
+        (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))) x
+  rw [hLR_eq] at hkoszul
+  exact hkoszul
+
+set_option linter.unusedSectionVars false in
+/-- **The integrated `18`-domination of the Koszul-triple jets** — `koszulTriple_rfns_le'`
+integrated against the Riemannian volume. -/
+private theorem koszulTriple_norm_sq_le' (g₀ : SmoothRiemannianMetric I M)
+    (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2) (p : ℕ) :
+    ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+        (koszulTripleDiff (I := I) g₀ T₁ T₂)‖ ^ 2 ≤
+      18 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 (p + 1)
+          (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2 := by
+  rw [normSq_eq_integral_rfns, normSq_eq_integral_rfns]
+  rw [← MeasureTheory.integral_const_mul]
+  refine MeasureTheory.integral_mono_of_nonneg (Filter.Eventually.of_forall (fun x => ?_))
+    ((Integral.Connection.integrable_riemannianFiberNormSq_toSection (I := I) (M := M)
+      g₀ 0 (2 + (p + 1)) _).const_mul 18) (Filter.Eventually.of_forall (fun x =>
+        koszulTriple_rfns_le' (I := I) (M := M) g₀ T₁ T₂ p x))
+  exact riemannianFiberNormSq_nonneg _ _ _ _ _
+
+set_option linter.unusedSectionVars false in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **The supercritical pointwise bound of the realized difference and its first covariant
+gradient by the order-`a` Sobolev mass of the difference.**  The `j ≤ 1` fibre values of
+`w = realizeSymm (T₁ − T₂)` are bounded at every point by `Cemb·‖(T₁ − T₂).toHs a‖`
+(`exists_realizedJetSum_le_toHs_sharpOrder`, the `2a > finrank + 4` realized `C²`-jet embedding). -/
+private theorem realized_diff_rfns_le_toHs (g₀ : SmoothRiemannianMetric I M)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ Cemb : ℝ, 0 ≤ Cemb ∧
+      ∀ (S : Integral.L2.SmoothCcTensor g₀ 0 2) (j : ℕ), j < 3 → ∀ x : M,
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+              (realizeSymmCcTensor (I := I) g₀ S)).toSection x) ≤
+          (Cemb * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a S‖) ^ 2 := by
+  classical
+  obtain ⟨Cemb, hCemb0, hCemb⟩ :=
+    exists_realizedJetSum_le_toHs_sharpOrder (I := I) g₀ a ha
+  refine ⟨Cemb, hCemb0.le, fun S j hj x => ?_⟩
+  have hjet := hCemb S x
+  have hsqrt : Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+          (realizeSymmCcTensor (I := I) g₀ S)).toSection x)) ≤
+      iteratedCovGradJetSum (I := I) g₀ (realizeSymmCcTensor (I := I) g₀ S) x := by
+    rw [iteratedCovGradJetSum]
+    have hhead : Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+            (realizeSymmCcTensor (I := I) g₀ S)).toSection x)) =
+        (letI : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 (2 + j) I bb) :=
+          Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + j)
+        ‖(PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+            (realizeSymmCcTensor (I := I) g₀ S)).toSection x‖) :=
+      (norm_toSection_eq_sqrt_riemannianFiberNormSq_installed (I := I) (M := M) g₀ 0 (2 + j)
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+          (realizeSymmCcTensor (I := I) g₀ S)) x).symm
+    rw [hhead]
+    refine Finset.single_le_sum (f := fun j' =>
+        (letI : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 (2 + j') I bb) :=
+          Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + j')
+        ‖(PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j'
+            (realizeSymmCcTensor (I := I) g₀ S)).toSection x‖))
+      (fun j' _ => ?_) (Finset.mem_range.mpr hj)
+    letI : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 (2 + j') I bb) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + j')
+    exact norm_nonneg _
+  have hrfns_nn := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + j) x
+    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+      (realizeSymmCcTensor (I := I) g₀ S)).toSection x)
+  calc riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+          (realizeSymmCcTensor (I := I) g₀ S)).toSection x)
+      = Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+            (realizeSymmCcTensor (I := I) g₀ S)).toSection x)) ^ 2 :=
+        (Real.sq_sqrt hrfns_nn).symm
+    _ ≤ (Cemb * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a S‖) ^ 2 := by
+        have hle : Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+              (realizeSymmCcTensor (I := I) g₀ S)).toSection x)) ≤
+            Cemb * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a S‖ :=
+          le_trans hsqrt hjet
+        exact pow_le_pow_left₀ (Real.sqrt_nonneg _) hle 2
+
+set_option linter.unusedSectionVars false in
+/-- **The uniform `C⁰` fibre-sup Lipschitz bound of the lowered connection-difference COCYCLE.**
+The order-`0` fibre value of `lowered(g₁, g₀) − lowered(g₂, g₀)` is bounded at every point by a
+constant times the order-`a` Sobolev mass `‖(T₁ − T₂).toHs a‖` of the perturbation difference —
+the pointwise Neumann absorption of the bilinear-factorized cocycle: the Koszul-triple arm and the
+`Φ(w, D₁)` arm are difference-small through the supercritical realized embedding, and the
+`Φ(h₂, D₁ − D₂)` arm is `δ²`-absorbed by the sharp passenger bound (`4 − 16δ² > 0` on
+`δ < 1/2`). -/
+private theorem loweredConnDiff_cocycle_rfns_sup (g₀ : SmoothRiemannianMetric I M)
+    (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ CΛsq : ℝ, 0 ≤ CΛsq ∧
+      ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+        (g₁ g₂ : SmoothRiemannianMetric I M),
+        (∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
+        (∀ (y : M) (v w : TangentSpace I y),
+          g₂.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₂ y v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+        ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
+              ((DeTurck.loweredConnDiffSection (I := I) g₁ g₀
+                - DeTurck.loweredConnDiffSection (I := I) g₂ g₀).toSection x) ≤
+            CΛsq * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
+                (T₁ - T₂)‖ ^ 2 := by
+  classical
+  obtain ⟨ΛD, hΛD0, hΛD⟩ := exists_loweredConnDiff_rfns_fibre_sup (I := I) g₀ hδ0 hδ1 B a ha
+  obtain ⟨Cd0, hCd00, hCd0⟩ := contraction_rfns_fullWindowGrid_uniform (I := I) (M := M) g₀ 0
+  obtain ⟨Cemb, hCemb0, hCemb⟩ := realized_diff_rfns_le_toHs (I := I) (M := M) g₀ a ha
+  have hden : (0 : ℝ) < 4 - 16 * δ ^ 2 := by nlinarith
+  refine ⟨(36 * Cemb ^ 2 + 16 * Cd0 * ΛD ^ 2 * Cemb ^ 2) / (4 - 16 * δ ^ 2), by positivity, ?_⟩
+  intro T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 x
+  have hball1a : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a T₁‖ ≤ B :=
+    le_trans (toHs_norm_mono (I := I) (M := M) g₀ (by omega : a ≤ a + 2) T₁) hball1
+  set Dn := ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
+    with hDn
+  have hDn_nn : 0 ≤ Dn := norm_nonneg _
+  set L₁ := DeTurck.loweredConnDiffSection (I := I) g₁ g₀ with hL₁
+  set L₂ := DeTurck.loweredConnDiffSection (I := I) g₂ g₀ with hL₂
+  set w := realizeSymmCcTensor (I := I) g₀ (T₁ - T₂) with hw
+  set D₁p := DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2] L₁ with hD₁p
+  set D₂p := DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2] L₂ with hD₂p
+  set X := riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x ((L₁ - L₂).toSection x) with hX
+  have hX_nn : 0 ≤ X := riemannianFiberNormSq_nonneg _ _ _ _ _
+  -- The section-level cocycle identity.
+  have hid : (2 : ℝ) • L₁ - (2 : ℝ) • L₂ =
+      koszulTripleDiff (I := I) g₀ T₁ T₂
+        - ((2 : ℝ) • DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
+          - (2 : ℝ) • DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂) := by
+    rw [hL₁, hL₂]
+    exact DifferentialGeometry.PDE.DeTurck.loweredConnDiffSection_sub_eq_koszulRealizeDiff_sub_crossCorrDiff
+      (I := I) g₀ g₁ g₂ T₁ T₂ hr1 hr2
+  -- The bilinear factorization of the cross-correction difference.
+  have hfact := crossCorrectionSectionDiff_eq_bilinearFactorization (I := I) (M := M)
+    g₀ g₁ g₂ T₁ T₂
+  -- Pointwise values.
+  set Φ₁ := Integral.Connection.crossCorrParallelContraction (I := I) g₀ (a := 0) (b := 0)
+    w D₁p with hΦ₁
+  set Φ₂ := Integral.Connection.crossCorrParallelContraction (I := I) g₀ (a := 0) (b := 0)
+    (realizeSymmCcTensor (I := I) g₀ T₂) (D₁p - D₂p) with hΦ₂
+  -- `4X = rfns(2•L₁ − 2•L₂)`.
+  have h2smul : (2 : ℝ) • L₁ - (2 : ℝ) • L₂ = (2 : ℝ) • (L₁ - L₂) := by
+    rw [smul_sub]
+  have h4X : riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
+      (((2 : ℝ) • L₁ - (2 : ℝ) • L₂).toSection x) = 4 * X := by
+    rw [h2smul]
+    rw [show ((((2 : ℝ) • (L₁ - L₂)).toSection x) : TensorRSSpace 0 3 I x) =
+        (2 : ℝ) • ((L₁ - L₂).toSection x) from by
+      rw [Integral.L2.SmoothCcTensor.toSection_smul]; rfl]
+    rw [show riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
+        ((2 : ℝ) • ((L₁ - L₂).toSection x)) =
+        (2 : ℝ) ^ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
+          ((L₁ - L₂).toSection x) from by
+      exact rfns_smul (I := I) (M := M) g₀ 0 3 x 2 ((L₁ - L₂).toSection x)]
+    rw [← hX]; norm_num
+  -- The K-arm and the two contraction arms, pointwise.
+  have hKpt : riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
+      ((koszulTripleDiff (I := I) g₀ T₁ T₂).toSection x) ≤ 18 * (Cemb * Dn) ^ 2 := by
+    have h0 := koszulTriple_rfns_le' (I := I) (M := M) g₀ T₁ T₂ 0 x
+    rw [show (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 0
+        (koszulTripleDiff (I := I) g₀ T₁ T₂)) = koszulTripleDiff (I := I) g₀ T₁ T₂
+      from rfl] at h0
+    refine le_trans h0 ?_
+    have h1 := hCemb (T₁ - T₂) 1 (by omega) x
+    rw [← hDn] at h1
+    nlinarith [h1]
+  have hΦ₁pt : riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x ((Φ₁ :
+      Integral.L2.SmoothCcTensor g₀ 0 (3 + 0 + 0)).toSection x) ≤
+      Cd0 * (ΛD ^ 2 * (Cemb * Dn) ^ 2) := by
+    have hgrid := hCd0 w D₁p x
+    rw [← hΦ₁] at hgrid
+    have hsimp : (∑ i ∈ Finset.range (0 + 1),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i D₁p).toSection x)
+          * ∑ l ∈ Finset.range (0 + 1 - i),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l w).toSection x)) =
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x (D₁p.toSection x)
+          * riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (w.toSection x) := by
+      rw [Finset.sum_range_one, Finset.sum_range_one]
+      rfl
+    rw [hsimp] at hgrid
+    refine le_trans hgrid ?_
+    have hD₁sup : riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x (D₁p.toSection x) ≤
+        ΛD ^ 2 := by
+      rw [hD₁p, rfns_permuteCcTensor_zero, hL₁]
+      exact hΛD T₁ g₁ hr1 hfib1 hball1a x
+    have hwsup : riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (w.toSection x) ≤
+        (Cemb * Dn) ^ 2 := by
+      have h0 := hCemb (T₁ - T₂) 0 (by omega) x
+      rw [← hDn] at h0
+      rw [hw]
+      exact h0
+    have hwnn := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 2 x (w.toSection x)
+    have hDnn := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 3 x (D₁p.toSection x)
+    have := mul_le_mul hD₁sup hwsup hwnn (by positivity)
+    nlinarith [hCd00, this]
+  have hΦ₂pt : riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x ((Φ₂ :
+      Integral.L2.SmoothCcTensor g₀ 0 (3 + 0 + 0)).toSection x) ≤ δ ^ 2 * X := by
+    have hsharp := DeTurck.crossCorrParallelContraction_rfns_le_sq_passenger (I := I) g₀ 0
+      T₂ hfib2 (D₁p - D₂p) x
+    rw [← hΦ₂] at hsharp
+    refine le_trans hsharp ?_
+    have hpermsub : D₁p - D₂p =
+        DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2] (L₁ - L₂) := by
+      rw [hD₁p, hD₂p, permuteCcTensor_sub_local]
+    rw [hpermsub, rfns_permuteCcTensor_zero, ← hX]
+  -- Assemble the pointwise Neumann absorption.
+  have hccpt : riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
+      ((DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
+        - DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂).toSection x) ≤
+      2 * (Cd0 * (ΛD ^ 2 * (Cemb * Dn) ^ 2)) + 2 * (δ ^ 2 * X) := by
+    rw [hfact]
+    rw [Integral.L2.SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
+    refine le_trans (riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 3 x _ _) ?_
+    have h1 := hΦ₁pt
+    have h2 := hΦ₂pt
+    linarith
+  have hidpt : (((2 : ℝ) • L₁ - (2 : ℝ) • L₂).toSection x : TensorRSSpace 0 3 I x) =
+      (koszulTripleDiff (I := I) g₀ T₁ T₂).toSection x
+        - (((2 : ℝ) • (DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
+            - DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂)).toSection x) := by
+    rw [hid]
+    rw [show ((2 : ℝ) • DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
+        - (2 : ℝ) • DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂)
+        = (2 : ℝ) • (DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
+          - DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂) from (smul_sub _ _ _).symm]
+    rw [Integral.L2.SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
+  have h2cc : riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
+      ((((2 : ℝ) • (DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
+          - DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂)).toSection x)) =
+      4 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
+        ((DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
+          - DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂).toSection x) := by
+    rw [show ((((2 : ℝ) • (DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
+        - DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂)).toSection x) :
+          TensorRSSpace 0 3 I x) =
+        (2 : ℝ) • ((DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
+          - DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂).toSection x) from by
+      rw [Integral.L2.SmoothCcTensor.toSection_smul]; rfl]
+    rw [rfns_smul (I := I) (M := M) g₀ 0 3 x 2 _]
+    norm_num
+  have hmain : 4 * X ≤ 2 * (18 * (Cemb * Dn) ^ 2)
+      + 2 * (4 * (2 * (Cd0 * (ΛD ^ 2 * (Cemb * Dn) ^ 2)) + 2 * (δ ^ 2 * X))) := by
+    have hsub' := rfns_sub_le (I := I) (M := M) g₀ 0 3 x
+      ((koszulTripleDiff (I := I) g₀ T₁ T₂).toSection x)
+      ((((2 : ℝ) • (DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
+          - DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂)).toSection x))
+    rw [h2cc] at hsub'
+    rw [← hidpt] at hsub'
+    rw [h4X] at hsub'
+    have hcc4 : 4 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
+        ((DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
+          - DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂).toSection x) ≤
+        4 * (2 * (Cd0 * (ΛD ^ 2 * (Cemb * Dn) ^ 2)) + 2 * (δ ^ 2 * X)) := by
+      linarith [hccpt]
+    linarith [hsub', hKpt, hcc4]
+  -- Divide by the Neumann margin `4 − 16δ²`.
+  have hkey : (4 - 16 * δ ^ 2) * X ≤
+      (36 * Cemb ^ 2 + 16 * Cd0 * ΛD ^ 2 * Cemb ^ 2) * Dn ^ 2 := by
+    nlinarith [hmain, hDn_nn, hX_nn]
+  rw [div_mul_eq_mul_div, le_div_iff₀ hden]
+  nlinarith [hkey]
+
+set_option maxHeartbeats 12800000 in
+set_option linter.unusedSectionVars false in
+/-- **The integrated two-arm `L²`-jet bound of the lowered connection-difference COCYCLE**
+(squared two-arm currency).  By strong induction on the order: the cocycle identity
+`2•(L₁ − L₂) = koszulTriple(w) − 2•Φ(w, D₁) − 2•Φ(h₂, D₁ − D₂)`, the `18`-dominated Koszul arm,
+the engine-integrated `Φ(w, D₁)` arm (with the single-metric low-ball fold on the `D₁`-jets), and
+the `t`-scaled top/rest split on the `δ`-absorbed arm at the margin scale
+`t = (1 − 4δ²)/(1 + 4δ²)` (absorption `16(1 + t)δ² < 4` on all of `δ < 1/2`). -/
+private theorem loweredConnDiff_cocycle_jet_norm_sq_fold (g₀ : SmoothRiemannianMetric I M)
+    (p : ℕ) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+        (g₁ g₂ : SmoothRiemannianMetric I M),
+        (∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
+        (∀ (y : M) (v w : TangentSpace I y),
+          g₂.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₂ y v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+              (DeTurck.loweredConnDiffSection (I := I) g₁ g₀
+                - DeTurck.loweredConnDiffSection (I := I) g₂ g₀)‖ ^ 2 ≤
+          C * ((∑ i ∈ Finset.range (p + 1 + 1),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                  (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2)
+            + ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
+                (T₁ - T₂)‖ ^ 2
+              * ∑ l ∈ Finset.range (p + 1 + 1),
+                  (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2
+                    + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖ ^ 2)) := by
+  classical
+  induction p using Nat.strong_induction_on with
+  | _ p ih =>
+    set μ := Integral.Measure.riemannianVolumeMeasure I M g₀ with hμ
+    obtain ⟨Cpk, hCpk0, hCpk⟩ := contraction_topRest_split_uniform (I := I) (M := M) g₀ p δ hδ0
+    obtain ⟨CΛsq, hCΛsq0, hCΛsq⟩ :=
+      loweredConnDiff_cocycle_rfns_sup (I := I) (M := M) g₀ δ hδ0 hδ1 B a ha
+    obtain ⟨Cemb, hCemb0, hCemb⟩ := realized_diff_rfns_le_toHs (I := I) (M := M) g₀ a ha
+    obtain ⟨ΛD, hΛD0, hΛD⟩ := exists_loweredConnDiff_rfns_fibre_sup (I := I) g₀ hδ0 hδ1 B a ha
+    obtain ⟨CdU, hCdU0, hCdU⟩ := contraction_rfns_fullWindowGrid_uniform (I := I) (M := M) g₀ p
+    obtain ⟨Csym, hCsym0, hsym⟩ :=
+      Analysis.Sobolev.Tensor.exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le
+        (I := I) (M := M) g₀ 3 2 p
+    obtain ⟨Cr2, hCr20, hCr2⟩ := realize_jet_norm_sq_sum_fold (I := I) (M := M) g₀ (p + 1)
+    choose CT1 hCT10 hCT1 using fun i =>
+      loweredConnDiff_jet_norm_sq_fold_low (I := I) (M := M) g₀ i δ hδ0 hδ1 B a ha
+    have hih : ∀ q ∈ Finset.range p, ∃ Cq : ℝ, 0 ≤ Cq ∧
+        ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
+          (g₁ g₂ : SmoothRiemannianMetric I M),
+          (∀ (y : M) (v w : TangentSpace I y),
+            g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
+          (∀ (y : M) (v w : TangentSpace I y),
+            g₂.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₂ y v w) →
+          gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+          gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+                (DeTurck.loweredConnDiffSection (I := I) g₁ g₀
+                  - DeTurck.loweredConnDiffSection (I := I) g₂ g₀)‖ ^ 2 ≤
+            Cq * ((∑ i ∈ Finset.range (q + 1 + 1),
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                    (realizeSymmCcTensor (I := I) g₀ (T₁ - T₂))‖ ^ 2)
+              + ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
+                  (T₁ - T₂)‖ ^ 2
+                * ∑ l ∈ Finset.range (q + 1 + 1),
+                    (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2
+                      + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖ ^ 2)) :=
+      fun q hq => ih q (Finset.mem_range.mp hq)
+    choose! Cq hCq0 hCq using hih
+    set t : ℝ := (1 - 4 * δ ^ 2) / (1 + 4 * δ ^ 2) with htdef
+    have hδsq : 4 * δ ^ 2 < 1 := by nlinarith
+    have hdenpos : (0 : ℝ) < 1 + 4 * δ ^ 2 := by positivity
+    have ht0 : 0 < t := by
+      rw [htdef]
+      exact div_pos (by linarith) hdenpos
+    have ht1 : t ≤ 1 := by
+      rw [htdef, div_le_one hdenpos]
+      nlinarith
+    have habsorb : 16 * (1 + t) * δ ^ 2 < 4 := by
+      have h1t : 1 + t = 2 / (1 + 4 * δ ^ 2) := by
+        rw [htdef]
+        field_simp
+        ring
+      rw [h1t]
+      rw [show 16 * (2 / (1 + 4 * δ ^ 2)) * δ ^ 2 = (32 * δ ^ 2) / (1 + 4 * δ ^ 2) from by
+        ring]
+      rw [div_lt_iff₀ hdenpos]
+      nlinarith
+    have hmargin : (0 : ℝ) < 4 - 16 * (1 + t) * δ ^ 2 := by linarith
+    set CsumT1 : ℝ := ∑ i ∈ Finset.range (p + 1), CT1 i with hCsumT1
+    have hCsumT1_nn : 0 ≤ CsumT1 := Finset.sum_nonneg fun i _ => hCT10 i
+    set CsumQ : ℝ := ∑ q ∈ Finset.range p, Cq q with hCsumQ
+    have hCsumQ_nn : 0 ≤ CsumQ := Finset.sum_nonneg fun q hq => hCq0 q hq
+    set Cbig : ℝ := 72 + 16 * (CdU * Csym * (Cemb ^ 2 * CsumT1 + ΛD ^ 2))
+        + 16 * Cpk * (1 / t) ^ p * (CsumQ + CΛsq * Cr2) with hCbig
+    have hCbig_nn : 0 ≤ Cbig := by
+      rw [hCbig]
+      positivity
+    refine ⟨Cbig / (4 - 16 * (1 + t) * δ ^ 2), by positivity, ?_⟩
+    intro T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2
+    set Dn := ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
+      with hDn
+    have hDn_nn : 0 ≤ Dn := norm_nonneg _
+    set w := realizeSymmCcTensor (I := I) g₀ (T₁ - T₂) with hw
+    set SW2 := ∑ i ∈ Finset.range (p + 1 + 1),
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i w‖ ^ 2 with hSW2
+    set ST2 := ∑ l ∈ Finset.range (p + 1 + 1),
+      (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2
+        + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖ ^ 2) with hST2
+    have hSW2_nn : 0 ≤ SW2 := Finset.sum_nonneg fun i _ => by positivity
+    have hST2_nn : 0 ≤ ST2 := Finset.sum_nonneg fun l _ => by positivity
+    set RHS0 := SW2 + Dn ^ 2 * ST2 with hRHS0
+    have hRHS0_nn : 0 ≤ RHS0 := by rw [hRHS0]; positivity
+    set L₁ := DeTurck.loweredConnDiffSection (I := I) g₁ g₀ with hL₁
+    set L₂ := DeTurck.loweredConnDiffSection (I := I) g₂ g₀ with hL₂
+    set D₁p := DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2] L₁ with hD₁p
+    set D₂p := DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2] L₂ with hD₂p
+    set Φ₁ := Integral.Connection.crossCorrParallelContraction (I := I) g₀ (a := 0) (b := 0)
+      w D₁p with hΦ₁
+    set Φ₂ := Integral.Connection.crossCorrParallelContraction (I := I) g₀ (a := 0) (b := 0)
+      (realizeSymmCcTensor (I := I) g₀ T₂) (D₁p - D₂p) with hΦ₂
+    set Ldp := ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p (L₁ - L₂)‖ ^ 2 with hLdp
+    have hLdp_nn : 0 ≤ Ldp := by rw [hLdp]; positivity
+    -- The section-level cocycle identity, bilinear-factorized.
+    have hsec : (2 : ℝ) • (L₁ - L₂) =
+        (koszulTripleDiff (I := I) g₀ T₁ T₂ - (2 : ℝ) • Φ₁) - (2 : ℝ) • Φ₂ := by
+      have hid := DifferentialGeometry.PDE.DeTurck.loweredConnDiffSection_sub_eq_koszulRealizeDiff_sub_crossCorrDiff
+        (I := I) g₀ g₁ g₂ T₁ T₂ hr1 hr2
+      have hfact := crossCorrectionSectionDiff_eq_bilinearFactorization (I := I) (M := M)
+        g₀ g₁ g₂ T₁ T₂
+      have h2cc : (2 : ℝ) • DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
+          - (2 : ℝ) • DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂
+          = (2 : ℝ) • Φ₁ + (2 : ℝ) • Φ₂ := by
+        rw [← smul_sub, hfact, smul_add]
+      rw [smul_sub]
+      rw [show ((2 : ℝ) • L₁ - (2 : ℝ) • L₂ :
+          Integral.L2.SmoothCcTensor g₀ 0 3) = koszulTripleDiff (I := I) g₀ T₁ T₂
+            - ((2 : ℝ) • DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
+              - (2 : ℝ) • DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂) from hid]
+      rw [h2cc]
+      abel
+    have h4L : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+          ((2 : ℝ) • (L₁ - L₂))‖ ^ 2 = 4 * Ldp := by
+      rw [iteratedCovGrad_norm_sq_smul, hLdp]; norm_num
+    have hsplit : 4 * Ldp ≤
+        4 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+            (koszulTripleDiff (I := I) g₀ T₁ T₂)‖ ^ 2
+        + 16 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (3 + 0 + 0) p Φ₁‖ ^ 2
+        + 8 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (3 + 0 + 0) p Φ₂‖ ^ 2 := by
+      have hle1 := iteratedCovGrad_norm_sq_sub_le (I := I) g₀ 3 p
+        (koszulTripleDiff (I := I) g₀ T₁ T₂ - (2 : ℝ) • Φ₁) ((2 : ℝ) • Φ₂)
+      have hle2 := iteratedCovGrad_norm_sq_sub_le (I := I) g₀ 3 p
+        (koszulTripleDiff (I := I) g₀ T₁ T₂) ((2 : ℝ) • Φ₁)
+      have h4Φ₁ : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p ((2 : ℝ) • Φ₁)‖ ^ 2 =
+          4 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (3 + 0 + 0) p Φ₁‖ ^ 2 := by
+        rw [iteratedCovGrad_norm_sq_smul]; norm_num
+      have h4Φ₂ : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p ((2 : ℝ) • Φ₂)‖ ^ 2 =
+          4 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (3 + 0 + 0) p Φ₂‖ ^ 2 := by
+        rw [iteratedCovGrad_norm_sq_smul]; norm_num
+      have hLrw : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+          ((2 : ℝ) • (L₁ - L₂))‖ ^ 2 =
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+            ((koszulTripleDiff (I := I) g₀ T₁ T₂ - (2 : ℝ) • Φ₁) - (2 : ℝ) • Φ₂)‖ ^ 2 := by
+        rw [hsec]
+      rw [h4L] at hLrw
+      rw [h4Φ₁] at hle2
+      rw [h4Φ₂] at hle1
+      linarith [hle1, hle2, hLrw.ge, hLrw.le]
+    -- ARM 1: the Koszul arm.
+    have hK : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+          (koszulTripleDiff (I := I) g₀ T₁ T₂)‖ ^ 2 ≤ 18 * SW2 := by
+      refine le_trans (koszulTriple_norm_sq_le' (I := I) (M := M) g₀ T₁ T₂ p) ?_
+      have htop : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 (p + 1) w‖ ^ 2 ≤ SW2 := by
+        rw [hSW2]
+        exact Finset.single_le_sum
+          (f := fun i => ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i w‖ ^ 2)
+          (fun i _ => by positivity) (Finset.mem_range.mpr (by omega))
+      rw [← hw]
+      nlinarith [htop]
+    -- ARM 2: the `Φ(w, D₁)` arm through the symmetric engine.
+    have hball1a : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a T₁‖
+        ≤ B :=
+      le_trans (toHs_norm_mono (I := I) (M := M) g₀ (by omega : a ≤ a + 2) T₁) hball1
+    have hD₁sup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
+        (D₁p.toSection x) ≤ ΛD ^ 2 := by
+      intro x
+      rw [hD₁p, rfns_permuteCcTensor_zero, hL₁]
+      exact hΛD T₁ g₁ hr1 hfib1 hball1a x
+    have hwsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+        (w.toSection x) ≤ (Cemb * Dn) ^ 2 := by
+      intro x
+      have h0 := hCemb (T₁ - T₂) 0 (by omega) x
+      rw [← hDn] at h0
+      rw [hw]
+      exact h0
+    obtain ⟨hint_sym, hsym'⟩ := hsym D₁p w ΛD (Cemb * Dn) hΛD0 (by positivity) hD₁sup hwsup
+    have hΦ₁sq : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (3 + 0 + 0) p Φ₁‖ ^ 2 ≤
+        CdU * (Csym * ((Cemb * Dn) ^ 2 * ∑ i ∈ Finset.range (p + 1),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i D₁p‖ ^ 2
+          + ΛD ^ 2 * ∑ l ∈ Finset.range (p + 1),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l w‖ ^ 2)) := by
+      rw [normSq_eq_integral_rfns]
+      calc (∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + 0 + 0 + p) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (3 + 0 + 0) p Φ₁).toSection x) ∂μ)
+          ≤ ∫ x, (CdU * ∑ i ∈ Finset.range (p + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i D₁p).toSection x)
+                * ∑ l ∈ Finset.range (p + 1 - i),
+                    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l w).toSection x)) ∂μ := by
+            refine MeasureTheory.integral_mono_of_nonneg
+              (Filter.Eventually.of_forall (fun x => ?_)) (hint_sym.const_mul CdU)
+              (Filter.Eventually.of_forall (fun x => ?_))
+            · exact riemannianFiberNormSq_nonneg _ _ _ _ _
+            · exact hCdU w D₁p x
+        _ = CdU * ∫ x, (∑ i ∈ Finset.range (p + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i D₁p).toSection x)
+                * ∑ l ∈ Finset.range (p + 1 - i),
+                    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l w).toSection x)) ∂μ := by
+            rw [MeasureTheory.integral_const_mul]
+        _ ≤ CdU * (Csym * ((Cemb * Dn) ^ 2 * ∑ i ∈ Finset.range (p + 1),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i D₁p‖ ^ 2
+            + ΛD ^ 2 * ∑ l ∈ Finset.range (p + 1),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l w‖ ^ 2)) :=
+            mul_le_mul_of_nonneg_left hsym' hCdU0
+    have hD₁fold : (∑ i ∈ Finset.range (p + 1),
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i D₁p‖ ^ 2) ≤ CsumT1 * ST2 := by
+      rw [hCsumT1, Finset.sum_mul]
+      refine Finset.sum_le_sum fun i hi => ?_
+      have hperm : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i D₁p‖ ^ 2 =
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i L₁‖ ^ 2 := by
+        rw [hD₁p]
+        exact norm_sq_iteratedCovGrad_permute (I := I) (M := M) g₀ c[(0 : Fin 3), 1, 2] L₁ i
+      rw [hperm, hL₁]
+      refine le_trans (hCT1 i T₁ g₁ hr1 hfib1 hball1) ?_
+      refine mul_le_mul_of_nonneg_left ?_ (hCT10 i)
+      rw [hST2]
+      calc (∑ l ∈ Finset.range (i + 1 + 1),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2)
+          ≤ ∑ l ∈ Finset.range (p + 1 + 1),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2 :=
+            Finset.sum_le_sum_of_subset_of_nonneg
+              (Finset.range_subset_range.2
+                (by have := Finset.mem_range.mp hi; omega))
+              (fun l _ _ => by positivity)
+        _ ≤ ∑ l ∈ Finset.range (p + 1 + 1),
+            (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2
+              + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖ ^ 2) :=
+            Finset.sum_le_sum fun l _ => le_add_of_nonneg_right (by positivity)
+    have hwfold : (∑ l ∈ Finset.range (p + 1),
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l w‖ ^ 2) ≤ SW2 := by
+      rw [hSW2]
+      exact Finset.sum_le_sum_of_subset_of_nonneg
+        (Finset.range_subset_range.2 (by omega)) (fun l _ _ => by positivity)
+    have hΦ₁final : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (3 + 0 + 0) p Φ₁‖ ^ 2 ≤
+        CdU * Csym * (Cemb ^ 2 * CsumT1 + ΛD ^ 2) * RHS0 := by
+      refine le_trans hΦ₁sq ?_
+      have h1 : (Cemb * Dn) ^ 2 * (∑ i ∈ Finset.range (p + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i D₁p‖ ^ 2) ≤
+          Cemb ^ 2 * CsumT1 * (Dn ^ 2 * ST2) := by
+        have h := mul_le_mul_of_nonneg_left hD₁fold
+          (by positivity : (0 : ℝ) ≤ (Cemb * Dn) ^ 2)
+        nlinarith [h]
+      have h2 : ΛD ^ 2 * (∑ l ∈ Finset.range (p + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l w‖ ^ 2) ≤ ΛD ^ 2 * SW2 :=
+        mul_le_mul_of_nonneg_left hwfold (by positivity)
+      have hDnST_nn : 0 ≤ Dn ^ 2 * ST2 := by positivity
+      have hinner : (Cemb * Dn) ^ 2 * (∑ i ∈ Finset.range (p + 1),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i D₁p‖ ^ 2)
+          + ΛD ^ 2 * (∑ l ∈ Finset.range (p + 1),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l w‖ ^ 2) ≤
+          (Cemb ^ 2 * CsumT1 + ΛD ^ 2) * RHS0 := by
+        rw [hRHS0]
+        nlinarith [h1, h2, hSW2_nn, hDnST_nn,
+          mul_nonneg (mul_nonneg (sq_nonneg Cemb) hCsumT1_nn) hSW2_nn,
+          mul_nonneg (sq_nonneg ΛD) hDnST_nn]
+      calc CdU * (Csym * ((Cemb * Dn) ^ 2 * ∑ i ∈ Finset.range (p + 1),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i D₁p‖ ^ 2
+            + ΛD ^ 2 * ∑ l ∈ Finset.range (p + 1),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l w‖ ^ 2))
+          ≤ CdU * (Csym * ((Cemb ^ 2 * CsumT1 + ΛD ^ 2) * RHS0)) := by
+            refine mul_le_mul_of_nonneg_left ?_ hCdU0
+            exact mul_le_mul_of_nonneg_left hinner hCsym0
+        _ = CdU * Csym * (Cemb ^ 2 * CsumT1 + ΛD ^ 2) * RHS0 := by ring
+    -- ARM 3: the `Φ(h₂, D₁ − D₂)` arm through the `t`-scaled top/rest split.
+    set ΛY : ℝ := Real.sqrt CΛsq * Dn with hΛY
+    have hΛY0 : 0 ≤ ΛY := by rw [hΛY]; positivity
+    have hYd_sub : D₁p - D₂p =
+        DeTurck.permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2] (L₁ - L₂) := by
+      rw [hD₁p, hD₂p, permuteCcTensor_sub_local]
+    have hYdsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
+        ((D₁p - D₂p).toSection x) ≤ ΛY ^ 2 := by
+      intro x
+      rw [hYd_sub, rfns_permuteCcTensor_zero]
+      have h := hCΛsq T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 x
+      rw [← hDn] at h
+      rw [hL₁, hL₂]
+      refine le_trans h (le_of_eq ?_)
+      rw [hΛY, mul_pow, Real.sq_sqrt hCΛsq0]
+    have hYdnorm : ∀ q : ℕ,
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q (D₁p - D₂p)‖ ^ 2 =
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q (L₁ - L₂)‖ ^ 2 := by
+      intro q
+      rw [hYd_sub]
+      exact norm_sq_iteratedCovGrad_permute (I := I) (M := M) g₀
+        c[(0 : Fin 3), 1, 2] (L₁ - L₂) q
+    have hΦ₂split := hCpk t ht0 ht1 T₂ (D₁p - D₂p) ΛY hΛY0 hfib2 hYdsup
+    rw [← hΦ₂] at hΦ₂split
+    rw [hYdnorm p, ← hLdp] at hΦ₂split
+    have hlowfold : (∑ q ∈ Finset.range p,
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q (D₁p - D₂p)‖ ^ 2) ≤
+        CsumQ * RHS0 := by
+      rw [hCsumQ, Finset.sum_mul]
+      refine Finset.sum_le_sum fun q hq => ?_
+      rw [hYdnorm q, hL₁, hL₂]
+      refine le_trans (hCq q hq T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2) ?_
+      refine mul_le_mul_of_nonneg_left ?_ (hCq0 q hq)
+      rw [hRHS0, hSW2, hST2, ← hw, ← hDn]
+      have hqp : q + 1 + 1 ≤ p + 1 + 1 := by
+        have := Finset.mem_range.mp hq; omega
+      have hsw : (∑ i ∈ Finset.range (q + 1 + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i w‖ ^ 2) ≤
+          ∑ i ∈ Finset.range (p + 1 + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i w‖ ^ 2 :=
+        Finset.sum_le_sum_of_subset_of_nonneg
+          (Finset.range_subset_range.2 hqp) (fun l _ _ => by positivity)
+      have hst : (∑ l ∈ Finset.range (q + 1 + 1),
+          (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2
+            + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖ ^ 2)) ≤
+          ∑ l ∈ Finset.range (p + 1 + 1),
+          (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2
+            + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖ ^ 2) :=
+        Finset.sum_le_sum_of_subset_of_nonneg
+          (Finset.range_subset_range.2 hqp) (fun l _ _ => by positivity)
+      nlinarith [hsw, hst, hDn_nn, sq_nonneg Dn]
+    have hSw₂fold : (∑ i ∈ Finset.range (p + 1 + 1),
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+          (realizeSymmCcTensor (I := I) g₀ T₂)‖ ^ 2) ≤ Cr2 * ST2 := by
+      refine le_trans (hCr2 T₂) ?_
+      refine mul_le_mul_of_nonneg_left ?_ hCr20
+      rw [hST2]
+      exact Finset.sum_le_sum fun l _ => le_add_of_nonneg_left (by positivity)
+    have hΦ₂final : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (3 + 0 + 0) p Φ₂‖ ^ 2 ≤
+        2 * (1 + t) * δ ^ 2 * Ldp
+          + 2 * Cpk * (1 / t) ^ p * (CsumQ + CΛsq * Cr2) * RHS0 := by
+      refine le_trans hΦ₂split ?_
+      have hΛYsq : ΛY ^ 2 = CΛsq * Dn ^ 2 := by
+        rw [hΛY, mul_pow, Real.sq_sqrt hCΛsq0]
+      have hpiece : ΛY ^ 2 * (∑ i ∈ Finset.range (p + 1 + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+            (realizeSymmCcTensor (I := I) g₀ T₂)‖ ^ 2) ≤
+          CΛsq * Cr2 * (Dn ^ 2 * ST2) := by
+        rw [hΛYsq]
+        have h := mul_le_mul_of_nonneg_left hSw₂fold
+          (by positivity : (0 : ℝ) ≤ CΛsq * Dn ^ 2)
+        nlinarith [h]
+      have hin : (∑ q ∈ Finset.range p,
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q (D₁p - D₂p)‖ ^ 2)
+          + ΛY ^ 2 * (∑ i ∈ Finset.range (p + 1 + 1),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+              (realizeSymmCcTensor (I := I) g₀ T₂)‖ ^ 2) ≤
+          (CsumQ + CΛsq * Cr2) * RHS0 := by
+        have hDnST_nn : 0 ≤ Dn ^ 2 * ST2 := by positivity
+        have hRHS_split : Dn ^ 2 * ST2 ≤ RHS0 := by
+          rw [hRHS0]; linarith [hSW2_nn]
+        have h2 : CΛsq * Cr2 * (Dn ^ 2 * ST2) ≤ CΛsq * Cr2 * RHS0 :=
+          mul_le_mul_of_nonneg_left hRHS_split (by positivity)
+        nlinarith [hlowfold, hpiece, h2]
+      have hfin : 2 * Cpk * (1 / t) ^ p * ((∑ q ∈ Finset.range p,
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q (D₁p - D₂p)‖ ^ 2)
+          + ΛY ^ 2 * ∑ i ∈ Finset.range (p + 1 + 1),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                (realizeSymmCcTensor (I := I) g₀ T₂)‖ ^ 2) ≤
+          2 * Cpk * (1 / t) ^ p * ((CsumQ + CΛsq * Cr2) * RHS0) :=
+        mul_le_mul_of_nonneg_left hin (by positivity)
+      have heq : 2 * Cpk * (1 / t) ^ p * ((CsumQ + CΛsq * Cr2) * RHS0) =
+          2 * Cpk * (1 / t) ^ p * (CsumQ + CΛsq * Cr2) * RHS0 := by ring
+      linarith [hfin, heq.le, heq.ge]
+    -- Close the recursion.
+    have hSW2_le : SW2 ≤ RHS0 := by
+      rw [hRHS0]
+      have : 0 ≤ Dn ^ 2 * ST2 := by positivity
+      linarith
+    have hkey : (4 - 16 * (1 + t) * δ ^ 2) * Ldp ≤ Cbig * RHS0 := by
+      have hexp : Cbig * RHS0 = 72 * RHS0
+          + 16 * (CdU * Csym * (Cemb ^ 2 * CsumT1 + ΛD ^ 2)) * RHS0
+          + 16 * Cpk * (1 / t) ^ p * (CsumQ + CΛsq * Cr2) * RHS0 := by
+        rw [hCbig]; ring
+      have hK72 : 4 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+          (koszulTripleDiff (I := I) g₀ T₁ T₂)‖ ^ 2 ≤ 72 * RHS0 := by
+        nlinarith [hK, hSW2_le]
+      have hΦ₁16 : 16 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (3 + 0 + 0) p Φ₁‖ ^ 2 ≤
+          16 * (CdU * Csym * (Cemb ^ 2 * CsumT1 + ΛD ^ 2)) * RHS0 := by
+        nlinarith [hΦ₁final]
+      have hΦ₂8 : 8 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (3 + 0 + 0) p Φ₂‖ ^ 2 ≤
+          16 * (1 + t) * δ ^ 2 * Ldp
+            + 16 * Cpk * (1 / t) ^ p * (CsumQ + CΛsq * Cr2) * RHS0 := by
+        nlinarith [hΦ₂final]
+      linarith [hsplit, hK72, hΦ₁16, hΦ₂8, hexp.le, hexp.ge]
+    rw [div_mul_eq_mul_div, le_div_iff₀ hmargin]
+    calc ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p (L₁ - L₂)‖ ^ 2
+          * (4 - 16 * (1 + t) * δ ^ 2)
+        = (4 - 16 * (1 + t) * δ ^ 2) * Ldp := by rw [← hLdp]; ring
+      _ ≤ Cbig * RHS0 := hkey
+      _ = Cbig * ((∑ i ∈ Finset.range (p + 1 + 1),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i w‖ ^ 2)
+          + Dn ^ 2 * ∑ l ∈ Finset.range (p + 1 + 1),
+              (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2
+                + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖ ^ 2)) := by
+          rw [hRHS0, hSW2, hST2]
+
+set_option linter.unusedSectionVars false in
+/-- **Nonneg term-square sum is at most the squared sum.**  `∑ fᵢ² ≤ (∑ fᵢ)²` for nonnegative
+terms (each `fᵢ² ≤ fᵢ·∑f`). -/
+private lemma sum_sq_le_sq_sum (n : ℕ) (f : ℕ → ℝ) (hf : ∀ i, 0 ≤ f i) :
+    (∑ i ∈ Finset.range n, f i ^ 2) ≤ (∑ i ∈ Finset.range n, f i) ^ 2 := by
+  have hsum_nn : 0 ≤ ∑ i ∈ Finset.range n, f i := Finset.sum_nonneg fun i _ => hf i
+  calc (∑ i ∈ Finset.range n, f i ^ 2)
+      ≤ ∑ i ∈ Finset.range n, f i * (∑ l ∈ Finset.range n, f l) := by
+        refine Finset.sum_le_sum fun i hi => ?_
+        rw [pow_two]
+        refine mul_le_mul_of_nonneg_left ?_ (hf i)
+        exact Finset.single_le_sum (fun l _ => hf l) hi
+    _ = (∑ i ∈ Finset.range n, f i) ^ 2 := by
+        rw [← Finset.sum_mul, pow_two]
+
+set_option linter.unusedSectionVars false in
+/-- **The two-arm unsquaring.**  From the squared two-arm bound `N² ≤ C·(SW2 + Dn²·ST2)` with
+`SW2 ≤ SW²`, `ST2 ≤ ST²`, the unsquared two-arm bound `N ≤ √C·SW + √C·Dn·ST`. -/
+private lemma norm_le_two_arm_of_sq_le {N C SW2 ST2 Dn SW ST : ℝ}
+    (hN : 0 ≤ N) (hC : 0 ≤ C) (hDn : 0 ≤ Dn) (hSW : 0 ≤ SW) (hST : 0 ≤ ST)
+    (h2 : N ^ 2 ≤ C * (SW2 + Dn ^ 2 * ST2)) (hSW2 : SW2 ≤ SW ^ 2) (hST2 : ST2 ≤ ST ^ 2) :
+    N ≤ Real.sqrt C * SW + Real.sqrt C * Dn * ST := by
+  have hsq : N ^ 2 ≤ (Real.sqrt C * SW + Real.sqrt C * Dn * ST) ^ 2 := by
+    have hCsq : Real.sqrt C ^ 2 = C := Real.sq_sqrt hC
+    have hexp : (Real.sqrt C * SW + Real.sqrt C * Dn * ST) ^ 2
+        = Real.sqrt C ^ 2 * SW ^ 2 + 2 * (Real.sqrt C ^ 2 * SW * (Dn * ST))
+          + Real.sqrt C ^ 2 * (Dn ^ 2 * ST ^ 2) := by ring
+    rw [hCsq] at hexp
+    have h1 : C * SW2 ≤ C * SW ^ 2 := mul_le_mul_of_nonneg_left hSW2 hC
+    have h2' : C * (Dn ^ 2 * ST2) ≤ C * (Dn ^ 2 * ST ^ 2) :=
+      mul_le_mul_of_nonneg_left
+        (mul_le_mul_of_nonneg_left hST2 (sq_nonneg Dn)) hC
+    have hcross : 0 ≤ 2 * (C * SW * (Dn * ST)) := by positivity
+    have hexp' : (Real.sqrt C * SW + Real.sqrt C * Dn * ST) ^ 2
+        = C * SW ^ 2 + 2 * (C * SW * (Dn * ST)) + C * (Dn ^ 2 * ST ^ 2) := hexp
+    have h2'' : N ^ 2 ≤ C * SW2 + C * (Dn ^ 2 * ST2) := by
+      calc N ^ 2 ≤ C * (SW2 + Dn ^ 2 * ST2) := h2
+        _ = C * SW2 + C * (Dn ^ 2 * ST2) := by ring
+    rw [hexp]
+    linarith
+  have hrhs_nn : 0 ≤ Real.sqrt C * SW + Real.sqrt C * Dn * ST := by positivity
+  calc N = Real.sqrt (N ^ 2) := (Real.sqrt_sq hN).symm
+    _ ≤ Real.sqrt ((Real.sqrt C * SW + Real.sqrt C * Dn * ST) ^ 2) :=
+        Real.sqrt_le_sqrt hsq
+    _ = Real.sqrt C * SW + Real.sqrt C * Dn * ST := Real.sqrt_sq hrhs_nn
+
+
+set_option linter.unusedVariables false in
+/-- **The integrated two-arm `L²` bound of the cross-correction SECTION difference (PROVEN).**
 The genuinely-deep reusable bilinear-difference content beneath the cross-correction-difference
 leaf, in the **integrated `L²` currency** (the pointwise diagonal-grid form is FALSE: the Neumann
 `k ≥ 2` layer of the Koszul-realized connection difference `connDiff = g₁⁻¹·(∇⁰h)` injects CUBIC
@@ -2654,8 +4310,14 @@ the k ≥ 2 Neumann cubic layer is bounded ONLY in this integrated currency, thr
 Gagliardo–Nirenberg engine (`exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le` /
 `exists_integrated_diagonalProductGrid_twoArm_pair_le`) with the sharp-order embeddings
 (`exists_realizedJetSum_le_toHs_sharpOrder` at order `a` for the cross arm,
-`exists_iteratedCovGradJetSum_le_toHs_sharpOrder` at order `a + 2` for the ball arm).  Its body is
-`sorry`: the genuine deep integrated bilinear-difference frontier of the redesign.
+`exists_iteratedCovGradJetSum_le_toHs_sharpOrder` for the ball arm).  Its body is **proven**: the
+cocycle identity reduces it to the Koszul-triple arm (`koszulTriple_norm_sq_le'`, the integrated
+`18`-domination) plus the cocycle two-arm recursion
+(`loweredConnDiff_cocycle_jet_norm_sq_fold`), itself closed by the `δ < 1/2` ε-Young absorption
+over the generic `t`-scaled top/rest split (`contraction_topRest_split_uniform`) with the
+single-metric low-ball Hamilton-tame fold (`loweredConnDiff_jet_norm_sq_fold_low`).  Consumers
+transitively depend on `sorryAx` ONLY through the sharp keystone passenger posit
+`crossCorrKeystoneTop_rfns_le_sq_passenger` (the lone remaining frontier cell of the redesign).
 
 **Non-vacuity.**  At `T₁ = T₂` the section difference vanishes (both metrics coincide) and both
 sides are `0`; a zero `Cd` is rejected whenever the difference is present.  Carries `w` up to
@@ -2684,8 +4346,120 @@ private theorem crossCorrectionSectionDiff_iteratedCovGrad_twoArm_l2Norm_le
             + Cd * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
                 * ∑ l ∈ Finset.range (p + 2),
                     (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖
-                      + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖) :=
-  sorry
+                      + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖) := by
+  classical
+  obtain ⟨Cco, hCco0, hCco⟩ :=
+    loweredConnDiff_cocycle_jet_norm_sq_fold (I := I) (M := M) g₀ p δ hδ0 hδ1 B a ha
+  refine ⟨Real.sqrt (9 + 2 * Cco), Real.sqrt_nonneg _, ?_⟩
+  intro T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2
+  set w := realizeSymmCcTensor (I := I) g₀ (T₁ - T₂) with hw
+  set Dn := ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
+    with hDn
+  have hDn_nn : 0 ≤ Dn := norm_nonneg _
+  set SW2 := ∑ i ∈ Finset.range (p + 1 + 1),
+    ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i w‖ ^ 2 with hSW2
+  set ST2 := ∑ l ∈ Finset.range (p + 1 + 1),
+    (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2
+      + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖ ^ 2) with hST2
+  have hSW2_nn : 0 ≤ SW2 := Finset.sum_nonneg fun i _ => by positivity
+  have hST2_nn : 0 ≤ ST2 := Finset.sum_nonneg fun l _ => by positivity
+  set L₁ := DeTurck.loweredConnDiffSection (I := I) g₁ g₀ with hL₁
+  set L₂ := DeTurck.loweredConnDiffSection (I := I) g₂ g₀ with hL₂
+  -- The squared two-arm bound of the section difference.
+  have hccsq : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+        (DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
+          - DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂)‖ ^ 2 ≤
+      (9 + 2 * Cco) * (SW2 + Dn ^ 2 * ST2) := by
+    -- `2•ccdiff = KT − 2•(L₁ − L₂)`.
+    have hid := DifferentialGeometry.PDE.DeTurck.loweredConnDiffSection_sub_eq_koszulRealizeDiff_sub_crossCorrDiff
+      (I := I) g₀ g₁ g₂ T₁ T₂ hr1 hr2
+    have hsec : (2 : ℝ) • (DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
+        - DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂) =
+        koszulTripleDiff (I := I) g₀ T₁ T₂ - (2 : ℝ) • (L₁ - L₂) := by
+      have h1 : (2 : ℝ) • L₁ - (2 : ℝ) • L₂ = (2 : ℝ) • (L₁ - L₂) := (smul_sub _ _ _).symm
+      have h2 : (2 : ℝ) • DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
+          - (2 : ℝ) • DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂
+          = (2 : ℝ) • (DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
+            - DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂) := (smul_sub _ _ _).symm
+      have hid' : (2 : ℝ) • (L₁ - L₂) =
+          koszulTripleDiff (I := I) g₀ T₁ T₂
+            - (2 : ℝ) • (DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
+              - DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂) := by
+        rw [← h1, ← h2]
+        exact hid
+      rw [hid']
+      abel
+    have h4N : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+          ((2 : ℝ) • (DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
+            - DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂))‖ ^ 2 =
+        4 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+          (DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
+            - DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂)‖ ^ 2 := by
+      rw [iteratedCovGrad_norm_sq_smul]; norm_num
+    have h4Ld : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+          ((2 : ℝ) • (L₁ - L₂))‖ ^ 2 =
+        4 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p (L₁ - L₂)‖ ^ 2 := by
+      rw [iteratedCovGrad_norm_sq_smul]; norm_num
+    have hle := iteratedCovGrad_norm_sq_sub_le (I := I) g₀ 3 p
+      (koszulTripleDiff (I := I) g₀ T₁ T₂) ((2 : ℝ) • (L₁ - L₂))
+    have hLrw : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+        ((2 : ℝ) • (DeTurck.crossCorrectionSection (I := I) g₁ g₀ T₁
+          - DeTurck.crossCorrectionSection (I := I) g₂ g₀ T₂))‖ ^ 2 =
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+          (koszulTripleDiff (I := I) g₀ T₁ T₂ - (2 : ℝ) • (L₁ - L₂))‖ ^ 2 := by
+      rw [hsec]
+    rw [h4N] at hLrw
+    rw [h4Ld] at hle
+    -- The Koszul arm and the cocycle arm.
+    have hK : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+          (koszulTripleDiff (I := I) g₀ T₁ T₂)‖ ^ 2 ≤ 18 * SW2 := by
+      refine le_trans (koszulTriple_norm_sq_le' (I := I) (M := M) g₀ T₁ T₂ p) ?_
+      have htop : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 (p + 1) w‖ ^ 2 ≤ SW2 := by
+        rw [hSW2]
+        exact Finset.single_le_sum
+          (f := fun i => ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i w‖ ^ 2)
+          (fun i _ => by positivity) (Finset.mem_range.mpr (by omega))
+      rw [← hw]
+      nlinarith [htop]
+    have hLd := hCco T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2
+    rw [← hw, ← hDn, ← hSW2, ← hST2] at hLd
+    rw [show DeTurck.loweredConnDiffSection (I := I) g₁ g₀
+        - DeTurck.loweredConnDiffSection (I := I) g₂ g₀ = L₁ - L₂ from by
+      rw [hL₁, hL₂]] at hLd
+    have hRHS0_nn : 0 ≤ SW2 + Dn ^ 2 * ST2 := by positivity
+    nlinarith [hle, hLrw.le, hLrw.ge, hK, hLd, hSW2_nn, hCco0, hRHS0_nn]
+  -- Unsquare into the two unsquared arms.
+  set SW := ∑ i ∈ Finset.range (p + 2),
+    ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i w‖ with hSW
+  set ST := ∑ l ∈ Finset.range (p + 2),
+    (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖
+      + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖) with hST
+  have hSW_nn : 0 ≤ SW := Finset.sum_nonneg fun i _ => norm_nonneg _
+  have hST_nn : 0 ≤ ST := Finset.sum_nonneg fun l _ =>
+    add_nonneg (norm_nonneg _) (norm_nonneg _)
+  have hSW2le : SW2 ≤ SW ^ 2 := by
+    rw [hSW2, hSW, show p + 1 + 1 = p + 2 from by omega]
+    exact sum_sq_le_sq_sum (p + 2)
+      (fun i => ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i w‖)
+      (fun i => norm_nonneg _)
+  have hST2le : ST2 ≤ ST ^ 2 := by
+    rw [hST2, hST, show p + 1 + 1 = p + 2 from by omega]
+    calc (∑ l ∈ Finset.range (p + 2),
+          (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2
+            + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖ ^ 2))
+        ≤ ∑ l ∈ Finset.range (p + 2),
+          (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖
+            + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖) ^ 2 := by
+          refine Finset.sum_le_sum fun l _ => ?_
+          nlinarith [norm_nonneg (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁),
+            norm_nonneg (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂)]
+      _ ≤ (∑ l ∈ Finset.range (p + 2),
+          (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖
+            + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖)) ^ 2 :=
+          sum_sq_le_sq_sum (p + 2) _ (fun l =>
+            add_nonneg (norm_nonneg _) (norm_nonneg _))
+  exact norm_le_two_arm_of_sq_le (norm_nonneg _) (by positivity) hDn_nn hSW_nn hST_nn
+    hccsq hSW2le hST2le
 
 /-- **The integrated two-arm `L²` bound of the pre-trace cross-correction difference**
 `crossCorrTripleDiff` (proven glue: the section identity `crossCorrTripleDiff =
@@ -2991,7 +4765,9 @@ theorem ricciLinearSection_covGrad_twoArm_l2Norm_le
     mul_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
   nlinarith [hsplit, hK_arm, hcrossarm, mul_nonneg (mul_nonneg hkk hD_nn) hST_nn]
 
-/-- **(POSIT — the integrated two-arm `L²` bound of the quadratic Cross section.)**  The metric
+set_option maxHeartbeats 12800000 in
+set_option linter.unusedVariables false in
+/-- **The integrated two-arm `L²` bound of the quadratic Cross section (PROVEN).**  The metric
 `L²` norm of the order-`j` covariant gradient of the concrete quadratic-in-difference curvature
 Cross section `crossSection g₀ g₁ g₂` carries, at the natural Leibniz window `j + 2` (BOTH
 quadratic factors are connection differences carrying one `T`-derivative each), the integrated
@@ -3011,8 +4787,14 @@ factor against one fixed factor in each arm.  The **pointwise** diagonal-grid fo
 FALSE at high order (the Neumann `k ≥ 2` layer of the Koszul-realized connection difference injects
 cubic jet monomials; the free-jet scaling certificate); the k = 1 bilinear layer is fed by the
 proven pointwise grids (`QuadraticTraceDifferencePointwiseGrid`), the k ≥ 2 layer only by the
-integrated Gagliardo–Nirenberg absorption.  Its body is `sorry`: the genuine deep integrated
-quadratic-Cross frontier of the redesign.
+integrated Gagliardo–Nirenberg absorption.  Its body is **proven**: the structural bridge
+`crossSection_eq_cometricDoubleDoubleTrace_loweredCocycleProduct` exposes the polarized carrier,
+the section-uniform cocycle-telescope grid
+(`cometricQuadraticTraceProduct_iteratedCovGrad_rfns_cocycleTelescope_fullWindowProductGrid_le`)
+integrates through the symmetric Gagliardo–Nirenberg engine, and the two folds
+(`loweredConnDiff_cocycle_jet_norm_sq_fold`, `loweredConnDiff_jet_norm_sq_fold_low`) land the two
+Hamilton-tame arms.  Consumers transitively depend on `sorryAx` ONLY through the sharp keystone
+passenger posit `crossCorrKeystoneTop_rfns_le_sq_passenger`.
 
 **Non-vacuity.**  At `g₁ = g₂` the Cross section vanishes (`crossSection_self_toModel`), so both
 sides are `0`; a zero `Cd` is rejected whenever the Cross part is genuinely present.  NO pointwise
@@ -3040,8 +4822,362 @@ theorem crossSection_iteratedCovGrad_twoArm_l2Norm_le
             + Cd * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
                 * ∑ l ∈ Finset.range (j + 2 + 1),
                     (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖
-                      + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖) :=
-  sorry
+                      + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖) := by
+  classical
+  set μ := Integral.Measure.riemannianVolumeMeasure I M g₀ with hμ
+  obtain ⟨Cq1, hCq10, hCq1⟩ :=
+    Integral.Connection.cometricQuadraticTraceProduct_iteratedCovGrad_rfns_cocycleTelescope_fullWindowProductGrid_le
+      (I := I) (M := M) g₀ crossTracePerm1 j
+  obtain ⟨Cq2, hCq20, hCq2⟩ :=
+    Integral.Connection.cometricQuadraticTraceProduct_iteratedCovGrad_rfns_cocycleTelescope_fullWindowProductGrid_le
+      (I := I) (M := M) g₀ crossTracePerm2 j
+  obtain ⟨Csym, hCsym0, hsym⟩ :=
+    Analysis.Sobolev.Tensor.exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le
+      (I := I) (M := M) g₀ 3 3 j
+  obtain ⟨ΛD, hΛD0, hΛD⟩ := exists_loweredConnDiff_rfns_fibre_sup (I := I) g₀ hδ0 hδ1 B a ha
+  obtain ⟨CΛsq, hCΛsq0, hCΛsq⟩ :=
+    loweredConnDiff_cocycle_rfns_sup (I := I) (M := M) g₀ δ hδ0 hδ1 B a ha
+  choose Cco hCco0 hCco using fun i =>
+    loweredConnDiff_cocycle_jet_norm_sq_fold (I := I) (M := M) g₀ i δ hδ0 hδ1 B a ha
+  choose CT1 hCT10 hCT1 using fun l =>
+    loweredConnDiff_jet_norm_sq_fold_low (I := I) (M := M) g₀ l δ hδ0 hδ1 B a ha
+  set CcoS : ℝ := ∑ i ∈ Finset.range (j + 1), Cco i with hCcoS
+  have hCcoS_nn : 0 ≤ CcoS := Finset.sum_nonneg fun i _ => hCco0 i
+  set CT1S : ℝ := ∑ l ∈ Finset.range (j + 1), CT1 l with hCT1S
+  have hCT1S_nn : 0 ≤ CT1S := Finset.sum_nonneg fun l _ => hCT10 l
+  set Ctot : ℝ := 16 * (Cq1 + Cq2) * Csym * (ΛD ^ 2 * CcoS + CΛsq * CT1S) with hCtot
+  have hCtot_nn : 0 ≤ Ctot := by
+    rw [hCtot]
+    positivity
+  refine ⟨Real.sqrt Ctot, Real.sqrt_nonneg _, ?_⟩
+  intro T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2
+  have hball1a : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a T₁‖ ≤ B :=
+    le_trans (toHs_norm_mono (I := I) (M := M) g₀ (by omega : a ≤ a + 2) T₁) hball1
+  have hball2a : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a T₂‖ ≤ B :=
+    le_trans (toHs_norm_mono (I := I) (M := M) g₀ (by omega : a ≤ a + 2) T₂) hball2
+  set Dn := ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a (T₁ - T₂)‖
+    with hDn
+  have hDn_nn : 0 ≤ Dn := norm_nonneg _
+  set w := realizeSymmCcTensor (I := I) g₀ (T₁ - T₂) with hw
+  set L₁ := DeTurck.loweredConnDiffSection (I := I) g₁ g₀ with hL₁
+  set L₂ := DeTurck.loweredConnDiffSection (I := I) g₂ g₀ with hL₂
+  -- The window-`(j+2)` squared jet sums (the folds' currency).
+  set SW2 := ∑ i ∈ Finset.range (j + 2 + 1),
+    ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i w‖ ^ 2 with hSW2
+  set ST2 := ∑ l ∈ Finset.range (j + 2 + 1),
+    (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2
+      + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖ ^ 2) with hST2
+  have hSW2_nn : 0 ≤ SW2 := Finset.sum_nonneg fun i _ => by positivity
+  have hST2_nn : 0 ≤ ST2 := Finset.sum_nonneg fun l _ => by positivity
+  set RHS0 := SW2 + Dn ^ 2 * ST2 with hRHS0
+  have hRHS0_nn : 0 ≤ RHS0 := by rw [hRHS0]; positivity
+  -- The two engine instances (one per fixed endpoint).
+  have hLdiffsup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
+      ((L₁ - L₂).toSection x) ≤ (Real.sqrt CΛsq * Dn) ^ 2 := by
+    intro x
+    have h := hCΛsq T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2 x
+    rw [← hDn] at h
+    rw [hL₁, hL₂]
+    refine le_trans h (le_of_eq ?_)
+    rw [mul_pow, Real.sq_sqrt hCΛsq0]
+  have hL₁sup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
+      (L₁.toSection x) ≤ ΛD ^ 2 := by
+    intro x
+    rw [hL₁]
+    exact hΛD T₁ g₁ hr1 hfib1 hball1a x
+  have hL₂sup : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
+      (L₂.toSection x) ≤ ΛD ^ 2 := by
+    intro x
+    rw [hL₂]
+    exact hΛD T₂ g₂ hr2 hfib2 hball2a x
+  obtain ⟨hint1, heng1⟩ := hsym (L₁ - L₂) L₁ (Real.sqrt CΛsq * Dn) ΛD
+    (by positivity) hΛD0 hLdiffsup hL₁sup
+  obtain ⟨hint2, heng2⟩ := hsym (L₁ - L₂) L₂ (Real.sqrt CΛsq * Dn) ΛD
+    (by positivity) hΛD0 hLdiffsup hL₂sup
+  -- The jet-sum folds.
+  have hLdifffold : (∑ i ∈ Finset.range (j + 1),
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i (L₁ - L₂)‖ ^ 2) ≤ CcoS * RHS0 := by
+    rw [hCcoS, Finset.sum_mul]
+    refine Finset.sum_le_sum fun i hi => ?_
+    rw [hL₁, hL₂]
+    refine le_trans (hCco i T₁ T₂ g₁ g₂ hr1 hr2 hfib1 hfib2 hball1 hball2) ?_
+    refine mul_le_mul_of_nonneg_left ?_ (hCco0 i)
+    rw [hRHS0, hSW2, hST2, ← hw, ← hDn]
+    have hii : i + 1 + 1 ≤ j + 2 + 1 := by
+      have := Finset.mem_range.mp hi; omega
+    have hsw : (∑ i' ∈ Finset.range (i + 1 + 1),
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i' w‖ ^ 2) ≤
+        ∑ i' ∈ Finset.range (j + 2 + 1),
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i' w‖ ^ 2 :=
+      Finset.sum_le_sum_of_subset_of_nonneg
+        (Finset.range_subset_range.2 hii) (fun l _ _ => by positivity)
+    have hst : (∑ l ∈ Finset.range (i + 1 + 1),
+        (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2
+          + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖ ^ 2)) ≤
+        ∑ l ∈ Finset.range (j + 2 + 1),
+        (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2
+          + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖ ^ 2) :=
+      Finset.sum_le_sum_of_subset_of_nonneg
+        (Finset.range_subset_range.2 hii) (fun l _ _ => by positivity)
+    nlinarith [hsw, hst, sq_nonneg Dn]
+  have hL₁fold : (∑ l ∈ Finset.range (j + 1),
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 l L₁‖ ^ 2) ≤ CT1S * ST2 := by
+    rw [hCT1S, Finset.sum_mul]
+    refine Finset.sum_le_sum fun l hl => ?_
+    rw [hL₁]
+    refine le_trans (hCT1 l T₁ g₁ hr1 hfib1 hball1) ?_
+    refine mul_le_mul_of_nonneg_left ?_ (hCT10 l)
+    rw [hST2]
+    calc (∑ l' ∈ Finset.range (l + 1 + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l' T₁‖ ^ 2)
+        ≤ ∑ l' ∈ Finset.range (j + 2 + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l' T₁‖ ^ 2 :=
+          Finset.sum_le_sum_of_subset_of_nonneg
+            (Finset.range_subset_range.2
+              (by have := Finset.mem_range.mp hl; omega))
+            (fun l' _ _ => by positivity)
+      _ ≤ ∑ l' ∈ Finset.range (j + 2 + 1),
+          (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l' T₁‖ ^ 2
+            + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l' T₂‖ ^ 2) :=
+          Finset.sum_le_sum fun l' _ => le_add_of_nonneg_right (by positivity)
+  have hL₂fold : (∑ l ∈ Finset.range (j + 1),
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 l L₂‖ ^ 2) ≤ CT1S * ST2 := by
+    rw [hCT1S, Finset.sum_mul]
+    refine Finset.sum_le_sum fun l hl => ?_
+    rw [hL₂]
+    refine le_trans (hCT1 l T₂ g₂ hr2 hfib2 hball2) ?_
+    refine mul_le_mul_of_nonneg_left ?_ (hCT10 l)
+    rw [hST2]
+    calc (∑ l' ∈ Finset.range (l + 1 + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l' T₂‖ ^ 2)
+        ≤ ∑ l' ∈ Finset.range (j + 2 + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l' T₂‖ ^ 2 :=
+          Finset.sum_le_sum_of_subset_of_nonneg
+            (Finset.range_subset_range.2
+              (by have := Finset.mem_range.mp hl; omega))
+            (fun l' _ _ => by positivity)
+      _ ≤ ∑ l' ∈ Finset.range (j + 2 + 1),
+          (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l' T₁‖ ^ 2
+            + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l' T₂‖ ^ 2) :=
+          Finset.sum_le_sum fun l' _ => le_add_of_nonneg_left (by positivity)
+  -- The per-arm `L²` bound: each of the two engine readings lands in `Csym·(…)·RHS0`.
+  have hArm : ∀ (Lk : Integral.L2.SmoothCcTensor g₀ 0 3),
+      (∑ l ∈ Finset.range (j + 1),
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 l Lk‖ ^ 2) ≤ CT1S * ST2 →
+      Csym * (ΛD ^ 2 * ∑ i ∈ Finset.range (j + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i (L₁ - L₂)‖ ^ 2
+        + (Real.sqrt CΛsq * Dn) ^ 2 * ∑ l ∈ Finset.range (j + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 l Lk‖ ^ 2) ≤
+      Csym * (ΛD ^ 2 * CcoS + CΛsq * CT1S) * RHS0 := by
+    intro Lk hfold
+    have h1 : ΛD ^ 2 * (∑ i ∈ Finset.range (j + 1),
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i (L₁ - L₂)‖ ^ 2) ≤
+        ΛD ^ 2 * (CcoS * RHS0) :=
+      mul_le_mul_of_nonneg_left hLdifffold (by positivity)
+    have h2 : (Real.sqrt CΛsq * Dn) ^ 2 * (∑ l ∈ Finset.range (j + 1),
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 l Lk‖ ^ 2) ≤
+        CΛsq * CT1S * (Dn ^ 2 * ST2) := by
+      rw [mul_pow, Real.sq_sqrt hCΛsq0]
+      have h := mul_le_mul_of_nonneg_left hfold
+        (by positivity : (0 : ℝ) ≤ CΛsq * Dn ^ 2)
+      nlinarith [h]
+    have h2' : CΛsq * CT1S * (Dn ^ 2 * ST2) ≤ CΛsq * CT1S * RHS0 := by
+      refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+      rw [hRHS0]
+      linarith [hSW2_nn]
+    have hinner : ΛD ^ 2 * (∑ i ∈ Finset.range (j + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i (L₁ - L₂)‖ ^ 2)
+        + (Real.sqrt CΛsq * Dn) ^ 2 * (∑ l ∈ Finset.range (j + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 l Lk‖ ^ 2) ≤
+        (ΛD ^ 2 * CcoS + CΛsq * CT1S) * RHS0 := by
+      nlinarith [h1, h2, h2', hRHS0_nn]
+    calc Csym * (ΛD ^ 2 * ∑ i ∈ Finset.range (j + 1),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i (L₁ - L₂)‖ ^ 2
+          + (Real.sqrt CΛsq * Dn) ^ 2 * ∑ l ∈ Finset.range (j + 1),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 l Lk‖ ^ 2)
+        ≤ Csym * ((ΛD ^ 2 * CcoS + CΛsq * CT1S) * RHS0) :=
+          mul_le_mul_of_nonneg_left hinner hCsym0
+      _ = Csym * (ΛD ^ 2 * CcoS + CΛsq * CT1S) * RHS0 := by ring
+  -- The squared `L²` bound of each traced permuted polarized arm.
+  have hTrace : ∀ (σ : Equiv.Perm (Fin 6)) (Cqσ : ℝ), 0 ≤ Cqσ →
+      (∀ (A₁ A₂ : Integral.L2.SmoothCcTensor g₀ 0 3) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+                (Integral.Connection.cometricDoubleTraceRecOp (I := I) g₀ 2 0
+                  (Integral.Connection.cometricDoubleTraceRecOp (I := I) g₀ 4 0
+                    (DeTurck.permuteCcTensor (I := I) g₀ σ
+                      (Integral.Connection.bareProd (I := I) g₀ 3 3 (a := 0) (b := 0)
+                          (A₁ - A₂) A₁
+                        + Integral.Connection.bareProd (I := I) g₀ 3 3 (a := 0) (b := 0)
+                          A₂ (A₁ - A₂)))))).toSection x) ≤
+          Cqσ * ∑ i ∈ Finset.range (j + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i (A₁ - A₂)).toSection x)
+                * ∑ l ∈ Finset.range (j + 1 - i),
+                    (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + l) x
+                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 l A₁).toSection x)
+                      + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + l) x
+                        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 l A₂).toSection x))) →
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+          (cometricDoubleDoubleTrace (I := I) g₀
+            (DeTurck.permuteCcTensor (I := I) g₀ σ
+              (crossProductPolarized (I := I) g₀ g₁ g₂)))‖ ^ 2 ≤
+        Cqσ * (2 * (Csym * (ΛD ^ 2 * CcoS + CΛsq * CT1S) * RHS0)) := by
+    intro σ Cqσ hCqσ0 hgrid
+    -- The RecOp spelling of the twice-applied double trace on the polarized carrier.
+    have hspell : cometricDoubleDoubleTrace (I := I) g₀
+        (DeTurck.permuteCcTensor (I := I) g₀ σ
+          (crossProductPolarized (I := I) g₀ g₁ g₂)) =
+        Integral.Connection.cometricDoubleTraceRecOp (I := I) g₀ 2 0
+          (Integral.Connection.cometricDoubleTraceRecOp (I := I) g₀ 4 0
+            (DeTurck.permuteCcTensor (I := I) g₀ σ
+              (Integral.Connection.bareProd (I := I) g₀ 3 3 (a := 0) (b := 0)
+                  (L₁ - L₂) L₁
+                + Integral.Connection.bareProd (I := I) g₀ 3 3 (a := 0) (b := 0)
+                  L₂ (L₁ - L₂)))) := rfl
+    rw [hspell]
+    -- Integrate the pointwise cocycle grid, splitting the pair sum into the two engine halves.
+    rw [normSq_eq_integral_rfns]
+    have hgridx := fun x => hgrid L₁ L₂ x
+    have hsplitpt : ∀ x : M, (∑ i ∈ Finset.range (j + 1),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i (L₁ - L₂)).toSection x)
+          * ∑ l ∈ Finset.range (j + 1 - i),
+              (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + l) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 l L₁).toSection x)
+                + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + l) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 l L₂).toSection x))) =
+        (∑ i ∈ Finset.range (j + 1),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i (L₁ - L₂)).toSection x)
+            * ∑ l ∈ Finset.range (j + 1 - i),
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + l) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 l L₁).toSection x))
+        + ∑ i ∈ Finset.range (j + 1),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i (L₁ - L₂)).toSection x)
+            * ∑ l ∈ Finset.range (j + 1 - i),
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + l) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 l L₂).toSection x) := by
+      intro x
+      rw [← Finset.sum_add_distrib]
+      refine Finset.sum_congr rfl fun i _ => ?_
+      rw [Finset.sum_add_distrib, mul_add]
+    calc (∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+              (Integral.Connection.cometricDoubleTraceRecOp (I := I) g₀ 2 0
+                (Integral.Connection.cometricDoubleTraceRecOp (I := I) g₀ 4 0
+                  (DeTurck.permuteCcTensor (I := I) g₀ σ
+                    (Integral.Connection.bareProd (I := I) g₀ 3 3 (a := 0) (b := 0)
+                        (L₁ - L₂) L₁
+                      + Integral.Connection.bareProd (I := I) g₀ 3 3 (a := 0) (b := 0)
+                        L₂ (L₁ - L₂)))))).toSection x) ∂μ)
+        ≤ ∫ x, (Cqσ * ((∑ i ∈ Finset.range (j + 1),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i (L₁ - L₂)).toSection x)
+              * ∑ l ∈ Finset.range (j + 1 - i),
+                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + l) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 l L₁).toSection x))
+          + ∑ i ∈ Finset.range (j + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i (L₁ - L₂)).toSection x)
+                * ∑ l ∈ Finset.range (j + 1 - i),
+                    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + l) x
+                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 l L₂).toSection x))) ∂μ := by
+          refine MeasureTheory.integral_mono_of_nonneg
+            (Filter.Eventually.of_forall (fun x => ?_))
+            ((hint1.add hint2).const_mul Cqσ)
+            (Filter.Eventually.of_forall (fun x => ?_))
+          · exact riemannianFiberNormSq_nonneg _ _ _ _ _
+          · refine le_trans (hgridx x) (le_of_eq ?_)
+            rw [hsplitpt x]
+      _ = Cqσ * ((∫ x, (∑ i ∈ Finset.range (j + 1),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i (L₁ - L₂)).toSection x)
+              * ∑ l ∈ Finset.range (j + 1 - i),
+                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + l) x
+                    ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 l L₁).toSection x)) ∂μ)
+          + ∫ x, (∑ i ∈ Finset.range (j + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i (L₁ - L₂)).toSection x)
+                * ∑ l ∈ Finset.range (j + 1 - i),
+                    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + l) x
+                      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 l L₂).toSection x)) ∂μ) := by
+          rw [MeasureTheory.integral_const_mul, MeasureTheory.integral_add hint1 hint2]
+      _ ≤ Cqσ * (2 * (Csym * (ΛD ^ 2 * CcoS + CΛsq * CT1S) * RHS0)) := by
+          refine mul_le_mul_of_nonneg_left ?_ hCqσ0
+          have hb1 := le_trans heng1 (hArm L₁ hL₁fold)
+          have hb2 := le_trans heng2 (hArm L₂ hL₂fold)
+          linarith
+  have hT1 := hTrace crossTracePerm1 Cq1 hCq10 hCq1
+  have hT2 := hTrace crossTracePerm2 Cq2 hCq20 hCq2
+  -- Assemble the `−2`-scaled antisymmetrised pair.
+  have hcrossSq : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+        (crossSection (I := I) g₀ g₁ g₂)‖ ^ 2 ≤ Ctot * RHS0 := by
+    have hidc := crossSection_eq_cometricDoubleDoubleTrace_loweredCocycleProduct
+      (I := I) g₀ g₁ g₂
+    set A₁ := cometricDoubleDoubleTrace (I := I) g₀
+      (DeTurck.permuteCcTensor (I := I) g₀ crossTracePerm1
+        (crossProductPolarized (I := I) g₀ g₁ g₂)) with hA₁
+    set A₂ := cometricDoubleDoubleTrace (I := I) g₀
+      (DeTurck.permuteCcTensor (I := I) g₀ crossTracePerm2
+        (crossProductPolarized (I := I) g₀ g₁ g₂)) with hA₂
+    have h4 : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j
+          (crossSection (I := I) g₀ g₁ g₂)‖ ^ 2 =
+        4 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j (A₁ - A₂)‖ ^ 2 := by
+      rw [show crossSection (I := I) g₀ g₁ g₂ = (-2 : ℝ) • (A₁ - A₂) from hidc]
+      rw [iteratedCovGrad_norm_sq_smul]
+      norm_num
+    have hsub := iteratedCovGrad_norm_sq_sub_le (I := I) g₀ 2 j A₁ A₂
+    rw [h4]
+    have hctot : 4 * (2 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j A₁‖ ^ 2
+        + 2 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j A₂‖ ^ 2) ≤ Ctot * RHS0 := by
+      have hb1 : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j A₁‖ ^ 2 ≤
+          Cq1 * (2 * (Csym * (ΛD ^ 2 * CcoS + CΛsq * CT1S) * RHS0)) := hT1
+      have hb2 : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j A₂‖ ^ 2 ≤
+          Cq2 * (2 * (Csym * (ΛD ^ 2 * CcoS + CΛsq * CT1S) * RHS0)) := hT2
+      have hCtoteq : Ctot * RHS0 = 16 * Cq1 * (Csym * (ΛD ^ 2 * CcoS + CΛsq * CT1S) * RHS0)
+          + 16 * Cq2 * (Csym * (ΛD ^ 2 * CcoS + CΛsq * CT1S) * RHS0) := by
+        rw [hCtot]; ring
+      linarith [hb1, hb2, hCtoteq.le, hCtoteq.ge]
+    have hLdsub : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j (A₁ - A₂)‖ ^ 2 ≤
+        2 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j A₁‖ ^ 2
+          + 2 * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 j A₂‖ ^ 2 := by
+      rw [PDE.RicciFlow.iteratedCovGrad_sub] at hsub ⊢
+      exact hsub
+    linarith [hLdsub, hctot]
+  -- Unsquare.
+  set SW := ∑ i ∈ Finset.range (j + 2 + 1),
+    ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i w‖ with hSW
+  set ST := ∑ l ∈ Finset.range (j + 2 + 1),
+    (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖
+      + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖) with hST
+  have hSW_nn : 0 ≤ SW := Finset.sum_nonneg fun i _ => norm_nonneg _
+  have hST_nn : 0 ≤ ST := Finset.sum_nonneg fun l _ =>
+    add_nonneg (norm_nonneg _) (norm_nonneg _)
+  have hSW2le : SW2 ≤ SW ^ 2 := by
+    rw [hSW2, hSW]
+    exact sum_sq_le_sq_sum (j + 2 + 1)
+      (fun i => ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i w‖)
+      (fun i => norm_nonneg _)
+  have hST2le : ST2 ≤ ST ^ 2 := by
+    rw [hST2, hST]
+    calc (∑ l ∈ Finset.range (j + 2 + 1),
+          (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2
+            + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖ ^ 2))
+        ≤ ∑ l ∈ Finset.range (j + 2 + 1),
+          (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖
+            + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖) ^ 2 := by
+          refine Finset.sum_le_sum fun l _ => ?_
+          nlinarith [norm_nonneg (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁),
+            norm_nonneg (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂)]
+      _ ≤ (∑ l ∈ Finset.range (j + 2 + 1),
+          (‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖
+            + ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₂‖)) ^ 2 :=
+          sum_sq_le_sq_sum (j + 2 + 1) _ (fun l =>
+            add_nonneg (norm_nonneg _) (norm_nonneg _))
+  exact norm_le_two_arm_of_sq_le (norm_nonneg _) hCtot_nn hDn_nn hSW_nn hST_nn
+    hcrossSq hSW2le hST2le
 
 end DeTurck
 end IntrinsicSpectral
