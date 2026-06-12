@@ -1,5 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckInitialAnchorConstruction
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ForcingMassLimit
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderDifferencePrincipalTopSplit
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.SharpGardingCovGradLadder
+import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingReverseHebeyToHs
 
 /-! # `g₀`-anchored DeTurck–Ricci interior existence from the honest self-representative remainder
 
@@ -269,6 +272,123 @@ theorem deTurckGatedRemainder_picard_forcing_exists
                   DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ F :=
   sorry
 
+/-- The coordinate of a difference of spectral elements is the difference of the
+coordinates (the additive structure of `tensorHs` is coordinatewise). -/
+private theorem picard_tensorHs_sub_coeff (g₀ : SmoothRiemannianMetric I M) {σ : ℝ}
+    (x y : tensorHs (I := I) (M := M) g₀ 0 2 σ)
+    (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
+    (x - y).coeff i = x.coeff i - y.coeff i := by
+  rw [sub_eq_add_neg, tensorHs.add_coeff, tensorHs.neg_coeff]
+  ring
+
+/-- The eigenbasis coordinate of a difference of `L²` classes is the difference of the
+coordinates (`tensorL2Coeff` is the linear eigenbasis representation). -/
+private theorem picard_tensorL2Coeff_sub (g₀ : SmoothRiemannianMetric I M)
+    (hc : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g₀ 0 2))
+    (x y : Integral.L2.TensorL2 0 2 g₀)
+    (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
+    tensorL2Coeff (I := I) (M := M) hc (x - y) i =
+      tensorL2Coeff (I := I) (M := M) hc x i - tensorL2Coeff (I := I) (M := M) hc y i := by
+  rw [show tensorL2Coeff (I := I) (M := M) hc (x - y) i =
+      ((tensorResolventHilbertEigenbasisSigma (I := I) (M := M) hc).repr (x - y)) i from rfl,
+    map_sub]
+  rfl
+
+/-- The unconditional `ENNReal.ofReal`-of-`tsum` comparison for nonnegative families: a
+non-summable real `tsum` is junk-`0`, so no summability hypothesis is needed for the `≤`
+direction. -/
+private theorem picard_ofReal_tsum_le {ι : Type*} (x : ι → ℝ) (hx : ∀ i, 0 ≤ x i) :
+    ENNReal.ofReal (∑' i, x i) ≤ ∑' i, ENNReal.ofReal (x i) := by
+  by_cases hsum : Summable x
+  · exact le_of_eq (ENNReal.ofReal_tsum_of_nonneg hx hsum)
+  · rw [tsum_eq_zero_of_not_summable hsum]
+    simp
+
+/-- Termwise-dominated `ENNReal` `tsum` against a summable nonnegative majorant. -/
+private theorem picard_tsum_ofReal_le {ι : Type*} (x y : ι → ℝ)
+    (hxy : ∀ i, x i ≤ y i) (hy0 : ∀ i, 0 ≤ y i) (hy : Summable y) :
+    ∑' i, ENNReal.ofReal (x i) ≤ ENNReal.ofReal (∑' i, y i) :=
+  le_trans (ENNReal.tsum_le_tsum fun i => ENNReal.ofReal_le_ofReal (hxy i))
+    (le_of_eq (ENNReal.ofReal_tsum_of_nonneg hy0 hy).symm)
+
+/-- The per-mode time integrand `t ↦ ofReal (α · ((h t).coeff i)²)` is `AEMeasurable` for
+the time measure: the coordinate agrees a.e. with the `L²` time-mode class. -/
+private theorem picard_aemeasurable_ofReal_coeff_sq (g₀ : SmoothRiemannianMetric I M)
+    {σ : ℝ} {T : ℝ}
+    (h : Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 σ) T) (α : ℝ)
+    (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
+    AEMeasurable (fun t => ENNReal.ofReal (α * ((h t).coeff i) ^ 2))
+      (Analysis.Parabolic.TimeSobolev.timeMeasure T) := by
+  have hcoeff : AEMeasurable (fun t => (h t).coeff i)
+      (Analysis.Parabolic.TimeSobolev.timeMeasure T) :=
+    (MeasureTheory.Lp.aestronglyMeasurable
+      (Analysis.Parabolic.MaximalRegularity.timeModeCoeff (I := I) (M := M) h i)).aemeasurable.congr
+      (Analysis.Parabolic.MaximalRegularity.timeModeCoeff_coeFn (I := I) (M := M) h i)
+  have hsq : AEMeasurable (fun t => α * ((h t).coeff i) ^ 2)
+      (Analysis.Parabolic.TimeSobolev.timeMeasure T) := by
+    have := (hcoeff.mul hcoeff).const_mul α
+    refine this.congr (Filter.Eventually.of_forall fun t => ?_)
+    ring
+  exact hsq.ennreal_ofReal
+
+-- The `lintegral`/`Lp` unfolding under the spectral `tensorHs` carrier is expensive at
+-- `whnf`; the per-mode Tonelli cell needs an enlarged heartbeat budget.
+set_option maxHeartbeats 1600000 in
+/-- **The per-mode Tonelli cell**: the time `lintegral` of the weighted squared
+eigen-coordinate of a time-`L²` field equals the weighted squared `L²(0,T)` norm of its
+time-mode class. -/
+private theorem picard_lintegral_ofReal_coeff_sq (g₀ : SmoothRiemannianMetric I M)
+    {σ : ℝ} {T : ℝ}
+    (h : Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 σ) T) (α : ℝ) (hα : 0 ≤ α)
+    (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
+    ∫⁻ t, ENNReal.ofReal (α * ((h t).coeff i) ^ 2)
+        ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T)
+      = ENNReal.ofReal (α *
+          ‖Analysis.Parabolic.MaximalRegularity.timeModeCoeff (I := I) (M := M) h i‖ ^ 2) := by
+  set φ := Analysis.Parabolic.MaximalRegularity.timeModeCoeff (I := I) (M := M) h i with hφ_def
+  have hcongr : ∫⁻ t, ENNReal.ofReal (α * ((h t).coeff i) ^ 2)
+        ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T)
+      = ∫⁻ t, ENNReal.ofReal (α * (φ t) ^ 2)
+        ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T) := by
+    refine MeasureTheory.lintegral_congr_ae ?_
+    filter_upwards [Analysis.Parabolic.MaximalRegularity.timeModeCoeff_coeFn
+      (I := I) (M := M) h i] with t ht
+    rw [ht]
+  have hint : MeasureTheory.Integrable (fun t => (φ t) ^ 2)
+      (Analysis.Parabolic.TimeSobolev.timeMeasure T) :=
+    Analysis.Parabolic.MaximalRegularity.integrable_timeModeCoeff_sq (I := I) (M := M) h i
+  have hnn : (0 : ℝ → ℝ) ≤ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T]
+      fun t => (φ t) ^ 2 :=
+    Filter.Eventually.of_forall fun t => sq_nonneg _
+  have hlt : ∫⁻ t, ENNReal.ofReal ((φ t) ^ 2)
+      ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T) ≠ ⊤ :=
+    ((MeasureTheory.hasFiniteIntegral_iff_ofReal hnn).mp hint.hasFiniteIntegral).ne
+  have hsq : ‖φ‖ ^ 2 = (∫⁻ t, ENNReal.ofReal ((φ t) ^ 2)
+      ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T)).toReal := by
+    rw [Analysis.Parabolic.MaximalRegularity.norm_timeModeCoeff_sq_eq_integral
+      (I := I) (M := M) h i,
+      show (∫ t in Set.Icc (0 : ℝ) T, (φ t) ^ 2)
+        = ∫ t, (φ t) ^ 2 ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T) from rfl]
+    exact MeasureTheory.integral_eq_lintegral_of_nonneg_ae hnn hint.aestronglyMeasurable
+  calc ∫⁻ t, ENNReal.ofReal (α * ((h t).coeff i) ^ 2)
+        ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T)
+      = ∫⁻ t, ENNReal.ofReal α * ENNReal.ofReal ((φ t) ^ 2)
+          ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T) := by
+        rw [hcongr]
+        refine MeasureTheory.lintegral_congr fun t => ?_
+        rw [ENNReal.ofReal_mul hα]
+    _ = ENNReal.ofReal α * ∫⁻ t, ENNReal.ofReal ((φ t) ^ 2)
+          ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T) :=
+        MeasureTheory.lintegral_const_mul' _ _ ENNReal.ofReal_ne_top
+    _ = ENNReal.ofReal (α * ‖φ‖ ^ 2) := by
+        rw [ENNReal.ofReal_mul hα, hsq, ENNReal.ofReal_toReal hlt]
+
+-- `ha2` is part of the frozen consumer-facing signature (the engine arithmetic datum)
+-- but the assembled contraction needs only the supercriticality `ha`.
+set_option linter.unusedVariables false in
+set_option maxHeartbeats 3200000 in set_option synthInstance.maxHeartbeats 1600000 in
 /-- **The weak-norm contraction of the gated Duhamel-remainder map along on-gate pairs
 (posited analytic input: the δ-funded principal smallness plus the √T-funded first-order
 part).**
@@ -300,8 +420,22 @@ field gain of maximal regularity) plus coefficient-difference terms against
 `∇²(field f')`, bounded by `C(B) · √T · ‖f − f'‖` through the all-order field
 bounds that the `B`-gradedness of `f'` supplies (sup-in-time control one order up) —
 so `δ` small (below the threshold from the principal-cancellation constant) and then
-`T₁ = T₁(B)` small give the `1/2`.  The body is the posited parabolic input; it remains
-`sorry`, so consumers transitively depend on `sorryAx`. -/
+`T₁ = T₁(B)` small give the `1/2`.
+
+**Proven by composition** (TRANSIT glue) over the posited spectral-mass top split
+`exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le`
+(`Analysis/Spectral/Intrinsic/DeTurck/RemainderDifferencePrincipalTopSplit.lean`), applied
+at the single order `d = a` along the a.e. gate data of the two on-gate classes: the gauge
+takes its honest branch at a.e. time, the `H^{a+2}`-ball hypothesis of the split is funded
+by the reverse Hebey–Sobolev bridge (`exists_toHs_norm_le_iteratedCovGrad_tensorL2Norm_sum`)
+through the sharp Gårding ladder (`iteratedCovGrad_l2Norm_le_sqrt_tensorSobolevMass`) and
+the a.e. field-mass coupling (`maxRegDuhamelSolFieldHa1_zeroDatum_spectralMass_ae_le`), and
+the three arms integrate in time through the per-mode Tonelli cells against the two-order
+maximal-regularity gain (`solFieldMass_le_forcingMass`, top arm), the `√T`-funded one-order
+gain (`weighted_solModeCoeff_Ha1_le`, generic arm), and the same `√T` gain below the fixed
+low anchor `k₀ ≤ a + 1` (cross arm) — so `δ ≤ δ₀ := min (1/4) (1/(8(c+1)))` absorbs the top
+arm and `T ≤ T₁(B)` absorbs the rest into the factor `1/2`.  Consumers transitively depend
+on `sorryAx` through the posited split. -/
 theorem deTurckGatedRemainder_picard_contraction_onGate
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -329,8 +463,590 @@ theorem deTurckGatedRemainder_picard_contraction_onGate
                     (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1
                       (I := I) (M := M) (a : ℝ) hT hT1
                       (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) f' t)))) →
-              dist F F' ≤ (1 / 2) * dist f f' :=
-  sorry
+              dist F F' ≤ (1 / 2) * dist f f' := by
+  classical
+  set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+    with hcompact_def
+  haveI hcount : Countable (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+      (I := I) (M := M) g₀ 0 2) :=
+    countable_tensorEigenIdx (I := I) (M := M) hcompact
+  obtain ⟨k₀, hk₀, c, hc_nn, hsplitAll⟩ :=
+    DeTurck.exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le
+      (I := I) (M := M) g₀ g_bg a ha
+  obtain ⟨C_RH, hC_RH_nn, hRH⟩ :=
+    exists_toHs_norm_le_iteratedCovGrad_tensorL2Norm_sum (I := I) (M := M) g₀ 0 2 (a + 2)
+  choose C_G hC_G_nn hC_G using fun m : ℕ =>
+    iteratedCovGrad_l2Norm_le_sqrt_tensorSobolevMass (I := I) (M := M) (g := g₀) m
+  refine ⟨min (1 / 4) (1 / (8 * (c + 1))), lt_min (by norm_num) (by positivity),
+    le_trans (min_le_left _ _) (by norm_num), ?_⟩
+  intro δ hδ0 hδ₀
+  have hδ_quarter : δ ≤ 1 / 4 := le_trans hδ₀ (min_le_left _ _)
+  have hδc : δ ≤ 1 / (8 * (c + 1)) := le_trans hδ₀ (min_le_right _ _)
+  have hδ_half : δ < 1 / 2 := lt_of_le_of_lt hδ_quarter (by norm_num)
+  have hδ_one : δ < 1 := lt_of_le_of_lt hδ_quarter (by norm_num)
+  intro B hB
+  set R : ℝ := C_RH * ∑ j ∈ Finset.range (2 * (a + 2) + 1),
+      C_G j * (2 * Real.sqrt (B ((j : ℝ) - 1))) with hR_def
+  have hR_nn : 0 ≤ R := by
+    refine mul_nonneg hC_RH_nn (Finset.sum_nonneg fun j _ => ?_)
+    exact mul_nonneg (hC_G_nn j) (by positivity)
+  obtain ⟨C, hC_nn, hsplit⟩ := hsplitAll R hR_nn δ hδ0.le hδ_half
+  have hX_nn : 0 ≤ C (a : ℝ) * (1 + 8 * B ((a : ℝ) + 1)) := by
+    have := hB ((a : ℝ) + 1)
+    exact mul_nonneg (hC_nn _) (by linarith)
+  refine ⟨min 1 (1 / (32 * (C (a : ℝ) * (1 + 8 * B ((a : ℝ) + 1)) + 1))),
+    lt_min one_pos (by positivity), min_le_left _ _, ?_⟩
+  intro T hT hT1 hTT₁ f f' F F' hf hf' hFpin hF'pin
+  have hT_small : T ≤ 1 / (32 * (C (a : ℝ) * (1 + 8 * B ((a : ℝ) + 1)) + 1)) :=
+    le_trans hTT₁ (min_le_right _ _)
+  have hσproof : (0 : ℝ) ≤ (a : ℝ) + 1 := by positivity
+  set Φf := Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+    (a : ℝ) hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) f with hΦf_def
+  set Φf' := Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+    (a : ℝ) hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) f' with hΦf'_def
+  set fdiff := maximalRegularitySolFieldHa1 (I := I) (M := M) (a : ℝ) hT hT1 (f - f')
+    with hfdiff_def
+  have hsubfield : Φf - Φf' = fdiff := by
+    rw [hΦf_def, hΦf'_def, hfdiff_def]
+    exact Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1_sub (I := I) (M := M)
+      hT hT1 hcompact _ f f'
+  set α : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+      (I := I) (M := M) g₀ 0 2 → ℝ := fun i =>
+    c * δ ^ 2 * tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2)
+      + C (a : ℝ) * tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 1)
+      + C (a : ℝ) * (8 * B ((a : ℝ) + 1)) * tensorSobolevWeight (I := I) (M := M) i (k₀ : ℝ)
+    with hα_def
+  have hαexp : ∀ i, α i =
+      c * δ ^ 2 * tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2)
+        + C (a : ℝ) * tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 1)
+        + C (a : ℝ) * (8 * B ((a : ℝ) + 1)) *
+            tensorSobolevWeight (I := I) (M := M) i (k₀ : ℝ) := fun i => by
+    rw [hα_def]
+  have h8B_nn : 0 ≤ 8 * B ((a : ℝ) + 1) := by have := hB ((a : ℝ) + 1); linarith
+  have hα_nn : ∀ i, 0 ≤ α i := fun i => by
+    rw [hαexp i]
+    have h1 := tensorSobolevWeight_nonneg (I := I) (M := M) i ((a : ℝ) + 2)
+    have h2 := tensorSobolevWeight_nonneg (I := I) (M := M) i ((a : ℝ) + 1)
+    have h3 := tensorSobolevWeight_nonneg (I := I) (M := M) i (k₀ : ℝ)
+    have hCnn := hC_nn (a : ℝ)
+    exact add_nonneg
+      (add_nonneg (mul_nonneg (mul_nonneg hc_nn (sq_nonneg δ)) h1) (mul_nonneg hCnn h2))
+      (mul_nonneg (mul_nonneg hCnn h8B_nn) h3)
+  -- the a.e. order-`j` field-mass coupling, for every integer order
+  have hM4f : ∀ j : ℕ, ∀ᵐ t ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T),
+      Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2 =>
+        tensorSobolevWeight (I := I) (M := M) i (j : ℝ) * ((Φf t).coeff i) ^ 2) ∧
+      ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2,
+          tensorSobolevWeight (I := I) (M := M) i (j : ℝ) * ((Φf t).coeff i) ^ 2 ≤
+        2 * (1 + T) *
+          ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+            (I := I) (M := M) g₀ 0 2,
+            forcingMass (I := I) (M := M) f ((j : ℝ) - 1) i := fun j =>
+    maxRegDuhamelSolFieldHa1_zeroDatum_spectralMass_ae_le (I := I) (M := M)
+      hcompact hT hT1 f (j : ℝ) ((hf.1 ((j : ℝ) - 1)).1)
+  have hM4f' : ∀ j : ℕ, ∀ᵐ t ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T),
+      Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2 =>
+        tensorSobolevWeight (I := I) (M := M) i (j : ℝ) * ((Φf' t).coeff i) ^ 2) ∧
+      ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2,
+          tensorSobolevWeight (I := I) (M := M) i (j : ℝ) * ((Φf' t).coeff i) ^ 2 ≤
+        2 * (1 + T) *
+          ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+            (I := I) (M := M) g₀ 0 2,
+            forcingMass (I := I) (M := M) f' ((j : ℝ) - 1) i := fun j =>
+    maxRegDuhamelSolFieldHa1_zeroDatum_spectralMass_ae_le (I := I) (M := M)
+      hcompact hT hT1 f' (j : ℝ) ((hf'.1 ((j : ℝ) - 1)).1)
+  have hgatef : ∀ᵐ t ∂Analysis.Parabolic.TimeSobolev.timeMeasure T,
+      ∃ h_mem : MemAllTensorHs (I := I) (M := M) g₀ 0 2
+        (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (show (0 : ℝ) ≤ (a : ℝ) + 1 by positivity) (Φf t)),
+      gFibreOpBound (I := I) (M := M) g₀
+        (ccTensorBilinSymm (I := I) g₀
+          (gateSmoothRep (I := I) g₀ (Φf t)
+            (show (0 : ℝ) ≤ (a : ℝ) + 1 by positivity) h_mem)) δ := hf.2
+  have hgatef' : ∀ᵐ t ∂Analysis.Parabolic.TimeSobolev.timeMeasure T,
+      ∃ h_mem : MemAllTensorHs (I := I) (M := M) g₀ 0 2
+        (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (show (0 : ℝ) ≤ (a : ℝ) + 1 by positivity) (Φf' t)),
+      gFibreOpBound (I := I) (M := M) g₀
+        (ccTensorBilinSymm (I := I) g₀
+          (gateSmoothRep (I := I) g₀ (Φf' t)
+            (show (0 : ℝ) ≤ (a : ℝ) + 1 by positivity) h_mem)) δ := hf'.2
+  -- the pointwise a.e. three-arm bound, merged into a single per-mode family
+  have key : ∀ᵐ t ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T),
+      ENNReal.ofReal (‖(F - F') t‖ ^ 2)
+        ≤ ∑' i, ENNReal.ofReal (α i * ((fdiff t).coeff i) ^ 2) := by
+    filter_upwards [hFpin, hF'pin, MeasureTheory.Lp.coeFn_sub F F',
+      MeasureTheory.Lp.coeFn_sub Φf Φf', hgatef, hgatef',
+      MeasureTheory.ae_all_iff.mpr hM4f, MeasureTheory.ae_all_iff.mpr hM4f']
+      with t htF htF' htFF htff htg htg' htM4 htM4'
+    obtain ⟨hmem1, hfib1⟩ := htg
+    obtain ⟨hmem2, hfib2⟩ := htg'
+    have hg1 : realizableAtGate (I := I) g₀ (Φf t) :=
+      ⟨hσproof, hmem1, δ, hδ_one, hfib1⟩
+    have hg2 : realizableAtGate (I := I) g₀ (Φf' t) :=
+      ⟨hσproof, hmem2, δ, hδ_one, hfib2⟩
+    set Trep1 := gateSmoothRep (I := I) g₀ (Φf t) hg1.choose hg1.choose_spec.choose
+      with hTrep1_def
+    set Trep2 := gateSmoothRep (I := I) g₀ (Φf' t) hg2.choose hg2.choose_spec.choose
+      with hTrep2_def
+    set m1 := tensorSectionRealizeMetric (I := I) g₀ Trep1
+      hg1.choose_spec.choose_spec.choose_spec.1
+      hg1.choose_spec.choose_spec.choose_spec.2 with hm1_def
+    set m2 := tensorSectionRealizeMetric (I := I) g₀ Trep2
+      hg2.choose_spec.choose_spec.choose_spec.1
+      hg2.choose_spec.choose_spec.choose_spec.2 with hm2_def
+    have hbranch1 : deTurckRemainderRealizeSection (I := I) g₀ g_bg (Φf t)
+        = DeTurck.realizedRHSRemainderSection (I := I) g₀ g_bg m1 Trep1 := by
+      rw [deTurckRemainderRealizeSection, dif_pos hg1]
+      rfl
+    have hbranch2 : deTurckRemainderRealizeSection (I := I) g₀ g_bg (Φf' t)
+        = DeTurck.realizedRHSRemainderSection (I := I) g₀ g_bg m2 Trep2 := by
+      rw [deTurckRemainderRealizeSection, dif_pos hg2]
+      rfl
+    have hcoeff1 : ∀ (hc : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g₀ 0 2))
+        (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2),
+        tensorL2Coeff (I := I) (M := M) hc
+          (Integral.L2.SmoothCcTensor.toL2 Trep1) i = (Φf t).coeff i := by
+      intro hc i
+      rw [hTrep1_def, gateSmoothRep_toL2 (I := I) g₀ (Φf t) hg1.choose
+        hg1.choose_spec.choose]
+      exact tensorHsToL2_tensorL2Coeff (I := I) (M := M) hg1.choose (Φf t) i
+    have hcoeff2 : ∀ (hc : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g₀ 0 2))
+        (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2),
+        tensorL2Coeff (I := I) (M := M) hc
+          (Integral.L2.SmoothCcTensor.toL2 Trep2) i = (Φf' t).coeff i := by
+      intro hc i
+      rw [hTrep2_def, gateSmoothRep_toL2 (I := I) g₀ (Φf' t) hg2.choose
+        hg2.choose_spec.choose]
+      exact tensorHsToL2_tensorL2Coeff (I := I) (M := M) hg2.choose (Φf' t) i
+    -- the `H^{a+2}`-ball funding chain for the two gate representatives
+    have hmassf : ∀ j : ℕ, ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+        (I := I) (M := M) g₀ 0 2,
+        tensorSobolevWeight (I := I) (M := M) i (j : ℝ) * ((Φf t).coeff i) ^ 2
+          ≤ 4 * B ((j : ℝ) - 1) := by
+      intro j
+      refine le_trans (htM4 j).2 ?_
+      have hBj := (hf.1 ((j : ℝ) - 1)).2
+      have hfm_nn : 0 ≤ ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2, forcingMass (I := I) (M := M) f ((j : ℝ) - 1) i :=
+        tsum_nonneg fun i => forcingMass_nonneg (I := I) (M := M) f ((j : ℝ) - 1) i
+      nlinarith [hT1, hT.le]
+    have hmassf' : ∀ j : ℕ, ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+        (I := I) (M := M) g₀ 0 2,
+        tensorSobolevWeight (I := I) (M := M) i (j : ℝ) * ((Φf' t).coeff i) ^ 2
+          ≤ 4 * B ((j : ℝ) - 1) := by
+      intro j
+      refine le_trans (htM4' j).2 ?_
+      have hBj := (hf'.1 ((j : ℝ) - 1)).2
+      have hfm_nn : 0 ≤ ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2, forcingMass (I := I) (M := M) f' ((j : ℝ) - 1) i :=
+        tsum_nonneg fun i => forcingMass_nonneg (I := I) (M := M) f' ((j : ℝ) - 1) i
+      nlinarith [hT1, hT.le]
+    have hball1 : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+        (a + 2) Trep1‖ ≤ R := by
+      refine le_trans (hRH Trep1) ?_
+      rw [hR_def]
+      refine mul_le_mul_of_nonneg_left (Finset.sum_le_sum fun j _ => ?_) hC_RH_nn
+      rw [← Integral.L2.SmoothCcTensor.norm_def]
+      refine le_trans (hC_G j Trep1) ?_
+      refine mul_le_mul_of_nonneg_left ?_ (hC_G_nn j)
+      have hmass_eq : (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+            (I := I) (M := M) g₀ 0 2,
+          tensorSobolevWeight (I := I) (M := M) i (j : ℝ) *
+            (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g₀)
+              (Integral.L2.SmoothCcTensor.toL2 Trep1) i) ^ 2)
+          = ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+            (I := I) (M := M) g₀ 0 2,
+            tensorSobolevWeight (I := I) (M := M) i (j : ℝ) * ((Φf t).coeff i) ^ 2 :=
+        tsum_congr fun i => by rw [hcoeff1 _ i]
+      rw [hmass_eq]
+      refine le_trans (Real.sqrt_le_sqrt (hmassf j)) ?_
+      rw [show (4 : ℝ) = 2 ^ 2 by norm_num,
+        Real.sqrt_mul (by positivity) (B ((j : ℝ) - 1)),
+        Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 2)]
+    have hball2 : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+        (a + 2) Trep2‖ ≤ R := by
+      refine le_trans (hRH Trep2) ?_
+      rw [hR_def]
+      refine mul_le_mul_of_nonneg_left (Finset.sum_le_sum fun j _ => ?_) hC_RH_nn
+      rw [← Integral.L2.SmoothCcTensor.norm_def]
+      refine le_trans (hC_G j Trep2) ?_
+      refine mul_le_mul_of_nonneg_left ?_ (hC_G_nn j)
+      have hmass_eq : (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+            (I := I) (M := M) g₀ 0 2,
+          tensorSobolevWeight (I := I) (M := M) i (j : ℝ) *
+            (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g₀)
+              (Integral.L2.SmoothCcTensor.toL2 Trep2) i) ^ 2)
+          = ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+            (I := I) (M := M) g₀ 0 2,
+            tensorSobolevWeight (I := I) (M := M) i (j : ℝ) * ((Φf' t).coeff i) ^ 2 :=
+        tsum_congr fun i => by rw [hcoeff2 _ i]
+      rw [hmass_eq]
+      refine le_trans (Real.sqrt_le_sqrt (hmassf' j)) ?_
+      rw [show (4 : ℝ) = 2 ^ 2 by norm_num,
+        Real.sqrt_mul (by positivity) (B ((j : ℝ) - 1)),
+        Real.sqrt_sq (by norm_num : (0 : ℝ) ≤ 2)]
+    have hinner1 : ∀ (x : M) (v w : TangentSpace I x),
+        m1.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ Trep1 x v w :=
+      fun x v w => tensorSectionRealizeMetric_inner (I := I) g₀ Trep1 _ _ x v w
+    have hinner2 : ∀ (x : M) (v w : TangentSpace I x),
+        m2.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ Trep2 x v w :=
+      fun x v w => tensorSectionRealizeMetric_inner (I := I) g₀ Trep2 _ _ x v w
+    have hfibT1 : gFibreOpBound (I := I) g₀
+        (fun y => ccTensorBilinSymm (I := I) g₀ Trep1 y) δ := hfib1
+    have hfibT2 : gFibreOpBound (I := I) g₀
+        (fun y => ccTensorBilinSymm (I := I) g₀ Trep2 y) δ := hfib2
+    obtain ⟨hsum_split, hle_split⟩ := hsplit Trep1 Trep2 m1 m2 hinner1 hinner2
+      hfibT1 hfibT2 hball1 hball2 (a : ℝ) (by positivity)
+    -- the difference coordinates are the coordinates of the maximal-regularity field
+    -- of the forcing difference
+    have hfd : fdiff t = Φf t - Φf' t := by
+      calc fdiff t = (Φf - Φf') t := by rw [hsubfield]
+        _ = Φf t - Φf' t := htff
+    have hdiffcoeff : ∀ (hc : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g₀ 0 2))
+        (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2),
+        tensorL2Coeff (I := I) (M := M) hc
+          (Integral.L2.SmoothCcTensor.toL2 (Trep1 - Trep2)) i = ((fdiff t).coeff i) := by
+      intro hc i
+      rw [Integral.L2.SmoothCcTensor.toL2_sub, picard_tensorL2Coeff_sub (I := I) g₀ hc _ _ i,
+        hcoeff1 hc i, hcoeff2 hc i, hfd, picard_tensorHs_sub_coeff (I := I) g₀ _ _ i]
+    -- assemble: identify the squared `Hᵃ` distance with the split's left side, then
+    -- dominate the three arms by the single merged per-mode family
+    refine le_trans (le_of_eq (congrArg ENNReal.ofReal ?_))
+      (le_trans (ENNReal.ofReal_le_ofReal hle_split) ?_)
+    · rw [htFF]
+      simp only [Pi.sub_apply]
+      rw [htF, htF', hbranch1, hbranch2, tensorHs.norm_sq_eq_tsum]
+      refine tsum_congr fun i => ?_
+      rw [picard_tensorHs_sub_coeff (I := I) g₀ _ _ i, deTurckG0SpectralN_coeff,
+        deTurckG0SpectralN_coeff, ← picard_tensorL2Coeff_sub (I := I) g₀ _ _ _ i]
+    · -- the three real arms, merged into the per-mode `α`-family
+      set M2 : ℝ := ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2,
+        tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2) *
+          (tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (Integral.L2.SmoothCcTensor.toL2 (Trep1 - Trep2)) i) ^ 2 with hM2_def
+      set M1 : ℝ := ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2,
+        tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 1) *
+          (tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (Integral.L2.SmoothCcTensor.toL2 (Trep1 - Trep2)) i) ^ 2 with hM1_def
+      set M0 : ℝ := ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2,
+        tensorSobolevWeight (I := I) (M := M) i (k₀ : ℝ) *
+          (tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (Integral.L2.SmoothCcTensor.toL2 (Trep1 - Trep2)) i) ^ 2 with hM0_def
+      set P1 : ℝ := ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2,
+        tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2) *
+          (tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (Integral.L2.SmoothCcTensor.toL2 Trep1) i) ^ 2 with hP1_def
+      set P2 : ℝ := ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2,
+        tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2) *
+          (tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (Integral.L2.SmoothCcTensor.toL2 Trep2) i) ^ 2 with hP2_def
+      have hM0_nn : 0 ≤ M0 := by
+        rw [hM0_def]
+        refine tsum_nonneg fun i => ?_
+        have := tensorSobolevWeight_nonneg (I := I) (M := M) i (k₀ : ℝ)
+        positivity
+      have hcast : ((a + 2 : ℕ) : ℝ) = (a : ℝ) + 2 := by push_cast; ring
+      have hcast' : ((a + 2 : ℕ) : ℝ) - 1 = (a : ℝ) + 1 := by push_cast; ring
+      have hP1_le : P1 ≤ 4 * B ((a : ℝ) + 1) := by
+        have h := hmassf (a + 2)
+        rw [hcast', hcast] at h
+        refine le_trans (le_of_eq ?_) h
+        rw [hP1_def]
+        exact tsum_congr fun i => by rw [hcoeff1 _ i]
+      have hP2_le : P2 ≤ 4 * B ((a : ℝ) + 1) := by
+        have h := hmassf' (a + 2)
+        rw [hcast', hcast] at h
+        refine le_trans (le_of_eq ?_) h
+        rw [hP2_def]
+        exact tsum_congr fun i => by rw [hcoeff2 _ i]
+      have hPM0_le : C (a : ℝ) * ((P1 + P2) * M0)
+          ≤ C (a : ℝ) * (8 * B ((a : ℝ) + 1)) * M0 := by
+        have h1 : (P1 + P2) * M0 ≤ (8 * B ((a : ℝ) + 1)) * M0 :=
+          mul_le_mul_of_nonneg_right (by linarith) hM0_nn
+        calc C (a : ℝ) * ((P1 + P2) * M0)
+            ≤ C (a : ℝ) * ((8 * B ((a : ℝ) + 1)) * M0) :=
+              mul_le_mul_of_nonneg_left h1 (hC_nn _)
+          _ = C (a : ℝ) * (8 * B ((a : ℝ) + 1)) * M0 := by ring
+      -- per-arm `ENNReal` domination through the per-mode coordinates of `fdiff t`
+      have hM2_tsum : ENNReal.ofReal (c * δ ^ 2 * M2)
+          ≤ ∑' i, ENNReal.ofReal
+              (c * δ ^ 2 * (tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2) *
+                ((fdiff t).coeff i) ^ 2)) := by
+        rw [ENNReal.ofReal_mul (by positivity), hM2_def,
+          show (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+              (I := I) (M := M) g₀ 0 2,
+            tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2) *
+              (tensorL2Coeff (I := I) (M := M)
+                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                  (Integral.L2.SmoothCcTensor.toL2 (Trep1 - Trep2)) i) ^ 2)
+            = ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+              (I := I) (M := M) g₀ 0 2,
+              tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2) *
+                ((fdiff t).coeff i) ^ 2 from
+            tsum_congr fun i => by rw [hdiffcoeff _ i]]
+        refine le_trans (mul_le_mul_of_nonneg_left
+          (picard_ofReal_tsum_le _ fun i => ?_) (zero_le _)) ?_
+        · have := tensorSobolevWeight_nonneg (I := I) (M := M) i ((a : ℝ) + 2)
+          positivity
+        · rw [← ENNReal.tsum_mul_left]
+          refine ENNReal.tsum_le_tsum fun i => ?_
+          rw [← ENNReal.ofReal_mul (by positivity)]
+      have hM1_tsum : ENNReal.ofReal (C (a : ℝ) * M1)
+          ≤ ∑' i, ENNReal.ofReal
+              (C (a : ℝ) * (tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 1) *
+                ((fdiff t).coeff i) ^ 2)) := by
+        rw [ENNReal.ofReal_mul (hC_nn _), hM1_def,
+          show (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+              (I := I) (M := M) g₀ 0 2,
+            tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 1) *
+              (tensorL2Coeff (I := I) (M := M)
+                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                  (Integral.L2.SmoothCcTensor.toL2 (Trep1 - Trep2)) i) ^ 2)
+            = ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+              (I := I) (M := M) g₀ 0 2,
+              tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 1) *
+                ((fdiff t).coeff i) ^ 2 from
+            tsum_congr fun i => by rw [hdiffcoeff _ i]]
+        refine le_trans (mul_le_mul_of_nonneg_left
+          (picard_ofReal_tsum_le _ fun i => ?_) (zero_le _)) ?_
+        · have := tensorSobolevWeight_nonneg (I := I) (M := M) i ((a : ℝ) + 1)
+          positivity
+        · rw [← ENNReal.tsum_mul_left]
+          refine ENNReal.tsum_le_tsum fun i => ?_
+          rw [← ENNReal.ofReal_mul (hC_nn _)]
+      have hM0_tsum : ENNReal.ofReal (C (a : ℝ) * (8 * B ((a : ℝ) + 1)) * M0)
+          ≤ ∑' i, ENNReal.ofReal
+              (C (a : ℝ) * (8 * B ((a : ℝ) + 1)) *
+                (tensorSobolevWeight (I := I) (M := M) i (k₀ : ℝ) *
+                  ((fdiff t).coeff i) ^ 2)) := by
+        rw [ENNReal.ofReal_mul (mul_nonneg (hC_nn _) h8B_nn), hM0_def,
+          show (∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+              (I := I) (M := M) g₀ 0 2,
+            tensorSobolevWeight (I := I) (M := M) i (k₀ : ℝ) *
+              (tensorL2Coeff (I := I) (M := M)
+                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                  (Integral.L2.SmoothCcTensor.toL2 (Trep1 - Trep2)) i) ^ 2)
+            = ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+              (I := I) (M := M) g₀ 0 2,
+              tensorSobolevWeight (I := I) (M := M) i (k₀ : ℝ) *
+                ((fdiff t).coeff i) ^ 2 from
+            tsum_congr fun i => by rw [hdiffcoeff _ i]]
+        refine le_trans (mul_le_mul_of_nonneg_left
+          (picard_ofReal_tsum_le _ fun i => ?_) (zero_le _)) ?_
+        · have := tensorSobolevWeight_nonneg (I := I) (M := M) i (k₀ : ℝ)
+          positivity
+        · rw [← ENNReal.tsum_mul_left]
+          refine ENNReal.tsum_le_tsum fun i => ?_
+          rw [← ENNReal.ofReal_mul (mul_nonneg (hC_nn _) h8B_nn)]
+      calc ENNReal.ofReal (c * δ ^ 2 * M2 + C (a : ℝ) * (M1 + (P1 + P2) * M0))
+          ≤ ENNReal.ofReal (c * δ ^ 2 * M2)
+              + ENNReal.ofReal (C (a : ℝ) * (M1 + (P1 + P2) * M0)) :=
+            ENNReal.ofReal_add_le
+        _ ≤ ENNReal.ofReal (c * δ ^ 2 * M2)
+              + (ENNReal.ofReal (C (a : ℝ) * M1)
+                + ENNReal.ofReal (C (a : ℝ) * ((P1 + P2) * M0))) := by
+            refine add_le_add le_rfl ?_
+            have hdist : C (a : ℝ) * (M1 + (P1 + P2) * M0)
+                = C (a : ℝ) * M1 + C (a : ℝ) * ((P1 + P2) * M0) := by ring
+            rw [hdist]
+            exact ENNReal.ofReal_add_le
+        _ ≤ ENNReal.ofReal (c * δ ^ 2 * M2)
+              + (ENNReal.ofReal (C (a : ℝ) * M1)
+                + ENNReal.ofReal (C (a : ℝ) * (8 * B ((a : ℝ) + 1)) * M0)) :=
+            add_le_add le_rfl (add_le_add le_rfl
+              (ENNReal.ofReal_le_ofReal hPM0_le))
+        _ ≤ (∑' i, ENNReal.ofReal
+                (c * δ ^ 2 * (tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2) *
+                  ((fdiff t).coeff i) ^ 2)))
+              + ((∑' i, ENNReal.ofReal
+                  (C (a : ℝ) * (tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 1) *
+                    ((fdiff t).coeff i) ^ 2)))
+                + ∑' i, ENNReal.ofReal
+                  (C (a : ℝ) * (8 * B ((a : ℝ) + 1)) *
+                    (tensorSobolevWeight (I := I) (M := M) i (k₀ : ℝ) *
+                      ((fdiff t).coeff i) ^ 2))) :=
+            add_le_add hM2_tsum (add_le_add hM1_tsum hM0_tsum)
+        _ = ∑' i, ENNReal.ofReal (α i * ((fdiff t).coeff i) ^ 2) := by
+            rw [← ENNReal.tsum_add, ← ENNReal.tsum_add]
+            refine tsum_congr fun i => ?_
+            have hw1 := tensorSobolevWeight_nonneg (I := I) (M := M) i ((a : ℝ) + 2)
+            have hw2 := tensorSobolevWeight_nonneg (I := I) (M := M) i ((a : ℝ) + 1)
+            have hw3 := tensorSobolevWeight_nonneg (I := I) (M := M) i (k₀ : ℝ)
+            have ha1 : 0 ≤ c * δ ^ 2 * (tensorSobolevWeight (I := I) (M := M) i
+                ((a : ℝ) + 2) * ((fdiff t).coeff i) ^ 2) :=
+              mul_nonneg (mul_nonneg hc_nn (sq_nonneg δ))
+                (mul_nonneg hw1 (sq_nonneg _))
+            have ha2 : 0 ≤ C (a : ℝ) * (tensorSobolevWeight (I := I) (M := M) i
+                ((a : ℝ) + 1) * ((fdiff t).coeff i) ^ 2) :=
+              mul_nonneg (hC_nn _) (mul_nonneg hw2 (sq_nonneg _))
+            have ha3 : 0 ≤ C (a : ℝ) * (8 * B ((a : ℝ) + 1)) *
+                (tensorSobolevWeight (I := I) (M := M) i (k₀ : ℝ) *
+                  ((fdiff t).coeff i) ^ 2) :=
+              mul_nonneg (mul_nonneg (hC_nn _) h8B_nn)
+                (mul_nonneg hw3 (sq_nonneg _))
+            rw [← ENNReal.ofReal_add ha2 ha3, ← ENNReal.ofReal_add ha1 (add_nonneg ha2 ha3)]
+            · refine congrArg ENNReal.ofReal ?_
+              rw [hαexp i]
+              ring
+  -- per-mode time integration against the maximal-regularity gains
+  have hk₀le : (k₀ : ℝ) ≤ (a : ℝ) + 1 := by
+    have hk : k₀ ≤ a + 1 := by omega
+    calc (k₀ : ℝ) ≤ ((a + 1 : ℕ) : ℝ) := Nat.cast_le.mpr hk
+      _ = (a : ℝ) + 1 := by push_cast; ring
+  set Q : ℝ := 4 * (c * δ ^ 2) + 4 * T * (C (a : ℝ) * (1 + 8 * B ((a : ℝ) + 1)))
+    with hQ_def
+  have hQ_nn : 0 ≤ Q := by
+    rw [hQ_def]
+    have := mul_nonneg (mul_nonneg (by linarith [hT.le] : (0 : ℝ) ≤ 4 * T) (hC_nn (a : ℝ)))
+      (by linarith [hB ((a : ℝ) + 1)] : (0 : ℝ) ≤ 1 + 8 * B ((a : ℝ) + 1))
+    nlinarith [hc_nn, sq_nonneg δ]
+  have hper : ∀ i, α i * ‖timeModeCoeff (I := I) (M := M) fdiff i‖ ^ 2
+      ≤ Q * (tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
+          ‖timeModeCoeff (I := I) (M := M) (f - f') i‖ ^ 2) := by
+    intro i
+    have hsolmode : timeModeCoeff (I := I) (M := M) fdiff i =
+        solModeCoeff (I := I) (M := M) (a := (a : ℝ)) hT.le (f - f') i := by
+      rw [hfdiff_def]
+      exact maximalRegularitySolFieldHa1_timeModeCoeff (I := I) (M := M)
+        (h_compact := hcompact) hT hT1 (f - f') i
+    have hb1 : tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2) *
+        ‖solModeCoeff (I := I) (M := M) (a := (a : ℝ)) hT.le (f - f') i‖ ^ 2
+          ≤ 4 * (tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
+            ‖timeModeCoeff (I := I) (M := M) (f - f') i‖ ^ 2) := by
+      have h := solFieldMass_le_forcingMass (I := I) (M := M) hT.le (f - f') (a : ℝ) i
+      simp only [solFieldMass, forcingMass] at h
+      have hwf : 0 ≤ tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
+          ‖timeModeCoeff (I := I) (M := M) (f - f') i‖ ^ 2 :=
+        mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i (a : ℝ)) (sq_nonneg _)
+      have h4 : (1 + T) ^ 2 ≤ 4 := by nlinarith [hT1, hT.le]
+      have h5 : (1 + T) ^ 2 * (tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
+            ‖timeModeCoeff (I := I) (M := M) (f - f') i‖ ^ 2)
+          ≤ 4 * (tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
+            ‖timeModeCoeff (I := I) (M := M) (f - f') i‖ ^ 2) :=
+        mul_le_mul_of_nonneg_right h4 hwf
+      linarith
+    have hb2 : tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 1) *
+        ‖solModeCoeff (I := I) (M := M) (a := (a : ℝ)) hT.le (f - f') i‖ ^ 2
+          ≤ 4 * T * (tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
+            ‖timeModeCoeff (I := I) (M := M) (f - f') i‖ ^ 2) := by
+      have h := weighted_solModeCoeff_Ha1_le (I := I) (M := M) (a := (a : ℝ))
+        hT hT1 (f - f') i
+      rw [mul_pow, Real.sq_sqrt hT.le] at h
+      calc tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 1) *
+            ‖solModeCoeff (I := I) (M := M) (a := (a : ℝ)) hT.le (f - f') i‖ ^ 2
+          ≤ 2 ^ 2 * T * (tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
+              ‖timeModeCoeff (I := I) (M := M) (f - f') i‖ ^ 2) := h
+        _ = 4 * T * (tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
+              ‖timeModeCoeff (I := I) (M := M) (f - f') i‖ ^ 2) := by ring
+    have hb3 : tensorSobolevWeight (I := I) (M := M) i (k₀ : ℝ) *
+        ‖solModeCoeff (I := I) (M := M) (a := (a : ℝ)) hT.le (f - f') i‖ ^ 2
+          ≤ tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 1) *
+            ‖solModeCoeff (I := I) (M := M) (a := (a : ℝ)) hT.le (f - f') i‖ ^ 2 :=
+      mul_le_mul_of_nonneg_right (tensorSobolevWeight_mono (I := I) (M := M) i hk₀le)
+        (sq_nonneg _)
+    rw [hsolmode, hαexp i]
+    have t1 := mul_le_mul_of_nonneg_left hb1 (mul_nonneg hc_nn (sq_nonneg δ))
+    have t2 := mul_le_mul_of_nonneg_left hb2 (hC_nn (a : ℝ))
+    have t3 := mul_le_mul_of_nonneg_left (le_trans hb3 hb2)
+      (mul_nonneg (hC_nn (a : ℝ)) h8B_nn)
+    rw [hQ_def]
+    nlinarith [t1, t2, t3]
+  have hQsummable : Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+      (I := I) (M := M) g₀ 0 2 =>
+      Q * (tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
+        ‖timeModeCoeff (I := I) (M := M) (f - f') i‖ ^ 2)) :=
+    (summable_weight_mul_norm_timeModeCoeff_sq (I := I) (M := M) hcompact
+      (f := f - f')).mul_left Q
+  have hQterm_nn : ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+      (I := I) (M := M) g₀ 0 2,
+      0 ≤ Q * (tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
+        ‖timeModeCoeff (I := I) (M := M) (f - f') i‖ ^ 2) := fun i =>
+    mul_nonneg hQ_nn (mul_nonneg
+      (tensorSobolevWeight_nonneg (I := I) (M := M) i (a : ℝ)) (sq_nonneg _))
+  have hInt : ∫⁻ t, ENNReal.ofReal (‖(F - F') t‖ ^ 2)
+        ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T)
+      ≤ ENNReal.ofReal (Q * ‖f - f'‖ ^ 2) := by
+    calc ∫⁻ t, ENNReal.ofReal (‖(F - F') t‖ ^ 2)
+          ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T)
+        ≤ ∫⁻ t, ∑' i, ENNReal.ofReal (α i * ((fdiff t).coeff i) ^ 2)
+            ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T) :=
+          MeasureTheory.lintegral_mono_ae key
+      _ = ∑' i, ∫⁻ t, ENNReal.ofReal (α i * ((fdiff t).coeff i) ^ 2)
+            ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T) :=
+          MeasureTheory.lintegral_tsum fun i =>
+            picard_aemeasurable_ofReal_coeff_sq (I := I) g₀ fdiff (α i) i
+      _ = ∑' i, ENNReal.ofReal
+            (α i * ‖timeModeCoeff (I := I) (M := M) fdiff i‖ ^ 2) :=
+          tsum_congr fun i =>
+            picard_lintegral_ofReal_coeff_sq (I := I) g₀ fdiff (α i) (hα_nn i) i
+      _ ≤ ENNReal.ofReal (∑' i, Q * (tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
+            ‖timeModeCoeff (I := I) (M := M) (f - f') i‖ ^ 2)) :=
+          picard_tsum_ofReal_le _ _ hper hQterm_nn hQsummable
+      _ = ENNReal.ofReal (Q * ‖f - f'‖ ^ 2) := by
+          rw [tsum_mul_left]
+          refine congrArg ENNReal.ofReal (congrArg (Q * ·) ?_)
+          exact (norm_sq_eq_tsum_timeModeCoeff (I := I) (M := M) (f := f - f')
+            hcompact).symm
+  have hdistsq : dist F F' ^ 2 ≤ Q * dist f f' ^ 2 := by
+    rw [dist_eq_norm, dist_eq_norm]
+    have hintFF : MeasureTheory.Integrable (fun t => ‖(F - F') t‖ ^ 2)
+        (Analysis.Parabolic.TimeSobolev.timeMeasure T) :=
+      (MeasureTheory.memLp_two_iff_integrable_sq_norm
+        (MeasureTheory.Lp.aestronglyMeasurable (F - F'))).mp
+        (MeasureTheory.Lp.memLp (F - F'))
+    have h1 : ‖F - F'‖ ^ 2 = (∫⁻ t, ENNReal.ofReal (‖(F - F') t‖ ^ 2)
+        ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T)).toReal := by
+      rw [Analysis.Parabolic.TimeSobolev.norm_sq_eq_integral (F - F'),
+        show (∫ t in Set.Icc (0 : ℝ) T, ‖(F - F') t‖ ^ 2)
+          = ∫ t, ‖(F - F') t‖ ^ 2 ∂(Analysis.Parabolic.TimeSobolev.timeMeasure T)
+          from rfl]
+      exact MeasureTheory.integral_eq_lintegral_of_nonneg_ae
+        (Filter.Eventually.of_forall fun t => sq_nonneg _) hintFF.aestronglyMeasurable
+    rw [h1]
+    have h2 := ENNReal.toReal_mono ENNReal.ofReal_ne_top hInt
+    rwa [ENNReal.toReal_ofReal (mul_nonneg hQ_nn (sq_nonneg _))] at h2
+  -- the numeric absorption: `Q ≤ 1/4`
+  have hQ_le : Q ≤ 1 / 4 := by
+    have hc1 : (0 : ℝ) < 8 * (c + 1) := by positivity
+    have hδ8 : δ * (8 * (c + 1)) ≤ 1 := by
+      have := (le_div_iff₀ hc1).mp hδc
+      linarith
+    have hδ8sq : (δ * (8 * (c + 1))) * (δ * (8 * (c + 1))) ≤ 1 * 1 :=
+      mul_le_mul hδ8 hδ8 (by positivity) (by norm_num)
+    have hkey : 64 * (c + 1) ^ 2 * δ ^ 2 ≤ 1 := by nlinarith [hδ8sq]
+    have hcd : c * δ ^ 2 ≤ (c + 1) ^ 2 * δ ^ 2 := by
+      nlinarith [sq_nonneg δ, hc_nn, mul_nonneg hc_nn (sq_nonneg δ),
+        mul_nonneg (sq_nonneg c) (sq_nonneg δ)]
+    have h1 : 4 * (c * δ ^ 2) ≤ 1 / 16 := by nlinarith
+    have hT32 : T * (32 * (C (a : ℝ) * (1 + 8 * B ((a : ℝ) + 1)) + 1)) ≤ 1 := by
+      have := (le_div_iff₀ (by positivity :
+        (0 : ℝ) < 32 * (C (a : ℝ) * (1 + 8 * B ((a : ℝ) + 1)) + 1))).mp hT_small
+      linarith
+    have h2 : 4 * T * (C (a : ℝ) * (1 + 8 * B ((a : ℝ) + 1))) ≤ 1 / 8 := by
+      nlinarith [hT.le, hX_nn]
+    rw [hQ_def]
+    linarith
+  have hfinal : dist F F' ^ 2 ≤ ((1 / 2) * dist f f') ^ 2 := by
+    nlinarith [hdistsq, hQ_le, sq_nonneg (dist f f'), dist_nonneg (x := F) (y := F')]
+  have hsqrt := Real.sqrt_le_sqrt hfinal
+  rwa [Real.sqrt_sq dist_nonneg, Real.sqrt_sq (by positivity)] at hsqrt
 
 /-- **The zero forcing lies in the graded on-gate Picard class** (for any nonnegative
 per-order bounds and any nonnegative fibre margin): its per-mode forcing masses all vanish
