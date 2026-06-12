@@ -64,7 +64,13 @@ posited analytic primitives plus the existing generic (`N`-free) carrier machine
 * `deTurckGated_carrier_RHS_continuousOn_interior` — the interior continuity of the gated
   carrier right-hand side `r ↦ Δ_∇ (u₂ r) + N_cont (ι (u₂ r))` on a fibre-small sub-horizon
   (the Nemytskii continuity of the gated remainder along the all-order-continuous
-  trajectory).
+  trajectory).  This node is **proven** here: on the fibre-small horizon the gate
+  representative is pinned to the trajectory's own smooth representative, so the gauge
+  equals the un-gated trajectory-indexed remainder, whose spectral read-off is continuous
+  through the spectral-lift Lipschitz `deTurckG0SpectralN_dist_le_pouHaNorm` and the
+  higher-order chart-RHS Sobolev–Lipschitz Nemytskii bound
+  `exists_realizedRHSRemainder_pouHa_le_toHs_highOrder` (it transits `sorryAx` through the
+  posited chart-RHS-tower primitives of `RHSHighOrderSobolevLipschitz.lean`).
 
 Everything else — the pointwise-carrier extraction (`zeroDatum_allscale_continuity_uptoZero`),
 the all-order interior membership, the canonical smooth-representative family
@@ -73,8 +79,9 @@ the all-order interior membership, the canonical smooth-representative family
 (`deturck_g0_carrier_Hk_smallness_upto_zero`), the fibre-small horizon shrink, the realized
 metric family, and the interior FTC strong derivative (over
 `deturck_g0_carrier_timeDeriv_ae`) — is assembled here without new analytic content.
-Consumers transitively depend on `sorryAx` through the two posited primitives (and the
-pre-existing deep nodes those generic engines transit, e.g. the Weyl counting bound).
+Consumers transitively depend on `sorryAx` through the posited Picard/mass-coupling
+primitives, the chart-RHS-tower Nemytskii primitives, and the pre-existing deep nodes the
+generic engines transit (e.g. the Weyl counting bound).
 -/
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -684,8 +691,27 @@ theorem deTurckGatedRemainder_maxReg_trajectory_exists
     deTurckGatedRemainder_fixedPoint_forcing_mass_coupling (I := I) (M := M) g₀ g_bg a
       ha ha2 hT hT1 gforce hfix⟩
 
+/-- The realized metric of a `g₀`-fibre-small perturbation section depends only on the
+section, not on the fibre-smallness witness pair: for equal sections `S = S'` and any two
+witness pairs, the realized metrics agree (`inner`-extensionality through
+`tensorSectionRealizeMetric_inner`). -/
+private theorem gated_realizeMetric_eq_of_section_eq
+    (g₀ : SmoothRiemannianMetric I M) {S S' : Integral.L2.SmoothCcTensor g₀ 0 2}
+    (hSS : S = S') {δ δ' : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ S) δ)
+    (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ S') δ') :
+    tensorSectionRealizeMetric (I := I) g₀ S hδ_lt hδ
+      = tensorSectionRealizeMetric (I := I) g₀ S' hδ'_lt hδ' := by
+  subst hSS
+  refine smoothRiemannianMetric_eq_of_inner (I := I) _ _ (fun x v w => ?_)
+  rw [tensorSectionRealizeMetric_inner, tensorSectionRealizeMetric_inner]
+
+-- `hTf` is part of the frozen consumer-facing signature (the positive sub-horizon datum)
+-- but the proof needs only the interval memberships, not positivity itself.
+set_option linter.unusedVariables false in
 /-- **Interior continuity of the gated self-representative carrier right-hand side on a
-fibre-small sub-horizon (posited analytic input).**
+fibre-small sub-horizon.**
 
 For the gated trajectory data — the Duhamel solution `u` of the smooth datum `0` (`hu`),
 its all-order mass coupling (`hcouple`), the pointwise order-`(a+2)` carrier `u₂` matching
@@ -712,8 +738,24 @@ spectral-lift Lipschitz `deTurckG0SpectralN_dist_le_pouHaNorm` transports that c
 to the gated forcing; the Laplacian summand is the continuous order-drop
 `scaleLaplacianFun` along the `H^{a+2}`-continuous interior trajectory.  The hypotheses are
 honest trajectory data, structurally distinct from the continuity conclusion; no
-packaging.  The body is the posited Nemytskii-continuity input; it remains `sorry`, so
-consumers transitively depend on `sorryAx`. -/
+packaging.
+
+**Proven** along exactly that route: on `[0, Tf]` the gate is discharged by
+`realizableAtGate_carrierInclusion` and the gate representative is pinned to `T_s r` by
+`gateSmoothRep_carrierInclusion_eq`, so (by metric `inner`-extensionality through
+`tensorSectionRealizeMetric_inner`) the gated gauge section *equals* the un-gated
+trajectory-indexed remainder `realizedRHSRemainderSection g₀ g_bg (g₀ + T_s r) (T_s r)`;
+the spectral-lift `toHs`-`a` Lipschitz `deTurckG0SpectralN_dist_le_pouHaNorm` composed
+with the higher-order chart-RHS Sobolev–Lipschitz Nemytskii bound
+`exists_realizedRHSRemainder_pouHa_le_toHs_highOrder` (at `δ = 1/4 < 1/2`, with the
+uniform `H^{a+2}`-size bound from the compact-interval supremum of the continuous
+supercritical `H^{2(a+3)}` trajectory norm `deturck_g0_carrier_Hk_continuousOn_upto_zero`)
+makes the forcing dist-controlled by the continuous `H^{2(a+3)}`-trajectory modulus; the
+Laplacian summand is the continuous linear `tensorScaleLaplacian` along the
+`H^{a+2}`-continuous carrier (`zeroDatum_allscale_continuity_uptoZero`).  Consumers
+transitively depend on `sorryAx` only through the posited chart-RHS-tower Nemytskii
+primitive (`exists_deTurckRHSRetagDiff_pouHa_le_toHs_highOrder` and the atomic Sobolev
+arms it consumes) and the pre-existing spectral substrate (the Weyl/Gårding nodes). -/
 theorem deTurckGated_carrier_RHS_continuousOn_interior
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -749,8 +791,230 @@ theorem deTurckGated_carrier_RHS_continuousOn_interior
           (deTurckRemainderRealizeSection (I := I) g₀ g_bg
             (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
               (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ r))))
+      (Set.Ioo (0 : ℝ) Tf) := by
+  classical
+  -- The canonical-representative identity, recovered from the coordinate identity
+  -- `hsmoothrepr` by eigenbasis-coordinate injectivity.
+  have hcanon : ∀ s ∈ Set.Icc (0 : ℝ) T,
+      Integral.L2.SmoothCcTensor.toL2 (T_s s) =
+        tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (show (0 : ℝ) ≤ (a : ℝ) + 2 by positivity) (u₂ s) := by
+    intro s hs
+    set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+      with hcompact_def
+    set b := tensorResolventHilbertEigenbasisSigma (I := I) (M := M) hcompact with hb
+    apply b.repr.injective
+    ext i
+    have hlhs : (b.repr (Integral.L2.SmoothCcTensor.toL2 (T_s s))) i
+        = (u₂ s).coeff i := by
+      rw [show (b.repr (Integral.L2.SmoothCcTensor.toL2 (T_s s))) i =
+          tensorL2Coeff (I := I) (M := M) hcompact
+            (Integral.L2.SmoothCcTensor.toL2 (T_s s)) i from rfl]
+      exact (hsmoothrepr s hs i).symm
+    have hrhs : (b.repr (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        hcompact (show (0 : ℝ) ≤ (a : ℝ) + 2 by positivity) (u₂ s))) i
+          = (u₂ s).coeff i := by
+      rw [show (b.repr (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          hcompact (show (0 : ℝ) ≤ (a : ℝ) + 2 by positivity) (u₂ s))) i =
+          tensorL2Coeff (I := I) (M := M) hcompact
+            (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              hcompact (show (0 : ℝ) ≤ (a : ℝ) + 2 by positivity) (u₂ s)) i from rfl,
+        tensorHsToL2_tensorL2Coeff (I := I) (M := M)
+          (show (0 : ℝ) ≤ (a : ℝ) + 2 by positivity) (u₂ s) i]
+    rw [hlhs, hrhs]
+  -- Up-to-`t = 0` supercritical `H^{2(a+3)}` continuity of the smooth representatives.
+  have hGcont : ContinuousOn
+      (fun s : ℝ => IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+        (2 * (a + 3)) (T_s s)) (Set.Icc (0 : ℝ) T) :=
+    deturck_g0_carrier_Hk_continuousOn_upto_zero (I := I) (M := M) g₀ a hT hT1
+      u₂ T_s gforce u hu hcouple hbridge hcanon (a + 3) (by omega)
+  -- `H^{a+2}`-continuity of the pointwise carrier, transported from the up-to-`0`
+  -- all-order synthesis through the coefficient bridge.
+  obtain ⟨u₂', hu₂'cont, hbridge'⟩ :=
+    zeroDatum_allscale_continuity_uptoZero (I := I) (M := M) g₀ a gforce hT hT1 u hu
+      hcouple ((a : ℝ) + 2) (by linarith)
+  have hu₂eq : Set.EqOn u₂ u₂' (Set.Icc (0 : ℝ) T) := by
+    intro s hs
+    refine tensorHs.ext (funext fun i => ?_)
+    have h1 : (u₂ s).coeff i
+        = (Analysis.Parabolic.TimeSobolev.timeH1.toFun u s).coeff i := by
+      rw [← tensorHsInclusion_coeff_apply
+        (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂ s) i, hbridge s hs]
+    have h2 : (u₂' s).coeff i
+        = (Analysis.Parabolic.TimeSobolev.timeH1.toFun u s).coeff i := by
+      rw [← tensorHsInclusion_coeff_apply
+        (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) (u₂' s) i, hbridge' s hs]
+    rw [h1, h2]
+  have hu₂cont : ContinuousOn u₂ (Set.Icc (0 : ℝ) T) := hu₂'cont.congr hu₂eq
+  have hsubIoo : Set.Ioo (0 : ℝ) Tf ⊆ Set.Icc (0 : ℝ) T :=
+    fun x hx => ⟨hx.1.le, hx.2.le.trans hTfT⟩
+  -- The realized metric family of the smooth representatives on the fibre-small horizon.
+  set gmet : ℝ → SmoothRiemannianMetric I M := fun r =>
+    if h : r ∈ Set.Icc (0 : ℝ) Tf then
+      tensorSectionRealizeMetric (I := I) g₀ (T_s r)
+        (by norm_num : (1 / 4 : ℝ) < 1) (hsmall r h)
+    else g₀ with hgmet_def
+  have hgmet_inner : ∀ r ∈ Set.Icc (0 : ℝ) Tf, ∀ (x : M) (v w : TangentSpace I x),
+      (gmet r).inner x v w
+        = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_s r) x v w := by
+    intro r hr x v w
+    rw [hgmet_def]
+    simp only [dif_pos hr]
+    exact tensorSectionRealizeMetric_inner (I := I) g₀ (T_s r) _ _ x v w
+  -- On the fibre-small horizon the gated gauge takes its honest branch, the gate
+  -- representative is `T_s r`, and the gauge section equals the un-gated
+  -- trajectory-indexed realized remainder.
+  have hsec_eq : ∀ r ∈ Set.Icc (0 : ℝ) Tf,
+      deTurckRemainderRealizeSection (I := I) g₀ g_bg
+          (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ r))
+        = DeTurck.realizedRHSRemainderSection (I := I) g₀ g_bg (gmet r) (T_s r) := by
+    intro r hr
+    have hrT : r ∈ Set.Icc (0 : ℝ) T := ⟨hr.1, hr.2.trans hTfT⟩
+    have hg : realizableAtGate (I := I) g₀
+        (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ r)) :=
+      realizableAtGate_carrierInclusion (I := I) g₀ a u₂ T_s (hsmoothrepr r hrT)
+        ⟨1 / 4, by norm_num, hsmall r hr⟩
+    have hrep := gateSmoothRep_carrierInclusion_eq (I := I) g₀ a u₂ T_s
+      (hsmoothrepr r hrT) hg
+    have hmet : tensorSectionRealizeMetric (I := I) g₀
+        (gateSmoothRep (I := I) g₀
+          (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ r))
+          hg.choose hg.choose_spec.choose)
+        hg.choose_spec.choose_spec.choose_spec.1
+        hg.choose_spec.choose_spec.choose_spec.2 = gmet r := by
+      have hgmet_eq : gmet r = tensorSectionRealizeMetric (I := I) g₀ (T_s r)
+          (by norm_num : (1 / 4 : ℝ) < 1) (hsmall r hr) := by
+        rw [hgmet_def]
+        simp only [dif_pos hr]
+      rw [hgmet_eq]
+      exact gated_realizeMetric_eq_of_section_eq (I := I) g₀ hrep _ _ _ _
+    have hbranch : deTurckRemainderRealizeSection (I := I) g₀ g_bg
+        (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ r))
+        = DeTurck.realizedRHSRemainderSection (I := I) g₀ g_bg
+            (tensorSectionRealizeMetric (I := I) g₀
+              (gateSmoothRep (I := I) g₀
+                (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                  (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ r))
+                hg.choose hg.choose_spec.choose)
+              hg.choose_spec.choose_spec.choose_spec.1
+              hg.choose_spec.choose_spec.choose_spec.2)
+            (gateSmoothRep (I := I) g₀
+              (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) (u₂ r))
+              hg.choose hg.choose_spec.choose) := by
+      rw [deTurckRemainderRealizeSection, dif_pos hg]
+      rfl
+    exact hbranch.trans
+      (congrArg₂
+        (fun m s => DeTurck.realizedRHSRemainderSection (I := I) g₀ g_bg m s) hmet hrep)
+  -- A uniform `H^{a+2}` size bound for the smooth representatives on the compact horizon.
+  obtain ⟨B₀, hB₀⟩ := isCompact_Icc.exists_bound_of_continuousOn
+    (hGcont.mono (Set.Icc_subset_Icc le_rfl hTfT))
+  have hsize : ∀ s ∈ Set.Icc (0 : ℝ) Tf,
+      ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) (T_s s)‖
+        ≤ max B₀ 0 := by
+    intro s hs
+    have h1 : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+          (a + 2) (T_s s)‖
+        ≤ ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+            (2 * (a + 3)) (T_s s)‖ :=
+      toHs_norm_mono (I := I) (M := M) g₀ (by omega) (T_s s)
+    exact h1.trans ((hB₀ s hs).trans (le_max_left _ _))
+  -- The spectral-lift `toHs`-`a` Lipschitz and the higher-order chart-RHS
+  -- Sobolev–Lipschitz Nemytskii bound, at the uniform fibre-smallness `δ = 1/4 < 1/2`.
+  obtain ⟨C₀, hC₀_nn, hC₀⟩ := deTurckG0SpectralN_dist_le_pouHaNorm (I := I) g₀ a
+  obtain ⟨CA, hCA_nn, hCA⟩ :=
+    DeTurck.exists_realizedRHSRemainder_pouHa_le_toHs_highOrder (I := I) g₀ g_bg a ha
+      (max B₀ 0) (le_max_right _ _) (1 / 4) (by norm_num) (by norm_num)
+  -- The trajectory dist bound: the forcing modulus is controlled by the continuous
+  -- supercritical `H^{2(a+3)}` trajectory modulus.
+  have hkey : ∀ r ∈ Set.Icc (0 : ℝ) Tf, ∀ r' ∈ Set.Icc (0 : ℝ) Tf,
+      dist
+          (deTurckG0SpectralN (I := I) g₀ a
+            (DeTurck.realizedRHSRemainderSection (I := I) g₀ g_bg (gmet r) (T_s r)))
+          (deTurckG0SpectralN (I := I) g₀ a
+            (DeTurck.realizedRHSRemainderSection (I := I) g₀ g_bg (gmet r') (T_s r')))
+        ≤ C₀ * CA *
+            ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+                (2 * (a + 3)) (T_s r)
+              - IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+                (2 * (a + 3)) (T_s r')‖ := by
+    intro r hr r' hr'
+    have hnem := hCA (T_s r) (T_s r') (gmet r) (gmet r') (hgmet_inner r hr)
+      (hgmet_inner r' hr') (hsmall r hr) (hsmall r' hr') (hsize r hr) (hsize r' hr')
+    have hmono : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+          (a + 2) (T_s r - T_s r')‖
+        ≤ ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+            (2 * (a + 3)) (T_s r - T_s r')‖ :=
+      toHs_norm_mono (I := I) (M := M) g₀ (by omega) (T_s r - T_s r')
+    calc dist
+            (deTurckG0SpectralN (I := I) g₀ a
+              (DeTurck.realizedRHSRemainderSection (I := I) g₀ g_bg (gmet r) (T_s r)))
+            (deTurckG0SpectralN (I := I) g₀ a
+              (DeTurck.realizedRHSRemainderSection (I := I) g₀ g_bg (gmet r') (T_s r')))
+        ≤ C₀ * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) a
+            (DeTurck.realizedRHSRemainderSection (I := I) g₀ g_bg (gmet r) (T_s r)
+              - DeTurck.realizedRHSRemainderSection (I := I) g₀ g_bg (gmet r')
+                  (T_s r'))‖ := hC₀ _ _
+      _ ≤ C₀ * (CA * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+            (a + 2) (T_s r - T_s r')‖) := mul_le_mul_of_nonneg_left hnem hC₀_nn
+      _ ≤ C₀ * (CA * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+            (2 * (a + 3)) (T_s r - T_s r')‖) :=
+          mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hmono hCA_nn) hC₀_nn
+      _ = C₀ * CA *
+            ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+                (2 * (a + 3)) (T_s r)
+              - IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+                (2 * (a + 3)) (T_s r')‖ := by
+          rw [SmoothCcTensor.toHs_sub]; ring
+  -- Interior continuity of the un-gated trajectory-indexed forcing, by squeezing the
+  -- dist modulus against the continuous `H^{2(a+3)}` trajectory.
+  have hN'cont : ContinuousOn
+      (fun r : ℝ => deTurckG0SpectralN (I := I) g₀ a
+        (DeTurck.realizedRHSRemainderSection (I := I) g₀ g_bg (gmet r) (T_s r)))
+      (Set.Ioo (0 : ℝ) Tf) := by
+    intro r₀ hr₀
+    have hr₀Icc : r₀ ∈ Set.Icc (0 : ℝ) Tf := ⟨hr₀.1.le, hr₀.2.le⟩
+    have hr₀T : r₀ ∈ Set.Icc (0 : ℝ) T := ⟨hr₀.1.le, hr₀.2.le.trans hTfT⟩
+    have hGat : Filter.Tendsto
+        (fun s : ℝ => IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+          (2 * (a + 3)) (T_s s))
+        (nhdsWithin r₀ (Set.Ioo (0 : ℝ) Tf))
+        (nhds (IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+          (2 * (a + 3)) (T_s r₀))) :=
+      (hGcont r₀ hr₀T).mono hsubIoo
+    have hzero : Filter.Tendsto
+        (fun r : ℝ => C₀ * CA *
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+              (2 * (a + 3)) (T_s r)
+            - IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+              (2 * (a + 3)) (T_s r₀)‖)
+        (nhdsWithin r₀ (Set.Ioo (0 : ℝ) Tf)) (nhds 0) := by
+      have h1 := hGat.sub (tendsto_const_nhds
+        (x := IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+          (2 * (a + 3)) (T_s r₀))
+        (f := nhdsWithin r₀ (Set.Ioo (0 : ℝ) Tf)))
+      have h2 := (h1.norm).const_mul (C₀ * CA)
+      simpa using h2
+    refine tendsto_iff_dist_tendsto_zero.mpr ?_
+    refine squeeze_zero' (Filter.Eventually.of_forall fun r => dist_nonneg) ?_ hzero
+    filter_upwards [self_mem_nhdsWithin] with r hr
+    exact hkey r ⟨hr.1.le, hr.2.le⟩ r₀ hr₀Icc
+  -- The Laplacian summand: the continuous linear order-drop along the `H^{a+2}`-continuous
+  -- carrier; assemble and transport along the on-gate section identity.
+  have hu₂Ioo : ContinuousOn u₂ (Set.Ioo (0 : ℝ) Tf) := hu₂cont.mono hsubIoo
+  have hL : ContinuousOn (fun r : ℝ => scaleLaplacianFun (I := I) (M := M) (u₂ r))
       (Set.Ioo (0 : ℝ) Tf) :=
-  sorry
+    (Analysis.Parabolic.MaximalRegularity.tensorScaleLaplacian (I := I) (M := M)
+      (g := g₀) (r := 0) (s := 2) ((a : ℝ))).continuous.comp_continuousOn hu₂Ioo
+  refine ContinuousOn.add hL (hN'cont.congr ?_)
+  intro r hr
+  exact congrArg (deTurckG0SpectralN (I := I) g₀ a) (hsec_eq r ⟨hr.1.le, hr.2.le⟩)
 
 /-- All-order interior membership of the gated smooth-datum carrier: for the
 maximal-regularity carrier `u` of the smooth datum `0` (`hu`), the all-order mass coupling
@@ -900,10 +1164,11 @@ maximal-regularity Duhamel carrier `u₂ : ℝ → Hᵃ⁺²(g₀)`, and its can
 * `hHk` — every supercritical `H^{2k}` Sobolev norm of `T_s s` is continuous up to `t = 0` (the
   parabolic-up-to-boundary regularity the chart-`C²` joint-continuity bridge consumes).
 
-This is **sorry-free glue** over the two posited analytic primitives
+This is **sorry-free glue** over the posited analytic primitive
 `deTurckGatedRemainder_maxReg_trajectory_exists` (the two-loss trajectory fixed point with its
-trajectory-native mass coupling) and `deTurckGated_carrier_RHS_continuousOn_interior` (the
-interior Nemytskii continuity of the gated forcing), assembled through the generic (`N`-free)
+trajectory-native mass coupling) and the proven interior Nemytskii continuity
+`deTurckGated_carrier_RHS_continuousOn_interior` (which transits the posited chart-RHS-tower
+primitives), assembled through the generic (`N`-free)
 carrier machinery: the up-to-`t = 0` pointwise-carrier synthesis
 `zeroDatum_allscale_continuity_uptoZero`, the canonical smooth-representative package
 `deturck_g0_carrier_realize_package`, the up-to-`0` `H^{2k}` continuity
@@ -914,8 +1179,8 @@ shrink, the `L²`-time-derivative transport `deturck_g0_carrier_timeDeriv_ae`, a
 FTC.  It constrains only the internal carrier `u₂`/`T_s`/`g_DT`, never `g₀`/the headline; the
 eight conjuncts are coordinate/realize identities and the genuine parabolic existence, none of
 them the interface conclusion (which is the geometric `deTurckRicciRHS`-derivative of `g_DT`,
-assembled downstream).  Consumers transitively depend on `sorryAx` through the two posited
-primitives. -/
+assembled downstream).  Consumers transitively depend on `sorryAx` through the posited
+Picard/mass-coupling primitives and the chart-RHS-tower Nemytskii primitives. -/
 theorem deTurck_g0_selfRepresentative_carrier
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ (T : ℝ) (a : ℕ), 0 < T ∧ 2 * a > Module.finrank ℝ E + 4 ∧
@@ -1167,7 +1432,7 @@ The carrier's gated nonlinearity reads the realized DeTurck remainder of the car
 representative directly, so the spectral-coordinate tie `hN_coeff` holds **definitionally** (no
 per-curve smoothed-vs-gate match), and the geometric reconciliation is the fully proven gate
 identity.  This is sorry-free glue over the carrier node; consumers transitively depend on the
-`sorryAx` of the carrier's two posited primitives. -/
+`sorryAx` of the carrier's posited Picard/mass-coupling and chart-RHS-tower primitives. -/
 theorem deturck_metric_pde_interior_at_initial_selfRepresentative
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ T : ℝ, 0 < T ∧ ∃ g_DT : ℝ → SmoothRiemannianMetric I M,
