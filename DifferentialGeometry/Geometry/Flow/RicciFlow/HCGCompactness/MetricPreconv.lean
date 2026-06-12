@@ -6,6 +6,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.MetricC
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 import Mathlib.Geometry.Manifold.PartitionOfUnity
+import Mathlib.Analysis.Calculus.ContDiff.Bounds
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -844,6 +845,62 @@ theorem iteratedFDeriv_comp_le_tower
         mul_le_mul_of_nonneg_left (hgi i) (norm_nonneg (c i)))) (le_of_eq ?_)
       rw [Finset.sum_mul]
       exact Finset.sum_congr rfl (fun i _ => (mul_assoc _ _ _).symm)
+
+/-! ## Brick B — chart-local extraction (bump-extended components) -/
+
+/-- **Bump-multiplication is globally smooth.**  A globally smooth bump `χ` with
+`tsupport χ ⊆ U` times a function `g` that is `ContDiffOn` the open set `U` is
+globally `ContDiff` (smooth on `U`, identically `0` off `tsupport χ`).  The
+Euclidean glue behind the bump-extended chart components. -/
+theorem bumpMul_contDiff {χ g : E → Real} {U : Set E} (hU : IsOpen U)
+    (hχ : ContDiff Real (∞ : WithTop ℕ∞) χ) (htsupp : tsupport χ ⊆ U)
+    (hg : ContDiffOn Real (∞ : WithTop ℕ∞) g U) :
+    ContDiff Real (∞ : WithTop ℕ∞) (fun x : E => χ x * g x) := by
+  rw [contDiff_iff_contDiffAt]
+  intro x
+  by_cases hx : x ∈ U
+  · exact (hχ.contDiffAt).mul (hg.contDiffAt (hU.mem_nhds hx))
+  · have hx' : x ∉ tsupport χ := fun h => hx (htsupp h)
+    refine (contDiffAt_const (c := (0 : Real))).congr_of_eventuallyEq ?_
+    filter_upwards [(isClosed_tsupport χ).isOpen_compl.mem_nhds hx'] with z hz
+    have hχz : χ z = 0 := image_eq_zero_of_notMem_tsupport hz
+    simp [hχz]
+
+/-- **Uniform iterated-derivative bound for a bump product.**  If on `tsupport χ`
+all derivatives of the bump `χ` are `≤ Bχ` and all derivatives of `gg` are `≤ Bg`,
+then `‖∇ʳ(χ·gg)‖ ≤ 2ʳ·Bχ·Bg` EVERYWHERE (off `tsupport χ` the χ-derivatives
+vanish, so the whole product derivative does).  The `K`-independent bound feeding
+`exists_cInf_subseq`. -/
+theorem norm_iteratedFDeriv_bumpMul_le {χ gg : E → Real} (r : ℕ)
+    (hχ : ContDiff Real (∞ : WithTop ℕ∞) χ) (hgg : ContDiff Real (∞ : WithTop ℕ∞) gg)
+    {Bχ Bg : Real} (hBχ0 : 0 ≤ Bχ) (hBg0 : 0 ≤ Bg)
+    (hχbd : ∀ x ∈ tsupport χ, ∀ i : ℕ, ‖iteratedFDeriv Real i χ x‖ ≤ Bχ)
+    (hgbd : ∀ x ∈ tsupport χ, ∀ j : ℕ, ‖iteratedFDeriv Real j gg x‖ ≤ Bg)
+    (x : E) :
+    ‖iteratedFDeriv Real r (fun y : E => χ y * gg y) x‖ ≤ 2 ^ r * Bχ * Bg := by
+  refine le_trans (norm_iteratedFDeriv_mul_le hχ hgg x (by exact_mod_cast le_top)) ?_
+  have hterm : ∀ i ∈ Finset.range (r + 1),
+      (r.choose i : Real) * ‖iteratedFDeriv Real i χ x‖
+          * ‖iteratedFDeriv Real (r - i) gg x‖
+        ≤ (r.choose i : Real) * (Bχ * Bg) := by
+    intro i _
+    by_cases hx : x ∈ tsupport χ
+    · rw [mul_assoc]
+      refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+      exact mul_le_mul (hχbd x hx i) (hgbd x hx (r - i)) (norm_nonneg _) hBχ0
+    · have hχx : iteratedFDeriv Real i χ x = 0 := by
+        have heq : χ =ᶠ[nhds x] (fun _ => (0 : Real)) := by
+          filter_upwards [(isClosed_tsupport χ).isOpen_compl.mem_nhds hx] with z hz
+          exact image_eq_zero_of_notMem_tsupport hz
+        rw [(heq.iteratedFDeriv Real i).eq_of_nhds]
+        simp [iteratedFDeriv_fun_zero]
+      rw [hχx]
+      simp only [norm_zero, mul_zero, zero_mul]
+      positivity
+  refine le_trans (Finset.sum_le_sum hterm) (le_of_eq ?_)
+  rw [← Finset.sum_mul, ← Nat.cast_sum, Nat.sum_range_choose]
+  push_cast
+  ring
 
 end HCGCompactness
 end DifferentialGeometry

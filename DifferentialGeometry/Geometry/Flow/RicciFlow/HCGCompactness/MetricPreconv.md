@@ -1,5 +1,30 @@
 # MetricPreconv — MSM135 Corollary lbl351 (metrics with bounded derivatives preconverge)
 
+**Status: Bricks A1 + A2 DONE + verified; Brick B IN PROGRESS (Euclidean
+bump-extension foundation done) (2026-06-11).**
+
+## Brick B IN PROGRESS — chart-local extraction (MetricPreconv.lean)
+
+Foundation (generic Euclidean, verified green):
+- `bumpMul_contDiff` — `χ` (smooth bump, `tsupport ⊆ U` open) `× g` (`ContDiffOn U`)
+  is globally `ContDiff ⊤` on `E`.
+- `norm_iteratedFDeriv_bumpMul_le` — `‖∇ʳ(χ·g̃)‖ ≤ 2ʳ·Bχ·Bg` EVERYWHERE, given
+  `χ`/`g̃` derivative bounds `Bχ`/`Bg` on `tsupport χ` (off `tsupport χ` the
+  χ-derivatives vanish ⇒ the product derivative does).  `K`-independent — exactly
+  `exists_cInf_subseq`'s `hbdd` shape.
+
+Route for the metric producer (next): two nested Euclidean bumps `χ ⊆ {χ₁=1} ⊆
+target` (via `exists_contMDiffMap_one_nhds_of_subset_interior` at model
+`𝓘(ℝ,E)` + `contMDiff_iff_contDiff`); `g̃_k := χ₁·(chart rep of the (i,j)-component
+of gSeq k)` global (`bumpMul_contDiff`); `Φ_k := χ·g̃_k`; `Bg` from A2
+(`iteratedFDeriv_comp_le_tower` at p=0, A0=`metricTensorField (gSeq k)`,
+V=globalized chart-const frame) — the A2 `b q` = `metricCovDerivNorm q (gSeq k)
+gRef z` (`metricCovDeriv_eq_covDerivOfField`), bounded uniformly in k by the
+`(B_r)` hypothesis (`MetricCovDerivOrderBoundOn`); `g̃_k = chart rep` germ on
+`tsupport χ` (χ₁=1 there) so `∇ʳ g̃_k = ∇ʳ chartRep`.  Then `exists_cInf_subseq`
+per chart/component + σ-compact atlas × n² diagonal.  Gotcha: `g̃` (combining
+tilde) is NOT a valid Lean identifier — use `gg`.
+
 **Status: Bricks A1 + A2 IMPLEMENTED, verified (focused+targeted build green,
 #print axioms clean) (2026-06-11).**
 
