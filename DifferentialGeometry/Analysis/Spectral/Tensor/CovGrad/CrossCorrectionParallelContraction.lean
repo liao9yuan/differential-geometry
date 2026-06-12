@@ -1654,7 +1654,444 @@ noncomputable def crossCorrKeystoneTop (g₀ : SmoothRiemannianMetric I M) (p : 
           (realizeSymmCcTensor (I := I) g₀ T₁))))
 
 set_option linter.unusedSectionVars false in
-/-- **(POSIT — the sharp `δ²` passenger fibre bound of the keystone product-level top cell.)**
+private lemma leadExtPerm_apply_of_lt {s : ℕ} (σ : Equiv.Perm (Fin s)) :
+    ∀ (p : ℕ) (k : Fin (s + p)), k.val < p → leadExtPerm σ p k = k := by
+  intro p
+  induction p with
+  | zero => intro k hk; exact absurd hk (Nat.not_lt_zero _)
+  | succ p ih =>
+    intro k hk
+    rcases Nat.eq_zero_or_pos k.val with hk0 | hkpos
+    · have hk' : k = (0 : Fin ((s + p) + 1)) := Fin.ext hk0
+      rw [hk']
+      change (Equiv.Perm.decomposeFin.symm (0, leadExtPerm σ p)) (0 : Fin ((s + p) + 1)) = _
+      rw [Equiv.Perm.decomposeFin_symm_apply_zero]
+    · have hk' : k = Fin.succ (⟨k.val - 1, by omega⟩ : Fin (s + p)) :=
+        Fin.ext (by simp only [Fin.val_succ]; omega)
+      rw [hk']
+      change (Equiv.Perm.decomposeFin.symm (0, leadExtPerm σ p))
+          (Fin.succ (⟨k.val - 1, by omega⟩ : Fin (s + p))) = _
+      rw [Equiv.Perm.decomposeFin_symm_apply_succ, Equiv.swap_self, Equiv.refl_apply]
+      rw [ih ⟨k.val - 1, by omega⟩ (by change k.val - 1 < p; omega)]
+
+set_option linter.unusedSectionVars false in
+private lemma leadExtPerm_apply_natAdd {s : ℕ} (σ : Equiv.Perm (Fin s)) :
+    ∀ (p : ℕ) (j : Fin s),
+      leadExtPerm σ p (Fin.cast (by omega : p + s = s + p) (Fin.natAdd p j)) =
+        Fin.cast (by omega : p + s = s + p) (Fin.natAdd p (σ j)) := by
+  intro p
+  induction p with
+  | zero =>
+    intro j
+    rw [show (Fin.cast (by omega : 0 + s = s + 0) (Fin.natAdd 0 j)) = (j : Fin (s + 0)) from
+      Fin.ext (by simp only [Fin.val_cast, Fin.val_natAdd]; omega)]
+    change σ j = _
+    exact Fin.ext (by simp only [Fin.val_cast, Fin.val_natAdd]; omega)
+  | succ p ih =>
+    intro j
+    rw [show (Fin.cast (by omega : (p + 1) + s = s + (p + 1)) (Fin.natAdd (p + 1) j))
+        = Fin.succ (Fin.cast (by omega : p + s = s + p) (Fin.natAdd p j)) from
+      Fin.ext (by simp only [Fin.val_cast, Fin.val_natAdd, Fin.val_succ]; omega)]
+    change (Equiv.Perm.decomposeFin.symm (0, leadExtPerm σ p)) (Fin.succ _) = _
+    rw [Equiv.Perm.decomposeFin_symm_apply_succ, Equiv.swap_self, Equiv.refl_apply, ih j]
+    exact Fin.ext (by simp only [Fin.val_cast, Fin.val_natAdd, Fin.val_succ]; omega)
+
+set_option linter.unusedSectionVars false in
+private lemma passengerCurry_toModel (g₀ : SmoothRiemannianMetric I M) (r : ℕ) (x : M) :
+    ∀ (p : ℕ) (D : Tensor0SBundle.Tensor0SSpace (r + p) I x) (q : Fin p → E) (w : Fin r → E),
+      Tensor0SBundle.Tensor0SSpace.toModel (passengerCurry (I := I) (M := M) g₀ r x p D q) w =
+        Tensor0SBundle.Tensor0SSpace.toModel D
+          (Matrix.vecAppend (by omega : r + p = p + r) q w) := by
+  intro p
+  induction p with
+  | zero =>
+    intro D q w
+    change Tensor0SBundle.Tensor0SSpace.toModel D w = _
+    congr 1
+    funext k
+    rw [Matrix.vecAppend_eq_ite]
+    simp only [Nat.not_lt_zero, dif_neg, not_false_iff]
+    apply congrArg
+    apply Fin.ext
+    simp
+  | succ p ih =>
+    intro D q w
+    rw [show passengerCurry (I := I) (M := M) g₀ r x (p + 1) D q
+        = passengerCurry (I := I) (M := M) g₀ r x p
+            ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (r + p) x)
+              (show Tensor0SBundle.Tensor0SSpace ((r + p) + 1) I x from D) (q 0))
+            (fun j : Fin p => q (Fin.succ j)) from rfl]
+    rw [ih ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (r + p) x)
+        (show Tensor0SBundle.Tensor0SSpace ((r + p) + 1) I x from D) (q 0))
+      (fun j : Fin p => q (Fin.succ j)) w]
+    rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+      (show Tensor0SBundle.Tensor0SSpace ((r + p) + 1) I x from D) (q 0)
+      (Matrix.vecAppend (by omega : r + p = p + r) (fun j : Fin p => q (Fin.succ j)) w)]
+    congr 1
+    funext k
+    refine Fin.cases ?_ (fun k' => ?_) k
+    · rw [Fin.cons_zero]
+      exact (Matrix.vecAppend_apply_zero (by omega : r + (p + 1) = (p + 1) + r) q w).symm
+    · rw [Fin.cons_succ]
+      rw [Matrix.vecAppend_eq_ite, Matrix.vecAppend_eq_ite]
+      simp only [Fin.val_succ]
+      by_cases hk : (k' : ℕ) < p
+      · rw [dif_pos hk, dif_pos (by omega)]
+        apply congrArg
+        apply Fin.ext
+        simp
+      · rw [dif_neg hk, dif_neg (by omega)]
+        apply congrArg
+        simp only [Fin.mk.injEq]
+        omega
+
+set_option linter.unusedSectionVars false in
+/-- Defining evaluation of the `IntrinsicSpectral.DeTurck.modelRankCast` model rank cast. -/
+private lemma modelRankCast_apply_local {m n : ℕ} (h : m = n)
+    (T : Tensor0SBundle.Tensor0SModel m ℝ E) (v : Fin n → E) :
+    DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.modelRankCast (E := E) h T v =
+      T (fun i => v (finCongr h i)) := by
+  change (ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ (finCongr h)) T v = _
+  rw [show (ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ (finCongr h)) T
+      = ContinuousMultilinearMap.domDomCongr (finCongr h) T from rfl,
+    ContinuousMultilinearMap.domDomCongr_apply]
+
+set_option linter.unusedSectionVars false in
+/-- The unit-model value of a rank-cast section reads the original on the cast tuple. -/
+private lemma unitModel_castRankCc_db_local (g₀ : SmoothRiemannianMetric I M) {a b : ℕ}
+    (h : a = b) (W : SmoothCcTensor g₀ 0 a) (x : M) (v : Fin b → TangentSpace I x) :
+    Analysis.Parabolic.TensorSpectral.unitModel (I := I) (M := M) g₀ b
+        (castRankCc_db g₀ 0 h W) x v =
+      Analysis.Parabolic.TensorSpectral.unitModel (I := I) (M := M) g₀ a W x
+        (fun i => v (Fin.cast h i)) := by
+  subst h
+  rfl
+
+set_option linter.unusedSectionVars false in
+/-- The model image of the cometric double-trace operator section value. -/
+private lemma crossCorrCometricOp_toSection_toModel (g₀ : SmoothRiemannianMetric I M) (a b : ℕ)
+    (x : M) (P : Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x) :
+    Tensor0SBundle.Tensor0SSpace.toModel
+        ((show Tensor0SBundle.Tensor0SSpace ((3 + b) + (2 + a)) I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace (3 + a + b) I x from
+          (crossCorrCometricOp (I := I) g₀ a b).toSection x) P) =
+      DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.modelDoubleTrace (E := E)
+          (3 + a + b)
+          (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.cometricLmodel (I := I) g₀ x)
+        (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.modelRankCast (E := E)
+          (by omega : (3 + b) + (2 + a) = (3 + a + b) + 2)
+          (Tensor0SBundle.Tensor0SSpace.toModel P)) := rfl
+
+set_option linter.unusedSectionVars false in
+/-- Concrete values of the `(a, b) = (0, 0)` cross-correction slot permutation on `Fin 5`. -/
+private lemma crossCorrPerm00_val (j : Fin ((3 + 0) + (2 + 0))) :
+    ((crossCorrPerm 0 0) j).val =
+      if j.val < 3 then 1 + j.val else if j.val = 3 then 0 else 4 := by
+  by_cases h3 : j.val < 3
+  · rw [show j = Fin.castAdd (2 + 0) (⟨j.val, h3⟩ : Fin (3 + 0)) from Fin.ext rfl,
+      crossCorrPerm_castAdd 0 0]
+    simp only [Fin.val_castAdd]
+    rw [if_pos h3]
+  · have hjlt : j.val < 5 := j.isLt
+    rw [show j = Fin.natAdd (3 + 0) (⟨j.val - 3, by omega⟩ : Fin (2 + 0)) from
+      Fin.ext (by simp only [Fin.val_natAdd]; omega),
+      crossCorrPerm_natAdd 0 0]
+    simp only [Fin.val_natAdd]
+    by_cases h4 : j.val - 3 = 0
+    · rw [if_pos h4, if_neg (by omega), if_pos (by omega)]
+    · rw [if_neg h4, if_neg (by omega), if_neg (by omega)]
+      omega
+
+set_option linter.unusedSectionVars false in
+/-- Last-slot grouping of a `Fin ((3 + 0 + 0) + p)` index sum. -/
+private lemma sum_index_lastSlot_group' {n p : ℕ} (f : (Fin ((3 + 0 + 0) + p) → Fin n) → ℝ) :
+    (∑ J : Fin ((3 + 0 + 0) + p) → Fin n, f J) =
+      ∑ c : Fin n, ∑ J' : Fin (2 + p) → Fin n,
+        f (fun k : Fin ((3 + 0 + 0) + p) =>
+          (Fin.snoc J' c : Fin ((2 + p) + 1) → Fin n)
+            (finCongr (by omega : (3 + 0 + 0) + p = (2 + p) + 1) k)) := by
+  classical
+  rw [← Fintype.sum_prod_type']
+  refine (Fintype.sum_equiv
+    ((Fin.snocEquiv (fun _ : Fin ((2 + p) + 1) => Fin n)).trans
+      (Equiv.arrowCongr (finCongr (by omega : (2 + p) + 1 = (3 + 0 + 0) + p)) (Equiv.refl (Fin n))))
+    _ _ ?_).symm
+  intro pr
+  simp only [Equiv.trans_apply, finCongr_apply]
+  congr 1
+
+set_option linter.unusedSectionVars false in
+/-- Middle-slot (position `p`) grouping of a `Fin ((3 + 0) + p)` index sum. -/
+private lemma sum_index_midSlot_group {n p : ℕ} (f : (Fin ((3 + 0) + p) → Fin n) → ℝ) :
+    (∑ J : Fin ((3 + 0) + p) → Fin n, f J) =
+      ∑ c : Fin n, ∑ J' : Fin (2 + p) → Fin n,
+        f (fun k : Fin ((3 + 0) + p) =>
+          (Fin.insertNth (⟨p, by omega⟩ : Fin ((2 + p) + 1)) c J' : Fin ((2 + p) + 1) → Fin n)
+            (finCongr (by omega : (3 + 0) + p = (2 + p) + 1) k)) := by
+  classical
+  rw [← Fintype.sum_prod_type']
+  refine (Fintype.sum_equiv
+    ((Fin.insertNthEquiv (fun _ : Fin ((2 + p) + 1) => Fin n) ⟨p, by omega⟩).trans
+      (Equiv.arrowCongr (finCongr (by omega : (2 + p) + 1 = (3 + 0) + p)) (Equiv.refl (Fin n))))
+    _ _ ?_).symm
+  intro pr
+  simp only [Equiv.trans_apply, finCongr_apply]
+  congr 1
+
+set_option linter.unusedSectionVars false in
+/-- The unit-model value of the keystone's slot-permuted bare-product argument: the `Z`-factor
+reads the (val-identity) leading `3 + p` product slots through the keystone permutation, the
+realized-perturbation factor the trailing `2`. -/
+private lemma keystoneArg_unit_toModel (g₀ : SmoothRiemannianMetric I M) (p : ℕ)
+    (T₁ : SmoothCcTensor g₀ 0 2) (Z : SmoothCcTensor g₀ 0 ((3 + 0) + p)) (x : M)
+    (u : Fin (((3 + 0) + (2 + 0)) + p) → E) :
+    Tensor0SBundle.Tensor0SSpace.toModel
+        ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace (((3 + 0) + (2 + 0)) + p) I x from
+          (PDE.DeTurck.permuteCcTensor (I := I) g₀ (leadExtPerm (crossCorrPerm 0 0) p)
+            (castRankCc_db g₀ 0 (by omega : ((3 + 2) + (0 + p) + 0) = ((3 + 2) + 0 + 0) + p)
+              ((bareTensorRfnsBilinearProduct (I := I) g₀ 3 2).prod (a := 0 + p) (b := 0)
+                (castRankCc_db g₀ 0 (by omega : ((3 + 0) + p) = 3 + (0 + p)) Z)
+                (realizeSymmCcTensor (I := I) g₀ T₁)))).toSection x)
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+        u =
+      ccUnitModel (I := I) g₀ Z x
+          (fun t : Fin ((3 + 0) + p) =>
+            u (leadExtPerm (crossCorrPerm 0 0) p
+              (⟨t.val, by omega⟩ : Fin (((3 + 0) + (2 + 0)) + p)))) *
+        ccUnitModel (I := I) g₀ (realizeSymmCcTensor (I := I) g₀ T₁) x
+          (fun l : Fin (2 + 0) =>
+            u (leadExtPerm (crossCorrPerm 0 0) p
+              (⟨((3 + 0) + p) + l.val, by omega⟩ : Fin (((3 + 0) + (2 + 0)) + p)))) := by
+  classical
+  rw [show Tensor0SBundle.Tensor0SSpace.toModel
+        ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace (((3 + 0) + (2 + 0)) + p) I x from
+          (PDE.DeTurck.permuteCcTensor (I := I) g₀ (leadExtPerm (crossCorrPerm 0 0) p)
+            (castRankCc_db g₀ 0 (by omega : ((3 + 2) + (0 + p) + 0) = ((3 + 2) + 0 + 0) + p)
+              ((bareTensorRfnsBilinearProduct (I := I) g₀ 3 2).prod (a := 0 + p) (b := 0)
+                (castRankCc_db g₀ 0 (by omega : ((3 + 0) + p) = 3 + (0 + p)) Z)
+                (realizeSymmCcTensor (I := I) g₀ T₁)))).toSection x)
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+      = Analysis.Parabolic.TensorSpectral.unitModel (I := I) (M := M) g₀ (((3 + 0) + (2 + 0)) + p)
+          (PDE.DeTurck.permuteCcTensor (I := I) g₀ (leadExtPerm (crossCorrPerm 0 0) p)
+            (castRankCc_db g₀ 0 (by omega : ((3 + 2) + (0 + p) + 0) = ((3 + 2) + 0 + 0) + p)
+              ((bareTensorRfnsBilinearProduct (I := I) g₀ 3 2).prod (a := 0 + p) (b := 0)
+                (castRankCc_db g₀ 0 (by omega : ((3 + 0) + p) = 3 + (0 + p)) Z)
+                (realizeSymmCcTensor (I := I) g₀ T₁)))) x from rfl]
+  rw [permuteCcTensor_unitModel (I := I) g₀ (leadExtPerm (crossCorrPerm 0 0) p) _ x]
+  rw [ContinuousMultilinearMap.domDomCongr_apply]
+  rw [unitModel_castRankCc_db_local (I := I) g₀
+    (by omega : ((3 + 2) + (0 + p) + 0) = ((3 + 2) + 0 + 0) + p) _ x]
+  rw [show (bareTensorRfnsBilinearProduct (I := I) g₀ 3 2).prod (a := 0 + p) (b := 0)
+        (castRankCc_db g₀ 0 (by omega : ((3 + 0) + p) = 3 + (0 + p)) Z)
+        (realizeSymmCcTensor (I := I) g₀ T₁)
+      = castRankCc_db g₀ 0 (by omega : (3 + (0 + p)) + (2 + 0) = (3 + 2) + (0 + p) + 0)
+          (Analysis.Parabolic.TensorSpectral.unitModelProdSection (I := I) g₀
+            (castRankCc_db g₀ 0 (by omega : ((3 + 0) + p) = 3 + (0 + p)) Z)
+            (realizeSymmCcTensor (I := I) g₀ T₁)) from rfl]
+  rw [unitModel_castRankCc_db_local (I := I) g₀
+    (by omega : (3 + (0 + p)) + (2 + 0) = (3 + 2) + (0 + p) + 0) _ x]
+  rw [Analysis.Parabolic.TensorSpectral.unitModelProdSection_unitModel (I := I) g₀
+    (castRankCc_db g₀ 0 (by omega : ((3 + 0) + p) = 3 + (0 + p)) Z)
+    (realizeSymmCcTensor (I := I) g₀ T₁) x]
+  rw [Bundle.continuousMultilinearMap.modelProduct_apply]
+  rw [unitModel_castRankCc_db_local (I := I) g₀ (by omega : ((3 + 0) + p) = 3 + (0 + p)) Z x]
+  rw [show Analysis.Parabolic.TensorSpectral.unitModel (I := I) (M := M) g₀ ((3 + 0) + p) Z x
+      = ccUnitModel (I := I) g₀ Z x from rfl]
+  rw [show Analysis.Parabolic.TensorSpectral.unitModel (I := I) (M := M) g₀ (2 + 0)
+        (realizeSymmCcTensor (I := I) g₀ T₁) x
+      = ccUnitModel (I := I) g₀ (realizeSymmCcTensor (I := I) g₀ T₁) x from rfl]
+  congr 1
+  congr 1
+  funext t
+  refine congrArg u (congrArg (leadExtPerm (crossCorrPerm 0 0) p) (Fin.ext ?_))
+  simp only [Fin.val_cast, Fin.val_natAdd]
+  omega
+
+set_option linter.unusedSectionVars false in
+/-- Evaluation of `vecAppend q w` below the passenger threshold. -/
+private lemma vecAppend_lt_eval {α : Type*} {r p : ℕ} (q : Fin p → α) (w : Fin r → α)
+    (k : Fin (r + p)) (hk : k.val < p) :
+    Matrix.vecAppend (by omega : r + p = p + r) q w k = q ⟨k.val, hk⟩ := by
+  simp only [Matrix.vecAppend_eq_ite]
+  rw [dif_pos hk]
+
+set_option linter.unusedSectionVars false in
+/-- Evaluation of `vecAppend q w` on the `w`-block. -/
+private lemma vecAppend_natAdd_eval {α : Type*} {r p : ℕ} (q : Fin p → α) (w : Fin r → α)
+    (j : Fin r) :
+    Matrix.vecAppend (by omega : r + p = p + r) q w
+        (Fin.cast (by omega : p + r = r + p) (Fin.natAdd p j)) = w j := by
+  simp only [Matrix.vecAppend_eq_ite]
+  rw [dif_neg (by simp only [Fin.val_cast, Fin.val_natAdd]; omega)]
+  apply congrArg
+  apply Fin.ext
+  simp only [Fin.val_cast, Fin.val_natAdd]
+  omega
+
+set_option linter.unusedSectionVars false in
+/-- Leading-slot evaluation of the double-`cons` model tuple. -/
+private lemma consPair_eval_zero {s2 : ℕ} (A B : E) (m : Fin s2 → E) (i : Fin (s2 + 2))
+    (hi : i.val = 0) :
+    (Fin.cons A (Fin.cons B m) : Fin (s2 + 2) → E) i = A := by
+  rw [show i = (0 : Fin (s2 + 2)) from Fin.ext (by rw [Fin.val_zero]; exact hi)]
+  rw [show (0 : Fin (s2 + 2)) = (0 : Fin ((s2 + 1) + 1)) from rfl, Fin.cons_zero]
+
+set_option linter.unusedSectionVars false in
+/-- Second-slot evaluation of the double-`cons` model tuple. -/
+private lemma consPair_eval_one {s2 : ℕ} (A B : E) (m : Fin s2 → E) (i : Fin (s2 + 2))
+    (hi : i.val = 1) :
+    (Fin.cons A (Fin.cons B m) : Fin (s2 + 2) → E) i = B := by
+  rw [show i = Fin.succ (0 : Fin (s2 + 1)) from Fin.ext (by simp only [Fin.val_succ, Fin.val_zero]; omega)]
+  rw [Fin.cons_succ, Fin.cons_zero]
+
+set_option linter.unusedSectionVars false in
+/-- Tail evaluation of the double-`cons` model tuple. -/
+private lemma consPair_eval_tail {s2 : ℕ} (A B : E) (m : Fin s2 → E) (i : Fin (s2 + 2))
+    (l : Fin s2) (hi : i.val = 2 + l.val) :
+    (Fin.cons A (Fin.cons B m) : Fin (s2 + 2) → E) i = m l := by
+  rw [show i = Fin.succ (Fin.succ l) from Fin.ext (by simp only [Fin.val_succ]; omega)]
+  rw [Fin.cons_succ, Fin.cons_succ]
+
+
+set_option linter.unusedSectionVars false in
+/-- The keystone `Z`-factor tuple identity: through the lead-extended cross-correction
+permutation, the bare-product `Z`-block reads the passenger slots, the model-basis vector in the
+contracted (position-`p`) slot, and the two following frame slots — the `insertNth` slice tuple. -/
+private lemma keystone_tupleZ_eval (x : M) {nn p : ℕ} (e : Fin nn → TangentSpace I x)
+    (J : Fin ((3 + 0 + 0) + p) → Fin nn) (A B : E) :
+    (fun t : Fin ((3 + 0) + p) =>
+      Matrix.vecAppend (by omega : ((3 + 0) + (2 + 0)) + p = p + ((3 + 0) + (2 + 0)))
+          (fun j : Fin p => (e (J ⟨j.val, by omega⟩) : E))
+          (fun i : Fin ((3 + 0) + (2 + 0)) =>
+            (Fin.cons A (Fin.cons B
+                (fun l : Fin (3 + 0 + 0) => (e (J ⟨p + l.val, by omega⟩) : E))) :
+              Fin ((3 + 0 + 0) + 2) → E)
+              (finCongr (by omega : (3 + 0) + (2 + 0) = (3 + 0 + 0) + 2) i))
+        (leadExtPerm (crossCorrPerm 0 0) p
+          (⟨t.val, by omega⟩ : Fin (((3 + 0) + (2 + 0)) + p))))
+    = fun t : Fin ((3 + 0) + p) =>
+        (Fin.insertNth (⟨p, by omega⟩ : Fin ((2 + p) + 1)) B
+          (fun j : Fin (2 + p) => (e (J ⟨j.val, by omega⟩) : E)) : Fin ((2 + p) + 1) → E)
+          (finCongr (by omega : (3 + 0) + p = (2 + p) + 1) t) := by
+  funext t
+  by_cases ht : t.val < p
+  · rw [leadExtPerm_apply_of_lt (crossCorrPerm 0 0) p
+      (⟨t.val, by omega⟩ : Fin (((3 + 0) + (2 + 0)) + p)) ht]
+    rw [vecAppend_lt_eval _ _ (⟨t.val, by omega⟩ : Fin (((3 + 0) + (2 + 0)) + p)) ht]
+    have hsa : (⟨p, by omega⟩ : Fin ((2 + p) + 1)).succAbove (⟨t.val, by omega⟩ : Fin (2 + p))
+        = finCongr (by omega : (3 + 0) + p = (2 + p) + 1) t := by
+      rw [Fin.succAbove_of_castSucc_lt _ _ (by
+        simp only [Fin.lt_def, Fin.val_castSucc]
+        exact ht)]
+      exact Fin.ext (by simp only [Fin.val_castSucc, finCongr_apply, Fin.val_cast])
+    rw [← hsa, Fin.insertNth_apply_succAbove]
+  · rw [show (⟨t.val, by omega⟩ : Fin (((3 + 0) + (2 + 0)) + p))
+        = Fin.cast (by omega : p + ((3 + 0) + (2 + 0)) = ((3 + 0) + (2 + 0)) + p)
+            (Fin.natAdd p (⟨t.val - p, by omega⟩ : Fin ((3 + 0) + (2 + 0)))) from
+      Fin.ext (by simp only [Fin.val_cast, Fin.val_natAdd]; omega)]
+    rw [leadExtPerm_apply_natAdd (crossCorrPerm 0 0) p
+      (⟨t.val - p, by omega⟩ : Fin ((3 + 0) + (2 + 0)))]
+    rcases (by omega : t.val - p = 0 ∨ t.val - p = 1 ∨ t.val - p = 2) with h0 | h1 | h2
+    · rw [show (⟨t.val - p, by omega⟩ : Fin ((3 + 0) + (2 + 0))) = ⟨0, by omega⟩ from Fin.ext h0]
+      rw [show (crossCorrPerm 0 0) (⟨0, by omega⟩ : Fin ((3 + 0) + (2 + 0)))
+          = (⟨1, by omega⟩ : Fin ((3 + 0) + (2 + 0))) from
+        Fin.ext (by rw [crossCorrPerm00_val]; rfl)]
+      rw [vecAppend_natAdd_eval]
+      rw [consPair_eval_one A B _
+        (finCongr (by omega : (3 + 0) + (2 + 0) = (3 + 0 + 0) + 2)
+          (⟨1, by omega⟩ : Fin ((3 + 0) + (2 + 0)))) rfl]
+      rw [show finCongr (by omega : (3 + 0) + p = (2 + p) + 1) t
+          = (⟨p, by omega⟩ : Fin ((2 + p) + 1)) from
+        Fin.ext (by simp only [finCongr_apply, Fin.val_cast]; omega)]
+      rw [Fin.insertNth_apply_same]
+    · rw [show (⟨t.val - p, by omega⟩ : Fin ((3 + 0) + (2 + 0))) = ⟨1, by omega⟩ from Fin.ext h1]
+      rw [show (crossCorrPerm 0 0) (⟨1, by omega⟩ : Fin ((3 + 0) + (2 + 0)))
+          = (⟨2, by omega⟩ : Fin ((3 + 0) + (2 + 0))) from
+        Fin.ext (by rw [crossCorrPerm00_val]; rfl)]
+      rw [vecAppend_natAdd_eval]
+      rw [consPair_eval_tail A B _
+        (finCongr (by omega : (3 + 0) + (2 + 0) = (3 + 0 + 0) + 2)
+          (⟨2, by omega⟩ : Fin ((3 + 0) + (2 + 0)))) (⟨0, by omega⟩ : Fin (3 + 0 + 0)) rfl]
+      have hsa : (⟨p, by omega⟩ : Fin ((2 + p) + 1)).succAbove (⟨p, by omega⟩ : Fin (2 + p))
+          = finCongr (by omega : (3 + 0) + p = (2 + p) + 1) t := by
+        rw [Fin.succAbove_of_le_castSucc _ _ (by
+          simp only [Fin.le_def, Fin.val_castSucc]; omega)]
+        exact Fin.ext (by simp only [Fin.val_succ, finCongr_apply, Fin.val_cast]; omega)
+      rw [← hsa, Fin.insertNth_apply_succAbove]
+      exact congrArg (fun z => (e (J z) : E)) (Fin.ext (by change p + 0 = p; omega))
+    · rw [show (⟨t.val - p, by omega⟩ : Fin ((3 + 0) + (2 + 0))) = ⟨2, by omega⟩ from Fin.ext h2]
+      rw [show (crossCorrPerm 0 0) (⟨2, by omega⟩ : Fin ((3 + 0) + (2 + 0)))
+          = (⟨3, by omega⟩ : Fin ((3 + 0) + (2 + 0))) from
+        Fin.ext (by rw [crossCorrPerm00_val]; rfl)]
+      rw [vecAppend_natAdd_eval]
+      rw [consPair_eval_tail A B _
+        (finCongr (by omega : (3 + 0) + (2 + 0) = (3 + 0 + 0) + 2)
+          (⟨3, by omega⟩ : Fin ((3 + 0) + (2 + 0)))) (⟨1, by omega⟩ : Fin (3 + 0 + 0)) rfl]
+      have hsa : (⟨p, by omega⟩ : Fin ((2 + p) + 1)).succAbove
+            (⟨p + 1, by omega⟩ : Fin (2 + p))
+          = finCongr (by omega : (3 + 0) + p = (2 + p) + 1) t := by
+        rw [Fin.succAbove_of_le_castSucc _ _ (by
+          simp only [Fin.le_def, Fin.val_castSucc]; omega)]
+        exact Fin.ext (by simp only [Fin.val_succ, finCongr_apply, Fin.val_cast]; omega)
+      rw [← hsa, Fin.insertNth_apply_succAbove]
+
+set_option linter.unusedSectionVars false in
+/-- The keystone realized-perturbation tuple identity: through the lead-extended cross-correction
+permutation, the perturbation block reads the cometric-raised covector and the last frame slot. -/
+private lemma keystone_tupleS_eval (x : M) {nn p : ℕ} (e : Fin nn → TangentSpace I x)
+    (J : Fin ((3 + 0 + 0) + p) → Fin nn) (A B : E) :
+    (fun l : Fin (2 + 0) =>
+      Matrix.vecAppend (by omega : ((3 + 0) + (2 + 0)) + p = p + ((3 + 0) + (2 + 0)))
+          (fun j : Fin p => (e (J ⟨j.val, by omega⟩) : E))
+          (fun i : Fin ((3 + 0) + (2 + 0)) =>
+            (Fin.cons A (Fin.cons B
+                (fun l2 : Fin (3 + 0 + 0) => (e (J ⟨p + l2.val, by omega⟩) : E))) :
+              Fin ((3 + 0 + 0) + 2) → E)
+              (finCongr (by omega : (3 + 0) + (2 + 0) = (3 + 0 + 0) + 2) i))
+        (leadExtPerm (crossCorrPerm 0 0) p
+          (⟨((3 + 0) + p) + l.val, by omega⟩ : Fin (((3 + 0) + (2 + 0)) + p))))
+    = ![A, (e (J ⟨2 + p, by omega⟩) : E)] := by
+  funext l
+  rcases (by omega : l.val = 0 ∨ l.val = 1) with hl | hl
+  · rw [show l = (0 : Fin (2 + 0)) from Fin.ext (by rw [Fin.val_zero]; exact hl)]
+    rw [show (⟨((3 + 0) + p) + (0 : Fin (2 + 0)).val, by omega⟩ :
+          Fin (((3 + 0) + (2 + 0)) + p))
+        = Fin.cast (by omega : p + ((3 + 0) + (2 + 0)) = ((3 + 0) + (2 + 0)) + p)
+            (Fin.natAdd p (⟨3, by omega⟩ : Fin ((3 + 0) + (2 + 0)))) from
+      Fin.ext (by simp only [Fin.val_cast, Fin.val_natAdd, Fin.val_zero]; omega)]
+    rw [leadExtPerm_apply_natAdd (crossCorrPerm 0 0) p (⟨3, by omega⟩ : Fin ((3 + 0) + (2 + 0)))]
+    rw [show (crossCorrPerm 0 0) (⟨3, by omega⟩ : Fin ((3 + 0) + (2 + 0)))
+        = (⟨0, by omega⟩ : Fin ((3 + 0) + (2 + 0))) from
+      Fin.ext (by rw [crossCorrPerm00_val]; rfl)]
+    rw [vecAppend_natAdd_eval]
+    rw [consPair_eval_zero A B _
+      (finCongr (by omega : (3 + 0) + (2 + 0) = (3 + 0 + 0) + 2)
+        (⟨0, by omega⟩ : Fin ((3 + 0) + (2 + 0)))) rfl]
+    rw [Matrix.cons_val_zero]
+  · rw [show l = (1 : Fin (2 + 0)) from Fin.ext (by rw [Fin.val_one]; exact hl)]
+    rw [show (⟨((3 + 0) + p) + (1 : Fin (2 + 0)).val, by omega⟩ :
+          Fin (((3 + 0) + (2 + 0)) + p))
+        = Fin.cast (by omega : p + ((3 + 0) + (2 + 0)) = ((3 + 0) + (2 + 0)) + p)
+            (Fin.natAdd p (⟨4, by omega⟩ : Fin ((3 + 0) + (2 + 0)))) from
+      Fin.ext (by simp only [Fin.val_cast, Fin.val_natAdd, Fin.val_one]; omega)]
+    rw [leadExtPerm_apply_natAdd (crossCorrPerm 0 0) p (⟨4, by omega⟩ : Fin ((3 + 0) + (2 + 0)))]
+    rw [show (crossCorrPerm 0 0) (⟨4, by omega⟩ : Fin ((3 + 0) + (2 + 0)))
+        = (⟨4, by omega⟩ : Fin ((3 + 0) + (2 + 0))) from
+      Fin.ext (by rw [crossCorrPerm00_val]; rfl)]
+    rw [vecAppend_natAdd_eval]
+    rw [consPair_eval_tail A B _
+      (finCongr (by omega : (3 + 0) + (2 + 0) = (3 + 0 + 0) + 2)
+        (⟨4, by omega⟩ : Fin ((3 + 0) + (2 + 0)))) (⟨2, by omega⟩ : Fin (3 + 0 + 0)) rfl]
+    rw [show ((![A, (e (J ⟨2 + p, by omega⟩) : E)] : Fin 2 → E) (1 : Fin (2 + 0)))
+        = (e (J ⟨2 + p, by omega⟩) : E) from rfl]
+    beta_reduce
+    exact congrArg (fun z => (e (J z) : E)) (Fin.ext (by change p + 2 = 2 + p; omega))
+
+set_option maxHeartbeats 12800000 in
+set_option linter.unusedSectionVars false in
+/-- **The sharp `δ²` passenger fibre bound of the keystone product-level top cell.**
 Under the `g₀`-fibre operator bound `gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, the intrinsic
 squared fibre norm of the keystone top cell `crossCorrKeystoneTop g₀ p T₁ Z` is dominated *sharply*
 — with the operator-norm constant `δ²`, NO dimension factor, NO envelope constant, uniformly in the
@@ -1675,10 +2112,13 @@ proven sibling.
 **Why this sharp bound is load-bearing.**  The `δ < 1/2`-uniform differentiated-Koszul recursion
 (`4 − 8δ > 0` exactly on `δ < 1/2`) has NO slack for any constant `> 1` on the top cell: a top arm
 `c·δ²·‖∇^p D‖²` with `c > 1` forces `δ < 1/(2√c)`, and the former envelope route
-(`c = n²·C_env(p)`, `p`-dependent) is precisely the deleted antitone-threshold disease.  Its body is
-`sorry`: the single genuinely-new mathematical frontier of the scaled-Young redesign (the
-frame-Riesz mirror at the keystone slot layout); consumers transitively depend on `sorryAx` through
-it.
+(`c = n²·C_env(p)`, `p`-dependent) is precisely the deleted antitone-threshold disease.  Proved by
+the frame-Riesz mirror at the keystone slot layout: `slotExtendPow_toModel_consSlots` reads the `p`
+spectator slots off, `passengerCurry_toModel` and `keystoneArg_unit_toModel` expose the inner
+contraction's frame component at a tuple as the pairing `h(W, e c)` of the slot-Riesz
+reconstruction `W` of the position-`p` slice functional of `Z` (`keystone_tupleZ_eval`,
+`keystone_tupleS_eval`), and the middle-slot regrouping (`sum_index_midSlot_group`) closes the
+Parseval argument through `gFibreOpBound_dualFrame_sq_sum_le` exactly as in the proven sibling.
 
 **Non-vacuity.**  At `T₁ = 0` both sides are `0`; for `T₁` with `h ≠ 0` the keystone cell is
 genuinely nonzero on generic `Z` (the cometric trace is the genuine single contraction
@@ -1690,8 +2130,250 @@ theorem crossCorrKeystoneTop_rfns_le_sq_passenger
     (Z : Integral.L2.SmoothCcTensor g₀ 0 ((3 + 0) + p)) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((3 + 0 + 0) + p) x
         ((crossCorrKeystoneTop (I := I) g₀ p T₁ Z).toSection x) ≤
-      δ ^ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((3 + 0) + p) x (Z.toSection x) :=
-  sorry
+      δ ^ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((3 + 0) + p) x (Z.toSection x) := by
+  classical
+  obtain ⟨n, e, bse, hn, hbse, horth, hpars, hexpand, hreprS⟩ :=
+    Integral.Connection.tangent_orthonormalBasisS_witness (I := I) (M := M) g₀ (3 + p) x
+  set K₀ : Fin 0 → Fin n := fun k => k.elim0 with hK₀
+  -- The slice functional of `Z` at the contracted (position-`p`) slot, as a CLM.
+  set leadFun : (Fin (2 + p) → Fin n) → (TangentSpace I x →L[ℝ] ℝ) := fun J' =>
+    ContinuousMultilinearMap.toContinuousLinearMap (ccUnitModel (I := I) g₀ Z x)
+      (fun k : Fin ((3 + 0) + p) =>
+        (Fin.insertNth (⟨p, by omega⟩ : Fin ((2 + p) + 1)) (0 : E)
+          (fun j : Fin (2 + p) => (e (J' j) : E)) : Fin ((2 + p) + 1) → E)
+          (finCongr (by omega : (3 + 0) + p = (2 + p) + 1) k))
+      (finCongr (by omega : (2 + p) + 1 = (3 + 0) + p) (⟨p, by omega⟩ : Fin ((2 + p) + 1)))
+    with hleadFun_def
+  have hleadFun_apply : ∀ (J' : Fin (2 + p) → Fin n) (u : TangentSpace I x),
+      leadFun J' u = ccUnitModel (I := I) g₀ Z x
+        (fun k : Fin ((3 + 0) + p) =>
+          (Fin.insertNth (⟨p, by omega⟩ : Fin ((2 + p) + 1)) (u : E)
+            (fun j : Fin (2 + p) => (e (J' j) : E)) : Fin ((2 + p) + 1) → E)
+            (finCongr (by omega : (3 + 0) + p = (2 + p) + 1) k)) := by
+    intro J' u
+    rw [hleadFun_def]
+    change (ContinuousMultilinearMap.toContinuousLinearMap (ccUnitModel (I := I) g₀ Z x)
+        (fun k : Fin ((3 + 0) + p) =>
+          (Fin.insertNth (⟨p, by omega⟩ : Fin ((2 + p) + 1)) (0 : E)
+            (fun j : Fin (2 + p) => (e (J' j) : E)) : Fin ((2 + p) + 1) → E)
+            (finCongr (by omega : (3 + 0) + p = (2 + p) + 1) k))
+        (finCongr (by omega : (2 + p) + 1 = (3 + 0) + p)
+          (⟨p, by omega⟩ : Fin ((2 + p) + 1)))) u = _
+    rw [ContinuousMultilinearMap.toContinuousLinearMap_apply]
+    congr 1
+    funext k
+    rcases eq_or_ne k (finCongr (by omega : (2 + p) + 1 = (3 + 0) + p)
+        (⟨p, by omega⟩ : Fin ((2 + p) + 1))) with hk | hk
+    · rw [hk, Function.update_self]
+      rw [show (finCongr (by omega : (3 + 0) + p = (2 + p) + 1)
+            (finCongr (by omega : (2 + p) + 1 = (3 + 0) + p)
+              (⟨p, by omega⟩ : Fin ((2 + p) + 1)))) = (⟨p, by omega⟩ : Fin ((2 + p) + 1)) from
+        Fin.ext (by simp)]
+      rw [Fin.insertNth_apply_same]
+    · rw [Function.update_of_ne hk]
+      have hne : (finCongr (by omega : (3 + 0) + p = (2 + p) + 1) k)
+          ≠ (⟨p, by omega⟩ : Fin ((2 + p) + 1)) := by
+        intro hc
+        apply hk
+        apply Fin.ext
+        have := congrArg Fin.val hc
+        simpa [Fin.val_cast] using this
+      obtain ⟨j', hj'⟩ := Fin.exists_succAbove_eq hne
+      rw [← hj', Fin.insertNth_apply_succAbove, Fin.insertNth_apply_succAbove]
+  -- The slice-Riesz vector and its two reconstruction facts.
+  set W : (Fin (2 + p) → Fin n) → TangentSpace I x := fun J' =>
+    ∑ c : Fin n, leadFun J' (e c) • e c with hW_def
+  have hWfacts : ∀ J' : Fin (2 + p) → Fin n,
+      (∀ u : TangentSpace I x, g₀.inner x (W J') u = leadFun J' u) ∧
+        g₀.inner x (W J') (W J') = ∑ c : Fin n, (leadFun J' (e c)) ^ 2 := by
+    intro J'
+    rw [hW_def]
+    exact frameRiesz_pair_and_normSq (I := I) g₀ x e horth hexpand (leadFun J')
+  -- Frame expansion of both sides.
+  rw [Integral.Connection.riemannianFiberNormSq_eq_sum_componentS_sq (I := I) (M := M) g₀ x
+      ((3 + 0 + 0) + p) e hreprS ((crossCorrKeystoneTop (I := I) g₀ p T₁ Z).toSection x) K₀,
+    Integral.Connection.riemannianFiberNormSq_eq_sum_componentS_sq (I := I) (M := M) g₀ x
+      ((3 + 0) + p) e hreprS (Z.toSection x) K₀]
+  -- The keystone frame component at a tuple `J`.
+  have hCcomp : ∀ J : Fin ((3 + 0 + 0) + p) → Fin n,
+      Integral.Connection.fiberNormSqComponent (I := I) (M := M) g₀ x 0 ((3 + 0 + 0) + p)
+          ((crossCorrKeystoneTop (I := I) g₀ p T₁ Z).toSection x) n e K₀ J =
+        ccTensorBilinSymm (I := I) g₀ T₁ x
+          (W (fun j : Fin (2 + p) => J ⟨j.val, by omega⟩)) (e (J ⟨2 + p, by omega⟩)) := by
+    intro J
+    rw [componentS_zero_eq_unit_local (I := I) g₀ ((3 + 0 + 0) + p) x e K₀ J
+      ((crossCorrKeystoneTop (I := I) g₀ p T₁ Z).toSection x)]
+    rw [show crossCorrKeystoneTop (I := I) g₀ p T₁ Z
+        = appCcRS (I := I) (M := M) g₀ 0 (((3 + 0) + (2 + 0)) + p) ((3 + 0 + 0) + p)
+            (slotExtendPow (I := I) (M := M) g₀ ((3 + 0) + (2 + 0)) (3 + 0 + 0) p
+              (crossCorrCometricOp (I := I) g₀ 0 0))
+            (PDE.DeTurck.permuteCcTensor (I := I) g₀ (leadExtPerm (crossCorrPerm 0 0) p)
+              (castRankCc_db g₀ 0
+                  (by omega : ((3 + 2) + (0 + p) + 0) = ((3 + 2) + 0 + 0) + p)
+                ((bareTensorRfnsBilinearProduct (I := I) g₀ 3 2).prod (a := 0 + p) (b := 0)
+                  (castRankCc_db g₀ 0 (by omega : ((3 + 0) + p) = 3 + (0 + p)) Z)
+                  (realizeSymmCcTensor (I := I) g₀ T₁)))) from rfl]
+    rw [appCcRS_toSection (I := I) (M := M) g₀ 0 (((3 + 0) + (2 + 0)) + p) ((3 + 0 + 0) + p)]
+    rw [ContinuousLinearMap.comp_apply]
+    rw [show (fun k : Fin ((3 + 0 + 0) + p) => (e (J k) : E))
+        = Matrix.vecAppend (by omega : (3 + 0 + 0) + p = p + (3 + 0 + 0))
+            (fun j : Fin p => (e (J ⟨j.val, by omega⟩) : E))
+            (fun l : Fin (3 + 0 + 0) => (e (J ⟨p + l.val, by omega⟩) : E)) from by
+      funext k
+      simp only [Matrix.vecAppend_eq_ite]
+      by_cases hk : k.val < p
+      · rw [dif_pos hk]
+      · rw [dif_neg hk]
+        exact congrArg (fun z => (e (J z) : E)) (Fin.ext (by change k.val = p + (k.val - p); omega))]
+    rw [slotExtendPow_toModel_consSlots (I := I) (M := M) g₀ ((3 + 0) + (2 + 0)) (3 + 0 + 0) x
+      (crossCorrCometricOp (I := I) g₀ 0 0) p _
+      (fun j : Fin p => (e (J ⟨j.val, by omega⟩) : E))
+      (fun l : Fin (3 + 0 + 0) => (e (J ⟨p + l.val, by omega⟩) : E))]
+    rw [crossCorrCometricOp_toSection_toModel (I := I) g₀ 0 0 x _]
+    rw [DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.modelDoubleTrace_apply
+      (3 + 0 + 0) (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.cometricLmodel
+        (I := I) g₀ x) _ _]
+    rw [show DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.cometricLmodel
+          (I := I) g₀ x = cometricReadingModel (I := I) g₀ x from rfl]
+    simp only [modelRankCast_apply_local, passengerCurry_toModel]
+    simp only [keystoneArg_unit_toModel (I := I) g₀ p T₁ Z x]
+    simp only [keystone_tupleZ_eval (I := I) x e J, keystone_tupleS_eval (I := I) x e J]
+    have hSfac : ∀ w₁ w₂ : TangentSpace I x,
+        ccUnitModel (I := I) g₀ (realizeSymmCcTensor (I := I) g₀ T₁) x ![(w₁ : E), (w₂ : E)]
+          = ccTensorBilinSymm (I := I) g₀ T₁ x w₁ w₂ := by
+      intro w₁ w₂
+      rw [← realizeSymmCcTensor_ccTensorBilin_apply, ccTensorBilin_apply]
+      rfl
+    have hper : ∀ kk : Fin (Module.finrank ℝ E),
+        ccUnitModel (I := I) g₀ Z x
+            (fun t : Fin ((3 + 0) + p) =>
+              (Fin.insertNth (⟨p, by omega⟩ : Fin ((2 + p) + 1))
+                ((Module.finBasis ℝ E) kk : E)
+                (fun j : Fin (2 + p) => (e (J ⟨j.val, by omega⟩) : E)) :
+                  Fin ((2 + p) + 1) → E)
+                (finCongr (by omega : (3 + 0) + p = (2 + p) + 1) t)) *
+          ccUnitModel (I := I) g₀ (realizeSymmCcTensor (I := I) g₀ T₁) x
+            ![(cometricReadingModel (I := I) g₀ x
+                (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                  ((Module.finBasis ℝ E).cDualBasis kk)) : E),
+              (e (J ⟨2 + p, by omega⟩) : E)]
+        = leadFun (fun j : Fin (2 + p) => J ⟨j.val, by omega⟩) ((Module.finBasis ℝ E) kk) *
+            ccTensorBilinSymm (I := I) g₀ T₁ x
+              (cometricReadingModel (I := I) g₀ x
+                (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                  ((Module.finBasis ℝ E).cDualBasis kk)))
+              (e (J ⟨2 + p, by omega⟩)) := by
+      intro kk
+      rw [hleadFun_apply (fun j : Fin (2 + p) => J ⟨j.val, by omega⟩)
+        ((Module.finBasis ℝ E) kk)]
+      rw [hSfac]
+    rw [Finset.sum_congr rfl (fun kk _ => hper kk)]
+    set φ : TangentSpace I x →L[ℝ] ℝ := (ccTensorBilinSymm (I := I) g₀ T₁ x).flip
+      (e (J ⟨2 + p, by omega⟩)) with hφ_def
+    rw [show (∑ kk : Fin (Module.finrank ℝ E),
+          leadFun (fun j : Fin (2 + p) => J ⟨j.val, by omega⟩) ((Module.finBasis ℝ E) kk) *
+            ccTensorBilinSymm (I := I) g₀ T₁ x
+              (cometricReadingModel (I := I) g₀ x
+                (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                  ((Module.finBasis ℝ E).cDualBasis kk)))
+              (e (J ⟨2 + p, by omega⟩)))
+        = ∑ kk : Fin (Module.finrank ℝ E),
+            φ (cometricReadingModel (I := I) g₀ x
+                (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                  ((Module.finBasis ℝ E).cDualBasis kk)))
+              * g₀.inner x (W (fun j : Fin (2 + p) => J ⟨j.val, by omega⟩))
+                  ((Module.finBasis ℝ E) kk) from by
+      refine Finset.sum_congr rfl (fun kk _ => ?_)
+      rw [hφ_def, ContinuousLinearMap.flip_apply, mul_comm]
+      congr 1
+      rw [(hWfacts (fun j : Fin (2 + p) => J ⟨j.val, by omega⟩)).1 ((Module.finBasis ℝ E) kk)]]
+    rw [sum_phi_cometric_inner_basis (I := I) g₀ x
+      (fun i => cometricReadingModel (I := I) g₀ x
+        (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+          ((Module.finBasis ℝ E).cDualBasis i)))
+      (fun k u => cometricReadingModel_dualBasis_inner (I := I) g₀ x k u)
+      φ (W (fun j : Fin (2 + p) => J ⟨j.val, by omega⟩))]
+    rfl
+  -- The `Z` frame component at a tuple `J`.
+  have hZcomp : ∀ J : Fin ((3 + 0) + p) → Fin n,
+      Integral.Connection.fiberNormSqComponent (I := I) (M := M) g₀ x 0 ((3 + 0) + p)
+          (Z.toSection x) n e K₀ J = ccUnitModel (I := I) g₀ Z x (fun k => e (J k)) := by
+    intro J
+    rw [componentS_zero_eq_unit_local (I := I) g₀ ((3 + 0) + p) x e K₀ J (Z.toSection x)]
+    rfl
+  simp only [hCcomp, hZcomp]
+  -- Group the LHS by the LAST slot.
+  rw [sum_index_lastSlot_group' (n := n) (p := p)
+    (fun J : Fin ((3 + 0 + 0) + p) → Fin n =>
+      ccTensorBilinSymm (I := I) g₀ T₁ x
+        (W (fun j : Fin (2 + p) => J ⟨j.val, by omega⟩)) (e (J ⟨2 + p, by omega⟩)) ^ 2)]
+  have hLslice : ∀ (c : Fin n) (J' : Fin (2 + p) → Fin n),
+      ccTensorBilinSymm (I := I) g₀ T₁ x
+          (W (fun j : Fin (2 + p) =>
+            (Fin.snoc J' c : Fin ((2 + p) + 1) → Fin n)
+              (finCongr (by omega : (3 + 0 + 0) + p = (2 + p) + 1) ⟨j.val, by omega⟩)))
+          (e ((Fin.snoc J' c : Fin ((2 + p) + 1) → Fin n)
+            (finCongr (by omega : (3 + 0 + 0) + p = (2 + p) + 1) ⟨2 + p, by omega⟩))) ^ 2
+        = ccTensorBilinSymm (I := I) g₀ T₁ x (W J') (e c) ^ 2 := by
+    intro c J'
+    have hsliceArg : (fun j : Fin (2 + p) =>
+          (Fin.snoc J' c : Fin ((2 + p) + 1) → Fin n)
+            (finCongr (by omega : (3 + 0 + 0) + p = (2 + p) + 1) ⟨j.val, by omega⟩)) = J' := by
+      funext j
+      rw [show (finCongr (by omega : (3 + 0 + 0) + p = (2 + p) + 1)
+            (⟨j.val, by omega⟩ : Fin ((3 + 0 + 0) + p)))
+            = Fin.castSucc (n := 2 + p) j from by apply Fin.ext; simp, Fin.snoc_castSucc]
+    have hsliceLast : ((Fin.snoc J' c : Fin ((2 + p) + 1) → Fin n)
+          (finCongr (by omega : (3 + 0 + 0) + p = (2 + p) + 1) ⟨2 + p, by omega⟩)) = c := by
+      rw [show (finCongr (by omega : (3 + 0 + 0) + p = (2 + p) + 1)
+            (⟨2 + p, by omega⟩ : Fin ((3 + 0 + 0) + p)))
+            = Fin.last (2 + p) from by apply Fin.ext; simp, Fin.snoc_last]
+    rw [hsliceArg, hsliceLast]
+  rw [Finset.sum_congr rfl (fun c _ => Finset.sum_congr rfl (fun J' _ => hLslice c J'))]
+  rw [Finset.sum_comm]
+  -- Group the RHS (`Z`'s frame components) by the MIDDLE (position-`p`) slot.
+  rw [sum_index_midSlot_group (n := n) (p := p)
+    (fun J : Fin ((3 + 0) + p) → Fin n =>
+      (ccUnitModel (I := I) g₀ Z x (fun k => e (J k))) ^ 2)]
+  have hRslice : ∀ (c : Fin n) (J' : Fin (2 + p) → Fin n),
+      (ccUnitModel (I := I) g₀ Z x (fun k => e ((fun k : Fin ((3 + 0) + p) =>
+          (Fin.insertNth (⟨p, by omega⟩ : Fin ((2 + p) + 1)) c J' : Fin ((2 + p) + 1) → Fin n)
+            (finCongr (by omega : (3 + 0) + p = (2 + p) + 1) k)) k))) ^ 2
+        = (leadFun J' (e c)) ^ 2 := by
+    intro c J'
+    rw [hleadFun_apply J' (e c)]
+    have hsliceArg : (fun k : Fin ((3 + 0) + p) => (e ((fun k : Fin ((3 + 0) + p) =>
+          (Fin.insertNth (⟨p, by omega⟩ : Fin ((2 + p) + 1)) c J' : Fin ((2 + p) + 1) → Fin n)
+            (finCongr (by omega : (3 + 0) + p = (2 + p) + 1) k)) k) : E))
+        = (fun k : Fin ((3 + 0) + p) =>
+            (Fin.insertNth (⟨p, by omega⟩ : Fin ((2 + p) + 1)) ((e c : TangentSpace I x) : E)
+              (fun j : Fin (2 + p) => (e (J' j) : E)) : Fin ((2 + p) + 1) → E)
+              (finCongr (by omega : (3 + 0) + p = (2 + p) + 1) k)) := by
+      funext k
+      beta_reduce
+      rcases eq_or_ne (finCongr (by omega : (3 + 0) + p = (2 + p) + 1) k)
+          (⟨p, by omega⟩ : Fin ((2 + p) + 1)) with hk | hk
+      · rw [hk, Fin.insertNth_apply_same, Fin.insertNth_apply_same]
+      · obtain ⟨j', hj'⟩ := Fin.exists_succAbove_eq hk
+        rw [← hj', Fin.insertNth_apply_succAbove, Fin.insertNth_apply_succAbove]
+    rw [hsliceArg]
+  rw [show (∑ c : Fin n, ∑ J' : Fin (2 + p) → Fin n,
+        (ccUnitModel (I := I) g₀ Z x (fun k => e ((fun k : Fin ((3 + 0) + p) =>
+          (Fin.insertNth (⟨p, by omega⟩ : Fin ((2 + p) + 1)) c J' : Fin ((2 + p) + 1) → Fin n)
+            (finCongr (by omega : (3 + 0) + p = (2 + p) + 1) k)) k))) ^ 2)
+      = ∑ J' : Fin (2 + p) → Fin n, ∑ c : Fin n, (leadFun J' (e c)) ^ 2 from by
+    rw [Finset.sum_comm]
+    exact Finset.sum_congr rfl (fun J' _ => Finset.sum_congr rfl (fun c _ => hRslice c J'))]
+  -- Both sides grouped by `J'`; bound each slice sharply.
+  rw [Finset.mul_sum]
+  refine Finset.sum_le_sum (fun J' _ => ?_)
+  have hcross_inner :
+      (∑ c : Fin n, ccTensorBilinSymm (I := I) g₀ T₁ x (W J') (e c) ^ 2) ≤
+        δ ^ 2 * g₀.inner x (W J') (W J') :=
+    gFibreOpBound_dualFrame_sq_sum_le (I := I) g₀ x e horth hpars
+      (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) hδ (W J')
+  rw [(hWfacts J').2] at hcross_inner
+  exact hcross_inner
 
 set_option maxHeartbeats 12800000 in
 set_option linter.unusedSectionVars false in
