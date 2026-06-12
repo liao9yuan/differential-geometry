@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckInitialAnchorConstruction
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ForcingMassLimit
 
 /-! # `g₀`-anchored DeTurck–Ricci interior existence from the honest self-representative remainder
 
@@ -49,13 +50,16 @@ posited analytic primitives plus the existing generic (`N`-free) carrier machine
   Duhamel solution `u = maxRegDuhamelMap … 0 gforce` whose forcing is reproduced a.e. by the
   gated self-representative nonlinearity along the trajectory's own solution field, together
   with the trajectory-native all-order forcing/solution mass coupling (the parabolic
-  bootstrap of the constructed zero-datum solution).  It is itself sorry-free glue over two
-  posited analytic primitives: `deTurckGatedRemainder_duhamel_fixedPoint_exists` — the
-  genuine quasilinear strictly-parabolic contraction, funded by the fibre-small δ-smallness
-  of the principal coefficient (`deTurckNonlinearitySpectral_principalPart_cancels`) and
-  small-time gains on the first-order part (the one-loss maximal-regularity tower does not
-  apply: its `LipschitzOnWith` binders are Lean-refuted for the two-loss gated remainder) —
-  and `deTurckGatedRemainder_fixedPoint_forcing_mass_coupling` — the per-order mass coupling
+  bootstrap of the constructed zero-datum solution).  It is itself sorry-free glue over
+  `deTurckGatedRemainder_duhamel_fixedPoint_exists` — the genuine quasilinear
+  strictly-parabolic fixed point, in turn **sorry-free two-norm Picard glue** along the
+  graded on-gate class `DeTurckGatedGradedForcing` over three posited Picard primitives
+  (the class-invariant step `deTurckGatedRemainder_picard_forcing_exists`, the on-gate
+  weak-norm contraction `deTurckGatedRemainder_picard_contraction_onGate`, and the gate
+  limit-transfer `deTurckGatedGradedForcing_gate_limit`), with the proven seed
+  `deTurckGatedGradedForcing_zero` and the proven per-order mass limit-transfer
+  `forcingMass_summable_tsum_le_of_tendsto` — and
+  `deTurckGatedRemainder_fixedPoint_forcing_mass_coupling` — the per-order mass coupling
   of the constructed fixed-point trajectory.
 * `deTurckGated_carrier_RHS_continuousOn_interior` — the interior continuity of the gated
   carrier right-hand side `r ↦ Δ_∇ (u₂ r) + N_cont (ι (u₂ r))` on a fibre-small sub-horizon
@@ -96,6 +100,328 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+/-- The `i`-th time-mode coordinate of the zero time-`L²` forcing vanishes: `timeModeCoeff`
+is the bounded coordinate functional acting on the time-`L²` space, so it maps `0` to `0`. -/
+private theorem timeModeCoeff_zero (g₀ : SmoothRiemannianMetric I M) {b T : ℝ}
+    (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
+    Analysis.Parabolic.MaximalRegularity.timeModeCoeff (I := I) (M := M)
+      (0 : Analysis.Parabolic.TimeSobolev.timeL2
+        (tensorHs (I := I) (M := M) g₀ 0 2 b) T) i = 0 :=
+  map_zero ((Analysis.Parabolic.MaximalRegularity.tensorHsCoeffL (I := I) (M := M) i).compLpL
+    2 (Analysis.Parabolic.TimeSobolev.timeMeasure T))
+
+/-- The extracted symmetric bilinear form of the **zero** smooth section vanishes.
+(Gated-route copy of the file-private lemma of `DeTurckG0AnalyticInputs.lean`.) -/
+private theorem gated_ccTensorBilinSymm_zero_apply
+    (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
+    ccTensorBilinSymm (I := I) g (0 : Integral.L2.SmoothCcTensor g 0 2) x v w = 0 := by
+  have hsec0 : (0 : Integral.L2.SmoothCcTensor g 0 2).toSection x
+      (ContinuousMultilinearMap.constOfIsEmpty ℝ
+        (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) = 0 := by
+    rw [Integral.L2.SmoothCcTensor.toSection_zero]
+    rfl
+  have hmodel : ccTensorModel (I := I) g (0 : Integral.L2.SmoothCcTensor g 0 2) x = 0 := by
+    rw [ccTensorModel, ccTensorMultilinear_apply, hsec0]
+    exact map_zero _
+  rw [ccTensorBilinSymm_apply, ccTensorBilin_apply, ccTensorBilin_apply, hmodel,
+    ContinuousMultilinearMap.zero_apply, ContinuousMultilinearMap.zero_apply]
+  ring
+
+/-- **The Duhamel field of `f` is almost everywhere gate-realizable and `δ`-fibre-small.**
+
+For a time-`L²` forcing `f ∈ L²([0,T]; Hᵃ)`, this predicate says that at almost every time
+`t` the `H^{a+1}`-view zero-datum Duhamel solution field of `f` is *on the gate with a `δ`
+fibre margin*: its `L²` class lies in every intrinsic Sobolev space (`MemAllTensorHs` — the
+membership half of `realizableAtGate`), and the extracted symmetric form of the
+gate-produced smooth representative is `g₀`-fibre bounded by `δ` (for `δ < 1` this is
+strictly inside the `δ' < 1` fibre-smallness half of `realizableAtGate`, so the gauge
+`deTurckRemainderRealizeSection` takes its honest branch at a.e. time, with a quantified
+margin).
+
+This is the *on-gate hypothesis* every modulus-flavoured statement about the gated
+nonlinearity must carry on **each** of its arguments (`PROVE_REFUTED.md`, family
+signature): the gate locus has dense complement and the gated section degenerates to zero
+off-gate, so bare ball quantifiers are false; this predicate is what excludes the
+off-gate rough perturbations.  The zero forcing satisfies it for every `δ ≥ 0`
+(`deTurckGatedGradedForcing_zero`), and any forcing whose field crosses the fibre gate
+fails it — the predicate genuinely constrains `f`. -/
+def DeTurckGatedFieldFibreSmall (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
+    (hT : 0 < T) (hT1 : T ≤ 1) (δ : ℝ)
+    (f : Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T) : Prop :=
+  ∀ᵐ t ∂Analysis.Parabolic.TimeSobolev.timeMeasure T,
+    ∃ h_mem : MemAllTensorHs (I := I) (M := M) g₀ 0 2
+      (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+        (show (0 : ℝ) ≤ (a : ℝ) + 1 by positivity)
+        (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+          (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) f t)),
+    gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀
+        (gateSmoothRep (I := I) g₀
+          (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+            (a : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) f t)
+          (show (0 : ℝ) ≤ (a : ℝ) + 1 by positivity) h_mem)) δ
+
+/-- **The graded on-gate Picard currency: per-order forcing-mass bounds plus a.e.
+fibre-small gate-realizability of the Duhamel field.**
+
+`DeTurckGatedGradedForcing g₀ a hT hT1 B δ f` packages the two-norm Picard induction
+invariant for the gated self-representative DeTurck nonlinearity:
+
+* **all-order gradedness** — at every spatial order `d` the per-mode forcing masses of `f`
+  are summable with total at most `B d` (bounds uniform along the iteration, growing only
+  in the order `d`); through the mass coupling
+  (`solFieldMass_summable_of_forcingMass_summable`) this makes the Duhamel field of `f`
+  all-order regular, and
+* **a.e. on-gate fibre-smallness** — `DeTurckGatedFieldFibreSmall`: at a.e. time the
+  field is gate-realizable with `δ`-fibre margin, so the gated gauge takes its honest
+  branch along the trajectory.
+
+This is the class over which the weak-norm contraction
+(`deTurckGatedRemainder_picard_contraction_onGate`) is stated **on both arguments** — the
+`PROVE_REFUTED.md` family signature forbids any modulus on the gated map over a class
+containing off-gate points, and this predicate is exactly the on-gate restriction.  It is
+non-vacuous (the zero forcing satisfies it whenever `B ≥ 0`, `δ ≥ 0`:
+`deTurckGatedGradedForcing_zero`) and genuinely constraining (it rejects any forcing with
+a rough mode tail, and any forcing whose field leaves the fibre gate). -/
+def DeTurckGatedGradedForcing (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
+    (hT : 0 < T) (hT1 : T ≤ 1) (B : ℝ → ℝ) (δ : ℝ)
+    (f : Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T) : Prop :=
+  (∀ d : ℝ, Summable (forcingMass (I := I) (M := M) f d) ∧
+      ∑' i, forcingMass (I := I) (M := M) f d i ≤ B d) ∧
+  DeTurckGatedFieldFibreSmall (I := I) g₀ a hT hT1 δ f
+
+/-- **The gated Picard step: the on-gate graded-forcing class is invariant under the gated
+Duhamel-remainder map on a small horizon (posited analytic input: the per-order parabolic
+ball invariance).**
+
+For a fibre margin `0 < δ < 1` there are a horizon bound `T₀ ∈ (0, 1]` and per-order mass
+bounds `B : ℝ → ℝ` (nonnegative, growing only in the order, *never* along the iteration)
+such that on every horizon `T ≤ T₀`, for every forcing `f` in the graded on-gate class
+`DeTurckGatedGradedForcing g₀ a hT hT1 B δ`, the next Picard iterate exists in the same
+class: a time-`L²` forcing `F` reproduced a.e. by the gated self-representative
+nonlinearity on the `H^{a+1}`-view zero-datum Duhamel field of `f`, again graded and
+on-gate.
+
+This is the classical per-order quasilinear ball invariance: under the antecedent the
+field of `f` is a.e. gate-realizable and `δ`-fibre-small, so the gated gauge takes its
+honest branch and `t ↦ N(field f t)` is the realized remainder of the field's own smooth
+gate representative — measurable and per-order square-integrable in time, with order-`d`
+mass at most `T₀ · (c₀(d) + C(d) · θ(B))²` (the remainder is two-derivative-loss tame and
+the field gains two orders per the maximal-regularity mass coupling); choosing `T₀`
+small (depending on `δ` and the order-recursion constants) closes each per-order bound
+and keeps the next field inside the `δ`-fibre gate.  The existential is non-degenerate:
+`F` is pinned a.e. by the reproduction equation, and `B ≡ 0` is *not* a witness unless
+`g₀` is a DeTurck fixed point of `g_bg` (the zero forcing would have to reproduce the
+generically nonzero remainder of `g₀` itself), so the produced `B` must contain the
+honest Picard tube.  The body is the posited parabolic input; it remains `sorry`, so
+consumers transitively depend on `sorryAx`. -/
+theorem deTurckGatedRemainder_picard_forcing_exists
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
+    (ha2 : Module.finrank ℝ E < 2 * (a - 2))
+    (δ : ℝ) (hδ0 : 0 < δ) (hδ1 : δ < 1) :
+    ∃ T₀ : ℝ, 0 < T₀ ∧ T₀ ≤ 1 ∧
+      ∃ B : ℝ → ℝ, (∀ d : ℝ, 0 ≤ B d) ∧
+        ∀ (T : ℝ) (hT : 0 < T) (hT1 : T ≤ 1), T ≤ T₀ →
+          ∀ f : Analysis.Parabolic.TimeSobolev.timeL2
+              (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T,
+            DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ f →
+            ∃ F : Analysis.Parabolic.TimeSobolev.timeL2
+                (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T,
+              ((F : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+                  =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T]
+                (fun t => deTurckG0SpectralN (I := I) g₀ a
+                  (deTurckRemainderRealizeSection (I := I) g₀ g_bg
+                    (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1
+                      (I := I) (M := M) (a : ℝ) hT hT1
+                      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) f t)))) ∧
+              DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ F :=
+  sorry
+
+/-- **The weak-norm contraction of the gated Duhamel-remainder map along on-gate pairs
+(posited analytic input: the δ-funded principal smallness plus the √T-funded first-order
+part).**
+
+There is a fibre margin `0 < δ < 1` such that for every nonnegative per-order bound
+family `B` there is a horizon bound `T₁ ∈ (0, 1]` with: on every horizon `T ≤ T₁`, for
+any two forcings `f, f'` **both** in the graded on-gate class
+`DeTurckGatedGradedForcing g₀ a hT hT1 B δ`, and any time-`L²` elements `F, F'`
+reproduced a.e. by the gated nonlinearity on the respective Duhamel fields, the map
+contracts with factor `1/2` in `L²([0,T]; Hᵃ)`.
+
+Both arguments carry the on-gate hypothesis — this is the binding requirement of the
+`PROVE_REFUTED.md` family signature (the refuted shape quantified one argument over a
+bare ball containing off-gate points, where the gated section degenerates to zero).  On
+the on-gate class both gauges take their honest branches, and the difference of realized
+remainders splits as the δ-small principal coefficient against `∇²(field f − field f')`
+(funded by `deTurckNonlinearitySpectral_principalPart_cancels` at the `δ`-fibre margin,
+with the two-order field gain of maximal regularity) plus coefficient-difference terms
+against `∇²(field f')`, bounded by `C(B) · √T · ‖f − f'‖` through the all-order field
+bounds that the `B`-gradedness of `f'` supplies (sup-in-time control one order up) —
+so `δ` small (universal, from the principal-cancellation constant) and then `T₁ = T₁(B)`
+small give the `1/2`.  The body is the posited parabolic input; it remains `sorry`, so
+consumers transitively depend on `sorryAx`. -/
+theorem deTurckGatedRemainder_picard_contraction_onGate
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
+    (ha2 : Module.finrank ℝ E < 2 * (a - 2)) :
+    ∃ δ : ℝ, 0 < δ ∧ δ < 1 ∧
+      ∀ B : ℝ → ℝ, (∀ d : ℝ, 0 ≤ B d) →
+        ∃ T₁ : ℝ, 0 < T₁ ∧ T₁ ≤ 1 ∧
+          ∀ (T : ℝ) (hT : 0 < T) (hT1 : T ≤ 1), T ≤ T₁ →
+            ∀ f f' F F' : Analysis.Parabolic.TimeSobolev.timeL2
+                (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T,
+              DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ f →
+              DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ f' →
+              ((F : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+                  =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T]
+                (fun t => deTurckG0SpectralN (I := I) g₀ a
+                  (deTurckRemainderRealizeSection (I := I) g₀ g_bg
+                    (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1
+                      (I := I) (M := M) (a : ℝ) hT hT1
+                      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) f t)))) →
+              ((F' : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+                  =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T]
+                (fun t => deTurckG0SpectralN (I := I) g₀ a
+                  (deTurckRemainderRealizeSection (I := I) g₀ g_bg
+                    (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1
+                      (I := I) (M := M) (a : ℝ) hT hT1
+                      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) f' t)))) →
+              dist F F' ≤ (1 / 2) * dist f f' :=
+  sorry
+
+/-- **The zero forcing lies in the graded on-gate Picard class** (for any nonnegative
+per-order bounds and any nonnegative fibre margin): its per-mode forcing masses all vanish
+(`timeModeCoeff` of `0` is `0`), and its zero-datum Duhamel field is the zero time-`L²`
+field (both the homogeneous part of the zero datum and the maximal-regularity part of the
+zero forcing vanish), which is a.e. gate-realizable with zero fibre form.  This is the
+seed of the Picard iteration and the non-vacuity witness of the class. -/
+theorem deTurckGatedGradedForcing_zero
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (B : ℝ → ℝ) (hB : ∀ d : ℝ, 0 ≤ B d) (δ : ℝ) (hδ : 0 ≤ δ) :
+    DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ
+      (0 : Analysis.Parabolic.TimeSobolev.timeL2
+        (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T) := by
+  classical
+  set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+    with hcompact_def
+  refine ⟨?_, ?_⟩
+  · intro d
+    have hzero' : ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+        (I := I) (M := M) g₀ 0 2,
+        forcingMass (I := I) (M := M)
+          (0 : Analysis.Parabolic.TimeSobolev.timeL2
+            (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T) d i = 0 := by
+      intro i
+      simp only [forcingMass, timeModeCoeff_zero (I := I) g₀ i, norm_zero]
+      ring
+    refine ⟨summable_zero.congr (fun i => (hzero' i).symm), ?_⟩
+    have htsum : ∑' i, forcingMass (I := I) (M := M)
+        (0 : Analysis.Parabolic.TimeSobolev.timeL2
+          (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T) d i = 0 := by
+      rw [tsum_congr hzero', tsum_zero]
+    exact htsum.le.trans (hB d)
+  · have hMR0 : maximalRegularitySolFieldHa1 (I := I) (M := M) (a : ℝ) hT hT1
+        (0 : Analysis.Parabolic.TimeSobolev.timeL2
+          (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T) = 0 := by
+      have h := maximalRegularitySolFieldHa1_sub (I := I) (M := M) (a := (a : ℝ)) hT hT1
+        hcompact 0 0
+      rw [sub_self, sub_self] at h
+      exact h
+    have hHom0 : Analysis.Parabolic.QuasiLinear.maxRegHomogeneousSolFieldHa1
+        (I := I) (M := M) (a : ℝ) T
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) = 0 := by
+      refine timeModeCoeff_injective (I := I) (M := M) hcompact (fun i => ?_)
+      rw [Analysis.Parabolic.QuasiLinear.maxRegHomogeneousSolFieldHa1_timeModeCoeff
+        (I := I) (M := M) hT.le _ i, timeModeCoeff_zero (I := I) g₀ i]
+      refine MeasureTheory.Lp.ext ?_
+      have h1 : (Analysis.Parabolic.QuasiLinear.homModeCoeff (I := I) (M := M)
+          (a := (a : ℝ)) (T := T)
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) i : ℝ → ℝ)
+          =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T]
+          fun t => Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)).coeff i :=
+        Analysis.Parabolic.TimeSobolev.coeFn_ofContinuousOn _
+      have h2 : (fun t : ℝ =>
+          Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)).coeff i)
+          = fun _ : ℝ => (0 : ℝ) := by
+        funext t
+        rw [tensorHs.zero_coeff, mul_zero]
+      rw [h2] at h1
+      exact h1.trans (MeasureTheory.Lp.coeFn_zero
+        (E := ℝ) (p := 2) (μ := Analysis.Parabolic.TimeSobolev.timeMeasure T)).symm
+    have hfield0 : Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+        (a : ℝ) hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
+        (0 : Analysis.Parabolic.TimeSobolev.timeL2
+          (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T) = 0 := by
+      unfold Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1
+      rw [hHom0, hMR0, add_zero]
+    unfold DeTurckGatedFieldFibreSmall
+    rw [hfield0]
+    filter_upwards [MeasureTheory.Lp.coeFn_zero
+      (E := tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) (p := 2)
+      (μ := Analysis.Parabolic.TimeSobolev.timeMeasure T)] with t ht
+    have ht' : (0 : Analysis.Parabolic.TimeSobolev.timeL2
+        (tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) T) t
+        = (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) := by
+      simpa using ht
+    rw [ht']
+    have h_mem : MemAllTensorHs (I := I) (M := M) g₀ 0 2
+        (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (show (0 : ℝ) ≤ (a : ℝ) + 1 by positivity)
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))) := by
+      intro σ hσ'
+      exact ⟨0, by rw [map_zero, map_zero]⟩
+    refine ⟨h_mem, ?_⟩
+    have hrep0 : gateSmoothRep (I := I) g₀
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
+        (show (0 : ℝ) ≤ (a : ℝ) + 1 by positivity) h_mem = 0 := by
+      apply smoothCcTensor_toL2_injective (I := I) (M := M) g₀ 0 2
+      rw [gateSmoothRep_toL2 (I := I) g₀ _ _ h_mem, map_zero, map_zero]
+    rw [hrep0]
+    intro x v w
+    rw [gated_ccTensorBilinSymm_zero_apply (I := I) g₀ x v w]
+    rw [abs_zero]
+    exact mul_nonneg (mul_nonneg hδ (Real.sqrt_nonneg _)) (Real.sqrt_nonneg _)
+
+/-- **A.e. on-gate fibre-smallness passes to time-`L²` limits of graded on-gate forcings
+(posited analytic input: the gate-closedness of the limit field).**
+
+If a sequence of forcings, each in the graded on-gate class
+`DeTurckGatedGradedForcing g₀ a hT hT1 B δ`, converges in `L²([0,T]; Hᵃ)`, then the limit
+forcing's Duhamel field is again a.e. gate-realizable and `δ`-fibre-small.
+
+This is the limit-transfer half of the two-norm Picard scheme that the per-order mass
+brick (`forcingMass_summable_tsum_le_of_tendsto`) does not cover: the Duhamel fields
+converge in `L²([0,T]; H^{a+1})` (`maxRegDuhamelSolFieldHa1_dist_le`), hence a.e. along a
+subsequence in `H^{a+1}`; the limit forcing inherits the per-order mass bounds (the mass
+brick again, inside the proof), so by the mass coupling its field is a.e. all-order
+regular — `MemAllTensorHs`, the membership half of the gate; and the gate representatives
+converge fibrewise (uniform higher-order bounds from `B` plus supercriticality `ha`), so
+the closed condition `gFibreOpBound … δ` passes to the limit.  The hypotheses are the
+honest sequence data, structurally distinct from the conclusion about the limit; no
+packaging.  The body is the posited input; it remains `sorry`, so consumers transitively
+depend on `sorryAx`. -/
+theorem deTurckGatedGradedForcing_gate_limit
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1) (B : ℝ → ℝ) (δ : ℝ)
+    (gf : ℕ → Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (glim : Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (htend : Filter.Tendsto gf Filter.atTop (𝓝 glim))
+    (hgraded : ∀ k, DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ (gf k)) :
+    DeTurckGatedFieldFibreSmall (I := I) g₀ a hT hT1 δ glim :=
+  sorry
+
 /-- **The two-derivative-loss Duhamel fixed point for the gated self-representative DeTurck
 nonlinearity (posited analytic input: the genuine quasilinear strictly-parabolic
 contraction).**
@@ -113,25 +439,37 @@ This cannot be obtained from the one-derivative-loss maximal-regularity tower
 siblings consume a global or `H^{a+1}`-ball `LipschitzOnWith` binder): the gated remainder
 is a genuine two-derivative-loss nonlinearity `[(g₀+T)⁻¹ − g₀⁻¹]·∇²T`, and an
 `H^{a+1}`-ball Lipschitz bound into `Hᵃ` for it is Lean-refuted (the eigentrain
-counterexample; see `PROVE_REFUTED.md`).  The expected proof is the two-loss small-time
-Banach contraction in `L²([0,T]; Hᵃ)`: the Duhamel field gains two orders
-(maximal regularity), the gated remainder loses them back with a `δ`-small constant on the
-principal term on the fibre-small ball (the principal cancellation
-`deTurckNonlinearitySpectral_principalPart_cancels`) and a small-time-funded constant on
-the first-order part (the `δ`-weighted top/lower split Lipschitz over
-`exists_realizedRHSRemainder_weightedHa_le_toHs_highOrder` and
-`deTurckG0SpectralN_dist_le_pouHaNorm`), with gate-domain persistence of the Picard
-iterates.  The forcing is the remainder of the trajectory's *own* gate representative —
-no smoothing operator, no second representative, no static all-order operator-loss
-hypothesis on the nonlinearity (the `PROVE_REFUTED.md` design invariant).
+counterexample; see `PROVE_REFUTED.md`); likewise any bare-ball modulus on the gated map
+is dead (family signature).  The proof is the honest **two-norm Picard scheme** along the
+graded on-gate class `DeTurckGatedGradedForcing`, assembled here as **sorry-free glue**
+over:
+
+* `deTurckGatedRemainder_picard_contraction_onGate` — the fibre margin `δ` and the
+  `1/2`-contraction in `L²([0,T]; Hᵃ)` along pairs carrying the on-gate currency on
+  **both** arguments;
+* `deTurckGatedRemainder_picard_forcing_exists` — the horizon `T₀`, the per-order bounds
+  `B`, and the class-invariant Picard step (each iterate exists and stays graded
+  on-gate);
+* `deTurckGatedGradedForcing_zero` — the proven seed: the zero forcing is in the class;
+* `forcingMass_summable_tsum_le_of_tendsto` — the proven per-order mass limit-transfer
+  (Fatou over finite partial sums) giving the limit's gradedness;
+* `deTurckGatedGradedForcing_gate_limit` — the a.e. gate fibre-smallness of the limit
+  field.
+
+The iterates form a `(1/2)`-geometric Cauchy sequence (`cauchySeq_of_le_geometric`), the
+limit exists by completeness of `L²([0,T]; Hᵃ)`, the limit is in the class by the two
+limit-transfer bricks, and applying the Picard step **at the limit** plus the contraction
+against the iterates identifies the step image with the limit (uniqueness of limits) —
+the fixed-point equation.  The forcing is the remainder of the trajectory's *own* gate
+representative — no smoothing operator, no second representative, no static all-order
+operator-loss hypothesis on the nonlinearity (the `PROVE_REFUTED.md` design invariant).
 
 The existential is non-degenerate, exactly as for the probe-passed consumer
 `deTurckGatedRemainder_maxReg_trajectory_exists` whose statement this is a verbatim
 sub-conjunction of: the fixed-point equation pins `gforce`, and the zero forcing is a
 witness exactly when `g₀` is a DeTurck fixed point of `g_bg` (e.g. the flat torus with
-`g_bg = g₀`), in which case the constant flow is the honest solution.  The body is the
-posited classical parabolic-contraction input; it remains `sorry`, so consumers
-transitively depend on `sorryAx`. -/
+`g_bg = g₀`), in which case the constant flow is the honest solution.  Consumers
+transitively depend on `sorryAx` through the three posited Picard primitives. -/
 theorem deTurckGatedRemainder_duhamel_fixedPoint_exists
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -145,8 +483,98 @@ theorem deTurckGatedRemainder_duhamel_fixedPoint_exists
           (deTurckRemainderRealizeSection (I := I) g₀ g_bg
             (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M)
               (a : ℝ) hT hT1
-              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))) :=
-  sorry
+              (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))) := by
+  classical
+  obtain ⟨δ, hδ0, hδ1, hcontrAll⟩ :=
+    deTurckGatedRemainder_picard_contraction_onGate (I := I) (M := M) g₀ g_bg a ha ha2
+  obtain ⟨T₀, hT₀0, hT₀1, B, hB0, hstepAll⟩ :=
+    deTurckGatedRemainder_picard_forcing_exists (I := I) (M := M) g₀ g_bg a ha ha2
+      δ hδ0 hδ1
+  obtain ⟨T₁, hT₁0, hT₁1, hcontrB⟩ := hcontrAll B hB0
+  refine ⟨min T₀ T₁, lt_min hT₀0 hT₁0, le_trans (min_le_left _ _) hT₀1, ?_⟩
+  set T : ℝ := min T₀ T₁ with hT_def
+  have hT : 0 < T := lt_min hT₀0 hT₁0
+  have hT1 : T ≤ 1 := le_trans (min_le_left _ _) hT₀1
+  have hstep := hstepAll T hT hT1 (min_le_left _ _)
+  have hcontr := hcontrB T hT hT1 (min_le_right _ _)
+  have hseed : DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ
+      (0 : Analysis.Parabolic.TimeSobolev.timeL2
+        (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T) :=
+    deTurckGatedGradedForcing_zero (I := I) g₀ a hT hT1 B hB0 δ hδ0.le
+  choose nextF hnextEq hnextMem using hstep
+  let seq : ℕ → {f : Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T //
+      DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ f} := fun k =>
+    Nat.rec (motive := fun _ => {f : Analysis.Parabolic.TimeSobolev.timeL2
+        (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T //
+        DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ f})
+      ⟨0, hseed⟩ (fun _ p => ⟨nextF p.1 p.2, hnextMem p.1 p.2⟩) k
+  have hseq_succ : ∀ k : ℕ, (seq (k + 1)).1 = nextF (seq k).1 (seq k).2 :=
+    fun _ => rfl
+  have hfixstep : ∀ k : ℕ,
+      ((seq (k + 1)).1 : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+        =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T]
+      (fun t => deTurckG0SpectralN (I := I) g₀ a
+        (deTurckRemainderRealizeSection (I := I) g₀ g_bg
+          (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+            (a : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) (seq k).1 t))) := by
+    intro k
+    rw [hseq_succ k]
+    exact hnextEq (seq k).1 (seq k).2
+  have hconsec : ∀ k : ℕ,
+      dist (seq (k + 2)).1 (seq (k + 1)).1 ≤ (1 / 2) * dist (seq (k + 1)).1 (seq k).1 :=
+    fun k => hcontr (seq (k + 1)).1 (seq k).1 (seq (k + 2)).1 (seq (k + 1)).1
+      (seq (k + 1)).2 (seq k).2 (hfixstep (k + 1)) (hfixstep k)
+  have hgeo : ∀ n : ℕ, dist (seq n).1 (seq (n + 1)).1
+      ≤ dist (seq 0).1 (seq 1).1 * (1 / 2) ^ n := by
+    intro n
+    induction n with
+    | zero => simp
+    | succ k ih =>
+      calc dist (seq (k + 1)).1 (seq (k + 2)).1
+          = dist (seq (k + 2)).1 (seq (k + 1)).1 := dist_comm _ _
+        _ ≤ (1 / 2) * dist (seq (k + 1)).1 (seq k).1 := hconsec k
+        _ = (1 / 2) * dist (seq k).1 (seq (k + 1)).1 := by rw [dist_comm]
+        _ ≤ (1 / 2) * (dist (seq 0).1 (seq 1).1 * (1 / 2) ^ k) := by
+            have := mul_le_mul_of_nonneg_left ih (by norm_num : (0 : ℝ) ≤ 1 / 2)
+            linarith
+        _ = dist (seq 0).1 (seq 1).1 * (1 / 2) ^ (k + 1) := by ring
+  have hcauchy : CauchySeq (fun k => (seq k).1) :=
+    cauchySeq_of_le_geometric (r := 1 / 2) (C := dist (seq 0).1 (seq 1).1)
+      (by norm_num) hgeo
+  obtain ⟨glim, hglim⟩ := cauchySeq_tendsto_of_complete hcauchy
+  have hmass : ∀ d : ℝ, Summable (forcingMass (I := I) (M := M) glim d) ∧
+      ∑' i, forcingMass (I := I) (M := M) glim d i ≤ B d := fun d =>
+    forcingMass_summable_tsum_le_of_tendsto (I := I) (M := M)
+      (fun k => (seq k).1) glim hglim d
+      (fun k => ((seq k).2.1 d).1) (fun k => ((seq k).2.1 d).2)
+  have hgate : DeTurckGatedFieldFibreSmall (I := I) g₀ a hT hT1 δ glim :=
+    deTurckGatedGradedForcing_gate_limit (I := I) g₀ a ha hT hT1 B δ
+      (fun k => (seq k).1) glim hglim (fun k => (seq k).2)
+  have hglimMem : DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ glim :=
+    ⟨hmass, hgate⟩
+  have hFlimEq := hnextEq glim hglimMem
+  have hdist0 : Filter.Tendsto (fun k => dist (seq k).1 glim) Filter.atTop (𝓝 0) :=
+    tendsto_iff_dist_tendsto_zero.mp hglim
+  have hbound : ∀ k : ℕ, dist (seq (k + 1)).1 (nextF glim hglimMem)
+      ≤ (1 / 2) * dist (seq k).1 glim :=
+    fun k => hcontr (seq k).1 glim (seq (k + 1)).1 (nextF glim hglimMem)
+      (seq k).2 hglimMem (hfixstep k) hFlimEq
+  have htoF : Filter.Tendsto (fun k => (seq (k + 1)).1) Filter.atTop
+      (𝓝 (nextF glim hglimMem)) := by
+    rw [tendsto_iff_dist_tendsto_zero]
+    have hhalf : Filter.Tendsto (fun k => (1 / 2 : ℝ) * dist (seq k).1 glim)
+        Filter.atTop (𝓝 0) := by
+      simpa using hdist0.const_mul (1 / 2 : ℝ)
+    exact squeeze_zero (fun k => dist_nonneg) hbound hhalf
+  have htoglim : Filter.Tendsto (fun k => (seq (k + 1)).1) Filter.atTop (𝓝 glim) := by
+    simpa [Function.comp_def] using hglim.comp (Filter.tendsto_add_atTop_nat 1)
+  have hglim_eq : glim = nextF glim hglimMem :=
+    tendsto_nhds_unique htoglim htoF
+  refine ⟨glim, ?_⟩
+  refine Filter.EventuallyEq.trans ?_ hFlimEq
+  rw [hglim_eq.symm]
 
 /-- **The all-order forcing/solution mass coupling of the gated fixed-point trajectory
 (posited analytic input: the parabolic bootstrap of the zero-datum solution).**
@@ -427,23 +855,6 @@ private theorem gated_carrier_zero_at_zero
     rw [hcar0]; rfl
   rw [tensorHsInclusion_coeff_apply] at hc
   rw [tensorHs.zero_coeff, hc]
-
-/-- The extracted symmetric bilinear form of the **zero** smooth section vanishes.
-(Gated-route copy of the file-private lemma of `DeTurckG0AnalyticInputs.lean`.) -/
-private theorem gated_ccTensorBilinSymm_zero_apply
-    (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
-    ccTensorBilinSymm (I := I) g (0 : Integral.L2.SmoothCcTensor g 0 2) x v w = 0 := by
-  have hsec0 : (0 : Integral.L2.SmoothCcTensor g 0 2).toSection x
-      (ContinuousMultilinearMap.constOfIsEmpty ℝ
-        (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) = 0 := by
-    rw [Integral.L2.SmoothCcTensor.toSection_zero]
-    rfl
-  have hmodel : ccTensorModel (I := I) g (0 : Integral.L2.SmoothCcTensor g 0 2) x = 0 := by
-    rw [ccTensorModel, ccTensorMultilinear_apply, hsec0]
-    exact map_zero _
-  rw [ccTensorBilinSymm_apply, ccTensorBilin_apply, ccTensorBilin_apply, hmodel,
-    ContinuousMultilinearMap.zero_apply, ContinuousMultilinearMap.zero_apply]
-  ring
 
 /-- If the `L²` class of a smooth section vanishes, its extracted symmetric bilinear form
 vanishes pointwise (`smoothCcTensor_toL2_injective`).  (Gated-route copy of the

@@ -734,6 +734,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.FaithfulH1Embedd
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.SobolevScaleSummable
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.BoundedC0Intrinsic
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.DuhamelSmoothing
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ForcingMassLimit
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.Intrinsic
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ParabolicInteriorSmoothing
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.QuasilinearExistenceIntrinsic
