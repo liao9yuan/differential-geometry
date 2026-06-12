@@ -1,7 +1,26 @@
 # MetricPreconv — MSM135 Corollary lbl351 (metrics with bounded derivatives preconverge)
 
 **Status: Bricks A1 + A2 DONE + verified; Brick B PRODUCER + PER-CHART
-CONVERGENCE DONE + verified; atlas×component diagonal REMAINING (2026-06-11).**
+CONVERGENCE DONE + verified; Brick C-I = C0 (`exists_diag_subseq`) DONE in
+`MetricPreconvDiag.lean`, C1a/C1b STOPPED (planner decision) (2026-06-12).**
+
+## Brick C-I status (2026-06-12) — see MetricPreconvDiag.md
+
+- **C0 `exists_diag_subseq` DONE** (`MetricPreconvDiag.lean`, sorry-free,
+  axiom-clean): the abstract countable common-subsequence diagonal, proved as the
+  planner fixed it.  Usable with `hstep := exists_chart_cInfConv`,
+  `hsub := MapCInfConvOnCompacts.comp_subseq`, `hextend` = the `∃k₀` shape.
+- **C1a / C1b STOPPED — planner decision.**  The `gInf : SmoothRiemannianMetric`
+  packaging needs the inverse of the `componentize` layer (build a smooth
+  intrinsic `(0,2)` field / `ContMDiffRiemannianMetric` — intrinsic `inner` CLM +
+  `contMDiff` bundle section — from a chart-compatible family of `ContDiff`
+  component functions).  That bridge does NOT exist; the project documents the
+  general gate as unavailable (`NonlinearitySpectral.lean:53`), and the only
+  realization (`exists_smooth_metric_of_smooth_tensor_small`) is a
+  compactly-supported, fibre-small perturbation consuming an intrinsic
+  `SmoothCcTensor`, not chart components / a global limit.  Full analysis + the
+  located building blocks (`compactCovering`, `exists_chart_cInfConv`,
+  `exists_diag_subseq`) + planner options are in **MetricPreconvDiag.md**.
 
 ## Brick B PRODUCER + per-chart convergence DONE (MetricPreconv.lean)
 
