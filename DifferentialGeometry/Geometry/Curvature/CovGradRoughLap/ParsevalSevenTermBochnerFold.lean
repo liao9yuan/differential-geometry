@@ -1690,6 +1690,25 @@ private def secondCovApplyCc (g : SmoothRiemannianMetric I M) (s : ℕ) (S : Smo
       (fun b : M => (⟨b, Vb b⟩ : TotalSpace E (TangentSpace I)))) : SmoothCcTensor g 0 s :=
   covApplyCc (I := I) (M := M) g s (covApplyCc (I := I) (M := M) g s S hVb) hVa
 
+/-- The **genuine Hessian** `∇²_{V a, V b} S = ∇_{V a}(∇_{V b} S) − ∇_{∇_{V a} V b} S`
+(`tensorSecondCovDeriv`) packaged as a smooth compactly-supported `(0, s)`-tensor.  Unlike the
+iterated second derivative `secondCovApplyCc`, this carrier is tensorial (`C^∞(M)`-linear) in
+**both** direction slots, so its Parseval double sums are frame-independent — the correct inner
+section for the curvature/second-derivative cross pairing `I₂`. -/
+private def crossHessianCc (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {Va Vb : Π b : M, TangentSpace I b}
+    (hVa : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Va b⟩ : TotalSpace E (TangentSpace I))))
+    (hVb : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Vb b⟩ : TotalSpace E (TangentSpace I)))) : SmoothCcTensor g 0 s where
+  toSection :=
+    { toFun := fun x : M =>
+        tensorSecondCovDeriv (I := I) g 0 s Va Vb (fun y : M => S.toSection y) x
+      contMDiff_toFun :=
+        tensorSecondCovDeriv_offDiag_section_contMDiff (I := I) g s
+          S.toSection.contMDiff hVa hVb }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
 set_option linter.unusedSectionVars false in
 /-- The group-`2` IBP residue integrand is integrable: it is `−(⟨R(V a, V b) S, ∇_{V a}(∇_{V b} S)⟩ +
 ⟨R(V a, V b) S, ∇_{V b} S⟩ · divᵍ (V a))`, a continuous function (sum of smooth inner-product scalars,
@@ -3375,8 +3394,13 @@ frame family, the diagonal differentiated-curvature trace double sum
 `D := ∑_a ∑_b ∫ ⟨nablaDiffCurvTraceCc, ∇_{V b} S⟩` (the frame-free global-section pairing of the
 differentiated curvature `(∇_{V a} R^{(s)})(V a, V b) S` against the slot-`0` gradient `∇_{V b} S`)
 equals the negated sum of the group-`1` curvature pairing double sum and the
-curvature/second-derivative cross pairing double sum
-`I₂ := ∑_a ∑_b ∫ ⟨R(V a, V b) S, ∇_{V a}(∇_{V b} S)⟩`:
+curvature/Hessian cross pairing double sum
+`I₂ := ∑_a ∑_b ∫ ⟨R(V a, V b) S, ∇²_{V a, V b} S⟩`, built on the **genuine Hessian** carrier
+`crossHessianCc` (`tensorSecondCovDeriv`, tensorial in both direction slots).  The former
+iterated-derivative form (`secondCovApplyCc`, `∇_{V a}(∇_{V b} S)`) was numerically REFUTED:
+its `I₂` is frame-variant by the missing `∇_{∇_{V a} V b} S` correction (defect
+`∑∑∫ ⟨R(V a, V b) S, ∇_{∇_{V a} V b} S⟩ ≠ 0`), while the Hessian-based identity holds to
+`≤ 4e-15` in dims `2` and `3`:
 ```
 D = −(bochnerFoldGroupSum (bochnerGroupElt1) + I₂).
 ```
@@ -3425,7 +3449,7 @@ private theorem parsevalFrameSum_diffCurvTrace_doubleSum_eq_neg_group1_add_cross
           ∑ a : Fin N, ∑ b : Fin N,
             ∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
                 (riemannSecCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
-                (secondCovApplyCc (I := I) (M := M) g s S (hV a) (hV b)).toSection x
+                (crossHessianCc (I := I) (M := M) g s S (hV a) (hV b)).toSection x
               ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
   sorry
 
@@ -3746,8 +3770,9 @@ Parseval frame family,
 ```
 G₄ − I₂ = ⟨Curv S, ∇S⟩_{L²} − ⟨GcurvSection g s S, ∇S⟩_{L²} − ⟨ricTraceSection g s S, ∇S⟩_{L²},
 ```
-with `I₂ := ∑_a ∑_b ∫ ⟨R(V a, V b) S, ∇_{V a}(∇_{V b} S)⟩` the curvature/second-derivative cross
-pairing.  This is the re-glued summed chain of the rank-`0` Bochner kernel over the single posited
+with `I₂ := ∑_a ∑_b ∫ ⟨R(V a, V b) S, ∇²_{V a, V b} S⟩` the curvature/Hessian cross pairing
+(`crossHessianCc`, the genuine `tensorSecondCovDeriv` carrier, tensorial in both slots).
+This is the re-glued summed chain of the rank-`0` Bochner kernel over the single posited
 primitive `D = −(G₁ + I₂)` (`parsevalFrameSum_diffCurvTrace_doubleSum_eq_neg_group1_add_crossPairing`):
 the admissible summed fold (`G₂ + G₃ + G₄ = ⟨Curv⟩ − ⟨Gcurv⟩`), the variance-honest group-`3`
 decomposition (`G₃ = bochnerFoldGroupSum (bochnerGroupElt3IiiIv) + ⟨ric, ∇S⟩`), the sorry-free
@@ -3768,7 +3793,7 @@ private theorem parsevalFrameSum_group4_sub_crossPairing_eq_curv_sub_gcurv_sub_r
       (∑ a : Fin N, ∑ b : Fin N,
         ∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
             (riemannSecCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
-            (secondCovApplyCc (I := I) (M := M) g s S (hV a) (hV b)).toSection x
+            (crossHessianCc (I := I) (M := M) g s S (hV a) (hV b)).toSection x
           ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
       tensorL2Inner (I := I) (M := M) g 0 (s + 1)
           (pointwiseTensorCurv (I := I) (M := M) g s S).toFun
@@ -3801,11 +3826,16 @@ operator-field pairing is the gauge-cancelling difference `G₄ − I₂`.**  Fo
 frame family `V a`, the global metric `L²` pairing of the differentiated-curvature operator-field
 section `appCc (covGrad Φ₀) S` (`Φ₀ := curvOpField g s`, definitionally `genuineDiffCurvSection g s
 S`, the `(∇R) S` trace) against `∇S := covGrad g 0 s S` equals the group-`4` double sum minus the
-curvature/second-derivative cross pairing:
+curvature/Hessian cross pairing:
 ```
 ⟨appCc (covGrad Φ₀) S, ∇S⟩_{L²} = G₄ − I₂,
-I₂ := ∑_a ∑_b ∫ ⟨R(V a, V b) S, ∇_{V a}(∇_{V b} S)⟩.
+I₂ := ∑_a ∑_b ∫ ⟨R(V a, V b) S, ∇²_{V a, V b} S⟩,
 ```
+with `I₂` built on the **genuine Hessian** carrier `crossHessianCc` (`tensorSecondCovDeriv`,
+tensorial in both direction slots).  The former iterated-derivative form (`secondCovApplyCc`,
+`∇_{V a}(∇_{V b} S)`) was numerically REFUTED: its `I₂` is frame-variant by the missing
+`∇_{∇_{V a} V b} S` correction, while this Hessian-based identity holds to `≤ 4e-15` in dims
+`2` and `3`.
 
 **Why this combination is admissible (not in the refuted per-group family).**  The left side is
 frame-free, and by the summed chain endpoint
@@ -3841,7 +3871,7 @@ private theorem tensorL2Inner_genuineDiffCurv_covGrad_eq_group4_sub_crossPairing
         (∑ a : Fin N, ∑ b : Fin N,
           ∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
               (riemannSecCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
-              (secondCovApplyCc (I := I) (M := M) g s S (hV a) (hV b)).toSection x
+              (crossHessianCc (I := I) (M := M) g s S (hV a) (hV b)).toSection x
             ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
   sorry
 
