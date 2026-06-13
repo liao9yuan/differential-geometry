@@ -244,6 +244,16 @@ smoothness bridge for
 as `normalCoordMetric_contDiffOn` or the closest reusable pullback-section
 theorem.
 
+Metric-smoothness audit accepted 2026-06-13: `OffZero.md` records that
+`normalCoordMetric_contDiffOn` is feasible with existing tools, but not a
+corollary.  The critical API exists
+(`ContMDiffOn.contMDiffOn_tangentMapWithin`, `ContMDiffOn.clm_bundle_apply₂`,
+`contMDiffOn_iff_contDiffOn`, and the `pullbackGram` pattern).  The remaining
+work is a substantial geometry/bundle assembly: compare the C1
+`expMapDiffeo` derivative with the forward `expMap` derivative on an open ball,
+build smooth pushforward sections, then assemble the
+`E ->L E ->L R`-valued pullback metric in coordinates.
+
 Target file: `StepBLocalMetrics.lean`.
 
 Goal: from `NormalCoordMetricBoundInput`, Step A chart/radius data, and

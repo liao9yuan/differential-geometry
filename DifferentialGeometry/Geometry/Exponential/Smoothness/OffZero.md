@@ -46,3 +46,45 @@ discharge is a separate downstream brick:
    inverse-function-theorem frontier** — the planner's explicit stop point.
 
 Both are now gated on *geometry/IFT wiring*, no longer on the ODE smoothness frontier.
+
+## B-metric `normalCoordMetric_contDiffOn` — feasibility audit (2026-06-13)
+
+**Verdict: FEASIBLE (every lemma exists), but a substantial bundle-assembly (~150–250 lines),
+not a corollary.** No new foundational lemma is missing (the planner's hard-stop #1 is NOT
+triggered: `ContMDiffOn.contMDiffOn_tangentMapWithin` supplies `mfderiv`-smoothness from
+`ContMDiffOn ∞ expMap`).
+
+`normalCoordMetric Y x z = (precomp D).comp ((g.inner (exp z)).comp D)`,
+`D = mfderiv (expMapDiffeo x) z : E →L T_{exp z}M`.  The codomain `T_{exp z}M` **varies
+with `z`** (a Hom-bundle), so ordinary model `ContDiff` composition does **not** apply
+directly — the bundle/`inCoordinates` machinery is required.
+
+### Confirmed reusable tools
+- `ContMDiffOn.contMDiffOn_tangentMapWithin` (`Mathlib …/ContMDiffMFDeriv.lean:275`):
+  `ContMDiffOn n f s → m+1 ≤ n → UniqueMDiffOn s → ContMDiffOn m (tangentMapWithin I I' f s)`.
+- `ContMDiffOn.clm_bundle_apply₂` (the bilinear bundle-apply; used by
+  `pullbackGram_jointContMDiffOn_interior` in `ConjugatingFlowProperties.lean:3685`, the
+  closest existing pattern — but it is **diffeo-family**-specific, not reusable verbatim).
+- `contMDiffOn_iff_contDiffOn {f : E → E'}` (`Mathlib …/ContMDiff/NormedSpace.lean:57`):
+  model↔model `ContMDiffOn = ContDiffOn`, for the final conversion.
+- `SmoothRiemannianMetric.contMDiff` (the metric inner is a smooth Hom-bundle section).
+
+### Precise 5-step assembly (the focused next commission)
+1. **Comparison (C¹→C∞):** `mfderiv (expMapDiffeo x) z = mfderivWithin (expMap x) U z` on
+   the open ball `U ⊆ source` — via `expMapDiffeo_apply_eq` (agree on source) +
+   `Filter.EventuallyEq.mfderiv_eq` + `mfderivWithin = mfderiv` on open `U`.  (`expMapDiffeo`
+   is only `PartialDiffeomorph … 1`; this is the planner's step-3 comparison lemma.)
+2. **Forward smoothness on the ball:** `expMap x` `ContMDiffOn ⊤ U` from
+   `expMap_contMDiffAt_infty_of_norm_lt` (pointwise `ContMDiffAt ∞` → `ContMDiffWithinAt`).
+3. **Pushforward sections:** `z ↦ ⟨exp z, mfderivWithin (exp x) U z v⟩` `ContMDiffOn` via
+   `tangentMapWithin (exp x) U` (= `contMDiffOn_tangentMapWithin`) composed with `z ↦ (z,v)`.
+4. **CLM-valued (not just scalar):** `exists_metricLimit_normalCoord` needs the **`E →L E →L ℝ`-valued**
+   `normalCoordMetric` `ContDiffOn ⊤`, not just scalar entries.  Either assemble the
+   Hom-bundle CLM `(precomp D).comp ((g.inner)∘D)` smoothly in `inCoordinates`, or use a
+   finite-dim componentwise→CLM bridge (`ContDiffOn` of `z ↦ B z` from `z ↦ B z eᵢ eⱼ`).
+   This is the most intricate step.
+5. **Convert** the resulting `ContMDiffOn 𝓘(ℝ,E) 𝓘(ℝ, E→L E→L ℝ) ⊤` to `ContDiffOn ℝ ⊤`
+   via `contMDiffOn_iff_contDiffOn`, and `domain` align with the wrapper's `U`.
+
+The forward theorem (the hard, foundational piece) is done; this remaining brick is pure
+geometry/bundle wiring with all tools in hand.  Recommended as the next focused session.
