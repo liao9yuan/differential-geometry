@@ -643,6 +643,273 @@ theorem exists_deTurckVF_gNorm_sup_le
             Λ_W :=
   sorry
 
+/-! ### Bedrock value algebra for the connection-difference operator bound -/
+
+set_option linter.unusedSectionVars false in
+/-- **The `g₀`-self-norm Riesz lift.**  If a vector `z` has its `g₀`-pairing against every direction
+`c` bounded by `K · √(g₀ c c)`, then its `g₀`-self-norm is bounded by `K`.  Tested at `c = z`:
+`g₀(z, z) ≤ K · √(g₀ z z)` and `g₀(z, z) = √(g₀ z z)²` give `√(g₀ z z) ≤ K` (or `√(g₀ z z) = 0`). -/
+private theorem sqrt_gInner_self_le_of_forall_inner_le
+    (g₀ : SmoothRiemannianMetric I M) (x : M) (z : TangentSpace I x) {K : ℝ} (hK0 : 0 ≤ K)
+    (hK : ∀ c : TangentSpace I x, |g₀.inner x z c| ≤ K * Real.sqrt (g₀.inner x c c)) :
+    Real.sqrt (g₀.inner x z z) ≤ K := by
+  have hzz_nn : 0 ≤ g₀.inner x z z :=
+    DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg (I := I) (M := M) g₀ x z
+  have hsq : Real.sqrt (g₀.inner x z z) * Real.sqrt (g₀.inner x z z) = g₀.inner x z z := by
+    rw [← Real.sqrt_mul hzz_nn, Real.sqrt_mul_self hzz_nn]
+  have hzz : g₀.inner x z z ≤ K * Real.sqrt (g₀.inner x z z) := by
+    have h := hK z
+    have hle : g₀.inner x z z ≤ |g₀.inner x z z| := le_abs_self _
+    exact le_trans hle h
+  rcases eq_or_lt_of_le (Real.sqrt_nonneg (g₀.inner x z z)) with hzero | hpos
+  · rw [← hzero]; exact hK0
+  · have hsqz : Real.sqrt (g₀.inner x z z) * Real.sqrt (g₀.inner x z z) ≤
+        K * Real.sqrt (g₀.inner x z z) := by rw [hsq]; exact hzz
+    exact le_of_mul_le_mul_right (by linarith [hsqz]) hpos
+
+set_option linter.unusedSectionVars false in
+/-- **The rank-`(0,3)` `g₀`-fibre Cauchy–Schwarz for a model `(0,3)`-form.**  For a `(0,3)`-fibre
+value `S : Tensor0SSpace 3 I x`, the absolute model evaluation `|toModel S ![a, b, c]|` is bounded by
+the square root of the `(0,3)` Riemannian fibre-norm-squared of the unit-section value times the
+`g₀`-quadratic factors of the three directions.  Proved by expanding `a, b, c` in a `g₀`-orthonormal
+frame, applying the triple Cauchy–Schwarz over the frame-triple index, and Parseval
+`∑_i (g₀ x (e i) v)² = g₀ x v v`, identifying the frame-triple square-sum with the `(0,3)` fibre norm
+through `fiberNormSqComponent` and `riemannianFiberNormSq_eq_sum_componentS_sq`. -/
+private theorem abs_toModel_three_le_sqrt_rfns
+    (g₀ : SmoothRiemannianMetric I M) (x : M)
+    (Sec : Integral.L2.SmoothCcTensor g₀ 0 3) (a b c : TangentSpace I x) :
+    |Tensor0SBundle.Tensor0SSpace.toModel (Sec.toSection x
+        (ContinuousMultilinearMap.constOfIsEmpty ℝ
+          (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) ![a, b, c]| ≤
+      Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
+          (Sec.toSection x)) *
+        Real.sqrt (g₀.inner x a a) *
+        Real.sqrt (g₀.inner x b b) * Real.sqrt (g₀.inner x c c) := by
+  classical
+  obtain ⟨n, e, hn, horth, hpars, hexpand, _hrepr2⟩ :=
+    Integral.Connection.tangent_frame_expansion (I := I) (M := M) g₀ x
+  have hrepr : ∀ (S : Tensor0SBundle.TensorRSSpace 0 3 I x),
+      Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x S =
+        ∑ K, ∑ J, Integral.Connection.fiberNormSqSummand (I := I) (M := M) g₀ x 0 3 S n e K J := by
+    intro S
+    exact Integral.Connection.rfns_eq_sum_fiberNormSqSummand_of_orthoFrame (I := I) (M := M)
+      g₀ 3 x S e hn horth
+  set K₀ : Fin 0 → Fin n := fun k => k.elim0 with hK₀
+  -- The model value of the unit-evaluated section equals the frame component when read at the frame.
+  have hcomp_eq : ∀ J : Fin 3 → Fin n,
+      Integral.Connection.fiberNormSqComponent (I := I) (M := M) g₀ x 0 3
+          (Sec.toSection x) n e K₀ J =
+        Tensor0SBundle.Tensor0SSpace.toModel (Sec.toSection x
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+          ![e (J 0), e (J 1), e (J 2)] := by
+    intro J
+    have hcoframe :
+        (ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+            (fun k => g₀.inner x (e (K₀ k))) =
+          ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ) := by
+      apply ContinuousMultilinearMap.ext
+      intro v
+      rw [ContinuousMultilinearMap.compContinuousLinearMap_apply,
+        ContinuousMultilinearMap.mkPiAlgebra_apply, Finset.prod_of_isEmpty]
+      rfl
+    unfold Integral.Connection.fiberNormSqComponent
+    rw [hcoframe]
+    rw [Tensor0SBundle.Tensor0SSpace.toModel,
+      Tensor0SBundle.tensor0SSpace_continuousLinearEquiv_apply]
+    congr 1
+    funext k
+    fin_cases k <;> rfl
+  -- The model value expands over the frame triples `J : Fin 3 → Fin n`.
+  set σ := Sec.toSection x
+    (ContinuousMultilinearMap.constOfIsEmpty ℝ
+      (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) with hσ
+  set B : ℝ := Tensor0SBundle.Tensor0SSpace.toModel σ ![a, b, c] with hB_def
+  set abc : Fin 3 → TangentSpace I x := ![a, b, c] with habc
+  set Tval : (Fin 3 → Fin n) → ℝ := fun J =>
+    Tensor0SBundle.Tensor0SSpace.toModel σ (fun t => e (J t)) with hT_def
+  set cf : (Fin 3 → Fin n) → ℝ := fun J =>
+    ∏ t : Fin 3, g₀.inner x (e (J t)) (abc t) with hcf_def
+  -- `toModel σ` is a continuous multilinear map; expand each slot in the frame via `map_sum`.
+  have hexp : B = ∑ J : Fin 3 → Fin n, cf J * Tval J := by
+    have hcong : abc = (fun t : Fin 3 => ∑ i : Fin n, g₀.inner x (e i) (abc t) • e i) := by
+      funext t; exact hexpand (abc t)
+    have hmap := (Tensor0SBundle.Tensor0SSpace.toModel σ).map_sum_finset
+      (fun (t : Fin 3) (i : Fin n) => g₀.inner x (e i) (abc t) • e i)
+    rw [hB_def]
+    calc Tensor0SBundle.Tensor0SSpace.toModel σ abc
+        = Tensor0SBundle.Tensor0SSpace.toModel σ
+            (fun t : Fin 3 => ∑ i : Fin n, g₀.inner x (e i) (abc t) • e i) := by rw [← hcong]
+      _ = ∑ J ∈ Fintype.piFinset (fun _ : Fin 3 => (Finset.univ : Finset (Fin n))),
+            Tensor0SBundle.Tensor0SSpace.toModel σ
+              (fun t => g₀.inner x (e (J t)) (abc t) • e (J t)) :=
+            hmap (fun _ : Fin 3 => (Finset.univ : Finset (Fin n)))
+      _ = ∑ J : Fin 3 → Fin n, cf J * Tval J := by
+            rw [Fintype.piFinset_univ]
+            refine Finset.sum_congr rfl (fun J _ => ?_)
+            rw [hcf_def, hT_def]
+            have hsmul := (Tensor0SBundle.Tensor0SSpace.toModel σ).toMultilinearMap.map_smul_univ
+              (fun t : Fin 3 => g₀.inner x (e (J t)) (abc t)) (fun t : Fin 3 => e (J t))
+            rw [ContinuousMultilinearMap.coe_coe] at hsmul
+            rw [hsmul, smul_eq_mul]
+  have hCS : (∑ J : Fin 3 → Fin n, cf J * Tval J) ^ 2 ≤
+      (∑ J : Fin 3 → Fin n, cf J ^ 2) * ∑ J : Fin 3 → Fin n, Tval J ^ 2 :=
+    Finset.sum_mul_sq_le_sq_mul_sq Finset.univ cf Tval
+  -- The frame-factor square-sum is the product of the three g₀-quadratics.
+  have hcfsq : (∑ J : Fin 3 → Fin n, cf J ^ 2) =
+      g₀.inner x a a * g₀.inner x b b * g₀.inner x c c := by
+    have hstep : (∑ J : Fin 3 → Fin n, cf J ^ 2) =
+        ∏ t : Fin 3, ∑ i : Fin n, g₀.inner x (e i) (abc t) ^ 2 := by
+      rw [Finset.prod_univ_sum (fun _ : Fin 3 => (Finset.univ : Finset (Fin n)))
+        (fun (t : Fin 3) (i : Fin n) => g₀.inner x (e i) (abc t) ^ 2)]
+      rw [Fintype.piFinset_univ]
+      refine Finset.sum_congr rfl (fun J _ => ?_)
+      rw [hcf_def, ← Finset.prod_pow]
+    rw [hstep, Fin.prod_univ_three]
+    have h0 : abc 0 = a := rfl
+    have h1 : abc 1 = b := rfl
+    have h2 : abc 2 = c := rfl
+    rw [h0, h1, h2, hpars a, hpars b, hpars c]
+  -- The frame-value square-sum is the (0,3) fibre norm.
+  have hTsq : (∑ J : Fin 3 → Fin n, Tval J ^ 2) =
+      Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x (Sec.toSection x) := by
+    rw [Integral.Connection.riemannianFiberNormSq_eq_sum_componentS_sq (I := I) (M := M) g₀ x 3 e
+      hrepr (Sec.toSection x) K₀]
+    refine Finset.sum_congr rfl (fun J _ => ?_)
+    have hfun : (fun t : Fin 3 => e (J t)) = ![e (J 0), e (J 1), e (J 2)] := by
+      funext t; fin_cases t <;> rfl
+    change (Tensor0SBundle.Tensor0SSpace.toModel σ (fun t : Fin 3 => e (J t))) ^ 2 =
+      Integral.Connection.fiberNormSqComponent (I := I) (M := M) g₀ x 0 3
+        (Sec.toSection x) n e K₀ J ^ 2
+    rw [hfun, ← hcomp_eq J]
+  -- Assemble the Cauchy–Schwarz into the square-root product bound.
+  have hBsq : B ^ 2 ≤ g₀.inner x a a * g₀.inner x b b * g₀.inner x c c *
+      Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x (Sec.toSection x) := by
+    rw [hexp]
+    refine hCS.trans ?_
+    rw [hcfsq, hTsq]
+  have hB_abs : |B| ≤ Real.sqrt (g₀.inner x a a * g₀.inner x b b * g₀.inner x c c *
+      Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x (Sec.toSection x)) := by
+    rw [show |B| = Real.sqrt (B ^ 2) from (Real.sqrt_sq_eq_abs B).symm]
+    exact Real.sqrt_le_sqrt hBsq
+  refine hB_abs.trans ?_
+  have ha := DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg (I := I) (M := M) g₀ x a
+  have hb := DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg (I := I) (M := M) g₀ x b
+  have hc := DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg (I := I) (M := M) g₀ x c
+  have hr := Integral.Connection.riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 3 x
+    (Sec.toSection x)
+  rw [show g₀.inner x a a * g₀.inner x b b * g₀.inner x c c *
+        Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x (Sec.toSection x) =
+      (Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x (Sec.toSection x)) *
+        (g₀.inner x a a) * (g₀.inner x b b) * (g₀.inner x c c) from by ring]
+  rw [Real.sqrt_mul (by positivity), Real.sqrt_mul (by positivity), Real.sqrt_mul (by positivity)]
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
+set_option linter.unusedSectionVars false in
+/-- **The family-uniform `C⁰` value bound of the realized covariant-derivative `(0,3)`-evaluation.**
+For the supercritically `H^{a + 2}`-bounded (`2a > finrank + 4`) perturbation family there is a single
+constant `Φ ≥ 0` (depending on `g₀, a, B`, not on `T₁`) such that, whenever `‖T₁.toHs(a + 2)‖ ≤ B`,
+the realized `(0,3)`-covariant-derivative evaluation obeys
+`|covDerivRealizeEval g₀ T₁ x p q r| ≤ Φ · √(g₀ p p) · √(g₀ q q) · √(g₀ r r)` at every base point and
+every triple.  The constant is the sharp-order `H^{a + 2} ↪ C²` embedding constant (`2(a + 2) > finrank
++ 4`) times `B`: the evaluation is the model reading of the order-`1` covariant gradient of the realized
+symmetric tensor, whose `(0,3)` fibre norm is the `j = 1` summand of `iteratedCovGradJetSum
+(realizeSymm T₁)`, dominated through `realizeSymm_iteratedCovGradJetSum_le` by
+`iteratedCovGradJetSum T₁`, and through `exists_iteratedCovGradJetSum_le_toHs_sharpOrder` by
+`C · ‖T₁.toHs(a + 2)‖ ≤ C · B`. -/
+private theorem exists_covDerivRealizeEval_gcs_value_bound
+    (g₀ : SmoothRiemannianMetric I M) (B : ℝ) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ Φ : ℝ, 0 ≤ Φ ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2),
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ∀ (x : M) (p q r : TangentSpace I x),
+          |covDerivRealizeEval (I := I) g₀ T₁ x p q r| ≤
+            Φ * Real.sqrt (g₀.inner x p p) * Real.sqrt (g₀.inner x q q) *
+              Real.sqrt (g₀.inner x r r) := by
+  classical
+  have hsuper : 2 * (a + 2) > Module.finrank ℝ E + 4 := by omega
+  obtain ⟨C₀, hC₀pos, hC₀⟩ :=
+    exists_iteratedCovGradJetSum_le_toHs_sharpOrder (I := I) (M := M) g₀ (a + 2) hsuper
+  refine ⟨C₀ * max B 0, by positivity, fun T₁ hB x p q r => ?_⟩
+  letI : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 (2 + 0) I bb) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + 0)
+  letI : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 (2 + 1) I bb) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + 1)
+  letI : Bundle.RiemannianBundle (fun bb : M => TensorRSSpace 0 (2 + 2) I bb) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + 2)
+  -- The realized `(0,3)` jet at `x`: bound its fibre norm through the embedding.
+  set Sec : Integral.L2.SmoothCcTensor g₀ 0 3 :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 2 (realizeSymmCcTensor (I := I) g₀ T₁) with hSec
+  -- `covGrad ∘ realizeSymm` is the order-1 iterated covariant gradient.
+  have hSeceq : Sec = PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 1
+      (realizeSymmCcTensor (I := I) g₀ T₁) := by
+    rw [hSec, PDE.RicciFlow.iteratedCovGrad_succ (I := I) g₀ 0 2 0
+      (realizeSymmCcTensor (I := I) g₀ T₁),
+      PDE.RicciFlow.iteratedCovGrad_zero (I := I) g₀ 0 2
+        (realizeSymmCcTensor (I := I) g₀ T₁)]
+  -- The `(0,3)` fibre norm of the order-1 jet is the `j = 1` summand of the jet sum.
+  have hsqrt_le : Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
+        (Sec.toSection x)) ≤ C₀ * max B 0 := by
+    -- `√rfns(Sec) = ‖(∇¹ realizeSymm).toSection x‖`, the `j = 1` summand of the jet sum.
+    have hsummand : Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
+          (Sec.toSection x)) ≤
+        iteratedCovGradJetSum (I := I) g₀ (realizeSymmCcTensor (I := I) g₀ T₁) x := by
+      rw [iteratedCovGradJetSum, Finset.sum_range_succ, Finset.sum_range_succ,
+        Finset.sum_range_one]
+      -- Rewrite all three jet summands to their `√rfns` forms, then compare as plain reals.
+      rw [DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.norm_toSection_eq_sqrt_riemannianFiberNormSq_installed
+          (I := I) (M := M) g₀ 0 (2 + 0)
+          (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 0
+            (realizeSymmCcTensor (I := I) g₀ T₁)) x,
+        DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.norm_toSection_eq_sqrt_riemannianFiberNormSq_installed
+          (I := I) (M := M) g₀ 0 (2 + 1)
+          (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 1
+            (realizeSymmCcTensor (I := I) g₀ T₁)) x,
+        DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.norm_toSection_eq_sqrt_riemannianFiberNormSq_installed
+          (I := I) (M := M) g₀ 0 (2 + 2)
+          (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 2
+            (realizeSymmCcTensor (I := I) g₀ T₁)) x]
+      have hSec_rfns : Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
+            (Sec.toSection x) =
+          Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 1
+              (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x) := by rw [hSeceq]
+      rw [hSec_rfns]
+      have h0 := Real.sqrt_nonneg (Integral.Connection.riemannianFiberNormSq (I := I) (M := M)
+        g₀ 0 (2 + 0) x ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 0
+          (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x))
+      have h2 := Real.sqrt_nonneg (Integral.Connection.riemannianFiberNormSq (I := I) (M := M)
+        g₀ 0 (2 + 2) x ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 2
+          (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x))
+      linarith
+    -- Domination by `T₁`'s jet sum and the embedding.
+    have hreal := realizeSymm_iteratedCovGradJetSum_le (I := I) g₀ T₁ x
+    have hemb := hC₀ T₁ x
+    have hBmax : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤
+        max B 0 := le_trans hB (le_max_left _ _)
+    have hchain : iteratedCovGradJetSum (I := I) g₀ (realizeSymmCcTensor (I := I) g₀ T₁) x ≤
+        C₀ * max B 0 := by
+      refine le_trans hreal (le_trans hemb ?_)
+      exact mul_le_mul_of_nonneg_left hBmax hC₀pos.le
+    exact le_trans hsummand hchain
+  -- Apply the rank-3 Cauchy–Schwarz, then dominate the fibre-norm factor by `C₀ · max B 0`.
+  have hmodel := covGrad_realizeSymm_unitModel_eq_covDerivRealizeEval (I := I) g₀ T₁ x p q r
+  have hCS := abs_toModel_three_le_sqrt_rfns (I := I) (M := M) g₀ x Sec p q r
+  rw [hSec] at hCS
+  rw [hmodel] at hCS
+  refine le_trans hCS ?_
+  have hppnn : 0 ≤ Real.sqrt (g₀.inner x p p) := Real.sqrt_nonneg _
+  have hqqnn : 0 ≤ Real.sqrt (g₀.inner x q q) := Real.sqrt_nonneg _
+  have hrrnn : 0 ≤ Real.sqrt (g₀.inner x r r) := Real.sqrt_nonneg _
+  have hsqrt_le' : Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 3 x
+      ((DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad (I := I) (M := M) g₀ 0 2
+        (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x)) ≤ C₀ * max B 0 := by
+    rw [← hSec]; exact hsqrt_le
+  apply mul_le_mul_of_nonneg_right _ hrrnn
+  apply mul_le_mul_of_nonneg_right _ hqqnn
+  exact mul_le_mul_of_nonneg_right hsqrt_le' hppnn
+
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
 /-- **(POSIT — the family-uniform `g₀`-operator value bound of the connection difference.)**  For
@@ -679,8 +946,70 @@ theorem exists_connDiff_gOp_sup_le
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ∀ (x : M) (u v : TangentSpace I x),
           Real.sqrt (g₀.inner x (connDiff (I := I) g₁ g₀ x u v) (connDiff (I := I) g₁ g₀ x u v)) ≤
-            Λ_C * Real.sqrt (g₀.inner x u u) * Real.sqrt (g₀.inner x v v) :=
-  sorry
+            Λ_C * Real.sqrt (g₀.inner x u u) * Real.sqrt (g₀.inner x v v) := by
+  classical
+  obtain ⟨Φ, hΦ0, hΦ⟩ := exists_covDerivRealizeEval_gcs_value_bound (I := I) (M := M) g₀ B a ha
+  -- The Neumann-absorbed constant; `1 - δ > 0` since `δ < 1/2`.
+  have hδlt1 : δ < 1 := by linarith
+  have h1δpos : 0 < 1 - δ := by linarith
+  refine ⟨3 * Φ / (2 * (1 - δ)), by positivity, fun T₁ g₁ hg₁ hδbnd hB x u v => ?_⟩
+  set z : TangentSpace I x := connDiff (I := I) g₁ g₀ x u v with hz
+  set su := Real.sqrt (g₀.inner x u u) with hsu
+  set sv := Real.sqrt (g₀.inner x v v) with hsv
+  have hsu_nn : 0 ≤ su := Real.sqrt_nonneg _
+  have hsv_nn : 0 ≤ sv := Real.sqrt_nonneg _
+  -- `connDiff` evaluated at the smooth extensions reduces to its value at `u, v`.
+  have hext : connDiff (I := I) g₁ g₀ x
+        (Integral.Connection.smoothExtensionTangent (I := I) x u x)
+        (Integral.Connection.smoothExtensionTangent (I := I) x v x) = z := by
+    rw [Integral.Connection.smoothExtensionTangent_eq (I := I) x u,
+      Integral.Connection.smoothExtensionTangent_eq (I := I) x v]
+  -- Pairing bound against an arbitrary direction `c`, via the Koszul triangle.
+  have hpair : ∀ c : TangentSpace I x,
+      |g₀.inner x z c| ≤ ((3 * Φ / 2) * su * sv + δ * Real.sqrt (g₀.inner x z z)) *
+        Real.sqrt (g₀.inner x c c) := by
+    intro c
+    have hkos := connDiff_g0_fibre_abs_bound (I := I) g₁ g₀ T₁ hg₁ x v u c
+    rw [hext] at hkos
+    -- Bound each covariant-derivative-evaluation term by the embedding constant.
+    have hcdre1 := hΦ T₁ hB x v u c
+    have hcdre2 := hΦ T₁ hB x u v c
+    have hcdre3 := hΦ T₁ hB x c v u
+    set sc := Real.sqrt (g₀.inner x c c) with hsc
+    have hsc_nn : 0 ≤ sc := Real.sqrt_nonneg _
+    -- The self-referential perturbation term, via `gFibreOpBound`.
+    have hself : |ccTensorBilinSymm (I := I) g₀ T₁ x z c| ≤
+        δ * Real.sqrt (g₀.inner x z z) * sc := hδbnd x z c
+    have hszz_nn : 0 ≤ Real.sqrt (g₀.inner x z z) := Real.sqrt_nonneg _
+    -- Assemble: `2|g₀(z,c)| ≤ 3Φ·su·sv·sc + 2δ·√(g₀ z z)·sc`.
+    have hsum : |2 * g₀.inner x z c| ≤
+        3 * Φ * su * sv * sc + 2 * (δ * Real.sqrt (g₀.inner x z z) * sc) := by
+      refine le_trans hkos ?_
+      have e1 : |covDerivRealizeEval (I := I) g₀ T₁ x v u c| ≤ Φ * sv * su * sc := hcdre1
+      have e2 : |covDerivRealizeEval (I := I) g₀ T₁ x u v c| ≤ Φ * su * sv * sc := hcdre2
+      have e3 : |covDerivRealizeEval (I := I) g₀ T₁ x c v u| ≤ Φ * sc * sv * su := hcdre3
+      have hself2 : 2 * |ccTensorBilinSymm (I := I) g₀ T₁ x z c| ≤
+          2 * (δ * Real.sqrt (g₀.inner x z z) * sc) := by linarith
+      nlinarith [e1, e2, e3, hself2, hsu_nn, hsv_nn, hsc_nn, hΦ0, mul_nonneg hsu_nn hsv_nn]
+    have h2zc : |2 * g₀.inner x z c| = 2 * |g₀.inner x z c| := by rw [abs_mul]; norm_num
+    rw [h2zc] at hsum
+    have hfinal : |g₀.inner x z c| ≤
+        (3 * Φ / 2) * su * sv * sc + δ * Real.sqrt (g₀.inner x z z) * sc := by linarith
+    calc |g₀.inner x z c|
+        ≤ (3 * Φ / 2) * su * sv * sc + δ * Real.sqrt (g₀.inner x z z) * sc := hfinal
+      _ = ((3 * Φ / 2) * su * sv + δ * Real.sqrt (g₀.inner x z z)) * sc := by ring
+  -- Riesz-lift the pairing bound to a self-norm bound, then Neumann-absorb the `√(g₀ z z)` term.
+  set R := Real.sqrt (g₀.inner x z z) with hR
+  have hR_nn : 0 ≤ R := Real.sqrt_nonneg _
+  have hKnn : 0 ≤ (3 * Φ / 2) * su * sv + δ * R := by positivity
+  have hRle : R ≤ (3 * Φ / 2) * su * sv + δ * R :=
+    sqrt_gInner_self_le_of_forall_inner_le (I := I) (M := M) g₀ x z hKnn hpair
+  -- `(1 - δ)·R ≤ (3Φ/2)·su·sv`, so `R ≤ 3Φ/(2(1-δ))·su·sv`.
+  have hRabsorb : (1 - δ) * R ≤ (3 * Φ / 2) * su * sv := by nlinarith [hRle]
+  have hgoal : R ≤ 3 * Φ / (2 * (1 - δ)) * su * sv := by
+    rw [div_mul_eq_mul_div, div_mul_eq_mul_div, le_div_iff₀ (by positivity : (0:ℝ) < 2 * (1 - δ))]
+    nlinarith [hRabsorb, h1δpos, hsu_nn, hsv_nn, mul_nonneg hsu_nn hsv_nn, hR_nn]
+  exact hgoal
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
