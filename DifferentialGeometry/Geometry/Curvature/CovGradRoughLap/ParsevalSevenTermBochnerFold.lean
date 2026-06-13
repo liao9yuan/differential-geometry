@@ -5253,7 +5253,161 @@ private lemma genuineDiffCurv_slot0_eq_parseval_sum
       ∑ a : Fin N,
         (bochnerGroupElt3IiiIv (I := I) (M := M) g s S (V a) (V b) x +
           bochnerGroupElt2 (I := I) (M := M) g s S (V a) (V b) x) := by
-  sorry
+  classical
+  -- (1) Per-`a` carrier regrouping at the `tensor0SAsRS` level: `e3IiiIv + e2 = nabla + e1`, with the
+  -- differentiated-curvature carrier `nabla` read as the `tensor0SAsRS`-wrap of `nablaTensor0SCurv`
+  -- (`nablaDiffCurvTraceCc_toSection_eq`, `nablaDiffCurvTraceCc_toSection_eq_tensor0SAsRS_nablaTensor0SCurv`).
+  have hregroup : ∀ (W : Π b : M, TangentSpace I b)
+      (hW : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+        (fun b : M => (⟨b, W b⟩ : TotalSpace E (TangentSpace I)))),
+      bochnerGroupElt3IiiIv (I := I) (M := M) g s S W (V b) x +
+        bochnerGroupElt2 (I := I) (M := M) g s S W (V b) x =
+      tensor0SAsRS (I := I) (M := M) x
+          (nablaTensor0SCurv (I := I) g s ⟨fun y => W y, hW⟩ ⟨fun y => W y, hW⟩
+            ⟨fun y => V b y, hV b⟩
+            (fun y : M =>
+              (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
+                (unitZeroSec (I := I) (M := M) y)) x) +
+        bochnerGroupElt1 (I := I) (M := M) g s S W (V b) x := by
+    intro W hW
+    have h := nablaDiffCurvTraceCc_toSection_eq (I := I) (M := M) g s S hW (hV b) x
+    have h2 := nablaDiffCurvTraceCc_toSection_eq_tensor0SAsRS_nablaTensor0SCurv
+      (I := I) (M := M) g s S hW (hV b) x
+    rw [h2] at h
+    rw [eq_sub_iff_add_eq] at h
+    exact h.symm
+  -- (2) Sum the regrouping over `a`, split the family sum additively.
+  rw [Finset.sum_congr rfl (fun a _ => hregroup (V a) (hV a)), Finset.sum_add_distrib]
+  -- (3) Transfer the `nabla` family sum to the orthonormal-frame diagonal trace (diag Parseval bridge).
+  rw [parsevalFrameSum_diag_nablaTensor0SCurv_tensor0SAsRS_eq_ortho
+    (I := I) (M := M) g s S V hV hPar b x]
+  -- (4) Transfer the `e1` family sum to the orthonormal-frame trace of the same group-`1` curvature
+  -- bilinear (`parseval_family_sum_bilin_eq`, center orthonormality only — no global Parseval needed).
+  have he1transfer :
+      (∑ a : Fin N, bochnerGroupElt1 (I := I) (M := M) g s S (V a) (V b) x) =
+        ∑ i : Fin (Module.finrank ℝ E),
+          bochnerGroupElt1 (I := I) (M := M) g s S
+            (fun y => smoothOrthoFrame (I := I) g x i y) (V b) x := by
+    -- Unwrap `bochnerGroupElt1 W = tensor0SAsRS x (C W)` with `C W` the unit-read curvature carrier,
+    -- collapse both frame sums through the additive wrapper, and reduce to a `Tensor0SSpace s` identity.
+    have hC : ∀ (W : Π b : M, TangentSpace I b),
+        bochnerGroupElt1 (I := I) (M := M) g s S W (V b) x =
+          tensor0SAsRS (I := I) (M := M) x
+            ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+                riemannSec (tensorCov (I := I) g 0 s) W (V b)
+                  (covApply (tensorCov (I := I) g 0 s) W (fun y : M => S.toSection y)) x)
+              (unitZeroSec (I := I) (M := M) x)) := fun W => rfl
+    rw [Finset.sum_congr rfl (fun a _ => hC (V a)),
+      Finset.sum_congr rfl (fun i _ => hC (fun y => smoothOrthoFrame (I := I) g x i y))]
+    rw [← tensor0SAsRS_finsetSum (I := I) (M := M) s x Finset.univ,
+      ← tensor0SAsRS_finsetSum (I := I) (M := M) s x Finset.univ]
+    rw [tensor0SAsRS_eq_iff]
+    apply Tensor0SSpace.toModel_injective
+    apply ContinuousMultilinearMap.ext
+    intro m
+    have hpush : ∀ {ι : Type} (fs : Finset ι) (C : ι → Tensor0SSpace s I x),
+        Tensor0SSpace.toModel (∑ i ∈ fs, C i) m =
+          ∑ i ∈ fs, Tensor0SSpace.toModel (C i) m := by
+      intro ι fs C
+      rw [← Tensor0SSpace.toModelL_apply, map_sum, ContinuousMultilinearMap.sum_apply]
+      exact Finset.sum_congr rfl (fun i _ => by rw [Tensor0SSpace.toModelL_apply])
+    rw [hpush Finset.univ, hpush Finset.univ]
+    -- Identify each carrier value with the slot-`0` curvature bilinear `B(u, u')`, then transfer
+    -- the diagonal frame sum to the orthonormal frame (`parseval_family_sum_bilin_eq`).
+    set Bform : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ :=
+      LinearMap.mk₂ ℝ
+        (fun u u' => Tensor0SSpace.toModel
+          (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) x
+            u (V b x) (gradCurry0 (I := I) (M := M) g s S x u')) m)
+        (fun u₁ u₂ u' => by
+          simp only [map_add, ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add,
+            ContinuousMultilinearMap.add_apply])
+        (fun c u u' => by
+          simp only [map_smul, ContinuousLinearMap.smul_apply, Tensor0SSpace.toModel_smul,
+            ContinuousMultilinearMap.smul_apply, smul_eq_mul])
+        (fun u u₁' u₂' => by
+          simp only [gradCurry0, map_add, Tensor0SSpace.toModel_add,
+            ContinuousMultilinearMap.add_apply])
+        (fun c u u' => by
+          simp only [gradCurry0, map_smul, Tensor0SSpace.toModel_smul,
+            ContinuousMultilinearMap.smul_apply, smul_eq_mul])
+      with hBform_def
+    have hcarrier : ∀ (W : Π b : M, TangentSpace I b)
+        (hW : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+          (fun b : M => (⟨b, W b⟩ : TotalSpace E (TangentSpace I)))),
+        Tensor0SSpace.toModel
+            ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+                riemannSec (tensorCov (I := I) g 0 s) W (V b)
+                  (covApply (tensorCov (I := I) g 0 s) W (fun y : M => S.toSection y)) x)
+              (unitZeroSec (I := I) (M := M) x)) m = Bform (W x) (W x) := by
+      intro W hW
+      change _ = Tensor0SSpace.toModel
+        (riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g)) x
+          (W x) (V b x) (gradCurry0 (I := I) (M := M) g s S x (W x))) m
+      rw [riemannSec_eq_riemannOp_smooth (cov := tensorCov (I := I) g 0 s) hW (hV b)
+        (covApplyRS_contMDiff (I := I) g 0 s S.toSection.contMDiff hW)]
+      rw [show covApply (tensorCov (I := I) g 0 s) W (fun y : M => S.toSection y) x =
+          unitScalarRSLift (I := I) (M := M) x (gradCurry0 (I := I) (M := M) g s S x (W x)) from by
+        rw [gradCurry0, curry_covGrad_unit_eval_genVal (I := I) (M := M) g s S x (W x)]
+        rw [show (tensorCovDerivAt (I := I) (M := M) g 0 s S x (W x))
+              (unitZeroSec (I := I) (M := M) x) =
+            (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+              covApply (tensorCov (I := I) g 0 s) W (fun y : M => S.toSection y) x)
+              (unitZeroSec (I := I) (M := M) x) from by
+          rw [covApply_apply]; rfl]
+        rw [unitScalarRSLift_unitEval_self (I := I) (M := M) x _]]
+      rw [riemannOp_tensorCov_unitScalarRSLift_unitEval (I := I) (M := M) g s x (W x) (V b x)
+        (gradCurry0 (I := I) (M := M) g s S x (W x))]
+    rw [Finset.sum_congr rfl (fun a _ => hcarrier (V a) (hV a)),
+      Finset.sum_congr rfl (fun i _ =>
+        hcarrier (fun y => smoothOrthoFrame (I := I) g x i y)
+          (smoothOrthoFrame_smooth (I := I) g x i))]
+    exact parseval_family_sum_bilin_eq (I := I) (M := M) g x (fun a => V a x)
+      (fun u => hPar x u) (fun i => smoothOrthoFrame (I := I) g x i x)
+      (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g x i j) Bform
+  rw [he1transfer]
+  -- (5) Re-fold the two orthonormal-frame sums into the merged carrier `e3IiiIv + e2` at `B_i`.
+  rw [← Finset.sum_add_distrib]
+  rw [Finset.sum_congr rfl (fun i _ =>
+    (hregroup (fun y => smoothOrthoFrame (I := I) g x i y)
+      (smoothOrthoFrame_smooth (I := I) g x i)).symm)]
+  -- (6) Express the merged orthonormal-frame carrier through the underlying `riemannSec`/`covApply`
+  -- value (the `tensor0SAsRS`-wrapped carrier of the Frozen value primitive), collapse the frame sum
+  -- through the wrapper, and read both sides on every model tuple against the Frozen value lemma.
+  have hcarrierVal : ∀ i : Fin (Module.finrank ℝ E),
+      bochnerGroupElt3IiiIv (I := I) (M := M) g s S
+          (fun y => smoothOrthoFrame (I := I) g x i y) (V b) x +
+        bochnerGroupElt2 (I := I) (M := M) g s S
+          (fun y => smoothOrthoFrame (I := I) g x i y) (V b) x =
+      tensor0SAsRS (I := I) (M := M) x
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+            riemannOp (tensorCov (I := I) g 0 s) x
+              ((LeviCivita (I := I) g).toFun (V b) x (smoothOrthoFrame (I := I) g x i x))
+              (smoothOrthoFrame (I := I) g x i x) (S.toSection x) +
+            riemannOp (tensorCov (I := I) g 0 s) x (V b x)
+              ((LeviCivita (I := I) g).toFun (smoothOrthoFrame (I := I) g x i) x
+                (smoothOrthoFrame (I := I) g x i x)) (S.toSection x) +
+            covApply (tensorCov (I := I) g 0 s) (smoothOrthoFrame (I := I) g x i)
+              (fun y : M => riemannSec (tensorCov (I := I) g 0 s)
+                (smoothOrthoFrame (I := I) g x i) (V b) (fun z : M => S.toSection z) y) x)
+          (unitZeroSec (I := I) (M := M) x)) := by
+    intro i
+    rw [bochnerGroupElt3IiiIv, bochnerGroupElt2, ← tensor0SAsRS_add]
+    congr 1
+  rw [Finset.sum_congr rfl (fun i _ => hcarrierVal i)]
+  rw [← tensor0SAsRS_finsetSum (I := I) (M := M) s x Finset.univ]
+  rw [tensor0SAsRS_eq_iff]
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro m
+  rw [genuineDiffCurvSection_slot0_unit_eval_frameTrace (I := I) (M := M) g s S (hV b) x m]
+  have hpush : ∀ (C : Fin (Module.finrank ℝ E) → Tensor0SSpace s I x),
+      Tensor0SSpace.toModel (∑ i : Fin (Module.finrank ℝ E), C i) m =
+        ∑ i : Fin (Module.finrank ℝ E), Tensor0SSpace.toModel (C i) m := by
+    intro C
+    rw [← Tensor0SSpace.toModelL_apply, map_sum, ContinuousMultilinearMap.sum_apply]
+    exact Finset.sum_congr rfl (fun i _ => by rw [Tensor0SSpace.toModelL_apply])
+  rw [hpush]
 
 set_option linter.unusedSectionVars false in
 /-- **The frame-balanced three-term normal form equals the genuine curvature/Hessian cross pairing
