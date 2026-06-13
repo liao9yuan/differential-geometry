@@ -371,5 +371,44 @@ theorem bz_eq_tangentConst (x : M)
   rw [IsLocalFrameOn.toBasisAt_coe, e.localFrame_apply_of_mem_baseSet basisE hz]
   simp [Bundle.Trivialization.basisAt, tangentConstInChart_apply, he]
 
+/-- **(4b-ii a) `component0S bz` IS a coordinate-frame tower value.**  The good-frame
+component of the covariant tower equals the tower evaluated on the constant-coefficient
+section combo `V^{I0}_q = Σ_j (finBasis.repr (basisE (I0 q)) j) • frame_j` (whose value at
+`z` is `bz (I0 q)`), for `z ∈ baseSet ∩ Kc` (where the chart-constant frame bridge holds).
+Combines `component0S_apply`, `bz_eq_tangentConst`, `tangentConst_basis_expand`, the
+section-sum eval, and `hframeσ`. -/
+theorem componentBz_eq_covDeriv
+    (gRef : SmoothRiemannianMetric I M) (x : M)
+    (basisE : Module.Basis (Fin (Module.finrank Real E)) Real E)
+    (frame : Fin (Module.finrank Real E) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _))
+    {Kc : Set M}
+    (hframeσ : ∀ i, ∀ᶠ y in 𝓝ˢ Kc, frame i y
+       = tangentConstInChart (𝕜 := Real) (I := I) x (Module.finBasis Real E i) y)
+    (a : ℕ) (I0 : Fin (a + 2) → Fin (Module.finrank Real E))
+    (g : SmoothRiemannianMetric I M)
+    {z : M} (hzbase : z ∈ (trivializationAt E (TangentSpace I : M → Type _) x).baseSet)
+    (hzKc : z ∈ Kc) :
+    Tensor0SBundle.component0S (I := I)
+        (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+            I 1 basisE).toBasisAt hzbase)
+        (metricCovDeriv (I := I) g gRef a z) I0
+      = (covDerivOfField (I := I) gRef (Tensor0SBundle.metricTensorField (I := I) g) a) z
+          (fun q => (∑ j : Fin (Module.finrank Real E),
+            (Module.finBasis Real E).repr (basisE (I0 q)) j • frame j) z) := by
+  rw [Tensor0SBundle.component0S_apply]
+  show (covDerivOfField (I := I) gRef (Tensor0SBundle.metricTensorField (I := I) g) a) z
+      (fun q => (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+          I 1 basisE).toBasisAt hzbase) (I0 q))
+    = (covDerivOfField (I := I) gRef (Tensor0SBundle.metricTensorField (I := I) g) a) z
+      (fun q => (∑ j : Fin (Module.finrank Real E),
+        (Module.finBasis Real E).repr (basisE (I0 q)) j • frame j) z)
+  congr 1
+  funext q
+  rw [bz_eq_tangentConst, tangentConst_basis_expand, ContMDiffSection.finset_sum_apply_gen]
+  refine Finset.sum_congr rfl fun j _ => ?_
+  simp only [ContMDiffSection.coe_smul, Pi.smul_apply]
+  rw [(hframeσ j).self_of_nhdsSet z hzKc]
+
 end HCGCompactness
 end DifferentialGeometry
