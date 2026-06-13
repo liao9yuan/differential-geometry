@@ -813,6 +813,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CrossCorrectionCont
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CrossCorrectionParallelContraction
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckCartanDiffBilinOp
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckCartanRfnsBilinearProduct
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckVFCovariantJetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.Defs
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLocality

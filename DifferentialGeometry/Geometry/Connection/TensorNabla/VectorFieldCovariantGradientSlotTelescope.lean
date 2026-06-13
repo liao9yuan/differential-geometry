@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.VectorFieldCovariant
 import DifferentialGeometry.Geometry.Connection.TensorNabla.DeTurckVFIntrinsicValueBound
 import DifferentialGeometry.Geometry.Connection.TensorNabla.VectorFieldCovariantGradientDifference
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CrossCorrectionParallelContraction
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckVFCovariantJetBound
 
 /-! # The slot telescope of the symmetrised-lowered DeTurck-field difference
 
@@ -1189,11 +1190,18 @@ theorem exists_iteratedCovGrad_connDiffActionSection_connSlot_hamiltonTame_le
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (l + 3 + 3 + a) T₁‖ ≤ B →
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l
               (connDiffActionSection (I := I) g₀ g₁ g₀ g_bg)‖ ^ 2 ≤
-          C * ∑ i ∈ Finset.range (l + 3),
-            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2 :=
-  sorry
+          C * ∑ i ∈ Finset.range (l + 2 + 1),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2
+            + C * (∑ m ∈ Finset.range (l + 3 + 1 + 1),
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 m T₁‖ ^ 2)
+              * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * (a + 2))
+                  (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2 :=
+  DifferentialGeometry.PDE.RicciFlow.Pullback.exists_iteratedCovGrad_connDiffActionSection_le_jetSum
+    (I := I) g₀ g_bg δ hδ0 hδ1 B a ha l
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
@@ -1230,6 +1238,7 @@ theorem loweredCovGradDeTurckVFMixed_connSlot_iteratedCovGrad_hamiltonTame_le
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (l + 3 + 3 + a) T₁‖ ≤ B →
           (∀ x : M,
             Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
               ((loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₁ g₁ g_bg
@@ -1238,8 +1247,13 @@ theorem loweredCovGradDeTurckVFMixed_connSlot_iteratedCovGrad_hamiltonTame_le
           ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l
               (loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₁ g₁ g_bg
                 - loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₁ g_bg)‖ ^ 2 ≤
-            C * ∑ i ∈ Finset.range (l + 3),
-              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2 := by
+            C * ∑ i ∈ Finset.range (l + 2 + 1),
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                  (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2
+              + C * (∑ m ∈ Finset.range (l + 3 + 1 + 1),
+                  ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 m T₁‖ ^ 2)
+                * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * (a + 2))
+                    (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2 := by
   classical
   obtain ⟨K₁, hK₁0, hK₁⟩ :=
     exists_bound_riemannianFiberNormSq_smoothCcTensor (I := I) (M := M) g₀ 0 (2 + l)
@@ -1258,22 +1272,43 @@ theorem loweredCovGradDeTurckVFMixed_connSlot_iteratedCovGrad_hamiltonTame_le
     have hnn : (0 : ℝ) ≤ Real.sqrt K₁ := Real.sqrt_nonneg _
     nlinarith [hsq, Real.sqrt_nonneg K₁, hΛ0, hC₃0, sq_nonneg (Λ + C₃),
       mul_nonneg hnn (add_nonneg hΛ0 hC₃0)]
-  · intro T₁ g₁ hg₁ hδbnd hB₁
+  · intro T₁ g₁ hg₁ hδbnd hB₁ hBjet
     refine ⟨?_, ?_⟩
     · intro x
       refine le_trans (hΛ T₁ g₁ hg₁ hδbnd hB₁ x) ?_
       have hnn : (0 : ℝ) ≤ Real.sqrt K₁ := Real.sqrt_nonneg _
       nlinarith [Real.sqrt_nonneg K₁, hΛ0, hC₃0, sq_nonneg (Real.sqrt K₁ + C₃),
         mul_nonneg hΛ0 (add_nonneg hnn hC₃0)]
-    · have hSnn : (0 : ℝ) ≤ ∑ i ∈ Finset.range (l + 3),
-          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2 :=
-        Finset.sum_nonneg fun i _ => sq_nonneg _
-      rw [loweredCovGradDeTurckVFMixed_connSlot_sub_eq_connDiffActionSection (I := I) g₀ g₁ g_bg]
-      refine le_trans (hC₃ T₁ g₁ hg₁ hδbnd hB₁) ?_
+    · rw [loweredCovGradDeTurckVFMixed_connSlot_sub_eq_connDiffActionSection (I := I) g₀ g₁ g_bg]
+      have hC₃u := hC₃ T₁ g₁ hg₁ hδbnd hB₁ hBjet
       have hCle : C₃ ≤ Real.sqrt K₁ + Λ + C₃ := by
         have : (0 : ℝ) ≤ Real.sqrt K₁ + Λ := by positivity
         linarith
-      exact mul_le_mul_of_nonneg_right hCle hSnn
+      set Sdiff : ℝ := ∑ i ∈ Finset.range (l + 2 + 1),
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2
+        with hSdiff
+      set Scross : ℝ := (∑ m ∈ Finset.range (l + 3 + 1 + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 m T₁‖ ^ 2)
+          * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * (a + 2))
+              (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2 with hScross
+      have hSdiff_nn : 0 ≤ Sdiff := Finset.sum_nonneg fun i _ => sq_nonneg _
+      have hScross_nn : 0 ≤ Scross := by
+        rw [hScross]; exact mul_nonneg (Finset.sum_nonneg fun m _ => sq_nonneg _) (sq_nonneg _)
+      have hC₃u' : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l
+              (connDiffActionSection (I := I) g₀ g₁ g₀ g_bg)‖ ^ 2 ≤ C₃ * Sdiff + C₃ * Scross := by
+        rw [hSdiff, hScross, ← mul_assoc]; exact hC₃u
+      calc ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l
+              (connDiffActionSection (I := I) g₀ g₁ g₀ g_bg)‖ ^ 2
+          ≤ C₃ * Sdiff + C₃ * Scross := hC₃u'
+        _ ≤ (Real.sqrt K₁ + Λ + C₃) * Sdiff + (Real.sqrt K₁ + Λ + C₃) * Scross := by
+            have h1 := mul_le_mul_of_nonneg_right hCle hSdiff_nn
+            have h2 := mul_le_mul_of_nonneg_right hCle hScross_nn
+            linarith [h1, h2]
+        _ = (Real.sqrt K₁ + Λ + C₃) * Sdiff + (Real.sqrt K₁ + Λ + C₃) *
+              (∑ m ∈ Finset.range (l + 3 + 1 + 1),
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 m T₁‖ ^ 2)
+              * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * (a + 2))
+                  (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2 := by rw [hScross, mul_assoc]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
@@ -1463,27 +1498,24 @@ theorem exists_riemannianFiberNormSq_loweredCovGradDeTurckVFMixed_fldSlot_diff_f
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
-/-- **(POSIT — the family-uniform integrated Hamilton-tame jet bound of the field-difference
-gradient section.)**  For the fibre-small (`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, `δ < 1/2`)
-supercritically `H^{a+2}`-bounded realized perturbation family, the order-`l` covariant-jet `L²`
-norm of the field-difference gradient section `fieldDiffGradSection g₀ g₁ g₀ g_bg` (fibre
-`g₀(∇^{g₀}_v (W₁ − W₀), w)`, `Wᵢ = deTurckVF gᵢ g_bg`) is dominated by the `≤ (l+2)`-jet of the
-perturbation `T₁`:
+/-- **(EngineB — RESTATED TO TWO-ARM, PROVEN — the family-uniform integrated Hamilton/Moser two-arm
+jet bound of the field-difference gradient section.)**  For the fibre-small
+(`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, `δ < 1/2`) supercritically `H`-bounded realized
+perturbation family, the order-`l` covariant-jet `L²` norm of the field-difference gradient section
+`fieldDiffGradSection g₀ g₁ g₀ g_bg` (fibre `g₀(∇^{g₀}_v (W₁ − W₀), w)`, `Wᵢ = deTurckVF gᵢ g_bg`)
+obeys the **integrated two-arm Moser bound**
 ```
-‖∇^l (fieldDiffGradSection g₀ g₁ g₀ g_bg)‖² ≤ C · ∑_{i ∈ range(l+3)} ‖∇^i T₁‖².
+‖∇^l (fieldDiffGradSection g₀ g₁ g₀ g_bg)‖²
+  ≤ C · ∑_{i ≤ l+2} ‖∇^i (realizeSymm T₁)‖²
+    + C · (∑_{m ≤ l+3} ‖∇^m T₁‖²) · ‖(realizeSymm T₁).toHs (2(a+2))‖².
 ```
 
-The section is the `g₀`-lowered `g₀`-Levi-Civita covariant gradient of the field difference
-`W₁ − W₀`, which is the inverse-Gram-weighted trace of the pair connection difference
-`connDiff g₁ g₀` (`deTurckVF_sub_apply_eq_trace_connDiff`), again connDiff-driven and
-realized-Koszul in `T₁`.  The covariant-Leibniz expansion of the lowered covariant gradient reads
-the order-`l` jet of the section as a binomial-weighted sum of the covariant jets of the lowered
-connection difference (`i ≤ l+1`, folded into the `≤ (i+1)`-jet of `T₁` by the connection-difference
-jet engine `exists_riemannianFiberNormSq_iteratedCovGrad_loweredConnDiff_le_jetSum`) against the
-bounded jets of the smooth inverse-Gram trace weights, so the whole order-`l` jet is Hamilton-tame
-in the `≤ (l+2)`-jet of `T₁` with a family-uniform constant.  Vanishes at `T₁ = 0` realized
-(`g₁ = g₀`, `W₁ − W₀ = 0`, the section is the zero section).  Body `sorry`: a posited deep
-covariant-Leibniz field-difference jet engine. -/
+The over-strong clean single-arm shape `C · ∑ ‖∇^i T₁‖²` was refuted at high order (the project fact
+`MetricDifferenceFdBTermTree`: the `W₁` coefficient jets of order `> 2` are not family-uniformly
+pointwise bounded).  The two-arm Moser shape is exactly the Lie-line foundation
+`exists_iteratedCovGrad_deTurckVF_le_jetSum` (`DeTurckVFCovariantJetBound.lean`) of which this engine is
+a verbatim restatement (same conclusion), proven there over the field-difference covariant-Leibniz
+product grid + the Gagliardo–Nirenberg two-arm engine + the proven connection-difference jet tower. -/
 theorem exists_iteratedCovGrad_fieldDiffGradSection_fldSlot_hamiltonTame_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
     (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) (l : ℕ) :
@@ -1493,11 +1525,18 @@ theorem exists_iteratedCovGrad_fieldDiffGradSection_fldSlot_hamiltonTame_le
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (l + 3 + 3 + a) T₁‖ ≤ B →
         ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l
               (fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg)‖ ^ 2 ≤
-          C * ∑ i ∈ Finset.range (l + 3),
-            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2 :=
-  sorry
+          C * ∑ i ∈ Finset.range (l + 2 + 1),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2
+            + C * (∑ m ∈ Finset.range (l + 3 + 1 + 1),
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 m T₁‖ ^ 2)
+              * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * (a + 2))
+                  (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2 :=
+  DifferentialGeometry.PDE.RicciFlow.Pullback.exists_iteratedCovGrad_deTurckVF_le_jetSum
+    (I := I) g₀ g_bg δ hδ0 hδ1 B a ha l
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
@@ -1534,6 +1573,7 @@ theorem loweredCovGradDeTurckVFMixed_fldSlot_iteratedCovGrad_hamiltonTame_le
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (l + 3 + 3 + a) T₁‖ ≤ B →
           (∀ x : M,
             Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
               ((loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₁ g_bg
@@ -1542,8 +1582,13 @@ theorem loweredCovGradDeTurckVFMixed_fldSlot_iteratedCovGrad_hamiltonTame_le
           ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l
               (loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₁ g_bg
                 - loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₀ g_bg)‖ ^ 2 ≤
-            C * ∑ i ∈ Finset.range (l + 3),
-              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2 := by
+            C * ∑ i ∈ Finset.range (l + 2 + 1),
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                  (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2
+              + C * (∑ m ∈ Finset.range (l + 3 + 1 + 1),
+                  ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 m T₁‖ ^ 2)
+                * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * (a + 2))
+                    (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2 := by
   classical
   obtain ⟨K₁, hK₁0, hK₁⟩ :=
     exists_bound_riemannianFiberNormSq_smoothCcTensor (I := I) (M := M) g₀ 0 (2 + l)
@@ -1562,22 +1607,43 @@ theorem loweredCovGradDeTurckVFMixed_fldSlot_iteratedCovGrad_hamiltonTame_le
     have hnn : (0 : ℝ) ≤ Real.sqrt K₁ := Real.sqrt_nonneg _
     nlinarith [hsq, Real.sqrt_nonneg K₁, hΛ0, hC₃0, sq_nonneg (Λ + C₃),
       mul_nonneg hnn (add_nonneg hΛ0 hC₃0)]
-  · intro T₁ g₁ hg₁ hδbnd hB₁
+  · intro T₁ g₁ hg₁ hδbnd hB₁ hBjet
     refine ⟨?_, ?_⟩
     · intro x
       refine le_trans (hΛ T₁ g₁ hg₁ hδbnd hB₁ x) ?_
       have hnn : (0 : ℝ) ≤ Real.sqrt K₁ := Real.sqrt_nonneg _
       nlinarith [Real.sqrt_nonneg K₁, hΛ0, hC₃0, sq_nonneg (Real.sqrt K₁ + C₃),
         mul_nonneg hΛ0 (add_nonneg hnn hC₃0)]
-    · have hSnn : (0 : ℝ) ≤ ∑ i ∈ Finset.range (l + 3),
-          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2 :=
-        Finset.sum_nonneg fun i _ => sq_nonneg _
-      rw [loweredCovGradDeTurckVFMixed_fldSlot_sub_eq_fieldDiffGradSection (I := I) g₀ g₁ g_bg]
-      refine le_trans (hC₃ T₁ g₁ hg₁ hδbnd hB₁) ?_
+    · rw [loweredCovGradDeTurckVFMixed_fldSlot_sub_eq_fieldDiffGradSection (I := I) g₀ g₁ g_bg]
+      have hC₃u := hC₃ T₁ g₁ hg₁ hδbnd hB₁ hBjet
       have hCle : C₃ ≤ Real.sqrt K₁ + Λ + C₃ := by
         have : (0 : ℝ) ≤ Real.sqrt K₁ + Λ := by positivity
         linarith
-      exact mul_le_mul_of_nonneg_right hCle hSnn
+      set Sdiff : ℝ := ∑ i ∈ Finset.range (l + 2 + 1),
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2
+        with hSdiff
+      set Scross : ℝ := (∑ m ∈ Finset.range (l + 3 + 1 + 1),
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 m T₁‖ ^ 2)
+          * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * (a + 2))
+              (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2 with hScross
+      have hSdiff_nn : 0 ≤ Sdiff := Finset.sum_nonneg fun i _ => sq_nonneg _
+      have hScross_nn : 0 ≤ Scross := by
+        rw [hScross]; exact mul_nonneg (Finset.sum_nonneg fun m _ => sq_nonneg _) (sq_nonneg _)
+      have hC₃u' : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l
+              (fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg)‖ ^ 2 ≤ C₃ * Sdiff + C₃ * Scross := by
+        rw [hSdiff, hScross, ← mul_assoc]; exact hC₃u
+      calc ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l
+              (fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg)‖ ^ 2
+          ≤ C₃ * Sdiff + C₃ * Scross := hC₃u'
+        _ ≤ (Real.sqrt K₁ + Λ + C₃) * Sdiff + (Real.sqrt K₁ + Λ + C₃) * Scross := by
+            have h1 := mul_le_mul_of_nonneg_right hCle hSdiff_nn
+            have h2 := mul_le_mul_of_nonneg_right hCle hScross_nn
+            linarith [h1, h2]
+        _ = (Real.sqrt K₁ + Λ + C₃) * Sdiff + (Real.sqrt K₁ + Λ + C₃) *
+              (∑ m ∈ Finset.range (l + 3 + 1 + 1),
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 m T₁‖ ^ 2)
+              * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * (a + 2))
+                  (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2 := by rw [hScross, mul_assoc]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
@@ -1634,6 +1700,7 @@ theorem loweredCovGradDeTurckVFMixed_diag_iteratedCovGrad_hamiltonTame_le
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (l + 3 + 3 + a) T₁‖ ≤ B →
           (∀ x : M,
             Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
               ((loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₁ g₁ g_bg
@@ -1642,8 +1709,13 @@ theorem loweredCovGradDeTurckVFMixed_diag_iteratedCovGrad_hamiltonTame_le
           ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l
               (loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₁ g₁ g_bg
                 - loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₀ g_bg)‖ ^ 2 ≤
-            C * ∑ i ∈ Finset.range (l + 3),
-              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2 := by
+            C * ∑ i ∈ Finset.range (l + 2 + 1),
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                  (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2
+              + C * (∑ m ∈ Finset.range (l + 3 + 1 + 1),
+                  ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 m T₁‖ ^ 2)
+                * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * (a + 2))
+                    (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2 := by
   classical
   obtain ⟨C_A, hCA_nn, hbgA, hfamA⟩ :=
     loweredCovGradDeTurckVFMixed_connSlot_iteratedCovGrad_hamiltonTame_le
@@ -1656,9 +1728,9 @@ theorem loweredCovGradDeTurckVFMixed_diag_iteratedCovGrad_hamiltonTame_le
     refine le_trans (hbgA x) ?_
     have hle : C_A ≤ 2 * (C_A + C_B) + 1 := by nlinarith
     nlinarith [sq_nonneg C_A, sq_nonneg (2 * (C_A + C_B) + 1 - C_A)]
-  · intro T₁ g₁ hg₁ hδbnd hB₁
-    obtain ⟨hvalA, hintA⟩ := hfamA T₁ g₁ hg₁ hδbnd hB₁
-    obtain ⟨hvalB, hintB⟩ := hfamB T₁ g₁ hg₁ hδbnd hB₁
+  · intro T₁ g₁ hg₁ hδbnd hB₁ hBjet
+    obtain ⟨hvalA, hintA⟩ := hfamA T₁ g₁ hg₁ hδbnd hB₁ hBjet
+    obtain ⟨hvalB, hintB⟩ := hfamB T₁ g₁ hg₁ hδbnd hB₁ hBjet
     set cA : Integral.L2.SmoothCcTensor g₀ 0 2 :=
       loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₁ g₁ g_bg
         - loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₁ g_bg with hcA
@@ -1668,9 +1740,16 @@ theorem loweredCovGradDeTurckVFMixed_diag_iteratedCovGrad_hamiltonTame_le
     have hPsum : loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₁ g₁ g_bg
         - loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₀ g_bg = cA + cB := by
       rw [hcA, hcB]; abel
-    have hSnn : (0 : ℝ) ≤ ∑ i ∈ Finset.range (l + 3),
-        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2 :=
-      Finset.sum_nonneg fun i _ => sq_nonneg _
+    set Sdiff : ℝ := ∑ i ∈ Finset.range (l + 2 + 1),
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2
+      with hSdiff
+    set Scross : ℝ := (∑ m ∈ Finset.range (l + 3 + 1 + 1),
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 m T₁‖ ^ 2)
+        * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * (a + 2))
+            (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2 with hScross
+    have hSdiff_nn : 0 ≤ Sdiff := Finset.sum_nonneg fun i _ => sq_nonneg _
+    have hScross_nn : 0 ≤ Scross := by
+      rw [hScross]; exact mul_nonneg (Finset.sum_nonneg fun m _ => sq_nonneg _) (sq_nonneg _)
     refine ⟨?_, ?_⟩
     · intro x
       rw [hPsum, Integral.L2.SmoothCcTensor.toSection_add]
@@ -1681,6 +1760,14 @@ theorem loweredCovGradDeTurckVFMixed_diag_iteratedCovGrad_hamiltonTame_le
       have hB' := hvalB x
       nlinarith [hA', hB', hCA_nn, hCB_nn, sq_nonneg (C_A + C_B), sq_nonneg (C_A - C_B)]
     · rw [hPsum, PDE.RicciFlow.iteratedCovGrad_add]
+      have hgoaleq : (2 * (C_A + C_B) + 1) * Sdiff + (2 * (C_A + C_B) + 1) *
+            (∑ m ∈ Finset.range (l + 3 + 1 + 1),
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 m T₁‖ ^ 2)
+            * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * (a + 2))
+                (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2
+          = (2 * (C_A + C_B) + 1) * Sdiff + (2 * (C_A + C_B) + 1) * Scross := by
+        rw [hScross, mul_assoc]
+      rw [hgoaleq]
       refine le_trans (sq_le_sq' ?_ (norm_add_le _ _)) ?_
       · have := norm_nonneg
           (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l cA
@@ -1689,12 +1776,10 @@ theorem loweredCovGradDeTurckVFMixed_diag_iteratedCovGrad_hamiltonTame_le
           norm_nonneg (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l cB)]
       · refine le_trans (add_sq_le_two_mul_sq_add_sq _ _) ?_
         have hAi : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l cA‖ ^ 2 ≤
-            C_A * ∑ i ∈ Finset.range (l + 3),
-              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2 := hintA
+            C_A * Sdiff + C_A * Scross := by rw [hSdiff, hScross, ← mul_assoc]; exact hintA
         have hBi : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l cB‖ ^ 2 ≤
-            C_B * ∑ i ∈ Finset.range (l + 3),
-              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i T₁‖ ^ 2 := hintB
-        nlinarith [hAi, hBi, hSnn, hCA_nn, hCB_nn]
+            C_B * Sdiff + C_B * Scross := by rw [hSdiff, hScross, ← mul_assoc]; exact hintB
+        nlinarith [hAi, hBi, hSdiff_nn, hScross_nn, hCA_nn, hCB_nn]
 
 end Pullback
 end RicciFlow
