@@ -655,6 +655,7 @@ import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedNorm
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.BanachAlgebraSmoothness
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CcTensorBilinFibreEndo
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CompactInclusionIntrinsic
+import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.FibreEndoSobolevMultiplier
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.FibreOperatorAlgebra
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HilbertSpace
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.Inclusion
