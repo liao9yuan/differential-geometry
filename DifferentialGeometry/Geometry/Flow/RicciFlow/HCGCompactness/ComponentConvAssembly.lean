@@ -214,5 +214,77 @@ theorem framePairs_pinned
   rw [hpin] at hΦinf
   exact hΦinf
 
+/-- **Step 3 — feed `hpairs` into the tower induction.**  Combines `exists_frameData`
+(frame), `framePairs_pinned` (`hpairs`), and `bumpTowerCarrier_all` (via
+`hbase_of_framePairs`) to produce, along one subsequence `ψ`, the all-orders
+`C∞`-on-compacts convergence of the bump tower carriers on the open patch
+`U = target ∩ symm⁻¹(interior K₀)` — for EVERY covariant order `a` and section tuple. -/
+theorem exists_tower_conv
+    (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
+    (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
+      metricCovDerivNorm (I := I) q (gSeq k) gRef z ≤ C)
+    (x₀ : M) {K₀ : Set M} (hK₀ : IsCompact K₀) (hK₀chart : K₀ ⊆ (chartAt H x₀).source)
+    (φ : ℕ → ℕ) (gInf : SmoothRiemannianMetric I M)
+    (hconv : ∀ x : M, Filter.Tendsto (fun m => (gSeq (φ m)).inner x) Filter.atTop
+      (nhds (gInf.inner x))) :
+    ∃ (ψ : ℕ → ℕ) (χ : E → Real) (U : Set E),
+      StrictMono ψ ∧ IsOpen U ∧
+      (extChartAt I x₀ '' interior K₀ ⊆ U) ∧ Set.EqOn χ 1 U ∧
+      ∀ (a : ℕ) (V : Fin (a + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+          (TangentSpace I : M → Type _)),
+        MapCInfConvOnCompacts U
+          (fun k z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gRef
+              (Tensor0SBundle.metricTensorField (I := I) (gSeq (φ (ψ k)))) a) w
+                (fun a => V a w)) z)
+          (fun z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gRef
+              (Tensor0SBundle.metricTensorField (I := I) gInf) a) w
+                (fun a => V a w)) z) := by
+  classical
+  obtain ⟨frame, vbasis, hframeσ, hspan⟩ := exists_frameData (I := I) x₀ hK₀ hK₀chart
+  obtain ⟨ψ, χ, hψ, hχcd, htsupp, hχ1, hpairs⟩ :=
+    framePairs_pinned (I := I) gRef gSeq hbdd x₀ hK₀ hK₀chart frame φ gInf hconv
+  -- the open patch `U = target ∩ symm⁻¹(interior K₀)`
+  set U : Set E := (extChartAt I x₀).target ∩
+    (extChartAt I x₀).symm ⁻¹' interior K₀ with hUdef
+  have hUopen : IsOpen U :=
+    (continuousOn_extChartAt_symm (I := I) x₀).isOpen_inter_preimage
+      (isOpen_extChartAt_target (I := I) x₀) isOpen_interior
+  have hUtarget : U ⊆ (extChartAt I x₀).target := fun z hz => hz.1
+  have hUKc : ∀ z ∈ U, (extChartAt I x₀).symm z ∈ K₀ := fun z hz => interior_subset hz.2
+  have hχU : Set.EqOn χ 1 U := by
+    intro z hz
+    have hzK₀ : (extChartAt I x₀).symm z ∈ K₀ := hUKc z hz
+    have := hχ1 ((extChartAt I x₀).symm z) hzK₀
+    rwa [(extChartAt I x₀).right_inv hz.1] at this
+  have hImg : extChartAt I x₀ '' interior K₀ ⊆ U := by
+    rintro z ⟨y, hy, rfl⟩
+    have hysrc : y ∈ (extChartAt I x₀).source := by
+      rw [extChartAt_source]; exact hK₀chart (interior_subset hy)
+    exact ⟨(extChartAt I x₀).map_source hysrc, by
+      rw [Set.mem_preimage, (extChartAt I x₀).left_inv hysrc]; exact hy⟩
+  refine ⟨ψ, χ, U, hψ, hUopen, hImg, hχU, fun a V => ?_⟩
+  -- restrict `hpairs` from `univ` to `U`
+  have hpairsU : ∀ (i j : Fin (Module.finrank Real E)),
+      MapCInfConvOnCompacts U
+        (fun k z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+          (fun w : M => (covDerivOfField (I := I) gRef
+            (Tensor0SBundle.metricTensorField (I := I) (gSeq (φ (ψ k)))) 0) w
+              (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)) z)
+        (fun z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+          (fun w : M => (covDerivOfField (I := I) gRef
+            (Tensor0SBundle.metricTensorField (I := I) gInf) 0) w
+              (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)) z) :=
+    fun i j K hK hKU p => (hpairs i j) K hK (Set.subset_univ K) p
+  exact bumpTowerCarrier_all (I := I) gRef
+    (fun k => Tensor0SBundle.metricTensorField (I := I) (gSeq (φ (ψ k))))
+    (Tensor0SBundle.metricTensorField (I := I) gInf) x₀ hχcd htsupp hUopen hχU hUtarget
+    hK₀chart hUKc Finset.univ frame vbasis hframeσ hspan
+    (fun V => hbase_of_framePairs (I := I) gRef
+      (fun k => Tensor0SBundle.metricTensorField (I := I) (gSeq (φ (ψ k))))
+      (Tensor0SBundle.metricTensorField (I := I) gInf) x₀ hχcd htsupp hUopen hχU hUtarget
+      hUKc Finset.univ frame hspan hpairsU V) a V
+
 end HCGCompactness
 end DifferentialGeometry
