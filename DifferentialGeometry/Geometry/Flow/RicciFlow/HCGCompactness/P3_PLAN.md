@@ -159,7 +159,11 @@ green, axiom-clean).  C1a/C1b ✅ ACCEPTED (5656ee51,
 green 3848 jobs, axiom-clean).  The live tree already contains the C1a/C1b
 brick, so the earlier "dispatch C1a/C1b" kickoff request is superseded.  C-II
 final still has to turn the pointwise `gInf` limit plus the scaffold hypotheses
-into the final `MetricCInfConvOnCompacts` / window input.**
+into the final `MetricCInfConvOnCompacts` / window input.  C-II-final-B0 ✅
+ACCEPTED (c2510190): `exists_engine_frameCInfConv` and
+`exists_engine_frameCInfConv_eq_gm` re-expose the engine's order-0
+C∞-on-compacts frame-component convergence and pin its limit to `gm`; targeted
+build green 3848 jobs, axiom-clean.**
 **File**: `MetricPreconvDiag.lean`.
 
 C0 (the abstract diagonal — design FIXED by the planner, prove as stated
@@ -273,15 +277,16 @@ constants-first seam is closed: good-frame witnesses `basisE`, `u'`, and `Cu`
 are now bound before `∀ gk gInf`, so they depend only on `gRef`, `a`, and `x`.**
 
 **NEXT FRONTIER (C-II-final-B):** do not try to prove the finite-cover `hnorm`
-wrapper until the input convergence theorem exists.  The missing bridge is
-`componentConv_covDeriv_of_chartCInf`: from re-exposed C∞-on-compacts order-0
-chart-component convergence of the metrics and the fixed `gRef` connection
-data, derive uniform convergence on a good-frame patch of
+wrapper until the higher-order input convergence theorem exists.  Gap A is now
+closed by C-II-final-B0 (`exists_engine_frameCInfConv` +
+`exists_engine_frameCInfConv_eq_gm`).  The remaining missing bridge is
+`componentConv_covDeriv_of_chartCInf`: from the re-exposed C∞-on-compacts
+order-0 chart-component convergence of the metrics and the fixed `gRef`
+connection data, derive uniform convergence on a good-frame patch of
 `component0S (metricCovDeriv (gSeq k) gRef a)` to
-`component0S (metricCovDeriv gInf gRef a)` for all `a ≤ p`.  Gap A is that
-`metricPreconv_gInf` currently exposes only pointwise order-0 CLM convergence;
-Gap B is this covariant-tower convergence bridge.  Once both are available,
-C-II can finish the finite-cover `hnorm` step and then assemble
+`component0S (metricCovDeriv gInf gRef a)` for all `a ≤ p`.  Once this
+covariant-tower convergence bridge is available, C-II can finish the finite-cover
+`hnorm` step and then assemble
 `metricPreconvInf`.**
 **File**: same or split `MetricPreconvBridge.lean` if > ~900 lines.
 
