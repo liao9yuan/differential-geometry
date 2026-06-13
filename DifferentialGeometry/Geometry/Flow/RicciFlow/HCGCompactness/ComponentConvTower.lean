@@ -176,5 +176,145 @@ theorem bumpTowerStep_chartConv
   · exact (bumpFderiv_eq_chartTowerStep (I := I) gRef A0inf p V x₀ v σ hσ hKchart
       hU hχU hUKc hUtarget hz).symm
 
+/-- The chart representative of a function smooth on the chart source is
+`ContDiffOn` the extended-chart target.  (General version of
+`chartRep_towerScalar_contDiffOn`, for the frame-coefficient functions that are
+only smooth on the chart domain.) -/
+theorem chartRep_contDiffOn (f : M → Real) (x₀ : M)
+    (hf : ContMDiffOn I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f (chartAt H x₀).source) :
+    ContDiffOn Real (∞ : WithTop ℕ∞)
+      (writtenInExtChartAt I 𝓘(Real, Real) x₀ f) (extChartAt I x₀).target := by
+  have hsymm : ContMDiffOn 𝓘(Real, E) I (∞ : WithTop ℕ∞)
+      (extChartAt I x₀).symm (extChartAt I x₀).target := contMDiffOn_extChartAt_symm x₀
+  have hmaps : Set.MapsTo (extChartAt I x₀).symm (extChartAt I x₀).target
+      (chartAt H x₀).source := by
+    intro z hz
+    rw [← extChartAt_source (I := I)]
+    exact (extChartAt I x₀).map_target hz
+  have hcomp : ContMDiffOn 𝓘(Real, E) 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+      (f ∘ (extChartAt I x₀).symm) (extChartAt I x₀).target := hf.comp hsymm hmaps
+  have hcd : ContDiffOn Real (∞ : WithTop ℕ∞)
+      (f ∘ (extChartAt I x₀).symm) (extChartAt I x₀).target :=
+    contMDiffOn_iff_contDiffOn.mp hcomp
+  have hwrite : writtenInExtChartAt I 𝓘(Real, Real) x₀ f
+      = f ∘ (extChartAt I x₀).symm := by funext z; simp [writtenInExtChartAt]
+  rw [hwrite]; exact hcd
+
+/-- **Multilinear frame-expansion convergence.**  If one slot `j` of the section
+tuple `V` is, on the chart source, the finite combination `∑ᵢ cᵢ • frameᵢ` of a
+section family with smooth coefficients `cᵢ`, then the bump-extended level-`p`
+tower carrier of `V` converges `C^∞`-on-compacts whenever each carrier of the
+slot-replaced tuple `update V j frameᵢ` does.  (Multilinearity of
+`covDerivOfField … w` in the slots + `mulLeft`/`sum`; the `χ²`/coefficient locality
+is absorbed by `congr` on `U`.)  Used for the leading-slot expansion of the
+`p → p+1` step and the order-`0` base. -/
+theorem bumpTower_slotExpand_conv
+    (gRef : SmoothRiemannianMetric I M)
+    (A0Seq : ℕ → Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    (A0inf : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    (p : ℕ) (x₀ : M)
+    {χ : E → Real} (hχ : ContDiff Real (∞ : WithTop ℕ∞) χ)
+    (htsupp : tsupport χ ⊆ (extChartAt I x₀).target)
+    {U : Set E} (hU : IsOpen U) (hχU : Set.EqOn χ 1 U)
+    (hUtarget : U ⊆ (extChartAt I x₀).target)
+    {ι : Type*} (s : Finset ι)
+    (frame : ι → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _))
+    (c : ι → M → Real)
+    (hc : ∀ i, ContMDiffOn I 𝓘(Real, Real) (∞ : WithTop ℕ∞) (c i)
+      (chartAt H x₀).source)
+    (V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _))
+    (j : Fin (p + 2))
+    (hexpand : ∀ w ∈ (chartAt H x₀).source,
+      (V j) w = ∑ i ∈ s, c i w • frame i w)
+    (hconv : ∀ i, MapCInfConvOnCompacts U
+      (fun k z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+        (fun w : M => (covDerivOfField (I := I) gRef (A0Seq k) p) w
+          (fun a => (Function.update V j (frame i)) a w)) z)
+      (fun z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+        (fun w : M => (covDerivOfField (I := I) gRef A0inf p) w
+          (fun a => (Function.update V j (frame i)) a w)) z)) :
+    MapCInfConvOnCompacts U
+      (fun k z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+        (fun w : M => (covDerivOfField (I := I) gRef (A0Seq k) p) w (fun a => V a w)) z)
+      (fun z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+        (fun w : M => (covDerivOfField (I := I) gRef A0inf p) w (fun a => V a w)) z) := by
+  classical
+  -- bump-extended coefficient `χ · chartRep(cᵢ)` is globally smooth
+  have hg : ∀ i, ContDiff Real (∞ : WithTop ℕ∞)
+      (fun z : E => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀ (c i) z) :=
+    fun i => bumpMul_contDiff (isOpen_extChartAt_target (I := I) x₀) hχ htsupp
+      (chartRep_contDiffOn (I := I) (c i) x₀ (hc i))
+  -- slot-replaced carriers are globally smooth
+  have hcarrSeq : ∀ (i : ι) (k : ℕ), ContDiff Real (∞ : WithTop ℕ∞)
+      (fun z : E => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+        (fun w : M => (covDerivOfField (I := I) gRef (A0Seq k) p) w
+          (fun a => (Function.update V j (frame i)) a w)) z) :=
+    fun i k => bumpTowerScalar_contDiff (I := I) gRef (A0Seq k) p
+      (Function.update V j (frame i)) x₀ hχ htsupp
+  have hcarrInf : ∀ i : ι, ContDiff Real (∞ : WithTop ℕ∞)
+      (fun z : E => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+        (fun w : M => (covDerivOfField (I := I) gRef A0inf p) w
+          (fun a => (Function.update V j (frame i)) a w)) z) :=
+    fun i => bumpTowerScalar_contDiff (I := I) gRef A0inf p
+      (Function.update V j (frame i)) x₀ hχ htsupp
+  -- each `gᵢ · carrierᵢ` converges, then sum over `s`
+  have hsum := MapCInfConvOnCompacts.sum s
+    (fun i => (hconv i).mulLeft (hg i) (fun k => hcarrSeq i k) (hcarrInf i))
+    (fun i k => (hg i).mul (hcarrSeq i k)) (fun i => (hg i).mul (hcarrInf i))
+  -- pointwise multilinear expansion, valid for every base field `A0` on the chart source
+  have hmulti : ∀ (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+        (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2),
+      ∀ q ∈ (chartAt H x₀).source,
+      (covDerivOfField (I := I) gRef A0 p) q (fun a => V a q)
+        = ∑ i ∈ s, c i q •
+            (covDerivOfField (I := I) gRef A0 p) q
+              (fun a => (Function.update V j (frame i)) a q) := by
+    intro A0 q hq
+    have hupd : ∀ i : ι,
+        Function.update (fun a => V a q) j (frame i q)
+          = fun a => (Function.update V j (frame i)) a q := by
+      intro i
+      funext a
+      by_cases h : a = j
+      · subst h; simp
+      · simp [Function.update_of_ne h]
+    have hstep1 : (fun a => V a q)
+        = Function.update (fun a => V a q) j (∑ i ∈ s, c i q • frame i q) := by
+      rw [← hexpand q hq]
+      exact (Function.update_eq_self j (fun a => V a q)).symm
+    calc
+      (covDerivOfField (I := I) gRef A0 p) q (fun a => V a q)
+          = (covDerivOfField (I := I) gRef A0 p) q
+              (Function.update (fun a => V a q) j (∑ i ∈ s, c i q • frame i q)) := by
+            rw [← hstep1]
+      _ = ∑ i ∈ s, (covDerivOfField (I := I) gRef A0 p) q
+              (Function.update (fun a => V a q) j (c i q • frame i q)) := by
+            simpa using ((covDerivOfField (I := I) gRef A0 p) q).toMultilinearMap.map_update_sum
+              s j (fun i => c i q • frame i q) (fun a => V a q)
+      _ = ∑ i ∈ s, c i q • (covDerivOfField (I := I) gRef A0 p) q
+              (fun a => (Function.update V j (frame i)) a q) := by
+            refine Finset.sum_congr rfl fun i _ => ?_
+            rw [((covDerivOfField (I := I) gRef A0 p) q).map_update_smul, hupd i]
+  -- the carrier of `V` agrees on `U` with the `Σ` of `gᵢ · carrierᵢ`
+  refine hsum.congr hU (fun k z hz => ?_) (fun z hz => ?_)
+  · have hsrc : (extChartAt I x₀).symm z ∈ (chartAt H x₀).source := by
+      rw [← extChartAt_source (I := I)]
+      exact (extChartAt I x₀).map_target (hUtarget hz)
+    have hχz : χ z = 1 := (hχU hz).trans (Pi.one_apply z)
+    simp only [writtenInExtChartAt_real_apply, hχz, one_mul]
+    rw [hmulti (A0Seq k) ((extChartAt I x₀).symm z) hsrc]
+    simp only [smul_eq_mul]
+  · have hsrc : (extChartAt I x₀).symm z ∈ (chartAt H x₀).source := by
+      rw [← extChartAt_source (I := I)]
+      exact (extChartAt I x₀).map_target (hUtarget hz)
+    have hχz : χ z = 1 := (hχU hz).trans (Pi.one_apply z)
+    simp only [writtenInExtChartAt_real_apply, hχz, one_mul]
+    rw [hmulti A0inf ((extChartAt I x₀).symm z) hsrc]
+    simp only [smul_eq_mul]
+
 end HCGCompactness
 end DifferentialGeometry
