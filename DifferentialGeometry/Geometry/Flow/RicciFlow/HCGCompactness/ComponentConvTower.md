@@ -5,24 +5,27 @@ metric-component convergence (general-`a` analogue of `componentConv_covDeriv_ze
 
 ## Status (2026-06-13)
 
-**Directional crux DONE + verified** (all axiom-clean, targeted build green).
-The hard analytic half of the induction step is complete; the remaining work is
-the correction split, the all-tuples induction wrapper, the base, and pointwise
-extraction — substantial but well-specified assembly.
+**ALL induction-step primitives DONE + verified** (every lemma axiom-clean, builds
+green).  The remaining work is ONLY the `Nat.rec` step wrapper + base + pointwise
+extraction — assembly of the committed pieces, no new mathematical content.
 
-### Landed (this file)
-- `chartRep_towerScalar_contDiffOn` — chart rep of `s_p^V(w) = (∇^p_gRef A0) w (V·w)`
-  is `ContDiffOn` the extended-chart target (via `covDerivOfField_eval_contMDiff`
-  + `contDiffAt_chartRep`).
+### Landed (this file + MapConvergenceDeriv.lean)
+- `chartRep_towerScalar_contDiffOn` / `chartRep_contDiffOn` — chart rep of a
+  chart-source-smooth function is `ContDiffOn` the extended-chart target.
 - `bumpTowerScalar_contDiff` — bump-extended `s_p^V` chart rep is globally
-  `ContDiff` on `E` (`bumpMul_contDiff`).  The global-smoothness prerequisite for
-  B2/mulLeft/sum.
-- `bumpFderiv_eq_chartTowerStep` — on open `U` with `χ ≡ 1` and `symm '' U ⊆ Kc`,
-  `fderiv (bump-carrier) z v = χ z · chartRep(towerStep) z` (χ=1 ⇒ bump-fderiv =
-  unbump-fderiv via `EventuallyEq.fderiv_eq`; then `fderiv_chartRep_eq_towerStep`
-  germ, `eq_of_nhds`).
-- `bumpTowerStep_chartConv` — **directional step**: bump-`s_p^V` C∞-conv on `U` ⇒
-  bump-`towerStep` C∞-conv on `U`.  `fderivApply` (B2) + `congr` via the bridge.
+  `ContDiff` on `E`.  Global-smoothness prerequisite for B2/mulLeft/sum.
+- `bumpFderiv_eq_chartTowerStep` + `bumpTowerStep_chartConv` — **directional step**:
+  bump-`s_p^V` C∞-conv on `U` ⇒ bump-`towerStep` C∞-conv on `U` (`fderivApply` +
+  `congr` + `fderiv_chartRep_eq_towerStep` germ).
+- `bumpTower_slotExpand_conv` — **multilinear frame expansion**: if slot `j` of `V`
+  is `∑ᵢ cᵢ • frameᵢ` on the chart source, the carrier of `V` converges from the
+  carriers of `update V j frameᵢ` (`map_update_sum`/`smul` + `mulLeft`/`sum` + `congr`).
+- `bumpTowerStep_split` — **`towerStep` split**: bump-`s_{p+1}^{cons σ V'}` (value
+  form) `= bump-towerStep − ∑_a bump-correctionₐ`, each correction a level-`p`
+  carrier for `update V' a (covSection … σ (V' a))` (the `∇_σ V'ₐ` slot as a
+  `covSection`, via `leviCivitaConnectionOfMetric_contMDiffCovariantDerivative`).
+- `MapCInfConvOnCompacts.sub` (MapConvergenceDeriv.lean) — subtraction closure, to
+  extract `s_{p+1} = towerStep − ∑ corrections`.
 
 ### Key existing machinery reused (MetricPreconv.lean — the A2 layer)
 - `towerStep gRef A0 p V σ` (def): `s_{p+1}^{cons σ V} + Σ_a s_p^{update V a (∇_{V a}σ)}`.
@@ -78,7 +81,17 @@ containing `extChartAt x₀ x` gives pointwise `Tendsto` of `s_a^V(x)`; choose
 sections `σ_q` with `σ_q x = b (I0 q)` to land the `component0S b (metricCovDeriv
 g gRef a x) I0` shape that `metricDerivNorm_le_compSq_uniform` / `hnorm` consume.
 
-**Smallest next lemma:** the multilinear frame-expansion convergence
-`s_p^{update V a (Σ_i c_i • frame_i)} = Σ_i (chartRep c_i) · s_p^{update V a frame_i}`
-lifted to `MapCInfConvOnCompacts` via `mulLeft + sum` — used for both the
-leading-slot expansion (step 1) and the base.  Then the `Nat.rec` induction wrapper.
+**Smallest next lemma DONE** = `bumpTower_slotExpand_conv` (frame-expansion conv).
+
+**All step primitives now committed.**  The `Nat.rec` step (IH at level `p`, all
+section tuples ⇒ same at `p+1`) is pure assembly of committed pieces:
+- leading-slot expansion: `bumpTower_slotExpand_conv` (j = 0, `frameᵢ`, coeffs `cᵢ`);
+- per `frameᵢ`: `bumpTowerStep_chartConv` (towerStep conv from IH at `tail W`)
+  + `bumpTowerStep_split` (= `s_{p+1}` + Σ corrections) + `.sub` + `.sum` over the
+  correction carriers (IH at `update (tail W) a (covSection … frameᵢ (tail W)ₐ)`);
+- bridge `update W 0 frameᵢ` ↔ value-form `Fin.cons frameᵢ (tail W)` (`funext`/`Fin.cases`).
+Context threaded as hypotheses: `frame : Fin n → ContMDiffSection` with
+`hframeσ i : frame i =ᶠ[𝓝ˢ Kc] tangentConstInChart x₀ (finBasis i)` and a
+`frame-spans-on-source` producer (from `exists_frameVec_basis`); plus
+`χ/U/Kc/hUKc/hUtarget`.  Then base (B0 + slotExpand over the n² pairs) + `φ`-diagonal
++ extraction give `componentConv_covDeriv_of_chartCInf`.
