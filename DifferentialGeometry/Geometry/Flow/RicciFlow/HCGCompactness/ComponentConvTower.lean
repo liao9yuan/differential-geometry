@@ -624,5 +624,54 @@ theorem bumpTowerCarrier_all
     exact bumpTowerCarrier_step (I := I) gRef A0Seq A0inf p x₀ hχ htsupp hU hχU hUtarget
       hKchart hUKc s frame vbasis hframeσ hspan IH
 
+/-- **Frame-data package** for `bumpTowerCarrier_all`/`bumpTowerCarrier_step`.  For a
+compact `Kc` inside a chart, produces global smooth sections `frame` agreeing with
+the chart-constant coordinate frame `tangentConstInChart x₀ (finBasis i)` near `Kc`,
+together with `hspan`: every smooth section's coordinate-frame coefficients are
+smooth on the chart source and reconstruct it on `Kc`.  Built from
+`exists_section_eqOn_compact` (globalization) and the Mathlib local-frame API
+(`localFrame_coeff` smoothness `contMDiffOn_baseSet_localFrame_coeff` +
+`eq_sum_localFrame_coeff_smul`), bridged to `tangentConstInChart` via `symmL`. -/
+theorem exists_frameData (x₀ : M) {Kc : Set M} (hKc : IsCompact Kc)
+    (hKchart : Kc ⊆ (chartAt H x₀).source) :
+    ∃ (frame : Fin (Module.finrank Real E) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _))
+      (vbasis : Fin (Module.finrank Real E) → E),
+      (∀ i, ∀ᶠ x in 𝓝ˢ Kc,
+        frame i x = tangentConstInChart (𝕜 := Real) (I := I) x₀ (vbasis i) x)
+      ∧ ∀ (W0 : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _)),
+          ∃ c : Fin (Module.finrank Real E) → M → Real,
+            (∀ i, ContMDiffOn I 𝓘(Real, Real) (∞ : WithTop ℕ∞) (c i)
+              (chartAt H x₀).source)
+            ∧ ∀ w ∈ Kc, W0 w = ∑ i : Fin (Module.finrank Real E), c i w • frame i w := by
+  classical
+  set e := trivializationAt E (TangentSpace I : M → Type _) x₀ with he
+  set b := Module.finBasis Real E with hb
+  have hbase : e.baseSet = (chartAt H x₀).source :=
+    TangentBundle.trivializationAt_baseSet (𝕜 := Real) (I := I) x₀
+  have hσex : ∀ i : Fin (Module.finrank Real E),
+      ∃ σ : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _),
+        ∀ᶠ x in 𝓝ˢ Kc, σ x = tangentConstInChart (𝕜 := Real) (I := I) x₀ (b i) x :=
+    fun i => exists_section_eqOn_compact (I := I) x₀ (b i) hKc hKchart
+  choose frame hframeσ using hσex
+  refine ⟨frame, b, hframeσ, fun W0 => ⟨fun i w => e.localFrame_coeff I b i w (W0 w), ?_, ?_⟩⟩
+  · intro i
+    rw [← hbase]
+    exact contMDiffOn_baseSet_localFrame_coeff b W0.contMDiff.contMDiffOn i
+  · intro w hw
+    have hwbase : w ∈ e.baseSet := by rw [hbase]; exact hKchart hw
+    have hexp := e.eq_sum_localFrame_coeff_smul (I := I) (b := b)
+      (s := (W0 : ∀ x : M, TangentSpace I x)) hwbase
+    rw [hexp]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    have hframe_eq : frame i w = tangentConstInChart (𝕜 := Real) (I := I) x₀ (b i) w :=
+      (hframeσ i).self_of_nhdsSet w hw
+    have hlf_eq : e.localFrame b i w = tangentConstInChart (𝕜 := Real) (I := I) x₀ (b i) w := by
+      rw [e.localFrame_apply_of_mem_baseSet b hwbase]
+      simp [Bundle.Trivialization.basisAt, tangentConstInChart_apply, he]
+    show e.localFrame_coeff I b i w (W0 w) • e.localFrame b i w
+        = e.localFrame_coeff I b i w (W0 w) • frame i w
+    rw [hlf_eq, hframe_eq]
+
 end HCGCompactness
 end DifferentialGeometry
