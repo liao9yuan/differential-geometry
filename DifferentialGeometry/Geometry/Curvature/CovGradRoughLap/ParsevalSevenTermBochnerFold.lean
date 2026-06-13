@@ -5223,6 +5223,100 @@ private theorem tensorL2Inner_genuineDiffCurv_covGrad_eq_neg_threeTerm
   ring
 
 set_option linter.unusedSectionVars false in
+/-- **The frame-free curvature/pure-Riemann/Ricci difference value is the differentiated-curvature
+trace double sum plus the group-`1` fold (the sorry-free frame-algebra reduction of `@5436`'s right
+side to `D + G₁`).**  For a fixed smooth Parseval frame family `V a`, the frame-free combination
+```
+⟨Curv S, ∇S⟩_{L²} − ⟨GcurvSection g s S, ∇S⟩_{L²} − ⟨ricTraceSection g s S, ∇S⟩_{L²}
+```
+equals the differentiated-curvature trace double sum `D := ∑_a ∑_b ∫ ⟨nablaDiffCurvTrace, ∇_{V b} S⟩`
+plus the group-`1` fold `G₁ := bochnerFoldGroupSum (bochnerGroupElt1)`.  This is pure sorry-free frame
+bookkeeping: the admissible summed fold `G₂ + G₃ + G₄ = ⟨Curv⟩ − ⟨Gcurv⟩`
+(`parsevalFrameSum_group2_add_group3_add_group4_eq_curv_sub_gcurv`), the variance-honest group-`3`
+decomposition `G₃ = G₃ᵢᵢᵢᵢᵥ + ⟨ricTrace, ∇S⟩` (`bochnerFoldGroupSum_elt3_eq_iiiIvSum_add_ricTrace`),
+the covariant-Leibniz split `G₃ᵢᵢᵢᵢᵥ = D − G₂ + G₁`
+(`bochnerFoldGroupSum_elt3IiiIv_eq_nablaDiffCurvTrace_split`), and the cometric-parallel group-`4`
+vanishing `G₄ = 0` (`bochnerFoldGroupSum_elt4_eq_zero`):
+`⟨Curv⟩ − ⟨Gcurv⟩ − ⟨ricTrace⟩ = G₂ + G₃ + G₄ − ⟨ricTrace⟩ = G₂ + G₃ᵢᵢᵢᵢᵥ + G₄ = (D − G₂ + G₁) + G₂ + 0 = D + G₁`.
+It exhibits `@5436`'s frame-free right side and `#10`'s frame-double-sum right side as the *same*
+value, so the remaining genuine content is the single operator-field identity
+`⟨gDCS, ∇S⟩ = ⟨Curv⟩ − ⟨Gcurv⟩ − ⟨ricTrace⟩`. -/
+private theorem curv_sub_gcurv_sub_ricTrace_eq_diffCurvTrace_add_group1
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
+    tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+          (pointwiseTensorCurv (I := I) (M := M) g s S).toFun
+          (covGrad (I := I) (M := M) g 0 s S).toFun -
+        tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+          (GcurvSection (I := I) (M := M) g s S).toFun
+          (covGrad (I := I) (M := M) g 0 s S).toFun -
+        tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+          (ricTraceSection (I := I) (M := M) g s S).toFun
+          (covGrad (I := I) (M := M) g 0 s S).toFun =
+      (∑ a : Fin N, ∑ b : Fin N,
+          ∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+              (nablaDiffCurvTraceCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+              (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
+        bochnerFoldGroupSum (I := I) (M := M) g s S V
+          (bochnerGroupElt1 (I := I) (M := M) g s S) := by
+  classical
+  have hsum := parsevalFrameSum_group2_add_group3_add_group4_eq_curv_sub_gcurv
+    (I := I) (M := M) g s S V hV hPar
+  have h3 := bochnerFoldGroupSum_elt3_eq_iiiIvSum_add_ricTrace
+    (I := I) (M := M) g s S V hV hPar
+  have hsplit := bochnerFoldGroupSum_elt3IiiIv_eq_nablaDiffCurvTrace_split
+    (I := I) (M := M) g s S V hV
+  have hG4 := bochnerFoldGroupSum_elt4_eq_zero (I := I) (M := M) g s S V hV hPar
+  linarith [hsum, h3, hsplit, hG4]
+
+set_option linter.unusedSectionVars false in
+/-- **The operator-field integration-by-parts form of the differentiated-curvature pairing (the
+non-circular reconstruction of the Bridge `pureR_form`).**  The frame-free `L²` pairing of the
+differentiated-curvature operator-field section `gDCS := appCc g s (s + 1) (covGrad g s s (curvOpField
+g s)) S` against `∇S := covGrad g 0 s S` equals the negated rough-Laplacian pairing of the order-`0`
+pure-Riemann curvature trace `P := pureRGenuineDiffOp g 0 s S` against `S`, minus the passenger-slot
+spectator action of `curvOpField g s` on `∇S` paired against `∇S`:
+```
+⟨gDCS, ∇S⟩_{L²}
+  = −⟨Δ_∇ P, S⟩_{L²} − ⟨appCc (slotExtend (curvOpField g s)) (∇S), ∇S⟩_{L²}.
+```
+This is the operator-field B-rule / Green-adjointness identity
+`tensorL2Inner_appCc_covGrad_covGrad_eq_neg` (`OperatorFieldPairingIBP`, the boundaryless connection-
+Laplacian Green identity inside the operator-field product rule) at the square field `Φ₀ := curvOpField
+g s`, with its order-`0` action `appCc Φ₀ S` rewritten to the moving-frame pure-Riemann curvature trace
+`P` by the `curvOpField` base spec `appCc_curvOpField_eq_pureRGenuineDiffOp`
+(`FrozenFramePureRCurvatureTower`).  It anchors the frame-free `⟨gDCS, ∇S⟩` to the rough Laplacian of
+`P` non-circularly (the slot-wise differentiated-curvature Bridge route is downstream of this file and
+unavailable). -/
+private theorem tensorL2Inner_genuineDiffCurv_covGrad_eq_neg_roughLap_pureR_sub_spectator
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
+    tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (appCc (I := I) (M := M) g s (s + 1)
+          (covGrad (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)) S).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun =
+      - tensorL2Inner (I := I) (M := M) g 0 s
+          (rawTensorConnLapSmooth (I := I) g 0 s
+            (pureRGenuineDiffOp (I := I) (M := M) g 0 s S)).toFun S.toFun -
+        tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+          (appCc (I := I) (M := M) g (s + 1) (s + 1)
+            (slotExtend (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s))
+            (covGrad (I := I) (M := M) g 0 s S)).toFun
+          (covGrad (I := I) (M := M) g 0 s S).toFun := by
+  classical
+  have hIBP := tensorL2Inner_appCc_covGrad_covGrad_eq_neg (I := I) (M := M) g s
+    (curvOpField (I := I) (M := M) g s) S
+  have hbase : appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s) S =
+      pureRGenuineDiffOp (I := I) (M := M) g 0 s S :=
+    appCc_curvOpField_eq_pureRGenuineDiffOp (I := I) (M := M) g s S
+  rw [hbase] at hIBP
+  exact hIBP
+
+set_option linter.unusedSectionVars false in
 /-- **The integrated differentiated-curvature operator-field pairing in Parseval double-sum normal
 form (frame-summed, no pointwise frame trace).**  For a fixed smooth Parseval frame family `V a`, the
 frame-free `L²` pairing of the differentiated-curvature operator-field section
