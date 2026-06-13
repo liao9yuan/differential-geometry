@@ -263,17 +263,26 @@ statement, and adjust the target shape to the cheapest faithful form.
 `gInf : SmoothRiemannianMetric I M` + component-convergence hypotheses;
 C-G and C1b have landed; C-II-final must wire their outputs through these
 scaffold endpoints.)**
-**STATUS (2026-06-12): C-II scaffold ✅ ACCEPTED as proof-verified
+**STATUS (2026-06-13): C-II scaffold ✅ ACCEPTED as proof-verified
 (68a63a7f; targeted build green 3856 jobs; four endpoints axiom-clean:
 `metricDerivNorm_le_compSq`, `metricCInfConvOnCompacts_of_normConv`,
-`exists_subseq_hconv`, `windowPreconv_of_perTime`).  Planner seam for
-C-II-final: `metricDerivNorm_le_compSq` currently binds the good-frame data
-`basisE`, `u'`, and `Cu` after the varying metrics `gk`/`gInf`.  The proof
-chooses those data from `exists_goodFrame_compBound` using only `gRef`, `a`,
-and `x`, so C-II-final must restate or wrap this as a constants-first adapter,
-e.g. `∃ basisE u' Cu, ... ∀ gk gInf, ...`, before sequence-level finite-cover
-use.  Do not consume the current binder order as the final uniform-on-sequence
-interface.**
+`exists_subseq_hconv`, `windowPreconv_of_perTime`).  C-II-final-A ✅ ACCEPTED
+(66c70d9a; targeted build green 3856 jobs; `metricDerivNorm_le_compSq_uniform`
+and the specialization `metricDerivNorm_le_compSq` axiom-clean).  The
+constants-first seam is closed: good-frame witnesses `basisE`, `u'`, and `Cu`
+are now bound before `∀ gk gInf`, so they depend only on `gRef`, `a`, and `x`.**
+
+**NEXT FRONTIER (C-II-final-B):** do not try to prove the finite-cover `hnorm`
+wrapper until the input convergence theorem exists.  The missing bridge is
+`componentConv_covDeriv_of_chartCInf`: from re-exposed C∞-on-compacts order-0
+chart-component convergence of the metrics and the fixed `gRef` connection
+data, derive uniform convergence on a good-frame patch of
+`component0S (metricCovDeriv (gSeq k) gRef a)` to
+`component0S (metricCovDeriv gInf gRef a)` for all `a ≤ p`.  Gap A is that
+`metricPreconv_gInf` currently exposes only pointwise order-0 CLM convergence;
+Gap B is this covariant-tower convergence bridge.  Once both are available,
+C-II can finish the finite-cover `hnorm` step and then assemble
+`metricPreconvInf`.**
 **File**: same or split `MetricPreconvBridge.lean` if > ~900 lines.
 
 C2: component convergence ⇒ `MetricCPConvOn K hK p (gSeq∘φ) gInf gRef`
