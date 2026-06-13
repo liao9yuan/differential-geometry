@@ -210,6 +210,30 @@ theorem MapCInfConvOnCompacts.sum {ι : Type*} {U : Set E} (s : Finset ι)
     exact MapCInfConvOnCompacts.add (h a) ih (fun k => hc a k) (hic a)
       (fun k => ContDiff.sum (fun i _ => hc i k)) (ContDiff.sum (fun i _ => hic i))
 
+/-- **Locality of `C^∞`-on-compacts convergence.**  Convergence on an OPEN set `U`
+depends only on the maps' restriction to `U`: replacing each `Φ k` and `Φinf` by
+maps agreeing with them on `U` preserves `MapCInfConvOnCompacts U`.  (`mapDerivNorm`
+is built from `iteratedFDeriv`, which is local, so on a compact `K ⊆ U` the
+order-`r` norms are unchanged.)  This is what lets the covariant-tower induction
+transfer convergence across a step recursion that only holds where the chosen
+global sections agree with the local coordinate frame. -/
+theorem MapCInfConvOnCompacts.congr {U : Set E} {Φ Φ' : ℕ → E → F} {Φinf Φ'inf : E → F}
+    (h : MapCInfConvOnCompacts U Φ Φinf) (hU : IsOpen U)
+    (hΦ : ∀ k, Set.EqOn (Φ' k) (Φ k) U) (hΦinf : Set.EqOn Φ'inf Φinf U) :
+    MapCInfConvOnCompacts U Φ' Φ'inf := by
+  intro K hK hKU p ε hε
+  obtain ⟨k0, hk0⟩ := h K hK hKU p ε hε
+  refine ⟨k0, fun k hk r hr x hx => ?_⟩
+  have hxU : x ∈ U := hKU hx
+  have heq : (fun y => Φ' k y - Φ'inf y) =ᶠ[nhds x] (fun y => Φ k y - Φinf y) := by
+    filter_upwards [hU.mem_nhds hxU] with y hy
+    rw [hΦ k hy, hΦinf hy]
+  have hval : mapDerivNorm r (Φ' k) Φ'inf x = mapDerivNorm r (Φ k) Φinf x := by
+    simp only [mapDerivNorm]
+    rw [(Filter.EventuallyEq.iteratedFDeriv ℝ heq r).eq_of_nhds]
+  rw [hval]
+  exact hk0 k hk r hr x hx
+
 end HCGCompactness
 end DifferentialGeometry
 
