@@ -154,11 +154,13 @@ split into two execution units:
 ### Brick C-I — countable diagonal + global limit object
 **STATUS (2026-06-12): C0 ✅ ACCEPTED (a36b7933, `exists_diag_subseq` in
 MetricPreconvDiag.lean, proved exactly as design-fixed; sorry-free, build
-green, axiom-clean).  C1a/C1b BLOCKED on the gInf packaging gate → see
-PLANNER RULING 2 below (resolution: Brick C-G + scaffold-mode C-II).
-C1a/C1b resume AFTER C-G lands.**
-**File**: same `MetricPreconv.lean` (split out `MetricPreconvDiag.lean` if the
-file passes ~1500 lines).
+green, axiom-clean).  C1a/C1b ✅ ACCEPTED (5656ee51,
+`metricPreconv_gInf` in MetricPreconvDiag.lean; sorry-free, targeted build
+green 3848 jobs, axiom-clean).  The live tree already contains the C1a/C1b
+brick, so the earlier "dispatch C1a/C1b" kickoff request is superseded.  C-II
+final still has to turn the pointwise `gInf` limit plus the scaffold hypotheses
+into the final `MetricCInfConvOnCompacts` / window input.**
+**File**: `MetricPreconvDiag.lean`.
 
 C0 (the abstract diagonal — design FIXED by the planner, prove as stated
 modulo naming):
@@ -219,7 +221,8 @@ KEY: `isVonNBounded` was discharged by the EXISTING
 `MetricExistence.posDef_isVonNBounded` — no new analytic input; only the
 `contMDiff` field was real content (LocalFrame route, tangent-trivialization
 symm-frame of `Module.finBasis`).  The C-I blocker's "inverse-componentize
-bridge does not exist" was over-scoped: ~210 lines.  C1a/C1b NOW UNBLOCKED.
+bridge does not exist" was over-scoped: ~210 lines.  C1a/C1b are now accepted
+via `metricPreconv_gInf`.
 Acceptance note on %-reporting: keep "Lemma 3.11 endpoint = 0% (unstated)"
 SEPARATE from its machinery (~70%); whole-HCG ~25-35% theorem-weighted.)**
 
@@ -258,7 +261,19 @@ statement, and adjust the target shape to the cheapest faithful form.
 ### Brick C-II — norm bridge + the P3 endpoints
 **(SCAFFOLD MODE per Ruling 2: endpoints parameterize
 `gInf : SmoothRiemannianMetric I M` + component-convergence hypotheses;
-C-G + C1b discharge them later.)**
+C-G and C1b have landed; C-II-final must wire their outputs through these
+scaffold endpoints.)**
+**STATUS (2026-06-12): C-II scaffold ✅ ACCEPTED as proof-verified
+(68a63a7f; targeted build green 3856 jobs; four endpoints axiom-clean:
+`metricDerivNorm_le_compSq`, `metricCInfConvOnCompacts_of_normConv`,
+`exists_subseq_hconv`, `windowPreconv_of_perTime`).  Planner seam for
+C-II-final: `metricDerivNorm_le_compSq` currently binds the good-frame data
+`basisE`, `u'`, and `Cu` after the varying metrics `gk`/`gInf`.  The proof
+chooses those data from `exists_goodFrame_compBound` using only `gRef`, `a`,
+and `x`, so C-II-final must restate or wrap this as a constants-first adapter,
+e.g. `∃ basisE u' Cu, ... ∀ gk gInf, ...`, before sequence-level finite-cover
+use.  Do not consume the current binder order as the final uniform-on-sequence
+interface.**
 **File**: same or split `MetricPreconvBridge.lean` if > ~900 lines.
 
 C2: component convergence ⇒ `MetricCPConvOn K hK p (gSeq∘φ) gInf gRef`
