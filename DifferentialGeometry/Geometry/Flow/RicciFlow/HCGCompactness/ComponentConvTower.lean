@@ -228,8 +228,8 @@ theorem bumpTower_slotExpand_conv
     (V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
       (TangentSpace I : M → Type _))
     (j : Fin (p + 2))
-    (hexpand : ∀ w ∈ (chartAt H x₀).source,
-      (V j) w = ∑ i ∈ s, c i w • frame i w)
+    {S : Set M} (hUS : ∀ z ∈ U, (extChartAt I x₀).symm z ∈ S)
+    (hexpand : ∀ w ∈ S, (V j) w = ∑ i ∈ s, c i w • frame i w)
     (hconv : ∀ i, MapCInfConvOnCompacts U
       (fun k z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
         (fun w : M => (covDerivOfField (I := I) gRef (A0Seq k) p) w
@@ -268,7 +268,7 @@ theorem bumpTower_slotExpand_conv
   -- pointwise multilinear expansion, valid for every base field `A0` on the chart source
   have hmulti : ∀ (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
         (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2),
-      ∀ q ∈ (chartAt H x₀).source,
+      ∀ q ∈ S,
       (covDerivOfField (I := I) gRef A0 p) q (fun a => V a q)
         = ∑ i ∈ s, c i q •
             (covDerivOfField (I := I) gRef A0 p) q
@@ -301,19 +301,13 @@ theorem bumpTower_slotExpand_conv
             rw [((covDerivOfField (I := I) gRef A0 p) q).map_update_smul, hupd i]
   -- the carrier of `V` agrees on `U` with the `Σ` of `gᵢ · carrierᵢ`
   refine hsum.congr hU (fun k z hz => ?_) (fun z hz => ?_)
-  · have hsrc : (extChartAt I x₀).symm z ∈ (chartAt H x₀).source := by
-      rw [← extChartAt_source (I := I)]
-      exact (extChartAt I x₀).map_target (hUtarget hz)
-    have hχz : χ z = 1 := (hχU hz).trans (Pi.one_apply z)
+  · have hχz : χ z = 1 := (hχU hz).trans (Pi.one_apply z)
     simp only [writtenInExtChartAt_real_apply, hχz, one_mul]
-    rw [hmulti (A0Seq k) ((extChartAt I x₀).symm z) hsrc]
+    rw [hmulti (A0Seq k) ((extChartAt I x₀).symm z) (hUS z hz)]
     simp only [smul_eq_mul]
-  · have hsrc : (extChartAt I x₀).symm z ∈ (chartAt H x₀).source := by
-      rw [← extChartAt_source (I := I)]
-      exact (extChartAt I x₀).map_target (hUtarget hz)
-    have hχz : χ z = 1 := (hχU hz).trans (Pi.one_apply z)
+  · have hχz : χ z = 1 := (hχU hz).trans (Pi.one_apply z)
     simp only [writtenInExtChartAt_real_apply, hχz, one_mul]
-    rw [hmulti A0inf ((extChartAt I x₀).symm z) hsrc]
+    rw [hmulti A0inf ((extChartAt I x₀).symm z) (hUS z hz)]
     simp only [smul_eq_mul]
 
 /-- **`towerStep` split.**  Pointwise, the bump-extended level-`(p+1)` carrier with
@@ -361,6 +355,59 @@ theorem bumpTowerStep_split
   simp only [hupd]
   rw [mul_add, Finset.mul_sum]
   ring
+
+/-- The bump-extended `towerStep` chart rep is globally `ContDiff` — obtained from
+the `bumpTowerStep_split` (`bump-towerStep = bump-s_{p+1} + Σ bump-corrections`),
+each summand a `bumpTowerScalar_contDiff`.  Needed as the minuend smoothness for
+`MapCInfConvOnCompacts.sub` in the induction step. -/
+theorem bumpTowerStepScalar_contDiff
+    (gRef : SmoothRiemannianMetric I M)
+    (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    (p : ℕ)
+    (V' : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _))
+    (σ : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (x₀ : M) {χ : E → Real} (hχ : ContDiff Real (∞ : WithTop ℕ∞) χ)
+    (htsupp : tsupport χ ⊆ (extChartAt I x₀).target) :
+    ContDiff Real (∞ : WithTop ℕ∞)
+      (fun z : E => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+        (towerStep (I := I) gRef A0 p V' σ) z) := by
+  have heq : (fun z : E => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+        (towerStep (I := I) gRef A0 p V' σ) z)
+      = (fun z : E =>
+          (χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gRef A0 (p + 1)) w
+              (Fin.cons (σ w) (fun a : Fin (p + 2) => V' a w))) z)
+          + ∑ a : Fin (p + 2), χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+              (fun w : M => (covDerivOfField (I := I) gRef A0 p) w
+                (fun b => (Function.update V' a
+                  (covSection (I := I) (leviCivitaConnectionOfMetric (I := I) gRef)
+                    (leviCivitaConnectionOfMetric_contMDiffCovariantDerivative
+                      (I := I) gRef) σ (V' a))) b w)) z) := by
+    funext z
+    have h := bumpTowerStep_split (I := I) gRef A0 p V' σ x₀ χ z
+    linarith [h]
+  rw [heq]
+  have hcons :
+      (fun w : M => (covDerivOfField (I := I) gRef A0 (p + 1)) w
+          (Fin.cons (σ w) (fun a : Fin (p + 2) => V' a w)))
+        = (fun w : M => (covDerivOfField (I := I) gRef A0 (p + 1)) w
+            (fun a : Fin (p + 3) =>
+              (Fin.cons σ V' : Fin (p + 3) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+                (TangentSpace I : M → Type _)) a w)) := by
+    funext w
+    congr 1
+    funext a
+    refine Fin.cases ?_ (fun j => ?_) a <;> simp
+  refine ContDiff.add ?_ (ContDiff.sum fun a _ => ?_)
+  · rw [hcons]
+    exact bumpTowerScalar_contDiff (I := I) gRef A0 (p + 1) (Fin.cons σ V') x₀ hχ htsupp
+  · exact bumpTowerScalar_contDiff (I := I) gRef A0 p
+      (Function.update V' a
+        (covSection (I := I) (leviCivitaConnectionOfMetric (I := I) gRef)
+          (leviCivitaConnectionOfMetric_contMDiffCovariantDerivative (I := I) gRef)
+          σ (V' a))) x₀ hχ htsupp
 
 end HCGCompactness
 end DifferentialGeometry
