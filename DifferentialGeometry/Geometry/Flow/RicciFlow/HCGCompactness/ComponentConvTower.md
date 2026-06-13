@@ -189,23 +189,36 @@ per pair); the per-pair limit pinning then mirrors
   pointwise `hχ1` + `right_inv`; `extChartAt '' interior K₀ ⊆ U`).  `s = Finset.univ`.
   `hpairs` restricted `univ → U` by `fun K hK hKU p => hpairs K hK (subset_univ K) p`.
 
-**REMAINING — Step 4 only (extraction + global assembly):**
-- *(per-point extract)* `componentConv_covDeriv_of_chartCInf` POINTWISE: pick chart
-  `x₀ = x`, `K₀` via `exists_compact_subset (chart-source-open) (mem_chart_source)`
-  so `x ∈ interior K₀ ⊆ K₀ ⊆ source`; `exists_tower_conv` → tower conv on `U` with
-  `extChartAt x ∈ U`; choose `V_q` (ContMDiffSection) with `V_q x = b (I0 q)` (frame
-  expansion at `x` — the one remaining fiddle: a section with a prescribed fibre
-  value at a point, via `exists_section_eqOn_compact x v_q` with `v_q = trivAt`-coord
-  of `b (I0 q)`, or `exists_contMDiffSection_eqOn_nhd`); `tendsto_of_cInf` (tower
-  conv at `a, V`) at `extChartAt x`; carrier value `= component0S b (metricCovDeriv g
-  gRef a x) I0` via `writtenInExtChartAt_real_apply` + `left_inv` + `component0S_apply`
-  (`= A (fun a => b (slots a))`, rfl) + `metricCovDeriv_eq_covDerivOfField` (rfl).
-  Produces a per-point further subsequence `ψ` (a≥1 needs the `C∞` data, unlike
-  order-0 `componentConv_covDeriv_zero`).
-- *(global)* `metricPreconvInf`: countable chart cover (`exists_chart_cover`, C1a) +
-  global diagonal (`exists_diag_subseq`) over charts keeping the tower `C∞` data →
-  ONE `φ`; then finite good-frame cover (`metricDerivNorm_le_compSq_uniform`,
-  `ric_bound` pattern) → `hnorm` → `metricCInfConvOnCompacts_of_normConv`.
+**DONE — Step 4a (committed `6c8e5e12`, focused check green):**
+- `componentConv_covDeriv_of_chartCInf` POINTWISE (general order `a`, frame-general
+  `Basis b`, `I0 : Fin (a+2) → Fin n`).  chart `x₀ = x`; `K₀` via
+  `exists_compact_subset (chartAt H x).open_source (mem_chart_source H x)` (needs
+  `LocallyCompactSpace H/M` haveI); `exists_tower_conv`; `extChartAt x x ∈ U` from
+  `hImg`; `V_q := (ContMDiffSection.exists_eq_at_gen (n := (⊤ : ℕ∞)) x (b (I0 q))).choose`
+  (note `n : ℕ∞` NOT `WithTop ℕ∞`!); `tendsto_of_cInf (htower a V) hxU`; carrier value
+  `= component0S b (metricCovDeriv g gRef a x) I0` via `hχU hxU` + `Pi.one_apply` +
+  `writtenInExtChartAt_real_apply` + `left_inv` + `simp [hVval]` + `rfl`
+  (`component0S_apply`/`metricCovDeriv_eq_covDerivOfField` are rfl).  `htend.congr`.
+
+**REMAINING — Step 4b ONLY: `metricPreconvInf` (the endpoint).**  Two parts:
+- *(4b-i global diagonal)* `exists_chart_cover` (countable charts/compacts) +
+  `exists_diag_subseq` over the cover, `hstep` = per-chart `exists_tower_conv`
+  C∞-data extraction (refines any subsequence), `hsub` = `MapCInfConvOnCompacts.comp_subseq`,
+  `hextend` = tail shift → ONE `φ` carrying the tower data on every chart.
+- *(4b-ii hnorm)* finite good-frame cover of each compact `K` + `metricDerivNorm_le_compSq_uniform`.
+  **KEY (de-risks the apparent point-dependence):** its component basis
+  `bz = (trivAt x).localFrame(basisE).toBasisAt hz` satisfies
+  `bz_i(z) = (trivAt x).symmL z (basisE i) = Σ_j M_{ij}·frame_j(z)`, where
+  `frame_j = tangentConstInChart x (finBasis j)` is the `exists_tower_conv` frame and
+  `M` is the **CONSTANT** (`z`-independent) `basisE`-in-`finBasis` change-of-basis in `E`.
+  So `component0S bz (Δtower) I0` is a constant-coefficient multilinear combination of
+  the coordinate-frame components `component0S frame (Δtower) (…)`, which converge
+  **uniformly on compacts** from the `exists_tower_conv` tower (`MapCInfConvOnCompacts`,
+  order-0 slice = `tendstoUniformlyOn_of_cPConv`).  Hence `bz`-components → 0 uniformly
+  (constant transition, NO point-dependent obstruction) ⇒ `metricDerivNorm < ε`
+  uniform on `K` ⇒ `hnorm` ⇒ `metricCInfConvOnCompacts_of_normConv`.
+  This is real work (the constant-transition multilinear expansion + the uniform
+  extraction from the tower per good-frame patch + the finite cover), but API-complete.
 
 ~~NOTE (real subtlety for step 4)~~ — **PLANNER RULING 2026-06-13: this note is
 WRONG; do NOT carry uniformity through the multilinear expansion.**  Verified
