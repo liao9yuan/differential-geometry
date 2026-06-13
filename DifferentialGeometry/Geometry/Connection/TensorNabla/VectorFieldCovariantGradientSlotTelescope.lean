@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.VectorFieldCovariantGradientSection
+import DifferentialGeometry.Geometry.Connection.TensorNabla.DeTurckVFIntrinsicValueBound
 import DifferentialGeometry.Geometry.Connection.TensorNabla.VectorFieldCovariantGradientDifference
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CrossCorrectionParallelContraction
 
@@ -605,43 +606,6 @@ theorem rfns_le_of_ccTensorBilin_gcs_bound
           have hnE : n = Module.finrank ℝ E := hn
           rw [hnE]; ring
 
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
-set_option linter.unusedSectionVars false in
-/-- **(POSIT — the family-uniform `g₀`-fibre value sup of the DeTurck vector field.)**  For the
-fibre-small (`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, `δ < 1/2`) supercritically
-`H^{a+2}`-bounded (`2a > finrank + 4`) realized perturbation family, the `g₀`-fibre norm of the
-DeTurck vector field `W₁ = deTurckVF g₁ g_bg` of every realized member is bounded by a single
-constant `Λ_W ≥ 0` over the manifold and the family:
-`√(g₀ x (W₁ x) (W₁ x)) ≤ Λ_W`.
-
-This is the genuine single-field bedrock engine.  `deTurckVF g₁ g_bg` is the `g₁`-trace of the
-Christoffel difference `Γ(g₁) − Γ(g_bg)` against the fixed background `g_bg`
-(`deTurckVF_apply_eq`: the `chartInvGram g₁`-weighted trace of `connDiff g₁ g_bg`), so its
-`g₀`-fibre value is a first-jet quantity of the metric `g₁ = g₀ + ccTensorBilinSymm g₀ T₁`.  It is
-`C⁰`-bounded family-uniformly through the supercritical `H^{a+2} ↪ C¹` embedding of the metric jet
-(`iteratedCovGradJetSum_le_toHs`, `2a > finrank + 4 ⟹ a + 2 > dim/2 + 1` controls the order-`(a+2)`
-Sobolev norm of `T₁` over the order-`1` jet of the Christoffel symbols); the fibre-smallness
-(`gFibreOpBound … δ`, `δ < 1/2`) keeps `g₁` comparable to `g₀`, so the `chartInvGram g₁` trace
-weight is family-uniformly controlled.
-
-**Non-vacuity.**  Genuine (`Λ_W = 0` forces `W₁ ≡ 0` at every point, false whenever
-`deTurckVF g₁ g_bg ≠ 0`).  At `g₁ = g_bg` realized the DeTurck field is the zero section
-(`deTurckVF_self`) and `Λ_W = 0` works there.  Body `sorry`: the genuine supercritical-`C¹` value
-bound of the first-jet Christoffel-trace DeTurck field (consumers transitively depend on `sorryAx`
-through this posited engine). -/
-theorem exists_deTurckVF_gNorm_sup_le
-    (g₀ g_bg : SmoothRiemannianMetric I M) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
-    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
-    ∃ Λ_W : ℝ, 0 ≤ Λ_W ∧
-      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
-        (∀ (x : M) (v w : TangentSpace I x),
-          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
-        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
-        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
-        ∀ x : M,
-          Real.sqrt (g₀.inner x (deTurckVF (I := I) g₁ g_bg x) (deTurckVF (I := I) g₁ g_bg x)) ≤
-            Λ_W :=
-  sorry
 
 /-! ### Bedrock value algebra for the connection-difference operator bound -/
 
