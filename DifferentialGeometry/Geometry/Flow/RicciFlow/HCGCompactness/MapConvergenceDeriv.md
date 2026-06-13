@@ -112,9 +112,17 @@ applied to the order-0 metric components.  Concretely:
 So C1b's `metricPreconv_gInf` (pointwise CLM only) is NOT the bottleneck — B0's
 re-exposed `C^∞` engine output + the fixed-operator propagation give the whole
 tower along one `φ`.  Remaining sub-frontiers are pure assembly (no new
-producer / no new diagonal): (i) frame match `frameVec` ↔ A2 globalized
-chart-constant direction (`frameVec = tangentConstInChart` at `finBasis`, already
-shown rfl — so this is mostly bookkeeping); (ii) the multilinear slot-expansion
+producer / no new diagonal): (i) frame match — DE-RISKED to one small lemma.
+`frameVec = tangentConstInChart` at `finBasis` (rfl, B0); AND `coordinateFrameAt
+x₀ i x = frameVec x₀ i x` on `baseSet` (since `coordinateTrivializationAt =
+trivializationAt E (TangentSpace I)` (abbrev), `localFrame b i x = basisAt b hx i =
+(linearEquivAt x hx).symm (b i)` on `baseSet`, and `symmL x = (continuousLinearEquivAt
+x hx).symm` — established in B0).  So the existing COORDINATE-frame covariant
+component formulas (`nabla0SFun_two_eval_coordFrame`,
+`nabla0SFun_eval_coordFrame_moving_raw`, `tensor0S_two_eval_coordFrame_sum`) apply
+DIRECTLY to B0's `frameVec` output on the patch — no separate frame-conversion
+needed.  Next concrete lemma: `coordinateFrameAt x₀ i =ᵇᵃˢᵉˢᵉᵗ frameVec x₀ i`.
+(ii) the multilinear slot-expansion
 (`leviCivita(frameₐ)(frame₀) = Σ Γᵏ frameₖ` + tensor linearity); (iii) the A2 germ
 (`=ᶠ[𝓝 y]`) → neighbourhood-of-compact upgrade (local equality on each `y∈K`
 patches to an open set ⊇ chart image of `K`, since `C^∞`-on-compacts convergence is
