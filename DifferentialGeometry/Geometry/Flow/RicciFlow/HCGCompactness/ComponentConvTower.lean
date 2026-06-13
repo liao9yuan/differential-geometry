@@ -409,5 +409,87 @@ theorem bumpTowerStepScalar_contDiff
           (leviCivitaConnectionOfMetric_contMDiffCovariantDerivative (I := I) gRef)
           σ (V' a))) x₀ hχ htsupp
 
+/-- **Per-frame-index convergence (induction step core).**  Given the level-`p`
+inductive hypothesis (convergence of the bump carriers for ALL section tuples) and
+a chart-constant leading slot `σ` (`= tangentConstInChart x₀ v` near `Kc`), the
+bump carrier of the level-`(p+1)` tuple `Fin.cons σ V'` converges.  Combines the
+directional step (`bumpTowerStep_chartConv`, from IH at `V'`), the correction
+convergences (IH at the `covSection`-updated tuples), `MapCInfConvOnCompacts.sub`,
+and the `towerStep` split. -/
+theorem bumpTowerCons_conv
+    (gRef : SmoothRiemannianMetric I M)
+    (A0Seq : ℕ → Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    (A0inf : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    (p : ℕ) (x₀ : M)
+    {χ : E → Real} (hχ : ContDiff Real (∞ : WithTop ℕ∞) χ)
+    (htsupp : tsupport χ ⊆ (extChartAt I x₀).target)
+    {U : Set E} (hU : IsOpen U) (hχU : Set.EqOn χ 1 U)
+    (hUtarget : U ⊆ (extChartAt I x₀).target)
+    {Kc : Set M} (hKchart : Kc ⊆ (chartAt H x₀).source)
+    (hUKc : ∀ z ∈ U, (extChartAt I x₀).symm z ∈ Kc)
+    (v : E) (σ : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (hσ : ∀ᶠ x in 𝓝ˢ Kc, σ x = tangentConstInChart (𝕜 := Real) (I := I) x₀ v x)
+    (V' : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _))
+    (IH : ∀ (V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _)),
+        MapCInfConvOnCompacts U
+          (fun k z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gRef (A0Seq k) p) w (fun a => V a w)) z)
+          (fun z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gRef A0inf p) w (fun a => V a w)) z)) :
+    MapCInfConvOnCompacts U
+      (fun k z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+        (fun w : M => (covDerivOfField (I := I) gRef (A0Seq k) (p + 1)) w
+          (Fin.cons (σ w) (fun a : Fin (p + 2) => V' a w))) z)
+      (fun z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+        (fun w : M => (covDerivOfField (I := I) gRef A0inf (p + 1)) w
+          (Fin.cons (σ w) (fun a : Fin (p + 2) => V' a w))) z) := by
+  classical
+  set corrSec : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _) :=
+    fun a => covSection (I := I) (leviCivitaConnectionOfMetric (I := I) gRef)
+      (leviCivitaConnectionOfMetric_contMDiffCovariantDerivative (I := I) gRef)
+      σ (V' a) with hcorrSec
+  have hTS := bumpTowerStep_chartConv (I := I) gRef A0Seq A0inf p V' x₀ v σ hσ hKchart
+    hχ htsupp hU hχU hUKc hUtarget (IH V')
+  have hSumCorr := MapCInfConvOnCompacts.sum (Finset.univ : Finset (Fin (p + 2)))
+    (fun a => IH (Function.update V' a (corrSec a)))
+    (fun a k => bumpTowerScalar_contDiff (I := I) gRef (A0Seq k) p
+      (Function.update V' a (corrSec a)) x₀ hχ htsupp)
+    (fun a => bumpTowerScalar_contDiff (I := I) gRef A0inf p
+      (Function.update V' a (corrSec a)) x₀ hχ htsupp)
+  have hsub := hTS.sub hSumCorr
+    (fun k => bumpTowerStepScalar_contDiff (I := I) gRef (A0Seq k) p V' σ x₀ hχ htsupp)
+    (bumpTowerStepScalar_contDiff (I := I) gRef A0inf p V' σ x₀ hχ htsupp)
+    (fun k => ContDiff.sum fun a _ => bumpTowerScalar_contDiff (I := I) gRef (A0Seq k) p
+      (Function.update V' a (corrSec a)) x₀ hχ htsupp)
+    (ContDiff.sum fun a _ => bumpTowerScalar_contDiff (I := I) gRef A0inf p
+      (Function.update V' a (corrSec a)) x₀ hχ htsupp)
+  have hfeq_seq : (fun (k : ℕ) (z : E) => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+        (fun w : M => (covDerivOfField (I := I) gRef (A0Seq k) (p + 1)) w
+          (Fin.cons (σ w) (fun a : Fin (p + 2) => V' a w))) z)
+      = fun (k : ℕ) (z : E) => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (towerStep (I := I) gRef (A0Seq k) p V' σ) z
+          - ∑ a : Fin (p + 2), χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+              (fun w : M => (covDerivOfField (I := I) gRef (A0Seq k) p) w
+                (fun b => (Function.update V' a (corrSec a)) b w)) z := by
+    funext k z
+    exact bumpTowerStep_split (I := I) gRef (A0Seq k) p V' σ x₀ χ z
+  have hfeq_inf : (fun (z : E) => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+        (fun w : M => (covDerivOfField (I := I) gRef A0inf (p + 1)) w
+          (Fin.cons (σ w) (fun a : Fin (p + 2) => V' a w))) z)
+      = fun (z : E) => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (towerStep (I := I) gRef A0inf p V' σ) z
+          - ∑ a : Fin (p + 2), χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+              (fun w : M => (covDerivOfField (I := I) gRef A0inf p) w
+                (fun b => (Function.update V' a (corrSec a)) b w)) z := by
+    funext z
+    exact bumpTowerStep_split (I := I) gRef A0inf p V' σ x₀ χ z
+  rw [hfeq_seq, hfeq_inf]
+  exact hsub
+
 end HCGCompactness
 end DifferentialGeometry
