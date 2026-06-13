@@ -111,17 +111,15 @@ applied to the order-0 metric components.  Concretely:
 
 So C1b's `metricPreconv_gInf` (pointwise CLM only) is NOT the bottleneck — B0's
 re-exposed `C^∞` engine output + the fixed-operator propagation give the whole
-tower along one `φ`.  Remaining sub-frontiers are pure assembly (no new
-producer / no new diagonal): (i) frame match — DE-RISKED to one small lemma.
-`frameVec = tangentConstInChart` at `finBasis` (rfl, B0); AND `coordinateFrameAt
-x₀ i x = frameVec x₀ i x` on `baseSet` (since `coordinateTrivializationAt =
-trivializationAt E (TangentSpace I)` (abbrev), `localFrame b i x = basisAt b hx i =
-(linearEquivAt x hx).symm (b i)` on `baseSet`, and `symmL x = (continuousLinearEquivAt
-x hx).symm` — established in B0).  So the existing COORDINATE-frame covariant
-component formulas (`nabla0SFun_two_eval_coordFrame`,
+tower along one `φ`.  **ALL remaining sub-frontiers are pure assembly of CONFIRMED-PRESENT lemmas — no
+missing API, no new producer, no new diagonal.**  (i) frame match — ALREADY DONE:
+`frameVec x₀ i = tangentConstInChart x₀ (finBasis i)` (rfl, B0) and
+`tangentConstInChart_eq_coordinateFrame_eventually`
+(ConnectionCoefficients.lean:36) gives `frameVec x₀ i =ᶠ[𝓝 x₀] coordinateFrameAt
+x₀ i`.  So B0's `frameVec` output IS the `coordinateFrameAt` data near `x₀`, and
+the existing coordinate-frame covariant formulas (`nabla0SFun_two_eval_coordFrame`,
 `nabla0SFun_eval_coordFrame_moving_raw`, `tensor0S_two_eval_coordFrame_sum`) apply
-DIRECTLY to B0's `frameVec` output on the patch — no separate frame-conversion
-needed.  Next concrete lemma: `coordinateFrameAt x₀ i =ᵇᵃˢᵉˢᵉᵗ frameVec x₀ i`.
+directly — NO frame-conversion lemma to prove.
 (ii) the multilinear slot-expansion
 (`leviCivita(frameₐ)(frame₀) = Σ Γᵏ frameₖ` + tensor linearity); (iii) the A2 germ
 (`=ᶠ[𝓝 y]`) → neighbourhood-of-compact upgrade (local equality on each `y∈K`
