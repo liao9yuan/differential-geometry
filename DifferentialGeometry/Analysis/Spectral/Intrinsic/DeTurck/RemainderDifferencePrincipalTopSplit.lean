@@ -343,6 +343,16 @@ cometric difference `g₁⁻¹ − g₀⁻¹` is NON-DIAGONAL and frequency-doub
 can hold (a single mode of `T` emits a higher mode of the remainder).  The correct SUMMED form
 operates on the section level and on whole spectral masses.
 
+The order-uniform top-arm scalar `c : ℝ` is **also** FALSE: the fibre-multiplication mode-doubling
+(frequency `m → 2m`) makes `mass_d(Top)` carry the weight `(1 + (2m)²)^d` against the right side's
+`(1 + m²)^{d+2}`, so the two-order gain `m⁴` supplies a fixed factor but the doubling supplies a
+per-order `4^d` — the implied constant grows as `4^d`, not order-uniformly (exact-rational cert
+`/tmp/exact_modedouble.py`, logged in `PROVE_REFUTED.md`).  The corrected (verified-TRUE) form
+order-indexes the top coefficient to a nonneg family `C_top : ℝ → ℝ`, keeping the load-bearing
+`δ²`-proportionality, exactly as the docstring's own "`4^p` growth confined to the order-indexed
+family" rule already requires of the `Rest` arm.  This is NOT the killed per-mode shape (it keeps
+the SUMMED-mass form); it only order-indexes the top coefficient.
+
 Writing the realized remainder as `realizedRHSRemainderSection g₀ g_bg g₁ T₁ =
 deTurckRHSRetag g₀ g_bg g₁ − Δ_∇ T₁` (`realizedRHSRemainderSection_eq_sub`), the `g₀⁻¹∇²` core of
 the retag's principal part is cancelled by the `Δ_∇` summand, so the second-order content of the
@@ -351,13 +361,14 @@ remainder difference is fibre-multiplication of `∇²(realize (T₁ − T₂))`
 splits the remainder-difference section as `Top + Rest` with, at **every** real spectral order
 `d ≥ 0`:
 
-* **the δ²-top arm on `Top`**: `mass_d(Top) ≤ c · δ² · mass_{d+2}(T₁ − T₂)`.  `Top` is the
+* **the δ²-top arm on `Top`**: `mass_d(Top) ≤ C_top d · δ² · mass_{d+2}(T₁ − T₂)`.  `Top` is the
   second-order quasilinear principal section (the fibre-multiplication of `∇²(realize (T₁ − T₂))`
   by the cometric difference); the `H^d` multiplier bound for fibre-multiplication
   `exists_toHs_appFullRS_norm_le_of_covLeibnizGrid` carries the fibre size `Λ ≤ Cd · δ`, and the
   sharp two-order covariant-gradient gain `covGrad_toHs_norm_le` (applied twice, `∇² → H^{d+2}`)
-  lands the spectral order `d + 2`; the constant `c` is independent of `d` (the top
-  covariant-Leibniz cell has binomial coefficient `1`); and
+  lands the spectral order `d + 2`; the coefficient `C_top d` is **order-indexed** (the
+  fibre-multiplication mode-doubling forces the `4^d`-type growth into `C_top`, never into a single
+  scalar), with the `δ²`-proportionality preserved; and
 
 * **the generic + cross arms on `Rest`**:
   `mass_d(Rest) ≤ C d · mass_{d+1}(T₁ − T₂) + c₂ · (mass_{d+2}(T₁) + mass_{d+2}(T₂)) ·
@@ -379,7 +390,7 @@ theorem realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_section_sp
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) :
     ∃ k₀ : ℕ, 2 * k₀ ≤ a + 1 ∧
-      ∃ c : ℝ, 0 ≤ c ∧ ∃ c₂ : ℝ, 0 ≤ c₂ ∧
+      ∃ C_top : ℝ → ℝ, (∀ d, 0 ≤ C_top d) ∧ ∃ c₂ : ℝ, 0 ≤ c₂ ∧
         ∀ (B : ℝ), 0 ≤ B → ∀ (δ : ℝ), 0 ≤ δ → δ < 1 / 2 →
           ∃ C : ℝ → ℝ, (∀ d, 0 ≤ C d) ∧
             ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
@@ -401,7 +412,7 @@ theorem realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_section_sp
                         (tensorL2Coeff (I := I) (M := M)
                             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
                             (Integral.L2.SmoothCcTensor.toL2 Top) i) ^ 2)
-                    ≤ c * δ ^ 2 *
+                    ≤ C_top d * δ ^ 2 *
                         (∑' i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
                           tensorSobolevWeight (I := I) (M := M) i (d + 2) *
                             (tensorL2Coeff (I := I) (M := M)
@@ -445,19 +456,21 @@ difference (the ε-Young squared form of the principal top-jet split, in the
 input).**
 
 For an anchor `g₀`, a flow background `g_bg`, a supercritical order `a` (`2a > dim M + 4`),
-there are a **fixed low anchor order `k₀` with `2 * k₀ ≤ a + 1`**, a top-arm constant
-`c ≥ 0`, and a cross-arm constant `c₂ ≥ 0`, all depending only on `(g₀, g_bg, a)` — uniform
-in the spectral order `d`, the ball radius `B`, and the margin `δ` — such that for every `H^{a+2}`-ball radius `B ≥ 0` and every
-fibre margin `0 ≤ δ < 1/2` there is a nonnegative order-indexed family `C : ℝ → ℝ` with: for
-any two `g₀`-fibre-`δ`-small perturbations `T₁, T₂` of `H^{a+2}` norm `≤ B`, any two
+there are a **fixed low anchor order `k₀` with `2 * k₀ ≤ a + 1`** and a cross-arm constant
+`c₂ ≥ 0`, depending only on `(g₀, g_bg, a)` — uniform in the spectral order `d`, the ball
+radius `B`, and the margin `δ` — such that for every `H^{a+2}`-ball radius `B ≥ 0` and every
+fibre margin `0 ≤ δ < 1/2` there are nonnegative order-indexed families `C_top, C : ℝ → ℝ`
+with: for any two `g₀`-fibre-`δ`-small perturbations `T₁, T₂` of `H^{a+2}` norm `≤ B`, any two
 realized metrics `g₁, g₂` (tied by the fibrewise `inner`-identities), and **every** spectral
 order `d ≥ 0`, the order-`d` spectral mass (the `(1+λᵢ)^d`-weighted square-sum of the
 `L²`-eigencoefficients) of the realized remainder difference is summable and dominated by
 
-* the **order-uniform δ²-top arm** `c · δ² · mass_{d+2}(T₁ − T₂)` — the square of the
-  δ-proportional principal arm, with `c` independent of `d` (the top covariant-Leibniz cell
-  has binomial coefficient `1`, and ε-Young at a FIXED ε absorbs the cross term of the
-  square into the two pure arms, so no order growth ever touches the δ²-coefficient); plus
+* the **order-indexed δ²-top arm** `C_top d · δ² · mass_{d+2}(T₁ − T₂)` — the square of the
+  δ-proportional principal arm.  The top covariant-Leibniz cell has binomial coefficient `1`,
+  but the fibre-multiplication of the cometric difference frequency-DOUBLES (`m → 2m`), so the
+  implied constant grows as `4^d`; the top coefficient is therefore order-INDEXED as `C_top d`
+  (an order-uniform scalar `c` here is FALSE, refuted by the exact-rational mode-doubling
+  certificate — `PROVE_REFUTED.md`), with the load-bearing `δ²`-proportionality preserved; plus
 * the order-indexed generic lower arm `C d · mass_{d+1}(T₁ − T₂)`: the Hamilton/Moser-tame
   arm one full spectral order below the top; plus
 * the **order-uniform fixed-pair cross arm** `c₂ · (mass_{d+2}(T₁) + mass_{d+2}(T₂)) ·
@@ -466,13 +479,13 @@ order `d ≥ 0`, the order-`d` spectral mass (the `(1+λᵢ)^d`-weighted square-
   independent of `d` (an order-growing cross coefficient would make the Picard
   class-invariance recursion jointly unsatisfiable against the middle arm's forced growth).
   ALL order growth — in particular the sharp binomial-Leibniz `4^p`-type emissions — is
-  confined to the family `C d`, never to `c` or `c₂` (the `PROVE_REFUTED.md`-ratified
-  ε-Young design: `δ < 1/2` uniform, `4^p` inside `C(p)`).
+  confined to the families `C d` and `C_top d`, never to the cross scalar `c₂` (the
+  `PROVE_REFUTED.md`-ratified ε-Young design: `δ < 1/2` uniform, `4^p` inside `C(p)`).
 
 This is the spectral-mass transcription of the per-order `L²`-jet split
 `exists_realizedRemainderDiff_principalTopSplit_allOrder_l2Norm_le`: the sharp Gårding
 ladder matches the order-`d` spectral mass with the squared covariant jet sums at matching
-order, the per-order split bounds each jet by `c·δ·(top jet) + (rest arms)`, and squaring
+order, the per-order split bounds each jet by `C_top·δ·(top jet) + (rest arms)`, and squaring
 via ε-Young at fixed ε yields the δ²-top arm at spectral order `d + 2` (comfortably inside
 the two-order maximal-regularity gain `solFieldMass_le_forcingMass`) with the rest collected
 at order `d + 1` (the `√T`-funded window of `maxRegDuhamelSolFieldHa1_dist_le`) and the
@@ -484,7 +497,7 @@ degeneracy can satisfy the bound vacuously.
 
 **Non-vacuity.**  At `T₁ = T₂` the metric ties force `g₁ = g₂` and every mass on both sides
 vanishes (`0 ≤ 0`); for `T₁ ≠ T₂` the left side is generically positive, rejecting the
-degenerate `c = 0`, `C ≡ 0` witness, and the δ²-arm genuinely carries the top order: the
+degenerate `C_top ≡ 0`, `C ≡ 0` witness, and the δ²-arm genuinely carries the top order: the
 lower arm stops one full spectral order below (`d + 1`) apart from the fixed low anchor, so
 for high-frequency differences the right side without the δ²-arm is strictly smaller than
 the left at large `d`.  The body is the posited analytic input; it remains `sorry`, so
@@ -493,7 +506,7 @@ theorem exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) :
     ∃ k₀ : ℕ, 2 * k₀ ≤ a + 1 ∧
-      ∃ c : ℝ, 0 ≤ c ∧ ∃ c₂ : ℝ, 0 ≤ c₂ ∧
+      ∃ C_top : ℝ → ℝ, (∀ d, 0 ≤ C_top d) ∧ ∃ c₂ : ℝ, 0 ≤ c₂ ∧
         ∀ (B : ℝ), 0 ≤ B → ∀ (δ : ℝ), 0 ≤ δ → δ < 1 / 2 →
           ∃ C : ℝ → ℝ, (∀ d, 0 ≤ C d) ∧
             ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
@@ -523,7 +536,7 @@ theorem exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le
                               (realizedRHSRemainderSection (I := I) g₀ g_bg g₁ T₁)
                             - Integral.L2.SmoothCcTensor.toL2
                               (realizedRHSRemainderSection (I := I) g₀ g_bg g₂ T₂)) i) ^ 2)
-                  ≤ c * δ ^ 2 *
+                  ≤ C_top d * δ ^ 2 *
                       (∑' i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
                         tensorSobolevWeight (I := I) (M := M) i (d + 2) *
                           (tensorL2Coeff (I := I) (M := M)
@@ -558,11 +571,12 @@ theorem exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le
   -- The SUMMED section split (the posited analytic input): the remainder difference splits as
   -- `Top + Rest` whose order-`d` spectral masses carry, respectively, the δ²-top arm and the
   -- generic + cross arms.  The mode-mixing per-mode shape is FALSE; this works on whole masses.
-  obtain ⟨k₀, hk₀, c, hc_nn, c₂, hc₂_nn, hbody⟩ :=
+  obtain ⟨k₀, hk₀, C_top, hC_top_nn, c₂, hc₂_nn, hbody⟩ :=
     realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_section_split
       (I := I) g₀ g_bg a ha
   -- The Young factor `2` of `(p + q)² ≤ 2 p² + 2 q²` is absorbed into the node constants.
-  refine ⟨k₀, hk₀, 2 * c, by positivity, 2 * c₂, by positivity, fun B hB δ hδ0 hδ1 => ?_⟩
+  refine ⟨k₀, hk₀, fun d => 2 * C_top d, fun d => by have := hC_top_nn d; positivity,
+    2 * c₂, by positivity, fun B hB δ hδ0 hδ1 => ?_⟩
   obtain ⟨C, hC_nn, hsplit⟩ := hbody B hB δ hδ0 hδ1
   refine ⟨fun d => 2 * C d, fun d => by have := hC_nn d; positivity, ?_⟩
   intro T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ d hd
@@ -636,7 +650,7 @@ theorem exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le
     _ = 2 * (∑' i, tensorSobolevWeight (I := I) (M := M) i d * (cTop i) ^ 2)
           + 2 * (∑' i, tensorSobolevWeight (I := I) (M := M) i d * (cRest i) ^ 2) := by
         rw [(hsumTop.mul_left 2).tsum_add (hsumRest.mul_left 2), tsum_mul_left, tsum_mul_left]
-    _ ≤ 2 * (c * δ ^ 2 *
+    _ ≤ 2 * (C_top d * δ ^ 2 *
             (∑' i, tensorSobolevWeight (I := I) (M := M) i (d + 2) *
               (tensorL2Coeff (I := I) (M := M) hc
                   (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2))
@@ -654,8 +668,8 @@ theorem exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le
               * (∑' i, tensorSobolevWeight (I := I) (M := M) i (k₀ : ℝ) *
                   (tensorL2Coeff (I := I) (M := M) hc
                       (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2)) := by
-        gcongr <;> assumption
-    _ = 2 * c * δ ^ 2 *
+        gcongr
+    _ = 2 * C_top d * δ ^ 2 *
           (∑' i, tensorSobolevWeight (I := I) (M := M) i (d + 2) *
             (tensorL2Coeff (I := I) (M := M) hc
                 (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2)

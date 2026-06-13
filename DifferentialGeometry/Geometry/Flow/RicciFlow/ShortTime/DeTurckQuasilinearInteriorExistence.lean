@@ -244,7 +244,7 @@ theorem qieGatedStep_budget
   classical
   set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
     with hcompact_def
-  obtain ⟨k₀, _hk₀, _c', _hc'_nn, c₂, hc₂_nn, hsplitAll⟩ :=
+  obtain ⟨k₀, _hk₀, _C_top, _hC_top_nn, c₂, hc₂_nn, hsplitAll⟩ :=
     DeTurck.exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le
       (I := I) (M := M) g₀ g_bg a ha
   -- the fixed anchor remainder and its all-order spectral masses
@@ -260,7 +260,8 @@ theorem qieGatedStep_budget
     refine tsum_nonneg fun i => ?_
     have := tensorSobolevWeight_nonneg (I := I) (M := M) i d
     positivity
-  -- the window ball radius and the split family
+  -- the window ball radius and the split family (the order-indexed top family is discarded
+  -- here — the budget recursion only consumes the order-growing generic family `C`)
   obtain ⟨C, hC_nn, _hsplit⟩ := hsplitAll 0 le_rfl δ hδ0.le hδ_half
   -- the order-recursion factor and product
   have hfac_16 : ∀ x : ℝ, 16 ≤ qieBudgetFac m₀fun C x := fun x => by
@@ -539,9 +540,13 @@ theorem deTurckGatedRemainder_picard_forcing_exists
                           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) f t)))) ∧
                   DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ F := by
   classical
-  obtain ⟨_k₀, _hk₀, c, hc_nn, _c₂, _hc₂_nn, _hsplitAll⟩ :=
+  obtain ⟨_k₀, _hk₀, C_top, hC_top_nn, _c₂, _hc₂_nn, _hsplitAll⟩ :=
     DeTurck.exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le
       (I := I) (M := M) g₀ g_bg a ha
+  -- the top-arm constant the threshold is built from is the order-indexed top family at the
+  -- fixed working order `a` (the split's top arm is consumed only at `d = a`)
+  set c : ℝ := C_top (a : ℝ) with hc_def
+  have hc_nn : 0 ≤ c := hC_top_nn (a : ℝ)
   refine ⟨min (1 / 4) (1 / (8 * (c + 1))),
     lt_min (by norm_num) (by positivity),
     le_trans (min_le_left _ _) (by norm_num), ?_⟩
@@ -748,9 +753,13 @@ theorem deTurckGatedRemainder_picard_contraction_onGate
   haveI hcount : Countable (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
       (I := I) (M := M) g₀ 0 2) :=
     countable_tensorEigenIdx (I := I) (M := M) hcompact
-  obtain ⟨k₀, hk₀, c, hc_nn, c₂, hc₂_nn, hsplitAll⟩ :=
+  obtain ⟨k₀, hk₀, C_top, hC_top_nn, c₂, hc₂_nn, hsplitAll⟩ :=
     DeTurck.exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le
       (I := I) (M := M) g₀ g_bg a ha
+  -- the top-arm constant the contraction threshold and per-mode top weight are built from is the
+  -- order-indexed top family at the fixed working order `a` (the split is consumed only at `d = a`)
+  set c : ℝ := C_top (a : ℝ) with hc_def
+  have hc_nn : 0 ≤ c := hC_top_nn (a : ℝ)
   obtain ⟨C_RH, hC_RH_nn, hRH⟩ :=
     exists_toHs_norm_le_iteratedCovGrad_tensorL2Norm_sum (I := I) (M := M) g₀ 0 2 (a + 2)
   choose C_G hC_G_nn hC_G using fun m : ℕ =>
