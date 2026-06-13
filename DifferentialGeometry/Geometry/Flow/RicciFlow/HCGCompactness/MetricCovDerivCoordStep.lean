@@ -50,6 +50,33 @@ theorem metricCovDeriv_succ_apply_section
         (metricCovDeriv (I := I) h gRef a) x slots := by
   rw [metricCovDeriv_succ, metricCovDerivStep_apply, totalNabla0SFun_apply_section]
 
+/-- **Smooth-slots recursion for the metric covariant tower.**  General-`a`
+analogue of `metricCovDeriv_one_eval_smooth_slots`: one tower step evaluated on a
+leading section `X` and smooth section slots `V` is the directional derivative of
+the order-`a` slot scalar minus the `gRef`-connection corrections.  This is the
+form the section-based Gap-B convergence induction consumes (directional term →
+B2, corrections → frame expansion + mulLeft + IH), with NO coordinate-frame /
+germ-localisation detour. -/
+theorem metricCovDeriv_succ_eval_smooth_slots
+    (h gRef : SmoothRiemannianMetric I M) (a : Nat)
+    (X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (V : Fin (a + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _))
+    (x : M) :
+    metricCovDeriv (I := I) h gRef (a + 1) x
+        (Fin.cons (X x) (fun q : Fin (a + 2) => V q x)) =
+      extDerivFun (I := I)
+          (fun y : M => metricCovDeriv (I := I) h gRef a y
+            (fun q : Fin (a + 2) => V q y)) x (X x) -
+        ∑ p : Fin (a + 2),
+          metricCovDeriv (I := I) h gRef a x
+            (Function.update (fun q : Fin (a + 2) => V q x) p
+              (((leviCivitaConnectionOfMetric (I := I) gRef)
+                  (fun y : M => V p y) x) (X x))) := by
+  rw [metricCovDeriv_succ_apply_section]
+  exact nabla0SFun_eval_smooth_slots (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+    (leviCivitaConnectionOfMetric (I := I) gRef) X V (metricCovDeriv (I := I) h gRef a) x
+
 /-- **Coordinate-frame component recursion for the metric covariant tower.**
 The order-`a+1` covariant component in the coordinate frame is the coordinate
 directional derivative of the order-`a` component (leading slot the derivative

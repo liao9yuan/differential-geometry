@@ -119,40 +119,50 @@ bridge uses), and needs only the CLM convergence, NOT the `C^∞` (chartCInf) in
 With the norm bridge at `a = 0` it gives `metricDerivNorm 0 (gSeq k) gInf gRef → 0`
 (the order-0 slice of `hnorm`).
 
-### Gap B remaining (`a ≥ 1`) — STOPPED, two exact missing pieces (per the brick stop condition)
-The covariant content (`a ≥ 1`) is genuinely blocked; neither is hidden behind an
-assumption.  `metricCovDeriv g gRef a` is LINEAR in `g` (`covDerivOfField_add`/
-`_smul`), so the difference is the covariant tower of the order-0 difference; the
-one-covariant-step component formula at rank 2 EXISTS
-(`Coordinates.nabla0SFun_two_eval_coordFrame`, `NablaComponents/TwoTensor.lean`:
-`(∇_X A)(eⱼ,eₗ) = coordDeriv0SAt(A's (j,l) comp) − Σ Christoffel·coordComponent0SAt`).
-But the bridge still needs BOTH:
+### Gap B remaining (`a ≥ 1`) — both original "missing pieces" now DONE (2026-06-13)
+The two pieces that previously blocked this are both resolved:
 
-1. **(analytic) `C^∞`-on-compacts ⇒ coordinate-derivative convergence.**  From
-   `exists_engine_frameCInfConv`'s `MapCInfConvOnCompacts` (Gap A) of the order-0
-   chart components, conclude convergence of `coordDeriv0SAt`/the chart `fderiv` of
-   those components.  `MapConvergence.lean` has NO `fderiv`/derivative-closure
-   lemma for `MapCInfConvOnCompacts` (only `mapDerivNorm`, `comp_subseq`,
-   `mono_*`, `tendsto_of_cInf`).  Needed already for `a = 1`.  Smallest next lemma:
+1. **(analytic) `C^∞`-on-compacts ⇒ derivative convergence — DONE (B2).**
+   `MapCInfConvOnCompacts.fderivApply` (`MapConvergenceDeriv.lean`):
    `MapCInfConvOnCompacts U Φ Φinf → MapCInfConvOnCompacts U (fun k z => fderiv ℝ
-   (Φ k) z v) (fun z => fderiv ℝ Φinf z v)` (the order-`r` derivative converges;
-   it IS the `MapCPConvOn` content but is not extracted as a usable lemma).
+   (Φ k) z v) (fun z => fderiv ℝ Φinf z v)`.  Plus producer (3)
+   `MapCInfConvOnCompacts.add/.mulLeft/.sum` (same file) for the Christoffel sums.
 
-2. **(algebraic) higher-rank coordinate covariant-derivative component formula.**
-   `NablaComponents/` covers only rank ≤ 2 (`Basic`/`OneForm`/`TwoTensor`).  The
-   tower `metricCovDeriv g gRef a = totalNabla0SFun (a+2) ∘ … ` produces rank
-   `a+2 ≥ 3` tensors for `a ≥ 1`; there is NO `component0S (totalNabla0SFun s …)` /
-   `component0S (metricCovDerivStep …)` coordinate formula for `s ≥ 3`.  Smallest
-   next lemma: a recursive `component0S (metricCovDerivStep gRef a A) I0' =
-   coordinate-frame directional derivative of `component0S A` + Σ Christoffel·
-   component0S A` (generalising `nabla0SFun_two_eval_coordFrame` to the tower /
-   arbitrary slot count), which closes the `a → a+1` induction once (1) supplies
-   the derivative convergence.
+2. **(algebraic) rank-general coordinate covariant-derivative formula — DONE
+   (producer 2).**  `Tensor.Coordinates.nabla0SFun_eval_coordFrame`
+   (`Geometry/Coordinates/NablaComponents/CoordFrameStep.lean`) for arbitrary slot
+   count, specialised to the metric tower by
+   `metricCovDeriv_succ_component_coordFrame`
+   (`HCGCompactness/MetricCovDerivCoordStep.lean`):
+   `component0S (coordinateFrameAt_toBasis x) (metricCovDeriv g gRef (a+1) x) I0 =
+    coordDeriv0SAt (coordinateFrameAt x (I0 0)) x (metricCovDeriv g gRef a) (tail I0)
+    − Σ_p Σ_k Γ^k · coordComponent0SAt (metricCovDeriv g gRef a x) (update (tail I0) p k)`.
 
-`fderiv_chartRep_eq_towerStep` (MetricPreconv.lean) gives the per-step germ
-recursion in the scalar-on-sections form, but converting it to a `component0S`
-convergence statement needs exactly (1)+(2).  Do not add a hypothesis that simply
-asserts covariant-tower convergence.
+**REMAINING = the `C^∞` convergence induction assembly (`componentConv_covDeriv_of_chartCInf`)
++ pointwise extraction + finite-cover `hnorm` + `metricPreconvInf`.**  All bridges
+needed are confirmed present; this is assembly, not new API:
+- **carrier**: induct on `a` over `MapCInfConvOnCompacts` (single `φ` from B0
+  `exists_engine_frameCInfConv`) of the chart-rep of the order-`a` component in the
+  coordinate frame centred at the target point `x₀`.
+- **base `a=0`**: B0 output, converted from the `σ = frameVec x₀` form to the
+  `coordinateFrameAt x₀` form via the germ match
+  `frameVec x₀ i =ᶠ[𝓝 x₀] coordinateFrameAt x₀ i`
+  (`tangentConstInChart_eq_coordinateFrame_eventually`).
+- **step `a→a+1`**: apply `metricCovDeriv_succ_component_coordFrame`; the directional
+  `coordDeriv0SAt` term = chart `fderiv` via the EXISTING connector
+  `extDerivFun_eq_fderiv_of_writtenInExtChartAt_eventuallyEq`
+  (`Bundle/PartialMfderiv/FixedBase.lean:199`) /
+  `extDerivFun_tangentConstAt_eq_fderiv_writtenInExtChartAt`
+  (`Geometry/Operator/LaplacianMinimum.lean:191`) ⇒ converges by **B2**; the
+  Christoffel coefficients are fixed `gRef`-smooth (`k`-independent) functions ⇒
+  **mulLeft + sum + IH**.
+- **extract**: order-0 of the C∞ tower at the point gives the pointwise
+  `Tendsto` matching `componentConv_covDeriv_zero`'s shape for general `a`.
+- then finite-cover `hnorm` (`metricDerivNorm_le_compSq_uniform`) → `metricPreconvInf`.
+
+Do not add a hypothesis that simply asserts covariant-tower convergence.
+`fderiv_chartRep_eq_towerStep` (MetricPreconv.lean) is the scalar-on-sections germ
+form of the same step recursion (alternative to the `component0S` route above).
 
 ## C0 — `exists_diag_subseq` (DONE)
 
