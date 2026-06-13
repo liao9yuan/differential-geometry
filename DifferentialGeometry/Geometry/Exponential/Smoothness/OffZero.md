@@ -47,12 +47,36 @@ discharge is a separate downstream brick:
 
 Both are now gated on *geometry/IFT wiring*, no longer on the ODE smoothness frontier.
 
-## B-metric `normalCoordMetric_contDiffOn` — feasibility audit (2026-06-13)
+## B-metric `normalCoordMetric_contDiffOn` — DONE (2026-06-13), axiom-clean
 
-**Verdict: FEASIBLE (every lemma exists), but a substantial bundle-assembly (~150–250 lines),
-not a corollary.** No new foundational lemma is missing (the planner's hard-stop #1 is NOT
-triggered: `ContMDiffOn.contMDiffOn_tangentMapWithin` supplies `mfderiv`-smoothness from
-`ContMDiffOn ∞ expMap`).
+**Landed in `HCGCompactness/StepBInputs.lean`** (`normalCoordMetric_contDiffOn`,
+`[propext, Classical.choice, Quot.sound]`, no `sorryAx`; focused check green).  For every
+`Y : PointedRiemannianManifold` and `x : Y.M` there is `δ > 0` with
+`ContDiffOn ℝ ⊤ (normalCoordMetric Y x) (ball 0 δ ∩ (expMapDiffeo Y.metric x).source)`.
+
+Final assembly (matches the 5-step route below):
+- step 1 `expMapDiffeo_contMDiffOn_ball` (C¹→C∞ comparison), step 2 `normalCoordMetric_apply`
+  (scalar eval) — as before.
+- step 3 `expMapDiffeo_pushforward_section_contMDiffOn` (private): the pushforward bundle
+  section `z ↦ ⟨expMapDiffeo z, d(expMapDiffeo)_z v⟩` is `ContMDiffOn`, via
+  `ContMDiffOn.contMDiffOn_tangentMapWithin` (`∞+1≤∞` discharges by `le_rfl` — defeq in
+  `WithTop ℕ∞`) composed with the **constant tangent section** `z ↦ ⟨z, v⟩`.  The clean route
+  for the constant section is `contMDiff_vectorSpace_iff_contDiff (V := fun _ => v) |>.mpr
+  contDiff_const` — the earlier `tangentBundleModelSpaceHomeomorph.symm`-composition route
+  died on the `ModelProd`-vs-`prodChartedSpace` instance wall (`chartedSpaceSelf_prod`); the
+  `T% V` vector-field iff sidesteps it entirely.  `mfderivWithin = mfderiv` on open `U` via
+  `mfderivWithin_of_isOpen`.
+- steps 4–5: `ContMDiffOn.clm_bundle_apply₂` (metric section `Y.metric.contMDiff.comp_contMDiffOn`
+  + the two pushforward sections) → scalar via `contMDiffWithinAt_totalSpace`; then
+  `contDiffOn_clm_apply` ×2 (finite-dim `E`) reduces the `E →L E →L ℝ`-valued map to scalar
+  entries, and `contMDiffOn_iff_contDiffOn` converts model↔model.  `set_option
+  synthInstance.maxHeartbeats 800000` needed for the nested-CLM-bundle synthesis under
+  `InnerProductSpace E`.
+
+**Verdict at audit time (kept for history): FEASIBLE (every lemma exists), substantial
+bundle-assembly.** Confirmed correct; the realized assembly is ~110 lines incl. the private
+pushforward helper.  The planner's hard-stop #1 was NOT triggered: the `PartialDiffeomorph … 1`
+defeq mismatch was dissolved by `ContMDiffOn.congr` at step 1, not blocked.
 
 `normalCoordMetric Y x z = (precomp D).comp ((g.inner (exp z)).comp D)`,
 `D = mfderiv (expMapDiffeo x) z : E →L T_{exp z}M`.  The codomain `T_{exp z}M` **varies

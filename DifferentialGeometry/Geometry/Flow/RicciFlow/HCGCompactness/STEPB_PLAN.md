@@ -208,9 +208,11 @@ Acceptance endpoints:
 
 ### B-metric - `lbl394` local metric limits
 
-Status: generic engine, fixed-center HCG wrapper, and forward `expMap C^infty`
-input accepted 2026-06-13; full `lbl394` metric endpoint still blocked on
-`normalCoordMetric_contDiffOn`.
+Status: generic engine, fixed-center HCG wrapper, forward `expMap C^infty`
+input, and `normalCoordMetric_contDiffOn` accepted 2026-06-13; full `lbl394`
+metric endpoint still blocked on the uniform domain/radius bridge needed to use
+one fixed model domain `U` for all sequence members, plus the finite beta
+diagonal.
 
 Acceptance verdict 2026-06-13: `StepBLocalMetrics.lean` is accepted for the
 generic bilinear-form limit theorem `exists_metricLimit_on` and the fixed
@@ -222,6 +224,8 @@ normal-coordinate smoothness as the bare hypothesis
 containment as `hdom`; this is not the unconditional manifold `lbl394`.
 Planner verification passed focused checks, targeted module builds, and axiom
 audit (`propext`, `Classical.choice`, `Quot.sound` only).
+The historical `hsmooth` gap is now discharged by `normalCoordMetric_contDiffOn`;
+`hdom`/uniform-radius bookkeeping remains.
 
 Frontier-1 audit corrected 2026-06-13: the fixed-box ODE theorem is already
 proved as `IsLocalFlow.contDiffOn_top` / `IsLocalFlow.contDiffOn_top_local`
@@ -238,11 +242,7 @@ Forward smoothness accepted 2026-06-13: `SmoothFlow.lean` now has
 `expMap_contMDiffAt_infty_of_norm_lt`.  Planner checked `SmoothFlow`,
 `OffZero`, and the `JacobiVariation` consumer; axiom audit is clean
 (`propext`, `Classical.choice`, `Quot.sound` only).  This discharges the ODE /
-forward-exp gate.  The next metric-facing producer is the geometry-layer
-smoothness bridge for
-`z |-> g.inner (expMap z) (mfderiv expMap z v) (mfderiv expMap z w)`, packaged
-as `normalCoordMetric_contDiffOn` or the closest reusable pullback-section
-theorem.
+forward-exp gate that fed the now-accepted metric smoothness producer.
 
 Metric-smoothness audit accepted 2026-06-13: `OffZero.md` records that
 `normalCoordMetric_contDiffOn` is feasible with existing tools, but not a
@@ -253,6 +253,15 @@ work is a substantial geometry/bundle assembly: compare the C1
 `expMapDiffeo` derivative with the forward `expMap` derivative on an open ball,
 build smooth pushforward sections, then assemble the
 `E ->L E ->L R`-valued pullback metric in coordinates.
+
+Metric smoothness producer accepted 2026-06-13: `StepBInputs.lean` proves
+`normalCoordMetric_contDiffOn`, with helper endpoints
+`expMapDiffeo_contMDiffOn_ball` and `normalCoordMetric_apply`.  Focused check,
+targeted module build, and axiom audit passed.  The next B-metric commission is
+not another smoothness lemma: relate the existential radius from
+`normalCoordMetric_contDiffOn` to the fixed Step-B model domain `U` along the
+sequence, using Step-A fixed-scale/radius data, then consume
+`exists_metricLimit_normalCoord`.
 
 Target file: `StepBLocalMetrics.lean`.
 

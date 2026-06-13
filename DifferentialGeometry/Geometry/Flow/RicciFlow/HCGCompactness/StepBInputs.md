@@ -84,3 +84,33 @@ Quot.sound]` (the `Classical.choice` is inherited from `expMapDiffeo`'s
   standard `set_option synthInstance.maxHeartbeats 800000` fixes it. Scope it to the one
   declaration (`NormalCoordMetricDerivBound`) — an unscoped top-level option trips the
   `linter.style.setOption` guard on a fresh build.
+
+## B-metric smoothness producer - accepted 2026-06-13
+
+`normalCoordMetric_contDiffOn` is now proved in `StepBInputs.lean`: for every pointed
+Riemannian manifold `Y` and center `x`, there is a radius `delta > 0` such that
+`normalCoordMetric Y x` is `ContDiffOn Real top` on
+`Metric.ball 0 delta inter (expMapDiffeo Y.metric x).source`.
+
+The proof closes the five planned geometry/bundle steps:
+
+- `expMapDiffeo_contMDiffOn_ball` compares the C1 `PartialDiffeomorph` realization with
+  the forward C-infinity `expMap` on the ball.
+- `normalCoordMetric_apply` exposes scalar evaluation as
+  `g_(H_x z) (dH_x z v) (dH_x z w)`.
+- the private pushforward-section lemma uses
+  `ContMDiffOn.contMDiffOn_tangentMapWithin` and a constant tangent section.
+- `ContMDiffOn.clm_bundle_apply2` assembles the metric section with the two pushed-forward
+  vectors.
+- two `contDiffOn_clm_apply` reductions and `contMDiffOn_iff_contDiffOn` package the
+  scalar entries as an `E ->L[Real] E ->L[Real] Real`-valued map.
+
+Verification passed: focused locked check and targeted module build were green.  The
+public axiom audit for `expMapDiffeo_contMDiffOn_ball`, `normalCoordMetric_apply`, and
+`normalCoordMetric_contDiffOn` is `[propext, Classical.choice, Quot.sound]` only.
+
+Impact: the B-metric smoothness hypothesis is no longer the frontier.  The remaining
+fixed-center wrapper work is domain/radius bookkeeping: relate the existential
+`delta_k` from `normalCoordMetric_contDiffOn` to the fixed model domain `U` used by
+`exists_metricLimit_normalCoord`, using the Step-A fixed-scale/radius data.  That is a
+uniform-domain input, not another smoothness theorem.
