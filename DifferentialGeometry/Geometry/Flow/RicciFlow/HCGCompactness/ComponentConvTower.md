@@ -209,17 +209,43 @@ per pair); the per-pair limit pinning then mirrors
   `localFrame_apply_of_mem_baseSet` + `simp [basisAt, tangentConstInChart_apply]`).
   So the norm-bridge basis `bz` IS the chart-constant frame.
 
-**REMAINING — Step 4b (wiring, the endpoint `metricPreconvInf`):**  Two parts:
-- *(4b-ii rest)* per-slot bridge `bz(I0 q) = V^{I0}_q(z')` (`bz_eq_tangentConst` +
-  `tangentConst_basis_expand` + `hframeσ` frame bridge near `Kc`; `V^{I0}_q :=
-  Σ_j (finBasis.repr (basisE (I0 q)) j) • frame_j`, a constant-combo `ContMDiffSection`)
-  ⇒ `component0S bz (metricCovDeriv g gRef a z') I0 = [exists_tower_conv carrier for
-  V^{I0}] (extChartAt z')` (`component0S_apply`) ⇒ uniform-on-patch convergence from the
-  tower's `MapCInfConvOnCompacts` order-0 slice (`tendstoUniformlyOn_of_cPConv`) ⇒
-  `metricDerivNorm < ε` uniform on the patch (`metricDerivNorm_le_compSq_uniform`).
-  Domain bookkeeping: patch ⊆ `baseSet ∩ {frame-bridge holds} ∩ interior K₀`
-  (so `extChartAt z' ∈ U`); call `metricDerivNorm_le_compSq_uniform` and
-  `exists_tower_conv` at the SAME center `x_p` (so `bz`/tower share `trivAt x_p`).
+**DONE — Step 4b-ii (a), the key identity (committed `38aa1243`, green):**
+- `componentBz_eq_covDeriv` — `component0S bz (metricCovDeriv g gRef a z) I0 =
+  covDerivOfField gRef (metricTensorField g) a z (fun q => V^{I0}_q z)`, where
+  `V^{I0}_q := Σ_j (finBasis.repr (basisE (I0 q)) j) • frame_j` (constant-combo
+  `ContMDiffSection`).  `component0S_apply` + `show` (fold `metricCovDeriv =
+  covDerivOfField`) + `congr 1`/`funext`; per slot `bz_eq_tangentConst` +
+  `tangentConst_basis_expand` + `ContMDiffSection.finset_sum_apply_gen` +
+  `coe_smul`/`Pi.smul_apply` + `hframeσ`.  **The 4b-ii ALGEBRA is fully done.**
+
+**REMAINING — Step 4b analytic wiring (the endpoint `metricPreconvInf`):**
+- *(4b-ii b, uniform-on-patch — the analytic heart)*: at a center `x_p`, set up
+  `exists_compact_subset` → `K₀` (`x_p ∈ interior K₀ ⊆ source`); `exists_frameData x_p`
+  (Kc := `K₀`) → `frame`/`hframeσ`; `metricDerivNorm_le_compSq_uniform x_p` →
+  `basisE`/`u'`/`Cu`; `exists_tower_conv x_p K₀` → `ψ`/`χ`/`U`/tower conv `∀ a V`.
+  **KEY:** instantiate the tower conv at `V := V^{I0}` (the `exists_frameData` frame —
+  the tower conv is `∀ V`, so the internal frame is irrelevant).  On a COMPACT
+  `C ⊆ u' ∩ interior K₀` (so `C ⊆ baseSet ∩ K₀`, `extChartAt '' C` compact `⊆ U` via
+  the exposed `extChartAt '' interior K₀ ⊆ U`, `χ = 1` there): for `z ∈ C`,
+  `component0S bz (metricCovDeriv g gRef a z) I0 = carrier_{V^{I0}} (extChartAt z)`
+  (`componentBz_eq_covDeriv` + `writtenInExtChartAt_real_apply` + `left_inv`, χ=1).
+  Tower conv order-`a` slice on `extChartAt '' C` (`MapCPConvOn … a`) ⇒ each
+  `|cBz_k − cBz_inf| < ε'` uniform on `C`; finite sum `Σ_I0 (…)² ≤ n^{a+2}·ε'²`;
+  `metricDerivNorm ≤ Cu·√(Σ) ≤ Cu·√(n^{a+2})·ε' < ε` (pick `ε' = ε/(Cu·√(n^{a+2}))`).
+  Keep uniformity in the `metricDerivNorm` SCALAR (RULING).  Output: a compact nbhd
+  `C` of `x_p` + uniform-on-`C` `metricDerivNorm` along the subsequence.
+- *(4b-i c, global diagonal)*: `{interior C_x : x ∈ M}` is an open cover; σ-compact ⇒
+  countable subcover at `x_n` (`exists_chart_cover`/Lindelöf).  `exists_diag_subseq`
+  with `P n φ := uniform metricDerivNorm on C_{x_n} along φ₀∘φ` (`C_{x_n}` fixed, NOT
+  in the existential — χ/U are internal to the hstep), `hstep` = (4b-ii b) at `x_n`,
+  `hsub`/`hextend` = `StrictMono.le_apply` / tail shift → ONE `φ`.
+- *(d, assemble `metricPreconvInf`)*: `metricPreconv_gInf` → `φ₀,gInf,hconv`; the
+  global diagonal → `φ`; `hnorm` on a compact `K` from the finite subcover of `K` by
+  `interior C_{x_n}` (uniform on each `C_{x_n}` ⇒ uniform on `K`);
+  `metricCInfConvOnCompacts_of_normConv`.
+
+No API gap encountered — this is volume (the per-patch uniform extraction + the two
+diagonal levels), best done with a fresh budget; all 5 consumed lemmas are green.
 - *(4b-i global diagonal)* `exists_chart_cover` (countable charts/compacts) +
   `exists_diag_subseq` over the cover, `hstep` = per-chart `exists_tower_conv`
   C∞-data extraction (refines any subsequence), `hsub` = `MapCInfConvOnCompacts.comp_subseq`,
