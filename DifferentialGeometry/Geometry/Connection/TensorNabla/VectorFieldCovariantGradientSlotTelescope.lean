@@ -555,6 +555,96 @@ theorem symLoweredDeTurckVFRetagG0_sub_eq_slotTelescope
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
+/-- **The Hilbert–Schmidt frame reduction of a `(0,2)` fibre norm from a pointwise `g₀`-Cauchy–Schwarz
+value bound.**  If the extracted bilinear form `ccTensorBilin g₀ S x` of a smooth `(0,2)`-tensor
+section `S` obeys the pointwise `g₀`-Cauchy–Schwarz value bound
+`|ccTensorBilin g₀ S x v w| ≤ Λ₀ · √(g₀ x v v) · √(g₀ x w w)` for all `v, w`, then the intrinsic
+squared Riemannian fibre norm of `S` at `x` is bounded by `(finrank · Λ₀)²`.  Proved by expanding the
+fibre norm in a `g₀`-orthonormal tangent frame `e`
+(`exists_orthonormal_frame_riemannianFiberNormSq`), identifying each frame component with the
+bilinear value at the unit frame vectors (`ccTensorBilin_eq_fiberNormSqComponent`, where
+`√(g₀ x (e j) (e j)) = √1 = 1`), and counting the `finrank²` frame-pair summands.  This is the pure
+fibre-algebra bridge by which a `C⁰` value bound on the first-order metric carrier yields the
+order-`0` Riemannian fibre sup. -/
+theorem rfns_le_of_ccTensorBilin_gcs_bound
+    (g₀ : SmoothRiemannianMetric I M) (S : Integral.L2.SmoothCcTensor g₀ 0 2)
+    (x : M) (Λ₀ : ℝ) (_hΛ₀ : 0 ≤ Λ₀)
+    (hbound : ∀ v w : TangentSpace I x,
+      |ccTensorBilin (I := I) g₀ S x v w| ≤
+        Λ₀ * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w)) :
+    Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (S.toSection x) ≤
+      (Module.finrank ℝ E * Λ₀) ^ 2 := by
+  classical
+  obtain ⟨n, e, hn, horth, _hpars, hrepr⟩ :=
+    Integral.Connection.exists_orthonormal_frame_riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+  set K₀ : Fin 0 → Fin n := fun k => k.elim0 with hK₀
+  rw [Integral.Connection.riemannianFiberNormSq_eq_sum_componentS_sq (I := I) (M := M) g₀ x 2 e
+      hrepr (S.toSection x) K₀]
+  have hcomp_le : ∀ J : Fin 2 → Fin n,
+      (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g₀ x 0 2
+        (S.toSection x) n e K₀ J) ^ 2 ≤ Λ₀ ^ 2 := by
+    intro J
+    rw [ccTensorBilin_eq_fiberNormSqComponent (I := I) g₀ S x e K₀ J]
+    have hjj : ∀ j : Fin n, Real.sqrt (g₀.inner x (e j) (e j)) = 1 := by
+      intro j
+      have hjj1 : g₀.inner x (e j) (e j) = 1 := by simpa using horth j j
+      rw [hjj1, Real.sqrt_one]
+    have hb := hbound (e (J 0)) (e (J 1))
+    rw [hjj (J 0), hjj (J 1)] at hb
+    have hb' : |ccTensorBilin (I := I) g₀ S x (e (J 0)) (e (J 1))| ≤ Λ₀ := by simpa using hb
+    exact sq_le_sq' (neg_le_of_abs_le hb') (le_of_abs_le hb')
+  calc (∑ J : Fin 2 → Fin n,
+          (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g₀ x 0 2
+            (S.toSection x) n e K₀ J) ^ 2)
+        ≤ ∑ _J : Fin 2 → Fin n, Λ₀ ^ 2 := Finset.sum_le_sum (fun J _ => hcomp_le J)
+    _ = (Fintype.card (Fin 2 → Fin n) : ℝ) * Λ₀ ^ 2 := by
+          rw [Finset.sum_const, nsmul_eq_mul, Finset.card_univ]
+    _ = (n : ℝ) ^ 2 * Λ₀ ^ 2 := by
+          rw [Fintype.card_fun, Fintype.card_fin, Fintype.card_fin]; push_cast; ring
+    _ = (Module.finrank ℝ E * Λ₀) ^ 2 := by
+          have hnE : n = Module.finrank ℝ E := hn
+          rw [hnE]; ring
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
+set_option linter.unusedSectionVars false in
+/-- **(POSIT — the family-uniform pointwise `g₀`-Cauchy–Schwarz value bound of the
+connection-difference action bilinear form.)**  For the fibre-small
+(`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, `δ < 1/2`) supercritically `H^{a+2}`-bounded
+(`2a > finrank + 4`) realized perturbation family, the extracted bilinear form
+`ccTensorBilin g₀ (connDiffActionSection g₀ g₁ g₀ g_bg) x` — value
+`g₀(connDiff g₁ g₀ x (W₁ x) v, w)`, `W₁ = deTurckVF g₁ g_bg` — obeys the family-uniform pointwise
+`g₀`-Cauchy–Schwarz value bound
+`|·| ≤ Λ₀ · √(g₀ x v v) · √(g₀ x w w)` for a single constant `Λ₀ ≥ 0` over the manifold and the
+family.
+
+This is the order-`0` `C⁰` value of the first-order metric carrier `connDiff g₁ g₀ x (W₁ x)`
+(a Christoffel-difference value contracted against the smooth DeTurck field): the connection
+difference is first order in the metric perturbation `h = ccTensorBilinSymm g₀ T₁`
+(`connDiff_g0_fibre_abs_bound`, the Koszul triangle with Neumann self-absorption, `δ < 1/2`), and the
+DeTurck field `W₁` is the `g₁`-trace of the same first-order Christoffel difference; both are
+`C⁰`-controlled family-uniformly by the supercritical `H^{a+2} ↪ C¹` embedding of the metric jet
+(`iteratedCovGradJetSum_le_toHs`, `2a > finrank + 4 ⟹ a + 2 > dim/2 + 1`).
+
+**Non-vacuity.**  Vanishes at `T₁ = 0` realized (`g₁ = g₀`, `connDiff g₀ g₀ = 0`, the bilinear form
+is `0`, `Λ₀ = 0` works); genuine (`Λ₀ = 0` forces the value `≡ 0`, false whenever `g₁ ≠ g₀`).  Body
+`sorry`: the genuine supercritical-`C¹` / Neumann-absorption `C⁰` value bound of the first-order
+Christoffel-difference carrier. -/
+theorem exists_connDiffActionBilin_gcs_value_bound
+    (g₀ g_bg : SmoothRiemannianMetric I M) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ Λ₀ : ℝ, 0 ≤ Λ₀ ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ∀ (x : M) (v w : TangentSpace I x),
+          |ccTensorBilin (I := I) g₀ (connDiffActionSection (I := I) g₀ g₁ g₀ g_bg) x v w| ≤
+            Λ₀ * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) :=
+  sorry
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
+set_option linter.unusedSectionVars false in
 /-- **(POSIT — the family-uniform order-`0` fibre value sup of the connection-difference action
 section.)**  For the fibre-small (`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, `δ < 1/2`)
 supercritically `H^{a+2}`-bounded (`2a > finrank + 4`) realized perturbation family, the order-`0`
@@ -586,8 +676,13 @@ theorem exists_connDiffActionSection_rfns_fibre_sup_le
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ∀ x : M,
           Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
-            ((connDiffActionSection (I := I) g₀ g₁ g₀ g_bg).toSection x) ≤ Λ ^ 2 :=
-  sorry
+            ((connDiffActionSection (I := I) g₀ g₁ g₀ g_bg).toSection x) ≤ Λ ^ 2 := by
+  obtain ⟨Λ₀, hΛ₀0, hΛ₀⟩ :=
+    exists_connDiffActionBilin_gcs_value_bound (I := I) g₀ g_bg δ hδ0 hδ1 B a ha
+  refine ⟨Module.finrank ℝ E * Λ₀, by positivity, fun T₁ g₁ hg₁ hδbnd hB₁ x => ?_⟩
+  exact rfns_le_of_ccTensorBilin_gcs_bound (I := I) g₀
+    (connDiffActionSection (I := I) g₀ g₁ g₀ g_bg) x Λ₀ hΛ₀0
+    (fun v w => hΛ₀ T₁ g₁ hg₁ hδbnd hB₁ x v w)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
@@ -752,6 +847,40 @@ theorem loweredCovGradDeTurckVFMixed_connSlot_iteratedCovGrad_hamiltonTame_le
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
+/-- **(POSIT — the family-uniform pointwise `g₀`-Cauchy–Schwarz value bound of the
+field-difference gradient bilinear form.)**  For the fibre-small
+(`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, `δ < 1/2`) supercritically `H^{a+2}`-bounded
+(`2a > finrank + 4`) realized perturbation family, the extracted bilinear form
+`ccTensorBilin g₀ (fieldDiffGradSection g₀ g₁ g₀ g_bg) x` — value `g₀(∇^{g₀}_v (W₁ − W₀), w)`,
+`Wᵢ = deTurckVF gᵢ g_bg` — obeys the family-uniform pointwise `g₀`-Cauchy–Schwarz value bound
+`|·| ≤ Λ₀ · √(g₀ x v v) · √(g₀ x w w)` for a single constant `Λ₀ ≥ 0` over the manifold and the
+family.
+
+This is the order-`0` `C⁰` value of the `g₀`-Levi-Civita covariant gradient of the field difference
+`W₁ − W₀`; the field difference is the inverse-Gram-weighted trace of the pair connection difference
+(`deTurckVF_sub_apply_eq_trace_connDiff`), a first-order Christoffel-difference quantity, so its
+covariant gradient is `C⁰`-controlled family-uniformly through the supercritical `H^{a+2} ↪ C¹`
+embedding of the metric jet (`iteratedCovGradJetSum_le_toHs`, `2a > finrank + 4`).
+
+**Non-vacuity.**  Vanishes at `T₁ = 0` realized (`g₁ = g₀`, `W₁ = W₀`, the bilinear form is `0`,
+`Λ₀ = 0` works); genuine (`Λ₀ = 0` forces the value `≡ 0`, false whenever `g₁ ≠ g₀`).  Body `sorry`:
+the genuine supercritical-`C¹` `C⁰` value bound of the field-difference covariant gradient. -/
+theorem exists_fieldDiffGradBilin_gcs_value_bound
+    (g₀ g_bg : SmoothRiemannianMetric I M) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ Λ₀ : ℝ, 0 ≤ Λ₀ ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ∀ (x : M) (v w : TangentSpace I x),
+          |ccTensorBilin (I := I) g₀ (fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg) x v w| ≤
+            Λ₀ * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) :=
+  sorry
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
+set_option linter.unusedSectionVars false in
 /-- **(POSIT — the field-difference gradient action value sup.)**  For the fibre-small
 (`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, `δ < 1/2`) supercritically `H^{a+2}`-bounded
 (`2a > finrank + 4`) realized perturbation family, the order-`0` intrinsic squared fibre norm of
@@ -780,8 +909,13 @@ theorem exists_fieldDiffGradSection_rfns_fibre_sup_le
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ∀ x : M,
           Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
-            ((fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg).toSection x) ≤ Λ ^ 2 :=
-  sorry
+            ((fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg).toSection x) ≤ Λ ^ 2 := by
+  obtain ⟨Λ₀, hΛ₀0, hΛ₀⟩ :=
+    exists_fieldDiffGradBilin_gcs_value_bound (I := I) g₀ g_bg δ hδ0 hδ1 B a ha
+  refine ⟨Module.finrank ℝ E * Λ₀, by positivity, fun T₁ g₁ hg₁ hδbnd hB₁ x => ?_⟩
+  exact rfns_le_of_ccTensorBilin_gcs_bound (I := I) g₀
+    (fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg) x Λ₀ hΛ₀0
+    (fun v w => hΛ₀ T₁ g₁ hg₁ hδbnd hB₁ x v w)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
