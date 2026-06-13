@@ -490,6 +490,7 @@ import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SmoothingHs
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SpectralBounds
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SpectralBoundsCalculus
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.BochnerL2
+import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.InteriorContinuousMemLp
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDense
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseHigherOrder
