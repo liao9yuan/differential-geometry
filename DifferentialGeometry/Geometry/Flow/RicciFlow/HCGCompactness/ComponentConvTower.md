@@ -196,9 +196,22 @@ per pair); the per-pair limit pinning then mirrors
    `metricDerivNorm_le_compSq_uniform` → `hnorm` →
    `metricCInfConvOnCompacts_of_normConv` → `metricPreconvInf`.
 
-NOTE (real subtlety for step 4): `bumpTowerCarrier_all` gives `MapCInfConvOnCompacts`
-(uniform on compacts) of the chart-rep carriers; `componentConv_covDeriv_zero` is
-POINTWISE.  The `hnorm` endpoint needs UNIFORM-on-`K` component convergence, so the
-extraction should keep the uniform `MapCPConvOn`/`MapCInfConvOnCompacts` (order-0
-slice = `tendstoUniformlyOn_of_cPConv`) through the multilinear expansion, not drop to
-pointwise `Tendsto`.  This is the one place to watch when wiring `hnorm`.
+~~NOTE (real subtlety for step 4)~~ — **PLANNER RULING 2026-06-13: this note is
+WRONG; do NOT carry uniformity through the multilinear expansion.**  Verified
+against the actual signatures (workflow trace, high confidence):
+`metricDerivNorm_le_compSq_uniform` (MetricPreconvBridge.lean:76-107) uses the
+component basis `bz = (…).isLocalFrameOn_localFrame_baseSet I 1 basisE).toBasisAt hz`
+(line 102-103), which is **POINT-DEPENDENT** (re-derived at each `z ∈ u'`, under
+`∀ z ∈ u', ∀ hz`).  So `z ↦ component0S bz (…) I0` lands in a `z`-varying fibre
+basis — a `TendstoUniformlyOn` of it over the patch is **ill-typed**, not merely
+unnecessary.  Build no such conversion lemma.
+**CORRECT thread:** state `componentConv_covDeriv_of_chartCInf` POINTWISE,
+mirroring `componentConv_covDeriv_zero` exactly (fixed `x`, frame-general `Basis b`,
+fixed `I0`, conclusion `Filter.Tendsto … (𝓝 …)`).  Extraction = `tendsto_of_cInf`
+(MapConvergence.lean:124-135) at `extChartAt x₀ x` on `bumpTowerCarrier_all`'s
+order-0 carrier, then the finite multilinear `b (I0 q)`-expansion (preserves
+pointwise `Tendsto`).  The uniform-on-`K` of `hnorm` is assembled SEPARATELY by a
+finite good-frame cover of `K` via `metricDerivNorm_le_compSq_uniform` — the same
+finite-cover pattern as `ric_bound`, already the plan of record (line 196,
+MetricPreconvBridge.md:154-160).  No uniform-vs-pointwise conversion lemma is
+missing.

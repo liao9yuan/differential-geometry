@@ -5,6 +5,30 @@ planning session.  Written 2026-06-11 by the planning (Fable) session.**
 
 ---
 
+## PLANNER ACCEPTANCE + RULING — assembly Step 1 (2026-06-13)
+
+ACCEPTED (own build + axioms): `exists_cInf_subseq_finiteFamily`
+(ComponentConvAssembly.lean — the finite n²-fold C∞ diagonal) — AXIOM-CLEAN,
+green 3866 jobs.
+
+**RULING — uniform-vs-pointwise endpoint shape (resolves the executor's flagged
+subtlety; HIGH confidence, signatures traced + independently spot-checked):**
+The executor flagged that `componentConv_covDeriv_of_chartCInf` should be UNIFORM
+because `bumpTowerCarrier_all` delivers `MapCInfConvOnCompacts` and `hnorm` needs
+uniform-on-K. **This is WRONG.** The norm bridge's component basis
+`bz = (…).toBasisAt hz` (MetricPreconvBridge.lean:102-103) is POINT-DEPENDENT, so a
+`TendstoUniformlyOn` of `component0S bz (…)` is ILL-TYPED, not just unnecessary.
+RULING: state `componentConv_covDeriv_of_chartCInf` **POINTWISE**, mirroring
+`componentConv_covDeriv_zero` (MetricPreconvDiag.lean:613-636) at general order `a`
+(fixed `x`, frame-general basis, fixed `I0`, `Filter.Tendsto`). The uniform-on-K of
+`hnorm` is a SEPARATE finite good-frame cover step (`metricDerivNorm_le_compSq_uniform`,
+the `ric_bound` pattern) — already the plan of record. NO conversion lemma is
+missing; building a TendstoUniformlyOn-through-the-expansion lemma would be wasted,
+ill-typed effort. The misleading note in ComponentConvTower.md is now struck through
+and corrected. Remaining real work: (1) `componentConv_covDeriv_of_chartCInf` for
+a≥1 (pointwise: `tendsto_of_cInf` + multilinear expansion); (2) the finite good-frame
+cover lemma → `hnorm`; both API-complete.
+
 ## PLANNER ACCEPTANCE LOG — Gap B (2026-06-13)
 
 Planner re-verified (own build + `#print axioms`, not just executor report):
