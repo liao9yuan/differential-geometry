@@ -334,51 +334,54 @@ theorem exists_realizedRemainderDiff_principalTopSplit_allOrder_l2Norm_le
                   ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i (T₁ - T₂)‖ :=
         (add_assoc _ _ _).symm
 
-/-- **The per-eigenmode principal-cell microlocal split of the realized DeTurck remainder
-difference, with the δ²-Neumann top-cell bound (child a) and the lower-order Nemytskii
-cross-mass rest bound (child b) — the two genuine microlocal primitives of the per-mode
-symbol estimate.**
+/-- **The order-uniform per-order spectral-mass `Top + Rest` section split of the realized
+DeTurck remainder difference (the SUMMED quasilinear principal refinement of the symbol-level
+cancellation — the posited analytic input replacing the mode-mixing per-mode shape).**
 
-This is the eigenmode transcription of the symbol-level cancellation
-`deTurckNonlinearitySpectral_principalPart_cancels` (`NonlinearitySpectral.lean`).  Writing the
-realized remainder as `realizedRHSRemainderSection g₀ g_bg g₁ T₁ = deTurckRHSRetag g₀ g_bg g₁ −
-Δ_∇ T₁` (`realizedRHSRemainderSection_eq_sub`), the `L²`-eigencoordinate of the difference is
-`coeffᵢ(R₁ − R₂) = coeffᵢ(retag₁ − retag₂) + λᵢ · coeffᵢ(T₁ − T₂)` (the Laplacian eigen-action
-`rawConnLapSmooth_tensorL2Coeff`, `cᵢ(Δ_∇ T) = −λᵢ cᵢ(T)`).  This posit splits that single
-coordinate as `principal + rest`, where:
+The per-mode decomposition `coeffᵢ(R₁ − R₂) ≤ … coeffᵢ(T)` is FALSE: fibre-multiplication by the
+cometric difference `g₁⁻¹ − g₀⁻¹` is NON-DIAGONAL and frequency-doubles, so no per-eigenmode bound
+can hold (a single mode of `T` emits a higher mode of the remainder).  The correct SUMMED form
+operates on the section level and on whole spectral masses.
 
-* **child (a) — the per-mode quasilinear principal cell carries the sharp `δ²` top arm**:
-  `principal² ≤ c · δ² · (1 + λᵢ)² · (coeffᵢ(T₁ − T₂))²`.  `principal` is the second-order
-  quasilinear cell `[(g_t⁻¹ − g₀⁻¹)] · (second-order symbol)` of the retag difference: the
-  `g₀⁻¹∇²` core of the retag's principal part is exactly the `+λᵢ · coeffᵢ(T₁ − T₂)` Laplacian
-  term, so the order-2 content cancels and `principal`'s coefficient is the inverse-difference
-  fibre operator `g⁻¹ − g₀⁻¹`, Neumann-bounded by `2δ` under the fibre gate
-  `gFibreOpBound … δ` for `δ < 1/2`; the second-order symbol weight is `(1 + λᵢ)²`, and `c` is
-  independent of `i` (the top covariant-Leibniz cell has binomial coefficient `1`); and
+Writing the realized remainder as `realizedRHSRemainderSection g₀ g_bg g₁ T₁ =
+deTurckRHSRetag g₀ g_bg g₁ − Δ_∇ T₁` (`realizedRHSRemainderSection_eq_sub`), the `g₀⁻¹∇²` core of
+the retag's principal part is cancelled by the `Δ_∇` summand, so the second-order content of the
+remainder difference is fibre-multiplication of `∇²(realize (T₁ − T₂))` by the cometric difference
+`g_t⁻¹ − g₀⁻¹`, Neumann-bounded by `2δ` under the fibre gate `gFibreOpBound … δ`.  This posit
+splits the remainder-difference section as `Top + Rest` with, at **every** real spectral order
+`d ≥ 0`:
 
-* **child (b) — the lower-order Nemytskii cross-mass carries the mid + cross arms**:
-  `rest² ≤ C₀ · (1 + λᵢ)¹ · (coeffᵢ(T₁ − T₂))² + c₂ · mass_{k₀}(T₁ − T₂) · (1 + λᵢ)² ·
-  ((coeffᵢ T₁)² + (coeffᵢ T₂)²)`, with the fixed low-anchor spectral mass
-  `mass_{k₀}(T₁ − T₂) := ∑ⱼ (1 + λⱼ)^{k₀} (coeffⱼ(T₁ − T₂))²`.  `rest` collects every
-  coefficient-differentiated FdB cell: the generic differentiated-coefficient term one full
-  spectral order below the top (`(1 + λᵢ)¹`, per-mode constant `C₀` order-uniform), and the
-  fixed-pair cross term carrying the unbounded fixed-pair top symbol `(1 + λᵢ)²` against the
-  fixed low-anchor difference mass, with `c₂` independent of `i`.
+* **the δ²-top arm on `Top`**: `mass_d(Top) ≤ c · δ² · mass_{d+2}(T₁ − T₂)`.  `Top` is the
+  second-order quasilinear principal section (the fibre-multiplication of `∇²(realize (T₁ − T₂))`
+  by the cometric difference); the `H^d` multiplier bound for fibre-multiplication
+  `exists_toHs_appFullRS_norm_le_of_covLeibnizGrid` carries the fibre size `Λ ≤ Cd · δ`, and the
+  sharp two-order covariant-gradient gain `covGrad_toHs_norm_le` (applied twice, `∇² → H^{d+2}`)
+  lands the spectral order `d + 2`; the constant `c` is independent of `d` (the top
+  covariant-Leibniz cell has binomial coefficient `1`); and
 
-The two arm bounds are coupled by the structural identity `coeffᵢ(R₁ − R₂) = principal + rest`,
-so neither arm is vacuous: at `T₁ = T₂` the metric ties force `g₁ = g₂`, both `principal` and
-`rest` vanish, and the bounds are equalities `0 ≤ 0`; for `T₁ ≠ T₂` a degenerate `principal = 0`
-witness is rejected for high `i` (where the left side carries genuine order-2 difference content
-that the `(1 + λᵢ)¹` rest arm cannot supply).  The body is the posited analytic input (the
-per-mode DeTurck symbol cancellation + Nemytskii bound); it remains `sorry`, so consumers
-transitively depend on `sorryAx`. -/
-theorem realizedRemainderDiff_perMode_principalCell_symbol_split
+* **the generic + cross arms on `Rest`**:
+  `mass_d(Rest) ≤ C d · mass_{d+1}(T₁ − T₂) + c₂ · (mass_{d+2}(T₁) + mass_{d+2}(T₂)) ·
+  mass_{k₀}(T₁ − T₂)`.  `Rest` collects every coefficient-differentiated term: the generic
+  differentiated-coefficient term one full spectral order below the top (`mass_{d+1}`, family
+  `C d`), and the fixed-pair cross term carrying the unbounded fixed-pair top mass `mass_{d+2}`
+  against the fixed low-anchor difference mass `mass_{k₀}` (`2 * k₀ ≤ a + 1`), with `c₂`
+  independent of `d` — all order growth confined to `C d`.
+
+The two arm bounds are coupled by the structural section identity `Rdiff = Top + Rest`; all the
+weighted masses are summable (smoothness gives super-polynomial eigencoefficient decay,
+`smoothCcTensor_tensorL2Coeff_weighted_summable`).  Non-vacuity: at `T₁ = T₂` the metric ties
+force `g₁ = g₂`, both `Top` and `Rest` vanish, and the bounds are equalities `0 ≤ 0`; for
+`T₁ ≠ T₂` a degenerate `Top = 0` witness is rejected at high `d` (the `Rest` arm stops one full
+spectral order below the top, while the left side carries genuine order-`(d+2)` difference content).
+The body is the posited analytic input (the SUMMED DeTurck symbol cancellation + fibre-mult
+multiplier + Nemytskii bound); it remains `sorry`, so consumers transitively depend on `sorryAx`. -/
+theorem realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_section_split
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4) :
     ∃ k₀ : ℕ, 2 * k₀ ≤ a + 1 ∧
       ∃ c : ℝ, 0 ≤ c ∧ ∃ c₂ : ℝ, 0 ≤ c₂ ∧
         ∀ (B : ℝ), 0 ≤ B → ∀ (δ : ℝ), 0 ≤ δ → δ < 1 / 2 →
-          ∃ C₀ : ℝ, 0 ≤ C₀ ∧
+          ∃ C : ℝ → ℝ, (∀ d, 0 ≤ C d) ∧
             ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
               (g₁ g₂ : SmoothRiemannianMetric I M),
               (∀ (x : M) (v w : TangentSpace I x),
@@ -389,189 +392,52 @@ theorem realizedRemainderDiff_perMode_principalCell_symbol_split
               gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
               ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
               ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
-              ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
-                ∃ principal rest : ℝ,
-                  tensorL2Coeff (I := I) (M := M)
-                      (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-                      (Integral.L2.SmoothCcTensor.toL2
-                        (realizedRHSRemainderSection (I := I) g₀ g_bg g₁ T₁
-                          - realizedRHSRemainderSection (I := I) g₀ g_bg g₂ T₂)) i
-                      = principal + rest ∧
-                  -- child (a): the δ²-Neumann principal top cell
-                  principal ^ 2 ≤
-                    c * δ ^ 2 *
-                      (tensorSobolevWeight (I := I) (M := M) i 2 *
+              ∃ Top Rest : Integral.L2.SmoothCcTensor g₀ 0 2,
+                realizedRHSRemainderSection (I := I) g₀ g_bg g₁ T₁
+                    - realizedRHSRemainderSection (I := I) g₀ g_bg g₂ T₂ = Top + Rest ∧
+                ∀ d : ℝ, 0 ≤ d →
+                  (∑' i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+                      tensorSobolevWeight (I := I) (M := M) i d *
                         (tensorL2Coeff (I := I) (M := M)
                             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-                            (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2) ∧
-                  -- child (b): the lower-order Nemytskii mid + cross mass
-                  rest ^ 2 ≤
-                    C₀ *
-                        (tensorSobolevWeight (I := I) (M := M) i 1 *
-                          (tensorL2Coeff (I := I) (M := M)
-                              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-                              (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2)
-                    + c₂ *
-                        (∑' j : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
-                            tensorSobolevWeight (I := I) (M := M) j (k₀ : ℝ) *
-                              (tensorL2Coeff (I := I) (M := M)
-                                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-                                  (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) j) ^ 2) *
-                          (tensorSobolevWeight (I := I) (M := M) i 2 *
-                            ((tensorL2Coeff (I := I) (M := M)
-                                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-                                  (Integral.L2.SmoothCcTensor.toL2 T₁) i) ^ 2 +
-                              (tensorL2Coeff (I := I) (M := M)
-                                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-                                  (Integral.L2.SmoothCcTensor.toL2 T₂) i) ^ 2)) :=
+                            (Integral.L2.SmoothCcTensor.toL2 Top) i) ^ 2)
+                    ≤ c * δ ^ 2 *
+                        (∑' i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+                          tensorSobolevWeight (I := I) (M := M) i (d + 2) *
+                            (tensorL2Coeff (I := I) (M := M)
+                                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                                (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2) ∧
+                  (∑' i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+                      tensorSobolevWeight (I := I) (M := M) i d *
+                        (tensorL2Coeff (I := I) (M := M)
+                            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                            (Integral.L2.SmoothCcTensor.toL2 Rest) i) ^ 2)
+                    ≤ C d *
+                        (∑' i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+                          tensorSobolevWeight (I := I) (M := M) i (d + 1) *
+                            (tensorL2Coeff (I := I) (M := M)
+                                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                                (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2)
+                      + c₂ *
+                          ((∑' i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+                                  tensorSobolevWeight (I := I) (M := M) i (d + 2) *
+                                    (tensorL2Coeff (I := I) (M := M)
+                                        (tensorResolventL2_isCompactOperator
+                                          (I := I) (M := M) g₀ 0 2)
+                                        (Integral.L2.SmoothCcTensor.toL2 T₁) i) ^ 2)
+                                + (∑' i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+                                    tensorSobolevWeight (I := I) (M := M) i (d + 2) *
+                                      (tensorL2Coeff (I := I) (M := M)
+                                          (tensorResolventL2_isCompactOperator
+                                            (I := I) (M := M) g₀ 0 2)
+                                          (Integral.L2.SmoothCcTensor.toL2 T₂) i) ^ 2))
+                          * (∑' i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+                              tensorSobolevWeight (I := I) (M := M) i (k₀ : ℝ) *
+                                (tensorL2Coeff (I := I) (M := M)
+                                    (tensorResolventL2_isCompactOperator
+                                      (I := I) (M := M) g₀ 0 2)
+                                    (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2) :=
   sorry
-
-/-- **The per-eigenmode symbol bound on the squared `L²`-eigencoefficient of the realized
-DeTurck remainder difference (the genuine analytic content of the spectral-mass split,
-posited as a single per-mode primitive).**
-
-In eigenmode coordinates the realized remainder difference
-`realizedRHSRemainderSection g₀ g_bg g₁ T₁ − realizedRHSRemainderSection g₀ g_bg g₂ T₂`
-has, at each eigen-index `i`, a squared coefficient dominated by
-
-* the **δ²-proportional top symbol** `c · δ² · (1 + λᵢ)² · (coeffᵢ(T₁ − T₂))²` — the square of
-  the δ-proportional principal arm, with the second-order symbol weight `(1 + λᵢ)²` (the
-  rough-Laplacian symbol whose `g₀⁻¹∇²` core is cancelled, leaving the `g⁻¹ − g₀⁻¹` fibre
-  operator Neumann-bounded by `2δ` under the fibre gate), the constant `c` independent of `i`
-  (the top covariant-Leibniz cell has binomial coefficient `1`); plus
-* the generic lower symbol `C₀ · (1 + λᵢ)¹ · (coeffᵢ(T₁ − T₂))²` one full spectral order below
-  the top (the differentiated-coefficient Moser/Hamilton-tame arm — in eigenmode coordinates
-  the per-mode constant `C₀` is order-uniform, the `4^p` jet-order growth of the `L²`-jet
-  sibling never appearing per mode); plus
-* the **fixed-pair cross symbol** `c₂ · mass_{k₀}(T₁ − T₂) · (1 + λᵢ)² · ((coeffᵢ(T₁))² +
-  (coeffᵢ(T₂))²)` carrying the unbounded fixed-pair top symbol against the fixed low-anchor
-  spectral mass `mass_{k₀}(T₁ − T₂) := ∑ⱼ (1 + λⱼ)^{k₀} (coeffⱼ(T₁ − T₂))²` of the difference
-  (a fixed scalar, treated per mode as a constant), with `c₂` independent of `i`.
-
-Multiplying this per-mode bound by the order weight `(1 + λᵢ)^d` and summing over `i` lands
-the three arms, at every real order `d ≥ 0`, sharply at spectral orders `d + 2`, `d + 1`, and
-`d + 2` against the low anchor `mass_{k₀}` — exactly the
-`exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le` split, with the same
-`k₀`, `c`, `c₂` and the constant order family `C d := C₀`.  The weights `(1 + λᵢ)^σ` are the
-`tensorSobolevWeight i σ`, so the rpow algebra `(1 + λᵢ)^d · (1 + λᵢ)^σ = (1 + λᵢ)^{d+σ}`
-(`tensorHs.tensorSobolevWeight_add`) is what makes the top arm land at order `d + 2` for every
-real `d` — there is no integer-ceiling loss.  The body is the posited analytic input (the
-per-mode DeTurck symbol estimate); it remains `sorry`, so consumers transitively depend on
-`sorryAx`. -/
-theorem realizedRemainderDiff_perMode_symbol_le
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha : 2 * a > Module.finrank ℝ E + 4) :
-    ∃ k₀ : ℕ, 2 * k₀ ≤ a + 1 ∧
-      ∃ c : ℝ, 0 ≤ c ∧ ∃ c₂ : ℝ, 0 ≤ c₂ ∧
-        ∀ (B : ℝ), 0 ≤ B → ∀ (δ : ℝ), 0 ≤ δ → δ < 1 / 2 →
-          ∃ C₀ : ℝ, 0 ≤ C₀ ∧
-            ∀ (T₁ T₂ : Integral.L2.SmoothCcTensor g₀ 0 2)
-              (g₁ g₂ : SmoothRiemannianMetric I M),
-              (∀ (x : M) (v w : TangentSpace I x),
-                g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
-              (∀ (x : M) (v w : TangentSpace I x),
-                g₂.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₂ x v w) →
-              gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
-              gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₂ y) δ →
-              ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
-              ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₂‖ ≤ B →
-              ∀ i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
-                (tensorL2Coeff (I := I) (M := M)
-                      (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-                      (Integral.L2.SmoothCcTensor.toL2
-                        (realizedRHSRemainderSection (I := I) g₀ g_bg g₁ T₁
-                          - realizedRHSRemainderSection (I := I) g₀ g_bg g₂ T₂)) i) ^ 2 ≤
-                  c * δ ^ 2 *
-                      (tensorSobolevWeight (I := I) (M := M) i 2 *
-                        (tensorL2Coeff (I := I) (M := M)
-                            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-                            (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2)
-                    + C₀ *
-                        (tensorSobolevWeight (I := I) (M := M) i 1 *
-                          (tensorL2Coeff (I := I) (M := M)
-                              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-                              (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2)
-                    + c₂ *
-                        (∑' j : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
-                            tensorSobolevWeight (I := I) (M := M) j (k₀ : ℝ) *
-                              (tensorL2Coeff (I := I) (M := M)
-                                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-                                  (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) j) ^ 2) *
-                          (tensorSobolevWeight (I := I) (M := M) i 2 *
-                            ((tensorL2Coeff (I := I) (M := M)
-                                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-                                  (Integral.L2.SmoothCcTensor.toL2 T₁) i) ^ 2 +
-                              (tensorL2Coeff (I := I) (M := M)
-                                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-                                  (Integral.L2.SmoothCcTensor.toL2 T₂) i) ^ 2)) := by
-  classical
-  set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hc_def
-  obtain ⟨k₀, hk₀, c, hc_nn, c₂, hc₂_nn, hsplit⟩ :=
-    realizedRemainderDiff_perMode_principalCell_symbol_split (I := I) g₀ g_bg a ha
-  refine ⟨k₀, hk₀, 2 * c, by positivity, 2 * c₂, by positivity,
-    fun B hB δ hδ0 hδ1 => ?_⟩
-  obtain ⟨C₀, hC₀_nn, hcell⟩ := hsplit B hB δ hδ0 hδ1
-  refine ⟨2 * C₀, by positivity, fun T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ i => ?_⟩
-  -- The genuine microlocal split of the per-mode remainder coefficient into a
-  -- δ²-Neumann principal cell and a lower-order Nemytskii rest, supplied by the
-  -- posited principal-cell split, together with its two arm bounds.
-  obtain ⟨principal, rest, hdecomp, htop, hrest⟩ :=
-    hcell T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ i
-  -- The principal cell carries the sharp δ² top arm; the rest carries the lower +
-  -- cross arms.  Squaring the split `coeffᵢ(R₁−R₂) = principal + rest` via the
-  -- elementary `(p + q)² ≤ 2 p² + 2 q²` lands the three target arms (with the
-  -- top and cross constants doubled, absorbed into the chosen `2 * c`, `2 * c₂`,
-  -- `2 * C₀`).
-  have hsq :
-      (tensorL2Coeff (I := I) (M := M) hc
-            (Integral.L2.SmoothCcTensor.toL2
-              (realizedRHSRemainderSection (I := I) g₀ g_bg g₁ T₁
-                - realizedRHSRemainderSection (I := I) g₀ g_bg g₂ T₂)) i) ^ 2
-        ≤ 2 * principal ^ 2 + 2 * rest ^ 2 := by
-    rw [hdecomp]; nlinarith [sq_nonneg (principal - rest)]
-  calc
-    (tensorL2Coeff (I := I) (M := M) hc
-          (Integral.L2.SmoothCcTensor.toL2
-            (realizedRHSRemainderSection (I := I) g₀ g_bg g₁ T₁
-              - realizedRHSRemainderSection (I := I) g₀ g_bg g₂ T₂)) i) ^ 2
-        ≤ 2 * principal ^ 2 + 2 * rest ^ 2 := hsq
-    _ ≤ 2 * (c * δ ^ 2 *
-            (tensorSobolevWeight (I := I) (M := M) i 2 *
-              (tensorL2Coeff (I := I) (M := M) hc
-                  (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2))
-          + 2 * (C₀ *
-              (tensorSobolevWeight (I := I) (M := M) i 1 *
-                (tensorL2Coeff (I := I) (M := M) hc
-                    (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2)
-            + c₂ *
-                (∑' j : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
-                    tensorSobolevWeight (I := I) (M := M) j (k₀ : ℝ) *
-                      (tensorL2Coeff (I := I) (M := M) hc
-                          (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) j) ^ 2) *
-                  (tensorSobolevWeight (I := I) (M := M) i 2 *
-                    ((tensorL2Coeff (I := I) (M := M) hc
-                          (Integral.L2.SmoothCcTensor.toL2 T₁) i) ^ 2 +
-                      (tensorL2Coeff (I := I) (M := M) hc
-                          (Integral.L2.SmoothCcTensor.toL2 T₂) i) ^ 2))) := by
-        gcongr
-    _ = 2 * c * δ ^ 2 *
-            (tensorSobolevWeight (I := I) (M := M) i 2 *
-              (tensorL2Coeff (I := I) (M := M) hc
-                  (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2)
-          + 2 * C₀ *
-              (tensorSobolevWeight (I := I) (M := M) i 1 *
-                (tensorL2Coeff (I := I) (M := M) hc
-                    (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2)
-          + 2 * c₂ *
-              (∑' j : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
-                  tensorSobolevWeight (I := I) (M := M) j (k₀ : ℝ) *
-                    (tensorL2Coeff (I := I) (M := M) hc
-                        (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) j) ^ 2) *
-                (tensorSobolevWeight (I := I) (M := M) i 2 *
-                  ((tensorL2Coeff (I := I) (M := M) hc
-                        (Integral.L2.SmoothCcTensor.toL2 T₁) i) ^ 2 +
-                    (tensorL2Coeff (I := I) (M := M) hc
-                        (Integral.L2.SmoothCcTensor.toL2 T₂) i) ^ 2)) := by ring
 
 /-- **The order-uniform per-order spectral-mass split of the realized DeTurck remainder
 difference (the ε-Young squared form of the principal top-jet split, in the
@@ -689,34 +555,35 @@ theorem exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le
                                     (I := I) (M := M) g₀ 0 2)
                                   (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2) := by
   classical
+  -- The SUMMED section split (the posited analytic input): the remainder difference splits as
+  -- `Top + Rest` whose order-`d` spectral masses carry, respectively, the δ²-top arm and the
+  -- generic + cross arms.  The mode-mixing per-mode shape is FALSE; this works on whole masses.
   obtain ⟨k₀, hk₀, c, hc_nn, c₂, hc₂_nn, hbody⟩ :=
-    realizedRemainderDiff_perMode_symbol_le (I := I) g₀ g_bg a ha
-  refine ⟨k₀, hk₀, c, hc_nn, c₂, hc₂_nn, fun B hB δ hδ0 hδ1 => ?_⟩
-  obtain ⟨C₀, hC₀_nn, hperMode⟩ := hbody B hB δ hδ0 hδ1
-  refine ⟨fun _ => C₀, fun _ => hC₀_nn, ?_⟩
+    realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_section_split
+      (I := I) g₀ g_bg a ha
+  -- The Young factor `2` of `(p + q)² ≤ 2 p² + 2 q²` is absorbed into the node constants.
+  refine ⟨k₀, hk₀, 2 * c, by positivity, 2 * c₂, by positivity, fun B hB δ hδ0 hδ1 => ?_⟩
+  obtain ⟨C, hC_nn, hsplit⟩ := hbody B hB δ hδ0 hδ1
+  refine ⟨fun d => 2 * C d, fun d => by have := hC_nn d; positivity, ?_⟩
   intro T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ d hd
   set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hc_def
-  -- The remainder difference as a single smooth compactly-supported section.
+  obtain ⟨Top, Rest, hdecomp, harms⟩ :=
+    hsplit T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂
+  obtain ⟨hTopArm, hRestArm⟩ := harms d hd
+  -- The remainder difference as a single smooth compactly-supported section, and its `toL2`.
   set Rdiff : Integral.L2.SmoothCcTensor g₀ 0 2 :=
     realizedRHSRemainderSection (I := I) g₀ g_bg g₁ T₁
       - realizedRHSRemainderSection (I := I) g₀ g_bg g₂ T₂ with hRdiff_def
-  set Tdiff : Integral.L2.SmoothCcTensor g₀ 0 2 := T₁ - T₂ with hTdiff_def
-  -- Eigencoefficient families.
+  -- Coefficient families of `Top`, `Rest`, and the remainder difference.
+  set cTop : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ :=
+    fun i => tensorL2Coeff (I := I) (M := M) hc (Integral.L2.SmoothCcTensor.toL2 Top) i
+    with hcTop_def
+  set cRest : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ :=
+    fun i => tensorL2Coeff (I := I) (M := M) hc (Integral.L2.SmoothCcTensor.toL2 Rest) i
+    with hcRest_def
   set cRem : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ :=
     fun i => tensorL2Coeff (I := I) (M := M) hc (Integral.L2.SmoothCcTensor.toL2 Rdiff) i
     with hcRem_def
-  set cD : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ :=
-    fun i => tensorL2Coeff (I := I) (M := M) hc (Integral.L2.SmoothCcTensor.toL2 Tdiff) i
-    with hcD_def
-  set cT1 : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ :=
-    fun i => tensorL2Coeff (I := I) (M := M) hc (Integral.L2.SmoothCcTensor.toL2 T₁) i
-    with hcT1_def
-  set cT2 : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ :=
-    fun i => tensorL2Coeff (I := I) (M := M) hc (Integral.L2.SmoothCcTensor.toL2 T₂) i
-    with hcT2_def
-  -- The fixed low-anchor spectral mass of the difference (a constant scalar `Q`).
-  set Q : ℝ := ∑' j : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
-      tensorSobolevWeight (I := I) (M := M) j (k₀ : ℝ) * (cD j) ^ 2 with hQ_def
   -- The toL2 of the section difference equals the difference of the toL2s (the LHS rewrite).
   have htoL2_sub :
       Integral.L2.SmoothCcTensor.toL2 (realizedRHSRemainderSection (I := I) g₀ g_bg g₁ T₁)
@@ -726,108 +593,77 @@ theorem exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le
     exact (ContinuousLinearMap.map_sub (Integral.L2.SmoothCcTensor.toL2)
       (realizedRHSRemainderSection (I := I) g₀ g_bg g₁ T₁)
       (realizedRHSRemainderSection (I := I) g₀ g_bg g₂ T₂)).symm
-  -- Summability of the weighted coefficient families at every real order.
+  -- `Rdiff = Top + Rest` (the section identity; `Rdiff` is defeq to the remainder difference).
+  have hRdiff_eq : Rdiff = Top + Rest := hdecomp
+  -- Mode-by-mode: `cRem = cTop + cRest`, from `Rdiff = Top + Rest` and `toL2` additivity.
+  have hcRem_split : ∀ i, cRem i = cTop i + cRest i := by
+    intro i
+    simp only [hcRem_def, hcTop_def, hcRest_def]
+    rw [hRdiff_eq, map_add]
+    exact tensorL2Coeff_add (I := I) (M := M) hc
+      (Integral.L2.SmoothCcTensor.toL2 Top) (Integral.L2.SmoothCcTensor.toL2 Rest) i
+  -- Weighted summability of all the families involved.
   have hsumRem : Summable (fun i => tensorSobolevWeight (I := I) (M := M) i d * (cRem i) ^ 2) :=
     smoothCcTensor_tensorL2Coeff_weighted_summable (I := I) (M := M) g₀ d Rdiff hc
-  have hsumD2 : Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (d + 2) * (cD i) ^ 2) :=
-    smoothCcTensor_tensorL2Coeff_weighted_summable (I := I) (M := M) g₀ (d + 2) Tdiff hc
-  have hsumD1 : Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (d + 1) * (cD i) ^ 2) :=
-    smoothCcTensor_tensorL2Coeff_weighted_summable (I := I) (M := M) g₀ (d + 1) Tdiff hc
-  have hsumT1 : Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (d + 2) * (cT1 i) ^ 2) :=
-    smoothCcTensor_tensorL2Coeff_weighted_summable (I := I) (M := M) g₀ (d + 2) T₁ hc
-  have hsumT2 : Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (d + 2) * (cT2 i) ^ 2) :=
-    smoothCcTensor_tensorL2Coeff_weighted_summable (I := I) (M := M) g₀ (d + 2) T₂ hc
-  -- The three weighted-RHS families and their summability.
-  set topF : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ :=
-    fun i => c * δ ^ 2 * (tensorSobolevWeight (I := I) (M := M) i (d + 2) * (cD i) ^ 2)
-    with htopF_def
-  set lowF : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ :=
-    fun i => C₀ * (tensorSobolevWeight (I := I) (M := M) i (d + 1) * (cD i) ^ 2) with hlowF_def
-  set crossF : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ :=
-    fun i => c₂ * Q *
-      (tensorSobolevWeight (I := I) (M := M) i (d + 2) * ((cT1 i) ^ 2 + (cT2 i) ^ 2))
-    with hcrossF_def
-  have hsumTop : Summable topF := by
-    rw [htopF_def]; exact (hsumD2.mul_left (c * δ ^ 2))
-  have hsumLow : Summable lowF := by
-    rw [hlowF_def]; exact (hsumD1.mul_left C₀)
-  have hsumCross : Summable crossF := by
-    rw [hcrossF_def]
-    have : Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (d + 2) *
-        ((cT1 i) ^ 2 + (cT2 i) ^ 2)) := by
-      have heq : (fun i => tensorSobolevWeight (I := I) (M := M) i (d + 2) *
-            ((cT1 i) ^ 2 + (cT2 i) ^ 2))
-          = (fun i => tensorSobolevWeight (I := I) (M := M) i (d + 2) * (cT1 i) ^ 2
-              + tensorSobolevWeight (I := I) (M := M) i (d + 2) * (cT2 i) ^ 2) := by
-        funext i; ring
-      rw [heq]; exact hsumT1.add hsumT2
-    exact this.mul_left (c₂ * Q)
-  have hsumRHS : Summable (fun i => topF i + lowF i + crossF i) :=
-    (hsumTop.add hsumLow).add hsumCross
-  -- Pointwise: the weighted per-mode bound (from the posited per-mode symbol estimate).
+  have hsumTop : Summable (fun i => tensorSobolevWeight (I := I) (M := M) i d * (cTop i) ^ 2) :=
+    smoothCcTensor_tensorL2Coeff_weighted_summable (I := I) (M := M) g₀ d Top hc
+  have hsumRest : Summable (fun i => tensorSobolevWeight (I := I) (M := M) i d * (cRest i) ^ 2) :=
+    smoothCcTensor_tensorL2Coeff_weighted_summable (I := I) (M := M) g₀ d Rest hc
+  -- The Young-doubled bound family `2·mass_d(Top) + 2·mass_d(Rest)`, summable.
+  have hsumYoung : Summable (fun i =>
+      2 * (tensorSobolevWeight (I := I) (M := M) i d * (cTop i) ^ 2)
+        + 2 * (tensorSobolevWeight (I := I) (M := M) i d * (cRest i) ^ 2)) :=
+    (hsumTop.mul_left 2).add (hsumRest.mul_left 2)
+  -- Pointwise Young: `w·(cTop+cRest)² ≤ 2·w·cTop² + 2·w·cRest²`.
   have hpoint : ∀ i, tensorSobolevWeight (I := I) (M := M) i d * (cRem i) ^ 2
-      ≤ topF i + lowF i + crossF i := by
+      ≤ 2 * (tensorSobolevWeight (I := I) (M := M) i d * (cTop i) ^ 2)
+        + 2 * (tensorSobolevWeight (I := I) (M := M) i d * (cRest i) ^ 2) := by
     intro i
-    have hmode := hperMode T₁ T₂ g₁ g₂ hg₁ hg₂ hfib₁ hfib₂ hsize₁ hsize₂ i
     have hwnn := tensorSobolevWeight_nonneg (I := I) (M := M) i d
-    have hstep := mul_le_mul_of_nonneg_left hmode hwnn
-    refine le_trans hstep (le_of_eq ?_)
-    simp only [htopF_def, hlowF_def, hcrossF_def, hQ_def, hcD_def, hcT1_def, hcT2_def, hTdiff_def]
-    rw [tensorHs.tensorSobolevWeight_add (I := I) (M := M) i d 2,
-      tensorHs.tensorSobolevWeight_add (I := I) (M := M) i d 1]
-    ring
-  -- Compute the total of the weighted RHS as the three target masses.
-  have htsumTop : ∑' i, topF i
-      = c * δ ^ 2 * ∑' i, tensorSobolevWeight (I := I) (M := M) i (d + 2) * (cD i) ^ 2 := by
-    simp only [htopF_def]; rw [tsum_mul_left]
-  have htsumLow : ∑' i, lowF i
-      = C₀ * ∑' i, tensorSobolevWeight (I := I) (M := M) i (d + 1) * (cD i) ^ 2 := by
-    simp only [hlowF_def]; rw [tsum_mul_left]
-  have htsumCross : ∑' i, crossF i
-      = c₂ * Q *
-          (∑' i, tensorSobolevWeight (I := I) (M := M) i (d + 2) * (cT1 i) ^ 2
-            + ∑' i, tensorSobolevWeight (I := I) (M := M) i (d + 2) * (cT2 i) ^ 2) := by
-    simp only [hcrossF_def]
-    rw [tsum_mul_left]
-    congr 1
-    have heq : (fun i => tensorSobolevWeight (I := I) (M := M) i (d + 2) *
-          ((cT1 i) ^ 2 + (cT2 i) ^ 2))
-        = (fun i => tensorSobolevWeight (I := I) (M := M) i (d + 2) * (cT1 i) ^ 2
-            + tensorSobolevWeight (I := I) (M := M) i (d + 2) * (cT2 i) ^ 2) := by
-      funext i; ring
-    rw [heq, hsumT1.tsum_add hsumT2]
-  -- The node conclusion is the summability of the LHS family together with the bound.
+    rw [hcRem_split i]
+    nlinarith [sq_nonneg (cTop i - cRest i), hwnn,
+      mul_nonneg hwnn (sq_nonneg (cTop i - cRest i))]
+  -- The node conclusion: summability of the LHS family + the three-arm bound.
   refine ⟨?_, ?_⟩
-  · refine hsumRem.congr (fun i => ?_)
-    rw [hcRem_def, ← htoL2_sub]
-  -- Assemble: sum the pointwise bound and identify the masses.
-  calc ∑' i, tensorSobolevWeight (I := I) (M := M) i d *
-          (tensorL2Coeff (I := I) (M := M) hc
-              (Integral.L2.SmoothCcTensor.toL2
-                  (realizedRHSRemainderSection (I := I) g₀ g_bg g₁ T₁)
-                - Integral.L2.SmoothCcTensor.toL2
-                  (realizedRHSRemainderSection (I := I) g₀ g_bg g₂ T₂)) i) ^ 2
-      = ∑' i, tensorSobolevWeight (I := I) (M := M) i d * (cRem i) ^ 2 := by
-        rw [htoL2_sub]
-    _ ≤ ∑' i, (topF i + lowF i + crossF i) :=
-        hsumRem.tsum_le_tsum hpoint hsumRHS
-    _ = (∑' i, topF i + ∑' i, lowF i) + ∑' i, crossF i := by
-        rw [(hsumTop.add hsumLow).tsum_add hsumCross, hsumTop.tsum_add hsumLow]
-    _ = c * δ ^ 2 * ∑' i, tensorSobolevWeight (I := I) (M := M) i (d + 2) * (cD i) ^ 2
-          + C₀ * ∑' i, tensorSobolevWeight (I := I) (M := M) i (d + 1) * (cD i) ^ 2
-          + c₂ *
-              (∑' i, tensorSobolevWeight (I := I) (M := M) i (d + 2) * (cT1 i) ^ 2
-                + ∑' i, tensorSobolevWeight (I := I) (M := M) i (d + 2) * (cT2 i) ^ 2) * Q := by
-        rw [htsumTop, htsumLow, htsumCross]; ring
-    _ = c * δ ^ 2 *
+  · rw [htoL2_sub]
+    refine hsumRem.congr (fun i => ?_)
+    simp only [hcRem_def]
+  rw [htoL2_sub]
+  calc ∑' i, tensorSobolevWeight (I := I) (M := M) i d * (cRem i) ^ 2
+      ≤ ∑' i, (2 * (tensorSobolevWeight (I := I) (M := M) i d * (cTop i) ^ 2)
+          + 2 * (tensorSobolevWeight (I := I) (M := M) i d * (cRest i) ^ 2)) :=
+        hsumRem.tsum_le_tsum hpoint hsumYoung
+    _ = 2 * (∑' i, tensorSobolevWeight (I := I) (M := M) i d * (cTop i) ^ 2)
+          + 2 * (∑' i, tensorSobolevWeight (I := I) (M := M) i d * (cRest i) ^ 2) := by
+        rw [(hsumTop.mul_left 2).tsum_add (hsumRest.mul_left 2), tsum_mul_left, tsum_mul_left]
+    _ ≤ 2 * (c * δ ^ 2 *
+            (∑' i, tensorSobolevWeight (I := I) (M := M) i (d + 2) *
+              (tensorL2Coeff (I := I) (M := M) hc
+                  (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2))
+          + 2 * (C d *
+              (∑' i, tensorSobolevWeight (I := I) (M := M) i (d + 1) *
+                (tensorL2Coeff (I := I) (M := M) hc
+                    (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2)
+            + c₂ *
+                ((∑' i, tensorSobolevWeight (I := I) (M := M) i (d + 2) *
+                      (tensorL2Coeff (I := I) (M := M) hc
+                          (Integral.L2.SmoothCcTensor.toL2 T₁) i) ^ 2)
+                  + (∑' i, tensorSobolevWeight (I := I) (M := M) i (d + 2) *
+                      (tensorL2Coeff (I := I) (M := M) hc
+                          (Integral.L2.SmoothCcTensor.toL2 T₂) i) ^ 2))
+              * (∑' i, tensorSobolevWeight (I := I) (M := M) i (k₀ : ℝ) *
+                  (tensorL2Coeff (I := I) (M := M) hc
+                      (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2)) := by
+        gcongr <;> assumption
+    _ = 2 * c * δ ^ 2 *
           (∑' i, tensorSobolevWeight (I := I) (M := M) i (d + 2) *
             (tensorL2Coeff (I := I) (M := M) hc
                 (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2)
-        + C₀ *
+        + 2 * C d *
             (∑' i, tensorSobolevWeight (I := I) (M := M) i (d + 1) *
               (tensorL2Coeff (I := I) (M := M) hc
                   (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2)
-        + c₂ *
+        + 2 * c₂ *
             ((∑' i, tensorSobolevWeight (I := I) (M := M) i (d + 2) *
                   (tensorL2Coeff (I := I) (M := M) hc
                       (Integral.L2.SmoothCcTensor.toL2 T₁) i) ^ 2)
@@ -836,8 +672,7 @@ theorem exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le
                       (Integral.L2.SmoothCcTensor.toL2 T₂) i) ^ 2))
           * (∑' i, tensorSobolevWeight (I := I) (M := M) i (k₀ : ℝ) *
               (tensorL2Coeff (I := I) (M := M) hc
-                  (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2) := by
-        simp only [hQ_def, hcD_def, hcT1_def, hcT2_def, hTdiff_def]
+                  (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2) := by ring
 
 end DeTurck
 end IntrinsicSpectral
