@@ -29,15 +29,29 @@ double `bumpTower_slotExpand_conv` reduces the order-0 carrier of any `Fin 2`
 section pair to the frame-pair carriers, given the diagonalised frame-pair
 convergence `hpairs`.
 
-**REMAINING:**
-1. **B0 diagonal** producing `hpairs`: from B0 `exists_engine_frameCInfConv`
-   (per-`(i,j)` `MapCInfConvOnCompacts`) diagonalise over the `n²` frame pairs into
-   ONE `φ` (`exists_refine_allComponents`-style, keeping the `C^∞` data), with
-   `A0Seq k = metricTensorField (gSeq (φ k))`, `χ/U/Kc` from B0's bump.
-2. **extraction**: order-0 of the `C^∞`-on-compacts conv at `extChartAt x₀ x` ⇒
-   pointwise `Tendsto` of `s_a^V(x)`; fixed (`k`-independent) multilinear expansion
-   of the basis vectors `b (I0 q)` in the frame at `x` lands the
-   `component0S b (metricCovDeriv g gRef a x) I0` shape ⇒
+**χ-SHARING RESOLVED (2026-06-13, `exists_chart_engineInput_family`, axiom-clean):**
+the bump `χ` of `exists_chart_engineInput` is provably `V`-independent (built from
+`x₀`/`K₀` only), so ONE `χ` serves the whole `n²` frame-pair family with per-member
+`ContDiff` + uniform iterated-derivative bounds.  **The first stop condition (B0
+outputs cannot share `χ/U/Kc`) is NOT hit.**
+
+**REMAINING (no missing API; all well-specified):**
+1. **diagonal → one `φ`**: feed `exists_chart_engineInput_family`'s per-member
+   bounds through `exists_diag_subseq` (`hsub = MapCInfConvOnCompacts.comp_subseq`,
+   `hextend` = subsequence-shift, `hstep` = `exists_cInf_subseq` on the φ-composed
+   member sequence) — OR bundle into `F = (Fin n × Fin n) → ℝ` and one
+   `exists_cInf_subseq` (needs a Σ-of-components Pi-`iteratedFDeriv` bound +
+   projection `comp_clm`).  Gives one `φ`, all pairs converge to some `Φinf_{ij}`.
+2. **limit-pinning**: `Φinf_{ij} = χ · chartRep(gInf.inner (frameᵢ)(frameⱼ))` by
+   pointwise-limit uniqueness (order-0 of the `C^∞` conv vs the pointwise metric
+   limit `hconv` from `metricPreconv_gInf`).  Yields `hpairs` with
+   `A0Seq k = metricTensorField (gSeq (φ k))`, `A0inf = metricTensorField gInf`.
+   `U` = open subset of `{χ=1} ∩ tgt` with `symm U ⊆ Kc`; `Kc = symm '' (tsupport χ)`.
+3. **feed**: `hpairs` → `hbase_of_framePairs` → `bumpTowerCarrier_all` (with
+   `exists_frameData`'s frame as the engine `Vfam`).
+4. **extraction**: order-0 of the resulting `C^∞` conv at `extChartAt x₀ x` ⇒
+   pointwise `Tendsto`; fixed multilinear expansion of `b (I0 q)` in the frame at
+   `x` ⇒ `component0S b (metricCovDeriv g gRef a x) I0` shape ⇒
    `componentConv_covDeriv_of_chartCInf`.  Then finite-cover `hnorm` → `metricPreconvInf`.
 
 Planner acceptance note: `bumpTower_slotExpand_conv` intentionally keeps the
