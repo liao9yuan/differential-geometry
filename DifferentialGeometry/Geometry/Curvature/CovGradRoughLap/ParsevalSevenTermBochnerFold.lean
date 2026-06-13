@@ -5687,6 +5687,127 @@ private lemma roughLapPureR_pairing_eq_fourTerm_frameJSum_integrated
   exact diagHessianPureR_pairing_eq_fourTerm_frameJSum (I := I) (M := M) g s S (hV a) x bse hbse
 
 set_option linter.unusedSectionVars false in
+/-- **Per-direction core of the integrated second-Bianchi emission (the undifferentiated-`P` route).**
+For a fixed smooth Parseval frame family and a fixed read direction `V b`, the three operator-field
+three-term integrands of `T₃` for that `b` — with `P := appCc Φ₀ S` UNDIFFERENTIATED — sum to the
+Parseval family sum over `a` of the genuine curvature/Hessian cross pairing
+`∫ ⟨R(V a, V b) S, ∇²_{V a, V b} S⟩`:
+```
+∫⟨P, ∇_{V b}(∇_{V b} S)⟩ + ∫⟨P, ∇_{V b} S⟩·divᵍ V_b + ∫⟨Φ₀(∇_{V b} S), ∇_{V b} S⟩
+  = ∑_a ∫ ⟨R(V a, V b) S, ∇²_{V a, V b} S⟩.
+```
+The whole engine `threeTerm_eq_crossPairing_direct` (and through it the kernel leaf
+`genuineDiffCurv_covGrad_eq_diffCurvTrace_add_group1_bianchi`, the public root, and the entire
+downstream cascade) is reduced to this single per-direction identity by `Finset.sum_comm`.
+
+**DEFERRED (the genuine-math core, body is `sorry`).**  This is the single irreducible second-Bianchi
+content of the `#10` kernel chain.  The sorry-free derivation expands the UNDIFFERENTIATED `P`'s explicit
+moving-frame value (`pureRGenuineDiffOp_zero_succ_toSection_unit_eval`, the `∑_i R(B_i, ·)(curry S B_i)`
+frame trace, lifted from the orthonormal frame `B_i` to the Parseval family `V a` by
+`parseval_family_sum_bilin_eq` exactly as `gcurv_slot0_eq_parseval_sum_elt1` does), pairs it against the
+iterated derivative `∇_{V b}(∇_{V b} S)`, reconciles the iterated vs genuine Hessian by the Christoffel
+correction (`residue_add_crossHessian_pointwise_eq`, the middle divergence term supplying the match), and
+cancels the spectator/swap-slot curvature by the cyclic differential Bianchi
+(`nablaTensor0SCurv_cyclic_eq_zero`) and the orthonormal moving-frame skew (`smoothOrthoFrame_cov_skew`,
+frame-summed).  Parallel in scale to the proven `D`-side primitive
+`parsevalFrameSum_diffCurvTrace_doubleSum_eq_neg_group1_add_crossPairing`.  Consumers transitively depend
+on `sorryAx` until this core is filled; the route is non-circular (it does NOT transit
+`threeTerm_eq_crossPairing_direct`, FACT-X, or any downstream member). -/
+private theorem threeTermPerB_eq_crossPairingSum
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) (b : Fin N) :
+    (∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+          (appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s) S).toSection
+          (covApplyGenCc (I := I) (M := M) g s
+            (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)) (hV b)).toSection x
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
+      (∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+          (appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s) S).toSection
+          (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x *
+          DifferentialGeometry.Integral.DivergenceTheorem.divergence_g (I := I) g
+            ⟨fun y : M => V b y, hV b⟩ x
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
+      (∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+          (appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)
+            (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))).toSection
+          (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g)) =
+      ∑ a : Fin N,
+        ∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+            (riemannSecCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+            (crossHessianCc (I := I) (M := M) g s S (hV a) (hV b)).toSection x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
+  sorry
+
+set_option linter.unusedSectionVars false in
+/-- **The genuine engine: the operator-field three-term normal form `T₃` equals the curvature/Hessian
+cross pairing `I₂`, proven DIRECTLY on the undifferentiated-`P` route (the integrated moving-frame
+second-Bianchi emission).**  For a fixed smooth Parseval frame family, the frame sum of the operator-field
+three-term normal form
+```
+T₃ := ∑_b ∫ [ ⟨P, ∇_{V b}(∇_{V b} S)⟩ + ⟨P, ∇_{V b} S⟩·divᵍ V_b + ⟨Φ₀(∇_{V b} S), ∇_{V b} S⟩ ],
+```
+with `P := pureRGenuineDiffOp g 0 s S = appCc Φ₀ S` the order-`0` (UNDIFFERENTIATED) moving-frame
+pure-Riemann curvature trace and `Φ₀ := curvOpField g s`, equals the genuine curvature/Hessian cross
+pairing
+```
+I₂ := ∑_a ∑_b ∫ ⟨R(V a, V b) S, ∇²_{V a, V b} S⟩
+```
+built on the genuine Hessian carrier `crossHessianCc` (`tensorSecondCovDeriv`, tensorial in both
+direction slots).
+
+This is the CLEAN route: `P` is undifferentiated, so we pair the explicit frame-summed curvature trace
+`P = ∑_i R(B_i, ·)(curry S B_i)` (`pureRGenuineDiffOp_zero_succ_toSection_unit_eval`) directly against
+the second derivative of `S` — no second-order curvature `∇²R` is created, and there is no circular
+integration by parts re-forming `⟨gDCS, ∇S⟩`.  The iterated derivative `∇_{V b}(∇_{V b} S)` vs the genuine
+Hessian `∇²_{V a, V b} S` differ by the Christoffel correction `∇_{∇_{V b} V b} S`, reconciled by the
+pointwise residue/Hessian identity (`residue_add_crossHessian_pointwise_eq`); the matching divergence is
+supplied by `T₃`'s middle (divergence-weighted) term; the `∑_i` frame trace of `P`'s value supplies the
+`∑_a` index of `I₂`'s double sum, and the swap-slot curvature term is killed by the cyclic differential
+Bianchi (`nablaTensor0SCurv_cyclic_eq_zero`) and the orthonormal moving-frame skew form
+(`smoothOrthoFrame_cov_skew`, frame-summed).  Parallel to the proven `D`-side primitive
+`parsevalFrameSum_diffCurvTrace_doubleSum_eq_neg_group1_add_crossPairing`. -/
+private theorem threeTerm_eq_crossPairing_direct
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
+    (∑ b : Fin N,
+        ((∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+            (appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s) S).toSection
+            (covApplyGenCc (I := I) (M := M) g s
+              (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)) (hV b)).toSection x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
+        (∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+            (appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s) S).toSection
+            (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x *
+            DifferentialGeometry.Integral.DivergenceTheorem.divergence_g (I := I) g
+              ⟨fun y : M => V b y, hV b⟩ x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
+        (∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+            (appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)
+              (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))).toSection
+            (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)))) =
+      (∑ a : Fin N, ∑ b : Fin N,
+          ∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+              (riemannSecCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+              (crossHessianCc (I := I) (M := M) g s S (hV a) (hV b)).toSection x
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
+  classical
+  -- Per-`b` reduction of the three-term integrands to the Parseval `a`-sum of the cross pairing,
+  -- then reorder `∑_b ∑_a = ∑_a ∑_b`.
+  rw [Finset.sum_congr rfl (fun b _ =>
+    threeTermPerB_eq_crossPairingSum (I := I) (M := M) g s S V hV hPar b)]
+  exact Finset.sum_comm
+
+set_option linter.unusedSectionVars false in
 /-- **The genuine differentiated-curvature operator-field pairing value (the moving-frame integrated
 second-Bianchi emission, non-circular form).**  For a fixed smooth Parseval frame family, the frame-free
 `L²` pairing of the differentiated-curvature operator-field section `gDCS := genuineDiffCurvSection g s
@@ -5697,30 +5818,11 @@ differentiated-curvature-trace double sum `D := ∑_a ∑_b ∫ ⟨(∇_{V a} R)
 ⟨gDCS, ∇S⟩_{L²} = D + G₁.
 ```
 This is the genuine moving-frame integrated covariant second-Bianchi content of the kernel.  By the
-operator-field Green integration-by-parts `tensorL2Inner_genuineDiffCurv_covGrad_eq_neg_roughLap_pureR_sub_spectator`,
-`⟨gDCS, ∇S⟩ = −⟨Δ_∇ P, S⟩ − ⟨spectator⟩` with `P := pureRGenuineDiffOp g 0 s S`.  The rough Laplacian
-`Δ_∇ P = ∑_a ∇²_{V a, V a} P` is read off the diagonal second covariant derivative
-(`roughLapPureR_pairing_eq_secondCovDeriv_frameSum`); the diagonal Hessian `∇²_{V a, V a} P` carries the
-twice-differentiated curvature trace through the operator-field four-term normal form
-(`covGrad_covGrad_appCc_curvOpField_eq_fourTerm`) whose leading `T₁` term unit-evaluates to the
-once-differentiated curvature carrier (`appCc_covGrad_covGrad_curvOpField_unit_eval`), so the moving-frame
-double derivative `∑_a (∇_{V a} R)(V a, ·) S` emerges; the swap-slot curvature derivative is killed by
-the cyclic differential Bianchi (`nablaTensor0SCurv_cyclic_eq_zero`) and the orthonormal moving-frame
-skew form (`smoothOrthoFrame_cov_skew`, frame-summed), and the residue and Christoffel corrections land
-on the moving-frame trace plus the group-`1` fold after the full Parseval double sum.  All
-frame-summed-integrated; no pointwise per-frame curvature jet is transited.
-
-**DEFERRED (genuine leaf).** The body is `sorry`: this is the single irreducible genuine-math
-content of the `#10` kernel chain — the integrated tensor Bochner–Weitzenböck identity, posited
-library-wide as `bochnerWeitzenbockResidue_curvatureValue_root`
-(`MovingFrameCurvatureValueAnchor`, itself `sorryAx`) and never yet proven sorry-free.  Every other
-formulation of this value (`genuineCurvFields_crossPairing_value_upstream`,
-`fourCarrierRemainder_integrated_nullity_valueAnchored`,
-`weitzenbock_curvature_genuineSections_crossPairingRS`) transits that posited root's `sorryAx`; the
-*sorry-free* derivation is the direct moving-frame second-Bianchi engine sketched above (node-1 +
-the four-term normal form + cyclic Bianchi + orthonormal skew), parallel-scale to the proven
-sorry-free `D`-side primitive `parsevalFrameSum_diffCurvTrace_doubleSum_eq_neg_group1_add_crossPairing`.
-Consumers transitively depend on `sorryAx` until this engine is built. -/
+operator-field Green integration-by-parts `tensorL2Inner_genuineDiffCurv_covGrad_eq_neg_threeTerm`,
+`⟨gDCS, ∇S⟩ = −T₃` with `T₃` the operator-field three-term normal form; the engine
+`threeTerm_eq_crossPairing_direct` gives `T₃ = I₂`; and the proven `D`-side primitive
+`parsevalFrameSum_diffCurvTrace_doubleSum_eq_neg_group1_add_crossPairing` gives `D = −(G₁ + I₂)`.
+Combining `−T₃ = −I₂ = D + G₁`. -/
 private theorem genuineDiffCurv_covGrad_eq_diffCurvTrace_add_group1_bianchi
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
@@ -5739,7 +5841,17 @@ private theorem genuineDiffCurv_covGrad_eq_diffCurvTrace_add_group1_bianchi
             ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
         bochnerFoldGroupSum (I := I) (M := M) g s S V
           (bochnerGroupElt1 (I := I) (M := M) g s S) := by
-  sorry
+  classical
+  -- `⟨gDCS, ∇S⟩ = −T₃` (the B-rule/IBP normal form, `@5102`).
+  have h3 := tensorL2Inner_genuineDiffCurv_covGrad_eq_neg_threeTerm
+    (I := I) (M := M) g s S V hV hPar
+  -- The genuine engine: `T₃ = I₂` (proven directly on the undifferentiated-`P` route).
+  have hX := threeTerm_eq_crossPairing_direct (I := I) (M := M) g s S V hV hPar
+  -- The proven `D`-side primitive: `D = −(G₁ + I₂)`.
+  have hD := parsevalFrameSum_diffCurvTrace_doubleSum_eq_neg_group1_add_crossPairing
+    (I := I) (M := M) g s S V hV hPar
+  -- `⟨gDCS, ∇S⟩ = −T₃ = −I₂ = D + G₁`.
+  linarith [h3, hX, hD]
 
 set_option linter.unusedSectionVars false in
 /-- **The operator-field three-term normal form equals the genuine curvature/Hessian cross pairing
