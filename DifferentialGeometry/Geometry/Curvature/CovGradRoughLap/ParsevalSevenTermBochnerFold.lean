@@ -5531,6 +5531,59 @@ private lemma diagHessian_pureR_unit_eval_fourTerm
   ring
 
 set_option linter.unusedSectionVars false in
+/-- **Step (a): the diagonal-Hessian-of-`P` cross pairing, opened in the orthonormal frame.**  For the
+operator-field pure-Riemann curvature trace `P := appCc (curvOpField g s) S`, a fixed smooth direction
+field `V a`, a point `x`, and any orthonormal basis `bse` of `T_x M` realizing the smooth orthonormal
+frame `B_i := smoothOrthoFrame g x i` at `x`, the `(0, s)` cross pairing of the diagonal genuine Hessian
+`∇²_{V a, V a} P` (`secondCovDerivCc (V a) P`) against `S` opens as the frame sum over multi-indices
+`J : Fin s → Fin (finrank E)` of the product of the diagonal-Hessian four-term unit value
+(`diagHessian_pureR_unit_eval_fourTerm`, read on `m := B ∘ J`) against `S`'s `J`-component.  This is
+the `tensor0SAsRS`-unit rewrap (`tensor0SAsRS_rs_unit'`) of both pairing slots followed by the frame
+double-sum collapse (`tensorInnerPointwise_tensor0SAsRS_eq_frameSum`).  Non-circular: it reads the
+diagonal Hessian off `P` purely through the proven four-term operator-field normal form, transiting no
+circle member. -/
+private lemma diagHessianPureR_pairing_eq_fourTerm_frameJSum
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {Va : Π b : M, TangentSpace I b}
+    (hVa : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Va b⟩ : TotalSpace E (TangentSpace I)))) (x : M)
+    (bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x))
+    (hbse : ∀ i, bse i = smoothOrthoFrame (I := I) g x i x) :
+    tensorInnerScalar (I := I) (M := M) g 0 s
+        (secondCovDerivCc (I := I) (M := M) g s hVa
+          (appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s) S)).toSection
+        S.toSection x =
+      ∑ J : Fin s → Fin (Module.finrank ℝ E),
+        Tensor0SSpace.toModel
+            ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+              tensorSecondCovDeriv (I := I) g 0 s Va Va
+                (fun y : M => (appCc (I := I) (M := M) g s s
+                  (curvOpField (I := I) (M := M) g s) S).toSection y) x)
+              (unitZeroSec (I := I) (M := M) x))
+            (fun k => smoothOrthoFrame (I := I) g x (J k) x) *
+          Tensor0SSpace.toModel
+            ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from S.toSection x)
+              (unitZeroSec (I := I) (M := M) x))
+            (fun k => smoothOrthoFrame (I := I) g x (J k) x) := by
+  classical
+  have horth : ∀ a b : Fin (Module.finrank ℝ E),
+      g.inner x (smoothOrthoFrame (I := I) g x a x) (smoothOrthoFrame (I := I) g x b x)
+        = if a = b then 1 else 0 :=
+    fun a b => smoothOrthoFrame_orthonormal_at_center (I := I) g x a b
+  set Wsec : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x :=
+    tensorSecondCovDeriv (I := I) g 0 s Va Va
+      (fun y : M => (appCc (I := I) (M := M) g s s
+        (curvOpField (I := I) (M := M) g s) S).toSection y) x with hWsec_def
+  set Ssec : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x := S.toSection x with hSsec_def
+  rw [tensorInnerScalar_apply (I := I) (M := M) g 0 s, secondCovDerivCc_toSection_apply]
+  have hfs := tensorInnerPointwise_tensor0SAsRS_eq_frameSum (I := I) (M := M) g s x
+    (Wsec (unitZeroSec (I := I) (M := M) x)) (Ssec (unitZeroSec (I := I) (M := M) x))
+    (fun i => smoothOrthoFrame (I := I) g x i x) bse rfl (fun i => hbse i) horth
+  rw [tensor0SAsRS_rs_unit' (I := I) (M := M) s x Wsec,
+    tensor0SAsRS_rs_unit' (I := I) (M := M) s x Ssec] at hfs
+  exact hfs
+
+set_option linter.unusedSectionVars false in
 /-- **The genuine differentiated-curvature operator-field pairing value (the moving-frame integrated
 second-Bianchi emission, non-circular form).**  For a fixed smooth Parseval frame family, the frame-free
 `L²` pairing of the differentiated-curvature operator-field section `gDCS := genuineDiffCurvSection g s
