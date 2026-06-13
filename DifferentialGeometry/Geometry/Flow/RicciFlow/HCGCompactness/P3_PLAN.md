@@ -5,6 +5,27 @@ planning session.  Written 2026-06-11 by the planning (Fable) session.**
 
 ---
 
+## PLANNER ACCEPTANCE LOG — Gap B (2026-06-13)
+
+Planner re-verified (own build + `#print axioms`, not just executor report):
+- `metricPreconv_gInf` (MetricPreconvDiag.lean) — C1b: subsequence + smooth
+  limit metric `gInf` w/ pointwise CLM convergence. **AXIOM-CLEAN.** The gInf
+  gate is fully discharged (consumes `smoothMetric_of_localCoeff`).
+- `bumpTowerCarrier_all` (ComponentConvTower.lean) — the all-orders
+  covariant-tower component-convergence induction. **AXIOM-CLEAN.**
+- `exists_chart_engineInput_family` (shared-χ finite-family engine input).
+  **AXIOM-CLEAN.**  ComponentConvTower builds green (3854 jobs).
+
+STATE: P3 machinery ~85% (limit-metric construction + tower induction DONE).
+`metricPreconvInf` endpoint still UNSTATED (0%).  REMAINING = the 4 assembly
+steps in ComponentConvTower.md "REMAINING": (1) diagonal→one φ, (2)
+limit-pinning, (3) feed `hbase_of_framePairs`→`bumpTowerCarrier_all`, (4)
+finite-cover extraction → `componentConv_covDeriv_of_chartCInf` → `metricPreconvInf`.
+"No missing API" per the executor scout.  Then C-II-final discharges the gInf
+scaffold (`MetricPreconvBridge.lean`) → `SourceMetricCPConvOnWindow`.
+
+---
+
 ## 0. Mandatory reading before any edit
 
 1. `CLAUDE.md` (repo root) — especially: lake-locked workflow, surgical
