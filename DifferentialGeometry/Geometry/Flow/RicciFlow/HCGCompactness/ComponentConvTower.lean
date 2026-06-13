@@ -573,5 +573,55 @@ theorem bumpTowerCarrier_step
   exact bumpTowerCons_conv (I := I) gRef A0Seq A0inf p x₀ hχ htsupp hU hχU hUtarget
     hKchart hUKc (vbasis i) (frame i) (hframeσ i) (Fin.tail W) IH
 
+/-- **All-levels covariant-tower convergence (the `Nat.rec` induction).**  From the
+order-`0` base (`hbase`) and the step `bumpTowerCarrier_step`, the bump carriers of
+EVERY section tuple at EVERY covariant order `a` converge `C^∞`-on-compacts on `U`,
+along the single subsequence baked into `A0Seq`. -/
+theorem bumpTowerCarrier_all
+    (gRef : SmoothRiemannianMetric I M)
+    (A0Seq : ℕ → Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    (A0inf : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    (x₀ : M)
+    {χ : E → Real} (hχ : ContDiff Real (∞ : WithTop ℕ∞) χ)
+    (htsupp : tsupport χ ⊆ (extChartAt I x₀).target)
+    {U : Set E} (hU : IsOpen U) (hχU : Set.EqOn χ 1 U)
+    (hUtarget : U ⊆ (extChartAt I x₀).target)
+    {Kc : Set M} (hKchart : Kc ⊆ (chartAt H x₀).source)
+    (hUKc : ∀ z ∈ U, (extChartAt I x₀).symm z ∈ Kc)
+    {ι : Type*} (s : Finset ι)
+    (frame : ι → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _))
+    (vbasis : ι → E)
+    (hframeσ : ∀ i, ∀ᶠ x in 𝓝ˢ Kc,
+      frame i x = tangentConstInChart (𝕜 := Real) (I := I) x₀ (vbasis i) x)
+    (hspan : ∀ (W0 : ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _)),
+        ∃ c : ι → M → Real,
+          (∀ i, ContMDiffOn I 𝓘(Real, Real) (∞ : WithTop ℕ∞) (c i)
+            (chartAt H x₀).source)
+          ∧ ∀ w ∈ Kc, W0 w = ∑ i ∈ s, c i w • frame i w)
+    (hbase : ∀ (V : Fin (0 + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _)),
+        MapCInfConvOnCompacts U
+          (fun k z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gRef (A0Seq k) 0) w (fun a => V a w)) z)
+          (fun z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gRef A0inf 0) w (fun a => V a w)) z)) :
+    ∀ (a : ℕ) (V : Fin (a + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _)),
+        MapCInfConvOnCompacts U
+          (fun k z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gRef (A0Seq k) a) w (fun a => V a w)) z)
+          (fun z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gRef A0inf a) w (fun a => V a w)) z) := by
+  intro a
+  induction a with
+  | zero => exact hbase
+  | succ p IH =>
+    exact bumpTowerCarrier_step (I := I) gRef A0Seq A0inf p x₀ hχ htsupp hU hχU hUtarget
+      hKchart hUKc s frame vbasis hframeσ hspan IH
+
 end HCGCompactness
 end DifferentialGeometry
