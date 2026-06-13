@@ -79,5 +79,140 @@ theorem exists_cInf_subseq_finiteFamily
     · obtain ⟨Φinf, hΦinf⟩ := hconv p hps
       exact ⟨Φinf, hΦinf.comp_subseq hψ⟩
 
+/-- **Step 1 — the `n²`-frame-pair diagonal (shared `χ`, one subsequence).**  For a
+chart center `x₀`, a compact `K₀ ⊆ source`, and the chart-constant frame `frame`,
+the `n²` order-0 frame-pair carriers `![frameᵢ, frameⱼ]` (built against the metric
+sequence `gSeq ∘ φ`) share ONE bump `χ` (via `exists_chart_engineInput_family`) and,
+via `exists_cInf_subseq_finiteFamily`, ONE further subsequence `ψ` along which every
+pair converges `C∞`-on-compacts to some limit.  This is the `hpairs` precursor; the
+limit is pinned to the `gInf` carrier in `framePairs_pinned`. -/
+theorem exists_framePairs_diag
+    (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
+    (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
+      metricCovDerivNorm (I := I) q (gSeq k) gRef z ≤ C)
+    (x₀ : M) {K₀ : Set M} (hK₀ : IsCompact K₀) (hK₀chart : K₀ ⊆ (chartAt H x₀).source)
+    (frame : Fin (Module.finrank Real E) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _))
+    (φ : ℕ → ℕ) :
+    ∃ (ψ : ℕ → ℕ) (χ : E → Real),
+      StrictMono ψ ∧ ContDiff Real (∞ : WithTop ℕ∞) χ ∧
+      tsupport χ ⊆ (extChartAt I x₀).target ∧
+      (∀ y ∈ K₀, χ (extChartAt I x₀ y) = 1) ∧
+      ∀ (i j : Fin (Module.finrank Real E)), ∃ Φinf : E → Real,
+        MapCInfConvOnCompacts (Set.univ : Set E)
+          (fun k z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gRef
+              (Tensor0SBundle.metricTensorField (I := I) (gSeq (φ (ψ k)))) 0) w
+                (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)) z) Φinf := by
+  classical
+  set Vfam : (Fin (Module.finrank Real E) × Fin (Module.finrank Real E)) →
+      Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
+    fun p => Function.update (fun _ : Fin 2 => frame p.1) 1 (frame p.2) with hVfam
+  have hbdd' : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
+      metricCovDerivNorm (I := I) q ((gSeq ∘ φ) k) gRef z ≤ C := by
+    intro q K hK; obtain ⟨C, hC⟩ := hbdd q K hK; exact ⟨C, fun k z hz => hC (φ k) z hz⟩
+  obtain ⟨χ, hχcd, htsupp, hχ1, hfam⟩ :=
+    exists_chart_engineInput_family (I := I) gRef (gSeq ∘ φ) hbdd' x₀ Vfam hK₀ hK₀chart
+  set Φ : (Fin (Module.finrank Real E) × Fin (Module.finrank Real E)) → ℕ → E → Real :=
+    fun p k z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+      (fun w : M => (covDerivOfField (I := I) gRef
+        (Tensor0SBundle.metricTensorField (I := I) ((gSeq ∘ φ) k)) 0) w
+          (fun a => Vfam p a w)) z with hΦ
+  obtain ⟨ψ, hψ, hconv⟩ :=
+    exists_cInf_subseq_finiteFamily (Finset.univ : Finset (Fin (Module.finrank Real E) ×
+        Fin (Module.finrank Real E))) Φ
+      (fun p _ k => (hfam p).1 k)
+      (fun p _ r K _ => by
+        obtain ⟨Mr, hMr⟩ := (hfam p).2 r
+        exact ⟨Mr, fun k x _ => hMr k x⟩)
+  refine ⟨ψ, χ, hψ, hχcd, htsupp, hχ1, fun i j => ?_⟩
+  obtain ⟨Φinf, hΦinf⟩ := hconv (i, j) (Finset.mem_univ _)
+  exact ⟨Φinf, hΦinf⟩
+
+/-- **Step 2 — limit pinning ⇒ `hpairs`.**  The per-pair `C∞`-on-compacts limit of
+`exists_framePairs_diag` is pinned to the `gInf` frame-pair carrier by pointwise-limit
+uniqueness (`tendsto_of_cInf` + `metricPreconv_gInf`'s `hconv` + `tendsto_nhds_unique`),
+yielding the `hpairs` input to `hbase_of_framePairs`.  `A0Seq k = metricTensorField
+(gSeq (φ (ψ k)))`, `A0inf = metricTensorField gInf`. -/
+theorem framePairs_pinned
+    (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
+    (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
+      metricCovDerivNorm (I := I) q (gSeq k) gRef z ≤ C)
+    (x₀ : M) {K₀ : Set M} (hK₀ : IsCompact K₀) (hK₀chart : K₀ ⊆ (chartAt H x₀).source)
+    (frame : Fin (Module.finrank Real E) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _))
+    (φ : ℕ → ℕ) (gInf : SmoothRiemannianMetric I M)
+    (hconv : ∀ x : M, Filter.Tendsto (fun m => (gSeq (φ m)).inner x) Filter.atTop
+      (nhds (gInf.inner x))) :
+    ∃ (ψ : ℕ → ℕ) (χ : E → Real),
+      StrictMono ψ ∧ ContDiff Real (∞ : WithTop ℕ∞) χ ∧
+      tsupport χ ⊆ (extChartAt I x₀).target ∧
+      (∀ y ∈ K₀, χ (extChartAt I x₀ y) = 1) ∧
+      ∀ (i j : Fin (Module.finrank Real E)),
+        MapCInfConvOnCompacts (Set.univ : Set E)
+          (fun k z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gRef
+              (Tensor0SBundle.metricTensorField (I := I) (gSeq (φ (ψ k)))) 0) w
+                (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)) z)
+          (fun z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gRef
+              (Tensor0SBundle.metricTensorField (I := I) gInf) 0) w
+                (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)) z) := by
+  classical
+  obtain ⟨ψ, χ, hψ, hχcd, htsupp, hχ1, hpairs0⟩ :=
+    exists_framePairs_diag (I := I) gRef gSeq hbdd x₀ hK₀ hK₀chart frame φ
+  refine ⟨ψ, χ, hψ, hχcd, htsupp, hχ1, fun i j => ?_⟩
+  obtain ⟨Φinf, hΦinf⟩ := hpairs0 i j
+  -- carrier value at a point, for any metric `g`
+  have hinner : ∀ (g : SmoothRiemannianMetric I M) (w : M),
+      (covDerivOfField (I := I) gRef (Tensor0SBundle.metricTensorField (I := I) g) 0) w
+          (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)
+        = g.inner w (frame i w) (frame j w) := by
+    intro g w
+    show (Tensor0SBundle.metricTensorField (I := I) g) w
+        (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)
+      = g.inner w (frame i w) (frame j w)
+    rw [Tensor0SBundle.metricTensorField_apply]
+    simp [Function.update_of_ne, Function.update_self]
+  have hval : ∀ (g : SmoothRiemannianMetric I M) (z : E),
+      χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+          (fun w : M => (covDerivOfField (I := I) gRef
+            (Tensor0SBundle.metricTensorField (I := I) g) 0) w
+              (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)) z
+        = χ z * g.inner ((extChartAt I x₀).symm z)
+            (frame i ((extChartAt I x₀).symm z)) (frame j ((extChartAt I x₀).symm z)) := by
+    intro g z
+    rw [writtenInExtChartAt_real_apply, hinner g ((extChartAt I x₀).symm z)]
+  have hpin : Φinf = (fun z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+      (fun w : M => (covDerivOfField (I := I) gRef
+        (Tensor0SBundle.metricTensorField (I := I) gInf) 0) w
+          (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)) z) := by
+    funext z
+    have hseq := tendsto_of_cInf hΦinf (Set.mem_univ z)
+    have hlim : Filter.Tendsto
+        (fun k => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+          (fun w : M => (covDerivOfField (I := I) gRef
+            (Tensor0SBundle.metricTensorField (I := I) (gSeq (φ (ψ k)))) 0) w
+              (fun a => (Function.update (fun _ : Fin 2 => frame i) 1 (frame j)) a w)) z)
+        Filter.atTop (nhds (χ z * (gInf.inner ((extChartAt I x₀).symm z)
+          (frame i ((extChartAt I x₀).symm z)) (frame j ((extChartAt I x₀).symm z))))) := by
+      have hcont : Continuous
+          (fun η : TangentSpace I ((extChartAt I x₀).symm z) →L[Real]
+              TangentSpace I ((extChartAt I x₀).symm z) →L[Real] Real =>
+            η (frame i ((extChartAt I x₀).symm z)) (frame j ((extChartAt I x₀).symm z))) :=
+        ((ContinuousLinearMap.apply Real Real
+            (frame j ((extChartAt I x₀).symm z))).comp
+          (ContinuousLinearMap.apply Real (TangentSpace I ((extChartAt I x₀).symm z) →L[Real] Real)
+            (frame i ((extChartAt I x₀).symm z)))).continuous
+      have hbase := ((hcont.tendsto _).comp
+        ((hconv ((extChartAt I x₀).symm z)).comp hψ.tendsto_atTop)).const_mul (χ z)
+      refine hbase.congr (fun k => ?_)
+      rw [hval (gSeq (φ (ψ k))) z]
+      simp only [Function.comp_apply]
+    rw [hval gInf z]
+    exact tendsto_nhds_unique hseq hlim
+  rw [hpin] at hΦinf
+  exact hΦinf
+
 end HCGCompactness
 end DifferentialGeometry
