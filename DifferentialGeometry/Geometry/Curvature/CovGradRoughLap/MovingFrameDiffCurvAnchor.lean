@@ -188,27 +188,21 @@ This is the rank-`0` analogue of the on-disk general-rank deepest moving-frame a
 downstream, posited `sorry`); `exists_movingCentreDiffCurvSection_divergenceDatum` (the
 literal-subtraction consumer form) reads off by collapsing `Grem` to `Curv − Gcurv − Gcd`.
 
-**Proof (composition glue over the slot-complete gauge-glued section, two upstream posits).** The
-gauge-glued tensorial differentiated-curvature section is now the *slot-complete* concrete witness
-`Gcd := genuineDiffCurvSection g s S + ricTraceSection g s S` (`MovingFrameDiffCurvTraceSection` /
-`RicciTraceCarrier`, the operator-field action of `covGrad (Φ₀ s)` on `S` plus the leading-slot
-raised-Ricci trace), and `Grem := Curv − Gcurv − Gcd` is the literal moving-frame remainder (the
-section split `Curv = Gcurv + Gcd + Grem` then holds by `abel`). The `(3')` Gcd fibre bound is the
-fibre subadditivity `riemannianFiberNormSq_add_le` over the two carriers
-`exists_genuineDiffCurvSection_fiberNormSq_bound` and `exists_ricTraceSection_fiberNormSq_bound`. The
-`(4')` remainder fibre bound is the iterated fibre subadditivity triangle `riemannianFiberNormSq_sub_le`
-/ `riemannianFiberNormSq_add_le` over the four pieces — the order-`2` commutator-defect fibre order
-`exists_pointwiseTensorCurv_fiberNormSq_bound_upstream` (posited curvature input), the pure-Riemann
-section grid bound `exists_GcurvSection_iteratedCovGrad_grid_bound` at gradient order `k = 0` (whose
-contracted range collapses to `rfns(∇S)`), and the two carriers of `(3')` — with the constants merged
-into a single `K s := √(8(Kgcd s)² + 8(Crc s)² + 8(Ccurv s)² + 8(cg s 0)²)`. The `(2)` integrated
-moving-frame nullity is `movingFrameNullity_of_genuineCrossPairingValue` (`MovingFrameIntegratedNullity`)
-fed its hypothesis by the genuine differentiated-curvature cross-pairing value
-`genuineDiffCurv_crossPairing_value` (`MovingFrameDiffCurvTraceSection`, the slot-complete four-carrier
-third-order Weitzenböck IBP-telescoping content) with
-`Gcd := genuineDiffCurvSection g s S + ricTraceSection g s S`. The body is thus *proved by composition*,
-transiting only the two upstream posited leaves (`exists_pointwiseTensorCurv_fiberNormSq_bound_upstream`
-and `genuineDiffCurv_crossPairing_value`); consumers transitively depend on their `sorryAx`. -/
+**Proof (composition glue over the honest existential value datum, one upstream posit).** The
+gauge-glued tensorial differentiated-curvature section `Gcd` is now the *existentially-carried* witness
+of the honest rank-`0` value datum `exists_diffCurvSection_carrier_valueDatum`
+(`MovingFrameDiffCurvTraceSection`, the rank-`0` mirror of the rank-`r`
+`exists_diffCurvSectionRS_carrier_valueDatum`), which supplies the `(3')` Gcd sum fibre bound, the `(4')`
+companion remainder fibre bound on `Curv − Gcurv − Gcd`, and the genuine cross-pairing VALUE
+`⟨Gcurv + Gcd, ∇S⟩_{L²} = ‖Δ_∇S‖²_{L²} − ‖∇²S‖²_{L²}` directly; `Grem := Curv − Gcurv − Gcd` is the
+literal moving-frame remainder (the section split `Curv = Gcurv + Gcd + Grem` then holds by `abel`). The
+`(2)` integrated moving-frame nullity is `movingFrameNullity_of_genuineCrossPairingValue`
+(`MovingFrameIntegratedNullity`, sorry-free) fed its hypothesis by the value datum's genuine cross-pairing
+VALUE — *not* the discarded fixed-three-carrier value (the on-disk
+`genuineDiffCurvSection + ricTraceSection` carriers do not sum to the commutator defect — the existential
+witness carries the genuine content soundly, `PROVE_REFUTED.md`). The body is thus *proved by composition*,
+transiting only the single honest posited leaf (`exists_diffCurvSection_carrier_valueDatum`); consumers
+transitively depend on its `sorryAx`. -/
 theorem exists_movingCentreDiffCurvSection_splitDivergenceDatum
     (g : SmoothRiemannianMetric I M) :
     ∃ K : ℕ → ℝ, (∀ s, 0 ≤ K s) ∧
@@ -232,107 +226,19 @@ theorem exists_movingCentreDiffCurvSection_splitDivergenceDatum
           tensorL2Inner (I := I) (M := M) g 0 (s + 1) Grem.toFun
               (covGrad (I := I) (M := M) g 0 s S).toFun = 0 := by
   classical
-  obtain ⟨Kgcd, hKgcd_nn, hKgcd⟩ :=
-    exists_genuineDiffCurvSection_fiberNormSq_bound (I := I) (M := M) g
-  obtain ⟨Crc, hCrc_nn, hCrc⟩ :=
-    exists_ricTraceSection_fiberNormSq_bound (I := I) (M := M) g
-  obtain ⟨Ccurv, hCcurv_nn, hCcurv⟩ :=
-    exists_pointwiseTensorCurv_fiberNormSq_bound_upstream (I := I) (M := M) g
-  obtain ⟨cg, hcg_nn, hcg⟩ :=
-    exists_GcurvSection_iteratedCovGrad_grid_bound (I := I) (M := M) g
-  refine ⟨fun s => Real.sqrt (8 * (Kgcd s) ^ 2 + 8 * (Crc s) ^ 2 + 8 * (Ccurv s) ^ 2
-      + 8 * (cg s 0) ^ 2), fun s => Real.sqrt_nonneg _, fun s S => ?_⟩
-  set Curv : SmoothCcTensor g 0 (s + 1) := pointwiseTensorCurv (I := I) (M := M) g s S with hCurv
-  set Gcurv : SmoothCcTensor g 0 (s + 1) := GcurvSection (I := I) (M := M) g s S with hGcurv
-  set Gcd : SmoothCcTensor g 0 (s + 1) :=
-    genuineDiffCurvSection (I := I) (M := M) g s S +
-      ricTraceSection (I := I) (M := M) g s S with hGcd
-  refine ⟨Gcd, Curv - Gcurv - Gcd, ?_, ?_, ?_, ?_⟩
-  · abel
-  · intro x
-    have hKsq : Real.sqrt (8 * (Kgcd s) ^ 2 + 8 * (Crc s) ^ 2 + 8 * (Ccurv s) ^ 2
-        + 8 * (cg s 0) ^ 2) ^ 2 =
-        8 * (Kgcd s) ^ 2 + 8 * (Crc s) ^ 2 + 8 * (Ccurv s) ^ 2 + 8 * (cg s 0) ^ 2 := by
-      rw [Real.sq_sqrt]; positivity
-    rw [hKsq]
-    simp only [hGcd, SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
-    have hfgS_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
-        ((covGrad (I := I) (M := M) g 0 s S).toSection x) :=
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x _
-    have hfS_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) :=
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x _
-    have hsubGcd := riemannianFiberNormSq_add_le (I := I) (M := M) g 0 (s + 1) x
-      ((genuineDiffCurvSection (I := I) (M := M) g s S).toSection x)
-      ((ricTraceSection (I := I) (M := M) g s S).toSection x)
-    have hgd := hKgcd s S x
-    have hrc := hCrc s S x
-    nlinarith [hsubGcd, hgd, hrc, hfgS_nn, hfS_nn,
-      sq_nonneg (Ccurv s), sq_nonneg (cg s 0), sq_nonneg (Kgcd s), sq_nonneg (Crc s),
-      mul_nonneg (add_nonneg hfgS_nn hfS_nn) (sq_nonneg (Ccurv s)),
-      mul_nonneg (add_nonneg hfgS_nn hfS_nn) (sq_nonneg (cg s 0)),
-      mul_nonneg (add_nonneg hfgS_nn hfS_nn) (sq_nonneg (Kgcd s)),
-      mul_nonneg (add_nonneg hfgS_nn hfS_nn) (sq_nonneg (Crc s))]
-  · intro x
-    have hKsq : Real.sqrt (8 * (Kgcd s) ^ 2 + 8 * (Crc s) ^ 2 + 8 * (Ccurv s) ^ 2
-        + 8 * (cg s 0) ^ 2) ^ 2 =
-        8 * (Kgcd s) ^ 2 + 8 * (Crc s) ^ 2 + 8 * (Ccurv s) ^ 2 + 8 * (cg s 0) ^ 2 := by
-      rw [Real.sq_sqrt]; positivity
-    rw [hKsq]
-    simp only [hGcd, SmoothCcTensor.toSection_sub, SmoothCcTensor.toSection_add,
-      ContMDiffSection.coe_sub, ContMDiffSection.coe_add, Pi.sub_apply, Pi.add_apply]
-    set fS : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) with hfS
-    set fgS : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
-        ((covGrad (I := I) (M := M) g 0 s S).toSection x) with hfgS
-    set fg2S : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
-        ((covGrad (I := I) (M := M) g 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S)).toSection x)
-      with hfg2S
-    have hfS_nn : 0 ≤ fS := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x _
-    have hfgS_nn : 0 ≤ fgS := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x _
-    have hfg2S_nn : 0 ≤ fg2S := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1 + 1) x _
-    have hsub1 := riemannianFiberNormSq_sub_le (I := I) (M := M) g 0 (s + 1) x
-      (Curv.toSection x - Gcurv.toSection x)
-      ((genuineDiffCurvSection (I := I) (M := M) g s S).toSection x +
-        (ricTraceSection (I := I) (M := M) g s S).toSection x)
-    have hsub2 := riemannianFiberNormSq_sub_le (I := I) (M := M) g 0 (s + 1) x
-      (Curv.toSection x) (Gcurv.toSection x)
-    have hsubGcd := riemannianFiberNormSq_add_le (I := I) (M := M) g 0 (s + 1) x
-      ((genuineDiffCurvSection (I := I) (M := M) g s S).toSection x)
-      ((ricTraceSection (I := I) (M := M) g s S).toSection x)
-    have hCurvB := hCcurv s S x
-    rw [← hCurv] at hCurvB
-    have hgc0 := hcg s S 0 x
-    simp only [iteratedCovGrad_zero, Nat.add_zero, Finset.range_one, Finset.sum_singleton,
-      iteratedCovGrad_succ] at hgc0
-    rw [← hGcurv] at hgc0
-    have hgc : riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x (Gcurv.toSection x) ≤
-        cg s 0 ^ 2 * fgS := hgc0
-    have hgd := hKgcd s S x
-    have hrc := hCrc s S x
-    nlinarith [hsub1, hsub2, hsubGcd, hCurvB, hgc, hgd, hrc, hfS_nn, hfgS_nn, hfg2S_nn,
-      sq_nonneg (Ccurv s), sq_nonneg (cg s 0), sq_nonneg (Kgcd s), sq_nonneg (Crc s),
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x (Curv.toSection x),
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x (Gcurv.toSection x),
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x
-        (Curv.toSection x - Gcurv.toSection x),
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x
-        ((genuineDiffCurvSection (I := I) (M := M) g s S).toSection x),
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x
-        ((ricTraceSection (I := I) (M := M) g s S).toSection x),
-      riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x
-        ((genuineDiffCurvSection (I := I) (M := M) g s S).toSection x +
-          (ricTraceSection (I := I) (M := M) g s S).toSection x),
-      mul_nonneg hfg2S_nn (sq_nonneg (Ccurv s)), mul_nonneg hfgS_nn (sq_nonneg (cg s 0)),
-      mul_nonneg hfgS_nn (sq_nonneg (Kgcd s)), mul_nonneg hfS_nn (sq_nonneg (Kgcd s)),
-      mul_nonneg hfgS_nn (sq_nonneg (Crc s)), mul_nonneg hfS_nn (sq_nonneg (Crc s))]
-  · rw [show (Curv - Gcurv - Gcd).toFun = (pointwiseTensorCurv (I := I) (M := M) g s S
-        - GcurvSection (I := I) (M := M) g s S -
-          (genuineDiffCurvSection (I := I) (M := M) g s S +
-            ricTraceSection (I := I) (M := M) g s S)).toFun
-      from by rw [hCurv, hGcurv, hGcd]]
-    exact movingFrameNullity_of_genuineCrossPairingValue (I := I) (M := M) g s S
-      (genuineDiffCurvSection (I := I) (M := M) g s S +
-        ricTraceSection (I := I) (M := M) g s S)
-      (genuineDiffCurv_crossPairing_value (I := I) (M := M) g s S)
+  -- The honest existential differentiated-curvature value datum: the gauge-glued `(∇R) S` carrier
+  -- `Gcd` with its sum bound, the companion remainder bound, and the genuine cross-pairing VALUE.
+  obtain ⟨K, hK_nn, hdatum⟩ :=
+    exists_diffCurvSection_carrier_valueDatum (I := I) (M := M) g
+  refine ⟨K, hK_nn, fun s S => ?_⟩
+  obtain ⟨Gcd, hGcd_bound, hrem_bound, hval⟩ := hdatum s S
+  refine ⟨Gcd, pointwiseTensorCurv (I := I) (M := M) g s S -
+      GcurvSection (I := I) (M := M) g s S - Gcd, ?_, hGcd_bound, hrem_bound, ?_⟩
+  · -- The section split `Curv = GcurvSection + Gcd + (Curv − GcurvSection − Gcd)`.
+    abel
+  · -- The integrated moving-frame nullity of the explicit remainder `Curv − GcurvSection − Gcd`,
+    -- via the value-to-nullity converter fed by the honest value datum (no fixed-carrier value).
+    exact movingFrameNullity_of_genuineCrossPairingValue (I := I) (M := M) g s S Gcd hval
 
 /-- **Coupled differentiated-curvature section `(∇R) S` with its order-`2` remainder fibre bound and
 its integrated moving-frame nullity (literal-subtraction consumer form).** For a closed smooth

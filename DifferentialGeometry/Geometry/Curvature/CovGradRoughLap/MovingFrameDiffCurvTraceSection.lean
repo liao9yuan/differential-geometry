@@ -842,6 +842,75 @@ theorem fourCarrierRemainder_fiberNormSq_bound_upstream
     mul_nonneg hfgS_nn (sq_nonneg (Kgcd s)), mul_nonneg hfS_nn (sq_nonneg (Kgcd s)),
     mul_nonneg hfgS_nn (sq_nonneg (Crc s)), mul_nonneg hfS_nn (sq_nonneg (Crc s))]
 
+/-- **The rank-`0` differentiated-curvature `(∇R) S` value datum (the honest existential rank-`0`
+Bochner–Weitzenböck curvature primitive).** The contravariant-rank-`0` mirror of the *honest existential*
+rank-`r` value input `exists_diffCurvSectionRS_carrier_valueDatum` (`MovingFrameGenuineFieldPairingRS`):
+the genuine differentiated-curvature cross-pairing VALUE, carried by an order-controlled field, together
+with the companion remainder's order bound. For a closed smooth Riemannian manifold `(M, g)` there is a
+*valence-dependent* nonnegative constant `K : ℕ → ℝ` such that, at every covariant rank `s` and for every
+smooth compactly-supported `(0, s)`-tensor `S` there **exists** a single differentiated-curvature genuine
+field `Gcd : SmoothCcTensor g 0 (s + 1)` — the gauge-glued tensorial `(∇R) S` section — such that, writing
+`Curv := pointwiseTensorCurv g s S`, `Gcurv := GcurvSection g s S`, `∇S := covGrad g 0 s S`,
+`Δ_∇S := rawTensorConnLapSmooth g 0 s S` and `∇²S := covGrad g 0 (s + 1) (covGrad g 0 s S)`:
+
+* `rfns(Gcd)(x) ≤ (K s)² · ( rfns(∇S)(x) + rfns(S)(x) )` — the `(∇R) S` field, sum-order;
+* `rfns(Curv − Gcurv − Gcd)(x) ≤ (K s)² · ( rfns(∇²S)(x) + rfns(∇S)(x) + rfns(S)(x) )` — the moving-frame
+  remainder, genuinely `∇²S`-order after the iterated-Ricci cancellation of the top-order `∇³S` terms; and
+* `⟨Gcurv + Gcd, ∇S⟩_{L²} = ‖Δ_∇S‖²_{L²} − ‖∇²S‖²_{L²}` — the genuine cross-pairing VALUE: the two genuine
+  curvature carriers, paired against the gradient field, recover the entire Weitzenböck curvature integral.
+
+**Why this is TRUE (and is NOT the discarded fixed-carrier identity).** By the sorry-free integrated
+Weitzenböck value `weitzenbock_curvature_crossPairing_value` the order-`2` commutator defect pairs as
+`⟨Curv, ∇S⟩_{L²} = ‖Δ_∇S‖²_{L²} − ‖∇²S‖²_{L²}`; so the value datum is equivalent to the existence of an
+order-`(∇S, S)`-controlled field `Gcd` with `⟨Gcd, ∇S⟩_{L²} = ⟨Curv − Gcurv, ∇S⟩_{L²}` (the residual
+cross-pairing `⟨Curv − Gcurv, ∇S⟩` is the differentiated curvature `(∇R) S` paired against `∇S`, carried
+by an order-`(∇S, S)`-controlled gauge-glued tensorial section — the `∇²S`-order moving-frame bracket
+integrates away against `∇S` over the closed manifold). It is the rank-`0` analogue of the rank-`r` honest
+value input, with the additional companion remainder bound `(4')` (the order-`2` commutator defect is
+`∇²S`-order after the iterated Ricci identity `secondCovDeriv_covGrad_antisymm_eq_riemannOp_gen` cancels
+the top-order `∇³S` terms, the lower terms absorbed by the curvature sups over the compact manifold).
+
+This is an EXISTENTIAL value datum (the witness `Gcd` is existentially carried, never fixed to the specific
+sum `genuineDiffCurvSection g s S + ricTraceSection g s S`); it does NOT assert the discarded
+fixed-three-carrier sum identity (the on-disk `genuineDiffCurvSection`/`ricTraceSection` carriers do not sum
+to the commutator defect — they are off by the `O(ε)` differentiated-curvature pairing against the `O(ε²)`
+carrier difference — so a fixed-carrier value is false; only the existential value, satisfied by a suitably
+gauge-glued tensorial section, is sound, `PROVE_REFUTED.md`). The body is `sorry`; consumers transitively
+depend on its `sorryAx`.
+
+**Non-vacuity (the value rejects `Gcd = 0`).** With `Gcd = 0` the value reads
+`⟨Gcurv, ∇S⟩_{L²} = ‖Δ_∇S‖²_{L²} − ‖∇²S‖²_{L²}`; *false* on a non-flat manifold — the pure-Riemann pairing
+does not carry the differentiated-curvature `(∇R) S` content. So `Gcd` must carry the genuine content; the
+constant family is genuinely positive. -/
+theorem exists_diffCurvSection_carrier_valueDatum (g : SmoothRiemannianMetric I M) :
+    ∃ K : ℕ → ℝ, (∀ s, 0 ≤ K s) ∧
+      ∀ (s : ℕ) (S : SmoothCcTensor g 0 s),
+        ∃ Gcd : SmoothCcTensor g 0 (s + 1),
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x (Gcd.toSection x) ≤
+            K s ^ 2 *
+              (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                  ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x))) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+              ((pointwiseTensorCurv (I := I) (M := M) g s S -
+                  GcurvSection (I := I) (M := M) g s S - Gcd).toSection x) ≤
+            K s ^ 2 *
+              (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
+                  ((covGrad (I := I) (M := M) g 0 (s + 1)
+                    (covGrad (I := I) (M := M) g 0 s S)).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+                    ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
+                riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x))) ∧
+          tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+              (GcurvSection (I := I) (M := M) g s S + Gcd).toFun
+              (covGrad (I := I) (M := M) g 0 s S).toFun =
+            tensorL2Norm (I := I) (M := M) g 0 s
+                (rawTensorConnLapSmooth (I := I) g 0 s S).toFun ^ 2 -
+              tensorL2Norm (I := I) (M := M) g 0 (s + 1 + 1)
+                (covGrad (I := I) (M := M) g 0 (s + 1)
+                  (covGrad (I := I) (M := M) g 0 s S)).toFun ^ 2 :=
+  sorry
+
 /-- **Posited upstream genuine third-order Weitzenböck field decomposition with proportional fibre
 bounds and the concrete spectral pairing (the deepest curvature core, homed upstream of the
 moving-frame spine).** For a closed smooth Riemannian manifold `(M, g)` there is a *valence-dependent*
@@ -886,9 +955,19 @@ chain (which transitively imports this file).
 in general — the right-hand side is the genuine Weitzenböck curvature defect
 `⟨Curv S, ∇S⟩_{L²}` (`weitzenbock_curvature_crossPairing_value`), nonzero on a non-flat manifold with a
 non-parallel `S` — so the genuine fields must carry the actual curvature integral; the bounds-only
-shoving of everything into the remainder is forbidden by the pairing. The body is `sorry` (the genuine
-classical third-order tensor Bochner–Weitzenböck curvature-field derivation); consumers transitively
-depend on `sorryAx`. -/
+shoving of everything into the remainder is forbidden by the pairing.
+
+**Proof (sorry-free glue over the honest existential value datum).** The pure-Riemann field
+`Gcurv := GcurvSection g s S` is bounded by the sorry-free pure-Riemann grid bound at gradient order `0`
+(`exists_GcurvSection_iteratedCovGrad_grid_bound`). The differentiated-curvature field `GcurvDeriv := Gcd`
+is the *existentially-carried* gauge-glued `(∇R) S` section from the honest rank-`0` value datum
+`exists_diffCurvSection_carrier_valueDatum` (the rank-`0` mirror of the rank-`r`
+`exists_diffCurvSectionRS_carrier_valueDatum`), which supplies the sum fibre bound, the companion remainder
+fibre bound `rfns(Curv − GcurvSection − Gcd)(x) ≤ K s²·(rfns(∇²S) + rfns(∇S) + rfns(S))`, and the genuine
+cross-pairing VALUE `⟨GcurvSection + Gcd, ∇S⟩_{L²} = ‖Δ_∇S‖²_{L²} − ‖∇²S‖²_{L²}` directly. This avoids the
+discarded *fixed*-three-carrier value (the on-disk `genuineDiffCurvSection + ricTraceSection` carriers do
+not sum to the commutator defect — `PROVE_REFUTED.md`); the existential witness carries the genuine content
+soundly. Consumers transitively depend on the value datum's `sorryAx`. -/
 theorem exists_pointwiseTensorCurv_genuineFields_spectralPairing_upstream
     (g : SmoothRiemannianMetric I M) :
     ∃ Cper : ℕ → ℝ, (∀ s, 0 ≤ Cper s) ∧
@@ -923,25 +1002,17 @@ theorem exists_pointwiseTensorCurv_genuineFields_spectralPairing_upstream
   -- The pure-Riemann section grid bound at gradient order `k = 0` (sorry-free).
   obtain ⟨cg, hcg_nn, hcg⟩ :=
     exists_GcurvSection_iteratedCovGrad_grid_bound (I := I) (M := M) g
-  -- The differentiated-curvature section sum bound (sorry-free).
-  obtain ⟨Kgcd, hKgcd_nn, hKgcd⟩ :=
-    exists_genuineDiffCurvSection_fiberNormSq_bound (I := I) (M := M) g
-  -- The Ricci-trace carrier sum bound (sorry-free).
-  obtain ⟨Crc, hCrc_nn, hCrc⟩ :=
-    exists_ricTraceSection_fiberNormSq_bound (I := I) (M := M) g
-  -- The four-carrier remainder fibre bound (the genuine upstream-irreducible quantitative atom).
-  obtain ⟨Crem, hCrem_nn, hCrem⟩ :=
-    fourCarrierRemainder_fiberNormSq_bound_upstream (I := I) (M := M) g
-  refine ⟨fun s => Real.sqrt (4 * (cg s 0) ^ 2 + 4 * (Kgcd s) ^ 2 + 4 * (Crc s) ^ 2
-      + 4 * (Crem s) ^ 2), fun s => Real.sqrt_nonneg _, fun s S => ?_⟩
-  refine ⟨GcurvSection (I := I) (M := M) g s S,
-    genuineDiffCurvSection (I := I) (M := M) g s S +
-      ricTraceSection (I := I) (M := M) g s S, ?_, ?_, ?_, ?_⟩
+  -- The honest existential differentiated-curvature value datum: the gauge-glued `(∇R) S` carrier
+  -- `Gcd` with its sum bound, the companion remainder bound, and the genuine cross-pairing VALUE.
+  obtain ⟨K, hK_nn, hdatum⟩ :=
+    exists_diffCurvSection_carrier_valueDatum (I := I) (M := M) g
+  refine ⟨fun s => Real.sqrt ((cg s 0) ^ 2 + (K s) ^ 2),
+    fun s => Real.sqrt_nonneg _, fun s S => ?_⟩
+  obtain ⟨Gcd, hGcd_bound, hrem_bound, hval⟩ := hdatum s S
+  refine ⟨GcurvSection (I := I) (M := M) g s S, Gcd, ?_, ?_, ?_, ?_⟩
   · -- `Gcurv := GcurvSection`, bound by the pure-Riemann proportional grid bound at `k = 0`.
     intro x
-    have hKsq : Real.sqrt (4 * (cg s 0) ^ 2 + 4 * (Kgcd s) ^ 2 + 4 * (Crc s) ^ 2
-        + 4 * (Crem s) ^ 2) ^ 2 =
-        4 * (cg s 0) ^ 2 + 4 * (Kgcd s) ^ 2 + 4 * (Crc s) ^ 2 + 4 * (Crem s) ^ 2 := by
+    have hKsq : Real.sqrt ((cg s 0) ^ 2 + (K s) ^ 2) ^ 2 = (cg s 0) ^ 2 + (K s) ^ 2 := by
       rw [Real.sq_sqrt]; positivity
     rw [hKsq]
     have hgc0 := hcg s S 0 x
@@ -955,41 +1026,28 @@ theorem exists_pointwiseTensorCurv_genuineFields_spectralPairing_upstream
     have hfgS_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
         ((covGrad (I := I) (M := M) g 0 s S).toSection x) :=
       riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x _
-    nlinarith [hgc, hfgS_nn, sq_nonneg (cg s 0), sq_nonneg (Kgcd s), sq_nonneg (Crc s),
-      sq_nonneg (Crem s), mul_nonneg hfgS_nn (sq_nonneg (Kgcd s)),
-      mul_nonneg hfgS_nn (sq_nonneg (Crc s)), mul_nonneg hfgS_nn (sq_nonneg (Crem s))]
-  · -- `GcurvDeriv := genuineDiffCurvSection + ricTraceSection`, sum-bounded by subadditivity.
+    nlinarith [hgc, hfgS_nn, sq_nonneg (cg s 0), sq_nonneg (K s),
+      mul_nonneg hfgS_nn (sq_nonneg (K s))]
+  · -- `GcurvDeriv := Gcd`, the sum bound carried by the honest value datum.
     intro x
-    have hKsq : Real.sqrt (4 * (cg s 0) ^ 2 + 4 * (Kgcd s) ^ 2 + 4 * (Crc s) ^ 2
-        + 4 * (Crem s) ^ 2) ^ 2 =
-        4 * (cg s 0) ^ 2 + 4 * (Kgcd s) ^ 2 + 4 * (Crc s) ^ 2 + 4 * (Crem s) ^ 2 := by
+    have hKsq : Real.sqrt ((cg s 0) ^ 2 + (K s) ^ 2) ^ 2 = (cg s 0) ^ 2 + (K s) ^ 2 := by
       rw [Real.sq_sqrt]; positivity
     rw [hKsq]
-    simp only [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
+    have hgd := hGcd_bound x
     have hfgS_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
         ((covGrad (I := I) (M := M) g 0 s S).toSection x) :=
       riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x _
     have hfS_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) :=
       riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x _
-    have hsub := riemannianFiberNormSq_add_le (I := I) (M := M) g 0 (s + 1) x
-      ((genuineDiffCurvSection (I := I) (M := M) g s S).toSection x)
-      ((ricTraceSection (I := I) (M := M) g s S).toSection x)
-    have hgd := hKgcd s S x
-    have hrc := hCrc s S x
-    nlinarith [hsub, hgd, hrc, hfgS_nn, hfS_nn,
-      sq_nonneg (cg s 0), sq_nonneg (Kgcd s), sq_nonneg (Crc s), sq_nonneg (Crem s),
-      mul_nonneg (add_nonneg hfgS_nn hfS_nn) (sq_nonneg (cg s 0)),
-      mul_nonneg (add_nonneg hfgS_nn hfS_nn) (sq_nonneg (Kgcd s)),
-      mul_nonneg (add_nonneg hfgS_nn hfS_nn) (sq_nonneg (Crc s)),
-      mul_nonneg (add_nonneg hfgS_nn hfS_nn) (sq_nonneg (Crem s))]
-  · -- The remainder `Curv − Gcurv − GcurvDeriv` fibre bound, from the posited upstream atom.
+    nlinarith [hgd, hfgS_nn, hfS_nn, sq_nonneg (cg s 0), sq_nonneg (K s),
+      mul_nonneg (add_nonneg hfgS_nn hfS_nn) (sq_nonneg (cg s 0))]
+  · -- The remainder `Curv − Gcurv − GcurvDeriv = Curv − GcurvSection − Gcd` fibre bound, from the
+    -- companion remainder bound carried by the honest value datum.
     intro x
-    have hKsq : Real.sqrt (4 * (cg s 0) ^ 2 + 4 * (Kgcd s) ^ 2 + 4 * (Crc s) ^ 2
-        + 4 * (Crem s) ^ 2) ^ 2 =
-        4 * (cg s 0) ^ 2 + 4 * (Kgcd s) ^ 2 + 4 * (Crc s) ^ 2 + 4 * (Crem s) ^ 2 := by
+    have hKsq : Real.sqrt ((cg s 0) ^ 2 + (K s) ^ 2) ^ 2 = (cg s 0) ^ 2 + (K s) ^ 2 := by
       rw [Real.sq_sqrt]; positivity
     rw [hKsq]
-    have hrem := hCrem s S x
+    have hrem := hrem_bound x
     have hf2_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1 + 1) x
         ((covGrad (I := I) (M := M) g 0 (s + 1)
           (covGrad (I := I) (M := M) g 0 s S)).toSection x) :=
@@ -1004,16 +1062,13 @@ theorem exists_pointwiseTensorCurv_genuineFields_spectralPairing_upstream
             (covGrad (I := I) (M := M) g 0 s S)).toSection x) +
         riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
           ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
-        riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) := by positivity
-    -- The remainder atom is on `Curv − Gcurv − (genuineDiffCurvSection + ricTraceSection)`,
-    -- which is defeq to `Curv − Gcurv − GcurvDeriv`.
-    nlinarith [hrem, hf2_nn, hfgS_nn, hfS_nn, sq_nonneg (cg s 0), sq_nonneg (Kgcd s),
-      sq_nonneg (Crc s), sq_nonneg (Crem s), mul_nonneg hsumnn (sq_nonneg (cg s 0)),
-      mul_nonneg hsumnn (sq_nonneg (Kgcd s)), mul_nonneg hsumnn (sq_nonneg (Crc s))]
-  · -- The spectral pairing: the three concrete carriers carry the Weitzenböck value, via `(★)`
-    -- `genuineCurvFields_crossPairing_value_bochnerLeaf` and the sorry-free Weitzenböck value.
-    rw [genuineCurvFields_crossPairing_value_bochnerLeaf (I := I) (M := M) g s S]
-    exact weitzenbock_curvature_crossPairing_value (I := I) (M := M) g s S
+        riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) := by
+      have := add_nonneg (add_nonneg hf2_nn hfgS_nn) hfS_nn; linarith
+    nlinarith [hrem, hsumnn, sq_nonneg (cg s 0), sq_nonneg (K s),
+      mul_nonneg hsumnn (sq_nonneg (cg s 0))]
+  · -- The spectral pairing: the genuine carriers carry the Weitzenböck value, carried directly by
+    -- the honest value datum (no fixed-three-carrier `(★)` identity).
+    exact hval
 
 /-- **Posited upstream companion `pointwiseTensorCurv` fibre bound feeding the remainder order `(4')`
 (the order-`2` commutator-defect fibre order, homed upstream of the moving-frame spine).** For a closed
