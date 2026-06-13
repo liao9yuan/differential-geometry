@@ -5,6 +5,29 @@ planning session.  Written 2026-06-11 by the planning (Fable) session.**
 
 ---
 
+## PLANNER ACCEPTANCE — assembly Steps 1-3 (2026-06-13)
+
+ACCEPTED (own build + axioms): `exists_framePairs_diag` (1-rest),
+`framePairs_pinned` (2), `exists_tower_conv` (3) — all AXIOM-CLEAN, green
+3866 jobs. The per-chart `hpairs → all-orders tower C∞ conv on U` pipeline is
+done; the RULING held (machinery delivers `MapCInfConvOnCompacts`, no
+uniform-through-expansion lemma built). Commits f0dc74fd, fa535664, b316fea8.
+
+REMAINING = Step 4 only (metricPreconvInf still 0%/unstated). Two pieces:
+(4a) `componentConv_covDeriv_of_chartCInf` POINTWISE (per the RULING) —
+`exists_tower_conv` + `tendsto_of_cInf` at `extChartAt x₀ x` + the multilinear
+`b (I0 q)`-expansion; carrier↔`component0S … metricCovDeriv` via
+`component0S_apply`+`metricCovDeriv_eq_covDerivOfField` (both rfl).
+**SIMPLIFICATION (planner, verified):** the flagged "section-value-at-a-point
+fiddle" is a ONE-LINER — `ContMDiffSection.exists_eq_at_gen x (b (I0 q))`
+(SectionRealized.lean:204, sig `(p)(v) : ∃ σ, σ p = v`) gives `V_q` with
+`V_q x = b (I0 q)` directly; do NOT route through `exists_section_eqOn_compact`
++ chart coordinates of `b (I0 q)` (harder). (4b) `metricPreconvInf`: global
+chart-cover diagonal (`exists_chart_cover` + `exists_diag_subseq`) → one φ
+carrying tower data on every chart, then finite good-frame cover
+(`metricDerivNorm_le_compSq_uniform`, ric_bound pattern) → `hnorm` →
+`metricCInfConvOnCompacts_of_normConv`. No missing API.
+
 ## PLANNER ACCEPTANCE + RULING — assembly Step 1 (2026-06-13)
 
 ACCEPTED (own build + axioms): `exists_cInf_subseq_finiteFamily`
