@@ -169,32 +169,43 @@ The shared `χ` for the `n²` pairs comes from `exists_chart_engineInput_family`
 per pair); the per-pair limit pinning then mirrors
 `exists_engine_frameCInfConv_eq_gm`'s `tendsto_nhds_unique` against `hconv`.
 
-**DONE + verified (axiom-clean, focused check green):**
-- `exists_cInf_subseq_finiteFamily` — the finite-family `C∞`-on-compacts diagonal:
-  a finite `Finset ι` of Euclidean `ContDiff ⊤` section sequences with uniform
-  iterated-derivative bounds → ONE subsequence with every member `MapCInfConvOnCompacts`
-  (to its own limit).  Finite fold of `exists_cInf_subseq` + `comp_subseq`
-  (`Finset.induction`, `revert hΦ hbdd` first).  This is the combinatorial core of
-  Step 1's `n²`-pair diagonal.
+**DONE + verified (focused checks green; committed):**
+- `exists_cInf_subseq_finiteFamily` — finite-family `C∞`-on-compacts diagonal
+  (`Finset.induction` over `exists_cInf_subseq` + `comp_subseq`; `revert hΦ hbdd`).
+- **Step 1-rest** `exists_framePairs_diag` — `Vfam (i,j) = update (fun _ => frame i)
+  1 (frame j)`; `exists_chart_engineInput_family` (shared `χ`) →
+  `exists_cInf_subseq_finiteFamily` over `univ : Finset (Fin n × Fin n)` → one `ψ`,
+  each pair `MapCInfConvOnCompacts`-converges (to some `Φinf`).  Carrier order
+  `(gSeq ∘ φ)(ψ k) = gSeq (φ (ψ k))` matched by defeq.
+- **Step 2** `framePairs_pinned` — pins each `Φinf` to the `gInf` carrier
+  (`tendsto_of_cInf` + `hconv ∘ ψ` + continuous fibre eval + `tendsto_nhds_unique`,
+  then `funext`/rw of the limit) ⇒ `hpairs`.  KEY: `covDerivOfField_zero` is `rfl`
+  so `rw` chokes — fold it with `show (metricTensorField g) w … = …` then
+  `metricTensorField_apply` + `simp [Function.update_of_ne, Function.update_self]`.
+- **Step 3** `exists_tower_conv` — `exists_frameData` + `framePairs_pinned` +
+  `hbase_of_framePairs` + `bumpTowerCarrier_all` → all-orders `C∞` tower-carrier
+  convergence on `U = target ∩ symm⁻¹(interior K₀)` (open via
+  `(continuousOn_extChartAt_symm).isOpen_inter_preimage`; `χ = 1` on `U` from the
+  pointwise `hχ1` + `right_inv`; `extChartAt '' interior K₀ ⊆ U`).  `s = Finset.univ`.
+  `hpairs` restricted `univ → U` by `fun K hK hKU p => hpairs K hK (subset_univ K) p`.
 
-**REMAINING (precise, the rest of steps 1–4):**
-1. *(step 1 rest)* Build `Vfam (i,j) = update (fun _ => frame i) 1 (frame j)` from
-   `exists_frameData`'s frame; run `exists_chart_engineInput_family` for the shared
-   `χ` + per-member `(ContDiff, uniform bounds)`; feed into
-   `exists_cInf_subseq_finiteFamily` (over `s = univ : Finset (Fin n × Fin n)`) for
-   ONE `φ₁`, refining `φ₀` from `metricPreconv_gInf`.  Construct
-   `U = interior {χ = 1} ∩ tgt` (or `extChartAt '' (interior K₀-ish)`) with
-   `Kc = symm '' tsupport χ`, `hUKc`, `hUtarget`, `hχU`.
-2. *(pinning)* `Φinf_{ij} = χ · writtenInExtChartAt(metricTensorField gInf …)` on `U`
-   by `tendsto_of_cInf` + `hconv` + `tendsto_nhds_unique` (per pair), then
-   `MapCInfConvOnCompacts.congr` to land the gInf-carrier limit ⇒ `hpairs`.
-3. *(feed)* `fun V => hbase_of_framePairs … hpairs V` = `hbase`; apply
-   `bumpTowerCarrier_all` with `exists_frameData`'s `frame/vbasis/hframeσ/hspan`.
-4. *(extract)* `tendsto_of_cInf` (order-0) at `extChartAt x₀ x` + multilinear
-   `b (I0 q)`-expansion ⇒ pointwise `componentConv_covDeriv_of_chartCInf` (general
-   `a`, the `componentConv_covDeriv_zero` shape); then finite good-frame cover +
-   `metricDerivNorm_le_compSq_uniform` → `hnorm` →
-   `metricCInfConvOnCompacts_of_normConv` → `metricPreconvInf`.
+**REMAINING — Step 4 only (extraction + global assembly):**
+- *(per-point extract)* `componentConv_covDeriv_of_chartCInf` POINTWISE: pick chart
+  `x₀ = x`, `K₀` via `exists_compact_subset (chart-source-open) (mem_chart_source)`
+  so `x ∈ interior K₀ ⊆ K₀ ⊆ source`; `exists_tower_conv` → tower conv on `U` with
+  `extChartAt x ∈ U`; choose `V_q` (ContMDiffSection) with `V_q x = b (I0 q)` (frame
+  expansion at `x` — the one remaining fiddle: a section with a prescribed fibre
+  value at a point, via `exists_section_eqOn_compact x v_q` with `v_q = trivAt`-coord
+  of `b (I0 q)`, or `exists_contMDiffSection_eqOn_nhd`); `tendsto_of_cInf` (tower
+  conv at `a, V`) at `extChartAt x`; carrier value `= component0S b (metricCovDeriv g
+  gRef a x) I0` via `writtenInExtChartAt_real_apply` + `left_inv` + `component0S_apply`
+  (`= A (fun a => b (slots a))`, rfl) + `metricCovDeriv_eq_covDerivOfField` (rfl).
+  Produces a per-point further subsequence `ψ` (a≥1 needs the `C∞` data, unlike
+  order-0 `componentConv_covDeriv_zero`).
+- *(global)* `metricPreconvInf`: countable chart cover (`exists_chart_cover`, C1a) +
+  global diagonal (`exists_diag_subseq`) over charts keeping the tower `C∞` data →
+  ONE `φ`; then finite good-frame cover (`metricDerivNorm_le_compSq_uniform`,
+  `ric_bound` pattern) → `hnorm` → `metricCInfConvOnCompacts_of_normConv`.
 
 ~~NOTE (real subtlety for step 4)~~ — **PLANNER RULING 2026-06-13: this note is
 WRONG; do NOT carry uniformity through the multilinear expansion.**  Verified
