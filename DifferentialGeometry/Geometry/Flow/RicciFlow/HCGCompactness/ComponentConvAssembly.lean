@@ -286,5 +286,57 @@ theorem exists_tower_conv
       (Tensor0SBundle.metricTensorField (I := I) gInf) x₀ hχcd htsupp hUopen hχU hUtarget
       hUKc Finset.univ frame hspan hpairsU V) a V
 
+/-- **Step 4a — pointwise covariant-tower component convergence (general order
+`a`).**  The `a ≥ 1` analogue of `componentConv_covDeriv_zero`: along a further
+subsequence `ψ`, the order-`a` covariant-tower component in ANY fibre basis `b`
+converges at the fixed point `x`.  POINTWISE (the norm bridge's component basis is
+point-dependent, so a uniform statement is ill-typed — planner ruling).  Proof:
+chart at `x`, `exists_tower_conv`, `tendsto_of_cInf` at `extChartAt x x`; the section
+`V_q` with `V_q x = b (I0 q)` is `ContMDiffSection.exists_eq_at_gen`, and the carrier
+value equals `component0S b (metricCovDeriv g gRef a x) I0` (`component0S_apply` +
+`metricCovDeriv_eq_covDerivOfField`, both `rfl`). -/
+theorem componentConv_covDeriv_of_chartCInf
+    (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
+    (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
+      metricCovDerivNorm (I := I) q (gSeq k) gRef z ≤ C)
+    (φ : ℕ → ℕ) (gInf : SmoothRiemannianMetric I M)
+    (hconv : ∀ x : M, Filter.Tendsto (fun m => (gSeq (φ m)).inner x) Filter.atTop
+      (nhds (gInf.inner x)))
+    (a : ℕ) (x : M)
+    (b : Module.Basis (Fin (Module.finrank Real E)) Real (TangentSpace I x))
+    (I0 : Fin (a + 2) → Fin (Module.finrank Real E)) :
+    ∃ ψ : ℕ → ℕ, StrictMono ψ ∧
+      Filter.Tendsto (fun m => Tensor0SBundle.component0S (I := I) b
+          (metricCovDeriv (I := I) (gSeq (φ (ψ m))) gRef a x) I0) Filter.atTop
+        (nhds (Tensor0SBundle.component0S (I := I) b
+          (metricCovDeriv (I := I) gInf gRef a x) I0)) := by
+  classical
+  haveI : LocallyCompactSpace H := I.locallyCompactSpace
+  haveI : LocallyCompactSpace M := ChartedSpace.locallyCompactSpace H M
+  obtain ⟨K₀, hK₀cpt, hxint, hK₀src⟩ :=
+    exists_compact_subset (chartAt H x).open_source (mem_chart_source H x)
+  obtain ⟨ψ, χ, U, hψ, hUopen, hImg, hχU, htower⟩ :=
+    exists_tower_conv (I := I) gRef gSeq hbdd x hK₀cpt hK₀src φ gInf hconv
+  refine ⟨ψ, hψ, ?_⟩
+  have hxU : extChartAt I x x ∈ U := hImg ⟨x, hxint, rfl⟩
+  set V : Fin (a + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
+    fun q => (ContMDiffSection.exists_eq_at_gen (I := I) (n := (⊤ : ℕ∞)) x (b (I0 q))).choose
+    with hVdef
+  have hVval : ∀ q, V q x = b (I0 q) := fun q =>
+    (ContMDiffSection.exists_eq_at_gen (I := I) (n := (⊤ : ℕ∞)) x (b (I0 q))).choose_spec
+  have hcar : ∀ (g : SmoothRiemannianMetric I M),
+      χ (extChartAt I x x) * writtenInExtChartAt I 𝓘(Real, Real) x
+          (fun w : M => (covDerivOfField (I := I) gRef
+            (Tensor0SBundle.metricTensorField (I := I) g) a) w (fun q => V q w)) (extChartAt I x x)
+        = Tensor0SBundle.component0S (I := I) b (metricCovDeriv (I := I) g gRef a x) I0 := by
+    intro g
+    rw [hχU hxU, Pi.one_apply, one_mul, writtenInExtChartAt_real_apply,
+      (extChartAt I x).left_inv (mem_extChartAt_source x)]
+    simp only [hVval]
+    rfl
+  have htend := tendsto_of_cInf (htower a V) hxU
+  rw [hcar gInf] at htend
+  exact htend.congr (fun k => hcar (gSeq (φ (ψ k))))
+
 end HCGCompactness
 end DifferentialGeometry
