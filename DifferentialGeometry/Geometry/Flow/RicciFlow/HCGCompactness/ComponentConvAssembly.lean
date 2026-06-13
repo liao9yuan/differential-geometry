@@ -34,6 +34,7 @@ open scoped Manifold ContDiff Topology BigOperators
 open DifferentialGeometry.Integral.Connection
 open Tensor0SBundle TensorLieDeriv
 open Filter Topology
+open DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
@@ -409,6 +410,144 @@ theorem componentBz_eq_covDeriv
   refine Finset.sum_congr rfl fun j _ => ?_
   simp only [ContMDiffSection.coe_smul, Pi.smul_apply]
   rw [(hframeσ j).self_of_nhdsSet z hzKc]
+
+/-- **(4b-ii b) per-patch uniform `metricDerivNorm` convergence.**  Around any `x`, there
+is an open `W ∋ x` with compact closure `C` such that, refining any subsequence `ρ`, the
+metric derivative norms converge UNIFORMLY on `C`.  The good-frame components are the
+coordinate-frame tower carriers (`componentBz_eq_covDeriv`), which converge uniformly on
+compacts (`exists_tower_conv`); the `exists_goodFrame_compBound` reverse bound + the
+`ε' = ε/(2·Cu·(√card+1))` finite-sum estimate make `metricDerivNorm` uniformly small. -/
+theorem exists_uniform_patch
+    (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
+    (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
+      metricCovDerivNorm (I := I) q (gSeq k) gRef z ≤ C)
+    (φ₀ : ℕ → ℕ) (gInf : SmoothRiemannianMetric I M)
+    (hconv : ∀ x : M, Filter.Tendsto (fun m => (gSeq (φ₀ m)).inner x) Filter.atTop
+      (nhds (gInf.inner x)))
+    (x : M) :
+    ∃ (W C : Set M), IsOpen W ∧ x ∈ W ∧ IsCompact C ∧ W ⊆ C ∧
+      ∀ ρ : ℕ → ℕ, StrictMono ρ → ∃ ψ : ℕ → ℕ, StrictMono ψ ∧
+        ∀ (p : ℕ) (ε : Real), 0 < ε → ∃ k0 : ℕ, ∀ k : ℕ, k0 ≤ k → ∀ a : ℕ, a ≤ p →
+          ∀ z ∈ C, metricDerivNorm (I := I) a (gSeq (φ₀ (ρ (ψ k)))) gInf gRef z < ε := by
+  classical
+  haveI : LocallyCompactSpace H := I.locallyCompactSpace
+  haveI : LocallyCompactSpace M := ChartedSpace.locallyCompactSpace H M
+  obtain ⟨K₀, hK₀cpt, hxK₀int, hK₀src⟩ :=
+    exists_compact_subset (chartAt H x).open_source (mem_chart_source H x)
+  choose frame hframeσ using
+    (fun i => exists_section_eqOn_compact (I := I) x (Module.finBasis Real E i) hK₀cpt hK₀src)
+  obtain ⟨basisE, u', εgf, hu'open, hxu', hu'sub, -, -, -, -, -, hrev⟩ :=
+    exists_goodFrame_compBound (I := I) gRef x
+  obtain ⟨C, hCcpt, hxCint, hCsub⟩ :=
+    exists_compact_subset (hu'open.inter isOpen_interior) ⟨hxu', hxK₀int⟩
+  refine ⟨interior C, C, isOpen_interior, hxCint, hCcpt, interior_subset, fun ρ hρ => ?_⟩
+  have hconv' : ∀ y : M, Filter.Tendsto (fun m => (gSeq ((φ₀ ∘ ρ) m)).inner y) Filter.atTop
+      (nhds (gInf.inner y)) := fun y => (hconv y).comp hρ.tendsto_atTop
+  obtain ⟨ψ, χ, U, hψ, hUopen, hImg, hχU, htower⟩ :=
+    exists_tower_conv (I := I) gRef gSeq hbdd x hK₀cpt hK₀src (φ₀ ∘ ρ) gInf hconv'
+  refine ⟨ψ, hψ, fun p ε hε => ?_⟩
+  -- domain facts
+  have hCu' : C ⊆ u' := fun z hz => (hCsub hz).1
+  have hCK₀ : C ⊆ interior K₀ := fun z hz => (hCsub hz).2
+  have hCbase : C ⊆ (trivializationAt E (TangentSpace I : M → Type _) x).baseSet :=
+    fun z hz => hu'sub (hCu' hz)
+  have hCsrc : C ⊆ (extChartAt I x).source := by
+    rw [extChartAt_source]; exact fun z hz => hK₀src (interior_subset (hCK₀ hz))
+  have hEcC : IsCompact (extChartAt I x '' C) :=
+    hCcpt.image_of_continuousOn ((continuousOn_extChartAt (I := I) x).mono hCsrc)
+  have hEcCU : extChartAt I x '' C ⊆ U := by
+    rintro w ⟨z, hz, rfl⟩; exact hImg ⟨z, hCK₀ hz, rfl⟩
+  -- the `V^{I0}` section combo (depends on a, I0)
+  set Vfun : (a : ℕ) → (Fin (a + 2) → Fin (Module.finrank Real E)) →
+      Fin (a + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _) :=
+    fun a I0 q => ∑ j : Fin (Module.finrank Real E),
+      (Module.finBasis Real E).repr (basisE (I0 q)) j • frame j with hVfun
+  -- the carrier value at `extChartAt z` equals `component0S bz`
+  have hcarval : ∀ (a : ℕ) (I0 : Fin (a + 2) → Fin (Module.finrank Real E))
+      (g : SmoothRiemannianMetric I M) {z : M} (hz : z ∈ C),
+      χ (extChartAt I x z) * writtenInExtChartAt I 𝓘(Real, Real) x
+          (fun w : M => (covDerivOfField (I := I) gRef
+            (Tensor0SBundle.metricTensorField (I := I) g) a) w (fun q => Vfun a I0 q w))
+          (extChartAt I x z)
+        = Tensor0SBundle.component0S (I := I)
+            (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+                I 1 basisE).toBasisAt (hCbase hz)) (metricCovDeriv (I := I) g gRef a z) I0 := by
+    intro a I0 g z hz
+    rw [hχU (hEcCU ⟨z, hz, rfl⟩), Pi.one_apply, one_mul, writtenInExtChartAt_real_apply,
+      (extChartAt I x).left_inv (hCsrc hz)]
+    exact (componentBz_eq_covDeriv (I := I) gRef x basisE frame hframeσ a I0 g
+      (hCbase hz) (interior_subset (hCK₀ hz))).symm
+  -- per order `a`, a uniform threshold (vacuous for `a > p`)
+  have key : ∀ a : ℕ, ∃ k0a : ℕ, a ≤ p → ∀ k : ℕ, k0a ≤ k → ∀ z ∈ C,
+      metricDerivNorm (I := I) a (gSeq (φ₀ (ρ (ψ k)))) gInf gRef z < ε := by
+    intro a
+    by_cases ha : a ≤ p
+    · set cardI : ℕ := Fintype.card (Fin (a + 2) → Fin (Module.finrank Real E)) with hcardI
+      set Cgf : Real :=
+        ((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ (a + 2) with hCgf
+      have hcard0 : (0 : Real) ≤ (Fintype.card (Fin (Module.finrank Real E)) : Real) := Nat.cast_nonneg _
+      have hCgf1 : (1 : Real) ≤ Cgf := one_le_pow₀ (by nlinarith)
+      have hCgf0 : (0 : Real) < Cgf := lt_of_lt_of_le one_pos hCgf1
+      have hsqc : (0 : Real) ≤ Real.sqrt (cardI : Real) := Real.sqrt_nonneg _
+      have hden0 : (0 : Real) < 2 * Cgf * (Real.sqrt (cardI : Real) + 1) := by positivity
+      set ε' : Real := ε / (2 * Cgf * (Real.sqrt (cardI : Real) + 1)) with hε'
+      have hε'0 : 0 < ε' := div_pos hε hden0
+      have perI0 : ∀ I0 : Fin (a + 2) → Fin (Module.finrank Real E),
+          ∃ k0 : ℕ, ∀ k : ℕ, k0 ≤ k → ∀ z : M, ∀ hz : z ∈ C,
+            |Tensor0SBundle.component0S (I := I)
+                (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+                    I 1 basisE).toBasisAt (hCbase hz))
+                (metricDiffCovDerivAt (I := I) a (gSeq (φ₀ (ρ (ψ k)))) gInf gRef z) I0| ≤ ε' := by
+        intro I0
+        obtain ⟨k0, hk0⟩ := htower a (Vfun a I0) (extChartAt I x '' C) hEcC hEcCU 0 ε' hε'0
+        refine ⟨k0, fun k hk z hz => ?_⟩
+        have hb := hk0 k hk 0 le_rfl (extChartAt I x z) ⟨z, hz, rfl⟩
+        simp only [mapDerivNorm, norm_iteratedFDeriv_zero, Function.comp_apply,
+          Real.norm_eq_abs] at hb
+        rw [hcarval a I0 (gSeq (φ₀ (ρ (ψ k)))) hz, hcarval a I0 gInf hz] at hb
+        exact hb
+      choose k0fn hk0fn using perI0
+      refine ⟨Finset.univ.sup k0fn, fun _ k hk z hz => ?_⟩
+      rw [metricDerivNorm]
+      have hsumle : (∑ I0 : Fin (a + 2) → Fin (Module.finrank Real E),
+            Tensor0SBundle.component0S (I := I)
+              (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+                  I 1 basisE).toBasisAt (hCbase hz))
+              (metricDiffCovDerivAt (I := I) a (gSeq (φ₀ (ρ (ψ k)))) gInf gRef z) I0 ^ 2)
+          ≤ (cardI : Real) * ε' ^ 2 := by
+        calc (∑ I0 : Fin (a + 2) → Fin (Module.finrank Real E),
+              Tensor0SBundle.component0S (I := I)
+                (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+                    I 1 basisE).toBasisAt (hCbase hz))
+                (metricDiffCovDerivAt (I := I) a (gSeq (φ₀ (ρ (ψ k)))) gInf gRef z) I0 ^ 2)
+            ≤ ∑ _I0 : Fin (a + 2) → Fin (Module.finrank Real E), ε' ^ 2 :=
+              Finset.sum_le_sum (fun I0 _ => by
+                rw [← sq_abs]
+                exact pow_le_pow_left₀ (abs_nonneg _)
+                  (hk0fn I0 k (le_trans (Finset.le_sup (Finset.mem_univ I0)) hk) z hz) 2)
+          _ = (cardI : Real) * ε' ^ 2 := by
+              rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul, hcardI]
+      have hnormle : Tensor0SBundle.normSq0S (I := I) gRef z (a + 2)
+          (metricDiffCovDerivAt (I := I) a (gSeq (φ₀ (ρ (ψ k)))) gInf gRef z) ≤ Cgf * ((cardI : Real) * ε' ^ 2) :=
+        le_trans (hrev z (hCbase hz) (hCu' hz) (a + 2) _) (by gcongr)
+      have hCgfsq : Cgf ≤ Cgf ^ 2 := le_self_pow₀ hCgf1 (by norm_num)
+      have hsqCgf : Real.sqrt Cgf ≤ Cgf :=
+        (Real.sqrt_le_sqrt hCgfsq).trans_eq (Real.sqrt_sq hCgf0.le)
+      calc Real.sqrt (Tensor0SBundle.normSq0S (I := I) gRef z (a + 2) _)
+          ≤ Real.sqrt (Cgf * ((cardI : Real) * ε' ^ 2)) := Real.sqrt_le_sqrt hnormle
+        _ = Real.sqrt (Cgf * (cardI : Real)) * ε' := by
+            rw [show Cgf * ((cardI : Real) * ε' ^ 2) = Cgf * (cardI : Real) * ε' ^ 2 by ring,
+              Real.sqrt_mul (by positivity), Real.sqrt_sq hε'0.le]
+        _ ≤ Cgf * (Real.sqrt (cardI : Real) + 1) * ε' := by
+            gcongr ?_ * ε'
+            rw [Real.sqrt_mul hCgf0.le]
+            nlinarith [mul_le_mul_of_nonneg_right hsqCgf hsqc, hCgf0.le, hsqc]
+        _ = ε / 2 := by rw [hε']; field_simp
+        _ < ε := by linarith
+    · exact ⟨0, fun h => absurd h ha⟩
+  choose k0fn hk0fn using key
+  refine ⟨(Finset.range (p + 1)).sup k0fn, fun k hk a ha z hz => ?_⟩
+  exact hk0fn a ha k (le_trans (Finset.le_sup (Finset.mem_range.2 (Nat.lt_succ_of_le ha))) hk) z hz
 
 end HCGCompactness
 end DifferentialGeometry
