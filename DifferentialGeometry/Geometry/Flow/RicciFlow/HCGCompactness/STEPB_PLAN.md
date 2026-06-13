@@ -222,13 +222,15 @@ containment as `hdom`; this is not the unconditional manifold `lbl394`.
 Planner verification passed focused checks, targeted module builds, and axiom
 audit (`propext`, `Classical.choice`, `Quot.sound` only).
 
-Frontier-1 audit accepted 2026-06-13: the missing smoothness is now pinned to
-one ODE-layer theorem.  `exists_contDiffOn_flow_Cinfty` already gives fixed-box
-`C^infty` flow regularity, but it requires
-`hLsp : forall j, ContDiffOn R j (spatialPieceFn Phi)` on the same box.  For
-the geodesic chart-phase flow, that `hLsp` discharge is the foundational
-uniform-domain variational-flow smoothness brick.  No Lean proof was attempted
-in the audit; `StepBLocalMetrics.md` records the traced chain.
+Frontier-1 audit corrected 2026-06-13: the fixed-box ODE theorem is already
+proved as `IsLocalFlow.contDiffOn_top` / `IsLocalFlow.contDiffOn_top_local`
+and axiom-clean.  The finite-order `flowCkPred_all` route still has shrinking
+boxes, but the correct next frontier is chart-phase wiring: apply the local
+Hartman theorem to the geodesic chart-phase flow, package `combined_inf`, then
+push the existing off-zero bridge to forward `expMap ContMDiffAt infinity` on a
+uniform ball.  `StepBLocalMetrics.md` and
+`Analysis/ODE/Flow/HigherRegularity/VariationalMapContDiffOnK.md` record the
+correction.
 
 Target file: `StepBLocalMetrics.lean`.
 

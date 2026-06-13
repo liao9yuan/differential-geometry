@@ -66,10 +66,9 @@ directly; the slow nested-CLM synthesis under `InnerProductSpace E` needs
 application — the moment a `ContDiffOn ⊤` producer for `normalCoordMetric` lands, B-metric
 completes for a fixed `β`.
 
-### Frontier-1 root gap — FULL CHAIN TRACED (2026-06-13, frontier-1 attack)
+### Frontier-1 root gap — corrected after ODE-layer audit (2026-06-13)
 
-The `n`-dependent radius is **not** an exp-layer artifact; it traces to an undischarged
-ODE smooth-dependence input. Chain:
+The `n`-dependent radius in the old finite-order route is real:
 
 ```
 exp ContMDiffAt ⊤  ⟸  chart-flow Φ ContDiffOn ⊤ on a fixed ball
@@ -80,32 +79,27 @@ combined_nat radius  ⟸  exists_contDiffOn_flow_Cnat = flowCkPred_all n  [domai
 
 `exists_contDiffOn_flow_Cnat` (`VariationalMapContDiffOnK.lean`) is `flowCkPred_all n`, a
 strong induction (`flowCkPred_base`=C¹ Picard–Lindelöf; `flowCkPred_step` via the augmented
-flow `augVF`). `FlowCkPred n` returns an **existential** neighbourhood `U` (line 1813), and
-`flowCkPred_step`'s box `ball x₀ ρ ×ˢ Ioo (t₀-T)(t₀+T)` is built from cap/nesting data that
-depends on the augmented flow's own neighbourhood from the IH — so **the domain shrinks
-with `n`**. The flow `Φ` itself is `n`-independent; only the proven-smooth domain shrinks.
+flow `augVF`). `FlowCkPred n` returns an **existential** neighbourhood, and
+`flowCkPred_step`'s box is built from the augmented flow's own IH neighbourhood — so this
+route shrinks the domain with `n`.
 
-The **C∞-on-a-fixed-box theorem already exists**: `exists_contDiffOn_flow_Cinfty`
-(`VariationalMapContDiffOnK.lean:1956`) gives `ContDiffOn ℝ ∞ Φ U` on one fixed box — **but
-it takes the hypothesis**
-`hLsp : ∀ j, ContDiffOn ℝ j (spatialPieceFn Φ) (fixed nesting box)`
-(the spatial piece of the flow's `fderiv` = variational linear map, smooth at every order
-on ONE box). The authors' own docstring calls `hLsp` "the smooth-parameter-dependence
-content of the variational linear ODE … the sole remaining mathematical input." Grep
-confirms **`hLsp` is discharged nowhere** for any flow.
+However, the stronger fixed-box ODE theorem is already present and verified:
 
-### THE EXACT MISSING THEOREM (foundational API frontier — hard stop)
+- `IsLocalFlow.contDiffOn_top`
+  (`DifferentialGeometry/Analysis/ODE/Flow/HigherRegularity/ContDiffOnTop.lean`);
+- `IsLocalFlow.contDiffOn_top_local`
+  (`DifferentialGeometry/Analysis/ODE/Flow/HigherRegularity/ContDiffOnTopChartLocal.lean`).
 
-> For the geodesic chart-phase flow `Φ` of `chartPhaseVF`, discharge
-> `hLsp : ∀ j, ContDiffOn ℝ j (spatialPieceFn Φ)` on the **single fixed** nesting box from
-> `exists_flow_nesting_data` — i.e. a **uniform-domain** all-orders smoothness for the
-> variational/augmented flow (the existing `flowCkPred` induction gives only order-dependent
-> shrinking neighbourhoods via the `augVF` recursion).
+Planner check passed for `ContDiffOnTop.lean`, and `#print axioms` for both the global and
+local top-order flow theorems is clean (`propext`, `Classical.choice`, `Quot.sound` only).
+So the next frontier is **not** a new linear-ODE smoothness theorem.  It is the wiring
+frontier:
 
-Mathematically true (the linear variational ODEs all live over one fixed base-flow domain
-with bounded coefficients on a compact region), but it requires a genuinely new
-uniform-domain ODE smooth-dependence argument, NOT a quick lemma. Once `hLsp` is proved for
-`chartPhaseVF`, `exists_contDiffOn_flow_Cinfty` → a `combined_inf` chart-flow theorem →
-`expMap ContMDiffAt ∞` on a uniform ball → `expMapDiffeo : PartialDiffeomorph … ∞` (+ the
-`C∞` inverse function theorem for the inverse chart) → both wrappers' `hsmooth` discharge.
-`exists_contDiffOn_flow_Cinfty` is the ready consumer; `hLsp` is the one blocking input.
+1. apply `IsLocalFlow.contDiffOn_top_local` to the geodesic chart-phase flow of
+   `chartPhaseVF` on the existing nesting box;
+2. package this as the missing `combined_inf` chart-flow theorem;
+3. push through the existing off-zero bridge to obtain forward `expMap ContMDiffAt ∞` /
+   `ContDiffOn ℝ ⊤` on a uniform ball.
+
+The inverse `normalChartAt`/`expMapDiffeo : PartialDiffeomorph … ∞` upgrade remains the
+next downstream inverse-function-theorem wiring step after the forward theorem lands.
