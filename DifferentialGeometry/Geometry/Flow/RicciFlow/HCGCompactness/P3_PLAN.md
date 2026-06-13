@@ -174,7 +174,13 @@ recursion ✅ ACCEPTED (1fd3844c, c83af74f, 01ba8309, f2402e95):
 coordinate covariant-step component formula; `metricCovDeriv_succ_apply_section`,
 `metricCovDeriv_succ_component_coordFrame`, and the preferred section recursion
 `metricCovDeriv_succ_eval_smooth_slots` specialise it to the metric covariant
-tower; targeted builds green 3440/3629 jobs, axiom-clean.**
+tower; targeted builds green 3440/3629 jobs, axiom-clean.  ComponentConvTower
+foundation ✅ ACCEPTED (6cded1f2, 20f88d78, c861bc7b, ff6cf674):
+`MapCInfConvOnCompacts.congr` supplies locality; `chartRep_towerScalar_contDiffOn`
+and `bumpTowerScalar_contDiff` supply global smooth carriers; `bumpFderiv_eq_chartTowerStep`
+and `bumpTowerStep_chartConv` close the directional convergence step using the
+existing A2 `fderiv_chartRep_eq_towerStep` germ identity plus B2.  Targeted build
+green 3847 jobs, axiom-clean.**
 **File**: `MetricPreconvDiag.lean`.
 
 C0 (the abstract diagonal — design FIXED by the planner, prove as stated
@@ -287,21 +293,20 @@ and the specialization `metricDerivNorm_le_compSq` axiom-clean).  The
 constants-first seam is closed: good-frame witnesses `basisE`, `u'`, and `Cu`
 are now bound before `∀ gk gInf`, so they depend only on `gRef`, `a`, and `x`.**
 
-**NEXT FRONTIER (C-II-final-B, convergence assembly):** the two formerly missing
-producer lemmas are now closed.  The remaining theorem is the actual
+**NEXT FRONTIER (C-II-final-B, convergence assembly):** the directional analytic
+crux is now closed.  The remaining theorem is still the actual
 `componentConv_covDeriv_of_chartCInf` induction, followed by pointwise extraction,
-finite-cover `hnorm`, and `metricPreconvInf`.  Use the section-based recursion
-`metricCovDeriv_succ_eval_smooth_slots`, not the coordinate-frame recursion, as
-the main route: B0's carrier is already `g.inner w (σi w) (σj w)`, so keep a
-single subsequence `φ` and a fixed finite family of smooth sections `σ` across all
-slot tuples.  Base `a = 0` is B0/B1.  For the step, the directional
-`extDerivFun` term is converted to chart `fderiv` by the existing
-`extDerivFun_eq_fderiv_of_writtenInExtChartAt_eventuallyEq` connector and then
-uses B2; the correction terms expand the fixed `gRef` connection coefficients
-against the same section family and use `MapCInfConvOnCompacts.mulLeft`/`sum`
-plus the IH.  Do not add a hypothesis asserting covariant-tower convergence.
-The main design point is the all-slot-tuples/common-`φ` induction carrier; once
-that is in place, C-II can finish `hnorm` and assemble `metricPreconvInf`.**
+finite-cover `hnorm`, and `metricPreconvInf`; do not report it as proved until the
+theorem is stated and checked.  The smallest next lemma is the multilinear
+frame-expansion convergence from `ComponentConvTower.md`: expand an arbitrary
+section slot in the fixed local frame,
+`s_p^{slot = Σ_i c_i • frame_i} = Σ_i (chartRep c_i) · s_p^{slot = frame_i}`,
+and lift it to `MapCInfConvOnCompacts` via `mulLeft`/`sum`.  This handles both
+the leading-slot expansion in the step and the base expansion from B0 frame-pairs
+to all tuples.  After that, write the `Nat.rec` all-section-tuples carrier with
+one common `φ`; corrections are themselves lower-level carriers, so no correction
+frame expansion is needed.  Then extract pointwise component convergence and
+finish `hnorm`/`metricPreconvInf`.**
 **File**: same or split `MetricPreconvBridge.lean` if > ~900 lines.
 
 C2: component convergence ⇒ `MetricCPConvOn K hK p (gSeq∘φ) gInf gRef`

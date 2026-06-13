@@ -15,8 +15,9 @@ original `a ≥ 1` missing pieces are now DONE: derivative-closure of
 coordinate/tower covariant-step formulas (`CoordFrameStep.lean`,
 `MetricCovDerivCoordStep.lean`).  Remaining work is the `C∞` convergence
 induction assembly, pointwise extraction, finite-cover `hnorm`, and
-`metricPreconvInf`.  See "Gap A exposed" / "Gap B base case" / "Gap B remaining"
-below.**
+`metricPreconvInf`; its directional analytic step is now also proved in
+`ComponentConvTower.lean`.  See "Gap A exposed" / "Gap B base case" /
+"Gap B remaining" below.**
 
 ## C1a + C1b DONE (2026-06-12) — verified lemma inventory
 
@@ -143,26 +144,28 @@ The two pieces that previously blocked this are both resolved:
     − Σ_p Σ_k Γ^k · coordComponent0SAt (metricCovDeriv g gRef a x) (update (tail I0) p k)`.
 
 **REMAINING = the `C^∞` convergence induction assembly (`componentConv_covDeriv_of_chartCInf`)
-+ pointwise extraction + finite-cover `hnorm` + `metricPreconvInf`.**  All bridges
-needed are confirmed present; this is assembly, not new API:
-- **carrier**: induct on `a` over `MapCInfConvOnCompacts` (single `φ` from B0
-  `exists_engine_frameCInfConv`) of the chart-rep of the order-`a` component in the
-  coordinate frame centred at the target point `x₀`.
-- **base `a=0`**: B0 output, converted from the `σ = frameVec x₀` form to the
-  `coordinateFrameAt x₀` form via the germ match
-  `frameVec x₀ i =ᶠ[𝓝 x₀] coordinateFrameAt x₀ i`
-  (`tangentConstInChart_eq_coordinateFrame_eventually`).
-- **step `a→a+1`**: apply `metricCovDeriv_succ_component_coordFrame`; the directional
-  `coordDeriv0SAt` term = chart `fderiv` via the EXISTING connector
-  `extDerivFun_eq_fderiv_of_writtenInExtChartAt_eventuallyEq`
-  (`Bundle/PartialMfderiv/FixedBase.lean:199`) /
-  `extDerivFun_tangentConstAt_eq_fderiv_writtenInExtChartAt`
-  (`Geometry/Operator/LaplacianMinimum.lean:191`) ⇒ converges by **B2**; the
-  Christoffel coefficients are fixed `gRef`-smooth (`k`-independent) functions ⇒
-  **mulLeft + sum + IH**.
-- **extract**: order-0 of the C∞ tower at the point gives the pointwise
-  `Tendsto` matching `componentConv_covDeriv_zero`'s shape for general `a`.
-- then finite-cover `hnorm` (`metricDerivNorm_le_compSq_uniform`) → `metricPreconvInf`.
++ pointwise extraction + finite-cover `hnorm` + `metricPreconvInf`.**  The
+directional crux is done in `ComponentConvTower.lean`:
+- `MapCInfConvOnCompacts.congr` (locality),
+- `chartRep_towerScalar_contDiffOn` / `bumpTowerScalar_contDiff` (smooth carriers),
+- `bumpFderiv_eq_chartTowerStep` / `bumpTowerStep_chartConv` (directional step via
+  B2 + the A2 `fderiv_chartRep_eq_towerStep` germ identity).
+
+The remaining work is assembly, not a new directional API:
+- **carrier**: all section tuples `V`, one common `φ`, bump-extended chart reps of
+  `covDerivOfField gRef A0 p` evaluated on `V`.
+- **base `p=0`**: B0 frame-pair convergence, expanded to arbitrary section pairs by
+  multilinearity and `mulLeft`/`sum`.
+- **step `p→p+1`**: leading-slot frame expansion reduces arbitrary leading section
+  to chart-constant frame sections; `bumpTowerStep_chartConv` gives the tower-step
+  convergence; correction terms are themselves lower-level carriers for updated
+  section tuples, hence IH directly (no correction frame expansion).
+- **smallest next lemma**: the multilinear frame-expansion convergence
+  `s_p^{slot = Σ_i c_i • frame_i} = Σ_i (chartRep c_i) · s_p^{slot = frame_i}`
+  lifted to `MapCInfConvOnCompacts`.
+- **extract**: order-0 of the C∞ tower at the point gives the pointwise `Tendsto`
+  matching `componentConv_covDeriv_zero`'s shape for general `a`; then finite-cover
+  `hnorm` (`metricDerivNorm_le_compSq_uniform`) → `metricPreconvInf`.
 
 Do not add a hypothesis that simply asserts covariant-tower convergence.
 `fderiv_chartRep_eq_towerStep` (MetricPreconv.lean) is the scalar-on-sections germ
