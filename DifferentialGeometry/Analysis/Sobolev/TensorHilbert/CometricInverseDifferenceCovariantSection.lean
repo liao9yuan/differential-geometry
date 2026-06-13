@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricInverseDiffer
 import DifferentialGeometry.Geometry.Connection.ConnectionDifferenceFieldJets
 import DifferentialGeometry.Geometry.Operator.NormGradSq
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.CcTensorFibreCauchySchwarz
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizeSymmIteratedCovGradFiberNormBound
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseToL2Packaging
 
 /-! # The cometric inverse-difference as a covariant `(0,2)`-section and its Koszul jet tower
 
@@ -673,6 +675,248 @@ theorem riemannianFiberNormSq_cometricInverseDiffSection_order0_le
     rw [hnn]
   rw [hJsplit, hParseval]
   rw [← hnE]; exact hsum_le
+
+/-! ## Stage 4 — the clean linear arm: the realized-perturbation `L²` jet (the no-gain part)
+
+The resolvent split `cometricInverseDiffSection g₁ g₀ = −realizeSymmCcTensor g₀ T₁ − crossCometricSection
+g₁ g₀ T₁` carries a *clean linear part* `−realizeSymmCcTensor g₀ T₁`, the realized symmetric perturbation
+itself.  The symmetric realization gains no derivatives, so its order-`p` covariant gradient is controlled
+*unconditionally* (no fibre-small gate, no family hypothesis) by the `≤ p`-jet of `T₁`.  This is the
+integrated `L²` form of the pointwise no-gain fibre brick
+`exists_riemannianFiberNormSq_iteratedCovGrad_realizeSymm_le_jetSum`, obtained by integrating both sides
+against the Riemannian volume measure.  It is the inverse-Gram analog of the connection-difference
+`koszulCombSection_iteratedCovGrad_norm_sq_le` clean-linear-part brick, and the first arm consumed by the
+self-absorption assembly of the order-`p` cometric jet tower. -/
+
+set_option linter.unusedSectionVars false in
+/-- **The realized-perturbation `L²` no-gain jet bound.**  For any order `p`, the squared metric `L²`
+norm of the order-`p` covariant gradient of the realized symmetric perturbation `realizeSymmCcTensor g₀
+T₁` is dominated by the `≤ p`-jet of `T₁`:
+
+  `‖∇^p (realizeSymmCcTensor g₀ T₁)‖² ≤ C · ∑_{l ≤ p} ‖∇^l T₁‖²`,
+
+uniformly in `T₁` (no fibre-small gate).  The pointwise fibre-norm no-gain bound
+`exists_riemannianFiberNormSq_iteratedCovGrad_realizeSymm_le_jetSum` is integrated against the Riemannian
+volume measure: `‖S‖² = ∫ rfns(S)` (`tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq`,
+`SmoothCcTensor.norm_def`), the pointwise bound integrates by monotonicity
+(`integral_mono_of_nonneg`), and the right side's per-term integrals are exactly the `L²` jet norms. -/
+theorem realizeSymm_iteratedCovGrad_normSq_le_jetSum
+    (g₀ : SmoothRiemannianMetric I M) (p : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ T₁ : Integral.L2.SmoothCcTensor g₀ 0 2,
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 p
+              (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2 ≤
+          C * ∑ l ∈ Finset.range (p + 1),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2 := by
+  classical
+  obtain ⟨C, hC0, hC⟩ :=
+    PDE.RicciFlow.IntrinsicSpectral.DeTurck.exists_riemannianFiberNormSq_iteratedCovGrad_realizeSymm_le_jetSum
+      (I := I) (M := M) g₀ p
+  refine ⟨C, hC0, fun T₁ => ?_⟩
+  set μ := riemannianVolumeMeasure (I := I) (M := M) g₀ with hμ
+  -- Rewrite both `‖·‖²` as integrals of `rfns`.
+  have hnorm_sq : ∀ {s : ℕ} (S : Integral.L2.SmoothCcTensor g₀ 0 s),
+      ‖S‖ ^ 2 = ∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x (S.toSection x) ∂μ := by
+    intro s S
+    rw [Integral.L2.SmoothCcTensor.norm_def, hμ]
+    exact Integral.Connection.tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq
+      (I := I) (M := M) g₀ s S
+  rw [hnorm_sq (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 p (realizeSymmCcTensor (I := I) g₀ T₁))]
+  -- The right side as an integral of the (constant-times) summed `rfns`.
+  have hRHS_int : C * ∑ l ∈ Finset.range (p + 1),
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2 =
+      ∫ x, C * ∑ l ∈ Finset.range (p + 1),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x) ∂μ := by
+    rw [MeasureTheory.integral_const_mul, MeasureTheory.integral_finset_sum]
+    · congr 1
+      refine Finset.sum_congr rfl (fun l _ => ?_)
+      rw [hnorm_sq (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁)]
+    · intro l _
+      exact Integral.Connection.integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g₀ 0 (2 + l)
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁)
+  rw [hRHS_int]
+  -- Integrate the pointwise bound by monotonicity.
+  refine MeasureTheory.integral_mono_of_nonneg (Eventually.of_forall (fun x => ?_)) ?_
+    (Eventually.of_forall (fun x => hC T₁ x))
+  · exact riemannianFiberNormSq_nonneg _ _ _ _ _
+  · refine (MeasureTheory.integrable_finset_sum (Finset.range (p + 1)) (fun l _ => ?_)).const_mul C
+    exact Integral.Connection.integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g₀ 0 (2 + l)
+      (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁)
+
+/-! ## Stage 5 — the sharp `δ²` order-`0` cross anchor (the base case of the cross-jet brick)
+
+The cross-correction's fibre value `h(D a, b)` (`h = ccTensorBilinSymm g₀ T₁`, `D = gInvDiffRaisedEndo
+g₀ g₁`) is the `g₀`-fibre-operator contraction of `h` against the raised representative `D`, whose
+`g₀`-lowering is exactly `cometricInverseDiffSection`'s fibre `g₀(D a, b)`.  Grouping the squared fibre
+norm in a `g₀`-orthonormal frame over the trailing index `b`, the cross inner sum is the dual-frame
+squared sum `∑_b h(D a, e_b)²`, bounded *sharply* by `δ² · g₀(D a, D a)` (operator-norm, no dimension
+factor); and `g₀(D a, D a) = ∑_b g₀(D a, e_b)²` (Parseval) is exactly the `a`-slice squared sum of
+`cometricInverseDiffSection`'s frame components.  This is the inverse-Gram analog of
+`crossCorrectionSection_rfns_le_sq_loweredConnDiff` and the **base case** (order `0`) of the
+order-`p` cometric cross-jet brick. -/
+
+set_option linter.unusedSectionVars false in
+/-- **The dual-frame sharp `δ²` operator squared-sum bound** (inverse-Gram local re-derivation).  For a
+`g₀`-orthonormal frame `e` (with `g₀(e_i, e_j) = δ_{ij}` and Parseval `∑_i g₀(e_i, v)² = g₀(v, v)`), a
+symmetric `(0,2)`-fibre form `h` with `gFibreOpBound g₀ h δ`, and any tangent vector `u`:
+`∑_k (h x u (e k))² ≤ δ² · g₀(u, u)`.  The covector `h x u` is reconstructed in the frame as `P = ∑_k
+h x u (e k) • e k`, whose squared `g₀`-norm is the squared sum (Parseval), and `‖P‖²_{g₀} = h x u P ≤
+δ · √(g₀ u u) · √(‖P‖²_{g₀})`, giving the sharp `δ²` after dividing out `√(‖P‖²_{g₀})`.  This is the
+file-local copy of the (file-private) `gFibreOpBound_dualFrame_sq_sum_le`. -/
+private lemma cometricFibreOpBound_dualFrame_sq_sum_le
+    (g₀ : SmoothRiemannianMetric I M) (x : M)
+    {n : ℕ} (e : Fin n → TangentSpace I x)
+    (horth : ∀ i j : Fin n, g₀.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0)
+    (hpars : ∀ v : TangentSpace I x, ∑ i : Fin n, g₀.inner x (e i) v ^ 2 = g₀.inner x v v)
+    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) g₀ h δ) (u : TangentSpace I x) :
+    ∑ k : Fin n, (h x u (e k)) ^ 2 ≤ δ ^ 2 * g₀.inner x u u := by
+  classical
+  set Q : ℝ := ∑ k : Fin n, (h x u (e k)) ^ 2 with hQ_def
+  set P : TangentSpace I x := ∑ k : Fin n, (h x u (e k)) • e k with hP_def
+  have hhuP : h x u P = Q := by
+    rw [hP_def, map_sum]
+    simp only [map_smul, smul_eq_mul]
+    rw [hQ_def]
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    rw [sq]
+  have hcoord : ∀ k : Fin n, g₀.inner x (e k) P = h x u (e k) := by
+    intro k
+    rw [hP_def, map_sum, Finset.sum_eq_single k]
+    · rw [ContinuousLinearMap.map_smul, smul_eq_mul, horth k k, if_pos rfl, mul_one]
+    · intro l _ hl
+      rw [ContinuousLinearMap.map_smul, smul_eq_mul, horth k l, if_neg (fun he => hl he.symm),
+        mul_zero]
+    · intro hk; exact absurd (Finset.mem_univ k) hk
+  have hPP : g₀.inner x P P = Q := by
+    rw [← hpars P, hQ_def]
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    rw [hcoord k]
+  have hQnn : 0 ≤ Q := by rw [hQ_def]; exact Finset.sum_nonneg (fun k _ => sq_nonneg _)
+  have huu_nn : 0 ≤ g₀.inner x u u :=
+    DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg (I := I) (M := M) g₀ x u
+  have hbound : Q ≤ δ * Real.sqrt (g₀.inner x u u) * Real.sqrt Q := by
+    have hb := hδ x u P
+    rw [hhuP, hPP] at hb
+    calc Q = |Q| := (abs_of_nonneg hQnn).symm
+      _ ≤ δ * Real.sqrt (g₀.inner x u u) * Real.sqrt Q := hb
+  rcases eq_or_lt_of_le hQnn with hQ0 | hQpos
+  · rw [← hQ0]; positivity
+  · have hsqQ_pos : 0 < Real.sqrt Q := Real.sqrt_pos.mpr hQpos
+    have hQ_sqrt : Q = Real.sqrt Q * Real.sqrt Q := (Real.mul_self_sqrt hQnn).symm
+    have hstep : Real.sqrt Q ≤ δ * Real.sqrt (g₀.inner x u u) := by
+      have hb2 : Real.sqrt Q * Real.sqrt Q ≤ (δ * Real.sqrt (g₀.inner x u u)) * Real.sqrt Q := by
+        rw [← hQ_sqrt]; linarith [hbound]
+      exact le_of_mul_le_mul_right hb2 hsqQ_pos
+    have hsqrtuu : Real.sqrt (g₀.inner x u u) * Real.sqrt (g₀.inner x u u) = g₀.inner x u u :=
+      Real.mul_self_sqrt huu_nn
+    have hstep_nn : 0 ≤ δ * Real.sqrt (g₀.inner x u u) :=
+      le_trans (Real.sqrt_nonneg Q) hstep
+    calc Q = Real.sqrt Q * Real.sqrt Q := hQ_sqrt
+      _ ≤ (δ * Real.sqrt (g₀.inner x u u)) * (δ * Real.sqrt (g₀.inner x u u)) :=
+          mul_le_mul hstep hstep (Real.sqrt_nonneg _) hstep_nn
+      _ = δ ^ 2 * (Real.sqrt (g₀.inner x u u) * Real.sqrt (g₀.inner x u u)) := by ring
+      _ = δ ^ 2 * g₀.inner x u u := by rw [hsqrtuu]
+
+set_option linter.unusedSectionVars false in
+/-- **The extracted bilinear form of the cometric cross-correction section is the contracted
+realized perturbation.**  `ccTensorBilin g₀ (crossCometricSection g₁ g₀ T₁) x v w = ccTensorBilinSymm
+g₀ T₁ x (gInvDiffRaisedEndo g₀ g₁ x v) w`: the extracted bilinear form is the unit-evaluated `toModel`
+reading (`ccTensorBilin_apply`, `ccTensorModel`, `ccTensorMultilinear_apply`), which is the section's
+fibre value `crossCometricSection_toModel_apply`. -/
+theorem ccTensorBilin_crossCometricSection_apply (g₁ g₀ : SmoothRiemannianMetric I M)
+    (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (x : M) (v w : TangentSpace I x) :
+    ccTensorBilin (I := I) g₀ (crossCometricSection (I := I) g₁ g₀ T₁) x v w =
+      ccTensorBilinSymm (I := I) g₀ T₁ x (gInvDiffRaisedEndo (I := I) g₀ g₁ x v) w := by
+  rw [ccTensorBilin_apply, ccTensorModel, ccTensorMultilinear_apply]
+  exact crossCometricSection_toModel_apply (I := I) g₁ g₀ T₁ x v w
+
+set_option linter.unusedSectionVars false in
+/-- **The order-`0` `g₀`-fibre norm of the cometric cross-correction section as a frame sum.**  In a
+`g₀`-orthonormal tangent frame `e`, `rfns g₀ 0 2 x (crossCometricSection g₁ g₀ T₁ .toSection x) =
+∑_J (h(D e_{J 0}, e_{J 1}))²`, where `h = ccTensorBilinSymm g₀ T₁` and `D = gInvDiffRaisedEndo g₀ g₁`.
+The `riemannianFiberNormSq`-as-frame-pair-square-sum identity
+(`riemannianFiberNormSq_eq_sum_componentS_sq`, `fiberNormSqSummand_eq_component_sq`,
+`ccTensorBilin_eq_fiberNormSqComponent`) applied to the extracted bilinear form
+`ccTensorBilin_crossCometricSection_apply`. -/
+theorem riemannianFiberNormSq_crossCometricSection_frameSum
+    (g₁ g₀ : SmoothRiemannianMetric I M) (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (x : M)
+    {n : ℕ} (e : Fin n → TangentSpace I x)
+    (hrepr : ∀ S : TensorRSSpace 0 2 I x,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x S =
+        ∑ K : Fin 0 → Fin n, ∑ J : Fin 2 → Fin n,
+          fiberNormSqSummand (I := I) (M := M) g₀ x 0 2 S n e K J) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+        ((crossCometricSection (I := I) g₁ g₀ T₁).toSection x) =
+      ∑ J : Fin 2 → Fin n,
+        (ccTensorBilinSymm (I := I) g₀ T₁ x (gInvDiffRaisedEndo (I := I) g₀ g₁ x (e (J 0)))
+          (e (J 1))) ^ 2 := by
+  classical
+  rw [Integral.Connection.riemannianFiberNormSq_eq_sum_componentS_sq (I := I) (M := M) g₀ x 2 e hrepr
+    ((crossCometricSection (I := I) g₁ g₀ T₁).toSection x) (fun k : Fin 0 => k.elim0)]
+  refine Finset.sum_congr rfl (fun J _ => ?_)
+  rw [ccTensorBilin_eq_fiberNormSqComponent (I := I) g₀ (crossCometricSection (I := I) g₁ g₀ T₁) x e
+    (fun k : Fin 0 => k.elim0) J, ccTensorBilin_crossCometricSection_apply]
+
+set_option linter.unusedSectionVars false in
+/-- **The sharp `δ²` order-`0` fibre bound of the cometric cross-correction section.**  Under the
+`g₀`-fibre operator bound `gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, the intrinsic squared fibre
+norm of the cometric cross correction `crossCometricSection g₁ g₀ T₁` is dominated *sharply* — with the
+operator-norm constant `δ²`, no dimension factor — by that of the cometric inverse-difference section:
+
+  `rfns(crossCometricSection g₁ g₀ T₁)(x) ≤ δ² · rfns(cometricInverseDiffSection g₁ g₀)(x)`.
+
+This is the inverse-Gram analog of `crossCorrectionSection_rfns_le_sq_loweredConnDiff` and the **base
+case** (order `0`) of the order-`p` cometric cross-jet brick.  Proved by Parseval in a `g₀`-orthonormal
+frame: the cross component at `(a, b)` is `h(D e_a, e_b)`; grouping over `b` it is the dual-frame squared
+sum `∑_b h(u, e_b)²` (`u := D e_a`), bounded sharply by `δ² · g₀(u, u)`
+(`cometricFibreOpBound_dualFrame_sq_sum_le`); and `g₀(u, u) = ∑_b g₀(u, e_b)²` (Parseval) is exactly the
+`a`-slice squared sum of the cometric inverse-difference's frame components.
+
+**Non-vacuity.**  At `g₁ = g₀` the raised representative vanishes (`gInvDiffRaisedEndo_self`), so both
+sides are `0`; the `δ²`-arm genuinely carries the cross-correction smallness. -/
+theorem riemannianFiberNormSq_crossCometricSection_le_sq_cometricInverseDiff
+    (g₀ g₁ : SmoothRiemannianMetric I M) (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) {δ : ℝ}
+    (hδ : gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+        ((crossCometricSection (I := I) g₁ g₀ T₁).toSection x) ≤
+      δ ^ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+        ((cometricInverseDiffSection (I := I) g₁ g₀).toSection x) := by
+  classical
+  set Λ : TangentSpace I x →L[ℝ] TangentSpace I x := gInvDiffRaisedEndo (I := I) g₀ g₁ x with hΛ
+  obtain ⟨n, e, bse, hn, hbse, horth, hpars, hexpand, hrepr⟩ :=
+    Integral.Connection.tangent_orthonormalBasisS_witness (I := I) (M := M) g₀ 2 x
+  -- Frame-sum the cross side and the cometric-inverse-difference side.
+  rw [riemannianFiberNormSq_crossCometricSection_frameSum (I := I) g₁ g₀ T₁ x e hrepr,
+    riemannianFiberNormSq_cometricInverseDiffSection_frameSum (I := I) g₁ g₀ x e hrepr]
+  rw [← hΛ]
+  -- Reindex `∑_J` over `J : Fin 2 → Fin n` as `∑_a ∑_b` on both sides.
+  have hsplit : ∀ f : TangentSpace I x → TangentSpace I x → ℝ,
+      (∑ J : Fin 2 → Fin n, f (e (J 0)) (e (J 1)))
+        = ∑ a : Fin n, ∑ b : Fin n, f (e a) (e b) := by
+    intro f
+    rw [← (finTwoArrowEquiv (Fin n)).symm.sum_comp
+      (fun J : Fin 2 → Fin n => f (e (J 0)) (e (J 1)))]
+    rw [Fintype.sum_prod_type]; rfl
+  rw [hsplit (fun u v => (ccTensorBilinSymm (I := I) g₀ T₁ x (Λ u) v) ^ 2),
+    hsplit (fun u v => (g₀.inner x (Λ u) v) ^ 2)]
+  -- Distribute `δ²` over the `a`-sum, then bound each `a`-slice.
+  rw [Finset.mul_sum]
+  refine Finset.sum_le_sum (fun a _ => ?_)
+  set u : TangentSpace I x := Λ (e a) with hu_def
+  -- Cross inner sum over `b`: `∑_b h(u, e_b)² ≤ δ² · g₀(u, u)`.
+  have hcross_inner :
+      (∑ b : Fin n, (ccTensorBilinSymm (I := I) g₀ T₁ x u (e b)) ^ 2) ≤ δ ^ 2 * g₀.inner x u u :=
+    cometricFibreOpBound_dualFrame_sq_sum_le (I := I) g₀ x e horth hpars
+      (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) hδ u
+  -- Cometric-inverse-difference inner sum over `b`: `∑_b g₀(u, e_b)² = g₀(u, u)`.
+  have hcometric_inner : (∑ b : Fin n, (g₀.inner x u (e b)) ^ 2) = g₀.inner x u u := by
+    rw [← hpars u]
+    refine Finset.sum_congr rfl (fun b _ => ?_)
+    rw [g₀.symm x u (e b)]
+  rw [hcometric_inner]
+  exact hcross_inner
 
 end DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
