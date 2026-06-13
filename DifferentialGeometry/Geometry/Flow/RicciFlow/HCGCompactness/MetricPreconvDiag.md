@@ -1,9 +1,74 @@
 # MetricPreconvDiag.lean — P3 Brick C-I (countable diagonal + global limit)
 
-**Status (2026-06-12): C0 DONE + verified (focused check + targeted build green,
-`#print axioms` clean = `[propext, Classical.choice, Quot.sound]`).  C1a/C1b
-STOPPED and reported to the planner — the `gInf : SmoothRiemannianMetric`
-packaging needs a foundational bridge that does not exist (see below).**
+**Status (2026-06-12): C0 + C1a + C1b ALL DONE + verified (focused check +
+targeted build green 3848 jobs; `#print axioms metricPreconv_gInf` clean =
+`[propext, Classical.choice, Quot.sound]`).  The Brick C-G bridge
+`smoothMetric_of_localCoeff` unblocked C1a/C1b; endpoint
+`metricPreconv_gInf` constructs the limit `SmoothRiemannianMetric`.**
+
+## C1a + C1b DONE (2026-06-12) — verified lemma inventory
+
+Endpoint `metricPreconv_gInf (hne : Nonempty M) gRef gSeq (hbdd : (B_r)) (hlow :
+∃ c>0, ∀ k x v, c·gRef ≤ gSeq k) : ∃ φ, StrictMono φ ∧ ∃ gInf :
+SmoothRiemannianMetric I M, ∀ x, Tendsto (fun m => (gSeq (φ m)).inner x) atTop
+(𝓝 (gInf.inner x))`.  The chain (all axiom-clean):
+
+- `frameVec_eq_tangentConst` — `Geometry.frameVec x₀ i = tangentConstInChart x₀
+  (Module.finBasis ℝ E i)` by `rfl` (the make-or-break seam; privacy of `mdlBasis`
+  is bypassed by defeq to the public `finBasis`).
+- `exists_tendsto_clm_of_basis_eval` — finite-dim: a bilinear-form sequence
+  converges (to SOME limit) if every basis-pair matrix entry converges
+  (`LinearMap.isClosedEmbedding_of_injective` of the eval map +
+  `IsClosed.mem_of_tendsto`).  REUSABLE (Thm 3.9 too).
+- `exists_chart_cover` (C1a) — σ-compact ⇒ countable `(c k, K k)` with `K k`
+  compact ⊆ chart source, covering `M` (`exists_compact_subset` + Lindelöf
+  `elim_countable_subcover` + `Set.Countable.exists_eq_range`).
+- `exists_gm_symm_pos` — from pointwise convergence `hconv` + `hlow`: the limits
+  `gm := (hconv x).choose` are symmetric (each term is; `tendsto_nhds_unique`) and
+  positive-definite (`ge_of_tendsto` of `c·gRef ≤ gSeq k`, `gRef.pos`).
+- `exists_engine_frameConv` — engine consumption WITH the smooth limit: run
+  `exists_chart_cInfConv` on `gSeq ∘ φ` at `x₀` with `![σi, σj]` = globalized
+  `frameVec` (via `exists_section_eqOn_compact` at `finBasis i,j`); on `K₀` the
+  converged scalar is `(gSeq …).inner x (frameVec i x)(frameVec j x) → Φinf
+  (extChartAt x)`, `Φinf` `ContDiff ∞`.  `exists_refine_componentConv` is the
+  forget-`Φinf` corollary (the diagonal `hstep`).
+- `exists_frameVec_basis` — `frameVec x₀ · x` is a `Basis` of `T_x M` for `x ∈
+  baseSet` (`(finBasis).map (continuousLinearEquivAt x hx).symm`; `symmL = symm`
+  by `rfl`).
+- `exists_refine_allComponents` — finite fold of `exists_refine_componentConv`
+  over the `n²` pairs (`Finset.induction`; earlier pairs survive by
+  subsequence-stability).
+- `exists_limit_gm` — diagonal (C0) over the cover with `hstep =
+  exists_refine_allComponents`, `hsub`/`hextend` from convergence
+  subsequence/tail-stability; at each `x` combine the `n²` scalar limits into a
+  CLM limit (`exists_frameVec_basis` + `exists_tendsto_clm_of_basis_eval`) ⇒
+  `hconv`; then `exists_gm_symm_pos`.
+- `frameComp_contMDiffOn` (`hcoeff`) — per `x₀`, frame component smooth on
+  `baseSet`: locally near `z`, `exists_engine_frameConv` gives `Φinf`; the
+  component `= Φinf ∘ extChartAt` on `K₀` by `tendsto_nhds_unique` (gm = lim along
+  φ; same along φ∘ψ), smooth by `contMDiffAt_extChartAt'` +
+  `contMDiff_iff_contDiff`, lifted to `ContMDiffOn baseSet` via
+  `ContMDiffAt.congr_of_eventuallyEq` on a compact nbhd.
+- `metricPreconv_gInf` — assemble via `Geometry.smoothMetric_of_localCoeff gm
+  hsymm hpos hcoeff`; `gInf.inner = gm` ⇒ the pointwise `Tendsto` endpoint.
+
+### Lean gotchas (C1a/C1b)
+- `L∞` is NOT a valid identifier (`∞` is a notation token) → `Linf`.
+- `exists_chart_cover`/`frameComp_contMDiffOn` need `haveI : LocallyCompactSpace
+  H := I.locallyCompactSpace; … M := ChartedSpace.locallyCompactSpace H M`, and
+  `include I in` (the cover statement does not mention `I`, so the section var is
+  otherwise dropped).
+- `Filter.Eventually.self_of_nhdsSet` takes the point EXPLICITLY (`hσ.self_of_nhdsSet x hx`).
+- `[InnerProductSpace ℝ E]` on the model (the bridge's requirement, for
+  `posDef_isVonNBounded`) — declared in the section; it extends `NormedSpace`, so
+  MetricPreconv's lemmas still apply.
+
+### Endpoint note (for C-II / planner)
+`metricPreconv_gInf` delivers the POINTWISE-CLM-limit form (subsumes
+chart-component convergence).  The C2 `metricDerivNorm` bridge
+(`metricCInfConvOnCompacts_of_normConv`) wants uniform-on-compacts component
+convergence; the engine's `MapCInfConvOnCompacts` provides it but is not
+re-exposed here — that strengthening is C2's interface, not C1b's.
 
 ## C0 — `exists_diag_subseq` (DONE)
 
@@ -43,7 +108,58 @@ subsequence `∀k, … (φ k)`), `hsub := MapCInfConvOnCompacts.comp_subseq`, `h
 - `n + 1 + (j + 1)` is defeq `(n + 1 + j) + 1` (Nat succ), so the `Gf`-step at the
   shifted index closes by `show … ; rfl`-style without a `ring` rewrite.
 
-## C1a / C1b — STOPPED, planner decision required
+## C1a / C1b — RESUMED 2026-06-12 (Brick C-G `smoothMetric_of_localCoeff` unblocks)
+
+**Verified route (all seams confirmed before coding):**
+
+1. **Frame identity (rfl).** The bridge's `hcoeff` is against
+   `Geometry.frameVec x₀ i x = (trivAt x₀).symmL ℝ x (mdlBasis E i)` where
+   `mdlBasis E := Module.finBasis ℝ E` (private, but DEFEQ to the public
+   `Module.finBasis`).  `tangentConstInChart x₀ v p = (trivAt x₀).symmL 𝕜 p v`
+   (NablaOnTensors.lean:474).  So
+   `frameVec x₀ i = tangentConstInChart x₀ (Module.finBasis ℝ E i)` by `rfl`
+   (privacy blocks the NAME `mdlBasis`, not definitional unfolding; write the RHS
+   with the public `Module.finBasis ℝ E i`).  Hence the engine's section
+   globalizer `exists_section_eqOn_compact x₀ (Module.finBasis ℝ E i)` produces a
+   global `ContMDiffSection` equal to `frameVec x₀ i` near a compact.
+2. **Engine output = frameVec component.** `exists_chart_cInfConv` converges
+   `χ · writtenInExtChartAt x₀ (component)`; `writtenInExtChartAt_real_apply` gives
+   value `= component ∘ (extChartAt).symm`, and `covDerivOfField gRef A0 0 = A0`,
+   so at `y ∈ K₀` (χ=1) the converged scalar is `(gSeq k).inner y (V 0 y)(V 1 y)`.
+   Feed `V = ![frameVec x₀ i globalized, frameVec x₀ j globalized]`.
+3. **Typeclass.** The bridge needs `[InnerProductSpace ℝ E]` on the MODEL (for
+   `posDef_isVonNBounded`); MetricPreconv's lemmas need only `[NormedSpace ℝ E]`.
+   `InnerProductSpace` extends `NormedSpace`, so declaring `E` an inner-product
+   space satisfies BOTH (matches Brick C-G's own assumption — consistent down the
+   consumer chain).
+4. **`hpos` from `hlow`.** C1b takes `hlow : ∃ c, 0 < c ∧ ∀ k x v,
+   c * gRef.inner x v v ≤ (gSeq k).inner x v v` (eq 3.3 shape; cf.
+   `metric_lower_bound_of_compact`).  Then `gm x v v = lim ≥ c·gRef x v v > 0`
+   for `v ≠ 0` (gRef `.pos`).
+5. **`gm` existence (pointwise CLM limit).** Diagonal (C0) over a countable
+   (chart × n² component) cover (C1a, via `compactCovering` + finite chart
+   subcovers) gives ONE `φ` with frameVec-components converging C∞ on every cover
+   compact `Kₙ`.  At `y ∈ Kₙ` the n² components against the basis
+   `{frameVec x₀ⁿ i y}` (basis since `y ∈ baseSet`) converge ⇒ finite-dim ⇒ the
+   CLM `(gSeq(φk)).inner y` converges (`FiniteDimensional.complete`,
+   `continuous_equivFun_basis`).  Define `gm y := limUnder atTop (...)`
+   (`Tendsto.limUnder_eq`, `tendsto_nhds_limUnder`).  `Kₙ` cover `M` ⇒ defined
+   everywhere.
+6. **`hcoeff` ∀ x₀ (incl. non-cover charts) by engine re-run + limit uniqueness.**
+   For arbitrary `x₀`, globalize `frameVec x₀ i,j` on a compact `K₀ ⊆ baseSet`,
+   run `exists_chart_cInfConv` on `gSeq ∘ φ` → smooth `Φinf` + a further `ψ`.
+   `gm`-component `= Φinf ∘ extChartAt` on `K₀` by uniqueness of pointwise limits
+   (gm = lim along φ ⇒ same along φ∘ψ) ⇒ smooth on `K₀`; cover `baseSet` by such
+   `K₀` ⇒ `ContMDiffOn baseSet`.
+7. **Assemble** `smoothMetric_of_localCoeff gm hsymm hpos hcoeff` ⇒ `gInf` with
+   `gInf.inner = gm`.  Endpoint: `∃ φ, StrictMono φ ∧ ∃ gInf, [component C∞ conv]`.
+
+**Endpoint target** (C-II `metricCInfConvOnCompacts_of_normConv` consumes
+`metricDerivNorm`, and the metricDerivNorm bridge C2 is itself scaffolded): C1b
+delivers `∃ φ, StrictMono φ ∧ ∃ gInf : SmoothRiemannianMetric I M, [per-chart
+frameVec-component `MapCInfConvOnCompacts` of gSeq(φk) → gInf]`.
+
+## C1a / C1b — (historical) STOPPED note, planner decision required
 
 ### What was checked FIRST (per the prompt)
 
