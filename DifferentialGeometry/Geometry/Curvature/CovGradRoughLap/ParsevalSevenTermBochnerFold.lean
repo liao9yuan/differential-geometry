@@ -5687,6 +5687,115 @@ private lemma roughLapPureR_pairing_eq_fourTerm_frameJSum_integrated
   exact diagHessianPureR_pairing_eq_fourTerm_frameJSum (I := I) (M := M) g s S (hV a) x bse hbse
 
 set_option linter.unusedSectionVars false in
+/-- **The operator-field three-term normal form equals the genuine curvature/Hessian cross pairing `I₂`
+(the integrated second-Bianchi kernel — THE genuine open leaf of the rank-`0` Bochner kernel).**  For a
+fixed smooth Parseval frame family, the b-sum of the operator-field three-term normal form
+```
+T₃ := ∑_b ∫ [ ⟨P, ∇_{V b}(∇_{V b} S)⟩ + ⟨P, ∇_{V b} S⟩·divᵍ V_b + ⟨Φ₀(∇_{V b} S), ∇_{V b} S⟩ ],
+```
+with `P := appCc Φ₀ S = pureRGenuineDiffOp g 0 s S` the order-`0` (UNDIFFERENTIATED) moving-frame
+pure-Riemann curvature trace and `Φ₀ := curvOpField g s`, equals the genuine curvature/Hessian cross
+pairing
+```
+I₂ := ∑_a ∑_b ∫ ⟨R(V a, V b) S, ∇²_{V a, V b} S⟩
+```
+built on the genuine Hessian carrier `crossHessianCc`.
+
+**STATUS: the single GENUINE OPEN LEAF (`sorry` body).**  This is the cleanest tractable form of the
+rank-`0` Bochner kernel content (the former `genuineDiffCurv_covGrad_eq_diffCurvTrace_add_group1_direct`):
+the surrounding glue (the target `genuineDiffCurv_..._direct`, the intermediate
+`roughLapPureR_add_spectator_eq_crossPairing_emission`, and the whole downstream cascade to the public
+root) all close once this lands, by clean `linarith` over the proven upstream bricks
+`tensorL2Inner_genuineDiffCurv_covGrad_eq_neg_roughLap_pureR_sub_spectator` (`@5296`),
+`roughLapPureR_add_spectator_eq_threeTerm_aux` (`@5601`), and the proven `D`-side primitive
+`parsevalFrameSum_diffCurvTrace_doubleSum_eq_neg_group1_add_crossPairing` (`@4042`).
+
+**The genuine route (NON-circular; it must NOT transit `threeTerm_eq_crossPairing_direct`, FACT-X, or any
+downstream member).**  `P` is undifferentiated, so no second-order curvature `∇²R` is created:
+`P = ∑_i R(B_i, ·)(curry S B_i)` (`pureRGenuineDiffOp_zero_succ_toSection_unit_eval`), the `∑_i` frame
+trace is lifted to the Parseval family index `∑_a` (`parseval_family_sum_bilin_eq`), the iterated
+derivative `∇_{V b}(∇_{V b} S)` differs from the genuine Hessian `∇²_{V a, V b} S` by the Christoffel
+correction reconciled pointwise (`residue_add_crossHessian_pointwise_eq`) with the divergence-weighted
+middle term, the swap-slot curvature term is killed by the cyclic differential Bianchi
+(`nablaTensor0SCurv_cyclic_eq_zero`) and the orthonormal moving-frame skew form
+(`smoothOrthoFrame_cov_skew`, frame-summed over `a`), and the result is integrated.  FRAME-SUMMED over `a`
+AND `b` — the per-`b` precursor is REFUTED frame-variant.  Mirror of the proven `D`-side primitive
+`@4042` (the operator-field analog of its `hzero`/`hone` skeleton).  Consumers transitively depend on
+this leaf's `sorryAx`. -/
+private theorem threeTerm_eq_crossPairing_emission
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
+    (∑ b : Fin N,
+        ((∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+            (appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s) S).toSection
+            (covApplyGenCc (I := I) (M := M) g s
+              (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)) (hV b)).toSection x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
+        (∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+            (appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s) S).toSection
+            (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x *
+            DifferentialGeometry.Integral.DivergenceTheorem.divergence_g (I := I) g
+              ⟨fun y : M => V b y, hV b⟩ x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
+        (∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+            (appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)
+              (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))).toSection
+            (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)))) =
+      (∑ a : Fin N, ∑ b : Fin N,
+          ∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+              (riemannSecCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+              (crossHessianCc (I := I) (M := M) g s S (hV a) (hV b)).toSection x
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
+  sorry
+
+set_option linter.unusedSectionVars false in
+/-- **The integrated covariant second-Bianchi emission (clean glue over the genuine kernel leaf).**  For a
+fixed smooth Parseval frame family, with `P := pureRGenuineDiffOp g 0 s S` the order-`0` moving-frame
+pure-Riemann curvature trace and `Φ₀ := curvOpField g s`,
+```
+⟨Δ_∇ P, S⟩_{L²} + ⟨appCc (slotExtend Φ₀)(∇S), ∇S⟩_{L²} = I₂,
+I₂ := ∑_a ∑_b ∫ ⟨R(V a, V b) S, ∇²_{V a, V b} S⟩.
+```
+**Proof (clean glue, NON-circular).**  The operator-field three-term reduction
+`roughLapPureR_add_spectator_eq_threeTerm_aux` (`@5601`, proven) rewrites the LHS `⟨Δ_∇ P, S⟩ + spectator`
+to the three-term normal form `T₃`; the genuine kernel leaf `threeTerm_eq_crossPairing_emission`
+(`T₃ = I₂`) closes the goal.  It does NOT transit `roughLapPureR_add_spectator_eq_crossPairing_direct`,
+`threeTerm_eq_crossPairing_direct`, FACT-X, or any downstream member.  The genuine open content lives in
+the kernel leaf `threeTerm_eq_crossPairing_emission`; consumers transitively depend on its `sorryAx`. -/
+private theorem roughLapPureR_add_spectator_eq_crossPairing_emission
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
+    tensorL2Inner (I := I) (M := M) g 0 s
+          (rawTensorConnLapSmooth (I := I) g 0 s
+            (pureRGenuineDiffOp (I := I) (M := M) g 0 s S)).toFun S.toFun +
+        tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+          (appCc (I := I) (M := M) g (s + 1) (s + 1)
+            (slotExtend (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s))
+            (covGrad (I := I) (M := M) g 0 s S)).toFun
+          (covGrad (I := I) (M := M) g 0 s S).toFun =
+      (∑ a : Fin N, ∑ b : Fin N,
+          ∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+              (riemannSecCc (I := I) (M := M) g s S (hV a) (hV b)).toSection
+              (crossHessianCc (I := I) (M := M) g s S (hV a) (hV b)).toSection x
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
+  classical
+  -- `⟨Δ_∇ P, S⟩ + spectator = T₃`, the operator-field three-term normal form
+  -- (`roughLapPureR_add_spectator_eq_threeTerm_aux`, proven upstream, non-circular).
+  rw [roughLapPureR_add_spectator_eq_threeTerm_aux (I := I) (M := M) g s S V hV hPar]
+  -- The genuine engine: the b-summed three-term normal form `T₃` equals the curvature/Hessian cross
+  -- pairing `I₂`, the integrated second-Bianchi emission (frame-summed over `a` AND `b`).
+  exact threeTerm_eq_crossPairing_emission (I := I) (M := M) g s S V hV hPar
+
+set_option linter.unusedSectionVars false in
 /-- **The genuine moving-frame integrated covariant second-Bianchi emission (non-circular).**  For a fixed
 smooth Parseval frame family, the frame-free `L²` pairing of the differentiated-curvature operator-field
 section `gDCS := appCc (covGrad Φ₀) S` (the `(∇R) S` field, `Φ₀ := curvOpField g s`) against
@@ -5748,7 +5857,19 @@ private theorem genuineDiffCurv_covGrad_eq_diffCurvTrace_add_group1_direct
             ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
         bochnerFoldGroupSum (I := I) (M := M) g s S V
           (bochnerGroupElt1 (I := I) (M := M) g s S) := by
-  sorry
+  classical
+  -- `⟨gDCS, ∇S⟩ = −⟨Δ_∇ P, S⟩ − spectator` (operator-field Green IBP, `@5296`, non-circular).
+  have hIBP := tensorL2Inner_genuineDiffCurv_covGrad_eq_neg_roughLap_pureR_sub_spectator
+    (I := I) (M := M) g s S
+  -- The genuine integrated second-Bianchi emission `⟨Δ_∇ P, S⟩ + spectator = I₂`, proven DIRECTLY
+  -- (the operator-field mirror of the `D`-side `hzero`; non-circular, see the lemma below).
+  have hEmit := roughLapPureR_add_spectator_eq_crossPairing_emission
+    (I := I) (M := M) g s S V hV hPar
+  -- The proven `D`-side primitive `D = −(G₁ + I₂)` (`@4042`).
+  have hD := parsevalFrameSum_diffCurvTrace_doubleSum_eq_neg_group1_add_crossPairing
+    (I := I) (M := M) g s S V hV hPar
+  -- `⟨gDCS, ∇S⟩ = −(⟨Δ_∇ P, S⟩ + spectator) = −I₂ = D + G₁`.
+  linarith [hIBP, hEmit, hD]
 
 set_option linter.unusedSectionVars false in
 /-- **The integrated covariant second-Bianchi emission, proven DIRECTLY (the operator-field mirror of the
