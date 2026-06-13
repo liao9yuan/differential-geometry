@@ -1,8 +1,65 @@
 # MetricPreconvBridge.lean — P3 Brick C-II (SCAFFOLD MODE)
 
 **Status (2026-06-12): IMPLEMENTED + verified — focused check + targeted build
-green (3854 jobs); `#print axioms` clean = `[propext, Classical.choice,
-Quot.sound]` on all four endpoints.**
+green (3856 jobs); `#print axioms` clean = `[propext, Classical.choice,
+Quot.sound]` on all endpoints.  Brick C-II-final-A: the constants-first norm
+bridge `metricDerivNorm_le_compSq_uniform` is added (good-frame witnesses bound
+BEFORE `gk`/`gInf`); the old `metricDerivNorm_le_compSq` is now a thin
+specialization of it.  The local-to-compact `hnorm` step is NOT attempted — it
+requires higher covariant-derivative component convergence that the current
+C1b output does not supply (frontier reported below).**
+
+## C-II-final-A (2026-06-12) — constants-first norm bridge
+
+`metricDerivNorm_le_compSq_uniform (gRef) (a) (x) : ∃ basisE u' Cu, IsOpen u' ∧
+x ∈ u' ∧ u' ⊆ baseSet ∧ 1 ≤ Cu ∧ ∀ (gk gInf), ∀ z ∈ u', ∀ hz, metricDerivNorm a
+gk gInf gRef z ≤ Cu · √(∑ (component0S (toBasisAt hz) (metricCovDeriv gk gRef a z)
+− component0S … gInf)²)`.  The good-frame witnesses `basisE`/`u'`/`Cu` are chosen
+from `exists_goodFrame_compBound gRef x` (which depends only on `gRef`, `x`) BEFORE
+the `∀ gk gInf` — the P3_PLAN §5 constants-first shape required for sequence use.
+The proof is the former `metricDerivNorm_le_compSq` body verbatim, with `gk gInf`
+introduced inside the witness tuple (`fun gk gInf z hzu' hz => …`); `exists_goodFrame_compBound`'s
+reverse bound `hrev z hz hzu' (a+2) A` is applied to `A = metricDiffCovDerivAt a
+gk gInf gRef z`, valid for any `gk gInf`.  The old `metricDerivNorm_le_compSq`
+(outer `gk gInf`) is kept as a 2-line specialization corollary (no Lean
+consumers; only doc references).  Both axiom-clean.
+
+## FRONTIER (C-II-final-B, the `hnorm` derivation — NOT attempted, reported per stop condition)
+
+`metricCInfConvOnCompacts_of_normConv` consumes
+`hnorm : ∀ p K compact, ∀ ε>0, ∃ k0, ∀ k≥k0, ∀ a≤p, ∀ x∈K, metricDerivNorm a
+(gSeq k) gInf gRef x < ε`.  Via `metricDerivNorm_le_compSq_uniform`, producing
+`hnorm` reduces to: the COMPONENT DIFFERENCES `component0S (toBasisAt)
+(metricCovDeriv (gSeq k) gRef a z) − component0S … gInf` → 0, uniform on a finite
+good-frame cover of `K`, for ALL `a ≤ p`.  TWO gaps block this:
+
+- **Gap A (exposure + uniformity).**  C1b's endpoint `metricPreconv_gInf`
+  (MetricPreconvDiag.lean:490) exposes ONLY order-0, POINTWISE CLM convergence:
+  `∀ x, Tendsto (fun m => (gSeq (φ m)).inner x) atTop (𝓝 (gInf.inner x))`.  The AA
+  engine `exists_chart_cInfConv` internally has `MapCInfConvOnCompacts` (C^∞ on
+  compacts) of the ORDER-0 component chart functions, but C1b discards it.  Re-
+  exposing it is C1b/MetricPreconvDiag's job (off-limits to this brick).
+
+- **Gap B (covariant order, the real missing theorem).**  Even with the engine's
+  C^∞ order-0 chart-component convergence, NOTHING turns it into convergence of
+  the COVARIANT-TOWER components `component0S (metricCovDeriv (gSeq k) gRef a)` for
+  `a ≥ 1`.  `metricCovDeriv g gRef a` is the a-th covariant derivative w.r.t. the
+  FIXED gRef connection; its frame components are a fixed (gRef-Christoffel)
+  polynomial in the coordinate derivatives ≤ a of the order-0 g components.  The
+  bridge "C^∞ order-0 chart-component convergence ⇒ covariant-tower component
+  convergence" — the convergence-level inverse of Brick A2's coordinate→covariant
+  tower expansion — DOES NOT EXIST.  `exists_chart_cInfConv` produces
+  `covDerivOfField gRef (metricTensorField (gSeq (φ k))) 0` (order 0) only; higher
+  orders are in the `hbdd` HYPOTHESIS, never the conclusion.
+
+  **Smallest next lemma to unblock**: a `componentConv_covDeriv_of_chartCInf`
+  bridge — from the engine's C^∞-on-compacts order-0 chart-component convergence
+  (Gap A, re-exposed by C1b) and the fixed gRef connection data, derive
+  `∀ a ≤ p, component0S (metricCovDeriv (gSeq k) gRef a) → component0S
+  (metricCovDeriv gInf gRef a)` uniformly on each good-frame patch.  This is a
+  covariant↔coordinate component expansion at the convergence level; it belongs
+  with A2/C1b, not in this C-II file.  Until it exists, the finite-cover `hnorm`
+  step has no input to consume.
 
 Scaffold mode per `P3_PLAN.md` PLANNER RULING 2: the limit metric `gInf` is a
 HYPOTHESIS (its construction is the foundational brick C-G); C-II's endpoints are
@@ -117,12 +174,15 @@ P3 assembly fits once C-G + C1b land.
 - `StrictMono.le_apply : k ≤ ψ k` (implicit index) for the `hsub` reindex.
 
 ## Progress (honest, nested)
-- C-II scaffold: **complete + verified** (4 endpoints, axiom-clean).  The genuine
-  norm-bridge content (`metricDerivNorm_le_compSq`) + the spatial endpoint + the
-  dense-time wiring + the verified compose with `windowPreconv`.
+- C-II scaffold: **complete + verified** (5 endpoints incl. the constants-first
+  `metricDerivNorm_le_compSq_uniform`, axiom-clean).  Norm-bridge content + spatial
+  endpoint + dense-time wiring + verified compose with `windowPreconv`.
 - P3 (metric preconvergence → `SourceMetricCPConvOnWindow`): A1✅ A2✅ B✅ D✅
-  C0✅ C-II✅(scaffold).  REMAINING: C-G (gInf gate) + C1a/C1b (atlas + finite
-  good-frame cover discharging C-II's hypotheses).  P3 ≈ 65% (the analytic engine
-  is done; the foundational gInf gate + cover plumbing remain).
-- Lemma 3.11 / Thm 3.10 input: P1✅ P2✅ P3 in progress → ≈ 75% when P3 lands.
-- Whole HCG compactness project (MSM135 Ch3 + Ch4): ≈ 35–40%.
+  C0✅ C-G✅ C1a/C1b✅ (`metricPreconv_gInf`, 5656ee51) C-II-final-A✅ (constants-
+  first norm bridge).  REMAINING: the `hnorm` derivation (C-II-final-B) — blocked
+  on Gap A (C1b re-exposing the engine's C^∞-on-compacts order-0 convergence) +
+  Gap B (the covariant↔coordinate component-convergence bridge for orders a ≥ 1,
+  `componentConv_covDeriv_of_chartCInf`).  Then `metricPreconvInf` assembles.
+  P3 ≈ 72%.
+- Lemma 3.11 / Thm 3.10 input: P1✅ P2 ~85% P3 ~72% → ≈ 63%.
+- Whole HCG compactness project (MSM135 Ch3 + Ch4): ≈ 26% theorem-weighted.

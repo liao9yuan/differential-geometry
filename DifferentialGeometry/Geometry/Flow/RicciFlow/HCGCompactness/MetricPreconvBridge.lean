@@ -73,12 +73,13 @@ per-metric frame components.
 `metricDiffCovDerivAt`, so the difference-tower's frame components are the
 difference of each metric's frame components — the form C1b feeds after extracting
 per-metric component convergence from the Arzelà–Ascoli engine. -/
-theorem metricDerivNorm_le_compSq
-    (gRef gk gInf : SmoothRiemannianMetric I M) (a : ℕ) (x : M) :
+theorem metricDerivNorm_le_compSq_uniform
+    (gRef : SmoothRiemannianMetric I M) (a : ℕ) (x : M) :
     ∃ (basisE : Module.Basis (Fin (Module.finrank Real E)) Real E)
       (u' : Set M) (Cu : Real),
       IsOpen u' ∧ x ∈ u' ∧
       u' ⊆ (trivializationAt E (TangentSpace I : M → Type _) x).baseSet ∧ 1 ≤ Cu ∧
+      ∀ (gk gInf : SmoothRiemannianMetric I M),
       ∀ z ∈ u', ∀ hz : z ∈ (trivializationAt E (TangentSpace I : M → Type _) x).baseSet,
         metricDerivNorm (I := I) a gk gInf gRef z ≤
           Cu * Real.sqrt (∑ I0 : Fin (a + 2) → Fin (Module.finrank Real E),
@@ -92,7 +93,7 @@ theorem metricDerivNorm_le_compSq
   obtain ⟨basisE, u', ε, hopen, hxu', hsub, hε0, hnε, hgram, hONx, hfwd, hrev⟩ :=
     exists_goodFrame_compBound (I := I) gRef x
   refine ⟨basisE, u', ((3 / 2) * ((Fintype.card (Fin (Module.finrank Real E)) : Real) + 1)) ^ (a + 2),
-    hopen, hxu', hsub, ?_, fun z hzu' hz => ?_⟩
+    hopen, hxu', hsub, ?_, fun gk gInf z hzu' hz => ?_⟩
   · -- 1 ≤ Cu
     have hcard : (0 : Real) ≤ (Fintype.card (Fin (Module.finrank Real E)) : Real) :=
       Nat.cast_nonneg _
@@ -152,6 +153,29 @@ theorem metricDerivNorm_le_compSq
               (Tensor0SBundle.component0S (I := I) bz (metricCovDeriv (I := I) gk gRef a z) I0
                 - Tensor0SBundle.component0S (I := I) bz (metricCovDeriv (I := I) gInf gRef a z) I0) ^ 2) := by
           rw [hsumeq]
+
+/-- The pre-constants-first binder order (good-frame data bound after `gk`/`gInf`),
+as a specialization of `metricDerivNorm_le_compSq_uniform`.  Prefer the `_uniform`
+form for any sequence-level use: there the good-frame witnesses depend only on
+`gRef`, `a`, `x` (chosen before `gk`/`gInf`). -/
+theorem metricDerivNorm_le_compSq
+    (gRef gk gInf : SmoothRiemannianMetric I M) (a : ℕ) (x : M) :
+    ∃ (basisE : Module.Basis (Fin (Module.finrank Real E)) Real E)
+      (u' : Set M) (Cu : Real),
+      IsOpen u' ∧ x ∈ u' ∧
+      u' ⊆ (trivializationAt E (TangentSpace I : M → Type _) x).baseSet ∧ 1 ≤ Cu ∧
+      ∀ z ∈ u', ∀ hz : z ∈ (trivializationAt E (TangentSpace I : M → Type _) x).baseSet,
+        metricDerivNorm (I := I) a gk gInf gRef z ≤
+          Cu * Real.sqrt (∑ I0 : Fin (a + 2) → Fin (Module.finrank Real E),
+            (Tensor0SBundle.component0S (I := I)
+                (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+                    I 1 basisE).toBasisAt hz) (metricCovDeriv (I := I) gk gRef a z) I0
+              - Tensor0SBundle.component0S (I := I)
+                (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+                    I 1 basisE).toBasisAt hz) (metricCovDeriv (I := I) gInf gRef a z) I0) ^ 2) := by
+  obtain ⟨basisE, u', Cu, hopen, hxu', hsub, hCu, h⟩ :=
+    metricDerivNorm_le_compSq_uniform (I := I) gRef a x
+  exact ⟨basisE, u', Cu, hopen, hxu', hsub, hCu, fun z hzu' hz => h gk gInf z hzu' hz⟩
 
 /-- **C2 — the spatial P3 endpoint (scaffolded).**  Uniform-on-compacts pointwise
 `metricDerivNorm` convergence of `gSeq` to a GIVEN limit `gInf` upgrades to
