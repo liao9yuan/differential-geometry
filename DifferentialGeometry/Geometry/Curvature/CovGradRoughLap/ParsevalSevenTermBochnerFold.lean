@@ -5379,6 +5379,58 @@ private lemma roughLapPureR_pairing_eq_secondCovDeriv_frameSum
   exact MeasureTheory.integral_finset_sum Finset.univ (fun a _ => hint a)
 
 set_option linter.unusedSectionVars false in
+/-- **The second covariant gradient of the curvature-trace operator-field action, in operator-field
+four-term Leibniz normal form.**  For `Φ₀ := curvOpField g s` and a smooth compactly-supported
+`(0, s)`-tensor `S`, the second covariant gradient `∇²(appCc Φ₀ S) = covGrad g 0 (s + 1)(covGrad g 0 s
+(appCc Φ₀ S))` of the operator-field action splits, by two applications of the operator-field covariant
+product rule (`covGrad_appCc_eq`, the B-rule) interleaved with `covGrad`-additivity (`covGrad_add`), into
+the four operator-field carriers
+```
+∇²(appCc Φ₀ S)
+  = appCc (∇²Φ₀) S                              -- T₁ the differentiated-curvature term
+    + appCc (slotExtend (∇Φ₀)) (∇S)             -- T₂
+    + appCc (∇(slotExtend Φ₀)) (∇S)             -- T₃  (the two passenger cross terms)
+    + appCc (slotExtend (slotExtend Φ₀)) (∇²S), -- T₄ the genuine-Hessian passenger term
+```
+where `∇²Φ₀ = covGrad g r (r + 1)(covGrad g r r Φ₀)` (`r := s + 0`) carries the second covariant
+derivative of the curvature operator field, `∇S = covGrad g 0 r S`, and `∇²S = covGrad g 0 (r + 1)
+(covGrad g 0 r S)`.  This is the operator-field engine of the integrated second-Bianchi emission: the
+diagonal Hessian `∇²_{V a, V a}(appCc Φ₀ S)` read in the leaf is the two-slot value read of this normal
+form (`tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal`); the leading T₁ term carries the
+differentiated curvature `(∇R) S`, T₂ + T₃ the curvature/`∇S` cross action, and T₄ the genuine Hessian
+`∇²S` passenger.  No pointwise per-frame moving-frame curvature jet is transited; the expansion is purely
+the section-level operator-field product rule. -/
+private lemma covGrad_covGrad_appCc_curvOpField_eq_fourTerm
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
+    covGrad (I := I) (M := M) g 0 (s + 0 + 1)
+        (covGrad (I := I) (M := M) g 0 (s + 0)
+          (appCc (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s) S)) =
+      appCc (I := I) (M := M) g (s + 0) (s + 0 + 1 + 1)
+          (covGrad (I := I) (M := M) g (s + 0) (s + 0 + 1)
+            (covGrad (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s))) S +
+      appCc (I := I) (M := M) g (s + 0 + 1) (s + 0 + 1 + 1)
+          (slotExtend (I := I) (M := M) g (s + 0) (s + 0 + 1)
+            (covGrad (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s)))
+          (covGrad (I := I) (M := M) g 0 (s + 0) S) +
+      ( appCc (I := I) (M := M) g (s + 0 + 1) (s + 0 + 1 + 1)
+            (covGrad (I := I) (M := M) g (s + 0 + 1) (s + 0 + 1)
+              (slotExtend (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s)))
+            (covGrad (I := I) (M := M) g 0 (s + 0) S) +
+        appCc (I := I) (M := M) g (s + 0 + 1 + 1) (s + 0 + 1 + 1)
+            (slotExtend (I := I) (M := M) g (s + 0 + 1) (s + 0 + 1)
+              (slotExtend (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s)))
+            (covGrad (I := I) (M := M) g 0 (s + 0 + 1)
+              (covGrad (I := I) (M := M) g 0 (s + 0) S)) ) := by
+  classical
+  rw [covGrad_appCc_eq (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s) S]
+  rw [covGrad_add]
+  rw [covGrad_appCc_eq (I := I) (M := M) g (s + 0) (s + 0 + 1)
+    (covGrad (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s)) S]
+  rw [covGrad_appCc_eq (I := I) (M := M) g (s + 0 + 1) (s + 0 + 1)
+    (slotExtend (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s))
+    (covGrad (I := I) (M := M) g 0 (s + 0) S)]
+
+set_option linter.unusedSectionVars false in
 /-- **The integrated covariant second-Bianchi emission: the rough-Laplacian-of-curvature-trace pairing
 plus the spectator action equals the genuine curvature/Hessian cross pairing `I₂`.**  For a fixed smooth
 Parseval frame family, with `P := pureRGenuineDiffOp g 0 s S` the order-`0` moving-frame pure-Riemann
