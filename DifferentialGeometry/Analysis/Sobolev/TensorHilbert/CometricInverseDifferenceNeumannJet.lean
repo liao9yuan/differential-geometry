@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricInverseDifferenceCovariantSection
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricCrossContractionCalculus
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizeSymmIteratedCovGradFiberNormBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricKeystoneTopPassenger
 
 /-! # The family-uniform cometric inverse-difference covariant Neumann jet
 
@@ -111,6 +112,7 @@ private lemma iteratedCovGrad_normSq_sub_le (g₀ : SmoothRiemannianMetric I M) 
 /-! ## The `δ`-coupled cross-jet brick (the one posited child) -/
 
 set_option linter.unusedSectionVars false in
+set_option linter.unusedVariables false in
 /-- **(POSITED CHILD — the `δ`-coupled cometric cross-correction covariant jet brick, the
 operator-reconciliation + binomial telescope under cometric trace annihilation.)**
 
@@ -162,8 +164,136 @@ theorem cometricCrossSection_iteratedCovGrad_rfns_le
           δ * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 p
               (cometricInverseDiffSection (I := I) g₁ g₀)‖ ^ 2
           + Ccross * ∑ l ∈ Finset.range (p + 1 + 1),
-              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2 :=
-  sorry
+              ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2 := by
+  classical
+  -- Strong induction on `p`: the grid (`cometricCrossSection_iteratedCovGrad_grid_le`) carries the
+  -- lower-order `∑_{q<p} ‖∇^q cometricInverseDiff‖²` term; the IH (at orders `q < p`) folds each lower
+  -- jet `‖∇^q cometricInverseDiff‖²` into the `T₁`-jets through the resolvent `(1 − 2δ)` self-absorption,
+  -- producing the posited no-lower-jet shape.
+  induction p using Nat.strong_induction_on with
+  | _ p ih =>
+    have hden : (0 : ℝ) < 1 - 2 * δ := by linarith
+    -- The grid (lower-`D` shape) at order `p`.
+    obtain ⟨Cg, hCg0, hCg⟩ :=
+      Integral.Connection.cometricCrossSection_iteratedCovGrad_grid_le (I := I) g₀ p δ hδ0 hδ1
+    -- The realized-perturbation clean-linear `L²` jet at each order `q ≤ p`.
+    have hrz : ∀ q : ℕ, ∃ Crz : ℝ, 0 ≤ Crz ∧ ∀ T : Integral.L2.SmoothCcTensor g₀ 0 2,
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 q (realizeSymmCcTensor (I := I) g₀ T)‖ ^ 2 ≤
+          Crz * ∑ l ∈ Finset.range (q + 1),
+            ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T‖ ^ 2 :=
+      fun q => realizeSymm_iteratedCovGrad_normSq_le_jetSum (I := I) g₀ q
+    -- The IH (at orders `q < p`), packaged with its constant.
+    have hih : ∀ q ∈ Finset.range p, ∃ Cq : ℝ, 0 ≤ Cq ∧
+        ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+          (∀ (y : M) (v w : TangentSpace I y),
+            g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
+          gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (q + 3 + a) T₁‖ ≤ B →
+          ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 q
+                (crossCometricSection (I := I) g₁ g₀ T₁)‖ ^ 2 ≤
+            δ * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 q
+                (cometricInverseDiffSection (I := I) g₁ g₀)‖ ^ 2
+            + Cq * ∑ l ∈ Finset.range (q + 1 + 1),
+                ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2 :=
+      fun q hq => ih q (Finset.mem_range.mp hq)
+    choose! Cq hCq0 hCq using hih
+    -- Per lower order `q < p`, the resolvent `(1 − 2δ)` self-absorption gives
+    -- `‖∇^q cometricInverseDiff‖² ≤ Dq · ∑_{l ≤ q+1} ‖∇^l T₁‖²` (the headline at order `q`, from the IH).
+    choose Crz hCrz0 hCrz using hrz
+    -- The fold constant `Dq := (2·Crz q + 2·Cq q)/(1 − 2δ)`.
+    set Dq : ℕ → ℝ := fun q => (2 * Crz q + 2 * Cq q) / (1 - 2 * δ) with hDqd
+    have hDq0 : ∀ q ∈ Finset.range p, 0 ≤ Dq q := fun q hq => by
+      rw [hDqd]
+      exact div_nonneg (by linarith [hCrz0 q, hCq0 q hq]) hden.le
+    have hSumDq0 : 0 ≤ ∑ q ∈ Finset.range p, Dq q := Finset.sum_nonneg hDq0
+    refine ⟨Cg + Cg * (∑ q ∈ Finset.range p, Dq q),
+      by have h1 := mul_nonneg hCg0 hSumDq0; linarith [hCg0], ?_⟩
+    intro T₁ g₁ hr hfib hball
+    set S := ∑ l ∈ Finset.range (p + 1 + 1),
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2 with hSdef
+    have hSnn : 0 ≤ S := Finset.sum_nonneg fun l _ => by positivity
+    -- Monotone window fold `∑_{l ≤ q+1} ≤ S` for `q < p`.
+    have hSwin : ∀ q : ℕ, q < p → (∑ l ∈ Finset.range (q + 1 + 1),
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2) ≤ S := by
+      intro q hq
+      rw [hSdef]
+      exact Finset.sum_le_sum_of_subset_of_nonneg
+        (Finset.range_subset_range.2 (by omega)) (fun l _ _ => by positivity)
+    -- The lower-`q` `D`-jet bound, derived from the IH `@166`-at-`q` + resolvent self-absorption.
+    have hDjet : ∀ q : ℕ, q < p →
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 q
+            (cometricInverseDiffSection (I := I) g₁ g₀)‖ ^ 2 ≤ Dq q * S := by
+      intro q hq
+      have hballq : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+          (q + 3 + a) T₁‖ ≤ B :=
+        le_trans (toHs_norm_mono (I := I) (M := M) g₀ (by omega : q + 3 + a ≤ p + 3 + a) T₁) hball
+      set Lq := ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 q
+        (cometricInverseDiffSection (I := I) g₁ g₀)‖ ^ 2 with hLqd
+      set Rzq := ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 q
+        (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2 with hRzqd
+      set Crq := ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 q
+        (crossCometricSection (I := I) g₁ g₀ T₁)‖ ^ 2 with hCrqd
+      set Sq := ∑ l ∈ Finset.range (q + 1 + 1),
+        ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁‖ ^ 2 with hSqd
+      have hSqnn : 0 ≤ Sq := Finset.sum_nonneg fun l _ => by positivity
+      have hLqnn : 0 ≤ Lq := by rw [hLqd]; positivity
+      -- The resolvent split under `∇^q`: `Lq ≤ 2 Rzq + 2 Crq`.
+      have hsplit : cometricInverseDiffSection (I := I) g₁ g₀ =
+          (-realizeSymmCcTensor (I := I) g₀ T₁) - crossCometricSection (I := I) g₁ g₀ T₁ :=
+        cometricInverseDiffSection_eq_neg_realizeSymm_sub_cross (I := I) g₁ g₀ T₁ hr
+      have hsub : Lq ≤ 2 * Rzq + 2 * Crq := by
+        rw [hLqd, hsplit]
+        have hle := iteratedCovGrad_normSq_sub_le (I := I) g₀ 2 q
+          (-realizeSymmCcTensor (I := I) g₀ T₁) (crossCometricSection (I := I) g₁ g₀ T₁)
+        have hneg : ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 q
+              (-realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2 = Rzq := by
+          rw [show (-realizeSymmCcTensor (I := I) g₀ T₁)
+              = ((-1 : ℝ)) • realizeSymmCcTensor (I := I) g₀ T₁ from by rw [neg_one_smul]]
+          rw [iteratedCovGrad_normSq_smul, hRzqd]; norm_num
+        rw [hneg, ← hCrqd] at hle
+        exact hle
+      -- The clean-linear arm (window `q+1` ⊆ `q+1+1`) and the IH cross brick.
+      have hRzq_le : Rzq ≤ Crz q * Sq := by
+        refine le_trans (hCrz q T₁) (mul_le_mul_of_nonneg_left ?_ (hCrz0 q))
+        rw [hSqd]
+        exact Finset.sum_le_sum_of_subset_of_nonneg
+          (Finset.range_subset_range.2 (by omega)) (fun l _ _ => by positivity)
+      have hCrq_le : Crq ≤ δ * Lq + Cq q * Sq :=
+        hCq q (Finset.mem_range.mpr hq) T₁ g₁ hr hfib hballq
+      -- Close: `(1 − 2δ) Lq ≤ (2 Crz q + 2 Cq q) Sq ≤ (2 Crz q + 2 Cq q) S`.
+      have hCq0q : 0 ≤ Cq q := hCq0 q (Finset.mem_range.mpr hq)
+      have hkey : (1 - 2 * δ) * Lq ≤ (2 * Crz q + 2 * Cq q) * Sq := by
+        nlinarith [hsub, hRzq_le, hCrq_le, hSqnn, hLqnn, hCrz0 q, hCq0q]
+      have hSqS : Sq ≤ S := hSwin q hq
+      have hCsum_nn : 0 ≤ 2 * Crz q + 2 * Cq q := by linarith [hCrz0 q, hCq0q]
+      have hkey2 : (1 - 2 * δ) * Lq ≤ (2 * Crz q + 2 * Cq q) * S :=
+        le_trans hkey (mul_le_mul_of_nonneg_left hSqS hCsum_nn)
+      rw [hLqd] at hkey2 ⊢
+      rw [hDqd, div_mul_eq_mul_div, le_div_iff₀ hden]
+      nlinarith [hkey2]
+    -- The grid at order `p`, then fold the lower-`D` term via `hDjet`.
+    set Lp := ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 p
+      (cometricInverseDiffSection (I := I) g₁ g₀)‖ ^ 2 with hLpd
+    set SlowD := ∑ q ∈ Finset.range p,
+      ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 q
+        (cometricInverseDiffSection (I := I) g₁ g₀)‖ ^ 2 with hSlowDd
+    have hgrid := hCg T₁ g₁ hr hfib
+    -- Fold `SlowD ≤ (∑_{q<p} Dq q) · S`.
+    have hSlowD_fold : SlowD ≤ (∑ q ∈ Finset.range p, Dq q) * S := by
+      rw [hSlowDd, Finset.sum_mul]
+      refine Finset.sum_le_sum fun q hq => ?_
+      exact hDjet q (Finset.mem_range.mp hq)
+    have hLpnn : 0 ≤ Lp := by rw [hLpd]; positivity
+    calc ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 p
+            (crossCometricSection (I := I) g₁ g₀ T₁)‖ ^ 2
+        ≤ δ * Lp + Cg * (SlowD + S) := hgrid
+      _ ≤ δ * Lp + Cg * ((∑ q ∈ Finset.range p, Dq q) * S + S) := by
+          have : Cg * (SlowD + S) ≤ Cg * ((∑ q ∈ Finset.range p, Dq q) * S + S) :=
+            mul_le_mul_of_nonneg_left (by linarith [hSlowD_fold]) hCg0
+          linarith
+      _ = δ * ‖PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 p
+            (cometricInverseDiffSection (I := I) g₁ g₀)‖ ^ 2
+          + (Cg + Cg * (∑ q ∈ Finset.range p, Dq q)) * S := by rw [hLpd]; ring
 
 /-! ## The headline — the family-uniform cometric inverse-difference covariant Neumann jet -/
 
