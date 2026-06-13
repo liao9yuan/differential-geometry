@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.HomFieldActionIterat
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseToL2Packaging
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizeSymmIteratedCovGradFiberNormBound
 
 /-! # The cometric inverse-difference applied section and its covariant-gradient jet tower
 
@@ -204,6 +205,99 @@ theorem exists_riemannianFiberNormSq_iteratedCovGrad_gInvDiffAppliedSection_wind
   intro X k x
   rw [gInvDiffAppliedSection_eq_appFullSec]
   exact hcc X k x
+
+/-! ## The fixed-`g₁` all-order jet bound against the realization-generator carrier -/
+
+set_option linter.unusedSectionVars false in
+/-- **The all-order covariant-gradient jet bound of the cometric inverse-difference applied section on
+the realized perturbation, at a fixed perturbed metric — against the `T₁`-jet carrier.**  For a closed
+Riemannian manifold `(M, g₀)` and a fixed second metric `g₁`, there is a single nonnegative constant
+family `cc : ℕ → ℝ` such that, for every realization generator `T₁` (a fixed `(0, 2)` perturbation), every
+order `k`, every point `x`, the order-`k` covariant gradient of the cometric inverse-difference multiplier
+applied to the *realized symmetric perturbation* `realizeSymmCcTensor g₀ T₁` is dominated by the
+`≤ k`-jet of the generator `T₁`:
+
+  `rfns(∇^k (gInvDiffAppliedSection g₀ g₁ (realizeSymm T₁)) .toSection x) ≤ cc k · ∑_{l ≤ k} rfns(∇^l T₁ .toSection x)`.
+
+This is the **carrier conversion** consumed on the `X`-side by the Lie / segment-metric jet engines: the
+window bound `exists_riemannianFiberNormSq_iteratedCovGrad_gInvDiffAppliedSection_window_le` (placing the
+fixed-coefficient covariant Leibniz grid on the contracted section `X`) is composed with the metric-
+realization map's no-derivative-gain `rfns` jet bound
+`exists_riemannianFiberNormSq_iteratedCovGrad_realizeSymm_le_jetSum`
+(`RealizeSymmIteratedCovGradFiberNormBound.lean`), which dominates each `≤ k`-jet of the *realized* section
+`realizeSymm T₁` by the `≤ k`-jet of the *generator* `T₁` — the single high derivative landing on the
+perturbation factor.  The combined constant is `cc k · (∑_{i ≤ k} Cᵢ)` where `Cᵢ` is the order-`i`
+realization no-gain constant.
+
+For the **fixed** coefficient `g₁` this is complete and proved outright; the family-uniform refinement —
+the constant controlled by the generator `T₁` *uniformly over the fibre-small perturbation family* — is
+the orthogonal differentiated-Neumann-resolvent coefficient-jet content (`g₁⁻¹ − g₀⁻¹ = −g₁⁻¹(g₁−g₀)g₀⁻¹`),
+which is not carried by the existential window constant `cc k` here.
+
+**Non-vacuity.**  At `g₁ = g₀` the applied section vanishes (`gInvDiffAppliedSection_self`), so the bound is
+`0 ≤ 0`; the cometric difference genuinely measures `g₁⁻¹ − g₀⁻¹`. -/
+theorem exists_riemannianFiberNormSq_iteratedCovGrad_gInvDiffAppliedSection_realizeSymm_le_jetSum
+    (g₀ g₁ : SmoothRiemannianMetric I M) (k : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (x : M),
+        riemannianFiberNormSq g₀ 0 (2 + k) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 k
+                (gInvDiffAppliedSection (I := I) g₀ g₁
+                  (realizeSymmCcTensor (I := I) g₀ T₁))).toSection x) ≤
+          C * ∑ l ∈ Finset.range (k + 1),
+            riemannianFiberNormSq g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x) := by
+  classical
+  -- The fixed-`g₁` window constant `cc k` (on the contracted section `X`).
+  obtain ⟨cc, hcc0, hcc⟩ :=
+    exists_riemannianFiberNormSq_iteratedCovGrad_gInvDiffAppliedSection_window_le (I := I) g₀ g₁
+  -- The order-`i` realization no-derivative-gain `rfns` constants `Ci`, for each `i ≤ k`.
+  have hrealize : ∀ i : ℕ, ∃ Ci : ℝ, 0 ≤ Ci ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (x : M),
+        riemannianFiberNormSq g₀ 0 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 i
+                (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x) ≤
+          Ci * ∑ l ∈ Finset.range (i + 1),
+            riemannianFiberNormSq g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x) :=
+    fun i =>
+      DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.exists_riemannianFiberNormSq_iteratedCovGrad_realizeSymm_le_jetSum
+        (I := I) g₀ i
+  choose Ci hCi0 hCi using hrealize
+  -- The combined constant `cc k · ∑_{i ≤ k} Cᵢ`.
+  refine ⟨cc k * ∑ i ∈ Finset.range (k + 1), Ci i,
+    mul_nonneg (hcc0 k) (Finset.sum_nonneg fun i _ => hCi0 i), fun T₁ x => ?_⟩
+  -- Abbreviate the generator-jet terms `b l := rfns(∇^l T₁)` (nonnegative).
+  set b : ℕ → ℝ := fun l => riemannianFiberNormSq g₀ 0 (2 + l) x
+    ((iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x) with hb_def
+  have hb_nn : ∀ l, 0 ≤ b l := fun l => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + l) x _
+  have hsum_b_nn : 0 ≤ ∑ l ∈ Finset.range (k + 1), b l := Finset.sum_nonneg fun l _ => hb_nn l
+  -- Step 1: the window bound on the realized section `X := realizeSymm T₁`.
+  have hwin := hcc (realizeSymmCcTensor (I := I) g₀ T₁) k x
+  refine le_trans hwin ?_
+  -- Step 2: dominate each `≤ k`-jet of `realizeSymm T₁` by `Cᵢ · ∑_{l ≤ k} b l`.
+  have hX_le : ∀ i ∈ Finset.range (k + 1),
+      riemannianFiberNormSq g₀ 0 (2 + i) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 i
+              (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x) ≤
+        Ci i * ∑ l ∈ Finset.range (k + 1), b l := by
+    intro i hi
+    refine le_trans (hCi i T₁ x) ?_
+    -- `∑_{l ≤ i} b l ≤ ∑_{l ≤ k} b l` since `i ≤ k`.
+    have hsub : (∑ l ∈ Finset.range (i + 1), b l) ≤ ∑ l ∈ Finset.range (k + 1), b l :=
+      Finset.sum_le_sum_of_subset_of_nonneg
+        (Finset.range_subset_range.2 (by have := Finset.mem_range.mp hi; omega : i + 1 ≤ k + 1))
+        fun l _ _ => hb_nn l
+    exact mul_le_mul_of_nonneg_left hsub (hCi0 i)
+  -- Step 3: accumulate the window sum and factor out `∑_{l ≤ k} b l`.
+  calc cc k * ∑ i ∈ Finset.range (k + 1),
+          riemannianFiberNormSq g₀ 0 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 i
+                (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x)
+      ≤ cc k * ∑ i ∈ Finset.range (k + 1), Ci i * ∑ l ∈ Finset.range (k + 1), b l :=
+        mul_le_mul_of_nonneg_left (Finset.sum_le_sum hX_le) (hcc0 k)
+    _ = (cc k * ∑ i ∈ Finset.range (k + 1), Ci i) * ∑ l ∈ Finset.range (k + 1), b l := by
+        rw [← Finset.sum_mul]; ring
 
 end DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
