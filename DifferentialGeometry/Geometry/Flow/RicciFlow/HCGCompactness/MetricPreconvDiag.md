@@ -9,10 +9,14 @@ targeted build green 3848 jobs; `#print axioms metricPreconv_gInf` clean =
 `exists_engine_frameCInfConv_eq_gm` re-expose the engine's `C^∞`-on-compacts
 frame-component convergence (Gap A); both axiom-clean, `metricPreconv_gInf`
 unchanged.  (2026-06-13) C-II-final-B1: `componentConv_covDeriv_zero` proves the
-covariant-tower bridge at order `a = 0` (base case, axiom-clean); `a ≥ 1` STOPPED
-on two exact missing pieces (derivative-closure of `MapCInfConvOnCompacts` +
-the rank-≥3 coordinate covariant-derivative formula).  See "Gap A exposed" /
-"Gap B base case" / "Gap B remaining" below.**
+covariant-tower bridge at order `a = 0` (base case, axiom-clean).  The two
+original `a ≥ 1` missing pieces are now DONE: derivative-closure of
+`MapCInfConvOnCompacts` (`MapConvergenceDeriv.lean`) and the rank-general
+coordinate/tower covariant-step formulas (`CoordFrameStep.lean`,
+`MetricCovDerivCoordStep.lean`).  Remaining work is the `C∞` convergence
+induction assembly, pointwise extraction, finite-cover `hnorm`, and
+`metricPreconvInf`.  See "Gap A exposed" / "Gap B base case" / "Gap B remaining"
+below.**
 
 ## C1a + C1b DONE (2026-06-12) — verified lemma inventory
 

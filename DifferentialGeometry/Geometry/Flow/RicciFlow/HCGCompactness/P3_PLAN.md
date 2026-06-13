@@ -165,7 +165,16 @@ ACCEPTED (c2510190): `exists_engine_frameCInfConv` and
 C∞-on-compacts frame-component convergence and pin its limit to `gm`; targeted
 build green 3848 jobs, axiom-clean.  C-II-final-B1 ✅ ACCEPTED (61584c6e):
 `componentConv_covDeriv_zero` proves the covariant-tower component bridge at
-order `a = 0` in any fibre basis; targeted build green 3848 jobs, axiom-clean.**
+order `a = 0` in any fibre basis; targeted build green 3848 jobs, axiom-clean.
+C-II-final-B2 ✅ ACCEPTED (33d34fb7): `MapCInfConvOnCompacts.fderivApply` gives
+the reusable derivative-closure of the Euclidean `C∞`-on-compacts convergence
+notion; targeted build green 2323 jobs, axiom-clean.  Producer-(2) / tower
+recursion ✅ ACCEPTED (1fd3844c, c83af74f, 01ba8309, f2402e95):
+`Tensor.Coordinates.nabla0SFun_eval_coordFrame` proves the rank-general
+coordinate covariant-step component formula; `metricCovDeriv_succ_apply_section`,
+`metricCovDeriv_succ_component_coordFrame`, and the preferred section recursion
+`metricCovDeriv_succ_eval_smooth_slots` specialise it to the metric covariant
+tower; targeted builds green 3440/3629 jobs, axiom-clean.**
 **File**: `MetricPreconvDiag.lean`.
 
 C0 (the abstract diagonal — design FIXED by the planner, prove as stated
@@ -278,21 +287,21 @@ and the specialization `metricDerivNorm_le_compSq` axiom-clean).  The
 constants-first seam is closed: good-frame witnesses `basisE`, `u'`, and `Cu`
 are now bound before `∀ gk gInf`, so they depend only on `gRef`, `a`, and `x`.**
 
-**NEXT FRONTIER (C-II-final-B, `a ≥ 1`):** do not try to prove the finite-cover
-`hnorm` wrapper until the higher-order input convergence theorem exists.  Gap A
-is closed by C-II-final-B0 (`exists_engine_frameCInfConv` +
-`exists_engine_frameCInfConv_eq_gm`), and the order-0 slice of Gap B is closed
-by C-II-final-B1 (`componentConv_covDeriv_zero`).  The remaining bridge
-`componentConv_covDeriv_of_chartCInf` still needs two producer lemmas:
-(1) derivative-closure for `MapCInfConvOnCompacts` (Euclidean analysis, likely
-in `MapConvergence.lean`), turning C∞-on-compacts convergence of chart
-components into convergence of their `fderiv` / coordinate derivatives, needed
-already for `a = 1`; and (2) a rank-≥3/tower coordinate covariant-derivative
-component formula generalizing `Coordinates.nabla0SFun_two_eval_coordFrame`
-from rank 2 to `component0S (metricCovDerivStep ...)` / arbitrary slot count.
-Do not add a hypothesis asserting covariant-tower convergence.  Once these
-producers exist, C-II can finish the finite-cover `hnorm` step and then assemble
-`metricPreconvInf`.**
+**NEXT FRONTIER (C-II-final-B, convergence assembly):** the two formerly missing
+producer lemmas are now closed.  The remaining theorem is the actual
+`componentConv_covDeriv_of_chartCInf` induction, followed by pointwise extraction,
+finite-cover `hnorm`, and `metricPreconvInf`.  Use the section-based recursion
+`metricCovDeriv_succ_eval_smooth_slots`, not the coordinate-frame recursion, as
+the main route: B0's carrier is already `g.inner w (σi w) (σj w)`, so keep a
+single subsequence `φ` and a fixed finite family of smooth sections `σ` across all
+slot tuples.  Base `a = 0` is B0/B1.  For the step, the directional
+`extDerivFun` term is converted to chart `fderiv` by the existing
+`extDerivFun_eq_fderiv_of_writtenInExtChartAt_eventuallyEq` connector and then
+uses B2; the correction terms expand the fixed `gRef` connection coefficients
+against the same section family and use `MapCInfConvOnCompacts.mulLeft`/`sum`
+plus the IH.  Do not add a hypothesis asserting covariant-tower convergence.
+The main design point is the all-slot-tuples/common-`φ` induction carrier; once
+that is in place, C-II can finish `hnorm` and assemble `metricPreconvInf`.**
 **File**: same or split `MetricPreconvBridge.lean` if > ~900 lines.
 
 C2: component convergence ⇒ `MetricCPConvOn K hK p (gSeq∘φ) gInf gRef`
