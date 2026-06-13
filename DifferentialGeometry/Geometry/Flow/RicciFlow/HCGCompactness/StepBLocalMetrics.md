@@ -66,12 +66,46 @@ directly; the slow nested-CLM synthesis under `InnerProductSpace E` needs
 application — the moment a `ContDiffOn ⊤` producer for `normalCoordMetric` lands, B-metric
 completes for a fixed `β`.
 
-### Frontier-1 root gap (audited 2026-06-13)
-`normalCoordMetric` is a pullback via `mfderiv (expMapDiffeo)`. The forward exp has only
-`expMap_contMDiffAtN_of_norm_lt` (per-order `C^n`, radius `δ_n` **depends on `n`** via
-`exists_unified_chartFlow_data_nat … n`) and `expMap_contMDiffAt_zero` (`C^1` at `0`). No
-single-radius `ContMDiffOn ⊤` exists. The exact missing **foundational** theorem
-(already flagged in `JacobiVariation.md:172`): `expMap` is `ContMDiffAt ∞` on a *uniform*
-small ball ("the per-`N` radius is a construction artifact — bigger"). That unblocks
-`expMapDiffeo : PartialDiffeomorph … ∞`, the inverse chart `C∞`, and both `normalCoordMetric`
-/ `normalTransition` smoothness.
+### Frontier-1 root gap — FULL CHAIN TRACED (2026-06-13, frontier-1 attack)
+
+The `n`-dependent radius is **not** an exp-layer artifact; it traces to an undischarged
+ODE smooth-dependence input. Chain:
+
+```
+exp ContMDiffAt ⊤  ⟸  chart-flow Φ ContDiffOn ⊤ on a fixed ball
+   (expMap_contMDiffAtN_of_norm_lt → contMDiffAt_infty)
+chart-flow Φ ContDiffOn ⊤  ⟸  exists_chartPhase_…_combined_nat  [only the _nat form exists]
+combined_nat radius  ⟸  exists_contDiffOn_flow_Cnat = flowCkPred_all n  [domain is n-DEPENDENT]
+```
+
+`exists_contDiffOn_flow_Cnat` (`VariationalMapContDiffOnK.lean`) is `flowCkPred_all n`, a
+strong induction (`flowCkPred_base`=C¹ Picard–Lindelöf; `flowCkPred_step` via the augmented
+flow `augVF`). `FlowCkPred n` returns an **existential** neighbourhood `U` (line 1813), and
+`flowCkPred_step`'s box `ball x₀ ρ ×ˢ Ioo (t₀-T)(t₀+T)` is built from cap/nesting data that
+depends on the augmented flow's own neighbourhood from the IH — so **the domain shrinks
+with `n`**. The flow `Φ` itself is `n`-independent; only the proven-smooth domain shrinks.
+
+The **C∞-on-a-fixed-box theorem already exists**: `exists_contDiffOn_flow_Cinfty`
+(`VariationalMapContDiffOnK.lean:1956`) gives `ContDiffOn ℝ ∞ Φ U` on one fixed box — **but
+it takes the hypothesis**
+`hLsp : ∀ j, ContDiffOn ℝ j (spatialPieceFn Φ) (fixed nesting box)`
+(the spatial piece of the flow's `fderiv` = variational linear map, smooth at every order
+on ONE box). The authors' own docstring calls `hLsp` "the smooth-parameter-dependence
+content of the variational linear ODE … the sole remaining mathematical input." Grep
+confirms **`hLsp` is discharged nowhere** for any flow.
+
+### THE EXACT MISSING THEOREM (foundational API frontier — hard stop)
+
+> For the geodesic chart-phase flow `Φ` of `chartPhaseVF`, discharge
+> `hLsp : ∀ j, ContDiffOn ℝ j (spatialPieceFn Φ)` on the **single fixed** nesting box from
+> `exists_flow_nesting_data` — i.e. a **uniform-domain** all-orders smoothness for the
+> variational/augmented flow (the existing `flowCkPred` induction gives only order-dependent
+> shrinking neighbourhoods via the `augVF` recursion).
+
+Mathematically true (the linear variational ODEs all live over one fixed base-flow domain
+with bounded coefficients on a compact region), but it requires a genuinely new
+uniform-domain ODE smooth-dependence argument, NOT a quick lemma. Once `hLsp` is proved for
+`chartPhaseVF`, `exists_contDiffOn_flow_Cinfty` → a `combined_inf` chart-flow theorem →
+`expMap ContMDiffAt ∞` on a uniform ball → `expMapDiffeo : PartialDiffeomorph … ∞` (+ the
+`C∞` inverse function theorem for the inverse chart) → both wrappers' `hsmooth` discharge.
+`exists_contDiffOn_flow_Cinfty` is the ready consumer; `hLsp` is the one blocking input.
