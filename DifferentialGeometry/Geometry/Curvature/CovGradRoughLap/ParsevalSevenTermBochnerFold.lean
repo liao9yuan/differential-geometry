@@ -5431,6 +5431,106 @@ private lemma covGrad_covGrad_appCc_curvOpField_eq_fourTerm
     (covGrad (I := I) (M := M) g 0 (s + 0) S)]
 
 set_option linter.unusedSectionVars false in
+/-- **The diagonal-Hessian four-term unit value of the moving-frame pure-Riemann curvature trace `P`
+(the operator-field analog of `elt3IiiIv_doubleSum_pointwise_eq`, the entry point of the integrated
+second-Bianchi emission).**  For `Φ₀ := curvOpField g s`, `P := appCc Φ₀ S = pureRGenuineDiffOp g 0 s S`,
+a fixed smooth direction field `V a`, point `x`, and trailing tuple `m : Fin (s + 0) → T_x M`, the
+diagonal genuine Hessian `∇²_{V a, V a} P`, read on the unit and on `m`, decomposes into the four
+operator-field carriers of the section-level normal form `covGrad_covGrad_appCc_curvOpField_eq_fourTerm`,
+each unit-evaluated:
+```
+(∇²_{V a, V a} P)(x)(unit)(m)
+  = T₁ + T₂ + T₃ + T₄,
+T₁ := (∇_{V a}(genuineDiffCurvSection g s S))(x)(unit)(Fin.cons (V a x) m)
+        − (∇Φ₀)(x)((∇_{V a} S)(x))(Fin.cons (V a x) m)      -- the doubly-differentiated curvature carrier
+T₂ := (appCc (slotExtend (∇Φ₀)) (∇S))(x)(unit)(Fin.cons (V a x)(Fin.cons (V a x) m))
+T₃ := (appCc (∇(slotExtend Φ₀)) (∇S))(x)(unit)(Fin.cons (V a x)(Fin.cons (V a x) m))
+T₄ := (appCc (slotExtend (slotExtend Φ₀)) (∇²S))(x)(unit)(Fin.cons (V a x)(Fin.cons (V a x) m)).
+```
+The diagonal Hessian is the two-slot value read of `covGrad(covGrad P)`
+(`tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal`), `covGrad(covGrad P)` is the section-level
+four-term operator-field product-rule normal form (`covGrad_covGrad_appCc_curvOpField_eq_fourTerm`), and
+its leading `T₁` carrier `appCc (∇²Φ₀) S` unit-evaluates to the directional covariant derivative of the
+once-differentiated curvature carrier minus the once-differentiated curvature spectator
+(`appCc_covGrad_covGrad_curvOpField_unit_eval`).  This exhibits `∇²_{V a, V a} P`'s leading term as the
+twice-differentiated moving-frame curvature carrier `∇(∇R)`-trace on which the cyclic differential
+Bianchi (`nablaTensor0SCurv_cyclic_eq_zero`) and the orthonormal-frame skew form (`smoothOrthoFrame_cov_skew`,
+frame-summed) act to produce the curvature/Hessian cross pairing `I₂` after the full Parseval double sum.
+No pointwise per-frame moving-frame curvature jet is transited; the expansion is the section-level
+operator-field product rule read at the unit. -/
+private lemma diagHessian_pureR_unit_eval_fourTerm
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {Va : Π b : M, TangentSpace I b}
+    (hVa : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, Va b⟩ : TotalSpace E (TangentSpace I)))) (x : M)
+    (m : Fin s → TangentSpace I x) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+          tensorSecondCovDeriv (I := I) g 0 s Va Va
+            (fun y : M => (appCc (I := I) (M := M) g s s
+              (curvOpField (I := I) (M := M) g s) S).toSection y) x)
+          (unitZeroSec (I := I) (M := M) x))
+        m =
+      ( Tensor0SSpace.toModel
+            ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0 + 1) I x from
+              tensorCovDerivAt (I := I) (M := M) g 0 (s + 0 + 1)
+                (genuineDiffCurvSection (I := I) (M := M) g s S) x (Va x)) (unitZeroSec (I := I) (M := M) x))
+            (Fin.cons (Va x) m)
+        - Tensor0SSpace.toModel
+            ((show Tensor0SSpace (s + 0) I x →L[ℝ] Tensor0SSpace (s + 0 + 1) I x from
+              (covGrad (I := I) (M := M) g (s + 0) (s + 0)
+                (curvOpField (I := I) (M := M) g s)).toSection x)
+              ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0) I x from
+                tensorCovDerivAt (I := I) (M := M) g 0 (s + 0) S x (Va x))
+                (unitZeroSec (I := I) (M := M) x)))
+            (Fin.cons (Va x) m) ) +
+      ( Tensor0SSpace.toModel
+            ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0 + 1 + 1) I x from
+              (appCc (I := I) (M := M) g (s + 0 + 1) (s + 0 + 1 + 1)
+                (slotExtend (I := I) (M := M) g (s + 0) (s + 0 + 1)
+                  (covGrad (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s)))
+                (covGrad (I := I) (M := M) g 0 (s + 0) S)).toSection x)
+              (unitZeroSec (I := I) (M := M) x))
+            (Fin.cons (Va x) (Fin.cons (Va x) m)) +
+        ( Tensor0SSpace.toModel
+              ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0 + 1 + 1) I x from
+                (appCc (I := I) (M := M) g (s + 0 + 1) (s + 0 + 1 + 1)
+                  (covGrad (I := I) (M := M) g (s + 0 + 1) (s + 0 + 1)
+                    (slotExtend (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s)))
+                  (covGrad (I := I) (M := M) g 0 (s + 0) S)).toSection x)
+                (unitZeroSec (I := I) (M := M) x))
+              (Fin.cons (Va x) (Fin.cons (Va x) m)) +
+          Tensor0SSpace.toModel
+              ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0 + 1 + 1) I x from
+                (appCc (I := I) (M := M) g (s + 0 + 1 + 1) (s + 0 + 1 + 1)
+                  (slotExtend (I := I) (M := M) g (s + 0 + 1) (s + 0 + 1)
+                    (slotExtend (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s)))
+                  (covGrad (I := I) (M := M) g 0 (s + 0 + 1)
+                    (covGrad (I := I) (M := M) g 0 (s + 0) S))).toSection x)
+                (unitZeroSec (I := I) (M := M) x))
+              (Fin.cons (Va x) (Fin.cons (Va x) m)) ) ) := by
+  classical
+  have hfour := covGrad_covGrad_appCc_curvOpField_eq_fourTerm (I := I) (M := M) g s S
+  simp only [Nat.add_zero] at hfour
+  rw [← tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal (I := I) (M := M) g s
+    (appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s) S) hVa hVa x m]
+  rw [hfour]
+  rw [SmoothCcTensor.toSection_add, SmoothCcTensor.toSection_add,
+    ContMDiffSection.coe_add, ContMDiffSection.coe_add, Pi.add_apply, Pi.add_apply,
+    ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply,
+    Tensor0SSpace.toModel_add, Tensor0SSpace.toModel_add,
+    ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.add_apply]
+  have huni := appCc_covGrad_covGrad_curvOpField_unit_eval (I := I) (M := M) g s S x
+    (unitZeroSec (I := I) (M := M) x) (Va x) (Fin.cons (Va x) m)
+  simp only [Nat.add_zero] at huni
+  rw [huni]
+  rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply,
+    ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add,
+    ContinuousMultilinearMap.add_apply]
+  simp only [Nat.add_zero]
+  ring
+
+set_option linter.unusedSectionVars false in
 /-- **The genuine differentiated-curvature operator-field pairing value (the moving-frame integrated
 second-Bianchi emission, non-circular form).**  For a fixed smooth Parseval frame family, the frame-free
 `L²` pairing of the differentiated-curvature operator-field section `gDCS := genuineDiffCurvSection g s
