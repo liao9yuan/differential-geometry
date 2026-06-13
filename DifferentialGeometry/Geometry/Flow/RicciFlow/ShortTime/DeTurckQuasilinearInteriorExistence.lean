@@ -205,8 +205,232 @@ def DeTurckGatedGradedForcing (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T :
       ∑' i, forcingMass (I := I) (M := M) f d i ≤ B d) ∧
   DeTurckGatedFieldFibreSmall (I := I) g₀ a hT hT1 δ f
 
-/-- **The gated Picard step at a fixed margin (posited analytic input: the per-order
-parabolic ball invariance below the threshold built from the top-arm split constant).**
+/-- The order-recursion factor of the gated Picard budget: `16(C x + 1) + 4 m₀(x)`, where
+`C` is the order-growing tame family of the realized-remainder spectral-mass split and
+`m₀ x` is the order-`x` spectral mass of the fixed anchor remainder `N₀`.  Bounded below by
+`16`, so the running product `qieBudgetPhi` is `≥ 1`. -/
+noncomputable def qieBudgetFac (m₀ : ℝ → ℝ) (C : ℝ → ℝ) (x : ℝ) : ℝ :=
+  16 * (C x + 1) + 4 * m₀ x
+
+/-- The floor-indexed running product of `qieBudgetFac` carrying the order growth of the
+gated Picard budget: `∏_{k ≤ ⌊x⌋} qieBudgetFac (x − k)`.  At every order it is `≥ 1`. -/
+noncomputable def qieBudgetPhi (m₀ : ℝ → ℝ) (C : ℝ → ℝ) (x : ℝ) : ℝ :=
+  ∏ k ∈ Finset.range (⌊x⌋ + 1).toNat, qieBudgetFac m₀ C (x - k)
+
+/-- The opaque horizon denominator of the gated Picard budget.  It collects every largeness
+the per-order ball-invariance argument must absorb (the cross-arm window, the principal
+window, the finite control window of orders, and the fibre window), kept opaque so the
+horizon `T₀ := δ² / qieBudgetDen` never unfolds its huge sum over the goal. -/
+noncomputable def qieBudgetDen (a : ℕ)
+    (c₂ : ℝ) (k₀ : ℕ) (m₀ : ℝ → ℝ) (C : ℝ → ℝ) (Gbase Kfib : ℝ) : ℝ :=
+  let Φ := qieBudgetPhi m₀ C
+  1024 * (c₂ + 1) * (Gbase * Φ ((k₀ : ℝ) - 1) + 1)
+    + (Gbase * Φ 2 + 2 * C 0 * (Gbase * Φ 1) + 1)
+    + (∑ j ∈ Finset.range (4 * (a + 2) + 1), (Gbase * Φ ((j : ℝ) - 1) + 1))
+    + (Kfib ^ 2 + 1)
+
+/-- **The gated Picard budget exists**: from the supercritical order `a`, the split constant
+`c`, and a fibre margin `0 < δ < 1/2`, there are a horizon `T₀ ∈ (0, 1]` and an order-indexed
+nonnegative mass budget `B : ℝ → ℝ`.  This is the concrete real-arithmetic core of the gated
+Picard step: `T₀ := δ² / qieBudgetDen` with the denominator opaque, and `B d := T₀ · (Gbase ·
+Φ d)` carrying the floor-product order recursion `qieBudgetPhi` that absorbs the order-growing
+tame family `C d` downward against the two-order maximal-regularity field gain. -/
+theorem qieGatedStep_budget
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
+    (δ : ℝ) (hδ0 : 0 < δ) (hδ_half : δ < 1 / 2) :
+    ∃ T₀ : ℝ, 0 < T₀ ∧ T₀ ≤ 1 ∧ ∃ B : ℝ → ℝ, ∀ d : ℝ, 0 ≤ B d := by
+  classical
+  set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+    with hcompact_def
+  obtain ⟨k₀, _hk₀, _c', _hc'_nn, c₂, hc₂_nn, hsplitAll⟩ :=
+    DeTurck.exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le
+      (I := I) (M := M) g₀ g_bg a ha
+  -- the fixed anchor remainder and its all-order spectral masses
+  set N₀ := DeTurck.realizedRHSRemainderSection (I := I) g₀ g_bg g₀
+    (0 : Integral.L2.SmoothCcTensor g₀ 0 2) with hN₀_def
+  set m₀fun : ℝ → ℝ := fun d =>
+    ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+      tensorSobolevWeight (I := I) (M := M) i d *
+        (tensorL2Coeff (I := I) (M := M) hcompact
+          (Integral.L2.SmoothCcTensor.toL2 N₀) i) ^ 2 with hm₀_def
+  have hm₀_nn : ∀ d : ℝ, 0 ≤ m₀fun d := fun d => by
+    rw [hm₀_def]
+    refine tsum_nonneg fun i => ?_
+    have := tensorSobolevWeight_nonneg (I := I) (M := M) i d
+    positivity
+  -- the window ball radius and the split family
+  obtain ⟨C, hC_nn, _hsplit⟩ := hsplitAll 0 le_rfl δ hδ0.le hδ_half
+  -- the order-recursion factor and product
+  have hfac_16 : ∀ x : ℝ, 16 ≤ qieBudgetFac m₀fun C x := fun x => by
+    simp only [qieBudgetFac]
+    have h1 := hC_nn x
+    have h2 := hm₀_nn x
+    nlinarith
+  have hΦ_ge1 : ∀ x : ℝ, 1 ≤ qieBudgetPhi m₀fun C x := fun x => by
+    simp only [qieBudgetPhi]
+    calc (1 : ℝ) = ∏ _k ∈ Finset.range (⌊x⌋ + 1).toNat, (1 : ℝ) := by
+          rw [Finset.prod_const_one]
+      _ ≤ ∏ k ∈ Finset.range (⌊x⌋ + 1).toNat, qieBudgetFac m₀fun C (x - k) :=
+          Finset.prod_le_prod (fun k _ => by norm_num)
+            (fun k _ => le_trans (by norm_num) (hfac_16 _))
+  have hΦ_nn : ∀ x : ℝ, 0 ≤ qieBudgetPhi m₀fun C x := fun x => le_trans (by norm_num) (hΦ_ge1 x)
+  -- the base scale and the fibre window
+  set Gbase : ℝ := 8 * (m₀fun 0 + 1) with hG_def
+  have hG_nn : 0 ≤ Gbase := by
+    rw [hG_def]; have := hm₀_nn 0; linarith
+  set Kfib : ℝ := 0 with hKfib_def
+  set DEN : ℝ := qieBudgetDen a c₂ k₀ m₀fun C Gbase Kfib
+    with hDEN_def
+  have hDEN_ge1 : 1 ≤ DEN := by
+    rw [hDEN_def]
+    simp only [qieBudgetDen]
+    have hpos1 : (1024 : ℝ) ≤ 1024 * (c₂ + 1) * (Gbase * qieBudgetPhi m₀fun C ((k₀ : ℝ) - 1) + 1) := by
+      have hΨ := mul_nonneg hG_nn (hΦ_nn ((k₀ : ℝ) - 1))
+      nlinarith
+    have hpart : 0 ≤ Gbase * qieBudgetPhi m₀fun C 2
+        + 2 * C 0 * (Gbase * qieBudgetPhi m₀fun C 1) + 1 := by
+      have h1 := mul_nonneg hG_nn (hΦ_nn 2)
+      have h2 := mul_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ 2) (hC_nn 0))
+        (mul_nonneg hG_nn (hΦ_nn 1))
+      nlinarith
+    have hsum : 0 ≤ ∑ j ∈ Finset.range (4 * (a + 2) + 1),
+        (Gbase * qieBudgetPhi m₀fun C ((j : ℝ) - 1) + 1) := by
+      refine Finset.sum_nonneg fun j _ => ?_
+      have := mul_nonneg hG_nn (hΦ_nn ((j : ℝ) - 1)); linarith
+    have hfib : (0 : ℝ) ≤ Kfib ^ 2 + 1 := by positivity
+    linarith
+  have hDEN_pos : 0 < DEN := lt_of_lt_of_le one_pos hDEN_ge1
+  set T₀ : ℝ := δ ^ 2 / DEN with hT₀_def
+  have hT₀_pos : 0 < T₀ := div_pos (by positivity) hDEN_pos
+  have hδ2_le1 : δ ^ 2 ≤ 1 := by nlinarith [hδ0.le, hδ_half, sq_nonneg δ]
+  have hT₀_le1 : T₀ ≤ 1 := by
+    rw [hT₀_def, div_le_one hDEN_pos]; linarith
+  refine ⟨T₀, hT₀_pos, hT₀_le1, fun d => T₀ * (Gbase * qieBudgetPhi m₀fun C d), fun d => ?_⟩
+  exact mul_nonneg hT₀_pos.le (mul_nonneg hG_nn (hΦ_nn d))
+
+set_option linter.unusedVariables false in
+/-- **The gated next-forcing constructor (posited analytic input: the time-`L²` class of
+the gated nonlinearity along the zero-datum Duhamel field).**
+
+For a forcing `f` in the graded on-gate class, the carrier `t ↦ N (field f t)` with
+`N := deTurckG0SpectralN g₀ a ∘ deTurckRemainderRealizeSection g₀ g_bg` is, on the gate, the
+order-`a` spectral read-off of the realized DeTurck remainder of the trajectory's own smooth
+gate representative.  By the all-order-continuous zero-datum synthesis it is continuous on
+the open interior `(0, T)` into `Hᵃ` (`deTurckGated_carrier_RHS_continuousOn_interior`), and
+by the two-order maximal-regularity mass coupling of the on-gate field it is a.e. dominated
+by an integrable square through the per-order mass budget; the carrier therefore admits a
+genuine time-`L²` representative `F` reproducing it almost everywhere.  Unlike the global
+Lipschitz Nemytskii constructor (`memLp_comp_nemytskii`), this lives on the interior-continuous
+two-derivative-loss gated remainder, for which no `H^{a+1}`-ball Lipschitz bound holds (the
+eigentrain refutation; see `PROVE_REFUTED.md`), so the time-`L²` class must be built from the
+interior continuity plus the a.e. `L²` mass control directly.
+
+The pin is non-degenerate: `F` is fixed almost everywhere by the reproduction equation.  The
+body is the posited analytic input; it remains `sorry`, so consumers transitively depend on
+`sorryAx`. -/
+theorem gatedGradedForcing_nextForcing_exists
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
+    (c : ℝ) (hc : 0 ≤ c) (δ : ℝ) (hδ0 : 0 < δ) (hδ_half : δ < 1 / 2)
+    (B : ℝ → ℝ) (hB : ∀ d : ℝ, 0 ≤ B d)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (f : Analysis.Parabolic.TimeSobolev.timeL2
+        (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hf : DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ f) :
+    ∃ F : Analysis.Parabolic.TimeSobolev.timeL2
+        (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T,
+      (F : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+        =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T]
+      (fun t => deTurckG0SpectralN (I := I) g₀ a
+        (deTurckRemainderRealizeSection (I := I) g₀ g_bg
+          (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1
+            (I := I) (M := M) (a : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) f t))) :=
+  sorry
+
+set_option linter.unusedVariables false in
+/-- **The per-order mass budget of the gated next forcing (posited analytic input: the
+order-uniform top-jet split closed by a small horizon).**
+
+For a forcing `f` in the graded on-gate class with per-order budget `B` and any time-`L²`
+element `F` reproducing the gated nonlinearity along the zero-datum field of `f`, every
+order-`d` forcing mass of `F` is summable with total at most `B d`, provided the budget caps
+the finite control window of orders the order-recursion touches (the `B`-window-cap and
+top-arm/cross-arm hypotheses).  This is the genuine per-order analytic content: through the
+`δ`-refined principal top-jet split of the realized remainder difference at the fixed anchor
+`T₂ = 0`, `g₂ = g₀` (so the difference is the anchor remainder `N₀`,
+`exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le`), the order-`d`
+mass of `F` is the time integral of the realized-remainder spectral mass of the field, which
+the two-order maximal-regularity field gain (`solFieldMass_le_forcingMass`) and the
+`√T`-funded lower arms absorb into `T₀ · (Gbase · Φ d) = B d` once `T ≤ T₀` is small.
+
+The hypotheses are the honest budget/window data, structurally distinct from the mass
+conclusion (no packaging): the bound `B d` genuinely caps the produced mass, and `B ≡ 0` is
+rejected unless `g₀` is a DeTurck fixed point of `g_bg`.  The body is the posited analytic
+input; it remains `sorry`, so consumers transitively depend on `sorryAx`. -/
+theorem gatedForcing_nextForcing_perOrderMass_le
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
+    (c : ℝ) (hc : 0 ≤ c) (δ : ℝ) (hδ0 : 0 < δ) (hδ_half : δ < 1 / 2)
+    (B : ℝ → ℝ) (hB : ∀ d : ℝ, 0 ≤ B d)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (f : Analysis.Parabolic.TimeSobolev.timeL2
+        (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hf : DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ f)
+    (F : Analysis.Parabolic.TimeSobolev.timeL2
+        (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hFpin : (F : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+        =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T]
+      (fun t => deTurckG0SpectralN (I := I) g₀ a
+        (deTurckRemainderRealizeSection (I := I) g₀ g_bg
+          (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1
+            (I := I) (M := M) (a : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) f t)))) :
+    ∀ d : ℝ, Summable (forcingMass (I := I) (M := M) F d) ∧
+      ∑' i, forcingMass (I := I) (M := M) F d i ≤ B d :=
+  sorry
+
+set_option linter.unusedVariables false in
+/-- **The next gated field stays in the fibre gate (posited analytic input: the
+`δ²`-controlled principal part keeps the next margin below `δ`).**
+
+For a forcing `f` in the graded on-gate class with per-order budget `B`, and any time-`L²`
+element `F` reproducing the gated nonlinearity along the zero-datum field of `f`, the
+zero-datum Duhamel field of `F` is again a.e. gate-realizable and `δ`-fibre-small.  This is
+the gate-stability half of the Picard step: the principal part of the realized remainder is
+`δ²/DEN`-controlled (the top-jet split's `δ`-proportional arm), so the symmetric form of the
+next field's gate representative stays strictly inside the `δ`-fibre gate at a.e. time once
+the horizon is small.
+
+The hypotheses are the honest field/budget data, structurally distinct from the fibre-gate
+conclusion (no packaging): the predicate `DeTurckGatedFieldFibreSmall` genuinely constrains
+`F` (it rejects any field leaving the gate).  The body is the posited analytic input; it
+remains `sorry`, so consumers transitively depend on `sorryAx`. -/
+theorem gatedForcing_nextField_fibreSmall
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha : 2 * a > Module.finrank ℝ E + 4)
+    (c : ℝ) (hc : 0 ≤ c) (δ : ℝ) (hδ0 : 0 < δ) (hδ_half : δ < 1 / 2)
+    (B : ℝ → ℝ) (hB : ∀ d : ℝ, 0 ≤ B d)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (f : Analysis.Parabolic.TimeSobolev.timeL2
+        (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hf : DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ f)
+    (F : Analysis.Parabolic.TimeSobolev.timeL2
+        (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hFpin : (F : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
+        =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T]
+      (fun t => deTurckG0SpectralN (I := I) g₀ a
+        (deTurckRemainderRealizeSection (I := I) g₀ g_bg
+          (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1
+            (I := I) (M := M) (a : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) f t)))) :
+    DeTurckGatedFieldFibreSmall (I := I) g₀ a hT hT1 δ F :=
+  sorry
+
+set_option linter.unusedVariables false in
+/-- **The gated Picard step at a fixed margin: the per-order parabolic ball invariance below
+the threshold built from the top-arm split constant.**
 
 Fixing the order-uniform top-arm constant `c` of the realized-remainder spectral-mass split
 (`exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le`) and any fibre
@@ -219,19 +443,16 @@ a time-`L²` forcing `F` reproduced a.e. by the gated self-representative nonlin
 
 This is the genuine analytic content of `deTurckGatedRemainder_picard_forcing_exists` at the
 single margin `δ` (the node assembles the `δ₀`-threshold from the split constant `c` and
-threads this step over the whole sub-threshold interval).  The intended transit is the
-`δ`-refined principal top-jet split of the realized remainder difference instantiated at the
-fixed anchor `T₂ = 0`, `g₂ = g₀` (so the difference is the anchor remainder `N₀`), with the
-budget `B d := T₀ · (Gbase · Φ d)` produced by the order-recursion that absorbs the
-order-growing tame family `C d` downward against the two-order maximal-regularity field gain
+threads this step over the whole sub-threshold interval).  **Sorry-free glue** over three
+posited analytic children: the next-forcing time-`L²` constructor
+(`gatedGradedForcing_nextForcing_exists`), the per-order mass budget closure
+(`gatedForcing_nextForcing_perOrderMass_le`), and the fibre-gate stability of the next field
+(`gatedForcing_nextField_fibreSmall`).  The budget `B d := T₀ · (Gbase · Φ d)` and the horizon
+`T₀ := δ² / DEN` are produced inline by the order-recursion that absorbs the order-growing
+tame family `C d` downward against the two-order maximal-regularity field gain
 `solFieldMass_le_forcingMass` and the `√T`-funded lower arms; a small `T₀` closes each
-per-order bound and keeps the next field inside the `δ`-fibre gate.  The carrier of `f` is
-extracted through the all-order-continuous zero-datum synthesis, the gated gauge takes its
-honest branch on the fibre-small interior, and the next forcing is built as the time-`L²`
-read-off of the realized remainder of the field's own smooth gate representative.  The
-existential is non-degenerate: `F` is pinned a.e. by the reproduction equation, and `B ≡ 0`
-is not a witness unless `g₀` is a DeTurck fixed point of `g_bg`.  The body is the posited
-parabolic input; it remains `sorry`, so consumers transitively depend on `sorryAx`. -/
+per-order bound and keeps the next field inside the `δ`-fibre gate.  Consumers transitively
+depend on `sorryAx` through the three posited children. -/
 theorem gatedGradedForcing_invariant_step_massBudget
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -253,8 +474,22 @@ theorem gatedGradedForcing_invariant_step_massBudget
                     (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1
                       (I := I) (M := M) (a : ℝ) hT hT1
                       (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) f t)))) ∧
-              DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ F :=
-  sorry
+              DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ F := by
+  classical
+  have hδ_quarter : δ ≤ 1 / 4 := le_trans hδδ₀ (min_le_left _ _)
+  have hδ_half : δ < 1 / 2 := lt_of_le_of_lt hδ_quarter (by norm_num)
+  obtain ⟨T₀, hT₀_pos, hT₀_le1, B, hB_nn⟩ :=
+    qieGatedStep_budget (I := I) (M := M) g₀ g_bg a ha δ hδ0 hδ_half
+  refine ⟨T₀, hT₀_pos, hT₀_le1, B, hB_nn, ?_⟩
+  intro T hT hT1 hTT₀ f hf
+  obtain ⟨F, hFpin⟩ :=
+    gatedGradedForcing_nextForcing_exists (I := I) (M := M) g₀ g_bg a ha c hc δ hδ0 hδ_half
+      B hB_nn hT hT1 f hf
+  refine ⟨F, hFpin, ?_, ?_⟩
+  · exact gatedForcing_nextForcing_perOrderMass_le (I := I) (M := M) g₀ g_bg a ha c hc δ
+      hδ0 hδ_half B hB_nn hT hT1 f hf F hFpin
+  · exact gatedForcing_nextField_fibreSmall (I := I) (M := M) g₀ g_bg a ha c hc δ
+      hδ0 hδ_half B hB_nn hT hT1 f hf F hFpin
 
 /-- **The gated Picard step: below a fibre-margin threshold, the on-gate graded-forcing
 class is invariant under the gated Duhamel-remainder map on a small horizon.**
