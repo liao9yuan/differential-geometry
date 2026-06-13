@@ -36,7 +36,7 @@ open Tensor0SBundle TensorLieDeriv
 open Filter Topology
 open DifferentialGeometry.PDE.RicciFlow
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -548,6 +548,71 @@ theorem exists_uniform_patch
   choose k0fn hk0fn using key
   refine ⟨(Finset.range (p + 1)).sup k0fn, fun k hk a ha z hz => ?_⟩
   exact hk0fn a ha k (le_trans (Finset.le_sup (Finset.mem_range.2 (Nat.lt_succ_of_le ha))) hk) z hz
+
+set_option maxHeartbeats 800000 in
+/-- **P3 spatial endpoint (MSM135 Ch3 `lbl351`).**  A sequence of metrics with uniform
+local covariant-derivative bounds (`hbdd`) and a uniform lower bound (`hlow`) has a
+subsequence converging `C^∞`-on-compacts to a smooth limit metric `gInf`.  Assembles the
+limit metric (`metricPreconv_gInf`), the per-patch uniform convergence (`exists_uniform_patch`)
+diagonalised over a countable Lindelöf cover (`exists_diag_subseq`), and the finite good-frame
+cover `hnorm` fed to `metricCInfConvOnCompacts_of_normConv`. -/
+theorem metricPreconvInf (hne : Nonempty M)
+    (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
+    (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
+      metricCovDerivNorm (I := I) q (gSeq k) gRef z ≤ C)
+    (hlow : ∃ c : Real, 0 < c ∧ ∀ (k : ℕ) (x : M) (v : TangentSpace I x),
+      c * gRef.inner x v v ≤ (gSeq k).inner x v v) :
+    ∃ φ : ℕ → ℕ, StrictMono φ ∧ ∃ gInf : SmoothRiemannianMetric I M,
+      MetricCInfConvOnCompacts (I := I) (fun k => gSeq (φ k)) gInf gRef := by
+  classical
+  obtain ⟨φ₀, hφ₀, gInf, hconv⟩ := metricPreconv_gInf (I := I) hne gRef gSeq hbdd hlow
+  choose W C hWopen hxW hCcpt hWC hpatch using
+    exists_uniform_patch (I := I) gRef gSeq hbdd φ₀ gInf hconv
+  obtain ⟨s, hscount, hscov⟩ :=
+    (isLindelof_univ (X := M)).elim_countable_subcover W hWopen
+      (fun y _ => Set.mem_iUnion.2 ⟨y, hxW y⟩)
+  have hsne : s.Nonempty := by
+    obtain ⟨y⟩ := hne
+    obtain ⟨z, hz, -⟩ := Set.mem_iUnion₂.1 (hscov (Set.mem_univ y))
+    exact ⟨z, hz⟩
+  obtain ⟨e, hse⟩ := hscount.exists_eq_range hsne
+  have hcovN : (Set.univ : Set M) ⊆ ⋃ n : ℕ, W (e n) := fun z hz => by
+    obtain ⟨w, hw, hzw⟩ := Set.mem_iUnion₂.1 (hscov hz)
+    rw [hse] at hw
+    obtain ⟨n, rfl⟩ := hw
+    exact Set.mem_iUnion.2 ⟨n, hzw⟩
+  obtain ⟨φd, hφd, hPφd⟩ := exists_diag_subseq
+    (fun n φ => ∀ (p : ℕ) (ε : Real), 0 < ε → ∃ k0 : ℕ, ∀ k : ℕ, k0 ≤ k → ∀ a : ℕ, a ≤ p →
+      ∀ z ∈ C (e n), metricDerivNorm (I := I) a (gSeq (φ₀ (φ k))) gInf gRef z < ε)
+    (fun n φ hφ => by
+      obtain ⟨ψ, hψ, hu⟩ := hpatch (e n) φ hφ
+      refine ⟨ψ, hψ, fun p ε hε => ?_⟩
+      obtain ⟨k0, hk0⟩ := hu p ε hε
+      refine ⟨k0, fun k hk a ha z hz => ?_⟩
+      simpa only [Function.comp_apply] using hk0 k hk a ha z hz)
+    (fun n φ ψ hψ hP p ε hε => by
+      obtain ⟨k0, hk0⟩ := hP p ε hε
+      exact ⟨k0, fun k hk a ha z hz => hk0 (ψ k) (le_trans hk hψ.le_apply) a ha z hz⟩)
+    (fun n φ m hP p ε hε => by
+      obtain ⟨k0, hk0⟩ := hP p ε hε
+      refine ⟨k0 + m, fun k hk a ha z hz => ?_⟩
+      have hval := hk0 (k - m) (by omega) a ha z hz
+      simp only [Nat.sub_add_cancel (show m ≤ k by omega)] at hval
+      exact hval)
+  refine ⟨φ₀ ∘ φd, hφ₀.comp hφd, gInf,
+    metricCInfConvOnCompacts_of_normConv (I := I) (fun k => gSeq ((φ₀ ∘ φd) k)) gInf gRef ?_⟩
+  intro p K hK ε hε
+  obtain ⟨F, hF⟩ := hK.elim_finite_subcover (fun n => W (e n)) (fun n => hWopen (e n))
+    (fun z hz => hcovN (Set.mem_univ z))
+  have perN : ∀ n ∈ F, ∃ k0 : ℕ, ∀ k : ℕ, k0 ≤ k → ∀ a : ℕ, a ≤ p →
+      ∀ z ∈ C (e n), metricDerivNorm (I := I) a (gSeq (φ₀ (φd k))) gInf gRef z < ε :=
+    fun n _ => hPφd n p ε hε
+  choose k0fn hk0fn using perN
+  refine ⟨F.attach.sup (fun n => k0fn n.1 n.2), fun k hk a ha z hz => ?_⟩
+  obtain ⟨n, hn, hzw⟩ := Set.mem_iUnion₂.1 (hF hz)
+  simpa only [Function.comp_apply] using
+    hk0fn n hn k (le_trans (Finset.le_sup (f := fun n => k0fn n.1 n.2)
+      (Finset.mem_attach F ⟨n, hn⟩)) hk) a ha z (hWC (e n) hzw)
 
 end HCGCompactness
 end DifferentialGeometry
