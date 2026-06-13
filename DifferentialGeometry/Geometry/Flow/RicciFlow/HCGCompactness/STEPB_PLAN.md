@@ -263,6 +263,27 @@ not another smoothness lemma: relate the existential radius from
 sequence, using Step-A fixed-scale/radius data, then consume
 `exists_metricLimit_normalCoord`.
 
+Pure-ball producer accepted 2026-06-13 (session 3): `normalCoordMetric_contDiffOn_ball`
+(`∃ r > 0, ContDiffOn R top (normalCoordMetric Y x) (ball 0 r)`) landed in
+`StepBInputs.lean` (focused check green, axiom-clean) — folds a positive ball of
+`expMapDiffeo.source` into the producer, dropping the `∩ source` wrinkle.  This is the
+smallest domain/radius lemma of the bridge.
+
+HARD STOP #1 reached on the fixed-`U` discharge.  Correcting the line above ("not another
+smoothness lemma"): the uniform-radius step is NOT pure Step-A bookkeeping.  The producer
+radius `r_k` ultimately comes from `expMap_contMDiffAt_infty_of_norm_lt` ⟵
+`exists_unified_chartFlow_data_inf`, an opaque ODE existential `δ_k=(T_match/2)·ρ` with no
+geometric anchor.  Step-A uniformly controls `injRadius` (`InjRadiusDecayInput`) and
+`expMapC2Radius` (`Item3RadiusInput`), but `expMapC2Radius` uses a *separate*
+`Classical.choose (expMap_contMDiffAt2_of_norm_lt)` (only **C²**); nothing relates `δ_k` to
+either.  So `inf_k r_k > 0` is unprovable ⇒ `U ⊆ ball 0 r_k` (fixed `U`, all `k`) is
+unprovable.  EXACT MISSING THEOREM: a named-radius ∞ producer
+`expMap_contMDiffAt_infty_of_norm_lt_radius : ‖w‖ < expMapC2Radius g p → ContMDiffAt ∞ (expMap g p) w`
+(or anchored to a fixed fraction of `injRadius`).  This is smoothness-layer work
+(re-deriving the OffZero off-zero ∞ producer on a geometrically-named radius), so it is
+deferred per the "frontier is no longer smoothness" scope.  Full record + the post-unblock
+discharge chain in `StepBLocalMetrics.md`.
+
 Target file: `StepBLocalMetrics.lean`.
 
 Goal: from `NormalCoordMetricBoundInput`, Step A chart/radius data, and

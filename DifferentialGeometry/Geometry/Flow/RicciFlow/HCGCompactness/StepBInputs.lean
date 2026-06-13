@@ -301,6 +301,35 @@ theorem normalCoordMetric_contDiffOn
   rw [← contMDiffOn_iff_contDiffOn]
   exact (hscalar v w).congr (fun z _ => normalCoordMetric_apply (I := I) Y x z v w)
 
+/-- **B-metric smoothness producer, pure-ball form** (the smallest domain/radius lemma for
+the fixed-`U` wrapper).  Combining `normalCoordMetric_contDiffOn` (`C∞` on `ball 0 δ ∩ source`)
+with a positive model ball inside the chart source (`source` is open and contains `0`), the
+pulled-back normal-coordinate metric is `C∞` on a single `Metric.ball 0 r`.  This is the clean
+consumable shape matching `NormalCoordMetricBoundInput.radius` (no `∩ source` wrinkle).
+
+The per-point `r` here is still an **opaque existential** (`min` of the `expMap`-smoothness
+radius `δ` and the ball-in-source radius), with no uniform positive lower bound across the
+sequence; supplying that uniform lower bound is the remaining frontier recorded in
+`StepBLocalMetrics.md` (it requires anchoring the `∞`-smoothness radius to a Step-A-controlled
+geometric scale — a smoothness-layer input, not domain bookkeeping). -/
+theorem normalCoordMetric_contDiffOn_ball
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
+    ∃ r : ℝ, 0 < r ∧
+      ContDiffOn Real (⊤ : ℕ∞) (normalCoordMetric (I := I) Y x) (Metric.ball (0 : E) r) := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  obtain ⟨δ, hδ, hsm⟩ := normalCoordMetric_contDiffOn (I := I) Y x
+  obtain ⟨r₀, hr₀, hsub⟩ :=
+    Metric.isOpen_iff.mp (expMapDiffeo (I := I) Y.metric x).open_source 0
+      (zero_mem_expMapDiffeo_source (I := I) Y.metric x)
+  refine ⟨min δ r₀, lt_min hδ hr₀, hsm.mono fun z hz => ?_⟩
+  rw [Metric.mem_ball, dist_zero_right] at hz
+  refine ⟨Metric.mem_ball.mpr ?_, hsub (Metric.mem_ball.mpr ?_)⟩
+  · rw [dist_zero_right]; exact lt_of_lt_of_le hz (min_le_left _ _)
+  · rw [dist_zero_right]; exact lt_of_lt_of_le hz (min_le_right _ _)
+
 /-- Local Euclidean equivalence of the pulled-back normal-coordinate metric on `U`:
 `½‖v‖² ≤ g(z)(v,v) ≤ 2‖v‖²` for every `z ∈ U` and `v` — the quadratic-form form of
 the book's `½(δ_ij) ≤ (g_ij) ≤ 2(δ_ij)`. -/

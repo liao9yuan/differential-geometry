@@ -117,3 +117,72 @@ frontier:
   `mfderiv`-pullback-section smoothness brick (~100 lines, geometry layer).
 - B-trans `normalTransition_contDiffOn`: the `C∞` inverse function theorem for the
   inverse chart `normalChartAt = (expMapDiffeo).symm` (separate frontier).
+
+## UPDATE (2026-06-13): B-metric producer steps 1–2 LANDED in `StepBInputs.lean`
+
+Two verified, axiom-clean (`[propext, Classical.choice, Quot.sound]`) building blocks for
+`normalCoordMetric_contDiffOn`:
+- `expMapDiffeo_contMDiffOn_ball` — the **C¹→C∞ comparison** (hard-stop #1 fallback): on
+  `ball 0 δ ∩ source` (δ from `expMap_contMDiffAt_infty_of_norm_lt`), the realized
+  `expMapDiffeo` (a `PartialDiffeomorph … 1`) is `ContMDiffOn ⊤`, since it agrees there with
+  the now-`C∞` `expMap` (`ContMDiffOn.congr` + `expMapDiffeo_apply_eq`).
+- `normalCoordMetric_apply` — the **scalar evaluation**
+  `normalCoordMetric Y x z v w = g.inner(expMapDiffeo z)(D z v)(D z w)`, `D = mfderiv …`.
+
+### DONE: full producer `normalCoordMetric_contDiffOn` (2026-06-13), axiom-clean
+The full producer landed in `StepBInputs.lean` (focused check green,
+`[propext, Classical.choice, Quot.sound]`).  Steps 3–5 were assembled exactly as scoped:
+- step 3 pushforward sections: `expMapDiffeo_pushforward_section_contMDiffOn` (private) via
+  `ContMDiffOn.contMDiffOn_tangentMapWithin` ∘ the constant tangent section
+  `contMDiff_vectorSpace_iff_contDiff.mpr contDiff_const` (NOT the homeomorph-symm route —
+  that hits the `ModelProd`/`prodChartedSpace` instance wall) + `mfderivWithin_of_isOpen`;
+- steps 4–5: `ContMDiffOn.clm_bundle_apply₂` (metric section + two pushforward sections) →
+  `contMDiffWithinAt_totalSpace` scalar extraction → `contDiffOn_clm_apply` ×2 →
+  `contMDiffOn_iff_contDiffOn`.
+
+**`hsmooth` is no longer the gate.**  For a fixed `β`, `exists_metricLimit_normalCoord`'s
+`hsmooth : ∀ k, ContDiffOn ℝ ⊤ (normalCoordMetric (X.obj k) (c k)) U` is now PROVABLE on the
+producer's own ball `ball 0 δ_k ∩ source_k` from `normalCoordMetric_contDiffOn`.  The ONLY
+remaining gap to discharge `hsmooth` on the wrapper's fixed `U` is **gap #2 (uniform radius)**:
+the producer yields a per-`k` existential `δ_k`, while `exists_metricLimit_on` needs a single
+`U` with `U ⊆ ball 0 δ_k ∩ source_k` for all `k`.
+
+## UPDATE (2026-06-13, session 3): pure-ball producer LANDED; uniform-radius is NOT pure bookkeeping
+
+`normalCoordMetric_contDiffOn_ball` landed in `StepBInputs.lean` (focused check green,
+axiom-clean `[propext, Classical.choice, Quot.sound]`): combining `normalCoordMetric_contDiffOn`
+with `Metric.isOpen_iff` on the open `expMapDiffeo.source` (`zero_mem_expMapDiffeo_source`), it
+gives `∃ r > 0, ContDiffOn ℝ ⊤ (normalCoordMetric Y x) (Metric.ball 0 r)` — the clean pure-ball
+shape (no `∩ source`), matching `NormalCoordMetricBoundInput.radius`.  This is the "smallest
+domain/radius lemma" of the bridge route.
+
+**Correction to the earlier note (it was too optimistic).**  Discharging `hsmooth`/`hdom` on a
+fixed `U` is **HARD-STOP #1**, and the missing input is *not* pure Step-A bookkeeping — it is a
+**smoothness-layer anchoring theorem**.  Precise reason:
+- The producer radius `r_k = min(δ_k, source-ball_k)`, where `δ_k = (T_match/2)·ρ` comes from
+  `expMap_contMDiffAt_infty_of_norm_lt` ⟵ `exists_unified_chartFlow_data_inf` — an **opaque ODE
+  existential** with NO geometric anchor and NO uniform lower bound across the sequence.
+- Step-A *does* uniformly control the **injectivity radius** (`InjRadiusDecayInput.decay`,
+  `a·(min baseInj.ρ 1)^n·e^{-C·dist}`) and the **C²/geometry radius** `expMapC2Radius`
+  (`GoodCoveringItem3.Item3RadiusInput`'s `ρ k α ≤ expMapC2Radius`, with
+  `ball 0 (expMapC2Radius) ⊆ source`).  But `expMapC2Radius` is built from a *separate*
+  `Classical.choose (expMap_contMDiffAt2_of_norm_lt)` (only **C²**), independent of the ∞-radius
+  `δ_k`.  No theorem relates `δ_k` to `injRadius` or `expMapC2Radius`.
+- Therefore `inf_k δ_k > 0` cannot be established, so `U ⊆ ball 0 δ_k` (fixed `U`, all `k`) is
+  unprovable from current API.
+
+**Exact missing theorem (the unblock):** a *named-radius* ∞-smoothness producer
+`expMap_contMDiffAt_infty_of_norm_lt_radius : ‖w‖ < ρ_geom g p → ContMDiffAt ∞ (expMap g p) w`,
+where `ρ_geom` is a geometric radius that Step-A already bounds below uniformly — e.g.
+`ρ_geom = expMapC2Radius g p` (then `ball ⊆ source` is free via its 4th component), or a fixed
+fraction of `injRadius g p`.  Equivalently: prove the ∞-smoothness radius `≥ expMapC2Radius`
+(plausible since the C² radius is itself a downgrade of the same fixed-box chart-flow `C∞`
+data, but the two existentials are chosen independently, so this needs an explicit comparison
+or a re-derivation of the ∞ producer anchored to `expMapC2Radius`).  This is **smoothness-layer
+work** (re-opening / extending the OffZero off-zero ∞-smoothness frontier), NOT the
+domain-bookkeeping the planner's framing assumed.  Once it lands, the fixed-`U` discharge
+chains: `normalCoordMetric_contDiffOn_ball` (now on `ball 0 (expMapC2Radius)`) + Step-A
+`Item3RadiusInput`/`InjRadiusDecayInput` uniform lower bound + `ContDiffOn.mono`.
+
+The ODE/geometry smoothness frontier for a *single* manifold is closed; what remains is making
+that single-manifold smoothness radius **geometrically named and uniformly bounded below**.
