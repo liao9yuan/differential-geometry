@@ -70,6 +70,10 @@ axiom-clean):
   compact (`IsCompact.bddAbove_image` of `(continuous_iteratedFDeriv).norm`, summed
   over `i ≤ p`), `∑ C(r,i) = 2ʳ`; threshold `ε/(2ᵖ·Bg+1)`.  This is the closure for
   the fixed `gRef`-Christoffel correction terms.
+- `MapCInfConvOnCompacts.sum (s : Finset ι) (∀ i, MapCInfConvOnCompacts U (Φ i)
+  (Φinf i)) (ContDiff hyps) : MapCInfConvOnCompacts U (fun k z => ∑ i ∈ s, Φ i k z)
+  (fun z => ∑ i ∈ s, Φinf i z)` — `Finset.induction` fold of `.add` (`ContDiff.sum`
+  for partial-sum smoothness); the form the Christoffel/slot sums take.
 
 ## Gap B `a ≥ 1` — route now fully scoped (the remaining work is assembly)
 Producers (1)=B2 fderiv-closure and (3)=add/mulLeft are DONE.  Producer (2) — the

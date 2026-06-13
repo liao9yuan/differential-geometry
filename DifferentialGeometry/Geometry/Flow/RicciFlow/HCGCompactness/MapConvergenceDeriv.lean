@@ -182,5 +182,34 @@ theorem MapCInfConvOnCompacts.mulLeft {U : Set E} {Φ : ℕ → E → ℝ} {Φli
       = 2 ^ r * Bg * ε / (2 ^ p * Bg + 1) from by ring, div_le_iff₀ hD]
   nlinarith [mul_nonneg (mul_nonneg hε.le (sub_nonneg.mpr h2r)) hBg0, hε.le]
 
+/-- **Finite sums of `C^∞`-on-compacts convergent families converge.**  The
+`Finset` fold of `MapCInfConvOnCompacts.add` — the form the covariant-tower
+induction uses for the Christoffel correction sums (over the slot index and the
+frame index). -/
+theorem MapCInfConvOnCompacts.sum {ι : Type*} {U : Set E} (s : Finset ι)
+    {Φ : ι → ℕ → E → F} {Φinf : ι → E → F}
+    (h : ∀ i, MapCInfConvOnCompacts U (Φ i) (Φinf i))
+    (hc : ∀ i k, ContDiff ℝ (∞ : WithTop ℕ∞) (Φ i k))
+    (hic : ∀ i, ContDiff ℝ (∞ : WithTop ℕ∞) (Φinf i)) :
+    MapCInfConvOnCompacts U (fun k z => ∑ i ∈ s, Φ i k z) (fun z => ∑ i ∈ s, Φinf i z) := by
+  classical
+  induction s using Finset.induction with
+  | empty =>
+    intro K hK hKU p ε hε
+    refine ⟨0, fun k _ r _ x _ => ?_⟩
+    simp only [Finset.sum_empty, mapDerivNorm, sub_self, iteratedFDeriv_fun_zero,
+      Pi.zero_apply, norm_zero]
+    exact hε.le
+  | insert a t hat ih =>
+    rw [show (fun k z => ∑ i ∈ insert a t, Φ i k z)
+          = (fun k z => Φ a k z + ∑ i ∈ t, Φ i k z) from by
+            funext k z; rw [Finset.sum_insert hat],
+      show (fun z => ∑ i ∈ insert a t, Φinf i z)
+          = (fun z => Φinf a z + ∑ i ∈ t, Φinf i z) from by
+            funext z; rw [Finset.sum_insert hat]]
+    exact MapCInfConvOnCompacts.add (h a) ih (fun k => hc a k) (hic a)
+      (fun k => ContDiff.sum (fun i _ => hc i k)) (ContDiff.sum (fun i _ => hic i))
+
 end HCGCompactness
 end DifferentialGeometry
+
