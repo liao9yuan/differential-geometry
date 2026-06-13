@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.ConnectionDifferenceFieldJets
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CrossCorrectionParallelContraction
+import DifferentialGeometry.Geometry.Connection.TensorNabla.DeTurckVFIntrinsicValueBound
 
 /-! # The bare connection-difference `(0,3)`-section and the DeTurck-field cometric-trace operator
 
@@ -22,6 +23,23 @@ the *base* metric `g₀` doing the lowering of the *fixed-pair* connection diffe
 lowering used here — a separately-named lowering metric on an arbitrary connection-difference pair —
 is the `g₀`-fibre carrier that the two-arm DeTurck-field cometric-trace operator development consumes.
 
+The file then proves the **intrinsic frame-free DeTurck-field cometric-double-trace identity** — the
+foundational bottom of the Lie line, mirroring the curvature half's
+`crossCorrParallelContraction_eq_crossCorrectionSection`.  The `g`-lowered DeTurck vector field
+`W^♭ = g(deTurckVF g g', ·)` (the `(0,1)`-section `loweredDeTurckVFSection g g'`) is identified with the
+operator-field action of the `∇₀`-parallel cometric double-trace field `cometricDoubleTraceField g 1`
+on the bare lowered connection-difference section:
+
+```
+loweredDeTurckVFSection g g'
+  = appCcRS g 0 (1 + 2) 1 (cometricDoubleTraceField g 1) (connDiffSection g g').
+```
+
+This is `W^k = g^{ij}(Γ(g)^k_{ij} − Γ̄^k_{ij})` read as the `g`-cometric (`g⁻¹`) double trace of the
+connection difference, established with NO chart inverse-Gram (the chart-Gram-weighted trace
+`deTurckVF_apply_eq` is read in a `g`-orthonormal frame where the inverse Gram is the identity, and the
+cometric double trace becomes the matching orthonormal-frame diagonal).
+
 ## Main definitions
 
 * `connDiffLoweredTri gL gA gB x` — the continuous trilinear form
@@ -31,6 +49,9 @@ is the `g₀`-fibre carrier that the two-arm DeTurck-field cometric-trace operat
   same chart-coordinate route as `loweredConnDiffField`.
 * `connDiffSection g₀ g_bg := connDiffLoweredSection g₀ g₀ g_bg` — the `g₀`-lowered fixed-pair
   connection difference, as a `SmoothCcTensor g₀ 0 3`.
+* `loweredDeTurckVFField g g'` / `loweredDeTurckVFSection g g'` — the `g`-lowered DeTurck vector field
+  as a smooth covariant `(0, 1)`-tensor field / `SmoothCcTensor g 0 1`, fibre value
+  `c ↦ g.inner x (deTurckVF g g' x) c`.
 
 ## Main results
 
@@ -38,6 +59,15 @@ is the `g₀`-fibre carrier that the two-arm DeTurck-field cometric-trace operat
   `toModel(connDiffSection g₀ g_bg x) ![a, b, c] = g₀.inner x (connDiff g₀ g_bg x b a) c`.
 * `connDiffSection_self_toModel` — the `g`-lowered connection difference of `g` with itself is the
   zero section (the non-vacuity litmus; `connDiff_self`).
+* `iteratedCovGrad_appCcRS_of_parallel`, `covGrad_slotExtendPow_eq_zero` — the public per-arm iterated
+  parallel operator-field covariant Leibniz reductions.
+* `deTurckVF_eq_sum_orthonormalBasis` — the public intrinsic frame-free DeTurck value
+  `deTurckVF g g' x = ∑ i, connDiff g g' x (B i) (B i)` in any `g`-orthonormal frame.
+* `cometricDualBasisDoubleTrace_eq_orthoFrameDiag` — the cometric dual-basis double trace equals the
+  `g`-orthonormal-frame diagonal sum (generic rank).
+* `deTurckVF_eq_appCcRS_cometricTrace_connDiffSection` — the **intrinsic frame-free cometric-double-trace
+  identity** `loweredDeTurckVFSection g g' = appCcRS g 0 (1+2) 1 (cometricDoubleTraceField g 1)
+  (connDiffSection g g')`.
 -/
 
 noncomputable section
@@ -366,6 +396,386 @@ theorem iteratedCovGrad_appCcRS_of_parallel (g₀ : SmoothRiemannianMetric I M) 
       (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ a b p W), zero_add]
     rw [PDE.RicciFlow.iteratedCovGrad_succ]
     rfl
+
+/-! ### The intrinsic frame-free DeTurck-field cometric-double-trace identity
+
+The DeTurck vector field `W = deTurckVF g g'`, lowered by `g` to the `(0,1)`-covector
+`c ↦ g(W, c)`, is the genuine `g`-cometric double trace of the bare connection-difference
+`(0,3)`-section `connDiffSection g g'` (whose fibre is `g(connDiff g g' x b a, c)`).  This is the
+DeTurck-field analog of the curvature half's `crossCorrParallelContraction_eq_crossCorrectionSection`
+(which identifies the parallel two-section cometric contraction with the concrete cross-correction
+section): here the un-differentiated lowered DeTurck field is identified with the operator-field action
+`appCcRS g 0 3 1 (cometricDoubleTraceField g 1) (connDiffSection g g')` of the **frame-free
+`∇₀`-parallel** cometric double-trace operator field `cometricDoubleTraceField g 1`
+(`cometricDoubleTraceField_covGrad_eq_zero`) on the bare lowered connection-difference section.
+
+Everything is INTRINSIC: the chart-Gram-weighted trace `deTurckVF_apply_eq`
+(`W = g^{jk}(Γ − Γ̄)`, T1-forbidden) is read in any `g`-orthonormal frame `{e_i}` where the inverse
+Gram is the identity, collapsing to the plain frame sum `W x = ∑_i (connDiff g g' x)(e_i, e_i)`
+(`deTurckVF_eq_sum_orthonormalBasis`); the cometric double trace, in the same frame, is the
+orthonormal-frame diagonal `∑_i D(e_i, e_i, ·)` (`cometricDualBasisDoubleTrace_eq_orthoFrameDiag`),
+routed through the smooth cometric Hom-section `inverseMetricSharpField` with NO chart-selected ambient
+frame.  Once this base identity exists, the two-arm `fieldDiffGradSection` development closes its `∇^l`
+reduction through `iteratedCovGrad_appCcRS_of_parallel` + `covGrad_slotExtendPow_eq_zero` above. -/
+
+set_option linter.unusedSectionVars false in
+/-- **Intrinsic orthonormal-frame trace identity for the DeTurck vector field** (public form).  For
+any `g`-orthonormal frame `{B i}` at `x`, the DeTurck vector field collapses to the plain frame sum of
+the connection difference: `deTurckVF g g' x = ∑ i, (connDiff g g' x)(B i, B i)`.  The chart-free reading
+of the chart-Gram-weighted trace `deTurckVF_apply_eq`: the trace is the basis-independent `g`-cometric
+trace of `connDiff g g'`, computed in the `g`-orthonormal frame where the inverse Gram is the identity
+(by `orthonormal_basis_bilin_trace_chartα`).  The public companion of the value-bound file's private
+`deTurckVF_eq_sum_orthonormalBasis`. -/
+theorem deTurckVF_eq_sum_orthonormalBasis (g g' : SmoothRiemannianMetric I M) (x : M)
+    (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
+    (hB : ∀ (i j : Fin (Module.finrank ℝ E)),
+      g.inner x (B i) (B j) = if i = j then 1 else 0) :
+    (deTurckVF (I := I) g g' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x =
+      ∑ i, connDiff (I := I) g g' x (B i) (B i) := by
+  have hx : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt' x
+  have htrace := Integral.Connection.orthonormal_basis_bilin_trace_chartα (I := I) (M := M)
+    (A := TangentSpace I x) g x (b := x) hx (connDiff (I := I) g g' x) B hB
+  rw [htrace, deTurckVF_apply_eq (I := I) g g' x]
+
+set_option linter.unusedSectionVars false in
+/-- **The cometric dual-basis double trace equals the `g`-orthonormal-frame diagonal sum.**  For a
+`g`-orthonormal frame `{e i}` at `x` with the Parseval expansion `v = ∑ᵢ g(eᵢ, v) • eᵢ`, the frame-free
+cometric double trace of a model `(0, s+2)`-tensor `T` — slot `0` raised by the cometric `♯` of the
+model dual-basis covectors `b^k`, slot `1` contracted against the model basis `b_k`, summed over `k` —
+equals the orthonormal-frame diagonal sum `∑ᵢ T(eᵢ, eᵢ, mm)`.  The cometric raise reads `g` only through
+the smooth Hom-section (via `cometricReadingModel_dualBasis_inner`: `g(♯b^k, u) = repr(u)ₖ`); pairing the
+raised covectors against the Parseval expansion of the frame collapses the chart-model double sum to the
+intrinsic frame diagonal.  The public, generic-`s` companion of `CometricDoubleTraceField`'s private
+`cometric_dualTrace_eq_orthoFrame_diag`. -/
+theorem cometricDualBasisDoubleTrace_eq_orthoFrameDiag
+    (g : SmoothRiemannianMetric I M) {s : ℕ} (x : M)
+    (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
+    (hexpand : ∀ v : TangentSpace I x, v = ∑ i, g.inner x (e i) v • e i)
+    (T : Tensor0SBundle.Tensor0SModel (s + 2) ℝ E) (mm : Fin s → E) :
+    ∑ k : Fin (Module.finrank ℝ E),
+        T (Fin.cons (cometricReadingModel (I := I) g x
+              (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                ((Module.finBasis ℝ E).cDualBasis k)))
+            (Fin.cons ((Module.finBasis ℝ E) k) mm)) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        T (Fin.cons ((e i : TangentSpace I x) : E)
+            (Fin.cons ((e i : TangentSpace I x) : E) mm)) := by
+  classical
+  have hslot0_sum : ∀ (fs : Finset (Fin (Module.finrank ℝ E))) (f : Fin (Module.finrank ℝ E) → E)
+      (rest : Fin (s + 1) → E),
+      T (Fin.cons (∑ i ∈ fs, f i) rest) = ∑ i ∈ fs, T (Fin.cons (f i) rest) := by
+    intro fs f rest
+    have h : ∀ u : E, T (Fin.cons u rest) =
+        ((continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (s + 2) => E) ℝ) T u) rest := by
+      intro u; rw [continuousMultilinearCurryLeftEquiv_apply]
+    rw [h, map_sum, ContinuousMultilinearMap.sum_apply]
+    exact Finset.sum_congr rfl fun i _ => (h (f i)).symm
+  have hslot0_smul : ∀ (c : ℝ) (u : E) (rest : Fin (s + 1) → E),
+      T (Fin.cons (c • u) rest) = c * T (Fin.cons u rest) := by
+    intro c u rest
+    have h : ∀ z : E, T (Fin.cons z rest) =
+        ((continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (s + 2) => E) ℝ) T z) rest := by
+      intro z; rw [continuousMultilinearCurryLeftEquiv_apply]
+    rw [h, map_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul, ← h]
+  set P : Fin (Module.finrank ℝ E) → TangentSpace I x :=
+    fun k => cometricReadingModel (I := I) g x
+      (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+        ((Module.finBasis ℝ E).cDualBasis k)) with hP_def
+  have hsharp : ∀ (k : Fin (Module.finrank ℝ E)) (u : TangentSpace I x),
+      g.inner x (P k) u = (Module.finBasis ℝ E).repr (u : E) k :=
+    fun k u => cometricReadingModel_dualBasis_inner (I := I) g x k u
+  have hexp : ∀ k : Fin (Module.finrank ℝ E),
+      (P k : TangentSpace I x) =
+        ∑ i : Fin (Module.finrank ℝ E),
+          ((Module.finBasis ℝ E).repr ((e i : TangentSpace I x) : E) k) • e i := by
+    intro k
+    conv_lhs => rw [hexpand (P k)]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    rw [g.symm x (e i) (P k), hsharp k (e i)]
+  calc ∑ k : Fin (Module.finrank ℝ E),
+        T (Fin.cons ((P k : TangentSpace I x) : E) (Fin.cons ((Module.finBasis ℝ E) k) mm))
+      = ∑ k : Fin (Module.finrank ℝ E), ∑ i : Fin (Module.finrank ℝ E),
+          ((Module.finBasis ℝ E).repr ((e i : TangentSpace I x) : E) k) *
+            T (Fin.cons ((e i : TangentSpace I x) : E)
+                (Fin.cons ((Module.finBasis ℝ E) k) mm)) := by
+        refine Finset.sum_congr rfl fun k _ => ?_
+        have hPk : ((P k : TangentSpace I x) : E) =
+            ∑ i : Fin (Module.finrank ℝ E),
+              ((Module.finBasis ℝ E).repr ((e i : TangentSpace I x) : E) k) •
+                ((e i : TangentSpace I x) : E) := by
+          have h := hexp k
+          calc ((P k : TangentSpace I x) : E)
+              = (∑ i : Fin (Module.finrank ℝ E),
+                  ((Module.finBasis ℝ E).repr ((e i : TangentSpace I x) : E) k) • e i :
+                    TangentSpace I x) := by rw [← h]
+            _ = ∑ i : Fin (Module.finrank ℝ E),
+                  ((Module.finBasis ℝ E).repr ((e i : TangentSpace I x) : E) k) •
+                    ((e i : TangentSpace I x) : E) := rfl
+        calc T (Fin.cons ((P k : TangentSpace I x) : E)
+                  (Fin.cons ((Module.finBasis ℝ E) k) mm))
+            = T (Fin.cons (∑ i : Fin (Module.finrank ℝ E),
+                  ((Module.finBasis ℝ E).repr ((e i : TangentSpace I x) : E) k) •
+                    ((e i : TangentSpace I x) : E))
+                (Fin.cons ((Module.finBasis ℝ E) k) mm)) := by rw [hPk]
+          _ = ∑ i : Fin (Module.finrank ℝ E),
+                T (Fin.cons (((Module.finBasis ℝ E).repr ((e i : TangentSpace I x) : E) k) •
+                    ((e i : TangentSpace I x) : E))
+                  (Fin.cons ((Module.finBasis ℝ E) k) mm)) :=
+              hslot0_sum Finset.univ
+                (fun i => ((Module.finBasis ℝ E).repr ((e i : TangentSpace I x) : E) k) •
+                  ((e i : TangentSpace I x) : E))
+                (Fin.cons ((Module.finBasis ℝ E) k) mm)
+          _ = ∑ i : Fin (Module.finrank ℝ E),
+                ((Module.finBasis ℝ E).repr ((e i : TangentSpace I x) : E) k) *
+                  T (Fin.cons ((e i : TangentSpace I x) : E)
+                      (Fin.cons ((Module.finBasis ℝ E) k) mm)) :=
+              Finset.sum_congr rfl fun i _ => hslot0_smul _ _ _
+    _ = ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+          ((Module.finBasis ℝ E).repr ((e i : TangentSpace I x) : E) k) *
+            T (Fin.cons ((e i : TangentSpace I x) : E)
+                (Fin.cons ((Module.finBasis ℝ E) k) mm)) := Finset.sum_comm
+    _ = ∑ i : Fin (Module.finrank ℝ E),
+          T (Fin.cons ((e i : TangentSpace I x) : E)
+              (Fin.cons ((e i : TangentSpace I x) : E) mm)) := by
+        refine Finset.sum_congr rfl fun i _ => ?_
+        have hcurry2 : ∀ (lead : E) (z : E),
+            T (Fin.cons lead (Fin.cons z mm)) =
+              ((continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (s + 1) => E) ℝ)
+                  ((continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (s + 2) => E) ℝ) T lead)
+                  z) mm := by
+          intro lead z
+          rw [continuousMultilinearCurryLeftEquiv_apply, continuousMultilinearCurryLeftEquiv_apply]
+        have hslot1_sum : ∀ (fs : Finset (Fin (Module.finrank ℝ E)))
+            (f : Fin (Module.finrank ℝ E) → E) (lead : E),
+            T (Fin.cons lead (Fin.cons (∑ j ∈ fs, f j) mm)) =
+              ∑ j ∈ fs, T (Fin.cons lead (Fin.cons (f j) mm)) := by
+          intro fs f lead
+          rw [hcurry2, map_sum, ContinuousMultilinearMap.sum_apply]
+          exact Finset.sum_congr rfl fun j _ => (hcurry2 lead (f j)).symm
+        have hslot1_smul : ∀ (c : ℝ) (u : E) (lead : E),
+            T (Fin.cons lead (Fin.cons (c • u) mm)) = c * T (Fin.cons lead (Fin.cons u mm)) := by
+          intro c u lead
+          rw [hcurry2, map_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul, ← hcurry2]
+        calc ∑ k : Fin (Module.finrank ℝ E),
+              ((Module.finBasis ℝ E).repr ((e i : TangentSpace I x) : E) k) *
+                T (Fin.cons ((e i : TangentSpace I x) : E)
+                    (Fin.cons ((Module.finBasis ℝ E) k) mm))
+            = ∑ k : Fin (Module.finrank ℝ E),
+                T (Fin.cons ((e i : TangentSpace I x) : E)
+                    (Fin.cons (((Module.finBasis ℝ E).repr ((e i : TangentSpace I x) : E) k) •
+                      ((Module.finBasis ℝ E) k)) mm)) := by
+                refine Finset.sum_congr rfl fun k _ => ?_
+                rw [hslot1_smul]
+          _ = T (Fin.cons ((e i : TangentSpace I x) : E)
+                  (Fin.cons (∑ k : Fin (Module.finrank ℝ E),
+                    ((Module.finBasis ℝ E).repr ((e i : TangentSpace I x) : E) k) •
+                      ((Module.finBasis ℝ E) k)) mm)) := (hslot1_sum Finset.univ _ _).symm
+          _ = T (Fin.cons ((e i : TangentSpace I x) : E)
+                  (Fin.cons ((e i : TangentSpace I x) : E) mm)) := by
+                rw [(Module.finBasis ℝ E).sum_repr ((e i : TangentSpace I x) : E)]
+
+/-- **The `g`-lowered DeTurck vector field as a smooth covariant `(0,1)`-tensor field.**  Its fibre
+value is the `g`-covector `c ↦ g(deTurckVF g g' x, c)` (the metric lowering `W ↦ W^♭` of the DeTurck
+vector field), packaged via the rank-`1` model bridge `model_covectorOfCLM`.  Chart-component smoothness
+is the `g`-inner pairing of the smooth DeTurck section `deTurckVF g g'` against the smooth chart frame
+(`contMDiff_g_inner_of_smooth_sections`), by the same `contMDiff_multilinearSection_iff_coord` route as
+`connDiffLoweredField`. -/
+def loweredDeTurckVFField (g g' : SmoothRiemannianMetric I M) :
+    Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) ∞ 1 :=
+  letI := tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 1
+  letI := TangentBundle.contMDiffVectorBundle (I := I) (M := M) (n := ∞)
+  ⟨fun x => Tensor0SSpace.ofModel
+      (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+        (g.inner x (deTurckVF (I := I) g g' x))), by
+    let d := Module.finrank ℝ E
+    let b : Module.Basis (Fin d) ℝ E := chartModelBasis E
+    refine (contMDiff_multilinearSection_iff_coord (TangentSpace I) ∞ b _).mpr
+      fun σ x₀ => ?_
+    have hcomp : ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+        (fun x : M =>
+          g.inner x (deTurckVF (I := I) g g' x)
+            (chartFrameVec (I := I) x₀ (σ 0) x))
+        (chartAt H x₀).source := by
+      intro x hx
+      have hframe_on : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
+          (fun bb : M => TotalSpace.mk' E bb (chartFrameVec (I := I) x₀ (σ 0) bb))
+          (chartAt H x₀).source := chartAlphaFrame_section_contMDiffOn (I := I) x₀ (σ 0)
+      obtain ⟨S, hS_eq⟩ :=
+        exists_contMDiffSection_eqOn_nhd
+          (s := fun _ : Fin 1 => fun bb : M => chartFrameVec (I := I) x₀ (σ 0) bb)
+          (u := (chartAt H x₀).source) (p := x)
+          (fun _ => hframe_on) ((chartAt H x₀).open_source) hx
+      have hSk : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+          (T% (fun bb : M => (S 0) bb : Π bb : M, TangentSpace I bb)) := (S 0).contMDiff
+      have hpair : ContMDiff I 𝓘(ℝ, ℝ) ∞
+          (fun bb : M => g.inner bb (deTurckVF (I := I) g g' bb) ((S 0) bb)) :=
+        contMDiff_g_inner_of_smooth_sections (I := I) g (deTurckVF (I := I) g g') (S 0)
+      have hpair_at : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
+          (fun bb : M => g.inner bb (deTurckVF (I := I) g g' bb) ((S 0) bb)) x := hpair x
+      have hchart_at : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
+          (fun x : M => g.inner x (deTurckVF (I := I) g g' x)
+            (chartFrameVec (I := I) x₀ (σ 0) x)) x := by
+        refine hpair_at.congr_of_eventuallyEq ?_
+        filter_upwards [hS_eq] with bb hb
+        rw [hb 0]
+      exact hchart_at.contMDiffWithinAt
+    have hx₀_src : x₀ ∈ (chartAt H x₀).source := mem_chart_source H x₀
+    have hx₀_base : x₀ ∈ (trivializationAt E (TangentSpace I) x₀).baseSet :=
+      mem_baseSet_trivializationAt E (TangentSpace I) x₀
+    have h_src_nhd : (chartAt H x₀).source ∈ 𝓝 x₀ :=
+      (chartAt H x₀).open_source.mem_nhds hx₀_src
+    refine ((hcomp x₀ hx₀_src).contMDiffAt h_src_nhd).congr_of_eventuallyEq ?_
+    have h_base_nhd :
+        (trivializationAt E (TangentSpace I) x₀).baseSet ∈ 𝓝 x₀ :=
+      (trivializationAt E (TangentSpace I) x₀).open_baseSet.mem_nhds hx₀_base
+    filter_upwards [h_base_nhd] with x hx
+    rw [continuousMultilinearMap_basis_repr]
+    change Tensor0SSpace.toModel
+        (Tensor0SSpace.ofModel (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+          (g.inner x (deTurckVF (I := I) g g' x))) : Tensor0SSpace 1 I x)
+        (fun j => (trivializationAt E (TangentSpace I) x₀).symmL ℝ x (b (σ j))) = _
+    rw [Tensor0SSpace.toModel_ofModel, Tensor0SBundle.model_covectorOfCLM_apply]
+    rfl⟩
+
+/-- The `g`-lowered DeTurck vector field as a smooth mixed `(0,1)`-tensor section. -/
+def loweredDeTurckVFMixedSection (g g' : SmoothRiemannianMetric I M) :
+    Cₛ^∞⟮I; TensorRSModel 0 1 ℝ E, (fun x : M => TensorRSSpace 0 1 I x)⟯ :=
+  MixedSection.fromMultilinearSection (𝕜 := ℝ) (F := E) (IB := I)
+    (E := (TangentSpace I : M → Type _)) ∞ (loweredDeTurckVFField (I := I) g g')
+
+/-- **The `g`-metrically-lowered DeTurck vector field as a `SmoothCcTensor g 0 1`** — the genuine
+covariant `(0,1)`-section representative of the DeTurck field, with fibre value
+`toModel(loweredDeTurckVFSection g g' x) ![c] = g.inner x (deTurckVF g g' x) c`
+(`loweredDeTurckVFSection_toModel_apply`); compact support automatic on the closed manifold `M`.  This
+is the LHS of the intrinsic cometric-double-trace identity
+`deTurckVF_eq_appCcRS_cometricTrace_connDiffSection`. -/
+def loweredDeTurckVFSection (g g' : SmoothRiemannianMetric I M) :
+    Integral.L2.SmoothCcTensor g 0 1 where
+  toSection := loweredDeTurckVFMixedSection (I := I) g g'
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+set_option linter.unusedSectionVars false in
+/-- **The fibre value of the `g`-lowered DeTurck vector field section.**  Evaluating the underlying
+`(0,1)` mixed tensor at the canonical unit `(0,0)`-tensor and a tangent vector `c` recovers the
+`g`-lowering `g.inner x (deTurckVF g g' x) c`. -/
+theorem loweredDeTurckVFSection_toModel_apply (g g' : SmoothRiemannianMetric I M) (x : M)
+    (c : TangentSpace I x) :
+    Tensor0SSpace.toModel
+        ((loweredDeTurckVFSection (I := I) g g').toSection x
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+          ![c] =
+      g.inner x (deTurckVF (I := I) g g' x) c := by
+  classical
+  change Tensor0SSpace.toModel
+      ((MixedSection.eval₀ (F := E) (E := (TangentSpace I : M → Type _)) x).smulRight
+          (loweredDeTurckVFField (I := I) g g' x)
+        (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+          ![c] = _
+  rw [ContinuousLinearMap.smulRight_apply, MixedSection.eval₀_apply,
+    ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
+  change Tensor0SSpace.toModel
+    (Tensor0SSpace.ofModel
+      (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+        (g.inner x (deTurckVF (I := I) g g' x)))) ![c] = _
+  rw [Tensor0SSpace.toModel_ofModel, Tensor0SBundle.model_covectorOfCLM_apply]
+  rfl
+
+set_option linter.unusedSectionVars false in
+/-- **The intrinsic frame-free DeTurck-field cometric-double-trace identity.**  The `g`-lowered DeTurck
+vector field `loweredDeTurckVFSection g g'` (fibre value `c ↦ g(deTurckVF g g' x, c)`) is the
+operator-field action of the `∇₀`-parallel cometric double-trace operator field
+`cometricDoubleTraceField g 1` on the bare `g`-lowered connection-difference `(0,3)`-section
+`connDiffSection g g'`:
+```
+loweredDeTurckVFSection g g'
+  = appCcRS g 0 (1 + 2) 1 (cometricDoubleTraceField g 1) (connDiffSection g g').
+```
+This is the DeTurck-field analog of the curvature half's
+`crossCorrParallelContraction_eq_crossCorrectionSection`: the `W^k = g^{ij}(Γ(g)^k_{ij} − Γ̄^k_{ij})`
+DeTurck field is the `g`-cometric (`g⁻¹`) double trace of the connection difference, established here
+**INTRINSICALLY** (no chart inverse-Gram).  Proved by section extensionality through the unit
+`(0,0)`-tensor read at a one-vector tuple `![c]`: a `g`-orthonormal frame `{e i}` at `x`
+(`tangent_orthonormalBasis_witness`) makes the cometric double trace the orthonormal-frame diagonal
+`∑ᵢ (connDiffSection)(eᵢ, eᵢ, c) = ∑ᵢ g(connDiff g g' x eᵢ eᵢ, c)`
+(`cometricDualBasisDoubleTrace_eq_orthoFrameDiag` + `connDiffSection_toModel_apply`), and the DeTurck
+field is the same frame's plain trace `∑ᵢ connDiff g g' x eᵢ eᵢ` (`deTurckVF_eq_sum_orthonormalBasis`),
+so both sides equal `g(deTurckVF g g' x, c)`. -/
+theorem deTurckVF_eq_appCcRS_cometricTrace_connDiffSection (g g' : SmoothRiemannianMetric I M) :
+    loweredDeTurckVFSection (I := I) g g' =
+      appCcRS (I := I) (M := M) g 0 (1 + 2) 1
+        (cometricDoubleTraceField (I := I) g 1)
+        (connDiffSection (I := I) g g') := by
+  classical
+  apply Integral.L2.SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply tensor0s_ext_unitZero (I := I) (M := M) (s := 1)
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro v
+  have hvtuple : v = ![v 0] := by funext i; fin_cases i; rfl
+  obtain ⟨n, e, _bse, hn, _hbse, horth, _hpars, hexpand, _hrepr⟩ :=
+    Integral.Connection.tangent_orthonormalBasis_witness (I := I) (M := M) g x
+  have hmn : n = Module.finrank ℝ E := hn
+  subst hmn
+  have hLHS : Tensor0SSpace.toModel
+      ((loweredDeTurckVFSection (I := I) g g').toSection x
+        (unitZeroSec (I := I) (M := M) x)) v = g.inner x (deTurckVF (I := I) g g' x) (v 0) := by
+    rw [hvtuple]
+    exact loweredDeTurckVFSection_toModel_apply (I := I) g g' x (v 0)
+  have hRHS : Tensor0SSpace.toModel
+      ((appCcRS (I := I) (M := M) g 0 (1 + 2) 1
+          (cometricDoubleTraceField (I := I) g 1)
+          (connDiffSection (I := I) g g')).toSection x
+        (unitZeroSec (I := I) (M := M) x)) v = g.inner x (deTurckVF (I := I) g g' x) (v 0) := by
+    rw [show (unitZeroSec (I := I) (M := M) x : Tensor0SSpace 0 I x)
+        = ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ) from rfl]
+    rw [appCcRS_toSection]
+    rw [ContinuousLinearMap.comp_apply]
+    rw [show (cometricDoubleTraceField (I := I) g 1).toSection x
+        = (show Tensor0SBundle.TensorRSSpace (1 + 2) 1 I x from
+            cometricDoubleTraceFib (I := I) g 1 x) from rfl]
+    set D : Tensor0SBundle.Tensor0SSpace (1 + 2) I x :=
+      (connDiffSection (I := I) g g').toSection x
+        (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))
+      with hD_def
+    rw [show ((show Tensor0SBundle.Tensor0SSpace (1 + 2) I x →L[ℝ]
+            Tensor0SBundle.Tensor0SSpace 1 I x from cometricDoubleTraceFib (I := I) g 1 x)
+        ((connDiffSection (I := I) g g').toSection x
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))))
+        = cometricDoubleTraceFib (I := I) g 1 x D from rfl]
+    rw [show Tensor0SSpace.toModel (cometricDoubleTraceFib (I := I) g 1 x D) v
+        = modelDoubleTrace (E := E) 1 (cometricLmodel (I := I) g x)
+            (Tensor0SSpace.toModel D) v from by
+      rw [cometricDoubleTraceFib_toModel]]
+    rw [modelDoubleTrace_apply]
+    rw [show cometricLmodel (I := I) g x = cometricReadingModel (I := I) g x from rfl]
+    rw [cometricDualBasisDoubleTrace_eq_orthoFrameDiag (I := I) g (s := 1) x e hexpand
+      (Tensor0SSpace.toModel D) v]
+    have hsummand : ∀ i : Fin (Module.finrank ℝ E),
+        (Tensor0SSpace.toModel D)
+          (Fin.cons ((e i : TangentSpace I x) : E)
+            (Fin.cons ((e i : TangentSpace I x) : E) v)) =
+          g.inner x (connDiff (I := I) g g' x (e i) (e i)) (v 0) := by
+      intro i
+      have hcons : (Fin.cons ((e i : TangentSpace I x) : E)
+            (Fin.cons ((e i : TangentSpace I x) : E) v) : Fin 3 → TangentSpace I x)
+          = ![e i, e i, v 0] := by
+        funext j; fin_cases j <;> rfl
+      rw [hcons]
+      exact connDiffSection_toModel_apply (I := I) g g' x (e i) (e i) (v 0)
+    rw [Finset.sum_congr rfl (fun i _ => hsummand i)]
+    have hW := deTurckVF_eq_sum_orthonormalBasis (I := I) g g' x e horth
+    rw [hW]
+    have hflip : g.inner x (∑ i, connDiff (I := I) g g' x (e i) (e i)) (v 0)
+        = ∑ i, g.inner x (connDiff (I := I) g g' x (e i) (e i)) (v 0) := by
+      have h := map_sum ((g.inner x).flip (v 0))
+        (fun i => connDiff (I := I) g g' x (e i) (e i)) Finset.univ
+      simp only [ContinuousLinearMap.flip_apply] at h
+      exact h
+    rw [hflip]
+  rw [hLHS, hRHS]
 
 end DeTurck
 end PDE
