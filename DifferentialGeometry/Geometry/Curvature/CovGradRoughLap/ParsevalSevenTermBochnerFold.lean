@@ -5584,6 +5584,109 @@ private lemma diagHessianPureR_pairing_eq_fourTerm_frameJSum
   exact hfs
 
 set_option linter.unusedSectionVars false in
+/-- **The rough-Laplacian-of-`P` pairing plus the spectator action equals the operator-field three-term
+normal form `T₃` (non-circular).**  For a fixed smooth Parseval frame family, with
+`P := pureRGenuineDiffOp g 0 s S` the order-`0` moving-frame pure-Riemann curvature trace and
+`Φ₀ := curvOpField g s`, the rough-Laplacian pairing `⟨Δ_∇ P, S⟩` plus the passenger-slot spectator
+action `⟨appCc (slotExtend Φ₀)(∇S), ∇S⟩` equals the operator-field three-term normal form
+```
+T₃ := ∑_b [ ∫ ⟨P, ∇_{V b}(∇_{V b} S)⟩ + ∫ ⟨P, ∇_{V b} S⟩·divᵍ V_b + ∫ ⟨Φ₀(∇_{V b} S), ∇_{V b} S⟩ ].
+```
+This is the combination of the two non-circular operator-field identities: the Green
+integration-by-parts `tensorL2Inner_genuineDiffCurv_covGrad_eq_neg_roughLap_pureR_sub_spectator`
+(`⟨gDCS, ∇S⟩ = −⟨Δ_∇ P, S⟩ − ⟨spectator⟩`, so the left side equals `−⟨gDCS, ∇S⟩`) and the
+per-direction-IBP normal form `tensorL2Inner_genuineDiffCurv_covGrad_eq_neg_threeTerm`
+(`⟨gDCS, ∇S⟩ = −T₃`, so `−⟨gDCS, ∇S⟩ = T₃`).  Neither transits the kernel leaf
+`genuineDiffCurv_covGrad_eq_diffCurvTrace_add_group1_bianchi`. -/
+private theorem roughLapPureR_add_spectator_eq_threeTerm_aux
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
+    tensorL2Inner (I := I) (M := M) g 0 s
+          (rawTensorConnLapSmooth (I := I) g 0 s
+            (pureRGenuineDiffOp (I := I) (M := M) g 0 s S)).toFun S.toFun +
+        tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+          (appCc (I := I) (M := M) g (s + 1) (s + 1)
+            (slotExtend (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s))
+            (covGrad (I := I) (M := M) g 0 s S)).toFun
+          (covGrad (I := I) (M := M) g 0 s S).toFun =
+      (∑ b : Fin N,
+        ((∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+            (appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s) S).toSection
+            (covApplyGenCc (I := I) (M := M) g s
+              (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)) (hV b)).toSection x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
+        (∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+            (appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s) S).toSection
+            (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x *
+            DifferentialGeometry.Integral.DivergenceTheorem.divergence_g (I := I) g
+              ⟨fun y : M => V b y, hV b⟩ x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)) +
+        (∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+            (appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s)
+              (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b))).toSection
+            (bochnerGradSlot0Cc (I := I) (M := M) g s S (hV b)).toSection x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g)))) := by
+  classical
+  have hIBP := tensorL2Inner_genuineDiffCurv_covGrad_eq_neg_roughLap_pureR_sub_spectator
+    (I := I) (M := M) g s S
+  have h3term := tensorL2Inner_genuineDiffCurv_covGrad_eq_neg_threeTerm
+    (I := I) (M := M) g s S V hV hPar
+  linarith [hIBP, h3term]
+
+set_option linter.unusedSectionVars false in
+/-- **The rough-Laplacian-of-`P` pairing opened in the four-term diagonal-Hessian frame-J double sum.**
+For a fixed smooth Parseval frame family, with `P := pureRGenuineDiffOp g 0 s S` the order-`0`
+moving-frame pure-Riemann curvature trace, the `L²` pairing of the rough Laplacian `Δ_∇ P` against `S`
+equals the family sum over `a` of the integral of the frame-`J`-sum of the diagonal-Hessian four-term unit
+value (`diagHessian_pureR_unit_eval_fourTerm`, read on `m := B ∘ J`) against `S`'s `J`-component.  This is
+the integrated form of the diagonal second-covariant-derivative frame sum
+(`roughLapPureR_pairing_eq_secondCovDeriv_frameSum`) with each diagonal-Hessian cross pairing opened in the
+orthonormal frame (`diagHessianPureR_pairing_eq_fourTerm_frameJSum`).  Purely the section-level
+operator-field product rule read at the unit; no pointwise per-frame curvature jet. -/
+private lemma roughLapPureR_pairing_eq_fourTerm_frameJSum_integrated
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
+    tensorL2Inner (I := I) (M := M) g 0 s
+        (rawTensorConnLapSmooth (I := I) g 0 s
+          (pureRGenuineDiffOp (I := I) (M := M) g 0 s S)).toFun S.toFun =
+      ∑ a : Fin N,
+        ∫ x, (∑ J : Fin s → Fin (Module.finrank ℝ E),
+            Tensor0SSpace.toModel
+                ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+                  tensorSecondCovDeriv (I := I) g 0 s (V a) (V a)
+                    (fun y : M => (appCc (I := I) (M := M) g s s
+                      (curvOpField (I := I) (M := M) g s) S).toSection y) x)
+                  (unitZeroSec (I := I) (M := M) x))
+                (fun k => smoothOrthoFrame (I := I) g x (J k) x) *
+              Tensor0SSpace.toModel
+                ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from S.toSection x)
+                  (unitZeroSec (I := I) (M := M) x))
+                (fun k => smoothOrthoFrame (I := I) g x (J k) x))
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
+  classical
+  have hP : pureRGenuineDiffOp (I := I) (M := M) g 0 s S =
+      appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s) S :=
+    (appCc_curvOpField_eq_pureRGenuineDiffOp (I := I) (M := M) g s S).symm
+  rw [roughLapPureR_pairing_eq_secondCovDeriv_frameSum (I := I) (M := M) g s
+    (pureRGenuineDiffOp (I := I) (M := M) g 0 s S) S V hV hPar]
+  refine Finset.sum_congr rfl (fun a _ => ?_)
+  refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+  obtain ⟨bse, hbse⟩ := smoothOrthoFrame_center_basis (I := I) (M := M) g x
+  rw [show (secondCovDerivCc (I := I) (M := M) g s (hV a)
+        (pureRGenuineDiffOp (I := I) (M := M) g 0 s S)) =
+      secondCovDerivCc (I := I) (M := M) g s (hV a)
+        (appCc (I := I) (M := M) g s s (curvOpField (I := I) (M := M) g s) S) from by rw [hP]]
+  exact diagHessianPureR_pairing_eq_fourTerm_frameJSum (I := I) (M := M) g s S (hV a) x bse hbse
+
+set_option linter.unusedSectionVars false in
 /-- **The genuine differentiated-curvature operator-field pairing value (the moving-frame integrated
 second-Bianchi emission, non-circular form).**  For a fixed smooth Parseval frame family, the frame-free
 `L²` pairing of the differentiated-curvature operator-field section `gDCS := genuineDiffCurvSection g s
