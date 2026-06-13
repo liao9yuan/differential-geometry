@@ -600,6 +600,41 @@ theorem metricPreconv_gInf (hne : Nonempty M)
   have hx : gInf.inner x = gm x := by ext v w; exact hgInf x v w
   rw [hx]; exact hgm x
 
+include I in
+/-- **Gap B base case (covariant order 0).**  The order-0 covariant-tower component
+`component0S b (metricCovDeriv g gRef 0)` is just the metric component
+`g.inner (b ·) (b ·)` (since `covDerivOfField gRef · 0 = ·`), so it converges in
+ANY fibre basis directly from the limit-metric CLM convergence (the
+`metricPreconv_gInf` / `exists_limit_gm` output).  This is the base of the
+covariant tower in the exact `component0S`-of-`metricCovDeriv` shape that the
+`metricDerivNorm` norm bridge consumes; the order `a ≥ 1` steps need the
+coordinate covariant-derivative component formula and its convergence (the missing
+pieces — see `MetricPreconvDiag.md`, "Gap B remaining"). -/
+lemma componentConv_covDeriv_zero
+    (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
+    (φ : ℕ → ℕ) (gInf : SmoothRiemannianMetric I M)
+    (hconv : ∀ x : M, Filter.Tendsto (fun m => (gSeq (φ m)).inner x) Filter.atTop
+      (nhds (gInf.inner x)))
+    (x : M) (b : Module.Basis (Fin (Module.finrank Real E)) Real (TangentSpace I x))
+    (I0 : Fin 2 → Fin (Module.finrank Real E)) :
+    Filter.Tendsto (fun m => Tensor0SBundle.component0S (I := I) b
+        (metricCovDeriv (I := I) (gSeq (φ m)) gRef 0 x) I0) Filter.atTop
+      (nhds (Tensor0SBundle.component0S (I := I) b
+        (metricCovDeriv (I := I) gInf gRef 0 x) I0)) := by
+  have hkey : ∀ g : SmoothRiemannianMetric I M,
+      Tensor0SBundle.component0S (I := I) b (metricCovDeriv (I := I) g gRef 0 x) I0
+        = g.inner x (b (I0 0)) (b (I0 1)) := by
+    intro g
+    simp only [Tensor0SBundle.component0S_apply, metricCovDeriv_eq_covDerivOfField,
+      covDerivOfField_zero]
+    rw [Tensor0SBundle.metricTensorField_apply]
+  simp only [hkey]
+  have hcont : Continuous (fun η : TangentSpace I x →L[Real] TangentSpace I x →L[Real] Real =>
+      η (b (I0 0)) (b (I0 1))) :=
+    ((ContinuousLinearMap.apply Real Real (b (I0 1))).comp
+      (ContinuousLinearMap.apply Real (TangentSpace I x →L[Real] Real) (b (I0 0)))).continuous
+  exact (hcont.tendsto (gInf.inner x)).comp (hconv x)
+
 end Realization
 
 end HCGCompactness

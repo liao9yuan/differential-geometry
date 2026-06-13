@@ -8,7 +8,11 @@ targeted build green 3848 jobs; `#print axioms metricPreconv_gInf` clean =
 (2026-06-13) C-II-final-B0 added: `exists_engine_frameCInfConv` +
 `exists_engine_frameCInfConv_eq_gm` re-expose the engine's `C^∞`-on-compacts
 frame-component convergence (Gap A); both axiom-clean, `metricPreconv_gInf`
-unchanged.  See the "Gap A exposed" / "Gap B" notes below.**
+unchanged.  (2026-06-13) C-II-final-B1: `componentConv_covDeriv_zero` proves the
+covariant-tower bridge at order `a = 0` (base case, axiom-clean); `a ≥ 1` STOPPED
+on two exact missing pieces (derivative-closure of `MapCInfConvOnCompacts` +
+the rank-≥3 coordinate covariant-derivative formula).  See "Gap A exposed" /
+"Gap B base case" / "Gap B remaining" below.**
 
 ## C1a + C1b DONE (2026-06-12) — verified lemma inventory
 
@@ -95,15 +99,60 @@ The engine's `C^∞`-on-compacts frame-component convergence is now re-exposed
   So the chart components of `gSeq (φ (ψ ·))` converge `C^∞`-on-compacts to the
   chart component of the LIMIT metric `gInf` (= `gm`).
 
-### Gap B — the remaining real frontier (NOT in this brick)
-Producing the C-II `hnorm` still needs `componentConv_covDeriv_of_chartCInf`:
-turn the order-0 `C^∞`-on-compacts chart-component convergence above into
-COVARIANT-TOWER component convergence `component0S (metricCovDeriv (gSeq k) gRef a)
-→ component0S (metricCovDeriv gInf gRef a)` for `a ≥ 1` (the convergence-level
-inverse of Brick A2's coordinate→covariant tower expansion; `metricCovDeriv g gRef
-a` is a fixed gRef-Christoffel polynomial in coordinate derivatives ≤ a of the
-order-0 components).  `exists_engine_frameCInfConv` is exactly the order-0 input it
-consumes.  This is the next brick; do not hide it behind a new assumption.
+### Gap B base case DONE (2026-06-13, C-II-final-B1) — `componentConv_covDeriv_zero`
+The COVARIANT order `a = 0` of `componentConv_covDeriv_of_chartCInf` is proved
+(axiom-clean):
+```
+componentConv_covDeriv_zero (gRef gSeq) (φ) (gInf)
+  (hconv : ∀ x, Tendsto (fun m => (gSeq (φ m)).inner x) atTop (𝓝 (gInf.inner x)))
+  (x) (b : Basis (Fin (finrank E)) ℝ (T_xM)) (I0 : Fin 2 → Fin (finrank E)) :
+  Tendsto (fun m => component0S b (metricCovDeriv (gSeq (φ m)) gRef 0 x) I0) atTop
+    (𝓝 (component0S b (metricCovDeriv gInf gRef 0 x) I0))
+```
+`metricCovDeriv g gRef 0 = covDerivOfField gRef (metricTensorField g) 0 =
+metricTensorField g` (`covDerivOfField_zero`), so `component0S b (·) I0 =
+g.inner x (b (I0 0))(b (I0 1))` (`component0S_apply` + `metricTensorField_apply`);
+convergence is then the limit-metric CLM convergence `hconv` (= `metricPreconv_gInf`
+output) under continuous evaluation `η ↦ η (b (I0 0))(b (I0 1))`.  This is frame-
+GENERAL (any fibre `Basis b` — so it serves the good-frame `toBasisAt` the norm
+bridge uses), and needs only the CLM convergence, NOT the `C^∞` (chartCInf) input.
+With the norm bridge at `a = 0` it gives `metricDerivNorm 0 (gSeq k) gInf gRef → 0`
+(the order-0 slice of `hnorm`).
+
+### Gap B remaining (`a ≥ 1`) — STOPPED, two exact missing pieces (per the brick stop condition)
+The covariant content (`a ≥ 1`) is genuinely blocked; neither is hidden behind an
+assumption.  `metricCovDeriv g gRef a` is LINEAR in `g` (`covDerivOfField_add`/
+`_smul`), so the difference is the covariant tower of the order-0 difference; the
+one-covariant-step component formula at rank 2 EXISTS
+(`Coordinates.nabla0SFun_two_eval_coordFrame`, `NablaComponents/TwoTensor.lean`:
+`(∇_X A)(eⱼ,eₗ) = coordDeriv0SAt(A's (j,l) comp) − Σ Christoffel·coordComponent0SAt`).
+But the bridge still needs BOTH:
+
+1. **(analytic) `C^∞`-on-compacts ⇒ coordinate-derivative convergence.**  From
+   `exists_engine_frameCInfConv`'s `MapCInfConvOnCompacts` (Gap A) of the order-0
+   chart components, conclude convergence of `coordDeriv0SAt`/the chart `fderiv` of
+   those components.  `MapConvergence.lean` has NO `fderiv`/derivative-closure
+   lemma for `MapCInfConvOnCompacts` (only `mapDerivNorm`, `comp_subseq`,
+   `mono_*`, `tendsto_of_cInf`).  Needed already for `a = 1`.  Smallest next lemma:
+   `MapCInfConvOnCompacts U Φ Φinf → MapCInfConvOnCompacts U (fun k z => fderiv ℝ
+   (Φ k) z v) (fun z => fderiv ℝ Φinf z v)` (the order-`r` derivative converges;
+   it IS the `MapCPConvOn` content but is not extracted as a usable lemma).
+
+2. **(algebraic) higher-rank coordinate covariant-derivative component formula.**
+   `NablaComponents/` covers only rank ≤ 2 (`Basic`/`OneForm`/`TwoTensor`).  The
+   tower `metricCovDeriv g gRef a = totalNabla0SFun (a+2) ∘ … ` produces rank
+   `a+2 ≥ 3` tensors for `a ≥ 1`; there is NO `component0S (totalNabla0SFun s …)` /
+   `component0S (metricCovDerivStep …)` coordinate formula for `s ≥ 3`.  Smallest
+   next lemma: a recursive `component0S (metricCovDerivStep gRef a A) I0' =
+   coordinate-frame directional derivative of `component0S A` + Σ Christoffel·
+   component0S A` (generalising `nabla0SFun_two_eval_coordFrame` to the tower /
+   arbitrary slot count), which closes the `a → a+1` induction once (1) supplies
+   the derivative convergence.
+
+`fderiv_chartRep_eq_towerStep` (MetricPreconv.lean) gives the per-step germ
+recursion in the scalar-on-sections form, but converting it to a `component0S`
+convergence statement needs exactly (1)+(2).  Do not add a hypothesis that simply
+asserts covariant-tower convergence.
 
 ## C0 — `exists_diag_subseq` (DONE)
 
