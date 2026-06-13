@@ -5,6 +5,35 @@ planning session.  Written 2026-06-11 by the planning (Fable) session.**
 
 ---
 
+## PLANNER ACCEPTANCE — assembly Step 4a (2026-06-13)
+
+ACCEPTED (own build + axioms): `componentConv_covDeriv_of_chartCInf`
+(commit 6c8e5e12) — the pointwise Gap-B endpoint, a≥1 covariant-tower
+component convergence at a point, general order, frame-general basis.
+AXIOM-CLEAN, green 3866 jobs. **The hardest mathematical content of P3 is
+now done.** The pointwise RULING was correct and the `exists_eq_at_gen`
+simplification made the section choice a one-liner (only fix: its arg is
+`n : ℕ∞`).
+
+REMAINING = Step 4b only → `metricPreconvInf` (still unstated, 0%). Two
+sub-assemblies, both API-complete:
+- **4b-i (global diagonal):** `exists_chart_cover` + `exists_diag_subseq`
+  over the countable cover (`hstep` = per-chart `exists_tower_conv`) → one φ
+  carrying tower data on every chart.
+- **4b-ii (uniform hnorm):** `metricDerivNorm_le_compSq_uniform` (ric_bound
+  finite-cover pattern) → `hnorm` → `metricCInfConvOnCompacts_of_normConv`.
+  **DE-RISKED (executor scout + planner first-principles check, HIGH conf):**
+  the norm-bridge basis `bz_i(z) = Σ_j M_{ij}·frame_j(z)` with `M` the
+  CONSTANT (z-independent) `basisE↔finBasis` change of basis in `E` — because
+  both `bz_i(z)` and the coordinate frame `frame_j(z)` are `e.symmL(z)`
+  (linear) applied to a fixed `E`-vector. So `component0S bz` is a
+  constant-coefficient combo of the uniformly-convergent coordinate-frame
+  carriers (`bumpTowerCarrier_all`'s `MapCInfConvOnCompacts`, order-0 slice);
+  uniform-on-K convergence transfers with NO z-varying-basis obstruction.
+  This does NOT reopen the pointwise RULING (the THEOREM stays pointwise —
+  `component0S bz` uniform is still ill-typed); uniformity is recovered HERE,
+  downstream, exactly as the RULING said. No missing API.
+
 ## PLANNER ACCEPTANCE — assembly Steps 1-3 (2026-06-13)
 
 ACCEPTED (own build + axioms): `exists_framePairs_diag` (1-rest),
