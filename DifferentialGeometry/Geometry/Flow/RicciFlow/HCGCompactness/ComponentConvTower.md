@@ -218,7 +218,29 @@ per pair); the per-pair limit pinning then mirrors
   `tangentConst_basis_expand` + `ContMDiffSection.finset_sum_apply_gen` +
   `coe_smul`/`Pi.smul_apply` + `hframeσ`.  **The 4b-ii ALGEBRA is fully done.**
 
-**REMAINING — Step 4b analytic wiring (the endpoint `metricPreconvInf`):**
+## ✅ DONE — Step 4b LANDED: `metricPreconvInf` is PROVED (commits `85669572`, `422b7dd8`)
+
+`metricPreconvInf` (ComponentConvAssembly.lean) — the P3 spatial endpoint — is stated
+and proved, **axiom-clean** (`propext, Classical.choice, Quot.sound`), targeted build
+green 3866 jobs.  The full P3 spatial gate (Gap B → endpoint) is COMPLETE.
+- **(b) `exists_uniform_patch`** — per-patch uniform `metricDerivNorm`: `exists_goodFrame_compBound`
+  (a-independent `basisE/u'`, NOT `metricDerivNorm_le_compSq_uniform` whose per-`a` `∃`
+  hides it) + `exists_frameData` frame + `exists_tower_conv` at the SAME center; the
+  tower conv `∀ V` instantiated at `V^{I0}`; `componentBz_eq_covDeriv` rewrites `component0S
+  bz` to the carrier; `MapCPConvOn` order-0 slice on `extChartAt '' C` (compact ⊆ U) +
+  `hrev` reverse bound + `ε' = ε/(2·Cgf·(√card+1))` ⟹ `≤ ε/2 < ε`.  `Finset.sup` over
+  `a≤p` and over `univ` (the `I0`) for one `k0`.  Domain: `C` compact ⊆ `u' ∩ interior K₀`.
+- **(c)+(d) `metricPreconvInf`** — `metricPreconv_gInf` (REQUIRES `[InnerProductSpace ℝ E]`
+  — the section was strengthened from `NormedSpace`; implies it, so all earlier lemmas hold);
+  Lindelöf countable subcover of `M` by the open patches `W x` (`isLindelof_univ.elim_countable_subcover`,
+  `Set.Countable.exists_eq_range`); `exists_diag_subseq` (P = uniform on `C (e n)`, `hstep`
+  = (b), `hsub`/`hextend` = `StrictMono.le_apply` / tail shift) → one `φ`; per compact `K`,
+  `IsCompact.elim_finite_subcover` + `Finset.attach.sup` → uniform `hnorm` →
+  `metricCInfConvOnCompacts_of_normConv`.  TRAP: `φ∘ψ` vs `φ(ψ·)` defeq in huge terms times
+  out `isDefEq` — use `simpa only [Function.comp_apply]`, not a heartbeat bump.
+
+### Historical plan (now executed)
+**Step 4b analytic wiring (the endpoint `metricPreconvInf`):**
 - *(4b-ii b, uniform-on-patch — the analytic heart)*: at a center `x_p`, set up
   `exists_compact_subset` → `K₀` (`x_p ∈ interior K₀ ⊆ source`); `exists_frameData x_p`
   (Kc := `K₀`) → `frame`/`hframeσ`; `metricDerivNorm_le_compSq_uniform x_p` →
