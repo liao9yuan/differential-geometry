@@ -103,3 +103,17 @@ frontier:
 
 The inverse `normalChartAt`/`expMapDiffeo : PartialDiffeomorph … ∞` upgrade remains the
 next downstream inverse-function-theorem wiring step after the forward theorem lands.
+
+## UPDATE (2026-06-13): forward `expMap C∞` LANDED
+
+Steps 1–3 above are DONE: `Geodesic.exists_chartPhase_contDiffOn_isLocalFlow_combined_inf`
+(`SmoothFlow.lean`) + `expMap_contMDiffAt_infty_of_norm_lt` (`OffZero.lean`) — `expMap` is
+`ContMDiffAt ∞` on a **uniform** ball, axiom-clean (`[propext, Classical.choice,
+Quot.sound]`). See `Geometry/Exponential/Smoothness/OffZero.md`.
+
+The two Step B `hsmooth` hypotheses are now gated on **geometry/IFT wiring**, not the ODE
+frontier:
+- B-metric `normalCoordMetric_contDiffOn`: forward `expMap C∞` + a model-coordinate
+  `mfderiv`-pullback-section smoothness brick (~100 lines, geometry layer).
+- B-trans `normalTransition_contDiffOn`: the `C∞` inverse function theorem for the
+  inverse chart `normalChartAt = (expMapDiffeo).symm` (separate frontier).

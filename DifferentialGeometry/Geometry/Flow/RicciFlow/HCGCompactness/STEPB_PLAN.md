@@ -208,8 +208,9 @@ Acceptance endpoints:
 
 ### B-metric - `lbl394` local metric limits
 
-Status: generic engine and fixed-center HCG wrapper accepted 2026-06-13;
-full `lbl394` metric endpoint still blocked.
+Status: generic engine, fixed-center HCG wrapper, and forward `expMap C^infty`
+input accepted 2026-06-13; full `lbl394` metric endpoint still blocked on
+`normalCoordMetric_contDiffOn`.
 
 Acceptance verdict 2026-06-13: `StepBLocalMetrics.lean` is accepted for the
 generic bilinear-form limit theorem `exists_metricLimit_on` and the fixed
@@ -231,6 +232,17 @@ push the existing off-zero bridge to forward `expMap ContMDiffAt infinity` on a
 uniform ball.  `StepBLocalMetrics.md` and
 `Analysis/ODE/Flow/HigherRegularity/VariationalMapContDiffOnK.md` record the
 correction.
+
+Forward smoothness accepted 2026-06-13: `SmoothFlow.lean` now has
+`exists_chartPhase_contDiffOn_isLocalFlow_combined_inf`, and `OffZero.lean` has
+`expMap_contMDiffAt_infty_of_norm_lt`.  Planner checked `SmoothFlow`,
+`OffZero`, and the `JacobiVariation` consumer; axiom audit is clean
+(`propext`, `Classical.choice`, `Quot.sound` only).  This discharges the ODE /
+forward-exp gate.  The next metric-facing producer is the geometry-layer
+smoothness bridge for
+`z |-> g.inner (expMap z) (mfderiv expMap z v) (mfderiv expMap z w)`, packaged
+as `normalCoordMetric_contDiffOn` or the closest reusable pullback-section
+theorem.
 
 Target file: `StepBLocalMetrics.lean`.
 
