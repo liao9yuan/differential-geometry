@@ -180,7 +180,15 @@ foundation ✅ ACCEPTED (6cded1f2, 20f88d78, c861bc7b, ff6cf674):
 and `bumpTowerScalar_contDiff` supply global smooth carriers; `bumpFderiv_eq_chartTowerStep`
 and `bumpTowerStep_chartConv` close the directional convergence step using the
 existing A2 `fderiv_chartRep_eq_towerStep` germ identity plus B2.  Targeted build
-green 3847 jobs, axiom-clean.**
+green 3847 jobs, axiom-clean.  ComponentConvTower induction ✅ ACCEPTED
+(57412cb9, 73f46522, 3ef86455, 1f4926a1, 0473472d, 45034b41, 70726247;
+notes b4e4eaf9/1a5100a7): `bumpTower_slotExpand_conv`,
+`MapCInfConvOnCompacts.sub`, `bumpTowerStep_split`,
+`bumpTowerStepScalar_contDiff`, `bumpTowerCons_conv`, `bumpTowerCarrier_step`,
+and `bumpTowerCarrier_all` prove the all-orders/all-section-tuples bump-carrier
+convergence induction from an order-0 base.  Targeted build green 3854 jobs,
+axiom-clean; planner cleanup locally scopes the one uniform-context
+unused-variable linter warning in `bumpTower_slotExpand_conv`.**
 **File**: `MetricPreconvDiag.lean`.
 
 C0 (the abstract diagonal — design FIXED by the planner, prove as stated
@@ -293,20 +301,19 @@ and the specialization `metricDerivNorm_le_compSq` axiom-clean).  The
 constants-first seam is closed: good-frame witnesses `basisE`, `u'`, and `Cu`
 are now bound before `∀ gk gInf`, so they depend only on `gRef`, `a`, and `x`.**
 
-**NEXT FRONTIER (C-II-final-B, convergence assembly):** the directional analytic
-crux is now closed.  The remaining theorem is still the actual
-`componentConv_covDeriv_of_chartCInf` induction, followed by pointwise extraction,
-finite-cover `hnorm`, and `metricPreconvInf`; do not report it as proved until the
-theorem is stated and checked.  The smallest next lemma is the multilinear
-frame-expansion convergence from `ComponentConvTower.md`: expand an arbitrary
-section slot in the fixed local frame,
-`s_p^{slot = Σ_i c_i • frame_i} = Σ_i (chartRep c_i) · s_p^{slot = frame_i}`,
-and lift it to `MapCInfConvOnCompacts` via `mulLeft`/`sum`.  This handles both
-the leading-slot expansion in the step and the base expansion from B0 frame-pairs
-to all tuples.  After that, write the `Nat.rec` all-section-tuples carrier with
-one common `φ`; corrections are themselves lower-level carriers, so no correction
-frame expansion is needed.  Then extract pointwise component convergence and
-finish `hnorm`/`metricPreconvInf`.**
+**NEXT FRONTIER (C-II-final-B, theorem boundary inputs):** the `Nat.rec`
+covariant-tower convergence induction is now closed as `bumpTowerCarrier_all`.
+`componentConv_covDeriv_of_chartCInf` is still not stated/proved.  It now needs
+three boundary inputs to feed the induction and extract the theorem:
+(1) the order-0 base, from B0 `exists_engine_frameCInfConv` plus
+`bumpTower_slotExpand_conv` on both slots; (2) the frame-data package
+`frame/vbasis/hframeσ/hspan`, where globalized `frameVec` sections agree on `Kc`
+and every smooth section has smooth coordinate-frame coefficients there; and
+(3) pointwise extraction from order-0 `C∞` convergence plus a fixed
+multilinear basis-vector expansion to the `component0S b (metricCovDeriv …)` shape.
+The smallest next target is the frame-data/hspan producer, since both the base
+and extraction consume it.  Do not claim `componentConv_covDeriv_of_chartCInf`
+until these inputs are built and the final theorem checks.**
 **File**: same or split `MetricPreconvBridge.lean` if > ~900 lines.
 
 C2: component convergence ⇒ `MetricCPConvOn K hK p (gSeq∘φ) gInf gRef`

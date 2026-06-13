@@ -200,6 +200,7 @@ theorem chartRep_contDiffOn (f : M → Real) (x₀ : M)
       = f ∘ (extChartAt I x₀).symm := by funext z; simp [writtenInExtChartAt]
   rw [hwrite]; exact hcd
 
+set_option linter.unusedVariables false in
 /-- **Multilinear frame-expansion convergence.**  If one slot `j` of the section
 tuple `V` is, on the chart source, the finite combination `∑ᵢ cᵢ • frameᵢ` of a
 section family with smooth coefficients `cᵢ`, then the bump-extended level-`p`
