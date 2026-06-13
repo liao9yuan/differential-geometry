@@ -5,6 +5,25 @@ planning session.  Written 2026-06-11 by the planning (Fable) session.**
 
 ---
 
+## PLANNER ACCEPTANCE + WORKFLOW NOTE — Step 4b-ii core (2026-06-13)
+
+ACCEPTED (own build + axioms): `tangentConst_basis_expand` + `bz_eq_tangentConst`
+(commit 78a119b0) — the constant-`M` algebra core, AXIOM-CLEAN, green 3866 jobs.
+The de-risked insight is now realized in Lean: `bz` (norm-bridge basis) = the
+chart-constant `tangentConstInChart` frame = a z-independent combo of the
+`finBasis` frame. **Every mathematical risk in P3 is now retired and verified.**
+
+**WORKFLOW RULING: dispatch the rest of 4b as ONE end-to-end session, not
+per-helper.** Rationale: fine per-helper slicing was the correct cadence WHILE
+mathematical risk was live (it surfaced the pointwise ruling, the
+`exists_eq_at_gen` simplification, and the constant-`M` insight each at the
+right moment). That risk is now gone — the remaining 4b is pure wiring (the
+per-slot bridge `bz(I0 q)=V^{I0}_q(z')` with patch-domain bookkeeping, the
+tower-carrier identity, the uniform-on-patch extraction, the global chart-cover
+diagonal, the finite-cover `hnorm` assembly). Slicing it further is inefficient
+and risks an inconsistent half-state. ONE focused session, end to end, to land
+`metricPreconvInf`.
+
 ## PLANNER ACCEPTANCE — assembly Step 4a (2026-06-13)
 
 ACCEPTED (own build + axioms): `componentConv_covDeriv_of_chartCInf`
