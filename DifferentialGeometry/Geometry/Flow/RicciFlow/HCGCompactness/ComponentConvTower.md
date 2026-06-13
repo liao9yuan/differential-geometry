@@ -148,3 +148,57 @@ Context threaded as hypotheses: `frame : Fin n → ContMDiffSection` with
 `frame-spans-on-source` producer (from `exists_frameVec_basis`); plus
 `χ/U/Kc/hUKc/hUtarget`.  Then base (B0 + slotExpand over the n² pairs) + `φ`-diagonal
 + extraction give `componentConv_covDeriv_of_chartCInf`.
+
+## FINAL ASSEMBLY — in progress (new file `ComponentConvAssembly.lean`)
+
+The 4 REMAINING steps are being assembled in a NEW top file
+`ComponentConvAssembly.lean` (imports `ComponentConvTower` + `MetricPreconvBridge`,
+which transitively pulls `MetricPreconvDiag`/`MetricPreconv`/`WindowPreconv`; no
+import cycle — `ComponentConvTower` and `MetricPreconvBridge` are siblings).
+`metricPreconvInf` is stated fresh here (`MetricCInfConvOnCompacts` lives in
+`PointedConvergence.lean`).
+
+**Verified signatures dovetail (step-0 scout, confirms "no missing API"):**
+`exists_frameData` supplies `frame/vbasis/hframeσ/hspan`; `hbase_of_framePairs`
+consumes `hpairs` (frame-pair order-0 carrier conv for the tuple
+`update (fun _ => frame i) 1 (frame j)`) and produces exactly the `hbase` argument
+(`∀ V : Fin 2 → …`) of `bumpTowerCarrier_all`.  `hbase_of_framePairs` and
+`bumpTowerCarrier_all` share one `χ/U/Kc/frame/s = Finset.univ : Finset (Fin n)`.
+The shared `χ` for the `n²` pairs comes from `exists_chart_engineInput_family`
+(NOT the per-pair `exists_engine_frameCInfConv_eq_gm`, whose `χ_{ij}/ψ_{ij}` differ
+per pair); the per-pair limit pinning then mirrors
+`exists_engine_frameCInfConv_eq_gm`'s `tendsto_nhds_unique` against `hconv`.
+
+**DONE + verified (axiom-clean, focused check green):**
+- `exists_cInf_subseq_finiteFamily` — the finite-family `C∞`-on-compacts diagonal:
+  a finite `Finset ι` of Euclidean `ContDiff ⊤` section sequences with uniform
+  iterated-derivative bounds → ONE subsequence with every member `MapCInfConvOnCompacts`
+  (to its own limit).  Finite fold of `exists_cInf_subseq` + `comp_subseq`
+  (`Finset.induction`, `revert hΦ hbdd` first).  This is the combinatorial core of
+  Step 1's `n²`-pair diagonal.
+
+**REMAINING (precise, the rest of steps 1–4):**
+1. *(step 1 rest)* Build `Vfam (i,j) = update (fun _ => frame i) 1 (frame j)` from
+   `exists_frameData`'s frame; run `exists_chart_engineInput_family` for the shared
+   `χ` + per-member `(ContDiff, uniform bounds)`; feed into
+   `exists_cInf_subseq_finiteFamily` (over `s = univ : Finset (Fin n × Fin n)`) for
+   ONE `φ₁`, refining `φ₀` from `metricPreconv_gInf`.  Construct
+   `U = interior {χ = 1} ∩ tgt` (or `extChartAt '' (interior K₀-ish)`) with
+   `Kc = symm '' tsupport χ`, `hUKc`, `hUtarget`, `hχU`.
+2. *(pinning)* `Φinf_{ij} = χ · writtenInExtChartAt(metricTensorField gInf …)` on `U`
+   by `tendsto_of_cInf` + `hconv` + `tendsto_nhds_unique` (per pair), then
+   `MapCInfConvOnCompacts.congr` to land the gInf-carrier limit ⇒ `hpairs`.
+3. *(feed)* `fun V => hbase_of_framePairs … hpairs V` = `hbase`; apply
+   `bumpTowerCarrier_all` with `exists_frameData`'s `frame/vbasis/hframeσ/hspan`.
+4. *(extract)* `tendsto_of_cInf` (order-0) at `extChartAt x₀ x` + multilinear
+   `b (I0 q)`-expansion ⇒ pointwise `componentConv_covDeriv_of_chartCInf` (general
+   `a`, the `componentConv_covDeriv_zero` shape); then finite good-frame cover +
+   `metricDerivNorm_le_compSq_uniform` → `hnorm` →
+   `metricCInfConvOnCompacts_of_normConv` → `metricPreconvInf`.
+
+NOTE (real subtlety for step 4): `bumpTowerCarrier_all` gives `MapCInfConvOnCompacts`
+(uniform on compacts) of the chart-rep carriers; `componentConv_covDeriv_zero` is
+POINTWISE.  The `hnorm` endpoint needs UNIFORM-on-`K` component convergence, so the
+extraction should keep the uniform `MapCPConvOn`/`MapCInfConvOnCompacts` (order-0
+slice = `tendstoUniformlyOn_of_cPConv`) through the multilinear expansion, not drop to
+pointwise `Tendsto`.  This is the one place to watch when wiring `hnorm`.
