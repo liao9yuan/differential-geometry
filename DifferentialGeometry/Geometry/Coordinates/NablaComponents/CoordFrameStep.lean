@@ -47,13 +47,6 @@ variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
 variable [IsManifold I (∞ : WithTop ℕ∞) M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 
-instance tensor0SModelNormedSpace_local {s : ℕ} :
-    NormedSpace Real (Tensor0SModel s Real E) :=
-  Tensor0SBundle.tensor0SModel_normedSpace (𝕜 := Real) (E := E) s
-
-instance tensor0SModelNormedAddCommGroup_local {s : ℕ} :
-    NormedAddCommGroup (Tensor0SModel s Real E) := inferInstance
-
 /-- **Producer (2): rank-general coordinate covariant-step component formula.** -/
 theorem nabla0SFun_eval_coordFrame {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
