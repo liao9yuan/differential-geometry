@@ -5317,6 +5317,68 @@ private theorem tensorL2Inner_genuineDiffCurv_covGrad_eq_neg_roughLap_pureR_sub_
   exact hIBP
 
 set_option linter.unusedSectionVars false in
+/-- **The rough-Laplacian-of-`P` `L²` pairing is the Parseval frame sum of the diagonal
+second-covariant-derivative pairings.**  For a fixed smooth Parseval frame family `V a` and any smooth
+compactly-supported `(0, s)`-tensor `P`, the `L²` pairing of the rough Laplacian `Δ_∇ P =
+rawTensorConnLapSmooth g 0 s P` against `S` is the frame sum over `a` of the integral of the pointwise
+`(0, s)` pairing of the diagonal genuine Hessian `∇²_{V a, V a} P` (`secondCovDerivCc`) against `S`:
+```
+⟨Δ_∇ P, S⟩_{L²} = ∑_a ∫ ⟨∇²_{V a, V a} P, S⟩.
+```
+This is the integrated form of the Parseval frame-trace expansion of the rough Laplacian
+(`rawTensorConnLapSmooth_toSection_eq_parseval_secondCovDeriv_sum`, the frame trace of the second
+covariant derivative), distributed over the integral by the finite-sum linearity of the integral
+(`MeasureTheory.integral_finset_sum`) and the per-`a` cross-pairing integrability
+(`SmoothCcTensor.integrable_inner_cross`).  It is the first frame-summed-integrated step of the
+operator-field rough-Laplacian-of-curvature-trace pairing, with no pointwise per-frame curvature
+jet. -/
+private lemma roughLapPureR_pairing_eq_secondCovDeriv_frameSum
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (P : SmoothCcTensor g 0 s) (S : SmoothCcTensor g 0 s)
+    {N : ℕ} (V : Fin N → Π b : M, TangentSpace I b)
+    (hV : ∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => (⟨b, V a b⟩ : TotalSpace E (TangentSpace I))))
+    (hPar : ∀ (x : M) (u : TangentSpace I x),
+      (∑ a : Fin N, g.inner x (V a x) u • V a x) = u) :
+    tensorL2Inner (I := I) (M := M) g 0 s
+        (rawTensorConnLapSmooth (I := I) g 0 s P).toFun S.toFun =
+      ∑ a : Fin N,
+        ∫ x, tensorInnerScalar (I := I) (M := M) g 0 s
+            (secondCovDerivCc (I := I) (M := M) g s (hV a) P).toSection S.toSection x
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
+  classical
+  -- Per-`a` integrability of the diagonal-Hessian cross pairing.
+  have hint : ∀ a : Fin N, Integrable
+      (fun x : M => tensorInnerScalar (I := I) (M := M) g 0 s
+        (secondCovDerivCc (I := I) (M := M) g s (hV a) P).toSection S.toSection x)
+      (riemannianVolumeMeasure (I := I) (M := M) g) := fun a =>
+    SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+      (secondCovDerivCc (I := I) (M := M) g s (hV a) P) S
+  -- The pointwise rough-Laplacian frame-trace expansion against `S`.
+  have hpt : ∀ x : M,
+      tensorInnerPointwise (I := I) (M := M) g 0 s x
+          ((rawTensorConnLapSmooth (I := I) g 0 s P).toFun x) (S.toFun x) =
+        ∑ a : Fin N, tensorInnerScalar (I := I) (M := M) g 0 s
+            (secondCovDerivCc (I := I) (M := M) g s (hV a) P).toSection S.toSection x := by
+    intro x
+    rw [show (rawTensorConnLapSmooth (I := I) g 0 s P).toFun x =
+        TensorRSSpace.toModel ((rawTensorConnLapSmooth (I := I) g 0 s P).toSection x) from rfl]
+    rw [rawTensorConnLapSmooth_toSection_apply,
+      rawTensorConnLapSmooth_toSection_eq_parseval_secondCovDeriv_sum
+        (I := I) (M := M) g V hV hPar s P x]
+    rw [show (∑ a : Fin N, tensorSecondCovDeriv (I := I) g 0 s (V a) (V a)
+          (fun y : M => P.toSection y) x) =
+        ∑ a : Fin N, (1 : ℝ) • ((secondCovDerivCc (I := I) (M := M) g s (hV a) P).toSection x) from
+      Finset.sum_congr rfl (fun a _ => by
+        rw [one_smul, secondCovDerivCc_toSection_apply (I := I) (M := M) g s (hV a) P x])]
+    rw [toModel_weighted_finsetSum (I := I) (M := M) s x Finset.univ _ _,
+      tensorInnerPointwise_sum_left (I := I) (M := M) g 0 s x Finset.univ _ _ _]
+    refine Finset.sum_congr rfl (fun a _ => ?_)
+    rw [tensorInnerScalar_apply (I := I) (M := M) g 0 s, one_mul]
+    rfl
+  rw [tensorL2Inner, MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall hpt)]
+  exact MeasureTheory.integral_finset_sum Finset.univ (fun a _ => hint a)
+
+set_option linter.unusedSectionVars false in
 /-- **The integrated covariant second-Bianchi emission: the rough-Laplacian-of-curvature-trace pairing
 plus the spectator action equals the genuine curvature/Hessian cross pairing `I₂`.**  For a fixed smooth
 Parseval frame family, with `P := pureRGenuineDiffOp g 0 s S` the order-`0` moving-frame pure-Riemann
