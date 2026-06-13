@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ForcingMas
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderDifferencePrincipalTopSplit
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.SharpGardingCovGradLadder
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingReverseHebeyToHs
+import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.TimeL2InterpolationLimit
 
 /-! # `g₀`-anchored DeTurck–Ricci interior existence from the honest self-representative remainder
 
@@ -1416,24 +1417,440 @@ theorem deTurckGatedGradedForcing_zero
     rw [abs_zero]
     exact mul_nonneg (mul_nonneg hδ (Real.sqrt_nonneg _)) (Real.sqrt_nonneg _)
 
-/-- **A.e. on-gate fibre-smallness passes to time-`L²` limits of graded on-gate forcings
-(posited analytic input: the gate-closedness of the limit field).**
+/-- **The zero-datum `H^{a+1}`-view Duhamel field collapses to the maximal-regularity
+solution field of the forcing.**  The homogeneous part of the zero initial datum vanishes,
+leaving the pure maximal-regularity field of `f`. -/
+private theorem maxRegDuhamelSolFieldHa1_zero_datum
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (f : Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T) :
+    Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+        (a : ℝ) hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) f =
+      maximalRegularitySolFieldHa1 (I := I) (M := M) (a : ℝ) hT hT1 f := by
+  classical
+  set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+    with hcompact_def
+  have hHom0 : Analysis.Parabolic.QuasiLinear.maxRegHomogeneousSolFieldHa1
+      (I := I) (M := M) (a : ℝ) T
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) = 0 := by
+    refine timeModeCoeff_injective (I := I) (M := M) hcompact (fun i => ?_)
+    rw [Analysis.Parabolic.QuasiLinear.maxRegHomogeneousSolFieldHa1_timeModeCoeff
+      (I := I) (M := M) hT.le _ i, timeModeCoeff_zero (I := I) g₀ i]
+    refine MeasureTheory.Lp.ext ?_
+    have h1 : (Analysis.Parabolic.QuasiLinear.homModeCoeff (I := I) (M := M)
+        (a := (a : ℝ)) (T := T)
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) i : ℝ → ℝ)
+        =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T]
+        fun t => Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)).coeff i :=
+      Analysis.Parabolic.TimeSobolev.coeFn_ofContinuousOn _
+    have h2 : (fun t : ℝ =>
+        Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)).coeff i)
+        = fun _ : ℝ => (0 : ℝ) := by
+      funext t
+      rw [tensorHs.zero_coeff, mul_zero]
+    rw [h2] at h1
+    exact h1.trans (MeasureTheory.Lp.coeFn_zero
+      (E := ℝ) (p := 2) (μ := Analysis.Parabolic.TimeSobolev.timeMeasure T)).symm
+  rw [Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1, hHom0, zero_add]
+
+/-- **The limit forcing inherits all-order forcing-mass summability from a graded
+sequence.**  If a sequence of forcings converges to `glim` in `L²([0,T]; Hᵃ)` and each
+member is graded (`∀ d`, summable order-`d` masses bounded by `B d`), then `glim` has
+summable forcing masses at every spatial order. -/
+private theorem gateLimit_forcingMass_summable_all
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (B : ℝ → ℝ) (δ : ℝ)
+    (gf : ℕ → Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (glim : Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (htend : Filter.Tendsto gf Filter.atTop (𝓝 glim))
+    (hgraded : ∀ k, DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ (gf k)) :
+    ∀ d : ℝ, Summable (forcingMass (I := I) (M := M) glim d) := by
+  intro d
+  exact (forcingMass_summable_tsum_le_of_tendsto (I := I) (M := M) gf glim htend d
+    (fun k => ((hgraded k).1 d).1) (fun k => ((hgraded k).1 d).2)).1
+
+/-- **The limit forcing's Duhamel field is all-order regular.**  Its solution-field masses
+are summable at every spatial order, since the limit's forcing masses are summable at every
+order (the limit-transfer brick). -/
+private theorem gateLimit_solFieldMass_summable_all
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (B : ℝ → ℝ) (δ : ℝ)
+    (gf : ℕ → Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (glim : Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (htend : Filter.Tendsto gf Filter.atTop (𝓝 glim))
+    (hgraded : ∀ k, DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ (gf k)) :
+    ∀ σ : ℝ, Summable (solFieldMass (I := I) (M := M) hT.le glim σ) := by
+  have hforce := gateLimit_forcingMass_summable_all (I := I) g₀ a hT hT1 B δ gf glim
+    htend hgraded
+  have hbase : Summable (solFieldMass (I := I) (M := M) hT.le glim ((a : ℝ) - 2 + 2)) :=
+    solFieldMass_summable_of_forcingMass_summable (I := I) (M := M) hT.le glim
+      ((a : ℝ) - 2) (hforce ((a : ℝ) - 2))
+  exact solFieldMass_summable_all (I := I) (M := M) hT.le glim
+    (fun d _ => hforce d) hbase
+
+/-- **The a.e.-time spectral coordinates of the zero-datum Duhamel field are the solution
+coordinates.**  At almost every time `t`, the eigenbasis coordinate `(field f t).coeff i`
+equals the synthesised solution-field coordinate `(solFieldAtOrder f σ t).coeff i`, for
+every order `σ` at which the solution masses are summable. -/
+private theorem gateLimit_field_coeff_eq_solFieldAtOrder_ae
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (f : Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T) {σ : ℝ}
+    (hσ : Summable (solFieldMass (I := I) (M := M) hT.le f σ))
+    (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
+    ∀ᵐ t ∂Analysis.Parabolic.TimeSobolev.timeMeasure T,
+      (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+          (a : ℝ) hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) f t).coeff i =
+        (solFieldAtOrder (I := I) (M := M) hT.le f σ hσ t).coeff i := by
+  classical
+  set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+    with hcompact_def
+  set F := Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+    (a : ℝ) hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) f with hF_def
+  have hFcoll : F = maximalRegularitySolFieldHa1 (I := I) (M := M) (a : ℝ) hT hT1 f :=
+    maxRegDuhamelSolFieldHa1_zero_datum (I := I) g₀ a hT hT1 f
+  have hFcoeff := Analysis.Parabolic.MaximalRegularity.timeModeCoeff_coeFn
+    (I := I) (M := M) F i
+  have hScoeff := Analysis.Parabolic.MaximalRegularity.timeModeCoeff_coeFn
+    (I := I) (M := M) (solFieldAtOrder (I := I) (M := M) hT.le f σ hσ) i
+  have hFmode : Analysis.Parabolic.MaximalRegularity.timeModeCoeff (I := I) (M := M) F i =
+      solModeCoeff (I := I) (M := M) (a := (a : ℝ)) hT.le f i := by
+    rw [hFcoll]
+    exact maximalRegularitySolFieldHa1_timeModeCoeff (I := I) (M := M)
+      (h_compact := hcompact) (a := (a : ℝ)) hT hT1 f i
+  have hSmode : Analysis.Parabolic.MaximalRegularity.timeModeCoeff (I := I) (M := M)
+      (solFieldAtOrder (I := I) (M := M) hT.le f σ hσ) i =
+      solModeCoeff (I := I) (M := M) (a := (a : ℝ)) hT.le f i :=
+    solFieldAtOrder_timeModeCoeff (I := I) (M := M) hT.le f σ hσ i
+  filter_upwards [hFcoeff, hScoeff] with t htF htS
+  rw [← htF, ← htS, hFmode, hSmode]
+
+/-- **The limit forcing's zero-datum Duhamel field is a.e. gate-realizable.**  At almost
+every time `t`, the `L²` class of the field value lies in every intrinsic Sobolev space:
+the field's pointwise coordinates a.e. agree with the all-order solution-field synthesis
+`solFieldAtOrder glim n` for every natural order `n`, so the natural-order synthesis (pushed
+down by the Sobolev inclusion) realises the field class at every order. -/
+private theorem gateLimit_field_memAllTensorHs_ae
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (B : ℝ → ℝ) (δ : ℝ)
+    (gf : ℕ → Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (glim : Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (htend : Filter.Tendsto gf Filter.atTop (𝓝 glim))
+    (hgraded : ∀ k, DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ (gf k)) :
+    ∀ᵐ t ∂Analysis.Parabolic.TimeSobolev.timeMeasure T,
+      MemAllTensorHs (I := I) (M := M) g₀ 0 2
+        (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (show (0 : ℝ) ≤ (a : ℝ) + 1 by positivity)
+          (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+            (a : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) glim t)) := by
+  classical
+  set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+    with hcompact_def
+  haveI hcount : Countable (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+      (I := I) (M := M) g₀ 0 2) :=
+    countable_tensorEigenIdx (I := I) (M := M) hcompact
+  set F := Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+    (a : ℝ) hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) glim with hF_def
+  have hsolall := gateLimit_solFieldMass_summable_all (I := I) g₀ a hT hT1 B δ gf glim
+    htend hgraded
+  -- co-null set: field coords match the natural-order synthesis at every order `n`
+  have hmatch : ∀ n : ℕ, ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+        (I := I) (M := M) g₀ 0 2,
+      ∀ᵐ t ∂Analysis.Parabolic.TimeSobolev.timeMeasure T,
+        (F t).coeff i =
+          (solFieldAtOrder (I := I) (M := M) hT.le glim (n : ℝ) (hsolall (n : ℝ)) t).coeff i :=
+    fun n i => gateLimit_field_coeff_eq_solFieldAtOrder_ae (I := I) g₀ a hT hT1 glim
+      (hsolall (n : ℝ)) i
+  have hmatch' : ∀ q : ℕ × Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+        (I := I) (M := M) g₀ 0 2,
+      ∀ᵐ t ∂Analysis.Parabolic.TimeSobolev.timeMeasure T,
+        (F t).coeff q.2 =
+          (solFieldAtOrder (I := I) (M := M) hT.le glim (q.1 : ℝ)
+            (hsolall (q.1 : ℝ)) t).coeff q.2 :=
+    fun q => hmatch q.1 q.2
+  rw [← MeasureTheory.ae_all_iff] at hmatch'
+  filter_upwards [hmatch'] with t htmatch
+  intro σ hσ
+  obtain ⟨n, hn⟩ := exists_nat_ge σ
+  refine ⟨tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+    (show σ ≤ (n : ℝ) from hn)
+    (solFieldAtOrder (I := I) (M := M) hT.le glim (n : ℝ) (hsolall (n : ℝ)) t), ?_⟩
+  apply (tensorResolventHilbertEigenbasisSigma (I := I) (M := M) hcompact).repr.injective
+  ext i
+  have hcoeff_match : (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (show σ ≤ (n : ℝ) from hn)
+        (solFieldAtOrder (I := I) (M := M) hT.le glim (n : ℝ) (hsolall (n : ℝ)) t)).coeff i
+      = (F t).coeff i := by
+    rw [tensorHsInclusion_coeff_apply, ← htmatch (n, i)]
+  have hlhs : ((tensorResolventHilbertEigenbasisSigma (I := I) (M := M) hcompact).repr
+      (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hcompact hσ
+        (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (show σ ≤ (n : ℝ) from hn)
+          (solFieldAtOrder (I := I) (M := M) hT.le glim (n : ℝ) (hsolall (n : ℝ)) t)))) i
+      = (F t).coeff i := by
+    rw [show ((tensorResolventHilbertEigenbasisSigma (I := I) (M := M) hcompact).repr
+          (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hcompact hσ
+            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show σ ≤ (n : ℝ) from hn)
+              (solFieldAtOrder (I := I) (M := M) hT.le glim (n : ℝ)
+                (hsolall (n : ℝ)) t)))) i =
+        tensorL2Coeff (I := I) (M := M) hcompact
+          (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hcompact hσ
+            (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+              (show σ ≤ (n : ℝ) from hn)
+              (solFieldAtOrder (I := I) (M := M) hT.le glim (n : ℝ)
+                (hsolall (n : ℝ)) t))) i from rfl,
+      tensorHsToL2_tensorL2Coeff hσ _ i, hcoeff_match]
+  have hrhs : ((tensorResolventHilbertEigenbasisSigma (I := I) (M := M) hcompact).repr
+      (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hcompact
+        (show (0 : ℝ) ≤ (a : ℝ) + 1 by positivity) (F t))) i
+      = (F t).coeff i := by
+    rw [show ((tensorResolventHilbertEigenbasisSigma (I := I) (M := M) hcompact).repr
+          (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hcompact
+            (show (0 : ℝ) ≤ (a : ℝ) + 1 by positivity) (F t))) i =
+        tensorL2Coeff (I := I) (M := M) hcompact
+          (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hcompact
+            (show (0 : ℝ) ≤ (a : ℝ) + 1 by positivity) (F t)) i from rfl,
+      tensorHsToL2_tensorL2Coeff (show (0 : ℝ) ≤ (a : ℝ) + 1 by positivity) (F t) i]
+  rw [hlhs, hrhs]
+
+/-- **The synthesised high-order solution field's uniform mass bound from gradedness.**
+At spatial order `σ`, the time-integrated weighted mass of `solFieldAtOrder f σ` is the
+order-`σ` solution mass total, dominated by `(1+T)²` times the order-`(σ-2)` forcing-mass
+total. -/
+private theorem solFieldAtOrder_weightedMass_le
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T)
+    (f : Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T) (σ : ℝ)
+    (hσ : Summable (solFieldMass (I := I) (M := M) hT.le f σ)) {Bv : ℝ}
+    (hforce : ∑' i, forcingMass (I := I) (M := M) f (σ - 2) i ≤ Bv)
+    (hforcesum : Summable (forcingMass (I := I) (M := M) f (σ - 2))) :
+    ∑' i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+        tensorSobolevWeight (I := I) (M := M) i σ *
+          ‖Analysis.Parabolic.MaximalRegularity.timeModeCoeff (I := I) (M := M)
+            (solFieldAtOrder (I := I) (M := M) hT.le f σ hσ) i‖ ^ 2 ≤
+      (1 + T) ^ 2 * Bv := by
+  have hterm : ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+        (I := I) (M := M) g₀ 0 2,
+      tensorSobolevWeight (I := I) (M := M) i σ *
+          ‖Analysis.Parabolic.MaximalRegularity.timeModeCoeff (I := I) (M := M)
+            (solFieldAtOrder (I := I) (M := M) hT.le f σ hσ) i‖ ^ 2 =
+        solFieldMass (I := I) (M := M) hT.le f σ i := by
+    intro i
+    rw [solFieldAtOrder_timeModeCoeff (I := I) (M := M) hT.le f σ hσ i, solFieldMass]
+  rw [tsum_congr hterm]
+  calc ∑' i, solFieldMass (I := I) (M := M) hT.le f σ i
+      ≤ ∑' i, (1 + T) ^ 2 * forcingMass (I := I) (M := M) f (σ - 2) i := by
+        refine Summable.tsum_le_tsum (fun i => ?_) hσ (hforcesum.mul_left _)
+        have h := solFieldMass_le_forcingMass (I := I) (M := M) hT.le f (σ - 2) i
+        rwa [show σ - 2 + 2 = σ by ring] at h
+    _ = (1 + T) ^ 2 * ∑' i, forcingMass (I := I) (M := M) f (σ - 2) i :=
+        tsum_mul_left
+    _ ≤ (1 + T) ^ 2 * Bv :=
+        mul_le_mul_of_nonneg_left hforce (by positivity)
+
+/-- **The high-order solution-field synthesis pushed to order `a+1` is the maximal-regularity
+field.**  The order-`σ` synthesis `solFieldAtOrder f σ`, included down to `H^{a+1}`, has the
+same time-mode coordinates as `maximalRegularitySolFieldHa1 f`, hence is equal. -/
+private theorem timeL2Inclusion_solFieldAtOrder_eq_solFieldHa1
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (f : Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T) {σ : ℝ}
+    (hσ : Summable (solFieldMass (I := I) (M := M) hT.le f σ))
+    (haσ : (a : ℝ) + 1 ≤ σ) :
+    timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2) haσ
+        (solFieldAtOrder (I := I) (M := M) hT.le f σ hσ) =
+      maximalRegularitySolFieldHa1 (I := I) (M := M) (a : ℝ) hT hT1 f := by
+  set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+    with hcompact_def
+  refine timeModeCoeff_injective (I := I) (M := M) hcompact (fun i => ?_)
+  rw [timeModeCoeff_timeL2Inclusion (I := I) (M := M) haσ _ i,
+    solFieldAtOrder_timeModeCoeff (I := I) (M := M) hT.le f σ hσ i,
+    maximalRegularitySolFieldHa1_timeModeCoeff (I := I) (M := M)
+      (h_compact := hcompact) (a := (a : ℝ)) hT hT1 f i]
+
+open Filter in
+/-- **The high-order solution fields converge in `L²([0,T]; H^{σ'})` along a subsequence
+a.e.**  Given a graded sequence converging to `glim` in `L²([0,T]; Hᵃ)`, for any
+intermediate Sobolev order `σ'` (with `a+1 ≤ σ' < σ''`) there is a subsequence `ψ` along
+which, at almost every time `t`, the order-`σ'` field-value differences
+`(solFieldAtOrder (gf (ψ j)) σ'' t) − (solFieldAtOrder glim σ'' t)` tend to `0` in `H^{σ'}`.
+The time-`L²` interpolation brick supplies `L²([0,T]; H^{σ'})` convergence from the
+`L²([0,T]; H^{a+1})` field convergence (`maxRegDuhamelSolFieldHa1_dist_le`) and the uniform
+high-order mass; convergence in `L²` then gives the a.e.-convergent subsequence. -/
+private theorem gateLimit_solFieldAtOrder_subseq_ae_tendsto
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (B : ℝ → ℝ) (δ : ℝ)
+    (gf : ℕ → Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (glim : Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (htend : Filter.Tendsto gf Filter.atTop (𝓝 glim))
+    (hgraded : ∀ k, DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ (gf k))
+    {σ' σ'' : ℝ} (haσ' : (a : ℝ) + 1 ≤ σ') (hσ'σ'' : σ' < σ'')
+    (hsumlim : ∀ σ : ℝ, Summable (solFieldMass (I := I) (M := M) hT.le glim σ))
+    (hsumgf : ∀ k, ∀ σ : ℝ, Summable (solFieldMass (I := I) (M := M) hT.le (gf k) σ)) :
+    ∃ ψ : ℕ → ℕ, StrictMono ψ ∧
+      ∀ᵐ t ∂Analysis.Parabolic.TimeSobolev.timeMeasure T,
+        Filter.Tendsto (fun j =>
+          tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hσ'σ''.le
+            (solFieldAtOrder (I := I) (M := M) hT.le (gf (ψ j)) σ''
+              (hsumgf (ψ j) σ'') t) -
+          tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hσ'σ''.le
+            (solFieldAtOrder (I := I) (M := M) hT.le glim σ'' (hsumlim σ'') t)) atTop
+          (𝓝 0) := by
+  classical
+  set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+    with hcompact_def
+  set Bm : ℝ := (1 + T) ^ 2 * B (σ'' - 2) with hBm_def
+  -- uniform high-order mass for the sequence and the limit
+  have hforce_gf : ∀ k, ∑' i, forcingMass (I := I) (M := M) (gf k) (σ'' - 2) i ≤ B (σ'' - 2) :=
+    fun k => ((hgraded k).1 (σ'' - 2)).2
+  have hforcesum_gf : ∀ k, Summable (forcingMass (I := I) (M := M) (gf k) (σ'' - 2)) :=
+    fun k => ((hgraded k).1 (σ'' - 2)).1
+  have hforce_lim := gateLimit_forcingMass_summable_all (I := I) g₀ a hT hT1 B δ gf glim
+    htend hgraded
+  have hforcebd_lim : ∑' i, forcingMass (I := I) (M := M) glim (σ'' - 2) i ≤ B (σ'' - 2) :=
+    (forcingMass_summable_tsum_le_of_tendsto (I := I) (M := M) gf glim htend (σ'' - 2)
+      (fun k => ((hgraded k).1 (σ'' - 2)).1) (fun k => ((hgraded k).1 (σ'' - 2)).2)).2
+  have humass : ∀ k, ∑' i, tensorSobolevWeight (I := I) (M := M) i σ'' *
+      ‖Analysis.Parabolic.MaximalRegularity.timeModeCoeff (I := I) (M := M)
+        (solFieldAtOrder (I := I) (M := M) hT.le (gf k) σ'' (hsumgf k σ'')) i‖ ^ 2 ≤ Bm :=
+    fun k => solFieldAtOrder_weightedMass_le (I := I) g₀ a hT (gf k) σ'' (hsumgf k σ'')
+      (hforce_gf k) (hforcesum_gf k)
+  have hlmass : ∑' i, tensorSobolevWeight (I := I) (M := M) i σ'' *
+      ‖Analysis.Parabolic.MaximalRegularity.timeModeCoeff (I := I) (M := M)
+        (solFieldAtOrder (I := I) (M := M) hT.le glim σ'' (hsumlim σ'')) i‖ ^ 2 ≤ Bm :=
+    solFieldAtOrder_weightedMass_le (I := I) g₀ a hT glim σ'' (hsumlim σ'')
+      hforcebd_lim (hforce_lim (σ'' - 2))
+  -- low-order time-L²(H^{a+1}) convergence of the synthesised fields
+  have hlow : Filter.Tendsto (fun k =>
+      timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (haσ'.trans hσ'σ''.le) (solFieldAtOrder (I := I) (M := M) hT.le (gf k) σ''
+          (hsumgf k σ''))) atTop
+      (𝓝 (timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (haσ'.trans hσ'σ''.le) (solFieldAtOrder (I := I) (M := M) hT.le glim σ''
+          (hsumlim σ'')))) := by
+    have heqgf : ∀ k, timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (haσ'.trans hσ'σ''.le) (solFieldAtOrder (I := I) (M := M) hT.le (gf k) σ''
+          (hsumgf k σ'')) =
+          maximalRegularitySolFieldHa1 (I := I) (M := M) (a : ℝ) hT hT1 (gf k) :=
+      fun k => timeL2Inclusion_solFieldAtOrder_eq_solFieldHa1 (I := I) g₀ a hT hT1
+        (gf k) (hsumgf k σ'') (haσ'.trans hσ'σ''.le)
+    have heqlim : timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (haσ'.trans hσ'σ''.le) (solFieldAtOrder (I := I) (M := M) hT.le glim σ''
+          (hsumlim σ'')) =
+          maximalRegularitySolFieldHa1 (I := I) (M := M) (a : ℝ) hT hT1 glim :=
+      timeL2Inclusion_solFieldAtOrder_eq_solFieldHa1 (I := I) g₀ a hT hT1
+        glim (hsumlim σ'') (haσ'.trans hσ'σ''.le)
+    simp only [heqgf, heqlim]
+    rw [tendsto_iff_norm_sub_tendsto_zero]
+    refine squeeze_zero (fun k => norm_nonneg _) (fun k => ?_)
+      (by
+        have : Filter.Tendsto (fun k => 2 * Real.sqrt T * ‖gf k - glim‖) atTop (𝓝 0) := by
+          have h0 : Filter.Tendsto (fun k => ‖gf k - glim‖) atTop (𝓝 0) := by
+            rw [← tendsto_iff_norm_sub_tendsto_zero]
+            exact htend
+          simpa using h0.const_mul (2 * Real.sqrt T)
+        simpa using this)
+    have hsub : maximalRegularitySolFieldHa1 (I := I) (M := M) (a : ℝ) hT hT1 (gf k) -
+        maximalRegularitySolFieldHa1 (I := I) (M := M) (a : ℝ) hT hT1 glim =
+        maximalRegularitySolFieldHa1 (I := I) (M := M) (a : ℝ) hT hT1 (gf k - glim) :=
+      (maximalRegularitySolFieldHa1_sub (I := I) (M := M) (h_compact := hcompact)
+        (a := (a : ℝ)) hT hT1 (gf k) glim).symm
+    rw [hsub]
+    exact maximalRegularitySolFieldHa1_norm_le (I := I) (M := M)
+      (h_compact := hcompact) (a := (a : ℝ)) hT hT1 (gf k - glim)
+  -- the time-L² interpolation brick: H^{σ'} convergence of the difference
+  have hbrick := timeL2_tendsto_of_tendsto_of_uniform_weightedMass (I := I) (M := M)
+    (g := g₀) (r := 0) (s := 2) haσ' hσ'σ'' hcompact
+    (fun k => solFieldAtOrder (I := I) (M := M) hT.le (gf k) σ'' (hsumgf k σ''))
+    (solFieldAtOrder (I := I) (M := M) hT.le glim σ'' (hsumlim σ''))
+    (B := Bm) hlow humass hlmass
+  -- L²-convergence of the H^{σ'} inclusions of the synthesised fields
+  set Uk : ℕ → Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 σ') T :=
+    fun k => timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hσ'σ''.le
+      (solFieldAtOrder (I := I) (M := M) hT.le (gf k) σ'' (hsumgf k σ'')) with hUk_def
+  set Ulim : Analysis.Parabolic.TimeSobolev.timeL2
+      (tensorHs (I := I) (M := M) g₀ 0 2 σ') T :=
+    timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hσ'σ''.le
+      (solFieldAtOrder (I := I) (M := M) hT.le glim σ'' (hsumlim σ'')) with hUlim_def
+  have hLp : Filter.Tendsto Uk atTop (𝓝 Ulim) := by
+    rw [tendsto_iff_norm_sub_tendsto_zero]
+    refine hbrick.congr (fun k => ?_)
+    simp only [hUk_def, hUlim_def, ← map_sub]
+  have hInM : MeasureTheory.TendstoInMeasure
+      (Analysis.Parabolic.TimeSobolev.timeMeasure T) (fun k => (Uk k : ℝ → _)) atTop
+      (Ulim : ℝ → _) :=
+    MeasureTheory.tendstoInMeasure_of_tendsto_Lp hLp
+  obtain ⟨ψ, hψ_mono, hψ_ae⟩ := hInM.exists_seq_tendsto_ae
+  refine ⟨ψ, hψ_mono, ?_⟩
+  -- a.e. pointwise value of the temporal inclusion equals the spatial inclusion of the value
+  have hincl_gf : ∀ k, (Uk k : ℝ → _)
+      =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T]
+      fun t => tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hσ'σ''.le
+        (solFieldAtOrder (I := I) (M := M) hT.le (gf k) σ'' (hsumgf k σ'') t) :=
+    fun k => (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+      hσ'σ''.le).coeFn_compLpL (p := 2)
+      (μ := Analysis.Parabolic.TimeSobolev.timeMeasure T) _
+  have hincl_lim : (Ulim : ℝ → _)
+      =ᵐ[Analysis.Parabolic.TimeSobolev.timeMeasure T]
+      fun t => tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hσ'σ''.le
+        (solFieldAtOrder (I := I) (M := M) hT.le glim σ'' (hsumlim σ'') t) :=
+    (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+      hσ'σ''.le).coeFn_compLpL (p := 2)
+      (μ := Analysis.Parabolic.TimeSobolev.timeMeasure T) _
+  filter_upwards [hψ_ae, MeasureTheory.ae_all_iff.mpr hincl_gf, hincl_lim]
+    with t htae htinclgf htincllim
+  have hconv : Filter.Tendsto (fun j =>
+      tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hσ'σ''.le
+        (solFieldAtOrder (I := I) (M := M) hT.le (gf (ψ j)) σ'' (hsumgf (ψ j) σ'') t)) atTop
+      (𝓝 (tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hσ'σ''.le
+        (solFieldAtOrder (I := I) (M := M) hT.le glim σ'' (hsumlim σ'') t))) := by
+    have h1 : (fun j => (Uk (ψ j)) t) = fun j =>
+        tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hσ'σ''.le
+          (solFieldAtOrder (I := I) (M := M) hT.le (gf (ψ j)) σ'' (hsumgf (ψ j) σ'') t) := by
+      funext j; exact htinclgf (ψ j)
+    rw [← h1, ← htincllim]
+    exact htae
+  rw [show (0 : tensorHs (I := I) (M := M) g₀ 0 2 σ') =
+    tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hσ'σ''.le
+        (solFieldAtOrder (I := I) (M := M) hT.le glim σ'' (hsumlim σ'') t) -
+      tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hσ'σ''.le
+        (solFieldAtOrder (I := I) (M := M) hT.le glim σ'' (hsumlim σ'') t) from
+    (sub_self _).symm]
+  exact hconv.sub tendsto_const_nhds
+
+open Filter in
+/-- **A.e. on-gate fibre-smallness passes to time-`L²` limits of graded on-gate forcings.**
 
 If a sequence of forcings, each in the graded on-gate class
 `DeTurckGatedGradedForcing g₀ a hT hT1 B δ`, converges in `L²([0,T]; Hᵃ)`, then the limit
-forcing's Duhamel field is again a.e. gate-realizable and `δ`-fibre-small.
+forcing's zero-datum Duhamel field is again a.e. gate-realizable and `δ`-fibre-small.
 
 This is the limit-transfer half of the two-norm Picard scheme that the per-order mass
-brick (`forcingMass_summable_tsum_le_of_tendsto`) does not cover: the Duhamel fields
-converge in `L²([0,T]; H^{a+1})` (`maxRegDuhamelSolFieldHa1_dist_le`), hence a.e. along a
-subsequence in `H^{a+1}`; the limit forcing inherits the per-order mass bounds (the mass
-brick again, inside the proof), so by the mass coupling its field is a.e. all-order
-regular — `MemAllTensorHs`, the membership half of the gate; and the gate representatives
-converge fibrewise (uniform higher-order bounds from `B` plus supercriticality `ha`), so
-the closed condition `gFibreOpBound … δ` passes to the limit.  The hypotheses are the
-honest sequence data, structurally distinct from the conclusion about the limit; no
-packaging.  The body is the posited input; it remains `sorry`, so consumers transitively
-depend on `sorryAx`. -/
+brick (`forcingMass_summable_tsum_le_of_tendsto`) does not cover. The limit forcing
+inherits the per-order mass bounds, so by the mass coupling its field is a.e. all-order
+regular — `MemAllTensorHs`, the membership half of the gate
+(`gateLimit_field_memAllTensorHs_ae`). At a supercritical even order `4k₀ ≥ a+1`, the
+synthesised high-order solution fields converge along a subsequence a.e. in `H^{σ'}`
+(`gateLimit_solFieldAtOrder_subseq_ae_tendsto`, via the time-`L²` interpolation brick),
+hence the gate representatives' high-order `H^{2k₀}` differences are the bounded
+`spectralToPouSobolevCLM` image of the order-`σ'` field differences and tend to `0`, so
+the closed condition `gFibreOpBound … δ` (with the Sobolev-embedding fibre constant)
+passes from the iterates to the limit. The hypotheses are the honest sequence data,
+structurally distinct from the conclusion about the limit; no packaging. -/
 theorem deTurckGatedGradedForcing_gate_limit
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 2 * a > Module.finrank ℝ E + 4)
@@ -1444,8 +1861,176 @@ theorem deTurckGatedGradedForcing_gate_limit
       (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (htend : Filter.Tendsto gf Filter.atTop (𝓝 glim))
     (hgraded : ∀ k, DeTurckGatedGradedForcing (I := I) g₀ a hT hT1 B δ (gf k)) :
-    DeTurckGatedFieldFibreSmall (I := I) g₀ a hT hT1 δ glim :=
-  sorry
+    DeTurckGatedFieldFibreSmall (I := I) g₀ a hT hT1 δ glim := by
+  classical
+  set hcompact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+    with hcompact_def
+  -- a supercritical even order with `a+1 ≤ 4k₀`
+  set k₀ : ℕ := (Module.finrank ℝ E + 4) / 2 + 1 + (a + 1) with hk₀_def
+  have hk₀_super : 2 * k₀ > Module.finrank ℝ E + 4 := by rw [hk₀_def]; omega
+  set σ' : ℝ := ((2 * (2 * k₀) : ℕ) : ℝ) with hσ'_def
+  set σ'' : ℝ := σ' + 1 with hσ''_def
+  have hσ'σ'' : σ' < σ'' := by rw [hσ''_def]; linarith
+  have haσ' : (a : ℝ) + 1 ≤ σ' := by
+    rw [hσ'_def]; push_cast; rw [hk₀_def]; push_cast; nlinarith [Nat.cast_nonneg (α := ℝ)
+      ((Module.finrank ℝ E + 4) / 2)]
+  -- field all-order regularity for the limit and each iterate
+  have hsumlim := gateLimit_solFieldMass_summable_all (I := I) g₀ a hT hT1 B δ gf glim
+    htend hgraded
+  have hsumgf : ∀ k, ∀ σ : ℝ, Summable (solFieldMass (I := I) (M := M) hT.le (gf k) σ) := by
+    intro k
+    have hforce_k : ∀ σ : ℝ, Summable (forcingMass (I := I) (M := M) (gf k) σ) :=
+      fun σ => ((hgraded k).1 σ).1
+    have hbase : Summable (solFieldMass (I := I) (M := M) hT.le (gf k) ((a : ℝ) - 2 + 2)) :=
+      solFieldMass_summable_of_forcingMass_summable (I := I) (M := M) hT.le (gf k)
+        ((a : ℝ) - 2) (hforce_k ((a : ℝ) - 2))
+    exact solFieldMass_summable_all (I := I) (M := M) hT.le (gf k)
+      (fun d _ => hforce_k d) hbase
+  -- the fibre Sobolev-embedding constant and the spectral transfer CLM bound
+  obtain ⟨Cfib, hCfib_nn, hCfib⟩ :=
+    gFibreOpBound_ccTensorBilinSymm_le_tensorHsNorm (I := I) (M := M) g₀
+  obtain ⟨Cclm, hCclm_nn, hCclm⟩ :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.spectralToPouSobolevCLM_opNorm_le
+      (I := I) (M := M) g₀ k₀
+  -- membership half (a.e. gate-realizability of the limit field)
+  have hmem := gateLimit_field_memAllTensorHs_ae (I := I) g₀ a hT hT1 B δ gf glim htend hgraded
+  -- per-iterate a.e. fibre bound of the iterate's gate representative
+  have hfibre_iter : ∀ k, DeTurckGatedFieldFibreSmall (I := I) g₀ a hT hT1 δ (gf k) :=
+    fun k => (hgraded k).2
+  have hfibre_all : ∀ᵐ t ∂Analysis.Parabolic.TimeSobolev.timeMeasure T, ∀ k : ℕ,
+      ∃ h_mem : MemAllTensorHs (I := I) (M := M) g₀ 0 2
+        (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hcompact
+          (show (0 : ℝ) ≤ (a : ℝ) + 1 by positivity)
+          (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+            (a : ℝ) hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) (gf k) t)),
+        gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀
+            (gateSmoothRep (I := I) g₀
+              (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+                (a : ℝ) hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) (gf k) t)
+              (show (0 : ℝ) ≤ (a : ℝ) + 1 by positivity) h_mem)) δ :=
+    MeasureTheory.ae_all_iff.mpr (fun k => hfibre_iter k)
+  -- the subsequence with a.e. H^{σ'} convergence of the field-value differences
+  obtain ⟨ψ, hψ_mono, hψ_ae⟩ :=
+    gateLimit_solFieldAtOrder_subseq_ae_tendsto (I := I) g₀ a hT hT1 B δ gf glim htend hgraded
+      haσ' hσ'σ'' hsumlim hsumgf
+  -- a.e. tie of the field-value coordinates to the synthesised field coordinates
+  haveI hcount : Countable (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+      (I := I) (M := M) g₀ 0 2) :=
+    countable_tensorEigenIdx (I := I) (M := M) hcompact
+  have hcoeff_gf : ∀ k, ∀ᵐ t ∂Analysis.Parabolic.TimeSobolev.timeMeasure T,
+      ∀ i, (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+            (a : ℝ) hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) (gf k) t).coeff i
+          = (solFieldAtOrder (I := I) (M := M) hT.le (gf k) σ'' (hsumgf k σ'') t).coeff i := by
+    intro k
+    rw [MeasureTheory.ae_all_iff]
+    exact fun i => gateLimit_field_coeff_eq_solFieldAtOrder_ae (I := I) g₀ a hT hT1
+      (gf k) (hsumgf k σ'') i
+  have hcoeff_gf_all : ∀ᵐ t ∂Analysis.Parabolic.TimeSobolev.timeMeasure T, ∀ k : ℕ,
+      ∀ i, (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+            (a : ℝ) hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) (gf k) t).coeff i
+          = (solFieldAtOrder (I := I) (M := M) hT.le (gf k) σ'' (hsumgf k σ'') t).coeff i :=
+    MeasureTheory.ae_all_iff.mpr hcoeff_gf
+  have hcoeff_lim : ∀ᵐ t ∂Analysis.Parabolic.TimeSobolev.timeMeasure T,
+      ∀ i, (Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+            (a : ℝ) hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) glim t).coeff i
+          = (solFieldAtOrder (I := I) (M := M) hT.le glim σ'' (hsumlim σ'') t).coeff i := by
+    rw [MeasureTheory.ae_all_iff]
+    exact fun i => gateLimit_field_coeff_eq_solFieldAtOrder_ae (I := I) g₀ a hT hT1
+      glim (hsumlim σ'') i
+  -- assemble: at a.e. time, the limit field is on-gate with `δ` fibre margin
+  filter_upwards [hmem, hfibre_all, hψ_ae, hcoeff_gf_all, hcoeff_lim]
+    with t htmem htfibre htconv htcgf htclim
+  refine ⟨htmem, ?_⟩
+  -- the limit field value and its gate representative
+  set Flim := Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+    (a : ℝ) hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) glim t with hFlim_def
+  set Rlim := gateSmoothRep (I := I) g₀ Flim (show (0 : ℝ) ≤ (a : ℝ) + 1 by positivity) htmem
+    with hRlim_def
+  intro x v w
+  -- the iterate field values and their gate representatives along the subsequence
+  set Fk : ℕ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) :=
+    fun k => Analysis.Parabolic.QuasiLinear.maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+      (a : ℝ) hT hT1 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) (gf k) t with hFk_def
+  -- choose the iterate gate representative carrying the `δ` fibre bound, per subsequence index
+  have hpick : ∀ j, ∃ Rj : Integral.L2.SmoothCcTensor g₀ 0 2,
+      Integral.L2.SmoothCcTensor.toL2 Rj =
+        tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hcompact
+          (show (0 : ℝ) ≤ (a : ℝ) + 1 by positivity) (Fk (ψ j)) ∧
+      gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ Rj) δ := by
+    intro j
+    obtain ⟨hmemj, hboundj⟩ := htfibre (ψ j)
+    exact ⟨gateSmoothRep (I := I) g₀ (Fk (ψ j))
+        (show (0 : ℝ) ≤ (a : ℝ) + 1 by positivity) hmemj,
+      gateSmoothRep_toL2 (I := I) g₀ (Fk (ψ j)) _ hmemj, hboundj⟩
+  choose Rk hRk_toL2 hRk_bound using hpick
+  -- the order-`σ'` field-value difference, as spatial inclusions of the pointwise field values
+  set Gk : ℕ → tensorHs (I := I) (M := M) g₀ 0 2 σ' :=
+    fun j => tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hσ'σ''.le
+      (solFieldAtOrder (I := I) (M := M) hT.le (gf (ψ j)) σ'' (hsumgf (ψ j) σ'') t)
+    with hGk_def
+  set GlimInc : tensorHs (I := I) (M := M) g₀ 0 2 σ' :=
+    tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hσ'σ''.le
+      (solFieldAtOrder (I := I) (M := M) hT.le glim σ'' (hsumlim σ'') t) with hGlimInc_def
+  -- the a.e. convergence in the spatial-inclusion form
+  have htconv' : Filter.Tendsto (fun j => Gk j - GlimInc) atTop (𝓝 0) := htconv
+  -- the rep difference's `toHs (2k₀)` is the CLM image of the order-`σ'` field difference
+  have hRdiff_toHs : ∀ j,
+      IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * k₀) (Rk j - Rlim) =
+        DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.spectralToPouSobolevCLM
+          (I := I) (M := M) g₀ k₀ (Gk j - GlimInc) := by
+    intro j
+    refine (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.spectralToPouSobolevCLM_apply_of_coeff
+      (I := I) (M := M) g₀ k₀ (Rk j - Rlim) (Gk j - GlimInc) (fun i => ?_)).symm
+    rw [picard_tensorHs_sub_coeff (I := I) g₀ _ _ i, hGk_def, hGlimInc_def,
+      tensorHsInclusion_coeff_apply,
+      tensorHsInclusion_coeff_apply, Integral.L2.SmoothCcTensor.toL2_sub,
+      picard_tensorL2Coeff_sub (I := I) g₀ hcompact _ _ i, hRk_toL2 j, hRlim_def,
+      gateSmoothRep_toL2 (I := I) g₀ Flim _ htmem,
+      tensorHsToL2_tensorL2Coeff (show (0 : ℝ) ≤ (a : ℝ) + 1 by positivity) (Fk (ψ j)) i,
+      tensorHsToL2_tensorL2Coeff (show (0 : ℝ) ≤ (a : ℝ) + 1 by positivity) Flim i,
+      ← htcgf (ψ j) i, ← htclim i, hFk_def, hFlim_def]
+  -- the per-index triangle bound and its limit
+  have hbound_j : ∀ j, |ccTensorBilinSymm (I := I) g₀ Rlim x v w| ≤
+      δ * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) +
+        (Cfib * ‖DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.spectralToPouSobolevCLM
+          (I := I) (M := M) g₀ k₀ (Gk j - GlimInc)‖) *
+          Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) := by
+    intro j
+    have hsplit : ccTensorBilinSymm (I := I) g₀ Rlim x v w =
+        ccTensorBilinSymm (I := I) g₀ (Rk j) x v w -
+          ccTensorBilinSymm (I := I) g₀ (Rk j - Rlim) x v w := by
+      rw [ccTensorBilinSymm_sub (I := I) g₀ (Rk j) Rlim x v w]; ring
+    rw [hsplit]
+    refine (abs_sub _ _).trans ?_
+    have h1 : |ccTensorBilinSymm (I := I) g₀ (Rk j) x v w| ≤
+        δ * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) := hRk_bound j x v w
+    have h2 : |ccTensorBilinSymm (I := I) g₀ (Rk j - Rlim) x v w| ≤
+        (Cfib * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+          (2 * k₀) (Rk j - Rlim)‖) *
+          Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) :=
+      hCfib k₀ hk₀_super (Rk j - Rlim) x v w
+    rw [hRdiff_toHs j] at h2
+    linarith
+  -- the cross term tends to `0`, so the bound passes to the limit
+  have hcross_tendsto : Filter.Tendsto (fun j =>
+      δ * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) +
+        (Cfib * ‖DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.spectralToPouSobolevCLM
+          (I := I) (M := M) g₀ k₀ (Gk j - GlimInc)‖) *
+          Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w)) atTop
+      (𝓝 (δ * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) +
+        (Cfib * 0) * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w))) := by
+    refine Filter.Tendsto.add tendsto_const_nhds ?_
+    refine ((((tendsto_const_nhds (x := Cfib)).mul ?_).mul tendsto_const_nhds).mul
+      tendsto_const_nhds)
+    have hCLMcont :=
+      (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.SobolevScale.spectralToPouSobolevCLM
+        (I := I) (M := M) g₀ k₀).continuous.tendsto 0
+    have hcomp := (hCLMcont.comp htconv')
+    rw [map_zero] at hcomp
+    simpa using hcomp.norm
+  have hle := le_of_tendsto_of_tendsto' tendsto_const_nhds hcross_tendsto hbound_j
+  simpa using hle
 
 /-- **The two-derivative-loss Duhamel fixed point for the gated self-representative DeTurck
 nonlinearity (posited analytic input: the genuine quasilinear strictly-parabolic
