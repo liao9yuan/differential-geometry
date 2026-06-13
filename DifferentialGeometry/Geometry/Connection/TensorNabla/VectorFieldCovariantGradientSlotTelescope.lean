@@ -1310,28 +1310,256 @@ theorem loweredCovGradDeTurckVFMixed_connSlot_iteratedCovGrad_hamiltonTame_le
               * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (2 * (a + 2))
                   (realizeSymmCcTensor (I := I) g₀ T₁)‖ ^ 2 := by rw [hScross, mul_assoc]
 
+/-! ### The pointwise fibre-norm sup of the field-difference covariant gradient
+
+The genuine order-`2` content behind the field-difference covariant-gradient value sup is the
+pointwise intrinsic fibre-norm sup of the field-difference gradient section
+`fieldDiffGradSection g₀ g₁ g₀ g_bg`.  It is assembled from the proven `l = 0` covariant-Leibniz
+product grid of that section (`fieldDiffGradSection_iteratedCovGrad_rfns_productGrid_le`), the proven
+sharp-order supercritical fibre sups of the realized-perturbation jets
+(`realizeSymm_iteratedCovGrad_rfns_fibre_sup`), and the per-order fibre sup of the `g₀`-lowered
+connection-difference jets (`loweredConnDiff_iteratedCovGrad_rfns_fibre_sup`).  The connection-difference
+factor reaches order `3` (the realized `4`-jet), so the assembly carries the **higher Sobolev ball**
+`‖T₁.toHs(6 + a)‖ ≤ B`, mirroring the sibling field-difference jet engine
+`exists_iteratedCovGrad_deTurckVF_le_jetSum` (whose second ball is `‖T₁.toHs(l + 3 + 3 + a)‖ ≤ B`, the
+`l = 0` instance of which is `‖T₁.toHs(6 + a)‖ ≤ B`). -/
+
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
-/-- **(POSIT — the family-uniform `g₀`-fibre value sup of the field-difference covariant gradient.)**
+/-- **(POSIT — the family-uniform per-order pointwise fibre sup of the `g₀`-lowered
+connection-difference jets.)**  For the fibre-small
+(`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, `δ < 1/2`) supercritically `H^{p + 3 + a}`-bounded
+(`2a > finrank + 4`) realized perturbation family, the order-`p` intrinsic squared fibre norm of the
+`g₀`-lowered connection difference `D = loweredConnDiffSection g₁ g₀` (its order-`p` covariant
+gradient `∇^p D`, a `(0, 3 + p)`-tensor) is uniformly bounded by a single constant `Λ²` over the
+manifold and the family: `∀ x, rfns(∇^p (loweredConnDiffSection g₁ g₀))(x) ≤ Λ²`.
+
+This is the **order-`p ≥ 1` generalization** of the proven-`p = 0` Neumann-absorbed fibre sup
+`exists_loweredConnDiffSection_rfns_fibre_sup_le` (`CrossCorrectionContractionTopRest.lean`).  The
+order-`p` differentiated-Koszul section identity
+`2·∇^p D = ∇^p (koszulComb) − 2·∇^p (crossCorrection)` controls `rfns(∇^p D)` by the pointwise
+clean-linear-part jet brick `koszulCombSection_iteratedCovGrad_rfns_le` (the `≤ (p + 1)`-jet of the
+realized perturbation, proven) divided out by the order-uniform `(1 − 2δ) > 0` Neumann absorption of
+the cross-correction contraction (`crossCorrParallelContraction_rfns_le_sq_passenger`, sharp `δ²`,
+proven), the realized `≤ (p + 1)`-jet itself being dominated family-uniformly by the sharp-order
+supercritical jet embedding `exists_iteratedCovGradJetSum_le_toHs_sharpOrder`.
+
+**Non-vacuity.**  A genuine fibre sup (`Λ = 0` forces `∇^p D ≡ 0`, false whenever `g₁ ≠ g₀`).  At
+`T₁ = 0` realized (`g₁ = g₀`) the connection difference vanishes and `Λ = 0` works.  Its body is
+`sorry`: the genuine order-`p` differentiated-Koszul / Neumann-absorption fibre sup (consumers
+transitively depend on `sorryAx` through this posited per-order engine). -/
+private theorem loweredConnDiff_iteratedCovGrad_rfns_fibre_sup
+    (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ Λ : ℝ, 0 ≤ Λ ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+        (∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (p + 3 + a) T₁‖ ≤ B →
+        ∀ x : M,
+          Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+                (loweredConnDiffSection (I := I) g₁ g₀)).toSection x) ≤ Λ ^ 2 :=
+  sorry
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
+set_option linter.unusedSectionVars false in
+/-- **The family-uniform per-order pointwise fibre sup of the realized-perturbation jets.**  For the
+supercritically `H^{a + 2}`-bounded (`2a > finrank + 4`) realized perturbation family and every order
+`i ≤ 2`, the order-`i` intrinsic squared fibre norm of the symmetric realized tensor
+`realizeSymmCcTensor g₀ T₁` (its order-`i` covariant gradient `∇^i (realizeSymm T₁)`, a
+`(0, 2 + i)`-tensor) is uniformly bounded by a single constant `(C · max B 0)²` over the manifold and
+the family: `∀ x, rfns(∇^i (realizeSymm T₁))(x) ≤ (C · max B 0)²` whenever `‖T₁.toHs(a + 2)‖ ≤ B`.
+
+The order-`i` summand (`i ∈ {0, 1, 2}`) of the covariant 2-jet sum
+`iteratedCovGradJetSum (realizeSymm T₁)` is `√rfns(∇^i (realizeSymm T₁))(x)`
+(`norm_toSection_eq_sqrt_riemannianFiberNormSq_installed`), hence at most the whole nonnegative jet
+sum, which is dominated by `C · ‖T₁.toHs(a + 2)‖ ≤ C · max B 0` through the sharp-order realized jet
+embedding `exists_realizedJetSum_le_toHs_sharpOrder`; squaring gives the per-order fibre sup.  Proved
+outright; no posit. -/
+private theorem realizeSymm_iteratedCovGrad_rfns_fibre_sup
+    (g₀ : SmoothRiemannianMetric I M) (B : ℝ) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2),
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ∀ (i : ℕ), i < 3 → ∀ x : M,
+          Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x) ≤ (C * max B 0) ^ 2 := by
+  classical
+  have ha2 : 2 * (a + 2) > Module.finrank ℝ E + 4 := by omega
+  obtain ⟨C, hC0, hC⟩ := exists_realizedJetSum_le_toHs_sharpOrder (I := I) g₀ (a + 2) ha2
+  refine ⟨C, hC0.le, fun T₁ hB i hi x => ?_⟩
+  set Q : ℝ := C * max B 0 with hQ
+  have hQ_nn : 0 ≤ Q := by rw [hQ]; positivity
+  have hjet : iteratedCovGradJetSum (I := I) g₀ (realizeSymmCcTensor (I := I) g₀ T₁) x ≤ Q := by
+    refine le_trans (hC T₁ x) ?_
+    rw [hQ]
+    exact mul_le_mul_of_nonneg_left (le_trans hB (le_max_left _ _)) hC0.le
+  -- Split the covariant `2`-jet sum into its three terms `j = 0, 1, 2`, each `√rfns(∇^j ⋯)(x)`.
+  have hsplit : iteratedCovGradJetSum (I := I) g₀ (realizeSymmCcTensor (I := I) g₀ T₁) x =
+      Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 0) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 0
+            (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x))
+        + Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 1
+              (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x))
+        + Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 2) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 2
+              (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x)) := by
+    rw [iteratedCovGradJetSum, Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one,
+      DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.norm_toSection_eq_sqrt_riemannianFiberNormSq_installed
+        (I := I) (M := M) g₀ 0 (2 + 0)
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 0 (realizeSymmCcTensor (I := I) g₀ T₁)) x,
+      DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.norm_toSection_eq_sqrt_riemannianFiberNormSq_installed
+        (I := I) (M := M) g₀ 0 (2 + 1)
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 1 (realizeSymmCcTensor (I := I) g₀ T₁)) x,
+      DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.norm_toSection_eq_sqrt_riemannianFiberNormSq_installed
+        (I := I) (M := M) g₀ 0 (2 + 2)
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 2 (realizeSymmCcTensor (I := I) g₀ T₁)) x]
+  have h0 : 0 ≤ Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 0) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 0
+        (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x)) := Real.sqrt_nonneg _
+  have h1 : 0 ≤ Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 1) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 1
+        (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x)) := Real.sqrt_nonneg _
+  have h2 : 0 ≤ Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 2) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 2
+        (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x)) := Real.sqrt_nonneg _
+  -- The order-`i` summand (`i < 3`) is `≤` the whole nonnegative jet sum `≤ Q`.
+  have hsqrt : Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+          (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x)) ≤
+      iteratedCovGradJetSum (I := I) g₀ (realizeSymmCcTensor (I := I) g₀ T₁) x := by
+    rw [hsplit]
+    interval_cases i <;> linarith
+  have hrnn : 0 ≤ Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+        (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x) :=
+    Integral.Connection.riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + i) x _
+  have hsq : (Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+          (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x))) ^ 2 =
+      Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+          (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x) := Real.sq_sqrt hrnn
+  have hsqrt_nn : 0 ≤ Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) (M := M)
+      g₀ 0 (2 + i) x ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+        (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x)) := Real.sqrt_nonneg _
+  nlinarith [hsqrt, hjet, hsq, hsqrt_nn, hQ_nn]
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
+set_option linter.unusedSectionVars false in
+/-- **The family-uniform pointwise fibre-norm sup of the field-difference gradient section.**  For
+the fibre-small (`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, `δ < 1/2`) supercritically
+`H^{a + 2}`- and `H^{6 + a}`-bounded (`2a > finrank + 4`) realized perturbation family, the order-`0`
+intrinsic squared fibre norm of the field-difference gradient section `fieldDiffGradSection g₀ g₁ g₀
+g_bg` (fibre `g₀(∇^{g₀}_v (W₁ − W₀), w)`, `Wᵢ = deTurckVF gᵢ g_bg`) is uniformly bounded by a single
+constant `Λ` over the manifold and the family:
+`∀ x, rfns(fieldDiffGradSection g₀ g₁ g₀ g_bg)(x) ≤ Λ`.
+
+The `l = 0` covariant-Leibniz product grid `fieldDiffGradSection_iteratedCovGrad_rfns_productGrid_le`
+dominates the fibre norm pointwise by the diagonal product of the realized-perturbation jets
+(orders `i ≤ 2`, the difference factor) against the `g₀`-lowered connection-difference jets
+(orders `m ≤ 3`, the fixed-pair factor); each realized-perturbation jet fibre norm is bounded by the
+sharp-order supercritical fibre sup `realizeSymm_iteratedCovGrad_rfns_fibre_sup` (using `‖T₁.toHs(a +
+2)‖ ≤ B`), and each connection-difference jet fibre norm by the per-order fibre sup
+`loweredConnDiff_iteratedCovGrad_rfns_fibre_sup` (each order `m ≤ 3` using `‖T₁.toHs(m + 3 + a)‖ ≤
+‖T₁.toHs(6 + a)‖ ≤ B`, `toHs_norm_mono`), so the finite product grid telescopes to a single
+family-uniform constant `Λ`. -/
+private theorem fieldDiffGradSection_rfns_fibre_sup_pointwise
+    (g₀ g_bg : SmoothRiemannianMetric I M) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ Λ : ℝ, 0 ≤ Λ ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (6 + a) T₁‖ ≤ B →
+        ∀ x : M,
+          Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+              ((fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg).toSection x) ≤ Λ := by
+  classical
+  obtain ⟨Cgrid, hCgrid0, hgrid⟩ :=
+    fieldDiffGradSection_iteratedCovGrad_rfns_productGrid_le (I := I) g₀ g_bg δ hδ0 hδ1 B a ha 0
+  obtain ⟨Cr, hCr0, hCr⟩ := realizeSymm_iteratedCovGrad_rfns_fibre_sup (I := I) g₀ B a ha
+  -- The connection-difference per-order fibre sups, one constant per order `m ≤ 3`.
+  choose ΛD hΛD0 hΛD using fun m : ℕ =>
+    loweredConnDiff_iteratedCovGrad_rfns_fibre_sup (I := I) g₀ m δ hδ0 hδ1 B a ha
+  -- The grid product, with each factor replaced by its uniform sup, is a single finite constant.
+  set Rsup : ℝ := (Cr * max B 0) ^ 2 with hRsup
+  have hRsup0 : 0 ≤ Rsup := by rw [hRsup]; positivity
+  set Bound : ℝ := Cgrid * ∑ i ∈ Finset.range (0 + 2 + 1),
+      Rsup * ∑ m ∈ Finset.range (0 + 3 + 1 - i), (ΛD m) ^ 2 with hBound
+  have hBound0 : 0 ≤ Bound := by
+    rw [hBound]
+    refine mul_nonneg hCgrid0 (Finset.sum_nonneg fun i _ => ?_)
+    exact mul_nonneg hRsup0 (Finset.sum_nonneg fun m _ => sq_nonneg _)
+  refine ⟨Bound, hBound0, fun T₁ g₁ hg₁ hδbnd hB hBjet x => ?_⟩
+  -- Read the `l = 0` grid and the order-`0` identity `∇^0 fieldDiffGradSection = fieldDiffGradSection`.
+  have hg := hgrid T₁ g₁ hg₁ hδbnd hB x
+  rw [show PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 0
+      (fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg) = fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg
+      from rfl] at hg
+  -- The grid's RHS index ranges (`l = 0`): `i ∈ {0,1,2}`, `m ∈ {0,…,3-i}`.
+  refine le_trans hg ?_
+  rw [hBound]
+  refine mul_le_mul_of_nonneg_left ?_ hCgrid0
+  refine Finset.sum_le_sum (fun i hi => ?_)
+  have hi3 : i < 3 := by simpa using Finset.mem_range.mp hi
+  -- The realized-perturbation factor `rfns(∇^i realizeSymm T₁)(x) ≤ Rsup`.
+  have hrz : Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+        (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x) ≤ Rsup := by
+    rw [hRsup]; exact hCr T₁ hB i hi3 x
+  -- The inner connection-difference sum is `≤ ∑_{m} ΛD m ^ 2`.
+  have hinner : (∑ m ∈ Finset.range (0 + 3 + 1 - i),
+        Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + m) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 m
+            (loweredConnDiffSection (I := I) g₁ g₀)).toSection x)) ≤
+      ∑ m ∈ Finset.range (0 + 3 + 1 - i), (ΛD m) ^ 2 := by
+    refine Finset.sum_le_sum (fun m hm => ?_)
+    have hm4 : m < 0 + 3 + 1 - i := Finset.mem_range.mp hm
+    -- Each order-`m` connection-difference jet sup uses `‖T₁.toHs(m+3+a)‖ ≤ ‖T₁.toHs(6+a)‖ ≤ B`
+    -- (`m ≤ 3` since `m < 4 - i ≤ 4` and `i ≥ 0`, so `m + 3 + a ≤ 6 + a`).
+    have hball : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (m + 3 + a) T₁‖ ≤
+        B := le_trans (toHs_norm_mono (I := I) g₀ (by omega) T₁) hBjet
+    exact hΛD m T₁ g₁ hg₁ hδbnd hball x
+  have hinner_nn : 0 ≤ ∑ m ∈ Finset.range (0 + 3 + 1 - i),
+      Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + m) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 m
+          (loweredConnDiffSection (I := I) g₁ g₀)).toSection x) :=
+    Finset.sum_nonneg fun m _ => Integral.Connection.riemannianFiberNormSq_nonneg _ _ _ _ _
+  exact mul_le_mul hrz hinner hinner_nn hRsup0
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
+set_option linter.unusedSectionVars false in
+/-- **The family-uniform `g₀`-fibre value sup of the field-difference covariant gradient.**
 For the fibre-small (`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, `δ < 1/2`) supercritically
-`H^{a+2}`-bounded (`2a > finrank + 4`) realized perturbation family, the `g₀`-Levi-Civita covariant
-gradient of the DeTurck field difference `W₁ − W₀`, `Wᵢ = deTurckVF gᵢ g_bg`, obeys the
-family-uniform value bound
+`H^{a+2}`- and `H^{6 + a}`-bounded (`2a > finrank + 4`) realized perturbation family, the
+`g₀`-Levi-Civita covariant gradient of the DeTurck field difference `W₁ − W₀`, `Wᵢ = deTurckVF gᵢ
+g_bg`, obeys the family-uniform value bound
 `√(g₀ x (∇^{g₀}_v (W₁ − W₀)) (∇^{g₀}_v (W₁ − W₀))) ≤ Λ · √(g₀ x v v)`
 for a single constant `Λ ≥ 0` over the manifold and the family.
 
-This is the order-`0` `C⁰` value of the `g₀`-Levi-Civita covariant gradient of the field difference:
-the field difference `W₁ − W₀` is the inverse-Gram-weighted trace of the pair connection difference
-(`deTurckVF_sub_apply_eq_trace_connDiff`), a first-order Christoffel-difference quantity against the
-fixed background `g_bg`, so its `g₀`-covariant gradient is a second-jet metric quantity that is
-`C⁰`-controlled family-uniformly through the supercritical `H^{a+2} ↪ C¹` embedding of the metric
-jet (`iteratedCovGradJetSum_le_toHs`, `2a > finrank + 4`).  As a `g₀`-operator on `v`, the covariant
-gradient `(∇^{g₀}(W₁ − W₀)) x` having a uniform `g₀`-fibre sup is exactly this value bound.
+The bilinear value `g₀(∇^{g₀}_v (W₁ − W₀), w)` is the fibre of the field-difference gradient section
+`fieldDiffGradSection g₀ g₁ g₀ g_bg` (`fieldDiffGradSection_toModel_apply`, `fieldDiffGradBilin_apply`),
+whose pointwise intrinsic fibre-norm sup `fieldDiffGradSection_rfns_fibre_sup_pointwise` is
+family-uniform.  The `(0,2)` `g₀`-fibre Cauchy–Schwarz `ccTensorBilin_sq_le_gInner_riemannianFiberNormSq`
+folds the fibre norm into the bilinear value bound `|g₀(∇^{g₀}_v (W₁ − W₀), w)| ≤ √Λ_rfns · √(g₀ v v) ·
+√(g₀ w w)`, and the `g₀`-Riesz lift `sqrt_gInner_self_le_of_forall_inner_le` (at fixed `v`) raises the
+gradient self-norm to `√(g₀ (∇^{g₀}_v (W₁ − W₀))²) ≤ √Λ_rfns · √(g₀ v v)`, so `Λ = √Λ_rfns`.
+
+The **higher Sobolev ball** `‖T₁.toHs(6 + a)‖ ≤ B` is the `l = 0` instance of the sibling
+field-difference jet engine's second ball `‖T₁.toHs(l + 3 + 3 + a)‖ ≤ B`
+(`exists_iteratedCovGrad_deTurckVF_le_jetSum`): the covariant-Leibniz expansion of the gradient of the
+inverse-Gram-weighted connection-difference trace reaches the realized `4`-jet, which the supercritical
+`H^{a + 2} ↪ C²` embedding alone does not control.
 
 **Non-vacuity.**  Genuine (`Λ = 0` forces `∇^{g₀}(W₁ − W₀) ≡ 0`, false whenever `W₁ ≠ W₀`).  At
-`g₁ = g₀` realized (`T₁ = 0`) the field difference is the zero section and `Λ = 0` works.  Body
-`sorry`: the genuine supercritical-`C¹` value bound of the field-difference covariant gradient
-(consumers transitively depend on `sorryAx` through this posited engine). -/
+`g₁ = g₀` realized (`T₁ = 0`) the field difference is the zero section and `Λ = 0` works. -/
 theorem exists_covGrad_deTurckVF_sub_gNorm_sup_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
     (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
@@ -1341,6 +1569,7 @@ theorem exists_covGrad_deTurckVF_sub_gNorm_sup_le
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (6 + a) T₁‖ ≤ B →
         ∀ (x : M) (v : TangentSpace I x),
           Real.sqrt (g₀.inner x
               ((LeviCivita (I := I) g₀)
@@ -1349,8 +1578,57 @@ theorem exists_covGrad_deTurckVF_sub_gNorm_sup_le
               ((LeviCivita (I := I) g₀)
                 ((deTurckVF (I := I) g₁ g_bg - deTurckVF (I := I) g₀ g_bg :
                   Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) : ∀ x : M, TangentSpace I x) x v)) ≤
-            Λ * Real.sqrt (g₀.inner x v v) :=
-  sorry
+            Λ * Real.sqrt (g₀.inner x v v) := by
+  classical
+  obtain ⟨Λ_rfns, hΛ_rfns0, hΛ_rfns⟩ :=
+    fieldDiffGradSection_rfns_fibre_sup_pointwise (I := I) g₀ g_bg δ hδ0 hδ1 B a ha
+  refine ⟨Real.sqrt Λ_rfns, Real.sqrt_nonneg _, fun T₁ g₁ hg₁ hδbnd hB hBjet x v => ?_⟩
+  -- The gradient vector `z := ∇^{g₀}_v (W₁ − W₀) x`.
+  set z : TangentSpace I x :=
+    (LeviCivita (I := I) g₀)
+      ((deTurckVF (I := I) g₁ g_bg - deTurckVF (I := I) g₀ g_bg :
+        Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) : ∀ x : M, TangentSpace I x) x v with hz
+  have hsv : 0 ≤ Real.sqrt (g₀.inner x v v) := Real.sqrt_nonneg _
+  -- The fibre-norm sup of the field-difference gradient section at `x`.
+  have hrfns := hΛ_rfns T₁ g₁ hg₁ hδbnd hB hBjet x
+  have hrfns_nn : 0 ≤ Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+      ((fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg).toSection x) :=
+    Integral.Connection.riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 2 x _
+  -- `K v := √Λ_rfns · √(g₀ v v)` is the Riesz constant for the functional `c ↦ g₀(z, c)`.
+  refine sqrt_gInner_self_le_of_forall_inner_le (I := I) g₀ x z
+    (K := Real.sqrt Λ_rfns * Real.sqrt (g₀.inner x v v)) (by positivity) (fun c => ?_)
+  -- `g₀(z, c) = ccTensorBilin g₀ (fieldDiffGradSection g₀ g₁ g₀ g_bg) x v c`.
+  have hbilin : g₀.inner x z c =
+      ccTensorBilin (I := I) g₀ (fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg) x v c := by
+    rw [ccTensorBilin_apply]
+    show _ = ccTensorModel (I := I) g₀ (fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg) x ![v, c]
+    rw [ccTensorModel, ccTensorMultilinear_apply, fieldDiffGradSection_toModel_apply,
+      fieldDiffGradBilin_apply]
+  -- The `(0,2)` `g₀`-fibre Cauchy–Schwarz: `(ccTensorBilin)² ≤ (g₀ v v)·(g₀ c c)·rfns`.
+  have hcs := ccTensorBilin_sq_le_gInner_riemannianFiberNormSq (I := I) g₀
+    (fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg) x v c
+  have hvv_nn : 0 ≤ g₀.inner x v v :=
+    DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg (I := I) (M := M) g₀ x v
+  have hcc_nn : 0 ≤ g₀.inner x c c :=
+    DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg (I := I) (M := M) g₀ x c
+  rw [hbilin]
+  -- `|B| = √(B²) ≤ √((g₀ v v)·(g₀ c c)·Λ_rfns) = √Λ_rfns · √(g₀ v v) · √(g₀ c c)`.
+  have habs : |ccTensorBilin (I := I) g₀ (fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg) x v c| =
+      Real.sqrt
+        ((ccTensorBilin (I := I) g₀ (fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg) x v c) ^ 2) := by
+    rw [Real.sqrt_sq_eq_abs]
+  rw [habs]
+  have hstep : Real.sqrt
+        ((ccTensorBilin (I := I) g₀ (fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg) x v c) ^ 2) ≤
+      Real.sqrt (g₀.inner x v v * g₀.inner x c c * Λ_rfns) := by
+    refine Real.sqrt_le_sqrt (le_trans hcs ?_)
+    refine mul_le_mul_of_nonneg_left hrfns ?_
+    exact mul_nonneg hvv_nn hcc_nn
+  refine le_trans hstep ?_
+  -- `√((g₀ v v)·(g₀ c c)·Λ_rfns) = √Λ_rfns · √(g₀ v v) · √(g₀ c c)`, then reassociate to `K · √(g₀ c c)`.
+  rw [show g₀.inner x v v * g₀.inner x c c * Λ_rfns =
+      Λ_rfns * (g₀.inner x v v) * (g₀.inner x c c) from by ring]
+  rw [Real.sqrt_mul (by positivity), Real.sqrt_mul (by positivity)]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
@@ -1389,12 +1667,13 @@ theorem exists_fieldDiffGradBilin_gcs_value_bound
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (6 + a) T₁‖ ≤ B →
         ∀ (x : M) (v w : TangentSpace I x),
           |ccTensorBilin (I := I) g₀ (fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg) x v w| ≤
             Λ₀ * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) := by
   obtain ⟨Λ, hΛ0, hΛ⟩ :=
     exists_covGrad_deTurckVF_sub_gNorm_sup_le (I := I) g₀ g_bg δ hδ0 hδ1 B a ha
-  refine ⟨Λ, hΛ0, fun T₁ g₁ hg₁ hδbnd hB₁ x v w => ?_⟩
+  refine ⟨Λ, hΛ0, fun T₁ g₁ hg₁ hδbnd hB₁ hBjet x v w => ?_⟩
   have hred : ccTensorBilin (I := I) g₀ (fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg) x v w =
       g₀.inner x ((LeviCivita (I := I) g₀)
           ((deTurckVF (I := I) g₁ g_bg - deTurckVF (I := I) g₀ g_bg :
@@ -1410,7 +1689,7 @@ theorem exists_fieldDiffGradBilin_gcs_value_bound
   refine le_trans
     (DifferentialGeometry.Analysis.Laplacian.abs_metric_inner_le_sqrt_metric_quadratic g₀ x u w) ?_
   have hwnn : 0 ≤ Real.sqrt (g₀.inner x w w) := Real.sqrt_nonneg _
-  have hop := hΛ T₁ g₁ hg₁ hδbnd hB₁ x v
+  have hop := hΛ T₁ g₁ hg₁ hδbnd hB₁ hBjet x v
   calc Real.sqrt (g₀.inner x u u) * Real.sqrt (g₀.inner x w w)
       ≤ (Λ * Real.sqrt (g₀.inner x v v)) * Real.sqrt (g₀.inner x w w) :=
         mul_le_mul_of_nonneg_right hop hwnn
@@ -1444,15 +1723,16 @@ theorem exists_fieldDiffGradSection_rfns_fibre_sup_le
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (6 + a) T₁‖ ≤ B →
         ∀ x : M,
           Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
             ((fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg).toSection x) ≤ Λ ^ 2 := by
   obtain ⟨Λ₀, hΛ₀0, hΛ₀⟩ :=
     exists_fieldDiffGradBilin_gcs_value_bound (I := I) g₀ g_bg δ hδ0 hδ1 B a ha
-  refine ⟨Module.finrank ℝ E * Λ₀, by positivity, fun T₁ g₁ hg₁ hδbnd hB₁ x => ?_⟩
+  refine ⟨Module.finrank ℝ E * Λ₀, by positivity, fun T₁ g₁ hg₁ hδbnd hB₁ hBjet x => ?_⟩
   exact rfns_le_of_ccTensorBilin_gcs_bound (I := I) g₀
     (fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg) x Λ₀ hΛ₀0
-    (fun v w => hΛ₀ T₁ g₁ hg₁ hδbnd hB₁ x v w)
+    (fun v w => hΛ₀ T₁ g₁ hg₁ hδbnd hB₁ hBjet x v w)
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
@@ -1486,15 +1766,16 @@ theorem exists_riemannianFiberNormSq_loweredCovGradDeTurckVFMixed_fldSlot_diff_f
           g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
         gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (6 + a) T₁‖ ≤ B →
         ∀ x : M,
           Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
             ((loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₁ g_bg
                 - loweredCovGradDeTurckVFMixed (I := I) g₀ g₀ g₀ g₀ g_bg).toSection x) ≤ Λ ^ 2 := by
   obtain ⟨Λ, hΛ0, hΛ⟩ :=
     exists_fieldDiffGradSection_rfns_fibre_sup_le (I := I) g₀ g_bg δ hδ0 hδ1 B a ha
-  refine ⟨Λ, hΛ0, fun T₁ g₁ hg₁ hδbnd hB₁ x => ?_⟩
+  refine ⟨Λ, hΛ0, fun T₁ g₁ hg₁ hδbnd hB₁ hBjet x => ?_⟩
   rw [loweredCovGradDeTurckVFMixed_fldSlot_sub_eq_fieldDiffGradSection (I := I) g₀ g₁ g_bg]
-  exact hΛ T₁ g₁ hg₁ hδbnd hB₁ x
+  exact hΛ T₁ g₁ hg₁ hδbnd hB₁ hBjet x
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
@@ -1608,9 +1889,13 @@ theorem loweredCovGradDeTurckVFMixed_fldSlot_iteratedCovGrad_hamiltonTame_le
     nlinarith [hsq, Real.sqrt_nonneg K₁, hΛ0, hC₃0, sq_nonneg (Λ + C₃),
       mul_nonneg hnn (add_nonneg hΛ0 hC₃0)]
   · intro T₁ g₁ hg₁ hδbnd hB₁ hBjet
+    -- The fldSlot value sup uses the higher Sobolev ball `‖T₁.toHs(6+a)‖ ≤ B`, the `l = 0`
+    -- instance of the integrated jet ball `‖T₁.toHs(l+3+3+a)‖ ≤ B` (`toHs_norm_mono`).
+    have hB6 : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (6 + a) T₁‖ ≤ B :=
+      le_trans (toHs_norm_mono (I := I) g₀ (by omega) T₁) hBjet
     refine ⟨?_, ?_⟩
     · intro x
-      refine le_trans (hΛ T₁ g₁ hg₁ hδbnd hB₁ x) ?_
+      refine le_trans (hΛ T₁ g₁ hg₁ hδbnd hB₁ hB6 x) ?_
       have hnn : (0 : ℝ) ≤ Real.sqrt K₁ := Real.sqrt_nonneg _
       nlinarith [Real.sqrt_nonneg K₁, hΛ0, hC₃0, sq_nonneg (Real.sqrt K₁ + C₃),
         mul_nonneg hΛ0 (add_nonneg hnn hC₃0)]
