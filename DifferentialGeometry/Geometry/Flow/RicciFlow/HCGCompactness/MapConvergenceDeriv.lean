@@ -86,5 +86,101 @@ theorem MapCInfConvOnCompacts.fderivApply {U : Set E} {Φ : ℕ → E → F} {Φ
         rw [← mul_div_assoc, div_le_iff₀ (by positivity : (0:ℝ) < ‖v‖ + 1)]
         nlinarith [norm_nonneg v, hε.le]
 
+/-- **Additivity of `C^∞`-on-compacts convergence.**  Sums of `C^∞`-on-compacts
+convergent families (all `C^∞`) converge `C^∞`-on-compacts to the sum of the
+limits. -/
+theorem MapCInfConvOnCompacts.add {U : Set E} {Φ Ψ : ℕ → E → F} {Φinf Ψinf : E → F}
+    (hΦ : MapCInfConvOnCompacts U Φ Φinf) (hΨ : MapCInfConvOnCompacts U Ψ Ψinf)
+    (hΦc : ∀ k, ContDiff ℝ (∞ : WithTop ℕ∞) (Φ k)) (hΦic : ContDiff ℝ (∞ : WithTop ℕ∞) Φinf)
+    (hΨc : ∀ k, ContDiff ℝ (∞ : WithTop ℕ∞) (Ψ k)) (hΨic : ContDiff ℝ (∞ : WithTop ℕ∞) Ψinf) :
+    MapCInfConvOnCompacts U (fun k z => Φ k z + Ψ k z) (fun z => Φinf z + Ψinf z) := by
+  intro K hK hKU p ε hε
+  obtain ⟨k1, hk1⟩ := hΦ K hK hKU p (ε / 2) (by positivity)
+  obtain ⟨k2, hk2⟩ := hΨ K hK hKU p (ε / 2) (by positivity)
+  refine ⟨max k1 k2, fun k hk r hr x hx => ?_⟩
+  have hsplit : mapDerivNorm r (fun z => Φ k z + Ψ k z) (fun z => Φinf z + Ψinf z) x
+      ≤ mapDerivNorm r (Φ k) Φinf x + mapDerivNorm r (Ψ k) Ψinf x := by
+    have hfun : (fun y => (Φ k y + Ψ k y) - (Φinf y + Ψinf y))
+        = (fun y => Φ k y - Φinf y) + (fun y => Ψ k y - Ψinf y) := by
+      funext y
+      change (Φ k y + Ψ k y) - (Φinf y + Ψinf y) = (Φ k y - Φinf y) + (Ψ k y - Ψinf y)
+      abel
+    have heq : mapDerivNorm r (fun z => Φ k z + Ψ k z) (fun z => Φinf z + Ψinf z) x
+        = ‖iteratedFDeriv ℝ r ((fun y => Φ k y - Φinf y) + (fun y => Ψ k y - Ψinf y)) x‖ := by
+      rw [show mapDerivNorm r (fun z => Φ k z + Ψ k z) (fun z => Φinf z + Ψinf z) x
+          = ‖iteratedFDeriv ℝ r (fun y => (Φ k y + Ψ k y) - (Φinf y + Ψinf y)) x‖ from rfl, hfun]
+    rw [heq, iteratedFDeriv_add_apply
+      (((hΦc k).sub hΦic).contDiffAt.of_le (by exact_mod_cast le_top))
+      (((hΨc k).sub hΨic).contDiffAt.of_le (by exact_mod_cast le_top))]
+    exact norm_add_le _ _
+  calc mapDerivNorm r (fun z => Φ k z + Ψ k z) (fun z => Φinf z + Ψinf z) x
+      ≤ mapDerivNorm r (Φ k) Φinf x + mapDerivNorm r (Ψ k) Ψinf x := hsplit
+    _ ≤ ε / 2 + ε / 2 := by
+        gcongr
+        · exact hk1 k (le_trans (le_max_left _ _) hk) r hr x hx
+        · exact hk2 k (le_trans (le_max_right _ _) hk) r hr x hx
+    _ = ε := by ring
+
+/-- **`C^∞`-on-compacts convergence is closed under multiplication by a fixed
+smooth scalar field.**  If `Φₖ → Φ_∞` in `C^∞`-on-compacts (scalar, all `C^∞`) and
+`g` is `C^∞`, then `g · Φₖ → g · Φ_∞` in `C^∞`-on-compacts.  This is the closure
+the covariant-tower induction needs for the (fixed `gRef`-Christoffel) correction
+terms.  Proof: Leibniz (`norm_iteratedFDeriv_mul_le`) bounds `mapDerivNorm r
+(g·Φₖ) (g·Φ_∞)` by `∑_{i≤r} C(r,i)‖∇ⁱg‖·mapDerivNorm (r-i) Φₖ Φ_∞`, then the fixed
+`‖∇ⁱg‖` are bounded on the compact and the difference norms vanish. -/
+theorem MapCInfConvOnCompacts.mulLeft {U : Set E} {Φ : ℕ → E → ℝ} {Φlim : E → ℝ}
+    (h : MapCInfConvOnCompacts U Φ Φlim) {g : E → ℝ} (hg : ContDiff ℝ (∞ : WithTop ℕ∞) g)
+    (hΦc : ∀ k, ContDiff ℝ (∞ : WithTop ℕ∞) (Φ k)) (hΦic : ContDiff ℝ (∞ : WithTop ℕ∞) Φlim) :
+    MapCInfConvOnCompacts U (fun k z => g z * Φ k z) (fun z => g z * Φlim z) := by
+  intro K hK hKU p ε hε
+  obtain ⟨Bg, hBg0, hBg⟩ : ∃ Bg : ℝ, 0 ≤ Bg ∧ ∀ i ≤ p, ∀ x ∈ K,
+      ‖iteratedFDeriv ℝ i g x‖ ≤ Bg := by
+    have hbd : ∀ i : ℕ, ∃ B : ℝ, ∀ x ∈ K, ‖iteratedFDeriv ℝ i g x‖ ≤ B := by
+      intro i
+      obtain ⟨B, hB⟩ := hK.bddAbove_image
+        (hg.continuous_iteratedFDeriv (m := i) (by exact_mod_cast le_top)).norm.continuousOn
+      exact ⟨B, fun x hx => hB ⟨x, hx, rfl⟩⟩
+    choose B hB using hbd
+    refine ⟨∑ i ∈ Finset.range (p + 1), |B i|, Finset.sum_nonneg (fun _ _ => abs_nonneg _),
+      fun i hi x hx => ?_⟩
+    calc ‖iteratedFDeriv ℝ i g x‖ ≤ B i := hB i x hx
+      _ ≤ |B i| := le_abs_self _
+      _ ≤ ∑ j ∈ Finset.range (p + 1), |B j| :=
+          Finset.single_le_sum (f := fun j => |B j|) (fun j _ => abs_nonneg (B j))
+            (Finset.mem_range.mpr (Nat.lt_succ_of_le hi))
+  obtain ⟨k0, hk0⟩ := h K hK hKU p (ε / (2 ^ p * Bg + 1)) (by positivity)
+  refine ⟨k0, fun k hk r hr x hx => ?_⟩
+  have hle : mapDerivNorm r (fun z => g z * Φ k z) (fun z => g z * Φlim z) x
+      ≤ ∑ i ∈ Finset.range (r + 1),
+        (r.choose i : ℝ) * ‖iteratedFDeriv ℝ i g x‖ * mapDerivNorm (r - i) (Φ k) Φlim x := by
+    have hfun : (fun y => g y * Φ k y - g y * Φlim y) = (fun y => g y * (Φ k y - Φlim y)) := by
+      funext y; ring
+    have hfeq : mapDerivNorm r (fun z => g z * Φ k z) (fun z => g z * Φlim z) x
+        = ‖iteratedFDeriv ℝ r (fun y => g y * (Φ k y - Φlim y)) x‖ := by
+      rw [show mapDerivNorm r (fun z => g z * Φ k z) (fun z => g z * Φlim z) x
+          = ‖iteratedFDeriv ℝ r (fun y => g y * Φ k y - g y * Φlim y) x‖ from rfl, hfun]
+    rw [hfeq]
+    exact norm_iteratedFDeriv_mul_le (𝕜 := ℝ) (f := g) (g := fun y => Φ k y - Φlim y)
+      hg ((hΦc k).sub hΦic) x (by exact_mod_cast le_top)
+  refine hle.trans ?_
+  have hstep : ∀ i ∈ Finset.range (r + 1),
+      (r.choose i : ℝ) * ‖iteratedFDeriv ℝ i g x‖ * mapDerivNorm (r - i) (Φ k) Φlim x
+        ≤ (r.choose i : ℝ) * (Bg * (ε / (2 ^ p * Bg + 1))) := by
+    intro i hi
+    have hi' : i ≤ p := le_trans (Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)) hr
+    rw [mul_assoc]
+    refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+    exact mul_le_mul (hBg i hi' x hx) (hk0 k hk (r - i) (by omega) x hx)
+      (mapDerivNorm_nonneg _ _ _ _) hBg0
+  refine (Finset.sum_le_sum hstep).trans ?_
+  rw [← Finset.sum_mul,
+    (by exact_mod_cast Nat.sum_range_choose r :
+      (∑ i ∈ Finset.range (r + 1), (r.choose i : ℝ)) = 2 ^ r)]
+  have hD : (0:ℝ) < 2 ^ p * Bg + 1 := by positivity
+  have h2r : (2:ℝ) ^ r ≤ 2 ^ p := pow_le_pow_right₀ (by norm_num) hr
+  rw [show (2:ℝ) ^ r * (Bg * (ε / (2 ^ p * Bg + 1)))
+      = 2 ^ r * Bg * ε / (2 ^ p * Bg + 1) from by ring, div_le_iff₀ hD]
+  nlinarith [mul_nonneg (mul_nonneg hε.le (sub_nonneg.mpr h2r)) hBg0, hε.le]
+
 end HCGCompactness
 end DifferentialGeometry

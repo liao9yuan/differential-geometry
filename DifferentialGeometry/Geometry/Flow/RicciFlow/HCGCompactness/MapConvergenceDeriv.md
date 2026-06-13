@@ -52,10 +52,48 @@ because `MapConvergence.lean` is currently owned/dirty in another session
 (off-limits per P3_PLAN §3).  Candidate to fold back into `MapConvergence.lean`
 when that file is free.
 
-## Remaining for Gap B `a ≥ 1` (NOT in this brick)
-Producer (1) is now DONE.  The covariant-tower bridge still needs producer (2):
-the rank-≥3 / tower coordinate covariant-derivative component formula (a recursive
-`component0S (metricCovDerivStep gRef a A) = directional-deriv(component0S A) + Σ
-Christoffel · component0S A` generalising `nabla0SFun_two_eval_coordFrame` past
-rank 2).  Then `componentConv_covDeriv` for general `a` assembles from (1)+(2) by
-induction.
+## Producer (3) — scalar convergence-algebra closures (2026-06-13, added)
+
+The covariant-tower convergence induction also needs the algebra of `C^∞`-on-
+compacts convergence (sum of terms, Christoffel-weighted terms).  Added (both
+axiom-clean):
+
+- `MapCInfConvOnCompacts.add (hΦ hΨ) (ContDiff hyps) : MapCInfConvOnCompacts U
+  (fun k z => Φ k z + Ψ k z) (fun z => Φinf z + Ψinf z)`.  `mapDerivNorm r` of the
+  sum-difference splits by `iteratedFDeriv_add_apply` + `norm_add_le`; threshold
+  `ε/2 + ε/2`.  (Codomain `F` is an additive group ⇒ the rearrangement is `abel`,
+  not `ring`.)
+- `MapCInfConvOnCompacts.mulLeft (h) (hg : ContDiff ∞ g) (ContDiff hyps) :
+  MapCInfConvOnCompacts U (fun k z => g z * Φ k z) (fun z => g z * Φlim z)` (scalar
+  `ℝ`).  Leibniz `norm_iteratedFDeriv_mul_le` bounds `mapDerivNorm r (g·Φₖ)(g·Φlim)`
+  by `∑_{i≤r} C(r,i)‖∇ⁱg‖·mapDerivNorm (r-i)`; `‖∇ⁱg‖ ≤ Bg` uniformly on the
+  compact (`IsCompact.bddAbove_image` of `(continuous_iteratedFDeriv).norm`, summed
+  over `i ≤ p`), `∑ C(r,i) = 2ʳ`; threshold `ε/(2ᵖ·Bg+1)`.  This is the closure for
+  the fixed `gRef`-Christoffel correction terms.
+
+## Gap B `a ≥ 1` — route now fully scoped (the remaining work is assembly)
+Producers (1)=B2 fderiv-closure and (3)=add/mulLeft are DONE.  Producer (2) — the
+rank-general covariant-step component formula — is **already provided by A2**:
+`fderiv_chartRep_eq_towerStep` (MetricPreconv.lean) + the `towerStep` def give, for
+any level `p`, that the chart-`fderiv` of the `p`-tower scalar `s_p^V` equals the
+chart-rep of `towerStep = (next-order on cons-slots) + Σ Christoffel-corrected
+lower-order scalars`.  Rearranged, the `(p+1)`-order component on cons-slots =
+chart-`fderiv` of the `p`-scalar − Σ (lower-order scalars on Christoffel-modified
+slots).
+
+Induction for `componentConv_covDeriv_of_chartCInf` (IH at `C^∞`-on-compacts level,
+over ALL slot tuples `V`):
+- base `a = 0`: B0 (`exists_engine_frameCInfConv`) gives `MapCInfConvOnCompacts` of
+  the order-0 chart components.
+- step `a → a+1`: the directional term is the chart-`fderiv` of the `a`-scalar ⇒
+  converges by **B2**; each Christoffel term is a fixed `gRef`-Christoffel times a
+  lower-order scalar (after expanding the modified slot in the frame, using tensor
+  multilinearity) ⇒ converges by **mulLeft** + **add** + IH.
+
+Remaining sub-frontiers to actually close it (assembly, not new producers): (i) the
+frame match between the engine's `frameVec` and A2's globalized chart-constant
+direction; (ii) the multilinear slot-expansion of the Christoffel-modified slot
+into the frame basis (`leviCivita(frameₐ)(frame₀) = Σ Γᵏ frameₖ` + tensor
+linearity); (iii) discharging the A2 germ/regularity hypotheses along the
+sequence.  After the bridge: finite-cover `hnorm` (via `metricDerivNorm_le_compSq_uniform`)
+→ `metricPreconvInf`.
