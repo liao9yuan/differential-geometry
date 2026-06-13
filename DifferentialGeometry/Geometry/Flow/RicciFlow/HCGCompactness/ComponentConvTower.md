@@ -16,19 +16,29 @@ core) → `bumpTower_slotExpand_conv` (leading-slot frame expansion) →
 Supporting: `chartRep_contDiffOn`, `bumpTowerScalar_contDiff`,
 `bumpTowerStepScalar_contDiff`.
 
-**REMAINING = the three INPUTS to `bumpTowerCarrier_all`** (each well-specified):
-1. **base `hbase`** (order-0, all section pairs): from B0 `exists_engine_frameCInfConv`
-   (frame-pair convergence) + `bumpTower_slotExpand_conv` applied to BOTH slots.
-2. **frame data** `(frame, vbasis, hframeσ, hspan)`: global sections `= frameVec`
-   on `Kc` (`exists_section_eqOn_compact`), `hframeσ` from
-   `frameVec = tangentConstInChart`, and `hspan` = coordinate-frame coefficient
-   smoothness (`exists_frameVec_basis` + frame-coeff smoothness on the chart domain).
-3. **extraction**: order-0 of the `C^∞`-on-compacts conv at `extChartAt x₀ x` ⇒
-   pointwise `Tendsto` of `s_a^V(x)`; then a fixed (`k`-independent) multilinear
-   expansion of the basis vectors `b (I0 q)` in the frame at `x` lands the
-   `component0S b (metricCovDeriv g gRef a x) I0` shape (the
-   `componentConv_covDeriv_of_chartCInf` statement, general-`a` analogue of
-   `componentConv_covDeriv_zero`).  Then finite-cover `hnorm` → `metricPreconvInf`.
+**INPUT 2 (frame data) DONE** = `exists_frameData` (axiom-clean): for compact `Kc`
+in a chart, global sections `frame i = tangentConstInChart x₀ (finBasis i)` near
+`Kc` (via `exists_section_eqOn_compact`) + `hspan` (coordinate-frame coefficient
+smoothness) — built from the **Mathlib local-frame API**: `c_i = e.localFrame_coeff`,
+smooth via `contMDiffOn_baseSet_localFrame_coeff`, expansion via
+`eq_sum_localFrame_coeff_smul`, bridged `e.localFrame i = tangentConstInChart` via
+`basisAt`/`symmL` (both `= e.symm w (b i)`).  **NO missing local-frame theorem.**
+
+**INPUT 1 (base) — algebraic half DONE** = `hbase_of_framePairs` (axiom-clean):
+double `bumpTower_slotExpand_conv` reduces the order-0 carrier of any `Fin 2`
+section pair to the frame-pair carriers, given the diagonalised frame-pair
+convergence `hpairs`.
+
+**REMAINING:**
+1. **B0 diagonal** producing `hpairs`: from B0 `exists_engine_frameCInfConv`
+   (per-`(i,j)` `MapCInfConvOnCompacts`) diagonalise over the `n²` frame pairs into
+   ONE `φ` (`exists_refine_allComponents`-style, keeping the `C^∞` data), with
+   `A0Seq k = metricTensorField (gSeq (φ k))`, `χ/U/Kc` from B0's bump.
+2. **extraction**: order-0 of the `C^∞`-on-compacts conv at `extChartAt x₀ x` ⇒
+   pointwise `Tendsto` of `s_a^V(x)`; fixed (`k`-independent) multilinear expansion
+   of the basis vectors `b (I0 q)` in the frame at `x` lands the
+   `component0S b (metricCovDeriv g gRef a x) I0` shape ⇒
+   `componentConv_covDeriv_of_chartCInf`.  Then finite-cover `hnorm` → `metricPreconvInf`.
 
 Planner acceptance note: `bumpTower_slotExpand_conv` intentionally keeps the
 uniform chart-patch hypothesis `hUtarget` even though this declaration does not use
