@@ -29,3 +29,58 @@ the tree has no committed-broken file from this layer anymore.
 B1 (`lbl397`) ⟸ B0 (missing, real work) + this input + item-3 chart-scale + lbl390
 windows (done). B2/B3 analysis on top; B4 local-diffeo brick independent; B5/B6 gated
 on the F3 engine interface (see Lemma45CovariantAbstract).
+
+## B-input brick — `lbl395` normal-coordinate metric honest input (2026-06-13)
+
+Added the `lbl395` honest input (STEPB_PLAN Planner Ruling Q1), sibling to
+`ExpInverseDerivBoundInput`. **Verification PASSED** (focused locked check + targeted
+module build green; sorry-free). Only definitions/predicates/a structure were added —
+**no theorem endpoint was introduced**. Axiom audit on the one concrete `def` that
+carries content, `normalCoordMetric`, is clean: `[propext, Classical.choice,
+Quot.sound]` (the `Classical.choice` is inherited from `expMapDiffeo`'s
+`Classical.choose`; no `sorryAx`).
+
+### What was added (all in `StepBInputs.lean`)
+- **`normalCoordMetric Y x : E → (E →L[ℝ] E →L[ℝ] ℝ)`** — the model-coordinate
+  pulled-back normal-coordinate metric `(H_x)^* g`, where `H_x := expMapDiffeo g x`.
+  Defined *concretely* (NOT as supplied chart-data) by mirroring
+  `Geometry/Metric/Pullback.lean : Diffeomorph.pullbackInner`: at `z`,
+  `(ContinuousLinearMap.precomp ℝ D).comp ((g.inner (H_x z)).comp D)` with
+  `D := mfderiv 𝓘(ℝ,E) I H_x z`, so the value is the bilinear form
+  `(u,v) ↦ g_{H_x z}(dH_x u, dH_x v)`. Off the chart domain `D` is junk; the bounds
+  apply only on the relevant ball (parallel to `normalTransition`).
+- **`NormalCoordMetricEquivOn Y x U`** — `½‖v‖² ≤ g(z)(v,v) ≤ 2‖v‖²` on `U`
+  (quadratic-form form of `½δ ≤ g ≤ 2δ`).
+- **`NormalCoordMetricDerivBound Y x U p C`** — `‖iteratedFDeriv ℝ p (normalCoordMetric
+  Y x) z‖ ≤ C` on `U`.
+- **`NormalCoordMetricBoundInput (X : PointedRiemannianSeq)`** — constants-first honest
+  input: `metricC : ℕ → ℝ` (+ nonneg) listed first and uniform over `k,x`; per-center
+  `radius` (the book `min{c₁/√C₀,r₀}` scale, `radius_pos`); `metric_equiv` and
+  `metric_deriv` stated on `Metric.ball 0 (radius k x)` only.
+
+### Design decisions (why this shape)
+- **Concrete map, NOT a chart-data record.** STEPB_PLAN step 7 anticipated possibly
+  needing a separate `H_k^α`/pulled-back-metric chart-data record. It was NOT needed:
+  `Diffeomorph.pullbackInner` already establishes that `g.inner pt : TₚM →L TₚM →L ℝ`
+  composes cleanly with `mfderiv` via `.comp`/`ContinuousLinearMap.precomp` (the
+  `precomp` route avoids the `SeminormedAddCommGroup` instances `bilinearComp` would
+  demand on `TangentSpace`). So `normalCoordMetric` is a genuine pullback, mirroring
+  `normalTransition`. This keeps the honest input free of realization-hypothesis fields
+  and gives B-metric a real bilinear-form-valued map to feed to (localized) AA.
+- **Target = `E →L[ℝ] E →L[ℝ] ℝ`** (Q3's "equivalent continuous bilinear-form target"),
+  reusing the project's canonical pullback-bilinear type rather than CMM currying.
+- **No `radius_subset_source` / total-`univ` claim.** The B-input brick records exactly
+  the local metric control Step B will consume; source containment/nested-domain
+  bookkeeping belongs to the Step A item-3 data and the later B-loc bridge.
+  `Set.univ`/`IsometryDerivBounds` is deliberately avoided (B-loc).
+- `½` and `2` are hardcoded (the book gives exactly these); the dimensional gap between
+  the operator-norm `‖iteratedFDeriv‖` and per-component `|∂^α g_ij|` is absorbed into
+  the honest constant `metricC p`.
+
+### Lean lesson
+- `iteratedFDeriv ℝ p` over the nested `E →L[ℝ] E →L[ℝ] ℝ` codomain with
+  `InnerProductSpace ℝ E` in scope blows the default `synthInstance` budget (20000 hb,
+  `SeminormedAddCommGroup (E →L[ℝ] E →L[ℝ] ℝ)`). It is slow-but-terminating; the project
+  standard `set_option synthInstance.maxHeartbeats 800000` fixes it. Scope it to the one
+  declaration (`NormalCoordMetricDerivBound`) — an unscoped top-level option trips the
+  `linter.style.setOption` guard on a fresh build.
