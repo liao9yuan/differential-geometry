@@ -5,9 +5,30 @@ metric-component convergence (general-`a` analogue of `componentConv_covDeriv_ze
 
 ## Status (2026-06-13)
 
-**ALL induction-step primitives DONE + verified** (every lemma axiom-clean, builds
-green).  The remaining work is ONLY the `Nat.rec` step wrapper + base + pointwise
-extraction — assembly of the committed pieces, no new mathematical content.
+**THE FULL COVARIANT-TOWER CONVERGENCE INDUCTION IS DONE + verified** (every lemma
+axiom-clean, builds green): `bumpTowerCarrier_all` — from the order-`0` base, the
+bump carriers of EVERY section tuple at EVERY covariant order `a` converge
+`C^∞`-on-compacts on `U`, along one subsequence.  Chain (all committed):
+`bumpTowerStep_chartConv` (directional) → `bumpTowerStep_split` (towerStep =
+`s_{p+1}` + Σ corrections) + `.sub` → `bumpTowerCons_conv` (frame-leading step
+core) → `bumpTower_slotExpand_conv` (leading-slot frame expansion) →
+`bumpTowerCarrier_step` (IH(p) ⇒ IH(p+1)) → `bumpTowerCarrier_all` (`Nat.rec`).
+Supporting: `chartRep_contDiffOn`, `bumpTowerScalar_contDiff`,
+`bumpTowerStepScalar_contDiff`.
+
+**REMAINING = the three INPUTS to `bumpTowerCarrier_all`** (each well-specified):
+1. **base `hbase`** (order-0, all section pairs): from B0 `exists_engine_frameCInfConv`
+   (frame-pair convergence) + `bumpTower_slotExpand_conv` applied to BOTH slots.
+2. **frame data** `(frame, vbasis, hframeσ, hspan)`: global sections `= frameVec`
+   on `Kc` (`exists_section_eqOn_compact`), `hframeσ` from
+   `frameVec = tangentConstInChart`, and `hspan` = coordinate-frame coefficient
+   smoothness (`exists_frameVec_basis` + frame-coeff smoothness on the chart domain).
+3. **extraction**: order-0 of the `C^∞`-on-compacts conv at `extChartAt x₀ x` ⇒
+   pointwise `Tendsto` of `s_a^V(x)`; then a fixed (`k`-independent) multilinear
+   expansion of the basis vectors `b (I0 q)` in the frame at `x` lands the
+   `component0S b (metricCovDeriv g gRef a x) I0` shape (the
+   `componentConv_covDeriv_of_chartCInf` statement, general-`a` analogue of
+   `componentConv_covDeriv_zero`).  Then finite-cover `hnorm` → `metricPreconvInf`.
 
 ### Landed (this file + MapConvergenceDeriv.lean)
 - `chartRep_towerScalar_contDiffOn` / `chartRep_contDiffOn` — chart rep of a
