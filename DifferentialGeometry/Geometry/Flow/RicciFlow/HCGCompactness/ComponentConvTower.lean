@@ -316,5 +316,51 @@ theorem bumpTower_slotExpand_conv
     rw [hmulti A0inf ((extChartAt I x₀).symm z) hsrc]
     simp only [smul_eq_mul]
 
+/-- **`towerStep` split.**  Pointwise, the bump-extended level-`(p+1)` carrier with
+leading slot `σ` is the bump-extended `towerStep` minus the bump-extended
+`gRef`-Christoffel corrections, each of which is itself a level-`p` carrier for the
+section tuple `update V' a (∇_σ V'ₐ)` (the covariant-derivative slot realised as a
+`covSection`).  This is the algebraic identity behind extracting `s_{p+1}` from the
+directional step via `MapCInfConvOnCompacts.sub`. -/
+theorem bumpTowerStep_split
+    (gRef : SmoothRiemannianMetric I M)
+    (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    (p : ℕ)
+    (V' : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _))
+    (σ : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (x₀ : M) (χ : E → Real) (z : E) :
+    χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+        (fun w : M => (covDerivOfField (I := I) gRef A0 (p + 1)) w
+          (Fin.cons (σ w) (fun a : Fin (p + 2) => V' a w))) z
+      = χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+          (towerStep (I := I) gRef A0 p V' σ) z
+        - ∑ a : Fin (p + 2), χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gRef A0 p) w
+              (fun b => (Function.update V' a
+                (covSection (I := I) (leviCivitaConnectionOfMetric (I := I) gRef)
+                  (leviCivitaConnectionOfMetric_contMDiffCovariantDerivative
+                    (I := I) gRef) σ (V' a))) b w)) z := by
+  simp only [writtenInExtChartAt_real_apply, towerStep]
+  set q : M := (extChartAt I x₀).symm z with hq
+  have hupd : ∀ a : Fin (p + 2),
+      (fun b : Fin (p + 2) =>
+          (Function.update V' a
+            (covSection (I := I) (leviCivitaConnectionOfMetric (I := I) gRef)
+              (leviCivitaConnectionOfMetric_contMDiffCovariantDerivative
+                (I := I) gRef) σ (V' a))) b q)
+        = Function.update (fun b : Fin (p + 2) => V' b q) a
+            (((leviCivitaConnectionOfMetric (I := I) gRef)
+              (fun r : M => V' a r) q) (σ q)) := by
+    intro a
+    funext b
+    by_cases h : b = a
+    · subst h; simp [covSection_apply]
+    · simp [Function.update_of_ne h]
+  simp only [hupd]
+  rw [mul_add, Finset.mul_sum]
+  ring
+
 end HCGCompactness
 end DifferentialGeometry
