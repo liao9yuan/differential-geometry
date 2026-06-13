@@ -90,10 +90,30 @@ over ALL slot tuples `V`):
   lower-order scalar (after expanding the modified slot in the frame, using tensor
   multilinearity) ⇒ converges by **mulLeft** + **add** + IH.
 
-Remaining sub-frontiers to actually close it (assembly, not new producers): (i) the
-frame match between the engine's `frameVec` and A2's globalized chart-constant
-direction; (ii) the multilinear slot-expansion of the Christoffel-modified slot
-into the frame basis (`leviCivita(frameₐ)(frame₀) = Σ Γᵏ frameₖ` + tensor
-linearity); (iii) discharging the A2 germ/regularity hypotheses along the
-sequence.  After the bridge: finite-cover `hnorm` (via `metricDerivNorm_le_compSq_uniform`)
-→ `metricPreconvInf`.
+**KEY de-risking insight (2026-06-13): the induction runs along the SINGLE
+subsequence `φ` from B0 — NO new diagonal is needed.**  The reason: a covariant
+component `s_p^V` is a FIXED (gRef-Christoffel) differential operator of order ≤ p
+applied to the order-0 metric components.  Concretely:
+- **All slot tuples from one frame.**  For arbitrary smooth `V`, expand each slot
+  in the frame `V_c = Σ_i (cᵢ_c) frameVecᵢ` (smooth coefficient functions `cᵢ_c`);
+  then `s_0^V = g.inner(V_0)(V_1) = Σ_{ij} cᵢ_0 cⱼ_1 · (g.inner(frameVecᵢ)(frameVecⱼ))
+  = Σ (fixed smooth coeff) · (B0 frame component)`.  So `s_0^V` converges `C^∞`
+  ALONG THE SAME `φ` as B0, via **mulLeft + add** — no extra engine run / diagonal.
+- **Levels propagate along the same `φ`.**  A2's `towerStep` recursion takes
+  `fderiv` (B2) + Christoffel multiplication (mulLeft) + sums (add) of the SAME
+  converging sequence; so `s_{p+1}^V` converges `C^∞` along `φ` given `s_p^{·}`
+  does (IH over all `V`).  The modified slots `leviCivita(Vₐ)(X)` are smooth fields
+  ⇒ still covered by the (all-`V`) IH.
+
+So C1b's `metricPreconv_gInf` (pointwise CLM only) is NOT the bottleneck — B0's
+re-exposed `C^∞` engine output + the fixed-operator propagation give the whole
+tower along one `φ`.  Remaining sub-frontiers are pure assembly (no new
+producer / no new diagonal): (i) frame match `frameVec` ↔ A2 globalized
+chart-constant direction (`frameVec = tangentConstInChart` at `finBasis`, already
+shown rfl — so this is mostly bookkeeping); (ii) the multilinear slot-expansion
+(`leviCivita(frameₐ)(frame₀) = Σ Γᵏ frameₖ` + tensor linearity); (iii) the A2 germ
+(`=ᶠ[𝓝 y]`) → neighbourhood-of-compact upgrade (local equality on each `y∈K`
+patches to an open set ⊇ chart image of `K`, since `C^∞`-on-compacts convergence is
+local); (iv) discharge of A2's per-point regularity hypotheses along the sequence.
+After the bridge: finite-cover `hnorm` (via `metricDerivNorm_le_compSq_uniform`,
+B-final-A) → `metricPreconvInf`.
