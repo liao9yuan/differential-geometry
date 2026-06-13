@@ -163,7 +163,9 @@ into the final `MetricCInfConvOnCompacts` / window input.  C-II-final-B0 ✅
 ACCEPTED (c2510190): `exists_engine_frameCInfConv` and
 `exists_engine_frameCInfConv_eq_gm` re-expose the engine's order-0
 C∞-on-compacts frame-component convergence and pin its limit to `gm`; targeted
-build green 3848 jobs, axiom-clean.**
+build green 3848 jobs, axiom-clean.  C-II-final-B1 ✅ ACCEPTED (61584c6e):
+`componentConv_covDeriv_zero` proves the covariant-tower component bridge at
+order `a = 0` in any fibre basis; targeted build green 3848 jobs, axiom-clean.**
 **File**: `MetricPreconvDiag.lean`.
 
 C0 (the abstract diagonal — design FIXED by the planner, prove as stated
@@ -276,17 +278,20 @@ and the specialization `metricDerivNorm_le_compSq` axiom-clean).  The
 constants-first seam is closed: good-frame witnesses `basisE`, `u'`, and `Cu`
 are now bound before `∀ gk gInf`, so they depend only on `gRef`, `a`, and `x`.**
 
-**NEXT FRONTIER (C-II-final-B):** do not try to prove the finite-cover `hnorm`
-wrapper until the higher-order input convergence theorem exists.  Gap A is now
-closed by C-II-final-B0 (`exists_engine_frameCInfConv` +
-`exists_engine_frameCInfConv_eq_gm`).  The remaining missing bridge is
-`componentConv_covDeriv_of_chartCInf`: from the re-exposed C∞-on-compacts
-order-0 chart-component convergence of the metrics and the fixed `gRef`
-connection data, derive uniform convergence on a good-frame patch of
-`component0S (metricCovDeriv (gSeq k) gRef a)` to
-`component0S (metricCovDeriv gInf gRef a)` for all `a ≤ p`.  Once this
-covariant-tower convergence bridge is available, C-II can finish the finite-cover
-`hnorm` step and then assemble
+**NEXT FRONTIER (C-II-final-B, `a ≥ 1`):** do not try to prove the finite-cover
+`hnorm` wrapper until the higher-order input convergence theorem exists.  Gap A
+is closed by C-II-final-B0 (`exists_engine_frameCInfConv` +
+`exists_engine_frameCInfConv_eq_gm`), and the order-0 slice of Gap B is closed
+by C-II-final-B1 (`componentConv_covDeriv_zero`).  The remaining bridge
+`componentConv_covDeriv_of_chartCInf` still needs two producer lemmas:
+(1) derivative-closure for `MapCInfConvOnCompacts` (Euclidean analysis, likely
+in `MapConvergence.lean`), turning C∞-on-compacts convergence of chart
+components into convergence of their `fderiv` / coordinate derivatives, needed
+already for `a = 1`; and (2) a rank-≥3/tower coordinate covariant-derivative
+component formula generalizing `Coordinates.nabla0SFun_two_eval_coordFrame`
+from rank 2 to `component0S (metricCovDerivStep ...)` / arbitrary slot count.
+Do not add a hypothesis asserting covariant-tower convergence.  Once these
+producers exist, C-II can finish the finite-cover `hnorm` step and then assemble
 `metricPreconvInf`.**
 **File**: same or split `MetricPreconvBridge.lean` if > ~900 lines.
 
