@@ -324,6 +324,103 @@ lemma exists_engine_frameConv
   exact htend
 
 include I in
+/-- **Gap A producer — `C^∞`-on-compacts frame-component convergence.**  The
+Brick-B engine returns `MapCInfConvOnCompacts` (full `C^∞`-on-compacts, not only
+pointwise `Tendsto`) of the bump-extended chart representative of the `(i,j)`
+metric component, against global sections `σi, σj` equal to `frameVec x₀ i, j` on
+`K₀`.  `exists_engine_frameConv` keeps only the pointwise extraction; this exposes
+the full convergence — the order-0 input the higher covariant-tower bridge
+(`componentConv_covDeriv_of_chartCInf`, Gap B) will consume. -/
+lemma exists_engine_frameCInfConv
+    (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
+    (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
+      metricCovDerivNorm (I := I) q (gSeq k) gRef z ≤ C)
+    (x₀ : M) {K₀ : Set M} (hK₀ : IsCompact K₀) (hK₀chart : K₀ ⊆ (chartAt H x₀).source)
+    (i j : Fin (Module.finrank Real E)) (φ : ℕ → ℕ) :
+    ∃ (ψ : ℕ → ℕ) (Φinf χ : E → Real)
+      (σi σj : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _)),
+      StrictMono ψ ∧ ContDiff Real (∞ : WithTop ℕ∞) Φinf ∧
+      (∀ x ∈ K₀, σi x = Geometry.frameVec (I := I) x₀ i x) ∧
+      (∀ x ∈ K₀, σj x = Geometry.frameVec (I := I) x₀ j x) ∧
+      (∀ x ∈ K₀, χ (extChartAt I x₀ x) = 1) ∧
+      MapCInfConvOnCompacts (Set.univ : Set E)
+        (fun k => fun x : E => χ x * writtenInExtChartAt I 𝓘(Real, Real) x₀
+          (fun w : M => (gSeq (φ (ψ k))).inner w (σi w) (σj w)) x) Φinf := by
+  obtain ⟨σi, hσi⟩ :=
+    exists_section_eqOn_compact (I := I) x₀ (Module.finBasis Real E i) hK₀ hK₀chart
+  obtain ⟨σj, hσj⟩ :=
+    exists_section_eqOn_compact (I := I) x₀ (Module.finBasis Real E j) hK₀ hK₀chart
+  have hbdd' : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
+      metricCovDerivNorm (I := I) q ((gSeq ∘ φ) k) gRef z ≤ C := by
+    intro q K hK; obtain ⟨C, hC⟩ := hbdd q K hK; exact ⟨C, fun k z hz => hC (φ k) z hz⟩
+  obtain ⟨ψ, Φinf, χ, hψ, hΦinf, hχ1, hconv⟩ :=
+    exists_chart_cInfConv (I := I) gRef (gSeq ∘ φ) hbdd' x₀ ![σi, σj] hK₀ hK₀chart
+  have hxi : ∀ x ∈ K₀, σi x = Geometry.frameVec (I := I) x₀ i x := fun x hx =>
+    (hσi.self_of_nhdsSet x hx).trans (congrFun (frameVec_eq_tangentConst (I := I) x₀ i).symm x)
+  have hxj : ∀ x ∈ K₀, σj x = Geometry.frameVec (I := I) x₀ j x := fun x hx =>
+    (hσj.self_of_nhdsSet x hx).trans (congrFun (frameVec_eq_tangentConst (I := I) x₀ j).symm x)
+  have hinner : ∀ (g : SmoothRiemannianMetric I M) (w : M),
+      (covDerivOfField (I := I) gRef (Tensor0SBundle.metricTensorField (I := I) g) 0) w
+          (fun a => (![σi, σj] : Fin 2 → _) a w)
+        = g.inner w (σi w) (σj w) := by
+    intro g w
+    rw [covDerivOfField_zero, Tensor0SBundle.metricTensorField_apply]
+    simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
+  simp only [hinner, Function.comp_apply] at hconv
+  exact ⟨ψ, Φinf, χ, σi, σj, hψ, hΦinf, hxi, hxj, hχ1, hconv⟩
+
+include I in
+/-- **Gap A producer, limit pinned to `gm`.**  When the metric sequence already
+converges pointwise to `gm` along `φ` (the `metricPreconv_gInf`/`exists_limit_gm`
+output), the `C^∞`-on-compacts limit `Φinf` of the frame-component chart sequence
+equals `gm`'s frame component on the patch — by pointwise-limit uniqueness (the
+`frameComp_contMDiffOn` route).  So the chart components of `gSeq` converge `C^∞`
+on compacts to the chart component of the limit metric. -/
+lemma exists_engine_frameCInfConv_eq_gm
+    (gRef : SmoothRiemannianMetric I M) (gSeq : ℕ → SmoothRiemannianMetric I M)
+    (hbdd : ∀ q : ℕ, ∀ K : Set M, IsCompact K → ∃ C : Real, ∀ k : ℕ, ∀ z ∈ K,
+      metricCovDerivNorm (I := I) q (gSeq k) gRef z ≤ C)
+    (φ : ℕ → ℕ)
+    (gm : Π x : M, TangentSpace I x →L[Real] TangentSpace I x →L[Real] Real)
+    (hgm : ∀ x, Filter.Tendsto (fun m => (gSeq (φ m)).inner x) Filter.atTop (nhds (gm x)))
+    (x₀ : M) {K₀ : Set M} (hK₀ : IsCompact K₀) (hK₀chart : K₀ ⊆ (chartAt H x₀).source)
+    (i j : Fin (Module.finrank Real E)) :
+    ∃ (ψ : ℕ → ℕ) (Φinf χ : E → Real)
+      (σi σj : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _)),
+      StrictMono ψ ∧ ContDiff Real (∞ : WithTop ℕ∞) Φinf ∧
+      (∀ x ∈ K₀, σi x = Geometry.frameVec (I := I) x₀ i x) ∧
+      (∀ x ∈ K₀, σj x = Geometry.frameVec (I := I) x₀ j x) ∧
+      (∀ x ∈ K₀, χ (extChartAt I x₀ x) = 1) ∧
+      (∀ x ∈ K₀, Φinf (extChartAt I x₀ x)
+        = gm x (Geometry.frameVec (I := I) x₀ i x) (Geometry.frameVec (I := I) x₀ j x)) ∧
+      MapCInfConvOnCompacts (Set.univ : Set E)
+        (fun k => fun x : E => χ x * writtenInExtChartAt I 𝓘(Real, Real) x₀
+          (fun w : M => (gSeq (φ (ψ k))).inner w (σi w) (σj w)) x) Φinf := by
+  obtain ⟨ψ, Φinf, χ, σi, σj, hψ, hΦinf, hxi, hxj, hχ1, hconv⟩ :=
+    exists_engine_frameCInfConv (I := I) gRef gSeq hbdd x₀ hK₀ hK₀chart i j φ
+  refine ⟨ψ, Φinf, χ, σi, σj, hψ, hΦinf, hxi, hxj, hχ1, fun x hx => ?_, hconv⟩
+  have hxsrc : x ∈ (extChartAt I x₀).source := by rw [extChartAt_source]; exact hK₀chart hx
+  have hA : Filter.Tendsto (fun k => (gSeq (φ (ψ k))).inner x
+      (Geometry.frameVec (I := I) x₀ i x) (Geometry.frameVec (I := I) x₀ j x))
+      Filter.atTop (nhds (Φinf (extChartAt I x₀ x))) := by
+    have htend := tendsto_of_cInf hconv (Set.mem_univ (extChartAt I x₀ x))
+    have hfun : (fun k => χ (extChartAt I x₀ x) * writtenInExtChartAt I 𝓘(Real, Real) x₀
+          (fun w : M => (gSeq (φ (ψ k))).inner w (σi w) (σj w)) (extChartAt I x₀ x))
+        = (fun k => (gSeq (φ (ψ k))).inner x
+            (Geometry.frameVec (I := I) x₀ i x) (Geometry.frameVec (I := I) x₀ j x)) := by
+      funext k
+      rw [hχ1 x hx, one_mul, writtenInExtChartAt_real_apply, PartialEquiv.left_inv _ hxsrc,
+        hxi x hx, hxj x hx]
+    rw [hfun] at htend; exact htend
+  have hcont : Continuous (fun η : TangentSpace I x →L[Real] TangentSpace I x →L[Real] Real =>
+      η (Geometry.frameVec (I := I) x₀ i x) (Geometry.frameVec (I := I) x₀ j x)) :=
+    ((ContinuousLinearMap.apply Real Real (Geometry.frameVec (I := I) x₀ j x)).comp
+      (ContinuousLinearMap.apply Real (TangentSpace I x →L[Real] Real)
+        (Geometry.frameVec (I := I) x₀ i x))).continuous
+  have hB := ((hcont.tendsto (gm x)).comp (hgm x)).comp hψ.tendsto_atTop
+  exact (tendsto_nhds_unique hB hA).symm
+
+include I in
 /-- Pointwise-convergence corollary of `exists_engine_frameConv` (forgets the
 smooth limit; the `hstep` shape for the diagonal). -/
 lemma exists_refine_componentConv

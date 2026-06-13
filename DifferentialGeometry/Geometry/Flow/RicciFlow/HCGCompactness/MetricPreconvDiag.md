@@ -4,7 +4,11 @@
 targeted build green 3848 jobs; `#print axioms metricPreconv_gInf` clean =
 `[propext, Classical.choice, Quot.sound]`).  The Brick C-G bridge
 `smoothMetric_of_localCoeff` unblocked C1a/C1b; endpoint
-`metricPreconv_gInf` constructs the limit `SmoothRiemannianMetric`.**
+`metricPreconv_gInf` constructs the limit `SmoothRiemannianMetric`.
+(2026-06-13) C-II-final-B0 added: `exists_engine_frameCInfConv` +
+`exists_engine_frameCInfConv_eq_gm` re-expose the engine's `C^∞`-on-compacts
+frame-component convergence (Gap A); both axiom-clean, `metricPreconv_gInf`
+unchanged.  See the "Gap A exposed" / "Gap B" notes below.**
 
 ## C1a + C1b DONE (2026-06-12) — verified lemma inventory
 
@@ -67,8 +71,39 @@ SmoothRiemannianMetric I M, ∀ x, Tendsto (fun m => (gSeq (φ m)).inner x) atTo
 `metricPreconv_gInf` delivers the POINTWISE-CLM-limit form (subsumes
 chart-component convergence).  The C2 `metricDerivNorm` bridge
 (`metricCInfConvOnCompacts_of_normConv`) wants uniform-on-compacts component
-convergence; the engine's `MapCInfConvOnCompacts` provides it but is not
-re-exposed here — that strengthening is C2's interface, not C1b's.
+convergence; the engine's `MapCInfConvOnCompacts` provides it but `metricPreconv_gInf`
+keeps only the pointwise extraction.
+
+### Gap A exposed (2026-06-13, C-II-final-B0)
+The engine's `C^∞`-on-compacts frame-component convergence is now re-exposed
+(both axiom-clean; `metricPreconv_gInf` unchanged):
+
+- `exists_engine_frameCInfConv (gRef gSeq) (hbdd) (x₀ {K₀} hK₀ hK₀chart) (i j) (φ)
+  : ∃ ψ Φinf χ σi σj, StrictMono ψ ∧ ContDiff ∞ Φinf ∧ (σi/σj = frameVec i,j on K₀)
+  ∧ (χ ∘ extChartAt = 1 on K₀) ∧ MapCInfConvOnCompacts univ (fun k x => χ x ·
+  writtenInExtChartAt x₀ (fun w => (gSeq (φ (ψ k))).inner w (σi w)(σj w)) x) Φinf`.
+  Same engine setup as `exists_engine_frameConv`, but returns the FULL
+  `MapCInfConvOnCompacts` rather than the pointwise `Tendsto`.  The engine's raw
+  `covDerivOfField gRef (metricTensorField ·) 0` chart function is rewritten to the
+  clean `.inner w (σi w)(σj w)` form globally (via `covDerivOfField_zero` +
+  `metricTensorField_apply`, valid for every `w`).
+- `exists_engine_frameCInfConv_eq_gm (… φ gm hgm …)` — given the `gm` pointwise
+  convergence (the `exists_limit_gm`/`metricPreconv_gInf` output), pins the limit:
+  `∀ x ∈ K₀, Φinf (extChartAt x) = gm x (frameVec i x)(frameVec j x)` (pointwise-
+  limit uniqueness, the `frameComp_contMDiffOn` route — `tendsto_nhds_unique` of the
+  engine `MapCInfConvOnCompacts` pointwise extraction vs the `gm`-evaluated limit).
+  So the chart components of `gSeq (φ (ψ ·))` converge `C^∞`-on-compacts to the
+  chart component of the LIMIT metric `gInf` (= `gm`).
+
+### Gap B — the remaining real frontier (NOT in this brick)
+Producing the C-II `hnorm` still needs `componentConv_covDeriv_of_chartCInf`:
+turn the order-0 `C^∞`-on-compacts chart-component convergence above into
+COVARIANT-TOWER component convergence `component0S (metricCovDeriv (gSeq k) gRef a)
+→ component0S (metricCovDeriv gInf gRef a)` for `a ≥ 1` (the convergence-level
+inverse of Brick A2's coordinate→covariant tower expansion; `metricCovDeriv g gRef
+a` is a fixed gRef-Christoffel polynomial in coordinate derivatives ≤ a of the
+order-0 components).  `exists_engine_frameCInfConv` is exactly the order-0 input it
+consumes.  This is the next brick; do not hide it behind a new assumption.
 
 ## C0 — `exists_diag_subseq` (DONE)
 
