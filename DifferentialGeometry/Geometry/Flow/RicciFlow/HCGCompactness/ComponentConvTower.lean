@@ -491,5 +491,87 @@ theorem bumpTowerCons_conv
   rw [hfeq_seq, hfeq_inf]
   exact hsub
 
+/-- **The covariant-tower convergence induction step.**  If the level-`p` bump
+carriers converge for ALL section tuples (IH), so do the level-`(p+1)` bump
+carriers.  Expand the leading slot of `W` in the frame (`bumpTower_slotExpand_conv`,
+chart-constant `frameᵢ`), reducing to the frame-leading case handled by
+`bumpTowerCons_conv` (bridging `update W 0 frameᵢ` to `Fin.cons frameᵢ (tail W)`). -/
+theorem bumpTowerCarrier_step
+    (gRef : SmoothRiemannianMetric I M)
+    (A0Seq : ℕ → Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    (A0inf : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    (p : ℕ) (x₀ : M)
+    {χ : E → Real} (hχ : ContDiff Real (∞ : WithTop ℕ∞) χ)
+    (htsupp : tsupport χ ⊆ (extChartAt I x₀).target)
+    {U : Set E} (hU : IsOpen U) (hχU : Set.EqOn χ 1 U)
+    (hUtarget : U ⊆ (extChartAt I x₀).target)
+    {Kc : Set M} (hKchart : Kc ⊆ (chartAt H x₀).source)
+    (hUKc : ∀ z ∈ U, (extChartAt I x₀).symm z ∈ Kc)
+    {ι : Type*} (s : Finset ι)
+    (frame : ι → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _))
+    (vbasis : ι → E)
+    (hframeσ : ∀ i, ∀ᶠ x in 𝓝ˢ Kc,
+      frame i x = tangentConstInChart (𝕜 := Real) (I := I) x₀ (vbasis i) x)
+    (hspan : ∀ (W0 : ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _)),
+        ∃ c : ι → M → Real,
+          (∀ i, ContMDiffOn I 𝓘(Real, Real) (∞ : WithTop ℕ∞) (c i)
+            (chartAt H x₀).source)
+          ∧ ∀ w ∈ Kc, W0 w = ∑ i ∈ s, c i w • frame i w)
+    (IH : ∀ (V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _)),
+        MapCInfConvOnCompacts U
+          (fun k z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gRef (A0Seq k) p) w (fun a => V a w)) z)
+          (fun z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gRef A0inf p) w (fun a => V a w)) z))
+    (W : Fin (p + 3) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _)) :
+    MapCInfConvOnCompacts U
+      (fun k z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+        (fun w : M => (covDerivOfField (I := I) gRef (A0Seq k) (p + 1)) w (fun a => W a w)) z)
+      (fun z => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+        (fun w : M => (covDerivOfField (I := I) gRef A0inf (p + 1)) w (fun a => W a w)) z) := by
+  classical
+  obtain ⟨c, hc, hexpand⟩ := hspan (W 0)
+  refine bumpTower_slotExpand_conv (I := I) gRef A0Seq A0inf (p + 1) x₀ hχ htsupp
+    hU hχU hUtarget s frame c hc W 0 hUKc hexpand ?_
+  intro i
+  have hslot : ∀ (A0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+        (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2),
+      (fun w : M => (covDerivOfField (I := I) gRef A0 (p + 1)) w
+          (fun a => (Function.update W 0 (frame i)) a w))
+        = (fun w : M => (covDerivOfField (I := I) gRef A0 (p + 1)) w
+            (Fin.cons (frame i w) (fun a : Fin (p + 2) => (Fin.tail W) a w))) := by
+    intro A0
+    funext w
+    congr 1
+    funext a
+    refine Fin.cases ?_ (fun j => ?_) a
+    · simp
+    · simp [Fin.tail]
+  have hbr_seq : (fun (k : ℕ) (z : E) => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+        (fun w : M => (covDerivOfField (I := I) gRef (A0Seq k) (p + 1)) w
+          (fun a => (Function.update W 0 (frame i)) a w)) z)
+      = fun (k : ℕ) (z : E) => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+          (fun w : M => (covDerivOfField (I := I) gRef (A0Seq k) (p + 1)) w
+            (Fin.cons (frame i w) (fun a : Fin (p + 2) => (Fin.tail W) a w))) z := by
+    funext k z
+    rw [hslot (A0Seq k)]
+  have hbr_inf : (fun (z : E) => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+        (fun w : M => (covDerivOfField (I := I) gRef A0inf (p + 1)) w
+          (fun a => (Function.update W 0 (frame i)) a w)) z)
+      = fun (z : E) => χ z * writtenInExtChartAt I 𝓘(Real, Real) x₀
+          (fun w : M => (covDerivOfField (I := I) gRef A0inf (p + 1)) w
+            (Fin.cons (frame i w) (fun a : Fin (p + 2) => (Fin.tail W) a w))) z := by
+    funext z
+    rw [hslot A0inf]
+  rw [hbr_seq, hbr_inf]
+  exact bumpTowerCons_conv (I := I) gRef A0Seq A0inf p x₀ hχ htsupp hU hχU hUtarget
+    hKchart hUKc (vbasis i) (frame i) (hframeσ i) (Fin.tail W) IH
+
 end HCGCompactness
 end DifferentialGeometry
