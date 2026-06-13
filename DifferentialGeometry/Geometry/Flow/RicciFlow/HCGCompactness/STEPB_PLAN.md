@@ -171,7 +171,17 @@ Acceptance endpoints:
 
 ### B-loc - localized map and isometry compactness
 
-Status: next analysis brick; central new frontier for `lbl394`.
+Status: accepted 2026-06-13.
+
+Acceptance verdict 2026-06-13: B-loc is complete.  The accepted work added
+the localized map extraction `exists_cInf_subseq_on` to `MapConvergence.lean`
+and the localized isometry consumers in `StepBLocalizedAA.lean`:
+`comp_eq_id_of_cInf_on`, `isometry_seq_cInf_on`, and
+`isometry_seq_diffeo_on`.  The inverse identities are intentionally
+domain-conditional, because the Step B transition maps are only controlled on
+chart overlaps.  Planner rechecked focused files, refreshed targeted modules,
+and audited the new public endpoints as axiom-clean (`propext`,
+`Classical.choice`, `Quot.sound` only).
 
 Target file: `StepBLocalizedAA.lean` plus same-name note.
 
@@ -193,11 +203,24 @@ Acceptance endpoints:
 
 - Focused check and targeted module build green.
 - `#print axioms` clean for localized AA and localized F8 endpoints.
-- No edits to `MapConvergence.lean` or `IsometryCompactness.lean`.
+- No edits to `IsometryCompactness.lean`; `MapConvergence.lean` was edited
+  only for the planner-authorized localized extraction.
 
 ### B-metric - `lbl394` local metric limits
 
-Status: blocked on B-input and B-loc.
+Status: generic engine and fixed-center HCG wrapper accepted 2026-06-13;
+full `lbl394` metric endpoint still blocked.
+
+Acceptance verdict 2026-06-13: `StepBLocalMetrics.lean` is accepted for the
+generic bilinear-form limit theorem `exists_metricLimit_on` and the fixed
+center normal-coordinate wrapper `exists_metricLimit_normalCoord`.  The wrapper
+wires `NormalCoordMetricBoundInput` into the generic engine, preserving the
+`1/2 delta <= g <= 2 delta` equivalence.  It deliberately keeps the missing
+normal-coordinate smoothness as the bare hypothesis
+`hsmooth : forall k, ContDiffOn R top (normalCoordMetric ...) U` and the domain
+containment as `hdom`; this is not the unconditional manifold `lbl394`.
+Planner verification passed focused checks, targeted module builds, and axiom
+audit (`propext`, `Classical.choice`, `Quot.sound` only).
 
 Target file: `StepBLocalMetrics.lean`.
 
@@ -215,7 +238,20 @@ Acceptance endpoints:
 
 ### B-trans - `lbl394` transition limits and cocycle
 
-Status: blocked on B-loc and B-metric.
+Status: generic engine and fixed-pair HCG wrapper accepted 2026-06-13;
+full `lbl394` transition endpoint still blocked.
+
+Acceptance verdict 2026-06-13: `StepBTransition.lean` is accepted for
+`exists_transitionLimit_on`, the honest overlap predicate `NormalOverlapOn`,
+and the fixed-pair normal-transition wrapper
+`exists_transitionLimit_normalTransition`.  The wrapper wires
+`ExpInverseDerivBoundInput` into localized isometry compactness and states the
+limit cocycle conditionally on limit-domain membership.  It deliberately keeps
+the missing transition smoothness as the bare hypotheses `hsmoothJ` and
+`hsmoothJbar`, plus explicit overlap/domain inputs; this is not the
+unconditional finite-pair diagonal `lbl394`.  Planner verification passed
+focused checks, targeted module builds, and axiom audit (`propext`,
+`Classical.choice`, `Quot.sound` only).
 
 Target file: `StepBTransition.lean`.
 
@@ -234,7 +270,15 @@ Acceptance endpoints:
 
 ### B-Falpha - local maps converge to identity (`lbl399`)
 
-Status: blocked on B-trans; independent of Step C.
+Status: `C^0` compact convergence core accepted 2026-06-13; full `C^infty`
+`lbl399` remains blocked on composition-convergence calculus.
+
+Acceptance verdict 2026-06-13: `StepBApproxIso.lean` is accepted for the
+generic `comp_tendsto_id_on` theorem.  It proves the uniform-on-compact `C^0`
+identity limit for two independently convergent local map sequences with the
+limit inverse identity supplied conditionally.  It does not prove the full
+`C^infty` convergence of compositions; that remains the Faà-di-Bruno
+composition-convergence frontier.
 
 Target file: `StepBApproxIso.lean`.
 
@@ -251,7 +295,8 @@ Acceptance endpoints:
 
 ### B-404 - almost-identity pullback lemma
 
-Status: can run after B-loc; best after B-metric for exact statement shape.
+Status: not started; blocked on the same Faà-di-Bruno
+composition-convergence frontier as full `lbl399`.
 
 Target file: `StepBApproxIso.lean` or a small Euclidean helper file if the
 proof is generic.

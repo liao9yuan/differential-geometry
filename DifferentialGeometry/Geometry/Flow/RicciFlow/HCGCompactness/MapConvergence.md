@@ -90,3 +90,50 @@ Focused check passed (no warnings); targeted builds of `MapConvergence` and
 axioms) for `exists_cInf_subseq`, `cmm_finiteDimensional`,
 `arzelaAscoli_isCompact_closure`, `arzelaAscoli_subseq_vec`, `isometry_seq_cInf`,
 `isometry_seq_diffeo`.
+
+## Localized engine `exists_cInf_subseq_on` (B-loc, 2026-06-13)
+
+Planner-authorized addition for MSM135 Ch4 Step B (the Step B maps live only on nested
+Euclidean balls, not `Set.univ`). Two new declarations in the `MapArzelaAscoli` section,
+both **axiom-clean** (`[propext, Classical.choice, Quot.sound]`), no edits to existing
+theorems:
+
+- `equicontOn_iteratedFDerivWithin` (private) — localized equicontinuity: the order-`r`
+  within-derivative family is equicontinuous **as maps on the metric subspace `↥U`**.
+  Same MVT as `equicont_iteratedFDeriv` but the ball is shrunk inside `U`
+  (`closedBall x₀ (ρ/2) ⊆ U` from openness), the derivative comes from the *within*
+  Taylor series `ContDiffOn.ftaylorSeriesWithin`, and `↥U`'s metric (`Subtype.dist_eq`)
+  lets `Metric.equicontinuousAt_iff` apply directly — no `EquicontinuousWithinAt` API.
+- `exists_cInf_subseq_on` — the localized extraction: `IsOpen U`, `ContDiffOn ℝ ⊤ (Φ k) U`,
+  bounds on compacts ⊆ `U` ⇒ subsequence + `ContDiffOn ℝ ⊤ Φinf U` +
+  `MapCInfConvOnCompacts U`.
+
+### Route (what differs from the global proof)
+- The bundled maps `Fb r k : C(↥U, …)` use `iteratedFDerivWithin ℝ r (Φ k) U` and are
+  continuous on `↥U` (`ContDiffOn.continuousOn_iteratedFDerivWithin` + subtype val).
+  `↥U` is locally compact (`IsOpen.locallyCompactSpace`) and second-countable hence
+  sigma-compact, so the same product-compactness `tendsto_subseq` trick extracts one
+  subsequence for all orders.
+- The global `hbdd` (`iteratedFDeriv`) is converted to within-bounds by the
+  **unconditional** `iteratedFDerivWithin_of_isOpen` (`EqOn (iteratedFDerivWithin ℝ n f U)
+  (iteratedFDeriv ℝ n f) U` for any `f`) — the single bridge used throughout.
+- Limits `G r : C(↥U, …)` are extended to `Gext r : E → …` by `dite (· ∈ U)`; subtype
+  uniform convergence transfers to `U`-compacts via `Subtype.isCompact_iff` +
+  `Subtype.image_preimage_coe` and `Metric.tendstoUniformlyOn_iff`.
+- Derivative-of-limit: `hasFDerivAt_of_tendstoUniformlyOn` on an **open ball ⊆ U**
+  (`HasFDerivWithinAt.hasFDerivAt` since the ball is open), assembled into
+  `HasFTaylorSeriesUpToOn ⊤ Φinf (Gext ·) U`; `.contDiffOn` and
+  `.eq_iteratedFDerivWithin_of_uniqueDiffOn` give `ContDiffOn` and `∇ᵤʳΦinf = Gext r`.
+- Final `MapCInfConvOnCompacts U`: `iteratedFDerivWithin_sub_apply` + the open-set bridge
+  turn the global `mapDerivNorm` into `‖∇ᵤʳ(Φₖ) − Gext r‖` on `K ⊆ U`.
+
+### Lean gotchas (this pass)
+- A line starting with `.isometry.uniformContinuous` (leading-dot after a newline) is a
+  parse error ("must be atomic"); keep the dot chain attached to the closing paren.
+  Naming the curry equiv in a `have` hides it from the `simpa [Function.comp_def]` that
+  rewrites `continuousMultilinearCurryLeftEquiv … c` to `c.curryLeft` — keep it inline.
+- `Subtype.image_preimage_coe` gives `t ∩ s` = `U ∩ K` (not `K ∩ U`); use
+  `Set.inter_eq_right.mpr hKU`.
+- `Metric.equicontinuousAt_iff`'s pair is `dist (F x₀) (F x)` and
+  `Metric.tendstoUniformlyOn_iff`'s is `dist (limit) (Fₙ)` — both needed `norm_sub_rev`
+  / `dist_comm` against the natural orientation.
