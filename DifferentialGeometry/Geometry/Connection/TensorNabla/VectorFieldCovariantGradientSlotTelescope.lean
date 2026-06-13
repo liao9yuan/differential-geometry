@@ -1324,6 +1324,442 @@ factor reaches order `3` (the realized `4`-jet), so the assembly carries the **h
 `exists_iteratedCovGrad_deTurckVF_le_jetSum` (whose second ball is `‖T₁.toHs(l + 3 + 3 + a)‖ ≤ B`, the
 `l = 0` instance of which is `‖T₁.toHs(6 + a)‖ ≤ B`). -/
 
+set_option linter.unusedSectionVars false in
+/-- **The scalar `rfns` homogeneity.**  `rfns(c • T) = c² · rfns(T)` for a fibre tensor `T`, from
+the pointwise inner-product `smul`-bilinearity (`tensorInnerPointwise_smul_left/right`,
+`TensorRSSpace.toModel_smul`). -/
+private lemma rfns_smul_local (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (c : ℝ)
+    (T : TensorRSSpace r s I x) :
+    Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r s x (c • T) =
+      c ^ 2 * Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g r s x T := by
+  rw [Integral.Connection.riemannianFiberNormSq_eq_tensorInnerPointwise,
+    Integral.Connection.riemannianFiberNormSq_eq_tensorInnerPointwise,
+    TensorRSSpace.toModel_smul, Integral.L2.tensorInnerPointwise_smul_left,
+    Integral.L2.tensorInnerPointwise_smul_right]
+  ring
+
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
+set_option linter.unusedSectionVars false in
+/-- **The family-uniform per-order pointwise fibre sup of the perturbation jets.**  For the
+supercritically `H^{σ₀}`-bounded realized perturbation family (`2(a + 1) > finrank`, encoded as
+`a + 1 + l ≤ σ₀` per order), the order-`l` intrinsic squared fibre norm of `T₁` is bounded by a
+single per-order constant `K l` over the manifold and the family.  The order-`l` chain is the
+sharp-order supercritical embedding `tensorC0_embedding_sharpOrder` (`N = a + 1`, `2(a + 1) >
+finrank` from `2a > finrank + 4`) of the order-`l` covariant gradient `∇^l T₁`, composed with the
+order-dropping `iteratedCovGrad_toHs_norm_le` (`‖(∇^l T₁).toHs(a + 1)‖ ≤ C · ‖T₁.toHs(a + 1 + l)‖`)
+and the Sobolev-order monotonicity `toHs_norm_mono` (`‖T₁.toHs(a + 1 + l)‖ ≤ ‖T₁.toHs σ₀‖ ≤ B`,
+whenever `a + 1 + l ≤ σ₀`); squaring `‖(∇^l T₁).toSection x‖ = √rfns` gives the per-order fibre
+sup. -/
+private lemma loweredConnDiff_t1jet_rfns_familyUniform
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) (B : ℝ)
+    (σ₀ : ℕ) :
+    ∃ K : ℕ → ℝ, (∀ l, 0 ≤ K l) ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (l : ℕ), a + 1 + l ≤ σ₀ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) σ₀ T₁‖ ≤ B →
+        ∀ x : M,
+          Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x) ≤ K l := by
+  classical
+  have hsuper : Module.finrank ℝ E < 2 * (a + 1) := by omega
+  have hC0 : ∀ l : ℕ, ∃ C : ℝ, 0 < C ∧
+      ∀ (T : Integral.L2.SmoothCcTensor g₀ 0 (2 + l)) (x : M),
+        (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + l) I b) :=
+          Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + l)
+        ‖T.toSection x‖) ≤
+          C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2 + l) (a + 1) T‖ :=
+    fun l => tensorC0_embedding_sharpOrder (I := I) (M := M) g₀ 0 (2 + l) (a + 1) hsuper
+  choose Cemb hCemb0 hCemb using hC0
+  have hCdrop : ∀ l : ℕ, ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (T : Integral.L2.SmoothCcTensor g₀ 0 2),
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2 + l) (a + 1)
+            (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T)‖ ≤
+          C * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+            ((a + 1) + l) T‖ :=
+    fun l => iteratedCovGrad_toHs_norm_le (I := I) g₀ 0 2 l (a + 1)
+  choose Cdrop hCdrop0 hCdrop using hCdrop
+  refine ⟨fun l => (Cemb l * Cdrop l * max B 0) ^ 2, fun l => by positivity, ?_⟩
+  intro T₁ l hσ hB x
+  letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + l) I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + l)
+  have hball : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+      ((a + 1) + l) T₁‖ ≤ max B 0 :=
+    le_trans (le_trans (toHs_norm_mono (I := I) g₀ (by omega) T₁) hB) (le_max_left _ _)
+  have hnorm_le : ‖(PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x‖ ≤
+      Cemb l * Cdrop l * max B 0 := by
+    calc ‖(PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x‖
+        ≤ Cemb l * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2 + l) (a + 1)
+            (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁)‖ :=
+          hCemb l (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁) x
+      _ ≤ Cemb l * (Cdrop l * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+            ((a + 1) + l) T₁‖) :=
+          mul_le_mul_of_nonneg_left (hCdrop l T₁) (hCemb0 l).le
+      _ ≤ Cemb l * (Cdrop l * max B 0) :=
+          mul_le_mul_of_nonneg_left
+            (mul_le_mul_of_nonneg_left hball (hCdrop0 l)) (hCemb0 l).le
+      _ = Cemb l * Cdrop l * max B 0 := by ring
+  have hrfns_nn : 0 ≤ Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x) :=
+    Integral.Connection.riemannianFiberNormSq_nonneg _ _ _ _ _
+  have hsqrt := DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.norm_toSection_eq_sqrt_riemannianFiberNormSq_installed
+    (I := I) (M := M) g₀ 0 (2 + l)
+    (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁) x
+  rw [hsqrt] at hnorm_le
+  have hsqrt_le : Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)) ≤
+      Cemb l * Cdrop l * max B 0 := hnorm_le
+  calc Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)
+      = Real.sqrt (Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T₁).toSection x)) ^ 2 :=
+        (Real.sq_sqrt hrfns_nn).symm
+    _ ≤ (Cemb l * Cdrop l * max B 0) ^ 2 := pow_le_pow_left₀ (Real.sqrt_nonneg _) hsqrt_le 2
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
+set_option linter.unusedSectionVars false in
+/-- **The family-uniform per-order pointwise fibre sup of the realized-symmetric perturbation
+jets (all orders).**  For the supercritically `H^{σ₀}`-bounded realized perturbation family, the
+order-`i` intrinsic squared fibre norm of `realizeSymmCcTensor g₀ T₁` is bounded by a single
+per-order constant `Krs i` whenever `a + 1 + i ≤ σ₀`.  The order-`i` realize-jet `rfns` is bounded by
+`C_i · ∑_{l ≤ i} rfns(∇^l T₁)(x)` (`exists_riemannianFiberNormSq_iteratedCovGrad_realizeSymm_le_jetSum`,
+no derivative gain through the realization map) and each underlying `T₁`-jet `rfns(∇^l T₁)(x)` by the
+per-order perturbation-jet fibre sup `loweredConnDiff_t1jet_rfns_familyUniform` (`a + 1 + l ≤
+a + 1 + i ≤ σ₀`), so the finite sum telescopes to `Krs i := C_i · ∑_{l ≤ i} K l`. -/
+private lemma loweredConnDiff_realizeSymm_jet_rfns_familyUniform
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) (B : ℝ)
+    (σ₀ : ℕ) :
+    ∃ Krs : ℕ → ℝ, (∀ i, 0 ≤ Krs i) ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (i : ℕ), a + 1 + i ≤ σ₀ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) σ₀ T₁‖ ≤ B →
+        ∀ x : M,
+          Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+                (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x) ≤ Krs i := by
+  classical
+  obtain ⟨K, hK0, hK⟩ := loweredConnDiff_t1jet_rfns_familyUniform (I := I) g₀ a ha B σ₀
+  have hrs : ∀ i : ℕ, ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (T : Integral.L2.SmoothCcTensor g₀ 0 2) (x : M),
+        Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 i
+              (realizeSymmCcTensor (I := I) g₀ T)).toSection x) ≤
+          C * ∑ l ∈ Finset.range (i + 1),
+            Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x) :=
+    fun i => DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.exists_riemannianFiberNormSq_iteratedCovGrad_realizeSymm_le_jetSum
+      (I := I) g₀ i
+  choose Crs hCrs0 hCrs using hrs
+  refine ⟨fun i => Crs i * ∑ l ∈ Finset.range (i + 1), K l, fun i => ?_, ?_⟩
+  · exact mul_nonneg (hCrs0 i) (Finset.sum_nonneg fun l _ => hK0 l)
+  · intro T₁ i hσ hB x
+    refine le_trans (hCrs i T₁ x) ?_
+    refine mul_le_mul_of_nonneg_left ?_ (hCrs0 i)
+    refine Finset.sum_le_sum (fun l hl => ?_)
+    have hli : l ≤ i := by have := Finset.mem_range.mp hl; omega
+    exact hK T₁ l (by omega) hB x
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
+set_option linter.unusedSectionVars false in
+/-- **(POSIT — the family-uniform Rest bound of the cross-correction covariant jet.)**  The
+family-uniform restatement of the per-`(g₁, T₁)`-posited sibling
+`crossCorrParallelContraction_iteratedCovGrad_rest_rfns_peel_le`
+(`CrossCorrectionContractionTopRest.lean`), whose genuine combinatorial constant `Cenv(g₀, p) · 4^p`
+is in fact family-uniform — the on-disk sibling merely places the `∃ C` after `(g₁, T₁)`.  The
+difference-factor window is **strictly below `p`** (`i < p`), so it never re-introduces the order-`p`
+jet `∇^p D`; the realized factor runs `l ≤ p + 1 − i`.  Its body is `sorry`: the contraction-native
+operator-reconciliation + bare-product binomial telescope under the cometric trace annihilation
+(consumers transitively depend on `sorryAx` through this posited Rest engine). -/
+private theorem loweredConnDiff_crossCorr_rest_rfns_familyUniform
+    (g₀ : SmoothRiemannianMetric I M) (p : ℕ) :
+    ∃ Crest : ℝ, 0 ≤ Crest ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M) (x : M),
+        Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + 0 + 0 + p) x
+            ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (3 + 0 + 0) p
+                (Integral.Connection.crossCorrParallelContraction (I := I) g₀ (a := 0) (b := 0)
+                  (realizeSymmCcTensor (I := I) g₀ T₁)
+                  (permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2]
+                    (loweredConnDiffSection (I := I) g₁ g₀)))
+              - Integral.Connection.crossCorrParallelContraction (I := I) g₀ (a := 0) (b := p)
+                  (realizeSymmCcTensor (I := I) g₀ T₁)
+                  (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+                    (permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2]
+                      (loweredConnDiffSection (I := I) g₁ g₀)))).toSection x) ≤
+          Crest * ∑ i ∈ Finset.range p,
+            Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i
+                  (loweredConnDiffSection (I := I) g₁ g₀)).toSection x) *
+              ∑ l ∈ Finset.range (p + 1 - i),
+                Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+                  ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l
+                    (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x) := by
+  sorry
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
+set_option linter.unusedSectionVars false in
+/-- **The order-`p` Neumann-absorbed fibre sup of the `g₀`-lowered connection difference (strong
+induction on `p`).**  The family-uniform inductive engine behind
+`loweredConnDiff_iteratedCovGrad_rfns_fibre_sup`.  At order `p` the differentiated-Koszul section
+identity `2 · ∇^p D = ∇^p (koszulComb) − 2 · ∇^p (crossCorrection)` controls `rD := rfns(∇^p D)(x)`
+by `4 · rD ≤ 2 · rfns(∇^p koszul) + 8 · rfns(∇^p cross)`; the clean-linear-part Koszul arm is bounded
+family-uniformly by `koszulCombSection_iteratedCovGrad_rfns_le` (the `≤ (p + 1)`-jet of the
+perturbation, each jet dominated by `loweredConnDiff_t1jet_rfns_familyUniform`); the cross arm splits
+into a Top cell `crossCorrParallelContraction (b := p) (realizeSymm T₁) (∇^p (permute D))` bounded by
+the sharp `δ²` of `crossCorrParallelContraction_rfns_le_sq_passenger` (re-indexed to `rD` through the
+permutation isometry `riemannianFiberNormSq_iteratedCovGrad_permuteCcTensor`) and a Rest cell bounded
+by the family-uniform `loweredConnDiff_crossCorr_rest_rfns_familyUniform` (whose connection-difference
+window is strictly `< p`, closed by the strong induction hypothesis, and whose realized window is
+bounded by `loweredConnDiff_realizeSymm_jet_rfns_familyUniform`).  The order-uniform Neumann
+absorption `(4 − 16δ²) > 0` (`δ < 1/2`) divides out the `δ²`-fed back-coupling. -/
+private theorem loweredConnDiff_iteratedCovGrad_rfns_fibre_sup_aux
+    (g₀ : SmoothRiemannianMetric I M) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∀ p : ℕ, ∃ Λ : ℝ, 0 ≤ Λ ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+        (∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (p + 3 + a) T₁‖ ≤ B →
+        ∀ x : M,
+          Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+                (loweredConnDiffSection (I := I) g₁ g₀)).toSection x) ≤ Λ ^ 2 := by
+  classical
+  intro p
+  induction p using Nat.strong_induction_on with
+  | _ p IH =>
+    -- The Koszul clean-linear-part jet constant and the per-order perturbation-jet sups.
+    obtain ⟨Ck, hCk0, hCk⟩ := koszulCombSection_iteratedCovGrad_rfns_le (I := I) g₀ p
+    obtain ⟨K, hK0, hK⟩ :=
+      loweredConnDiff_t1jet_rfns_familyUniform (I := I) g₀ a ha B (p + 3 + a)
+    obtain ⟨Krs, hKrs0, hKrs⟩ :=
+      loweredConnDiff_realizeSymm_jet_rfns_familyUniform (I := I) g₀ a ha B (p + 3 + a)
+    obtain ⟨Crest, hCrest0, hCrest⟩ :=
+      loweredConnDiff_crossCorr_rest_rfns_familyUniform (I := I) g₀ p
+    -- The strong-induction lower-order connection-difference sups (one `Λq` per `q < p`).
+    have hIH : ∀ q : ℕ, q < p → ∃ Λq : ℝ, 0 ≤ Λq ∧
+        ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+          (∀ (y : M) (v w : TangentSpace I y),
+            g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
+          gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (p + 3 + a) T₁‖ ≤ B →
+          ∀ x : M,
+            Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + q) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 q
+                  (loweredConnDiffSection (I := I) g₁ g₀)).toSection x) ≤ Λq ^ 2 := by
+      intro q hq
+      obtain ⟨Λq, hΛq0, hΛq⟩ := IH q hq
+      refine ⟨Λq, hΛq0, fun T₁ g₁ hr hfib hball x => ?_⟩
+      -- The order-`q` ball `‖T₁.toHs(q+3+a)‖ ≤ ‖T₁.toHs(p+3+a)‖ ≤ B` (`q < p`).
+      have hballq : ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2)
+          (q + 3 + a) T₁‖ ≤ B := le_trans (toHs_norm_mono (I := I) g₀ (by omega) T₁) hball
+      exact hΛq T₁ g₁ hr hfib hballq x
+    -- Uniform Koszul and Rest sums.
+    set RKbound : ℝ := Ck * ∑ l ∈ Finset.range (p + 1 + 1), K l with hRKbound
+    have hRKbound_nn : 0 ≤ RKbound := by
+      rw [hRKbound]; exact mul_nonneg hCk0 (Finset.sum_nonneg fun l _ => hK0 l)
+    -- The lower-order connection-difference sups packaged as a function `ΛD : ℕ → ℝ`.
+    have hΛDexists : ∀ i : ℕ, i < p → ∃ c : ℝ, 0 ≤ c ∧
+        ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+          (∀ (y : M) (v w : TangentSpace I y),
+            g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
+          gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (p + 3 + a) T₁‖ ≤ B →
+          ∀ x : M,
+            Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i
+                  (loweredConnDiffSection (I := I) g₁ g₀)).toSection x) ≤ c ^ 2 := hIH
+    -- A uniform constant for `rfns(∇^i D)(x)`, `i < p`: `ΛDsq i := (Λi)²`.
+    have hΛDsq : ∀ i : ℕ, ∃ c : ℝ, 0 ≤ c ∧
+        (i < p → ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+          (∀ (y : M) (v w : TangentSpace I y),
+            g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T₁ y v w) →
+          gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+          ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (p + 3 + a) T₁‖ ≤ B →
+          ∀ x : M,
+            Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+                ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i
+                  (loweredConnDiffSection (I := I) g₁ g₀)).toSection x) ≤ c) := by
+      intro i
+      by_cases hi : i < p
+      · obtain ⟨c, hc0, hc⟩ := hΛDexists i hi
+        exact ⟨c ^ 2, by positivity, fun _ T₁ g₁ hr hfib hball x => hc T₁ g₁ hr hfib hball x⟩
+      · exact ⟨0, le_refl 0, fun h => absurd h hi⟩
+    choose ΛDsq hΛDsq0 hΛDsq_bound using hΛDsq
+    -- The uniform Rest sum: `∑_{i<p} ΛDsq i · ∑_{l < p+1-i} Krs l`.
+    set RestSum : ℝ := ∑ i ∈ Finset.range p, ΛDsq i * ∑ l ∈ Finset.range (p + 1 - i), Krs l
+      with hRestSum
+    have hRestSum_nn : 0 ≤ RestSum := by
+      rw [hRestSum]
+      exact Finset.sum_nonneg fun i _ =>
+        mul_nonneg (hΛDsq0 i) (Finset.sum_nonneg fun l _ => hKrs0 l)
+    set RestBound : ℝ := Crest * RestSum with hRestBound
+    have hRestBound_nn : 0 ≤ RestBound := mul_nonneg hCrest0 hRestSum_nn
+    -- The denominator of the Neumann absorption.
+    have hden_pos : (0 : ℝ) < 4 - 16 * δ ^ 2 := by nlinarith [hδ0, hδ1]
+    set num : ℝ := 2 * RKbound + 16 * RestBound with hnum
+    have hnum_nn : 0 ≤ num := by rw [hnum]; linarith [hRKbound_nn, hRestBound_nn]
+    refine ⟨Real.sqrt (num / (4 - 16 * δ ^ 2)), Real.sqrt_nonneg _, ?_⟩
+    intro T₁ g₁ hr hfib hball x
+    rw [Real.sq_sqrt (by positivity)]
+    set D := loweredConnDiffSection (I := I) g₁ g₀ with hD
+    set rD := Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p D).toSection x) with hrD
+    have hrD_nn : 0 ≤ rD := Integral.Connection.riemannianFiberNormSq_nonneg _ _ _ _ _
+    set rK := Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+        (koszulCombSection (I := I) g₁ g₀ T₁)).toSection x) with hrK
+    set rC := Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+      ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+        (crossCorrectionSection (I := I) g₁ g₀ T₁)).toSection x) with hrC
+    -- KOSZUL ARM: `rK ≤ RKbound`.
+    have hkoszul : rK ≤ RKbound := by
+      have h := hCk T₁ g₁ hr x
+      rw [← hrK] at h
+      refine le_trans h ?_
+      rw [hRKbound]
+      refine mul_le_mul_of_nonneg_left ?_ hCk0
+      refine Finset.sum_le_sum (fun l hl => ?_)
+      have hlp : l ≤ p + 1 := by have := Finset.mem_range.mp hl; omega
+      exact hK T₁ l (by omega) hball x
+    -- SECTION IDENTITY: `(2:ℝ) • ∇^p D = ∇^p koszul − (2:ℝ) • ∇^p cross`.
+    have hsecid : (2 : ℝ) • PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p D =
+        PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p (koszulCombSection (I := I) g₁ g₀ T₁)
+          - (2 : ℝ) • PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+              (crossCorrectionSection (I := I) g₁ g₀ T₁) := by
+      have h2D : (2 : ℝ) • PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p D =
+          PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p ((2 : ℝ) • D) :=
+        (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.iteratedCovGrad_smul
+          (I := I) g₀ 0 3 p (2 : ℝ) D).symm
+      have hkos : (2 : ℝ) • D = koszulCombSection (I := I) g₁ g₀ T₁
+          - (2 : ℝ) • crossCorrectionSection (I := I) g₁ g₀ T₁ := by
+        rw [hD, koszulCombSection]; abel
+      rw [h2D, hkos, PDE.RicciFlow.iteratedCovGrad_sub,
+        (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.iteratedCovGrad_smul
+          (I := I) g₀ 0 3 p (2 : ℝ) (crossCorrectionSection (I := I) g₁ g₀ T₁))]
+    -- Read the section identity pointwise and through `rfns`.
+    have hpt : ((2 : ℝ) • PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p D).toSection x =
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+            (koszulCombSection (I := I) g₁ g₀ T₁)).toSection x
+          - ((2 : ℝ) • PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+              (crossCorrectionSection (I := I) g₁ g₀ T₁)).toSection x := by
+      rw [hsecid, Integral.L2.SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub,
+        Pi.sub_apply]
+    have h4D : Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+        (((2 : ℝ) • PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p D).toSection x) = 4 * rD := by
+      rw [show (((2 : ℝ) • PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p D).toSection x :
+            TensorRSSpace 0 (3 + p) I x) =
+          (2 : ℝ) • (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p D).toSection x from by
+            rw [Integral.L2.SmoothCcTensor.toSection_smul]; rfl,
+        rfns_smul_local, ← hrD]
+      norm_num
+    have h2C : Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+        (((2 : ℝ) • PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+          (crossCorrectionSection (I := I) g₁ g₀ T₁)).toSection x) = 4 * rC := by
+      rw [show (((2 : ℝ) • PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+            (crossCorrectionSection (I := I) g₁ g₀ T₁)).toSection x : TensorRSSpace 0 (3 + p) I x) =
+          (2 : ℝ) • (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+            (crossCorrectionSection (I := I) g₁ g₀ T₁)).toSection x from by
+            rw [Integral.L2.SmoothCcTensor.toSection_smul]; rfl,
+        rfns_smul_local, ← hrC]
+      norm_num
+    have hsub : 4 * rD ≤ 2 * rK + 8 * rC := by
+      have hle := Integral.Connection.riemannianFiberNormSq_sub_le (I := I) (M := M) g₀ 0 (3 + p) x
+        ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+          (koszulCombSection (I := I) g₁ g₀ T₁)).toSection x)
+        (((2 : ℝ) • PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+          (crossCorrectionSection (I := I) g₁ g₀ T₁)).toSection x)
+      rw [h2C, ← hrK] at hle
+      have heq : Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+              (koszulCombSection (I := I) g₁ g₀ T₁)).toSection x
+            - (((2 : ℝ) • PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+              (crossCorrectionSection (I := I) g₁ g₀ T₁)).toSection x)) = 4 * rD := by
+        rw [← hpt]; exact h4D
+      rw [heq] at hle
+      linarith
+    -- CROSS ARM Top/Rest split.
+    -- Rewrite `cross` as the parallel cometric contraction.
+    have hcrosseq : crossCorrectionSection (I := I) g₁ g₀ T₁ =
+        Integral.Connection.crossCorrParallelContraction (I := I) g₀ (a := 0) (b := 0)
+          (realizeSymmCcTensor (I := I) g₀ T₁)
+          (permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2] D) :=
+      (Integral.Connection.crossCorrParallelContraction_eq_crossCorrectionSection
+        (I := I) g₀ g₁ T₁).symm
+    set Full : Integral.L2.SmoothCcTensor g₀ 0 (3 + p) :=
+      PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 (3 + 0 + 0) p
+        (Integral.Connection.crossCorrParallelContraction (I := I) g₀ (a := 0) (b := 0)
+          (realizeSymmCcTensor (I := I) g₀ T₁)
+          (permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2] D)) with hFull
+    set Top : Integral.L2.SmoothCcTensor g₀ 0 (3 + p) :=
+      Integral.Connection.crossCorrParallelContraction (I := I) g₀ (a := 0) (b := p)
+        (realizeSymmCcTensor (I := I) g₀ T₁)
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+          (permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2] D)) with hTop
+    -- The reduced-degree abbreviations of the three cross-cell fibre norms.
+    set rFull := Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+      (Full.toSection x) with hrFull
+    set rRest := Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+      ((Full - Top).toSection x) with hrRest
+    set rTop := Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+      (Top.toSection x) with hrTop
+    -- `rfns(∇^p cross)(x) = rfns(Full)(x) = rFull`.
+    have hrC_full : rC = rFull := by
+      rw [hrC, hrFull, hFull]
+      congr 1
+      rw [hcrosseq]
+    -- Top cell sharp `δ²` bound, re-indexed to `rD`.
+    have hTopbound : rTop ≤ δ ^ 2 * rD := by
+      have h := DifferentialGeometry.PDE.DeTurck.crossCorrParallelContraction_rfns_le_sq_passenger
+        (I := I) g₀ p T₁ hfib
+        (PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
+          (permuteCcTensor (I := I) g₀ c[(0 : Fin 3), 1, 2] D)) x
+      rw [← hTop] at h
+      rw [hrTop]
+      refine le_trans h ?_
+      rw [hrD,
+        DifferentialGeometry.PDE.DeTurck.riemannianFiberNormSq_iteratedCovGrad_permuteCcTensor
+          (I := I) g₀ c[(0 : Fin 3), 1, 2] D p x]
+    -- Rest cell bound via the posit + IH + realize-jet sups.
+    have hRestbound : rRest ≤ RestBound := by
+      have h := hCrest T₁ g₁ x
+      rw [← hFull, ← hTop] at h
+      rw [hrRest]
+      refine le_trans h ?_
+      rw [hRestBound, hRestSum]
+      refine mul_le_mul_of_nonneg_left ?_ hCrest0
+      refine Finset.sum_le_sum (fun i hi => ?_)
+      have hip : i < p := Finset.mem_range.mp hi
+      have hDi : Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
+          ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 i D).toSection x) ≤ ΛDsq i :=
+        hΛDsq_bound i hip T₁ g₁ hr hfib hball x
+      have hRSi : (∑ l ∈ Finset.range (p + 1 - i),
+            Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 2 l
+                (realizeSymmCcTensor (I := I) g₀ T₁)).toSection x)) ≤
+          ∑ l ∈ Finset.range (p + 1 - i), Krs l := by
+        refine Finset.sum_le_sum (fun l hl => ?_)
+        have hlpi : l < p + 1 - i := Finset.mem_range.mp hl
+        exact hKrs T₁ l (by omega) hball x
+      exact mul_le_mul hDi hRSi (Finset.sum_nonneg fun l _ =>
+        Integral.Connection.riemannianFiberNormSq_nonneg _ _ _ _ _) (hΛDsq0 i)
+    -- `rFull ≤ 2·rRest + 2·rTop`.
+    have hFullsplit : rFull ≤ 2 * rRest + 2 * rTop := by
+      have hsplit : Full.toSection x = (Full - Top).toSection x + Top.toSection x := by
+        rw [Integral.L2.SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
+        abel
+      rw [hrFull, hrRest, hrTop, hsplit]
+      exact Integral.Connection.riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (3 + p) x
+        ((Full - Top).toSection x) (Top.toSection x)
+    -- Stitch the cross arm: `rC ≤ 2·RestBound + 2·δ²·rD`.
+    have hcross : rC ≤ 2 * RestBound + 2 * (δ ^ 2 * rD) := by
+      rw [hrC_full]
+      linarith [hFullsplit, hTopbound, hRestbound]
+    -- NEUMANN ABSORPTION: `(4 − 16δ²) · rD ≤ num`, then divide by the positive denominator.
+    rw [le_div_iff₀ hden_pos, hnum]
+    have hexp : rD * (4 - 16 * δ ^ 2) = 4 * rD - 16 * (δ ^ 2 * rD) := by ring
+    rw [hexp]
+    linarith [hsub, hcross, hkoszul]
+
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
 /-- **(POSIT — the family-uniform per-order pointwise fibre sup of the `g₀`-lowered
@@ -1361,7 +1797,7 @@ private theorem loweredConnDiff_iteratedCovGrad_rfns_fibre_sup
           Integral.Connection.riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
               ((PDE.RicciFlow.iteratedCovGrad (I := I) g₀ 0 3 p
                 (loweredConnDiffSection (I := I) g₁ g₀)).toSection x) ≤ Λ ^ 2 :=
-  sorry
+  loweredConnDiff_iteratedCovGrad_rfns_fibre_sup_aux (I := I) g₀ δ hδ0 hδ1 B a ha p
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
