@@ -2407,6 +2407,204 @@ theorem covGrad_pureRGenuineDiffOp_unit_eval_eq_genuineDiffCurv_add_spectator
     appCc_slotExtend_curvOpField_covGrad_unit_eval (I := I) (M := M) g s S x d v0 vs
   rw [hlhs, happ, Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply, hterm2]
 
+/-- **The second covariant-derivative spec of the frame-free curvature operator field (the
+twice-differentiated B-rule inversion).** For a closed smooth Riemannian manifold `(M, g)`, covariant
+rank `s`, and smooth compactly-supported `(0, s)`-tensor `S`, the operator-field action of the second
+covariant derivative `∇²Φ₀ = covGrad g r (r + 1)(covGrad g r r Φ₀)` (`r := s + 0`) of the frame-free
+curvature operator field `Φ₀ s := curvOpField g s` on `S` — the differentiated-curvature carrier `T₁`
+of the operator-field four-term Leibniz normal form — equals the covariant gradient of the once-
+differentiated carrier `genuineDiffCurvSection g s S` minus the passenger-slot extension of the
+once-differentiated operator field `∇Φ₀` acting on `∇S`:
+```
+appCc (∇²Φ₀) S
+  = covGrad g 0 (s + 1) (genuineDiffCurvSection g s S)
+    − appCc (slotExtend (∇Φ₀)) (∇S).
+```
+This is the once-differentiated spec `genuineDiffCurvSection_eq_covGrad_sub_slotExtend` applied one
+covariant order higher: where the order-`1` inversion isolates `appCc (∇Φ₀) S = genuineDiffCurvSection`
+from `covGrad (Φ₀-trace) − appCc (slotExtend Φ₀)(∇S)`, the order-`2` inversion isolates the curvature
+carrier `appCc (∇²Φ₀) S = T₁` from `covGrad (genuineDiffCurvSection) − appCc (slotExtend (∇Φ₀))(∇S)`,
+the differentiated-curvature term separated from the passenger cross term `T₃`.
+
+**Proof.** The operator-field covariant product rule `covGrad_appCc_eq` (the B-rule) at the once-
+differentiated square field `∇Φ₀ := covGrad g (s + 0) (s + 0) Φ₀` (rank `(s + 0, s + 0 + 1)`) and the
+tensor `S` reads `covGrad g 0 (s + 0 + 1) (appCc (∇Φ₀) S) = appCc (covGrad (∇Φ₀)) S +
+appCc (slotExtend (∇Φ₀)) (∇S)`; the contracted action `appCc (∇Φ₀) S` is `genuineDiffCurvSection g s S`
+by definition, and the first summand `appCc (covGrad (∇Φ₀)) S` is `appCc (∇²Φ₀) S = T₁`. Rearranging by
+`eq_sub_of_add_eq` isolates that summand. -/
+theorem appCc_covGrad_covGrad_curvOpField_eq_covGrad_genuineDiffCurv_sub_slotExtend
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
+    appCc (I := I) (M := M) g (s + 0) (s + 0 + 1 + 1)
+        (covGrad (I := I) (M := M) g (s + 0) (s + 0 + 1)
+          (covGrad (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s))) S =
+      covGrad (I := I) (M := M) g 0 (s + 0 + 1)
+          (genuineDiffCurvSection (I := I) (M := M) g s S) -
+        appCc (I := I) (M := M) g (s + 0 + 1) (s + 0 + 1 + 1)
+          (slotExtend (I := I) (M := M) g (s + 0) (s + 0 + 1)
+            (covGrad (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s)))
+          (covGrad (I := I) (M := M) g 0 (s + 0) S) := by
+  classical
+  have hB := covGrad_appCc_eq (I := I) (M := M) g (s + 0) (s + 0 + 1)
+    (covGrad (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s)) S
+  have hgds : appCc (I := I) (M := M) g (s + 0) (s + 0 + 1)
+        (covGrad (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s)) S =
+      genuineDiffCurvSection (I := I) (M := M) g s S := rfl
+  rw [hgds] at hB
+  exact (eq_sub_of_add_eq hB.symm)
+
+/-- **The passenger-slot action of the once-differentiated curvature operator field on `∇S` reads the
+gradient direction first (the second-order spectator-term unit-evaluation).** For a closed smooth
+Riemannian manifold `(M, g)`, covariant rank `s`, smooth compactly-supported `(0, s)`-tensor `S`, point
+`x`, base `(0, 0)`-tensor `d`, gradient direction `v0`, and trailing tuple `vs`, the passenger-slot
+operator-field action `appCc (slotExtend (∇Φ₀)) (∇S)` — the passenger cross term `T₃` of the second-
+order normal form — evaluated on `Fin.cons v0 vs` reads the leading gradient direction `v0` off the
+passenger slot and applies the once-differentiated curvature operator field `∇Φ₀ := covGrad Φ₀`
+(`Φ₀ s = curvOpField g s`) to the directional covariant derivative `∇_{v0} S`:
+```
+(appCc (slotExtend (∇Φ₀)) (∇S))(x)(d)(Fin.cons v0 vs)
+  = (∇Φ₀)(x)((∇_{v0} S)(x)(d))(vs).
+```
+This is the second-order spectator term in unit-evaluated form: the passenger slot carries the gradient
+direction and the *differentiated* curvature endomorphism `∇Φ₀` acts on the trailing slots of the
+directional derivative of `S`. It is `appCc_slotExtend_curvOpField_covGrad_unit_eval` one covariant
+order higher (`Φ := ∇Φ₀` in place of `Φ₀`), proved by the identical operator-field calculus: expand the
+action (`appCc_toSection`), the slot-extended fibre operator (`slotExtend_toSection`), read the leading
+slot (`slotExtendFib_apply_eval`), and identify the curried gradient with the directional covariant
+derivative (`tensor0S_curry_covGrad_appCc_eq`). -/
+theorem appCc_slotExtend_covGrad_curvOpField_covGrad_unit_eval
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
+    (d : Tensor0SSpace 0 I x) (v0 : E) (vs : Fin (s + 0 + 1) → E) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0 + 1 + 1) I x from
+          (appCc (I := I) (M := M) g (s + 0 + 1) (s + 0 + 1 + 1)
+            (slotExtend (I := I) (M := M) g (s + 0) (s + 0 + 1)
+              (covGrad (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s)))
+            (covGrad (I := I) (M := M) g 0 (s + 0) S)).toSection x) d)
+        (Fin.cons v0 vs) =
+      Tensor0SSpace.toModel
+        ((show Tensor0SSpace (s + 0) I x →L[ℝ] Tensor0SSpace (s + 0 + 1) I x from
+          (covGrad (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s)).toSection x)
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0) I x from
+            tensorCovDerivAt (I := I) (M := M) g 0 (s + 0) S x v0) d))
+        vs := by
+  classical
+  rw [appCc_toSection (I := I) (M := M) g (s + 0 + 1) (s + 0 + 1 + 1)
+      (slotExtend (I := I) (M := M) g (s + 0) (s + 0 + 1)
+        (covGrad (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s)))
+      (covGrad (I := I) (M := M) g 0 (s + 0) S) x,
+    ContinuousLinearMap.comp_apply,
+    slotExtend_toSection (I := I) (M := M) g (s + 0) (s + 0 + 1)
+      (covGrad (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s)) x]
+  rw [slotExtendFib_apply_eval (I := I) (M := M) g (s + 0) (s + 0 + 1) x
+    (show Tensor0SSpace (s + 0) I x →L[ℝ] Tensor0SSpace (s + 0 + 1) I x from
+      (covGrad (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s)).toSection x)
+    ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0 + 1) I x from
+      (covGrad (I := I) (M := M) g 0 (s + 0) S).toSection x) d) v0 vs]
+  rw [tensor0S_curry_covGrad_appCc_eq (I := I) (M := M) g (s + 0) S x d v0]
+
+/-- **The full unit-evaluated second covariant-derivative frame-trace characterization of the `T₁`
+curvature carrier (the doubly-differentiated frame-free `∇²R`-trace pointwise form).** For a closed
+smooth Riemannian manifold `(M, g)`, covariant rank `s`, smooth compactly-supported `(0, s)`-tensor `S`,
+point `x`, base `(0, 0)`-tensor `d`, leading covariant direction `v0`, and trailing tuple
+`vs : Fin (s + 0 + 1) → E`, the unit-evaluated value of the differentiated-curvature carrier
+`appCc (∇²Φ₀) S` (the `T₁` term of the operator-field four-term normal form
+`covGrad_covGrad_appCc_curvOpField_eq_fourTerm`) decomposes as the directional covariant derivative of
+the once-differentiated carrier `genuineDiffCurvSection g s S` (the `(∇R) S` field) minus the passenger-
+slot spectator action of the once-differentiated curvature operator field `∇Φ₀` on `∇_{v0} S`:
+```
+(appCc (∇²Φ₀) S)(x)(d)(Fin.cons v0 vs)
+  = (∇_{v0}(genuineDiffCurvSection g s S))(x)(d)(vs)
+    − (∇Φ₀)(x)((∇_{v0} S)(x)(d))(vs).
+```
+The single leading direction `v0` is read by *both* the outer covariant derivative (term 1) and the
+spectator passenger slot (term 2) — it is the outermost covariant slot of the second derivative; the
+inner covariant direction and the curvature/gradient slots are carried by `vs`. This is the second-
+order analogue of `covGrad_pureRGenuineDiffOp_unit_eval_eq_genuineDiffCurv_add_spectator`: where the
+order-`1` form reads `∇` of the order-`0` pure-Riemann curvature trace as the carrier plus the order-`0`
+curvature spectator `Φ₀(∇S)`, this order-`2` form reads `∇` of the *carrier* `genuineDiffCurvSection`
+(itself `∇(R-trace) − Φ₀(∇S)`) as the `T₁` curvature carrier plus the once-differentiated curvature
+spectator `(∇Φ₀)(∇S)`.
+
+This is the frame-trace entry point the integrated covariant second-Bianchi emission consumes: composing
+it with the once-differentiated unit-eval (which reads `genuineDiffCurvSection` through the frame-trace
+value `pureRGenuineDiffOp_zero_succ_toSection_unit_eval`) exhibits the `T₁` carrier as the second
+covariant derivative of the frame-summed moving-frame pure-Riemann curvature trace `∑ᵢ R(Bᵢ, ·)(slot0 S)`
+— the doubly-differentiated moving-frame curvature carrier on which the cyclic differential Bianchi
+`nablaTensor0SCurv_cyclic_eq_zero` and the orthonormal-frame skew form (frame-summed) act downstream. No
+pointwise per-frame moving-frame curvature jet is transited; the decomposition is purely the section-
+level operator-field product rule read at the unit.
+
+**Proof.** The section-level second B-rule inversion
+`appCc_covGrad_covGrad_curvOpField_eq_covGrad_genuineDiffCurv_sub_slotExtend`, read at `x`, applied to
+`d`, distributing the subtraction over the fibre value (`SmoothCcTensor.toSection_sub`,
+`ContMDiffSection.coe_sub`, `Tensor0SSpace.toModel_sub`, `ContinuousMultilinearMap.sub_apply`): the
+outer covariant-gradient term reads `v0` off the leading slot (`covGrad_toSection_apply_eval`) leaving
+the directional derivative of `genuineDiffCurvSection` on `vs`, and the spectator term unit-evaluates by
+`appCc_slotExtend_covGrad_curvOpField_covGrad_unit_eval`. -/
+theorem appCc_covGrad_covGrad_curvOpField_unit_eval
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
+    (d : Tensor0SSpace 0 I x) (v0 : E) (vs : Fin (s + 0 + 1) → E) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0 + 1 + 1) I x from
+          (appCc (I := I) (M := M) g (s + 0) (s + 0 + 1 + 1)
+            (covGrad (I := I) (M := M) g (s + 0) (s + 0 + 1)
+              (covGrad (I := I) (M := M) g (s + 0) (s + 0)
+                (curvOpField (I := I) (M := M) g s))) S).toSection x) d)
+        (Fin.cons v0 vs) =
+      Tensor0SSpace.toModel
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0 + 1) I x from
+            tensorCovDerivAt (I := I) (M := M) g 0 (s + 0 + 1)
+              (genuineDiffCurvSection (I := I) (M := M) g s S) x v0) d)
+          vs -
+        Tensor0SSpace.toModel
+          ((show Tensor0SSpace (s + 0) I x →L[ℝ] Tensor0SSpace (s + 0 + 1) I x from
+            (covGrad (I := I) (M := M) g (s + 0) (s + 0)
+              (curvOpField (I := I) (M := M) g s)).toSection x)
+            ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0) I x from
+              tensorCovDerivAt (I := I) (M := M) g 0 (s + 0) S x v0) d))
+          vs := by
+  classical
+  have hsec := appCc_covGrad_covGrad_curvOpField_eq_covGrad_genuineDiffCurv_sub_slotExtend
+    (I := I) (M := M) g s S
+  have happ :
+      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0 + 1 + 1) I x from
+          (appCc (I := I) (M := M) g (s + 0) (s + 0 + 1 + 1)
+            (covGrad (I := I) (M := M) g (s + 0) (s + 0 + 1)
+              (covGrad (I := I) (M := M) g (s + 0) (s + 0)
+                (curvOpField (I := I) (M := M) g s))) S).toSection x) d =
+        (covGrad (I := I) (M := M) g 0 (s + 0 + 1)
+            (genuineDiffCurvSection (I := I) (M := M) g s S)).toSection x d -
+          (appCc (I := I) (M := M) g (s + 0 + 1) (s + 0 + 1 + 1)
+            (slotExtend (I := I) (M := M) g (s + 0) (s + 0 + 1)
+              (covGrad (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s)))
+            (covGrad (I := I) (M := M) g 0 (s + 0) S)).toSection x d := by
+    rw [hsec]
+    rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
+      ContinuousLinearMap.sub_apply]
+  rw [happ, Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
+  have hT1 :
+      Tensor0SSpace.toModel
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0 + 1 + 1) I x from
+            (covGrad (I := I) (M := M) g 0 (s + 0 + 1)
+              (genuineDiffCurvSection (I := I) (M := M) g s S)).toSection x) d)
+          (Fin.cons v0 vs) =
+        Tensor0SSpace.toModel
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 0 + 1) I x from
+            tensorCovDerivAt (I := I) (M := M) g 0 (s + 0 + 1)
+              (genuineDiffCurvSection (I := I) (M := M) g s S) x v0) d)
+          vs := by
+    rw [covGrad_toSection_apply_eval (I := I) (M := M) g 0 (s + 0 + 1)
+      (genuineDiffCurvSection (I := I) (M := M) g s S) x d (Fin.cons v0 vs)]
+    have hhead : (Fin.cons v0 vs : Fin (s + 0 + 1 + 1) → E) 0 = v0 := by
+      simp [Fin.cons_zero]
+    have htail : Matrix.vecTail (Fin.cons v0 vs : Fin (s + 0 + 1 + 1) → E) =
+        (vs : Fin (s + 0 + 1) → E) := by
+      funext j; simp [Matrix.vecTail, Fin.cons_succ]
+    rw [hhead, htail]
+  have hT2 := appCc_slotExtend_covGrad_curvOpField_covGrad_unit_eval
+    (I := I) (M := M) g s S x d v0 vs
+  rw [hT1, hT2]
+
 end Connection
 end Integral
 end DifferentialGeometry
