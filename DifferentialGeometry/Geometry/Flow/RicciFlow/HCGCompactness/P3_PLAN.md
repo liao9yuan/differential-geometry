@@ -5,6 +5,43 @@ planning session.  Written 2026-06-11 by the planning (Fable) session.**
 
 ---
 
+## NEXT DISPATCH — the final 4b session (kickoff, durable)
+
+ACCEPTED 2026-06-13: `componentBz_eq_covDeriv` (commit 38aa1243) — the 4b-ii
+(a) identity `component0S bz (metricCovDeriv g gRef a z) I0 = covDerivOfField
+gRef (metricTensorField g) a z (V^{I0}·z)`, AXIOM-CLEAN, green 3866 jobs.
+**All of 4b-ii's algebra is now done; (a) is complete.** Remaining = (b)/(c)/(d),
+pure analytic wiring, ~400+ lines — to be done in ONE fresh dedicated session
+(per the WORKFLOW RULING below). Paste this as that session's kickoff:
+
+```
+Work in DifferentialGeometry/ on branch short-time-existence. Land P3's spatial
+endpoint metricPreconvInf end-to-end. ALL risk retired + green: the per-chart
+pipeline (exists_tower_conv), the Gap-B theorem (componentConv_covDeriv_of_chartCInf),
+and the FULL 4b-ii algebra (tangentConst_basis_expand, bz_eq_tangentConst,
+componentBz_eq_covDeriv — the (a) identity). What remains is wiring (b)/(c)/(d).
+1. Read: CLAUDE.md; this P3_PLAN.md (this block + Step-4a + the BINDING pointwise
+   RULING + sections 3,4,5); ComponentConvTower.md's full 4b plan + MetricPreconvBridge.md.
+2. Implement in ComponentConvAssembly.lean (split → ComponentConvFinal.lean if >~1800 lines):
+   (b) uniform-on-patch: on a patch ⊆ baseSet ∩ {frame-bridge} ∩ interior K₀
+       (metricDerivNorm_le_compSq_uniform + exists_tower_conv at the SAME center),
+       metricDerivNorm a (gSeq(φ k)) gInf gRef converges uniformly — via
+       componentBz_eq_covDeriv (the (a) identity, DONE) rewriting each component0S bz
+       as the coordinate-frame tower carrier for V^{I0}, then exists_tower_conv's
+       MapCInfConvOnCompacts; the ε'=ε/(Cu·√(n^{a+2})) finite-sum bound. Keep
+       uniformity in the metricDerivNorm SCALAR — component0S bz uniform is ill-typed.
+   (c) global diagonal: exists_chart_cover + exists_diag_subseq (hstep = per-chart
+       exists_tower_conv) → one φ on every chart.
+   (d) assemble: per compact K, finite good-frame cover, (b) per patch → uniform
+       hnorm → metricCInfConvOnCompacts_of_normConv → state+prove metricPreconvInf.
+   Consume the listed lemmas; do NOT edit them. STRICT constants-first. Fail-loud:
+   each sub-step green before the next; do NOT write (b)-(d) blind.
+3. Claim via ./scripts/lake-locked.ps1; off-limits per §3.
+4. Acceptance: focused check + targeted build green, #print axioms clean on
+   metricPreconvInf, update ComponentConvTower.md, commit locally, NEVER push.
+   3-failures rule; STOP+report at the FIRST genuine API gap, not routine friction.
+```
+
 ## PLANNER ACCEPTANCE + WORKFLOW NOTE — Step 4b-ii core (2026-06-13)
 
 ACCEPTED (own build + axioms): `tangentConst_basis_expand` + `bz_eq_tangentConst`
