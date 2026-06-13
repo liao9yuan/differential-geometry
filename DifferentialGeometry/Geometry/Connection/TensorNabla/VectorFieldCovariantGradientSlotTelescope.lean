@@ -607,6 +607,120 @@ theorem rfns_le_of_ccTensorBilin_gcs_bound
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
+/-- **(POSIT — the family-uniform `g₀`-fibre value sup of the DeTurck vector field.)**  For the
+fibre-small (`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, `δ < 1/2`) supercritically
+`H^{a+2}`-bounded (`2a > finrank + 4`) realized perturbation family, the `g₀`-fibre norm of the
+DeTurck vector field `W₁ = deTurckVF g₁ g_bg` of every realized member is bounded by a single
+constant `Λ_W ≥ 0` over the manifold and the family:
+`√(g₀ x (W₁ x) (W₁ x)) ≤ Λ_W`.
+
+This is the genuine single-field bedrock engine.  `deTurckVF g₁ g_bg` is the `g₁`-trace of the
+Christoffel difference `Γ(g₁) − Γ(g_bg)` against the fixed background `g_bg`
+(`deTurckVF_apply_eq`: the `chartInvGram g₁`-weighted trace of `connDiff g₁ g_bg`), so its
+`g₀`-fibre value is a first-jet quantity of the metric `g₁ = g₀ + ccTensorBilinSymm g₀ T₁`.  It is
+`C⁰`-bounded family-uniformly through the supercritical `H^{a+2} ↪ C¹` embedding of the metric jet
+(`iteratedCovGradJetSum_le_toHs`, `2a > finrank + 4 ⟹ a + 2 > dim/2 + 1` controls the order-`(a+2)`
+Sobolev norm of `T₁` over the order-`1` jet of the Christoffel symbols); the fibre-smallness
+(`gFibreOpBound … δ`, `δ < 1/2`) keeps `g₁` comparable to `g₀`, so the `chartInvGram g₁` trace
+weight is family-uniformly controlled.
+
+**Non-vacuity.**  Genuine (`Λ_W = 0` forces `W₁ ≡ 0` at every point, false whenever
+`deTurckVF g₁ g_bg ≠ 0`).  At `g₁ = g_bg` realized the DeTurck field is the zero section
+(`deTurckVF_self`) and `Λ_W = 0` works there.  Body `sorry`: the genuine supercritical-`C¹` value
+bound of the first-jet Christoffel-trace DeTurck field (consumers transitively depend on `sorryAx`
+through this posited engine). -/
+theorem exists_deTurckVF_gNorm_sup_le
+    (g₀ g_bg : SmoothRiemannianMetric I M) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ Λ_W : ℝ, 0 ≤ Λ_W ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ∀ x : M,
+          Real.sqrt (g₀.inner x (deTurckVF (I := I) g₁ g_bg x) (deTurckVF (I := I) g₁ g_bg x)) ≤
+            Λ_W :=
+  sorry
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
+set_option linter.unusedSectionVars false in
+/-- **(POSIT — the family-uniform `g₀`-operator value bound of the connection difference.)**  For
+the fibre-small (`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, `δ < 1/2`) supercritically
+`H^{a+2}`-bounded (`2a > finrank + 4`) realized perturbation family, the connection difference
+`connDiff g₁ g₀ x` of every realized member, as a `g₀`-operator, obeys the family-uniform value
+bound
+`√(g₀ x (connDiff g₁ g₀ x u v) (connDiff g₁ g₀ x u v)) ≤ Λ_C · √(g₀ x u u) · √(g₀ x v v)`
+for a single constant `Λ_C ≥ 0` over the manifold and the family.
+
+This is the value-form of the order-`0` Riemannian fibre sup of the `g₀`-lowered connection
+difference `loweredConnDiffSection g₁ g₀` (whose `riemannianFiberNormSq` order-`0` fibre sup is the
+Neumann-absorbed supercritical-`C¹` bound `exists_loweredConnDiffSection_rfns_fibre_sup_le`):
+`connDiff g₁ g₀ = Γ(g₁) − Γ(g₀)` is first order in the metric perturbation
+`h = ccTensorBilinSymm g₀ T₁` (`connDiff_g0_fibre_abs_bound`, the Koszul triangle with Neumann
+self-absorption, `δ < 1/2`), and is `C⁰`-controlled family-uniformly by the supercritical
+`H^{a+2} ↪ C¹` embedding of the metric jet (`iteratedCovGradJetSum_le_toHs`, `2a > finrank + 4`).
+The trilinear `g₀`-fibre form `(u, v, w) ↦ g₀(connDiff g₁ g₀ x u v, w)` having a uniform fibre sup
+is exactly a `g₀`-operator value bound on the contraction `u, v ↦ connDiff g₁ g₀ x u v`.
+
+**Non-vacuity.**  Genuine (`Λ_C = 0` forces `connDiff g₁ g₀ ≡ 0`, false whenever `g₁ ≠ g₀`).  At
+`g₁ = g₀` realized (`T₁ = 0`) the connection difference is `0` (`connDiff_self`) and `Λ_C = 0`
+works.  Body `sorry`: the genuine supercritical-`C¹` / Neumann-absorption `C⁰` value bound of the
+first-order Christoffel difference (consumers transitively depend on `sorryAx` through this posited
+engine). -/
+theorem exists_connDiff_gOp_sup_le
+    (g₀ : SmoothRiemannianMetric I M) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ Λ_C : ℝ, 0 ≤ Λ_C ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ∀ (x : M) (u v : TangentSpace I x),
+          Real.sqrt (g₀.inner x (connDiff (I := I) g₁ g₀ x u v) (connDiff (I := I) g₁ g₀ x u v)) ≤
+            Λ_C * Real.sqrt (g₀.inner x u u) * Real.sqrt (g₀.inner x v v) :=
+  sorry
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
+set_option linter.unusedSectionVars false in
+/-- **(The family-uniform `g₀`-fibre value sup of the connection-difference action — glued.)**
+For the fibre-small supercritically `H^{a+2}`-bounded realized perturbation family, the
+`g₀`-fibre norm of the connection-difference action `connDiff g₁ g₀ x (W₁ x) v`,
+`W₁ = deTurckVF g₁ g_bg`, obeys the family-uniform value bound
+`√(g₀ x (connDiff g₁ g₀ x (W₁ x) v) (connDiff g₁ g₀ x (W₁ x) v)) ≤ Λ · √(g₀ x v v)`.
+
+Glued: the connection difference `g₀`-operator bound `exists_connDiff_gOp_sup_le` applied at the
+field `u = W₁ x` gives `√(g₀ (action v)²) ≤ Λ_C · √(g₀ (W₁ x) (W₁ x)) · √(g₀ v v)`, and the DeTurck
+field value sup `exists_deTurckVF_gNorm_sup_le` absorbs the middle factor into `Λ_W`, so the action
+norm is bounded by `Λ_C · Λ_W · √(g₀ v v)`.  Both factors are the posited bedrock engines above
+(consumers transitively depend on `sorryAx` through them). -/
+theorem exists_connDiffActionG0_gNorm_sup_le
+    (g₀ g_bg : SmoothRiemannianMetric I M) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ Λ : ℝ, 0 ≤ Λ ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ∀ (x : M) (v : TangentSpace I x),
+          Real.sqrt (g₀.inner x
+              (connDiff (I := I) g₁ g₀ x (deTurckVF (I := I) g₁ g_bg x) v)
+              (connDiff (I := I) g₁ g₀ x (deTurckVF (I := I) g₁ g_bg x) v)) ≤
+            Λ * Real.sqrt (g₀.inner x v v) := by
+  obtain ⟨Λ_W, hW0, hW⟩ := exists_deTurckVF_gNorm_sup_le (I := I) g₀ g_bg δ hδ0 hδ1 B a ha
+  obtain ⟨Λ_C, hC0, hC⟩ := exists_connDiff_gOp_sup_le (I := I) g₀ δ hδ0 hδ1 B a ha
+  refine ⟨Λ_C * Λ_W, by positivity, fun T₁ g₁ hg₁ hδbnd hB₁ x v => ?_⟩
+  have hWx := hW T₁ g₁ hg₁ hδbnd hB₁ x
+  have hCx := hC T₁ g₁ hg₁ hδbnd hB₁ x (deTurckVF (I := I) g₁ g_bg x) v
+  refine le_trans hCx ?_
+  have hvnn : 0 ≤ Real.sqrt (g₀.inner x v v) := Real.sqrt_nonneg _
+  apply mul_le_mul_of_nonneg_right _ hvnn
+  exact mul_le_mul_of_nonneg_left hWx hC0
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
+set_option linter.unusedSectionVars false in
 /-- **(POSIT — the family-uniform pointwise `g₀`-Cauchy–Schwarz value bound of the
 connection-difference action bilinear form.)**  For the fibre-small
 (`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, `δ < 1/2`) supercritically `H^{a+2}`-bounded
@@ -626,9 +740,15 @@ DeTurck field `W₁` is the `g₁`-trace of the same first-order Christoffel dif
 (`iteratedCovGradJetSum_le_toHs`, `2a > finrank + 4 ⟹ a + 2 > dim/2 + 1`).
 
 **Non-vacuity.**  Vanishes at `T₁ = 0` realized (`g₁ = g₀`, `connDiff g₀ g₀ = 0`, the bilinear form
-is `0`, `Λ₀ = 0` works); genuine (`Λ₀ = 0` forces the value `≡ 0`, false whenever `g₁ ≠ g₀`).  Body
-`sorry`: the genuine supercritical-`C¹` / Neumann-absorption `C⁰` value bound of the first-order
-Christoffel-difference carrier. -/
+is `0`, `Λ₀ = 0` works); genuine (`Λ₀ = 0` forces the value `≡ 0`, false whenever `g₁ ≠ g₀`).
+
+Glued (consumers transitively depend on `sorryAx` only through the posited bedrock engines): the
+bilinear value rewrites — `ccTensorBilin_apply`, `ccTensorModel`, `ccTensorMultilinear_apply`,
+`connDiffActionSection_toModel_apply`, `connDiffActionBilin_apply` — to
+`g₀(connDiff g₁ g₀ x (W₁ x) v, w)`, `W₁ = deTurckVF g₁ g_bg`; the `g₀`-Cauchy–Schwarz
+(`abs_metric_inner_le_sqrt_metric_quadratic`) folds it to
+`√(g₀ (connDiff g₁ g₀ x (W₁ x) v)²) · √(g₀ w w)`, and the connection-difference action `g₀`-fibre
+value sup `exists_connDiffActionG0_gNorm_sup_le` bounds the action factor by `Λ · √(g₀ v v)`. -/
 theorem exists_connDiffActionBilin_gcs_value_bound
     (g₀ g_bg : SmoothRiemannianMetric I M) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
     (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
@@ -640,8 +760,25 @@ theorem exists_connDiffActionBilin_gcs_value_bound
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ∀ (x : M) (v w : TangentSpace I x),
           |ccTensorBilin (I := I) g₀ (connDiffActionSection (I := I) g₀ g₁ g₀ g_bg) x v w| ≤
-            Λ₀ * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) :=
-  sorry
+            Λ₀ * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) := by
+  obtain ⟨Λ, hΛ0, hΛ⟩ := exists_connDiffActionG0_gNorm_sup_le (I := I) g₀ g_bg δ hδ0 hδ1 B a ha
+  refine ⟨Λ, hΛ0, fun T₁ g₁ hg₁ hδbnd hB₁ x v w => ?_⟩
+  have hred : ccTensorBilin (I := I) g₀ (connDiffActionSection (I := I) g₀ g₁ g₀ g_bg) x v w =
+      g₀.inner x (connDiff (I := I) g₁ g₀ x (deTurckVF (I := I) g₁ g_bg x) v) w := by
+    rw [ccTensorBilin_apply]
+    show ccTensorModel (I := I) g₀ (connDiffActionSection (I := I) g₀ g₁ g₀ g_bg) x ![v, w] = _
+    rw [ccTensorModel, ccTensorMultilinear_apply, connDiffActionSection_toModel_apply,
+      connDiffActionBilin_apply]
+  rw [hred]
+  set u := connDiff (I := I) g₁ g₀ x (deTurckVF (I := I) g₁ g_bg x) v with hu
+  refine le_trans
+    (DifferentialGeometry.Analysis.Laplacian.abs_metric_inner_le_sqrt_metric_quadratic g₀ x u w) ?_
+  have hwnn : 0 ≤ Real.sqrt (g₀.inner x w w) := Real.sqrt_nonneg _
+  have hop := hΛ T₁ g₁ hg₁ hδbnd hB₁ x v
+  calc Real.sqrt (g₀.inner x u u) * Real.sqrt (g₀.inner x w w)
+      ≤ (Λ * Real.sqrt (g₀.inner x v v)) * Real.sqrt (g₀.inner x w w) :=
+        mul_le_mul_of_nonneg_right hop hwnn
+    _ = Λ * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) := by ring
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
@@ -847,6 +984,48 @@ theorem loweredCovGradDeTurckVFMixed_connSlot_iteratedCovGrad_hamiltonTame_le
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
+/-- **(POSIT — the family-uniform `g₀`-fibre value sup of the field-difference covariant gradient.)**
+For the fibre-small (`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, `δ < 1/2`) supercritically
+`H^{a+2}`-bounded (`2a > finrank + 4`) realized perturbation family, the `g₀`-Levi-Civita covariant
+gradient of the DeTurck field difference `W₁ − W₀`, `Wᵢ = deTurckVF gᵢ g_bg`, obeys the
+family-uniform value bound
+`√(g₀ x (∇^{g₀}_v (W₁ − W₀)) (∇^{g₀}_v (W₁ − W₀))) ≤ Λ · √(g₀ x v v)`
+for a single constant `Λ ≥ 0` over the manifold and the family.
+
+This is the order-`0` `C⁰` value of the `g₀`-Levi-Civita covariant gradient of the field difference:
+the field difference `W₁ − W₀` is the inverse-Gram-weighted trace of the pair connection difference
+(`deTurckVF_sub_apply_eq_trace_connDiff`), a first-order Christoffel-difference quantity against the
+fixed background `g_bg`, so its `g₀`-covariant gradient is a second-jet metric quantity that is
+`C⁰`-controlled family-uniformly through the supercritical `H^{a+2} ↪ C¹` embedding of the metric
+jet (`iteratedCovGradJetSum_le_toHs`, `2a > finrank + 4`).  As a `g₀`-operator on `v`, the covariant
+gradient `(∇^{g₀}(W₁ − W₀)) x` having a uniform `g₀`-fibre sup is exactly this value bound.
+
+**Non-vacuity.**  Genuine (`Λ = 0` forces `∇^{g₀}(W₁ − W₀) ≡ 0`, false whenever `W₁ ≠ W₀`).  At
+`g₁ = g₀` realized (`T₁ = 0`) the field difference is the zero section and `Λ = 0` works.  Body
+`sorry`: the genuine supercritical-`C¹` value bound of the field-difference covariant gradient
+(consumers transitively depend on `sorryAx` through this posited engine). -/
+theorem exists_covGrad_deTurckVF_sub_gNorm_sup_le
+    (g₀ g_bg : SmoothRiemannianMetric I M) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
+    (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
+    ∃ Λ : ℝ, 0 ≤ Λ ∧
+      ∀ (T₁ : Integral.L2.SmoothCcTensor g₀ 0 2) (g₁ : SmoothRiemannianMetric I M),
+        (∀ (x : M) (v w : TangentSpace I x),
+          g₁.inner x v w = g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ T₁ x v w) →
+        gFibreOpBound (I := I) g₀ (fun y => ccTensorBilinSymm (I := I) g₀ T₁ y) δ →
+        ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
+        ∀ (x : M) (v : TangentSpace I x),
+          Real.sqrt (g₀.inner x
+              ((LeviCivita (I := I) g₀)
+                ((deTurckVF (I := I) g₁ g_bg - deTurckVF (I := I) g₀ g_bg :
+                  Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) : ∀ x : M, TangentSpace I x) x v)
+              ((LeviCivita (I := I) g₀)
+                ((deTurckVF (I := I) g₁ g_bg - deTurckVF (I := I) g₀ g_bg :
+                  Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) : ∀ x : M, TangentSpace I x) x v)) ≤
+            Λ * Real.sqrt (g₀.inner x v v) :=
+  sorry
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
+set_option linter.unusedSectionVars false in
 /-- **(POSIT — the family-uniform pointwise `g₀`-Cauchy–Schwarz value bound of the
 field-difference gradient bilinear form.)**  For the fibre-small
 (`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T₁) δ`, `δ < 1/2`) supercritically `H^{a+2}`-bounded
@@ -863,8 +1042,16 @@ covariant gradient is `C⁰`-controlled family-uniformly through the supercritic
 embedding of the metric jet (`iteratedCovGradJetSum_le_toHs`, `2a > finrank + 4`).
 
 **Non-vacuity.**  Vanishes at `T₁ = 0` realized (`g₁ = g₀`, `W₁ = W₀`, the bilinear form is `0`,
-`Λ₀ = 0` works); genuine (`Λ₀ = 0` forces the value `≡ 0`, false whenever `g₁ ≠ g₀`).  Body `sorry`:
-the genuine supercritical-`C¹` `C⁰` value bound of the field-difference covariant gradient. -/
+`Λ₀ = 0` works); genuine (`Λ₀ = 0` forces the value `≡ 0`, false whenever `g₁ ≠ g₀`).
+
+Glued (consumers transitively depend on `sorryAx` only through the posited bedrock engine): the
+bilinear value rewrites — `ccTensorBilin_apply`, `ccTensorModel`, `ccTensorMultilinear_apply`,
+`fieldDiffGradSection_toModel_apply`, `fieldDiffGradBilin_apply` — to
+`g₀(∇^{g₀}_v (W₁ − W₀), w)`, `Wᵢ = deTurckVF gᵢ g_bg`; the `g₀`-Cauchy–Schwarz
+(`abs_metric_inner_le_sqrt_metric_quadratic`) folds it to
+`√(g₀ (∇^{g₀}_v (W₁ − W₀))²) · √(g₀ w w)`, and the field-difference covariant-gradient `g₀`-fibre
+value sup `exists_covGrad_deTurckVF_sub_gNorm_sup_le` bounds the gradient factor by
+`Λ · √(g₀ v v)`. -/
 theorem exists_fieldDiffGradBilin_gcs_value_bound
     (g₀ g_bg : SmoothRiemannianMetric I M) (δ : ℝ) (hδ0 : 0 ≤ δ) (hδ1 : δ < 1 / 2) (B : ℝ)
     (a : ℕ) (ha : 2 * a > Module.finrank ℝ E + 4) :
@@ -876,8 +1063,30 @@ theorem exists_fieldDiffGradBilin_gcs_value_bound
         ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g₀) (r := 0) (s := 2) (a + 2) T₁‖ ≤ B →
         ∀ (x : M) (v w : TangentSpace I x),
           |ccTensorBilin (I := I) g₀ (fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg) x v w| ≤
-            Λ₀ * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) :=
-  sorry
+            Λ₀ * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) := by
+  obtain ⟨Λ, hΛ0, hΛ⟩ :=
+    exists_covGrad_deTurckVF_sub_gNorm_sup_le (I := I) g₀ g_bg δ hδ0 hδ1 B a ha
+  refine ⟨Λ, hΛ0, fun T₁ g₁ hg₁ hδbnd hB₁ x v w => ?_⟩
+  have hred : ccTensorBilin (I := I) g₀ (fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg) x v w =
+      g₀.inner x ((LeviCivita (I := I) g₀)
+          ((deTurckVF (I := I) g₁ g_bg - deTurckVF (I := I) g₀ g_bg :
+            Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) : ∀ x : M, TangentSpace I x) x v) w := by
+    rw [ccTensorBilin_apply]
+    show ccTensorModel (I := I) g₀ (fieldDiffGradSection (I := I) g₀ g₁ g₀ g_bg) x ![v, w] = _
+    rw [ccTensorModel, ccTensorMultilinear_apply, fieldDiffGradSection_toModel_apply,
+      fieldDiffGradBilin_apply]
+  rw [hred]
+  set u := (LeviCivita (I := I) g₀)
+      ((deTurckVF (I := I) g₁ g_bg - deTurckVF (I := I) g₀ g_bg :
+        Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) : ∀ x : M, TangentSpace I x) x v with hu
+  refine le_trans
+    (DifferentialGeometry.Analysis.Laplacian.abs_metric_inner_le_sqrt_metric_quadratic g₀ x u w) ?_
+  have hwnn : 0 ≤ Real.sqrt (g₀.inner x w w) := Real.sqrt_nonneg _
+  have hop := hΛ T₁ g₁ hg₁ hδbnd hB₁ x v
+  calc Real.sqrt (g₀.inner x u u) * Real.sqrt (g₀.inner x w w)
+      ≤ (Λ * Real.sqrt (g₀.inner x v v)) * Real.sqrt (g₀.inner x w w) :=
+        mul_le_mul_of_nonneg_right hop hwnn
+    _ = Λ * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) := by ring
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization in
 set_option linter.unusedSectionVars false in
