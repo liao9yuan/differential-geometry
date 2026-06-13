@@ -200,7 +200,26 @@ per pair); the per-pair limit pinning then mirrors
   `writtenInExtChartAt_real_apply` + `left_inv` + `simp [hVval]` + `rfl`
   (`component0S_apply`/`metricCovDeriv_eq_covDerivOfField` are rfl).  `htend.congr`.
 
-**REMAINING — Step 4b ONLY: `metricPreconvInf` (the endpoint).**  Two parts:
+**DONE — Step 4b-ii algebraic core (committed `78a119b0`, focused checks green):**
+- `tangentConst_basis_expand` — `tangentConstInChart x (basisE i) p = Σ_j (finBasis.repr
+  (basisE i) j) • tangentConstInChart x (finBasis j) p` (`Basis.sum_repr` + `map_sum`/
+  `map_smul` on the linear `symmL`).  The CONSTANT-`M` (z-independent) expansion.
+- `bz_eq_tangentConst` — `(trivAt x).localFrame(basisE).toBasisAt hz i =
+  tangentConstInChart x (basisE i) z` (`IsLocalFrameOn.toBasisAt_coe` +
+  `localFrame_apply_of_mem_baseSet` + `simp [basisAt, tangentConstInChart_apply]`).
+  So the norm-bridge basis `bz` IS the chart-constant frame.
+
+**REMAINING — Step 4b (wiring, the endpoint `metricPreconvInf`):**  Two parts:
+- *(4b-ii rest)* per-slot bridge `bz(I0 q) = V^{I0}_q(z')` (`bz_eq_tangentConst` +
+  `tangentConst_basis_expand` + `hframeσ` frame bridge near `Kc`; `V^{I0}_q :=
+  Σ_j (finBasis.repr (basisE (I0 q)) j) • frame_j`, a constant-combo `ContMDiffSection`)
+  ⇒ `component0S bz (metricCovDeriv g gRef a z') I0 = [exists_tower_conv carrier for
+  V^{I0}] (extChartAt z')` (`component0S_apply`) ⇒ uniform-on-patch convergence from the
+  tower's `MapCInfConvOnCompacts` order-0 slice (`tendstoUniformlyOn_of_cPConv`) ⇒
+  `metricDerivNorm < ε` uniform on the patch (`metricDerivNorm_le_compSq_uniform`).
+  Domain bookkeeping: patch ⊆ `baseSet ∩ {frame-bridge holds} ∩ interior K₀`
+  (so `extChartAt z' ∈ U`); call `metricDerivNorm_le_compSq_uniform` and
+  `exists_tower_conv` at the SAME center `x_p` (so `bz`/tower share `trivAt x_p`).
 - *(4b-i global diagonal)* `exists_chart_cover` (countable charts/compacts) +
   `exists_diag_subseq` over the cover, `hstep` = per-chart `exists_tower_conv`
   C∞-data extraction (refines any subsequence), `hsub` = `MapCInfConvOnCompacts.comp_subseq`,
