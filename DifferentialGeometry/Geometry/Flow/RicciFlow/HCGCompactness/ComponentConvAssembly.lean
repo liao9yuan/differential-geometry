@@ -338,5 +338,38 @@ theorem componentConv_covDeriv_of_chartCInf
   rw [hcar gInf] at htend
   exact htend.congr (fun k => hcar (gSeq (φ (ψ k))))
 
+/-- **Constant-`M` expansion (4b-ii algebraic core).**  A chart-constant frame vector
+for the basis `basisE` of `E` is a CONSTANT-coefficient (`z`-independent) linear combo
+of the chart-constant frame vectors for the model basis `finBasis`, the coefficients
+being the `basisE`-in-`finBasis` change of basis.  Both sides are `(trivAt x₀).symmL p`
+(linear) applied to a fixed `E`-vector, so this is `Basis.sum_repr` + `map_sum`/`map_smul`. -/
+theorem tangentConst_basis_expand (x₀ : M)
+    (basisE : Module.Basis (Fin (Module.finrank Real E)) Real E)
+    (i : Fin (Module.finrank Real E)) (p : M) :
+    tangentConstInChart (𝕜 := Real) (I := I) x₀ (basisE i) p
+      = ∑ j : Fin (Module.finrank Real E),
+          (Module.finBasis Real E).repr (basisE i) j •
+            tangentConstInChart (𝕜 := Real) (I := I) x₀ (Module.finBasis Real E j) p := by
+  simp only [tangentConstInChart_apply]
+  conv_lhs => rw [← (Module.finBasis Real E).sum_repr (basisE i)]
+  rw [map_sum]
+  refine Finset.sum_congr rfl fun j _ => ?_
+  rw [map_smul]
+
+/-- **The norm-bridge basis `bz` IS the chart-constant frame (4b-ii).**  The basis
+`metricDerivNorm_le_compSq_uniform` uses at `z`, `(trivAt x).localFrame(basisE).toBasisAt hz`,
+equals the chart-constant frame `tangentConstInChart x (basisE i) z`
+(`IsLocalFrameOn.toBasisAt_coe` + `localFrame_apply_of_mem_baseSet`). -/
+theorem bz_eq_tangentConst (x : M)
+    (basisE : Module.Basis (Fin (Module.finrank Real E)) Real E)
+    (i : Fin (Module.finrank Real E)) {z : M}
+    (hz : z ∈ (trivializationAt E (TangentSpace I : M → Type _) x).baseSet) :
+    (((trivializationAt E (TangentSpace I : M → Type _) x).isLocalFrameOn_localFrame_baseSet
+        I 1 basisE).toBasisAt hz) i
+      = tangentConstInChart (𝕜 := Real) (I := I) x (basisE i) z := by
+  set e := trivializationAt E (TangentSpace I : M → Type _) x with he
+  rw [IsLocalFrameOn.toBasisAt_coe, e.localFrame_apply_of_mem_baseSet basisE hz]
+  simp [Bundle.Trivialization.basisAt, tangentConstInChart_apply, he]
+
 end HCGCompactness
 end DifferentialGeometry
