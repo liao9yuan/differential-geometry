@@ -1,0 +1,851 @@
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatureOperatorField
+import DifferentialGeometry.Geometry.Metric.InverseMetricField
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.PosDefPerturbation
+import DifferentialGeometry.Geometry.Connection.TensorNabla.HomTensorRSRiemannian
+
+/-! # The cometric inverse-difference fibre-endomorphism field and its Neumann fibre bound
+
+For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g₀)` modelled on a real
+inner-product space `E`, and a second smooth metric `g₁`, this file constructs the **cometric
+inverse-difference fibre-endomorphism field**
+
+  `gInvDiffFibreEndo g₀ g₁ : Π x : M, TensorRSSpace 0 2 I x →L[ℝ] TensorRSSpace 0 2 I x`,
+
+the fibrewise endomorphism of `(0, 2)`-tensors implementing the cometric difference `g₁⁻¹ − g₀⁻¹`
+acting through its `g₀`-lowered `(1, 1)`-representative.  Unlike the *perturbation* endomorphism
+`ccTensorBilinFibreEndo` (`CcTensorBilinFibreEndo.lean`), which implements the cometric `g₀⁻¹`
+applied to the metric difference `h = g₁ − g₀`, this field implements the genuine **inverse-Gram
+difference** `g₁⁻¹ − g₀⁻¹`, the second-order coefficient of the DeTurck *remainder* (the principal
+symbol `g⁻¹` minus the rough-Laplacian symbol `g₀⁻¹`).
+
+## The construction (three concrete stages, each `sorry`-free), mirroring `ccTensorBilinFibreEndo`
+
+1. **Raise.** `gInvDiffRaisedEndo g₀ g₁ x : TₓM →L TₓM` is the `g₀`-lowered representative of the
+   cometric difference, `v ↦ g₁^♯(g₀^♭ v) − v`, where `g₀^♭ v := dualToCotangent (g₀.inner x v)` is
+   the `g₀`-flat covector and `g₁^♯ = inverseMetricSharpFib g₁` is the `g₁`-sharp.  The resolvent
+   identity `gInvDiffRaisedEndo_eq_neg_sharp` rewrites it as `−g₁^♯((g₁ − g₀)(v, ·))`, which makes
+   the `δ`-smallness manifest (`g₀^♯ g₀^♭ = id`, so `g₁^♯ g₀^♭ − id = (g₁^♯ − g₀^♯) g₀^♭`).
+2. **Insert.** `gInvDiffSlotEndo g₀ g₁ x := slotInsertEndoFib 2 0 x (gInvDiffRaisedEndo g₀ g₁ x)` is
+   the leading-slot insertion, a fibre endomorphism of `Tensor0SSpace 2`.
+3. **Post-compose.** `gInvDiffFibreEndo g₀ g₁ x` is post-composition by the slot endomorphism, an
+   endomorphism of `TensorRSSpace 0 2 I x`, exactly the `ccTensorBilinFibreEndo` post-composition
+   shape.
+
+Each stage carries its base-point smoothness; the assembled field is a jointly `ContMDiff` section
+of the `(0, 2)`-endomorphism Hom-bundle (`g₁` being an honest `SmoothRiemannianMetric`).
+
+## The Neumann fibre bound
+
+Under the fibre gate `gFibreOpBound g₀ h δ` for the metric difference `h = g₁ − g₀` (the realize-tie
+`g₁ = g₀ + h`) and `δ < 1/2`, the intrinsic `g₀`-fibre operator action of the field is bounded,
+uniformly over `g₁` and the perturbation family, by `(Cnorm · δ)`:
+
+  `rfns(gInvDiffFibreEndo g₀ g₁ x v) ≤ (Cnorm · δ)² · rfns(v)`,   with `Cnorm = 2`.
+
+The δ-proportionality is the resolvent identity `g₁⁻¹ − g₀⁻¹ = −g₁⁻¹ (g₁ − g₀) g₀⁻¹`: the raised
+representative is `−g₁^♯((g₁−g₀)(v,·))`, whose `g₀`-fibre norm is bounded by the Neumann factor
+`1/(1−δ) ≤ 2` (for `δ < 1/2`) times the fibre size `δ · ‖v‖_{g₀}` of the metric difference — the
+`g₁`-comparison `(1−δ)‖·‖²_{g₀} ≤ ‖·‖²_{g₁}` supplies the resolvent factor, and the gate supplies
+the `δ`-small flat-difference.  The slot-insertion and post-composition factors are passed through
+exactly as in `ccTensorBilinFibreEndo` (the dimension-counting Hilbert–Schmidt slot ampliation and
+the partial-contraction Cauchy–Schwarz `riemannianFiberNormSq_compRS_le_mul`).
+
+## Non-vacuity
+
+The field is a genuine concrete construction tied to the metrics: at `g₁ = g₀` it is the zero field
+(`gInvDiffRaisedEndo` then sends `v ↦ g₀^♯(g₀^♭ v) − v = v − v = 0`), and the Neumann bound is an
+honest `0 ≤ 0`.  For `g₁ ≠ g₀` the raised representative reads the genuine cometric difference, not a
+bound-only stand-in; the `δ`-arm genuinely carries the inverse-Gram smallness (the `δ → 1` Neumann
+blow-up shows the factor is load-bearing).
+-/
+
+noncomputable section
+
+set_option linter.style.setOption false
+set_option synthInstance.maxHeartbeats 1600000
+set_option maxHeartbeats 3200000
+
+open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
+open scoped Manifold Topology ContDiff ENNReal BigOperators
+
+namespace DifferentialGeometry.Analysis.Sobolev.TensorHilbert
+
+open DifferentialGeometry
+open DifferentialGeometry.Analysis.Laplacian
+open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Integral.Measure
+open TensorMultilinear (contMDiffAt_section_apply contMDiff_section_apply)
+
+variable
+    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+      [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+      [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
+      [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+/-! ## Stage 1 — the `g₀`-lowered raised representative of the cometric difference -/
+
+/-- `dualToCotangent` is additive: it is a section of the injective linear map
+`cotangentToDualLinear`, so it inherits additivity. -/
+private lemma dualToCotangent_add {x : M}
+    (α β : Module.Dual ℝ (TangentSpace I x)) :
+    dualToCotangent (I := I) (x := x) (α + β)
+      = dualToCotangent (I := I) (x := x) α + dualToCotangent (I := I) (x := x) β := by
+  apply cotangentToDualLinear_injective (I := I) (x := x)
+  rw [map_add, cotangentToDualLinear_apply, cotangentToDualLinear_apply,
+    cotangentToDualLinear_apply, cotangentToDual_dualToCotangent,
+    cotangentToDual_dualToCotangent, cotangentToDual_dualToCotangent]
+
+/-- `dualToCotangent` is homogeneous: same section argument. -/
+private lemma dualToCotangent_smul {x : M} (c : ℝ)
+    (α : Module.Dual ℝ (TangentSpace I x)) :
+    dualToCotangent (I := I) (x := x) (c • α)
+      = c • dualToCotangent (I := I) (x := x) α := by
+  apply cotangentToDualLinear_injective (I := I) (x := x)
+  rw [map_smul, cotangentToDualLinear_apply, cotangentToDualLinear_apply,
+    cotangentToDual_dualToCotangent, cotangentToDual_dualToCotangent]
+
+/-- **The `g₀`-flat of a tangent vector**, `g₀^♭ v := dualToCotangent ((g₀.inner x v).toLinearMap)`,
+as a continuous-linear map `TₓM →L[ℝ] Tensor0SSpace 1 I x`.  This is the metric flat read into the
+realized cotangent fibre; its dual evaluation is `g₀(v, w)` (`cotangentToDual_g0FlatCLM`). -/
+def g0FlatCLM (g₀ : SmoothRiemannianMetric I M) (x : M) :
+    TangentSpace I x →L[ℝ] Tensor0SSpace 1 I x :=
+  LinearMap.toContinuousLinearMap
+    { toFun := fun v => dualToCotangent (I := I) (x := x) (g₀.inner x v).toLinearMap
+      map_add' := fun v v' => by
+        have h : ((g₀.inner x (v + v')).toLinearMap : Module.Dual ℝ (TangentSpace I x))
+            = (g₀.inner x v).toLinearMap + (g₀.inner x v').toLinearMap := by
+          ext w; simp [map_add]
+        rw [h, dualToCotangent_add]
+      map_smul' := fun c v => by
+        have h : ((g₀.inner x (c • v)).toLinearMap : Module.Dual ℝ (TangentSpace I x))
+            = c • (g₀.inner x v).toLinearMap := by
+          ext w; simp [map_smul]
+        rw [h, dualToCotangent_smul]; rfl }
+
+@[simp] lemma g0FlatCLM_apply (g₀ : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
+    g0FlatCLM (I := I) g₀ x v = dualToCotangent (I := I) (x := x) (g₀.inner x v).toLinearMap := by
+  rw [g0FlatCLM, LinearMap.coe_toContinuousLinearMap']; rfl
+
+/-- **The sharp of a `g₀`-flat covector collapses to a metric sharp.**  Composing the `g₀`-flat (read
+into the cotangent fibre via `dualToCotangent`) with any metric sharp `g'^♯` recovers `metricSharp g'
+x (g₀.inner x v)` directly, because `cotangentToDualLinear (dualToCotangent α) = α`.  This bypasses the
+cotangent-fibre round-trip in the smoothness proof, reducing it to the metric-sharp smoothness engine
+`metricSharp_contMDiff_total`. -/
+lemma inverseMetricSharpFib_g0FlatCLM_eq_metricSharp (g₀ g' : SmoothRiemannianMetric I M) (x : M)
+    (v : TangentSpace I x) :
+    inverseMetricSharpFib (I := I) g' x (g0FlatCLM (I := I) g₀ x v) =
+      metricSharp (I := I) g' x (g₀.inner x v).toLinearMap := by
+  rw [inverseMetricSharpFib_apply, g0FlatCLM_apply]
+  rw [show cotangentToDualLinear (I := I) (dualToCotangent (I := I) (g₀.inner x v).toLinearMap)
+        = (g₀.inner x v).toLinearMap from by
+    rw [cotangentToDualLinear_apply, cotangentToDual_dualToCotangent]]
+
+@[simp] lemma cotangentToDual_g0FlatCLM (g₀ : SmoothRiemannianMetric I M) (x : M)
+    (v w : TangentSpace I x) :
+    cotangentToDual (I := I) (x := x) (g0FlatCLM (I := I) g₀ x v) w = g₀.inner x v w := by
+  rw [g0FlatCLM_apply, cotangentToDual_dualToCotangent]; rfl
+
+/-- **Injectivity of the metric flat** `v ↦ g₀.inner x v` into the dual: positive-definiteness. -/
+private lemma metricInner_injective (g₀ : SmoothRiemannianMetric I M) (x : M) :
+    Function.Injective
+      (fun u : TangentSpace I x => (g₀.inner x u : TangentSpace I x →L[ℝ] ℝ)) := by
+  intro a b hab
+  have hval : ∀ w, g₀.inner x a w = g₀.inner x b w := fun w => by
+    have := congrArg (fun (φ : TangentSpace I x →L[ℝ] ℝ) => φ w) hab
+    simpa using this
+  by_contra hne
+  have hsub : a - b ≠ 0 := sub_ne_zero.mpr hne
+  have hpos := g₀.pos x (a - b) hsub
+  have hzero : g₀.inner x (a - b) (a - b) = 0 := by
+    have hsymm₁ : g₀.inner x (a - b) (a - b) = g₀.inner x (a - b) a - g₀.inner x (a - b) b := by
+      rw [← map_sub]
+    rw [hsymm₁]
+    rw [g₀.symm x (a - b) a, g₀.symm x (a - b) b]
+    have e1 : g₀.inner x a (a - b) = g₀.inner x b (a - b) := hval (a - b)
+    rw [e1]; ring
+  exact absurd hzero (ne_of_gt hpos)
+
+/-- The `g₀`-sharp inverts the `g₀`-flat: `g₀^♯(g₀^♭ v) = v`.  This is the inverse property of the
+sharp (`inverseMetricSharpFib_inner`) plus injectivity of the metric flat: both `g₀^♯(g₀^♭ v)` and
+`v` pair against every `w` with the metric to give `g₀(v, w)`. -/
+lemma inverseMetricSharpFib_g0FlatCLM (g₀ : SmoothRiemannianMetric I M) (x : M)
+    (v : TangentSpace I x) :
+    inverseMetricSharpFib (I := I) g₀ x (g0FlatCLM (I := I) g₀ x v) = v := by
+  have hkey : (g₀.inner x (inverseMetricSharpFib (I := I) g₀ x (g0FlatCLM (I := I) g₀ x v)) :
+        TangentSpace I x →L[ℝ] ℝ) = g₀.inner x v := by
+    ext w
+    rw [inverseMetricSharpFib_inner, cotangentToDualLinear_apply, cotangentToDual_g0FlatCLM]
+  exact metricInner_injective (I := I) g₀ x hkey
+
+/-- **The `g₀`-lowered raised representative of the cometric difference `g₁⁻¹ − g₀⁻¹`.**  The fibre
+endomorphism of `TₓM`, `v ↦ g₁^♯(g₀^♭ v) − v`, where `g₀^♭ = g0FlatCLM g₀` is the `g₀`-flat and
+`g₁^♯ = inverseMetricSharpFib g₁` is the `g₁`-sharp.  Since `g₀^♯ g₀^♭ = id`
+(`inverseMetricSharpFib_g0FlatCLM`), this is `(g₁^♯ − g₀^♯) ∘ g₀^♭`, the `g₀`-lowered cometric
+difference. -/
+def gInvDiffRaisedEndo (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+    TangentSpace I x →L[ℝ] TangentSpace I x :=
+  (inverseMetricSharpFib (I := I) g₁ x).comp (g0FlatCLM (I := I) g₀ x)
+    - ContinuousLinearMap.id ℝ (TangentSpace I x)
+
+@[simp] lemma gInvDiffRaisedEndo_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (v : TangentSpace I x) :
+    gInvDiffRaisedEndo (I := I) g₀ g₁ x v =
+      inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x v) - v := by
+  rw [gInvDiffRaisedEndo]
+  rw [ContinuousLinearMap.sub_apply, ContinuousLinearMap.comp_apply,
+    ContinuousLinearMap.id_apply]
+
+/-- **Self-vanishing of the raised representative at `g₁ = g₀`** (non-vacuity litmus).  When the two
+metrics coincide, the raised cometric-difference representative is the zero endomorphism: `g₀^♯(g₀^♭ v)
+= v` (`inverseMetricSharpFib_g0FlatCLM`), so `D v = v − v = 0`.  Thus the whole field vanishes at
+`g₁ = g₀`, and the cometric difference genuinely measures `g₁⁻¹ − g₀⁻¹` (it is not a bound-only
+stand-in). -/
+@[simp] lemma gInvDiffRaisedEndo_self (g₀ : SmoothRiemannianMetric I M) (x : M)
+    (v : TangentSpace I x) :
+    gInvDiffRaisedEndo (I := I) g₀ g₀ x v = 0 := by
+  rw [gInvDiffRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM, sub_self]
+
+/-- **The defining `g₁`-pairing of the raised representative: `g₁(D v, w) = g₀(v, w) − g₁(v, w)`.**
+Pairing `D v = g₁^♯(g₀^♭ v) − v` against `w` with the `g₁`-metric: the sharp's inverse property
+(`inverseMetricSharpFib_inner` for `g₁`) gives `g₁(g₁^♯(g₀^♭ v), w) = (g₀^♭ v)(w) = g₀(v, w)`, and the
+identity slot gives `−g₁(v, w)`.  This is the resolvent identity in pairing form: the `g₁`-pairing of
+the raised cometric difference reads off the *negative* metric difference `g₀ − g₁`. -/
+lemma inner_g1_gInvDiffRaisedEndo (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (v w : TangentSpace I x) :
+    g₁.inner x (gInvDiffRaisedEndo (I := I) g₀ g₁ x v) w =
+      g₀.inner x v w - g₁.inner x v w := by
+  rw [gInvDiffRaisedEndo_apply, map_sub, ContinuousLinearMap.sub_apply]
+  rw [inverseMetricSharpFib_inner, cotangentToDualLinear_apply, cotangentToDual_g0FlatCLM]
+
+/-! ## The Neumann `g₀`-fibre bound on the raised representative -/
+
+/-- **The `g₁`-lower comparison from the gate.**  Under the realize-tie `g₁ = g₀ + h` and the fibre
+gate `gFibreOpBound g₀ h δ` with `δ < 1`, the `g₁`-quadratic form dominates `(1 − δ)` times the
+`g₀`-quadratic form: `(1 − δ) · g₀(u, u) ≤ g₁(u, u)`.  This is the perturbation lower bound
+(`perturbedInner_self_lower_bound`) transported across the realize-tie. -/
+private lemma g1_self_lower_bound
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + h y v w)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) g₀ h δ)
+    (x : M) (u : TangentSpace I x) :
+    (1 - δ) * g₀.inner x u u ≤ g₁.inner x u u := by
+  have hlb := perturbedInner_self_lower_bound (I := I) (M := M) g₀ h hδ x u
+  rw [perturbedInner_apply] at hlb
+  rw [htie x u u]
+  exact hlb
+
+/-- **The Neumann `g₀`-fibre bound on the raised representative.**
+For the realize-tie `g₁ = g₀ + h` with the fibre gate `gFibreOpBound g₀ h δ` and `δ < 1`, the raised
+cometric-difference representative `D = gInvDiffRaisedEndo g₀ g₁` is `g₀`-fibre small with the Neumann
+factor: its `g₀`-norm is `≤ δ / (1 − δ)` times the `g₀`-norm of the argument,
+
+  `√(g₀(D v, D v)) ≤ (δ / (1 − δ)) · √(g₀(v, v))`.
+
+**Proof.**  Set `N := √(g₀(D v, D v))`, `Nv := √(g₀(v, v))`.  The defining `g₁`-pairing
+`inner_g1_gInvDiffRaisedEndo` at `w := D v` gives `g₁(D v, D v) = g₀(v, D v) − g₁(v, D v) = −h(v, D v)`
+(the realize-tie), so the gate bounds `g₁(D v, D v) ≤ |h(v, D v)| ≤ δ · Nv · N`.  The `g₁`-lower
+comparison `g1_self_lower_bound` gives `(1 − δ) · g₀(D v, D v) ≤ g₁(D v, D v)`, i.e. `(1 − δ) · N² ≤ δ
+· Nv · N`.  Dividing by `(1 − δ) · N > 0` (or trivial if `N = 0`) yields `N ≤ (δ / (1 − δ)) · Nv`. -/
+lemma sqrt_inner_gInvDiffRaisedEndo_le
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + h y v w)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : gFibreOpBound (I := I) g₀ h δ)
+    (x : M) (v : TangentSpace I x) :
+    Real.sqrt (g₀.inner x (gInvDiffRaisedEndo (I := I) g₀ g₁ x v)
+        (gInvDiffRaisedEndo (I := I) g₀ g₁ x v))
+      ≤ (δ / (1 - δ)) * Real.sqrt (g₀.inner x v v) := by
+  set Dv : TangentSpace I x := gInvDiffRaisedEndo (I := I) g₀ g₁ x v with hDv
+  set N : ℝ := Real.sqrt (g₀.inner x Dv Dv) with hN
+  set Nv : ℝ := Real.sqrt (g₀.inner x v v) with hNv
+  have hcoeff : 0 < 1 - δ := by linarith
+  have hg0Dv_nn : 0 ≤ g₀.inner x Dv Dv := metric_inner_self_nonneg (I := I) (M := M) g₀ x Dv
+  have hg0v_nn : 0 ≤ g₀.inner x v v := metric_inner_self_nonneg (I := I) (M := M) g₀ x v
+  have hN_nn : 0 ≤ N := Real.sqrt_nonneg _
+  have hNv_nn : 0 ≤ Nv := Real.sqrt_nonneg _
+  have hN_sq : N * N = g₀.inner x Dv Dv := by
+    rw [hN, ← Real.sqrt_mul hg0Dv_nn, Real.sqrt_mul_self hg0Dv_nn]
+  -- The `g₁`-quadratic form of `Dv` equals `−h(v, Dv)`.
+  have hg1Dv : g₁.inner x Dv Dv = -(h x v Dv) := by
+    have hp := inner_g1_gInvDiffRaisedEndo (I := I) g₀ g₁ x v Dv
+    rw [hDv] at hp ⊢
+    rw [hp, htie x v Dv]; ring
+  -- Bound `g₁(Dv, Dv) ≤ δ · Nv · N`.
+  have hgate := hδ x v Dv
+  have habs : |h x v Dv| ≤ δ * Nv * N := by
+    rw [hNv, hN]; exact hgate
+  have hg1Dv_le : g₁.inner x Dv Dv ≤ δ * Nv * N := by
+    rw [hg1Dv]
+    calc -(h x v Dv) ≤ |h x v Dv| := neg_le_abs _
+      _ ≤ δ * Nv * N := habs
+  -- The `g₁`-lower comparison.
+  have hlow := g1_self_lower_bound (I := I) g₀ g₁ h htie hδ x Dv
+  -- `(1 - δ) · N² ≤ δ · Nv · N`.
+  have hkey : (1 - δ) * (N * N) ≤ δ * Nv * N := by
+    rw [hN_sq]; exact le_trans hlow hg1Dv_le
+  -- Divide by `(1 - δ) · N` (or `N = 0` case).
+  rcases eq_or_lt_of_le hN_nn with hN0 | hNpos
+  · rw [← hN0]
+    exact mul_nonneg (div_nonneg hδ_nn hcoeff.le) hNv_nn
+  · have hNN : (1 - δ) * N ≤ δ * Nv := by
+      have h1 : (1 - δ) * N * N ≤ δ * Nv * N := by nlinarith [hkey]
+      exact le_of_mul_le_mul_right h1 hNpos
+    rw [div_mul_eq_mul_div, le_div_iff₀ hcoeff]
+    rw [mul_comm N (1 - δ)]; exact hNN
+
+/-! ## Base-point smoothness of the raised representative -/
+
+omit [CompactSpace M] in
+/-- **On-chart-source smoothness of the metric-flat covector field's chart components.**  For a
+smooth tangent field `Y` and the chart-`γ` frame vector `chartBasisVecFiber γ j`, the scalar
+`b ↦ g₀(Y b, chartBasisVecFiber γ j b)` is `C^∞` on the chart-`γ` source: the metric `g₀` (smooth
+Hom-bundle section) paired against the two smooth tangent fields `Y` and the on-source-smooth chart
+frame, via the bundle evaluation `ContMDiffOn.clm_bundle_apply₂`.  This discharges the chart-component
+hypothesis of `metricSharp_contMDiff_total`. -/
+theorem metricFlat_chartComponent_contMDiffOn (g₀ : SmoothRiemannianMetric I M)
+    (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (γ : M) (j : Fin (Module.finrank ℝ E)) :
+    ContMDiffOn I 𝓘(ℝ) ∞
+      (fun b : M => (g₀.inner b (Y b)).toLinearMap (chartBasisVecFiber (I := I) γ j b))
+      (chartAt H γ).source := by
+  have h_total : ContMDiffOn I (I.prod 𝓘(ℝ, ℝ)) ∞
+      (fun b : M => (⟨b, g₀.inner b (Y b) (chartBasisVecFiber (I := I) γ j b)⟩ :
+        TotalSpace ℝ (Bundle.Trivial M ℝ)))
+      (trivializationAt E (TangentSpace I) γ).baseSet :=
+    ContMDiffOn.clm_bundle_apply₂ (F₁ := E) (F₂ := E) (F₃ := ℝ) (b := id)
+      g₀.contMDiff.contMDiffOn Y.contMDiff.contMDiffOn
+      (chartBasisVec_contMDiffOn (I := I) γ j)
+  have hbase_eq :
+      (trivializationAt E (TangentSpace I) γ).baseSet = (chartAt H γ).source :=
+    trivializationAt_baseSet_eq_chartAt_source (I := I) γ
+  rw [hbase_eq] at h_total
+  intro b hb
+  have hpb := h_total b hb
+  rw [Bundle.contMDiffWithinAt_totalSpace] at hpb
+  exact hpb.2
+
+/-- **The raised representative as a single metric sharp of the metric-difference flat.**
+`gInvDiffRaisedEndo g₀ g₁ x v = metricSharp g₁ x ((g₀.inner x v).toLinearMap − (g₁.inner x v).toLinearMap)`.
+Indeed `g₁^♯(g₀^♭ v) = metricSharp g₁ x (g₀.inner x v)` and `v = metricSharp g₁ x (g₁.inner x v)` (the
+`g₁`-flat inverted by the `g₁`-sharp), so `D v = metricSharp g₁ x (g₀^♭ v − g₁^♭ v)` by `map_sub`.  This
+exhibits the raised representative as a *single* metric sharp, removing the tangent subtraction from the
+smoothness proof. -/
+lemma gInvDiffRaisedEndo_eq_metricSharp_flatDiff (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (v : TangentSpace I x) :
+    gInvDiffRaisedEndo (I := I) g₀ g₁ x v =
+      metricSharp (I := I) g₁ x
+        ((g₀.inner x v).toLinearMap - (g₁.inner x v).toLinearMap) := by
+  rw [gInvDiffRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM_eq_metricSharp]
+  -- `v = metricSharp g₁ x (g₁.inner x v)`: the `g₁`-flat inverted by the `g₁`-sharp.
+  have hv : metricSharp (I := I) g₁ x (g₁.inner x v).toLinearMap = v := by
+    rw [← inverseMetricSharpFib_g0FlatCLM_eq_metricSharp (I := I) g₁ g₁ x v]
+    exact inverseMetricSharpFib_g0FlatCLM (I := I) g₁ x v
+  -- `metricSharp` is the symm of the flat equiv, hence additive/subtractive.
+  have hsharp_sub : metricSharp (I := I) g₁ x
+        ((g₀.inner x v).toLinearMap - (g₁.inner x v).toLinearMap)
+      = metricSharp (I := I) g₁ x (g₀.inner x v).toLinearMap
+        - metricSharp (I := I) g₁ x (g₁.inner x v).toLinearMap := by
+    rw [metricSharp_def, metricSharp_def, metricSharp_def, map_sub]
+  rw [hsharp_sub, hv]
+
+omit [CompactSpace M] in
+/-- **On-chart-source smoothness of the metric-difference flat covector field's chart components.**
+For two smooth metrics and a smooth tangent field `Y`, the scalar `b ↦ (g₀(Y b, ·) − g₁(Y b, ·))
+(chartBasisVecFiber γ j b)` is `C^∞` on the chart-`γ` source: the difference of the two
+metric-flat chart components, each smooth by `metricFlat_chartComponent_contMDiffOn`. -/
+theorem metricFlatDiff_chartComponent_contMDiffOn (g₀ g₁ : SmoothRiemannianMetric I M)
+    (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (γ : M) (j : Fin (Module.finrank ℝ E)) :
+    ContMDiffOn I 𝓘(ℝ) ∞
+      (fun b : M => ((g₀.inner b (Y b)).toLinearMap - (g₁.inner b (Y b)).toLinearMap)
+        (chartBasisVecFiber (I := I) γ j b))
+      (chartAt H γ).source := by
+  have h0 := metricFlat_chartComponent_contMDiffOn (I := I) g₀ Y γ j
+  have h1 := metricFlat_chartComponent_contMDiffOn (I := I) g₁ Y γ j
+  refine (h0.sub h1).congr ?_
+  intro b hb
+  rw [LinearMap.sub_apply]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **Base-point smoothness of the raised representative field.**  The `(1, 1)`-operator field
+`x ↦ gInvDiffRaisedEndo g₀ g₁ x` is a smooth section of the endomorphism bundle.  By
+`contMDiff_clm_section_of_pointwise` it reduces, per smooth tangent field `Y`, to the smoothness of
+`x ↦ gInvDiffRaisedEndo g₀ g₁ x (Y x)`, which by `gInvDiffRaisedEndo_eq_metricSharp_flatDiff` is the
+`g₁`-metric sharp of the smooth covector field `x ↦ g₀(Y x, ·) − g₁(Y x, ·)`
+(`metricSharp_contMDiff_total` for `g₁`, chart components smooth by
+`metricFlatDiff_chartComponent_contMDiffOn`).  A single metric sharp — no tangent subtraction. -/
+theorem gInvDiffRaisedEndo_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
+      (fun x : M => TotalSpace.mk' (E →L[ℝ] E)
+        (E := fun z : M => TangentSpace I z →L[ℝ] TangentSpace I z) x
+        (gInvDiffRaisedEndo (I := I) g₀ g₁ x)) := by
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (F₁ := E) (V₁ := fun z : M => TangentSpace I z)
+    (F₂ := E) (V₂ := fun z : M => TangentSpace I z)
+    (φ := fun x => gInvDiffRaisedEndo (I := I) g₀ g₁ x)
+  intro Y
+  have hsharpY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => TotalSpace.mk' E
+        (E := fun z : M => TangentSpace I z) b
+        (metricSharp (I := I) g₁ b
+          ((g₀.inner b (Y b)).toLinearMap - (g₁.inner b (Y b)).toLinearMap))) := by
+    apply metricSharp_contMDiff_total (I := I) g₁
+    intro γ j
+    exact metricFlatDiff_chartComponent_contMDiffOn (I := I) g₀ g₁ Y γ j
+  refine hsharpY.congr (fun x => ?_)
+  rw [gInvDiffRaisedEndo_eq_metricSharp_flatDiff (I := I) g₀ g₁ x (Y x)]
+
+/-! ## Stage 2 — the leading-slot insertion of the raised representative -/
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The leading-slot insertion of the raised cometric-difference representative.**  The fibre
+endomorphism of `(0, 2)`-tensors (as multilinear forms `Tensor0SSpace 2`) that precomposes the leading
+covariant slot with the raised endomorphism `gInvDiffRaisedEndo g₀ g₁ x`. -/
+def gInvDiffSlotEndo (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+    Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
+  slotInsertEndoFib (I := I) (M := M) 2 0 x (gInvDiffRaisedEndo (I := I) g₀ g₁ x)
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **Base-point smoothness of the leading-slot insertion field** (as a `(2, 2)`-tensor section): the
+slot-insertion smoothness `slotInsertEndoFib_contMDiff` on the smooth raised-representative field
+`gInvDiffRaisedEndo_contMDiff`. -/
+theorem gInvDiffSlotEndo_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (TensorRSModel 2 2 ℝ E)
+        (E := fun z : M => TensorRSSpace 2 2 I z) x
+        (TensorRSSpace.ofCLM (gInvDiffSlotEndo (I := I) g₀ g₁ x))) :=
+  slotInsertEndoFib_contMDiff (I := I) (M := M) g₀ 2 0
+    (fun x : M => gInvDiffRaisedEndo (I := I) g₀ g₁ x)
+    (gInvDiffRaisedEndo_contMDiff (I := I) g₀ g₁)
+
+/-! ## Stage 3 — the assembled cometric inverse-difference fibre-endomorphism field -/
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The cometric inverse-difference fibre-endomorphism field `gInvDiffFibreEndo g₀ g₁ x`.**  The
+concrete fibre endomorphism of `(0, 2)`-tensors `TensorRSSpace 0 2 I x = Tensor0SSpace 0 I x →L
+Tensor0SSpace 2 I x` obtained by post-composing with the leading-slot insertion
+`gInvDiffSlotEndo g₀ g₁ x` of the raised cometric-difference representative.  This is the genuine
+`(g₁⁻¹ − g₀⁻¹)·h` inverse-Gram-difference action, the keystone fibre multiplier consumed by the
+DeTurck-remainder spectral-mass split through `fibreFieldMulL2`. -/
+def gInvDiffFibreEndo (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+    TensorRSSpace 0 2 I x →L[ℝ] TensorRSSpace 0 2 I x :=
+  haveI : FiniteDimensional ℝ (TensorRSSpace 0 2 I x) :=
+    inferInstanceAs (FiniteDimensional ℝ (Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x))
+  haveI : T2Space (TensorRSSpace 0 2 I x) :=
+    inferInstanceAs (T2Space (Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x))
+  LinearMap.toContinuousLinearMap
+    { toFun := fun v => (gInvDiffSlotEndo (I := I) g₀ g₁ x).comp
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from v)
+      map_add' := fun v v' => by
+        rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from v + v') =
+            (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from v) +
+              (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from v') from rfl,
+          ContinuousLinearMap.comp_add]
+      map_smul' := fun c v => by
+        rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from c • v) =
+            c • (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from v) from rfl,
+          ContinuousLinearMap.comp_smul]
+        rfl }
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- The defining formula for `gInvDiffFibreEndo`: post-composition by the leading-slot insertion. -/
+@[simp] lemma gInvDiffFibreEndo_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (v : TensorRSSpace 0 2 I x) :
+    gInvDiffFibreEndo (I := I) g₀ g₁ x v =
+      (gInvDiffSlotEndo (I := I) g₀ g₁ x).comp
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from v) := by
+  haveI : FiniteDimensional ℝ (TensorRSSpace 0 2 I x) :=
+    inferInstanceAs (FiniteDimensional ℝ (Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x))
+  haveI : T2Space (TensorRSSpace 0 2 I x) :=
+    inferInstanceAs (T2Space (Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x))
+  rw [gInvDiffFibreEndo, LinearMap.coe_toContinuousLinearMap']
+  rfl
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **Base-point smoothness of the assembled fibre-endomorphism field.**  The `(0, 2)`-endomorphism
+field `x ↦ gInvDiffFibreEndo g₀ g₁ x` is a smooth section of the `(0, 2)` Hom-bundle, by the pointwise
+smooth-section criterion (twice) reducing to a single `ContMDiff.clm_bundle_apply` over the smooth
+slot-insertion field `gInvDiffSlotEndo_contMDiff` (the `ccTensorBilinFibreEndo_contMDiff` pattern). -/
+theorem gInvDiffFibreEndo_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 2 ℝ E →L[ℝ] TensorRSModel 0 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (TensorRSModel 0 2 ℝ E →L[ℝ] TensorRSModel 0 2 ℝ E)
+        (E := fun z : M => TensorRSSpace 0 2 I z →L[ℝ] TensorRSSpace 0 2 I z) x
+        (gInvDiffFibreEndo (I := I) g₀ g₁ x)) := by
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (F₁ := TensorRSModel 0 2 ℝ E) (V₁ := fun z : M => TensorRSSpace 0 2 I z)
+    (F₂ := TensorRSModel 0 2 ℝ E) (V₂ := fun z : M => TensorRSSpace 0 2 I z)
+    (φ := fun x => gInvDiffFibreEndo (I := I) g₀ g₁ x)
+  intro Z
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (F₁ := Tensor0SModel 0 ℝ E) (V₁ := fun z : M => Tensor0SSpace 0 I z)
+    (F₂ := Tensor0SModel 2 ℝ E) (V₂ := fun z : M => Tensor0SSpace 2 I z)
+    (φ := fun x => (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
+      gInvDiffFibreEndo (I := I) g₀ g₁ x (Z x)))
+  intro ζ
+  have hZinner : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+        (E := fun z : M => Tensor0SSpace 2 I z) x
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from Z x) (ζ x))) :=
+    ContMDiff.clm_bundle_apply (b := id) Z.contMDiff ζ.contMDiff
+  have happ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+        (E := fun z : M => Tensor0SSpace 2 I z) x
+        (gInvDiffSlotEndo (I := I) g₀ g₁ x
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from Z x) (ζ x)))) := by
+    have hslot : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E →L[ℝ] Tensor0SModel 2 ℝ E)) ∞
+        (fun x : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E →L[ℝ] Tensor0SModel 2 ℝ E)
+          (E := fun z : M => Tensor0SSpace 2 I z →L[ℝ] Tensor0SSpace 2 I z) x
+          (gInvDiffSlotEndo (I := I) g₀ g₁ x)) :=
+      gInvDiffSlotEndo_contMDiff (I := I) g₀ g₁
+    exact ContMDiff.clm_bundle_apply (b := id) hslot hZinner
+  refine happ.congr ?_
+  intro x
+  rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
+        gInvDiffFibreEndo (I := I) g₀ g₁ x (Z x)) (ζ x) =
+      gInvDiffSlotEndo (I := I) g₀ g₁ x
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from Z x) (ζ x)) from by
+    rw [gInvDiffFibreEndo_apply, ContinuousLinearMap.comp_apply]]
+
+/-! ## The Neumann fibre bound on the slot-insertion field -/
+
+set_option linter.unusedSectionVars false in
+/-- **A `g₀`-orthonormal tangent frame representing the `(2, 2)` fibre norm.**  Mirrors
+`tangent_frame_expansion`: the `stdOrthonormalBasis` of the `g₀`-inner core, with the `(2, 2)`-valence
+frame-sum representation (`rfl` for the `stdOrthonormalBasis` frame). -/
+private lemma orthoFrame_repr_22 (g₀ : SmoothRiemannianMetric I M) (x : M) :
+    ∃ (n : ℕ) (e : Fin n → TangentSpace I x),
+      n = Module.finrank ℝ (TangentSpace I x) ∧
+      (∀ i j : Fin n, g₀.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0) ∧
+      (∀ u : TangentSpace I x,
+        ∑ b : Fin n, (g₀.inner x u (e b)) ^ 2 = g₀.inner x u u) ∧
+      (∀ S : TensorRSSpace 2 2 I x,
+        riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x S =
+          ∑ K : Fin 2 → Fin n, ∑ J : Fin 2 → Fin n,
+            fiberNormSqSummand (I := I) (M := M) g₀ x 2 2 S n e K J) := by
+  classical
+  let cd : InnerProductSpace.Core ℝ (TangentSpace I x) := g₀.toRiemannianMetric.toCore x
+  have hc : ContinuousAt (fun v : TangentSpace I x => cd.inner v v) 0 :=
+    g₀.toRiemannianMetric.continuousAt x
+  have hbnd : Bornology.IsVonNBounded ℝ {v : TangentSpace I x |
+      RCLike.re (cd.inner v v) < 1} :=
+    g₀.toRiemannianMetric.isVonNBounded x
+  letI nag : NormedAddCommGroup (TangentSpace I x) :=
+    cd.toNormedAddCommGroupOfTopology hc hbnd
+  letI ips : InnerProductSpace ℝ (TangentSpace I x) :=
+    InnerProductSpace.ofCoreOfTopology cd hc hbnd
+  set n : ℕ := Module.finrank ℝ (TangentSpace I x) with hn_def
+  set eob : OrthonormalBasis (Fin n) ℝ (TangentSpace I x) := stdOrthonormalBasis ℝ _ with heob_def
+  have hinner_eq : ∀ u v : TangentSpace I x, (inner ℝ u v : ℝ) = g₀.inner x u v :=
+    fun u v => rfl
+  refine ⟨n, fun i => eob i, rfl, ?_, ?_, ?_⟩
+  · intro i j
+    have horth : Orthonormal ℝ (fun i : Fin n => eob i) := eob.orthonormal
+    have hite := (orthonormal_iff_ite (𝕜 := ℝ) (E := TangentSpace I x)).mp horth i j
+    rw [← hinner_eq (eob i) (eob j)]; exact hite
+  · -- Parseval for the `g₀`-orthonormal basis `eob`.
+    intro u
+    have hpar := eob.sum_inner_mul_inner u u
+    rw [← hinner_eq u u, ← hpar]
+    refine Finset.sum_congr rfl (fun b _ => ?_)
+    rw [← hinner_eq u (eob b), sq, real_inner_comm (eob b) u]
+  · intro S; rfl
+
+set_option linter.unusedSectionVars false in
+/-- **The leading-slot square-sum dimension identity** (pure ℝ-arithmetic, frame-independent).  For a
+`g₀`-orthonormal frame the squared frame-component sum of `ofCLM (slotInsertEndoFib 2 0 x Λ)` factors
+as `n` times the squared frame-component sum of the leading endomorphism's reading: the passenger
+covariant slot contributes the Kronecker indicator `δ_{K₁J₁}` whose square-sum over the passenger pair
+is exactly `n`. -/
+private lemma slotInsert_sqsum_eq_dim_mul' (n : ℕ) (f : Fin n → Fin n → ℝ) :
+    (∑ K : Fin 2 → Fin n, ∑ J : Fin 2 → Fin n,
+      (f (J 0) (K 0) * (if K 1 = J 1 then (1 : ℝ) else 0)) ^ 2)
+      = (n : ℝ) * ∑ J : Fin 2 → Fin n, (f (J 0) (J 1)) ^ 2 := by
+  classical
+  have key : ∀ g : (Fin 2 → Fin n) → ℝ,
+      (∑ p : Fin 2 → Fin n, g p) = ∑ a : Fin n, ∑ b : Fin n, g ![a, b] := by
+    intro g
+    rw [← (finTwoArrowEquiv (Fin n)).symm.sum_comp g, Fintype.sum_prod_type]; rfl
+  have hL : (∑ K : Fin 2 → Fin n, ∑ J : Fin 2 → Fin n,
+      (f (J 0) (K 0) * (if K 1 = J 1 then (1 : ℝ) else 0)) ^ 2)
+      = ∑ k0 : Fin n, ∑ k1 : Fin n, ∑ j0 : Fin n, ∑ j1 : Fin n,
+          (f j0 k0 * (if k1 = j1 then (1 : ℝ) else 0)) ^ 2 := by
+    rw [key]
+    refine Finset.sum_congr rfl (fun k0 _ => Finset.sum_congr rfl (fun k1 _ => ?_))
+    rw [key]; rfl
+  have hR : ((n : ℝ) * ∑ J : Fin 2 → Fin n, (f (J 0) (J 1)) ^ 2)
+      = (n : ℝ) * ∑ j0 : Fin n, ∑ j1 : Fin n, (f j0 j1) ^ 2 := by
+    rw [key]; rfl
+  rw [hL, hR]
+  have hcollapse : ∀ (a : ℝ) (k1 j1 : Fin n),
+      (a * (if k1 = j1 then (1 : ℝ) else 0)) ^ 2 = a ^ 2 * (if k1 = j1 then (1 : ℝ) else 0) := by
+    intro a k1 j1; by_cases h : k1 = j1 <;> simp [h]
+  have step1 : ∑ k0 : Fin n, ∑ k1 : Fin n, ∑ j0 : Fin n, ∑ j1 : Fin n,
+          (f j0 k0 * (if k1 = j1 then (1 : ℝ) else 0)) ^ 2
+        = ∑ k0 : Fin n, ∑ j0 : Fin n, ∑ j1 : Fin n, (f j0 k0) ^ 2 := by
+    refine Finset.sum_congr rfl (fun k0 _ => ?_)
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl (fun j0 _ => ?_)
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl (fun j1 _ => ?_)
+    rw [Finset.sum_congr rfl (fun k1 _ => hcollapse (f j0 k0) k1 j1),
+      ← Finset.mul_sum, Finset.sum_ite_eq' Finset.univ j1 (fun _ => (1 : ℝ))]
+    simp
+  rw [step1]
+  have step2 : ∀ k0 j0 : Fin n, (∑ _j1 : Fin n, (f j0 k0) ^ 2) = (n : ℝ) * (f j0 k0) ^ 2 := by
+    intro k0 j0; rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin]; ring
+  rw [Finset.sum_congr rfl (fun k0 _ => Finset.sum_congr rfl (fun j0 _ => step2 k0 j0))]
+  rw [Finset.mul_sum, Finset.sum_comm]
+  refine Finset.sum_congr rfl (fun j0 _ => ?_)
+  rw [Finset.mul_sum]
+
+set_option linter.unusedSectionVars false in
+/-- **The `(2, 2)`-fibre frame-component of the slot insertion of a general `(1, 1)`-endomorphism.**  At
+a `g₀`-orthonormal frame, the `(K, J)`-component of `ofCLM (slotInsertEndoFib 2 0 x Λ)` reads the leading
+slot `g₀(Λ(e_{J₀}), e_{K₀})` (the slot-`0` insertion evaluation `slotInsertEndoFib_apply_eval` and the
+`coframeS` reading through `g₀`-symmetry) times the passenger Kronecker indicator `g₀(e_{K₁}, e_{J₁}) =
+δ_{K₁J₁}`. -/
+private lemma slotEndo_fiberComponent_endo_eq (g₀ : SmoothRiemannianMetric I M) (x : M)
+    (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
+    {n : ℕ} (e : Fin n → TangentSpace I x)
+    (horth : ∀ i j : Fin n, g₀.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0)
+    (K J : Fin 2 → Fin n) :
+    fiberNormSqComponent (I := I) (M := M) g₀ x 2 2
+        (show TensorRSSpace 2 2 I x from
+          TensorRSSpace.ofCLM (slotInsertEndoFib (I := I) (M := M) 2 0 x Λ)) n e K J =
+      g₀.inner x (Λ (e (J 0))) (e (K 0)) * (if K 1 = J 1 then (1 : ℝ) else 0) := by
+  have hcomp : fiberNormSqComponent (I := I) (M := M) g₀ x 2 2
+      (show TensorRSSpace 2 2 I x from
+        TensorRSSpace.ofCLM (slotInsertEndoFib (I := I) (M := M) 2 0 x Λ)) n e K J =
+      Tensor0SSpace.toModel
+        ((slotInsertEndoFib (I := I) (M := M) 2 0 x Λ) (coframeS (I := I) (M := M) g₀ x 2 e K))
+        (fun k => e (J k)) := by
+    unfold fiberNormSqComponent coframeS; rfl
+  rw [hcomp, slotInsertEndoFib_apply_eval]
+  rw [show (coframeS (I := I) (M := M) g₀ x 2 e K).toModel
+        (Function.update (fun k => e (J k)) 0 (Λ (e (J 0))))
+      = coframeS (I := I) (M := M) g₀ x 2 e K
+        (Function.update (fun k => e (J k)) 0 (Λ (e (J 0)))) from rfl]
+  rw [coframeS_apply, Fin.prod_univ_two, Function.update_self,
+    Function.update_of_ne (by decide : (1 : Fin 2) ≠ 0)]
+  rw [g₀.symm x (e (K 0)) (Λ (e (J 0))), horth (K 1) (J 1)]
+
+set_option linter.unusedSectionVars false in
+/-- **The slot-insertion `(2, 2)`-fibre norm equals `dim` times the leading endomorphism's frame
+Hilbert–Schmidt sum.**  Expanding `riemannianFiberNormSq g₀ 2 2 x (ofCLM (slotInsertEndoFib 2 0 x Λ))`
+in one `g₀`-orthonormal tangent frame, the `(2, 2)`-component factors as the leading reading `g₀(Λ
+e_{J₀}, e_{K₀})` times the passenger Kronecker indicator (`slotEndo_fiberComponent_endo_eq`), so its
+square-sum is `dim` times the leading reading's frame square-sum (`slotInsert_sqsum_eq_dim_mul'`). -/
+private lemma riemannianFiberNormSq_slotInsert_eq_dim_mul (g₀ : SmoothRiemannianMetric I M) (x : M)
+    (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) :
+    ∃ (n : ℕ) (e : Fin n → TangentSpace I x),
+      n = Module.finrank ℝ E ∧
+      (∀ i j : Fin n, g₀.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0) ∧
+      (∀ u : TangentSpace I x,
+        ∑ b : Fin n, (g₀.inner x u (e b)) ^ 2 = g₀.inner x u u) ∧
+      riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+          (show TensorRSSpace 2 2 I x from
+            TensorRSSpace.ofCLM (slotInsertEndoFib (I := I) (M := M) 2 0 x Λ))
+        = (n : ℝ) * ∑ J : Fin 2 → Fin n, (g₀.inner x (Λ (e (J 0))) (e (J 1))) ^ 2 := by
+  obtain ⟨n, e, hn, horth, hpar, hrepr22⟩ := orthoFrame_repr_22 (I := I) g₀ x
+  have hnE : n = Module.finrank ℝ E := by
+    rw [hn]; rfl
+  refine ⟨n, e, hnE, horth, hpar, ?_⟩
+  have h22 : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+      (show TensorRSSpace 2 2 I x from
+        TensorRSSpace.ofCLM (slotInsertEndoFib (I := I) (M := M) 2 0 x Λ))
+      = ∑ K : Fin 2 → Fin n, ∑ J : Fin 2 → Fin n,
+          (fiberNormSqComponent (I := I) (M := M) g₀ x 2 2
+            (show TensorRSSpace 2 2 I x from
+              TensorRSSpace.ofCLM (slotInsertEndoFib (I := I) (M := M) 2 0 x Λ)) n e K J) ^ 2 :=
+    riemannianFiberNormSq_eq_sum_componentRS_sq (I := I) (M := M) g₀ x 2 2 e hrepr22 _
+  rw [h22]
+  have h22' : (∑ K : Fin 2 → Fin n, ∑ J : Fin 2 → Fin n,
+          (fiberNormSqComponent (I := I) (M := M) g₀ x 2 2
+            (show TensorRSSpace 2 2 I x from
+              TensorRSSpace.ofCLM (slotInsertEndoFib (I := I) (M := M) 2 0 x Λ)) n e K J) ^ 2)
+      = ∑ K : Fin 2 → Fin n, ∑ J : Fin 2 → Fin n,
+          (g₀.inner x (Λ (e (J 0))) (e (K 0)) *
+            (if K 1 = J 1 then (1 : ℝ) else 0)) ^ 2 := by
+    refine Finset.sum_congr rfl (fun K _ => Finset.sum_congr rfl (fun J _ => ?_))
+    rw [slotEndo_fiberComponent_endo_eq (I := I) g₀ x Λ e horth K J]
+  rw [h22',
+    slotInsert_sqsum_eq_dim_mul' n (fun a b => g₀.inner x (Λ (e a)) (e b))]
+
+set_option linter.unusedSectionVars false in
+/-- **The Neumann `(2, 2)`-fibre bound on the slot-insertion field.**  Under the realize-tie `g₁ = g₀
++ h` with the fibre gate `gFibreOpBound g₀ h δ` and `δ < 1`, the slot insertion of the raised cometric
+difference is `g₀`-fibre small with the squared Neumann factor:
+
+  `rfns g₀ 2 2 x (ofCLM (gInvDiffSlotEndo g₀ g₁ x)) ≤ (dim · (δ / (1 − δ)))²`.
+
+**Proof.**  Expand in a `g₀`-orthonormal frame: the slot norm is `dim · ∑_J (g₀(Λ e_{J₀}, e_{J₁}))²`
+(`riemannianFiberNormSq_slotInsert_eq_dim_mul`, `Λ = gInvDiffRaisedEndo`).  Splitting `J` into `(a, b)`
+and using Parseval `∑_b (g₀(Λ e_a, e_b))² = g₀(Λ e_a, Λ e_a)` collapses the inner sum to `∑_a
+g₀(Λ e_a, Λ e_a)`; the raised per-vector Neumann bound `sqrt_inner_gInvDiffRaisedEndo_le` (squared, with
+`g₀(e_a, e_a) = 1`) gives each `≤ (δ / (1 − δ))²`, so `∑_a ≤ dim · (δ / (1 − δ))²` and the slot norm
+`≤ dim · dim · (δ / (1 − δ))² = (dim · (δ / (1 − δ)))²`. -/
+theorem riemannianFiberNormSq_gInvDiffSlotEndo_le
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
+    (htie : ∀ (y : M) (v w : TangentSpace I y),
+      g₁.inner y v w = g₀.inner y v w + h y v w)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : gFibreOpBound (I := I) g₀ h δ)
+    (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+        (show TensorRSSpace 2 2 I x from
+          TensorRSSpace.ofCLM (gInvDiffSlotEndo (I := I) g₀ g₁ x))
+      ≤ ((Module.finrank ℝ E : ℝ) * (δ / (1 - δ))) ^ 2 := by
+  classical
+  set Λ : TangentSpace I x →L[ℝ] TangentSpace I x := gInvDiffRaisedEndo (I := I) g₀ g₁ x with hΛ
+  -- Slot norm = dim · ∑_J (g₀(Λ e_{J₀}, e_{J₁}))², in a frame `e` carrying Parseval.
+  obtain ⟨n, e, hn, horth, hpar, heq⟩ :=
+    riemannianFiberNormSq_slotInsert_eq_dim_mul (I := I) g₀ x Λ
+  have hnE : (n : ℝ) = (Module.finrank ℝ E : ℝ) := by rw [hn]
+  rw [show gInvDiffSlotEndo (I := I) g₀ g₁ x = slotInsertEndoFib (I := I) (M := M) 2 0 x Λ from rfl, heq]
+  set r : ℝ := δ / (1 - δ) with hr
+  have hr_nn : 0 ≤ r := div_nonneg hδ_nn (by linarith)
+  -- Per-vector squared raised bound `g₀(Λ a, Λ a) ≤ r²` for a unit frame vector `a := e i`.
+  have hper : ∀ i : Fin n, g₀.inner x (Λ (e i)) (Λ (e i)) ≤ r ^ 2 := by
+    intro i
+    have hsqrt := sqrt_inner_gInvDiffRaisedEndo_le (I := I) g₀ g₁ h htie hδ_lt hδ_nn hδ x (e i)
+    rw [← hΛ] at hsqrt
+    have he1 : g₀.inner x (e i) (e i) = 1 := by rw [horth i i]; simp
+    rw [he1, Real.sqrt_one, mul_one] at hsqrt
+    have hLnn : 0 ≤ g₀.inner x (Λ (e i)) (Λ (e i)) :=
+      metric_inner_self_nonneg (I := I) (M := M) g₀ x (Λ (e i))
+    have hsq := Real.sq_sqrt hLnn
+    nlinarith [Real.sqrt_nonneg (g₀.inner x (Λ (e i)) (Λ (e i))), hsqrt, hsq, hr_nn]
+  -- Reindex `∑_J` over `J : Fin 2 → Fin n` as `∑_a ∑_b`, apply Parseval in `b`, then bound in `a`.
+  have hJsplit : (∑ J : Fin 2 → Fin n, (g₀.inner x (Λ (e (J 0))) (e (J 1))) ^ 2)
+      = ∑ a : Fin n, ∑ b : Fin n, (g₀.inner x (Λ (e a)) (e b)) ^ 2 := by
+    rw [← (finTwoArrowEquiv (Fin n)).symm.sum_comp
+      (fun J : Fin 2 → Fin n => (g₀.inner x (Λ (e (J 0))) (e (J 1))) ^ 2)]
+    rw [Fintype.sum_prod_type]; rfl
+  -- Parseval collapses the `b`-sum to `g₀(Λ e_a, Λ e_a)`.
+  have hParseval : (∑ a : Fin n, ∑ b : Fin n, (g₀.inner x (Λ (e a)) (e b)) ^ 2)
+      = ∑ a : Fin n, g₀.inner x (Λ (e a)) (Λ (e a)) :=
+    Finset.sum_congr rfl (fun a _ => hpar (Λ (e a)))
+  -- Bound the `a`-sum: each summand ≤ r², so the sum ≤ n · r².
+  have hsum_le : (∑ a : Fin n, g₀.inner x (Λ (e a)) (Λ (e a))) ≤ (n : ℝ) * r ^ 2 := by
+    calc (∑ a : Fin n, g₀.inner x (Λ (e a)) (Λ (e a)))
+        ≤ ∑ _a : Fin n, r ^ 2 := Finset.sum_le_sum (fun a _ => hper a)
+      _ = (n : ℝ) * r ^ 2 := by rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin]; ring
+  -- Assemble: dim · (inner-sum) ≤ dim · (n · r²) = (dim · r)².
+  rw [hJsplit, hParseval]
+  have hn_nn : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
+  calc (n : ℝ) * (∑ a : Fin n, g₀.inner x (Λ (e a)) (Λ (e a)))
+      ≤ (n : ℝ) * ((n : ℝ) * r ^ 2) := mul_le_mul_of_nonneg_left hsum_le hn_nn
+    _ = ((Module.finrank ℝ E : ℝ) * r) ^ 2 := by rw [← hnE]; ring
+
+/-! ## The headline: smoothness and the Neumann fibre bound of the assembled field -/
+
+set_option linter.unusedSectionVars false in
+/-- **The cometric inverse-difference fibre-endomorphism field satisfies the Neumann `g₀`-fibre bound
+`Cnorm · δ`, with `Cnorm = 2 · dim M`.**  (The companion joint smoothness is the standalone
+`gInvDiffFibreEndo_contMDiff`.)
+
+For a closed Riemannian manifold `(M, g₀)`, a second metric `g₁` tied to `g₀` by the realize-tie
+`g₁ = g₀ + h` with the fibre gate `gFibreOpBound g₀ h δ` and `δ < 1/2`, for every point `x` and every
+`(0, 2)`-tensor `v`,
+
+  `rfns(gInvDiffFibreEndo g₀ g₁ x v) ≤ (Cnorm · δ)² · rfns(v)`,   with `Cnorm = 2 · dim M`.
+
+Together with `gInvDiffFibreEndo_contMDiff`, this is the keystone that promotes the cometric
+inverse-difference field to a bounded `L²` multiplication operator with operator norm `≤ Cnorm · δ`
+(through `fibreFieldMulL2`), supplying the order-`0` base of the covariant-Leibniz jet grid
+`PointwiseCovLeibnizGrid` that the DeTurck-remainder all-order spectral-mass split
+(`RemainderDifferencePrincipalTopSplit`) consumes with multiplier size `Λ ≤ Cnorm · δ` — the
+Neumann-bounded second-order remainder coefficient `g₁⁻¹ − g₀⁻¹`.
+
+**Proof.**  The field value on `v` is
+the fibrewise composition `(gInvDiffSlotEndo g₀ g₁ x).comp v` (`gInvDiffFibreEndo_apply`); the intrinsic
+partial-contraction Cauchy–Schwarz `riemannianFiberNormSq_compRS_le_mul` (valences `a = 0, b = c = 2`)
+bounds its fibre norm by `rfns(gInvDiffSlotEndo g₀ g₁ x) · rfns(v)`, and the slot Neumann bound
+`riemannianFiberNormSq_gInvDiffSlotEndo_le` bounds `rfns(gInvDiffSlotEndo) ≤ (dim · (δ / (1 − δ)))²`.
+Finally `1/(1 − δ) ≤ 2` for `δ < 1/2` gives `dim · (δ / (1 − δ)) ≤ (2 · dim) · δ = Cnorm · δ`.
+
+**Non-vacuity.**  At `g₁ = g₀` the realize-tie forces `h = 0`, the gate holds with `δ = 0`, and the
+field vanishes (`gInvDiffRaisedEndo_self`), so the bound is `0 ≤ 0` — the `δ`-arm genuinely carries the
+inverse-Gram smallness, not a constant stand-in. -/
+theorem exists_gInvDiffFibreEndo_neumannFibreBound
+    (g₀ : SmoothRiemannianMetric I M) :
+    ∃ Cnorm : ℝ, 0 ≤ Cnorm ∧
+      ∀ (g₁ : SmoothRiemannianMetric I M)
+        (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ),
+        (∀ (y : M) (v w : TangentSpace I y),
+          g₁.inner y v w = g₀.inner y v w + h y v w) →
+        ∀ {δ : ℝ}, δ < 1 / 2 → 0 ≤ δ → gFibreOpBound (I := I) g₀ h δ →
+        ∀ (x : M) (v : TensorRSSpace 0 2 I x),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+              (gInvDiffFibreEndo (I := I) g₀ g₁ x v) ≤
+            (Cnorm * δ) ^ 2 *
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x v := by
+  refine ⟨2 * (Module.finrank ℝ E : ℝ), by positivity, ?_⟩
+  intro g₁ h htie δ hδ_half hδ_nn hδ x v
+  have hδ_lt1 : δ < 1 := by linarith
+  -- The fibre value is the fibrewise composition `(slotEndo).comp v`.
+  rw [gInvDiffFibreEndo_apply]
+  -- Reduce `rfns((slotEndo).comp v)` to `rfns(slotEndo) · rfns(v)` by the partial-contraction CS.
+  have hcomp := riemannianFiberNormSq_compRS_le_mul (I := I) (M := M) g₀ 0 2 2 x
+    (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (gInvDiffSlotEndo (I := I) g₀ g₁ x))
+    (show TensorRSSpace 0 2 I x from v)
+  have hslotcomp :
+      (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+          (show TensorRSSpace 2 2 I x from
+            TensorRSSpace.ofCLM (gInvDiffSlotEndo (I := I) g₀ g₁ x))).comp
+          (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
+            (show TensorRSSpace 0 2 I x from v)) =
+        (gInvDiffSlotEndo (I := I) g₀ g₁ x).comp
+          (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from v) := by
+    rfl
+  rw [hslotcomp] at hcomp
+  -- Bound `rfns(slotEndo)` by `(dim · (δ/(1-δ)))²` and pass to `(Cnorm · δ)²`.
+  have hslot_le := riemannianFiberNormSq_gInvDiffSlotEndo_le (I := I) g₀ g₁ h htie hδ_lt1 hδ_nn hδ x
+  have hv_nn : 0 ≤ riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x v :=
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 2 x v
+  -- `dim · (δ/(1-δ)) ≤ (2·dim)·δ` because `1/(1-δ) ≤ 2` for `δ < 1/2`, hence the squared bound.
+  have hcoeff : 0 < 1 - δ := by linarith
+  have hslot_le' : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+        (show TensorRSSpace 2 2 I x from
+          TensorRSSpace.ofCLM (gInvDiffSlotEndo (I := I) g₀ g₁ x))
+      ≤ ((2 * (Module.finrank ℝ E : ℝ)) * δ) ^ 2 := by
+    refine hslot_le.trans ?_
+    -- `(dim · (δ/(1-δ)))² ≤ ((2·dim)·δ)²` since `0 ≤ dim·(δ/(1-δ)) ≤ (2·dim)·δ`.
+    have hdimnn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := Nat.cast_nonneg _
+    have hbase_nn : 0 ≤ (Module.finrank ℝ E : ℝ) * (δ / (1 - δ)) :=
+      mul_nonneg hdimnn (div_nonneg hδ_nn hcoeff.le)
+    have hratio : δ / (1 - δ) ≤ 2 * δ := by
+      rw [div_le_iff₀ hcoeff]
+      nlinarith [hδ_half, hδ_nn]
+    have hbase_le : (Module.finrank ℝ E : ℝ) * (δ / (1 - δ))
+        ≤ (2 * (Module.finrank ℝ E : ℝ)) * δ := by
+      calc (Module.finrank ℝ E : ℝ) * (δ / (1 - δ))
+          ≤ (Module.finrank ℝ E : ℝ) * (2 * δ) :=
+            mul_le_mul_of_nonneg_left hratio hdimnn
+        _ = (2 * (Module.finrank ℝ E : ℝ)) * δ := by ring
+    exact pow_le_pow_left₀ hbase_nn hbase_le 2
+  calc riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+          ((gInvDiffSlotEndo (I := I) g₀ g₁ x).comp
+            (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from v))
+      ≤ riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+            (show TensorRSSpace 2 2 I x from
+              TensorRSSpace.ofCLM (gInvDiffSlotEndo (I := I) g₀ g₁ x)) *
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x v := hcomp
+    _ ≤ ((2 * (Module.finrank ℝ E : ℝ)) * δ) ^ 2 *
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x v :=
+        mul_le_mul_of_nonneg_right hslot_le' hv_nn
+
+end DifferentialGeometry.Analysis.Sobolev.TensorHilbert
+
+end
