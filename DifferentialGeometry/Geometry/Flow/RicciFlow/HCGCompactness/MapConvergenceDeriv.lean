@@ -121,6 +121,41 @@ theorem MapCInfConvOnCompacts.add {U : Set E} {Φ Ψ : ℕ → E → F} {Φinf �
         · exact hk2 k (le_trans (le_max_right _ _) hk) r hr x hx
     _ = ε := by ring
 
+/-- **`C^∞`-on-compacts convergence is closed under subtraction.**  Lets the
+covariant-tower induction extract `s_{p+1} = towerStep − Σ corrections` from the
+directional step and the (lower-level) correction convergences. -/
+theorem MapCInfConvOnCompacts.sub {U : Set E} {Φ Ψ : ℕ → E → F} {Φinf Ψinf : E → F}
+    (hΦ : MapCInfConvOnCompacts U Φ Φinf) (hΨ : MapCInfConvOnCompacts U Ψ Ψinf)
+    (hΦc : ∀ k, ContDiff ℝ (∞ : WithTop ℕ∞) (Φ k)) (hΦic : ContDiff ℝ (∞ : WithTop ℕ∞) Φinf)
+    (hΨc : ∀ k, ContDiff ℝ (∞ : WithTop ℕ∞) (Ψ k)) (hΨic : ContDiff ℝ (∞ : WithTop ℕ∞) Ψinf) :
+    MapCInfConvOnCompacts U (fun k z => Φ k z - Ψ k z) (fun z => Φinf z - Ψinf z) := by
+  intro K hK hKU p ε hε
+  obtain ⟨k1, hk1⟩ := hΦ K hK hKU p (ε / 2) (by positivity)
+  obtain ⟨k2, hk2⟩ := hΨ K hK hKU p (ε / 2) (by positivity)
+  refine ⟨max k1 k2, fun k hk r hr x hx => ?_⟩
+  have hsplit : mapDerivNorm r (fun z => Φ k z - Ψ k z) (fun z => Φinf z - Ψinf z) x
+      ≤ mapDerivNorm r (Φ k) Φinf x + mapDerivNorm r (Ψ k) Ψinf x := by
+    have hfun : (fun y => (Φ k y - Ψ k y) - (Φinf y - Ψinf y))
+        = (fun y => Φ k y - Φinf y) - (fun y => Ψ k y - Ψinf y) := by
+      funext y
+      change (Φ k y - Ψ k y) - (Φinf y - Ψinf y) = (Φ k y - Φinf y) - (Ψ k y - Ψinf y)
+      abel
+    have heq : mapDerivNorm r (fun z => Φ k z - Ψ k z) (fun z => Φinf z - Ψinf z) x
+        = ‖iteratedFDeriv ℝ r ((fun y => Φ k y - Φinf y) - (fun y => Ψ k y - Ψinf y)) x‖ := by
+      rw [show mapDerivNorm r (fun z => Φ k z - Ψ k z) (fun z => Φinf z - Ψinf z) x
+          = ‖iteratedFDeriv ℝ r (fun y => (Φ k y - Ψ k y) - (Φinf y - Ψinf y)) x‖ from rfl, hfun]
+    rw [heq, iteratedFDeriv_sub_apply
+      (((hΦc k).sub hΦic).contDiffAt.of_le (by exact_mod_cast le_top))
+      (((hΨc k).sub hΨic).contDiffAt.of_le (by exact_mod_cast le_top))]
+    exact norm_sub_le _ _
+  calc mapDerivNorm r (fun z => Φ k z - Ψ k z) (fun z => Φinf z - Ψinf z) x
+      ≤ mapDerivNorm r (Φ k) Φinf x + mapDerivNorm r (Ψ k) Ψinf x := hsplit
+    _ ≤ ε / 2 + ε / 2 := by
+        gcongr
+        · exact hk1 k (le_trans (le_max_left _ _) hk) r hr x hx
+        · exact hk2 k (le_trans (le_max_right _ _) hk) r hr x hx
+    _ = ε := by ring
+
 /-- **`C^∞`-on-compacts convergence is closed under multiplication by a fixed
 smooth scalar field.**  If `Φₖ → Φ_∞` in `C^∞`-on-compacts (scalar, all `C^∞`) and
 `g` is `C^∞`, then `g · Φₖ → g · Φ_∞` in `C^∞`-on-compacts.  This is the closure
