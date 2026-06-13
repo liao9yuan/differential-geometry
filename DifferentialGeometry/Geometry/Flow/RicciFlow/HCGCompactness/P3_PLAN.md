@@ -188,7 +188,12 @@ notes b4e4eaf9/1a5100a7): `bumpTower_slotExpand_conv`,
 and `bumpTowerCarrier_all` prove the all-orders/all-section-tuples bump-carrier
 convergence induction from an order-0 base.  Targeted build green 3854 jobs,
 axiom-clean; planner cleanup locally scopes the one uniform-context
-unused-variable linter warning in `bumpTower_slotExpand_conv`.**
+unused-variable linter warning in `bumpTower_slotExpand_conv`.  Frame data +
+base reduction ✅ ACCEPTED (8b3bcc87, 2d9b4a2b; note 9d1a4693):
+`exists_frameData` resolves the `hspan` coefficient-smoothness risk using the
+Mathlib local-frame coefficient API, and `hbase_of_framePairs` reduces the
+order-0 base for arbitrary section pairs to the diagonalised frame-pair
+convergence `hpairs`.**
 **File**: `MetricPreconvDiag.lean`.
 
 C0 (the abstract diagonal — design FIXED by the planner, prove as stated
@@ -302,18 +307,17 @@ constants-first seam is closed: good-frame witnesses `basisE`, `u'`, and `Cu`
 are now bound before `∀ gk gInf`, so they depend only on `gRef`, `a`, and `x`.**
 
 **NEXT FRONTIER (C-II-final-B, theorem boundary inputs):** the `Nat.rec`
-covariant-tower convergence induction is now closed as `bumpTowerCarrier_all`.
-`componentConv_covDeriv_of_chartCInf` is still not stated/proved.  It now needs
-three boundary inputs to feed the induction and extract the theorem:
-(1) the order-0 base, from B0 `exists_engine_frameCInfConv` plus
-`bumpTower_slotExpand_conv` on both slots; (2) the frame-data package
-`frame/vbasis/hframeσ/hspan`, where globalized `frameVec` sections agree on `Kc`
-and every smooth section has smooth coordinate-frame coefficients there; and
-(3) pointwise extraction from order-0 `C∞` convergence plus a fixed
-multilinear basis-vector expansion to the `component0S b (metricCovDeriv …)` shape.
-The smallest next target is the frame-data/hspan producer, since both the base
-and extraction consume it.  Do not claim `componentConv_covDeriv_of_chartCInf`
-until these inputs are built and the final theorem checks.**
+covariant-tower convergence induction is closed as `bumpTowerCarrier_all`, frame
+data is closed as `exists_frameData`, and the base algebraic reduction is closed
+as `hbase_of_framePairs`.  `componentConv_covDeriv_of_chartCInf` is still not
+stated/proved.  It now needs two concrete boundary inputs: (1) the B0 diagonal
+producing `hpairs`, i.e. diagonalise `exists_engine_frameCInfConv` over the
+`n²` frame pairs into one subsequence `φ`, with `A0Seq k = metricTensorField
+(gSeq (φ k))` and the B0 bump data aligned; and (2) pointwise extraction from
+order-0 `C∞` convergence plus a fixed multilinear basis-vector expansion to the
+`component0S b (metricCovDeriv …)` shape.  The smallest next target is the B0
+diagonal to `hpairs`; do not claim `componentConv_covDeriv_of_chartCInf` until
+`hpairs`, extraction, and the final theorem all check.**
 **File**: same or split `MetricPreconvBridge.lean` if > ~900 lines.
 
 C2: component convergence ⇒ `MetricCPConvOn K hK p (gSeq∘φ) gInf gRef`

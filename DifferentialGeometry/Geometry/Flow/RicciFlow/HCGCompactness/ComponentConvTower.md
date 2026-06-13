@@ -45,6 +45,9 @@ uniform chart-patch hypothesis `hUtarget` even though this declaration does not 
 it directly; a declaration-local linter option now records that choice without
 changing the public theorem shape.  Verification still passed.
 
+Planner acceptance cleanup: replaced the style-only `show` step in
+`exists_frameData` with `change`; focused verification still passed.
+
 ### Landed (this file + MapConvergenceDeriv.lean)
 - `chartRep_towerScalar_contDiffOn` / `chartRep_contDiffOn` — chart rep of a
   chart-source-smooth function is `ContDiffOn` the extended-chart target.

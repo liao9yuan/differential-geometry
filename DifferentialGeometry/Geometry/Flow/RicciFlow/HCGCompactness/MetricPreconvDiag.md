@@ -13,12 +13,12 @@ covariant-tower bridge at order `a = 0` (base case, axiom-clean).  The two
 original `a ≥ 1` missing pieces are now DONE: derivative-closure of
 `MapCInfConvOnCompacts` (`MapConvergenceDeriv.lean`) and the rank-general
 coordinate/tower covariant-step formulas (`CoordFrameStep.lean`,
-`MetricCovDerivCoordStep.lean`).  Remaining work is the `C∞` convergence
-induction assembly, pointwise extraction, finite-cover `hnorm`, and
-`metricPreconvInf`; its directional analytic step is now also proved in
-`ComponentConvTower.lean`, and the full `Nat.rec` bump-carrier induction is
-proved by `bumpTowerCarrier_all`.  See "Gap A exposed" / "Gap B base case" /
-"Gap B remaining" below.**
+`MetricCovDerivCoordStep.lean`).  The `C∞` convergence induction assembly is now
+proved by `bumpTowerCarrier_all`; frame data is proved by `exists_frameData`;
+and the order-0 base algebraic reduction is proved by `hbase_of_framePairs`.
+Remaining work is the B0 diagonal to `hpairs`, pointwise extraction,
+finite-cover `hnorm`, and `metricPreconvInf`.  See "Gap A exposed" / "Gap B base
+case" / "Gap B remaining" below.**
 
 ## C1a + C1b DONE (2026-06-12) — verified lemma inventory
 
@@ -157,15 +157,17 @@ The induction core itself is done in `ComponentConvTower.lean`:
   carrier induction from an order-0 base).
 
 The remaining inputs are bounded:
-- **base `hbase`**: B0 frame-pair convergence expanded to arbitrary section pairs
-  by `bumpTower_slotExpand_conv` on both slots.
-- **frame data**: global sections agreeing with `frameVec`/chart-constant frame on
-  `Kc`, plus `hspan` coordinate-frame coefficient smoothness for arbitrary smooth
-  sections.
+- **B0 diagonal to `hpairs`**: diagonalise `exists_engine_frameCInfConv` over the
+  `n²` frame pairs into one subsequence, keeping the `C∞` data and aligning
+  `A0Seq k = metricTensorField (gSeq (φ k))` with the B0 bump data.
 - **extract**: order-0 of the C∞ tower at the point plus a fixed multilinear
   basis-vector expansion gives the pointwise `Tendsto` matching
   `componentConv_covDeriv_zero`'s shape for general `a`; then finite-cover `hnorm`
   (`metricDerivNorm_le_compSq_uniform`) → `metricPreconvInf`.
+
+The former `frame data` risk is resolved by `exists_frameData`, whose `hspan`
+uses Mathlib's local-frame coefficient API; the former base algebraic reduction
+is resolved by `hbase_of_framePairs`, which consumes the still-needed `hpairs`.
 
 Do not add a hypothesis that simply asserts covariant-tower convergence.
 `fderiv_chartRep_eq_towerStep` (MetricPreconv.lean) is the scalar-on-sections germ

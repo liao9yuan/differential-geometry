@@ -669,7 +669,7 @@ theorem exists_frameData (x₀ : M) {Kc : Set M} (hKc : IsCompact Kc)
     have hlf_eq : e.localFrame b i w = tangentConstInChart (𝕜 := Real) (I := I) x₀ (b i) w := by
       rw [e.localFrame_apply_of_mem_baseSet b hwbase]
       simp [Bundle.Trivialization.basisAt, tangentConstInChart_apply, he]
-    show e.localFrame_coeff I b i w (W0 w) • e.localFrame b i w
+    change e.localFrame_coeff I b i w (W0 w) • e.localFrame b i w
         = e.localFrame_coeff I b i w (W0 w) • frame i w
     rw [hlf_eq, hframe_eq]
 
