@@ -5,6 +5,39 @@ planning session.  Written 2026-06-11 by the planning (Fable) session.**
 
 ---
 
+## ✅✅✅ P3 ABSTRACT WINDOW ENDPOINT PROVED — windowGInf (2026-06-13, Codex; planner-verified DEEP)
+
+`windowGInf` (MetricPreconvWindowGInf.lean:507, commit 36a059a5) — the genuine
+P3 window endpoint (the `windowPreconv_of_perTime` shape: `∃ φ, ∃ gInf : ℝ →
+SmoothRiemannianMetric, ∀ε ∃k0 ∀k≥k0 ∀t∈Icc, metricDerivNormSupOn K p
+(gSeq (φ k) t) (gInf t) gRef < ε`). **The dominant `gInf`-family frontier is
+DONE** — the master diagonal + the all-`t` Cauchy-in-`Cᵖ` construction + per-`t`
+smooth limit are all built and verified.
+
+PLANNER ACCEPTANCE was DEEP (not just build+axioms — the "completed a hard
+frontier" prior demanded reading the statements/proofs):
+- build green 3879 jobs; no sorry in file (the only tree sorry is the
+  pre-existing Coordinates/Field.lean:282); windowGInf / metricPreconvFull /
+  fullOfSubseq / netCauchyAt all AXIOM-CLEAN.
+- VERIFIED NON-VACUOUS: hypotheses are the honest bound package
+  (hgLip/hbdd/hlow + dense net), NOT the conclusion — not the
+  turn-goal-into-hypotheses anti-pattern. The hard per-`t` convergence along the
+  master φ is CONSTRUCTED: `netCauchyAt` (4-term triangle: Lipschitz endpoints +
+  net-convergence middle, δ=ε/(4(L+1))) gives Cauchy; `fullOfSubseq` (Cauchy +
+  convergent subsequence ⇒ convergent, via psi.id_le) lifts the per-`t`
+  `metricPreconvFull` sub-subsequence to the master φ. `metricPreconvFull` is a
+  real derivation from the verified `metricPreconv_gInf` + `exists_uniform_patch`
+  + Lindelöf + `exists_diag_subseq` + finite cover (the metricPreconvInf
+  architecture in metricDerivNorm shape).
+
+**REMAINING for P3-as-consumed-by-P4 = thread P1/P2 producers into windowGInf's
+hypotheses** (mechanical, modulo hShi): hgLip from `hgLip_orderN_of_solutions`
+(order-N core done) maxed over a≤p; hbdd from `covOrderBound_of_soln` (P2);
+hlow from P1 (eq 3.3). This threading carries the still-open `hShi` BBS frontier,
+same as P2 — so P3's flow-instantiated endpoint depends on hShi, like P2.
+HONEST %: P3 abstract endpoint PROVED; P3 flow-instantiated ~90% (residual =
+hShi-dependent hypothesis threading, really the P2/BBS frontier surfacing).
+
 ## C-II-final STARTED — hgLip order-N core landed (2026-06-13, planner-built)
 
 Planner built + verified (own focused check + build + #print axioms, all
