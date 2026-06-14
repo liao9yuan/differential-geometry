@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Tensor
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapIterL2WtwokTwoBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHSSection
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.FaithfulH1Embedding
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
 
 /-!
 # Short-time existence driven by the continuous (Sobolev) Ricci–DeTurck nonlinearity
@@ -190,10 +191,40 @@ intrinsic spectral scale `tensorHs g₀ 0 2 σ`: the spectral coordinates of smo
 the weighted-`ℓ²` space (finite-support spectral elements are dense
 — `tensorHsFiniteSupportSubmodule_dense` — and each is the embedding of a smooth tensor).
 
-POSITED (recursion frontier — the classical smooth-density input). -/
+Each finitely-supported spectral element `x` is the embedding `smoothCcToTensorHs g₀ σ` of the
+smooth finite eigen-combination `finiteEigenCombo g₀ (support x.coeff) x.coeff`: their spectral
+coordinates coincide (`finiteEigenComboHs_coeff_eq`, `finiteEigenCombo_tensorL2Coeff`), so the
+range of `smoothCcToTensorHs` contains the dense finite-support submodule and is therefore
+dense. -/
 theorem smoothCcToTensorHs_denseRange (g₀ : SmoothRiemannianMetric I M) (σ : ℝ) :
-    DenseRange (smoothCcToTensorHs (I := I) (M := M) g₀ σ) :=
-  sorry
+    DenseRange (smoothCcToTensorHs (I := I) (M := M) g₀ σ) := by
+  classical
+  have hsub :
+      (tensorHs.finiteSupportSubmodule (I := I) (M := M) (g := g₀) (r := 0) (s := 2) σ :
+          Set (tensorHs (I := I) (M := M) g₀ 0 2 σ)) ⊆
+        Set.range (smoothCcToTensorHs (I := I) (M := M) g₀ σ) := by
+    intro x hx
+    have hxfin : (Function.support x.coeff).Finite :=
+      (tensorHs.mem_finiteSupportSubmodule (I := I) (M := M) x).1 hx
+    refine ⟨finiteEigenCombo (I := I) (M := M) g₀ hxfin.toFinset x.coeff, ?_⟩
+    refine tensorHs.ext ?_
+    funext i
+    rw [smoothCcToTensorHs_coeff]
+    have hcoeff :
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2
+              (finiteEigenCombo (I := I) (M := M) g₀ hxfin.toFinset x.coeff)) i =
+          (if i ∈ hxfin.toFinset then x.coeff i else 0) := by
+      rw [SmoothCcTensor.toL2_apply,
+        finiteEigenCombo_tensorL2Coeff (I := I) (M := M) g₀ hxfin.toFinset x.coeff i]
+    rw [hcoeff]
+    by_cases hi : i ∈ hxfin.toFinset
+    · rw [if_pos hi]
+    · rw [if_neg hi]
+      rw [Set.Finite.mem_toFinset] at hi
+      exact (Function.notMem_support.mp hi).symm
+  exact (tensorHsFiniteSupportSubmodule_dense (I := I) (M := M)).mono hsub
 
 /-- **The continuous (Sobolev) Ricci–DeTurck nonlinearity** as a map of spectral Sobolev
 spaces
