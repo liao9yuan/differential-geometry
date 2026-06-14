@@ -684,7 +684,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrin
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.ConnectionLaplacianMaximalRegularity
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.TensorHsInterpolationLimit
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.Linearization
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRicciSolutionExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.NonlinearitySpectral
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PrincipalPartMatch
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence

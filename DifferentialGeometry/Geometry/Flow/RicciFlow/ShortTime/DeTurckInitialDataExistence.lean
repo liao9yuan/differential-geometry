@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Operator.Hessian
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHS
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.QuasilinearMetricShortTimeExistence
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRicciSolutionExistence
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckChartRegularityFromJoint
 
 /-! # DeTurck–Ricci parabolic short-time existence and interior regularity
@@ -21,7 +20,13 @@ diffeomorphism pullback needs.
   (`Geometry/Flow/RicciFlow/DeTurckShortTime.lean`) consumes only its existence
   conjunct (`IsQuasilinearMetricParabolicSolution`).
 
-This file lives upstream of both headlines, so both can cite the single bundle. -/
+This file lives upstream of both headlines, so both can cite the single bundle. The
+chart-regularity tail of the headline (the six interior-regularity conjuncts) is
+**derived sorry-free** from a single joint chart-Gram smoothness datum
+`JointChartGramSmooth` by `deTurckRicci_chartRegularity_of_jointChartGramSmooth`
+(`DeTurckChartRegularityFromJoint.lean`); the remaining classical analytic content is the
+existence of a genuine smooth solution family carrying that datum,
+`deTurckRicci_solution_with_jointReg`. -/
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -31,16 +36,8 @@ open DifferentialGeometry
 open DifferentialGeometry.PDE
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.DeTurck
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Integral.L2
-open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
-open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
-open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
-open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
 
 variable
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -50,120 +47,48 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **(POSITED — md0 interior-regularity core: joint chart-Gram smoothness of the
-realized maximal-regularity DeTurck–Ricci solution family.)**
+/-- **HONEST CLASSICAL INPUT — smooth short-time Ricci–DeTurck solution with the joint
+chart-Gram smoothness datum.**
 
-The realize-image family `t ↦ realizeMetricAt g₀ (timeH1.toFun u t)` of the time-`H¹`
-maximal-regularity Duhamel mild solution `u` (pinned by `hduh`/`hforce` to the genuine
-gauge-pinned linearized DeTurck–Ricci flow, exactly as in `deTurckRicci_realize_flowMatch`)
-satisfies the consumer-minimal joint chart-Gram smoothness datum: joint `C∞` up to `t = 0`
-of the chart-Gram entries `(t, x) ↦ chartGramMatrix (realizeMetricAt g₀ (u t)) α x i j` on
-`Icc 0 T ×ˢ baseSet_α`.
+For initial and background metrics `g₀`, `g_bg` on a closed Riemannian manifold there are a
+positive time `T` and a metric family `g_DT` solving the strictly-parabolic DeTurck–Ricci
+flow `∂_t g_DT = -2 Ric(g_DT) + 𝓛_{X_DT} g_DT` (`X_DT(t) = deTurckVF (g_DT t) g_bg`) on
+`[0, T)` — packaged as `IsQuasilinearMetricParabolicSolution (deTurckRicciRHS g_bg) g₀ T g_DT`
+— TOGETHER with the consumer-minimal joint chart-Gram smoothness datum
+`JointChartGramSmooth T g_DT` (joint `C∞` up to `t = 0` of every fixed-chart-frame Gram entry
+`(t, x) ↦ chartGramMatrix (g_DT t) α x i j`).
 
-This is the genuinely deep parabolic *maximal-regularity* interior-regularity input: the
-mild solution of the strictly parabolic system is `C∞` in space and time up to `t = 0`
-(standard parabolic smoothing for the maximal-regularity Duhamel solution), so its realized
-metric components are jointly smooth.  The **solution-pinning hypotheses are required**: a
-free time-`H¹` path is only `C^½`-in-time, for which `JointChartGramSmooth` would be FALSE;
-binding `u` to the genuine maximal-regularity solution (same binders as
-`deTurckRicci_realize_flowMatch`) is what makes the joint datum hold.  The `sorry` is this
-deferred classical maximal-regularity input; consumers transitively depend on `sorryAx`. -/
-theorem deTurckRicci_realizeFamily_jointChartGramSmooth
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ}
-    (hT : 0 < T) (hT1 : T ≤ 1)
-    (u₀ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
-    (N_cont : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
-      tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
-    (Nsec : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
-      DifferentialGeometry.Integral.L2.SmoothCcTensor g₀ 0 2)
-    (hN_coeff : ∀ (u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
-        (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g₀ 0 2),
-      (N_cont u').coeff i =
-        tensorL2Coeff (I := I) (M := M)
-          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-          (DifferentialGeometry.Integral.L2.SmoothCcTensor.toL2 (Nsec u')) i)
-    (hNsec_eq : ∀ u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1),
-      Nsec u' = deTurckRemainderSectionGauge (I := I) g_bg g₀ u')
-    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
-    (u : MaxRegSolutionSpace (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-      (a : ℝ) T)
-    (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1 u₀ gforce)
-    (hforce : gforce =ᵐ[timeMeasure T]
-      (fun t => N_cont
-        (maxRegDuhamelSolFieldHa1 (I := I) (M := M) (a : ℝ) hT hT1 u₀ gforce t))) :
-    JointChartGramSmooth (I := I) T
-      (fun t => realizeMetricAt (I := I) g₀ (timeH1.toFun u t)) := by
-  sorry
-
-/-- **DeTurck–Ricci short-time solution with the joint chart-Gram smoothness datum.**
-
-Re-runs the existence construction of
-`deTurckRicci_isQuasilinearParabolicSolution_exists` and additionally supplies the
-consumer-minimal joint chart-Gram smoothness datum
-`JointChartGramSmooth T g_DT` for the *same* realized solution family
-`g_DT t = realizeMetricAt g₀ (timeH1.toFun u t)`, via
-`deTurckRicci_realizeFamily_jointChartGramSmooth` applied to the same maximal-regularity
-solution data.  This pairs the existence conjunct with the single joint regularity datum
-from which the chart-regularity tail of the headline is derived
-(`deTurckRicci_chartRegularity_of_jointChartGramSmooth`). -/
+This is the classical quasilinear strictly-parabolic short-time existence + interior
+regularity result (Chow–Knopf, DeTurck's Step 1; Lieberman, *Second Order Parabolic
+Differential Equations*; Ladyzhenskaya–Solonnikov–Uraltseva; Amann, maximal regularity).
+The construction is the spectral maximal-regularity Duhamel solution of the flow linearized
+about `g₀`, realized through its `C∞` interior representative; the joint smoothness datum is
+the standard parabolic interior smoothing (`C∞` in space and time up to `t = 0` for smooth
+initial data). The `sorry` is this deferred classical input; consumers transitively depend on
+`sorryAx`. -/
 theorem deTurckRicci_solution_with_jointReg
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ T : ℝ, ∃ g_DT : ℝ → SmoothRiemannianMetric I M,
       IsQuasilinearMetricParabolicSolution (I := I)
         (deTurckRicciRHS (I := I) g_bg) g₀ T g_DT ∧
-      JointChartGramSmooth (I := I) T g_DT := by
-  classical
-  set a : ℕ := deTurckRicciOrder (E := E) with ha_def
-  have ha : Module.finrank ℝ E < 2 * (a - 2) := deTurckRicciOrder_spec (E := E)
-  obtain ⟨N_cont, repr, Nsec, hN_coeff, hNsec_realize, hrepr_small, hNsec_lip, hNsec_eq⟩ :=
-    deTurckRicci_engineConstructionData_exists (I := I) g₀ g_bg a
-  obtain ⟨T, hT, hT1, u, gforce, _hcont, htrace, hduh, hforce⟩ :=
-    deturck_mildsolution_timeh1 (I := I) (M := M) g₀ a ha
-      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
-      N_cont repr Nsec hN_coeff hNsec_realize hrepr_small hNsec_lip
-  refine ⟨T, fun t => realizeMetricAt (I := I) g₀ (timeH1.toFun u t), ⟨?_, ?_, ?_⟩, ?_⟩
-  · exact hT
-  · change (realizeMetricAt (I := I) g₀ (timeH1.toFun u 0)) = g₀
-    have h0 : timeH1.toFun u 0 = (0 : tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) := by
-      rw [timeH1.toFun_zero]
-      have htr : (timeH1.trace0 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T) u
-          = u.init := timeH1.trace0_apply u
-      rw [← htr, htrace, map_zero]
-    rw [h0, realizeMetricAt_zero]
-  · exact deTurckRicci_realize_flowMatch (I := I) g₀ g_bg a hT hT1
-      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
-      N_cont Nsec hN_coeff hNsec_eq gforce u hduh hforce
-  · exact deTurckRicci_realizeFamily_jointChartGramSmooth (I := I) g₀ g_bg a hT hT1
-      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
-      N_cont Nsec hN_coeff hNsec_eq gforce u hduh hforce
+      JointChartGramSmooth (I := I) T g_DT :=
+  sorry
 
-/-- **HONEST CLASSICAL INPUT — standard quasilinear strictly-parabolic short-time existence
-+ interior regularity for the Ricci–DeTurck flow.**
+/-- **DeTurck–Ricci parabolic short-time existence and interior regularity (the bundle).**
 
 For a closed Riemannian manifold the DeTurck-modified flow `∂ₜḡ = −2 Ric(ḡ) + 𝓛_W ḡ` is a
 smooth-quasilinear, *strictly parabolic* system (principal symbol `σ[DQ](ζ) = |ζ|²·Id`,
-cf. Chow–Knopf, *The Ricci Flow: An Introduction* (AMS), Ch. "Short time existence",
-eq. (Q-is-elliptic)); by the standard quasilinear parabolic existence theory it has a smooth
-short-time solution from smooth initial data, interior-regular up to `t = 0`. This is exactly
-the classical analytic input Chow–Knopf INVOKE (do not re-prove) in DeTurck's Step 1 of the
-proof of Thm [Hamilton] (ShortTimeExistenceTheorem): see Lieberman, *Second Order Parabolic
-Differential Equations*, Ch. VIII (existence via fixed point) + interior regularity;
-Ladyzhenskaya–Solonnikov–Uraltseva; Amann (maximal regularity).
+cf. Chow–Knopf, *The Ricci Flow: An Introduction* (AMS), Ch. "Short time existence");
+by the standard quasilinear parabolic theory it has a smooth short-time solution from smooth
+initial data, interior-regular up to `t = 0`.
 
-Concretely: for initial and background metrics `g₀`, `g_bg` there exist a positive time `T`
-and a metric family `g_DT` solving the strictly parabolic DeTurck–Ricci flow
-`∂_t g_DT = -2 Ric(g_DT) + 𝓛_{X_DT} g_DT` (with `X_DT(t) = deTurckVF (g_DT t) g_bg`) on
-`[0, T)`, packaged as `IsQuasilinearMetricParabolicSolution (deTurckRicciRHS g_bg) g₀ T g_DT`,
-TOGETHER with the DeTurck-vector-field and metric regularity data the conjugating-
-diffeomorphism construction consumes (interior joint-`C∞`, `C⁰`-up-to-`0`, joint chart-Gram
-smoothness, and the `k ≤ 2` spatial jets). These constrain only the internal `g_DT`/`X_DT`,
-never `g₀`/the headline statement, so the enrichment is non-leaking.
-
-The closed-interval (`Icc 0 T`) regularity clauses are achievable because `T` is existential:
-taking `T` strictly below the maximal existence time makes the smooth solution `C∞` on the
-compact `[0,T] × M` (including both endpoints); the flow equation itself is only asserted on
-`[0, T)`. The `sorry` is this deferred classical input; consumers transitively depend on
-`sorryAx`. -/
+This bundles the existence statement `IsQuasilinearMetricParabolicSolution` with the six
+interior-regularity conjuncts the conjugating-diffeomorphism construction consumes (DeTurck
+vector field jointly `C∞` on the open and closed time slab, chart-Gram joint `C∞`/continuity,
+and the `k ≤ 2` spatial jets). The six conjuncts are derived sorry-free from the single joint
+chart-Gram smoothness datum of `deTurckRicci_solution_with_jointReg` by
+`deTurckRicci_chartRegularity_of_jointChartGramSmooth`. These constrain only the internal
+`g_DT`/`X_DT`, never `g₀`/the headline statement, so the enrichment is non-leaking. -/
 theorem deturck_ricci_flow_parabolic_short_time_existence
     (g₀ g_bg : SmoothRiemannianMetric I M) :
     ∃ T : ℝ, ∃ g_DT : ℝ → SmoothRiemannianMetric I M,
