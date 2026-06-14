@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHS
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.QuasilinearMetricShortTimeExistence
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckChartRegularityFromJoint
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckRealizedSolutionFamily
 
 /-! # DeTurck–Ricci parabolic short-time existence and interior regularity
 
@@ -36,6 +37,7 @@ open DifferentialGeometry
 open DifferentialGeometry.PDE
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.DeTurck
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 
@@ -71,8 +73,16 @@ theorem deTurckRicci_solution_with_jointReg
     ∃ T : ℝ, ∃ g_DT : ℝ → SmoothRiemannianMetric I M,
       IsQuasilinearMetricParabolicSolution (I := I)
         (deTurckRicciRHS (I := I) g_bg) g₀ T g_DT ∧
-      JointChartGramSmooth (I := I) T g_DT :=
-  sorry
+      JointChartGramSmooth (I := I) T g_DT := by
+  obtain ⟨T, g_DT, T_rep, hT, hinit, hrel, hflow, hJ⟩ :=
+    realizedDeTurckFamily_exists (I := I) g₀ g_bg
+  refine ⟨T, g_DT, ⟨hT, hinit, ?_⟩, hJ⟩
+  intro t ht x v w
+  have hcongr : (fun s : ℝ => (g_DT s).inner x v w) =
+      fun s : ℝ => g₀.inner x v w + ccTensorBilinSymm (I := I) g₀ (T_rep s) x v w := by
+    funext s; exact hrel s x v w
+  rw [hcongr]
+  exact (hflow t ht x v w).const_add (g₀.inner x v w)
 
 /-- **DeTurck–Ricci parabolic short-time existence and interior regularity (the bundle).**
 
