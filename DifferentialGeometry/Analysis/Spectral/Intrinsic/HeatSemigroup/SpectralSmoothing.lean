@@ -261,6 +261,91 @@ theorem spectral_smooth_realization_reduction
     ⟨heatHsWitness (I := I) (M := M) g r s σ ht u₀,
       heat_semigroup_into_tensorHs (I := I) (M := M) g r s hσ ht u₀⟩)
 
+/-- **Classical `C^∞` spectral-series assembly (deferred analytic input).**
+
+Let `u : TensorL2 r s g` be an `L²` tensor field whose intrinsic
+eigenbasis coordinates `cᵢ = tensorL2Coeff h_compact u i` decay so fast
+that, for *every even order* `2k`, the weighted squares
+`(1 + λᵢ)^{2k} · cᵢ²` are summable. Then the eigenfunction series
+`∑ᵢ cᵢ · eigenvectorSmooth g r s i` converges in `Cᵏ` for every `k`, and
+its limit is a genuine smooth, compactly-supported section
+`T : SmoothCcTensor g r s` whose `L²` class is `u`.
+
+This is the **all-orders spectral Sobolev embedding** in its assembled
+form: the per-eigentensor `H^{2k}`-norm bound
+`eigenvectorSmooth_wtwokTwoNorm_le_uniform`
+(`wtwokTwoNorm g k (eigenvectorSmooth g r s i)
+  ≤ ENNReal.ofReal (C · i.fst.valᐟ ^ (2k+1)) · ‖bᵢ‖`, polynomial growth
+in the eigenvalue, since `1 + λᵢ = i.fst.val⁻¹`) is beaten by the
+hypothesised super-polynomial coefficient decay; term-by-term this makes
+the partial sums Cauchy in the `Cᵏ` (iterated-covariant-derivative)
+Banach norm for each `k`, and the unconditional `C^m` tensor Sobolev
+embedding `iteratedCovGrad_toSobolev_embedding_Cm_unconditional`
+(`Embedding/SobolevEmbeddingCmOrderDropping.lean`) converts the
+`H^{2k}`-Cauchy partial sums into a `Cᵏ`-Cauchy family of smooth
+sections, whose common `C^∞` limit is the desired `SmoothCcTensor`. The
+`L²` limit of the same partial sums is `u` by completeness of the
+eigenbasis expansion, pinning `↑T = u`.
+
+This lemma is the precise remaining classical analytic content of the
+smooth-representative gate. It is a **deferred input**: its body is
+`sorry`, and every consumer transitively depends on `sorryAx`. Its
+hypothesis is the *concrete* all-orders coefficient summability of `u`
+(strictly weaker, and strictly more elementary, than the abstract
+`⋂_σ Hˢ`-membership hypothesis of the gate predicate, from which it is
+derived in `spectralSmoothRealizesAsSmooth_holds`). -/
+theorem spectralSeries_smoothCcTensor_of_allOrders_summable
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (u : TensorL2 r s g)
+    (h_decay : ∀ k : ℕ,
+      Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
+        tensorSobolevWeight (I := I) (M := M) i (2 * k : ℝ) *
+          (tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
+            u i) ^ 2)) :
+    ∃ T : SmoothCcTensor g r s, (T : TensorL2 r s g) = u := by
+  sorry
+
+/-- **The smooth-representative gate (proved).**
+
+`SpectralSmoothRealizesAsSmooth g r s` holds unconditionally: every `L²`
+tensor `u` lying (via the chart-locality-free inclusion `tensorHsToL2`)
+in `Hˢ` for *every* exponent `σ ≥ 0` admits a genuine `C^∞`
+representative `T : SmoothCcTensor g r s` with `↑T = u`.
+
+The proof extracts, from the abstract `⋂_σ Hˢ`-membership hypothesis, the
+*concrete* all-orders coefficient summability of `u`: at each even order
+`2k`, the gate hypothesis provides an `Hˢ` witness `v` with
+`tensorHsToL2 h_compact v = u`; its structural square-summability
+`tensorHs.weighted_summable` together with the coordinate-faithfulness
+`tensorHsToL2_tensorL2Coeff` (which identifies `v.coeff i` with the
+intrinsic eigenbasis coordinate `tensorL2Coeff h_compact u i`) yields the
+weighted summability of `(1 + λᵢ)^{2k} · cᵢ²`. The deferred classical
+`C^∞` spectral-series assembly
+`spectralSeries_smoothCcTensor_of_allOrders_summable` then converts that
+super-polynomial coefficient decay into the smooth section. -/
+theorem spectralSmoothRealizesAsSmooth_holds
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    SpectralSmoothRealizesAsSmooth (I := I) (M := M) g r s := by
+  intro u hu
+  refine spectralSeries_smoothCcTensor_of_allOrders_summable
+    (I := I) (M := M) g r s u (fun k => ?_)
+  have h2k : (0 : ℝ) ≤ (2 * k : ℝ) := by positivity
+  obtain ⟨v, hv⟩ := hu (2 * k : ℝ) h2k
+  have hcoeff : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+      tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
+          u i = v.coeff i := by
+    intro i
+    have h := tensorHsToL2_tensorL2Coeff
+      (I := I) (M := M)
+      (h_compact := tensorResolventL2_isCompactOperator
+        (I := I) (M := M) g r s) h2k v i
+    rw [hv] at h
+    exact h
+  have hsummable := v.weighted_summable
+  refine hsummable.congr (fun i => ?_)
+  rw [hcoeff i]
+
 end IntrinsicSpectral
 end RicciFlow
 end PDE
