@@ -24,3 +24,28 @@ construction is still not implemented. The missing step is the Cauchy/extension
 argument from net-time limits plus `hgLip`, followed by smoothness of each
 time-slice. This file now leaves that as the single visible frontier instead of
 repackaging it as an assumption inside the net-time diagonal.
+
+## 2026-06-13 follow-up
+
+Implemented the all-time `gInf` blocker in the same file.
+
+What landed:
+- `metricPreconvFull`: fixed-time producer exposing both pointwise inner
+  convergence and pointwise `metricDerivNorm` convergence.
+- `netFullDiag`: dense-net diagonal retaining both fixed-time outputs.
+- Local routing lemmas: `normSq0S_neg`, `metricDerivNorm_symm`,
+  `netCauchyAt`, `fullOfSubseq`, and `infLipOfConv`.
+- `windowGInf`: constructs the all-time limit family by per-time fixed-time
+  precompactness, proves full master-subsequence convergence from dense-net
+  Cauchy control, derives the limit Lipschitz estimate, and feeds `windowOfNet`.
+
+Verification: focused check and targeted module build passed. Axiom checks for
+the new public endpoints were clean: only `propext`, `Classical.choice`, and
+`Quot.sound`. No `sorry` or `admit` remains in this file.
+
+Scope note: `windowGInf` still takes the upstream uniform time-Lipschitz,
+boundedness, and lower-bound hypotheses explicitly. This brick closes the
+all-time limit-family construction; it does not discharge those Ricci-flow
+producer assumptions. Whole HCG compactness estimate: this closes the dedicated
+`gInf` blocker, while the broader Chapter 4/HCG pipeline still depends on the
+upstream bound producers and later compactness assembly.
