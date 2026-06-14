@@ -56,8 +56,59 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **Smooth realization of an all-orders-decaying coordinate family
-(deferred analytic input).**
+/-- **`C^∞` realization of an all-orders-decaying `L²` tensor
+(the single deep classical analytic input).**
+
+Let `u : TensorL2 r s g` be an `L²` tensor field whose intrinsic
+eigenbasis coordinates `cᵢ = tensorL2Coeff h_compact u i` decay so fast
+that, for *every even order* `2k`, the weighted squares
+`(1 + λᵢ)^{2k} · cᵢ²` are summable. Then `u` admits a genuine smooth,
+compactly-supported representative `T : SmoothCcTensor g r s` with
+`↑T = u`.
+
+This is the precise `Cᵏ`-Banach-completeness content of the all-orders
+spectral Sobolev embedding `⋂_σ Hˢ ⊆ C^∞`, isolated as the *one* deep
+classical analytic input of the smooth-representative gate. Its proof is
+term-by-term: the eigenfunction series `∑ᵢ cᵢ · eigenvectorSmooth g r s i`
+has partial sums whose per-eigentensor `H^{2k}`-norm obeys the uniform
+bound `eigenvectorSmooth_wtwokTwoNorm_le_uniform`
+(`wtwokTwoNorm g k (eigenvectorSmooth g r s i)
+  ≤ ENNReal.ofReal (C · i.fst.valᐟ ^ (2k+1)) · ‖bᵢ‖`, polynomial growth
+in the eigenvalue since `1 + λᵢ = i.fst.val⁻¹` by
+`one_add_lambda_eq_inv_val`); the hypothesised super-polynomial
+coefficient decay beats this polynomial growth, making the partial sums
+Cauchy in the `Cᵏ` (iterated-covariant-derivative) Banach norm for each
+`k`, via the unconditional `C^m` tensor Sobolev embedding
+`iteratedCovGrad_toSobolev_embedding_Cm_unconditional`. The common `C^∞`
+limit of those `Cᵏ`-Cauchy partial sums is the desired `SmoothCcTensor`,
+and the `L²` limit of the same partial sums is `u` by completeness of the
+eigenbasis expansion, pinning `↑T = u`.
+
+This is a **deferred input**: its body is `sorry`, and every consumer
+transitively depends on `sorryAx`. The two genuine prerequisites it
+black-boxes are (i) the all-orders uniform-limit-of-derivatives passage
+to `ContMDiff` (`Mathlib` carries only the single-derivative
+`hasFDerivAt_of_tendstoUniformly` family; there is no `ContDiff` /
+`ContMDiff` uniform-derivative-limit theorem), and (ii) the Weyl-type
+eigenvalue-counting summability `∑ᵢ (1 + λᵢ)^{-N} < ∞` needed to turn the
+per-eigentensor `H^{2k}`-bound into an `ℓ¹` convergence of the `Cᵏ`
+fibre-norms (the library has only the sublevel-set finiteness
+`tensorEigenIdx_one_add_lambda_lt_finite`). The hypothesis is genuinely
+load-bearing: dropping `h_decay` makes the statement false (a generic
+`ℓ²`-but-not-smooth `L²` tensor has no smooth representative). -/
+theorem tensorL2_smoothRepr_of_allOrders_decay
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (u : TensorL2 r s g)
+    (h_decay : ∀ k : ℕ,
+      Summable
+        (fun i : TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s =>
+          tensorSobolevWeight (I := I) (M := M) i (2 * k : ℝ) *
+            (tensorL2Coeff (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
+              u i) ^ 2)) :
+    ∃ T : SmoothCcTensor g r s, (T : TensorL2 r s g) = u :=
+  sorry
+
+/-- **Smooth realization of an all-orders-decaying coordinate family.**
 
 Let `c : TensorEigenIdx g r s → ℝ` be a coordinate family whose weighted
 squares `(1 + λᵢ)^{2k} · cᵢ²` are summable for *every even order* `2k`.
@@ -66,33 +117,19 @@ smooth, compactly-supported section `T : SmoothCcTensor g r s`:
 
   `∀ i, tensorL2Coeff h_compact (↑T) i = cᵢ`.
 
-This is the precise `Cᵏ`-Banach-completeness content of the all-orders
-spectral Sobolev embedding `⋂_σ Hˢ ⊆ C^∞`, isolated as the *one* deep
-classical analytic input of the smooth-representative gate. Its proof is
-term-by-term: the per-eigentensor `H^{2k}`-norm bound
-`eigenvectorSmooth_wtwokTwoNorm_le_uniform`
-(`wtwokTwoNorm g k (eigenvectorSmooth g r s i)
-  ≤ ENNReal.ofReal (C · i.fst.valᐟ ^ (2k+1)) · ‖bᵢ‖`, polynomial growth
-in the eigenvalue since `1 + λᵢ = i.fst.val⁻¹` by
-`one_add_lambda_eq_inv_val`) is beaten by the hypothesised
-super-polynomial coefficient decay; this makes the partial sums
-`∑_{i ∈ finset} cᵢ · eigenvectorSmooth g r s i` Cauchy in the `Cᵏ`
-(iterated-covariant-derivative) Banach norm for each `k`, via the
-unconditional `C^m` tensor Sobolev embedding
-`iteratedCovGrad_toSobolev_embedding_Cm_unconditional`. The common `C^∞`
-limit of those `Cᵏ`-Cauchy partial sums is the desired `SmoothCcTensor`,
-and its `L²` class is the eigenbasis sum, so its `i`-th eigenbasis
-coordinate is `cᵢ`.
-
-This is a **deferred input**: its body is `sorry`, and every consumer
-transitively depends on `sorryAx`. It is phrased on the prescribed
-coordinate family `c` (rather than on a pre-built `L²` element) so that
-the entire `L²`-side identification — building the eigenbasis sum and
-pinning the stated `HasSum` against the `L²`-embedded smooth eigenbasis —
-is *proved* structurally in `spectralSeries_hasSmoothSum_of_allOrders_summable`
-on top of this single analytic core. The hypothesis is genuinely
-load-bearing: dropping `h_decay` makes the statement false (a generic
-`ℓ²`-but-not-smooth coordinate family has no smooth representative). -/
+The proof is the `L²`-side reduction to the single deep analytic core
+`tensorL2_smoothRepr_of_allOrders_decay`: the order-`0` instance of
+`h_decay` (with `tensorSobolevWeight i 0 = 1`) makes `c` square-summable,
+hence an element `c ∈ ℓ²`; the resolvent eigenbasis
+`tensorResolventHilbertEigenbasisSigma h_compact` realizes it as the
+`L²` element `u = b.repr.symm c`, whose intrinsic eigenbasis coordinates
+`tensorL2Coeff h_compact u i = (b.repr u) i = cᵢ` are exactly `c` by the
+`b.repr.symm`-round-trip. Transporting `h_decay` along this coordinate
+identity, the analytic core supplies the smooth representative `T` with
+`↑T = u`, and `tensorL2Coeff h_compact (↑T) i = tensorL2Coeff h_compact u i
+= cᵢ`. The hypothesis is genuinely load-bearing: dropping `h_decay` makes
+the statement false (a generic `ℓ²`-but-not-smooth coordinate family has
+no smooth representative). -/
 theorem smoothCcTensor_exists_of_allOrders_decay
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s → ℝ)
@@ -104,8 +141,42 @@ theorem smoothCcTensor_exists_of_allOrders_decay
       ∀ i : TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s,
         tensorL2Coeff (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
-            (T : TensorL2 r s g) i = c i :=
-  sorry
+            (T : TensorL2 r s g) i = c i := by
+  classical
+  set h_compact :=
+    tensorResolventL2_isCompactOperator (I := I) (M := M) g r s
+    with hcompact_def
+  set bsis := tensorResolventHilbertEigenbasisSigma (I := I) (M := M) h_compact
+    with hbsis_def
+  have hsq : Summable (fun i => (c i) ^ 2) := by
+    have h0 := h_decay 0
+    simp only [Nat.cast_zero, mul_zero, tensorSobolevWeight_zero, one_mul] at h0
+    exact h0
+  have hmem : Memℓp c 2 := by
+    rw [memℓp_gen_iff (by norm_num : (0 : ℝ) < (2 : ℝ≥0∞).toReal)]
+    simpa using hsq
+  set cl : lp
+      (fun _ : TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s => ℝ) 2 :=
+    ⟨c, hmem⟩ with hcl_def
+  set u : TensorL2 r s g := bsis.repr.symm cl with hu_def
+  have hcoeff_u : ∀ i, tensorL2Coeff (I := I) (M := M) h_compact u i = c i := by
+    intro i
+    have hround : bsis.repr u = cl := by
+      rw [hu_def]; exact bsis.repr.apply_symm_apply cl
+    have hval : (bsis.repr u) i = c i := by rw [hround]
+    simpa [tensorL2Coeff] using hval
+  have h_decay_u : ∀ k : ℕ,
+      Summable
+        (fun i : TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s =>
+          tensorSobolevWeight (I := I) (M := M) i (2 * k : ℝ) *
+            (tensorL2Coeff (I := I) (M := M) h_compact u i) ^ 2) := by
+    intro k
+    refine (h_decay k).congr (fun i => ?_)
+    rw [hcoeff_u i]
+  obtain ⟨T, hT⟩ :=
+    tensorL2_smoothRepr_of_allOrders_decay (I := I) (M := M) g r s u h_decay_u
+  refine ⟨T, fun i => ?_⟩
+  rw [hT, hcoeff_u i]
 
 /-- **Smooth-series convergence engine.**
 

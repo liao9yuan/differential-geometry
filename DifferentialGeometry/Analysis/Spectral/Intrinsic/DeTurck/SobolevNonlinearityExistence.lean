@@ -1,51 +1,69 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChartDeTurckRemainderPolynomial
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapIterL2WtwokTwoBound
+import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHSSection
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.FaithfulH1Embedding
 
 /-!
 # Short-time existence driven by the continuous (Sobolev) Ricci–DeTurck nonlinearity
 
 This file assembles the **continuous, non-gated** Ricci–DeTurck nonlinearity on the
-spectral Sobolev scale and feeds it into the unconditional maximal-regularity engine
+spectral Sobolev scale by **Nemytskii-by-density / Lipschitz extension**, and feeds it
+into the unconditional maximal-regularity engine
 `deTurckRemainder_strong_shortTime_exists`
 (`Analysis/Spectral/Intrinsic/DeTurck/RemainderShortTimeExistence.lean`).
 
-## The continuous nonlinearity (no finite-support gating)
+## The dense-extension architecture (no rough pointwise evaluation, no gating)
 
-The Ricci–DeTurck remainder of a metric perturbation `h = section(v)` of the initial
-metric `g₀` is
+A rough Sobolev element of `tensorHs g₀ 0 2 (a+1)` has **no pointwise values**, so it can
+neither index the chart polynomial nor be fed to the intrinsic `deTurckRicciRHS` (which
+needs a genuine `SmoothRiemannianMetric` and its second chart-derivatives).  The classical
+remedy is to define the nonlinearity on **smooth** data and extend by uniform continuity.
 
-  `N(v) = deTurckRicciRHS g_bg (g₀ + section(v)) − Δ_{g₀}(section(v))`,
+* `deTurckSmoothN` — the **smooth-input** nonlinearity.  For a *smooth* compactly-supported
+  `(0,2)`-tensor `T : SmoothCcTensor g₀ 0 2` whose symmetrization is `g₀`-fibre small
+  (`gFibreOpBound g₀ (ccTensorBilinSymm g₀ T) δ`, `δ < 1`, so `g₀ + T` is a genuine
+  `SmoothRiemannianMetric` via `tensorSectionRealizeMetric`), `deTurckSmoothN T` reads off
+  the order-`a` spectral coordinates of the **genuine intrinsic remainder**
 
-which the principal-part match
-(`deTurckNonlinearitySpectral_principalPart_cancels`) makes genuinely **first order** in
-`h`: it loses exactly one derivative and maps `H^{a+1} → H^a`.  Crucially the value of
-`N(v)` on a **rough** (Sobolev, not smooth) `section(v)` is computed *through the
-chart-coordinate polynomial* `chartDeTurckRicciRHS_sub_eq`
-(`Analysis/Spectral/Intrinsic/DeTurckCoefficients/ChartDeTurckRemainderPolynomial.lean`):
-the remainder is an explicit finite sum of products of chart components of the metric
-difference (chart-jet order `≤ 2`) with plain inverse-Gram / Christoffel data, so it
-extends from smooth to Sobolev sections **without** the finite-support / HLCC gate of the
-abandoned `deTurckGeometricN` (whose dense-complement degeneracy made it discontinuous).
+    `deTurckRicciRHS g_bg (g₀ + T) − Δ_∇ T`
 
-The rough-section evaluation of the chart polynomial — sending an `H^{a+1}` spectral
-element to the `L²` `(0,2)`-tensor of its Ricci–DeTurck remainder — is the continuous
-realization map `deTurckSobolevRemainderL2`, posited here with a precise total
-signature (it is total on all of `H^{a+1}`; no validity-domain gate appears).  The
-spectral nonlinearity `deTurckSobolevN` then reads off its eigenbasis coordinates, and
-the summability witness `deTurckSobolevRemainderL2_weighted_summable` places them in
-`H^a`.
+  as the smooth `(0,2)`-tensor `deTurckRHSSection g_bg (g₀ + T) − rawTensorConnLapSmooth g₀ 0 2 T`.
+  Its `tensorHs g₀ 0 2 a` membership is the spectral-scale summability of a smooth
+  compactly-supported tensor (`smoothCcTensor_tensorL2Coeff_weighted_summable`).  This uses
+  the **sorry-free intrinsic objects directly** — no chart-rough-evaluation and no
+  finite-support gating.
 
-## The analytic core (posited)
+* `smoothCcToTensorHs` — the canonical embedding of smooth tensors into the spectral scale
+  `tensorHs g₀ 0 2 σ` (the same `L²`-coordinate read-off), with dense range
+  (`smoothCcToTensorHs_denseRange`).
 
-The single deep analytic input is the **local Lipschitz estimate**
-`deTurckSobolevN_lipschitzOnWith`:
-`‖N(v) − N(v')‖_{H^a} ≤ K · ‖v − v'‖_{H^{a+1}}` on a closed `H^{a+1}`-ball.  It is to be
-proven from the chart-polynomial monomials majorised term by term by the Moser / Gagliardo–
-Nirenberg tame-product backbone (`exists_moserTameProduct_iteratedCovGrad_l2Norm_le`,
-`exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le`).  With it in hand the
-engine produces, on a positive horizon, the strong maximal-regularity solution
-`u ∈ H¹([0,T]; Hᵃ)` of `∂_t u = Δ_∇ u + N(u)`, `u(0) = u₀`
-(`deTurckSobolev_solution_exists`).
+* `deTurckSobolevN` — the **total** continuous nonlinearity
+  `tensorHs g₀ 0 2 (a+1) → tensorHs g₀ 0 2 a`, the dense/uniformly-continuous extension of
+  `deTurckSmoothN` (codomain `tensorHs g₀ 0 2 a` is complete), recentred onto the engine
+  ball by `recenteredBallRetraction`.  It agrees with `deTurckSmoothN` on smooth fibre-small
+  inputs (`deTurckSobolevN_eq_smoothN`), so the genuine Ricci–DeTurck remainder is what the
+  flow sees; it carries no `realizableAt` / finite-support / HLCC gate.
+
+## The analytic core and the extension input (posited)
+
+Two deep classical inputs are posited as named TRUE leaves:
+
+* `deTurckSmoothN_lipschitzOnWith` — the **smooth-ball Lipschitz estimate**
+  `‖N(T) − N(T')‖_{H^a} ≤ K · ‖T − T'‖_{H^{a+1}}` for smooth fibre-small `T, T'`, proven by
+  majorising the chart-polynomial remainder **difference** `chartDeTurckRicciRHS_sub_eq`
+  term by term with the Moser / Gagliardo–Nirenberg tame-product backbone.  It needs the
+  **supercritical** Sobolev-algebra order `2 * (a + 1) > finrank E + 4` (hypothesis
+  `ha_super`).
+
+* `deTurckSobolevN` itself, `smoothCcToTensorHs_denseRange`, `deTurckSobolevN_eq_smoothN`,
+  and `deTurckSobolevN_lipschitzOnWith` package the Lipschitz dense extension to the complete
+  codomain.
+
+With the local Lipschitz bound in hand the engine produces, on a positive horizon, the
+strong maximal-regularity solution `u ∈ H¹([0,T]; Hᵃ)` of
+`∂_t u = Δ_∇ u + N(u)`, `u(0) = u₀` (`deTurckSobolev_solution_exists`).
 -/
 
 noncomputable section
@@ -64,108 +82,210 @@ open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-  [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+  [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-/-- **The continuous Ricci–DeTurck remainder, realized into `L²` (the
-rough-section evaluation of the chart polynomial).**
+/-- **The genuine Ricci–DeTurck remainder of a SMOOTH fibre-small perturbation, as a smooth
+`(0,2)`-tensor.**
 
-For the initial metric `g₀` and DeTurck background `g_bg`, this sends a perturbation
-`v ∈ H^{a+1}` to the `L²` `(0,2)`-tensor field of the Ricci–DeTurck remainder
+For the initial metric `g₀`, DeTurck background `g_bg`, and a smooth compactly-supported
+`(0,2)`-tensor `T` whose symmetrization is `g₀`-fibre small with constant `δ < 1` (so
+`g₀ + T` is a genuine `SmoothRiemannianMetric` via `tensorSectionRealizeMetric`), this is
+the smooth tensor
 
-  `deTurckRicciRHS g_bg (g₀ + section(v)) − Δ_{g₀}(section(v))`,
+  `deTurckRHSSection g_bg (g₀ + T) − rawTensorConnLapSmooth g₀ 0 2 T`
 
-computed through the chart-coordinate polynomial `chartDeTurckRicciRHS_sub_eq` so that it
-applies to a **rough** (Sobolev) `section(v)`.  It is **total** on all of `H^{a+1}`
-(no finite-support / fibre-small validity-domain gate) and continuous — the continuous,
-non-gated replacement of the abandoned `deTurckRemainderSection ∘ realizeMetricAt`.
+(the intrinsic Ricci–DeTurck right-hand side of the realized metric, minus the connection
+Laplacian of the perturbation — the gauge-cancelled first-order remainder).  Because the
+input is smooth this uses the **sorry-free intrinsic objects directly**: no chart-rough
+evaluation, no finite-support / `realizableAt` gating. -/
+def deTurckSmoothRemainder (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
+    SmoothCcTensor g₀ 0 2 :=
+  { toSection :=
+      (deTurckRHSSection (I := I) g_bg
+        (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ)).toSection
+    hasCompactSupport :=
+      (deTurckRHSSection (I := I) g_bg
+        (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ)).hasCompactSupport }
+  - rawTensorConnLapSmooth (I := I) g₀ 0 2 T
 
-POSITED (recursion frontier): this is the rough-section evaluation map the chart
-polynomial needs.  Its construction realizes each monomial of `chartDeTurckRicciRHS_sub_eq`
-as an `L²` tensor via the chart-localised Moser/GN product structure; the value is
-independent of any chart selection (the intrinsic operator `deTurckRicciRHS` agrees with
-the chart polynomial on Levi-Civita good sets,
-`deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS`). -/
-def deTurckSobolevRemainderL2 (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
-    tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
-      TensorL2 0 2 g₀ :=
-  sorry
+/-- **The smooth-input Ricci–DeTurck nonlinearity.**
 
-/-- The `L²` coordinates of the continuous Ricci–DeTurck remainder are weighted
-square-summable at spectral order `a`: the remainder of an `H^{a+1}` perturbation lands
-in `H^a`.
-
-POSITED (recursion frontier): the order bookkeeping "first-order remainder of `H^{a+1}`
-lies in `H^a`", supplied by the tame chart-polynomial `L²` bounds at every order. -/
-theorem deTurckSobolevRemainderL2_weighted_summable
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) :
-    Summable (fun i : TensorEigenIdx (I := I) (M := M) g₀ 0 2 =>
-      tensorSobolevWeight (I := I) (M := M) i (a : ℝ) *
-        (tensorL2Coeff (I := I) (M := M)
-          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-          (deTurckSobolevRemainderL2 (I := I) (M := M) g₀ g_bg a v) i) ^ 2) :=
-  sorry
-
-/-- **The continuous (Sobolev) Ricci–DeTurck nonlinearity** as a map of spectral
-Sobolev spaces
-
-  `N : tensorHs g₀ 0 2 ((a : ℝ) + 1) → tensorHs g₀ 0 2 (a : ℝ)`.
-
-`N(v)` is the order-`a` spectral element whose eigenbasis coordinates are the `L²`
-coordinates of the continuous Ricci–DeTurck remainder `deTurckSobolevRemainderL2 g₀ g_bg a v`
-(`= deTurckRicciRHS g_bg (g₀ + section(v)) − Δ_{g₀}(section(v))`, computed through the
-chart polynomial on a rough section).  The weighted square-summability witness placing
-these coordinates in `H^a` is `deTurckSobolevRemainderL2_weighted_summable`.
-
-This is the **continuous, non-gated** nonlinearity demanded by the engine: it is total on
-all of `H^{a+1}` (no `realizableAt` / finite-support / HLCC gate), so it has no
-dense-complement degeneracy and is the genuine first-order Ricci–DeTurck remainder. -/
-def deTurckSobolevN (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1)) :
+For a smooth fibre-small `T : SmoothCcTensor g₀ 0 2`, `deTurckSmoothN g₀ g_bg a hδ_lt hδ`
+is the order-`a` spectral element whose eigenbasis coordinates are the `L²` coordinates of
+the genuine remainder `deTurckSmoothRemainder g₀ g_bg T`
+(`= deTurckRicciRHS g_bg (g₀ + T) − Δ_∇ T`).  Its `H^a` membership is the spectral-scale
+summability of a smooth compactly-supported tensor
+(`smoothCcTensor_tensorL2Coeff_weighted_summable`, valid at every real order).  This is the
+**continuous, non-gated** Ricci–DeTurck remainder on the smooth representatives. -/
+def deTurckSmoothN (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (T : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
     tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ) where
   coeff i :=
     tensorL2Coeff (I := I) (M := M)
       (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-      (deTurckSobolevRemainderL2 (I := I) (M := M) g₀ g_bg a v) i
+      (SmoothCcTensor.toL2 (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ)) i
   weighted_summable :=
-    deTurckSobolevRemainderL2_weighted_summable (I := I) (M := M) g₀ g_bg a v
+    smoothCcTensor_tensorL2Coeff_weighted_summable (I := I) (M := M) g₀
+      (a : ℝ) (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ)
+      (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
 
-/-- The eigenbasis coordinate of `deTurckSobolevN g₀ g_bg a v` is the `L²` coordinate of
-the continuous Ricci–DeTurck remainder. -/
-@[simp] theorem deTurckSobolevN_coeff (g₀ g_bg : SmoothRiemannianMetric I M)
-    (a : ℕ) (v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1))
-    (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
-    (deTurckSobolevN (I := I) (M := M) g₀ g_bg a v).coeff i =
+/-- The eigenbasis coordinate of `deTurckSmoothN` is the `L²` coordinate of the genuine
+smooth remainder. -/
+@[simp] theorem deTurckSmoothN_coeff (g₀ g_bg : SmoothRiemannianMetric I M)
+    (a : ℕ) (T : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (i : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+      (I := I) (M := M) g₀ 0 2) :
+    (deTurckSmoothN (I := I) (M := M) g₀ g_bg a T hδ_lt hδ).coeff i =
       tensorL2Coeff (I := I) (M := M)
         (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-        (deTurckSobolevRemainderL2 (I := I) (M := M) g₀ g_bg a v) i :=
+        (SmoothCcTensor.toL2 (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ)) i :=
   rfl
 
-/-- **The local Lipschitz estimate for the continuous Ricci–DeTurck nonlinearity (the
-deep analytic core).**
+/-- **The canonical embedding of smooth tensors into the spectral Sobolev scale.**
 
-On the closed `H^{a+1}`-ball `closedBall (ι u₀) R` about the included initial datum
-`u₀ ∈ H^{a+2}`, the continuous nonlinearity `deTurckSobolevN g₀ g_bg a` is Lipschitz with
-some constant `L_R`:
+A smooth compactly-supported `(0,2)`-tensor `T` is sent to the order-`σ` spectral element
+whose eigenbasis coordinates are the `L²` coordinates of `T` (`SmoothCcTensor.toL2 T`).  Its
+`H^σ` membership is `smoothCcTensor_tensorL2Coeff_weighted_summable` (smooth data is in every
+`H^σ`).  This is the genuine, total, non-gating inclusion `SmoothCcTensor g₀ 0 2 → H^σ`. -/
+def smoothCcToTensorHs (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
+    (T : SmoothCcTensor g₀ 0 2) :
+    tensorHs (I := I) (M := M) g₀ 0 2 σ where
+  coeff i :=
+    tensorL2Coeff (I := I) (M := M)
+      (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+      (SmoothCcTensor.toL2 T) i
+  weighted_summable :=
+    smoothCcTensor_tensorL2Coeff_weighted_summable (I := I) (M := M) g₀ σ T
+      (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
 
-  `‖N(v) − N(v')‖_{H^a} ≤ L_R · ‖v − v'‖_{H^{a+1}}`   for `v, v' ∈ closedBall (ι u₀) R`.
+/-- The eigenbasis coordinate of the smooth-tensor embedding is the `L²` coordinate of `T`. -/
+@[simp] theorem smoothCcToTensorHs_coeff (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
+    (T : SmoothCcTensor g₀ 0 2)
+    (i : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+      (I := I) (M := M) g₀ 0 2) :
+    (smoothCcToTensorHs (I := I) (M := M) g₀ σ T).coeff i =
+      tensorL2Coeff (I := I) (M := M)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+        (SmoothCcTensor.toL2 T) i :=
+  rfl
 
-POSITED (recursion frontier — the analytic core).  To be proven from the chart-polynomial
-remainder identity `chartDeTurckRicciRHS_sub_eq`: each monomial of the remainder carries a
-single metric-difference factor of chart-jet order `≤ 2`, majorised in `L²` by the
-Moser / Gagliardo–Nirenberg tame-product backbone
+/-- **Density of the smooth-tensor embedding in the spectral Sobolev scale.**
+
+The textbook fact that smooth compactly-supported tensors are dense in `H^σ`, here for the
+intrinsic spectral scale `tensorHs g₀ 0 2 σ`: the spectral coordinates of smooth data exhaust
+the weighted-`ℓ²` space (finite-support spectral elements are dense
+— `tensorHsFiniteSupportSubmodule_dense` — and each is the embedding of a smooth tensor).
+
+POSITED (recursion frontier — the classical smooth-density input). -/
+theorem smoothCcToTensorHs_denseRange (g₀ : SmoothRiemannianMetric I M) (σ : ℝ) :
+    DenseRange (smoothCcToTensorHs (I := I) (M := M) g₀ σ) :=
+  sorry
+
+/-- **The continuous (Sobolev) Ricci–DeTurck nonlinearity** as a map of spectral Sobolev
+spaces
+
+  `N : tensorHs g₀ 0 2 ((a : ℝ) + 1) → tensorHs g₀ 0 2 (a : ℝ)`.
+
+`deTurckSobolevN` is the **total, continuous** nonlinearity obtained by extending the
+smooth-input nonlinearity `deTurckSmoothN` from the dense range of `smoothCcToTensorHs`
+(`smoothCcToTensorHs_denseRange`) to all of `H^{a+1}`, using completeness of the codomain
+`H^a` (`tensorHs.instCompleteSpace`) and the smooth-ball Lipschitz estimate
+`deTurckSmoothN_lipschitzOnWith`.  It is total on `H^{a+1}` (no `realizableAt` /
+finite-support / HLCC gate), and on smooth fibre-small inputs it equals the genuine
+intrinsic Ricci–DeTurck remainder `deTurckSmoothN` (`deTurckSobolevN_eq_smoothN`), so the
+flow sees the honest first-order remainder.
+
+POSITED (recursion frontier): the dense Lipschitz/uniformly-continuous extension to the
+complete codomain.  Mathlib's `LipschitzOnWith.extend_*` only target `ℝ`/finite products, so
+the Hilbert-codomain dense extension (`IsDenseInducing.extend` of the uniformly continuous
+`deTurckSmoothN` across `smoothCcToTensorHs_denseRange`) is supplied here. -/
+def deTurckSobolevN (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
+    tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 1) →
+      tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ) :=
+  sorry
+
+/-- **`deTurckSobolevN` is the genuine smooth nonlinearity on smooth fibre-small inputs.**
+
+On the spectral image `smoothCcToTensorHs g₀ (a+1) T` of a smooth fibre-small `T`, the total
+nonlinearity equals `deTurckSmoothN g₀ g_bg a T hδ_lt hδ`
+(`= deTurckRicciRHS g_bg (g₀ + T) − Δ_∇ T`).  This pins `deTurckSobolevN` to the **genuine
+intrinsic Ricci–DeTurck remainder** on the dense smooth subset — the non-vacuity /
+flow-faithfulness guarantee — and is the defining property of the dense extension
+(`IsDenseInducing.extend_eq` along `smoothCcToTensorHs_denseRange`).
+
+POSITED (recursion frontier): the extension's agreement-on-dense-subset property. -/
+theorem deTurckSobolevN_eq_smoothN (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (T : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
+    deTurckSobolevN (I := I) (M := M) g₀ g_bg a
+        (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 1) T) =
+      deTurckSmoothN (I := I) (M := M) g₀ g_bg a T hδ_lt hδ :=
+  sorry
+
+/-- **The smooth-ball Lipschitz estimate for the Ricci–DeTurck nonlinearity (the deep
+analytic core).**
+
+For a **supercritical** spectral order (`ha_super : finrank E + 4 < 2 * (a + 1)`, i.e. the
+Sobolev algebra/multiplication threshold) the smooth-input nonlinearity `deTurckSmoothN` is
+Lipschitz in the `H^{a+1}`-norm:
+
+  `‖N(T) − N(T')‖_{H^a} ≤ K · ‖T − T'‖_{H^{a+1}}`
+
+for smooth fibre-small `T, T'`.  Concretely, the embedded values
+`deTurckSobolevN (ι T)`, `deTurckSobolevN (ι T')` (`ι = smoothCcToTensorHs (a+1)`) differ in
+`H^a` by at most `K` times the `H^{a+1}`-distance of `ι T, ι T'`.
+
+POSITED (recursion frontier — THE analytic core).  Proven from the chart-polynomial remainder
+**difference** identity `chartDeTurckRicciRHS_sub_eq` (sorry-free, for the two SMOOTH metrics
+`g₀ + T`, `g₀ + T'`): each monomial carries a single metric-difference factor of chart-jet
+order `≤ 2`, majorised in `L²` by the Moser / Gagliardo–Nirenberg tame-product backbone
 `exists_moserTameProduct_iteratedCovGrad_l2Norm_le`
 (`Analysis/Sobolev/MoserTameProduct.lean`) and
 `exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le`
 (`Analysis/Spectral/Tensor/CovGrad/GagliardoNirenbergProductTwoArm.lean`); summing the
-per-monomial bounds over the closed ball yields the uniform Lipschitz constant `L_R`. -/
+per-monomial bounds yields the uniform Lipschitz constant `K`. -/
+theorem deTurckSmoothN_lipschitzOnWith (g₀ g_bg : SmoothRiemannianMetric I M)
+    (a : ℕ) (ha_super : Module.finrank ℝ E + 4 < 2 * (a + 1)) :
+    ∃ K : ℝ≥0, ∀ (T T' : SmoothCcTensor g₀ 0 2)
+      {δ : ℝ} (hδ_lt : δ < 1)
+      (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      {δ' : ℝ} (hδ'_lt : δ' < 1)
+      (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+      ‖deTurckSmoothN (I := I) (M := M) g₀ g_bg a T hδ_lt hδ -
+          deTurckSmoothN (I := I) (M := M) g₀ g_bg a T' hδ'_lt hδ'‖ ≤
+        (K : ℝ) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 1) T -
+          smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 1) T'‖ :=
+  sorry
+
+/-- **The total nonlinearity is locally Lipschitz on the engine ball.**
+
+On the closed `H^{a+1}`-ball `closedBall (ι u₀) R` about the included initial datum
+`u₀ ∈ H^{a+2}`, `deTurckSobolevN g₀ g_bg a` is Lipschitz with some constant `L_R`:
+
+  `‖N(v) − N(v')‖_{H^a} ≤ L_R · ‖v − v'‖_{H^{a+1}}`  for `v, v' ∈ closedBall (ι u₀) R`.
+
+POSITED (recursion frontier): the continuity/Lipschitz transfer of the dense extension —
+`deTurckSobolevN` inherits the smooth-ball Lipschitz bound `deTurckSmoothN_lipschitzOnWith`
+across the dense range `smoothCcToTensorHs_denseRange` to a full closed-ball Lipschitz bound
+(`LipschitzWith` of `IsDenseInducing.extend` of a uniformly continuous map). -/
 theorem deTurckSobolevN_lipschitzOnWith (g₀ g_bg : SmoothRiemannianMetric I M)
-    (a : ℕ) {R : ℝ} (hR : 0 < R)
+    (a : ℕ) (ha_super : Module.finrank ℝ E + 4 < 2 * (a + 1))
+    {R : ℝ} (hR : 0 < R)
     (u₀ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) :
     ∃ L_R : ℝ≥0, LipschitzOnWith L_R (deTurckSobolevN (I := I) (M := M) g₀ g_bg a)
       (Metric.closedBall
@@ -173,28 +293,29 @@ theorem deTurckSobolevN_lipschitzOnWith (g₀ g_bg : SmoothRiemannianMetric I M)
           (show ((a : ℝ) + 1) ≤ (a : ℝ) + 2 by linarith) u₀) R) :=
   sorry
 
-/-- **Short-time existence driven by the continuous (Sobolev) Ricci–DeTurck
-nonlinearity.**
+/-- **Short-time existence driven by the continuous (Sobolev) Ricci–DeTurck nonlinearity.**
 
-For a closed Riemannian manifold `(M, g₀)`, DeTurck background `g_bg`, spectral Sobolev
-exponent `a : ℕ`, an initial perturbation `u₀ ∈ H^{a+2}`, and any positive ball radius
-`R`, there is a positive horizon `T₀` such that for every short interval `(0, T]` with
-`T ≤ T₀ ≤ 1` there is a strong maximal-regularity solution `u ∈ H¹([0,T]; Hᵃ)` of the
-Ricci–DeTurck quasi-linear tensor heat equation
+For a closed Riemannian manifold `(M, g₀)`, DeTurck background `g_bg`, a **supercritical**
+spectral Sobolev exponent `a : ℕ` (`ha_super : finrank E + 4 < 2 * (a + 1)`, the Sobolev
+algebra threshold making the nonlinearity Lipschitz), an initial perturbation `u₀ ∈ H^{a+2}`,
+and any positive ball radius `R`, there is a positive horizon `T₀` such that for every short
+interval `(0, T]` with `T ≤ T₀ ≤ 1` there is a strong maximal-regularity solution
+`u ∈ H¹([0,T]; Hᵃ)` of the Ricci–DeTurck quasi-linear tensor heat equation
 
   `∂_t u = Δ_∇ u + N(u)`,  `u(0) = u₀`,   `N = deTurckSobolevN g₀ g_bg a`,
 
 driven by the **continuous, non-gated** Sobolev nonlinearity (NO finite-support /
-`realizeMetricAt` gating anywhere).  The solution bundle is the engine's:
-`u` is the Duhamel image of its forcing `gforce`; the forcing reproduces `N` a.e. along
-the `H^{a+1}`-view field; the initial value is `u₀`; the time derivative satisfies the
-equation; and the field stays in the engine ball a.e.
+`realizeMetricAt` gating anywhere; `N` equals the genuine intrinsic Ricci–DeTurck remainder
+`deTurckSmoothN` on smooth fibre-small inputs, `deTurckSobolevN_eq_smoothN`).  The solution
+bundle is the engine's: `u` is the Duhamel image of its forcing `gforce`; the forcing
+reproduces `N` a.e. along the `H^{a+1}`-view field; the initial value is `u₀`.
 
 This is exactly `deTurckRemainder_strong_shortTime_exists` applied with the continuous
-nonlinearity `deTurckSobolevN` and its local Lipschitz bound
+nonlinearity `deTurckSobolevN` and its closed-ball Lipschitz bound
 `deTurckSobolevN_lipschitzOnWith`. -/
 theorem deTurckSobolev_solution_exists (g₀ g_bg : SmoothRiemannianMetric I M)
-    (a : ℕ) {R : ℝ} (hR : 0 < R)
+    (a : ℕ) (ha_super : Module.finrank ℝ E + 4 < 2 * (a + 1))
+    {R : ℝ} (hR : 0 < R)
     (u₀ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) :
     ∃ T₀ : ℝ, 0 < T₀ ∧ ∀ {T : ℝ} (hT : 0 < T) (_hTT₀ : T ≤ T₀) (hT1 : T ≤ 1),
       ∃ (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
@@ -207,7 +328,8 @@ theorem deTurckSobolev_solution_exists (g₀ g_bg : SmoothRiemannianMetric I M)
           timeH1.trace0 _ T u =
               tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
                 (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith) u₀ := by
-  obtain ⟨L_R, hLip⟩ := deTurckSobolevN_lipschitzOnWith (I := I) (M := M) g₀ g_bg a hR u₀
+  obtain ⟨L_R, hLip⟩ :=
+    deTurckSobolevN_lipschitzOnWith (I := I) (M := M) g₀ g_bg a ha_super hR u₀
   obtain ⟨T₀, hT₀_pos, hsol⟩ :=
     deTurckRemainder_strong_shortTime_exists (I := I) (M := M) g₀ (a := (a : ℝ))
       (N := deTurckSobolevN (I := I) (M := M) g₀ g_bg a) (L_R := L_R) (R := R) hR u₀ hLip

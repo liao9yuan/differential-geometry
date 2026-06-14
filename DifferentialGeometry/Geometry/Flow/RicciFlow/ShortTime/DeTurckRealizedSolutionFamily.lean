@@ -303,10 +303,13 @@ theorem realizedDeTurckFamily_exists
       JointChartGramSmooth (I := I) T g_DT := by
   classical
   -- The continuous-nonlinearity maximal-regularity engine, with zero initial
-  -- perturbation (so `g_DT 0 = g₀`), spectral order `a = 0`, and ball radius `R = 1`.
+  -- perturbation (so `g_DT 0 = g₀`), a supercritical spectral order `a` (so the
+  -- Sobolev tame estimates of the Nemytskii nonlinearity close), and ball radius `R = 1`.
+  set a : ℕ := Module.finrank ℝ E + 2 with ha_def
+  have ha_super : Module.finrank ℝ E + 4 < 2 * (a + 1) := by rw [ha_def]; omega
   obtain ⟨T₀, hT₀_pos, hsol⟩ :=
-    deTurckSobolev_solution_exists (I := I) (M := M) g₀ g_bg 0 (R := 1) one_pos
-      (0 : tensorHs (I := I) (M := M) g₀ 0 2 (((0 : ℕ) : ℝ) + 2))
+    deTurckSobolev_solution_exists (I := I) (M := M) g₀ g_bg a ha_super (R := 1) one_pos
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
   set T : ℝ := min T₀ 1 with hT_def
   have hT_pos : 0 < T := lt_min hT₀_pos one_pos
   have hT_le₀ : T ≤ T₀ := min_le_left _ _
@@ -315,7 +318,7 @@ theorem realizedDeTurckFamily_exists
   -- The interior smoothing + smooth-representative gate: the pinned `C∞`
   -- representative family `T_rep`, uniformly `g₀`-fibre small with `δ < 1`.
   obtain ⟨T_rep, δ, hδ_lt, hrep_zero, hδ, htrep_pin⟩ :=
-    solInterior_smoothRepr_pin (I := I) (M := M) g₀ g_bg 0 hT_pos hT_le1 u gforce
+    solInterior_smoothRepr_pin (I := I) (M := M) g₀ g_bg a hT_pos hT_le1 u gforce
       hduh hforce htrace
   -- The realized metric family: realize the `C∞` representative directly.
   refine
@@ -329,10 +332,10 @@ theorem realizedDeTurckFamily_exists
     intro t x v w
     rw [tensorSectionRealizeMetric_inner]
   · -- The DeTurck–Ricci flow derivative: the SOLUTION-PINNED flow-match input.
-    exact realizedDeTurck_flowMatch (I := I) (M := M) g₀ g_bg 0 hT_pos hT_le1 u gforce
+    exact realizedDeTurck_flowMatch (I := I) (M := M) g₀ g_bg a hT_pos hT_le1 u gforce
       hduh hforce T_rep hδ_lt hδ htrep_pin
   · -- The joint chart-Gram smoothness: the SOLUTION-PINNED joint-regularity input.
-    exact realizedDeTurck_jointReg (I := I) (M := M) g₀ g_bg 0 hT_pos hT_le1 u gforce
+    exact realizedDeTurck_jointReg (I := I) (M := M) g₀ g_bg a hT_pos hT_le1 u gforce
       hduh T_rep hδ_lt hδ htrep_pin
 
 end DifferentialGeometry.PDE.RicciFlow
