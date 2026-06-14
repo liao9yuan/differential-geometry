@@ -101,5 +101,62 @@ theorem evolNorm_bound_of_ricBound
           mul_le_mul_of_nonneg_left hmcd hpp0
         linarith
 
+/-- **Order-`N` time-Lipschitz of the flow metric** (the reusable core of the
+endpoint's `hgLip`).  From a sequence of Ricci-flow solutions realizing `gSeq`
++ the P2 `ric_bound_field` inputs + the `(Bₙ)` cap + the per-level swaps, the
+order-`N` background covariant derivative norm of the moving metric is
+`L`-Lipschitz in time on `K × [β,ψ]`, uniformly in the sequence index.
+Assembles `timeLipschitz_of_hasDerivAt` from `hevComp_of_solutions` (`hev`) and
+`evolNorm_bound_of_ricBound` (`hbound`).  The endpoint's full `hgLip` maxes
+these over `a ≤ p`. -/
+theorem hgLip_orderN_of_solutions
+    {K U : Set M} {β ψ : Real}
+    {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
+    {gRef : SmoothRiemannianMetric I M} {N : Nat}
+    (hKc : IsCompact K) (hU : IsOpen U) (hKU : K ⊆ U) (hN : 1 ≤ N)
+    (B : Real -> Real)
+    (hequiv : MetricUniformEquivalentOnWindow (I := I) U β ψ gRef gSeq B)
+    (Bmax : Real) (hBmax1 : 1 ≤ Bmax) (hBmax : ∀ t ∈ Set.Icc β ψ, B t ≤ Bmax)
+    (Cg : Nat -> Real)
+    (hBprev : forall r : Nat, 1 <= r -> r < N ->
+      MetricCovDerivOrderBoundOnWindow (I := I) U β ψ gSeq gRef r (Cg r))
+    (KShi : Real) (hKShi0 : 0 ≤ KShi)
+    (hShi : forall s : Nat, s <= N -> forall i : Nat,
+      forall t : Real, t ∈ Set.Icc β ψ -> forall x : M, x ∈ U ->
+        Real.sqrt
+          (Tensor0SBundle.normSq0S (I := I) (gSeq i t) x (2 + s)
+            (ricCovTower (I := I) (gSeq i t) (gSeq i t) s x)) <= KShi)
+    (CN : Real) (hCN0 : 0 ≤ CN)
+    (hboundN : MetricCovDerivOrderBoundOnWindow (I := I) K β ψ gSeq gRef N CN)
+    (D : Nat -> RealTimeInterval)
+    (S : (i : Nat) -> SolutionOn (I := I) (M := M) (D i))
+    (hS : ∀ i : Nat, IsSolutionOn (I := I) (S i))
+    (hmet : ∀ (i : Nat) (r : Real), (S i).family.metric r = gSeq i r)
+    (hreg : ∀ i : Nat, Set.Icc β ψ ⊆ (D i).regular)
+    (hswap : ∀ i : Nat, ∀ p : ℕ, p < N →
+      ∀ V : Fin (p + 2) → ContMDiffSection I E (∞ : WithTop ℕ∞)
+        (TangentSpace I : M → Type _), ∀ x₀ : M,
+      FixedBaseExtDerivTimeDerivativeOnRegular (I := I) (D i).carrier (D i).regular
+        ({x₀} : Set M)
+        (fun r p' => (covDerivOfField (I := I) gRef (solnMetricField (I := I) (S i) r) p) p'
+          (fun a : Fin (p + 2) => V a p'))
+        (fun r p' => (covDerivOfField (I := I) gRef (solnEvolField (I := I) (S i) r) p) p'
+          (fun a : Fin (p + 2) => V a p'))) :
+    ∃ L : Real, 0 ≤ L ∧
+      ∀ i : Nat, ∀ s : Real, s ∈ Set.Icc β ψ -> ∀ t : Real, t ∈ Set.Icc β ψ ->
+        ∀ x : M, x ∈ K ->
+          metricDerivNorm (I := I) N (gSeq i s) (gSeq i t) gRef x ≤ L * |s - t| := by
+  obtain ⟨L, hL0, hLbound⟩ := evolNorm_bound_of_ricBound (I := I) hKc hU hKU hN
+    B hequiv Bmax hBmax1 hBmax Cg hBprev KShi hKShi0 hShi CN hCN0 hboundN
+  have hev := hevComp_of_solutions (I := I) (K := K) (β := β) (ψ := ψ)
+    (gSeq := gSeq) (gRef := gRef) (N := N) D S hS hmet hreg hswap
+  refine ⟨L, hL0, fun i s hs t ht x hx => ?_⟩
+  exact timeLipschitz_of_hasDerivAt (I := I) gRef N (gSeq i)
+    (fun s' x' => (-2 : Real) • nablaRicReal (I := I) gSeq gRef N i s' x')
+    K β ψ L
+    (fun x' hx' s' hs' v => hev i x' hx' s' hs' v)
+    (fun x' hx' s' hs' => hLbound i x' hx' s' hs')
+    s hs t ht x hx
+
 end HCGCompactness
 end DifferentialGeometry
