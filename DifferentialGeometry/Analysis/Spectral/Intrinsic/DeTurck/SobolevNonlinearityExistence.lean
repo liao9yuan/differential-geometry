@@ -226,6 +226,190 @@ theorem smoothCcToTensorHs_denseRange (g₀ : SmoothRiemannianMetric I M) (σ : 
       exact (Function.notMem_support.mp hi).symm
   exact (tensorHsFiniteSupportSubmodule_dense (I := I) (M := M)).mono hsub
 
+/-- The smooth-tensor embedding `smoothCcToTensorHs` is additive in its tensor argument:
+its spectral coordinates are the `L²` coordinates of the tensor, and both `tensorL2Coeff`
+and `SmoothCcTensor.toL2` are additive. -/
+theorem smoothCcToTensorHs_add (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
+    (S T : SmoothCcTensor g₀ 0 2) :
+    smoothCcToTensorHs (I := I) (M := M) g₀ σ (S + T) =
+      smoothCcToTensorHs (I := I) (M := M) g₀ σ S +
+        smoothCcToTensorHs (I := I) (M := M) g₀ σ T := by
+  refine tensorHs.ext ?_
+  funext i
+  rw [tensorHs.add_coeff]
+  simp only [smoothCcToTensorHs_coeff]
+  rw [show SmoothCcTensor.toL2 (S + T) =
+        SmoothCcTensor.toL2 S + SmoothCcTensor.toL2 T from map_add _ _ _,
+    tensorL2Coeff_add]
+
+/-- The smooth-tensor embedding `smoothCcToTensorHs` is negation-compatible in its tensor
+argument. -/
+theorem smoothCcToTensorHs_neg (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
+    (S : SmoothCcTensor g₀ 0 2) :
+    smoothCcToTensorHs (I := I) (M := M) g₀ σ (-S) =
+      -smoothCcToTensorHs (I := I) (M := M) g₀ σ S := by
+  refine tensorHs.ext ?_
+  funext i
+  rw [tensorHs.neg_coeff]
+  simp only [smoothCcToTensorHs_coeff]
+  rw [show SmoothCcTensor.toL2 (-S) = -SmoothCcTensor.toL2 S from map_neg _ _]
+  rw [show (-SmoothCcTensor.toL2 S : TensorL2 0 2 g₀) = (-1 : ℝ) • SmoothCcTensor.toL2 S by
+    rw [neg_one_smul]]
+  rw [tensorL2Coeff_smul]
+  ring
+
+/-- The smooth-tensor embedding `smoothCcToTensorHs` is subtraction-compatible in its tensor
+argument: `ι(S − T) = ι S − ι T`. -/
+theorem smoothCcToTensorHs_sub (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
+    (S T : SmoothCcTensor g₀ 0 2) :
+    smoothCcToTensorHs (I := I) (M := M) g₀ σ (S - T) =
+      smoothCcToTensorHs (I := I) (M := M) g₀ σ S -
+        smoothCcToTensorHs (I := I) (M := M) g₀ σ T := by
+  rw [sub_eq_add_neg, sub_eq_add_neg, smoothCcToTensorHs_add, smoothCcToTensorHs_neg]
+
+/-- **The smooth nonlinearity difference is the spectral embedding of the genuine remainder
+difference.**
+
+For smooth fibre-small `T, T'`, `deTurckSmoothN T − deTurckSmoothN T'` (in `H^a`) is exactly
+the order-`a` spectral embedding `smoothCcToTensorHs g₀ a` of the difference of the two genuine
+smooth remainders `deTurckSmoothRemainder T − deTurckSmoothRemainder T'`.  Both sides have, at
+each eigenbasis index `i`, the `L²` coordinate of the corresponding remainder (read off by the
+same compact-resolvent witness), so the identity is the additivity of `tensorL2Coeff` and
+`SmoothCcTensor.toL2` over the remainder difference. -/
+theorem deTurckSmoothN_sub_eq_smoothCcToTensorHs_remainderSub
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    deTurckSmoothN (I := I) (M := M) g₀ g_bg a T hδ_lt hδ -
+        deTurckSmoothN (I := I) (M := M) g₀ g_bg a T' hδ'_lt hδ' =
+      smoothCcToTensorHs (I := I) (M := M) g₀ (a : ℝ)
+        (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+          deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ') := by
+  refine tensorHs.ext ?_
+  funext i
+  have hsub :
+      (deTurckSmoothN (I := I) (M := M) g₀ g_bg a T hδ_lt hδ -
+          deTurckSmoothN (I := I) (M := M) g₀ g_bg a T' hδ'_lt hδ').coeff i =
+        (deTurckSmoothN (I := I) (M := M) g₀ g_bg a T hδ_lt hδ).coeff i -
+          (deTurckSmoothN (I := I) (M := M) g₀ g_bg a T' hδ'_lt hδ').coeff i := by
+    rw [sub_eq_add_neg, tensorHs.add_coeff, tensorHs.neg_coeff]
+    rfl
+  have hcoeff_sub :
+      tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (SmoothCcTensor.toL2
+            (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+              deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ')) i =
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ)) i -
+          tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 (deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ')) i := by
+    rw [show SmoothCcTensor.toL2
+            (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+              deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ') =
+          SmoothCcTensor.toL2 (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ) -
+            SmoothCcTensor.toL2 (deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ')
+        from map_sub _ _ _]
+    rw [sub_eq_add_neg, tensorL2Coeff_add]
+    rw [show (-SmoothCcTensor.toL2 (deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ') :
+          TensorL2 0 2 g₀) =
+        (-1 : ℝ) • SmoothCcTensor.toL2 (deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ') by
+      rw [neg_one_smul]]
+    rw [tensorL2Coeff_smul]
+    ring
+  rw [hsub, deTurckSmoothN_coeff, deTurckSmoothN_coeff, smoothCcToTensorHs_coeff, hcoeff_sub]
+
+/-- **The smooth-ball Lipschitz estimate for the genuine Ricci–DeTurck remainder, at the
+quasilinear `H^{a+2}` order (the deep analytic core).**
+
+For a **supercritical** spectral order (`ha_super : finrank E + 4 < 2 * (a + 1)`, the Sobolev
+algebra/multiplication threshold) and a positive ball radius `R`, the `H^a`-spectral norm of
+the genuine smooth Ricci–DeTurck remainder **difference**
+`deTurckSmoothRemainder g₀ g_bg T − deTurckSmoothRemainder g₀ g_bg T'` is controlled by `K`
+times the `H^{a+2}`-spectral distance of the embedded perturbations `ι(a+2) T`, `ι(a+2) T'`,
+uniformly over the `H^{a+2}`-ball `{‖ι(a+2) T‖ ≤ R}`.
+
+The order is `H^{a+2}` — **two** derivatives — because the Ricci–DeTurck remainder is the
+genuine **quasilinear** Nemytskii nonlinearity whose difference
+`chartDeTurckRicciRHS_sub_eq` carries second-order metric-difference jet factors
+`∂²(T − T')`: each monomial of the chart-polynomial remainder difference contributes a single
+`T − T'` jet of chart order `≤ 2`, so the difference factor is bounded in `L²` by the
+`H^{a+2}` norm (not `H^{a+1}` — the dead-false order).
+
+This is the genuine missing analytic prerequisite: it combines (i) the Moser /
+Gagliardo–Nirenberg tame-product majorisation of the chart-polynomial remainder difference in
+`covGrad`-iterate `L²` (`exists_moserTameProduct_iteratedCovGrad_l2Norm_le`,
+`exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le`, with the supercritical
+`ha_super` closing the Sobolev-algebra products and the ball-bound supplying the `C⁰`/jet
+bounds on the plain factors) with (ii) the interior elliptic-regularity / Gårding two-sided
+comparison between the intrinsic spectral `H^σ` norm and the `covGrad`-iterate `L²` data of a
+smooth tensor — the chart-locality-free all-orders elliptic estimate isolated as an open
+analytic sub-program in this library (cf. `Order2NormEquivOnSmooth`,
+`eigenSpan_pouHs_le_spectral_of_elliptic`, which carry it as an explicit hypothesis and never
+as a headline).  Neither (i)+(ii)-assembled bound exists yet as an unconditional public
+declaration, so this remainder-level estimate is posited as the single named honest leaf on
+which the `deTurckSmoothN`-level Lipschitz estimate below rests. -/
+theorem smoothRemainderDiff_ballLipschitz_Ha2
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (a : ℕ) (ha_super : Module.finrank ℝ E + 4 < 2 * (a + 1)) {R : ℝ} (hR : 0 < R) :
+    ∃ K : ℝ≥0, ∀ (T T' : SmoothCcTensor g₀ 0 2)
+      {δ : ℝ} (hδ_lt : δ < 1)
+      (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      {δ' : ℝ} (hδ'_lt : δ' < 1)
+      (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖ ≤ R →
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T'‖ ≤ R →
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ (a : ℝ)
+          (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+            deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ')‖ ≤
+        (K : ℝ) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T -
+          smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T'‖ :=
+  sorry
+
+/-- **The smooth-ball Lipschitz estimate for the Ricci–DeTurck nonlinearity at the
+quasilinear `H^{a+2}` order (the corrected analytic core).**
+
+For a **supercritical** spectral order (`ha_super : finrank E + 4 < 2 * (a + 1)`) and a
+positive `H^{a+2}`-ball radius `R`, the smooth-input nonlinearity `deTurckSmoothN` is Lipschitz
+in the `H^{a+2}`-norm on the ball:
+
+  `‖N(T) − N(T')‖_{H^a} ≤ K · ‖ι(a+2) T − ι(a+2) T'‖`,   `‖ι(a+2) T‖, ‖ι(a+2) T'‖ ≤ R`,
+
+for smooth fibre-small `T, T'`.  The right-hand side is the **`H^{a+2}`** norm — the
+DeTurck–Ricci flow is **quasilinear**, so its Nemytskii remainder difference
+(`chartDeTurckRicciRHS_sub_eq`) carries second-order `∂²(T − T')` factors and loses **two**
+derivatives (the `H^{a+1}` order is dead-false).
+
+The `deTurckSmoothN` difference is the order-`a` spectral embedding of the genuine remainder
+difference (`deTurckSmoothN_sub_eq_smoothCcToTensorHs_remainderSub`), so the estimate is exactly
+the remainder-level ball-Lipschitz bound `smoothRemainderDiff_ballLipschitz_Ha2` rephrased on
+`deTurckSmoothN`. -/
+theorem deTurckSmoothN_ballLipschitz_Ha2 (g₀ g_bg : SmoothRiemannianMetric I M)
+    (a : ℕ) (ha_super : Module.finrank ℝ E + 4 < 2 * (a + 1)) {R : ℝ} (hR : 0 < R) :
+    ∃ K : ℝ≥0, ∀ (T T' : SmoothCcTensor g₀ 0 2)
+      {δ : ℝ} (hδ_lt : δ < 1)
+      (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      {δ' : ℝ} (hδ'_lt : δ' < 1)
+      (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖ ≤ R →
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T'‖ ≤ R →
+      ‖deTurckSmoothN (I := I) (M := M) g₀ g_bg a T hδ_lt hδ -
+          deTurckSmoothN (I := I) (M := M) g₀ g_bg a T' hδ'_lt hδ'‖ ≤
+        (K : ℝ) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T -
+          smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T'‖ := by
+  obtain ⟨K, hK⟩ :=
+    smoothRemainderDiff_ballLipschitz_Ha2 (I := I) (M := M) g₀ g_bg a ha_super hR
+  refine ⟨K, ?_⟩
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
+  rw [deTurckSmoothN_sub_eq_smoothCcToTensorHs_remainderSub
+    (I := I) (M := M) g₀ g_bg a T T' hδ_lt hδ hδ'_lt hδ']
+  exact hK T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
+
 /-- **The continuous (Sobolev) Ricci–DeTurck nonlinearity** as a map of spectral Sobolev
 spaces
 
