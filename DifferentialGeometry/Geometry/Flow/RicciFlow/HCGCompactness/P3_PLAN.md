@@ -5,6 +5,22 @@ planning session.  Written 2026-06-11 by the planning (Fable) session.**
 
 ---
 
+## C-II-final STARTED — hgLip order-N core landed (2026-06-13, planner-built)
+
+Planner built + verified (own focused check + build + #print axioms, all
+axiom-clean) in NEW `MetricPreconvWindow.lean`:
+- `evolNorm_bound_of_ricBound` — the `hbound` of `timeLipschitz_of_hasDerivAt`:
+  `√normSq0S(-2·∇ᴺRc) ≤ 2(Cpp·Cₙ+Cppp)` from `ric_bound_field` + the `(Bₙ)` cap.
+- `hgLip_orderN_of_solutions` — the order-`N` time-Lipschitz core
+  (`timeLipschitz_of_hasDerivAt ∘ hevComp_of_solutions ∘ evolNorm_bound`).
+The executor's "hgLip ∂ₜ-shape is clean" finding is now a green theorem.
+REMAINING for the window endpoint (the dedicated brick): the uniform-over-`a≤p`
+`hgLip` max (mechanical), `hInfLip`, the dense net, and **the dominant frontier
+= the `gInf : ℝ → metric` family** (`metricPreconvInf`-scale: master diagonal +
+all-`t` Cauchy-in-`Cᵖ` + per-`t` `smoothMetric_of_localCoeff`). The endpoint
+carries `hShi` (BBS frontier) as an honest input, same as P2. See
+MetricPreconvWindow.md.
+
 ## PLANNER CORRECTION — the P3 endpoint is the ABSTRACT window, NOT SourceMetricCPConvOnWindow (2026-06-13)
 
 **My earlier kickoffs (and scorecards) wrongly named `SourceMetricCPConvOnWindow`
