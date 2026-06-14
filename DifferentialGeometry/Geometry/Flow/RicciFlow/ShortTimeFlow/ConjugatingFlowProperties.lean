@@ -660,14 +660,15 @@ horizon `T`): for a jointly-`C∞`-in-`(t, x)` field the flow map is jointly `C�
 interior, so its spatial Jacobian — and thus `s ↦ (mfderiv I I (Φ_fam s) y u : E)` — is continuous
 at every interior time.  Combined with the at-`0` data and the orbit continuity, both conjuncts
 follow; this is the genuine flow-continuity / Hartman content of `flow_pushforward_continuous_in_time`,
-isolated here as a single faithful labeled `sorry`, PINNED to the genuine flow by `hΦode`, fed the
+PINNED to the genuine flow by `hΦode`, fed the
 field regularity `hfield_reg`, and consuming the flow's `t = 0`-endpoint orbit/Jacobian continuity
 (`hΦorbit0` / `hΦmfderiv0`, the `conjugating_diffeo_family` outputs).  All hypotheses constrain only
 the internal data `g_DT` / `Φ_fam`, never the headline; neither output is equal to, nor destructures
 to, any hypothesis (the at-`0` hypotheses are `ContinuousWithinAt … 0`, the field datum is a
 `ContMDiffOn` of the velocity field; the conclusions are `ContinuousOn (Ico 0 T)` of a bundle-valued
-/ orbit map), so this is not hypothesis-packaging.  Faithful labeled deferred input for a dedicated
-fill effort. -/
+/ orbit map), so this is not hypothesis-packaging.  It is fully proven (sorry-free): `hfield_reg`
+makes the orbit jointly `C∞` on the interior (`conjugating_flow_jointContMDiffOn`), giving interior
+continuity of the orbit and its spatial Jacobian, glued to the `t = 0` endpoints. -/
 theorem conjugating_flow_orbit_pushforward_continuity_data
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (_hT : 0 < T) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
@@ -1240,15 +1241,13 @@ Their content is the chain rule combining (i) the supplied joint chart-Gram regu
 orbit `(t, x) ↦ Φ_fam t x` and its chart Jacobian `mfderiv (Φ_fam t) x`.  Part (ii) is the
 classical Hartman smooth-dependence-on-initial-conditions output for the conjugating flow
 (`global_flow_jointContMDiffOn_on_closed_manifold` + `manifoldFlowFamily_*` applied along the
-cutoff windows of the interior field, continuous up to the `C⁰`-at-`0` boundary).  The on-disk
-Hartman / pullback chart-Gram joint-smoothness machinery is faithful but not yet wired to the
-specific conjugating flow; we isolate that open content here as a single faithful labeled
-`sorry`, PINNED to the genuine flow by `hΦode`, fed the joint-`C∞` DeTurck-field regularity
-`hfield_reg` (the Hartman smooth-dependence input that makes the orbit `(t, x) ↦ Φ_fam t x`
+cutoff windows of the interior field, continuous up to the `C⁰`-at-`0` boundary).  We prove this
+here (sorry-free) by wiring the on-disk Hartman / pullback chart-Gram joint-smoothness machinery to
+the specific conjugating flow, PINNED to the genuine flow by `hΦode`, fed the joint-`C∞` DeTurck-field
+regularity `hfield_reg` (the Hartman smooth-dependence input that makes the orbit `(t, x) ↦ Φ_fam t x`
 jointly `C∞`), and consuming the genuine `g_DT` regularity `hgram_DT`/`hgram0_DT`.  Neither output is equal to, nor destructures to, any hypothesis (the
 hypotheses concern `g_DT`; the conclusions concern the pullback `pullbackMetric (g_DT) (Φ_fam)`),
-so this is not hypothesis-packaging.  Faithful labeled deferred input for a dedicated fill
-effort. -/
+so this is not hypothesis-packaging. -/
 theorem conjugating_flow_pullback_jointGram_data
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
