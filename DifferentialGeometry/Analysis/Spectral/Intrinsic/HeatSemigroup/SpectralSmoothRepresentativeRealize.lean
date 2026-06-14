@@ -56,41 +56,75 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **Smooth-series convergence engine (deferred analytic input).**
+/-- **Smooth realization of an all-orders-decaying coordinate family
+(deferred analytic input).**
+
+Let `c : TensorEigenIdx g r s → ℝ` be a coordinate family whose weighted
+squares `(1 + λᵢ)^{2k} · cᵢ²` are summable for *every even order* `2k`.
+Then `c` is the intrinsic eigenbasis coordinate family of a genuine
+smooth, compactly-supported section `T : SmoothCcTensor g r s`:
+
+  `∀ i, tensorL2Coeff h_compact (↑T) i = cᵢ`.
+
+This is the precise `Cᵏ`-Banach-completeness content of the all-orders
+spectral Sobolev embedding `⋂_σ Hˢ ⊆ C^∞`, isolated as the *one* deep
+classical analytic input of the smooth-representative gate. Its proof is
+term-by-term: the per-eigentensor `H^{2k}`-norm bound
+`eigenvectorSmooth_wtwokTwoNorm_le_uniform`
+(`wtwokTwoNorm g k (eigenvectorSmooth g r s i)
+  ≤ ENNReal.ofReal (C · i.fst.valᐟ ^ (2k+1)) · ‖bᵢ‖`, polynomial growth
+in the eigenvalue since `1 + λᵢ = i.fst.val⁻¹` by
+`one_add_lambda_eq_inv_val`) is beaten by the hypothesised
+super-polynomial coefficient decay; this makes the partial sums
+`∑_{i ∈ finset} cᵢ · eigenvectorSmooth g r s i` Cauchy in the `Cᵏ`
+(iterated-covariant-derivative) Banach norm for each `k`, via the
+unconditional `C^m` tensor Sobolev embedding
+`iteratedCovGrad_toSobolev_embedding_Cm_unconditional`. The common `C^∞`
+limit of those `Cᵏ`-Cauchy partial sums is the desired `SmoothCcTensor`,
+and its `L²` class is the eigenbasis sum, so its `i`-th eigenbasis
+coordinate is `cᵢ`.
+
+This is a **deferred input**: its body is `sorry`, and every consumer
+transitively depends on `sorryAx`. It is phrased on the prescribed
+coordinate family `c` (rather than on a pre-built `L²` element) so that
+the entire `L²`-side identification — building the eigenbasis sum and
+pinning the stated `HasSum` against the `L²`-embedded smooth eigenbasis —
+is *proved* structurally in `spectralSeries_hasSmoothSum_of_allOrders_summable`
+on top of this single analytic core. The hypothesis is genuinely
+load-bearing: dropping `h_decay` makes the statement false (a generic
+`ℓ²`-but-not-smooth coordinate family has no smooth representative). -/
+theorem smoothCcTensor_exists_of_allOrders_decay
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (c : TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s → ℝ)
+    (h_decay : ∀ k : ℕ,
+      Summable
+        (fun i : TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s =>
+          tensorSobolevWeight (I := I) (M := M) i (2 * k : ℝ) * (c i) ^ 2)) :
+    ∃ T : SmoothCcTensor g r s,
+      ∀ i : TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s,
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
+            (T : TensorL2 r s g) i = c i :=
+  sorry
+
+/-- **Smooth-series convergence engine.**
 
 Let `c : TensorEigenIdx g r s → ℝ` be a coordinate family whose weighted
 squares `(1 + λᵢ)^{2k} · cᵢ²` are summable for *every even order* `2k`.
 Then the intrinsic eigenfunction series
 `∑ᵢ cᵢ · eigenvectorSmooth g r s i` (each summand a smooth, compactly
-supported eigentensor) converges in `Cᵏ` for every `k`, and its limit is a
-genuine smooth, compactly-supported section `T : SmoothCcTensor g r s`,
-whose `L²` class realizes the (square-summable) `L²` sum of the series:
+supported eigentensor) sums, in `L²`, to a genuine smooth,
+compactly-supported section `T : SmoothCcTensor g r s`:
 
   `HasSum (fun i => cᵢ • (eigenvectorSmooth g r s i : L²)) (↑T)`.
 
-This is the precise `Cᵏ`-Banach-completeness content of the all-orders
-spectral Sobolev embedding. Term-by-term the per-eigentensor `H^{2k}`-norm
-bound `eigenvectorSmooth_wtwokTwoNorm_le_uniform`
-(`wtwokTwoNorm g k (eigenvectorSmooth g r s i)
-  ≤ ENNReal.ofReal (C · i.fst.valᐟ ^ (2k+1)) · ‖bᵢ‖`, polynomial growth
-in the eigenvalue since `1 + λᵢ = i.fst.val⁻¹` by
-`one_add_lambda_eq_inv_val`) is beaten by the hypothesised
-super-polynomial coefficient decay; this makes the partial sums Cauchy in
-the `Cᵏ` (iterated-covariant-derivative) Banach norm for each `k`, and the
-unconditional `C^m` tensor Sobolev embedding
-`iteratedCovGrad_toSobolev_embedding_Cm_unconditional` converts the
-`H^{2k}`-Cauchy partial sums into a `Cᵏ`-Cauchy family of smooth sections,
-whose common `C^∞` limit is the desired `SmoothCcTensor`. The `L²`
-realization of the same partial sums is the `L²` sum of the series,
-pinning the stated `HasSum`.
-
-This lemma is the precise remaining classical analytic content of the
-smooth-representative gate. It is a **deferred input**: its body is
-`sorry`, and every consumer transitively depends on `sorryAx`. Phrasing
-the conclusion as a `HasSum` against the `L²`-embedded smooth eigenbasis
-keeps the downstream assembly purely structural: identifying the series
-sum with a given `L²` element `u` is then a one-line `HasSum`-uniqueness
-against the resolvent eigenbasis representation. -/
+The smooth section `T` is produced by the deferred analytic core
+`smoothCcTensor_exists_of_allOrders_decay`, whose `i`-th eigenbasis
+coordinate is exactly `cᵢ`. The `HasSum` is then the resolvent
+eigenbasis expansion of `↑T`: the `HilbertBasis.hasSum_repr` of `↑T`
+against `tensorResolventHilbertEigenbasisSigma` is the series
+`∑ᵢ (b.repr (↑T) i) • bᵢ = ∑ᵢ cᵢ • bᵢ`, and each basis vector
+`bᵢ = (eigenvectorSmooth g r s i : L²)` by `eigenvectorSmooth_toL2`. -/
 theorem spectralSeries_hasSmoothSum_of_allOrders_summable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s → ℝ)
@@ -103,8 +137,28 @@ theorem spectralSeries_hasSmoothSum_of_allOrders_summable
         (fun i : TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s =>
           c i •
             (eigenvectorSmooth (I := I) (M := M) g r s i : TensorL2 r s g))
-        (T : TensorL2 r s g) :=
-  sorry
+        (T : TensorL2 r s g) := by
+  classical
+  set h_compact :=
+    tensorResolventL2_isCompactOperator (I := I) (M := M) g r s
+    with hcompact_def
+  set bsis := tensorResolventHilbertEigenbasisSigma (I := I) (M := M) h_compact
+    with hbsis_def
+  obtain ⟨T, hT_coeff⟩ :=
+    smoothCcTensor_exists_of_allOrders_decay (I := I) (M := M) g r s c h_decay
+  refine ⟨T, ?_⟩
+  have hHasSum : HasSum (fun i => bsis.repr (T : TensorL2 r s g) i • bsis i)
+      (T : TensorL2 r s g) := bsis.hasSum_repr (T : TensorL2 r s g)
+  refine hHasSum.congr_fun (fun i => ?_)
+  have hbi : bsis i =
+      (eigenvectorSmooth (I := I) (M := M) g r s i : TensorL2 r s g) := by
+    rw [hbsis_def, tensorResolventHilbertEigenbasisSigma_apply,
+      eigenvectorSmooth_toL2 (I := I) (M := M) g r s i]
+  have hci : bsis.repr (T : TensorL2 r s g) i = c i := by
+    have hcoe : bsis.repr (T : TensorL2 r s g) i =
+        tensorL2Coeff (I := I) (M := M) h_compact (T : TensorL2 r s g) i := rfl
+    rw [hcoe, hT_coeff i]
+  rw [hbi, hci]
 
 /-- **Classical `C^∞` spectral-series assembly (deferred analytic input).**
 
