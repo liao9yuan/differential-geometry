@@ -5,6 +5,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2So
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHSSection
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.FaithfulH1Embedding
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.LocallyLipschitzTruncation
 
 /-!
 # Short-time existence driven by the continuous (Sobolev) Ricci–DeTurck nonlinearity
@@ -409,6 +410,458 @@ theorem deTurckSmoothN_ballLipschitz_Ha2 (g₀ g_bg : SmoothRiemannianMetric I M
   rw [deTurckSmoothN_sub_eq_smoothCcToTensorHs_remainderSub
     (I := I) (M := M) g₀ g_bg a T T' hδ_lt hδ hδ'_lt hδ']
   exact hK T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
+
+/-- The smooth-tensor embedding `smoothCcToTensorHs` is `ℝ`-homogeneous in its tensor
+argument: `ι(c • T) = c • ι T`.  Its spectral coordinates are the `L²` coordinates of the
+tensor, and both `tensorL2Coeff` and `SmoothCcTensor.toL2` are `ℝ`-homogeneous. -/
+theorem smoothCcToTensorHs_smul (g₀ : SmoothRiemannianMetric I M) (σ : ℝ) (c : ℝ)
+    (T : SmoothCcTensor g₀ 0 2) :
+    smoothCcToTensorHs (I := I) (M := M) g₀ σ (c • T) =
+      c • smoothCcToTensorHs (I := I) (M := M) g₀ σ T := by
+  refine tensorHs.ext ?_
+  funext i
+  rw [tensorHs.smul_coeff]
+  simp only [smoothCcToTensorHs_coeff]
+  rw [show SmoothCcTensor.toL2 (c • T) = c • SmoothCcTensor.toL2 T from map_smul _ _ _,
+    tensorL2Coeff_smul]
+
+/-- The norm of a scalar multiple in the spectral Sobolev scale: `‖c • x‖ = |c| · ‖x‖`.
+The scale is a real normed space through the linear isometry `tensorHs.rescaleEquivL2` onto
+weighted `ℓ²`, where scalar multiplication is homogeneous. -/
+theorem tensorHs_norm_smul (g₀ : SmoothRiemannianMetric I M) {σ : ℝ} (c : ℝ)
+    (x : tensorHs (I := I) (M := M) g₀ 0 2 σ) :
+    ‖c • x‖ = |c| * ‖x‖ := by
+  have h1 : ‖c • x‖ =
+      ‖tensorHs.rescaleEquivL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (σ := σ) (c • x)‖ :=
+    (tensorHs.rescaleEquivL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+      (σ := σ)).norm_map (c • x) |>.symm
+  have h2 : ‖tensorHs.rescaleEquivL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (σ := σ) x‖ = ‖x‖ :=
+    (tensorHs.rescaleEquivL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+      (σ := σ)).norm_map x
+  rw [h1, map_smul, norm_smul, Real.norm_eq_abs, h2]
+
+/-- **A spectral `H^{a+2}`-ball of smooth perturbations is uniformly fibre-small (the
+quasilinear realizability radius).**
+
+There is a positive radius `R₀` and a smallness constant `δ₀ < 1` such that **every** smooth
+compactly-supported `(0,2)`-tensor `T` whose order-`(a+2)` spectral embedding has norm
+`‖smoothCcToTensorHs g₀ (a+2) T‖ ≤ R₀` has its symmetrization `ccTensorBilinSymm g₀ T`
+uniformly `g₀`-fibre bounded by `δ₀ < 1`.  Equivalently, on this ball the realized metric
+`g₀ + T` is a genuine `SmoothRiemannianMetric` (via `tensorSectionRealizeMetric`), so the
+genuine smooth Ricci–DeTurck nonlinearity `deTurckSmoothN g₀ g_bg a T` is defined.
+
+This is the **realizability radius** that makes the dense extension of `deTurckSmoothN`
+non-vacuous: inside it, smooth data is fibre-small (hence dense-able and Lipschitz-controlled
+by `deTurckSmoothN_ballLipschitz_Ha2`), and the recentred ball retraction maps all of `H^{a+2}`
+into it.
+
+POSITED (recursion frontier — the spectral `C⁰`-control bridge).  Classically this is the
+supercritical Sobolev embedding `H^{a+2} ↪ C⁰` (`tensorPouSobolevHilbert_embedding_Ck` /
+`tensorHsToC0`, valid under `2(a+2) > finrank E + 4`, hence `ha_super`): the pointwise fibre
+norm of a smooth tensor is bounded by a constant times its `H^{a+2}` norm, so a sufficiently
+small `H^{a+2}`-ball forces the operator-norm smallness `gFibreOpBound … δ₀`.  The only
+on-disk `C⁰` embedding lives on the **chart partition-of-unity** Sobolev tower
+(`TensorPouSobolevHilbert`), and transporting it to the **spectral** scale
+`tensorHs g₀ 0 2 (a+2)` used here requires exactly the chart-locality-free order-`2` Gårding
+two-sided norm equivalence isolated as the open analytic sub-program
+`Order2NormEquivOnSmooth` / `eigenSpan_pouHs_le_spectral_of_elliptic`
+(`Analysis/Spectral/Tensor/SobolevScale/Order2Equivalence.lean`,
+`Analysis/Spectral/Intrinsic/Garding/EigenComboGardingReduction.lean`), which carry it as an
+explicit hypothesis and never as a headline.  Neither the spectral-tower `C⁰` bound nor the
+scale bridge exists yet as an unconditional public declaration, so this realizability radius is
+posited as the single named honest leaf on which the spectral dense extension rests. -/
+theorem sobolevBall_smooth_fibreSmall (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : Module.finrank ℝ E + 4 < 2 * (a + 1)) :
+    ∃ R₀ : ℝ, 0 < R₀ ∧ ∃ δ₀ : ℝ, δ₀ < 1 ∧
+      ∀ (T : SmoothCcTensor g₀ 0 2),
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖ ≤ R₀ →
+        gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ₀ :=
+  sorry
+
+/-- **The smooth Ricci–DeTurck nonlinearity factors through the spectral embedding** (proven
+from the ball-Lipschitz estimate).
+
+If two smooth fibre-small `(0,2)`-tensors `T, T'` have the same order-`(a+2)` spectral
+embedding `smoothCcToTensorHs g₀ (a+2) T = smoothCcToTensorHs g₀ (a+2) T'`, then their genuine
+smooth Ricci–DeTurck nonlinearities agree: `deTurckSmoothN T = deTurckSmoothN T'`.  This is the
+**well-definedness on the embedded image** that lets the dense extension `deTurckSobolevNHa2`
+read off the genuine `deTurckSmoothN` value from the spectral datum alone
+(`deTurckSobolevNHa2_eq_smoothN`).
+
+It is a corollary of the quasilinear ball-Lipschitz estimate
+`deTurckSmoothN_ballLipschitz_Ha2`: on a ball of radius `R := max ‖ι T‖ ‖ι T'‖`, that estimate
+gives `‖N(T) − N(T')‖ ≤ K · ‖ι T − ι T'‖`, and the embeddings being equal makes the right-hand
+side `0`, forcing `N(T) = N(T')`. -/
+theorem deTurckSmoothN_embedding_wellDefined (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : Module.finrank ℝ E + 4 < 2 * (a + 1))
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hTT' : smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T =
+      smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T') :
+    deTurckSmoothN (I := I) (M := M) g₀ g_bg a T hδ_lt hδ =
+      deTurckSmoothN (I := I) (M := M) g₀ g_bg a T' hδ'_lt hδ' := by
+  set R : ℝ := max ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖
+    ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T'‖ + 1 with hR_def
+  have hR_pos : 0 < R := by
+    have : (0 : ℝ) ≤ max ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T'‖ :=
+      le_trans (norm_nonneg _) (le_max_left _ _)
+    rw [hR_def]; linarith
+  obtain ⟨K, hK⟩ :=
+    deTurckSmoothN_ballLipschitz_Ha2 (I := I) (M := M) g₀ g_bg a ha_super hR_pos
+  have hTball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖ ≤ R := by
+    rw [hR_def]; linarith [le_max_left ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T'‖]
+  have hT'ball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T'‖ ≤ R := by
+    rw [hR_def]; linarith [le_max_right ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T'‖]
+  have hbound := hK T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
+  rw [hTT', sub_self, norm_zero, mul_zero] at hbound
+  have hzero : ‖deTurckSmoothN (I := I) (M := M) g₀ g_bg a T hδ_lt hδ -
+      deTurckSmoothN (I := I) (M := M) g₀ g_bg a T' hδ'_lt hδ'‖ = 0 :=
+    le_antisymm hbound (norm_nonneg _)
+  rw [norm_eq_zero, sub_eq_zero] at hzero
+  exact hzero
+
+/-- **The radial scaling of a smooth `(0,2)`-tensor into the spectral `H^{a+2}` ball of radius
+`R₀`.**  The smooth tensor `T` is multiplied by `min 1 (R₀ / ‖ι(a+2) T‖)`, which is `≤ 1` and
+contracts `T` so that its order-`(a+2)` embedding has norm `≤ R₀`, while leaving it unchanged
+when it already lies in the ball. -/
+def radialScaleSmooth (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (R₀ : ℝ)
+    (T : SmoothCcTensor g₀ 0 2) : SmoothCcTensor g₀ 0 2 :=
+  (min 1 (R₀ / ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖)) • T
+
+/-- The radial scaling lands in the `H^{a+2}` ball of radius `R₀` (for `0 ≤ R₀`): its order-`(a+2)`
+embedding has norm `≤ R₀`. -/
+theorem norm_smoothCcToTensorHs_radialScaleSmooth_le
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    (T : SmoothCcTensor g₀ 0 2) :
+    ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
+        (radialScaleSmooth (I := I) (M := M) g₀ a R₀ T)‖ ≤ R₀ := by
+  set n := ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖ with hn
+  have hn0 : 0 ≤ n := norm_nonneg _
+  have hcnn : 0 ≤ min 1 (R₀ / n) := le_min zero_le_one (div_nonneg hR₀ hn0)
+  rw [radialScaleSmooth, smoothCcToTensorHs_smul, tensorHs_norm_smul, abs_of_nonneg hcnn]
+  rcases eq_or_lt_of_le hn0 with heq | hpos
+  · rw [← heq]; simpa using hR₀
+  · have hmin_le : min 1 (R₀ / n) ≤ R₀ / n := min_le_right _ _
+    calc min 1 (R₀ / n) * n ≤ (R₀ / n) * n :=
+          mul_le_mul_of_nonneg_right hmin_le hn0
+      _ = R₀ := by field_simp
+
+/-- The order-`(a+2)` embedding of the radial scaling of `T` is the **ball retraction** of the
+embedding of `T`: `ι(a+2) (radialScaleSmooth R₀ T) = ballRetraction R₀ (ι(a+2) T)`.  Both sides
+are `(min 1 (R₀ / ‖ι T‖)) • ι T`, since the embedding is `ℝ`-homogeneous
+(`smoothCcToTensorHs_smul`) and norm-multiplicative (`tensorHs_norm_smul`). -/
+theorem smoothCcToTensorHs_radialScaleSmooth_eq_ballRetraction
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (R₀ : ℝ) (T : SmoothCcTensor g₀ 0 2) :
+    smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
+        (radialScaleSmooth (I := I) (M := M) g₀ a R₀ T) =
+      ballRetraction R₀ (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T) := by
+  rw [radialScaleSmooth, smoothCcToTensorHs_smul, ballRetraction]
+
+open Classical in
+/-- **The total continuous Ricci–DeTurck nonlinearity at the quasilinear `H^{a+2}` order.**
+
+  `N : tensorHs g₀ 0 2 ((a : ℝ) + 2) → tensorHs g₀ 0 2 (a : ℝ)`.
+
+`deTurckSobolevNHa2` is the **total, continuous, non-gated** quasilinear Ricci–DeTurck
+nonlinearity on the spectral Sobolev scale.  It is built by **dense Lipschitz extension** of the
+genuine smooth-input nonlinearity `deTurckSmoothN`:
+
+* `deTurckSmoothN` is `H^{a+2}`-ball-Lipschitz on smooth fibre-small data
+  (`deTurckSmoothN_ballLipschitz_Ha2`), hence uniformly continuous on the **realizability ball**
+  `closedBall (0 : H^{a+2}) R₀` where every smooth datum is fibre-small
+  (`sobolevBall_smooth_fibreSmall`), in whose dense smooth subset (`smoothCcToTensorHs_denseRange`)
+  it lives;
+* the codomain `H^a` is complete (`tensorHs.instCompleteSpace`), so the uniformly continuous map
+  extends to the closure (`Dense.extend`);
+* the **recentred radial retraction** `recenteredBallRetraction 0 R₀` (1-Lipschitz, sorry-free,
+  `LocallyLipschitzTruncation.lean`) maps **all** of `H^{a+2}` into the realizability ball, making
+  the composite total.
+
+The dense-subset value reads off `deTurckSmoothN` of the radial scaling
+(`radialScaleSmooth`) of a chosen smooth representative into the realizability ball, well-defined
+on the embedded image by `deTurckSmoothN_embedding_wellDefined`.  It carries no `realizeMetricAt`
+/ finite-support / HLCC gate, and on smooth fibre-small in-ball data equals the genuine intrinsic
+remainder `deTurckSmoothN` (`deTurckSobolevNHa2_eq_smoothN`). -/
+def deTurckSobolevNHa2 (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
+    tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) →
+      tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ) :=
+  fun v =>
+    if h : ∃ p : ℝ × ℝ, 0 < p.1 ∧ p.2 < 1 ∧
+        ∀ (T : SmoothCcTensor g₀ 0 2),
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖ ≤ p.1 →
+          gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) p.2 then
+      Dense.extend (smoothCcToTensorHs_denseRange (I := I) (M := M) g₀ ((a : ℝ) + 2))
+        (fun x =>
+          deTurckSmoothN (I := I) (M := M) g₀ g_bg a
+            (radialScaleSmooth (I := I) (M := M) g₀ a (Classical.choose h).1
+              (Classical.choose x.2))
+            (Classical.choose_spec h).2.1
+            ((Classical.choose_spec h).2.2 _
+              (norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M)
+                g₀ a (Classical.choose_spec h).1.le (Classical.choose x.2))))
+        (recenteredBallRetraction (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
+          (Classical.choose h).1 v)
+    else 0
+
+/-- The realizability existence holds under the supercritical hypothesis `ha_super`: this is the
+`∃ p`-witness that drives the `then` branch of `deTurckSobolevNHa2`. -/
+theorem deTurckSobolevNHa2_exists_of_super (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : Module.finrank ℝ E + 4 < 2 * (a + 1)) :
+    ∃ p : ℝ × ℝ, 0 < p.1 ∧ p.2 < 1 ∧
+      ∀ (T : SmoothCcTensor g₀ 0 2),
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖ ≤ p.1 →
+        gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) p.2 := by
+  obtain ⟨R₀, hR₀, δ₀, hδ₀_lt, hball⟩ :=
+    sobolevBall_smooth_fibreSmall (I := I) (M := M) g₀ a ha_super
+  exact ⟨(R₀, δ₀), hR₀, hδ₀_lt, hball⟩
+
+/-- **`deTurckSobolevNHa2` is globally Lipschitz** (under the supercritical order).
+
+The dense-subset function is Lipschitz **in the embedding coordinate**: on the realizability
+ball both radial scalings are fibre-small, so `deTurckSmoothN_ballLipschitz_Ha2` controls their
+nonlinearity difference by `K` times the `H^{a+2}`-distance of their embeddings, which are the
+ball retractions of the underlying points (`smoothCcToTensorHs_radialScaleSmooth_eq_ballRetraction`)
+and hence `1`-Lipschitz in the point (`lipschitzWith_ballRetraction`).  The dense extension is the
+continuous map agreeing with this `K`-Lipschitz function on the dense range, so it is `K`-Lipschitz
+on the closure `= univ` (`LipschitzOnWith.closure`); precomposing with the `1`-Lipschitz recentred
+retraction keeps the constant. -/
+theorem deTurckSobolevNHa2_lipschitzWith (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : Module.finrank ℝ E + 4 < 2 * (a + 1)) :
+    ∃ K : ℝ≥0, LipschitzWith K (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a) := by
+  classical
+  have h := deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a ha_super
+  set R₀ := (Classical.choose h).1 with hR₀_def
+  have hR₀ : 0 < R₀ := (Classical.choose_spec h).1
+  have hδ₀_lt : (Classical.choose h).2 < 1 := (Classical.choose_spec h).2.1
+  obtain ⟨K, hK⟩ :=
+    deTurckSmoothN_ballLipschitz_Ha2 (I := I) (M := M) g₀ g_bg a ha_super hR₀
+  -- the dense-subset function
+  set F : (Set.range (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2))) →
+      tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ) :=
+    fun x =>
+      deTurckSmoothN (I := I) (M := M) g₀ g_bg a
+        (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (Classical.choose x.2))
+        (Classical.choose_spec h).2.1
+        ((Classical.choose_spec h).2.2 _
+          (norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M)
+            g₀ a hR₀.le (Classical.choose x.2))) with hF_def
+  -- the embedding of the radial scaling of the chosen representative is `ballRetraction R₀ ↑x`
+  have hembed : ∀ x : Set.range (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)),
+      smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
+        (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (Classical.choose x.2)) =
+          ballRetraction R₀ (x : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) := by
+    intro x
+    rw [smoothCcToTensorHs_radialScaleSmooth_eq_ballRetraction, Classical.choose_spec x.2]
+  -- `F` is `K`-Lipschitz in the embedding coordinate
+  have hF_lip : ∀ x y : Set.range (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)),
+      ‖F x - F y‖ ≤ (K : ℝ) *
+        ‖(x : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) - (y : _)‖ := by
+    intro x y
+    have hbound := hK
+      (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (Classical.choose x.2))
+      (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (Classical.choose y.2))
+      (Classical.choose_spec h).2.1
+      ((Classical.choose_spec h).2.2 _
+        (norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M) g₀ a hR₀.le _))
+      (Classical.choose_spec h).2.1
+      ((Classical.choose_spec h).2.2 _
+        (norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M) g₀ a hR₀.le _))
+      (norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M) g₀ a hR₀.le _)
+      (norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M) g₀ a hR₀.le _)
+    calc ‖F x - F y‖ ≤ (K : ℝ) *
+            ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
+                (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (Classical.choose x.2)) -
+              smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
+                (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (Classical.choose y.2))‖ := hbound
+      _ = (K : ℝ) * ‖ballRetraction R₀
+              (x : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) -
+            ballRetraction R₀ (y : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))‖ := by
+            rw [hembed x, hembed y]
+      _ ≤ (K : ℝ) * ‖(x : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) -
+            (y : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))‖ := by
+            have hlip := (lipschitzWith_ballRetraction (X := tensorHs (I := I) (M := M)
+              g₀ 0 2 ((a : ℝ) + 2)) hR₀.le).dist_le_mul
+              (x : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
+              (y : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
+            rw [NNReal.coe_one, one_mul, dist_eq_norm, dist_eq_norm] at hlip
+            exact mul_le_mul_of_nonneg_left hlip K.coe_nonneg
+  -- `F` is `K`-Lipschitz, hence continuous and uniformly continuous
+  have hlipF : LipschitzWith K F := by
+    refine LipschitzWith.of_dist_le_mul (fun x y => ?_)
+    rw [dist_eq_norm, Subtype.dist_eq, dist_eq_norm]
+    exact hF_lip x y
+  have hF_cont : Continuous F := hlipF.continuous
+  -- the dense extension agrees with `F` on the dense range and is uniformly continuous
+  have hdense := smoothCcToTensorHs_denseRange (I := I) (M := M) g₀ ((a : ℝ) + 2)
+  have hext_eq : ∀ x : Set.range (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)),
+      Dense.extend hdense F (x : _) = F x := fun x => hdense.extend_eq hF_cont x
+  have hext_cont : Continuous (Dense.extend hdense F) :=
+    (hdense.uniformContinuous_extend hlipF.uniformContinuous).continuous
+  -- the extension is `K`-Lipschitz on the dense range, hence (by continuity) on its closure `univ`
+  have hext_lip_s : LipschitzOnWith K (Dense.extend hdense F)
+      (Set.range (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2))) := by
+    refine lipschitzOnWith_iff_dist_le_mul.mpr (fun p hp q hq => ?_)
+    obtain ⟨xp, hxp⟩ := hp
+    obtain ⟨xq, hxq⟩ := hq
+    have hep : Dense.extend hdense F p = F ⟨p, ⟨xp, hxp⟩⟩ := by
+      have := hext_eq ⟨p, ⟨xp, hxp⟩⟩; simpa using this
+    have heq : Dense.extend hdense F q = F ⟨q, ⟨xq, hxq⟩⟩ := by
+      have := hext_eq ⟨q, ⟨xq, hxq⟩⟩; simpa using this
+    rw [dist_eq_norm, hep, heq, dist_eq_norm]
+    exact hF_lip ⟨p, ⟨xp, hxp⟩⟩ ⟨q, ⟨xq, hxq⟩⟩
+  have hext_lip : LipschitzWith K (Dense.extend hdense F) := by
+    have hcl : LipschitzOnWith K (Dense.extend hdense F)
+        (closure (Set.range (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)))) :=
+      hext_lip_s.closure (hext_cont.continuousOn)
+    rw [hdense.closure_range] at hcl
+    rwa [lipschitzOnWith_univ] at hcl
+  -- assemble: `deTurckSobolevNHa2 = extend ∘ recenter` under the existence, recenter 1-Lipschitz
+  refine ⟨K, ?_⟩
+  have hretr : LipschitzWith 1 (recenteredBallRetraction
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) R₀) :=
+    recenteredBallRetraction_lipschitzWith hR₀.le _
+  have hcomp : LipschitzWith (K * 1)
+      ((Dense.extend hdense F) ∘ (recenteredBallRetraction
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) R₀)) :=
+    hext_lip.comp hretr
+  rw [mul_one] at hcomp
+  have heq_fun : deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a =
+      (Dense.extend hdense F) ∘ (recenteredBallRetraction
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) R₀) := by
+    funext v
+    rw [deTurckSobolevNHa2]
+    rw [dif_pos h]
+    rfl
+  rw [heq_fun]
+  exact hcomp
+
+/-- **The total nonlinearity `deTurckSobolevNHa2` is locally Lipschitz on any engine ball.**
+
+For the Ha2 quasilinear maximal-regularity contraction, the nonlinearity must be Lipschitz on the
+closed `H^{a+2}`-ball about the initial datum.  Since `deTurckSobolevNHa2` is **globally**
+Lipschitz (`deTurckSobolevNHa2_lipschitzWith`), it is Lipschitz on every closed ball — in
+particular on `closedBall u₀ R` about any `H^{a+2}`-datum `u₀` and radius `R`. -/
+theorem deTurckSobolevNHa2_lipschitzOnWith (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : Module.finrank ℝ E + 4 < 2 * (a + 1))
+    (R : ℝ) (u₀ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) :
+    ∃ L_R : ℝ≥0, LipschitzOnWith L_R (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a)
+      (Metric.closedBall u₀ R) := by
+  obtain ⟨K, hK⟩ := deTurckSobolevNHa2_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super
+  exact ⟨K, hK.lipschitzOnWith⟩
+
+/-- **`deTurckSobolevNHa2` is the genuine smooth nonlinearity on smooth fibre-small in-ball
+inputs.**
+
+On the spectral image `smoothCcToTensorHs g₀ (a+2) T` of a smooth fibre-small `T` whose embedding
+lies in **the realizability ball** the construction uses (`hball : ‖ι T‖ ≤ R₀`, with `(R₀, δ₀)`
+the realizability witness selected inside `deTurckSobolevNHa2` —
+`deTurckSobolevNHa2_realizability`), the total nonlinearity equals
+`deTurckSmoothN g₀ g_bg a T hδ_lt hδ` (`= deTurckRicciRHS g_bg (g₀ + T) − Δ_∇ T`).  This pins
+`deTurckSobolevNHa2` to the **genuine intrinsic Ricci–DeTurck remainder** on the dense smooth
+in-ball subset — the non-vacuity / flow-faithfulness guarantee.
+
+The recentred retraction fixes the in-ball point, the dense extension reads off `F` there
+(`Dense.extend_eq`), and `F`'s value is `deTurckSmoothN` of the radial scaling of a chosen smooth
+representative whose embedding is the (identity, in-ball) ball retraction of `ι T`; the genuine
+value is recovered by the embedding-well-definedness `deTurckSmoothN_embedding_wellDefined`. -/
+theorem deTurckSobolevNHa2_eq_smoothN (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : Module.finrank ℝ E + 4 < 2 * (a + 1))
+    (T : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖ ≤
+      (Classical.choose (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a ha_super)).1) :
+    deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T) =
+      deTurckSmoothN (I := I) (M := M) g₀ g_bg a T hδ_lt hδ := by
+  classical
+  have h := deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a ha_super
+  set R₀ := (Classical.choose h).1 with hR₀_def
+  have hR₀ : 0 < R₀ := (Classical.choose_spec h).1
+  -- abbreviations matching the definition's `then` branch
+  set hdense := smoothCcToTensorHs_denseRange (I := I) (M := M) g₀ ((a : ℝ) + 2) with hdense_def
+  set F : (Set.range (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2))) →
+      tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ) :=
+    fun x =>
+      deTurckSmoothN (I := I) (M := M) g₀ g_bg a
+        (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (Classical.choose x.2))
+        (Classical.choose_spec h).2.1
+        ((Classical.choose_spec h).2.2 _
+          (norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M)
+            g₀ a hR₀.le (Classical.choose x.2))) with hF_def
+  -- `F` is continuous (same Lipschitz argument as in `deTurckSobolevNHa2_lipschitzWith`)
+  obtain ⟨K, hK⟩ :=
+    deTurckSmoothN_ballLipschitz_Ha2 (I := I) (M := M) g₀ g_bg a ha_super hR₀
+  have hembed : ∀ x : Set.range (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)),
+      smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
+        (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (Classical.choose x.2)) =
+          ballRetraction R₀ (x : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) := by
+    intro x
+    rw [smoothCcToTensorHs_radialScaleSmooth_eq_ballRetraction, Classical.choose_spec x.2]
+  have hF_cont : Continuous F := by
+    refine (LipschitzWith.of_dist_le_mul (K := K) (fun x y => ?_)).continuous
+    rw [dist_eq_norm, Subtype.dist_eq, dist_eq_norm]
+    have hbound := hK
+      (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (Classical.choose x.2))
+      (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (Classical.choose y.2))
+      (Classical.choose_spec h).2.1
+      ((Classical.choose_spec h).2.2 _
+        (norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M) g₀ a hR₀.le _))
+      (Classical.choose_spec h).2.1
+      ((Classical.choose_spec h).2.2 _
+        (norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M) g₀ a hR₀.le _))
+      (norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M) g₀ a hR₀.le _)
+      (norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M) g₀ a hR₀.le _)
+    calc ‖F x - F y‖ ≤ (K : ℝ) *
+            ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
+                (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (Classical.choose x.2)) -
+              smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
+                (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (Classical.choose y.2))‖ := hbound
+      _ = (K : ℝ) * ‖ballRetraction R₀
+              (x : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) -
+            ballRetraction R₀ (y : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))‖ := by
+            rw [hembed x, hembed y]
+      _ ≤ (K : ℝ) * ‖(x : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) -
+            (y : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))‖ := by
+            have hlip := (lipschitzWith_ballRetraction (X := tensorHs (I := I) (M := M)
+              g₀ 0 2 ((a : ℝ) + 2)) hR₀.le).dist_le_mul
+              (x : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
+              (y : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
+            rw [NNReal.coe_one, one_mul, dist_eq_norm, dist_eq_norm] at hlip
+            exact mul_le_mul_of_nonneg_left hlip K.coe_nonneg
+  -- unfold the definition at the embedded point
+  have hmem : smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T ∈
+      Set.range (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)) := ⟨T, rfl⟩
+  have hunfold : deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+      (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T) =
+      Dense.extend hdense F
+        (recenteredBallRetraction (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) R₀
+          (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T)) := by
+    rw [deTurckSobolevNHa2, dif_pos h]
+  -- the recentred retraction fixes the in-ball point
+  have hfix : recenteredBallRetraction (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) R₀
+      (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T) =
+      smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T := by
+    refine recenteredBallRetraction_eq_self_of_mem ?_
+    rw [Metric.mem_closedBall, dist_zero_right]
+    exact hball
+  rw [hunfold, hfix, hdense.extend_eq hF_cont ⟨_, hmem⟩]
+  -- the dense-set value is `deTurckSmoothN` of the radial scaling, whose embedding is `ι T` (in
+  -- ball, so the retraction is the identity); recover `deTurckSmoothN T` by well-definedness
+  change deTurckSmoothN (I := I) (M := M) g₀ g_bg a
+      (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (Classical.choose hmem)) _ _ =
+    deTurckSmoothN (I := I) (M := M) g₀ g_bg a T hδ_lt hδ
+  refine deTurckSmoothN_embedding_wellDefined (I := I) (M := M) g₀ g_bg a ha_super _ T _ _ _ _ ?_
+  rw [smoothCcToTensorHs_radialScaleSmooth_eq_ballRetraction, Classical.choose_spec hmem]
+  exact ballRetraction_eq_self_of_mem hball
 
 /-- **The continuous (Sobolev) Ricci–DeTurck nonlinearity** as a map of spectral Sobolev
 spaces
