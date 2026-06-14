@@ -5,7 +5,35 @@ planning session.  Written 2026-06-11 by the planning (Fable) session.**
 
 ---
 
-## NEXT DISPATCH — the final 4b session (kickoff, durable)
+## ✅✅ P3 SPATIAL ENDPOINT LANDED — metricPreconvInf (2026-06-13)
+
+PLANNER-ACCEPTED (own build + axioms + sorry check): **`metricPreconvInf`**
+(commits 85669572 `exists_uniform_patch` (b), 422b7dd8 endpoint (c)+(d)) —
+AXIOM-CLEAN (propext/Classical.choice/Quot.sound, no sorryAx), green 3866 jobs,
+file sorry-free. THE assembly brick (Gap B → metricPreconvInf) is **DONE**.
+A sequence of metrics with uniform local covariant-derivative bounds + a uniform
+lower bound has a subsequence converging C∞-on-compacts to a genuine smooth
+limit metric (MSM135 Ch3 lbl351 spatial conclusion).
+
+As-built notes (real friction, NO API gap — all tool-choice): (1) `exists_chart_cover`
+gives only a POINTWISE cover → used Lindelöf directly with the (b)-patches;
+(2) `metricDerivNorm_le_compSq_uniform`'s per-`a` `∃` hides the `a`-independent
+`basisE/u'` → went through `exists_goodFrame_compBound` directly; (3) the
+ComponentConvAssembly section was strengthened `NormedSpace → InnerProductSpace ℝ E`
+(required by `metricPreconv_gInf` via `posDef_isVonNBounded`; `InnerProductSpace
+⟹ NormedSpace` so contained, no reverse-dep breakage — endpoint file, nothing
+imports it yet); (4) `φ∘ψ` vs `φ(ψ·)` defeq in huge terms → `simpa only
+[Function.comp_apply]`, not a heartbeat bump.
+
+**REMAINING for P3 = C-II window-wrap ONLY** (the last spatial→window wiring):
+thread `metricPreconvInf` (spatial, done) + `windowPreconv` (time, done, Brick D)
+through `MetricPreconvBridge` to the consumer shape `SourceMetricCPConvOnWindow`
+(PointedConvergence.lean:777) that P4's Thm 3.10 assembly consumes. The
+MetricPreconvBridge scaffold (C-II) is already committed (parameterized by gInf
++ per-time convergence); this wires the now-concrete `metricPreconvInf`/`gInf`
++ the dense-time diagonal into `windowPreconv.hconv`.
+
+## NEXT DISPATCH — the final 4b session (kickoff, durable) — ✅ DONE 2026-06-13
 
 ACCEPTED 2026-06-13: `componentBz_eq_covDeriv` (commit 38aa1243) — the 4b-ii
 (a) identity `component0S bz (metricCovDeriv g gRef a z) I0 = covDerivOfField
