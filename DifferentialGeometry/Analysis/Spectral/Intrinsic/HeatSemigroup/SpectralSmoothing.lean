@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.Intrinsic
 import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SmoothingHs
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
+import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Smooth.EigenvectorSmoothToL2
 
 /-!
 # Parabolic smoothing of the intrinsic tensor heat semigroup into every `Hˢ`
@@ -91,11 +92,11 @@ against the intrinsic compactness witness
 theorem tensorHeatSemigroup_intrinsic_tensorL2Coeff_ofCompact
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {t : ℝ} (ht : 0 ≤ t) (u₀ : TensorL2 r s g)
-    (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    (i : TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s) :
     tensorL2Coeff (I := I) (M := M)
         (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
         (tensorHeatSemigroup (I := I) (M := M) g r s t u₀) i =
-      Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
+      Real.exp (-(TensorHeatEquation.TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
         tensorL2Coeff (I := I) (M := M)
           (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
           u₀ i := by
@@ -112,7 +113,7 @@ private def baseHZero (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)).symm u₀
 
 private lemma baseHZero_coeff (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (u₀ : TensorL2 r s g) (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    (u₀ : TensorL2 r s g) (i : TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s) :
     (baseHZero (I := I) (M := M) g r s u₀).coeff i =
       tensorL2Coeff (I := I) (M := M)
         (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
@@ -133,9 +134,9 @@ def heatHsWitness (g : SmoothRiemannianMetric I M) (r s : ℕ)
 intrinsic eigenbasis coordinate of `u₀`. -/
 @[simp] theorem heatHsWitness_coeff (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (σ : ℝ) {t : ℝ} (ht : 0 < t) (u₀ : TensorL2 r s g)
-    (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    (i : TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s) :
     (heatHsWitness (I := I) (M := M) g r s σ ht u₀).coeff i =
-      Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
+      Real.exp (-(TensorHeatEquation.TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
         tensorL2Coeff (I := I) (M := M)
           (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
           u₀ i := by
@@ -174,7 +175,7 @@ theorem heat_semigroup_into_tensorHs (g : SmoothRiemannianMetric I M) (r s : ℕ
           (I := I) (M := M) h_compact).repr
         (tensorHsToL2 (I := I) (M := M) (g := g) (r := r) (s := s)
           h_compact hσ (heatHsWitness (I := I) (M := M) g r s σ ht u₀))) i =
-        Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
+        Real.exp (-(TensorHeatEquation.TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
           tensorL2Coeff (I := I) (M := M) h_compact u₀ i := by
     have h := tensorHsToL2_tensorL2Coeff
       (I := I) (M := M) (h_compact := h_compact) hσ
@@ -185,7 +186,7 @@ theorem heat_semigroup_into_tensorHs (g : SmoothRiemannianMetric I M) (r s : ℕ
       ((tensorResolventHilbertEigenbasisSigma
           (I := I) (M := M) h_compact).repr
         (tensorHeatSemigroup (I := I) (M := M) g r s t u₀)) i =
-        Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
+        Real.exp (-(TensorHeatEquation.TensorEigenIdx.lambda (I := I) (M := M) i) * t) *
           tensorL2Coeff (I := I) (M := M) h_compact u₀ i := by
     have h := tensorHeatSemigroup_intrinsic_tensorL2Coeff_ofCompact
       (I := I) (M := M) g r s ht.le u₀ i
@@ -261,6 +262,56 @@ theorem spectral_smooth_realization_reduction
     ⟨heatHsWitness (I := I) (M := M) g r s σ ht u₀,
       heat_semigroup_into_tensorHs (I := I) (M := M) g r s hσ ht u₀⟩)
 
+/-- **Smooth-series convergence engine (deferred analytic input).**
+
+Let `c : TensorEigenIdx g r s → ℝ` be a coordinate family whose weighted
+squares `(1 + λᵢ)^{2k} · cᵢ²` are summable for *every even order* `2k`.
+Then the intrinsic eigenfunction series
+`∑ᵢ cᵢ · eigenvectorSmooth g r s i` (each summand a smooth, compactly
+supported eigentensor) converges in `Cᵏ` for every `k`, and its limit is a
+genuine smooth, compactly-supported section `T : SmoothCcTensor g r s`,
+whose `L²` class realizes the (square-summable) `L²` sum of the series:
+
+  `HasSum (fun i => cᵢ • (eigenvectorSmooth g r s i : L²)) (↑T)`.
+
+This is the precise `Cᵏ`-Banach-completeness content of the all-orders
+spectral Sobolev embedding. Term-by-term the per-eigentensor `H^{2k}`-norm
+bound `eigenvectorSmooth_wtwokTwoNorm_le_uniform`
+(`wtwokTwoNorm g k (eigenvectorSmooth g r s i)
+  ≤ ENNReal.ofReal (C · i.fst.valᐟ ^ (2k+1)) · ‖bᵢ‖`, polynomial growth
+in the eigenvalue since `1 + λᵢ = i.fst.val⁻¹` by
+`one_add_lambda_eq_inv_val`) is beaten by the hypothesised
+super-polynomial coefficient decay; this makes the partial sums Cauchy in
+the `Cᵏ` (iterated-covariant-derivative) Banach norm for each `k`, and the
+unconditional `C^m` tensor Sobolev embedding
+`iteratedCovGrad_toSobolev_embedding_Cm_unconditional` converts the
+`H^{2k}`-Cauchy partial sums into a `Cᵏ`-Cauchy family of smooth sections,
+whose common `C^∞` limit is the desired `SmoothCcTensor`. The `L²`
+realization of the same partial sums is the `L²` sum of the series,
+pinning the stated `HasSum`.
+
+This lemma is the precise remaining classical analytic content of the
+smooth-representative gate. It is a **deferred input**: its body is
+`sorry`, and every consumer transitively depends on `sorryAx`. Phrasing
+the conclusion as a `HasSum` against the `L²`-embedded smooth eigenbasis
+keeps the downstream assembly purely structural: identifying the series
+sum with a given `L²` element `u` is then a one-line `HasSum`-uniqueness
+against the resolvent eigenbasis representation. -/
+theorem spectralSeries_hasSmoothSum_of_allOrders_summable
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (c : TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s → ℝ)
+    (h_decay : ∀ k : ℕ,
+      Summable
+        (fun i : TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s =>
+          tensorSobolevWeight (I := I) (M := M) i (2 * k : ℝ) * (c i) ^ 2)) :
+    ∃ T : SmoothCcTensor g r s,
+      HasSum
+        (fun i : TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s =>
+          c i •
+            (eigenvectorSmooth (I := I) (M := M) g r s i : TensorL2 r s g))
+        (T : TensorL2 r s g) :=
+  sorry
+
 /-- **Classical `C^∞` spectral-series assembly (deferred analytic input).**
 
 Let `u : TensorL2 r s g` be an `L²` tensor field whose intrinsic
@@ -297,13 +348,43 @@ derived in `spectralSmoothRealizesAsSmooth_holds`). -/
 theorem spectralSeries_smoothCcTensor_of_allOrders_summable
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (u : TensorL2 r s g)
     (h_decay : ∀ k : ℕ,
-      Summable (fun i : TensorEigenIdx (I := I) (M := M) g r s =>
+      Summable (fun i : TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s =>
         tensorSobolevWeight (I := I) (M := M) i (2 * k : ℝ) *
           (tensorL2Coeff (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
             u i) ^ 2)) :
     ∃ T : SmoothCcTensor g r s, (T : TensorL2 r s g) = u := by
-  sorry
+  classical
+  set h_compact :=
+    tensorResolventL2_isCompactOperator (I := I) (M := M) g r s
+    with hcompact_def
+  -- The deep `Cᵏ`-completeness engine: the eigenfunction series with the
+  -- coefficient family `cᵢ = tensorL2Coeff h_compact u i` converges to the
+  -- `L²` class of a smooth section `T`.
+  obtain ⟨T, hT⟩ :=
+    spectralSeries_hasSmoothSum_of_allOrders_summable
+      (I := I) (M := M) g r s
+      (fun i => tensorL2Coeff (I := I) (M := M) h_compact u i) h_decay
+  refine ⟨T, ?_⟩
+  -- The resolvent eigenbasis representation of `u` is the *same* series:
+  -- `bᵢ = (eigenvectorSmooth g r s i : L²)` and `b.repr u i = tensorL2Coeff u i`.
+  have h_repr :
+      HasSum
+        (fun i : TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s =>
+          tensorL2Coeff (I := I) (M := M) h_compact u i •
+            (eigenvectorSmooth (I := I) (M := M) g r s i : TensorL2 r s g)) u := by
+    have hbasis :=
+      (tensorResolventHilbertEigenbasisSigma (I := I) (M := M) h_compact).hasSum_repr u
+    refine hbasis.congr_fun (fun i => ?_)
+    have hb :
+        (tensorResolventHilbertEigenbasisSigma (I := I) (M := M) h_compact) i =
+          (eigenvectorSmooth (I := I) (M := M) g r s i : TensorL2 r s g) := by
+      rw [tensorResolventHilbertEigenbasisSigma_apply
+        (I := I) (M := M) h_compact i,
+        eigenvectorSmooth_toL2 (I := I) (M := M) g r s i]
+    rw [hb]
+    rfl
+  exact hT.unique h_repr
 
 /-- **The smooth-representative gate (proved).**
 
@@ -331,7 +412,7 @@ theorem spectralSmoothRealizesAsSmooth_holds
     (I := I) (M := M) g r s u (fun k => ?_)
   have h2k : (0 : ℝ) ≤ (2 * k : ℝ) := by positivity
   obtain ⟨v, hv⟩ := hu (2 * k : ℝ) h2k
-  have hcoeff : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+  have hcoeff : ∀ i : TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s,
       tensorL2Coeff (I := I) (M := M)
           (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
           u i = v.coeff i := by
