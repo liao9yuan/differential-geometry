@@ -5,6 +5,46 @@ planning session.  Written 2026-06-11 by the planning (Fable) session.**
 
 ---
 
+## PLANNER CORRECTION — the P3 endpoint is the ABSTRACT window, NOT SourceMetricCPConvOnWindow (2026-06-13)
+
+**My earlier kickoffs (and scorecards) wrongly named `SourceMetricCPConvOnWindow`
+as the P3 endpoint. It is a P4 object.** Verified firsthand against the code
+(an executor fail-loud caught it; I confirmed):
+- `SourceMetricCPConvOnWindow` (PointedConvergence.lean:777) is parameterized by
+  `Φ : PointedCGHMaps` + `D : ∀k, SourceDomainMetricData Φ k`; `(D k).derivNormSupOn`
+  unfolds (line 757-759) to `metricDerivNormSupOn` of the PULLED-BACK metric
+  `D.pullbackMetric t` on the PER-k source domain `SourceDomain Φ k`. The doc
+  comment (793-796) calls constructing these "the current open-domain metric
+  frontier" = P4. Grep: NO producer anywhere (only the def). `metricPreconvInf`
+  (on one fixed `M`) cannot supply it — bridging is the P4 pullback formula.
+- The TRUE P3-internal endpoint is the ABSTRACT window convergence on `M`, =
+  the conclusion of **`windowPreconv_of_perTime`** (MetricPreconvBridge.lean:247,
+  GREEN): `∃ φ, StrictMono φ ∧ ∀ε>0 ∃k0 ∀k≥k0 ∀t∈Icc,
+  metricDerivNormSupOn K p (gSeq (φ k) t) (gInf t) gRef < ε`.
+
+**RE-SCOPED dispatch (replaces the wrong C-II window-wrap kickoff):**
+- **C-II-final (P3-internal, achievable NOW, the real "complete P3"):** discharge
+  `windowPreconv_of_perTime`'s 4 hypotheses — (hstep) per-time spatial from
+  `metricPreconvInf` relative to a `gInf : ℝ → metric` family built by a per-time
+  `metricPreconv_gInf` + master diagonal; (hgLip) time-Lipschitz of `gSeq` from
+  P2 `ric_bound_field` + the flow's `∂ₜ(∇ᵖg)` family (needs the FLOW
+  `gSeq : ℕ → ℝ → metric`, MVT — `timeLipschitz_of_hasDerivAt` is the engine,
+  WindowPreconv.lean); (hInfLip) limit continuity; (hdense/e) a dense rational
+  time net. Substantial flow-layer construction, NOT thin wiring — all engines
+  green. This is the genuine P3 endpoint.
+- **P4 pullback layer (OUT of P3 scope):** construct `PointedCGHMaps` /
+  `SourceDomainMetricData` + the pullback formulas to reach
+  `SourceMetricCPConvOnWindow`. The documented open-domain frontier.
+
+HONEST %: P3 against its TRUE (abstract-window) endpoint ~80% — spatial endpoint
+`metricPreconvInf` ✅ + the time assembly lemma `windowPreconv(_of_perTime)` ✅;
+remaining = discharging the 4 hypotheses (gInf family + hgLip from P2 + hInfLip +
+dense net). The earlier "~90% → SourceMetricCPConvOnWindow" measured the wrong
+target (folded P4's pullback layer in). Lemma 3.11 unchanged: 0% as a discharged
+theorem, machinery P1✅+P2✅+P3~80%, and there is now an explicitly-named extra
+frontier between P3 and 3.11 (the P4 pullback layer) that I had been implicitly
+absorbing into "P4 assembly".
+
 ## ✅✅ P3 SPATIAL ENDPOINT LANDED — metricPreconvInf (2026-06-13)
 
 PLANNER-ACCEPTED (own build + axioms + sorry check): **`metricPreconvInf`**
