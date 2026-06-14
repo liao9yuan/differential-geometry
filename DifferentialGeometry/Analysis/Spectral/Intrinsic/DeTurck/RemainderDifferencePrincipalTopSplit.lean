@@ -422,6 +422,12 @@ theorem realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_section_sp
                             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
                             (Integral.L2.SmoothCcTensor.toL2 Top) i) ^ 2)
                     ≤ C_top d * δ ^ 2 *
+                        (∑' i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+                            tensorSobolevWeight (I := I) (M := M) i ((d : ℝ) + 2) *
+                              (tensorL2Coeff (I := I) (M := M)
+                                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                                  (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2)
+                      + C_top d * δ ^ 2 *
                         ((∑' i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
                                 tensorSobolevWeight (I := I) (M := M) i ((d : ℝ) + 2) *
                                   (tensorL2Coeff (I := I) (M := M)
@@ -567,6 +573,12 @@ theorem exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le
                             - Integral.L2.SmoothCcTensor.toL2
                               (realizedRHSRemainderSection (I := I) g₀ g_bg g₂ T₂)) i) ^ 2)
                   ≤ C_top d * δ ^ 2 *
+                      (∑' i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
+                          tensorSobolevWeight (I := I) (M := M) i ((d : ℝ) + 2) *
+                            (tensorL2Coeff (I := I) (M := M)
+                                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                                (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2)
+                    + C_top d * δ ^ 2 *
                       ((∑' i : TensorEigenIdx (I := I) (M := M) g₀ 0 2,
                               tensorSobolevWeight (I := I) (M := M) i ((d : ℝ) + 2) *
                                 (tensorL2Coeff (I := I) (M := M)
@@ -694,6 +706,10 @@ theorem exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le
           + 2 * (∑' i, tensorSobolevWeight (I := I) (M := M) i (d : ℝ) * (cRest i) ^ 2) := by
         rw [(hsumTop.mul_left 2).tsum_add (hsumRest.mul_left 2), tsum_mul_left, tsum_mul_left]
     _ ≤ 2 * (C_top d * δ ^ 2 *
+              (∑' i, tensorSobolevWeight (I := I) (M := M) i ((d : ℝ) + 2) *
+                  (tensorL2Coeff (I := I) (M := M) hc
+                      (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2)
+            + C_top d * δ ^ 2 *
             ((∑' i, tensorSobolevWeight (I := I) (M := M) i ((d : ℝ) + 2) *
                   (tensorL2Coeff (I := I) (M := M) hc
                       (Integral.L2.SmoothCcTensor.toL2 T₁) i) ^ 2)
@@ -719,6 +735,10 @@ theorem exists_realizedRemainderDiff_principalTopSplit_allOrder_spectralMass_le
                       (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2)) := by
         gcongr
     _ = 2 * C_top d * δ ^ 2 *
+          (∑' i, tensorSobolevWeight (I := I) (M := M) i ((d : ℝ) + 2) *
+              (tensorL2Coeff (I := I) (M := M) hc
+                  (Integral.L2.SmoothCcTensor.toL2 (T₁ - T₂)) i) ^ 2)
+        + 2 * C_top d * δ ^ 2 *
           ((∑' i, tensorSobolevWeight (I := I) (M := M) i ((d : ℝ) + 2) *
                 (tensorL2Coeff (I := I) (M := M) hc
                     (Integral.L2.SmoothCcTensor.toL2 T₁) i) ^ 2)
