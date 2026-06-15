@@ -110,6 +110,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (covGrad)
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -438,8 +439,342 @@ private theorem riemannianFiberNormSq_neg_value
     tensorInnerPointwise_smul_left, tensorInnerPointwise_smul_right]
   ring
 
-/-- **(POSIT — the genuine pointwise order-`a` covariant-jet bound of the linear connection
-Laplacian, the Δ-arm of the sealed remainder difference.)**
+/-- **(POSIT — the pointwise order-`0` rough-Laplacian fibre bound, public jet form.)**
+
+For a smooth compactly-supported `(0, s)`-tensor `S` there is a single nonnegative constant `C`,
+uniform over `S` and the base point `x`, with the **order-`0`** pointwise domination of the rough
+(connection) Laplacian `Δ_∇ S := rawTensorConnLapSmooth g₀ 0 s S` by the **order-`2`** covariant jet of
+`S`:
+```
+rfns(Δ_∇ S)(x) ≤ C · rfns(∇²S)(x),   ∇²S := iteratedCovGrad g₀ 0 s 2 S.
+```
+
+This is the value-local order-`0` content of the rough Laplacian: pointwise `Δ_∇ S` is the diagonal
+`g₀`-trace of the Hessian `∑_i ∇²_{B_i,B_i} S` (`rawTensorConnLap_eq_frame_trace_secondCovDeriv`), and
+the `n`-sub-additivity of the squared fibre norm together with the per-slot two-slot-evaluation Parseval
+bound dominates the trace by `dim² · rfns(∇²S)(x)` (the witness `C := dim²`).  The on-disk material
+already carries this exact bound as the **private** lemma `rawConnLap_fiberNormSq_le_secondCovGrad`
+(`Geometry/Connection/Laplacian/RoughLaplacianSecondCovGradL2Bound.lean`), built from the private
+per-slot two-slot-evaluation bound `riemannianFiberNormSq_twoSlotUnitEval_le`; only its **public** jet
+restatement (in `iteratedCovGrad g₀ 0 s 2`-form) is absent on disk.  Posited here as one precise true
+order-`0` infrastructure child; its body is `sorry`, and consumers transitively depend on its `sorryAx`.
+
+**Non-vacuity / order self-check.**  The bound reads `∇²S`; a `C = 0` witness is rejected by a
+nonvanishing `Δ_∇ S` for a non-flat `S` (already at `s = 0`, `Δ_∇ f = trace ∇²f ≠ 0`). -/
+private theorem rawTensorConnLapSmooth_fiberNormSq_le_secondCovGrad_jet
+    (g₀ : SmoothRiemannianMetric I M) (s : ℕ) :
+    ∃ C : ℝ,
+      0 ≤ C ∧
+      ∀ (S : SmoothCcTensor g₀ 0 s) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x
+            ((rawTensorConnLapSmooth (I := I) g₀ 0 s S).toSection x) ≤
+          C * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + 2) x
+            ((iteratedCovGrad (I := I) g₀ 0 s 2 S).toSection x) := by
+  sorry
+
+/-- **The pointwise iterated-gradient fibre bound of the single-level commutator defect.**
+
+For every covariant rank `s` there is a nonnegative per-gradient-order constant family `K : ℕ → ℝ`,
+uniform in `S`, such that for every gradient order `p` the squared fibre norm of the `p`-fold covariant
+gradient of the single-level rough-Laplacian / covariant-gradient commutator defect
+`pointwiseTensorCurv g s S = Δ_∇(∇S) − ∇(Δ_∇ S)` obeys, pointwise,
+```
+rfns(∇^p (pointwiseTensorCurv g s S))(x) ≤ K p · ∑_{a ∈ range (p + 2)} rfns(∇^a S)(x).
+```
+
+This is the pointwise (`riemannianFiberNormSq`) analogue of the `L²` bound
+`exists_iteratedCovGrad_pointwiseTensorCurv_l2Norm_le`; it is **proved** here (no `sorry`) from the
+sorry-free Hom-field first-order section identity
+`exists_pointwiseTensorCurv_firstOrder_homField_section` (`Curv S = appFullSec H_R (∇S) +
+appFullSec H_dR S`) and the two order-shifted Hom-field jet window bounds
+`exists_appFullSec_iteratedCovGrad_window_bound`, split by the `2`-sub-additivity
+`riemannianFiberNormSq_add_le` of the squared fibre norm. -/
+private theorem pointwiseTensorCurv_iteratedCovGrad_fiberNormSq_jet_le
+    (g₀ : SmoothRiemannianMetric I M) (s : ℕ) :
+    ∃ K : ℕ → ℝ, (∀ p, 0 ≤ K p) ∧
+      ∀ (p : ℕ) (S : SmoothCcTensor g₀ 0 s) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((s + 1) + p) x
+            ((iteratedCovGrad (I := I) g₀ 0 (s + 1) p
+              (pointwiseTensorCurv (I := I) (M := M) g₀ s S)).toSection x) ≤
+          K p * ∑ a ∈ Finset.range (p + 2),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + a) x
+              ((iteratedCovGrad (I := I) g₀ 0 s a S).toSection x) := by
+  classical
+  obtain ⟨H_R, H_dR, hsec⟩ :=
+    exists_pointwiseTensorCurv_firstOrder_homField_section (I := I) (M := M) g₀ s
+  obtain ⟨ccR, hccR_nn, hccR⟩ :=
+    exists_appFullSec_iteratedCovGrad_window_bound (I := I) (M := M) g₀ 0 (s + 1) (s + 1) H_R
+  obtain ⟨ccdR, hccdR_nn, hccdR⟩ :=
+    exists_appFullSec_iteratedCovGrad_window_bound (I := I) (M := M) g₀ 0 s (s + 1) H_dR
+  refine ⟨fun p => 2 * ccR p + 2 * ccdR p,
+    fun p => by have := hccR_nn p; have := hccdR_nn p; positivity, fun p S x => ?_⟩
+  set rfnsS : ℕ → ℝ := fun a =>
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + a) x
+      ((iteratedCovGrad (I := I) g₀ 0 s a S).toSection x) with hrfnsS_def
+  have hrfnsS_nn : ∀ a, 0 ≤ rfnsS a := fun a =>
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (s + a) x _
+  set FULL : ℝ := ∑ a ∈ Finset.range (p + 2), rfnsS a with hFULL_def
+  have hFULL_nn : 0 ≤ FULL := Finset.sum_nonneg (fun a _ => hrfnsS_nn a)
+  -- The two Hom-field arms of the section identity.
+  set AR : SmoothCcTensor g₀ 0 (s + 1) :=
+    appFullSec (I := I) (M := M) g₀ 0 (s + 1) (s + 1) H_R (covGrad (I := I) (M := M) g₀ 0 s S)
+    with hAR_def
+  set AdR : SmoothCcTensor g₀ 0 (s + 1) :=
+    appFullSec (I := I) (M := M) g₀ 0 s (s + 1) H_dR S with hAdR_def
+  have hgradsplit :
+      iteratedCovGrad (I := I) g₀ 0 (s + 1) p (pointwiseTensorCurv (I := I) (M := M) g₀ s S) =
+        iteratedCovGrad (I := I) g₀ 0 (s + 1) p AR + iteratedCovGrad (I := I) g₀ 0 (s + 1) p AdR := by
+    rw [hsec S, ← hAR_def, ← hAdR_def, iteratedCovGrad_add (I := I) (M := M) g₀ 0 (s + 1) p]
+  have happ :
+      (iteratedCovGrad (I := I) g₀ 0 (s + 1) p
+          (pointwiseTensorCurv (I := I) (M := M) g₀ s S)).toSection x =
+        (iteratedCovGrad (I := I) g₀ 0 (s + 1) p AR).toSection x +
+          (iteratedCovGrad (I := I) g₀ 0 (s + 1) p AdR).toSection x := by
+    rw [hgradsplit, SmoothCcTensor.toSection_add]; rfl
+  rw [happ]
+  refine le_trans (riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 ((s + 1) + p) x
+    ((iteratedCovGrad (I := I) g₀ 0 (s + 1) p AR).toSection x)
+    ((iteratedCovGrad (I := I) g₀ 0 (s + 1) p AdR).toSection x)) ?_
+  -- The `H_R` arm reads the jets `∇^i (∇S) = ∇^{i+1} S`, the `H_dR` arm reads `∇^i S`.
+  have hAR_w :
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((s + 1) + p) x
+          ((iteratedCovGrad (I := I) g₀ 0 (s + 1) p AR).toSection x) ≤
+        ccR p * ∑ i ∈ Finset.range (p + 1), rfnsS (i + 1) := by
+    -- `covGrad g₀ 0 s S = iteratedCovGrad g₀ 0 s 1 S` definitionally.
+    have hcov1 : covGrad (I := I) (M := M) g₀ 0 s S = iteratedCovGrad (I := I) g₀ 0 s 1 S := rfl
+    have h := hccR (iteratedCovGrad (I := I) g₀ 0 s 1 S) p x
+    rw [hAR_def, hcov1]
+    refine h.trans_eq ?_
+    refine congrArg (ccR p * ·) (Finset.sum_congr rfl (fun i _ => ?_))
+    have hcomp := rfns_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 s 1 i S x
+    -- `rfns(∇^i (∇S)) = rfns(∇^{1+i} S) = rfnsS (1 + i) = rfnsS (i + 1)`.
+    have harg : rfnsS (1 + i) = rfnsS (i + 1) := by rw [Nat.add_comm 1 i]
+    rw [← harg, hrfnsS_def]
+    exact hcomp
+  have hAdR_w :
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((s + 1) + p) x
+          ((iteratedCovGrad (I := I) g₀ 0 (s + 1) p AdR).toSection x) ≤
+        ccdR p * ∑ i ∈ Finset.range (p + 1), rfnsS i := by
+    have h := hccdR S p x
+    rw [hAdR_def]
+    exact h.trans_eq (by rw [hrfnsS_def])
+  -- Both windows inject into `range (p + 2)`.
+  have hsubR : ∑ i ∈ Finset.range (p + 1), rfnsS (i + 1) ≤ FULL := by
+    rw [hFULL_def]
+    have hIco : ∑ i ∈ Finset.range (p + 1), rfnsS (i + 1) =
+        ∑ a ∈ Finset.Ico 1 (1 + (p + 1)), rfnsS a := by
+      rw [Finset.sum_Ico_eq_sum_range]
+      refine Finset.sum_congr (by congr 1; omega) (fun i _ => by rw [Nat.add_comm 1 i])
+    rw [hIco]
+    refine Finset.sum_le_sum_of_subset_of_nonneg ?_ (fun a _ _ => hrfnsS_nn a)
+    intro a ha; rw [Finset.mem_Ico] at ha; rw [Finset.mem_range]; omega
+  have hsubdR : ∑ i ∈ Finset.range (p + 1), rfnsS i ≤ FULL := by
+    rw [hFULL_def]
+    refine Finset.sum_le_sum_of_subset_of_nonneg ?_ (fun a _ _ => hrfnsS_nn a)
+    intro a ha; rw [Finset.mem_range] at ha ⊢; omega
+  calc 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((s + 1) + p) x
+            ((iteratedCovGrad (I := I) g₀ 0 (s + 1) p AR).toSection x) +
+          2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((s + 1) + p) x
+            ((iteratedCovGrad (I := I) g₀ 0 (s + 1) p AdR).toSection x)
+      ≤ 2 * (ccR p * ∑ i ∈ Finset.range (p + 1), rfnsS (i + 1)) +
+          2 * (ccdR p * ∑ i ∈ Finset.range (p + 1), rfnsS i) :=
+        add_le_add (by linarith [hAR_w]) (by linarith [hAdR_w])
+    _ ≤ 2 * (ccR p * FULL) + 2 * (ccdR p * FULL) := by
+        refine add_le_add ?_ ?_
+        · exact mul_le_mul_of_nonneg_left
+            (mul_le_mul_of_nonneg_left hsubR (hccR_nn p)) (by norm_num)
+        · exact mul_le_mul_of_nonneg_left
+            (mul_le_mul_of_nonneg_left hsubdR (hccdR_nn p)) (by norm_num)
+    _ = (2 * ccR p + 2 * ccdR p) * FULL := by ring
+
+set_option linter.style.show false in
+/-- **The pointwise `m`-fold rough-Laplacian / covariant-gradient iterated-commutator fibre bound.**
+
+For every commutator order `m`, all covariant ranks `s` and all gradient orders `p`, there is a
+nonnegative per-gradient-order constant family `Cfun : ℕ → ℝ`, uniform in `S`, with the pointwise
+domination
+```
+rfns(∇^p ([Δ_∇, ∇^m] S))(x) ≤ Cfun p · ∑_{a ∈ range (m + p + 1)} rfns(∇^a S)(x),
+```
+where `[Δ_∇, ∇^m] S = Δ_∇(∇^m S) − ∇^m(Δ_∇ S)` (`∇^m S = iteratedCovGrad g₀ 0 s m S`,
+`Δ_∇ = rawTensorConnLapSmooth`) and `∇^p (·) = iteratedCovGrad g₀ 0 (s + m) p (·)`.
+
+This is the pointwise (`riemannianFiberNormSq`) analogue of
+`iteratedRoughLapGrad_commutator_l2Norm_le_aux`; it is **proved** here (no `sorry`) by the same
+telescoping induction on `m`, simultaneously for all `s` and all `p`.  The recursion
+`[Δ_∇, ∇^{m+1}] S = pointwiseTensorCurv g (s + m) (∇^m S) + ∇([Δ_∇, ∇^m] S)`
+(`pointwiseTensorCurv_commutator_eq` at rank `s + m` applied to `∇^m S`) feeds the first arm into the
+single-level pointwise jet bound `pointwiseTensorCurv_iteratedCovGrad_fiberNormSq_jet_le` and the second
+arm into the induction hypothesis at gradient order `p + 1`, with the `2`-sub-additivity
+`riemannianFiberNormSq_add_le` in place of the `L²` triangle inequality. -/
+private theorem iteratedRoughLapGrad_commutator_fiberNormSq_jet_le_aux
+    (g₀ : SmoothRiemannianMetric I M) (m : ℕ) :
+    ∀ s : ℕ, ∃ Cfun : ℕ → ℝ, (∀ p, 0 ≤ Cfun p) ∧
+      ∀ (p : ℕ) (S : SmoothCcTensor g₀ 0 s) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((s + m) + p) x
+            ((iteratedCovGrad (I := I) g₀ 0 (s + m) p
+              (rawTensorConnLapSmooth (I := I) g₀ 0 (s + m)
+                  (iteratedCovGrad (I := I) g₀ 0 s m S) -
+                iteratedCovGrad (I := I) g₀ 0 s m
+                  (rawTensorConnLapSmooth (I := I) g₀ 0 s S))).toSection x) ≤
+          Cfun p * ∑ a ∈ Finset.range (m + p + 1),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + a) x
+              ((iteratedCovGrad (I := I) g₀ 0 s a S).toSection x) := by
+  induction m with
+  | zero =>
+    intro s
+    refine ⟨fun _ => 0, fun _ => le_refl _, fun p S x => ?_⟩
+    -- `[Δ_∇, ∇^0] S = Δ_∇ S − Δ_∇ S = 0`, so its `p`-fold gradient vanishes.
+    have hcomm0 :
+        rawTensorConnLapSmooth (I := I) g₀ 0 (s + 0) (iteratedCovGrad (I := I) g₀ 0 s 0 S) -
+            iteratedCovGrad (I := I) g₀ 0 s 0 (rawTensorConnLapSmooth (I := I) g₀ 0 s S) =
+          (0 : SmoothCcTensor g₀ 0 (s + 0)) := by
+      simp only [iteratedCovGrad_zero, Nat.add_zero, sub_self]
+    rw [hcomm0]
+    have hz : iteratedCovGrad (I := I) g₀ 0 (s + 0) p (0 : SmoothCcTensor g₀ 0 (s + 0)) =
+        (0 : SmoothCcTensor g₀ 0 (s + 0 + p)) := by
+      have := iteratedCovGrad_sub (I := I) (M := M) g₀ 0 (s + 0) p
+        (0 : SmoothCcTensor g₀ 0 (s + 0)) (0 : SmoothCcTensor g₀ 0 (s + 0))
+      simpa using this
+    rw [hz]
+    have hzero : ((0 : SmoothCcTensor g₀ 0 (s + 0 + p)).toSection x :
+        TensorRSSpace 0 ((s + 0) + p) I x) = 0 := rfl
+    rw [show ((0 : SmoothCcTensor g₀ 0 (s + 0 + p)).toSection x) =
+        (0 : TensorRSSpace 0 ((s + 0) + p) I x) from hzero]
+    rw [riemannianFiberNormSq_zero (I := I) (M := M) g₀ 0 ((s + 0) + p) x]
+    exact mul_nonneg (le_refl 0)
+      (Finset.sum_nonneg (fun a _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (s + a) x _))
+  | succ m ih =>
+    intro s
+    obtain ⟨Cm, hCm_nn, hCm⟩ := ih s
+    obtain ⟨K, hK_nn, hK⟩ :=
+      pointwiseTensorCurv_iteratedCovGrad_fiberNormSq_jet_le (I := I) (M := M) g₀ (s + m)
+    refine ⟨fun p => 2 * K p + 2 * Cm (p + 1),
+      fun p => by have := hK_nn p; have := hCm_nn (p + 1); positivity, fun p S x => ?_⟩
+    -- The telescoping split at the section level.
+    have hsplit :
+        rawTensorConnLapSmooth (I := I) g₀ 0 (s + (m + 1))
+              (iteratedCovGrad (I := I) g₀ 0 s (m + 1) S) -
+            iteratedCovGrad (I := I) g₀ 0 s (m + 1)
+              (rawTensorConnLapSmooth (I := I) g₀ 0 s S) =
+          pointwiseTensorCurv (I := I) (M := M) g₀ (s + m) (iteratedCovGrad (I := I) g₀ 0 s m S) +
+            covGrad (I := I) (M := M) g₀ 0 (s + m)
+              (rawTensorConnLapSmooth (I := I) g₀ 0 (s + m) (iteratedCovGrad (I := I) g₀ 0 s m S) -
+                iteratedCovGrad (I := I) g₀ 0 s m (rawTensorConnLapSmooth (I := I) g₀ 0 s S)) := by
+      rw [iteratedCovGrad_succ (I := I) (M := M) g₀ 0 s m S,
+        iteratedCovGrad_succ (I := I) (M := M) g₀ 0 s m
+          (rawTensorConnLapSmooth (I := I) g₀ 0 s S)]
+      show rawTensorConnLapSmooth (I := I) g₀ 0 (s + m + 1)
+            (covGrad (I := I) (M := M) g₀ 0 (s + m) (iteratedCovGrad (I := I) g₀ 0 s m S)) -
+          covGrad (I := I) (M := M) g₀ 0 (s + m)
+            (iteratedCovGrad (I := I) g₀ 0 s m (rawTensorConnLapSmooth (I := I) g₀ 0 s S)) =
+        pointwiseTensorCurv (I := I) (M := M) g₀ (s + m) (iteratedCovGrad (I := I) g₀ 0 s m S) +
+          covGrad (I := I) (M := M) g₀ 0 (s + m)
+            (rawTensorConnLapSmooth (I := I) g₀ 0 (s + m) (iteratedCovGrad (I := I) g₀ 0 s m S) -
+              iteratedCovGrad (I := I) g₀ 0 s m (rawTensorConnLapSmooth (I := I) g₀ 0 s S))
+      rw [pointwiseTensorCurv_commutator_eq (I := I) (M := M) g₀ (s + m)
+          (iteratedCovGrad (I := I) g₀ 0 s m S),
+        covGrad_sub (I := I) (M := M) g₀ 0 (s + m)]
+      abel
+    set comm_m : SmoothCcTensor g₀ 0 (s + m) :=
+      rawTensorConnLapSmooth (I := I) g₀ 0 (s + m) (iteratedCovGrad (I := I) g₀ 0 s m S) -
+        iteratedCovGrad (I := I) g₀ 0 s m (rawTensorConnLapSmooth (I := I) g₀ 0 s S) with hcomm_m
+    set gradm : SmoothCcTensor g₀ 0 (s + m) := iteratedCovGrad (I := I) g₀ 0 s m S with hgradm
+    set fullSum : ℝ := ∑ a ∈ Finset.range (m + 1 + p + 1),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + a) x
+        ((iteratedCovGrad (I := I) g₀ 0 s a S).toSection x) with hfullSum
+    have hfullSum_nn : 0 ≤ fullSum :=
+      Finset.sum_nonneg (fun a _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (s + a) x _)
+    -- Distribute `∇^p` over the split and apply `2`-sub-additivity.
+    have happ :
+        (iteratedCovGrad (I := I) g₀ 0 (s + (m + 1)) p
+            (rawTensorConnLapSmooth (I := I) g₀ 0 (s + (m + 1))
+                (iteratedCovGrad (I := I) g₀ 0 s (m + 1) S) -
+              iteratedCovGrad (I := I) g₀ 0 s (m + 1)
+                (rawTensorConnLapSmooth (I := I) g₀ 0 s S))).toSection x =
+          (iteratedCovGrad (I := I) g₀ 0 (s + (m + 1)) p
+              (pointwiseTensorCurv (I := I) (M := M) g₀ (s + m) gradm)).toSection x +
+            (iteratedCovGrad (I := I) g₀ 0 (s + (m + 1)) p
+              (covGrad (I := I) (M := M) g₀ 0 (s + m) comm_m)).toSection x := by
+      rw [hsplit, iteratedCovGrad_add (I := I) (M := M) g₀ 0 (s + (m + 1)) p,
+        SmoothCcTensor.toSection_add]
+      rfl
+    rw [happ]
+    refine le_trans (riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 ((s + (m + 1)) + p) x
+      ((iteratedCovGrad (I := I) g₀ 0 (s + (m + 1)) p
+        (pointwiseTensorCurv (I := I) (M := M) g₀ (s + m) gradm)).toSection x)
+      ((iteratedCovGrad (I := I) g₀ 0 (s + (m + 1)) p
+        (covGrad (I := I) (M := M) g₀ 0 (s + m) comm_m)).toSection x)) ?_
+    -- Arm 1: the single-level pointwise jet bound at rank `s + m`, applied to `∇^m S`.
+    have harm1 :
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((s + (m + 1)) + p) x
+            ((iteratedCovGrad (I := I) g₀ 0 (s + (m + 1)) p
+              (pointwiseTensorCurv (I := I) (M := M) g₀ (s + m) gradm)).toSection x) ≤
+          K p * fullSum := by
+      have hKb := hK p gradm x
+      -- Reindex `∇^a (∇^m S) → ∇^{m + a} S`.
+      have hreindex : ∀ a,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((s + m) + a) x
+              ((iteratedCovGrad (I := I) g₀ 0 (s + m) a gradm).toSection x) =
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + (m + a)) x
+              ((iteratedCovGrad (I := I) g₀ 0 s (m + a) S).toSection x) := by
+        intro a
+        rw [hgradm]
+        exact rfns_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 s m a S x
+      rw [Finset.sum_congr rfl (fun a _ => hreindex a)] at hKb
+      -- `hKb`'s LHS rank `((s + m) + 1) + p` is defeq to the goal's `(s + (m + 1)) + p`.
+      refine hKb.trans ?_
+      refine mul_le_mul_of_nonneg_left ?_ (hK_nn p)
+      -- The reindexed window `∑_{a < p + 2} ‖∇^{m + a} S‖²` injects into `fullSum`.
+      have hIco : ∑ a ∈ Finset.range (p + 2),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + (m + a)) x
+              ((iteratedCovGrad (I := I) g₀ 0 s (m + a) S).toSection x) =
+          ∑ b ∈ Finset.Ico m (m + (p + 2)),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + b) x
+              ((iteratedCovGrad (I := I) g₀ 0 s b S).toSection x) := by
+        rw [Finset.sum_Ico_eq_sum_range]
+        refine Finset.sum_congr (by congr 1; omega) (fun a _ => by rw [show m + a = m + a from rfl])
+      rw [hfullSum, hIco]
+      refine Finset.sum_le_sum_of_subset_of_nonneg ?_
+        (fun b _ _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (s + b) x _)
+      intro b hb; rw [Finset.mem_Ico] at hb; rw [Finset.mem_range]; omega
+    -- Arm 2: the induction hypothesis at gradient order `p + 1` on `[Δ_∇, ∇^m] S`.
+    have harm2 :
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((s + (m + 1)) + p) x
+            ((iteratedCovGrad (I := I) g₀ 0 (s + (m + 1)) p
+              (covGrad (I := I) (M := M) g₀ 0 (s + m) comm_m)).toSection x) ≤
+          Cm (p + 1) * fullSum := by
+      -- `∇^p (∇ comm_m) = ∇^{p+1} comm_m`; the induction hypothesis at gradient order `p + 1`.
+      have hCmb := hCm (p + 1) S x
+      rw [← hcomm_m] at hCmb
+      have hsum_eq : ∑ a ∈ Finset.range (m + (p + 1) + 1),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + a) x
+              ((iteratedCovGrad (I := I) g₀ 0 s a S).toSection x) = fullSum := by
+        rw [hfullSum, show m + (p + 1) + 1 = m + 1 + p + 1 from by omega]
+      rw [hsum_eq] at hCmb
+      -- Relate `∇^p (∇ comm_m)` to `∇^{p+1} comm_m` by the iterated-gradient composition.
+      have h := rfns_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 (s + m) 1 p comm_m x
+      rw [iteratedCovGrad_succ (I := I) (M := M) g₀ 0 (s + m) 0 comm_m,
+        iteratedCovGrad_zero] at h
+      -- `h : rfns(∇^p (∇ comm_m)) = rfns(∇^{1+p} comm_m)`; rewrite the order `1 + p → p + 1`
+      -- uniformly (both the rank index and the gradient order share the subterm `1 + p`).
+      rw [Nat.add_comm 1 p] at h
+      exact h.trans_le hCmb
+    -- Assemble: `2·arm1 + 2·arm2 ≤ (2K + 2Cm) · fullSum`.
+    calc 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((s + (m + 1)) + p) x
+              ((iteratedCovGrad (I := I) g₀ 0 (s + (m + 1)) p
+                (pointwiseTensorCurv (I := I) (M := M) g₀ (s + m) gradm)).toSection x) +
+            2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((s + (m + 1)) + p) x
+              ((iteratedCovGrad (I := I) g₀ 0 (s + (m + 1)) p
+                (covGrad (I := I) (M := M) g₀ 0 (s + m) comm_m)).toSection x)
+        ≤ 2 * (K p * fullSum) + 2 * (Cm (p + 1) * fullSum) :=
+          add_le_add (mul_le_mul_of_nonneg_left harm1 (by norm_num))
+            (mul_le_mul_of_nonneg_left harm2 (by norm_num))
+      _ = (2 * K p + 2 * Cm (p + 1)) * fullSum := by ring
+
+/-- **(The genuine pointwise order-`a` covariant-jet bound of the linear connection
+Laplacian, the Δ-arm of the sealed remainder difference — PROVED from the order-`0` rough-Laplacian
+fibre posit and the pointwise iterated commutator telescope.)**
 
 For a smooth compactly-supported `(0,2)`-tensor `W` (the perturbation difference `T − T'` at the call
 site) there is a single nonnegative constant `C`, uniform over `W` and the base point `x`, such that
@@ -451,22 +786,18 @@ rfns(∇^a (Δ_∇ W))(x) ≤ C · ∑_{q ≤ a+2} rfns(∇^q W)(x).
 ```
 
 **The jet order is `a + 2`, not `a`** — the rough Laplacian is genuinely *second order*: pointwise it
-is the diagonal `g₀`-trace of the Hessian `∑_i ∇²_{B_i,B_i} W`
-(`rawTensorConnLap_eq_frame_trace_secondCovDeriv`), so `Δ_∇ W` reads `∇²W` already at order `0`
-(`rawConnLap_fiberNormSq_le_secondCovGrad`: `rfns(Δ_∇ W)(x) ≤ dim² · rfns(∇²W)(x)`), and commuting the
-order-`a` gradient past `Δ_∇` advances the read order by exactly two (the iterated rough-Laplacian /
-gradient commutator `[Δ_∇, ∇^a]` is curvature-controlled, the pointwise covariant analogue of the
-on-disk `L²` telescope `iteratedRoughLapGrad_commutator_l2Norm_le_aux`), giving the order-`(a + 2)`
-read window `q ≤ a + 2`.  A window-`a` bound (`q ≤ a`) is FALSE: the rough Laplacian loses exactly two
-derivatives, the value-local order-`0` realization refuted in the consumer docstring.
+is the diagonal `g₀`-trace of the Hessian `∑_i ∇²_{B_i,B_i} W`, so `Δ_∇ W` reads `∇²W` already at order
+`0`, and commuting the order-`a` gradient past `Δ_∇` advances the read order by exactly two.  A window-`a`
+bound (`q ≤ a`) is FALSE: the rough Laplacian loses exactly two derivatives.
 
-The on-disk pointwise material delivers the order-`0` envelope (`rawConnLap_fiberNormSq_le_secondCovGrad`,
-the metric-trace Hessian bound) but the order-`a` pointwise covariant-jet lift — the `riemannianFiberNormSq`
-form of the curvature-corrected `[Δ_∇, ∇^a]` telescope, the second-order analogue of the
-`DiffBilinOp.exists_rfns_iteratedCovGrad_singleSum_le` engine (which is hard-locked to *order-`0`*
-operators, hence cannot host the two-derivative rough Laplacian) — has **no on-disk antecedent in
-pointwise `rfns` form** (only the `L²` telescope `iteratedRoughLapGrad_commutator_l2Norm_le_aux`
-exists); its body is `sorry`, and consumers transitively depend on its `sorryAx`.
+**Assembly.**  Splitting `∇^a(Δ_∇ W) = Δ_∇(∇^a W) − [Δ_∇, ∇^a]W` (the iterated commutator, `abel`),
+the `2`-sub-additivity of the squared fibre norm bounds `rfns(∇^a(Δ_∇ W))` by `2·rfns(Δ_∇(∇^a W)) +
+2·rfns([Δ_∇, ∇^a]W)`.  The **top-jet** term `Δ_∇(∇^a W)` is dominated by the order-`0` rough-Laplacian
+fibre posit `rawTensorConnLapSmooth_fiberNormSq_le_secondCovGrad_jet` at rank `2 + a` applied to
+`∇^a W`, whose `∇²(∇^a W)` reindexes (`rfns_iteratedCovGrad_comp`) onto the genuine `q = a + 2` jet
+`∇^{a+2}W`; the **lower-order** commutator term is dominated by the pointwise iterated-commutator
+telescope `iteratedRoughLapGrad_commutator_fiberNormSq_jet_le_aux` at `m := a`, `p := 0`, `s := 2`,
+controlled by the `∇^{≤ a}W` jets.  Both land in the read window `q ≤ a + 2`.
 
 **Non-vacuity / order self-check.**  The bound reads `∇^{≤ a+2}W`; the `q = a + 2` term is the genuine
 top jet (the second-order Laplacian read), so a window-`a` weakening is rejected.  A `C = 0` witness is
@@ -482,7 +813,88 @@ private theorem rawTensorConnLapSmooth_iteratedCovGrad_riemannianFiberNormSq_jet
           C * ∑ q ∈ Finset.range (a + 2 + 1),
             riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
               ((iteratedCovGrad (I := I) g₀ 0 2 q W).toSection x) := by
-  sorry
+  classical
+  -- The order-`0` rough-Laplacian fibre posit at rank `2 + a` (the top-jet Δ-arm).
+  obtain ⟨Cpost, hCpost_nn, hCpost⟩ :=
+    rawTensorConnLapSmooth_fiberNormSq_le_secondCovGrad_jet (I := I) (M := M) g₀ (2 + a)
+  -- The pointwise iterated-commutator telescope at `m := a`, `s := 2` (the lower-order arm).
+  obtain ⟨Cfun, hCfun_nn, hCfun⟩ :=
+    iteratedRoughLapGrad_commutator_fiberNormSq_jet_le_aux (I := I) (M := M) g₀ a 2
+  refine ⟨2 * Cpost + 2 * Cfun 0, by have := hCfun_nn 0; positivity, fun W x => ?_⟩
+  set Scol : ℝ := ∑ q ∈ Finset.range (a + 2 + 1),
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 q W).toSection x) with hScol_def
+  have hScol_nn : 0 ≤ Scol :=
+    Finset.sum_nonneg fun q _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + q) x _
+  -- The iterated-commutator section, and the `abel` split `∇^a(Δ_∇ W) = Δ_∇(∇^a W) − Comm`.
+  set Comm : SmoothCcTensor g₀ 0 (2 + a) :=
+    rawTensorConnLapSmooth (I := I) g₀ 0 (2 + a) (iteratedCovGrad (I := I) g₀ 0 2 a W) -
+      iteratedCovGrad (I := I) g₀ 0 2 a (rawTensorConnLapSmooth (I := I) g₀ 0 2 W) with hComm_def
+  have hsplit :
+      iteratedCovGrad (I := I) g₀ 0 2 a (rawTensorConnLapSmooth (I := I) g₀ 0 2 W) =
+        rawTensorConnLapSmooth (I := I) g₀ 0 (2 + a) (iteratedCovGrad (I := I) g₀ 0 2 a W) +
+          (-Comm) := by
+    rw [hComm_def]; abel
+  have hsec :
+      (iteratedCovGrad (I := I) g₀ 0 2 a
+          (rawTensorConnLapSmooth (I := I) g₀ 0 2 W)).toSection x =
+        (rawTensorConnLapSmooth (I := I) g₀ 0 (2 + a) (iteratedCovGrad (I := I) g₀ 0 2 a W)).toSection x +
+          (-Comm).toSection x := by
+    rw [hsplit, SmoothCcTensor.toSection_add]; rfl
+  rw [hsec]
+  refine le_trans (riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (2 + a) x
+    ((rawTensorConnLapSmooth (I := I) g₀ 0 (2 + a) (iteratedCovGrad (I := I) g₀ 0 2 a W)).toSection x)
+    ((-Comm).toSection x)) ?_
+  -- The Δ-arm: order-`0` fibre posit at `S := ∇^a W`, top jet `q = a + 2`.
+  have hΔarm :
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+          ((rawTensorConnLapSmooth (I := I) g₀ 0 (2 + a)
+            (iteratedCovGrad (I := I) g₀ 0 2 a W)).toSection x) ≤ Cpost * Scol := by
+    refine (hCpost (iteratedCovGrad (I := I) g₀ 0 2 a W) x).trans ?_
+    -- `rfns(∇²(∇^a W)) = rfns(∇^{a+2} W)`, the `q = a + 2` summand of `Scol`.
+    have hreindex :
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((2 + a) + 2) x
+            ((iteratedCovGrad (I := I) g₀ 0 (2 + a) 2 (iteratedCovGrad (I := I) g₀ 0 2 a W)).toSection x) =
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (a + 2)) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 (a + 2) W).toSection x) :=
+      rfns_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 2 a 2 W x
+    rw [hreindex]
+    refine mul_le_mul_of_nonneg_left ?_ hCpost_nn
+    rw [hScol_def]
+    refine Finset.single_le_sum
+      (f := fun q => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 q W).toSection x))
+      (fun q _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + q) x _) ?_
+    rw [Finset.mem_range]; omega
+  -- The commutator arm: telescope at `m = a`, `p = 0`, `s = 2`, lower-order jets `q ≤ a`.
+  have hCommarm :
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x ((-Comm).toSection x) ≤
+        Cfun 0 * Scol := by
+    -- `rfns((-Comm)(x)) = rfns(Comm(x))` by negation-invariance of the fibre norm.
+    have hneg : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x ((-Comm).toSection x) =
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x (Comm.toSection x) := by
+      rw [SmoothCcTensor.toSection_neg]
+      rw [show ((-Comm.toSection) x : TensorRSSpace 0 (2 + a) I x) = -(Comm.toSection x) from rfl]
+      exact riemannianFiberNormSq_neg_value (I := I) (M := M) g₀ 0 (2 + a) x (Comm.toSection x)
+    rw [hneg]
+    -- The telescope at `m = a`, `p = 0`, `s = 2`; `∇^0 [Δ_∇, ∇^a]W = Comm` (`(2 + a) + 0 = 2 + a`).
+    have hC := hCfun 0 W x
+    rw [iteratedCovGrad_zero] at hC
+    refine hC.trans ?_
+    refine mul_le_mul_of_nonneg_left ?_ (hCfun_nn 0)
+    rw [hScol_def]
+    -- The telescope window `∑_{a' < a + 0 + 1}` injects into `∑_{q < a + 2 + 1}`.
+    refine Finset.sum_le_sum_of_subset_of_nonneg ?_
+      (fun q _ _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + q) x _)
+    intro q hq; rw [Finset.mem_range] at hq ⊢; omega
+  calc 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+            ((rawTensorConnLapSmooth (I := I) g₀ 0 (2 + a)
+              (iteratedCovGrad (I := I) g₀ 0 2 a W)).toSection x) +
+          2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x ((-Comm).toSection x)
+      ≤ 2 * (Cpost * Scol) + 2 * (Cfun 0 * Scol) :=
+        add_le_add (mul_le_mul_of_nonneg_left hΔarm (by norm_num))
+          (mul_le_mul_of_nonneg_left hCommarm (by norm_num))
+    _ = (2 * Cpost + 2 * Cfun 0) * Scol := by ring
 
 /-- **(POSIT — the genuine chart→intrinsic per-pair order-`a` covariant-jet bound of the
 Ricci–DeTurck right-hand-side arm of the sealed remainder difference.)**
