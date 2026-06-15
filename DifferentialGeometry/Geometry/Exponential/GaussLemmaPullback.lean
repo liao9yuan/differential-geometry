@@ -223,12 +223,12 @@ theorem radial_maximalGeodesic_cont_and_foot_in_source_of_small
 
 /-- The radius of the ball around the origin on which the second-order
 variational argument behind Gauss's lemma is available: the minimum of the
-`C²` radius of `expMap g p`, the radius on which the radial curve is a
+`C^∞` radius of `expMap g p` (which a fortiori gives `C²`), the radius on which the radial curve is a
 geodesic on `[0, 1]`, the radius of the geodesic rescaling identity, and the
 radius of a Euclidean ball confined inside the normal-chart target (so that the
 chart inverse is defined on the whole ball). -/
 def expMapC2Radius (g : SmoothRiemannianMetric I M) (p : M) : ℝ :=
-  min (Classical.choose (Exponential.expMap_contMDiffAt2_of_norm_lt (I := I) g p))
+  min (Classical.choose (Exponential.expMap_contMDiffAt_infty_of_norm_lt (I := I) g p))
     (min
       (Classical.choose
         (radial_maximalGeodesic_hasGeodesicEquationAt_of_small (I := I) g p))
@@ -244,7 +244,7 @@ lemma expMapC2Radius_pos (g : SmoothRiemannianMetric I M) (p : M) :
   rw [expMapC2Radius, lt_min_iff, lt_min_iff, lt_min_iff]
   refine ⟨?_, ?_, ?_, ?_⟩
   · exact (Classical.choose_spec
-      (Exponential.expMap_contMDiffAt2_of_norm_lt (I := I) g p)).1
+      (Exponential.expMap_contMDiffAt_infty_of_norm_lt (I := I) g p)).1
   · exact (Classical.choose_spec
       (radial_maximalGeodesic_hasGeodesicEquationAt_of_small (I := I) g p)).1
   · exact (Classical.choose_spec
@@ -252,15 +252,29 @@ lemma expMapC2Radius_pos (g : SmoothRiemannianMetric I M) (p : M) :
   · exact (Classical.choose_spec
       (exists_metric_ball_subset_expMapDiffeo_source (I := I) g p)).1
 
-/-- On the ball of radius `expMapC2Radius g p`, `expMap g p` is `C²`. -/
+/-- On the ball of radius `expMapC2Radius g p`, `expMap g p` is `C^∞`. The
+geometric radius is anchored to the all-orders chart-flow producer
+`expMap_contMDiffAt_infty_of_norm_lt` through the first component of
+`expMapC2Radius`, so the smoothness is available at every order on the named
+ball (no comparison between independent `Classical.choose` radii is needed). -/
+theorem expMap_contMDiffAt_infty_of_norm_lt_radius
+    (g : SmoothRiemannianMetric I M) (p : M) {w : E}
+    (hw : ‖w‖ < expMapC2Radius (I := I) g p) :
+    ContMDiffAt 𝓘(ℝ, E) I ∞
+      (fun u : E => (expMap (I := I) g p (show TangentSpace I p from u) : M)) w :=
+  (Classical.choose_spec
+    (Exponential.expMap_contMDiffAt_infty_of_norm_lt (I := I) g p)).2 w
+    (lt_of_lt_of_le hw (min_le_left _ _))
+
+/-- On the ball of radius `expMapC2Radius g p`, `expMap g p` is `C²` (a fortiori
+from the `C^∞` smoothness on the named ball). -/
 lemma expMap_contMDiffAt2_of_norm_lt_radius
     (g : SmoothRiemannianMetric I M) (p : M) {w : E}
     (hw : ‖w‖ < expMapC2Radius (I := I) g p) :
     ContMDiffAt 𝓘(ℝ, E) I 2
       (fun u : E => (expMap (I := I) g p (show TangentSpace I p from u) : M)) w :=
-  (Classical.choose_spec
-    (Exponential.expMap_contMDiffAt2_of_norm_lt (I := I) g p)).2 w
-    (lt_of_lt_of_le hw (min_le_left _ _))
+  (expMap_contMDiffAt_infty_of_norm_lt_radius (I := I) g p hw).of_le
+    (WithTop.coe_le_coe.2 (le_top : (2 : ℕ∞) ≤ (⊤ : ℕ∞)))
 
 /-- On the ball of radius `expMapC2Radius g p`, the radial curve is a
 geodesic at every `t ∈ (-1, 2)` (an open interval containing `[0, 1]`). -/
@@ -300,6 +314,16 @@ lemma ball_subset_normalChartAt_target
   exact lt_of_lt_of_le hx
     (le_trans (min_le_right _ _) (le_trans (min_le_right _ _) (min_le_right _ _)))
 
+/-- The Euclidean ball of radius `expMapC2Radius g p` lies in the source of the
+exponential-side diffeomorphism `expMapDiffeo g p` (equivalently, the target of
+the normal chart at `p`). -/
+lemma mem_expMapDiffeo_source_of_norm_lt_radius
+    (g : SmoothRiemannianMetric I M) (p : M) {x : E}
+    (hx : ‖x‖ < expMapC2Radius (I := I) g p) :
+    x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source := by
+  have := ball_subset_normalChartAt_target (I := I) g p hx
+  rwa [NormalCoordinates.normalChartAt_target_eq] at this
+
 /-- The vector `x ∈ E` with `‖x‖ < expMapC2Radius g p` lies in the natural
 domain of `expMap g p`. The chart target equals the diffeomorphism source, on
 which `expMap g p` is realised by the partial diffeomorphism `expMapDiffeo`;
@@ -310,9 +334,8 @@ lemma mem_expDomain_of_norm_lt_radius
     (hx : ‖x‖ < expMapC2Radius (I := I) g p) :
     (show TangentSpace I p from x) ∈ expDomain (I := I) g p := by
   classical
-  have hsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source := by
-    have := ball_subset_normalChartAt_target (I := I) g p hx
-    rwa [NormalCoordinates.normalChartAt_target_eq] at this
+  have hsrc : x ∈ (NormalCoordinates.expMapDiffeo (I := I) g p).source :=
+    mem_expMapDiffeo_source_of_norm_lt_radius (I := I) g p hx
   by_cases hx0 : x = 0
   · subst hx0; exact zero_mem_expDomain (I := I) g p
   · by_contra hcon

@@ -20,7 +20,20 @@ plan). Verification passed, sorry-free (2026-06-11).
   discharged (`injOn_expMap_ball_of_ofReal_lt_injRadius`); `hloc` is the one
   remaining input.
 
-## The remaining input (B3 frontier)
+## B3 RESOLVED (2026-06-13) — item-3a complete, unconditional
+
+- **`exp_isLocalDiffeomorphOn_ball`** (`r ≤ expMapC2Radius`): discharges `hloc`
+  DIRECTLY from `NormalCoordinates.expMapDiffeo` (the repo's normal-coordinate
+  partial-diffeomorphism realizing exp). Source ⊇ ball via
+  `ball_subset_normalChartAt_target` + `normalChartAt_target_eq`; equals exp on the
+  source via `expMapDiffeo_apply_eq`. `IsLocalDiffeomorphAt` is then immediate (the
+  diffeo Φ with `x ∈ Φ.source`, `EqOn exp Φ Φ.source`).
+- **`exists_expBall_diffeo_of_lt`** (`ofReal r < injRadius` AND `r ≤ expMapC2Radius`):
+  the UNCONDITIONAL item-3a ball diffeomorphism — `hloc` no longer a hypothesis.
+
+The Jacobi/Grönwall route below (the "remaining input") is NO LONGER NEEDED for `hloc`.
+
+## (Obsolete for hloc) The former B3 frontier
 
 `hloc` = nonsingularity of `d exp` on the ball (no conjugate points below the
 scale). Native route (B0-shared, see `ConvexBalls.md` B3): exp-variation-is-Jacobi

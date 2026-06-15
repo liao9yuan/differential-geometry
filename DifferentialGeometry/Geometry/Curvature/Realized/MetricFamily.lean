@@ -492,10 +492,15 @@ structure MetricFamilySmoothOn
   metricTensor_cont :
     Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2 D.carrier
       (fun t x => metricTensorField (I := I) (G.metric t) x)
+  /-- Joint spacetime smoothness of the metric components in a local frame.  The frame is
+  required to be **C∞** (`IsLocalFrameOn I E (∞ : WithTop ℕ∞)`): demanding C∞ component output
+  from a merely-C¹ frame is unconstructible (a C¹-not-C² frame yields C¹-not-C² components), so
+  the C∞-in/C∞-out matched form is the honest, inhabitable statement.  Consumers pass genuinely
+  C∞ frames (`e.localFrame b`, `coordinateFrameAt`), so this costs them nothing. -/
   frameCompSmooth :
     forall {Idx : Type} [Fintype Idx]
       (frame : Idx -> (x : M) -> TangentSpace I x) {u : Set M},
-      IsLocalFrameOn I E 1 frame u ->
+      IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u ->
       forall i j : Idx,
         ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
           (fun p : Real × M =>

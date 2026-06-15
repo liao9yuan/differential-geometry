@@ -126,6 +126,14 @@ theorem inner_metricSharp
     LinearEquiv.apply_symm_apply (metricFlatEquiv (I := I) g x) alpha
   exact congrArg (fun L : Module.Dual Real (TangentSpace I x) => L w) h
 
+/-- Symmetric form of the sharp identity: `g_x(w, sharp α) = α w`. -/
+theorem inner_metricSharp_right
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (alpha : Module.Dual Real (TangentSpace I x)) (w : TangentSpace I x) :
+    g.inner x w (metricSharp (I := I) g x alpha) = alpha w := by
+  rw [g.symm x w (metricSharp (I := I) g x alpha)]
+  exact inner_metricSharp (I := I) g x alpha w
+
 /-! ## Gradient, divergence, and Laplacian -/
 
 /-- Pointwise gradient of a scalar function with respect to a realized metric. -/

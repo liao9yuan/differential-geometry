@@ -233,6 +233,19 @@ theorem continuousLinearMapAt_apply (s : ℕ)
       (trivializationAt _ _ x₀).coe_linearMapAt_of_mem (R := 𝕜) hx]
   rfl
 
+/-- Evaluating the fixed-chart constant `(0,s)` tensor section `constInChart` on
+tangent slots transports each slot to the fixed model fiber and applies the model
+tensor. This is the theorem-form apply lemma for `constInChart`; downstream proofs
+should use it instead of unfolding the `symmL` trivialization internals. -/
+theorem constInChart_apply (s : ℕ)
+    (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
+    (β : Tensor0SModel s 𝕜 E) (v : Fin s → TangentSpace I x) :
+    (constInChart (𝕜 := 𝕜) (I := I) s x₀ β x) v =
+      β (fun i => (trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt 𝕜 x (v i)) := by
+  rw [constInChart, Bundle.continuousMultilinearMap.triv_symmL_eq_compContinuousLinearMap
+      (F := E) (E := TangentSpace I) x₀ x hx,
+    ContinuousMultilinearMap.compContinuousLinearMap_apply]
+
 end Tensor0SSpace
 
 namespace TensorRSSpace

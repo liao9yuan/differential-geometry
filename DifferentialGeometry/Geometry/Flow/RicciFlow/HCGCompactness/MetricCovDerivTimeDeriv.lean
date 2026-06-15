@@ -614,8 +614,8 @@ theorem solnMetricJointAt
   set b := Module.finBasis Real E with hb
   have hxe : x ∈ e.baseSet := by simp [he]
   -- joint smoothness of the frame components at (t, x)
-  have hframe : IsLocalFrameOn I E 1 (e.localFrame b) e.baseSet :=
-    Bundle.Trivialization.isLocalFrameOn_localFrame_baseSet I 1 e b
+  have hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) (e.localFrame b) e.baseSet :=
+    Bundle.Trivialization.isLocalFrameOn_localFrame_baseSet I (∞ : WithTop ℕ∞) e b
   have hcompOn := hS.smoothMetric.frameCompSmooth (e.localFrame b) hframe
   have hmemProd : (D.regular ×ˢ e.baseSet : Set (Real × M)) ∈ 𝓝 (t, x) :=
     prod_mem_nhds hDreg (e.open_baseSet.mem_nhds hxe)

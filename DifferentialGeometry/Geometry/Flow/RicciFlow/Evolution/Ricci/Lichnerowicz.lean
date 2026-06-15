@@ -25,7 +25,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 section Components
@@ -530,7 +530,6 @@ theorem ricciLichnerowiczSpecializesInFrame_lc
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
-    (hcov : ConnectionLocallySmoothOn (I := I) S)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hcover : forall x : M, x ∈ u)
     (hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
@@ -548,9 +547,9 @@ theorem ricciLichnerowiczSpecializesInFrame_lc
     RicciLichnerowiczSpecializesInFrame
       (I := I) S Rm04 gInv frame roughLapRic := by
   have hOutput :=
-    rm04OutputSkew_regular (I := I) S hS Rm13 Rm04 hcov hRm13 hLower
+    rm04OutputSkew_regular (I := I) S hS Rm13 Rm04 hRm13 hLower
   have hPair :=
-    rm04PairSymm_regular (I := I) S hS Rm13 Rm04 hcov hRm13 hLower
+    rm04PairSymm_regular (I := I) S hS Rm13 Rm04 hRm13 hLower
   have hInput :=
     rm04InputSkew_regular (I := I) S Rm13 Rm04 hRm13 hLower
   have hRic : RicciSymmetricInFrameOnRegular (I := I) S frame :=
@@ -624,7 +623,6 @@ theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_lc
     (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (roughLapRic : Real -> M -> Idx -> Idx -> Real)
-    (hcov : ConnectionLocallySmoothOn (I := I) S)
     (hframe : IsLocalFrameOn I E 1 frame u)
     (hcover : forall x : M, x ∈ u)
     (hTrace : forall (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M),
@@ -646,7 +644,7 @@ theorem ricciLichnerowiczEquationInFrame_of_ricciEvolution_lc
   ricciLichnerowiczEquationInFrame_of_ricciEvolution
     (I := I) S Rm04 gInv frame roughLapRic h_ricci
     (ricciLichnerowiczSpecializesInFrame_lc
-      (I := I) S hS Rm13 Rm04 gInv frame roughLapRic hcov hframe hcover
+      (I := I) S hS Rm13 Rm04 gInv frame roughLapRic hframe hcover
       hTrace hRm13 hLower hinv)
 
 /-- Corollary 6.5 in the coordinate-frame display form used by the native
@@ -685,9 +683,6 @@ theorem evol_ricci_lichnerowicz_coordFrameAt_of_christoffelEvolution_nabla2_comm
       DifferentialGeometry.Integral.Connection.RicciTensorRealizesRm13Trace (I := I) (S.ricci s) (Rm13 s))
     (hRm : ∀ s : Real, s ∈ D.carrier ->
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I) (S.family.connection s) (Rm13 s))
-    (hcov : ∀ s : Real, s ∈ D.carrier ->
-      CovariantDerivative.ContMDiffCovariantDerivativeLocally
-        (S.family.connection s) (1 : WithTop ℕ∞))
     (hcurv : ∀ s : Real, s ∈ D.carrier ->
       DifferentialGeometry.Integral.Connection.ConnectionCurvatureCoordAt (I := I) (S.family.connection s) x₀)
     (hmix :
@@ -713,7 +708,7 @@ theorem evol_ricci_lichnerowicz_coordFrameAt_of_christoffelEvolution_nabla2_comm
   have hRicci :=
     evol_ricci_coordFrameAt_of_christoffelEvolution_nabla2_commutators
       (I := I) S hS Rm13 Rm04 gInv gInvDt nablaRic nabla2Ric x₀ hmetricReg
-      hnablaReg hRicTrace hRm hcov hcurv hmix hcomm t i j
+      hnablaReg hRicTrace hRm hcurv hmix hcomm t i j
   have hx₀ : x₀ ∈ coordinateFrameSet (I := I) x₀ :=
     coordinateFrameAt_mem (I := I) x₀
   have hinvAt :

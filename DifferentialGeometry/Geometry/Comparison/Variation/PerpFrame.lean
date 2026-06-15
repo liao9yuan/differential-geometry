@@ -605,7 +605,7 @@ theorem exists_parallel_orthonormal_perp_frame_along_geodesic
       (∀ t ∈ Set.Icc (0 : ℝ) L, covDerivAlong (I := I) g γ V t = 0) := by
     intro i
     exact DifferentialGeometry.Geometry.Riemannian.Variation.exists_parallel_transport_on_Icc
-      (I := I) g γ hγ hL (seed i)
+      (I := I) g γ (N := 2) le_rfl (hγ.of_le (by exact_mod_cast le_top)) hL (seed i)
   choose Vfun hV0 hVdiff hVpar using htransport
   refine ⟨fun i => ⟨fun t => Vfun i t⟩, ?_, ?_, ?_, ?_⟩
   · intro i t ht; exact hVdiff i t ht
@@ -613,7 +613,7 @@ theorem exists_parallel_orthonormal_perp_frame_along_geodesic
   · intro t ht i j
     have hconst :=
       DifferentialGeometry.Geometry.Riemannian.Variation.parallel_transport_preserves_inner_product
-        (I := I) g γ hγ hL.le (Vfun i) (Vfun j)
+        (I := I) g γ (N := 2) le_rfl (hγ.of_le (by exact_mod_cast le_top)) hL.le (Vfun i) (Vfun j)
         (hVdiff i) (hVdiff j) (hVpar i) (hVpar j) t ht
     rw [show ((fun i => (⟨fun t => Vfun i t⟩ : SectionAlongCurve I M γ)) i).toFun t = Vfun i t
         from rfl,
@@ -643,7 +643,7 @@ this produces the parallel orthonormal frame consumed by the covariant
 Grönwall transfer (`CovariantGronwall.lean`). -/
 theorem exists_parallel_frame
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {L : ℝ} (hL : 0 < L)
+    {N : ℕ} (hN : 2 ≤ N) (hγ : ContMDiff 𝓘(ℝ, ℝ) I (N : ℕ∞) γ) {L : ℝ} (hL : 0 < L)
     {ι : Type*} [DecidableEq ι] (v : ι → TangentSpace I (γ 0))
     (hON0 : ∀ i j, g.inner (γ 0) (v i) (v j) = if i = j then (1 : ℝ) else 0) :
     ∃ e : ι → ∀ t : ℝ, TangentSpace I (γ t),
@@ -661,13 +661,13 @@ theorem exists_parallel_frame
       (∀ t ∈ Set.Icc (0 : ℝ) L, covDerivAlong (I := I) g γ V t = 0) :=
     fun i =>
       DifferentialGeometry.Geometry.Riemannian.Variation.exists_parallel_transport_on_Icc
-        (I := I) g γ hγ hL (v i)
+        (I := I) g γ hN hγ hL (v i)
   choose Vfun hV0 hVdiff hVpar using htransport
   refine ⟨Vfun, hV0, hVdiff, hVpar, ?_⟩
   intro t ht i j
   have hconst :=
     DifferentialGeometry.Geometry.Riemannian.Variation.parallel_transport_preserves_inner_product
-      (I := I) g γ hγ hL.le (Vfun i) (Vfun j)
+      (I := I) g γ hN hγ hL.le (Vfun i) (Vfun j)
       (hVdiff i) (hVdiff j) (hVpar i) (hVpar j) t ht
   rw [hconst, hV0 i, hV0 j]
   exact hON0 i j
@@ -1172,7 +1172,8 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
         (mfderiv 𝓘(ℝ, ℝ) I γ t (1 : ℝ) : E) = 1 := by
     intro t ht
     have hconst :=
-      parallel_transport_preserves_inner_product (I := I) g γ hγ hL.le
+      parallel_transport_preserves_inner_product (I := I) g γ (N := 2) le_rfl
+        (hγ.of_le (by exact_mod_cast le_top)) hL.le
         (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E))
         (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s (1 : ℝ) : E))
         hvel_diff hvel_diff hvel_par hvel_par t ht
@@ -1194,7 +1195,8 @@ theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace 
     have hχj : χ j t = 1 := by have := hχ_one j ht; simpa using this
     rw [hχi, hχj, one_smul, one_smul]
     have hconst :=
-      parallel_transport_preserves_inner_product (I := I) g γ hγ hL.le
+      parallel_transport_preserves_inner_product (I := I) g γ (N := 2) le_rfl
+        (hγ.of_le (by exact_mod_cast le_top)) hL.le
         (Vfun i) (Vfun j) (hVdiff i) (hVdiff j) (hVpar i) (hVpar j) t ht
     rw [hconst, hV0 i, hV0 j]
     exact hseed_ON i j

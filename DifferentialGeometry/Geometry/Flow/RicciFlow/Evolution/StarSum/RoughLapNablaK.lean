@@ -40,7 +40,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 /-- **The covariant derivative of the rough Laplacian of `∇ᵏRm`, as a slot-shifted
@@ -50,10 +49,6 @@ trace of `∇^{k+3}Rm`.**  Specialisation of `nabla_metricTraceFirstTwo0S` to
 theorem nabla_roughLap0S_nablaKRm
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ)
-    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
-      (S.family.connection t) 1)
-    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I)
-      (S.family.connection t) (S.base.metric t))
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
@@ -67,6 +62,15 @@ theorem nabla_roughLap0S_nablaKRm
         gInv i j *
           nablaKRm04Field (I := I) S t (k + 3) x
             (Fin.cons X (metricTraceInput (I := I) (basis i) (basis j) tail)) := by
+  have hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (S.family.connection t) (1 : WithTop ℕ∞) := by
+    simpa [SolutionFamily.connection, metricCov] using
+      leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
+        (I := I) (M := M) (S.base.metric t)
+  have hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I)
+      (S.family.connection t) (S.base.metric t) := by
+    simpa [SolutionFamily.connection, metricCov] using
+      leviCivitaConnectionOfMetric_isMetricCompatible (I := I) (S.base.metric t)
   refine (nabla_metricTraceFirstTwo0S (I := I) (M := M) (S.family.connection t) hcov
     (S.base.metric t) hmc (nablaKRm04Field (I := I) S t (k + 2)) basis gInv hinv X
     tail).trans ?_
@@ -91,10 +95,6 @@ all-`k` Ricci identity `nablaKRm04_ricciIdentityAt` converts to controlled
 theorem spatialComm_nablaKRm_traceDiff
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ)
-    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
-      (S.family.connection t) 1)
-    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I)
-      (S.family.connection t) (S.base.metric t))
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
@@ -118,7 +118,7 @@ theorem spatialComm_nablaKRm_traceDiff
   rw [metricTraceFirstTwo0SAt_eq_sum_basis (I := I) (S.base.metric t) basis gInv hinv
     (nablaKRm04Field (I := I) S t (k + 3) x) (Fin.cons X tail)]
   rw [metricTrace0S2InBasis]
-  rw [nabla_roughLap0S_nablaKRm (I := I) (M := M) S t k hcov hmc basis gInv hinv X tail]
+  rw [nabla_roughLap0S_nablaKRm (I := I) (M := M) S t k basis gInv hinv X tail]
   rw [← Finset.sum_sub_distrib]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [← Finset.sum_sub_distrib]
@@ -143,10 +143,6 @@ theorem spatialComm_nablaKRm_split
     (hS : IsSolutionOn (I := I) S)
     (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
     (k : ℕ)
-    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
-      (S.family.connection (t : Real)) 1)
-    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen (I := I)
-      (S.family.connection (t : Real)) (S.base.metric (t : Real)))
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     {x : M} (basis : Module.Basis Idx Real (TangentSpace I x))
     (gInv : Idx -> Idx -> Real)
@@ -168,7 +164,7 @@ theorem spatialComm_nablaKRm_split
             curvatureAction0SAt (I := I) (S.base.rm13 (t : Real))
               (nablaKRm04Field (I := I) S (t : Real) (k + 1) x)
               (basis i) X (Fin.cons (basis j) tail)) := by
-  rw [spatialComm_nablaKRm_traceDiff (I := I) S (t : Real) k hcov hmc basis gInv hinv X tail]
+  rw [spatialComm_nablaKRm_traceDiff (I := I) S (t : Real) k basis gInv hinv X tail]
   refine Finset.sum_congr rfl fun i _ => ?_
   refine Finset.sum_congr rfl fun j _ => ?_
   congr 1

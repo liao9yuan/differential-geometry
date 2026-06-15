@@ -63,6 +63,19 @@ input-producer brick, not here.
   `exists_diffeo_of_injOn` (generic injective-local-diffeo glue, a Mathlib TODO)
   + `exists_expBall_diffeo` (item 3a with `hloc` nonsingularity input;
   injectivity discharged from `injRadius`).
+- **B3 — RESOLVED 2026-06-13, item-3a NOW COMPLETE & UNCONDITIONAL.** The whole
+  Jacobi/Grönwall nonsingularity tower was UNNECESSARY for `hloc`: the repo already
+  has exp as a `PartialDiffeomorph` via normal coordinates
+  (`NormalCoordinates.expMapDiffeo`), whose source contains the ball
+  (`ball_subset_normalChartAt_target` + `normalChartAt_target_eq`) and equals exp on
+  it (`expMapDiffeo_apply_eq`). New `ExpBallDiffeo.lean:exp_isLocalDiffeomorphOn_ball`
+  (~15 lines) discharges `hloc` from this for `r ≤ expMapC2Radius`; new
+  `exists_expBall_diffeo_of_lt` is the UNCONDITIONAL item-3a producer (no Jacobi
+  input). 6th "search-before-walls" lesson — `mfderiv_expMap_injective_of_norm_lt_radius`
+  (GaussLemma, found while scoping the manifold-IFT brick) pointed at expMapDiffeo.
+  The B3 Jacobi/Grönwall bricks (keystone `covGronwall_ne_zero`, `ExpNonsingular`,
+  the ∞→N refactor) remain valid reusable analysis but are OFF the item-3a path
+  (still relevant to Step B's `lbl395` metric bounds).
 - B3 (NATIVE FRONTIER, multi-session, B0-shared): CORRECTION 2026-06-11 — the
   old "W=∂ₜ commutation missing" gate is STALE: `commute_ds_dt_curvature` exists
   (de-privatized 2026-06-10) and B0 **stage 2 is fully done**

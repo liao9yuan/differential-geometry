@@ -87,7 +87,7 @@ theorem coordMetricSmooth
   simpa [metricCompInFrame] using
     hS.smoothMetric.frameCompSmooth
       (coordinateFrameAt (I := I) x₀)
-      (coordinateFrameAt_isLocalFrame_one (I := I) x₀) i j
+      (coordinateFrameAt_isLocalFrame (I := I) x₀) i j
 
 /-- Pointwise spacetime smoothness of coordinate-frame metric components at
 regular times and points in the coordinate-frame domain. -/

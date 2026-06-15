@@ -439,7 +439,6 @@ theorem exists_goodFrame_compBound
                 (((e₀.isLocalFrameOn_localFrame_baseSet I 1 basisE)).toBasisAt hz) A I0 ^ 2 :=
           mul_le_mul_of_nonneg_right hmono hcomp0
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **The tower bound at a good-frame point** (the non-orthonormal sibling of
 `B5 = compL2_tower_eq`).  At a point `y` of the frame domain where the raw
 frame-component `ℓ²` of `(0,s)`-tensors is bounded by `2^s` times the intrinsic
@@ -513,7 +512,6 @@ theorem compL2_tower_le
             (iterCov (I := I) gM r T j y)) :=
         mul_le_mul_of_nonneg_right hs (Real.sqrt_nonneg _)
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **The reverse tower bound at a good-frame point**: from the
 norm-versus-component upper bound (`exists_goodFrame_compBound`'s second
 output, with constant `Cu ≥ 1`), the intrinsic norm of the `iterCov` tower is

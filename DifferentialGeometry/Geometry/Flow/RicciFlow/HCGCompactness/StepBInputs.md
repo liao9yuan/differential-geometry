@@ -114,3 +114,26 @@ fixed-center wrapper work is domain/radius bookkeeping: relate the existential
 `delta_k` from `normalCoordMetric_contDiffOn` to the fixed model domain `U` used by
 `exists_metricLimit_normalCoord`, using the Step-A fixed-scale/radius data.  That is a
 uniform-domain input, not another smoothness theorem.
+
+## 2026-06-13 (session 5): named-radius producers landed (axiom-clean, focused checks GREEN)
+
+Now imports `GaussLemmaPullback` and opens `…Geometry.Riemannian` (for `expMapC2Radius` and
+`mem_expMapDiffeo_source_of_norm_lt_radius`).
+
+- Extracted the reusable core `normalCoordMetric_contDiffOn_of_smooth (hU : IsOpen S)
+  (hf : expMapDiffeo C∞ on S) : ContDiffOn ⊤ (normalCoordMetric Y x) S`.  The opaque-radius
+  `normalCoordMetric_contDiffOn` is now a 3-line specialization of it (no duplicated bundle proof).
+- `expMapDiffeo_contMDiffOn_expBall` / `normalCoordMetric_contDiffOn_expBall`: smoothness on the
+  **named** ball `Metric.ball 0 (expMapC2Radius Y.metric x)` (no `∩ source` — component 4 of
+  `expMapC2Radius` absorbs it via `mem_expMapDiffeo_source_of_norm_lt_radius`; ∞-smoothness via the
+  new `expMap_contMDiffAt_infty_of_norm_lt_radius`).  This is the radius anchoring that closes
+  HARD-STOP #1 from `StepBLocalMetrics.md`.
+- `contDiffOn_normalCoordMetric_of_subset_expBall`: reduces the `hsmooth` hypothesis of
+  `exists_metricLimit_normalCoord` to the single containment `hsub : ∀ k, U ⊆ ball 0 (expMapC2Radius
+  (X.obj k).metric (c k))` (via `.mono`).  `hsub`'s statement needs `letI` for `(X.obj k).M`'s
+  instances since `expMapC2Radius` takes them as typeclass args (unlike `normalCoordMetric`, which
+  bundles them internally — so its `∀ k …` conclusion needs no `letI`).
+
+Remaining: the β-wrapper assembly in `StepBLocalMetrics.lean` (fixed `U`, `hdom`, feed `hsub` from
+`Item3RadiusInput`'s `ρ ≤ expMapC2Radius`).  No smoothness/geometry frontier remains; gated only on the
+honest-input `radius_lb` wiring.  Full detail in `StepBLocalMetrics.md` (session-5 UPDATE).

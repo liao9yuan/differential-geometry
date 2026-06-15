@@ -1210,4 +1210,76 @@ theorem ricci_continuous_in_metric_time
   exact chartRicciTensor_continuous_of_hC2 (I := I) g_DT x i k hx_int (Set.Icc 0 T)
     hx_base h0 h1 h2
 
+/-- **Public joint `(t, x)` chart-Ricci-tensor continuity.**
+
+Re-exports the joint-continuity machinery in `RicciContJointAux` (whose lemmas are
+file-private) so downstream `ricciCont` assembly — joint bundle continuity of the
+canonical Ricci of an interior-slab Ricci-flow solution — can consume it.  From
+joint chart-Gram `iteratedFDeriv` (orders `0,1,2`) continuity on a set `Sp ⊆ ℝ × M`
+of good-set points, the chart-Ricci entry `q ↦ chartRicciTensor (g_DT q.1) α i k
+(extChartAt I α q.2)` is jointly continuous on `Sp`. -/
+theorem chartRicci_jointContinuousOn
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (Sp : Set (ℝ × M))
+    (hgood : ∀ q ∈ Sp, q.2 ∈ chartLeviCivitaGoodSet (I := I) α)
+    (h0 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 0
+        (chartGramOnE (I := I) (g_DT q.1) α a b) (extChartAt I α q.2)) Sp)
+    (h1 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 1
+        (chartGramOnE (I := I) (g_DT q.1) α a b) (extChartAt I α q.2)) Sp)
+    (h2 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 2
+        (chartGramOnE (I := I) (g_DT q.1) α a b) (extChartAt I α q.2)) Sp)
+    (i k : Fin (Module.finrank ℝ E)) :
+    ContinuousOn (fun q : ℝ × M =>
+      chartRicciTensor (I := I) (g_DT q.1) α i k (extChartAt I α q.2)) Sp :=
+  RicciContJointAux.jointRicci_continuousOn g_DT α Sp hgood h0 h1 h2 i k
+
+/-- **Public joint `(t, x)` chart-Riemann-tensor continuity.**  Companion of
+`chartRicci_jointContinuousOn`, for the `(1,3)` chart-Riemann entry. -/
+theorem chartRiemann_jointContinuousOn
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (Sp : Set (ℝ × M))
+    (hgood : ∀ q ∈ Sp, q.2 ∈ chartLeviCivitaGoodSet (I := I) α)
+    (h0 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 0
+        (chartGramOnE (I := I) (g_DT q.1) α a b) (extChartAt I α q.2)) Sp)
+    (h1 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 1
+        (chartGramOnE (I := I) (g_DT q.1) α a b) (extChartAt I α q.2)) Sp)
+    (h2 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 2
+        (chartGramOnE (I := I) (g_DT q.1) α a b) (extChartAt I α q.2)) Sp)
+    (i j k r : Fin (Module.finrank ℝ E)) :
+    ContinuousOn (fun q : ℝ × M =>
+      chartRiemannTensor (I := I) (g_DT q.1) α i j k r (extChartAt I α q.2)) Sp :=
+  RicciContJointAux.jointRiemann_continuousOn g_DT α Sp hgood h0 h1 h2 i j k r
+
+/-- **Joint `(t, x)` continuity of the chart-frame Ricci components.**
+
+Combines `chartRicci_jointContinuousOn` with the chart-frame Ricci identity
+`ricciTensor_chartBasisVec_alpha_eq`
+(`ricciTensor g x (e^α_i x) (e^α_j x) = chartRicciTensor g α i j (ϕ_α x)` on the good set)
+to give joint continuity of the canonical Ricci tensor evaluated on the chart-`α`
+basis frame.  This is the form the keystone bundle-continuity constructor
+`tensor0SFamilyContinuousOnSet_of_chartBasisComp` consumes for `ricciCont`. -/
+theorem ricciChartFrameComp_jointContinuousOn [I.Boundaryless]
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (Sp : Set (ℝ × M))
+    (hgood : ∀ q ∈ Sp, q.2 ∈ chartLeviCivitaGoodSet (I := I) α)
+    (h0 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 0
+        (chartGramOnE (I := I) (g_DT q.1) α a b) (extChartAt I α q.2)) Sp)
+    (h1 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 1
+        (chartGramOnE (I := I) (g_DT q.1) α a b) (extChartAt I α q.2)) Sp)
+    (h2 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 2
+        (chartGramOnE (I := I) (g_DT q.1) α a b) (extChartAt I α q.2)) Sp)
+    (i j : Fin (Module.finrank ℝ E)) :
+    ContinuousOn (fun q : ℝ × M =>
+      ricciTensor (I := I) (g_DT q.1) q.2
+        (chartBasisVecFiber (I := I) α i q.2)
+        (chartBasisVecFiber (I := I) α j q.2)) Sp :=
+  (chartRicci_jointContinuousOn g_DT α Sp hgood h0 h1 h2 i j).congr
+    (fun q hq => ricciTensor_chartBasisVec_alpha_eq (I := I) (g_DT q.1) α i j (hgood q hq))
+
 end DifferentialGeometry.PDE.RicciFlow

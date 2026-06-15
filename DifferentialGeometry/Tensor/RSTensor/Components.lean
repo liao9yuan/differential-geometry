@@ -148,6 +148,16 @@ theorem componentRS_apply_gen
         (fun a => basis (lower a)) :=
   rfl
 
+/-- Rewrite the upper/lower slot maps of a mixed component under slot-map equalities, without
+unfolding `componentRS_gen` / `basisTensor0S` / `Fin.cons`. -/
+theorem componentRS_gen_congr_slots
+    (T : TensorRSSpace r s I x)
+    {upper upper' : Fin r -> Idx} {lower lower' : Fin s -> Idx}
+    (hu : upper = upper') (hl : lower = lower') :
+    componentRS_gen (I := I) basis T upper lower =
+      componentRS_gen (I := I) basis T upper' lower' := by
+  rw [hu, hl]
+
 /-- Expanding the Hom input of a mixed tensor in a basis gives the usual
 component contraction formula. -/
 theorem componentRS_apply_input_eq_sum

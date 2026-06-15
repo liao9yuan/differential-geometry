@@ -82,6 +82,24 @@ noncomputable def metricScalarAt (g : SmoothRiemannianMetric I M) (x : M) :
     Real :=
   DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) g (metricRicciAt (I := I) (M := M) g x)
 
+/-- **Canonical trace identity: Ricci = trace of the `(1,3)` Riemann tensor.**  The metric Ricci
+tensor is the `0↔2` contraction of the metric `(1,3)` Riemann tensor `metricRm13At`.  This is the
+canonical metric-level "Ricci as a trace of Riemann" bridge (definitional: `metricRicciAt` is
+`ricciCurvatureAt (metricCov g)`, which is `ricciFromRm13At` of `metricRm13At`).  Use this instead of
+unfolding `metricRicciAt`/`ricciCurvatureAt`. -/
+theorem metricRicciAt_eq_trace (g : SmoothRiemannianMetric I M) (x : M) :
+    metricRicciAt (I := I) g x
+      = DifferentialGeometry.Integral.Connection.ricciFromRm13At
+          (metricRm13At (I := I) (M := M) g x) := rfl
+
+/-- **Canonical trace identity: scalar = metric trace of Ricci.**  Restates `metricScalarAt` as the
+metric trace pair of the canonical Ricci tensor, so downstream rewrites the canonical scalar without
+unfolding its definition. -/
+theorem metricScalarAt_def (g : SmoothRiemannianMetric I M) (x : M) :
+    metricScalarAt (I := I) g x
+      = DifferentialGeometry.Integral.Connection.metricTracePair0SAt (I := I) g
+          (metricRicciAt (I := I) (M := M) g x) := rfl
+
 /-- The lowered Riemann tensor section canonically associated to a metric. -/
 noncomputable def metricRm04 (g : SmoothRiemannianMetric I M) :
     DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M) :=
@@ -106,12 +124,6 @@ noncomputable def metricRm04StdAt
     (X Y Z W : TangentSpace I x) : Real :=
   tensor04StdAt (I := I) (M := M)
     (metricRm04At (I := I) (M := M) g x) X Y Z W
-
-/-- The metric Riemann tensor as a raw four-tensor field in standard slot
-order. -/
-noncomputable def metricRm04Std (g : SmoothRiemannianMetric I M) :
-    RawFourTensorField (I := I) (M := M) :=
-  fun x X Y Z W => metricRm04StdAt (I := I) (M := M) g x X Y Z W
 
 /-- The Ricci tensor section canonically associated to a metric. -/
 noncomputable def metricRicci (g : SmoothRiemannianMetric I M) :
@@ -167,13 +179,6 @@ noncomputable def metricRm04LastDualAt
     (g : SmoothRiemannianMetric I M) (x : M)
     (X Y Z W : TangentSpace I x) :
     metricRm04LastDualAt (I := I) (M := M) g x X Y Z W =
-      metricRm04StdAt (I := I) (M := M) g x X Y Z W := by
-  rfl
-
-@[simp] theorem metricRm04Std_apply
-    (g : SmoothRiemannianMetric I M) (x : M)
-    (X Y Z W : TangentSpace I x) :
-    metricRm04Std (I := I) (M := M) g x X Y Z W =
       metricRm04StdAt (I := I) (M := M) g x X Y Z W := by
   rfl
 
@@ -537,14 +542,14 @@ theorem metricRicciSymm
             (DifferentialGeometry.Integral.Connection.vec4 (I := I) Z W X Y) := by
     simpa using
       (DifferentialGeometry.Integral.Connection.rm04PairSymmAt_of_leviCivita_realizes
-        (I := I) g hcov1 (metricRm04 (I := I) (M := M) g) K.h_rm04
+        (I := I) g (metricRm04 (I := I) (M := M) g) K.h_rm04
         (x := x))
   have hOutput :
       DifferentialGeometry.Integral.Connection.Rm04OutputSkewAt (I := I)
         (metricRm04At (I := I) (M := M) g x) := by
     simpa using
       (DifferentialGeometry.Integral.Connection.rm04OutputSkewAt_of_leviCivita_realizes
-        (I := I) g hcov1 (metricRm04 (I := I) (M := M) g) K.h_rm04
+        (I := I) g (metricRm04 (I := I) (M := M) g) K.h_rm04
         (x := x))
   have hInput :
       ∀ X Y Z W : TangentSpace I x,

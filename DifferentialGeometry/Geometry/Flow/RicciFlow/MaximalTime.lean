@@ -1,9 +1,13 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CinftyLimitGlue
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BBSLimitProducer
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Basic
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Coordinate
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Product
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Smooth
+import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
+import Mathlib.Analysis.Calculus.FDeriv.Extend
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -22,14 +26,16 @@ noncomputable section
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open scoped Manifold ContDiff
+open DifferentialGeometry.Integral.Connection
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [FiniteDimensional Real E]
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+variable [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H]
-variable {I : ModelWithCorners Real E H}
+variable {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+variable [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless]
 
 /-- Two interval solutions agree on `U` when their stored metric, connection,
 and Ricci data agree at every time in `U`.  Ricci equality is explicit because
@@ -145,6 +151,95 @@ theorem rmBounded_of_not_unbounded
   intro t x ht hT
   exact hK t x ht hT
 
+/-- Generic one-sided boundary right-derivative: interior right-derivatives (`Set.Ici α`) on
+`Ioo α ω`, plus boundary continuity of `f` (on `Ico α ω`) and of the value field `e` (within
+`Ioi α` at `α`), give the right-derivative of `f` at the closed endpoint `α`.  This is the
+general-`α`, generic-`(f, e)` core of `ricci_flow_pde_at_zero`, kept here (no `ricciTensor`
+specialisation) to avoid importing the DeTurck-heavy short-time-assembly file. -/
+private theorem hasDerivWithinAt_Ici_boundary {a b : ℝ} (hab : a < b) (f e : ℝ → ℝ)
+    (h_cont : ContinuousOn f (Set.Ico a b))
+    (h_e_cont : ContinuousWithinAt e (Set.Ioi a) a)
+    (h_int : ∀ t ∈ Set.Ioo a b, HasDerivWithinAt f (e t) (Set.Ici a) t) :
+    HasDerivWithinAt f (e a) (Set.Ici a) a := by
+  have hopen : IsOpen (Set.Ioo a b) := isOpen_Ioo
+  have hsub : Set.Ioo a b ⊆ Set.Ici a := fun y hy => le_of_lt hy.1
+  have h_within : ∀ t ∈ Set.Ioo a b, HasDerivWithinAt f (e t) (Set.Ioo a b) t :=
+    fun t ht => (h_int t ht).mono hsub
+  have h_diff : DifferentiableOn ℝ f (Set.Ioo a b) :=
+    fun t ht => (h_within t ht).differentiableWithinAt
+  have h_derivEq : ∀ t ∈ Set.Ioo a b, deriv f t = e t := by
+    intro t ht
+    rw [← derivWithin_of_isOpen hopen ht]
+    exact (h_within t ht).derivWithin (hopen.uniqueDiffWithinAt ht)
+  refine hasDerivWithinAt_Ici_of_tendsto_deriv (s := Set.Ioo a b) h_diff ?_ ?_ ?_
+  · exact (h_cont.continuousWithinAt ⟨le_rfl, hab⟩).mono Set.Ioo_subset_Ico_self
+  · exact Ioo_mem_nhdsGT hab
+  · exact (h_e_cont.tendsto).congr'
+      (Filter.eventuallyEq_of_mem (Ioo_mem_nhdsGT hab) h_derivEq).symm
+
+/-- Scalar continuity of a continuous `(0,2)`-tensor time-family `A`, evaluated against two fixed
+tangent vectors at a fixed base point, on the family's time set `K`. -/
+private theorem tensor2_eval_contOn {K : Set ℝ}
+    {A : (t : ℝ) → (x : M) →
+      Tensor0SBundle.Tensor0SSpace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 2 x}
+    (hA : Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2 K A)
+    (x : M) (v w : TangentSpace I x) :
+    ContinuousOn (fun s : ℝ => A s x (vec2 v w)) K := by
+  rw [continuousOn_iff_continuous_restrict]
+  exact hA.eval_continuous (P := {s : ℝ // s ∈ K}) (τ := Subtype.val)
+    (b := fun _ => x) continuous_subtype_val (fun p => p.2) continuous_const
+    (v := fun i _ => vec2 v w i) (fun _ => continuous_const)
+
+/-- **`hleft` for `extends_of_rmBounded`.**  The Ricci-flow metric PDE of a solution, restated as a
+right-derivative `HasDerivWithinAt … (Set.Ici α)` on the closed-left carrier `Ico α ω` — the form the
+banked `ricci_flow_extends_construction` consumes — extracted from `hS` (whose `.equation` lives only
+on the open regular times `Ioo α ω`) via `metricDerivAt` on the interior and `hasDerivWithinAt_Ici_boundary`
+at the closed endpoint `α`.  The Ricci-name change `metricRicciAt ↔ ricciTensor` is the now-free
+`metricRicciAt_apply_eq_ricciTensor`. -/
+private theorem ricciFlowPDE_Ici_of_solution
+    {alpha omega : ℝ} {hαω : alpha < omega}
+    {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
+    (hS : IsSolutionOn (I := I) S) :
+    ∀ t ∈ Set.Ico alpha omega, ∀ (x : M) (v w : TangentSpace I x),
+      HasDerivWithinAt (fun s : ℝ => (S.base.metric s).inner x v w)
+        ((-2 : ℝ) * ricciTensor (I := I) (S.base.metric t) x v w) (Set.Ici alpha) t := by
+  -- interior right-derivative, available at every regular time `t ∈ Ioo α ω`
+  have hinterior : ∀ t ∈ Set.Ioo alpha omega, ∀ (x : M) (v w : TangentSpace I x),
+      HasDerivWithinAt (fun s : ℝ => (S.base.metric s).inner x v w)
+        ((-2 : ℝ) * ricciTensor (I := I) (S.base.metric t) x v w) (Set.Ici alpha) t := by
+    intro t ht x v w
+    have hval : S.ricciAt t x (vec2 v w) = ricciTensor (I := I) (S.base.metric t) x v w :=
+      metricRicciAt_apply_eq_ricciTensor (S.base.metric t) x v w
+    have h := metricDerivAt (I := I) S hS ⟨t, ht⟩ x v w
+    rw [hval] at h
+    exact h.hasDerivWithinAt
+  -- scalar continuity of `s ↦ ricciTensor (g s) x v w`, on the carrier
+  have hric_cont : ∀ (x : M) (v w : TangentSpace I x),
+      ContinuousOn (fun s : ℝ => ricciTensor (I := I) (S.base.metric s) x v w)
+        (Set.Ico alpha omega) := by
+    intro x v w
+    refine (tensor2_eval_contOn hS.ricciCont x v w).congr (fun s _ => ?_)
+    have e1 : S.ricci s x = metricRicciAt (S.base.metric s) x := by
+      simp only [SolutionOn.ricci, SolutionFamily.ricci_apply, SolutionFamily.ricciAt]
+    rw [e1]
+    exact (metricRicciAt_apply_eq_ricciTensor (S.base.metric s) x v w).symm
+  intro t ht x v w
+  rcases eq_or_lt_of_le ht.1 with rfl | hlt
+  · refine hasDerivWithinAt_Ici_boundary hαω
+      (fun s => (S.base.metric s).inner x v w)
+      (fun s => (-2 : ℝ) * ricciTensor (I := I) (S.base.metric s) x v w) ?_ ?_
+      (fun s hs => hinterior s hs x v w)
+    · -- h_cont : metric scalar continuity
+      refine (tensor2_eval_contOn hS.smoothMetric.metricTensor_cont x v w).congr
+        (fun s _ => ?_)
+      simp [Tensor0SBundle.metricTensorField_apply, vec2]
+    · -- h_e_cont : ricci scalar continuity within `Ioi α` at `α`
+      have hmem : Set.Ico alpha omega ∈ nhdsWithin alpha (Set.Ioi alpha) :=
+        Filter.mem_of_superset (Ioo_mem_nhdsGT hαω) Set.Ioo_subset_Ico_self
+      exact (((hric_cont x v w).continuousWithinAt ⟨le_rfl, hαω⟩).mono_of_mem_nhdsWithin
+        hmem).const_mul (-2)
+  · exact hinterior t ⟨hlt, ht.2⟩ x v w
+
 /-- Black Box 11.2: bounded curvature on a closed finite-endpoint Ricci flow
 lets the flow extend smoothly past the endpoint.  This is global PDE theory,
 not local tensor algebra. -/
@@ -153,10 +248,66 @@ theorem extends_of_rmBounded
     {S : SolutionOn (I := I) (M := M)
       (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω)}
     {Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M)}
+    (hdim : Module.finrank ℝ E = 3)
+    (_hS : IsSolutionOn (I := I) S)
     (_hRm : Rm04RealizesSolutionConnectionOn (I := I) S Rm04)
     (_hbound : Rm04NormSqBoundedAt (I := I) S Rm04) :
     ExtendsPastEndpoint (I := I) hαω S := by
-  sorry
+  let g_fam := S.base.metric
+  -- Leaf 1: Ricci-flow PDE on [α, ω) in the form ricci_flow_extends_construction needs,
+  -- extracted from the solution's `MetricVariationEquationOn` (regular times) + boundary lemma.
+  have hleft : ∀ t ∈ Set.Ico alpha omega, ∀ (x : M) (v w : TangentSpace I x),
+      HasDerivWithinAt (fun s : ℝ => (g_fam s).inner x v w)
+        ((-2 : ℝ) *
+          DifferentialGeometry.Integral.Connection.ricciTensor (I := I) (g_fam t) x v w)
+        (Set.Ici alpha) t :=
+    ricciFlowPDE_Ici_of_solution (I := I) _hS
+  -- Leaf 2: C∞ limit data from BBS all-m derivative bounds (dim-3 BBS producer)
+  have hLimit : DifferentialGeometry.PDE.RicciFlow.CinftyLimitData (I := I)
+      g_fam alpha omega hαω :=
+    cinftyLimitData_of_solution (I := I) S _hS hdim Rm04 _hRm _hbound
+  -- Leaf 3: short-time glue (DeTurck — collaborator's work)
+  have hglue : ∀ (r : ℝ → SmoothRiemannianMetric I M) (T : ℝ),
+      r 0 = hLimit.limitMetric → 0 < T →
+      (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
+        HasDerivWithinAt (fun u : ℝ => (r u).inner x v w)
+          ((-2 : ℝ) *
+            DifferentialGeometry.Integral.Connection.ricciTensor (I := I) (r t) x v w)
+          (Set.Ici 0) t) →
+      ∃ ε : ℝ, 0 < ε ∧ ε ≤ T ∧
+        DifferentialGeometry.PDE.RicciFlow.CinftyGlueData (I := I) g_fam r alpha omega ε := by
+    sorry
+  -- Leaf 4: apply the banked construction
+  obtain ⟨ε, hε, g_ext, hagree, _hsmooth, _hcont, hpde⟩ :=
+    DifferentialGeometry.PDE.RicciFlow.ricci_flow_extends_construction (I := I)
+      g_fam hαω hleft hLimit hglue
+  -- Leaf 5: wrap the raw metric data into ExtendsPastEndpoint
+  have hwide : alpha < omega + ε := by linarith
+  let Shat : SolutionOn (I := I) (M := M)
+      (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha (omega + ε) hwide) :=
+    { base := { metric := g_ext } }
+  refine ⟨ε, hε, hwide, Shat, ?_, ?_⟩
+  · -- IsSolutionOn for the extended solution
+    sorry
+  · -- SolutionAgreesOn on [α, ω)
+    intro t ht
+    have htlt : t < omega := ht.2
+    have hteq : g_ext t = g_fam t := hagree t htlt
+    refine ⟨?_, ?_, ?_⟩
+    · -- metric agreement: g_ext t = S.base.metric t
+      show S.family.metric t = Shat.family.metric t
+      change S.base.metric t = g_ext t
+      exact hteq.symm
+    · -- connection agreement (follows from metric agreement)
+      show S.family.connection t = Shat.family.connection t
+      change S.base.connection t = (SolutionFamily.connection { metric := g_ext }) t
+      simp only [SolutionFamily.connection]
+      congr 1; exact hteq.symm
+    · -- Ricci agreement (follows from metric agreement)
+      show S.ricci t = Shat.ricci t
+      change S.base.ricci t = SolutionFamily.ricci { metric := g_ext } t
+      simp only [SolutionFamily.ricci]
+      congr 1; exact hteq.symm
 
 /-- Lemma 11.3: a maximal finite-endpoint Ricci flow has unbounded curvature.
 
@@ -168,11 +319,13 @@ theorem rmUnbounded_of_maximal
     {S : SolutionOn (I := I) (M := M)
       (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω)}
     {Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M)}
+    (hdim : Module.finrank ℝ E = 3)
+    (hS : IsSolutionOn (I := I) S)
     (hmax : IsMaximalAtEndpoint (I := I) hαω S)
     (hRm : Rm04RealizesSolutionConnectionOn (I := I) S Rm04) :
     Rm04NormSqUnboundedAt (I := I) S Rm04 := by
   by_contra hnot
-  exact hmax (extends_of_rmBounded (I := I) hRm
+  exact hmax (extends_of_rmBounded (I := I) hdim hS hRm
     (rmBounded_of_not_unbounded (I := I) hnot))
 
 /-- A Ricci flow forms a singularity at the finite endpoint when some lowered
@@ -192,22 +345,26 @@ theorem formsSing_of_maximal
     {alpha omega : Real} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
       (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω)}
+    (hdim : Module.finrank ℝ E = 3)
+    (hS : IsSolutionOn (I := I) S)
     (hmax : IsMaximalAtEndpoint (I := I) hαω S)
     (hRmEx :
       ∃ Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M),
         Rm04RealizesSolutionConnectionOn (I := I) S Rm04) :
     FormsSingularityAt (I := I) S := by
   rcases hRmEx with ⟨Rm04, hRm⟩
-  exact ⟨Rm04, hRm, rmUnbounded_of_maximal (I := I) hmax hRm⟩
+  exact ⟨Rm04, hRm, rmUnbounded_of_maximal (I := I) hdim hS hmax hRm⟩
 
 /-- Canonical metric-curvature version of Lemma 11.3. -/
 theorem formsSing_of_maximal_metric
     {alpha omega : Real} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
       (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha omega hαω)}
+    (hdim : Module.finrank ℝ E = 3)
+    (hS : IsSolutionOn (I := I) S)
     (hmax : IsMaximalAtEndpoint (I := I) hαω S) :
     FormsSingularityAt (I := I) S := by
-  exact formsSing_of_maximal (I := I) hmax
+  exact formsSing_of_maximal (I := I) hdim hS hmax
     ⟨S.base.rm04, rm04Realizes_metric (I := I) S⟩
 
 /-- Interface for Lemma 14.27.  Proving this requires the global extension

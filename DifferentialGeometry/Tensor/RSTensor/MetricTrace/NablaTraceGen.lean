@@ -617,7 +617,6 @@ theorem metricTraceInput_apply {x : M} {s : ℕ} (X Y : TangentSpace I x)
       apply Fin.ext
       simp [Fin.val_succ]
 
-set_option backward.isDefEq.respectTransparency false in
 /-- Pointwise coordinate formula for the first-two metric trace field, with the
 canonical centred chart inverse metric. -/
 theorem metricTraceFirstTwoField_eq_sum {s : ℕ}

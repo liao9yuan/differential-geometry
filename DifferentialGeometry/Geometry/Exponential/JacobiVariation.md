@@ -191,3 +191,24 @@ no `sorry` introduced anywhere. Claim on JacobiVariation.lean RELEASED.
 the FIRST brick of the next session. Then the clamped radial curve (degree 8)
 qualifies directly, and the regularity-export brick proceeds per the blueprint
 above.
+
+### ∞→finite-order refactor DONE (2026-06-11, the obstruction unblock)
+
+Weakened `ContMDiff ∞ γ` → `ContMDiff (N:ℕ∞) γ` with `(hN : 2 ≤ N)` across the
+parallel-transport chain (the genuine ODE need is C², `N≥2`):
+- `ParallelTransport.lean` (GREEN): `exists_piece_parallel_section`,
+  `parallel_transport_unique_of_eq_at_point`,
+  `exists_global_parallel_transport_on_Ioo`, `exists_parallel_transport_on_Icc`,
+  `parallel_transport_preserves_inner_product` — all take `(N) (hN)` now; the
+  internal `extChartAt` smoothness stays `∞` (`.of_le`), `deriv_of_isOpen`/
+  `differentiable*` order side-goals discharged with `N ≠ 0` (NOT `1 ≤ N` —
+  the API wants `n ≠ 0`).
+- `PerpFrame.lean` (pending olean): `exists_parallel_frame` weakened to `(N)(hN)`;
+  existing `∞`-callers (`exists_parallel_orthonormal_perp_frame_along_geodesic`,
+  `perp_to_velocity_preserved_*`) keep `∞` signatures and `.of_le` at the call
+  (cascade bounded — `(N := 2) le_rfl (hγ.of_le (by exact_mod_cast le_top))`).
+- `ParallelTransportSmooth.lean` (pending olean): two call sites `.of_le`'d.
+
+⟹ the clamped radial central curve (`ContMDiff 8`) now qualifies for
+`exists_parallel_frame`. NEXT: the regularity-export theorem per the blueprint
+above, then instantiate `covGronwall_ne_zero`.

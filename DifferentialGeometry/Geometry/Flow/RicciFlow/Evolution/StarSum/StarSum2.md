@@ -76,11 +76,347 @@ each extra trace costs one `card` → base constant `card^{2+r}`.  New light-lay
 `Equiv.sumCongr e (refl)`), `mtIter` + `mtIter_add` + iterated keystone (`τ`-induction) +
 iterated `mtfOrthoBd`.
 
-**REMAINING bricks: 4–5 (E_k recursion + tower wiring).**  NOTE for brick 5: the tower's
-`starBound` has the FIXED constant card² per j-bucket, but bucket term-counts grow with k (Leibniz
-iterations), so the reshape will either carry the ∃C into a k-dependent tower constant (the
-Bernstein stage already digests `c = 2·card^{6+k}`) or restate `IteratedRmTowerOn.starBound` with
-`∃ c`, — an interface decision to make at wiring time.
+# ═══ P1.3 DONE + P1.4 IN PROGRESS (2026-06-12, Opus session β) ═══
+
+## ✅ P1.3 COMPLETE (GREEN): `e0Field`-comps `= −2·B# − drift`
+New in `StarSum2.lean` (`section ComponentIdentity`, `open Dim3Reaction`), all 0-sorry:
+- `rmComp_eq_rm`: `∇⁰Rm`-comps `= rm R` at orthonormal Fin-3 frame (via `solution_rm04_kn_all`
+  + `nablaKRm04Field_zero` + `simp [← hR, horth, htr, rm, sc, kd]`).  **Needs `NeZero (finrank E)`**
+  — derived locally `⟨by have : finrank E = 3 := hdim; omega⟩` (TangentSpace defeq E).
+- `ricTrace`: `∑_b rm R a b c b = −R a c` (`fin_cases a<;>fin_cases c<;>simp only[…,Fin.reduceFinMk,…]<;>ring`).
+- `driftPiece` (g-general): `∑_e∑_f rm a e f e · g f = −∑_p R a p · g p` (`Finset.sum_comm` +
+  `ricTrace` + `Finset.sum_neg_distrib`).
+- `btStar2/3/4`, `drStar1/2/3/4`: the 7 `btStar_eq`-template term identities (σ-tables as recorded;
+  `include horth` needed — it's used only in the proof, not the statement, so not auto-bound).
+- `e0Field_comp` (capstone, GREEN first try): distribute eval (`hev := rfl`) + 8 term identities
+  + `simp [rmComp_eq_rm …, Matrix.cons_val_{zero,one,two,three}, head_cons, tail_cons]` (Rm→rm R,
+  reduce `![…] i`) + 4 `driftPiece` rw + `simp [Bt, drift, Finset.sum_add_distrib]` + `ring`.
+  **All 8 σ-routings verified correct** (the identity closed — pencil tables were right).
+
+## ✅ P1.4 COMPLETE (GREEN): `residualStarSum_zero` — k=0 instance, 0 sorry in the k=0 path
+`residualStarSum_zero (S) (t : RegularTime D) (hdim : ∀x, finrank = 3) (hbase) : ∃ T,
+StarSum2 S t 0 T ∧ <frozen conclusion at k=0, Idx=Fin 3>`.  Proof = `⟨e0Field, e0Field_mem, …⟩`;
+per `(x,basis,horth,I0)`: `htr` from `scalar_eq_trace_ortho`+`simp[sc]`; `hlhs := rfl`
+(`tensor0SComponent ∇⁰Rm = S.base.rm04` via `nablaKRm04Field_zero`); `hval := rfl` splits
+`tensor0SComponent (roughLap + e0Field x)` into `comps(roughLap) + e0Field x (basis∘I0)` (CMM
+`add_apply` rfl); `rw [e0Field_comp …]` (the genuine content) turns `e0Field`-comps into the
+`−2B#−drift` reaction; `exact hbase`.  **Needs `NeZero (finrank E)`** — derived locally per x.
+
+**DESIGN (de-walling, honest standing input)**: `hbase` carries the per-`(x, orthonormal-frame)`
+`∂ₜRm04` evolution with **Laplacian already in the rough-trace form**
+`comps(metricTrace0S2TensorInBasis basis δ ∇²Rm04)` and **reaction in bare `Bt`/`drift` form**.
+This is the natural orthonormal heat-equation statement for `Rm` (bottoming out on the standing
+`hlich`/scalar DeTurck layer — coworker's lane), and it BYPASSES BOTH (a) the forbidden C⁴
+transfer AND (b) the deep `traceRm04Kn`/`rm04DerivsKn`/`lapRm04Kn` Δ-part machinery (the
+`KN(lap,lapS,δ) = comps(roughLap ∇²Rm04)` intermediate is never needed — `hbase` states the
+rough-trace form directly).  The genuine new math in the k=0 path is `e0Field_comp` (P1.3); the
+PDE input is honestly threaded, not proven here.  **If a future session wants `hbase` discharged
+from `rm04BaseEvolution_at`**: that needs the Δ-part proof (`KN = comps roughLap` via
+`traceRm04Kn` + connecting `nablaKRm04Field S t 2` to `rm04DerivsKn.nabla2A`) — a separate
+substantial chunk, deferred.
+
+## STATUS: P1 COMPLETE through k=0.  Only remaining sorry = the all-`k` `residualStarSum` stub (P3).
+
+# ═══ REVIEW + NEXT-PHASE DIRECTIVES (2026-06-12, Fable planner) ═══
+
+## Review verdict on the P0+P1 session: ACCEPTED
+- Claims verified: focused check GREEN, exactly 1 real `sorry` (line ~892, the intended
+  `residualStarSum` stub); the frozen statement's math is right (slot order: the two
+  outermost derivative slots are traced, matching `traceRm04Kn`'s convention).
+- **All 8 σ-routing tables PENCIL-VERIFIED** against the recorded convention
+  (`W = [e,e,f,f,m0..m3]`, `u(i) = W(σ i)`, factor1 = `u(0..3)`, factor2 = `u(4..7)`):
+  σBt1–σBt4 realize `Bt(m0m1m2m3) / (m0m1m3m2) / (m0m2m1m3) / (m0m3m1m2)` = exactly the
+  `Bsharp = Bt(abcd)−Bt(abdc)+Bt(acbd)−Bt(adbc)` expansion with the `−2,+2,−2,+2`
+  coefficients ✓; σD1–σD4 realize the four drift tuples `(mᵢ,e,f,e,…f…)` ✓; all eight are
+  bijections ✓.  Residual risk shifts to (i) `UhlReaction3`'s exact `R = −trace` slot/sign
+  (compiled-checked by the Ricci-trace lemma) and (ii) the producer's actual `Bsharp`
+  spelling (compiled-checked at assembly).  Proceed.
+
+## ⚠️ DIRECTIVE for P1.4 — the "C⁴ wall" is BYPASSED, do not climb it
+The frozen statement is at ORTHONORMAL bases — and `rm04BaseEvolution_at`
+(`UhlenbeckBaseProducer.lean`, banked) is ALREADY the per-(t,x) g_t-orthonormal-frame
+derivative `∂ₜRm04-comps = KN(lap,lapS,δ) − 2B# − drift`, with its four shaped hypotheses
+discharged by the banked `rm04CompknOrtho` / `ricDot_ortho` / `scalarDot_ortho` /
+`scalar_eq_trace_ortho`.  `rm04HrmProducer` (the coordinate-frame capstone) is the TOWER's
+input, NOT ours — **do not touch the C⁴ coordinate↔orthonormal transfer at all**.
+What P1.4 actually is (plumbing, each step has an existing lemma):
+1. `fun r => tensor0SComponent (nablaKRm04Field S r 0 x) basis I0` IS
+   `fun r => S.base.rm04 r x (basis∘I0)` (`nablaKRm04Field_zero` rfl) — feed
+   `rm04BaseEvolution_at` directly.
+2. Δ-part match: comps(`metricTrace0S2TensorInBasis basis δ (∇²Rm04)`) =
+   `KN(lap,lapS,δ)`-comps, via `metricTrace0S2InBasis_eq_metricTrace`
+   (`RoughLaplacian.lean:644`) + `traceRm04Kn` (field-level, DONE) evaluated at the
+   orthonormal basis (`mtfDiag`-machinery) + the bundled-`ΔRic`↦`roughLapRic`-array and
+   `ΔS`↦`scalarLap` component bridges (the route-status "light plumbing":
+   `metricTraceFirstTwo0SAt_eq_sum_basis` / `RoughLap0SRealizesMetricTrace`).
+3. **Statement adjustment (REQUIRED, not a failure)**: `rm04BaseEvolution_at`'s inputs
+   bottom out on the standing h_ricci/hlich layer (`hswap`, `hmetricFrame`/`hmix` —
+   the project-wide DeTurck-level black boxes, coworker's lane).  `residualStarSum`
+   MUST carry the same standing hypotheses as `rm04BaseEvolution_at`'s discharger chain
+   (mirror `rm04HrmProducer`'s hypothesis list where orthonormal-relevant).  This is
+   honest threading of KNOWN standing inputs, not a wrapper.
+If after this de-walling a genuine mismatch persists for 3 routes — return with the
+exact goal/error; do NOT fall back to the C⁴ transfer.
+
+## Parallelization directive
+- **Session α (next): P1.3 + P1.4** in `StarSum2.lean` (claim it via lake-locked).
+- **Session β (parallel, independent): P2** in a NEW file
+  `Evolution/StarSum/SpatialMember.lean` (import StarSum2; claim only the new file) —
+  needs only the banked `starBaseProd_eq`/`mtfDiag`.  Follow the P2 section of the plan;
+  same ground rules; do NOT edit `StarSum2.lean` (if an eval-lemma variant is missing,
+  state it in the new file privately and flag here for later promotion).
+
+# ═══ BRICK 4 — P0 + P1 EXECUTION LOG (2026-06-11, Opus session) ═══
+
+## ✅ P0 STATEMENT FREEZE — DONE (GREEN, elaborates with `sorry`)
+
+Frozen as `residualStarSum (S) (hS) (k) (t : RealTimeInterval.RegularTime D)` in
+`StarSum2.lean` (new `section Brick4`, abstract `{Idx}[Fintype][DecidableEq]`):
+```
+∃ T : Tensor0SField (4+k), StarSum2 S t k T ∧
+  ∀ (x) (basis : Basis Idx ℝ (TangentSpace I x))
+    (_horth : ∀ i j, (S.base.metric t).inner x (basis i) (basis j) = if i=j then 1 else 0)
+    (I0 : Fin (4+k) → Idx),
+    HasDerivWithinAt
+      (fun r => tensor0SComponent (nablaKRm04Field S r k x) (fun i => basis i) I0)
+      (tensor0SComponent
+        (metricTrace0S2TensorInBasis basis (identityInvMetric) (nablaKRm04Field S t (k+2) x)
+          + T x) (fun i => basis i) I0)
+      D.carrier t
+```
+Reading: `∂ₜ∇ᵏRm = Δ∇ᵏRm + T`, `T = (∂ₜ−Δ)∇ᵏRm ∈ StarSum2 k`.  **Recon facts that pinned it:**
+- **Component-form caution RESOLVED**: `tensor0SComponent A frame slots := A (fun a => frame (slots a))`
+  (`Tensor0SMetric.lean:478`, rfl) — definitionally `T x (fun p => basis (m p))`, so the
+  frozen `tensor0SComponent` form is rfl-interchangeable with `StarSum2.bound`'s `|T x …|`.
+  `@[simp] tensor0SComponent_apply` is the bridge lemma.
+- **heatEq `hT` interface** (`IteratedRmTowerHeatEq.lean:214`): `Tdot : Real → (x) →
+  Tensor0SSpace (4+k) x` is a *parameter*; consumer reads `tensor0SComponent (Tdot t x) basis I0`.
+  ⟹ set `Tdot t x := metricTrace0S2TensorInBasis basis δ (∇^{k+2}Rm) + T x` and the frozen
+  value IS `tensor0SComponent (Tdot t x) basis I0` (zero glue at P4).  `hT` is over ALL x with a
+  GLOBAL basis family (not orthonormal-restricted) — P4 picks an orthonormal frame family so
+  the frozen orthonormal identity supplies it.
+- **residual bridge** (`IteratedRmTowerProducer.lean:411` `combinedStarArray` + `:434` #38
+  `nablaKRm04Reaction_orthoBasis_eq_compContract`): `residualComp m = tensor0SComponent
+  (Tdot t x − metricTrace0S2TensorInBasis basis gInv (∇^{k+2}Rm)) basis m` = `(∂ₜ−Δ)∇ᵏRm`.
+  With `Tdot := roughLap + T`, residual `= T`, so `.bound` plugs straight in.
+- **`orthonormality` uses `S.base.metric`** (matches producers + heatEq `hinv`); proofs bridge
+  to `StarSum2`-internal `S.family.metric t` via `SolutionOn.family_metric`.
+- **k=0 producer** (`UhlenbeckBaseProducer.lean:1486` `rm04HrmProducer`): gives
+  `∂ₜrealizedRmBase = ∑slots [KN(roughLapRic,scalarLap,δ) − 2·Bsharp − drift](slots)·∏basis.coord`
+  in **bare `Fin 3` / coordinate-frame** form (`Bt R`, `drift R`, `Bsharp = Bt(abcd)−Bt(abdc)+
+  Bt(acbd)−Bt(adbc)`).  The C⁴-coordinate↔orthonormal-frame transfer is the flagged hard spot.
+
+## ✅ P1.2 `e0Field` + membership — DONE (GREEN, 0 sorry)
+`e0Field S t : Tensor0SField (4+0)` defined as the signed star-sum combination (8 `base` terms
+via the 8 routing perms `btPermE, σBt2/3/4, σD1/2/3/4 : Fin 8 ≃ Fin 8`, each
+`Equiv.ofBijective ![…] (by decide)`); `e0Field_mem : StarSum2 S t 0 (e0Field S t)` by the
+`.smul`/`.add`/`.base` constructor tree (use `refine StarSum2.add (… ?_ ?_) … ?_` + per-term
+`exact` bullets — the giant nested `.add` expression is paren-error-prone).  **Brick-1 wall
+does NOT bite at concrete rank `4+0`** — `•`/`+` elaborate fine under `respectTransparency false`.
+
+## ✅ P1.1 + the eval toolchain — DONE (GREEN, 0 sorry).  Five new declarations:
+1. `mtfDiag` (private): the **single-trace diagonal equality** atom (the equality underlying
+   `mtfOrthoBd`'s rw-chain): `metricTraceFirstTwoField g X x (basis∘mm) = ∑ i, X x
+   (metricTraceInput (basis i)(basis i)(basis∘mm))`.  Reusable, all τ.
+2. `starBase_comp_eq` (r=0): `starBaseField k a b 0 σ x (basis∘m) = ∑ j ∑ i
+   (domDomCongr σ (starProd a b 0)) x (metricTraceInput (basis i)(basis i)
+   (metricTraceInput (basis j)(basis j)(basis∘m)))`.  Proof = peel `mtIter (2+0)` as two
+   `metricTraceFirstTwoField` + `mtfDiag` ×2 + `mtInputBasis`.
+3. `starBaseProd_eq` (r=0): same, with the generator's `product` split into its two factors —
+   `= ∑ j ∑ i (∇ᵃRm) x (W∘σ∘castAdd(4+b)) · (∇ᵇRm) x (W∘σ∘natAdd(4+a))`, `W` = the nested
+   metricTraceInput.  THE reusable product-split for P1 (`e0Field`) **and** P2 (`∇ᵃRm∗∇ᵇRm`).
+4. `btPermE` + `btStar_eq`: the **validated σ-term template**.  `btPermE := Equiv.ofBijective
+   ![4,0,5,2,6,1,7,3] (by decide) : Fin 8 ≃ Fin 8`; `btStar_eq : starBaseField 0 0 0 0 btPermE
+   x (basis∘m) = ∑ e ∑ f Rm(![m0,e,m1,f])·Rm(![m2,e,m3,f])` (= the `B`-tensor contraction;
+   `Rm := ∇⁰Rm`).  Proof = `starBaseProd_eq` + `Finset.sum_comm` + two `have`s, each
+   `funext p; fin_cases p <;> simp [btPermE, Equiv.ofBijective, Fin.castAdd/natAdd,
+   metricTraceInput_apply]`.
+
+### Lean traps solved (apply, don't rediscover)
+- **Reduce `mtIter g (2+0) A`**: `rw [show (2:ℕ)+0 = … from rfl]` FAILS (motive not type-correct
+  — `2+0` is in `mtIter`'s dependent rank slot).  FIX: rewrite the whole **field** via
+  `rw [show mtIter g (2+0) A = metricTraceFirstTwoField g (metricTraceFirstTwoField g A) from rfl]`
+  (same result type `Field (4+k)`, motive trivial).  `set A := domDomCongr … AFTER rw [starBaseField]`.
+- **`product_fun_apply` via `rw` FAILS** on `starProd…0 x`: the `v`-domain is
+  `Fin (((4+a)+(4+b))+2*0)` (the `+2*0` from `starProd`'s rank), not `Fin (s+q)`; `rw` won't
+  unify the `2*0`.  FIX: `exact Bundle.continuousMultilinearMap.product_fun_apply (∇ᵃRm x)(∇ᵇRm x)
+  (fun p => W (σ p))` — `exact`'s full defeq absorbs both the `2*0` cast and `starProd 0 = product_fun`.
+- **`congr 1` on `Rm(a)·Rm(b) = Rm(c)·Rm(d)`** mis-splits → "No goals".  FIX: prove the two
+  arg-function equalities as `have hL/hR` and `rw [hL, hR]`.
+- **σ construction**: `Equiv.ofBijective ![…] (by decide)` for `Fin 8`; evaluate `σ (Fin.castAdd …)`
+  by `fin_cases p <;> simp [Equiv.ofBijective, …]` (validated cheaply in a throwaway probe first).
+
+## MATH FEASIBILITY of `e0Field` (P1.2) — CONFIRMED
+`Bt R a b c d = ∑_e ∑_f rm(a,e,b,f)·rm(c,e,d,f)` (`UhlReaction3.lean:67`) IS a double trace of
+`rm⊗rm`.  `drift` (`:74`) contracts Ricci (= a trace of Rm) with Rm ⟹ also a double trace of
+`Rm⊗Rm`.  Both `r=0`.  `btStar_eq` proves the Bt(abcd) term GREEN — the route is fully validated.
+
+## REMAINING in P1 (next session, all routes de-risked) — with the EXACT σ routings computed:
+
+**Convention** (from `starBaseProd_eq` + `Finset.sum_comm`, outer sum var `e`, inner `f`):
+the diagonal input is `W = [e,e,f,f,m0,m1,m2,m3]` (slots {0,1}→e, {2,3}→f, 4..7→m0..m3); a
+permutation `σ : Fin 8 ≃ Fin 8` makes `base 0 0 0 0 σ comps = ∑_e ∑_f Rm(W∘σ|₀₋₃)·Rm(W∘σ|₄₋₇)`.
+To realize a factor-tuple `(p0,…,p7)` (each `pᵢ ∈ {e,f,m0,m1,m2,m3}`): `σ(slot)=0/1` for `e`,
+`=2/3` for `f`, `=4+k` for `mₖ`.  `btStar_eq` is the proven template (σBt1 below).
+
+- **4 `Bt`-term identities** (`btStar_eq` template; `Bt R a b c d = ∑∑ rm(a,e,b,f)·rm(c,e,d,f)`):
+  - `Bt(s0s1s2s3)`: tuple `(m0,e,m1,f,m2,e,m3,f)` → σBt1 `![4,0,5,2,6,1,7,3]` (=`btPermE` ✓ done)
+  - `Bt(s0s1s3s2)`: tuple `(m0,e,m1,f,m3,e,m2,f)` → σBt2 `![4,0,5,2,7,1,6,3]`
+  - `Bt(s0s2s1s3)`: tuple `(m0,e,m2,f,m1,e,m3,f)` → σBt3 `![4,0,6,2,5,1,7,3]`
+  - `Bt(s0s3s1s2)`: tuple `(m0,e,m3,f,m1,e,m2,f)` → σBt4 `![4,0,7,2,5,1,6,3]`
+- **Ricci-trace identity (dim 3)**: `R a c = -∑_e rm(a,e,c,e)` (UhlReaction3 `:61` comment
+  "Σ_b rm a b c b = -R a c"; slots 1,3 traced).  Prove via `Fin.sum_univ_three` + `rm`/`R` defs.
+- **4 `drift`-term identities** (`drift = ∑_p (R a p·rm(p,b,c,d)+R b p·rm(a,p,c,d)+
+  R c p·rm(a,b,p,d)+R d p·rm(a,b,c,p))`; using `R x p = -∑_e rm(x,e,p,e)`, so `base σDk comps =
+  -(drift-term-k)`, hence the 4 drift bases sum to `-drift` with coefficient **+1**):
+  - term1 `R a p·rm(p,b,c,d)`: tuple `(m0,e,f,e, f,m1,m2,m3)` → σD1 `![4,0,2,1,3,5,6,7]`
+  - term2 `R b p·rm(a,p,c,d)`: tuple `(m1,e,f,e, m0,f,m2,m3)` → σD2 `![5,0,2,1,4,3,6,7]`
+  - term3 `R c p·rm(a,b,p,d)`: tuple `(m2,e,f,e, m0,m1,f,m3)` → σD3 `![6,0,2,1,4,5,3,7]`
+  - term4 `R d p·rm(a,b,c,p)`: tuple `(m3,e,f,e, m0,m1,m2,f)` → σD4 `![7,0,2,1,4,5,6,3]`
+- **`e0Field` def + membership** (constructors, zero math): reaction `= -2(Bt1-Bt2+Bt3-Bt4) - drift`,
+  and `-drift = base σD1+σD2+σD3+σD4` (sign from `R=-trace`), so
+  `e0Field := (-2)•base σBt1 + 2•base σBt2 + (-2)•base σBt3 + 2•base σBt4
+            + base σD1 + base σD2 + base σD3 + base σD4`.
+  `StarSum2 S t 0 e0Field` = `.smul`/`.add`/`.base` tree.
+- **P1.3 component identity** (orthonormal, abstract→dim-3): assemble the 8 term-identities +
+  `rm04CompknOrtho` (`∇⁰Rm comps = rm R`, banked in `rm04HrmProducer`) ⟹ `e0Field comps =
+  -2·Bsharp(R) - drift(R)` by `Bt`/`Bsharp`/`drift` defs.  **WALL-FREE** — completes P1.2+P1.3,
+  the "reaction is a star sum" theorem (the math heart of brick-4 k=0).
+- **P1.4 k=0 assembly into `residualStarSum_zero`**: connect `rm04HrmProducer` (coordinate
+  frame, `realizedRmBase`/bare-`Fin 3`) to the frozen statement (`nablaKRm04Field`/orthonormal).
+  **THE FLAGGED WALL = the C⁴ coordinate↔orthonormal frame transfer.**  Also the Laplacian-part
+  match `comps(roughLap_δ ∇²Rm) = comps(KN(roughLapRic,scalarLap,δ))`.  Fallback (plan): state
+  P1's deliverable at the orthonormal frame only, defer coordinate-transfer to P3.
+
+# ═══ BRICK 4 EXECUTION PLAN (2026-06-11, Fable-planned, for Opus sessions) ═══
+
+## 0. The frozen target + a verified plan-level simplification
+
+**The j-split frontier DISSOLVES.**  Source-verified (2026-06-11):
+- `combinedStarArray` (`IteratedRmTowerProducer.lean:411`) `= ricStarArray ric (comp ∇ᵏRm)
+  + residualComp`, where `residualComp m` is LITERALLY the `m`-component of
+  `Tdot t x − metricTrace0S2TensorInBasis basis gInv (∇^{k+2}Rm)` — i.e. `(∂ₜ−Δ)∇ᵏRm`
+  with `Tdot` a *parameter* of the reaction.
+- The Bernstein consumer is `TowerHeatBoundOn w wLap c k` (`BernsteinShiHigher.lean:478`)
+  with an ARBITRARY constant `c` (`towerReactionSum w c k = Σⱼ c·√wⱼ√w_{k−j}·√wk`), and
+  `iteratedRmTower_heatBoundSharp` itself emits the k-dependent `c = 2·card^{6+k}`.
+  `BernsteinTower.hheat` uses ONE `c`, but the max-principle runs per target level `m`,
+  so instantiate per-`m` with `c_m := max(constants for k ≤ m)` — no interface change.
+
+**So bricks 4+5 = (4) the RESIDUAL MEMBERSHIP**: for each `k` and regular `t`, the
+components of `(∂ₜ−Δ)∇ᵏRm` are the components of some `T_k ∈ StarSum2 S t k`
+(then `.bound` gives `|residual comps| ≤ C_k·Σⱼ√wⱼ√w_{k−j}`), **+ (5) wiring** to
+`TowerHeatBoundOn` directly — `IteratedRmTowerOn`'s per-j `star` arrays are BYPASSED
+(do NOT build the j-bucketed split; do NOT touch `IteratedRmTowerOn`).
+
+**Component-form caution**: the reaction bridge speaks `tensor0SComponent (field x)
+basis m`; `StarSum2.bound` speaks `|T x (fun p => basis (m p))|`.  P0 must check these
+are rfl-interchangeable (expected) and record the bridging idiom.
+
+## P0 — recon + statement freeze (½ session, read-only + stubs)
+Pin down, then freeze the brick-4 statement:
+1. `nablaKRm04NormHeatEquationOn_intrinsic` (`IteratedRmTowerHeatEq.lean:185`): the EXACT
+   hypothesis through which `Tdot` enters (what the producer must supply per (k,t,x)).
+2. `iteratedRmComp_hasDerivWithinAt` (`IteratedRmTowerHeatEq.lean:430`): the VALUE shape of
+   the `∂ₜ∇^{k+1}` recursion (how `∂ₜΓ`-terms and the level-`k` derivative enter).
+3. What #38 ("schematic commuted-curvature identity → heatEq") actually banked — avoid dupes.
+4. `rm04HrmProducer` (`UhlenbeckBaseProducer.lean:1486`)'s exact hrm value-shape (k=0 input).
+**Frozen statement (validate/adjust in P0; keep the invariants):** per `k`, `hS`,
+regular `t`: `∃ T, StarSum2 S t k T ∧ (∀ x₀ ⟨frame data at x₀⟩, HasDerivWithinAt
+(fun s => comps(∇ᵏRm s)) (comps(Δ∇ᵏRm) + comps(T)) D.carrier t)` — the per-component
+HasDerivWithinAt form, uniform over centres `x₀` (each `x` is the centre of its own
+coordinate frame — the #45 pattern; this uniformity is what makes P3's ∇-step legal).
+If the heatEq's Tdot-interface makes the `Tdot = roughLap + T` equality form cheaper,
+freeze that instead. Deliverable: the frozen statements appended HERE + stubs compiling
+with precise `sorry`s.
+
+## P1 — E₀ membership (1 session; first execution block)
+1. **`starBase_comp_eq`** (new, in `StarSum2.lean`): the EQUALITY version of the
+   δ-collapse — components of `starBaseField k a b r σ` at a g-orthonormal basis as the
+   explicit `(2+r)`-fold diagonal sum of `starProd`-components (extract from
+   `mtfOrthoBd`/`mtIterOrthoBd`'s proof pattern: `metricTraceFirstTwoField_apply` chain +
+   `sumIdentityDiag` + `mtInputBasis`, iterated).  This is THE shared eval tool for
+   P1/P2/P4 — build it first, reusable, τ-induction.
+2. **`e0Field`**: explicit `base 0 0 0 r σ`-combination (constructors `.add`/`.smul`)
+   matching `−2B# − drift` of `rm04BaseEvolution_at`.  EXPECTATION: `B#` and the drift
+   are plain double-traces of `Rm⊗Rm` (`B#ᵢⱼₖₗ = Σ_{p,q} Rmᵢₚⱼ_q Rmₖₚₗ_q` at δ), so
+   `r = 0` suffices throughout; the `r > 0` generality is insurance (use it if the
+   drift/`uhlenbeckBTensorInFrame` shapes force `g`-factors — check `uhlBt_eq_bt`/
+   `uhlDrift_eq_drift` first).  Membership is BY CONSTRUCTORS (zero math).
+3. **Component identity**: `e0Field`-comps at orthonormal = `−2B#−drift` comps — via
+   `starBase_comp_eq` + the banked δ-frame bridges (`uhlBt_eq_bt`, `uhlDrift_eq_drift`,
+   `UhlReaction3` closed forms `bt_closed`/`cc_closed`).  Bare `Fin 3`-free: keep it at
+   abstract `Idx`/`Fin n` with `horth` (dim only enters where the banked identities do).
+4. Assemble the k=0 instance of the frozen statement from `rm04HrmProducer`'s hrm value
+   (its `KN(ΔRic,ΔS,δ)`-part = `comps(ΔRm04)` via `traceRm04Kn` + the C⁴-transform
+   frame-transfer already inside `rm04HrmProducer`).
+Done-criterion: frozen statement at `k = 0`, GREEN, 0 sorry.  Likely-hard spot: the
+C⁴-coordinate-vs-orthonormal frame transfer around hrm — if stuck 3 routes, return with
+the exact mismatch; an acceptable fallback is to state P1's deliverable at the
+orthonormal frame only and leave the coordinate-transfer to P3's assembly.
+
+## P2 — spatial commutator membership (1 session; needs P1's `starBase_comp_eq` only)
+`[Δ,∇]∇ᵏRm`-comps = comps of a `StarSum2 (k+1)` element (per k, all x, orthonormal).
+Inputs (all banked, IDENTITY form): `spatialComm_nablaKRm_split` (`RoughLapNablaK.lean`,
+`[Δ,∇]∇ᵏRm = Ricci-term + term-B`), `nablaK_antisym_eq_rm04_raise_leibniz`
+(`NablaReactionAllK.lean`, term-B `= ∇Rm04∗∇ᵏRm + Rm04∗∇^{k+1}Rm`),
+`curvatureAction0SAt_eq_rm04` (raise form).  Work = recast each RHS as
+`starBase_comp_eq`-form (σ-bookkeeping; the Ricci-term: `Ric = trace Rm` makes it a
+2-trace of `Rm⊗∇^{k+1}Rm`; expect `r = 0`).  These lemmas' STATEMENTS are per-point —
+the membership witness `T` must be uniform in `x` (the field is built from
+`nablaKRm04Field`s, so it is — only the IDENTITY is checked pointwise).
+
+## P3 — time recursion → full `E_k` (1–2 sessions; the heaviest; needs P1+P2)
+Induction on `k` of the frozen statement.  Step `k → k+1`:
+`E_{k+1}-comps = ∇(E_k)-comps + (∂ₜΓ ∗ ∇ᵏRm)-comps − ([Δ,∇]∇ᵏRm)-comps`, with
+- `∇(E_k)`: from IH `T_k` + `StarSum2.nabla` (the hcov1 hypothesis: discharge via
+  `connSmoothOfSol S hS t (D.regular_subset t.2)`).  **CENTRAL DESIGN RISK**: the IH's
+  component identity must hold at EVERY centre (the ∀x₀-uniform frozen form) so that
+  `comps(∇E_k) = comps(stNabla T_k)` is derivable (realizes-machinery at each point);
+  if this step won't typecheck after 3 genuinely different routes (e.g. via
+  `totalNabla0SRealizes_unique` + the producers' `iteratedRmComp ↔ totalNabla0S` bridge
+  #36 `RmRealizationBridgeAllK`), STOP and return — that's a statement-form bug, fix in
+  P0's freeze, don't brute-force.
+- `(∂ₜΓ ∗ ∇ᵏRm)`-comps: `christoffelEvolution_of_solution` (`MetricCovDerivProducer`)
+  gives `∂ₜΓ` as `∇Ric`-combination; `∇Ric = trace ∇Rm` ⟹ 2-trace `∇Rm⊗∇ᵏRm` base
+  terms (`a=1, b=k`, expect `r=0`).  The contraction shape must match
+  `iteratedRmComp_hasDerivWithinAt`'s value (P0 item 2).
+- the spatial piece: P2's lemma at level `k`.
+Membership of the sum: constructors.  Done-criterion: frozen statement ∀k, GREEN.
+
+## P4 — wiring to `TowerHeatBoundOn` (= brick 5; 1 session; needs P3)
+1. From the intrinsic heatEq + `nablaKRm04Reaction_orthoBasis_eq_compContract` +
+   brick-4 + `.bound`: `|reaction| ≤ 2·(Σ_m |rmC m|)·max_m|combined m|` with
+   `Σ_m |rmC_m| ≤ √(card^{4+k})·√wk` (ℓ¹–ℓ² on `card^{4+k}` indices) and
+   `|combined m| ≤ |ricStar m| (≤ card²√w0√wk, banked `abs_ricStarArray_le`) + C_k·Σⱼ√√`
+   ⟹ `TowerHeatBoundOn w wLap c_k k` with `c_k = 2·√(card^{4+k})·(card² + C_k)`-shape.
+2. Per-target-level `m`: `c⋆_m := max_{k ≤ m} c_k` → `BernsteinTower` instantiation →
+   the existing Stage-1/2 max-principle machinery → the C∞ bounds feeding
+   `extends_of_rmBounded`'s skeleton.  (The remaining global-PDE step of
+   `extends_of_rmBounded` stays a black box — NOT this plan's scope.)
+
+## Ground rules for every executing session (paste-verbatim material)
+- Work ONLY in `DifferentialGeometry/`; follow `CLAUDE.md` (lake-locked claims, focused
+  checks, same-name `.md` notes, no public-API rewrites, ≤20-char names).
+- Read FIRST: this file (whole), `bbs-allk-route-status` content is mirrored here — do
+  NOT re-derive; `convention.md` for conventions.
+- The solved-trap list (apply, don't rediscover): per-declaration
+  `set_option backward.isDefEq.respectTransparency false in` for ANY generic-rank
+  `0/+/•/ddc/mT` statement; `rw` on `product_fun_apply` DIES on rank-index mismatch →
+  `refine le_trans (le_of_eq (congrArg abs hpf)) ?_` / `congrArg`-style exact-defeq;
+  `Fin.natAdd`'s rank + `(i : Fin 2)` literals EXPLICIT; ∃-witnesses EXPLICIT,
+  right-assoc `.trans` + `Equiv.trans_assoc` in the closing simp; `induction` case
+  binders do NOT re-bind the family index `k`; the project's `abs_le_sqrt_*` helpers
+  carry an alien ℝ-lattice instance → use `sq_le_compNormSqMulti` + Mathlib's
+  `Real.abs_le_sqrt`; `Finset.single_le_sum` needs `simp only [h] at` to beta-reduce;
+  bare `Fin.cons/cases` motive not inferred → `@Fin.cons n (fun _ => V)` or
+  dite-indexed ∃-tuple forms (`mtInputBasis` pattern).
+- Stop conditions: 3 genuinely different routes failed on one lemma / missing API /
+  statement smells wrong → write findings HERE (same-name md) and return.  A green
+  intermediate with a named next lemma is NOT a stopping point.
+
+**REMAINING after this plan**: the Bernstein→C∞→`extends_of_rmBounded` glue (partly
+banked, #14), the DeTurck black boxes (coworker), `ham3_main` assembly.
 
 ## ✅ BRICK 3 DONE (2026-06-11, GREEN — `StarSum2.nabla` proved)
 
@@ -367,3 +703,358 @@ they all hit the same synthesis path.**
 The verified upstream pieces (`traceRicWit`-style slot algebra, `nabla_metricTraceFirstTwo0S`,
 `spatialComm_nablaKRm_split`, `abs_curvatureAction0SAt_orthoBasis_le`, the orthonormal collapse)
 all remain ready; only the predicate's hosting layer is the open question.
+
+## 2026-06-13 Codex pass
+
+`starSum2_sum` was promoted into `StarSum2.lean` next to the `StarSum2` constructors.  The proof is
+the finite-sum closure by `Finset.induction`, using `StarSum2.zero` and `StarSum2.add`.
+
+Verification status: focused verification of `StarSum2.lean` passed, and the `StarSum2` module
+built.  The file still has its pre-existing `residualStarSum` sorry warning.
+
+## 2026-06-13 P3 EXECUTOR FINDINGS (Opus) — STOPPED on the Ricci-trace bridge + a scope conflict
+
+Did targeted recon for `gammaStepStar`; hit the planner's named stop condition.  Two findings:
+
+### FINDING 1 (scope/architecture): P3 cannot live in `StarSum2.lean`
+The executor prompt says "work in `StarSum2.lean`", but the same prompt requires (a) instantiating
+`spatialCommStarSum` (P2) which is in **`SpatialMember.lean`**, and (b) reusing the `StarRouting`
+route helpers (`slotdiffStarA`/`sigmaDiffA`, etc.) in **`StarRouting.lean`**.  Import DAG is
+`StarSum2 ← StarRouting ← SpatialMember`, so `StarSum2` is **upstream** of both — it cannot import
+either.  Concretely:
+- `gammaStepStar`'s normalized term is `base (k+1) 1 k 0` = **exactly `slotdiffStarA`'s shape**
+  (`StarRouting.lean:390`, `starBaseField S t (k+1) 1 k 0 (sigmaDiffA k q)`).  Reuse needs StarRouting.
+- The all-`k` `residualStarSum` induction needs P2 (`spatialCommStarSum`, SpatialMember) + the
+  time-step inputs from `iteratedRmComp_hasDerivWithinAt` (`IteratedRmTowerHeatEq.lean`, NOT imported
+  by `StarSum2`).  So the old `residualStarSum` stub at `StarSum2.lean:1176` can **never be proved in
+  `StarSum2.lean`** — it is itself misplaced.
+- ⇒ **P3 (refreeze + P2-at-Fin3 + `gammaStepStar` + induction) belongs in a NEW file downstream of
+  `SpatialMember.lean`** (e.g. `Evolution/StarSum/TimeRecursion.lean`).  The refrozen endpoint and
+  the `S hS k t` stub should move there; do not keep the unprovable stub in `StarSum2.lean`.
+  No `StarSum2.lean` edit was made (any P3 edit there would be wrong/unprovable).
+
+### FINDING 2 (the named stop condition): the Ricci-trace-to-`nablaRm` bridge is MISSING
+`gammaStepStar` needs, after `iteratedRmCompDt_succ` → `covDerivStepDt (chrDt) (∇ᵏRm)` +
+`christoffelRHS_id` (orthonormal: `chrDt_{ijk} = −nablaRic_{ijk} − nablaRic_{jik} + nablaRic_{kij}`)
++ `christoffelEvolution_of_solution` (realizes `nablaRic := ricciCovDerivCompInFrame`), the bridge:
+```
+-- SMALLEST MISSING API LEMMA (report shape; do NOT name it hgamma)
+ricciCovDeriv_trace_nablaRm (S) (hS) (frame) (t) (x) (horth : orthonormal) (d a b : Idx) :
+  ricciCovDerivCompInFrame S frame t x d a b
+    = ∑ e : Idx, nablaKRm04Field S t 1 x
+        (vec5 (frame d x) (frame e x) (frame a x) (frame e x) (frame b x))
+```
+i.e. `∇_d Ric_{ab} = ∑_e ∇_d Rm04(e,a,e,b)` in the *realized-component* (`ricciCovDerivCompInFrame`)
+form.  **What exists (and the exact gaps):**
+- `NablaRicTraceAt basis gInv nablaRm04 nablaRic` (`Bianchi.lean:1108`) = the trace PREDICATE
+  `nablaRic(A,B,C) = ∑ᵢⱼ gInv·nablaRm04(A,eᵢ,B,C,eⱼ)`.  ✓ the right statement.
+- `canBianchiAt` (`Ricci/CoordinateIdentities.lean:200`) produces
+  `∃ nablaRm04, … ∧ NablaRicTraceAt basis gInvAt nablaRm04 nablaRicT ∧ …` with
+  `nablaRicT := totalNabla0SFun 2 (conn t) (S.ricci t) x` (the intrinsic ∇Ric tensor).
+- **Gap A**: `canBianchiAt`'s `nablaRm04` is EXISTENTIAL — not identified with `nablaKRm04Field S t 1 x`.
+  Need `nablaRm04 = nablaKRm04Field S t 1 x` (the abstract ∇Rm04 = the StarSum2 ∇¹Rm).
+- **Gap B**: `nablaRicT = totalNabla0SFun 2 (conn) (S.ricci t)` (the COVARIANT-deriv tensor) vs
+  `ricciCovDerivCompInFrame = extDerivFun (ricciCompInFrame)` (the FRAME-deriv of components) — differ
+  by Christoffel corrections; equal only at a covariant-constant-at-`x` frame (the `#45`/frozen-slot
+  realization link).  No banked `ricciCovDerivCompInFrame = nablaRicT-component` lemma.
+- **Gap C**: `canBianchiAt` is at the coordinate frame (`coordinateFrameAt`); P3 wants an arbitrary
+  orthonormal frame.
+A targeted grep (`ricciCovDeriv*`, `nablaRic*`, `nablaRm04Field`, `Ric = ∑ Rm04`, `nabla*metricTrace`)
+found NO single lemma closing this; it is a producer in its own right (extract `canBianchiAt`'s
+existential + identify with `nablaKRm04Field S t 1` + the frame-realization link).  Per the stop
+rule, reported rather than built.
+
+### IH-to-`stNabla` bridge (P3.3) — NOT reached
+`gammaStepStar` is upstream of the induction step, so the IH/`stNabla` realization bridge was not
+exercised this session.  It remains a flagged downstream risk.
+
+### Recommended next executor prompt
+Create `Evolution/StarSum/TimeRecursion.lean` (import `SpatialMember`); move the refrozen endpoint
+there; first build `ricciCovDeriv_trace_nablaRm` (the bridge above) from `canBianchiCore` +
+an arbitrary-frame realization of `totalNabla0SFun ... S.ricci`; then `gammaStepStar` via
+`slotdiffStarA`.
+
+### Planner review (2026-06-13)
+
+Accepted the scope finding: `StarSum2.lean` is upstream of both `StarRouting.lean` and
+`SpatialMember.lean`, and it does not import the time-recursion producer
+`IteratedRmTowerHeatEq.lean`.  P3 cannot be closed in `StarSum2.lean`; the all-`k` endpoint
+belongs downstream, in a new `TimeRecursion.lean` file.
+
+Accepted the missing-bridge stop condition, with one route correction.  The coordinate-only
+`canBianchiAt` is not the best first source for an arbitrary orthonormal frame: the lower producer
+`canBianchiCore` in `Geometry/Connection/LeviCivita/Curvature/Realized.lean` already gives
+`NablaRicTraceAt` for an arbitrary basis and inverse metric.  The real missing API is the
+Ricci-flow specialization and component realization:
+
+- identify the geometric `nablaRm04` from `canBianchiCore` with the project field
+  `nablaKRm04Field S t 1` (definitionally the same route as `nablaRm04Field`);
+- identify the geometric `nablaRic := totalNabla0SFun 2 (S.family.connection t) (S.ricci t) x`
+  component with `ricciCovDerivCompInFrame S frame t x d a b`;
+- then collapse the inverse metric to the orthonormal diagonal.
+
+There is a coordinate-frame prototype for the second bullet: `coordNablaReal` /
+`coordNablaRealOn` in `Evolution/Ricci/CoordinateRegularity.lean`.  No arbitrary-frame version was
+found by grep.  So `gammaStepStar` remains 0%; P3 remains 0%; the next producer is the
+arbitrary-frame Ricci-trace bridge, not the induction.
+
+## 2026-06-13 Planner P3 design, after P2 closure
+
+Status:
+- `residualStarSum` itself is still 0% complete: the theorem is not proved and still has the
+  intended all-`k` `sorry`.
+- P3 infrastructure is substantial but not the theorem: `StarSum2.nabla`, `starSum2_sum`,
+  `residualStarSum_zero`, the component time-recursion machinery
+  `iteratedRmCompDt_succ` / `iteratedRmComp_hasDerivWithinAt`, and the P2 routing bank are
+  available.
+- P2 is closed and accepted: `spatialCommStarSum` returns a level-`k+1` witness for the spatial
+  commutator and carries `hcov`/`hmc`; in P3 those should be discharged by
+  `connSmoothOfSol S hS (t : Real) (D.regular_subset t.2)` and
+  `solution_isMetricCompatible S (t : Real)`.
+- The P2 theorem is generic in `Idx`, but the refrozen all-`k` endpoint should follow
+  `residualStarSum_zero` and instantiate P2 at `Idx := Fin 3` with the same orthonormal basis.
+
+### P3.0 required statement refreeze
+
+The current stub
+
+```lean
+residualStarSum (S) (hS) (k) (t)
+```
+
+is too strong as written. The checked base case `residualStarSum_zero` needs the honest
+dimension-3 and base-evolution inputs:
+
+```lean
+hdim : forall x, Module.finrank Real (TangentSpace I x) = 3
+hbase : forall x (basis : Module.Basis (Fin 3) Real (TangentSpace I x)) horth I0,
+  HasDerivWithinAt ...  -- the orthonormal rough-trace plus bare Bt/drift value
+```
+
+The review section above already says this is required. The first P3 executor step is therefore
+to refreeze the public P3 target, not to force the current stub. Preferred route:
+
+1. Replace the current `residualStarSum` statement with the honest Fin-3/input-bearing endpoint
+   needed by the BBS consumer, or introduce `residualStarSum3` and stop treating the old generic
+   stub as the active target. Do not leave both as parallel frontiers.
+2. Keep the theorem at orthonormal `Fin 3` bases. Do not re-open the C4 coordinate-to-orthonormal
+   transfer.
+3. Carry the standing time-side inputs explicitly. At minimum this means the `hbase` used by
+   `residualStarSum_zero`; for the induction step, either carry the already packaged time-step
+   input produced by `iteratedRmComp_hasDerivWithinAt`, or carry the same `hrm`/`hchr`/`hswap`
+   style inputs needed to derive it. This is honest threading, not a wrapper.
+
+Stop immediately if an executor tries to prove the current `S hS k t` stub with no extra inputs:
+that would be a statement-form bug, not a proof-search problem.
+
+### P3.1 induction shape
+
+For the step from level `k` to `k+1`, use the actual component recursion, not a remembered sign:
+
+```text
+iteratedRmCompDt_succ =
+  covDerivStepComp (... E_k ...) - covDerivStepDt (d/dt Gamma) (nabla^k Rm)
+```
+
+Together with the spatial commutator convention from P2, normalize the residual to:
+
+```text
+E_{k+1} = nabla(E_k) + gamma-correction - spatial-commutator
+```
+
+where the sign of `gamma-correction` is whatever remains after unfolding
+`iteratedRmCompDt_succ`. Do not hard-code the plus sign from prose; let the definition set it.
+
+The witness should have the constructor form:
+
+```text
+T_{k+1} = stNabla T_k + T_gamma +/- T_spatial
+```
+
+with membership by:
+- IH gives `T_k : StarSum2 S t k`;
+- `StarSum2.nabla` gives `stNabla T_k : StarSum2 S t (k+1)`;
+- P2 gives `T_spatial : StarSum2 S t (k+1)`;
+- the new gamma lemma gives `T_gamma : StarSum2 S t (k+1)`;
+- `.add`/`.smul` assemble the signed sum.
+
+### P3.2 gamma-correction lemma
+
+The only new StarSum algebra in P3 should be the `d/dt Gamma * nabla^k Rm` correction.
+Use the existing route bank before adding any new routing family:
+
+- `covDerivStepDt` is a sum over the moved lower slot and replacement index.
+- `christoffelRHS_id` rewrites the raised Christoffel evolution in an orthonormal frame as
+  the three `nablaRic` terms.
+- `nablaRic` is a trace of `nablaRm`; after expanding that trace, each summand is a double
+  trace of `nablaRm * nabla^kRm`, so it should be a `base (k+1) 1 k 0` term.
+- Try to reuse the `slotdiffStarA`/`slotdiffStarB` route shapes where the normalized term
+  matches. Add only the missing three-term Christoffel routing helpers that are not literally
+  covered by the SLOTDIFF routes.
+
+Suggested private endpoint before full induction:
+
+```lean
+gammaStepStar
+  : exists Tgamma, StarSum2 S (t : Real) (k+1) Tgamma
+      /\ forall x basis horth I0, gammaCorrectionComponent = tensor0SComponent (Tgamma x) basis I0
+```
+
+If the normalized `nablaRic` trace cannot be connected to `nablaKRm04Field S t 1` by existing
+Ricci-trace/`nablaKRm04Field` lemmas after targeted grep, report that as the smallest missing
+API lemma. Do not introduce an assumption named like `hgamma`.
+
+### P3.3 IH derivative bridge
+
+The known risk is turning the IH component identity for `E_k` into the component identity for
+`nabla(E_k)`. The intended bridge is:
+
+1. Use the IH uniformly in the centre `x` and basis.
+2. Use `stNabla_realizes` / `nablaKRm04Field_realizes` / `totalNabla0SRealizes_unique` to identify
+   the covariant derivative of the IH witness with `stNabla T_k`.
+3. Evaluate at `basis (I0 0)` and `I0.succ`, matching the `Fin.cons` spelling used in P2.
+
+Stop condition: if this cannot be made to typecheck after three genuinely different local routes,
+the frozen theorem is still missing the right "uniform in local frame/centre" hypothesis. Report
+the exact goal; do not bury the gap behind a new adapter theorem.
+
+### Superseded executor prompt
+
+```text
+Do not use the old "work in StarSum2.lean" prompt for P3.  It is superseded by
+`TimeRecursion.md`: P3 lives downstream of `SpatialMember`, and the next step is the
+local-frame endpoint refreeze `residualStarSumLF`, not `gammaStepStar`.
+```
+
+### 2026-06-13 Planner update
+
+The `gammaStepStar` part of P3 is now closed downstream in `TimeRecursion.lean`; the three needed
+Ricci-trace routes live in `StarRouting.lean` as `slotRic1/2/3`. The active P3 frontier is now the
+single `residualStarSumLF` `succ`-branch assembly in `TimeRecursion.lean`, not a new StarSum2
+predicate or routing-family design.
+
+## 2026-06-13 PLANNER REVIEW -- P3 complete; P4 starts with residual bound bridge
+
+Live source review accepts the `TimeRecursion` completion report:
+
+- `resStarLFU` is present and the local Lean `sorry` grep is clean in `TimeRecursion.lean`.
+- The obsolete fixed-point `gammaStepStar` declaration is gone; `gammaStarU` is the remaining gamma
+  producer.
+- `StarRouting.lean` now names `gammaStarU`.
+- Minor cleanup remains: a few `TimeRecursion.lean` doc comments still mention the old
+  `residualStarSumLF` name or say the induction body is a `sorry`. These are comment-only but should
+  be fixed before the next proof pass touches that file.
+
+Planner decision for P4: do not resurrect the old `IteratedRmTowerOn` j-split as the first target.
+The P3 endpoint plus `StarSum2.bound` should first be exposed as a direct local-frame residual bound.
+That is the smallest honest bridge toward `TowerHeatBoundOn`; the later global scalar/Bernstein
+consumer still has frame-existence and reaction-assembly choices to settle.
+
+### Next executor prompt
+
+```text
+Work in E:\testdifferential-geometry on branch short-time-existence.
+
+Read first:
+- CLAUDE.md
+- convention.md
+- dictionary.md
+- important_lesson.md
+- lessons.md
+- DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/StarSum/StarSum2.md, especially
+  "2026-06-13 PLANNER REVIEW -- P3 complete; P4 starts with residual bound bridge"
+- DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/StarSum/TimeRecursion.md
+- DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/StarSum/TimeRecursion.lean
+- DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/StarSum/StarSum2.lean
+- DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/IteratedRmTowerProducer.lean
+- DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/BernsteinShiHigher.lean
+
+Target:
+Begin P4 by proving the smallest direct bound bridge from the closed P3 endpoint. Do not try to
+prove the full `TowerHeatBoundOn` theorem in the first pass unless this bridge closes easily.
+
+First cleanup:
+- Claim `TimeRecursion.lean`.
+- Fix stale comments that still mention `residualStarSumLF` or say the all-k induction body is a
+  `sorry`. Do not change theorem statements.
+
+Implementation target:
+- Create `DifferentialGeometry/Geometry/Flow/RicciFlow/Evolution/StarSum/TowerHeat.lean` and
+  `TowerHeat.md` if no better existing downstream file is found.
+- Import `TimeRecursion` plus the reaction/heat-bound files needed for the bridge.
+- Add a theorem with short name, suggested `resStarBoundLF`, that consumes `resStarLFU` and
+  `StarSum2.bound` and returns a local-frame residual component bound.
+
+Suggested statement shape:
+Given the same local-frame/time-side hypotheses as `resStarLFU`, obtain the witness `T` from
+`resStarLFU`, then obtain `C` from `StarSum2.bound hT`. Conclude:
+
+  exists T, StarSum2 S (t:Real) k T and exists C, 0 <= C and
+    (component derivative identity from resStarLFU) and
+    forall y, y in u -> forall m : Fin (4+k) -> Fin 3,
+      |T y (fun p => frame (m p) y)|
+        <= C * sum j in Finset.range (k+1),
+             sqrt (stNormSq S (t:Real) j y (hframe.toBasisAt hy)) *
+             sqrt (stNormSq S (t:Real) (k-j) y (hframe.toBasisAt hy))
+
+Do not hide the residual behind a new assumption.
+
+Proof route:
+1. Apply `resStarLFU` to get `T, hT, hcomp`.
+2. Apply `StarSum2.bound hT` with `Idx := Fin 3`.
+3. For each `y hy`, use `basis := hframe.toBasisAt hy`.
+4. Build orthonormality for `S.family.metric (t:Real)` from `horthU y hy`, using
+   `hframe.toBasisAt_coe hy` and the existing `SolutionOn.family_metric` simp bridge if needed.
+5. Specialize the bound at `m`; reduce
+   `T y (fun p => (hframe.toBasisAt hy) (m p))` to `T y (fun p => frame (m p) y)` by
+   `hframe.toBasisAt_coe hy`.
+
+Stop conditions:
+- Stop if the `S.base.metric` vs `S.family.metric` orthonormality bridge is not available; report
+  the exact goal.
+- Stop if `StarSum2.bound` cannot be specialized with `basis := hframe.toBasisAt hy`; report the
+  exact type mismatch.
+- Stop if the theorem statement wants a global orthonormal frame or global basis family; report this
+  as a P4 design issue instead of adding an assumption.
+
+Verification:
+Use `scripts/lake-locked.ps1` claims for edited Lean files, focused-check the edited file(s), release
+the lock, and update the same-name `.md` note without full logs. Do not run a full build.
+```
+
+## 2026-06-13 EXECUTOR -- P4 bridge `resStarBoundLF` GREEN
+
+P4 first step done. New file `Evolution/StarSum/TowerHeat.lean` (details + lessons in `TowerHeat.md`):
+`resStarBoundLF` composes `resStarLFU` (P3 endpoint) with `StarSum2.bound` into a single local-frame
+residual bound `|T y (frame · y)| <= C * Σⱼ √(stNormSq j)·√(stNormSq (k-j))`, taking exactly the
+`resStarLFU` hypotheses (no new assumption), sorry-free.
+
+One necessary upstream API change: `lfBase`/`lfChr` in `TimeRecursion.lean` were `private` and so could
+not be named in a downstream file's hypothesis types -> removed `private` (no statement change).
+
+NOT attempted (the real P4 frontier, per the planner decision): the global scalar/Bernstein
+`TowerHeatBoundOn`. **CORRECTION: no global basis is needed** (a global orthonormal frame generally
+does not exist -- parallelizability). The global consumer is INTRINSIC (`nIntrinsic = |∇ᵏRm|²`); the
+per-`u` local bound lifts to a pointwise intrinsic bound because at an orthonormal frame the component
+sum-of-squares IS the intrinsic norm (`compNormSqMulti_orthoBasis_eq_normSq0S`, already banked) and
+local orthonormal frames always exist -- intrinsic results glue trivially. So frame existence/
+invariance is NOT a frontier. The genuine remaining work = (b) the reaction/heat WIRING: connect the
+residual `T` to `nablaKRm04ReactionIntrinsic` and assemble the eq-7.4 `n` predicate, plus discharging
+the standing analytic inputs at each point's local frame. Details in `TowerHeat.md`.
+
+## 2026-06-14 hcov cleanup
+
+`stNabla_starBase` and `StarSum2.nabla` no longer take a caller-supplied
+local-smoothness proof for the solution connection.  The proof is derived from
+the fixed-time metric connection internally.
+
+Verification passed for the edited file and the module was rebuilt for
+downstream signature refresh.
+
+## 2026-06-14 manifold instance cleanup
+
+Removed the redundant explicit `infty+1` manifold binder from the concrete
+StarSum2 metric context.  The exported star-sum surfaces no longer expose that
+extra smoothness spelling.
+
+Verification passed for the edited file.

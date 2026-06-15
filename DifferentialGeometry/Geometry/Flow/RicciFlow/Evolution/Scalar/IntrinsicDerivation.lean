@@ -34,7 +34,7 @@ variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
-variable [IsManifold I 1 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [IsManifold I 1 M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 /-- Swap the two traced index pairs in a four-fold finite sum. -/
@@ -506,9 +506,6 @@ private theorem coordScalarRmTrace_center
         (S.family.metric (t : Real)) x₀ basis gInv := by
     simpa [hbasis_def, hgInv_def] using coordInvReal (I := I) S x₀ (t : Real)
   -- the pointwise curvature symmetry producers, specialized at the center
-  have hcovReg : ConnectionLocallySmoothOn (I := I) S := by
-    intro τ
-    exact connSmoothOfSol (I := I) S hS (τ : Real) (D.regular_subset τ.2)
   have hRm13 :
       ∀ τ : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D,
         DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
@@ -543,11 +540,11 @@ private theorem coordScalarRmTrace_center
   have hOutput :
       DifferentialGeometry.Integral.Connection.Rm04OutputSkewAt (I := I)
         (S.base.rm04 (t : Real) x₀) :=
-    rm04OutputSkew_regular (I := I) S hS S.base.rm13 S.base.rm04 hcovReg hRm13 hLower t x₀
+    rm04OutputSkew_regular (I := I) S hS S.base.rm13 S.base.rm04 hRm13 hLower t x₀
   have hFirst :
       DifferentialGeometry.Integral.Connection.FirstBianchiAt (I := I)
         (S.base.rm04 (t : Real) x₀) :=
-    rm04FirstBianchi_regular (I := I) S hS S.base.rm13 S.base.rm04 hcovReg hRm13 hLower t x₀
+    rm04FirstBianchi_regular (I := I) S hS S.base.rm13 S.base.rm04 hRm13 hLower t x₀
   have hRicAt : ∀ i j : CoordinateIdx (𝕜 := Real) E,
       (S.ricci (t : Real) x₀)
           (DifferentialGeometry.Integral.Connection.vec2 (basis i) (basis j)) =

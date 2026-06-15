@@ -428,9 +428,9 @@ This is the algebraic half of the bridge to `IteratedRmTowerOn.heatEq`: it remov
 the inverse metric `gInv` (via `inner0S_orthoBasis_eq_compContract` and
 `ricReactionContract_delta_eq_compContract`), turning the metric-contracted
 reaction into the plain component form `nablaRmReactionMulti` consumes.  The
-genuine remaining frontier is splitting `combinedStarArray` over `j ∈ {0,…,k}`
-into `∇ʲRm ∗ ∇^{k−j}Rm` factors with the per-`j` Cauchy–Schwarz bound (the
-commuted-curvature identity; see the file footer). -/
+residual half `comp (Tdot − Δ∇ᵏRm)` is `comp T` with `T ∈ StarSum2 k`
+(`StarSum/TimeRecursion.resStarLFU`), bounded by `StarSum/TowerHeat.resStarBoundLF`; so
+`combinedStarArray` is bounded as a whole rather than split per-`j` (see the updated file footer). -/
 theorem nablaKRm04Reaction_orthoBasis_eq_compContract
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (k : ℕ)
@@ -503,6 +503,19 @@ theorem nablaKRm04Reaction_orthoBasis_eq_compContract
 end ReactionBridge
 
 /-! ## The remaining frontier (the commuted-curvature star decomposition)
+
+**UPDATE (2026-06-13): frontier #1 below is resolved by the StarSum2 route — do not build the
+per-`j` split.**  `StarSum/TimeRecursion.resStarLFU` proves `(∂ₜ − Δ)∇ᵏRm = T` with
+`T ∈ StarSum2 k` (all `k`, no `0<j<k` iterated-commutator assembly needed), and
+`StarSum2.bound` / `StarSum/TowerHeat.resStarBoundLF` give the residual component bound
+`|T y (frame·y)| ≤ C·Σⱼ √wⱼ·√w_{k−j}` directly.  The downstream consumer is
+`BernsteinShiHigher.TowerHeatBoundOn`, whose reaction is the **summed** `towerReactionSum =
+Σⱼ c·√wⱼ·√w_{k−j}·√w_k` — NOT the per-`j` `IteratedRmTowerOn.starBound` arrays.  So `combinedStarArray`
+is bounded as a whole (Cauchy–Schwarz on `2⟨∇ᵏRm, combinedStar⟩`, then Minkowski split
+`combinedStar = ricStar + residual`, with `abs_ricStarArray_le` for the `j=0` half and
+`resStarBoundLF` (per-component → L²) for the residual half); the explicit `j`-bucket split below is
+bypassed.  The genuine remaining work is the analytic estimate-plumbing of those norm bounds plus
+discharging `Tdot = ∂ₜ∇ᵏRm` (the time-side inputs).  The original analysis is kept below for history.
 
 This file closes the **algebraic (orthonormal-collapse) half** of the bridge from
 the concrete derived heat equation `nablaKRm04NormHeatEquationOn_intrinsic` to the

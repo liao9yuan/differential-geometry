@@ -69,3 +69,17 @@ as B5.  This converts intrinsic (B_r) bounds into the `hgB` compL2 form on u'.
 4. Finite-subcover uniformization over compact K + max constants.
 5. RicBound.lean assembly (apply `aN_intrinsic_point` per point; R4f arity
    bridge for the RHS).
+
+## 2026-06-14 — component-eval transparency sweep (item 4): 3 → 1 blocks
+
+Removed the `set_option backward.isDefEq.respectTransparency false` from **two** component-eval blocks; both
+were **STALE** (the option was unnecessary):
+- `compL2_tower_le` — component-eval core is `rw [component0S_apply]; … rw [IsLocalFrameOn.toBasisAt_coe]; rfl`
+  (pointwise frame-component eval); rest is `Real.sqrt`/`pow` algebra. **Corrects the note above** (the
+  "Needs the same `respectTransparency false` as B5" line): the hack is NOT needed here.
+- `sqrt_tower_le_compL2` — reverse bound, same frame-component shape.
+
+Both focused-check **green** without the option, no new API lemma. **Kept** `ricCompField_mdiffOn` (a
+`ContMDiffOn` smoothness producer → bundle/section class, not component-eval). Statement-preserving; the
+`ric_bound`/eq-3.4 consumers are unaffected. Triage signal + cross-file results in
+`Tensor/RSTensor/ComponentEvalApiPlan.md`.

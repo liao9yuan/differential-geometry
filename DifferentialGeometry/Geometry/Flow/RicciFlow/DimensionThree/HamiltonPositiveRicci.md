@@ -1104,3 +1104,238 @@ follow-ups #1–15.
 **Resume:** frontier #1 (the all-k iterated commutator) is the genuine remaining mathematics
 — generalize the `k=1` `T₁`/`T₂` machinery to all ranks via the rank-uniform `(0,s)` Ricci
 identity + `inner0S_nabla` applied iteratively.
+
+## 2026-06-13 ham3_short_isSolution: scoped frontier (NOT pure packaging — a real analytic wall)
+
+User picked the `ham3_short_isSolution` direction expecting "regularity packaging only".
+A deeper feasibility pass corrects that: the residual is NOT purely mechanical assembly.
+It bottoms out on a genuine analytic fact the short-time/DeTurck layer does not provide.
+
+### Field-by-field map of `IsSolutionOn S` (Core.lean:508) against the candidate
+
+The candidate (`ham3_short_solution_candidate`) exposes, for the canonical trivialization
+frame at each `x0`: chart-Gram **joint** C∞ on `Ioo 0 T ×ˢ baseSet`, chart-Gram **joint**
+C⁰ on `Ico 0 T ×ˢ baseSet`, and the 1st-order PDE `∂ₜg = -2 Ric` (`HasDerivWithinAt … Ici 0`).
+
+REACHABLE (direct from candidate + small bridges):
+- `smoothConnection` — each fixed-time LC connection is smooth; no time regularity demanded.
+- `equation` — from the raw PDE: `Ici 0`→`carrier` at interior `t`, + the
+  `ricciTensor g x v w = S.ricciAt t x (vec2 v w)` bridge.
+- `smoothMetric.coeff` (`ContDiffOn ⊤ … D.regular = Ioo 0 T`) — from chart-Gram joint C∞ on
+  `Ioo`; the fixed-vector inner product is a constant-coefficient combination of Gram entries.
+- `smoothMetric.coeff_cont` (`ContinuousOn … D.carrier = Ico 0 T`) — from chart-Gram joint C⁰.
+- `smoothMetric.frameCompSmooth` — joint C∞ on `Ioo ×ˢ u` for the canonical frame; arbitrary
+  `IsLocalFrameOn` frame via the time-independent transition functions.
+- `ricciNormSpace`, `ricciNormGrad`, `scalarTime` — fixed-time spatial regularity from the
+  fixed-time smooth metric.
+
+BLOCKED — the curvature **bundle joint-continuity** fields:
+- `smoothMetric.metricTensor_cont` : `Tensor0SFamilyContinuousOnSet 2 D.carrier (metric)`
+- `ricciCont` : `Tensor0SFamilyContinuousOnSet 2 D.carrier (S.ricci)`
+- `rm04Cont`  : `Tensor0SFamilyContinuousOnSet 4 D.carrier (S.base.rm04)`
+- `nablaRicCont` : `Tensor0SFamilyContinuousOnSet 3 D.regular (∇Ric)`  (interior only)
+- `scalarCont` : `ContinuousOn (scalar) (D.carrier ×ˢ univ)`
+
+### Two keystones (both genuinely missing)
+
+**Keystone A — component→section continuity constructor (missing API, buildable).**
+`Tensor0SFamilyContinuousOnSet` (MetricFamily.lean:252) is *joint* total-space continuity
+over `{t∈K}×M`. The tree has only the EVAL direction (`eval_continuous`,
+`TensorMultilinear.continuous_section_apply_base`: section→component) and an algebra
+(`mono`/`comp_time`/`add`/`smul`). There is **no constructor** that builds a
+`Tensor0SFamilyContinuousOnSet` FROM joint local-frame/chart component continuity — the
+continuity analog of `contMDiffOn_iff_localFrame_coeff`. Every existing instance is a
+transport rebuild (`timeShift`/`paraSolution`). Route: `FiberBundle.continuousAt_totalSpace`
+(already used by `add`/`smul`) + the `Tensor0SModel` trivialization-fiber-coordinate ⟷
+component bridge. Moderate bundle-trivialization work. Layer: `Curvature/Realized/` (or a new
+`Tensor0SContinuityFromComponents` file). With Keystone A the candidate's **joint** chart-Gram
+C⁰ on `Ico` discharges `metricTensor_cont` (hence the whole `smoothMetric` field).
+
+**Keystone B — joint (t,x) curvature continuity UP TO t=0 (genuine analytic wall).**
+`ricciCont`/`rm04Cont`/`scalarCont` are on `D.carrier` (up to t=0) and are genuinely consumed
+there: the tensor/scalar maximum principle (`RicciPreservation.lean`) and the HCG whole-window
+bounds (`AllTimesBoundsFlow.lean:466`) use closed slabs `[0,T]`/`uIcc` *including* the initial
+time, so these fields CANNOT be weakened to `D.regular` (unlike `nablaRicCont`, which is
+interior). But the DeTurck layer (`ShortTime/SolutionC2Continuous.lean`
+`deturck_solution_c2_continuous_icc0`; `ShortTimeAssembly/RicciContinuityInMetricTime.lean`
+`ricci_continuous_in_metric_time`/`ricci_gfam_continuous_on`) proves curvature continuity up
+to t=0 only **per-fixed-x in time** — never **jointly in (t,x)**. On the interior `Ioo 0 T`
+joint C∞ is available, so the interior `nablaRicCont` is fine; the wall is exactly the
+**joint, up-to-t=0** continuity of `Ric`/`Rm`/`R` on the carrier. This needs (i) the short-time
+headline `ricci_flow_short_time_existence` STRENGTHENED to expose the joint C²-up-to-0 chart-Gram
+data (`hC2_chart` shape, jointly in (s,y)), currently hidden, and (ii) a genuine
+joint-continuity-of-curvature analytic proof from it. This is statement-strength + missing
+analytic producer, NOT assembly.
+
+### Verdict / classification
+
+`ham3_short_isSolution` is NOT fillable this pass. Classification: missing API (Keystone A) +
+missing analytic producer & statement-strength (Keystone B). Per CLAUDE.md the wall is left
+visible rather than papered over with Hamilton-level hypotheses or a faked bundle constructor.
+
+Recommended brick order (independent sessions):
+1. Keystone A: the component→section `Tensor0SFamilyContinuousOnSet` constructor (reusable;
+   needed by ALL bundle-continuity work, incl. future HCG eq 3.3/3.4). Discharges `smoothMetric`.
+2. Short-time output strengthening: expose joint C²-up-to-0 chart-Gram from the DeTurck layer
+   in `ricci_flow_short_time_existence`'s headline (the data already exists internally as the
+   `hC2_chart` hypothesis to `deturck_solution_c2_continuous_icc0`).
+3. Keystone B: joint (t,x) curvature continuity up to t=0 from (2) + Keystone A → `ricciCont`,
+   `rm04Cont`, `scalarCont`. Genuine analysis.
+4. Assemble all 9 `IsSolutionOn` fields → fill `ham3_short_isSolution`. Note the whole chain
+   still rests on the standing DeTurck `sorryAx`, so even a filled `ham3_short_isSolution` is
+   NOT axiom-clean — it removes the *intermediate* `sorry`, not the foundational black box.
+
+## 2026-06-13 CORRECTION (user): Keystone B is NOT a wall — recenter into the open interval
+
+User correction (accepted): the "joint continuity up to t=0" I called a genuine analytic wall
+is dissolved by the standard recentering trick. The solution is jointly C∞ on the OPEN `(0,T)`
+(exposed). Restrict to a CLOSED interior slab `[a,b] ⊂ (0,T)` (`0 < a < b < T`): every
+carrier-continuity field then only needs continuity at points INTERIOR to `(0,T)`, where the
+flow is already jointly smooth — there is no up-to-`t=0` limit to take. So `IsSolutionOn` on an
+interior slab follows from the exposed joint C∞ alone, with NO joint-up-to-0 proof and NO
+short-time-headline strengthening. Brick steps 2 (headline strengthening) and 3 (Keystone B)
+above are therefore UNNECESSARY for the smooth-solution producer.
+
+Architectural consequence (the only real residue): the interior-slab solution's initial slice
+is `g(a)`, not `g0`. This is exactly the smooth-solution input the maximal-flow / blow-up
+analysis consumes; the `g(0)=g0` initial condition is carried separately at the C⁰ level
+(`metric 0 = g0` is exposed, `g→g0` continuously). The literal `ham3_short_isSolution` as stated
+([0,T) + full up-to-0 `IsSolutionOn`) is the only thing still touching the rough initial instant;
+the substance moves to an interior-slab producer
+`isSolutionOn_interior_slab : 0 < a → a < b → b < T → IsSolutionOn (S | [a,b])`, then the downstream
+maximal continuation feeds on that + the C⁰ initial condition.
+
+### Revised SOLE missing piece: Keystone A only
+
+`Tensor0SFamilyContinuousOnSet s K A` (MetricFamily.lean:252) = joint `{t∈K}×M` total-space
+continuity. Needed for `metricTensor_cont`/`ricciCont`/`rm04Cont`/`nablaRicCont`/`scalarCont`,
+all on an interior slab where joint C∞ holds. Must build a constructor:
+
+  `Tensor0SFamilyContinuousOnSet s K A` FROM joint (t,x) continuity of the trivialization-frame
+  components of `A`, via `FiberBundle.continuousAt_totalSpace` (base continuous + fiber-coord
+  continuous). Template: the existing `Tensor0SFamilyContinuousOnSet.add`/`const_smul` proofs
+  (MetricFamily.lean:324–356) already use `FiberBundle.continuousAt_totalSpace` and manipulate
+  the `.2` fiber coordinate as a continuous map — same pattern, but constructing rather than
+  transforming. The fiber coordinate of `Tensor0SModel s ℝ E` ↔ `component0S`/chart-Gram bridge
+  is the bookkeeping. Mathlib `contMDiffOn_iff_localFrame_coeff` (`VectorBundle/LocalFrame.lean`)
+  is the single-base SMOOTH analog (at n=0 = continuity) — usable for the per-fixed-t section but
+  the joint (t,x) version needs `continuousAt_totalSpace` directly.
+
+  NOTE: `metricTensor_cont` is NEVER constructed from scratch in-tree (only transported via
+  `timeShift`/`paraSolution`), so there is no existing template for the constructor — it is
+  genuinely new bundle infrastructure. Size: a focused file (~150–300 LOC), moderate
+  trivialization difficulty. Home: new sibling `Geometry/Curvature/Realized/` file importing
+  `MetricFamily.lean`, or appended into `MetricFamily.lean`.
+
+  Once Keystone A exists: feed it the joint chart-Gram C∞ (`chartGramMatrix_entry_contMDiffOn`
+  + the joint short-time smoothness on `Ioo`) for the metric, and the curvature analog for
+  `Ric`/`Rm` (curvature is a smooth function of the jointly-smooth metric jet on the interior),
+  to discharge all five bundle-continuity fields on the interior slab.
+
+## 2026-06-13 KEYSTONE A DONE (verified, exit 0, no sorry)
+
+New file `Geometry/Curvature/Realized/MetricFamilyContinuity.lean`:
+`tensor0SFamilyContinuousOnSet_of_chartComp` — the component→section bundle-continuity
+constructor. From: for every trivialization centre `x₀` and multi-index `idx`, joint continuity
+(on the trivialization domain `{q | q.2 ∈ baseSet x₀}`) of
+`q ↦ A q.1.1 q.2 (fun k => (trivializationAt E (TangentSpace I) x₀).symmL ℝ q.2 (chartModelBasis (idx k)))`,
+it produces `Tensor0SFamilyContinuousOnSet s K A`.
+
+Proof (verified): `FiberBundle.continuousAt_totalSpace` reduces section continuity at `q₀` to
+base continuity (`continuous_snd`) + fibre-coordinate continuity; fibre coord
+`= A.compContinuousLinearMap (symmL …)` (rfl); `eval0SCLE` (finite-dim eval homeomorphism,
+`DifferentialGeometry.Analysis.Parabolic.TensorSpectral`) turns fibre-coord continuity into
+per-component continuity (`continuousAt_pi` + `eval0SCLE_apply` + `compContinuousLinearMap_apply`);
+each component is exactly the supplied `hcomp`, restricted to the open nbhd of `q₀`.
+
+Setting: stated in `InnerProductSpace Real E` (NOT `MetricFamily.lean`'s `NormedSpace` section) —
+`chartModelBasis`/`eval0SCLE` need the Euclidean structure, and putting it in `MetricFamily.lean`
+caused a `NormedSpace` instance diamond. All realized Ricci-flow consumers are in `InnerProductSpace`.
+
+METRIC CONSUMER ALSO DONE (verified, exit 0, no sorry, same file):
+`metricTensorCont_of_chartGram` — from joint chart-Gram continuity (per centre `x₀`, entries
+`q ↦ chartGramMatrix (g q.1.1) x₀ q.2 i j` continuous on the trivialization domain) produces
+`Tensor0SFamilyContinuousOnSet 2 K (fun t x => metricTensorField (g t) x)`. Proof: apply the
+keystone; reduce the component via `metricTensorField_apply` + `chartGramMatrix_apply`, with
+`symmL ℝ q.2 (chartModelBasis (idx k)) = chartBasisVecFiber x₀ (idx k) q.2` closing by `rfl`
+(symmL's `toFun` is `e.symm`, and `chartBasisVecFiber := e.symm · (chartModelBasis ·)`). This is
+the `metricTensor_cont` field of `MetricFamilySmoothOn` / `IsSolutionOn`, done.
+
+REMAINING BRICKS (clearly scoped, each self-contained; increasingly couple to the short-time
+family structure in `ShortTimeExistence`/`HamiltonPositiveRicci`):
+1. SMOOTH analog of the keystone — `…ContMDiff…_of_chartComp` (joint `ContMDiffOn` of the section
+   on `D.regular ×ˢ u` from joint chart-Gram C∞). Then `coeff` (ContDiffOn-in-time) and
+   `frameCompSmooth` (arbitrary `IsLocalFrameOn`) follow by evaluating the smooth section against
+   smooth frame fields (`contMDiff_section_apply_gen`, already in `BundleSmoothEvalRealized`).
+   `coeff_cont` follows from the continuity consumer just built.
+2. Assemble `MetricFamilySmoothOn` for the short-time family on an interior slab (recentered) from
+   (1) + the done `metricTensor_cont`. `smoothConnection`: each fixed-time Levi-Civita is smooth.
+3. `equation` field: from the short-time first-order PDE (`Ici 0` → `D.carrier` at interior t,
+   + the `ricciTensor g x v w = ricciAt`-bridge).
+4. Ricci/Rm/scalar bundle continuity (`ricciCont`/`rm04Cont`/`scalarCont`) on the interior slab:
+   curvature is a smooth function of the jointly-smooth metric jet; feed the SMOOTH-keystone the
+   curvature-component joint smoothness, OR the continuity keystone the curvature-component joint
+   continuity. `ricciNormSpace`/`ricciNormGrad`: fixed-time spatial from the fixed-time metric.
+5. `isSolutionOn_interior_slab : 0<a → a<b → b<T → IsSolutionOn (S | [a,b])` assembling 1–4.
+6. Bridge to `ham3_short_isSolution` ([0,T)+g0) via recentering + the C⁰ initial condition, OR
+   restate the downstream maximal-flow consumer to take the interior-slab producer.
+
+## 2026-06-13 DE-RISK: brick 4 (ricciCont/rm04Cont) is ALREADY built, not a wall
+
+`ShortTimeAssembly/RicciContinuityInMetricTime.lean` contains a full `RicciContJointAux`
+namespace with JOINT `(t,x)` curvature continuity: `jointRicci_continuousOn` (:740),
+`jointRiemann_continuousOn` (:701) — joint `ContinuousOn (fun q : ℝ×M => chartRicciTensor
+(g_DT q.1) α i k (extChartAt α q.2)) Sp` from joint chart-Gram `iteratedFDeriv` (k≤2)
+continuity — plus `moving_chartCoord_jointContinuousWithinAt` (:817).  So `ricciCont`/`rm04Cont`
+are ASSEMBLY: short-time joint C∞ ⟶ joint `h0/h1/h2` jets ⟶ `jointRicci_continuousOn` ⟶ bridge
+`chartRicci → S.ricci` chart-frame components ⟶ `tensor0SFamilyContinuousOnSet_of_chartBasisComp`
+(new, verified) ⟶ `ricciCont`.  No analytic wall remains in the `ham3_short_isSolution` chain;
+the rest is consumer assembly coupling to the short-time family / `SolutionOn` structure.
+
+VERIFIED this session (all exit 0, no sorry):
+- `Geometry/Curvature/Realized/MetricFamilyContinuity.lean` (NEW):
+  `tensor0SFamilyContinuousOnSet_of_chartComp` (keystone), `…_of_chartBasisComp` (clean interface),
+  `metricTensorCont_of_chartGram` (the `metricTensor_cont` consumer).
+- `ShortTimeAssembly/RicciContinuityInMetricTime.lean` (+3 public lemmas): `chartRicci_jointContinuousOn`,
+  `chartRiemann_jointContinuousOn` — expose the file-private joint `(t,x)` curvature continuity
+  (`RicciContJointAux.jointRicci/Riemann_continuousOn`); and `ricciChartFrameComp_jointContinuousOn`
+  (needs `[I.Boundaryless]`) — joint continuity of `ricciTensor (g_DT q.1) q.2 (cbvf α i q.2)(cbvf α j q.2)`,
+  via `ricciTensor_chartBasisVec_alpha_eq` (`ricci on chart frame = chartRicci`) `.congr`'d through
+  `chartRicci_jointContinuousOn`. THIS IS THE FORM `…_of_chartBasisComp` consumes for `ricciCont`.
+
+REMAINING for `ricciCont` (steps (b)+(c) now DONE = `ricciChartFrameComp_jointContinuousOn`):
+(a) short-time joint chart-Gram jets `h0/h1/h2` on the interior slab — bridge the candidate's
+    `ContMDiffOn (chartGramMatrix …)` to `iteratedFDeriv (chartGramOnE …)` joint continuity
+    (the only genuinely short-time-coupled, fiddly step);
+(a') subtype glue: `ricciChartFrameComp_jointContinuousOn` lives over `ℝ×M` on `Sp` (good-set);
+    `…_of_chartBasisComp` wants `{t∈K}×M` on `{q | q.2 ∈ baseSet}` — convert via the subtype
+    inclusion + goodSet⊆baseSet, with `Sp = (image of K) ×ˢ goodSet`;
+(d) `S.ricci`'s apply lemma (`S.ricci t x v = ricciTensor (g t) x (v 0)(v 1)`, Core.lean) so the
+    keystone's `A = S.ricci` components match `ricciChartFrameComp_jointContinuousOn`'s output;
+(e) `tensor0SFamilyContinuousOnSet_of_chartBasisComp` → `ricciCont`.
+`rm04Cont`: analogous with the `(0,4)` chart-frame Riemann bridge (build the `rm04` analog of
+`ricciChartFrameComp_jointContinuousOn` from `chartRiemann_jointContinuousOn` + the lowered-Rm
+chart-frame identity).  Couples to `Core.lean` + short-time candidate; a focused session.
+
+## 2026-06-13 ROOT BLOCKER for `ham3_short_isSolution`: `frameCompSmooth` is UNCONSTRUCTIBLE as stated
+
+(Found while executing Dispatch B in `MaximalTime.md`, which is the same `chartGram → IsSolutionOn`
+problem on a shifted interval. Full write-up: `MaximalTime.md` "2026-06-13 EXECUTOR — Dispatch B".)
+
+The de-risking above (bricks 1–6, "no analytic wall remains") MISSED a field-design wall. The
+`smoothMetric` field's `MetricFamilySmoothOn.frameCompSmooth` (`MetricFamily.lean:495`) requires, for
+EVERY `IsLocalFrameOn I E 1 frame u` (a merely **C¹** frame — Mathlib `IsLocalFrameOn _ _ k` = each
+section is `Cᵏ`), that `(g p.1).inner p.2 (frame i)(frame j)` be jointly **C∞** (`⊤`) on
+`D.regular ×ˢ u`. This is mathematically FALSE for arbitrary C¹ frames (C¹-not-C² frame ⇒ C¹-not-C²
+output), for ANY metric. So the field is consumable-but-not-constructible: `hS.smoothMetric.frameCompSmooth`
+(an ASSUMED field) feeds consumers fine (they all pass C∞ `e.localFrame b`), but you cannot INHABIT it
+when building a fresh `MetricFamilySmoothOn`. THIS is why `ham3_short_isSolution` (and Dispatch B's
+sorry #4) cannot be filled — not the curvature continuity, which is genuinely assembly.
+
+Smallest honest fix = a DESIGN DECISION (foundational structure + consumers; needs user approval):
+strengthen the field's frame hypothesis `IsLocalFrameOn I E 1` → `IsLocalFrameOn I E ⊤` (C∞). Then the
+field is constructible from chart-Gram C∞, and brick 1 (the SMOOTH-keystone route) goes through. Caveat:
+frame-BUILDERS that currently make `IsLocalFrameOn I E 1` (`Regularity.lean:323`,
+`Tensor/RSTensor/Tensor0SRiemannian/Smooth.lean:378,831`) must build `⊤`-frames (mechanical — their
+underlying `e.localFrame b` is C∞). Until this is decided, treat `ham3_short_isSolution`'s `smoothMetric`
+as blocked-on-design, not blocked-on-proof.

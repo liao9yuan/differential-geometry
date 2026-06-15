@@ -1659,7 +1659,7 @@ private theorem traceData_metricTrace
         (DifferentialGeometry.Integral.Connection.standardRmCompAt
           (I := I) basis (S.base.rm04 t x)) :=
     DifferentialGeometry.Integral.Connection.algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
-      (I := I) (g := S.base.metric t) (hcov := hcov)
+      (I := I) (g := S.base.metric t)
       (Rm04 := S.base.rm04 t) (hRm04 := hRm04) basis
   have hRicFirst :
       DifferentialGeometry.Integral.Connection.RicciRealizesRm04FirstTraceAt (I := I) (S.ricci t x)

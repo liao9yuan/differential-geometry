@@ -3,6 +3,7 @@ import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 import DifferentialGeometry.Geometry.Exponential.Smoothness.OffZero
+import DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.StepAInputs
 
 set_option autoImplicit false
@@ -55,6 +56,7 @@ namespace HCGCompactness
 open Bundle
 open scoped Manifold ContDiff Topology Bundle
 
+open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 
@@ -235,6 +237,72 @@ private theorem expMapDiffeo_pushforward_section_contMDiffOn
   rw [hmf]
 
 set_option synthInstance.maxHeartbeats 800000 in
+/-- **Generic-domain B-metric smoothness** (the reusable core): on any open set `S ⊆ E`
+on which the realized parametrization `expMapDiffeo` is `C∞`, the pulled-back
+normal-coordinate metric `normalCoordMetric Y x` is `ContDiffOn ℝ ⊤`.  The opaque-radius and
+named-radius producers below specialize `S`.  Built from the pushforward sections +
+`ContMDiffOn.clm_bundle_apply₂` (the bilinear bundle apply) + the finite-dimensional
+`contDiffOn_clm_apply` reduction. -/
+theorem normalCoordMetric_contDiffOn_of_smooth
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) {S : Set E}
+    (hU : IsOpen S)
+    (hf : letI : TopologicalSpace Y.M := Y.topology
+          letI : ChartedSpace H Y.M := Y.charted
+          letI : IsManifold I ∞ Y.M := Y.smooth
+          letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+          ContMDiffOn 𝓘(Real, E) I ∞ (fun w => expMapDiffeo (I := I) Y.metric x w) S) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    ContDiffOn Real (⊤ : ℕ∞) (normalCoordMetric (I := I) Y x) S := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  -- scalar smoothness `z ↦ g(f z)(d f_z v, d f_z w)` for fixed `v, w`
+  have hscalar : ∀ v w : E, ContMDiffOn 𝓘(Real, E) 𝓘(Real, Real) ∞
+      (fun z => Y.metric.inner (expMapDiffeo (I := I) Y.metric x z)
+          (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z v)
+          (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z w))
+      S := by
+    intro v w
+    have hg : ContMDiffOn 𝓘(Real, E) (I.prod 𝓘(Real, E →L[Real] E →L[Real] Real)) ∞
+        (fun z => TotalSpace.mk' (E →L[Real] E →L[Real] Real)
+          (E := fun b : Y.M => TangentSpace I b →L[Real] TangentSpace I b →L[Real] Real)
+          (expMapDiffeo (I := I) Y.metric x z)
+          (Y.metric.inner (expMapDiffeo (I := I) Y.metric x z)))
+        S :=
+      Y.metric.contMDiff.comp_contMDiffOn hf
+    have hv := expMapDiffeo_pushforward_section_contMDiffOn (I := I) Y x hU hf v
+    have hw := expMapDiffeo_pushforward_section_contMDiffOn (I := I) Y x hU hf w
+    have htotal : ContMDiffOn 𝓘(Real, E) (I.prod 𝓘(Real, Real)) ∞
+        (fun z => TotalSpace.mk' Real (E := Bundle.Trivial Y.M Real)
+          (expMapDiffeo (I := I) Y.metric x z)
+          (Y.metric.inner (expMapDiffeo (I := I) Y.metric x z)
+            (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z v)
+            (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z w)))
+        S :=
+      ContMDiffOn.clm_bundle_apply₂
+        (E₁ := fun b : Y.M => TangentSpace I b) (E₂ := fun b : Y.M => TangentSpace I b)
+        (E₃ := fun _ : Y.M => Real)
+        (b := fun z => expMapDiffeo (I := I) Y.metric x z)
+        (ψ := fun z => Y.metric.inner (expMapDiffeo (I := I) Y.metric x z))
+        (v := fun z => mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z v)
+        (w := fun z => mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z w)
+        hg hv hw
+    intro z hz
+    have h_at := htotal z hz
+    rw [contMDiffWithinAt_totalSpace] at h_at
+    exact h_at.2
+  rw [contDiffOn_clm_apply]
+  intro v
+  rw [contDiffOn_clm_apply]
+  intro w
+  rw [← contMDiffOn_iff_contDiffOn]
+  exact (hscalar v w).congr (fun z _ => normalCoordMetric_apply (I := I) Y x z v w)
+
+set_option synthInstance.maxHeartbeats 800000 in
 /-- **B-metric smoothness producer** (frontier-1, S6/`lbl395`): the model-coordinate
 normal-coordinate pulled-back metric `normalCoordMetric Y x` is `ContDiffOn ℝ ⊤` on a uniform
 ball `ball 0 δ ∩ source` where forward `expMap` is `C∞`.  This discharges the `hsmooth`
@@ -255,51 +323,8 @@ theorem normalCoordMetric_contDiffOn
   letI : IsManifold I ∞ Y.M := Y.smooth
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   obtain ⟨δ, hδ, hf⟩ := expMapDiffeo_contMDiffOn_ball (I := I) Y x
-  refine ⟨δ, hδ, ?_⟩
-  have hU : IsOpen (Metric.ball (0 : E) δ ∩ (expMapDiffeo (I := I) Y.metric x).source) :=
-    Metric.isOpen_ball.inter (expMapDiffeo (I := I) Y.metric x).open_source
-  -- scalar smoothness `z ↦ g(f z)(d f_z v, d f_z w)` for fixed `v, w`
-  have hscalar : ∀ v w : E, ContMDiffOn 𝓘(Real, E) 𝓘(Real, Real) ∞
-      (fun z => Y.metric.inner (expMapDiffeo (I := I) Y.metric x z)
-          (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z v)
-          (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z w))
-      (Metric.ball (0 : E) δ ∩ (expMapDiffeo (I := I) Y.metric x).source) := by
-    intro v w
-    have hg : ContMDiffOn 𝓘(Real, E) (I.prod 𝓘(Real, E →L[Real] E →L[Real] Real)) ∞
-        (fun z => TotalSpace.mk' (E →L[Real] E →L[Real] Real)
-          (E := fun b : Y.M => TangentSpace I b →L[Real] TangentSpace I b →L[Real] Real)
-          (expMapDiffeo (I := I) Y.metric x z)
-          (Y.metric.inner (expMapDiffeo (I := I) Y.metric x z)))
-        (Metric.ball (0 : E) δ ∩ (expMapDiffeo (I := I) Y.metric x).source) :=
-      Y.metric.contMDiff.comp_contMDiffOn hf
-    have hv := expMapDiffeo_pushforward_section_contMDiffOn (I := I) Y x hU hf v
-    have hw := expMapDiffeo_pushforward_section_contMDiffOn (I := I) Y x hU hf w
-    have htotal : ContMDiffOn 𝓘(Real, E) (I.prod 𝓘(Real, Real)) ∞
-        (fun z => TotalSpace.mk' Real (E := Bundle.Trivial Y.M Real)
-          (expMapDiffeo (I := I) Y.metric x z)
-          (Y.metric.inner (expMapDiffeo (I := I) Y.metric x z)
-            (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z v)
-            (mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z w)))
-        (Metric.ball (0 : E) δ ∩ (expMapDiffeo (I := I) Y.metric x).source) :=
-      ContMDiffOn.clm_bundle_apply₂
-        (E₁ := fun b : Y.M => TangentSpace I b) (E₂ := fun b : Y.M => TangentSpace I b)
-        (E₃ := fun _ : Y.M => Real)
-        (b := fun z => expMapDiffeo (I := I) Y.metric x z)
-        (ψ := fun z => Y.metric.inner (expMapDiffeo (I := I) Y.metric x z))
-        (v := fun z => mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z v)
-        (w := fun z => mfderiv 𝓘(Real, E) I (fun u => expMapDiffeo (I := I) Y.metric x u) z w)
-        hg hv hw
-    intro z hz
-    have h_at := htotal z hz
-    rw [contMDiffWithinAt_totalSpace] at h_at
-    exact h_at.2
-  -- reduce the `E →L E →L ℝ`-valued map to scalar entries, then convert model↔model
-  rw [contDiffOn_clm_apply]
-  intro v
-  rw [contDiffOn_clm_apply]
-  intro w
-  rw [← contMDiffOn_iff_contDiffOn]
-  exact (hscalar v w).congr (fun z _ => normalCoordMetric_apply (I := I) Y x z v w)
+  exact ⟨δ, hδ, normalCoordMetric_contDiffOn_of_smooth (I := I) Y x
+    (Metric.isOpen_ball.inter (expMapDiffeo (I := I) Y.metric x).open_source) hf⟩
 
 /-- **B-metric smoothness producer, pure-ball form** (the smallest domain/radius lemma for
 the fixed-`U` wrapper).  Combining `normalCoordMetric_contDiffOn` (`C∞` on `ball 0 δ ∩ source`)
@@ -329,6 +354,74 @@ theorem normalCoordMetric_contDiffOn_ball
   refine ⟨Metric.mem_ball.mpr ?_, hsub (Metric.mem_ball.mpr ?_)⟩
   · rw [dist_zero_right]; exact lt_of_lt_of_le hz (min_le_left _ _)
   · rw [dist_zero_right]; exact lt_of_lt_of_le hz (min_le_right _ _)
+
+/-- **Realized parametrization `C∞` on the named geometric ball.**  On
+`Metric.ball 0 (expMapC2Radius Y.metric x)` the realized normal-coordinate parametrization
+`expMapDiffeo` — only a `PartialDiffeomorph … 1` — is `ContMDiffOn ⊤`, because it agrees there
+with the now-`C∞` forward `expMap` (`expMap_contMDiffAt_infty_of_norm_lt_radius` +
+`expMapDiffeo_apply_eq` + `ContMDiffOn.congr`), the ball being inside the chart source by
+the fourth component of `expMapC2Radius` (`mem_expMapDiffeo_source_of_norm_lt_radius`). -/
+theorem expMapDiffeo_contMDiffOn_expBall
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    ContMDiffOn 𝓘(Real, E) I ∞
+      (fun w => expMapDiffeo (I := I) Y.metric x w)
+      (Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric x)) := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  have hexp : ContMDiffOn 𝓘(Real, E) I ∞
+      (fun w : E => (expMap (I := I) Y.metric x (show TangentSpace I x from w) : Y.M))
+      (Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric x)) := by
+    intro w hw
+    rw [Metric.mem_ball, dist_zero_right] at hw
+    exact (expMap_contMDiffAt_infty_of_norm_lt_radius (I := I) Y.metric x hw).contMDiffWithinAt
+  refine hexp.congr (fun w hw => ?_)
+  rw [Metric.mem_ball, dist_zero_right] at hw
+  exact expMapDiffeo_apply_eq (I := I) Y.metric x
+    (mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x hw)
+
+/-- **B-metric smoothness producer, named-radius pure-ball form.**  The pulled-back
+normal-coordinate metric `normalCoordMetric Y x` is `ContDiffOn ℝ ⊤` on the named ball
+`Metric.ball 0 (expMapC2Radius Y.metric x)` — the exposed geometric radius that Step-A
+controls from below (so a single `U` works across the sequence).  This strengthens
+`normalCoordMetric_contDiffOn_ball` by anchoring the opaque smoothness radius to the named
+geometric scale, discharging the frontier flagged in `StepBLocalMetrics.md`. -/
+theorem normalCoordMetric_contDiffOn_expBall
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    ContDiffOn Real (⊤ : ℕ∞) (normalCoordMetric (I := I) Y x)
+      (Metric.ball (0 : E) (expMapC2Radius (I := I) Y.metric x)) := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  exact normalCoordMetric_contDiffOn_of_smooth (I := I) Y x Metric.isOpen_ball
+    (expMapDiffeo_contMDiffOn_expBall (I := I) Y x)
+
+/-- **`hsmooth` reduction for the fixed-`U` wrapper.**  Given a fixed open `U` contained in
+every term's named smoothness ball `ball 0 (expMapC2Radius (X.obj k).metric (c k))`, the
+pulled-back metrics are uniformly `ContDiffOn ℝ ⊤` on `U` — exactly the `hsmooth` hypothesis
+of `exists_metricLimit_normalCoord`.  This reduces `hsmooth` to the single geometric
+containment `hsub`, i.e. to a uniform lower bound on `expMapC2Radius` across the sequence (the
+remaining Step-A wiring frontier). -/
+theorem contDiffOn_normalCoordMetric_of_subset_expBall
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)} (c : ∀ k : ℕ, (X.obj k).M) {U : Set E}
+    (hsub : ∀ k,
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+      letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+      letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
+      U ⊆ Metric.ball (0 : E) (expMapC2Radius (I := I) (X.obj k).metric (c k))) :
+    ∀ k, ContDiffOn Real (⊤ : ℕ∞) (normalCoordMetric (I := I) (X.obj k) (c k)) U :=
+  fun k => (normalCoordMetric_contDiffOn_expBall (I := I) (X.obj k) (c k)).mono (hsub k)
 
 /-- Local Euclidean equivalence of the pulled-back normal-coordinate metric on `U`:
 `½‖v‖² ≤ g(z)(v,v) ≤ 2‖v‖²` for every `z ∈ U` and `v` — the quadratic-form form of

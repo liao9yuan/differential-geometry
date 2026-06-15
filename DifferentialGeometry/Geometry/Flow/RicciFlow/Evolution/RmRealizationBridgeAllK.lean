@@ -226,6 +226,77 @@ theorem iteratedRmComp_one_eq_nablaKRm04Field
         (frameTuple (I := I) (coordinateFrameAt (I := I) x₀) x n) :=
   iteratedRmComp_eq_nablaKRm04Field (I := I) S x₀ t 1 hx n
 
+/-- **The rank-uniform `∇ᵏRm` bridge, arbitrary smooth local frame.**  The local-frame analogue of
+`iteratedRmComp_eq_nablaKRm04Field`: for any smooth `IsLocalFrameOn` frame on an open `u`, the
+level-`k` iterated-derivative component array with the solution's own in-frame Christoffel data
+(`christoffelSymbolInFrame (S.family.connection ·) frame hframe`) and level-0 Riemann components
+(`frameComp0S (S.base.rm04 ·) frame`) equals the canonical bundled `∇ᵏRm` (`nablaKRm04Field`)
+evaluated on the frame vectors.
+
+Proof is the same induction as the coordinate-frame version, with `coordinateFrameSet_open`/`hx`
+replaced by `hu.mem_nhds hx` and the supplied `hframe`; the key step is the frame-general
+`covDerivStepComp_frameComp_eq`.  This is the realization bridge the Brick 4 P3 endpoint
+(`StarSum.TimeRecursion.residualStarSumLF`) consumes. -/
+theorem iterRmLF_eq_nabla
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real)
+    (frame : Idx → (y : M) → TangentSpace I y) {u : Set M}
+    (hframe : IsLocalFrameOn I E (1 : WithTop ℕ∞) frame u) (hu : IsOpen u) :
+    ∀ (k : ℕ) {x : M}, x ∈ u →
+      ∀ n : Fin (4 + k) → Idx,
+        iteratedRmComp (I := I) frame
+            (fun s y => christoffelSymbolInFrame (S.family.connection s) frame hframe y)
+            (fun s => frameComp0S (I := I) (S.base.rm04 s) frame) k t x n =
+          nablaKRm04Field (I := I) S t k x (frameTuple (I := I) frame x n) := by
+  classical
+  intro k
+  induction k with
+  | zero =>
+      intro x _hx n
+      simp only [iteratedRmComp_zero, nablaKRm04Field_zero, frameComp0S]
+  | succ k ih =>
+      intro x hx n
+      -- The inner level-`k` array equals the frame-component array of the bundled `∇ᵏRm`
+      -- throughout the open set `u` (the inductive hypothesis).
+      have hlevelk :
+          (fun y : M =>
+              iteratedRmComp (I := I) frame
+                (fun s y => christoffelSymbolInFrame (S.family.connection s) frame hframe y)
+                (fun s => frameComp0S (I := I) (S.base.rm04 s) frame) k t y) =ᶠ[nhds x]
+            fun y : M =>
+              frameComp0S (I := I) (nablaKRm04Field (I := I) S t k) frame y := by
+        refine Filter.eventually_of_mem (hu.mem_nhds hx) ?_
+        intro y hy
+        funext m
+        simpa [frameComp0S] using ih hy m
+      rw [iteratedRmComp_succ]
+      have hext :
+          frameExtData (I := I) frame
+              (fun y : M =>
+                iteratedRmComp (I := I) frame
+                  (fun s y => christoffelSymbolInFrame (S.family.connection s) frame hframe y)
+                  (fun s => frameComp0S (I := I) (S.base.rm04 s) frame) k t y) x =
+            frameExtData (I := I) frame
+              (frameComp0S (I := I) (nablaKRm04Field (I := I) S t k) frame) x := by
+        funext m d
+        simp only [frameExtData]
+        refine extDerivFun_eventuallyEq_congr (I := I) _ ?_
+        exact hlevelk.mono fun y hy => congrFun hy m
+      have hbase :
+          iteratedRmComp (I := I) frame
+              (fun s y => christoffelSymbolInFrame (S.family.connection s) frame hframe y)
+              (fun s => frameComp0S (I := I) (S.base.rm04 s) frame) k t x =
+            frameComp0S (I := I) (nablaKRm04Field (I := I) S t k) frame x :=
+        hlevelk.self_of_nhds
+      rw [hext, hbase]
+      have hstep :=
+        covDerivStepComp_frameComp_eq
+          (I := I) (S.family.connection t) (nablaKRm04Field (I := I) S t k)
+          (nablaKRm04Field (I := I) S t (k + 1))
+          (nablaKRm04Field_realizes (I := I) S t k)
+          frame hframe hu hx n
+      simpa using hstep
+
 end Bridge
 
 /-! ## The rank-uniform `(0,s)` Ricci identity instances

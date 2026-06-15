@@ -147,14 +147,38 @@ exists_proper_realization` (the user-approved Hopf–Rinow black box). Honest in
 A0 `lbl384` CGT decay, A0' PackingBound/ratio-ballMult (Bishop–Gromov), RealizesEdist.
 
 - [ ] **A-item3 — `lbl383` item 3** (exp∘L diffeo at λ-scale + geodesic convexity):
-      the ONLY remaining Step A content. UN-PARKED 2026-06-11 (user chose full 3a+3b);
-      brick plan + status in `Geometry/Comparison/ConvexBalls.md`. DONE: **B1**
-      (`ConvexBalls.lean:isConvexWith_smallNormalBall` — lbl417 assembly, sorry-free)
-      + **B2** (`ExpBallDiffeo.lean:exists_diffeo_of_injOn` generic glue [a Mathlib
-      TODO] + `exists_expBall_diffeo` — 3a with nonsingularity input, sorry-free).
-      REMAINING: **B3** native nonsingularity (W=∂ₜ commutation → exp-variation-is-
-      Jacobi → Grönwall; B0-shared gate) · **B4** lbl416 producer (S1/S2 Hess-d²
-      interface design pending) · **B5** Step A wiring. Step B's chart scale = B3.
+      the ONLY remaining Step A content. UN-PARKED 2026-06-11 (user: full 3a+3b);
+      brick plan + status in `Geometry/Comparison/ConvexBalls.md`. **DONE sorry-free
+      (2026-06-11):** B1 (`ConvexBalls.lean:isConvexWith_smallNormalBall`, lbl417) ·
+      B2 (`ExpBallDiffeo.lean:exists_diffeo_of_injOn` [Mathlib-TODO glue] +
+      `exists_expBall_diffeo`) · B3-pieces: ODE heart
+      (`SecondOrderGronwall.lean:gronwall_sub_linear`/`gronwall_ne_zero`) ·
+      ℓ²/ON-frame (`InnerExpansion.lean`) · frame producer
+      (`PerpFrame.lean:exists_parallel_frame`) · KEYSTONE
+      (`CovariantGronwall.lean:covGronwall_ne_zero`) · the **∞→finite-order
+      refactor** of the parallel-transport chain (5 thms in `ParallelTransport.lean`
+      + callers) so the clamped radial curve (ContMDiff 8) qualifies · injectivity
+      reduction (`ExpNonsingular.lean:mfderiv_exp_injective_of_jacobi`).
+      **B3 RESOLVED 2026-06-13 — item-3a COMPLETE & UNCONDITIONAL.** The Jacobi/Grönwall
+      nonsingularity tower was UNNECESSARY for `hloc`: `ExpBallDiffeo.lean:
+      exp_isLocalDiffeomorphOn_ball` discharges it directly from
+      `NormalCoordinates.expMapDiffeo` (exp IS a partial diffeo via normal coords;
+      source ⊇ ball), and `exists_expBall_diffeo_of_lt` is the unconditional item-3a
+      ball-diffeo producer. **3b** = `ConvexBalls.lean:isConvexWith_smallNormalBall`
+      (lbl417 assembly) modulo the §5 honest-inputs (Hopf–Rinow join selector + lbl416
+      d²-Hessian-convexity, both = the plan's approved §5/`lbl413` boundary).
+      **B5 DONE 2026-06-13 — ITEM 3 COMPLETE at the brick level.**
+      `GoodCoveringItem3.lean`: `PointedRiemannianManifold.exists_expBall_diffeo` (layer
+      bridge net-manifold → exp ball diffeo) + `Item3RadiusInput` (honest-input, book's
+      "`D` large enough" §5 scale) + `exists_seqItem3Diffeo` (net-level `lbl383` item 3:
+      every live center carries the exp ball diffeo). So item 3 = 3a
+      (`exists_expBall_diffeo_of_lt`, unconditional) + 3b (`isConvexWith_smallNormalBall`,
+      §5 honest-inputs) + net wiring (`exists_seqItem3Diffeo`, §5 radius honest-input).
+      Optional: fold `exists_seqItem3Diffeo` into the `exists_stableNetData` capstone as a
+      field (presentation only). The Jacobi/Grönwall bricks (keystone, ExpNonsingular, ∞→N
+      refactor) are reusable analysis, now relevant to Step B `lbl395`, not item 3.
+      **⟹ STEP A (faithful, book-benchmark) = COMPLETE modulo the declared black boxes**
+      (Hopf–Rinow, A0/A0' decay+volume, §5 `lbl413`/`lbl416` convexity + C²-radius scale).
 
 ## §3 Step B — local metrics & transition maps (`L1370–1882`)
 

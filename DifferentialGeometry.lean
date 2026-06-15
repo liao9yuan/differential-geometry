@@ -1020,7 +1020,6 @@ import DifferentialGeometry.Geometry.Comparison.HopfRinow
 import DifferentialGeometry.Geometry.Comparison.InjectivityRadius
 import DifferentialGeometry.Geometry.Comparison.LocalGeodesicSeed
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
-import DifferentialGeometry.Geometry.Comparison.RadialSurjectivity
 import DifferentialGeometry.Geometry.Comparison.RiemannianDistContinuity
 import DifferentialGeometry.Geometry.Comparison.TangentNormDiamond
 import DifferentialGeometry.Geometry.Comparison.Variation.ArcLength

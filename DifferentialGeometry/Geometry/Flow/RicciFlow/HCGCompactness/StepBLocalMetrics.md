@@ -186,3 +186,95 @@ chains: `normalCoordMetric_contDiffOn_ball` (now on `ball 0 (expMapC2Radius)`) +
 
 The ODE/geometry smoothness frontier for a *single* manifold is closed; what remains is making
 that single-manifold smoothness radius **geometrically named and uniformly bounded below**.
+
+## UPDATE (2026-06-13, session 4): unblock plan VERIFIED feasible; execution blocked on a concurrent agent holding `GaussLemmaPullback.lean`
+
+Audited the OffZero/GaussLemmaPullback smoothness-radius layer.  **Hard-stop #1 does NOT trigger** —
+the C∞ data IS recoverable, and the unblock is a clean, small change (NOT a smoothness-framework
+rewrite).  Key findings:
+
+1. `expMapC2Radius` (`GaussLemmaPullback.lean:230`) = `min` of four `Classical.choose` radii:
+   component **1** = `expMap_contMDiffAt2_of_norm_lt` (C²), 2 = radial-geodesic, 3 = rescale,
+   4 = `exists_metric_ball_subset_expMapDiffeo_source` (⇒ `ball 0 expMapC2Radius ⊆ source`, FREE).
+   `expMapC2Radius_pos` and the geometry/`_radius` consumer lemmas use it **opaquely** (positivity +
+   `min_le_*`), so changing component 1's *source theorem* is safe.
+2. The C² radius (`expMap_contMDiffAt2_of_norm_lt`, OffZero:670, via `exists_unified_chartFlow_data_two`
+   ⟵ `..._combined_two`) and the ∞ radius (`expMap_contMDiffAt_infty_of_norm_lt`, OffZero:1171, via
+   `exists_unified_chartFlow_data_inf` ⟵ `..._combined_inf`) are **parallel** fixed-box chart-flow
+   producers — same shape `∃ δ>0, ∀ w, ‖w‖<δ → ContMDiffAt … LEVEL`.  So `expMap_contMDiffAt_infty_of_norm_lt`
+   ALREADY supplies the C∞ data; nothing new in the ODE layer is needed.
+3. Bare `expMap_contMDiffAt2_of_norm_lt` is consumed ONLY in `GaussLemmaPullback.lean` (lines 231,
+   247, 262 — the radius def, `_pos`, and the `_radius` lemma).  `expMap_contMDiffAt2_of_norm_lt_radius`
+   has many downstream **C²** consumers (JacobiVariation, MinimizingGeodesic, GaussLemmaPullback) — must
+   stay C².
+
+### READY-TO-EXECUTE plan (Option X — minimal, all in `GaussLemmaPullback.lean`)
+- L231 & L246-247: swap component-1 theorem `Exponential.expMap_contMDiffAt2_of_norm_lt` →
+  `Exponential.expMap_contMDiffAt_infty_of_norm_lt`.  (`expMapC2Radius` keeps positivity + `ball⊆source`;
+  value may shift but every consumer is opaque.)
+- L256-263 `expMap_contMDiffAt2_of_norm_lt_radius`: keep its `ContMDiffAt 2` conclusion, but the
+  swapped `(Classical.choose_spec …).2 w …` now yields `∞`, so append `.of_le ENat.LEInfty.out`
+  (the codebase's ∞→finite idiom, used at OffZero:919/961/1192/1225).
+- ADD `expMap_contMDiffAt_infty_of_norm_lt_radius (hw : ‖w‖ < expMapC2Radius g p) : ContMDiffAt ∞ … w :=
+  (Classical.choose_spec (Exponential.expMap_contMDiffAt_infty_of_norm_lt g p)).2 w
+    (lt_of_lt_of_le hw (min_le_left _ _))`.
+- Update the `expMapC2Radius` docstring (L226) "C² radius" → "C∞ smoothness radius".
+- (alt **Option Y**, if touching the radius def is disallowed: instead strengthen
+  `expMap_contMDiffAt2_of_norm_lt` itself to `∞` in OffZero — but it must move below the ∞ theorem
+  and STILL forces the same L262 `.of_le` edit in GaussLemmaPullback; Option X is strictly cleaner.)
+
+Then downstream (own files, unblocked once the above lands):
+- `StepBInputs.lean`: add `normalCoordMetric_contDiffOn_geom : ContDiffOn ℝ ⊤ (normalCoordMetric Y x)
+  (Metric.ball 0 (expMapC2Radius Y.metric x))` — like `normalCoordMetric_contDiffOn_ball` but with the
+  NAMED radius: `expMapDiffeo_contMDiffOn_ball`'s `∩ source` is absorbed by component 4, and ∞-smoothness
+  now holds on the whole `expMapC2Radius` ball via `expMap_contMDiffAt_infty_of_norm_lt_radius`.
+- `StepBLocalMetrics.lean`: discharge `hsmooth`/`hdom` of `exists_metricLimit_normalCoord` for fixed β
+  using Step-A `Item3RadiusInput` (`ρ k α ≤ expMapC2Radius`, uniform) + `ContDiffOn.mono`, with
+  `U = ball 0 (uniform ρ)`.
+
+### BLOCKER (operational, not mathematical)
+`GaussLemmaPullback.lean` is held by a concurrent agent (token `ba8d2152`), actively running successive
+`check`s.  Changing it directly, or changing its upstream `OffZero.lean` in a way that breaks its
+in-flight checks (Option Y), would disrupt that agent.  Per the multi-agent rules the lock was NOT
+force-released.  Resume Option X above once `GaussLemmaPullback.lean` is free.
+
+## UPDATE (2026-06-13, session 5): Option X EXECUTED — frontier-1 (named-radius ∞ smoothness) CLOSED
+
+HARD-STOP #1 is resolved. The smoothness radius is now geometrically named and the metric producer
+is anchored to it.  All focused checks GREEN; the three new endpoints are **axiom-clean**
+(`propext, Classical.choice, Quot.sound`, no `sorryAx`).
+
+**`GaussLemmaPullback.lean` (Option X, verbatim):**
+- `expMapC2Radius` component **1** swapped `expMap_contMDiffAt2_of_norm_lt` → `…_infty_of_norm_lt`
+  (`expMapC2Radius_pos` branch updated; value may shift but every consumer is opaque — `min_le_*` /
+  positivity only; the `ρ ≤ expMapC2Radius` discipline in GoodCoveringItem3 is an *upper-bound
+  hypothesis on ρ*, unaffected).
+- NEW `expMap_contMDiffAt_infty_of_norm_lt_radius (hw : ‖w‖ < expMapC2Radius g p) : ContMDiffAt ∞ … w`.
+- `expMap_contMDiffAt2_of_norm_lt_radius` kept `ContMDiffAt 2`, now derived `∞ → 2` via
+  `.of_le (WithTop.coe_le_coe.2 (le_top : (2:ℕ∞) ≤ ⊤))` (the order is `WithTop ℕ∞`; `∞ ≠ ⊤`, so plain
+  `le_top` fails — this is the working idiom, cf. `Curvature/Riemann/Basic/Field.lean:145`).
+- NEW adapter `mem_expMapDiffeo_source_of_norm_lt_radius` (ball ⊆ source, extracted from
+  `mem_expDomain_of_norm_lt_radius`'s inline derivation; that proof now reuses it).
+
+**`StepBInputs.lean` (downstream, named-radius producers):**
+- Refactor: extracted the reusable core `normalCoordMetric_contDiffOn_of_smooth (hU : IsOpen S)
+  (hf : expMapDiffeo C∞ on S) : ContDiffOn ⊤ (normalCoordMetric Y x) S`; `normalCoordMetric_contDiffOn`
+  is now a 3-line specialization (no duplicated bundle proof).
+- NEW `expMapDiffeo_contMDiffOn_expBall` and `normalCoordMetric_contDiffOn_expBall` — the planned
+  `…_geom`: `ContDiffOn ℝ ⊤ (normalCoordMetric Y x) (Metric.ball 0 (expMapC2Radius Y.metric x))`,
+  the `∩ source` absorbed by component 4 (`mem_expMapDiffeo_source_of_norm_lt_radius`), ∞-smoothness
+  on the whole named ball via `expMap_contMDiffAt_infty_of_norm_lt_radius`.
+- NEW `hsmooth` reducer `contDiffOn_normalCoordMetric_of_subset_expBall`: given `hsub : ∀ k,
+  U ⊆ ball 0 (expMapC2Radius (X.obj k).metric (c k))`, produces the `∀ k, ContDiffOn ⊤ … U`
+  hypothesis of `exists_metricLimit_normalCoord` by `.mono`.  Reduces `hsmooth` to the single
+  containment `hsub`.
+
+### REMAINING frontier (the β-wrapper, `StepBLocalMetrics.lean`) — planner-scoped Step-A wiring
+`exists_metricLimit_normalCoord` still needs, for a concrete sequence, the fixed `U` + `hdom` + `hsmooth`:
+- pick `U = ball 0 ρ` with `ρ` the uniform covering radius (book `205 e^{20cC} λ^α`, fixed across `k`);
+- `hsub`/`hsmooth`: from `Item3RadiusInput` (`ρ k α ≤ expMapC2Radius (X.obj k).metric c`, uniform) feed
+  `contDiffOn_normalCoordMetric_of_subset_expBall`;
+- `hdom`: `U ⊆ ball 0 (input.radius k (c k))` — needs the `NormalCoordMetricBoundInput.radius` uniform
+  lower bound (gap #2: a `radius_lb` field or a Step-A lemma giving the uniform `R`).
+This is the "full Step-A β wiring" the planner flagged as a separate follow-up; it is now pure assembly
+(no remaining smoothness/geometry frontier), gated only on the honest-input `radius_lb`/Item3 wiring.

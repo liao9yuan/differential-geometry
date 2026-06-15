@@ -615,3 +615,21 @@ Only needed if the project later wants the Uhlenbeck base in `dim ≠ 3`. **Not 
 - Starts from A2's `∇²Ric` expanded RHS (`realizedRmBase_timeDeriv`).
 - Hardest single theorem in the pillar; warrants GPT Pro route consultation on the index
   bookkeeping. **Deferred.**
+
+## 2026-06-14 hcov cleanup
+
+Removed the caller-facing local-smoothness hypothesis from the realized base
+curvature coefficient/time-derivative bridge.  The fixed-time solution
+connection now derives the Koszul local smoothness internally from the metric.
+
+Verification passed for the edited file and downstream module refresh.
+
+## 2026-06-14 manifold instance cleanup
+
+Removed all explicit `infty+1` manifold binders from the Uhlenbeck base producer.
+These theorem surfaces already carry the smooth/finite-order manifold context
+they need, and the file's metric-specific connection smoothness and metric
+compatibility facts are produced internally by `connSmoothSol` and
+`metricCompatSol`.
+
+Verification passed for the edited file and module refresh.

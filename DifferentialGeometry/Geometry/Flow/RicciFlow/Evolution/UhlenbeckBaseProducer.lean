@@ -78,8 +78,6 @@ theorem realizedRmBase_eq_curvCoeff_lower
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
     (x₀ : M) (t : Real)
-    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
-      (S.family.connection t) (1 : WithTop ℕ∞))
     (hRm : DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
       (S.family.connection t) (S.base.rm13 t))
     (hcurv : DifferentialGeometry.Integral.Connection.ConnectionCurvatureCoordAt (I := I)
@@ -98,6 +96,11 @@ theorem realizedRmBase_eq_curvCoeff_lower
           (coordinateFrameAt (I := I) x₀ (m 2) x₀)
           (coordinateFrameAt (I := I) x₀ (m 3) x₀) := by
     funext q; fin_cases q <;> rfl
+  have hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (S.family.connection t) (1 : WithTop ℕ∞) := by
+    simpa [SolutionFamily.connection, metricCov] using
+      DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally_one
+        (I := I) (M := M) (S.base.metric t)
   rw [realizedRmBase_apply, hvec,
     solution_rm04LowersRm13At S t x₀
       (coordinateFrameAt (I := I) x₀ (m 0) x₀)
@@ -146,8 +149,6 @@ theorem realizedRmBase_timeDeriv
       (coordinateFrameAt_isLocalFrame_one (I := I) x₀)
       (christoffelEvolutionRHSInFrame (M := M) (coordInv (I := I) S x₀)
         (fun t x d a b => ricciCovDerivCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) t x d a b)))
-    (hcov : ∀ s, s ∈ D.carrier ->
-      CovariantDerivative.ContMDiffCovariantDerivativeLocally (S.family.connection s) (1 : WithTop ℕ∞))
     (hRm : ∀ s, s ∈ D.carrier ->
       DifferentialGeometry.Integral.Connection.Rm13RealizesConnection (I := I)
         (S.family.connection s) (S.base.rm13 s))
@@ -179,7 +180,7 @@ theorem realizedRmBase_timeDeriv
           DifferentialGeometry.Integral.Connection.christoffelCurvCoeffAt (I := I)
             (S.family.connection s) x₀ (m 0) (m 1) (m 2) p
             * metricCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) s x₀ (m 3) p :=
-    fun s hs => realizedRmBase_eq_curvCoeff_lower S x₀ s (hcov s hs) (hRm s hs) (hcurv s hs) m
+    fun s hs => realizedRmBase_eq_curvCoeff_lower S x₀ s (hRm s hs) (hcurv s hs) m
   have hterm : ∀ p ∈ (Finset.univ : Finset (CoordinateIdx (𝕜 := Real) E)),
       HasDerivWithinAt
         (fun s : Real =>
@@ -700,7 +701,7 @@ realized by the permuted product-Leibniz right-hand side (the `∇g`-half is the
 field).  Composes `nabla0S_product_realizes` (with `ricNablaRealizes` and
 `zero_realizes_metric`) with `totalNabla0SRealizes_domDomCongr`. -/
 theorem knTermRealizes
-    [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I 2 M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
     (e : Fin (2 + 2) ≃ Fin (2 + 2)) :
@@ -743,7 +744,7 @@ two `(S/2)·δδ`-terms of the Kulkarni–Nomizu combination are (half of) the i
 realized by the permuted product-Leibniz right-hand side, with the `∇(S·g)`-half given
 by `nabla_smul_metric` (`∇(S·g) = dS⊗g`, `dS = duSec`) and the `∇g`-half zero. -/
 theorem knScalRealizes
-    [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I 2 M]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
     (e : Fin (2 + 2) ≃ Fin (2 + 2)) :
@@ -857,7 +858,7 @@ corresponding signed combination of the term realizers (`knTermRealizes` ×4,
 the underscore-elaborated combination; its KN-shape normal form is the ext-transport
 step's concern, not this lemma's. -/
 private theorem knFieldRealizes
-    [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
     ∃ knField' : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         (n := (∞ : WithTop ℕ∞)) (2 + 2 + 1),
@@ -974,7 +975,7 @@ set_option maxHeartbeats 1000000 in
 by the one-rank-up closure stack — outer `frontExtendEquiv (frontExtendEquiv e)`, the
 two Leibniz branches differentiated again (`∇²Ric`, `∇g = 0`, `∇0 = 0`). -/
 private theorem knTerm2Realizes
-    [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
     (e : Fin (2 + 2) ≃ Fin (2 + 2)) :
     TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -1047,7 +1048,7 @@ realized by the one-rank-up closure stack, with the `∇((dS⊗g)⊗g)`-branch s
 the Hessian handle `duNablaRealizes` and the `∇((S·g)⊗0)`-branch by
 `nabla_smul_metric` and the zero realizers. -/
 private theorem knScal2Realizes
-    [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
     (e : Fin (2 + 2) ≃ Fin (2 + 2)) :
     TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -1198,7 +1199,7 @@ explicit signed combination `knFieldD` of slot-permuted products of `∇Ric`, `d
 `g` — the input that B3c-2 differentiates once more and traces into
 `ΔRm04 = KN(ΔRic, ΔS, g)`. -/
 private theorem nablaRm04Kn
-    [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
     (hdim : forall x : M, Module.finrank Real (TangentSpace I x) = 3) :
     TotalNabla0SRealizes (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -1218,7 +1219,7 @@ realized by the signed combination of the six explicit level-2 witnesses.  This 
 `CanonicalSpatialDerivs0S`-shaped input for the trace step
 (`ΔRm04 = KN(ΔRic, ΔS, g)`), mirroring `metricDerivsZero`. -/
 private noncomputable def rm04DerivsKn
-    [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
     (hdim : forall x : M, Module.finrank Real (TangentSpace I x) = 3) :
     CanonicalSpatialDerivs0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -1248,7 +1249,7 @@ open DifferentialGeometry.Integral.Connection in
 the three `∇g = 0`/`∇0 = 0` Leibniz branches vanish and the surviving `∇²Ric ⊗ g` front
 factor traces to `(ΔRic) ⊗ g`. -/
 private theorem traceRicWit
-    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I 1 M] [IsManifold I 2 M]
     (gm : SmoothRiemannianMetric I M)
     (e : Fin (2 + 2) ≃ Fin (2 + 2))
     (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -1313,7 +1314,7 @@ open DifferentialGeometry.Integral.Connection in
 all `∇g = 0`/`∇0 = 0` branches vanish and the two nested front-factor traces land on `∇²S`,
 giving `((ΔS·g)⊗g)` in the `product (ΔS) g ⊗ g` (rank-0 leading factor) form. -/
 private theorem traceScalWit
-    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I 1 M] [IsManifold I 2 M]
     (gm : SmoothRiemannianMetric I M)
     (e : Fin (2 + 2) ≃ Fin (2 + 2))
     (Hess : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -1395,7 +1396,7 @@ private theorem traceScalWit
 open DifferentialGeometry.Integral.Connection in
 /-- The KN `Ric⊗g` term with `Ric` replaced by its rough Laplacian `ΔRic = trace₁₂ ∇²Ric`. -/
 private noncomputable def knRicLapT
-    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I 1 M] [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
     (e : Fin (2 + 2) ≃ Fin (2 + 2)) :
     Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -1418,7 +1419,7 @@ private noncomputable def knRicLapT
 open DifferentialGeometry.Integral.Connection in
 /-- The KN `(S·g)⊗g` term with `S` replaced by `ΔS = trace₁₂ ∇²S` (rank-0 leading factor). -/
 private noncomputable def knScalLapT
-    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I 1 M] [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
     (e : Fin (2 + 2) ≃ Fin (2 + 2)) :
     Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -1442,7 +1443,7 @@ private noncomputable def knScalLapT
 /-- **The dim-3 Kulkarni–Nomizu field of the Laplacians** `KN(ΔRic, ΔS, g)`, mirroring
 `knField` with `Ric ↦ ΔRic`, `S ↦ ΔS`. -/
 private noncomputable def lapRm04Kn
-    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I 1 M] [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real) :
     Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (n := (∞ : WithTop ℕ∞)) (2 + 2) :=
@@ -1459,7 +1460,7 @@ half of the Uhlenbeck base evolution `∂ₜRm04 = ΔRm04 − 2B# − drift`; th
 level-2 witnesses of `rm04DerivsKn.nabla2A` each trace through `traceRicWit`/`traceScalWit`
 into the corresponding `Δ`-of-leaf KN term. -/
 theorem traceRm04Kn
-    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+    [IsManifold I 1 M] [IsManifold I 2 M]
     (S : SolutionOn (I := I) (M := M) D) (t : Real)
     (hdim : forall x : M, Module.finrank Real (TangentSpace I x) = 3) :
     metricTraceFirstTwoField (I := I) (M := M) (S.family.metric t)

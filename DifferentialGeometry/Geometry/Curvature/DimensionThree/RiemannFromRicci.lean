@@ -486,8 +486,6 @@ theorem algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
     [CompleteSpace E] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M] [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M)
-    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) (1 : WithTop ℕ∞))
     (Rm04 : Tensor04Section (I := I) (M := M))
     (hRm04 : Rm04RealizesConnection (I := I) g
       (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) Rm04)
@@ -501,7 +499,7 @@ theorem algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
   · intro i j k l
     have h :=
       DifferentialGeometry.Integral.Connection.rm04OutputSkewAt_of_leviCivita_realizes
-        (I := I) g hcov Rm04 hRm04 (basis i) (basis j) (basis k) (basis l)
+        (I := I) g Rm04 hRm04 (basis i) (basis j) (basis k) (basis l)
     have h' :
         (Rm04 x) (vec4 (basis i) (basis j) (basis l) (basis k)) =
           -(Rm04 x) (vec4 (basis i) (basis j) (basis k) (basis l)) := by
@@ -510,7 +508,7 @@ theorem algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
   · intro i j k l
     simpa [standardRmCompAt_apply] using
       (DifferentialGeometry.Integral.Connection.rm04PairSymmAt_of_leviCivita_realizes
-        (I := I) g hcov Rm04 hRm04 (basis i) (basis j) (basis k) (basis l)).symm
+        (I := I) g Rm04 hRm04 (basis i) (basis j) (basis k) (basis l)).symm
 
 /-- Lemma 14.2 for a Levi-Civita lowered curvature realization, with Ricci and
 scalar terms expressed as canonical traces of the same curvature array. -/
@@ -518,8 +516,6 @@ theorem rm04Comp_displayedRiemannFromRicci3D_at_of_leviCivita_realizes
     [CompleteSpace E] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I 3 M]
     [IsManifold I ((∞ : WithTop ℕ∞) + 1) M] [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M)
-    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
-      (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) (1 : WithTop ℕ∞))
     (Rm04 : Tensor04Section (I := I) (M := M))
     (hRm04 : Rm04RealizesConnection (I := I) g
       (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric (I := I) g) Rm04)
@@ -534,7 +530,7 @@ theorem rm04Comp_displayedRiemannFromRicci3D_at_of_leviCivita_realizes
               (delta3 i l * delta3 j k - delta3 j l * delta3 i k) :=
   rm04Comp_displayedRiemannFromRicci3D_at_of_curvature_symmetries (I := I)
     (algebraicCurvatureSymmetries3_standardRmCompAt_of_leviCivita_realizes
-      (I := I) g hcov Rm04 hRm04 basis)
+      (I := I) g Rm04 hRm04 basis)
 
 /-- Pointwise data needed to feed the realized 3D bridge.
 

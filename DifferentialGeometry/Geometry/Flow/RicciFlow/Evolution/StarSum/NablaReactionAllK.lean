@@ -45,7 +45,6 @@ variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
 
 /-! ## The level-`k` frozen-slot one-form of `∇ᵏRm` and its covariant derivative
@@ -1008,8 +1007,6 @@ theorem abs_spatialComm_nablaKRm_ortho_le
               Real.sqrt (compNormSqMulti (fun idx : Fin (4 + (k + 1)) → Fin n =>
                 nablaKRm04Field (I := I) S (t : Real) (k + 1) x₀ (fun p => basis (idx p)))))) := by
   classical
-  have hcov := connSmoothOfSol (I := I) S hS (t : Real) (D.regular_subset t.2)
-  have hmc := solution_isMetricCompatible (I := I) S (t : Real)
   set gInv : Fin n → Fin n → Real := fun i j => if i = j then (1 : Real) else 0 with hgInv
   have hdiag : ∀ i : Fin n, gInv i i = 1 := by intro i; simp [hgInv]
   have hoff : ∀ i l : Fin n, i ≠ l → gInv i l = 0 := by intro i l hl; simp [hgInv, hl]
@@ -1025,7 +1022,7 @@ theorem abs_spatialComm_nablaKRm_ortho_le
       · rw [hdiag j, mul_one]; exact horth i j
       · intro l _ hl; rw [hoff l j hl, mul_zero]
       · intro h; exact absurd (Finset.mem_univ j) h
-  rw [spatialComm_nablaKRm_split (I := I) S hS t k hcov hmc basis gInv hinv (basis c')
+  rw [spatialComm_nablaKRm_split (I := I) S hS t k basis gInv hinv (basis c')
     (fun p : Fin (4 + k) => basis (m' p))]
   -- `gInv = δ` collapses the inner sum to the diagonal.
   simp only [hgInv, ite_mul, one_mul, zero_mul, Finset.sum_ite_eq, Finset.mem_univ, if_true]

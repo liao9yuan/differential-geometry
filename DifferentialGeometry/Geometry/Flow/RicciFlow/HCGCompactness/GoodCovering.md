@@ -17,8 +17,10 @@ radius in `InjRadiusDecayInput.decay`). The ≤inj corollary is the geometric po
 blocked.** The book builds the net greedily, ordered by distance from O, taking
 `r^α = d(Sᵅ,O)` as the *attained* minimum over the closed set `Sᵅ`. That minimizer
 needs **properness** (closed bounded ⟹ compact), which routes through
-`Geometry/Comparison/HopfRinow.lean` — currently **9 sorries** (`expMap_continuous_of_geodesic_complete`,
-minimizing-geodesic existence, `univ ⊆ expMap '' closedBall`). Also
+`Geometry/Comparison/HopfRinow.lean` — currently **4 sorries** (minimizing-geodesic
+existence; the false single-chart `expMap` continuity/surjectivity sorries have been
+deleted, superseded by the cross-chart `expMapIntrinsic` route in
+`Exponential/MinimizingGeodesic.lean`). Also
 `InjRadiusDecayInput.dist` is a *bare* `M→M→ℝ` with **no metric axioms**.
 
 Consequences / decisions:

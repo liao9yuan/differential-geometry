@@ -85,6 +85,16 @@ theorem componentRS_apply
         (fun a => basis (lower a)) :=
   rfl
 
+/-- Rewrite the upper/lower slot maps of a mixed component under slot-map equalities, without
+unfolding `componentRS` / `basisTensor0S` / `Fin.cons`. -/
+theorem componentRS_congr_slots
+    (T : TensorRSSpace r s I x)
+    {upper upper' : Fin r -> Idx} {lower lower' : Fin s -> Idx}
+    (hu : upper = upper') (hl : lower = lower') :
+    componentRS (I := I) basis T upper lower =
+      componentRS (I := I) basis T upper' lower' := by
+  rw [hu, hl]
+
 private theorem componentRS_expand_input
     (T : TensorRSSpace r s I x) (input : Tensor0SSpace r I x)
     (lower : Fin s -> Idx) :
