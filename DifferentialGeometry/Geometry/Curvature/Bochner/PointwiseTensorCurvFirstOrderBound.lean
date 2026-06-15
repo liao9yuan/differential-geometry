@@ -10,6 +10,11 @@ import DifferentialGeometry.Geometry.Curvature.Order2Defect.MetricTraceFrame
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.FrozenFrameTrace
 import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.BareSlot0CurryParseval
+import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.SlotSubstitutionFiberNormBound
+import DifferentialGeometry.Geometry.Connection.MetricCompatibility.NablaTensorCurvSecIdentification
+import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvatureRS
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedSlotwiseCurvature
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.UniformDiffCurvatureNormBound
 
 /-!
 # The first-order curvature fibre bound of the order-`2` commutator defect
@@ -832,7 +837,266 @@ private lemma slot0_read_curv_eq_frameFree
   rw [Finset.smul_sum]
   abel
 
-/-- **The `∇R · S` arm uniform fibre bound (`appCc`-contracted differentiated curvature).** For a
+/-- **Frame component reads the unit evaluation.** For a `g`-orthonormal frame `e`, the `(K₀, J)`
+fibre-norm frame component of a `(0, s)`-tensor value `T` is the model evaluation, on the frame tuple
+`e ∘ J`, of `T` applied to the unit `(0, 0)`-tensor:
+```
+fiberNormSqComponent g x 0 s T n e K₀ J = toModel (T (unit)) (e ∘ J).
+```
+The rank-`0` covector `mkPiAlgebra.compContinuousLinearMap (g.inner x ∘ e ∘ K₀)` (an empty product,
+scalar value `1`) is the unit `(0, 0)`-tensor `unitZeroSec x`, so the component is `T` read at the
+unit. -/
+private lemma fiberNormSqComponent_eq_toModel_unitEval
+    (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) (T : TensorRSSpace 0 s I x)
+    {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n) (J : Fin s → Fin n) :
+    fiberNormSqComponent (I := I) (M := M) g x 0 s T n e K₀ J =
+      Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from T)
+          (unitZeroSec (I := I) (M := M) x))
+        (fun k => e (J k)) := by
+  rw [fiberNormSqComponent]
+  have hscal : ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+        (fun k => g.inner x (e (K₀ k))) : Tensor0SSpace 0 I x) =
+      unitZeroSec (I := I) (M := M) x := by
+    apply Tensor0SSpace.toModel_injective
+    apply ContinuousMultilinearMap.ext
+    intro m
+    have hL : Tensor0SSpace.toModel
+        ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+          (fun k => g.inner x (e (K₀ k))) : Tensor0SSpace 0 I x) m = 1 := by
+      change ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+          (fun k => g.inner x (e (K₀ k)))) m = 1
+      rw [ContinuousMultilinearMap.compContinuousLinearMap_apply,
+        ContinuousMultilinearMap.mkPiAlgebra_apply]
+      simp
+    have hR : Tensor0SSpace.toModel (unitZeroSec (I := I) (M := M) x) m = 1 := by
+      rw [unitZeroSec_apply, Tensor0SSpace.toModel_ofModel,
+        ContinuousMultilinearMap.constOfIsEmpty_apply]
+    rw [hL, hR]
+  rw [hscal]
+  rfl
+
+/-- **The intrinsic fibre norm of a `(0, s)`-tensor value equals that of the `embedRS`-embedding of
+its unit evaluation.** For any `(0, s)`-tensor value `T`, the intrinsic Riemannian fibre norm of `T`
+agrees with that of the `(0, s)`-tensor `embedRS (T (unit))` obtained by re-embedding the unit
+evaluation `T (unit) : Tensor0SSpace s I x`:
+```
+riemannianFiberNormSq g 0 s x T = riemannianFiberNormSq g 0 s x (embedRS (T (unit))).
+```
+Both Parseval frame expansions (`riemannianFiberNormSq_eq_sum_componentS_sq`) read, component by
+component, the same model evaluation `toModel (T (unit)) (e ∘ J)` — for `T` via
+`fiberNormSqComponent_eq_toModel_unitEval`, for `embedRS (T (unit))` via `fiberNormSqComponent_embedRS`.
+This lets the curvature value (which is not literally of `embedRS`-form) be controlled through the
+purely tensor-algebraic slot-substitution bound `riemannianFiberNormSq_slotSub_le`. -/
+private lemma riemannianFiberNormSq_eq_embedRS_unitEval
+    (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) (T : TensorRSSpace 0 s I x) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 s x T =
+      riemannianFiberNormSq (I := I) (M := M) g 0 s x
+        (embedRS (I := I) (M := M) x s
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from T)
+            (unitZeroSec (I := I) (M := M) x))) := by
+  classical
+  obtain ⟨n, e, _bse, _hn, _hbse, _horth, _hpars, _hexpand, hreprS⟩ :=
+    tangent_orthonormalBasisS_witness (I := I) (M := M) g s x
+  set K₀ : Fin 0 → Fin n := fun k => k.elim0 with hK₀
+  rw [riemannianFiberNormSq_eq_sum_componentS_sq (I := I) (M := M) g x s e hreprS T K₀]
+  rw [riemannianFiberNormSq_eq_sum_componentS_sq (I := I) (M := M) g x s e hreprS
+    (embedRS (I := I) (M := M) x s
+      ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from T)
+        (unitZeroSec (I := I) (M := M) x))) K₀]
+  refine Finset.sum_congr rfl (fun J _ => ?_)
+  rw [fiberNormSqComponent_eq_toModel_unitEval (I := I) (M := M) g x s T e K₀ J]
+  rw [fiberNormSqComponent_embedRS (I := I) (M := M) g x s
+    ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from T)
+      (unitZeroSec (I := I) (M := M) x)) e K₀ J]
+
+/-- **Unit-evaluation intertwines the `(0, s)`-tensor section curvature across the two connections.**
+For smooth tangent fields `X, W` and a smooth `(r = 0, s)`-tensor section `τ`, the section-level
+Riemann curvature of the `(0, s)`-tensor connection `tensorCov g 0 s` (`= tensorRSCovariantDerivative
+0 s`), applied to the unit `(0, 0)`-tensor, equals the curvature of the abstract `(0, s)`-tensor
+connection `tensor0SCovariantDerivative s` of the unit-evaluated section `b ↦ τ b (unit)`:
+```
+(R^{(0,s)RS}(X, W) τ x)(unit) = R^{(0,s)abs}(X, W) (b ↦ τ b (unit)) x.
+```
+The rank-generic slot-wise curvature formula `riemannSec_tensorCov_apply_eval` (at `r = 0`, with the
+smooth unit `(0, 0)`-section `unitZeroSec` as the contravariant input) splits the left-hand curvature
+into the covariant `R^{(0,s)}` part and a contravariant `R^{(0,0)}` part; the latter vanishes by the
+scalar flatness `riemannSec_tensor0SCov_zero_eq_zero`. Both sides are `(0, s)`-tensor values, identified
+on all tuples by `tensor0SSpace_ext`. -/
+private lemma riemannSec_tensorRSCov_unitEval
+    (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (τ : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun y : M => TensorRSSpace 0 s I y)⟯) (x : M) :
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+        riemannSec (tensorCov (I := I) g 0 s)
+          (fun b => X b) (fun b => W b) (fun b => τ b) x)
+        (unitZeroSec (I := I) (M := M) x) =
+      riemannSec (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+        (fun b => X b) (fun b => W b)
+        (fun b => (show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace s I b from τ b)
+          (unitZeroSec (I := I) (M := M) b)) x := by
+  classical
+  apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro u
+  have hkey := riemannSec_tensorCov_apply_eval (I := I) (M := M) g 0 s X W τ
+    (unitZeroSec (I := I) (M := M)) x u
+  have hzero : riemannSec (Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g))
+      (fun b => X b) (fun b => W b)
+      (fun b => unitZeroSec (I := I) (M := M) b) x = 0 :=
+    riemannSec_tensor0SCov_zero_eq_zero (I := I) g X W
+      (fun b => unitZeroSec (I := I) (M := M) b) unitZeroSec.contMDiff x
+  rw [hzero, map_zero] at hkey
+  have hzeromodel : Tensor0SSpace.toModel (0 : Tensor0SSpace s I x) u = 0 := by simp
+  rw [hzeromodel, sub_zero] at hkey
+  exact hkey
+
+/-- **Smoothness of the `(0, s)`-tensor section curvature.** For smooth tangent fields `X, Y` and a
+smooth `(0, s)`-tensor section `τ`, the section-level Riemann curvature `b ↦ riemannSec (tensorCov g
+0 s) X Y τ b` of the `(0, s)`-tensor connection is a smooth section. Each of the three terms in
+`riemannSec_def` is a smooth iterated `covApply (tensorCov g 0 s)` (RS-bundle smoothness
+`covApplyRS_contMDiff`) or bracket-differentiated section (`mlieBracket_contMDiff`). -/
+private lemma riemannSecRS_contMDiff
+    (g : SmoothRiemannianMetric I M) (s : ℕ)
+    {X Y : Π b : M, TangentSpace I b} {τ : Π b : M, TensorRSSpace 0 s I b}
+    (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X))
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y))
+    (hτ : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
+        (E := fun z : M => TensorRSSpace 0 s I z) y (τ y))) :
+    ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
+        (E := fun z : M => TensorRSSpace 0 s I z) y
+        (riemannSec (tensorCov (I := I) g 0 s) X Y τ y)) := by
+  have hbr : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (VectorField.mlieBracket I X Y)) :=
+    mlieBracket_contMDiff (I := I) hX hY
+  have h1 : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
+        (E := fun z : M => TensorRSSpace 0 s I z) y
+        (covApply (tensorCov (I := I) g 0 s) X
+          (covApply (tensorCov (I := I) g 0 s) Y τ) y)) :=
+    covApplyRS_contMDiff (I := I) g 0 s (covApplyRS_contMDiff (I := I) g 0 s hτ hY) hX
+  have h2 : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
+        (E := fun z : M => TensorRSSpace 0 s I z) y
+        (covApply (tensorCov (I := I) g 0 s) Y
+          (covApply (tensorCov (I := I) g 0 s) X τ) y)) :=
+    covApplyRS_contMDiff (I := I) g 0 s (covApplyRS_contMDiff (I := I) g 0 s hτ hX) hY
+  have h3 : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
+        (E := fun z : M => TensorRSSpace 0 s I z) y
+        (covApply (tensorCov (I := I) g 0 s) (VectorField.mlieBracket I X Y) τ y)) :=
+    covApplyRS_contMDiff (I := I) g 0 s hτ hbr
+  have hresult := (h1.sub_section h2).sub_section h3
+  refine hresult.congr ?_
+  intro b
+  rfl
+
+/-- **Unit-evaluation intertwines the abstract second-order curvature across the two connections.**
+For smooth tangent fields `X, Y, Z` and a smooth `(0, s)`-tensor section `τ`, the rank-generic
+differentiated curvature `nablaTensorCurvSec` of the `(0, s)`-tensor connection `tensorCov g 0 s`,
+applied to the unit `(0, 0)`-tensor, equals the differentiated `(0, s)`-tensor curvature
+`nablaTensor0SCurv` of the unit-evaluated section `A := b ↦ τ b (unit)`:
+```
+(nablaTensorCurvSec g (tensorCov g 0 s) X Y Z τ x)(unit) = nablaTensor0SCurv g s X Y Z A x.
+```
+Both sides unfold (`nablaTensorCurvSec_def`, `nablaTensor0SCurv_def`) into four Leibniz terms; the
+unit-evaluation transports through each term by the unit-transports `covDeriv_unit_eval_eq_genVal`
+(leading derivative slot), `covApply_unit_eval_eq_genVal` (section derivative slot) and the
+section-curvature transport `riemannSec_tensorRSCov_unitEval` (the three curvature terms), the
+once-differentiated directions `∇X Y, ∇X Z` packaged as smooth sections through `covApply_contMDiff`. -/
+private lemma nablaTensorCurvSec_tensorRSCov_unitEval
+    (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (τ : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun y : M => TensorRSSpace 0 s I y)⟯) (x : M) :
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+        nablaTensorCurvSec (I := I) g (tensorCov (I := I) g 0 s)
+          (fun b => X b) (fun b => Y b) (fun b => Z b) (fun b => τ b) x)
+        (unitZeroSec (I := I) (M := M) x) =
+      nablaTensor0SCurv (I := I) g s X Y Z
+        (fun b => (show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace s I b from τ b)
+          (unitZeroSec (I := I) (M := M) b)) x := by
+  classical
+  set A : Π b : M, Tensor0SSpace s I b :=
+    fun b => (show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace s I b from τ b)
+      (unitZeroSec (I := I) (M := M) b) with hA
+  -- The two once-differentiated tangent directions, as smooth sections.
+  have hCovXY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (covApply (LeviCivita (I := I) g)
+      (fun b => X b) (fun b => Y b))) :=
+    covApply_contMDiff (cov := LeviCivita (I := I) g) X.contMDiff Y.contMDiff
+  have hCovXZ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (covApply (LeviCivita (I := I) g)
+      (fun b => X b) (fun b => Z b))) :=
+    covApply_contMDiff (cov := LeviCivita (I := I) g) X.contMDiff Z.contMDiff
+  set covXY : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    ContMDiffSection.mk (covApply (LeviCivita (I := I) g) (fun b => X b) (fun b => Y b)) hCovXY
+    with hCovXY_def
+  set covXZ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    ContMDiffSection.mk (covApply (LeviCivita (I := I) g) (fun b => X b) (fun b => Z b)) hCovXZ
+    with hCovXZ_def
+  -- The section-derivative of `τ` along `X`, as a smooth section.
+  have hcovτ : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
+        (E := fun z : M => TensorRSSpace 0 s I z) y
+        (covApply (tensorCov (I := I) g 0 s) (fun b => X b) (fun b => τ b) y)) :=
+    covApplyRS_contMDiff (I := I) g 0 s τ.contMDiff X.contMDiff
+  set covτ : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun y : M => TensorRSSpace 0 s I y)⟯ :=
+    ContMDiffSection.mk (covApply (tensorCov (I := I) g 0 s) (fun b => X b) (fun b => τ b)) hcovτ
+    with hcovτ_def
+  -- The leading section `b ↦ riemannSec (tensorCov g 0 s) Y Z τ b`, as a smooth section.
+  have hRsec : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
+      (fun y : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
+        (E := fun z : M => TensorRSSpace 0 s I z) y
+        (riemannSec (tensorCov (I := I) g 0 s)
+          (fun b' => Y b') (fun b' => Z b') (fun b' => τ b') y)) :=
+    riemannSecRS_contMDiff (I := I) g s Y.contMDiff Z.contMDiff τ.contMDiff
+  set Rsec : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun y : M => TensorRSSpace 0 s I y)⟯ :=
+    ContMDiffSection.mk (fun b => riemannSec (tensorCov (I := I) g 0 s)
+      (fun b' => Y b') (fun b' => Z b') (fun b' => τ b') b) hRsec with hRsec_def
+  rw [nablaTensorCurvSec_def, nablaTensor0SCurv_def]
+  rw [ContinuousLinearMap.sub_apply, ContinuousLinearMap.sub_apply, ContinuousLinearMap.sub_apply]
+  -- The two sides are `((t1 - t2) - t3) - t4 = ((u1 - u2) - u3) - u4`; peel the left spine.
+  refine congrArg₂ HSub.hSub (congrArg₂ HSub.hSub (congrArg₂ HSub.hSub ?_ ?_) ?_) ?_
+  · -- Leading term: `covDeriv_unit_eval_eq_genVal` then inner-section `riemannSec` transport.
+    have h1 := covDeriv_unit_eval_eq_genVal (I := I) (M := M) g s Rsec x (X x)
+    have hRsec_app : ∀ b, Rsec b = riemannSec (tensorCov (I := I) g 0 s)
+        (fun b' => Y b') (fun b' => Z b') (fun b' => τ b') b := fun b => rfl
+    simp only [hRsec_app] at h1
+    rw [h1]
+    have hsec_eq : (fun b => (show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace s I b from
+          riemannSec (tensorCov (I := I) g 0 s)
+            (fun b' => Y b') (fun b' => Z b') (fun b' => τ b') b)
+          (unitZeroSec (I := I) (M := M) b)) =
+        (fun b => riemannSec
+          (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
+          (fun b' => Y b') (fun b' => Z b')
+          (fun b' => (show Tensor0SSpace 0 I b' →L[ℝ] Tensor0SSpace s I b' from τ b')
+            (unitZeroSec (I := I) (M := M) b')) b) := by
+      funext b
+      exact riemannSec_tensorRSCov_unitEval (I := I) (M := M) g s Y Z τ b
+    rw [hsec_eq]
+  · -- Term 2: section curvature transport along `covXY := ∇_X Y`.
+    have h2 := riemannSec_tensorRSCov_unitEval (I := I) (M := M) g s covXY Z τ x
+    have hCovXY_app : ∀ b, covXY b = covApply (LeviCivita (I := I) g)
+        (fun b' => X b') (fun b' => Y b') b := fun b => rfl
+    simp only [hCovXY_app] at h2
+    exact h2
+  · -- Term 3: section curvature transport along `covXZ := ∇_X Z`.
+    have h3 := riemannSec_tensorRSCov_unitEval (I := I) (M := M) g s Y covXZ τ x
+    have hCovXZ_app : ∀ b, covXZ b = covApply (LeviCivita (I := I) g)
+        (fun b' => X b') (fun b' => Z b') b := fun b => rfl
+    simp only [hCovXZ_app] at h3
+    exact h3
+  · -- Term 4: section curvature transport with the covariant-derivative section, then
+    -- the section-derivative unit transport.
+    have h4 := riemannSec_tensorRSCov_unitEval (I := I) (M := M) g s Y Z covτ x
+    have hcovτ_app : ∀ b, covτ b = covApply (tensorCov (I := I) g 0 s)
+        (fun b' => X b') (fun b' => τ b') b := fun b => rfl
+    simp only [hcovτ_app] at h4
+    rw [h4]
+    congr 1
+    rw [covApply_unit_eval_eq_genVal (I := I) (M := M) g s τ (fun b => X b)]
+
+/-- **The `∇R · S` arm uniform fibre bound (the divergence-of-curvature slot substitution).** For a
 closed smooth Riemannian manifold `(M, g)` there is a valence-dependent nonnegative constant
 `Cd : ℕ → ℝ` such that, at every rank `s`, smooth compactly-supported `(0, s)`-tensor `S`, point `x`,
 and frame index `a`, the frame-summed differentiated-curvature contraction
@@ -841,12 +1105,16 @@ and frame index `a`, the frame-summed differentiated-curvature contraction
 ```
 rfns( ∑ᵢ nablaTensorCurvSec g (tensorCov g 0 s) Bᵢ Bᵢ Bₐ S (x) ) ≤ Cd s · rfns(S)(x).
 ```
-This is `S`-linear: each `nablaTensorCurvSec` is the once-differentiated curvature operator field
-`∇R` contracted against `S` (the `appCc`-image `genuineDiffCurvSection` of `covGrad (curvOpField g s)`
-applied to `S`, via `nablaTensorCurvSec_diag_frameSum_eq_nablaTensor0SCurv_diag_frameSum` and the
-`appCc_curvOpField_eq_pureRGenuineDiffOp` / `genuineDiffCurvSection_toSection` chain), so the uniform
-section-proportional envelope `exists_uniform_riemannianFiberNormSq_appCc_le` of the **fixed** smooth
-`∇R` operator field controls it by `rfns(S)`, uniformly over the compact `M`. -/
+The constant is `Cd s = s² · Kw`, where `Kw` is the compact-uniform `g`-operator bound of the
+frame-summed differentiated curvature `W := nablaBaseSlotCurvFrameSumCLM g B Bₐ x`
+(`exists_uniform_nablaCurvSec_LeviCivita_gNorm_bound`). The mechanism is the **divergence-of-curvature
+slot substitution**: unit-evaluating the abstract second-order curvature transports the frame sum onto
+the differentiated `(0, s)`-tensor curvature (`nablaTensorCurvSec_tensorRSCov_unitEval`), whose diagonal
+frame trace `frame_sum_nablaTensor0SCurv_diag_baseSlot_eval` collapses (once-contracted second Bianchi)
+to the negated slot substitution `slotSub(S(x), W) = − ∑ₖ S(x)(update · k (W ·))` of the single tangent
+endomorphism `W`. The fibre norm of the value coincides with that of the `embedRS`-embedding of its unit
+evaluation (`riemannianFiberNormSq_eq_embedRS_unitEval`), and the purely tensor-algebraic slot
+substitution bound `riemannianFiberNormSq_slotSub_le` (factor `s² · Kw`) controls it by `rfns(S)`. -/
 private theorem exists_frameSummed_nablaTensorCurvSec_fiberNormSq_le
     (g : SmoothRiemannianMetric I M) :
     ∃ Cd : ℕ → ℝ, (∀ s, 0 ≤ Cd s) ∧
@@ -856,8 +1124,121 @@ private theorem exists_frameSummed_nablaTensorCurvSec_fiberNormSq_le
               nablaTensorCurvSec (I := I) g (tensorCov (I := I) g 0 s)
                 (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i)
                 (smoothOrthoFrame (I := I) g x a) (fun y : M => S.toSection y) x) ≤
-          Cd s * riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) :=
-  sorry
+          Cd s * riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) := by
+  classical
+  obtain ⟨Kw, hKw_nn, hKw⟩ :=
+    exists_uniform_nablaCurvSec_LeviCivita_gNorm_bound (I := I) (M := M) g
+  refine ⟨fun s => (s : ℝ) ^ 2 * Kw, fun s => by positivity, fun s S x a => ?_⟩
+  -- Smooth `g_x`-orthonormal frame sections in the derivation / first-curvature slot and the
+  -- second-curvature slot.
+  set B : Fin (Module.finrank ℝ E) →
+      Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ := fun i =>
+    ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+      (smoothOrthoFrame_smooth (I := I) g x i) with hB
+  set Ba : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    ContMDiffSection.mk (smoothOrthoFrame (I := I) g x a)
+      (smoothOrthoFrame_smooth (I := I) g x a) with hBa
+  -- The unit-evaluated tensor `A b := S(b)(unit)` and the frame-summed differentiated curvature
+  -- tangent endomorphism `W`.
+  set A : Π b : M, Tensor0SSpace s I b := fun b =>
+    (show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace s I b from S.toSection b)
+      (unitZeroSec (I := I) (M := M) b) with hA
+  set W : TangentSpace I x →L[ℝ] TangentSpace I x :=
+    nablaBaseSlotCurvFrameSumCLM (I := I) g B Ba x with hW
+  -- The frame-summed curvature value, and its unit-evaluation collapsing to the slot substitution.
+  set V : TensorRSSpace 0 s I x := ∑ i : Fin (Module.finrank ℝ E),
+    nablaTensorCurvSec (I := I) g (tensorCov (I := I) g 0 s)
+      (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i)
+      (smoothOrthoFrame (I := I) g x a) (fun y : M => S.toSection y) x with hV
+  -- The unit-evaluation of the frame sum is the negated slot substitution of `A x` by `W`.
+  have hVunit : (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from V)
+      (unitZeroSec (I := I) (M := M) x) =
+      (- ∑ k : Fin s,
+        tensorSlotSubstCLM (I := I) s x (tangentSlotCLM (I := I) s k W) (A x)) := by
+    -- Distribute the unit over the finite curvature sum, transport each term to `nablaTensor0SCurv`.
+    rw [hV]
+    rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+          ∑ i : Fin (Module.finrank ℝ E),
+            nablaTensorCurvSec (I := I) g (tensorCov (I := I) g 0 s)
+              (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i)
+              (smoothOrthoFrame (I := I) g x a) (fun y : M => S.toSection y) x) =
+        ∑ i : Fin (Module.finrank ℝ E),
+          (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+            nablaTensorCurvSec (I := I) g (tensorCov (I := I) g 0 s)
+              (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i)
+              (smoothOrthoFrame (I := I) g x a) (fun y : M => S.toSection y) x) from rfl]
+    rw [ContinuousLinearMap.sum_apply]
+    have hper : ∀ i : Fin (Module.finrank ℝ E),
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+          nablaTensorCurvSec (I := I) g (tensorCov (I := I) g 0 s)
+            (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i)
+            (smoothOrthoFrame (I := I) g x a) (fun y : M => S.toSection y) x)
+          (unitZeroSec (I := I) (M := M) x) =
+        nablaTensor0SCurv (I := I) g s (B i) (B i) Ba A x := fun i =>
+      nablaTensorCurvSec_tensorRSCov_unitEval (I := I) (M := M) g s (B i) (B i) Ba S.toSection x
+    rw [Finset.sum_congr rfl (fun i _ => hper i)]
+    -- Both sides are `(0, s)`-tensor values; identify on every tuple.
+    apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+    apply ContinuousMultilinearMap.ext
+    intro u
+    -- LHS: the diagonal frame trace collapses to the slot substitution of `A x` by `W`.
+    rw [show Tensor0SSpace.toModel (∑ i : Fin (Module.finrank ℝ E),
+          nablaTensor0SCurv (I := I) g s (B i) (B i) Ba A x) u =
+        ∑ i : Fin (Module.finrank ℝ E),
+          Tensor0SSpace.toModel (nablaTensor0SCurv (I := I) g s (B i) (B i) Ba A x) u from by
+      rw [← Tensor0SSpace.toModelL_apply (∑ i : Fin (Module.finrank ℝ E),
+          nablaTensor0SCurv (I := I) g s (B i) (B i) Ba A x),
+        map_sum (Tensor0SSpace.toModelL s x)]
+      rw [ContinuousMultilinearMap.sum_apply]
+      refine Finset.sum_congr rfl (fun i _ => ?_)
+      rw [Tensor0SSpace.toModelL_apply]]
+    rw [frame_sum_nablaTensor0SCurv_diag_baseSlot_eval (I := I) g s Ba A
+      (contMDiff_unitEvalSection (I := I) (M := M) g s S) x u]
+    -- Fold the frame sum of `nablaBaseSlotCurv` into the endomorphism `W`.
+    have hWuk : ∀ w : TangentSpace I x,
+        (∑ i : Fin (Module.finrank ℝ E),
+          nablaBaseSlotCurv (I := I) g
+            (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+              (smoothOrthoFrame_smooth (I := I) g x i))
+            (ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
+              (smoothOrthoFrame_smooth (I := I) g x i)) Ba x w) = W w := by
+      intro w
+      rw [hW, nablaBaseSlotCurvFrameSumCLM_apply]
+    simp_rw [hWuk]
+    -- RHS: the model of the negated slot substitution sum is the same slot update sum.
+    rw [show ((fun T : Tensor0SSpace s I x => Tensor0SSpace.toModel T)
+          (- ∑ k : Fin s, tensorSlotSubstCLM (I := I) s x
+            (tangentSlotCLM (I := I) s k W) (A x))) u =
+        Tensor0SSpace.toModel
+          (- ∑ k : Fin s, tensorSlotSubstCLM (I := I) s x
+            (tangentSlotCLM (I := I) s k W) (A x)) u from rfl]
+    rw [Tensor0SSpace.toModel_neg, ContinuousMultilinearMap.neg_apply]
+    refine congrArg Neg.neg ?_
+    rw [show Tensor0SSpace.toModel (∑ k : Fin s, tensorSlotSubstCLM (I := I) s x
+          (tangentSlotCLM (I := I) s k W) (A x))
+        = ∑ k : Fin s, Tensor0SSpace.toModel (tensorSlotSubstCLM (I := I) s x
+            (tangentSlotCLM (I := I) s k W) (A x)) from by
+      rw [← Tensor0SSpace.toModelL_apply (∑ k : Fin s, tensorSlotSubstCLM (I := I) s x
+          (tangentSlotCLM (I := I) s k W) (A x)),
+        map_sum (Tensor0SSpace.toModelL s x)]
+      refine Finset.sum_congr rfl (fun k _ => ?_)
+      rw [Tensor0SSpace.toModelL_apply]]
+    rw [ContinuousMultilinearMap.sum_apply]
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    rw [toModel_tensorSlotSubstCLM_apply (I := I) s x k W (A x) u]
+  -- The fibre norm of `V` is that of the `embedRS` of its unit evaluation, hence of the slot
+  -- substitution; the slot-substitution bound (factor `s² · Kw`) closes the estimate.
+  rw [riemannianFiberNormSq_eq_embedRS_unitEval (I := I) (M := M) g x s V]
+  rw [hVunit]
+  -- Convert `rfns(S(x))` to `rfns(embedRS (A x))` for the right-hand comparison.
+  have hSrhs : riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) =
+      riemannianFiberNormSq (I := I) (M := M) g 0 s x
+        (embedRS (I := I) (M := M) x s (A x)) := by
+    rw [riemannianFiberNormSq_eq_embedRS_unitEval (I := I) (M := M) g x s (S.toSection x)]
+  rw [hSrhs]
+  -- Apply the slot-substitution fibre bound; `Kw` controls `W` by the posited uniform sup.
+  exact riemannianFiberNormSq_slotSub_le (I := I) (M := M) g x s (A x) W Kw hKw_nn
+    (fun u => hKw x a u)
 
 /-- Non-negativity of the metric quadratic form `g.inner x v v`. -/
 private lemma metric_inner_self_nonneg' (g : SmoothRiemannianMetric I M) (x : M)
