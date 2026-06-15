@@ -199,6 +199,129 @@ theorem loweredCovDeriv_bracketChannel_combined_isDivergence
   integral_tensorInner_covDeriv_combined_eq_zero (I := I) (M := M) g r s
     W'.toSection Z.toSection V
 
+/-- **The per-direction bracket-channel covariant Leibniz integrand IS a pointwise metric divergence.**
+For a closed smooth Riemannian manifold `(M, g)`, ranks `(r, s)`, smooth `(r, s)`-tensor sections `W'`,
+`Z`, and a smooth tangent vector field `V`, the metric-lowered covariant Leibniz integrand
+```
+⟨∇_V W', Z⟩₀ + ⟨W', ∇_V Z⟩₀ + ⟨W', Z⟩ · divᵍ V
+```
+equals, **pointwise** (not merely under the integral), the metric divergence of the explicit smooth
+`∇S`-order tangent field `⟨W', Z⟩ · V`:
+```
+divᵍ ( (tensorInnerScalar g r s W' Z) · V )  =  ⟨∇_V W', Z⟩₀ + ⟨W', ∇_V Z⟩₀ + ⟨W', Z⟩ · divᵍ V.
+```
+Here `∇_V` is the metric-lowered directional covariant derivative `loweredCovDerivAlongVF`, `⟨·, ·⟩₀`
+is the covariant `(0, r + s)` inner product `tensorInnerPointwise_0s` of the metric-lowered tensors
+(through `liftedTensorSection`), and `⟨W', Z⟩` is `tensorInnerScalar`. The current is the global
+`smoothSmul (⟨W', Z⟩) V`, smooth by `tensorInnerScalar_contMDiff`.
+
+This is the **pointwise** divergence form of each per-direction term, the genuine building block of the
+moving-frame remainder divergence datum: the divergence-Leibniz rule `divergence_g_smoothSmul`
+(`divᵍ(φ V) = φ · divᵍ V + V φ`) at `φ := ⟨W', Z⟩` evaluates `V φ` through the covariant inner-product
+Leibniz rule `tangentSectionAction_tensorInnerScalar` (`V⟨W', Z⟩ = ⟨∇_V W', Z⟩₀ + ⟨W', ∇_V Z⟩₀`),
+re-reading the lowered derivatives `loweredCovDerivAt` as `loweredCovDerivAlongVF` along `V`. Summed over
+a frame it gives `integral_frameSummed_bracketCovDeriv_combined_eq_zero`, but here the identity is
+pointwise, so the per-direction term is literally a divergence with a named explicit current. -/
+theorem loweredCovDeriv_bracketChannel_combined_eq_divergence_smoothSmul
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (W' Z : SmoothCcTensor g r s)
+    (V : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
+    divergence_g (I := I) g
+        (smoothSmul (I := I)
+          (tensorInnerScalar (I := I) (M := M) g r s W'.toSection Z.toSection)
+          (tensorInnerScalar_contMDiff (I := I) (M := M) g r s W'.toSection Z.toSection)
+          V) x =
+      tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+          (Tensor0SSpace.toModel
+            (loweredCovDerivAlongVF (I := I) (M := M) g r s W'.toSection V x))
+          (Tensor0SSpace.toModel
+            (liftedTensorSection (I := I) (M := M) g r s Z.toSection x))
+        + tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+          (Tensor0SSpace.toModel
+            (liftedTensorSection (I := I) (M := M) g r s W'.toSection x))
+          (Tensor0SSpace.toModel
+            (loweredCovDerivAlongVF (I := I) (M := M) g r s Z.toSection V x))
+        + tensorInnerScalar (I := I) (M := M) g r s W'.toSection Z.toSection x
+          * divergence_g (I := I) g V x := by
+  rw [divergence_g_smoothSmul (I := I) (M := M) g
+    (tensorInnerScalar (I := I) (M := M) g r s W'.toSection Z.toSection)
+    (tensorInnerScalar_contMDiff (I := I) (M := M) g r s W'.toSection Z.toSection) V x]
+  rw [tangentSectionAction_tensorInnerScalar (I := I) (M := M) g r s
+    W'.toSection Z.toSection V x]
+  rw [loweredCovDerivAlongVF_apply, loweredCovDerivAlongVF_apply]
+  ring
+
+/-- **The metric divergence is additive over a finite sum of smooth tangent fields.** For a closed
+smooth Riemannian manifold `(M, g)`, a finite index family `ι`, and smooth tangent vector fields
+`V i : Cₛ^∞⟮I; E, TangentSpace I⟯`, the divergence of the finite sum equals the sum of the divergences:
+```
+divᵍ (∑ i, V i) x = ∑ i, divᵍ (V i) x.
+```
+A `Finset.induction` over the two-field rule `divergence_g_add` and the zero rule `divergence_g_zero`,
+using the pointwise additivity `ContMDiffSection.finset_sum_apply` of the section sum. This is the engine
+that turns a per-direction current sum into a single explicit global divergence current. -/
+theorem divergence_g_finset_sum
+    (g : SmoothRiemannianMetric I M) {ι : Type*} [Fintype ι]
+    (V : ι → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
+    divergence_g (I := I) g (∑ i, V i) x = ∑ i, divergence_g (I := I) g (V i) x := by
+  classical
+  induction (Finset.univ : Finset ι) using Finset.induction_on with
+  | empty =>
+    rw [Finset.sum_empty, Finset.sum_empty]
+    exact divergence_g_zero (I := I) (M := M) g x
+  | insert a t ha ih =>
+    rw [Finset.sum_insert ha, Finset.sum_insert ha]
+    rw [divergence_g_add (I := I) (M := M) g (V a) (∑ i ∈ t, V i) x]
+    rw [ih]
+
+/-- **The frame-summed bracket-channel covariant Leibniz integrand is the metric divergence of an
+explicit global current (the pointwise frame-summed divergence form).** For a closed smooth Riemannian
+manifold `(M, g)`, ranks `(r, s)`, a finite index family `ι`, smooth tangent direction fields `V i`, and
+smooth `(r, s)`-tensor sections `W i`, `Z`, the frame-summed metric-lowered covariant Leibniz integrand
+```
+∑ᵢ ( ⟨∇_{V i}(W i), Z⟩₀ + ⟨W i, ∇_{V i} Z⟩₀ + ⟨W i, Z⟩ · divᵍ (V i) )
+```
+equals, **pointwise**, the metric divergence of the explicit global tangent field
+```
+X := ∑ᵢ (tensorInnerScalar g r s (W i) Z) · (V i),
+```
+the finite sum of the per-direction `smoothSmul` currents:
+```
+divᵍ X (x) = ∑ᵢ ( ⟨∇_{V i}(W i), Z⟩₀(x) + ⟨W i, ∇_{V i} Z⟩₀(x) + ⟨W i, Z⟩(x) · divᵍ (V i)(x) ).
+```
+This is the pointwise (not merely integrated) global divergence form of the frame-summed
+bracket-channel integrand: the divergence is pushed through the finite sum by `divergence_g_finset_sum`
+and each per-direction summand is resolved by the pointwise per-direction divergence
+`loweredCovDeriv_bracketChannel_combined_eq_divergence_smoothSmul`. The integral of this current vanishes
+over the closed manifold (`integral_frameSummed_bracketCovDeriv_combined_eq_zero`), but here the identity
+is the strictly stronger pointwise statement with a named explicit current `X`. -/
+theorem frameSummed_bracketCovDeriv_combined_eq_divergence
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) {ι : Type*} [Fintype ι]
+    (V : ι → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (W : ι → SmoothCcTensor g r s) (Z : SmoothCcTensor g r s) (x : M) :
+    divergence_g (I := I) g
+        (∑ i, smoothSmul (I := I)
+          (tensorInnerScalar (I := I) (M := M) g r s (W i).toSection Z.toSection)
+          (tensorInnerScalar_contMDiff (I := I) (M := M) g r s (W i).toSection Z.toSection)
+          (V i)) x =
+      ∑ i, (tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+              (Tensor0SSpace.toModel
+                (loweredCovDerivAlongVF (I := I) (M := M) g r s (W i).toSection (V i) x))
+              (Tensor0SSpace.toModel
+                (liftedTensorSection (I := I) (M := M) g r s Z.toSection x))
+            + tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+              (Tensor0SSpace.toModel
+                (liftedTensorSection (I := I) (M := M) g r s (W i).toSection x))
+              (Tensor0SSpace.toModel
+                (loweredCovDerivAlongVF (I := I) (M := M) g r s Z.toSection (V i) x))
+            + tensorInnerScalar (I := I) (M := M) g r s (W i).toSection Z.toSection x
+              * divergence_g (I := I) g (V i) x) := by
+  classical
+  rw [divergence_g_finset_sum (I := I) (M := M) g _ x]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  exact loweredCovDeriv_bracketChannel_combined_eq_divergence_smoothSmul
+    (I := I) (M := M) g r s (W i) Z (V i) x
+
 /-- **The frame-summed bracket-channel covariant Leibniz integral vanishes (the engine consumption
 bridge).** For a closed smooth Riemannian manifold `(M, g)`, ranks `(r, s)`, a finite index family `ι`,
 smooth tangent direction fields `V i`, and smooth `(r, s)`-tensor sections `W i`, `Z`, the frame-summed
