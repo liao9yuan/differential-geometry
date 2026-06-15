@@ -233,6 +233,64 @@ noncomputable def christoffelResidualPairingFib
           (covGrad (I := I) (M := M) g 0 s S).toSection x)
           (unitZeroSec (I := I) (M := M) x)) (smoothOrthoFrame (I := I) g x i x)))
 
+/-- **The carrier-peeling divergence datum: the frame-jet discrepancy between the remainder pairing and
+the frame-summed Christoffel-residual pairing is a total covariant divergence (the genuinely-irreducible
+integrated curvature half of the carrier-peeling bridge, posited).** For a closed smooth Riemannian
+manifold `(M, g)`, covariant rank `s`, and a smooth compactly-supported `(0, s)`-tensor `S`, there is a
+smooth tangent vector field `X` whose metric divergence `divᵍ X` realises, almost everywhere, the
+pointwise difference between the remainder pairing `⟨Rem S, ∇S⟩(x)` and the frame-summed per-summand
+Christoffel-residual pairing `∑ᵢ christoffelResidualPairingFib g s S x i`:
+
+```
+tensorInnerPointwise g 0 (s + 1) x (Rem S x) (∇S x)
+  =ᵐ ( ∑ᵢ christoffelResidualPairingFib g s S x i ) + divᵍ X x,
+```
+
+with `Rem S := pointwiseTensorCurv g s S − GcurvSection g s S − (genuineDiffCurvSection g s S +
+ricTraceSection g s S)` and `∇S := covGrad g 0 s S`.
+
+**This is the genuine integrated curvature content of the carrier-peeling bridge.** Pointwise,
+`pointwiseTensorCurv` decomposes per `g_x`-orthonormal frame summand
+(`pointwiseTensorCurv_toSection_eq_frame_sum`), and the per-summand Ricci peeling
+`frameSummand_leadingSlot_secondOrder_commutation_orthoFrame` splits each summand, curried against
+`∇S`, into the differentiated curvature `(∇_{Bᵢ} R)(Bᵢ, Bᵢ) V`, the curvature applied to the
+differentiated frame data, and the explicit residual `secondOrderChristoffelResidual` whose pairing is
+`christoffelResidualPairingFib`. The three genuine curvature carriers `GcurvSection` (pure Riemann
+`R(∇S)`), `genuineDiffCurvSection` (the differentiated trace `(∇R) S`, folded from the extension-curried
+trace by the **contracted second Bianchi** frame trace
+`frameSummed_contracted_second_bianchi_eq_half_nablaScalar` together with the cyclic second Bianchi
+`frame_cyclic_second_bianchi_orthoFrame`), and `ricTraceSection` (the Ricci trace `Ric(∇S)`) are the
+**frame-jet-free tensorial** sections, which differ from the extension-curried per-summand trace fields
+by a quantity whose frame sum, paired against `∇S`, is the metric divergence of an explicit
+`∇S`-order tangent current `X`. The cancellation is *false* as a pointwise fibre identity (the slot-`0`
+frame-trace matching is false on a normal manifold) and holds only **under the integral** on the closed
+manifold, where `∫ divᵍ X = 0`. This is the carrier-peeling field-level folding debt of the integrated
+curvature fold; it has no producer on disk, and the bridge
+`movingFrameRemainder_l2Inner_eq_integral_christoffelResidualPairing` is mechanical above it (the
+closed-manifold divergence theorem kills `∫ divᵍ X`).
+
+**Non-vacuity / soundness.** The datum is *false* for an arbitrary triple of subtracted fields on a
+non-flat manifold: were every carrier replaced by `0` the pairing would be `⟨Curv S, ∇S⟩`, whose
+integral is the nonzero Weitzenböck curvature integral (`weitzenbock_curvature_crossPairing_value`,
+`‖Δ_∇ S‖²_{L²} − ‖∇²S‖²_{L²}`, at `s = 0` it is `∫ Ric(∇f, ∇f) ≠ 0`), not the integral of a divergence;
+the datum genuinely uses all three genuine curvature carriers folded by the second-Bianchi pieces. -/
+theorem movingFrameRemainder_pairing_eq_christoffelResidual_add_divergence
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
+    ∃ X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯,
+      (fun x : M =>
+          tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x
+            ((pointwiseTensorCurv (I := I) (M := M) g s S -
+              GcurvSection (I := I) (M := M) g s S -
+              (genuineDiffCurvSection (I := I) (M := M) g s S +
+                ricTraceSection (I := I) (M := M) g s S)).toFun x)
+            ((covGrad (I := I) (M := M) g 0 s S).toFun x))
+        =ᵐ[riemannianVolumeMeasure (I := I) (M := M) g]
+      (fun x : M =>
+        (∑ i : Fin (Module.finrank ℝ E),
+            christoffelResidualPairingFib (I := I) (M := M) g s S x i)
+          + divergence_g (I := I) g X x) :=
+  sorry
+
 /-- **The carrier-peeling bridge: the three-carrier remainder pairing IS the integrated frame-summed
 Christoffel-residual pairing (the integrated genuine-carrier peeling, posited).** For a closed smooth
 Riemannian manifold `(M, g)`, covariant rank `s`, and a smooth compactly-supported `(0, s)`-tensor
@@ -272,8 +330,15 @@ content — the carrier-peeling half of the fold — distinct from and composing
 telescoping `frameSummed_christoffelResidual_eq_bracketDivergence` (piece 3). The two compose to the
 full fold `movingFrameBracketRemainder_integral_eq_genuineDiffCurv_ricTrace` (`MovingFrameBracketFold`):
 this bridge peels the genuine carriers to the Christoffel-residual pairing, piece 3 telescopes that
-into the divergence-engine integrand. No producer on disk; it is one of the two field-level folding
-debts of the fold (the carrier-peeling debt; the residual-telescoping debt is piece 3). -/
+into the divergence-engine integrand.
+
+The genuine integrated content is isolated in the single named field-level child
+`movingFrameRemainder_pairing_eq_christoffelResidual_add_divergence` below: a smooth tangent field `X`
+whose metric divergence `divᵍ X` realises, almost everywhere, the frame-jet discrepancy between the
+pointwise remainder pairing `⟨Rem S, ∇S⟩(x)` and the frame-summed Christoffel-residual pairing
+`∑ᵢ christoffelResidualPairingFib`. Above it this bridge is mechanical: the closed-manifold divergence
+theorem `integral_divergence_eq_zero_of_compact` kills `∫ divᵍ X`, leaving the two integrands with equal
+integral. -/
 theorem movingFrameRemainder_l2Inner_eq_integral_christoffelResidualPairing
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     tensorL2Inner (I := I) (M := M) g 0 (s + 1)
@@ -284,8 +349,52 @@ theorem movingFrameRemainder_l2Inner_eq_integral_christoffelResidualPairing
         (covGrad (I := I) (M := M) g 0 s S).toFun =
       ∫ x, (∑ i : Fin (Module.finrank ℝ E),
               christoffelResidualPairingFib (I := I) (M := M) g s S x i)
-          ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
-  sorry
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
+  classical
+  set μ := riemannianVolumeMeasure (I := I) (M := M) g with hμ
+  set Rem : SmoothCcTensor g 0 (s + 1) :=
+    pointwiseTensorCurv (I := I) (M := M) g s S -
+      GcurvSection (I := I) (M := M) g s S -
+      (genuineDiffCurvSection (I := I) (M := M) g s S +
+        ricTraceSection (I := I) (M := M) g s S) with hRem
+  set gradS : SmoothCcTensor g 0 (s + 1) := covGrad (I := I) (M := M) g 0 s S with hgrad
+  -- The remainder-pairing integrand and the frame-summed residual-pairing integrand.
+  set f : M → ℝ := fun x =>
+    tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x (Rem.toFun x) (gradS.toFun x) with hf
+  set h : M → ℝ := fun x =>
+    ∑ i : Fin (Module.finrank ℝ E),
+      christoffelResidualPairingFib (I := I) (M := M) g s S x i with hh
+  -- The genuine integrated content: the discrepancy `f − h` is a metric divergence almost everywhere.
+  obtain ⟨X, hX⟩ :=
+    movingFrameRemainder_pairing_eq_christoffelResidual_add_divergence (I := I) (M := M) g s S
+  -- `tensorL2Inner` unfolds definitionally to `∫ f`; reduce the goal to `∫ f = ∫ h`.
+  change ∫ x, f x ∂μ = ∫ x, h x ∂μ
+  -- `f` is integrable (a cross pairing of two smooth compactly-supported sections).
+  have hf_int : Integrable f μ := by
+    rw [hf, hμ]
+    exact SmoothCcTensor.integrable_inner_cross (I := I) (M := M) Rem gradS
+  -- `divᵍ X` is continuous with compact support on the compact manifold, hence integrable.
+  have hdivX_cont : Continuous (fun x : M => divergence_g (I := I) g X x) :=
+    (divergence_g_contMDiff (I := I) (M := M) g X).continuous
+  have hdivX_int : Integrable (fun x : M => divergence_g (I := I) g X x) μ := by
+    rw [hμ]
+    exact hdivX_cont.integrable_of_hasCompactSupport_riemannianVolumeMeasure (I := I) (M := M) g
+      (HasCompactSupport.of_compactSpace _)
+  -- `h = f − divᵍ X` almost everywhere, so `h` is integrable.
+  have hh_ae : h =ᵐ[μ] fun x => f x - divergence_g (I := I) g X x := by
+    filter_upwards [hX] with x hx
+    rw [hf, hh]
+    linarith [hx]
+  have hh_int : Integrable h μ :=
+    (hf_int.sub hdivX_int).congr hh_ae.symm
+  -- `∫ f = ∫ h + ∫ divᵍ X` and `∫ divᵍ X = 0`.
+  have hf_ae : f =ᵐ[μ] fun x => h x + divergence_g (I := I) g X x := by
+    filter_upwards [hX] with x hx
+    rw [hf, hh]
+    linarith [hx]
+  rw [MeasureTheory.integral_congr_ae hf_ae,
+    MeasureTheory.integral_add hh_int hdivX_int]
+  rw [hμ, integral_divergence_eq_zero_of_compact (I := I) (M := M) g X, add_zero]
 
 /-- **The summed Christoffel-residual telescoping (piece 3 — the genuinely-irreducible core,
 posited).** For a closed smooth Riemannian manifold `(M, g)`, covariant rank `s`, and a smooth
