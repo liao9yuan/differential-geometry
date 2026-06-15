@@ -5,6 +5,7 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseToL2Pack
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RicciTraceCarrier
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.BracketDivergenceForm
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameBracketFold
+import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorCurvFirstOrderBound
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldContractionBound
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.CauchySchwarz
 
@@ -508,19 +509,17 @@ Sobolev budget of `S`:
 − ⟨Curv S, ∇S⟩_{L²} ≤ Ccross · (‖∇S‖²_{L²} + ‖S‖_{L²} · ‖∇S‖_{L²}),     Ccross ≥ 0 uniform in S.
 ```
 
-**Proof.** The integrated three-carrier moving-frame nullity `movingFrameRemainder_genuineSections_nullity`
-(with `GcurvDeriv` taken to be the combined field `genuineDiffCurvSection + ricTraceSection`) feeds
-`tensorL2Inner_genuineFields_covGrad_eq_pointwiseTensorCurv_of_movingFrameRemainder_nullity`
-(`MovingFrameRemainderDivergenceForm.lean`) to give the bracket-free pairing
-`⟨GcurvSection g s S + (genuineDiffCurvSection g s S + ricTraceSection g s S), ∇S⟩_{L²} =
-⟨Curv S, ∇S⟩_{L²}` — the three genuine curvature fields carry the whole cross-pairing. Cauchy–Schwarz
-(`abs_tensorL2Inner_le`) bounds the left pairing by
-`(‖GcurvSection g s S‖ + ‖genuineDiffCurvSection g s S‖ + ‖ricTraceSection g s S‖) · ‖∇S‖`, and the
-`L²`-proportional bounds `exists_GcurvSection_l2Norm_le_covGrad` (`‖GcurvSection‖ ≤ Cr · ‖∇S‖`),
-`exists_genuineDiffCurvSection_l2Norm_le_self` (`‖genuineDiffCurvSection‖ ≤ Cd · ‖S‖`), and
-`exists_ricTraceSection_l2Norm_le` (`‖ricTraceSection‖ ≤ Cric · (‖∇S‖ + ‖S‖)`) give
-`(Cr + Cric) · ‖∇S‖² + (Cd + Cric) · ‖S‖ · ‖∇S‖`, dominated by
-`(Cr + Cd + Cric) · (‖∇S‖² + ‖S‖ · ‖∇S‖)`. -/
+**Proof (the classical first-order route).** The defect is first-order: by the pointwise first-order
+curvature fibre bound `exists_pointwiseTensorCurv_fiberNormSq_bound` (the genuine moving-frame
+third-order Bochner–Weitzenböck `∇²S`-elimination) there are uniform `K_R, K_dR ≥ 0` with
+`√(rfns(Curv S)(x)) ≤ K_R · √(rfns(∇S)(x)) + K_dR · √(rfns(S)(x))`. Squaring with `(a + b)² ≤
+2 a² + 2 b²` gives the pointwise-to-`L²` budget `rfns(Curv S)(x) ≤ C² · (rfns(∇S)(x) + rfns(S)(x))`
+with `C := √2 · max K_R K_dR`, which the two-term packaging
+`tensorL2Norm_le_of_pointwise_fiberNormSq_bound_two` lifts to `‖Curv S‖ ≤ C · (‖∇S‖ + ‖S‖)`.
+Cauchy–Schwarz (`abs_tensorL2Inner_le`) then bounds the cross-pairing by
+`‖Curv S‖ · ‖∇S‖ ≤ C · (‖∇S‖ + ‖S‖) · ‖∇S‖ = C · (‖∇S‖² + ‖S‖ · ‖∇S‖)`, and
+`−⟨Curv S, ∇S⟩ ≤ |⟨Curv S, ∇S⟩|`. The route reads the defect only through its first-order fibre
+bound and never through the (false-as-stated) integrated three-carrier nullity. -/
 theorem exists_integrated_curvatureCrossBound
     (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ∃ Ccross : ℝ, 0 ≤ Ccross ∧
@@ -538,99 +537,88 @@ theorem exists_integrated_curvatureCrossBound
                 tensorL2Norm (I := I) (M := M) g 0 (s + 1)
                   (covGrad (I := I) (M := M) g 0 s S).toFun) := by
   classical
-  obtain ⟨Cr, hCr_nn, hCr⟩ := exists_GcurvSection_l2Norm_le_covGrad (I := I) (M := M) g s
-  obtain ⟨Cd, hCd_nn, hCd⟩ := exists_genuineDiffCurvSection_l2Norm_le_self (I := I) (M := M) g s
-  obtain ⟨Cric, hCric_nn, hCric⟩ := exists_ricTraceSection_l2Norm_le (I := I) (M := M) g s
-  refine ⟨Cr + Cd + Cric, by positivity, fun S => ?_⟩
-  set Gr : SmoothCcTensor g 0 (s + 1) := GcurvSection (I := I) (M := M) g s S with hGr_def
-  set Gdc : SmoothCcTensor g 0 (s + 1) := genuineDiffCurvSection (I := I) (M := M) g s S with hGdc_def
-  set Gric : SmoothCcTensor g 0 (s + 1) := ricTraceSection (I := I) (M := M) g s S with hGric_def
-  set Gd : SmoothCcTensor g 0 (s + 1) := Gdc + Gric with hGd_def
+  obtain ⟨K_R, K_dR, hK_R_nn, hK_dR_nn, hfibre⟩ :=
+    exists_pointwiseTensorCurv_fiberNormSq_bound (I := I) (M := M) g s
+  -- The `L²` packaging constant `C := √2 · max K_R K_dR`.
+  set C : ℝ := Real.sqrt 2 * max K_R K_dR with hC_def
+  have hmax_nn : 0 ≤ max K_R K_dR := le_max_of_le_left hK_R_nn
+  have hC_nn : 0 ≤ C := mul_nonneg (Real.sqrt_nonneg _) hmax_nn
+  refine ⟨C, hC_nn, fun S => ?_⟩
   set gradS : SmoothCcTensor g 0 (s + 1) := covGrad (I := I) (M := M) g 0 s S with hgradS_def
-  -- The 3-carrier nullity, rephrased with `GcurvDeriv := Gdc + Gric`, feeds the 2-field engine.
-  have hnull : tensorL2Inner (I := I) (M := M) g 0 (s + 1)
-      (pointwiseTensorCurv (I := I) (M := M) g s S - Gr - Gd).toFun gradS.toFun = 0 := by
-    have hsub : (pointwiseTensorCurv (I := I) (M := M) g s S - Gr - Gd) =
-        (pointwiseTensorCurv (I := I) (M := M) g s S - Gr - Gdc - Gric) := by
-      rw [hGd_def]; abel
-    rw [hsub, hGr_def, hGdc_def, hGric_def, hgradS_def]
-    exact movingFrameRemainder_genuineSections_nullity (I := I) (M := M) g s S
-  -- The bracket-free pairing: the genuine fields carry the whole cross-pairing.
-  have hpair : tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Gr + Gd).toFun gradS.toFun =
-      tensorL2Inner (I := I) (M := M) g 0 (s + 1)
-        (pointwiseTensorCurv (I := I) (M := M) g s S).toFun gradS.toFun := by
-    rw [hgradS_def]
-    exact tensorL2Inner_genuineFields_covGrad_eq_pointwiseTensorCurv_of_movingFrameRemainder_nullity
-      (I := I) (M := M) g s S Gr Gd
-      (by rw [← hgradS_def]; exact hnull)
   -- Identify the target defect with `pointwiseTensorCurv`.
   have hCurvFun : (pointwiseTensorCurv (I := I) (M := M) g s S).toFun =
       (rawTensorConnLapSmooth (I := I) g 0 (s + 1)
           (covGrad (I := I) (M := M) g 0 s S) -
         covGrad (I := I) (M := M) g 0 s
           (rawTensorConnLapSmooth (I := I) g 0 s S)).toFun := rfl
-  -- Cauchy–Schwarz on the genuine-field pairing.
-  have hcs : |tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Gr + Gd).toFun gradS.toFun| ≤
-      tensorL2Norm (I := I) (M := M) g 0 (s + 1) (Gr + Gd).toFun *
+  -- Pointwise squared fibre budget: `rfns(Curv)(x) ≤ C² · (rfns(∇S)(x) + rfns(S)(x))`.
+  have hpt : ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+          ((pointwiseTensorCurv (I := I) (M := M) g s S).toSection x) ≤
+        C ^ 2 *
+          (riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+              ((covGrad (I := I) (M := M) g 0 s S).toSection x) +
+            riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x)) := by
+    intro x
+    set rC : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+      ((pointwiseTensorCurv (I := I) (M := M) g s S).toSection x) with hrC_def
+    set rG : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+      ((covGrad (I := I) (M := M) g 0 s S).toSection x) with hrG_def
+    set rS : ℝ := riemannianFiberNormSq (I := I) (M := M) g 0 s x (S.toSection x) with hrS_def
+    have hrC_nn : 0 ≤ rC := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x _
+    have hrG_nn : 0 ≤ rG := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + 1) x _
+    have hrS_nn : 0 ≤ rS := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x _
+    have hsqrtC : Real.sqrt rC ≤ K_R * Real.sqrt rG + K_dR * Real.sqrt rS := hfibre S x
+    -- `√rC ≤ max·(√rG + √rS)`, so `rC = (√rC)² ≤ max² · (√rG + √rS)² ≤ 2 max² (rG + rS) = C² (rG + rS)`.
+    have hsqrtC' : Real.sqrt rC ≤ max K_R K_dR * (Real.sqrt rG + Real.sqrt rS) := by
+      refine le_trans hsqrtC ?_
+      have h1 : K_R * Real.sqrt rG ≤ max K_R K_dR * Real.sqrt rG :=
+        mul_le_mul_of_nonneg_right (le_max_left _ _) (Real.sqrt_nonneg _)
+      have h2 : K_dR * Real.sqrt rS ≤ max K_R K_dR * Real.sqrt rS :=
+        mul_le_mul_of_nonneg_right (le_max_right _ _) (Real.sqrt_nonneg _)
+      nlinarith [h1, h2]
+    have hrC_eq : rC = Real.sqrt rC ^ 2 := (Real.sq_sqrt hrC_nn).symm
+    have hrG_eq : rG = Real.sqrt rG ^ 2 := (Real.sq_sqrt hrG_nn).symm
+    have hrS_eq : rS = Real.sqrt rS ^ 2 := (Real.sq_sqrt hrS_nn).symm
+    have hC_sq : C ^ 2 = 2 * max K_R K_dR ^ 2 := by
+      rw [hC_def, mul_pow, Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 2)]
+    rw [hC_sq, hrC_eq, hrG_eq, hrS_eq]
+    have hsqrtrC_nn : 0 ≤ Real.sqrt rC := Real.sqrt_nonneg _
+    have hsum_nn : 0 ≤ max K_R K_dR * (Real.sqrt rG + Real.sqrt rS) :=
+      mul_nonneg hmax_nn (by positivity)
+    nlinarith [hsqrtC', sq_nonneg (Real.sqrt rG - Real.sqrt rS),
+      mul_nonneg hmax_nn hmax_nn, Real.sqrt_nonneg rG, Real.sqrt_nonneg rS,
+      mul_le_mul hsqrtC' hsqrtC' hsqrtrC_nn hsum_nn]
+  -- Lift to the `L²` norm: `‖Curv‖ ≤ C · (‖∇S‖ + ‖S‖)`.
+  have hL2 : ‖pointwiseTensorCurv (I := I) (M := M) g s S‖ ≤
+      C * (‖covGrad (I := I) (M := M) g 0 s S‖ + ‖S‖) :=
+    tensorL2Norm_le_of_pointwise_fiberNormSq_bound_two (I := I) (M := M) g
+      (covGrad (I := I) (M := M) g 0 s S) S
+      (pointwiseTensorCurv (I := I) (M := M) g s S) C hC_nn hpt
+  -- Rewrite `‖·‖` to `tensorL2Norm … .toFun`.
+  rw [SmoothCcTensor.norm_def (I := I) (M := M) (pointwiseTensorCurv (I := I) (M := M) g s S),
+    SmoothCcTensor.norm_def (I := I) (M := M) (covGrad (I := I) (M := M) g 0 s S),
+    SmoothCcTensor.norm_def (I := I) (M := M) S] at hL2
+  -- Cauchy–Schwarz on `⟨Curv, ∇S⟩`.
+  have hcs : |tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (pointwiseTensorCurv (I := I) (M := M) g s S).toFun gradS.toFun| ≤
+      tensorL2Norm (I := I) (M := M) g 0 (s + 1)
+        (pointwiseTensorCurv (I := I) (M := M) g s S).toFun *
         tensorL2Norm (I := I) (M := M) g 0 (s + 1) gradS.toFun :=
-    abs_tensorL2Inner_le (I := I) (M := M) g 0 (s + 1) (Gr + Gd).toFun gradS.toFun
-      (SmoothCcTensor.memL2_toFun (I := I) (M := M) (Gr + Gd))
+    abs_tensorL2Inner_le (I := I) (M := M) g 0 (s + 1)
+      (pointwiseTensorCurv (I := I) (M := M) g s S).toFun gradS.toFun
+      (SmoothCcTensor.memL2_toFun (I := I) (M := M) (pointwiseTensorCurv (I := I) (M := M) g s S))
       (SmoothCcTensor.memL2_toFun (I := I) (M := M) gradS)
-      (SmoothCcTensor.integrable_inner_cross (I := I) (M := M) (Gr + Gd) gradS)
-  -- `‖Gr + Gd‖ ≤ ‖Gr‖ + ‖Gd‖`, and the proportional bounds.
-  have htri : tensorL2Norm (I := I) (M := M) g 0 (s + 1) (Gr + Gd).toFun ≤
-      tensorL2Norm (I := I) (M := M) g 0 (s + 1) Gr.toFun +
-        tensorL2Norm (I := I) (M := M) g 0 (s + 1) Gd.toFun := by
-    have := norm_add_le Gr Gd
-    rwa [SmoothCcTensor.norm_def (I := I) (M := M) (Gr + Gd),
-      SmoothCcTensor.norm_def (I := I) (M := M) Gr,
-      SmoothCcTensor.norm_def (I := I) (M := M) Gd,
-      SmoothCcTensor.toFun_add] at this
-  -- `‖Gd‖ = ‖Gdc + Gric‖ ≤ ‖Gdc‖ + ‖Gric‖`.
-  have htriGd : tensorL2Norm (I := I) (M := M) g 0 (s + 1) Gd.toFun ≤
-      tensorL2Norm (I := I) (M := M) g 0 (s + 1) Gdc.toFun +
-        tensorL2Norm (I := I) (M := M) g 0 (s + 1) Gric.toFun := by
-    rw [hGd_def]
-    have := norm_add_le Gdc Gric
-    rwa [SmoothCcTensor.norm_def (I := I) (M := M) (Gdc + Gric),
-      SmoothCcTensor.norm_def (I := I) (M := M) Gdc,
-      SmoothCcTensor.norm_def (I := I) (M := M) Gric,
-      SmoothCcTensor.toFun_add] at this
-  -- Normalize the three proportional bounds to `tensorL2Norm` form.
-  have hCrS : tensorL2Norm (I := I) (M := M) g 0 (s + 1) Gr.toFun ≤
-      Cr * tensorL2Norm (I := I) (M := M) g 0 (s + 1) gradS.toFun := by
-    have h := hCr S
-    rw [hGr_def, hgradS_def]
-    simpa only [SmoothCcTensor.norm_def] using h
-  have hCdS : tensorL2Norm (I := I) (M := M) g 0 (s + 1) Gdc.toFun ≤
-      Cd * tensorL2Norm (I := I) (M := M) g 0 s S.toFun := by
-    have h := hCd S
-    rw [hGdc_def]
-    simpa only [SmoothCcTensor.norm_def] using h
-  have hCricS : tensorL2Norm (I := I) (M := M) g 0 (s + 1) Gric.toFun ≤
-      Cric * (tensorL2Norm (I := I) (M := M) g 0 (s + 1) gradS.toFun +
-        tensorL2Norm (I := I) (M := M) g 0 s S.toFun) := by
-    have h := hCric S
-    rw [hGric_def, hgradS_def]
-    simpa only [SmoothCcTensor.norm_def] using h
-  -- Assemble.
+      (SmoothCcTensor.integrable_inner_cross (I := I) (M := M)
+        (pointwiseTensorCurv (I := I) (M := M) g s S) gradS)
+  -- Names for the three `L²` norms.
   set nGrad : ℝ := tensorL2Norm (I := I) (M := M) g 0 (s + 1) gradS.toFun with hnGrad_def
   set nS : ℝ := tensorL2Norm (I := I) (M := M) g 0 s S.toFun with hnS_def
-  set nGr : ℝ := tensorL2Norm (I := I) (M := M) g 0 (s + 1) Gr.toFun with hnGr_def
-  set nGd : ℝ := tensorL2Norm (I := I) (M := M) g 0 (s + 1) Gd.toFun with hnGd_def
-  set nGdc : ℝ := tensorL2Norm (I := I) (M := M) g 0 (s + 1) Gdc.toFun with hnGdc_def
-  set nGric : ℝ := tensorL2Norm (I := I) (M := M) g 0 (s + 1) Gric.toFun with hnGric_def
+  set nCurv : ℝ := tensorL2Norm (I := I) (M := M) g 0 (s + 1)
+    (pointwiseTensorCurv (I := I) (M := M) g s S).toFun with hnCurv_def
   have hnGrad_nn : 0 ≤ nGrad := tensorL2Norm_nonneg (I := I) (M := M) g 0 (s + 1) _
   have hnS_nn : 0 ≤ nS := tensorL2Norm_nonneg (I := I) (M := M) g 0 s _
-  -- Fold the proportional bounds into the `n…` names.
-  have hCrS' : nGr ≤ Cr * nGrad := hCrS
-  have hCdS' : nGdc ≤ Cd * nS := hCdS
-  have hCricS' : nGric ≤ Cric * (nGrad + nS) := hCricS
-  have htriGd' : nGd ≤ nGdc + nGric := htriGd
-  -- `‖Gr‖ + ‖Gd‖ ≤ (Cr + Cric)·nGrad + (Cd + Cric)·nS`.
-  have hsum : nGr + nGd ≤ (Cr + Cric) * nGrad + (Cd + Cric) * nS := by
-    nlinarith [hCrS', hCdS', hCricS', htriGd']
-  -- The cross-pairing value equals the genuine-field pairing; bound its negation by its abs.
+  -- The cross-pairing value, with the defect identified as `pointwiseTensorCurv`.
   have hval_eq :
       tensorL2Inner (I := I) (M := M) g 0 (s + 1)
         (rawTensorConnLapSmooth (I := I) g 0 (s + 1)
@@ -638,24 +626,24 @@ theorem exists_integrated_curvatureCrossBound
           covGrad (I := I) (M := M) g 0 s
             (rawTensorConnLapSmooth (I := I) g 0 s S)).toFun
         (covGrad (I := I) (M := M) g 0 s S).toFun =
-      tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Gr + Gd).toFun gradS.toFun := by
-    rw [← hgradS_def, ← hCurvFun, hpair]
+      tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (pointwiseTensorCurv (I := I) (M := M) g s S).toFun gradS.toFun := by
+    rw [← hgradS_def, ← hCurvFun]
   rw [hval_eq]
-  -- `-⟨Gr+Gd, ∇S⟩ ≤ |⟨Gr+Gd, ∇S⟩| ≤ ‖Gr+Gd‖·‖∇S‖ ≤ (nGr+nGd)·nGrad`.
-  have hneg_le : - tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Gr + Gd).toFun gradS.toFun ≤
-      |tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Gr + Gd).toFun gradS.toFun| := neg_le_abs _
-  have hstep1 : - tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Gr + Gd).toFun gradS.toFun ≤
-      (nGr + nGd) * nGrad := by
-    refine le_trans hneg_le (le_trans hcs ?_)
-    rw [hnGrad_def]
-    exact mul_le_mul_of_nonneg_right htri hnGrad_nn
-  calc - tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Gr + Gd).toFun gradS.toFun
-      ≤ (nGr + nGd) * nGrad := hstep1
-    _ ≤ ((Cr + Cric) * nGrad + (Cd + Cric) * nS) * nGrad :=
-        mul_le_mul_of_nonneg_right hsum hnGrad_nn
-    _ ≤ (Cr + Cd + Cric) * (nGrad ^ 2 + nS * nGrad) := by
-        nlinarith [mul_nonneg hCd_nn (mul_nonneg hnGrad_nn hnGrad_nn),
-          mul_nonneg hCr_nn (mul_nonneg hnS_nn hnGrad_nn)]
+  -- `-⟨Curv, ∇S⟩ ≤ |⟨Curv, ∇S⟩| ≤ nCurv · nGrad ≤ C·(nGrad+nS)·nGrad = C·(nGrad²+nS·nGrad)`.
+  have hneg_le : - tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (pointwiseTensorCurv (I := I) (M := M) g s S).toFun gradS.toFun ≤
+      |tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (pointwiseTensorCurv (I := I) (M := M) g s S).toFun gradS.toFun| := neg_le_abs _
+  have hstep1 : - tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (pointwiseTensorCurv (I := I) (M := M) g s S).toFun gradS.toFun ≤
+      nCurv * nGrad :=
+    le_trans hneg_le hcs
+  calc - tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+          (pointwiseTensorCurv (I := I) (M := M) g s S).toFun gradS.toFun
+      ≤ nCurv * nGrad := hstep1
+    _ ≤ (C * (nGrad + nS)) * nGrad := mul_le_mul_of_nonneg_right hL2 hnGrad_nn
+    _ = C * (nGrad ^ 2 + nS * nGrad) := by ring
 
 end Connection
 end Integral
