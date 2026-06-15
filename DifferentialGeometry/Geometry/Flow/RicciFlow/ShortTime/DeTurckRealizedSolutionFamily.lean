@@ -1,19 +1,24 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.QuasilinearMetricShortTimeExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckQuasilinearExistence
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckRicciRHSSymmetric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckChartRegularityFromJoint
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.MildSolutionTimeH1
 
 /-! # The realized DeTurck–Ricci solution family
 
-The continuous-nonlinearity spectral maximal-regularity engine
-`deTurckSobolev_solution_exists` produces, for the initial perturbation `u₀ = 0`
-(so `g_DT 0 = g₀`), a positive horizon `T₀` and, for every short interval, the
+The genuine second-order quasilinear spectral maximal-regularity engine
+`deTurckRicci_quasilinear_maxreg_solution` produces, for the initial perturbation
+`u₀ = 0` (so `g_DT 0 = g₀`), a positive horizon `T₀` and, for every short interval, the
 strong (`MaxRegSolutionSpace = timeH1`) Duhamel solution `u` of the Ricci–DeTurck
 flow linearized about the background, as a path in the tensor Sobolev scale
-`tensorHs g₀ 0 2 (a : ℝ)`, driven by the **continuous, non-gated** nonlinearity
-`deTurckSobolevN` (NO finite-support / `realizeMetricAt` gating).
+`tensorHs g₀ 0 2 (a : ℝ)`, driven by the **continuous, non-gated, genuinely
+second-order** nonlinearity `deTurckSobolevNHa2 : H^{a+2} → H^a` (NO finite-support /
+`realizeMetricAt` gating).  The engine is the mixed-view forcing contraction of the
+DeTurck–Ricci quasilinear equation (the lower-order arm killed by small `T`, the
+second-order arm killed by a small forcing ball), so the forcing reproduces
+`deTurckSobolevNHa2` along the order-`(a+2)` Duhamel field `maxRegDuhamelSolField`.
 
 The interior parabolic smoothing (`solField_into_all_tensorHs_interior`) places
 `u.toFun t` in `⋂_σ Hˢ` for every interior time `t ∈ Ioo 0 T`, so — through the
@@ -26,7 +31,7 @@ metric family `g_DT t`, and the parabolic interior regularity makes the chart-Gr
 entries jointly smooth.
 
 This file assembles the construction.  The glue obtains `T, u, gforce` and its
-defining identities from `deTurckSobolev_solution_exists`, builds `g_DT` by
+defining identities from `deTurckRicci_quasilinear_maxreg_solution`, builds `g_DT` by
 realizing the smooth representative family through `tensorSectionRealizeMetric`, and
 discharges the initial-value and realize-relation conjuncts purely structurally from
 `tensorSectionRealizeMetric_inner` and `ccTensorBilinSymm_zero_apply`.  The three
@@ -119,9 +124,10 @@ theorem gFibreOpBound_ccTensorBilinSymm_zero (g : SmoothRiemannianMetric I M) :
 /-- **SOLUTION-PINNED honest input (1/3) — interior smoothing + smooth-representative
 gate.**
 
-For the genuine continuous-nonlinearity engine solution `u` of the Ricci–DeTurck
+For the genuine second-order quasilinear engine solution `u` of the Ricci–DeTurck
 flow about `g₀` with zero initial perturbation (the Duhamel image of its own forcing
-`gforce`, with forcing reproducing `deTurckSobolevN` a.e. and trace `0` at `t = 0`),
+`gforce`, with forcing reproducing `deTurckSobolevNHa2` a.e. along the order-`(a+2)`
+Duhamel field and trace `0` at `t = 0`),
 the interior parabolic smoothing `solField_into_all_tensorHs_interior` places
 `u.toFun t` in the spectral smooth subspace `⋂_σ Hˢ` for every interior time
 `t ∈ Ioo 0 T`, and the now-PROVED smooth-representative gate
@@ -147,13 +153,10 @@ theorem solInterior_smoothRepr_pin
     (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
       (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce)
     (hforce : gforce =ᵐ[timeMeasure T]
-      (fun t => deTurckSobolevN (I := I) (M := M) g₀ g_bg a
-        (maxRegDuhamelSolFieldHa1 (I := I) (M := M) (a : ℝ) hT hT1
+      (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
-    (htrace : timeH1.trace0 _ T u =
-      tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-        (show (a : ℝ) ≤ (a : ℝ) + 2 by linarith)
-        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))) :
+    (htrace : timeH1.trace0 _ T u = 0) :
     ∃ (T_rep : ℝ → SmoothCcTensor g₀ 0 2) (δ : ℝ), δ < 1 ∧
       T_rep 0 = 0 ∧
       (∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
@@ -178,15 +181,15 @@ realized inner product `s ↦ ccTensorBilinSymm g₀ (T_rep s) x v w` equals the
 Ricci–DeTurck right-hand side `deTurckRicciRHS g_bg (g_DT t) x v w`.
 
 PINNED to the solution: `hduh`/`hforce` exhibit `u` as the genuine Duhamel solution of
-`∂_t u = Δ_∇ u + deTurckSobolevN u`, and `htrep_pin` ties `T_rep` to `u`, so the flow
+`∂_t u = Δ_∇ u + deTurckSobolevNHa2 u`, and `htrep_pin` ties `T_rep` to `u`, so the flow
 identity is the solution's own equation read pointwise — not satisfiable by an
 arbitrary family.
 
 POSITED (recursion frontier).  Its eventual proof: the maximal-regularity
-`L²`-time-derivative of `u` is `deTurckSobolevN u` plus the connection Laplacian,
+`L²`-time-derivative of `u` is `deTurckSobolevNHa2 u` plus the connection Laplacian,
 transported to the pointwise right-derivative by
 `maxreg_l2deriv_to_pointwise_hasderivwithinat` (`Intrinsic/PointwiseDeriv.lean`); the
-spectral nonlinearity `deTurckSobolevN` realizes pointwise to the intrinsic
+spectral nonlinearity `deTurckSobolevNHa2` realizes pointwise to the intrinsic
 Ricci–DeTurck remainder via the chart-coordinate polynomial tie
 `deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS`
 (`DeTurckCoefficients/ChartDeTurckRemainderPolynomial.lean`), evaluated on the realized
@@ -198,8 +201,8 @@ theorem realizedDeTurck_flowMatch
     (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
       (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce)
     (hforce : gforce =ᵐ[timeMeasure T]
-      (fun t => deTurckSobolevN (I := I) (M := M) g₀ g_bg a
-        (maxRegDuhamelSolFieldHa1 (I := I) (M := M) (a : ℝ) hT hT1
+      (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
     (T_rep : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
@@ -273,8 +276,9 @@ This is the classical quasilinear strictly-parabolic short-time existence with i
 regularity (Chow–Knopf, DeTurck's Step 1; Lieberman; Ladyzhenskaya–Solonnikov–Uraltseva;
 Amann maximal regularity), CONSTRUCTED here: the representative family `T_rep` is the
 spectral maximal-regularity Duhamel solution `u` of the flow linearized about `g₀`
-(`deTurckSobolev_solution_exists`, driven by the continuous non-gated nonlinearity
-`deTurckSobolevN`), smoothed in the interior and lifted to `C∞` sections through the
+(`deTurckRicci_quasilinear_maxreg_solution`, the mixed-view forcing contraction driven
+by the continuous non-gated genuinely second-order nonlinearity `deTurckSobolevNHa2`),
+smoothed in the interior and lifted to `C∞` sections through the
 now-PROVED smooth-representative gate (`solInterior_smoothRepr_pin`); the metric family
 `g_DT` is the realize of that representative DIRECTLY via `tensorSectionRealizeMetric`
 (NO finite support, NO `realizeMetricAt` gating).
@@ -302,19 +306,18 @@ theorem realizedDeTurckFamily_exists
           (Set.Ici 0) t) ∧
       JointChartGramSmooth (I := I) T g_DT := by
   classical
-  -- The continuous-nonlinearity maximal-regularity engine, with zero initial
-  -- perturbation (so `g_DT 0 = g₀`), a supercritical spectral order `a` (so the
-  -- Sobolev tame estimates of the Nemytskii nonlinearity close), and ball radius `R = 1`.
+  -- The genuine second-order quasilinear maximal-regularity engine, with zero initial
+  -- perturbation (so `g_DT 0 = g₀`) and a supercritical spectral order `a` (so the
+  -- Sobolev tame estimates of the second-order Nemytskii nonlinearity close).
   set a : ℕ := Module.finrank ℝ E + 2 with ha_def
   have ha_super : Module.finrank ℝ E + 4 < 2 * (a + 1) := by rw [ha_def]; omega
   obtain ⟨T₀, hT₀_pos, hsol⟩ :=
-    deTurckSobolev_solution_exists (I := I) (M := M) g₀ g_bg a ha_super (R := 1) one_pos
-      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
+    deTurckRicci_quasilinear_maxreg_solution (I := I) (M := M) g₀ g_bg a ha_super
   set T : ℝ := min T₀ 1 with hT_def
   have hT_pos : 0 < T := lt_min hT₀_pos one_pos
   have hT_le₀ : T ≤ T₀ := min_le_left _ _
   have hT_le1 : T ≤ 1 := min_le_right _ _
-  obtain ⟨u, gforce, hduh, hforce, htrace⟩ := hsol hT_pos hT_le₀ hT_le1
+  obtain ⟨u, gforce, hduh, hforce, htrace, _hderiv⟩ := hsol hT_pos hT_le₀ hT_le1
   -- The interior smoothing + smooth-representative gate: the pinned `C∞`
   -- representative family `T_rep`, uniformly `g₀`-fibre small with `δ < 1`.
   obtain ⟨T_rep, δ, hδ_lt, hrep_zero, hδ, htrep_pin⟩ :=
