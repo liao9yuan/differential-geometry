@@ -591,7 +591,7 @@ private lemma nablaCurvSec_vanish_acted
 with `W x = W' x`, `(∇_X R)(Y, Z) W x = (∇_X R)(Y, Z) W' x`.  Write `W = W' + (W - W')`; the additivity
 `nablaCurvSec_add_acted` splits the value into `(∇_X R)(Y, Z) W' x + (∇_X R)(Y, Z)(W - W') x`, and the
 second summand vanishes by `nablaCurvSec_vanish_acted` since `(W - W') x = 0`. -/
-private lemma nablaCurvSec_eq_of_acted_eq
+lemma nablaCurvSec_eq_of_acted_eq
     (g : SmoothRiemannianMetric I M)
     (X Y Z W W' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
     (hWW' : (W : Π b : M, TangentSpace I b) x = W' x) :

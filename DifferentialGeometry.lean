@@ -971,6 +971,7 @@ import DifferentialGeometry.Geometry.Connection.Chart.NablaComponents.Basic
 import DifferentialGeometry.Geometry.Connection.Chart.NablaComponents.OneForm
 import DifferentialGeometry.Geometry.Connection.Chart.NablaComponents.TwoTensor
 import DifferentialGeometry.Geometry.Connection.Chart.Tensor
+import DifferentialGeometry.Geometry.Connection.ChartBridge.DiffRiemannBasisIdentityOffCentre
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Gradient
 import DifferentialGeometry.Geometry.Connection.ChartBridge.HessFrobenius
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian

@@ -473,7 +473,7 @@ private lemma nablaCurvSec_smul_right
 
 /-- Additivity of the differentiated base-slot curvature `nablaBaseSlotCurv` in its derivation slot,
 read from `nablaCurvSec_add_left` through the definitional `nablaBaseSlotCurv_eq_nablaCurvSec`. -/
-private lemma nablaBaseSlotCurv_add_left
+lemma nablaBaseSlotCurv_add_left
     (g : SmoothRiemannianMetric I M)
     (X X' Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
     nablaBaseSlotCurv (I := I) g (X + X') Y Z x u =
@@ -487,7 +487,7 @@ private lemma nablaBaseSlotCurv_add_left
 /-- `ℝ`-homogeneity of the differentiated base-slot curvature `nablaBaseSlotCurv` in its derivation
 slot (constant scalar), read from `nablaCurvSec_smul_left` (with `f` the constant `c`) through
 `nablaBaseSlotCurv_eq_nablaCurvSec`. -/
-private lemma nablaBaseSlotCurv_smul_left
+lemma nablaBaseSlotCurv_smul_left
     (g : SmoothRiemannianMetric I M) (c : ℝ)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
     nablaBaseSlotCurv (I := I) g (c • X) Y Z x u =
@@ -503,7 +503,7 @@ private lemma nablaBaseSlotCurv_smul_left
 
 /-- `ℝ`-homogeneity of `nablaBaseSlotCurv` in its first antisymmetric slot (constant scalar), read from
 `nablaCurvSec_smul_right` (with `f` the constant `c`) through `nablaBaseSlotCurv_eq_nablaCurvSec`. -/
-private lemma nablaBaseSlotCurv_smul_right
+lemma nablaBaseSlotCurv_smul_right
     (g : SmoothRiemannianMetric I M) (c : ℝ)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
     nablaBaseSlotCurv (I := I) g X (c • Y) Z x u =
@@ -519,7 +519,7 @@ private lemma nablaBaseSlotCurv_smul_right
 
 /-- Additivity of `nablaBaseSlotCurv` in its first antisymmetric slot, read from
 `nablaCurvSec_add_right` through `nablaBaseSlotCurv_eq_nablaCurvSec`. -/
-private lemma nablaBaseSlotCurv_add_right
+lemma nablaBaseSlotCurv_add_right
     (g : SmoothRiemannianMetric I M)
     (X Y Y' Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
     nablaBaseSlotCurv (I := I) g X (Y + Y') Z x u =
@@ -566,7 +566,7 @@ private lemma nablaCurvSec_zero_right
 /-- Finite additivity of the tangent-level differentiated curvature in its first antisymmetric slot:
 `(∇_X R)(∑ᵢ Yᵢ, Z) W = ∑ᵢ (∇_X R)(Yᵢ, Z) W`, by induction over the index finset using
 `nablaCurvSec_add_right` and `nablaCurvSec_zero_right`. -/
-private lemma nablaCurvSec_finsetSum_right
+lemma nablaCurvSec_finsetSum_right
     (g : SmoothRiemannianMetric I M) {ι : Type*} (s : Finset ι)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (Y : ι → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -906,7 +906,7 @@ smooth fields with `X x = X' x` and `Y x = Y' x`, the differentiated base-slot c
 `nablaBaseSlotCurv g X Y Z x u = nablaBaseSlotCurv g X' Y' Z x u`, by the value-determinacy of
 `nablaCurvSec` in its derivation slot and first antisymmetric slot, read through the definitional
 `nablaBaseSlotCurv_eq_nablaCurvSec`. -/
-private lemma nablaBaseSlotCurv_eq_of_leftMid
+lemma nablaBaseSlotCurv_eq_of_leftMid
     (g : SmoothRiemannianMetric I M)
     (X X' Y Y' Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
     (hXX' : (X : Π b : M, TangentSpace I b) x = X' x)
