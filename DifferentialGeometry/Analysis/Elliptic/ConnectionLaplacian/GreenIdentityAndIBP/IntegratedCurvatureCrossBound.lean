@@ -92,6 +92,7 @@ namespace Connection
 
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -106,6 +107,68 @@ private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
+
+/-- **The moving-frame divergence datum of the three-carrier remainder (the irreducible frame-free
+curvature debt).** For a closed smooth Riemannian manifold `(M, g)`, covariant rank `s`, and smooth
+compactly-supported `(0, s)`-tensor `S`, there is a smooth tangent vector field `X` whose metric
+divergence `divᵍ X` agrees almost everywhere (against the Riemannian volume measure) with the
+pointwise metric inner product of the **three-carrier moving-frame remainder**
+`pointwiseTensorCurv g s S − GcurvSection g s S − (genuineDiffCurvSection g s S + ricTraceSection g s S)`
+against `∇S := covGrad g 0 s S`:
+
+```
+⟨Curv S − GcurvSection − (genuineDiffCurvSection + ricTraceSection), ∇S⟩(x) =ᵐ divᵍ X(x),
+```
+
+with `Curv S := pointwiseTensorCurv g s S`.
+
+This is the **genuinely-irreducible moving-frame third-order Bochner–Weitzenböck curvature-folding
+content** — the user's known frame-free curvature debt. It is the divergence half of the carrier
+decomposition: the field-level split
+`pointwiseTensorCurv_toSection_eq_genuine_add_bracket_field`
+(`PointwiseTensorBochnerFieldSplit.lean`) writes the defect fibre value as
+`genuineThirdCurvFieldFib + bracketThirdCurvFieldFib`, where the genuine field splits further into the
+pure-Riemann carrier `GcurvSection` (`genuineThirdCurvFieldFibPureR`, identified by
+`GcurvSection_toSection_eq_genuineThirdCurvFieldFibPureR`) and the differentiated-curvature carrier
+`genuineDiffCurvSection` (`genuineThirdCurvFieldFibCovDeriv`, via
+`genuineThirdCurvFieldFib_eq_pureR_add_covDeriv`). The surviving obstruction `bracketThirdCurvFieldFib`,
+summed over the `g_x`-orthonormal frame `Bᵢ := smoothOrthoFrame g x i` and paired against `∇S`, folds
+— via the second-Bianchi identity (`secondBianchi`/`contractedBianchi`) and the abstract bracket-free
+Ricci identities `tensorSecondCovDeriv_antisymm_eq_riemannSec` (`TensorRicciCommutator.lean`),
+`secondCovDeriv_gradTensor_antisymm_eq_riemannOp` (`OffDiagonalCurvatureCore.lean`) commuting the
+gradient slot past the two trace slots, together with the gradient-slot Leibniz frame sum
+`covGradRoughLapCurv_toSection_eq_frame_sum` (`GradientSlotLeibniz.lean`) — into the Ricci-trace
+carrier `ricTraceSection` plus a total covariant divergence `divᵍ X` of an `∇S`-order field. The
+off-diagonal `±N` frame-pair error terms cancel **only in the full frame sum** `∑ᵢ` (never per term /
+per pair: per-pair the cancellation is false, the diagonal `R(Bᵢ, Bᵢ) = 0` is degenerate, the content
+is off-diagonal), so this is a genuine frame-summed curvature-endomorphism identity, distinct from any
+per-carrier or cross-bound conclusion, and *false* for an arbitrary triple of subtracted fields. The
+frame-bracket directional terms `∇_{[Bᵢ, W]}(∇_{Bᵢ}T)`, `∇_{Bᵢ}(∇_{[Bᵢ, W]}T)` are exhibited as the
+divergence of the engine's first slot by `integral_frameSummed_bracketCovDeriv_combined_eq_zero`
+(`BracketDivergenceForm.lean`); the genuine Ricci identification of the surviving carrier
+(`ricTraceSection`, term-`(IV)` of the commutator slot table, `RicciTraceCarrier.lean`) is the
+curvature content above the divergence engine. The carrier-folding producer
+`movingFrameBracketRemainder_integral_eq_genuineDiffCurv_ricTrace` that would discharge this datum has
+no producer on disk, so it is carried here as the single named honest debt node.
+
+**Non-vacuity / soundness.** The datum is *false* for an arbitrary triple of subtracted fields on a
+non-flat manifold: with all three carriers replaced by `0` the inner product is
+`⟨Curv S, ∇S⟩` whose integral is `‖Δ_∇ S‖²_{L²} − ‖∇²S‖²_{L²}` by
+`weitzenbock_curvature_crossPairing_value`, a genuinely nonzero curvature integral (at `s = 0` it is
+`∫Ric(∇f, ∇f) ≠ 0`), so no compactly-supported `X` could have `divᵍ X` integrating to it; the datum
+genuinely uses all three genuine curvature carriers. -/
+theorem exists_movingFrameGenuineSectionsRemainder_divergenceDatum
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
+    ∃ X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯,
+      (fun x : M => tensorInnerPointwise (I := I) (M := M) g 0 (s + 1) x
+            ((pointwiseTensorCurv (I := I) (M := M) g s S -
+                GcurvSection (I := I) (M := M) g s S -
+                (genuineDiffCurvSection (I := I) (M := M) g s S +
+                  ricTraceSection (I := I) (M := M) g s S)).toFun x)
+            ((covGrad (I := I) (M := M) g 0 s S).toFun x))
+        =ᵐ[riemannianVolumeMeasure (I := I) (M := M) g]
+      (fun x : M => divergence_g (I := I) g X x) :=
+  sorry
 
 /-- **The genuine three-carrier cross-pairing value (the moving-frame frame-free-debt node).** For a
 closed smooth Riemannian manifold `(M, g)`, covariant rank `s`, and smooth compactly-supported
@@ -161,8 +224,18 @@ theorem genuineSections_crossPairing_value
           (rawTensorConnLapSmooth (I := I) g 0 s S).toFun ^ 2 -
         tensorL2Norm (I := I) (M := M) g 0 (s + 1 + 1)
           (covGrad (I := I) (M := M) g 0 (s + 1)
-            (covGrad (I := I) (M := M) g 0 s S)).toFun ^ 2 :=
-  sorry
+            (covGrad (I := I) (M := M) g 0 s S)).toFun ^ 2 := by
+  classical
+  obtain ⟨X, hdiv⟩ :=
+    exists_movingFrameGenuineSectionsRemainder_divergenceDatum (I := I) (M := M) g s S
+  have hpair :=
+    tensorL2Inner_genuineFields_covGrad_eq_pointwiseTensorCurv_of_pointwise_divergence
+      (I := I) (M := M) g s S
+      (GcurvSection (I := I) (M := M) g s S)
+      (genuineDiffCurvSection (I := I) (M := M) g s S +
+        ricTraceSection (I := I) (M := M) g s S) X hdiv
+  rw [hpair]
+  exact weitzenbock_curvature_crossPairing_value (I := I) (M := M) g s S
 
 /-- **The integrated moving-frame nullity for the three concrete genuine curvature sections (the
 genuine moving-frame third-order Bochner–Weitzenböck node).** For a closed smooth Riemannian manifold
