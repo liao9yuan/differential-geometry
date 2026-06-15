@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinear
 import DifferentialGeometry.Analysis.Sobolev.MoserTameProduct
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.GagliardoNirenbergProductTwoArm
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqSmoothCcUniformBound
 
 /-!
 # The two-arm covariant-`L²` ball-Lipschitz bound on the DeTurck–Ricci remainder difference
@@ -60,16 +61,21 @@ orders by `Lᵖ` interpolation so each arm carries one factor's full `L²`-jet s
   `tensorL2Norm_le_of_pointwise_fiberNormSq_bound_two`; it is **not** used by the headline below
   (a pointwise two-arm split is the refuted shape), but is kept as reusable covariant-`L²` packaging.
 
-* `deTurckRemainderDiff_singleField_diagonalGrid` — the **single posited leaf**, isolated to its
-  irreducible chart→intrinsic content: the intrinsic covariant Faà-di-Bruno **single-coefficient
-  diagonal product-grid domination** of the sealed remainder difference `D` itself, against a single
-  intrinsic coefficient field `coeff : SmoothCcTensor g₀ 0 s`,
-  `rfns(∇^a D)(x) ≤ Cmid · ∑_{i ≤ a+2} rfns(∇^i (T − T'))(x) · ∑_{l ≤ a+2−i} rfns(∇^l coeff)(x)`,
-  plus the two `C⁰` sups.  This is the genuine analytic prerequisite (the chart→intrinsic
-  covariant-bilinear realization of the sealed remainder difference, with the chart-polynomial
-  coefficient lifted to an intrinsic `SmoothCcTensor` and the two-factor diagonal `rfns` grid, has no
-  on-disk antecedent — it is the chart-locality-free covariant-jet comparison documented as the open
-  analytic sub-program); its body is `sorry`.
+* `deTurckRemainderDiff_singleField_diagonalGrid_intrinsicCore` — the **single posited leaf**, the
+  irreducible chart→intrinsic content stripped of all packaging: the intrinsic covariant Faà-di-Bruno
+  **single-coefficient diagonal product-grid domination** of the sealed remainder difference `D`
+  itself, against a single intrinsic coefficient field `coeff : SmoothCcTensor g₀ 0 s`,
+  `rfns(∇^a D)(x) ≤ Cmid · ∑_{i ≤ a+2} rfns(∇^i (T − T'))(x) · ∑_{l ≤ a+2−i} rfns(∇^l coeff)(x)`.  This
+  is the genuine analytic prerequisite (the chart→intrinsic covariant-bilinear realization of the
+  sealed remainder difference, with the chart-polynomial coefficient lifted to an intrinsic
+  `SmoothCcTensor` and the two-factor diagonal `rfns` grid, has no on-disk antecedent — it is the
+  chart-locality-free covariant-jet comparison documented as the open analytic sub-program); its body
+  is `sorry`.
+
+* `deTurckRemainderDiff_singleField_diagonalGrid` — the same single-coefficient diagonal grid **with
+  the two `C⁰` fibre-sup levels** `ΛW, Λcoeff`, **proved** (no `sorry` of its own) from the core posit
+  by mechanically recovering the sups via the uniform smooth-tensor fibre-norm bound
+  `exists_bound_riemannianFiberNormSq_smoothCcTensor` on the compact manifold.
 
 * `deTurckRemainderDiff_principalSplit_singleCoeffDiagonalGrid` — the **two-field
   principal/lower-order split** of the sealed remainder difference `D = D₁ + D₂` with each field `Dₚ`
@@ -210,49 +216,91 @@ theorem tensorL2Norm_le_of_pointwise_fiberNormSq_twoCoeff
   have hsqrt := Real.sqrt_le_sqrt hsq_final
   rwa [Real.sqrt_sq hCurv_nn, Real.sqrt_sq htarget_nn] at hsqrt
 
-/-- **(POSIT — the genuine missing analytic prerequisite: the intrinsic covariant Faà-di-Bruno
-single-coefficient diagonal product-grid domination of the sealed Ricci–DeTurck remainder
-difference.)**
+/-- **(POSIT — the irreducible chart→intrinsic content of the single-field diagonal grid: the
+intrinsic covariant Faà-di-Bruno coefficient + diagonal product grid of the sealed Ricci–DeTurck
+remainder difference, WITHOUT the `C⁰` fibre-sup packaging.)**
 
-This is the *one* honest analytic leaf of the covariant-`L²` core, isolated to its irreducible
-chart→intrinsic content.  Fix `g₀`, the DeTurck background `g_bg`, an order `a`, and a
-covariant-`L²` ball radius `R ≥ 0`.  There is a fixed DeTurck chart-polynomial coefficient valence
-`s`; for any two `g₀`-fibre-small smooth perturbations `T, T'` whose covariant-`L²` jets up to order
-`a + 2` lie in the radius-`R` ball, there are a single intrinsic coefficient field
-`coeff : SmoothCcTensor g₀ 0 s` (the smooth curvature / metric-jet coefficient data of the
-quasilinear Ricci–DeTurck right-hand side), a middle grid constant `Cmid ≥ 0`, and two `C⁰` fibre-sup
-levels `ΛW, Λcoeff ≥ 0`, such that for the **sealed remainder difference**
+This is the genuine analytic prerequisite stripped to its irreducible core.  It delivers, for any two
+`g₀`-fibre-small smooth ball-radius-`R` perturbations `T, T'`, a fixed intrinsic coefficient field
+`coeff : SmoothCcTensor g₀ 0 s` (the smooth curvature / metric-jet coefficient data of the quasilinear
+Ricci–DeTurck right-hand side, assembled from the chart-polynomial difference
+`chartDeTurckRicciRHS_sub_eq_principalSymbol_add_lowerOrder` grounded against the intrinsic operator by
+`deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS`, globalised to a `SmoothCcTensor` over the
+compact manifold) and a middle grid constant `Cmid ≥ 0`, with the **single-coefficient diagonal
+covariant-Leibniz product-grid domination** of the sealed remainder difference
+`D := deTurckSmoothRemainder g₀ g_bg T − deTurckSmoothRemainder g₀ g_bg T'`:
+```
+rfns(∇^a D)(x) ≤ Cmid · ∑_{i ≤ a+2} rfns(∇^i (T − T'))(x) · ∑_{l ≤ a+2−i} rfns(∇^l coeff)(x).
+```
+
+It is **finer** than `deTurckRemainderDiff_singleField_diagonalGrid`: that consumer's two `C⁰`
+fibre-sup clauses (`√rfns(T − T') ≤ ΛW`, `√rfns(coeff) ≤ Λcoeff`) are NOT carried here — they are
+mechanically recovered from this core by the uniform smooth-tensor fibre-norm bound
+`exists_bound_riemannianFiberNormSq_smoothCcTensor` on the compact manifold.  What remains, and what
+this posit isolates, is the genuinely irreducible chart-locality-free covariant-jet realization: the
+construction of the intrinsic coefficient `coeff` as a global `SmoothCcTensor` from the per-chart
+Christoffel-based polynomial coefficients (which are not individually global tensors), and the
+two-factor diagonal `rfns` grid for `∇^a D` (via the covariant Leibniz of each bilinear monomial,
+`ParallelTensorProduct.exists_norm_iteratedCovGrad_prod_le` / `DiffBilinOp.rfns_iteratedCovGrad_grid`).
+This has **no on-disk antecedent**; its body is `sorry`, and consumers transitively depend on its
+`sorryAx`.
+
+**Non-vacuity.**  The grid bounds the genuine sealed remainder difference `D`, not a free choice; the
+`l = 0` column carries `∑_i rfns(∇^i (T − T'))·rfns(coeff)`, so a `Cmid = 0` witness is rejected by a
+nonvanishing remainder-difference jet where `coeff` is nonzero. -/
+private theorem deTurckRemainderDiff_singleField_diagonalGrid_intrinsicCore
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R) :
+    ∃ s : ℕ,
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_lt : δ' < 1)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∃ (coeff : SmoothCcTensor g₀ 0 s) (Cmid : ℝ),
+          0 ≤ Cmid ∧
+          (∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 a
+                  (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+                    deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ')).toSection x) ≤
+              Cmid * ∑ i ∈ Finset.range (a + 2 + 1),
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                    ((iteratedCovGrad (I := I) g₀ 0 2 i (T - T')).toSection x)
+                  * ∑ l ∈ Finset.range (a + 2 + 1 - i),
+                      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + l) x
+                        ((iteratedCovGrad (I := I) g₀ 0 s l coeff).toSection x)) := by
+  sorry
+
+/-- **The intrinsic covariant Faà-di-Bruno single-coefficient diagonal product-grid domination of the
+sealed Ricci–DeTurck remainder difference, with the two `C⁰` fibre-sup levels.**
+
+Fix `g₀`, the DeTurck background `g_bg`, an order `a`, and a covariant-`L²` ball radius `R ≥ 0`.  For
+any two `g₀`-fibre-small smooth perturbations `T, T'` whose covariant-`L²` jets up to order `a + 2`
+lie in the radius-`R` ball, there are a single intrinsic coefficient field
+`coeff : SmoothCcTensor g₀ 0 s`, a middle grid constant `Cmid ≥ 0`, and two `C⁰` fibre-sup levels
+`ΛW, Λcoeff ≥ 0`, such that for the **sealed remainder difference**
 `D := deTurckSmoothRemainder g₀ g_bg T − deTurckSmoothRemainder g₀ g_bg T'`:
 
 * `√rfns(T − T') ≤ ΛW` everywhere (the `C⁰` sup of the perturbation difference),
-* `√rfns(coeff) ≤ Λcoeff` everywhere (the `C⁰` sup of the coefficient data, an `O(R)` metric defect
-  on the principal column via the supercritical Sobolev embedding), and
+* `√rfns(coeff) ≤ Λcoeff` everywhere (the `C⁰` sup of the coefficient data), and
 * the **single-coefficient diagonal covariant-Leibniz product-grid domination**: for every `x`,
   ```
   rfns(∇^a D)(x)
     ≤ Cmid · ∑_{i ≤ a+2} rfns(∇^i (T − T'))(x) · ∑_{l ≤ a+2−i} rfns(∇^l coeff)(x).
   ```
 
-This is the intrinsic covariant Faà-di-Bruno expansion of `∇^a (F(g₀ + T) − F(g₀ + T'))` for the
-quasilinear Ricci–DeTurck nonlinearity `F`: the chart-polynomial difference split
-`chartDeTurckRicciRHS_sub_eq_principalSymbol_add_lowerOrder` (sorry-free, in chart coordinates)
-exhibits `D` (tied to the intrinsic operator by `deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS`)
-as a finite sum of bilinear monomials, each a fixed (undifferenced) curvature/metric/Christoffel
-coefficient field times a single `T − T'` jet of chart order `≤ 2`; the covariant Leibniz of each
-bilinear product (`ParallelTensorProduct.exists_norm_iteratedCovGrad_prod_le` / the abstract
-`DiffBilinOp.rfns_iteratedCovGrad_grid` of `MetricContractionLeibnizGrid`, in `rfns` form) gives the
-diagonal product grid against the assembled coefficient field `coeff`.  This **chart→intrinsic**
-covariant-bilinear realization of the sealed remainder difference (the construction of the intrinsic
-`coeff` as a `SmoothCcTensor` and the two-factor diagonal `rfns` grid for `∇^a D`) has **no on-disk
-antecedent** — it is the chart-locality-free all-orders covariant-jet comparison documented as the
-open analytic sub-program (`Order2NormEquivOnSmooth`, `smoothRemainderDiff_ballLipschitz_Ha2`), the
-prerequisite the `MoserTameProduct` / `GagliardoNirenbergProductTwoArm` / `CovariantBilinearLeibniz`
-engines were built to feed.  Its body is `sorry`; consumers transitively depend on its `sorryAx`.
+It is **assembled** from the irreducible chart→intrinsic posit
+`deTurckRemainderDiff_singleField_diagonalGrid_intrinsicCore` (which supplies the intrinsic coefficient
+field `coeff` and the diagonal product grid): the two `C⁰` fibre-sup clauses are mechanically recovered
+from that core by the uniform smooth-tensor fibre-norm bound
+`exists_bound_riemannianFiberNormSq_smoothCcTensor` on the compact manifold (set `ΛW := √(sup rfns(T −
+T'))`, `Λcoeff := √(sup rfns(coeff))`).  Consumers transitively depend on the core's `sorryAx`.
 
-**Non-vacuity.**  Each diagonal `i + l ≤ a + 2` grid genuinely carries the perturbation difference
-(the `l = 0` column reads `∑_i rfns(∇^i (T − T'))·rfns(coeff)`); a `Cmid = 0` witness is rejected by a
-nonvanishing remainder-difference jet at a point where `coeff` is nonzero, and the grid bounds the
-genuine sealed remainder difference `D`, not a free choice. -/
+**Non-vacuity.**  The grid bounds the genuine sealed remainder difference `D`, not a free choice; the
+`l = 0` column reads `∑_i rfns(∇^i (T − T'))·rfns(coeff)`, so a `Cmid = 0` witness is rejected by a
+nonvanishing remainder-difference jet where `coeff` is nonzero. -/
 private theorem deTurckRemainderDiff_singleField_diagonalGrid
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R) :
     ∃ s : ℕ,
@@ -280,7 +328,29 @@ private theorem deTurckRemainderDiff_singleField_diagonalGrid
                   * ∑ l ∈ Finset.range (a + 2 + 1 - i),
                       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + l) x
                         ((iteratedCovGrad (I := I) g₀ 0 s l coeff).toSection x)) := by
-  sorry
+  -- Strip the `C⁰` fibre-sup packaging off the irreducible chart→intrinsic core: the core supplies
+  -- the intrinsic coefficient field and the diagonal product grid; the two sups are recovered from
+  -- the uniform smooth-tensor fibre-norm bound on the compact manifold.
+  obtain ⟨s, hcore⟩ :=
+    deTurckRemainderDiff_singleField_diagonalGrid_intrinsicCore (I := I) (M := M) g₀ g_bg a hR
+  refine ⟨s, ?_⟩
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
+  obtain ⟨coeff, Cmid, hCmid, hgrid⟩ :=
+    hcore T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
+  -- `C⁰` fibre-sup of the perturbation difference `T − T'` on the compact manifold.
+  obtain ⟨KW, hKW_nn, hKW⟩ :=
+    exists_bound_riemannianFiberNormSq_smoothCcTensor (I := I) (M := M) g₀ 0 2 (T - T')
+  -- `C⁰` fibre-sup of the coefficient field `coeff` on the compact manifold.
+  obtain ⟨Kc, hKc_nn, hKc⟩ :=
+    exists_bound_riemannianFiberNormSq_smoothCcTensor (I := I) (M := M) g₀ 0 s coeff
+  refine ⟨coeff, Cmid, Real.sqrt KW, Real.sqrt Kc, hCmid, Real.sqrt_nonneg KW,
+    Real.sqrt_nonneg Kc, ?_, ?_, hgrid⟩
+  · intro x
+    rw [Real.sq_sqrt hKW_nn]
+    exact hKW x
+  · intro x
+    rw [Real.sq_sqrt hKc_nn]
+    exact hKc x
 
 /-- **The intrinsic covariant Faà-di-Bruno principal/lower-order split of the sealed Ricci–DeTurck
 remainder difference into two single-coefficient covariant-bilinear product fields** (assembled from
