@@ -99,7 +99,7 @@ orders by `Lᵖ` interpolation so each arm carries one factor's full `L²`-jet s
 
 noncomputable section
 
-open MeasureTheory Set Filter Topology
+open MeasureTheory Set Filter Topology Bundle Manifold Tensor0SBundle ContinuousLinearMap
 open scoped ENNReal NNReal BigOperators Manifold ContDiff
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
@@ -216,38 +216,309 @@ theorem tensorL2Norm_le_of_pointwise_fiberNormSq_twoCoeff
   have hsqrt := Real.sqrt_le_sqrt hsq_final
   rwa [Real.sqrt_sq hCurv_nn, Real.sqrt_sq htarget_nn] at hsqrt
 
-/-- **(POSIT — the irreducible chart→intrinsic content of the single-field diagonal grid: the
-intrinsic covariant Faà-di-Bruno coefficient + diagonal product grid of the sealed Ricci–DeTurck
-remainder difference, WITHOUT the `C⁰` fibre-sup packaging.)**
+/-- The `(0,2)`-tensor fibre at `x` obtained from the metric bilinear form `g₀.inner x` by the fibre
+isometry `bilinFormToModel`.  Factored out (outside the bundle-topology `letI` of
+`metricTensor0SField`) so the `Tensor0SModel` normed-space instance is visible at elaboration. -/
+private def metricTensorModelFun (g₀ : SmoothRiemannianMetric I M) (x : M) :
+    Tensor0SBundle.Tensor0SSpace 2 I x :=
+  Tensor0SBundle.Tensor0SSpace.ofModel
+    (bilinFormToModel (TangentSpace I x) (g₀.inner x))
+
+set_option linter.unusedSectionVars false in
+private theorem metricTensorModelFun_toModel_apply (g₀ : SmoothRiemannianMetric I M)
+    (x : M) (v : Fin 2 → TangentSpace I x) :
+    Tensor0SBundle.Tensor0SSpace.toModel (metricTensorModelFun (I := I) g₀ x) v =
+      g₀.inner x (v 0) (v 1) := by
+  unfold metricTensorModelFun
+  rw [Tensor0SBundle.Tensor0SSpace.toModel_ofModel]
+  exact bilinFormToModel_apply (TangentSpace I x) (g₀.inner x) v
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The metric `g₀`, viewed as the model `(0,2)`-multilinear field `x ↦ (v ↦ g₀(v 0, v 1))`.  This is
+the smooth `(0,2)`-tensor field obtained from the bilinear metric form `g₀.inner x` by the fibre
+isometry `bilinFormToModel`.  Its smoothness is the metric analog of `deTurckRHSField`: in any chart at
+`α`, each chart-frame component `x ↦ g₀(e_i^α(x), e_j^α(x))` is smooth, by the chart Gram smoothness
+together with the smoothness of the metric inner product on smooth tangent sections. -/
+private def metricTensor0SField (g₀ : SmoothRiemannianMetric I M) :
+    Tensor0SField (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) ∞ 2 :=
+  letI := tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 2
+  letI := TangentBundle.contMDiffVectorBundle (I := I) (M := M) (n := ∞)
+  ⟨fun x => metricTensorModelFun (I := I) g₀ x, by
+    let d := Module.finrank ℝ E
+    let b : Module.Basis (Fin d) ℝ E := DifferentialGeometry.Integral.Measure.chartModelBasis E
+    refine (contMDiff_multilinearSection_iff_coord (TangentSpace I) ∞ b _).mpr
+      fun σ x₀ => ?_
+    have hcomp : ContMDiffOn I 𝓘(ℝ, ℝ) ∞
+        (fun x : M =>
+          g₀.inner x
+            (DifferentialGeometry.PDE.RicciFlow.chartFrameVec (I := I) x₀ (σ 0) x)
+            (DifferentialGeometry.PDE.RicciFlow.chartFrameVec (I := I) x₀ (σ 1) x))
+        (chartAt H x₀).source := by
+      intro y hy
+      have h_frame_on : ∀ k : Fin (Module.finrank ℝ E),
+          ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
+            (fun w : M => TotalSpace.mk' E w
+              (DifferentialGeometry.PDE.RicciFlow.chartFrameVec (I := I) x₀ k w))
+            (chartAt H x₀).source := fun k =>
+        DifferentialGeometry.Integral.Measure.chartAlphaFrame_section_contMDiffOn (I := I) x₀ k
+      obtain ⟨S, hS_eq⟩ :=
+        exists_contMDiffSection_eqOn_nhd
+          (s := fun k : Fin (Module.finrank ℝ E) => fun w : M =>
+            DifferentialGeometry.PDE.RicciFlow.chartFrameVec (I := I) x₀ k w)
+          (u := (chartAt H x₀).source) (p := y)
+          h_frame_on ((chartAt H x₀).open_source) hy
+      have h_scalar :
+          ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun w : M => g₀.inner w ((S (σ 0)) w) ((S (σ 1)) w)) :=
+        DifferentialGeometry.Integral.DivergenceTheorem.contMDiff_g_inner_of_smooth_sections
+          (I := I) g₀ (S (σ 0)) (S (σ 1))
+      have h_at : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
+          (fun x : M => g₀.inner x
+            (DifferentialGeometry.PDE.RicciFlow.chartFrameVec (I := I) x₀ (σ 0) x)
+            (DifferentialGeometry.PDE.RicciFlow.chartFrameVec (I := I) x₀ (σ 1) x)) y := by
+        refine (h_scalar y).congr_of_eventuallyEq ?_
+        filter_upwards [hS_eq] with w hw
+        rw [hw (σ 0), hw (σ 1)]
+      exact h_at.contMDiffWithinAt
+    have hx₀_src : x₀ ∈ (chartAt H x₀).source := mem_chart_source H x₀
+    have h_src_nhd : (chartAt H x₀).source ∈ 𝓝 x₀ :=
+      (chartAt H x₀).open_source.mem_nhds hx₀_src
+    have hx₀_base : x₀ ∈ (trivializationAt E (TangentSpace I) x₀).baseSet :=
+      mem_baseSet_trivializationAt E (TangentSpace I) x₀
+    refine ((hcomp x₀ hx₀_src).contMDiffAt h_src_nhd).congr_of_eventuallyEq ?_
+    have h_base_nhd :
+        (trivializationAt E (TangentSpace I) x₀).baseSet ∈ 𝓝 x₀ :=
+      (trivializationAt E (TangentSpace I) x₀).open_baseSet.mem_nhds hx₀_base
+    filter_upwards [h_base_nhd] with x hx
+    rw [continuousMultilinearMap_basis_repr]
+    change Tensor0SBundle.Tensor0SSpace.toModel
+        (metricTensorModelFun (I := I) g₀ x)
+        (fun j => (trivializationAt E (TangentSpace I) x₀).symmL ℝ x (b (σ j))) = _
+    rw [metricTensorModelFun_toModel_apply]
+    rfl⟩
+
+/-- The model value of `metricTensor0SField` recovers the metric bilinear form. -/
+private theorem metricTensor0SField_toModel_apply (g₀ : SmoothRiemannianMetric I M)
+    (x : M) (v : Fin 2 → TangentSpace I x) :
+    Tensor0SBundle.Tensor0SSpace.toModel (metricTensor0SField (I := I) g₀ x) v =
+      g₀.inner x (v 0) (v 1) :=
+  metricTensorModelFun_toModel_apply (I := I) g₀ x v
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The metric `g₀`, promoted to a smooth mixed `(0,2)`-tensor section via the scalar-extension
+`MixedSection.fromMultilinearSection` (the metric analog of `deTurckRHSMixedSection`). -/
+private def metricMixedSection (g₀ : SmoothRiemannianMetric I M) :
+    Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯ :=
+  MixedSection.fromMultilinearSection (𝕜 := ℝ) (F := E) (IB := I)
+    (E := (TangentSpace I : M → Type _)) ∞ (metricTensor0SField (I := I) g₀)
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The metric `g₀` as a smooth, compactly-supported `(0,2)`-tensor section (compact support is
+automatic on a compact manifold). -/
+private def metricSmoothCcTensor (g₀ : SmoothRiemannianMetric I M) :
+    SmoothCcTensor g₀ 0 2 where
+  toSection := metricMixedSection (I := I) g₀
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The underlying section value of `metricSmoothCcTensor`, evaluated at the canonical unit
+`(0,0)`-tensor and a tangent pair, recovers the metric bilinear form `g₀(v 0, v 1)`. -/
+private theorem metricSmoothCcTensor_toModel_apply (g₀ : SmoothRiemannianMetric I M)
+    (x : M) (v : Fin 2 → TangentSpace I x) :
+    Tensor0SBundle.Tensor0SSpace.toModel
+        ((metricSmoothCcTensor (I := I) g₀).toSection x
+          (ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) v =
+      g₀.inner x (v 0) (v 1) := by
+  have hsec : ((metricSmoothCcTensor (I := I) g₀).toSection x
+        (ContinuousMultilinearMap.constOfIsEmpty ℝ
+          (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+      = (MixedSection.eval₀ (F := E) (E := (TangentSpace I : M → Type _)) x).smulRight
+          (metricTensor0SField (I := I) g₀ x)
+        (ContinuousMultilinearMap.constOfIsEmpty ℝ
+          (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) := rfl
+  rw [hsec, ContinuousLinearMap.smulRight_apply, MixedSection.eval₀_apply]
+  rw [show (ContinuousMultilinearMap.constOfIsEmpty ℝ
+        (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) Fin.elim0 = (1 : ℝ) from rfl, one_smul,
+    metricTensor0SField_toModel_apply]
+
+/-- **(The positive intrinsic coefficient column — PROVED via the metric tensor.)**  A fixed
+intrinsic coefficient field `coeff : SmoothCcTensor g₀ 0 s` with a strictly-positive fibre-norm floor
+`1 ≤ rfns(coeff)(x)` at every base point.  This is the auxiliary positive parallel coefficient used to
+lift the single-sum covariant-Leibniz `rfns` grid of the linearized operator to the two-factor diagonal
+product-grid shape the integrated Gagliardo–Nirenberg engine consumes: its `l = 0` column carries the
+positive floor that absorbs the single-sum grid constant.
+
+The witness is the metric tensor `metricSmoothCcTensor g₀` (`s = 2`).  In a `g₀(x)`-orthonormal frame
+`e` of `T_x M` (`exists_orthonormal_frame_riemannianFiberNormSq`), the model value of the metric tensor
+on the pair `(e_{J 0}, e_{J 1})` is `g₀(e_{J 0}, e_{J 1}) = δ_{J 0, J 1}`; hence the rfns frame
+double-sum collapses to the count of the diagonal multi-indices `J : Fin 2 → Fin n`, which is `n =
+finrank E ≥ 1`.  Picking out the single diagonal multi-index `J = ![0, 0]` (present since `n ≥ 1`)
+already contributes a `1`, and all other summands are nonnegative, so the rfns is `≥ 1`.
+
+**Non-vacuity.**  The floor `1 ≤ rfns(coeff)(x)` rejects the degenerate `coeff = 0` witness
+(`rfns(0) = 0`), so the coefficient genuinely carries a positive column. -/
+private theorem exists_positiveFloor_intrinsicCoeff (g₀ : SmoothRiemannianMetric I M) :
+    ∃ (s : ℕ) (coeff : SmoothCcTensor g₀ 0 s),
+      ∀ x : M, (1 : ℝ) ≤ riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x (coeff.toSection x) := by
+  classical
+  refine ⟨2, metricSmoothCcTensor (I := I) g₀, fun x => ?_⟩
+  -- The `g₀(x)`-orthonormal frame `e` representing `rfns` as a frame double-sum.
+  obtain ⟨n, e, hn, horth, _hpars, hrepr⟩ :=
+    exists_orthonormal_frame_riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+  have hn1 : 1 ≤ n := by
+    rw [hn]
+    have hne : Module.finrank ℝ (TangentSpace I x) ≠ 0 := by
+      change Module.finrank ℝ E ≠ 0
+      exact NeZero.ne _
+    omega
+  -- Rewrite the rfns as the frame double-sum and isolate the diagonal multi-index `J = ![0, 0]`.
+  rw [hrepr]
+  have hsummand_eq : ∀ (K : Fin 0 → Fin n) (J : Fin 2 → Fin n),
+      fiberNormSqSummand (I := I) (M := M) g₀ x 0 2
+          ((metricSmoothCcTensor (I := I) g₀).toSection x) n e K J =
+        (g₀.inner x (e (J 0)) (e (J 1))) ^ 2 := by
+    intro K J
+    unfold fiberNormSqSummand
+    congr 1
+    have hconst : ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+          (fun k : Fin 0 => g₀.inner x (e (K k))) :
+          Tensor0SBundle.Tensor0SSpace 0 I x) =
+        ContinuousMultilinearMap.constOfIsEmpty ℝ
+          (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ) := by
+      apply Tensor0SBundle.tensor0SSpace_ext
+      intro w
+      change ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+          (fun k : Fin 0 => g₀.inner x (e (K k)))) w =
+        (ContinuousMultilinearMap.constOfIsEmpty ℝ
+          (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) w
+      rw [show ((ContinuousMultilinearMap.constOfIsEmpty ℝ
+            (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) w : ℝ) = 1 from rfl]
+      change (ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ)
+          (fun k => g₀.inner x (e (K k)) (w k)) = 1
+      rw [ContinuousMultilinearMap.mkPiAlgebra_apply]
+      exact Finset.prod_of_isEmpty _
+    rw [hconst]
+    have h := metricSmoothCcTensor_toModel_apply (I := I) g₀ x (fun k => e (J k))
+    rw [show ((metricSmoothCcTensor (I := I) g₀).toSection x
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ
+              (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))
+          (fun k => e (J k)) : ℝ)
+        = Tensor0SBundle.Tensor0SSpace.toModel
+            ((metricSmoothCcTensor (I := I) g₀).toSection x
+              (ContinuousMultilinearMap.constOfIsEmpty ℝ
+                (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
+            (fun k => e (J k)) from rfl]
+    rw [h]
+  simp only [hsummand_eq]
+  have hJ0 : (g₀.inner x (e ((![⟨0, hn1⟩, ⟨0, hn1⟩] : Fin 2 → Fin n) 0))
+      (e ((![⟨0, hn1⟩, ⟨0, hn1⟩] : Fin 2 → Fin n) 1))) ^ 2 = 1 := by
+    have h00 : g₀.inner x (e ⟨0, hn1⟩) (e ⟨0, hn1⟩) = 1 := by
+      have := horth ⟨0, hn1⟩ ⟨0, hn1⟩; simpa using this
+    simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
+    rw [h00]; norm_num
+  rw [Fintype.sum_unique]
+  refine le_trans (le_of_eq hJ0.symm) ?_
+  refine Finset.single_le_sum
+    (f := fun J : Fin 2 → Fin n => (g₀.inner x (e (J 0)) (e (J 1))) ^ 2)
+    (fun J _ => sq_nonneg _) (Finset.mem_univ _)
+
+/-- **(POSIT — the genuine order-`(a+2)`-window single-factor covariant grid of the sealed
+Ricci–DeTurck remainder difference.)**
+
+This is the irreducible analytic content of the single-field diagonal grid, stripped of the auxiliary
+coefficient column: for any two `g₀`-fibre-small smooth ball-radius-`R` perturbations `T, T'`, the
+order-`a` covariant gradient of the sealed remainder difference
+`D := deTurckSmoothRemainder g₀ g_bg T − deTurckSmoothRemainder g₀ g_bg T'` is dominated, at the squared
+fibre-norm level, by a single nonnegative constant `C` times the **order-`(a + 2)` covariant jet** of the
+perturbation difference `T − T'`:
+```
+rfns(∇^a D)(x) ≤ C · ∑_{q ≤ a+2} rfns(∇^q (T − T'))(x).
+```
+
+**The jet order is `a + 2`, not `a`** — this is the genuinely quasilinear content.  The remainder
+difference `D` is genuinely *second order* in `T − T'`: its connection-Laplacian arm
+`−rawTensorConnLapSmooth g₀ 0 2 (T − T')` reads `∇²(T − T')`
+(`rawTensorConnLap_eq_frame_trace_secondCovDeriv`), so `∇^a D` reads `∇^{a+2}(T − T')`, and the read
+window of the contracted-section jet sum is correspondingly `q ≤ a + 2`.  A window-`a` bound
+(`q ≤ a`) is FALSE — it is the value-local order-`0` realization refuted by
+`DiffBilinOp.exists_rfns_iteratedCovGrad_singleSum_le` (`rfns(∇^a (op 0 W)) ≤ C · ∑_{q ≤ a} rfns(∇^q W)`
+forces order-`0` reading, which `D` violates by losing two derivatives).
+
+It is the chart→intrinsic content: the RHS-arm
+`deTurckRHSSection g_bg (g₀ + T) − deTurckRHSSection g_bg (g₀ + T')` is, by the chart-polynomial
+difference `chartDeTurckRicciRHS_sub_eq_principalSymbol_add_lowerOrder` grounded against the intrinsic
+operator (`deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS`), a finite sum of bilinear
+monomials of (fixed undifferenced curvature / metric / Christoffel coefficient data) × (a single
+`(T − T')` jet of chart order `≤ 2`), realized intrinsically as a second-order covariant-bilinear product
+reading `∇^{≤ 2}(T − T')` (`ParallelTensorProduct.exists_norm_iteratedCovGrad_prod_le`); the Δ-arm is the
+exact `q = a + 2` jet of the linear connection Laplacian (`rawTensorConnLapSmooth_sub`).  The
+covariant-Leibniz grid then bounds `rfns(∇^a D)` by the order-`(a + 2)` jet of `T − T'`.  This has **no
+on-disk antecedent** (the chart→intrinsic globalization of the coefficient data and the second-order
+covariant-jet comparison are the irreducible open analytic sub-program); its body is `sorry`, and
+consumers transitively depend on its `sorryAx`.
+
+**Non-vacuity / order self-check.**  The bound reads `∇^{≤ a+2}(T − T')`; the `q = a + 2` term is the
+genuine top jet (carried by the Δ-arm), so a window-`a` weakening is rejected.  A `C = 0` witness is
+rejected by a nonvanishing `∇^a D` (a genuinely second-order, non-flat remainder difference). -/
+private theorem deTurckRemainderDiff_singleField_singleFactorGrid
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R) :
+    ∀ (T T' : SmoothCcTensor g₀ 0 2)
+      {δ : ℝ} (hδ_lt : δ < 1)
+      (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      {δ' : ℝ} (hδ'_lt : δ' < 1)
+      (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+      (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+      (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+      ∃ C : ℝ,
+        0 ≤ C ∧
+        (∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 a
+                (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+                  deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ')).toSection x) ≤
+            C * ∑ q ∈ Finset.range (a + 2 + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection x)) := by
+  sorry
+
+/-- **The irreducible chart→intrinsic content of the single-field diagonal grid: the intrinsic
+covariant Faà-di-Bruno coefficient + diagonal product grid of the sealed Ricci–DeTurck remainder
+difference, WITHOUT the `C⁰` fibre-sup packaging.**
 
 This is the genuine analytic prerequisite stripped to its irreducible core.  It delivers, for any two
 `g₀`-fibre-small smooth ball-radius-`R` perturbations `T, T'`, a fixed intrinsic coefficient field
-`coeff : SmoothCcTensor g₀ 0 s` (the smooth curvature / metric-jet coefficient data of the quasilinear
-Ricci–DeTurck right-hand side, assembled from the chart-polynomial difference
-`chartDeTurckRicciRHS_sub_eq_principalSymbol_add_lowerOrder` grounded against the intrinsic operator by
-`deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS`, globalised to a `SmoothCcTensor` over the
-compact manifold) and a middle grid constant `Cmid ≥ 0`, with the **single-coefficient diagonal
-covariant-Leibniz product-grid domination** of the sealed remainder difference
+`coeff : SmoothCcTensor g₀ 0 s` and a middle grid constant `Cmid ≥ 0`, with the **single-coefficient
+diagonal covariant-Leibniz product-grid domination** of the sealed remainder difference
 `D := deTurckSmoothRemainder g₀ g_bg T − deTurckSmoothRemainder g₀ g_bg T'`:
 ```
 rfns(∇^a D)(x) ≤ Cmid · ∑_{i ≤ a+2} rfns(∇^i (T − T'))(x) · ∑_{l ≤ a+2−i} rfns(∇^l coeff)(x).
 ```
 
+It is **assembled** from two ingredients:
+* the genuine order-`(a + 2)`-window single-factor covariant grid posit
+  `deTurckRemainderDiff_singleField_singleFactorGrid`
+  (`rfns(∇^a D)(x) ≤ C · ∑_{q ≤ a+2} rfns(∇^q (T − T'))(x)`, the irreducible quasilinear analytic
+  content reading `∇^{≤ a+2}(T − T')` — **not** the value-local order-`0` form, which is refuted), and
+* the positive intrinsic coefficient column `exists_positiveFloor_intrinsicCoeff` (the metric tensor
+  `coeff := metricSmoothCcTensor g₀`, `s = 2`, with `1 ≤ rfns(coeff)(x)` everywhere — **proved**, no
+  posit).
+
+Taking `Cmid := C`, each single-factor term `C · rfns(∇^i (T − T'))(x)` (window `i ≤ a + 2`) is lifted
+to the diagonal term `C · rfns(∇^i (T − T'))(x) · ∑_{l ≤ a+2−i} rfns(∇^l coeff)(x)` by the positive
+coefficient floor `1 ≤ ∑_{l ≤ a+2−i} rfns(∇^l coeff)(x)` (which always contains the `l = 0` term
+`rfns(coeff)(x) ≥ 1` since `i ≤ a + 2` makes the window nonempty).  The coefficient column is auxiliary
+bookkeeping for the downstream Gagliardo–Nirenberg two-arm redistribution; the genuine analytic order
+content lives entirely in the single-factor posit.
+
 It is **finer** than `deTurckRemainderDiff_singleField_diagonalGrid`: that consumer's two `C⁰`
 fibre-sup clauses (`√rfns(T − T') ≤ ΛW`, `√rfns(coeff) ≤ Λcoeff`) are NOT carried here — they are
 mechanically recovered from this core by the uniform smooth-tensor fibre-norm bound
-`exists_bound_riemannianFiberNormSq_smoothCcTensor` on the compact manifold.  What remains, and what
-this posit isolates, is the genuinely irreducible chart-locality-free covariant-jet realization: the
-construction of the intrinsic coefficient `coeff` as a global `SmoothCcTensor` from the per-chart
-Christoffel-based polynomial coefficients (which are not individually global tensors), and the
-two-factor diagonal `rfns` grid for `∇^a D` (via the covariant Leibniz of each bilinear monomial,
-`ParallelTensorProduct.exists_norm_iteratedCovGrad_prod_le` / `DiffBilinOp.rfns_iteratedCovGrad_grid`).
-This has **no on-disk antecedent**; its body is `sorry`, and consumers transitively depend on its
-`sorryAx`.
+`exists_bound_riemannianFiberNormSq_smoothCcTensor` on the compact manifold.  Consumers transitively
+depend on the single-factor grid posit's `sorryAx`.
 
 **Non-vacuity.**  The grid bounds the genuine sealed remainder difference `D`, not a free choice; the
 `l = 0` column carries `∑_i rfns(∇^i (T − T'))·rfns(coeff)`, so a `Cmid = 0` witness is rejected by a
-nonvanishing remainder-difference jet where `coeff` is nonzero. -/
+nonvanishing remainder-difference jet (the metric coefficient floor `rfns(coeff) ≥ 1` is nonzero). -/
 private theorem deTurckRemainderDiff_singleField_diagonalGrid_intrinsicCore
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R) :
     ∃ s : ℕ,
@@ -271,7 +542,57 @@ private theorem deTurckRemainderDiff_singleField_diagonalGrid_intrinsicCore
                   * ∑ l ∈ Finset.range (a + 2 + 1 - i),
                       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + l) x
                         ((iteratedCovGrad (I := I) g₀ 0 s l coeff).toSection x)) := by
-  sorry
+  classical
+  -- The positive intrinsic coefficient column (`1 ≤ rfns(coeff)` everywhere): the metric tensor.
+  obtain ⟨s, coeff, hcoeff_floor⟩ := exists_positiveFloor_intrinsicCoeff (I := I) (M := M) g₀
+  refine ⟨s, fun T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball => ?_⟩
+  -- The genuine order-`(a+2)`-window single-factor covariant grid of the sealed remainder difference
+  -- at this `(T, T')` (the grid constant `C` depends on the metric path, hence on `T, T'`).
+  obtain ⟨Cmid, hCmid_nn, hgrid⟩ :=
+    deTurckRemainderDiff_singleField_singleFactorGrid (I := I) (M := M) g₀ g_bg a hR
+      T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
+  refine ⟨coeff, Cmid, hCmid_nn, fun x => ?_⟩
+  refine (hgrid x).trans ?_
+  -- Abbreviate the difference-jet column entries (window `q ≤ a + 2`).
+  set Wq : ℕ → ℝ := fun q =>
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection x) with hWq_def
+  have hWq_nn : ∀ q, 0 ≤ Wq q := fun q =>
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + q) x _
+  -- The coefficient column at gradient order `i`: `∑_{l ≤ a+2−i} rfns(∇^l coeff)(x)`, with `1 ≤` floor.
+  set Ccol : ℕ → ℝ := fun i =>
+    ∑ l ∈ Finset.range (a + 2 + 1 - i),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + l) x
+        ((iteratedCovGrad (I := I) g₀ 0 s l coeff).toSection x) with hCcol_def
+  have hCcol_floor : ∀ i, i ≤ a + 2 → (1 : ℝ) ≤ Ccol i := by
+    intro i hi
+    rw [hCcol_def]
+    -- The window `range (a+2+1−i)` is nonempty (contains `l = 0` since `i ≤ a+2`); its `l = 0` term is
+    -- `rfns(∇^0 coeff) = rfns(coeff) ≥ 1`; all other terms are nonnegative.
+    have hmem : 0 ∈ Finset.range (a + 2 + 1 - i) := by
+      rw [Finset.mem_range]; omega
+    have hl0 : (1 : ℝ) ≤
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + 0) x
+          ((iteratedCovGrad (I := I) g₀ 0 s 0 coeff).toSection x) :=
+      hcoeff_floor x
+    refine le_trans hl0 ?_
+    exact Finset.single_le_sum
+      (f := fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + l) x
+        ((iteratedCovGrad (I := I) g₀ 0 s l coeff).toSection x))
+      (fun l _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (s + l) x _) hmem
+  -- Each single-factor term `Cmid · Wq i` (window `i ≤ a + 2`) is dominated by the diagonal term
+  -- `Cmid · Wq i · Ccol i` via the floor `1 ≤ Ccol i`.
+  have hsum_le :
+      Cmid * ∑ q ∈ Finset.range (a + 2 + 1), Wq q ≤
+        Cmid * ∑ i ∈ Finset.range (a + 2 + 1), Wq i * Ccol i := by
+    refine mul_le_mul_of_nonneg_left ?_ hCmid_nn
+    refine Finset.sum_le_sum (fun i hi => ?_)
+    rw [Finset.mem_range] at hi
+    have hi' : i ≤ a + 2 := by omega
+    nlinarith [hWq_nn i, hCcol_floor i hi', mul_nonneg (hWq_nn i) (sub_nonneg.2 (hCcol_floor i hi'))]
+  refine hsum_le.trans_eq ?_
+  -- Re-expose the abbreviations.
+  rw [hWq_def, hCcol_def]
 
 /-- **The intrinsic covariant Faà-di-Bruno single-coefficient diagonal product-grid domination of the
 sealed Ricci–DeTurck remainder difference, with the two `C⁰` fibre-sup levels.**
