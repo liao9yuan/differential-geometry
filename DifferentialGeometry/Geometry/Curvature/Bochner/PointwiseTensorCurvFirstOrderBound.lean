@@ -148,7 +148,7 @@ private lemma tensor0S_eq_of_toModel_eq' {t : ℕ} {x : M} {T T' : Tensor0SSpace
   Tensor0SSpace.toModel_injective (ContinuousMultilinearMap.ext h)
 
 /-- The scalar-extraction functional evaluates to `1` on the unit `(0, 0)`-tensor. -/
-private lemma tensor00Scalar_unitZeroSec' (x : M) :
+lemma tensor00Scalar_unitZeroSec' (x : M) :
     tensor00Scalar (I := I) (M := M) x (unitZeroSec (I := I) (M := M) x) = 1 := by
   rw [tensor00Scalar_apply (I := I) (M := M) x _ (fun k : Fin 0 => k.elim0)]
   rw [show ((unitZeroSec (I := I) (M := M) x) (fun k : Fin 0 => k.elim0) : ℝ) =
@@ -157,7 +157,7 @@ private lemma tensor00Scalar_unitZeroSec' (x : M) :
     ContinuousMultilinearMap.constOfIsEmpty_apply]
 
 /-- Every `(0, 0)`-tensor is its unit-scalar multiple of the unit `(0, 0)`-tensor. -/
-private lemma tensor0S_zero_span' (x : M) (τ : Tensor0SSpace 0 I x) :
+lemma tensor0S_zero_span' (x : M) (τ : Tensor0SSpace 0 I x) :
     τ = tensor00Scalar (I := I) (M := M) x τ • unitZeroSec (I := I) (M := M) x := by
   apply tensor0S_eq_of_toModel_eq' (I := I) (M := M)
   intro v
@@ -174,7 +174,7 @@ private lemma tensor0S_zero_span' (x : M) (τ : Tensor0SSpace 0 I x) :
 
 /-- **Wrapping the unit evaluation of a `(0, t)`-Hom-tensor reconstructs the tensor.**
 `tensor0SAsRS x ((W : Tensor0SSpace 0 →L Tensor0SSpace t) (unit)) = W`. -/
-private lemma tensor0SAsRS_unit_recover (t : ℕ) (x : M) (W : TensorRSSpace 0 t I x) :
+lemma tensor0SAsRS_unit_recover (t : ℕ) (x : M) (W : TensorRSSpace 0 t I x) :
     tensor0SAsRS (I := I) (M := M) x
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from W)
           (unitZeroSec (I := I) (M := M) x)) = W := by
@@ -192,7 +192,7 @@ private lemma tensor0SAsRS_unit_recover (t : ℕ) (x : M) (W : TensorRSSpace 0 t
   rw [ContinuousLinearMap.map_smul]
 
 /-- **The `(0, t)`-tensor wrapper distributes over subtraction.** -/
-private lemma tensor0SAsRS_sub' (t : ℕ) (x : M) (C D : Tensor0SSpace t I x) :
+lemma tensor0SAsRS_sub' (t : ℕ) (x : M) (C D : Tensor0SSpace t I x) :
     tensor0SAsRS (I := I) (M := M) x (C - D) =
       tensor0SAsRS (I := I) (M := M) x C - tensor0SAsRS (I := I) (M := M) x D := by
   have h : (tensor0SAsRS (I := I) (M := M) x (C - D) :
@@ -730,7 +730,7 @@ order-`2` defect `Curv S (x)` is the **frame-free** first-order curvature combin
   − ∑ᵢ ∇_{R(Bᵢ, X) Bᵢ} S (x),                                   [the R·∇S arm, the C5 term]
 ```
 with `Bᵢ := smoothOrthoFrame g x i`. No `∇²S`, no frame-jet coefficient, and no Lie bracket survives. -/
-private lemma slot0_read_curv_eq_frameFree
+lemma slot0_read_curv_eq_frameFree
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {X : Π b : M, TangentSpace I b}
     (hXs : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -1005,7 +1005,7 @@ unit-evaluation transports through each term by the unit-transports `covDeriv_un
 (leading derivative slot), `covApply_unit_eval_eq_genVal` (section derivative slot) and the
 section-curvature transport `riemannSec_tensorRSCov_unitEval` (the three curvature terms), the
 once-differentiated directions `∇X Y, ∇X Z` packaged as smooth sections through `covApply_contMDiff`. -/
-private lemma nablaTensorCurvSec_tensorRSCov_unitEval
+lemma nablaTensorCurvSec_tensorRSCov_unitEval
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (τ : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun y : M => TensorRSSpace 0 s I y)⟯) (x : M) :
