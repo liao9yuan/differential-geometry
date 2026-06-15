@@ -422,8 +422,136 @@ private theorem exists_positiveFloor_intrinsicCoeff (g₀ : SmoothRiemannianMetr
     (f := fun J : Fin 2 → Fin n => (g₀.inner x (e (J 0)) (e (J 1))) ^ 2)
     (fun J _ => sq_nonneg _) (Finset.mem_univ _)
 
-/-- **(POSIT — the genuine order-`(a+2)`-window single-factor covariant grid of the sealed
-Ricci–DeTurck remainder difference.)**
+/-- **The squared intrinsic fibre norm is invariant under negation of the tensor value.** For any
+`(r, s)`-tensor `v` at `x`, `rfns(−v)(x) = rfns(v)(x)`.  Proved through the model-inner-product bridge
+`riemannianFiberNormSq_eq_tensorInnerPointwise`: negation passes to `−toModel v` (`toModel_neg`), and
+the two sign factors cancel by `ℝ`-bilinearity of `tensorInnerPointwise`. -/
+private theorem riemannianFiberNormSq_neg_value
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (v : TensorRSSpace r s I x) :
+    riemannianFiberNormSq (I := I) (M := M) g r s x (-v) =
+      riemannianFiberNormSq (I := I) (M := M) g r s x v := by
+  rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x (-v),
+    riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x v]
+  rw [TensorRSSpace.toModel_neg]
+  rw [← neg_one_smul ℝ (TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M)
+        (r := r) (s := s) (x := x) v),
+    tensorInnerPointwise_smul_left, tensorInnerPointwise_smul_right]
+  ring
+
+/-- **(POSIT — the genuine pointwise order-`a` covariant-jet bound of the linear connection
+Laplacian, the Δ-arm of the sealed remainder difference.)**
+
+For a smooth compactly-supported `(0,2)`-tensor `W` (the perturbation difference `T − T'` at the call
+site) there is a single nonnegative constant `C`, uniform over `W` and the base point `x`, such that
+the order-`a` covariant gradient of the rough (connection) Laplacian `Δ_∇ W := rawTensorConnLapSmooth
+g₀ 0 2 W` is dominated, at the squared fibre-norm level, by the **order-`(a + 2)` covariant jet** of
+`W`:
+```
+rfns(∇^a (Δ_∇ W))(x) ≤ C · ∑_{q ≤ a+2} rfns(∇^q W)(x).
+```
+
+**The jet order is `a + 2`, not `a`** — the rough Laplacian is genuinely *second order*: pointwise it
+is the diagonal `g₀`-trace of the Hessian `∑_i ∇²_{B_i,B_i} W`
+(`rawTensorConnLap_eq_frame_trace_secondCovDeriv`), so `Δ_∇ W` reads `∇²W` already at order `0`
+(`rawConnLap_fiberNormSq_le_secondCovGrad`: `rfns(Δ_∇ W)(x) ≤ dim² · rfns(∇²W)(x)`), and commuting the
+order-`a` gradient past `Δ_∇` advances the read order by exactly two (the iterated rough-Laplacian /
+gradient commutator `[Δ_∇, ∇^a]` is curvature-controlled, the pointwise covariant analogue of the
+on-disk `L²` telescope `iteratedRoughLapGrad_commutator_l2Norm_le_aux`), giving the order-`(a + 2)`
+read window `q ≤ a + 2`.  A window-`a` bound (`q ≤ a`) is FALSE: the rough Laplacian loses exactly two
+derivatives, the value-local order-`0` realization refuted in the consumer docstring.
+
+The on-disk pointwise material delivers the order-`0` envelope (`rawConnLap_fiberNormSq_le_secondCovGrad`,
+the metric-trace Hessian bound) but the order-`a` pointwise covariant-jet lift — the `riemannianFiberNormSq`
+form of the curvature-corrected `[Δ_∇, ∇^a]` telescope, the second-order analogue of the
+`DiffBilinOp.exists_rfns_iteratedCovGrad_singleSum_le` engine (which is hard-locked to *order-`0`*
+operators, hence cannot host the two-derivative rough Laplacian) — has **no on-disk antecedent in
+pointwise `rfns` form** (only the `L²` telescope `iteratedRoughLapGrad_commutator_l2Norm_le_aux`
+exists); its body is `sorry`, and consumers transitively depend on its `sorryAx`.
+
+**Non-vacuity / order self-check.**  The bound reads `∇^{≤ a+2}W`; the `q = a + 2` term is the genuine
+top jet (the second-order Laplacian read), so a window-`a` weakening is rejected.  A `C = 0` witness is
+rejected by a nonvanishing `∇^a (Δ_∇ W)` for a non-flat `W`. -/
+private theorem rawTensorConnLapSmooth_iteratedCovGrad_riemannianFiberNormSq_jet_le
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
+    ∃ C : ℝ,
+      0 ≤ C ∧
+      ∀ (W : SmoothCcTensor g₀ 0 2) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 a
+              (rawTensorConnLapSmooth (I := I) g₀ 0 2 W)).toSection x) ≤
+          C * ∑ q ∈ Finset.range (a + 2 + 1),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 q W).toSection x) := by
+  sorry
+
+/-- **(POSIT — the genuine chart→intrinsic per-pair order-`a` covariant-jet bound of the
+Ricci–DeTurck right-hand-side arm of the sealed remainder difference.)**
+
+This is the irreducible chart→intrinsic content.  For any two `g₀`-fibre-small smooth perturbations
+`T, T'`, the order-`a` covariant gradient of the **RHS-arm residual**
+```
+RHSarm := (deTurckSmoothRemainder g₀ g_bg T − deTurckSmoothRemainder g₀ g_bg T')
+            + rawTensorConnLapSmooth g₀ 0 2 (T − T')
+```
+— i.e. the sealed remainder difference with the linear connection-Laplacian (Δ-)arm added back, which
+by `deTurckSmoothRemainder`'s definition `deTurckRHSSection g_bg (g₀ + ·) − Δ_∇ (·)` and the linearity
+`rawTensorConnLapSmooth_sub` equals the genuine Ricci–DeTurck RHS difference
+`deTurckRHSSection g_bg (g₀ + T) − deTurckRHSSection g_bg (g₀ + T')` — is dominated, at the squared
+fibre-norm level, by a single nonnegative **per-pair** constant `C` (depending on the metric path,
+hence on `T, T'`, but uniform over `x`) times the **order-`(a + 2)` covariant jet** of `T − T'`:
+```
+rfns(∇^a RHSarm)(x) ≤ C · ∑_{q ≤ a+2} rfns(∇^q (T − T'))(x).
+```
+
+**The chart→intrinsic content.**  By the chart-polynomial difference
+`chartDeTurckRicciRHS_sub_eq_principalSymbol_add_lowerOrder` grounded against the intrinsic operator
+(`deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS`), the RHS difference is a finite sum of
+bilinear monomials, each a product of fixed (per-pair-smooth) undifferenced curvature / metric /
+Christoffel / inverse-Gram coefficient data `coeff_k(g₀ + T, g₀ + T')` with a single `(T − T')` jet of
+chart order `≤ 2`.  Realized intrinsically, each monomial is a second-order covariant-bilinear product
+reading `∇^{≤ 2}(T − T')`, whose order-`a` covariant Leibniz grid
+(`ParallelTensorProduct.exists_norm_iteratedCovGrad_prod_le`) bounds `rfns(∇^a monomial)(x)` by the
+`∇^{≤ a+2}(T − T')` jet against the **finite per-pair** coefficient jets `sup_x rfns(∇^{≤ a} coeff_k)`
+(finite because `g₀ + T`, `g₀ + T'` are genuine smooth metrics — the `δ, δ' < 1` fibre-smallness keeps
+them positive-definite, so their inverse-Gram and Christoffel data are smooth fields on the compact
+`M`, with finite covariant-jet sup by `exists_bound_riemannianFiberNormSq_smoothCcTensor`); the per-pair
+coefficient jet sup is absorbed into `C`.  Summing the finitely many monomials gives the order-`(a + 2)`
+jet bound.  The chart-locality-free realization of each monomial's coefficient as an intrinsic smooth
+section + its per-pair jet sup has **no on-disk antecedent** (the chart→intrinsic globalization of the
+coefficient data is the irreducible open analytic sub-program); its body is `sorry`, and consumers
+transitively depend on its `sorryAx`.
+
+**Per-pair, not ball-uniform.**  The constant `C` lives inside the per-pair statement (it is allowed to
+depend on `T, T'` through the metric-path coefficient sups), so no ball-uniformity of `C` is required —
+any finite per-pair coefficient-jet bound is absorbed.
+
+**Non-vacuity / order self-check.**  The bound reads `∇^{≤ a+2}(T − T')`; the genuine `∂²(T − T')` Ricci
+principal symbol forces a top jet at `q = a + 2`, so a window-`a` weakening is rejected.  A `C = 0`
+witness is rejected by a nonvanishing `∇^a RHSarm` for a non-flat, genuinely-second-order RHS
+difference. -/
+private theorem deTurckRHSArmDiff_iteratedCovGrad_riemannianFiberNormSq_jet_le
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ∃ C : ℝ,
+      0 ≤ C ∧
+      ∀ x : M,
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 a
+              ((deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+                  deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ') +
+                rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T'))).toSection x) ≤
+          C * ∑ q ∈ Finset.range (a + 2 + 1),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection x) := by
+  sorry
+
+set_option linter.unusedVariables false in
+/-- **(The genuine order-`(a+2)`-window single-factor covariant grid of the sealed
+Ricci–DeTurck remainder difference — PROVED from the Δ-arm and RHS-arm covariant-jet posits.)**
 
 This is the irreducible analytic content of the single-field diagonal grid, stripped of the auxiliary
 coefficient column: for any two `g₀`-fibre-small smooth ball-radius-`R` perturbations `T, T'`, the
@@ -444,18 +572,18 @@ window of the contracted-section jet sum is correspondingly `q ≤ a + 2`.  A wi
 `DiffBilinOp.exists_rfns_iteratedCovGrad_singleSum_le` (`rfns(∇^a (op 0 W)) ≤ C · ∑_{q ≤ a} rfns(∇^q W)`
 forces order-`0` reading, which `D` violates by losing two derivatives).
 
-It is the chart→intrinsic content: the RHS-arm
-`deTurckRHSSection g_bg (g₀ + T) − deTurckRHSSection g_bg (g₀ + T')` is, by the chart-polynomial
-difference `chartDeTurckRicciRHS_sub_eq_principalSymbol_add_lowerOrder` grounded against the intrinsic
-operator (`deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS`), a finite sum of bilinear
-monomials of (fixed undifferenced curvature / metric / Christoffel coefficient data) × (a single
-`(T − T')` jet of chart order `≤ 2`), realized intrinsically as a second-order covariant-bilinear product
-reading `∇^{≤ 2}(T − T')` (`ParallelTensorProduct.exists_norm_iteratedCovGrad_prod_le`); the Δ-arm is the
-exact `q = a + 2` jet of the linear connection Laplacian (`rawTensorConnLapSmooth_sub`).  The
-covariant-Leibniz grid then bounds `rfns(∇^a D)` by the order-`(a + 2)` jet of `T − T'`.  This has **no
-on-disk antecedent** (the chart→intrinsic globalization of the coefficient data and the second-order
-covariant-jet comparison are the irreducible open analytic sub-program); its body is `sorry`, and
-consumers transitively depend on its `sorryAx`.
+**Assembly.**  The sealed remainder difference splits at the value level as
+`D = RHSarm − rawTensorConnLapSmooth g₀ 0 2 (T − T')`, where
+`RHSarm := D + rawTensorConnLapSmooth g₀ 0 2 (T − T')` is the genuine Ricci–DeTurck RHS difference
+(by `deTurckSmoothRemainder`'s definition and the connection-Laplacian linearity
+`rawTensorConnLapSmooth_sub`).  The order-`a` covariant gradient distributes over this difference
+(`iteratedCovGrad_sub`), and the `2`-sub-additivity of the intrinsic fibre norm
+(`riemannianFiberNormSq_add_le`) splits `rfns(∇^a D)` into `2·rfns(∇^a RHSarm) + 2·rfns(∇^a Δarm)`.  The
+RHS-arm term is the chart→intrinsic per-pair posit
+`deTurckRHSArmDiff_iteratedCovGrad_riemannianFiberNormSq_jet_le`; the Δ-arm term is the rough-Laplacian
+covariant-jet posit `rawTensorConnLapSmooth_iteratedCovGrad_riemannianFiberNormSq_jet_le` at `W := T − T'`
+— both bounding `rfns(∇^a ·)` by `C · ∑_{q ≤ a+2} rfns(∇^q (T − T'))(x)`.  Adding the two scaled bounds
+gives the claim with `C := 2·(C_RHS + C_Δ)`.  Consumers transitively depend on both posits' `sorryAx`.
 
 **Non-vacuity / order self-check.**  The bound reads `∇^{≤ a+2}(T − T')`; the `q = a + 2` term is the
 genuine top jet (carried by the Δ-arm), so a window-`a` weakening is rejected.  A `C = 0` witness is
@@ -479,7 +607,86 @@ private theorem deTurckRemainderDiff_singleField_singleFactorGrid
             C * ∑ q ∈ Finset.range (a + 2 + 1),
               riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
                 ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection x)) := by
-  sorry
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
+  -- The sealed remainder difference and the two arms.
+  set D : SmoothCcTensor g₀ 0 2 :=
+    deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+      deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ' with hD_def
+  set Δdiff : SmoothCcTensor g₀ 0 2 :=
+    rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T') with hΔdiff_def
+  set RHSarm : SmoothCcTensor g₀ 0 2 := D + Δdiff with hRHSarm_def
+  -- The Δ-arm covariant-jet posit at `W := T − T'`.
+  obtain ⟨CΔ, hCΔ_nn, hCΔ⟩ :=
+    rawTensorConnLapSmooth_iteratedCovGrad_riemannianFiberNormSq_jet_le (I := I) (M := M) g₀ a
+  -- The RHS-arm chart→intrinsic per-pair covariant-jet posit.
+  obtain ⟨CR, hCR_nn, hCR⟩ :=
+    deTurckRHSArmDiff_iteratedCovGrad_riemannianFiberNormSq_jet_le (I := I) (M := M) g₀ g_bg a
+      T T' hδ_lt hδ hδ'_lt hδ'
+  refine ⟨2 * (CR + CΔ), by positivity, fun x => ?_⟩
+  -- Abbreviate the order-`(a+2)` jet column of `T − T'` at `x`.
+  set Scol : ℝ := ∑ q ∈ Finset.range (a + 2 + 1),
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection x) with hScol_def
+  have hScol_nn : 0 ≤ Scol :=
+    Finset.sum_nonneg fun q _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + q) x _
+  -- The value-level split `D = RHSarm + (−Δdiff)`, lifted to the order-`a` covariant gradient.
+  have hDsplit : D = RHSarm + (-Δdiff) := by
+    rw [hRHSarm_def, add_neg_cancel_right]
+  have hgrad_split :
+      iteratedCovGrad (I := I) g₀ 0 2 a D =
+        iteratedCovGrad (I := I) g₀ 0 2 a RHSarm +
+          iteratedCovGrad (I := I) g₀ 0 2 a (-Δdiff) := by
+    rw [hDsplit, iteratedCovGrad_add]
+  -- `2`-sub-additivity of the squared fibre norm on the split.
+  have hsub :
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 a D).toSection x) ≤
+        2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 a RHSarm).toSection x) +
+          2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 a (-Δdiff)).toSection x) := by
+    rw [hgrad_split]
+    exact riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (2 + a) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 a RHSarm).toSection x)
+      ((iteratedCovGrad (I := I) g₀ 0 2 a (-Δdiff)).toSection x)
+  -- The `−Δdiff` term reduces to the Δ-arm term by negation-invariance of `rfns`.
+  have hneg_grad : iteratedCovGrad (I := I) g₀ 0 2 a (-Δdiff) =
+      -iteratedCovGrad (I := I) g₀ 0 2 a Δdiff := iteratedCovGrad_neg (I := I) g₀ 0 2 a Δdiff
+  have hneg_rfns :
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 a (-Δdiff)).toSection x) =
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 a Δdiff).toSection x) := by
+    rw [hneg_grad]
+    rw [show ((-iteratedCovGrad (I := I) g₀ 0 2 a Δdiff).toSection x) =
+        -((iteratedCovGrad (I := I) g₀ 0 2 a Δdiff).toSection x) from rfl]
+    exact riemannianFiberNormSq_neg_value (I := I) (M := M) g₀ 0 (2 + a) x _
+  -- The Δ-arm bound at `W := T − T'` (`Δdiff = rawTensorConnLapSmooth g₀ 0 2 (T − T')`).
+  have hΔbound :
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 a Δdiff).toSection x) ≤ CΔ * Scol := by
+    rw [hScol_def]; exact hCΔ (T - T') x
+  -- The RHS-arm bound (`RHSarm = D + Δdiff`).
+  have hRbound :
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 a RHSarm).toSection x) ≤ CR * Scol := by
+    rw [hScol_def]; exact hCR x
+  -- Assemble: `rfns(∇^a D) ≤ 2·(CR·Scol) + 2·(CΔ·Scol) = 2·(CR + CΔ)·Scol`.
+  calc riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 a D).toSection x)
+      ≤ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 a RHSarm).toSection x) +
+          2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 a (-Δdiff)).toSection x) := hsub
+    _ = 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 a RHSarm).toSection x) +
+          2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 a Δdiff).toSection x) := by rw [hneg_rfns]
+    _ ≤ 2 * (CR * Scol) + 2 * (CΔ * Scol) := by
+        refine add_le_add ?_ ?_
+        · exact mul_le_mul_of_nonneg_left hRbound (by norm_num)
+        · exact mul_le_mul_of_nonneg_left hΔbound (by norm_num)
+    _ = 2 * (CR + CΔ) * Scol := by ring
 
 /-- **The irreducible chart→intrinsic content of the single-field diagonal grid: the intrinsic
 covariant Faà-di-Bruno coefficient + diagonal product grid of the sealed Ricci–DeTurck remainder
