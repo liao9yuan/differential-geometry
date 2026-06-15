@@ -1,4 +1,5 @@
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameBracketFold
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemainderCarrierSection
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.BracketDivergenceForm
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradCovDerivSecondOrderCommutation
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ContractedBianchi
 
@@ -38,15 +39,26 @@ Bianchi trace, or the explicit Christoffel residual telescoping), instantiated a
   Bianchi identity that folds the differentiated-curvature carrier. This re-exposes
   `contracted_second_bianchi` (`ContractedBianchi`) as a fold-line building block.
 
-## The summed Christoffel residual telescoping (the hard core)
+## The two field-level folding debts (the hard core) and the fold assembly
 
-The genuine `±N`-cancellation — the statement that the frame-summed Christoffel residual
-`∑ᵢ ⟨secondOrderChristoffelResidual g nab Bᵢ Bᵢ V, ∇S⟩₀(x)` telescopes (in the full frame sum `∑ᵢ`,
-never per `i`) into an explicit frame-bracket-direction covariant Leibniz divergence integrand — is
-the genuinely-irreducible core of the fold. It is the one piece this file does **not** close
-sorry-free; it is the single field-level folding debt that the integrated fold
-`movingFrameBracketRemainder_integral_eq_genuineDiffCurv_ricTrace` carries. The pieces above are the
-exact per-summand curvature peeling and the contracted Bianchi trace that surround it.
+The integrated fold `movingFrameBracketRemainder_integral_eq_genuineDiffCurv_ricTrace`
+(`MovingFrameBracketFold`, a downstream consumer of this file) is assembled by **composing two
+field-level folding nodes** delivered here, each carrying an honest curvature debt:
+
+* `movingFrameRemainder_l2Inner_eq_integral_christoffelResidualPairing` — **the carrier-peeling
+  bridge.** The three-carrier remainder pairing `⟨Rem S, ∇S⟩_{L²}` equals the integral of the
+  frame-summed Christoffel-residual pairing `∫ ∑ᵢ christoffelResidualPairingFib g s S x i`: the
+  genuine curvature carriers `GcurvSection`, `genuineDiffCurvSection`, `ricTraceSection` peel off
+  **under the integral** (via the contracted/cyclic second Bianchi pieces above and the frame-jet
+  total-divergence correction — *not* pointwise), leaving the Christoffel residual.
+
+* `frameSummed_christoffelResidual_eq_bracketDivergence` — **the residual telescoping.** The
+  frame-summed Christoffel residual `∑ᵢ ⟨secondOrderChristoffelResidual g nab Bᵢ Bᵢ V, ∇S⟩₀(x)`
+  telescopes (in the full frame sum `∑ᵢ`, never per `i`) into the explicit frame-bracket-direction
+  covariant Leibniz divergence integrand the engine consumes. This is the genuine `±N`-cancellation.
+
+These two are the field-level folding debts of the fold, with no producer on disk; the per-summand
+peeling pieces above are the exact curvature identities that surround them.
 
 ## Convention
 
@@ -220,6 +232,60 @@ noncomputable def christoffelResidualPairingFib
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
           (covGrad (I := I) (M := M) g 0 s S).toSection x)
           (unitZeroSec (I := I) (M := M) x)) (smoothOrthoFrame (I := I) g x i x)))
+
+/-- **The carrier-peeling bridge: the three-carrier remainder pairing IS the integrated frame-summed
+Christoffel-residual pairing (the integrated genuine-carrier peeling, posited).** For a closed smooth
+Riemannian manifold `(M, g)`, covariant rank `s`, and a smooth compactly-supported `(0, s)`-tensor
+`S`, the global metric `L²` pairing of the **three-carrier moving-frame remainder**
+
+```
+Rem S := pointwiseTensorCurv g s S − GcurvSection g s S − (genuineDiffCurvSection g s S + ricTraceSection g s S)
+```
+
+against `∇S := covGrad g 0 s S` equals the **integral of the frame-summed per-summand
+Christoffel-residual pairing scalar**:
+
+```
+⟨Rem S, ∇S⟩_{L²}  =  ∫_M ( ∑ᵢ christoffelResidualPairingFib g s S x i ) dvolᵍ.
+```
+
+This is the **integrated peeling of the three genuine curvature carriers** down to the Christoffel
+residual. Pointwise, `Curv S` decomposes per `g_x`-orthonormal frame summand
+(`pointwiseTensorCurv_toSection_eq_frame_sum`) and the per-summand peeling
+`frameSummand_leadingSlot_secondOrder_commutation_orthoFrame` splits each summand, curried against
+`∇S`, into the differentiated curvature `(∇_{Bᵢ} R)(Bᵢ, Bᵢ) V`, the curvature applied to the
+differentiated frame data, and the explicit residual `secondOrderChristoffelResidual` whose pairing is
+`christoffelResidualPairingFib`. Summed over the frame and **integrated** against `∇S`, the genuine
+curvature carriers collapse onto the tensorial sections `GcurvSection` (pure Riemann `R(∇S)`),
+`genuineDiffCurvSection` (the differentiated trace `(∇R) S`, folded from the extension-curried trace by
+the **contracted second Bianchi** frame trace
+`frameSummed_contracted_second_bianchi_eq_half_nablaScalar` and the cyclic second Bianchi
+`frame_cyclic_second_bianchi_orthoFrame`), and `ricTraceSection` (the Ricci trace `Ric(∇S)`), so the
+pairing of `Rem S` against `∇S` retains exactly the Christoffel-residual half.
+
+**Only under the integral.** The genuine carriers `genuineDiffCurvSection`/`ricTraceSection` are the
+**frame-jet-free tensorial** sections (`appCc (covGrad (curvOpField)) S`, `appCc (ricSlotOpField) (∇S)`),
+which agree with the extension-curried per-summand trace fields **only under the integral against `∇S`
+on the closed manifold** (the frame-jet discrepancy is itself a total covariant divergence): the
+identity is *false* as a pointwise fibre identity. It is therefore genuine **integrated** curvature
+content — the carrier-peeling half of the fold — distinct from and composing with the residual
+telescoping `frameSummed_christoffelResidual_eq_bracketDivergence` (piece 3). The two compose to the
+full fold `movingFrameBracketRemainder_integral_eq_genuineDiffCurv_ricTrace` (`MovingFrameBracketFold`):
+this bridge peels the genuine carriers to the Christoffel-residual pairing, piece 3 telescopes that
+into the divergence-engine integrand. No producer on disk; it is one of the two field-level folding
+debts of the fold (the carrier-peeling debt; the residual-telescoping debt is piece 3). -/
+theorem movingFrameRemainder_l2Inner_eq_integral_christoffelResidualPairing
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
+    tensorL2Inner (I := I) (M := M) g 0 (s + 1)
+        (pointwiseTensorCurv (I := I) (M := M) g s S -
+          GcurvSection (I := I) (M := M) g s S -
+          (genuineDiffCurvSection (I := I) (M := M) g s S +
+            ricTraceSection (I := I) (M := M) g s S)).toFun
+        (covGrad (I := I) (M := M) g 0 s S).toFun =
+      ∫ x, (∑ i : Fin (Module.finrank ℝ E),
+              christoffelResidualPairingFib (I := I) (M := M) g s S x i)
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
+  sorry
 
 /-- **The summed Christoffel-residual telescoping (piece 3 — the genuinely-irreducible core,
 posited).** For a closed smooth Riemannian manifold `(M, g)`, covariant rank `s`, and a smooth

@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemainderCarrierSection
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.BracketDivergenceForm
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemainderDivergenceForm
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameFoldPieces
 
 /-!
 # The moving-frame summed-folding of the three-carrier remainder against `∇S`
@@ -200,8 +201,13 @@ theorem movingFrameBracketRemainder_integral_eq_genuineDiffCurv_ricTrace
               + tensorInnerScalar (I := I) (M := M) g 0 (s + 1) (W i).toSection
                   (covGrad (I := I) (M := M) g 0 s S).toSection x
                 * divergence_g (I := I) g (V i) x)
-          ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
-  sorry
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
+  obtain ⟨ι, fι, V, W, hp3⟩ :=
+    frameSummed_christoffelResidual_eq_bracketDivergence (I := I) (M := M) g s S
+  refine ⟨ι, fι, V, W, ?_⟩
+  rw [movingFrameRemainder_l2Inner_eq_integral_christoffelResidualPairing
+    (I := I) (M := M) g s S]
+  exact hp3
 
 /-- **The integrated nullity of the three-carrier moving-frame remainder, from the integrated curvature
 fold.** For a closed smooth Riemannian manifold `(M, g)`, covariant rank `s`, and smooth
