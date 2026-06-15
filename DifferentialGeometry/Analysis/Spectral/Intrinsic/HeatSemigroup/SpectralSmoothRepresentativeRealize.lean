@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralSmoothing
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Smooth.EigenvectorSmoothToL2
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.TensorHsInterpolationLimit
 
 /-!
 # `C^∞` spectral-series realization of the smooth-representative gate
@@ -56,32 +57,233 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **Weyl-type eigenvalue-counting summability (deferred classical
+/-- **Weyl polynomial eigenvalue-counting bound (the genuine classical
 spectral input).**
+
+For the intrinsic connection-Laplacian eigenvalues `λᵢ ≥ 0` of the mixed
+`(r, s)`-tensor bundle on a closed Riemannian manifold, the eigenvalue
+*counting function* `Λ ↦ #{i | 1 + λᵢ < Λ}` grows at most polynomially in
+`Λ`: there exist a constant `C` and an exponent `p ≥ 0` with
+
+  `#{i | 1 + λᵢ < Λ} ≤ C · Λ^p`   for all `Λ ≥ 1`.
+
+(The counting set is the finite Finset
+`(tensorEigenIdx_one_add_lambda_lt_finite g r s Λ).toFinset` carried by
+the library.) This is the **Weyl asymptotic** in its crude one-sided
+upper-bound form: on a closed `n`-manifold the connection-Laplacian
+counting function satisfies `N(Λ) ≍ Λ^{n/2}`, so the bound holds with
+any `p ≥ n/2` and a suitable `C`.
+
+This is the genuine spectral-counting ingredient missing from the
+library, which carries only the sublevel-set *finiteness*
+`tensorEigenIdx_one_add_lambda_lt_finite` (`{i | 1 + λᵢ < Λ}.Finite`) —
+enough for countability of each sublevel, but not for the *rate* of
+growth that yields summability. The statement is strictly more than the
+available finiteness (a compact operator with `μⱼ = 1/log(j+2)` has every
+sublevel finite yet violates every polynomial counting bound), and it is
+genuinely non-vacuous: it asserts an actual polynomial growth rate that a
+super-polynomially-degenerating spectrum would falsify. Its body is
+`sorry`: it is the one classical analytic input (the local Weyl law on a
+closed manifold), and every consumer transitively depends on `sorryAx`
+through it.
+
+This is the strictly-minimal classical prerequisite of the trace-class
+summability `tensorEigenIdx_one_add_lambda_rpow_neg_summable`, which is
+proved from it below by an elementary linear-block (layer-cake)
+estimate. -/
+theorem tensorEigenIdx_one_add_lambda_lt_polynomial_counting
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    ∃ C p : ℝ, 0 ≤ p ∧
+      ∀ Λ : ℝ, 1 ≤ Λ →
+        ((tensorEigenIdx_one_add_lambda_lt_finite
+              (I := I) (M := M) g r s Λ).toFinset.card : ℝ)
+          ≤ C * Λ ^ p :=
+  sorry
+
+/-- **Weyl-type eigenvalue-power summability (trace-class property of a
+large resolvent power).**
 
 For the intrinsic connection-Laplacian eigenvalues `λᵢ ≥ 0` of the mixed
 `(r, s)`-tensor bundle on a closed Riemannian manifold, there is an
 exponent `N` (large enough) for which the powers `(1 + λᵢ)^{-N}` are
 summable over the eigen-index set `TensorEigenIdx g r s`. Concretely this
 is the trace-class property of a large power of the (compact) resolvent:
-by the Weyl asymptotic `N(Λ) ≍ Λ^{(dim M)/2}` the eigenvalues grow like
-`λⱼ ≍ j^{2/dim M}`, so `∑ⱼ (1 + λⱼ)^{-N} ≍ ∑ⱼ j^{-2N/dim M}` converges
-once `2N > dim M`.
+since `1 + λᵢ = (i.fst.val)⁻¹` is the reciprocal of the resolvent
+eigenvalue, `∑ᵢ (1 + λᵢ)^{-N}` is the `N`-th Schatten quasi-norm of the
+resolvent, and it converges once `2N > dim M`.
 
-This is a **deferred input**: its body is `sorry`. It is the genuine
-spectral-counting ingredient missing from the library, which carries only
-the sublevel-set *finiteness* `tensorEigenIdx_one_add_lambda_lt_finite`
-(`{i | 1 + λᵢ < Λ}.Finite`) — enough for countability of each sublevel,
-but not for the polynomial counting bound that yields summability. The
-statement is genuinely true (a standard consequence of the Weyl law on a
-closed manifold) and strictly more than the available finiteness. -/
+The proof is the elementary **linear-block (layer-cake) estimate** built
+on the Weyl polynomial counting bound
+`tensorEigenIdx_one_add_lambda_lt_polynomial_counting` (`#{i | 1 + λᵢ < Λ}
+≤ C · Λ^p`). Take `N := p + 2`. For a finite index set `u`, group its
+indices by the natural block `k(i) := ⌊1 + λᵢ⌋₊` (so `k ≤ 1 + λᵢ < k + 1`
+and `k ≥ 1` since `1 + λᵢ ≥ 1`). On block `k` the term `(1 + λᵢ)^{-N}` is
+`≤ k^{-N}`, and the block has `≤ C · (k+1)^p` indices (its members lie in
+`{i | 1 + λᵢ < k + 1}`), so the block contributes `≤ C · (k+1)^p · k^{-N}
+≤ C · 2^p · k^{-2}`. Summing the geometric-decay majorant `∑ₖ k^{-2}
+< ∞` over all blocks bounds every finite partial sum uniformly, whence
+`summable_of_sum_le` gives summability. -/
 theorem tensorEigenIdx_one_add_lambda_rpow_neg_summable
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ N : ℝ,
       Summable
         (fun i : TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s =>
-          (1 + i.lambda) ^ (-N)) :=
-  sorry
+          (1 + i.lambda) ^ (-N)) := by
+  classical
+  obtain ⟨C, p, hp_nn, hcount⟩ :=
+    tensorEigenIdx_one_add_lambda_lt_polynomial_counting (I := I) (M := M) g r s
+  -- WLOG `C ≥ 0`: the counting cardinalities are nonnegative, so if the
+  -- supplied `C` were negative the bound would already be vacuous at `Λ = 1`;
+  -- replace it by `max C 0 ≥ 0` (which only weakens the bound).
+  set C' : ℝ := max C 0 with hC'_def
+  have hC'_nn : 0 ≤ C' := le_max_right _ _
+  have hcount' : ∀ Λ : ℝ, 1 ≤ Λ →
+      ((tensorEigenIdx_one_add_lambda_lt_finite
+            (I := I) (M := M) g r s Λ).toFinset.card : ℝ) ≤ C' * Λ ^ p := by
+    intro Λ hΛ
+    refine (hcount Λ hΛ).trans ?_
+    have hΛp_nn : 0 ≤ Λ ^ p := Real.rpow_nonneg (by linarith) p
+    exact mul_le_mul_of_nonneg_right (le_max_left _ _) hΛp_nn
+  -- The exponent `N := p + 2`, so the leftover power is `p - N = -2 < -1`.
+  refine ⟨p + 2, ?_⟩
+  set N : ℝ := p + 2 with hN_def
+  set I0 := TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s
+  set lam : I0 → ℝ := fun i => 1 + i.lambda with hlam_def
+  have hlam_one_le : ∀ i : I0, (1 : ℝ) ≤ lam i := by
+    intro i
+    have := tensor_lambda_nonneg (I := I) (M := M) i
+    simp only [hlam_def]; linarith
+  -- The per-block index: `k(i) = ⌊1 + λᵢ⌋₊`, which is `≥ 1`.
+  set blk : I0 → ℕ := fun i => ⌊lam i⌋₊ with hblk_def
+  have hblk_pos : ∀ i : I0, 1 ≤ blk i := by
+    intro i
+    simp only [hblk_def]
+    exact (Nat.one_le_floor_iff _).2 (hlam_one_le i)
+  -- The polynomially-decaying majorant over blocks `k : ℕ`.
+  set Maj : ℕ → ℝ := fun k => C' * ((k : ℝ) + 1) ^ p * (k : ℝ) ^ (-N) with hMaj_def
+  have hMaj_summable : Summable Maj := by
+    -- dominate `Maj k` by `C' * 2^p * k^{-2}`, summable since `-2 < -1`.
+    have hmaj_summable : Summable (fun k : ℕ => C' * 2 ^ p * (k : ℝ) ^ (-2 : ℝ)) :=
+      ((Real.summable_nat_rpow (p := (-2 : ℝ))).2 (by norm_num)).mul_left _
+    refine Summable.of_nonneg_of_le (fun k => ?_) (fun k => ?_) hmaj_summable
+    · -- `0 ≤ Maj k`
+      have h1 : (0 : ℝ) ≤ ((k : ℝ) + 1) ^ p :=
+        Real.rpow_nonneg (by positivity) p
+      have h2 : (0 : ℝ) ≤ (k : ℝ) ^ (-N) :=
+        Real.rpow_nonneg (by positivity) _
+      simp only [hMaj_def]; positivity
+    · -- `Maj k ≤ C' * 2^p * k^{-2}`
+      rcases Nat.eq_zero_or_pos k with hk0 | hkpos
+      · subst hk0
+        simp only [hMaj_def, Nat.cast_zero, zero_add]
+        have hNne : (-N : ℝ) ≠ 0 := by rw [hN_def]; intro h; linarith [neg_eq_zero.mp h]
+        have hz : (0 : ℝ) ^ (-N) = 0 := Real.zero_rpow hNne
+        rw [hz]; ring_nf
+        positivity
+      · have hk1 : (1 : ℝ) ≤ (k : ℝ) := by exact_mod_cast hkpos
+        have hkpos' : (0 : ℝ) < (k : ℝ) := by linarith
+        -- `(k+1)^p ≤ (2k)^p = 2^p · k^p`
+        have hk1le : ((k : ℝ) + 1) ≤ 2 * (k : ℝ) := by linarith
+        have hstep1 : ((k : ℝ) + 1) ^ p ≤ (2 * (k : ℝ)) ^ p :=
+          Real.rpow_le_rpow (by positivity) hk1le hp_nn
+        have hstep2 : (2 * (k : ℝ)) ^ p = 2 ^ p * (k : ℝ) ^ p := by
+          rw [Real.mul_rpow (by norm_num) (by positivity)]
+        -- `k^p · k^{-N} = k^{p - N} = k^{-2}`
+        have hstep3 : (k : ℝ) ^ p * (k : ℝ) ^ (-N) = (k : ℝ) ^ (-2 : ℝ) := by
+          rw [← Real.rpow_add hkpos']
+          congr 1
+          rw [hN_def]; ring
+        have hkN_nn : (0 : ℝ) ≤ (k : ℝ) ^ (-N) := Real.rpow_nonneg hkpos'.le _
+        calc Maj k = C' * (((k : ℝ) + 1) ^ p) * (k : ℝ) ^ (-N) := rfl
+          _ ≤ C' * (2 ^ p * (k : ℝ) ^ p) * (k : ℝ) ^ (-N) := by
+              apply mul_le_mul_of_nonneg_right _ hkN_nn
+              apply mul_le_mul_of_nonneg_left _ hC'_nn
+              exact hstep1.trans_eq hstep2
+          _ = C' * 2 ^ p * ((k : ℝ) ^ p * (k : ℝ) ^ (-N)) := by ring
+          _ = C' * 2 ^ p * (k : ℝ) ^ (-2 : ℝ) := by rw [hstep3]
+  -- The uniform bound on finite partial sums, with constant `c := ∑' k, Maj k`.
+  have hf_nn : (0 : I0 → ℝ) ≤ fun i => lam i ^ (-N) := by
+    intro i
+    exact Real.rpow_nonneg (by have := hlam_one_le i; linarith) _
+  refine summable_of_sum_le (c := ∑' k : ℕ, Maj k) hf_nn (fun u => ?_)
+  · -- `∑_{i∈u} (1+λᵢ)^{-N} ≤ ∑'_k Maj k =: c`.
+    -- Group `u` by the block index `blk`.
+    set t : Finset ℕ := u.image blk with ht_def
+    have hmaps : ∀ i ∈ u, blk i ∈ t := fun i hi => Finset.mem_image_of_mem blk hi
+    have hfib :
+        ∑ k ∈ t, ∑ i ∈ u.filter (fun i => blk i = k), lam i ^ (-N)
+          = ∑ i ∈ u, lam i ^ (-N) :=
+      Finset.sum_fiberwise_of_maps_to hmaps (fun i => lam i ^ (-N))
+    -- `Maj k` is always nonnegative.
+    have hMaj_nn : ∀ k : ℕ, 0 ≤ Maj k := by
+      intro k
+      have h1 : (0 : ℝ) ≤ ((k : ℝ) + 1) ^ p := Real.rpow_nonneg (by positivity) p
+      have h2 : (0 : ℝ) ≤ (k : ℝ) ^ (-N) := Real.rpow_nonneg (by positivity) _
+      simp only [hMaj_def]; positivity
+    -- Bound each block sum by `Maj k`.
+    have hblock : ∀ k ∈ t,
+        ∑ i ∈ u.filter (fun i => blk i = k), lam i ^ (-N) ≤ Maj k := by
+      intro k _
+      rcases (u.filter (fun i => blk i = k)).eq_empty_or_nonempty with hempty | hne
+      · simp only [hempty, Finset.sum_empty]; exact hMaj_nn k
+      -- The fiber is nonempty: extract `k ≥ 1` from any member.
+      obtain ⟨i₀, hi₀⟩ := hne
+      rw [Finset.mem_filter] at hi₀
+      have hk1 : 1 ≤ k := by rw [← hi₀.2]; exact hblk_pos i₀
+      have hk1R : (1 : ℝ) ≤ (k : ℝ) := by exact_mod_cast hk1
+      have hkposR : (0 : ℝ) < (k : ℝ) := by linarith
+      -- The fiber sits inside the finite sublevel set `{i | 1 + λᵢ < k + 1}`.
+      set F : Finset I0 :=
+        (tensorEigenIdx_one_add_lambda_lt_finite
+          (I := I) (M := M) g r s ((k : ℝ) + 1)).toFinset with hF_def
+      have hfiber_sub : u.filter (fun i => blk i = k) ⊆ F := by
+        intro i hi
+        rw [Finset.mem_filter] at hi
+        have hlt : lam i < (k : ℝ) + 1 := by
+          have hfl : lam i < (⌊lam i⌋₊ : ℝ) + 1 := Nat.lt_floor_add_one (lam i)
+          have hcast : (⌊lam i⌋₊ : ℝ) = (k : ℝ) := by
+            simp only [hblk_def] at hi; rw [hi.2]
+          rwa [hcast] at hfl
+        rw [hF_def, Set.Finite.mem_toFinset]
+        simpa only [Set.mem_setOf_eq, hlam_def] using hlt
+      -- Cardinality of the fiber is bounded by the counting bound.
+      have hcard_le :
+          ((u.filter (fun i => blk i = k)).card : ℝ) ≤ C' * ((k : ℝ) + 1) ^ p := by
+        have hcsub : (u.filter (fun i => blk i = k)).card ≤ F.card :=
+          Finset.card_le_card hfiber_sub
+        have hcsubR : ((u.filter (fun i => blk i = k)).card : ℝ) ≤ (F.card : ℝ) := by
+          exact_mod_cast hcsub
+        refine hcsubR.trans ?_
+        rw [hF_def]
+        exact hcount' ((k : ℝ) + 1) (by linarith)
+      -- On the fiber, each term `(1+λᵢ)^{-N} ≤ k^{-N}`.
+      have hterm_le : ∀ i ∈ u.filter (fun i => blk i = k),
+          lam i ^ (-N) ≤ (k : ℝ) ^ (-N) := by
+        intro i hi
+        rw [Finset.mem_filter] at hi
+        have hge : (k : ℝ) ≤ lam i := by
+          have hfl : (⌊lam i⌋₊ : ℝ) ≤ lam i :=
+            Nat.floor_le (by linarith [hlam_one_le i])
+          have hcast : (⌊lam i⌋₊ : ℝ) = (k : ℝ) := by
+            simp only [hblk_def] at hi; rw [hi.2]
+          rwa [hcast] at hfl
+        have hNnonpos : (-N : ℝ) ≤ 0 := by rw [hN_def]; linarith
+        exact Real.rpow_le_rpow_of_nonpos hkposR hge hNnonpos
+      have hkN_nn : (0 : ℝ) ≤ (k : ℝ) ^ (-N) := Real.rpow_nonneg hkposR.le _
+      -- Assemble: fiber sum ≤ card · k^{-N} ≤ C' (k+1)^p · k^{-N} = Maj k.
+      calc ∑ i ∈ u.filter (fun i => blk i = k), lam i ^ (-N)
+          ≤ ∑ _i ∈ u.filter (fun i => blk i = k), (k : ℝ) ^ (-N) :=
+            Finset.sum_le_sum hterm_le
+        _ = ((u.filter (fun i => blk i = k)).card : ℝ) * (k : ℝ) ^ (-N) := by
+            rw [Finset.sum_const, nsmul_eq_mul]
+        _ ≤ (C' * ((k : ℝ) + 1) ^ p) * (k : ℝ) ^ (-N) :=
+            mul_le_mul_of_nonneg_right hcard_le hkN_nn
+        _ = Maj k := by simp only [hMaj_def, mul_assoc]
+    -- Sum the block bound and dominate by the tsum of the majorant.
+    calc ∑ i ∈ u, lam i ^ (-N)
+        = ∑ k ∈ t, ∑ i ∈ u.filter (fun i => blk i = k), lam i ^ (-N) := hfib.symm
+      _ ≤ ∑ k ∈ t, Maj k := Finset.sum_le_sum hblock
+      _ ≤ ∑' k : ℕ, Maj k := Summable.sum_le_tsum t (fun k _ => hMaj_nn k) hMaj_summable
 
 /-- **`C^∞` realization of a super-polynomially-`ℓ¹`-decaying eigenfunction
 series (the deep uniform-limit-of-derivatives analytic core).**
