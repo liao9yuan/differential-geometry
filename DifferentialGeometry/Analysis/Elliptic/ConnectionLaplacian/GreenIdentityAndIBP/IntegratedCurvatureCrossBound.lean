@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemainderDivergenceForm
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFramePureRCurvatureTracePairing
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseToL2Packaging
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RicciTraceCarrier
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldContractionBound
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.CauchySchwarz
 
@@ -25,17 +26,25 @@ the chart-`H²` Gårding constant unconditional.
 The defect cross-pairing is *not* small term-by-term: by the integrated order-`2` Weitzenböck identity
 `weitzenbock_curvature_crossPairing_value` it equals `‖Δ_∇ S‖²_{L²} − ‖∇²S‖²_{L²}`, which carries the
 genuine `∇²S`-order energy — so bounding it through that *value* is circular for the Gårding constant.
-The sound route bounds the cross-pairing through the **genuine curvature fields**: the concrete
-pure-Riemann curvature section `GcurvSection g s S` (`= R(∇S)`) and the differentiated-curvature trace
-section `genuineDiffCurvSection g s S` (`= (∇R) S`). The moving-frame remainder
-`Curv S − GcurvSection g s S − genuineDiffCurvSection g s S` is a total covariant divergence of an
-`∇S`-order field, so it pairs to zero against `∇S` on the closed manifold (the **integrated nullity**,
-the genuine moving-frame third-order Bochner–Weitzenböck content, supplied here as
-`movingFrameRemainder_genuineSections_nullity`). The nullity feeds
+The sound route bounds the cross-pairing through the **three genuine curvature fields**: the concrete
+pure-Riemann curvature section `GcurvSection g s S` (`= R(∇S)`), the differentiated-curvature trace
+section `genuineDiffCurvSection g s S` (`= (∇R) S`), and the Bochner–Lichnerowicz Ricci-trace carrier
+`ricTraceSection g s S` (`= Ric(∇S)`). The moving-frame remainder
+`Curv S − GcurvSection g s S − genuineDiffCurvSection g s S − ricTraceSection g s S` is a total
+covariant divergence of an `∇S`-order field, so it pairs to zero against `∇S` on the closed manifold
+(the **integrated nullity**, the genuine moving-frame third-order Bochner–Weitzenböck content,
+supplied here as `movingFrameRemainder_genuineSections_nullity`). The nullity (with `GcurvDeriv` taken
+to be the combined field `genuineDiffCurvSection + ricTraceSection`) feeds
 `tensorL2Inner_genuineFields_covGrad_eq_pointwiseTensorCurv_of_movingFrameRemainder_nullity`
 (`MovingFrameRemainderDivergenceForm.lean`) to give the bracket-free pairing
-`⟨GcurvSection + genuineDiffCurvSection, ∇S⟩_{L²} = ⟨Curv S, ∇S⟩_{L²}`, and the genuine fields carry
-the whole cross-pairing.
+`⟨GcurvSection + genuineDiffCurvSection + ricTraceSection, ∇S⟩_{L²} = ⟨Curv S, ∇S⟩_{L²}`, and the three
+genuine fields carry the whole cross-pairing.
+
+The Ricci-trace carrier is the missing fourth slot of the commutator defect: term-`(IV)` of the
+slot table (`RicciTraceCarrier.lean`), the frame trace of the curvature's derivative-direction
+contraction, producing `Ric`. It does NOT integrate to zero (at `s = 0` it carries the whole defect:
+`Curv f = Ric(∇f, ·)`, `⟨Curv f, ∇f⟩ = ∫Ric(∇f, ∇f) > 0` on a positively-curved manifold), so it must
+be subtracted alongside the two curvature fields.
 
 Each genuine field is then bounded `L²`-proportionally:
 
@@ -49,11 +58,16 @@ Each genuine field is then bounded `L²`-proportionally:
   `exists_uniform_riemannianFiberNormSq_appCc_le` (the fixed smooth differentiated-curvature operator
   `∇R` is uniformly fibre-bounded over the compact manifold), so
   `‖genuineDiffCurvSection g s S‖_{L²} ≤ √C · ‖S‖_{L²}`.
+* `ricTraceSection g s S = appCc (ricSlotOpField g s) (∇S)` has fibre norm
+  `≤ (C s)² · (rfns(∇S) + rfns(S))` by `exists_ricTraceSection_fiberNormSq_bound` (the fixed smooth
+  raised-Ricci operator field is uniformly fibre-bounded), so
+  `‖ricTraceSection g s S‖_{L²} ≤ Cric · (‖∇S‖_{L²} + ‖S‖_{L²})` by the same packaging.
 
 Cauchy–Schwarz (`abs_tensorL2Inner_le`) then bounds the cross-pairing by
-`(‖GcurvSection‖ + ‖genuineDiffCurvSection‖) · ‖∇S‖ ≤ √kappa · ‖∇S‖² + √C · ‖S‖ · ‖∇S‖`, so
-`Ccross := max √kappa √C` works. The route never reads the gradient slot pointwise and never
-differentiates the curvature beyond the fixed smooth coefficient `∇R`, so it carries no chart-jet debt.
+`(‖GcurvSection‖ + ‖genuineDiffCurvSection‖ + ‖ricTraceSection‖) · ‖∇S‖`, dominated by
+`Ccross · (‖∇S‖² + ‖S‖ · ‖∇S‖)` for `Ccross := Cr + Cd + Cric`. The route never reads the gradient slot
+pointwise and never differentiates the curvature beyond the fixed smooth coefficients `∇R`, `Ric`, so
+it carries no chart-jet debt.
 
 ## Convention
 
@@ -92,41 +106,51 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **The integrated moving-frame nullity for the concrete genuine curvature sections (the genuine
-moving-frame third-order Bochner–Weitzenböck node).** For a closed smooth Riemannian manifold
+/-- **The integrated moving-frame nullity for the three concrete genuine curvature sections (the
+genuine moving-frame third-order Bochner–Weitzenböck node).** For a closed smooth Riemannian manifold
 `(M, g)`, covariant rank `s`, and smooth compactly-supported `(0, s)`-tensor `S`, the moving-frame
 remainder of the order-`2` commutator defect — the defect `Curv S := pointwiseTensorCurv g s S` minus
-the genuine pure-Riemann curvature section `GcurvSection g s S` (the `R(∇S)` contraction) and the
-differentiated-curvature trace section `genuineDiffCurvSection g s S` (the `(∇R) S` contraction) —
-pairs to zero against `∇S := covGrad g 0 s S` in the global metric `L²`:
+ALL THREE genuine curvature carriers: the pure-Riemann curvature section `GcurvSection g s S`
+(the `R(∇S)` contraction), the differentiated-curvature trace section `genuineDiffCurvSection g s S`
+(the `(∇R) S` contraction), and the Ricci-trace carrier `ricTraceSection g s S` (the
+Bochner–Lichnerowicz Ricci trace `Ric(∇S)`) — pairs to zero against `∇S := covGrad g 0 s S` in the
+global metric `L²`:
 
 ```
-⟨Curv S − GcurvSection g s S − genuineDiffCurvSection g s S, ∇S⟩_{L²} = 0.
+⟨Curv S − GcurvSection g s S − genuineDiffCurvSection g s S − ricTraceSection g s S, ∇S⟩_{L²} = 0.
 ```
 
 This is the integrated half of the moving-frame third-order Weitzenböck cancellation: the
-frame-bracket discrepancy that survives after the two genuine curvature contractions are subtracted —
-whose fibre value is the explicit obstruction field `bracketThirdCurvFieldFib` of the field-level split
-`pointwiseTensorCurv_toSection_eq_genuine_add_bracket_field` (`PointwiseTensorBochnerFieldSplit.lean`)
-— folds, summed over the `g_x`-orthonormal frame and paired against `∇S`, into a total covariant
-divergence of an `∇S`-order field, whose integral over the closed manifold vanishes
-(`integral_frameSummed_bracketCovDeriv_combined_eq_zero`, `BracketDivergenceForm.lean`). The
-folding (identifying the frame-summed bracket field with `∑ᵢ ∇_{Bᵢ} W` for an honest smooth
+frame-bracket discrepancy that survives after the **three** genuine curvature contractions are
+subtracted — whose fibre value is the explicit obstruction field `bracketThirdCurvFieldFib` of the
+field-level split `pointwiseTensorCurv_toSection_eq_genuine_add_bracket_field`
+(`PointwiseTensorBochnerFieldSplit.lean`) — folds, summed over the `g_x`-orthonormal frame and paired
+against `∇S`, into a total covariant divergence of an `∇S`-order field, whose integral over the closed
+manifold vanishes (`integral_frameSummed_bracketCovDeriv_combined_eq_zero`, `BracketDivergenceForm.lean`).
+The folding (identifying the frame-summed bracket field with `∑ᵢ ∇_{Bᵢ} W` for an honest smooth
 `∇S`-order field `W` via the second-Bianchi / frame-Ricci identity) is the genuinely-irreducible
-moving-frame curvature-endomorphism content; it is *false* for an arbitrary pair of subtracted fields
-and holds exactly for the genuine pure-Riemann and differentiated-curvature sections, so this is a
-genuine mathematical statement distinct from any cross-bound conclusion.
+moving-frame curvature-endomorphism content; it is *false* for an arbitrary triple of subtracted fields
+and holds exactly for the genuine pure-Riemann, differentiated-curvature, and Ricci-trace sections, so
+this is a genuine mathematical statement distinct from any cross-bound conclusion.
 
-**Non-vacuity.** With `GcurvSection` and `genuineDiffCurvSection` both replaced by `0` the statement
-would force `⟨Curv S, ∇S⟩_{L²} = 0`, which is *false* on a non-flat manifold (it equals
+The Ricci-trace carrier `ricTraceSection` is the term-`(IV)` Bochner–Lichnerowicz slot of the
+commutator defect (`RicciTraceCarrier.lean`): commuting the gradient slot past the rough-Laplacian
+trace slots by the Ricci identity, the frame sum of the curvature's derivative-direction contraction
+is the Ricci tensor; without subtracting it the remainder is *not* a covariant divergence (the scalar
+litmus `Curv f = Ric(∇f, ·)` already integrates to `∫Ric(∇f, ∇f) ≠ 0`).
+
+**Non-vacuity.** With all three curvature carriers replaced by `0` the statement would force
+`⟨Curv S, ∇S⟩_{L²} = 0`, which is *false* on a non-flat manifold (it equals
 `‖Δ_∇ S‖²_{L²} − ‖∇²S‖²_{L²}` by `weitzenbock_curvature_crossPairing_value`, a genuinely nonzero
-curvature integral); the nullity genuinely uses the two genuine curvature fields. -/
+curvature integral; at `s = 0` it equals `∫Ric(∇f, ∇f)` carried by `ricTraceSection` alone); the
+nullity genuinely uses all three genuine curvature fields. -/
 theorem movingFrameRemainder_genuineSections_nullity
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     tensorL2Inner (I := I) (M := M) g 0 (s + 1)
         (pointwiseTensorCurv (I := I) (M := M) g s S -
           GcurvSection (I := I) (M := M) g s S -
-          genuineDiffCurvSection (I := I) (M := M) g s S).toFun
+          genuineDiffCurvSection (I := I) (M := M) g s S -
+          ricTraceSection (I := I) (M := M) g s S).toFun
         (covGrad (I := I) (M := M) g 0 s S).toFun = 0 :=
   sorry
 
@@ -230,6 +254,34 @@ theorem exists_genuineDiffCurvSection_l2Norm_le_self
       exact riemannianFiberNormSq_zero (I := I) (M := M) g 0 s x
     rw [hz, add_zero]; exact hpt x
 
+/-- **`L²` proportional control of the Ricci-trace carrier by `∇S` and `S`.** For a closed smooth
+Riemannian manifold `(M, g)`, covariant rank `s`, and smooth compactly-supported `(0, s)`-tensor `S`,
+the metric `L²` norm of the Bochner–Lichnerowicz Ricci-trace carrier `ricTraceSection g s S`
+(`= Ric(∇S)`, the term-`(IV)` slot of the order-`2` commutator defect, the operator-field action of the
+fixed smooth raised-Ricci operator field `ricSlotOpField g s` on `∇S`) is bounded by a uniform constant
+times the first-order Sobolev budget of `S`:
+
+```
+‖ricTraceSection g s S‖ ≤ Cric · (‖∇S‖ + ‖S‖),     ∇S := covGrad g 0 s S,   Cric ≥ 0 uniform in S.
+```
+
+The proof uses the uniform fibre bound `exists_ricTraceSection_fiberNormSq_bound`
+(`rfns(ricTraceSection g s S)(x) ≤ (C s)² · (rfns(∇S)(x) + rfns(S)(x))`, the operator-field action of
+the fixed smooth raised-Ricci field) and lifts it to the `L²` norm by the two-term pointwise-to-`L²`
+packaging `tensorL2Norm_le_of_pointwise_fiberNormSq_bound_two` with `A := ∇S`, `B := S`, `Cric := C s`. -/
+theorem exists_ricTraceSection_l2Norm_le
+    (g : SmoothRiemannianMetric I M) (s : ℕ) :
+    ∃ Cric : ℝ, 0 ≤ Cric ∧ ∀ S : SmoothCcTensor g 0 s,
+      ‖ricTraceSection (I := I) (M := M) g s S‖ ≤
+        Cric * (‖covGrad (I := I) (M := M) g 0 s S‖ + ‖S‖) := by
+  classical
+  obtain ⟨C, hC_nn, hC⟩ := exists_ricTraceSection_fiberNormSq_bound (I := I) (M := M) g
+  refine ⟨C s, hC_nn s, fun S => ?_⟩
+  exact tensorL2Norm_le_of_pointwise_fiberNormSq_bound_two (I := I) (M := M) g
+    (covGrad (I := I) (M := M) g 0 s S) S
+    (ricTraceSection (I := I) (M := M) g s S) (C s) (hC_nn s)
+    (fun x => hC s S x)
+
 /-- **The integrated `L²` curvature cross-bound (rank-generic).** For a closed smooth Riemannian
 manifold `(M, g)`, covariant rank `s`, the one-sided `L²` curvature cross-term — minus the global
 metric pairing of the order-`2` commutator defect `Curv S := pointwiseTensorCurv g s S =
@@ -240,15 +292,19 @@ Sobolev budget of `S`:
 − ⟨Curv S, ∇S⟩_{L²} ≤ Ccross · (‖∇S‖²_{L²} + ‖S‖_{L²} · ‖∇S‖_{L²}),     Ccross ≥ 0 uniform in S.
 ```
 
-**Proof.** The integrated moving-frame nullity `movingFrameRemainder_genuineSections_nullity` feeds
+**Proof.** The integrated three-carrier moving-frame nullity `movingFrameRemainder_genuineSections_nullity`
+(with `GcurvDeriv` taken to be the combined field `genuineDiffCurvSection + ricTraceSection`) feeds
 `tensorL2Inner_genuineFields_covGrad_eq_pointwiseTensorCurv_of_movingFrameRemainder_nullity`
 (`MovingFrameRemainderDivergenceForm.lean`) to give the bracket-free pairing
-`⟨GcurvSection g s S + genuineDiffCurvSection g s S, ∇S⟩_{L²} = ⟨Curv S, ∇S⟩_{L²}` — the genuine
-curvature fields carry the whole cross-pairing. Cauchy–Schwarz (`abs_tensorL2Inner_le`) bounds the
-left pairing by `(‖GcurvSection g s S‖ + ‖genuineDiffCurvSection g s S‖) · ‖∇S‖`, and the
-`L²`-proportional bounds `exists_GcurvSection_l2Norm_le_covGrad` (`‖GcurvSection‖ ≤ Cr · ‖∇S‖`) and
-`exists_genuineDiffCurvSection_l2Norm_le_self` (`‖genuineDiffCurvSection‖ ≤ Cd · ‖S‖`) give
-`Cr · ‖∇S‖² + Cd · ‖S‖ · ‖∇S‖`, dominated by `(max Cr Cd) · (‖∇S‖² + ‖S‖ · ‖∇S‖)`. -/
+`⟨GcurvSection g s S + (genuineDiffCurvSection g s S + ricTraceSection g s S), ∇S⟩_{L²} =
+⟨Curv S, ∇S⟩_{L²}` — the three genuine curvature fields carry the whole cross-pairing. Cauchy–Schwarz
+(`abs_tensorL2Inner_le`) bounds the left pairing by
+`(‖GcurvSection g s S‖ + ‖genuineDiffCurvSection g s S‖ + ‖ricTraceSection g s S‖) · ‖∇S‖`, and the
+`L²`-proportional bounds `exists_GcurvSection_l2Norm_le_covGrad` (`‖GcurvSection‖ ≤ Cr · ‖∇S‖`),
+`exists_genuineDiffCurvSection_l2Norm_le_self` (`‖genuineDiffCurvSection‖ ≤ Cd · ‖S‖`), and
+`exists_ricTraceSection_l2Norm_le` (`‖ricTraceSection‖ ≤ Cric · (‖∇S‖ + ‖S‖)`) give
+`(Cr + Cric) · ‖∇S‖² + (Cd + Cric) · ‖S‖ · ‖∇S‖`, dominated by
+`(Cr + Cd + Cric) · (‖∇S‖² + ‖S‖ · ‖∇S‖)`. -/
 theorem exists_integrated_curvatureCrossBound
     (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ∃ Ccross : ℝ, 0 ≤ Ccross ∧
@@ -268,23 +324,29 @@ theorem exists_integrated_curvatureCrossBound
   classical
   obtain ⟨Cr, hCr_nn, hCr⟩ := exists_GcurvSection_l2Norm_le_covGrad (I := I) (M := M) g s
   obtain ⟨Cd, hCd_nn, hCd⟩ := exists_genuineDiffCurvSection_l2Norm_le_self (I := I) (M := M) g s
-  refine ⟨max Cr Cd, le_trans hCr_nn (le_max_left _ _), fun S => ?_⟩
+  obtain ⟨Cric, hCric_nn, hCric⟩ := exists_ricTraceSection_l2Norm_le (I := I) (M := M) g s
+  refine ⟨Cr + Cd + Cric, by positivity, fun S => ?_⟩
   set Gr : SmoothCcTensor g 0 (s + 1) := GcurvSection (I := I) (M := M) g s S with hGr_def
-  set Gd : SmoothCcTensor g 0 (s + 1) := genuineDiffCurvSection (I := I) (M := M) g s S with hGd_def
+  set Gdc : SmoothCcTensor g 0 (s + 1) := genuineDiffCurvSection (I := I) (M := M) g s S with hGdc_def
+  set Gric : SmoothCcTensor g 0 (s + 1) := ricTraceSection (I := I) (M := M) g s S with hGric_def
+  set Gd : SmoothCcTensor g 0 (s + 1) := Gdc + Gric with hGd_def
   set gradS : SmoothCcTensor g 0 (s + 1) := covGrad (I := I) (M := M) g 0 s S with hgradS_def
-  -- The bracket-free pairing: the genuine fields carry the whole cross-pairing.
+  -- The 3-carrier nullity, rephrased with `GcurvDeriv := Gdc + Gric`, feeds the 2-field engine.
   have hnull : tensorL2Inner (I := I) (M := M) g 0 (s + 1)
       (pointwiseTensorCurv (I := I) (M := M) g s S - Gr - Gd).toFun gradS.toFun = 0 := by
-    rw [hGr_def, hGd_def, hgradS_def]
+    have hsub : (pointwiseTensorCurv (I := I) (M := M) g s S - Gr - Gd) =
+        (pointwiseTensorCurv (I := I) (M := M) g s S - Gr - Gdc - Gric) := by
+      rw [hGd_def]; abel
+    rw [hsub, hGr_def, hGdc_def, hGric_def, hgradS_def]
     exact movingFrameRemainder_genuineSections_nullity (I := I) (M := M) g s S
+  -- The bracket-free pairing: the genuine fields carry the whole cross-pairing.
   have hpair : tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Gr + Gd).toFun gradS.toFun =
       tensorL2Inner (I := I) (M := M) g 0 (s + 1)
         (pointwiseTensorCurv (I := I) (M := M) g s S).toFun gradS.toFun := by
-    rw [hGr_def, hGd_def, hgradS_def]
+    rw [hgradS_def]
     exact tensorL2Inner_genuineFields_covGrad_eq_pointwiseTensorCurv_of_movingFrameRemainder_nullity
-      (I := I) (M := M) g s S (GcurvSection (I := I) (M := M) g s S)
-      (genuineDiffCurvSection (I := I) (M := M) g s S)
-      (by rw [← hGr_def, ← hGd_def, ← hgradS_def]; exact hnull)
+      (I := I) (M := M) g s S Gr Gd
+      (by rw [← hgradS_def]; exact hnull)
   -- Identify the target defect with `pointwiseTensorCurv`.
   have hCurvFun : (pointwiseTensorCurv (I := I) (M := M) g s S).toFun =
       (rawTensorConnLapSmooth (I := I) g 0 (s + 1)
@@ -308,29 +370,50 @@ theorem exists_integrated_curvatureCrossBound
       SmoothCcTensor.norm_def (I := I) (M := M) Gr,
       SmoothCcTensor.norm_def (I := I) (M := M) Gd,
       SmoothCcTensor.toFun_add] at this
-  -- Normalize the proportional bounds to `tensorL2Norm` form.
+  -- `‖Gd‖ = ‖Gdc + Gric‖ ≤ ‖Gdc‖ + ‖Gric‖`.
+  have htriGd : tensorL2Norm (I := I) (M := M) g 0 (s + 1) Gd.toFun ≤
+      tensorL2Norm (I := I) (M := M) g 0 (s + 1) Gdc.toFun +
+        tensorL2Norm (I := I) (M := M) g 0 (s + 1) Gric.toFun := by
+    rw [hGd_def]
+    have := norm_add_le Gdc Gric
+    rwa [SmoothCcTensor.norm_def (I := I) (M := M) (Gdc + Gric),
+      SmoothCcTensor.norm_def (I := I) (M := M) Gdc,
+      SmoothCcTensor.norm_def (I := I) (M := M) Gric,
+      SmoothCcTensor.toFun_add] at this
+  -- Normalize the three proportional bounds to `tensorL2Norm` form.
   have hCrS : tensorL2Norm (I := I) (M := M) g 0 (s + 1) Gr.toFun ≤
       Cr * tensorL2Norm (I := I) (M := M) g 0 (s + 1) gradS.toFun := by
     have h := hCr S
     rw [hGr_def, hgradS_def]
     simpa only [SmoothCcTensor.norm_def] using h
-  have hCdS : tensorL2Norm (I := I) (M := M) g 0 (s + 1) Gd.toFun ≤
+  have hCdS : tensorL2Norm (I := I) (M := M) g 0 (s + 1) Gdc.toFun ≤
       Cd * tensorL2Norm (I := I) (M := M) g 0 s S.toFun := by
     have h := hCd S
-    rw [hGd_def]
+    rw [hGdc_def]
+    simpa only [SmoothCcTensor.norm_def] using h
+  have hCricS : tensorL2Norm (I := I) (M := M) g 0 (s + 1) Gric.toFun ≤
+      Cric * (tensorL2Norm (I := I) (M := M) g 0 (s + 1) gradS.toFun +
+        tensorL2Norm (I := I) (M := M) g 0 s S.toFun) := by
+    have h := hCric S
+    rw [hGric_def, hgradS_def]
     simpa only [SmoothCcTensor.norm_def] using h
   -- Assemble.
   set nGrad : ℝ := tensorL2Norm (I := I) (M := M) g 0 (s + 1) gradS.toFun with hnGrad_def
   set nS : ℝ := tensorL2Norm (I := I) (M := M) g 0 s S.toFun with hnS_def
   set nGr : ℝ := tensorL2Norm (I := I) (M := M) g 0 (s + 1) Gr.toFun with hnGr_def
   set nGd : ℝ := tensorL2Norm (I := I) (M := M) g 0 (s + 1) Gd.toFun with hnGd_def
+  set nGdc : ℝ := tensorL2Norm (I := I) (M := M) g 0 (s + 1) Gdc.toFun with hnGdc_def
+  set nGric : ℝ := tensorL2Norm (I := I) (M := M) g 0 (s + 1) Gric.toFun with hnGric_def
   have hnGrad_nn : 0 ≤ nGrad := tensorL2Norm_nonneg (I := I) (M := M) g 0 (s + 1) _
   have hnS_nn : 0 ≤ nS := tensorL2Norm_nonneg (I := I) (M := M) g 0 s _
-  have hnGr_nn : 0 ≤ nGr := tensorL2Norm_nonneg (I := I) (M := M) g 0 (s + 1) _
-  have hnGd_nn : 0 ≤ nGd := tensorL2Norm_nonneg (I := I) (M := M) g 0 (s + 1) _
-  -- Fold the proportional bounds into `nGr`/`nGd` form.
+  -- Fold the proportional bounds into the `n…` names.
   have hCrS' : nGr ≤ Cr * nGrad := hCrS
-  have hCdS' : nGd ≤ Cd * nS := hCdS
+  have hCdS' : nGdc ≤ Cd * nS := hCdS
+  have hCricS' : nGric ≤ Cric * (nGrad + nS) := hCricS
+  have htriGd' : nGd ≤ nGdc + nGric := htriGd
+  -- `‖Gr‖ + ‖Gd‖ ≤ (Cr + Cric)·nGrad + (Cd + Cric)·nS`.
+  have hsum : nGr + nGd ≤ (Cr + Cric) * nGrad + (Cd + Cric) * nS := by
+    nlinarith [hCrS', hCdS', hCricS', htriGd']
   -- The cross-pairing value equals the genuine-field pairing; bound its negation by its abs.
   have hval_eq :
       tensorL2Inner (I := I) (M := M) g 0 (s + 1)
@@ -342,7 +425,7 @@ theorem exists_integrated_curvatureCrossBound
       tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Gr + Gd).toFun gradS.toFun := by
     rw [← hgradS_def, ← hCurvFun, hpair]
   rw [hval_eq]
-  -- `-⟨Gr+Gd, ∇S⟩ ≤ |⟨Gr+Gd, ∇S⟩| ≤ ‖Gr+Gd‖·‖∇S‖ ≤ (nGr+nGd)·nGrad ≤ (Cr·nGrad + Cd·nS)·nGrad`.
+  -- `-⟨Gr+Gd, ∇S⟩ ≤ |⟨Gr+Gd, ∇S⟩| ≤ ‖Gr+Gd‖·‖∇S‖ ≤ (nGr+nGd)·nGrad`.
   have hneg_le : - tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Gr + Gd).toFun gradS.toFun ≤
       |tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Gr + Gd).toFun gradS.toFun| := neg_le_abs _
   have hstep1 : - tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Gr + Gd).toFun gradS.toFun ≤
@@ -350,21 +433,13 @@ theorem exists_integrated_curvatureCrossBound
     refine le_trans hneg_le (le_trans hcs ?_)
     rw [hnGrad_def]
     exact mul_le_mul_of_nonneg_right htri hnGrad_nn
-  have hCr_le : Cr ≤ max Cr Cd := le_max_left _ _
-  have hCd_le : Cd ≤ max Cr Cd := le_max_right _ _
-  have hmax_nn : 0 ≤ max Cr Cd := le_trans hCr_nn hCr_le
   calc - tensorL2Inner (I := I) (M := M) g 0 (s + 1) (Gr + Gd).toFun gradS.toFun
       ≤ (nGr + nGd) * nGrad := hstep1
-    _ ≤ (Cr * nGrad + Cd * nS) * nGrad :=
-        mul_le_mul_of_nonneg_right (add_le_add hCrS' hCdS') hnGrad_nn
-    _ ≤ max Cr Cd * (nGrad ^ 2 + nS * nGrad) := by
-        have h1 : Cr * nGrad * nGrad ≤ max Cr Cd * (nGrad * nGrad) := by
-          rw [mul_assoc]
-          exact mul_le_mul_of_nonneg_right hCr_le (mul_nonneg hnGrad_nn hnGrad_nn)
-        have h2 : Cd * nS * nGrad ≤ max Cr Cd * (nS * nGrad) := by
-          rw [mul_assoc]
-          exact mul_le_mul_of_nonneg_right hCd_le (mul_nonneg hnS_nn hnGrad_nn)
-        nlinarith [h1, h2]
+    _ ≤ ((Cr + Cric) * nGrad + (Cd + Cric) * nS) * nGrad :=
+        mul_le_mul_of_nonneg_right hsum hnGrad_nn
+    _ ≤ (Cr + Cd + Cric) * (nGrad ^ 2 + nS * nGrad) := by
+        nlinarith [mul_nonneg hCd_nn (mul_nonneg hnGrad_nn hnGrad_nn),
+          mul_nonneg hCr_nn (mul_nonneg hnS_nn hnGrad_nn)]
 
 end Connection
 end Integral
