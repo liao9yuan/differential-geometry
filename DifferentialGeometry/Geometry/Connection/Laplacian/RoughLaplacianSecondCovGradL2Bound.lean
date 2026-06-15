@@ -441,7 +441,7 @@ where `dim = finrank ℝ E`. The rough Laplacian is the metric trace `∑_i ∇�
 `n`-sub-additivity of the squared fibre norm contributes one factor of `dim` and the
 orthonormal-frame component bound `secondCovDeriv_unit_frame_fiberNormSq_le` bounds each summand
 by `rfns(∇²S)(x)`, contributing the second. -/
-private theorem rawConnLap_fiberNormSq_le_secondCovGrad
+theorem rawConnLap_fiberNormSq_le_secondCovGrad
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : Integral.L2.SmoothCcTensor g 0 s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 0 s x
         ((rawTensorConnLapSmooth (I := I) g 0 s S).toSection x) ≤
