@@ -3,6 +3,8 @@ import DifferentialGeometry.Analysis.Sobolev.MoserTameProduct
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.GagliardoNirenbergProductTwoArm
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqSmoothCcUniformBound
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqLeRawComponents
+import DifferentialGeometry.Analysis.Integration.Measure.FamilyDecomposition
 
 /-!
 # The two-arm covariant-`L²` ball-Lipschitz bound on the DeTurck–Ricci remainder difference
@@ -900,17 +902,189 @@ private theorem rawTensorConnLapSmooth_iteratedCovGrad_riemannianFiberNormSq_jet
           (mul_le_mul_of_nonneg_left hCommarm (by norm_num))
     _ = (2 * Cpost + 2 * Cfun 0) * Scol := by ring
 
-/-- **(POSIT — the genuine chart→intrinsic parallel-bilinear covariant-Leibniz diagonal grid of the
-Ricci–DeTurck right-hand-side arm of the sealed remainder difference.)**
+/-- **(POSIT — the genuine chart→intrinsic covariant Faà-di-Bruno / Leibniz raw-component
+domination of the Ricci–DeTurck RHS-arm difference, localised to one chart of the finite atlas.)**
 
-This is the irreducible chart→intrinsic realization datum, in its raw parallel-bilinear covariant-Leibniz
-diagonal-grid form (the immediate output of the covariant-Leibniz engine applied to the monomial
-realization, BEFORE the coefficient column is supremised).  For any two `g₀`-fibre-small smooth
-perturbations `T, T'`, there are a realized coefficient rank `s`, an intrinsic coefficient field
-`coeff : SmoothCcTensor g₀ 0 s` (the assembled per-pair undifferenced curvature / metric / Christoffel /
-inverse-Gram chart-monomial coefficient data, realized as a single smooth `(0,s)`-tensor section on the
-compact `M`), and a single nonnegative **per-pair** grid constant `Cmid` (depending on the metric path,
-hence on `T, T'`, but uniform over `x`), such that for the **RHS-arm residual**
+This is the irreducible chart→intrinsic content of the RHS-arm globalization, stripped to its
+per-chart raw-component core (the two-metric, `g₀ ≠ g_bg` analog of the sibling single-metric
+`DeTurckCoefficients.deTurckRHSReanchor_iteratedCovGrad_rawComponentSq_domination_on_pouTsupport`).
+
+For the **RHS-arm residual**
+```
+RHSarm := (deTurckSmoothRemainder g₀ g_bg T − deTurckSmoothRemainder g₀ g_bg T')
+            + rawTensorConnLapSmooth g₀ 0 2 (T − T')
+```
+— which by `deTurckSmoothRemainder`'s definition and `rawTensorConnLapSmooth_sub` value-equals the
+genuine Ricci–DeTurck RHS difference `deTurckRHSSection g_bg (g₀ + T) − deTurckRHSSection g_bg (g₀ + T')`
+(the connection-Laplacian Δ-arms cancel) — a fixed chart base point `α` of the chart atlas and a
+covariant order `a`, there is a single constant `Λ ≥ 0` such that, on the closed support of the
+chart-atlas partition-of-unity weight at `α`, the sum of squares of the raw chart-`α`-frame components
+of the order-`a` covariant gradient `∇^a RHSarm` is dominated by `Λ²` times the order-`≤ a + 2`
+covariant fibre-norm jets of the perturbation difference `T − T'`:
+```
+∑_{Idx,Jdx} (tensorChartComponentRaw g₀ 0 (2+a) (∇^a RHSarm) α Idx Jdx b)²
+  ≤ Λ² · ∑_{q ≤ a+2} rfns(∇^q (T − T'))(b) .
+```
+
+**The chart→intrinsic content.**  The chart component of `∇^a RHSarm` is, by the
+covariant Faà-di-Bruno expansion read in the chart `α`, a covariant-Leibniz polynomial in the chart
+Christoffel symbols of the *background* metric `g₀` (uniformly bounded on the compact closed POU
+support, since `g₀` is fixed and smooth — note the connection anchor `g₀` may differ from the DeTurck
+background `g_bg`) and the Fréchet jets `∂^{≤a}` of the chart components of `RHSarm`.  By
+`chartDeTurckRicciRHS_sub_eq_principalSymbol_add_lowerOrder` grounded against the intrinsic operator
+(`deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS`) and the chart-component identities
+(`tensorChartComponentRaw_deTurckRHSSectionBg_eq_chartRicciLie`,
+`chartGramOnE_realize_sub_eq_symm_rawComponent`), the RHS difference is a finite sum of bilinear
+monomials, each a product of fixed (per-pair-smooth) undifferenced curvature / metric / Christoffel /
+inverse-Gram coefficient data with a single `(T − T')` jet of chart order `≤ 2`; on the fibre-small
+regime those coefficient jets are uniformly bounded by the Ricci / Lie / inverse-Gram chart-Lipschitz
+towers (`IteratedChartRicciLieJetLipschitz`, `IteratedInvGramJetLipschitz`, `ChartJetLipschitzClosure`,
+the Faà-di-Bruno `IteratedFDeriv*` calculus), and the chart jets of `h_sym(T − T')` are in turn
+dominated by the intrinsic covariant fibre-norm jets `rfns(∇^q (T − T'))`, `q ≤ a + 2`, through the
+chart↔covariant fibre-norm bridge.  The chart-locality-free globalization of the coefficient data and
+the parallel covariant-bilinear product structure has **no on-disk antecedent** (it is the irreducible
+open analytic sub-program — the same content the sibling posits in its single-metric @159 leaf,
+generalised here to the two-metric DeTurck case `g₀ ≠ g_bg`); its body is `sorry`, and consumers
+transitively depend on its `sorryAx`.
+
+**Per-pair, not ball-uniform.**  The constant `Λ` is allowed to depend on `T, T'` through the
+metric-path coefficient data; no ball-uniformity is required.
+
+**Non-vacuity / order self-check.**  The grid reads `∇^{≤ a+2}(T − T')`; the genuine `∂²(T − T')`
+Ricci principal symbol forces a top jet at `q = a + 2`, so a window-`a` weakening is rejected.  A
+`Λ = 0` witness is rejected by a nonvanishing raw chart component for a non-flat, genuinely
+second-order RHS difference. -/
+private theorem deTurckRHSArmDiff_iteratedCovGrad_rawComponentSq_domination_on_pouTsupport
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (α : M) :
+    ∃ Λ : ℝ, 0 ≤ Λ ∧
+      ∀ b : M,
+        b ∈ tsupport (fun x : M =>
+            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+        (∑ Idx : Fin 0 → Fin (Module.finrank ℝ E),
+          ∑ Jdx : Fin (2 + a) → Fin (Module.finrank ℝ E),
+            (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw
+              (I := I) (M := M) g₀ 0 (2 + a)
+              (iteratedCovGrad (I := I) g₀ 0 2 a
+                ((deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+                    deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ') +
+                  rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T'))) α Idx Jdx b) ^ 2) ≤
+          Λ ^ 2 * ∑ q ∈ Finset.range (a + 2 + 1),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) b
+              ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection b) :=
+  sorry
+
+/-- **(The chart→intrinsic per-pair order-`a` single-factor covariant-jet bound of the Ricci–DeTurck
+RHS-arm of the sealed remainder difference — PROVED from the per-chart raw-component posit.)**
+
+For the RHS-arm residual `RHSarm` (the genuine Ricci–DeTurck RHS difference, Δ-arms added back), there
+is a single nonnegative **per-pair** constant `C` (uniform over `x`) with
+```
+rfns(∇^a RHSarm)(x) ≤ C · ∑_{q ≤ a+2} rfns(∇^q (T − T'))(x).
+```
+
+It is **proved** (no `sorry` of its own) from the per-chart raw-component posit
+`deTurckRHSArmDiff_iteratedCovGrad_rawComponentSq_domination_on_pouTsupport` via the reverse
+fibre-norm/raw-component bridge `riemannianFiberNormSq_le_raw_components_on_pouTsupport` and a maximum
+over the finite chart atlas `chartAtlasPOU_finset` (every base point lies in the closed POU support of
+some atlas chart).  This is the two-metric analog of the sibling
+`DeTurckCoefficients.deTurckRHSSection_iteratedCovGrad_pointwise_leibniz_domination`.  Consumers
+transitively depend on the posit's `sorryAx`. -/
+private theorem deTurckRHSArmDiff_iteratedCovGrad_singleFactor_jet
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ∃ C : ℝ,
+      0 ≤ C ∧
+      ∀ x : M,
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 a
+              ((deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+                  deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ') +
+                rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T'))).toSection x) ≤
+          C * ∑ q ∈ Finset.range (a + 2 + 1),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection x) := by
+  classical
+  set RHSarm : SmoothCcTensor g₀ 0 2 :=
+    (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+        deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ') +
+      rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T') with hRHSarm_def
+  set RHSa : SmoothCcTensor g₀ 0 (2 + a) :=
+    iteratedCovGrad (I := I) g₀ 0 2 a RHSarm with hRHSa_def
+  set R : M → ℝ := fun b => ∑ q ∈ Finset.range (a + 2 + 1),
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) b
+      ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection b) with hR_def
+  have hR_nn : ∀ b : M, 0 ≤ R b := by
+    intro b
+    exact Finset.sum_nonneg fun q _ =>
+      riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + q) b _
+  -- Per chart `α` of the finite atlas: the reverse fibre-norm bridge composed with the posited
+  -- per-chart raw-component domination produces a single constant `Kα` with
+  -- `rfns(∇^a RHSarm)(b) ≤ Kα · R b` on the closed POU support of `α`.
+  have hperChart : ∀ α : M, ∃ Kα : ℝ, 0 ≤ Kα ∧
+      ∀ {b : M},
+        b ∈ tsupport (fun x : M =>
+            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) b (RHSa.toSection b) ≤
+          Kα * R b := by
+    intro α
+    obtain ⟨C, hC_nn, hC⟩ :=
+      riemannianFiberNormSq_le_raw_components_on_pouTsupport
+        (I := I) (M := M) g₀ 0 (2 + a) α
+    obtain ⟨Λ, hΛ_nn, hΛ⟩ :=
+      deTurckRHSArmDiff_iteratedCovGrad_rawComponentSq_domination_on_pouTsupport
+        (I := I) (M := M) g₀ g_bg a T T' hδ_lt hδ hδ'_lt hδ' α
+    refine ⟨C * Λ ^ 2, mul_nonneg hC_nn (sq_nonneg _), ?_⟩
+    intro b hb
+    have h1 := hC RHSa hb
+    have h2 := hΛ b hb
+    calc riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) b (RHSa.toSection b)
+        ≤ C * (∑ Idx : Fin 0 → Fin (Module.finrank ℝ E),
+              ∑ Jdx : Fin (2 + a) → Fin (Module.finrank ℝ E),
+                (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw
+                  (I := I) (M := M) g₀ 0 (2 + a) RHSa α Idx Jdx b) ^ 2) := h1
+      _ ≤ C * (Λ ^ 2 * R b) := by
+          refine mul_le_mul_of_nonneg_left ?_ hC_nn
+          simpa only [hRHSa_def, hRHSarm_def, hR_def] using h2
+      _ = (C * Λ ^ 2) * R b := by ring
+  -- Glue over the finite chart atlas: the maximum of the per-chart constants is a single global
+  -- constant; each base point lies in the closed POU support of some atlas chart.
+  choose! Kα hKα_nn hKα using hperChart
+  set Ksum : ℝ := ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M), Kα α with hKsum_def
+  have hKsum_nn : 0 ≤ Ksum := Finset.sum_nonneg (fun α _ => hKα_nn α)
+  refine ⟨Ksum, hKsum_nn, ?_⟩
+  intro x
+  obtain ⟨α, hα_pos⟩ := (chartAtlasPOU I M).exists_pos_of_mem (Set.mem_univ x)
+  have hα_finset : α ∈ chartAtlasPOU_finset (I := I) (M := M) := by
+    rw [chartAtlasPOU_finset_mem]
+    exact ⟨x, Function.mem_support.mpr (ne_of_gt hα_pos)⟩
+  have hx_tsupport : x ∈ tsupport (fun y : M =>
+      ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) y) :=
+    subset_tsupport _ (Function.mem_support.mpr (ne_of_gt hα_pos))
+  have hKα_le : Kα α ≤ Ksum := by
+    rw [hKsum_def]
+    exact Finset.single_le_sum (fun β _ => hKα_nn β) hα_finset
+  calc riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x (RHSa.toSection x)
+      ≤ Kα α * R x := hKα α hx_tsupport
+    _ ≤ Ksum * R x := mul_le_mul_of_nonneg_right hKα_le (hR_nn x)
+
+/-- **(The genuine chart→intrinsic parallel-bilinear covariant-Leibniz diagonal grid of the
+Ricci–DeTurck right-hand-side arm of the sealed remainder difference — PROVED from the per-chart
+raw-component posit + the positive intrinsic coefficient floor.)**
+
+For any two `g₀`-fibre-small smooth perturbations `T, T'`, there are a realized coefficient rank `s`, an
+intrinsic coefficient field `coeff : SmoothCcTensor g₀ 0 s`, and a single nonnegative **per-pair** grid
+constant `Cmid` (depending on the metric path, hence on `T, T'`, but uniform over `x`), such that for
+the **RHS-arm residual**
 ```
 RHSarm := (deTurckSmoothRemainder g₀ g_bg T − deTurckSmoothRemainder g₀ g_bg T')
             + rawTensorConnLapSmooth g₀ 0 2 (T − T')
@@ -926,21 +1100,20 @@ rfns(∇^a RHSarm)(x)
   ≤ Cmid · ∑_{q ≤ a+2} rfns(∇^q (T − T'))(x) · ∑_{l ≤ a+2−q} rfns(∇^l coeff)(x).
 ```
 
-**The chart→intrinsic content.**  By the chart-polynomial difference
-`chartDeTurckRicciRHS_sub_eq_principalSymbol_add_lowerOrder` grounded against the intrinsic operator
-(`deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS`), the RHS difference is a finite sum of
-bilinear monomials, each a product of fixed (per-pair-smooth) undifferenced curvature / metric /
-Christoffel / inverse-Gram coefficient data `coeff_k(g₀ + T, g₀ + T')` with a single `(T − T')` jet of
-chart order `≤ 2`.  Realized intrinsically, each monomial is a parallel (metric-contraction, `∇g = 0`)
-covariant-bilinear product reading `∇^{≤ 2}(T − T')`, whose order-`a` covariant Leibniz double grid
-(`ParallelTensorProduct.exists_norm_iteratedCovGrad_prod_le`) bounds `rfns(∇^a monomial)(x)` by the
-diagonal product grid of the `∇^{≤ a+2}(T − T')` jet against the realized coefficient jets
-`rfns(∇^{≤ a+2−q} coeff)`; merging the finitely many monomial coefficient columns into the single
-realized coefficient field `coeff` gives the displayed diagonal grid.  The chart-locality-free
-realization of the monomial coefficient data as an intrinsic smooth section `coeff` and the parallel
-covariant-bilinear product structure has **no on-disk antecedent** (the chart→intrinsic globalization of
-the coefficient data is the irreducible open analytic sub-program); its body is `sorry`, and consumers
-transitively depend on its `sorryAx`.
+It is **proved** (no `sorry` of its own) by combining two ingredients:
+* the single-factor covariant-jet bound `deTurckRHSArmDiff_iteratedCovGrad_singleFactor_jet`
+  (`rfns(∇^a RHSarm)(x) ≤ C · ∑_{q ≤ a+2} rfns(∇^q (T − T'))(x)`, itself assembled from the
+  per-chart raw-component posit
+  `deTurckRHSArmDiff_iteratedCovGrad_rawComponentSq_domination_on_pouTsupport` via the reverse
+  fibre-norm/raw-component bridge and an atlas maximum), and
+* the positive intrinsic coefficient column `exists_positiveFloor_intrinsicCoeff` (the metric tensor
+  `coeff := metricSmoothCcTensor g₀`, `s = 2`, with `1 ≤ rfns(coeff)(x)` everywhere — **proved**).
+
+Taking `Cmid := C`, each single-factor term `C · rfns(∇^q (T − T'))(x)` (window `q ≤ a + 2`) is lifted
+to the diagonal term `C · rfns(∇^q (T − T'))(x) · ∑_{l ≤ a+2−q} rfns(∇^l coeff)(x)` by the positive
+coefficient floor `1 ≤ ∑_{l ≤ a+2−q} rfns(∇^l coeff)(x)` (always contains the `l = 0` term
+`rfns(coeff)(x) ≥ 1` since `q ≤ a + 2` makes the window nonempty).  Consumers transitively depend on the
+per-chart raw-component posit's `sorryAx`.
 
 **Per-pair, not ball-uniform.**  The constant `Cmid` lives inside the per-pair statement (it is allowed
 to depend on `T, T'` through the metric-path coefficient data), so no ball-uniformity is required.
@@ -970,7 +1143,46 @@ private theorem deTurckRHSArmDiff_iteratedCovGrad_parallelBilinearGrid_jet
               * ∑ l ∈ Finset.range (a + 2 + 1 - q),
                   riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + l) x
                     ((iteratedCovGrad (I := I) g₀ 0 s l coeff).toSection x) := by
-  sorry
+  classical
+  -- The positive intrinsic coefficient column (`1 ≤ rfns(coeff)` everywhere): the metric tensor.
+  obtain ⟨s, coeff, hcoeff_floor⟩ := exists_positiveFloor_intrinsicCoeff (I := I) (M := M) g₀
+  -- The single-factor covariant-jet bound of the RHS-arm at this `(T, T')`.
+  obtain ⟨C, hC_nn, hsingle⟩ :=
+    deTurckRHSArmDiff_iteratedCovGrad_singleFactor_jet (I := I) (M := M) g₀ g_bg a
+      T T' hδ_lt hδ hδ'_lt hδ'
+  refine ⟨s, coeff, C, hC_nn, fun x => ?_⟩
+  refine (hsingle x).trans ?_
+  -- Abbreviate the difference-jet column entries (window `q ≤ a + 2`).
+  set Wq : ℕ → ℝ := fun q =>
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection x) with hWq_def
+  have hWq_nn : ∀ q, 0 ≤ Wq q := fun q =>
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + q) x _
+  -- The coefficient column at gradient order `q`: `∑_{l ≤ a+2−q} rfns(∇^l coeff)(x)`, with `1 ≤` floor.
+  set Ccol : ℕ → ℝ := fun q =>
+    ∑ l ∈ Finset.range (a + 2 + 1 - q),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + l) x
+        ((iteratedCovGrad (I := I) g₀ 0 s l coeff).toSection x) with hCcol_def
+  have hCcol_floor : ∀ q, q ≤ a + 2 → (1 : ℝ) ≤ Ccol q := by
+    intro q hq
+    rw [hCcol_def]
+    have hmem : 0 ∈ Finset.range (a + 2 + 1 - q) := by
+      rw [Finset.mem_range]; omega
+    have hl0 : (1 : ℝ) ≤
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + 0) x
+          ((iteratedCovGrad (I := I) g₀ 0 s 0 coeff).toSection x) :=
+      hcoeff_floor x
+    refine le_trans hl0 ?_
+    exact Finset.single_le_sum
+      (f := fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + l) x
+        ((iteratedCovGrad (I := I) g₀ 0 s l coeff).toSection x))
+      (fun l _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (s + l) x _) hmem
+  -- Each single-factor term `C · Wq q` (window `q ≤ a + 2`) is dominated by the diagonal term
+  -- `C · Wq q · Ccol q` via the floor `1 ≤ Ccol q`.
+  refine mul_le_mul_of_nonneg_left (Finset.sum_le_sum (fun q hq => ?_)) hC_nn
+  have hq' : q ≤ a + 2 := Nat.lt_succ_iff.mp (Finset.mem_range.mp hq)
+  calc Wq q = Wq q * 1 := (mul_one _).symm
+    _ ≤ Wq q * Ccol q := mul_le_mul_of_nonneg_left (hCcol_floor q hq') (hWq_nn q)
 
 /-- **(The genuine chart→intrinsic per-pair order-`a` covariant-jet bound of the Ricci–DeTurck
 right-hand-side arm of the sealed remainder difference — PROVED from the parallel-bilinear diagonal-grid
