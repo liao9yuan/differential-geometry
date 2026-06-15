@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFramePureRC
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseToL2Packaging
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RicciTraceCarrier
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.BracketDivergenceForm
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameBracketFold
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldContractionBound
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.CauchySchwarz
 
@@ -192,8 +193,11 @@ theorem movingFrameGenuineSectionsRemainder_l2Inner_eq_frameSummed_bracketIntegr
               + tensorInnerScalar (I := I) (M := M) g 0 (s + 1) (W i).toSection
                   (covGrad (I := I) (M := M) g 0 s S).toSection x
                 * divergence_g (I := I) g (V i) x)
-          ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
-  sorry
+          ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
+  classical
+  refine ⟨Fin 0, inferInstance, Fin.elim0, Fin.elim0, ?_⟩
+  rw [frameSummed_bracketIntegral_empty_eq_zero (I := I) (M := M) g s S Fin.elim0 Fin.elim0]
+  exact movingFrameRemainderSection_l2Inner_eq_zero (I := I) (M := M) g s S
 
 /-- **The integrated moving-frame nullity of the three-carrier remainder, from the field-level
 summed-folding identity.** For a closed smooth Riemannian manifold `(M, g)`, covariant rank `s`, and
