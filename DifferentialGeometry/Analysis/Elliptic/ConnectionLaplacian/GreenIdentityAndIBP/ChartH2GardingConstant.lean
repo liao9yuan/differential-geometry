@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.L2Bound
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingReverseHebey
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.IntegratedOrder2Garding
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.IntegratedCurvatureCrossBound
 
 /-!
 # The quantitative order-`2` chart-`H²` Gårding constant for `(0, 2)`-tensors
@@ -113,7 +114,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-/-- **The integrated curvature cross-bound (deferred analytic input).** There is a nonnegative
+/-- **The integrated curvature cross-bound.** There is a nonnegative
 constant `Ccross`, uniform in `T`, such that, for every smooth compactly-supported `(0, 2)`-tensor
 field `T`, the one-sided `L²` curvature cross-term — minus the global metric pairing of the
 rough-Laplacian / covariant-gradient commutator defect `Curv T := Δ_∇(∇T) − ∇(Δ_∇ T)` against the
@@ -124,23 +125,32 @@ gradient field `∇T := covGrad g 0 2 T` — is bounded by the first-order Sobol
 
 This is the exact `hcross` hypothesis of the integrated order-`2` Gårding reduction
 `secondCovGrad_l2NormSq_le_of_cross_bound` (`IntegratedOrder2Garding.lean`) at rank `s = 2`. It is
-the *integrated* curvature content of the route, posited here as a single, honestly-labelled deferred
-input and the *only* `sorry` underlying every other declaration in this file. The commutator defect
-`Δ_∇(∇T) − ∇(Δ_∇ T)` is `pointwiseTensorCurv g 2 T`; its cross-pairing against `∇T` is the genuine
-Weitzenböck curvature integral, reduced through the integrated moving-frame nullity
-`movingFrameNullity_of_genuineCrossPairingValue` (`MovingFrameIntegratedNullity.lean`) to the genuine
-curvature fields `R(∇T)` (`GcurvSection g 2 T = pureRGenuineDiffOp g 0 3 (∇T)`) and `(∇R) T`
-(`genuineDiffCurvSection g 2 T`), then bounded by Cauchy–Schwarz (`abs_pointwiseTensorCurvPairing_le`)
-together with the uniform proportional sups of `R` and `∇R` over the compact manifold
-(`exists_proportional_pureRGenuineDiffOp`,
-`exists_continuous_riemannianFiberNormSq_riemannOp_tensorCov_proportional`,
-`exists_proportional_diffCurvOp`). The cross-pairing — unlike the defect's own fibre norm — is
-lower-order in `T` precisely because the `∇²T`-order moving-frame remainder integrates to zero against
-`∇T` on the closed manifold; the reduction never reads the gradient slot pointwise and never
-differentiates the curvature, so it carries no chart-jet debt (in contrast to the abandoned pointwise
-frame-jet route, whose slot-`0` Christoffel matching is false term-by-term on a normal manifold). The
-constant `Ccross` is uniform in `T` because the commutator defect is `ℝ`-linear in `T` and `R`, `∇R`
-are uniformly bounded on the compact manifold. -/
+the *integrated* curvature content of the route, assembled here as the rank-`2` instance of the
+rank-generic producer `exists_integrated_curvatureCrossBound`
+(`IntegratedCurvatureCrossBound.lean`). The commutator defect `Δ_∇(∇T) − ∇(Δ_∇ T)` is
+`pointwiseTensorCurv g 2 T`; its cross-pairing against `∇T` is the genuine Weitzenböck curvature
+integral, reduced through the integrated moving-frame nullity
+(`movingFrameRemainder_genuineSections_nullity` feeding
+`tensorL2Inner_genuineFields_covGrad_eq_pointwiseTensorCurv_of_movingFrameRemainder_nullity`,
+`MovingFrameRemainderDivergenceForm.lean`) to the genuine curvature fields `R(∇T)`
+(`GcurvSection g 2 T = pureRGenuineDiffOp g 0 3 (∇T)`) and `(∇R) T` (`genuineDiffCurvSection g 2 T`),
+then bounded by Cauchy–Schwarz (`abs_tensorL2Inner_le`) together with the uniform proportional sups of
+`R` and `∇R` over the compact manifold (`exists_proportional_pureRGenuineDiffOp`,
+`exists_uniform_riemannianFiberNormSq_appCc_le`) lifted to the `L²` norm
+(`tensorL2Norm_le_of_pointwise_fiberNormSq_bound_two`). The cross-pairing — unlike the defect's own
+fibre norm — is lower-order in `T` precisely because the `∇²T`-order moving-frame remainder integrates
+to zero against `∇T` on the closed manifold; the reduction never reads the gradient slot pointwise and
+never differentiates the curvature beyond the fixed smooth coefficient `∇R`, so it carries no chart-jet
+debt (in contrast to the abandoned pointwise frame-jet route, whose slot-`0` Christoffel matching is
+false term-by-term on a normal manifold). The constant `Ccross` is uniform in `T` because the
+commutator defect is `ℝ`-linear in `T` and `R`, `∇R` are uniformly bounded on the compact manifold.
+
+The single remaining `sorry` underneath this declaration is the integrated moving-frame nullity
+`movingFrameRemainder_genuineSections_nullity` — the genuinely-irreducible moving-frame third-order
+Bochner–Weitzenböck divergence content (the bracket-folding `bracketThirdCurvFieldFib = ∑ᵢ ∇_{Bᵢ} W`
+of the second-Bianchi / frame-Ricci identity, integrating to zero by
+`integral_frameSummed_bracketCovDeriv_combined_eq_zero`); consumers transitively depend on `sorryAx`
+through that single named node. -/
 theorem exists_Ccross_for_secondCovGrad
     (g : SmoothRiemannianMetric I M) :
     ∃ Ccross : ℝ, 0 ≤ Ccross ∧
@@ -157,7 +167,7 @@ theorem exists_Ccross_for_secondCovGrad
               tensorL2Norm (I := I) (M := M) g 0 2 T.toFun *
                 tensorL2Norm (I := I) (M := M) g 0 (2 + 1)
                   (covGrad (I := I) (M := M) g 0 2 T).toFun) :=
-  sorry
+  exists_integrated_curvatureCrossBound (I := I) (M := M) g 2
 
 set_option linter.unusedSectionVars false in
 /-- **The covariant order-`2` Gårding constant.** There is a nonnegative constant `Cg`, uniform in
