@@ -3,6 +3,9 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapIterL2WtwokTwoBound
 import DifferentialGeometry.Geometry.Connection.Laplacian.RoughLaplacianSecondCovGradL2Bound
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingReverseHebey
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
+import DifferentialGeometry.Geometry.Connection.TensorNabla.HomFieldActionIteratedCovGradWindow
+import DifferentialGeometry.Analysis.Sobolev.Embedding.RawConnLapToHsOrderDropping
 
 /-!
 # The all-orders intrinsic Gårding / interior-elliptic-regularity bound
@@ -130,6 +133,70 @@ theorem exists_secondCovGrad_l2NormSq_le_rawConnLap_rankGen
   refine ⟨2 + 2 * Ccross, by positivity, fun S => ?_⟩
   exact secondCovGrad_l2NormSq_le_of_cross_bound (I := I) (M := M) g s S Ccross hCcross (hcross S)
 
+/-- **Norm-level composition of iterated covariant gradients.** Applying `i` further covariant
+gradients to the `j`-th covariant jet `∇^j S` produces a tensor whose intrinsic metric `L²` norm
+equals that of the `(j + i)`-fold iterated gradient of `S`. The two sections live in the ranks
+`(s + j) + i` and `s + (j + i)` (equal as naturals); their underlying fibre values are
+heterogeneously equal, so the pointwise intrinsic fibre norms agree (`rfns_iteratedCovGrad_comp`) and
+hence so do the integrated `L²` norms. -/
+private theorem norm_iteratedCovGrad_comp
+    (g : SmoothRiemannianMetric I M) (s j i : ℕ) (S : SmoothCcTensor g 0 s) :
+    ‖iteratedCovGrad g 0 (s + j) i (iteratedCovGrad g 0 s j S)‖ =
+      ‖iteratedCovGrad g 0 s (j + i) S‖ := by
+  have hsq :
+      ‖iteratedCovGrad g 0 (s + j) i (iteratedCovGrad g 0 s j S)‖ ^ 2 =
+        ‖iteratedCovGrad g 0 s (j + i) S‖ ^ 2 := by
+    rw [← tensorL2Norm_toFun_eq_norm (I := I) (M := M) g
+        (iteratedCovGrad g 0 (s + j) i (iteratedCovGrad g 0 s j S)),
+      ← tensorL2Norm_toFun_eq_norm (I := I) (M := M) g (iteratedCovGrad g 0 s (j + i) S),
+      tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g
+        ((s + j) + i) (iteratedCovGrad g 0 (s + j) i (iteratedCovGrad g 0 s j S)),
+      tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g
+        (s + (j + i)) (iteratedCovGrad g 0 s (j + i) S)]
+    refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
+    exact rfns_iteratedCovGrad_comp (I := I) (M := M) g 0 s j i S x
+  have h1 : 0 ≤ ‖iteratedCovGrad g 0 (s + j) i (iteratedCovGrad g 0 s j S)‖ := norm_nonneg _
+  have h2 : 0 ≤ ‖iteratedCovGrad g 0 s (j + i) S‖ := norm_nonneg _
+  nlinarith [hsq, h1, h2]
+
+/-- **The iterated-gradient `L²` bound of the single-level commutator defect (the all-orders
+curvature-derivative input).** For a closed smooth Riemannian manifold `(M, g)` and every covariant
+rank `s`, there is a nonnegative per-gradient-order constant family `K : ℕ → ℝ`, uniform in `S`, such
+that for every gradient order `p` the `L²` norm of the `p`-fold covariant gradient of the single-level
+rough-Laplacian / covariant-gradient commutator defect `pointwiseTensorCurv g s S = Δ_∇(∇S) − ∇(Δ_∇ S)`
+is controlled by the covariant-gradient norms of `S` up to order `p + 1`:
+```
+‖∇^p (pointwiseTensorCurv g s S)‖_{L²} ≤ K p · ∑_{a ∈ range (p + 2)} ‖∇^a S‖_{L²},
+```
+for every smooth compactly-supported `(0, s)`-tensor field `S`, where `∇^a S = iteratedCovGrad g 0 s a
+S` and `∇^p (·) = iteratedCovGrad g 0 (s + 1) p (·)`.
+
+**Why this is TRUE (and the genuine carried content).** The defect is a *first-order* curvature
+contraction of `(∇S, S)`: by the moving-frame third-order Bochner–Weitzenböck `∇²S`-elimination
+(`pointwiseTensorCurv_fiberNormSq_le_first_order`) it equals a finite contraction of the Riemann
+curvature `R` against `∇S` plus the differentiated curvature `∇R` against `S`. Differentiating `p`
+times, the Leibniz rule produces a finite sum of contractions of the iterated curvature derivatives
+`∇^q R` (`q ≤ p + 1`) against the gradients `∇^b S` (`b ≤ p + 1`); each `∇^q R` is a continuous, hence
+uniformly fibre-bounded, field on the compact manifold, so the pointwise fibre norm of
+`∇^p (defect)` is bounded by `(∑_q ‖∇^q R‖_∞)² · ∑_{b ≤ p + 1} rfns(∇^b S)`, which integrates to the
+stated `L²` bound. This is exactly the all-orders `∇^a R` content the iterated commutator bookkeeping
+needs, isolated here as one honestly-labelled node (the `p = 0` case is the rank-generic single-level
+defect bound `exists_pointwiseTensorCurv_fiberNormSq_bound`, already proved sorry-free).
+
+**Non-vacuity.** With `K p = 0` the bound forces `∇^p (pointwiseTensorCurv g s S) = 0` for all `S`; at
+`p = 0` this is `pointwiseTensorCurv g s S = 0`, i.e. the rough Laplacian and the covariant gradient
+commute, which is *false* on a non-flat manifold already at `s = 0` (the defect is the Ricci
+contraction `Ric(∇f, ·) ≠ 0` on a positively-curved `M`). So the constant family `K` genuinely
+envelopes the per-order curvature-derivative sups. It is never assumed in a headline; consumers
+transitively depend on `sorryAx` through this single all-orders curvature node. -/
+theorem exists_iteratedCovGrad_pointwiseTensorCurv_l2Norm_le
+    (g : SmoothRiemannianMetric I M) (s : ℕ) :
+    ∃ K : ℕ → ℝ, (∀ p, 0 ≤ K p) ∧
+      ∀ (p : ℕ) (S : SmoothCcTensor g 0 s),
+        ‖iteratedCovGrad g 0 (s + 1) p (pointwiseTensorCurv (I := I) (M := M) g s S)‖ ≤
+          K p * ∑ a ∈ Finset.range (p + 2), ‖iteratedCovGrad g 0 s a S‖ :=
+  sorry
+
 /-! ### The iterated rough-Laplacian / covariant-gradient commutator
 
 The bootstrap below rests on one all-orders curvature input: the `m`-fold *iterated commutator*
@@ -139,6 +206,160 @@ expands into a finite sum of contractions of the covariant derivatives `∇^a R`
 Riemann curvature against the gradients `∇^b S` (`b ≤ m`), all of which are uniformly fibre-bounded on
 the compact manifold (each `∇^a R` is a continuous, hence bounded, field). Consequently the `L²` norm
 of the iterated commutator is controlled by the gradient norms `‖∇^a S‖_{L²}` for `a ≤ m`. -/
+
+set_option linter.style.show false in
+/-- **The strengthened telescoping induction for the iterated commutator.** Proved by induction on the
+commutator order `m`, simultaneously for ALL covariant ranks `s` and ALL extra gradient orders `p`:
+there is a per-gradient-order constant family `Cfun : ℕ → ℝ`, uniform in `S`, with
+```
+‖∇^p ([Δ_∇, ∇^m] S)‖_{L²} ≤ Cfun p · ∑_{a ∈ range (m + p + 1)} ‖∇^a S‖_{L²},
+```
+where `[Δ_∇, ∇^m] S = Δ_∇(∇^m S) − ∇^m(Δ_∇ S)` (`∇^m S = iteratedCovGrad g 0 s m S`,
+`Δ_∇ = rawTensorConnLapSmooth`) and `∇^p (·) = iteratedCovGrad g 0 (s + m) p (·)`.
+
+The `p`-simultaneous strengthening is what makes the telescope close: the recursion
+`[Δ_∇, ∇^{m+1}] S = pointwiseTensorCurv g (s + m) (∇^m S) + ∇([Δ_∇, ∇^m] S)`
+(the single-level commutator equation `pointwiseTensorCurv_commutator_eq` at rank `s + m` applied to
+`∇^m S`, peeling the outermost gradient) makes `∇^p` of the second arm an `(p + 1)`-fold gradient of
+the order-`m` commutator — handled by the induction hypothesis at gradient order `p + 1` — while
+`∇^p` of the first arm is the posited iterated-gradient defect bound
+`exists_iteratedCovGrad_pointwiseTensorCurv_l2Norm_le` at rank `s + m`, whose `∇^m S`-jets reindex onto
+the `S`-jets `∇^{m + a} S` (`norm_iteratedCovGrad_comp`). Both arms land in the order budget
+`∑_{a ∈ range ((m + 1) + p + 1)}`, so `Cfun_{m+1} p := K p + Cfun_m (p + 1)`. The base `m = 0` is the
+vanishing commutator `[Δ_∇, ∇^0] S = Δ_∇ S − Δ_∇ S = 0`. -/
+private theorem iteratedRoughLapGrad_commutator_l2Norm_le_aux
+    (g : SmoothRiemannianMetric I M) (m : ℕ) :
+    ∀ s : ℕ, ∃ Cfun : ℕ → ℝ, (∀ p, 0 ≤ Cfun p) ∧
+      ∀ (p : ℕ) (S : SmoothCcTensor g 0 s),
+        ‖iteratedCovGrad g 0 (s + m) p
+            (rawTensorConnLapSmooth (I := I) g 0 (s + m) (iteratedCovGrad g 0 s m S) -
+              iteratedCovGrad g 0 s m (rawTensorConnLapSmooth (I := I) g 0 s S))‖ ≤
+          Cfun p * ∑ a ∈ Finset.range (m + p + 1), ‖iteratedCovGrad g 0 s a S‖ := by
+  induction m with
+  | zero =>
+    intro s
+    refine ⟨fun _ => 0, fun _ => le_refl _, fun p S => ?_⟩
+    -- `[Δ_∇, ∇^0] S = Δ_∇ S − Δ_∇ S = 0`, so its `p`-fold gradient is `0`.
+    have hcomm0 :
+        rawTensorConnLapSmooth (I := I) g 0 (s + 0) (iteratedCovGrad g 0 s 0 S) -
+            iteratedCovGrad g 0 s 0 (rawTensorConnLapSmooth (I := I) g 0 s S) =
+          (0 : SmoothCcTensor g 0 (s + 0)) := by
+      simp only [iteratedCovGrad_zero, Nat.add_zero, sub_self]
+    rw [hcomm0]
+    have hz : iteratedCovGrad g 0 (s + 0) p (0 : SmoothCcTensor g 0 (s + 0)) =
+        (0 : SmoothCcTensor g 0 (s + 0 + p)) := by
+      have := iteratedCovGrad_sub (I := I) (M := M) g 0 (s + 0) p
+        (0 : SmoothCcTensor g 0 (s + 0)) (0 : SmoothCcTensor g 0 (s + 0))
+      simpa using this
+    rw [hz, norm_zero]
+    exact mul_nonneg (le_refl 0) (Finset.sum_nonneg (fun a _ => norm_nonneg _))
+  | succ m ih =>
+    intro s
+    -- The order-`m` constant at the SAME rank `s` (the induction hypothesis), and the posited
+    -- iterated-gradient defect constant at the shifted rank `s + m`.
+    obtain ⟨Cm, hCm_nn, hCm⟩ := ih s
+    obtain ⟨K, hK_nn, hK⟩ :=
+      exists_iteratedCovGrad_pointwiseTensorCurv_l2Norm_le (I := I) (M := M) g (s + m)
+    refine ⟨fun p => K p + Cm (p + 1), fun p => add_nonneg (hK_nn p) (hCm_nn (p + 1)),
+      fun p S => ?_⟩
+    -- The telescoping algebraic identity at the section level (fully explicit):
+    -- `[Δ_∇, ∇^{m+1}] S = pointwiseTensorCurv g (s+m) (∇^m S) + ∇([Δ_∇, ∇^m] S)`.
+    have hsplit :
+        rawTensorConnLapSmooth (I := I) g 0 (s + (m + 1)) (iteratedCovGrad g 0 s (m + 1) S) -
+            iteratedCovGrad g 0 s (m + 1) (rawTensorConnLapSmooth (I := I) g 0 s S) =
+          pointwiseTensorCurv (I := I) (M := M) g (s + m) (iteratedCovGrad g 0 s m S) +
+            covGrad (I := I) (M := M) g 0 (s + m)
+              (rawTensorConnLapSmooth (I := I) g 0 (s + m) (iteratedCovGrad g 0 s m S) -
+                iteratedCovGrad g 0 s m (rawTensorConnLapSmooth (I := I) g 0 s S)) := by
+      rw [iteratedCovGrad_succ (I := I) (M := M) g 0 s m S,
+        iteratedCovGrad_succ (I := I) (M := M) g 0 s m
+          (rawTensorConnLapSmooth (I := I) g 0 s S)]
+      show rawTensorConnLapSmooth (I := I) g 0 (s + m + 1)
+            (covGrad (I := I) (M := M) g 0 (s + m) (iteratedCovGrad g 0 s m S)) -
+          covGrad (I := I) (M := M) g 0 (s + m)
+            (iteratedCovGrad g 0 s m (rawTensorConnLapSmooth (I := I) g 0 s S)) =
+        pointwiseTensorCurv (I := I) (M := M) g (s + m) (iteratedCovGrad g 0 s m S) +
+          covGrad (I := I) (M := M) g 0 (s + m)
+            (rawTensorConnLapSmooth (I := I) g 0 (s + m) (iteratedCovGrad g 0 s m S) -
+              iteratedCovGrad g 0 s m (rawTensorConnLapSmooth (I := I) g 0 s S))
+      rw [pointwiseTensorCurv_commutator_eq (I := I) (M := M) g (s + m)
+          (iteratedCovGrad g 0 s m S),
+        covGrad_sub (I := I) (M := M) g 0 (s + m)]
+      abel
+    -- Abbreviations.
+    set comm_m : SmoothCcTensor g 0 (s + m) :=
+      rawTensorConnLapSmooth (I := I) g 0 (s + m) (iteratedCovGrad g 0 s m S) -
+        iteratedCovGrad g 0 s m (rawTensorConnLapSmooth (I := I) g 0 s S) with hcomm_m
+    set gradm : SmoothCcTensor g 0 (s + m) := iteratedCovGrad g 0 s m S with hgradm
+    set fullSum : ℝ := ∑ a ∈ Finset.range (m + 1 + p + 1),
+      ‖iteratedCovGrad g 0 s a S‖ with hfullSum
+    have hfullSum_nn : 0 ≤ fullSum :=
+      Finset.sum_nonneg (fun a _ => norm_nonneg _)
+    -- The `p`-fold gradient of the split, distributed by `iteratedCovGrad_add`.
+    rw [hsplit, iteratedCovGrad_add (I := I) (M := M) g 0 (s + (m + 1)) p]
+    -- Bound by the triangle inequality.
+    refine le_trans (norm_add_le _ _) ?_
+    -- Arm 1: the posited iterated-gradient defect bound at rank `s + m`, applied to `∇^m S`.
+    have harm1 :
+        ‖iteratedCovGrad g 0 (s + (m + 1)) p
+            (pointwiseTensorCurv (I := I) (M := M) g (s + m) gradm)‖ ≤
+          K p * fullSum := by
+      have hKb := hK p gradm
+      -- Reindex the `∇^m S`-jets `∇^a (∇^m S)` onto the `S`-jets `∇^{m + a} S`.
+      have hreindex : ∀ a, ‖iteratedCovGrad g 0 (s + m) a gradm‖ =
+          ‖iteratedCovGrad g 0 s (m + a) S‖ := by
+        intro a
+        rw [hgradm, norm_iteratedCovGrad_comp (I := I) (M := M) g s m a S]
+      rw [Finset.sum_congr rfl (fun a _ => hreindex a)] at hKb
+      -- The reindexed sum `∑_{a < p + 2} ‖∇^{m + a} S‖` injects into `fullSum`.
+      have hsub : ∑ a ∈ Finset.range (p + 2), ‖iteratedCovGrad g 0 s (m + a) S‖ ≤ fullSum := by
+        rw [hfullSum]
+        have hIco : ∑ a ∈ Finset.range (p + 2), ‖iteratedCovGrad g 0 s (m + a) S‖ =
+            ∑ b ∈ Finset.Ico m (m + (p + 2)), ‖iteratedCovGrad g 0 s b S‖ := by
+          rw [Finset.sum_Ico_eq_sum_range]
+          refine Finset.sum_congr ?_ (fun a _ => rfl)
+          congr 1
+          omega
+        rw [hIco]
+        refine Finset.sum_le_sum_of_subset_of_nonneg ?_ (fun b _ _ => norm_nonneg _)
+        intro b hb
+        rw [Finset.mem_Ico] at hb
+        rw [Finset.mem_range]
+        omega
+      calc ‖iteratedCovGrad g 0 (s + (m + 1)) p
+              (pointwiseTensorCurv (I := I) (M := M) g (s + m) gradm)‖
+          ≤ K p * ∑ a ∈ Finset.range (p + 2), ‖iteratedCovGrad g 0 s (m + a) S‖ := hKb
+        _ ≤ K p * fullSum := mul_le_mul_of_nonneg_left hsub (hK_nn p)
+    -- Arm 2: the induction hypothesis at gradient order `p + 1` on `[Δ_∇, ∇^m] S`.
+    have harm2 :
+        ‖iteratedCovGrad g 0 (s + (m + 1)) p
+            (covGrad (I := I) (M := M) g 0 (s + m) comm_m)‖ ≤
+          Cm (p + 1) * fullSum := by
+      -- `∇^p (∇ comm_m) = ∇^{p+1} comm_m` up to the norm-composition.
+      have hcomp :
+          ‖iteratedCovGrad g 0 (s + (m + 1)) p
+              (covGrad (I := I) (M := M) g 0 (s + m) comm_m)‖ =
+            ‖iteratedCovGrad g 0 (s + m) (p + 1) comm_m‖ := by
+        have h := norm_iteratedCovGrad_comp (I := I) (M := M) g (s + m) 1 p comm_m
+        rw [Nat.add_comm 1 p] at h
+        exact h
+      rw [hcomp]
+      have hCmb := hCm (p + 1) S
+      rw [← hcomm_m] at hCmb
+      -- `m + (p + 1) + 1 = m + 1 + p + 1`, so the order budget matches `fullSum`.
+      have hsum_eq : ∑ a ∈ Finset.range (m + (p + 1) + 1), ‖iteratedCovGrad g 0 s a S‖ = fullSum := by
+        rw [hfullSum, show m + (p + 1) + 1 = m + 1 + p + 1 from by omega]
+      rw [hsum_eq] at hCmb
+      exact hCmb
+    -- Assemble: both arms over the common sum `fullSum`.
+    have hfinal : K p * fullSum + Cm (p + 1) * fullSum =
+        (K p + Cm (p + 1)) * fullSum := by ring
+    calc ‖iteratedCovGrad g 0 (s + (m + 1)) p
+            (pointwiseTensorCurv (I := I) (M := M) g (s + m) gradm)‖ +
+          ‖iteratedCovGrad g 0 (s + (m + 1)) p
+            (covGrad (I := I) (M := M) g 0 (s + m) comm_m)‖
+        ≤ K p * fullSum + Cm (p + 1) * fullSum := add_le_add harm1 harm2
+      _ = (K p + Cm (p + 1)) * fullSum := hfinal
 
 /-- **The `m`-fold iterated rough-Laplacian / covariant-gradient commutator (all-orders).** For a
 closed smooth Riemannian manifold `(M, g)`, every covariant rank `s`, and every order `m`, there is a
@@ -169,19 +390,25 @@ and the iterated covariant gradient commute; this is *false* on a non-flat manif
 `s = 0`, where the defect is the Ricci contraction `Ric(∇f, ·) ≠ 0` on a positively-curved `M`. So the
 constant `C` genuinely envelopes the per-order curvature-derivative sups.
 
-This is the single posited all-orders curvature input of the elliptic bootstrap below. It is the
-all-orders (`m`-fold) extension of the `m = 1` single-level defect bound — itself the rank-generic
-integrated cross-bound `exists_integrated_curvatureCrossBound` assembled from the first-order fibre
-leaf `pointwiseTensorCurv_fiberNormSq_le_first_order`. It is never assumed in a headline; consumers
-transitively depend on `sorryAx` through this node alongside that first-order curvature leaf. -/
+It is the all-orders (`m`-fold) extension of the `m = 1` single-level defect bound — itself the
+rank-generic integrated cross-bound `exists_integrated_curvatureCrossBound` assembled from the
+first-order fibre leaf `pointwiseTensorCurv_fiberNormSq_le_first_order`. The telescope below rests on
+the single posited all-orders curvature-derivative node
+`exists_iteratedCovGrad_pointwiseTensorCurv_l2Norm_le` (the iterated-gradient `L²` bound of the
+single-level defect); it is never assumed in a headline; consumers transitively depend on `sorryAx`
+through that node alongside the first-order curvature leaf. -/
 theorem exists_iteratedRoughLapGrad_commutator_l2Norm_le
     (g : SmoothRiemannianMetric I M) (s m : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ S : SmoothCcTensor g 0 s,
         ‖rawTensorConnLapSmooth (I := I) g 0 (s + m) (iteratedCovGrad g 0 s m S) -
             iteratedCovGrad g 0 s m (rawTensorConnLapSmooth (I := I) g 0 s S)‖ ≤
-          C * ∑ a ∈ Finset.range (m + 1), ‖iteratedCovGrad g 0 s a S‖ :=
-  sorry
+          C * ∑ a ∈ Finset.range (m + 1), ‖iteratedCovGrad g 0 s a S‖ := by
+  obtain ⟨Cfun, _hCfun_nn, hbound⟩ :=
+    iteratedRoughLapGrad_commutator_l2Norm_le_aux (I := I) (M := M) g m s
+  refine ⟨Cfun 0, _hCfun_nn 0, fun S => ?_⟩
+  have h := hbound 0 S
+  simpa only [iteratedCovGrad_zero, Nat.add_zero, Nat.add_zero] using h
 
 /-- The inner-applied iterate shift: applying `i` rough Laplacians to `Δ_∇ S` is the `(i + 1)`-th
 iterate of `S`. Both unfold to `i + 1` successive applications of `rawTensorConnLapSmooth`. -/
