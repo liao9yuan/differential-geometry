@@ -309,8 +309,8 @@ theorem realizedDeTurckFamily_exists
   -- The genuine second-order quasilinear maximal-regularity engine, with zero initial
   -- perturbation (so `g_DT 0 = g₀`) and a supercritical spectral order `a` (so the
   -- Sobolev tame estimates of the second-order Nemytskii nonlinearity close).
-  set a : ℕ := Module.finrank ℝ E + 2 with ha_def
-  have ha_super : Module.finrank ℝ E + 4 < 2 * (a + 1) := by rw [ha_def]; omega
+  set a : ℕ := 2 * Module.finrank ℝ E + 3 with ha_def
+  have ha_super : 2 * Module.finrank ℝ E + 3 ≤ a := by rw [ha_def]
   obtain ⟨T₀, hT₀_pos, hsol⟩ :=
     deTurckRicci_quasilinear_maxreg_solution (I := I) (M := M) g₀ g_bg a ha_super
   set T : ℝ := min T₀ 1 with hT_def

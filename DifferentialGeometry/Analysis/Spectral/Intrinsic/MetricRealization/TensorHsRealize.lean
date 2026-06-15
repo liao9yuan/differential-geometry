@@ -137,6 +137,38 @@ theorem ccTensorBilin_apply (g : SmoothRiemannianMetric I M)
       ccTensorModel (I := I) g T x ![v, w] :=
   bilinFormToModel_symm_apply E (ccTensorModel (I := I) g T x) v w
 
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **The pointwise tensor Cauchy–Schwarz bound for the extracted bilinear form.**
+
+The bilinear evaluation `ccTensorBilin g₀ T x v w` (which recovers the `(0,2)`-tensor value
+`T(x)(v, w)`) is controlled by the Riemannian fibre norm of the tensor at `x` times the
+`g₀`-lengths of the two arguments:
+
+  `|ccTensorBilin g₀ T x v w| ≤ ‖T.toSection x‖_g · √(g₀ x v v) · √(g₀ x w w)`,
+
+where `‖·‖_g` is the fibre norm of the installed `RiemannianBundle` instance
+`tensorRS_riemannianBundle g₀ 0 2`.  This is the textbook pointwise tensor Cauchy–Schwarz
+inequality for a covariant `(0,2)`-tensor: pairing `T(x)` with the rank-one cotensor
+`v♭ ⊗ w♭` (the metric duals of `v, w`) recovers `T(x)(v, w)`, the bilinear
+metric-induced Cauchy–Schwarz `tensorInnerPointwise_sq_le_mul` bounds it by the fibre norms,
+and `‖v♭ ⊗ w♭‖_g = √(g₀ x v v) · √(g₀ x w w)`.
+
+This is the single named geometric leaf of the spectral `C⁰`-control bridge
+`ccTensorBilinSymm_gFibreOpBound_le_spectral_lossy`: composed with the supercritical
+Sobolev embedding `H^{2k} ↪ C⁰` and the PoU → spectral norm comparison, it turns a small
+`H^σ` ball into the fibre operator-norm smallness `gFibreOpBound`. -/
+theorem ccTensorBilin_abs_le_fibreNorm_mul_sqrt
+    (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) (x : M)
+    (v w : TangentSpace I x) :
+    letI : Bundle.RiemannianBundle
+        (fun b : M => Tensor0SBundle.TensorRSSpace 0 2 I b) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 2
+    |ccTensorBilin (I := I) g₀ T x v w| ≤
+      ‖(T.toSection x : Tensor0SBundle.TensorRSSpace 0 2 I x)‖ *
+        Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) :=
+  sorry
+
 /-- For two smooth tangent sections `Y, W`, the scalar
 `x ↦ ccTensorBilin T x (Y x) (W x)` is `C^∞`.
 
