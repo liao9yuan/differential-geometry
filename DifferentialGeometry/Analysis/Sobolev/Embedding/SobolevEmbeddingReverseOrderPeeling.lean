@@ -223,7 +223,7 @@ private lemma abs_apply_basisTupleE_le_opNorm {m : ℕ}
 the chart-frame scalar component post-composed with the chart inverse and the
 Euclidean representation map.  (A non-private analogue of the forward file's
 `rawPull`, usable across tensor valences.) -/
-private def rawPullR (g : SmoothRiemannianMetric I M) (r s : ℕ)
+def rawPullR (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
@@ -231,7 +231,7 @@ private def rawPullR (g : SmoothRiemannianMetric I M) (r s : ℕ)
     ∘ (extChartAt I α).symm
     ∘ (toEuclidean (E := E)).symm
 
-private lemma rawPullR_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
+lemma rawPullR_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
@@ -241,7 +241,7 @@ private lemma rawPullR_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
       rawPullR (I := I) (M := M) g r s S α Idx Jdx := rfl
 
 /-- `rawPullR` is `C^∞` on the (open) Euclidean chart target. -/
-private lemma rawPullR_contDiffOn (g : SmoothRiemannianMetric I M) (r s : ℕ)
+lemma rawPullR_contDiffOn (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
@@ -251,7 +251,7 @@ private lemma rawPullR_contDiffOn (g : SmoothRiemannianMetric I M) (r s : ℕ)
     g r s S α Idx Jdx).congr (fun y hy => ?_)
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy]; rfl
 
-private lemma rawPullR_contDiffAt (g : SmoothRiemannianMetric I M) (r s : ℕ)
+lemma rawPullR_contDiffAt (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E))
@@ -278,20 +278,20 @@ private lemma chartPushedRaw_eventuallyEq_rawPullR (g : SmoothRiemannianMetric I
 all component multi-index pairs of the magnitude of the chart-pulled raw
 component.  This is the (square-root-free) `L¹` analogue of the order-`0`
 Hilbert-Schmidt content. -/
-private def zeroContentR (g : SmoothRiemannianMetric I M) (r s : ℕ)
+def zeroContentR (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) (y : EuclN) : ℝ :=
   ∑ q : (Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin s → Fin (Module.finrank ℝ E)),
     |rawPullR (I := I) (M := M) g r s S α q.1 q.2 y|
 
-private lemma zeroContentR_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
+lemma zeroContentR_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) (y : EuclN) :
     0 ≤ zeroContentR (I := I) (M := M) g r s S α y :=
   Finset.sum_nonneg (fun _ _ => abs_nonneg _)
 
 /-- A single chart-pulled raw component magnitude is bounded by the order-`0`
 content. -/
-private lemma abs_rawPullR_le_zeroContentR (g : SmoothRiemannianMetric I M)
+lemma abs_rawPullR_le_zeroContentR (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) (y : EuclN) :
@@ -348,7 +348,7 @@ private lemma fderiv_rawPullR_single_eq (g : SmoothRiemannianMetric I M) (r s : 
     rw [hform, h_fderiv_eq]
   linarith [hform']
 
-private lemma exists_iteratedFDeriv_norm_bound_on_compactR
+lemma exists_iteratedFDeriv_norm_bound_on_compactR
     {f : EuclN → ℝ} {s : Set EuclN} (hf : ContDiffOn ℝ ∞ f s) (hs : IsOpen s)
     {K : Set EuclN} (hK : IsCompact K) (hKs : K ⊆ s) (N : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ l ≤ N, ∀ y ∈ K,
@@ -635,7 +635,7 @@ compact kernel `chartImagePOUTsupport α`,
 `‖D^l (rawPullR (∇^p T) Idx Jdx) y‖ ≤ C · ∑_{i ≤ l} zeroContentR (∇^{p+i} T) α y`.
 The single constant `C` covers all orders `l ≤ j`, which is what the Leibniz
 lower-order term of the inductive step consumes. -/
-private lemma iteratedFDeriv_rawPullR_le_zeroContent_sum
+lemma iteratedFDeriv_rawPullR_le_zeroContent_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P : ℕ) :
     ∀ j : ℕ, j ≤ P → ∃ C : ℝ, 0 ≤ C ∧
