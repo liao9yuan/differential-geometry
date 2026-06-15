@@ -6,6 +6,7 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingReverseHe
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
 import DifferentialGeometry.Geometry.Connection.TensorNabla.HomFieldActionIteratedCovGradWindow
 import DifferentialGeometry.Analysis.Sobolev.Embedding.RawConnLapToHsOrderDropping
+import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorCurvFirstOrderSection
 
 /-!
 # The all-orders intrinsic Gårding / interior-elliptic-regularity bound
@@ -194,8 +195,116 @@ theorem exists_iteratedCovGrad_pointwiseTensorCurv_l2Norm_le
     ∃ K : ℕ → ℝ, (∀ p, 0 ≤ K p) ∧
       ∀ (p : ℕ) (S : SmoothCcTensor g 0 s),
         ‖iteratedCovGrad g 0 (s + 1) p (pointwiseTensorCurv (I := I) (M := M) g s S)‖ ≤
-          K p * ∑ a ∈ Finset.range (p + 2), ‖iteratedCovGrad g 0 s a S‖ :=
-  sorry
+          K p * ∑ a ∈ Finset.range (p + 2), ‖iteratedCovGrad g 0 s a S‖ := by
+  classical
+  -- The first-order Hom-field section identity: `Curv S = H_R · ∇S + H_dR · S`.
+  obtain ⟨H_R, H_dR, hsec⟩ :=
+    exists_pointwiseTensorCurv_firstOrder_homField_section (I := I) (M := M) g s
+  -- The two order-shifted windowed fibre bounds (pointwise `rfns`):
+  --  • `H_R` acts on `∇S = ∇^1 S` (a `(0, s + 1)`-tensor): jet window `j = 1`.
+  --  • `H_dR` acts on `S = ∇^0 S` (a `(0, s)`-tensor): jet window `j = 0`.
+  obtain ⟨ccR, hccR_nn, hccR⟩ :=
+    exists_appFullSec_on_jet_iteratedCovGrad_window_bound (I := I) (M := M) g 0 s 1 (s + 1) H_R
+  obtain ⟨ccdR, hccdR_nn, hccdR⟩ :=
+    exists_appFullSec_on_jet_iteratedCovGrad_window_bound (I := I) (M := M) g 0 s 0 (s + 1) H_dR
+  -- The combined constant: `K p = √(2 ccR p + 2 ccdR p)`.
+  refine ⟨fun p => Real.sqrt (2 * ccR p + 2 * ccdR p), fun p => Real.sqrt_nonneg _,
+    fun p S => ?_⟩
+  set Kp : ℝ := Real.sqrt (2 * ccR p + 2 * ccdR p) with hKp_def
+  have hKp_nn : 0 ≤ Kp := Real.sqrt_nonneg _
+  have hKp_sq : Kp ^ 2 = 2 * ccR p + 2 * ccdR p := by
+    rw [hKp_def, Real.sq_sqrt (by have := hccR_nn p; have := hccdR_nn p; linarith)]
+  -- Abbreviate the `S`-jet fibre norms.
+  set rfnsS : ℕ → M → ℝ := fun a x =>
+    riemannianFiberNormSq (I := I) (M := M) g 0 (s + a) x ((iteratedCovGrad g 0 s a S).toSection x)
+    with hrfnsS_def
+  have hrfnsS_nn : ∀ a x, 0 ≤ rfnsS a x := fun a x =>
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + a) x _
+  -- The two `appFullSec` arms of the section identity.
+  set AR : SmoothCcTensor g 0 (s + 1) :=
+    appFullSec (I := I) (M := M) g 0 (s + 1) (s + 1) H_R (covGrad (I := I) (M := M) g 0 s S)
+    with hAR_def
+  set AdR : SmoothCcTensor g 0 (s + 1) :=
+    appFullSec (I := I) (M := M) g 0 s (s + 1) H_dR S with hAdR_def
+  -- The `p`-fold gradient of the section identity, split additively.
+  have hgradsplit :
+      iteratedCovGrad g 0 (s + 1) p (pointwiseTensorCurv (I := I) (M := M) g s S) =
+        iteratedCovGrad g 0 (s + 1) p AR + iteratedCovGrad g 0 (s + 1) p AdR := by
+    rw [hsec S, ← hAR_def, ← hAdR_def, iteratedCovGrad_add (I := I) (M := M) g 0 (s + 1) p]
+  -- Pointwise `rfns` bound for the `p`-fold gradient of `Curv S`.
+  have hpt : ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g 0 ((s + 1) + p) x
+          ((iteratedCovGrad g 0 (s + 1) p (pointwiseTensorCurv (I := I) (M := M) g s S)).toSection x) ≤
+        Kp ^ 2 * ∑ a ∈ Finset.range (p + 2), rfnsS a x := by
+    intro x
+    -- Split the fibre norm by `2`-subadditivity at the section level.
+    have happ :
+        (iteratedCovGrad g 0 (s + 1) p (pointwiseTensorCurv (I := I) (M := M) g s S)).toSection x =
+          (iteratedCovGrad g 0 (s + 1) p AR).toSection x +
+            (iteratedCovGrad g 0 (s + 1) p AdR).toSection x := by
+      rw [hgradsplit, SmoothCcTensor.toSection_add]; rfl
+    rw [happ]
+    refine le_trans (riemannianFiberNormSq_add_le (I := I) (M := M) g 0 ((s + 1) + p) x
+      ((iteratedCovGrad g 0 (s + 1) p AR).toSection x)
+      ((iteratedCovGrad g 0 (s + 1) p AdR).toSection x)) ?_
+    -- Window bound on the `H_R` arm (`j = 1`): `rfns(∇^p AR)(x) ≤ ccR p · ∑_{i < 1 + p} rfns(∇^{i+1} S)(x)`.
+    have hAR_w : riemannianFiberNormSq (I := I) (M := M) g 0 ((s + 1) + p) x
+          ((iteratedCovGrad g 0 (s + 1) p AR).toSection x) ≤
+        ccR p * ∑ i ∈ Finset.range (1 + p), rfnsS (i + 1) x := by
+      have h := hccR S p x
+      rw [hrfnsS_def]
+      simpa only [hAR_def] using h
+    -- Window bound on the `H_dR` arm (`j = 0`): `rfns(∇^p AdR)(x) ≤ ccdR p · ∑_{i < 1 + p} rfns(∇^i S)(x)`.
+    have hAdR_w : riemannianFiberNormSq (I := I) (M := M) g 0 ((s + 1) + p) x
+          ((iteratedCovGrad g 0 (s + 1) p AdR).toSection x) ≤
+        ccdR p * ∑ i ∈ Finset.range (1 + p), rfnsS i x := by
+      have h := hccdR S p x
+      have hreidx : ∀ i, riemannianFiberNormSq (I := I) (M := M) g 0 (s + (i + 0)) x
+            ((iteratedCovGrad g 0 s (i + 0) S).toSection x) = rfnsS i x := by
+        intro i; rw [hrfnsS_def]; simp only [Nat.add_zero]
+      rw [Finset.sum_congr rfl (fun i _ => hreidx i)] at h
+      simpa only [hAdR_def] using h
+    -- The `H_R` window (orders `1 … p + 1`) injects into the full `range (p + 2)` window.
+    have hsubR : ∑ i ∈ Finset.range (1 + p), rfnsS (i + 1) x ≤
+        ∑ a ∈ Finset.range (p + 2), rfnsS a x := by
+      have hIco : ∑ i ∈ Finset.range (1 + p), rfnsS (i + 1) x =
+          ∑ a ∈ Finset.Ico 1 (1 + (1 + p)), rfnsS a x := by
+        rw [Finset.sum_Ico_eq_sum_range]
+        refine Finset.sum_congr (by congr 1; omega) (fun i _ => by rw [Nat.add_comm 1 i])
+      rw [hIco]
+      refine Finset.sum_le_sum_of_subset_of_nonneg ?_ (fun a _ _ => hrfnsS_nn a x)
+      intro a ha
+      rw [Finset.mem_Ico] at ha; rw [Finset.mem_range]; omega
+    -- The `H_dR` window (orders `0 … p`) injects into the full `range (p + 2)` window.
+    have hsubdR : ∑ i ∈ Finset.range (1 + p), rfnsS i x ≤
+        ∑ a ∈ Finset.range (p + 2), rfnsS a x := by
+      refine Finset.sum_le_sum_of_subset_of_nonneg ?_ (fun a _ _ => hrfnsS_nn a x)
+      intro a ha
+      rw [Finset.mem_range] at ha ⊢; omega
+    -- Assemble: `2 rfns(AR) + 2 rfns(AdR) ≤ (2 ccR + 2 ccdR) · ∑`.
+    set FULL : ℝ := ∑ a ∈ Finset.range (p + 2), rfnsS a x with hFULL_def
+    have hFULL_nn : 0 ≤ FULL := Finset.sum_nonneg (fun a _ => hrfnsS_nn a x)
+    rw [hKp_sq]
+    calc 2 * riemannianFiberNormSq (I := I) (M := M) g 0 ((s + 1) + p) x
+              ((iteratedCovGrad g 0 (s + 1) p AR).toSection x) +
+            2 * riemannianFiberNormSq (I := I) (M := M) g 0 ((s + 1) + p) x
+              ((iteratedCovGrad g 0 (s + 1) p AdR).toSection x)
+        ≤ 2 * (ccR p * ∑ i ∈ Finset.range (1 + p), rfnsS (i + 1) x) +
+            2 * (ccdR p * ∑ i ∈ Finset.range (1 + p), rfnsS i x) :=
+          add_le_add (by linarith [hAR_w]) (by linarith [hAdR_w])
+      _ ≤ 2 * (ccR p * FULL) + 2 * (ccdR p * FULL) := by
+          refine add_le_add ?_ ?_
+          · exact mul_le_mul_of_nonneg_left
+              (mul_le_mul_of_nonneg_left hsubR (hccR_nn p)) (by norm_num)
+          · exact mul_le_mul_of_nonneg_left
+              (mul_le_mul_of_nonneg_left hsubdR (hccdR_nn p)) (by norm_num)
+      _ = (2 * ccR p + 2 * ccdR p) * FULL := by ring
+  -- Lift the pointwise `rfns` bound to the `L²` norm by the finite-sum packaging.
+  have hL2 := tensorL2Norm_le_of_pointwise_fiberNormSq_bound_sum (I := I) (M := M) g
+    (c := (s + 1) + p) (p + 2) (fun a => s + a) (fun a => iteratedCovGrad g 0 s a S)
+    (iteratedCovGrad g 0 (s + 1) p (pointwiseTensorCurv (I := I) (M := M) g s S)) Kp hKp_nn
+    (fun x => by simpa only [hrfnsS_def] using hpt x)
+  simpa only using hL2
 
 /-! ### The iterated rough-Laplacian / covariant-gradient commutator
 
