@@ -3,6 +3,12 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FixedFieldThirdOr
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.MetricTraceIntertwining
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ContractedBianchi
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseToL2Packaging
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameGenuineFieldFiberEnergy
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.CovGradBundleEquivFiberNormFrameSum
+import DifferentialGeometry.Geometry.Curvature.Order2Defect.MetricTraceFrame
+import DifferentialGeometry.Geometry.Curvature.Order2Defect.FrozenFrameTrace
+import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
+import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.BareSlot0CurryParseval
 
 /-!
 # The first-order curvature fibre bound of the order-`2` commutator defect
@@ -89,6 +95,45 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+/-- **Entry reduction.** The intrinsic fibre norm of any `(0, s + 1)`-tensor `T` at `x` is the
+frame sum, over the smooth `g_x`-orthonormal frame `Bₐ := smoothOrthoFrame g x a x` read in the
+gradient (slot-`0`) direction, of the `(0, s)`-fibre norms of the wrapped slot-`0` curry slices
+`Trₐ := tensor0SAsRS x (tensor0S_curry s x (T (unit)) (Bₐ))`:
+```
+rfns(T)(x) = ∑ₐ rfns( tensor0SAsRS x (tensor0S_curry s x (T (unit)) (Bₐ)) ).
+```
+This is `riemannianFiberNormSq_succ_eq_sum_slot0Curry_of_frame` at the smooth-frame values
+`Bₐ` (orthonormal at `x`, with both Parseval representations supplied by
+`rfns_eq_sum_fiberNormSqSummand_of_orthoFrame`), rewritten through the slot-`0`-curry bridge
+`slot0Curry_eq_tensor0SAsRS_curry_unitZeroSec`. -/
+private lemma rfns_succ_eq_sum_curry_smoothOrthoFrame
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
+    (T : TensorRSSpace 0 (s + 1) I x) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x T =
+      ∑ a : Fin (Module.finrank ℝ E),
+        riemannianFiberNormSq (I := I) (M := M) g 0 s x
+          (slot0Curry (I := I) (M := M) g x s
+            (fun a => smoothOrthoFrame (I := I) g x a x) (fun k : Fin 0 => k.elim0) T a) := by
+  classical
+  set e : Fin (Module.finrank ℝ E) → TangentSpace I x :=
+    fun a => smoothOrthoFrame (I := I) g x a x with he
+  have hn : (Module.finrank ℝ E) = Module.finrank ℝ (TangentSpace I x) := rfl
+  have horth : ∀ i j : Fin (Module.finrank ℝ E),
+      g.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0 := fun i j =>
+    smoothOrthoFrame_orthonormal_at_center (I := I) g x i j
+  have hreprS : ∀ S : TensorRSSpace 0 s I x,
+      riemannianFiberNormSq (I := I) (M := M) g 0 s x S =
+        ∑ K : Fin 0 → Fin (Module.finrank ℝ E), ∑ J : Fin s → Fin (Module.finrank ℝ E),
+          fiberNormSqSummand (I := I) (M := M) g x 0 s S (Module.finrank ℝ E) e K J := fun S =>
+    rfns_eq_sum_fiberNormSqSummand_of_orthoFrame (I := I) (M := M) g s x S e hn horth
+  have hreprSucc : ∀ S : TensorRSSpace 0 (s + 1) I x,
+      riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x S =
+        ∑ K : Fin 0 → Fin (Module.finrank ℝ E), ∑ J : Fin (s + 1) → Fin (Module.finrank ℝ E),
+          fiberNormSqSummand (I := I) (M := M) g x 0 (s + 1) S (Module.finrank ℝ E) e K J := fun S =>
+    rfns_eq_sum_fiberNormSqSummand_of_orthoFrame (I := I) (M := M) g (s + 1) x S e hn horth
+  exact riemannianFiberNormSq_succ_eq_sum_slot0Curry_of_frame (I := I) (M := M) g s x e
+    (fun k : Fin 0 => k.elim0) hreprS hreprSucc T
 
 /-- **The first-order curvature fibre bound of the order-`2` commutator defect (the genuine
 moving-frame third-order Bochner–Weitzenböck `∇²S`-elimination leaf).** For a closed smooth

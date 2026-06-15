@@ -130,6 +130,126 @@ theorem exists_secondCovGrad_l2NormSq_le_rawConnLap_rankGen
   refine ⟨2 + 2 * Ccross, by positivity, fun S => ?_⟩
   exact secondCovGrad_l2NormSq_le_of_cross_bound (I := I) (M := M) g s S Ccross hCcross (hcross S)
 
+/-! ### The iterated rough-Laplacian / covariant-gradient commutator
+
+The bootstrap below rests on one all-orders curvature input: the `m`-fold *iterated commutator*
+`[Δ_∇, ∇^m]S = Δ_∇(∇^m S) − ∇^m(Δ_∇ S)`. Unrolling the single-level defect
+`covGradRoughLapCurv_gen g s' S' = Δ_∇(∇S') − ∇(Δ_∇ S')` one slot at a time, the `m`-fold commutator
+expands into a finite sum of contractions of the covariant derivatives `∇^a R` (`a ≤ m`) of the
+Riemann curvature against the gradients `∇^b S` (`b ≤ m`), all of which are uniformly fibre-bounded on
+the compact manifold (each `∇^a R` is a continuous, hence bounded, field). Consequently the `L²` norm
+of the iterated commutator is controlled by the gradient norms `‖∇^a S‖_{L²}` for `a ≤ m`. -/
+
+/-- **The `m`-fold iterated rough-Laplacian / covariant-gradient commutator (all-orders).** For a
+closed smooth Riemannian manifold `(M, g)`, every covariant rank `s`, and every order `m`, there is a
+nonnegative constant `C`, uniform in `S`, such that the `L²` norm of the `m`-fold commutator
+```
+[Δ_∇, ∇^m] S := Δ_∇(∇^m S) − ∇^m(Δ_∇ S)
+            =  rawTensorConnLapSmooth g 0 (s + m) (∇^m S) − ∇^m (rawTensorConnLapSmooth g 0 s S)
+```
+is bounded by the covariant-gradient norms of `S` up to order `m`:
+```
+‖[Δ_∇, ∇^m] S‖_{L²} ≤ C · ∑_{a ∈ range (m + 1)} ‖∇^a S‖_{L²},
+```
+for every smooth compactly-supported `(0, s)`-tensor field `S`, where `∇^a S = iteratedCovGrad g 0 s a
+S`.
+
+**Why this is TRUE (and the genuine carried content).** The single-level defect
+`covGradRoughLapCurv_gen g s' S' = Δ_∇(∇S') − ∇(Δ_∇ S')` is, by the moving-frame third-order
+Bochner–Weitzenböck `∇²S`-elimination (`pointwiseTensorCurv_fiberNormSq_le_first_order`), a *first-order*
+curvature contraction of `(∇S', S')`: `√(rfns(defect)) ≤ K_R √(rfns(∇S')) + K_{dR} √(rfns(S'))`. The
+`m`-fold commutator telescopes through this single-level defect: passing `Δ_∇` outward across each of
+the `m` gradient slots produces `m` differentiated copies of the single-level defect, whose pointwise
+fibre norms are bounded by the curvature derivatives `∇^a R` (`a ≤ m`, each a continuous field on the
+compact `M`, hence uniformly bounded) contracted against the gradients `∇^b S` (`b ≤ m`). Integrating
+the finitely many pointwise bounds gives the `L²` estimate.
+
+**Non-vacuity.** With `C = 0` the bound forces `[Δ_∇, ∇^m] S = 0` for all `S`, i.e. the rough Laplacian
+and the iterated covariant gradient commute; this is *false* on a non-flat manifold already at `m = 1`,
+`s = 0`, where the defect is the Ricci contraction `Ric(∇f, ·) ≠ 0` on a positively-curved `M`. So the
+constant `C` genuinely envelopes the per-order curvature-derivative sups.
+
+This is the single posited all-orders curvature input of the elliptic bootstrap below. It is the
+all-orders (`m`-fold) extension of the `m = 1` single-level defect bound — itself the rank-generic
+integrated cross-bound `exists_integrated_curvatureCrossBound` assembled from the first-order fibre
+leaf `pointwiseTensorCurv_fiberNormSq_le_first_order`. It is never assumed in a headline; consumers
+transitively depend on `sorryAx` through this node alongside that first-order curvature leaf. -/
+theorem exists_iteratedRoughLapGrad_commutator_l2Norm_le
+    (g : SmoothRiemannianMetric I M) (s m : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ S : SmoothCcTensor g 0 s,
+        ‖rawTensorConnLapSmooth (I := I) g 0 (s + m) (iteratedCovGrad g 0 s m S) -
+            iteratedCovGrad g 0 s m (rawTensorConnLapSmooth (I := I) g 0 s S)‖ ≤
+          C * ∑ a ∈ Finset.range (m + 1), ‖iteratedCovGrad g 0 s a S‖ :=
+  sorry
+
+/-- The inner-applied iterate shift: applying `i` rough Laplacians to `Δ_∇ S` is the `(i + 1)`-th
+iterate of `S`. Both unfold to `i + 1` successive applications of `rawTensorConnLapSmooth`. -/
+private theorem rawTensorConnLapIter_rawTensorConnLapSmooth
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (i : ℕ) (S : SmoothCcTensor g 0 s) :
+    rawTensorConnLapIter (I := I) g 0 s i (rawTensorConnLapSmooth (I := I) g 0 s S) =
+      rawTensorConnLapIter (I := I) g 0 s (i + 1) S := by
+  induction i with
+  | zero => rfl
+  | succ n ih =>
+    rw [rawTensorConnLapIter_succ (I := I) g 0 s n
+          (rawTensorConnLapSmooth (I := I) g 0 s S),
+        ih, rawTensorConnLapIter_succ (I := I) g 0 s (n + 1) S]
+
+/-- `‖·‖`-form of the rank-generic order-`1` covariant-gradient control
+`covGrad_l2NormSq_le_rawConnLap_mul_self_gen`: `‖∇S‖² ≤ ‖Δ_∇ S‖ · ‖S‖`. -/
+private theorem covGrad_norm_sq_le_rawConnLap_mul_self
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
+    ‖covGrad (I := I) (M := M) g 0 s S‖ ^ 2 ≤
+      ‖rawTensorConnLapSmooth (I := I) g 0 s S‖ * ‖S‖ := by
+  have h := covGrad_l2NormSq_le_rawConnLap_mul_self_gen (I := I) (M := M) g s S
+  rwa [tensorL2Norm_toFun_eq_norm (I := I) (M := M) g (covGrad (I := I) (M := M) g 0 s S),
+    tensorL2Norm_toFun_eq_norm (I := I) (M := M) g (rawTensorConnLapSmooth (I := I) g 0 s S),
+    tensorL2Norm_toFun_eq_norm (I := I) (M := M) g S] at h
+
+/-- `‖·‖`-form of the rank-generic order-`2` covariant Gårding constant
+`exists_secondCovGrad_l2NormSq_le_rawConnLap_rankGen`: for a single nonnegative `Cg`, uniform in `S`,
+`‖∇²S‖² ≤ Cg · (‖Δ_∇ S‖² + ‖S‖²)`, where `∇²S = covGrad g 0 (s + 1) (covGrad g 0 s S)`. -/
+private theorem exists_secondCovGrad_norm_sq_le_rawConnLap
+    (g : SmoothRiemannianMetric I M) (s : ℕ) :
+    ∃ Cg : ℝ, 0 ≤ Cg ∧
+      ∀ S : SmoothCcTensor g 0 s,
+        ‖covGrad (I := I) (M := M) g 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S)‖ ^ 2 ≤
+          Cg * (‖rawTensorConnLapSmooth (I := I) g 0 s S‖ ^ 2 + ‖S‖ ^ 2) := by
+  obtain ⟨Cg, hCg, hbound⟩ := exists_secondCovGrad_l2NormSq_le_rawConnLap_rankGen (I := I) (M := M) g s
+  refine ⟨Cg, hCg, fun S => ?_⟩
+  have h := hbound S
+  rwa [tensorL2Norm_toFun_eq_norm (I := I) (M := M) g
+        (covGrad (I := I) (M := M) g 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S)),
+      tensorL2Norm_toFun_eq_norm (I := I) (M := M) g (rawTensorConnLapSmooth (I := I) g 0 s S),
+      tensorL2Norm_toFun_eq_norm (I := I) (M := M) g S] at h
+
+/-- The two-slot covariant gradient `covGrad g 0 (s + 1) (covGrad g 0 s S)` is the order-`2` iterated
+covariant gradient `∇²S = iteratedCovGrad g 0 s 2 S` (definitionally, by `iteratedCovGrad_succ`). -/
+private theorem covGrad_covGrad_eq_iteratedCovGrad_two
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
+    covGrad (I := I) (M := M) g 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S) =
+      iteratedCovGrad g 0 s 2 S := rfl
+
+/-- The order-`(j + 2)` iterated covariant gradient is the order-`2` two-slot gradient of the
+order-`j` gradient: `∇^{j+2}S = covGrad (covGrad (∇^j S))`. The two outer slots are added on the
+outside, so this is definitional. -/
+private theorem iteratedCovGrad_add_two
+    (g : SmoothRiemannianMetric I M) (s j : ℕ) (S : SmoothCcTensor g 0 s) :
+    iteratedCovGrad g 0 s (j + 2) S =
+      covGrad (I := I) (M := M) g 0 (s + j + 1)
+        (covGrad (I := I) (M := M) g 0 (s + j) (iteratedCovGrad g 0 s j S)) := rfl
+
+/-- `Δ_∇(∇^m S) = ∇^m(Δ_∇ S) + [Δ_∇, ∇^m]S`: the iterated commutator splits the rough Laplacian of
+the gradient iterate into the gradient iterate of the rough Laplacian plus the commutator defect. -/
+private theorem rawConnLap_iteratedCovGrad_eq_iteratedCovGrad_rawConnLap_add_comm
+    (g : SmoothRiemannianMetric I M) (s m : ℕ) (S : SmoothCcTensor g 0 s) :
+    rawTensorConnLapSmooth (I := I) g 0 (s + m) (iteratedCovGrad g 0 s m S) =
+      iteratedCovGrad g 0 s m (rawTensorConnLapSmooth (I := I) g 0 s S) +
+        (rawTensorConnLapSmooth (I := I) g 0 (s + m) (iteratedCovGrad g 0 s m S) -
+          iteratedCovGrad g 0 s m (rawTensorConnLapSmooth (I := I) g 0 s S)) := by
+  abel
+
 /-- **The all-orders covariant-gradient-iterate elliptic bound (interior elliptic regularity).** For
 every covariant rank `s` and order `k`, there is a nonnegative constant `C`, uniform in `S`, such that
 for every covariant-gradient iterate order `j ≤ 2k`,
@@ -144,14 +264,15 @@ interior elliptic-regularity bootstrap that controls each covariant-gradient ite
 by the rough-Laplacian iterates up to order `k`, handling the curvature commutator `[Δ_∇, ∇]` at every
 order (an all-orders curvature-derivative quantity `∇^a R`).
 
-The bound is uniform in `j` over the finite window `j ≤ 2k`: the constant `C` is the maximum over the
-finitely many orders of the per-order elliptic constants. The order-`0` case is the trivial equality
-`‖S‖ = ‖Δ_∇^0 S‖`, the order-`1` case is the order-`1` covariant-gradient control, and the even
-orders `j = 2m` are the genuine elliptic content; the odd orders interpolate through the order-`1`
-control and the metric-trace bound `‖Δ_∇ V‖ ≤ K · ‖∇²V‖`.
-
-This is the single posited all-orders elliptic-regularity input of the file; it is never assumed in a
-headline. -/
+The proof is a strong induction on `k`, proving the bound for *all* `j ≤ 2k` simultaneously with a
+single constant. The base `k = 0` is the trivial equality `‖∇^0 S‖ = ‖S‖ = ‖Δ_∇^0 S‖`. The step
+`k → k + 1` reaches the two new orders `j = 2k + 1` and `j = 2k + 2` from the order-`1` covariant
+control and the order-`2` Gårding constant applied to `∇^{2k} S`, splitting the appearing
+`Δ_∇(∇^{2k} S)` into `∇^{2k}(Δ_∇ S) + [Δ_∇, ∇^{2k}]S`: the first folds into the induction hypothesis
+applied to `Δ_∇ S` (one fewer Laplacian budget), and the iterated commutator
+`[Δ_∇, ∇^{2k}]S` is the posited all-orders curvature input
+`exists_iteratedRoughLapGrad_commutator_l2Norm_le`, controlled by the gradients `∇^{≤2k} S` — which
+fold back into the same induction hypothesis. -/
 theorem exists_iteratedCovGrad_l2Norm_le_sum_rawConnLapIter
     (g : SmoothRiemannianMetric I M) (s k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -160,8 +281,236 @@ theorem exists_iteratedCovGrad_l2Norm_le_sum_rawConnLapIter
             (iteratedCovGrad g 0 s j S).toFun ≤
           C * ∑ i ∈ Finset.range (k + 1),
             tensorL2Norm (I := I) (M := M) g 0 s
-              (rawTensorConnLapIter (I := I) g 0 s i S).toFun :=
-  sorry
+              (rawTensorConnLapIter (I := I) g 0 s i S).toFun := by
+  classical
+  -- Work in the `SmoothCcTensor` norm `‖·‖` throughout; convert at the end.
+  -- `lapSum r S := ∑ i ∈ range (r + 1), ‖Δ_∇^i S‖` (the order-`r` Laplacian-iterate sum).
+  -- The whole statement is proved, uniformly in `s`, in the abbreviation `‖·‖`.
+  suffices h : ∀ s : ℕ, ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (j : ℕ), j ≤ 2 * k → ∀ S : SmoothCcTensor g 0 s,
+        ‖iteratedCovGrad g 0 s j S‖ ≤
+          C * ∑ i ∈ Finset.range (k + 1), ‖rawTensorConnLapIter (I := I) g 0 s i S‖ by
+    obtain ⟨C, hC, hbound⟩ := h s
+    refine ⟨C, hC, fun j hj S => ?_⟩
+    have hb := hbound j hj S
+    rw [tensorL2Norm_toFun_eq_norm (I := I) (M := M) g (iteratedCovGrad g 0 s j S)]
+    refine le_trans hb (le_of_eq ?_)
+    simp only [tensorL2Norm_toFun_eq_norm (I := I) (M := M) g]
+  -- Induct on `k`, proving the bound for ALL ranks `s` simultaneously (so that the induction
+  -- hypothesis can be applied at the shifted rank `s` to `Δ_∇ S` and to the gradient iterates).
+  induction k with
+  | zero =>
+    intro s
+    refine ⟨1, by norm_num, fun j hj S => ?_⟩
+    have hj0 : j = 0 := by omega
+    subst hj0
+    rw [iteratedCovGrad_zero, Finset.sum_range_one, rawTensorConnLapIter_zero, one_mul]
+  | succ n ih =>
+    intro s
+    -- Notation: `lapSum r S := ∑ i ∈ range (r + 1), ‖Δ_∇^i S‖`.
+    set lapSum : ∀ r : ℕ, SmoothCcTensor g 0 s → ℝ :=
+      fun r S => ∑ i ∈ Finset.range (r + 1), ‖rawTensorConnLapIter (I := I) g 0 s i S‖
+      with hlapSum_def
+    -- Order-`1` and order-`2` constants at the relevant ranks.
+    obtain ⟨Cn, hCn_nn, hCn⟩ := ih s
+    -- The induction hypothesis at the shifted rank `s` for `Δ_∇ S` and for the gradient iterates
+    -- is just `hCn` itself (same rank `s`).
+    obtain ⟨Cg, hCg_nn, hgard⟩ := exists_secondCovGrad_norm_sq_le_rawConnLap (I := I) (M := M) g (s + 2 * n)
+    obtain ⟨Ccomm, hCcomm_nn, hcomm⟩ :=
+      exists_iteratedRoughLapGrad_commutator_l2Norm_le (I := I) (M := M) g s (2 * n)
+    -- The combined "step" constant for the new orders.
+    set P : ℝ := Cn + Ccomm * ((2 * n + 1 : ℕ) : ℝ) * Cn with hP_def
+    have hP_nn : 0 ≤ P := by
+      have : 0 ≤ Ccomm * ((2 * n + 1 : ℕ) : ℝ) * Cn :=
+        mul_nonneg (mul_nonneg hCcomm_nn (by positivity)) hCn_nn
+      positivity
+    set C2 : ℝ := Real.sqrt (Cg * (P ^ 2 + Cn ^ 2)) with hC2_def
+    set C1 : ℝ := Real.sqrt (P * Cn) with hC1_def
+    refine ⟨max Cn (max C2 C1), le_trans hCn_nn (le_max_left _ _), fun j hj S => ?_⟩
+    -- Basic facts about `lapSum`.
+    have hlapSum_nn : ∀ r, 0 ≤ lapSum r S := fun r =>
+      Finset.sum_nonneg (fun i _ => norm_nonneg _)
+    -- Monotonicity in the order: `lapSum n S ≤ lapSum (n + 1) S`.
+    have hlapSum_mono : lapSum n S ≤ lapSum (n + 1) S := by
+      simp only [hlapSum_def]
+      rw [Finset.sum_range_succ
+        (fun i => ‖rawTensorConnLapIter (I := I) g 0 s i S‖) (n + 1)]
+      have := norm_nonneg (rawTensorConnLapIter (I := I) g 0 s (n + 1) S)
+      linarith
+    -- `‖∇^i S‖ ≤ Cn · lapSum n S` for `i ≤ 2n` (the induction hypothesis at rank `s`).
+    have hgrad_le : ∀ i : ℕ, i ≤ 2 * n → ‖iteratedCovGrad g 0 s i S‖ ≤ Cn * lapSum n S := by
+      intro i hi
+      have := hCn i hi S
+      rwa [hlapSum_def]
+    -- The induction hypothesis applied to `Δ_∇ S` at order `2n`, reindexed: it yields
+    -- `‖∇^{2n}(Δ_∇ S)‖ ≤ Cn · ∑_{i≤n} ‖Δ^{i+1} S‖ ≤ Cn · lapSum (n + 1) S`.
+    have hgrad_lap_le :
+        ‖iteratedCovGrad g 0 s (2 * n) (rawTensorConnLapSmooth (I := I) g 0 s S)‖ ≤
+          Cn * lapSum (n + 1) S := by
+      have hih := hCn (2 * n) (le_refl _) (rawTensorConnLapSmooth (I := I) g 0 s S)
+      -- Reindex the Laplacian-iterate sum of `Δ_∇ S` into the order-`(n+1)` sum of `S`.
+      have hreindex :
+          ∑ i ∈ Finset.range (n + 1),
+              ‖rawTensorConnLapIter (I := I) g 0 s i (rawTensorConnLapSmooth (I := I) g 0 s S)‖ ≤
+            lapSum (n + 1) S := by
+        have hterm : ∀ i ∈ Finset.range (n + 1),
+            ‖rawTensorConnLapIter (I := I) g 0 s i (rawTensorConnLapSmooth (I := I) g 0 s S)‖ =
+              ‖rawTensorConnLapIter (I := I) g 0 s (i + 1) S‖ := by
+          intro i _
+          rw [rawTensorConnLapIter_rawTensorConnLapSmooth (I := I) (M := M) g s i S]
+        rw [Finset.sum_congr rfl hterm]
+        rw [hlapSum_def]
+        simp only
+        -- `∑_{i ∈ range (n+1)} ‖Δ^{i+1} S‖ ≤ ∑_{i ∈ range (n+2)} ‖Δ^i S‖`.
+        rw [Finset.sum_range_succ' (fun i => ‖rawTensorConnLapIter (I := I) g 0 s i S‖) (n + 1)]
+        have : (0 : ℝ) ≤ ‖rawTensorConnLapIter (I := I) g 0 s 0 S‖ := norm_nonneg _
+        linarith
+      calc ‖iteratedCovGrad g 0 s (2 * n) (rawTensorConnLapSmooth (I := I) g 0 s S)‖
+          ≤ Cn * ∑ i ∈ Finset.range (n + 1),
+              ‖rawTensorConnLapIter (I := I) g 0 s i (rawTensorConnLapSmooth (I := I) g 0 s S)‖ := hih
+        _ ≤ Cn * lapSum (n + 1) S := by
+            exact mul_le_mul_of_nonneg_left hreindex hCn_nn
+    -- The commutator term `‖[Δ_∇, ∇^{2n}] S‖ ≤ Ccomm · (2n+1) · Cn · lapSum (n+1) S`.
+    have hcomm_le :
+        ‖rawTensorConnLapSmooth (I := I) g 0 (s + 2 * n) (iteratedCovGrad g 0 s (2 * n) S) -
+            iteratedCovGrad g 0 s (2 * n) (rawTensorConnLapSmooth (I := I) g 0 s S)‖ ≤
+          Ccomm * ((2 * n + 1 : ℕ) : ℝ) * Cn * lapSum (n + 1) S := by
+      have hc := hcomm S
+      -- Bound the commutator's gradient sum: each `‖∇^a S‖ ≤ Cn · lapSum n S` for `a ≤ 2n`.
+      have hsum_le :
+          ∑ a ∈ Finset.range (2 * n + 1), ‖iteratedCovGrad g 0 s a S‖ ≤
+            ((2 * n + 1 : ℕ) : ℝ) * (Cn * lapSum n S) := by
+        calc ∑ a ∈ Finset.range (2 * n + 1), ‖iteratedCovGrad g 0 s a S‖
+            ≤ ∑ _a ∈ Finset.range (2 * n + 1), (Cn * lapSum n S) :=
+              Finset.sum_le_sum (fun a ha =>
+                hgrad_le a (Nat.lt_succ_iff.mp (Finset.mem_range.mp ha)))
+          _ = ((2 * n + 1 : ℕ) : ℝ) * (Cn * lapSum n S) := by
+              rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+      calc ‖rawTensorConnLapSmooth (I := I) g 0 (s + 2 * n) (iteratedCovGrad g 0 s (2 * n) S) -
+              iteratedCovGrad g 0 s (2 * n) (rawTensorConnLapSmooth (I := I) g 0 s S)‖
+          ≤ Ccomm * ∑ a ∈ Finset.range (2 * n + 1), ‖iteratedCovGrad g 0 s a S‖ := hc
+        _ ≤ Ccomm * (((2 * n + 1 : ℕ) : ℝ) * (Cn * lapSum n S)) :=
+            mul_le_mul_of_nonneg_left hsum_le hCcomm_nn
+        _ ≤ Ccomm * ((2 * n + 1 : ℕ) : ℝ) * Cn * lapSum (n + 1) S := by
+            have hmono := mul_le_mul_of_nonneg_left hlapSum_mono
+              (by positivity : (0 : ℝ) ≤ Ccomm * ((2 * n + 1 : ℕ) : ℝ) * Cn)
+            nlinarith [hmono, mul_nonneg (mul_nonneg hCcomm_nn
+              (by positivity : (0 : ℝ) ≤ ((2 * n + 1 : ℕ) : ℝ))) hCn_nn]
+    -- Hence `‖Δ_∇(∇^{2n} S)‖ ≤ P · lapSum (n + 1) S`.
+    have hrawlap_grad_le :
+        ‖rawTensorConnLapSmooth (I := I) g 0 (s + 2 * n) (iteratedCovGrad g 0 s (2 * n) S)‖ ≤
+          P * lapSum (n + 1) S := by
+      have hsplit := rawConnLap_iteratedCovGrad_eq_iteratedCovGrad_rawConnLap_add_comm
+        (I := I) (M := M) g s (2 * n) S
+      rw [hsplit]
+      refine le_trans (norm_add_le _ _) ?_
+      have := add_le_add hgrad_lap_le hcomm_le
+      rw [hP_def]
+      calc ‖iteratedCovGrad g 0 s (2 * n) (rawTensorConnLapSmooth (I := I) g 0 s S)‖ +
+            ‖rawTensorConnLapSmooth (I := I) g 0 (s + 2 * n) (iteratedCovGrad g 0 s (2 * n) S) -
+              iteratedCovGrad g 0 s (2 * n) (rawTensorConnLapSmooth (I := I) g 0 s S)‖
+          ≤ Cn * lapSum (n + 1) S +
+              Ccomm * ((2 * n + 1 : ℕ) : ℝ) * Cn * lapSum (n + 1) S := this
+        _ = (Cn + Ccomm * ((2 * n + 1 : ℕ) : ℝ) * Cn) * lapSum (n + 1) S := by ring
+    -- `‖∇^{2n} S‖ ≤ Cn · lapSum (n + 1) S` (from the IH and monotonicity of `lapSum`).
+    have hgrad2n_le : ‖iteratedCovGrad g 0 s (2 * n) S‖ ≤ Cn * lapSum (n + 1) S :=
+      le_trans (hgrad_le (2 * n) (le_refl _))
+        (mul_le_mul_of_nonneg_left hlapSum_mono hCn_nn)
+    -- Now case on `j ≤ 2 * (n + 1) = 2n + 2`.
+    rcases Nat.lt_or_ge j (2 * n + 1) with hjlt | hjge
+    · -- `j ≤ 2n`: the induction hypothesis at rank `s` suffices (with `lapSum n ≤ lapSum (n+1)`).
+      have hjle : j ≤ 2 * n := Nat.lt_succ_iff.mp hjlt
+      calc ‖iteratedCovGrad g 0 s j S‖
+          ≤ Cn * lapSum n S := hgrad_le j hjle
+        _ ≤ Cn * lapSum (n + 1) S := mul_le_mul_of_nonneg_left hlapSum_mono hCn_nn
+        _ = Cn * ∑ i ∈ Finset.range (n + 1 + 1), ‖rawTensorConnLapIter (I := I) g 0 s i S‖ := by
+            simp only [hlapSum_def]
+        _ ≤ max Cn (max C2 C1) *
+              ∑ i ∈ Finset.range (n + 1 + 1), ‖rawTensorConnLapIter (I := I) g 0 s i S‖ :=
+            mul_le_mul_of_nonneg_right (le_max_left _ _) (by positivity)
+    · -- `j ∈ {2n+1, 2n+2}`.
+      have hjcase : j = 2 * n + 1 ∨ j = 2 * n + 2 := by omega
+      rcases hjcase with hj1 | hj2
+      · subst hj1
+        -- `j = 2n + 1`: order-`1` covariant control on `∇^{2n} S`.
+        -- `∇^{2n+1} S = covGrad (∇^{2n} S)`.
+        have heq : iteratedCovGrad g 0 s (2 * n + 1) S =
+            covGrad (I := I) (M := M) g 0 (s + 2 * n) (iteratedCovGrad g 0 s (2 * n) S) := rfl
+        have hord1 := covGrad_norm_sq_le_rawConnLap_mul_self (I := I) (M := M) g (s + 2 * n)
+          (iteratedCovGrad g 0 s (2 * n) S)
+        -- `‖∇^{2n+1} S‖² ≤ ‖Δ_∇(∇^{2n}S)‖ · ‖∇^{2n}S‖ ≤ (P·L)·(Cn·L) = (P·Cn)·L²`.
+        have hsq : ‖iteratedCovGrad g 0 s (2 * n + 1) S‖ ^ 2 ≤
+            (P * Cn) * lapSum (n + 1) S ^ 2 := by
+          rw [heq]
+          refine le_trans hord1 ?_
+          have h1 := hrawlap_grad_le
+          have h2 := hgrad2n_le
+          have hL := hlapSum_nn (n + 1)
+          nlinarith [mul_nonneg (norm_nonneg
+            (rawTensorConnLapSmooth (I := I) g 0 (s + 2 * n) (iteratedCovGrad g 0 s (2 * n) S)))
+            (norm_nonneg (iteratedCovGrad g 0 s (2 * n) S)),
+            mul_le_mul h1 h2 (norm_nonneg _) (mul_nonneg hP_nn hL),
+            mul_nonneg hP_nn hL, mul_nonneg hCn_nn hL]
+        -- Take square roots.
+        have hle : ‖iteratedCovGrad g 0 s (2 * n + 1) S‖ ≤ C1 * lapSum (n + 1) S := by
+          rw [hC1_def]
+          have hfinal : ‖iteratedCovGrad g 0 s (2 * n + 1) S‖ ^ 2 ≤
+              (Real.sqrt (P * Cn) * lapSum (n + 1) S) ^ 2 := by
+            rw [mul_pow, Real.sq_sqrt (mul_nonneg hP_nn hCn_nn)]
+            exact hsq
+          exact le_of_sq_le_sq hfinal
+            (mul_nonneg (Real.sqrt_nonneg _) (hlapSum_nn (n + 1)))
+        calc ‖iteratedCovGrad g 0 s (2 * n + 1) S‖
+            ≤ C1 * lapSum (n + 1) S := hle
+          _ ≤ max Cn (max C2 C1) * lapSum (n + 1) S :=
+              mul_le_mul_of_nonneg_right (le_trans (le_max_right _ _) (le_max_right _ _))
+                (hlapSum_nn (n + 1))
+          _ = max Cn (max C2 C1) *
+                ∑ i ∈ Finset.range (n + 1 + 1), ‖rawTensorConnLapIter (I := I) g 0 s i S‖ := by
+              simp only [hlapSum_def]
+      · subst hj2
+        -- `j = 2n + 2`: order-`2` Gårding on `∇^{2n} S`.
+        -- `∇^{2n+2} S = covGrad (covGrad (∇^{2n} S))`.
+        have heq : iteratedCovGrad g 0 s (2 * n + 2) S =
+            covGrad (I := I) (M := M) g 0 (s + 2 * n + 1)
+              (covGrad (I := I) (M := M) g 0 (s + 2 * n) (iteratedCovGrad g 0 s (2 * n) S)) :=
+          iteratedCovGrad_add_two (I := I) (M := M) g s (2 * n) S
+        have hord2 := hgard (iteratedCovGrad g 0 s (2 * n) S)
+        -- `‖∇^{2n+2} S‖² ≤ Cg·(‖Δ_∇(∇^{2n}S)‖² + ‖∇^{2n}S‖²) ≤ Cg·(P²+Cn²)·L²`.
+        have hsq : ‖iteratedCovGrad g 0 s (2 * n + 2) S‖ ^ 2 ≤
+            (Cg * (P ^ 2 + Cn ^ 2)) * lapSum (n + 1) S ^ 2 := by
+          rw [heq]
+          refine le_trans hord2 ?_
+          have h1 := hrawlap_grad_le
+          have h2 := hgrad2n_le
+          have hL := hlapSum_nn (n + 1)
+          have hb1 : ‖rawTensorConnLapSmooth (I := I) g 0 (s + 2 * n)
+              (iteratedCovGrad g 0 s (2 * n) S)‖ ^ 2 ≤ P ^ 2 * lapSum (n + 1) S ^ 2 := by
+            have hnn := norm_nonneg (rawTensorConnLapSmooth (I := I) g 0 (s + 2 * n)
+              (iteratedCovGrad g 0 s (2 * n) S))
+            nlinarith [h1, mul_nonneg hP_nn hL]
+          have hb2 : ‖iteratedCovGrad g 0 s (2 * n) S‖ ^ 2 ≤ Cn ^ 2 * lapSum (n + 1) S ^ 2 := by
+            have hnn := norm_nonneg (iteratedCovGrad g 0 s (2 * n) S)
+            nlinarith [h2, mul_nonneg hCn_nn hL]
+          nlinarith [hb1, hb2, hCg_nn, mul_nonneg hCg_nn
+            (add_nonneg (sq_nonneg P) (sq_nonneg Cn))]
+        have hle : ‖iteratedCovGrad g 0 s (2 * n + 2) S‖ ≤ C2 * lapSum (n + 1) S := by
+          rw [hC2_def]
+          have hfinal : ‖iteratedCovGrad g 0 s (2 * n + 2) S‖ ^ 2 ≤
+              (Real.sqrt (Cg * (P ^ 2 + Cn ^ 2)) * lapSum (n + 1) S) ^ 2 := by
+            rw [mul_pow, Real.sq_sqrt
+              (mul_nonneg hCg_nn (add_nonneg (sq_nonneg P) (sq_nonneg Cn)))]
+            exact hsq
+          exact le_of_sq_le_sq hfinal
+            (mul_nonneg (Real.sqrt_nonneg _) (hlapSum_nn (n + 1)))
+        calc ‖iteratedCovGrad g 0 s (2 * n + 2) S‖
+            ≤ C2 * lapSum (n + 1) S := hle
+          _ ≤ max Cn (max C2 C1) * lapSum (n + 1) S :=
+              mul_le_mul_of_nonneg_right (le_trans (le_max_left _ _) (le_max_right _ _))
+                (hlapSum_nn (n + 1))
+          _ = max Cn (max C2 C1) *
+                ∑ i ∈ Finset.range (n + 1 + 1), ‖rawTensorConnLapIter (I := I) g 0 s i S‖ := by
+              simp only [hlapSum_def]
 
 set_option linter.unusedSectionVars false in
 /-- **The all-orders intrinsic Gårding constant in the `h_elliptic` consumer shape (rank-generic).**
