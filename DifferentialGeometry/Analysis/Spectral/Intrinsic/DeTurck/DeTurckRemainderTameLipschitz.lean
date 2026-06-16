@@ -3732,7 +3732,68 @@ private theorem rawTensorConnLapSmooth_iteratedCovGrad_l2_tame
   exact l2RootSum_of_pointwise_iteratedCovGrad_jet (I := I) g₀ q (a + 2)
     (rawTensorConnLapSmooth (I := I) g₀ 0 2 W) W Cunif hCunif_nn hpt
 
-/-- **(POSIT — the integrated covariant-`L²` Moser tame bound on the NONLINEAR Ricci–DeTurck
+/-- **(POSIT — the deficit-free order-endpoint Nemytskii data of the nonlinear Ricci–DeTurck
+RHS-arm difference: the order-`0` `C⁰` sup and the order-`0` / top-order-`a` integrated covariant-`L²`
+norms.)**
+
+This is the irreducible curvature/Lie/inverse-Gram **Nemytskii content** that the deficit-free
+Gagliardo–Nirenberg route consumes, isolated at the two endpoints (order `0` and order `a`) of the
+covariant-jet ladder.  Fix `g₀`, the DeTurck background `g_bg`, an order `a`, and a covariant-`L²`
+ball radius `R ≥ 0`.  There is **one** nonnegative constant `Λ₀` — uniform over the fibre-small
+radius-`R` ball, **outside** the `∀ T T'` quantifier — such that for any two `g₀`-fibre-small smooth
+perturbations `T, T'` whose covariant-`L²` jets up to order `a + 2` lie in the radius-`R` ball, the
+nonlinear RHS-arm difference `N := deTurckRHSArmG0 g₀ g_bg T − deTurckRHSArmG0 g₀ g_bg T'` obeys, with
+`S := ∑_{i ≤ a+2} ‖∇^i (T − T')‖²_{L²}`, all three endpoint bounds
+```
+(C⁰ sup)        ∀ x,  rfns(N)(x)        ≤ Λ₀² · S ,
+(order-0 L²)          ‖N‖_{L²}          ≤ Λ₀ · √S ,
+(top-order L²)        ‖∇^a N‖_{L²}      ≤ Λ₀ · √S .
+```
+
+**Why these three are the deficit-free endpoints.**  `N = deTurckRHSSection g_bg (g₀ + T) −
+deTurckRHSSection g_bg (g₀ + T')` is a smooth (rational, det-`≠ 0` by `δ < 1`) second-order Nemytskii
+difference of the order-`≤ 2` metric jets.  The genuine `L²`-Moser tame on `N` reduces, by the
+intrinsic Gagliardo–Nirenberg interpolation `exists_gagliardoNirenberg_iteratedCovGrad_l2Norm_le`, to
+exactly these two `L²` endpoints (orders `0` and `a`) and the order-`0` `C⁰` sup `Λ₀ · √S` — never an
+order-`(a + 2)` `C^k`-sup of any coefficient, so the route is **deficit-free**.  The order-`0` `C⁰`
+sup is the only genuinely pointwise datum (the supercritical `C⁰` Nemytskii Lipschitz modulus of the
+RHS map, ball-uniform on the realized fibre-small `R`-ball); the two `L²` endpoints are integrated
+`tensorL2Norm` quantities.  No order-deficient per-order pointwise domination grid and no chart-jet
+`tensorChartComponentRaw` / `HasChartJetLip` content enters.
+
+**Non-vacuity.**  All three bounds vanish as `T − T' → 0` (`S → 0`), so the genuine Nemytskii
+Lipschitz character is preserved; a `Λ₀ = 0` witness is rejected by a nonvanishing `‖N‖` for a
+genuinely second-order, non-flat RHS difference.  Posited here as one consumer-minimal standalone
+INTEGRATED curvature/Lie/inverse-Gram endpoint child; its body is `sorry`, and consumers transitively
+depend on its `sorryAx`. -/
+private theorem deTurckRHSArmDiff_endpoints_l2_tame_ballUniform
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R) :
+    ∃ Λ₀ : ℝ, 0 ≤ Λ₀ ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_lt : δ' < 1)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        (∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+                ((deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+                    deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ').toSection x) ≤
+              Λ₀ ^ 2 * ∑ i ∈ Finset.range (a + 2 + 1),
+                ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2) ∧
+          ‖deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+              deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ'‖ ≤
+            Λ₀ * Real.sqrt (∑ i ∈ Finset.range (a + 2 + 1),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2) ∧
+          ‖iteratedCovGrad (I := I) g₀ 0 2 a
+              (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+                deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ')‖ ≤
+            Λ₀ * Real.sqrt (∑ i ∈ Finset.range (a + 2 + 1),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2) :=
+  sorry
+
+/-- **(The integrated covariant-`L²` Moser tame bound on the NONLINEAR Ricci–DeTurck
 right-hand-side arm difference.)**
 
 This is the genuine curvature/Lie/inverse-Gram Nemytskii content of the sealed remainder, with the
@@ -3747,26 +3808,32 @@ covariant-`L²` Moser tame bound
 ‖∇^q (RHSarm T − RHSarm T')‖_{L²} ≤ C · √(∑_{i ≤ a+2} ‖∇^i (T − T')‖²_{L²}).
 ```
 
-**Why integrated, not pointwise / chart-jet.**  `RHSarm T = deTurckRicciRHS g_bg (g₀ + T)` is a smooth
-(rational, det-`≠ 0` by `δ < 1`) second-order Nemytskii nonlinearity of the order-`≤ 2` metric jets;
-the telescoped difference `RHSarm T − RHSarm T' = ∫₀¹ (d/ds) RHSarm(g₀ + s·T + (1−s)·T') ds` is a finite
-sum of products of (rational, det-`≠ 0`) interpolated-metric-jet coefficient fields (order `≤ 2`)
-against covariant gradients of `T − T'`.  Its order-`q` covariant Leibniz grid is exactly the
-hypothesis the integrated `L²`-Moser product engine
-`Analysis.Sobolev.Tensor.exists_moserTameProduct_iteratedCovGrad_l2Norm_le` consumes (it is
-`AXIOM`-clean / integrated): the high covariant order always lands on the `T − T'` factor in `L²`, and
-the **low-order** (`≤ 2`) coefficients enter in `L^∞`, controlled ball-uniformly by the supercritical
-section embedding `H^{a+2} ↪ C²` of the radius-`R` ball
-(`exists_riemannianFiberNormSq_section_le_smoothCcToTensorHs_sq`).  Only that low-order pointwise
-control is ever needed — never an order-`(a + 2)` sup — so the bound is **deficit-free**, never a
-pointwise per-order fibre-norm grid and never a chart-jet Lipschitz chain.
+**Why integrated, via Gagliardo–Nirenberg — deficit-free.**  `RHSarm T = deTurckRicciRHS g_bg
+(g₀ + T)` is a smooth (rational, det-`≠ 0` by `δ < 1`) second-order Nemytskii nonlinearity of the
+order-`≤ 2` metric jets, so `N := RHSarm T − RHSarm T'` is a fixed smooth `(0,2)`-tensor for each
+`(T, T')`.  Rather than expanding a covariant Leibniz product grid (whose `C^k`-sup coefficient
+control would be order-deficient over the `R`-ball), the per-order bound is obtained by the intrinsic
+**Gagliardo–Nirenberg interpolation** `exists_gagliardoNirenberg_iteratedCovGrad_l2Norm_le` applied to
+the single tensor `N`: each intermediate order `0 < q < a` is interpolated between the order-`0` `C⁰`
+sup of `N` (the supercritical Nemytskii Lipschitz modulus `Λ₀ · √S`, ball-uniform) and the top-order
+`a` covariant-`L²` norm `‖∇^a N‖ ≤ Λ₀ · √S`, with weights `1 − q/a` and `q/a`:
+`‖∇^q N‖ ≤ C · (Λ₀ √S)^{1−q/a} · (Λ₀ √S)^{q/a} = C · Λ₀ · √S`.  Only the order-`0` `C⁰` sup and the two
+`L²` endpoints (orders `0`, `a`) of `N` ever enter — never an order-`(a + 2)` `C^k`-sup of any
+coefficient — so the route is **deficit-free**, never an order-deficient per-order pointwise fibre-norm
+grid and never a chart-jet `tensorChartComponentRaw` / `HasChartJetLip` Lipschitz chain.
+
+**Assembly.**  The three endpoint data of `N` — the `C⁰` sup `∀ x, rfns(N)(x) ≤ Λ₀² · S`, the
+order-`0` `L²` `‖N‖ ≤ Λ₀ √S`, and the top-order `L²` `‖∇^a N‖ ≤ Λ₀ √S` — are the posited
+consumer-minimal INTEGRATED curvature/Lie/inverse-Gram child
+`deTurckRHSArmDiff_endpoints_l2_tame_ballUniform` (its `sorryAx` transits here).  Orders `q = 0` and
+`q = a` are the two `L²` endpoints directly; each intermediate order `0 < q < a` is the
+Gagliardo–Nirenberg interpolation of `N` between the `C⁰` sup and the top-order `L²` (the degenerate
+`a = 0` case reads only the order-`0` endpoint).  The common leaf constant is `C := C_{GN} · (Λ₀ + 1)`.
 
 **Non-vacuity / order self-check.**  The bound reads `∇^{≤ a+2}(T − T')`; the genuine `∂²(T − T')`
 Ricci principal symbol (carried by the curvature term of `RHSarm`) forces a top jet at the `i = a + 2`
-term, so a window-`a` weakening is rejected.  A `C = 0` witness is rejected by a nonvanishing
-`∇^q (RHSarm T − RHSarm T')` for a non-flat, genuinely second-order difference.  Posited here as one
-consumer-minimal standalone INTEGRATED curvature/Lie/inverse-Gram child; its body is `sorry`, and
-consumers transitively depend on its `sorryAx`. -/
+term of `S`, so a window-`a` weakening is rejected.  A `C = 0` witness is rejected by a nonvanishing
+`∇^q (RHSarm T − RHSarm T')` for a non-flat, genuinely second-order difference. -/
 private theorem deTurckRHSArmDiff_iteratedCovGrad_l2_tame_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -3782,8 +3849,98 @@ private theorem deTurckRHSArmDiff_iteratedCovGrad_l2_tame_ballUniform
               (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
                 deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ')‖ ≤
             C * Real.sqrt (∑ i ∈ Finset.range (a + 2 + 1),
-              ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2) :=
-  sorry
+              ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2) := by
+  classical
+  -- The posited deficit-free endpoint Nemytskii data of the arm difference.
+  obtain ⟨Λ₀, hΛ₀_nn, hEnd⟩ :=
+    deTurckRHSArmDiff_endpoints_l2_tame_ballUniform (I := I) g₀ g_bg a hR
+  -- The Gagliardo–Nirenberg interpolation engine for the single tensor `N` (top order `a`).
+  rcases Nat.eq_zero_or_pos a with ha0 | hapos
+  · -- Degenerate top order `a = 0`: every `q ≤ a` is `q = 0`, the order-`0` `L²` endpoint.
+    subst ha0
+    refine ⟨Λ₀, hΛ₀_nn, ?_⟩
+    intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball q hq
+    obtain rfl : q = 0 := Nat.le_zero.mp hq
+    have hEnd' := hEnd T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
+    simpa using hEnd'.2.1
+  · obtain ⟨Cgn, hCgn_nn, hGN⟩ :=
+      DifferentialGeometry.Analysis.Sobolev.Tensor.exists_gagliardoNirenberg_iteratedCovGrad_l2Norm_le
+        (I := I) (M := M) g₀ 2 a hapos
+    refine ⟨(Cgn + 1) * (Λ₀ + 1), by positivity, ?_⟩
+    intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball q hq
+    set N : SmoothCcTensor g₀ 0 2 :=
+      deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+        deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ' with hN_def
+    set S : ℝ := ∑ i ∈ Finset.range (a + 2 + 1),
+      ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2 with hS_def
+    have hS_nn : 0 ≤ S := Finset.sum_nonneg fun i _ => sq_nonneg _
+    have hsqrtS_nn : 0 ≤ Real.sqrt S := Real.sqrt_nonneg _
+    obtain ⟨hC0, hL0, hLa⟩ := hEnd T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
+    -- Restate the three endpoint data in terms of the abbreviations `N`, `S`.
+    have hC0' : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (N.toSection x) ≤
+        (Λ₀ * Real.sqrt S) ^ 2 := by
+      intro x
+      have hx := hC0 x
+      rw [mul_pow, Real.sq_sqrt hS_nn]
+      exact hx
+    have hL0' : ‖N‖ ≤ Λ₀ * Real.sqrt S := by rw [hN_def, hS_def]; exact hL0
+    have hLa' : ‖iteratedCovGrad (I := I) g₀ 0 2 a N‖ ≤ Λ₀ * Real.sqrt S := by
+      rw [hN_def, hS_def]; exact hLa
+    -- The single uniform bound `‖∇^q N‖ ≤ (Cgn + 1) * (Λ₀ + 1) * √S` for every `q ≤ a`.
+    have hN_norm_nn : 0 ≤ ‖iteratedCovGrad (I := I) g₀ 0 2 a N‖ := norm_nonneg _
+    have hΛ₀S_nn : 0 ≤ Λ₀ * Real.sqrt S := mul_nonneg hΛ₀_nn hsqrtS_nn
+    -- The target bound for the abbreviated `N`, `S`.
+    suffices hgoal : ‖iteratedCovGrad (I := I) g₀ 0 2 q N‖ ≤
+        ((Cgn + 1) * (Λ₀ + 1)) * Real.sqrt S by
+      rw [hN_def, hS_def] at hgoal; exact hgoal
+    rcases Nat.eq_zero_or_pos q with hq0 | hqpos
+    · -- Order `q = 0`: the order-`0` `L²` endpoint, widened by the larger constant.
+      subst hq0
+      have h0 : ‖iteratedCovGrad (I := I) g₀ 0 2 0 N‖ = ‖N‖ := by simp
+      rw [h0]
+      refine hL0'.trans ?_
+      refine mul_le_mul_of_nonneg_right ?_ hsqrtS_nn
+      nlinarith [hCgn_nn, hΛ₀_nn]
+    · rcases lt_or_eq_of_le hq with hqlt | hqeq
+      · -- Intermediate order `0 < q < a`: Gagliardo–Nirenberg interpolation of `N`.
+        have hGNq := hGN N (Λ₀ * Real.sqrt S) hΛ₀S_nn hC0' q hqpos hqlt
+        -- `hGNq : ‖∇^q N‖ ≤ Cgn · (Λ₀√S)^{1−q/a} · ‖∇^a N‖^{q/a}`.
+        set e : ℝ := (q : ℝ) / a with he_def
+        have he_nn : 0 ≤ e := by
+          rw [he_def]; positivity
+        have he_lt_one : e < 1 := by
+          rw [he_def]
+          rw [div_lt_one (by exact_mod_cast hapos)]
+          exact_mod_cast hqlt
+        have h1me_nn : 0 ≤ 1 - e := by linarith
+        -- Bound `‖∇^a N‖^{q/a} ≤ (Λ₀√S)^{q/a}` (monotone, exponent ≥ 0).
+        have hak_mono : (‖iteratedCovGrad (I := I) g₀ 0 2 a N‖) ^ e ≤
+            (Λ₀ * Real.sqrt S) ^ e :=
+          Real.rpow_le_rpow hN_norm_nn hLa' he_nn
+        -- Assemble the right-hand side of `hGNq` into `Cgn · (Λ₀√S)`.
+        have hrhs_eq : Cgn * (Λ₀ * Real.sqrt S) ^ (1 - e) * (Λ₀ * Real.sqrt S) ^ e =
+            Cgn * (Λ₀ * Real.sqrt S) := by
+          rcases eq_or_lt_of_le hΛ₀S_nn with hzero | hpos
+          · rw [← hzero, Real.zero_rpow (ne_of_gt (by linarith [he_lt_one] : (0 : ℝ) < 1 - e))]
+            simp
+          · rw [mul_assoc, ← Real.rpow_add hpos, sub_add_cancel, Real.rpow_one]
+        calc ‖iteratedCovGrad (I := I) g₀ 0 2 q N‖
+            ≤ Cgn * (Λ₀ * Real.sqrt S) ^ (1 - e) *
+                (‖iteratedCovGrad (I := I) g₀ 0 2 a N‖) ^ e := by
+              simpa only [he_def] using hGNq
+          _ ≤ Cgn * (Λ₀ * Real.sqrt S) ^ (1 - e) * (Λ₀ * Real.sqrt S) ^ e := by
+              refine mul_le_mul_of_nonneg_left hak_mono ?_
+              exact mul_nonneg hCgn_nn (Real.rpow_nonneg hΛ₀S_nn _)
+          _ = Cgn * (Λ₀ * Real.sqrt S) := hrhs_eq
+          _ = (Cgn * Λ₀) * Real.sqrt S := by ring
+          _ ≤ ((Cgn + 1) * (Λ₀ + 1)) * Real.sqrt S := by
+              refine mul_le_mul_of_nonneg_right ?_ hsqrtS_nn
+              nlinarith [hCgn_nn, hΛ₀_nn]
+      · -- Order `q = a`: the top-order `L²` endpoint, widened by the larger constant.
+        subst hqeq
+        refine hLa'.trans ?_
+        refine mul_le_mul_of_nonneg_right ?_ hsqrtS_nn
+        nlinarith [hCgn_nn, hΛ₀_nn]
 
 /-- **(The integrated covariant-`L²` Moser tame bound on the sealed Ricci–DeTurck remainder
 difference — the genuine `L²`-Moser Nemytskii tame leaf.)**
