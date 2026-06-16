@@ -7,6 +7,7 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Analysis.Integration.Measure.FamilyDecomposition
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RawComponentEuclideanBridge
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChartDeTurckRicciRHSRealizeJet
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChartJetLipschitzBallUniform
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSSectionChartComponentIdentity
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure
 
@@ -1061,6 +1062,225 @@ private lemma bareChartJetContentOnE_le_sqrt_fiberNormSq_sum
           Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g 0 (2 + i) b
             ((iteratedCovGrad (I := I) g 0 2 i D).toSection b)) := by ring
 
+/-- **The tensor-uniform `EuclN` bare chart-jet-content Stage-4 bound.**
+
+The `D`-uniform hoist of `DeTurckCoefficients.bareChartJetContent_le_sqrt_fiberNormSq_sum`: a single
+constant `C` (outside the `∀ D`) such that for **every** smooth compactly-supported `(0,2)`-tensor `D`,
+on the POU kernel, `bareChartJetContent g 0 2 D α N y ≤ C · ∑_{i ≤ N} √rfns(∇^i D)`.  The underlying
+reverse order-peeling (`iteratedFDeriv_rawPullR_le_zeroContent_sum`) and reverse fibre bound
+(`exists_zeroContentR_le_fiberNorm_on_pouKernel`) already quantify the tensor inside the `∃ C`, so the
+constant is genuinely `D`-uniform; this lemma merely re-states it with the `D`-quantifier inside. -/
+private lemma bareChartJetContent_le_sqrt_fiberNormSq_sum_uniform
+    (g : SmoothRiemannianMetric I M) (α : M) (N : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (D : SmoothCcTensor g 0 2) {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))},
+        y ∈ DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartPouKernel (I := I) (M := M) α →
+        bareChartJetContent (I := I) (M := M) g 0 2 D α N y ≤
+          C * ∑ i ∈ Finset.range (N + 1),
+            Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g 0 (2 + i)
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
+              ((iteratedCovGrad (I := I) g 0 2 i D).toSection
+                ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))) := by
+  classical
+  set n : ℕ := Module.finrank ℝ E with hn_def
+  obtain ⟨Cpeel, hCpeel_nn, hCpeel⟩ :=
+    DifferentialGeometry.PDE.RicciFlow.iteratedFDeriv_rawPullR_le_zeroContent_sum
+      (I := I) (M := M) g 0 2 α N N (le_refl N)
+  obtain ⟨Cfib0, hCfib0_nn, hCfib0⟩ :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_zeroContentR_le_fiberNorm_on_pouKernel
+      (I := I) (M := M) g 0 2 α
+  -- For each derived rank `2 + i` a single (tensor-uniform) reverse fibre constant `Cfib i`.
+  have h_fib : ∀ i : ℕ, ∃ Ci : ℝ, 0 ≤ Ci ∧
+      ∀ (D : SmoothCcTensor g 0 2)
+        {z : EuclideanSpace ℝ (Fin n)},
+        z ∈ DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartPouKernel (I := I) (M := M) α →
+        zeroContentR (I := I) (M := M) g 0 (2 + i)
+          (iteratedCovGrad (I := I) g 0 2 i D) α z ≤
+          Ci * Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g 0 (2 + i)
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))
+            ((iteratedCovGrad (I := I) g 0 2 i D).toSection
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm z)))) := by
+    intro i
+    obtain ⟨Ci, hCi_nn, hCi⟩ :=
+      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.exists_zeroContentR_le_fiberNorm_on_pouKernel
+        (I := I) (M := M) g 0 (2 + i) α
+    refine ⟨Ci, hCi_nn, fun D {z} hz => ?_⟩
+    refine (hCi (iteratedCovGrad (I := I) g 0 2 i D) hz).trans ?_
+    refine mul_le_mul_of_nonneg_left (le_of_eq ?_) hCi_nn
+    letI : Bundle.RiemannianBundle (fun w : M => TensorRSSpace 0 (2 + i) I w) :=
+      Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g 0 (2 + i)
+    rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 (2 + i)
+      ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))
+      ((iteratedCovGrad (I := I) g 0 2 i D).toSection
+        ((extChartAt I α).symm ((toEuclidean (E := E)).symm z)))]
+    exact norm_eq_sqrt_tensorInnerPointwise (I := I) (M := M) g 0 (2 + i)
+      ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))
+      ((iteratedCovGrad (I := I) g 0 2 i D).toSection
+        ((extChartAt I α).symm ((toEuclidean (E := E)).symm z)))
+  choose Cfib hCfib_nn hCfib using h_fib
+  set Cfibmax : ℝ := (Finset.range (N + 1)).sup' (by simp) Cfib with hCfibmax_def
+  have hCfibmax_nn : 0 ≤ Cfibmax :=
+    le_trans (hCfib_nn 0) (Finset.le_sup' Cfib (by simp))
+  set Npair : ℝ := (Fintype.card ((Fin 0 → Fin n) × (Fin 2 → Fin n)) : ℝ) with hNpair_def
+  have hNpair_nn : 0 ≤ Npair := by positivity
+  refine ⟨Npair * (Cpeel * (((N : ℝ) + 1) * Cfibmax)), by positivity, ?_⟩
+  intro D y hyK
+  set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
+  set Fib : ℕ → ℝ := fun i => Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g 0 (2 + i) b
+    ((iteratedCovGrad (I := I) g 0 2 i D).toSection b)) with hFib_def
+  have hFib_nn : ∀ i, 0 ≤ Fib i := fun i => Real.sqrt_nonneg _
+  set FibSum : ℝ := ∑ i ∈ Finset.range (N + 1), Fib i with hFibSum_def
+  have hFibSum_nn : 0 ≤ FibSum := Finset.sum_nonneg fun i _ => hFib_nn i
+  have hyK' : y ∈ DifferentialGeometry.Analysis.Sobolev.Chart.chartImagePOUTsupport
+      (I := I) (M := M) α := hyK
+  have h_zc : ∀ i ∈ Finset.range (N + 1),
+      zeroContentR (I := I) (M := M) g 0 (2 + i)
+        (iteratedCovGrad (I := I) g 0 2 i D) α y ≤ Cfibmax * Fib i := by
+    intro i hi
+    have hiN : i < N + 1 := Finset.mem_range.mp hi
+    have hzc := hCfib i D hyK
+    refine hzc.trans ?_
+    rw [hFib_def, hb_def]
+    exact mul_le_mul_of_nonneg_right
+      (Finset.le_sup' Cfib (Finset.mem_range.mpr hiN)) (Real.sqrt_nonneg _)
+  have h_each : ∀ q' : (Fin 0 → Fin n) × (Fin 2 → Fin n),
+      (∑ m ∈ Finset.range (N + 1),
+        ‖iteratedFDeriv ℝ m (rawPullR (I := I) (M := M) g 0 2 D α q'.1 q'.2) y‖) ≤
+      (Cpeel * (((N : ℝ) + 1) * Cfibmax)) * FibSum := by
+    intro q'
+    have h_per : ∀ m ∈ Finset.range (N + 1),
+        ‖iteratedFDeriv ℝ m (rawPullR (I := I) (M := M) g 0 2 D α q'.1 q'.2) y‖ ≤
+          Cpeel * (Cfibmax * FibSum) := by
+      intro m hm
+      have hmN : m ≤ N := Nat.lt_succ_iff.mp (Finset.mem_range.mp hm)
+      have hpeel := hCpeel D m hmN 0 (by omega) q'.1 q'.2 y hyK'
+      have h0eq : (iteratedCovGrad (I := I) g 0 2 0 D) = D :=
+        DifferentialGeometry.PDE.RicciFlow.iteratedCovGrad_zero (I := I) g 0 2 D
+      rw [h0eq] at hpeel
+      have hreindex : (∑ i ∈ Finset.range (m + 1),
+            zeroContentR (I := I) (M := M) g 0 (2 + (0 + i))
+              (iteratedCovGrad (I := I) g 0 2 (0 + i) D) α y) =
+          ∑ i ∈ Finset.range (m + 1),
+            zeroContentR (I := I) (M := M) g 0 (2 + i)
+              (iteratedCovGrad (I := I) g 0 2 i D) α y := by
+        refine Finset.sum_congr rfl (fun i _ => ?_)
+        congr 1 <;> rw [Nat.zero_add]
+      rw [hreindex] at hpeel
+      refine hpeel.trans ?_
+      refine mul_le_mul_of_nonneg_left ?_ hCpeel_nn
+      calc (∑ i ∈ Finset.range (m + 1),
+            zeroContentR (I := I) (M := M) g 0 (2 + i)
+              (iteratedCovGrad (I := I) g 0 2 i D) α y)
+          ≤ ∑ i ∈ Finset.range (m + 1), Cfibmax * Fib i :=
+            Finset.sum_le_sum (fun i hi => h_zc i
+              (Finset.mem_range.mpr (lt_of_lt_of_le (Finset.mem_range.mp hi)
+                (Nat.succ_le_succ hmN))))
+        _ = Cfibmax * ∑ i ∈ Finset.range (m + 1), Fib i := by rw [Finset.mul_sum]
+        _ ≤ Cfibmax * FibSum := by
+            refine mul_le_mul_of_nonneg_left ?_ hCfibmax_nn
+            rw [hFibSum_def]
+            exact Finset.sum_le_sum_of_subset_of_nonneg
+              (Finset.range_mono (by omega)) (fun i _ _ => hFib_nn i)
+    refine (Finset.sum_le_sum h_per).trans (le_of_eq ?_)
+    rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+    push_cast
+    ring
+  calc bareChartJetContent (I := I) (M := M) g 0 2 D α N y
+      = ∑ q' : (Fin 0 → Fin n) × (Fin 2 → Fin n),
+          ∑ m ∈ Finset.range (N + 1),
+            ‖iteratedFDeriv ℝ m (rawPullR (I := I) (M := M) g 0 2 D α q'.1 q'.2) y‖ := rfl
+    _ ≤ ∑ _q' : (Fin 0 → Fin n) × (Fin 2 → Fin n),
+          (Cpeel * (((N : ℝ) + 1) * Cfibmax)) * FibSum :=
+        Finset.sum_le_sum (fun q' _ => h_each q')
+    _ = Npair * ((Cpeel * (((N : ℝ) + 1) * Cfibmax)) * FibSum) := by
+        rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul, hNpair_def]
+    _ = (Npair * (Cpeel * (((N : ℝ) + 1) * Cfibmax))) * FibSum := by ring
+
+/-- **The tensor-uniform `E`-coordinate bare chart-jet-content Stage-4 bound.**
+
+The `D`-uniform hoist of `bareChartJetContentOnE_le_sqrt_fiberNormSq_sum`: a single constant `C`
+(outside the `∀ D`) such that for **every** smooth compactly-supported `(0,2)`-tensor `D`, on the
+closed POU support, `bareChartJetContentOnE g D α N (extChartAt I α b) ≤ C · ∑_{i ≤ N} √rfns(∇^i D)(b)`.
+The reverse Euclidean coordinate bridge factor `eFac` and the tensor-uniform `EuclN` Stage-4 constant
+`bareChartJetContent_le_sqrt_fiberNormSq_sum_uniform` are both `(D)`-independent. -/
+private lemma bareChartJetContentOnE_le_sqrt_fiberNormSq_sum_uniform
+    (g : SmoothRiemannianMetric I M) (α : M) (N : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (D : SmoothCcTensor g 0 2) {b : M},
+        b ∈ tsupport (fun x : M =>
+            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+        DeTurckCoefficients.bareChartJetContentOnE (I := I) (M := M) g D α N (extChartAt I α b) ≤
+          C * ∑ i ∈ Finset.range (N + 1),
+            Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g 0 (2 + i) b
+              ((iteratedCovGrad (I := I) g 0 2 i D).toSection b)) := by
+  classical
+  set n : ℕ := Module.finrank ℝ E with hn_def
+  set eNorm : ℝ := ‖((toEuclidean (E := E)) : E →L[ℝ] EuclideanSpace ℝ (Fin n))‖ with heNorm_def
+  have heNorm_nn : 0 ≤ eNorm := norm_nonneg _
+  set eFac : ℝ := (Finset.range (N + 1)).sup' (by simp) (fun m => eNorm ^ m) with heFac_def
+  have heFac_nn : 0 ≤ eFac := le_trans (by positivity : (0:ℝ) ≤ eNorm ^ 0)
+    (Finset.le_sup' (fun m => eNorm ^ m) (by simp))
+  obtain ⟨Cstage, hCstage_nn, hCstage⟩ :=
+    bareChartJetContent_le_sqrt_fiberNormSq_sum_uniform (I := I) (M := M) g α N
+  refine ⟨eFac * Cstage, by positivity, ?_⟩
+  intro D b hb
+  set y : E := extChartAt I α b with hy_def
+  have hb_src : b ∈ (extChartAt I α).source := by
+    rw [extChartAt_source]
+    exact DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α hb
+  have hy_target : y ∈ (extChartAt I α).target := (extChartAt I α).map_source hb_src
+  have hy_int : y ∈ interior (extChartAt I α).target := by
+    rw [(isOpen_extChartAt_target (I := I) α).interior_eq]; exact hy_target
+  set yE : EuclideanSpace ℝ (Fin n) := (toEuclidean (E := E)) y with hyE_def
+  have hyE_kernel : yE ∈
+      DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartPouKernel (I := I) (M := M) α := by
+    refine ⟨y, ?_, rfl⟩
+    exact ⟨b, hb, rfl⟩
+  have hround : (extChartAt I α).symm ((toEuclidean (E := E)).symm yE) = b := by
+    rw [hyE_def, hy_def, ContinuousLinearEquiv.symm_apply_apply]
+    exact (extChartAt I α).left_inv hb_src
+  have hstage := hCstage D hyE_kernel
+  rw [hround] at hstage
+  set colE : (Fin 2 → Fin n) → ℝ := fun Jdx =>
+    ∑ m ∈ Finset.range (N + 1),
+      ‖iteratedFDeriv ℝ m (rawPullR (I := I) (M := M) g 0 2 D α (![] : Fin 0 → Fin n) Jdx) yE‖
+    with hcolE_def
+  have hcolE_nn : ∀ Jdx, 0 ≤ colE Jdx := fun Jdx =>
+    Finset.sum_nonneg fun m _ => norm_nonneg _
+  have hbridge : DeTurckCoefficients.bareChartJetContentOnE (I := I) (M := M) g D α N y ≤
+      eFac * bareChartJetContent (I := I) (M := M) g 0 2 D α N yE := by
+    have hstep1 : DeTurckCoefficients.bareChartJetContentOnE (I := I) (M := M) g D α N y ≤
+        eFac * ∑ Jdx : Fin 2 → Fin n, colE Jdx := by
+      rw [DeTurckCoefficients.bareChartJetContentOnE, Finset.mul_sum]
+      refine Finset.sum_le_sum (fun Jdx _ => ?_)
+      rw [hcolE_def, Finset.mul_sum]
+      refine Finset.sum_le_sum (fun m hm => ?_)
+      have hmN : m ≤ N := Nat.lt_succ_iff.mp (Finset.mem_range.mp hm)
+      have hb' := norm_iteratedFDerivWithin_rawCompOnE_le_iteratedFDeriv_rawPullR
+        (I := I) (M := M) g D α Jdx m hy_int
+      rw [show (toEuclidean (E := E)) y = yE from rfl] at hb'
+      refine hb'.trans ?_
+      refine mul_le_mul_of_nonneg_right ?_ (norm_nonneg _)
+      exact Finset.le_sup' (fun m => eNorm ^ m) (Finset.mem_range.mpr (Nat.lt_succ_of_le hmN))
+    have hstep2 : bareChartJetContent (I := I) (M := M) g 0 2 D α N yE =
+        ∑ Jdx : Fin 2 → Fin n, colE Jdx := by
+      rw [bareChartJetContent, Fintype.sum_prod_type, Fintype.sum_unique]
+      refine Finset.sum_congr rfl (fun Jdx _ => ?_)
+      rw [hcolE_def]
+      refine Finset.sum_congr rfl (fun m _ => ?_)
+      congr 2
+    rw [hstep2]
+    exact hstep1
+  calc DeTurckCoefficients.bareChartJetContentOnE (I := I) (M := M) g D α N y
+      ≤ eFac * bareChartJetContent (I := I) (M := M) g 0 2 D α N yE := hbridge
+    _ ≤ eFac * (Cstage * ∑ i ∈ Finset.range (N + 1),
+          Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g 0 (2 + i) b
+            ((iteratedCovGrad (I := I) g 0 2 i D).toSection b))) :=
+        mul_le_mul_of_nonneg_left hstage heFac_nn
+    _ = (eFac * Cstage) * ∑ i ∈ Finset.range (N + 1),
+          Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g 0 (2 + i) b
+            ((iteratedCovGrad (I := I) g 0 2 i D).toSection b)) := by ring
+
 /-- The raw chart-frame component depends only on the underlying section, not on the (phantom)
 metric type-tag of the `SmoothCcTensor`. -/
 private lemma tensorChartComponentRaw_toSection_congr
@@ -1913,6 +2133,213 @@ private theorem deTurckRHSArmDiff_iteratedCovGrad_riemannianFiberNormSq_jet_le
     _ = Cmid * Kcol * ∑ q ∈ Finset.range (a + 2 + 1), Wq q := by
         rw [← Finset.sum_mul]; ring
 
+/-- **(The ball-uniform bare chart-jet content domination of the Ricci–DeTurck RHS-arm difference —
+PROVED from the ball-uniform chart-jet Nemytskii base towers.)**
+
+The ball-uniform hoist of `bareChartJetContent_deTurckRHSArm_le_sqrt_fiberNormSq_sum`: there is a single
+nonnegative constant `K` — uniform over the fibre-small radius-`R` covariant ball, **outside** the
+`∀ T T'` quantifier — such that for any two `g₀`-fibre-small perturbations `T, T'` whose covariant-`L²`
+jets up to order `a + 2` lie in the radius-`R` ball, on the closed support of the chart-`α` POU weight,
+the order-`a` bare chart-jet content of the RHS-arm residual is dominated by `K · ∑_{q ≤ a+2}
+√rfns(∇^q (T − T'))(b)`.
+
+The only `(T, T')`-dependent factor of the per-pair source is the chart-Nemytskii Lipschitz modulus,
+which is hoisted to a single ball-uniform `CNemMax` via
+`chartDeTurckRicciRHS_realize_seminorm_le_bareChartJetContentOnE_ballUniform` (supremised over the `n²`
+chart index pairs); the forward Euclidean-coordinate bridge factor `eFac` and the `g₀`-anchored Stage-4
+content constant `Cstage` are `(T, T')`-independent.  Consumers transitively depend on the posited
+ball-uniform base towers' `sorryAx`. -/
+private lemma bareChartJetContent_deTurckRHSArm_le_sqrt_fiberNormSq_sum_ballUniform
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (α : M) :
+    ∃ K : ℝ, 0 ≤ K ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_lt : δ' < 1)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ {b : M},
+        b ∈ tsupport (fun x : M =>
+            ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+        bareChartJetContent (I := I) (M := M) g₀ 0 2
+            ((deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+                deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ') +
+              rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T')) α a
+            ((toEuclidean (E := E)) (extChartAt I α b)) ≤
+          K * ∑ q ∈ Finset.range (a + 2 + 1),
+            Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) b
+              ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection b)) := by
+  classical
+  set n : ℕ := Module.finrank ℝ E with hn_def
+  -- The fixed compact target neighbourhood (the chart image of the closed POU support).
+  set Kc : Set E := (extChartAt I α) '' (tsupport (fun x : M =>
+      ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) with hKc_def
+  have hKc_compact : IsCompact Kc :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartImage_pouTsupport_isCompact
+      (I := I) (M := M) α
+  have hKc_sub : Kc ⊆ interior ((extChartAt I α).target : Set E) :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartImage_pouTsupport_subset_interior_target
+      (I := I) (M := M) α
+  -- The forward-bridge factor (`EuclN`-jet ≤ `E`-jet, scaled by `‖toEuclidean.symm‖^m`).
+  set eNorm : ℝ :=
+    ‖((toEuclidean (E := E)).symm : EuclideanSpace ℝ (Fin n) →L[ℝ] E)‖ with heNorm_def
+  set eFac : ℝ := (Finset.range (a + 1)).sup' (by simp) (fun m => eNorm ^ m) with heFac_def
+  have heFac_nn : 0 ≤ eFac := le_trans (by positivity : (0:ℝ) ≤ eNorm ^ 0)
+    (Finset.le_sup' (fun m => eNorm ^ m) (by simp))
+  -- **Ball-uniform two-metric Nemytskii**: a single `CNem ik ≥ 0` (uniform over the ball) per chart
+  -- index pair, supremised to `CNemMax`.  The order-`a` seminorm of the chart Ricci–DeTurck carrier
+  -- difference is bounded by `CNem ik · bareChartJetContentOnE g₀ (T−T') (a+2)`, uniformly over the
+  -- fibre-small radius-`R` ball.
+  have hNem : ∀ ik : Fin n × Fin n, ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_lt : δ' < 1)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ y ∈ Kc,
+        DeTurckCoefficients.iteratedFDerivSeminorm a
+            (fun z => DeTurckCoefficients.chartDeTurckRicciRHS (I := I)
+                (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) g_bg α ik.1 ik.2 z -
+              DeTurckCoefficients.chartDeTurckRicciRHS (I := I)
+                (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') g_bg α ik.1 ik.2 z)
+            (interior (extChartAt I α).target) y ≤
+          C * DeTurckCoefficients.bareChartJetContentOnE (I := I) (M := M) g₀ (T - T') α (a + 2) y := by
+    intro ik
+    obtain ⟨C, hC_nn, hC⟩ :=
+      DeTurckCoefficients.chartDeTurckRicciRHS_realize_seminorm_le_bareChartJetContentOnE_ballUniform
+        (I := I) (M := M) g₀ g_bg (R := R) α hKc_compact hKc_sub ik.1 ik.2 a
+    exact ⟨C, hC_nn, fun T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball y hy =>
+      hC T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball y hy⟩
+  choose CNem hCNem_nn hCNem using hNem
+  set CNemMax : ℝ := Finset.univ.sup' (Finset.univ_nonempty (α := Fin n × Fin n)) CNem
+    with hCNemMax_def
+  have hCNemMax_nn : 0 ≤ CNemMax :=
+    le_trans (hCNem_nn (Classical.arbitrary _)) (Finset.le_sup' CNem (Finset.mem_univ _))
+  -- The `(T, T')`-uniform `E`-content Stage-4 constant (anchored at `g₀`).
+  obtain ⟨Cstage, hCstage_nn, hCstage⟩ :=
+    bareChartJetContentOnE_le_sqrt_fiberNormSq_sum_uniform (I := I) (M := M) g₀ α (a + 2)
+  -- The honest `K`: the same expression as the per-pair source with the ball-uniform `CNemMax`.
+  refine ⟨((n : ℝ) ^ 2) * (((a : ℝ) + 1) * (eFac * (CNemMax * Cstage))),
+    by positivity, ?_⟩
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball b hb
+  set g₁ := tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ with hg₁_def
+  set g₂ := tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ' with hg₂_def
+  set RHSarm : SmoothCcTensor g₀ 0 2 :=
+    (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+        deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ') +
+      rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T') with hRHSarm_def
+  -- Setup the manifold/chart points.
+  have hb_src : b ∈ (extChartAt I α).source := by
+    rw [extChartAt_source]
+    exact DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α hb
+  set yb : E := extChartAt I α b with hyb_def
+  have hyb_Kc : yb ∈ Kc := ⟨b, hb, rfl⟩
+  have hyb_int : yb ∈ interior ((extChartAt I α).target : Set E) := hKc_sub hyb_Kc
+  set yE : EuclideanSpace ℝ (Fin n) := (toEuclidean (E := E)) yb with hyE_def
+  have hb_good : b ∈ DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet (I := I) α := by
+    rw [DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartLeviCivitaGoodSet_eq_extChartAt_source
+      (I := I) α]
+    exact hb_src
+  -- Stage-4 OnE bound of `T − T'` at `b`.
+  have hstage4 := hCstage (T - T') hb
+  set Sdiff : ℝ := ∑ q ∈ Finset.range (a + 2 + 1),
+    Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) b
+      ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection b)) with hSdiff_def
+  have hSdiff_nn : 0 ≤ Sdiff := Finset.sum_nonneg fun q _ => Real.sqrt_nonneg _
+  -- The reduced per-`(Jdx, m)` bound: each chart Fréchet jet of `RHSarm` is `≤ const · Sdiff`.
+  have hper : ∀ (Jdx : Fin 2 → Fin n) (m : ℕ), m ∈ Finset.range (a + 1) →
+      ‖iteratedFDeriv ℝ m (rawPullR (I := I) (M := M) g₀ 0 2 RHSarm α
+          (![] : Fin 0 → Fin n) Jdx) yE‖ ≤
+        eFac * (CNemMax * Cstage) * Sdiff := by
+    intro Jdx m hm
+    have hmA : m ≤ a := Nat.lt_succ_iff.mp (Finset.mem_range.mp hm)
+    have hyb_pre : (toEuclidean (E := E)).symm yE ∈ interior (extChartAt I α).target := by
+      rw [hyE_def, ContinuousLinearEquiv.symm_apply_apply]; exact hyb_int
+    have hbridge := norm_iteratedFDeriv_rawPullR_le_iteratedFDerivWithin_rawCompOnE
+      (I := I) (M := M) g₀ RHSarm α Jdx m hyb_pre
+    rw [hyE_def, ContinuousLinearEquiv.symm_apply_apply] at hbridge
+    set F : E → ℝ := fun z =>
+      DeTurckCoefficients.chartDeTurckRicciRHS (I := I) g₁ g_bg α (Jdx 0) (Jdx 1) z -
+        DeTurckCoefficients.chartDeTurckRicciRHS (I := I) g₂ g_bg α (Jdx 0) (Jdx 1) z with hF_def
+    have hEqOn : Set.EqOn (DeTurckCoefficients.rawCompOnE (I := I) (M := M) g₀ RHSarm α Jdx) F
+        (interior (extChartAt I α).target) := by
+      intro z hz
+      have hz_src : (extChartAt I α).symm z ∈
+          DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet (I := I) α := by
+        rw [DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartLeviCivitaGoodSet_eq_extChartAt_source
+          (I := I) α]
+        exact (extChartAt I α).map_target (interior_subset hz)
+      have hzt : z ∈ (extChartAt I α).target := interior_subset hz
+      have hid := tensorChartComponentRaw_deTurckRHSArm_eq_chartDeTurckRicciRHS_diff
+        (I := I) (M := M) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' α hz_src Jdx
+      rw [DeTurckCoefficients.rawCompOnE, hF_def]
+      rw [← hg₁_def, ← hg₂_def] at hid
+      rw [show (extChartAt I α) ((extChartAt I α).symm z) = z from (extChartAt I α).right_inv hzt]
+        at hid
+      rw [hRHSarm_def]
+      exact hid
+    have hcongr := iteratedFDerivWithin_congr (𝕜 := ℝ) hEqOn hyb_int m
+    have hStage3 : ‖iteratedFDerivWithin ℝ m
+        (DeTurckCoefficients.rawCompOnE (I := I) (M := M) g₀ RHSarm α Jdx)
+        (interior (extChartAt I α).target) yb‖ ≤
+        CNemMax * DeTurckCoefficients.bareChartJetContentOnE (I := I) (M := M) g₀ (T - T') α
+          (a + 2) yb := by
+      rw [hcongr]
+      have hsemi : ‖iteratedFDerivWithin ℝ m F (interior (extChartAt I α).target) yb‖ ≤
+          DeTurckCoefficients.iteratedFDerivSeminorm a F (interior (extChartAt I α).target) yb :=
+        DeTurckCoefficients.norm_iteratedFDerivWithin_le_seminorm hmA F _ yb
+      refine hsemi.trans ?_
+      have hnem := hCNem (Jdx 0, Jdx 1) T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball yb hyb_Kc
+      rw [← hg₁_def, ← hg₂_def] at hnem
+      rw [hF_def]
+      refine hnem.trans ?_
+      refine mul_le_mul_of_nonneg_right ?_
+        (DeTurckCoefficients.bareChartJetContentOnE_nonneg (I := I) (M := M) g₀ (T - T') α (a + 2) yb)
+      exact Finset.le_sup' CNem (Finset.mem_univ _)
+    have hOnE_le : DeTurckCoefficients.bareChartJetContentOnE (I := I) (M := M) g₀ (T - T') α
+        (a + 2) yb ≤ Cstage * Sdiff := by
+      rw [hSdiff_def]
+      simpa only [hyb_def] using hstage4
+    calc ‖iteratedFDeriv ℝ m (rawPullR (I := I) (M := M) g₀ 0 2 RHSarm α
+            (![] : Fin 0 → Fin n) Jdx) yE‖
+        ≤ eNorm ^ m * ‖iteratedFDerivWithin ℝ m
+            (DeTurckCoefficients.rawCompOnE (I := I) (M := M) g₀ RHSarm α Jdx)
+            (interior (extChartAt I α).target) yb‖ := hbridge
+      _ ≤ eFac * (CNemMax * Cstage * Sdiff) := by
+          refine mul_le_mul (Finset.le_sup' (fun m => eNorm ^ m) hm) ?_ (norm_nonneg _) heFac_nn
+          refine hStage3.trans ?_
+          rw [mul_assoc]
+          exact mul_le_mul_of_nonneg_left hOnE_le hCNemMax_nn
+      _ = eFac * (CNemMax * Cstage) * Sdiff := by ring
+  rw [bareChartJetContent]
+  have hCard2 : (Fintype.card ((Fin 0 → Fin n) × (Fin 2 → Fin n)) : ℝ) = (n : ℝ) ^ 2 := by
+    simp only [Fintype.card_prod, Fintype.card_fun, Fintype.card_fin, pow_zero, one_mul]
+    push_cast; ring
+  calc (∑ q' : (Fin 0 → Fin n) × (Fin 2 → Fin n),
+          ∑ m ∈ Finset.range (a + 1),
+            ‖iteratedFDeriv ℝ m (rawPullR (I := I) (M := M) g₀ 0 2 RHSarm α q'.1 q'.2) yE‖)
+      ≤ ∑ _q' : (Fin 0 → Fin n) × (Fin 2 → Fin n),
+          ((((a : ℝ) + 1) * (eFac * (CNemMax * Cstage))) * Sdiff) := by
+        refine Finset.sum_le_sum (fun q' _ => ?_)
+        have hq1 : q'.1 = (![] : Fin 0 → Fin n) := Subsingleton.elim _ _
+        calc (∑ m ∈ Finset.range (a + 1),
+                ‖iteratedFDeriv ℝ m (rawPullR (I := I) (M := M) g₀ 0 2 RHSarm α q'.1 q'.2) yE‖)
+            ≤ ∑ _m ∈ Finset.range (a + 1), (eFac * (CNemMax * Cstage) * Sdiff) := by
+              refine Finset.sum_le_sum (fun m hm => ?_)
+              rw [hq1]
+              exact hper q'.2 m hm
+          _ = (((a : ℝ) + 1) * (eFac * (CNemMax * Cstage))) * Sdiff := by
+              rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+              push_cast; ring
+    _ = (Fintype.card ((Fin 0 → Fin n) × (Fin 2 → Fin n)) : ℝ) *
+          ((((a : ℝ) + 1) * (eFac * (CNemMax * Cstage))) * Sdiff) := by
+        rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
+    _ = ((n : ℝ) ^ 2) * (((a : ℝ) + 1) * (eFac * (CNemMax * Cstage))) * Sdiff := by
+        rw [hCard2]; ring
+
 /-- **(The ball-uniform per-component raw chart-jet domination of the order-`a` covariant gradient of
 the Ricci–DeTurck RHS-arm difference — the single named honest leaf carrying the uniform-over-`R`-ball
 chart-Nemytskii Lipschitz modulus.)**
@@ -1959,7 +2386,7 @@ principal symbol forces a top jet at `q = a + 2`, so a window-`a` weakening is r
 witness is rejected by a nonvanishing raw chart component for a non-flat, genuinely second-order RHS
 difference. -/
 private theorem deTurckRHSArmDiff_iteratedCovGrad_rawComponent_domination_on_pouTsupport_ballUniform
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R) (α : M) :
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (_hR : 0 ≤ R) (α : M) :
     ∃ M0 : ℝ, 0 ≤ M0 ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_lt : δ < 1)
@@ -1981,8 +2408,62 @@ private theorem deTurckRHSArmDiff_iteratedCovGrad_rawComponent_domination_on_pou
                 α (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx b| ≤
               M0 * ∑ q ∈ Finset.range (a + 2 + 1),
                 Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) b
-                  ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection b)) :=
-  sorry
+                  ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection b)) := by
+  classical
+  set n : ℕ := Module.finrank ℝ E with hn_def
+  -- The `(T, T')`-uniform forward covariant chart-jet peel constant (order window `P = a`,
+  -- depending only on the `g₀`-Christoffel jets on the compact kernel).
+  obtain ⟨Cpeel, hCpeel_nn, hCpeel⟩ :=
+    iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
+      (I := I) (M := M) g₀ 0 2 α a
+  -- The ball-uniform RHS-arm bare chart-jet content domination by the intrinsic fibre-norm jets.
+  obtain ⟨K, hK_nn, hK⟩ :=
+    bareChartJetContent_deTurckRHSArm_le_sqrt_fiberNormSq_sum_ballUniform
+      (I := I) (M := M) g₀ g_bg a (R := R) α
+  refine ⟨Cpeel * K, by positivity, ?_⟩
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball b hb Jdx
+  set RHSarm : SmoothCcTensor g₀ 0 2 :=
+    (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+        deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ') +
+      rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T') with hRHSarm_def
+  set Ssqrt : ℝ := ∑ q ∈ Finset.range (a + 2 + 1),
+    Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) b
+      ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection b)) with hSsqrt_def
+  have hSsqrt_nn : 0 ≤ Ssqrt := Finset.sum_nonneg fun q _ => Real.sqrt_nonneg _
+  -- Chart-`α` setup: `b` lies in the chart source, and the Euclidean kernel point round-trips to `b`.
+  have hb_src : b ∈ (extChartAt I α).source := by
+    rw [extChartAt_source]
+    exact DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α hb
+  set yb : EuclideanSpace ℝ (Fin n) := (toEuclidean (E := E)) (extChartAt I α b) with hyb_def
+  have hy_kernel : yb ∈ DifferentialGeometry.Analysis.Sobolev.Chart.chartImagePOUTsupport
+      (I := I) (M := M) α := ⟨extChartAt I α b, ⟨b, hb, rfl⟩, rfl⟩
+  -- The ball-uniform bare-content domination at `b`, threaded for this `(T, T')`.
+  have hcontent : bareChartJetContent (I := I) (M := M) g₀ 0 2 RHSarm α a yb ≤ K * Ssqrt := by
+    rw [hSsqrt_def, hRHSarm_def]
+    exact hK T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball hb
+  -- The chart component value at `b` is the order-`0` `rawPullR` jet at the kernel point.
+  have hval : DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw
+        (I := I) (M := M) g₀ 0 (2 + a)
+        (iteratedCovGrad (I := I) g₀ 0 2 a RHSarm) α (![] : Fin 0 → Fin n) Jdx b =
+      rawPullR (I := I) (M := M) g₀ 0 (2 + a)
+        (iteratedCovGrad (I := I) g₀ 0 2 a RHSarm) α (![] : Fin 0 → Fin n) Jdx yb := by
+    rw [hyb_def]
+    simp only [rawPullR, Function.comp_apply, ContinuousLinearEquiv.symm_apply_apply]
+    rw [(extChartAt I α).left_inv hb_src]
+  rw [hval]
+  have hpeel := hCpeel RHSarm a 0 (by omega) (![] : Fin 0 → Fin n) Jdx yb hy_kernel
+  rw [Nat.zero_add] at hpeel
+  have hzero : ‖iteratedFDeriv ℝ 0
+      (rawPullR (I := I) (M := M) g₀ 0 (2 + a)
+        (iteratedCovGrad (I := I) g₀ 0 2 a RHSarm) α (![] : Fin 0 → Fin n) Jdx) yb‖ =
+      |rawPullR (I := I) (M := M) g₀ 0 (2 + a)
+        (iteratedCovGrad (I := I) g₀ 0 2 a RHSarm) α (![] : Fin 0 → Fin n) Jdx yb| := by
+    rw [norm_iteratedFDeriv_zero, Real.norm_eq_abs]
+  rw [hzero] at hpeel
+  refine hpeel.trans ?_
+  calc Cpeel * bareChartJetContent (I := I) (M := M) g₀ 0 2 RHSarm α a yb
+      ≤ Cpeel * (K * Ssqrt) := mul_le_mul_of_nonneg_left hcontent hCpeel_nn
+    _ = (Cpeel * K) * Ssqrt := by ring
 
 /-- **(The ball-uniform per-chart raw-component domination of the Ricci–DeTurck RHS-arm difference —
 the single named honest leaf carrying the uniform-over-`R`-ball chart-Nemytskii Lipschitz modulus.)**

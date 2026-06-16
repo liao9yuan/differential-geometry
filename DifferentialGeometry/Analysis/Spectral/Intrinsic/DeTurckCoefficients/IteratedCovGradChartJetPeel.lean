@@ -165,11 +165,10 @@ This is the pointwise covariant Faà-di-Bruno expansion read forward (peeling ea
 covariant slot to one extra Euclidean partial plus a zeroth-order Christoffel
 correction), with the single constant `C` collecting the uniform chart-Christoffel
 jets on the compact partition-of-unity kernel. -/
-lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent
-    (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (X : SmoothCcTensor g r s) (α : M) (P : ℕ) :
+lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) (P : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
-      ∀ (p l : ℕ), l + p ≤ P →
+      ∀ (X : SmoothCcTensor g r s) (p l : ℕ), l + p ≤ P →
         ∀ (Idx : Fin r → Fin (Module.finrank ℝ E))
           (Jdx : Fin (s + p) → Fin (Module.finrank ℝ E)),
           ∀ y ∈ chartImagePOUTsupport (I := I) (M := M) α,
@@ -185,14 +184,17 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent
     have : 1 ≤ n := Nat.one_le_iff_ne_zero.mpr (NeZero.ne n); exact_mod_cast this
   set Npair : ℝ := (n : ℝ) ^ (r + (s + P)) with hNpair_def
   have hNpair_nn : 0 ≤ Npair := by positivity
-  -- A single uniform constant `C` covering all `p ≤ P`, defined by the (finite) recursion
-  -- `C₀ = 1`, `C_{p+1} = 1 + Npair · 2^P · Γ · C_p`.  We prove the bound for each `p` with
-  -- this `C_p` and then majorise by the maximum over `p ≤ P`.
+  -- A single uniform constant `C` covering all `p ≤ P` **and all tensors `X`**, defined by the
+  -- (finite) recursion `C₀ = 1`, `C_{p+1} = 1 + Npair · 2^P · Γ · C_p` (the constant depends only on
+  -- the chart-Christoffel bound `Γ`, not on `X`).
   set Cstep : ℝ := 1 + Npair * (2 : ℝ) ^ P * Γ with hCstep_def
   have hCstep_nn : 0 ≤ Cstep := by rw [hCstep_def]; positivity
   set Cp : ℕ → ℝ := fun p => Cstep ^ p with hCp_def
   have hCp_nn : ∀ p, 0 ≤ Cp p := fun p => by rw [hCp_def]; positivity
-  -- The per-`p` bound (the genuine forward induction on `p`).
+  refine ⟨(Finset.range (P + 1)).sup' ⟨0, Finset.mem_range.mpr (Nat.succ_pos P)⟩ Cp,
+    le_trans (hCp_nn 0) (Finset.le_sup' Cp (Finset.mem_range.mpr (Nat.succ_pos P))), ?_⟩
+  intro X
+  -- The per-`p` bound (the genuine forward induction on `p`), for this tensor `X`.
   have hmain : ∀ p l : ℕ, l + p ≤ P →
       ∀ (Idx : Fin r → Fin (Module.finrank ℝ E))
         (Jdx : Fin (s + p) → Fin (Module.finrank ℝ E)),
@@ -437,14 +439,33 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent
                   g r (s + p) Z α m0 Idx Jtail z) y‖
             ≤ Cp p * RHS + (Npair * (2 : ℝ) ^ P * Γ * Cp p) * RHS := add_le_add hA hB
           _ = Cp (p + 1) * RHS := by rw [hCp_succ]; ring
-  -- Globalize: a single constant `C := max over p ≤ P of Cp p`.
-  refine ⟨(Finset.range (P + 1)).sup' ⟨0, Finset.mem_range.mpr (Nat.succ_pos P)⟩ Cp,
-    le_trans (hCp_nn 0) (Finset.le_sup' Cp (Finset.mem_range.mpr (Nat.succ_pos P))), ?_⟩
+  -- Majorise by the chosen constant `max over p ≤ P of Cp p`.
   intro p l hlP Idx Jdx y hy
   refine (hmain p l hlP Idx Jdx y hy).trans ?_
   refine mul_le_mul_of_nonneg_right ?_
     (bareChartJetContent_nonneg (I := I) (M := M) g r s X α _ y)
   exact Finset.le_sup' Cp (Finset.mem_range.mpr (by omega))
+
+/-- **The forward covariant chart-jet peel (per-tensor specialization).**
+The single-tensor specialization of the tensor-uniform
+`iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform` (constant uniform over the
+chart-Christoffel jets on the compact partition-of-unity kernel). -/
+lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (X : SmoothCcTensor g r s) (α : M) (P : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (p l : ℕ), l + p ≤ P →
+        ∀ (Idx : Fin r → Fin (Module.finrank ℝ E))
+          (Jdx : Fin (s + p) → Fin (Module.finrank ℝ E)),
+          ∀ y ∈ chartImagePOUTsupport (I := I) (M := M) α,
+            ‖iteratedFDeriv ℝ l
+                (rawPullR (I := I) (M := M) g r (s + p)
+                  (iteratedCovGrad (I := I) g r s p X) α Idx Jdx) y‖ ≤
+              C * bareChartJetContent (I := I) (M := M) g r s X α (l + p) y := by
+  obtain ⟨C, hC_nn, hC⟩ :=
+    iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
+      (I := I) (M := M) g r s α P
+  exact ⟨C, hC_nn, fun p l hlP Idx Jdx y hy => hC X p l hlP Idx Jdx y hy⟩
 
 /-- **The bare chart-jet content of a tensor difference is dominated by the square roots
 of the intrinsic covariant fibre-norm jets, on the partition-of-unity kernel.**
