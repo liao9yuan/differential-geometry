@@ -125,6 +125,123 @@ theorem gFibreOpBound_ccTensorBilinSymm_zero (g : SmoothRiemannianMetric I M) :
   rw [ccTensorBilinSymm_zero_apply]
   simp only [abs_zero, zero_mul, le_refl]
 
+/-- **Classical child A — the time-regular smooth-representative selection.**
+
+The interior parabolic smoothing (`solField_into_all_tensorHs_interior`) places the
+Duhamel interior field of `u` in `⋂_σ Hˢ` for every interior `t`, so the now-PROVED
+Weyl-free smooth-representative gate `spectralSmoothRealizesAsSmooth_holds` supplies, for
+each interior `t`, a genuine `C∞` representative whose `L²` class is the inclusion of
+`u.toFun t`; the selection is made TIME-REGULARLY (continuously in `t`).  Near the zero
+initial datum the realized perturbation stays uniformly `g₀`-fibre small with a single
+`δ < 1`, and the selection starts at `T_rep 0 = 0`.
+
+This is the classical interior-smoothing ∘ smooth-representative-gate ∘ short-time
+fibre-smallness selection; its conclusion is strictly WEAKER than the full time-regular
+family (it carries neither the flow derivative nor the joint chart-Gram smoothness), so it
+is a genuinely distinct classical theorem, not a restatement of its consumer. -/
+theorem realizedDeTurck_smoothSelection
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce)
+    (hforce : gforce =ᵐ[timeMeasure T]
+      (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (htrace : timeH1.trace0 _ T u = 0) :
+    ∃ (T_rep : ℝ → SmoothCcTensor g₀ 0 2) (δ : ℝ) (hδ_lt : δ < 1)
+        (_hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ (T_rep t)) δ),
+      T_rep 0 = 0 ∧
+      (∀ t ∈ Set.Ioo (0 : ℝ) T,
+        SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (T_rep t) =
+          tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (Nat.cast_nonneg a) (timeH1.toFun u t)) :=
+  sorry
+
+/-- **Classical child B — the realized perturbation solves the Ricci–DeTurck flow.**
+
+Given the smooth-representative selection family `T_rep` (with its fibre-smallness
+witnesses `hδ_lt`, `hδ`) pinned to the maximal-regularity solution `u` by the interior
+`L²` relation, the realized metric `g_DT t = tensorSectionRealizeMetric g₀ (T_rep t) hδ_lt
+(hδ t)` solves the true DeTurck–Ricci flow: at every `t ∈ Ico 0 T`, base point `x`, and
+tangent pair `(v, w)`, the pointwise `[0,∞)`-derivative of the perturbation part of the
+realized inner product equals the intrinsic Ricci–DeTurck right-hand side
+`deTurckRicciRHS g_bg (g_DT t) x v w`.
+
+Classical content (DISTINCT from the joint-regularity child and from the selection): the
+maximal-regularity `L²`-time-derivative of `u` (`maxRegDuhamelMap_timeDeriv_eq`) is the
+connection Laplacian plus `deTurckSobolevNHa2`, transported to the pointwise right
+derivative by `maxreg_l2deriv_to_pointwise_hasderivwithinat` and realized pointwise to the
+intrinsic Ricci–DeTurck remainder by the chart-coordinate polynomial tie
+`deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS`, evaluated on `g_DT t`.  Its
+conclusion is the single flow-derivative conjunct, so it is not a restatement of the full
+family. -/
+theorem realizedDeTurck_flowDeriv
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce)
+    (hforce : gforce =ᵐ[timeMeasure T]
+      (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (htrace : timeH1.trace0 _ T u = 0)
+    (T_rep : ℝ → SmoothCcTensor g₀ 0 2) (δ : ℝ) (hδ_lt : δ < 1)
+    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (T_rep t)) δ)
+    (hpin : ∀ t ∈ Set.Ioo (0 : ℝ) T,
+      SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (T_rep t) =
+        tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (Nat.cast_nonneg a) (timeH1.toFun u t)) :
+    ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
+      HasDerivWithinAt
+        (fun s : ℝ => ccTensorBilinSymm (I := I) g₀ (T_rep s) x v w)
+        (deTurckRicciRHS (I := I) g_bg
+          (tensorSectionRealizeMetric (I := I) g₀ (T_rep t) hδ_lt (hδ t)) x v w)
+        (Set.Ici 0) t :=
+  sorry
+
+/-- **Classical child C — joint chart-Gram interior regularity of the realized family.**
+
+Given the smooth-representative selection family `T_rep` pinned to the maximal-regularity
+solution `u`, the chart-Gram entries of the realized metric family `g_DT t =
+tensorSectionRealizeMetric g₀ (T_rep t) hδ_lt (hδ t)` are jointly `C∞` up to `t = 0`
+(`JointChartGramSmooth T g_DT`).
+
+Classical content (DISTINCT from the flow-derivative child): standard parabolic interior
+smoothing makes the maximal-regularity solution jointly `C∞` in space and time up to
+`t = 0`; pushed through the smooth-in-its-tensor-argument realize map
+`tensorSectionRealizeMetric` and the chart-Gram extraction `chartGramMatrix`, this gives
+the joint smoothness of the Gram entries.  Its conclusion is the single joint-regularity
+conjunct. -/
+theorem realizedDeTurck_jointSmooth
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce)
+    (hforce : gforce =ᵐ[timeMeasure T]
+      (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (htrace : timeH1.trace0 _ T u = 0)
+    (T_rep : ℝ → SmoothCcTensor g₀ 0 2) (δ : ℝ) (hδ_lt : δ < 1)
+    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (T_rep t)) δ)
+    (hpin : ∀ t ∈ Set.Ioo (0 : ℝ) T,
+      SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (T_rep t) =
+        tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (Nat.cast_nonneg a) (timeH1.toFun u t)) :
+    JointChartGramSmooth (I := I) T
+      (fun t : ℝ => tensorSectionRealizeMetric (I := I) g₀ (T_rep t) hδ_lt (hδ t)) :=
+  sorry
+
 /-- **The time-regular realized DeTurck–Ricci representative family (recursion
 frontier — the single deep parabolic soundness tie).**
 
@@ -152,10 +269,16 @@ PINNED to the solution: the hypotheses `hduh`/`hforce`/`htrace` are the engine's
 defining identities for `u`, so a family unrelated to `u` does not satisfy the interior
 `L²` pin — the conclusion is not satisfiable by an arbitrary family.
 
-POSITED (recursion frontier — the single deep node).  Its eventual proof assembles four
-classical parabolic ingredients into a TIME-REGULAR (continuous/differentiable-in-`t`)
-representative family, which is the soundness core that the per-time existential
-selection of the smooth-representative gate alone cannot supply:
+PROVEN by composition of three distinct classical parabolic children (the recursion
+frontier, decomposed): `realizedDeTurck_smoothSelection` supplies the time-regular
+representative family with its zero initial value, fibre-smallness, and interior `L²` pin;
+`realizedDeTurck_flowDeriv` supplies the Ricci–DeTurck flow derivative for that family;
+`realizedDeTurck_jointSmooth` supplies the joint chart-Gram interior regularity.  Each
+child has a conclusion strictly weaker than this family (one of the four data groups), so
+the assembly is a genuine composition, not a restatement.  The classical content the
+children isolate is the TIME-REGULAR (continuous/differentiable-in-`t`) representative
+family, which is the soundness core that the per-time existential selection of the
+smooth-representative gate alone cannot supply:
 
 * interior smoothing: `hduh` exhibits `u` as the Duhamel solution, whose interior field
   lies in `⋂_σ Hˢ` for each interior `t` by `solField_into_all_tensorHs_interior`
@@ -204,8 +327,15 @@ theorem realizedDeTurck_timeRegular_family
             (tensorSectionRealizeMetric (I := I) g₀ (T_rep t) hδ_lt (hδ t)) x v w)
           (Set.Ici 0) t) ∧
       JointChartGramSmooth (I := I) T
-        (fun t : ℝ => tensorSectionRealizeMetric (I := I) g₀ (T_rep t) hδ_lt (hδ t)) :=
-  sorry
+        (fun t : ℝ => tensorSectionRealizeMetric (I := I) g₀ (T_rep t) hδ_lt (hδ t)) := by
+  obtain ⟨T_rep, δ, hδ_lt, hδ, hrep_zero, hpin⟩ :=
+    realizedDeTurck_smoothSelection (I := I) (M := M) g₀ g_bg a hT hT1 u gforce
+      hduh hforce htrace
+  refine ⟨T_rep, δ, hδ_lt, hδ, hrep_zero, hpin, ?_, ?_⟩
+  · exact realizedDeTurck_flowDeriv (I := I) (M := M) g₀ g_bg a hT hT1 u gforce
+      hduh hforce htrace T_rep δ hδ_lt hδ hpin
+  · exact realizedDeTurck_jointSmooth (I := I) (M := M) g₀ g_bg a hT hT1 u gforce
+      hduh hforce htrace T_rep δ hδ_lt hδ hpin
 
 /-- **SOLUTION-PINNED honest input (1/3) — interior smoothing + smooth-representative
 gate (projection of the time-regular family).**

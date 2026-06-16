@@ -309,7 +309,7 @@ lemma abs_rawPullR_le_zeroContentR (g : SmoothRiemannianMetric I M)
 `m`-th coordinate partial of a chart-pulled raw component of `S` equals the
 chart-pulled raw `(m ::ᵥ Jdx')`-component of `covGrad S` minus the zeroth-order
 Christoffel correction `covDerivLowerOrderTerm`. -/
-private lemma fderiv_rawPullR_single_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
+lemma fderiv_rawPullR_single_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (m : Fin (Module.finrank ℝ E))
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -385,7 +385,7 @@ differentiation direction `m`, the source input multi-index `Idx`, the source
 output multi-index `Jdx'`, and the target multi-index pair `p` — up to iterated
 Fréchet order `N`, the operator norm is bounded by a single non-negative `C` on
 the compact partition-of-unity kernel `chartImagePOUTsupport α`. -/
-private lemma exists_lowerOrderCoeff_uniform_boundR
+lemma exists_lowerOrderCoeff_uniform_boundR
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) (N : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (m : Fin (Module.finrank ℝ E))
@@ -432,7 +432,7 @@ private lemma exists_lowerOrderCoeff_uniform_boundR
 
 /-- **One-order Fréchet peeling.** For `u` smooth on the open chart target and
 `y` in it, `‖D^{j+1} u y‖ ≤ n^j · ∑_m ‖D^j (euclidPartial m u) y‖`. -/
-private lemma iteratedFDeriv_succ_norm_le_sum_euclidPartial
+lemma iteratedFDeriv_succ_norm_le_sum_euclidPartial
     {u : EuclN → ℝ} {O : Set EuclN} (hO : IsOpen O) (hu : ContDiffOn ℝ ∞ u O)
     (j : ℕ) {y : EuclN} (hy : y ∈ O) :
     ‖iteratedFDeriv ℝ (j + 1) u y‖ ≤
@@ -525,7 +525,7 @@ private lemma iteratedFDeriv_succ_norm_le_sum_euclidPartial
         push_cast
         exact le_refl _
 
-private lemma lowerOrderTerm_iteratedFDeriv_norm_leR
+lemma lowerOrderTerm_iteratedFDeriv_norm_leR
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s)
     (α : M) (m : Fin (Module.finrank ℝ E))
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -595,7 +595,7 @@ private lemma lowerOrderTerm_iteratedFDeriv_norm_leR
       iteratedFDerivWithin_of_isOpen (𝕜 := ℝ)
         (f := rawPullR (I := I) (M := M) g r s S α p.1 p.2) (j - l) h_open hy]
 
-private lemma exists_christoffel_bound_valence_range
+lemma exists_christoffel_bound_valence_range
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) (P N : ℕ) :
     ∃ Γ : ℝ, 0 ≤ Γ ∧ ∀ p ≤ P,
       ∀ (m : Fin (Module.finrank ℝ E))
