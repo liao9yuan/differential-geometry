@@ -207,10 +207,10 @@ coordinate faithfulness `tensorL2_ext_of_tensorL2Coeff`, and the value's `∀σ 
 membership is exactly the conclusion. -/
 theorem solInterior_uToFun_allHs
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a)
+    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) (ha_even : Even a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
-      (I := I) (M := M) g₀ g_bg a ha_super).choose)
+      (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
@@ -548,11 +548,11 @@ Consumers transitively depend on the `sorryAx` carried by the two SOLUTION-PINNE
 honest inputs and the joint-regularity bedrock. -/
 theorem realizedDeTurck_timeRegular_family
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a)
+    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) (ha_even : Even a)
     (ha_eq : a = 2 * Module.finrank ℝ E + 4)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
-      (I := I) (M := M) g₀ g_bg a ha_super).choose)
+      (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
@@ -583,7 +583,7 @@ theorem realizedDeTurck_timeRegular_family
   classical
   -- The per-time all-order membership of the spatial solution value, on the closed slab.
   have hmem :=
-    solInterior_uToFun_allHs (I := I) (M := M) g₀ g_bg a ha_super hT hT1 hTT₀ u gforce
+    solInterior_uToFun_allHs (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1 hTT₀ u gforce
       hduh hforce htrace
   -- `u.toFun 0 = 0` from the zero trace.
   have hinit : u.init = 0 := by
@@ -722,11 +722,11 @@ defining identities for `u`, so a `rep` unrelated to `u` does not satisfy the `L
 pin `SmoothCcTensor.toL2 rep = tensorHsToL2 _ hσ (u.toFun t)`. -/
 theorem solInterior_smoothRepr_pin
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a)
+    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) (ha_even : Even a)
     (ha_eq : a = 2 * Module.finrank ℝ E + 4)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
-      (I := I) (M := M) g₀ g_bg a ha_super).choose)
+      (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
@@ -747,7 +747,7 @@ theorem solInterior_smoothRepr_pin
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
             (Nat.cast_nonneg a) (timeH1.toFun u t)) := by
   obtain ⟨T₁, hT₁_pos, hT₁_le, T_rep, δ, hδ_lt, hδ, hrep_zero, htrep_pin, _hflow, _hJ⟩ :=
-    realizedDeTurck_timeRegular_family (I := I) (M := M) g₀ g_bg a ha_super ha_eq hT hT1 hTT₀ u
+    realizedDeTurck_timeRegular_family (I := I) (M := M) g₀ g_bg a ha_super ha_even ha_eq hT hT1 hTT₀ u
       gforce hduh hforce htrace
   exact ⟨T₁, hT₁_pos, hT₁_le, T_rep, δ, hδ_lt, hrep_zero, hδ, htrep_pin⟩
 
@@ -766,11 +766,11 @@ existential `T_rep`/`δ` it ranges over is the genuine solution family of
 `realizedDeTurck_timeRegular_family`, so it is not satisfiable by an arbitrary family. -/
 theorem realizedDeTurck_flowMatch
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a)
+    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) (ha_even : Even a)
     (ha_eq : a = 2 * Module.finrank ℝ E + 4)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
-      (I := I) (M := M) g₀ g_bg a ha_super).choose)
+      (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
@@ -796,7 +796,7 @@ theorem realizedDeTurck_flowMatch
             (tensorSectionRealizeMetric (I := I) g₀ (T_rep t) hδ_lt (hδ t)) x v w)
           (Set.Ici 0) t) := by
   obtain ⟨T₁, hT₁_pos, hT₁_le, T_rep, δ, hδ_lt, hδ, _hrep_zero, htrep_pin, hflow, _hJ⟩ :=
-    realizedDeTurck_timeRegular_family (I := I) (M := M) g₀ g_bg a ha_super ha_eq hT hT1 hTT₀ u
+    realizedDeTurck_timeRegular_family (I := I) (M := M) g₀ g_bg a ha_super ha_even ha_eq hT hT1 hTT₀ u
       gforce hduh hforce htrace
   exact ⟨T₁, hT₁_pos, hT₁_le, T_rep, δ, hδ_lt, hδ, htrep_pin, hflow⟩
 
@@ -812,11 +812,11 @@ existential `T_rep`/`δ` it ranges over is the genuine solution family of
 `realizedDeTurck_timeRegular_family`. -/
 theorem realizedDeTurck_jointReg
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a)
+    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) (ha_even : Even a)
     (ha_eq : a = 2 * Module.finrank ℝ E + 4)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
-      (I := I) (M := M) g₀ g_bg a ha_super).choose)
+      (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
@@ -833,7 +833,7 @@ theorem realizedDeTurck_jointReg
       JointChartGramSmooth (I := I) T₁
         (fun t : ℝ => tensorSectionRealizeMetric (I := I) g₀ (T_rep t) hδ_lt (hδ t)) := by
   obtain ⟨T₁, hT₁_pos, hT₁_le, T_rep, δ, hδ_lt, hδ, _hrep_zero, _htrep_pin, _hflow, hJ⟩ :=
-    realizedDeTurck_timeRegular_family (I := I) (M := M) g₀ g_bg a ha_super ha_eq hT hT1 hTT₀ u
+    realizedDeTurck_timeRegular_family (I := I) (M := M) g₀ g_bg a ha_super ha_even ha_eq hT hT1 hTT₀ u
       gforce hduh hforce htrace
   exact ⟨T₁, hT₁_pos, hT₁_le, T_rep, δ, hδ_lt, hδ, hJ⟩
 
@@ -898,12 +898,13 @@ theorem realizedDeTurckFamily_exists
   set a : ℕ := 2 * Module.finrank ℝ E + 4 with ha_def
   have ha_super : 2 * Module.finrank ℝ E + 3 ≤ a := by rw [ha_def]; omega
   have ha_eq : a = 2 * Module.finrank ℝ E + 4 := ha_def
+  have ha_even : Even a := by rw [ha_def]; exact ⟨Module.finrank ℝ E + 2, by ring⟩
   -- The engine horizon `T₀` and its existence package, kept as the literal `.choose`
   -- terms so the time-regular family's `T ≤ T₀` hypothesis matches definitionally.
   set T₀ : ℝ := (deTurckRicci_quasilinear_maxreg_solution
-    (I := I) (M := M) g₀ g_bg a ha_super).choose with hT₀_def
+    (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose with hT₀_def
   obtain ⟨hT₀_pos, hsol⟩ :=
-    (deTurckRicci_quasilinear_maxreg_solution (I := I) (M := M) g₀ g_bg a ha_super).choose_spec
+    (deTurckRicci_quasilinear_maxreg_solution (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose_spec
   set T : ℝ := min T₀ 1 with hT_def
   have hT_pos : 0 < T := lt_min hT₀_pos one_pos
   have hT_le₀ : T ≤ T₀ := min_le_left _ _
@@ -913,7 +914,7 @@ theorem realizedDeTurckFamily_exists
   -- representative family `T_rep` (uniformly `g₀`-fibre small with `δ < 1`), together with
   -- the four data conjuncts the realized metric must carry — obtained in ONE call.
   obtain ⟨T₁, hT₁_pos, _hT₁_le, T_rep, δ, hδ_lt, hδ, hrep_zero, _htrep_pin, hflow, hJ⟩ :=
-    realizedDeTurck_timeRegular_family (I := I) (M := M) g₀ g_bg a ha_super ha_eq hT_pos hT_le1
+    realizedDeTurck_timeRegular_family (I := I) (M := M) g₀ g_bg a ha_super ha_even ha_eq hT_pos hT_le1
       hT_le₀ u gforce hduh hforce htrace
   -- The realized metric family on the smallness horizon: realize the `C∞` representative
   -- directly.

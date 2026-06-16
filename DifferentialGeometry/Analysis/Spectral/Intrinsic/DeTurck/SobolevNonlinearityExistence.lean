@@ -554,7 +554,8 @@ declaration, so this remainder-level estimate is posited as the single named hon
 which the `deTurckSmoothN`-level Lipschitz estimate below rests. -/
 theorem smoothRemainderDiff_ballLipschitz_Ha2
     (g₀ g_bg : SmoothRiemannianMetric I M)
-    (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) {R : ℝ} (hR : 0 < R) :
+    (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) (ha_even : Even a)
+    {R : ℝ} (hR : 0 < R) :
     ∃ K : ℝ≥0, ∀ (T T' : SmoothCcTensor g₀ 0 2)
       {δ : ℝ} (hδ_lt : δ < 1)
       (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -588,7 +589,8 @@ difference (`deTurckSmoothN_sub_eq_smoothCcToTensorHs_remainderSub`), so the est
 the remainder-level ball-Lipschitz bound `smoothRemainderDiff_ballLipschitz_Ha2` rephrased on
 `deTurckSmoothN`. -/
 theorem deTurckSmoothN_ballLipschitz_Ha2 (g₀ g_bg : SmoothRiemannianMetric I M)
-    (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) {R : ℝ} (hR : 0 < R) :
+    (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) (ha_even : Even a)
+    {R : ℝ} (hR : 0 < R) :
     ∃ K : ℝ≥0, ∀ (T T' : SmoothCcTensor g₀ 0 2)
       {δ : ℝ} (hδ_lt : δ < 1)
       (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -601,7 +603,7 @@ theorem deTurckSmoothN_ballLipschitz_Ha2 (g₀ g_bg : SmoothRiemannianMetric I M
         (K : ℝ) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T -
           smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T'‖ := by
   obtain ⟨K, hK⟩ :=
-    smoothRemainderDiff_ballLipschitz_Ha2 (I := I) (M := M) g₀ g_bg a ha_super hR
+    smoothRemainderDiff_ballLipschitz_Ha2 (I := I) (M := M) g₀ g_bg a ha_super ha_even hR
   refine ⟨K, ?_⟩
   intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
   rw [deTurckSmoothN_sub_eq_smoothCcToTensorHs_remainderSub
@@ -842,7 +844,7 @@ It is a corollary of the quasilinear ball-Lipschitz estimate
 gives `‖N(T) − N(T')‖ ≤ K · ‖ι T − ι T'‖`, and the embeddings being equal makes the right-hand
 side `0`, forcing `N(T) = N(T')`. -/
 theorem deTurckSmoothN_embedding_wellDefined (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a)
+    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) (ha_even : Even a)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -860,7 +862,7 @@ theorem deTurckSmoothN_embedding_wellDefined (g₀ g_bg : SmoothRiemannianMetric
       le_trans (norm_nonneg _) (le_max_left _ _)
     rw [hR_def]; linarith
   obtain ⟨K, hK⟩ :=
-    deTurckSmoothN_ballLipschitz_Ha2 (I := I) (M := M) g₀ g_bg a ha_super hR_pos
+    deTurckSmoothN_ballLipschitz_Ha2 (I := I) (M := M) g₀ g_bg a ha_super ha_even hR_pos
   have hTball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖ ≤ R := by
     rw [hR_def]; linarith [le_max_left ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T'‖]
@@ -981,7 +983,7 @@ continuous map agreeing with this `K`-Lipschitz function on the dense range, so 
 on the closure `= univ` (`LipschitzOnWith.closure`); precomposing with the `1`-Lipschitz recentred
 retraction keeps the constant. -/
 theorem deTurckSobolevNHa2_lipschitzWith (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) :
+    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) (ha_even : Even a) :
     ∃ K : ℝ≥0, LipschitzWith K (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a) := by
   classical
   have h := deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a ha_super
@@ -989,7 +991,7 @@ theorem deTurckSobolevNHa2_lipschitzWith (g₀ g_bg : SmoothRiemannianMetric I M
   have hR₀ : 0 < R₀ := (Classical.choose_spec h).1
   have hδ₀_lt : (Classical.choose h).2 < 1 := (Classical.choose_spec h).2.1
   obtain ⟨K, hK⟩ :=
-    deTurckSmoothN_ballLipschitz_Ha2 (I := I) (M := M) g₀ g_bg a ha_super hR₀
+    deTurckSmoothN_ballLipschitz_Ha2 (I := I) (M := M) g₀ g_bg a ha_super ha_even hR₀
   -- the dense-subset function
   set F : (Set.range (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2))) →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ) :=
@@ -1097,11 +1099,11 @@ closed `H^{a+2}`-ball about the initial datum.  Since `deTurckSobolevNHa2` is **
 Lipschitz (`deTurckSobolevNHa2_lipschitzWith`), it is Lipschitz on every closed ball — in
 particular on `closedBall u₀ R` about any `H^{a+2}`-datum `u₀` and radius `R`. -/
 theorem deTurckSobolevNHa2_lipschitzOnWith (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a)
+    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) (ha_even : Even a)
     (R : ℝ) (u₀ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) :
     ∃ L_R : ℝ≥0, LipschitzOnWith L_R (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a)
       (Metric.closedBall u₀ R) := by
-  obtain ⟨K, hK⟩ := deTurckSobolevNHa2_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super
+  obtain ⟨K, hK⟩ := deTurckSobolevNHa2_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super ha_even
   exact ⟨K, hK.lipschitzOnWith⟩
 
 /-- **`deTurckSobolevNHa2` is the genuine smooth nonlinearity on smooth fibre-small in-ball
@@ -1120,7 +1122,7 @@ The recentred retraction fixes the in-ball point, the dense extension reads off 
 representative whose embedding is the (identity, in-ball) ball retraction of `ι T`; the genuine
 value is recovered by the embedding-well-definedness `deTurckSmoothN_embedding_wellDefined`. -/
 theorem deTurckSobolevNHa2_eq_smoothN (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a)
+    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) (ha_even : Even a)
     (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -1146,7 +1148,7 @@ theorem deTurckSobolevNHa2_eq_smoothN (g₀ g_bg : SmoothRiemannianMetric I M) (
             g₀ a hR₀.le (Classical.choose x.2))) with hF_def
   -- `F` is continuous (same Lipschitz argument as in `deTurckSobolevNHa2_lipschitzWith`)
   obtain ⟨K, hK⟩ :=
-    deTurckSmoothN_ballLipschitz_Ha2 (I := I) (M := M) g₀ g_bg a ha_super hR₀
+    deTurckSmoothN_ballLipschitz_Ha2 (I := I) (M := M) g₀ g_bg a ha_super ha_even hR₀
   have hembed : ∀ x : Set.range (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)),
       smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
         (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (Classical.choose x.2)) =
@@ -1206,7 +1208,7 @@ theorem deTurckSobolevNHa2_eq_smoothN (g₀ g_bg : SmoothRiemannianMetric I M) (
   change deTurckSmoothN (I := I) (M := M) g₀ g_bg a
       (radialScaleSmooth (I := I) (M := M) g₀ a R₀ (Classical.choose hmem)) _ _ =
     deTurckSmoothN (I := I) (M := M) g₀ g_bg a T hδ_lt hδ
-  refine deTurckSmoothN_embedding_wellDefined (I := I) (M := M) g₀ g_bg a ha_super _ T _ _ _ _ ?_
+  refine deTurckSmoothN_embedding_wellDefined (I := I) (M := M) g₀ g_bg a ha_super ha_even _ T _ _ _ _ ?_
   rw [smoothCcToTensorHs_radialScaleSmooth_eq_ballRetraction, Classical.choose_spec hmem]
   exact ballRetraction_eq_self_of_mem hball
 
