@@ -1913,6 +1913,74 @@ private theorem deTurckRHSArmDiff_iteratedCovGrad_riemannianFiberNormSq_jet_le
     _ = Cmid * Kcol * ∑ q ∈ Finset.range (a + 2 + 1), Wq q := by
         rw [← Finset.sum_mul]; ring
 
+/-- **(The ball-uniform per-chart raw-component domination of the Ricci–DeTurck RHS-arm difference —
+the single named honest leaf carrying the uniform-over-`R`-ball chart-Nemytskii Lipschitz modulus.)**
+
+This is the **ball-uniform hoist** of the per-pair per-chart raw-component bound
+`deTurckRHSArmDiff_iteratedCovGrad_rawComponentSq_domination_on_pouTsupport`: a single nonnegative
+constant `Λ` — uniform over the fibre-small radius-`R` covariant ball, i.e. **outside** the `∀ T T'`
+quantifier — such that for any two `g₀`-fibre-small smooth perturbations `T, T'` whose covariant jets up
+to order `a + 2` lie in the radius-`R` ball, on the closed support of the chart-`α` partition-of-unity
+weight, the sum of squares of the raw chart-`α`-frame components of the order-`a` covariant gradient
+`∇^a RHSarm` of the RHS-arm residual
+```
+RHSarm := (deTurckSmoothRemainder g₀ g_bg T − deTurckSmoothRemainder g₀ g_bg T')
+            + rawTensorConnLapSmooth g₀ 0 2 (T − T')
+```
+is dominated by `Λ²` times the order-`≤ a + 2` covariant fibre-norm jets of `T − T'`:
+```
+∑_{Idx,Jdx} (tensorChartComponentRaw g₀ 0 (2+a) (∇^a RHSarm) α Idx Jdx b)²
+  ≤ Λ² · ∑_{q ≤ a+2} rfns(∇^q (T − T'))(b) .
+```
+
+**Why ball-uniform (and not per-pair).**  In the per-pair source the only `(T, T')`-dependent factor of
+the constant is the chart-Nemytskii Lipschitz modulus `CNemMax` of
+`hasChartJetLip_chartDeTurckRicciRHS (g₀ + T) (g₀ + T') g_bg` (the forward Euclidean-coordinate peel
+`Cpeel`, the bridge factor `eFac`, the Stage-4 content constant `Cstage` and the `n^{2+a}·(a+3)`
+combinatorial factor are all `g₀`-anchored and `(T, T')`-independent).  On the fibre-small radius-`R`
+ball the realized metrics `g₀ + h_sym T`, `g₀ + h_sym T'` stay uniformly positive-definite (the `δ < 1`
+fibre bound keeps `det` bounded away from `0`) with metric jets bounded by `R` to order `a + 2`, so the
+`HasChartJetLip` chart-jet Lipschitz modulus of the rational-with-nonvanishing-denominator Ricci–DeTurck
+nonlinearity is uniform over the ball (the standard Moser ball-uniformity of the chart-Gram / inverse-Gram
+/ Christoffel / Ricci / Lie–DeTurck jet towers, each `∃ C, ∀` over the compact base and the bounded
+realized-metric jet set).  Supremising the resulting modulus over the finitely many chart orders and the
+`n²` index pairs gives the single `(T, T')`-independent `Λ`.
+
+This is the genuine missing analytic prerequisite: the current `HasChartJetLip.lip`/`.seminorm_le` field
+binds its constant to a fixed `(g₁, g₂)` with no STATED ball-uniformity, so the hoist to a single `Λ`
+over the realized `R`-ball is posited here (the underlying base towers are uniform-by-construction; the
+ball-uniform packaging is the deferred input).  Consumers transitively depend on this leaf's `sorryAx`.
+
+**Non-vacuity / order self-check.**  The grid reads `∇^{≤ a+2}(T − T')`; the genuine `∂²(T − T')` Ricci
+principal symbol forces a top jet at `q = a + 2`, so a window-`a` weakening is rejected.  A `Λ = 0`
+witness is rejected by a nonvanishing raw chart component for a non-flat, genuinely second-order RHS
+difference. -/
+private theorem deTurckRHSArmDiff_rawComponentSq_domination_on_pouTsupport_ballUniform
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R) (α : M) :
+    ∃ Λ : ℝ, 0 ≤ Λ ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_lt : δ' < 1)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ b : M,
+          b ∈ tsupport (fun x : M =>
+              ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+          (∑ Idx : Fin 0 → Fin (Module.finrank ℝ E),
+            ∑ Jdx : Fin (2 + a) → Fin (Module.finrank ℝ E),
+              (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw
+                (I := I) (M := M) g₀ 0 (2 + a)
+                (iteratedCovGrad (I := I) g₀ 0 2 a
+                  ((deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+                      deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ') +
+                    rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T'))) α Idx Jdx b) ^ 2) ≤
+            Λ ^ 2 * ∑ q ∈ Finset.range (a + 2 + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) b
+                ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection b) :=
+  sorry
+
 /-- **(The ball-uniform order-`(a+2)`-window covariant-jet bound on the Ricci–DeTurck RHS arm of
 the sealed remainder difference — the uniform-over-`R`-ball Nemytskii estimate.)**
 
@@ -1965,8 +2033,88 @@ private theorem deTurckRHSArmDiff_iteratedCovGrad_riemannianFiberNormSq_jet_le_b
                   rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T'))).toSection x) ≤
             CR * ∑ q ∈ Finset.range (a + 2 + 1),
               riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
-                ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection x) :=
-  sorry
+                ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection x) := by
+  classical
+  -- This is the ball-uniform re-thread of the per-pair single-factor covariant-jet assembly
+  -- `deTurckRHSArmDiff_iteratedCovGrad_singleFactor_jet`: per chart `α` of the finite atlas, the
+  -- reverse fibre-norm/raw-component bridge (uniform over all sections) composed with the **ball-uniform**
+  -- per-chart raw-component domination posit produces a single `(T, T')`-independent constant
+  -- `Cα := Cbridge α · (Λ α)²`; the atlas maximum `Ksum := ∑_α Cα` is the single ball-uniform `CR`.
+  -- The reverse fibre-norm/raw-component bridge constant `Cbridge α` is uniform over **all** sections
+  -- (the `∀ S` is inside its `∃ C`), hence `(T, T')`-independent.
+  set Cbridge : M → ℝ := fun α =>
+    (riemannianFiberNormSq_le_raw_components_on_pouTsupport
+      (I := I) (M := M) g₀ 0 (2 + a) α).choose with hCbridge_def
+  have hCbridge_nn : ∀ α, 0 ≤ Cbridge α := fun α =>
+    (riemannianFiberNormSq_le_raw_components_on_pouTsupport
+      (I := I) (M := M) g₀ 0 (2 + a) α).choose_spec.1
+  have hCbridge : ∀ (α : M) (S : SmoothCcTensor g₀ 0 (2 + a)) {b : M},
+      b ∈ tsupport (fun x : M =>
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) b (S.toSection b) ≤
+        Cbridge α *
+          (∑ Idx : Fin 0 → Fin (Module.finrank ℝ E),
+            ∑ Jdx : Fin (2 + a) → Fin (Module.finrank ℝ E),
+              (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw
+                (I := I) (M := M) g₀ 0 (2 + a) S α Idx Jdx b) ^ 2) := fun α =>
+    (riemannianFiberNormSq_le_raw_components_on_pouTsupport
+      (I := I) (M := M) g₀ 0 (2 + a) α).choose_spec.2
+  -- The ball-uniform per-chart raw-component domination posit: a single `(T, T')`-independent `Λ α`.
+  set Lam : M → ℝ := fun α =>
+    (deTurckRHSArmDiff_rawComponentSq_domination_on_pouTsupport_ballUniform
+      (I := I) (M := M) g₀ g_bg a hR α).choose with hLam_def
+  have hLam_nn : ∀ α, 0 ≤ Lam α := fun α =>
+    (deTurckRHSArmDiff_rawComponentSq_domination_on_pouTsupport_ballUniform
+      (I := I) (M := M) g₀ g_bg a hR α).choose_spec.1
+  have hLam := fun α =>
+    (deTurckRHSArmDiff_rawComponentSq_domination_on_pouTsupport_ballUniform
+      (I := I) (M := M) g₀ g_bg a hR α).choose_spec.2
+  -- The single per-chart constant `Cα := Cbridge α · (Λ α)²` and its atlas-sum `Ksum`.
+  set Cα : M → ℝ := fun α => Cbridge α * (Lam α) ^ 2 with hCα_def
+  have hCα_nn : ∀ α, 0 ≤ Cα α := fun α => mul_nonneg (hCbridge_nn α) (sq_nonneg _)
+  set Ksum : ℝ := ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M), Cα α with hKsum_def
+  have hKsum_nn : 0 ≤ Ksum := Finset.sum_nonneg (fun α _ => hCα_nn α)
+  refine ⟨Ksum, hKsum_nn, ?_⟩
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball x
+  -- Abbreviate the RHS-arm, its order-`a` covariant gradient, and the order-`(a+2)` jet column at `x`.
+  set RHSarm : SmoothCcTensor g₀ 0 2 :=
+    (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+        deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ') +
+      rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T') with hRHSarm_def
+  set RHSa : SmoothCcTensor g₀ 0 (2 + a) :=
+    iteratedCovGrad (I := I) g₀ 0 2 a RHSarm with hRHSa_def
+  set Rcol : ℝ := ∑ q ∈ Finset.range (a + 2 + 1),
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection x) with hRcol_def
+  have hRcol_nn : 0 ≤ Rcol :=
+    Finset.sum_nonneg fun q _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + q) x _
+  -- Choose a chart `α` whose closed POU support contains `x`.
+  obtain ⟨α, hα_pos⟩ := (chartAtlasPOU I M).exists_pos_of_mem (Set.mem_univ x)
+  have hα_finset : α ∈ chartAtlasPOU_finset (I := I) (M := M) := by
+    rw [chartAtlasPOU_finset_mem]
+    exact ⟨x, Function.mem_support.mpr (ne_of_gt hα_pos)⟩
+  have hx_tsupport : x ∈ tsupport (fun y : M =>
+      ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) y) :=
+    subset_tsupport _ (Function.mem_support.mpr (ne_of_gt hα_pos))
+  -- The reverse fibre-norm bridge at `x` for the chart `α`, applied to `RHSa`.
+  have hbridge := hCbridge α RHSa hx_tsupport
+  -- The ball-uniform raw-component domination at `x` for the chart `α`.
+  have hraw := hLam α T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball x hx_tsupport
+  -- Combine the two into `rfns(∇^a RHSarm)(x) ≤ Cα α · Rcol`, then majorise by the atlas-sum `Ksum`.
+  have hCα_le : Cα α ≤ Ksum := by
+    rw [hKsum_def]
+    exact Finset.single_le_sum (fun β _ => hCα_nn β) hα_finset
+  calc riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x (RHSa.toSection x)
+      ≤ Cbridge α *
+          (∑ Idx : Fin 0 → Fin (Module.finrank ℝ E),
+            ∑ Jdx : Fin (2 + a) → Fin (Module.finrank ℝ E),
+              (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw
+                (I := I) (M := M) g₀ 0 (2 + a) RHSa α Idx Jdx x) ^ 2) := hbridge
+    _ ≤ Cbridge α * ((Lam α) ^ 2 * Rcol) := by
+        refine mul_le_mul_of_nonneg_left ?_ (hCbridge_nn α)
+        simpa only [hRHSa_def, hRHSarm_def, hRcol_def] using hraw
+    _ = Cα α * Rcol := by rw [hCα_def]; ring
+    _ ≤ Ksum * Rcol := mul_le_mul_of_nonneg_right hCα_le hRcol_nn
 
 set_option linter.unusedVariables false in
 /-- **(The genuine order-`(a+2)`-window single-factor covariant grid of the sealed
