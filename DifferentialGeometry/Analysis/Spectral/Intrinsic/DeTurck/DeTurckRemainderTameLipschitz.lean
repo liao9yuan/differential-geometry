@@ -2165,6 +2165,95 @@ private theorem deTurckRemainderDiff_singleField_diagonalGrid_intrinsicCore
   -- Re-expose the abbreviations.
   rw [hWq_def, hCcol_def]
 
+set_option maxHeartbeats 1600000 in
+attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
+  Tensor0SBundle.tensorRSSpace_normedSpace in
+/-- **The sharp supercritical-Sobolev pointwise fibre-norm bound on a smooth tensor section.**
+
+At a supercritical spectral order (`ha_super : 2·finrank E + 3 ≤ a`) there is a uniform constant
+`C₀ ≥ 0` such that, for **every** smooth compactly-supported `(0,2)`-tensor `S` and **every** base
+point `x`, the intrinsic squared Riemannian fibre norm of the section value is dominated by the
+square of `C₀` times the order-`(a + 2)` spectral norm of `S`:
+
+  `riemannianFiberNormSq g₀ 0 2 x (S.toSection x) ≤ (C₀ · ‖smoothCcToTensorHs g₀ (a+2) S‖)²`.
+
+This is the section-level supercritical Sobolev embedding `H ↪ C⁰`, transported to the intrinsic
+fibre norm.  Concretely the chart `H^{2·kE} ↪ C⁰` embedding `tensorPouSobolevHilbert_embedding_Ck_gNorm`
+(at the smallest chart order `kE = finrank E / 2 + 1`, so `2·kE > finrank E`) bounds the bundle fibre
+norm `‖S.toSection x‖` by `C₁ · ‖S.toHs (2·kE)‖`; the lossy-bridge spectral chain (the `toHs`/PoU
+norm identity `tensorPouSobolevHilbert_norm_eq`, the PoU → spectral comparison
+`tensorPouSobolevHsNorm_le_ccSpectralEmbed`, the spectral monotonicity `ccSpectralEmbed_norm_mono`
+raising the order `4·kE ≤ a + 2`, and the `ccSpectralEmbed = smoothCcToTensorHs` definitional
+equality) lifts it to `C₀ · ‖smoothCcToTensorHs g₀ (a+2) S‖`; finally the fibre-norm/bundle-norm
+bridge `riemannianFiberNormSq_eq_bundle_norm_sq'` rewrites `rfns` as `‖S.toSection x‖²` and squaring
+gives the bound.  This is the **sharp** witness that replaces the loose
+`exists_bound_riemannianFiberNormSq_smoothCcTensor` upper bound on the perturbation-difference
+`C⁰` sup, exposing the `‖smoothCcToTensorHs‖` scale of the sup so a downstream consumer can absorb
+the cross arm. -/
+private theorem exists_riemannianFiberNormSq_section_le_smoothCcToTensorHs_sq
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) :
+    ∃ C₀ : ℝ, 0 ≤ C₀ ∧ ∀ (S : SmoothCcTensor g₀ 0 2) (x : M),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (S.toSection x) ≤
+        (C₀ * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) S‖) ^ 2 := by
+  classical
+  set kE : ℕ := Module.finrank ℝ E / 2 + 1 with hkE_def
+  have hkE_super : 2 * kE > Module.finrank ℝ E + 2 * 0 := by rw [hkE_def]; omega
+  have h4kE_le : (2 * (2 * kE) : ℕ) ≤ a + 2 := by rw [hkE_def]; omega
+  -- chart `H^{2 kE} ↪ C⁰` (section-level supercritical Sobolev embedding)
+  obtain ⟨C₁, hC₁_pos, hC₁⟩ :=
+    DifferentialGeometry.PDE.RicciFlow.tensorPouSobolevHilbert_embedding_Ck_gNorm
+      (I := I) (M := M) g₀ 0 2 kE 0 hkE_super
+  -- PoU → spectral comparison (N1)
+  obtain ⟨C₂, hC₂_nn, hC₂⟩ :=
+    tensorPouSobolevHsNorm_le_ccSpectralEmbed (I := I) (M := M) g₀ (2 * kE)
+  refine ⟨C₁ * (C₂ + 1), by positivity, fun S x => ?_⟩
+  letI : Bundle.RiemannianBundle
+      (fun b : M => Tensor0SBundle.TensorRSSpace 0 2 I b) :=
+    Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 2
+  -- the spectral lift of the chart fibre-norm bound, mirroring the lossy bridge's `hupper`
+  have hupper : C₁ * ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+        (g := g₀) (r := 0) (s := 2) (2 * kE) S‖ ≤
+      (C₁ * (C₂ + 1)) * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) S‖ := by
+    have hstep2 : ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+          (g := g₀) (r := 0) (s := 2) (2 * kE) S‖ =
+        (DifferentialGeometry.Analysis.Sobolev.Tensor.tensorPouSobolevHsNorm
+          (I := I) (M := M) g₀ (2 * kE) S).toReal :=
+      DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.tensorPouSobolevHilbert_norm_eq
+        (I := I) (M := M) g₀ (2 * kE) S
+    have hstep3 : (DifferentialGeometry.Analysis.Sobolev.Tensor.tensorPouSobolevHsNorm
+          (I := I) (M := M) g₀ (2 * kE) S).toReal ≤
+        C₂ * ‖ccSpectralEmbed (I := I) (M := M) g₀ ((2 * (2 * kE) : ℕ) : ℝ) S‖ := hC₂ S
+    have hstep4 : ‖ccSpectralEmbed (I := I) (M := M) g₀ ((2 * (2 * kE) : ℕ) : ℝ) S‖ ≤
+        ‖ccSpectralEmbed (I := I) (M := M) g₀ ((a : ℝ) + 2) S‖ := by
+      refine ccSpectralEmbed_norm_mono (I := I) (M := M) g₀ ?_ S
+      have h2 : ((2 * (2 * kE) : ℕ) : ℝ) ≤ ((a + 2 : ℕ) : ℝ) := by exact_mod_cast h4kE_le
+      push_cast at h2 ⊢
+      linarith [h2]
+    have hembed_eq : ccSpectralEmbed (I := I) (M := M) g₀ ((a : ℝ) + 2) S =
+        smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) S :=
+      DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.tensorHs.ext
+        (funext (fun i => rfl))
+    set Nm : ℝ := ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) S‖ with hNm_def
+    have hNm_nn : 0 ≤ Nm := norm_nonneg _
+    have hspec_le : ‖ccSpectralEmbed (I := I) (M := M) g₀ ((2 * (2 * kE) : ℕ) : ℝ) S‖ ≤ Nm := by
+      rw [hNm_def, ← hembed_eq]; exact hstep4
+    calc C₁ * ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+            (g := g₀) (r := 0) (s := 2) (2 * kE) S‖
+        = C₁ * (DifferentialGeometry.Analysis.Sobolev.Tensor.tensorPouSobolevHsNorm
+            (I := I) (M := M) g₀ (2 * kE) S).toReal := by rw [hstep2]
+      _ ≤ C₁ * (C₂ * ‖ccSpectralEmbed (I := I) (M := M) g₀ ((2 * (2 * kE) : ℕ) : ℝ) S‖) :=
+          mul_le_mul_of_nonneg_left hstep3 hC₁_pos.le
+      _ ≤ C₁ * (C₂ * Nm) :=
+          mul_le_mul_of_nonneg_left
+            (mul_le_mul_of_nonneg_left hspec_le hC₂_nn) hC₁_pos.le
+      _ ≤ (C₁ * (C₂ + 1)) * Nm := by nlinarith [hNm_nn, hC₁_pos.le, hC₂_nn]
+  -- the section fibre-norm bound (instance inferred from `hC₁ S x`, never annotated), then
+  -- rewrite `rfns = ‖·‖²` and square
+  have hsection := le_trans (hC₁ S x) hupper
+  rw [riemannianFiberNormSq_eq_bundle_norm_sq' (I := I) (M := M) g₀ 0 2 x (S.toSection x)]
+  exact pow_le_pow_left₀ (norm_nonneg _) hsection 2
+
 /-- **The intrinsic covariant Faà-di-Bruno single-coefficient diagonal product-grid domination of the
 sealed Ricci–DeTurck remainder difference, with the two `C⁰` fibre-sup levels.**
 
@@ -2194,7 +2283,8 @@ T'))`, `Λcoeff := √(sup rfns(coeff))`).  Consumers transitively depend on the
 `l = 0` column reads `∑_i rfns(∇^i (T − T'))·rfns(coeff)`, so a `Cmid = 0` witness is rejected by a
 nonvanishing remainder-difference jet where `coeff` is nonzero. -/
 private theorem deTurckRemainderDiff_singleField_diagonalGrid
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R) :
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
     ∃ s : ℕ,
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_lt : δ < 1)
@@ -2203,8 +2293,9 @@ private theorem deTurckRemainderDiff_singleField_diagonalGrid
         (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
-        ∃ (coeff : SmoothCcTensor g₀ 0 s) (Cmid ΛW Λcoeff : ℝ),
-          0 ≤ Cmid ∧ 0 ≤ ΛW ∧ 0 ≤ Λcoeff ∧
+        ∃ (coeff : SmoothCcTensor g₀ 0 s) (Cmid ΛW Λcoeff Cw : ℝ),
+          0 ≤ Cmid ∧ 0 ≤ ΛW ∧ 0 ≤ Λcoeff ∧ 0 ≤ Cw ∧
+          ΛW ≤ Cw * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (T - T')‖ ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x ((T - T').toSection x) ≤
             ΛW ^ 2) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x (coeff.toSection x) ≤
@@ -2229,17 +2320,20 @@ private theorem deTurckRemainderDiff_singleField_diagonalGrid
   intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
   obtain ⟨coeff, Cmid, hCmid, hgrid⟩ :=
     hcore T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
-  -- `C⁰` fibre-sup of the perturbation difference `T − T'` on the compact manifold.
-  obtain ⟨KW, hKW_nn, hKW⟩ :=
-    exists_bound_riemannianFiberNormSq_smoothCcTensor (I := I) (M := M) g₀ 0 2 (T - T')
+  -- **Sharp** `C⁰` fibre-sup of the perturbation difference `T − T'`: the supercritical-Sobolev
+  -- section embedding exposes the `‖smoothCcToTensorHs (a+2) (T − T')‖` scale of the sup.
+  obtain ⟨C₀, hC₀_nn, hC₀⟩ :=
+    exists_riemannianFiberNormSq_section_le_smoothCcToTensorHs_sq (I := I) (M := M) g₀ a ha_super
   -- `C⁰` fibre-sup of the coefficient field `coeff` on the compact manifold.
   obtain ⟨Kc, hKc_nn, hKc⟩ :=
     exists_bound_riemannianFiberNormSq_smoothCcTensor (I := I) (M := M) g₀ 0 s coeff
-  refine ⟨coeff, Cmid, Real.sqrt KW, Real.sqrt Kc, hCmid, Real.sqrt_nonneg KW,
-    Real.sqrt_nonneg Kc, ?_, ?_, hgrid⟩
+  set ΛW : ℝ := C₀ * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (T - T')‖ with hΛW_def
+  have hΛW_nn : 0 ≤ ΛW := by rw [hΛW_def]; positivity
+  refine ⟨coeff, Cmid, ΛW, Real.sqrt Kc, C₀, hCmid, hΛW_nn,
+    Real.sqrt_nonneg Kc, hC₀_nn, le_of_eq hΛW_def, ?_, ?_, hgrid⟩
   · intro x
-    rw [Real.sq_sqrt hKW_nn]
-    exact hKW x
+    rw [hΛW_def]
+    exact hC₀ (T - T') x
   · intro x
     rw [Real.sq_sqrt hKc_nn]
     exact hKc x
@@ -2267,7 +2361,8 @@ be the single posited coefficient (`coeff₁ = coeff₂ = coeff`).  The principa
 the lower-order-field grid is trivial (`∇^a 0 = 0`, `rfns(0) = 0 ≤ Cmid · (nonneg grid)`); the split
 `D = D₁ + D₂` is `add_zero`.  Consumers transitively depend on the posit's `sorryAx`. -/
 private theorem deTurckRemainderDiff_principalSplit_singleCoeffDiagonalGrid
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R) :
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
     ∃ s : ℕ,
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_lt : δ < 1)
@@ -2277,8 +2372,9 @@ private theorem deTurckRemainderDiff_principalSplit_singleCoeffDiagonalGrid
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∃ (coeff₁ coeff₂ : SmoothCcTensor g₀ 0 s) (D₁ D₂ : SmoothCcTensor g₀ 0 2)
-          (Cmid ΛW Λcoeff : ℝ),
-          0 ≤ Cmid ∧ 0 ≤ ΛW ∧ 0 ≤ Λcoeff ∧
+          (Cmid ΛW Λcoeff Cw : ℝ),
+          0 ≤ Cmid ∧ 0 ≤ ΛW ∧ 0 ≤ Λcoeff ∧ 0 ≤ Cw ∧
+          ΛW ≤ Cw * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (T - T')‖ ∧
           deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
               deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ' = D₁ + D₂ ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x ((T - T').toSection x) ≤
@@ -2306,16 +2402,17 @@ private theorem deTurckRemainderDiff_principalSplit_singleCoeffDiagonalGrid
                       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + l) x
                         ((iteratedCovGrad (I := I) g₀ 0 s l coeff₂).toSection x)) := by
   obtain ⟨s, hgrid⟩ :=
-    deTurckRemainderDiff_singleField_diagonalGrid (I := I) (M := M) g₀ g_bg a hR
+    deTurckRemainderDiff_singleField_diagonalGrid (I := I) (M := M) g₀ g_bg a ha_super hR
   refine ⟨s, ?_⟩
   intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
-  obtain ⟨coeff, Cmid, ΛW, Λcoeff, hCmid, hΛW, hΛcoeff, hWsup, hcoeffsup, hgridD⟩ :=
+  obtain ⟨coeff, Cmid, ΛW, Λcoeff, Cw, hCmid, hΛW, hΛcoeff, hCw, hWupper, hWsup, hcoeffsup, hgridD⟩ :=
     hgrid T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
   -- Principal field `D₁ := D` (the whole sealed remainder difference); lower-order field `D₂ := 0`.
   refine ⟨coeff, coeff,
     deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
       deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ',
-    0, Cmid, ΛW, Λcoeff, hCmid, hΛW, hΛcoeff, ?_, hWsup, hcoeffsup, hcoeffsup, hgridD, ?_⟩
+    0, Cmid, ΛW, Λcoeff, Cw, hCmid, hΛW, hΛcoeff, hCw, hWupper, ?_, hWsup, hcoeffsup, hcoeffsup,
+    hgridD, ?_⟩
   · -- The split `D = D + 0`.
     rw [add_zero]
   · -- The lower-order grid: `∇^a 0 = 0`, so `rfns(∇^a D₂) = 0`, dominated by the nonnegative grid.
@@ -2370,7 +2467,8 @@ the `2`-sub-additivity of the intrinsic fibre norm (`riemannianFiberNormSq_add_l
 single-coefficient grids merge per diagonal column into the `coeff₁ + coeff₂` pair grid (the
 leaf-`Cmid` is `2·Cmid`).  Consumers transitively depend on the `sorryAx` of the posited split. -/
 theorem pointwise_iteratedCovGrad_deTurckRemainderDiff_productGrid
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R) :
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
     ∃ s : ℕ,
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_lt : δ < 1)
@@ -2379,8 +2477,9 @@ theorem pointwise_iteratedCovGrad_deTurckRemainderDiff_productGrid
         (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
-        ∃ (coeff₁ coeff₂ : SmoothCcTensor g₀ 0 s) (Cmid ΛW Λcoeff : ℝ),
-          0 ≤ Cmid ∧ 0 ≤ ΛW ∧ 0 ≤ Λcoeff ∧
+        ∃ (coeff₁ coeff₂ : SmoothCcTensor g₀ 0 s) (Cmid ΛW Λcoeff Cw : ℝ),
+          0 ≤ Cmid ∧ 0 ≤ ΛW ∧ 0 ≤ Λcoeff ∧ 0 ≤ Cw ∧
+          ΛW ≤ Cw * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (T - T')‖ ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x ((T - T').toSection x) ≤
             ΛW ^ 2) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x (coeff₁.toSection x) ≤
@@ -2401,13 +2500,14 @@ theorem pointwise_iteratedCovGrad_deTurckRemainderDiff_productGrid
                         + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + l) x
                           ((iteratedCovGrad (I := I) g₀ 0 s l coeff₂).toSection x)) := by
   obtain ⟨s, hsplit⟩ :=
-    deTurckRemainderDiff_principalSplit_singleCoeffDiagonalGrid (I := I) (M := M) g₀ g_bg a hR
+    deTurckRemainderDiff_principalSplit_singleCoeffDiagonalGrid (I := I) (M := M) g₀ g_bg a
+      ha_super hR
   refine ⟨s, ?_⟩
   intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
-  obtain ⟨coeff₁, coeff₂, D₁, D₂, Cmid, ΛW, Λcoeff, hCmid, hΛW, hΛcoeff,
+  obtain ⟨coeff₁, coeff₂, D₁, D₂, Cmid, ΛW, Λcoeff, Cw, hCmid, hΛW, hΛcoeff, hCw, hWupper,
       hDsplit, hWsup, hcoeff₁sup, hcoeff₂sup, hgrid₁, hgrid₂⟩ :=
     hsplit T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
-  refine ⟨coeff₁, coeff₂, 2 * Cmid, ΛW, Λcoeff, by positivity, hΛW, hΛcoeff,
+  refine ⟨coeff₁, coeff₂, 2 * Cmid, ΛW, Λcoeff, Cw, by positivity, hΛW, hΛcoeff, hCw, hWupper,
     hWsup, hcoeff₁sup, hcoeff₂sup, ?_⟩
   intro x
   -- Abbreviations: the difference-jet column and the two coefficient diagonal columns at `x`.
@@ -2519,7 +2619,8 @@ integrated replacement for the refuted pointwise two-arm split).  It depends tra
 `sorry` of the posited covariant expansion and on the `Lᵖ`-interpolation `sorry` underneath the
 engine. -/
 theorem deTurckRemainderDiff_iteratedCovGrad_twoArm_ballLipschitz
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R) :
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
     ∃ s : ℕ,
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_lt : δ < 1)
@@ -2528,8 +2629,9 @@ theorem deTurckRemainderDiff_iteratedCovGrad_twoArm_ballLipschitz
         (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
-        ∃ (coeff₁ coeff₂ : SmoothCcTensor g₀ 0 s) (C ΛW Λcoeff : ℝ),
-          0 ≤ C ∧ 0 ≤ ΛW ∧ 0 ≤ Λcoeff ∧
+        ∃ (coeff₁ coeff₂ : SmoothCcTensor g₀ 0 s) (C ΛW Λcoeff Cw : ℝ),
+          0 ≤ C ∧ 0 ≤ ΛW ∧ 0 ≤ Λcoeff ∧ 0 ≤ Cw ∧
+          ΛW ≤ Cw * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (T - T')‖ ∧
           ‖iteratedCovGrad (I := I) g₀ 0 2 a
               (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
                 deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ')‖ ^ 2 ≤
@@ -2539,17 +2641,18 @@ theorem deTurckRemainderDiff_iteratedCovGrad_twoArm_ballLipschitz
                 (‖iteratedCovGrad (I := I) g₀ 0 s l coeff₁‖ ^ 2
                   + ‖iteratedCovGrad (I := I) g₀ 0 s l coeff₂‖ ^ 2) := by
   obtain ⟨s, hgrid⟩ :=
-    pointwise_iteratedCovGrad_deTurckRemainderDiff_productGrid (I := I) (M := M) g₀ g_bg a hR
+    pointwise_iteratedCovGrad_deTurckRemainderDiff_productGrid (I := I) (M := M) g₀ g_bg a
+      ha_super hR
   refine ⟨s, ?_⟩
   intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
-  obtain ⟨coeff₁, coeff₂, Cmid, ΛW, Λcoeff, hCmid, hΛW, hΛcoeff,
+  obtain ⟨coeff₁, coeff₂, Cmid, ΛW, Λcoeff, Cw, hCmid, hΛW, hΛcoeff, hCw, hWupper,
       hWsup, hcoeff₁sup, hcoeff₂sup, hdom⟩ :=
     hgrid T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
   -- The sorry-free integrated two-arm pair engine, at valences (2, s), window (a+2), order a.
   obtain ⟨Cd, hCd, hpair⟩ :=
     Analysis.Sobolev.Tensor.exists_integrated_diagonalProductGrid_twoArm_pair_le
       (I := I) (M := M) g₀ 2 s (a + 2) a
-  refine ⟨coeff₁, coeff₂, Cd * Cmid, ΛW, Λcoeff, by positivity, hΛW, hΛcoeff, ?_⟩
+  refine ⟨coeff₁, coeff₂, Cd * Cmid, ΛW, Λcoeff, Cw, by positivity, hΛW, hΛcoeff, hCw, hWupper, ?_⟩
   -- Feed the posited product grid (with `U := D`, `W := T - T'`, pair `(coeff₁, coeff₂)`).
   have hres :=
     hpair (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -

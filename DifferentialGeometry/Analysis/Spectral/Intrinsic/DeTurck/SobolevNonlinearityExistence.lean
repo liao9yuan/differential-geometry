@@ -7,6 +7,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.FaithfulH1Embedd
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.LocallyLipschitzTruncation
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingManifoldC0
+import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingReverseHebeyToHs
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralPouNormEquiv
 
 /-!
@@ -323,6 +324,255 @@ theorem deTurckSmoothN_sub_eq_smoothCcToTensorHs_remainderSub
     rw [tensorL2Coeff_smul]
     ring
   rw [hsub, deTurckSmoothN_coeff, deTurckSmoothN_coeff, smoothCcToTensorHs_coeff, hcoeff_sub]
+
+/-- **The innermost-peel recursion for the one-minus-connection-Laplacian iterate.**
+`(1 − Δ_∇)^{k+1} S = (1 − Δ_∇)^k ((1 − Δ_∇) S)`: peeling one factor off the inside agrees with
+peeling it off the outside.  Proved by induction on `k`. -/
+private theorem oneMinusConnLapSmoothIter_succ'
+    (g₀ : SmoothRiemannianMetric I M) (k : ℕ) (S : SmoothCcTensor g₀ 0 2) :
+    oneMinusConnLapSmoothIter (I := I) g₀ 0 2 (k + 1) S =
+      oneMinusConnLapSmoothIter (I := I) g₀ 0 2 k (oneMinusConnLapSmooth (I := I) g₀ 0 2 S) := by
+  induction k with
+  | zero => rfl
+  | succ k ih =>
+      rw [oneMinusConnLapSmoothIter_succ, ih, ← oneMinusConnLapSmoothIter_succ]
+
+/-- **The single-step `toHs` order-drop for the one-minus-connection-Laplacian** at any fixed
+output order `m`.  Since `(1 − Δ_∇) U = U − Δ_∇ U`, the triangle inequality on
+`SmoothCcTensor.toHs_sub`, the order monotonicity `toHs_norm_mono` (`‖U‖_{H^m} ≤ ‖U‖_{H^{m+1}}`)
+and the single-step rough-Laplacian order-drop `exists_rawConnLapSmooth_toHs_le_toHs_succ` give a
+constant `C = 1 + C₁` with `‖(1 − Δ_∇) U‖_{H^m} ≤ C · ‖U‖_{H^{m+1}}`. -/
+private theorem exists_oneMinusConnLapSmooth_toHs_le_toHs_succ
+    (g₀ : SmoothRiemannianMetric I M) (m : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ U : SmoothCcTensor g₀ 0 2,
+        ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+            (g := g₀) (r := 0) (s := 2) m (oneMinusConnLapSmooth (I := I) g₀ 0 2 U)‖ ≤
+          C * ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+            (g := g₀) (r := 0) (s := 2) (m + 1) U‖ := by
+  obtain ⟨C₁, hC₁_nn, hC₁⟩ := exists_rawConnLapSmooth_toHs_le_toHs_succ (I := I) g₀ m
+  refine ⟨1 + C₁, by positivity, fun U => ?_⟩
+  have hsub : oneMinusConnLapSmooth (I := I) g₀ 0 2 U =
+      U - rawTensorConnLapSmooth (I := I) g₀ 0 2 U := rfl
+  rw [hsub, SmoothCcTensor.toHs_sub]
+  have hmono : ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+        (g := g₀) (r := 0) (s := 2) m U‖ ≤
+      ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+        (g := g₀) (r := 0) (s := 2) (m + 1) U‖ :=
+    toHs_norm_mono (I := I) g₀ (Nat.le_succ m) U
+  have hlap := hC₁ U
+  calc ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+          (g := g₀) (r := 0) (s := 2) m U -
+          DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+            (g := g₀) (r := 0) (s := 2) m (rawTensorConnLapSmooth (I := I) g₀ 0 2 U)‖
+      ≤ ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+            (g := g₀) (r := 0) (s := 2) m U‖ +
+          ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+            (g := g₀) (r := 0) (s := 2) m (rawTensorConnLapSmooth (I := I) g₀ 0 2 U)‖ :=
+        norm_sub_le _ _
+    _ ≤ ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+            (g := g₀) (r := 0) (s := 2) (m + 1) U‖ +
+          C₁ * ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+            (g := g₀) (r := 0) (s := 2) (m + 1) U‖ := add_le_add hmono hlap
+    _ = (1 + C₁) * ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+            (g := g₀) (r := 0) (s := 2) (m + 1) U‖ := by ring
+
+/-- **The order-dropping `toHs` bound for the genuine smooth one-minus-connection-Laplacian
+iterate** (output order fixed at `0`).  For every `k` there is a nonnegative constant `C` with
+`‖(1 − Δ_∇)^k S‖_{H^0} ≤ C · ‖S‖_{H^k}` for every smooth `(0,2)`-tensor `S`.  Induction on `k`
+peeling the **innermost** factor (`oneMinusConnLapSmoothIter_succ'`): the inductive hypothesis at
+output order `0` applied to `(1 − Δ_∇) S` gives `‖(1 − Δ_∇)^k ((1 − Δ_∇) S)‖_{H^0} ≤ Ck · ‖(1 −
+Δ_∇) S‖_{H^k}`, and the single-step drop at the **fixed** output order `k`
+(`exists_oneMinusConnLapSmooth_toHs_le_toHs_succ`) bounds `‖(1 − Δ_∇) S‖_{H^k} ≤ Cstep · ‖S‖_{H^{k+1}}`
+— so the constant `Ck · Cstep` is order-independent. -/
+private theorem exists_oneMinusConnLapSmoothIter_toHs_le_toHs
+    (g₀ : SmoothRiemannianMetric I M) (k : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ S : SmoothCcTensor g₀ 0 2,
+        ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+            (g := g₀) (r := 0) (s := 2) 0 (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 k S)‖ ≤
+          C * ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+            (g := g₀) (r := 0) (s := 2) k S‖ := by
+  induction k with
+  | zero =>
+      refine ⟨1, zero_le_one, fun S => ?_⟩
+      simp only [oneMinusConnLapSmoothIter_zero, one_mul, le_refl]
+  | succ k ih =>
+      obtain ⟨Ck, hCk_nn, hCk⟩ := ih
+      obtain ⟨Cstep, hCstep_nn, hCstep⟩ :=
+        exists_oneMinusConnLapSmooth_toHs_le_toHs_succ (I := I) g₀ k
+      refine ⟨Ck * Cstep, mul_nonneg hCk_nn hCstep_nn, fun S => ?_⟩
+      rw [oneMinusConnLapSmoothIter_succ']
+      calc ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+              (g := g₀) (r := 0) (s := 2) 0
+              (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 k
+                (oneMinusConnLapSmooth (I := I) g₀ 0 2 S))‖
+          ≤ Ck * ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+              (g := g₀) (r := 0) (s := 2) k (oneMinusConnLapSmooth (I := I) g₀ 0 2 S)‖ :=
+            hCk (oneMinusConnLapSmooth (I := I) g₀ 0 2 S)
+        _ ≤ Ck * (Cstep * ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+              (g := g₀) (r := 0) (s := 2) (k + 1) S‖) :=
+            mul_le_mul_of_nonneg_left (hCstep S) hCk_nn
+        _ = (Ck * Cstep) * ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+              (g := g₀) (r := 0) (s := 2) (k + 1) S‖ := by ring
+
+/-- **The spectral-to-covariant-gradient bound (the missing N2 direction at even order).**
+For every `k` there is a nonnegative constant `C` such that the even-order spectral norm
+`‖smoothCcToTensorHs g₀ (2k) S‖` of a smooth `(0,2)`-tensor `S` is bounded by `C` times the
+covariant-`L²` jet sum `∑_{j ≤ 2k} ‖∇^j S‖`:
+
+  `‖smoothCcToTensorHs g₀ (2k) S‖ ≤ C · ∑_{j ≤ 2k} ‖iteratedCovGrad g₀ 0 2 j S‖`.
+
+This is the (otherwise absent) general-order interior-elliptic comparison from the spectral
+`H^{2k}` scale to the covariant-gradient `L²` data.  It assembles: the even-order
+spectral-norm/Laplacian identity `ccSpectralEmbed_even_norm_sq_eq_oneMinusConnLap_l2`
+(`‖ccSpectralEmbed g (2k) S‖² = ‖(1 − Δ_∇)^k S‖²_{L²}`), the order-dropping `toHs` bound for the
+one-minus-connection-Laplacian iterate `exists_oneMinusConnLapSmoothIter_toHs_le_toHs`
+(`‖(1 − Δ_∇)^k S‖_{H^0} ≤ C · ‖S‖_{H^k}`, via `exists_l2Norm_le_toHs_zero` to bridge the `L²` and
+`H^0` norms), and the reverse Hebey–Sobolev bridge `exists_toHs_norm_le_iteratedCovGrad_tensorL2Norm_sum`
+(`‖S‖_{H^k} ≤ C · ∑_{j ≤ 2k} ‖∇^j S‖`).  The `ccSpectralEmbed = smoothCcToTensorHs` definitional
+equality identifies the spectral embeddings. -/
+theorem exists_smoothCcToTensorHs_even_le_iteratedCovGrad_sum
+    (g₀ : SmoothRiemannianMetric I M) (k : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ S : SmoothCcTensor g₀ 0 2,
+        ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * k : ℕ) : ℝ) S‖ ≤
+          C * ∑ j ∈ Finset.range (2 * k + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖ := by
+  classical
+  obtain ⟨Cl2, hCl2_nn, hCl2⟩ := exists_l2Norm_le_toHs_zero (I := I) g₀
+  obtain ⟨Cdrop, hCdrop_nn, hCdrop⟩ := exists_oneMinusConnLapSmoothIter_toHs_le_toHs (I := I) g₀ k
+  obtain ⟨Chebey, hChebey_nn, hChebey⟩ :=
+    exists_toHs_norm_le_iteratedCovGrad_tensorL2Norm_sum (I := I) (M := M) g₀ 0 2 k
+  refine ⟨Cl2 * Cdrop * Chebey, by positivity, fun S => ?_⟩
+  -- `‖smoothCcToTensorHs g (2k) S‖ = ‖ccSpectralEmbed g (2k) S‖ = ‖(1 − Δ_∇)^k S‖_{L²}`.
+  have hembed_eq : smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * k : ℕ) : ℝ) S =
+      ccSpectralEmbed (I := I) (M := M) g₀ ((2 * k : ℕ) : ℝ) S :=
+    tensorHs.ext (funext (fun i => rfl))
+  have hsq := ccSpectralEmbed_even_norm_sq_eq_oneMinusConnLap_l2 (I := I) (M := M) g₀ k S
+  have hnorm_eq : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * k : ℕ) : ℝ) S‖ =
+      ‖SmoothCcTensor.toL2 (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 k S)‖ := by
+    have h1 : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * k : ℕ) : ℝ) S‖ =
+        ‖ccSpectralEmbed (I := I) (M := M) g₀ ((2 * k : ℕ) : ℝ) S‖ := by rw [hembed_eq]
+    have h2 : ‖ccSpectralEmbed (I := I) (M := M) g₀ ((2 * k : ℕ) : ℝ) S‖ =
+        ‖SmoothCcTensor.toL2 (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 k S)‖ := by
+      have hnn1 : (0 : ℝ) ≤ ‖ccSpectralEmbed (I := I) (M := M) g₀ ((2 * k : ℕ) : ℝ) S‖ :=
+        norm_nonneg _
+      have hnn2 : (0 : ℝ) ≤
+          ‖SmoothCcTensor.toL2 (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 k S)‖ := norm_nonneg _
+      nlinarith [hsq, hnn1, hnn2]
+    rw [h1, h2]
+  rw [hnorm_eq]
+  -- `‖(1 − Δ_∇)^k S‖_{L²} ≤ Cl2 · ‖(1 − Δ_∇)^k S‖_{H^0} ≤ Cl2·Cdrop · ‖S‖_{H^k}
+  --   ≤ Cl2·Cdrop·Chebey · ∑_j ‖∇^j S‖`.
+  have hjet_eq : ∀ j : ℕ,
+      tensorL2Norm (I := I) (M := M) g₀ 0 (2 + j) (iteratedCovGrad (I := I) g₀ 0 2 j S).toFun =
+        ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖ := fun j =>
+    (SmoothCcTensor.norm_def (iteratedCovGrad (I := I) g₀ 0 2 j S)).symm
+  have hl2 := hCl2 (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 k S)
+  have hdrop := hCdrop S
+  have hhebey := hChebey S
+  have hsum_nn : 0 ≤ ∑ j ∈ Finset.range (2 * k + 1),
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖ :=
+    Finset.sum_nonneg (fun j _ => norm_nonneg _)
+  have htoHsk_nn : 0 ≤ ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+      (g := g₀) (r := 0) (s := 2) k S‖ := norm_nonneg _
+  have htoHs0_nn : 0 ≤ ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+      (g := g₀) (r := 0) (s := 2) 0 (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 k S)‖ :=
+    norm_nonneg _
+  have hhebey' : ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+        (g := g₀) (r := 0) (s := 2) k S‖ ≤
+      Chebey * ∑ j ∈ Finset.range (2 * k + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖ := by
+    refine le_trans hhebey ?_
+    refine mul_le_mul_of_nonneg_left ?_ hChebey_nn
+    exact le_of_eq (Finset.sum_congr rfl (fun j _ => hjet_eq j))
+  calc ‖SmoothCcTensor.toL2 (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 k S)‖
+      ≤ Cl2 * ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+          (g := g₀) (r := 0) (s := 2) 0 (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 k S)‖ := hl2
+    _ ≤ Cl2 * (Cdrop * ‖DifferentialGeometry.PDE.RicciFlow.IntrinsicSobolev.SmoothCcTensor.toHs
+          (g := g₀) (r := 0) (s := 2) k S‖) := mul_le_mul_of_nonneg_left hdrop hCl2_nn
+    _ ≤ Cl2 * (Cdrop * (Chebey * ∑ j ∈ Finset.range (2 * k + 1),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖)) := by
+        refine mul_le_mul_of_nonneg_left ?_ hCl2_nn
+        exact mul_le_mul_of_nonneg_left hhebey' hCdrop_nn
+    _ = Cl2 * Cdrop * Chebey * ∑ j ∈ Finset.range (2 * k + 1),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖ := by ring
+
+/-- **The covariant-gradient-to-spectral bound (the forward Gårding direction at even order).**
+For every `k` there is a nonnegative constant `C` such that, for every smooth `(0,2)`-tensor `S`,
+each covariant-`L²` jet `‖∇^j S‖` of order `j ≤ 2k` is bounded by `C` times the even-order
+spectral norm `‖smoothCcToTensorHs g₀ (2k) S‖`:
+
+  `∑_{j ≤ 2k} ‖iteratedCovGrad g₀ 0 2 j S‖ ≤ C · ‖smoothCcToTensorHs g₀ (2k) S‖`.
+
+It composes the all-orders covariant-gradient Gårding bound
+`exists_iteratedCovGrad_l2Norm_le_sum_rawConnLapIter` (`‖∇^j S‖ ≤ C · ∑_{i ≤ k} ‖Δ_∇^i S‖`), the
+per-iterate spectral bound `rawConnLapIter_l2_le_ccSpectralEmbed_even`
+(`‖Δ_∇^i S‖ ≤ ‖ccSpectralEmbed g (2i) S‖`), and the spectral monotonicity
+`ccSpectralEmbed_norm_mono` (`2i ≤ 2k`), then identifies `ccSpectralEmbed = smoothCcToTensorHs`. -/
+theorem exists_iteratedCovGrad_sum_le_smoothCcToTensorHs
+    (g₀ : SmoothRiemannianMetric I M) (k : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ S : SmoothCcTensor g₀ 0 2,
+        ∑ j ∈ Finset.range (2 * k + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖ ≤
+          C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * k : ℕ) : ℝ) S‖ := by
+  classical
+  obtain ⟨Cg, hCg_nn, hCg⟩ := exists_iteratedCovGrad_l2Norm_le_sum_rawConnLapIter (I := I) g₀ 2 k
+  refine ⟨((2 * k + 1 : ℕ) : ℝ) * (Cg * (k + 1)), by positivity, fun S => ?_⟩
+  have hembed_eq : ccSpectralEmbed (I := I) (M := M) g₀ ((2 * k : ℕ) : ℝ) S =
+      smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * k : ℕ) : ℝ) S :=
+    tensorHs.ext (funext (fun i => rfl))
+  set Nspec : ℝ := ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((2 * k : ℕ) : ℝ) S‖ with hNspec_def
+  have hNspec_nn : 0 ≤ Nspec := norm_nonneg _
+  -- each `‖Δ_∇^i S‖ ≤ Nspec` (spectral bound at order `2i ≤ 2k`)
+  have hlap_le : ∀ i ∈ Finset.range (k + 1),
+      tensorL2Norm (I := I) (M := M) g₀ 0 2 (rawTensorConnLapIter (I := I) g₀ 0 2 i S).toFun ≤
+        Nspec := by
+    intro i hi
+    have hik : i ≤ k := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)
+    have heq : tensorL2Norm (I := I) (M := M) g₀ 0 2
+          (rawTensorConnLapIter (I := I) g₀ 0 2 i S).toFun =
+        ‖SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g₀ 0 2 i S)‖ :=
+      (DifferentialGeometry.Analysis.Sobolev.Tensor.tensorL2Norm_toFun_eq_norm
+        (I := I) (M := M) g₀ (rawTensorConnLapIter (I := I) g₀ 0 2 i S)).trans
+        (SmoothCcTensor.norm_toL2 (rawTensorConnLapIter (I := I) g₀ 0 2 i S)).symm
+    rw [heq]
+    have h1 : ‖SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g₀ 0 2 i S)‖ ≤
+        ‖ccSpectralEmbed (I := I) (M := M) g₀ ((2 * i : ℕ) : ℝ) S‖ :=
+      rawConnLapIter_l2_le_ccSpectralEmbed_even (I := I) (M := M) g₀ i S
+    have h2 : ‖ccSpectralEmbed (I := I) (M := M) g₀ ((2 * i : ℕ) : ℝ) S‖ ≤ Nspec := by
+      rw [hNspec_def, ← hembed_eq]
+      refine ccSpectralEmbed_norm_mono (I := I) (M := M) g₀ ?_ S
+      have : (2 * i : ℕ) ≤ (2 * k : ℕ) := by omega
+      exact_mod_cast this
+    exact le_trans h1 h2
+  -- the Laplacian-iterate sum is bounded by `(k+1)·Nspec`
+  have hlapsum : ∑ i ∈ Finset.range (k + 1),
+      tensorL2Norm (I := I) (M := M) g₀ 0 2 (rawTensorConnLapIter (I := I) g₀ 0 2 i S).toFun ≤
+        ((k + 1 : ℕ) : ℝ) * Nspec := by
+    calc ∑ i ∈ Finset.range (k + 1),
+          tensorL2Norm (I := I) (M := M) g₀ 0 2 (rawTensorConnLapIter (I := I) g₀ 0 2 i S).toFun
+        ≤ ∑ _i ∈ Finset.range (k + 1), Nspec := Finset.sum_le_sum hlap_le
+      _ = ((k + 1 : ℕ) : ℝ) * Nspec := by
+          rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+  -- each covariant jet `‖∇^j S‖` (`j ≤ 2k`) is bounded by `Cg · (Laplacian-iterate sum)`
+  have hjet_le : ∀ j ∈ Finset.range (2 * k + 1),
+      ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖ ≤ Cg * (((k + 1 : ℕ) : ℝ) * Nspec) := by
+    intro j hj
+    have hj2k : j ≤ 2 * k := Nat.lt_succ_iff.mp (Finset.mem_range.mp hj)
+    have hgj := hCg j hj2k S
+    have heqj : tensorL2Norm (I := I) (M := M) g₀ 0 (2 + j)
+          (iteratedCovGrad (I := I) g₀ 0 2 j S).toFun =
+        ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖ :=
+      (SmoothCcTensor.norm_def (iteratedCovGrad (I := I) g₀ 0 2 j S)).symm
+    rw [heqj] at hgj
+    exact le_trans hgj (mul_le_mul_of_nonneg_left hlapsum hCg_nn)
+  calc ∑ j ∈ Finset.range (2 * k + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖
+      ≤ ∑ _j ∈ Finset.range (2 * k + 1), Cg * (((k + 1 : ℕ) : ℝ) * Nspec) :=
+        Finset.sum_le_sum hjet_le
+    _ = ((2 * k + 1 : ℕ) : ℝ) * (Cg * (((k + 1 : ℕ) : ℝ) * Nspec)) := by
+        rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+    _ = ((2 * k + 1 : ℕ) : ℝ) * (Cg * (k + 1)) * Nspec := by push_cast; ring
 
 /-- **The smooth-ball Lipschitz estimate for the genuine Ricci–DeTurck remainder, at the
 quasilinear `H^{a+2}` order (the deep analytic core).**
