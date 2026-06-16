@@ -1913,6 +1913,77 @@ private theorem deTurckRHSArmDiff_iteratedCovGrad_riemannianFiberNormSq_jet_le
     _ = Cmid * Kcol * ∑ q ∈ Finset.range (a + 2 + 1), Wq q := by
         rw [← Finset.sum_mul]; ring
 
+/-- **(The ball-uniform per-component raw chart-jet domination of the order-`a` covariant gradient of
+the Ricci–DeTurck RHS-arm difference — the single named honest leaf carrying the uniform-over-`R`-ball
+chart-Nemytskii Lipschitz modulus.)**
+
+This is the **ball-uniform hoist** of the per-pair per-component raw chart-jet bound (the `hperPair`
+inner estimate of `deTurckRHSArmDiff_iteratedCovGrad_rawComponentSq_domination_on_pouTsupport`): a single
+nonnegative constant `M0` — uniform over the fibre-small radius-`R` covariant ball, i.e. **outside** the
+`∀ T T'` quantifier — such that for any two `g₀`-fibre-small smooth perturbations `T, T'` whose covariant
+jets up to order `a + 2` lie in the radius-`R` ball, on the closed support of the chart-`α`
+partition-of-unity weight and for every target multi-index `Jdx`, the absolute value of the raw
+chart-`α`-frame component of the order-`a` covariant gradient `∇^a RHSarm` of the RHS-arm residual
+```
+RHSarm := (deTurckSmoothRemainder g₀ g_bg T − deTurckSmoothRemainder g₀ g_bg T')
+            + rawTensorConnLapSmooth g₀ 0 2 (T − T')
+```
+is dominated by `M0` times the sum of square roots of the intrinsic covariant fibre-norm jets of the
+perturbation difference `T − T'`:
+```
+|tensorChartComponentRaw g₀ 0 (2+a) (∇^a RHSarm) α ![] Jdx b|
+  ≤ M0 · ∑_{q ≤ a+2} √rfns(∇^q (T − T'))(b) .
+```
+
+**Why ball-uniform (and not per-pair).**  In the per-pair source the only `(T, T')`-dependent factor of
+the constant `M0 = Cpeel · K` is the chart-Nemytskii Lipschitz modulus `CNemMax` of
+`hasChartJetLip_chartDeTurckRicciRHS (g₀ + T) (g₀ + T') g_bg` (the forward covariant chart-jet peel
+constant `Cpeel`, the bridge factor `eFac`, the Stage-4 content constant `Cstage` and the `n²·(a+1)`
+combinatorial factor are all `g₀`-anchored and `(T, T')`-independent — `Cpeel` is built solely from the
+`g₀`-Christoffel jets on the compact kernel).  On the fibre-small radius-`R` ball the realized metrics
+`g₀ + h_sym T`, `g₀ + h_sym T'` stay uniformly positive-definite (the `δ < 1` fibre bound keeps `det`
+bounded away from `0`) with metric jets bounded by `R`, so the `HasChartJetLip` chart-jet Lipschitz
+modulus of the rational-with-nonvanishing-denominator Ricci–DeTurck nonlinearity (the standard Moser
+ball-uniformity of the chart-Gram / inverse-Gram / Christoffel / Ricci / Lie–DeTurck jet towers, each
+`∃ C, ∀` over the compact base and the bounded realized-metric jet set) is uniform over the ball;
+supremising the modulus over the finitely many chart index pairs and orders gives the single
+`(T, T')`-independent `M0`.
+
+This is the genuine missing analytic prerequisite: the current `HasChartJetLip.lip`/`.seminorm_le` field
+binds its constant to a fixed `(g₁, g₂)` with no STATED ball-uniformity, so the hoist to a single `M0`
+over the realized `R`-ball is posited here (the underlying base towers are uniform-by-construction; the
+ball-uniform packaging is the deferred input).  Consumers transitively depend on this leaf's `sorryAx`.
+
+**Non-vacuity / order self-check.**  The grid reads `∇^{≤ a+2}(T − T')`; the genuine `∂²(T − T')` Ricci
+principal symbol forces a top jet at `q = a + 2`, so a window-`a` weakening is rejected.  A `M0 = 0`
+witness is rejected by a nonvanishing raw chart component for a non-flat, genuinely second-order RHS
+difference. -/
+private theorem deTurckRHSArmDiff_iteratedCovGrad_rawComponent_domination_on_pouTsupport_ballUniform
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R) (α : M) :
+    ∃ M0 : ℝ, 0 ≤ M0 ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_lt : δ' < 1)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ b : M,
+          b ∈ tsupport (fun x : M =>
+              ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
+          ∀ Jdx : Fin (2 + a) → Fin (Module.finrank ℝ E),
+            |DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw
+                (I := I) (M := M) g₀ 0 (2 + a)
+                (iteratedCovGrad (I := I) g₀ 0 2 a
+                  ((deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+                      deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ') +
+                    rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T')))
+                α (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx b| ≤
+              M0 * ∑ q ∈ Finset.range (a + 2 + 1),
+                Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) b
+                  ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection b)) :=
+  sorry
+
 /-- **(The ball-uniform per-chart raw-component domination of the Ricci–DeTurck RHS-arm difference —
 the single named honest leaf carrying the uniform-over-`R`-ball chart-Nemytskii Lipschitz modulus.)**
 
@@ -1978,8 +2049,85 @@ private theorem deTurckRHSArmDiff_rawComponentSq_domination_on_pouTsupport_ballU
                     rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T'))) α Idx Jdx b) ^ 2) ≤
             Λ ^ 2 * ∑ q ∈ Finset.range (a + 2 + 1),
               riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) b
-                ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection b) :=
-  sorry
+                ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection b) := by
+  classical
+  set n : ℕ := Module.finrank ℝ E with hn_def
+  obtain ⟨M0, hM0_nn, hM0⟩ :=
+    deTurckRHSArmDiff_iteratedCovGrad_rawComponent_domination_on_pouTsupport_ballUniform
+      (I := I) (M := M) g₀ g_bg a hR α
+  refine ⟨Real.sqrt (((n : ℝ) ^ (2 + a)) * ((a : ℝ) + 3)) * M0, by positivity, ?_⟩
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball b hb
+  set RHSarm : SmoothCcTensor g₀ 0 2 :=
+    (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+        deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ') +
+      rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T') with hRHSarm_def
+  set R0 : ℝ := ∑ q ∈ Finset.range (a + 2 + 1),
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) b
+      ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection b) with hR0_def
+  have hR0_nn : 0 ≤ R0 := Finset.sum_nonneg fun q _ =>
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + q) b _
+  set Ssqrt : ℝ := ∑ q ∈ Finset.range (a + 2 + 1),
+    Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) b
+      ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection b)) with hSsqrt_def
+  have hSsqrt_nn : 0 ≤ Ssqrt := Finset.sum_nonneg fun q _ => Real.sqrt_nonneg _
+  have hperPair : ∀ Jdx : Fin (2 + a) → Fin n,
+      |DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw
+          (I := I) (M := M) g₀ 0 (2 + a)
+          (iteratedCovGrad (I := I) g₀ 0 2 a RHSarm) α (![] : Fin 0 → Fin n) Jdx b| ≤
+        M0 * Ssqrt := by
+    intro Jdx
+    have h := hM0 T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball b hb Jdx
+    rw [hSsqrt_def]
+    simpa only [hRHSarm_def] using h
+  have hSsqrt_sq : Ssqrt ^ 2 ≤ ((a : ℝ) + 3) * R0 := by
+    rw [hSsqrt_def, hR0_def]
+    have hcheb := sq_sum_le_card_mul_sum_sq (s := Finset.range (a + 2 + 1))
+      (f := fun q => Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) b
+        ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection b)))
+    refine hcheb.trans (le_of_eq ?_)
+    rw [Finset.card_range]
+    congr 1
+    · push_cast; ring
+    · refine Finset.sum_congr rfl (fun q _ => ?_)
+      exact Real.sq_sqrt (riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + q) b _)
+  have hperPairSq : ∀ Jdx : Fin (2 + a) → Fin n,
+      (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw
+          (I := I) (M := M) g₀ 0 (2 + a)
+          (iteratedCovGrad (I := I) g₀ 0 2 a RHSarm) α (![] : Fin 0 → Fin n) Jdx b) ^ 2 ≤
+        M0 ^ 2 * (((a : ℝ) + 3) * R0) := by
+    intro Jdx
+    have h1 := hperPair Jdx
+    have h2 : (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw
+          (I := I) (M := M) g₀ 0 (2 + a)
+          (iteratedCovGrad (I := I) g₀ 0 2 a RHSarm) α (![] : Fin 0 → Fin n) Jdx b) ^ 2 ≤
+        (M0 * Ssqrt) ^ 2 := by
+      rw [← sq_abs]
+      exact pow_le_pow_left₀ (abs_nonneg _) h1 2
+    refine h2.trans ?_
+    rw [mul_pow]
+    exact mul_le_mul_of_nonneg_left hSsqrt_sq (by positivity)
+  have hΛsq : (Real.sqrt (((n : ℝ) ^ (2 + a)) * ((a : ℝ) + 3)) * M0) ^ 2 =
+      ((n : ℝ) ^ (2 + a)) * (M0 ^ 2 * ((a : ℝ) + 3)) := by
+    rw [mul_pow, Real.sq_sqrt (by positivity)]; ring
+  rw [hΛsq]
+  calc (∑ Idx : Fin 0 → Fin n, ∑ Jdx : Fin (2 + a) → Fin n,
+          (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorChartComponentRaw
+            (I := I) (M := M) g₀ 0 (2 + a)
+            (iteratedCovGrad (I := I) g₀ 0 2 a RHSarm) α Idx Jdx b) ^ 2)
+      ≤ ∑ _Idx : Fin 0 → Fin n, ∑ _Jdx : Fin (2 + a) → Fin n,
+          (M0 ^ 2 * (((a : ℝ) + 3) * R0)) := by
+        refine Finset.sum_le_sum (fun Idx _ => Finset.sum_le_sum (fun Jdx _ => ?_))
+        rw [Subsingleton.elim Idx (![] : Fin 0 → Fin n)]
+        exact hperPairSq Jdx
+    _ = (((n : ℝ) ^ (2 + a))) * (M0 ^ 2 * (((a : ℝ) + 3) * R0)) := by
+        rw [Finset.sum_const, Finset.sum_const, Finset.card_univ, Finset.card_univ, nsmul_eq_mul,
+          nsmul_eq_mul, ← mul_assoc]
+        have hcard : ((Fintype.card (Fin 0 → Fin n) : ℝ) * (Fintype.card (Fin (2 + a) → Fin n) : ℝ)) =
+            (n : ℝ) ^ (2 + a) := by
+          simp only [Fintype.card_fun, Fintype.card_fin, pow_zero]
+          push_cast; ring
+        rw [hcard]
+    _ = ((n : ℝ) ^ (2 + a)) * (M0 ^ 2 * ((a : ℝ) + 3)) * R0 := by ring
 
 /-- **(The ball-uniform order-`(a+2)`-window covariant-jet bound on the Ricci–DeTurck RHS arm of
 the sealed remainder difference — the uniform-over-`R`-ball Nemytskii estimate.)**
