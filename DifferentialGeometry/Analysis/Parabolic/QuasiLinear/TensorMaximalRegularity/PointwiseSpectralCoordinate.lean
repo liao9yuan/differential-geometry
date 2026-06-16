@@ -30,15 +30,21 @@ on the interior `(0,T)`, which is dense in `[0,T]`).
 ## The continuous forcing coordinate
 
 The convolution `perModeConv` depends on the forcing only through its `L²` class on
-`[0,t]`, so the forcing field is supplied here through a **time-continuous
-representative** `F : ℝ → Hᵃ` with `gforce =ᵐ F` and `F` continuous on `[0,T]`.
-This is exactly the structure the Ricci–DeTurck consumer provides: there the forcing
-is `N ∘ (solution field)`, a composition of the continuous nonlinearity with the
-time-continuous solution field, hence continuous in time into `Hᵃ`.  The per-mode
-coordinate `φᵢ` is obtained from `t ↦ (F t).coeff i` by clamping the argument into
-`[0,T]` (`Set.IccExtend`), making it **globally continuous** while preserving its
-values on `[0,T]`; the every-time identity then reads `= perModeConv λᵢ φᵢ t` with a
-genuinely continuous `φᵢ`.
+`[0,t]`, and the every-`t` upgrade needs only that each eigen-coordinate of the forcing
+is continuous in time.  The forcing field is therefore supplied here through an
+everywhere representative `F : ℝ → Hᵃ` with `gforce =ᵐ F` together with the
+**per-eigenmode coordinate continuity** `hcoord : ∀ i, ContinuousOn (t ↦ (F t).coeff i)
+[0,T]` — strictly weaker than full `Hᵃ`-continuity of `F`.  This is exactly the
+structure the Ricci–DeTurck consumer can provide: the forcing is `N ∘ (solution
+field)`, whose order-`(a+2)` solution field has a continuous representative only into
+the *lower* scale `H^{a+1}` (the Lions–Magenes parabolic trace), and the genuinely
+second-order Nemytskii lowers the order further, so the forcing representative is
+continuous only into a scale strictly below `Hᵃ` — but its `L²` eigen-coordinates
+`t ↦ (F t).coeff i` are continuous (they factor through the `L²` coordinate functional,
+which is bounded at every scale).  The per-mode coordinate `φᵢ` is obtained from
+`t ↦ (F t).coeff i` by clamping the argument into `[0,T]` (`Set.IccExtend`), making it
+**globally continuous** while preserving its values on `[0,T]`; the every-time identity
+then reads `= perModeConv λᵢ φᵢ t` with a genuinely continuous `φᵢ`.
 
 ## All-order summability
 
@@ -196,7 +202,8 @@ private theorem carrier_toFun_coeff_eq_perModeConv_IccExtend (hT : 0 < T) (hT1 :
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
     {F : ℝ → tensorHs (I := I) (M := M) g r s a}
-    (hF_cont : ContinuousOn F (Set.Icc (0 : ℝ) T))
+    (hcoord : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+      ContinuousOn (fun t => (F t).coeff i) (Set.Icc (0 : ℝ) T))
     (hF_rep : ⇑gforce =ᵐ[timeMeasure T] F)
     (i : TensorEigenIdx (I := I) (M := M) g r s) {t : ℝ} (ht : t ∈ Set.Icc (0 : ℝ) T) :
     ((maxRegDuhamelMap (I := I) (M := M) a hT hT1
@@ -210,8 +217,7 @@ private theorem carrier_toFun_coeff_eq_perModeConv_IccExtend (hT : 0 < T) (hT1 :
     Set.IccExtend hT.le (fun p : ↑(Set.Icc (0 : ℝ) T) => (F p.1).coeff i) with hφi_def
   have hφi_cont : Continuous φi := by
     refine Continuous.Icc_extend' ?_
-    exact ((coeffCLM (I := I) (M := M) (g := g) (r := r) (s := s) (σ := a) i).continuous.comp_continuousOn
-      hF_cont).restrict
+    exact (hcoord i).restrict
   have hφi_mem : ∀ {x : ℝ}, x ∈ Set.Icc (0 : ℝ) T → φi x = (F x).coeff i := by
     intro x hx
     rw [hφi_def, Set.IccExtend_of_mem hT.le _ hx]
@@ -260,9 +266,12 @@ private theorem carrier_toFun_coeff_eq_perModeConv_IccExtend (hT : 0 < T) (hT1 :
 
 /-- **The every-time spectral-coordinate representation of the Duhamel solution.**
 Let `u = maxRegDuhamelMap a hT hT1 0 gforce` be the affine Duhamel map with zero
-initial datum, and let `F : ℝ → Hᵃ` be a time-continuous representative of the
-forcing `gforce` (`gforce =ᵐ F`, `F` continuous on `[0,T]`) whose forcing masses are
-summable at every order (`hsum`).  Then there is a per-mode forcing-coordinate family
+initial datum, and let `F : ℝ → Hᵃ` be an everywhere representative of the forcing
+`gforce` (`gforce =ᵐ F`) whose per-eigenmode `L²` coordinates `t ↦ (F t).coeff i` are
+continuous on `[0,T]` (`hcoord` — strictly weaker than `Hᵃ`-continuity of `F`, which
+the genuinely second-order Ricci–DeTurck forcing does NOT have: its continuous
+representative ceilings below `Hᵃ`) and whose forcing masses are summable at every
+order (`hsum`).  Then there is a per-mode forcing-coordinate family
 `φ : TensorEigenIdx → ℝ → ℝ` with
 
 * **(continuity)** each `φ i` is continuous;
@@ -283,7 +292,8 @@ theorem maxRegDuhamel_toFun_tensorL2Coeff_eq_perModeConv (hT : 0 < T) (hT1 : T �
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
     {F : ℝ → tensorHs (I := I) (M := M) g r s a}
-    (hF_cont : ContinuousOn F (Set.Icc (0 : ℝ) T))
+    (hcoord : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+      ContinuousOn (fun t => (F t).coeff i) (Set.Icc (0 : ℝ) T))
     (hF_rep : ⇑gforce =ᵐ[timeMeasure T] F)
     (hsum : ∀ c : ℝ, 0 ≤ c → Summable (forcingMass (I := I) (M := M) gforce c)) :
     ∃ φ : TensorEigenIdx (I := I) (M := M) g r s → ℝ → ℝ,
@@ -303,8 +313,7 @@ theorem maxRegDuhamel_toFun_tensorL2Coeff_eq_perModeConv (hT : 0 < T) (hT1 : T �
   · -- continuity of each φ i
     intro i
     refine Continuous.Icc_extend' ?_
-    exact ((coeffCLM (I := I) (M := M) (g := g) (r := r) (s := s) (σ := a) i).continuous.comp_continuousOn
-      hF_cont).restrict
+    exact (hcoord i).restrict
   · -- all-order summability by comparison with forcingMass
     intro c hc t ht
     refine Summable.of_nonneg_of_le (fun i => ?_) (fun i => ?_) (hsum c hc)
@@ -317,8 +326,7 @@ theorem maxRegDuhamel_toFun_tensorL2Coeff_eq_perModeConv (hT : 0 < T) (hT1 : T �
         Set.IccExtend hT.le (fun p : ↑(Set.Icc (0 : ℝ) T) => (F p.1).coeff i) with hφi_def
       have hφi_cont : Continuous φi := by
         refine Continuous.Icc_extend' ?_
-        exact ((coeffCLM (I := I) (M := M) (g := g) (r := r) (s := s) (σ := a) i).continuous.comp_continuousOn
-          hF_cont).restrict
+        exact (hcoord i).restrict
       have hforcing : forcingMass (I := I) (M := M) gforce c i =
           tensorSobolevWeight (I := I) (M := M) i c *
             ∫ τ in Set.Icc (0 : ℝ) T,
@@ -356,7 +364,7 @@ theorem maxRegDuhamel_toFun_tensorL2Coeff_eq_perModeConv (hT : 0 < T) (hT1 : T �
     intro t ht i
     rw [tensorHsToL2_tensorL2Coeff ha]
     exact carrier_toFun_coeff_eq_perModeConv_IccExtend (I := I) (M := M)
-      (h_compact := h_compact) (a := a) hT hT1 gforce hF_cont hF_rep i ht
+      (h_compact := h_compact) (a := a) hT hT1 gforce hcoord hF_rep i ht
 
 end QuasiLinear
 end Parabolic

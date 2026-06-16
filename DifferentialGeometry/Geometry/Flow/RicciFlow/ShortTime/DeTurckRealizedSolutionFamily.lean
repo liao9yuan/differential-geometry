@@ -149,23 +149,33 @@ theorem tensorL2_ext_of_tensorL2Coeff
   have hT : (b.repr T) i = tensorL2Coeff (I := I) (M := M) h_compact T i := rfl
   rw [hS, hT, h i]
 
-/-- **Time-regularity of the Ricci–DeTurck Nemytskii forcing (honest `sorry`;
+/-- **Coordinate-time-regularity of the Ricci–DeTurck Nemytskii forcing (honest `sorry`;
 genuinely-missing parabolic prerequisite).**
 
-The engine forcing `gforce = deTurckSobolevNHa2 ∘ (maxRegDuhamelSolField …)` admits a
-representative `F : ℝ → Hᵃ` that is **continuous on the closed slab `[0,T]`** and whose
-**forcing masses are summable at every spatial order** (`∀ c ≥ 0, Summable (forcingMass
-gforce c)`).  This is the Nemytskii regularity of the composed forcing: the continuity is
-`deTurckSobolevNHa2` (Lipschitz, `deTurckSobolevNHa2_lipschitz`) composed with the
-time-continuity of the order-`(a+2)` Duhamel field, and the all-order forcing-mass
-summability is the Nemytskii first-order coupling (`solFieldMass_summable_succ`, the
-`‖N(u)‖_{Hᵈ} ≲ ‖u‖_{H^{d+1}}` integrated control) bootstrapped through
-`solFieldMass_summable_all`.  It supplies exactly the abstract hypotheses (`hF_cont`,
-`hF_rep`, `hsum`) of the every-time spectral-coordinate representation
+The engine forcing `gforce = deTurckSobolevNHa2 ∘ (maxRegDuhamelSolField …)` admits an
+everywhere representative `F : ℝ → Hᵃ` (`gforce =ᵐ F`) whose **per-eigenmode `L²`
+coordinates `t ↦ (F t).coeff i` are continuous on the closed slab `[0,T]`** (`hcoord`),
+and whose **forcing masses are summable at every spatial order** (`∀ c ≥ 0, Summable
+(forcingMass gforce c)`).
+
+The coordinate continuity — NOT full `Hᵃ`-continuity of `F` — is the genuinely-available
+regularity, and is what the every-time spectral-coordinate representation actually
+consumes.  The order-`(a+2)` Duhamel field `maxRegDuhamelSolField` has a continuous
+representative only into the *lower* scale `H^{a+1}` (the Lions–Magenes parabolic trace,
+`CrossScaleField.continuousOn_repr`/`continuousOn_coeffFun`), and the genuinely
+second-order Nemytskii `deTurckSobolevNHa2` lowers the order further, so the composed
+forcing representative is continuous only into a scale strictly BELOW `Hᵃ` (into
+`L²`/`H^{a-1}`).  Its `Hᵃ`-continuity is FALSE; only the `L²` eigen-coordinates
+`t ↦ (F t).coeff i` are continuous (they factor through the `L²` coordinate functional,
+which is bounded at every scale).  The all-order forcing-mass summability is the
+Nemytskii first-order coupling (`solFieldMass_summable_succ`, the `‖N(u)‖_{Hᵈ} ≲
+‖u‖_{H^{d+1}}` integrated control) bootstrapped through `solFieldMass_summable_all`.  It
+supplies exactly the (now scale-honest) abstract hypotheses (`hcoord`, `hF_rep`, `hsum`)
+of the every-time spectral-coordinate representation
 `maxRegDuhamel_toFun_tensorL2Coeff_eq_perModeConv`.
 
-This is about the FORCING's time-regularity, a strictly different object from the
-spatial `Hˢ`-membership conclusion below, so it is not the consumer's conclusion.
+This is about the FORCING's coordinate time-regularity, a strictly different object from
+the spatial `Hˢ`-membership conclusion below, so it is not the consumer's conclusion.
 
 DEFERRED (honest `sorry`; consumers transitively depend on `sorryAx`). -/
 theorem realizedSol_forcing_continuousRepr_allOrderMass
@@ -178,7 +188,9 @@ theorem realizedSol_forcing_continuousRepr_allOrderMass
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t))) :
     ∃ F : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ),
-      ContinuousOn F (Set.Icc (0 : ℝ) T) ∧
+      (∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+          (I := I) (M := M) g₀ 0 2,
+        ContinuousOn (fun t => (F t).coeff i) (Set.Icc (0 : ℝ) T)) ∧
       (⇑gforce =ᵐ[timeMeasure T] F) ∧
       (∀ c : ℝ, 0 ≤ c →
         Summable (forcingMass (I := I) (M := M) gforce c)) :=
@@ -229,12 +241,13 @@ theorem solInterior_uToFun_allHs
             (Nat.cast_nonneg a) (timeH1.toFun u t) := by
   classical
   set h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc
-  -- The time-regular Nemytskii forcing representative and its all-order masses.
-  obtain ⟨F, hF_cont, hF_rep, hsum⟩ :=
+  -- The coordinate-time-regular Nemytskii forcing representative and its all-order masses.
+  obtain ⟨F, hcoord, hF_rep, hsum⟩ :=
     realizedSol_forcing_continuousRepr_allOrderMass (I := I) (M := M) g₀ g_bg a ha_super
       hT hT1 gforce hforce
   -- The explicit per-mode forcing coordinate family the every-time identity uses: the
-  -- `Set.IccExtend` of the `i`-th coordinate of the continuous representative `F`.
+  -- `Set.IccExtend` of the `i`-th coordinate of the representative `F` (continuous via the
+  -- per-eigenmode `L²` coordinate continuity `hcoord`).
   set Φ : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
       (I := I) (M := M) g₀ 0 2 → ℝ → ℝ :=
     fun i => Set.IccExtend hT.le
@@ -242,14 +255,13 @@ theorem solInterior_uToFun_allHs
   have hΦ_cont : ∀ i, Continuous (Φ i) := by
     intro i
     refine Continuous.Icc_extend' ?_
-    exact ((coeffCLM (I := I) (M := M) (g := g₀) (r := 0) (s := 2) (σ := (a : ℝ)) i).continuous.comp_continuousOn
-      hF_cont).restrict
+    exact (hcoord i).restrict
   -- The every-time spectral-coordinate representation of the Duhamel solution: the
   -- coordinate of `u.toFun t` is the per-mode convolution `perModeConv λᵢ (Φ i) t`.
   obtain ⟨_φ, _hφ_cont, _hφ_sum, hΦ_id⟩ :=
     maxRegDuhamel_toFun_tensorL2Coeff_eq_perModeConv (I := I) (M := M)
       (g := g₀) (r := 0) (s := 2) (a := (a : ℝ)) (T := T) hT hT1 (Nat.cast_nonneg a)
-      h_compact gforce hF_cont hF_rep hsum
+      h_compact gforce hcoord hF_rep hsum
   rw [← hduh] at hΦ_id
   intro t ht σ hσ
   -- The all-order endpoint summability of the weighted `Φ`-integrals at this `t`, by the
