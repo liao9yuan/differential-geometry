@@ -5,6 +5,9 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckQuasiline
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckRicciRHSSymmetric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckChartRegularityFromJoint
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.MildSolutionTimeH1
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralSmoothRepresentativeRealize
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralPartialSumJointGram
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.PointwiseDeriv
 
 /-! # The realized DeTurck–Ricci solution family
 
@@ -125,8 +128,170 @@ theorem gFibreOpBound_ccTensorBilinSymm_zero (g : SmoothRiemannianMetric I M) :
   rw [ccTensorBilinSymm_zero_apply]
   simp only [abs_zero, zero_mul, le_refl]
 
+/-- **Per-time interior smoothing of the maximal-regularity Duhamel solution
+(SOLUTION-PINNED honest input — the spatial smooth subspace at each time).**
+
+For the genuine maximal-regularity Duhamel solution `u` of the Ricci–DeTurck flow about
+`g₀` (the Duhamel image of its own forcing `gforce`, with zero initial perturbation and
+trace `0` at `t = 0`), the spatial value `u.toFun t` lies in the spectral smooth
+subspace `⋂_σ Hˢ` at every time of the closed interval `t ∈ Icc 0 T`: for each Sobolev
+order `σ ≥ 0` there is an `Hˢ` element whose chart-locality-free `L²` realization
+(`tensorHsToL2`) equals the `L²` class `tensorHsToL2 (u.toFun t)`.
+
+PINNED to the solution: the hypotheses `hduh`/`hforce`/`htrace` are the engine's own
+defining identities for `u` (the Duhamel image of the order-`(a+2)`-regular nonlinear
+forcing), so this is the genuine parabolic interior smoothing of THIS solution, not a
+generic membership.  At `t = 0` the value is the zero initial perturbation (trivially in
+`⋂_σ Hˢ`); at interior and endpoint times the order-`(a+2)` two-derivative-gain Duhamel
+field, bootstrapped through the all-order coupling, supplies every order.
+
+DEFERRED (honest `sorry`; consumers transitively depend on `sorryAx`).  The two-step
+classical construction is: `solField_into_all_tensorHs_interior`
+(`HeatSemigroup/ParabolicInteriorSmoothing.lean`) places the time-`L²` solution field in
+`L²((0,T]; Hˢ)` for every `σ`, and the per-time Duhamel value smoothing
+`duhamel_into_all_tensorHs` (`HeatSemigroup/DuhamelSmoothing.lean`) — applied at each
+fixed `t` to the continuous per-mode convolution coordinates of the Duhamel field —
+exhibits the fixed-time `Hˢ` element whose `L²` realization is `u.toFun t`. -/
+theorem solInterior_uToFun_allHs
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
+      (I := I) (M := M) g₀ g_bg a ha_super).choose)
+    (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce)
+    (hforce : gforce =ᵐ[timeMeasure T]
+      (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (htrace : timeH1.trace0 _ T u = 0) :
+    ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ σ : ℝ, ∀ hσ : 0 ≤ σ,
+      ∃ v : tensorHs (I := I) (M := M) g₀ 0 2 σ,
+        tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2) hσ v =
+          tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (Nat.cast_nonneg a) (timeH1.toFun u t) :=
+  sorry
+
+/-- **Short-time `g₀`-fibre smallness of the realized solution family
+(SOLUTION-PINNED honest input).**
+
+For the genuine maximal-regularity Duhamel solution `u` (zero initial perturbation,
+trace `0` at `t = 0`) and ANY family `T_rep` of `C∞` representatives whose `L²` classes
+realize `u.toFun t` on `Ioc 0 T` and vanish at `t = 0` (the interior `L²` pin together
+with `T_rep 0 = 0`), there is a single smallness constant `δ < 1` for which the realized
+symmetric bilinear perturbation `ccTensorBilinSymm g₀ (T_rep t)` is uniformly `g₀`-fibre
+small (`gFibreOpBound … δ`) at every interior time `t ∈ Ioc 0 T`.
+
+PINNED to the solution: the hypotheses `hduh`/`hforce`/`htrace` and the pin `h_pin`
+make the family the genuine near-zero solution; the smallness is the short-time
+`H^{a+2}` smallness of the solution about `u₀ = 0` (the supercritical Sobolev embedding
+`sobolevBall_smooth_fibreSmall` controls the fibre operator norm by the `H^{a+2}` norm,
+which is small on the short interval).  The hypothesis is NOT the conclusion: it requires
+the genuine solution pin, and a non-pinned (e.g. large constant) family does not inherit
+the smallness.
+
+DEFERRED (honest `sorry`; consumers transitively depend on `sorryAx`). -/
+theorem realizedSol_fibreSmall
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
+      (I := I) (M := M) g₀ g_bg a ha_super).choose)
+    (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce)
+    (hforce : gforce =ᵐ[timeMeasure T]
+      (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (htrace : timeH1.trace0 _ T u = 0)
+    (T_rep : ℝ → SmoothCcTensor g₀ 0 2)
+    (h_zero : T_rep 0 = 0)
+    (h_pin : ∀ t ∈ Set.Ioc (0 : ℝ) T,
+      SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (T_rep t) =
+        tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (Nat.cast_nonneg a) (timeH1.toFun u t)) :
+    ∃ δ : ℝ, δ < 1 ∧
+      ∀ t ∈ Set.Ioc (0 : ℝ) T,
+        gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ (T_rep t)) δ :=
+  sorry
+
+/-- **The Ricci–DeTurck flow derivative of the realized solution family
+(SOLUTION-PINNED honest input — the soundness core).**
+
+For the genuine maximal-regularity Duhamel solution `u` and the constructed time-regular
+representative family `T_rep` — pinned to `u` by `h_zero` (`T_rep 0 = 0`), the interior
+`L²` pin `h_pin` (on the closed interval, so it constrains the boundary as well as the
+interior, excluding spiked families), and the `L²`-time-continuity `h_cont` of the
+representative — the realized metric family
+`g_DT t = tensorSectionRealizeMetric g₀ (T_rep t) hδ_lt (hδ t)` solves the TRUE
+Ricci–DeTurck flow: at every `t ∈ Ico 0 T`, base point `x`, tangent pair `(v, w)`, the
+pointwise `[0,∞)`-derivative of the perturbation part of the realized inner product
+`s ↦ ccTensorBilinSymm g₀ (T_rep s) x v w` equals the intrinsic Ricci–DeTurck right-hand
+side `deTurckRicciRHS g_bg (g_DT t) x v w`.
+
+PINNED to the solution AND time-regular: unlike a bare value pin, the hypotheses
+`h_pin` (on `Icc 0 T`, pinning the boundary value `T_rep 0 = 0` as well) and `h_cont`
+(`L²`-time continuity) fix the time-variation `s ↦ T_rep s` that a within-`[0,∞)`
+time-derivative on `Ico 0 T` requires — a family agreeing with the genuine solution only
+on the open interior, or with a nonzero or discontinuous boundary value, does NOT satisfy
+these hypotheses, so the conclusion is not satisfiable by an arbitrary family (the
+spiked-`T_rep` counterexample is excluded).
+
+DEFERRED (honest `sorry`; consumers transitively depend on `sorryAx`).  The classical
+chain: the maximal-regularity `L²`-time-derivative of `u`
+(`maxRegDuhamelMap_timeDeriv_eq`, `SolutionSpace.lean`) is the connection Laplacian plus
+the forcing, transported to the pointwise right-derivative of `u.toFun` by
+`maxreg_l2deriv_to_pointwise_hasderivwithinat` (`Intrinsic/PointwiseDeriv.lean`), composed
+with the supercritical-order-bounded chart-evaluation functional `T ↦ ccTensorBilinSymm
+g₀ T x v w` (point-evaluation is `Hᵃ`-bounded by the Sobolev embedding `a > dim/2`); the
+spectral nonlinearity realizes pointwise to the intrinsic Ricci–DeTurck remainder via the
+chart-coordinate polynomial tie
+`deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS`
+(`DeTurckCoefficients/ChartDeTurckRemainderPolynomial.lean`), evaluated on the realized
+metric `g_DT t`. -/
+theorem realizedSol_flowDeriv
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce)
+    (hforce : gforce =ᵐ[timeMeasure T]
+      (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (htrace : timeH1.trace0 _ T u = 0)
+    (T_rep : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (T_rep t)) δ)
+    (h_zero : T_rep 0 = 0)
+    (h_pin : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (T_rep t) =
+        tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (Nat.cast_nonneg a) (timeH1.toFun u t))
+    (h_cont : ContinuousOn
+      (fun t : ℝ => (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (T_rep t)))
+      (Set.Icc (0 : ℝ) T)) :
+    ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
+      HasDerivWithinAt
+        (fun s : ℝ => ccTensorBilinSymm (I := I) g₀ (T_rep s) x v w)
+        (deTurckRicciRHS (I := I) g_bg
+          (tensorSectionRealizeMetric (I := I) g₀ (T_rep t) hδ_lt (hδ t)) x v w)
+        (Set.Ici 0) t :=
+  sorry
+
 /-- **The time-regular realized DeTurck–Ricci representative family (recursion
-frontier — the single deep parabolic soundness tie).**
+frontier — the single deep parabolic soundness tie), as glue over the construction.**
 
 For the genuine second-order quasilinear engine solution `u` of the Ricci–DeTurck
 flow about `g₀` with zero initial perturbation (the Duhamel image of its own forcing
@@ -142,52 +307,37 @@ family `g_DT t = tensorSectionRealizeMetric g₀ (T_rep t) hδ_lt (hδ t)` must 
 * the **Ricci–DeTurck flow derivative** — at every `t ∈ Ico 0 T`, base point `x`, and
   tangent pair `(v, w)`, the pointwise `[0,∞)`-derivative of the perturbation part of
   the realized inner product `s ↦ ccTensorBilinSymm g₀ (T_rep s) x v w` equals the
-  intrinsic Ricci–DeTurck right-hand side `deTurckRicciRHS g_bg (g_DT t) x v w` (the
-  soundness core: the realized metric solves the TRUE DeTurck–Ricci flow, NOT a
-  magnified equation);
+  intrinsic Ricci–DeTurck right-hand side `deTurckRicciRHS g_bg (g_DT t) x v w`;
 * the **joint chart-Gram interior regularity** `JointChartGramSmooth T g_DT` (the
   chart-Gram entries are jointly `C∞` up to `t = 0`).
 
-PINNED to the solution: the hypotheses `hduh`/`hforce`/`htrace` are the engine's own
-defining identities for `u`, so a family unrelated to `u` does not satisfy the interior
-`L²` pin — the conclusion is not satisfiable by an arbitrary family.
+The representative family is CONSTRUCTED here as the Weyl-free smooth-representative gate
+`spectralSmoothRealizesAsSmooth_holds`
+(`HeatSemigroup/SpectralSmoothRepresentativeRealize.lean`) applied to the per-time
+spatial smoothing `solInterior_uToFun_allHs` of the solution, set to `0` outside the
+existence interval (so `T_rep 0 = 0` is structural).  The four conjuncts are then GLUE
+over the construction and three SOLUTION-PINNED honest inputs, all keyed to the SAME
+constructed family with its full structural provenance (zero value, `L²` pin, `L²`-time
+continuity) — NOT a value-only pin:
 
-DEFERRED (the single deep parabolic soundness leaf — body is `sorry`; consumers
-transitively depend on `sorryAx`).  This theorem is NOT a composition of separately-stated
-children: the four data groups (zero initial value, interior `L²` pin, flow derivative,
-joint chart-Gram regularity) must be produced JOINTLY for the SAME constructed
-time-regular family.  An earlier decomposition that re-exposed the flow derivative and
-joint regularity as standalone theorems taking the interior `L²` pin as INPUT was
-unsound: the pin is value-only and interior-only (`Ioo 0 T`), so it pins neither the
-boundary value `T_rep 0` nor the time-variation `s ↦ T_rep s` that a within-`[0,∞)`
-time-derivative on `Ico 0 T` requires — a family agreeing with the genuine solution on
-`Ioo 0 T` but with a nonzero `T_rep 0` satisfies the pin yet has no derivative at
-`t = 0`.  The flow derivative is therefore a property of the SPECIFIC time-regular
-construction, produced together with it here, not a glue step over the pin.  The intended
-proof (the classical Chow–Knopf interior-smoothing construction) is:
+* `T_rep 0 = 0` and the interior `L²` pin are proved OUTRIGHT from the gate's defining
+  property and the choice at `t = 0`;
+* the flow derivative is `realizedSol_flowDeriv`, which receives the constructed family
+  together with `T_rep 0 = 0`, the `Icc`-pin, and the `L²`-time-continuity (so the
+  spiked-`T_rep` counterexample is excluded);
+* the joint chart-Gram regularity is the general spectral-regularity bedrock
+  `jointChartGramSmooth_of_spectralSmooth_timeContinuous`
+  (`HeatSemigroup/SpectralPartialSumJointGram.lean`), fed the `L²`-time-continuity and
+  the per-time all-order membership of the constructed family.
 
-* interior smoothing: `hduh` exhibits `u` as the Duhamel solution, whose interior field
-  lies in `⋂_σ Hˢ` for each interior `t` by `solField_into_all_tensorHs_interior`
-  (`HeatSemigroup/ParabolicInteriorSmoothing.lean`), and the now-PROVED Weyl-free gate
-  `spectralSmoothRealizesAsSmooth_holds`
-  (`HeatSemigroup/SpectralSmoothRepresentativeRealize.lean`) lifts that to the `C∞`
-  representative whose `L²` class is `u.toFun t` — selected TIME-REGULARLY, not pointwise;
-* short-time fibre-smallness: the solution stays uniformly `g₀`-fibre small about
-  `u₀ = 0` with a single `δ < 1`;
-* the flow derivative: the maximal-regularity `L²`-time-derivative of `u`
-  (`maxRegDuhamelMap_timeDeriv_eq`, `SolutionSpace.lean`) is the connection Laplacian
-  plus `deTurckSobolevNHa2 u`, transported to the pointwise right-derivative by
-  `maxreg_l2deriv_to_pointwise_hasderivwithinat` (`Intrinsic/PointwiseDeriv.lean`), and
-  the spectral nonlinearity realizes pointwise to the intrinsic Ricci–DeTurck remainder
-  via the chart-coordinate polynomial tie
-  `deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS`
-  (`DeTurckCoefficients/ChartDeTurckRemainderPolynomial.lean`), evaluated on the realized
-  metric `g_DT t = g₀ + ccTensorBilinSymm g₀ (T_rep t)`;
-* the joint regularity: standard parabolic interior smoothing makes the solution jointly
-  `C∞` in space and time up to `t = 0`, pushed through the smooth-in-its-tensor-argument
-  realize map `tensorSectionRealizeMetric` and the chart-Gram extraction. -/
+Consumers transitively depend on the `sorryAx` carried by the three SOLUTION-PINNED
+honest inputs and the joint-regularity bedrock. -/
 theorem realizedDeTurck_timeRegular_family
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
+      (I := I) (M := M) g₀ g_bg a ha_super).choose)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
@@ -213,8 +363,110 @@ theorem realizedDeTurck_timeRegular_family
             (tensorSectionRealizeMetric (I := I) g₀ (T_rep t) hδ_lt (hδ t)) x v w)
           (Set.Ici 0) t) ∧
       JointChartGramSmooth (I := I) T
-        (fun t : ℝ => tensorSectionRealizeMetric (I := I) g₀ (T_rep t) hδ_lt (hδ t)) :=
-  sorry
+        (fun t : ℝ => tensorSectionRealizeMetric (I := I) g₀ (T_rep t) hδ_lt (hδ t)) := by
+  classical
+  -- The per-time all-order membership of the spatial solution value, on the closed slab.
+  have hmem :=
+    solInterior_uToFun_allHs (I := I) (M := M) g₀ g_bg a ha_super hT hT1 hTT₀ u gforce
+      hduh hforce htrace
+  -- `u.toFun 0 = 0` from the zero trace.
+  have hinit : u.init = 0 := by
+    have := htrace
+    rwa [timeH1.trace0_apply] at this
+  have hu0 : (timeH1.toFun u) 0 = 0 := by
+    rw [timeH1.toFun_zero, hinit]
+  -- The chosen smooth representative of `u.toFun t` on the existence interval, `0`
+  -- elsewhere (so the boundary value `T_rep 0 = 0` is structural).
+  set uL2 : ℝ → TensorL2 0 2 g₀ :=
+    fun t => tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+      (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+      (Nat.cast_nonneg a) (timeH1.toFun u t) with huL2_def
+  set T_rep : ℝ → SmoothCcTensor g₀ 0 2 :=
+    fun t =>
+      if ht : t ∈ Set.Ioc (0 : ℝ) T then
+        Classical.choose
+          (spectralSmoothRealizesAsSmooth_holds (I := I) (M := M) g₀ (uL2 t)
+            (fun σ hσ => hmem t ⟨le_of_lt ht.1, ht.2⟩ σ hσ))
+      else 0 with hTrep_def
+  -- The gate's defining property of the representative on `Ioc 0 T`.
+  have hgate : ∀ t ∈ Set.Ioc (0 : ℝ) T,
+      SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (T_rep t) = uL2 t := by
+    intro t ht
+    have hchoose := Classical.choose_spec
+      (spectralSmoothRealizesAsSmooth_holds (I := I) (M := M) g₀ (uL2 t)
+        (fun σ hσ => hmem t ⟨le_of_lt ht.1, ht.2⟩ σ hσ))
+    have hsimp : T_rep t = Classical.choose
+        (spectralSmoothRealizesAsSmooth_holds (I := I) (M := M) g₀ (uL2 t)
+          (fun σ hσ => hmem t ⟨le_of_lt ht.1, ht.2⟩ σ hσ)) := by
+      rw [hTrep_def]; simp only [ht, dif_pos]
+    rw [hsimp, SmoothCcTensor.toL2_apply, hchoose]
+  -- `T_rep 0 = 0`: `0 ∉ Ioc 0 T`.
+  have hrep_zero : T_rep 0 = 0 := by
+    rw [hTrep_def]; simp only [Set.mem_Ioc, lt_irrefl, false_and, dif_neg, not_false_iff]
+  -- The interior `L²` pin (and its `Ioc`/`Icc` extensions).
+  have hpin_ioc : ∀ t ∈ Set.Ioc (0 : ℝ) T,
+      SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (T_rep t) = uL2 t := hgate
+  have hpin_icc : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (T_rep t) = uL2 t := by
+    intro t ht
+    rcases eq_or_lt_of_le ht.1 with h0 | h0
+    · subst h0
+      rw [hrep_zero]
+      have hu0L2 : uL2 0 = 0 := by rw [huL2_def]; simp only [hu0, map_zero]
+      rw [hu0L2, map_zero]
+    · exact hpin_ioc t ⟨h0, ht.2⟩
+  have hpin_ioo : ∀ t ∈ Set.Ioo (0 : ℝ) T,
+      SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (T_rep t) = uL2 t :=
+    fun t ht => hpin_ioc t ⟨ht.1, le_of_lt ht.2⟩
+  -- `L²`-time continuity of the representative on the closed slab: equals `uL2`, which is
+  -- the continuous `tensorHsToL2`-image of the continuous `u.toFun`.
+  have hcont : ContinuousOn
+      (fun t : ℝ => (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (T_rep t)))
+      (Set.Icc (0 : ℝ) T) := by
+    have hcontU : ContinuousOn uL2 (Set.Icc (0 : ℝ) T) := by
+      refine ((tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+        (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+        (Nat.cast_nonneg a)).continuous.comp_continuousOn ?_)
+      exact timeH1.continuousOn_toFun u
+    exact hcontU.congr (fun t ht => hpin_icc t ht)
+  -- The single fibre smallness constant on `Ioc 0 T`; extend to all `t` via the zero case.
+  obtain ⟨δ, hδ_lt, hδ_ioc⟩ :=
+    realizedSol_fibreSmall (I := I) (M := M) g₀ g_bg a ha_super hT hT1 hTT₀ u gforce
+      hduh hforce htrace T_rep hrep_zero (fun t ht => hpin_ioc t ht)
+  set δ' : ℝ := max δ 0 with hδ'_def
+  have hδ'_lt : δ' < 1 := max_lt hδ_lt one_pos
+  have hδ' : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (T_rep t)) δ' := by
+    intro t
+    by_cases ht : t ∈ Set.Ioc (0 : ℝ) T
+    · intro x v w
+      refine le_trans (hδ_ioc t ht x v w) ?_
+      have hsv : 0 ≤ Real.sqrt (g₀.inner x v v) := Real.sqrt_nonneg _
+      have hsw : 0 ≤ Real.sqrt (g₀.inner x w w) := Real.sqrt_nonneg _
+      have hδle : δ ≤ δ' := le_max_left _ _
+      have hprod : 0 ≤ Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) :=
+        mul_nonneg hsv hsw
+      nlinarith [hprod, hδle]
+    · have hT0 : T_rep t = 0 := by rw [hTrep_def]; simp only [ht, dif_neg, not_false_iff]
+      intro x v w
+      rw [hT0, ccTensorBilinSymm_zero_apply]
+      have hnn : 0 ≤ δ' * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) := by
+        have : 0 ≤ δ' := le_max_right _ _
+        positivity
+      simpa only [abs_zero] using hnn
+  -- Assemble.
+  refine ⟨T_rep, δ', hδ'_lt, hδ', hrep_zero, hpin_ioo, ?_, ?_⟩
+  · -- The Ricci–DeTurck flow derivative: the soundness core.
+    exact realizedSol_flowDeriv (I := I) (M := M) g₀ g_bg a ha_super hT hT1 u gforce hduh
+      hforce htrace T_rep hδ'_lt hδ' hrep_zero hpin_icc hcont
+  · -- The joint chart-Gram interior regularity from the general spectral bedrock.
+    refine jointChartGramSmooth_of_spectralSmooth_timeContinuous (I := I) (M := M) g₀ hT
+      T_rep hδ'_lt hδ' hcont ?_
+    intro t ht σ hσ
+    obtain ⟨v, hv⟩ := hmem t ht σ hσ
+    refine ⟨v, ?_⟩
+    rw [hpin_icc t ht]
+    exact hv
 
 /-- **SOLUTION-PINNED honest input (1/3) — interior smoothing + smooth-representative
 gate (projection of the time-regular family).**
@@ -231,7 +483,11 @@ PINNED to the solution: the hypotheses `hduh`/`hforce`/`htrace` are the engine's
 defining identities for `u`, so a `rep` unrelated to `u` does not satisfy the `L²`
 pin `SmoothCcTensor.toL2 rep = tensorHsToL2 _ hσ (u.toFun t)`. -/
 theorem solInterior_smoothRepr_pin
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
+      (I := I) (M := M) g₀ g_bg a ha_super).choose)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
@@ -251,8 +507,8 @@ theorem solInterior_smoothRepr_pin
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
             (Nat.cast_nonneg a) (timeH1.toFun u t)) := by
   obtain ⟨T_rep, δ, hδ_lt, hδ, hrep_zero, htrep_pin, _hflow, _hJ⟩ :=
-    realizedDeTurck_timeRegular_family (I := I) (M := M) g₀ g_bg a hT hT1 u gforce
-      hduh hforce htrace
+    realizedDeTurck_timeRegular_family (I := I) (M := M) g₀ g_bg a ha_super hT hT1 hTT₀ u
+      gforce hduh hforce htrace
   exact ⟨T_rep, δ, hδ_lt, hrep_zero, hδ, htrep_pin⟩
 
 /-- **SOLUTION-PINNED honest input (2/3) — the realized perturbation solves the
@@ -269,7 +525,11 @@ The flow derivative is the time-regular family's own equation read pointwise; th
 existential `T_rep`/`δ` it ranges over is the genuine solution family of
 `realizedDeTurck_timeRegular_family`, so it is not satisfiable by an arbitrary family. -/
 theorem realizedDeTurck_flowMatch
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
+      (I := I) (M := M) g₀ g_bg a ha_super).choose)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
@@ -294,8 +554,8 @@ theorem realizedDeTurck_flowMatch
             (tensorSectionRealizeMetric (I := I) g₀ (T_rep t) hδ_lt (hδ t)) x v w)
           (Set.Ici 0) t) := by
   obtain ⟨T_rep, δ, hδ_lt, hδ, _hrep_zero, htrep_pin, hflow, _hJ⟩ :=
-    realizedDeTurck_timeRegular_family (I := I) (M := M) g₀ g_bg a hT hT1 u gforce
-      hduh hforce htrace
+    realizedDeTurck_timeRegular_family (I := I) (M := M) g₀ g_bg a ha_super hT hT1 hTT₀ u
+      gforce hduh hforce htrace
   exact ⟨T_rep, δ, hδ_lt, hδ, htrep_pin, hflow⟩
 
 /-- **SOLUTION-PINNED honest input (3/3) — joint chart-Gram interior regularity
@@ -309,7 +569,11 @@ The joint regularity is the time-regular family's interior parabolic smoothing; 
 existential `T_rep`/`δ` it ranges over is the genuine solution family of
 `realizedDeTurck_timeRegular_family`. -/
 theorem realizedDeTurck_jointReg
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
+      (I := I) (M := M) g₀ g_bg a ha_super).choose)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
@@ -325,8 +589,8 @@ theorem realizedDeTurck_jointReg
       JointChartGramSmooth (I := I) T
         (fun t : ℝ => tensorSectionRealizeMetric (I := I) g₀ (T_rep t) hδ_lt (hδ t)) := by
   obtain ⟨T_rep, δ, hδ_lt, hδ, _hrep_zero, _htrep_pin, _hflow, hJ⟩ :=
-    realizedDeTurck_timeRegular_family (I := I) (M := M) g₀ g_bg a hT hT1 u gforce
-      hduh hforce htrace
+    realizedDeTurck_timeRegular_family (I := I) (M := M) g₀ g_bg a ha_super hT hT1 hTT₀ u
+      gforce hduh hforce htrace
   exact ⟨T_rep, δ, hδ_lt, hδ, hJ⟩
 
 /-- **Realized strictly-parabolic DeTurck–Ricci solution family.**
@@ -387,8 +651,12 @@ theorem realizedDeTurckFamily_exists
   -- Sobolev tame estimates of the second-order Nemytskii nonlinearity close).
   set a : ℕ := 2 * Module.finrank ℝ E + 3 with ha_def
   have ha_super : 2 * Module.finrank ℝ E + 3 ≤ a := by rw [ha_def]
-  obtain ⟨T₀, hT₀_pos, hsol⟩ :=
-    deTurckRicci_quasilinear_maxreg_solution (I := I) (M := M) g₀ g_bg a ha_super
+  -- The engine horizon `T₀` and its existence package, kept as the literal `.choose`
+  -- terms so the time-regular family's `T ≤ T₀` hypothesis matches definitionally.
+  set T₀ : ℝ := (deTurckRicci_quasilinear_maxreg_solution
+    (I := I) (M := M) g₀ g_bg a ha_super).choose with hT₀_def
+  obtain ⟨hT₀_pos, hsol⟩ :=
+    (deTurckRicci_quasilinear_maxreg_solution (I := I) (M := M) g₀ g_bg a ha_super).choose_spec
   set T : ℝ := min T₀ 1 with hT_def
   have hT_pos : 0 < T := lt_min hT₀_pos one_pos
   have hT_le₀ : T ≤ T₀ := min_le_left _ _
@@ -398,8 +666,8 @@ theorem realizedDeTurckFamily_exists
   -- (uniformly `g₀`-fibre small with `δ < 1`), together with the four data conjuncts
   -- the realized metric must carry — obtained in ONE call (the SPLIT-WRONG fix).
   obtain ⟨T_rep, δ, hδ_lt, hδ, hrep_zero, _htrep_pin, hflow, hJ⟩ :=
-    realizedDeTurck_timeRegular_family (I := I) (M := M) g₀ g_bg a hT_pos hT_le1 u gforce
-      hduh hforce htrace
+    realizedDeTurck_timeRegular_family (I := I) (M := M) g₀ g_bg a ha_super hT_pos hT_le1
+      hT_le₀ u gforce hduh hforce htrace
   -- The realized metric family: realize the `C∞` representative directly.
   refine
     ⟨T, fun t : ℝ => tensorSectionRealizeMetric (I := I) g₀ (T_rep t) hδ_lt (hδ t),
