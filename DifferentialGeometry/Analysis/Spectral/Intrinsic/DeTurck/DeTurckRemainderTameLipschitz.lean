@@ -2726,4 +2726,168 @@ theorem deTurckRemainderDiff_iteratedCovGrad_twoArm_ballLipschitz
             (‖iteratedCovGrad (I := I) g₀ 0 s l coeff₁‖ ^ 2
               + ‖iteratedCovGrad (I := I) g₀ 0 s l coeff₂‖ ^ 2) := by ring
 
+/-- **The single-arm full covariant-jet-column ball-Lipschitz bound on the genuine Ricci–DeTurck
+remainder difference.**
+
+Fix `g₀`, the DeTurck background `g_bg`, an order `a`, and a covariant-`L²` ball radius `R ≥ 0`.
+There is one nonnegative constant `C` — uniform over the fibre-small radius-`R` ball — such that for
+any two `g₀`-fibre-small smooth perturbations `T, T'` whose covariant-`L²` jets up to order `a + 2`
+lie in the radius-`R` ball, the **entire covariant-gradient jet column** (orders `q ≤ a`) of the
+genuine remainder difference
+`D := deTurckSmoothRemainder g₀ g_bg T − deTurckSmoothRemainder g₀ g_bg T'` obeys, at the squared
+`L²` level, the single-arm tame bound
+```
+∑_{q ≤ a} ‖∇^q D‖²  ≤  C · ∑_{i ≤ a+2} ‖∇^i (T − T')‖².
+```
+
+Unlike the top-jet two-arm tower `deTurckRemainderDiff_iteratedCovGrad_twoArm_ballLipschitz`, this
+bound is **single-arm** and requires no supercriticality hypothesis: every order-`q` jet of the
+sealed remainder difference reads `∇^{≤ q+2}(T − T') ≤ ∇^{≤ a+2}(T − T')` (the genuine quasilinear
+window), so the difference jets alone control the column.  It is assembled by integrating, at each
+order `q ≤ a`, the per-order pointwise single-factor covariant grid
+`deTurckRemainderDiff_singleField_singleFactorGrid`
+(`rfns(∇^q D)(x) ≤ Cq · ∑_{i ≤ q+2} rfns(∇^i (T − T'))(x)`, which carries the
+`@deTurckRHSArmDiff_…_ballUniform` RHS-arm and rough-Laplacian Δ-arm posits) to the squared `L²`
+bound `‖∇^q D‖² ≤ Cq · ∑_{i ≤ a+2} ‖∇^i (T − T')‖²` (`window q+2 ≤ a+2`), then summing the finitely
+many orders with the uniform constant `C := ∑_{q ≤ a} Cq`.  Consumers transitively depend on the
+per-order grid posit's `sorryAx`. -/
+theorem deTurckRemainderDiff_iteratedCovGradSum_ballLipschitz
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_lt : δ' < 1)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        (∑ q ∈ Finset.range (a + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 q
+              (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+                deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ')‖ ^ 2) ≤
+          C * ∑ i ∈ Finset.range (a + 2 + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2 := by
+  classical
+  -- Per-order constant from the single-factor grid posit at each order `q`.
+  set Cfun : ℕ → ℝ := fun q =>
+    (deTurckRemainderDiff_singleField_singleFactorGrid (I := I) (M := M) g₀ g_bg q hR).choose
+    with hCfun_def
+  have hCspec : ∀ q : ℕ,
+      0 ≤ Cfun q ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_lt : δ' < 1)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ q + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ q + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        (∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 q
+                (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+                  deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ')).toSection x) ≤
+            Cfun q * ∑ i ∈ Finset.range (q + 2 + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 i (T - T')).toSection x)) := fun q =>
+    (deTurckRemainderDiff_singleField_singleFactorGrid (I := I) (M := M) g₀ g_bg q hR).choose_spec
+  have hCfun_nn : ∀ q, 0 ≤ Cfun q := fun q => (hCspec q).1
+  refine ⟨∑ q ∈ Finset.range (a + 1), Cfun q,
+    Finset.sum_nonneg fun q _ => hCfun_nn q, ?_⟩
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
+  set W : SmoothCcTensor g₀ 0 2 := T - T' with hW_def
+  set D : SmoothCcTensor g₀ 0 2 :=
+    deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+      deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ' with hD_def
+  set μ := riemannianVolumeMeasure (I := I) (M := M) g₀ with hμ_def
+  -- The full order-`(a+2)` covariant jet column of the perturbation difference `W := T − T'`.
+  set Scol : ℝ := ∑ i ∈ Finset.range (a + 2 + 1),
+    ‖iteratedCovGrad (I := I) g₀ 0 2 i W‖ ^ 2 with hScol_def
+  have hScol_nn : 0 ≤ Scol :=
+    Finset.sum_nonneg fun i _ => sq_nonneg _
+  -- The squared `L²` norm of any covariant jet is the integral of its fibre norm.
+  have hnorm_int : ∀ (c : ℕ) (S : SmoothCcTensor g₀ 0 c),
+      ‖S‖ ^ 2 = ∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 c x (S.toSection x) ∂μ :=
+    fun c S => by
+      rw [SmoothCcTensor.norm_def (I := I) (M := M) S, hμ_def]
+      exact tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g₀ c S
+  -- The order-`(a+2)`-window jet-column integral identity for `W`.
+  have hScol_int :
+      Scol = ∫ x, (∑ i ∈ Finset.range (a + 2 + 1),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 i W).toSection x)) ∂μ := by
+    rw [hScol_def]
+    rw [MeasureTheory.integral_finset_sum (Finset.range (a + 2 + 1))
+      (fun i _ => by
+        rw [hμ_def]
+        exact integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g₀ 0 (2 + i)
+          (iteratedCovGrad (I := I) g₀ 0 2 i W))]
+    exact Finset.sum_congr rfl (fun i _ => hnorm_int (2 + i) (iteratedCovGrad (I := I) g₀ 0 2 i W))
+  -- Integrability of the full window column (used to dominate the truncated per-order columns).
+  have hcol_int : MeasureTheory.Integrable
+      (fun x => ∑ i ∈ Finset.range (a + 2 + 1),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 i W).toSection x)) μ := by
+    rw [hμ_def]
+    exact MeasureTheory.integrable_finset_sum (Finset.range (a + 2 + 1))
+      (fun i _ => integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g₀ 0 (2 + i)
+        (iteratedCovGrad (I := I) g₀ 0 2 i W))
+  -- Per order `q ≤ a`: the squared `L²` norm of `∇^q D` is `≤ Cfun q · Scol`.
+  have hper : ∀ q ∈ Finset.range (a + 1),
+      ‖iteratedCovGrad (I := I) g₀ 0 2 q D‖ ^ 2 ≤ Cfun q * Scol := by
+    intro q hq
+    have hqa : q ≤ a := Nat.lt_succ_iff.mp (Finset.mem_range.mp hq)
+    -- Ball hypotheses at the smaller window `q + 2 ≤ a + 2`.
+    have hTq : ∀ j : ℕ, j ≤ q + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R :=
+      fun j hj => hTball j (by omega)
+    have hT'q : ∀ j : ℕ, j ≤ q + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R :=
+      fun j hj => hT'ball j (by omega)
+    have hpt := (hCspec q).2 T T' hδ_lt hδ hδ'_lt hδ' hTq hT'q
+    -- Integrate the pointwise per-order bound, then dominate the `q+2`-window column by the
+    -- full `a+2`-window column `Scol` (extra nonnegative tail terms).
+    have hint_le :
+        (∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 q D).toSection x) ∂μ) ≤
+          Cfun q * Scol := by
+      have hrhs_int : MeasureTheory.Integrable
+          (fun x => Cfun q * ∑ i ∈ Finset.range (q + 2 + 1),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 i W).toSection x)) μ := by
+        rw [hμ_def]
+        exact (MeasureTheory.integrable_finset_sum (Finset.range (q + 2 + 1))
+          (fun i _ => integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g₀ 0 (2 + i)
+            (iteratedCovGrad (I := I) g₀ 0 2 i W))).const_mul (Cfun q)
+      calc (∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 q D).toSection x) ∂μ)
+          ≤ ∫ x, Cfun q * ∑ i ∈ Finset.range (q + 2 + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 i W).toSection x) ∂μ := by
+            refine MeasureTheory.integral_mono_of_nonneg
+              (Filter.Eventually.of_forall (fun x =>
+                riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + q) x _))
+              hrhs_int (Filter.Eventually.of_forall (fun x => ?_))
+            simpa only [hD_def, hW_def] using hpt x
+        _ = Cfun q * ∫ x, (∑ i ∈ Finset.range (q + 2 + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 i W).toSection x)) ∂μ :=
+            MeasureTheory.integral_const_mul _ _
+        _ ≤ Cfun q * Scol := by
+            refine mul_le_mul_of_nonneg_left ?_ (hCfun_nn q)
+            rw [hScol_int]
+            have hsub : Finset.range (q + 2 + 1) ⊆ Finset.range (a + 2 + 1) :=
+              Finset.range_mono (Nat.succ_le_succ (Nat.add_le_add_right hqa 2))
+            refine MeasureTheory.integral_mono_of_nonneg
+              (Filter.Eventually.of_forall (fun x =>
+                Finset.sum_nonneg fun i _ =>
+                  riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + i) x _))
+              hcol_int (Filter.Eventually.of_forall (fun x => ?_))
+            exact Finset.sum_le_sum_of_subset_of_nonneg hsub
+              (fun i _ _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + i) x _)
+    rw [hnorm_int (2 + q) (iteratedCovGrad (I := I) g₀ 0 2 q D)]
+    exact hint_le
+  -- Sum the finitely many per-order squared bounds.
+  calc (∑ q ∈ Finset.range (a + 1),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 q D‖ ^ 2)
+      ≤ ∑ q ∈ Finset.range (a + 1), Cfun q * Scol := Finset.sum_le_sum hper
+    _ = (∑ q ∈ Finset.range (a + 1), Cfun q) * Scol := by rw [← Finset.sum_mul]
+
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
