@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
 import DifferentialGeometry.Analysis.Sobolev.MoserTameProduct
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.GagliardoNirenbergProductTwoArm
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
@@ -1913,6 +1913,61 @@ private theorem deTurckRHSArmDiff_iteratedCovGrad_riemannianFiberNormSq_jet_le
     _ = Cmid * Kcol * ∑ q ∈ Finset.range (a + 2 + 1), Wq q := by
         rw [← Finset.sum_mul]; ring
 
+/-- **(The ball-uniform order-`(a+2)`-window covariant-jet bound on the Ricci–DeTurck RHS arm of
+the sealed remainder difference — the uniform-over-`R`-ball Nemytskii estimate.)**
+
+This is the **single named honest leaf** carrying the uniform-over-`R`-ball Lipschitz constant of the
+two-metric chart Nemytskii nonlinearity at the quasilinear order.  Fix `g₀`, the DeTurck background
+`g_bg`, an order `a`, and a covariant-`L²` ball radius `R ≥ 0`.  There is **one** nonnegative constant
+`CR` — uniform over the fibre-small radius-`R` ball, i.e. **outside** the `∀ T T'` quantifier — such
+that for any two `g₀`-fibre-small smooth perturbations `T, T'` whose covariant-`L²` jets up to order
+`a + 2` lie in the radius-`R` ball, the order-`a` covariant gradient of the **RHS-arm residual**
+```
+RHSarm := (deTurckSmoothRemainder g₀ g_bg T − deTurckSmoothRemainder g₀ g_bg T')
+            + rawTensorConnLapSmooth g₀ 0 2 (T − T')
+```
+— the genuine Ricci–DeTurck RHS difference `deTurckRHSSection g_bg (g₀ + T) − deTurckRHSSection g_bg
+(g₀ + T')` (the Δ-arms cancel by `rawTensorConnLapSmooth_sub`) — is dominated, at the squared
+fibre-norm level, by `CR` times the order-`(a + 2)` covariant jet of `T − T'`:
+```
+rfns(∇^a RHSarm)(x) ≤ CR · ∑_{q ≤ a+2} rfns(∇^q (T − T'))(x).
+```
+
+It is the per-pair bound `deTurckRHSArmDiff_iteratedCovGrad_riemannianFiberNormSq_jet_le` with the grid
+constant **hoisted to a single ball-uniform value**: the chart-Nemytskii Lipschitz constant of
+`hasChartJetLip_chartDeTurckRicciRHS` (anchored at `g₀`, the metric path constrained to the realized
+ball `g₀ + T`, `g₀ + T'` with `‖∇^j T‖, ‖∇^j T'‖ ≤ R`) is uniform over the realized fibre-small `R`-ball
+(the chart-jet Lipschitz modulus is taken over the bounded realized-metric jet set, hence finite and
+`(T, T')`-independent), and the realized coefficient column `Kcol` is the fixed metric-tensor sup, also
+`(T, T')`-independent.  Threading both uniform constants through the per-chart raw-component domination
+and the atlas maximum gives the single `CR := Cmid · Kcol`.
+
+**Non-vacuity / order self-check.**  The bound reads `∇^{≤ a+2}(T − T')`; the genuine `∂²(T − T')`
+Ricci principal symbol forces a top jet at `q = a + 2`, so a window-`a` weakening is rejected.  A
+`CR = 0` witness is rejected by a nonvanishing `∇^a RHSarm` for a non-flat, genuinely second-order RHS
+difference. -/
+private theorem deTurckRHSArmDiff_iteratedCovGrad_riemannianFiberNormSq_jet_le_ballUniform
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R) :
+    ∃ CR : ℝ,
+      0 ≤ CR ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_lt : δ' < 1)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 a
+                ((deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+                    deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ') +
+                  rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T'))).toSection x) ≤
+            CR * ∑ q ∈ Finset.range (a + 2 + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection x) :=
+  sorry
+
 set_option linter.unusedVariables false in
 /-- **(The genuine order-`(a+2)`-window single-factor covariant grid of the sealed
 Ricci–DeTurck remainder difference — PROVED from the Δ-arm and RHS-arm covariant-jet posits.)**
@@ -1954,15 +2009,15 @@ genuine top jet (carried by the Δ-arm), so a window-`a` weakening is rejected. 
 rejected by a nonvanishing `∇^a D` (a genuinely second-order, non-flat remainder difference). -/
 private theorem deTurckRemainderDiff_singleField_singleFactorGrid
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R) :
-    ∀ (T T' : SmoothCcTensor g₀ 0 2)
-      {δ : ℝ} (hδ_lt : δ < 1)
-      (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-      {δ' : ℝ} (hδ'_lt : δ' < 1)
-      (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
-      (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
-      (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
-      ∃ C : ℝ,
-        0 ≤ C ∧
+    ∃ C : ℝ,
+      0 ≤ C ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_lt : δ' < 1)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         (∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
               ((iteratedCovGrad (I := I) g₀ 0 2 a
@@ -1971,7 +2026,16 @@ private theorem deTurckRemainderDiff_singleField_singleFactorGrid
             C * ∑ q ∈ Finset.range (a + 2 + 1),
               riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
                 ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection x)) := by
-  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
+  -- The Δ-arm covariant-jet posit at `W := T − T'` — its constant is already ball-uniform
+  -- (`(T, T')`-independent: the `∀ W x` quantifier is inside the `∃ CΔ`).
+  obtain ⟨CΔ, hCΔ_nn, hCΔ⟩ :=
+    rawTensorConnLapSmooth_iteratedCovGrad_riemannianFiberNormSq_jet_le (I := I) (M := M) g₀ a
+  -- The RHS-arm ball-uniform covariant-jet posit — its constant `CR` is hoisted outside `∀ T T'`.
+  obtain ⟨CR, hCR_nn, hCR⟩ :=
+    deTurckRHSArmDiff_iteratedCovGrad_riemannianFiberNormSq_jet_le_ballUniform
+      (I := I) (M := M) g₀ g_bg a hR
+  refine ⟨2 * (CR + CΔ), by positivity, ?_⟩
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball x
   -- The sealed remainder difference and the two arms.
   set D : SmoothCcTensor g₀ 0 2 :=
     deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
@@ -1979,14 +2043,6 @@ private theorem deTurckRemainderDiff_singleField_singleFactorGrid
   set Δdiff : SmoothCcTensor g₀ 0 2 :=
     rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T') with hΔdiff_def
   set RHSarm : SmoothCcTensor g₀ 0 2 := D + Δdiff with hRHSarm_def
-  -- The Δ-arm covariant-jet posit at `W := T − T'`.
-  obtain ⟨CΔ, hCΔ_nn, hCΔ⟩ :=
-    rawTensorConnLapSmooth_iteratedCovGrad_riemannianFiberNormSq_jet_le (I := I) (M := M) g₀ a
-  -- The RHS-arm chart→intrinsic per-pair covariant-jet posit.
-  obtain ⟨CR, hCR_nn, hCR⟩ :=
-    deTurckRHSArmDiff_iteratedCovGrad_riemannianFiberNormSq_jet_le (I := I) (M := M) g₀ g_bg a
-      T T' hδ_lt hδ hδ'_lt hδ'
-  refine ⟨2 * (CR + CΔ), by positivity, fun x => ?_⟩
   -- Abbreviate the order-`(a+2)` jet column of `T − T'` at `x`.
   set Scol : ℝ := ∑ q ∈ Finset.range (a + 2 + 1),
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
@@ -2034,7 +2090,8 @@ private theorem deTurckRemainderDiff_singleField_singleFactorGrid
   have hRbound :
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
           ((iteratedCovGrad (I := I) g₀ 0 2 a RHSarm).toSection x) ≤ CR * Scol := by
-    rw [hScol_def]; exact hCR x
+    rw [hScol_def, hRHSarm_def, hD_def, hΔdiff_def]
+    exact hCR T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball x
   -- Assemble: `rfns(∇^a D) ≤ 2·(CR·Scol) + 2·(CΔ·Scol) = 2·(CR + CΔ)·Scol`.
   calc riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
           ((iteratedCovGrad (I := I) g₀ 0 2 a D).toSection x)
@@ -2092,7 +2149,8 @@ depend on the single-factor grid posit's `sorryAx`.
 nonvanishing remainder-difference jet (the metric coefficient floor `rfns(coeff) ≥ 1` is nonzero). -/
 private theorem deTurckRemainderDiff_singleField_diagonalGrid_intrinsicCore
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R) :
-    ∃ s : ℕ,
+    ∃ (s : ℕ) (coeff : SmoothCcTensor g₀ 0 s) (Cmid : ℝ),
+      0 ≤ Cmid ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_lt : δ < 1)
         (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -2100,30 +2158,27 @@ private theorem deTurckRemainderDiff_singleField_diagonalGrid_intrinsicCore
         (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
-        ∃ (coeff : SmoothCcTensor g₀ 0 s) (Cmid : ℝ),
-          0 ≤ Cmid ∧
-          (∀ x : M,
-            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
-                ((iteratedCovGrad (I := I) g₀ 0 2 a
-                  (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
-                    deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ')).toSection x) ≤
-              Cmid * ∑ i ∈ Finset.range (a + 2 + 1),
-                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                    ((iteratedCovGrad (I := I) g₀ 0 2 i (T - T')).toSection x)
-                  * ∑ l ∈ Finset.range (a + 2 + 1 - i),
-                      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + l) x
-                        ((iteratedCovGrad (I := I) g₀ 0 s l coeff).toSection x)) := by
+        (∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 a
+                (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+                  deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ')).toSection x) ≤
+            Cmid * ∑ i ∈ Finset.range (a + 2 + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                  ((iteratedCovGrad (I := I) g₀ 0 2 i (T - T')).toSection x)
+                * ∑ l ∈ Finset.range (a + 2 + 1 - i),
+                    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + l) x
+                      ((iteratedCovGrad (I := I) g₀ 0 s l coeff).toSection x)) := by
   classical
-  -- The positive intrinsic coefficient column (`1 ≤ rfns(coeff)` everywhere): the metric tensor.
+  -- The positive intrinsic coefficient column (`1 ≤ rfns(coeff)` everywhere): the metric tensor —
+  -- `(T, T')`-independent, hence hoisted outside the perturbation quantifier.
   obtain ⟨s, coeff, hcoeff_floor⟩ := exists_positiveFloor_intrinsicCoeff (I := I) (M := M) g₀
-  refine ⟨s, fun T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball => ?_⟩
-  -- The genuine order-`(a+2)`-window single-factor covariant grid of the sealed remainder difference
-  -- at this `(T, T')` (the grid constant `C` depends on the metric path, hence on `T, T'`).
+  -- The ball-uniform single-factor covariant grid: its constant `Cmid` is now hoisted outside `∀ T T'`.
   obtain ⟨Cmid, hCmid_nn, hgrid⟩ :=
     deTurckRemainderDiff_singleField_singleFactorGrid (I := I) (M := M) g₀ g_bg a hR
-      T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
-  refine ⟨coeff, Cmid, hCmid_nn, fun x => ?_⟩
-  refine (hgrid x).trans ?_
+  refine ⟨s, coeff, Cmid, hCmid_nn, ?_⟩
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball x
+  refine (hgrid T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball x).trans ?_
   -- Abbreviate the difference-jet column entries (window `q ≤ a + 2`).
   set Wq : ℕ → ℝ := fun q =>
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
@@ -2285,7 +2340,10 @@ nonvanishing remainder-difference jet where `coeff` is nonzero. -/
 private theorem deTurckRemainderDiff_singleField_diagonalGrid
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
-    ∃ s : ℕ,
+    ∃ (s : ℕ) (coeff : SmoothCcTensor g₀ 0 s) (Cmid Λcoeff Cw : ℝ),
+      0 ≤ Cmid ∧ 0 ≤ Λcoeff ∧ 0 ≤ Cw ∧
+      (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x (coeff.toSection x) ≤
+        Λcoeff ^ 2) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_lt : δ < 1)
         (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -2293,13 +2351,11 @@ private theorem deTurckRemainderDiff_singleField_diagonalGrid
         (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
-        ∃ (coeff : SmoothCcTensor g₀ 0 s) (Cmid ΛW Λcoeff Cw : ℝ),
-          0 ≤ Cmid ∧ 0 ≤ ΛW ∧ 0 ≤ Λcoeff ∧ 0 ≤ Cw ∧
+        ∃ ΛW : ℝ,
+          0 ≤ ΛW ∧
           ΛW ≤ Cw * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (T - T')‖ ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x ((T - T').toSection x) ≤
             ΛW ^ 2) ∧
-          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x (coeff.toSection x) ≤
-            Λcoeff ^ 2) ∧
           (∀ x : M,
             riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
                 ((iteratedCovGrad (I := I) g₀ 0 2 a
@@ -2312,31 +2368,29 @@ private theorem deTurckRemainderDiff_singleField_diagonalGrid
                       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + l) x
                         ((iteratedCovGrad (I := I) g₀ 0 s l coeff).toSection x)) := by
   -- Strip the `C⁰` fibre-sup packaging off the irreducible chart→intrinsic core: the core supplies
-  -- the intrinsic coefficient field and the diagonal product grid; the two sups are recovered from
-  -- the uniform smooth-tensor fibre-norm bound on the compact manifold.
-  obtain ⟨s, hcore⟩ :=
+  -- the intrinsic coefficient field and the (ball-uniform) diagonal product grid; the coefficient
+  -- sup and the `Cw` scale are `(T, T')`-independent and hoisted outside the perturbation quantifier.
+  obtain ⟨s, coeff, Cmid, hCmid, hgrid⟩ :=
     deTurckRemainderDiff_singleField_diagonalGrid_intrinsicCore (I := I) (M := M) g₀ g_bg a hR
-  refine ⟨s, ?_⟩
-  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
-  obtain ⟨coeff, Cmid, hCmid, hgrid⟩ :=
-    hcore T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
-  -- **Sharp** `C⁰` fibre-sup of the perturbation difference `T − T'`: the supercritical-Sobolev
-  -- section embedding exposes the `‖smoothCcToTensorHs (a+2) (T − T')‖` scale of the sup.
+  -- **Sharp** `C⁰` fibre-sup scale of the perturbation difference: the supercritical-Sobolev section
+  -- embedding constant `C₀ = Cw` is `(T, T')`-independent.
   obtain ⟨C₀, hC₀_nn, hC₀⟩ :=
     exists_riemannianFiberNormSq_section_le_smoothCcToTensorHs_sq (I := I) (M := M) g₀ a ha_super
-  -- `C⁰` fibre-sup of the coefficient field `coeff` on the compact manifold.
+  -- `C⁰` fibre-sup of the FIXED coefficient field `coeff` on the compact manifold (uniform).
   obtain ⟨Kc, hKc_nn, hKc⟩ :=
     exists_bound_riemannianFiberNormSq_smoothCcTensor (I := I) (M := M) g₀ 0 s coeff
-  set ΛW : ℝ := C₀ * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (T - T')‖ with hΛW_def
-  have hΛW_nn : 0 ≤ ΛW := by rw [hΛW_def]; positivity
-  refine ⟨coeff, Cmid, ΛW, Real.sqrt Kc, C₀, hCmid, hΛW_nn,
-    Real.sqrt_nonneg Kc, hC₀_nn, le_of_eq hΛW_def, ?_, ?_, hgrid⟩
-  · intro x
-    rw [hΛW_def]
-    exact hC₀ (T - T') x
+  refine ⟨s, coeff, Cmid, Real.sqrt Kc, C₀, hCmid, Real.sqrt_nonneg Kc, hC₀_nn, ?_, ?_⟩
   · intro x
     rw [Real.sq_sqrt hKc_nn]
     exact hKc x
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
+  set ΛW : ℝ := C₀ * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (T - T')‖ with hΛW_def
+  have hΛW_nn : 0 ≤ ΛW := by rw [hΛW_def]; positivity
+  refine ⟨ΛW, hΛW_nn, le_of_eq hΛW_def, ?_,
+    hgrid T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball⟩
+  intro x
+  rw [hΛW_def]
+  exact hC₀ (T - T') x
 
 /-- **The intrinsic covariant Faà-di-Bruno principal/lower-order split of the sealed Ricci–DeTurck
 remainder difference into two single-coefficient covariant-bilinear product fields** (assembled from
@@ -2363,7 +2417,12 @@ the lower-order-field grid is trivial (`∇^a 0 = 0`, `rfns(0) = 0 ≤ Cmid · (
 private theorem deTurckRemainderDiff_principalSplit_singleCoeffDiagonalGrid
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
-    ∃ s : ℕ,
+    ∃ (s : ℕ) (coeff₁ coeff₂ : SmoothCcTensor g₀ 0 s) (Cmid Λcoeff Cw : ℝ),
+      0 ≤ Cmid ∧ 0 ≤ Λcoeff ∧ 0 ≤ Cw ∧
+      (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x (coeff₁.toSection x) ≤
+        Λcoeff ^ 2) ∧
+      (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x (coeff₂.toSection x) ≤
+        Λcoeff ^ 2) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_lt : δ < 1)
         (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -2371,18 +2430,13 @@ private theorem deTurckRemainderDiff_principalSplit_singleCoeffDiagonalGrid
         (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
-        ∃ (coeff₁ coeff₂ : SmoothCcTensor g₀ 0 s) (D₁ D₂ : SmoothCcTensor g₀ 0 2)
-          (Cmid ΛW Λcoeff Cw : ℝ),
-          0 ≤ Cmid ∧ 0 ≤ ΛW ∧ 0 ≤ Λcoeff ∧ 0 ≤ Cw ∧
+        ∃ (D₁ D₂ : SmoothCcTensor g₀ 0 2) (ΛW : ℝ),
+          0 ≤ ΛW ∧
           ΛW ≤ Cw * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (T - T')‖ ∧
           deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
               deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ' = D₁ + D₂ ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x ((T - T').toSection x) ≤
             ΛW ^ 2) ∧
-          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x (coeff₁.toSection x) ≤
-            Λcoeff ^ 2) ∧
-          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x (coeff₂.toSection x) ≤
-            Λcoeff ^ 2) ∧
           (∀ x : M,
             riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
                 ((iteratedCovGrad (I := I) g₀ 0 2 a D₁).toSection x) ≤
@@ -2401,18 +2455,16 @@ private theorem deTurckRemainderDiff_principalSplit_singleCoeffDiagonalGrid
                   * ∑ l ∈ Finset.range (a + 2 + 1 - i),
                       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + l) x
                         ((iteratedCovGrad (I := I) g₀ 0 s l coeff₂).toSection x)) := by
-  obtain ⟨s, hgrid⟩ :=
+  obtain ⟨s, coeff, Cmid, Λcoeff, Cw, hCmid, hΛcoeff, hCw, hcoeffsup, hgrid⟩ :=
     deTurckRemainderDiff_singleField_diagonalGrid (I := I) (M := M) g₀ g_bg a ha_super hR
-  refine ⟨s, ?_⟩
+  refine ⟨s, coeff, coeff, Cmid, Λcoeff, Cw, hCmid, hΛcoeff, hCw, hcoeffsup, hcoeffsup, ?_⟩
   intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
-  obtain ⟨coeff, Cmid, ΛW, Λcoeff, Cw, hCmid, hΛW, hΛcoeff, hCw, hWupper, hWsup, hcoeffsup, hgridD⟩ :=
+  obtain ⟨ΛW, hΛW, hWupper, hWsup, hgridD⟩ :=
     hgrid T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
   -- Principal field `D₁ := D` (the whole sealed remainder difference); lower-order field `D₂ := 0`.
-  refine ⟨coeff, coeff,
-    deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+  refine ⟨deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
       deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ',
-    0, Cmid, ΛW, Λcoeff, Cw, hCmid, hΛW, hΛcoeff, hCw, hWupper, ?_, hWsup, hcoeffsup, hcoeffsup,
-    hgridD, ?_⟩
+    0, ΛW, hΛW, hWupper, ?_, hWsup, hgridD, ?_⟩
   · -- The split `D = D + 0`.
     rw [add_zero]
   · -- The lower-order grid: `∇^a 0 = 0`, so `rfns(∇^a D₂) = 0`, dominated by the nonnegative grid.
@@ -2469,7 +2521,12 @@ leaf-`Cmid` is `2·Cmid`).  Consumers transitively depend on the `sorryAx` of th
 theorem pointwise_iteratedCovGrad_deTurckRemainderDiff_productGrid
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
-    ∃ s : ℕ,
+    ∃ (s : ℕ) (coeff₁ coeff₂ : SmoothCcTensor g₀ 0 s) (Cmid Λcoeff Cw : ℝ),
+      0 ≤ Cmid ∧ 0 ≤ Λcoeff ∧ 0 ≤ Cw ∧
+      (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x (coeff₁.toSection x) ≤
+        Λcoeff ^ 2) ∧
+      (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x (coeff₂.toSection x) ≤
+        Λcoeff ^ 2) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_lt : δ < 1)
         (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -2477,15 +2534,11 @@ theorem pointwise_iteratedCovGrad_deTurckRemainderDiff_productGrid
         (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
-        ∃ (coeff₁ coeff₂ : SmoothCcTensor g₀ 0 s) (Cmid ΛW Λcoeff Cw : ℝ),
-          0 ≤ Cmid ∧ 0 ≤ ΛW ∧ 0 ≤ Λcoeff ∧ 0 ≤ Cw ∧
+        ∃ ΛW : ℝ,
+          0 ≤ ΛW ∧
           ΛW ≤ Cw * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (T - T')‖ ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x ((T - T').toSection x) ≤
             ΛW ^ 2) ∧
-          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x (coeff₁.toSection x) ≤
-            Λcoeff ^ 2) ∧
-          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x (coeff₂.toSection x) ≤
-            Λcoeff ^ 2) ∧
           ∀ x : M,
             riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
                 ((iteratedCovGrad (I := I) g₀ 0 2 a
@@ -2499,16 +2552,15 @@ theorem pointwise_iteratedCovGrad_deTurckRemainderDiff_productGrid
                           ((iteratedCovGrad (I := I) g₀ 0 s l coeff₁).toSection x)
                         + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + l) x
                           ((iteratedCovGrad (I := I) g₀ 0 s l coeff₂).toSection x)) := by
-  obtain ⟨s, hsplit⟩ :=
+  obtain ⟨s, coeff₁, coeff₂, Cmid, Λcoeff, Cw, hCmid, hΛcoeff, hCw, hcoeff₁sup, hcoeff₂sup, hsplit⟩ :=
     deTurckRemainderDiff_principalSplit_singleCoeffDiagonalGrid (I := I) (M := M) g₀ g_bg a
       ha_super hR
-  refine ⟨s, ?_⟩
+  refine ⟨s, coeff₁, coeff₂, 2 * Cmid, Λcoeff, Cw, by positivity, hΛcoeff, hCw,
+    hcoeff₁sup, hcoeff₂sup, ?_⟩
   intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
-  obtain ⟨coeff₁, coeff₂, D₁, D₂, Cmid, ΛW, Λcoeff, Cw, hCmid, hΛW, hΛcoeff, hCw, hWupper,
-      hDsplit, hWsup, hcoeff₁sup, hcoeff₂sup, hgrid₁, hgrid₂⟩ :=
+  obtain ⟨D₁, D₂, ΛW, hΛW, hWupper, hDsplit, hWsup, hgrid₁, hgrid₂⟩ :=
     hsplit T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
-  refine ⟨coeff₁, coeff₂, 2 * Cmid, ΛW, Λcoeff, Cw, by positivity, hΛW, hΛcoeff, hCw, hWupper,
-    hWsup, hcoeff₁sup, hcoeff₂sup, ?_⟩
+  refine ⟨ΛW, hΛW, hWupper, hWsup, ?_⟩
   intro x
   -- Abbreviations: the difference-jet column and the two coefficient diagonal columns at `x`.
   set Wcol : ℕ → ℝ := fun i =>
@@ -2621,7 +2673,8 @@ engine. -/
 theorem deTurckRemainderDiff_iteratedCovGrad_twoArm_ballLipschitz
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
-    ∃ s : ℕ,
+    ∃ (s : ℕ) (coeff₁ coeff₂ : SmoothCcTensor g₀ 0 s) (C Λcoeff Cw : ℝ),
+      0 ≤ C ∧ 0 ≤ Λcoeff ∧ 0 ≤ Cw ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_lt : δ < 1)
         (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -2629,8 +2682,8 @@ theorem deTurckRemainderDiff_iteratedCovGrad_twoArm_ballLipschitz
         (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
-        ∃ (coeff₁ coeff₂ : SmoothCcTensor g₀ 0 s) (C ΛW Λcoeff Cw : ℝ),
-          0 ≤ C ∧ 0 ≤ ΛW ∧ 0 ≤ Λcoeff ∧ 0 ≤ Cw ∧
+        ∃ ΛW : ℝ,
+          0 ≤ ΛW ∧
           ΛW ≤ Cw * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (T - T')‖ ∧
           ‖iteratedCovGrad (I := I) g₀ 0 2 a
               (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
@@ -2640,19 +2693,19 @@ theorem deTurckRemainderDiff_iteratedCovGrad_twoArm_ballLipschitz
               + C * ΛW ^ 2 * ∑ l ∈ Finset.range (a + 2 + 1),
                 (‖iteratedCovGrad (I := I) g₀ 0 s l coeff₁‖ ^ 2
                   + ‖iteratedCovGrad (I := I) g₀ 0 s l coeff₂‖ ^ 2) := by
-  obtain ⟨s, hgrid⟩ :=
+  obtain ⟨s, coeff₁, coeff₂, Cmid, Λcoeff, Cw, hCmid, hΛcoeff, hCw, hcoeff₁sup, hcoeff₂sup, hgrid⟩ :=
     pointwise_iteratedCovGrad_deTurckRemainderDiff_productGrid (I := I) (M := M) g₀ g_bg a
       ha_super hR
-  refine ⟨s, ?_⟩
-  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
-  obtain ⟨coeff₁, coeff₂, Cmid, ΛW, Λcoeff, Cw, hCmid, hΛW, hΛcoeff, hCw, hWupper,
-      hWsup, hcoeff₁sup, hcoeff₂sup, hdom⟩ :=
-    hgrid T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
-  -- The sorry-free integrated two-arm pair engine, at valences (2, s), window (a+2), order a.
+  -- The sorry-free integrated two-arm pair engine, at valences (2, s), window (a+2), order a —
+  -- its constant `Cd` is `(T, T')`-independent, so `C := Cd · Cmid` is ball-uniform.
   obtain ⟨Cd, hCd, hpair⟩ :=
     Analysis.Sobolev.Tensor.exists_integrated_diagonalProductGrid_twoArm_pair_le
       (I := I) (M := M) g₀ 2 s (a + 2) a
-  refine ⟨coeff₁, coeff₂, Cd * Cmid, ΛW, Λcoeff, Cw, by positivity, hΛW, hΛcoeff, hCw, hWupper, ?_⟩
+  refine ⟨s, coeff₁, coeff₂, Cd * Cmid, Λcoeff, Cw, by positivity, hΛcoeff, hCw, ?_⟩
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
+  obtain ⟨ΛW, hΛW, hWupper, hWsup, hdom⟩ :=
+    hgrid T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
+  refine ⟨ΛW, hΛW, hWupper, ?_⟩
   -- Feed the posited product grid (with `U := D`, `W := T - T'`, pair `(coeff₁, coeff₂)`).
   have hres :=
     hpair (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
