@@ -3503,6 +3503,59 @@ theorem deTurckRemainderDiff_iteratedCovGrad_twoArm_ballLipschitz
             (‖iteratedCovGrad (I := I) g₀ 0 s l coeff₁‖ ^ 2
               + ‖iteratedCovGrad (I := I) g₀ 0 s l coeff₂‖ ^ 2) := by ring
 
+/-- **(The integrated covariant-`L²` Moser tame bound on the sealed Ricci–DeTurck remainder
+difference — the genuine `L²`-Moser Nemytskii tame leaf.)**
+
+This is the **integrated** (global-`L²`) replacement for the pointwise per-order fibre-norm grid:
+its conclusion bounds the *integrated* covariant-`L²` (semi)norm `‖∇^q D‖ = tensorL2Norm(∇^q D)` of
+each jet of the sealed remainder difference, **not** a pointwise fibre value.  Fix `g₀`, the DeTurck
+background `g_bg`, an order `a`, and a covariant-`L²` ball radius `R ≥ 0`.  There is **one**
+nonnegative constant `C` — uniform over the fibre-small radius-`R` ball, **outside** the `∀ T T'`
+quantifier — such that for any two `g₀`-fibre-small smooth perturbations `T, T'` whose covariant-`L²`
+jets up to order `a + 2` lie in the radius-`R` ball, every order-`q` (`q ≤ a`) covariant-gradient jet
+of the sealed remainder difference
+`D := deTurckSmoothRemainder g₀ g_bg T − deTurckSmoothRemainder g₀ g_bg T'` obeys the per-order
+covariant-`L²` Moser tame bound
+```
+‖∇^q D‖_{L²}  ≤  C · √(∑_{i ≤ a+2} ‖∇^i (T − T')‖²_{L²}).
+```
+
+**Why integrated, not pointwise.**  `D` is the smooth second-order Nemytskii nonlinearity
+`F(g) = deTurckRHSSection g_bg g − Δ_∇(·)` evaluated along the metric path `g₀ + s·(T − T')`; the
+Taylor remainder `F(g₀ + T) − F(g₀ + T')` is a finite sum of products of (rational, det-`≠ 0` by
+`δ < 1`) metric-jet coefficient fields (order `≤ 2`) against covariant gradients of `T − T'`.  The
+covariant Leibniz grid of `∇^q` of such a product is exactly the hypothesis the integrated
+`L²`-Moser tame engine `Analysis.Sobolev.Tensor.exists_moserTameProduct_iteratedCovGrad_l2Norm_le`
+consumes (it is `AXIOM`-clean / integrated): the high covariant order always lands on the `T − T'`
+factor in `L²`, and the **low-order** (`≤ 2`) coefficients enter in `L^∞`, controlled ball-uniformly
+by the supercritical section embedding `H^{a+2} ↪ C²` of the radius-`R` ball.  Only that low-order
+pointwise control is ever needed — never an order-`(a + 2)` sup — so the bound is **deficit-free**,
+unlike the pointwise fibre-norm grid, whose Lipschitz modulus needs order-`(a + 2)` `C⁰` control of
+the metric jets (`L²` orders `a + 2 + dim/2` the ball cannot supply).
+
+**Non-vacuity / order self-check.**  The bound reads `∇^{≤ a+2}(T − T')`; the genuine `∂²(T − T')`
+Ricci principal symbol (carried by the connection-Laplacian arm of `D`) forces a top jet at the
+`i = a + 2` term, so a window-`a` weakening is rejected.  A `C = 0` witness is rejected by a
+nonvanishing `∇^q D` for a non-flat, genuinely second-order remainder difference.  Its body is
+`sorry`: the genuine integrated `L²`-Moser Nemytskii tame-difference content. -/
+private theorem deTurckSmoothRemainderDiff_iteratedCovGrad_l2_tame_ballUniform
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_lt : δ' < 1)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ q : ℕ, q ≤ a →
+          ‖iteratedCovGrad (I := I) g₀ 0 2 q
+              (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+                deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ')‖ ≤
+            C * Real.sqrt (∑ i ∈ Finset.range (a + 2 + 1),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2) :=
+  sorry
+
 /-- **The single-arm full covariant-jet-column ball-Lipschitz bound on the genuine Ricci–DeTurck
 remainder difference.**
 
@@ -3518,16 +3571,23 @@ genuine remainder difference
 ```
 
 Unlike the top-jet two-arm tower `deTurckRemainderDiff_iteratedCovGrad_twoArm_ballLipschitz`, this
-bound is **single-arm** and requires no supercriticality hypothesis: every order-`q` jet of the
-sealed remainder difference reads `∇^{≤ q+2}(T − T') ≤ ∇^{≤ a+2}(T − T')` (the genuine quasilinear
-window), so the difference jets alone control the column.  It is assembled by integrating, at each
-order `q ≤ a`, the per-order pointwise single-factor covariant grid
-`deTurckRemainderDiff_singleField_singleFactorGrid`
-(`rfns(∇^q D)(x) ≤ Cq · ∑_{i ≤ q+2} rfns(∇^i (T − T'))(x)`, which carries the
-`@deTurckRHSArmDiff_…_ballUniform` RHS-arm and rough-Laplacian Δ-arm posits) to the squared `L²`
-bound `‖∇^q D‖² ≤ Cq · ∑_{i ≤ a+2} ‖∇^i (T − T')‖²` (`window q+2 ≤ a+2`), then summing the finitely
-many orders with the uniform constant `C := ∑_{q ≤ a} Cq`.  Consumers transitively depend on the
-per-order grid posit's `sorryAx`. -/
+bound is **single-arm** and requires no supercriticality hypothesis at this layer: it is assembled
+**directly from the integrated covariant-`L²` Moser tame leaf**
+`deTurckSmoothRemainderDiff_iteratedCovGrad_l2_tame_ballUniform`, whose per-order conclusion
+`‖∇^q D‖_{L²} ≤ C · √(∑_{i ≤ a+2} ‖∇^i (T − T')‖²)` is the genuine `L²`-Moser Nemytskii tame bound for
+the second-order remainder `F = deTurckSmoothRemainder` (its high covariant order always lands on the
+`T − T'` factor in `L²`, the low-order metric coefficients enter in `L^∞` via the supercritical
+section embedding `H^{a+2} ↪ C²` — **deficit-free**, never an order-`(a + 2)` sup).  Squaring each
+per-order bound (`‖∇^q D‖² ≤ C² · ∑_{i ≤ a+2} ‖∇^i (T − T')‖²`, by `Real.sq_sqrt` on the nonnegative
+window column) and summing the `a + 1` orders gives the column bound with constant
+`C_col := (a + 1) · C²`.
+
+This route is **integrated throughout**: it never converts to a pointwise per-order fibre-norm grid
+(the order-deficient pointwise `rfns(∇^q D)(x) ≤ Cq · ∑_{i ≤ q+2} rfns(∇^i (T − T'))(x)` shape, whose
+pointwise Lipschitz modulus needs order-`(a + 2)` `C⁰` control of the metric jets the radius-`R` ball
+cannot supply — `L²` orders `a + 2 + dim/2`), and never through the chart-jet Lipschitz chain.
+Consumers transitively depend only on the integrated `L²`-Moser tame leaf's `sorryAx`, but **not** on
+any pointwise grid posit, **not** on the chart-jet `bareChartJetContent`/`HasChartJetLip` chain. -/
 theorem deTurckRemainderDiff_iteratedCovGradSum_ballLipschitz
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -3545,126 +3605,41 @@ theorem deTurckRemainderDiff_iteratedCovGradSum_ballLipschitz
           C * ∑ i ∈ Finset.range (a + 2 + 1),
             ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2 := by
   classical
-  -- Per-order constant from the single-factor grid posit at each order `q`.
-  set Cfun : ℕ → ℝ := fun q =>
-    (deTurckRemainderDiff_singleField_singleFactorGrid (I := I) (M := M) g₀ g_bg q hR).choose
-    with hCfun_def
-  have hCspec : ∀ q : ℕ,
-      0 ≤ Cfun q ∧
-      ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_lt : δ < 1)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_lt : δ' < 1)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
-        (∀ j : ℕ, j ≤ q + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
-        (∀ j : ℕ, j ≤ q + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
-        (∀ x : M,
-          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
-              ((iteratedCovGrad (I := I) g₀ 0 2 q
-                (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
-                  deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ')).toSection x) ≤
-            Cfun q * ∑ i ∈ Finset.range (q + 2 + 1),
-              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                ((iteratedCovGrad (I := I) g₀ 0 2 i (T - T')).toSection x)) := fun q =>
-    (deTurckRemainderDiff_singleField_singleFactorGrid (I := I) (M := M) g₀ g_bg q hR).choose_spec
-  have hCfun_nn : ∀ q, 0 ≤ Cfun q := fun q => (hCspec q).1
-  refine ⟨∑ q ∈ Finset.range (a + 1), Cfun q,
-    Finset.sum_nonneg fun q _ => hCfun_nn q, ?_⟩
+  -- The single integrated covariant-`L²` Moser tame leaf: its constant `C` is hoisted outside
+  -- `∀ T T'`, and its per-order conclusion is the genuine `L²`-norm bound (chart-jet-free,
+  -- no pointwise per-order fibre-norm grid).
+  obtain ⟨C, hC_nn, hC⟩ :=
+    deTurckSmoothRemainderDiff_iteratedCovGrad_l2_tame_ballUniform (I := I) (M := M) g₀ g_bg a hR
+  refine ⟨(a + 1 : ℕ) * C ^ 2, by positivity, ?_⟩
   intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
-  set W : SmoothCcTensor g₀ 0 2 := T - T' with hW_def
   set D : SmoothCcTensor g₀ 0 2 :=
     deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
       deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ' with hD_def
-  set μ := riemannianVolumeMeasure (I := I) (M := M) g₀ with hμ_def
-  -- The full order-`(a+2)` covariant jet column of the perturbation difference `W := T − T'`.
+  -- The full order-`(a+2)` covariant jet column of the perturbation difference `T − T'`.
   set Scol : ℝ := ∑ i ∈ Finset.range (a + 2 + 1),
-    ‖iteratedCovGrad (I := I) g₀ 0 2 i W‖ ^ 2 with hScol_def
+    ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2 with hScol_def
   have hScol_nn : 0 ≤ Scol :=
     Finset.sum_nonneg fun i _ => sq_nonneg _
-  -- The squared `L²` norm of any covariant jet is the integral of its fibre norm.
-  have hnorm_int : ∀ (c : ℕ) (S : SmoothCcTensor g₀ 0 c),
-      ‖S‖ ^ 2 = ∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 c x (S.toSection x) ∂μ :=
-    fun c S => by
-      rw [SmoothCcTensor.norm_def (I := I) (M := M) S, hμ_def]
-      exact tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g₀ c S
-  -- The order-`(a+2)`-window jet-column integral identity for `W`.
-  have hScol_int :
-      Scol = ∫ x, (∑ i ∈ Finset.range (a + 2 + 1),
-          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-            ((iteratedCovGrad (I := I) g₀ 0 2 i W).toSection x)) ∂μ := by
-    rw [hScol_def]
-    rw [MeasureTheory.integral_finset_sum (Finset.range (a + 2 + 1))
-      (fun i _ => by
-        rw [hμ_def]
-        exact integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g₀ 0 (2 + i)
-          (iteratedCovGrad (I := I) g₀ 0 2 i W))]
-    exact Finset.sum_congr rfl (fun i _ => hnorm_int (2 + i) (iteratedCovGrad (I := I) g₀ 0 2 i W))
-  -- Integrability of the full window column (used to dominate the truncated per-order columns).
-  have hcol_int : MeasureTheory.Integrable
-      (fun x => ∑ i ∈ Finset.range (a + 2 + 1),
-        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-          ((iteratedCovGrad (I := I) g₀ 0 2 i W).toSection x)) μ := by
-    rw [hμ_def]
-    exact MeasureTheory.integrable_finset_sum (Finset.range (a + 2 + 1))
-      (fun i _ => integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g₀ 0 (2 + i)
-        (iteratedCovGrad (I := I) g₀ 0 2 i W))
-  -- Per order `q ≤ a`: the squared `L²` norm of `∇^q D` is `≤ Cfun q · Scol`.
+  -- `(√Scol)² = Scol` (the window column is nonnegative).
+  have hsqrt_sq : Real.sqrt Scol ^ 2 = Scol := Real.sq_sqrt hScol_nn
+  -- Per order `q ≤ a`: squaring the integrated per-order bound `‖∇^q D‖ ≤ C · √Scol` (monotone on
+  -- nonnegatives) gives `‖∇^q D‖² ≤ C² · Scol`.
   have hper : ∀ q ∈ Finset.range (a + 1),
-      ‖iteratedCovGrad (I := I) g₀ 0 2 q D‖ ^ 2 ≤ Cfun q * Scol := by
+      ‖iteratedCovGrad (I := I) g₀ 0 2 q D‖ ^ 2 ≤ C ^ 2 * Scol := by
     intro q hq
     have hqa : q ≤ a := Nat.lt_succ_iff.mp (Finset.mem_range.mp hq)
-    -- Ball hypotheses at the smaller window `q + 2 ≤ a + 2`.
-    have hTq : ∀ j : ℕ, j ≤ q + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R :=
-      fun j hj => hTball j (by omega)
-    have hT'q : ∀ j : ℕ, j ≤ q + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R :=
-      fun j hj => hT'ball j (by omega)
-    have hpt := (hCspec q).2 T T' hδ_lt hδ hδ'_lt hδ' hTq hT'q
-    -- Integrate the pointwise per-order bound, then dominate the `q+2`-window column by the
-    -- full `a+2`-window column `Scol` (extra nonnegative tail terms).
-    have hint_le :
-        (∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
-            ((iteratedCovGrad (I := I) g₀ 0 2 q D).toSection x) ∂μ) ≤
-          Cfun q * Scol := by
-      have hrhs_int : MeasureTheory.Integrable
-          (fun x => Cfun q * ∑ i ∈ Finset.range (q + 2 + 1),
-            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-              ((iteratedCovGrad (I := I) g₀ 0 2 i W).toSection x)) μ := by
-        rw [hμ_def]
-        exact (MeasureTheory.integrable_finset_sum (Finset.range (q + 2 + 1))
-          (fun i _ => integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g₀ 0 (2 + i)
-            (iteratedCovGrad (I := I) g₀ 0 2 i W))).const_mul (Cfun q)
-      calc (∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
-              ((iteratedCovGrad (I := I) g₀ 0 2 q D).toSection x) ∂μ)
-          ≤ ∫ x, Cfun q * ∑ i ∈ Finset.range (q + 2 + 1),
-              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                ((iteratedCovGrad (I := I) g₀ 0 2 i W).toSection x) ∂μ := by
-            refine MeasureTheory.integral_mono_of_nonneg
-              (Filter.Eventually.of_forall (fun x =>
-                riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + q) x _))
-              hrhs_int (Filter.Eventually.of_forall (fun x => ?_))
-            simpa only [hD_def, hW_def] using hpt x
-        _ = Cfun q * ∫ x, (∑ i ∈ Finset.range (q + 2 + 1),
-              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                ((iteratedCovGrad (I := I) g₀ 0 2 i W).toSection x)) ∂μ :=
-            MeasureTheory.integral_const_mul _ _
-        _ ≤ Cfun q * Scol := by
-            refine mul_le_mul_of_nonneg_left ?_ (hCfun_nn q)
-            rw [hScol_int]
-            have hsub : Finset.range (q + 2 + 1) ⊆ Finset.range (a + 2 + 1) :=
-              Finset.range_mono (Nat.succ_le_succ (Nat.add_le_add_right hqa 2))
-            refine MeasureTheory.integral_mono_of_nonneg
-              (Filter.Eventually.of_forall (fun x =>
-                Finset.sum_nonneg fun i _ =>
-                  riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + i) x _))
-              hcol_int (Filter.Eventually.of_forall (fun x => ?_))
-            exact Finset.sum_le_sum_of_subset_of_nonneg hsub
-              (fun i _ _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + i) x _)
-    rw [hnorm_int (2 + q) (iteratedCovGrad (I := I) g₀ 0 2 q D)]
-    exact hint_le
+    have hbound : ‖iteratedCovGrad (I := I) g₀ 0 2 q D‖ ≤ C * Real.sqrt Scol := by
+      rw [hD_def, hScol_def]
+      exact hC T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball q hqa
+    have hnn : 0 ≤ ‖iteratedCovGrad (I := I) g₀ 0 2 q D‖ := norm_nonneg _
+    calc ‖iteratedCovGrad (I := I) g₀ 0 2 q D‖ ^ 2
+        ≤ (C * Real.sqrt Scol) ^ 2 := pow_le_pow_left₀ hnn hbound 2
+      _ = C ^ 2 * Scol := by rw [mul_pow, hsqrt_sq]
   -- Sum the finitely many per-order squared bounds.
   calc (∑ q ∈ Finset.range (a + 1),
           ‖iteratedCovGrad (I := I) g₀ 0 2 q D‖ ^ 2)
-      ≤ ∑ q ∈ Finset.range (a + 1), Cfun q * Scol := Finset.sum_le_sum hper
-    _ = (∑ q ∈ Finset.range (a + 1), Cfun q) * Scol := by rw [← Finset.sum_mul]
+      ≤ ∑ _q ∈ Finset.range (a + 1), C ^ 2 * Scol := Finset.sum_le_sum hper
+    _ = (a + 1 : ℕ) * C ^ 2 * Scol := by
+        rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]; ring
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
