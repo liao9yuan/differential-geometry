@@ -3503,6 +3503,288 @@ theorem deTurckRemainderDiff_iteratedCovGrad_twoArm_ballLipschitz
             (‖iteratedCovGrad (I := I) g₀ 0 s l coeff₁‖ ^ 2
               + ‖iteratedCovGrad (I := I) g₀ 0 s l coeff₂‖ ^ 2) := by ring
 
+/-- **The nonlinear Ricci–DeTurck right-hand-side arm of the sealed remainder, as a smooth tensor
+tagged to `g₀`.**
+
+For `g₀`-fibre-small `T`, this is the genuine Ricci–DeTurck right-hand side of the realized metric
+`g₀ + T`, packaged as a `g₀`-tagged smooth compactly-supported `(0,2)`-tensor.  It is exactly the
+first (nonlinear) summand of `deTurckSmoothRemainder`: by definitional unfolding
+`deTurckSmoothRemainder g₀ g_bg T = deTurckRHSArmG0 g₀ g_bg T − rawTensorConnLapSmooth g₀ 0 2 T`
+(the second summand being the linear connection-Laplacian arm).  Carrying the nonlinear arm as its
+own object isolates the genuine curvature/Lie/inverse-Gram Nemytskii content (the right-hand side is
+a smooth — rational, det-`≠ 0` by `δ < 1` — function of the order-`≤ 2` metric jets of `g₀ + T`)
+from the linear Δ-arm, whose difference is handled by the on-disk pointwise jet bound directly. -/
+private def deTurckRHSArmG0 (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
+    SmoothCcTensor g₀ 0 2 where
+  toSection :=
+    (deTurckRHSSection (I := I) g_bg
+      (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ)).toSection
+  hasCompactSupport :=
+    (deTurckRHSSection (I := I) g_bg
+      (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ)).hasCompactSupport
+
+/-- **The sealed remainder splits definitionally into the nonlinear RHS arm minus the linear
+connection-Laplacian arm.**  This is `rfl`: the very definition of `deTurckSmoothRemainder` is the
+record `deTurckRHSArmG0` minus `rawTensorConnLapSmooth g₀ 0 2 T`. -/
+private theorem deTurckSmoothRemainder_eq_arm_sub_connLap
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
+    deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ =
+      deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+        rawTensorConnLapSmooth (I := I) g₀ 0 2 T :=
+  rfl
+
+/-- **The sealed remainder difference splits into the nonlinear RHS-arm difference minus the linear
+connection-Laplacian difference of `T − T'`.**  Purely algebraic in the additive group
+`SmoothCcTensor g₀ 0 2`: substitute the definitional split of each remainder, then use the linearity
+`rawTensorConnLapSmooth_sub` and regroup. -/
+private theorem deTurckSmoothRemainderDiff_eq_armDiff_sub_connLapDiff
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+        deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ' =
+      (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+          deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ') -
+        rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T') := by
+  rw [deTurckSmoothRemainder_eq_arm_sub_connLap (I := I) g₀ g_bg T hδ_lt hδ,
+    deTurckSmoothRemainder_eq_arm_sub_connLap (I := I) g₀ g_bg T' hδ'_lt hδ',
+    rawTensorConnLapSmooth_sub (I := I) g₀ 0 2 T T']
+  abel
+
+/-- **Pointwise covariant-jet domination ⟹ integrated covariant-`L²` root-sum bound.**
+
+If the order-`q` covariant gradient of a smooth tensor `P` (valence `2 + q`) is dominated pointwise
+by `C` times the covariant-jet column of a smooth tensor `W` up to order `N`,
+```
+rfns(∇^q P)(x) ≤ C · ∑_{i ≤ N} rfns(∇^i W)(x)   (∀ x),
+```
+with `C ≥ 0`, then the integrated covariant-`L²` (semi)norm of `∇^q P` obeys the root-sum bound
+```
+‖∇^q P‖_{L²} ≤ √C · √(∑_{i ≤ N} ‖∇^i W‖²_{L²}).
+```
+
+The proof integrates the pointwise bound over the closed manifold against the Riemannian volume
+measure: the squared `L²` norm of each jet is the integral of its fibre norm
+(`tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq`), every fibre norm is integrable
+(`integrable_riemannianFiberNormSq_toSection`), and integral monotonicity plus finite additivity
+turn the pointwise column bound into `‖∇^q P‖² ≤ C · ∑_{i ≤ N} ‖∇^i W‖²`; taking square roots and
+`√(C · S) = √C · √S` gives the displayed form. -/
+private theorem l2RootSum_of_pointwise_iteratedCovGrad_jet
+    (g₀ : SmoothRiemannianMetric I M) (q N : ℕ)
+    (P W : SmoothCcTensor g₀ 0 2) (C : ℝ) (hC : 0 ≤ C)
+    (hpt : ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 q P).toSection x) ≤
+        C * ∑ i ∈ Finset.range (N + 1),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 i W).toSection x)) :
+    ‖iteratedCovGrad (I := I) g₀ 0 2 q P‖ ≤
+      Real.sqrt C * Real.sqrt (∑ i ∈ Finset.range (N + 1),
+        ‖iteratedCovGrad (I := I) g₀ 0 2 i W‖ ^ 2) := by
+  classical
+  set μ := riemannianVolumeMeasure (I := I) (M := M) g₀ with hμ_def
+  -- The squared `L²` norm of each jet, as an integral of its fibre norm.
+  have hbridgeP : ‖iteratedCovGrad (I := I) g₀ 0 2 q P‖ ^ 2 =
+      ∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 q P).toSection x) ∂μ := by
+    rw [SmoothCcTensor.norm_def (I := I) (M := M) (iteratedCovGrad (I := I) g₀ 0 2 q P), hμ_def]
+    exact tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g₀ (2 + q)
+      (iteratedCovGrad (I := I) g₀ 0 2 q P)
+  have hbridgeW : ∀ i, ‖iteratedCovGrad (I := I) g₀ 0 2 i W‖ ^ 2 =
+      ∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 i W).toSection x) ∂μ := by
+    intro i
+    rw [SmoothCcTensor.norm_def (I := I) (M := M) (iteratedCovGrad (I := I) g₀ 0 2 i W), hμ_def]
+    exact tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g₀ (2 + i)
+      (iteratedCovGrad (I := I) g₀ 0 2 i W)
+  -- Integrability of the fibre norms.
+  have hintW : ∀ i, MeasureTheory.Integrable
+      (fun x => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 i W).toSection x)) μ := by
+    intro i; rw [hμ_def]
+    exact integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g₀ 0 (2 + i)
+      (iteratedCovGrad (I := I) g₀ 0 2 i W)
+  -- The integrated column sum.
+  set Scol : ℝ := ∑ i ∈ Finset.range (N + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 i W‖ ^ 2
+    with hScol_def
+  have hScol_nn : 0 ≤ Scol := Finset.sum_nonneg fun i _ => sq_nonneg _
+  -- The RHS integrand and its integrability.
+  set RHS : M → ℝ := fun x =>
+    C * ∑ i ∈ Finset.range (N + 1),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 i W).toSection x) with hRHS_def
+  have hsum_int : MeasureTheory.Integrable
+      (fun x => ∑ i ∈ Finset.range (N + 1),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 i W).toSection x)) μ :=
+    MeasureTheory.integrable_finset_sum (Finset.range (N + 1)) (fun i _ => hintW i)
+  have hRHS_int : MeasureTheory.Integrable RHS μ := by
+    rw [hRHS_def]; exact hsum_int.const_mul C
+  have hP_nn_ae : (0 : M → ℝ) ≤ᵐ[μ]
+      (fun x => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 q P).toSection x)) :=
+    Filter.Eventually.of_forall (fun x =>
+      riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + q) x _)
+  -- Integrate the pointwise column bound.
+  have hint_le :
+      (∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 q P).toSection x) ∂μ) ≤
+        ∫ x, RHS x ∂μ :=
+    MeasureTheory.integral_mono_of_nonneg hP_nn_ae hRHS_int
+      (Filter.Eventually.of_forall (fun x => by rw [hRHS_def]; exact hpt x))
+  have hRHS_integral : (∫ x, RHS x ∂μ) = C * Scol := by
+    rw [hRHS_def, MeasureTheory.integral_const_mul, hScol_def,
+      MeasureTheory.integral_finset_sum (Finset.range (N + 1)) (fun i _ => hintW i)]
+    refine congrArg (C * ·) (Finset.sum_congr rfl (fun i _ => (hbridgeW i).symm))
+  -- The squared `L²` bound.
+  have hsq : ‖iteratedCovGrad (I := I) g₀ 0 2 q P‖ ^ 2 ≤ C * Scol := by
+    rw [hbridgeP]; exact hint_le.trans_eq hRHS_integral
+  -- Take square roots.
+  have hPq_nn : 0 ≤ ‖iteratedCovGrad (I := I) g₀ 0 2 q P‖ := norm_nonneg _
+  calc ‖iteratedCovGrad (I := I) g₀ 0 2 q P‖
+      = Real.sqrt (‖iteratedCovGrad (I := I) g₀ 0 2 q P‖ ^ 2) := (Real.sqrt_sq hPq_nn).symm
+    _ ≤ Real.sqrt (C * Scol) := Real.sqrt_le_sqrt hsq
+    _ = Real.sqrt C * Real.sqrt Scol := Real.sqrt_mul hC Scol
+
+/-- **The linear connection-Laplacian arm is integrated covariant-`L²` tame.**
+
+For a fixed order `a` there is one nonnegative constant `C` such that, for any smooth `W` and any
+covariant order `q ≤ a`, the integrated covariant-`L²` norm of the order-`q` jet of the connection
+Laplacian `Δ_∇ W := rawTensorConnLapSmooth g₀ 0 2 W` is controlled by the order-`(a+2)` covariant-`L²`
+jet column of `W`:
+```
+‖∇^q (Δ_∇ W)‖_{L²} ≤ C · √(∑_{i ≤ a+2} ‖∇^i W‖²_{L²}).
+```
+The connection Laplacian is **linear**, so this is the genuine (provable, no curvature Nemytskii
+content) Δ-arm of the remainder-difference tame.  The proof bundles, via `choose`, the per-order
+pointwise jet bounds `rawTensorConnLapSmooth_iteratedCovGrad_riemannianFiberNormSq_jet_le` into one
+constant `Cunif := ∑_{q ≤ a} C(q)`; for each `q ≤ a` the order-`q` pointwise bound
+`rfns(∇^q (Δ_∇ W))(x) ≤ C(q) · ∑_{i ≤ q+2} rfns(∇^i W)(x)` is widened (window `q + 2 ≤ a + 2`,
+constant `C(q) ≤ Cunif`) to the order-`(a+2)` column and integrated to the `L²` root-sum bound by
+`l2RootSum_of_pointwise_iteratedCovGrad_jet`. -/
+private theorem rawTensorConnLapSmooth_iteratedCovGrad_l2_tame
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (W : SmoothCcTensor g₀ 0 2) (q : ℕ), q ≤ a →
+        ‖iteratedCovGrad (I := I) g₀ 0 2 q
+            (rawTensorConnLapSmooth (I := I) g₀ 0 2 W)‖ ≤
+          C * Real.sqrt (∑ i ∈ Finset.range (a + 2 + 1),
+            ‖iteratedCovGrad (I := I) g₀ 0 2 i W‖ ^ 2) := by
+  classical
+  -- The per-order pointwise jet bounds, bundled into a family `(Cfam q)` via `choose`.
+  choose Cfam hCfam_nn hCfam using
+    (fun q : ℕ => rawTensorConnLapSmooth_iteratedCovGrad_riemannianFiberNormSq_jet_le
+      (I := I) (M := M) g₀ q)
+  set Cunif : ℝ := ∑ q ∈ Finset.range (a + 1), Cfam q with hCunif_def
+  have hCunif_nn : 0 ≤ Cunif :=
+    Finset.sum_nonneg fun q _ => hCfam_nn q
+  refine ⟨Real.sqrt Cunif, Real.sqrt_nonneg _, fun W q hq => ?_⟩
+  -- The order-`q` pointwise jet bound, widened to constant `Cunif` and window `a + 2`.
+  have hCfam_le_Cunif : Cfam q ≤ Cunif := by
+    rw [hCunif_def]
+    exact Finset.single_le_sum (f := Cfam) (fun i _ => hCfam_nn i)
+      (Finset.mem_range.mpr (by omega))
+  have hpt : ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 q
+            (rawTensorConnLapSmooth (I := I) g₀ 0 2 W)).toSection x) ≤
+        Cunif * ∑ i ∈ Finset.range (a + 2 + 1),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 i W).toSection x) := by
+    intro x
+    refine (hCfam q W x).trans ?_
+    -- Widen the constant `Cfam q ≤ Cunif` and the window `range (q+2+1) ⊆ range (a+2+1)`.
+    have hqle : q + 2 + 1 ≤ a + 2 + 1 := by omega
+    have hwindow : (∑ i ∈ Finset.range (q + 2 + 1),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 i W).toSection x)) ≤
+        ∑ i ∈ Finset.range (a + 2 + 1),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 i W).toSection x) :=
+      Finset.sum_le_sum_of_subset_of_nonneg
+        (Finset.range_mono hqle)
+        (fun i _ _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + i) x _)
+    have hsum_nn : 0 ≤ ∑ i ∈ Finset.range (a + 2 + 1),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 i W).toSection x) :=
+      Finset.sum_nonneg fun i _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + i) x _
+    calc Cfam q * ∑ i ∈ Finset.range (q + 2 + 1),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 i W).toSection x)
+        ≤ Cfam q * ∑ i ∈ Finset.range (a + 2 + 1),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 i W).toSection x) :=
+          mul_le_mul_of_nonneg_left hwindow (hCfam_nn q)
+      _ ≤ Cunif * ∑ i ∈ Finset.range (a + 2 + 1),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 i W).toSection x) :=
+          mul_le_mul_of_nonneg_right hCfam_le_Cunif hsum_nn
+  -- Integrate the pointwise column bound to the `L²` root-sum form.
+  exact l2RootSum_of_pointwise_iteratedCovGrad_jet (I := I) g₀ q (a + 2)
+    (rawTensorConnLapSmooth (I := I) g₀ 0 2 W) W Cunif hCunif_nn hpt
+
+/-- **(POSIT — the integrated covariant-`L²` Moser tame bound on the NONLINEAR Ricci–DeTurck
+right-hand-side arm difference.)**
+
+This is the genuine curvature/Lie/inverse-Gram Nemytskii content of the sealed remainder, with the
+linear connection-Laplacian arm split off.  Fix `g₀`, the DeTurck background `g_bg`, an order `a`,
+and a covariant-`L²` ball radius `R ≥ 0`.  There is **one** nonnegative constant `C` — uniform over
+the fibre-small radius-`R` ball, **outside** the `∀ T T'` quantifier — such that for any two
+`g₀`-fibre-small smooth perturbations `T, T'` whose covariant-`L²` jets up to order `a + 2` lie in
+the radius-`R` ball, every order-`q` (`q ≤ a`) covariant-gradient jet of the **nonlinear RHS-arm
+difference** `deTurckRHSArmG0 g₀ g_bg T − deTurckRHSArmG0 g₀ g_bg T'` obeys the per-order **integrated**
+covariant-`L²` Moser tame bound
+```
+‖∇^q (RHSarm T − RHSarm T')‖_{L²} ≤ C · √(∑_{i ≤ a+2} ‖∇^i (T − T')‖²_{L²}).
+```
+
+**Why integrated, not pointwise / chart-jet.**  `RHSarm T = deTurckRicciRHS g_bg (g₀ + T)` is a smooth
+(rational, det-`≠ 0` by `δ < 1`) second-order Nemytskii nonlinearity of the order-`≤ 2` metric jets;
+the telescoped difference `RHSarm T − RHSarm T' = ∫₀¹ (d/ds) RHSarm(g₀ + s·T + (1−s)·T') ds` is a finite
+sum of products of (rational, det-`≠ 0`) interpolated-metric-jet coefficient fields (order `≤ 2`)
+against covariant gradients of `T − T'`.  Its order-`q` covariant Leibniz grid is exactly the
+hypothesis the integrated `L²`-Moser product engine
+`Analysis.Sobolev.Tensor.exists_moserTameProduct_iteratedCovGrad_l2Norm_le` consumes (it is
+`AXIOM`-clean / integrated): the high covariant order always lands on the `T − T'` factor in `L²`, and
+the **low-order** (`≤ 2`) coefficients enter in `L^∞`, controlled ball-uniformly by the supercritical
+section embedding `H^{a+2} ↪ C²` of the radius-`R` ball
+(`exists_riemannianFiberNormSq_section_le_smoothCcToTensorHs_sq`).  Only that low-order pointwise
+control is ever needed — never an order-`(a + 2)` sup — so the bound is **deficit-free**, never a
+pointwise per-order fibre-norm grid and never a chart-jet Lipschitz chain.
+
+**Non-vacuity / order self-check.**  The bound reads `∇^{≤ a+2}(T − T')`; the genuine `∂²(T − T')`
+Ricci principal symbol (carried by the curvature term of `RHSarm`) forces a top jet at the `i = a + 2`
+term, so a window-`a` weakening is rejected.  A `C = 0` witness is rejected by a nonvanishing
+`∇^q (RHSarm T − RHSarm T')` for a non-flat, genuinely second-order difference.  Posited here as one
+consumer-minimal standalone INTEGRATED curvature/Lie/inverse-Gram child; its body is `sorry`, and
+consumers transitively depend on its `sorryAx`. -/
+private theorem deTurckRHSArmDiff_iteratedCovGrad_l2_tame_ballUniform
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_lt : δ' < 1)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ q : ℕ, q ≤ a →
+          ‖iteratedCovGrad (I := I) g₀ 0 2 q
+              (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+                deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ')‖ ≤
+            C * Real.sqrt (∑ i ∈ Finset.range (a + 2 + 1),
+              ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2) :=
+  sorry
+
 /-- **(The integrated covariant-`L²` Moser tame bound on the sealed Ricci–DeTurck remainder
 difference — the genuine `L²`-Moser Nemytskii tame leaf.)**
 
@@ -3536,8 +3818,20 @@ the metric jets (`L²` orders `a + 2 + dim/2` the ball cannot supply).
 **Non-vacuity / order self-check.**  The bound reads `∇^{≤ a+2}(T − T')`; the genuine `∂²(T − T')`
 Ricci principal symbol (carried by the connection-Laplacian arm of `D`) forces a top jet at the
 `i = a + 2` term, so a window-`a` weakening is rejected.  A `C = 0` witness is rejected by a
-nonvanishing `∇^q D` for a non-flat, genuinely second-order remainder difference.  Its body is
-`sorry`: the genuine integrated `L²`-Moser Nemytskii tame-difference content. -/
+nonvanishing `∇^q D` for a non-flat, genuinely second-order remainder difference.
+
+**Assembly.**  The sealed remainder difference splits (definitionally, then by the linearity of the
+connection Laplacian, `deTurckSmoothRemainderDiff_eq_armDiff_sub_connLapDiff`) into the **nonlinear
+RHS-arm difference** minus the **linear connection-Laplacian difference**
+`Δ_∇(T − T') = rawTensorConnLapSmooth g₀ 0 2 (T − T')`.  Each covariant jet of the difference is the
+difference of the jets (`iteratedCovGrad_sub`), so the triangle inequality on the integrated `L²`
+(semi)norm bounds `‖∇^q D‖` by `‖∇^q (RHSarm-diff)‖ + ‖∇^q (Δ_∇(T − T'))‖`.  The nonlinear arm is the
+posited curvature/Lie/inverse-Gram integrated Moser tame leaf
+`deTurckRHSArmDiff_iteratedCovGrad_l2_tame_ballUniform` (its `sorryAx` transits here); the linear arm
+is the genuine (provable) Δ-arm tame `rawTensorConnLapSmooth_iteratedCovGrad_l2_tame`, obtained by
+integrating the on-disk per-order pointwise jet bound.  Both produce the common root-sum form
+`C · √(∑_{i ≤ a+2} ‖∇^i (T − T')‖²)`, so the leaf constant is the sum of the two arm constants.  No
+pointwise per-order fibre-norm grid and no chart-jet Lipschitz chain enter this assembly. -/
 private theorem deTurckSmoothRemainderDiff_iteratedCovGrad_l2_tame_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {R : ℝ} (hR : 0 ≤ R) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -3553,8 +3847,60 @@ private theorem deTurckSmoothRemainderDiff_iteratedCovGrad_l2_tame_ballUniform
               (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
                 deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ')‖ ≤
             C * Real.sqrt (∑ i ∈ Finset.range (a + 2 + 1),
-              ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2) :=
-  sorry
+              ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2) := by
+  classical
+  -- The nonlinear curvature/Lie/inverse-Gram RHS-arm tame (posited integrated child).
+  obtain ⟨Cn, hCn_nn, hCn⟩ :=
+    deTurckRHSArmDiff_iteratedCovGrad_l2_tame_ballUniform (I := I) g₀ g_bg a hR
+  -- The linear connection-Laplacian arm tame (proved by integrating the on-disk jet bound).
+  obtain ⟨Cl, hCl_nn, hCl⟩ :=
+    rawTensorConnLapSmooth_iteratedCovGrad_l2_tame (I := I) g₀ a
+  refine ⟨Cn + Cl, by positivity, ?_⟩
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball q hq
+  -- The remainder-difference root-sum window column.
+  set S : ℝ := ∑ i ∈ Finset.range (a + 2 + 1),
+    ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2 with hS_def
+  have hS_nn : 0 ≤ S := Finset.sum_nonneg fun i _ => sq_nonneg _
+  have hsqrtS_nn : 0 ≤ Real.sqrt S := Real.sqrt_nonneg _
+  -- The arm difference and the linear-arm operand abbreviations.
+  set N : SmoothCcTensor g₀ 0 2 :=
+    deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+      deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ' with hN_def
+  -- Split the sealed remainder difference into the nonlinear arm minus the linear Δ-arm, then take
+  -- the order-`q` covariant jet of the difference (jet of a difference is the difference of jets).
+  have hjet_split :
+      iteratedCovGrad (I := I) g₀ 0 2 q
+          (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+            deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ') =
+        iteratedCovGrad (I := I) g₀ 0 2 q N -
+          iteratedCovGrad (I := I) g₀ 0 2 q
+            (rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T')) := by
+    rw [deTurckSmoothRemainderDiff_eq_armDiff_sub_connLapDiff
+      (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ', ← hN_def, iteratedCovGrad_sub]
+  -- The triangle inequality on the integrated `L²` (semi)norm.
+  have htri :
+      ‖iteratedCovGrad (I := I) g₀ 0 2 q
+          (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+            deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ')‖ ≤
+        ‖iteratedCovGrad (I := I) g₀ 0 2 q N‖ +
+          ‖iteratedCovGrad (I := I) g₀ 0 2 q
+            (rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T'))‖ := by
+    rw [hjet_split]; exact norm_sub_le _ _
+  -- The two arm bounds, both in the common root-sum form.
+  have hNarm : ‖iteratedCovGrad (I := I) g₀ 0 2 q N‖ ≤ Cn * Real.sqrt S := by
+    rw [hN_def, hS_def]
+    exact hCn T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball q hq
+  have hLarm : ‖iteratedCovGrad (I := I) g₀ 0 2 q
+      (rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T'))‖ ≤ Cl * Real.sqrt S := by
+    rw [hS_def]; exact hCl (T - T') q hq
+  calc ‖iteratedCovGrad (I := I) g₀ 0 2 q
+          (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+            deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ')‖
+      ≤ ‖iteratedCovGrad (I := I) g₀ 0 2 q N‖ +
+          ‖iteratedCovGrad (I := I) g₀ 0 2 q
+            (rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T'))‖ := htri
+    _ ≤ Cn * Real.sqrt S + Cl * Real.sqrt S := add_le_add hNarm hLarm
+    _ = (Cn + Cl) * Real.sqrt S := by ring
 
 /-- **The single-arm full covariant-jet-column ball-Lipschitz bound on the genuine Ricci–DeTurck
 remainder difference.**
