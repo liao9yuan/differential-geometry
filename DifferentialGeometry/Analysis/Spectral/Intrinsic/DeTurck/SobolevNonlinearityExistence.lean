@@ -525,7 +525,7 @@ set_option linter.unusedVariables false in
 /-- **The smooth-ball Lipschitz estimate for the genuine Ricci–DeTurck remainder, at the
 quasilinear `H^{a+2}` order (the deep analytic core).**
 
-For a **supercritical** spectral order (`ha_super : 2 * finrank E + 3 ≤ a`, the Sobolev
+For a **supercritical** spectral order (`ha_super : 2 * finrank E + 10 ≤ a`, the Sobolev
 algebra/multiplication threshold, which implies `finrank E + 4 < 2 * (a + 1)`) and a positive
 ball radius `R`, the `H^a`-spectral norm of the genuine smooth Ricci–DeTurck remainder
 **difference**
@@ -570,7 +570,7 @@ every order.  Consumers transitively depend on the column tower's single honest 
 Nemytskii `sorryAx`. -/
 theorem smoothRemainderDiff_ballLipschitz_Ha2
     (g₀ g_bg : SmoothRiemannianMetric I M)
-    (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) (ha_even : Even a)
+    (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {R : ℝ} (hR : 0 < R) :
     ∃ K : ℝ≥0, ∀ (T T' : SmoothCcTensor g₀ 0 2)
       {δ : ℝ} (hδ_lt : δ < 1)
@@ -599,7 +599,7 @@ theorem smoothRemainderDiff_ballLipschitz_Ha2
   -- The single-arm full-column tower at covariant ball radius `R' := Cb · R`.
   have hR'_nn : (0 : ℝ) ≤ Cb * R := mul_nonneg hCb_nn hR.le
   obtain ⟨Ccol, hCcol_nn, hCcol⟩ :=
-    deTurckRemainderDiff_iteratedCovGradSum_ballLipschitz (I := I) (M := M) g₀ g_bg a hR'_nn
+    deTurckRemainderDiff_iteratedCovGradSum_ballLipschitz (I := I) (M := M) g₀ g_bg a ha_super hR'_nn
   -- The Lipschitz constant.
   refine ⟨Real.toNNReal (Ca * Real.sqrt (((a : ℝ) + 1) * (Ccol * Cb ^ 2))), ?_⟩
   intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
@@ -711,7 +711,7 @@ theorem smoothRemainderDiff_ballLipschitz_Ha2
 /-- **The smooth-ball Lipschitz estimate for the Ricci–DeTurck nonlinearity at the
 quasilinear `H^{a+2}` order (the corrected analytic core).**
 
-For a **supercritical** spectral order (`ha_super : 2 * finrank E + 3 ≤ a`) and a
+For a **supercritical** spectral order (`ha_super : 2 * finrank E + 10 ≤ a`) and a
 positive `H^{a+2}`-ball radius `R`, the smooth-input nonlinearity `deTurckSmoothN` is Lipschitz
 in the `H^{a+2}`-norm on the ball:
 
@@ -727,7 +727,7 @@ difference (`deTurckSmoothN_sub_eq_smoothCcToTensorHs_remainderSub`), so the est
 the remainder-level ball-Lipschitz bound `smoothRemainderDiff_ballLipschitz_Ha2` rephrased on
 `deTurckSmoothN`. -/
 theorem deTurckSmoothN_ballLipschitz_Ha2 (g₀ g_bg : SmoothRiemannianMetric I M)
-    (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) (ha_even : Even a)
+    (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {R : ℝ} (hR : 0 < R) :
     ∃ K : ℝ≥0, ∀ (T T' : SmoothCcTensor g₀ 0 2)
       {δ : ℝ} (hδ_lt : δ < 1)
@@ -910,12 +910,12 @@ chart `C⁰` embedding to the spectral scale is the lossy bridge
 `ccTensorBilinSymm_gFibreOpBound_le_spectral_lossy`: at any even spectral order `m` above the
 supercritical threshold `2·finrank E + 4 ≤ m` there is a uniform `C` with
 `gFibreOpBound g₀ (ccTensorBilinSymm g₀ T) (C · ‖ι_m T‖)`.  Under the strengthened
-`ha_super : 2·finrank E + 3 ≤ a` the order `a + 2` is `≥ 2·finrank E + 5`, so there is an even
+`ha_super : 2·finrank E + 10 ≤ a` the order `a + 2` is `≥ 2·finrank E + 12`, so there is an even
 `m` with `2·finrank E + 4 ≤ m ≤ a + 2`; instantiating the lossy bridge at `m` and raising the
 order `m ≤ a + 2` by `ccSpectralEmbed_norm_mono` bounds the fibre operator norm by
 `C · ‖ι_{a+2} T‖`, and the realizability radius is `R₀ = 1 / (2C)` with smallness `δ₀ = 1/2`. -/
 theorem sobolevBall_smooth_fibreSmall (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) :
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
     ∃ R₀ : ℝ, 0 < R₀ ∧ ∃ δ₀ : ℝ, δ₀ < 1 ∧
       ∀ (T : SmoothCcTensor g₀ 0 2),
         ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖ ≤ R₀ →
@@ -982,7 +982,7 @@ It is a corollary of the quasilinear ball-Lipschitz estimate
 gives `‖N(T) − N(T')‖ ≤ K · ‖ι T − ι T'‖`, and the embeddings being equal makes the right-hand
 side `0`, forcing `N(T) = N(T')`. -/
 theorem deTurckSmoothN_embedding_wellDefined (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) (ha_even : Even a)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -1101,7 +1101,7 @@ def deTurckSobolevNHa2 (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) :
 /-- The realizability existence holds under the supercritical hypothesis `ha_super`: this is the
 `∃ p`-witness that drives the `then` branch of `deTurckSobolevNHa2`. -/
 theorem deTurckSobolevNHa2_exists_of_super (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) :
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
     ∃ p : ℝ × ℝ, 0 < p.1 ∧ p.2 < 1 ∧
       ∀ (T : SmoothCcTensor g₀ 0 2),
         ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖ ≤ p.1 →
@@ -1121,7 +1121,7 @@ continuous map agreeing with this `K`-Lipschitz function on the dense range, so 
 on the closure `= univ` (`LipschitzOnWith.closure`); precomposing with the `1`-Lipschitz recentred
 retraction keeps the constant. -/
 theorem deTurckSobolevNHa2_lipschitzWith (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) (ha_even : Even a) :
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a) :
     ∃ K : ℝ≥0, LipschitzWith K (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a) := by
   classical
   have h := deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a ha_super
@@ -1237,7 +1237,7 @@ closed `H^{a+2}`-ball about the initial datum.  Since `deTurckSobolevNHa2` is **
 Lipschitz (`deTurckSobolevNHa2_lipschitzWith`), it is Lipschitz on every closed ball — in
 particular on `closedBall u₀ R` about any `H^{a+2}`-datum `u₀` and radius `R`. -/
 theorem deTurckSobolevNHa2_lipschitzOnWith (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) (ha_even : Even a)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     (R : ℝ) (u₀ : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) :
     ∃ L_R : ℝ≥0, LipschitzOnWith L_R (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a)
       (Metric.closedBall u₀ R) := by
@@ -1260,7 +1260,7 @@ The recentred retraction fixes the in-ball point, the dense extension reads off 
 representative whose embedding is the (identity, in-ball) ball retraction of `ι T`; the genuine
 value is recovered by the embedding-well-definedness `deTurckSmoothN_embedding_wellDefined`. -/
 theorem deTurckSobolevNHa2_eq_smoothN (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) (ha_even : Even a)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)

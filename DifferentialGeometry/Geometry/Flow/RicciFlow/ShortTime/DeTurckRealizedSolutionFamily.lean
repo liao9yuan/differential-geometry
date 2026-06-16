@@ -180,7 +180,7 @@ the spatial `Hˢ`-membership conclusion below, so it is not the consumer's concl
 DEFERRED (honest `sorry`; consumers transitively depend on `sorryAx`). -/
 theorem realizedSol_forcing_continuousRepr_allOrderMass
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
@@ -219,7 +219,7 @@ coordinate faithfulness `tensorL2_ext_of_tensorL2Coeff`, and the value's `∀σ 
 membership is exactly the conclusion. -/
 theorem solInterior_uToFun_allHs
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) (ha_even : Even a)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
       (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
@@ -360,7 +360,7 @@ smallness constant `δ < 1` for which the realized symmetric bilinear perturbati
 `ccTensorBilinSymm g₀ (T_rep t)` is uniformly `g₀`-fibre small at every `t ∈ Ioc 0 T₁`.
 
 CLOSED here as the genuine short-time smallness, by CONTINUITY about the zero initial
-datum (no `sorry`): the supercritical even spectral order `a = 2·finrank E + 4` is above
+datum (no `sorry`): the supercritical even spectral order `a = 2·finrank E + 10` is above
 the fibre-embedding threshold, so the lossy spectral bridge
 `ccTensorBilinSymm_gFibreOpBound_le_spectral_lossy` gives a uniform `C` with
 `gFibreOpBound g₀ (ccTensorBilinSymm g₀ S) (C · ‖smoothCcToTensorHs g₀ a S‖)` for every
@@ -375,7 +375,7 @@ fixed section near `t = 0` violates `h_pin`, so the smallness is genuinely about
 solution-pinned family. -/
 theorem realizedSol_smallness_horizon
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_eq : a = 2 * Module.finrank ℝ E + 4)
+    (ha_eq : a = 2 * Module.finrank ℝ E + 10)
     {T : ℝ} (hT : 0 < T)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
     (htrace : timeH1.trace0 _ T u = 0)
@@ -390,8 +390,8 @@ theorem realizedSol_smallness_horizon
         gFibreOpBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (T_rep t)) δ := by
   -- The lossy spectral fibre bound at the even supercritical order `a`.
-  have ha_even : Even a := by rw [ha_eq]; exact ⟨Module.finrank ℝ E + 2, by ring⟩
-  have ha_lossy : 2 * Module.finrank ℝ E + 4 ≤ a := by rw [ha_eq]
+  have ha_even : Even a := by rw [ha_eq]; exact ⟨Module.finrank ℝ E + 5, by ring⟩
+  have ha_lossy : 2 * Module.finrank ℝ E + 4 ≤ a := by rw [ha_eq]; omega
   obtain ⟨C, hC_pos, hC⟩ :=
     ccTensorBilinSymm_gFibreOpBound_le_spectral_lossy (I := I) (M := M) g₀ a ha_even ha_lossy
   -- `u.toFun` is `H^a`-continuous on `Icc 0 T` and vanishes at `0`.
@@ -479,7 +479,7 @@ chart-coordinate polynomial tie
 metric `g_DT t`. -/
 theorem realizedSol_flowDeriv
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     {T₁ : ℝ} (hT₁_pos : 0 < T₁) (hT₁_le : T₁ ≤ T)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
@@ -560,8 +560,8 @@ Consumers transitively depend on the `sorryAx` carried by the two SOLUTION-PINNE
 honest inputs and the joint-regularity bedrock. -/
 theorem realizedDeTurck_timeRegular_family
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) (ha_even : Even a)
-    (ha_eq : a = 2 * Module.finrank ℝ E + 4)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
+    (ha_eq : a = 2 * Module.finrank ℝ E + 10)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
       (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
@@ -734,8 +734,8 @@ defining identities for `u`, so a `rep` unrelated to `u` does not satisfy the `L
 pin `SmoothCcTensor.toL2 rep = tensorHsToL2 _ hσ (u.toFun t)`. -/
 theorem solInterior_smoothRepr_pin
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) (ha_even : Even a)
-    (ha_eq : a = 2 * Module.finrank ℝ E + 4)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
+    (ha_eq : a = 2 * Module.finrank ℝ E + 10)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
       (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
@@ -778,8 +778,8 @@ existential `T_rep`/`δ` it ranges over is the genuine solution family of
 `realizedDeTurck_timeRegular_family`, so it is not satisfiable by an arbitrary family. -/
 theorem realizedDeTurck_flowMatch
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) (ha_even : Even a)
-    (ha_eq : a = 2 * Module.finrank ℝ E + 4)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
+    (ha_eq : a = 2 * Module.finrank ℝ E + 10)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
       (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
@@ -824,8 +824,8 @@ existential `T_rep`/`δ` it ranges over is the genuine solution family of
 `realizedDeTurck_timeRegular_family`. -/
 theorem realizedDeTurck_jointReg
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 3 ≤ a) (ha_even : Even a)
-    (ha_eq : a = 2 * Module.finrank ℝ E + 4)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
+    (ha_eq : a = 2 * Module.finrank ℝ E + 10)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (deTurckRicci_quasilinear_maxreg_solution
       (I := I) (M := M) g₀ g_bg a ha_super ha_even).choose)
@@ -904,13 +904,14 @@ theorem realizedDeTurckFamily_exists
   classical
   -- The genuine second-order quasilinear maximal-regularity engine, with zero initial
   -- perturbation (so `g_DT 0 = g₀`) and the even supercritical spectral order
-  -- `a = 2·finrank E + 4` (so the Sobolev tame estimates of the second-order Nemytskii
-  -- nonlinearity close, and the order-`a` lossy fibre-embedding bridge fires for the
-  -- short-time smallness via continuity).
-  set a : ℕ := 2 * Module.finrank ℝ E + 4 with ha_def
-  have ha_super : 2 * Module.finrank ℝ E + 3 ≤ a := by rw [ha_def]; omega
-  have ha_eq : a = 2 * Module.finrank ℝ E + 4 := ha_def
-  have ha_even : Even a := by rw [ha_def]; exact ⟨Module.finrank ℝ E + 2, by ring⟩
+  -- `a = 2·finrank E + 10` (so the Sobolev tame estimates of the second-order Nemytskii
+  -- nonlinearity close, the order-`a` lossy fibre-embedding bridge fires for the
+  -- short-time smallness via continuity, and the supercritical C² embedding of the
+  -- realized perturbation closes after the order-doubling reverse-Hebey step).
+  set a : ℕ := 2 * Module.finrank ℝ E + 10 with ha_def
+  have ha_super : 2 * Module.finrank ℝ E + 10 ≤ a := by rw [ha_def]
+  have ha_eq : a = 2 * Module.finrank ℝ E + 10 := ha_def
+  have ha_even : Even a := by rw [ha_def]; exact ⟨Module.finrank ℝ E + 5, by ring⟩
   -- The engine horizon `T₀` and its existence package, kept as the literal `.choose`
   -- terms so the time-regular family's `T ≤ T₀` hypothesis matches definitionally.
   set T₀ : ℝ := (deTurckRicci_quasilinear_maxreg_solution
