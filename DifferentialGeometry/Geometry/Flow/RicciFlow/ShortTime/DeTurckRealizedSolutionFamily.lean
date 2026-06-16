@@ -7,6 +7,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckChartRegula
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.MildSolutionTimeH1
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralSmoothRepresentativeRealize
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralPartialSumJointGram
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.MaxRegSolutionJointlySmooth
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.PointwiseSpectralCoordinate
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.PointwiseDeriv
 
@@ -534,30 +535,23 @@ Duhamel field and trace `0` at `t = 0`), there is a positive **smallness horizon
 * the **joint chart-Gram interior regularity** `JointChartGramSmooth T₁ g_DT` (the
   chart-Gram entries are jointly `C∞` up to `t = 0`).
 
-The representative family is CONSTRUCTED here as the Weyl-free smooth-representative gate
-`spectralSmoothRealizesAsSmooth_holds`
-(`HeatSemigroup/SpectralSmoothRepresentativeRealize.lean`) applied to the per-time
-spatial smoothing `solInterior_uToFun_allHs` of the solution, then RESTRICTED to the
-smallness horizon `Ioc 0 T₁` (`0` elsewhere, so `T_rep 0 = 0` is structural).  The
-smallness horizon and the single fibre-smallness constant come from
-`realizedSol_smallness_horizon` — the genuine short-time `H^a` smallness of the solution
-about the zero initial datum, by CONTINUITY of `u.toFun` and `u.toFun 0 = 0`.  The four
-conjuncts are then GLUE over the construction and two SOLUTION-PINNED honest inputs, all
-keyed to the SAME constructed family with its full structural provenance (zero value, `L²`
-pin, `L²`-time continuity) — NOT a value-only pin:
+The whole family — together with all four conjuncts — is supplied in ONE call by the
+single deep classical parabolic-regularity leaf
+`maxreg_solution_jointly_smooth_representative`
+(`HeatSemigroup/MaxRegSolutionJointlySmooth.lean`): the smooth-initial-data
+maximal-regularity solution is jointly `C∞` in `(t, x)` up to `t = 0`, so its time-regular
+`C∞` representative family `F` carries the zero initial value, the interior `L²` pin, the
+intrinsic Ricci–DeTurck pointwise flow derivative, and the joint chart-Gram interior
+regularity.  The glue here is purely the obtain-and-weaken of that deep leaf: the deep
+leaf's `Icc 0 T₁` `L²` pin is restricted to the `Ioo 0 T₁` interior pin of the output,
+and the remaining three conjuncts (`F 0 = 0`, the flow derivative, the joint regularity)
+are returned unchanged.  The flow derivative and joint regularity are the genuine
+parabolic-regularity content (NOT consequences of an `L²`-class pin plus `L²`-time
+continuity alone), now isolated entirely in the deep leaf rather than split across two
+SOLUTION-PINNED honest inputs.
 
-* `T_rep 0 = 0` and the interior `L²` pin are proved OUTRIGHT from the gate's defining
-  property and the choice at `t = 0`;
-* the flow derivative is `realizedSol_flowDeriv`, which receives the constructed family
-  together with `T_rep 0 = 0`, the `Icc`-pin, and the `L²`-time-continuity (so the
-  spiked-`T_rep` counterexample is excluded);
-* the joint chart-Gram regularity is the general spectral-regularity bedrock
-  `jointChartGramSmooth_of_spectralSmooth_timeContinuous`
-  (`HeatSemigroup/SpectralPartialSumJointGram.lean`), fed the `L²`-time-continuity and
-  the per-time all-order membership of the constructed family.
-
-Consumers transitively depend on the `sorryAx` carried by the two SOLUTION-PINNED
-honest inputs and the joint-regularity bedrock. -/
+Consumers transitively depend on the `sorryAx` carried by the single deep leaf
+`maxreg_solution_jointly_smooth_representative`. -/
 theorem realizedDeTurck_timeRegular_family
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
@@ -592,131 +586,16 @@ theorem realizedDeTurck_timeRegular_family
           (Set.Ici 0) t) ∧
       JointChartGramSmooth (I := I) T₁
         (fun t : ℝ => tensorSectionRealizeMetric (I := I) g₀ (T_rep t) hδ_lt (hδ t)) := by
-  classical
-  -- The per-time all-order membership of the spatial solution value, on the closed slab.
-  have hmem :=
-    solInterior_uToFun_allHs (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1 hTT₀ u gforce
-      hduh hforce htrace
-  -- `u.toFun 0 = 0` from the zero trace.
-  have hinit : u.init = 0 := by
-    have := htrace
-    rwa [timeH1.trace0_apply] at this
-  have hu0 : (timeH1.toFun u) 0 = 0 := by
-    rw [timeH1.toFun_zero, hinit]
-  -- The chosen smooth representative of `u.toFun t` on the existence interval, `0`
-  -- elsewhere.
-  set uL2 : ℝ → TensorL2 0 2 g₀ :=
-    fun t => tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-      (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-      (Nat.cast_nonneg a) (timeH1.toFun u t) with huL2_def
-  set G : ℝ → SmoothCcTensor g₀ 0 2 :=
-    fun t =>
-      if ht : t ∈ Set.Ioc (0 : ℝ) T then
-        Classical.choose
-          (spectralSmoothRealizesAsSmooth_holds (I := I) (M := M) g₀ (uL2 t)
-            (fun σ hσ => hmem t ⟨le_of_lt ht.1, ht.2⟩ σ hσ))
-      else 0 with hG_def
-  -- The gate's defining property of `G` on `Ioc 0 T`.
-  have hGgate : ∀ t ∈ Set.Ioc (0 : ℝ) T,
-      SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (G t) = uL2 t := by
-    intro t ht
-    have hchoose := Classical.choose_spec
-      (spectralSmoothRealizesAsSmooth_holds (I := I) (M := M) g₀ (uL2 t)
-        (fun σ hσ => hmem t ⟨le_of_lt ht.1, ht.2⟩ σ hσ))
-    have hsimp : G t = Classical.choose
-        (spectralSmoothRealizesAsSmooth_holds (I := I) (M := M) g₀ (uL2 t)
-          (fun σ hσ => hmem t ⟨le_of_lt ht.1, ht.2⟩ σ hσ)) := by
-      rw [hG_def]; simp only [ht, dif_pos]
-    rw [hsimp, SmoothCcTensor.toL2_apply, hchoose]
-  have hGzero : G 0 = 0 := by
-    rw [hG_def]; simp only [Set.mem_Ioc, lt_irrefl, false_and, dif_neg, not_false_iff]
-  -- The `Icc 0 T` pin for `G`.
-  have hGpin_icc : ∀ t ∈ Set.Icc (0 : ℝ) T,
-      SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (G t) = uL2 t := by
-    intro t ht
-    rcases eq_or_lt_of_le ht.1 with h0 | h0
-    · subst h0
-      rw [hGzero]
-      have hu0L2 : uL2 0 = 0 := by rw [huL2_def]; simp only [hu0, map_zero]
-      rw [hu0L2, map_zero]
-    · exact hGgate t ⟨h0, ht.2⟩
-  -- The smallness horizon and the single fibre-smallness constant on `Ioc 0 T₁`.
-  obtain ⟨T₁, hT₁_pos, hT₁_le, δ, hδ_lt, hδ_ioc⟩ :=
-    realizedSol_smallness_horizon (I := I) (M := M) g₀ a ha_eq hT u htrace G hGpin_icc
-  -- The final family: `G` on the smallness horizon, `0` elsewhere.
-  set T_rep : ℝ → SmoothCcTensor g₀ 0 2 :=
-    fun t => if t ∈ Set.Ioc (0 : ℝ) T₁ then G t else 0 with hTrep_def
-  -- `T_rep 0 = 0`: `0 ∉ Ioc 0 T₁`.
-  have hrep_zero : T_rep 0 = 0 := by
-    rw [hTrep_def]; simp only [Set.mem_Ioc, lt_irrefl, false_and, if_neg, not_false_iff]
-  -- `T_rep` agrees with `G` on `Ioc 0 T₁`.
-  have hTrep_eq_G : ∀ t ∈ Set.Ioc (0 : ℝ) T₁, T_rep t = G t := by
-    intro t ht; rw [hTrep_def]; simp only [ht, if_pos]
-  -- The interior `L²` pin on `Ioc 0 T₁` (and its `Ioo`/`Icc` restrictions).
-  have hpin_ioc : ∀ t ∈ Set.Ioc (0 : ℝ) T₁,
-      SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (T_rep t) = uL2 t := by
-    intro t ht
-    rw [hTrep_eq_G t ht]
-    exact hGpin_icc t ⟨ht.1.le, le_trans ht.2 hT₁_le⟩
-  have hpin_icc : ∀ t ∈ Set.Icc (0 : ℝ) T₁,
-      SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (T_rep t) = uL2 t := by
-    intro t ht
-    rcases eq_or_lt_of_le ht.1 with h0 | h0
-    · subst h0
-      rw [hrep_zero]
-      have hu0L2 : uL2 0 = 0 := by rw [huL2_def]; simp only [hu0, map_zero]
-      rw [hu0L2, map_zero]
-    · exact hpin_ioc t ⟨h0, ht.2⟩
-  have hpin_ioo : ∀ t ∈ Set.Ioo (0 : ℝ) T₁,
-      SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (T_rep t) = uL2 t :=
-    fun t ht => hpin_ioc t ⟨ht.1, le_of_lt ht.2⟩
-  -- `L²`-time continuity of `T_rep` on `Icc 0 T₁`: equals `uL2`, the continuous
-  -- `tensorHsToL2`-image of the continuous `u.toFun`.
-  have hcont : ContinuousOn
-      (fun t : ℝ => (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (T_rep t)))
-      (Set.Icc (0 : ℝ) T₁) := by
-    have hcontU : ContinuousOn uL2 (Set.Icc (0 : ℝ) T₁) := by
-      refine ((tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-        (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-        (Nat.cast_nonneg a)).continuous.comp_continuousOn ?_)
-      exact (timeH1.continuousOn_toFun u).mono (Set.Icc_subset_Icc le_rfl hT₁_le)
-    exact hcontU.congr (fun t ht => hpin_icc t ht)
-  -- The fibre-smallness on all of `ℝ`: small on `Ioc 0 T₁`, `0` (hence small) elsewhere.
-  set δ' : ℝ := max δ 0 with hδ'_def
-  have hδ'_lt : δ' < 1 := max_lt hδ_lt one_pos
-  have hδ' : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
-      (ccTensorBilinSymm (I := I) g₀ (T_rep t)) δ' := by
-    intro t
-    by_cases ht : t ∈ Set.Ioc (0 : ℝ) T₁
-    · intro x v w
-      rw [hTrep_eq_G t ht]
-      refine le_trans (hδ_ioc t ht x v w) ?_
-      have hsv : 0 ≤ Real.sqrt (g₀.inner x v v) := Real.sqrt_nonneg _
-      have hsw : 0 ≤ Real.sqrt (g₀.inner x w w) := Real.sqrt_nonneg _
-      have hδle : δ ≤ δ' := le_max_left _ _
-      have hprod : 0 ≤ Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) :=
-        mul_nonneg hsv hsw
-      nlinarith [hprod, hδle]
-    · have hT0 : T_rep t = 0 := by rw [hTrep_def]; simp only [ht, if_neg, not_false_iff]
-      intro x v w
-      rw [hT0, ccTensorBilinSymm_zero_apply]
-      have hnn : 0 ≤ δ' * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) := by
-        have : 0 ≤ δ' := le_max_right _ _
-        positivity
-      simpa only [abs_zero] using hnn
-  -- Assemble.
-  refine ⟨T₁, hT₁_pos, hT₁_le, T_rep, δ', hδ'_lt, hδ', hrep_zero, hpin_ioo, ?_, ?_⟩
-  · -- The Ricci–DeTurck flow derivative: the soundness core.
-    exact realizedSol_flowDeriv (I := I) (M := M) g₀ g_bg a ha_super hT hT1 hT₁_pos hT₁_le u
-      gforce hduh hforce htrace T_rep hδ'_lt hδ' hrep_zero hpin_icc hcont
-  · -- The joint chart-Gram interior regularity from the general spectral bedrock.
-    refine jointChartGramSmooth_of_spectralSmooth_timeContinuous (I := I) (M := M) g₀ hT₁_pos
-      T_rep hδ'_lt hδ' hcont ?_
-    intro t ht σ hσ
-    obtain ⟨v, hv⟩ := hmem t ⟨ht.1, le_trans ht.2 hT₁_le⟩ σ hσ
-    refine ⟨v, ?_⟩
-    rw [hpin_icc t ht]
-    exact hv
+  -- The single deep classical parabolic-regularity leaf: the jointly-`C∞`-up-to-`t = 0`
+  -- smooth representative family `F` of the smooth-initial-data maximal-regularity
+  -- solution, carrying the zero initial value, the interior `L²` pin, the intrinsic
+  -- Ricci–DeTurck pointwise flow derivative, and the joint chart-Gram interior regularity.
+  obtain ⟨T₁, hT₁_pos, hT₁_le, F, δ, hδ_lt, hδ, hF_zero, hF_pin_icc, hF_flow, hF_joint⟩ :=
+    maxreg_solution_jointly_smooth_representative (I := I) (M := M) g₀ g_bg a ha_super ha_even
+      ha_eq hT hT1 hTT₀ u gforce hduh hforce htrace
+  refine ⟨T₁, hT₁_pos, hT₁_le, F, δ, hδ_lt, hδ, hF_zero, ?_, hF_flow, hF_joint⟩
+  intro t ht
+  exact hF_pin_icc t ⟨ht.1.le, le_of_lt ht.2⟩
 
 /-- **SOLUTION-PINNED honest input (1/3) — interior smoothing + smooth-representative
 gate (projection of the time-regular family).**

@@ -196,6 +196,48 @@ def deTurckTimeNemytskii (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤
     (deTurckSobolevNHa2_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)
       a ha_super ha_even)
 
+/-- **The pointwise-in-time spectral mixed two-arm bound for the DeTurck–Ricci nonlinearity (the
+genuine missing analytic prerequisite).**
+
+For the spectral nonlinearity `Φ = deTurckSobolevNHa2 g₀ g_bg a : H^{a+2} → H^a` there are
+constants `C₁, C₂` such that for any `time-L²` ball radius `R ≥ 0` and any two `H^{a+2}`-valued
+time-`L²` fields `f, f'` whose `time-L²` norms are `≤ R`, the **pointwise-in-time** mixed bound
+
+  `‖Φ (f t) − Φ (f' t)‖_{H^a} ≤ C₁·R·‖(f − f') t‖_{H^{a+2}}
+                              + C₂·‖(timeL2Inclusion … (f − f')) t‖_{H^{a+1}}`
+
+holds for a.e. `t ∈ [0,T]`.
+
+This packages the spatial half of `deTurckSobolevNHa2_mixed_lipschitz`: the genuine refined Moser /
+Gagliardo–Nirenberg two-arm split of the gauge-cancelled Ricci–DeTurck remainder difference, lifted
+from the covariant-`L²` ball estimate `deTurckRemainderDiff_iteratedCovGrad_twoArm_ballLipschitz`
+(on `SmoothCcTensor` data, with the principal-symbol difference coefficient an `O`-of-the-clamp-radius
+metric defect against the second-order `∂²(T − T')` factor, and the lower-order jets paired with the
+`H^{a+1}` difference) through the spectral↔covariant Gårding bridges
+(`exists_smoothCcToTensorHs_even_le_iteratedCovGrad_sum`,
+`exists_iteratedCovGrad_sum_le_smoothCcToTensorHs`), the dense Lipschitz extension defining
+`deTurckSobolevNHa2`, and the fixed realizability clamp `recenteredBallRetraction 0 R₀` (which caps
+the effective pointwise `H^{a+2}` radius at the fixed manifold constant `R₀`, so that for fields in
+a `time-L²` ball of radius `R` the per-time principal coefficient is uniformly `O(R)`).  Its
+pointwise-a.e. form is exactly what the `time-L²` Minkowski bound `timeL2_norm_le_of_ae_mixed_bound`
+integrates into the forcing estimate below.
+
+POSITED (recursion frontier — the genuine missing analytic prerequisite; the spectral `H^σ`
+translation tower of the on-disk covariant-`L²` two-arm bound). -/
+theorem deTurckSobolevNHa2_mixed_lipschitz_pointwise (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a) :
+    ∃ C₁ C₂ : ℝ≥0, ∀ {T : ℝ}, 0 < T → ∀ (R : ℝ), 0 ≤ R →
+      ∀ (f f' : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) T),
+        ‖f‖ ≤ R → ‖f'‖ ≤ R →
+        ∀ᵐ t ∂(timeMeasure T),
+          ‖deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a (f t) -
+              deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a (f' t)‖ ≤
+            (C₁ : ℝ) * R * ‖(f - f') t‖ +
+              (C₂ : ℝ) *
+                ‖(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                    (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f - f')) t‖ :=
+  sorry
+
 /-- **The refined mixed forcing estimate for the DeTurck–Ricci Nemytskii operator (the one honest
 analytic leaf).**
 
@@ -208,19 +250,8 @@ time-`L²` fields `f, f'` of norm `≤ R`,
 i.e. the second-order part of the nonlinearity is controlled by the ball radius times the full
 `H^{a+2}`-distance, and the lower-order part by the `H^{a+1}`-distance of the difference alone.
 
-POSITED (recursion frontier — the genuine missing analytic prerequisite).  This is the
-time-integration of the pointwise mixed Nemytskii bound
-
-  `‖N v − N v'‖_{H^a} ≤ C₁·R·‖v − v'‖_{H^{a+2}} + C₂·‖ι (v − v')‖_{H^{a+1}}`   (`‖v‖,‖v'‖ ≤ R`),
-
-the refined Moser / Gagliardo–Nirenberg split of the chart-polynomial remainder difference
-`chartDeTurckRicciRHS_sub_eq` by the **order of the difference factor**: each monomial carries a
-single `(T − T')` jet of chart order `≤ 2`; the genuinely-second-order jets are paired with a
-bounded (ball-radius `R`) plain factor and majorised in `H^{a+2}`, while the order-`≤ 1` jets need
-only the `H^{a+1}` norm of the difference.  Neither the pointwise split nor its time-integration is
-yet an unconditional public declaration (`deTurckSmoothN_ballLipschitz_Ha2` carries only the
-single-order `H^{a+2}` bound), so the mixed estimate is the single named honest leaf on which the
-mixed-view contraction below rests. -/
+Proved here as the time-`L²` Minkowski integration (`timeL2_norm_le_of_ae_mixed_bound`) of the
+pointwise-in-time mixed two-arm bound `deTurckSobolevNHa2_mixed_lipschitz_pointwise`. -/
 theorem deTurckSobolevNHa2_mixed_lipschitz (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a) :
     ∃ C₁ C₂ : ℝ≥0, ∀ {T : ℝ}, 0 < T → ∀ (R : ℝ), 0 ≤ R →
@@ -231,8 +262,43 @@ theorem deTurckSobolevNHa2_mixed_lipschitz (a : ℕ)
           (C₁ : ℝ) * R * ‖f - f'‖ +
             (C₂ : ℝ) *
               ‖timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
-                  (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f - f')‖ :=
-  sorry
+                  (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f - f')‖ := by
+  classical
+  obtain ⟨C₁, C₂, hpt⟩ :=
+    deTurckSobolevNHa2_mixed_lipschitz_pointwise (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)
+      a ha_super ha_even
+  refine ⟨C₁, C₂, ?_⟩
+  intro T hT R hR f f' hf hf'
+  -- the Nemytskii operator unfolds to `nemytskii` of the witnessed Lipschitz bound
+  set hLip := deTurckSobolevNHa2_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)
+    a ha_super ha_even with hLip_def
+  have hNem_f : deTurckTimeNemytskii (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super ha_even f =
+      nemytskii (I := I) (M := M) hLip f := rfl
+  have hNem_f' : deTurckTimeNemytskii (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super ha_even f' =
+      nemytskii (I := I) (M := M) hLip f' := rfl
+  rw [hNem_f, hNem_f']
+  -- the Nemytskii difference is a.e. the pointwise difference of `Φ ∘ f` and `Φ ∘ f'`
+  have hNf := nemytskii_coeFn (I := I) (M := M) hLip f
+  have hNf' := nemytskii_coeFn (I := I) (M := M) hLip f'
+  have hsub := Lp.coeFn_sub
+    (nemytskii (I := I) (M := M) hLip f) (nemytskii (I := I) (M := M) hLip f')
+  -- a.e. domination of the Nemytskii difference by the mixed pointwise majorant
+  have hbound : ∀ᵐ t ∂(timeMeasure T),
+      ‖(nemytskii (I := I) (M := M) hLip f - nemytskii (I := I) (M := M) hLip f') t‖ ≤
+        (C₁ : ℝ) * R * ‖(f - f') t‖ +
+          (C₂ : ℝ) *
+            ‖(timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+                (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f - f')) t‖ := by
+    filter_upwards [hsub, hNf, hNf', hpt hT R hR f f' hf hf'] with t ht htf htf' htpt
+    rw [ht, Pi.sub_apply, htf, htf']
+    exact htpt
+  -- integrate the a.e. mixed bound into the time-`L²` Minkowski estimate
+  exact timeL2_norm_le_of_ae_mixed_bound (T := T)
+    (nemytskii (I := I) (M := M) hLip f - nemytskii (I := I) (M := M) hLip f')
+    (f - f')
+    (timeL2Inclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+      (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (f - f'))
+    (mul_nonneg C₁.coe_nonneg hR) C₂.coe_nonneg hbound
 
 /-- **The mixed-view forcing fixed-point map of the DeTurck–Ricci quasilinear equation.**
 
