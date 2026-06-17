@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Defs
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.TensorHsInterpolationLimit
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.MercerProjectorTrace
 
 /-!
 # Weyl summability of negative Sobolev-scale weights
@@ -34,13 +35,16 @@ polynomial **counting bound** `tensorEigen_counting_le`:
 
   `N(Λ) := #{i | 1 + λᵢ < Λ} ≤ K · Λ^{n/2}`.
 
-The counting bound is the genuine Weyl-law node — the only `sorry` here — and is
-the eigenvalue-counting estimate (min-max / Sobolev-embedding eigenvalue counting,
-or the heat-kernel / Hilbert–Schmidt resolvent route). Given it, the abstract
-reduction (finite sub-levels `tensorEigenIdx_one_add_lambda_lt_finite` ⟹ countable
-index set; lex-ordered rank enumeration `φ i = #{j ≺ i}`; `φ i + 1 ≤ N(1 + λᵢ + 1)
-≤ K·2^{n/2}·(1 + λᵢ)^{n/2}`) yields the growth floor with the sharp exponent
-`2/n = 1/(n/2)`.
+The counting bound is the genuine Weyl-law node — the eigenvalue-counting estimate
+in its min-max / Sobolev-embedding (Mercer projector-trace) form, proved in
+`eigenProjector_card_le_sobolev` via `Spectral.Mercer.eigenProjector_card_le_mercer`
+(the projector trace integrated against the on-diagonal reproducing kernel, whose
+genuine analytic content — the Bessel reproducing-kernel diagonal estimate — is the
+single deferred node `Spectral.Mercer.eigenProjector_diagonal_le`). Given it, the
+abstract reduction (finite sub-levels `tensorEigenIdx_one_add_lambda_lt_finite` ⟹
+countable index set; lex-ordered rank enumeration `φ i = #{j ≺ i}`;
+`φ i + 1 ≤ N(1 + λᵢ + 1) ≤ K·2^{p}·(1 + λᵢ)^{p}`, `p = weylSobolevExp`) yields the
+growth floor with exponent `1/weylSobolevExp`.
 -/
 
 noncomputable section
@@ -206,14 +210,22 @@ private theorem exists_growth_of_counting_bound
       _ = w i := hC
 
 /-- The Sobolev order used in the (non-sharp) Mercer eigenvalue-counting bound:
-`weylSobolevExp = 2 · (n / 2 + 1)` (with `n = finrank E` and `/` Nat division),
-chosen so that the embedding hypothesis `2k > n` of `tensorHsToC0_opNorm_le`
-holds at `k = n / 2 + 1`, i.e. `weylSobolevExp > n`. -/
-def weylSobolevExp : ℕ := 2 * (Module.finrank ℝ E / 2 + 1)
+`weylSobolevExp = 2 · (2 · (n / 2 + 1)) = 4 · (n / 2 + 1)` (with `n = finrank E`
+and `/` Nat division), even and `> n`.  It is the exponent produced by the
+projector-trace route (`Spectral.Mercer.mercerSobolevExp`): the supercritical
+Sobolev `H^{2k₀} ↪ C⁰` embedding (`k₀ = n/2 + 1`) costs `2k₀` orders, doubled by
+the orthogonal Gårding spectral conversion to a spectral exponent `4k₀`, which the
+Bessel reproducing-kernel self-reproduction carries to the on-diagonal counting
+bound. -/
+def weylSobolevExp : ℕ := 2 * (2 * (Module.finrank ℝ E / 2 + 1))
 
 lemma weylSobolevExp_gt_finrank :
     Module.finrank ℝ E < weylSobolevExp (E := E) := by
   unfold weylSobolevExp; omega
+
+/-- The file-level Weyl exponent agrees with the projector-trace exponent. -/
+lemma weylSobolevExp_eq_mercerSobolevExp :
+    weylSobolevExp (E := E) = Spectral.Mercer.mercerSobolevExp (E := E) := rfl
 
 /-- **Mercer on-diagonal eigenvalue-counting bound** for the connection-Laplacian
 spectrum on `(0, 2)`-tensor fields, with the *non-sharp* Sobolev exponent
@@ -229,14 +241,16 @@ C²·(1 + Λ)^{2k}` pointwise. The spectral-projector trace identity
 `dim V_Λ = #{i | 1 + λᵢ < Λ} = ∫_M K_Λ(x, x) dvol` then integrates this to
 `#{i | 1 + λᵢ < Λ} ≤ vol(M)·C²·(1 + Λ)^{2k} = K·(1 + Λ)^{weylSobolevExp}`.
 
-The proof is the classical Mercer / projector-trace eigenvalue-counting estimate;
-it is the only deferred (`sorry`) node of this file. -/
+The proof is the classical Mercer / projector-trace eigenvalue-counting estimate,
+assembled in `Spectral.Mercer.eigenProjector_card_le_mercer`: the projector trace
+`#S_Λ = ∑_{i∈S_Λ} ‖eᵢ‖²_{L²} = ∫_M (∑_{i∈S_Λ} |eᵢ(x)|²_g) dvol` integrated against
+the on-diagonal reproducing-kernel bound `Spectral.Mercer.eigenProjector_diagonal_le`. -/
 theorem eigenProjector_card_le_sobolev (g : SmoothRiemannianMetric I M) :
     ∃ K : ℝ, 0 < K ∧ ∀ Λ : ℝ,
       (Nat.card {i : TensorEigenIdx (I := I) (M := M) g 0 2 |
         1 + TensorEigenIdx.lambda (I := I) (M := M) i < Λ} : ℝ) ≤
-        K * (1 + Λ) ^ ((weylSobolevExp (E := E) : ℕ) : ℝ) := by
-  sorry
+        K * (1 + Λ) ^ ((weylSobolevExp (E := E) : ℕ) : ℝ) :=
+  Spectral.Mercer.eigenProjector_card_le_mercer (I := I) (M := M) g
 
 /-- **Weyl eigenvalue-counting bound** for the connection-Laplacian spectrum on
 `(0, 2)`-tensor fields. The number of eigen-indices below a threshold grows at

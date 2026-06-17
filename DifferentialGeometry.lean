@@ -914,6 +914,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Rellich.TensorL2Subsequence
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Defs
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.FractionalPower
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Inclusion
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.MercerProjectorTrace
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Order2Equivalence
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Order2SpectralIterateEquiv
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralPouNormEquiv
