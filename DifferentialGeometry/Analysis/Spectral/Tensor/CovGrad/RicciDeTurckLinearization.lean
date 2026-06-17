@@ -460,34 +460,273 @@ private theorem riemannianFiberNormSq_unitModelProdSection_le (g₀ : SmoothRiem
         ((unitModelProdSection (I := I) g₀ S T).toSection x) ≤
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 p x (S.toSection x) *
         riemannianFiberNormSq (I := I) (M := M) g₀ 0 q x (T.toSection x) := by
-  sorry
+  classical
+  obtain ⟨n, e, _bse, hn, _hbse, horth, _hpar, _hexp, _hreprS⟩ :=
+    tangent_orthonormalBasisS_witness (I := I) (M := M) g₀ 0 x
+  set K₀ : Fin 0 → Fin n := fun k => k.elim0 with hK₀
+  -- The empty-covector frame component of a `(0, t)`-section reads its `unitModel` on the frame tuple.
+  have hcomp : ∀ {t : ℕ} (W : SmoothCcTensor g₀ 0 t) (J : Fin t → Fin n),
+      DifferentialGeometry.Integral.Connection.fiberNormSqComponent (I := I) (M := M) g₀ x 0 t
+          (show TensorRSSpace 0 t I x from W.toSection x) n e K₀ J =
+        unitModel (I := I) (M := M) g₀ t W x (fun k => e (J k)) := by
+    intro t W J
+    have hweight : ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+        (fun k => g₀.inner x (e (K₀ k))) : Tensor0SSpace 0 I x) =
+        unitTensor (I := I) (M := M) x := by
+      apply Tensor0SSpace.toModel_injective
+      apply ContinuousMultilinearMap.ext
+      intro mm
+      rw [show (Tensor0SSpace.toModel
+          ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+            (fun k => g₀.inner x (e (K₀ k))) : Tensor0SSpace 0 I x)) mm = 1 from by
+        change ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+            (fun k => g₀.inner x (e (K₀ k)))) mm = 1
+        rw [ContinuousMultilinearMap.compContinuousLinearMap_apply,
+          ContinuousMultilinearMap.mkPiAlgebra_apply]
+        simp]
+      rw [show (Tensor0SSpace.toModel (unitTensor (I := I) (M := M) x)) mm = 1 from by
+        rw [unitTensor, Tensor0SSpace.toModel_ofModel]; rfl]
+    rw [DifferentialGeometry.Integral.Connection.fiberNormSqComponent, hweight, unitModel]
+    rfl
+  -- Represent all three fibre norms in the single frame, then collapse the empty `∑_K`.
+  rw [DifferentialGeometry.Integral.Connection.rfns_repr_of_orthoFrame_cb (I := I) (M := M) g₀
+        (p + q) x _ e hn horth,
+      DifferentialGeometry.Integral.Connection.rfns_repr_of_orthoFrame_cb (I := I) (M := M) g₀
+        p x _ e hn horth,
+      DifferentialGeometry.Integral.Connection.rfns_repr_of_orthoFrame_cb (I := I) (M := M) g₀
+        q x _ e hn horth]
+  rw [Finset.sum_eq_single K₀ (fun K _ hK => absurd (Subsingleton.elim K K₀) hK)
+        (fun h => absurd (Finset.mem_univ K₀) h),
+      Finset.sum_eq_single K₀ (fun K _ hK => absurd (Subsingleton.elim K K₀) hK)
+        (fun h => absurd (Finset.mem_univ K₀) h),
+      Finset.sum_eq_single K₀ (fun K _ hK => absurd (Subsingleton.elim K K₀) hK)
+        (fun h => absurd (Finset.mem_univ K₀) h)]
+  -- The `(p + q)`-component of the bare product factorises as `(S-component) · (T-component)`.
+  have hsplit : ∀ J : Fin (p + q) → Fin n,
+      DifferentialGeometry.Integral.Connection.fiberNormSqSummand (I := I) (M := M) g₀ x 0 (p + q)
+          (show TensorRSSpace 0 (p + q) I x from (unitModelProdSection (I := I) g₀ S T).toSection x)
+          n e K₀ J =
+        (DifferentialGeometry.Integral.Connection.fiberNormSqComponent (I := I) (M := M) g₀ x 0 p
+            (show TensorRSSpace 0 p I x from S.toSection x) n e K₀ (J ∘ Fin.castAdd q)) ^ 2 *
+          (DifferentialGeometry.Integral.Connection.fiberNormSqComponent (I := I) (M := M) g₀ x 0 q
+            (show TensorRSSpace 0 q I x from T.toSection x) n e K₀ (J ∘ Fin.natAdd p)) ^ 2 := by
+    intro J
+    rw [DifferentialGeometry.Integral.Connection.fiberNormSqSummand_eq_component_sq,
+      hcomp (unitModelProdSection (I := I) g₀ S T) J,
+      hcomp S (J ∘ Fin.castAdd q), hcomp T (J ∘ Fin.natAdd p),
+      unitModelProdSection_unitModel (I := I) g₀ S T x,
+      Bundle.continuousMultilinearMap.modelProduct_apply]
+    rw [show ((fun k => e (J k)) ∘ Fin.castAdd q) = (fun k => e ((J ∘ Fin.castAdd q) k)) from rfl,
+      show ((fun k => e (J k)) ∘ Fin.natAdd p) = (fun k => e ((J ∘ Fin.natAdd p) k)) from rfl,
+      mul_pow]
+  rw [Finset.sum_congr rfl (fun J _ => hsplit J)]
+  -- Factorise `∑_J cS² cT²` along `Fin p ⊕ Fin q ≃ Fin (p + q)`.
+  set cS : (Fin p → Fin n) → ℝ := fun J₁ =>
+    (DifferentialGeometry.Integral.Connection.fiberNormSqComponent (I := I) (M := M) g₀ x 0 p
+      (show TensorRSSpace 0 p I x from S.toSection x) n e K₀ J₁) ^ 2 with hcS
+  set cT : (Fin q → Fin n) → ℝ := fun J₂ =>
+    (DifferentialGeometry.Integral.Connection.fiberNormSqComponent (I := I) (M := M) g₀ x 0 q
+      (show TensorRSSpace 0 q I x from T.toSection x) n e K₀ J₂) ^ 2 with hcT
+  have hreindex : (∑ J : Fin (p + q) → Fin n, cS (J ∘ Fin.castAdd q) * cT (J ∘ Fin.natAdd p)) =
+      (∑ J₁ : Fin p → Fin n, cS J₁) * (∑ J₂ : Fin q → Fin n, cT J₂) := by
+    let eqv : (Fin (p + q) → Fin n) ≃ (Fin p → Fin n) × (Fin q → Fin n) :=
+      (Equiv.arrowCongr finSumFinEquiv (Equiv.refl (Fin n))).symm.trans
+        (Equiv.sumArrowEquivProdArrow (Fin p) (Fin q) (Fin n))
+    have hL : (∑ J : Fin (p + q) → Fin n, cS (J ∘ Fin.castAdd q) * cT (J ∘ Fin.natAdd p)) =
+        ∑ pr : (Fin p → Fin n) × (Fin q → Fin n), cS pr.1 * cT pr.2 := by
+      rw [← Equiv.sum_comp eqv (fun pr : (Fin p → Fin n) × (Fin q → Fin n) => cS pr.1 * cT pr.2)]
+      refine Finset.sum_congr rfl (fun J _ => ?_)
+      have h1 : (eqv J).1 = J ∘ Fin.castAdd q := by
+        funext i
+        change J (finSumFinEquiv (Sum.inl i)) = J (Fin.castAdd q i)
+        rw [finSumFinEquiv_apply_left]
+      have h2 : (eqv J).2 = J ∘ Fin.natAdd p := by
+        funext i
+        change J (finSumFinEquiv (Sum.inr i)) = J (Fin.natAdd p i)
+        rw [finSumFinEquiv_apply_right]
+      rw [h1, h2]
+    rw [hL, Fintype.sum_prod_type, ← Fintype.sum_mul_sum]
+  rw [hreindex, hcS, hcT]
+  refine le_of_eq ?_
+  congr 1 <;>
+    exact Finset.sum_congr rfl (fun J _ =>
+      (DifferentialGeometry.Integral.Connection.fiberNormSqSummand_eq_component_sq
+        (I := I) (M := M) g₀ x 0 _ _ n e K₀ J).symm)
 
-/-- **(Deep `g`-native bedrock — the RANK-UNIFORM, base-uniform `g`-Riemannian fibre bound of the
-cometric double-trace operator field.)**  There is a single nonnegative constant `Cdt`, uniform over
-BOTH the passenger count `n` AND the base point `x`, with
+/-- **(Deep `g`-native bedrock — the RANK-UNIFORM, base-uniform `g`-Riemannian fibre ACTION bound of
+the cometric double-trace operator.)**  There is a single nonnegative constant `Cdt = dim`, uniform
+over BOTH the passenger count `n` AND the base point `x`, controlling the cometric double-trace
+*action* on any `(0, n + 2)`-tensor `Wx`:
 ```
-rfns_{(n+2,n)}((cometricDoubleTraceField g₀ n)(x)) ≤ Cdt.
+rfns_{(0,n)}((cometricDoubleTraceFib g₀ n x).comp Wx) ≤ Cdt · rfns_{(0,n+2)}(Wx).
 ```
-This is the `g`-native, chart-trivialisation-free analogue of the model bound
-`norm_cometricDoubleTraceField_toSection_le` (`‖·‖ ≤ doubleTraceModelConst · ‖cometricLmodel g₀ x‖`):
-the rank-uniformity is the genuine content (the double trace touches only the two leading slots, the
-`n` passenger slots passing through isometrically), and the base-uniformity is the compactness of `M`
-with the continuity of the `g₀`-cometric.  Crucially it is bounded by the intrinsic `g`-fibre norm of
-the cometric, NEVER the model operator norm `‖cometricLmodel g₀ x‖` (whose uniform bound is the
-chart-Jacobian-inverse sup, chart-trivialisation-circular).  Posited here as a deep frame-expansion
-leaf; the proof Parseval-expands `rfns(cometricDoubleTraceFib g₀ n x)` in a `g_x`-orthonormal frame,
-the double trace collapsing the two leading slots against the cometric Gram while the passenger sum
-factorises to a `dim`-power times the rank-`2` cometric fibre norm (the `riemannianFiberNormSq_gInvDiffSlotEndo_le`
-pattern, rank-generic), then takes the finite continuous sup over the compact base.
+This is the `g`-native, chart-trivialisation-free, RANK-UNIFORM action bound.  It is stated as an
+*action* bound (operator applied to a tensor), NOT as a fibre-`rfns` bound on the operator field
+itself: the Hilbert–Schmidt fibre norm `rfns(cometricDoubleTraceFib g₀ n x)` GROWS like `dim^{(n+1)}`
+with the passenger count `n` (in a `g`-orthonormal frame the cometric is the identity, so the
+double-trace operator has `dim^{n+1}` nonzero unit-norm frame components), so no single rank-uniform
+constant bounds it — only its *action* on a vector is rank-uniformly bounded (the operator norm, not
+the HS norm).  The proof Parseval-expands both fibre norms in the `g_x`-orthonormal smooth frame
+`smoothOrthoFrame g₀ x · x`: the result's `J`-component is the cometric diagonal trace
+`∑_i Wx-component(i, i, J)` (`cometricDoubleTraceFib_eq_orthoFrame_diag`, the cometric is the identity
+on the `g`-orthonormal frame), a per-output discrete Cauchy–Schwarz over the `dim` diagonal indices
+gives `(∑_i c(i,i,J))² ≤ dim · ∑_i c(i,i,J)²`, and the diagonal-index sub-sum is dominated by the full
+`(n + 2)`-index Hilbert–Schmidt sum `rfns(Wx)²`.  `Cdt = dim` is base-uniform (the frame is
+`g`-orthonormal at every base point) and rank-uniform (the `dim` factor is from the single contracted
+pair, independent of the `n` passenger slots).
 
-**Non-vacuity.**  `Cdt = 0` is rejected: the cometric double trace is nonzero on a nondegenerate
-metric (it realises `D(g⁻¹)`), so its fibre norm is strictly positive at some `(n, x)`. -/
-private theorem exists_uniform_riemannianFiberNormSq_cometricDoubleTraceFib
+**Non-vacuity.**  The bound genuinely uses `Wx` (the operator is applied to it); it vanishes as
+`Wx → 0`, so a degenerate constant stand-in is rejected. -/
+private theorem exists_uniform_rfns_cometricDoubleTrace_comp_le
     (g₀ : SmoothRiemannianMetric I M) :
-    ∃ Cdt : ℝ, 0 ≤ Cdt ∧ ∀ (n : ℕ) (x : M),
-      riemannianFiberNormSq (I := I) (M := M) g₀ (n + 2) n x
-          ((cometricDoubleTraceField (I := I) g₀ n).toSection x) ≤ Cdt := by
-  sorry
+    ∃ Cdt : ℝ, 0 ≤ Cdt ∧ ∀ (n : ℕ) (x : M) (Wx : TensorRSSpace 0 (n + 2) I x),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 n x
+          (show TensorRSSpace 0 n I x from
+            (cometricDoubleTraceFib (I := I) g₀ n x).comp
+              (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (n + 2) I x from Wx)) ≤
+        Cdt * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (n + 2) x Wx := by
+  classical
+  refine ⟨(Module.finrank ℝ E : ℝ), Nat.cast_nonneg _, ?_⟩
+  intro n x Wx
+  set d : ℕ := Module.finrank ℝ E with hd
+  -- The `g₀(x)`-orthonormal smooth frame attached at `x`, read at its own centre.
+  set e : Fin d → TangentSpace I x := fun i => smoothOrthoFrame (I := I) g₀ x i x with he
+  have hxnbhd : x ∈ smoothOrthoFrameNbhd (I := I) (M := M) x :=
+    mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x
+  have horth : ∀ i j : Fin d, g₀.inner x (e i) (e j) = if i = j then (1 : ℝ) else 0 :=
+    fun i j => smoothOrthoFrame_orthonormal (I := I) g₀ x hxnbhd i j
+  have hdrank : d = Module.finrank ℝ (TangentSpace I x) := rfl
+  set K₀ : Fin 0 → Fin d := fun k => k.elim0 with hK₀
+  -- The result `(0, n)`-tensor's `J`-component is the cometric diagonal trace of `Wx`'s components.
+  have hcompTrace : ∀ J : Fin n → Fin d,
+      DifferentialGeometry.Integral.Connection.fiberNormSqComponent (I := I) (M := M) g₀ x 0 n
+          (show TensorRSSpace 0 n I x from
+            (cometricDoubleTraceFib (I := I) g₀ n x).comp
+              (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (n + 2) I x from Wx)) d e K₀ J =
+        ∑ i : Fin d,
+          DifferentialGeometry.Integral.Connection.fiberNormSqComponent (I := I) (M := M) g₀ x 0
+            (n + 2) (show TensorRSSpace 0 (n + 2) I x from Wx) d e K₀
+            (Fin.cons i (Fin.cons i J)) := by
+    intro J
+    -- Unfold the component: it is `(Φ.comp Wx)(unit)(e_J) = toModel(Φ (Wx unit))(e_J)`.
+    have hunit : ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+        (fun k => g₀.inner x (e (K₀ k))) : Tensor0SSpace 0 I x) = unitTensor (I := I) (M := M) x := by
+      apply Tensor0SSpace.toModel_injective
+      apply ContinuousMultilinearMap.ext
+      intro mm
+      rw [show (Tensor0SSpace.toModel
+          ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+            (fun k => g₀.inner x (e (K₀ k))) : Tensor0SSpace 0 I x)) mm = 1 from by
+        change ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
+            (fun k => g₀.inner x (e (K₀ k)))) mm = 1
+        rw [ContinuousMultilinearMap.compContinuousLinearMap_apply,
+          ContinuousMultilinearMap.mkPiAlgebra_apply]; simp]
+      rw [show (Tensor0SSpace.toModel (unitTensor (I := I) (M := M) x)) mm = 1 from by
+        rw [unitTensor, Tensor0SSpace.toModel_ofModel]; rfl]
+    set D : Tensor0SSpace (n + 2) I x :=
+      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (n + 2) I x from Wx)
+        (unitTensor (I := I) (M := M) x) with hD
+    -- The component is the model evaluation `toModel(Φ D)(e_J)`.
+    have hLHS : DifferentialGeometry.Integral.Connection.fiberNormSqComponent (I := I) (M := M) g₀ x
+          0 n (show TensorRSSpace 0 n I x from
+            (cometricDoubleTraceFib (I := I) g₀ n x).comp
+              (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (n + 2) I x from Wx)) d e K₀ J =
+        Tensor0SSpace.toModel (cometricDoubleTraceFib (I := I) g₀ n x D) (fun k => (e (J k) : E)) := by
+      rw [DifferentialGeometry.Integral.Connection.fiberNormSqComponent, hunit,
+        ContinuousLinearMap.comp_apply, ← hD]
+      rfl
+    -- Each `Wx`-component is the model evaluation `toModel(D)(e_ξ)`.
+    have hRHScomp : ∀ i : Fin d,
+        DifferentialGeometry.Integral.Connection.fiberNormSqComponent (I := I) (M := M) g₀ x 0
+            (n + 2) (show TensorRSSpace 0 (n + 2) I x from Wx) d e K₀ (Fin.cons i (Fin.cons i J)) =
+          Tensor0SSpace.toModel D
+            (Fin.cons (e i : E) (Fin.cons (e i : E) (fun k => (e (J k) : E)))) := by
+      intro i
+      have htuple : (fun k => e ((Fin.cons i (Fin.cons i J) : Fin (n + 2) → Fin d) k)) =
+          Fin.cons (e i) (Fin.cons (e i) (fun k => e (J k))) := by
+        funext k
+        refine Fin.cases ?_ (fun k => ?_) k
+        · rfl
+        · exact Fin.cases rfl (fun _ => rfl) k
+      rw [DifferentialGeometry.Integral.Connection.fiberNormSqComponent, hunit, ← hD, htuple]
+      rfl
+    rw [hLHS]
+    rw [cometricDoubleTraceFib_toModel (I := I) g₀ n x D]
+    rw [modelDoubleTrace_apply (E := E) n (cometricLmodel (I := I) g₀ x)
+      (Tensor0SSpace.toModel D) (fun k => (e (J k) : E))]
+    rw [cometric_dualTrace_eq_orthoFrame_diag (I := I) g₀ (s := n) x hxnbhd
+      (Tensor0SSpace.toModel D) (fun k => (e (J k) : E))]
+    refine (Finset.sum_congr rfl (fun i _ => ?_)).symm
+    rw [hRHScomp i]
+  -- Represent both fibre norms in the single `g`-orthonormal frame, collapse the empty covector.
+  rw [DifferentialGeometry.Integral.Connection.rfns_repr_of_orthoFrame_cb (I := I) (M := M) g₀
+        n x _ e hdrank horth]
+  rw [Finset.sum_eq_single K₀ (fun K _ hK => absurd (Subsingleton.elim K K₀) hK)
+        (fun h => absurd (Finset.mem_univ K₀) h)]
+  rw [DifferentialGeometry.Integral.Connection.rfns_repr_of_orthoFrame_cb (I := I) (M := M) g₀
+        (n + 2) x _ e hdrank horth]
+  rw [Finset.sum_eq_single K₀ (fun K _ hK => absurd (Subsingleton.elim K K₀) hK)
+        (fun h => absurd (Finset.mem_univ K₀) h)]
+  -- Per-output Cauchy–Schwarz + sub-sum domination of the diagonal indices.
+  set c : (Fin (n + 2) → Fin d) → ℝ := fun ξ =>
+    DifferentialGeometry.Integral.Connection.fiberNormSqComponent (I := I) (M := M) g₀ x 0 (n + 2)
+      (show TensorRSSpace 0 (n + 2) I x from Wx) d e K₀ ξ with hc
+  have hCS : ∀ J : Fin n → Fin d,
+      DifferentialGeometry.Integral.Connection.fiberNormSqSummand (I := I) (M := M) g₀ x 0 n
+          (show TensorRSSpace 0 n I x from
+            (cometricDoubleTraceFib (I := I) g₀ n x).comp
+              (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (n + 2) I x from Wx)) d e K₀ J ≤
+        (d : ℝ) * ∑ i : Fin d, c (Fin.cons i (Fin.cons i J)) ^ 2 := by
+    intro J
+    rw [DifferentialGeometry.Integral.Connection.fiberNormSqSummand_eq_component_sq, hcompTrace J]
+    calc (∑ i : Fin d, c (Fin.cons i (Fin.cons i J))) ^ 2
+        = (∑ i : Fin d, (1 : ℝ) * c (Fin.cons i (Fin.cons i J))) ^ 2 := by
+          simp
+      _ ≤ (∑ i : Fin d, (1 : ℝ) ^ 2) * ∑ i : Fin d, c (Fin.cons i (Fin.cons i J)) ^ 2 :=
+          Finset.sum_mul_sq_le_sq_mul_sq (Finset.univ : Finset (Fin d))
+            (fun _ : Fin d => (1 : ℝ)) (fun i => c (Fin.cons i (Fin.cons i J)))
+      _ = (d : ℝ) * ∑ i : Fin d, c (Fin.cons i (Fin.cons i J)) ^ 2 := by
+          rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin]; simp
+  -- The diagonal-index sub-sum is dominated by the full Hilbert–Schmidt sum (injective reindex).
+  have hsub : (∑ J : Fin n → Fin d, ∑ i : Fin d, c (Fin.cons i (Fin.cons i J)) ^ 2) ≤
+      ∑ ξ : Fin (n + 2) → Fin d, c ξ ^ 2 := by
+    let g : ((Fin n → Fin d) × Fin d) → (Fin (n + 2) → Fin d) :=
+      fun p => Fin.cons p.2 (Fin.cons p.2 p.1)
+    have hginj : Function.Injective g := by
+      intro p₁ p₂ hpe
+      have h0 : g p₁ 0 = g p₂ 0 := by rw [hpe]
+      have h2 : p₁.1 = p₂.1 := by
+        funext k
+        have := congrFun hpe (Fin.succ (Fin.succ k))
+        simpa [g, Fin.cons_succ] using this
+      have h1 : p₁.2 = p₂.2 := by simpa [g, Fin.cons_zero] using h0
+      exact Prod.ext h2 h1
+    calc (∑ J : Fin n → Fin d, ∑ i : Fin d, c (Fin.cons i (Fin.cons i J)) ^ 2)
+        = ∑ p : (Fin n → Fin d) × Fin d, c (g p) ^ 2 := by
+          rw [Fintype.sum_prod_type]
+      _ = ∑ ξ ∈ (Finset.univ.image g), c ξ ^ 2 := by
+          rw [Finset.sum_image (fun a _ b _ hab => hginj hab)]
+      _ ≤ ∑ ξ : Fin (n + 2) → Fin d, c ξ ^ 2 :=
+          Finset.sum_le_sum_of_subset_of_nonneg (Finset.subset_univ _)
+            (fun ξ _ _ => sq_nonneg _)
+  calc (∑ J : Fin n → Fin d,
+          DifferentialGeometry.Integral.Connection.fiberNormSqSummand (I := I) (M := M) g₀ x 0 n
+            (show TensorRSSpace 0 n I x from
+              (cometricDoubleTraceFib (I := I) g₀ n x).comp
+                (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (n + 2) I x from Wx)) d e K₀ J)
+      ≤ ∑ J : Fin n → Fin d, (d : ℝ) * ∑ i : Fin d, c (Fin.cons i (Fin.cons i J)) ^ 2 :=
+        Finset.sum_le_sum (fun J _ => hCS J)
+    _ = (d : ℝ) * ∑ J : Fin n → Fin d, ∑ i : Fin d, c (Fin.cons i (Fin.cons i J)) ^ 2 := by
+        rw [Finset.mul_sum]
+    _ ≤ (d : ℝ) * ∑ ξ : Fin (n + 2) → Fin d, c ξ ^ 2 :=
+        mul_le_mul_of_nonneg_left hsub (Nat.cast_nonneg d)
+    _ = (d : ℝ) * ∑ J : Fin (n + 2) → Fin d,
+          DifferentialGeometry.Integral.Connection.fiberNormSqSummand (I := I) (M := M) g₀ x 0
+            (n + 2) (show TensorRSSpace 0 (n + 2) I x from Wx) d e K₀ J := by
+        refine congrArg (fun t => (d : ℝ) * t) ?_
+        exact Finset.sum_congr rfl (fun ξ _ =>
+          (DifferentialGeometry.Integral.Connection.fiberNormSqSummand_eq_component_sq
+            (I := I) (M := M) g₀ x 0 (n + 2) _ d e K₀ ξ))
 
 set_option linter.unusedSectionVars false in
 /-- **The `g`-native uniform fibrewise operator bound of the `g₀`-parallel double-cometric-trace
@@ -497,15 +736,17 @@ the intrinsic `g`-Riemannian squared fibre norm of `gInvGramProdSection g₀ S T
 ```
 rfns(gInvGramProdSection g₀ S T)(x) ≤ C · rfns(S)(x) · rfns(T)(x).
 ```
-The constant is the rank-uniform cometric double-trace fibre bound
-(`exists_uniform_riemannianFiberNormSq_cometricDoubleTraceFib`).  The pointwise step reads
+The constant is the rank-uniform cometric double-trace ACTION bound `Cdt = dim`
+(`exists_uniform_rfns_cometricDoubleTrace_comp_le`).  The pointwise step reads
 `gInvGramProdSection = appCc Φ (castRankCc_db (S ⊗ T))`, whose fibre value is the composition
-`(Φ x).comp ((castRankCc_db (S ⊗ T)) x)`; the intrinsic partial-contraction Cauchy–Schwarz
-`riemannianFiberNormSq_compRS_le_mul` bounds it by `rfns(Φ x) · rfns((castRankCc_db (S ⊗ T)) x)`, the
-rank-cast `rfns`-invariance `rfns_iteratedCovGrad_castRankCc_db` (order `0`) drops the cast, the tensor
-cross-norm `riemannianFiberNormSq_unitModelProdSection_le` factorises `rfns(S ⊗ T) ≤ rfns(S) · rfns(T)`,
-and the rank-uniform cometric fibre bound `Cdt` dominates `rfns(Φ x)`.  Never the model operator norm,
-never `cometricLmodel`, never the chart-Jacobian-inverse sup. -/
+`(Φ x).comp ((castRankCc_db (S ⊗ T)) x)`; the rank-uniform cometric double-trace ACTION bound
+`rfns((Φ x).comp Wx) ≤ Cdt · rfns(Wx)` bounds it by `Cdt · rfns((castRankCc_db (S ⊗ T)) x)`, the
+rank-cast `rfns`-invariance `rfns_iteratedCovGrad_castRankCc_db` (order `0`) drops the cast, and the
+tensor cross-norm `riemannianFiberNormSq_unitModelProdSection_le` factorises
+`rfns(S ⊗ T) ≤ rfns(S) · rfns(T)`.  Crucially the contraction is bounded by its rank-uniform OPERATOR
+norm (the `Cdt` action bound), NOT the rank-DEPENDENT Hilbert–Schmidt fibre norm of the cometric
+double-trace operator field — which grows like `dim^{n+1}` and supports no uniform constant.  Never the
+model operator norm, never `cometricLmodel`, never the chart-Jacobian-inverse sup. -/
 theorem gInvGramProd_rfns_bound (g₀ : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ {a b : ℕ} (S : SmoothCcTensor g₀ 0 (2 + a))
       (T : SmoothCcTensor g₀ 0 (2 + b)) (x : M),
@@ -514,7 +755,7 @@ theorem gInvGramProd_rfns_bound (g₀ : SmoothRiemannianMetric I M) :
         C * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x (S.toSection x) *
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + b) x (T.toSection x) := by
   obtain ⟨Cdt, hCdt_nn, hCdt⟩ :=
-    exists_uniform_riemannianFiberNormSq_cometricDoubleTraceFib (I := I) g₀
+    exists_uniform_rfns_cometricDoubleTrace_comp_le (I := I) g₀
   refine ⟨Cdt, hCdt_nn, ?_⟩
   intro a b S T x
   set n := 2 + a + b with hn
@@ -522,42 +763,31 @@ theorem gInvGramProd_rfns_bound (g₀ : SmoothRiemannianMetric I M) :
     (show (2 + a) + (2 + b) = n + 2 by omega)
     (unitModelProdSection (I := I) g₀ S T) 0 x
   rw [iteratedCovGrad_zero, iteratedCovGrad_zero] at hcast
-  -- rfns(gInvGramProdSection) ≤ rfns(Φ x) · rfns((castRankCc_db (S ⊗ T)) x)
+  -- rfns(gInvGramProdSection) ≤ Cdt · rfns((castRankCc_db (S ⊗ T)) x), the rank-uniform action bound.
   have hcs : riemannianFiberNormSq (I := I) (M := M) g₀ 0 n x
         ((gInvGramProdSection (I := I) g₀ S T).toSection x) ≤
-      riemannianFiberNormSq (I := I) (M := M) g₀ (n + 2) n x
-          ((cometricDoubleTraceField (I := I) g₀ n).toSection x) *
-        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (n + 2) x
+      Cdt * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (n + 2) x
           ((castRankCc_db (I := I) (M := M) g₀ 0
             (show (2 + a) + (2 + b) = n + 2 by omega)
             (unitModelProdSection (I := I) g₀ S T)).toSection x) := by
-    rw [gInvGramProdSection, appCc_toSection]
-    exact riemannianFiberNormSq_compRS_le_mul (I := I) (M := M) g₀ 0 (n + 2) n x
-      ((cometricDoubleTraceField (I := I) g₀ n).toSection x)
-      ((castRankCc_db (I := I) (M := M) g₀ 0
-        (show (2 + a) + (2 + b) = n + 2 by omega)
-        (unitModelProdSection (I := I) g₀ S T)).toSection x)
+    rw [gInvGramProdSection, appCc_toSection, cometricDoubleTraceField_toSection]
+    exact hCdt n x
+      (show TensorRSSpace 0 (n + 2) I x from
+        (castRankCc_db (I := I) (M := M) g₀ 0
+          (show (2 + a) + (2 + b) = n + 2 by omega)
+          (unitModelProdSection (I := I) g₀ S T)).toSection x)
   -- drop the cast, then factorise the tensor product
   rw [hcast] at hcs
   have hprod := riemannianFiberNormSq_unitModelProdSection_le (I := I) (M := M) g₀ S T x
   have hSnn := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + a) x (S.toSection x)
   have hTnn := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + b) x (T.toSection x)
-  have hΦnn := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ (n + 2) n x
-    ((cometricDoubleTraceField (I := I) g₀ n).toSection x)
   calc riemannianFiberNormSq (I := I) (M := M) g₀ 0 n x
           ((gInvGramProdSection (I := I) g₀ S T).toSection x)
-      ≤ riemannianFiberNormSq (I := I) (M := M) g₀ (n + 2) n x
-            ((cometricDoubleTraceField (I := I) g₀ n).toSection x) *
-          riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((2 + a) + (2 + b)) x
+      ≤ Cdt * riemannianFiberNormSq (I := I) (M := M) g₀ 0 ((2 + a) + (2 + b)) x
             ((unitModelProdSection (I := I) g₀ S T).toSection x) := hcs
-    _ ≤ riemannianFiberNormSq (I := I) (M := M) g₀ (n + 2) n x
-            ((cometricDoubleTraceField (I := I) g₀ n).toSection x) *
-          (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x (S.toSection x) *
-            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + b) x (T.toSection x)) :=
-        mul_le_mul_of_nonneg_left hprod hΦnn
     _ ≤ Cdt * (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x (S.toSection x) *
             riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + b) x (T.toSection x)) :=
-        mul_le_mul_of_nonneg_right (hCdt n x) (mul_nonneg hSnn hTnn)
+        mul_le_mul_of_nonneg_left hprod hCdt_nn
     _ = Cdt * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x (S.toSection x) *
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + b) x (T.toSection x) := by ring
 

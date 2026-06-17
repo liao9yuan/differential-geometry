@@ -79,7 +79,7 @@ set_option linter.unusedSectionVars false in
 Riemannian fibre norm of a `(0, t)`-tensor `S` is the frame double sum of `fiberNormSqSummand`. The single
 non-trivial multi-index is the empty `K`; the rank-`t` index `J` ranges over the dual tensor frame. Ported
 from the diagonal-sum reconstruction `tensorInnerPointwise_0s_eq_diag_sum_orthoFrame`. -/
-private lemma rfns_repr_of_orthoFrame_cb
+lemma rfns_repr_of_orthoFrame_cb
     (g : SmoothRiemannianMetric I M) (t : ℕ) (x : M) (S : TensorRSSpace 0 t I x)
     {n : ℕ} (e : Fin n → TangentSpace I x)
     (hn : n = Module.finrank ℝ (TangentSpace I x))

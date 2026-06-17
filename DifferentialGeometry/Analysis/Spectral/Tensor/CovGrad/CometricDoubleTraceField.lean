@@ -867,7 +867,7 @@ point `y` of the orthonormality neighbourhood of the frame attached at `x`, the 
 double trace of a model `(0, s + 2)`-tensor `T` — slot `0` raised by the cometric `♯` of the model
 dual-basis covectors, slot `1` contracted against the model basis — equals the `g₀(y)`-orthonormal
 frame diagonal sum `∑ᵢ T(Bᵢ y, Bᵢ y, mm)`. -/
-private theorem cometric_dualTrace_eq_orthoFrame_diag (g₀ : SmoothRiemannianMetric I M)
+theorem cometric_dualTrace_eq_orthoFrame_diag (g₀ : SmoothRiemannianMetric I M)
     {s : ℕ} (x : M) {y : M}
     (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x)
     (T : Tensor0SBundle.Tensor0SModel (s + 2) ℝ E) (mm : Fin s → E) :
@@ -1005,7 +1005,7 @@ cometricDoubleTraceFib g₀ p y D = ∑ᵢ curry_p (curry_{p+1} D (Bᵢ y)) (B�
 the `g₀(y)`-orthonormal diagonal trace of the two leading covariant slots.  This is the frame reading
 of the frame-free cometric double trace (`cometric_dualTrace_eq_orthoFrame_diag`, the rank-generic,
 `−2`-unscaled version of `ricciModelTrace42Fib_eq_orthoFrame_diag`). -/
-private theorem cometricDoubleTraceFib_eq_orthoFrame_diag (g₀ : SmoothRiemannianMetric I M)
+theorem cometricDoubleTraceFib_eq_orthoFrame_diag (g₀ : SmoothRiemannianMetric I M)
     (p : ℕ) (x : M) {y : M} (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x)
     (D : Tensor0SBundle.Tensor0SSpace (p + 2) I y) :
     cometricDoubleTraceFib (I := I) g₀ p y D =
