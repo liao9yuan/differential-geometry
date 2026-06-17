@@ -12,6 +12,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.Char
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSSectionChartComponentIdentity
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckMetricArmCoeffField
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.AppCcDropIteratedGrid
 
 /-!
 # The two-arm covariant-`L²` ball-Lipschitz bound on the DeTurck–Ricci remainder difference
@@ -4264,6 +4265,64 @@ private theorem deTurckRHSArmDiff_order0_pointwise_domination_ballUniform
     _ ≤ Ksum * Scol := mul_le_mul_of_nonneg_right hCα_le hScol_nn
 
 
+/-- **(POSITED deep bedrock — the genuine intrinsic Lichnerowicz linearization with the appCc arm grids
+EXCISED, leaving only the section identity + the THREE scalar engine-constant ball-sups.)**
+
+This is the strictly-smaller deep child of
+`deTurckRHSArmG0_diff_intrinsicLichnerowiczLinearization_section`: the valence-dropping per-order
+`appCc` arm `rfns` grids `k₁, k₂` are NO LONGER posited here — they are PROVED in the consumer from the
+sorry-free reusable engine `appCc_iteratedCovGrad_drop_singleSum_le`
+(`Analysis/Spectral/Tensor/CovGrad/AppCcDropIteratedGrid`, the valence-dropping covariant
+Faà-di-Bruno `rfns` grid whose order-`q` constant is `4^q · gridWindowSum (dropKappa C) 0 0 q`).  What
+remains genuinely missing on disk is:
+
+* the **intrinsic section identity** `N = (fixedCoeffDiffOp Φ₀).op 0 2 (T − T') + appCc C₁ (∇(T − T'))
+  + appCc C₂ (∇²(T − T'))` — the `g`-native mean-value / FTC linearization of the second-order
+  quasilinear Nemytskii `deTurckRHSSection ∘ realize` (the intrinsic Palatini `δRic = ∇·(δΓ) − ∇(tr δΓ)`
+  with `δΓ = connDiff`, the intrinsic inverse-Gram Neumann linearization, and a `SmoothCcTensor`-valued
+  mean-value FTC along the realize-tie path — none of which exist intrinsically on disk; only the
+  FORBIDDEN chart-component `RicciDiffAffine` / `MetricFamilyChartLinearization` forms do); and
+* the **three scalar ball-sup envelopes** `k₀, κ₁, κ₂ : ℕ → ℝ` (outside the `∀ T T'` quantifier): the
+  order-`0` inverse-Gram engine-constant ball-sup `4^q · gridWindowSum (fixedCoeffDiffOp Φ₀).kappa 0 2 q
+  ≤ k₀ q`, and the two valence-dropping arm jet-envelope ball-sups
+  `4^q · gridWindowSum (dropKappa C₁) 0 0 q ≤ κ₁ q`, `4^q · gridWindowSum (dropKappa C₂) 0 0 q ≤ κ₂ q`
+  (the ball-compactness of the Christoffel- / Ricci-variation coefficient fields over the realize-tie
+  metrics of the radius-`R` ball, made finite by the supercritical embedding).
+
+Expressed entirely in `fixedCoeffDiffOp` / `appCc` / `dropKappa` / `iteratedCovGrad` /
+`riemannianFiberNormSq` — **never** a `chartGramOnE` / `chartInvGramOnE` / `HasChartJetLip` chart-jet
+chain.  Consumers transitively depend on its `sorryAx`. -/
+private theorem deTurckRHSArmG0_diff_intrinsicLichnerowiczLinearization_section_core
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
+    ∃ k₀ κ₁ κ₂ : ℕ → ℝ, (∀ q, 0 ≤ k₀ q) ∧ (∀ q, 0 ≤ κ₁ q) ∧ (∀ q, 0 ≤ κ₂ q) ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_lt : δ' < 1)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∃ (g₁ : SmoothRiemannianMetric I M)
+          (C₁ : SmoothCcTensor g₀ 3 2) (C₂ : SmoothCcTensor g₀ 4 2),
+          (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+              deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ') =
+            ((fixedCoeffDiffOp (I := I) (M := M) g₀
+                (gInvDiffMetricArmCoeffField (I := I) g₀ g₁)).op 0 2 (T - T') +
+              appCc (I := I) (M := M) g₀ 3 2 C₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
+              appCc (I := I) (M := M) g₀ 4 2 C₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) ∧
+          (∀ q : ℕ, q ≤ a →
+            (4 : ℝ) ^ q * gridWindowSum
+                (fixedCoeffDiffOp (I := I) (M := M) g₀
+                  (gInvDiffMetricArmCoeffField (I := I) g₀ g₁)).kappa 0 2 q ≤ k₀ q) ∧
+          (∀ q : ℕ, q ≤ a →
+            (4 : ℝ) ^ q * gridWindowSum
+                (dropKappa (I := I) (M := M) g₀ 3 2 C₁) 0 0 q ≤ κ₁ q) ∧
+          (∀ q : ℕ, q ≤ a →
+            (4 : ℝ) ^ q * gridWindowSum
+                (dropKappa (I := I) (M := M) g₀ 4 2 C₂) 0 0 q ≤ κ₂ q) :=
+  sorry
+
 /-- **(POSITED deep bedrock — the genuine intrinsic Lichnerowicz linearization, stripped to its
 irreducible missing content.)**
 
@@ -4343,8 +4402,105 @@ private theorem deTurckRHSArmG0_diff_intrinsicLichnerowiczLinearization_section
                     (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')))).toSection x) ≤
               k₂ q * ∑ p ∈ Finset.range (q + 1),
                 riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p + 2)) x
-                  ((iteratedCovGrad (I := I) g₀ 0 2 (p + 2) (T - T')).toSection x)) :=
-  sorry
+                  ((iteratedCovGrad (I := I) g₀ 0 2 (p + 2) (T - T')).toSection x)) := by
+  classical
+  -- The deep section-identity core supplies the section identity, the order-`0` inverse-Gram
+  -- engine-constant ball-sup `k₀`, and the two valence-dropping arm jet-envelope ball-sups `κ₁, κ₂`
+  -- of `gridWindowSum (dropKappa Cₘ) 0 0`.  The appCc arm `rfns` grids are GENUINE GLUE here, proved
+  -- from the sorry-free reusable valence-dropping engine `appCc_iteratedCovGrad_drop_singleSum_le`.
+  obtain ⟨k₀, κ₁, κ₂, hk₀_nn, hκ₁_nn, hκ₂_nn, hcore⟩ :=
+    deTurckRHSArmG0_diff_intrinsicLichnerowiczLinearization_section_core
+      (I := I) g₀ g_bg a ha_super hR
+  refine ⟨k₀, κ₁, κ₂, hk₀_nn, hκ₁_nn, hκ₂_nn, ?_⟩
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
+  obtain ⟨g₁, C₁, C₂, hid, hk₀dom, hκ₁dom, hκ₂dom⟩ :=
+    hcore T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
+  refine ⟨g₁, C₁, C₂, hid, hk₀dom, ?_, ?_⟩
+  · -- The `C₁` arm grid (drop `3 → 2`), input `W₁ := ∇(T − T') : (0, 3)`.  Reusable engine with the
+    -- EXPLICIT constant `4^q · gridWindowSum (dropKappa C₁) 0 0 q`, dominated by `κ₁ q` from the core.
+    intro q hq x
+    have hgrid := appCc_iteratedCovGrad_drop_singleSum_le_explicit
+      (I := I) (M := M) g₀ 3 2 C₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) q x
+    -- Convert the engine column `∑_{p ≤ q} rfns(∇^p W₁)` to `∑_{p ≤ q} rfns(∇^{p+1}(T − T'))`.
+    have hcol : ∀ p : ℕ,
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+            ((iteratedCovGrad (I := I) g₀ 0 3 p
+              (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))).toSection x) =
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p + 1)) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 (p + 1) (T - T')).toSection x) := by
+      intro p
+      -- `iteratedCovGrad 0 2 1 (T−T')` is defeq `covGrad 0 2 (T−T')` and `(2+1) ≡ 3`, so the engine
+      -- column entry is defeq the commute lemma's LHS at valence `s = 2`.
+      exact rfns_iteratedCovGrad_covGrad_comm (I := I) (M := M) g₀ 2 p (T - T') x
+    have hsum_nn : (0 : ℝ) ≤ ∑ p ∈ Finset.range (q + 1),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p + 1)) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 (p + 1) (T - T')).toSection x) :=
+      Finset.sum_nonneg fun p _ =>
+        riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + (p + 1)) x _
+    calc riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 q
+              (appCc (I := I) (M := M) g₀ 3 2 C₁
+                (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')))).toSection x)
+        ≤ ((4 : ℝ) ^ q * gridWindowSum
+              (dropKappa (I := I) (M := M) g₀ 3 2 C₁) 0 0 q) *
+            ∑ p ∈ Finset.range (q + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + p) x
+                ((iteratedCovGrad (I := I) g₀ 0 3 p
+                  (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))).toSection x) := hgrid
+      _ = ((4 : ℝ) ^ q * gridWindowSum
+              (dropKappa (I := I) (M := M) g₀ 3 2 C₁) 0 0 q) *
+            ∑ p ∈ Finset.range (q + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p + 1)) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 (p + 1) (T - T')).toSection x) := by
+            rw [Finset.sum_congr rfl (fun p _ => hcol p)]
+      _ ≤ κ₁ q * ∑ p ∈ Finset.range (q + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p + 1)) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 (p + 1) (T - T')).toSection x) :=
+            mul_le_mul_of_nonneg_right (hκ₁dom q hq) hsum_nn
+  · -- The `C₂` arm grid (drop `4 → 2`), input `W₂ := ∇²(T − T') : (0, 4)`.
+    intro q hq x
+    have hgrid := appCc_iteratedCovGrad_drop_singleSum_le_explicit
+      (I := I) (M := M) g₀ 4 2 C₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) q x
+    -- Convert `∑_{p ≤ q} rfns(∇^p W₂)` to `∑_{p ≤ q} rfns(∇^{p+2}(T − T'))`.
+    have hcol : ∀ p : ℕ,
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + p) x
+            ((iteratedCovGrad (I := I) g₀ 0 4 p
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))).toSection x) =
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p + 2)) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 (p + 2) (T - T')).toSection x) := by
+      intro p
+      -- Two front-commutes, both by defeq of the iterated jets (`∇²(T−T') ≡ ∇(∇(T−T'))`, `4 ≡ 3+1`,
+      -- `(p+1)+1 ≡ p+2`): the commute lemma at valence `s = 3` (outer) chained with `s = 2` (inner).
+      have h3 := rfns_iteratedCovGrad_covGrad_comm (I := I) (M := M) g₀ 3 p
+        (covGrad (I := I) (M := M) g₀ 0 2 (T - T')) x
+      have hstep2 := rfns_iteratedCovGrad_covGrad_comm (I := I) (M := M) g₀ 2 (p + 1)
+        (T - T') x
+      exact h3.trans hstep2
+    have hsum_nn : (0 : ℝ) ≤ ∑ p ∈ Finset.range (q + 1),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p + 2)) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 (p + 2) (T - T')).toSection x) :=
+      Finset.sum_nonneg fun p _ =>
+        riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + (p + 2)) x _
+    calc riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 q
+              (appCc (I := I) (M := M) g₀ 4 2 C₂
+                (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')))).toSection x)
+        ≤ ((4 : ℝ) ^ q * gridWindowSum
+              (dropKappa (I := I) (M := M) g₀ 4 2 C₂) 0 0 q) *
+            ∑ p ∈ Finset.range (q + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + p) x
+                ((iteratedCovGrad (I := I) g₀ 0 4 p
+                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))).toSection x) := hgrid
+      _ = ((4 : ℝ) ^ q * gridWindowSum
+              (dropKappa (I := I) (M := M) g₀ 4 2 C₂) 0 0 q) *
+            ∑ p ∈ Finset.range (q + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p + 2)) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 (p + 2) (T - T')).toSection x) := by
+            rw [Finset.sum_congr rfl (fun p _ => hcol p)]
+      _ ≤ κ₂ q * ∑ p ∈ Finset.range (q + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p + 2)) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 (p + 2) (T - T')).toSection x) :=
+            mul_le_mul_of_nonneg_right (hκ₂dom q hq) hsum_nn
 
 /-- **(POSITED deep bedrock — the INTRINSIC mean-value Fréchet realization of the nonlinear
 Ricci–DeTurck RHS-arm difference as a single three-term `fixedCoeffDiffOp` / `appCc` covariant
