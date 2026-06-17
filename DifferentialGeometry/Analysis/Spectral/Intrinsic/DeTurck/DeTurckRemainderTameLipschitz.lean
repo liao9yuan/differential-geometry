@@ -4261,6 +4261,62 @@ private theorem deTurckRHSArmDiff_order0_pointwise_domination_ballUniform
         exact hCα α T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball hx_tsupport
     _ ≤ Ksum * Scol := mul_le_mul_of_nonneg_right hCα_le hScol_nn
 
+/-- **(POSITED deficit-free INTRINSIC covariant-Leibniz / Faà-di-Bruno per-order pointwise grid
+domination of the nonlinear Ricci–DeTurck RHS-arm difference — the irreducible curvature / Lie /
+inverse-Gram covariant-jet leaf, chart-jet-free; the SHARED foundation of both endpoint posits.)**
+
+Fix `g₀`, the DeTurck background `g_bg`, a supercritical order `a` (`2·finrank E + 10 ≤ a`), and a
+covariant-`L²` ball radius `R ≥ 0`.  There is **one** nonnegative constant `Λg` — uniform over the
+fibre-small radius-`R` ball, **outside** the `∀ T T'` quantifier — such that for any two
+`g₀`-fibre-small smooth perturbations `T, T'` whose covariant-`L²` jets up to order `a + 2` lie in the
+radius-`R` ball, **every** covariant order `q ≤ a` of the nonlinear RHS-arm difference
+`N := deTurckRHSArmG0 g₀ g_bg T − deTurckRHSArmG0 g₀ g_bg T'` is dominated, at the pointwise squared
+fibre-norm level, by the order-`(q+2)` covariant-jet column of the perturbation difference `T − T'`:
+```
+∀ q ≤ a, ∀ x,  rfns(∇^q N)(x)  ≤  Λg² · ∑_{i ≤ q+2} rfns(∇^i (T − T'))(x) .
+```
+
+**Why deficit-free, and why INTRINSIC.**  The RHS arm `deTurckRHSArmG0 g₀ g_bg T = deTurckRHSSection
+g_bg (g₀ + T) = −2 Ric(g₀+T) + 𝓛_{W(g₀+T,g_bg)}(g₀+T)` is a second-order quasilinear Nemytskii
+nonlinearity of the order-`≤ 2` metric jets.  By the mean-value path `N = ∫₀¹ dF(g₀ + T' + s·(T − T'))
+[T − T'] ds`, `N` is a finite sum of intrinsic covariant-bilinear contractions of the perturbation
+difference `T − T'` against a fixed-`g₀` coefficient field (the `dF` symbol along the path — the
+curvature / Christoffel / inverse-Gram combination, rational and det-`≠ 0` by `δ < 1`).  Each such
+term is a `DiffBilinOp` whose binomial covariant-Leibniz `rfns` grid
+(`DiffBilinOp.rfns_iteratedCovGrad_grid`) puts the order-`q` covariant gradient `∇^q N` under the
+order-`(q+2)` covariant-jet column of `T − T'` (the order-`≤ 2` operator reads `∇^{≤ 2}` and each of
+the `q` gradient steps advances the read order by one), the differentiated operator entering **only**
+through its base-point-uniform fibre coefficient `kappa`, controlled ball-uniformly by the
+supercritical `H^{a+2} ↪ C²` section embedding of the radius-`R` ball (`ha_super`); the high covariant
+orders all land on the `T − T'` factor.  This is the genuine intrinsic curvature / Lie / inverse-Gram
+covariant-jet Nemytskii content, expressed entirely in `iteratedCovGrad` / `riemannianFiberNormSq` —
+**never** a `chartGramOnE` / `chartInvGramOnE` / `HasChartJetLip` chart-jet ball Lipschitz chain.
+
+**Non-vacuity.**  The bound vanishes as `T − T' → 0`, so the Nemytskii Lipschitz character is
+preserved; a `Λg = 0` witness is rejected by a nonvanishing `rfns(∇^q N)` for a genuinely
+second-order, non-flat RHS difference.  This is a posited deficit-free analytic leaf; consumers
+transitively depend on its `sorryAx`. -/
+private theorem deTurckRHSArmDiff_iteratedCovGrad_rfns_grid_intrinsic_ballUniform
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
+    ∃ Λg : ℝ, 0 ≤ Λg ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_lt : δ' < 1)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ q : ℕ, q ≤ a → ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 q
+                (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+                  deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ')).toSection x) ≤
+            Λg ^ 2 * ∑ i ∈ Finset.range (q + 2 + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 i (T - T')).toSection x) := by
+  sorry
+
 /-- **(POSITED deficit-free INTRINSIC order-`0` pointwise fibre-norm domination of the nonlinear
 Ricci–DeTurck RHS-arm difference — the irreducible curvature/Lie/inverse-Gram value-level Nemytskii
 leaf, chart-jet-free.)**
@@ -4313,7 +4369,35 @@ private theorem deTurckRHSArmDiff_order0_rfns_intrinsic_ballUniform
                   deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ').toSection x) ≤
             Λa ^ 2 * ∑ i ∈ Finset.range (a + 2 + 1),
               ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2 := by
-  sorry
+  classical
+  -- The shared intrinsic covariant-Leibniz grid leaf (at covariant order `q = 0`, window `≤ 2`):
+  -- `rfns(N)(x) ≤ Λg² · ∑_{i ≤ 2} rfns(∇^i (T − T'))(x)`.
+  obtain ⟨Λg, hΛg_nn, hgrid⟩ :=
+    deTurckRHSArmDiff_iteratedCovGrad_rfns_grid_intrinsic_ballUniform (I := I) g₀ g_bg a ha_super hR
+  -- The supercritical `H^{a+2} ↪ C²` section embedding of the radius-`R` ball, applied to `T − T'`:
+  -- `∑_{i ≤ 2} rfns(∇^i (T − T'))(x) ≤ Cemb² · ∑_{i ≤ a+2} ‖∇^i (T − T')‖²`.
+  obtain ⟨Cemb, hCemb_nn, hemb⟩ :=
+    deTurckArmDiff_supercritical_pointwise_jet_le (I := I) g₀ a ha_super
+  refine ⟨Λg * Cemb, by positivity, ?_⟩
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball x
+  set S : ℝ := ∑ i ∈ Finset.range (a + 2 + 1),
+    ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2 with hS_def
+  have hS_nn : 0 ≤ S := Finset.sum_nonneg fun i _ => sq_nonneg _
+  -- The grid leaf at `q = 0`: `rfns(∇^0 N)(x) = rfns(N)(x)` (the order-`0` jet is the tensor itself).
+  have hg0 := hgrid T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball 0 (Nat.zero_le a) x
+  -- The embedding column for `T − T'`.
+  have hemb' := hemb (T - T') x
+  -- Chain: `rfns(N)(x) ≤ Λg² · (∑_{i ≤ 2} rfns(∇^i (T − T'))(x)) ≤ Λg² · Cemb² · S = (Λg·Cemb)² · S`.
+  calc riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
+          ((deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+              deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ').toSection x)
+      ≤ Λg ^ 2 * ∑ i ∈ Finset.range (0 + 2 + 1),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 i (T - T')).toSection x) := hg0
+    _ ≤ Λg ^ 2 * (Cemb ^ 2 * S) := by
+        refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+        rw [hS_def]; exact hemb'
+    _ = (Λg * Cemb) ^ 2 * S := by ring
 
 /-- **(POSITED deficit-free INTRINSIC top-order-`a` integrated covariant-`L²` Moser–Nemytskii tame
 bound on the nonlinear Ricci–DeTurck RHS-arm difference — the irreducible curvature/Lie/inverse-Gram
@@ -4362,7 +4446,33 @@ private theorem deTurckRHSArmDiff_topOrder_l2_intrinsic_ballUniform
               deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ')‖ ≤
           Λc * Real.sqrt (∑ i ∈ Finset.range (a + 2 + 1),
             ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2) := by
-  sorry
+  classical
+  -- The shared intrinsic covariant-Leibniz grid leaf (at covariant order `q = a`, window `≤ a + 2`):
+  -- `∀ x, rfns(∇^a N)(x) ≤ Λg² · ∑_{i ≤ a+2} rfns(∇^i (T − T'))(x)`.
+  obtain ⟨Λg, hΛg_nn, hgrid⟩ :=
+    deTurckRHSArmDiff_iteratedCovGrad_rfns_grid_intrinsic_ballUniform (I := I) g₀ g_bg a ha_super hR
+  refine ⟨Λg, hΛg_nn, ?_⟩
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
+  set N : SmoothCcTensor g₀ 0 2 :=
+    deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+      deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ' with hN_def
+  -- The grid leaf at `q = a` is exactly the pointwise covariant-jet hypothesis of
+  -- `l2RootSum_of_pointwise_iteratedCovGrad_jet` (P := N, W := T − T', q := a, window N := a + 2,
+  -- constant C := Λg²): integrate the pointwise grid over the closed manifold to the `L²` root-sum.
+  have hpt : ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 a N).toSection x) ≤
+        Λg ^ 2 * ∑ i ∈ Finset.range ((a + 2) + 1),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 i (T - T')).toSection x) := by
+    intro x
+    rw [hN_def]
+    exact hgrid T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball a le_rfl x
+  have hl2 :=
+    l2RootSum_of_pointwise_iteratedCovGrad_jet (I := I) g₀ a (a + 2) N (T - T')
+      (Λg ^ 2) (by positivity) hpt
+  -- `√(Λg²) = Λg` (since `Λg ≥ 0`); the goal already reads `N` (via `set`).
+  rwa [Real.sqrt_sq hΛg_nn] at hl2
 
 /-- **(The top-order integrated `L²` tame bound on the nonlinear Ricci–DeTurck RHS-arm difference,
 re-proved DEFICIT-FREE from the intrinsic covariant-Leibniz top-jet leaf.)**
