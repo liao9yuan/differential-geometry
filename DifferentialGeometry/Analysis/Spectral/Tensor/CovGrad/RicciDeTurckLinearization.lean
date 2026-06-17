@@ -3,6 +3,12 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantBilinearLe
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTraceField
 import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldContractionBound
 import DifferentialGeometry.Geometry.Connection.SingleSlotOperatorFiberNormBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.InnerBridge
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.LowerAllUpperIndices
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBounds.InnerLowerBound
+import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChartParallelTransportOpNorm.ChartLeviCivitaParallelCLM
+import DifferentialGeometry.Analysis.Sobolev.Manifold.Rellich
+import DifferentialGeometry.Analysis.Elliptic.MetricBounds
 
 /-! # The intrinsic metric-variation foundation of the Ricci–DeTurck right-hand side
 
@@ -527,18 +533,303 @@ private theorem norm_modelDoubleTrace_le (s : ℕ) (L : Tensor0SModel 1 ℝ E �
           ‖Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
             ((Module.finBasis ℝ E).cDualBasis k)‖ * ‖L‖ := by ring
 
+open DifferentialGeometry.Tensor.Tensor0SRiemannian
+  DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+  DifferentialGeometry.Integral.Measure in
+/-- **Chart-local operator-form lower bound of the chart-Gram quadratic form.**  On a compact subset
+`K` of the tangent trivialisation base set at `α`, the chart-Gram form has a strictly positive uniform
+lower bound `c · ‖u‖² ≤ chartGramBilin g α b u u`.  The chart-Gram form is the `chartJinv α b`-pullback
+of the bundle metric, jointly continuous in `(b, u)` on `K × E` (the Gram-matrix entries are continuous
+on the base set, the model coordinate maps are continuous), strictly positive at every `(b, u)` with
+`u ≠ 0` (`chartJinv α b u ≠ 0` since `chartJinv` is left-invertible by `chartJ` on the base set, then
+`g.pos`); the extreme-value theorem on the compact `K × sphere(E)` produces a strictly positive minimum,
+and homogeneity in `u` extends it to all of `E`. -/
+private theorem exists_chartGramBilin_quadForm_lower_bound_on_compact
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {K : Set M} (hK : IsCompact K)
+    (hK_sub : K ⊆ (trivializationAt E (TangentSpace I) α).baseSet) :
+    ∃ c : ℝ, 0 < c ∧ ∀ b ∈ K, ∀ u : E,
+      c * ‖u‖ ^ 2 ≤ chartGramBilin (I := I) (M := M) g α b u u := by
+  classical
+  set F : M × E → ℝ := fun p => chartGramBilin (I := I) (M := M) g α p.1 p.2 p.2 with hF
+  have hcoord : ∀ j : Fin (Module.finrank ℝ E),
+      Continuous (fun u : E => (chartModelBasis E).equivFun u j) := by
+    intro j
+    have hlin : Continuous (fun u : E => (chartModelBasis E).equivFun u) :=
+      LinearMap.continuous_of_finiteDimensional (chartModelBasis E).equivFun.toLinearMap
+    exact (continuous_apply j).comp hlin
+  have hF_cont : ContinuousOn F (K ×ˢ (Set.univ : Set E)) := by
+    have hF_eq : ∀ p : M × E, F p =
+        ∑ j : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+          chartGramMatrix g α p.1 j k *
+            (chartModelBasis E).equivFun p.2 j * (chartModelBasis E).equivFun p.2 k := by
+      intro p; exact chartGramBilin_apply (I := I) (M := M) g α p.1 p.2 p.2
+    refine ContinuousOn.congr ?_ (fun p _ => hF_eq p)
+    refine continuousOn_finset_sum _ (fun j _ => ?_)
+    refine continuousOn_finset_sum _ (fun k _ => ?_)
+    refine ContinuousOn.mul (ContinuousOn.mul ?_ ?_) ?_
+    · have hentry := (chartGramMatrix_entry_contMDiffOn (I := I) g α j k).continuousOn
+      exact (hentry.mono hK_sub).comp continuousOn_fst (fun p hp => hp.1)
+    · exact ((hcoord j).comp continuous_snd).continuousOn
+    · exact ((hcoord k).comp continuous_snd).continuousOn
+  set Sph : Set E := Metric.sphere (0 : E) 1 with hSph
+  have hSph_compact : IsCompact Sph := isCompact_sphere _ _
+  -- a unit vector exists: normalise a nonzero model-basis vector (finrank > 0)
+  have hSph_ne : Sph.Nonempty := by
+    have hfr : 0 < Module.finrank ℝ E := Nat.pos_of_ne_zero (NeZero.ne _)
+    set b₀ : E := (Module.finBasis ℝ E) ⟨0, hfr⟩ with hb₀
+    have hb₀_ne : b₀ ≠ 0 := (Module.finBasis ℝ E).ne_zero _
+    have hb₀_norm_pos : 0 < ‖b₀‖ := norm_pos_iff.mpr hb₀_ne
+    refine ⟨‖b₀‖⁻¹ • b₀, ?_⟩
+    rw [hSph, Metric.mem_sphere, dist_zero_right, norm_smul, norm_inv, Real.norm_eq_abs,
+      abs_of_pos hb₀_norm_pos, inv_mul_cancel₀ (ne_of_gt hb₀_norm_pos)]
+  set Kp : Set (M × E) := K ×ˢ Sph with hKp
+  have hKp_compact : IsCompact Kp := hK.prod hSph_compact
+  have hKp_sub : Kp ⊆ K ×ˢ (Set.univ : Set E) := fun p hp => ⟨hp.1, Set.mem_univ _⟩
+  have hF_cont_Kp : ContinuousOn F Kp := hF_cont.mono hKp_sub
+  -- positivity of the chart-Gram quadratic form at a nonzero vector
+  have hF_pos : ∀ b ∈ (trivializationAt E (TangentSpace I) α).baseSet, ∀ u : E, u ≠ 0 →
+      0 < chartGramBilin (I := I) (M := M) g α b u u := by
+    intro b hb u hu
+    rw [chartGramBilin_eq_innerJinv (I := I) (M := M) g α b u u]
+    have hjne : chartJinv (I := I) (M := M) α b u ≠ 0 := by
+      intro hzero
+      apply hu
+      have := chartJ_chartJinv (I := I) (M := M) α hb u
+      rw [hzero, map_zero] at this
+      exact this.symm
+    exact g.pos b (chartJinv (I := I) (M := M) α b u) hjne
+  -- the extreme value over K × sphere
+  by_cases hK_ne : Kp.Nonempty
+  · obtain ⟨p₀, hp₀_mem, hp₀_min⟩ := hKp_compact.exists_isMinOn hK_ne hF_cont_Kp
+    have hp₀_base : p₀.1 ∈ (trivializationAt E (TangentSpace I) α).baseSet := hK_sub hp₀_mem.1
+    have hp₀_ne : p₀.2 ≠ 0 := by
+      have : p₀.2 ∈ Sph := hp₀_mem.2
+      rw [hSph, Metric.mem_sphere, dist_zero_right] at this
+      intro hzero; rw [hzero, norm_zero] at this; exact one_ne_zero this.symm
+    have hp₀_pos : 0 < F p₀ := hF_pos p₀.1 hp₀_base p₀.2 hp₀_ne
+    refine ⟨F p₀, hp₀_pos, ?_⟩
+    intro b hb u
+    by_cases hu0 : u = 0
+    · subst hu0; simp
+    · -- rescale: u/‖u‖ on the sphere
+      have hu_norm_pos : 0 < ‖u‖ := norm_pos_iff.mpr hu0
+      set v : E := ‖u‖⁻¹ • u with hv
+      have hv_sphere : v ∈ Sph := by
+        rw [hSph, Metric.mem_sphere, dist_zero_right, hv, norm_smul, norm_inv, Real.norm_eq_abs,
+          abs_of_pos hu_norm_pos, inv_mul_cancel₀ (ne_of_gt hu_norm_pos)]
+      have hbv_mem : (b, v) ∈ Kp := ⟨hb, hv_sphere⟩
+      have hmin_le : F p₀ ≤ F (b, v) := hp₀_min hbv_mem
+      have hFbv : F (b, v) = chartGramBilin (I := I) (M := M) g α b v v := rfl
+      have hscale : chartGramBilin (I := I) (M := M) g α b v v =
+          ‖u‖⁻¹ ^ 2 * chartGramBilin (I := I) (M := M) g α b u u := by
+        rw [hv]
+        simp only [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
+        ring
+      have hquad_eq : ‖u‖ ^ 2 * F p₀ ≤ chartGramBilin (I := I) (M := M) g α b u u := by
+        rw [hFbv, hscale] at hmin_le
+        have hsq_pos : 0 < ‖u‖ ^ 2 := by positivity
+        calc ‖u‖ ^ 2 * F p₀
+            ≤ ‖u‖ ^ 2 * (‖u‖⁻¹ ^ 2 * chartGramBilin (I := I) (M := M) g α b u u) :=
+              mul_le_mul_of_nonneg_left hmin_le (le_of_lt hsq_pos)
+          _ = chartGramBilin (I := I) (M := M) g α b u u := by
+              field_simp
+      calc F p₀ * ‖u‖ ^ 2 = ‖u‖ ^ 2 * F p₀ := by ring
+        _ ≤ chartGramBilin (I := I) (M := M) g α b u u := hquad_eq
+  · -- Kp empty: since the sphere is nonempty, K must be empty, so the bound is vacuous
+    refine ⟨1, one_pos, ?_⟩
+    intro b hb u
+    exact absurd ⟨(b, hSph_ne.choose), hb, hSph_ne.choose_spec⟩ hK_ne
+
+open DifferentialGeometry.Tensor.Tensor0SRiemannian in
+/-- **Uniform model-norm bound of the chart-Jacobian inverse on a compact chart piece (POSITED —
+genuinely-missing PUBLIC prerequisite).**  On a compact subset `K` of the tangent trivialisation base
+set at `α`, the operator norm of the chart-Jacobian inverse `chartJinv α b : E →L[ℝ] E` — measured in
+the project's MODEL fibre norm (the default `tangentSpace_normedAddCommGroup` E-norm, NOT the
+`g`-Riemannian fibre norm) — is bounded by a single nonnegative constant.
+
+This is the model-norm analogue of `chartJinv_opNorm_isBounded_on_compact_unconditional`
+(`ChartLeviCivitaParallelCLM.lean:168`), which states the SAME bound but for the `g`-Riemannian fibre
+norm (its conclusion is the op-norm of `symmL` measured against the `RiemannianBundle`-induced
+`NormedAddCommGroup (TangentSpace I b)` instance, a different norm than the project E-norm used by
+`cometricLmodel`'s op-norm).  It is true by the identical extreme-value-on-a-compact-chart-piece
+argument (the chart-Jacobian inverse `b ↦ chartJinv α b` is continuous into `E →L[ℝ] E` on the chart
+base set; on a compact subset its operator norm attains a finite sup), but the on-disk infrastructure
+(`chartJinv_pre_clm_contMDiffAt`, `chartJ_opNorm_isBounded_on_compact_unconditional`) is all phrased
+under the `RiemannianBundle` g-norm convention, so no project-E-norm form currently exists on disk. -/
+theorem exists_uniform_chartJinv_modelOpNorm_bound_on_compact
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {K : Set M} (hK : IsCompact K)
+    (hK_sub : K ⊆ (trivializationAt E (TangentSpace I) α).baseSet) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ b ∈ K, ‖chartJinv (I := I) (M := M) α b‖ ≤ C := by
+  sorry
+
+open DifferentialGeometry.Tensor.Tensor0SRiemannian
+  DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+  DifferentialGeometry.Integral.Measure in
+/-- **Chart-local intrinsic metric ellipticity on a compact base set.**  On a compact subset `K` of the
+tangent trivialisation base set at `α`, the bundle metric is uniformly elliptic: `c · ‖w‖² ≤ g.inner b w w`
+for all `b ∈ K` and `w : TangentSpace I b`.  Through the round-trip `chartJinv α b (chartJ α b w) = w` and
+`chartGramBilin α b (chartJ α b w)(chartJ α b w) = g.inner b w w`, the chart-Gram lower bound
+`c₀‖chartJ α b w‖² ≤ chartGramBilin α b (chartJ α b w)(chartJ α b w)` combines with the uniform
+`chartJinv`-operator bound `‖w‖ ≤ ‖chartJinv α b‖ · ‖chartJ α b w‖ ≤ C · ‖chartJ α b w‖` to yield
+`g.inner b w w ≥ (c₀ / C²) · ‖w‖²`. -/
+private theorem exists_chartLocal_metric_ellipticity
+    (g : SmoothRiemannianMetric I M) (α : M)
+    {K : Set M} (hK : IsCompact K)
+    (hK_sub : K ⊆ (trivializationAt E (TangentSpace I) α).baseSet) :
+    ∃ c : ℝ, 0 < c ∧ ∀ b ∈ K, ∀ w : TangentSpace I b,
+      c * ‖w‖ ^ 2 ≤ g.inner b w w := by
+  classical
+  obtain ⟨c₀, hc₀_pos, hc₀⟩ :=
+    exists_chartGramBilin_quadForm_lower_bound_on_compact (I := I) (M := M) g α hK hK_sub
+  obtain ⟨C, hC_nn, hC⟩ :=
+    exists_uniform_chartJinv_modelOpNorm_bound_on_compact (I := I) (M := M) g α hK hK_sub
+  refine ⟨c₀ / (C + 1) ^ 2, by positivity, ?_⟩
+  intro b hb w
+  have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := hK_sub hb
+  set u : E := chartJ (I := I) (M := M) α b w with hu
+  have hwu : w = chartJinv (I := I) (M := M) α b u := (chartJinv_chartJ (I := I) (M := M) α hb_base w).symm
+  -- g.inner b w w = chartGramBilin α b u u
+  have hinner_eq : g.inner b w w = chartGramBilin (I := I) (M := M) g α b u u := by
+    rw [chartGramBilin_eq_innerJinv (I := I) (M := M) g α b u u, ← hwu]
+  -- chartJinv op-norm bound: ‖w‖ ≤ (C+1) * ‖u‖
+  have hsymm_bound : ‖chartJinv (I := I) (M := M) α b‖ ≤ C := hC b hb
+  have hw_le : ‖w‖ ≤ (C + 1) * ‖u‖ := by
+    rw [hwu]
+    calc ‖chartJinv (I := I) (M := M) α b u‖
+        ≤ ‖chartJinv (I := I) (M := M) α b‖ * ‖u‖ := (chartJinv (I := I) (M := M) α b).le_opNorm u
+      _ ≤ (C + 1) * ‖u‖ := by
+          apply mul_le_mul_of_nonneg_right _ (norm_nonneg _)
+          linarith
+  have hCp1_pos : 0 < C + 1 := by linarith
+  -- ‖u‖² ≥ ‖w‖²/(C+1)²
+  have hnorm_sq : ‖w‖ ^ 2 ≤ (C + 1) ^ 2 * ‖u‖ ^ 2 := by
+    have h := mul_le_mul hw_le hw_le (norm_nonneg _) (by positivity : (0:ℝ) ≤ (C+1) * ‖u‖)
+    calc ‖w‖ ^ 2 = ‖w‖ * ‖w‖ := by ring
+      _ ≤ ((C + 1) * ‖u‖) * ((C + 1) * ‖u‖) := h
+      _ = (C + 1) ^ 2 * ‖u‖ ^ 2 := by ring
+  rw [hinner_eq]
+  calc c₀ / (C + 1) ^ 2 * ‖w‖ ^ 2
+      ≤ c₀ / (C + 1) ^ 2 * ((C + 1) ^ 2 * ‖u‖ ^ 2) := by
+        apply mul_le_mul_of_nonneg_left hnorm_sq
+        positivity
+    _ = c₀ * ‖u‖ ^ 2 := by field_simp
+    _ ≤ chartGramBilin (I := I) (M := M) g α b u u := hc₀ b hb u
+
+open DifferentialGeometry.Tensor.Tensor0SRiemannian
+  DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+  DifferentialGeometry.Integral.Measure in
+/-- **Global intrinsic metric ellipticity on the closed manifold.**  The smooth Riemannian metric `g`
+on a closed manifold is uniformly elliptic against the fixed model fibre norm: there is a single
+`c > 0` with `c · ‖v‖² ≤ g.inner x v v` for every base point `x` and every tangent vector
+`v : TangentSpace I x`.  The chart-local ellipticity holds on each compact partition-of-unity support
+`tsupport(POU_α)` (which lies inside the trivialisation base set, `pouTsupport_subset_baseSet`); the
+partition-of-unity finset covers `M` (`chartAtlasPOU_finset_sum_eq_one` forces every `x` into some
+support), so the finite minimum of the per-piece constants is a global lower bound. -/
+theorem exists_uniform_metric_ellipticity_lowerBound (g : SmoothRiemannianMetric I M) :
+    ∃ c : ℝ, 0 < c ∧ ∀ (x : M) (v : TangentSpace I x), c * ‖v‖ ^ 2 ≤ g.inner x v v := by
+  classical
+  -- per-piece ellipticity constant
+  have hpiece : ∀ α : M, ∃ c : ℝ, 0 < c ∧
+      ∀ b ∈ (tsupport fun x : M => ((chartAtlasPOU I M) α) x), ∀ w : TangentSpace I b,
+        c * ‖w‖ ^ 2 ≤ g.inner b w w := by
+    intro α
+    exact exists_chartLocal_metric_ellipticity (I := I) (M := M) g α
+      (pouTsupport_isCompact (I := I) (M := M) α)
+      (pouTsupport_subset_baseSet (I := I) (M := M) α)
+  choose cα hcα_pos hcα using hpiece
+  set S : Finset M := chartAtlasPOU_finset (E := E) (I := I) (M := M) with hS
+  -- the global constant: min over the (nonempty) finset, or 1 if empty
+  by_cases hS_ne : S.Nonempty
+  · set c : ℝ := S.inf' hS_ne cα with hc
+    have hc_pos : 0 < c := (Finset.lt_inf'_iff hS_ne).mpr (fun α _ => hcα_pos α)
+    refine ⟨c, hc_pos, ?_⟩
+    intro x v
+    -- x lies in some piece tsupport
+    obtain ⟨α, hαS, hαx⟩ : ∃ α ∈ S, x ∈ tsupport fun y : M => ((chartAtlasPOU I M) α) y := by
+      by_contra hcon
+      have hsum : ∑ α ∈ S, ((chartAtlasPOU I M) α) x = 1 :=
+        DifferentialGeometry.Analysis.Sobolev.Chart.chartAtlasPOU_finset_sum_eq_one (I := I) (M := M) x
+      have hzero : ∀ α ∈ S, ((chartAtlasPOU I M) α) x = 0 := by
+        intro α hαS
+        by_contra hne
+        exact hcon ⟨α, hαS, subset_tsupport _ hne⟩
+      rw [Finset.sum_congr rfl hzero, Finset.sum_const_zero] at hsum
+      exact one_ne_zero hsum.symm
+    have hle := hcα α x hαx v
+    have hc_le : c ≤ cα α := Finset.inf'_le _ hαS
+    calc c * ‖v‖ ^ 2 ≤ cα α * ‖v‖ ^ 2 :=
+          mul_le_mul_of_nonneg_right hc_le (by positivity)
+      _ ≤ g.inner x v v := hle
+  · -- S empty ⟹ M empty (sum = 1 fails); ellipticity is vacuous
+    refine ⟨1, one_pos, ?_⟩
+    intro x v
+    exfalso
+    have hsum : ∑ α ∈ S, ((chartAtlasPOU I M) α) x = 1 :=
+      DifferentialGeometry.Analysis.Sobolev.Chart.chartAtlasPOU_finset_sum_eq_one (I := I) (M := M) x
+    rw [Finset.not_nonempty_iff_eq_empty.mp hS_ne, Finset.sum_empty] at hsum
+    exact one_ne_zero hsum.symm
+
 /-- **Uniform-over-the-base operator-norm bound of the model cometric raise (LEAF — classical
-compactness).**  On the compact base `M`, the model operator norm `x ↦ ‖cometricLmodel g₀ x‖` of the
-cometric index-raise (the model reading of the smooth Hom-bundle section `inverseMetricSharpField`,
-`Hom(T^*M, TM)`) is bounded by a single nonnegative constant.  This is the classical "a continuous
-operator-valued field on a compact base attains a finite operator-norm sup" fact (the exact model-norm
-analogue of `exists_uniform_cometricBilin_bound` / `bddAbove_opNorm_range_of_continuous_opNorm`), the
-sole missing PUBLIC prerequisite of the rank-uniform contraction-product operator bound; no direct
-model-operator-norm form of it currently exists on disk (the disk carries only the `(0, 2)`
-tangent-bilinear and the `g`-Riemannian `TensorRSSpace`-Hom variants). -/
+compactness, via metric ellipticity).**  On the compact base `M`, the model operator norm
+`x ↦ ‖cometricLmodel g₀ x‖` of the cometric index-raise is bounded by a single nonnegative constant
+`1/c`, where `c` is the global metric ellipticity constant (`exists_uniform_metric_ellipticity_lowerBound`).
+
+`cometricLmodel g₀ x f = ♯(equiv.symm f)` (the model reading of the inverse-metric sharp).  Setting
+`w = ♯(equiv.symm f)` and `α = equiv.symm f`, `inverseMetricSharpFib_inner` gives
+`g.inner x w w = (cotangentToDualLinear α) w ≤ ‖α‖·‖w‖ = ‖f‖·‖w‖` (the cotangent dual reads the single
+slot; `equiv.symm` and `cotangentToCLM` are norm-preserving), and ellipticity `c‖w‖² ≤ g.inner x w w`
+yields `c‖w‖ ≤ ‖f‖`, i.e. `‖cometricLmodel g₀ x f‖ = ‖w‖ ≤ (1/c)‖f‖`.  The whole argument stays in the
+clean model-fibre norm `‖f‖` (on `Tensor0SModel 1 ℝ E`) and the tangent E-norm `‖w‖` (never the
+fibre-Hom op-norm), so no `g`-Riemannian fibre-norm diamond enters. -/
 theorem exists_uniform_cometricLmodel_opNorm_bound (g₀ : SmoothRiemannianMetric I M) :
     ∃ μ : ℝ, 0 ≤ μ ∧ ∀ x : M, ‖cometricLmodel (I := I) g₀ x‖ ≤ μ := by
-  sorry
+  classical
+  obtain ⟨c, hc_pos, hc⟩ := exists_uniform_metric_ellipticity_lowerBound (I := I) (M := M) g₀
+  refine ⟨1 / c, by positivity, ?_⟩
+  intro x
+  apply ContinuousLinearMap.opNorm_le_bound _ (by positivity)
+  intro f
+  set α : Tensor0SSpace 1 I x :=
+    (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 1 x).symm f with hα
+  set w : TangentSpace I x := inverseMetricSharpFib (I := I) g₀ x α with hw
+  have hval : cometricLmodel (I := I) g₀ x f = w := rfl
+  rw [hval]
+  -- ‖α‖ = ‖f‖
+  have hα_norm : ‖α‖ = ‖f‖ := by
+    rw [hα]; exact tensor0SSpace_continuousLinearEquiv_symm_norm_apply (𝕜 := ℝ) (I := I) 1 x f
+  -- g.inner x w w = (cotangentToDualLinear α) w
+  have hinner : g₀.inner x w w = (Tensor0SBundle.cotangentToDualLinear α) w := by
+    rw [hw]; exact inverseMetricSharpFib_inner (I := I) g₀ x α w
+  have hclm_norm : ‖Tensor0SBundle.cotangentToCLM (I := I) α‖ ≤ ‖α‖ := by
+    rw [Tensor0SBundle.cotangentToCLM,
+      (continuousMultilinearCurryFin1 ℝ (TangentSpace I x) ℝ).norm_map]
+    exact le_of_eq (tensor0SSpace_continuousLinearEquiv_norm_apply (𝕜 := ℝ) (I := I) 1 x α)
+  have hdual_le : (Tensor0SBundle.cotangentToDualLinear α) w ≤ ‖α‖ * ‖w‖ := by
+    rw [Tensor0SBundle.cotangentToDualLinear_apply, Tensor0SBundle.cotangentToDual_apply]
+    have hcoe : α (fun _ : Fin 1 => w) = Tensor0SBundle.cotangentToCLM (I := I) α w := by
+      rw [Tensor0SBundle.cotangentToCLM]; rfl
+    rw [hcoe]
+    calc Tensor0SBundle.cotangentToCLM (I := I) α w
+        ≤ ‖Tensor0SBundle.cotangentToCLM (I := I) α w‖ := le_abs_self _
+      _ ≤ ‖Tensor0SBundle.cotangentToCLM (I := I) α‖ * ‖w‖ :=
+          (Tensor0SBundle.cotangentToCLM (I := I) α).le_opNorm w
+      _ ≤ ‖α‖ * ‖w‖ := mul_le_mul_of_nonneg_right hclm_norm (norm_nonneg _)
+  have hell : c * ‖w‖ ^ 2 ≤ g₀.inner x w w := hc x w
+  have hkey : c * ‖w‖ ^ 2 ≤ ‖f‖ * ‖w‖ := by
+    rw [hinner] at hell
+    calc c * ‖w‖ ^ 2 ≤ (Tensor0SBundle.cotangentToDualLinear α) w := hell
+      _ ≤ ‖α‖ * ‖w‖ := hdual_le
+      _ = ‖f‖ * ‖w‖ := by rw [hα_norm]
+  have hw_nn : 0 ≤ ‖w‖ := norm_nonneg _
+  rcases eq_or_lt_of_le hw_nn with hw0 | hw_pos
+  · rw [← hw0]; positivity
+  · have hc_w : c * ‖w‖ ≤ ‖f‖ := by
+      have hmul : c * ‖w‖ * ‖w‖ ≤ ‖f‖ * ‖w‖ := by nlinarith [hkey, sq_nonneg ‖w‖]
+      exact le_of_mul_le_mul_right hmul hw_pos
+    rw [div_mul_eq_mul_div, one_mul, le_div_iff₀ hc_pos, mul_comm]
+    exact hc_w
 
 /-- **The RANK-UNIFORM operator-norm bound of the cometric double-trace fibre.**  At every passenger
 count `n` and base point `x`,
