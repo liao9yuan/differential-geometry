@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricDiffCovGradKoszul
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.ConnDiffCovGradBridge
 import DifferentialGeometry.Geometry.Metric.InverseMetricField
+import DifferentialGeometry.Geometry.Connection.MetricCompatibility.InverseMetricFieldParallel
 
 /-!
 # The connection-difference vector as the inverse-Gram raise of the metric-difference covariant gradient
@@ -238,6 +239,110 @@ theorem connDiff_eq_appCc_invGram_covGrad
         (koszulCovGradCovec (I := I) (M := M) g₀ g₁ X Y x) ζ,
       cotangentToDualLinear_apply,
       koszulCovGradCovec_dual_apply (I := I) (M := M) g₀ g₁ X Y x ζ]
+
+/-! ## The differentiated connection difference (the value-level order-graded product rule) -/
+
+set_option linter.unusedSectionVars false in
+/-- **The differentiated connection difference, order-graded (value level).**
+
+The directional covariant derivative `covDerivConnDiff g₀ g₁ X Z Y x` of the connection-difference
+tensor `A = connDiff g₁ g₀` under the `g₀`-Levi-Civita connection (`= (∇₀_X A)(Z, Y)` in the
+consumer's `X Z Y` slot order) is the order-graded covariant product rule of the inverse-Gram raise
+`connDiff_eq_appCc_invGram_covGrad`.  Writing `K = koszulCovGradCovec g₀ g₁ Z Y` for the `g₁`-flat
+Koszul covector of the metric-difference covariant gradient, `A(Z, Y) = ♯_{g₁}(K)` (leaf (1)), so
+differentiating covariantly in `X` along `∇₀` and using the difference one-form `connDiff` to swap
+`∇₀ ↔ ∇₁` together with the `∇₁`-parallelism of `♯_{g₁}`
+(`inverseMetricSharpField_covGrad_eq_zero`) gives
+```
+(∇₀_X A)(Z, Y)
+  = ♯_{g₁}(∇₁_X K)                                   -- the order-2 PRINCIPAL: the further covariant
+                                                       --   gradient of K (carrying ∇₀²(metric diff)),
+                                                       --   raised by the cometric ♯_{g₁};
+    − A(♯_{g₁}(K), X)                                -- the order-1 CROSS term ∇₀(g₁⁻¹) (the genuine
+                                                       --   endpoint coefficient: the Christoffel
+                                                       --   difference applied to the raised K);
+    − A(Y, ∇₀_X Z) − A(∇₀_X Y, Z),                   -- the two order-1 SLOT corrections of the
+                                                       --   (1, 2)-tensor covariant derivative,
+```
+where `∇₁_X K := dualToCotangent ((cotangentCov (LeviCivita g₁)) (b ↦ cotangentToCLM (K b)) x (X x))`
+is the `g₁`-cotangent covariant derivative of the Koszul covector, `A(·, ·) = connDiff g₁ g₀ x · ·`,
+and `∇₀_X Z = (LeviCivita g₀) Z x (X x)`.  The principal `♯_{g₁}(∇₁_X K)` is the order-2 term the
+Ricci–DeTurck `C₂` linearization expands; the three `connDiff` terms are the order-1 cross
+coefficients (`A = δΓ`, the intrinsic Christoffel variation).  This is the value-level identity the
+Ricci/Lie arms consume (the `appCc` packaging happens later, at the `(0, 2)` output level). -/
+theorem covDerivConnDiff_eq_invGramSharp_graded
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
+    covDerivConnDiff (I := I) g₀ g₁ (fun b => X b) (fun b => Z b) (fun b => Y b) x =
+      inverseMetricSharpFib (I := I) g₁ x
+          (dualToCotangent (I := I)
+            ((cotangentCov (LeviCivita (I := I) g₁)).toFun
+              (fun b : M => cotangentToCLM (I := I)
+                (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x (X x)))
+        - PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+            (inverseMetricSharpFib (I := I) g₁ x
+              (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y x)) (X x)
+        - PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x)
+            ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x))
+        - PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+            ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x)) (Z x) := by
+  classical
+  -- The `g₁`-flat Koszul covector field and the raised connection-difference field.
+  set K : Π b : M, Tensor0SSpace 1 I b :=
+    fun b => koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b with hKdef
+  -- Leaf (1), pointwise: `A(Z, Y) = ♯_{g₁}(K)` as a field equality.
+  have hWeq : (fun b : M => inverseMetricSharpFib (I := I) g₁ b (K b)) =
+      (fun b : M => PDE.DeTurck.connDiff (I := I) g₁ g₀ b (Y b) (Z b)) := by
+    funext b
+    exact (connDiff_eq_appCc_invGram_covGrad (I := I) (M := M) g₀ g₁ Z Y b).symm
+  set W : Π b : M, TangentSpace I b :=
+    fun b => PDE.DeTurck.connDiff (I := I) g₁ g₀ b (Y b) (Z b) with hWdef
+  -- Smoothness of the raised field `W` (`connDiff` of two smooth fields, first slot `Y`).
+  have hW_sm : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b (W b)) :=
+    PDE.DeTurck.connDiff_contMDiff (I := I) g₁ g₀ Y.contMDiff Z.contMDiff
+  have hW_at : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b (W b)) x :=
+    (hW_sm x).mdifferentiableAt (by simp)
+  -- Same differentiability transported across `hWeq` to the `♯_{g₁}(K)` form (for the parallelism).
+  have hWsharp_at : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b
+        (inverseMetricSharpFib (I := I) g₁ b (K b))) x := by
+    have hfun : (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b
+          (inverseMetricSharpFib (I := I) g₁ b (K b))) =
+        (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b (W b)) := by
+      funext b; rw [congrFun hWeq b]
+    rw [hfun]; exact hW_at
+  -- The `∇₀ ↔ ∇₁` swap on the raised field via the difference one-form `connDiff g₁ g₀`.
+  have hswap : (LeviCivita (I := I) g₀).toFun (fun b => W b) x (X x) =
+      (LeviCivita (I := I) g₁).toFun (fun b => W b) x (X x) -
+        PDE.DeTurck.connDiff (I := I) g₁ g₀ x (W x) (X x) := by
+    have h := PDE.DeTurck.connDiff_apply (I := I) g₁ g₀ (σ := fun b => W b) (x := x) hW_at (X x)
+    rw [h]; abel
+  -- The `∇₁`-parallelism of the cometric raise applied to the Koszul covector field `K`.
+  have hpar := inverseMetricSharpField_covGrad_eq_zero (I := I) g₁ K hWsharp_at (X x)
+  -- Rewrite `(LeviCivita g₁) W` through `hWeq` into the `♯_{g₁}(K)` form, then apply `hpar`.
+  have hW1 : (LeviCivita (I := I) g₁).toFun (fun b => W b) x (X x) =
+      inverseMetricSharpFib (I := I) g₁ x
+        (dualToCotangent (I := I)
+          ((cotangentCov (LeviCivita (I := I) g₁)).toFun
+            (fun b : M => cotangentToCLM (I := I) (K b)) x (X x))) := by
+    rw [show (fun b => W b) =
+        (fun b : M => inverseMetricSharpFib (I := I) g₁ b (K b)) from hWeq.symm]
+    exact hpar
+  -- `W x = ♯_{g₁}(K x)` for the cross term.
+  have hWx : W x = inverseMetricSharpFib (I := I) g₁ x (K x) := by
+    have := congrFun hWeq x
+    rw [hWdef]; exact this.symm
+  -- The definitional unfolding of `covDerivConnDiff` (the bridge's `hexpand`, value level).
+  have hexpand : covDerivConnDiff (I := I) g₀ g₁
+        (fun b => X b) (fun b => Z b) (fun b => Y b) x =
+      (LeviCivita (I := I) g₀).toFun (fun b => W b) x (X x)
+        - PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x)
+            ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x))
+        - PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+            ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x)) (Z x) := rfl
+  rw [hexpand, hswap, hW1, hWx]
 
 end TensorSpectral
 end Parabolic
