@@ -205,61 +205,115 @@ private theorem exists_growth_of_counting_bound
           mul_le_mul_of_nonneg_left hpow (by positivity)
       _ = w i := hC
 
+/-- The Sobolev order used in the (non-sharp) Mercer eigenvalue-counting bound:
+`weylSobolevExp = 2 · (n / 2 + 1)` (with `n = finrank E` and `/` Nat division),
+chosen so that the embedding hypothesis `2k > n` of `tensorHsToC0_opNorm_le`
+holds at `k = n / 2 + 1`, i.e. `weylSobolevExp > n`. -/
+def weylSobolevExp : ℕ := 2 * (Module.finrank ℝ E / 2 + 1)
+
+lemma weylSobolevExp_gt_finrank :
+    Module.finrank ℝ E < weylSobolevExp (E := E) := by
+  unfold weylSobolevExp; omega
+
+/-- **Mercer on-diagonal eigenvalue-counting bound** for the connection-Laplacian
+spectrum on `(0, 2)`-tensor fields, with the *non-sharp* Sobolev exponent
+`weylSobolevExp = 2·(n/2 + 1) > n`.
+
+This is the genuine Weyl-law content (the spectral counting function), in its
+min-max / reproducing-kernel form. For the finite-dimensional spectral subspace
+`V_Λ = span{eᵢ : 1 + λᵢ < Λ}` of the connection Laplacian, each `H^{2k}`-mass of a
+unit-`L²` eigen-combination is `≤ (1 + Λ)^k`, so the quantitative Sobolev
+embedding `H^{2k} ↪ C⁰` (`tensorHsToC0_opNorm_le`, valid since `2k > n`) gives the
+on-diagonal reproducing-kernel bound `K_Λ(x, x) = ∑_{1+λᵢ<Λ} |eᵢ(x)|²_g ≤
+C²·(1 + Λ)^{2k}` pointwise. The spectral-projector trace identity
+`dim V_Λ = #{i | 1 + λᵢ < Λ} = ∫_M K_Λ(x, x) dvol` then integrates this to
+`#{i | 1 + λᵢ < Λ} ≤ vol(M)·C²·(1 + Λ)^{2k} = K·(1 + Λ)^{weylSobolevExp}`.
+
+The proof is the classical Mercer / projector-trace eigenvalue-counting estimate;
+it is the only deferred (`sorry`) node of this file. -/
+theorem eigenProjector_card_le_sobolev (g : SmoothRiemannianMetric I M) :
+    ∃ K : ℝ, 0 < K ∧ ∀ Λ : ℝ,
+      (Nat.card {i : TensorEigenIdx (I := I) (M := M) g 0 2 |
+        1 + TensorEigenIdx.lambda (I := I) (M := M) i < Λ} : ℝ) ≤
+        K * (1 + Λ) ^ ((weylSobolevExp (E := E) : ℕ) : ℝ) := by
+  sorry
+
 /-- **Weyl eigenvalue-counting bound** for the connection-Laplacian spectrum on
 `(0, 2)`-tensor fields. The number of eigen-indices below a threshold grows at
-most polynomially with the sharp Weyl exponent `n/2` (`n = finrank E`):
+most polynomially with the (non-sharp) Weyl exponent
+`weylSobolevExp = 2·(n/2 + 1)`:
 
-  `N(Λ) := #{i | 1 + λᵢ < Λ} ≤ K · Λ^{n/2}`  for some `K > 0`.
+  `N(Λ) := #{i | 1 + λᵢ < Λ} ≤ K · Λ^{weylSobolevExp}`  for some `K > 0`.
 
-This is the genuine Weyl-law content (the spectral counting function). Its proof
-is the classical eigenvalue-counting estimate via either
-
-* the min-max / Courant–Fischer principle against the quantitative Sobolev
-  embedding `H^{2k} ↪ C⁰` (`tensorHsToC0_opNorm_le`) applied to the finite-
-  dimensional spectral subspace `V_Λ = span{eᵢ : 1 + λᵢ < Λ}` (the on-diagonal
-  Mercer bound `∑_{i ∈ low} |eᵢ(x)|²_g ≤ C²·Λ^{2(2k+1)}` integrated over `M`,
-  giving a — non-sharp — counting exponent `2(2k+1)`), or
-
-* the Hilbert–Schmidt / heat-kernel trace `∑ᵢ e^{-tλᵢ} = ∫_M K_t(x,x) dvol`
-  with the on-diagonal heat-kernel bound `K_t(x,x) ≤ C t^{-n/2}` (giving the
-  sharp exponent `n/2`).
-
-It is the only deferred (`sorry`) node of this file. -/
+This is obtained from the Mercer on-diagonal counting bound
+`eigenProjector_card_le_sobolev` (which produces the `(1 + Λ)^{weylSobolevExp}`
+form) by the elementary reduction `(1 + Λ)^p ≤ (2Λ)^p = 2^p·Λ^p` for `Λ > 1`,
+while for `Λ ≤ 1` the index set is empty (`1 + λᵢ ≥ 1 ≥ Λ`) and `Λ^p ≥ 0` since
+`p = weylSobolevExp` is an even natural number. The sharp Weyl exponent `n/2`
+would require the heat-kernel route; the non-sharp `weylSobolevExp` suffices for
+the downstream summability with threshold `s > weylSobolevExp`. -/
 theorem tensorEigen_counting_le (g : SmoothRiemannianMetric I M) :
     ∃ K : ℝ, 0 < K ∧ ∀ Λ : ℝ,
       (Nat.card {i : TensorEigenIdx (I := I) (M := M) g 0 2 |
         1 + TensorEigenIdx.lambda (I := I) (M := M) i < Λ} : ℝ) ≤
-        K * Λ ^ ((Module.finrank ℝ E : ℝ) / 2) := by
-  sorry
+        K * Λ ^ ((weylSobolevExp (E := E) : ℕ) : ℝ) := by
+  obtain ⟨K, hK, hKbound⟩ := eigenProjector_card_le_sobolev (I := I) (M := M) g
+  set p : ℝ := ((weylSobolevExp (E := E) : ℕ) : ℝ) with hp_def
+  have hp0 : 0 ≤ p := by positivity
+  have hpow_nonneg : ∀ Λ : ℝ, 0 ≤ Λ ^ p := by
+    intro Λ; rw [hp_def, Real.rpow_natCast, weylSobolevExp, pow_mul]; positivity
+  refine ⟨K * 2 ^ p, by positivity, fun Λ => ?_⟩
+  by_cases hΛ : 1 < Λ
+  · have h1 : (1 + Λ) ^ p ≤ (2 * Λ) ^ p :=
+      Real.rpow_le_rpow (by linarith) (by linarith) hp0
+    have h2 : (2 * Λ) ^ p = 2 ^ p * Λ ^ p :=
+      Real.mul_rpow (by norm_num) (by linarith)
+    calc (Nat.card {i : TensorEigenIdx (I := I) (M := M) g 0 2 |
+              1 + TensorEigenIdx.lambda (I := I) (M := M) i < Λ} : ℝ)
+        ≤ K * (1 + Λ) ^ p := hKbound Λ
+      _ ≤ K * (2 * Λ) ^ p := mul_le_mul_of_nonneg_left h1 hK.le
+      _ = K * (2 ^ p * Λ ^ p) := by rw [h2]
+      _ = K * 2 ^ p * Λ ^ p := by ring
+  · have hΛ' : Λ ≤ 1 := not_lt.mp hΛ
+    have hempty : {i : TensorEigenIdx (I := I) (M := M) g 0 2 |
+        1 + TensorEigenIdx.lambda (I := I) (M := M) i < Λ} = ∅ := by
+      ext i
+      simp only [Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false, not_lt]
+      have := tensor_lambda_nonneg (I := I) (M := M) i
+      linarith
+    rw [hempty, Nat.card_coe_set_eq, Set.ncard_empty, Nat.cast_zero]
+    have h2p : (0 : ℝ) ≤ (2 : ℝ) ^ p := by positivity
+    have := hpow_nonneg Λ
+    positivity
 
 /-- **Weyl polynomial eigenvalue growth** for the connection-Laplacian spectrum on
 `(0, 2)`-tensor fields. The (countable, spectrally-discrete) eigen-index set admits
 an injective rank-enumeration `φ : TensorEigenIdx g 0 2 ↪ ℕ` along which the
 eigenvalues grow at least polynomially:
 
-  `C · (φ i + 1)^{2/n} ≤ 1 + λᵢ`  for some `C > 0`,  `n = finrank E`.
+  `C · (φ i + 1)^{1/weylSobolevExp} ≤ 1 + λᵢ`  for some `C > 0`,
+  with `weylSobolevExp = 2·(n/2 + 1)`,  `n = finrank E`.
 
 This is the quantitative form of Weyl's eigenvalue-counting law
-`N(Λ) ≲ Λ^{n/2}` (equivalently `1 + λ_k ≳ k^{2/n}` along a non-decreasing
-enumeration). Any positive growth exponent `ε > 0` in place of `2/n` would
-suffice for the consumers below; the sharp Weyl exponent `2/n` is recorded here.
+`N(Λ) ≲ Λ^{weylSobolevExp}` (equivalently `1 + λ_k ≳ k^{1/weylSobolevExp}` along a
+non-decreasing enumeration). Any positive growth exponent `ε > 0` would suffice
+for the consumers below; the non-sharp exponent `1/weylSobolevExp` is recorded
+here (the sharp Weyl exponent `2/n` requires the heat-kernel route).
 
 The proof is the classical eigenvalue-counting estimate: order the spectrum by
 the finite sub-level sets `{i | 1 + λᵢ < Λ}` (`tensorEigenIdx_one_add_lambda_lt_finite`)
-and bound the counting function `N(Λ)` via the min-max / Courant–Fischer principle
-against the Sobolev embedding constant (equivalently, the Hilbert–Schmidt /
-heat-kernel on-diagonal bound for the resolvent power). It is the only deferred
-node of this file. -/
+and bound the counting function `N(Λ)` via the min-max / Sobolev-embedding Mercer
+on-diagonal counting estimate `tensorEigen_counting_le`. -/
 theorem tensorEigen_one_add_lambda_growth (g : SmoothRiemannianMetric I M) :
     ∃ (φ : TensorEigenIdx (I := I) (M := M) g 0 2 → ℕ) (C : ℝ),
       Function.Injective φ ∧ 0 < C ∧
         ∀ i : TensorEigenIdx (I := I) (M := M) g 0 2,
-          C * ((φ i : ℝ) + 1) ^ (2 / (Module.finrank ℝ E : ℝ)) ≤
+          C * ((φ i : ℝ) + 1) ^ (1 / ((weylSobolevExp (E := E) : ℕ) : ℝ)) ≤
             1 + TensorEigenIdx.lambda (I := I) (M := M) i := by
   haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
-  set n : ℝ := (Module.finrank ℝ E : ℝ) with hn_def
-  have hn : 0 < n := by
-    have hne := NeZero.ne (Module.finrank ℝ E); rw [hn_def]; positivity
+  set p : ℝ := ((weylSobolevExp (E := E) : ℕ) : ℝ) with hp_def
+  have hp : 0 < p := by
+    rw [hp_def]; unfold weylSobolevExp; positivity
   set w : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ :=
     fun i => 1 + TensorEigenIdx.lambda (I := I) (M := M) i with hw_def
   have hw1 : ∀ i, 1 ≤ w i := fun i => by
@@ -269,30 +323,32 @@ theorem tensorEigen_one_add_lambda_growth (g : SmoothRiemannianMetric I M) :
   obtain ⟨K, hK, hcount⟩ := tensorEigen_counting_le (I := I) (M := M) g
   obtain ⟨φ, C, hφ, hC, hgrow⟩ :=
     exists_growth_of_counting_bound (ι := TensorEigenIdx (I := I) (M := M) g 0 2)
-      w hw1 hfin K (n / 2) hK (by positivity) hcount
+      w hw1 hfin K p hK hp hcount
   refine ⟨φ, C, hφ, hC, fun i => ?_⟩
   have hi := hgrow i
   rw [hw_def] at hi
-  rw [show (2 / n) = 1 / (n / 2) by field_simp]
   exact hi
 
-/-- **Weyl summability of negative Sobolev-scale weights.** For `s > n / 2`
-(`n = finrank E`), the negative Sobolev weights are summable:
+/-- **Weyl summability of negative Sobolev-scale weights.** For
+`s > weylSobolevExp = 2·(n/2 + 1)` (`n = finrank E`), the negative Sobolev weights
+are summable:
 
   `∑ᵢ (1 + λᵢ)^{-s} = ∑ᵢ tensorSobolevWeight i (-s) < ∞`.
 
 This is the trace-class / eigenvalue-summability consequence of Weyl's law. The
 proof compares `(1 + λᵢ)^{-s}` against the convergent `p`-series
-`∑ₖ (k + 1)^{-2s/n}` (with `2s/n > 1`) along the polynomial eigenvalue growth
-`tensorEigen_one_add_lambda_growth`. -/
+`∑ₖ (k + 1)^{-s/weylSobolevExp}` (with `s/weylSobolevExp > 1`) along the polynomial
+eigenvalue growth `tensorEigen_one_add_lambda_growth`. The threshold is the
+non-sharp `weylSobolevExp` (the sharp threshold `n/2` requires the heat-kernel
+route); since the downstream consumer uses the summability with an arbitrarily
+large `s`, this non-sharp threshold is harmless. -/
 theorem tensorEigen_summable_negpow (g : SmoothRiemannianMetric I M) (s : ℝ)
-    (hs : (Module.finrank ℝ E : ℝ) / 2 < s) :
+    (hs : ((weylSobolevExp (E := E) : ℕ) : ℝ) < s) :
     Summable (fun i : TensorEigenIdx (I := I) (M := M) g 0 2 =>
       tensorSobolevWeight (I := I) (M := M) i (-s)) := by
-  set n : ℝ := (Module.finrank ℝ E : ℝ) with hn_def
-  have hn : 0 < n := by
-    have hne := NeZero.ne (Module.finrank ℝ E)
-    rw [hn_def]; positivity
+  set p : ℝ := ((weylSobolevExp (E := E) : ℕ) : ℝ) with hp_def
+  have hp : 0 < p := by
+    rw [hp_def]; unfold weylSobolevExp; positivity
   obtain ⟨φ, C, hφ, hC, hgrowth⟩ :=
     tensorEigen_one_add_lambda_growth (I := I) (M := M) g
   have hlam : ∀ i : TensorEigenIdx (I := I) (M := M) g 0 2,
@@ -302,28 +358,28 @@ theorem tensorEigen_summable_negpow (g : SmoothRiemannianMetric I M) (s : ℝ)
       (1 : ℝ) ≤ 1 + TensorEigenIdx.lambda (I := I) (M := M) i :=
     fun i => by linarith [hlam i]
   have hbasepos : ∀ i : TensorEigenIdx (I := I) (M := M) g 0 2,
-      (0 : ℝ) < C * ((φ i : ℝ) + 1) ^ (2 / n) := fun i => by
-    have : (0 : ℝ) < ((φ i : ℝ) + 1) ^ (2 / n) :=
+      (0 : ℝ) < C * ((φ i : ℝ) + 1) ^ (1 / p) := fun i => by
+    have : (0 : ℝ) < ((φ i : ℝ) + 1) ^ (1 / p) :=
       Real.rpow_pos_of_pos (by positivity) _
     positivity
-  set gnat : ℕ → ℝ := fun k => (C * ((k : ℝ) + 1) ^ (2 / n)) ^ (-s) with hgnat
+  set gnat : ℕ → ℝ := fun k => (C * ((k : ℝ) + 1) ^ (1 / p)) ^ (-s) with hgnat
   set f : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ :=
-    fun i => (C * ((φ i : ℝ) + 1) ^ (2 / n)) ^ (-s) with hf
+    fun i => (C * ((φ i : ℝ) + 1) ^ (1 / p)) ^ (-s) with hf
   have hfcomp : f = gnat ∘ φ := by
     funext i; simp [hf, hgnat, Function.comp]
   have hgnat_summable : Summable gnat := by
-    have hrw : gnat = fun k : ℕ => C ^ (-s) * (((k : ℝ) + 1) ^ (-(2 * s / n))) := by
+    have hrw : gnat = fun k : ℕ => C ^ (-s) * (((k : ℝ) + 1) ^ (-(s / p))) := by
       funext k
       have hkpos : (0 : ℝ) < (k : ℝ) + 1 := by positivity
-      change (C * ((k : ℝ) + 1) ^ (2 / n)) ^ (-s) = _
+      change (C * ((k : ℝ) + 1) ^ (1 / p)) ^ (-s) = _
       rw [Real.mul_rpow hC.le (Real.rpow_pos_of_pos hkpos _).le,
         ← Real.rpow_mul hkpos.le]
       congr 2
-      rw [div_mul_eq_mul_div]; ring
+      rw [div_eq_mul_inv]; ring
     rw [hrw]
     apply Summable.mul_left
-    have hexp : 1 < 2 * s / n := by rw [lt_div_iff₀ hn]; linarith
-    exact summable_nat_add_one_rpow_neg (2 * s / n) hexp
+    have hexp : 1 < s / p := by rw [lt_div_iff₀ hp]; linarith
+    exact summable_nat_add_one_rpow_neg (s / p) hexp
   have hfsummable : Summable f := by
     rw [hfcomp]; exact hgnat_summable.comp_injective hφ
   refine Summable.of_nonneg_of_le ?_ ?_ hfsummable
