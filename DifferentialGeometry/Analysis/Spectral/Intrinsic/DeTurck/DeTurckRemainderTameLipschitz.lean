@@ -4671,6 +4671,80 @@ private theorem ParallelTensorProduct_norm_iteratedCovGrad_prod_diagonal_le
     fun j => mul_nonneg Φ.opNorm_nonneg (by positivity), fun x j => ?_⟩
   exact diagGrid_jet Φ j (a := 0) (b := 0) S U x
 
+/-- **(POSITED deep bedrock — the INTRINSIC mean-value Fréchet realization of the nonlinear
+Ricci–DeTurck RHS-arm difference as a single three-term parallel-tensor-product covariant contraction,
+at the SECTION level, with a `g`-NATIVE fibrewise operator envelope.)**
+
+This is the irreducible section-level core of
+`deTurckRHSArmG0_diff_eq_threeTerm_parallelTensorProduct_realization`: it delivers the **section
+equality**
+```
+N  =  Φ₀.prod coeff (T − T') + Φ₁.prod coeff (∇(T − T')) + Φ₂.prod coeff (∇²(T − T'))
+```
+(`N := deTurckRHSArmG0 g₀ g_bg T − deTurckRHSArmG0 g₀ g_bg T'`), together with the `g`-native action
+bounds on the three parallel contractions `Φ₀, Φ₁, Φ₂` and the ball-uniform `C⁰` envelope of the
+realized intrinsic coefficient field `coeff`.  The order-`q ≤ a` covariant-gradient form consumed
+downstream is then a one-step `congrArg`-of-`iteratedCovGrad` consequence (`= the assembly`).
+
+**Why this is the genuine deep INTRINSIC content (and why it is the irreducible atomic leaf).**
+`deTurckRHSArmG0` is the second-order quasilinear Nemytskii nonlinearity
+`−2 Ric(g₀+T) + 𝓛_{W(g₀+T,g_bg)}(g₀+T)`.  By the mean-value path
+`N = ∫₀¹ dF(g₀ + T' + r·(T − T'))[T − T'] dr`, the Fréchet derivative `dF[h]` of the Ricci–DeTurck RHS
+in the metric is the second-order operator `coeff₀·h + coeff₁·∇h + coeff₂·∇²h` (the intrinsic
+Lichnerowicz / Christoffel-variation / inverse-Gram-Neumann symbols along the path); the three
+valence-dropping parallel contractions `Φ_m.prod coeff (∇^m(T − T'))` realize these three terms
+exactly, as a single `SmoothCcTensor`-valued identity.  Three intrinsic-DG prerequisites are fused
+inseparably here: (i) the intrinsic `g`-native Ricci / Lie / Christoffel / inverse-Gram *metric*
+linearization (on disk only the FORBIDDEN chart-component `RicciLinearization` /
+`MetricFamilyChartLinearization` / `RicciDiffAffine` exist); (ii) the *construction* of the concrete
+`ParallelTensorProduct` values with their exact `covGrad_prod` covariant-Leibniz field (the structure
+is consumed only as a supplied hypothesis throughout the library — no concrete witness exists on disk);
+(iii) the supercritical `H^{a+2} ↪ C²` ball-uniformity of `(s, gOp, Ccoef)`, chosen together with the
+construction (not extractable from a per-pair existence by glue).  Expressed entirely in
+`iteratedCovGrad` / `ParallelTensorProduct` / `riemannianFiberNormSq` — **never** a `chartGramOnE` /
+`chartInvGramOnE` / `HasChartJetLip` chart-jet ball Lipschitz chain, **never** the model `opNorm`, and
+**never** the chart-component route.  Consumers transitively depend on its `sorryAx`. -/
+private theorem deTurckRHSArmG0_diff_eq_threeTerm_parallelTensorProduct_realization_section
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
+    ∃ (s : ℕ) (gOp Ccoef : ℝ), 0 ≤ gOp ∧ 0 ≤ Ccoef ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_lt : δ' < 1)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∃ (Φ₀ : DifferentialGeometry.PDE.RicciFlow.ParallelTensorProduct g₀ 0 s 0 2 0 2)
+          (Φ₁ : DifferentialGeometry.PDE.RicciFlow.ParallelTensorProduct g₀ 0 s 0 3 0 2)
+          (Φ₂ : DifferentialGeometry.PDE.RicciFlow.ParallelTensorProduct g₀ 0 s 0 4 0 2)
+          (coeff : SmoothCcTensor g₀ 0 s),
+          (∀ {p q : ℕ} (S : SmoothCcTensor g₀ 0 (s + p)) (U : SmoothCcTensor g₀ 0 (2 + q)) (x : M),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + p + q) x
+                ((Φ₀.prod S U).toSection x) ≤
+              gOp * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + p) x (S.toSection x) *
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x (U.toSection x)) ∧
+          (∀ {p q : ℕ} (S : SmoothCcTensor g₀ 0 (s + p)) (U : SmoothCcTensor g₀ 0 (3 + q)) (x : M),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + p + q) x
+                ((Φ₁.prod S U).toSection x) ≤
+              gOp * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + p) x (S.toSection x) *
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + q) x (U.toSection x)) ∧
+          (∀ {p q : ℕ} (S : SmoothCcTensor g₀ 0 (s + p)) (U : SmoothCcTensor g₀ 0 (4 + q)) (x : M),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + p + q) x
+                ((Φ₂.prod S U).toSection x) ≤
+              gOp * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + p) x (S.toSection x) *
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + q) x (U.toSection x)) ∧
+          (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+              deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ') =
+            (Φ₀.prod (a := 0) (b := 0) coeff (T - T') +
+             Φ₁.prod (a := 0) (b := 0) coeff (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
+             Φ₂.prod (a := 0) (b := 0) coeff
+               (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) ∧
+          (∀ l : ℕ, l ≤ a + 2 → ∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 s l coeff).toSection x) ≤ Ccoef) :=
+  sorry
+
 /-- **(POSITED deep bedrock — the INTRINSIC mean-value Fréchet realization identity of the nonlinear
 Ricci–DeTurck RHS-arm difference as a three-term parallel-tensor-product covariant contraction, with a
 `g`-NATIVE fibrewise operator envelope.)**
@@ -4695,20 +4769,28 @@ each `Φ_m` carries the **`g`-native** fibrewise squared-fibre-norm operator bou
 `Φ_m.opNorm`, which is chartJ-unbounded), and the coefficient field is ball-uniformly `C⁰`-bounded,
 `∀ l ≤ a + 2, ∀ x, rfns(∇^l coeff)(x) ≤ Ccoef`.
 
-**Why this is the genuine deep INTRINSIC content (and why it is posited here).**  `deTurckRHSArmG0` is
-the second-order quasilinear Nemytskii nonlinearity `−2 Ric(g₀+T) + 𝓛_{W(g₀+T,g_bg)}(g₀+T)`.  By the
-mean-value path `N = ∫₀¹ dF(g₀ + T' + r·(T − T'))[T − T'] dr`, the Fréchet derivative `dF[h]` of the
-Ricci–DeTurck RHS in the metric is a second-order operator `coeff₀·h + coeff₁·∇h + coeff₂·∇²h` whose
-intrinsic symbols are curvature / Christoffel / inverse-Gram (Neumann-series) jets along the path; the
-three valence-dropping parallel contractions `Φ_m.prod coeff (∇^m(T − T'))` realize these terms.  The
-`g`-native operator envelope `gOp` is bounded because each `Φ_m` is a fixed smooth parallel contraction
-of the path coefficient on the **compact** base, so its `g`-fibre operator norm is the finite supremum of
-a continuous coefficient (chart-independently — the model `opNorm` would be chartJ-unbounded).  Expressed
-entirely in `iteratedCovGrad` / `ParallelTensorProduct` / `riemannianFiberNormSq` — **never** a
-`chartGramOnE` / `chartInvGramOnE` / `HasChartJetLip` chart-jet ball Lipschitz chain, **never** the model
-`opNorm`, and **never** the chart-component route `MetricFamilyChartLinearization` / `RicciDiffAffine`.
-This realization identity is the irreducible bedrock the `g`-native fibre-norm grid below assembles on
-(dominate each `Φ_m.prod` by the `g`-native diagonal covariant-Leibniz engine
+**Why this is the genuine deep INTRINSIC content (and why it is the irreducible atomic leaf).**
+`deTurckRHSArmG0` is the second-order quasilinear Nemytskii nonlinearity
+`−2 Ric(g₀+T) + 𝓛_{W(g₀+T,g_bg)}(g₀+T)`.  By the mean-value path
+`N = ∫₀¹ dF(g₀ + T' + r·(T − T'))[T − T'] dr`, the Fréchet derivative `dF[h]` of the Ricci–DeTurck RHS in
+the metric is a second-order operator `coeff₀·h + coeff₁·∇h + coeff₂·∇²h` whose intrinsic symbols are
+curvature / Christoffel / inverse-Gram (Neumann-series) jets along the path; the three valence-dropping
+parallel contractions `Φ_m.prod coeff (∇^m(T − T'))` realize these terms.  Three missing intrinsic-DG
+prerequisites are fused inseparably here: (i) the intrinsic `g`-native Ricci / Lie / Christoffel /
+inverse-Gram *metric*-linearization API (on disk only chart-form `MetricFamilyChartLinearization` /
+`RicciDiffAffine` exist — FORBIDDEN); (ii) the *construction* of a concrete `ParallelTensorProduct`
+value with its exact `covGrad_prod` covariant-Leibniz field (the structure is consumed only as a supplied
+hypothesis throughout the library — no concrete witness exists on disk); (iii) the supercritical
+`H^{a+2} ↪ C²` *ball-uniformity* of `(s, gOp, Ccoef)`, which cannot be extracted from a per-pair
+existence by glue (the uniform constants must be chosen together with the construction).  The `g`-native
+operator envelope `gOp` is finite because each `Φ_m` is a fixed smooth parallel contraction of the path
+coefficient on the **compact** base (the finite supremum of a continuous `g`-fibre coefficient —
+chart-independently; the model `opNorm` would be chartJ-unbounded).  Expressed entirely in
+`iteratedCovGrad` / `ParallelTensorProduct` / `riemannianFiberNormSq` — **never** a `chartGramOnE` /
+`chartInvGramOnE` / `HasChartJetLip` chart-jet ball Lipschitz chain, **never** the model `opNorm`, and
+**never** the chart-component route `MetricFamilyChartLinearization` / `RicciDiffAffine`.  This is the
+irreducible bedrock the `g`-native fibre-norm grid below assembles on (dominate each `Φ_m.prod` by the
+`g`-native diagonal covariant-Leibniz engine
 `ParallelTensorProduct_riemannianFiberNormSq_iteratedCovGrad_prod_diagonal_le`, merge the three terms
 into the single-coefficient diagonal product grid).  Consumers transitively depend on its `sorryAx`.
 
@@ -4757,8 +4839,19 @@ private theorem deTurckRHSArmG0_diff_eq_threeTerm_parallelTensorProduct_realizat
                    (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')))).toSection x)) ∧
           (∀ l : ℕ, l ≤ a + 2 → ∀ x : M,
             riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + l) x
-              ((iteratedCovGrad (I := I) g₀ 0 s l coeff).toSection x) ≤ Ccoef) :=
-  sorry
+              ((iteratedCovGrad (I := I) g₀ 0 s l coeff).toSection x) ≤ Ccoef) := by
+  obtain ⟨s, gOp, Ccoef, hgOp_nn, hCcoef_nn, hsec⟩ :=
+    deTurckRHSArmG0_diff_eq_threeTerm_parallelTensorProduct_realization_section
+      (I := I) g₀ g_bg a ha_super hR
+  refine ⟨s, gOp, Ccoef, hgOp_nn, hCcoef_nn, ?_⟩
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
+  obtain ⟨Φ₀, Φ₁, Φ₂, coeff, hop₀, hop₁, hop₂, hident, hC0⟩ :=
+    hsec T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
+  refine ⟨Φ₀, Φ₁, Φ₂, coeff, hop₀, hop₁, hop₂, ?_, hC0⟩
+  intro q _hq x
+  -- The order-`q` covariant-gradient pointwise form is the section identity `hident`, transported by
+  -- `congrArg` through the order-`q` iterated covariant gradient and section evaluation at `x`.
+  exact congrArg (fun w => (iteratedCovGrad (I := I) g₀ 0 2 q w).toSection x) hident
 
 /-- **Diagonal-grid collapse (pure real-analysis bookkeeping).**  If a nonnegative `W` is dominated by
 a three-term covariant-Leibniz grid `∑_{m<3} C m · ∑_{p+l≤q} f p · h (l+m)` whose factor constants
