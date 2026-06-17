@@ -1,5 +1,8 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.BareTensorProductCovariantLeibniz
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantBilinearLeibniz
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTraceField
+import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldContractionBound
+import DifferentialGeometry.Geometry.Connection.SingleSlotOperatorFiberNormBound
 
 /-! # The intrinsic metric-variation foundation of the Ricci–DeTurck right-hand side
 
@@ -313,6 +316,109 @@ two differ by a slot-permutation `domDomCongr σ`, which the field does not inse
 *contraction* against a parallel tensor (`∇ Φ = 0`) collapses the contracted slots and reindexes the
 surviving gradient slot to the front, satisfying the field exactly.  Building that contraction's exact
 covariant Leibniz (front-slot placement) is deep intrinsic content; it is posited here. -/
+
+/-! ## The concrete `g₀`-parallel double-cometric-trace `ParallelTensorProduct` value
+
+This subsection inhabits the `ParallelTensorProduct` structure for the first time, with the
+`g₀`-parallel double-cometric-trace contraction of the bare model tensor product.  For
+`(0, 2 + a)`-tensor `S` and `(0, 2 + b)`-tensor `T` the section-level bilinear product is
+
+```
+prod S T := appCc g₀ ((2+a+b)+2) (2+a+b) (cometricDoubleTraceField g₀ (2+a+b)) (S ⊗ T),
+```
+
+i.e. form the bare model tensor product `S ⊗ T` (`unitModelProdSection`, a `(0, (2+a)+(2+b)) =
+(0, (2+a+b)+2)`-tensor, rank-cast through `castRankCc_db`), then contract its two leading covariant
+slots against the cometric `g₀⁻¹` via the rank-generic intrinsic double-trace operator field
+`cometricDoubleTraceField g₀ (2+a+b)` (a `((2+a+b)+2, 2+a+b)`-tensor), giving a `(0, 2+a+b)`-tensor.
+The result is `r₁ = s₁ = 2`, `r₂ = s₂ = 2`, `r₀ = s₀ = 2`: a `ParallelTensorProduct g₀ 0 2 0 2 0 2`.
+
+The contraction operator field is `∇₀`-parallel (`cometricDoubleTraceField_covGrad_eq_zero`,
+`∇₀ g₀⁻¹ = 0`), which is exactly why the `covGrad_prod` covariant Leibniz of the contraction has no
+cross-term from the cometric factor and reindexes the surviving gradient slot to the front.
+
+The two genuinely deep fields are isolated as precisely-stated children:
+* `gInvGramProd_norm_bound` — the uniform fibrewise operator bound of the contraction product (the
+  composite of the uniform compact `appCc` operator bound and the bare-product fibre operator bound);
+* `gInvGramProd_covGrad` — the exact single-step front-slot covariant Leibniz of the contraction
+  product (the deep intrinsic content: the `∇₀`-parallel contraction reindexes the surviving gradient
+  slot to the front, with no cometric-factor cross-term).
+-/
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck in
+/-- **The section-level `g₀`-parallel double-cometric-trace contraction product.**  Contracts the two
+leading covariant slots of the bare model tensor product `S ⊗ T` against the cometric `g₀⁻¹`.  Maps a
+`(0, 2 + a)`- and a `(0, 2 + b)`-tensor to a `(0, 2 + a + b)`-tensor. -/
+noncomputable def gInvGramProdSection (g₀ : SmoothRiemannianMetric I M) {a b : ℕ}
+    (S : SmoothCcTensor g₀ 0 (2 + a)) (T : SmoothCcTensor g₀ 0 (2 + b)) :
+    SmoothCcTensor g₀ 0 (2 + a + b) :=
+  appCc (I := I) (M := M) g₀ ((2 + a + b) + 2) (2 + a + b)
+    (cometricDoubleTraceField (I := I) g₀ (2 + a + b))
+    (castRankCc_db (I := I) (M := M) g₀ 0
+      (show (2 + a) + (2 + b) = (2 + a + b) + 2 by omega)
+      (unitModelProdSection (I := I) g₀ S T))
+
+/-- **The uniform fibrewise operator bound of the `g₀`-parallel double-cometric-trace contraction
+product (POSITED — deep analytic content).**  There is a single nonnegative constant `C` bounding the
+fibre operator norm of `gInvGramProdSection g₀ S T` by `C · ‖S‖ · ‖T‖` uniformly over the base point
+and over the extra-slot counts `a, b`.  This is the boundedness of the continuous bilinear contraction
+map: the composite of the uniform compact operator bound of the `appCc` action of the smooth
+double-trace field (`exists_uniform_riemannianFiberNormSq_appCc_le`, value-local on a compact
+manifold) with the bare-product fibre operator bound (`modelProduct_norm_bound` lifted through the
+fibre/model norm bridge `riemannianFiberNormSq_eq_bundle_norm_sq'`).  The uniform-over-`(a,b)` form
+requires the compact uniform double-trace operator-norm bound to be `a, b`-independent, which holds
+because the double-trace fibre operator norm is bounded by `(finrank E) · ‖g₀⁻¹‖` independent of the
+passenger count — the deep analytic node positing here. -/
+theorem gInvGramProd_norm_bound (g₀ : SmoothRiemannianMetric I M) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ {a b : ℕ} (S : SmoothCcTensor g₀ 0 (2 + a))
+      (T : SmoothCcTensor g₀ 0 (2 + b)) (x : M),
+      ‖(gInvGramProdSection (I := I) g₀ S T).toSection x‖ ≤
+        C * ‖S.toSection x‖ * ‖T.toSection x‖ := by
+  sorry
+
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck in
+/-- **The exact single-step front-slot covariant Leibniz of the `g₀`-parallel double-cometric-trace
+contraction product (POSITED — deep intrinsic content).**  The covariant gradient of the contraction
+product splits into the two one-sided derivatives, each carried by the SAME contraction product, with
+the new leading covariant slot at the FRONT (position `0`) and NO cometric-factor cross-term.  The left
+summand `gInvGramProdSection (∇S) T` carries covariant rank `(2 + (a+1) + b)`, rank-cast to the
+differentiated rank `(2 + a + b) + 1` via `castRankCc`.
+
+This is the deep intrinsic content the bare product fails: by `covGrad_appCc_eq` the covariant gradient
+of `appCc Φ (S ⊗ T)` is `appCc (∇Φ) (S ⊗ T) + appCc (slotExtend Φ) (∇(S ⊗ T))`; the first summand
+vanishes because `Φ = cometricDoubleTraceField g₀ (2+a+b)` is `∇₀`-parallel
+(`cometricDoubleTraceField_covGrad_eq_zero`, `appCc_zero_left`).  The surviving term
+`appCc (slotExtend Φ) (∇(S ⊗ T))` reconciles, through the bare-product covariant Leibniz
+(`unitModelProdSection_covGrad_unitModel_pub`) lifted to the section level by the keystone
+`smoothCcTensor_ext_of_unitModel` and the slot-permutation operator `domDomCongrSection`, with the two
+front-slot contraction products `castRankCc (gInvGramProdSection (∇S) T) + gInvGramProdSection S (∇T)`:
+the `∇₀`-parallel double trace contracts the two original leading slots, passengering the new gradient
+slot to the front in both summands. -/
+theorem gInvGramProd_covGrad (g₀ : SmoothRiemannianMetric I M) {a b : ℕ}
+    (S : SmoothCcTensor g₀ 0 (2 + a)) (T : SmoothCcTensor g₀ 0 (2 + b)) :
+    covGrad (I := I) (M := M) g₀ 0 (2 + a + b) (gInvGramProdSection (I := I) g₀ S T) =
+      castRankCc g₀ 0 (show 2 + (a + 1) + b = 2 + a + b + 1 by omega)
+          (gInvGramProdSection (I := I) (a := a + 1) (b := b) g₀
+            (covGrad (I := I) (M := M) g₀ 0 (2 + a) S) T) +
+        gInvGramProdSection (I := I) (a := a) (b := b + 1) g₀ S
+          (covGrad (I := I) (M := M) g₀ 0 (2 + b) T) := by
+  sorry
+
+set_option linter.unusedVariables false in
+/-- **The first inhabitant of `ParallelTensorProduct`: the `g₀`-parallel double-cometric-trace
+contraction product.**  Its `prod` is `gInvGramProdSection` (the double-`g₀⁻¹` contraction of the bare
+model tensor product); its `opNorm` is the uniform bound constant from `gInvGramProd_norm_bound`; its
+`covGrad_prod` is the exact front-slot covariant Leibniz `gInvGramProd_covGrad` (the cometric factor's
+gradient vanishes by `∇₀ g₀⁻¹ = 0`).  This is the structural unlock for the intrinsic Ricci–DeTurck
+linearization — the witness realizing `D(g⁻¹)[h] = −g₀⁻¹ h g₀⁻¹` as a parallel cometric contraction. -/
+noncomputable def gInvGramPTP (g₀ : SmoothRiemannianMetric I M) :
+    ParallelTensorProduct g₀ 0 2 0 2 0 2 where
+  prod := fun {a b} S T => gInvGramProdSection (I := I) g₀ S T
+  opNorm := Classical.choose (gInvGramProd_norm_bound (I := I) g₀)
+  opNorm_nonneg := (Classical.choose_spec (gInvGramProd_norm_bound (I := I) g₀)).1
+  norm_prod_le := fun {a b} S T x =>
+    (Classical.choose_spec (gInvGramProd_norm_bound (I := I) g₀)).2 S T x
+  covGrad_prod := fun {a b} S T => gInvGramProd_covGrad (I := I) g₀ S T
 
 end TensorSpectral
 end Parabolic
