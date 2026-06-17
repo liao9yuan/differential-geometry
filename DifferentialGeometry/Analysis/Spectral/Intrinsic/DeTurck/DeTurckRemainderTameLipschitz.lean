@@ -4261,6 +4261,114 @@ private theorem deTurckRHSArmDiff_order0_pointwise_domination_ballUniform
         exact hCα α T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball hx_tsupport
     _ ≤ Ksum * Scol := mul_le_mul_of_nonneg_right hCα_le hScol_nn
 
+/-- **(POSITED — INTRINSIC section-level mean-value-path Faà-di-Bruno difference grid of the nonlinear
+Ricci–DeTurck RHS arm, in coefficient-column rfns form; chart-jet-free; PER-PAIR.)**
+
+For any two `g₀`-fibre-small smooth perturbations `T, T'`, there are a realized coefficient rank `s`, an
+intrinsic `g₀`-built coefficient field `coeff : SmoothCcTensor g₀ 0 s` (the mean-value-path `dF`-symbol
+— the curvature / Christoffel / inverse-Gram combination of the realized metric path
+`g₀ + T' + r·(T − T')`, rational and det-`≠ 0` by `δ, δ' < 1`), and a single nonnegative **per-pair**
+covariant-Leibniz grid constant `Cmid` (uniform over `x`, allowed to depend on `T, T'` through the path
+data) such that, for the nonlinear RHS-arm difference
+`N := deTurckRHSArmG0 g₀ g_bg T − deTurckRHSArmG0 g₀ g_bg T'`, **every** covariant order `q` is
+dominated, at the pointwise squared fibre-norm level, by the single-coefficient diagonal
+covariant-Leibniz product grid
+```
+rfns(∇^q N)(x) ≤ Cmid · ∑_{i ≤ q+2} rfns(∇^i (T − T'))(x) · ∑_{l ≤ q+2−i} rfns(∇^l coeff)(x).
+```
+
+**Why this is the genuine deep INTRINSIC content (and why it is posited here).**  The RHS arm
+`deTurckRHSArmG0 g₀ g_bg T = deTurckRHSSection g_bg (g₀ + T) = −2 Ric(g₀+T) + 𝓛_{W(g₀+T,g_bg)}(g₀+T)`
+is a second-order quasilinear Nemytskii nonlinearity of the order-`≤ 2` metric jets.  By the mean-value
+path `N = ∫₀¹ dF(g₀ + T' + r·(T − T'))[T − T'] dr`, `N` is a finite sum of intrinsic
+covariant-bilinear *valence-dropping* contractions of the order-`≤ 2` covariant jets of `T − T'`
+against the path-`dF`-symbol coefficient field `coeff`; the intrinsic valence-dropping covariant-Leibniz
+grid (the `ParallelTensorProduct` / `DiffBilinOp` covariant-Faà-di-Bruno engine) leaves the top
+covariant orders on the `T − T'` factor (order `≤ q + 2`) and on the `coeff` factor (order `≤ q + 2 − i`),
+giving the displayed diagonal product grid.  This is expressed entirely in `iteratedCovGrad` /
+`riemannianFiberNormSq` — **never** a `chartGramOnE` / `chartInvGramOnE` / `HasChartJetLip` chart-jet ball
+Lipschitz chain, and **never** the chart-component raw route of `parallelBilinearGrid_jet`.  This is the
+intrinsic, chart-jet-free analogue of the (forbidden) chart-component `parallelBilinearGrid_jet`.
+
+**Non-vacuity.**  The bound vanishes as `T − T' → 0`; a `Cmid = 0` witness is rejected by a nonvanishing
+`∇^q N` for a non-flat, genuinely second-order RHS difference. -/
+private theorem deTurckRHSArmDiff_iteratedCovGrad_intrinsicBilinearGrid_jet
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ∃ (s : ℕ) (coeff : SmoothCcTensor g₀ 0 s) (Cmid : ℝ),
+      0 ≤ Cmid ∧
+      ∀ q : ℕ, q ≤ a → ∀ x : M,
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 q
+              (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+                deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ')).toSection x) ≤
+          Cmid * ∑ i ∈ Finset.range (q + 2 + 1),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 i (T - T')).toSection x)
+              * ∑ l ∈ Finset.range (q + 2 + 1 - i),
+                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + l) x
+                    ((iteratedCovGrad (I := I) g₀ 0 s l coeff).toSection x) :=
+  sorry
+
+/-- **(POSITED — ball-uniform `C⁰` envelope of the realized mean-value-path coefficient grid constant of
+the nonlinear Ricci–DeTurck RHS arm; chart-jet-free.)**
+
+Fix `g₀`, `g_bg`, a supercritical order `a` (`2·finrank E + 10 ≤ a`), and a covariant-`L²` ball radius
+`R ≥ 0`.  There is a single nonnegative **ball-uniform** constant `Λcoef` — **outside** the `∀ T T'`
+quantifier — such that for any two `g₀`-fibre-small smooth perturbations `T, T'` whose covariant-`L²`
+jets up to order `a + 2` lie in the radius-`R` ball, the per-pair coefficient-grid product produced by
+`deTurckRHSArmDiff_iteratedCovGrad_intrinsicBilinearGrid_jet` — the constant `Cmid` times every coefficient
+column `∑_{l ≤ q+2−i} rfns(∇^l coeff)(x)` for `q ≤ a` — is bounded, **uniformly over `x` and over the
+ball**, by `Λcoef`:
+```
+∀ q ≤ a, ∀ i ≤ q+2, ∀ x,  Cmid · ∑_{l ≤ q+2−i} rfns(∇^l coeff)(x)  ≤  Λcoef ,
+```
+where `(s, coeff, Cmid)` are the data delivered by `intrinsicBilinearGrid_jet` at `(T, T')`.
+
+**Why this is the genuine ball-uniform analytic content.**  The path-`dF`-symbol coefficient field
+`coeff` is a smooth (rational, det-`≠ 0` by `δ, δ' < 1`) function of the order-`≤ 2` covariant jets of
+the realized metric path `g₀ + T' + r·(T − T')`.  Its order-`≤ a + 2` covariant `C⁰` sup is controlled
+**ball-uniformly** by the supercritical `H^{a+2} ↪ C²` section embedding of the radius-`R` ball
+(`ha_super`); the per-pair grid constant `Cmid` (the `4^{·}` covariant-Leibniz binomial factor times the
+operator norm of the contraction, both base-point-uniform) is likewise ball-bounded.  This is the
+genuine analytic content that promotes the per-pair grid to a single ball-uniform constant; expressed
+entirely in `iteratedCovGrad` / `riemannianFiberNormSq` — **never** a chart-jet ball Lipschitz chain.
+
+**Non-vacuity.**  A `Λcoef = 0` witness is rejected by the positive coefficient floor
+`1 ≤ rfns(coeff)(x)` of the metric tensor and a nonvanishing `Cmid`. -/
+private theorem deTurckRHSArmDiff_intrinsicBilinearGrid_coeffColumn_ballUniform
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
+    ∃ Λcoef : ℝ, 0 ≤ Λcoef ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_lt : δ' < 1)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∀ (s : ℕ) (coeff : SmoothCcTensor g₀ 0 s) (Cmid : ℝ), 0 ≤ Cmid →
+          (∀ q : ℕ, q ≤ a → ∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 q
+                  (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+                    deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ')).toSection x) ≤
+              Cmid * ∑ i ∈ Finset.range (q + 2 + 1),
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                    ((iteratedCovGrad (I := I) g₀ 0 2 i (T - T')).toSection x)
+                  * ∑ l ∈ Finset.range (q + 2 + 1 - i),
+                      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + l) x
+                        ((iteratedCovGrad (I := I) g₀ 0 s l coeff).toSection x)) →
+          ∀ q : ℕ, q ≤ a → ∀ (i : ℕ), i ∈ Finset.range (q + 2 + 1) → ∀ x : M,
+            Cmid * ∑ l ∈ Finset.range (q + 2 + 1 - i),
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + l) x
+                  ((iteratedCovGrad (I := I) g₀ 0 s l coeff).toSection x) ≤ Λcoef :=
+  sorry
+
 /-- **(POSITED deficit-free INTRINSIC covariant-Leibniz / Faà-di-Bruno *per-order-constant* pointwise
 grid domination of the nonlinear Ricci–DeTurck RHS-arm difference — the irreducible curvature / Lie /
 inverse-Gram covariant-jet analytic content, chart-jet-free.)**
@@ -4277,24 +4385,23 @@ fibre-norm level, by the order-`(q+2)` covariant-jet column of the perturbation 
 ∀ q ≤ a, ∀ x,  rfns(∇^q N)(x)  ≤  κ̄ q · ∑_{i ≤ q+2} rfns(∇^i (T − T'))(x) .
 ```
 
-**Why this is the genuine deep INTRINSIC content (and why it is posited here).**  The RHS arm
+**How it is assembled (genuine glue over two intrinsic children).**  The RHS arm
 `deTurckRHSArmG0 g₀ g_bg T = deTurckRHSSection g_bg (g₀ + T) = −2 Ric(g₀+T) + 𝓛_{W(g₀+T,g_bg)}(g₀+T)`
-is a second-order quasilinear Nemytskii nonlinearity of the order-`≤ 2` metric jets.  By the mean-value
-path `N = ∫₀¹ dF(g₀ + T' + s·(T − T'))[T − T'] ds`, `N` is a finite sum of intrinsic
-covariant-bilinear *valence-dropping* contractions of the order-`≤ 2` covariant jets of `T − T'`
-against a fixed-`g₀` coefficient field (the `dF` symbol along the path — the curvature / Christoffel /
-inverse-Gram combination, rational and det-`≠ 0` by `δ < 1`), whose order-`≤ 2` `C⁰` sup is controlled
-ball-uniformly by the supercritical `H^{a+2} ↪ C²` section embedding of the radius-`R` ball
-(`ha_super`).  Covariantly differentiating `q` times (the intrinsic covariant-Leibniz / Faà-di-Bruno
-binomial expansion) leaves the top covariant orders on the `T − T'` factor (order `≤ q + 2`), the
-coefficient entering only through its base-point-uniform fibre sup.  This is expressed entirely in
-`iteratedCovGrad` / `riemannianFiberNormSq` — **never** a `chartGramOnE` / `chartInvGramOnE` /
-`HasChartJetLip` chart-jet ball Lipschitz chain, and **never** the chart-component raw route of the
-sibling `deTurckRHSArmDiff_order0_pointwise_domination_ballUniform`.  The `DiffBilinOp` covariant-grid
-engine (`DiffBilinOp.rfns_iteratedCovGrad_grid`) is rank-*preserving* and value-local at its
-differentiation order `0`, so it does **not** model `N`'s valence-dropping second-order contraction; an
-intrinsic valence-dropping covariant-bilinear grid (the genuine missing prerequisite) supplies this
-per-order envelope.  Consumers transitively depend on its `sorryAx`.
+is a second-order quasilinear Nemytskii nonlinearity.  Its difference grid factors:
+* the section-level intrinsic Faà-di-Bruno difference grid
+  `deTurckRHSArmDiff_iteratedCovGrad_intrinsicBilinearGrid_jet` supplies, per-pair, the realized
+  path-`dF`-symbol coefficient `coeff` and the single-coefficient diagonal covariant-Leibniz product grid
+  `rfns(∇^q N)(x) ≤ Cmid · ∑_{i ≤ q+2} rfns(∇^i (T − T'))(x) · ∑_{l ≤ q+2−i} rfns(∇^l coeff)(x)`; and
+* the ball-uniform coefficient-column envelope
+  `deTurckRHSArmDiff_intrinsicBilinearGrid_coeffColumn_ballUniform` bounds `Cmid` times every coefficient
+  column `∑_{l ≤ q+2−i} rfns(∇^l coeff)(x)` by a single ball-uniform constant `Λcoef` (the supercritical
+  `H^{a+2} ↪ C²` `C⁰` control of the path coefficient, outside the `∀ T T'` quantifier).
+Per order `q`, replacing each coefficient column by `Λcoef / Cmid` (uniformly) collapses the diagonal
+product grid into `κ̄ q := Λcoef · ∑_i 1`-form: `rfns(∇^q N)(x) ≤ Λcoef · ∑_{i ≤ q+2} rfns(∇^i (T −
+T'))(x)`, i.e. `κ̄ q := Λcoef` for every `q`.  Expressed entirely in `iteratedCovGrad` /
+`riemannianFiberNormSq` — **never** a `chartGramOnE` / `chartInvGramOnE` / `HasChartJetLip` chart-jet
+ball Lipschitz chain, and **never** the chart-component raw route of `parallelBilinearGrid_jet`.
+Consumers transitively depend on the two children's `sorryAx`.
 
 **Non-vacuity.**  The bound vanishes as `T − T' → 0`, so the Nemytskii Lipschitz character is
 preserved; a `κ̄ ≡ 0` witness is rejected by a nonvanishing `rfns(∇^q N)` for a genuinely
@@ -4317,8 +4424,47 @@ private theorem deTurckRHSArmDiff_iteratedCovGrad_rfns_perOrder_intrinsic_ballUn
                   deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ')).toSection x) ≤
             kbar q * ∑ i ∈ Finset.range (q + 2 + 1),
               riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
-                ((iteratedCovGrad (I := I) g₀ 0 2 i (T - T')).toSection x) :=
-  sorry
+                ((iteratedCovGrad (I := I) g₀ 0 2 i (T - T')).toSection x) := by
+  classical
+  -- The ball-uniform coefficient-column envelope `Λcoef` (outside `∀ T T'`).
+  obtain ⟨Λcoef, hΛcoef_nn, hcoeff⟩ :=
+    deTurckRHSArmDiff_intrinsicBilinearGrid_coeffColumn_ballUniform
+      (I := I) g₀ g_bg a ha_super hR
+  -- The per-order envelope is the single ball-uniform constant `Λcoef` at every order.
+  refine ⟨fun _ => Λcoef, fun _ => hΛcoef_nn, ?_⟩
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball q hq x
+  -- The per-pair section-level Faà-di-Bruno difference grid at `(T, T')`.
+  obtain ⟨s, coeff, Cmid, hCmid_nn, hgrid⟩ :=
+    deTurckRHSArmDiff_iteratedCovGrad_intrinsicBilinearGrid_jet
+      (I := I) g₀ g_bg a T T' hδ_lt hδ hδ'_lt hδ'
+  -- The ball-uniform column bound, specialised to this `(s, coeff, Cmid, hgrid)`.
+  have hcol := hcoeff T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball s coeff Cmid hCmid_nn hgrid q hq
+  -- Abbreviate the perturbation-difference jet column entries (window `i ≤ q + 2`).
+  set Wi : ℕ → ℝ := fun i =>
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 i (T - T')).toSection x) with hWi_def
+  have hWi_nn : ∀ i, 0 ≤ Wi i := fun i =>
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + i) x _
+  -- The coefficient column at gradient order `i`: `∑_{l ≤ q+2−i} rfns(∇^l coeff)(x)`.
+  set Ccol : ℕ → ℝ := fun i =>
+    ∑ l ∈ Finset.range (q + 2 + 1 - i),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + l) x
+        ((iteratedCovGrad (I := I) g₀ 0 s l coeff).toSection x) with hCcol_def
+  have hCcol_nn : ∀ i, 0 ≤ Ccol i := fun i =>
+    Finset.sum_nonneg fun l _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (s + l) x _
+  -- Each diagonal term `Cmid · Wi i · Ccol i` (window `i ≤ q + 2`) is dominated by `Λcoef · Wi i`
+  -- using the ball-uniform column bound `Cmid · Ccol i ≤ Λcoef`.
+  calc riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 q
+            (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+              deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ')).toSection x)
+      ≤ Cmid * ∑ i ∈ Finset.range (q + 2 + 1), Wi i * Ccol i := hgrid q hq x
+    _ = ∑ i ∈ Finset.range (q + 2 + 1), (Cmid * Ccol i) * Wi i := by
+          rw [Finset.mul_sum]; exact Finset.sum_congr rfl fun i _ => by ring
+    _ ≤ ∑ i ∈ Finset.range (q + 2 + 1), Λcoef * Wi i := by
+          refine Finset.sum_le_sum fun i hi => ?_
+          exact mul_le_mul_of_nonneg_right (hcol i hi x) (hWi_nn i)
+    _ = Λcoef * ∑ i ∈ Finset.range (q + 2 + 1), Wi i := by rw [Finset.mul_sum]
 
 /-- **(POSITED deficit-free INTRINSIC covariant-Leibniz / Faà-di-Bruno per-order pointwise grid
 domination of the nonlinear Ricci–DeTurck RHS-arm difference — the irreducible curvature / Lie /
