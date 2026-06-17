@@ -912,6 +912,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Rellich.Diagonal
 import DifferentialGeometry.Analysis.Spectral.Tensor.Rellich.Tensor
 import DifferentialGeometry.Analysis.Spectral.Tensor.Rellich.TensorL2SubsequenceExtraction
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Defs
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.EigensectionSobolevDecay
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.FractionalPower
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Inclusion
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.MercerProjectorTrace
