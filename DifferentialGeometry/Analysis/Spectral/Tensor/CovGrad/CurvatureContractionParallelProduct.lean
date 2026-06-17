@@ -37,10 +37,11 @@ This entire chain is **proved** — the grid theorems below are axiom-clean
 (`#print axioms` is exactly `[propext, Classical.choice, Quot.sound]`).
 
 The `ParallelTensorProduct` abstraction of `CovariantBilinearLeibniz` (a parallel fibrewise bilinear
-bundle map, deriving the double grid `exists_norm_iteratedCovGrad_prod_le` from an exact covariant
-Leibniz `covGrad_prod`) is a *different*, two-section, parallel-map route; it does **not** apply here,
-because the curvature is non-parallel and `R(X, Y)·` is single-section. The diffCurvOp normal-form
-route above replaces it and is the one actually used.
+bundle map, carrying the `g`-Riemannian operator bound `rfns_prod_le` and the exact covariant Leibniz
+`covGrad_prod`, from which the `g`-native diagonal covariant-Leibniz grid is derived) is a *different*,
+two-section, parallel-map route; it does **not** apply here, because the curvature is non-parallel and
+`R(X, Y)·` is single-section. The diffCurvOp normal-form route above replaces it and is the one actually
+used.
 
 ## What is proved
 
