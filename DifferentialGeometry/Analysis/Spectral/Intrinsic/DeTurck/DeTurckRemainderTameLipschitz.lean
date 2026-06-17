@@ -4264,6 +4264,88 @@ private theorem deTurckRHSArmDiff_order0_pointwise_domination_ballUniform
     _ ≤ Ksum * Scol := mul_le_mul_of_nonneg_right hCα_le hScol_nn
 
 
+/-- **(POSITED deep bedrock — the genuine intrinsic Lichnerowicz linearization, stripped to its
+irreducible missing content.)**
+
+This is the `g`-native, chart-jet-free core of the Ricci–DeTurck right-hand-side linearization that has
+no usable on-disk prerequisite: the only intrinsic connection-level datum present is `connDiff`
+(`Geometry/Flow/ConnectionDifference.lean`); every Ricci / Christoffel / inverse-Gram *metric*
+linearization symbol on disk (`RicciDiffAffine.ricciDiffPrincipalSymbol`,
+`RicciLinearization.ricciSymbol`, `DeTurckLinearization.deTurckCorrectionSymbol`) is the FORBIDDEN
+chart-component form (`chartGramOnE` / `chartInvGramOnE` / `partialDeriv`), and there is no
+`SmoothCcTensor`-valued mean-value / FTC engine, nor a valence-dropping covariant Faà-di-Bruno
+per-order `appCc` grid (only the order-`0` `exists_uniform_riemannianFiberNormSq_appCc_le` exists).
+
+Fix `g₀`, `g_bg`, a supercritical order `a`, and a covariant-`L²` ball radius `R ≥ 0`.  Outside the
+`∀ T T'` quantifier there are three nonnegative ball-uniform per-order envelopes `k₀, k₁, k₂ : ℕ → ℝ`
+(the order-`0` inverse-Gram engine-constant ball-sup, and the order-`1` Christoffel / order-`2` Ricci
+valence-dropping arm envelopes).  For any two `g₀`-fibre-small smooth perturbations `T, T'` whose
+covariant-`L²` jets up to order `a + 2` lie in the radius-`R` ball, there are the realize-tie path
+endpoint metric `g₁` and the two intrinsic `g₀`-built deep valence-dropping coefficient operator fields
+`C₁ : SmoothCcTensor g₀ 3 2`, `C₂ : SmoothCcTensor g₀ 4 2` (the Christoffel-variation `½g⁻¹∂` symbol and
+the Ricci / Lichnerowicz principal `−½Δ_L + Rm★` symbol of the mean-value path `dF`), such that, with
+`N := deTurckRHSArmG0 g₀ g_bg T − deTurckRHSArmG0 g₀ g_bg T'`:
+
+* **(identity)** the intrinsic three-term mean-value section equality
+  `N = (fixedCoeffDiffOp (gInvDiffMetricArmCoeffField g₀ g₁)).op 0 2 (T − T')
+       + appCc C₁ (∇(T − T')) + appCc C₂ (∇²(T − T'))`;
+* **(order-`0` engine ball-sup)** the per-`g₁` proven inverse-Gram engine constant
+  `4^q · gridWindowSum (fixedCoeffDiffOp (gInvDiffMetricArmCoeffField g₀ g₁)).kappa 0 2 q` is dominated
+  by the ball-uniform `k₀ q` (the genuine ball-compactness of the inverse-Gram symbol over the
+  realize-tie metrics of the radius-`R` ball — the order-`0` arm's uniformity, the proven *per-`g₁`*
+  grid `gInvDiffMetricArm_iteratedCovGrad_singleSum_le` is then chained by the consumer);
+* **(arm grids)** the per-order valence-dropping `rfns` grids for the two deep arms (`m = 1, 2`),
+  ball-uniform with envelopes `k₁, k₂`.
+
+This is expressed entirely in `fixedCoeffDiffOp` / `appCc` / `iteratedCovGrad` / `riemannianFiberNormSq`
+— **never** a `chartGramOnE` / `chartInvGramOnE` / `HasChartJetLip` chart-jet chain.  Consumers
+transitively depend on its `sorryAx`.
+
+**Non-vacuity.**  The realization vanishes as `T − T' → 0` (`appCc` is `ℝ`-linear and `op 0 2` is
+fibrewise-linear in `T − T'`); a degenerate `C₁ = C₂ = 0` is rejected by a nonvanishing `∇^q N` for a
+genuinely second-order, non-flat RHS difference; a `kₘ ≡ 0` envelope is rejected by a nonvanishing arm
+on a section of positive fibre norm. -/
+private theorem deTurckRHSArmG0_diff_intrinsicLichnerowiczLinearization_section
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
+    ∃ k₀ k₁ k₂ : ℕ → ℝ, (∀ q, 0 ≤ k₀ q) ∧ (∀ q, 0 ≤ k₁ q) ∧ (∀ q, 0 ≤ k₂ q) ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_lt : δ' < 1)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∃ (g₁ : SmoothRiemannianMetric I M)
+          (C₁ : SmoothCcTensor g₀ 3 2) (C₂ : SmoothCcTensor g₀ 4 2),
+          (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+              deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ') =
+            ((fixedCoeffDiffOp (I := I) (M := M) g₀
+                (gInvDiffMetricArmCoeffField (I := I) g₀ g₁)).op 0 2 (T - T') +
+              appCc (I := I) (M := M) g₀ 3 2 C₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
+              appCc (I := I) (M := M) g₀ 4 2 C₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) ∧
+          (∀ q : ℕ, q ≤ a →
+            (4 : ℝ) ^ q * gridWindowSum
+                (fixedCoeffDiffOp (I := I) (M := M) g₀
+                  (gInvDiffMetricArmCoeffField (I := I) g₀ g₁)).kappa 0 2 q ≤ k₀ q) ∧
+          (∀ q : ℕ, q ≤ a → ∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 q
+                  (appCc (I := I) (M := M) g₀ 3 2 C₁
+                    (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')))).toSection x) ≤
+              k₁ q * ∑ p ∈ Finset.range (q + 1),
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p + 1)) x
+                  ((iteratedCovGrad (I := I) g₀ 0 2 (p + 1) (T - T')).toSection x)) ∧
+          (∀ q : ℕ, q ≤ a → ∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 q
+                  (appCc (I := I) (M := M) g₀ 4 2 C₂
+                    (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')))).toSection x) ≤
+              k₂ q * ∑ p ∈ Finset.range (q + 1),
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p + 2)) x
+                  ((iteratedCovGrad (I := I) g₀ 0 2 (p + 2) (T - T')).toSection x)) :=
+  sorry
+
 /-- **(POSITED deep bedrock — the INTRINSIC mean-value Fréchet realization of the nonlinear
 Ricci–DeTurck RHS-arm difference as a single three-term `fixedCoeffDiffOp` / `appCc` covariant
 contraction, at the SECTION level, with `g`-NATIVE per-order `rfns` grids, ball-uniform.)**
@@ -4360,8 +4442,29 @@ private theorem deTurckRHSArmG0_diff_eq_threeTerm_fixedCoeffDiffOp_realization_s
                     (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')))).toSection x) ≤
               k₂ q * ∑ p ∈ Finset.range (q + 1),
                 riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p + 2)) x
-                  ((iteratedCovGrad (I := I) g₀ 0 2 (p + 2) (T - T')).toSection x)) :=
-  sorry
+                  ((iteratedCovGrad (I := I) g₀ 0 2 (p + 2) (T - T')).toSection x)) := by
+  classical
+  -- Pull the three ball-uniform envelopes and the per-`(T, T')` intrinsic-Lichnerowicz data from the
+  -- deep linearization child.  `k₀` is the order-`0` inverse-Gram engine-constant ball-sup; `k₁, k₂` are
+  -- the valence-dropping arm envelopes; the per-`(T, T')` data supplies `g₁, C₁, C₂`, the three-term
+  -- section identity, the per-`g₁` engine-constant domination, and the two deep arm grids.
+  obtain ⟨k₀, k₁, k₂, hk₀_nn, hk₁_nn, hk₂_nn, hcore⟩ :=
+    deTurckRHSArmG0_diff_intrinsicLichnerowiczLinearization_section
+      (I := I) g₀ g_bg a ha_super hR
+  refine ⟨k₀, k₁, k₂, hk₀_nn, hk₁_nn, hk₂_nn, ?_⟩
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
+  obtain ⟨g₁, C₁, C₂, hid, hk₀dom, hk₁grid, hk₂grid⟩ :=
+    hcore T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
+  refine ⟨g₁, C₁, C₂, hid, ?_, hk₁grid, hk₂grid⟩
+  -- The order-`0` inverse-Gram arm grid is GENUINE GLUE: the PROVEN per-`g₁` metric-arm grid
+  -- `gInvDiffMetricArm_iteratedCovGrad_singleSum_le` (constant `4^q · gridWindowSum kappa 0 2 q`)
+  -- chained with the ball-uniform engine-constant domination `hk₀dom` (≤ `k₀ q`).
+  intro q hq x
+  refine (gInvDiffMetricArm_iteratedCovGrad_singleSum_le
+      (I := I) (M := M) g₀ g₁ x (T - T') q).trans ?_
+  refine mul_le_mul_of_nonneg_right (hk₀dom q hq) ?_
+  exact Finset.sum_nonneg fun p _ =>
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + p) x _
 
 set_option maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
