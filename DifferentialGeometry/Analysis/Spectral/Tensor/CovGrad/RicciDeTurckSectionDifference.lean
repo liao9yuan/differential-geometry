@@ -344,6 +344,92 @@ theorem covDerivConnDiff_eq_invGramSharp_graded
             ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x)) (Z x) := rfl
   rw [hexpand, hswap, hW1, hWx]
 
+/-! ## The two-endpoint mean-value telescope of the differentiated connection difference -/
+
+set_option linter.unusedSectionVars false in
+/-- **The two-endpoint differentiated connection difference, order-graded (value level).**
+
+For a common base metric `g₀` and two endpoint metrics `g₁, g₁'` (in the consumer the realized
+metrics `realize(g₀ + T)`, `realize(g₀ + T')` with section difference `S = T − T'`), the difference of
+the differentiated connection-differences `covDerivConnDiff g₀ g₁ X Z Y x − covDerivConnDiff g₀ g₁' X Z
+Y x` is the order-graded mean-value Leibniz telescope of the single-endpoint inverse-Gram raise
+`covDerivConnDiff_eq_invGramSharp_graded` (leaf SP1'), assembled by applying SP1' at each endpoint and
+subtracting term by term, with the principal term further telescoped by the add-subtract-middle-term
+rule into a *same-operator-on-covector-difference* arm plus an *operator-difference-on-endpoint* arm.
+
+Writing `K_g := koszulCovGradCovec g₀ g Z Y` for the `g`-flat Koszul covector of the metric-difference
+covariant gradient (`covGrad g₀ 0 2` of the section realising `g − g₀`), `A_g := connDiff g g₀` for the
+intrinsic Christoffel variation `δΓ`, `∇^g` the `g`-Levi-Civita connection, `∇^g_K` its induced
+cotangent covariant derivative, and `♯_g := inverseMetricSharpFib g` the cometric raise, the identity is
+```
+covDerivConnDiff g₀ g₁ X Z Y x − covDerivConnDiff g₀ g₁' X Z Y x
+  = ( ♯_{g₁}(∇^{g₁}_X K_{g₁}) − ♯_{g₁}(∇^{g₁}_X K_{g₁'}) )      -- (P) PRINCIPAL, order-2 in S:
+                                                                 --   the SAME operators ♯_{g₁}∇^{g₁}
+                                                                 --   on the covector difference K_S;
+    + ( ♯_{g₁}(∇^{g₁}_X K_{g₁'}) − ♯_{g₁'}(∇^{g₁'}_X K_{g₁'}) ) -- (O) OPERATOR-DIFFERENCE, order-0:
+                                                                 --   ♯_{g₁}∇^{g₁} − ♯_{g₁'}∇^{g₁'} on the
+                                                                 --   ENDPOINT covector K_{g₁'};
+    − ( A_{g₁}(♯_{g₁}(K_{g₁}), X) − A_{g₁'}(♯_{g₁'}(K_{g₁'}), X) ) -- (C) order-1 cross difference (δΓ);
+    − ( A_{g₁}(Y, ∇^{g₀}_X Z) − A_{g₁'}(Y, ∇^{g₀}_X Z) )          -- (S₁) order-1 slot difference;
+    − ( A_{g₁}(∇^{g₀}_X Y, Z) − A_{g₁'}(∇^{g₀}_X Y, Z) ).         -- (S₂) order-1 slot difference.
+```
+
+The principal arm (P) carries the second covariant gradient `∇₀² S` of the metric-difference section
+(the covector difference `K_{g₁} − K_{g₁'}` is, under the realize-tie, the Koszul covector of the
+section difference `S = T − T'`, by `covGrad_sub`), raised by the single cometric `♯_{g₁}`; it is the
+order-2 PRINCIPAL the Ricci–DeTurck `C₂` linearization expands.  The operator-difference arm (O) is
+order-`0` in `S` as a value: it splits, via the inverse-metric-difference multiplier
+`gInvDiffRaisedEndo_eq_metricSharp_flatDiff` (for `♯_{g₁} − ♯_{g₁'}`, linear in `S(x)` as a value) and
+the connection-difference cocycle `connDiff_cocycle` (for `∇^{g₁} − ∇^{g₁'} = connDiff g₁ g₁'`,
+order-`≤ 1`), into the genuine endpoint coefficients acting on the endpoint development `∇^{g₁'} K_{g₁'}`
+— the order-`0`/cross arm the Ricci/Lie arms package into `Rₘ`/`Lₘ`.  The cross and slot arms
+(C, S₁, S₂) are the order-`1` `connDiff` couplings.  The operator coefficients (`♯_{g₁}`, `∇^{g₁}`, the
+endpoint development of `K_{g₁'}`) are kept symbolic — they are the endpoint-dependent coefficients the
+arms package afterward.  This is the value-level two-endpoint identity both the Ricci-arm telescope
+(`ricciTensor_sub_eq_palatini_telescope`) and the Lie arm consume. -/
+theorem covDerivConnDiff_diff_endpoint_graded
+    (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
+    (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
+    covDerivConnDiff (I := I) g₀ g₁ (fun b => X b) (fun b => Z b) (fun b => Y b) x
+        - covDerivConnDiff (I := I) g₀ g₁' (fun b => X b) (fun b => Z b) (fun b => Y b) x =
+      (inverseMetricSharpFib (I := I) g₁ x
+            (dualToCotangent (I := I)
+              ((cotangentCov (LeviCivita (I := I) g₁)).toFun
+                (fun b : M => cotangentToCLM (I := I)
+                  (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x (X x)))
+          - inverseMetricSharpFib (I := I) g₁ x
+              (dualToCotangent (I := I)
+                ((cotangentCov (LeviCivita (I := I) g₁)).toFun
+                  (fun b : M => cotangentToCLM (I := I)
+                    (koszulCovGradCovec (I := I) (M := M) g₀ g₁' Z Y b)) x (X x))))
+        + (inverseMetricSharpFib (I := I) g₁ x
+              (dualToCotangent (I := I)
+                ((cotangentCov (LeviCivita (I := I) g₁)).toFun
+                  (fun b : M => cotangentToCLM (I := I)
+                    (koszulCovGradCovec (I := I) (M := M) g₀ g₁' Z Y b)) x (X x)))
+            - inverseMetricSharpFib (I := I) g₁' x
+                (dualToCotangent (I := I)
+                  ((cotangentCov (LeviCivita (I := I) g₁')).toFun
+                    (fun b : M => cotangentToCLM (I := I)
+                      (koszulCovGradCovec (I := I) (M := M) g₀ g₁' Z Y b)) x (X x))))
+        - (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+              (inverseMetricSharpFib (I := I) g₁ x
+                (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y x)) (X x)
+            - PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+                (inverseMetricSharpFib (I := I) g₁' x
+                  (koszulCovGradCovec (I := I) (M := M) g₀ g₁' Z Y x)) (X x))
+        - (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x)
+              ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x))
+            - PDE.DeTurck.connDiff (I := I) g₁' g₀ x (Y x)
+                ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x)))
+        - (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+              ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x)) (Z x)
+            - PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+                ((LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x)) (Z x)) := by
+  rw [covDerivConnDiff_eq_invGramSharp_graded (I := I) (M := M) g₀ g₁ X Y Z x,
+      covDerivConnDiff_eq_invGramSharp_graded (I := I) (M := M) g₀ g₁' X Y Z x]
+  abel
+
 end TensorSpectral
 end Parabolic
 end Analysis
