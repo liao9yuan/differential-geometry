@@ -75,6 +75,7 @@ namespace TensorSpectral
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -358,23 +359,275 @@ noncomputable def gInvGramProdSection (g₀ : SmoothRiemannianMetric I M) {a b :
       (show (2 + a) + (2 + b) = (2 + a + b) + 2 by omega)
       (unitModelProdSection (I := I) g₀ S T))
 
+/-! ### The operator-norm building blocks of the contraction-product bound
+
+The fibre operator bound is an OPERATOR-norm composition (never the rank-lossy Hilbert–Schmidt fibre
+norm): `gInvGramProdSection S T = appCc Φ (castRankCc_db (S ⊗ T))` reads, at every base point `x`, as
+the continuous-linear composition `(Φ x).comp ((S ⊗ T) x)`, so its operator norm is bounded by the
+product of the operator norms of the two factors (`tensorRSSpace_opNorm_le_bound` against
+`tensorRSSpace_norm_apply_le`).  The cometric factor `Φ x = cometricDoubleTraceFib g₀ n x` has a
+RANK-UNIFORM operator-norm bound `‖modelDoubleTrace n L‖ ≤ B_E · ‖L‖` (`B_E` the fixed model constant
+`doubleTraceModelConst`, independent of the passenger count `n` because the double trace touches only
+two slots), and `‖cometricLmodel g₀ x‖` is uniformly bounded over the compact base by the classical
+"continuous Hom-section operator norm on a compact base is bounded" leaf
+`exists_uniform_cometricLmodel_opNorm_bound`.  The bare-product factor obeys the operator bound
+`‖S ⊗ T‖ ≤ ‖S‖ · ‖T‖` through `modelProduct_norm_bound` and the `unitModel`/operator-norm bridge
+`norm_toSection_eq_norm_unitModel`. -/
+
+set_option linter.unusedSectionVars false in
+/-- The unit `(0, 0)`-tensor has operator norm `1`: `‖constOfIsEmpty 1‖ = 1` transported through the
+norm-preserving fibre/model equivalence. -/
+private theorem norm_unitTensor (x : M) : ‖unitTensor (I := I) (M := M) x‖ = 1 := by
+  rw [unitTensor, Tensor0SSpace.ofModel, tensor0SSpace_continuousLinearEquiv_symm_norm_apply,
+    ContinuousMultilinearMap.norm_constOfIsEmpty]; simp
+
+set_option linter.unusedSectionVars false in
+/-- **The operator norm of a `(0, s)`-tensor section value equals its `unitModel` model norm.**  The
+section value `W.toSection x : Tensor0SSpace 0 I x →L Tensor0SSpace s I x` has a one-dimensional domain
+spanned by the unit `(0, 0)`-tensor (norm `1`), so its operator norm is the norm of its value at the
+unit — which is exactly `‖unitModel g s W x‖` (the model image is norm-preserved by
+`tensor0SSpace_continuousLinearEquiv`).  This is the operator-norm/`unitModel` bridge through which the
+bare-product `modelProduct` bound lifts to the section operator norm. -/
+private theorem norm_toSection_eq_norm_unitModel (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (W : SmoothCcTensor g 0 s) (x : M) :
+    ‖W.toSection x‖ = ‖unitModel (I := I) (M := M) g s W x‖ := by
+  classical
+  have hunit : ‖unitTensor (I := I) (M := M) x‖ = 1 := norm_unitTensor (I := I) (M := M) x
+  have hval : ‖(show TensorRSSpace 0 s I x from W.toSection x) (unitTensor (I := I) (M := M) x)‖
+      = ‖unitModel (I := I) (M := M) g s W x‖ := by
+    rw [unitModel]
+    rw [show Tensor0SSpace.toModel
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from W.toSection x)
+            (unitTensor (I := I) (M := M) x)) =
+        tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) s x
+          ((show TensorRSSpace 0 s I x from W.toSection x) (unitTensor (I := I) (M := M) x)) from rfl]
+    rw [tensor0SSpace_continuousLinearEquiv_norm_apply]
+  rw [← hval]
+  apply le_antisymm
+  · apply Tensor0SBundle.tensorRSSpace_opNorm_le_bound _ (norm_nonneg _)
+    intro D
+    obtain ⟨c, hc⟩ : ∃ c : ℝ, D = c • unitTensor (I := I) (M := M) x :=
+      ⟨Tensor0SNabla.tensor0Iso I M x D, zeroTensor_eq_smul_unitTensor (I := I) (M := M) x D⟩
+    rw [hc, map_smul, norm_smul, norm_smul, hunit, mul_one, mul_comm]
+  · calc ‖(show TensorRSSpace 0 s I x from W.toSection x) (unitTensor (I := I) (M := M) x)‖
+        ≤ ‖W.toSection x‖ * ‖unitTensor (I := I) (M := M) x‖ :=
+          Tensor0SBundle.tensorRSSpace_norm_apply_le _ _
+      _ = ‖W.toSection x‖ := by rw [hunit, mul_one]
+
+/-- **The bare model tensor product obeys the section operator bound `‖S ⊗ T‖ ≤ ‖S‖ · ‖T‖`.**  Through
+the `unitModel` operator-norm bridge `norm_toSection_eq_norm_unitModel`, the bare-product operator norm
+is `‖modelProduct (unitModel S) (unitModel T)‖`, bounded by `1 · ‖unitModel S‖ · ‖unitModel T‖`
+(`modelProduct_norm_bound`), which is `‖S.toSection x‖ · ‖T.toSection x‖`. -/
+private theorem norm_unitModelProdSection_toSection_le (g : SmoothRiemannianMetric I M) {p q : ℕ}
+    (S : SmoothCcTensor g 0 p) (T : SmoothCcTensor g 0 q) (x : M) :
+    ‖(unitModelProdSection (I := I) g S T).toSection x‖ ≤ ‖S.toSection x‖ * ‖T.toSection x‖ := by
+  rw [norm_toSection_eq_norm_unitModel (I := I) g (p + q) (unitModelProdSection (I := I) g S T) x,
+    norm_toSection_eq_norm_unitModel (I := I) g p S x,
+    norm_toSection_eq_norm_unitModel (I := I) g q T x,
+    unitModelProdSection_unitModel (I := I) g S T x]
+  calc ‖Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) p q
+          (unitModel (I := I) (M := M) g p S x) (unitModel (I := I) (M := M) g q T x)‖
+      ≤ 1 * ‖unitModel (I := I) (M := M) g p S x‖ * ‖unitModel (I := I) (M := M) g q T x‖ :=
+        Bundle.continuousMultilinearMap.modelProduct_norm_bound p q _ _
+    _ = ‖unitModel (I := I) (M := M) g p S x‖ * ‖unitModel (I := I) (M := M) g q T x‖ := by ring
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
+/-- The covariant-rank cast `castRankCc_db` preserves the section operator norm (it is a transport
+along a `Nat` equality of ranks; `subst` collapses it to the identity). -/
+private theorem norm_castRankCc_db_toSection (g : SmoothRiemannianMetric I M) {a b : ℕ}
+    (h : a = b) (W : SmoothCcTensor g 0 a) (x : M) :
+    ‖(castRankCc_db (I := I) (M := M) g 0 h W).toSection x‖ = ‖W.toSection x‖ := by
+  subst h; rfl
+
+/-- The `appCc` action obeys the section operator bound `‖appCc Φ W‖ ≤ ‖Φ‖ · ‖W‖` at every base point:
+`(appCc Φ W).toSection x = (Φ.toSection x).comp (W.toSection x)` (`appCc_toSection`) and the operator
+norm of a composition is submultiplicative (`tensorRSSpace_opNorm_le_bound` against
+`tensorRSSpace_norm_apply_le`). -/
+private theorem norm_appCc_toSection_le (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) (x : M) :
+    ‖(appCc (I := I) (M := M) g r s Φ W).toSection x‖ ≤ ‖Φ.toSection x‖ * ‖W.toSection x‖ := by
+  rw [appCc_toSection]
+  apply Tensor0SBundle.tensorRSSpace_opNorm_le_bound _ (mul_nonneg (norm_nonneg _) (norm_nonneg _))
+  intro v
+  rw [ContinuousLinearMap.comp_apply]
+  calc ‖(show TensorRSSpace r s I x from Φ.toSection x)
+          ((show TensorRSSpace 0 r I x from W.toSection x) v)‖
+      ≤ ‖Φ.toSection x‖ * ‖(show TensorRSSpace 0 r I x from W.toSection x) v‖ :=
+        Tensor0SBundle.tensorRSSpace_norm_apply_le _ _
+    _ ≤ ‖Φ.toSection x‖ * (‖W.toSection x‖ * ‖v‖) :=
+        mul_le_mul_of_nonneg_left (Tensor0SBundle.tensorRSSpace_norm_apply_le _ _) (norm_nonneg _)
+    _ = ‖Φ.toSection x‖ * ‖W.toSection x‖ * ‖v‖ := by ring
+
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+  [SigmaCompactSpace M] in
+/-- `‖model_interior_product s v‖ ≤ ‖v‖`: the interior product reads `v` into the leading slot via the
+norm-`1` curry-left isometry and a vector evaluation. -/
+private theorem norm_model_interior_product_le (s : ℕ) (v : E) :
+    ‖Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) s v‖ ≤ ‖v‖ := by
+  apply ContinuousLinearMap.opNorm_le_bound _ (norm_nonneg _)
+  intro T
+  have hT : Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) s v T
+      = (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (s + 1) => E) ℝ T) v := rfl
+  rw [hT]
+  calc ‖(continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (s + 1) => E) ℝ T) v‖
+      ≤ ‖continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (s + 1) => E) ℝ T‖ * ‖v‖ :=
+        ContinuousLinearMap.le_opNorm _ _
+    _ = ‖T‖ * ‖v‖ := by
+        rw [(continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (s + 1) => E) ℝ).norm_map]
+    _ = ‖v‖ * ‖T‖ := by ring
+
+/-- **The rank-uniform model double-trace operator-norm constant.**  The fixed model constant
+`∑ₖ ‖b_k‖ · ‖b^k‖` (over the model basis `finBasis`/`cDualBasis`), independent of the passenger count
+`s`; it is the operator-norm coefficient of `modelDoubleTrace s L` against `‖L‖`. -/
+private def doubleTraceModelConst : ℝ :=
+  ∑ k : Fin (Module.finrank ℝ E),
+    ‖(Module.finBasis ℝ E) k‖ *
+      ‖Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E) ((Module.finBasis ℝ E).cDualBasis k)‖
+
+private theorem doubleTraceModelConst_nonneg : 0 ≤ (doubleTraceModelConst (E := E)) :=
+  Finset.sum_nonneg fun _ _ => mul_nonneg (norm_nonneg _) (norm_nonneg _)
+
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M]
+  [SigmaCompactSpace M] in
+/-- **The RANK-UNIFORM operator-norm bound of the model `g₀⁻¹` double trace.**  For every passenger
+count `s` and every model cometric raise `L`, `‖modelDoubleTrace s L‖ ≤ doubleTraceModelConst · ‖L‖`,
+with the constant `doubleTraceModelConst` INDEPENDENT of `s`.  The double trace is the `finrank`-fold
+sum of compositions `(interior_product s b_k) ∘ (interior_product (s+1) (L b^k))`; each summand's
+operator norm is `≤ ‖b_k‖ · ‖L b^k‖ ≤ ‖b_k‖ · ‖L‖ · ‖b^k‖` (`norm_model_interior_product_le`,
+`opNorm_comp_le`, `le_opNorm`), and the `s`-independent fixed-basis sum bounds the whole.  This is the
+node that makes the contraction-product operator bound uniform over the extra-slot counts `a, b` (the
+Hilbert–Schmidt fibre norm would carry a passenger-count-dependent dimension factor). -/
+private theorem norm_modelDoubleTrace_le (s : ℕ) (L : Tensor0SModel 1 ℝ E →L[ℝ] E) :
+    ‖modelDoubleTrace (E := E) s L‖ ≤ (doubleTraceModelConst (E := E)) * ‖L‖ := by
+  rw [modelDoubleTrace, doubleTraceModelConst]
+  refine le_trans (norm_sum_le _ _) ?_
+  rw [Finset.sum_mul]
+  apply Finset.sum_le_sum
+  intro k _
+  calc ‖(Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) s ((Module.finBasis ℝ E) k)).comp
+          (Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) (s + 1)
+            (L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+              ((Module.finBasis ℝ E).cDualBasis k))))‖
+      ≤ ‖Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) s ((Module.finBasis ℝ E) k)‖ *
+          ‖Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) (s + 1)
+            (L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+              ((Module.finBasis ℝ E).cDualBasis k)))‖ :=
+        ContinuousLinearMap.opNorm_comp_le _ _
+    _ ≤ ‖(Module.finBasis ℝ E) k‖ *
+          ‖L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+            ((Module.finBasis ℝ E).cDualBasis k))‖ :=
+        mul_le_mul (norm_model_interior_product_le _ _) (norm_model_interior_product_le _ _)
+          (norm_nonneg _) (norm_nonneg _)
+    _ ≤ ‖(Module.finBasis ℝ E) k‖ *
+          (‖L‖ * ‖Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+            ((Module.finBasis ℝ E).cDualBasis k)‖) :=
+        mul_le_mul_of_nonneg_left (ContinuousLinearMap.le_opNorm _ _) (norm_nonneg _)
+    _ = ‖(Module.finBasis ℝ E) k‖ *
+          ‖Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+            ((Module.finBasis ℝ E).cDualBasis k)‖ * ‖L‖ := by ring
+
+/-- **Uniform-over-the-base operator-norm bound of the model cometric raise (LEAF — classical
+compactness).**  On the compact base `M`, the model operator norm `x ↦ ‖cometricLmodel g₀ x‖` of the
+cometric index-raise (the model reading of the smooth Hom-bundle section `inverseMetricSharpField`,
+`Hom(T^*M, TM)`) is bounded by a single nonnegative constant.  This is the classical "a continuous
+operator-valued field on a compact base attains a finite operator-norm sup" fact (the exact model-norm
+analogue of `exists_uniform_cometricBilin_bound` / `bddAbove_opNorm_range_of_continuous_opNorm`), the
+sole missing PUBLIC prerequisite of the rank-uniform contraction-product operator bound; no direct
+model-operator-norm form of it currently exists on disk (the disk carries only the `(0, 2)`
+tangent-bilinear and the `g`-Riemannian `TensorRSSpace`-Hom variants). -/
+theorem exists_uniform_cometricLmodel_opNorm_bound (g₀ : SmoothRiemannianMetric I M) :
+    ∃ μ : ℝ, 0 ≤ μ ∧ ∀ x : M, ‖cometricLmodel (I := I) g₀ x‖ ≤ μ := by
+  sorry
+
+/-- **The RANK-UNIFORM operator-norm bound of the cometric double-trace fibre.**  At every passenger
+count `n` and base point `x`,
+`‖(cometricDoubleTraceField g₀ n).toSection x‖ ≤ doubleTraceModelConst · ‖cometricLmodel g₀ x‖`, with
+the constant `doubleTraceModelConst` independent of `n`.  Through `cometricDoubleTraceField_toSection`
+and `cometricDoubleTraceFib_toModel` the fibre operator is the `toModel`-conjugate of `modelDoubleTrace
+n (cometricLmodel g₀ x)`, whose `n`-uniform operator bound is `norm_modelDoubleTrace_le`; the
+`toModel`/`tensorRSSpace_opNorm_le_bound` bridge transports it to the default fibre operator norm. -/
+private theorem norm_cometricDoubleTraceField_toSection_le
+    (g₀ : SmoothRiemannianMetric I M) (n : ℕ) (x : M) :
+    ‖(cometricDoubleTraceField (I := I) g₀ n).toSection x‖ ≤
+      (doubleTraceModelConst (E := E)) * ‖cometricLmodel (I := I) g₀ x‖ := by
+  rw [cometricDoubleTraceField_toSection (I := I) g₀ n x]
+  apply Tensor0SBundle.tensorRSSpace_opNorm_le_bound
+    (show TensorRSSpace (n + 2) n I x from cometricDoubleTraceFib (I := I) g₀ n x)
+    (mul_nonneg (doubleTraceModelConst_nonneg (E := E)) (norm_nonneg _))
+  intro D
+  have hval : ‖(cometricDoubleTraceFib (I := I) g₀ n x) D‖
+      = ‖modelDoubleTrace (E := E) n (cometricLmodel (I := I) g₀ x) (Tensor0SSpace.toModel D)‖ := by
+    rw [← cometricDoubleTraceFib_toModel (I := I) g₀ n x D]; rfl
+  rw [hval]
+  calc ‖modelDoubleTrace (E := E) n (cometricLmodel (I := I) g₀ x) (Tensor0SSpace.toModel D)‖
+      ≤ ‖modelDoubleTrace (E := E) n (cometricLmodel (I := I) g₀ x)‖ * ‖Tensor0SSpace.toModel D‖ :=
+        ContinuousLinearMap.le_opNorm _ _
+    _ ≤ ((doubleTraceModelConst (E := E)) * ‖cometricLmodel (I := I) g₀ x‖) * ‖D‖ :=
+        mul_le_mul (norm_modelDoubleTrace_le _ _) (le_of_eq rfl) (norm_nonneg _)
+          (mul_nonneg (doubleTraceModelConst_nonneg (E := E)) (norm_nonneg _))
+
 /-- **The uniform fibrewise operator bound of the `g₀`-parallel double-cometric-trace contraction
-product (POSITED — deep analytic content).**  There is a single nonnegative constant `C` bounding the
-fibre operator norm of `gInvGramProdSection g₀ S T` by `C · ‖S‖ · ‖T‖` uniformly over the base point
-and over the extra-slot counts `a, b`.  This is the boundedness of the continuous bilinear contraction
-map: the composite of the uniform compact operator bound of the `appCc` action of the smooth
-double-trace field (`exists_uniform_riemannianFiberNormSq_appCc_le`, value-local on a compact
-manifold) with the bare-product fibre operator bound (`modelProduct_norm_bound` lifted through the
-fibre/model norm bridge `riemannianFiberNormSq_eq_bundle_norm_sq'`).  The uniform-over-`(a,b)` form
-requires the compact uniform double-trace operator-norm bound to be `a, b`-independent, which holds
-because the double-trace fibre operator norm is bounded by `(finrank E) · ‖g₀⁻¹‖` independent of the
-passenger count — the deep analytic node positing here. -/
+product.**  There is a single nonnegative constant `C` bounding the fibre operator norm of
+`gInvGramProdSection g₀ S T` by `C · ‖S‖ · ‖T‖` uniformly over the base point and over the extra-slot
+counts `a, b`.  The bound is the OPERATOR-norm composition `(Φ x).comp ((S ⊗ T) x)`
+(`norm_appCc_toSection_le`): the cometric factor's RANK-UNIFORM operator norm
+(`norm_cometricDoubleTraceField_toSection_le`, `doubleTraceModelConst · ‖cometricLmodel g₀ x‖`, with
+`doubleTraceModelConst` `a, b`-independent because the double trace touches only two slots) times the
+base-uniform cometric sup (`exists_uniform_cometricLmodel_opNorm_bound`), times the bare-product
+operator bound `‖S ⊗ T‖ ≤ ‖S‖ · ‖T‖` (`norm_unitModelProdSection_toSection_le`,
+`norm_castRankCc_db_toSection`).  `C := doubleTraceModelConst · μ`. -/
 theorem gInvGramProd_norm_bound (g₀ : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ {a b : ℕ} (S : SmoothCcTensor g₀ 0 (2 + a))
       (T : SmoothCcTensor g₀ 0 (2 + b)) (x : M),
       ‖(gInvGramProdSection (I := I) g₀ S T).toSection x‖ ≤
         C * ‖S.toSection x‖ * ‖T.toSection x‖ := by
-  sorry
+  obtain ⟨μ, hμ_nn, hμ⟩ := exists_uniform_cometricLmodel_opNorm_bound (I := I) g₀
+  refine ⟨(doubleTraceModelConst (E := E)) * μ,
+    mul_nonneg (doubleTraceModelConst_nonneg (E := E)) hμ_nn, ?_⟩
+  intro a b S T x
+  rw [gInvGramProdSection]
+  set n := 2 + a + b with hn
+  calc ‖(appCc (I := I) (M := M) g₀ (n + 2) n
+            (cometricDoubleTraceField (I := I) g₀ n)
+            (castRankCc_db (I := I) (M := M) g₀ 0
+              (show (2 + a) + (2 + b) = n + 2 by omega)
+              (unitModelProdSection (I := I) g₀ S T))).toSection x‖
+      ≤ ‖(cometricDoubleTraceField (I := I) g₀ n).toSection x‖ *
+          ‖(castRankCc_db (I := I) (M := M) g₀ 0
+              (show (2 + a) + (2 + b) = n + 2 by omega)
+              (unitModelProdSection (I := I) g₀ S T)).toSection x‖ :=
+        norm_appCc_toSection_le (I := I) g₀ (n + 2) n _ _ x
+    _ = ‖(cometricDoubleTraceField (I := I) g₀ n).toSection x‖ *
+          ‖(unitModelProdSection (I := I) g₀ S T).toSection x‖ := by
+        rw [norm_castRankCc_db_toSection (I := I) g₀ _ _ x]
+    _ ≤ ((doubleTraceModelConst (E := E)) * ‖cometricLmodel (I := I) g₀ x‖) *
+          (‖S.toSection x‖ * ‖T.toSection x‖) :=
+        mul_le_mul (norm_cometricDoubleTraceField_toSection_le (I := I) g₀ n x)
+          (norm_unitModelProdSection_toSection_le (I := I) g₀ S T x) (norm_nonneg _)
+          (mul_nonneg (doubleTraceModelConst_nonneg (E := E)) (norm_nonneg _))
+    _ ≤ ((doubleTraceModelConst (E := E)) * μ) * (‖S.toSection x‖ * ‖T.toSection x‖) := by
+        apply mul_le_mul_of_nonneg_right _ (mul_nonneg (norm_nonneg _) (norm_nonneg _))
+        exact mul_le_mul_of_nonneg_left (hμ x) (doubleTraceModelConst_nonneg (E := E))
+    _ = (doubleTraceModelConst (E := E)) * μ * ‖S.toSection x‖ * ‖T.toSection x‖ := by ring
+
+/-- **Step 1 of the contraction-product covariant Leibniz: the parallel-field cross-term vanishes.**
+For the `∇₀`-parallel cometric double-trace field `Φ = cometricDoubleTraceField g₀ n`, the covariant
+gradient of the contraction `appCc Φ W` collapses to the SINGLE surviving slot-extended summand
+`appCc (slotExtend Φ) (covGrad W)`.  By `covGrad_appCc_eq` the gradient is
+`appCc (covGrad Φ) W + appCc (slotExtend Φ) (covGrad W)`, and the first summand vanishes because
+`covGrad Φ = 0` (`cometricDoubleTraceField_covGrad_eq_zero`, `appCc_zero_left`).  This is the proved
+reduction on which the remaining front-slot reconciliation
+(`appCc (slotExtend Φ) (covGrad W)` ↦ the two front-slot contraction products) is built. -/
+private theorem covGrad_appCc_cometricDoubleTrace_eq (g₀ : SmoothRiemannianMetric I M) (n : ℕ)
+    (W : SmoothCcTensor g₀ 0 (n + 2)) :
+    covGrad (I := I) (M := M) g₀ 0 n
+        (appCc (I := I) (M := M) g₀ (n + 2) n (cometricDoubleTraceField (I := I) g₀ n) W) =
+      appCc (I := I) (M := M) g₀ (n + 2 + 1) (n + 1)
+        (slotExtend (I := I) (M := M) g₀ (n + 2) n (cometricDoubleTraceField (I := I) g₀ n))
+        (covGrad (I := I) (M := M) g₀ 0 (n + 2) W) := by
+  rw [covGrad_appCc_eq (I := I) (M := M) g₀ (n + 2) n (cometricDoubleTraceField (I := I) g₀ n) W,
+    cometricDoubleTraceField_covGrad_eq_zero (I := I) g₀ n, appCc_zero_left, zero_add]
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck in
 /-- **The exact single-step front-slot covariant Leibniz of the `g₀`-parallel double-cometric-trace
