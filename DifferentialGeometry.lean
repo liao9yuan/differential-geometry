@@ -1217,6 +1217,7 @@ import DifferentialGeometry.Geometry.Exponential.Smoothness.ZeroSectionConstancy
 import DifferentialGeometry.Geometry.Flow.ConnectionDifference
 import DifferentialGeometry.Geometry.Flow.DeTurckOperator
 import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
+import DifferentialGeometry.Geometry.Flow.DeTurckVFConnDiffVariation
 import DifferentialGeometry.Geometry.Flow.LieDerivativeChartFrameIdentity
 import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
 import DifferentialGeometry.Geometry.Flow.MetricTrace
