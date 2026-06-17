@@ -4262,6 +4262,152 @@ private theorem deTurckRHSArmDiff_order0_pointwise_domination_ballUniform
         exact hCα α T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball hx_tsupport
     _ ≤ Ksum * Scol := mul_le_mul_of_nonneg_right hCα_le hScol_nn
 
+set_option linter.unusedSectionVars false in
+/-- Nonnegativity of a single diagonal covariant-jet grid summand `‖∇^p S‖ · ‖∇^l T‖`. -/
+private lemma diagGrid_summand_nonneg {g : SmoothRiemannianMetric I M} {r₁ s₁ r₂ s₂ : ℕ}
+    (S : SmoothCcTensor g r₁ s₁) (T : SmoothCcTensor g r₂ s₂) (x : M) (p l : ℕ) :
+    0 ≤ ‖(iteratedCovGrad (I := I) g r₁ s₁ p S).toSection x‖ *
+      ‖(iteratedCovGrad (I := I) g r₂ s₂ l T).toSection x‖ :=
+  mul_nonneg (norm_nonneg _) (norm_nonneg _)
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **Diagonal left shift of the covariant-jet grid.** Differentiating the left factor once and
+grading over the order-conserving diagonal window `p + l ≤ j` is dominated by the diagonal window
+`p + l ≤ j + 1` of the undifferentiated factors: the front-commutation `∇^p(∇S) ↦ ∇^{p+1}S`
+reindexes the `p`-axis into `{1, …, j + 1}`, whose paired inner window `l ≤ j + 1 − p` matches the
+target's `l ≤ (j + 2) − (p + 1)`; the `p = 0` row of the target is nonnegative. -/
+private lemma diagGrid_shift_left_le {g : SmoothRiemannianMetric I M} {r₁ s₁ r₂ s₂ : ℕ} {a b : ℕ}
+    (S : SmoothCcTensor g r₁ (s₁ + a)) (T : SmoothCcTensor g r₂ (s₂ + b)) (x : M) (j : ℕ) :
+    (∑ p ∈ Finset.range (j + 1), ∑ l ∈ Finset.range (j + 1 - p),
+        ‖(iteratedCovGrad (I := I) g r₁ (s₁ + a + 1) p (covGrad g r₁ (s₁ + a) S)).toSection x‖ *
+          ‖(iteratedCovGrad (I := I) g r₂ (s₂ + b) l T).toSection x‖) ≤
+      ∑ p ∈ Finset.range (j + 2), ∑ l ∈ Finset.range (j + 2 - p),
+        ‖(iteratedCovGrad (I := I) g r₁ (s₁ + a) p S).toSection x‖ *
+          ‖(iteratedCovGrad (I := I) g r₂ (s₂ + b) l T).toSection x‖ := by
+  have hcomm : (∑ p ∈ Finset.range (j + 1), ∑ l ∈ Finset.range (j + 1 - p),
+        ‖(iteratedCovGrad (I := I) g r₁ (s₁ + a + 1) p (covGrad g r₁ (s₁ + a) S)).toSection x‖ *
+          ‖(iteratedCovGrad (I := I) g r₂ (s₂ + b) l T).toSection x‖) =
+      ∑ p ∈ Finset.range (j + 1), ∑ l ∈ Finset.range (j + 1 - p),
+        ‖(iteratedCovGrad (I := I) g r₁ (s₁ + a) (p + 1) S).toSection x‖ *
+          ‖(iteratedCovGrad (I := I) g r₂ (s₂ + b) l T).toSection x‖ := by
+    refine Finset.sum_congr rfl fun p _ => Finset.sum_congr rfl fun l _ => ?_
+    rw [norm_toSection_iteratedCovGrad_covGrad_comm g r₁ (s₁ + a) p S x]
+  rw [hcomm, Finset.sum_range_succ' (n := j + 1)
+    (f := fun p => ∑ l ∈ Finset.range (j + 2 - p),
+      ‖(iteratedCovGrad (I := I) g r₁ (s₁ + a) p S).toSection x‖ *
+        ‖(iteratedCovGrad (I := I) g r₂ (s₂ + b) l T).toSection x‖)]
+  refine le_add_of_le_of_nonneg ?_
+    (Finset.sum_nonneg fun l _ => diagGrid_summand_nonneg S T x 0 l)
+  refine Finset.sum_le_sum fun p _ => ?_
+  rw [show j + 2 - (p + 1) = j + 1 - p from by omega]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **Diagonal right shift of the covariant-jet grid.** Differentiating the right factor once and
+grading over the diagonal window `p + l ≤ j` is dominated by the diagonal window `p + l ≤ j + 1`:
+for each `p`, the reindexing `∇^l(∇T) ↦ ∇^{l+1}T` shifts the inner `l`-axis (target row split off
+the `l = 0` term), and the outer `p`-axis widens from `range (j + 1)` to `range (j + 2)`. -/
+private lemma diagGrid_shift_right_le {g : SmoothRiemannianMetric I M} {r₁ s₁ r₂ s₂ : ℕ} {a b : ℕ}
+    (S : SmoothCcTensor g r₁ (s₁ + a)) (T : SmoothCcTensor g r₂ (s₂ + b)) (x : M) (j : ℕ) :
+    (∑ p ∈ Finset.range (j + 1), ∑ l ∈ Finset.range (j + 1 - p),
+        ‖(iteratedCovGrad (I := I) g r₁ (s₁ + a) p S).toSection x‖ *
+          ‖(iteratedCovGrad (I := I) g r₂ (s₂ + b + 1) l (covGrad g r₂ (s₂ + b) T)).toSection x‖) ≤
+      ∑ p ∈ Finset.range (j + 2), ∑ l ∈ Finset.range (j + 2 - p),
+        ‖(iteratedCovGrad (I := I) g r₁ (s₁ + a) p S).toSection x‖ *
+          ‖(iteratedCovGrad (I := I) g r₂ (s₂ + b) l T).toSection x‖ := by
+  have hcomm : (∑ p ∈ Finset.range (j + 1), ∑ l ∈ Finset.range (j + 1 - p),
+        ‖(iteratedCovGrad (I := I) g r₁ (s₁ + a) p S).toSection x‖ *
+          ‖(iteratedCovGrad (I := I) g r₂ (s₂ + b + 1) l (covGrad g r₂ (s₂ + b) T)).toSection x‖) =
+      ∑ p ∈ Finset.range (j + 1), ∑ l ∈ Finset.range (j + 1 - p),
+        ‖(iteratedCovGrad (I := I) g r₁ (s₁ + a) p S).toSection x‖ *
+          ‖(iteratedCovGrad (I := I) g r₂ (s₂ + b) (l + 1) T).toSection x‖ := by
+    refine Finset.sum_congr rfl fun p _ => Finset.sum_congr rfl fun l _ => ?_
+    rw [norm_toSection_iteratedCovGrad_covGrad_comm g r₂ (s₂ + b) l T x]
+  rw [hcomm]
+  refine le_trans ?_ (Finset.sum_le_sum_of_subset_of_nonneg
+    (Finset.range_subset_range.2 (by omega : j + 1 ≤ j + 2))
+    (fun p _ _ => Finset.sum_nonneg fun l _ => diagGrid_summand_nonneg S T x p l))
+  refine Finset.sum_le_sum fun p hp => ?_
+  have hp' : p ≤ j + 1 := by have := Finset.mem_range.mp hp; omega
+  rw [show j + 2 - p = (j + 1 - p) + 1 from by omega,
+    Finset.sum_range_succ' (n := j + 1 - p)
+    (f := fun l => ‖(iteratedCovGrad (I := I) g r₁ (s₁ + a) p S).toSection x‖ *
+      ‖(iteratedCovGrad (I := I) g r₂ (s₂ + b) l T).toSection x‖)]
+  exact le_add_of_le_of_nonneg (le_refl _) (diagGrid_summand_nonneg S T x p 0)
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The DIAGONAL bilinear covariant Leibniz norm bound.** For every gradient order `j`, the
+pointwise fibre norm of `∇^j (prod S T)` is at most `opNorm · 2^j` times the *order-conserving
+diagonal* sum, over gradient orders `p + l ≤ j` (`l < j + 1 − p`), of the products `‖∇^p S‖ · ‖∇^l T‖`.
+
+This is the order-conservation refinement of `norm_iteratedCovGrad_prod_le_jetGrid` (which grades over
+the full box `p, l ≤ j`): the exact covariant Leibniz rule `∇(prod S T) = prod (∇S) T + prod S (∇T)`
+distributes the single gradient onto exactly one factor at each step, so every surviving leaf of the
+`j`-fold expansion has total order `p + l = j` exactly.  Proved by the same induction as the box bound,
+with the diagonal shift lemmas `diagGrid_shift_left_le` / `diagGrid_shift_right_le` keeping the inner
+window paired to `j + 1 − p` throughout. -/
+private theorem diagGrid_jet {g : SmoothRiemannianMetric I M} {r₁ s₁ r₂ s₂ r₀ s₀ : ℕ}
+    (Φ : DifferentialGeometry.PDE.RicciFlow.ParallelTensorProduct g r₁ s₁ r₂ s₂ r₀ s₀) (j : ℕ) :
+    ∀ {a b : ℕ} (S : SmoothCcTensor g r₁ (s₁ + a)) (T : SmoothCcTensor g r₂ (s₂ + b)) (x : M),
+      ‖(iteratedCovGrad (I := I) g r₀ (s₀ + a + b) j (Φ.prod S T)).toSection x‖ ≤
+        Φ.opNorm * (2 : ℝ) ^ j * ∑ p ∈ Finset.range (j + 1), ∑ l ∈ Finset.range (j + 1 - p),
+          ‖(iteratedCovGrad (I := I) g r₁ (s₁ + a) p S).toSection x‖ *
+            ‖(iteratedCovGrad (I := I) g r₂ (s₂ + b) l T).toSection x‖ := by
+  induction j with
+  | zero =>
+      intro a b S T x
+      rw [iteratedCovGrad_zero]
+      have hsum : (∑ p ∈ Finset.range 1, ∑ l ∈ Finset.range (1 - p),
+          ‖(iteratedCovGrad (I := I) g r₁ (s₁ + a) p S).toSection x‖ *
+            ‖(iteratedCovGrad (I := I) g r₂ (s₂ + b) l T).toSection x‖) =
+          ‖S.toSection x‖ * ‖T.toSection x‖ := by
+        simp
+      rw [hsum, pow_zero, mul_one, ← mul_assoc]
+      exact Φ.norm_prod_le S T x
+  | succ j ih =>
+      intro a b S T x
+      rw [show ‖(iteratedCovGrad (I := I) g r₀ (s₀ + a + b) (j + 1) (Φ.prod S T)).toSection x‖ =
+          ‖(iteratedCovGrad (I := I) g r₀ (s₀ + a + b + 1) j
+              (covGrad g r₀ (s₀ + a + b) (Φ.prod S T))).toSection x‖ from
+        (norm_toSection_iteratedCovGrad_covGrad_comm g r₀ (s₀ + a + b) j (Φ.prod S T) x).symm]
+      rw [Φ.covGrad_prod S T, iteratedCovGrad_add]
+      rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
+      refine norm_add_le _ _ |>.trans ?_
+      rw [norm_toSection_iteratedCovGrad_castRankCc g r₀
+        (by omega : s₀ + (a + 1) + b = s₀ + a + b + 1) (Φ.prod (covGrad g r₁ (s₁ + a) S) T) j x]
+      have hL := ih (a := a + 1) (b := b) (covGrad g r₁ (s₁ + a) S) T x
+      have hR := ih (a := a) (b := b + 1) S (covGrad g r₂ (s₂ + b) T) x
+      have hgridL := diagGrid_shift_left_le S T x j
+      have hgridR := diagGrid_shift_right_le S T x j
+      have hopNN : 0 ≤ Φ.opNorm := Φ.opNorm_nonneg
+      have hpowNN : (0 : ℝ) ≤ (2 : ℝ) ^ j := by positivity
+      calc
+        ‖(iteratedCovGrad (I := I) g r₀ (s₀ + (a + 1) + b) j
+              (Φ.prod (covGrad g r₁ (s₁ + a) S) T)).toSection x‖ +
+            ‖(iteratedCovGrad (I := I) g r₀ (s₀ + a + (b + 1)) j
+                (Φ.prod S (covGrad g r₂ (s₂ + b) T))).toSection x‖
+            ≤ (Φ.opNorm * (2 : ℝ) ^ j * ∑ p ∈ Finset.range (j + 1), ∑ l ∈ Finset.range (j + 1 - p),
+                  ‖(iteratedCovGrad (I := I) g r₁ (s₁ + a + 1) p (covGrad g r₁ (s₁ + a) S)).toSection x‖ *
+                    ‖(iteratedCovGrad (I := I) g r₂ (s₂ + b) l T).toSection x‖) +
+                (Φ.opNorm * (2 : ℝ) ^ j * ∑ p ∈ Finset.range (j + 1), ∑ l ∈ Finset.range (j + 1 - p),
+                  ‖(iteratedCovGrad (I := I) g r₁ (s₁ + a) p S).toSection x‖ *
+                    ‖(iteratedCovGrad (I := I) g r₂ (s₂ + b + 1) l (covGrad g r₂ (s₂ + b) T)).toSection x‖) :=
+          add_le_add hL hR
+        _ ≤ (Φ.opNorm * (2 : ℝ) ^ j * ∑ p ∈ Finset.range (j + 2), ∑ l ∈ Finset.range (j + 2 - p),
+                ‖(iteratedCovGrad (I := I) g r₁ (s₁ + a) p S).toSection x‖ *
+                  ‖(iteratedCovGrad (I := I) g r₂ (s₂ + b) l T).toSection x‖) +
+              (Φ.opNorm * (2 : ℝ) ^ j * ∑ p ∈ Finset.range (j + 2), ∑ l ∈ Finset.range (j + 2 - p),
+                ‖(iteratedCovGrad (I := I) g r₁ (s₁ + a) p S).toSection x‖ *
+                  ‖(iteratedCovGrad (I := I) g r₂ (s₂ + b) l T).toSection x‖) := by
+          refine add_le_add ?_ ?_
+          · exact mul_le_mul_of_nonneg_left hgridL (mul_nonneg hopNN hpowNN)
+          · exact mul_le_mul_of_nonneg_left hgridR (mul_nonneg hopNN hpowNN)
+        _ = Φ.opNorm * (2 : ℝ) ^ (j + 1) * ∑ p ∈ Finset.range (j + 1 + 1),
+              ∑ l ∈ Finset.range (j + 1 + 1 - p),
+                ‖(iteratedCovGrad (I := I) g r₁ (s₁ + a) p S).toSection x‖ *
+                  ‖(iteratedCovGrad (I := I) g r₂ (s₂ + b) l T).toSection x‖ := by
+          rw [pow_succ]; ring
+
+set_option backward.isDefEq.respectTransparency false in
 /-- **(POSITED — the DIAGONAL-window intrinsic covariant Leibniz / Faà-di-Bruno grid for a parallel
 bilinear tensor product, in pointwise fibre-norm form; chart-jet-free; reusable foundation.)**
 
@@ -4296,10 +4442,199 @@ private theorem ParallelTensorProduct_norm_iteratedCovGrad_prod_diagonal_le
           (Φ.prod (a := 0) (b := 0) S U)).toSection x‖ ≤
         C j * ∑ p ∈ Finset.range (j + 1), ∑ l ∈ Finset.range (j + 1 - p),
           ‖(iteratedCovGrad (I := I) g₀ r₁ s₁ p S).toSection x‖ *
-            ‖(iteratedCovGrad (I := I) g₀ r₂ s₂ l U).toSection x‖ :=
+            ‖(iteratedCovGrad (I := I) g₀ r₂ s₂ l U).toSection x‖ := by
+  refine ⟨fun j => Φ.opNorm * (2 : ℝ) ^ j,
+    fun j => mul_nonneg Φ.opNorm_nonneg (by positivity), fun x j => ?_⟩
+  exact diagGrid_jet Φ j (a := 0) (b := 0) S U x
+
+/-- **(POSITED deep bedrock — the INTRINSIC mean-value Fréchet realization identity of the nonlinear
+Ricci–DeTurck RHS-arm difference as a three-term parallel-tensor-product covariant contraction.)**
+
+Fix `g₀`, `g_bg`, a supercritical order `a` (`2·finrank E + 10 ≤ a`), and a covariant-`L²` ball radius
+`R ≥ 0`.  Outside the `∀ T T'` quantifier there are a realized coefficient rank `s` and a nonnegative
+ball-uniform coefficient `C⁰` envelope `Ccoef`; for any two `g₀`-fibre-small smooth perturbations
+`T, T'` whose covariant-`L²` jets up to order `a + 2` lie in the radius-`R` ball there are three
+parallel fibrewise-bilinear bundle maps `Φ₀, Φ₁, Φ₂` (the intrinsic metric-contraction symbols of the
+mean-value path `dF`) and a single intrinsic `g₀`-built coefficient field `coeff : SmoothCcTensor g₀ 0 s`
+(the path-`dF`-symbol: the curvature / Christoffel / inverse-Gram — Neumann-series, det-`≠ 0` by
+`δ, δ' < 1` — combination of the realized metric path `g₀ + T' + r·(T − T')`, integrated `∫₀¹ … dr`)
+such that, with `N := deTurckRHSArmG0 g₀ g_bg T − deTurckRHSArmG0 g₀ g_bg T'`, **every** covariant order
+`q ≤ a` of `N` realizes pointwise as the order-`q` covariant gradient of the three-term contraction of
+`coeff` against `∇^m (T − T')` (`m = 0, 1, 2`),
+```
+(∇^q N)(x) = ∇^q (Φ₀.prod coeff (T−T') + Φ₁.prod coeff (∇(T−T')) + Φ₂.prod coeff (∇²(T−T')))(x),
+```
+and the coefficient field is ball-uniformly `C⁰`-bounded, `∀ l ≤ a + 2, ∀ x, rfns(∇^l coeff)(x) ≤ Ccoef`.
+
+**Why this is the genuine deep INTRINSIC content (and why it is posited here).**  `deTurckRHSArmG0` is
+the second-order quasilinear Nemytskii nonlinearity `−2 Ric(g₀+T) + 𝓛_{W(g₀+T,g_bg)}(g₀+T)`.  By the
+mean-value path `N = ∫₀¹ dF(g₀ + T' + r·(T − T'))[T − T'] dr`, the Fréchet derivative `dF[h]` of the
+Ricci–DeTurck RHS in the metric is a second-order operator `coeff₀·h + coeff₁·∇h + coeff₂·∇²h` whose
+intrinsic symbols are curvature / Christoffel / inverse-Gram (Neumann-series) jets along the path; the
+three valence-dropping parallel contractions `Φ_m.prod coeff (∇^m(T − T'))` realize these terms.
+Expressed entirely in `iteratedCovGrad` / `ParallelTensorProduct` / `riemannianFiberNormSq` — **never** a
+`chartGramOnE` / `chartInvGramOnE` / `HasChartJetLip` chart-jet ball Lipschitz chain, and **never** the
+chart-component route `MetricFamilyChartLinearization` / `RicciDiffAffine`.  This realization identity is
+the irreducible bedrock the fibre-norm grid below assembles on (square via
+`riemannianFiberNormSq_eq_bundle_norm_sq'`, dominate each `Φ_m.prod` by the diagonal covariant-Leibniz
+engine `ParallelTensorProduct_norm_iteratedCovGrad_prod_diagonal_le`, merge the three terms into the
+single-coefficient diagonal product grid).  Consumers transitively depend on its `sorryAx`.
+
+**Non-vacuity.**  The realization vanishes as `T − T' → 0` (`prod_zero_right`), so the Nemytskii
+Lipschitz character is preserved; a degenerate `coeff = 0` is rejected by a nonvanishing `∇^q N` for a
+genuinely second-order, non-flat RHS difference. -/
+private theorem deTurckRHSArmG0_diff_eq_threeTerm_parallelTensorProduct_realization
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
+    ∃ (s : ℕ) (Cop Ccoef : ℝ), 0 ≤ Cop ∧ 0 ≤ Ccoef ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_lt : δ' < 1)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∃ (Φ₀ : DifferentialGeometry.PDE.RicciFlow.ParallelTensorProduct g₀ 0 s 0 2 0 2)
+          (Φ₁ : DifferentialGeometry.PDE.RicciFlow.ParallelTensorProduct g₀ 0 s 0 3 0 2)
+          (Φ₂ : DifferentialGeometry.PDE.RicciFlow.ParallelTensorProduct g₀ 0 s 0 4 0 2)
+          (coeff : SmoothCcTensor g₀ 0 s),
+          Φ₀.opNorm ≤ Cop ∧ Φ₁.opNorm ≤ Cop ∧ Φ₂.opNorm ≤ Cop ∧
+          (∀ q : ℕ, q ≤ a → ∀ x : M,
+            ((iteratedCovGrad (I := I) g₀ 0 2 q
+                (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+                  deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ')).toSection x) =
+              ((iteratedCovGrad (I := I) g₀ 0 2 q
+                (Φ₀.prod (a := 0) (b := 0) coeff (T - T') +
+                 Φ₁.prod (a := 0) (b := 0) coeff (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
+                 Φ₂.prod (a := 0) (b := 0) coeff
+                   (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')))).toSection x)) ∧
+          (∀ l : ℕ, l ≤ a + 2 → ∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 s l coeff).toSection x) ≤ Ccoef) :=
   sorry
 
-/-- **(POSITED — INTRINSIC section-level mean-value-path Faà-di-Bruno difference grid of the nonlinear
+/-- **Diagonal-grid collapse (pure real-analysis bookkeeping).**  If a nonnegative `W` is dominated by
+a three-term covariant-Leibniz grid `∑_{m<3} C m · ∑_{p+l≤q} f p · h (l+m)` whose factor constants
+satisfy `C m ≤ Cop`, then it is dominated by the single `(j, p)`-*diagonal* product grid
+`(3·Cop) · ∑_{j≤q+2} h j · ∑_{p≤q+2−j} f p`.  Order conservation (`l + m ≤ q + 2`) packs the three
+offset grids into the single `(p, j)`-diagonal `p + j ≤ q + 2`; the inner shift `l ↦ l + m` widens into
+the order-`(q+2)` window and the `(p, j)`-Fubini swap regroups the diagonal. -/
+private lemma threeTerm_diagonalGrid_le
+    (q : ℕ) (Cop : ℝ) (hCop : 0 ≤ Cop) (C : ℕ → ℝ) (hCle : ∀ m, C m ≤ Cop)
+    (f h : ℕ → ℝ) (hf : ∀ i, 0 ≤ f i) (hh : ∀ i, 0 ≤ h i) (W : ℝ)
+    (hb : W ≤ ∑ m ∈ Finset.range 3, C m *
+            ∑ p ∈ Finset.range (q + 1), ∑ l ∈ Finset.range (q + 1 - p), f p * h (l + m)) :
+    W ≤ (3 * Cop) *
+      (∑ j ∈ Finset.range (q + 2 + 1), h j * ∑ p ∈ Finset.range (q + 2 + 1 - j), f p) := by
+  set G := ∑ j ∈ Finset.range (q + 2 + 1), h j * ∑ p ∈ Finset.range (q + 2 + 1 - j), f p with hG
+  have hG_nn : 0 ≤ G := by
+    rw [hG]; exact Finset.sum_nonneg fun j _ => mul_nonneg (hh j)
+      (Finset.sum_nonneg fun p _ => hf p)
+  have hDm_le : ∀ m ∈ Finset.range 3,
+      (∑ p ∈ Finset.range (q + 1), ∑ l ∈ Finset.range (q + 1 - p), f p * h (l + m)) ≤ G := by
+    intro m hm
+    have hm2 : m ≤ 2 := by have := Finset.mem_range.mp hm; omega
+    have ha : (∑ p ∈ Finset.range (q + 1), ∑ l ∈ Finset.range (q + 1 - p), f p * h (l + m))
+        ≤ ∑ p ∈ Finset.range (q + 2 + 1), f p * ∑ j ∈ Finset.range (q + 2 + 1 - p), h j := by
+      refine le_trans ?_ (Finset.sum_le_sum_of_subset_of_nonneg
+        (Finset.range_subset_range.2 (by omega : q + 1 ≤ q + 2 + 1))
+        (fun p _ _ => mul_nonneg (hf p) (Finset.sum_nonneg fun j _ => hh j)))
+      refine Finset.sum_le_sum fun p hp => ?_
+      have hp_le : p ≤ q := by have := Finset.mem_range.mp hp; omega
+      have key : (∑ l ∈ Finset.range (q + 1 - p), h (l + m)) ≤
+          ∑ j ∈ Finset.range (q + 2 + 1 - p), h j := by
+        have step1 : (∑ l ∈ Finset.range (q + 1 - p), h (l + m)) ≤
+            ∑ j ∈ Finset.range ((q + 1 - p) + m), h j := by
+          rw [show (q + 1 - p) + m = m + (q + 1 - p) from by ring, Finset.sum_range_add]
+          have he : (∑ l ∈ Finset.range (q + 1 - p), h (l + m)) =
+              ∑ l ∈ Finset.range (q + 1 - p), h (m + l) := by
+            apply Finset.sum_congr rfl; intro l _; rw [Nat.add_comm]
+          rw [he]; exact le_add_of_nonneg_left (Finset.sum_nonneg fun j _ => hh j)
+        exact step1.trans (Finset.sum_le_sum_of_subset_of_nonneg
+          (Finset.range_subset_range.2 (by omega : (q + 1 - p) + m ≤ q + 2 + 1 - p))
+          (fun j _ _ => hh j))
+      calc (∑ l ∈ Finset.range (q + 1 - p), f p * h (l + m))
+          = f p * ∑ l ∈ Finset.range (q + 1 - p), h (l + m) := by rw [Finset.mul_sum]
+        _ ≤ f p * ∑ j ∈ Finset.range (q + 2 + 1 - p), h j := mul_le_mul_of_nonneg_left key (hf p)
+    have hfub : (∑ p ∈ Finset.range (q + 2 + 1), f p * ∑ j ∈ Finset.range (q + 2 + 1 - p), h j)
+        = G := by
+      rw [hG]
+      rw [Finset.sum_congr rfl (fun p _ => Finset.mul_sum _ _ _)]
+      rw [Finset.sum_congr rfl (fun j _ => Finset.mul_sum _ _ _)]
+      rw [Finset.sum_sigma', Finset.sum_sigma']
+      apply Finset.sum_nbij' (fun x => ⟨x.2, x.1⟩) (fun x => ⟨x.2, x.1⟩)
+      · rintro ⟨p, j⟩ hpj; simp only [Finset.mem_sigma, Finset.mem_range] at *; omega
+      · rintro ⟨j, p⟩ hjp; simp only [Finset.mem_sigma, Finset.mem_range] at *; omega
+      · rintro ⟨p, j⟩ _; rfl
+      · rintro ⟨j, p⟩ _; rfl
+      · rintro ⟨p, j⟩ _; ring
+    exact ha.trans (le_of_eq hfub)
+  have hsum_le : (∑ m ∈ Finset.range 3, C m *
+      ∑ p ∈ Finset.range (q + 1), ∑ l ∈ Finset.range (q + 1 - p), f p * h (l + m)) ≤
+      3 * Cop * G := by
+    calc (∑ m ∈ Finset.range 3, C m *
+            ∑ p ∈ Finset.range (q + 1), ∑ l ∈ Finset.range (q + 1 - p), f p * h (l + m))
+        ≤ ∑ m ∈ Finset.range 3, Cop * G := by
+          refine Finset.sum_le_sum fun m hm => ?_
+          have hDm := hDm_le m hm
+          have hDm_nn : 0 ≤ (∑ p ∈ Finset.range (q + 1),
+              ∑ l ∈ Finset.range (q + 1 - p), f p * h (l + m)) :=
+            Finset.sum_nonneg fun p _ => Finset.sum_nonneg fun l _ => mul_nonneg (hf p) (hh _)
+          calc C m * (∑ p ∈ Finset.range (q + 1), ∑ l ∈ Finset.range (q + 1 - p), f p * h (l + m))
+              ≤ Cop * (∑ p ∈ Finset.range (q + 1),
+                  ∑ l ∈ Finset.range (q + 1 - p), f p * h (l + m)) :=
+                mul_le_mul_of_nonneg_right (hCle m) hDm_nn
+            _ ≤ Cop * G := mul_le_mul_of_nonneg_left hDm hCop
+      _ = 3 * Cop * G := by rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]; ring
+  exact hb.trans hsum_le
+
+/-- **(POSITED — the DIAGONAL-window covariant Leibniz / Faà-di-Bruno grid for a parallel bilinear
+tensor product, in the intrinsic `g`-Riemannian squared fibre-norm `riemannianFiberNormSq`; the
+`g`-norm analogue of `ParallelTensorProduct_norm_iteratedCovGrad_prod_diagonal_le`.)**
+
+For an intrinsic `ParallelTensorProduct` `Φ` and two smooth compactly-supported factors `S, U`, there
+is a single nonnegative diagonal covariant-Leibniz grid constant family `C : ℕ → ℝ` such that, at every
+covariant order `q` and base point `x`, the order-`q` covariant gradient of `Φ.prod S U` is dominated,
+at the **`g`-Riemannian squared fibre-norm** level, by the order-conserving diagonal product grid
+```
+rfns(∇^q (Φ.prod S U))(x) ≤ C q · ∑_{p + l ≤ q} rfns(∇^p S)(x) · rfns(∇^l U)(x).
+```
+
+**Why posited separately from the model-norm engine.**  The sibling
+`ParallelTensorProduct_norm_iteratedCovGrad_prod_diagonal_le` (proved, in this file) delivers the same
+diagonal grid but in the **model** fibre norm `‖·‖` (`tensorRSSpace_normedAddCommGroup`, pulled back
+from `TensorRSModel`).  The Ricci–DeTurck consumer below grades in the **`g`-Riemannian** fibre norm
+`riemannianFiberNormSq` (built from `g.inner` orthonormal frames), and the on-disk bridge
+`riemannianFiberNormSq_eq_bundle_norm_sq'` connects `rfns` only to the `g`-*bundle* norm (a third
+instance, requiring `tensorRS_riemannianBundle` `letI` and the model instance disabled), **not** to the
+model norm the engine uses.  On a compact base the model and `g`-Riemannian fibre norms are uniformly
+equivalent, so this `g`-norm diagonal grid is the genuine intrinsic deliverable; it is posited here as
+the irreducible `g`-fibre-norm bilinear-Leibniz content (provable from the model-norm engine plus the
+uniform model↔`g` fibre-norm equivalence on the compact base, or directly from the `rfns`
+orthonormal-frame Parseval calculus and `Φ`'s parallelism).  Expressed entirely in `iteratedCovGrad` /
+`riemannianFiberNormSq` — never a chart-jet ball Lipschitz chain.
+
+The single nonnegative `Cg` (uniform over `Φ, S, U`, depending only on `g₀` and the ranks) is the
+model↔`g` fibre-norm equivalence constant on the compact base; the per-order constant is the engine's
+`Φ.opNorm · 2^j` scaled by `Cg`. -/
+private theorem ParallelTensorProduct_riemannianFiberNormSq_iteratedCovGrad_prod_diagonal_le
+    (g₀ : SmoothRiemannianMetric I M) (r₁ s₁ r₂ s₂ r₀ s₀ : ℕ) :
+    ∃ Cg : ℝ, 0 ≤ Cg ∧
+      ∀ (Φ : DifferentialGeometry.PDE.RicciFlow.ParallelTensorProduct g₀ r₁ s₁ r₂ s₂ r₀ s₀)
+        (S : SmoothCcTensor g₀ r₁ s₁) (U : SmoothCcTensor g₀ r₂ s₂) (x : M) (j : ℕ),
+      riemannianFiberNormSq (I := I) (M := M) g₀ r₀ (s₀ + j) x
+          ((iteratedCovGrad (I := I) g₀ r₀ s₀ j
+            (Φ.prod (a := 0) (b := 0) S U)).toSection x) ≤
+        Cg * (Φ.opNorm * (2 : ℝ) ^ j) * ∑ p ∈ Finset.range (j + 1), ∑ l ∈ Finset.range (j + 1 - p),
+          riemannianFiberNormSq (I := I) (M := M) g₀ r₁ (s₁ + p) x
+              ((iteratedCovGrad (I := I) g₀ r₁ s₁ p S).toSection x) *
+            riemannianFiberNormSq (I := I) (M := M) g₀ r₂ (s₂ + l) x
+              ((iteratedCovGrad (I := I) g₀ r₂ s₂ l U).toSection x) :=
+  sorry
+
+set_option maxHeartbeats 1600000 in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(INTRINSIC section-level mean-value-path Faà-di-Bruno difference grid of the nonlinear
 Ricci–DeTurck RHS arm, with a ball-uniform coefficient `C⁰` envelope; chart-jet-free.)**
 
 Fix `g₀`, `g_bg`, a supercritical order `a` (`2·finrank E + 10 ≤ a`), and a covariant-`L²` ball radius
@@ -4364,8 +4699,204 @@ private theorem deTurckRHSArmG0_sub_eq_parallelTensorProduct_realization
                         ((iteratedCovGrad (I := I) g₀ 0 s l coeff).toSection x)) ∧
           (∀ l : ℕ, l ≤ a + 2 → ∀ x : M,
             riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + l) x
-              ((iteratedCovGrad (I := I) g₀ 0 s l coeff).toSection x) ≤ Ccoef) :=
-  sorry
+              ((iteratedCovGrad (I := I) g₀ 0 s l coeff).toSection x) ≤ Ccoef) := by
+  classical
+  obtain ⟨s, Cop, Ccoef, hCop_nn, hCcoef_nn, hreal⟩ :=
+    deTurckRHSArmG0_diff_eq_threeTerm_parallelTensorProduct_realization
+      (I := I) g₀ g_bg a ha_super hR
+  -- The `g`-Riemannian diagonal covariant-Leibniz equivalence constants for the three rank shapes.
+  obtain ⟨Cg₀, hCg₀_nn, hQ₀⟩ :=
+    ParallelTensorProduct_riemannianFiberNormSq_iteratedCovGrad_prod_diagonal_le
+      (I := I) g₀ 0 s 0 2 0 2
+  obtain ⟨Cg₁, hCg₁_nn, hQ₁⟩ :=
+    ParallelTensorProduct_riemannianFiberNormSq_iteratedCovGrad_prod_diagonal_le
+      (I := I) g₀ 0 s 0 3 0 2
+  obtain ⟨Cg₂, hCg₂_nn, hQ₂⟩ :=
+    ParallelTensorProduct_riemannianFiberNormSq_iteratedCovGrad_prod_diagonal_le
+      (I := I) g₀ 0 s 0 4 0 2
+  set Cgmax : ℝ := max Cg₀ (max Cg₁ Cg₂) with hCgmax_def
+  have hCgmax_nn : 0 ≤ Cgmax := le_max_of_le_left hCg₀_nn
+  -- The single ball-uniform grid constant `Cmid`.
+  refine ⟨s, 3 * (4 * Cgmax * (Cop * (2 : ℝ) ^ a)), Ccoef, by positivity, hCcoef_nn, ?_⟩
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
+  obtain ⟨Φ₀, Φ₁, Φ₂, coeff, hΦ₀op, hΦ₁op, hΦ₂op, hid, hC0⟩ :=
+    hreal T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
+  refine ⟨coeff, ?_, hC0⟩
+  intro q hq x
+  -- `g`-Riemannian squared fibre-norm columns of the perturbation difference and the coefficient.
+  set hT : ℕ → ℝ := fun i =>
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 i (T - T')).toSection x) with hhT_def
+  set fC : ℕ → ℝ := fun p =>
+    riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + p) x
+      ((iteratedCovGrad (I := I) g₀ 0 s p coeff).toSection x) with hfC_def
+  have hT_nn : ∀ i, 0 ≤ hT i := fun i =>
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + i) x _
+  have fC_nn : ∀ p, 0 ≤ fC p := fun p =>
+    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (s + p) x _
+  -- `W` = the `g`-fibre norm² of `∇^q` of the RHS-arm difference at `x`.
+  set W : ℝ := riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 q
+        (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+          deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ')).toSection x) with hW_def
+  -- Order-conservation: `∇^l (∇^m (T − T')) = ∇^{l+m}(T − T')` at the `rfns` level (no chart route).
+  have hUcomp : ∀ (m l : ℕ),
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + m + l) x
+          ((iteratedCovGrad (I := I) g₀ 0 (2 + m) l
+            (iteratedCovGrad (I := I) g₀ 0 2 m (T - T'))).toSection x) = hT (m + l) := by
+    intro m l
+    rw [hhT_def]
+    exact rfns_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 2 m l (T - T') x
+  -- The per-term `g`-Leibniz diagonal grids from the `rfns` engine `Q`, with each second-factor column
+  -- folded to `∑_{p,l} fC p · hT (l + m)` via order conservation.
+  have hQ₀' := hQ₀ Φ₀ coeff (T - T') x q
+  have hQ₁' := hQ₁ Φ₁ coeff (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) x q
+  have hQ₂' := hQ₂ Φ₂ coeff (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) x q
+  set Cterm : ℝ := Cgmax * (Cop * (2 : ℝ) ^ a) with hCterm_def
+  have hCterm_nn : 0 ≤ Cterm := by positivity
+  have hgrid_nn : ∀ (m : ℕ), 0 ≤ ∑ p ∈ Finset.range (q + 1),
+      ∑ l ∈ Finset.range (q + 1 - p), fC p * hT (l + m) := fun m =>
+    Finset.sum_nonneg fun p _ => Finset.sum_nonneg fun l _ => mul_nonneg (fC_nn p) (hT_nn _)
+  -- Constant domination shared by all three terms.
+  have hCop2a_nn : 0 ≤ Cop * (2 : ℝ) ^ a := by positivity
+  have hpowq : (2 : ℝ) ^ q ≤ (2 : ℝ) ^ a := pow_le_pow_right₀ (by norm_num) hq
+  have hCleg : ∀ (op : ℝ), 0 ≤ op → op ≤ Cop → ∀ Cg, Cg ≤ Cgmax → 0 ≤ Cg →
+      Cg * (op * (2 : ℝ) ^ q) ≤ Cterm := by
+    intro op hop0 hop Cg hCg hCg0
+    rw [hCterm_def]
+    refine mul_le_mul hCg ?_ (by positivity) hCgmax_nn
+    exact mul_le_mul hop hpowq (by positivity) hCop_nn
+  -- m = 0 : the column is already `∑_{p,l} fC p · hT l` (no fold).
+  have hterm0 : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 q (Φ₀.prod (a := 0) (b := 0) coeff (T - T'))).toSection x) ≤
+      Cterm * ∑ p ∈ Finset.range (q + 1), ∑ l ∈ Finset.range (q + 1 - p), fC p * hT (l + 0) := by
+    refine hQ₀'.trans ?_
+    have hcoleq : (∑ p ∈ Finset.range (q + 1), ∑ l ∈ Finset.range (q + 1 - p),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + p) x
+              ((iteratedCovGrad (I := I) g₀ 0 s p coeff).toSection x) *
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 2 l (T - T')).toSection x))
+        = ∑ p ∈ Finset.range (q + 1), ∑ l ∈ Finset.range (q + 1 - p), fC p * hT (l + 0) := by
+      refine Finset.sum_congr rfl fun p _ => Finset.sum_congr rfl fun l _ => ?_
+      rw [hfC_def, hhT_def, Nat.add_zero]
+    rw [hcoleq]
+    exact mul_le_mul_of_nonneg_right
+      (hCleg _ Φ₀.opNorm_nonneg hΦ₀op _ (le_max_left _ _) hCg₀_nn) (hgrid_nn 0)
+  -- m = 1 : fold `rfns(∇^l (∇^1 (T − T')))` to `hT (l + 1)`.
+  have hterm1 : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 q
+        (Φ₁.prod (a := 0) (b := 0) coeff
+          (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')))).toSection x) ≤
+      Cterm * ∑ p ∈ Finset.range (q + 1), ∑ l ∈ Finset.range (q + 1 - p), fC p * hT (l + 1) := by
+    refine hQ₁'.trans ?_
+    have hcoleq : (∑ p ∈ Finset.range (q + 1), ∑ l ∈ Finset.range (q + 1 - p),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + p) x
+              ((iteratedCovGrad (I := I) g₀ 0 s p coeff).toSection x) *
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 3 l
+                (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))).toSection x))
+        = ∑ p ∈ Finset.range (q + 1), ∑ l ∈ Finset.range (q + 1 - p), fC p * hT (l + 1) := by
+      refine Finset.sum_congr rfl fun p _ => Finset.sum_congr rfl fun l _ => ?_
+      rw [hfC_def]; congr 1; rw [show l + 1 = 1 + l from by ring]; exact hUcomp 1 l
+    rw [hcoleq]
+    exact mul_le_mul_of_nonneg_right
+      (hCleg _ Φ₁.opNorm_nonneg hΦ₁op _ (le_max_of_le_right (le_max_left _ _)) hCg₁_nn) (hgrid_nn 1)
+  -- m = 2 : fold `rfns(∇^l (∇^2 (T − T')))` to `hT (l + 2)`.
+  have hterm2 : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 q
+        (Φ₂.prod (a := 0) (b := 0) coeff
+          (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')))).toSection x) ≤
+      Cterm * ∑ p ∈ Finset.range (q + 1), ∑ l ∈ Finset.range (q + 1 - p), fC p * hT (l + 2) := by
+    refine hQ₂'.trans ?_
+    have hcoleq : (∑ p ∈ Finset.range (q + 1), ∑ l ∈ Finset.range (q + 1 - p),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + p) x
+              ((iteratedCovGrad (I := I) g₀ 0 s p coeff).toSection x) *
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + l) x
+              ((iteratedCovGrad (I := I) g₀ 0 4 l
+                (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))).toSection x))
+        = ∑ p ∈ Finset.range (q + 1), ∑ l ∈ Finset.range (q + 1 - p), fC p * hT (l + 2) := by
+      refine Finset.sum_congr rfl fun p _ => Finset.sum_congr rfl fun l _ => ?_
+      rw [hfC_def]; congr 1; rw [show l + 2 = 2 + l from by ring]; exact hUcomp 2 l
+    rw [hcoleq]
+    exact mul_le_mul_of_nonneg_right
+      (hCleg _ Φ₂.opNorm_nonneg hΦ₂op _ (le_max_of_le_right (le_max_right _ _)) hCg₂_nn) (hgrid_nn 2)
+  -- Realize `W` via the section-level identity, then split by `g`-fibre subadditivity over the 3 terms.
+  have hWid : W = riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 q
+        (Φ₀.prod (a := 0) (b := 0) coeff (T - T') +
+         Φ₁.prod (a := 0) (b := 0) coeff (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
+         Φ₂.prod (a := 0) (b := 0) coeff
+           (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')))).toSection x) := by
+    rw [hW_def, hid q hq x]
+  -- `∇^q` distributes over the three-term sum at the section level.
+  set A₀ := Φ₀.prod (a := 0) (b := 0) coeff (T - T') with hA₀
+  set A₁ := Φ₁.prod (a := 0) (b := 0) coeff (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) with hA₁
+  set A₂ := Φ₂.prod (a := 0) (b := 0) coeff (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) with hA₂
+  have hsplit : ((iteratedCovGrad (I := I) g₀ 0 2 q (A₀ + A₁ + A₂)).toSection x)
+      = ((iteratedCovGrad (I := I) g₀ 0 2 q (A₀ + A₁)).toSection x)
+        + ((iteratedCovGrad (I := I) g₀ 0 2 q A₂).toSection x) := by
+    rw [iteratedCovGrad_add, SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
+  have hsplit2 : ((iteratedCovGrad (I := I) g₀ 0 2 q (A₀ + A₁)).toSection x)
+      = ((iteratedCovGrad (I := I) g₀ 0 2 q A₀).toSection x)
+        + ((iteratedCovGrad (I := I) g₀ 0 2 q A₁).toSection x) := by
+    rw [iteratedCovGrad_add, SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
+  -- `g`-fibre subadditivity: `rfns(a+b+c) ≤ 4·(rfns a + rfns b + rfns c)`.
+  have hsub : W ≤ 4 * (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 q A₀).toSection x)
+      + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 q A₁).toSection x)
+      + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+        ((iteratedCovGrad (I := I) g₀ 0 2 q A₂).toSection x)) := by
+    rw [hWid, hsplit, hsplit2]
+    have h1 := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (2 + q) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 q A₀).toSection x +
+        (iteratedCovGrad (I := I) g₀ 0 2 q A₁).toSection x)
+      ((iteratedCovGrad (I := I) g₀ 0 2 q A₂).toSection x)
+    have h2 := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 0 (2 + q) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 q A₀).toSection x)
+      ((iteratedCovGrad (I := I) g₀ 0 2 q A₁).toSection x)
+    have h0nn := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + q) x
+      ((iteratedCovGrad (I := I) g₀ 0 2 q A₂).toSection x)
+    nlinarith [h1, h2, h0nn]
+  -- Each term dominated by `Cterm · D_m`; combine and feed the diagonal-grid core.
+  have hcomb : W ≤ ∑ m ∈ Finset.range 3, (4 * Cterm) *
+      ∑ p ∈ Finset.range (q + 1), ∑ l ∈ Finset.range (q + 1 - p), fC p * hT (l + m) := by
+    have hterms : (riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 q A₀).toSection x)
+        + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 q A₁).toSection x)
+        + riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 q A₂).toSection x))
+        ≤ Cterm * (∑ p ∈ Finset.range (q + 1), ∑ l ∈ Finset.range (q + 1 - p), fC p * hT (l + 0))
+          + Cterm * (∑ p ∈ Finset.range (q + 1), ∑ l ∈ Finset.range (q + 1 - p), fC p * hT (l + 1))
+          + Cterm * (∑ p ∈ Finset.range (q + 1), ∑ l ∈ Finset.range (q + 1 - p),
+              fC p * hT (l + 2)) := by
+      exact add_le_add (add_le_add hterm0 hterm1) hterm2
+    have hexpand : (∑ m ∈ Finset.range 3, (4 * Cterm) *
+        ∑ p ∈ Finset.range (q + 1), ∑ l ∈ Finset.range (q + 1 - p), fC p * hT (l + m))
+        = 4 * (Cterm * (∑ p ∈ Finset.range (q + 1), ∑ l ∈ Finset.range (q + 1 - p), fC p * hT (l + 0))
+            + Cterm * (∑ p ∈ Finset.range (q + 1), ∑ l ∈ Finset.range (q + 1 - p), fC p * hT (l + 1))
+            + Cterm * (∑ p ∈ Finset.range (q + 1), ∑ l ∈ Finset.range (q + 1 - p),
+                fC p * hT (l + 2))) := by
+      rw [Finset.sum_range_succ, Finset.sum_range_succ, Finset.sum_range_one]; ring
+    rw [hexpand]
+    exact hsub.trans (by
+      refine mul_le_mul_of_nonneg_left hterms (by norm_num))
+  -- The diagonal-grid collapse: `W ≤ 3·(4·Cterm)·∑_{j≤q+2} hT j · ∑_{p≤q+2−j} fC p`.
+  have hcollapse := threeTerm_diagonalGrid_le q (4 * Cterm) (by positivity)
+    (fun _ => 4 * Cterm) (fun _ => le_refl _) fC hT fC_nn hT_nn W hcomb
+  -- Conclude: B1's RHS is exactly `(3·(4·Cterm)) · (the diagonal grid)`.
+  have hfinal : (3 * (4 * Cterm)) *
+        (∑ j ∈ Finset.range (q + 2 + 1), hT j * ∑ p ∈ Finset.range (q + 2 + 1 - j), fC p)
+      = (3 * (4 * Cgmax * (Cop * (2 : ℝ) ^ a))) *
+          ∑ i ∈ Finset.range (q + 2 + 1),
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + i) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 i (T - T')).toSection x)
+              * ∑ l ∈ Finset.range (q + 2 + 1 - i),
+                  riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s + l) x
+                    ((iteratedCovGrad (I := I) g₀ 0 s l coeff).toSection x) := by
+    rw [hCterm_def, hhT_def, hfC_def]; ring
+  exact hcollapse.trans (le_of_eq hfinal)
 
 /-- **(INTRINSIC section-level mean-value-path Faà-di-Bruno difference grid of the nonlinear
 Ricci–DeTurck RHS arm, with a fused ball-uniform coefficient-column envelope; chart-jet-free.)**
