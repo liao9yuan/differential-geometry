@@ -122,6 +122,61 @@ private theorem ccTensorBilinSymm_zero_apply_jsmooth (g : SmoothRiemannianMetric
   rw [h0, ccTensorBilinSymm_smul]
   ring
 
+/-- **DEEP ANALYTIC INPUT (1/2a) — the parabolic time-bootstrap of the engine forcing:
+a `C∞`-in-time per-mode forcing-coordinate family with a `t`-independent all-order
+time-jet spectral-mass majorant, realized by a time-continuous `Hᵃ`-representative of the
+forcing whose `i`-th eigen-coordinate equals the smooth `f i` on `[0,T]`.**
+
+For the genuinely-second-order Nemytskii forcing `gforce` of the Ricci–DeTurck flow about
+`g₀` (the engine forcing `gforce =ᵐ deTurckSobolevNHa2 ∘ (maxRegDuhamelSolField …)`, in
+the supercritical regularity regime `2·finrank + 10 ≤ a`), the per-eigenmode forcing
+coordinates admit a genuinely **`C∞`-in-time** representative `f` together with a
+time-continuous everywhere `Hᵃ`-representative `F` with:
+
+* **(smoothness)** each `f i` is `C∞`;
+* **(all-order time-jet spectral-mass)** for every time-derivative order `j` and spatial
+  Sobolev order `τ ≥ 0`, the weighted square of the `j`-th time-derivative of `f i` has a
+  single `t`-independent summable-across-modes majorant on `[0,T]`;
+* **(representative)** `gforce =ᵐ F`, each per-mode coordinate `t ↦ (F t).coeff i` is
+  continuous on `[0,T]`, and the forcing masses `forcingMass gforce c` are summable at
+  every order `c ≥ 0`;
+* **(coordinate realization)** on `[0,T]` the per-mode coordinate of `F` is the smooth
+  `f`: `(F t).coeff i = f i t`.
+
+This is the genuine parabolic interior-time smoothing of the engine forcing: beyond the
+*continuity* of the forcing's mode coordinates (`maxRegDuhamel_toFun_tensorL2Coeff_eq_perModeConv`),
+the bootstrap supplies the all-order time-derivative spectral-mass control by
+differentiating through the Nemytskii first-order coupling
+`‖N(u)‖_{Hᵈ} ≲ ‖u‖_{H^{d+1}}` and the maximal-regularity gain, recursively raising the
+spatial order by two per time-derivative.  The convolution identity tying these to the
+solution value is the *separate* glue lemma `forcingSmoothCoordsRealize` below, which
+consumes only the representative data and the public every-time spectral-coordinate bridge.
+
+DEFERRED (honest `sorry`; consumers transitively depend on `sorryAx`). -/
+private theorem forcingSmoothTimeCoords
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hforce : gforce =ᵐ[timeMeasure T]
+      (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t))) :
+    ∃ (f : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
+      (F : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)),
+      (∀ i, ContDiff ℝ ∞ (f i)) ∧
+      (∀ (j : ℕ) (τ : ℝ), 0 ≤ τ →
+        ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+          ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+            tensorSobolevWeight (I := I) (M := M) i τ *
+                (iteratedDeriv j (f i) t) ^ 2 ≤ B i) ∧
+      (⇑gforce =ᵐ[timeMeasure T] F) ∧
+      (∀ i, ContinuousOn (fun t => (F t).coeff i) (Set.Icc (0 : ℝ) T)) ∧
+      (∀ c : ℝ, 0 ≤ c → Summable (forcingMass (I := I) (M := M) gforce c)) ∧
+      (∀ t ∈ Set.Icc (0 : ℝ) T, ∀ i, (F t).coeff i = f i t) :=
+  sorry
+
+set_option linter.unusedVariables false in
 /-- **DEEP ANALYTIC INPUT (1/2) — the smooth forcing eigen-coordinate family
 realizing the solution value (the parabolic time-bootstrap of the engine forcing).**
 
@@ -133,14 +188,15 @@ summable-across-modes majorant on every time-jet of its weighted coordinate squa
 realizing the eigen-coordinates of the solution value `u.toFun t` as the per-mode Duhamel
 convolutions `perModeConv λᵢ (f i) t`.
 
-This is the `C∞` strengthening of the every-time spectral-coordinate identity
-`maxRegDuhamel_toFun_tensorL2Coeff_eq_perModeConv` (whose forcing coordinate is only
-continuous): the parabolic interior smoothing of the engine forcing supplies, in addition
-to continuity, the all-order time-derivative spectral-mass control (the Nemytskii
-first-order coupling `‖N(u)‖_{Hᵈ} ≲ ‖u‖_{H^{d+1}}` bootstrapped through the maximal
-regularity).  PINNED to the solution by `hduh`/`hforce`/`htrace`.
-
-DEFERRED (honest `sorry`; consumers transitively depend on `sorryAx`). -/
+The deep parabolic smoothing content (the `C∞`-in-time strengthening with the all-order
+time-jet spectral-mass control) is the separate input `forcingSmoothTimeCoords`.  This
+lemma is the **glue** that promotes its a.e. coordinate agreement to the every-time
+convolution identity for the solution value: the every-time spectral-coordinate identity
+`maxRegDuhamel_toFun_tensorL2Coeff_eq_perModeConv` realizes the solution coordinate as the
+per-mode Duhamel convolution of a continuous representative of the forcing coordinate, and
+`perModeConv_timeL2_congr` (a.e.-insensitivity of `perModeConv` on `[0,T]`) replaces that
+representative by the smooth `f`.  PINNED to the solution by `hduh`/`hforce`/`htrace`
+(`htrace` is part of the frozen consumer interface and is not consumed by this glue). -/
 private theorem forcingSmoothCoordsRealize
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -167,8 +223,36 @@ private theorem forcingSmoothCoordsRealize
             (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
               (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
               (Nat.cast_nonneg a) (timeH1.toFun u t)) i =
-          perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (f i) t) :=
-  sorry
+          perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (f i) t) := by
+  classical
+  -- The deep parabolic time-bootstrap: a `C∞`-in-time forcing-coordinate family `f`,
+  -- a time-continuous `Hᵃ`-representative `F` of `gforce` whose `i`-th mode coordinate is
+  -- the smooth `f i` on `[0,T]`, and the all-order time-jet spectral-mass majorant.
+  obtain ⟨f, F, hf_smooth, hf_mass, hF_rep, hF_coord_cont, hF_sum, hF_coeff⟩ :=
+    forcingSmoothTimeCoords (I := I) (M := M) g₀ g_bg a ha_super hT hT1 gforce hforce
+  refine ⟨f, hf_smooth, hf_mass, ?_⟩
+  set h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc
+  -- The public every-time spectral-coordinate bridge with the continuous representative
+  -- `F`: it realizes the solution-value coordinate as `perModeConv λᵢ φᵢ`, with `φᵢ` the
+  -- `Set.IccExtend` of `t ↦ (F t).coeff i`.
+  have hbridge :=
+    maxRegDuhamel_toFun_tensorL2Coeff_eq_perModeConv (I := I) (M := M)
+      (g := g₀) (r := 0) (s := 2) (a := (a : ℝ)) (T := T) hT hT1 (Nat.cast_nonneg a)
+      h_compact gforce (F := F) hF_coord_cont hF_rep hF_sum
+  obtain ⟨φ, hφ_cont, hφ_sum, hφ_id⟩ := hbridge
+  intro t ht i
+  rw [hduh]
+  -- `φ i = Set.IccExtend hT.le (fun p => (F p.1).coeff i)` by `maxRegDuhamel…`.
+  have hid := hφ_id t ht i
+  rw [hid]
+  -- On `[0,T]`, `(F · ).coeff i = f i`, so the `IccExtend` agrees a.e. with `f i`; the
+  -- `perModeConv` values therefore coincide at `t ∈ [0,T]`.
+  refine perModeConv_timeL2_congr (TensorEigenIdx.lambda (I := I) (M := M) i)
+    (f₁ := Set.IccExtend hT.le (fun p : ↑(Set.Icc (0 : ℝ) T) => (F (p : ℝ)).coeff i))
+    (f₂ := f i) ?_ ht
+  filter_upwards [MeasureTheory.ae_restrict_mem (μ := MeasureTheory.volume)
+    (measurableSet_Icc (a := (0 : ℝ)) (b := T))] with s hs
+  rw [Set.IccExtend_of_mem hT.le _ hs, hF_coeff s hs i]
 
 /-- **DEEP ANALYTIC INPUT (2/2) — the realized perturbation solves the Ricci–DeTurck
 flow (the soundness core).**
