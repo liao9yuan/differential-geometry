@@ -7,6 +7,8 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.Real
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RawComponentEuclideanBridge
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmOrderDropping
 import DifferentialGeometry.Analysis.Calculus.ContDiffOnTsum
+import DifferentialGeometry.Analysis.Spectral.Tensor.SmoothSection.CompactChartJetBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.WeylSummability
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.DeTurckChartRegularityFromJoint
 
 /-!
@@ -253,18 +255,24 @@ sums — which on disk exists only at the `L²`/`H^s`-norm level
 (`spectralPartialSum_toL2_tendsto`) — paired with the additivity of `ccTensorBilinSymm` in
 its tensor argument.
 
-Honest `sorry`: the chart-`C⁰` upgrade of the `L²` spectral convergence is not available
-on disk; consumers transitively depend on its `sorryAx`.  The `hcoeff` hypothesis fixes the
-coordinates `φ i t` as the `L²` eigen-coordinates of `T_rep t`, so the identity is the
-genuine spectral expansion, not a free posit. -/
+Honest `sorry`: the chart-`C⁰` upgrade of the `L²` spectral convergence
+(`spectralPartialSum_toL2_tendsto`) is not available on disk; it requires the **uniform-in-`i`
+eigensection chart `H^{2k} ↪ C⁰` Sobolev embedding** — the same missing prerequisite carried
+by `eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant` (P2) — so that the `L²`
+partial-sum convergence upgrades to chart-`C⁰` (uniform pointwise) convergence and the
+`ccTensorBilinSymm`-additivity gives the per-mode series.  Consumers transitively depend on its
+`sorryAx`.  The `hcoeff` hypothesis (now relativized to the slab `t ∈ Icc 0 T`) fixes the
+coordinates `φ i t` as the `L²` eigen-coordinates of `T_rep t`, so the identity is the genuine
+spectral expansion, not a free posit. -/
 private theorem realizedChartGramIncrement_eigenSeries_eq
     (g : SmoothRiemannianMetric I M) {T : ℝ}
     (T_rep : ℝ → SmoothCcTensor g 0 2)
     (φ : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ)
-    (hcoeff : ∀ (t : ℝ) (i : TensorEigenIdx (I := I) (M := M) g 0 2),
-      tensorL2Coeff (I := I) (M := M)
-          (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2)
-          (SmoothCcTensor.toL2 (g := g) (r := 0) (s := 2) (T_rep t)) i = φ i t)
+    (hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g 0 2),
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2)
+            (SmoothCcTensor.toL2 (g := g) (r := 0) (s := 2) (T_rep t)) i = φ i t)
     (α : M) (i' j' : Fin (Module.finrank ℝ E)) :
     ∀ q ∈ Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target,
       ccTensorBilinSymm (I := I) g (T_rep q.1) ((extChartAt I α).symm q.2)
@@ -273,20 +281,36 @@ private theorem realizedChartGramIncrement_eigenSeries_eq
         = ∑' i, eigenChartIncrementMode (I := I) (M := M) g φ α i' j' i q :=
   sorry
 
-/-- **Per-order summable mixed-jet majorant (analytic prerequisite P2).**  On any convex
-subset `Icc 0 T ×ˢ B` of the slab (`B` a convex chart-ball), each order-`k` within-iterated
-Fréchet derivative of the per-mode increment admits a single summable-across-modes uniform
-majorant.  By the Leibniz product rule the mixed `(t, y)`-jet is bounded by
-`∑_{a+b=k} |∂ₜ^a φ_i| · ‖∇^b(chart increment of eigensection)‖`; the spatial factor is
-controlled by the eigensection's `H^{2k} ↪ C^b` chart Sobolev embedding
-(`eigenvectorSmooth_wtwokTwoNorm_le_uniform` + `iteratedCovGrad_toSobolev_embedding_Cm_unconditional`)
-contributing a `tensorSobolevWeight`-power factor, which the supplied summable time-jet
-mode-mass (`hmodemass`) absorbs into a summable-across-modes bound.
+/-- **Per-order summable mixed-jet majorant (analytic prerequisite P2).**  On a convex
+subset `Icc 0 T ×ˢ B` of the slab over a **compact** chart-ball `B ⊆ interior target`, each
+order-`k` within-iterated Fréchet derivative of the per-mode increment admits a single
+summable-across-modes uniform majorant.  By the Leibniz product rule the mixed `(t, y)`-jet
+is bounded by `∑_{a+b=k} |∂ₜ^a φ_i| · ‖∇^b(chart increment of eigensection)‖`; the spatial
+factor is controlled, uniformly over the **compact** `B`, by the eigensection's chart
+`H^{2k} ↪ C^b` Sobolev embedding — now reduced (away from the partition-of-unity kernel, near
+the chart-target boundary) to the compact-uniform reverse-Christoffel order-peeling
+`iteratedFDeriv_rawPullR_le_zeroContent_sum_on_compact` and order-`0` fibre bound
+`exists_zeroContentR_le_fiberNorm_on_compact` (`CompactChartJetBound.lean`, both PROVEN),
+composed with the global pointwise `C^m` embedding
+`iteratedCovGrad_toSobolev_embedding_Cm_unconditional` — contributing a
+`tensorSobolevWeight`-power factor, which the supplied summable time-jet mode-mass
+(`hmodemass`) absorbs into a summable-across-modes bound.
 
-Honest `sorry`: the quantitative chart `H^{2k} ↪ C^b` eigensection bound feeding the
-`contDiffOn_tsum` `M`-test is not available on disk in this mixed-jet, chart-coordinate
-form; consumers transitively depend on its `sorryAx`.  The `hmodemass` hypothesis supplies
-the time-jet mode mass, without which no uniform majorant exists. -/
+**Domain correctness (the routing fix).**  The earlier free `{B} (hB : B ⊆ interior target)`
+quantification was FALSE-as-posited: the chart-trivialisation operator norm blows up at the
+chart-target boundary, so no `tensorSobolevWeight`-power majorant exists for an arbitrary
+boundary-touching `B`.  Requiring `B` compact (e.g. a closed ball strictly inside the
+interior) is exactly the domain on which the compact-uniform bounds hold; the consumer
+`realizedChartGramIncrement_euclidean_contDiffOn` only ever needs a compact-in-interior ball
+(it works locally per ball via `contDiffOn_of_locally_contDiffOn`), so the restriction does
+not weaken the apex.
+
+Honest `sorry`: the genuine remaining content is the **uniform-in-`i` eigensection chart
+`H^{2k} ↪ C^b` Sobolev decay** — that `‖eigenvectorSmooth g 0 2 i .toHs (2k)‖` decays like a
+fixed `tensorSobolevWeight`-power — feeding the `contDiffOn_tsum` `M`-test together with the
+PROVEN compact-uniform reverse-peel.  Consumers transitively depend on its `sorryAx`.  The
+`hmodemass` hypothesis supplies the time-jet mode mass, without which no uniform majorant
+exists. -/
 private theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
     (g : SmoothRiemannianMetric I M) {T : ℝ}
     (φ : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ)
@@ -296,7 +320,7 @@ private theorem eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
           tensorSobolevWeight (I := I) (M := M) i σ *
               (iteratedDeriv k (φ i) t) ^ 2 ≤ Cmaj i)
     (α : M) (i' j' : Fin (Module.finrank ℝ E))
-    {B : Set E} (hB : B ⊆ interior (extChartAt I α).target) :
+    {B : Set E} (hB_compact : IsCompact B) (hB : B ⊆ interior (extChartAt I α).target) :
     ∀ k : ℕ, ∃ v : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ, Summable v ∧
       ∀ (i : TensorEigenIdx (I := I) (M := M) g 0 2) (q : ℝ × E),
         q ∈ Set.Icc (0 : ℝ) T ×ˢ B →
@@ -334,10 +358,11 @@ theorem realizedChartGramIncrement_euclidean_contDiffOn
     (T_rep : ℝ → SmoothCcTensor g 0 2)
     (φ : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ)
     (hφ_smooth : ∀ i, ContDiff ℝ ∞ (φ i))
-    (hcoeff : ∀ (t : ℝ) (i : TensorEigenIdx (I := I) (M := M) g 0 2),
-      tensorL2Coeff (I := I) (M := M)
-          (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2)
-          (SmoothCcTensor.toL2 (g := g) (r := 0) (s := 2) (T_rep t)) i = φ i t)
+    (hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g 0 2),
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2)
+            (SmoothCcTensor.toL2 (g := g) (r := 0) (s := 2) (T_rep t)) i = φ i t)
     (hmodemass : ∀ (k : ℕ) (σ : ℝ), 0 ≤ σ →
       ∃ Cmaj : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ, Summable Cmaj ∧
         ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
@@ -356,40 +381,58 @@ theorem realizedChartGramIncrement_euclidean_contDiffOn
   rintro ⟨t₀, y₀⟩ hmem
   obtain ⟨_ht₀, hy₀⟩ := hmem
   obtain ⟨r, hr_pos, hball_sub⟩ := Metric.isOpen_iff.mp hΩ_open y₀ hy₀
-  refine ⟨Set.univ ×ˢ Metric.ball y₀ r, isOpen_univ.prod Metric.isOpen_ball,
-    ⟨Set.mem_univ t₀, Metric.mem_ball_self hr_pos⟩, ?_⟩
-  set B : Set E := Metric.ball y₀ r with hB_def
-  have hB_sub : B ⊆ Ω := hball_sub
+  -- Local set: the OPEN ball of radius `r/2`.  We prove `ContDiffOn` on the *compact* closed
+  -- ball `closedBall y₀ (r/2)` — where the compact-uniform spatial majorant (P2) holds — and
+  -- restrict (`mono`) to the requested open ball.
+  refine ⟨Set.univ ×ˢ Metric.ball y₀ (r / 2), isOpen_univ.prod Metric.isOpen_ball,
+    ⟨Set.mem_univ t₀, Metric.mem_ball_self (by positivity)⟩, ?_⟩
+  set B : Set E := Metric.ball y₀ (r / 2) with hB_def
+  set Bc : Set E := Metric.closedBall y₀ (r / 2) with hBc_def
+  have hball_le : B ⊆ Bc := Metric.ball_subset_closedBall
+  have hBc_sub : Bc ⊆ Ω := by
+    intro x hx
+    rw [hBc_def, Metric.mem_closedBall] at hx
+    exact hball_sub (by rw [Metric.mem_ball]; linarith)
+  have hB_sub : B ⊆ Ω := hball_le.trans hBc_sub
+  have hBc_compact : IsCompact Bc := isCompact_closedBall y₀ (r / 2)
   have hslab_inter :
       (Set.Icc (0 : ℝ) T ×ˢ Ω) ∩ (Set.univ ×ˢ B) = Set.Icc (0 : ℝ) T ×ˢ B := by
     rw [Set.prod_inter_prod, Set.inter_univ, Set.inter_eq_right.mpr hB_sub]
   rw [hslab_inter]
-  have hconv : Convex ℝ (Set.Icc (0 : ℝ) T ×ˢ B) :=
-    (convex_Icc (0 : ℝ) T).prod (convex_ball y₀ r)
-  have huniq : UniqueDiffOn ℝ (Set.Icc (0 : ℝ) T ×ˢ B) :=
-    (uniqueDiffOn_Icc hT).prod (Metric.isOpen_ball.uniqueDiffOn)
+  have hBc_int_ne : (interior Bc).Nonempty := by
+    rw [hBc_def, interior_closedBall y₀ (by positivity : (r / 2) ≠ 0)]
+    exact ⟨y₀, Metric.mem_ball_self (by positivity)⟩
+  have hconv : Convex ℝ (Set.Icc (0 : ℝ) T ×ˢ Bc) :=
+    (convex_Icc (0 : ℝ) T).prod (convex_closedBall y₀ (r / 2))
+  have huniq : UniqueDiffOn ℝ (Set.Icc (0 : ℝ) T ×ˢ Bc) :=
+    (uniqueDiffOn_Icc hT).prod
+      (uniqueDiffOn_convex (convex_closedBall y₀ (r / 2)) hBc_int_ne)
   have hmajorant :=
     eigenChartIncrementMode_iteratedFDerivWithin_summable_majorant
-      (I := I) (M := M) (T := T) g φ hmodemass α i' j' hB_sub
+      (I := I) (M := M) (T := T) g φ hmodemass α i' j' hBc_compact hBc_sub
   classical
   set v : ℕ → TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ :=
     fun k => Classical.choose (hmajorant k) with hv_def
   have hv_spec : ∀ k, Summable (v k) ∧
       ∀ (i : TensorEigenIdx (I := I) (M := M) g 0 2) (q : ℝ × E),
-        q ∈ Set.Icc (0 : ℝ) T ×ˢ B →
+        q ∈ Set.Icc (0 : ℝ) T ×ˢ Bc →
         ‖iteratedFDerivWithin ℝ k (eigenChartIncrementMode (I := I) (M := M) g φ α i' j' i)
-            (Set.Icc (0 : ℝ) T ×ˢ B) q‖ ≤ v k i :=
+            (Set.Icc (0 : ℝ) T ×ˢ Bc) q‖ ≤ v k i :=
     fun k => Classical.choose_spec (hmajorant k)
-  have htsum : ContDiffOn ℝ ∞
+  have htsum_Bc : ContDiffOn ℝ ∞
       (fun q : ℝ × E => ∑' i, eigenChartIncrementMode (I := I) (M := M) g φ α i' j' i q)
-      (Set.Icc (0 : ℝ) T ×ˢ B) := by
+      (Set.Icc (0 : ℝ) T ×ˢ Bc) := by
     refine DifferentialGeometry.Analysis.contDiffOn_tsum (v := v) (x₀ := (0, y₀))
       huniq hconv
       (fun i => (eigenChartIncrementMode_contDiffOn (I := I) (M := M) (T := T)
-        g φ hφ_smooth α i' j' i).mono (Set.prod_mono (le_refl _) hB_sub))
+        g φ hφ_smooth α i' j' i).mono (Set.prod_mono (le_refl _) hBc_sub))
       (fun k _hk => (hv_spec k).1)
       (fun k i q hq _hk => (hv_spec k).2 i q hq)
-      ⟨left_mem_Icc.mpr hT.le, Metric.mem_ball_self hr_pos⟩
+      ⟨left_mem_Icc.mpr hT.le, Metric.mem_closedBall_self (by positivity)⟩
+  have htsum : ContDiffOn ℝ ∞
+      (fun q : ℝ × E => ∑' i, eigenChartIncrementMode (I := I) (M := M) g φ α i' j' i q)
+      (Set.Icc (0 : ℝ) T ×ˢ B) :=
+    htsum_Bc.mono (Set.prod_mono (le_refl _) hball_le)
   refine htsum.congr ?_
   intro q hq
   have hq' : q ∈ Set.Icc (0 : ℝ) T ×ˢ Ω := ⟨hq.1, hB_sub hq.2⟩
@@ -406,10 +449,11 @@ private theorem realizedChartGramIncrement_alongChart_contMDiffOn
     (T_rep : ℝ → SmoothCcTensor g 0 2)
     (φ : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ)
     (hφ_smooth : ∀ i, ContDiff ℝ ∞ (φ i))
-    (hcoeff : ∀ (t : ℝ) (i : TensorEigenIdx (I := I) (M := M) g 0 2),
-      tensorL2Coeff (I := I) (M := M)
-          (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2)
-          (SmoothCcTensor.toL2 (g := g) (r := 0) (s := 2) (T_rep t)) i = φ i t)
+    (hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g 0 2),
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2)
+            (SmoothCcTensor.toL2 (g := g) (r := 0) (s := 2) (T_rep t)) i = φ i t)
     (hmodemass : ∀ (k : ℕ) (σ : ℝ), 0 ≤ σ →
       ∃ Cmaj : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ, Summable Cmaj ∧
         ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
@@ -502,10 +546,11 @@ theorem jointChartGramSmooth_of_spectralSmooth_timeSmooth
       (ccTensorBilinSymm (I := I) g (T_rep t)) δ)
     (φ : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ)
     (hφ_smooth : ∀ i, ContDiff ℝ ∞ (φ i))
-    (hcoeff : ∀ (t : ℝ) (i : TensorEigenIdx (I := I) (M := M) g 0 2),
-      tensorL2Coeff (I := I) (M := M)
-          (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2)
-          (SmoothCcTensor.toL2 (g := g) (r := 0) (s := 2) (T_rep t)) i = φ i t)
+    (hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g 0 2),
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2)
+            (SmoothCcTensor.toL2 (g := g) (r := 0) (s := 2) (T_rep t)) i = φ i t)
     (hmodemass : ∀ (k : ℕ) (σ : ℝ), 0 ≤ σ →
       ∃ Cmaj : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ, Summable Cmaj ∧
         ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
