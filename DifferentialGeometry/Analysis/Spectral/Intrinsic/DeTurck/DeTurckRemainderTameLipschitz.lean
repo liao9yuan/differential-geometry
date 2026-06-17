@@ -4266,45 +4266,51 @@ private theorem deTurckRHSArmDiff_order0_pointwise_domination_ballUniform
     _ ≤ Ksum * Scol := mul_le_mul_of_nonneg_right hCα_le hScol_nn
 
 
-/-- **(POSITED deep bedrock — the genuine intrinsic Lichnerowicz linearization with the appCc arm grids
-EXCISED, leaving only the section identity + the THREE scalar engine-constant ball-sups.)**
+/-- **(POSITED deep bedrock — Route P: the genuine intrinsic Lichnerowicz linearization as THREE
+endpoint-dependent `appCc` arms, with the per-order `appCc` arm grids EXCISED, leaving only the section
+identity + the THREE scalar engine-constant ball-sups.)**
 
 This is the strictly-smaller deep child of
 `deTurckRHSArmG0_diff_intrinsicLichnerowiczLinearization_section`: the valence-dropping per-order
-`appCc` arm `rfns` grids `k₁, k₂` are NO LONGER posited here — they are PROVED in the consumer from the
+`appCc` arm `rfns` grids are NO LONGER posited here — they are PROVED in the consumer from the
 sorry-free reusable engine `appCc_iteratedCovGrad_drop_singleSum_le`
 (`Analysis/Spectral/Tensor/CovGrad/AppCcDropIteratedGrid`, the valence-dropping covariant
-Faà-di-Bruno `rfns` grid whose order-`q` constant is `4^q · gridWindowSum (dropKappa C) 0 0 q`).  What
-remains genuinely missing on disk is:
+Faà-di-Bruno `rfns` grid whose order-`q` constant is `4^q · gridWindowSum (dropKappa C) 0 0 q`).
 
-* the **intrinsic section identity** `N = (fixedCoeffDiffOp Φc).op 0 2 (T − T') + appCc C₁ (∇(T − T'))
-  + appCc C₂ (∇²(T − T'))`, where `Φc := ricBackgroundArmCoeffField g₀` is the FIXED `g₀`-built
-  background-curvature coefficient field (the corrected order-`0` arm — the classical
-  Lichnerowicz–DeTurck CURVATURE action `2 Rm₀·S − Ric₀·S − S·Ric₀ + (DeTurck Γ-difference)·S` on
-  `S := T − T'`, vanishing on flat backgrounds), `appCc C₁ ∇` the order-`1` Christoffel/Lie arm, and
-  `appCc C₂ ∇²` the order-`2` arm carrying the inverse-metric-difference PRINCIPAL symbol
-  `(g₁⁻¹ − g₀⁻¹)·∂²S` and the Ricci principal — the `g`-native mean-value / FTC linearization of the
+**Route P (the corrected, satisfiable statement).**  The order-`0` arm is now the ENDPOINT-DEPENDENT
+`appCc C₀ (T − T')` with a per-`(T, T')` coefficient `C₀ : SmoothCcTensor g₀ 2 2` — NOT a single fixed
+`g₀`-built field.  This is the correction: the EXACT order-`0` symbol of the Lichnerowicz–DeTurck
+linearization is `g₁`-dependent (`g₁ = g₀ + T'` the realize-tie endpoint), so a FIXED `g₀`-only
+order-`0` arm cannot reproduce it (false-as-stated).  Putting `C₀` INSIDE the `∀ T T'` quantifier — like
+`C₁, C₂` — frees it to encode the endpoint-dependent curvature/inverse-Gram value action, while the
+scalar envelopes `κ₀, κ₁, κ₂` stay OUTSIDE (ball-uniform, may depend on `R`), dominating
+`4^q · gridWindowSum (dropKappa Cₘ) 0 0 q` ball-uniformly.  What remains genuinely missing on disk is:
+
+* the **intrinsic section identity** `N = appCc C₀ (T − T') + appCc C₁ (∇(T − T')) + appCc C₂ (∇²(T − T'))`,
+  with `C₀` the endpoint-dependent order-`0` curvature/inverse-Gram-value symbol (the classical
+  Lichnerowicz–DeTurck CURVATURE action plus the metric-inverse-difference value, evaluated at the
+  realize-tie endpoint `g₁`), `C₁` the order-`1` Christoffel/Lie arm ABSORBING the Palatini quadratic
+  `connDiff ∧ connDiff` (the quadratic-in-`S` term realized as `appCc` of a per-`(T, T')`-dependent
+  `C₁`), and `C₂` the order-`2` arm carrying the inverse-metric-difference PRINCIPAL symbol
+  `(g₁⁻¹ − g₀⁻¹)·∂²S` and the Ricci principal — the `g`-native mean-value linearization of the
   second-order quasilinear Nemytskii `deTurckRHSSection ∘ realize` (the intrinsic Palatini
   `δRic = ∇·(δΓ) − ∇(tr δΓ)` with `δΓ = connDiff`, the inverse-Gram Neumann linearization in the
-  principal order-`2` slot, and a `SmoothCcTensor`-valued mean-value FTC along the realize-tie path —
-  none of which exist intrinsically on disk; only the FORBIDDEN chart-component `RicciDiffAffine` /
-  `MetricFamilyChartLinearization` forms do); and
-* the **three scalar ball-sup envelopes** `k₀, κ₁, κ₂ : ℕ → ℝ` (outside the `∀ T T'` quantifier): the
-  order-`0` background-curvature engine-constant ball-sup
-  `4^q · gridWindowSum (fixedCoeffDiffOp Φc).kappa 0 2 q ≤ k₀ q` (a fixed `g₀`-only field, so this is a
-  bare finite-compactness sup, no `g₁` dependence), and the two valence-dropping arm jet-envelope
-  ball-sups `4^q · gridWindowSum (dropKappa C₁) 0 0 q ≤ κ₁ q`,
-  `4^q · gridWindowSum (dropKappa C₂) 0 0 q ≤ κ₂ q` (the ball-compactness of the Christoffel- /
-  inverse-Gram-principal coefficient fields over the realize-tie metrics of the radius-`R` ball, made
-  finite by the supercritical embedding).
+  principal order-`2` slot, telescoped through `g₀` along the realize-tie `g₁ − g₀ = ccTensorBilinSymm T`
+  — none of which exist intrinsically on disk; only the FORBIDDEN chart-component `RicciDiffAffine` /
+  `ChartRicciStructuralDifference` / `MetricFamilyChartLinearization` forms do); and
+* the **three scalar ball-sup envelopes** `κ₀, κ₁, κ₂ : ℕ → ℝ` (outside the `∀ T T'` quantifier): the
+  three valence-dropping arm jet-envelope ball-sups `4^q · gridWindowSum (dropKappa Cₘ) 0 0 q ≤ κₘ q`
+  (the ball-compactness of the endpoint-dependent curvature- / Christoffel- / inverse-Gram-principal
+  coefficient fields over the realize-tie metrics of the radius-`R` ball, made finite by the
+  supercritical embedding; `κₘ` may depend on `R`).
 
-Expressed entirely in `fixedCoeffDiffOp` / `appCc` / `dropKappa` / `iteratedCovGrad` /
-`riemannianFiberNormSq` — **never** a `chartGramOnE` / `chartInvGramOnE` / `HasChartJetLip` chart-jet
-chain.  Consumers transitively depend on its `sorryAx`. -/
+Expressed entirely in `appCc` / `dropKappa` / `iteratedCovGrad` / `riemannianFiberNormSq` — **never** a
+`chartGramOnE` / `chartInvGramOnE` / `HasChartJetLip` chart-jet chain.  Consumers transitively depend on
+its `sorryAx`. -/
 private theorem deTurckRHSArmG0_diff_intrinsicLichnerowiczLinearization_section_core
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
-    ∃ k₀ κ₁ κ₂ : ℕ → ℝ, (∀ q, 0 ≤ k₀ q) ∧ (∀ q, 0 ≤ κ₁ q) ∧ (∀ q, 0 ≤ κ₂ q) ∧
+    ∃ κ₀ κ₁ κ₂ : ℕ → ℝ, (∀ q, 0 ≤ κ₀ q) ∧ (∀ q, 0 ≤ κ₁ q) ∧ (∀ q, 0 ≤ κ₂ q) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_lt : δ < 1)
         (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -4312,17 +4318,15 @@ private theorem deTurckRHSArmG0_diff_intrinsicLichnerowiczLinearization_section_
         (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
-        ∃ (C₁ : SmoothCcTensor g₀ 3 2) (C₂ : SmoothCcTensor g₀ 4 2),
+        ∃ (C₀ : SmoothCcTensor g₀ 2 2) (C₁ : SmoothCcTensor g₀ 3 2) (C₂ : SmoothCcTensor g₀ 4 2),
           (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
               deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ') =
-            ((fixedCoeffDiffOp (I := I) (M := M) g₀
-                (ricBackgroundArmCoeffField (I := I) g₀)).op 0 2 (T - T') +
+            (appCc (I := I) (M := M) g₀ 2 2 C₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
               appCc (I := I) (M := M) g₀ 3 2 C₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
               appCc (I := I) (M := M) g₀ 4 2 C₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) ∧
           (∀ q : ℕ, q ≤ a →
             (4 : ℝ) ^ q * gridWindowSum
-                (fixedCoeffDiffOp (I := I) (M := M) g₀
-                  (ricBackgroundArmCoeffField (I := I) g₀)).kappa 0 2 q ≤ k₀ q) ∧
+                (dropKappa (I := I) (M := M) g₀ 2 2 C₀) 0 0 q ≤ κ₀ q) ∧
           (∀ q : ℕ, q ≤ a →
             (4 : ℝ) ^ q * gridWindowSum
                 (dropKappa (I := I) (M := M) g₀ 3 2 C₁) 0 0 q ≤ κ₁ q) ∧
@@ -4345,36 +4349,30 @@ per-order `appCc` grid (only the order-`0` `exists_uniform_riemannianFiberNormSq
 
 Fix `g₀`, `g_bg`, a supercritical order `a`, and a covariant-`L²` ball radius `R ≥ 0`.  Outside the
 `∀ T T'` quantifier there are three nonnegative ball-uniform per-order envelopes `k₀, k₁, k₂ : ℕ → ℝ`
-(the order-`0` background-curvature engine-constant ball-sup, and the order-`1` Christoffel / order-`2`
-inverse-Gram-principal valence-dropping arm envelopes).  For any two `g₀`-fibre-small smooth
-perturbations `T, T'` whose covariant-`L²` jets up to order `a + 2` lie in the radius-`R` ball, there are
-the realize-tie path endpoint metric `g₁` and the two intrinsic `g₀`-built deep valence-dropping
-coefficient operator fields `C₁ : SmoothCcTensor g₀ 3 2`, `C₂ : SmoothCcTensor g₀ 4 2` (the
-Christoffel-variation `½g⁻¹∂` symbol and the Ricci / inverse-Gram principal `−½Δ_L + (g₁⁻¹−g₀⁻¹)∂²`
-symbol of the mean-value path `dF`), such that, with
-`N := deTurckRHSArmG0 g₀ g_bg T − deTurckRHSArmG0 g₀ g_bg T'`:
+(the order-`0` endpoint-curvature / order-`1` Christoffel / order-`2` inverse-Gram-principal
+valence-dropping arm envelopes).  For any two `g₀`-fibre-small smooth perturbations `T, T'` whose
+covariant-`L²` jets up to order `a + 2` lie in the radius-`R` ball, there are the realize-tie path
+endpoint metric `g₁` and the three intrinsic `g₀`-built deep endpoint-dependent coefficient operator
+fields `C₀ : SmoothCcTensor g₀ 2 2`, `C₁ : SmoothCcTensor g₀ 3 2`, `C₂ : SmoothCcTensor g₀ 4 2` (the
+endpoint curvature/inverse-Gram value symbol, the Christoffel-variation `½g⁻¹∂` symbol, and the
+Ricci / inverse-Gram principal `−½Δ_L + (g₁⁻¹−g₀⁻¹)∂²` symbol of the mean-value path `dF`), such that,
+with `N := deTurckRHSArmG0 g₀ g_bg T − deTurckRHSArmG0 g₀ g_bg T'`:
 
 * **(identity)** the intrinsic three-term mean-value section equality
-  `N = (fixedCoeffDiffOp (ricBackgroundArmCoeffField g₀)).op 0 2 (T − T')
-       + appCc C₁ (∇(T − T')) + appCc C₂ (∇²(T − T'))` — the corrected grading with the FIXED
-  background-curvature arm at order `0` and the inverse-Gram principal symbol carried by `C₂` at
-  order `2`;
-* **(order-`0` engine ball-sup)** the FIXED `g₀`-built background-curvature engine constant
-  `4^q · gridWindowSum (fixedCoeffDiffOp (ricBackgroundArmCoeffField g₀)).kappa 0 2 q` is dominated
-  by the ball-uniform `k₀ q` (a bare finite-compactness sup of the fixed `g₀`-only field, no `g₁`
-  dependence; the proven grid `ricBackgroundArm_iteratedCovGrad_singleSum_le` is then chained by the
-  consumer);
-* **(arm grids)** the per-order valence-dropping `rfns` grids for the two deep arms (`m = 1, 2`),
-  ball-uniform with envelopes `k₁, k₂`.
+  `N = appCc C₀ (T − T') + appCc C₁ (∇(T − T')) + appCc C₂ (∇²(T − T'))` — Route P: the
+  endpoint-dependent curvature/inverse-Gram value arm at order `0`, and the inverse-Gram principal
+  symbol carried by `C₂` at order `2`;
+* **(arm grids)** the per-order valence-dropping `rfns` grids for all three deep arms (`m = 0, 1, 2`),
+  ball-uniform with envelopes `k₀, k₁, k₂`.
 
-This is expressed entirely in `fixedCoeffDiffOp` / `appCc` / `iteratedCovGrad` / `riemannianFiberNormSq`
-— **never** a `chartGramOnE` / `chartInvGramOnE` / `HasChartJetLip` chart-jet chain.  Consumers
-transitively depend on its `sorryAx`.
+This is expressed entirely in `appCc` / `iteratedCovGrad` / `riemannianFiberNormSq` — **never** a
+`chartGramOnE` / `chartInvGramOnE` / `HasChartJetLip` chart-jet chain.  Consumers transitively depend on
+its `sorryAx`.
 
-**Non-vacuity.**  The realization vanishes as `T − T' → 0` (`appCc` is `ℝ`-linear and `op 0 2` is
-fibrewise-linear in `T − T'`); a degenerate `C₁ = C₂ = 0` is rejected by a nonvanishing `∇^q N` for a
-genuinely second-order, non-flat RHS difference; a `kₘ ≡ 0` envelope is rejected by a nonvanishing arm
-on a section of positive fibre norm. -/
+**Non-vacuity.**  The realization vanishes as `T − T' → 0` (`appCc` is `ℝ`-linear in `T − T'` and its
+jets); a degenerate `C₀ = C₁ = C₂ = 0` is rejected by a nonvanishing `∇^q N` for a genuinely
+second-order, non-flat RHS difference; a `kₘ ≡ 0` envelope is rejected by a nonvanishing arm on a
+section of positive fibre norm. -/
 private theorem deTurckRHSArmG0_diff_intrinsicLichnerowiczLinearization_section
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
@@ -4386,17 +4384,20 @@ private theorem deTurckRHSArmG0_diff_intrinsicLichnerowiczLinearization_section
         (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
-        ∃ (C₁ : SmoothCcTensor g₀ 3 2) (C₂ : SmoothCcTensor g₀ 4 2),
+        ∃ (C₀ : SmoothCcTensor g₀ 2 2) (C₁ : SmoothCcTensor g₀ 3 2) (C₂ : SmoothCcTensor g₀ 4 2),
           (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
               deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ') =
-            ((fixedCoeffDiffOp (I := I) (M := M) g₀
-                (ricBackgroundArmCoeffField (I := I) g₀)).op 0 2 (T - T') +
+            (appCc (I := I) (M := M) g₀ 2 2 C₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
               appCc (I := I) (M := M) g₀ 3 2 C₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
               appCc (I := I) (M := M) g₀ 4 2 C₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) ∧
-          (∀ q : ℕ, q ≤ a →
-            (4 : ℝ) ^ q * gridWindowSum
-                (fixedCoeffDiffOp (I := I) (M := M) g₀
-                  (ricBackgroundArmCoeffField (I := I) g₀)).kappa 0 2 q ≤ k₀ q) ∧
+          (∀ q : ℕ, q ≤ a → ∀ x : M,
+            riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 q
+                  (appCc (I := I) (M := M) g₀ 2 2 C₀
+                    (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')))).toSection x) ≤
+              k₀ q * ∑ p ∈ Finset.range (q + 1),
+                riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + p) x
+                  ((iteratedCovGrad (I := I) g₀ 0 2 p (T - T')).toSection x)) ∧
           (∀ q : ℕ, q ≤ a → ∀ x : M,
             riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
                 ((iteratedCovGrad (I := I) g₀ 0 2 q
@@ -4414,18 +4415,57 @@ private theorem deTurckRHSArmG0_diff_intrinsicLichnerowiczLinearization_section
                 riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p + 2)) x
                   ((iteratedCovGrad (I := I) g₀ 0 2 (p + 2) (T - T')).toSection x)) := by
   classical
-  -- The deep section-identity core supplies the section identity, the order-`0` background-curvature
-  -- engine-constant ball-sup `k₀`, and the two valence-dropping arm jet-envelope ball-sups `κ₁, κ₂`
-  -- of `gridWindowSum (dropKappa Cₘ) 0 0`.  The appCc arm `rfns` grids are GENUINE GLUE here, proved
-  -- from the sorry-free reusable valence-dropping engine `appCc_iteratedCovGrad_drop_singleSum_le`.
-  obtain ⟨k₀, κ₁, κ₂, hk₀_nn, hκ₁_nn, hκ₂_nn, hcore⟩ :=
+  -- The deep section-identity core supplies the three-term section identity and the three
+  -- valence-dropping arm jet-envelope ball-sups `κ₀, κ₁, κ₂` of `gridWindowSum (dropKappa Cₘ) 0 0`.
+  -- All three appCc arm `rfns` grids are GENUINE GLUE here, proved from the sorry-free reusable
+  -- valence-dropping engine `appCc_iteratedCovGrad_drop_singleSum_le`.
+  obtain ⟨κ₀, κ₁, κ₂, hκ₀_nn, hκ₁_nn, hκ₂_nn, hcore⟩ :=
     deTurckRHSArmG0_diff_intrinsicLichnerowiczLinearization_section_core
       (I := I) g₀ g_bg a ha_super hR
-  refine ⟨k₀, κ₁, κ₂, hk₀_nn, hκ₁_nn, hκ₂_nn, ?_⟩
+  refine ⟨κ₀, κ₁, κ₂, hκ₀_nn, hκ₁_nn, hκ₂_nn, ?_⟩
   intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
-  obtain ⟨C₁, C₂, hid, hk₀dom, hκ₁dom, hκ₂dom⟩ :=
+  obtain ⟨C₀, C₁, C₂, hid, hκ₀dom, hκ₁dom, hκ₂dom⟩ :=
     hcore T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
-  refine ⟨C₁, C₂, hid, hk₀dom, ?_, ?_⟩
+  refine ⟨C₀, C₁, C₂, hid, ?_, ?_, ?_⟩
+  · -- The `C₀` arm grid (drop `2 → 2`), input `W₀ := ∇^0(T − T') = T − T' : (0, 2)`.  Reusable engine
+    -- with the EXPLICIT constant `4^q · gridWindowSum (dropKappa C₀) 0 0 q`, dominated by `κ₀ q`.
+    intro q hq x
+    have hgrid := appCc_iteratedCovGrad_drop_singleSum_le_explicit
+      (I := I) (M := M) g₀ 2 2 C₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) q x
+    -- The engine column `∑_{p ≤ q} rfns(∇^p W₀)` is, by `∇^0(T − T') = T − T'` (defeq), the column
+    -- `∑_{p ≤ q} rfns(∇^p(T − T'))`.
+    have hcol : ∀ p : ℕ,
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + p) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 p
+              (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))).toSection x) =
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + p) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 p (T - T')).toSection x) := by
+      intro p; rfl
+    have hsum_nn : (0 : ℝ) ≤ ∑ p ∈ Finset.range (q + 1),
+        riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + p) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 p (T - T')).toSection x) :=
+      Finset.sum_nonneg fun p _ =>
+        riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + p) x _
+    calc riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 q
+              (appCc (I := I) (M := M) g₀ 2 2 C₀
+                (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')))).toSection x)
+        ≤ ((4 : ℝ) ^ q * gridWindowSum
+              (dropKappa (I := I) (M := M) g₀ 2 2 C₀) 0 0 q) *
+            ∑ p ∈ Finset.range (q + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + p) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 p
+                  (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))).toSection x) := hgrid
+      _ = ((4 : ℝ) ^ q * gridWindowSum
+              (dropKappa (I := I) (M := M) g₀ 2 2 C₀) 0 0 q) *
+            ∑ p ∈ Finset.range (q + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + p) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 p (T - T')).toSection x) := by
+            rw [Finset.sum_congr rfl (fun p _ => hcol p)]
+      _ ≤ κ₀ q * ∑ p ∈ Finset.range (q + 1),
+              riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + p) x
+                ((iteratedCovGrad (I := I) g₀ 0 2 p (T - T')).toSection x) :=
+            mul_le_mul_of_nonneg_right (hκ₀dom q hq) hsum_nn
   · -- The `C₁` arm grid (drop `3 → 2`), input `W₁ := ∇(T − T') : (0, 3)`.  Reusable engine with the
     -- EXPLICIT constant `4^q · gridWindowSum (dropKappa C₁) 0 0 q`, dominated by `κ₁ q` from the core.
     intro q hq x
@@ -4512,63 +4552,56 @@ private theorem deTurckRHSArmG0_diff_intrinsicLichnerowiczLinearization_section
                 ((iteratedCovGrad (I := I) g₀ 0 2 (p + 2) (T - T')).toSection x) :=
             mul_le_mul_of_nonneg_right (hκ₂dom q hq) hsum_nn
 
-/-- **(POSITED deep bedrock — the INTRINSIC mean-value Fréchet realization of the nonlinear
-Ricci–DeTurck RHS-arm difference as a single three-term `fixedCoeffDiffOp` / `appCc` covariant
-contraction, at the SECTION level, with `g`-NATIVE per-order `rfns` grids, ball-uniform.)**
+/-- **(POSITED deep bedrock — Route P: the INTRINSIC mean-value Fréchet realization of the nonlinear
+Ricci–DeTurck RHS-arm difference as a single three-term `appCc` covariant contraction, at the SECTION
+level, with `g`-NATIVE per-order `rfns` grids, ball-uniform.)**
 
 This is the irreducible section-level core of the re-routed apex Moser tame, expressed on the *proven*
-fixed-coefficient metric-contraction grid `fixedCoeffDiffOp` (`MetricContractionTowerGrid`).  It
-supersedes the false-as-stated bilinear `ParallelTensorProduct` covariant-product realization (whose
-front-slot covariant Leibniz `covGrad_prod` is false because the gradient of a contraction lands in the
-contracted slots).  Fix `g₀`, `g_bg`, a supercritical order `a`, and a covariant-`L²` ball radius
-`R ≥ 0`.  Outside the `∀ T T'` quantifier there are three nonnegative **ball-uniform** per-order grid
-envelopes `k₀, k₁, k₂ : ℕ → ℝ` (the order-`0` background-curvature, order-`1` Christoffel, order-`2`
+valence-dropping `appCc` covariant Faà-di-Bruno grid (`AppCcDropIteratedGrid`).  It supersedes the
+false-as-stated bilinear `ParallelTensorProduct` covariant-product realization (whose front-slot
+covariant Leibniz `covGrad_prod` is false because the gradient of a contraction lands in the contracted
+slots).  Fix `g₀`, `g_bg`, a supercritical order `a`, and a covariant-`L²` ball radius `R ≥ 0`.  Outside
+the `∀ T T'` quantifier there are three nonnegative **ball-uniform** per-order grid envelopes
+`k₀, k₁, k₂ : ℕ → ℝ` (the order-`0` endpoint-curvature, order-`1` Christoffel, order-`2`
 inverse-Gram-principal arm envelopes).  For any two `g₀`-fibre-small smooth perturbations `T, T'` whose
 covariant-`L²` jets up to order `a + 2` lie in the radius-`R` ball there are an exposed realized metric
-`g₁` (the realize-tie endpoint of the mean-value path) and two intrinsic `g₀`-built deep
-valence-dropping coefficient operator fields `C₁ : SmoothCcTensor g₀ 3 2`, `C₂ : SmoothCcTensor g₀ 4 2`
-(the Christoffel-variation `½g⁻¹∂` symbol and the Ricci / inverse-Gram principal `−½Δ_L + (g₁⁻¹−g₀⁻¹)∂²`
+`g₁` (the realize-tie endpoint of the mean-value path) and three intrinsic `g₀`-built deep
+endpoint-dependent coefficient operator fields `C₀ : SmoothCcTensor g₀ 2 2`, `C₁ : SmoothCcTensor g₀ 3 2`,
+`C₂ : SmoothCcTensor g₀ 4 2` (the endpoint curvature/inverse-Gram value symbol, the
+Christoffel-variation `½g⁻¹∂` symbol, and the Ricci / inverse-Gram principal `−½Δ_L + (g₁⁻¹−g₀⁻¹)∂²`
 symbol of the path `dF`), such that, with `N := deTurckRHSArmG0 g₀ g_bg T − deTurckRHSArmG0 g₀ g_bg T'`:
 
-* **(identity)** the section equality realizing `N` as the sum of the order-`0` background-curvature arm
-  (the proven `fixedCoeffDiffOp` operator-field action of the FIXED `g₀`-built curvature coefficient on
-  `T − T'`) and the two valence-dropping deep arms (`appCc` of the Christoffel / inverse-Gram-principal
-  symbols on `∇(T − T')`, `∇²(T − T')`):
+* **(identity)** the section equality realizing `N` as the sum of the three valence-dropping
+  endpoint-dependent arms (`appCc` of the curvature/inverse-Gram-value / Christoffel /
+  inverse-Gram-principal symbols on `T − T'`, `∇(T − T')`, `∇²(T − T')`):
   ```
-  N  =  (fixedCoeffDiffOp Φc).op 0 2 (T − T')
-        + appCc C₁ (∇(T − T'))  +  appCc C₂ (∇²(T − T')),   Φc := ricBackgroundArmCoeffField g₀;
+  N  =  appCc C₀ (T − T')  +  appCc C₁ (∇(T − T'))  +  appCc C₂ (∇²(T − T'));
   ```
 * **(arm grids)** the per-order `rfns` Moser-tame grid for each of the three arms, ball-uniform:
-  `rfns(∇^q (op 0 2 (T−T')))(x) ≤ k₀ q · ∑_{p ≤ q} rfns(∇^p(T − T'))(x)` (the proven curvature-arm grid,
-  with the ball-uniform constant of the FIXED `g₀`-built coefficient on the compact base), and for
-  `m = 1, 2` `rfns(∇^q (appCc Cₘ (∇^m(T − T'))))(x) ≤ kₘ q · ∑_{p ≤ q} rfns(∇^{p + m}(T − T'))(x)` (the
-  valence-dropping covariant Faà-di-Bruno content the `appCc` operator-field engine lacks an iterated
-  grid for — only the order-`0` `exists_uniform_riemannianFiberNormSq_appCc_le` exists on disk).
+  for `m = 0, 1, 2`, `rfns(∇^q (appCc Cₘ (∇^m(T − T'))))(x) ≤ kₘ q · ∑_{p ≤ q} rfns(∇^{p + m}(T − T'))(x)`
+  (the valence-dropping covariant Faà-di-Bruno content of `AppCcDropIteratedGrid`).
 
 **Why this is the genuine deep INTRINSIC content (and why it is posited).**  `deTurckRHSArmG0` is the
 second-order quasilinear Nemytskii nonlinearity `−2 Ric(g₀+T) + 𝓛_{W(g₀+T,g_bg)}(g₀+T)`.  By the
 mean-value path `N = ∫₀¹ dF(g₀ + T' + r·(T − T'))[T − T'] dr`, the Fréchet derivative `dF[h]` of the
 Ricci–DeTurck RHS in the metric is the second-order operator `coeff₀·h + coeff₁·∇h + coeff₂·∇²h` (the
 intrinsic Lichnerowicz-curvature / Christoffel-variation / inverse-Gram-principal symbols along the
-path).  The order-`0` symbol is the classical Lichnerowicz–DeTurck CURVATURE action on `T − T'`
-(vanishing on flat backgrounds), realized as the *proven* curvature-arm grid (the `fixedCoeffDiffOp` of
-the FIXED `g₀`-built `ricBackgroundArmCoeffField`, the leading-slot raised background-Ricci endomorphism
-`ricEndoRaisedFib` of `RicciTraceCarrier`); its ball-uniform constant `k₀` is the bare compactness sup
-of the fixed `g₀`-only coefficient field's engine envelope `4^q · gridWindowSum kappa 0 2 q` over the
-ball.  The two higher arms are the genuine missing intrinsic-DG prerequisites: the `g`-native
-Christoffel / inverse-Gram-principal *metric* linearization symbols `C₁, C₂` — the inverse-metric
-difference `(g₁⁻¹−g₀⁻¹)·∂²` is the PRINCIPAL (order-`2`) parabolic Laplacian symbol carried by `C₂`,
-with its `O(δ)` Neumann smallness `exists_gInvDiffMetricArm_neumannFibreBound` (on disk only the
-FORBIDDEN chart-component `MetricFamilyChartLinearization` / `RicciDiffAffine` exist), together with the
-valence-dropping covariant Faà-di-Bruno grid for their `appCc` action.  Expressed entirely in `fixedCoeffDiffOp` / `appCc` /
-`iteratedCovGrad` / `riemannianFiberNormSq` — **never** a `chartGramOnE` / `chartInvGramOnE` /
-`HasChartJetLip` chart-jet ball Lipschitz chain, **never** the model `opNorm`, and **never** the
-chart-component route.  Consumers transitively depend on its `sorryAx`.
+path).  Route P puts the order-`0` symbol's ENDPOINT dependence into the per-`(T, T')` coefficient `C₀`
+(the EXACT order-`0` Lichnerowicz–DeTurck CURVATURE action at the realize-tie endpoint `g₁`, plus the
+metric-inverse-difference value), since a FIXED `g₀`-only order-`0` arm cannot reproduce the
+`g₁`-dependent symbol.  The three arms are the genuine missing intrinsic-DG prerequisites: the
+`g`-native curvature / Christoffel / inverse-Gram-principal *metric* linearization symbols `C₀, C₁, C₂`
+— the inverse-metric difference `(g₁⁻¹−g₀⁻¹)·∂²` is the PRINCIPAL (order-`2`) parabolic Laplacian symbol
+carried by `C₂` (on disk only the FORBIDDEN chart-component `ChartRicciStructuralDifference` /
+`RicciDiffAffine` exist).  Expressed entirely in `appCc` / `iteratedCovGrad` / `riemannianFiberNormSq`
+— **never** a `chartGramOnE` / `chartInvGramOnE` / `HasChartJetLip` chart-jet ball Lipschitz chain,
+**never** the model `opNorm`, and **never** the chart-component route.  Consumers transitively depend on
+its `sorryAx`.
 
-**Non-vacuity.**  The realization vanishes as `T − T' → 0` (`appCc` is `ℝ`-linear and `op 0 2` is
-fibrewise-linear in `T − T'`), so the Nemytskii Lipschitz character is preserved; a degenerate
-`C₁ = C₂ = 0` is rejected by a nonvanishing `∇^q N` for a genuinely second-order, non-flat RHS
-difference; a `kₘ ≡ 0` envelope is rejected by a nonvanishing arm on a section of positive fibre norm. -/
+**Non-vacuity.**  The realization vanishes as `T − T' → 0` (`appCc` is `ℝ`-linear in `T − T'` and its
+jets), so the Nemytskii Lipschitz character is preserved; a degenerate `C₀ = C₁ = C₂ = 0` is rejected by
+a nonvanishing `∇^q N` for a genuinely second-order, non-flat RHS difference; a `kₘ ≡ 0` envelope is
+rejected by a nonvanishing arm on a section of positive fibre norm. -/
 private theorem deTurckRHSArmG0_diff_eq_threeTerm_fixedCoeffDiffOp_realization_section
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
@@ -4580,18 +4613,17 @@ private theorem deTurckRHSArmG0_diff_eq_threeTerm_fixedCoeffDiffOp_realization_s
         (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
-        ∃ (C₁ : SmoothCcTensor g₀ 3 2) (C₂ : SmoothCcTensor g₀ 4 2),
+        ∃ (C₀ : SmoothCcTensor g₀ 2 2) (C₁ : SmoothCcTensor g₀ 3 2) (C₂ : SmoothCcTensor g₀ 4 2),
           (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
               deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ') =
-            ((fixedCoeffDiffOp (I := I) (M := M) g₀
-                (ricBackgroundArmCoeffField (I := I) g₀)).op 0 2 (T - T') +
+            (appCc (I := I) (M := M) g₀ 2 2 C₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
               appCc (I := I) (M := M) g₀ 3 2 C₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
               appCc (I := I) (M := M) g₀ 4 2 C₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) ∧
           (∀ q : ℕ, q ≤ a → ∀ x : M,
             riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
                 ((iteratedCovGrad (I := I) g₀ 0 2 q
-                  ((fixedCoeffDiffOp (I := I) (M := M) g₀
-                    (ricBackgroundArmCoeffField (I := I) g₀)).op 0 2 (T - T'))).toSection x) ≤
+                  (appCc (I := I) (M := M) g₀ 2 2 C₀
+                    (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')))).toSection x) ≤
               k₀ q * ∑ p ∈ Finset.range (q + 1),
                 riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + p) x
                   ((iteratedCovGrad (I := I) g₀ 0 2 p (T - T')).toSection x)) ∧
@@ -4612,27 +4644,11 @@ private theorem deTurckRHSArmG0_diff_eq_threeTerm_fixedCoeffDiffOp_realization_s
                 riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (p + 2)) x
                   ((iteratedCovGrad (I := I) g₀ 0 2 (p + 2) (T - T')).toSection x)) := by
   classical
-  -- Pull the three ball-uniform envelopes and the per-`(T, T')` intrinsic-Lichnerowicz data from the
-  -- deep linearization child.  `k₀` is the order-`0` background-curvature engine-constant ball-sup;
-  -- `k₁, k₂` are the valence-dropping arm envelopes; the per-`(T, T')` data supplies `g₁, C₁, C₂`, the
-  -- three-term section identity, the fixed-`g₀` engine-constant domination, and the two deep arm grids.
-  obtain ⟨k₀, k₁, k₂, hk₀_nn, hk₁_nn, hk₂_nn, hcore⟩ :=
-    deTurckRHSArmG0_diff_intrinsicLichnerowiczLinearization_section
-      (I := I) g₀ g_bg a ha_super hR
-  refine ⟨k₀, k₁, k₂, hk₀_nn, hk₁_nn, hk₂_nn, ?_⟩
-  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
-  obtain ⟨C₁, C₂, hid, hk₀dom, hk₁grid, hk₂grid⟩ :=
-    hcore T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
-  refine ⟨C₁, C₂, hid, ?_, hk₁grid, hk₂grid⟩
-  -- The order-`0` background-curvature arm grid is GENUINE GLUE: the PROVEN fixed-`g₀` curvature-arm
-  -- grid `ricBackgroundArm_iteratedCovGrad_singleSum_le` (constant `4^q · gridWindowSum kappa 0 2 q`)
-  -- chained with the ball-uniform engine-constant domination `hk₀dom` (≤ `k₀ q`).
-  intro q hq x
-  refine (ricBackgroundArm_iteratedCovGrad_singleSum_le
-      (I := I) (M := M) g₀ x (T - T') q).trans ?_
-  refine mul_le_mul_of_nonneg_right (hk₀dom q hq) ?_
-  exact Finset.sum_nonneg fun p _ =>
-    riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + p) x _
+  -- Route P: the deep linearization child now supplies ALL THREE valence-dropping appCc arm grids
+  -- directly (order `0` included, via the same `AppCcDropIteratedGrid` engine), so this realization
+  -- is a transparent forwarding of `_section` — no separate order-`0` curvature-arm route.
+  exact deTurckRHSArmG0_diff_intrinsicLichnerowiczLinearization_section
+    (I := I) g₀ g_bg a ha_super hR
 
 set_option maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -4654,16 +4670,15 @@ squared fibre-norm level, by the order-`(q+2)` covariant-jet column of the pertu
 
 **How it is assembled (genuine glue over the proven grid + the deep linearization child).**  The
 section-level realization `deTurckRHSArmG0_diff_eq_threeTerm_fixedCoeffDiffOp_realization_section`
-splits `N` into the order-`0` background-curvature arm `(fixedCoeffDiffOp Φc).op 0 2 (T − T')` (the
-*proven* curvature-arm grid `ricBackgroundArm_iteratedCovGrad_singleSum_le`) and the two valence-dropping
-deep arms `appCc Cₘ (∇^m(T − T'))` (`m = 1, 2`, the inverse-Gram principal symbol carried by `C₂` at
-order `2`), supplying the per-order ball-uniform `rfns` grids of all three arms with envelopes
-`k₀, k₁, k₂`.  Distributing `∇^q` over the three-term section identity and applying
-the factor-`4` `g`-fibre subadditivity bounds `rfns(∇^q N)` by `4·(k₀ q + k₁ q + k₂ q)` times the common
-order-`(q+2)` window `∑_{i ≤ q+2} rfns(∇^i(T − T'))`: each arm column `∑_{p ≤ q} rfns(∇^{p+m}(T − T'))`
-(`m = 0, 1, 2`) injects into the order-`(q+2)` window (`p + m ≤ q + 2`), all summands nonnegative.
-Expressed entirely in `fixedCoeffDiffOp` / `appCc` / `iteratedCovGrad` / `riemannianFiberNormSq` —
-**never** a chart-jet ball Lipschitz chain.  Consumers transitively depend on the deep child's `sorryAx`.
+splits `N` (Route P) into the three valence-dropping endpoint-dependent arms
+`appCc Cₘ (∇^m(T − T'))` (`m = 0, 1, 2`, the inverse-Gram principal symbol carried by `C₂` at order `2`),
+supplying the per-order ball-uniform `rfns` grids of all three arms with envelopes `k₀, k₁, k₂`.
+Distributing `∇^q` over the three-term section identity and applying the factor-`4` `g`-fibre
+subadditivity bounds `rfns(∇^q N)` by `4·(k₀ q + k₁ q + k₂ q)` times the common order-`(q+2)` window
+`∑_{i ≤ q+2} rfns(∇^i(T − T'))`: each arm column `∑_{p ≤ q} rfns(∇^{p+m}(T − T'))` (`m = 0, 1, 2`)
+injects into the order-`(q+2)` window (`p + m ≤ q + 2`), all summands nonnegative.  Expressed entirely in
+`appCc` / `iteratedCovGrad` / `riemannianFiberNormSq` — **never** a chart-jet ball Lipschitz chain.
+Consumers transitively depend on the deep child's `sorryAx`.
 
 **Non-vacuity.**  The bound vanishes as `T − T' → 0`, so the Nemytskii Lipschitz character is
 preserved; a `kbar ≡ 0` witness is rejected by a nonvanishing `rfns(∇^q N)` for a genuinely
@@ -4698,7 +4713,7 @@ private theorem deTurckRHSArmDiff_iteratedCovGrad_rfns_perOrder_intrinsic_ballUn
   refine ⟨fun q => 4 * (k₀ q + k₁ q + k₂ q), fun q => by
     have := hk₀_nn q; have := hk₁_nn q; have := hk₂_nn q; positivity, ?_⟩
   intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball q hq x
-  obtain ⟨C₁, C₂, hid, hg₀arm, hg₁arm, hg₂arm⟩ :=
+  obtain ⟨C₀, C₁, C₂, hid, hg₀arm, hg₁arm, hg₂arm⟩ :=
     hreal T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
   -- The single perturbation-difference jet column entry as a function of the gradient order.
   set f : ℕ → ℝ := fun i =>
@@ -4727,8 +4742,8 @@ private theorem deTurckRHSArmDiff_iteratedCovGrad_rfns_perOrder_intrinsic_ballUn
   -- The three arm grids at order `q`, each column dominated by the common window `Wcol`.
   have h0 : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
       ((iteratedCovGrad (I := I) g₀ 0 2 q
-        ((fixedCoeffDiffOp (I := I) (M := M) g₀
-          (ricBackgroundArmCoeffField (I := I) g₀)).op 0 2 (T - T'))).toSection x) ≤
+        (appCc (I := I) (M := M) g₀ 2 2 C₀
+          (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')))).toSection x) ≤
       k₀ q * Wcol := by
     refine (hg₀arm q hq x).trans ?_
     exact mul_le_mul_of_nonneg_left (by
@@ -4750,8 +4765,7 @@ private theorem deTurckRHSArmDiff_iteratedCovGrad_rfns_perOrder_intrinsic_ballUn
     exact mul_le_mul_of_nonneg_left (by simpa only [hf_def] using harm_col_le 2 (le_refl 2))
       (hk₂_nn q)
   -- Distribute `∇^q` over the three-term section identity; `g`-fibre subadditivity (factor `4`).
-  set A₀ := (fixedCoeffDiffOp (I := I) (M := M) g₀
-    (ricBackgroundArmCoeffField (I := I) g₀)).op 0 2 (T - T') with hA₀
+  set A₀ := appCc (I := I) (M := M) g₀ 2 2 C₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) with hA₀
   set A₁ := appCc (I := I) (M := M) g₀ 3 2 C₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) with hA₁
   set A₂ := appCc (I := I) (M := M) g₀ 4 2 C₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) with hA₂
   have hsplit : ((iteratedCovGrad (I := I) g₀ 0 2 q (A₀ + A₁ + A₂)).toSection x)
