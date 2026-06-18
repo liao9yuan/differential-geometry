@@ -404,13 +404,13 @@ tuple `v`, the scalar read-off `s ↦ unitModel g₀ 2 (appCc g₀ r 2 (Ψ s) W)
 `toModel ((Ψ s).toSection x)` (where `u = (W x) unit`), via `toModel_tensorRS_apply`; so its
 continuity in `s` follows from continuity in `s` of `s ↦ toModel ((Ψ s).toSection x)`.  This turns the
 joint-`(s, x)`-smoothness keystone's continuity slice into the per-arm read-off continuity. -/
-private theorem appCc_unitModel_read_continuous_of_toModel_continuous
+private theorem appCc_unitModel_read_continuousOn_of_toModel_continuousOn
     (g₀ : SmoothRiemannianMetric I M) (r : ℕ)
-    (Ψ : ℝ → SmoothCcTensor g₀ r 2) (W : SmoothCcTensor g₀ 0 r)
-    {x : M} (hΨ : Continuous (fun s : ℝ => TensorRSSpace.toModel ((Ψ s).toSection x)))
+    (Ψ : ℝ → SmoothCcTensor g₀ r 2) (W : SmoothCcTensor g₀ 0 r) {S : Set ℝ}
+    {x : M} (hΨ : ContinuousOn (fun s : ℝ => TensorRSSpace.toModel ((Ψ s).toSection x)) S)
     (v : Fin 2 → TangentSpace I x) :
-    Continuous (fun s : ℝ =>
-      unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ r 2 (Ψ s) W) x v) := by
+    ContinuousOn (fun s : ℝ =>
+      unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ r 2 (Ψ s) W) x v) S := by
   -- Abbreviate the fixed contracted-then-unit-evaluated `(0, r)`-tensor `u = (W x) unit`.
   set u : Tensor0SSpace r I x :=
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x)
@@ -428,7 +428,7 @@ private theorem appCc_unitModel_read_continuous_of_toModel_continuous
     (ContinuousMultilinearMap.apply ℝ (fun _ : Fin 2 => E) ℝ v).continuous.comp
       (ContinuousLinearMap.apply ℝ (Tensor0SBundle.Tensor0SModel 2 ℝ E)
         (Tensor0SBundle.Tensor0SSpace.toModel u)).continuous
-  exact (hchain.comp hΨ).congr (fun s => (key s).symm)
+  exact (hchain.comp_continuousOn hΨ).congr (fun s _ => (key s).symm)
 
 /-- **Continuity in `s` of the per-arm `unitModel`/`appCc` read-offs of the linearized-Ricci
 coefficient families (the deep mean-value continuity input).**
@@ -443,17 +443,18 @@ of the two endpoint Grams (`realizedFam_chartGramOnE`), hence smooth — indeed 
 its inverse-Gram, Christoffel, curvature and cometric jets (which build the two coefficient fibre
 operators `gInvDiffSlotCoeff` and `ricciArmPrincipalCoeff`) are continuous in `s`.  This is proved here
 by reducing each read-off to the fixed continuous-linear chain `T ↦ ((T) (toModel u)) v`
-(`appCc_unitModel_read_continuous_of_toModel_continuous`) applied to the model-fibre value of the
-coefficient family, whose `s`-continuity is the continuity slice of the joint `(s, x)`-smoothness
-keystone (`gInvDiffSlotCoeff_realizedFam_toModel_continuous` /
-`ricciArmPrincipalCoeff_realizedFam_toModel_continuous`), then restricting the resulting continuity to
-`[0, 1]`.  It genuinely constrains the read-off to be continuous, so it is non-vacuous. -/
+(`appCc_unitModel_read_continuousOn_of_toModel_continuousOn`) applied to the model-fibre value of the
+coefficient family, whose `s`-continuity on the realized small set is the continuity slice of the joint
+`(s, x)`-smoothness keystone (`gInvDiffSlotCoeff_realizedFam_toModel_continuous` /
+`ricciArmPrincipalCoeff_realizedFam_toModel_continuous`, each `ContinuousOn realizedSmallSet`), then
+restricting the resulting continuity to `[0, 1] ⊆ realizedSmallSet`.  It genuinely constrains the
+read-off to be continuous, so it is non-vacuous. -/
 theorem ricciArmCoeff_appCc_read_continuousOn
     (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (_hδ_lt : δ < 1)
+    {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (_hδ'_lt : δ' < 1)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
     (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (v : Fin 2 → TangentSpace I x) :
     ContinuousOn
@@ -468,18 +469,21 @@ theorem ricciArmCoeff_appCc_read_continuousOn
             (ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ' s)
             (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v)
         (Set.Icc (0 : ℝ) 1) := by
-  refine ⟨(?_ : Continuous _).continuousOn, (?_ : Continuous _).continuousOn⟩
+  have hIcc : Set.Icc (0 : ℝ) 1 ⊆ realizedSmallSet (δ := δ) (δ' := δ') :=
+    Icc_subset_realizedSmallSet hδ_lt hδ'_lt
+  refine ⟨?_, ?_⟩
   · -- Order-`0` arm: the read-off is a fixed CLM of `s ↦ toModel ((ricciArmOrder0Coeff s).toSection x)`,
-    -- continuous by the order-`0` continuity slice of the joint-smoothness keystone.
-    exact appCc_unitModel_read_continuous_of_toModel_continuous (I := I) g₀ 2
+    -- continuous on the small set by the order-`0` continuity slice of the joint-smoothness keystone,
+    -- then restricted to `[0, 1] ⊆ realizedSmallSet`.
+    exact (appCc_unitModel_read_continuousOn_of_toModel_continuousOn (I := I) g₀ 2
       (fun s => ricciArmOrder0Coeff (I := I) g₀ T T' hδ hδ' s)
       (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
-      (gInvDiffSlotCoeff_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x) v
+      (gInvDiffSlotCoeff_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x) v).mono hIcc
   · -- Order-`2` arm: same, via the order-`2` continuity slice of the keystone.
-    exact appCc_unitModel_read_continuous_of_toModel_continuous (I := I) g₀ 4
+    exact (appCc_unitModel_read_continuousOn_of_toModel_continuousOn (I := I) g₀ 4
       (fun s => ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ' s)
       (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))
-      (ricciArmPrincipalCoeff_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x) v
+      (ricciArmPrincipalCoeff_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x) v).mono hIcc
 
 /-- **The pointwise-in-`s` Lichnerowicz `appCc` coefficient families of the linearized Ricci
 operator (with `s`-continuous read-offs).**
@@ -634,20 +638,22 @@ the zero coefficient fails it whenever the path-integral read-off of `Φ` is non
 theorem exists_pathIntegralCoeffField
     (g₀ : SmoothRiemannianMetric I M) (r : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r 2) (W : SmoothCcTensor g₀ 0 r)
-    (hjoint : ContMDiff (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r 2 ℝ E)) ∞
+    (S : Set ℝ) (hS : IsOpen S) (hSI : Set.uIcc (0:ℝ) 1 ⊆ S)
+    (hjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r 2 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r 2 ℝ E)
-        (E := fun z : M => Tensor0SBundle.TensorRSSpace r 2 I z) p.1 ((Φ p.2).toSection p.1)))
-    (hcont : ∀ x : M, Continuous (fun t : ℝ =>
-      Tensor0SBundle.TensorRSSpace.toModel ((Φ t).toSection x))) :
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace r 2 I z) p.1 ((Φ p.2).toSection p.1))
+      ((Set.univ : Set M) ×ˢ S))
+    (hcont : ∀ x : M, ContinuousOn (fun t : ℝ =>
+      Tensor0SBundle.TensorRSSpace.toModel ((Φ t).toSection x)) S) :
     ∃ IΦ : SmoothCcTensor g₀ r 2,
       ∀ (x : M) (v : Fin 2 → TangentSpace I x),
         unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ r 2 IΦ W) x v =
           ∫ s in (0 : ℝ)..1,
             unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ r 2 (Φ s) W) x v := by
   -- The smooth-parametric fibre Bochner path integral of the jointly-smooth family `Φ`.
-  refine ⟨pathIntegralCoeffField (I := I) (M := M) g₀ r 2 Φ hjoint, fun x v => ?_⟩
+  refine ⟨pathIntegralCoeffField (I := I) (M := M) g₀ r 2 Φ S hS hSI hjoint, fun x v => ?_⟩
   -- Its `appCc`/`unitModel` read-off is the `s`-integral of the per-`s` read-offs (the swap).
-  exact pathIntegralCoeffField_appCc_eq (I := I) (M := M) g₀ r 2 Φ W hjoint hcont x v
+  exact pathIntegralCoeffField_appCc_eq (I := I) (M := M) g₀ r 2 Φ W S hS hSI hjoint hcont x v
 
 /-! ## The integrated linearized-Ricci `appCc` form (the Lichnerowicz mean-value content) -/
 
@@ -736,14 +742,20 @@ theorem integratedLinearizedRicci_appCc_eq
       MeasureTheory.volume 0 1 :=
     fun x v => ((hcontRead x v).2).intervalIntegrable_of_Icc zero_le_one
   -- The joint `(s, x)`-smoothness keystone (`hjoint`) and its continuity slice (`hcont`) for each arm.
+  have hSopen : IsOpen (realizedSmallSet (δ := δ) (δ' := δ')) := realizedSmallSet_isOpen
+  have hSI : Set.uIcc (0:ℝ) 1 ⊆ realizedSmallSet (δ := δ) (δ' := δ') := by
+    rw [Set.uIcc_of_le (zero_le_one)]
+    exact Icc_subset_realizedSmallSet hδ_lt hδ'_lt
   obtain ⟨IΦ₀, heval₀⟩ :=
     exists_pathIntegralCoeffField (I := I) (M := M) g₀ 2 R₀fib
       (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+      (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI
       (gInvDiffSlotCoeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ')
       (fun x => gInvDiffSlotCoeff_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x)
   obtain ⟨IΦ₂, heval₂⟩ :=
     exists_pathIntegralCoeffField (I := I) (M := M) g₀ 4 R₂fib
       (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))
+      (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI
       (ricciArmPrincipalCoeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ')
       (fun x => ricciArmPrincipalCoeff_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x)
   -- The integrated coefficient fields are the `(-2)`-scaled fibre path integrals.

@@ -651,6 +651,340 @@ theorem realizedFam_genJointGram (g₀ : SmoothRiemannianMetric I M)
   · intro s₀ _ x hx
     exact chartGramMatrix_det_pos (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) α hx
 
+/-! ### Generic joint operator-field lift over the product base `M × ℝ` -/
+
+/-- **Source-model-generic pointwise-to-operator smoothness bridge.**  The joint analog of
+`contMDiffAt_clm_of_pointwise` with the *source* model `IX` decoupled from the target operator
+model: per-vector `ContMDiffAt` lifts to operator `ContMDiffAt` over a finite-dimensional source
+fibre, via the basis-evaluation embedding `F₁ →L F₂ ↪ Fin (rank F₁) → F₂` and a continuous-linear
+left inverse. -/
+lemma contMDiffAt_clm_of_pointwise_jointSource
+    {F₁ : Type*} [NormedAddCommGroup F₁] [NormedSpace ℝ F₁] [FiniteDimensional ℝ F₁]
+    {F₂ : Type*} [NormedAddCommGroup F₂] [NormedSpace ℝ F₂] [FiniteDimensional ℝ F₂]
+    {EX : Type*} [NormedAddCommGroup EX] [NormedSpace ℝ EX]
+    {HX : Type*} [TopologicalSpace HX] {IX : ModelWithCorners ℝ EX HX}
+    {X : Type*} [TopologicalSpace X] [ChartedSpace HX X]
+    {n : WithTop ℕ∞}
+    {A : X → (F₁ →L[ℝ] F₂)} {x : X}
+    (h : ∀ v, ContMDiffAt IX 𝓘(ℝ, F₂) n (fun q => A q v) x) :
+    ContMDiffAt IX 𝓘(ℝ, F₁ →L[ℝ] F₂) n A x := by
+  haveI : FiniteDimensional ℝ (F₁ →L[ℝ] F₂) := ContinuousLinearMap.finiteDimensional
+  let bF₁ := Module.finBasis ℝ F₁
+  let evalBasis : (F₁ →L[ℝ] F₂) →L[ℝ] (Fin (Module.finrank ℝ F₁) → F₂) :=
+    ContinuousLinearMap.pi (fun i => ContinuousLinearMap.apply ℝ F₂ (bF₁ i))
+  have evalBasis_inj : Function.Injective evalBasis := fun L₁ L₂ heq => by
+    ext v; rw [← bF₁.sum_equivFun v]; simp only [map_sum, map_smul]
+    congr 1; ext i; exact congrArg _ (congrFun heq i)
+  haveI : FiniteDimensional ℝ (Fin (Module.finrank ℝ F₁) → F₂) := inferInstance
+  obtain ⟨gLM, hgLM⟩ := evalBasis.toLinearMap.exists_leftInverse_of_injective
+    (evalBasis.ker_eq_bot_of_injective evalBasis_inj)
+  let gCLM : (Fin (Module.finrank ℝ F₁) → F₂) →L[ℝ] (F₁ →L[ℝ] F₂) :=
+    ⟨gLM, LinearMap.continuous_of_finiteDimensional _⟩
+  have hg : ∀ y, gCLM (evalBasis y) = y := fun y => congr($(hgLM) y)
+  have hEA : ContMDiffAt IX 𝓘(ℝ, Fin _ → F₂) n (evalBasis ∘ A) x :=
+    contMDiffAt_pi_space.mpr fun i => h (bF₁ i)
+  have hcompose : A = gCLM ∘ evalBasis ∘ A := by funext q; exact (hg (A q)).symm
+  rw [hcompose]
+  exact gCLM.contDiff.contMDiff.contMDiffAt.comp _ hEA
+
+/-- **The joint pointwise-to-operator section bridge over the product base `M × ℝ`.**  For an
+`s`-family of fibre operators `φ : ∀ p : M × ℝ, V₁ p.1 →L V₂ p.1`, if for every globally smooth
+`M`-section `Y` of `V₁` the `M × ℝ`-section `(x, s) ↦ φ (x, s) (Y x)` is jointly `(x, s)`-`C^∞`
+over `M × ℝ`, then the operator field `(x, s) ↦ φ (x, s)` is itself jointly `C^∞` as a section of
+the Hom-bundle `Hom(V₁, V₂)`.  This is the product-base (`M × ℝ`) analog of
+`contMDiff_clm_section_of_pointwise`: the hom-bundle smoothness is reduced through
+`contMDiffAt_hom_bundle` to (i) the base projection (`contMDiffAt_fst`) and (ii) the `inCoordinates`
+smoothness, the latter handled by `contMDiffAt_clm_of_pointwise_jointSource` evaluated against a
+local frame of `V₁` near the spatial base point. -/
+theorem contMDiff_clm_section_of_pointwise_jointMR
+    {F₁ : Type*} [NormedAddCommGroup F₁] [NormedSpace ℝ F₁] [FiniteDimensional ℝ F₁]
+    {V₁ : M → Type*} [∀ x, AddCommGroup (V₁ x)] [∀ x, Module ℝ (V₁ x)]
+    [TopologicalSpace (TotalSpace F₁ V₁)] [∀ x, TopologicalSpace (V₁ x)]
+    [FiberBundle F₁ V₁] [VectorBundle ℝ F₁ V₁]
+    [ContMDiffVectorBundle ∞ F₁ V₁ I]
+    {F₂ : Type*} [NormedAddCommGroup F₂] [NormedSpace ℝ F₂] [FiniteDimensional ℝ F₂]
+    {V₂ : M → Type*} [∀ x, AddCommGroup (V₂ x)] [∀ x, Module ℝ (V₂ x)]
+    [TopologicalSpace (TotalSpace F₂ V₂)] [∀ x, TopologicalSpace (V₂ x)]
+    [FiberBundle F₂ V₂] [VectorBundle ℝ F₂ V₂]
+    [ContMDiffVectorBundle ∞ F₂ V₂ I]
+    [∀ x, IsTopologicalAddGroup (V₂ x)] [∀ x, ContinuousSMul ℝ (V₂ x)]
+    (φ : ∀ p : M × ℝ, V₁ p.1 →L[ℝ] V₂ p.1)
+    (h : ∀ (Y : Cₛ^∞⟮I; F₁, V₁⟯),
+      ContMDiff (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, F₂)) ∞
+        (fun p : M × ℝ => TotalSpace.mk' F₂ (E := V₂) p.1 (φ p (Y p.1)))) :
+    ContMDiff (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, F₁ →L[ℝ] F₂)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (F₁ →L[ℝ] F₂)
+        (E := fun x : M => V₁ x →L[ℝ] V₂ x) p.1 (φ p)) := by
+  intro p₀
+  rw [contMDiffAt_hom_bundle]
+  refine ⟨contMDiffAt_fst, ?_⟩
+  set x₀ := p₀.1 with hx₀
+  apply contMDiffAt_clm_of_pointwise_jointSource (IX := I.prod 𝓘(ℝ, ℝ)) (X := M × ℝ)
+  intro v
+  let e₁ := trivializationAt F₁ V₁ x₀
+  let e₂ := trivializationAt F₂ V₂ x₀
+  let b := Module.finBasis ℝ F₁
+  have he₁ : x₀ ∈ e₁.baseSet := mem_baseSet_trivializationAt F₁ V₁ x₀
+  have he₂ : x₀ ∈ e₂.baseSet := mem_baseSet_trivializationAt F₂ V₂ x₀
+  have hframe := e₁.isLocalFrameOn_localFrame_baseSet I (⊤ : ℕ∞) b
+  obtain ⟨Y, hY⟩ := hframe.exists_contMDiffSection_eqOn_nhd e₁.open_baseSet he₁
+  have hφY : ∀ i, ContMDiff (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, F₂)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' F₂ (E := V₂) p.1 (φ p (Y i p.1))) := fun i => h (Y i)
+  have hφY_fiber : ∀ i, ContMDiffAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, F₂) ∞
+      (fun p : M × ℝ => (e₂ ⟨p.1, φ p (Y i p.1)⟩).2) p₀ := fun i => by
+    have hi := (Bundle.contMDiffAt_totalSpace (F := F₂) (E := V₂)).mp ((hφY i) p₀)
+    exact hi.2
+  have hsum : ContMDiffAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, F₂) ∞
+      (fun p : M × ℝ => ∑ i, b.repr v i • (e₂ ⟨p.1, φ p (Y i p.1)⟩).2) p₀ := by
+    apply ContMDiffAt.sum
+    intro i _
+    exact (contMDiffAt_const (c := (b.repr v i : ℝ))).smul (hφY_fiber i)
+  refine hsum.congr_of_eventuallyEq ?_
+  have h_base₁ : ∀ᶠ p : M × ℝ in 𝓝 p₀, p.1 ∈ e₁.baseSet :=
+    continuousAt_fst (e₁.open_baseSet.mem_nhds he₁)
+  have h_base₂ : ∀ᶠ p : M × ℝ in 𝓝 p₀, p.1 ∈ e₂.baseSet :=
+    continuousAt_fst (e₂.open_baseSet.mem_nhds he₂)
+  have h_frame : ∀ᶠ p : M × ℝ in 𝓝 p₀, ∀ i, (Y i) p.1 = e₁.localFrame b i p.1 := by
+    have hYnhd : ∀ᶠ x in 𝓝 x₀, ∀ i, (Y i) x = e₁.localFrame b i x := hY
+    exact continuousAt_fst hYnhd
+  filter_upwards [h_base₁, h_base₂, h_frame] with p hx₁ hx₂ hYp
+  have hv_decomp : v = ∑ i, b.repr v i • b i := (b.sum_repr v).symm
+  have h_inCoord : (ContinuousLinearMap.inCoordinates F₁ V₁ F₂ V₂ x₀ p.1 x₀ p.1 (φ p)) v =
+      e₂.continuousLinearMapAt ℝ p.1 ((φ p) (e₁.symmL ℝ p.1 v)) := rfl
+  rw [h_inCoord]
+  have h₁ : e₁.symmL ℝ p.1 v = ∑ i, (b.repr v) i • e₁.symmL ℝ p.1 (b i) := by
+    conv_lhs => rw [hv_decomp]
+    rw [map_sum]; congr 1; ext i; rw [map_smul]
+  have h₂ : (φ p) (∑ i, (b.repr v) i • e₁.symmL ℝ p.1 (b i)) =
+      ∑ i, (b.repr v) i • (φ p) (e₁.symmL ℝ p.1 (b i)) := by
+    rw [map_sum]; congr 1; ext i; rw [map_smul]
+  have h₃ : e₂.continuousLinearMapAt ℝ p.1 (∑ i, (b.repr v) i • (φ p) (e₁.symmL ℝ p.1 (b i))) =
+      ∑ i, (b.repr v) i • e₂.continuousLinearMapAt ℝ p.1 ((φ p) (e₁.symmL ℝ p.1 (b i))) := by
+    rw [map_sum]; congr 1; ext i; rw [map_smul]
+  rw [h₁, h₂, h₃]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  congr 1
+  have h_lf : e₁.symmL ℝ p.1 (b i) = (Y i) p.1 := by
+    rw [hYp i]
+    rw [Trivialization.localFrame_apply_of_mem_baseSet (hx := hx₁)]
+    simp [Trivialization.basisAt]
+  rw [h_lf]
+  rw [Trivialization.continuousLinearMapAt_apply]
+  exact congrFun (Trivialization.coe_linearMapAt_of_mem (R := ℝ) (e := e₂) hx₂) _
+
+/-! ### Joint `(x, s)`-smoothness of the chart inverse-Gram entry along the realized family -/
+
+/-- **Joint `(x, s)`-smoothness of the chart inverse-Gram entry.**  On the product of the chart-`α`
+source and the realized small set, the intrinsic chart inverse-Gram entry
+`(x, s) ↦ G^{ij}(realizedFam g₀ T T' s)(α, x)` is jointly `C^∞`.  Obtained by composing the joint
+Euclidean inverse-Gram smoothness `gen_joint_invGram` (from the joint-Gram tower
+`realizedFam_genJointGram`) with the smooth moving point `(x, s) ↦ (s, extChartAt I α x)`, then
+reading off `chartInvGramOnE g α i j (extChartAt I α x) = G^{ij}(g)(α, x)` on the source. -/
+theorem realizedFam_chartInvGramMatrix_jointContMDiffOn
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (α : M) (i j : Fin (Module.finrank ℝ E)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+      (fun p : M × ℝ => chartInvGramMatrix (I := I)
+        (realizedFam (I := I) g₀ T T' hδ hδ' p.2) α p.1 i j)
+      ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+  have hG := realizedFam_genJointGram (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' α
+  have hmove : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E)) ∞
+      (fun p : M × ℝ => (p.2, extChartAt I α p.1))
+      ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+    refine ContMDiffOn.prodMk contMDiffOn_snd ?_
+    exact (contMDiffOn_extChartAt (I := I) (x := α)).comp contMDiffOn_fst (fun p hp => hp.1)
+  intro p hp
+  obtain ⟨hx, hs⟩ := hp
+  have hxsrc : p.1 ∈ (extChartAt I α).source := by rw [extChartAt_source (I := I)]; exact hx
+  have hy : extChartAt I α p.1 ∈ interior (extChartAt I α).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) α
+      ((extChartAt I α).map_source hxsrc)
+  have hentry := gen_joint_invGram (I := I)
+    (realizedFam (I := I) g₀ T T' hδ hδ') α hG i j hs hy
+  have hentryM : ContMDiffAt (𝓘(ℝ, ℝ × E)) 𝓘(ℝ) ∞
+      (fun r : ℝ × E => chartInvGramOnE (I := I)
+        (realizedFam (I := I) g₀ T T' hδ hδ' r.1) α i j r.2) (p.2, extChartAt I α p.1) :=
+    hentry.contMDiffAt
+  have hmoveAt : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) (𝓘(ℝ, ℝ × E)) ∞
+      (fun p : M × ℝ => (p.2, extChartAt I α p.1))
+      ((chartAt H α).source ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) p := by
+    have hm := hmove p ⟨hx, hs⟩
+    rw [← modelWithCornersSelf_prod, chartedSpaceSelf_prod] at hm
+    exact hm
+  refine (hentryM.comp_contMDiffWithinAt p hmoveAt).congr ?_ ?_
+  · intro q hq
+    have hqx : q.1 ∈ (extChartAt I α).source := by rw [extChartAt_source (I := I)]; exact hq.1
+    rw [Function.comp_apply, chartInvGramOnE_def, (extChartAt I α).left_inv hqx]
+  · rw [Function.comp_apply, chartInvGramOnE_def, (extChartAt I α).left_inv hxsrc]
+
+/-! ### Joint `(x, s)`-smoothness of the metric sharp along the realized family -/
+
+open DifferentialGeometry.Integral.DivergenceTheorem in
+/-- **Joint chart-basis frame section over `M × ℝ`.**  The chart-`α` frame vector
+`chartBasisVecFiber α i x` is `s`-independent; its `M × ℝ`-section `(x, s) ↦ ⟨x, e_i(x)⟩` is jointly
+`C^∞` on the chart-`α` source × `univ`, by pulling the spatial smoothness `chartBasisVec_contMDiffOn`
+back along the smooth first projection. -/
+theorem chartBasisVec_jointContMDiffOn (α : M) (i : Fin (Module.finrank ℝ E)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
+        (chartBasisVecFiber (I := I) α i p.1))
+      ((chartAt H α).source ×ˢ (Set.univ : Set ℝ)) := by
+  have hbase := chartBasisVec_contMDiffOn (I := I) α i
+  have hbase_eq : (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source :=
+    trivializationAt_baseSet_eq_chartAt_source (I := I) α
+  rw [hbase_eq] at hbase
+  exact hbase.comp contMDiffOn_fst (fun p hp => hp.1)
+
+open DifferentialGeometry.Integral.DivergenceTheorem in
+/-- **Joint `(x, s)`-smoothness of the chart-local sharp coefficient.**  For a metric family `gfam`
+whose chart inverse-Gram is jointly `(x, s)`-`C^∞` on the chart-`α` source × `S`, and a covector
+family `cv` whose chart-frame components `(x, s) ↦ cv s x (e_j(x))` are jointly `C^∞` there, the
+`i`-th sharp coefficient `(x, s) ↦ ∑_j G^{ij}(gfam s)(α, x) · cv_j(s, x)` is jointly `C^∞`. -/
+theorem metricSharpChartCoeff_jointContMDiffOn
+    (gfam : ℝ → SmoothRiemannianMetric I M) (α : M)
+    (cv : ℝ → Π b : M, TangentSpace I b →ₗ[ℝ] ℝ) {S : Set ℝ}
+    (hinv : ∀ i j : Fin (Module.finrank ℝ E),
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+        (fun p : M × ℝ => chartInvGramMatrix (I := I) (gfam p.2) α p.1 i j)
+        ((chartAt H α).source ×ˢ S))
+    (hcv : ∀ j : Fin (Module.finrank ℝ E),
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+        (fun p : M × ℝ => cv p.2 p.1 (chartBasisVecFiber (I := I) α j p.1))
+        ((chartAt H α).source ×ˢ S))
+    (i : Fin (Module.finrank ℝ E)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+      (fun p : M × ℝ => metricSharpChartCoeff (I := I) (gfam p.2) α (cv p.2) i p.1)
+      ((chartAt H α).source ×ˢ S) := by
+  classical
+  have heq : (fun p : M × ℝ => metricSharpChartCoeff (I := I) (gfam p.2) α (cv p.2) i p.1) =
+      (fun p : M × ℝ => ∑ j : Fin (Module.finrank ℝ E),
+        chartInvGramMatrix (I := I) (gfam p.2) α p.1 i j *
+          cv p.2 p.1 (chartBasisVecFiber (I := I) α j p.1)) := by
+    funext p; rw [metricSharpChartCoeff_def]
+  rw [heq]
+  exact contMDiffOn_finset_sum (fun j _ => (hinv i j).mul (hcv j))
+
+open DifferentialGeometry.Integral.DivergenceTheorem in
+/-- **Joint `(x, s)`-smoothness of the chart-local sharp representative total-space map over `M × ℝ`,
+on the chart-`α` source.**  The chart-local linear-combination representative
+`(x, s) ↦ ⟨x, ∑_i coeff_i(x, s) • e_i(x)⟩` is jointly `C^∞` into the tangent-bundle total space on
+chart-`α` source × `S`.  Worked pointwise through the total-space characterization
+`contMDiffWithinAt_totalSpace`: the projection is `(x, s) ↦ x` (smooth), and the trivialized fibre
+coordinate at the chart-center trivialization is `∑_i coeff_i(x, s) • b_i`, jointly `C^∞` by the joint
+coefficient smoothness `metricSharpChartCoeff_jointContMDiffOn`.  Stated with the trivialization at
+`α` fixed via `contMDiffWithinAt_totalSpace_of_baseSet`. -/
+theorem metricSharpChartLocal_jointContMDiffOn
+    (gfam : ℝ → SmoothRiemannianMetric I M) (α : M)
+    (cv : ℝ → Π b : M, TangentSpace I b →ₗ[ℝ] ℝ) {S : Set ℝ}
+    (hinv : ∀ i j : Fin (Module.finrank ℝ E),
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+        (fun p : M × ℝ => chartInvGramMatrix (I := I) (gfam p.2) α p.1 i j)
+        ((chartAt H α).source ×ˢ S))
+    (hcv : ∀ j : Fin (Module.finrank ℝ E),
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+        (fun p : M × ℝ => cv p.2 p.1 (chartBasisVecFiber (I := I) α j p.1))
+        ((chartAt H α).source ×ˢ S)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
+        (metricSharpChartLocal (I := I) (gfam p.2) α (cv p.2) p.1))
+      ((chartAt H α).source ×ˢ S) := by
+  classical
+  have hcoeff : ∀ i, ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+      (fun p : M × ℝ => metricSharpChartCoeff (I := I) (gfam p.2) α (cv p.2) i p.1)
+      ((chartAt H α).source ×ˢ S) :=
+    fun i => metricSharpChartCoeff_jointContMDiffOn (I := I) gfam α cv hinv hcv i
+  set e := trivializationAt E (TangentSpace I) α with he
+  -- The trivialized fibre coordinate at the FIXED chart-center trivialization `e`.
+  have hcoord_eq : ∀ q ∈ (chartAt H α).source ×ˢ S,
+      (e ⟨q.1, metricSharpChartLocal (I := I) (gfam q.2) α (cv q.2) q.1⟩).2 =
+        ∑ i, metricSharpChartCoeff (I := I) (gfam q.2) α (cv q.2) i q.1 •
+          (chartModelBasis E) i := by
+    rintro q ⟨hqx, _⟩
+    have hqbase : q.1 ∈ e.baseSet := by
+      rw [he, trivializationAt_baseSet_eq_chartAt_source (I := I)]; exact hqx
+    have hclm : ∀ w : TangentSpace I q.1,
+        (e ⟨q.1, w⟩).2 = e.continuousLinearMapAt ℝ q.1 w := fun w => by
+      rw [Trivialization.continuousLinearMapAt_apply]
+      exact (congrFun (Trivialization.coe_linearMapAt_of_mem (R := ℝ) (e := e) hqbase) w).symm
+    unfold metricSharpChartLocal
+    rw [hclm, map_sum]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [map_smul, ← hclm]
+    congr 1
+    rw [trivializationAt_chartBasisVec_snd (I := I) α i hqbase]
+  -- The trivialized coordinate at the FIXED chart-center trivialization `e` is jointly smooth.
+  have hcoordSmooth : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, E) ∞
+      (fun q : M × ℝ => (e ⟨q.1, metricSharpChartLocal (I := I) (gfam q.2) α (cv q.2) q.1⟩).2)
+      ((chartAt H α).source ×ˢ S) := by
+    refine ContMDiffOn.congr ?_ hcoord_eq
+    refine contMDiffOn_finset_sum (fun i _ => ?_)
+    exact (hcoeff i).smul contMDiffOn_const
+  -- Assemble via the arbitrary-trivialization total-space characterization at `e`.
+  haveI : MemTrivializationAtlas e := by rw [he]; infer_instance
+  rw [Bundle.Trivialization.contMDiffOn_iff (e := e) ?_]
+  · exact ⟨contMDiffOn_fst, hcoordSmooth⟩
+  · rintro q ⟨hqx, _⟩
+    rw [Trivialization.mem_source, he, trivializationAt_baseSet_eq_chartAt_source (I := I)]
+    exact hqx
+
+open DifferentialGeometry.Integral.DivergenceTheorem in
+/-- **Global joint `(x, s)`-smoothness of the metric sharp over `M × ℝ`, on the small set.**  For a
+metric family `gfam` with jointly-`C^∞` chart inverse-Gram on every chart source × `S`, and a covector
+family `cv` with jointly-`C^∞` chart-frame components, the metric-sharp total-space map
+`(x, s) ↦ ⟨x, metricSharp (gfam s) x (cv s x)⟩` is jointly `C^∞` on `M × ℝ` over the slab
+`univ ×ˢ S`.  The global statement is patched from the chart-local representative
+(`metricSharpChartLocal_jointContMDiffOn`), which agrees with the abstract pointwise sharp on each
+chart source (`metricSharpChartLocal_eq_metricSharp`), localised at each base point through the open
+chart source. -/
+theorem metricSharp_jointContMDiffOn
+    (gfam : ℝ → SmoothRiemannianMetric I M)
+    (cv : ℝ → Π b : M, TangentSpace I b →ₗ[ℝ] ℝ) {S : Set ℝ} (hS : IsOpen S)
+    (hinv : ∀ (α : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+        (fun p : M × ℝ => chartInvGramMatrix (I := I) (gfam p.2) α p.1 i j)
+        ((chartAt H α).source ×ˢ S))
+    (hcv : ∀ (α : M) (j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
+        (fun p : M × ℝ => cv p.2 p.1 (chartBasisVecFiber (I := I) α j p.1))
+        ((chartAt H α).source ×ˢ S)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
+        (metricSharp (I := I) (gfam p.2) p.1 (cv p.2 p.1)))
+      (Set.univ ×ˢ S) := by
+  intro p hp
+  obtain ⟨_, hps⟩ := hp
+  -- Localise at the chart of `p.1`.
+  have hlocal := metricSharpChartLocal_jointContMDiffOn (I := I) gfam p.1 cv
+    (hinv p.1) (hcv p.1)
+  -- On the chart-`p.1` source × S, the chart-local representative equals the abstract sharp.
+  have heqOn : ∀ q ∈ (chartAt H p.1).source ×ˢ S,
+      TotalSpace.mk' E (E := fun z : M => TangentSpace I z) q.1
+          (metricSharpChartLocal (I := I) (gfam q.2) p.1 (cv q.2) q.1) =
+        TotalSpace.mk' E (E := fun z : M => TangentSpace I z) q.1
+          (metricSharp (I := I) (gfam q.2) q.1 (cv q.2 q.1)) := by
+    rintro q ⟨hqx, _⟩
+    have hqbase : q.1 ∈ (trivializationAt E (TangentSpace I) p.1).baseSet := by
+      rw [trivializationAt_baseSet_eq_chartAt_source (I := I)]; exact hqx
+    rw [metricSharpChartLocal_eq_metricSharp (I := I) (gfam q.2) p.1 (cv q.2) hqbase]
+  -- The neighbourhood `(chartAt H p.1).source ×ˢ S` of `p` within `univ ×ˢ S`.
+  have hpmem : p ∈ (chartAt H p.1).source ×ˢ S := ⟨mem_chart_source H p.1, hps⟩
+  have hnhd : (chartAt H p.1).source ×ˢ S ∈ nhdsWithin p (Set.univ ×ˢ S) := by
+    refine mem_nhdsWithin.mpr ⟨(chartAt H p.1).source ×ˢ S,
+      (chartAt H p.1).open_source.prod hS, hpmem, fun q hq => hq.1⟩
+  -- The chart-local rep is `ContMDiffWithinAt` at `p` within `univ ×ˢ S` (mono via the nhd).
+  have hlocalAt : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
+      (fun q : M × ℝ => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) q.1
+        (metricSharpChartLocal (I := I) (gfam q.2) p.1 (cv q.2) q.1))
+      (Set.univ ×ˢ S) p :=
+    (hlocal p hpmem).mono_of_mem_nhdsWithin hnhd
+  -- Congr to the abstract sharp, eventually equal on the nhd.
+  refine hlocalAt.congr_of_eventuallyEq ?_ (heqOn p hpmem).symm
+  filter_upwards [hnhd] with q hq using (heqOn q hq).symm
+
 /-! ### s-slice smoothness of the chart Ricci along the realized family -/
 
 /-- The s-slice of the joint chart-Ricci smoothness: `s ↦ chartRicciTensor (gfam s) α i k y₀`
@@ -954,36 +1288,39 @@ topology, and post-composing with the continuous model coercion `TensorRSSpace.t
 (`toModel_continuous`) yields the claim. -/
 theorem jointContMDiff_toModel_continuous_slice
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
-    (Φ : ℝ → SmoothCcTensor g₀ r s)
-    (hjoint : ContMDiff (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
+    (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ)
+    (hjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
-        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) p.1 ((Φ p.2).toSection p.1)))
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) p.1 ((Φ p.2).toSection p.1))
+      ((Set.univ : Set M) ×ˢ S))
     (x : M) :
-    Continuous (fun t : ℝ =>
-      Tensor0SBundle.TensorRSSpace.toModel ((Φ t).toSection x)) := by
-  -- Restrict the joint section to the smooth slice `t ↦ (x, t)`.
-  have hslice : ContMDiff 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
+    ContinuousOn (fun t : ℝ =>
+      Tensor0SBundle.TensorRSSpace.toModel ((Φ t).toSection x)) S := by
+  -- Restrict the joint section to the smooth slice `t ↦ (x, t)` (mapping `S` into `univ ×ˢ S`).
+  have hmap : ContMDiff 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, ℝ)) ∞ (fun t : ℝ => (x, t)) :=
+    (contMDiff_const).prodMk contMDiff_id
+  have hmaps : Set.MapsTo (fun t : ℝ => (x, t)) S ((Set.univ : Set M) ×ˢ S) :=
+    fun t ht => ⟨Set.mem_univ _, ht⟩
+  have hslice : ContMDiffOn 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
       (fun t : ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
-        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x ((Φ t).toSection x)) := by
-    have hmap : ContMDiff 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, ℝ)) ∞ (fun t : ℝ => (x, t)) :=
-      (contMDiff_const).prodMk contMDiff_id
-    exact hjoint.comp hmap
-  -- Continuous into the total space.
-  have hcont_total : Continuous (fun t : ℝ =>
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x ((Φ t).toSection x)) S :=
+    hjoint.comp hmap.contMDiffOn hmaps
+  -- Continuous on `S` into the total space.
+  have hcont_total : ContinuousOn (fun t : ℝ =>
       TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
-        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x ((Φ t).toSection x)) :=
-    hslice.continuous
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x ((Φ t).toSection x)) S :=
+    hslice.continuousOn
   -- Extract the fibre value at the constant base `x` via the trivialization homeomorphism.
   set e := trivializationAt (Tensor0SBundle.TensorRSModel r s ℝ E)
     (fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x with he
   have hxbase : x ∈ e.baseSet := mem_baseSet_trivializationAt _ _ x
-  have hcoord : Continuous (fun t : ℝ =>
+  have hcoord : ContinuousOn (fun t : ℝ =>
       (e (TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
-        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x ((Φ t).toSection x))).2) :=
-    continuous_snd.comp (e.continuousOn_toFun.comp_continuous hcont_total
-      (fun t => e.mem_source.mpr hxbase))
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x ((Φ t).toSection x))).2) S :=
+    continuous_snd.comp_continuousOn (e.continuousOn_toFun.comp hcont_total
+      (fun t _ => e.mem_source.mpr hxbase))
   -- The fibre coordinate equals the `continuousLinearEquivAt`, whose inverse recovers the fibre.
-  have hfibre : Continuous (fun t : ℝ => (Φ t).toSection x) := by
+  have hfibre : ContinuousOn (fun t : ℝ => (Φ t).toSection x) S := by
     have hkey : ∀ t : ℝ, (Φ t).toSection x =
         (e.continuousLinearEquivAt ℝ x hxbase).symm
           ((e (TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
@@ -995,21 +1332,24 @@ theorem jointContMDiff_toModel_continuous_slice
       have hsnd := congrArg Prod.snd hp
       simp only at hsnd
       rw [hsnd, ContinuousLinearEquiv.symm_apply_apply]
-    have hrhs : Continuous (fun t : ℝ =>
+    have hrhs : ContinuousOn (fun t : ℝ =>
         (e.continuousLinearEquivAt ℝ x hxbase).symm
           ((e (TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
             (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x
-            ((Φ t).toSection x))).2)) :=
-      (e.continuousLinearEquivAt ℝ x hxbase).symm.continuous.comp hcoord
-    exact hrhs.congr (fun t => (hkey t).symm)
-  exact Tensor0SBundle.TensorRSSpace.toModel_continuous.comp hfibre
+            ((Φ t).toSection x))).2)) S :=
+      (e.continuousLinearEquivAt ℝ x hxbase).symm.continuous.comp_continuousOn hcoord
+    exact hrhs.congr (fun t _ => hkey t)
+  exact Tensor0SBundle.TensorRSSpace.toModel_continuous.comp_continuousOn hfibre
 
 /-- **Joint `(s, x)`-smoothness of the order-`2` principal coefficient along the realized path.**
 
 For the realized metric family `g_s = realizedFam g₀ T T' s`, the intrinsic order-`2`
 principal coefficient operator field `ricciArmPrincipalCoeff g₀ g_s` (the combined three-trace
 `(4, 2)`-operator field of `g_s`, `RicciDeTurckSectionDifference`) is jointly `C^∞` in the pair
-`(x, s)`, as a section over `M × ℝ` of the `(4, 2)`-tensor bundle.
+`(x, s)`, as a section over `M × ℝ` of the `(4, 2)`-tensor bundle, **on the slab
+`univ ×ˢ realizedSmallSet`** — the realized family is junk-extended to `g₀` off the small set, where it
+jumps at the boundary, so the joint smoothness holds only over the open parameter set `realizedSmallSet`
+(which contains the integration interval `[0, 1]`), not globally in `s` (`ContMDiffOn`, not `ContMDiff`).
 
 This is the joint-parameter lift of the single-metric base-point smoothness
 `ricciArmPrincipalCoeffFib_contMDiff`: the operator depends on `g_s` *only* through the smooth
@@ -1032,11 +1372,12 @@ theorem ricciArmPrincipalCoeff_realizedFam_jointContMDiff [BoundarylessManifold 
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
-    ContMDiff (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
         (E := fun z : M => Tensor0SBundle.TensorRSSpace 4 2 I z) p.1
         ((ricciArmPrincipalCoeff (I := I) g₀
-            (realizedFam (I := I) g₀ T T' hδ hδ' p.2)).toSection p.1)) :=
+            (realizedFam (I := I) g₀ T T' hδ hδ' p.2)).toSection p.1))
+      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
   sorry
 
 /-- **Joint `(s, x)`-smoothness of the order-`0` inverse-Gram slot coefficient along the realized
@@ -1045,7 +1386,18 @@ path.**
 For the realized metric family `g_s = realizedFam g₀ T T' s`, the intrinsic order-`0` inverse-Gram
 slot-insertion coefficient operator field `gInvDiffSlotCoeff g₀ g_s` (the `(2, 2)`-operator field of
 the cometric inverse-difference multiplier of `g_s`, `RicciDeTurckMetricArmCoeffField`) is jointly
-`C^∞` in the pair `(x, s)`, as a section over `M × ℝ` of the `(2, 2)`-tensor bundle.
+`C^∞` in the pair `(x, s)`, as a section over `M × ℝ` of the `(2, 2)`-tensor bundle, **on the slab
+`univ ×ˢ realizedSmallSet`** (the realized family is junk-extended to `g₀` off the small set and jumps
+at the boundary, so the joint smoothness is `ContMDiffOn` over `realizedSmallSet ⊇ [0, 1]`, not global).
+
+SIGNATURE NOTE (order-0 coefficient identity, surfaced for the orchestrator): the `gInvDiffSlotCoeff`
+order-`0` coefficient is the *cometric inverse-difference* multiplier `(g_s⁻¹ − g₀⁻¹)·`, which vanishes
+identically at `g_s = g₀`.  The genuine order-`0` arm of the *linearized Ricci* operator
+`D Ric(g_s)[h]` is the **curvature** action `Rm·h` (the classical Lichnerowicz remainder), NOT the
+inverse-difference; the value identities that consume this coefficient
+(`deriv_realizedRicciChartSum_eq_appCc_pointwise` etc., already `sorry`) are therefore false-as-stated
+on the `gInvDiffSlotCoeff` coefficient.  Correcting them requires re-minting the order-`0` coefficient
+to a curvature operator field; see the RESTATEMENT note in the worker report.
 
 This is the joint-parameter lift of the single-metric base-point smoothness
 `gInvDiffSlotEndo_contMDiff`: the operator depends on `g_s` *only* through the smooth cometric
@@ -1067,11 +1419,12 @@ theorem gInvDiffSlotCoeff_realizedFam_jointContMDiff [BoundarylessManifold I M]
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
-    ContMDiff (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
         (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1
         ((gInvDiffSlotCoeff (I := I) g₀
-            (realizedFam (I := I) g₀ T T' hδ hδ' p.2)).toSection p.1)) :=
+            (realizedFam (I := I) g₀ T T' hδ hδ' p.2)).toSection p.1))
+      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
   sorry
 
 /-- **Continuity-in-`s` slice of the order-`2` principal coefficient along the realized path.**
@@ -1087,15 +1440,16 @@ theorem ricciArmPrincipalCoeff_realizedFam_toModel_continuous [BoundarylessManif
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) :
-    Continuous (fun t : ℝ =>
+    ContinuousOn (fun t : ℝ =>
       Tensor0SBundle.TensorRSSpace.toModel
         ((ricciArmPrincipalCoeff (I := I) g₀
-            (realizedFam (I := I) g₀ T T' hδ hδ' t)).toSection x)) := by
+            (realizedFam (I := I) g₀ T T' hδ hδ' t)).toSection x))
+      (realizedSmallSet (δ := δ) (δ' := δ')) := by
   have hjoint := ricciArmPrincipalCoeff_realizedFam_jointContMDiff
     (I := I) g₀ T T' hδ hδ'
   exact jointContMDiff_toModel_continuous_slice (I := I) g₀ 4 2
     (fun t => ricciArmPrincipalCoeff (I := I) g₀
-      (realizedFam (I := I) g₀ T T' hδ hδ' t)) hjoint x
+      (realizedFam (I := I) g₀ T T' hδ hδ' t)) (realizedSmallSet (δ := δ) (δ' := δ')) hjoint x
 
 /-- **Continuity-in-`s` slice of the order-`0` inverse-Gram slot coefficient along the realized
 path.**
@@ -1108,15 +1462,16 @@ theorem gInvDiffSlotCoeff_realizedFam_toModel_continuous [BoundarylessManifold I
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) :
-    Continuous (fun t : ℝ =>
+    ContinuousOn (fun t : ℝ =>
       Tensor0SBundle.TensorRSSpace.toModel
         ((gInvDiffSlotCoeff (I := I) g₀
-            (realizedFam (I := I) g₀ T T' hδ hδ' t)).toSection x)) := by
+            (realizedFam (I := I) g₀ T T' hδ hδ' t)).toSection x))
+      (realizedSmallSet (δ := δ) (δ' := δ')) := by
   have hjoint := gInvDiffSlotCoeff_realizedFam_jointContMDiff
     (I := I) g₀ T T' hδ hδ'
   exact jointContMDiff_toModel_continuous_slice (I := I) g₀ 2 2
     (fun t => gInvDiffSlotCoeff (I := I) g₀
-      (realizedFam (I := I) g₀ T T' hδ hδ' t)) hjoint x
+      (realizedFam (I := I) g₀ T T' hδ hδ' t)) (realizedSmallSet (δ := δ) (δ' := δ')) hjoint x
 
 end RicciLinearization
 end DeTurck
