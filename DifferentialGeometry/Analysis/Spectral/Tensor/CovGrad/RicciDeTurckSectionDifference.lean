@@ -5347,21 +5347,28 @@ theorem order1CocycleLeg_flat_eq_explicit
 
 set_option linter.unusedSectionVars false in
 /-- **The combined lower-order arm connector of the Ricci-arm eval-matching (posited covariant bridge,
-MIXED order-`(0, 1)`).**
+order-`0` + order-`2`).**
 
 For two realize-tied endpoints `g₁ = realize(g₀ + T)`, `g₁' = realize(g₀ + T')`, the sum of the
-order-`0` operator-difference arm `(O)`, the order-`1` cross/slot `connDiff` couplings `(C)/(S₁)/(S₂)`,
-the order-`1` quadratic `connDiff ∧ diffSec` telescope (each taken at the X-slot config minus the Z-slot
-config of the Palatini telescope), and the carried order-`≤ 1` principal-remainder difference
+order-`0` operator-difference arm `(O)`, the cross/slot `connDiff` couplings `(C)/(S₁)/(S₂)`, the
+quadratic `connDiff ∧ diffSec` telescope (each taken at the X-slot config minus the Z-slot config of the
+Palatini telescope), and the carried principal-remainder difference
 `palatiniTracedPrincipalDiffRemainder − palatiniTracedPrincipalZDiffRemainder` is the `unitModel`/`appCc`
-read-off of a PAIR of endpoint-dependent operator coefficient fields `R₀` (order `0`) and `R₁` (order
-`1`) on the iterated covariant gradients `W₀ = (T − T')` and `W₁ = ∇₀(T − T')`.
+read-off of a PAIR of endpoint-dependent operator coefficient fields `R₀` (order `0`, a `(0, 2)` source)
+and `R₂lower` (order `2`, a `(0, 4)` source) on the iterated covariant gradients `W₀ = (T − T')` and
+`W₂ = ∇₀²(T − T')`.
 
 This is the COMBINED lower arm: no proper sub-arm is tensorial, but the full combination is (the
 test-field-extension `∇₀ Z`/`∇₀ Y` artifacts of `covDerivConnDiff` cancel across the combination, as the
-total Ricci difference and the order-`2` `appCc R₂ (∇₀² S)` piece are both extension-free).  The grading
-is genuinely MIXED order-`(0, 1)`: the inverse-Gram VALUE difference `g₁⁻¹ − g₁'⁻¹` residue survives at
-`∇₀(T − T')(x) = 0` (order `0`), while the `∇₀(g₁ − g₁') = ∇₀(T − T')` jet legs supply order `1`.
+total Ricci difference and the order-`2` `appCc R₂ (∇₀² S)` piece are both extension-free).  Crucially
+there is NO genuine order-`1` term: by the classical Lichnerowicz form of the linearised Ricci
+difference (a normal-frame `3`-jet computation), the combined-lower difference is order-`2` + order-`0`
+ONLY — the apparent order-`1` contribution is a coordinate `∂h` artifact (the `Γ(g₀)`-correction of the
+divergence trace) that vanishes in a normal frame.  Concretely the would-be order-`1` `(0, 3) → (0, 2)`
+single-trace coefficient is INDEX-IMPOSSIBLE: an honest tensorial order-`1` coefficient on a `(0, 2)`
+source would carry an odd number of free cometric slots, whereas both the order-`0` `(0, 2)` source and
+the order-`2` `(0, 4)` source are even-index and hence cometric-realizable (like the principal
+`ricciArmPrincipalCoeffFib`'s double cometric trace).
 
 The (O)-arm decomposition foundation is in place and sorry-free: `oArm_split` splits the per-`i`
 operator-difference atom into the order-`0` sharp-difference resolvent `(O.a)` plus the
@@ -5369,20 +5376,19 @@ connection-difference leg `(O.b)`; `inverseMetricSharpFib_sub_inner_g1` /
 `inverseMetricSharpFib_sub_inner_g1_realize` resolve `(O.a)`'s `g₁`-pairing to the (negated) symmetrized
 metric-VALUE difference `ccTensorBilinSymm g₀ (T − T')` (order-`0`, fibrewise-linear in `(T − T')(x)`);
 `oArm_leg_eq_connDiff` (via `cotangentCov_leviCivita_diff_endpoint`) rewrites `(O.b)` as the cotangent
-dual of `connDiff g₁ g₁'` (order-`≤ 1`); and `connDiff_g1g1'_order_split` (STAGE 1, sorry-free)
-splits that `connDiff g₁ g₁'` into its order-`0` inverse-metric VALUE-difference endomorphism plus the
-order-`1` `g₁'`-raise of the bare metric-difference Koszul covector, the foundational telescoping each
-order-`1` leg `(O.b)/(C.b)/(S₁)/(S₂)/(Q.b)` consumes.  The remaining work is the JOINT cancellation of
-the order-`1` legs against the extension artifacts, and the `ricSlotOpField`-style smooth `R₀`/`R₁`
-coefficient construction (the order-`0` residue extension of `combinedLowerCoeff0` and the from-scratch
-order-`1` `(0, 3) → (0, 2)` single-trace `R₁` model) realising the cancelled extension-free form. -/
+dual of `connDiff g₁ g₁'`; and `connDiff_g1g1'_order_split` (STAGE 1, sorry-free) splits that
+`connDiff g₁ g₁'` into its order-`0` inverse-metric VALUE-difference endomorphism plus the second-jet
+`g₁'`-raise of the bare metric-difference Koszul covector.  The remaining work is the JOINT cancellation
+of the artifact legs and the `ricSlotOpField`-style smooth `R₀`/`R₂lower` coefficient construction (the
+order-`0` residue extension of `combinedLowerCoeff0` and the order-`2` `(0, 4) → (0, 2)` double-trace
+`R₂lower` model, both even-index cometric-realizable) realising the cancelled extension-free form. -/
 theorem combinedLowerArm_appCc_eq
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     (hg₁ : ∀ (b : M) (u w : TangentSpace I b),
       g₁.inner b u w = g₀.inner b u w + ccTensorBilinSymm (I := I) g₀ T b u w)
     (hg₁' : ∀ (b : M) (u w : TangentSpace I b),
       g₁'.inner b u w = g₀.inner b u w + ccTensorBilinSymm (I := I) g₀ T' b u w) :
-    ∃ (R₀ : SmoothCcTensor g₀ 2 2) (R₁ : SmoothCcTensor g₀ 3 2),
+    ∃ (R₀ : SmoothCcTensor g₀ 2 2) (R₂lower : SmoothCcTensor g₀ 4 2),
       ∀ (x : M) (v : Fin 2 → TangentSpace I x),
       (
         ((∑ i : Fin (Module.finrank ℝ E),
@@ -5544,8 +5550,8 @@ theorem combinedLowerArm_appCc_eq
         unitModel (I := I) (M := M) g₀ 2
           (appCc (I := I) (M := M) g₀ 2 2 R₀
               (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
-            + appCc (I := I) (M := M) g₀ 3 2 R₁
-                (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v := by
+            + appCc (I := I) (M := M) g₀ 4 2 R₂lower
+                (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
   classical
   -- STEP 1 (proved sorry-free): the combined-lower arm-sum is EXTENSION-FREE, equal to the difference of
   -- two genuine Ricci `(0, 2)`-tensors minus the order-`2` principal `appCc R₂'` read-off.
@@ -5558,7 +5564,7 @@ theorem combinedLowerArm_appCc_eq
   -- `W₁ = ∇₀(T − T')`).  This is the `ricSlotOpField`-style smooth coefficient construction with the
   -- `chartModelBasis`-trace ↔ `appCc`/`unitModel` bridge (`traceViaBasis_c`,
   -- `cometric_dualTrace_eq_orthoFrame_diag`) realising the cancelled extension-free form.
-  have hrep : ∃ (R₀ : SmoothCcTensor g₀ 2 2) (R₁ : SmoothCcTensor g₀ 3 2),
+  have hrep : ∃ (R₀ : SmoothCcTensor g₀ 2 2) (R₂lower : SmoothCcTensor g₀ 4 2),
       ∀ (x : M) (v : Fin 2 → TangentSpace I x),
         ricciTensor (I := I) g₁ x (v 0) (v 1) - ricciTensor (I := I) g₁' x (v 0) (v 1)
             - unitModel (I := I) (M := M) g₀ 2
@@ -5567,11 +5573,11 @@ theorem combinedLowerArm_appCc_eq
           unitModel (I := I) (M := M) g₀ 2
             (appCc (I := I) (M := M) g₀ 2 2 R₀
                 (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
-              + appCc (I := I) (M := M) g₀ 3 2 R₁
-                  (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v := by
+              + appCc (I := I) (M := M) g₀ 4 2 R₂lower
+                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
     sorry
-  obtain ⟨R₀, R₁, hrep'⟩ := hrep
-  exact ⟨R₀, R₁, fun x v => (hef x v).trans (hrep' x v)⟩
+  obtain ⟨R₀, R₂lower, hrep'⟩ := hrep
+  exact ⟨R₀, R₂lower, fun x v => (hef x v).trans (hrep' x v)⟩
 
 end TensorSpectral
 end Parabolic
