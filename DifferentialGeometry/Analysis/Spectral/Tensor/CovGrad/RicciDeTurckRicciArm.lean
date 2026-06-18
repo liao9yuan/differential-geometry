@@ -291,23 +291,18 @@ theorem deTurckRicciArm_appCc_eval
   have hg₁' : ∀ (b : M) (u w : TangentSpace I b),
       g₁'.inner b u w = g₀.inner b u w + ccTensorBilinSymm (I := I) g₀ T' b u w := by
     intro b u w; rw [hg₁'def]; exact tensorSectionRealizeMetric_inner (I := I) g₀ T' hδ'_lt hδ' b u w
-  -- The posited order-`0`/order-`1` arm coefficient fields.  The operator-difference arm `(O)` splits
-  -- into its order-`0` cometric part `(B)` and its order-`1` connection part `(A)` (the corrected
-  -- `operatorDiffArm_B_appCc_eq`/`operatorDiffArm_A_appCc_eq`; the old single order-`0` connector was
-  -- false — it dropped the order-`1` `(A)` part).
-  obtain ⟨R₀c, hR₀⟩ := operatorDiffArm_B_appCc_eq (I := I) (M := M) g₀ g₁ g₁' T T' hg₁ hg₁'
-  obtain ⟨R₁A, hR₁A⟩ := operatorDiffArm_A_appCc_eq (I := I) (M := M) g₀ g₁ g₁' T T' hg₁ hg₁'
-  -- The cross/slot and quadratic arms are MIXED order-`(0,1)` (the value-difference `g₁⁻¹ − g₁'⁻¹`
-  -- residue survives at `∇₀(T − T') = 0`): each supplies an order-`0` and an order-`1` coefficient.
-  obtain ⟨R₀cs, R₁cs, hR₁cs⟩ :=
-    crossSlotArm_diffRemainder_appCc_eq (I := I) (M := M) g₀ g₁ g₁' T T' hg₁ hg₁'
-  obtain ⟨R₀q, R₁q, hR₁q⟩ := quadraticConnDiffArm_appCc_eq (I := I) (M := M) g₀ g₁ g₁' T T' hg₁ hg₁'
+  -- The posited COMBINED lower-order arm coefficient fields.  No proper sub-arm of the lower part is
+  -- tensorial on its own (each of `(O)`, the cross/slot couplings, the quadratic, and the carried
+  -- principal remainder individually carries the test-field-extension gradients `∇₀ Z`/`∇₀ Y`); the
+  -- extension artifacts cancel ONLY across the full lower combination, which is order-`(0, 1)` and
+  -- value/`∇₀(T − T')`-only (`combinedLowerArm_appCc_eq`).
+  obtain ⟨R₀cl, R₁cl, hRcl⟩ :=
+    combinedLowerArm_appCc_eq (I := I) (M := M) g₀ g₁ g₁' T T' hg₁ hg₁'
   -- The order-`2` PRINCIPAL coefficient, symmetrizer-absorbed onto the bare section difference.
   obtain ⟨R₂', hR₂'⟩ := symmAbsorbedPrincipalCoeff_appCc_eq (I := I) (M := M) g₀ (T - T')
     (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
       - ricciArmPrincipalCoeffZ (I := I) (M := M) g₀ g₁)
-  refine ⟨(-2 : ℝ) • (R₀c + R₀cs + R₀q), (-2 : ℝ) • (R₁cs + R₁q + R₁A), (-2 : ℝ) • R₂',
-    fun x v => ?_⟩
+  refine ⟨(-2 : ℝ) • R₀cl, (-2 : ℝ) • R₁cl, (-2 : ℝ) • R₂', fun x v => ?_⟩
   -- Abbreviations for the perturbation-difference iterated gradients.
   set W₀ : SmoothCcTensor g₀ 0 2 := iteratedCovGrad (I := I) g₀ 0 2 0 (T - T') with hW₀
   set W₁ : SmoothCcTensor g₀ 0 3 := iteratedCovGrad (I := I) g₀ 0 2 1 (T - T') with hW₁
@@ -399,26 +394,14 @@ theorem deTurckRicciArm_appCc_eval
     rw [hPX, hPZ, hR₂'v]
     linarith [huXZ]
   have htel := ricciTensor_sub_eq_palatini_telescope (I := I) g₀ g₁ g₁' x (v 0) (v 1)
-  -- The order-`0` operator-difference arm `(O)` splits into its order-`0` cometric part `(B)` and its
-  -- order-`1` connection part `(A)` (the sorry-free add-subtract-midpoint identity).
-  have hOsplit := operatorDiff_split (I := I) (M := M) g₀ g₁ g₁' x v
-  -- The un-scaled core identity: the Ricci-arm difference value is the sum of the five `unitModel`
-  -- read-offs (order-`0` `B`, order-`1` `A`, order-`1` cross/slot, order-`1` quadratic, order-`2`
-  -- PRINCIPAL).
+  -- The un-scaled core identity: the Ricci-arm difference value is the sum of the COMBINED lower-order
+  -- read-off (order-`0`/order-`1`) and the order-`2` PRINCIPAL read-off.
   have hcore :
       ricciTensor (I := I) g₁ x (v 0) (v 1) - ricciTensor (I := I) g₁' x (v 0) (v 1) =
         unitModel (I := I) (M := M) g₀ 2
-            (appCc (I := I) (M := M) g₀ 2 2 R₀c W₀) x v
-          + (unitModel (I := I) (M := M) g₀ 2
-                (appCc (I := I) (M := M) g₀ 2 2 R₀cs W₀) x v
-              + unitModel (I := I) (M := M) g₀ 2
-                  (appCc (I := I) (M := M) g₀ 3 2 R₁cs W₁) x v)
-          + (unitModel (I := I) (M := M) g₀ 2
-                (appCc (I := I) (M := M) g₀ 2 2 R₀q W₀) x v
-              + unitModel (I := I) (M := M) g₀ 2
-                  (appCc (I := I) (M := M) g₀ 3 2 R₁q W₁) x v)
+            (appCc (I := I) (M := M) g₀ 2 2 R₀cl W₀) x v
           + unitModel (I := I) (M := M) g₀ 2
-              (appCc (I := I) (M := M) g₀ 3 2 R₁A W₁) x v
+              (appCc (I := I) (M := M) g₀ 3 2 R₁cl W₁) x v
           + unitModel (I := I) (M := M) g₀ 2
               (appCc (I := I) (M := M) g₀ 4 2 R₂' W₂) x v := by
     -- The per-`i` order grading of the two-endpoint differentiated connection difference at the
@@ -642,18 +625,21 @@ theorem deTurckRicciArm_appCc_eval
       rw [hgradX i, hgradZ i]
       simp only [hZv, hYw, ContMDiffSection.coeFn_mk, smoothExtensionTangent_eq]
       abel
-    -- The mixed cross/slot and quadratic children read off a SUM of an order-`0` and an order-`1`
-    -- `appCc` term; split the `unitModel` of the sum into the two read-offs `linarith` consumes.
-    have hR₁cs' := hR₁cs x v
-    have hR₁q' := hR₁q x v
-    rw [unitModel_add_apply] at hR₁cs' hR₁q'
-    linarith [hregroup, hOsplit, hR₀ x v, hR₁A x v, hR₁q', hR₁cs', hP]
+    -- The COMBINED lower-order child reads off a SUM of an order-`0` and an order-`1` `appCc` term;
+    -- split the `unitModel` of the sum into the two read-offs `linarith` consumes.  Its LHS is the
+    -- three lower arms (the operator-difference `(O)`, the cross/slot couplings, the quadratic
+    -- telescope) of `hregroup` PLUS the carried principal-remainder difference `hP` peels off `block4`.
+    have hRcl' := hRcl x v
+    rw [unitModel_add_apply] at hRcl'
+    -- Fold the raw output-extension subtypes `⟨smoothExtensionTangent x (v ·), …⟩` to the `set`
+    -- abbreviations `Zv`/`Yw` so the combined-lower child's lower-arm atoms match those of `hregroup`
+    -- and its carried principal-remainder atoms match those of `hP`.
+    simp only [← hZv, ← hYw] at hRcl'
+    linarith [hregroup, hRcl', hP]
   -- Reduce the scaled goal to the un-scaled core by pushing `(-2) •` through `appCc`/`unitModel`.
-  -- The order-`0` coefficient is the sum of the `(B)`/cross/quad order-`0` fields and the order-`1`
-  -- coefficient the sum of the cross/quad/`(A)` order-`1` fields, so each `appCc` of a smul-of-sum
-  -- distributes into atomic read-offs by `appCc_smul_left'`/`appCc_add_left` and `unitModel`-linearity.
-  simp only [appCc_add_left, appCc_smul_left', unitModel_smul_apply, unitModel_add_apply,
-    smul_eq_mul]
+  -- Each coefficient is a single `(-2) •`-scaled combined field, so each `appCc` of a smul read-off
+  -- distributes by `appCc_smul_left'` and `unitModel`-linearity.
+  simp only [appCc_smul_left', unitModel_smul_apply, unitModel_add_apply, smul_eq_mul]
   rw [hcore]
   ring
 
