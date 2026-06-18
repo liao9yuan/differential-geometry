@@ -223,6 +223,58 @@ private lemma appCc_smul_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
 /-! ## The pointwise Lichnerowicz `appCc` form and the path-integral coefficient construction
 (the two deep mean-value inputs, posited and recursed into downstream) -/
 
+/-- **The pointwise-in-`s` Lichnerowicz `appCc` coefficient families of the linearized Ricci
+operator (with `s`-continuous read-offs).**
+
+For the realized metric path `g_s = realize(g₀, (1 - s)·T' + s·T)`, this is the deep chart-derivative
+→ intrinsic-Lichnerowicz bridge: there are continuous-in-`s` coefficient families
+`R₀fib(s) : (2,2)` (the order-`0` curvature field of `g_s`,
+`exists_GcurvSection_eq_appCc_curvatureOpField`) and `R₂fib(s) : (4,2)` (the order-`2` rough-Laplacian
+combined-trace field of `g_s`, `ricciArmPrincipalCoeff g₀ g_s`) such that, at every interior parameter
+`s ∈ (0,1)`, the linearized Ricci value `linearizedRicciAt g_s (T - T')_x(v 0, v 1)` is the two-term
+`unitModel`/`appCc` read-off on `W₀ = (T - T')` and `W₂ = ∇₀²(T - T')`, AND such that each per-arm
+read-off `s ↦ unitModel g₀ 2 (appCc (Rₘfib s) Wₘ) x v` is continuous on the closed interval `[0,1]`.
+
+This is the irreducible deep mean-value content of the Ricci-arm linearization: connecting the genuine
+`s`-derivative of the realized chart Ricci `deriv (realizedRicciChartSum)` (the affine chart-Christoffel
+→ Riemann polynomial differentiated in `s`, `linearizedRicciAt_eq_deriv_chartSum_on_Ioo`) to the
+intrinsic two-term Lichnerowicz `appCc` form runs through (i) the per-`s` chart principal-symbol closed
+form `ricciSymbolComp_eq_closedForm` (the four classical `∂²h` terms reorganising into the rough
+Laplacian `−½|ξ|²h` plus the divergence/trace-gradient gauge terms, NO genuine order-`1` arm) and (ii)
+the chart-trace → intrinsic `appCc` transfer of each piece, the same Palatini-trace ↔ `appCc`/`unitModel`
+bridge (`ricciArmPrincipalCoeff_appCc_eq_combinedTrace`, `palatini_tracedPrincipal_eq_combinedTrace`)
+and `∇^{g_s} ↔ ∇₀` conversion that the eval-matching of the sibling arms posits.  These covariant
+bridges are not yet on disk; the construction is *posited* here as the single deferred mean-value input,
+to be discharged by recursing into them.  The predicate genuinely constrains the families to reproduce
+the actual linearized-Ricci value pointwise, so it is non-vacuous: the zero families fail it where the
+linearized Ricci is nonzero. -/
+theorem exists_linearizedRicci_pointwise_appCc_families
+    (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ∃ (R₀fib : ℝ → SmoothCcTensor g₀ 2 2) (R₂fib : ℝ → SmoothCcTensor g₀ 4 2),
+      (∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 → ∀ (x : M) (v : Fin 2 → TangentSpace I x),
+        linearizedRicciAt (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s =
+          unitModel (I := I) (M := M) g₀ 2
+            (appCc (I := I) (M := M) g₀ 2 2 (R₀fib s)
+                (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+              + appCc (I := I) (M := M) g₀ 4 2 (R₂fib s)
+                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v) ∧
+      (∀ (x : M) (v : Fin 2 → TangentSpace I x), ContinuousOn
+        (fun s => unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 2 2 (R₀fib s)
+            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v)
+        (Set.Icc (0 : ℝ) 1)) ∧
+      (∀ (x : M) (v : Fin 2 → TangentSpace I x), ContinuousOn
+        (fun s => unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 4 2 (R₂fib s)
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v)
+        (Set.Icc (0 : ℝ) 1)) :=
+  sorry
+
 /-- **The pointwise-in-`s` Lichnerowicz `appCc` form of the linearized Ricci operator.**
 
 For the realized metric path `g_s = realize(g₀, (1 - s)·T' + s·T)`, the linearized Ricci operator
@@ -274,8 +326,16 @@ theorem linearizedRicci_pointwise_appCc
         (fun s => unitModel (I := I) (M := M) g₀ 2
           (appCc (I := I) (M := M) g₀ 4 2 (R₂fib s)
             (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v)
-        MeasureTheory.volume 0 1) :=
-  sorry
+        MeasureTheory.volume 0 1) := by
+  -- The deep chart-derivative → intrinsic Lichnerowicz bridge supplies the continuous-in-`s`
+  -- coefficient families together with the pointwise identity; the two per-arm interval-integrabilities
+  -- are then the `ContinuousOn`-on-`[0,1]` read-offs integrated (`intervalIntegrable_of_Icc`).
+  obtain ⟨R₀fib, R₂fib, hpt, hcont₀, hcont₂⟩ :=
+    exists_linearizedRicci_pointwise_appCc_families (I := I) (M := M) g₀ T T'
+      hδ_lt hδ hδ'_lt hδ'
+  refine ⟨R₀fib, R₂fib, hpt, fun x v => ?_, fun x v => ?_⟩
+  · exact (hcont₀ x v).intervalIntegrable_of_Icc (zero_le_one)
+  · exact (hcont₂ x v).intervalIntegrable_of_Icc (zero_le_one)
 
 /-- **The fibre Bochner path integral of a smooth operator-field coefficient family, read off
 through `unitModel`/`appCc`.**
