@@ -4111,6 +4111,83 @@ theorem oArm_leg_eq_connDiff (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
     ContinuousLinearMap.flip_apply, ContinuousLinearMap.coe_coe]
   exact hbridge
 
+set_option linter.unusedSectionVars false in
+/-- **The endpoint connection-difference cocycle (value level).**
+
+The two background-referenced connection differences telescope to the inter-endpoint connection difference:
+```
+connDiff g₁ g₀ x w v − connDiff g₁' g₀ x w v = connDiff g₁ g₁' x w v.
+```
+This is the difference-one-form cocycle `connDiff g₁ g₁' = connDiff g₁ g₀ − connDiff g₁' g₀` read at the
+value level (the reference connection `∇₀` cancels), the algebraic identity every cross/slot `(C)/(S₁)/(S₂)`
+leg consumes to telescope an endpoint-pair difference of `connDiff ·  g₀` into the single order-`≤ 1`
+inter-endpoint variation `connDiff g₁ g₁'`. -/
+theorem connDiff_endpoint_cocycle (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
+    (w v : TangentSpace I x) :
+    PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v
+        - PDE.DeTurck.connDiff (I := I) g₁' g₀ x w v =
+      PDE.DeTurck.connDiff (I := I) g₁ g₁' x w v := by
+  classical
+  set Y : Π b : M, TangentSpace I b := smoothExtensionTangent (I := I) x w with hYdef
+  have hY := smoothExtensionTangent_mdiff (I := I) x w x
+  have hYx : Y x = w := smoothExtensionTangent_eq (I := I) x w
+  have e1 := PDE.DeTurck.connDiff_apply (I := I) g₁ g₁' (σ := Y) hY v
+  have e2 := PDE.DeTurck.connDiff_apply (I := I) g₁ g₀ (σ := Y) hY v
+  have e3 := PDE.DeTurck.connDiff_apply (I := I) g₁' g₀ (σ := Y) hY v
+  rw [hYx] at e1 e2 e3
+  rw [e1, e2, e3]; abel
+
+set_option linter.unusedSectionVars false in
+/-- **The (C)-arm pointwise split: first-slot value difference plus inter-endpoint cocycle leg.**
+
+The (C)-arm cross atom differences the connection-difference `connDiff · g₀` over BOTH the metric and its
+first (raised-covector) vector argument: at the two endpoints the first argument is `a := ♯_{g₁}K_{g₁}` and
+`a' := ♯_{g₁'}K_{g₁'}`.  Add-subtract the middle term `connDiff g₁ g₀ x a' dir` to split it:
+```
+connDiff g₁ g₀ x a dir − connDiff g₁' g₀ x a' dir
+  = connDiff g₁ g₀ x (a − a') dir            -- (C.a) first-slot VALUE difference (linearity of connDiff)
+    + connDiff g₁ g₁' x a' dir,              -- (C.b) the inter-endpoint cocycle leg (order-`≤ 1`)
+```
+the first leg the pure first-slot value difference `a − a'` of the raised connection difference (order-`0`
+through `gInvDiffRaisedEndo_eq_metricSharp_flatDiff` plus an order-`≤ 1` covector-difference piece), the
+second the inter-endpoint variation `connDiff g₁ g₁'` (`connDiff_endpoint_cocycle`). -/
+theorem csArm_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
+    (a a' dir : TangentSpace I x) :
+    PDE.DeTurck.connDiff (I := I) g₁ g₀ x a dir
+        - PDE.DeTurck.connDiff (I := I) g₁' g₀ x a' dir =
+      PDE.DeTurck.connDiff (I := I) g₁ g₀ x (a - a') dir
+        + PDE.DeTurck.connDiff (I := I) g₁ g₁' x a' dir := by
+  rw [← connDiff_endpoint_cocycle (I := I) g₀ g₁ g₁' x a' dir]
+  rw [map_sub, ContinuousLinearMap.sub_apply]
+  abel
+
+set_option linter.unusedSectionVars false in
+/-- **The quadratic-arm pointwise split: first-slot difference-section difference plus cocycle leg.**
+
+The quadratic `connDiff ∧ diffSec` atom contracts the connection difference `connDiff · g₀` against the
+endpoint's OWN difference-section value (`q := diffSec_{g₁}`, `q' := diffSec_{g₁'}`).  Add-subtract the
+middle term `connDiff g₁ g₀ x q' dir` to split it:
+```
+connDiff g₁ g₀ x q dir − connDiff g₁' g₀ x q' dir
+  = connDiff g₁ g₀ x (q − q') dir            -- (Q.a) the `A_{g₁} ∘ (dA)` difference-section difference
+    + connDiff g₁ g₁' x q' dir,              -- (Q.b) the `(dA) ∘ A_endpoint` inter-endpoint cocycle leg,
+```
+matching the `dA ∘ A_endpoint + A_endpoint ∘ dA` quadratic structure: the first leg the endpoint connection
+applied to the difference-section difference `q − q' = dA` (order-`≤ 1`, since `diffSec g₁ − diffSec g₁'`
+carries one covariant derivative of the inter-endpoint metric difference), the second the inter-endpoint
+variation `connDiff g₁ g₁'` (`connDiff_endpoint_cocycle`) applied to a single difference-section.  Identical
+algebra to `csArm_split` (a left-slot value difference plus a metric-pair cocycle), specialised to the
+difference-section arguments. -/
+theorem quadArm_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
+    (q q' dir : TangentSpace I x) :
+    PDE.DeTurck.connDiff (I := I) g₁ g₀ x q dir
+        - PDE.DeTurck.connDiff (I := I) g₁' g₀ x q' dir =
+      PDE.DeTurck.connDiff (I := I) g₁ g₀ x (q - q') dir
+        + PDE.DeTurck.connDiff (I := I) g₁ g₁' x q' dir := by
+  rw [← connDiff_endpoint_cocycle (I := I) g₀ g₁ g₁' x q' dir]
+  rw [map_sub, ContinuousLinearMap.sub_apply]
+  abel
+
 /-! ## The combined lower-order arm connector of the Ricci-arm eval-matching (posited covariant bridge)
 
 The Ricci-arm eval-matching `deTurckRicciArm_appCc_eval` assembles the `(−2)`-scaled Ricci-tensor
