@@ -387,19 +387,66 @@ theorem dropTowerPsi_spec (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
           (iteratedCovGrad g 0 (b₀ + w) k W) :=
   Classical.choose_spec (dropTower_normalForm (I := I) (M := M) g b₀ s₀ C p w) W
 
-/-- **The per-`k` uniform fibre-norm-square envelope of the operator field `dropTowerPsi`.**  Named from
-the witness of `exists_uniform_riemannianFiberNormSq_appCcRS_le` applied to `Ψ k`: the nonnegative compact
-sup constant of the order-`k` jet of `C`. -/
+/-- **The per-`k` uniform fibre-norm-square envelope of the operator field `dropTowerPsi`, CANONICAL.**
+The supremum over the (compact) base of the intrinsic fibre-norm-square of the order-`k` jet field
+`Ψ k = dropTowerPsi C p w k`:
+```
+dropFibreSup C p w k = ⨆ x, rfns(Ψ k)(x).
+```
+This is the canonical (least) uniform fibre-norm envelope: by `exists_bound_riemannianFiberNormSq_smoothCcTensor`
+the fibre-norm-square `x ↦ rfns(Ψ k)(x)` is bounded above on the compact base, so the `iSup` is finite and
+agrees with the operator-action proportionality constant of `exists_uniform_riemannianFiberNormSq_appCcRS_le`,
+while now carrying a genuine upper-bound API (`dropFibreSup_le_of_fibreNormSup`): any uniform bound on the
+field's fibre sups dominates it.  (On the degenerate empty base the `iSup` of a real-valued function is `0`,
+so the constant is still nonnegative.) -/
 def dropFibreSup (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
     (C : SmoothCcTensor g b₀ s₀) (p w k : ℕ) : ℝ :=
-  Classical.choose (exists_uniform_riemannianFiberNormSq_appCcRS_le (I := I) (M := M) g 0
-    ((b₀ + w) + k) ((s₀ + w) + p) (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k))
+  ⨆ x : M, riemannianFiberNormSq (I := I) (M := M) g ((b₀ + w) + k) ((s₀ + w) + p) x
+    ((dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k).toSection x)
+
+/-- **The fibre-norm-square field of the order-`k` jet `Ψ k` is bounded above on the compact base.**
+The `BddAbove` witness underlying the finiteness of the canonical `dropFibreSup` iSup, from the global
+fibre-norm bound on the fixed smooth section `Ψ k`. -/
+private theorem dropFibreSup_bddAbove (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
+    (C : SmoothCcTensor g b₀ s₀) (p w k : ℕ) :
+    BddAbove (Set.range fun x : M =>
+      riemannianFiberNormSq (I := I) (M := M) g ((b₀ + w) + k) ((s₀ + w) + p) x
+        ((dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k).toSection x)) := by
+  obtain ⟨K, _, hK⟩ := exists_bound_riemannianFiberNormSq_smoothCcTensor (I := I) (M := M) g
+    ((b₀ + w) + k) ((s₀ + w) + p) (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k)
+  exact ⟨K, by rintro _ ⟨x, rfl⟩; exact hK x⟩
+
+/-- **The canonical fibre sup is the per-point upper bound of the jet field's fibre-norm-square.**
+`rfns(Ψ k)(x) ≤ dropFibreSup C p w k` for every base point `x`, by `le_ciSup` against the `BddAbove`
+witness.  This is the canonical analogue of the chosen-constant property the operator bound consumes. -/
+theorem dropFibreSup_fibre_le (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
+    (C : SmoothCcTensor g b₀ s₀) (p w k : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g ((b₀ + w) + k) ((s₀ + w) + p) x
+        ((dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k).toSection x) ≤
+      dropFibreSup (I := I) (M := M) g b₀ s₀ C p w k :=
+  le_ciSup (dropFibreSup_bddAbove (I := I) (M := M) g b₀ s₀ C p w k) x
 
 theorem dropFibreSup_nonneg (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
     (C : SmoothCcTensor g b₀ s₀) (p w k : ℕ) :
     0 ≤ dropFibreSup (I := I) (M := M) g b₀ s₀ C p w k :=
-  (Classical.choose_spec (exists_uniform_riemannianFiberNormSq_appCcRS_le (I := I) (M := M) g 0
-    ((b₀ + w) + k) ((s₀ + w) + p) (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k))).1
+  Real.iSup_nonneg fun x => riemannianFiberNormSq_nonneg (I := I) (M := M) g ((b₀ + w) + k)
+    ((s₀ + w) + p) x ((dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k).toSection x)
+
+/-- **The canonical upper-bound API: any nonnegative uniform fibre-norm-square bound dominates
+`dropFibreSup`.**  If `0 ≤ K` and `K` uniformly bounds the order-`k` jet field's fibre-norm-square
+(`∀ x, rfns(Ψ k)(x) ≤ K`), then `dropFibreSup C p w k ≤ K`, by `Real.iSup_le` (which absorbs the
+degenerate empty base via `sSup ∅ = 0`, where the nonnegativity of `K` carries the bound).  This is the
+KEY new handle the envelope leaf consumes: it lets the supercritical-embedding ball-uniform control of
+the field's covariant-jet fibre sups (themselves nonnegative) bound `dropFibreSup` ball-uniformly.  The
+`0 ≤ K` side condition is automatically met by any genuine fibre-norm-square bound (the bounded
+quantities are nonnegative), and is required only to handle the degenerate empty manifold, on which the
+`iSup` collapses to `0`. -/
+theorem dropFibreSup_le_of_fibreNormSup (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
+    (C : SmoothCcTensor g b₀ s₀) (p w k : ℕ) {K : ℝ} (hK_nonneg : 0 ≤ K)
+    (hK : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g ((b₀ + w) + k) ((s₀ + w) + p) x
+      ((dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k).toSection x) ≤ K) :
+    dropFibreSup (I := I) (M := M) g b₀ s₀ C p w k ≤ K :=
+  Real.iSup_le hK hK_nonneg
 
 theorem dropFibreSup_spec (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
     (C : SmoothCcTensor g b₀ s₀) (p w k : ℕ)
@@ -408,9 +455,14 @@ theorem dropFibreSup_spec (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
         ((appCcRS (I := I) (M := M) g 0 ((b₀ + w) + k) ((s₀ + w) + p)
           (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k) W).toSection x) ≤
       dropFibreSup (I := I) (M := M) g b₀ s₀ C p w k *
-        riemannianFiberNormSq (I := I) (M := M) g 0 ((b₀ + w) + k) x (W.toSection x) :=
-  (Classical.choose_spec (exists_uniform_riemannianFiberNormSq_appCcRS_le (I := I) (M := M) g 0
-    ((b₀ + w) + k) ((s₀ + w) + p) (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k))).2 W x
+        riemannianFiberNormSq (I := I) (M := M) g 0 ((b₀ + w) + k) x (W.toSection x) := by
+  rw [appCcRS_toSection (I := I) (M := M) g 0 ((b₀ + w) + k) ((s₀ + w) + p)
+    (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k) W x]
+  refine le_trans (riemannianFiberNormSq_compRS_le_mul (I := I) (M := M) g 0 ((b₀ + w) + k)
+    ((s₀ + w) + p) x ((dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k).toSection x)
+    (W.toSection x)) ?_
+  exact mul_le_mul_of_nonneg_right (dropFibreSup_fibre_le (I := I) (M := M) g b₀ s₀ C p w k x)
+    (riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 ((b₀ + w) + k) x (W.toSection x))
 
 /-! ## The packaged per-order, per-width jet envelope -/
 
