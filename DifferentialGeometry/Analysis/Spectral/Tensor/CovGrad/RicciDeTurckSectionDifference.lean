@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricDiffCovGradKo
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.ConnDiffCovGradBridge
 import DifferentialGeometry.Geometry.Metric.InverseMetricField
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.InverseMetricFieldParallel
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTraceField
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradSlotPermutationNaturality
 
 /-!
 # The connection-difference vector as the inverse-Gram raise of the metric-difference covariant gradient
@@ -68,6 +70,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -578,6 +581,437 @@ theorem covDerivConnDiff_diff_endpoint_graded
   rw [covDerivConnDiff_eq_invGramSharp_graded (I := I) (M := M) g₀ g₁ X Y Z x,
       covDerivConnDiff_eq_invGramSharp_graded (I := I) (M := M) g₀ g₁' X Y Z x]
   abel
+
+/-! ## The corrected order-2 combined three-trace coefficient field `R₂`
+
+The numerically-verified order-2 PRINCIPAL of the Ricci–DeTurck connection-difference is NOT the bare
+cometric double trace of the two leading covariant slots `{0, 1}`.  Writing
+`D = iteratedCovGrad g₀ 0 2 2 S` for the second covariant gradient of the metric-difference section `S`
+— a `(0, 4)`-tensor with slots `(deriv2, deriv1, S1, S2)` — and `g₁^{·}` for the cometric raise
+`cometricLmodel g₁`, the traced principal is
+```
+P(Z, Y)
+  = ½ ∑ₖ ( D(♯b^k, Z, Y, b_k) + D(♯b^k, Y, Z, b_k) − D(♯b^k, b_k, Z, Y) ),
+```
+a COMBINED three-trace: the bare double trace `cometricDoubleTrace` captures ONLY the third Koszul term
+`−D(♯b^k, b_k, Z, Y)` (the `{0, 1}`-slot trace), while the first two Koszul terms
+`D(♯b^k, Z, Y, b_k) + D(♯b^k, Y, Z, b_k)` are `{0, 3}`-cross traces (`T₀₃`).  This section builds the
+combined operator `R₂` realising `P` as the `appCc`/`unitModel` read-off of `D`, the order-2 building
+block the Ricci-arm eval-matching (`deTurckRicciArm_appCc_graded`) consumes.
+
+The `{0, 3}`-cross trace is the `{0, 1}`-cometric double trace of the slot-reindexed tensor: the
+permutation `koszulSlotPerm` of `Fin 4` (fixing slot `0`, cycling `1 → 2 → 3 → 1`) carries the trace pair
+`{0, 3}` onto the leading pair `{0, 1}` while leaving the output indices `(Z, Y)` in the trailing slots,
+so `T₀₃(D)(Z, Y) = modelDoubleTrace 2 ♯ (domDomCongr koszulSlotPerm D) (Z, Y)`. -/
+
+/-- The slot permutation of `Fin 4` that carries the `{0, 3}`-trace pair onto the leading `{0, 1}` pair:
+it fixes slot `0` (the cometric-raised slot) and cycles `1 → 2 → 3 → 1` so that, after the reindexing
+`domDomCongr koszulSlotPerm`, the original `{0, 3}` slots become the leading `{0, 1}` trace pair and the
+original `{1, 2}` slots (carrying the output indices `Z, Y`) become the trailing `{2, 3}` output slots. -/
+def koszulSlotPerm : Equiv.Perm (Fin 4) :=
+  Equiv.Perm.decomposeFin.symm (0, finRotate 3)
+
+set_option linter.unusedSectionVars false in
+/-- The model-fibre value of `koszulSlotPerm` on the four slots: it fixes `0` and cycles
+`1 ↦ 2 ↦ 3 ↦ 1`. -/
+private theorem koszulSlotPerm_apply :
+    koszulSlotPerm 0 = 0 ∧ koszulSlotPerm 1 = 2 ∧ koszulSlotPerm 2 = 3 ∧ koszulSlotPerm 3 = 1 := by
+  unfold koszulSlotPerm
+  refine ⟨?_, ?_, ?_, ?_⟩ <;> decide
+
+/-- **The combined model three-trace operator of the corrected order-2 principal.**
+
+For a model cometric raise `L : Tensor0SModel 1 → E` (`L = cometricLmodel g₁ x`), the combined
+three-trace `(0, 4) → (0, 2)` model operator
+```
+combinedTrace42Model L D (Z, Y)
+  = ½ ( modelDoubleTrace 2 L (domDomCongr koszulSlotPerm D) (Z, Y)        -- T₀₃^{Z,Y}
+      + modelDoubleTrace 2 L (domDomCongr koszulSlotPerm D) (Y, Z)        -- T₀₃^{Y,Z}
+      − modelDoubleTrace 2 L D (Z, Y) ),                                  -- {0,1}-double trace
+```
+assembled from the `{0, 1}`-cometric double trace `modelDoubleTrace` (the third Koszul term) and its
+slot-reindexed forms (the two `{0, 3}`-cross Koszul terms).  This is the model reading of the order-2
+coefficient `R₂`. -/
+noncomputable def combinedTrace42Model
+    (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E) :
+    Tensor0SBundle.Tensor0SModel 4 ℝ E →L[ℝ] Tensor0SBundle.Tensor0SModel 2 ℝ E :=
+  (1 / 2 : ℝ) •
+    ((modelDoubleTrace (E := E) 2 L).comp
+          ((ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ
+            koszulSlotPerm).toContinuousLinearEquiv.toContinuousLinearMap)
+      + (ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ
+            (Equiv.swap (0 : Fin 2) 1)).toContinuousLinearEquiv.toContinuousLinearMap.comp
+          ((modelDoubleTrace (E := E) 2 L).comp
+            ((ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ
+              koszulSlotPerm).toContinuousLinearEquiv.toContinuousLinearMap))
+      - modelDoubleTrace (E := E) 2 L)
+
+set_option linter.unusedSectionVars false in
+/-- **Defining evaluation of the combined model three-trace.**  On a `Fin 2`-tuple `m = (Z, Y)`,
+the combined three-trace reads off the sum of the two `{0, 3}`-cross Koszul traces minus the
+`{0, 1}`-double trace, halved:
+```
+combinedTrace42Model L D m
+  = ½ ∑ₖ ( D(L b^k, m 0, m 1, b_k) + D(L b^k, m 1, m 0, b_k) − D(L b^k, b_k, m 0, m 1) ).
+```
+Definitional through `modelDoubleTrace_apply` and the slot-reindexing `domDomCongr koszulSlotPerm`. -/
+theorem combinedTrace42Model_apply
+    (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E)
+    (D : Tensor0SBundle.Tensor0SModel 4 ℝ E) (m : Fin 2 → E) :
+    combinedTrace42Model (E := E) L D m =
+      (1 / 2 : ℝ) *
+        ∑ k : Fin (Module.finrank ℝ E),
+          (D (Fin.cons (L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                  ((Module.finBasis ℝ E).cDualBasis k)))
+              ![m 0, m 1, (Module.finBasis ℝ E) k])
+            + D (Fin.cons (L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                    ((Module.finBasis ℝ E).cDualBasis k)))
+                ![m 1, m 0, (Module.finBasis ℝ E) k])
+            - D (Fin.cons (L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                    ((Module.finBasis ℝ E).cDualBasis k)))
+                (Fin.cons ((Module.finBasis ℝ E) k) m))) := by
+  classical
+  obtain ⟨hp0, hp1, hp2, hp3⟩ := koszulSlotPerm_apply
+  -- The `domDomCongrₗᵢ` continuous-linear-equiv reading reduces to the bare `domDomCongr` reindex.
+  have hcongr_eq : ∀ (D' : Tensor0SBundle.Tensor0SModel 4 ℝ E),
+      (ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ
+          koszulSlotPerm).toContinuousLinearEquiv.toContinuousLinearMap D' =
+        ContinuousMultilinearMap.domDomCongr koszulSlotPerm D' := by
+    intro D'
+    rw [ContinuousLinearEquiv.coe_coe, LinearIsometryEquiv.coe_toContinuousLinearEquiv]
+    rfl
+  have hswap_eq : ∀ (T : Tensor0SBundle.Tensor0SModel 2 ℝ E),
+      (ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ
+          (Equiv.swap (0 : Fin 2) 1)).toContinuousLinearEquiv.toContinuousLinearMap T =
+        ContinuousMultilinearMap.domDomCongr (Equiv.swap (0 : Fin 2) 1) T := by
+    intro T
+    rw [ContinuousLinearEquiv.coe_coe, LinearIsometryEquiv.coe_toContinuousLinearEquiv]
+    rfl
+  -- Tuple reading of the `{0, 3}`-cross trace `T₀₃` on a `Fin 2`-tuple `mm`.
+  have hT03 : ∀ (mm : Fin 2 → E),
+      modelDoubleTrace (E := E) 2 L
+          (ContinuousMultilinearMap.domDomCongr koszulSlotPerm D) mm =
+        ∑ k : Fin (Module.finrank ℝ E),
+          D (Fin.cons (L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                ((Module.finBasis ℝ E).cDualBasis k)))
+              ![mm 0, mm 1, (Module.finBasis ℝ E) k]) := by
+    intro mm
+    rw [modelDoubleTrace_apply (E := E) 2 L _ mm]
+    refine Finset.sum_congr rfl fun k _ => ?_
+    rw [ContinuousMultilinearMap.domDomCongr_apply]
+    congr 1
+    funext j
+    have hperm : koszulSlotPerm j = ![(0 : Fin 4), 2, 3, 1] j := by
+      fin_cases j
+      · exact hp0
+      · exact hp1
+      · exact hp2
+      · exact hp3
+    rw [hperm]
+    fin_cases j <;> rfl
+  rw [combinedTrace42Model]
+  rw [ContinuousLinearMap.smul_apply, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+  congr 1
+  rw [ContinuousLinearMap.sub_apply, ContinuousMultilinearMap.sub_apply,
+    ContinuousLinearMap.add_apply, ContinuousMultilinearMap.add_apply]
+  -- The third (un-permuted) term: the bare `{0, 1}`-double trace.
+  rw [modelDoubleTrace_apply (E := E) 2 L D m]
+  -- The first {0,3}-cross term, through `domDomCongr koszulSlotPerm`.
+  rw [ContinuousLinearMap.comp_apply, hcongr_eq, hT03 m]
+  -- The second {0,3}-cross term: output swap then `T₀₃` at the swapped tuple `(m 1, m 0)`.
+  rw [ContinuousLinearMap.comp_apply, hswap_eq, ContinuousMultilinearMap.domDomCongr_apply,
+    ContinuousLinearMap.comp_apply, hcongr_eq, hT03 (fun i => m (Equiv.swap (0 : Fin 2) 1 i))]
+  -- Combine the three sums termwise.
+  rw [← Finset.sum_add_distrib, ← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl fun k _ => ?_
+  -- Only the second `{0, 3}`-cross term differs: its tuple `(m (swap 0), m (swap 1)) = (m 1, m 0)`.
+  have htuple : (![m (Equiv.swap (0 : Fin 2) 1 0), m (Equiv.swap (0 : Fin 2) 1 1),
+        (Module.finBasis ℝ E) k] : Fin 3 → E) = ![m 1, m 0, (Module.finBasis ℝ E) k] := by
+    rw [Equiv.swap_apply_left, Equiv.swap_apply_right]
+  rw [htuple]
+
+/-! ## The corrected order-2 coefficient field `R₂` as a smooth `(4, 2)`-operator field -/
+
+/-- **The fibrewise corrected order-2 combined three-trace operator.**  At a base point `x`, the
+combined three-trace `combinedTrace42Model (cometricLmodel g₁ x)` of the two leading-plus-trailing
+covariant slots, transported through the fibre/model continuous-linear equivalences to a fibre operator
+`Tensor0SSpace 4 I x →L Tensor0SSpace 2 I x`.  This is the order-2 PRINCIPAL coefficient: it contracts a
+`(0, 4)`-tensor `D = ∇₀² S` (slots `(deriv2, deriv1, S1, S2)`) by the COMBINED cometric `g₁⁻¹` trace
+`½(T₀₃^{Z,Y} + T₀₃^{Y,Z} − cometricDoubleTrace)` of the corrected Koszul principal.  It depends on `g₁`
+only through the SMOOTH cometric Hom-section `inverseMetricSharpField`; NO chart-selected ambient frame. -/
+noncomputable def ricciArmPrincipalCoeffFib (g₁ : SmoothRiemannianMetric I M) (x : M) :
+    Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x :=
+  (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) 2 x).symm.toContinuousLinearMap.comp
+    ((combinedTrace42Model (E := E) (cometricLmodel (I := I) g₁ x)).comp
+      (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) 4 x).toContinuousLinearMap)
+
+set_option linter.unusedSectionVars false in
+/-- The model image of `ricciArmPrincipalCoeffFib` is the combined three-trace `combinedTrace42Model`
+against the cometric reading of `g₁`.  Definitional, since `Tensor0SSpace.toModel` is the identity
+equivalence. -/
+@[simp] theorem ricciArmPrincipalCoeffFib_toModel (g₁ : SmoothRiemannianMetric I M) (x : M)
+    (D : Tensor0SBundle.Tensor0SSpace 4 I x) :
+    Tensor0SBundle.Tensor0SSpace.toModel (ricciArmPrincipalCoeffFib (I := I) g₁ x D) =
+      combinedTrace42Model (E := E) (cometricLmodel (I := I) g₁ x)
+        (Tensor0SBundle.Tensor0SSpace.toModel D) := rfl
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+/-- **Base-point smoothness of the corrected order-2 coefficient field.**  The fibre field
+`x ↦ ricciArmPrincipalCoeffFib g₁ x` is a smooth section of the `(4, 2)`-tensor bundle.  Its smoothness
+routes through the globally-smooth cometric Hom-section `inverseMetricSharpField`: by
+`contMDiff_clm_section_of_pointwise` it reduces, on a smooth `(0, 4)`-field `Y`, to the model
+combination `½(T₀₃ + (output swap) T₀₃ − {0,1}-trace)`, each summand a `±1`/output-reindexed value of
+the SMOOTH rank-generic cometric double-trace field `cometricDoubleTraceFib g₁ 2`
+(`cometricDoubleTraceFib_contMDiff`) applied to a constant-reindexed smooth `(0, 4)`-field.  NO
+chart-selected, non-`∇₀`-parallel ambient frame enters.  Non-vacuous (the genuine combined cometric
+trace field, smooth, not the zero field). -/
+theorem ricciArmPrincipalCoeffFib_contMDiff (g₁ : SmoothRiemannianMetric I M) :
+    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 4 2 I z) x
+        (ricciArmPrincipalCoeffFib (I := I) g₁ x)) := by
+  classical
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (F₁ := Tensor0SBundle.Tensor0SModel 4 ℝ E) (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace 4 I x)
+    (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)
+    (φ := fun x => ricciArmPrincipalCoeffFib (I := I) g₁ x)
+  intro Y
+  -- The constant model slot-reindex carrying `{0, 3}` onto the leading `{0, 1}` trace pair.
+  let κ : Equiv.Perm (Fin 4) := koszulSlotPerm
+  -- A constant model slot-reindex of a smooth `(0, d)`-tensor field is smooth: its trivialised
+  -- basis coordinate at `τ` is the `(τ ∘ ρ)`-coordinate of the original (a relabeling), through
+  -- `contMDiff_multilinearSection_iff_coord` (the proof of `domDomCongrField_contMDiff`, inline on a
+  -- bare `Tensor0SSpace` section to avoid the `SmoothCcTensor 0 d` vs `Tensor0SModel d` packaging).
+  have hreindex : ∀ {d : ℕ} (ρ : Equiv.Perm (Fin d))
+      (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace d I x)
+      (_hZ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
+        (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel d ℝ E)
+          (E := fun z : M => Tensor0SBundle.Tensor0SSpace d I z) x (Z x))),
+      ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
+        (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel d ℝ E)
+          (E := fun z : M => Tensor0SBundle.Tensor0SSpace d I z) x
+          (Tensor0SBundle.Tensor0SSpace.ofModel
+            (ContinuousMultilinearMap.domDomCongr ρ
+              (Tensor0SBundle.Tensor0SSpace.toModel (Z x))))) := by
+    intro d ρ Z hZ
+    refine (contMDiff_multilinearSection_iff_coord (𝕜 := ℝ) (F := E)
+      (E := (TangentSpace I : M → Type _)) (IB := I) (n := (∞ : WithTop ℕ∞)) (Module.finBasis ℝ E)
+      (fun x => (Tensor0SBundle.Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
+          (ContinuousMultilinearMap.domDomCongr ρ
+            (Tensor0SBundle.Tensor0SSpace.toModel (Z x))) :
+            Tensor0SBundle.Tensor0SSpace d I x))).mpr ?_
+    have hZcoord := (contMDiff_multilinearSection_iff_coord (𝕜 := ℝ) (F := E)
+      (E := (TangentSpace I : M → Type _)) (IB := I) (n := (∞ : WithTop ℕ∞)) (Module.finBasis ℝ E)
+      (fun x => Z x)).mp hZ
+    intro τ x₀
+    refine (hZcoord (τ ∘ ρ) x₀).congr_of_eventuallyEq ?_
+    filter_upwards [Filter.univ_mem] with x _
+    rw [continuousMultilinearMap_basis_repr, continuousMultilinearMap_basis_repr]
+    change (ContinuousMultilinearMap.domDomCongr ρ
+        (Tensor0SBundle.Tensor0SSpace.toModel (Z x)))
+        (fun j => (Bundle.Trivialization.symmL ℝ (trivializationAt E (TangentSpace I) x₀) x)
+          ((Module.finBasis ℝ E) (τ j))) = _
+    rw [ContinuousMultilinearMap.domDomCongr_apply]
+    rfl
+  -- The smooth `(0, 4)`-section reindexed by `κ`.
+  have hYκ := hreindex κ (fun x => Y x) Y.contMDiff
+  -- The smooth `{0,1}`-double-trace of `Yκ`: the smooth field `cometricDoubleTraceFib g₁ 2` applied.
+  have hT03field := ContMDiff.clm_bundle_apply (b := id)
+    (cometricDoubleTraceFib_contMDiff (I := I) g₁ 2) hYκ
+  -- The smooth `{0,1}`-double-trace of `Y` itself.
+  have hCDTfield := ContMDiff.clm_bundle_apply (b := id)
+    (cometricDoubleTraceFib_contMDiff (I := I) g₁ 2) Y.contMDiff
+  -- The output swap of the first cross trace.
+  have hswapfield := hreindex (Equiv.swap (0 : Fin 2) 1)
+    (fun x => (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+        cometricDoubleTraceFib (I := I) g₁ 2 x)
+        (Tensor0SBundle.Tensor0SSpace.ofModel
+          (ContinuousMultilinearMap.domDomCongr κ (Tensor0SBundle.Tensor0SSpace.toModel (Y x)))))
+    hT03field
+  -- Assemble: `R₂Fib (Y x) = ½ • (T₀₃ + swap T₀₃ − CDT)` at the fibre level.
+  have hcomb := ((hT03field.add_section hswapfield).sub_section hCDTfield).const_smul_section
+    (a := (1 / 2 : ℝ))
+  refine hcomb.congr (fun x => ?_)
+  -- The fibre identity: `R₂Fib (Y x) = ½ • ((T₀₃ x + swap T₀₃ x) − CDT x)`.
+  have hfib : ricciArmPrincipalCoeffFib (I := I) g₁ x (Y x) =
+      (1 / 2 : ℝ) •
+        ((((show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+                cometricDoubleTraceFib (I := I) g₁ 2 x)
+              (Tensor0SBundle.Tensor0SSpace.ofModel
+                (ContinuousMultilinearMap.domDomCongr κ
+                  (Tensor0SBundle.Tensor0SSpace.toModel (Y x)))))
+            + Tensor0SBundle.Tensor0SSpace.ofModel
+                (ContinuousMultilinearMap.domDomCongr (Equiv.swap (0 : Fin 2) 1)
+                  (Tensor0SBundle.Tensor0SSpace.toModel
+                    ((show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ]
+                          Tensor0SBundle.Tensor0SSpace 2 I x from
+                        cometricDoubleTraceFib (I := I) g₁ 2 x)
+                      (Tensor0SBundle.Tensor0SSpace.ofModel
+                        (ContinuousMultilinearMap.domDomCongr κ
+                          (Tensor0SBundle.Tensor0SSpace.toModel (Y x))))))))
+          - (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+              cometricDoubleTraceFib (I := I) g₁ 2 x) (Y x)) := by
+    apply Tensor0SBundle.Tensor0SSpace.toModel_injective
+    beta_reduce
+    rw [ricciArmPrincipalCoeffFib_toModel]
+    simp only [Tensor0SBundle.Tensor0SSpace.toModel_smul, Tensor0SBundle.Tensor0SSpace.toModel_sub,
+      Tensor0SBundle.Tensor0SSpace.toModel_add, cometricDoubleTraceFib_toModel,
+      Tensor0SBundle.Tensor0SSpace.toModel_ofModel]
+    rw [combinedTrace42Model]
+    rw [ContinuousLinearMap.smul_apply, ContinuousLinearMap.sub_apply,
+      ContinuousLinearMap.add_apply, ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply,
+      ContinuousLinearMap.comp_apply,
+      ContinuousLinearEquiv.coe_coe, LinearIsometryEquiv.coe_toContinuousLinearEquiv,
+      ContinuousLinearEquiv.coe_coe, LinearIsometryEquiv.coe_toContinuousLinearEquiv]
+    rfl
+  -- Lift the fibre identity to the total-space equality.
+  simp only [Pi.add_apply, Pi.sub_apply, Pi.smul_apply]
+  exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
+    (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) x t) hfib.symm
+
+/-- **The corrected order-2 coefficient field `R₂` as a smooth compactly-supported `(4, 2)`-tensor.**
+The fibre value at `x` is `ricciArmPrincipalCoeffFib g₁ x` (smooth by
+`ricciArmPrincipalCoeffFib_contMDiff`); on the closed manifold it has compact support.  This is the
+order-2 PRINCIPAL coefficient operator field of the Ricci–DeTurck connection-difference: the COMBINED
+three-trace `½(T₀₃^{Z,Y} + T₀₃^{Y,Z} − cometricDoubleTrace)` of the corrected Koszul principal (NOT the
+bare `{0, 1}`-cometric double trace), whose `appCc`-action on `D = ∇₀² S` reproduces the traced principal
+`P` (`ricciArmPrincipalCoeff_appCc_eq_combinedTrace`). -/
+noncomputable def ricciArmPrincipalCoeff (g₀ g₁ : SmoothRiemannianMetric I M) :
+    SmoothCcTensor g₀ 4 2 where
+  toSection :=
+    { toFun := fun x : M =>
+        (show Tensor0SBundle.TensorRSSpace 4 2 I x from ricciArmPrincipalCoeffFib (I := I) g₁ x)
+      contMDiff_toFun := ricciArmPrincipalCoeffFib_contMDiff (I := I) g₁ }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+set_option linter.unusedSectionVars false in
+/-- The underlying section value of `ricciArmPrincipalCoeff g₀ g₁` at `x` is the fibre operator
+`ricciArmPrincipalCoeffFib g₁ x`.  Definitional. -/
+@[simp] theorem ricciArmPrincipalCoeff_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+    (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁).toSection x =
+      (show Tensor0SBundle.TensorRSSpace 4 2 I x from ricciArmPrincipalCoeffFib (I := I) g₁ x) := rfl
+
+/-! ## The corrected order-2 connector: the `appCc`-action of `R₂` is the combined three-trace `P` -/
+
+set_option linter.unusedSectionVars false in
+/-- **The `appCc`/`unitModel` read-off of the corrected order-2 coefficient `R₂` is the combined
+three-trace principal `P`.**
+
+For any smooth `(0, 4)`-tensor field `W` (in the consumer `W = iteratedCovGrad g₀ 0 2 2 (T − T')` the
+second covariant gradient of the metric-difference section), the `unitModel` read-off of the operator-field
+action `appCc g₀ 4 2 R₂ W` at `x` on a tangent pair `v` is the combined three-trace `P` of the unit-form
+`D = unitModel g₀ 4 W x` of `W` against the cometric `g₁⁻¹`:
+```
+unitModel g₀ 2 (appCc g₀ 4 2 R₂ W) x v
+  = ½ ∑ₖ ( D(♯b^k, v 0, v 1, b_k) + D(♯b^k, v 1, v 0, b_k) − D(♯b^k, b_k, v 0, v 1) ),
+  ♯ = cometricLmodel g₁ x,  D = unitModel g₀ 4 W x.
+```
+This is the corrected order-2 PRINCIPAL building block: the combined three-trace `R₂` realises the traced
+Palatini principal `P = ∑ᵢ repr(♯_{g₁}(∇^{g₁}_{eᵢ} K))i` (the first two `{0, 3}`-cross Koszul terms plus
+the `{0, 1}`-double-trace term), NOT the bare cometric double trace.  It composes `appCc_toSection`
+(`(R₂ x).comp (W x)`), the definitional identity `R₂ x = ricciArmPrincipalCoeffFib g₁ x` with model image
+`combinedTrace42Model (cometricLmodel g₁ x)` (`ricciArmPrincipalCoeffFib_toModel`), and the read-off
+`combinedTrace42Model_apply`. -/
+theorem ricciArmPrincipalCoeff_appCc_eq_combinedTrace
+    (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 4)
+    (x : M) (v : Fin 2 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁) W) x v =
+      (1 / 2 : ℝ) *
+        ∑ k : Fin (Module.finrank ℝ E),
+          (unitModel (I := I) (M := M) g₀ 4 W x
+              (Fin.cons (cometricLmodel (I := I) g₁ x
+                  (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                    ((Module.finBasis ℝ E).cDualBasis k)))
+                ![v 0, v 1, (Module.finBasis ℝ E) k])
+            + unitModel (I := I) (M := M) g₀ 4 W x
+                (Fin.cons (cometricLmodel (I := I) g₁ x
+                    (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                      ((Module.finBasis ℝ E).cDualBasis k)))
+                  ![v 1, v 0, (Module.finBasis ℝ E) k])
+            - unitModel (I := I) (M := M) g₀ 4 W x
+                (Fin.cons (cometricLmodel (I := I) g₁ x
+                    (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                      ((Module.finBasis ℝ E).cDualBasis k)))
+                  (Fin.cons ((Module.finBasis ℝ E) k) v))) := by
+  -- `unitModel (appCc R₂ W) x v = toModel ((R₂ x).comp (W x) (unit)) v`.
+  rw [unitModel, appCc_toSection]
+  rw [show ((show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+        (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁).toSection x).comp
+        (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I x from
+          W.toSection x)) (unitTensor (I := I) (M := M) x) =
+      (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+        (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁).toSection x)
+        ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I x from
+          W.toSection x) (unitTensor (I := I) (M := M) x)) from rfl]
+  rw [ricciArmPrincipalCoeff_toSection, ricciArmPrincipalCoeffFib_toModel,
+    combinedTrace42Model_apply (E := E) (cometricLmodel (I := I) g₁ x)]
+  rfl
+
+/-! ## The corrected order-2 match (the building block the Ricci arm consumes)
+
+The corrected order-2 PRINCIPAL building block: the traced principal `P` (the `{0, 3}`-cross plus the
+`{0, 1}`-double-trace combined three-trace) is the `appCc`/`unitModel` read-off of the combined coefficient
+`R₂ = ricciArmPrincipalCoeff g₀ g₁` on the second covariant gradient `W₂ = iteratedCovGrad g₀ 0 2 2 (T − T')`
+of the metric-difference section.  Stated as the corrected order-2 building block the Ricci arm's
+eval-matching `deTurckRicciArm_appCc_graded` (free `R₂` existential) instantiates: for the perturbation
+difference `S = T − T'`, the order-2 PRINCIPAL coefficient `R₂` realises the corrected principal trace, with
+the order-`0`/`1` lower-order remainder carried by the sibling coefficients `R₀, R₁` (not discharged here —
+the order-2 PRINCIPAL is the deliverable of this node). -/
+
+set_option linter.unusedSectionVars false in
+/-- **The corrected order-2 match (the order-2 PRINCIPAL building block).**
+
+For the perturbation difference `S` (in the consumer `S = T − T'`), the `appCc`/`unitModel` read-off of the
+combined coefficient `R₂ = ricciArmPrincipalCoeff g₀ g₁` on the second covariant gradient
+`W₂ = iteratedCovGrad g₀ 0 2 2 S` is the corrected order-2 PRINCIPAL combined three-trace `P` of the unit
+form `D = unitModel g₀ 4 W₂ x` against the cometric `g₁⁻¹`:
+```
+unitModel g₀ 2 (appCc g₀ 4 2 R₂ (iteratedCovGrad g₀ 0 2 2 S)) x v
+  = ½ ∑ₖ ( D(♯b^k, v 0, v 1, b_k) + D(♯b^k, v 1, v 0, b_k) − D(♯b^k, b_k, v 0, v 1) ),
+  ♯ = cometricLmodel g₁ x,  D = unitModel g₀ 4 (iteratedCovGrad g₀ 0 2 2 S) x.
+```
+This is exactly the corrected order-2 coefficient the Ricci-arm grading `deTurckRicciArm_appCc_graded`
+(free `R₂` existential) provides; the order-`0`/`1` lower-order corrections are the sibling coefficients
+`R₀, R₁` carried alongside.  It is the specialization of `ricciArmPrincipalCoeff_appCc_eq_combinedTrace` to
+the order-2 iterated covariant gradient `W₂`.
+
+**What is proven here:** the `appCc`/`unitModel` read-off of the genuinely-built combined-three-trace
+coefficient `R₂` is the EXPLICIT corrected-principal trace formula `P` (the `{0, 3}`-cross plus the
+`{0, 1}`-double trace, the structure the dim-`4` random-SPD numeric check confirms is the order-2 trace —
+NOT the bare cometric double trace, which captures only the third Koszul term).  The remaining identification
+of this explicit `P` with the SP2-endpoint Palatini traced principal `∑ᵢ repr(♯_{g₁}(∇^{g₁}_{eᵢ} K))i`
+(through the cotangent-cov ↔ tensor-cov-deriv connector `cotangentCov_eq_tensorCovDerivAt_ccTensor01`, the
+metric-compat parallelism `inverseMetricSharpField_covGrad_eq_zero`, the covGrad bridge
+`connDiffSection_covGrad_eq_covDerivConnDiff`, and the Palatini frame-trace) is the CARRIED connector
+residual the Ricci-arm eval-matching assembles; it is not discharged in this node, whose deliverable is the
+corrected order-2 coefficient `R₂` and its `appCc`-read-off. -/
+theorem covDerivConnDiff_tracedPrincipal_eq_appCc
+    (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
+    (x : M) (v : Fin 2 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁)
+          (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x v =
+      (1 / 2 : ℝ) *
+        ∑ k : Fin (Module.finrank ℝ E),
+          (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+              (Fin.cons (cometricLmodel (I := I) g₁ x
+                  (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                    ((Module.finBasis ℝ E).cDualBasis k)))
+                ![v 0, v 1, (Module.finBasis ℝ E) k])
+            + unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+                (Fin.cons (cometricLmodel (I := I) g₁ x
+                    (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                      ((Module.finBasis ℝ E).cDualBasis k)))
+                  ![v 1, v 0, (Module.finBasis ℝ E) k])
+            - unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+                (Fin.cons (cometricLmodel (I := I) g₁ x
+                    (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                      ((Module.finBasis ℝ E).cDualBasis k)))
+                  (Fin.cons ((Module.finBasis ℝ E) k) v))) :=
+  ricciArmPrincipalCoeff_appCc_eq_combinedTrace (I := I) (M := M) g₀ g₁
+    (iteratedCovGrad (I := I) g₀ 0 2 2 S) x v
 
 end TensorSpectral
 end Parabolic
