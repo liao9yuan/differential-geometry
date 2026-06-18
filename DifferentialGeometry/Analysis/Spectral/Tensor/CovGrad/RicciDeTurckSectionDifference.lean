@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Metric.InverseMetricField
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.InverseMetricFieldParallel
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTraceField
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradSlotPermutationNaturality
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnDiffPalatini
 
 /-!
 # The connection-difference vector as the inverse-Gram raise of the metric-difference covariant gradient
@@ -4231,6 +4232,572 @@ discharged by recursing into the inverse-metric-difference multiplier
 `gInvDiffRaisedEndo_eq_metricSharp_flatDiff`, the `δΓ` slot couplings, the quadratic telescope, and the
 frame-derivative remainder bridges. -/
 set_option linter.unusedSectionVars false in
+/-- **STEP 1 — the extension-artifact cancellation: the combined lower arm is extension-free.**
+
+For two realize-tied endpoints `g₁ = realize(g₀ + T)`, `g₁' = realize(g₀ + T')`, the sum of the
+order-`0` operator-difference arm `(O)`, the order-`1` cross/slot `connDiff` couplings `(C)/(S₁)/(S₂)`,
+the order-`1` quadratic `connDiff ∧ diffSec` telescope, and the carried order-`≤ 1` principal-remainder
+difference `palatiniTracedPrincipalDiffRemainder − palatiniTracedPrincipalZDiffRemainder` (its left-hand
+side EXACTLY the left-hand side of `combinedLowerArm_appCc_eq`) equals the manifestly EXTENSION-FREE
+combination
+```
+Ric(g₁)(v 0, v 1) − Ric(g₁')(v 0, v 1) − unitModel g₀ 2 (appCc R₂' (∇₀² (T − T'))) x v,
+```
+where `R₂'` is the symmetrizer-absorbed order-`2` principal coefficient on the BARE section difference
+(from `symmAbsorbedPrincipalCoeff_appCc_eq`).  This is the joint artifact cancellation: each proper
+sub-arm carries the test-field-extension gradients `∇₀ Z`, `∇₀ Y`, but the full combination is a
+difference of two genuine Ricci `(0, 2)`-tensors minus the extension-free order-`2` principal read-off,
+so it is extension-INDEPENDENT.
+
+**Mechanism (no term-by-term grind).** The two-endpoint Palatini telescope
+`Ric(g₁) − Ric(g₁') = [Ric(g₁) − Ric(g₀)] − [Ric(g₁') − Ric(g₀)]`, each via
+`ricciTensor_sub_eq_connDiff_palatini`, regroups (`covDerivConnDiff_diff_endpoint_graded`) the
+differentiated connection difference at the X-slot config minus the Z-slot config into the four blocks
+`(O) + (C/S₁/S₂) + quadratic + (raw principal X/Z-slot trace)`.  The raw principal block is peeled by the
+X-slot/Z-slot principal connectors `palatini_tracedPrincipalDiff_covector_eq_combinedTrace`,
+`palatini_tracedPrincipalDiff_Zslot_eq_combinedTrace` and the symmetrizer absorption
+`symmAbsorbedPrincipalCoeff_appCc_eq` into `unitModel (appCc R₂' (∇₀² (T − T')))` plus the carried
+principal-remainder difference.  Subtracting the raw principal block from the Ricci telescope and adding
+back the carried remainder is exactly the combined-lower left-hand side, so it equals the extension-free
+right-hand side. -/
+theorem combinedLowerArm_extension_free
+    (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    (hg₁ : ∀ (b : M) (u w : TangentSpace I b),
+      g₁.inner b u w = g₀.inner b u w + ccTensorBilinSymm (I := I) g₀ T b u w)
+    (hg₁' : ∀ (b : M) (u w : TangentSpace I b),
+      g₁'.inner b u w = g₀.inner b u w + ccTensorBilinSymm (I := I) g₀ T' b u w) :
+    ∃ R₂' : SmoothCcTensor g₀ 4 2,
+      ∀ (x : M) (v : Fin 2 → TangentSpace I x),
+      (
+        ((∑ i : Fin (Module.finrank ℝ E),
+            (chartModelBasis E).repr
+              (inverseMetricSharpFib (I := I) g₁ x
+                  (dualToCotangent (I := I)
+                    ((cotangentCov (LeviCivita (I := I) g₁)).toFun
+                      (fun b : M => cotangentToCLM (I := I)
+                        (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                          (⟨smoothExtensionTangent (I := I) x (v 0),
+                            smoothExtensionTangent_contMDiff (I := I) x (v 0)⟩)
+                          (⟨smoothExtensionTangent (I := I) x (v 1),
+                            smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x
+                        ((chartModelBasis E) i)))
+                - inverseMetricSharpFib (I := I) g₁' x
+                    (dualToCotangent (I := I)
+                      ((cotangentCov (LeviCivita (I := I) g₁')).toFun
+                        (fun b : M => cotangentToCLM (I := I)
+                          (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                            (⟨smoothExtensionTangent (I := I) x (v 0),
+                              smoothExtensionTangent_contMDiff (I := I) x (v 0)⟩)
+                            (⟨smoothExtensionTangent (I := I) x (v 1),
+                              smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x
+                          ((chartModelBasis E) i)))) i)
+          - (∑ i : Fin (Module.finrank ℝ E),
+            (chartModelBasis E).repr
+              (inverseMetricSharpFib (I := I) g₁ x
+                  (dualToCotangent (I := I)
+                    ((cotangentCov (LeviCivita (I := I) g₁)).toFun
+                      (fun b : M => cotangentToCLM (I := I)
+                        (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                          (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
+                            smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩)
+                          (⟨smoothExtensionTangent (I := I) x (v 1),
+                            smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x (v 0)))
+                - inverseMetricSharpFib (I := I) g₁' x
+                    (dualToCotangent (I := I)
+                      ((cotangentCov (LeviCivita (I := I) g₁')).toFun
+                        (fun b : M => cotangentToCLM (I := I)
+                          (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                            (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
+                              smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩)
+                            (⟨smoothExtensionTangent (I := I) x (v 1),
+                              smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x (v 0)))) i))
+          ) + (
+        (∑ i : Fin (Module.finrank ℝ E),
+              (chartModelBasis E).repr
+                (-(PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+                        (inverseMetricSharpFib (I := I) g₁ x
+                          (koszulCovGradCovec (I := I) (M := M) g₀ g₁
+                            (⟨smoothExtensionTangent (I := I) x (v 0),
+                              smoothExtensionTangent_contMDiff (I := I) x (v 0)⟩)
+                            (⟨smoothExtensionTangent (I := I) x (v 1),
+                              smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) x))
+                          (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x)
+                      - PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+                          (inverseMetricSharpFib (I := I) g₁' x
+                            (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                              (⟨smoothExtensionTangent (I := I) x (v 0),
+                                smoothExtensionTangent_contMDiff (I := I) x (v 0)⟩)
+                              (⟨smoothExtensionTangent (I := I) x (v 1),
+                                smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) x))
+                            (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x))
+                  - (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+                        (smoothExtensionTangent (I := I) x (v 1) x)
+                        ((LeviCivita (I := I) g₀).toFun
+                          (fun b => smoothExtensionTangent (I := I) x (v 0) b) x
+                            (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x))
+                      - PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+                          (smoothExtensionTangent (I := I) x (v 1) x)
+                          ((LeviCivita (I := I) g₀).toFun
+                            (fun b => smoothExtensionTangent (I := I) x (v 0) b) x
+                              (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x)))
+                  - (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+                        ((LeviCivita (I := I) g₀).toFun
+                          (fun b => smoothExtensionTangent (I := I) x (v 1) b) x
+                            (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x))
+                        (smoothExtensionTangent (I := I) x (v 0) x)
+                      - PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+                          ((LeviCivita (I := I) g₀).toFun
+                            (fun b => smoothExtensionTangent (I := I) x (v 1) b) x
+                              (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x))
+                          (smoothExtensionTangent (I := I) x (v 0) x))) i)
+            - (∑ i : Fin (Module.finrank ℝ E),
+              (chartModelBasis E).repr
+                (-(PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+                        (inverseMetricSharpFib (I := I) g₁ x
+                          (koszulCovGradCovec (I := I) (M := M) g₀ g₁
+                            (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
+                              smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩)
+                            (⟨smoothExtensionTangent (I := I) x (v 1),
+                              smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) x))
+                          (smoothExtensionTangent (I := I) x (v 0) x)
+                      - PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+                          (inverseMetricSharpFib (I := I) g₁' x
+                            (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                              (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
+                                smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩)
+                              (⟨smoothExtensionTangent (I := I) x (v 1),
+                                smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) x))
+                            (smoothExtensionTangent (I := I) x (v 0) x))
+                  - (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+                        (smoothExtensionTangent (I := I) x (v 1) x)
+                        ((LeviCivita (I := I) g₀).toFun
+                          (fun b => smoothExtensionTangent (I := I) x ((chartModelBasis E) i) b) x
+                            (smoothExtensionTangent (I := I) x (v 0) x))
+                      - PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+                          (smoothExtensionTangent (I := I) x (v 1) x)
+                          ((LeviCivita (I := I) g₀).toFun
+                            (fun b => smoothExtensionTangent (I := I) x ((chartModelBasis E) i) b) x
+                              (smoothExtensionTangent (I := I) x (v 0) x)))
+                  - (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+                        ((LeviCivita (I := I) g₀).toFun
+                          (fun b => smoothExtensionTangent (I := I) x (v 1) b) x
+                            (smoothExtensionTangent (I := I) x (v 0) x))
+                        (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x)
+                      - PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+                          ((LeviCivita (I := I) g₀).toFun
+                            (fun b => smoothExtensionTangent (I := I) x (v 1) b) x
+                              (smoothExtensionTangent (I := I) x (v 0) x))
+                          (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x))) i)
+          ) + (
+        ((∑ i : Fin (Module.finrank ℝ E),
+            (chartModelBasis E).repr
+              (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+                  (diffSec (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁)
+                    (smoothExtensionTangent (I := I) x (v 0))
+                    (smoothExtensionTangent (I := I) x (v 1)) x)
+                  (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x)
+                - PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+                  (diffSec (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁)
+                    (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
+                    (smoothExtensionTangent (I := I) x (v 1)) x)
+                  (smoothExtensionTangent (I := I) x (v 0) x)) i)
+          - (∑ i : Fin (Module.finrank ℝ E),
+            (chartModelBasis E).repr
+              (PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+                  (diffSec (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁')
+                    (smoothExtensionTangent (I := I) x (v 0))
+                    (smoothExtensionTangent (I := I) x (v 1)) x)
+                  (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x)
+                - PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+                  (diffSec (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁')
+                    (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
+                    (smoothExtensionTangent (I := I) x (v 1)) x)
+                  (smoothExtensionTangent (I := I) x (v 0) x)) i))
+        + (palatiniTracedPrincipalDiffRemainder (I := I) (M := M) g₀ g₁ g₁'
+              (symmS (I := I) (M := M) g₀ T) (symmS (I := I) (M := M) g₀ T')
+              (⟨smoothExtensionTangent (I := I) x (v 0),
+                smoothExtensionTangent_contMDiff (I := I) x (v 0)⟩)
+              (⟨smoothExtensionTangent (I := I) x (v 1),
+                smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) x
+            - palatiniTracedPrincipalZDiffRemainder (I := I) (M := M) g₀ g₁ g₁'
+                (symmS (I := I) (M := M) g₀ T) (symmS (I := I) (M := M) g₀ T')
+                (⟨smoothExtensionTangent (I := I) x (v 0),
+                  smoothExtensionTangent_contMDiff (I := I) x (v 0)⟩)
+                (⟨smoothExtensionTangent (I := I) x (v 1),
+                  smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) x)) =
+        ricciTensor (I := I) g₁ x (v 0) (v 1) - ricciTensor (I := I) g₁' x (v 0) (v 1)
+          - unitModel (I := I) (M := M) g₀ 2
+              (appCc (I := I) (M := M) g₀ 4 2 R₂'
+                (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
+  classical
+  obtain ⟨R₂', hR₂'⟩ := symmAbsorbedPrincipalCoeff_appCc_eq (I := I) (M := M) g₀ (T - T')
+    (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
+      - ricciArmPrincipalCoeffZ (I := I) (M := M) g₀ g₁)
+  refine ⟨R₂', fun x v => ?_⟩
+  set Zv : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    ⟨smoothExtensionTangent (I := I) x (v 0), smoothExtensionTangent_contMDiff (I := I) x (v 0)⟩
+    with hZv
+  set Yw : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    ⟨smoothExtensionTangent (I := I) x (v 1), smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩
+    with hYw
+  have hZvx : Zv x = v 0 := smoothExtensionTangent_eq (I := I) x (v 0)
+  have hYwx : Yw x = v 1 := smoothExtensionTangent_eq (I := I) x (v 1)
+  have hcons : (![v 0, v 1] : Fin 2 → TangentSpace I x) = v := by
+    funext k; fin_cases k <;> rfl
+  -- The two-endpoint Palatini telescope built from the single-metric Palatini identity.
+  have htel : ricciTensor (I := I) g₁ x (v 0) (v 1) - ricciTensor (I := I) g₁' x (v 0) (v 1) =
+      (∑ i : Fin (Module.finrank ℝ E),
+        (chartModelBasis E).repr
+          ((covDerivConnDiff (I := I) g₀ g₁
+                (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
+                (smoothExtensionTangent (I := I) x (v 0))
+                (smoothExtensionTangent (I := I) x (v 1)) x
+              - covDerivConnDiff (I := I) g₀ g₁
+                (smoothExtensionTangent (I := I) x (v 0))
+                (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
+                (smoothExtensionTangent (I := I) x (v 1)) x)
+            + (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+                  (diffSec (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁)
+                    (smoothExtensionTangent (I := I) x (v 0))
+                    (smoothExtensionTangent (I := I) x (v 1)) x)
+                  (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x)
+                - PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+                  (diffSec (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁)
+                    (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
+                    (smoothExtensionTangent (I := I) x (v 1)) x)
+                  (smoothExtensionTangent (I := I) x (v 0) x))) i)
+        - (∑ i : Fin (Module.finrank ℝ E),
+        (chartModelBasis E).repr
+          ((covDerivConnDiff (I := I) g₀ g₁'
+                (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
+                (smoothExtensionTangent (I := I) x (v 0))
+                (smoothExtensionTangent (I := I) x (v 1)) x
+              - covDerivConnDiff (I := I) g₀ g₁'
+                (smoothExtensionTangent (I := I) x (v 0))
+                (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
+                (smoothExtensionTangent (I := I) x (v 1)) x)
+            + (PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+                  (diffSec (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁')
+                    (smoothExtensionTangent (I := I) x (v 0))
+                    (smoothExtensionTangent (I := I) x (v 1)) x)
+                  (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x)
+                - PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+                  (diffSec (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁')
+                    (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
+                    (smoothExtensionTangent (I := I) x (v 1)) x)
+                  (smoothExtensionTangent (I := I) x (v 0) x))) i) := by
+    have h₁ := ricciTensor_sub_eq_connDiff_palatini (I := I) g₀ g₁ x (v 0) (v 1)
+    have h₁' := ricciTensor_sub_eq_connDiff_palatini (I := I) g₀ g₁' x (v 0) (v 1)
+    rw [show ricciTensor (I := I) g₁ x (v 0) (v 1) - ricciTensor (I := I) g₁' x (v 0) (v 1) =
+        (ricciTensor (I := I) g₁ x (v 0) (v 1) - ricciTensor (I := I) g₀ x (v 0) (v 1))
+          - (ricciTensor (I := I) g₁' x (v 0) (v 1) - ricciTensor (I := I) g₀ x (v 0) (v 1)) from by
+      ring]
+    rw [h₁, h₁']
+  -- The per-`i` order grading at the X-slot config `(eᵢ, v0, v1)` and the Z-slot config `(v0, eᵢ, v1)`.
+  have hgradX : ∀ i : Fin (Module.finrank ℝ E),
+      covDerivConnDiff (I := I) g₀ g₁ (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
+            (smoothExtensionTangent (I := I) x (v 0)) (smoothExtensionTangent (I := I) x (v 1)) x =
+      _ + covDerivConnDiff (I := I) g₀ g₁'
+            (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
+            (smoothExtensionTangent (I := I) x (v 0)) (smoothExtensionTangent (I := I) x (v 1)) x :=
+    fun i => eq_add_of_sub_eq
+      (covDerivConnDiff_diff_endpoint_graded (I := I) (M := M) g₀ g₁ g₁'
+        ⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
+          smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩ Yw Zv x)
+  have hgradZ : ∀ i : Fin (Module.finrank ℝ E),
+      covDerivConnDiff (I := I) g₀ g₁ (smoothExtensionTangent (I := I) x (v 0))
+            (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
+            (smoothExtensionTangent (I := I) x (v 1)) x =
+      _ + covDerivConnDiff (I := I) g₀ g₁' (smoothExtensionTangent (I := I) x (v 0))
+            (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
+            (smoothExtensionTangent (I := I) x (v 1)) x :=
+    fun i => eq_add_of_sub_eq
+      (covDerivConnDiff_diff_endpoint_graded (I := I) (M := M) g₀ g₁ g₁' Zv Yw
+        ⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
+          smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩ x)
+  -- Regroup the telescope into blocks 1, 2, 3 (= combined-lower legs) plus block 4 (raw principal trace).
+  have hregroup :
+      ricciTensor (I := I) g₁ x (v 0) (v 1) - ricciTensor (I := I) g₁' x (v 0) (v 1) =
+      (
+      ((∑ i : Fin (Module.finrank ℝ E),
+          (chartModelBasis E).repr
+            (inverseMetricSharpFib (I := I) g₁ x
+                (dualToCotangent (I := I)
+                  ((cotangentCov (LeviCivita (I := I) g₁)).toFun
+                    (fun b : M => cotangentToCLM (I := I)
+                      (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                        (⟨smoothExtensionTangent (I := I) x (v 0),
+                          smoothExtensionTangent_contMDiff (I := I) x (v 0)⟩)
+                        (⟨smoothExtensionTangent (I := I) x (v 1),
+                          smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x
+                      ((chartModelBasis E) i)))
+              - inverseMetricSharpFib (I := I) g₁' x
+                  (dualToCotangent (I := I)
+                    ((cotangentCov (LeviCivita (I := I) g₁')).toFun
+                      (fun b : M => cotangentToCLM (I := I)
+                        (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                          (⟨smoothExtensionTangent (I := I) x (v 0),
+                            smoothExtensionTangent_contMDiff (I := I) x (v 0)⟩)
+                          (⟨smoothExtensionTangent (I := I) x (v 1),
+                            smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x
+                        ((chartModelBasis E) i)))) i)
+        - (∑ i : Fin (Module.finrank ℝ E),
+          (chartModelBasis E).repr
+            (inverseMetricSharpFib (I := I) g₁ x
+                (dualToCotangent (I := I)
+                  ((cotangentCov (LeviCivita (I := I) g₁)).toFun
+                    (fun b : M => cotangentToCLM (I := I)
+                      (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                        (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
+                          smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩)
+                        (⟨smoothExtensionTangent (I := I) x (v 1),
+                          smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x (v 0)))
+              - inverseMetricSharpFib (I := I) g₁' x
+                  (dualToCotangent (I := I)
+                    ((cotangentCov (LeviCivita (I := I) g₁')).toFun
+                      (fun b : M => cotangentToCLM (I := I)
+                        (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                          (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
+                            smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩)
+                          (⟨smoothExtensionTangent (I := I) x (v 1),
+                            smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x (v 0)))) i))
+        ) + (
+      (∑ i : Fin (Module.finrank ℝ E),
+            (chartModelBasis E).repr
+              (-(PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+                      (inverseMetricSharpFib (I := I) g₁ x
+                        (koszulCovGradCovec (I := I) (M := M) g₀ g₁
+                          (⟨smoothExtensionTangent (I := I) x (v 0),
+                            smoothExtensionTangent_contMDiff (I := I) x (v 0)⟩)
+                          (⟨smoothExtensionTangent (I := I) x (v 1),
+                            smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) x))
+                        (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x)
+                    - PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+                        (inverseMetricSharpFib (I := I) g₁' x
+                          (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                            (⟨smoothExtensionTangent (I := I) x (v 0),
+                              smoothExtensionTangent_contMDiff (I := I) x (v 0)⟩)
+                            (⟨smoothExtensionTangent (I := I) x (v 1),
+                              smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) x))
+                          (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x))
+                - (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+                      (smoothExtensionTangent (I := I) x (v 1) x)
+                      ((LeviCivita (I := I) g₀).toFun
+                        (fun b => smoothExtensionTangent (I := I) x (v 0) b) x
+                          (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x))
+                    - PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+                        (smoothExtensionTangent (I := I) x (v 1) x)
+                        ((LeviCivita (I := I) g₀).toFun
+                          (fun b => smoothExtensionTangent (I := I) x (v 0) b) x
+                            (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x)))
+                - (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+                      ((LeviCivita (I := I) g₀).toFun
+                        (fun b => smoothExtensionTangent (I := I) x (v 1) b) x
+                          (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x))
+                      (smoothExtensionTangent (I := I) x (v 0) x)
+                    - PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+                        ((LeviCivita (I := I) g₀).toFun
+                          (fun b => smoothExtensionTangent (I := I) x (v 1) b) x
+                            (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x))
+                        (smoothExtensionTangent (I := I) x (v 0) x))) i)
+          - (∑ i : Fin (Module.finrank ℝ E),
+            (chartModelBasis E).repr
+              (-(PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+                      (inverseMetricSharpFib (I := I) g₁ x
+                        (koszulCovGradCovec (I := I) (M := M) g₀ g₁
+                          (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
+                            smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩)
+                          (⟨smoothExtensionTangent (I := I) x (v 1),
+                            smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) x))
+                        (smoothExtensionTangent (I := I) x (v 0) x)
+                    - PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+                        (inverseMetricSharpFib (I := I) g₁' x
+                          (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                            (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
+                              smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩)
+                            (⟨smoothExtensionTangent (I := I) x (v 1),
+                              smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) x))
+                          (smoothExtensionTangent (I := I) x (v 0) x))
+                - (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+                      (smoothExtensionTangent (I := I) x (v 1) x)
+                      ((LeviCivita (I := I) g₀).toFun
+                        (fun b => smoothExtensionTangent (I := I) x ((chartModelBasis E) i) b) x
+                          (smoothExtensionTangent (I := I) x (v 0) x))
+                    - PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+                        (smoothExtensionTangent (I := I) x (v 1) x)
+                        ((LeviCivita (I := I) g₀).toFun
+                          (fun b => smoothExtensionTangent (I := I) x ((chartModelBasis E) i) b) x
+                            (smoothExtensionTangent (I := I) x (v 0) x)))
+                - (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+                      ((LeviCivita (I := I) g₀).toFun
+                        (fun b => smoothExtensionTangent (I := I) x (v 1) b) x
+                          (smoothExtensionTangent (I := I) x (v 0) x))
+                      (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x)
+                    - PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+                        ((LeviCivita (I := I) g₀).toFun
+                          (fun b => smoothExtensionTangent (I := I) x (v 1) b) x
+                            (smoothExtensionTangent (I := I) x (v 0) x))
+                        (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x))) i)
+        ) + (
+      ((∑ i : Fin (Module.finrank ℝ E),
+          (chartModelBasis E).repr
+            (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+                (diffSec (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁)
+                  (smoothExtensionTangent (I := I) x (v 0))
+                  (smoothExtensionTangent (I := I) x (v 1)) x)
+                (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x)
+              - PDE.DeTurck.connDiff (I := I) g₁ g₀ x
+                (diffSec (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁)
+                  (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
+                  (smoothExtensionTangent (I := I) x (v 1)) x)
+                (smoothExtensionTangent (I := I) x (v 0) x)) i)
+        - (∑ i : Fin (Module.finrank ℝ E),
+          (chartModelBasis E).repr
+            (PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+                (diffSec (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁')
+                  (smoothExtensionTangent (I := I) x (v 0))
+                  (smoothExtensionTangent (I := I) x (v 1)) x)
+                (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x)
+              - PDE.DeTurck.connDiff (I := I) g₁' g₀ x
+                (diffSec (LeviCivita (I := I) g₀) (LeviCivita (I := I) g₁')
+                  (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
+                  (smoothExtensionTangent (I := I) x (v 1)) x)
+                (smoothExtensionTangent (I := I) x (v 0) x)) i))
+        ) + (
+      ((∑ i : Fin (Module.finrank ℝ E),
+          (chartModelBasis E).repr
+            (inverseMetricSharpFib (I := I) g₁ x
+              (dualToCotangent (I := I)
+                (((cotangentCov (LeviCivita (I := I) g₁)).toFun
+                  (fun b => cotangentToCLM (I := I)
+                    (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Zv Yw b)) x
+                      ((chartModelBasis E) i) :
+                  TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))) i)
+        - (∑ i : Fin (Module.finrank ℝ E),
+          (chartModelBasis E).repr
+            (inverseMetricSharpFib (I := I) g₁ x
+              (dualToCotangent (I := I)
+                (((cotangentCov (LeviCivita (I := I) g₁)).toFun
+                  (fun b => cotangentToCLM (I := I)
+                    (koszulCovGradCovec (I := I) (M := M) g₀ g₁' Zv Yw b)) x
+                      ((chartModelBasis E) i) :
+                  TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))) i))
+      - ((∑ i : Fin (Module.finrank ℝ E),
+          (chartModelBasis E).repr
+            (inverseMetricSharpFib (I := I) g₁ x
+              (dualToCotangent (I := I)
+                (((cotangentCov (LeviCivita (I := I) g₁)).toFun
+                  (fun b => cotangentToCLM (I := I)
+                    (koszulCovGradCovec (I := I) (M := M) g₀ g₁
+                      (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
+                        smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩) Yw b)) x
+                        (v 0) :
+                  TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))) i)
+        - (∑ i : Fin (Module.finrank ℝ E),
+          (chartModelBasis E).repr
+            (inverseMetricSharpFib (I := I) g₁ x
+              (dualToCotangent (I := I)
+                (((cotangentCov (LeviCivita (I := I) g₁)).toFun
+                  (fun b => cotangentToCLM (I := I)
+                    (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                      (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
+                        smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩) Yw b)) x
+                        (v 0) :
+                  TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))) i))
+        ) := by
+    rw [htel]
+    simp only [← Finset.sum_sub_distrib, ← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    simp only [← Finsupp.sub_apply, ← Finsupp.add_apply, ← map_sub, ← map_add]
+    refine congrArg (fun t => (chartModelBasis E).repr t i) ?_
+    rw [hgradX i, hgradZ i]
+    simp only [hZv, hYw, ContMDiffSection.coeFn_mk, smoothExtensionTangent_eq]
+    abel
+  -- Peel block 4 (the raw principal X/Z-slot trace) into `unitModel (appCc R₂' W₂)` plus the carried
+  -- principal-remainder difference.
+  have hPX := palatini_tracedPrincipalDiff_covector_eq_combinedTrace
+    (I := I) (M := M) g₀ g₁ g₁' T T' hg₁ hg₁' Zv Yw x
+  have hPZ := palatini_tracedPrincipalDiff_Zslot_eq_combinedTrace
+    (I := I) (M := M) g₀ g₁ g₁' T T' Zv Yw x
+  have hR₂'v := hR₂' x v
+  rw [hZvx, hYwx, hcons] at hPX hPZ
+  have huXZ : unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁)
+          (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ (T - T')))) x v
+      - unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeffZ (I := I) (M := M) g₀ g₁)
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ (T - T')))) x v =
+        unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 4 2
+            (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
+              - ricciArmPrincipalCoeffZ (I := I) (M := M) g₀ g₁)
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ (T - T')))) x v := by
+    rw [show ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
+          - ricciArmPrincipalCoeffZ (I := I) (M := M) g₀ g₁ =
+        ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
+          + (-1 : ℝ) • ricciArmPrincipalCoeffZ (I := I) (M := M) g₀ g₁ from by
+      rw [neg_one_smul]; abel]
+    rw [appCc_add_left, appCc_smul_left, unitModel_add2, unitModel_smul,
+      ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.smul_apply]
+    simp only [smul_eq_mul]
+    ring
+  -- Peel block 4 (the raw principal X/Z-slot trace, in `Zv`/`Yw` form) into `unitModel (appCc R₂' W₂)`
+  -- plus the carried principal-remainder difference.
+  have hP :
+      ((∑ i : Fin (Module.finrank ℝ E),
+          (chartModelBasis E).repr
+            (inverseMetricSharpFib (I := I) g₁ x
+              (dualToCotangent (I := I)
+                (((cotangentCov (LeviCivita (I := I) g₁)).toFun
+                  (fun b => cotangentToCLM (I := I)
+                    (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Zv Yw b)) x
+                      ((chartModelBasis E) i) :
+                  TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))) i)
+        - (∑ i : Fin (Module.finrank ℝ E),
+          (chartModelBasis E).repr
+            (inverseMetricSharpFib (I := I) g₁ x
+              (dualToCotangent (I := I)
+                (((cotangentCov (LeviCivita (I := I) g₁)).toFun
+                  (fun b => cotangentToCLM (I := I)
+                    (koszulCovGradCovec (I := I) (M := M) g₀ g₁' Zv Yw b)) x
+                      ((chartModelBasis E) i) :
+                  TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))) i))
+      - ((∑ i : Fin (Module.finrank ℝ E),
+          (chartModelBasis E).repr
+            (inverseMetricSharpFib (I := I) g₁ x
+              (dualToCotangent (I := I)
+                (((cotangentCov (LeviCivita (I := I) g₁)).toFun
+                  (fun b => cotangentToCLM (I := I)
+                    (koszulCovGradCovec (I := I) (M := M) g₀ g₁
+                      (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
+                        smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩) Yw b)) x
+                        (v 0) :
+                  TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))) i)
+        - (∑ i : Fin (Module.finrank ℝ E),
+          (chartModelBasis E).repr
+            (inverseMetricSharpFib (I := I) g₁ x
+              (dualToCotangent (I := I)
+                (((cotangentCov (LeviCivita (I := I) g₁)).toFun
+                  (fun b => cotangentToCLM (I := I)
+                    (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                      (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
+                        smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩) Yw b)) x
+                        (v 0) :
+                  TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))) i)) =
+        unitModel (I := I) (M := M) g₀ 2
+            (appCc (I := I) (M := M) g₀ 4 2 R₂'
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v
+          + (palatiniTracedPrincipalDiffRemainder (I := I) (M := M) g₀ g₁ g₁'
+                (symmS (I := I) (M := M) g₀ T) (symmS (I := I) (M := M) g₀ T') Zv Yw x
+              - palatiniTracedPrincipalZDiffRemainder (I := I) (M := M) g₀ g₁ g₁'
+                  (symmS (I := I) (M := M) g₀ T) (symmS (I := I) (M := M) g₀ T') Zv Yw x) := by
+    rw [hPX, hPZ, hR₂'v]
+    linarith [huXZ]
+  rw [hregroup]
+  simp only [← hZv, ← hYw]
+  linarith [hP]
+
+set_option linter.unusedSectionVars false in
 /-- **The combined lower-order arm connector of the Ricci-arm eval-matching (posited covariant bridge,
 MIXED order-`(0, 1)`).**
 
@@ -4427,7 +4994,32 @@ theorem combinedLowerArm_appCc_eq
               (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
             + appCc (I := I) (M := M) g₀ 3 2 R₁
                 (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v := by
-  sorry
+  classical
+  -- STEP 1 (proved sorry-free): the combined-lower arm-sum is EXTENSION-FREE, equal to the difference of
+  -- two genuine Ricci `(0, 2)`-tensors minus the order-`2` principal `appCc R₂'` read-off.
+  obtain ⟨R₂', hef⟩ := combinedLowerArm_extension_free (I := I) (M := M) g₀ g₁ g₁' T T' hg₁ hg₁'
+  -- STEP 2 (the single deepest residual): the extension-free order-`(0, 1)` combined form is the
+  -- `unitModel`/`appCc` read-off of an order-`0` field `R₀` (the inverse-metric-difference multiplier
+  -- `inverseMetricSharpFib_sub_inner_g1_realize` collapsing the `(O)`-arm trace to a fibrewise-linear
+  -- coefficient on `W₀ = (T − T')`) and an order-`1` field `R₁` (the `connDiff g₁ g₁' ∼ ∇₀(T − T')`
+  -- couplings of the `(C)/(S₁)/(S₂)`, quadratic, and carried-remainder legs collapsed to a coefficient on
+  -- `W₁ = ∇₀(T − T')`).  This is the `ricSlotOpField`-style smooth coefficient construction with the
+  -- `chartModelBasis`-trace ↔ `appCc`/`unitModel` bridge (`traceViaBasis_c`,
+  -- `cometric_dualTrace_eq_orthoFrame_diag`) realising the cancelled extension-free form.
+  have hrep : ∃ (R₀ : SmoothCcTensor g₀ 2 2) (R₁ : SmoothCcTensor g₀ 3 2),
+      ∀ (x : M) (v : Fin 2 → TangentSpace I x),
+        ricciTensor (I := I) g₁ x (v 0) (v 1) - ricciTensor (I := I) g₁' x (v 0) (v 1)
+            - unitModel (I := I) (M := M) g₀ 2
+                (appCc (I := I) (M := M) g₀ 4 2 R₂'
+                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v =
+          unitModel (I := I) (M := M) g₀ 2
+            (appCc (I := I) (M := M) g₀ 2 2 R₀
+                (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+              + appCc (I := I) (M := M) g₀ 3 2 R₁
+                  (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v := by
+    sorry
+  obtain ⟨R₀, R₁, hrep'⟩ := hrep
+  exact ⟨R₀, R₁, fun x v => (hef x v).trans (hrep' x v)⟩
 
 end TensorSpectral
 end Parabolic
