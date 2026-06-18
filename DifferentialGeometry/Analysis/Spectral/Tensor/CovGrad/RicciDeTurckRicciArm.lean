@@ -291,8 +291,12 @@ theorem deTurckRicciArm_appCc_eval
   have hg₁' : ∀ (b : M) (u w : TangentSpace I b),
       g₁'.inner b u w = g₀.inner b u w + ccTensorBilinSymm (I := I) g₀ T' b u w := by
     intro b u w; rw [hg₁'def]; exact tensorSectionRealizeMetric_inner (I := I) g₀ T' hδ'_lt hδ' b u w
-  -- The three posited order-`0`/order-`1` arm coefficient fields.
-  obtain ⟨R₀c, hR₀⟩ := operatorDiffArm_appCc_eq (I := I) (M := M) g₀ g₁ g₁' T T' hg₁ hg₁'
+  -- The posited order-`0`/order-`1` arm coefficient fields.  The operator-difference arm `(O)` splits
+  -- into its order-`0` cometric part `(B)` and its order-`1` connection part `(A)` (the corrected
+  -- `operatorDiffArm_B_appCc_eq`/`operatorDiffArm_A_appCc_eq`; the old single order-`0` connector was
+  -- false — it dropped the order-`1` `(A)` part).
+  obtain ⟨R₀c, hR₀⟩ := operatorDiffArm_B_appCc_eq (I := I) (M := M) g₀ g₁ g₁' T T' hg₁ hg₁'
+  obtain ⟨R₁A, hR₁A⟩ := operatorDiffArm_A_appCc_eq (I := I) (M := M) g₀ g₁ g₁' T T' hg₁ hg₁'
   obtain ⟨R₁cs, hR₁cs⟩ :=
     crossSlotArm_diffRemainder_appCc_eq (I := I) (M := M) g₀ g₁ g₁' T T' hg₁ hg₁'
   obtain ⟨R₁q, hR₁q⟩ := quadraticConnDiffArm_appCc_eq (I := I) (M := M) g₀ g₁ g₁' T T' hg₁ hg₁'
@@ -300,7 +304,7 @@ theorem deTurckRicciArm_appCc_eval
   obtain ⟨R₂', hR₂'⟩ := symmAbsorbedPrincipalCoeff_appCc_eq (I := I) (M := M) g₀ (T - T')
     (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
       - ricciArmPrincipalCoeffZ (I := I) (M := M) g₀ g₁)
-  refine ⟨(-2 : ℝ) • R₀c, (-2 : ℝ) • (R₁cs + R₁q), (-2 : ℝ) • R₂', fun x v => ?_⟩
+  refine ⟨(-2 : ℝ) • R₀c, (-2 : ℝ) • (R₁cs + R₁q + R₁A), (-2 : ℝ) • R₂', fun x v => ?_⟩
   -- Abbreviations for the perturbation-difference iterated gradients.
   set W₀ : SmoothCcTensor g₀ 0 2 := iteratedCovGrad (I := I) g₀ 0 2 0 (T - T') with hW₀
   set W₁ : SmoothCcTensor g₀ 0 3 := iteratedCovGrad (I := I) g₀ 0 2 1 (T - T') with hW₁
@@ -392,8 +396,12 @@ theorem deTurckRicciArm_appCc_eval
     rw [hPX, hPZ, hR₂'v]
     linarith [huXZ]
   have htel := ricciTensor_sub_eq_palatini_telescope (I := I) g₀ g₁ g₁' x (v 0) (v 1)
-  -- The un-scaled core identity: the Ricci-arm difference value is the sum of the four `unitModel`
-  -- read-offs (order-`0` `O`, order-`1` cross/slot, order-`1` quadratic, order-`2` PRINCIPAL).
+  -- The order-`0` operator-difference arm `(O)` splits into its order-`0` cometric part `(B)` and its
+  -- order-`1` connection part `(A)` (the sorry-free add-subtract-midpoint identity).
+  have hOsplit := operatorDiff_split (I := I) (M := M) g₀ g₁ g₁' x v
+  -- The un-scaled core identity: the Ricci-arm difference value is the sum of the five `unitModel`
+  -- read-offs (order-`0` `B`, order-`1` `A`, order-`1` cross/slot, order-`1` quadratic, order-`2`
+  -- PRINCIPAL).
   have hcore :
       ricciTensor (I := I) g₁ x (v 0) (v 1) - ricciTensor (I := I) g₁' x (v 0) (v 1) =
         unitModel (I := I) (M := M) g₀ 2
@@ -402,6 +410,8 @@ theorem deTurckRicciArm_appCc_eval
               (appCc (I := I) (M := M) g₀ 3 2 R₁cs W₁) x v
           + unitModel (I := I) (M := M) g₀ 2
               (appCc (I := I) (M := M) g₀ 3 2 R₁q W₁) x v
+          + unitModel (I := I) (M := M) g₀ 2
+              (appCc (I := I) (M := M) g₀ 3 2 R₁A W₁) x v
           + unitModel (I := I) (M := M) g₀ 2
               (appCc (I := I) (M := M) g₀ 4 2 R₂' W₂) x v := by
     -- The per-`i` order grading of the two-endpoint differentiated connection difference at the
@@ -625,18 +635,21 @@ theorem deTurckRicciArm_appCc_eval
       rw [hgradX i, hgradZ i]
       simp only [hZv, hYw, ContMDiffSection.coeFn_mk, smoothExtensionTangent_eq]
       abel
-    linarith [hregroup, hR₀ x v, hR₁q x v, hR₁cs x v, hP]
+    linarith [hregroup, hOsplit, hR₀ x v, hR₁A x v, hR₁q x v, hR₁cs x v, hP]
   -- Reduce the scaled goal to the un-scaled core by pushing `(-2) •` through `appCc`/`unitModel`.
-  rw [appCc_smul_left', appCc_smul_left', appCc_smul_left', appCc_add_left,
+  rw [appCc_smul_left', appCc_smul_left', appCc_smul_left', appCc_add_left, appCc_add_left,
     show ((-2 : ℝ) • appCc (I := I) (M := M) g₀ 2 2 R₀c W₀
         + (-2 : ℝ) • (appCc (I := I) (M := M) g₀ 3 2 R₁cs W₁
-            + appCc (I := I) (M := M) g₀ 3 2 R₁q W₁)
+            + appCc (I := I) (M := M) g₀ 3 2 R₁q W₁
+            + appCc (I := I) (M := M) g₀ 3 2 R₁A W₁)
         + (-2 : ℝ) • appCc (I := I) (M := M) g₀ 4 2 R₂' W₂) =
       (-2 : ℝ) • (appCc (I := I) (M := M) g₀ 2 2 R₀c W₀
         + (appCc (I := I) (M := M) g₀ 3 2 R₁cs W₁
-            + appCc (I := I) (M := M) g₀ 3 2 R₁q W₁)
+            + appCc (I := I) (M := M) g₀ 3 2 R₁q W₁
+            + appCc (I := I) (M := M) g₀ 3 2 R₁A W₁)
         + appCc (I := I) (M := M) g₀ 4 2 R₂' W₂) from by simp only [smul_add]]
-  rw [unitModel_smul_apply, unitModel_add_apply, unitModel_add_apply, unitModel_add_apply]
+  rw [unitModel_smul_apply, unitModel_add_apply, unitModel_add_apply, unitModel_add_apply,
+    unitModel_add_apply]
   rw [hcore]
   simp only [smul_eq_mul]
   ring

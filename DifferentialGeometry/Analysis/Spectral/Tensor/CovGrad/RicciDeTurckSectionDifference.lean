@@ -3932,26 +3932,162 @@ actual arm values, so they are non-vacuous: the zero coefficient does not satisf
 nonzero. -/
 
 set_option linter.unusedSectionVars false in
-/-- **The order-`0` operator-difference arm connector of the Ricci-arm eval-matching (posited covariant
-bridge).**
+/-- **The order-`0` cometric-difference part `(B)` of the operator-difference arm `(O)` is the order-`0`
+`appCc` read-off (posited covariant bridge).**
 
-For two realize-tied endpoints `g₁ = realize(g₀ + T)`, `g₁' = realize(g₀ + T')`, the `chartModelBasis`
-trace of the order-`0` operator-difference arm `(O)` of `covDerivConnDiff_diff_endpoint_graded` — the
-inverse-metric-sharp difference `♯_{g₁}∇^{g₁} − ♯_{g₁'}∇^{g₁'}` applied to the ENDPOINT covector
-`K_{g₁'}` — taken at the X-slot config `(X = eᵢ, Z = v, Y = w)` minus the Z-slot config
+For two realize-tied endpoints `g₁ = realize(g₀ + T)`, `g₁' = realize(g₀ + T')`, the cometric-difference
+part `(B)` of the order-`0` operator-difference arm `(O)` of `covDerivConnDiff_diff_endpoint_graded` —
+the inverse-metric-sharp difference `(♯_{g₁} − ♯_{g₁'})` applied to the COMMON `g₁'`-covariant endpoint
+covector `∇^{g₁'} K_{g₁'}` — taken at the X-slot config `(X = eᵢ, Z = v, Y = w)` minus the Z-slot config
 `(X = v, Z = eᵢ, Y = w)` of the Palatini telescope, is the `unitModel`/`appCc` read-off of an
 endpoint-dependent order-`0` operator coefficient field `R₀` on the order-`0` iterated covariant gradient
 `W₀ = (T − T')` of the perturbation difference.  This is the inverse-metric-difference multiplier
-(`gInvDiffRaisedEndo_eq_metricSharp_flatDiff`, linear in `S(x)` as a value) plus the endpoint curvature,
-the order-`0` coefficient `R₀` the Ricci-arm eval-matching packages.  Posited here as the genuine missing
-covariant-bridge prerequisite (the eval-matching `∇^{g₁} ↔ ∇₀` conversion in `appCc` form). -/
-theorem operatorDiffArm_appCc_eq
+(`gInvDiffRaisedEndo_eq_metricSharp_flatDiff`: `g₁⁻¹ − g₁'⁻¹ = −g₁⁻¹(g₁ − g₁')g₁'⁻¹`, linear in `S(x)`
+as a value) contracted with the common `g₁'`-covariant endpoint covector, the order-`0` coefficient `R₀`
+the Ricci-arm eval-matching packages.  Posited here as the genuine missing covariant-bridge prerequisite
+(the `(O) = (B) + (A)` split is the sorry-free `operatorDiff_split`; this is its order-`0` half). -/
+theorem operatorDiffArm_B_appCc_eq
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     (hg₁ : ∀ (b : M) (u w : TangentSpace I b),
       g₁.inner b u w = g₀.inner b u w + ccTensorBilinSymm (I := I) g₀ T b u w)
     (hg₁' : ∀ (b : M) (u w : TangentSpace I b),
       g₁'.inner b u w = g₀.inner b u w + ccTensorBilinSymm (I := I) g₀ T' b u w) :
     ∃ R₀ : SmoothCcTensor g₀ 2 2, ∀ (x : M) (v : Fin 2 → TangentSpace I x),
+      ((∑ i : Fin (Module.finrank ℝ E),
+          (chartModelBasis E).repr
+            (inverseMetricSharpFib (I := I) g₁ x
+                (dualToCotangent (I := I)
+                  ((cotangentCov (LeviCivita (I := I) g₁')).toFun
+                    (fun b : M => cotangentToCLM (I := I)
+                      (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                        (⟨smoothExtensionTangent (I := I) x (v 0),
+                          smoothExtensionTangent_contMDiff (I := I) x (v 0)⟩)
+                        (⟨smoothExtensionTangent (I := I) x (v 1),
+                          smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x
+                      ((chartModelBasis E) i)))
+              - inverseMetricSharpFib (I := I) g₁' x
+                  (dualToCotangent (I := I)
+                    ((cotangentCov (LeviCivita (I := I) g₁')).toFun
+                      (fun b : M => cotangentToCLM (I := I)
+                        (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                          (⟨smoothExtensionTangent (I := I) x (v 0),
+                            smoothExtensionTangent_contMDiff (I := I) x (v 0)⟩)
+                          (⟨smoothExtensionTangent (I := I) x (v 1),
+                            smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x
+                        ((chartModelBasis E) i)))) i)
+        - (∑ i : Fin (Module.finrank ℝ E),
+          (chartModelBasis E).repr
+            (inverseMetricSharpFib (I := I) g₁ x
+                (dualToCotangent (I := I)
+                  ((cotangentCov (LeviCivita (I := I) g₁')).toFun
+                    (fun b : M => cotangentToCLM (I := I)
+                      (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                        (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
+                          smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩)
+                        (⟨smoothExtensionTangent (I := I) x (v 1),
+                          smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x (v 0)))
+              - inverseMetricSharpFib (I := I) g₁' x
+                  (dualToCotangent (I := I)
+                    ((cotangentCov (LeviCivita (I := I) g₁')).toFun
+                      (fun b : M => cotangentToCLM (I := I)
+                        (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                          (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
+                            smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩)
+                          (⟨smoothExtensionTangent (I := I) x (v 1),
+                            smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x (v 0)))) i)) =
+        unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 2 2 R₀
+            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v := by
+  sorry
+
+set_option linter.unusedSectionVars false in
+/-- **The order-`1` connection-difference part `(A)` of the operator-difference arm `(O)` is the order-`1`
+`appCc` read-off (posited covariant bridge).**
+
+For two realize-tied endpoints `g₁ = realize(g₀ + T)`, `g₁' = realize(g₀ + T')`, the
+connection-difference part `(A)` of the order-`0` operator-difference arm `(O)` of
+`covDerivConnDiff_diff_endpoint_graded` — the common `g₁`-sharp applied to the connection difference
+`♯_{g₁}((∇^{g₁} − ∇^{g₁'}) K_{g₁'})` of the COMMON `g₁'`-endpoint covector — taken at the X-slot config
+`(X = eᵢ, Z = v, Y = w)` minus the Z-slot config `(X = v, Z = eᵢ, Y = w)` of the Palatini telescope, is
+the `unitModel`/`appCc` read-off of an endpoint-dependent order-`1` operator coefficient field `R₁ᴬ` on
+the order-`1` iterated covariant gradient `W₁ = ∇₀(T − T')` of the perturbation difference.  By
+`cotangentCov_leviCivita_diff` the connection difference is `(∇^{g₁} − ∇^{g₁'}) K = −K(connDiff g₁ g₁' ·)`
+with `connDiff g₁ g₁' = ½♯_{g₁}∇₀(g₁ − g₁')` carrying the order-`1` jet `∇₀(T − T')`, the order-`1`
+coefficient `R₁ᴬ` the Ricci-arm eval-matching packages.  This is why the operator-difference arm is NOT
+order-`0`-only: when `(T − T')(x) = 0` but `∇₀(T − T')(x) ≠ 0` the `(B)` order-`0` part vanishes while
+`(A)` does not.  Posited here as the genuine missing covariant-bridge prerequisite (the `(O) = (B) + (A)`
+split is the sorry-free `operatorDiff_split`; this is its order-`1` half). -/
+theorem operatorDiffArm_A_appCc_eq
+    (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    (hg₁ : ∀ (b : M) (u w : TangentSpace I b),
+      g₁.inner b u w = g₀.inner b u w + ccTensorBilinSymm (I := I) g₀ T b u w)
+    (hg₁' : ∀ (b : M) (u w : TangentSpace I b),
+      g₁'.inner b u w = g₀.inner b u w + ccTensorBilinSymm (I := I) g₀ T' b u w) :
+    ∃ R₁A : SmoothCcTensor g₀ 3 2, ∀ (x : M) (v : Fin 2 → TangentSpace I x),
+      ((∑ i : Fin (Module.finrank ℝ E),
+          (chartModelBasis E).repr
+            (inverseMetricSharpFib (I := I) g₁ x
+                (dualToCotangent (I := I)
+                  ((cotangentCov (LeviCivita (I := I) g₁)).toFun
+                    (fun b : M => cotangentToCLM (I := I)
+                      (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                        (⟨smoothExtensionTangent (I := I) x (v 0),
+                          smoothExtensionTangent_contMDiff (I := I) x (v 0)⟩)
+                        (⟨smoothExtensionTangent (I := I) x (v 1),
+                          smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x
+                      ((chartModelBasis E) i)))
+              - inverseMetricSharpFib (I := I) g₁ x
+                  (dualToCotangent (I := I)
+                    ((cotangentCov (LeviCivita (I := I) g₁')).toFun
+                      (fun b : M => cotangentToCLM (I := I)
+                        (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                          (⟨smoothExtensionTangent (I := I) x (v 0),
+                            smoothExtensionTangent_contMDiff (I := I) x (v 0)⟩)
+                          (⟨smoothExtensionTangent (I := I) x (v 1),
+                            smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x
+                        ((chartModelBasis E) i)))) i)
+        - (∑ i : Fin (Module.finrank ℝ E),
+          (chartModelBasis E).repr
+            (inverseMetricSharpFib (I := I) g₁ x
+                (dualToCotangent (I := I)
+                  ((cotangentCov (LeviCivita (I := I) g₁)).toFun
+                    (fun b : M => cotangentToCLM (I := I)
+                      (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                        (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
+                          smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩)
+                        (⟨smoothExtensionTangent (I := I) x (v 1),
+                          smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x (v 0)))
+              - inverseMetricSharpFib (I := I) g₁ x
+                  (dualToCotangent (I := I)
+                    ((cotangentCov (LeviCivita (I := I) g₁')).toFun
+                      (fun b : M => cotangentToCLM (I := I)
+                        (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                          (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
+                            smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩)
+                          (⟨smoothExtensionTangent (I := I) x (v 1),
+                            smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x (v 0)))) i)) =
+        unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 3 2 R₁A
+            (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v := by
+  sorry
+
+set_option linter.unusedSectionVars false in
+/-- **The order-`0` operator-difference arm `(O)` splits into its order-`0` cometric part `(B)` plus its
+order-`1` connection part `(A)` (sorry-free add-subtract-midpoint identity).**
+
+The order-`0` operator-difference arm `(O)` of `covDerivConnDiff_diff_endpoint_graded` —
+`♯_{g₁}∇^{g₁} K_{g₁'} − ♯_{g₁'}∇^{g₁'} K_{g₁'}`, traced over the X-slot config minus the Z-slot config —
+equals the sum of its cometric-difference part `(B)` (`♯_{g₁}∇^{g₁'} K_{g₁'} − ♯_{g₁'}∇^{g₁'} K_{g₁'}`,
+the order-`0` LHS of `operatorDiffArm_B_appCc_eq`) and its connection-difference part `(A)`
+(`♯_{g₁}∇^{g₁} K_{g₁'} − ♯_{g₁}∇^{g₁'} K_{g₁'}`, the order-`1` LHS of `operatorDiffArm_A_appCc_eq`).
+
+This is the pure add-subtract-midpoint identity `a − d = (a − c) + (c − d)` (midpoint
+`c = ♯_{g₁}∇^{g₁'} K_{g₁'}`) pushed through the `chartModelBasis.repr` linear functional and the finite
+trace sums.  It carries no posited content: the `(O)` arm has both an order-`0` and an order-`1`
+component (the old single order-`0` connector was false — when `(T − T')(x) = 0` but `∇₀(T − T')(x) ≠ 0`
+the order-`0` part vanishes while `(O)` does not, the order-`1` part `(A)` surviving). -/
+theorem operatorDiff_split
+    (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M) (v : Fin 2 → TangentSpace I x) :
       ((∑ i : Fin (Module.finrank ℝ E),
           (chartModelBasis E).repr
             (inverseMetricSharpFib (I := I) g₁ x
@@ -3994,10 +4130,98 @@ theorem operatorDiffArm_appCc_eq
                             smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩)
                           (⟨smoothExtensionTangent (I := I) x (v 1),
                             smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x (v 0)))) i)) =
-        unitModel (I := I) (M := M) g₀ 2
-          (appCc (I := I) (M := M) g₀ 2 2 R₀
-            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v := by
-  sorry
+      -- `(B)`: cometric-difference part (`♯_{g₁} − ♯_{g₁'}` on the common `g₁'`-covariant covector).
+      ((∑ i : Fin (Module.finrank ℝ E),
+          (chartModelBasis E).repr
+            (inverseMetricSharpFib (I := I) g₁ x
+                (dualToCotangent (I := I)
+                  ((cotangentCov (LeviCivita (I := I) g₁')).toFun
+                    (fun b : M => cotangentToCLM (I := I)
+                      (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                        (⟨smoothExtensionTangent (I := I) x (v 0),
+                          smoothExtensionTangent_contMDiff (I := I) x (v 0)⟩)
+                        (⟨smoothExtensionTangent (I := I) x (v 1),
+                          smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x
+                      ((chartModelBasis E) i)))
+              - inverseMetricSharpFib (I := I) g₁' x
+                  (dualToCotangent (I := I)
+                    ((cotangentCov (LeviCivita (I := I) g₁')).toFun
+                      (fun b : M => cotangentToCLM (I := I)
+                        (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                          (⟨smoothExtensionTangent (I := I) x (v 0),
+                            smoothExtensionTangent_contMDiff (I := I) x (v 0)⟩)
+                          (⟨smoothExtensionTangent (I := I) x (v 1),
+                            smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x
+                        ((chartModelBasis E) i)))) i)
+        - (∑ i : Fin (Module.finrank ℝ E),
+          (chartModelBasis E).repr
+            (inverseMetricSharpFib (I := I) g₁ x
+                (dualToCotangent (I := I)
+                  ((cotangentCov (LeviCivita (I := I) g₁')).toFun
+                    (fun b : M => cotangentToCLM (I := I)
+                      (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                        (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
+                          smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩)
+                        (⟨smoothExtensionTangent (I := I) x (v 1),
+                          smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x (v 0)))
+              - inverseMetricSharpFib (I := I) g₁' x
+                  (dualToCotangent (I := I)
+                    ((cotangentCov (LeviCivita (I := I) g₁')).toFun
+                      (fun b : M => cotangentToCLM (I := I)
+                        (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                          (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
+                            smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩)
+                          (⟨smoothExtensionTangent (I := I) x (v 1),
+                            smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x (v 0)))) i))
+      +
+      -- `(A)`: connection-difference part (`♯_{g₁}` on the `∇^{g₁} − ∇^{g₁'}` covector difference).
+      ((∑ i : Fin (Module.finrank ℝ E),
+          (chartModelBasis E).repr
+            (inverseMetricSharpFib (I := I) g₁ x
+                (dualToCotangent (I := I)
+                  ((cotangentCov (LeviCivita (I := I) g₁)).toFun
+                    (fun b : M => cotangentToCLM (I := I)
+                      (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                        (⟨smoothExtensionTangent (I := I) x (v 0),
+                          smoothExtensionTangent_contMDiff (I := I) x (v 0)⟩)
+                        (⟨smoothExtensionTangent (I := I) x (v 1),
+                          smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x
+                      ((chartModelBasis E) i)))
+              - inverseMetricSharpFib (I := I) g₁ x
+                  (dualToCotangent (I := I)
+                    ((cotangentCov (LeviCivita (I := I) g₁')).toFun
+                      (fun b : M => cotangentToCLM (I := I)
+                        (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                          (⟨smoothExtensionTangent (I := I) x (v 0),
+                            smoothExtensionTangent_contMDiff (I := I) x (v 0)⟩)
+                          (⟨smoothExtensionTangent (I := I) x (v 1),
+                            smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x
+                        ((chartModelBasis E) i)))) i)
+        - (∑ i : Fin (Module.finrank ℝ E),
+          (chartModelBasis E).repr
+            (inverseMetricSharpFib (I := I) g₁ x
+                (dualToCotangent (I := I)
+                  ((cotangentCov (LeviCivita (I := I) g₁)).toFun
+                    (fun b : M => cotangentToCLM (I := I)
+                      (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                        (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
+                          smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩)
+                        (⟨smoothExtensionTangent (I := I) x (v 1),
+                          smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x (v 0)))
+              - inverseMetricSharpFib (I := I) g₁ x
+                  (dualToCotangent (I := I)
+                    ((cotangentCov (LeviCivita (I := I) g₁')).toFun
+                      (fun b : M => cotangentToCLM (I := I)
+                        (koszulCovGradCovec (I := I) (M := M) g₀ g₁'
+                          (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
+                            smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩)
+                          (⟨smoothExtensionTangent (I := I) x (v 1),
+                            smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) b)) x (v 0)))) i)) := by
+  classical
+  simp only [← Finset.sum_sub_distrib, ← Finset.sum_add_distrib]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  simp only [map_sub, Finsupp.sub_apply]
+  ring
 
 set_option linter.unusedSectionVars false in
 /-- **The order-`1` cross/slot arm plus principal-remainder connector of the Ricci-arm eval-matching
