@@ -1013,6 +1013,503 @@ theorem covDerivConnDiff_tracedPrincipal_eq_appCc
   ricciArmPrincipalCoeff_appCc_eq_combinedTrace (I := I) (M := M) g₀ g₁
     (iteratedCovGrad (I := I) g₀ 0 2 2 S) x v
 
+/-! ## The second-order Koszul covariant-gradient bridge (the SP2-endpoint deep prerequisite) -/
+
+/-- The scalar `(0, 3)` evaluation field of an abstract `(0, 3)`-tensor section `V` on three smooth
+vector fields `A, B, C`: `b ↦ V(b)(A b, B b, C b)`. -/
+private def triEvalFn (V : Π b : M, Tensor0SSpace 3 I b)
+    (A B C : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) : M → ℝ :=
+  fun b => Tensor0SSpace.toModel (V b) (Fin.cons (A b) (Fin.cons (B b) ![C b]))
+
+set_option linter.unusedSectionVars false in
+/-- The partial evaluation `y ↦ curriedSection W y (Y y)` of a `(0, s + 1)`-tensor section `W`
+differentiable at `x` against a smooth vector field `Y` is a `(0, s)`-tensor section differentiable
+at `x`. -/
+private lemma triMDiffAt_curried
+    (s : ℕ) (W : Π x : M, Tensor0SSpace (s + 1) I x) {x : M}
+    (hW : TensorSectionMDiffAt (I := I) (s + 1) W x)
+    (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
+    TensorSectionMDiffAt (I := I) s
+      (fun y : M => Tensor0SNabla.curriedSection I M W y (Y y)) x := by
+  classical
+  unfold TensorSectionMDiffAt
+  have hCurried := mdifferentiableAt_curriedSection_of_section (I := I) (M := M) s W hW
+  have hY : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
+      (fun y => TotalSpace.mk' E (E := TangentSpace I) y (Y y)) x :=
+    Y.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
+  exact MDifferentiableAt.clm_bundle_apply (𝕜 := ℝ)
+    (F₁ := E) (F₂ := Tensor0SModel s ℝ E)
+    (E₁ := fun x : M => TangentSpace I x)
+    (E₂ := fun x : M => Tensor0SSpace s I x)
+    (IM := I) (IB := I)
+    (b := id) (ϕ := fun y : M => Tensor0SNabla.curriedSection I M W y)
+    (v := fun y : M => Y y) hCurried hY
+
+-- The abstract (0,3) Leibniz-defect: 3-slot peel.
+
+set_option linter.unusedSectionVars false in
+/-- **The abstract `(0, 3)`-tensor covariant-derivative Leibniz-defect (tuple form).** For an abstract
+`(0, 3)`-tensor section `V` differentiable at `x`, a direction `v`, and three smooth vector fields
+`A, B, C`, the model value of `∇³_v V` read on the cons-tuple `(A x, B x, C x)` decomposes by the
+covariant Leibniz product rule applied to the three slots, with `∇₀ = LeviCivita g₀`:
+```
+toModel(∇³_v V x)(A x, B x, C x)
+  = ∂_v (b ↦ V(b)(A b, B b, C b))
+    − V(x)(∇₀_v A, B x, C x) − V(x)(A x, ∇₀_v B, C x) − V(x)(A x, B x, ∇₀_v C).
+```
+The three-fold leading-slot peel `tensor0SCovariantDerivative_succ_consEval_peel`. -/
+private theorem tensor0SCovariantDerivative03_consEval_leibnizDefect
+    (g₀ : SmoothRiemannianMetric I M) (V : Π b : M, Tensor0SSpace 3 I b) {x : M}
+    (hV : TensorSectionMDiffAt (I := I) 3 V x)
+    (A B C : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (v : TangentSpace I x) :
+    Tensor0SSpace.toModel
+        ((Tensor0SNabla.tensor0SCovariantDerivative I M 3 (LeviCivita (I := I) g₀)).toFun V x v)
+        (Fin.cons (A x) (Fin.cons (B x) ![C x])) =
+      directionalDeriv (I := I) (triEvalFn (I := I) (M := M) V A B C) x v
+        - Tensor0SSpace.toModel (V x)
+            (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => A b) x v) (Fin.cons (B x) ![C x]))
+        - Tensor0SSpace.toModel (V x)
+            (Fin.cons (A x) (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => B b) x v) ![C x]))
+        - Tensor0SSpace.toModel (V x)
+            (Fin.cons (A x) (Fin.cons (B x) ![(LeviCivita (I := I) g₀).toFun (fun b => C b) x v])) := by
+  classical
+  set W₂ : Π b : M, Tensor0SSpace 2 I b :=
+    fun b => Tensor0SNabla.curriedSection I M V b (A b) with hW₂
+  have hW₂_mdiff : TensorSectionMDiffAt (I := I) 2 W₂ x :=
+    triMDiffAt_curried (I := I) (M := M) 2 V hV A
+  set W₁ : Π b : M, Tensor0SSpace 1 I b :=
+    fun b => Tensor0SNabla.curriedSection I M W₂ b (B b) with hW₁
+  have hW₁_mdiff : TensorSectionMDiffAt (I := I) 1 W₁ x :=
+    triMDiffAt_curried (I := I) (M := M) 1 W₂ hW₂_mdiff B
+  -- Peel slot A off the rank-3 derivative.
+  have hpeel1 := tensor0SCovariantDerivative_succ_consEval_peel
+    (I := I) (M := M) g₀ 2 V hV A v (Fin.cons (B x) ![C x])
+  -- Peel slot B off the rank-2 derivative of W₂.
+  have hpeel2 := tensor0SCovariantDerivative_succ_consEval_peel
+    (I := I) (M := M) g₀ 1 W₂ hW₂_mdiff B v ![C x]
+  -- Peel slot C off the rank-1 derivative of W₁.
+  have hpeel3 := tensor0SCovariantDerivative_succ_consEval_peel
+    (I := I) (M := M) g₀ 0 W₁ hW₁_mdiff C v (fun i => Fin.elim0 i)
+  -- The rank-0 base reads as the directional derivative of the scalar tri-evaluation.
+  have hbase : Tensor0SSpace.toModel
+      ((Tensor0SNabla.tensor0SCovariantDerivative I M 0 (LeviCivita (I := I) g₀)).toFun
+        (fun b : M => Tensor0SNabla.curriedSection I M W₁ b (C b)) x v)
+      (fun i => Fin.elim0 i) =
+      directionalDeriv (I := I) (triEvalFn (I := I) (M := M) V A B C) x v := by
+    rw [tensor0SCovariantDerivative_zero_toModel_apply (I := I) (M := M) g₀
+      (fun b : M => Tensor0SNabla.curriedSection I M W₁ b (C b)) x v]
+    have hscalar : Tensor0SNabla.scalarFn I M
+        (fun b : M => Tensor0SNabla.curriedSection I M W₁ b (C b)) =
+        triEvalFn (I := I) (M := M) V A B C := by
+      funext b
+      rw [scalarFn_eq_toModel_elim0 (I := I) (M := M)]
+      rw [Tensor0SNabla.curriedSection_apply (s := 0)
+            (T := W₁)]
+      rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+            (T := W₁ b) (v0 := C b) (vs := (fun i => Fin.elim0 i))]
+      change Tensor0SSpace.toModel (W₁ b) (Fin.cons (C b) (fun i => Fin.elim0 i)) = _
+      rw [hW₁]
+      change Tensor0SSpace.toModel (Tensor0SNabla.curriedSection I M W₂ b (B b))
+        (Fin.cons (C b) (fun i => Fin.elim0 i)) = _
+      rw [Tensor0SNabla.curriedSection_apply (s := 1) (T := W₂)]
+      rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+            (T := W₂ b) (v0 := B b) (vs := Fin.cons (C b) (fun i => Fin.elim0 i))]
+      rw [hW₂]
+      change Tensor0SSpace.toModel (Tensor0SNabla.curriedSection I M V b (A b))
+        (Fin.cons (B b) (Fin.cons (C b) (fun i => Fin.elim0 i))) = _
+      rw [Tensor0SNabla.curriedSection_apply (s := 2) (T := V)]
+      rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+            (T := V b) (v0 := A b) (vs := Fin.cons (B b) (Fin.cons (C b) (fun i => Fin.elim0 i)))]
+      rw [triEvalFn]
+      apply congrArg
+      funext k
+      fin_cases k <;> rfl
+    rw [hscalar]
+  -- Correction slot C: reads W₁ x on cons-tuple, uncurries through W₂ x then V x.
+  have hcorrC : Tensor0SSpace.toModel (W₁ x)
+        (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => C b) x v) (fun i => Fin.elim0 i)) =
+      Tensor0SSpace.toModel (V x)
+        (Fin.cons (A x) (Fin.cons (B x) ![(LeviCivita (I := I) g₀).toFun (fun b => C b) x v])) := by
+    rw [hW₁]
+    change Tensor0SSpace.toModel (Tensor0SNabla.curriedSection I M W₂ x (B x))
+      (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => C b) x v) (fun i => Fin.elim0 i)) = _
+    rw [Tensor0SNabla.curriedSection_apply (s := 1) (T := W₂)]
+    rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+      (T := W₂ x) (v0 := B x)
+      (vs := Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => C b) x v) (fun i => Fin.elim0 i))]
+    rw [hW₂]
+    change Tensor0SSpace.toModel (Tensor0SNabla.curriedSection I M V x (A x))
+      (Fin.cons (B x) (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => C b) x v)
+        (fun i => Fin.elim0 i))) = _
+    rw [Tensor0SNabla.curriedSection_apply (s := 2) (T := V)]
+    rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+      (T := V x) (v0 := A x)
+      (vs := Fin.cons (B x) (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => C b) x v)
+        (fun i => Fin.elim0 i)))]
+    apply congrArg
+    funext k
+    fin_cases k <;> rfl
+  -- Correction slot B: reads W₂ x on cons-tuple, uncurries through V x.
+  have hcorrB : Tensor0SSpace.toModel (W₂ x)
+        (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => B b) x v)
+          (Fin.cons (C x) (fun i => Fin.elim0 i))) =
+      Tensor0SSpace.toModel (V x)
+        (Fin.cons (A x) (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => B b) x v) ![C x])) := by
+    rw [hW₂]
+    change Tensor0SSpace.toModel (Tensor0SNabla.curriedSection I M V x (A x))
+      (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => B b) x v)
+        (Fin.cons (C x) (fun i => Fin.elim0 i))) = _
+    rw [Tensor0SNabla.curriedSection_apply (s := 2) (T := V)]
+    rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+      (T := V x) (v0 := A x)
+      (vs := Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => B b) x v)
+        (Fin.cons (C x) (fun i => Fin.elim0 i)))]
+    apply congrArg
+    funext k
+    fin_cases k <;> rfl
+  -- Assemble.
+  rw [hpeel1]
+  rw [show (fun y : M => Tensor0SNabla.curriedSection I M V y (A y)) = W₂ from rfl]
+  rw [hpeel2]
+  rw [show (fun y : M => Tensor0SNabla.curriedSection I M W₂ y (B y)) = W₁ from rfl]
+  rw [show (![C x] : Fin 1 → E) = Fin.cons (C x) (fun i => Fin.elim0 i) from by
+    funext k; refine Fin.cases rfl (fun j => j.elim0) k]
+  rw [hpeel3, hbase, hcorrC, hcorrB]
+  have hfin1 : ∀ (u : TangentSpace I x), (![u] : Fin 1 → TangentSpace I x) =
+      Fin.cons u (fun i => Fin.elim0 i) := by
+    intro u; funext k; refine Fin.cases rfl (fun j => j.elim0) k
+  rw [hfin1 ((LeviCivita (I := I) g₀).toFun (fun b => C b) x v),
+      hfin1 (C x)]
+  ring
+
+set_option linter.unusedSectionVars false in
+/-- The unit-evaluated `(0, 3)`-field of the FIRST covariant gradient `covGrad g₀ 0 2 S`, as an abstract
+`(0, 3)`-tensor section (`unitEvalSection` of `covGrad g₀ 0 2 S`). -/
+private def covGrad2UnitV (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) :
+    Π b : M, Tensor0SSpace 3 I b :=
+  unitEvalSection (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S)
+
+set_option linter.unusedSectionVars false in
+/-- `covGradEval g₀ S A B C` is the `triEvalFn` of the unit-evaluated first covariant gradient. -/
+private lemma covGradEval_eq_triEvalFn (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
+    (A B C : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
+    (fun b : M => covGradEval (I := I) (M := M) g₀ S A B C b) =
+      triEvalFn (I := I) (M := M) (covGrad2UnitV (I := I) (M := M) g₀ S) A B C := rfl
+
+set_option linter.unusedSectionVars false in
+/-- The unit-evaluated first covariant gradient is differentiable at every point. -/
+private lemma covGrad2UnitV_mdiff (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M) :
+    TensorSectionMDiffAt (I := I) 3 (covGrad2UnitV (I := I) (M := M) g₀ S) x := by
+  have h := contMDiff_unitEvalSection (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S)
+  exact (h x).mdifferentiableAt (by simp)
+
+set_option linter.unusedSectionVars false in
+/-- The abstract `(0, 3)` covariant derivative of the unit-evaluated first covariant gradient `V` is the
+unit-evaluation of the SECOND covariant gradient `iteratedCovGrad g₀ 0 2 2 S`, read on the cons-tuple
+`(v, m)`: `toModel(∇³_v V x)(m) = unitModel g₀ 4 (∇₀²S) x (v, m)`. -/
+private lemma covGrad2UnitV_nabla3_eq_iteratedCovGrad
+    (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
+    (x : M) (v : TangentSpace I x) (m : Fin 3 → TangentSpace I x) :
+    Tensor0SSpace.toModel
+        ((Tensor0SNabla.tensor0SCovariantDerivative I M 3 (LeviCivita (I := I) g₀)).toFun
+          (covGrad2UnitV (I := I) (M := M) g₀ S) x v) m =
+      unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x (Fin.cons v m) := by
+  classical
+  have hiter : iteratedCovGrad (I := I) g₀ 0 2 2 S =
+      covGrad (I := I) (M := M) g₀ 0 3 (covGrad (I := I) (M := M) g₀ 0 2 S) := by
+    rw [iteratedCovGrad_succ, iteratedCovGrad_succ, iteratedCovGrad_zero]
+  have hunit : unitTensor (I := I) (M := M) x = unitZeroSec (I := I) (M := M) x := rfl
+  rw [unitModel, hunit, hiter,
+    covGrad_apply_unit_eval_genVal (I := I) (M := M) g₀ 3
+      (covGrad (I := I) (M := M) g₀ 0 2 S) x (Fin.cons v m)]
+  have hvt : Matrix.vecTail (Fin.cons v m) = m := by
+    funext k; simp only [Matrix.vecTail, Function.comp]; rw [Fin.cons_succ]
+  have h0 : (Fin.cons v m : Fin 4 → TangentSpace I x) 0 = v := rfl
+  rw [h0, hvt, tensorCovDerivAt_def (I := I) (M := M) g₀ 0 3
+      (covGrad (I := I) (M := M) g₀ 0 2 S) x v,
+    covDeriv_unit_eval_eq_genVal (I := I) (M := M) g₀ 3
+      (covGrad (I := I) (M := M) g₀ 0 2 S).toSection x v]
+  rfl
+
+set_option linter.unusedSectionVars false in
+/-- **The directional-derivative Leibniz defect of the first covariant-gradient evaluation.** The
+directional derivative of `b ↦ covGradEval g₀ S A B C b` along `v` is the unit-evaluation of the SECOND
+covariant gradient `iteratedCovGrad g₀ 0 2 2 S` on `(v, A x, B x, C x)`, plus the three order-1 frame
+corrections (the first covariant gradient applied to the frame derivatives `∇₀_v A`, `∇₀_v B`, `∇₀_v C`):
+```
+∂_v (covGradEval g₀ S A B C)
+  = unitModel g₀ 4 (∇₀²S) x (v, A x, B x, C x)
+    + (covGrad g₀ 0 2 S)(x)(unit)(∇₀_v A, B x, C x)
+    + (covGrad g₀ 0 2 S)(x)(unit)(A x, ∇₀_v B, C x)
+    + (covGrad g₀ 0 2 S)(x)(unit)(A x, B x, ∇₀_v C).
+```
+This is `tensor0SCovariantDerivative03_consEval_leibnizDefect` for the unit-evaluated first covariant
+gradient `V`, with the principal `∇³_v V` read off as the second covariant gradient
+(`covGrad2UnitV_nabla3_eq_iteratedCovGrad`). -/
+private lemma covGradEval_directionalDeriv
+    (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
+    (A B C : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x) :
+    directionalDeriv (I := I) (fun b : M => covGradEval (I := I) (M := M) g₀ S A B C b) x v =
+      unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+          (Fin.cons v (Fin.cons (A x) (Fin.cons (B x) ![C x])))
+        + unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+            ![(LeviCivita (I := I) g₀).toFun (fun b => A b) x v, B x, C x]
+        + unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+            ![A x, (LeviCivita (I := I) g₀).toFun (fun b => B b) x v, C x]
+        + unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+            ![A x, B x, (LeviCivita (I := I) g₀).toFun (fun b => C b) x v] := by
+  classical
+  have hpeel := tensor0SCovariantDerivative03_consEval_leibnizDefect (I := I) (M := M) g₀
+    (covGrad2UnitV (I := I) (M := M) g₀ S) (covGrad2UnitV_mdiff (I := I) (M := M) g₀ S x) A B C v
+  have hprin := covGrad2UnitV_nabla3_eq_iteratedCovGrad (I := I) (M := M) g₀ S x v
+    (Fin.cons (A x) (Fin.cons (B x) ![C x]))
+  rw [covGradEval_eq_triEvalFn (I := I) (M := M) g₀ S A B C]
+  rw [show directionalDeriv (I := I) (triEvalFn (I := I) (M := M)
+        (covGrad2UnitV (I := I) (M := M) g₀ S) A B C) x v =
+      Tensor0SSpace.toModel
+        ((Tensor0SNabla.tensor0SCovariantDerivative I M 3 (LeviCivita (I := I) g₀)).toFun
+          (covGrad2UnitV (I := I) (M := M) g₀ S) x v)
+        (Fin.cons (A x) (Fin.cons (B x) ![C x]))
+        + Tensor0SSpace.toModel (covGrad2UnitV (I := I) (M := M) g₀ S x)
+            (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => A b) x v) (Fin.cons (B x) ![C x]))
+        + Tensor0SSpace.toModel (covGrad2UnitV (I := I) (M := M) g₀ S x)
+            (Fin.cons (A x) (Fin.cons ((LeviCivita (I := I) g₀).toFun (fun b => B b) x v) ![C x]))
+        + Tensor0SSpace.toModel (covGrad2UnitV (I := I) (M := M) g₀ S x)
+            (Fin.cons (A x) (Fin.cons (B x) ![(LeviCivita (I := I) g₀).toFun (fun b => C b) x v]))
+      from by rw [hpeel]; ring]
+  rw [hprin]
+  rfl
+
+set_option linter.unusedSectionVars false in
+/-- The first covariant-gradient evaluation `b ↦ covGradEval g₀ S A B C b` is differentiable at `x`:
+the unit-evaluated first covariant gradient is a smooth `(0, 3)`-section, curried against the three
+smooth fields `A, B, C`, whose scalar evaluation is `covGradEval`. -/
+private lemma covGradEval_mdifferentiableAt
+    (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
+    (A B C : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
+    MDifferentiableAt I 𝓘(ℝ, ℝ)
+      (fun b : M => covGradEval (I := I) (M := M) g₀ S A B C b) x := by
+  classical
+  have h3 := covGrad2UnitV_mdiff (I := I) (M := M) g₀ S x
+  have h2 := triMDiffAt_curried (I := I) (M := M) 2 (covGrad2UnitV (I := I) (M := M) g₀ S) h3 A
+  have h1 := triMDiffAt_curried (I := I) (M := M) 1
+    (fun y : M => Tensor0SNabla.curriedSection I M (covGrad2UnitV (I := I) (M := M) g₀ S) y (A y))
+    h2 B
+  have h0 := triMDiffAt_curried (I := I) (M := M) 0
+    (fun y : M => Tensor0SNabla.curriedSection I M
+      (fun z : M => Tensor0SNabla.curriedSection I M (covGrad2UnitV (I := I) (M := M) g₀ S) z (A z))
+      y (B y)) h1 C
+  have hscalar := (Tensor0SNabla.mdifferentiableAt_scalarFn_iff_section (I := I) (M := M)
+    (fun y : M => Tensor0SNabla.curriedSection I M
+      (fun z : M => Tensor0SNabla.curriedSection I M
+        (fun w : M => Tensor0SNabla.curriedSection I M
+          (covGrad2UnitV (I := I) (M := M) g₀ S) w (A w)) z (B z)) y (C y)) (x := x)).mpr h0
+  have hfun : Tensor0SNabla.scalarFn I M
+      (fun y : M => Tensor0SNabla.curriedSection I M
+        (fun z : M => Tensor0SNabla.curriedSection I M
+          (fun w : M => Tensor0SNabla.curriedSection I M
+            (covGrad2UnitV (I := I) (M := M) g₀ S) w (A w)) z (B z)) y (C y)) =
+      (fun b : M => covGradEval (I := I) (M := M) g₀ S A B C b) := by
+    funext b
+    set V₃ : Π y : M, Tensor0SSpace 3 I y := covGrad2UnitV (I := I) (M := M) g₀ S with hV₃
+    set W₂ : Π y : M, Tensor0SSpace 2 I y :=
+      fun z : M => Tensor0SNabla.curriedSection I M V₃ z (A z) with hW₂
+    set W₁ : Π y : M, Tensor0SSpace 1 I y :=
+      fun z : M => Tensor0SNabla.curriedSection I M W₂ z (B z) with hW₁
+    rw [scalarFn_eq_toModel_elim0 (I := I) (M := M)]
+    rw [Tensor0SNabla.curriedSection_apply (s := 0) (T := W₁)]
+    rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+      (T := W₁ b) (v0 := C b) (vs := (fun i => Fin.elim0 i))]
+    rw [hW₁]
+    change Tensor0SSpace.toModel (Tensor0SNabla.curriedSection I M W₂ b (B b))
+      (Fin.cons (C b) (fun i => Fin.elim0 i)) = _
+    rw [Tensor0SNabla.curriedSection_apply (s := 1) (T := W₂)]
+    rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+      (T := W₂ b) (v0 := B b) (vs := Fin.cons (C b) (fun i => Fin.elim0 i))]
+    rw [hW₂]
+    change Tensor0SSpace.toModel (Tensor0SNabla.curriedSection I M V₃ b (A b))
+      (Fin.cons (B b) (Fin.cons (C b) (fun i => Fin.elim0 i))) = _
+    rw [Tensor0SNabla.curriedSection_apply (s := 2) (T := V₃)]
+    rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
+      (T := V₃ b) (v0 := A b) (vs := Fin.cons (B b) (Fin.cons (C b) (fun i => Fin.elim0 i)))]
+    rw [hV₃, covGradEval, covGrad2UnitV, unitEvalSection]
+    apply congrArg
+    funext k
+    fin_cases k <;> rfl
+  rw [hfun] at hscalar
+  exact hscalar
+
+set_option linter.unusedSectionVars false in
+/-- **The second-order Koszul covariant-gradient bridge (the SP2-endpoint deep prerequisite).**
+
+The `g₀`-cotangent covariant derivative of the half-Koszul covector field
+`b ↦ cotangentToCLM (koszulCovGradCovec g₀ g₁ Z Y b)`, taken in direction `X` and read (via the
+`g₁`-flat round trip `cotangentToDual ∘ dualToCotangent`) on a test vector `ζ`, is the half-Koszul
+combination of the SECOND covariant gradient `iteratedCovGrad g₀ 0 2 2 S` (the order-2 PRINCIPAL the
+Ricci–DeTurck `C₂` linearization expands) PLUS the order-1 FRAME remainder built from the FIRST
+covariant gradient `covGrad g₀ 0 2 S` applied to the `∇₀`-frame derivatives `∇₀_X Z`, `∇₀_X Y`:
+```
+cotangentToDual (∇^{g₀}_K (cotangentToCLM K_S))(X)(ζ)
+  = ½ ( D(X, Z, Y, ζ) + D(X, Y, Z, ζ) − D(X, ζ, Z, Y) )                 -- order-2 PRINCIPAL, D = ∇₀²S
+    + ½ ( C(∇₀_X Z, Y, ζ) + C(Z, ∇₀_X Y, ζ)
+        + C(∇₀_X Y, Z, ζ) + C(Y, ∇₀_X Z, ζ)
+        − C(ζ, ∇₀_X Z, Y) − C(ζ, Z, ∇₀_X Y) ),                          -- order-1 FRAME remainder, C = ∇₀S
+```
+where `D = unitModel g₀ 4 (∇₀²S)`, `C = unitModel g₀ 3 (∇₀S)`, and `∇₀_X Z = (LeviCivita g₀) Z x (X x)`.
+
+The frame remainder does NOT vanish (a `dim`-`3`/`4` random numeric check confirms the six terms do not
+cancel, since the first covariant gradient is not symmetric in its three slots); it is the order-1
+lower-order correction the connector absorbs.  The `ζ`-slot frame corrections of the three Koszul terms
+cancel exactly against the `−θ(∇₀_X ζ)` term of the cotangent Leibniz rule (the cotangent covariant
+derivative freezes the test vector), leaving only the `Z`/`Y`-slot frame corrections above.
+
+The route is the second covariant Leibniz peel: `cotangentCov (LeviCivita g₀)` reduces, via
+`cotangentCovAt_apply_of_diff`, to the Leibniz defect `cotangentScalar` (`∂_X(θ(ζ)) − θ(∇₀_X ζ)`);
+under the metric-difference hypothesis `hbil` each `θ(ζ)` pairing is the half-Koszul combination of the
+first covariant-gradient evaluation `covGradEval` (`koszulCovGradCovec_dual_apply_covGrad`), whose
+directional derivative is the second covariant gradient plus its three frame corrections
+(`covGradEval_directionalDeriv`). -/
+theorem koszulCovGradCovec_covDeriv_eq_secondCovGrad
+    (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
+    (hbil : ∀ (b : M) (u w : TangentSpace I b),
+      ccTensorBilin (I := I) g₀ S b u w = g₁.inner b u w - g₀.inner b u w)
+    (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (ζ : TangentSpace I x) :
+    cotangentToDual (I := I)
+        (dualToCotangent (I := I)
+          ((cotangentCov (LeviCivita (I := I) g₀)).toFun
+            (fun b => cotangentToCLM (I := I)
+              (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x (X x))) ζ =
+      (1 / 2 : ℝ) *
+          (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+              ![X x, Z x, Y x, ζ]
+            + unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+                ![X x, Y x, Z x, ζ]
+            - unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+                ![X x, ζ, Z x, Y x])
+        + (1 / 2 : ℝ) *
+          (unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+              ![(LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x), Y x, ζ]
+            + unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+                ![Z x, (LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x), ζ]
+            + unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+                ![(LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x), Z x, ζ]
+            + unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+                ![Y x, (LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x), ζ]
+            - unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+                ![ζ, (LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x), Y x]
+            - unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+                ![ζ, Z x, (LeviCivita (I := I) g₀).toFun (fun b => Y b) x (X x)]) := by
+  classical
+  rw [cotangentToDual_apply, dualToCotangent_apply]
+  -- The covector field is cotangent-differentiable at `x`.
+  have hθ := koszulCovGradCovecCLM_mdiffAtCotangent (I := I) (M := M) g₀ g₁ Z Y x
+  -- Smooth extensions of `X x` and `ζ`.
+  let ζf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    ⟨smoothExtensionTangent (I := I) x ζ, smoothExtensionTangent_contMDiff (I := I) x ζ⟩
+  let Xf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    ⟨smoothExtensionTangent (I := I) x (X x), smoothExtensionTangent_contMDiff (I := I) x (X x)⟩
+  have hζfx : ζf x = ζ := smoothExtensionTangent_eq (I := I) x ζ
+  have hXfx : Xf x = X x := smoothExtensionTangent_eq (I := I) x (X x)
+  have hXfmd := smoothExtensionTangent_mdiff (I := I) x (X x) x
+  have hζfmd := smoothExtensionTangent_mdiff (I := I) x ζ x
+  -- Reduce the cotangent covariant derivative to the Leibniz defect `cotangentScalar`.
+  have hcov : ((cotangentCov (LeviCivita (I := I) g₀)).toFun
+        (fun b => cotangentToCLM (I := I)
+          (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x (X x)) ζ =
+      cotangentScalar ((LeviCivita (I := I) g₀).toFun)
+        (fun b => cotangentToCLM (I := I)
+          (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x (fun b => Xf b) (fun b => ζf b) := by
+    rw [cotangentCov_toFun, cotangentCovFun_apply, ← hXfx, ← hζfx]
+    exact cotangentCovAt_apply_of_diff (LeviCivita (I := I) g₀) hθ hXfmd hζfmd
+  rw [ContinuousLinearMap.coe_coe, hcov, cotangentScalar_def]
+  -- The pairing `b ↦ θ_b(ζf_b)` is the half-Koszul combination of the first covariant gradient.
+  have hpairfun : (fun b : M => (cotangentToCLM (I := I)
+        (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) (ζf b)) =
+      (fun b : M => (1 / 2 : ℝ) *
+        (covGradEval (I := I) (M := M) g₀ S Z Y ζf b
+          + covGradEval (I := I) (M := M) g₀ S Y Z ζf b
+          - covGradEval (I := I) (M := M) g₀ S ζf Z Y b)) := by
+    funext b
+    have h := koszulCovGradCovec_dual_apply_covGrad (I := I) (M := M) g₀ g₁ S hbil Z Y ζf b
+    rw [show (cotangentToCLM (I := I) (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) (ζf b) =
+        cotangentToDual (I := I) (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b) (ζf b) from rfl]
+    rw [h]
+  -- Differentiate the half-Koszul pairing: linearity + the three `covGradEval` directional derivatives.
+  have hext : extDerivFun (I := I)
+        (fun b : M => (cotangentToCLM (I := I)
+          (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) (ζf b)) x (Xf x) =
+      (1 / 2 : ℝ) *
+        (directionalDeriv (I := I) (fun b : M => covGradEval (I := I) (M := M) g₀ S Z Y ζf b) x (Xf x)
+          + directionalDeriv (I := I) (fun b : M => covGradEval (I := I) (M := M) g₀ S Y Z ζf b) x (Xf x)
+          - directionalDeriv (I := I) (fun b : M => covGradEval (I := I) (M := M) g₀ S ζf Z Y b) x (Xf x)) := by
+    have hf := covGradEval_mdifferentiableAt (I := I) (M := M) g₀ S Z Y ζf x
+    have hg := covGradEval_mdifferentiableAt (I := I) (M := M) g₀ S Y Z ζf x
+    have hh := covGradEval_mdifferentiableAt (I := I) (M := M) g₀ S ζf Z Y x
+    -- The pairing function has the half-Koszul `HasMFDerivAt` derivative at `x`.
+    have hmf0 := (((hf.hasMFDerivAt.add hg.hasMFDerivAt).sub hh.hasMFDerivAt).const_smul
+      (1 / 2 : ℝ))
+    have heq : (fun b : M => (cotangentToCLM (I := I)
+          (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) (ζf b)) =ᶠ[nhds x]
+        ((1 / 2 : ℝ) • (fun b : M =>
+          covGradEval (I := I) (M := M) g₀ S Z Y ζf b
+            + covGradEval (I := I) (M := M) g₀ S Y Z ζf b
+            - covGradEval (I := I) (M := M) g₀ S ζf Z Y b)) := by
+      filter_upwards [Filter.univ_mem] with b _
+      rw [Pi.smul_apply, smul_eq_mul]
+      exact congrFun hpairfun b
+    have hmf := hmf0.congr_of_eventuallyEq heq
+    change mfderiv I 𝓘(ℝ, ℝ)
+        (fun b : M => (cotangentToCLM (I := I)
+          (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) (ζf b)) x (Xf x) = _
+    rw [hmf.mfderiv]
+    rfl
+  rw [hext, hXfx]
+  -- The `θ(∇₀_X ζf)` term: the half-Koszul evaluation on the frame derivative `∇₀_X ζf`.
+  have hθext : (cotangentToCLM (I := I) (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y x))
+        ((LeviCivita (I := I) g₀).toFun (fun b => ζf b) x (X x)) =
+      (1 / 2 : ℝ) *
+        (unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+            ![Z x, Y x, (LeviCivita (I := I) g₀).toFun (fun b => ζf b) x (X x)]
+          + unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+              ![Y x, Z x, (LeviCivita (I := I) g₀).toFun (fun b => ζf b) x (X x)]
+          - unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+              ![(LeviCivita (I := I) g₀).toFun (fun b => ζf b) x (X x), Z x, Y x]) := by
+    set w : TangentSpace I x := (LeviCivita (I := I) g₀).toFun (fun b => ζf b) x (X x) with hw
+    -- Extend `w` to a smooth field; the Koszul covector evaluation on `w` reads via `_dual_apply_covGrad`.
+    let wf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+      ⟨smoothExtensionTangent (I := I) x w, smoothExtensionTangent_contMDiff (I := I) x w⟩
+    have hwfx : wf x = w := smoothExtensionTangent_eq (I := I) x w
+    have h := koszulCovGradCovec_dual_apply_covGrad (I := I) (M := M) g₀ g₁ S hbil Z Y wf x
+    rw [show (cotangentToCLM (I := I) (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y x)) w =
+        cotangentToDual (I := I) (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y x) (wf x) from by
+      rw [hwfx]; rfl]
+    rw [h]
+    -- Each `covGradEval … wf … x` reads as `unitModel g₀ 3 (covGrad g₀ 0 2 S) x` on the vector `w`.
+    have hcg : ∀ (A B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
+        covGradEval (I := I) (M := M) g₀ S A B wf x =
+          unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x ![A x, B x, w] := by
+      intro A B
+      rw [covGradEval, unitModel, hwfx]; rfl
+    have hcg2 : covGradEval (I := I) (M := M) g₀ S wf Z Y x =
+        unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x ![w, Z x, Y x] := by
+      rw [covGradEval, unitModel, hwfx]; rfl
+    rw [hcg Z Y, hcg Y Z, hcg2]
+  rw [hθext]
+  -- Expand the three covGradEval directional derivatives (principal + frame).
+  rw [covGradEval_directionalDeriv (I := I) (M := M) g₀ S Z Y ζf x (X x),
+      covGradEval_directionalDeriv (I := I) (M := M) g₀ S Y Z ζf x (X x),
+      covGradEval_directionalDeriv (I := I) (M := M) g₀ S ζf Z Y x (X x)]
+  rw [hζfx]
+  -- Normalize the principal cons-tuples to matrix notation, then the ζ-slot frame corrections cancel.
+  have ht1 : (Fin.cons (X x) (Fin.cons (Z x) (Fin.cons (Y x) ![ζ])) : Fin 4 → TangentSpace I x) =
+      ![X x, Z x, Y x, ζ] := by funext k; fin_cases k <;> rfl
+  have ht2 : (Fin.cons (X x) (Fin.cons (Y x) (Fin.cons (Z x) ![ζ])) : Fin 4 → TangentSpace I x) =
+      ![X x, Y x, Z x, ζ] := by funext k; fin_cases k <;> rfl
+  have ht3 : (Fin.cons (X x) (Fin.cons ζ (Fin.cons (Z x) ![Y x])) : Fin 4 → TangentSpace I x) =
+      ![X x, ζ, Z x, Y x] := by funext k; fin_cases k <;> rfl
+  rw [ht1, ht2, ht3]
+  ring
+
 end TensorSpectral
 end Parabolic
 end Analysis
