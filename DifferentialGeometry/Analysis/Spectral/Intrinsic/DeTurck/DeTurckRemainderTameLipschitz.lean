@@ -14,7 +14,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.G
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckMetricArmCoeffField
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckCurvatureArmCoeffField
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.AppCcDropIteratedGrid
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckLichnerowiczCore
 
 /-!
 # The two-arm covariant-`L²` ball-Lipschitz bound on the DeTurck–Ricci remainder difference
