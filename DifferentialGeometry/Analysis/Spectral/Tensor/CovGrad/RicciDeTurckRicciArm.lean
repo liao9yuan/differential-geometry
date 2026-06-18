@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSection
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnDiffPalatini
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValue
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckMetricArmCoeffField
 
 /-!
 # The Ricci-tensor difference of two realized metrics: the Palatini telescope and its `appCc` grading
@@ -223,6 +224,105 @@ private lemma appCc_smul_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
 /-! ## The pointwise Lichnerowicz `appCc` form and the path-integral coefficient construction
 (the two deep mean-value inputs, posited and recursed into downstream) -/
 
+/-- **The order-`0` (curvature/inverse-Gram) coefficient field of the linearized Ricci operator along
+the realized path.**  For the realized path metric `g_s = realizedFam g₀ T T' s`, this is the `(2, 2)`
+inverse-Gram slot-insertion field `gInvDiffSlotCoeff g₀ g_s` of the order-`0` arm (the curvature/
+inverse-Gram-difference multiplier).  It is the per-`s` coefficient `R₀fib(s)` the linearized-Ricci
+two-term Lichnerowicz form contracts against `W₀ = T − T'`. -/
+noncomputable def ricciArmOrder0Coeff (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) : SmoothCcTensor g₀ 2 2 :=
+  gInvDiffSlotCoeff (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
+
+/-- **The order-`2` (rough-Laplacian principal) coefficient field of the linearized Ricci operator along
+the realized path.**  For the realized path metric `g_s = realizedFam g₀ T T' s`, this is the combined
+three-trace `(4, 2)` principal field `ricciArmPrincipalCoeff g₀ g_s` of the order-`2` arm (the rough
+Laplacian / corrected principal symbol).  It is the per-`s` coefficient `R₂fib(s)` the linearized-Ricci
+two-term Lichnerowicz form contracts against `W₂ = ∇₀²(T − T')`. -/
+noncomputable def ricciArmOrder2Coeff (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) : SmoothCcTensor g₀ 4 2 :=
+  ricciArmPrincipalCoeff (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
+
+/-- **The pointwise chart-derivative → intrinsic two-term `appCc` identity of the linearized Ricci
+operator (the deep covariant bridge).**
+
+For the realized metric path `g_s = realizedFam g₀ T T' s` and every interior parameter `s ∈ (0,1)`, the
+`s`-derivative of the realized chart-Ricci sum `deriv (realizedRicciChartSum) s` (which is the chart form
+of the linearized Ricci value `linearizedRicciAt g_s`, `linearizedRicciAt_eq_deriv_chartSum_on_Ioo`)
+equals the intrinsic two-term Lichnerowicz `unitModel`/`appCc` read-off of the order-`0` coefficient
+`ricciArmOrder0Coeff s` acting on `W₀ = T − T'` plus the order-`2` coefficient `ricciArmOrder2Coeff s`
+acting on `W₂ = ∇₀²(T − T')`.
+
+This is the irreducible deep mean-value/covariant content of the Ricci-arm linearization: the chart
+principal-symbol closed form `ricciSymbolComp_eq_closedForm` (the four classical `∂²h` terms reorganising
+into the rough Laplacian `−½|ξ|²h` plus the divergence/trace-gradient gauge terms folding into the
+order-`2` principal symbol — NO genuine order-`1` arm) composed with the chart-trace → intrinsic `appCc`
+transfer of each piece (the Palatini-trace ↔ `appCc`/`unitModel` bridge
+`ricciArmPrincipalCoeff_appCc_eq_combinedTrace`, `palatini_tracedPrincipal_eq_combinedTrace`, and the
+`∇^{g_s} ↔ ∇₀` conversion).  These covariant bridges are not yet on disk; the identity is *posited* here
+as the deep mean-value input, to be discharged by recursing into them.  It genuinely constrains the
+linearized-Ricci value to be the two-term read-off pointwise, so it is non-vacuous: the zero coefficients
+fail it where the linearized Ricci is nonzero. -/
+theorem deriv_realizedRicciChartSum_eq_appCc_pointwise
+    (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {s : ℝ} (hs : s ∈ Set.Ioo (0 : ℝ) 1) (x : M) (v : Fin 2 → TangentSpace I x) :
+    deriv (realizedRicciChartSum (I := I) g₀ T T' hδ hδ' x (v 0) (v 1)) s =
+      unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 2 2
+            (ricciArmOrder0Coeff (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+          + appCc (I := I) (M := M) g₀ 4 2
+              (ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ' s)
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
+  sorry
+
+/-- **Continuity in `s` of the per-arm `unitModel`/`appCc` read-offs of the linearized-Ricci coefficient
+families (the deep mean-value continuity input).**
+
+For the realized metric path `g_s = realizedFam g₀ T T' s`, each per-arm scalar read-off
+`s ↦ unitModel g₀ 2 (appCc (Rₘfib s) Wₘ) x v` of the order-`0` coefficient `ricciArmOrder0Coeff s` (on
+`W₀ = T − T'`) and the order-`2` coefficient `ricciArmOrder2Coeff s` (on `W₂ = ∇₀²(T − T')`) is
+continuous on the closed interval `[0, 1]`.
+
+This is the analytic half of the deep mean-value input: the chart Gram of `g_s` is a convex combination
+of the two endpoint Grams (`realizedFam_chartGramOnE`), hence smooth — indeed real-analytic — in `s`, so
+its inverse-Gram, Christoffel, curvature and cometric jets (which build the two coefficient fibre
+operators `gInvDiffSlotCoeff` and `ricciArmPrincipalCoeff`) are continuous in `s` on the small set
+`{s | g_s is g₀-fibre small}`, which contains `[0, 1]` (`Icc_subset_realizedSmallSet`); composing with the
+fixed continuous-linear read-off `appCc · W ↦ unitModel · x v` gives the claim.  This `s`-continuity of
+the coefficient jets is not yet on disk; it is *posited* here, to be discharged by recursing into the
+joint `(s, x)`-smoothness tower of the realized family.  It genuinely constrains the read-off to be
+continuous, so it is non-vacuous. -/
+theorem ricciArmCoeff_appCc_read_continuousOn
+    (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (v : Fin 2 → TangentSpace I x) :
+    ContinuousOn
+        (fun s => unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 2 2
+            (ricciArmOrder0Coeff (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v)
+        (Set.Icc (0 : ℝ) 1) ∧
+      ContinuousOn
+        (fun s => unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 4 2
+            (ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v)
+        (Set.Icc (0 : ℝ) 1) :=
+  sorry
+
 /-- **The pointwise-in-`s` Lichnerowicz `appCc` coefficient families of the linearized Ricci
 operator (with `s`-continuous read-offs).**
 
@@ -272,8 +372,21 @@ theorem exists_linearizedRicci_pointwise_appCc_families
         (fun s => unitModel (I := I) (M := M) g₀ 2
           (appCc (I := I) (M := M) g₀ 4 2 (R₂fib s)
             (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v)
-        (Set.Icc (0 : ℝ) 1)) :=
-  sorry
+        (Set.Icc (0 : ℝ) 1)) := by
+  refine ⟨ricciArmOrder0Coeff (I := I) g₀ T T' hδ hδ',
+    ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ', ?_, ?_, ?_⟩
+  · -- The pointwise identity on `Ioo 0 1`: rewrite the linearized Ricci to the chart-derivative
+    -- (`linearizedRicciAt_eq_deriv_chartSum_on_Ioo`), then apply the posited covariant bridge.
+    intro s hs x v
+    rw [linearizedRicciAt_eq_deriv_chartSum_on_Ioo (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x
+      (v 0) (v 1) hs]
+    exact deriv_realizedRicciChartSum_eq_appCc_pointwise (I := I) g₀ T T' hδ hδ' hs x v
+  · -- The order-`0` read-off continuity (first conjunct of the posited continuity bridge).
+    intro x v
+    exact (ricciArmCoeff_appCc_read_continuousOn (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x v).1
+  · -- The order-`2` read-off continuity (second conjunct of the posited continuity bridge).
+    intro x v
+    exact (ricciArmCoeff_appCc_read_continuousOn (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x v).2
 
 /-- **The pointwise-in-`s` Lichnerowicz `appCc` form of the linearized Ricci operator.**
 
