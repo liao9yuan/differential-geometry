@@ -4268,45 +4268,62 @@ private theorem deTurckRHSArmDiff_order0_pointwise_domination_ballUniform
 
 
 /-- **(POSITED deep bedrock — the intrinsic three-term mean-value SECTION IDENTITY of the
-Ricci–DeTurck RHS-arm difference, on the EXPLICIT endpoint-dependent Lichnerowicz coefficient fields.)**
+Ricci–DeTurck RHS-arm difference, on EXISTENTIAL endpoint-dependent coefficient fields with the explicit
+jet bound.)**
 
-For `g₀`-fibre-small smooth perturbations `T, T'` with realize-tie endpoint `g₁ := realize(g₀ + T)`, the
-section difference of the nonlinear Ricci–DeTurck right-hand-side arm decomposes as the three-term
-covariant `appCc` mean-value linearization on the explicit endpoint-dependent coefficient fields
-`lichCoeff0/1/2 g₀ g₁` (the order-`0` inverse-Gram value symbol, the order-`1` Christoffel-variation
-symbol, and the order-`2` inverse-Gram PRINCIPAL symbol of the path `dF`):
+For `g₀`-fibre-small smooth perturbations `T, T'` with realize-tie endpoint `g₁ := realize(g₀ + T)`,
+there EXIST three coefficient operator fields `C₀ : (2, 2)`, `C₁ : (3, 2)`, `C₂ : (4, 2)` — the genuine
+DeTurck–Ricci linearization symbols at the endpoint `g₁` (carrying the `−2·Ric + 𝓛`-scaling of
+`deTurckRicciRHS`: the order-`0` inverse-Gram value / curvature symbol, the order-`1` Christoffel-variation
+symbol, the order-`2` inverse-Gram PRINCIPAL symbol of the mean-value path `dF`) — such that
 ```
 deTurckRHSArmG0 g₀ g_bg T − deTurckRHSArmG0 g₀ g_bg T'
-  = appCc C₀ (T − T') + appCc C₁ (∇(T − T')) + appCc C₂ (∇²(T − T')).
+  = appCc C₀ (T − T') + appCc C₁ (∇(T − T')) + appCc C₂ (∇²(T − T')),
 ```
+and each `Cₘ`'s valence-dropping engine constant `dropKappa Cₘ` is dominated, per `(p, w)`, by the
+explicit definable jet bound `coeffJetBound g₀ g₁` of `g₁`'s covariant jets.
+
 This is the deep second-covariant-derivative mean-value identity (the intrinsic Palatini
 `δRic = ∇·(δΓ) − ∇(tr δΓ)` with `δΓ = connDiff`, telescoped through `g₀` along the realize-tie
 `g₁ − g₀ = ccTensorBilinSymm T`, with the inverse-Gram Neumann linearization in the principal order-`2`
-slot), read off the bedrock graded decomposition `covDerivConnDiff_diff_endpoint_graded`.  Expressed
-entirely in `appCc` / `iteratedCovGrad` — **never** a `chartGramOnE` / `chartInvGramOnE` /
-`HasChartJetLip` chart-jet chain.  Consumers transitively depend on its `sorryAx`.
+slot), read off the bedrock graded decomposition `covDerivConnDiff_diff_endpoint_graded`.  The
+coefficients are EXISTENTIAL — they ARE the actual linearization output, NOT fixed `g₀`-built fields — so
+the statement is TRUE (a fixed un-scaled `g₀`-only order-`2` field cannot reproduce the
+`−2·Ric + 𝓛`-scaled `g₁`-dependent principal symbol); their `dropKappa` is bounded by `coeffJetBound`,
+which is a definable functional of `g₁`'s jets.  Expressed entirely in `appCc` / `iteratedCovGrad` /
+`dropKappa` / `coeffJetBound` — **never** a `chartGramOnE` / `chartInvGramOnE` / `HasChartJetLip`
+chart-jet chain.  Consumers transitively depend on its `sorryAx`.
 
 **Non-vacuity.**  The realization is `ℝ`-linear in `T − T'` and its jets, so it vanishes as `T − T' → 0`
-(the Nemytskii Lipschitz character is preserved); the explicit `lichCoeffₘ g₀ g₁` are genuine
-non-zero endpoint-dependent operators (the cometric raise / connection difference of `g₁`). -/
-private theorem lichnerowicz_section_identity
+(the Nemytskii Lipschitz character is preserved); the existential `Cₘ` are the genuine non-zero
+endpoint-dependent operators (the cometric raise / connection difference / curvature of `g₁`), and a
+degenerate `C₀ = C₁ = C₂ = 0` is rejected by a nonvanishing `∇^q N` for a genuinely second-order,
+non-flat RHS difference. -/
+private theorem lichnerowicz_linearization_with_jetbound
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
     (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
-    (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
-        deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ') =
-      (appCc (I := I) (M := M) g₀ 2 2
-          (lichCoeff0 (I := I) g₀ (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ))
-          (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
-        appCc (I := I) (M := M) g₀ 3 2
-          (lichCoeff1 (I := I) g₀ (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ))
-          (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
-        appCc (I := I) (M := M) g₀ 4 2
-          (lichCoeff2 (I := I) g₀ (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ))
-          (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) :=
+    ∃ (C₀ : SmoothCcTensor g₀ 2 2) (C₁ : SmoothCcTensor g₀ 3 2) (C₂ : SmoothCcTensor g₀ 4 2),
+      (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+          deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ') =
+        (appCc (I := I) (M := M) g₀ 2 2 C₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
+          appCc (I := I) (M := M) g₀ 3 2 C₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
+          appCc (I := I) (M := M) g₀ 4 2 C₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) ∧
+      (∀ p w : ℕ,
+        dropKappa (I := I) (M := M) g₀ 2 2 C₀ p w ≤
+          coeffJetBound (I := I) (M := M) g₀
+            (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) p w) ∧
+      (∀ p w : ℕ,
+        dropKappa (I := I) (M := M) g₀ 3 2 C₁ p w ≤
+          coeffJetBound (I := I) (M := M) g₀
+            (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) p w) ∧
+      (∀ p w : ℕ,
+        dropKappa (I := I) (M := M) g₀ 4 2 C₂ p w ≤
+          coeffJetBound (I := I) (M := M) g₀
+            (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) p w) :=
   sorry
 
 /-- **(POSITED deep bedrock — Route P: the genuine intrinsic Lichnerowicz linearization as THREE
@@ -4376,16 +4393,24 @@ private theorem deTurckRHSArmG0_diff_intrinsicLichnerowiczLinearization_section_
           (∀ q : ℕ, q ≤ a →
             (4 : ℝ) ^ q * gridWindowSum
                 (dropKappa (I := I) (M := M) g₀ 4 2 C₂) 0 0 q ≤ κ₂ q) := by
-  obtain ⟨κ₀, κ₁, κ₂, h0, h1, h2, henv⟩ :=
-    exists_uniform_lichCoeff_dropKappa_envelope (I := I) g₀ g_bg a ha_super hR
-  refine ⟨κ₀, κ₁, κ₂, h0, h1, h2, ?_⟩
+  obtain ⟨κ, hκ_nn, hunif⟩ :=
+    exists_uniform_coeffJetBound (I := I) g₀ g_bg a ha_super hR
+  refine ⟨κ, κ, κ, hκ_nn, hκ_nn, hκ_nn, ?_⟩
   intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
-  obtain ⟨henv₀, henv₁, henv₂⟩ := henv T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
-  exact ⟨lichCoeff0 (I := I) g₀ (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ),
-    lichCoeff1 (I := I) g₀ (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ),
-    lichCoeff2 (I := I) g₀ (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ),
-    lichnerowicz_section_identity (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ',
-    henv₀, henv₁, henv₂⟩
+  obtain ⟨C₀, C₁, C₂, hid, hb₀, hb₁, hb₂⟩ :=
+    lichnerowicz_linearization_with_jetbound (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
+  have hu := hunif T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
+  refine ⟨C₀, C₁, C₂, hid, ?_, ?_, ?_⟩
+  · -- `4^q · gridWindowSum (dropKappa C₀) ≤ 4^q · gridWindowSum (coeffJetBound g₀ g₁) ≤ κ q`.
+    intro q hq
+    refine le_trans (mul_le_mul_of_nonneg_left
+      (gridWindowSum_mono _ _ hb₀ 0 0 q) (by positivity)) (hu q hq)
+  · intro q hq
+    refine le_trans (mul_le_mul_of_nonneg_left
+      (gridWindowSum_mono _ _ hb₁ 0 0 q) (by positivity)) (hu q hq)
+  · intro q hq
+    refine le_trans (mul_le_mul_of_nonneg_left
+      (gridWindowSum_mono _ _ hb₂ 0 0 q) (by positivity)) (hu q hq)
 
 /-- **(POSITED deep bedrock — the genuine intrinsic Lichnerowicz linearization, stripped to its
 irreducible missing content.)**
