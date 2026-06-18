@@ -5032,7 +5032,7 @@ lemma lowerSlotInsert0Fib_apply_eval (x : M)
     Tensor0SSpace.toModel (lowerSlotInsert0Fib (I := I) (M := M) x Λ A) m =
       Tensor0SSpace.toModel A (Function.update m 0 (Λ (m 0))) := by
   rw [lowerSlotInsert0Fib, LinearMap.coe_toContinuousLinearMap']
-  show (Tensor0SSpace.toModel ((Tensor0SSpace.ofModel
+  change (Tensor0SSpace.toModel ((Tensor0SSpace.ofModel
       ((Tensor0SSpace.toModel A).compContinuousLinearMap
         (fun i : Fin 2 => if i = 0 then Λ else ContinuousLinearMap.id ℝ E))) :
       Tensor0SSpace 2 I x)) m = _
@@ -5200,6 +5200,43 @@ theorem combinedLowerCoeff0_appCc_eq
   rfl
 
 set_option linter.unusedSectionVars false in
+/-- **STAGE 1 — the `connDiff g₁ g₁'` order-split (value level).**
+
+The inter-endpoint connection difference `connDiff g₁ g₁'`, evaluated at the value `Y x` of a smooth
+field `Y` in the direction `X x`, splits as an ORDER-`0` endomorphism applied to the FIXED endpoint-`g₁`
+Koszul covector plus an ORDER-`1` `g₁'`-raise of the inter-endpoint Koszul-covector difference:
+```
+connDiff g₁ g₁' x (Y x) (X x)
+  = (♯_{g₁} − ♯_{g₁'}) (koszulCovGradCovec g₀ g₁ X Y x)                        -- order `0`
+    + ♯_{g₁'} (koszulCovGradCovec g₀ g₁ X Y x − koszulCovGradCovec g₀ g₁' X Y x).  -- order `1`
+```
+The mechanism is the endpoint cocycle `connDiff_endpoint_cocycle`
+(`connDiff g₁ g₁' = connDiff g₁ g₀ − connDiff g₁' g₀`), the raised-Koszul formula
+`connDiff_eq_appCc_invGram_covGrad` at each endpoint
+(`connDiff g_e g₀ x (Y x) (X x) = ♯_{g_e}(koszulCovGradCovec g₀ g_e X Y x)`), and the pure algebraic
+add-subtract-middle of `♯_{g₁'}(koszulCovGradCovec g₀ g₁ X Y x)`.  The first leg is the order-`0`
+inverse-metric VALUE difference `g₁⁻¹ − g₁'⁻¹` applied to the fixed endpoint-`g₁` Koszul covector (it
+survives at `∇₀(T − T')(x) = 0`); the second leg is the order-`1` `g₁'`-raise of the Koszul-covector
+difference, whose `g₁'`-flat is the half-Koszul of the bare metric-difference `∇₀(T − T')`
+(`koszulCovGradCovec_dual_apply_covGrad`).  This is the foundational telescoping the (O.b)/(C.b)/(S₁)/(S₂)
+/(Q.b) order-`1` legs each consume. -/
+theorem connDiff_g1g1'_order_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
+    (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
+    PDE.DeTurck.connDiff (I := I) g₁ g₁' x (Y x) (X x) =
+      (inverseMetricSharpFib (I := I) g₁ x
+            (koszulCovGradCovec (I := I) (M := M) g₀ g₁ X Y x)
+          - inverseMetricSharpFib (I := I) g₁' x
+              (koszulCovGradCovec (I := I) (M := M) g₀ g₁ X Y x))
+        + inverseMetricSharpFib (I := I) g₁' x
+            (koszulCovGradCovec (I := I) (M := M) g₀ g₁ X Y x
+              - koszulCovGradCovec (I := I) (M := M) g₀ g₁' X Y x) := by
+  rw [← connDiff_endpoint_cocycle (I := I) g₀ g₁ g₁' x (Y x) (X x)]
+  rw [connDiff_eq_appCc_invGram_covGrad (I := I) (M := M) g₀ g₁ X Y x,
+      connDiff_eq_appCc_invGram_covGrad (I := I) (M := M) g₀ g₁' X Y x]
+  rw [map_sub (inverseMetricSharpFib (I := I) g₁' x)]
+  abel
+
+set_option linter.unusedSectionVars false in
 /-- **The combined lower-order arm connector of the Ricci-arm eval-matching (posited covariant bridge,
 MIXED order-`(0, 1)`).**
 
@@ -5223,9 +5260,13 @@ connection-difference leg `(O.b)`; `inverseMetricSharpFib_sub_inner_g1` /
 `inverseMetricSharpFib_sub_inner_g1_realize` resolve `(O.a)`'s `g₁`-pairing to the (negated) symmetrized
 metric-VALUE difference `ccTensorBilinSymm g₀ (T − T')` (order-`0`, fibrewise-linear in `(T − T')(x)`);
 `oArm_leg_eq_connDiff` (via `cotangentCov_leviCivita_diff_endpoint`) rewrites `(O.b)` as the cotangent
-dual of `connDiff g₁ g₁'` (order-`≤ 1`).  The remaining work is the JOINT cancellation of the `(O.b)`,
-`(C)/(S₁)/(S₂)`, quadratic, and remainder legs against the extension artifacts, and the `ricSlotOpField`
--style smooth `R₀`/`R₁` coefficient construction realising the cancelled extension-free form. -/
+dual of `connDiff g₁ g₁'` (order-`≤ 1`); and `connDiff_g1g1'_order_split` (STAGE 1, sorry-free)
+splits that `connDiff g₁ g₁'` into its order-`0` inverse-metric VALUE-difference endomorphism plus the
+order-`1` `g₁'`-raise of the bare metric-difference Koszul covector, the foundational telescoping each
+order-`1` leg `(O.b)/(C.b)/(S₁)/(S₂)/(Q.b)` consumes.  The remaining work is the JOINT cancellation of
+the order-`1` legs against the extension artifacts, and the `ricSlotOpField`-style smooth `R₀`/`R₁`
+coefficient construction (the order-`0` residue extension of `combinedLowerCoeff0` and the from-scratch
+order-`1` `(0, 3) → (0, 2)` single-trace `R₁` model) realising the cancelled extension-free form. -/
 theorem combinedLowerArm_appCc_eq
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     (hg₁ : ∀ (b : M) (u w : TangentSpace I b),
