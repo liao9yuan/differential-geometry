@@ -1,4 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifference
+import Mathlib.Analysis.Calculus.ParametricIntegral
+import Mathlib.MeasureTheory.Integral.DominatedConvergence
+import Mathlib.Analysis.Calculus.ContDiff.Comp
 
 /-!
 # The fibre Bochner path integral of a smooth operator-coefficient family
@@ -36,16 +39,32 @@ support automatically.
   with them in the fixed model fibre (`ContinuousLinearMap.intervalIntegral_apply` /
   `ContinuousLinearMap.intervalIntegral_comp_comm`).
 
-## The posited smooth-parametric-integral kernel
+## The smooth-parametric-integral kernel
 
-The single analytic kernel is the *parametric-integral section smoothness*
+The analytic kernel is the *parametric-integral section smoothness*
 `contMDiff_pathIntegralFib_of_jointContMDiff`: the pointwise interval Bochner integral of a jointly
-`(s, x)`-smooth family of `(r, s)`-tensor bundle sections is again a smooth section.  This is
-differentiation under the integral sign in charts, iterated to all orders; Mathlib packages the
-first-order `HasFDerivAt`/`HasDerivAt`-under-integral lemmas but not the manifold-section `ContMDiff`
-parametric integral, so it is posited here as the irreducible smooth-parametric-integral input and
-recursed into downstream.  Its predicate genuinely constrains the constructed section to the fibrewise
-integral (it is consumed only as the smoothness of that exact fibre formula). -/
+`(s, x)`-smooth family of `(r, s)`-tensor bundle sections is again a smooth section.  Mathlib packages
+the first-order `HasFDerivAt`/`HasDerivAt`-under-integral lemmas but not the all-orders statement, so
+it is proved here in two layers.
+
+* `contDiffAt_param` is the model-space core: for a finite-dimensional real domain `H` and a fixed
+  normed space `F`, the interval Bochner integral `y ↦ ∫ t in a..b, G (y, t)` of a jointly-`C∞` family
+  `G : H × ℝ → F` on an open `U ×ˢ univ` is `C∞` at each `y₀ ∈ U`.  It is built by induction on the
+  order: the `(k+1)`-th step differentiates under the integral sign
+  (`hasFDerivAt_integral_of_dominated_of_fderiv_le''`) — the derivative of the integral is the integral
+  of the partial fibre-derivative, dominated on a compact tube over `[a, b]` — and re-applies the
+  induction hypothesis at order `k` to that fibre-derivative family (jointly `C∞` by
+  `fderiv_fst_contDiffOn`).
+* `contMDiffAt_manifold_param` lifts the core to a manifold base: a fixed-target family
+  `g : M × ℝ → F` jointly smooth on `V ×ˢ univ` integrates to a base function smooth at each `x₀ ∈ V`,
+  by reducing the base-point smoothness to the source chart (boundaryless, so `range I = univ`).
+
+The kernel then reads the joint section `hjoint` through the fixed bundle trivialisation at `x₀`,
+producing a fixed-target chart-fibre integrand; the trivialisation is a fibrewise continuous linear
+equivalence, so it commutes with the Bochner integral and the path-integral read-off agrees with the
+parametric integral of that integrand near `x₀`.  Its predicate genuinely constrains the constructed
+section to the fibrewise integral (it is consumed only as the smoothness of that exact fibre
+formula). -/
 
 noncomputable section
 
@@ -55,7 +74,7 @@ set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
-open scoped Manifold Topology ContDiff BigOperators
+open scoped Manifold Topology ContDiff BigOperators Interval
 
 namespace DifferentialGeometry
 namespace Analysis
@@ -65,7 +84,133 @@ namespace TensorSpectral
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+universe u
+
+/-! ## The model-space C∞ parametric interval integral
+
+The analytic core of the parametric-integral kernel, stated in a fixed model normed space `F` over a
+finite-dimensional real domain `H`: the interval Bochner integral `y ↦ ∫ t in a..b, G (y, t)` of a
+jointly-`C∞` family `G : H × ℝ → F` is again `C∞`.  This is differentiation under the integral sign
+iterated to all orders — Mathlib packages the first-order `HasFDerivAt`-under-integral lemmas but not
+the all-orders statement, so it is built here by induction on the order: the `k`-th derivative of the
+integral is the integral of the `k`-th fibre-derivative, dominated on a compact tube over `[a, b]`. -/
+
+section ModelKernel
+
+variable {H : Type u} [NormedAddCommGroup H] [NormedSpace ℝ H] [FiniteDimensional ℝ H]
+
+set_option linter.unusedSectionVars false in
+/-- A jointly-continuous map on an open `U ×ˢ univ` is, near any `y₀ ∈ U`, uniformly bounded over
+`t ∈ Ι a b` (a compact tube over the interval). -/
+private theorem tube_bound {W : Type*} [NormedAddCommGroup W] (Φ : H × ℝ → W) (U : Set H)
+    (hU : IsOpen U) (a b : ℝ) (y₀ : H) (hy₀ : y₀ ∈ U)
+    (hΦ : ContinuousOn Φ (U ×ˢ (univ : Set ℝ))) :
+    ∃ C : ℝ, ∀ᶠ y in 𝓝 y₀, ∀ t ∈ Ι a b, ‖Φ (y, t)‖ ≤ C := by
+  obtain ⟨K, ⟨hKnhds, hKcomp⟩, hKU⟩ := (compact_basis_nhds y₀).mem_iff.1 (hU.mem_nhds hy₀)
+  have hcompact : IsCompact (K ×ˢ Set.uIcc a b) := hKcomp.prod isCompact_uIcc
+  have hsub : K ×ˢ Set.uIcc a b ⊆ U ×ˢ (univ : Set ℝ) := fun p hp => ⟨hKU hp.1, mem_univ _⟩
+  obtain ⟨C, hC⟩ := (hcompact.image_of_continuousOn (hΦ.mono hsub).norm).bddAbove
+  exact ⟨C, by filter_upwards [hKnhds] with y hyK t ht
+                  using hC ⟨(y,t), ⟨hyK, uIoc_subset_uIcc ht⟩, rfl⟩⟩
+
+set_option linter.unusedSectionVars false in
+/-- The `t`-slice of a jointly-continuous map on an open `U ×ˢ univ` is continuous at each `y' ∈ U`. -/
+private theorem slice_continuous {F : Type u} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (G : H × ℝ → F) (U : Set H) (hU : IsOpen U)
+    (hGc : ContinuousOn G (U ×ˢ (univ : Set ℝ))) (y' : H) (hy' : y' ∈ U) :
+    Continuous (fun t : ℝ => G (y', t)) := by
+  rw [continuous_iff_continuousAt]
+  intro t
+  exact (hGc.continuousAt ((hU.prod isOpen_univ).mem_nhds ⟨hy', mem_univ _⟩)).comp (by fun_prop)
+
+set_option linter.unusedSectionVars false in
+/-- The partial Fréchet derivative in the base variable of a jointly-`C∞` map on an open `U ×ˢ univ`
+is again jointly `C∞` on `U ×ˢ univ`. -/
+private theorem fderiv_fst_contDiffOn {F : Type u} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    (G : H × ℝ → F) (U : Set H) (hU : IsOpen U)
+    (hG : ContDiffOn ℝ ∞ G (U ×ˢ (univ : Set ℝ))) :
+    ContDiffOn ℝ ∞ (fun p : H × ℝ => fderiv ℝ (fun z => G (z, p.2)) p.1) (U ×ˢ univ) := by
+  have hopen : IsOpen (U ×ˢ (univ : Set ℝ)) := hU.prod isOpen_univ
+  rw [hopen.contDiffOn_iff] at hG ⊢
+  intro p hp
+  apply ContDiffAt.fderiv (n := (∞ : WithTop ℕ∞)) (m := (∞ : WithTop ℕ∞))
+  · exact (hG hp).comp _
+      (by fun_prop : ContDiffAt ℝ ∞ (fun w : (H × ℝ) × H => (w.2, w.1.2)) (p, p.1))
+  · fun_prop
+  · exact le_refl _
+
+/-- The finite-order induction behind `contDiffAt_param`: the interval Bochner integral of a
+jointly-`C∞` family is `C^n` for every finite `n`.  The inductive step differentiates under the
+integral sign (`hasFDerivAt_integral_of_dominated_of_fderiv_le''`) with the fibre-derivative
+dominated on a compact tube, and re-applies the induction hypothesis at one lower order to the
+fibre-derivative family, which is jointly `C∞` by `fderiv_fst_contDiffOn`. -/
+private theorem contDiffAt_param_aux :
+    ∀ (n : ℕ) {F : Type u} [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
+      (G : H × ℝ → F) (U : Set H) (_hU : IsOpen U) (a b : ℝ) (y₀ : H) (_hy₀ : y₀ ∈ U)
+      (_hG : ContDiffOn ℝ ∞ G (U ×ˢ (univ : Set ℝ))),
+    ContDiffAt ℝ (n : WithTop ℕ∞) (fun y => ∫ t in a..b, G (y, t)) y₀ := by
+  intro n
+  induction n with
+  | zero =>
+    intro F _ _ _ G U hU a b y₀ hy₀ hG
+    have hGc := hG.continuousOn
+    have hopen : IsOpen (U ×ˢ (univ : Set ℝ)) := hU.prod isOpen_univ
+    rw [show ((0 : ℕ) : WithTop ℕ∞) = 0 from rfl, contDiffAt_zero]
+    refine ⟨U, hU.mem_nhds hy₀, fun y hy => ?_⟩
+    apply ContinuousAt.continuousWithinAt
+    obtain ⟨C, hCbound⟩ := tube_bound G U hU a b y hy hGc
+    apply intervalIntegral.continuousAt_of_dominated_interval (bound := fun _ => C)
+    · filter_upwards [hU.mem_nhds hy] with y' hy'
+      exact (slice_continuous G U hU hGc y' hy').aestronglyMeasurable
+    · filter_upwards [hCbound] with y' hy' using ae_of_all _ (fun t ht => hy' t ht)
+    · exact intervalIntegrable_const
+    · refine ae_of_all _ (fun t _ => ?_)
+      exact (hGc.continuousAt (hopen.mem_nhds ⟨hy, mem_univ _⟩)).comp (by fun_prop)
+  | succ k ih =>
+    intro F _ _ _ G U hU a b y₀ hy₀ hG
+    have hopen : IsOpen (U ×ˢ (univ : Set ℝ)) := hU.prod isOpen_univ
+    have hGc := hG.continuousOn
+    set Gp : H × ℝ → (H →L[ℝ] F) := fun p => fderiv ℝ (fun z => G (z, p.2)) p.1 with hGpdef
+    have hGp_cd : ContDiffOn ℝ ∞ Gp (U ×ˢ univ) := fderiv_fst_contDiffOn G U hU hG
+    have hGpc := hGp_cd.continuousOn
+    rw [show ((k + 1 : ℕ) : WithTop ℕ∞) = (k : WithTop ℕ∞) + 1 by push_cast; ring,
+      contDiffAt_succ_iff_hasFDerivAt]
+    refine ⟨fun y => ∫ t in a..b, Gp (y, t), ⟨U, hU.mem_nhds hy₀, fun y hy => ?_⟩,
+      ih Gp U hU a b y₀ hy₀ hGp_cd⟩
+    obtain ⟨C, hCbound⟩ := tube_bound Gp U hU a b y hy hGpc
+    set s : Set H := {y' | ∀ t ∈ Ι a b, ‖Gp (y', t)‖ ≤ C} ∩ U with hsdef
+    have hsnhds : s ∈ 𝓝 y := Filter.inter_mem hCbound (hU.mem_nhds hy)
+    have hsU : s ⊆ U := Set.inter_subset_right
+    apply hasFDerivAt_integral_of_dominated_of_fderiv_le'' (μ := volume)
+      (F := fun y t => G (y, t)) (F' := fun y t => Gp (y, t)) (bound := fun _ => C)
+      (x₀ := y) (s := s) (a := a) (b := b) hsnhds
+      ?_ ?_ ?_ ?_ intervalIntegrable_const ?_
+    · filter_upwards [hU.mem_nhds hy] with y' hy'
+      exact (slice_continuous G U hU hGc y' hy').aestronglyMeasurable
+    · exact (slice_continuous G U hU hGc y hy).intervalIntegrable a b
+    · exact (slice_continuous Gp U hU hGpc y hy).aestronglyMeasurable
+    · rw [ae_restrict_iff' measurableSet_uIoc]
+      exact ae_of_all _ (fun t ht y' hy' => hy'.1 t ht)
+    · refine ae_of_all _ (fun t y' hy' => ?_)
+      have hslice : ContDiffAt ℝ ∞ (fun z => G (z, t)) y' :=
+        (hG.contDiffAt (hopen.mem_nhds ⟨hsU hy', mem_univ t⟩)).comp _
+          (by fun_prop : ContDiffAt ℝ ∞ (fun z : H => (z, t)) y')
+      exact (hslice.differentiableAt (by simp)).hasFDerivAt
+
+/-- **Model-space C∞ parametric interval integral.** For a finite-dimensional real domain `H` and a
+fixed normed space `F`, the interval Bochner integral `y ↦ ∫ t in a..b, G (y, t)` of a family
+`G : H × ℝ → F` that is jointly `C∞` on an open `U ×ˢ univ` is `C∞` at each `y₀ ∈ U`. -/
+private theorem contDiffAt_param {F : Type u} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [CompleteSpace F] (G : H × ℝ → F) (U : Set H) (hU : IsOpen U)
+    (a b : ℝ) (y₀ : H) (hy₀ : y₀ ∈ U)
+    (hG : ContDiffOn ℝ ∞ G (U ×ˢ (univ : Set ℝ))) :
+    ContDiffAt ℝ ∞ (fun y => ∫ t in a..b, G (y, t)) y₀ := by
+  rw [contDiffAt_infty]
+  exact fun n => contDiffAt_param_aux n G U hU a b y₀ hy₀ hG
+
+end ModelKernel
+
+variable {E : Type u} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
@@ -73,6 +218,45 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+set_option linter.unusedSectionVars false in
+/-- **Local manifold parametric interval integral.** A family `g : M × ℝ → F` into a fixed normed
+space `F` that is jointly smooth on `V ×ˢ univ` for an open `V ∋ x₀` integrates over `[a, b]` to a
+function smooth at `x₀`.  Proved by reducing the base-point smoothness to the chart coordinate
+(boundaryless, so `range I = univ`) and applying the model-space kernel `contDiffAt_param`. -/
+private theorem contMDiffAt_manifold_param {F : Type u} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    [CompleteSpace F] (g : M × ℝ → F) (a b : ℝ) (V : Set M) (hV : IsOpen V) (x₀ : M) (hx₀ : x₀ ∈ V)
+    (hg : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, F) ∞ g (V ×ˢ (univ : Set ℝ))) :
+    ContMDiffAt I 𝓘(ℝ, F) ∞ (fun x => ∫ t in a..b, g (x, t)) x₀ := by
+  rw [contMDiffAt_iff_source, I.range_eq_univ, contMDiffWithinAt_univ, contMDiffAt_iff_contDiffAt]
+  set chart := extChartAt I x₀ with hchart
+  set U' : Set E := chart.target ∩ chart.symm ⁻¹' V with hU'def
+  have hsymmCont : ContinuousOn chart.symm chart.target := continuousOn_extChartAt_symm x₀
+  have hU'open : IsOpen U' := hsymmCont.isOpen_inter_preimage (isOpen_extChartAt_target x₀) hV
+  have hy₀mem : chart x₀ ∈ U' := by
+    refine ⟨mem_extChartAt_target x₀, ?_⟩
+    simp only [Set.mem_preimage]
+    rw [hchart, extChartAt_to_inv]
+    exact hx₀
+  have hG : ContDiffOn ℝ ∞ (fun p : E × ℝ => g (chart.symm p.1, p.2)) (U' ×ˢ (univ : Set ℝ)) := by
+    have hsymm : ContMDiffOn 𝓘(ℝ, E) I ∞ chart.symm chart.target := contMDiffOn_extChartAt_symm x₀
+    have hsymmU' : ContMDiffOn 𝓘(ℝ, E) I ∞ chart.symm U' := hsymm.mono Set.inter_subset_left
+    have hfst : ContMDiffOn 𝓘(ℝ, E × ℝ) 𝓘(ℝ, E) ∞ (Prod.fst : E × ℝ → E)
+        (U' ×ˢ (univ : Set ℝ)) := contDiff_fst.contMDiff.contMDiffOn
+    have hsnd : ContMDiffOn 𝓘(ℝ, E × ℝ) 𝓘(ℝ, ℝ) ∞ (Prod.snd : E × ℝ → ℝ)
+        (U' ×ˢ (univ : Set ℝ)) := contDiff_snd.contMDiff.contMDiffOn
+    have hφ : ContMDiffOn 𝓘(ℝ, E × ℝ) (I.prod 𝓘(ℝ, ℝ)) ∞
+        (fun p : E × ℝ => (chart.symm p.1, p.2)) (U' ×ˢ (univ : Set ℝ)) :=
+      (hsymmU'.comp hfst (fun p hp => hp.1)).prodMk hsnd
+    have hφmaps : Set.MapsTo (fun p : E × ℝ => (chart.symm p.1, p.2)) (U' ×ˢ (univ : Set ℝ))
+        (V ×ˢ (univ : Set ℝ)) := by
+      rintro ⟨y, t⟩ ⟨hy, -⟩; exact ⟨hy.2, mem_univ _⟩
+    exact (hg.comp hφ hφmaps).contDiffOn
+  have hkey := contDiffAt_param (H := E) (F := F)
+    (fun p : E × ℝ => g (chart.symm p.1, p.2)) U' hU'open a b (chart x₀) hy₀mem hG
+  refine hkey.congr_of_eventuallyEq ?_
+  filter_upwards [hU'open.mem_nhds hy₀mem] with y hy
+  rfl
 
 /-- **The pointwise fibre interval-integral map of a coefficient family.**
 
@@ -94,12 +278,14 @@ family, by `toModel ∘ ofModel = id`. -/
       ∫ t in (0 : ℝ)..1, (TensorRSSpace.toModel ((Φ t).toSection x)) := by
   rw [pathIntegralFib, TensorRSSpace.toModel_ofModel]
 
-/-- **Posited smooth-parametric-integral kernel.** For a family `Φ : ℝ → SmoothCcTensor g₀ r s` whose
+/-- **The smooth-parametric-integral kernel.** For a family `Φ : ℝ → SmoothCcTensor g₀ r s` whose
 joint `(s, x)`-data `(x, t) ↦ (Φ t).toSection x` is a smooth section of the `(r, s)`-tensor bundle in
 the base point uniformly in the parameter, the pointwise interval Bochner integral
-`x ↦ pathIntegralFib g₀ r s Φ x` is again a smooth section.  This is differentiation under the integral
-sign in charts, iterated to all orders (the manifold-section `ContMDiff` parametric integral), the
-irreducible analytic input recursed into downstream. -/
+`x ↦ pathIntegralFib g₀ r s Φ x` is again a smooth section.  The proof reads the joint section through
+the fixed bundle trivialisation at `x₀` into the model fibre, where the read-off is a fibrewise
+continuous linear equivalence and so commutes with the Bochner integral; the resulting fixed-target
+chart-fibre integrand is integrated by `contMDiffAt_manifold_param` (the manifold-section `ContMDiff`
+parametric integral, differentiation under the integral sign iterated to all orders). -/
 theorem contMDiff_pathIntegralFib_of_jointContMDiff
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s)
@@ -109,8 +295,69 @@ theorem contMDiff_pathIntegralFib_of_jointContMDiff
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel r s ℝ E)
         (E := fun z : M => TensorRSSpace r s I z) x
-        (pathIntegralFib (I := I) (M := M) g₀ r s Φ x)) :=
-  sorry
+        (pathIntegralFib (I := I) (M := M) g₀ r s Φ x)) := by
+  intro x₀
+  rw [Bundle.contMDiffAt_section]
+  set e := trivializationAt (TensorRSModel r s ℝ E) (fun z : M => TensorRSSpace r s I z) x₀ with hedef
+  set g : M × ℝ → TensorRSModel r s ℝ E :=
+    fun p : M × ℝ => (e ⟨p.1, (Φ p.2).toSection p.1⟩).2 with hgdef
+  have hbase : x₀ ∈ e.baseSet := mem_baseSet_trivializationAt _ _ _
+  have hbaseOpen : IsOpen e.baseSet := e.open_baseSet
+  have hgContMDiffOn : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, TensorRSModel r s ℝ E) ∞ g
+      (e.baseSet ×ˢ (univ : Set ℝ)) := by
+    intro p hp
+    have hsource : (TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) p.1 ((Φ p.2).toSection p.1)) ∈ e.source := by
+      rw [Trivialization.mem_source]; exact hp.1
+    exact ((e.contMDiffAt_iff (f := fun q : M × ℝ => TotalSpace.mk' (TensorRSModel r s ℝ E)
+          (E := fun z : M => TensorRSSpace r s I z) q.1 ((Φ q.2).toSection q.1))
+          (x₀ := p) hsource).1 (hjoint p)).2.contMDiffWithinAt
+  have hintegral : ContMDiffAt I 𝓘(ℝ, TensorRSModel r s ℝ E) ∞
+      (fun x => ∫ t in (0:ℝ)..1, g (x, t)) x₀ :=
+    contMDiffAt_manifold_param g 0 1 e.baseSet hbaseOpen x₀ hbase hgContMDiffOn
+  refine hintegral.congr_of_eventuallyEq ?_
+  filter_upwards [hbaseOpen.mem_nhds hbase] with x hx
+  have hgx_cont : Continuous (fun t : ℝ => g (x, t)) := by
+    rw [continuous_iff_continuousAt]
+    intro t
+    have hgAt : ContinuousAt g (x, t) :=
+      (hgContMDiffOn (x, t) ⟨hx, mem_univ t⟩).continuousWithinAt.continuousAt
+        ((hbaseOpen.prod isOpen_univ).mem_nhds ⟨hx, mem_univ t⟩)
+    exact hgAt.comp (by fun_prop : ContinuousAt (fun t : ℝ => (x, t)) t)
+  set Lx := e.continuousLinearEquivAt ℝ x hx with hLx
+  have hreadoff : ∀ T : TensorRSSpace r s I x, (e ⟨x, T⟩).2 = Lx T := fun T => rfl
+  have hgx_eq : (fun t : ℝ => g (x, t)) = (fun t : ℝ => Lx ((Φ t).toSection x)) := by
+    funext t
+    change (e ⟨x, (Φ t).toSection x⟩).2 = Lx ((Φ t).toSection x)
+    rw [hreadoff]
+  have hslice_cont : Continuous (fun t : ℝ => TensorRSSpace.toModel ((Φ t).toSection x)) := by
+    have hLxslice : Continuous (fun t : ℝ => Lx ((Φ t).toSection x)) := hgx_eq ▸ hgx_cont
+    have hfibre : Continuous (fun t : ℝ => ((Φ t).toSection x : TensorRSSpace r s I x)) := by
+      refine (Lx.symm.continuous.comp hLxslice).congr (fun t => ?_)
+      exact Lx.symm_apply_apply _
+    exact (tensorRSSpace_continuousLinearEquiv (I := I) r s x).continuous.comp hfibre
+  have hIIm : IntervalIntegrable (fun t : ℝ => TensorRSSpace.toModel ((Φ t).toSection x))
+      volume 0 1 := hslice_cont.intervalIntegrable 0 1
+  change (e ⟨x, pathIntegralFib (I := I) (M := M) g₀ r s Φ x⟩).2 = ∫ t in (0:ℝ)..1, g (x, t)
+  rw [hreadoff]
+  set K : TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E :=
+    (Lx.toContinuousLinearMap).comp
+      (tensorRSSpace_continuousLinearEquiv (I := I) r s x).symm.toContinuousLinearMap with hK
+  rw [pathIntegralFib]
+  have hLxofM : Lx (TensorRSSpace.ofModel (I := I) (x := x)
+      (∫ t in (0:ℝ)..1, TensorRSSpace.toModel ((Φ t).toSection x)))
+      = K (∫ t in (0:ℝ)..1, TensorRSSpace.toModel ((Φ t).toSection x)) := rfl
+  rw [hLxofM]
+  have hRHS : (fun t : ℝ => g (x, t))
+      = (fun t : ℝ => K (TensorRSSpace.toModel ((Φ t).toSection x))) := by
+    funext t
+    change (e ⟨x, (Φ t).toSection x⟩).2 = K (TensorRSSpace.toModel ((Φ t).toSection x))
+    rw [hreadoff, hK, ContinuousLinearMap.comp_apply]
+    change Lx ((Φ t).toSection x) = Lx _
+    rw [show (tensorRSSpace_continuousLinearEquiv (I := I) r s x).symm.toContinuousLinearMap
+          (TensorRSSpace.toModel ((Φ t).toSection x)) = (Φ t).toSection x from
+        (tensorRSSpace_continuousLinearEquiv (I := I) r s x).symm_apply_apply _]
+  rw [hRHS, ContinuousLinearMap.intervalIntegral_comp_comm K hIIm]
 
 /-- **The fibre Bochner path integral of a smooth operator-coefficient family.**
 
