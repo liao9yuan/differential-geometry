@@ -98,6 +98,8 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.PDE.DeTurck
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
+open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
+open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -248,6 +250,110 @@ noncomputable def ricciArmOrder2Coeff (g₀ : SmoothRiemannianMetric I M)
     (s : ℝ) : SmoothCcTensor g₀ 4 2 :=
   ricciArmPrincipalCoeff (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
 
+/-- **The chart-Gram velocity of the realized section-difference perturbation at parameter `s`.**
+
+For the realized metric path `g_s = realizedFam g₀ T T' s`, every chart-Gram component
+`σ ↦ g_{ij}(g_σ)(α, y)` is, on the smallness set, affine in `σ` (`realizedFam_chartGramOnE` is the convex
+combination `(1 − σ)·g_{ij}(realize(g₀ + T')) + σ·g_{ij}(realize(g₀ + T))`), hence its `σ`-derivative at
+`s` is the constant velocity `g_{ij}(realize(g₀ + T)) − g_{ij}(realize(g₀ + T'))`.  A chart perturbation
+`h : ChartMetricPerturbation E` **is the realized section-difference velocity at `(α, s)`** when, at every
+chart-interior point `y`, each chart-Gram component of the realized family has `σ`-derivative at `s` equal
+to the component `h i j y`:
+`(d/dσ) g_{ij}(realizedFam σ)(α, y)|_{σ = s} = h i j y`.  This is exactly the chart-Gram value-velocity
+pin of `IsMetricPerturbationFamily` for the family translated to base `s`, and it pins `h` to the
+section-difference jet that the chart-symbol → intrinsic transfer reads off. -/
+def IsRealizedChartVelocity (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (α : M) (s : ℝ) (h : ChartMetricPerturbation E) : Prop :=
+  ∀ (i j : Fin (Module.finrank ℝ E)) {y : E}, y ∈ interior (extChartAt I α).target →
+    HasDerivAt
+      (fun σ : ℝ => chartGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' σ) α i j y)
+      (h i j y) s
+
+/-- **(Posited deep input — re-basing of the chart-Ricci `s`-derivative at an interior parameter.)**
+
+For the realized metric path `g_s = realizedFam g₀ T T' s` and every interior parameter `s ∈ (0,1)`, the
+`s`-derivative of the realized chart-Ricci sum `deriv (realizedRicciChartSum) s` equals the
+`chartModelBasis`-trace read-off, at the re-base metric `g_s`, of the on-disk chart Ricci-tensor
+`s`-derivative split `chartRicciSecondOrderPart g_s h + ricciDerivFirstOrderRemainder g_s h`, where `h` is
+the section-difference chart velocity (`IsRealizedChartVelocity`).
+
+This is the **re-basing** half of the Ricci-arm linearization: the public chart Ricci-tensor split
+`hasDerivAt_chartRicciTensor` (`MetricFamilyChartLinearization`) computes the `s`-derivative of
+`s ↦ chartRicciTensor (gfam s) α i k y` at `s = 0` for any `IsMetricPerturbationFamily g₀ α h gfam`; here
+the realized family `realizedFam` translated to base `s₀` (`gfam σ = realizedFam (s₀ + σ)`) is a
+metric-perturbation family of `g_{s₀}` with the affine section-difference velocity `h`
+(`realizedFam_chartGramOnE` is affine in `s`, so every chart-Gram jet pin holds), and `HasDerivAt.deriv`
+re-bases the derivative from `s = 0` of the translated family to `s = s₀` of `realizedRicciChartSum`.  The
+re-basing infrastructure (`realizedFam` as a translated `IsMetricPerturbationFamily` of `g_{s₀}`) is not
+yet on disk; it is *posited* here, to be discharged by recursing into it.  It genuinely constrains the
+derivative to be the re-based chart-symbol read-off, so it is non-vacuous: a wrong velocity field fails it
+where the chart Ricci derivative is nonzero. -/
+theorem deriv_realizedRicciChartSum_eq_rebased_chartSymbol
+    (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {s : ℝ} (hs : s ∈ Set.Ioo (0 : ℝ) 1) (x : M) (v w : TangentSpace I x) :
+    ∃ h : ChartMetricPerturbation E,
+      IsRealizedChartVelocity (I := I) g₀ T T' hδ hδ' x s h ∧
+        deriv (realizedRicciChartSum (I := I) g₀ T T' hδ hδ' x v w) s =
+          ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+            ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
+              (chartRicciSecondOrderPart (I := I)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x) +
+                ricciDerivFirstOrderRemainder (I := I)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x)) :=
+  sorry
+
+/-- **(Posited deep input — chart-symbol/remainder → intrinsic two-term `appCc` transfer.)**
+
+For the re-base metric `g_s = realizedFam g₀ T T' s`, the section-difference chart velocity `h`
+(`IsRealizedChartVelocity`), and any base point `x` and tangent pair `v`, the `chartModelBasis`-trace
+read-off of the on-disk chart Ricci-tensor `s`-derivative split `chartRicciSecondOrderPart g_s h +
+ricciDerivFirstOrderRemainder g_s h` equals the intrinsic two-term Lichnerowicz `unitModel`/`appCc`
+read-off of the order-`0` coefficient `ricciArmOrder0Coeff s` (the inverse-Gram slot field of `g_s`) on
+`W₀ = T − T'` plus the order-`2` coefficient `ricciArmOrder2Coeff s` (the combined three-trace field of
+`g_s`) on `W₂ = ∇₀²(T − T')`.
+
+This is the **chart → intrinsic transfer** half of the Ricci-arm linearization: the chart second-order
+part `chartRicciSecondOrderPart` splits into the four-term `∂²h` principal symbol
+`chartRicciSecondOrderPrincipalSymbol` plus the genuinely-first-order `chartRicciFirstOrderRemainder`
+(`chartRicciSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_source`); the chart `∂²h` of the
+section-difference velocity converts to the covariant Hessian `∇₀²(T − T')` (the chart-vs-covariant
+Hessian conversion `∂²h = ∇₀²h + Christoffel·∂h + ∂Christoffel·h`), so the `½G^{jl}∂²h` symbol becomes the
+combined three-trace `combinedTrace42Model (cometricLmodel g_s)` read off through
+`ricciArmPrincipalCoeff_appCc_eq_combinedTrace` (the order-`2` arm), and the Christoffel-correction `∂h`/`h`
+terms together with `chartRicciFirstOrderRemainder` and `ricciDerivFirstOrderRemainder` fold into the
+order-`0` inverse-Gram slot field `gInvDiffSlotCoeff g₀ g_s` on `T − T'` (NO genuine order-`1` arm).
+These covariant bridges are not yet on disk; the identity is *posited* here, to be discharged by recursing
+into them.  It genuinely constrains the chart read-off to be the two-term intrinsic read-off, so it is
+non-vacuous: the zero coefficients fail it where the chart Ricci derivative is nonzero. -/
+theorem rebased_chartSymbol_eq_appCc_pointwise
+    (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) (x : M) (h : ChartMetricPerturbation E)
+    (hh : IsRealizedChartVelocity (I := I) g₀ T T' hδ hδ' x s h)
+    (v : Fin 2 → TangentSpace I x) :
+    (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+          (chartRicciSecondOrderPart (I := I)
+              (realizedFam (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x) +
+            ricciDerivFirstOrderRemainder (I := I)
+              (realizedFam (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x))) =
+      unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 2 2
+            (ricciArmOrder0Coeff (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+          + appCc (I := I) (M := M) g₀ 4 2
+              (ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ' s)
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
+  sorry
+
 /-- **The pointwise chart-derivative → intrinsic two-term `appCc` identity of the linearized Ricci
 operator (the deep covariant bridge).**
 
@@ -258,16 +364,19 @@ equals the intrinsic two-term Lichnerowicz `unitModel`/`appCc` read-off of the o
 `ricciArmOrder0Coeff s` acting on `W₀ = T − T'` plus the order-`2` coefficient `ricciArmOrder2Coeff s`
 acting on `W₂ = ∇₀²(T − T')`.
 
-This is the irreducible deep mean-value/covariant content of the Ricci-arm linearization: the chart
-principal-symbol closed form `ricciSymbolComp_eq_closedForm` (the four classical `∂²h` terms reorganising
-into the rough Laplacian `−½|ξ|²h` plus the divergence/trace-gradient gauge terms folding into the
-order-`2` principal symbol — NO genuine order-`1` arm) composed with the chart-trace → intrinsic `appCc`
-transfer of each piece (the Palatini-trace ↔ `appCc`/`unitModel` bridge
-`ricciArmPrincipalCoeff_appCc_eq_combinedTrace`, `palatini_tracedPrincipal_eq_combinedTrace`, and the
-`∇^{g_s} ↔ ∇₀` conversion).  These covariant bridges are not yet on disk; the identity is *posited* here
-as the deep mean-value input, to be discharged by recursing into them.  It genuinely constrains the
-linearized-Ricci value to be the two-term read-off pointwise, so it is non-vacuous: the zero coefficients
-fail it where the linearized Ricci is nonzero. -/
+This is the irreducible deep mean-value/covariant content of the Ricci-arm linearization, assembled from
+the two posited covariant halves: the **re-basing**
+`deriv_realizedRicciChartSum_eq_rebased_chartSymbol` (the public chart Ricci-tensor split
+`hasDerivAt_chartRicciTensor` re-based to the interior parameter `s` via the translated
+`IsMetricPerturbationFamily` of `g_s`, yielding `deriv = ∑ repr·repr·(chartRicciSecondOrderPart g_s h +
+ricciDerivFirstOrderRemainder g_s h)` with `h` the section-difference chart velocity) and the **chart →
+intrinsic transfer** `rebased_chartSymbol_eq_appCc_pointwise` (the chart principal-symbol closed form
+`ricciSymbolComp_eq_closedForm` and the chart-vs-covariant Hessian conversion folding `½G^{jl}∂²h` into the
+combined three-trace `ricciArmPrincipalCoeff_appCc_eq_combinedTrace` on `∇₀²(T − T')` and the order-`0`
+inverse-Gram slot field `gInvDiffSlotCoeff` on `T − T'`, NO genuine order-`1` arm).  These covariant
+bridges are posited in the two halves, to be discharged by recursing into them.  It genuinely constrains
+the linearized-Ricci value to be the two-term read-off pointwise, so it is non-vacuous: the zero
+coefficients fail it where the linearized Ricci is nonzero. -/
 theorem deriv_realizedRicciChartSum_eq_appCc_pointwise
     (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -281,8 +390,11 @@ theorem deriv_realizedRicciChartSum_eq_appCc_pointwise
             (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
           + appCc (I := I) (M := M) g₀ 4 2
               (ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ' s)
-              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
-  sorry
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
+  obtain ⟨h, hh, hderiv⟩ :=
+    deriv_realizedRicciChartSum_eq_rebased_chartSymbol (I := I) g₀ T T' hδ hδ' hs x (v 0) (v 1)
+  rw [hderiv]
+  exact rebased_chartSymbol_eq_appCc_pointwise (I := I) g₀ T T' hδ hδ' s x h hh v
 
 /-- **Continuity in `s` of the per-arm `unitModel`/`appCc` read-offs of the linearized-Ricci coefficient
 families (the deep mean-value continuity input).**
