@@ -4797,6 +4797,408 @@ theorem combinedLowerArm_extension_free
   simp only [← hZv, ← hYw]
   linarith [hP]
 
+/-! ## The order-`0` inverse-metric-difference multiplier coefficient field (rebuilt in-file)
+
+The downstream `gInvDiffSlotCoeff`/`gInvDiffSlotEndo`/`gInvDiffRaisedEndo` of
+`RicciDeTurckMetricArmCoeffField`/`CometricInverseDifferenceMultiplier` are import-cyclic relative to this
+file, so the order-`0` two-endpoint inverse-metric-difference multiplier is rebuilt here from the
+in-closure primitives `inverseMetricSharpFib`, `metricSharp`, and the slot-insertion calculus.  The
+coefficient is the leading-slot insertion of the `g₁'`-lowered cometric difference
+`(g₁⁻¹ − g₁'⁻¹)`-representative, the `(2, 2)`-operator field whose `appCc`/`unitModel` read-off is the
+order-`0` value coefficient on `W₀ = (T − T')`. -/
+
+set_option linter.unusedSectionVars false in
+/-- **The `g₁'`-flat covector field** `v ↦ g₁'(v, ·)`, read into the cotangent fibre via
+`dualToCotangent`.  A continuous-linear map `TₓM →L Tensor0SSpace 1 I x`; the in-file rebuild of the
+`g0FlatCLM` flat operator. -/
+def lowerFlatCLM (g₁' : SmoothRiemannianMetric I M) (x : M) :
+    TangentSpace I x →L[ℝ] Tensor0SSpace 1 I x :=
+  LinearMap.toContinuousLinearMap
+    { toFun := fun v => dualToCotangent (I := I) (x := x) (g₁'.inner x v).toLinearMap
+      map_add' := fun v v' => by
+        have h : ((g₁'.inner x (v + v')).toLinearMap : Module.Dual ℝ (TangentSpace I x))
+            = (g₁'.inner x v).toLinearMap + (g₁'.inner x v').toLinearMap := by
+          ext w; simp [map_add]
+        rw [h, dualToCotangent_addC]
+      map_smul' := fun c v => by
+        have h : ((g₁'.inner x (c • v)).toLinearMap : Module.Dual ℝ (TangentSpace I x))
+            = c • (g₁'.inner x v).toLinearMap := by
+          ext w; simp [map_smul]
+        rw [h, dualToCotangent_smulC]; rfl }
+
+@[simp] lemma lowerFlatCLM_apply (g₁' : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
+    lowerFlatCLM (I := I) g₁' x v =
+      dualToCotangent (I := I) (x := x) (g₁'.inner x v).toLinearMap := by
+  rw [lowerFlatCLM, LinearMap.coe_toContinuousLinearMap']; rfl
+
+set_option linter.unusedSectionVars false in
+/-- The pairing of the `g₁'`-flat against any vector recovers the metric value. -/
+@[simp] lemma cotangentToDual_lowerFlatCLM (g₁' : SmoothRiemannianMetric I M) (x : M)
+    (v w : TangentSpace I x) :
+    cotangentToDual (I := I) (x := x) (lowerFlatCLM (I := I) g₁' x v) w = g₁'.inner x v w := by
+  rw [lowerFlatCLM_apply, cotangentToDual_dualToCotangent]; rfl
+
+set_option linter.unusedSectionVars false in
+/-- The `g₁'`-sharp inverts the `g₁'`-flat: `g₁'^♯(g₁'^♭ v) = v`. -/
+lemma inverseMetricSharpFib_lowerFlatCLM (g₁' : SmoothRiemannianMetric I M) (x : M)
+    (v : TangentSpace I x) :
+    inverseMetricSharpFib (I := I) g₁' x (lowerFlatCLM (I := I) g₁' x v) = v := by
+  have hkey : (g₁'.inner x (inverseMetricSharpFib (I := I) g₁' x (lowerFlatCLM (I := I) g₁' x v)) :
+        TangentSpace I x →L[ℝ] ℝ) = g₁'.inner x v := by
+    ext w
+    rw [inverseMetricSharpFib_inner, cotangentToDualLinear_apply, cotangentToDual_lowerFlatCLM]
+  -- injectivity of the metric flat (positive-definiteness)
+  have hinj : Function.Injective
+      (fun u : TangentSpace I x => (g₁'.inner x u : TangentSpace I x →L[ℝ] ℝ)) := by
+    intro a b hab
+    have hval : ∀ w, g₁'.inner x a w = g₁'.inner x b w := fun w => by
+      have := congrArg (fun (φ : TangentSpace I x →L[ℝ] ℝ) => φ w) hab
+      simpa using this
+    by_contra hne
+    have hsub : a - b ≠ 0 := sub_ne_zero.mpr hne
+    have hpos := g₁'.pos x (a - b) hsub
+    have hzero : g₁'.inner x (a - b) (a - b) = 0 := by
+      have hsymm₁ : g₁'.inner x (a - b) (a - b)
+          = g₁'.inner x (a - b) a - g₁'.inner x (a - b) b := by rw [← map_sub]
+      rw [hsymm₁, g₁'.symm x (a - b) a, g₁'.symm x (a - b) b]
+      have e1 : g₁'.inner x a (a - b) = g₁'.inner x b (a - b) := hval (a - b)
+      rw [e1]; ring
+    exact absurd hzero (ne_of_gt hpos)
+  exact hinj hkey
+
+set_option linter.unusedSectionVars false in
+/-- The `g₁`-sharp of a `g₁'`-flat covector collapses to a metric sharp:
+`g₁^♯(g₁'^♭ v) = metricSharp g₁ x (g₁'.inner x v)`. -/
+lemma inverseMetricSharpFib_lowerFlatCLM_eq_metricSharp
+    (g₁ g₁' : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
+    inverseMetricSharpFib (I := I) g₁ x (lowerFlatCLM (I := I) g₁' x v) =
+      DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ x
+        (g₁'.inner x v).toLinearMap := by
+  rw [inverseMetricSharpFib_apply, lowerFlatCLM_apply]
+  rw [show cotangentToDualLinear (I := I)
+        (dualToCotangent (I := I) (g₁'.inner x v).toLinearMap)
+        = (g₁'.inner x v).toLinearMap from by
+    rw [cotangentToDualLinear_apply, cotangentToDual_dualToCotangent]]
+
+/-- **The `g₁'`-lowered representative of the two-endpoint cometric difference `g₁⁻¹ − g₁'⁻¹`.**
+The fibre endomorphism `v ↦ g₁^♯(g₁'^♭ v) − v`.  Since `g₁'^♯ g₁'^♭ = id`, this is
+`(g₁^♯ − g₁'^♯) ∘ g₁'^♭`, the `g₁'`-lowered two-endpoint cometric difference; the in-file rebuild of
+`gInvDiffRaisedEndo g₁' g₁`. -/
+def combinedLowerRaisedEndo0 (g₁ g₁' : SmoothRiemannianMetric I M) (x : M) :
+    TangentSpace I x →L[ℝ] TangentSpace I x :=
+  (inverseMetricSharpFib (I := I) g₁ x).comp (lowerFlatCLM (I := I) g₁' x)
+    - ContinuousLinearMap.id ℝ (TangentSpace I x)
+
+@[simp] lemma combinedLowerRaisedEndo0_apply (g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
+    (v : TangentSpace I x) :
+    combinedLowerRaisedEndo0 (I := I) g₁ g₁' x v =
+      inverseMetricSharpFib (I := I) g₁ x (lowerFlatCLM (I := I) g₁' x v) - v := by
+  rw [combinedLowerRaisedEndo0, ContinuousLinearMap.sub_apply, ContinuousLinearMap.comp_apply,
+    ContinuousLinearMap.id_apply]
+
+set_option linter.unusedSectionVars false in
+/-- **Self-vanishing at `g₁ = g₁'`** (non-vacuity litmus).  When the two endpoints coincide the
+representative is the zero endomorphism (`g₁'^♯ g₁'^♭ v = v`), so the multiplier genuinely measures
+`g₁⁻¹ − g₁'⁻¹` and is not a degenerate stand-in. -/
+@[simp] lemma combinedLowerRaisedEndo0_self (g₁' : SmoothRiemannianMetric I M) (x : M)
+    (v : TangentSpace I x) :
+    combinedLowerRaisedEndo0 (I := I) g₁' g₁' x v = 0 := by
+  rw [combinedLowerRaisedEndo0_apply, inverseMetricSharpFib_lowerFlatCLM, sub_self]
+
+set_option linter.unusedSectionVars false in
+/-- **The raised representative as a single metric sharp of the metric-difference flat.**
+`combinedLowerRaisedEndo0 g₁ g₁' x v = metricSharp g₁ x ((g₁'.inner x v) − (g₁.inner x v))`. -/
+lemma combinedLowerRaisedEndo0_eq_metricSharp_flatDiff
+    (g₁ g₁' : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
+    combinedLowerRaisedEndo0 (I := I) g₁ g₁' x v =
+      DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ x
+        ((g₁'.inner x v).toLinearMap - (g₁.inner x v).toLinearMap) := by
+  rw [combinedLowerRaisedEndo0_apply, inverseMetricSharpFib_lowerFlatCLM_eq_metricSharp]
+  have hv : DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ x
+        (g₁.inner x v).toLinearMap = v := by
+    rw [← inverseMetricSharpFib_lowerFlatCLM_eq_metricSharp (I := I) g₁ g₁ x v]
+    exact inverseMetricSharpFib_lowerFlatCLM (I := I) g₁ x v
+  have hsharp_sub : DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ x
+        ((g₁'.inner x v).toLinearMap - (g₁.inner x v).toLinearMap) =
+      DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ x
+          (g₁'.inner x v).toLinearMap
+        - DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ x
+          (g₁.inner x v).toLinearMap := by
+    rw [DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_def,
+      DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_def,
+      DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_def, map_sub]
+  rw [hsharp_sub, hv]
+
+set_option linter.unusedSectionVars false in
+/-- **On-chart-source smoothness of the metric-flat covector field's chart components** (in-file rebuild
+of `metricFlat_chartComponent_contMDiffOn`).  For a smooth tangent field `Y`, the scalar
+`b ↦ g(Y b, chartBasisVecFiber γ j b)` is `C^∞` on the chart-`γ` source. -/
+theorem metricFlat_chartComponent_contMDiffOn_local (g : SmoothRiemannianMetric I M)
+    (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (γ : M) (j : Fin (Module.finrank ℝ E)) :
+    ContMDiffOn I 𝓘(ℝ) ∞
+      (fun b : M => (g.inner b (Y b)).toLinearMap
+        (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) γ j b))
+      (chartAt H γ).source := by
+  have h_total : ContMDiffOn I (I.prod 𝓘(ℝ, ℝ)) ∞
+      (fun b : M => (⟨b, g.inner b (Y b)
+          (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) γ j b)⟩ :
+        TotalSpace ℝ (Bundle.Trivial M ℝ)))
+      (trivializationAt E (TangentSpace I) γ).baseSet :=
+    ContMDiffOn.clm_bundle_apply₂ (F₁ := E) (F₂ := E) (F₃ := ℝ) (b := id)
+      g.contMDiff.contMDiffOn Y.contMDiff.contMDiffOn
+      (DifferentialGeometry.Integral.Measure.chartBasisVec_contMDiffOn (I := I) γ j)
+  have hbase_eq :
+      (trivializationAt E (TangentSpace I) γ).baseSet = (chartAt H γ).source :=
+    DifferentialGeometry.Integral.Measure.trivializationAt_baseSet_eq_chartAt_source (I := I) γ
+  rw [hbase_eq] at h_total
+  intro b hb
+  have hpb := h_total b hb
+  rw [Bundle.contMDiffWithinAt_totalSpace] at hpb
+  exact hpb.2
+
+set_option linter.unusedSectionVars false in
+/-- **On-chart-source smoothness of the two-endpoint metric-difference flat covector field's chart
+components** (in-file rebuild of `metricFlatDiff_chartComponent_contMDiffOn`). -/
+theorem metricFlatDiff_chartComponent_contMDiffOn_local (g₁ g₁' : SmoothRiemannianMetric I M)
+    (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
+    (γ : M) (j : Fin (Module.finrank ℝ E)) :
+    ContMDiffOn I 𝓘(ℝ) ∞
+      (fun b : M => ((g₁'.inner b (Y b)).toLinearMap - (g₁.inner b (Y b)).toLinearMap)
+        (DifferentialGeometry.Integral.Measure.chartBasisVecFiber (I := I) γ j b))
+      (chartAt H γ).source := by
+  have h0 := metricFlat_chartComponent_contMDiffOn_local (I := I) g₁' Y γ j
+  have h1 := metricFlat_chartComponent_contMDiffOn_local (I := I) g₁ Y γ j
+  refine (h0.sub h1).congr ?_
+  intro b hb
+  rw [LinearMap.sub_apply]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **Base-point smoothness of the order-`0` raised representative field.**  The `(1, 1)`-operator field
+`x ↦ combinedLowerRaisedEndo0 g₁ g₁' x` is a smooth section of the endomorphism bundle.  By
+`contMDiff_clm_section_of_pointwise` it reduces, per smooth tangent field `Y`, to the smoothness of
+`x ↦ combinedLowerRaisedEndo0 g₁ g₁' x (Y x)`, which by `combinedLowerRaisedEndo0_eq_metricSharp_flatDiff`
+is the `g₁`-metric sharp of the smooth covector field `x ↦ g₁'(Y x, ·) − g₁(Y x, ·)`. -/
+theorem combinedLowerRaisedEndo0_contMDiff (g₁ g₁' : SmoothRiemannianMetric I M) :
+    ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
+      (fun x : M => TotalSpace.mk' (E →L[ℝ] E)
+        (E := fun z : M => TangentSpace I z →L[ℝ] TangentSpace I z) x
+        (combinedLowerRaisedEndo0 (I := I) g₁ g₁' x)) := by
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (F₁ := E) (V₁ := fun z : M => TangentSpace I z)
+    (F₂ := E) (V₂ := fun z : M => TangentSpace I z)
+    (φ := fun x => combinedLowerRaisedEndo0 (I := I) g₁ g₁' x)
+  intro Y
+  have hsharpY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+      (fun b : M => TotalSpace.mk' E
+        (E := fun z : M => TangentSpace I z) b
+        (DifferentialGeometry.Integral.DivergenceTheorem.metricSharp (I := I) g₁ b
+          ((g₁'.inner b (Y b)).toLinearMap - (g₁.inner b (Y b)).toLinearMap))) := by
+    apply DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_contMDiff_total (I := I) g₁
+    intro γ j
+    exact metricFlatDiff_chartComponent_contMDiffOn_local (I := I) g₁ g₁' Y γ j
+  refine hsharpY.congr (fun x => ?_)
+  rw [combinedLowerRaisedEndo0_eq_metricSharp_flatDiff (I := I) g₁ g₁' x (Y x)]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The leading-slot insertion of a tangent endomorphism into a `(0, 2)`-tensor fibre** (in-file
+rebuild of `slotInsertEndoFib 2 0`).  The continuous-linear endomorphism of the `(0, 2)`-tensor fibre
+that precomposes the leading covariant slot with `Λ` and leaves the trailing slot untouched. -/
+def lowerSlotInsert0Fib (x : M) (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) :
+    Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
+  haveI : FiniteDimensional ℝ (Tensor0SSpace 2 I x) := inferInstance
+  LinearMap.toContinuousLinearMap
+    { toFun := fun A => Tensor0SSpace.ofModel
+        ((Tensor0SSpace.toModel A).compContinuousLinearMap
+          (fun i : Fin 2 => if i = 0 then Λ else ContinuousLinearMap.id ℝ E))
+      map_add' := fun A A' => by
+        apply Tensor0SSpace.toModel_injective (I := I)
+        simp only [Tensor0SSpace.toModel_ofModel, Tensor0SSpace.toModel_add]
+        ext m
+        simp
+      map_smul' := fun c A => by
+        apply Tensor0SSpace.toModel_injective (I := I)
+        simp only [Tensor0SSpace.toModel_ofModel, Tensor0SSpace.toModel_smul,
+          RingHom.id_apply]
+        ext m
+        simp }
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- The slot-`0` insertion reads its leading slot through `Λ`: on a tuple `m`, the inserted tensor is the
+original on the tuple with the `0`-th entry replaced by `Λ (m 0)`. -/
+lemma lowerSlotInsert0Fib_apply_eval (x : M)
+    (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (A : Tensor0SSpace 2 I x) (m : Fin 2 → E) :
+    Tensor0SSpace.toModel (lowerSlotInsert0Fib (I := I) (M := M) x Λ A) m =
+      Tensor0SSpace.toModel A (Function.update m 0 (Λ (m 0))) := by
+  rw [lowerSlotInsert0Fib, LinearMap.coe_toContinuousLinearMap']
+  show (Tensor0SSpace.toModel ((Tensor0SSpace.ofModel
+      ((Tensor0SSpace.toModel A).compContinuousLinearMap
+        (fun i : Fin 2 => if i = 0 then Λ else ContinuousLinearMap.id ℝ E))) :
+      Tensor0SSpace 2 I x)) m = _
+  rw [Tensor0SSpace.toModel_ofModel]
+  have hfam : (fun i : Fin 2 =>
+      (if i = 0 then Λ else ContinuousLinearMap.id ℝ E) (m i)) =
+      Function.update m 0 (Λ (m 0)) := by
+    funext i
+    by_cases h : i = 0
+    · subst h; simp
+    · rw [if_neg h, Function.update_of_ne h]; rfl
+  exact congrArg (fun t => Tensor0SSpace.toModel A t) hfam
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- **Slot-`0` insertion is the curry conjugation of right-composition** (the rank-`2` slot-`0`
+specialisation of `slotInsertEndoFib_zero`). -/
+lemma lowerSlotInsert0Fib_curry (x : M)
+    (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (A : Tensor0SSpace 2 I x) :
+    lowerSlotInsert0Fib (I := I) (M := M) x Λ A =
+      (Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x).symm
+        (((Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x) A).comp Λ) := by
+  have hcurry : Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x
+      (lowerSlotInsert0Fib (I := I) (M := M) x Λ A) =
+      ((Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x) A).comp Λ := by
+    apply ContinuousLinearMap.ext
+    intro v0
+    apply Tensor0SSpace.toModel_injective (I := I)
+    ext vt
+    rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M),
+      lowerSlotInsert0Fib_apply_eval, ContinuousLinearMap.comp_apply,
+      TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)]
+    congr 1
+    rw [Fin.cons_zero, Fin.update_cons_zero]
+  rw [← hcurry, ContinuousLinearEquiv.symm_apply_apply]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The order-`0` inverse-metric-difference multiplier fibre operator.**  At `x`, the leading-slot
+insertion of the `g₁'`-lowered cometric-difference representative `combinedLowerRaisedEndo0 g₁ g₁' x`
+into a `(0, 2)`-tensor.  This is the genuine `(g₁⁻¹ − g₁'⁻¹)·h` order-`0` action; the in-file rebuild
+of `gInvDiffSlotEndo`. -/
+def combinedLowerCoeff0Fib (g₁ g₁' : SmoothRiemannianMetric I M) (x : M) :
+    Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
+  lowerSlotInsert0Fib (I := I) (M := M) x (combinedLowerRaisedEndo0 (I := I) g₁ g₁' x)
+
+set_option linter.unusedSectionVars false in
+/-- The defining eval of `combinedLowerCoeff0Fib`: the original `(0, 2)`-tensor with the leading slot
+read through the raised representative. -/
+lemma combinedLowerCoeff0Fib_apply_eval (g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
+    (A : Tensor0SSpace 2 I x) (m : Fin 2 → E) :
+    Tensor0SSpace.toModel (combinedLowerCoeff0Fib (I := I) g₁ g₁' x A) m =
+      Tensor0SSpace.toModel A
+        (Function.update m 0 (combinedLowerRaisedEndo0 (I := I) g₁ g₁' x (m 0))) := by
+  rw [combinedLowerCoeff0Fib, lowerSlotInsert0Fib_apply_eval]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **Base-point smoothness of the order-`0` multiplier field** (as a `(2, 2)`-tensor section): the
+slot-`0` insertion (curry conjugation of right-composition, `lowerSlotInsert0Fib_curry`) of the smooth
+raised-representative field `combinedLowerRaisedEndo0_contMDiff`. -/
+theorem combinedLowerCoeff0Fib_contMDiff (g₁ g₁' : SmoothRiemannianMetric I M) :
+    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) x
+        (Tensor0SBundle.TensorRSSpace.ofCLM (combinedLowerCoeff0Fib (I := I) g₁ g₁' x))) := by
+  set φ : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x :=
+    fun x => combinedLowerRaisedEndo0 (I := I) g₁ g₁' x with hφdef
+  have hφ := combinedLowerRaisedEndo0_contMDiff (I := I) g₁ g₁'
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (F₁ := Tensor0SBundle.Tensor0SModel 2 ℝ E) (V₁ := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z)
+    (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E) (V₂ := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z)
+    (φ := fun x => combinedLowerCoeff0Fib (I := I) g₁ g₁' x)
+  intro Y
+  have heq : (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
+      (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) x
+      (combinedLowerCoeff0Fib (I := I) g₁ g₁' x (Y x))) =
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
+      (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) x
+      ((Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x).symm
+        (((Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x) (Y x)).comp (φ x)))) := by
+    funext x
+    rw [combinedLowerCoeff0Fib, lowerSlotInsert0Fib_curry]
+  rw [heq]
+  have hcurriedY : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] Tensor0SBundle.Tensor0SModel 1 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (E →L[ℝ] Tensor0SBundle.Tensor0SModel 1 ℝ E)
+        (E := fun z : M => TangentSpace I z →L[ℝ] Tensor0SBundle.Tensor0SSpace 1 I z) x
+        ((Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x) (Y x))) :=
+    fun x => TensorMultilinear.contMDiffAt_curriedSection_of_contMDiffAt_section (I := I) (M := M)
+      (fun y : M => Y y) x (Y.contMDiff x)
+  have hG : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] Tensor0SBundle.Tensor0SModel 1 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (E →L[ℝ] Tensor0SBundle.Tensor0SModel 1 ℝ E)
+        (E := fun z : M => TangentSpace I z →L[ℝ] Tensor0SBundle.Tensor0SSpace 1 I z) x
+        (((Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x) (Y x)).comp (φ x))) := by
+    apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+      (F₁ := E) (V₁ := fun z : M => TangentSpace I z)
+      (F₂ := Tensor0SBundle.Tensor0SModel 1 ℝ E) (V₂ := fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z)
+      (φ := fun x => ((Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x) (Y x)).comp (φ x))
+    intro Z
+    have heqZ : (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 1 ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z) x
+        ((((Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x) (Y x)).comp (φ x)) (Z x))) =
+        (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 1 ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z) x
+        ((Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x) (Y x) (φ x (Z x)))) := by
+      funext x; rfl
+    rw [heqZ]
+    have hinner : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
+        (fun x : M => TotalSpace.mk' E
+          (E := fun z : M => TangentSpace I z) x (φ x (Z x))) :=
+      ContMDiff.clm_bundle_apply (b := id) hφ Z.contMDiff
+    exact ContMDiff.clm_bundle_apply (b := id) hcurriedY hinner
+  exact contMDiff_uncurriedSection_of_contMDiff_homSection (I := I) (M := M)
+    (fun x : M => ((Tensor0SBundle.tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x) (Y x)).comp (φ x)) hG
+
+/-- **The order-`0` inverse-metric-difference multiplier coefficient field as a smooth
+compactly-supported `(2, 2)`-tensor.**  The fibre value at `x` is `combinedLowerCoeff0Fib g₁ g₁' x`
+(smooth by `combinedLowerCoeff0Fib_contMDiff`); on the closed manifold it has compact support.  It is the
+order-`0` value coefficient of the combined-lower arm, the slot-`0` insertion of the two-endpoint
+inverse-metric difference. -/
+noncomputable def combinedLowerCoeff0 (g₀ g₁ g₁' : SmoothRiemannianMetric I M) :
+    SmoothCcTensor g₀ 2 2 where
+  toSection :=
+    { toFun := fun x : M =>
+        (show Tensor0SBundle.TensorRSSpace 2 2 I x from combinedLowerCoeff0Fib (I := I) g₁ g₁' x)
+      contMDiff_toFun := combinedLowerCoeff0Fib_contMDiff (I := I) g₁ g₁' }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+set_option linter.unusedSectionVars false in
+/-- The underlying section value of `combinedLowerCoeff0` at `x` is the fibre operator
+`combinedLowerCoeff0Fib g₁ g₁' x`.  Definitional. -/
+@[simp] theorem combinedLowerCoeff0_toSection (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M) :
+    (combinedLowerCoeff0 (I := I) (M := M) g₀ g₁ g₁').toSection x =
+      (show Tensor0SBundle.TensorRSSpace 2 2 I x from combinedLowerCoeff0Fib (I := I) g₁ g₁' x) := rfl
+
+set_option linter.unusedSectionVars false in
+/-- **The `appCc`/`unitModel` read-off of the order-`0` coefficient `combinedLowerCoeff0`.**
+
+For any smooth `(0, 2)`-tensor field `W` (in the consumer `W = T − T'`), the `unitModel` read-off of the
+operator-field action `appCc g₀ 2 2 (combinedLowerCoeff0 g₀ g₁ g₁') W` at `x` on a tangent pair `v` reads
+the leading slot of the unit-form `D = unitModel g₀ 2 W x` through the raised representative
+`combinedLowerRaisedEndo0 g₁ g₁'`:
+```
+unitModel g₀ 2 (appCc g₀ 2 2 (combinedLowerCoeff0 g₀ g₁ g₁') W) x v
+  = D (Function.update v 0 (combinedLowerRaisedEndo0 g₁ g₁' x (v 0))).
+```
+This is the order-`0` value building block: the inverse-metric-difference multiplier collapses the
+`(O)`-arm's `g₁`-pairing to a fibrewise-linear coefficient acting on `W₀ = (T − T')`. -/
+theorem combinedLowerCoeff0_appCc_eq
+    (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 2)
+    (x : M) (v : Fin 2 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 2 2 (combinedLowerCoeff0 (I := I) (M := M) g₀ g₁ g₁') W) x v =
+      unitModel (I := I) (M := M) g₀ 2 W x
+        (Function.update v 0 (combinedLowerRaisedEndo0 (I := I) g₁ g₁' x (v 0))) := by
+  rw [unitModel, appCc_toSection]
+  rw [show ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (combinedLowerCoeff0 (I := I) (M := M) g₀ g₁ g₁').toSection x).comp
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
+          W.toSection x)) (unitTensor (I := I) (M := M) x) =
+      (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
+        (combinedLowerCoeff0 (I := I) (M := M) g₀ g₁ g₁').toSection x)
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
+          W.toSection x) (unitTensor (I := I) (M := M) x)) from rfl]
+  rw [combinedLowerCoeff0_toSection]
+  rw [combinedLowerCoeff0Fib_apply_eval]
+  rfl
+
 set_option linter.unusedSectionVars false in
 /-- **The combined lower-order arm connector of the Ricci-arm eval-matching (posited covariant bridge,
 MIXED order-`(0, 1)`).**
