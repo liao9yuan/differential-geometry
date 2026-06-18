@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.VectorField
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciIdentitySmoothFrame
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnDiffPalatini
 
 /-!
 # The DeTurck vector-field difference via the connection-difference trace
@@ -345,6 +346,80 @@ theorem connDiff_symm (g g' : SmoothRiemannianMetric I M) (x : M) (w v : Tangent
   abel_nf
   abel_nf at this
   linear_combination (norm := abel) this
+
+/-! ## The outer-`g` (minuend-connection) covariant derivative of `connDiff` -/
+
+/-- **The minuend-connection covariant derivative of the connection-difference tensor differs
+from the subtrahend-connection one by the connection-difference quadratic action.**
+
+Write `A = connDiff g g_bg = ∇^{g} - ∇^{g_bg}` (the difference of the two Levi-Civita
+connections, with `∇^{g}` the minuend and `∇^{g_bg}` the subtrahend).  The directional
+covariant derivative of the `(1,2)`-tensor `A` along `X` taken with respect to the **minuend**
+connection `∇^{g}` — the connection the Lie/Killing form `g(∇^{g}_v\,X, \cdot)` differentiates
+with — written in the standard coordinate-free `(1,2)`-tensor form
+`(∇^{g}_X A)(Y, Z) = ∇^{g}_X(A(Y, Z)) - A(∇^{g}_X Y, Z) - A(Y, ∇^{g}_X Z)`, equals the
+**subtrahend** derivative `(∇^{g_bg}_X A)(Y, Z) = covDerivConnDiff g_bg g X Y Z x` plus the
+connection-difference quadratic action of `A` on the three slots:
+$$
+  (\nabla^{g}_X A)(Y, Z)
+    = (\nabla^{g_{bg}}_X A)(Y, Z)
+      + A\bigl(A(Y, Z), X\bigr)
+      - A\bigl(Z, A(Y, X)\bigr)
+      - A\bigl(A(Z, X), Y\bigr),
+$$
+read in the project's `connDiff x · ·` argument convention (first argument the differentiated
+section value, second the direction).  The slot signs were fixed by unfolding the `covDerivDiff`
+structure and confirmed by a dimension-3/4 numeric check.
+
+Since `∇^{g} = ∇^{g_bg} + A` on vector fields, the three differences in the `(1,2)`-tensor
+covariant-derivative formula are each a single application of the connection-difference one-form:
+the outer derivative contributes `A(A(Y, Z), X)` (`diff_eval` on the smooth section `A(Y, Z)`),
+and the two slot-corrections contribute `-A(Z, A(Y, X))` and `-A(A(Z, X), Y)`
+(`covApply_cov1_eq` rewriting `∇^{g}_X Y - ∇^{g_bg}_X Y = A(Y, X)` and likewise for `Z`,
+followed by linearity of the bilinear `A`).  This is the outer-`g` differentiation bridge the
+Lie-arm grading consumes to convert `∇^{g}(\mathrm{deTurckVF}\,g\,g_{bg})` into the
+subtrahend-connection differentiated trace `covDerivConnDiff` plus a quadratic remainder. -/
+theorem connDiff_outerCovDeriv_eq (g g_bg : SmoothRiemannianMetric I M)
+    {X Y Z : Π b : M, TangentSpace I b}
+    (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y))
+    (hZ : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Z)) (x : M) :
+    (LeviCivita (I := I) g).toFun
+          (diffSec (LeviCivita (I := I) g_bg) (LeviCivita (I := I) g) Y Z) x (X x)
+        - connDiff (I := I) g g_bg x (Z x) (covApply (LeviCivita (I := I) g) X Y x)
+        - connDiff (I := I) g g_bg x (covApply (LeviCivita (I := I) g) X Z x) (Y x) =
+      covDerivConnDiff (I := I) g_bg g X Y Z x
+        + (connDiff (I := I) g g_bg x (connDiff (I := I) g g_bg x (Z x) (Y x)) (X x)
+            - connDiff (I := I) g g_bg x (Z x) (connDiff (I := I) g g_bg x (Y x) (X x))
+            - connDiff (I := I) g g_bg x (connDiff (I := I) g g_bg x (Z x) (X x)) (Y x)) := by
+  classical
+  haveI : CompleteSpace E := FiniteDimensional.complete ℝ E
+  set cov₀ := LeviCivita (I := I) g_bg with hcov₀
+  set cov₁ := LeviCivita (I := I) g with hcov₁
+  have hAeq : connDiff (I := I) g g_bg =
+      CovariantDerivative.difference cov₁ cov₀ := connDiff_eq_difference (I := I) g_bg g
+  have hYx : MDiffAt (T% Y) x := (hY x).mdifferentiableAt (by simp)
+  have hZx : MDiffAt (T% Z) x := (hZ x).mdifferentiableAt (by simp)
+  have hZ1 : ContMDiff I (I.prod 𝓘(ℝ, E)) ((∞ : WithTop ℕ∞) + 1) (T% Z) := by simpa using hZ
+  have hdiffYZ_at : MDiffAt (T% (diffSec cov₀ cov₁ Y Z)) x :=
+    ((diffSec_contMDiff cov₀ cov₁ hY hZ1) x).mdifferentiableAt (by simp)
+  rw [covDerivConnDiff_eq (I := I) g_bg g X Y Z x]
+  unfold covDerivDiff
+  rw [← hcov₀, ← hcov₁]
+  have hT1 : cov₁.toFun (diffSec cov₀ cov₁ Y Z) x (X x)
+        - cov₀.toFun (diffSec cov₀ cov₁ Y Z) x (X x) =
+      connDiff (I := I) g g_bg x (connDiff (I := I) g g_bg x (Z x) (Y x)) (X x) := by
+    rw [← diff_eval cov₀ cov₁ hdiffYZ_at (X x), hAeq]
+    rfl
+  have hcA1 : covApply cov₁ X Y x = covApply cov₀ X Y x + connDiff (I := I) g g_bg x (Y x) (X x) := by
+    rw [covApply_cov1_eq cov₀ cov₁ hYx, hAeq]; rfl
+  have hcA2 : covApply cov₁ X Z x = covApply cov₀ X Z x + connDiff (I := I) g g_bg x (Z x) (X x) := by
+    rw [covApply_cov1_eq cov₀ cov₁ hZx, hAeq]; rfl
+  have hT1' : cov₁.toFun (diffSec cov₀ cov₁ Y Z) x (X x) =
+      cov₀.toFun (diffSec cov₀ cov₁ Y Z) x (X x)
+        + connDiff (I := I) g g_bg x (connDiff (I := I) g g_bg x (Z x) (Y x)) (X x) := by
+    rw [← hT1]; abel
+  rw [hcA1, hcA2, hT1', ← hAeq, map_add, map_add, ContinuousLinearMap.add_apply]
+  abel
 
 end DeTurck
 end PDE
