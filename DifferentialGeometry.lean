@@ -1081,6 +1081,7 @@ import DifferentialGeometry.Geometry.Connection.Realization.HomNabla
 import DifferentialGeometry.Geometry.Connection.Realization.SmoothSections
 import DifferentialGeometry.Geometry.Connection.Realization.Tensor0SBridge
 import DifferentialGeometry.Geometry.Connection.Realization.TensorNabla
+import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentCovDerivIdentification
 import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentExtension
 import DifferentialGeometry.Geometry.Connection.TensorNabla.HomBundleCurvatureLeibniz
 import DifferentialGeometry.Geometry.Connection.TensorNabla.HomBundleNabla
