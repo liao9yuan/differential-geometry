@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.AppCcDropIteratedGrid
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradSlotPermutationNaturality
 import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotExtendCovariantParallelism
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.RankRReadingDominationUniformSup
 
@@ -579,6 +580,25 @@ lemma rsDomDomCongr_apply_eval {r s : ℕ} {x : M} (σ : Equiv.Perm (Fin s))
       (y : Tensor0SSpace s I x) w = Tensor0SSpace.toModel y w := fun y w => rfl
   rw [hfib, hL, ContinuousMultilinearMap.domDomCongr_apply, ← hfib]
 
+/-- **Composition of two covariant-slot permutations.**  `rsDomDomCongr σ (rsDomDomCongr τ T) =
+rsDomDomCongr (τ.trans σ) T`. -/
+lemma rsDomDomCongr_rsDomDomCongr {r s : ℕ} {x : M} (σ τ : Equiv.Perm (Fin s))
+    (T : TensorRSSpace r s I x) :
+    rsDomDomCongr (I := I) (M := M) σ (rsDomDomCongr (I := I) (M := M) τ T) =
+      rsDomDomCongr (I := I) (M := M) (τ.trans σ) T := by
+  apply ContinuousLinearMap.ext
+  intro d
+  apply Tensor0SSpace.toModel_injective
+  apply ContinuousMultilinearMap.ext
+  intro v
+  have hfib : ∀ (y : Tensor0SSpace s I x) (w : Fin s → TangentSpace I x),
+      Tensor0SSpace.toModel y w = (y : Tensor0SSpace s I x) w := fun y w => rfl
+  rw [hfib, hfib]
+  rw [rsDomDomCongr_apply_eval (I := I) (M := M) σ (rsDomDomCongr (I := I) (M := M) τ T) d v,
+    rsDomDomCongr_apply_eval (I := I) (M := M) τ T d (fun k => v (σ k)),
+    rsDomDomCongr_apply_eval (I := I) (M := M) (τ.trans σ) T d v]
+  rfl
+
 /-- **The frame component of a slot-permuted tensor reindexes the output multi-index.**  For a
 `g_x`-orthonormal frame `e`, the `(K, J)`-frame component of `rsDomDomCongr σ T` is the
 `(K, J ∘ σ)`-frame component of `T` (the slot reindexing acts on the output-slot reading). -/
@@ -656,6 +676,228 @@ over the gradient order, the covariant slot permutation invariance `riemannianFi
 absorbs the order-dependent transposition of the passenger slot through the accumulated gradient slots
 (needed because the contravariant rank `r + 1 > 0` makes the rank-`0` naturality inapplicable). -/
 
+/-- **Covariant gradient commutes with the leading-passenger-slot extension up to a leading-slot
+transposition (section level).**  At every base point `x`, the section value of `covGrad (slotExtend
+g r s Φ)` is the slot-`0,1`-transposition (`rsDomDomCongr (Equiv.swap 0 1)`) of the section value of
+`slotExtend g r (s + 1) (covGrad g r s Φ)`:
+```
+(covGrad (slotExtend Φ)).toSection x = rsDomDomCongr (swap 0 1) ((slotExtend (covGrad Φ)).toSection x).
+```
+Both sides are `(r + 1, (s + 1) + 1)`-tensors reading the gradient slot and the new passenger slot in
+the opposite order; the section identity is the `toModel`-level reading of `covGrad_toSection_apply_eval`,
+`tensorCovDerivAt_slotExtend_eq` and `slotExtendFib_apply_eval`. -/
+private lemma covGrad_slotExtend_toSection_rsDomDomCongr
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (Φ : SmoothCcTensor g r s) (x : M) :
+    (covGrad (I := I) (M := M) g (r + 1) (s + 1)
+        (slotExtend (I := I) (M := M) g r s Φ)).toSection x =
+      rsDomDomCongr (I := I) (M := M) (r := r + 1) (Equiv.swap (0 : Fin (s + 1 + 1)) 1)
+        ((slotExtend (I := I) (M := M) g r (s + 1)
+          (covGrad (I := I) (M := M) g r s Φ)).toSection x) := by
+  classical
+  apply ContinuousLinearMap.ext
+  intro d
+  apply Tensor0SSpace.toModel_injective
+  refine ContinuousMultilinearMap.ext (fun m => ?_)
+  have hfib : ∀ (y : Tensor0SSpace (s + 1 + 1) I x) (w : Fin (s + 1 + 1) → TangentSpace I x),
+      Tensor0SSpace.toModel y w = (y : Tensor0SSpace (s + 1 + 1) I x) w := fun _ _ => rfl
+  -- RHS: the slot-reindexing reads `m ∘ swap` (coe-application form).
+  conv_rhs => rw [hfib, rsDomDomCongr_apply_eval (I := I) (M := M) (r := r + 1)
+    (Equiv.swap (0 : Fin (s + 1 + 1)) 1)
+    ((slotExtend (I := I) (M := M) g r (s + 1) (covGrad (I := I) (M := M) g r s Φ)).toSection x) d m]
+  conv_rhs => rw [← hfib]
+  -- LHS: read the leading (gradient) slot via `covGrad_toSection_apply_eval`.
+  rw [covGrad_toSection_apply_eval (I := I) (M := M) g (r + 1) (s + 1)
+    (slotExtend (I := I) (M := M) g r s Φ) x d m]
+  rw [DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.tensorCovDerivAt_slotExtend_eq
+    (I := I) (M := M) g r s Φ x (m 0)]
+  -- The slot-extended fibre operator reads the new passenger slot first.
+  rw [show Matrix.vecTail m =
+      Fin.cons (m 1) (fun k : Fin s => m (Fin.succ (Fin.succ k))) from by
+    funext k
+    refine Fin.cases ?_ (fun i => ?_) k
+    · change m (Fin.succ 0) = _
+      rw [Fin.cons_zero]; rfl
+    · change m (Fin.succ (Fin.succ i)) = _
+      rw [Fin.cons_succ]]
+  rw [slotExtendFib_apply_eval (I := I) (M := M) g r s x
+    (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+      tensorCovDerivAt (I := I) (M := M) g r s Φ x (m 0))
+    d (m 1) (fun k : Fin s => m (Fin.succ (Fin.succ k)))]
+  -- RHS continued: `slotExtend (covGrad Φ)` reads the passenger slot first, then `covGrad`.
+  rw [slotExtend_toSection (I := I) (M := M) g r (s + 1) (covGrad (I := I) (M := M) g r s Φ) x]
+  rw [show (fun k => m ((Equiv.swap (0 : Fin (s + 1 + 1)) 1) k)) =
+      Fin.cons (m 1) (fun k : Fin (s + 1) => m ((Equiv.swap (0 : Fin (s + 1 + 1)) 1) (Fin.succ k)))
+      from by
+    funext k
+    refine Fin.cases ?_ (fun i => ?_) k
+    · simp only [Fin.cons_zero]
+      rw [Equiv.swap_apply_left]
+    · rw [Fin.cons_succ]]
+  rw [slotExtendFib_apply_eval (I := I) (M := M) g r (s + 1) x
+    (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+      (covGrad (I := I) (M := M) g r s Φ).toSection x)
+    d (m 1) (fun k : Fin (s + 1) => m ((Equiv.swap (0 : Fin (s + 1 + 1)) 1) (Fin.succ k)))]
+  rw [covGrad_toSection_apply_eval (I := I) (M := M) g r s Φ x
+    ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x) d (m 1))
+    (fun k : Fin (s + 1) => m ((Equiv.swap (0 : Fin (s + 1 + 1)) 1) (Fin.succ k)))]
+  -- The read-off direction and the tail tuple after the swap.
+  have hdir : m ((Equiv.swap (0 : Fin (s + 1 + 1)) 1) (Fin.succ (0 : Fin (s + 1)))) = m 0 := by
+    rw [show (Fin.succ (0 : Fin (s + 1)) : Fin (s + 1 + 1)) = 1 from rfl, Equiv.swap_apply_right]
+  have htail : (Matrix.vecTail (fun k : Fin (s + 1) =>
+        m ((Equiv.swap (0 : Fin (s + 1 + 1)) 1) (Fin.succ k)))) =
+      (fun k : Fin s => m (Fin.succ (Fin.succ k))) := by
+    funext k
+    change m ((Equiv.swap (0 : Fin (s + 1 + 1)) 1) (Fin.succ (Fin.succ k))) =
+      m (Fin.succ (Fin.succ k))
+    rw [Equiv.swap_apply_of_ne_of_ne]
+    · exact (Fin.succ_ne_zero _)
+    · rw [show (1 : Fin (s + 1 + 1)) = Fin.succ (0 : Fin (s + 1)) from rfl]
+      exact fun h => Fin.succ_ne_zero _ (Fin.succ_injective _ h)
+  rw [hdir, htail]
+
+/-- **The covariant gradient commutes with the covariant-rank cast `castRankCc_db`.** -/
+private lemma covGrad_castRankCc_db (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ} (h : a = b)
+    (W : SmoothCcTensor g r a) :
+    covGrad (I := I) (M := M) g r b
+        (DifferentialGeometry.Integral.Connection.castRankCc_db g r h W) =
+      DifferentialGeometry.Integral.Connection.castRankCc_db g r (by rw [h] : a + 1 = b + 1)
+        (covGrad (I := I) (M := M) g r a W) := by
+  subst h; rfl
+
+/-- **A leading-slot transposition is heterogeneously equal across a covariant-rank cast.** -/
+private lemma heq_swap_zero_one_of_eq {p q : ℕ} (h : p = q) :
+    HEq (Equiv.swap (0 : Fin (p + 1)) 1) (Equiv.swap (0 : Fin (q + 1)) 1) := by
+  subst h; rfl
+
+/-- **Succ-step cast/transposition bookkeeping.**  Given two `(r + 1, a)`-tensors `P, Q` related at
+the section level by the leading-slot transposition `rsDomDomCongr swapA` (helper 1), casting both up
+along `h : a = b` and reindexing by `σ̂` on the cast valence composes the transposition into
+`swapB.trans σ̂`.  Proven by `subst h` (collapsing the cast and identifying `swapA = swapB`), then the
+permutation composition `rsDomDomCongr_rsDomDomCongr`. -/
+private lemma succ_step_cast_transposition_eq {r a b : ℕ} (h : a = b)
+    (g : SmoothRiemannianMetric I M)
+    (P Q : SmoothCcTensor g (r + 1) a) (x : M)
+    (sigmaHat swapB : Equiv.Perm (Fin b)) (swapA : Equiv.Perm (Fin a)) (hswap : HEq swapA swapB)
+    (hPQ : P.toSection x = rsDomDomCongr (I := I) (M := M) swapA (Q.toSection x)) :
+    rsDomDomCongr (I := I) (M := M) sigmaHat
+        ((DifferentialGeometry.Integral.Connection.castRankCc_db g (r + 1) h P).toSection x) =
+      rsDomDomCongr (I := I) (M := M) (swapB.trans sigmaHat)
+        ((DifferentialGeometry.Integral.Connection.castRankCc_db g (r + 1) h Q).toSection x) := by
+  subst h
+  rw [eq_of_heq hswap] at hPQ
+  simp only [DifferentialGeometry.Integral.Connection.castRankCc_db]
+  rw [hPQ, rsDomDomCongr_rsDomDomCongr]
+
+/-- **The structural slot-extension naturality invariant for the iterated covariant gradient.**  At
+every gradient order `i`, the iterated covariant gradient `∇^i (slotExtend Φ)` is a covariant-output-
+slot reindexing of (the covariant-rank cast of) `slotExtend (∇^i Φ)`:
+```
+∃ σ, (∇^i (slotExtend g r s Φ)).toSection x =
+  rsDomDomCongr σ ((castRankCc_db g (r+1) h (slotExtend g r (s+i) (∇^i Φ))).toSection x).
+```
+Induction on `i`: order `0` is the identity; the step pushes one covariant gradient through the inner
+reindexing by the general-rank `covGrad`-naturality `covGrad_rs_toModel_domDomCongr` (the positive
+contravariant rank `r + 1` makes the rank-`0` naturality inapplicable), then absorbs the leading
+gradient/passenger transposition of `covGrad (slotExtend (∇^i Φ))` via
+`covGrad_slotExtend_toSection_rsDomDomCongr`. -/
+private lemma exists_iteratedCovGrad_slotExtend_rsDomDomCongr
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (Φ : SmoothCcTensor g r s) (i : ℕ) :
+    ∃ σ : Equiv.Perm (Fin ((s + 1) + i)),
+      ∀ x : M,
+        (iteratedCovGrad (I := I) g (r + 1) (s + 1) i
+            (slotExtend (I := I) (M := M) g r s Φ)).toSection x =
+          rsDomDomCongr (I := I) (M := M) σ
+            ((DifferentialGeometry.Integral.Connection.castRankCc_db g (r + 1)
+              (by omega : (s + i) + 1 = (s + 1) + i)
+              (slotExtend (I := I) (M := M) g r (s + i)
+                (iteratedCovGrad (I := I) g r s i Φ))).toSection x) := by
+  classical
+  induction i with
+  | zero =>
+      refine ⟨Equiv.refl _, fun x => ?_⟩
+      rw [iteratedCovGrad_zero, iteratedCovGrad_zero]
+      apply ContinuousLinearMap.ext
+      intro d
+      apply Tensor0SSpace.toModel_injective
+      apply ContinuousMultilinearMap.ext
+      intro m
+      have hfib : ∀ (y : Tensor0SSpace ((s + 1) + 0) I x)
+          (w : Fin ((s + 1) + 0) → TangentSpace I x),
+          Tensor0SSpace.toModel y w = (y : Tensor0SSpace ((s + 1) + 0) I x) w := fun _ _ => rfl
+      conv_rhs => rw [hfib, rsDomDomCongr_apply_eval (I := I) (M := M) (r := r + 1)
+        (Equiv.refl (Fin ((s + 1) + 0)))
+        ((DifferentialGeometry.Integral.Connection.castRankCc_db g (r + 1)
+          (by omega : (s + 0) + 1 = (s + 1) + 0)
+          (slotExtend (I := I) (M := M) g r (s + 0) Φ)).toSection x) d m]
+      simp only [Equiv.refl_apply]
+      -- `castRankCc_db` with `s + 0 + 1 = s + 1 + 0` is a transport over a defeq cast; both `Fin`
+      -- cardinalities reduce to `s + 1`.
+      rfl
+  | succ i ih =>
+      obtain ⟨σ, hσ⟩ := ih
+      -- The new permutation: shift `σ` past the new leading gradient slot, then absorb the
+      -- gradient/passenger transposition.
+      refine ⟨(Equiv.swap (0 : Fin (((s + 1) + i) + 1)) 1).trans
+        (Equiv.Perm.decomposeFin.symm (0, σ)), fun x => ?_⟩
+      -- `∇^{i+1}(slotExtend Φ) = covGrad (∇^i(slotExtend Φ))`.
+      rw [iteratedCovGrad_succ (I := I) g (r + 1) (s + 1) i (slotExtend (I := I) (M := M) g r s Φ)]
+      -- Push `covGrad` through the IH reindexing by the general-rank naturality.
+      have hcov : (covGrad (I := I) (M := M) g (r + 1) ((s + 1) + i)
+            (iteratedCovGrad (I := I) g (r + 1) (s + 1) i
+              (slotExtend (I := I) (M := M) g r s Φ))).toSection x =
+          rsDomDomCongr (I := I) (M := M) (Equiv.Perm.decomposeFin.symm (0, σ))
+            ((covGrad (I := I) (M := M) g (r + 1) ((s + 1) + i)
+              (DifferentialGeometry.Integral.Connection.castRankCc_db g (r + 1)
+                (by omega : (s + i) + 1 = (s + 1) + i)
+                (slotExtend (I := I) (M := M) g r (s + i)
+                  (iteratedCovGrad (I := I) g r s i Φ)))).toSection x) := by
+        apply ContinuousLinearMap.ext
+        intro d
+        apply Tensor0SSpace.toModel_injective
+        apply ContinuousMultilinearMap.ext
+        intro v
+        rw [covGrad_rs_toModel_domDomCongr (I := I) (M := M) g (r + 1) ((s + 1) + i) σ
+          (DifferentialGeometry.Integral.Connection.castRankCc_db g (r + 1)
+            (by omega : (s + i) + 1 = (s + 1) + i)
+            (slotExtend (I := I) (M := M) g r (s + i) (iteratedCovGrad (I := I) g r s i Φ)))
+          (iteratedCovGrad (I := I) g (r + 1) (s + 1) i (slotExtend (I := I) (M := M) g r s Φ))
+          (fun y d' => by
+            have := hσ y
+            rw [this]
+            exact toModel_rsDomDomCongr_apply (I := I) (M := M) σ _ d') x d v]
+        rw [ContinuousMultilinearMap.domDomCongr_apply]
+        have hfib : ∀ (y : Tensor0SSpace (((s + 1) + i) + 1) I x)
+            (w : Fin (((s + 1) + i) + 1) → TangentSpace I x),
+            Tensor0SSpace.toModel y w = (y : Tensor0SSpace (((s + 1) + i) + 1) I x) w := fun _ _ => rfl
+        conv_rhs => rw [hfib, rsDomDomCongr_apply_eval (I := I) (M := M) (r := r + 1)
+          (Equiv.Perm.decomposeFin.symm (0, σ))
+          ((covGrad (I := I) (M := M) g (r + 1) ((s + 1) + i)
+            (DifferentialGeometry.Integral.Connection.castRankCc_db g (r + 1)
+              (by omega : (s + i) + 1 = (s + 1) + i)
+              (slotExtend (I := I) (M := M) g r (s + i)
+                (iteratedCovGrad (I := I) g r s i Φ)))).toSection x) d v]
+        rfl
+      rw [hcov]
+      -- The inner `covGrad (castRankCc_db ... (slotExtend (∇^iΦ)))`: commute the cast, then absorb
+      -- the gradient/passenger transposition.
+      rw [covGrad_castRankCc_db (I := I) (M := M) g (r + 1)
+        (by omega : (s + i) + 1 = (s + 1) + i)
+        (slotExtend (I := I) (M := M) g r (s + i) (iteratedCovGrad (I := I) g r s i Φ))]
+      -- `iteratedCovGrad_succ` on the inner `∇^{i+1}Φ` and `slotExtend`'s gradient commutation.
+      rw [iteratedCovGrad_succ (I := I) g r s i Φ]
+      exact succ_step_cast_transposition_eq (I := I) (M := M)
+        (by omega : (s + i) + 1 + 1 = (s + 1) + i + 1) g
+        (covGrad (I := I) (M := M) g (r + 1) (s + i + 1)
+          (slotExtend (I := I) (M := M) g r (s + i) (iteratedCovGrad (I := I) g r s i Φ)))
+        (slotExtend (I := I) (M := M) g r (s + (i + 1))
+          (covGrad (I := I) (M := M) g r (s + i) (iteratedCovGrad (I := I) g r s i Φ)))
+        x (Equiv.Perm.decomposeFin.symm (0, σ))
+        (Equiv.swap (0 : Fin (((s + 1) + i) + 1)) 1)
+        (Equiv.swap (0 : Fin (((s + i) + 1) + 1)) 1)
+        (heq_swap_zero_one_of_eq (by omega : (s + i) + 1 = (s + 1) + i))
+        (covGrad_slotExtend_toSection_rsDomDomCongr (I := I) (M := M) g r (s + i)
+          (iteratedCovGrad (I := I) g r s i Φ) x)
+
 /-- **The iterated slot-extension fibre-norm bound.**  At every base point `x` and gradient order `i`,
 inserting one leading covariant passenger slot scales the iterated covariant-gradient fibre norm by at
 most the dimension factor `n = Module.finrank ℝ E`:
@@ -671,7 +913,8 @@ then applies the passenger scaling `rfns_slotExtend_eq` to `∇^i Φ`.
 This is the section-level slot-extension jet scaling consumed by the `appCc` diagonal product grid; it
 is the general-valence analogue of the rank-`0` slot-permutation jet invariance
 `riemannianFiberNormSq_iteratedCovGrad_eq_of_section_domDomCongr`, lifted to positive contravariant
-rank through `riemannianFiberNormSq_domDomCongr_covariant`. -/
+rank through `riemannianFiberNormSq_domDomCongr_covariant` and the general-rank covariant-gradient
+slot-permutation naturality `covGrad_rs_toModel_domDomCongr`. -/
 theorem rfns_iteratedCovGrad_slotExtend_le (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g (r + 1) ((s + 1) + i) x
@@ -680,7 +923,22 @@ theorem rfns_iteratedCovGrad_slotExtend_le (g : SmoothRiemannianMetric I M) (r s
       (Module.finrank ℝ E : ℝ) *
         riemannianFiberNormSq (I := I) (M := M) g r (s + i) x
           ((iteratedCovGrad (I := I) g r s i Φ).toSection x) := by
-  sorry
+  obtain ⟨σ, hσ⟩ := exists_iteratedCovGrad_slotExtend_rsDomDomCongr (I := I) (M := M) g r s Φ i
+  -- The structural invariant: `∇^i(slotExtend Φ)` is the `σ`-reindexing of the cast `slotExtend(∇^iΦ)`.
+  rw [hσ x]
+  -- The slot reindexing preserves the fibre norm.
+  rw [riemannianFiberNormSq_domDomCongr_covariant (I := I) (M := M) g (r + 1) ((s + 1) + i) x σ
+    ((DifferentialGeometry.Integral.Connection.castRankCc_db g (r + 1)
+      (by omega : (s + i) + 1 = (s + 1) + i)
+      (slotExtend (I := I) (M := M) g r (s + i)
+        (iteratedCovGrad (I := I) g r s i Φ))).toSection x)]
+  -- The cast preserves the fibre norm (heterogeneous-section congruence); `rfns_slotExtend_eq`
+  -- scales it by `n`.
+  rw [← rfns_toSection_heq_congr_rs g (by omega : (s + i) + 1 = (s + 1) + i)
+    (DifferentialGeometry.Integral.Connection.castRankCc_db_heq g (r + 1)
+      (by omega : (s + i) + 1 = (s + 1) + i)
+      (slotExtend (I := I) (M := M) g r (s + i) (iteratedCovGrad (I := I) g r s i Φ))).symm x]
+  rw [rfns_slotExtend_eq (I := I) (M := M) g r (s + i) (iteratedCovGrad (I := I) g r s i Φ) x]
 
 /-! ## The `appCc` diagonal product grid
 

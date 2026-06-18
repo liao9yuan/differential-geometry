@@ -619,6 +619,199 @@ theorem exists_iteratedCovGrad_unit_toModel_domDomCongr
       rw [Equiv.Perm.decomposeFin_symm_apply_succ, Equiv.swap_self, Equiv.refl_apply]
     rw [hzero, htail]
 
+/-! ## General contravariant-rank slot-permutation naturality of the covariant gradient
+
+The positive-contravariant-rank (`r > 0`) lift of the rank-`0` directional naturality
+`tensor0SCovariantDerivative_succ_domDomCongr`.  For two smooth `(r, s)`-tensor sections `Φ, Φ'`
+whose model forms are related fibrewise by a constant covariant-slot reindexing `σ : Equiv.Perm
+(Fin s)` (on every `(0, r)`-tensor input `d`), the directional covariant derivative
+`tensorCovDerivAt` of `Φ'` is the same reindexing of that of `Φ`, and hence the covariant gradient
+of `Φ'` is the `σ`-reindexing of that of `Φ` with the new leading gradient slot fixed.
+
+The contravariant slot index `r` is untouched by the `s`-slot covariant reindexing; the Hom-connection
+product rule `tensorRSCovariantDerivative_apply` splits the directional covariant derivative into the
+`(0, s)`-target arm (where the rank-`0` naturality applies) and the `(0, r)`-source arm (untouched by
+`σ`, just `σ`-reindexed by the hypothesis read at the source-differentiated input). -/
+
+/-- **Smoothness of the application `(Φ.toSection ·)(w ·)` as a `(0, s)`-tensor section.**  For a
+smooth `(r, s)`-operator field `Φ` and a smooth `(0, r)`-tensor section `w`, the `(0, s)`-tensor
+section `y ↦ (Φ.toSection y)(w y)` is `MDifferentiableAt` in total-space form at every point. -/
+private lemma applySection_tensorSectionMDiffAt
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (Φ : SmoothCcTensor g r s)
+    (w : Cₛ^∞⟮I; Tensor0SModel r ℝ E, (fun y : M => Tensor0SSpace r I y)⟯) (x : M) :
+    DifferentialGeometry.Integral.Connection.TensorSectionMDiffAt (I := I) s
+      (fun y => (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from Φ.toSection y) (w y)) x := by
+  classical
+  have hHom : MDifferentiableAt I (I.prod 𝓘(ℝ, Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E))
+      (fun z : M => TotalSpace.mk' (Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E)
+        (E := fun u : M => Tensor0SSpace r I u →L[ℝ] Tensor0SSpace s I u) z
+        (show Tensor0SSpace r I z →L[ℝ] Tensor0SSpace s I z from Φ.toSection z)) x :=
+    (Φ.toSection.contMDiff.contMDiffAt).mdifferentiableAt (by simp)
+  have hv : MDifferentiableAt I (I.prod 𝓘(ℝ, Tensor0SModel r ℝ E))
+      (fun z : M => TotalSpace.mk' (Tensor0SModel r ℝ E)
+        (E := fun u : M => Tensor0SSpace r I u) z (w z)) x :=
+    (w.contMDiff.contMDiffAt).mdifferentiableAt (by simp)
+  exact MDifferentiableAt.clm_bundle_apply (b := id) hHom hv
+
+/-- **General contravariant-rank directional covariant-derivative σ-naturality.**  Let `σ :
+Equiv.Perm (Fin s)` and let `Φ, Φ'` be smooth `(r, s)`-tensor sections whose model forms are related
+fibrewise by the constant covariant-slot reindexing `σ`:
+
+  `toModel ((Φ'.toSection y) d) = domDomCongr σ (toModel ((Φ.toSection y) d))`  for all `y` and all
+  `(0, r)`-inputs `d`.
+
+Then the directional covariant derivatives are related by the same reindexing:
+
+  `toModel ((tensorCovDerivAt g r s Φ' x v) d) = domDomCongr σ (toModel ((tensorCovDerivAt g r s Φ x
+  v) d))`.
+
+Tested on a `(0, r)`-tensor `D = w x` (a local smooth extension): the Hom-connection product rule
+`tensorRSCovariantDerivative_apply` writes both directional derivatives as the `(0, s)`-target arm
+`∇^{(0,s)}_v(y ↦ Φ(w))` minus the `(0, r)`-source arm `Φ(∇^{(0,r)}_v w)`.  The target arm is
+`σ`-natural by the rank-`0` directional naturality `tensor0SCovariantDerivative_succ_domDomCongr`
+(applied to the `(0, s)`-sections `y ↦ Φ(w)` and `y ↦ Φ'(w)`, related by `σ` via the hypothesis),
+and the source arm is `σ`-reindexed by the hypothesis read at the differentiated source input. -/
+theorem tensorCovDerivAt_rs_toModel_domDomCongr
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : Equiv.Perm (Fin s))
+    (Φ Φ' : SmoothCcTensor g r s)
+    (hrel : ∀ (y : M) (d : Tensor0SSpace r I y),
+      Tensor0SSpace.toModel
+          ((show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from Φ'.toSection y) d) =
+        ContinuousMultilinearMap.domDomCongr σ
+          (Tensor0SSpace.toModel
+            ((show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from Φ.toSection y) d)))
+    (x : M) (v : TangentSpace I x) (D : Tensor0SSpace r I x) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+          tensorCovDerivAt (I := I) (M := M) g r s Φ' x v) D) =
+      ContinuousMultilinearMap.domDomCongr σ
+        (Tensor0SSpace.toModel
+          ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+            tensorCovDerivAt (I := I) (M := M) g r s Φ x v) D)) := by
+  classical
+  -- Local smooth extension `w` of the `(0, r)`-input `D`.
+  obtain ⟨w, hw⟩ := ContMDiffSection.exists_eq_at (I := I)
+    (F := Tensor0SModel r ℝ E) (V := fun y : M => Tensor0SSpace r I y)
+    (n := (⊤ : ℕ∞)) x D
+  -- The `(0, s)`-application sections and their fibrewise `σ`-relation.
+  set u : Π y : M, Tensor0SSpace s I y :=
+    fun y => (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from Φ.toSection y) (w y) with hu_def
+  set u' : Π y : M, Tensor0SSpace s I y :=
+    fun y => (show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from Φ'.toSection y) (w y) with hu'_def
+  have hu_at : DifferentialGeometry.Integral.Connection.TensorSectionMDiffAt (I := I) s u x :=
+    applySection_tensorSectionMDiffAt (I := I) (M := M) g r s Φ w x
+  have hu'_at : DifferentialGeometry.Integral.Connection.TensorSectionMDiffAt (I := I) s u' x :=
+    applySection_tensorSectionMDiffAt (I := I) (M := M) g r s Φ' w x
+  have hurel : ∀ y : M, u' y =
+      ContinuousMultilinearMap.domDomCongr σ
+        (show ContinuousMultilinearMap ℝ (fun _ : Fin s => TangentSpace I y) ℝ from u y) := by
+    intro y
+    apply Tensor0SSpace.toModel_injective
+    have h := hrel y (w y)
+    rw [hu'_def, hu_def]
+    exact h
+  -- Both directional derivatives via the Hom product rule.
+  rw [tensorCovDerivAt_def (I := I) (M := M) g r s Φ' x v,
+    tensorCovDerivAt_def (I := I) (M := M) g r s Φ x v]
+  have hHL' := TensorRSNabla.tensorRSCovariantDerivative_apply (I := I) (M := M) r s
+    (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) Φ'.toSection w x v
+  have hHL := TensorRSNabla.tensorRSCovariantDerivative_apply (I := I) (M := M) r s
+    (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) Φ.toSection w x v
+  rw [← hw]
+  rw [hHL', hHL]
+  rw [Tensor0SSpace.toModel_sub, Tensor0SSpace.toModel_sub, domDomCongr_sub]
+  -- The source arm: `Φ'(∇^{(0,r)}_v w) = σ`-reindex of `Φ(∇^{(0,r)}_v w)` (hypothesis at that input).
+  have hsource :
+      Tensor0SSpace.toModel
+          ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ'.toSection x)
+            (Tensor0SNabla.tensor0SCovariantDerivative I M r
+              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) w x v)) =
+        ContinuousMultilinearMap.domDomCongr σ
+          (Tensor0SSpace.toModel
+            ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)
+              (Tensor0SNabla.tensor0SCovariantDerivative I M r
+                (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) w x v))) :=
+    hrel x _
+  -- The target arm: rank-`0` directional naturality on `u, u'`.
+  have htarget :
+      Tensor0SSpace.toModel
+          (Tensor0SNabla.tensor0SCovariantDerivative I M s
+            (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) u' x v) =
+        ContinuousMultilinearMap.domDomCongr σ
+          (Tensor0SSpace.toModel
+            (Tensor0SNabla.tensor0SCovariantDerivative I M s
+              (DifferentialGeometry.Integral.Connection.LeviCivita (I := I) g) u x v)) := by
+    rcases s with _ | s'
+    · -- `s = 0`: `domDomCongr` over `Fin 0` is the identity.
+      apply ContinuousMultilinearMap.ext
+      intro m
+      rw [ContinuousMultilinearMap.domDomCongr_apply]
+      congr 1
+      · have hsec : u' = u := by
+          funext y
+          have hy := hurel y
+          rw [Subsingleton.elim σ (1 : Equiv.Perm (Fin 0))] at hy
+          rw [hy]
+          apply ContinuousMultilinearMap.ext
+          intro m'
+          rw [ContinuousMultilinearMap.domDomCongr_apply]
+          exact congrArg _ (Subsingleton.elim _ _)
+        rw [hsec]
+      · exact Subsingleton.elim _ _
+    · refine congrArg Tensor0SSpace.toModel ?_
+      exact tensor0SCovariantDerivative_succ_domDomCongr (I := I) (M := M) s' g σ u u' x v
+        hu_at hu'_at hurel
+  rw [htarget, hsource]
+
+/-- **General contravariant-rank covariant-gradient σ-naturality (model form).**  Under the same
+fibrewise hypothesis as `tensorCovDerivAt_rs_toModel_domDomCongr`, the covariant gradients of `Φ`
+and `Φ'` are related by the `σ`-reindexing with the new leading gradient slot fixed: writing
+`σ̂ = Equiv.Perm.decomposeFin.symm (0, σ)` (the permutation of `Fin (s + 1)` fixing slot `0` and
+acting as `σ` on the remaining `s` slots),
+
+  `toModel ((covGrad g r s Φ').toSection x d) = domDomCongr σ̂ (toModel ((covGrad g r s Φ).toSection
+  x d))`  for all `x` and all `(0, r)`-inputs `d`.
+
+The covariant gradient reads the new leading slot as the directional covariant derivative
+(`covGrad_toSection_apply_eval`), which is `σ`-natural by `tensorCovDerivAt_rs_toModel_domDomCongr`;
+the leading gradient slot is therefore fixed and the tail slots are `σ`-reindexed. -/
+theorem covGrad_rs_toModel_domDomCongr
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : Equiv.Perm (Fin s))
+    (Φ Φ' : SmoothCcTensor g r s)
+    (hrel : ∀ (y : M) (d : Tensor0SSpace r I y),
+      Tensor0SSpace.toModel
+          ((show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from Φ'.toSection y) d) =
+        ContinuousMultilinearMap.domDomCongr σ
+          (Tensor0SSpace.toModel
+            ((show Tensor0SSpace r I y →L[ℝ] Tensor0SSpace s I y from Φ.toSection y) d)))
+    (x : M) (d : Tensor0SSpace r I x) (v : Fin (s + 1) → TangentSpace I x) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+          (covGrad (I := I) (M := M) g r s Φ').toSection x) d) v =
+      ContinuousMultilinearMap.domDomCongr (Equiv.Perm.decomposeFin.symm (0, σ))
+        (Tensor0SSpace.toModel
+          ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (s + 1) I x from
+            (covGrad (I := I) (M := M) g r s Φ).toSection x) d)) v := by
+  classical
+  rw [covGrad_toSection_apply_eval (I := I) (M := M) g r s Φ' x d v]
+  rw [ContinuousMultilinearMap.domDomCongr_apply,
+    covGrad_toSection_apply_eval (I := I) (M := M) g r s Φ x d
+      (fun k => v ((Equiv.Perm.decomposeFin.symm (0, σ)) k))]
+  -- Naturality of the directional covariant derivative against `σ`.
+  rw [tensorCovDerivAt_rs_toModel_domDomCongr (I := I) (M := M) g r s σ Φ Φ' hrel x (v 0) d]
+  rw [ContinuousMultilinearMap.domDomCongr_apply]
+  -- The reindexed tuple fixes slot `0` and restricts to `vecTail v ∘ σ` on the rest.
+  have hzero : v ((Equiv.Perm.decomposeFin.symm (0, σ)) (0 : Fin (s + 1))) = v 0 := by
+    rw [Equiv.Perm.decomposeFin_symm_apply_zero]
+  have htail :
+      (Matrix.vecTail fun k : Fin (s + 1) =>
+          v ((Equiv.Perm.decomposeFin.symm (0, σ)) k)) =
+        fun j : Fin s => Matrix.vecTail v (σ j) := by
+    funext j
+    change v ((Equiv.Perm.decomposeFin.symm (0, σ)) (Fin.succ j)) = v (Fin.succ (σ j))
+    rw [Equiv.Perm.decomposeFin_symm_apply_succ, Equiv.swap_self, Equiv.refl_apply]
+  rw [hzero, htail]
+
 /-- **Rank-`0` lowering reads off the unit-evaluated model form.**  At rank `r = 0`, the metric
 lowering `lowerAllUpperIndices g 0 s x` of the trivialized model tensor `TensorRSSpace.toModel
 W_x` of a smooth `(0, s)`-tensor section `W` is, on a tuple `u : Fin (0 + s) → E`, the
