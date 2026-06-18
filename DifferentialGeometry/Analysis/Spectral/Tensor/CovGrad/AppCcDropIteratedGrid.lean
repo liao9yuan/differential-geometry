@@ -369,23 +369,159 @@ hidden behind the outer existence's `Classical.choose`.  (Each `dropFibreSup` is
 of the per-`k` compactness sup, which is acceptable: it is now an explicit, named per-`k` functional of
 `C`'s jets, exposed to downstream as the `dropKappa_le_of_fibreNormSup` handle.) -/
 
-/-- **The drop-normal-form operator field `Ψ` of the fixed coefficient `(C, p, w)`.**  Named from the
-witness of `dropTower_normalForm`: `Ψ k : SmoothCcTensor g ((b₀ + w) + k) ((s₀ + w) + p)` is the order-`k`
-`covGrad`/`slotExtend` jet of `C` in the operator-field normal form of the drop tower. -/
-def dropTowerPsi (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
-    (C : SmoothCcTensor g b₀ s₀) (p w : ℕ) :
-    (k : ℕ) → SmoothCcTensor g ((b₀ + w) + k) ((s₀ + w) + p) :=
-  Classical.choose (dropTower_normalForm (I := I) (M := M) g b₀ s₀ C p w)
+/-- **The drop-normal-form operator field `Ψ` of the fixed coefficient `(C, p, w)`, EXPLICIT.**  The
+order-`k` `covGrad`/`slotExtend` jet of `C` in the operator-field normal form of the drop tower,
+defined by the *explicit* witness recursion of `dropNormalForm_zero`/`dropNormalForm_succ` (NOT an
+opaque `Classical.choose`):
 
-/-- **The drop normal form holds for the named operator field `dropTowerPsi`.** -/
+* `p = 0`: `Ψ 0 = slotExtendIter w C`, `Ψ (k + 1) = 0`;
+* `p + 1`: built from the order-`p` fields `Ψr = dropTowerPsi p w`, `Ψr1 = dropTowerPsi p (w + 1)` by the
+  Leibniz remainder recursion — `Ψ 0 = ∇(Ψr 0)`, and for `k + 1`,
+  `Ψ (k + 1) = (if k + 1 < p + 1 then ∇(Ψr (k + 1)) else 0) + (slotExtend (Ψr k) − cast (Ψr1 k))`.
+
+Exposing the explicit recursion (in place of `Classical.choose`) is what makes the per-jet fibre-norm
+bound `dropTowerPsi_fibreNormSq_le_iteratedCovGrad` provable: a `Classical.choose` witness's fibre norm
+is uncontrolled (the operator-action normal-form equation does not pin the operator field down — there
+is no `appCcRS` injectivity), whereas the explicit `covGrad`/`slotExtend` jets are bounded by the
+`iteratedCovGrad` jets of `C`. -/
+def dropTowerPsi (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
+    (C : SmoothCcTensor g b₀ s₀) : (p w : ℕ) → (k : ℕ) → SmoothCcTensor g ((b₀ + w) + k) ((s₀ + w) + p)
+  | 0, w => fun k => match k with
+      | 0 => slotExtendIter (I := I) (M := M) g b₀ s₀ w C
+      | (_ + 1) => 0
+  | (p + 1), w => fun j => match j with
+      | 0 => covGrad (I := I) (M := M) g ((b₀ + w) + 0) ((s₀ + w) + p)
+          (dropTowerPsi g b₀ s₀ C p w 0)
+      | (k + 1) =>
+          (if k + 1 < p + 1 then
+              covGrad (I := I) (M := M) g ((b₀ + w) + (k + 1)) ((s₀ + w) + p)
+                (dropTowerPsi g b₀ s₀ C p w (k + 1))
+            else 0)
+          + (slotExtend (I := I) (M := M) g ((b₀ + w) + k) ((s₀ + w) + p)
+              (dropTowerPsi g b₀ s₀ C p w k) -
+            castSrcCc g ((s₀ + w) + (p + 1)) (by omega : (b₀ + (w + 1)) + k = (b₀ + w) + (k + 1))
+              (castRankCc_db g ((b₀ + (w + 1)) + k)
+                (by omega : (s₀ + (w + 1)) + p = (s₀ + w) + (p + 1))
+                (dropTowerPsi g b₀ s₀ C p (w + 1) k)))
+
+/-- The order-`0` value of `dropTowerPsi`. -/
+theorem dropTowerPsi_zero (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
+    (C : SmoothCcTensor g b₀ s₀) (w : ℕ) :
+    dropTowerPsi (I := I) (M := M) g b₀ s₀ C 0 w =
+      fun k => match k with
+        | 0 => slotExtendIter (I := I) (M := M) g b₀ s₀ w C
+        | (_ + 1) => 0 :=
+  rfl
+
+/-- **The drop normal form holds for the explicit operator field `dropTowerPsi`.**  Proved by induction on
+`p`, re-using the `dropNormalForm_zero`/`dropNormalForm_succ` algebra against the explicit witness. -/
 theorem dropTowerPsi_spec (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
     (C : SmoothCcTensor g b₀ s₀) (p w : ℕ) (W : SmoothCcTensor g 0 (b₀ + w)) :
     DropTowerOp (I := I) (M := M) g b₀ s₀ C p w W =
       ∑ k ∈ Finset.range (p + 1),
         appCcRS (I := I) (M := M) g 0 ((b₀ + w) + k) ((s₀ + w) + p)
           (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k)
-          (iteratedCovGrad g 0 (b₀ + w) k W) :=
-  Classical.choose_spec (dropTower_normalForm (I := I) (M := M) g b₀ s₀ C p w) W
+          (iteratedCovGrad g 0 (b₀ + w) k W) := by
+  induction p generalizing w W with
+  | zero =>
+      rw [Finset.sum_range_one]
+      change appCcRS (I := I) (M := M) g 0 (b₀ + w) (s₀ + w)
+          (slotExtendIter (I := I) (M := M) g b₀ s₀ w C) W = _
+      rw [iteratedCovGrad_zero]
+      rfl
+  | succ p ih =>
+      have hrec : DropTowerOp (I := I) (M := M) g b₀ s₀ C (p + 1) w W =
+          covGrad g 0 ((s₀ + w) + p) (DropTowerOp (I := I) (M := M) g b₀ s₀ C p w W) -
+            castRankCc_db g 0 (by omega : (s₀ + (w + 1)) + p = (s₀ + w) + (p + 1))
+              (DropTowerOp (I := I) (M := M) g b₀ s₀ C p (w + 1)
+                (covGrad (I := I) (M := M) g 0 (b₀ + w) W)) := by
+        rw [DropTower_covGrad_op (I := I) (M := M) g b₀ s₀ C p w W]; abel
+      rw [hrec, ih w W, covGrad_dropNormalForm_sum (I := I) (M := M) g b₀ s₀ p w _ W]
+      rw [ih (w + 1) (covGrad g 0 (b₀ + w) W), castRankCc_db_finset_sum]
+      rw [show (∑ k ∈ Finset.range (p + 1),
+            castRankCc_db g 0 (by omega : (s₀ + (w + 1)) + p = (s₀ + w) + (p + 1))
+              (appCcRS (I := I) (M := M) g 0 ((b₀ + (w + 1)) + k) ((s₀ + (w + 1)) + p)
+                (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p (w + 1) k)
+                (iteratedCovGrad g 0 (b₀ + (w + 1)) k (covGrad g 0 (b₀ + w) W)))) =
+          ∑ k ∈ Finset.range (p + 1),
+            appCcRS (I := I) (M := M) g 0 ((b₀ + w) + (k + 1)) ((s₀ + w) + (p + 1))
+              (castSrcCc g ((s₀ + w) + (p + 1)) (by omega : (b₀ + (w + 1)) + k = (b₀ + w) + (k + 1))
+                (castRankCc_db g ((b₀ + (w + 1)) + k)
+                  (by omega : (s₀ + (w + 1)) + p = (s₀ + w) + (p + 1))
+                  (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p (w + 1) k)))
+              (iteratedCovGrad g 0 (b₀ + w) (k + 1) W) from
+        Finset.sum_congr rfl (fun k _ =>
+          castRankCc_appCcRS_drop_iteratedCovGrad_covGrad (I := I) (M := M) g b₀ s₀ p w k
+            (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p (w + 1) k) W)]
+      rw [Finset.sum_add_distrib]
+      rw [Finset.sum_range_succ' (fun j =>
+        appCcRS (I := I) (M := M) g 0 ((b₀ + w) + j) ((s₀ + w) + (p + 1))
+          (dropTowerPsi (I := I) (M := M) g b₀ s₀ C (p + 1) w j)
+          (iteratedCovGrad g 0 (b₀ + w) j W)) (p + 1)]
+      have hPsi0 : dropTowerPsi (I := I) (M := M) g b₀ s₀ C (p + 1) w 0 =
+          covGrad (I := I) (M := M) g ((b₀ + w) + 0) ((s₀ + w) + p)
+            (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w 0) := rfl
+      have hPsiSucc : ∀ k : ℕ, dropTowerPsi (I := I) (M := M) g b₀ s₀ C (p + 1) w (k + 1) =
+          (if k + 1 < p + 1 then
+              covGrad (I := I) (M := M) g ((b₀ + w) + (k + 1)) ((s₀ + w) + p)
+                (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w (k + 1))
+            else 0)
+          + (slotExtend (I := I) (M := M) g ((b₀ + w) + k) ((s₀ + w) + p)
+              (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k) -
+            castSrcCc g ((s₀ + w) + (p + 1)) (by omega : (b₀ + (w + 1)) + k = (b₀ + w) + (k + 1))
+              (castRankCc_db g ((b₀ + (w + 1)) + k)
+                (by omega : (s₀ + (w + 1)) + p = (s₀ + w) + (p + 1))
+                (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p (w + 1) k))) := fun k => rfl
+      rw [hPsi0]
+      have hsplit : (∑ k ∈ Finset.range (p + 1),
+            appCcRS (I := I) (M := M) g 0 ((b₀ + w) + (k + 1)) ((s₀ + w) + (p + 1))
+              (dropTowerPsi (I := I) (M := M) g b₀ s₀ C (p + 1) w (k + 1))
+              (iteratedCovGrad g 0 (b₀ + w) (k + 1) W)) =
+          (∑ k ∈ Finset.range (p + 1),
+            appCcRS (I := I) (M := M) g 0 ((b₀ + w) + (k + 1)) ((s₀ + w) + (p + 1))
+              (if k + 1 < p + 1 then
+                  covGrad (I := I) (M := M) g ((b₀ + w) + (k + 1)) ((s₀ + w) + p)
+                    (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w (k + 1))
+                else 0)
+              (iteratedCovGrad g 0 (b₀ + w) (k + 1) W)) +
+          ((∑ k ∈ Finset.range (p + 1),
+            appCcRS (I := I) (M := M) g 0 ((b₀ + w) + (k + 1)) ((s₀ + w) + (p + 1))
+              (slotExtend (I := I) (M := M) g ((b₀ + w) + k) ((s₀ + w) + p)
+                (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k))
+              (iteratedCovGrad g 0 (b₀ + w) (k + 1) W)) -
+          (∑ k ∈ Finset.range (p + 1),
+            appCcRS (I := I) (M := M) g 0 ((b₀ + w) + (k + 1)) ((s₀ + w) + (p + 1))
+              (castSrcCc g ((s₀ + w) + (p + 1)) (by omega : (b₀ + (w + 1)) + k = (b₀ + w) + (k + 1))
+                (castRankCc_db g ((b₀ + (w + 1)) + k)
+                  (by omega : (s₀ + (w + 1)) + p = (s₀ + w) + (p + 1))
+                  (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p (w + 1) k)))
+              (iteratedCovGrad g 0 (b₀ + w) (k + 1) W))) := by
+        rw [← Finset.sum_sub_distrib, ← Finset.sum_add_distrib]
+        refine Finset.sum_congr rfl (fun k _ => ?_)
+        rw [hPsiSucc k, appCcRS_add_left, appCcRS_sub_left]
+      rw [hsplit]
+      rw [show (∑ k ∈ Finset.range (p + 1),
+            appCcRS (I := I) (M := M) g 0 ((b₀ + w) + (k + 1)) ((s₀ + w) + (p + 1))
+              (if k + 1 < p + 1 then
+                  covGrad (I := I) (M := M) g ((b₀ + w) + (k + 1)) ((s₀ + w) + p)
+                    (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w (k + 1))
+                else 0)
+              (iteratedCovGrad g 0 (b₀ + w) (k + 1) W)) =
+          ∑ k ∈ Finset.range p,
+            appCcRS (I := I) (M := M) g 0 ((b₀ + w) + (k + 1)) ((s₀ + w) + (p + 1))
+              (covGrad (I := I) (M := M) g ((b₀ + w) + (k + 1)) ((s₀ + w) + p)
+                (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w (k + 1)))
+              (iteratedCovGrad g 0 (b₀ + w) (k + 1) W) from by
+        rw [Finset.sum_range_succ]
+        rw [if_neg (by omega : ¬ (p + 1 < p + 1)), appCcRS_zero_left, add_zero]
+        refine Finset.sum_congr rfl (fun k hk => ?_)
+        rw [if_pos (by simp only [Finset.mem_range] at hk; omega : k + 1 < p + 1)]]
+      rw [Finset.sum_range_succ' (fun k =>
+        appCcRS (I := I) (M := M) g 0 ((b₀ + w) + k) ((s₀ + w) + (p + 1))
+          (covGrad (I := I) (M := M) g ((b₀ + w) + k) ((s₀ + w) + p)
+            (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k))
+          (iteratedCovGrad g 0 (b₀ + w) k W)) p]
+      abel
 
 /-- **The per-`k` uniform fibre-norm-square envelope of the operator field `dropTowerPsi`, CANONICAL.**
 The supremum over the (compact) base of the intrinsic fibre-norm-square of the order-`k` jet field
