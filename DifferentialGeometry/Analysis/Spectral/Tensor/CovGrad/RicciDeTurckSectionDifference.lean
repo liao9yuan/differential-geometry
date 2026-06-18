@@ -4224,26 +4224,37 @@ theorem operatorDiff_split
   ring
 
 set_option linter.unusedSectionVars false in
-/-- **The order-`1` cross/slot arm plus principal-remainder connector of the Ricci-arm eval-matching
-(posited covariant bridge).**
+/-- **The order-`(0,1)` cross/slot arm plus principal-remainder connector of the Ricci-arm eval-matching
+(posited covariant bridge, MIXED order grading).**
 
-For two realize-tied endpoints `g₁ = realize(g₀ + T)`, `g₁' = realize(g₀ + T')`, the sum of the order-`1`
-cross/slot `connDiff` coupling arms `(C) + (S₁) + (S₂)` of `covDerivConnDiff_diff_endpoint_graded` (taken
-at the X-slot config minus the Z-slot config of the Palatini telescope) and the carried principal
-remainder difference `palatiniTracedPrincipalDiffRemainder − palatiniTracedPrincipalZDiffRemainder` is the
-`unitModel`/`appCc` read-off of an endpoint-dependent order-`1` operator coefficient field `R₁` on the
-order-`1` iterated covariant gradient `W₁ = ∇₀(T − T')` of the perturbation difference.  These are the
-intrinsic Christoffel-variation `δΓ` slot couplings (fibre operators built from `g₁⁻¹`/`∇g₁⁻¹`/the
-connection difference) plus the order-`≤ 1` frame/alignment remainders carried by the principal
-connectors, the order-`1` cross/slot coefficient `R₁` the Ricci-arm eval-matching packages.  Posited here
-as the genuine missing covariant-bridge prerequisite. -/
+For two realize-tied endpoints `g₁ = realize(g₀ + T)`, `g₁' = realize(g₀ + T')`, the sum of the cross/slot
+`connDiff` coupling arms `(C) + (S₁) + (S₂)` of `covDerivConnDiff_diff_endpoint_graded` (taken at the
+X-slot config minus the Z-slot config of the Palatini telescope) and the carried principal remainder
+difference `palatiniTracedPrincipalDiffRemainder − palatiniTracedPrincipalZDiffRemainder` is the
+`unitModel`/`appCc` read-off of a PAIR of endpoint-dependent operator coefficient fields `R₀` (order `0`)
+and `R₁` (order `1`) on the iterated covariant gradients `W₀ = (T − T')` and `W₁ = ∇₀(T − T')` of the
+perturbation difference.
+
+The grading is genuinely MIXED order-`(0,1)`: each coupling differences two `connDiff` operators over the
+endpoints, telescoping to `connDiff_{g₁} − connDiff_{g₁'} =
+½(g₁⁻¹∇₀(g₁ − g₁') + (g₁⁻¹ − g₁'⁻¹)∇₀(g₁' − g₀))`.  The first summand carries the order-`1` jet
+`∇₀(g₁ − g₁') = ∇₀(T − T')` (the `R₁` part); the second carries the inverse-Gram VALUE difference
+`g₁⁻¹ − g₁'⁻¹ = −g₁⁻¹(g₁ − g₁')g₁'⁻¹` (linear in the VALUE `(T − T')(x)`) against the FIXED order-`1`
+endpoint jet `∇₀(g₁' − g₀)`, hence an order-`0` term in `(T − T')` that SURVIVES at `∇₀(T − T')(x) = 0`
+(numerically verified: the X-slot/Z-slot trace is nonzero when `(T − T')(x) ≠ 0` but `∇₀(T − T')(x) = 0`).
+The mixed form subsumes a pure order-`0` (`R₁ = 0`) and a pure order-`1` (`R₀ = 0`) child, so it is robust
+regardless of the exact split.  These are the intrinsic Christoffel-variation `δΓ` slot couplings (fibre
+operators built from `g₁⁻¹`/`∇g₁⁻¹`/the inverse-Gram difference/the connection difference) plus the
+order-`≤ 1` frame/alignment remainders carried by the principal connectors.  Posited here as the genuine
+missing covariant-bridge prerequisite. -/
 theorem crossSlotArm_diffRemainder_appCc_eq
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     (hg₁ : ∀ (b : M) (u w : TangentSpace I b),
       g₁.inner b u w = g₀.inner b u w + ccTensorBilinSymm (I := I) g₀ T b u w)
     (hg₁' : ∀ (b : M) (u w : TangentSpace I b),
       g₁'.inner b u w = g₀.inner b u w + ccTensorBilinSymm (I := I) g₀ T' b u w) :
-    ∃ R₁ : SmoothCcTensor g₀ 3 2, ∀ (x : M) (v : Fin 2 → TangentSpace I x),
+    ∃ (R₀ : SmoothCcTensor g₀ 2 2) (R₁ : SmoothCcTensor g₀ 3 2),
+      ∀ (x : M) (v : Fin 2 → TangentSpace I x),
       ((∑ i : Fin (Module.finrank ℝ E),
             (chartModelBasis E).repr
               (-(PDE.DeTurck.connDiff (I := I) g₁ g₀ x
@@ -4333,29 +4344,42 @@ theorem crossSlotArm_diffRemainder_appCc_eq
                 (⟨smoothExtensionTangent (I := I) x (v 1),
                   smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) x)) =
         unitModel (I := I) (M := M) g₀ 2
-          (appCc (I := I) (M := M) g₀ 3 2 R₁
-            (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v := by
+          (appCc (I := I) (M := M) g₀ 2 2 R₀
+              (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+            + appCc (I := I) (M := M) g₀ 3 2 R₁
+                (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v := by
   sorry
 
 set_option linter.unusedSectionVars false in
-/-- **The order-`1` quadratic `connDiff ∧ diffSec` telescope connector of the Ricci-arm eval-matching
+/-- **The order-`(0,1)` quadratic `connDiff ∧ diffSec` telescope connector of the Ricci-arm eval-matching
 (posited covariant bridge).**
 
 For two realize-tied endpoints `g₁ = realize(g₀ + T)`, `g₁' = realize(g₀ + T')`, the
 `chartModelBasis` trace of the quadratic `connDiff ∧ diffSec` contraction of the Palatini telescope
 `ricciTensor_sub_eq_palatini_telescope` (the `connDiff g₁ g₀ (diffSec …)` term), differenced over the two
-endpoints, is the `unitModel`/`appCc` read-off of an endpoint-dependent order-`1` operator coefficient
-field `R₁q` on the order-`1` iterated covariant gradient `W₁ = ∇₀(T − T')` of the perturbation
-difference.  This is the order-`1` quadratic telescope (the product of the Christoffel variation `δΓ`
-with the connection-difference section `diffSec`), the order-`1` quadratic coefficient `R₁q` the
-Ricci-arm eval-matching packages.  Posited here as the genuine missing covariant-bridge prerequisite. -/
+endpoints, is the `unitModel`/`appCc` read-off of a PAIR of endpoint-dependent operator coefficient fields
+`R₀q` (order `0`) and `R₁q` (order `1`) on the iterated covariant gradients `W₀ = (T − T')` and
+`W₁ = ∇₀(T − T')` of the perturbation difference.
+
+The grading is genuinely MIXED order-`(0,1)`: the quadratic term is a PRODUCT of two endpoint-`g`
+operators — `connDiff_g g₀` (carrying `g`'s inverse Gram `g⁻¹` and its order-`1` jet) and the
+connection-difference section `diffSec(LC g₀, LC g)` (`= −connDiff_g g₀`, again carrying `g⁻¹` and an
+order-`1` jet).  Differencing the product over the endpoints telescopes through the inverse-Gram VALUE
+difference `g₁⁻¹ − g₁'⁻¹` (linear in the VALUE `(T − T')(x)`) times the FIXED order-`1` endpoint factors,
+giving an order-`0` term that SURVIVES at `∇₀(T − T')(x) = 0`, together with the order-`1` jet differences
+`∇₀(T − T')` from the jet legs (numerically verified: nonzero at both `(T − T')(x) ≠ 0, ∇₀(T − T')(x) = 0`
+and `(T − T')(x) = 0, ∇₀(T − T')(x) ≠ 0`).  The mixed form subsumes a pure order-`0` (`R₁q = 0`) and a
+pure order-`1` (`R₀q = 0`) child, so it is robust regardless of the exact split.  This is the order-`(0,1)`
+quadratic telescope (the product of the Christoffel variation `δΓ` with the connection-difference section
+`diffSec`).  Posited here as the genuine missing covariant-bridge prerequisite. -/
 theorem quadraticConnDiffArm_appCc_eq
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     (hg₁ : ∀ (b : M) (u w : TangentSpace I b),
       g₁.inner b u w = g₀.inner b u w + ccTensorBilinSymm (I := I) g₀ T b u w)
     (hg₁' : ∀ (b : M) (u w : TangentSpace I b),
       g₁'.inner b u w = g₀.inner b u w + ccTensorBilinSymm (I := I) g₀ T' b u w) :
-    ∃ R₁q : SmoothCcTensor g₀ 3 2, ∀ (x : M) (v : Fin 2 → TangentSpace I x),
+    ∃ (R₀q : SmoothCcTensor g₀ 2 2) (R₁q : SmoothCcTensor g₀ 3 2),
+      ∀ (x : M) (v : Fin 2 → TangentSpace I x),
       ((∑ i : Fin (Module.finrank ℝ E),
           (chartModelBasis E).repr
             (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
@@ -4381,8 +4405,10 @@ theorem quadraticConnDiffArm_appCc_eq
                   (smoothExtensionTangent (I := I) x (v 1)) x)
                 (smoothExtensionTangent (I := I) x (v 0) x)) i)) =
         unitModel (I := I) (M := M) g₀ 2
-          (appCc (I := I) (M := M) g₀ 3 2 R₁q
-            (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v := by
+          (appCc (I := I) (M := M) g₀ 2 2 R₀q
+              (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+            + appCc (I := I) (M := M) g₀ 3 2 R₁q
+                (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v := by
   sorry
 
 end TensorSpectral

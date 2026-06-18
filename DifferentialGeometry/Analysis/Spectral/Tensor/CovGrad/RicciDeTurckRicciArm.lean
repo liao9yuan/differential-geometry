@@ -297,14 +297,17 @@ theorem deTurckRicciArm_appCc_eval
   -- false — it dropped the order-`1` `(A)` part).
   obtain ⟨R₀c, hR₀⟩ := operatorDiffArm_B_appCc_eq (I := I) (M := M) g₀ g₁ g₁' T T' hg₁ hg₁'
   obtain ⟨R₁A, hR₁A⟩ := operatorDiffArm_A_appCc_eq (I := I) (M := M) g₀ g₁ g₁' T T' hg₁ hg₁'
-  obtain ⟨R₁cs, hR₁cs⟩ :=
+  -- The cross/slot and quadratic arms are MIXED order-`(0,1)` (the value-difference `g₁⁻¹ − g₁'⁻¹`
+  -- residue survives at `∇₀(T − T') = 0`): each supplies an order-`0` and an order-`1` coefficient.
+  obtain ⟨R₀cs, R₁cs, hR₁cs⟩ :=
     crossSlotArm_diffRemainder_appCc_eq (I := I) (M := M) g₀ g₁ g₁' T T' hg₁ hg₁'
-  obtain ⟨R₁q, hR₁q⟩ := quadraticConnDiffArm_appCc_eq (I := I) (M := M) g₀ g₁ g₁' T T' hg₁ hg₁'
+  obtain ⟨R₀q, R₁q, hR₁q⟩ := quadraticConnDiffArm_appCc_eq (I := I) (M := M) g₀ g₁ g₁' T T' hg₁ hg₁'
   -- The order-`2` PRINCIPAL coefficient, symmetrizer-absorbed onto the bare section difference.
   obtain ⟨R₂', hR₂'⟩ := symmAbsorbedPrincipalCoeff_appCc_eq (I := I) (M := M) g₀ (T - T')
     (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
       - ricciArmPrincipalCoeffZ (I := I) (M := M) g₀ g₁)
-  refine ⟨(-2 : ℝ) • R₀c, (-2 : ℝ) • (R₁cs + R₁q + R₁A), (-2 : ℝ) • R₂', fun x v => ?_⟩
+  refine ⟨(-2 : ℝ) • (R₀c + R₀cs + R₀q), (-2 : ℝ) • (R₁cs + R₁q + R₁A), (-2 : ℝ) • R₂',
+    fun x v => ?_⟩
   -- Abbreviations for the perturbation-difference iterated gradients.
   set W₀ : SmoothCcTensor g₀ 0 2 := iteratedCovGrad (I := I) g₀ 0 2 0 (T - T') with hW₀
   set W₁ : SmoothCcTensor g₀ 0 3 := iteratedCovGrad (I := I) g₀ 0 2 1 (T - T') with hW₁
@@ -406,10 +409,14 @@ theorem deTurckRicciArm_appCc_eval
       ricciTensor (I := I) g₁ x (v 0) (v 1) - ricciTensor (I := I) g₁' x (v 0) (v 1) =
         unitModel (I := I) (M := M) g₀ 2
             (appCc (I := I) (M := M) g₀ 2 2 R₀c W₀) x v
-          + unitModel (I := I) (M := M) g₀ 2
-              (appCc (I := I) (M := M) g₀ 3 2 R₁cs W₁) x v
-          + unitModel (I := I) (M := M) g₀ 2
-              (appCc (I := I) (M := M) g₀ 3 2 R₁q W₁) x v
+          + (unitModel (I := I) (M := M) g₀ 2
+                (appCc (I := I) (M := M) g₀ 2 2 R₀cs W₀) x v
+              + unitModel (I := I) (M := M) g₀ 2
+                  (appCc (I := I) (M := M) g₀ 3 2 R₁cs W₁) x v)
+          + (unitModel (I := I) (M := M) g₀ 2
+                (appCc (I := I) (M := M) g₀ 2 2 R₀q W₀) x v
+              + unitModel (I := I) (M := M) g₀ 2
+                  (appCc (I := I) (M := M) g₀ 3 2 R₁q W₁) x v)
           + unitModel (I := I) (M := M) g₀ 2
               (appCc (I := I) (M := M) g₀ 3 2 R₁A W₁) x v
           + unitModel (I := I) (M := M) g₀ 2
@@ -635,23 +642,19 @@ theorem deTurckRicciArm_appCc_eval
       rw [hgradX i, hgradZ i]
       simp only [hZv, hYw, ContMDiffSection.coeFn_mk, smoothExtensionTangent_eq]
       abel
-    linarith [hregroup, hOsplit, hR₀ x v, hR₁A x v, hR₁q x v, hR₁cs x v, hP]
+    -- The mixed cross/slot and quadratic children read off a SUM of an order-`0` and an order-`1`
+    -- `appCc` term; split the `unitModel` of the sum into the two read-offs `linarith` consumes.
+    have hR₁cs' := hR₁cs x v
+    have hR₁q' := hR₁q x v
+    rw [unitModel_add_apply] at hR₁cs' hR₁q'
+    linarith [hregroup, hOsplit, hR₀ x v, hR₁A x v, hR₁q', hR₁cs', hP]
   -- Reduce the scaled goal to the un-scaled core by pushing `(-2) •` through `appCc`/`unitModel`.
-  rw [appCc_smul_left', appCc_smul_left', appCc_smul_left', appCc_add_left, appCc_add_left,
-    show ((-2 : ℝ) • appCc (I := I) (M := M) g₀ 2 2 R₀c W₀
-        + (-2 : ℝ) • (appCc (I := I) (M := M) g₀ 3 2 R₁cs W₁
-            + appCc (I := I) (M := M) g₀ 3 2 R₁q W₁
-            + appCc (I := I) (M := M) g₀ 3 2 R₁A W₁)
-        + (-2 : ℝ) • appCc (I := I) (M := M) g₀ 4 2 R₂' W₂) =
-      (-2 : ℝ) • (appCc (I := I) (M := M) g₀ 2 2 R₀c W₀
-        + (appCc (I := I) (M := M) g₀ 3 2 R₁cs W₁
-            + appCc (I := I) (M := M) g₀ 3 2 R₁q W₁
-            + appCc (I := I) (M := M) g₀ 3 2 R₁A W₁)
-        + appCc (I := I) (M := M) g₀ 4 2 R₂' W₂) from by simp only [smul_add]]
-  rw [unitModel_smul_apply, unitModel_add_apply, unitModel_add_apply, unitModel_add_apply,
-    unitModel_add_apply]
+  -- The order-`0` coefficient is the sum of the `(B)`/cross/quad order-`0` fields and the order-`1`
+  -- coefficient the sum of the cross/quad/`(A)` order-`1` fields, so each `appCc` of a smul-of-sum
+  -- distributes into atomic read-offs by `appCc_smul_left'`/`appCc_add_left` and `unitModel`-linearity.
+  simp only [appCc_add_left, appCc_smul_left', unitModel_smul_apply, unitModel_add_apply,
+    smul_eq_mul]
   rw [hcore]
-  simp only [smul_eq_mul]
   ring
 
 /-- **The Ricci–DeTurck Ricci-arm order-graded `appCc` decomposition with order-`0` `C⁰` and order-`a`
