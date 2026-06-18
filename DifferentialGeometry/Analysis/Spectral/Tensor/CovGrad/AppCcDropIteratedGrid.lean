@@ -352,42 +352,131 @@ theorem dropTower_normalForm (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
   | zero => exact fun w => dropNormalForm_zero (I := I) (M := M) g b₀ s₀ C w
   | succ p ih => exact fun w => dropNormalForm_succ (I := I) (M := M) g b₀ s₀ C p ih w
 
-/-! ## The per-order jet envelope from the drop normal form -/
+/-! ## The explicit per-order jet envelope from the drop normal form
 
-/-- **The per-order jet envelope of the drop tower from its operator-field normal form.**  If
-`op p w` admits the drop normal form, then its intrinsic squared fibre norm is bounded, uniformly over
-the compact `M`, by a nonnegative constant times the order-`≤ p` covariant jet of the contracted
-section. -/
-theorem exists_dropTower_jet_bound (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
+The per-order, per-width jet envelope constant of the drop tower is built as an **explicit functional**
+of the fixed coefficient field `C`'s covariant jets, with no opaque outer `Classical.choose`.  Two named
+ingredients carry the construction:
+
+* `dropTowerPsi` — the drop-normal-form operator field `Ψ` of `(C, p, w)` (the `covGrad`/`slotExtend`
+  jets of `C`), named from the witness of `dropTower_normalForm`;
+* `dropFibreSup` — the per-`k` uniform fibre-norm-square envelope of the operator field `Ψ k`, named from
+  the witness of `exists_uniform_riemannianFiberNormSq_appCcRS_le`.
+
+The envelope constant `dropKappa C p w := (p + 1) · ∑_{k ≤ p} dropFibreSup C p w k` is then a plain
+`def` whose value is a NAMED finite sum of fibre-norm sups of `C`'s jets — a transparent functional, not
+hidden behind the outer existence's `Classical.choose`.  (Each `dropFibreSup` is itself a `Classical.choose`
+of the per-`k` compactness sup, which is acceptable: it is now an explicit, named per-`k` functional of
+`C`'s jets, exposed to downstream as the `dropKappa_le_of_fibreNormSup` handle.) -/
+
+/-- **The drop-normal-form operator field `Ψ` of the fixed coefficient `(C, p, w)`.**  Named from the
+witness of `dropTower_normalForm`: `Ψ k : SmoothCcTensor g ((b₀ + w) + k) ((s₀ + w) + p)` is the order-`k`
+`covGrad`/`slotExtend` jet of `C` in the operator-field normal form of the drop tower. -/
+def dropTowerPsi (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
     (C : SmoothCcTensor g b₀ s₀) (p w : ℕ) :
-    ∃ kappa : ℝ, 0 ≤ kappa ∧
-      ∀ (W : SmoothCcTensor g 0 (b₀ + w)) (x : M),
-        riemannianFiberNormSq (I := I) (M := M) g 0 ((s₀ + w) + p) x
-            ((DropTowerOp (I := I) (M := M) g b₀ s₀ C p w W).toSection x) ≤
-          kappa * ∑ q ∈ Finset.range (p + 1),
-            riemannianFiberNormSq (I := I) (M := M) g 0 ((b₀ + w) + q) x
-              ((iteratedCovGrad g 0 (b₀ + w) q W).toSection x) := by
-  classical
-  obtain ⟨Ψ, hΨ⟩ := dropTower_normalForm (I := I) (M := M) g b₀ s₀ C p w
-  choose Ck hCk_nn hCk using fun k =>
-    exists_uniform_riemannianFiberNormSq_appCcRS_le (I := I) (M := M) g 0 ((b₀ + w) + k)
-      ((s₀ + w) + p) (Ψ k)
-  refine ⟨(p + 1 : ℝ) * ∑ k ∈ Finset.range (p + 1), Ck k,
-    mul_nonneg (by positivity) (Finset.sum_nonneg fun k _ => hCk_nn k), fun W x => ?_⟩
+    (k : ℕ) → SmoothCcTensor g ((b₀ + w) + k) ((s₀ + w) + p) :=
+  Classical.choose (dropTower_normalForm (I := I) (M := M) g b₀ s₀ C p w)
+
+/-- **The drop normal form holds for the named operator field `dropTowerPsi`.** -/
+theorem dropTowerPsi_spec (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
+    (C : SmoothCcTensor g b₀ s₀) (p w : ℕ) (W : SmoothCcTensor g 0 (b₀ + w)) :
+    DropTowerOp (I := I) (M := M) g b₀ s₀ C p w W =
+      ∑ k ∈ Finset.range (p + 1),
+        appCcRS (I := I) (M := M) g 0 ((b₀ + w) + k) ((s₀ + w) + p)
+          (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k)
+          (iteratedCovGrad g 0 (b₀ + w) k W) :=
+  Classical.choose_spec (dropTower_normalForm (I := I) (M := M) g b₀ s₀ C p w) W
+
+/-- **The per-`k` uniform fibre-norm-square envelope of the operator field `dropTowerPsi`.**  Named from
+the witness of `exists_uniform_riemannianFiberNormSq_appCcRS_le` applied to `Ψ k`: the nonnegative compact
+sup constant of the order-`k` jet of `C`. -/
+def dropFibreSup (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
+    (C : SmoothCcTensor g b₀ s₀) (p w k : ℕ) : ℝ :=
+  Classical.choose (exists_uniform_riemannianFiberNormSq_appCcRS_le (I := I) (M := M) g 0
+    ((b₀ + w) + k) ((s₀ + w) + p) (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k))
+
+theorem dropFibreSup_nonneg (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
+    (C : SmoothCcTensor g b₀ s₀) (p w k : ℕ) :
+    0 ≤ dropFibreSup (I := I) (M := M) g b₀ s₀ C p w k :=
+  (Classical.choose_spec (exists_uniform_riemannianFiberNormSq_appCcRS_le (I := I) (M := M) g 0
+    ((b₀ + w) + k) ((s₀ + w) + p) (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k))).1
+
+theorem dropFibreSup_spec (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
+    (C : SmoothCcTensor g b₀ s₀) (p w k : ℕ)
+    (W : SmoothCcTensor g 0 ((b₀ + w) + k)) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 ((s₀ + w) + p) x
+        ((appCcRS (I := I) (M := M) g 0 ((b₀ + w) + k) ((s₀ + w) + p)
+          (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k) W).toSection x) ≤
+      dropFibreSup (I := I) (M := M) g b₀ s₀ C p w k *
+        riemannianFiberNormSq (I := I) (M := M) g 0 ((b₀ + w) + k) x (W.toSection x) :=
+  (Classical.choose_spec (exists_uniform_riemannianFiberNormSq_appCcRS_le (I := I) (M := M) g 0
+    ((b₀ + w) + k) ((s₀ + w) + p) (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k))).2 W x
+
+/-! ## The packaged per-order, per-width jet envelope -/
+
+/-- **The packaged per-order, per-width jet envelope constant of the drop tower, EXPLICIT.**  The
+nonnegative two-index family `(p, w) ↦ (p + 1) · ∑_{k ≤ p} dropFibreSup C p w k`: a NAMED finite sum of
+the fibre-norm sups of `C`'s `covGrad`/`slotExtend` jets, with no opaque outer `Classical.choose`.  This
+is the witness the drop-tower jet bound asserts; downstream may dominate it via the
+`dropKappa_le_of_fibreNormSup` handle by ball-uniform bounds on the field's covariant-jet fibre sups. -/
+def dropKappa (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ) (C : SmoothCcTensor g b₀ s₀) :
+    ℕ → ℕ → ℝ :=
+  fun p w => (p + 1 : ℝ) * ∑ k ∈ Finset.range (p + 1), dropFibreSup (I := I) (M := M) g b₀ s₀ C p w k
+
+/-- **`dropKappa` is, by definition, `(p + 1) · ∑_{k ≤ p} dropFibreSup C p w k`.**  The exposed unfolding
+of the explicit envelope constant. -/
+theorem dropKappa_eq_explicit (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
+    (C : SmoothCcTensor g b₀ s₀) (p w : ℕ) :
+    dropKappa (I := I) (M := M) g b₀ s₀ C p w =
+      (p + 1 : ℝ) * ∑ k ∈ Finset.range (p + 1), dropFibreSup (I := I) (M := M) g b₀ s₀ C p w k :=
+  rfl
+
+theorem dropKappa_nonneg (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
+    (C : SmoothCcTensor g b₀ s₀) (p w : ℕ) :
+    0 ≤ dropKappa (I := I) (M := M) g b₀ s₀ C p w :=
+  mul_nonneg (by positivity)
+    (Finset.sum_nonneg fun k _ => dropFibreSup_nonneg (I := I) (M := M) g b₀ s₀ C p w k)
+
+/-- **The downstream domination handle: `dropKappa` is bounded by `(p + 1)` times the sum of any per-`k`
+upper bounds on the operator-field fibre sups.**  If a two-index-plus-`k` family `S` dominates each
+`dropFibreSup C p w k`, then `dropKappa C p w ≤ (p + 1) · ∑_{k ≤ p} S p w k`.  This is the explicit-functional
+exposure the envelope leaf consumes: bounding the (covariant-jet) fibre sups `dropFibreSup` ball-uniformly
+(which the supercritical embedding controls) bounds `dropKappa` ball-uniformly. -/
+theorem dropKappa_le_of_fibreNormSup (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
+    (C : SmoothCcTensor g b₀ s₀) (p w : ℕ) (S : ℕ → ℕ → ℕ → ℝ)
+    (hS : ∀ k ∈ Finset.range (p + 1), dropFibreSup (I := I) (M := M) g b₀ s₀ C p w k ≤ S p w k) :
+    dropKappa (I := I) (M := M) g b₀ s₀ C p w ≤
+      (p + 1 : ℝ) * ∑ k ∈ Finset.range (p + 1), S p w k := by
+  rw [dropKappa_eq_explicit]
+  exact mul_le_mul_of_nonneg_left (Finset.sum_le_sum hS) (by positivity)
+
+theorem dropTower_rfns_op_le (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
+    (C : SmoothCcTensor g b₀ s₀) (p w : ℕ) (W : SmoothCcTensor g 0 (b₀ + w)) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 ((s₀ + w) + p) x
+        ((DropTowerOp (I := I) (M := M) g b₀ s₀ C p w W).toSection x) ≤
+      dropKappa (I := I) (M := M) g b₀ s₀ C p w * ∑ q ∈ Finset.range (p + 1),
+        riemannianFiberNormSq (I := I) (M := M) g 0 ((b₀ + w) + q) x
+          ((iteratedCovGrad g 0 (b₀ + w) q W).toSection x) := by
+  set Ck : ℕ → ℝ := fun k => dropFibreSup (I := I) (M := M) g b₀ s₀ C p w k with hCk_def
+  have hCk_nn : ∀ k, 0 ≤ Ck k := fun k => dropFibreSup_nonneg (I := I) (M := M) g b₀ s₀ C p w k
   set a : ℕ → ℝ := fun k => riemannianFiberNormSq (I := I) (M := M) g 0 ((b₀ + w) + k) x
     ((iteratedCovGrad g 0 (b₀ + w) k W).toSection x) with ha_def
   have ha_nn : ∀ k, 0 ≤ a k := fun k =>
     riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 ((b₀ + w) + k) x _
-  rw [hΨ W, SmoothCcTensor.toSection_sum_apply]
+  rw [dropKappa_eq_explicit, dropTowerPsi_spec (I := I) (M := M) g b₀ s₀ C p w W,
+    SmoothCcTensor.toSection_sum_apply]
   refine le_trans (riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g 0 ((s₀ + w) + p) x
     (Finset.range (p + 1))
-    (fun k => (appCcRS (I := I) (M := M) g 0 ((b₀ + w) + k) ((s₀ + w) + p) (Ψ k)
+    (fun k => (appCcRS (I := I) (M := M) g 0 ((b₀ + w) + k) ((s₀ + w) + p)
+      (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k)
       (iteratedCovGrad g 0 (b₀ + w) k W)).toSection x)) ?_
   rw [Finset.card_range]
   have hsummand : ∀ k ∈ Finset.range (p + 1),
       riemannianFiberNormSq (I := I) (M := M) g 0 ((s₀ + w) + p) x
-          ((appCcRS (I := I) (M := M) g 0 ((b₀ + w) + k) ((s₀ + w) + p) (Ψ k)
-            (iteratedCovGrad g 0 (b₀ + w) k W)).toSection x) ≤ Ck k * a k := fun k _ => hCk k _ x
+          ((appCcRS (I := I) (M := M) g 0 ((b₀ + w) + k) ((s₀ + w) + p)
+            (dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k)
+            (iteratedCovGrad g 0 (b₀ + w) k W)).toSection x) ≤ Ck k * a k := fun k _ =>
+    dropFibreSup_spec (I := I) (M := M) g b₀ s₀ C p w k _ x
   refine le_trans (mul_le_mul_of_nonneg_left (Finset.sum_le_sum hsummand) (by positivity)) ?_
   have hCa_le : (∑ k ∈ Finset.range (p + 1), Ck k * a k) ≤
       (∑ k ∈ Finset.range (p + 1), Ck k) * ∑ k ∈ Finset.range (p + 1), a k := by
@@ -401,28 +490,22 @@ theorem exists_dropTower_jet_bound (g : SmoothRiemannianMetric I M) (b₀ s₀ :
         mul_le_mul_of_nonneg_left hCa_le (by positivity)
     _ = (p + 1 : ℝ) * (∑ k ∈ Finset.range (p + 1), Ck k) * ∑ k ∈ Finset.range (p + 1), a k := by ring
 
-/-! ## The packaged per-order, per-width jet envelope -/
-
-/-- **The packaged per-order, per-width jet envelope constant of the drop tower.**  The `Classical.choose`
-of `exists_dropTower_jet_bound`, as a nonnegative two-index family `(p, w) ↦ kappa`, so that the
-binomial grid can be stated against `gridWindowSum`. -/
-def dropKappa (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ) (C : SmoothCcTensor g b₀ s₀) :
-    ℕ → ℕ → ℝ :=
-  fun p w => Classical.choose (exists_dropTower_jet_bound (I := I) (M := M) g b₀ s₀ C p w)
-
-theorem dropKappa_nonneg (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
+/-- **The per-order jet envelope of the drop tower from its operator-field normal form.**  The
+existential packaging of `dropTower_rfns_op_le`: the explicit `dropKappa` constant is a valid witness.
+If `op p w` admits the drop normal form, then its intrinsic squared fibre norm is bounded, uniformly over
+the compact `M`, by a nonnegative constant times the order-`≤ p` covariant jet of the contracted
+section. -/
+theorem exists_dropTower_jet_bound (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
     (C : SmoothCcTensor g b₀ s₀) (p w : ℕ) :
-    0 ≤ dropKappa (I := I) (M := M) g b₀ s₀ C p w :=
-  (Classical.choose_spec (exists_dropTower_jet_bound (I := I) (M := M) g b₀ s₀ C p w)).1
-
-theorem dropTower_rfns_op_le (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
-    (C : SmoothCcTensor g b₀ s₀) (p w : ℕ) (W : SmoothCcTensor g 0 (b₀ + w)) (x : M) :
-    riemannianFiberNormSq (I := I) (M := M) g 0 ((s₀ + w) + p) x
-        ((DropTowerOp (I := I) (M := M) g b₀ s₀ C p w W).toSection x) ≤
-      dropKappa (I := I) (M := M) g b₀ s₀ C p w * ∑ q ∈ Finset.range (p + 1),
-        riemannianFiberNormSq (I := I) (M := M) g 0 ((b₀ + w) + q) x
-          ((iteratedCovGrad g 0 (b₀ + w) q W).toSection x) :=
-  (Classical.choose_spec (exists_dropTower_jet_bound (I := I) (M := M) g b₀ s₀ C p w)).2 W x
+    ∃ kappa : ℝ, 0 ≤ kappa ∧
+      ∀ (W : SmoothCcTensor g 0 (b₀ + w)) (x : M),
+        riemannianFiberNormSq (I := I) (M := M) g 0 ((s₀ + w) + p) x
+            ((DropTowerOp (I := I) (M := M) g b₀ s₀ C p w W).toSection x) ≤
+          kappa * ∑ q ∈ Finset.range (p + 1),
+            riemannianFiberNormSq (I := I) (M := M) g 0 ((b₀ + w) + q) x
+              ((iteratedCovGrad g 0 (b₀ + w) q W).toSection x) :=
+  ⟨dropKappa (I := I) (M := M) g b₀ s₀ C p w, dropKappa_nonneg (I := I) (M := M) g b₀ s₀ C p w,
+    fun W x => dropTower_rfns_op_le (I := I) (M := M) g b₀ s₀ C p w W x⟩
 
 /-! ## The binomial covariant-Leibniz `rfns` grid of the drop tower -/
 
