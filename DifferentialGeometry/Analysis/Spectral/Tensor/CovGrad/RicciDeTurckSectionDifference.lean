@@ -1628,6 +1628,15 @@ private lemma dualToCotangent_smulC {x : M} (c : ℝ) (α : Module.Dual ℝ (Tan
   rw [map_smul, cotangentToDualLinear_apply, cotangentToDualLinear_apply,
     cotangentToDual_dualToCotangent, cotangentToDual_dualToCotangent]
 
+set_option linter.unusedSectionVars false in
+private lemma dualToCotangent_subC {x : M} (α β : Module.Dual ℝ (TangentSpace I x)) :
+    dualToCotangent (I := I) (x := x) (α - β)
+      = dualToCotangent (I := I) (x := x) α - dualToCotangent (I := I) (x := x) β := by
+  apply cotangentToDualLinear_injective (I := I) (x := x)
+  rw [map_sub, cotangentToDualLinear_apply, cotangentToDualLinear_apply,
+    cotangentToDualLinear_apply, cotangentToDual_dualToCotangent,
+    cotangentToDual_dualToCotangent, cotangentToDual_dualToCotangent]
+
 /-- The `g₀`-aligned SP2-endpoint principal endomorphism `v ↦ ♯_{g₁}(∇₀_v K_{Z,Y})` as a linear map. -/
 private def alignedPrincipalEndoC (g₀ g₁ : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : E →ₗ[ℝ] E where
@@ -3906,6 +3915,202 @@ theorem symmAbsorbedPrincipalCoeff_appCc_eq
     simp only [smul_eq_mul]
   rw [hLHS, hRHS]
 
+/-! ## The operator-difference (O)-arm sharp-difference resolvent (order-`0`, extension-free) -/
+
+set_option linter.unusedSectionVars false in
+/-- **The sharp-difference resolvent paired with `g₁` (order-`0`, value-only).**
+
+For a single cotangent value `α : Tensor0SSpace 1 I x`, the difference of the two inverse-metric sharps
+`♯_{g₁} α − ♯_{g₁'} α`, paired with the OPERATOR metric `g₁` against any test vector `w`, reads off the
+metric-VALUE difference `α(w) − g₁(♯_{g₁'} α, w)`:
+```
+g₁(♯_{g₁} α − ♯_{g₁'} α, w) = cotangentToDualLinear α w − g₁(♯_{g₁'} α, w).
+```
+The `g₁`-sharp inverts the `g₁`-flat (`inverseMetricSharpFib_inner`): `g₁(♯_{g₁} α, w)
+= cotangentToDualLinear α w`, so the `g₁`-pairing of the sharp difference equals
+`α(w) − g₁(♯_{g₁'} α, w)`.  Since `g₁'(♯_{g₁'} α, w) = cotangentToDualLinear α w` too, this is the
+resolvent kernel of the order-`0` (O)-arm: the metric VALUE difference `g₁ − g₁'` survives at
+`∇₀(T − T')(x) = 0`. -/
+theorem inverseMetricSharpFib_sub_inner_g1
+    (g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
+    (α : Tensor0SSpace 1 I x) (w : TangentSpace I x) :
+    g₁.inner x
+        (inverseMetricSharpFib (I := I) g₁ x α
+          - inverseMetricSharpFib (I := I) g₁' x α) w =
+      cotangentToDualLinear (I := I) (x := x) α w
+        - g₁.inner x (inverseMetricSharpFib (I := I) g₁' x α) w := by
+  rw [map_sub, ContinuousLinearMap.sub_apply,
+      inverseMetricSharpFib_inner (I := I) g₁ x α w]
+
+set_option linter.unusedSectionVars false in
+/-- **The sharp-difference resolved through the metric-VALUE difference under the realize-tie.**
+
+Under the two realize-ties `g₁.inner = g₀.inner + ccTensorBilinSymm g₀ T`,
+`g₁'.inner = g₀.inner + ccTensorBilinSymm g₀ T'`, the operator `g₁`-pairing of the sharp difference is
+the (negated) symmetrized bilinear form of `T − T'`:
+```
+g₁(♯_{g₁} α − ♯_{g₁'} α, w) = − ccTensorBilinSymm g₀ (T − T') x (♯_{g₁'} α) w.
+```
+This collapses the resolvent `inverseMetricSharpFib_sub_inner_g1` through the realize-ties:
+`g₁'(u, w) − g₁(u, w) = ccTensorBilinSymm g₀ T' x u w − ccTensorBilinSymm g₀ T x u w
+= − ccTensorBilinSymm g₀ (T − T') x u w` (linearity of `ccTensorBilinSymm` in the section).  It is the
+genuine order-`0` value coefficient of the (O)-arm: a fibrewise-linear function of `(T − T')(x)`. -/
+theorem inverseMetricSharpFib_sub_inner_g1_realize
+    (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    (hg₁ : ∀ (b : M) (u w : TangentSpace I b),
+      g₁.inner b u w = g₀.inner b u w + ccTensorBilinSymm (I := I) g₀ T b u w)
+    (hg₁' : ∀ (b : M) (u w : TangentSpace I b),
+      g₁'.inner b u w = g₀.inner b u w + ccTensorBilinSymm (I := I) g₀ T' b u w)
+    (x : M) (α : Tensor0SSpace 1 I x) (w : TangentSpace I x) :
+    g₁.inner x
+        (inverseMetricSharpFib (I := I) g₁ x α
+          - inverseMetricSharpFib (I := I) g₁' x α) w =
+      - ccTensorBilinSymm (I := I) g₀ (T - T') x
+          (inverseMetricSharpFib (I := I) g₁' x α) w := by
+  rw [inverseMetricSharpFib_sub_inner_g1 (I := I) g₁ g₁' x α w]
+  rw [← inverseMetricSharpFib_inner (I := I) g₁' x α w]
+  set u : TangentSpace I x := inverseMetricSharpFib (I := I) g₁' x α with hu
+  rw [hg₁' x u w, hg₁ x u w]
+  have hbsub : ∀ (a c : TangentSpace I x),
+      ccTensorBilin (I := I) g₀ (T - T') x a c =
+        ccTensorBilin (I := I) g₀ T x a c - ccTensorBilin (I := I) g₀ T' x a c := by
+    intro a c
+    rw [show T - T' = T + (-1 : ℝ) • T' from by rw [neg_one_smul]; abel,
+      ccTensorBilin_add (I := I) (M := M) g₀ T ((-1 : ℝ) • T') x a c,
+      ccTensorBilin_smul (I := I) (M := M) g₀ (-1 : ℝ) T' x a c]
+    ring
+  have hsub : ccTensorBilinSymm (I := I) g₀ (T - T') x u w =
+      ccTensorBilinSymm (I := I) g₀ T x u w - ccTensorBilinSymm (I := I) g₀ T' x u w := by
+    rw [ccTensorBilinSymm_apply, ccTensorBilinSymm_apply, ccTensorBilinSymm_apply,
+      hbsub u w, hbsub w u]
+    ring
+  rw [hsub]; ring
+
+set_option linter.unusedSectionVars false in
+/-- **The two-endpoint cotangent connection-difference bridge (value level).**
+
+Chaining the single-endpoint cotangent connection-difference bridge `cotangentCov_leviCivita_diff` at the
+two endpoints `(g₁, g₀)` and `(g₁', g₀)` (the connection-independent exterior-derivative term cancels at
+each, and the `∇₀` reference term cancels between them):
+```
+(∇^{g₁}_K θ)(v)(w) − (∇^{g₁'}_K θ)(v)(w) = −θ x (connDiff g₁ g₁' x w v).
+```
+This is the value-level cotangent connection difference between the TWO endpoint connections directly
+(the cotangent dual of `connDiff g₁ g₁'`, the intrinsic Christoffel variation between the endpoints),
+the bridge the (O)-arm connection leg consumes. -/
+theorem cotangentCov_leviCivita_diff_endpoint
+    (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
+    {θ : Π b : M, TangentSpace I b →L[ℝ] ℝ} {x : M}
+    (hθ : MDiffAtCotangent (I := I) θ x)
+    (v w : TangentSpace I x) :
+    ((cotangentCov (LeviCivita (I := I) g₁)).toFun θ x v) w -
+        ((cotangentCov (LeviCivita (I := I) g₁')).toFun θ x v) w =
+      -θ x (PDE.DeTurck.connDiff (I := I) g₁ g₁' x w v) := by
+  have h1 := cotangentCov_leviCivita_diff (I := I) (M := M) g₀ g₁ hθ v w
+  have h1' := cotangentCov_leviCivita_diff (I := I) (M := M) g₀ g₁' hθ v w
+  -- `connDiff g₁ g₁' = connDiff g₁ g₀ − connDiff g₁' g₀` (the difference-one-form cocycle, value level).
+  have hcocycle : PDE.DeTurck.connDiff (I := I) g₁ g₁' x w v =
+      PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v
+        - PDE.DeTurck.connDiff (I := I) g₁' g₀ x w v := by
+    classical
+    set Y : Π b : M, TangentSpace I b := smoothExtensionTangent (I := I) x w with hYdef
+    have hY := smoothExtensionTangent_mdiff (I := I) x w x
+    have hYx : Y x = w := smoothExtensionTangent_eq (I := I) x w
+    have e1 := PDE.DeTurck.connDiff_apply (I := I) g₁ g₁' (σ := Y) hY v
+    have e2 := PDE.DeTurck.connDiff_apply (I := I) g₁ g₀ (σ := Y) hY v
+    have e3 := PDE.DeTurck.connDiff_apply (I := I) g₁' g₀ (σ := Y) hY v
+    rw [hYx] at e1 e2 e3
+    rw [e1, e2, e3]; abel
+  rw [hcocycle, map_sub]
+  linarith [h1, h1']
+
+set_option linter.unusedSectionVars false in
+/-- **The (O)-arm pointwise split: sharp-difference resolvent plus connection-difference leg.**
+
+The per-`i` (O)-arm atom differentiates a SINGLE endpoint covector `K_{g₁'}` (operator and connection
+both vary across the two terms).  Add-subtract the middle term `♯_{g₁'}(dual(∇^{g₁}_dir K))` to split it:
+```
+♯_{g₁}(dual(∇^{g₁}_dir K)) − ♯_{g₁'}(dual(∇^{g₁'}_dir K))
+  = (♯_{g₁} − ♯_{g₁'})(dual(∇^{g₁}_dir K))                       -- (O.a) the sharp-difference resolvent
+                                                                  --   (order-`0` cometric VALUE difference)
+    + ♯_{g₁'}(dual(∇^{g₁}_dir K) − dual(∇^{g₁'}_dir K)),         -- (O.b) the connection-difference leg
+```
+where `K = koszulCovGradCovec g₀ g₁' Z Y`.  This is the pure algebraic add-subtract-middle of the
+operator-difference arm: it isolates the sharp-difference resolvent `(O.a)` (whose `g₁`-pairing is the
+order-`0` cometric value difference, `inverseMetricSharpFib_sub_inner_g1`) from the cotangent
+connection-difference leg `(O.b)` (the cotangent dual of `connDiff g₁ g₁'`,
+`cotangentCov_leviCivita_diff_endpoint`). -/
+theorem oArm_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
+    (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (dir : TangentSpace I x) :
+    inverseMetricSharpFib (I := I) g₁ x
+          (dualToCotangent (I := I)
+            ((cotangentCov (LeviCivita (I := I) g₁)).toFun
+              (fun b : M => cotangentToCLM (I := I)
+                (koszulCovGradCovec (I := I) (M := M) g₀ g₁' Z Y b)) x dir))
+        - inverseMetricSharpFib (I := I) g₁' x
+            (dualToCotangent (I := I)
+              ((cotangentCov (LeviCivita (I := I) g₁')).toFun
+                (fun b : M => cotangentToCLM (I := I)
+                  (koszulCovGradCovec (I := I) (M := M) g₀ g₁' Z Y b)) x dir)) =
+      (inverseMetricSharpFib (I := I) g₁ x
+            (dualToCotangent (I := I)
+              ((cotangentCov (LeviCivita (I := I) g₁)).toFun
+                (fun b : M => cotangentToCLM (I := I)
+                  (koszulCovGradCovec (I := I) (M := M) g₀ g₁' Z Y b)) x dir))
+          - inverseMetricSharpFib (I := I) g₁' x
+              (dualToCotangent (I := I)
+                ((cotangentCov (LeviCivita (I := I) g₁)).toFun
+                  (fun b : M => cotangentToCLM (I := I)
+                    (koszulCovGradCovec (I := I) (M := M) g₀ g₁' Z Y b)) x dir)))
+        + inverseMetricSharpFib (I := I) g₁' x
+            (dualToCotangent (I := I)
+                ((cotangentCov (LeviCivita (I := I) g₁)).toFun
+                  (fun b : M => cotangentToCLM (I := I)
+                    (koszulCovGradCovec (I := I) (M := M) g₀ g₁' Z Y b)) x dir)
+              - dualToCotangent (I := I)
+                  ((cotangentCov (LeviCivita (I := I) g₁')).toFun
+                    (fun b : M => cotangentToCLM (I := I)
+                      (koszulCovGradCovec (I := I) (M := M) g₀ g₁' Z Y b)) x dir)) := by
+  rw [map_sub]
+  abel
+
+set_option linter.unusedSectionVars false in
+/-- **The (O.b) connection-difference leg as the cotangent dual of `connDiff g₁ g₁'`.**
+
+The cotangent covariant-derivative difference `dual(∇^{g₁}_dir K) − dual(∇^{g₁'}_dir K)` of the SINGLE
+covector `K = koszulCovGradCovec g₀ g₁' Z Y` is the `dualToCotangent` of the functional
+`w ↦ −cotangentToCLM(K x)(connDiff g₁ g₁' x w dir)`:
+```
+dual(∇^{g₁}_dir K) − dual(∇^{g₁'}_dir K)
+  = dualToCotangent (−(K_x ∘ (connDiff g₁ g₁' x).flip dir)).
+```
+This converts the operator-difference leg into the order-`1` connection difference `connDiff g₁ g₁'`
+(the intrinsic Christoffel variation between the endpoints), via the two-endpoint cotangent bridge
+`cotangentCov_leviCivita_diff_endpoint`.  The functional is genuinely linear (a CLM composition), so it
+packages as a single `Module.Dual`. -/
+theorem oArm_leg_eq_connDiff (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
+    (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (dir : TangentSpace I x) :
+    dualToCotangent (I := I)
+          ((cotangentCov (LeviCivita (I := I) g₁)).toFun
+            (fun b : M => cotangentToCLM (I := I)
+              (koszulCovGradCovec (I := I) (M := M) g₀ g₁' Z Y b)) x dir)
+        - dualToCotangent (I := I)
+            ((cotangentCov (LeviCivita (I := I) g₁')).toFun
+              (fun b : M => cotangentToCLM (I := I)
+                (koszulCovGradCovec (I := I) (M := M) g₀ g₁' Z Y b)) x dir) =
+      dualToCotangent (I := I)
+        (-((cotangentToCLM (I := I) (koszulCovGradCovec (I := I) (M := M) g₀ g₁' Z Y x)).comp
+            ((PDE.DeTurck.connDiff (I := I) g₁ g₁' x).flip dir)).toLinearMap) := by
+  have hθ := koszulCovGradCovecCLM_mdiffAtCotangent (I := I) (M := M) g₀ g₁' Z Y x
+  rw [← dualToCotangent_subC]
+  congr 1
+  ext w
+  have hbridge := cotangentCov_leviCivita_diff_endpoint (I := I) (M := M) g₀ g₁ g₁' hθ dir w
+  rw [LinearMap.sub_apply]
+  simp only [LinearMap.neg_apply, ContinuousLinearMap.coe_comp', Function.comp_apply,
+    ContinuousLinearMap.flip_apply, ContinuousLinearMap.coe_coe]
+  exact hbridge
+
 /-! ## The combined lower-order arm connector of the Ricci-arm eval-matching (posited covariant bridge)
 
 The Ricci-arm eval-matching `deTurckRicciArm_appCc_eval` assembles the `(−2)`-scaled Ricci-tensor
@@ -3964,7 +4169,17 @@ This is the COMBINED lower arm: no proper sub-arm is tensorial, but the full com
 test-field-extension `∇₀ Z`/`∇₀ Y` artifacts of `covDerivConnDiff` cancel across the combination, as the
 total Ricci difference and the order-`2` `appCc R₂ (∇₀² S)` piece are both extension-free).  The grading
 is genuinely MIXED order-`(0, 1)`: the inverse-Gram VALUE difference `g₁⁻¹ − g₁'⁻¹` residue survives at
-`∇₀(T − T')(x) = 0` (order `0`), while the `∇₀(g₁ − g₁') = ∇₀(T − T')` jet legs supply order `1`. -/
+`∇₀(T − T')(x) = 0` (order `0`), while the `∇₀(g₁ − g₁') = ∇₀(T − T')` jet legs supply order `1`.
+
+The (O)-arm decomposition foundation is in place and sorry-free: `oArm_split` splits the per-`i`
+operator-difference atom into the order-`0` sharp-difference resolvent `(O.a)` plus the
+connection-difference leg `(O.b)`; `inverseMetricSharpFib_sub_inner_g1` /
+`inverseMetricSharpFib_sub_inner_g1_realize` resolve `(O.a)`'s `g₁`-pairing to the (negated) symmetrized
+metric-VALUE difference `ccTensorBilinSymm g₀ (T − T')` (order-`0`, fibrewise-linear in `(T − T')(x)`);
+`oArm_leg_eq_connDiff` (via `cotangentCov_leviCivita_diff_endpoint`) rewrites `(O.b)` as the cotangent
+dual of `connDiff g₁ g₁'` (order-`≤ 1`).  The remaining work is the JOINT cancellation of the `(O.b)`,
+`(C)/(S₁)/(S₂)`, quadratic, and remainder legs against the extension artifacts, and the `ricSlotOpField`
+-style smooth `R₀`/`R₁` coefficient construction realising the cancelled extension-free form. -/
 theorem combinedLowerArm_appCc_eq
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     (hg₁ : ∀ (b : M) (u w : TangentSpace I b),
