@@ -5345,6 +5345,140 @@ theorem order1CocycleLeg_flat_eq_explicit
   have eZXY := (hcg Ze X Y).trans (hval (S - S') Ze Ze X Xe Y Ye rfl hXex.symm hYex.symm)
   linarith [eXY, eYX, eZXY]
 
+/-! ## The subleading order-2 coefficient `R₂lower` — the two-endpoint full-Ricci principal difference
+
+The combined-lower arm-sum equals (by `combinedLowerArm_extension_free`)
+`Ric(g₁) − Ric(g₁') − unitModel(appCc R₂' (∇₀²(T − T')))`, where `R₂'` subtracts the order-2 PRINCIPAL of
+the Ricci difference read at the SINGLE operator cometric `g₁⁻¹`.  The order-2 part of THIS leftover is the
+classical Lichnerowicz principal symbol applied at the cometric DIFFERENCE `g₁⁻¹ − g₁'⁻¹`: in a `g₀`-normal
+frame the linearised Ricci principal symbol of `Ric(g_e) − Ric(g₀)` is the full combined three-trace
+`combinedTrace42Model(g_e⁻¹) − combinedTrace42ModelZ(g_e⁻¹)` of `∇₀²(T_e)`, so
+
+```
+[Ric(g₁) − Ric(g₀)]₂ − [Ric(g₁') − Ric(g₀)]₂ − [R₂'(g₁⁻¹) read-off on ∇₀²(T − T')]
+  = (full-trace(g₁⁻¹) − full-trace(g₁⁻¹))(∇₀²T) − full-trace(g₁'⁻¹)(∇₀²T')
+  = (full-trace(g₁⁻¹) − full-trace(g₁'⁻¹))(∇₀²T').
+```
+
+Hence the subleading order-2 coefficient is the two-endpoint DIFFERENCE of the full-Ricci principal
+coefficients `(R₂ − R₂ᶻ)(g₁) − (R₂ − R₂ᶻ)(g₁')`, a metric-only `(4, 2)`-operator field whose `appCc`
+read-off is the cometric-DIFFERENCE full combined three-trace.  It is even-rank (4, 2), index-consistent,
+and built decl-for-decl from the PROVEN principal coefficients `ricciArmPrincipalCoeff` /
+`ricciArmPrincipalCoeffZ` and the `SmoothCcTensor` subtraction.  Its consumer source is `∇₀²T'` (the second
+covariant gradient of the SINGLE endpoint `T'`), NOT `∇₀²(T − T')`: the leftover order-2 is the bilinear
+product of the order-1 cometric difference `g₁⁻¹ − g₁'⁻¹` and the order-2 jet `∇₀²T'`, which is not a
+function of `∇₀²(T − T')` alone (a `g₀`-normal-frame 3-jet computation confirms varying `∇₀²T` at fixed
+`∇₀²(T − T')` changes the leftover). -/
+noncomputable def ricciArmSubleadingCoeff (g₀ g₁ g₁' : SmoothRiemannianMetric I M) :
+    SmoothCcTensor g₀ 4 2 :=
+  (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
+      - ricciArmPrincipalCoeffZ (I := I) (M := M) g₀ g₁)
+    - (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁'
+        - ricciArmPrincipalCoeffZ (I := I) (M := M) g₀ g₁')
+
+set_option linter.unusedSectionVars false in
+/-- **The `appCc`/`unitModel` read-off of the subleading order-2 coefficient `R₂lower` is the
+cometric-DIFFERENCE full combined three-trace.**
+
+For any smooth `(0, 4)`-tensor field `W` (in the consumer `W = ∇₀²T'`, the second covariant gradient of the
+SINGLE endpoint `T'`), the `unitModel` read-off of `appCc g₀ 4 2 (ricciArmSubleadingCoeff g₀ g₁ g₁') W` at
+`x` on a tangent pair `v` is the difference of the two endpoint full-Ricci combined three-traces of the
+unit form `D = unitModel g₀ 4 W x`, against the cometrics `g₁⁻¹` and `g₁'⁻¹`:
+```
+unitModel g₀ 2 (appCc R₂lower W) x v
+  = [combinedTrace(g₁⁻¹) − combinedTraceZ(g₁⁻¹)] D v
+    − [combinedTrace(g₁'⁻¹) − combinedTraceZ(g₁'⁻¹)] D v,
+```
+where each `combinedTrace − combinedTraceZ` is the full linearised-Ricci principal symbol `½ ∑ₖ (X-slot
+cross + Z-slot cross − double trace)`.  Routes through `appCc_sub_left`/`appCc_add_left`/`appCc_smul_left`
+and the `unitModel`-level additivity (`unitModel_add2`/`unitModel_smul`) onto the four PROVEN single-endpoint
+connectors `ricciArmPrincipalCoeff_appCc_eq_combinedTrace` (X-slot) and
+`ricciArmPrincipalCoeffZ_appCc_eq_combinedTrace` (Z-slot).  Non-vacuous: the read-off is the genuine
+cometric-difference Lichnerowicz trace, which is the zero field only when `g₁⁻¹ = g₁'⁻¹` (i.e. `T = T'`). -/
+theorem ricciArmSubleadingCoeff_appCc_eq
+    (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 4)
+    (x : M) (v : Fin 2 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 4 2
+          (ricciArmSubleadingCoeff (I := I) (M := M) g₀ g₁ g₁') W) x v =
+      ((1 / 2 : ℝ) *
+          ∑ k : Fin (Module.finrank ℝ E),
+            (unitModel (I := I) (M := M) g₀ 4 W x
+                (Fin.cons (cometricLmodel (I := I) g₁ x
+                    (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                      ((Module.finBasis ℝ E).cDualBasis k)))
+                  ![v 0, v 1, (Module.finBasis ℝ E) k])
+              + unitModel (I := I) (M := M) g₀ 4 W x
+                  (Fin.cons (cometricLmodel (I := I) g₁ x
+                      (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                        ((Module.finBasis ℝ E).cDualBasis k)))
+                    ![v 1, v 0, (Module.finBasis ℝ E) k])
+              - unitModel (I := I) (M := M) g₀ 4 W x
+                  (Fin.cons (cometricLmodel (I := I) g₁ x
+                      (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                        ((Module.finBasis ℝ E).cDualBasis k)))
+                    (Fin.cons ((Module.finBasis ℝ E) k) v)))
+        - (1 / 2 : ℝ) *
+            ∑ k : Fin (Module.finrank ℝ E),
+              (unitModel (I := I) (M := M) g₀ 4 W x
+                  ![v 0, cometricLmodel (I := I) g₁ x
+                      (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                        ((Module.finBasis ℝ E).cDualBasis k)), v 1, (Module.finBasis ℝ E) k]
+                + unitModel (I := I) (M := M) g₀ 4 W x
+                    ![v 0, v 1, cometricLmodel (I := I) g₁ x
+                        (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                          ((Module.finBasis ℝ E).cDualBasis k)), (Module.finBasis ℝ E) k]
+                - unitModel (I := I) (M := M) g₀ 4 W x
+                    ![v 0, (Module.finBasis ℝ E) k, cometricLmodel (I := I) g₁ x
+                        (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                          ((Module.finBasis ℝ E).cDualBasis k)), v 1])) -
+      ((1 / 2 : ℝ) *
+          ∑ k : Fin (Module.finrank ℝ E),
+            (unitModel (I := I) (M := M) g₀ 4 W x
+                (Fin.cons (cometricLmodel (I := I) g₁' x
+                    (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                      ((Module.finBasis ℝ E).cDualBasis k)))
+                  ![v 0, v 1, (Module.finBasis ℝ E) k])
+              + unitModel (I := I) (M := M) g₀ 4 W x
+                  (Fin.cons (cometricLmodel (I := I) g₁' x
+                      (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                        ((Module.finBasis ℝ E).cDualBasis k)))
+                    ![v 1, v 0, (Module.finBasis ℝ E) k])
+              - unitModel (I := I) (M := M) g₀ 4 W x
+                  (Fin.cons (cometricLmodel (I := I) g₁' x
+                      (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                        ((Module.finBasis ℝ E).cDualBasis k)))
+                    (Fin.cons ((Module.finBasis ℝ E) k) v)))
+        - (1 / 2 : ℝ) *
+            ∑ k : Fin (Module.finrank ℝ E),
+              (unitModel (I := I) (M := M) g₀ 4 W x
+                  ![v 0, cometricLmodel (I := I) g₁' x
+                      (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                        ((Module.finBasis ℝ E).cDualBasis k)), v 1, (Module.finBasis ℝ E) k]
+                + unitModel (I := I) (M := M) g₀ 4 W x
+                    ![v 0, v 1, cometricLmodel (I := I) g₁' x
+                        (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                          ((Module.finBasis ℝ E).cDualBasis k)), (Module.finBasis ℝ E) k]
+                - unitModel (I := I) (M := M) g₀ 4 W x
+                    ![v 0, (Module.finBasis ℝ E) k, cometricLmodel (I := I) g₁' x
+                        (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                          ((Module.finBasis ℝ E).cDualBasis k)), v 1])) := by
+  classical
+  have hsub : ∀ (A B : SmoothCcTensor g₀ 4 2),
+      unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2 (A - B) W) x v =
+        unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2 A W) x v -
+          unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2 B W) x v := by
+    intro A B
+    rw [show A - B = A + (-1 : ℝ) • B from by rw [neg_one_smul]; abel,
+      appCc_add_left, appCc_smul_left, unitModel_add2, unitModel_smul,
+      ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.smul_apply, neg_one_smul]
+    rw [← sub_eq_add_neg]
+  rw [ricciArmSubleadingCoeff, hsub, hsub, hsub,
+    ricciArmPrincipalCoeff_appCc_eq_combinedTrace (I := I) (M := M) g₀ g₁ W x v,
+    ricciArmPrincipalCoeffZ_appCc_eq_combinedTrace (I := I) (M := M) g₀ g₁ W x v,
+    ricciArmPrincipalCoeff_appCc_eq_combinedTrace (I := I) (M := M) g₀ g₁' W x v,
+    ricciArmPrincipalCoeffZ_appCc_eq_combinedTrace (I := I) (M := M) g₀ g₁' W x v]
+
 set_option linter.unusedSectionVars false in
 /-- **The combined lower-order arm connector of the Ricci-arm eval-matching (posited covariant bridge,
 order-`0` + order-`2`).**
