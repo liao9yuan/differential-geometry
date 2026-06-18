@@ -3597,6 +3597,315 @@ theorem palatini_tracedPrincipalDiff_Zslot_eq_combinedTrace
   rw [hsub]
   ring
 
+/-! ## The source-slot reindex of a `(4, 2)`-operator coefficient (the symmetrizer absorption — PIECE 3)
+
+The X-slot and Z-slot section-difference principal connectors
+(`palatini_tracedPrincipalDiff_covector_eq_combinedTrace`,
+`palatini_tracedPrincipalDiff_Zslot_eq_combinedTrace`) read the principal arm on the SYMMETRIZED
+section difference `symmS g₀ (T − T')`, whereas the Ricci-arm eval-matching target
+`deTurckRicciArm_appCc_eval` reads on the BARE difference `T − T'`.  The symmetrization is the half-sum
+`symmS g₀ S = ½(S + domDomCongrSection (swap 0 1) S)` (`symmS`), so by `appCc`-linearity and
+`iteratedCovGrad_sub`/`iteratedCovGrad`-additivity the principal on `∇₀² (symmS S)` is the half-sum of
+the principal on `∇₀² S` and on `∇₀² (domDomCongrSection (swap 0 1) S)`.  The slot-permutation
+naturality of the iterated covariant gradient `exists_iteratedCovGrad_unitModel_domDomCongrSection`
+identifies the unit fibre of `∇₀² (domDomCongrSection σ S)` with a CONSTANT model reindexing
+`domDomCongr σ' (unit fibre of ∇₀² S)` at a fixed permutation `σ'` of `Fin (2 + 2) = Fin 4` (for the
+slot-`{0, 1}` swap at order `2`, `σ'` is the trailing-pair swap `swap 2 3`, the dispatch's "slot
+symmetrizer on the LAST TWO S-slot indices of `∇₀²`").
+
+`reindexCoeff R σ'` is the source-slot reindex of the `(4, 2)`-coefficient `R` that ABSORBS this
+constant model reindexing: it precomposes `R` (fibrewise) with the model reindex `domDomCongr σ'`, so
+that `appCc (reindexCoeff R σ') W = appCc R W'` whenever `unit(W') = domDomCongr σ' (unit W)`
+(`reindexCoeff_appCc_eq`).  Composing with the half-sum gives `symmAbsorbedPrincipalCoeff R σ'`, the
+coefficient whose `appCc`-action on `∇₀² (T − T')` reproduces the principal on `∇₀² (symmS (T − T'))`
+(`symmAbsorbedPrincipalCoeff_appCc_eq`).  This is the order-2 PRINCIPAL coefficient `R₂` of the Ricci-arm
+eval-matching, read on the bare iterated gradient of the section difference, exactly as the dispatch
+posits.  The construction mirrors `combinedTrace42Model`'s model precomposition with `domDomCongrₗᵢ`, and
+its smoothness routes through the same constant-reindex-of-a-smooth-field criterion as
+`ricciArmPrincipalCoeffFib_contMDiff`. -/
+
+/-- **The fibrewise source-slot reindex of a `(4, 2)`-operator.**  Precomposes the fibre operator `A`
+with the constant model slot reindexing `domDomCongr σ'` of its `(0, 4)`-source, transported through the
+fibre/model continuous-linear equivalences.  This absorbs a `domDomCongr σ'` reindex of the contracted
+section into the coefficient (`reindexCoeffFib_apply`). -/
+noncomputable def reindexCoeffFib (σ' : Equiv.Perm (Fin 4)) (x : M)
+    (A : Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x) :
+    Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x :=
+  A.comp
+    ((Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) 4 x).symm.toContinuousLinearMap.comp
+      (((ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ
+            σ').toContinuousLinearEquiv.toContinuousLinearMap).comp
+        (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) 4 x).toContinuousLinearMap))
+
+set_option linter.unusedSectionVars false in
+/-- The defining application of `reindexCoeffFib`: `A` applied to the `ofModel` of the
+`domDomCongr σ'`-reindexed model fibre. -/
+theorem reindexCoeffFib_apply (σ' : Equiv.Perm (Fin 4)) (x : M)
+    (A : Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x)
+    (D : Tensor0SBundle.Tensor0SSpace 4 I x) :
+    reindexCoeffFib (I := I) σ' x A D =
+      A (Tensor0SBundle.Tensor0SSpace.ofModel
+          (ContinuousMultilinearMap.domDomCongr σ'
+            (Tensor0SBundle.Tensor0SSpace.toModel D))) := by
+  rw [reindexCoeffFib, ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply,
+    ContinuousLinearMap.comp_apply]
+  congr 1
+
+set_option linter.unusedSectionVars false in
+/-- The source-slot reindex `reindexCoeffFib σ' x` is `ℝ`-linear in the operator `A` (the half-sum of
+the symmetrizer threads through it). -/
+private theorem reindexCoeffFib_add (σ' : Equiv.Perm (Fin 4)) (x : M)
+    (A B : Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x)
+    (D : Tensor0SBundle.Tensor0SSpace 4 I x) :
+    reindexCoeffFib (I := I) σ' x (A + B) D =
+      reindexCoeffFib (I := I) σ' x A D + reindexCoeffFib (I := I) σ' x B D := by
+  rw [reindexCoeffFib_apply, reindexCoeffFib_apply, reindexCoeffFib_apply,
+    ContinuousLinearMap.add_apply]
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+/-- **Base-point smoothness of the source-slot-reindexed `(4, 2)`-coefficient field.**  For a smooth
+`(4, 2)`-coefficient field `R` and a fixed permutation `σ'`, `x ↦ reindexCoeffFib σ' x (R x)` is a
+smooth section of the `(4, 2)`-tensor bundle.  As in `ricciArmPrincipalCoeffFib_contMDiff`, on a smooth
+`(0, 4)`-field `Y` the value `R x (ofModel (domDomCongr σ' (toModel (Y x))))` is the action of the
+smooth operator field `R` on the constant-reindexed smooth field `ofModel (domDomCongr σ' (toModel Y))`,
+smooth by the constant-reindex-of-a-smooth-field criterion (`contMDiff_multilinearSection_iff_coord`)
+and `ContMDiff.clm_bundle_apply`. -/
+theorem reindexCoeffFib_contMDiff (g₀ : SmoothRiemannianMetric I M)
+    (R : SmoothCcTensor g₀ 4 2) (σ' : Equiv.Perm (Fin 4)) :
+    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 4 2 I z) x
+        (reindexCoeffFib (I := I) σ' x
+          (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+            R.toSection x))) := by
+  classical
+  apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
+    (F₁ := Tensor0SBundle.Tensor0SModel 4 ℝ E) (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace 4 I x)
+    (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)
+    (φ := fun x => reindexCoeffFib (I := I) σ' x
+      (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+        R.toSection x))
+  intro Y
+  -- The constant model slot-reindex of the smooth `(0, 4)`-field `Y` is smooth (same coordinate
+  -- relabeling argument as `domDomCongrField_contMDiff` / `ricciArmPrincipalCoeffFib_contMDiff`).
+  have hYσ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 4 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 4 ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace 4 I z) x
+        (Tensor0SBundle.Tensor0SSpace.ofModel
+          (ContinuousMultilinearMap.domDomCongr σ'
+            (Tensor0SBundle.Tensor0SSpace.toModel (Y x))))) := by
+    refine (contMDiff_multilinearSection_iff_coord (𝕜 := ℝ) (F := E)
+      (E := (TangentSpace I : M → Type _)) (IB := I) (n := (∞ : WithTop ℕ∞)) (Module.finBasis ℝ E)
+      (fun x => (Tensor0SBundle.Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
+          (ContinuousMultilinearMap.domDomCongr σ'
+            (Tensor0SBundle.Tensor0SSpace.toModel (Y x))) :
+            Tensor0SBundle.Tensor0SSpace 4 I x))).mpr ?_
+    have hYcoord := (contMDiff_multilinearSection_iff_coord (𝕜 := ℝ) (F := E)
+      (E := (TangentSpace I : M → Type _)) (IB := I) (n := (∞ : WithTop ℕ∞)) (Module.finBasis ℝ E)
+      (fun x => Y x)).mp Y.contMDiff
+    intro τ x₀
+    refine (hYcoord (τ ∘ σ') x₀).congr_of_eventuallyEq ?_
+    filter_upwards [Filter.univ_mem] with x _
+    rw [continuousMultilinearMap_basis_repr, continuousMultilinearMap_basis_repr]
+    change (ContinuousMultilinearMap.domDomCongr σ'
+        (Tensor0SBundle.Tensor0SSpace.toModel (Y x)))
+        (fun j => (Bundle.Trivialization.symmL ℝ (trivializationAt E (TangentSpace I) x₀) x)
+          ((Module.finBasis ℝ E) (τ j))) = _
+    rw [ContinuousMultilinearMap.domDomCongr_apply]
+    rfl
+  have hRY := ContMDiff.clm_bundle_apply (b := id) R.toSection.contMDiff hYσ
+  refine hRY.congr (fun x => ?_)
+  exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
+    (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) x t)
+    (reindexCoeffFib_apply (I := I) σ' x
+      (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+        R.toSection x) (Y x)).symm
+
+/-- **The source-slot reindex of a `(4, 2)`-coefficient field as a smooth compactly-supported tensor.**
+The fibre value at `x` is `reindexCoeffFib σ' x (R x)` (smooth by `reindexCoeffFib_contMDiff`); on the
+closed manifold it has compact support.  Absorbs a constant `domDomCongr σ'` reindex of the contracted
+`(0, 4)`-section into the coefficient. -/
+noncomputable def reindexCoeff (g₀ : SmoothRiemannianMetric I M)
+    (R : SmoothCcTensor g₀ 4 2) (σ' : Equiv.Perm (Fin 4)) :
+    SmoothCcTensor g₀ 4 2 where
+  toSection :=
+    { toFun := fun x : M =>
+        (show Tensor0SBundle.TensorRSSpace 4 2 I x from
+          reindexCoeffFib (I := I) σ' x
+            (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+              R.toSection x))
+      contMDiff_toFun := reindexCoeffFib_contMDiff (I := I) (M := M) g₀ R σ' }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+set_option linter.unusedSectionVars false in
+/-- The underlying section value of `reindexCoeff R σ'` at `x` is `reindexCoeffFib σ' x (R x)`.
+Definitional. -/
+@[simp] theorem reindexCoeff_toSection (g₀ : SmoothRiemannianMetric I M)
+    (R : SmoothCcTensor g₀ 4 2) (σ' : Equiv.Perm (Fin 4)) (x : M) :
+    (reindexCoeff (I := I) (M := M) g₀ R σ').toSection x =
+      (show Tensor0SBundle.TensorRSSpace 4 2 I x from
+        reindexCoeffFib (I := I) σ' x
+          (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+            R.toSection x)) := rfl
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+/-- **The source-slot reindex absorbs a constant `domDomCongr σ'` reindex of the contracted section.**
+If two smooth `(0, 4)`-fields `W, W'` have unit fibres related by the constant model reindexing
+`unit(W' x) = domDomCongr σ' (unit(W x))` at every base point, then the `unitModel` read-off of
+`appCc (reindexCoeff R σ') W` equals that of `appCc R W'`:
+```
+unitModel g₀ 2 (appCc g₀ 4 2 (reindexCoeff R σ') W) x = unitModel g₀ 2 (appCc g₀ 4 2 R W') x.
+```
+This is the absorption of the slot-permutation naturality `exists_iteratedCovGrad_unitModel_domDomCongrSection`
+into the coefficient. -/
+theorem reindexCoeff_appCc_eq (g₀ : SmoothRiemannianMetric I M)
+    (R : SmoothCcTensor g₀ 4 2) (σ' : Equiv.Perm (Fin 4))
+    (W W' : SmoothCcTensor g₀ 0 4)
+    (hWW' : ∀ x : M, unitModel (I := I) (M := M) g₀ 4 W' x =
+      ContinuousMultilinearMap.domDomCongr σ' (unitModel (I := I) (M := M) g₀ 4 W x))
+    (x : M) :
+    unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 4 2 (reindexCoeff (I := I) (M := M) g₀ R σ') W) x =
+      unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2 R W') x := by
+  rw [unitModel, unitModel, appCc_toSection, appCc_toSection,
+    ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
+  rw [reindexCoeff_toSection]
+  -- The reindex-coefficient applied to `W`'s unit fibre, reduced through `reindexCoeffFib_apply`.
+  rw [reindexCoeffFib_apply (I := I) σ' x
+    (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+      R.toSection x)
+    ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I x from
+      W.toSection x) (unitTensor (I := I) (M := M) x))]
+  -- `toModel (W.toSection x unit) = unitModel W x`; rewrite by the σ'-relation, then `ofModel_toModel`.
+  have hWu : Tensor0SBundle.Tensor0SSpace.toModel
+      ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I x from
+        W.toSection x) (unitTensor (I := I) (M := M) x)) =
+      unitModel (I := I) (M := M) g₀ 4 W x := rfl
+  have hW'u : (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I x from
+        W'.toSection x) (unitTensor (I := I) (M := M) x) =
+      Tensor0SBundle.Tensor0SSpace.ofModel (unitModel (I := I) (M := M) g₀ 4 W' x) := by
+    rw [show unitModel (I := I) (M := M) g₀ 4 W' x =
+        Tensor0SBundle.Tensor0SSpace.toModel
+          ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I x from
+            W'.toSection x) (unitTensor (I := I) (M := M) x)) from rfl,
+      Tensor0SBundle.Tensor0SSpace.ofModel_toModel]
+  rw [hWu, ← hWW' x, hW'u]
+
+set_option linter.unusedSectionVars false in
+/-- The iterated covariant gradient is `ℝ`-homogeneous in the section: `∇^j (c • w) = c • ∇^j w`.
+Induction on `j` from `iteratedCovGrad_zero`/`iteratedCovGrad_succ` and the single-step `covGrad_smul`. -/
+private theorem iteratedCovGrad_smul (g : SmoothRiemannianMetric I M) (r s j : ℕ)
+    (c : ℝ) (w : SmoothCcTensor g r s) :
+    iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
+  induction j with
+  | zero => simp only [iteratedCovGrad_zero]
+  | succ j ih =>
+    rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_smul]
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- The operator-field action is `ℝ`-homogeneous in the operator-field factor:
+`appCc (c • Φ) W = c • appCc Φ W`.  Mirrors `appCc_add_left`. -/
+private theorem appCc_smul_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (c : ℝ) (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
+    appCc (I := I) (M := M) g r s (c • Φ) W =
+      c • appCc (I := I) (M := M) g r s Φ W := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [show ((c • appCc (I := I) (M := M) g r s Φ W).toSection x) =
+      c • (appCc (I := I) (M := M) g r s Φ W).toSection x from rfl]
+  rw [appCc_toSection, appCc_toSection]
+  rw [show ((c • Φ).toSection x : TensorRSSpace r s I x) = c • Φ.toSection x from by
+    rw [SmoothCcTensor.toSection_smul]; rfl]
+  rw [ContinuousLinearMap.smul_comp]
+
+set_option linter.unusedSectionVars false in
+/-- **The symmetrizer-absorbed order-2 principal coefficient (connector 1 — the X/Z PRINCIPAL `R₂`).**
+
+The X-slot and Z-slot section-difference principal connectors read the principal arm on the SYMMETRIZED
+section difference `symmS g₀ (T − T')` (the unsymmetric realize-tie `hbil` forces the symmetrization),
+whereas the Ricci-arm eval-matching target `deTurckRicciArm_appCc_eval` reads on the BARE difference
+`T − T'`.  This connector absorbs the slot-symmetrizer into the coefficient: there is a single built
+`(4, 2)`-coefficient field `R₂' = ½ R₂ + ½ reindexCoeff R₂ σ'` (`σ'` the order-`2` slot permutation of the
+iterated-gradient naturality `exists_iteratedCovGrad_unitModel_domDomCongrSection (swap 0 1) S 2`, the
+trailing-pair swap of `∇₀²`) whose `appCc`/`unitModel` read-off on the bare `∇₀² (T − T')` reproduces the
+principal-arm read-off on `∇₀² (symmS (T − T'))`:
+```
+unitModel g₀ 2 (appCc g₀ 4 2 R₂' (∇₀² (T − T'))) x v
+  = unitModel g₀ 2 (appCc g₀ 4 2 R₂ (∇₀² (symmS g₀ (T − T')))) x v.
+```
+Route: `symmS S = ½(S + domDomCongrSection (swap 0 1) S)` (`symmS`); `iteratedCovGrad` is additive
+(`iteratedCovGrad_add`) and `ℝ`-homogeneous (`iteratedCovGrad_smul`); `appCc` is right-additive and
+right-homogeneous (`appCc_add_right`, `appCc_smul_right`); the swapped-section term is absorbed via the
+source-slot reindex `reindexCoeff` (`reindexCoeff_appCc_eq`) at the order-`2` permutation `σ'`; the
+half-sum of coefficients is collected through `appCc_add_left` and the `unitModel`-level scalar
+distribution (`unitModel_add2`, `unitModel_smul`).  This is the order-2 PRINCIPAL coefficient `R₂` of the
+Ricci-arm eval-matching, read on the bare iterated gradient of the section difference, exactly as the
+dispatch posits. -/
+theorem symmAbsorbedPrincipalCoeff_appCc_eq
+    (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
+    (R₂ : SmoothCcTensor g₀ 4 2) :
+    ∃ R₂' : SmoothCcTensor g₀ 4 2, ∀ (x : M) (v : Fin 2 → TangentSpace I x),
+      unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 4 2 R₂'
+            (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x v =
+        unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 4 2 R₂
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ S))) x v := by
+  classical
+  -- The order-`2` slot permutation `σ'` relating `∇₀² (domDomCongrSection (swap) S)` to `∇₀² S`.
+  obtain ⟨σ', hσ'⟩ := exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
+    (Equiv.swap (0 : Fin 2) 1) S 2
+  refine ⟨(1 / 2 : ℝ) • R₂ + (1 / 2 : ℝ) • reindexCoeff (I := I) (M := M) g₀ R₂ σ', fun x v => ?_⟩
+  -- Expand `∇₀² (symmS S)` through the half-sum of `S` and its slot-swapped section.
+  have hsymm : iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ S) =
+      (1 / 2 : ℝ) • iteratedCovGrad (I := I) g₀ 0 2 2 S +
+        (1 / 2 : ℝ) • iteratedCovGrad (I := I) g₀ 0 2 2
+          (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) S) := by
+    rw [symmS, iteratedCovGrad_smul, iteratedCovGrad_add, smul_add]
+  -- Abbreviations for the three `unitModel`-read-off scalars.
+  set uR : ℝ := unitModel (I := I) (M := M) g₀ 2
+    (appCc (I := I) (M := M) g₀ 4 2 R₂ (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x v with huR
+  set uRein : ℝ := unitModel (I := I) (M := M) g₀ 2
+    (appCc (I := I) (M := M) g₀ 4 2 (reindexCoeff (I := I) (M := M) g₀ R₂ σ')
+      (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x v with huRein
+  -- LHS = `½ uR + ½ uRein` through `appCc`-left-linearity (`R₂' = ½ R₂ + ½ reindexCoeff R₂ σ'`).
+  have hLHS : unitModel (I := I) (M := M) g₀ 2
+      (appCc (I := I) (M := M) g₀ 4 2
+        ((1 / 2 : ℝ) • R₂ + (1 / 2 : ℝ) • reindexCoeff (I := I) (M := M) g₀ R₂ σ')
+        (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x v =
+      (1 / 2 : ℝ) * uR + (1 / 2 : ℝ) * uRein := by
+    rw [appCc_add_left, appCc_smul_left, appCc_smul_left, unitModel_add2,
+      unitModel_smul, unitModel_smul, ContinuousMultilinearMap.add_apply,
+      ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.smul_apply]
+    rw [huR, huRein]
+    simp only [smul_eq_mul]
+  -- RHS = `½ uR + ½ uSwap`, and `uSwap = uRein` by the source-slot reindex absorption.
+  have hSwap : unitModel (I := I) (M := M) g₀ 2
+      (appCc (I := I) (M := M) g₀ 4 2 R₂
+        (iteratedCovGrad (I := I) g₀ 0 2 2
+          (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) S))) x v = uRein := by
+    rw [huRein]
+    exact congrFun (congrArg _
+      (reindexCoeff_appCc_eq (I := I) (M := M) g₀ R₂ σ'
+        (iteratedCovGrad (I := I) g₀ 0 2 2 S)
+        (iteratedCovGrad (I := I) g₀ 0 2 2
+          (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) S))
+        hσ' x).symm) v
+  have hRHS : unitModel (I := I) (M := M) g₀ 2
+      (appCc (I := I) (M := M) g₀ 4 2 R₂
+        (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ S))) x v =
+      (1 / 2 : ℝ) * uR + (1 / 2 : ℝ) * uRein := by
+    rw [hsymm, appCc_add_right, appCc_smul_right, appCc_smul_right, unitModel_add2,
+      unitModel_smul, unitModel_smul, ContinuousMultilinearMap.add_apply,
+      ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.smul_apply]
+    rw [huR, hSwap]
+    simp only [smul_eq_mul]
+  rw [hLHS, hRHS]
+
 end TensorSpectral
 end Parabolic
 end Analysis
