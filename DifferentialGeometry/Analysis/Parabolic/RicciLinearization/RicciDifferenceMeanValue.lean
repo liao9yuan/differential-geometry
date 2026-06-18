@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Tensor
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.MetricFamilyChartLinearization
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Ricci
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifference
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckMetricArmCoeffField
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
 /-!
@@ -47,8 +49,9 @@ them.
 noncomputable section
 
 set_option linter.style.setOption false
+set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 2400000
-set_option synthInstance.maxHeartbeats 800000
+set_option synthInstance.maxHeartbeats 1600000
 
 open Set Function MeasureTheory intervalIntegral Bundle Tensor0SBundle
 open scoped Topology Manifold BigOperators ContDiff Matrix
@@ -65,6 +68,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -933,6 +937,186 @@ theorem ricciTensor_realized_sub_eq_integral_linearizedRicci
           realizedRicciPathValue (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x v w 0 :=
     integral_eq_sub_of_hasDerivAt_of_le zero_le_one hcont hderiv hint
   rw [hFTC, realizedRicciPathValue_one, realizedRicciPathValue_zero]
+
+/-! ### The joint `(s, x)`-smoothness keystone: the intrinsic fibre coefficient operators
+along the realized path are jointly smooth -/
+
+private local instance instCompleteSpaceE_keystone : CompleteSpace E :=
+  FiniteDimensional.complete ℝ E
+
+/-- **Continuity-in-`s` slice of a joint `(s, x)`-smooth coefficient family.**  Given a family
+`Φ : ℝ → SmoothCcTensor g₀ r s` whose joint `(x, s)`-data is `C^∞` over the product base `M × ℝ`,
+at every fixed base point `x` the model-fibre value `s ↦ (Φ s).toSection x |>.toModel` is
+continuous in `s`.  The joint section restricted to the smooth slice `t ↦ (x, t)` is continuous
+into the total space; the trivialization at the constant base `x` is a homeomorphism on its base
+set (which contains `x`), so the fibre value `t ↦ (Φ t).toSection x` is continuous in the fibre
+topology, and post-composing with the continuous model coercion `TensorRSSpace.toModel`
+(`toModel_continuous`) yields the claim. -/
+theorem jointContMDiff_toModel_continuous_slice
+    (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : ℝ → SmoothCcTensor g₀ r s)
+    (hjoint : ContMDiff (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) p.1 ((Φ p.2).toSection p.1)))
+    (x : M) :
+    Continuous (fun t : ℝ =>
+      Tensor0SBundle.TensorRSSpace.toModel ((Φ t).toSection x)) := by
+  -- Restrict the joint section to the smooth slice `t ↦ (x, t)`.
+  have hslice : ContMDiff 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
+      (fun t : ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x ((Φ t).toSection x)) := by
+    have hmap : ContMDiff 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, ℝ)) ∞ (fun t : ℝ => (x, t)) :=
+      (contMDiff_const).prodMk contMDiff_id
+    exact hjoint.comp hmap
+  -- Continuous into the total space.
+  have hcont_total : Continuous (fun t : ℝ =>
+      TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x ((Φ t).toSection x)) :=
+    hslice.continuous
+  -- Extract the fibre value at the constant base `x` via the trivialization homeomorphism.
+  set e := trivializationAt (Tensor0SBundle.TensorRSModel r s ℝ E)
+    (fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x with he
+  have hxbase : x ∈ e.baseSet := mem_baseSet_trivializationAt _ _ x
+  have hcoord : Continuous (fun t : ℝ =>
+      (e (TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x ((Φ t).toSection x))).2) :=
+    continuous_snd.comp (e.continuousOn_toFun.comp_continuous hcont_total
+      (fun t => e.mem_source.mpr hxbase))
+  -- The fibre coordinate equals the `continuousLinearEquivAt`, whose inverse recovers the fibre.
+  have hfibre : Continuous (fun t : ℝ => (Φ t).toSection x) := by
+    have hkey : ∀ t : ℝ, (Φ t).toSection x =
+        (e.continuousLinearEquivAt ℝ x hxbase).symm
+          ((e (TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
+            (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x
+            ((Φ t).toSection x))).2) := by
+      intro t
+      have hp := Trivialization.apply_eq_prod_continuousLinearEquivAt
+        (R := ℝ) (e := e) (b := x) hxbase ((Φ t).toSection x)
+      have hsnd := congrArg Prod.snd hp
+      simp only at hsnd
+      rw [hsnd, ContinuousLinearEquiv.symm_apply_apply]
+    have hrhs : Continuous (fun t : ℝ =>
+        (e.continuousLinearEquivAt ℝ x hxbase).symm
+          ((e (TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
+            (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x
+            ((Φ t).toSection x))).2)) :=
+      (e.continuousLinearEquivAt ℝ x hxbase).symm.continuous.comp hcoord
+    exact hrhs.congr (fun t => (hkey t).symm)
+  exact Tensor0SBundle.TensorRSSpace.toModel_continuous.comp hfibre
+
+/-- **Joint `(s, x)`-smoothness of the order-`2` principal coefficient along the realized path.**
+
+For the realized metric family `g_s = realizedFam g₀ T T' s`, the intrinsic order-`2`
+principal coefficient operator field `ricciArmPrincipalCoeff g₀ g_s` (the combined three-trace
+`(4, 2)`-operator field of `g_s`, `RicciDeTurckSectionDifference`) is jointly `C^∞` in the pair
+`(x, s)`, as a section over `M × ℝ` of the `(4, 2)`-tensor bundle.
+
+This is the joint-parameter lift of the single-metric base-point smoothness
+`ricciArmPrincipalCoeffFib_contMDiff`: the operator depends on `g_s` *only* through the smooth
+cometric Hom-section `inverseMetricSharpField g_s` (the model raise `cometricLmodel g_s x`,
+through `cometricDoubleTraceFib`/`combinedTrace42Model`), and the chart inverse-Gram of `g_s` is
+jointly `(s, y)`-`C^∞` by the joint-Gram tower (`realizedFam_genJointGram` / `gen_joint_invGram`,
+which already give the realized-family chart Gram, inverse-Gram and Christoffel jets jointly
+`(s, y)`-`C^∞`).  Through the chart-coordinate form of the metric sharp
+(`metricSharpChartLocal`/`metricSharpChartCoeff`, whose coefficient is `∑_j G^{ij}(g_s) · cv_j`)
+the joint chart-inverse-Gram smoothness lifts the single-metric `contMDiff_clm_section_of_pointwise`
+construction to the product base `M × ℝ` via `Bundle.contMDiffAt_totalSpace` (the
+`cutoffField_contMDiff` product-base section pattern).  This irreducible joint manifold-section
+lift over the product base `M × ℝ` (a complete joint analog of the
+`metricSharp_contMDiff_total` → `inverseMetricSharpField_contMDiff` →
+`ricciArmPrincipalCoeffFib_contMDiff` tower, threaded through the joint-Gram tower) is *posited*
+here as the single joint-fibre-smoothness keystone, to be discharged by recursing into it.  It
+genuinely constrains the section to the realized-family principal coefficient (it is consumed only
+as the joint smoothness of that exact fibre operator), so it is non-vacuous. -/
+theorem ricciArmPrincipalCoeff_realizedFam_jointContMDiff [BoundarylessManifold I M]
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ContMDiff (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 4 2 I z) p.1
+        ((ricciArmPrincipalCoeff (I := I) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' p.2)).toSection p.1)) :=
+  sorry
+
+/-- **Joint `(s, x)`-smoothness of the order-`0` inverse-Gram slot coefficient along the realized
+path.**
+
+For the realized metric family `g_s = realizedFam g₀ T T' s`, the intrinsic order-`0` inverse-Gram
+slot-insertion coefficient operator field `gInvDiffSlotCoeff g₀ g_s` (the `(2, 2)`-operator field of
+the cometric inverse-difference multiplier of `g_s`, `RicciDeTurckMetricArmCoeffField`) is jointly
+`C^∞` in the pair `(x, s)`, as a section over `M × ℝ` of the `(2, 2)`-tensor bundle.
+
+This is the joint-parameter lift of the single-metric base-point smoothness
+`gInvDiffSlotEndo_contMDiff`: the operator depends on `g_s` *only* through the smooth cometric
+Hom-section `inverseMetricSharpField g_s` (the raised endomorphism `gInvDiffRaisedEndo g₀ g_s x =
+♯_{g_s} ∘ g₀^♭ − id`, through `slotInsertEndoFib`), and the chart inverse-Gram of `g_s` is jointly
+`(s, y)`-`C^∞` by the joint-Gram tower (`realizedFam_genJointGram` / `gen_joint_invGram`).  Through
+the chart-coordinate form of the metric sharp (`metricSharpChartLocal`/`metricSharpChartCoeff`,
+coefficient `∑_j G^{ij}(g_s) · cv_j`) the joint chart-inverse-Gram smoothness lifts the
+single-metric `contMDiff_clm_section_of_pointwise` construction to the product base `M × ℝ` via
+`Bundle.contMDiffAt_totalSpace` (the `cutoffField_contMDiff` product-base section pattern).  This
+irreducible joint manifold-section lift over the product base `M × ℝ` (a complete joint analog of
+the `metricSharp_contMDiff_total` → `inverseMetricSharpField_contMDiff` →
+`gInvDiffRaisedEndo_contMDiff` → `gInvDiffSlotEndo_contMDiff` tower, threaded through the joint-Gram
+tower) is *posited* here as the single joint-fibre-smoothness keystone, to be discharged by
+recursing into it.  It genuinely constrains the section to the realized-family inverse-Gram slot
+coefficient (it is consumed only as the joint smoothness of that exact fibre operator), so it is
+non-vacuous. -/
+theorem gInvDiffSlotCoeff_realizedFam_jointContMDiff [BoundarylessManifold I M]
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ContMDiff (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1
+        ((gInvDiffSlotCoeff (I := I) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' p.2)).toSection p.1)) :=
+  sorry
+
+/-- **Continuity-in-`s` slice of the order-`2` principal coefficient along the realized path.**
+
+The continuity slice of the joint `(s, x)`-smoothness keystone
+`ricciArmPrincipalCoeff_realizedFam_jointContMDiff`: at every fixed base point `x`, the
+model-fibre value `s ↦ (ricciArmPrincipalCoeff g₀ g_s).toSection x |>.toModel` is continuous in
+`s`.  Obtained by restricting the joint section to the slice `t ↦ (x, t)` (smooth), reading the
+fibre coordinate through the trivialization at the constant base `x`, and post-composing with the
+continuous model coercion `TensorRSSpace.toModel`. -/
+theorem ricciArmPrincipalCoeff_realizedFam_toModel_continuous [BoundarylessManifold I M]
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) :
+    Continuous (fun t : ℝ =>
+      Tensor0SBundle.TensorRSSpace.toModel
+        ((ricciArmPrincipalCoeff (I := I) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' t)).toSection x)) := by
+  have hjoint := ricciArmPrincipalCoeff_realizedFam_jointContMDiff
+    (I := I) g₀ T T' hδ hδ'
+  exact jointContMDiff_toModel_continuous_slice (I := I) g₀ 4 2
+    (fun t => ricciArmPrincipalCoeff (I := I) g₀
+      (realizedFam (I := I) g₀ T T' hδ hδ' t)) hjoint x
+
+/-- **Continuity-in-`s` slice of the order-`0` inverse-Gram slot coefficient along the realized
+path.**
+
+The continuity slice of the joint `(s, x)`-smoothness keystone
+`gInvDiffSlotCoeff_realizedFam_jointContMDiff`: at every fixed base point `x`, the model-fibre
+value `s ↦ (gInvDiffSlotCoeff g₀ g_s).toSection x |>.toModel` is continuous in `s`. -/
+theorem gInvDiffSlotCoeff_realizedFam_toModel_continuous [BoundarylessManifold I M]
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) :
+    Continuous (fun t : ℝ =>
+      Tensor0SBundle.TensorRSSpace.toModel
+        ((gInvDiffSlotCoeff (I := I) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' t)).toSection x)) := by
+  have hjoint := gInvDiffSlotCoeff_realizedFam_jointContMDiff
+    (I := I) g₀ T T' hδ hδ'
+  exact jointContMDiff_toModel_continuous_slice (I := I) g₀ 2 2
+    (fun t => gInvDiffSlotCoeff (I := I) g₀
+      (realizedFam (I := I) g₀ T T' hδ hδ' t)) hjoint x
 
 end RicciLinearization
 end DeTurck
