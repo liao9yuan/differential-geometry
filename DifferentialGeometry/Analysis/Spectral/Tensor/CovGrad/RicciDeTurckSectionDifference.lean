@@ -1510,6 +1510,492 @@ theorem koszulCovGradCovec_covDeriv_eq_secondCovGrad
   rw [ht1, ht2, ht3]
   ring
 
+
+/-! ## The Palatini SP2-endpoint traced-principal connector to the combined three-trace `P` -/
+
+set_option linter.unusedSectionVars false in
+private theorem traceViaBasis_c (G : E →ₗ[ℝ] E) :
+    ∑ i : Fin (Module.finrank ℝ E),
+        (chartModelBasis E).repr (G ((chartModelBasis E) i)) i =
+      LinearMap.trace ℝ E G := by
+  classical
+  rw [LinearMap.trace_eq_matrix_trace ℝ (chartModelBasis E), Matrix.trace]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [Matrix.diag_apply, LinearMap.toMatrix_apply]
+
+set_option linter.unusedSectionVars false in
+private theorem cometric_finBasis_biorth_c (g₁ : SmoothRiemannianMetric I M) (x : M)
+    (j k : Fin (Module.finrank ℝ E)) :
+    g₁.inner x
+        (cometricLmodel (I := I) g₁ x
+          (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+            ((Module.finBasis ℝ E).cDualBasis k)))
+        ((Module.finBasis ℝ E) j) =
+      if j = k then 1 else 0 := by
+  classical
+  have h1 : cometricLmodel (I := I) g₁ x
+        (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+          ((Module.finBasis ℝ E).cDualBasis k)) =
+      inverseMetricSharpFib (I := I) g₁ x
+        ((Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 1 x).symm
+          (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+            ((Module.finBasis ℝ E).cDualBasis k))) := rfl
+  rw [h1, inverseMetricSharpFib_inner (I := I) g₁ x _ ((Module.finBasis ℝ E) j),
+    cotangentToDualLinear_apply, cotangentToDual_apply]
+  have h2 : (((Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) 1 x).symm
+        (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+          ((Module.finBasis ℝ E).cDualBasis k))) (fun _ : Fin 1 => (Module.finBasis ℝ E) j) : ℝ) =
+      Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+        ((Module.finBasis ℝ E).cDualBasis k) (fun _ : Fin 1 => ((Module.finBasis ℝ E) j : E)) := rfl
+  rw [h2, Tensor0SBundle.model_covectorOfCLM_apply]
+  rw [show ((Module.finBasis ℝ E).cDualBasis k) =
+      LinearMap.toContinuousLinearMap ((Module.finBasis ℝ E).coord k) from by
+    rw [Module.Basis.cDualBasis, Module.Basis.map_apply]
+    congr 1
+    exact congrFun (Module.Basis.coe_dualBasis (Module.finBasis ℝ E)) k]
+  rw [LinearMap.coe_toContinuousLinearMap', Module.Basis.coord_apply, Module.Basis.repr_self]
+  rw [Finsupp.single_apply]
+
+private theorem traceViaCometric_c (g₁ : SmoothRiemannianMetric I M) (x : M) (G : E →ₗ[ℝ] E) :
+    ∑ k : Fin (Module.finrank ℝ E),
+        g₁.inner x
+          (G (cometricLmodel (I := I) g₁ x
+            (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+              ((Module.finBasis ℝ E).cDualBasis k))))
+          ((Module.finBasis ℝ E) k) =
+      LinearMap.trace ℝ E G := by
+  classical
+  set d : Fin (Module.finrank ℝ E) → E := fun k =>
+    cometricLmodel (I := I) g₁ x
+      (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+        ((Module.finBasis ℝ E).cDualBasis k)) with hd
+  set ε : Fin (Module.finrank ℝ E) → Module.Dual ℝ E := fun k =>
+    ((g₁.inner x).flip ((Module.finBasis ℝ E) k)).toLinearMap with hε
+  have hev_same : ∀ k, ε k (d k) = 1 := by
+    intro k
+    rw [hε, hd]
+    change g₁.inner x (d k) ((Module.finBasis ℝ E) k) = 1
+    rw [hd, cometric_finBasis_biorth_c (I := I) g₁ x k k, if_pos rfl]
+  have hev_ne : Pairwise fun i j => ε i (d j) = 0 := by
+    intro i j hij
+    rw [hε, hd]
+    change g₁.inner x (d j) ((Module.finBasis ℝ E) i) = 0
+    rw [hd, cometric_finBasis_biorth_c (I := I) g₁ x i j, if_neg hij]
+  have htot : ∀ {m₁ m₂ : E}, (∀ k, ε k m₁ = ε k m₂) → m₁ = m₂ := by
+    intro m₁ m₂ hm
+    apply SmoothRiemannianMetric.eq_of_inner_eq g₁ (x := x)
+    intro ζ
+    have hζ : ζ = ∑ k : Fin (Module.finrank ℝ E), (Module.finBasis ℝ E).repr ζ k • (Module.finBasis ℝ E) k :=
+      ((Module.finBasis ℝ E).sum_repr ζ).symm
+    rw [hζ]
+    simp only [map_sum, map_smul, smul_eq_mul]
+    refine Finset.sum_congr rfl fun k _ => ?_
+    have hk := hm k
+    change (Module.finBasis ℝ E).repr ζ k * g₁.inner x m₁ ((Module.finBasis ℝ E) k) =
+      (Module.finBasis ℝ E).repr ζ k * g₁.inner x m₂ ((Module.finBasis ℝ E) k)
+    rw [g₁.symm x m₁, g₁.symm x m₂]
+    have hk' : g₁.inner x m₁ ((Module.finBasis ℝ E) k) = g₁.inner x m₂ ((Module.finBasis ℝ E) k) := by
+      have e1 : ε k m₁ = g₁.inner x m₁ ((Module.finBasis ℝ E) k) := by rw [hε]; rfl
+      have e2 : ε k m₂ = g₁.inner x m₂ ((Module.finBasis ℝ E) k) := by rw [hε]; rfl
+      rw [← e1, ← e2, hk]
+    rw [g₁.symm x ((Module.finBasis ℝ E) k) m₁, g₁.symm x ((Module.finBasis ℝ E) k) m₂, hk']
+  have hdual : Module.DualBases d ε :=
+    { eval_same := hev_same, eval_of_ne := hev_ne, total := htot }
+  rw [LinearMap.trace_eq_matrix_trace ℝ hdual.basis, Matrix.trace]
+  refine Finset.sum_congr rfl fun k _ => ?_
+  rw [Matrix.diag_apply, LinearMap.toMatrix_apply]
+  rw [Module.DualBases.coe_basis]
+  have hrepr : hdual.basis.repr (G (d k)) k = ε k (G (d k)) := by
+    rw [Module.DualBases.basis_repr_apply, Module.DualBases.coeffs_apply]
+  rw [hrepr, hε]
+  rfl
+
+
+set_option linter.unusedSectionVars false in
+private lemma dualToCotangent_addC {x : M} (α β : Module.Dual ℝ (TangentSpace I x)) :
+    dualToCotangent (I := I) (x := x) (α + β)
+      = dualToCotangent (I := I) (x := x) α + dualToCotangent (I := I) (x := x) β := by
+  apply cotangentToDualLinear_injective (I := I) (x := x)
+  rw [map_add, cotangentToDualLinear_apply, cotangentToDualLinear_apply,
+    cotangentToDualLinear_apply, cotangentToDual_dualToCotangent,
+    cotangentToDual_dualToCotangent, cotangentToDual_dualToCotangent]
+
+set_option linter.unusedSectionVars false in
+private lemma dualToCotangent_smulC {x : M} (c : ℝ) (α : Module.Dual ℝ (TangentSpace I x)) :
+    dualToCotangent (I := I) (x := x) (c • α)
+      = c • dualToCotangent (I := I) (x := x) α := by
+  apply cotangentToDualLinear_injective (I := I) (x := x)
+  rw [map_smul, cotangentToDualLinear_apply, cotangentToDualLinear_apply,
+    cotangentToDual_dualToCotangent, cotangentToDual_dualToCotangent]
+
+/-- The `g₀`-aligned SP2-endpoint principal endomorphism `v ↦ ♯_{g₁}(∇₀_v K_{Z,Y})` as a linear map. -/
+private def alignedPrincipalEndoC (g₀ g₁ : SmoothRiemannianMetric I M)
+    (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : E →ₗ[ℝ] E where
+  toFun := fun v => inverseMetricSharpFib (I := I) g₁ x
+    (dualToCotangent (I := I)
+      (((cotangentCov (LeviCivita (I := I) g₀)).toFun
+        (fun b => cotangentToCLM (I := I)
+          (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x v :
+        TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))
+  map_add' := fun v v' => by
+    rw [show (((cotangentCov (LeviCivita (I := I) g₀)).toFun
+        (fun b => cotangentToCLM (I := I)
+          (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x (v + v') :
+        TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)) =
+      (((cotangentCov (LeviCivita (I := I) g₀)).toFun
+        (fun b => cotangentToCLM (I := I)
+          (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x v :
+        TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)) +
+      (((cotangentCov (LeviCivita (I := I) g₀)).toFun
+        (fun b => cotangentToCLM (I := I)
+          (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x v' :
+        TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)) from by
+      ext w; simp [map_add]]
+    rw [dualToCotangent_addC]
+    rw [map_add]
+  map_smul' := fun c v => by
+    rw [show (((cotangentCov (LeviCivita (I := I) g₀)).toFun
+        (fun b => cotangentToCLM (I := I)
+          (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x (c • v) :
+        TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)) =
+      c • (((cotangentCov (LeviCivita (I := I) g₀)).toFun
+        (fun b => cotangentToCLM (I := I)
+          (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x v :
+        TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)) from by
+      ext w; simp [map_smul]]
+    rw [dualToCotangent_smulC]
+    rw [map_smul]; rfl
+
+/-- The SP2-endpoint `g₁`-principal vector `♯_{g₁}(∇^{g₁}_v K_{Z,Y})` (direction `v`). -/
+private def g1PrincipalVecC (g₀ g₁ : SmoothRiemannianMetric I M)
+    (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x) :
+    TangentSpace I x :=
+  inverseMetricSharpFib (I := I) g₁ x
+    (dualToCotangent (I := I)
+      (((cotangentCov (LeviCivita (I := I) g₁)).toFun
+        (fun b => cotangentToCLM (I := I)
+          (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x v :
+        TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))
+
+/-- The order-1 alignment correction vector `♯_{g₁}(−K_{Z,Y}(connDiff g₁ g₀ · v))` (direction `v`),
+the `∇^{g₁} → ∇₀` SP2-endpoint conversion residual. -/
+private def alignCorrVecC (g₀ g₁ : SmoothRiemannianMetric I M)
+    (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x) :
+    TangentSpace I x :=
+  inverseMetricSharpFib (I := I) g₁ x
+    (dualToCotangent (I := I)
+      (-(LinearMap.toContinuousLinearMap
+        { toFun := fun w => cotangentToCLM (I := I)
+            (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y x)
+            (PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v)
+          map_add' := by
+            intro w w'
+            rw [show PDE.DeTurck.connDiff (I := I) g₁ g₀ x (w + w') v =
+              PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v +
+                PDE.DeTurck.connDiff (I := I) g₁ g₀ x w' v from by rw [map_add]; rfl]
+            rw [map_add]
+          map_smul' := by
+            intro c w
+            rw [show PDE.DeTurck.connDiff (I := I) g₁ g₀ x (c • w) v =
+              c • PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v from by rw [map_smul]; rfl]
+            rw [map_smul]; rfl } : TangentSpace I x →L[ℝ] ℝ)))
+
+@[simp] private lemma alignedPrincipalEndoC_apply (g₀ g₁ : SmoothRiemannianMetric I M)
+    (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x) :
+    alignedPrincipalEndoC (I := I) (M := M) g₀ g₁ Z Y x v =
+      inverseMetricSharpFib (I := I) g₁ x
+        (dualToCotangent (I := I)
+          (((cotangentCov (LeviCivita (I := I) g₀)).toFun
+            (fun b => cotangentToCLM (I := I)
+              (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x v :
+            TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x))) := rfl
+
+private lemma g1Principal_splitC
+    (g₀ g₁ : SmoothRiemannianMetric I M)
+    (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x) :
+    g1PrincipalVecC (I := I) (M := M) g₀ g₁ Z Y x v =
+      inverseMetricSharpFib (I := I) g₁ x
+        (dualToCotangent (I := I)
+          (((cotangentCov (LeviCivita (I := I) g₀)).toFun
+            (fun b => cotangentToCLM (I := I)
+              (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x v :
+            TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))
+        + alignCorrVecC (I := I) (M := M) g₀ g₁ Z Y x v := by
+  classical
+  rw [g1PrincipalVecC, alignCorrVecC]
+  rw [← map_add]
+  congr 1
+  rw [← dualToCotangent_addC]
+  congr 1
+  ext w
+  rw [LinearMap.add_apply]
+  set Xf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    ⟨smoothExtensionTangent (I := I) x v, smoothExtensionTangent_contMDiff (I := I) x v⟩ with hXfdef
+  have hXfx : Xf x = v := smoothExtensionTangent_eq (I := I) x v
+  have halign := covDerivConnDiff_principal_align (I := I) (M := M) g₀ g₁ Xf Y Z x w
+  rw [hXfx] at halign
+  rw [ContinuousLinearMap.coe_coe, ContinuousLinearMap.coe_coe, halign]
+  rw [show ((-(LinearMap.toContinuousLinearMap
+        { toFun := fun w => cotangentToCLM (I := I)
+            (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y x)
+            (PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v)
+          map_add' := by
+            intro w w'
+            rw [show PDE.DeTurck.connDiff (I := I) g₁ g₀ x (w + w') v =
+              PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v +
+                PDE.DeTurck.connDiff (I := I) g₁ g₀ x w' v from by rw [map_add]; rfl]
+            rw [map_add]
+          map_smul' := by
+            intro c w
+            rw [show PDE.DeTurck.connDiff (I := I) g₁ g₀ x (c • w) v =
+              c • PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v from by rw [map_smul]; rfl]
+            rw [map_smul]; rfl } : TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)) w) =
+      -(cotangentToCLM (I := I)
+        (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y x)
+        (PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v)) from rfl]
+  ring
+
+
+private lemma alignedPrincipalEndoC_inner_secondKoszul
+    (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
+    (hbil : ∀ (b : M) (u w : TangentSpace I b),
+      ccTensorBilin (I := I) g₀ S b u w = g₁.inner b u w - g₀.inner b u w)
+    (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v ζ : TangentSpace I x) :
+    g₁.inner x (alignedPrincipalEndoC (I := I) (M := M) g₀ g₁ Z Y x v) ζ =
+      (1 / 2 : ℝ) *
+          (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+              ![v, Z x, Y x, ζ]
+            + unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+                ![v, Y x, Z x, ζ]
+            - unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+                ![v, ζ, Z x, Y x])
+        + (1 / 2 : ℝ) *
+          (unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+              ![(LeviCivita (I := I) g₀).toFun (fun b => Z b) x v, Y x, ζ]
+            + unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+                ![Z x, (LeviCivita (I := I) g₀).toFun (fun b => Y b) x v, ζ]
+            + unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+                ![(LeviCivita (I := I) g₀).toFun (fun b => Y b) x v, Z x, ζ]
+            + unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+                ![Y x, (LeviCivita (I := I) g₀).toFun (fun b => Z b) x v, ζ]
+            - unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+                ![ζ, (LeviCivita (I := I) g₀).toFun (fun b => Z b) x v, Y x]
+            - unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+                ![ζ, Z x, (LeviCivita (I := I) g₀).toFun (fun b => Y b) x v]) := by
+  classical
+  let Xf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    ⟨smoothExtensionTangent (I := I) x v, smoothExtensionTangent_contMDiff (I := I) x v⟩
+  have hXfx : Xf x = v := smoothExtensionTangent_eq (I := I) x v
+  rw [alignedPrincipalEndoC_apply]
+  rw [inverseMetricSharpFib_inner (I := I) g₁ x _ ζ, cotangentToDualLinear_apply]
+  rw [← hXfx]
+  have hbridge := koszulCovGradCovec_covDeriv_eq_secondCovGrad (I := I) (M := M) g₀ g₁ S hbil Xf Y Z x ζ
+  rw [hXfx]
+  rw [hXfx] at hbridge
+  rw [hbridge]
+
+
+/-- The order-1 second-Koszul frame remainder `R_trace`: the `½`-scaled cometric-frame sum of the six
+order-1 frame-derivative terms of the second covariant gradient bridge. -/
+private def secondKoszulFrameRemainder (g₀ g₁ : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g₀ 0 2) (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : ℝ :=
+  (1 / 2 : ℝ) *
+    ∑ k : Fin (Module.finrank ℝ E),
+      (unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+          ![(LeviCivita (I := I) g₀).toFun (fun b => Z b) x
+              (cometricLmodel (I := I) g₁ x
+                (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                  ((Module.finBasis ℝ E).cDualBasis k))), Y x, (Module.finBasis ℝ E) k]
+        + unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+            ![Z x, (LeviCivita (I := I) g₀).toFun (fun b => Y b) x
+                (cometricLmodel (I := I) g₁ x
+                  (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                    ((Module.finBasis ℝ E).cDualBasis k))), (Module.finBasis ℝ E) k]
+        + unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+            ![(LeviCivita (I := I) g₀).toFun (fun b => Y b) x
+                (cometricLmodel (I := I) g₁ x
+                  (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                    ((Module.finBasis ℝ E).cDualBasis k))), Z x, (Module.finBasis ℝ E) k]
+        + unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+            ![Y x, (LeviCivita (I := I) g₀).toFun (fun b => Z b) x
+                (cometricLmodel (I := I) g₁ x
+                  (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                    ((Module.finBasis ℝ E).cDualBasis k))), (Module.finBasis ℝ E) k]
+        - unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+            ![(Module.finBasis ℝ E) k, (LeviCivita (I := I) g₀).toFun (fun b => Z b) x
+                (cometricLmodel (I := I) g₁ x
+                  (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                    ((Module.finBasis ℝ E).cDualBasis k))), Y x]
+        - unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+            ![(Module.finBasis ℝ E) k, Z x,
+              (LeviCivita (I := I) g₀).toFun (fun b => Y b) x
+                (cometricLmodel (I := I) g₁ x
+                  (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                    ((Module.finBasis ℝ E).cDualBasis k)))])
+
+private lemma alignedPrincipalEndoC_trace_eq
+    (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
+    (hbil : ∀ (b : M) (u w : TangentSpace I b),
+      ccTensorBilin (I := I) g₀ S b u w = g₁.inner b u w - g₀.inner b u w)
+    (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
+    LinearMap.trace ℝ E (alignedPrincipalEndoC (I := I) (M := M) g₀ g₁ Z Y x) =
+      unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁)
+            (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x ![Z x, Y x]
+        + secondKoszulFrameRemainder (I := I) (M := M) g₀ g₁ S Z Y x := by
+  classical
+  rw [← traceViaCometric_c (I := I) (M := M) g₁ x (alignedPrincipalEndoC (I := I) (M := M) g₀ g₁ Z Y x)]
+  rw [covDerivConnDiff_tracedPrincipal_eq_appCc (I := I) (M := M) g₀ g₁ S x ![Z x, Y x]]
+  rw [secondKoszulFrameRemainder]
+  rw [show (∑ k : Fin (Module.finrank ℝ E),
+        g₁.inner x
+          (alignedPrincipalEndoC (I := I) (M := M) g₀ g₁ Z Y x
+            (cometricLmodel (I := I) g₁ x
+              (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                ((Module.finBasis ℝ E).cDualBasis k))))
+          ((Module.finBasis ℝ E) k)) =
+      ∑ k : Fin (Module.finrank ℝ E),
+        ((1 / 2 : ℝ) *
+          (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+              ![cometricLmodel (I := I) g₁ x
+                  (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                    ((Module.finBasis ℝ E).cDualBasis k)), Z x, Y x, (Module.finBasis ℝ E) k]
+            + unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+                ![cometricLmodel (I := I) g₁ x
+                    (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                      ((Module.finBasis ℝ E).cDualBasis k)), Y x, Z x, (Module.finBasis ℝ E) k]
+            - unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x
+                ![cometricLmodel (I := I) g₁ x
+                    (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                      ((Module.finBasis ℝ E).cDualBasis k)), (Module.finBasis ℝ E) k, Z x, Y x])
+        + (1 / 2 : ℝ) *
+          (unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+              ![(LeviCivita (I := I) g₀).toFun (fun b => Z b) x
+                  (cometricLmodel (I := I) g₁ x
+                    (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                      ((Module.finBasis ℝ E).cDualBasis k))), Y x, (Module.finBasis ℝ E) k]
+            + unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+                ![Z x, (LeviCivita (I := I) g₀).toFun (fun b => Y b) x
+                    (cometricLmodel (I := I) g₁ x
+                      (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                        ((Module.finBasis ℝ E).cDualBasis k))), (Module.finBasis ℝ E) k]
+            + unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+                ![(LeviCivita (I := I) g₀).toFun (fun b => Y b) x
+                    (cometricLmodel (I := I) g₁ x
+                      (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                        ((Module.finBasis ℝ E).cDualBasis k))), Z x, (Module.finBasis ℝ E) k]
+            + unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+                ![Y x, (LeviCivita (I := I) g₀).toFun (fun b => Z b) x
+                    (cometricLmodel (I := I) g₁ x
+                      (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                        ((Module.finBasis ℝ E).cDualBasis k))), (Module.finBasis ℝ E) k]
+            - unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+                ![(Module.finBasis ℝ E) k, (LeviCivita (I := I) g₀).toFun (fun b => Z b) x
+                    (cometricLmodel (I := I) g₁ x
+                      (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                        ((Module.finBasis ℝ E).cDualBasis k))), Y x]
+            - unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x
+                ![(Module.finBasis ℝ E) k, Z x,
+                  (LeviCivita (I := I) g₀).toFun (fun b => Y b) x
+                    (cometricLmodel (I := I) g₁ x
+                      (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                        ((Module.finBasis ℝ E).cDualBasis k)))])) from by
+      refine Finset.sum_congr rfl fun k _ => ?_
+      exact alignedPrincipalEndoC_inner_secondKoszul (I := I) (M := M) g₀ g₁ S hbil Z Y x
+        (cometricLmodel (I := I) g₁ x
+          (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+            ((Module.finBasis ℝ E).cDualBasis k))) ((Module.finBasis ℝ E) k)]
+  rw [Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum]
+  congr 1
+
+
+/-- The order-1 `∇^{g₁} → ∇₀` alignment-trace remainder: the `chartModelBasis`-frame trace of the
+order-1 alignment correction vector `alignCorrVecC` (the SP2-endpoint `g₁`-to-`g₀` connection-conversion
+residual `−K_{Z,Y}(connDiff g₁ g₀ · ·)` raised by `♯_{g₁}`). -/
+private def alignmentTraceRemainder (g₀ g₁ : SmoothRiemannianMetric I M)
+    (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : ℝ :=
+  ∑ i : Fin (Module.finrank ℝ E),
+    (chartModelBasis E).repr
+      (alignCorrVecC (I := I) (M := M) g₀ g₁ Z Y x ((chartModelBasis E) i)) i
+
+/-- **The named order-1 remainder of the Palatini SP2-endpoint traced-principal connector.**
+
+The sum of the second-Koszul order-1 frame remainder `secondKoszulFrameRemainder` (the `∇₀`-frame
+derivative terms of the second covariant-gradient bridge) and the `∇^{g₁} → ∇₀` alignment-trace remainder
+`alignmentTraceRemainder` (the `g₁`-to-`g₀` SP2-endpoint connection-conversion residual).  Both arms carry
+at most ONE covariant derivative of the metric-difference section `S` (through `covGrad g₀ 0 2 S`), so the
+remainder is genuinely order `≤ 1`; the Ricci-arm order-`0`/`1` sibling coefficients `R₀, R₁` absorb it. -/
+private def palatiniTracedPrincipalRemainder (g₀ g₁ : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g₀ 0 2) (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : ℝ :=
+  secondKoszulFrameRemainder (I := I) (M := M) g₀ g₁ S Z Y x
+    + alignmentTraceRemainder (I := I) (M := M) g₀ g₁ Z Y x
+
+/-- **The Palatini SP2-endpoint traced-principal connector.**
+
+The `chartModelBasis`-frame trace of the SP2-endpoint order-2 PRINCIPAL `♯_{g₁}(∇^{g₁}_{eᵢ} K_{Z,Y})` of
+the differentiated connection difference (the divergence-type principal arm of
+`covDerivConnDiff_eq_invGramSharp_graded`, the Ricci-arm Palatini-telescope's leading term) equals the
+EXPLICIT combined-three-trace `P = unitModel g₀ 2 (appCc g₀ 4 2 R₂ (∇₀² S)) ![Z x, Y x]` of the second
+covariant gradient (the `appCc`/`unitModel` read-off of the corrected order-2 coefficient
+`R₂ = ricciArmPrincipalCoeff g₀ g₁` proved in `covDerivConnDiff_tracedPrincipal_eq_appCc`), PLUS the
+named order-`≤ 1` remainder `palatiniTracedPrincipalRemainder` (the second-Koszul `∇₀`-frame derivative
+remainder plus the `∇^{g₁} → ∇₀` alignment-trace residual).
+
+Route: the frame-trace is the basis-independent `LinearMap.trace` of the principal direction-endomorphism
+(`traceViaBasis_c`); the `∇^{g₁}`-principal splits, via `covDerivConnDiff_principal_align`, into the
+`g₀`-aligned principal `alignedPrincipalEndoC` plus the order-1 alignment correction `alignCorrVecC`
+(`g1Principal_splitC`); the `g₀`-aligned principal's trace is computed in the cometric biorthogonal frame
+(`traceViaCometric_c`), where each summand is the second covariant-gradient half-Koszul of
+`koszulCovGradCovec_covDeriv_eq_secondCovGrad` (`alignedPrincipalEndoC_inner_secondKoszul`); the half-Koszul
+combined three-trace is exactly `P` (`covDerivConnDiff_tracedPrincipal_eq_appCc`), the second-Koszul
+frame terms forming `secondKoszulFrameRemainder` (`alignedPrincipalEndoC_trace_eq`).  The two order-1
+remainders are carried as the named `palatiniTracedPrincipalRemainder`. -/
+theorem palatini_tracedPrincipal_eq_combinedTrace
+    (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
+    (hbil : ∀ (b : M) (u w : TangentSpace I b),
+      ccTensorBilin (I := I) g₀ S b u w = g₁.inner b u w - g₀.inner b u w)
+    (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
+    (∑ i : Fin (Module.finrank ℝ E),
+      (chartModelBasis E).repr
+        (inverseMetricSharpFib (I := I) g₁ x
+          (dualToCotangent (I := I)
+            (((cotangentCov (LeviCivita (I := I) g₁)).toFun
+              (fun b => cotangentToCLM (I := I)
+                (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x
+                  ((chartModelBasis E) i) :
+              TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))) i) =
+      unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁)
+            (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x ![Z x, Y x]
+        + palatiniTracedPrincipalRemainder (I := I) (M := M) g₀ g₁ S Z Y x := by
+  classical
+  -- Each summand is `repr (g1PrincipalVecC ... (chartModelBasis E i)) i`.
+  have hsumeq : (∑ i : Fin (Module.finrank ℝ E),
+      (chartModelBasis E).repr
+        (inverseMetricSharpFib (I := I) g₁ x
+          (dualToCotangent (I := I)
+            (((cotangentCov (LeviCivita (I := I) g₁)).toFun
+              (fun b => cotangentToCLM (I := I)
+                (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b)) x
+                  ((chartModelBasis E) i) :
+              TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))) i) =
+      ∑ i : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr
+            (alignedPrincipalEndoC (I := I) (M := M) g₀ g₁ Z Y x ((chartModelBasis E) i)) i
+          + (chartModelBasis E).repr
+              (alignCorrVecC (I := I) (M := M) g₀ g₁ Z Y x ((chartModelBasis E) i)) i) := by
+    refine Finset.sum_congr rfl fun i _ => ?_
+    have hsplit := g1Principal_splitC (I := I) (M := M) g₀ g₁ Z Y x ((chartModelBasis E) i)
+    rw [g1PrincipalVecC] at hsplit
+    rw [hsplit]
+    rw [map_add, Finsupp.add_apply]
+    rw [← alignedPrincipalEndoC_apply]
+  rw [hsumeq, Finset.sum_add_distrib]
+  rw [traceViaBasis_c (alignedPrincipalEndoC (I := I) (M := M) g₀ g₁ Z Y x)]
+  rw [alignedPrincipalEndoC_trace_eq (I := I) (M := M) g₀ g₁ S hbil Z Y x]
+  rw [palatiniTracedPrincipalRemainder, alignmentTraceRemainder]
+  ring
+
 end TensorSpectral
 end Parabolic
 end Analysis
