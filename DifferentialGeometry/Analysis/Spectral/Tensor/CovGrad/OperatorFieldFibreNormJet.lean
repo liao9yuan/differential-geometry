@@ -528,6 +528,405 @@ theorem rfns_slotExtendIter_eq (g : SmoothRiemannianMetric I M) (r s : ℕ) :
       rw [pow_succ]
       ring
 
+/-! ## General-valence covariant-slot permutation invariance of the fibre norm
+
+The intrinsic fibre norm of an `(r, s)`-tensor is invariant under any permutation of its `s` covariant
+output slots.  This is the general-valence `(r, s)` lift of the rank-`0` slot-permutation invariance
+`riemannianFiberNormSq_iteratedCovGrad_eq_of_section_domDomCongr`; here the contravariant rank `r` is
+arbitrary (untouched by the output-slot permutation), which is exactly what the iterated
+slot-extension fibre-norm scaling needs when it must commute an inner covariant gradient past the
+slot-extension's covariant-output-slot transposition at positive contravariant rank. -/
+
+/-- **The covariant-slot permutation of an `(r, s)`-tensor fibre.**  Post-compose the output
+`(0, s)`-fibre `Tensor0SSpace s I x` of the `(r, s)`-tensor `T` (a continuous linear map from
+`(0, r)`-fibres) with the isometric slot reindexing `domDomCongr σ`.  The result is the `(r, s)`-tensor
+whose `(K, J)`-frame component is the `(K, J ∘ σ)`-component of `T`. -/
+def rsDomDomCongr {r s : ℕ} {x : M} (σ : Equiv.Perm (Fin s))
+    (T : TensorRSSpace r s I x) : TensorRSSpace r s I x :=
+  TensorRSSpace.ofCLM
+    ((((tensor0SSpace_continuousLinearEquiv s x).symm.toContinuousLinearMap).comp
+        (((ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ σ).toContinuousLinearEquiv
+            : Tensor0SModel s ℝ E ≃L[ℝ] Tensor0SModel s ℝ E).toContinuousLinearMap.comp
+          ((tensor0SSpace_continuousLinearEquiv s x).toContinuousLinearMap))).comp
+      (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from T))
+
+/-- **The model form of `rsDomDomCongr σ T` on a `(0, r)`-tensor `d` is the slot-reindexing of the
+model form of `T d`.** -/
+lemma toModel_rsDomDomCongr_apply {r s : ℕ} {x : M} (σ : Equiv.Perm (Fin s))
+    (T : TensorRSSpace r s I x) (d : Tensor0SSpace r I x) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from rsDomDomCongr σ T) d) =
+      ContinuousMultilinearMap.domDomCongr σ
+        (Tensor0SSpace.toModel
+          ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from T) d)) := by
+  rw [rsDomDomCongr, TensorRSSpace.ofCLM]
+  rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply,
+    ContinuousLinearMap.comp_apply]
+  rw [Tensor0SSpace.toModel]
+  simp only [ContinuousLinearEquiv.coe_coe, ContinuousLinearEquiv.apply_symm_apply,
+    LinearIsometryEquiv.coe_toContinuousLinearEquiv]
+  rfl
+
+/-- **Evaluation of the slot-permuted tensor.**  On a `(0, r)`-tensor `d` and a tangent tuple `v`,
+`rsDomDomCongr σ T` reads `T d` on the slot-reindexed tuple `v ∘ σ`. -/
+lemma rsDomDomCongr_apply_eval {r s : ℕ} {x : M} (σ : Equiv.Perm (Fin s))
+    (T : TensorRSSpace r s I x) (d : Tensor0SSpace r I x) (v : Fin s → TangentSpace I x) :
+    (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from rsDomDomCongr σ T) d v =
+      (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from T) d (fun k => v (σ k)) := by
+  classical
+  have hL := toModel_rsDomDomCongr_apply (I := I) (M := M) σ T d
+  have hfib : ∀ (y : Tensor0SSpace s I x) (w : Fin s → TangentSpace I x),
+      (y : Tensor0SSpace s I x) w = Tensor0SSpace.toModel y w := fun y w => rfl
+  rw [hfib, hL, ContinuousMultilinearMap.domDomCongr_apply, ← hfib]
+
+/-- **The frame component of a slot-permuted tensor reindexes the output multi-index.**  For a
+`g_x`-orthonormal frame `e`, the `(K, J)`-frame component of `rsDomDomCongr σ T` is the
+`(K, J ∘ σ)`-frame component of `T` (the slot reindexing acts on the output-slot reading). -/
+lemma fiberNormSqComponent_rsDomDomCongr {r s : ℕ} (g : SmoothRiemannianMetric I M) (x : M)
+    (σ : Equiv.Perm (Fin s)) (T : TensorRSSpace r s I x)
+    {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin r → Fin n) (J : Fin s → Fin n) :
+    fiberNormSqComponent (I := I) (M := M) g x r s (rsDomDomCongr σ T) n e K J =
+      fiberNormSqComponent (I := I) (M := M) g x r s T n e K (fun k => J (σ k)) := by
+  rw [fiberNormSqComponent, fiberNormSqComponent]
+  exact rsDomDomCongr_apply_eval (I := I) (M := M) σ T _ (fun k => e (J k))
+
+/-- **General-valence covariant-slot permutation invariance of the intrinsic fibre norm.**  For any
+permutation `σ : Equiv.Perm (Fin s)` of the `s` covariant output slots and any `(r, s)`-tensor `T`,
+```
+rfns(rsDomDomCongr σ T)(x) = rfns(T)(x).
+```
+Parseval-expand both fibre norms in a `g_x`-orthonormal frame (`rfns_rs_eq_sum_componentSq_of_basis`);
+the `(K, J)`-component of `rsDomDomCongr σ T` is the `(K, J ∘ σ)`-component of `T`
+(`fiberNormSqComponent_rsDomDomCongr`), and `J ↦ J ∘ σ` is a bijective reindexing of the inner
+`J`-sum, hence leaves the component-square sum unchanged.  The contravariant index `K` is untouched. -/
+theorem riemannianFiberNormSq_domDomCongr_covariant
+    (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
+    (σ : Equiv.Perm (Fin s)) (T : TensorRSSpace r s I x) :
+    riemannianFiberNormSq (I := I) (M := M) g r s x (rsDomDomCongr σ T) =
+      riemannianFiberNormSq (I := I) (M := M) g r s x T := by
+  classical
+  obtain ⟨e, bse, hbse, horth⟩ := exists_orthoFrame_basis (I := I) (M := M) g x
+  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g r s x (rsDomDomCongr σ T)
+    e bse rfl hbse horth]
+  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g r s x T e bse rfl hbse horth]
+  refine Finset.sum_congr rfl (fun K _ => ?_)
+  refine Fintype.sum_equiv
+    (Equiv.arrowCongr σ.symm (Equiv.refl (Fin (Module.finrank ℝ E))))
+    (fun J => (fiberNormSqComponent (I := I) (M := M) g x r s (rsDomDomCongr σ T)
+      (Module.finrank ℝ E) e K J) ^ 2)
+    (fun J => (fiberNormSqComponent (I := I) (M := M) g x r s T
+      (Module.finrank ℝ E) e K J) ^ 2)
+    (fun J => ?_)
+  simp only []
+  have heqv : (Equiv.arrowCongr σ.symm (Equiv.refl (Fin (Module.finrank ℝ E)))) J =
+      (fun k => J (σ k)) := by
+    funext a; simp [Equiv.arrowCongr]
+  rw [heqv]
+  rw [fiberNormSqComponent_rsDomDomCongr (I := I) (M := M) g x σ T e K J]
+
+/-! ## Cast / commute bookkeeping for the diagonal product grid (generic contravariant rank) -/
+
+set_option linter.unusedSectionVars false in
+/-- **`rfns` is invariant under a `SmoothCcTensor` rank-cast (heterogeneous form, generic
+contravariant rank `r`).** -/
+private theorem rfns_toSection_heq_congr_rs (g : SmoothRiemannianMetric I M)
+    {r a b : ℕ} (h : a = b) {Y : SmoothCcTensor g r a} {Z : SmoothCcTensor g r b}
+    (hYZ : HEq Y Z) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g r a x (Y.toSection x) =
+      riemannianFiberNormSq (I := I) (M := M) g r b x (Z.toSection x) := by
+  subst h; rw [eq_of_heq hYZ]
+
+set_option linter.unusedSectionVars false in
+/-- **Front-commuting one covariant gradient through the iterated gradient (rfns form, generic
+contravariant rank `r`).**  `rfns(∇^m(∇Φ))` at valence `(r, (s + 1) + m)` equals `rfns(∇^{m+1}Φ)` at
+valence `(r, s + (m + 1))`; the generic-rank instance of `rfns_iteratedCovGrad_covGrad_comm`. -/
+theorem rfns_iteratedCovGrad_covGrad_comm_rs (g : SmoothRiemannianMetric I M)
+    (r s m : ℕ) (Φ : SmoothCcTensor g r s) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g r ((s + 1) + m) x
+        ((iteratedCovGrad g r (s + 1) m (covGrad (I := I) (M := M) g r s Φ)).toSection x) =
+      riemannianFiberNormSq (I := I) (M := M) g r (s + (m + 1)) x
+        ((iteratedCovGrad g r s (m + 1) Φ).toSection x) :=
+  rfns_toSection_heq_congr_rs g (by omega : (s + 1) + m = s + (m + 1))
+    (iteratedCovGrad_covGrad_comm_heq' g r s m Φ) x
+
+/-! ## The iterated slot-extension fibre-norm bound
+
+Iterating the single-step gradient/slot-extension fibre-norm scaling `rfns_covGrad_slotExtend_scale`
+over the gradient order, the covariant slot permutation invariance `riemannianFiberNormSq_domDomCongr_covariant`
+absorbs the order-dependent transposition of the passenger slot through the accumulated gradient slots
+(needed because the contravariant rank `r + 1 > 0` makes the rank-`0` naturality inapplicable). -/
+
+/-- **The iterated slot-extension fibre-norm bound.**  At every base point `x` and gradient order `i`,
+inserting one leading covariant passenger slot scales the iterated covariant-gradient fibre norm by at
+most the dimension factor `n = Module.finrank ℝ E`:
+```
+rfns(∇^i (slotExtend g r s Φ))(x) ≤ n · rfns(∇^i Φ)(x).
+```
+The single-step `i = 0`/`i = 1` instances are `rfns_slotExtend_eq` / `rfns_covGrad_slotExtend_scale`;
+the iterate commutes the inner covariant gradient `∇^i` past the slot-extension's covariant-output-slot
+transposition, whose fibre norm is invariant by `riemannianFiberNormSq_domDomCongr_covariant` (the
+general-valence slot-permutation invariance, applicable at the positive contravariant rank `r + 1`),
+then applies the passenger scaling `rfns_slotExtend_eq` to `∇^i Φ`.
+
+This is the section-level slot-extension jet scaling consumed by the `appCc` diagonal product grid; it
+is the general-valence analogue of the rank-`0` slot-permutation jet invariance
+`riemannianFiberNormSq_iteratedCovGrad_eq_of_section_domDomCongr`, lifted to positive contravariant
+rank through `riemannianFiberNormSq_domDomCongr_covariant`. -/
+theorem rfns_iteratedCovGrad_slotExtend_le (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : SmoothCcTensor g r s) (i : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g (r + 1) ((s + 1) + i) x
+        ((iteratedCovGrad (I := I) g (r + 1) (s + 1) i
+          (slotExtend (I := I) (M := M) g r s Φ)).toSection x) ≤
+      (Module.finrank ℝ E : ℝ) *
+        riemannianFiberNormSq (I := I) (M := M) g r (s + i) x
+          ((iteratedCovGrad (I := I) g r s i Φ).toSection x) := by
+  sorry
+
+/-! ## The `appCc` diagonal product grid
+
+The covariant Leibniz diagonal product grid for the operator-field action: the iterated covariant
+gradient `∇^j (appCc C W)` of the contracted action of a coefficient field `C` on a section `W` is
+bounded, fibrewise, by the diagonal product of the `C`-jets and the `W`-jets,
+```
+rfns(∇^j (appCc C W))(x) ≤ Gdiag j · ∑_{i ≤ j} rfns(∇^i C)(x) · ∑_{l ≤ j − i} rfns(∇^l W)(x),
+```
+with `Gdiag j = (2 (n + 1))^j`, `n = Module.finrank ℝ E`.  This is the chart-jet-free Moser-tame grid
+fed to the integrated Gagliardo–Nirenberg two-arm engine. -/
+
+/-- **The per-order diagonal product-grid constant `Gdiag j = (2 (n + 1))^j`.** -/
+def appCcGdiag (j : ℕ) : ℝ := (2 * ((Module.finrank ℝ E : ℝ) + 1)) ^ j
+
+set_option linter.unusedSectionVars false in
+/-- `appCcGdiag` is nonnegative. -/
+theorem appCcGdiag_nonneg (j : ℕ) : 0 ≤ appCcGdiag (E := E) j := by
+  rw [appCcGdiag]; positivity
+
+/-- **The pure combinatorial diagonal-grid step inequality.**  For nonnegative jet-coefficient
+families `cΦ, cW : ℕ → ℝ` and dimension factor `n ≥ 0`, the gradient-step combination of the
+`Φ`-shifted and `W`-shifted diagonal grids is dominated by `(n + 1)` times the order-`(j + 1)`
+diagonal grid:
+```
+∑_{i≤j} cΦ(i+1)·(∑_{l≤j-i} cW l) + n · ∑_{i≤j} cΦ(i)·(∑_{l≤j-i} cW(l+1))
+  ≤ (n + 1) · ∑_{i≤j+1} cΦ(i)·(∑_{l≤j+1-i} cW l).
+``` -/
+private lemma diagonalGrid_step_le (n : ℝ) (hn : 0 ≤ n) (j : ℕ) (cΦ cW : ℕ → ℝ)
+    (hcΦ : ∀ i, 0 ≤ cΦ i) (hcW : ∀ l, 0 ≤ cW l) :
+    (∑ i ∈ Finset.range (j + 1), cΦ (i + 1) * ∑ l ∈ Finset.range (j + 1 - i), cW l) +
+        n * ∑ i ∈ Finset.range (j + 1), cΦ i * ∑ l ∈ Finset.range (j + 1 - i), cW (l + 1) ≤
+      (n + 1) * ∑ i ∈ Finset.range (j + 1 + 1),
+        cΦ i * ∑ l ∈ Finset.range (j + 1 + 1 - i), cW l := by
+  classical
+  set D : ℝ := ∑ i ∈ Finset.range (j + 1 + 1), cΦ i * ∑ l ∈ Finset.range (j + 1 + 1 - i), cW l
+    with hD_def
+  have hcell_nn : ∀ i, 0 ≤ cΦ i * ∑ l ∈ Finset.range (j + 1 + 1 - i), cW l := by
+    intro i; exact mul_nonneg (hcΦ i) (Finset.sum_nonneg (fun l _ => hcW l))
+  have hD_nn : 0 ≤ D := Finset.sum_nonneg (fun i _ => hcell_nn i)
+  -- A shift bound: `∑_{l<m} cW(l+1) ≤ ∑_{l<m+1} cW l`.
+  have hWshift : ∀ m : ℕ, (∑ l ∈ Finset.range m, cW (l + 1)) ≤ ∑ l ∈ Finset.range (m + 1), cW l := by
+    intro m
+    rw [Finset.sum_range_succ' (fun l => cW l) m]
+    exact le_add_of_nonneg_right (hcW 0)
+  -- First sum: reindex `i ↦ i + 1`, each term ≤ the `(i+1)`-cell of `D`.
+  have hA : (∑ i ∈ Finset.range (j + 1), cΦ (i + 1) * ∑ l ∈ Finset.range (j + 1 - i), cW l) ≤ D := by
+    rw [hD_def]
+    rw [Finset.sum_range_succ' (fun i => cΦ i * ∑ l ∈ Finset.range (j + 1 + 1 - i), cW l) (j + 1)]
+    refine le_trans ?_ (le_add_of_nonneg_right (hcell_nn 0))
+    refine Finset.sum_le_sum (fun i hi => ?_)
+    have hile : i ≤ j := by simp only [Finset.mem_range] at hi; omega
+    refine mul_le_mul_of_nonneg_left (le_of_eq ?_) (hcΦ (i + 1))
+    rw [show j + 1 + 1 - (i + 1) = j + 1 - i from by omega]
+  -- Second sum: each `W`-shifted inner sum ≤ the full inner sum of the `i`-cell of `D`.
+  have hB : (∑ i ∈ Finset.range (j + 1), cΦ i * ∑ l ∈ Finset.range (j + 1 - i), cW (l + 1)) ≤ D := by
+    rw [hD_def]
+    rw [Finset.sum_range_succ (fun i => cΦ i * ∑ l ∈ Finset.range (j + 1 + 1 - i), cW l) (j + 1)]
+    refine le_trans ?_ (le_add_of_nonneg_right (hcell_nn (j + 1)))
+    refine Finset.sum_le_sum (fun i hi => ?_)
+    have hile : i ≤ j := by simp only [Finset.mem_range] at hi; omega
+    refine mul_le_mul_of_nonneg_left ?_ (hcΦ i)
+    refine le_trans (hWshift (j + 1 - i)) (le_of_eq ?_)
+    rw [show j + 1 - i + 1 = j + 1 + 1 - i from by omega]
+  calc (∑ i ∈ Finset.range (j + 1), cΦ (i + 1) * ∑ l ∈ Finset.range (j + 1 - i), cW l) +
+          n * ∑ i ∈ Finset.range (j + 1), cΦ i * ∑ l ∈ Finset.range (j + 1 - i), cW (l + 1)
+      ≤ D + n * D := by
+        refine add_le_add hA ?_
+        exact mul_le_mul_of_nonneg_left hB hn
+    _ = (n + 1) * D := by ring
+
+set_option maxHeartbeats 6400000 in
+/-- **The generic-rank diagonal product grid for the operator-field action `appCcRS`.**  For an
+operator field `Φ : SmoothCcTensor g a b` and a contracted section `W : SmoothCcTensor g 0 a`, the
+iterated covariant gradient of `appCcRS g 0 a b Φ W` is bounded fibrewise by the diagonal product of the
+`Φ`-jets (at contravariant valence `a`) and the `W`-jets:
+```
+rfns(∇^j (appCcRS Φ W))(x) ≤ Gdiag j · ∑_{i ≤ j} rfns(∇^i Φ)(x) · ∑_{l ≤ j − i} rfns(∇^l W)(x).
+```
+Induction on `j`: the single-step operator-field covariant product rule `covGrad_appCcRS_eq` splits the
+gradient into the `Φ`-differentiated arm `appCcRS (∇Φ) W` and the `slotExtend`-passenger arm
+`appCcRS (slotExtend Φ) (∇W)`; `riemannianFiberNormSq_add_le` separates them, the inductive hypothesis
+(at `(a, b + 1)` and `(a + 1, b + 1)`) bounds each, the front-commute `rfns_iteratedCovGrad_covGrad_comm_rs`
+reindexes the differentiated jets, and the slot-extension scaling `rfns_iteratedCovGrad_slotExtend_le`
+collapses the passenger arm's `Φ`-jets back to the `∇^i Φ` jets with the dimension factor `n`. -/
+theorem rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_le (g : SmoothRiemannianMetric I M) :
+    ∀ (j a b : ℕ) (Φ : SmoothCcTensor g a b) (W : SmoothCcTensor g 0 a) (x : M),
+      riemannianFiberNormSq (I := I) (M := M) g 0 (b + j) x
+          ((iteratedCovGrad (I := I) g 0 b j
+            (appCcRS (I := I) (M := M) g 0 a b Φ W)).toSection x) ≤
+        appCcGdiag (E := E) j *
+          ∑ i ∈ Finset.range (j + 1),
+            riemannianFiberNormSq (I := I) (M := M) g a (b + i) x
+                ((iteratedCovGrad (I := I) g a b i Φ).toSection x) *
+              ∑ l ∈ Finset.range (j + 1 - i),
+                riemannianFiberNormSq (I := I) (M := M) g 0 (a + l) x
+                  ((iteratedCovGrad (I := I) g 0 a l W).toSection x) := by
+  intro j
+  induction j with
+  | zero =>
+      intro a b Φ W x
+      rw [iteratedCovGrad_zero, appCcGdiag, pow_zero, one_mul]
+      rw [Finset.sum_range_one, Finset.sum_range_one, iteratedCovGrad_zero, iteratedCovGrad_zero]
+      -- `rfns(appCcRS Φ W) ≤ rfns Φ · rfns W` by the partial-contraction Cauchy–Schwarz.
+      rw [appCcRS_toSection (I := I) (M := M) g 0 a b Φ W x]
+      have h := riemannianFiberNormSq_compRS_le_mul (I := I) (M := M) g 0 a b x
+        (show TensorRSSpace a b I x from Φ.toSection x)
+        (show TensorRSSpace 0 a I x from W.toSection x)
+      simpa using h
+  | succ j ih =>
+      intro a b Φ W x
+      classical
+      -- Front-commute one gradient: `∇^{j+1}(appCcRS Φ W)` has the same `rfns` as `∇^j(∇(appCcRS Φ W))`.
+      rw [← rfns_iteratedCovGrad_covGrad_comm_rs (I := I) (M := M) g 0 b j
+        (appCcRS (I := I) (M := M) g 0 a b Φ W) x]
+      -- Split the inner gradient by the operator-field covariant product rule.
+      rw [covGrad_appCcRS_eq (I := I) (M := M) g 0 a b Φ W]
+      rw [iteratedCovGrad_add]
+      -- Separate the two arms.
+      refine le_trans (riemannianFiberNormSq_add_le (I := I) (M := M) g 0 ((b + 1) + j) x
+        ((iteratedCovGrad (I := I) g 0 (b + 1) j
+          (appCcRS (I := I) (M := M) g 0 a (b + 1)
+            (covGrad (I := I) (M := M) g a b Φ) W)).toSection x)
+        ((iteratedCovGrad (I := I) g 0 (b + 1) j
+          (appCcRS (I := I) (M := M) g 0 (a + 1) (b + 1)
+            (slotExtend (I := I) (M := M) g a b Φ)
+            (covGrad (I := I) (M := M) g 0 a W))).toSection x)) ?_
+      -- Abbreviations for the jet coefficient families and the diagonal grids.
+      set cΦ : ℕ → ℝ := fun i => riemannianFiberNormSq (I := I) (M := M) g a (b + i) x
+        ((iteratedCovGrad (I := I) g a b i Φ).toSection x) with hcΦ_def
+      set cW : ℕ → ℝ := fun l => riemannianFiberNormSq (I := I) (M := M) g 0 (a + l) x
+        ((iteratedCovGrad (I := I) g 0 a l W).toSection x) with hcW_def
+      have hcΦ_nn : ∀ i, 0 ≤ cΦ i := fun i =>
+        riemannianFiberNormSq_nonneg (I := I) (M := M) g a (b + i) x _
+      have hcW_nn : ∀ l, 0 ≤ cW l := fun l =>
+        riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (a + l) x _
+      have hGj_nn : (0 : ℝ) ≤ appCcGdiag (E := E) j := appCcGdiag_nonneg (E := E) j
+      have hn_nn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := Nat.cast_nonneg _
+      -- Arm A: bound by the IH at `(a, b + 1)` on `∇Φ`, then reindex `Φ`-jets.
+      have hArmA : riemannianFiberNormSq (I := I) (M := M) g 0 ((b + 1) + j) x
+            ((iteratedCovGrad (I := I) g 0 (b + 1) j
+              (appCcRS (I := I) (M := M) g 0 a (b + 1)
+                (covGrad (I := I) (M := M) g a b Φ) W)).toSection x) ≤
+          appCcGdiag (E := E) j *
+            ∑ i ∈ Finset.range (j + 1), cΦ (i + 1) * ∑ l ∈ Finset.range (j + 1 - i), cW l := by
+        refine le_trans (ih a (b + 1) (covGrad (I := I) (M := M) g a b Φ) W x) ?_
+        refine mul_le_mul_of_nonneg_left (le_of_eq (Finset.sum_congr rfl (fun i _ => ?_))) hGj_nn
+        rw [hcΦ_def]
+        dsimp only
+        rw [rfns_iteratedCovGrad_covGrad_comm_rs (I := I) (M := M) g a b i Φ x]
+      -- Arm B: bound by the IH at `(a + 1, b + 1)` on `slotExtend Φ`, `∇W`; slot-extension + comm.
+      have hArmB : riemannianFiberNormSq (I := I) (M := M) g 0 ((b + 1) + j) x
+            ((iteratedCovGrad (I := I) g 0 (b + 1) j
+              (appCcRS (I := I) (M := M) g 0 (a + 1) (b + 1)
+                (slotExtend (I := I) (M := M) g a b Φ)
+                (covGrad (I := I) (M := M) g 0 a W))).toSection x) ≤
+          appCcGdiag (E := E) j *
+            ((Module.finrank ℝ E : ℝ) *
+              ∑ i ∈ Finset.range (j + 1), cΦ i * ∑ l ∈ Finset.range (j + 1 - i), cW (l + 1)) := by
+        refine le_trans (ih (a + 1) (b + 1) (slotExtend (I := I) (M := M) g a b Φ)
+          (covGrad (I := I) (M := M) g 0 a W) x) ?_
+        refine mul_le_mul_of_nonneg_left ?_ hGj_nn
+        rw [Finset.mul_sum]
+        refine Finset.sum_le_sum (fun i _ => ?_)
+        -- `rfns(∇^i(slotExtend Φ)) ≤ n·rfns(∇^iΦ)`, and `rfns(∇^l(∇W)) = rfns(∇^{l+1}W)`.
+        have hWinner : (∑ l ∈ Finset.range (j + 1 - i),
+              riemannianFiberNormSq (I := I) (M := M) g 0 ((a + 1) + l) x
+                ((iteratedCovGrad (I := I) g 0 (a + 1) l
+                  (covGrad (I := I) (M := M) g 0 a W)).toSection x)) =
+            ∑ l ∈ Finset.range (j + 1 - i), cW (l + 1) := by
+          refine Finset.sum_congr rfl (fun l _ => ?_)
+          rw [hcW_def]
+          dsimp only
+          rw [rfns_iteratedCovGrad_covGrad_comm_rs (I := I) (M := M) g 0 a l W x]
+        rw [hWinner]
+        have hΦle : riemannianFiberNormSq (I := I) (M := M) g (a + 1) ((b + 1) + i) x
+              ((iteratedCovGrad (I := I) g (a + 1) (b + 1) i
+                (slotExtend (I := I) (M := M) g a b Φ)).toSection x) ≤
+            (Module.finrank ℝ E : ℝ) * cΦ i := by
+          rw [hcΦ_def]
+          dsimp only
+          exact rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g a b Φ i x
+        calc riemannianFiberNormSq (I := I) (M := M) g (a + 1) ((b + 1) + i) x
+                ((iteratedCovGrad (I := I) g (a + 1) (b + 1) i
+                  (slotExtend (I := I) (M := M) g a b Φ)).toSection x) *
+              ∑ l ∈ Finset.range (j + 1 - i), cW (l + 1)
+            ≤ ((Module.finrank ℝ E : ℝ) * cΦ i) * ∑ l ∈ Finset.range (j + 1 - i), cW (l + 1) :=
+                mul_le_mul_of_nonneg_right hΦle
+                  (Finset.sum_nonneg (fun l _ => hcW_nn (l + 1)))
+          _ = (Module.finrank ℝ E : ℝ) * (cΦ i * ∑ l ∈ Finset.range (j + 1 - i), cW (l + 1)) := by
+                ring
+      -- Combine the two arms (each with the factor `2` from `rfns_add_le`) with the combinatorial step.
+      refine le_trans (add_le_add
+        (mul_le_mul_of_nonneg_left hArmA (by norm_num : (0:ℝ) ≤ 2))
+        (mul_le_mul_of_nonneg_left hArmB (by norm_num : (0:ℝ) ≤ 2))) ?_
+      -- Pull `appCcGdiag j` and the dimension factor out; reduce to the pure combinatorial step.
+      set Gj : ℝ := appCcGdiag (E := E) j with hGj_def
+      set SA : ℝ := ∑ i ∈ Finset.range (j + 1), cΦ (i + 1) * ∑ l ∈ Finset.range (j + 1 - i), cW l
+        with hSA_def
+      set SB : ℝ := ∑ i ∈ Finset.range (j + 1), cΦ i * ∑ l ∈ Finset.range (j + 1 - i), cW (l + 1)
+        with hSB_def
+      set DG : ℝ := ∑ i ∈ Finset.range (j + 1 + 1),
+        cΦ i * ∑ l ∈ Finset.range (j + 1 + 1 - i), cW l with hDG_def
+      have hstep : SA + (Module.finrank ℝ E : ℝ) * SB ≤ ((Module.finrank ℝ E : ℝ) + 1) * DG := by
+        rw [hSA_def, hSB_def, hDG_def]
+        exact diagonalGrid_step_le (Module.finrank ℝ E : ℝ) hn_nn j cΦ cW hcΦ_nn hcW_nn
+      have hGdiag_succ : appCcGdiag (E := E) (j + 1) = (2 * ((Module.finrank ℝ E : ℝ) + 1)) * Gj := by
+        rw [hGj_def, appCcGdiag, appCcGdiag, pow_succ]; ring
+      rw [hGdiag_succ]
+      -- `2·(Gj·SA) + 2·(Gj·(n·SB)) = 2 Gj (SA + n SB) ≤ 2 Gj (n+1) DG`.
+      have hGj_nn' : (0 : ℝ) ≤ Gj := hGj_nn
+      nlinarith [mul_le_mul_of_nonneg_left hstep (by positivity : (0:ℝ) ≤ 2 * Gj), hGj_nn',
+        hstep]
+
+/-- **The `appCc` diagonal product grid (the headline pointwise Moser-tame grid).**
+
+For a fixed coefficient operator field `C : SmoothCcTensor g b₀ s₀` (covariant source width `b₀`,
+target `s₀`) acting on a section `W : SmoothCcTensor g 0 b₀`, at every base point `x` and gradient
+order `j` the iterated covariant gradient of the contracted action `appCc C W` is bounded by the
+**diagonal product** of the `C`-jets (at contravariant valence `b₀`) and the `W`-jets:
+```
+rfns(∇^j (appCc C W))(x) ≤ Gdiag j · ∑_{i ≤ j} rfns(∇^i C)(x) · ∑_{l ≤ j − i} rfns(∇^l W)(x),
+```
+with `Gdiag j = (2 (n + 1))^j`, `n = Module.finrank ℝ E`.  This is the diagonal companion of the
+single-sum drop bound `appCc_iteratedCovGrad_drop_singleSum_le`: there the coefficient is collapsed
+into an `L^∞` window envelope, here it carries its own covariant-`L²` jets, so the apex top-order
+Ricci–DeTurck-arm leaf can feed it into the integrated Gagliardo–Nirenberg two-arm EXTREMES engine
+`exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le` with each arm carrying one factor's
+full covariant-`L²` jet scale against the other factor's order-`0` `C⁰` sup.
+
+The rank-`0` reading of the generic-valence diagonal grid
+`rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_le` through `appCcRS_zero_eq_appCc`. -/
+theorem appCc_iteratedCovGrad_diagonalProductGrid_le (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
+    (C : SmoothCcTensor g b₀ s₀) (W : SmoothCcTensor g 0 b₀) (j : ℕ) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 (s₀ + j) x
+        ((iteratedCovGrad (I := I) g 0 s₀ j (appCc (I := I) (M := M) g b₀ s₀ C W)).toSection x) ≤
+      appCcGdiag (E := E) j *
+        ∑ i ∈ Finset.range (j + 1),
+          riemannianFiberNormSq (I := I) (M := M) g b₀ (s₀ + i) x
+              ((iteratedCovGrad (I := I) g b₀ s₀ i C).toSection x) *
+            ∑ l ∈ Finset.range (j + 1 - i),
+              riemannianFiberNormSq (I := I) (M := M) g 0 (b₀ + l) x
+                ((iteratedCovGrad (I := I) g 0 b₀ l W).toSection x) := by
+  rw [← appCcRS_zero_eq_appCc (I := I) (M := M) g b₀ s₀ C W]
+  exact rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_le (I := I) (M := M) g j b₀ s₀ C W x
+
 end Connection
 end Integral
 end DifferentialGeometry
