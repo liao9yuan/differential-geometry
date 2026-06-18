@@ -5236,6 +5236,115 @@ theorem connDiff_g1g1'_order_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M
   rw [map_sub (inverseMetricSharpFib (I := I) g₁' x)]
   abel
 
+/-! ## The value-local order-`1` cocycle leg (the explicit `E` form)
+
+The order-`1` cocycle legs `(O.b)/(C.b)/(S₁)/(S₂)/(Q.b)` of the combined lower arm all reduce, through
+`connDiff_g1g1'_order_split`, to the single order-`1` building block
+`♯_{g₁'}(koszulCovGradCovec g₀ g₁ X Y x − koszulCovGradCovec g₀ g₁' X Y x)` — the `g₁'`-raise of the
+inter-endpoint Koszul-covector difference.  This block is genuinely VALUE-LOCAL: its `g₁'`-flat is the
+half symmetric Koszul combination of the BARE metric-difference covariant gradient
+`covGrad g₀ 0 2 (S − S')` (the order-`1` jet of `g₁ − g₁'`), a function of `(S − S')`'s first covariant
+gradient and the output values `X x`, `Y x` only — no `∇₀ Z`/`∇₀ Y` test-field artifacts.  This is the
+explicit `E` form the order-`1` R₁ representation consumes. -/
+
+set_option linter.unusedSectionVars false in
+/-- **The value-local explicit `E` covector of the order-`1` cocycle leg.**
+
+The `g₁'`-flat (`cotangentToDual`) of the order-`1` cocycle building block
+`♯_{g₁'}(koszulCovGradCovec g₀ g₁ X Y x − koszulCovGradCovec g₀ g₁' X Y x)`, evaluated on a vector `ζ`,
+is the half symmetric Koszul combination of the covariant gradient `covGrad g₀ 0 2 (S − S')` of the BARE
+metric-difference section `S − S'` (where `S` realises `g₁ − g₀` and `S'` realises `g₁' − g₀`, so `S − S'`
+realises `g₁ − g₁'`):
+```
+g₁'(♯_{g₁'}(K_{g₁,X,Y} − K_{g₁',X,Y}), ζ)
+  = ½ (covGrad(S−S')(X, Y, ζ) + covGrad(S−S')(Y, X, ζ) − covGrad(S−S')(ζ, X, Y)).
+```
+The right-hand side is manifestly VALUE-LOCAL: each `covGradEval` term reads the unit-evaluated covariant
+gradient `covGrad g₀ 0 2 (S − S')` on the values `X x`, `Y x`, `ζ` only.  This is the explicit `E` form
+(its `g₁'`-flat) the order-`1` cocycle legs `(O.b)/(C.b)/(S₁)/(S₂)/(Q.b)` each consume after the
+`connDiff_g1g1'_order_split` telescoping; it decouples the order-`1` R₁ representation from the order-`0`
+inverse-metric-difference residue.
+
+Route: the sharp un-pairs against the `g₁'`-flat (`inverseMetricSharpFib_inner`); the Koszul-covector
+difference's flat is the difference of the two endpoint half-Koszul evaluations
+(`koszulCovGradCovec_dual_apply_covGrad` at `S` and at `S'`); and `covGrad_sub` collapses
+`covGrad(S) − covGrad(S')` to `covGrad(S − S')`. -/
+theorem order1CocycleLeg_flat_eq_explicit
+    (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (S S' : SmoothCcTensor g₀ 0 2)
+    (hbil : ∀ (b : M) (u w : TangentSpace I b),
+      ccTensorBilin (I := I) g₀ S b u w = g₁.inner b u w - g₀.inner b u w)
+    (hbil' : ∀ (b : M) (u w : TangentSpace I b),
+      ccTensorBilin (I := I) g₀ S' b u w = g₁'.inner b u w - g₀.inner b u w)
+    (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (ζ : TangentSpace I x) :
+    g₁'.inner x
+        (inverseMetricSharpFib (I := I) g₁' x
+          (koszulCovGradCovec (I := I) (M := M) g₀ g₁ X Y x
+            - koszulCovGradCovec (I := I) (M := M) g₀ g₁' X Y x)) ζ =
+      (1 / 2 : ℝ) *
+        (covGradEval (I := I) (M := M) g₀ (S - S')
+            (⟨smoothExtensionTangent (I := I) x (X x), smoothExtensionTangent_contMDiff (I := I) x (X x)⟩)
+            (⟨smoothExtensionTangent (I := I) x (Y x), smoothExtensionTangent_contMDiff (I := I) x (Y x)⟩)
+            (⟨smoothExtensionTangent (I := I) x ζ, smoothExtensionTangent_contMDiff (I := I) x ζ⟩) x
+          + covGradEval (I := I) (M := M) g₀ (S - S')
+              (⟨smoothExtensionTangent (I := I) x (Y x), smoothExtensionTangent_contMDiff (I := I) x (Y x)⟩)
+              (⟨smoothExtensionTangent (I := I) x (X x), smoothExtensionTangent_contMDiff (I := I) x (X x)⟩)
+              (⟨smoothExtensionTangent (I := I) x ζ, smoothExtensionTangent_contMDiff (I := I) x ζ⟩) x
+          - covGradEval (I := I) (M := M) g₀ (S - S')
+              (⟨smoothExtensionTangent (I := I) x ζ, smoothExtensionTangent_contMDiff (I := I) x ζ⟩)
+              (⟨smoothExtensionTangent (I := I) x (X x), smoothExtensionTangent_contMDiff (I := I) x (X x)⟩)
+              (⟨smoothExtensionTangent (I := I) x (Y x), smoothExtensionTangent_contMDiff (I := I) x (Y x)⟩)
+              x) := by
+  classical
+  set Xe : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    ⟨smoothExtensionTangent (I := I) x (X x), smoothExtensionTangent_contMDiff (I := I) x (X x)⟩ with hXe
+  set Ye : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    ⟨smoothExtensionTangent (I := I) x (Y x), smoothExtensionTangent_contMDiff (I := I) x (Y x)⟩ with hYe
+  set Ze : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
+    ⟨smoothExtensionTangent (I := I) x ζ, smoothExtensionTangent_contMDiff (I := I) x ζ⟩ with hZe
+  have hXex : Xe x = X x := smoothExtensionTangent_eq (I := I) x (X x)
+  have hYex : Ye x = Y x := smoothExtensionTangent_eq (I := I) x (Y x)
+  have hZex : Ze x = ζ := smoothExtensionTangent_eq (I := I) x ζ
+  -- The sharp un-pairs through `g₁'`; the Koszul-covector difference's flat is the difference of flats.
+  rw [inverseMetricSharpFib_inner (I := I) g₁' x
+        (koszulCovGradCovec (I := I) (M := M) g₀ g₁ X Y x
+          - koszulCovGradCovec (I := I) (M := M) g₀ g₁' X Y x) ζ,
+      cotangentToDualLinear_apply,
+      show cotangentToDual (I := I)
+            (koszulCovGradCovec (I := I) (M := M) g₀ g₁ X Y x
+              - koszulCovGradCovec (I := I) (M := M) g₀ g₁' X Y x) ζ =
+          cotangentToDual (I := I) (koszulCovGradCovec (I := I) (M := M) g₀ g₁ X Y x) ζ
+            - cotangentToDual (I := I) (koszulCovGradCovec (I := I) (M := M) g₀ g₁' X Y x) ζ from by
+        rw [← cotangentToDualLinear_apply, ← cotangentToDualLinear_apply,
+            ← cotangentToDualLinear_apply, map_sub, LinearMap.sub_apply]]
+  -- The covariant-gradient evaluation of each endpoint Koszul covector against `ζ = Ze x`.
+  rw [show ζ = Ze x from hZex.symm]
+  rw [koszulCovGradCovec_dual_apply_covGrad (I := I) (M := M) g₀ g₁ S hbil X Y Ze x,
+      koszulCovGradCovec_dual_apply_covGrad (I := I) (M := M) g₀ g₁' S' hbil' X Y Ze x]
+  -- Realign the section-difference covariant gradient: `covGrad(S) − covGrad(S') = covGrad(S − S')`.
+  have hcg : ∀ (P Q R : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
+      covGradEval (I := I) (M := M) g₀ S P Q R x
+          - covGradEval (I := I) (M := M) g₀ S' P Q R x =
+        covGradEval (I := I) (M := M) g₀ (S - S') P Q R x := by
+    intro P Q R
+    simp only [covGradEval]
+    rw [covGrad_sub (I := I) (M := M) g₀ 0 2 S S', SmoothCcTensor.toSection_sub]
+    rw [ContMDiffSection.coe_sub, Pi.sub_apply, ContinuousLinearMap.sub_apply,
+        Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
+  -- `covGradEval` reads only the VALUES of its three field arguments (manifestly value-local).
+  have hval : ∀ (W : SmoothCcTensor g₀ 0 2)
+      (P₁ P₂ Q₁ Q₂ R₁ R₂ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
+      P₁ x = P₂ x → Q₁ x = Q₂ x → R₁ x = R₂ x →
+        covGradEval (I := I) (M := M) g₀ W P₁ Q₁ R₁ x =
+          covGradEval (I := I) (M := M) g₀ W P₂ Q₂ R₂ x := by
+    intro W P₁ P₂ Q₁ Q₂ R₁ R₂ hP hQ hR
+    simp only [covGradEval, hP, hQ, hR]
+  -- Switch the section-difference evaluations to the extension forms (`hval`), then combine paired
+  -- endpoint terms into section-difference ones (`hcg`) by linear arithmetic.
+  have eXY := (hcg X Y Ze).trans (hval (S - S') X Xe Y Ye Ze Ze hXex.symm hYex.symm rfl)
+  have eYX := (hcg Y X Ze).trans (hval (S - S') Y Ye X Xe Ze Ze hYex.symm hXex.symm rfl)
+  have eZXY := (hcg Ze X Y).trans (hval (S - S') Ze Ze X Xe Y Ye rfl hXex.symm hYex.symm)
+  linarith [eXY, eYX, eZXY]
+
 set_option linter.unusedSectionVars false in
 /-- **The combined lower-order arm connector of the Ricci-arm eval-matching (posited covariant bridge,
 MIXED order-`(0, 1)`).**
