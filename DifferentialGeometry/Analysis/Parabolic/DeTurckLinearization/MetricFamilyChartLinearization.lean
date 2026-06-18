@@ -925,7 +925,7 @@ not captured by the on-disk `chartRicciSecondOrderPart g₀ h`.  It is the chart
 the Christoffel first-order corrections (the `∂(G⁻¹)`-branch of the Christoffel
 linearization) plus the `s`-derivative of the `Γ·Γ` term — both genuinely first order in
 `h`. -/
-private def ricciDerivFirstOrderRemainder (g₀ : SmoothRiemannianMetric I M) (α : M)
+def ricciDerivFirstOrderRemainder (g₀ : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   (∑ j : Fin (Module.finrank ℝ E),
       (partialDeriv (E := E) j
@@ -970,7 +970,7 @@ private lemma chartChristoffel_differentiableAt
 point, `s ↦ chartRicciTensor (gfam s) α i k y` has derivative at `0` the on-disk
 second-order part `chartRicciSecondOrderPart g₀ h i k y` plus the
 `ricciDerivFirstOrderRemainder`. -/
-private lemma hasDerivAt_chartRicciTensor
+lemma hasDerivAt_chartRicciTensor
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
     {gfam : ℝ → SmoothRiemannianMetric I M}
     (hfam : IsMetricPerturbationFamily (I := I) g₀ α h gfam)
