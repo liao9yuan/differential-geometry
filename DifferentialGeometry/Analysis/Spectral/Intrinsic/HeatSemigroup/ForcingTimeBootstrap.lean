@@ -171,6 +171,60 @@ theorem deTurckForcing_smoothTimeCoordinateField
       (∀ t ∈ Set.Icc (0 : ℝ) T, ∀ i, (F t).coeff i = f i t) :=
   sorry
 
+/-- **DEEP PARABOLIC LEAF — the small-data Nemytskii spectral `+2` forcing-mass advance.**
+
+For the engine forcing `gforce =ᵐ deTurckSobolevNHa2 g₀ g_bg a ∘ (maxRegDuhamelSolField …)`
+about `g₀` (supercritical `2·finrank + 10 ≤ a`, zero initial datum), the all-order spatial
+forcing-mass summability is generated, two spatial orders at a time, by the genuine
+small-data parabolic interior smoothing of the engine forcing: **at every spatial order
+`d ≥ a`, forcing-mass summability at order `d` (the forcing in `L²([0,T]; Hᵈ)`) propagates
+up to forcing-mass summability at order `d + 2` (the forcing in `L²([0,T]; H^{d+2}})`).**
+
+The `+2` increment matches the genuine **second-order** derivative loss of the Ricci–DeTurck
+remainder (the quadratic inverse-Gram `C₂·∇²` arm): the AFFINE ball bound
+`deTurckRemainder_iteratedCovGradSum_ballBound` (window `d + 2`) gives
+`‖N(u)‖_{Hᵈ} ≲ 1 + ‖u‖_{H^{d+2}}`, NOT `≲ 1 + ‖u‖_{H^{d+1}}`.  This is why the advance is
+two orders, and why it is **not** the dead one-order coupling
+(`solFieldMass (d+1) → forcingMass d`) that `solFieldMass_summable_all` consumes: composed
+with the PROVEN `+2` Duhamel gain `solFieldMass_le_forcingMass`
+(`solFieldMass (c+2) ≤ (1+T)²·forcingMass c`), a `+2` loss matched by a `+2` gain has net
+order advance `0` and stalls.
+
+The honest mechanism is **same-order absorption**, not a ratcheting bootstrap: about the zero
+initial datum the realized solution field is fibre-small with one constant `δ < 1`
+(`realizedDeTurck_timeRegular_family`), the `(1 + ‖u‖_∞)` Moser factor is controlled by the
+supercritical embedding (`2·finrank + 10 ≤ a` forces the base order `a + 2 ≫ finrank/2`, held
+FIXED), and the short-time contraction `C·δ < 1` closes the self-referential order-`d`
+inequality `X ≤ background + θ·X` (`θ = C(1+T)² < 1`) to a finite order-`(d+2)` mass — the
+fixed point, not a net order race.  The constant background `N(0) = −2 Ric(g₀) + 𝓛_{W} g₀` is
+a fixed smooth section, hence lies in `H^∞` with spectral masses summable at every order, so
+the affine `1 +` does not break across-mode summability.  This is the genuine quasilinear
+small-data parabolic smoothing (Amann maximal regularity; Ladyzhenskaya–Solonnikov–Uraltseva;
+Lieberman), the coupling-agnostic spectral output feeding
+`realizedSol_forcing_continuousRepr_allOrderMass`.
+
+PINNED to the forcing by `hforce` (so it is not vacuous): `hforce` fixes `gforce` to the
+genuine second-order Nemytskii image of its own Duhamel solution field, and the hypothesis
+`Summable (forcingMass gforce d)` is satisfiable (it holds at `d = a` by the Plancherel
+identity `summable_weight_mul_norm_timeModeCoeff_sq`), so the implication is contentful, not
+vacuously true.  The smallness `δ < 1` is internal to the deep parabolic truth (the upstream
+zero-datum solution construction), not a free signature hypothesis.
+
+DEFERRED (honest `sorry`; consumers transitively depend on `sorryAx`). -/
+theorem deTurckForcing_forcingMass_summable_succ
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hforce : gforce =ᵐ[timeMeasure T]
+      (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (d : ℝ) (hda : (a : ℝ) ≤ d)
+    (hd : Summable (forcingMass (I := I) (M := M) gforce d)) :
+    Summable (forcingMass (I := I) (M := M) gforce (d + 2)) :=
+  sorry
+
 /-- **DEEP PARABOLIC LEAF (2/2) — all-order spatial forcing-mass summability of the
 Ricci–DeTurck engine forcing.**
 
@@ -195,7 +249,14 @@ statement under the same hypotheses.
 
 PINNED to the forcing by `hforce` (so it is not vacuous).
 
-DEFERRED (honest `sorry`; consumers transitively depend on `sorryAx`). -/
+PROVEN here as the spatial-order bootstrap over the genuine `+2` small-data advance: the base
+order `c = a` is the Plancherel identity `summable_weight_mul_norm_timeModeCoeff_sq` (the
+forcing lives in `L²([0,T]; Hᵃ)` by construction); the `+2` step
+`deTurckForcing_forcingMass_summable_succ` (the deep small-data Nemytskii spectral coupling)
+ratchets the summability up to every order `a + 2 n`; and the down-widening
+(`tensorSobolevWeight_mono`, the weight is `≥ 1` and the exponent larger) covers every real
+order `c ≥ 0` from a sufficiently high `a + 2 n ≥ c`.  Consumers transitively depend on the
+`sorryAx` of the deep `+2` advance. -/
 theorem deTurckForcing_allOrderForcingMass
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -205,8 +266,46 @@ theorem deTurckForcing_allOrderForcingMass
       (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t))) :
-    ∀ c : ℝ, 0 ≤ c → Summable (forcingMass (I := I) (M := M) gforce c) :=
-  sorry
+    ∀ c : ℝ, 0 ≤ c → Summable (forcingMass (I := I) (M := M) gforce c) := by
+  classical
+  have h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+  -- BASE (`c = a`): the forcing lives in `L²([0,T]; Hᵃ)`, so its order-`a` masses are
+  -- summable by the Plancherel identity (definitionally `forcingMass gforce a`).
+  have hbase : Summable (forcingMass (I := I) (M := M) gforce (a : ℝ)) :=
+    summable_weight_mul_norm_timeModeCoeff_sq (I := I) (M := M) gforce h_compact
+  -- The `+2` ratchet: forcing-mass summability at every order `a + 2 n`, `n : ℕ`, by the
+  -- deep small-data Nemytskii spectral advance applied `n` times above the base order `a`.
+  have hstep : ∀ n : ℕ,
+      Summable (forcingMass (I := I) (M := M) gforce ((a : ℝ) + 2 * n)) := by
+    intro n
+    induction n with
+    | zero => simpa using hbase
+    | succ k ih =>
+      have hda : (a : ℝ) ≤ (a : ℝ) + 2 * (k : ℝ) := by
+        have : (0 : ℝ) ≤ 2 * (k : ℝ) := by positivity
+        linarith
+      have hadv := deTurckForcing_forcingMass_summable_succ (I := I) (M := M) g₀ g_bg a
+        ha_super hT hT1 gforce hforce ((a : ℝ) + 2 * (k : ℝ)) hda ih
+      have hrw : (a : ℝ) + 2 * (k : ℝ) + 2 = (a : ℝ) + 2 * ((k : ℕ) + 1 : ℕ) := by
+        push_cast; ring
+      rwa [hrw] at hadv
+  -- ALL orders `c ≥ 0`: reach a high even-spaced order `a + 2 n ≥ c`, then DOWN-WIDEN — the
+  -- order-`c` masses are dominated mode by mode by the order-`(a + 2 n)` masses (`(1 + λᵢ)^c ≤
+  -- (1 + λᵢ)^{a + 2 n}`, the weight is `≥ 1` and the exponent larger), same `timeModeCoeff`.
+  intro c _hc
+  obtain ⟨n, hn⟩ := exists_nat_ge (c - a)
+  have hc_le : c ≤ (a : ℝ) + 2 * (n : ℝ) := by
+    have hnn : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
+    have : (n : ℝ) ≤ 2 * (n : ℝ) := by linarith
+    linarith
+  refine Summable.of_nonneg_of_le
+    (fun i => forcingMass_nonneg (I := I) (M := M) gforce c i)
+    (fun i => ?_) (hstep n)
+  have hwle : tensorSobolevWeight (I := I) (M := M) i c ≤
+      tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + 2 * (n : ℝ)) :=
+    tensorSobolevWeight_mono (I := I) (M := M) i hc_le
+  simpa only [forcingMass] using
+    mul_le_mul_of_nonneg_right hwle (sq_nonneg _)
 
 /-- **DEEP ANALYTIC INPUT — the `C∞`-in-time forcing coordinate family with all-order
 forcing-mass summability.**
