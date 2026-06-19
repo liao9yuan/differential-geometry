@@ -78,9 +78,10 @@ This is the single-field analogue of the order-`d` difference tower
 jet vanishes, so it lies in every ball, with `δ' = 0 < 1` and
 `gFibreOpBound g₀ (ccTensorBilinSymm g₀ 0) 0`).  The `1 +` affine factor is necessary because the
 genuine background remainder `N(0) = deTurckSmoothRemainder g₀ g_bg 0` does **not** vanish in general
-(a pure multiplicative form would force `g₀` to be a steady state).  This is the spatial-Sobolev
-estimate the existence-side spectral coupling `deTurckForcing_higherOrderRepresentative` should cite to
-lift the Nemytskii forcing into `Hᵈ`. -/
+(a pure multiplicative form would force `g₀` to be a steady state).  This is the `+2` spatial-Sobolev
+estimate (output order `d` controlled by the input jet window `d+2`) feeding the small-data forcing
+regularity of `deTurckForcing_smoothTimeCoordinateFamily`: the Nemytskii forcing lands in `Hᵈ` for
+solution data in `H^{d+2}`, the fibre-smallness contraction (`C·δ < 1`) bootstrapping the order. -/
 theorem deTurckRemainder_iteratedCovGradSum_ballBound
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (d : ℕ) (hda : a ≤ d) {R : ℝ} (hR : 0 ≤ R) :
