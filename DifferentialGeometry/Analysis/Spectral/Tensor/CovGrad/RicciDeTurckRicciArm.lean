@@ -693,6 +693,174 @@ theorem deriv_realizedDeTurckRicciChartSum_eq_rebased_chartSymbol
   rw [hfun]
   exact hsum.deriv
 
+/-- **The contracted chart Christoffel correction of the covariant Hessian, fibrewise at `x`.**
+
+The chart inverse-Gram (`g_s`-cometric) contraction over the two derivative slots `(j, l)` of the genuine
+chart **Christoffel correction** `tcr(∇₀² S) − ∂²(chartComp S)` exposed by the landed covariant-vs-chart
+Hessian decomposition `chartCovariantSecondGrad_chartHessian_sub_correction`: the `(Jdx 0)`-partial of the
+first-gradient Christoffel term `covDerivLowerOrderTerm g₀ 0 2 S` plus the outer zeroth-order Christoffel
+term `covDerivLowerOrderTerm g₀ 0 3 (covGrad g₀ 0 2 S)`, summed for `Jdx = ![j, l, i, k]` over `(j, l)`
+weighted by `chartInvGramOnE g_s x j l`, read at the base chart point.  This is the genuine `Γ·∂S +
+(∂Γ + ΓΓ)·S` correction that converts the chart second partial `∂²` into the covariant Hessian `∇₀²`; it
+is non-vacuous (nonzero on any curved metric where the Christoffel symbols of `g₀` do not vanish at `x`). -/
+private noncomputable def chartChristoffelCorrFib
+    (g₀ g_s : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
+    (i k : Fin (Module.finrank ℝ E)) : ℝ :=
+  ∑ j : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+    chartInvGramOnE (I := I) g_s x j l (extChartAt I x x) *
+      (DifferentialGeometry.Analysis.Laplacian.TensorRegularity.euclidPartial (E := E) j
+          (fun y' =>
+            DifferentialGeometry.Analysis.Laplacian.TensorRegularity.covDerivLowerOrderTerm
+              (I := I) (M := M) g₀ 0 2 S x l Fin.elim0 ![i, k] y')
+          (toEuclidean (extChartAt I x x))
+        + DifferentialGeometry.Analysis.Laplacian.TensorRegularity.covDerivLowerOrderTerm
+            (I := I) (M := M) g₀ 0 3
+            (covGrad (I := I) (M := M) g₀ 0 2 S) x j Fin.elim0 ![l, i, k]
+            (toEuclidean (extChartAt I x x)))
+
+/-- **(Posited deep covariant bridge 1 — the chart cometric double-trace read-off.)**
+
+The `chartModelBasis`-trace + cometric-double-trace read-off of the **chart components of the covariant
+Hessian** of the section difference `S = T − T'`.  For the re-base metric `g_s = realizedFam g₀ T T' s`,
+contracting the raw chart components of the second covariant gradient `∇₀² S = iteratedCovGrad g₀ 0 2 2 S`
+(read at the base chart point `extChartAt I x x`, with the two leading slots `(j, l)` the derivative
+directions and the two trailing slots `(i, k)` the original `(0, 2)`-tensor slots) against the chart
+inverse-Gram `G^{jl}(g_s)` in the leading two slots and against the tangent-frame reprs `repr(v 0)_k`,
+`repr(v 1)_i` in the trailing two slots equals the intrinsic order-`2` `unitModel` read-off arm of the
+fold: the cometric double-trace of `∇₀² S`,
+`∑ₖ unitModel g₀ 4 (∇₀² S) x (♯_{g_s} b^k, b_k, v)`, `♯_{g_s} = cometricLmodel g_s x`.
+
+This is the genuine **chart ↔ covariant read-off** of the cometric double-trace: it identifies the
+chart-component contraction `∑_{i,k,j,l} repr·repr·G^{jl}·(∇₀² S)_{jlik}` with the frame-free model
+cometric double-trace `∑ₖ unitModel g₀ 4 (∇₀² S) x (Fin.cons (♯ b^k) (Fin.cons b_k v))` (the
+`unitModel`↔`tensorChartComponentRaw` slot-evaluation identity together with the
+`cometricLmodel ↔ chartInvGramOnE` inverse-Gram-vs-cometric-raise read-off).  It genuinely constrains the
+chart contraction to reproduce the covariant double-trace value, so it is non-vacuous: a chart Hessian
+that vanishes where the covariant double-trace is nonzero fails it.  Posited here, to be discharged by
+recursing into the `unitModel`↔chart slot read-off and the inverse-Gram↔cometric raise. -/
+theorem chart_cometricDoubleTrace_readoff
+    (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) (x : M) (v : Fin 2 → TangentSpace I x) :
+    (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+          (∑ j : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+            chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x j l
+                (extChartAt I x x) *
+              tensorChartComponentRaw (I := I) (M := M) g₀ 0 (2 + 2)
+                (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) x Fin.elim0 ![j, l, i, k] x)) =
+      ∑ k : Fin (Module.finrank ℝ E),
+        unitModel (I := I) (M := M) g₀ 4
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) x
+          (Fin.cons (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.cometricLmodel
+              (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+              (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                ((Module.finBasis ℝ E).cDualBasis k)))
+            (Fin.cons ((Module.finBasis ℝ E) k) v)) :=
+  sorry
+
+/-- **(Posited deep covariant bridge 2 — the chart Hessian = covariant-Hessian read-off minus the chart
+Christoffel correction.)**
+
+The translation of the landed covariant-vs-chart Hessian decomposition
+`chartCovariantSecondGrad_chartHessian_sub_correction` (stated in `tensorChartComponentRaw`/`euclidPartial`/
+`covDerivLowerOrderTerm` form on `EuclN` coordinates) into the fold's `partialDeriv`/`chartInvGramOnE`/
+`chartModelBasis.repr` form at the base chart point `extChartAt I x x`.  For the realized section-difference
+chart velocity `h` (`IsRealizedChartVelocity`, which ties `h i k` to the raw chart `(i, k)`-component of the
+section difference `S = T − T'`), the chart inverse-Gram contraction of the **second chart partials**
+`∑_{j,l} G^{jl}(g_s)·∂_j∂_l h_{ik}` equals the chart inverse-Gram contraction of the **raw chart components
+of the covariant Hessian** `∑_{j,l} G^{jl}(g_s)·(∇₀² S)_{jlik}` minus the contracted chart **Christoffel
+correction** `chartChristoffelCorrFib`:
+```
+∑_{j,l} G^{jl}·∂_j∂_l h_{ik}
+  = (∑_{j,l} G^{jl}·(∇₀² S)_{jlik}) − chartChristoffelCorrFib g₀ g_s S x i k.
+```
+Here `chartChristoffelCorrFib` is the contracted `Γ·∂h + (∂Γ + ΓΓ)·h` correction the landed lemma exposes
+(the `(Jdx 0)`-partial of the first-gradient Christoffel term plus the outer zeroth-order Christoffel term,
+contracted by `G^{jl}` over the two derivative slots).  This is the genuine **chart Hessian → covariant
+Hessian** conversion: the chart second partial `∂²h` is the covariant Hessian chart component plus the
+connection's Christoffel corrections; subtracting the corrections recovers `∂²h`.  It genuinely constrains
+the chart Hessian to be the covariant Hessian read-off corrected by the on-disk Christoffel terms, so it is
+non-vacuous: on a curved metric where `chartChristoffelCorrFib ≠ 0` the bare covariant read-off does not
+equal `∂²h`.  Posited here, to be discharged by recursing into the coordinate translation of
+`chartCovariantSecondGrad_chartHessian_sub_correction` plus the `IsRealizedChartVelocity` realize-tie. -/
+theorem chartCovariantSecondGrad_partialDeriv_form
+    (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) (x : M) (h : ChartMetricPerturbation E)
+    (hh : IsRealizedChartVelocity (I := I) g₀ T T' hδ hδ' x s h)
+    (i k : Fin (Module.finrank ℝ E)) :
+    (∑ j : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+        chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x j l
+            (extChartAt I x x) *
+          partialDeriv (E := E) j (partialDeriv (E := E) l (h i k)) (extChartAt I x x)) =
+      (∑ j : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+          chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x j l
+              (extChartAt I x x) *
+            tensorChartComponentRaw (I := I) (M := M) g₀ 0 (2 + 2)
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) x Fin.elim0 ![j, l, i, k] x) -
+        chartChristoffelCorrFib (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
+          (T - T') x i k :=
+  sorry
+
+/-- **(Posited deep covariant bridge 3 — the chart Christoffel + remainder fold to the two-slot Ricci.)**
+
+The Bochner/Ricci-identity contraction folding the chart **Christoffel correction** `chartChristoffelCorrFib`
+(from bridge 2) together with the **three genuinely-lower-order chart remainders** of the gauge-cancelled
+chart form (`(−2)·chartRicciFirstOrderRemainder + chartDeTurckCorrFirstOrderRemainder +
+metricFamilyDeTurckRicciFirstOrderRemainder`, all on the realized chart velocity `h`) into the intrinsic
+**two-slot raised-Ricci** `unitModel` read-off pair of the fold.  Contracting against the tangent-frame
+reprs `repr(v 0)_k`, `repr(v 1)_i` (the correction enters with a **minus** sign, since the chart
+Hessian is the covariant Hessian *minus* the Christoffel correction, so the gauge-cancelled chart form is
+`∑G^{jl}∂²h + R = (∑G^{jl}∇₀²S) + (−Corr + R)`):
+```
+∑_{i,k} repr·repr·( −chartChristoffelCorrFib g₀ g_s S x i k
+                      + ((−2)·RicRem + DTRem + MFRem)_{ik} )
+  = unitModel g₀ 2 (∇₀⁰ S) x (update v 0 (Ric♯_{g_s} (v 0)))
+      + unitModel g₀ 2 (∇₀⁰ S) x (update v 1 (Ric♯_{g_s} (v 1))),
+```
+`S = T − T'`, `∇₀⁰ S = iteratedCovGrad g₀ 0 2 0 S`, `Ric♯_{g_s} = ricEndoRaisedFib g_s x`.
+
+This is the classical integrated Bochner–Weitzenböck step: the cometric trace of the curvature commutator
+`Δ_chart − Δ_∇` collapses Riemann → Ricci (the contracted-Christoffel-derivative identity), and the two
+endpoints of the contraction give the SYMMETRIC two-slot Ricci insertion with equal coefficients (one per
+slot, no independent Riemann term — the chart coordinate Laplacian, unlike Lichnerowicz, picks up only the
+contracted-Christoffel-derivative Ricci pieces).  It genuinely constrains the Christoffel-plus-remainder
+fold to reproduce the two-slot Ricci action, so it is non-vacuous: where the Ricci curvature of `g_s` is
+nonzero on `S`, the zero fold fails it.  Posited here, to be discharged by recursing into the
+contracted-Christoffel-derivative Ricci identity and the on-disk remainder closed forms. -/
+theorem chart_twoSlotRicci_readoff
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) (x : M) (h : ChartMetricPerturbation E)
+    (hh : IsRealizedChartVelocity (I := I) g₀ T T' hδ hδ' x s h)
+    (v : Fin 2 → TangentSpace I x) :
+    (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+          (-chartChristoffelCorrFib (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
+              (T - T') x i k +
+            ((-2 : ℝ) * DifferentialGeometry.PDE.DeTurck.RicciLinearization.chartRicciFirstOrderRemainder
+                  (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x) +
+                DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.chartDeTurckCorrFirstOrderRemainder
+                  (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x) +
+              DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.metricFamilyDeTurckRicciFirstOrderRemainder
+                (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x)))) =
+      unitModel (I := I) (M := M) g₀ 2
+          (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) x
+        (Function.update v 0
+          (ricEndoRaisedFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x (v 0))) +
+        unitModel (I := I) (M := M) g₀ 2
+            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) x
+          (Function.update v 1
+            (ricEndoRaisedFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x (v 1))) :=
+  sorry
+
 /-- **(Posited deep input — the pointwise covariant Lichnerowicz/Weitzenböck fold, in coordinate
 read-off form.)**
 
@@ -764,8 +932,52 @@ theorem rebased_chartSymbol_covariantWeitzenbockFold
           unitModel (I := I) (M := M) g₀ 2
               (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) x
             (Function.update v 1
-              (ricEndoRaisedFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x (v 1)))) :=
-  sorry
+              (ricEndoRaisedFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x (v 1)))) := by
+  classical
+  -- Step 1: per `(i, k)`, rewrite the chart Hessian via bridge 2
+  -- (`∑G^{jl}∂²h = ∑G^{jl}·(∇₀²S read-off) − Christoffel correction`) and regroup the inner term to
+  -- `(∑G^{jl}·(∇₀²S read-off)) + (−Christoffel correction + remainders)`, then distribute the double sum
+  -- into the principal half (order `2`) and the correction-plus-remainder half (order `0`).
+  have hinner : (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+          ((∑ j : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+              chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x j l
+                  (extChartAt I x x) *
+                partialDeriv (E := E) j (partialDeriv (E := E) l (h i k)) (extChartAt I x x)) +
+            ((-2 : ℝ) * DifferentialGeometry.PDE.DeTurck.RicciLinearization.chartRicciFirstOrderRemainder
+                  (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x) +
+                DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.chartDeTurckCorrFirstOrderRemainder
+                  (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x) +
+              DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.metricFamilyDeTurckRicciFirstOrderRemainder
+                (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x)))) =
+      (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+          ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+            (∑ j : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+              chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x j l
+                  (extChartAt I x x) *
+                tensorChartComponentRaw (I := I) (M := M) g₀ 0 (2 + 2)
+                  (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) x Fin.elim0 ![j, l, i, k] x)) +
+        (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+          ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+            (-chartChristoffelCorrFib (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
+                (T - T') x i k +
+              ((-2 : ℝ) * DifferentialGeometry.PDE.DeTurck.RicciLinearization.chartRicciFirstOrderRemainder
+                    (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x) +
+                  DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.chartDeTurckCorrFirstOrderRemainder
+                    (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x) +
+                DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.metricFamilyDeTurckRicciFirstOrderRemainder
+                  (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x)))) := by
+    rw [← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    rw [chartCovariantSecondGrad_partialDeriv_form (I := I) g₀ T T' hδ hδ' s x h hh i k]
+    ring
+  rw [hinner]
+  -- Step 2: the principal half is bridge 1 (the cometric double-trace read-off, order `2`); the
+  -- correction-plus-remainder half is bridge 3 (the two-slot Ricci read-off, order `0`).
+  rw [chart_cometricDoubleTrace_readoff (I := I) g₀ T T' hδ hδ' s x v,
+    chart_twoSlotRicci_readoff (I := I) g₀ g_bg T T' hδ hδ' s x h hh v]
 
 /-- **(The covariant Lichnerowicz/Weitzenböck bridge, gauge cancellation already factored out.)**
 
