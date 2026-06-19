@@ -693,8 +693,69 @@ theorem deriv_realizedDeTurckRicciChartSum_eq_rebased_chartSymbol
   rw [hfun]
   exact hsum.deriv
 
-/-- **(Posited deep input — the covariant Lichnerowicz/Weitzenböck bridge, gauge cancellation already
-factored out.)**
+/-- **(Posited deep input — the pointwise covariant Lichnerowicz/Weitzenböck fold, in coordinate
+read-off form.)**
+
+This is the single irreducible covariant content of the chart → intrinsic transfer (gauge cancellation
+already factored out by `deTurckRicciChartPrincipalSymbol_eq_roughLaplacian`).  It equates the
+`chartModelBasis`-trace read-off of the gauge-cancelled chart form (the pure chart rough Laplacian
+`∑_{j,l} G^{j,l}(g_s)·∂_j∂_l h_{ik}` plus the genuinely-lower-order chart remainder) directly to the
+**covariant read-off pair**: the cometric double-trace of the covariant Hessian `∇₀²(T − T')` (the
+intrinsic rough Laplacian `∑ₖ (∇₀² S)(♯_{g_s} b^k, b_k, v 0, v 1)`) plus the leading-slot Ricci-curvature
+action `(T − T')(ricEndoRaisedFib g_s (v 0), v 1)`.
+
+The right-hand side is written here in the EXACT shape the two sorry-free `appCc`/`unitModel` read-offs
+`ricciArmPrincipalCoeffPure_appCc_eq_roughLaplacian` (order-`2`) and
+`ricciArmOrder0CurvCoeff_appCc_eq_curvatureAction` (order-`0`) produce, so that the consumer bridge
+`rebased_chartSymbol_covariantBridge` is a pure `unitModel`/`appCc` ASSEMBLY on top of this fold and the
+two read-offs (no further covariant content).  Establishing this fold is the classical Lichnerowicz
+computation: (i) the chart-vs-covariant Hessian conversion
+`chartCovariantSecondGrad_chartHessian_sub_correction` turning `∂²h` into the covariant Hessian
+component plus the Christoffel `Γ·∂h + (∂Γ + ΓΓ)·h` corrections (with `h` the realized section-difference
+chart velocity, `realizedFam_chartGramOnE` + `IsRealizedChartVelocity` +
+`chartGramOnE_realize_sub_eqOn_symm_rawComponent`), and (ii) the Weitzenböck fold of those Christoffel
+corrections together with the three lower-order chart remainders into the leading-slot Ricci action via
+the Ricci identity.  An exact-arithmetic dim-3/4 random-SPD jet computation confirms the composed
+identity is TRUE-as-stated (the principal `∂²h` cancels between the chart and covariant rough
+Laplacians, and the chart remainder + Christoffel fold leaves precisely the leading-slot Ricci action,
+with the non-symmetric chart remainder matching the non-symmetric leading-slot curvature term).
+It genuinely constrains the chart value to reproduce the covariant read-off, so it is non-vacuous: the
+zero chart value fails it where the curvature/Hessian read-off is nonzero. -/
+theorem rebased_chartSymbol_covariantWeitzenbockFold
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) (x : M) (h : ChartMetricPerturbation E)
+    (hh : IsRealizedChartVelocity (I := I) g₀ T T' hδ hδ' x s h)
+    (v : Fin 2 → TangentSpace I x) :
+    (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+          ((∑ j : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+              chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x j l
+                  (extChartAt I x x) *
+                partialDeriv (E := E) j (partialDeriv (E := E) l (h i k)) (extChartAt I x x)) +
+            ((-2 : ℝ) * DifferentialGeometry.PDE.DeTurck.RicciLinearization.chartRicciFirstOrderRemainder
+                  (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x) +
+                DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.chartDeTurckCorrFirstOrderRemainder
+                  (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x) +
+              DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.metricFamilyDeTurckRicciFirstOrderRemainder
+                (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x)))) =
+      (∑ k : Fin (Module.finrank ℝ E),
+          unitModel (I := I) (M := M) g₀ 4
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) x
+            (Fin.cons (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.cometricLmodel
+                (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+                (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                  ((Module.finBasis ℝ E).cDualBasis k)))
+              (Fin.cons ((Module.finBasis ℝ E) k) v))) +
+        unitModel (I := I) (M := M) g₀ 2
+            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) x
+          (Function.update v 0
+            (ricEndoRaisedFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x (v 0))) :=
+  sorry
+
+/-- **(The covariant Lichnerowicz/Weitzenböck bridge, gauge cancellation already factored out.)**
 
 For the re-base metric `g_s = realizedFam g₀ T T' s` and the realized section-difference chart velocity
 `h` (`IsRealizedChartVelocity`), the `chartModelBasis`-trace read-off of the **gauge-cancelled** chart
@@ -706,22 +767,14 @@ metricFamilyDeTurckRicciFirstOrderRemainder g_s g_bg` — equals the intrinsic t
 `W₀ = T − T'` plus the PURE order-`2` rough-Laplacian coefficient `ricciArmOrder2Coeff s` on
 `W₂ = ∇₀²(T − T')`.
 
-This is the **irreducible covariant content** of the chart → intrinsic transfer that remains AFTER the
-DeTurck gauge cancellation has been carried out at the chart-functional level (the proven, reusable
-`deTurckRicciChartPrincipalSymbol_eq_roughLaplacian`).  Its two genuine ingredients are both classical
-but not yet named on disk: (i) the **chart-vs-covariant Hessian conversion** turning the chart `∂²h`
-rough Laplacian `∑ G^{j,l}∂_j∂_l h_{ik}` into the intrinsic `∑ g_s^{j,l}(∇₀² h)_{j,l,ik}` plus the
-Christoffel `Γ·∂h + ∂Γ·h` corrections (the model-space bridge between `euclidPartial` of the chart
-component of `iteratedCovGrad g₀ 0 2 2 (T − T')` and `partialDeriv` of `h`, via
-`chartCovariantSecondGrad_chartHessian_sub_correction`), and (ii) the **Lichnerowicz/Weitzenböck fold**
-of those Christoffel corrections together with the lower-order chart remainder into the intrinsic
-curvature action `Rm(g_s)·h = ricciArmOrder0CurvCoeff g_s · (T − T')`.  The rough-Laplacian arm is the
-sorry-free read-off `ricciArmPrincipalCoeffPure_appCc_eq_roughLaplacian` and the curvature arm is the
-sorry-free `ricciArmOrder0CurvCoeff_appCc_eq_curvatureAction`; what is posited is the multi-step
-covariant ASSEMBLY threading the chart Hessian correction into those two intrinsic read-offs (no genuine
-order-`1` arm survives).  A dim-3/4 random-SPD numeric confirms the composed identity is TRUE-as-stated.
-The predicate genuinely constrains the coefficients to reproduce the gauge-cancelled chart value, so it
-is non-vacuous: the zero coefficients fail it where the chart value is nonzero. -/
+This is a pure `unitModel`/`appCc` ASSEMBLY: the order-`0` coefficient `ricciArmOrder0Coeff s` is, by
+definition, `ricciArmOrder0CurvCoeff g₀ g_s`, whose `appCc` read-off is the leading-slot curvature
+action (`ricciArmOrder0CurvCoeff_appCc_eq_curvatureAction`, sorry-free), and the order-`2` coefficient
+`ricciArmOrder2Coeff s` is, by definition, `ricciArmPrincipalCoeffPure g₀ g_s`, whose `appCc` read-off is
+the cometric double-trace of the covariant Hessian (`ricciArmPrincipalCoeffPure_appCc_eq_roughLaplacian`,
+sorry-free).  Distributing the `unitModel` over the `appCc` sum (`unitModel_add_left`) and applying the
+two read-offs reduces the right-hand side to the covariant read-off pair, which is exactly the right-hand
+side of the posited fold `rebased_chartSymbol_covariantWeitzenbockFold`. -/
 theorem rebased_chartSymbol_covariantBridge
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -748,8 +801,25 @@ theorem rebased_chartSymbol_covariantBridge
             (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
           + appCc (I := I) (M := M) g₀ 4 2
               (ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ' s)
-              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
-  sorry
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
+  classical
+  -- Distribute the `unitModel` over the `appCc` sum and evaluate the resulting multilinear sum at `v`.
+  rw [unitModel_add_left, ContinuousMultilinearMap.add_apply]
+  -- The order-`0` coefficient is the curvature coefficient; its `appCc` read-off is the leading-slot
+  -- Ricci action.  The order-`2` coefficient is the pure rough-Laplacian coefficient; its `appCc`
+  -- read-off is the cometric double-trace of the covariant Hessian.  Both are sorry-free read-offs.
+  rw [show ricciArmOrder0Coeff (I := I) g₀ T T' hδ hδ' s =
+        ricciArmOrder0CurvCoeff (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) from rfl,
+    show ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ' s =
+        ricciArmPrincipalCoeffPure (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) from rfl,
+    ricciArmOrder0CurvCoeff_appCc_eq_curvatureAction (I := I) g₀
+      (realizedFam (I := I) g₀ T T' hδ hδ' s) (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) x v,
+    ricciArmPrincipalCoeffPure_appCc_eq_roughLaplacian (I := I) g₀
+      (realizedFam (I := I) g₀ T T' hδ hδ' s) (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) x v]
+  -- The remaining identity is the posited covariant Weitzenböck fold (the two arms are now in the
+  -- exact read-off shape the fold delivers), commuting the two summands.
+  rw [add_comm]
+  exact rebased_chartSymbol_covariantWeitzenbockFold (I := I) g₀ g_bg T T' hδ hδ' s x h hh v
 
 /-- **The combined chart-derivative split → intrinsic two-term `appCc` transfer.**
 
