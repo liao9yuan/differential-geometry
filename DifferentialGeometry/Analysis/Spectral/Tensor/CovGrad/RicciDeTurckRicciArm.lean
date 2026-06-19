@@ -977,6 +977,91 @@ private lemma chartHessian_symm_rawComponent_eq_covariantHessian_sub_christoffel
   simp only [Matrix.empty_eq] at hland ⊢
   linarith [hland]
 
+/-- **The raw chart `(0, s)`-component of a section at the chart centre is the `unitModel` read-off on
+the model-basis tuple.**  Composing the closed-form raw chart-component identity
+`tensorChartComponentRaw_eq_chartFrame` (the `r = 0` component is `S.toSection x` applied to the unit
+`(0, 0)`-tensor — `chartFrameBasisModel x x 0 Fin.elim0 = unitTensor x` — evaluated on the chart-frame
+tuple) with the chart-centre identity `chartBasisVecFiber_self` (`chartBasisVecFiber x m x =
+chartModelBasis E m`): at the chart centre `x` the raw chart component equals the model `unitModel` form
+evaluated on the model-basis tuple `m ↦ chartModelBasis E (Jdx m)`. -/
+private lemma tensorChartComponentRaw_self_eq_unitModel_chartModelBasis
+    (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g₀ 0 s) (x : M)
+    (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
+    tensorChartComponentRaw (I := I) (M := M) g₀ 0 s S x Fin.elim0 Jdx x =
+      unitModel (I := I) (M := M) g₀ s S x
+        (fun m : Fin s => (chartModelBasis E) (Jdx m)) := by
+  classical
+  have hx : x ∈ (chartAt H x).source := mem_chart_source H x
+  rw [tensorChartComponentRaw_eq_chartFrame (I := I) (M := M) g₀ 0 s S x hx Fin.elim0 Jdx]
+  -- For `r = 0`, the chart-frame basis element is the canonical `(0, 0)` unit `constOfIsEmpty 1`.
+  have hframe : chartFrameBasisModel (I := I) (M := M) x x 0 Fin.elim0 =
+      (ContinuousMultilinearMap.constOfIsEmpty ℝ
+        (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) := by
+    apply ContinuousMultilinearMap.ext
+    intro v
+    have h := chartFrameBasisModel_apply (I := I) (M := M) x x 0 Fin.elim0 v
+    rw [Fin.prod_univ_zero] at h
+    rw [ContinuousMultilinearMap.constOfIsEmpty_apply]
+    exact h
+  rw [hframe]
+  -- The section value at the unit recovers `unitModel` via the model-evaluation identity (an `rfl`-cast).
+  have hdirect :
+      ((S.toSection x
+            (ContinuousMultilinearMap.constOfIsEmpty ℝ
+              (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)) :
+          ContinuousMultilinearMap ℝ (fun _ : Fin s => TangentSpace I x) ℝ)
+        (fun m : Fin s => chartBasisVecFiber (I := I) x (Jdx m) x)) =
+      unitModel (I := I) (M := M) g₀ s S x
+        (fun m : Fin s => chartBasisVecFiber (I := I) x (Jdx m) x) := rfl
+  rw [hdirect]
+  congr 1
+  funext m
+  exact chartBasisVecFiber_self (I := I) x (Jdx m)
+
+/-- **(Posited deep sub-child of bridge 1 — the cometric double-trace ↔ chart-inverse-Gram read-off on
+the trailing-symmetric covariant Hessian.)**
+
+The isolated deep covariant content of bridge 1, after the mechanical unit read-off
+(`tensorChartComponentRaw_self_eq_unitModel_chartModelBasis`) has converted the raw chart components to
+the model `unitModel` form `Φ = unitModel g₀ 4 (∇₀²(symmS (T − T')))` evaluated on the model-basis
+tuples.  For the re-base metric `g_s = realizedFam g₀ T T' s`, contracting `Φ ![e_j, e_l, e_i, e_k]`
+against the chart inverse-Gram matrix `G^{jl}(g_s)` in the leading two slots and the tangent-frame reprs
+`repr(v 0)_k`, `repr(v 1)_i` in the trailing two slots equals the frame-free cometric double trace
+`∑ₖ Φ (♯_{g_s} b^k, b_k, v 0, v 1)`.
+
+This is the genuine cometric raise-and-trace fact, in two parts: (i) the cometric double trace
+`∑ₖ Φ(♯b^k, b_k, mm)` equals the chart-inverse-Gram contraction `∑_{j,l} G^{jl} Φ(e_j, e_l, mm)` (one
+inverse, `Φ : g_s⁻¹` on the leading pair — the `cometricLmodel ↔ chartInvGramMatrix` basis-change raise),
+and (ii) the trailing-slot symmetry of `Φ = unitModel g₀ 4 (∇₀²(symmS (T − T')))` (the trailing two
+slots are the original covariant tensor slots of the SYMMETRIC section `symmS (T − T')`, so feeding
+`(v 1, v 0)` — the order produced by the index sum `![j, l, i, k]` — equals feeding `(v 0, v 1)`).  The
+hypothesis `hΦ` pins `Φ` to the actual symmetric covariant Hessian, so the predicate is non-vacuous: it
+genuinely constrains the chart-inverse-Gram contraction to reproduce the frame-free cometric double trace
+of THIS tensor.  Posited here, to be discharged by recursing into the orthonormal-frame cometric trace
+(`cometric_dualTrace_eq_orthoFrame_diag`) with the inverse-Gram ↔ orthonormal-bivector identity and the
+trailing-slot symmetry of `∇₀²(symmS ·)`. -/
+theorem chart_cometricDoubleTrace_symmHessian_readoff
+    (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) (x : M) (v : Fin 2 → TangentSpace I x)
+    (Φ : Tensor0SBundle.Tensor0SModel 4 ℝ E)
+    (hΦ : Φ = unitModel (I := I) (M := M) g₀ 4
+      (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ (T - T'))) x) :
+    (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+          (∑ j : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+            chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x x j l *
+              Φ (fun m : Fin 4 => (chartModelBasis E) (![j, l, i, k] m)))) =
+      ∑ k : Fin (Module.finrank ℝ E),
+        Φ (Fin.cons (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.cometricLmodel
+              (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
+              (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                ((Module.finBasis ℝ E).cDualBasis k)))
+            (Fin.cons ((Module.finBasis ℝ E) k) v)) :=
+  sorry
+
 /-- **(Posited deep covariant bridge 1 — the chart cometric double-trace read-off.)**
 
 The `chartModelBasis`-trace + cometric-double-trace read-off of the **chart components of the covariant
@@ -1018,8 +1103,34 @@ theorem chart_cometricDoubleTrace_readoff
               (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
               (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
                 ((Module.finBasis ℝ E).cDualBasis k)))
-            (Fin.cons ((Module.finBasis ℝ E) k) v)) :=
-  sorry
+            (Fin.cons ((Module.finBasis ℝ E) k) v)) := by
+  classical
+  set gs : SmoothRiemannianMetric I M := realizedFam (I := I) g₀ T T' hδ hδ' s with hgs
+  set Φ : Tensor0SBundle.Tensor0SModel 4 ℝ E :=
+    unitModel (I := I) (M := M) g₀ 4
+      (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ (T - T'))) x with hΦ
+  -- Step 1: read off each raw chart component at the chart centre as the model `unitModel` form on the
+  -- model-basis tuple `m ↦ chartModelBasis E (![j,l,i,k] m)`.
+  have hread : ∀ j l i k : Fin (Module.finrank ℝ E),
+      tensorChartComponentRaw (I := I) (M := M) g₀ 0 (2 + 2)
+          (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ (T - T'))) x
+          Fin.elim0 ![j, l, i, k] x =
+        Φ (fun m : Fin 4 => (chartModelBasis E) (![j, l, i, k] m)) := by
+    intro j l i k
+    rw [hΦ]
+    exact tensorChartComponentRaw_self_eq_unitModel_chartModelBasis (I := I) (M := M) g₀ 4
+      (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ (T - T'))) x ![j, l, i, k]
+  -- Step 2: rewrite the centre `chartInvGramOnE` value as the chart inverse-Gram matrix at `x`.
+  have hbase : (extChartAt I x).symm (extChartAt I x x) = x :=
+    (extChartAt I x).left_inv (by rw [extChartAt_source]; exact mem_chart_source H x)
+  have hG : ∀ j l : Fin (Module.finrank ℝ E),
+      chartInvGramOnE (I := I) gs x j l (extChartAt I x x) =
+        chartInvGramMatrix (I := I) gs x x j l := by
+    intro j l
+    rw [chartInvGramOnE_def, hbase]
+  -- Reduce to the posited deep cometric double-trace read-off on the trailing-symmetric covariant Hessian.
+  simp only [hread, hG]
+  exact chart_cometricDoubleTrace_symmHessian_readoff (I := I) (M := M) g₀ T T' hδ hδ' s x v Φ hΦ
 
 /-- **(Covariant bridge 2 — the chart Hessian = covariant-Hessian read-off minus the chart
 Christoffel correction.)**
