@@ -17,6 +17,7 @@ import DifferentialGeometry.Analysis.Integration.L2.Hilbert.DenseSubset
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.PointwiseSpectralCoordinate
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SmallTimeSmoothness
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.PointwiseDeriv
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SeriesContinuous
 
 /-! # Jointly-smooth representative of the maximal-regularity DeTurck–Ricci solution
 
@@ -290,8 +291,8 @@ private theorem forcingSmoothCoordsRealize
     (measurableSet_Icc (a := (0 : ℝ)) (b := T))] with s hs
   rw [Set.IccExtend_of_mem hT.le _ hs, hF_coeff s hs i]
 
-/-- **DEEP ANALYTIC INPUT (horizon, continuity) — the order-`(a+2)` time-continuity of
-the realized smooth-representative field.**
+set_option linter.unusedVariables false in
+/-- **The order-`(a+2)` time-continuity of the realized smooth-representative field.**
 
 For a time-smooth spectral family whose order-`0` `L²` eigen-coordinates of the smooth
 representative `F t` are the `C∞`-in-time scalars `φ i t` on the closed slab (`hcoeff`),
@@ -301,16 +302,21 @@ the closed slab `Icc 0 T₁`.
 
 This is the **continuity analogue** of the joint chart-Gram interior regularity
 `realizedFamily_jointChartGramSmooth` (and of the order-`(a+2)` smallness horizon
-`realizedSol_solField_smallnessHorizon_Ha2`): both are the Weierstrass `M`-test on the
-order-`(a+2)` `Hˢ`-norm series `∑ᵢ tensorSobolevWeight i (a+2) · (φ i t)²` fed the
-continuity of each mode `φ i` and the single uniform-in-`t` summable square-majorant
-`hmodemass 0 (a+2)`.  The order-`(a+2)` topology is genuinely stronger than the `L²`
-topology of the file's existing `hF_cont`, so this is the genuine parabolic order-`(a+2)`
-time-regularity of the realized field, not a consequence of the `L²`-continuity.
+`realizedSol_solField_smallnessHorizon_Ha2`): it is the Weierstrass `M`-test on the
+order-`(a+2)` `Hˢ`-norm series `∑ᵢ (φ i t) • bᵢ` fed the continuity of each mode `φ i`
+and a single uniform-in-`t` summable majorant.  The order-`(a+2)` topology is genuinely
+stronger than the `L²` topology of the file's existing `hF_cont`, so this is the genuine
+parabolic order-`(a+2)` time-regularity of the realized field, not a consequence of the
+`L²`-continuity.
 
-DEFERRED (honest `sorry`; consumers transitively depend on `sorryAx`).  This is the
-order-`(a+2)` parabolic time-regularity content (the time-continuity of the realized field
-up to `t = 0` in the full quasilinear order). -/
+PROVEN sorry-free by `tensorHs_continuousOn_of_coeff_of_higher_mass`: the eigen-coordinate
+presentation `(smoothCcToTensorHs g₀ (a+2) (F t)).coeff i = φ i t` (`smoothCcToTensorHs_coeff`
++ `hcoeff`) exhibits the field as the basis series `∑ᵢ (φ i t) • bᵢ`; the per-mode norm
+`‖(φ i t) • bᵢ‖² = tensorSobolevWeight i (a+2) · (φ i t)²` is dominated, *uniformly in `t`*,
+by the geometric/arithmetic-mean split against the `(0, (a+2)+(weylSobolevExp+1))` instance of
+the all-order time-jet majorant `hmodemass` — the gain of `weylSobolevExp+1` spatial orders
+turns the Weyl-summable inverse weight (`tensorEigen_summable_negpow`) into a summable
+square-root majorant — and Mathlib's `continuousOn_tsum` closes the continuity. -/
 private theorem realizedSol_solField_continuousOn_Ha2
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T₁ : ℝ} (hT₁_pos : 0 < T₁)
     (F : ℝ → SmoothCcTensor g₀ 0 2)
@@ -328,8 +334,34 @@ private theorem realizedSol_solField_continuousOn_Ha2
               (iteratedDeriv k (φ i) t) ^ 2 ≤ Cmaj i) :
     ContinuousOn
       (fun t : ℝ => smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t))
-      (Set.Icc (0 : ℝ) T₁) :=
-  sorry
+      (Set.Icc (0 : ℝ) T₁) := by
+  classical
+  -- The order-`σ' = (a+2) + (weylSobolevExp + 1)` higher-order spectral mass, supplying a
+  -- summable square-majorant strictly above the Weyl summability threshold.
+  set σ : ℝ := (a : ℝ) + 2 with hσ_def
+  set p : ℝ := ((weylSobolevExp (E := E) : ℕ) : ℝ) + 1 with hp_def
+  set σ' : ℝ := σ + p with hσ'_def
+  obtain ⟨Cmaj, hCmaj_sum, hCmaj_le⟩ := hmodemass 0 σ' (by
+    rw [hσ'_def, hσ_def, hp_def]; positivity)
+  -- Drop the `iteratedDeriv 0` in the majorant.
+  have hmass : ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T₁,
+      tensorSobolevWeight (I := I) (M := M) i σ' * (φ i t) ^ 2 ≤ Cmaj i := by
+    intro i t ht
+    have := hCmaj_le i t ht
+    rwa [iteratedDeriv_zero] at this
+  -- The eigen-coordinate presentation of the embedded field.
+  have hcoeff' : ∀ t ∈ Set.Icc (0 : ℝ) T₁, ∀ i,
+      (smoothCcToTensorHs (I := I) (M := M) g₀ σ (F t)).coeff i = φ i t := by
+    intro t ht i
+    rw [smoothCcToTensorHs_coeff]
+    exact hcoeff t ht i
+  -- Apply the Weierstrass `M`-test for eigen-coordinate-presented `Hˢ`-families.
+  have hwthr : ((weylSobolevExp (E := E) : ℕ) : ℝ) < σ' - σ := by
+    rw [hσ'_def, hp_def]; ring_nf; linarith
+  exact tensorHs_continuousOn_of_coeff_of_higher_mass (I := I) (M := M) g₀ hwthr
+    (s := Set.Icc (0 : ℝ) T₁)
+    (fun t => smoothCcToTensorHs (I := I) (M := M) g₀ σ (F t)) φ hcoeff'
+    (fun i => (hφ_smooth i).continuous.continuousOn) hCmaj_sum hmass
 
 set_option linter.unusedVariables false in
 /-- **DEEP ANALYTIC INPUT (2/2a) — the pointwise forcing-coordinate identification.**
