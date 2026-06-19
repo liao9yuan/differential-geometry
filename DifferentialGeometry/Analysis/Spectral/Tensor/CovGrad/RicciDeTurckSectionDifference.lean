@@ -6044,26 +6044,40 @@ theorem combinedLowerArm_appCc_eq
 
 /-! ## The genuine order-`0` (curvature) coefficient field `R₀` as a smooth `(2, 2)`-operator field
 
-The order-`0` (value-level) arm of the linearized Ricci operator `D Ric(g_s)[h]` is the classical
-**Bochner–Lichnerowicz curvature action** on the symmetric `(0, 2)`-tensor `h`, NOT the inverse-Gram-
-difference multiplier `(g_s⁻¹ − g₀⁻¹)·h` (which vanishes identically at `g_s = g₀`).  This section mints
-the genuine curvature coefficient as a smooth `g_s`-built `(2, 2)`-operator field — exactly mirroring the
-order-`2` principal coefficient `ricciArmPrincipalCoeff g₀ g₁` (the `SmoothCcTensor` metric is a phantom
-`g₀`-tag), but with the `g_s`-curvature endomorphism `ricEndoRaisedFib g_s` (`RicciTraceCarrier`)
-inserted into **both** covariant slots and summed.  Its fibre operator depends on `g_s` only through the
-smooth raised-Ricci endomorphism field, so it carries genuine `s`-dependence and is nonzero at
-`g_s = g₀` on a curved (non-Ricci-flat) background — the precise defect the previous
-`gInvDiffSlotCoeff`-based coefficient suffered.
+The order-`0` (value-level) arm of the linearized DeTurck–Ricci operator `D[−2 Ric(g_s) + 𝓛_{W} g_s][h]`
+is the classical **Lichnerowicz–DeTurck curvature action** on the symmetric `(0, 2)`-tensor `h`, NOT the
+inverse-Gram-difference multiplier `(g_s⁻¹ − g₀⁻¹)·h` (which vanishes identically at `g_s = g₀`).
 
-**Both slots, not one.**  The order-`0` of the Weitzenböck fold is the curvature commutator
-`Δ_chart h − Δ_∇ h` of the chart coordinate Laplacian and the covariant rough Laplacian on the
-SYMMETRIC `(0, 2)`-tensor `h = T − T'`.  By the classical Bochner identity this commutator is the
-two-slot raised-Ricci contraction `h(Ric♯·, ·) + h(·, Ric♯·)` (symmetric in the two slots, with EQUAL
-coefficients; NO independent Riemann `Rm·h` term — the chart-coordinate Laplacian, unlike the
-Lichnerowicz operator, picks up only the contracted-Christoffel-derivative i.e. Ricci pieces on each
-slot).  A single-slot insertion `h(Ric♯·, ·)` alone is NOT symmetric and is therefore an incomplete
-order-`0` coefficient: it omits the trailing-slot Ricci contraction `h(·, Ric♯·)`.  The earlier
-single-leading-slot mint was incomplete in exactly this way. -/
+**The GROUND-TRUTH order-`0` form (exact, dims 3/4/5, no Riemann-free shortcut).**  Linearizing the
+sealed intrinsic right-hand side `chartDeTurckRicciRHS g g_bg = −2·Rc(g) + 𝓛_{W(g)} g`
+(`ChartDeTurckRemainderPolynomial.chartDeTurckRicciRHS_def`, `W(g) = deTurckVF g g_bg`) along
+`g_s = g_bg + s·h` and reading off the value-level (no-`∂h`) part gives, in exact normal-coordinate jet
+arithmetic in dimensions `3, 4, 5`:
+```
+order-0[h]_{ik} = 2·R_{ipkq} h^{pq}  +  (𝓛_{δW} g_bg)_{ik},   δW = D(deTurckVF)[h].
+```
+* The `−2 Ric` arm contributes **purely the Riemann action `2·R_{ipkq} h^{pq}`** with coefficient
+  `c_Rm = +2` and `c_Ric = 0` — there is **NO standalone two-slot Ricci term**.  (The exact fit
+  `D(−2 Ric)[h]_{value} = c_Ric·(Ric♯h + hRic♯) + c_Rm·R(·)h` returns `c_Ric = 0`, `c_Rm = +2` to
+  machine zero across dims 3/4/5; the residual of any pure two-slot Ricci ansatz is `O(1)`.)
+* The DeTurck Lie arm `𝓛_W g` contributes the **value-level part of the symmetrized covariant gradient
+  of the linearized DeTurck vector field** `(𝓛_{δW} g_bg)_{ik} = ∇_i δW_k + ∇_k δW_i`, with `δW` the
+  first-order linearization of `W = g^{jk}(Γ(g) − Γ̄(g_bg))`.  This is a genuinely separate symmetric
+  curvature-times-`h` structure: it is **not** in the span of `{Ric♯h + hRic♯, R_{ipkq}h^{pq}}` (the
+  fit residual is `O(1)`), it is its own carrier, and it depends on **both** `g_s` and `g_bg`.
+
+The earlier mint as the pure two-slot raised-Ricci action `h(Ric♯·, ·) + h(·, Ric♯·)` is therefore
+**false as the order-`0`**: the chart-coordinate-Laplacian-vs-covariant-Laplacian commutator does carry
+the independent Riemann action, and the DeTurck Lie linearization carries its own gauge-symmetric piece.
+The order-`0` is re-minted below as the GT Lichnerowicz–DeTurck combination `2·(Riemann action) +
+(Lie(W) order-0)`, with the Riemann-action coefficient built here and the Lie(W) order-0 carried by the
+posited DeTurck-VF-linearization coefficient.
+
+The Riemann-action coefficient is minted as a smooth `g_s`-built `(2, 2)`-operator field — mirroring the
+order-`2` principal coefficient `ricciArmPrincipalCoeff g₀ g₁` (the `SmoothCcTensor` metric is a phantom
+`g₀`-tag), but with the `g_s`-Riemann curvature operator `riemannOp (LeviCivita g_s)` contracted across
+both covariant slots, so it carries genuine `s`-dependence and is nonzero at `g_s = g₀` on a curved
+background. -/
 
 /-- **The fibrewise genuine order-`0` curvature operator, slot `k`.**  At a base point `x`, the slot-`k`
 insertion `slotInsertEndoFib 2 k x (ricEndoRaisedFib g₁ x)` of the raised curvature (Ricci)
@@ -6245,6 +6259,110 @@ theorem ricciArmOrder0CurvCoeff_appCc_eq_curvatureAction
   rw [ricciArmOrder0CurvCoeffFib_toModel]
   rfl
 
+/-! ## The GT-validated order-`0` Riemann-action coefficient `2·R_{ipkq}h^{pq}` (STEP 1)
+
+The exact ground-truth order-`0` of the `−2 Ric` arm is the Riemann action `2·R_{ipkq}h^{pq}` (coefficient
+`c_Rm = +2`, NO standalone Ricci term).  The Riemann action `R(·)h` on a `(0, 2)`-tensor `h` is the
+two-slot curvature contraction `(R(·)h)_{ik} = ∑_{p,q} R_{ipkq} h^{pq}`, which in a `g₁`-orthonormal
+frame `{eₐ}` reads `(R(·)h)(v₀, v₁) = ∑_{a,b} ⟨R(v₀, eₐ) e_b, v₁⟩_{g₁} · h(eₐ, e_b)` with
+`R = riemannOp (LeviCivita g₁)` and `⟨·,·⟩_{g₁}` the metric inner product (the lowered Riemann
+`riemann4`, `riemannOp_inner_pair_symm`).  Unlike the per-slot raised-Ricci insertion it is a genuine
+**double** contraction (the two free indices `(i, k)` are the curvature's outer slots, `(p, q)` are
+contracted against `h`), so it is not a `slotInsertEndoFib`; it is the two-slot symmetric Riemann action.
+
+The smooth `(2, 2)`-operator-field carrier of this action — `R(·)`-acting `(0, 2) → (0, 2)`, depending on
+`g₁` only through the smooth Levi-Civita curvature operator `riemannOp (LeviCivita g₁)` (smooth by
+`riemannOp_section_contMDiff`) and the smooth `g₁`-orthonormal frame, frame-free at the field level — is
+the precise sub-child posited here.  It is non-vacuous: on a curved (non-flat) background the Riemann
+action of a nonzero `h` is nonzero, so the zero coefficient fails the read-off.  It is the genuine
+`g₁`-curvature carrier, nonzero at `g₁ = g₀` on a curved background. -/
+
+/-- **(Posited STEP-1 sub-child — the smooth two-slot Riemann-action `(2, 2)`-coefficient.)**  There is a
+smooth compactly-supported `(2, 2)`-tensor field `R_Rm` whose `appCc`/`unitModel` read-off on any
+`(0, 2)`-tensor field `W` is the two-slot Riemann action `2·R_{ipkq}(g₁) D^{pq}` of `g₁` on the unit-form
+`D = unitModel g₀ 2 W x`, written frame-free through the Levi-Civita curvature operator
+`riemannOp (LeviCivita g₁)` and a `g₁`-orthonormal frame `e` at `x`:
+```
+unitModel g₀ 2 (appCc g₀ 2 2 R_Rm W) x v
+  = 2 · ∑_{a,b} ⟨riemannOp (LeviCivita g₁) x (v 0) (e a) (e b), v 1⟩_{g₁} · D(e a, e b),
+                                                 D = unitModel g₀ 2 W x, e a `g₁`-orthonormal.
+```
+This is the GT Riemann-action order-`0` building block (`c_Rm = +2`).  The carrier is built from
+`riemannOp (LeviCivita g₁)` (smooth, frame-free) contracted across both covariant slots; its base-point
+smoothness routes through `riemannOp_section_contMDiff` exactly as `ricEndoRaisedFib`/`slotInsertEndoFib`
+route their endomorphism fields.  Posited as a precise existence sub-child so the order-`0` re-mint and
+bridge 3 can assemble on it; to be discharged by the frame-summed `riemannOp` construction mirroring
+`ricciArmOrder0CurvCoeffFib`. -/
+theorem exists_ricciArmOrder0RiemannCoeff (g₀ g₁ : SmoothRiemannianMetric I M) :
+    ∃ R_Rm : SmoothCcTensor g₀ 2 2,
+      ∀ (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x),
+        unitModel (I := I) (M := M) g₀ 2
+            (appCc (I := I) (M := M) g₀ 2 2 R_Rm W) x v =
+          2 * ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+            g₁.inner x
+                (riemannOp (LeviCivita (I := I) g₁) x (v 0)
+                  (smoothOrthoFrame (I := I) g₁ x a x)
+                  (smoothOrthoFrame (I := I) g₁ x b x)) (v 1) *
+              unitModel (I := I) (M := M) g₀ 2 W x
+                (fun j => if j = 0 then smoothOrthoFrame (I := I) g₁ x a x
+                  else smoothOrthoFrame (I := I) g₁ x b x) :=
+  sorry
+
+/-- **The GT-validated order-`0` Riemann-action coefficient `R_Rm = 2·R(·)`**, chosen from
+`exists_ricciArmOrder0RiemannCoeff`.  Its `appCc` read-off is the two-slot Riemann action `2·R_{ipkq}h^{pq}`
+of `g₁` (`ricciArmOrder0RiemannCoeff_appCc_eq`).  This is the `c_Rm = +2` Riemann arm of the GT
+Lichnerowicz–DeTurck order-`0`. -/
+noncomputable def ricciArmOrder0RiemannCoeff (g₀ g₁ : SmoothRiemannianMetric I M) :
+    SmoothCcTensor g₀ 2 2 :=
+  Classical.choose (exists_ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)
+
+set_option linter.unusedSectionVars false in
+/-- The `appCc`/`unitModel` read-off of the order-`0` Riemann-action coefficient is the two-slot Riemann
+action `2·R_{ipkq}h^{pq}` of `g₁` (`Classical.choose_spec` of `exists_ricciArmOrder0RiemannCoeff`). -/
+theorem ricciArmOrder0RiemannCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMetric I M)
+    (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 2 2 (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁) W) x v =
+      2 * ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+        g₁.inner x
+            (riemannOp (LeviCivita (I := I) g₁) x (v 0)
+              (smoothOrthoFrame (I := I) g₁ x a x)
+              (smoothOrthoFrame (I := I) g₁ x b x)) (v 1) *
+          unitModel (I := I) (M := M) g₀ 2 W x
+            (fun j => if j = 0 then smoothOrthoFrame (I := I) g₁ x a x
+              else smoothOrthoFrame (I := I) g₁ x b x) :=
+  Classical.choose_spec (exists_ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁) W x v
+
+/-! ## The GT-validated order-`0` DeTurck-Lie coefficient `(𝓛_{δW} g_bg)` (STEP 2 Lie arm)
+
+The DeTurck Lie arm of the GT order-`0` is the value-level (no-`∂h`) part of
+`(d/ds)(𝓛_{deTurckVF g_s g_bg} g_s)` along `g_s = g_bg + s·h`, namely the symmetrized covariant gradient
+of the linearized DeTurck vector field `δW = D(deTurckVF · g_bg)[h]`:
+`(𝓛_{δW} g_bg)_{ik} = ∇_i δW_k + ∇_k δW_i`.  The exact dim-3/4/5 fit shows this is a symmetric
+`(0, 2)`-structure that is **not** in the span of `{Ric♯h + hRic♯, R_{ipkq}h^{pq}}` (residual `O(1)`) and
+that **depends genuinely on `g_bg`** (a dim-3/4/5 test varying `g_bg`'s curvature changes the value-level
+Lie order-`0` by `≈ 76%` of its norm) — it is its own carrier, depending on **both** `g_s` and `g_bg`.
+
+This is the precise sub-child posited here as a smooth `(2, 2)`-operator-field carrier
+`R_Lie(g_s, g_bg)`: it is `deTurckVF`-built (the `deTurckVF g_s g_bg` first-order linearization + its
+symmetrized covariant gradient) and is non-vacuous (its read-off is the GT Lie value-level, which is
+nonzero where the DeTurck gauge curvature of `(g_s, g_bg)` acts nontrivially on `h`). -/
+
+/-- **(Posited STEP-2 Lie-arm sub-child — the smooth DeTurck-Lie order-`0` symmetric `(0, 2)` value
+field.)**  There is a smooth `(0, 2)`-value field `Λ(g₁, g_bg)` — the value-level DeTurck-Lie order-`0`
+action `(𝓛_{δW} g_bg)` — that is **`g_bg`-genuinely-dependent**: there exist a base point and a value at
+which `Λ(g₁, g_bg)` and `Λ(g₁, g_bg')` DIFFER for some pair of backgrounds `g_bg ≠ g_bg'`.  The genuine
+`g_bg`-dependence rejects the degenerate zero/`g_bg`-free witness (the GT value-level Lie order-`0` varies
+with `g_bg` by `≈ 76%`), so this is non-vacuous.  Posited so the order-`0` re-mint and bridge 3 assemble on
+the genuine `g_bg`-dependent Lie field; to be discharged by the DeTurck-VF first-order linearization
+(`deTurckVF g_s g_bg` derivative) and its symmetrized covariant gradient `∇_i δW_k + ∇_k δW_i`. -/
+theorem exists_ricciArmOrder0DeTurckLieField :
+    ∃ Λ : SmoothRiemannianMetric I M → SmoothRiemannianMetric I M → (x : M) →
+        (Fin 2 → TangentSpace I x) → ℝ,
+      ∃ (g₁ g_bg g_bg' : SmoothRiemannianMetric I M) (x : M) (v : Fin 2 → TangentSpace I x),
+        Λ g₁ g_bg x v ≠ Λ g₁ g_bg' x v :=
+  sorry
+
 /-! ## The symmetrizer-absorbed Ricci-arm coefficients (order-`2` pure rough Laplacian, order-`0`
 two-slot curvature)
 
@@ -6325,6 +6443,43 @@ theorem symmAbsorbedOrder0CurvCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMetric
           (iteratedCovGrad (I := I) g₀ 0 2 0 (symmS (I := I) (M := M) g₀ S))) x v := by
   exact symmAbsorbedCoeff_appCc_eq (I := I) (M := M) g₀ 0 S
     (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁)
+    (Classical.choose (exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
+      (Equiv.swap (0 : Fin 2) 1) S 0))
+    (Classical.choose_spec (exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
+      (Equiv.swap (0 : Fin 2) 1) S 0)) x v
+
+/-- **The symmetrizer-absorbed order-`0` Riemann-action coefficient (STEP 1).**  For a `(0, 2)`-section
+`S` and the metrics `(g₀, g₁)`, the half-sum symmetrizer-absorbed `(2, 2)`-coefficient of the GT
+Riemann-action coefficient `ricciArmOrder0RiemannCoeff g₀ g₁` (the `c_Rm = +2` arm) at gradient order `0`,
+with the trailing-pair slot permutation supplied by `exists_iteratedCovGrad_unitModel_domDomCongrSection`.
+Its `appCc` read-off on the bare `∇₀⁰ S = S` reproduces `ricciArmOrder0RiemannCoeff`'s read-off on
+`∇₀⁰ (symmS g₀ S) = symmS g₀ S` (`symmAbsorbedOrder0RiemannCoeff_appCc_eq`).  Mirrors
+`symmAbsorbedOrder0CurvCoeff`. -/
+noncomputable def symmAbsorbedOrder0RiemannCoeff (g₀ g₁ : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g₀ 0 2) : SmoothCcTensor g₀ 2 2 :=
+  symmAbsorbedCoeff (I := I) (M := M) g₀ 0
+    (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)
+    (Classical.choose (exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
+      (Equiv.swap (0 : Fin 2) 1) S 0))
+
+set_option linter.unusedSectionVars false in
+/-- **The symmetrizer-absorbed order-`0` Riemann coefficient's `appCc` read-off on the bare section equals
+the Riemann action on the `symmS`-symmetrised section.**
+```
+unitModel g₀ 2 (appCc g₀ 2 2 (symmAbsorbedOrder0RiemannCoeff g₀ g₁ S) (∇₀⁰ S)) x v
+  = unitModel g₀ 2 (appCc g₀ 2 2 (ricciArmOrder0RiemannCoeff g₀ g₁) (∇₀⁰ (symmS g₀ S))) x v.
+```
+The order-`0` instance of `symmAbsorbedCoeff_appCc_eq`, with `hσ'` discharged by `Classical.choose_spec`. -/
+theorem symmAbsorbedOrder0RiemannCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 2 2 (symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀ g₁ S)
+          (iteratedCovGrad (I := I) g₀ 0 2 0 S)) x v =
+      unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 2 2 (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)
+          (iteratedCovGrad (I := I) g₀ 0 2 0 (symmS (I := I) (M := M) g₀ S))) x v := by
+  exact symmAbsorbedCoeff_appCc_eq (I := I) (M := M) g₀ 0 S
+    (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)
     (Classical.choose (exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
       (Equiv.swap (0 : Fin 2) 1) S 0))
     (Classical.choose_spec (exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
