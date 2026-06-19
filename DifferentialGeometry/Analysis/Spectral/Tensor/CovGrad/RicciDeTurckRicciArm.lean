@@ -1173,29 +1173,173 @@ private theorem ricciArm_scalarBilin_ortho_diag_eq_chartInvGram_trace
   congr 1
   rw [← ricciArm_sum_famCoord_eq_chartInvGram (I := I) g x F hF m n]
 
-/-- **(Posited precise sub-child of bridge 1 — the trailing-pair symmetry of the symmetric covariant
-Hessian read-off.)**
+/-- The unit-evaluated `(0, 2)` model fibre of `S` on `![u, w]` is the extracted bilinear form
+`ccTensorBilin g₀ S b u w` (a local re-derivation of the cross-file private bridge). -/
+private lemma unitModel_eq_ccBilin_local
+    (g₀ : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
+    unitModel (I := I) (M := M) g₀ 2 S b ![u, w] = ccTensorBilin (I := I) g₀ S b u w := by
+  rw [ccTensorBilin_apply (I := I) g₀ S b u w, ccTensorModel, ccTensorMultilinear_apply, unitModel]
+  rfl
 
-The covariant Hessian read-off `Φ = unitModel g₀ 4 (∇₀²(symmS (T − T'))) x` is symmetric in its TWO
-TRAILING slots: the slots `2, 3` of the order-`4` model tensor are the original `(0, 2)`-tensor slots of
-the SYMMETRIC section `symmS (T − T')`, and the covariant gradient `∇₀²` only prepends two derivative
-slots — the Christoffel corrections `−Γ·S − Γ·S` preserve the trailing symmetry of a symmetric `S` at
-every order.  Hence feeding the trailing pair in either order gives the same value:
-`Φ ![a, b, u, w] = Φ ![a, b, w, u]`.
+/-- **The unit fibre of `symmS g₀ S` is invariant under the slot-`{0, 1}` reindexing.**  Since the
+extracted bilinear form of `symmS g₀ S` is the symmetrised form `ccTensorBilinSymm g₀ S`
+(`ccTensorBilin_symmS`), which is symmetric (`ccTensorBilinSymm_symm`), swapping the two model slots
+leaves the unit-evaluated `(0, 2)`-form unchanged. -/
+private lemma unitModel_symmS_swap01
+    (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M) :
+    unitModel (I := I) (M := M) g₀ 2 (symmS (I := I) (M := M) g₀ S) x =
+      ContinuousMultilinearMap.domDomCongr (Equiv.swap (0 : Fin 2) 1)
+        (unitModel (I := I) (M := M) g₀ 2 (symmS (I := I) (M := M) g₀ S) x) := by
+  apply ContinuousMultilinearMap.ext
+  intro m
+  rw [ContinuousMultilinearMap.domDomCongr_apply]
+  have key : ∀ a b : E, unitModel (I := I) (M := M) g₀ 2 (symmS (I := I) (M := M) g₀ S) x ![a, b]
+      = ccTensorBilin (I := I) g₀ (symmS (I := I) (M := M) g₀ S) x a b :=
+    fun a b => unitModel_eq_ccBilin_local (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ S) x a b
+  have hmR : (fun i => m (Equiv.swap (0 : Fin 2) 1 i)) = ![m 1, m 0] := by
+    funext k; fin_cases k
+    · change m ((Equiv.swap (0 : Fin 2) 1) 0) = m 1; rw [Equiv.swap_apply_left]
+    · change m ((Equiv.swap (0 : Fin 2) 1) 1) = m 0; rw [Equiv.swap_apply_right]
+  rw [hmR]
+  conv_lhs => rw [show m = ![m 0, m 1] from by funext k; fin_cases k <;> rfl]
+  rw [key, key, ccTensorBilin_symmS, ccTensorBilin_symmS, ccTensorBilinSymm_symm]
 
-This is the classical fact that the iterated covariant gradient of a symmetric `(0, 2)`-tensor is
-symmetric in its trailing pair.  It genuinely constrains the read-off (a non-symmetric Hessian fails it),
-so it is non-vacuous.  Posited here as the single precise sub-child; to be discharged by the explicit
-trailing-slot-swap specialisation of the iterated-covariant-gradient slot-permutation naturality
-(`exists_iteratedCovGrad_unit_toModel_domDomCongr`, with `σ = swap 0 1` carried to `swap 2 3`). -/
+/-- **The unit-evaluated covariant gradient, one order, in public form.**  Reads the leftmost
+(gradient) slot of `unitModel g (s + 1) (covGrad g 0 s W)` as the unit-evaluated directional covariant
+derivative, evaluated on the tail.  A re-derivation of the cross-file private `unitModel_covGrad_apply`
+through the public `covGrad_toSection_apply_eval` (its right-hand side is the private `covDerivUnitModel`
+unfolded, kept here in `toModel (tensorCovDerivAt …)` form so no private name is referenced). -/
+private lemma unitModel_covGrad_eval_pub
+    (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (W : SmoothCcTensor g 0 s) (x : M) (v : Fin (s + 1) → TangentSpace I x) :
+    unitModel (I := I) (M := M) g (s + 1) (covGrad (I := I) (M := M) g 0 s W) x v =
+      Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+          tensorCovDerivAt (I := I) (M := M) g 0 s W x (v 0)) (unitTensor (I := I) (M := M) x))
+        (Matrix.vecTail v) := by
+  rw [unitModel]
+  exact covGrad_toSection_apply_eval (I := I) (M := M) g 0 s W x (unitTensor (I := I) (M := M) x) v
+
+/-- **The directional covariant-derivative slot-`σ` naturality, in unit-unfolded form.**  Identical to
+`tensorCovDerivAt_unit_toModel_domDomCongr_of_section`, with the private `covDerivUnitModel` unfolded to
+its definition `toModel (tensorCovDerivAt …)` (the two are defeq, so the public lemma discharges it
+directly). -/
+private lemma covDerivUnit_unfold_natural
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (σ : Equiv.Perm (Fin s))
+    (S S' : SmoothCcTensor g 0 s)
+    (hSS' : ∀ y : M, unitModel (I := I) (M := M) g s S' y =
+      ContinuousMultilinearMap.domDomCongr σ (unitModel (I := I) (M := M) g s S y))
+    (x : M) (v : TangentSpace I x) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+          tensorCovDerivAt (I := I) (M := M) g 0 s S' x v) (unitTensor (I := I) (M := M) x)) =
+      ContinuousMultilinearMap.domDomCongr σ
+        (Tensor0SSpace.toModel
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
+            tensorCovDerivAt (I := I) (M := M) g 0 s S x v) (unitTensor (I := I) (M := M) x))) :=
+  tensorCovDerivAt_unit_toModel_domDomCongr_of_section (I := I) (M := M) g s σ S S' hSS' x v
+
+/-- **One covariant-gradient order carries a slot reindexing `σ` to `decomposeFin.symm (0, σ)`.**  If
+the unit fibres of two sections are related by the constant slot reindexing `σ`, then their first
+covariant gradients are related by the reindexing that fixes the new leading gradient slot and acts as
+`σ` on the rest.  The single-order CMM specialisation of the iterated naturality, with the explicit
+permutation tracked (so the trailing-slot swap can be read off below). -/
+private lemma unitModel_covGrad_domDomCongr_step
+    (g : SmoothRiemannianMetric I M) (s : ℕ) (σ : Equiv.Perm (Fin s))
+    (S S' : SmoothCcTensor g 0 s)
+    (hSS' : ∀ y : M, unitModel (I := I) (M := M) g s S' y =
+      ContinuousMultilinearMap.domDomCongr σ (unitModel (I := I) (M := M) g s S y))
+    (x : M) :
+    unitModel (I := I) (M := M) g (s + 1) (covGrad (I := I) (M := M) g 0 s S') x =
+      ContinuousMultilinearMap.domDomCongr (Equiv.Perm.decomposeFin.symm (0, σ))
+        (unitModel (I := I) (M := M) g (s + 1) (covGrad (I := I) (M := M) g 0 s S) x) := by
+  apply ContinuousMultilinearMap.ext
+  intro v
+  rw [unitModel_covGrad_eval_pub (I := I) (M := M) g s S' x v,
+    ContinuousMultilinearMap.domDomCongr_apply,
+    unitModel_covGrad_eval_pub (I := I) (M := M) g s S x
+      (fun k => v ((Equiv.Perm.decomposeFin.symm (0, σ)) k)),
+    covDerivUnit_unfold_natural (I := I) (M := M) g s σ S S' hSS' x (v 0),
+    ContinuousMultilinearMap.domDomCongr_apply]
+  have hzero : v ((Equiv.Perm.decomposeFin.symm (0, σ)) (0 : Fin (s + 1))) = v 0 := by
+    rw [Equiv.Perm.decomposeFin_symm_apply_zero]
+  have htail :
+      (Matrix.vecTail fun k : Fin (s + 1) => v ((Equiv.Perm.decomposeFin.symm (0, σ)) k)) =
+        fun j : Fin s => Matrix.vecTail v (σ j) := by
+    funext j
+    change v ((Equiv.Perm.decomposeFin.symm (0, σ)) (Fin.succ j)) = v (Fin.succ (σ j))
+    rw [Equiv.Perm.decomposeFin_symm_apply_succ, Equiv.swap_self, Equiv.refl_apply]
+  rw [hzero, htail]
+
+/-- **The second covariant gradient of `symmS g₀ S` is invariant under the trailing-pair swap.**  Two
+applications of the single-order step `unitModel_covGrad_domDomCongr_step` carry the order-`0` slot-`{0,1}`
+symmetry of `symmS g₀ S` (`unitModel_symmS_swap01`) up to the order-`2` relation, with the explicit
+permutation `decomposeFin.symm (0, decomposeFin.symm (0, swap 0 1)) = swap 2 3` on `Fin 4` (the two new
+leading gradient slots are fixed, the original trailing pair carries the swap). -/
+private lemma unitModel_symmHessian_swap23
+    (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M) :
+    unitModel (I := I) (M := M) g₀ 4
+        (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ S)) x =
+      ContinuousMultilinearMap.domDomCongr (Equiv.swap (2 : Fin 4) 3)
+        (unitModel (I := I) (M := M) g₀ 4
+          (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ S)) x) := by
+  set Ssy : SmoothCcTensor g₀ 0 2 := symmS (I := I) (M := M) g₀ S with hSsy
+  have h1 : ∀ y : M, unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 Ssy) y =
+      ContinuousMultilinearMap.domDomCongr
+          (Equiv.Perm.decomposeFin.symm (0, Equiv.swap (0 : Fin 2) 1))
+        (unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 Ssy) y) :=
+    fun y => unitModel_covGrad_domDomCongr_step (I := I) (M := M) g₀ 2 (Equiv.swap (0 : Fin 2) 1)
+      Ssy Ssy (fun z => unitModel_symmS_swap01 (I := I) (M := M) g₀ S z) y
+  have h2 := unitModel_covGrad_domDomCongr_step (I := I) (M := M) g₀ 3
+      (Equiv.Perm.decomposeFin.symm (0, Equiv.swap (0 : Fin 2) 1))
+      (covGrad (I := I) (M := M) g₀ 0 2 Ssy) (covGrad (I := I) (M := M) g₀ 0 2 Ssy) h1 x
+  have hperm : (Equiv.Perm.decomposeFin.symm
+        (0, Equiv.Perm.decomposeFin.symm (0, Equiv.swap (0 : Fin 2) 1)))
+      = Equiv.swap (2 : Fin 4) 3 := by decide
+  calc unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 Ssy) x
+      = unitModel (I := I) (M := M) g₀ 4
+          (covGrad (I := I) (M := M) g₀ 0 3 (covGrad (I := I) (M := M) g₀ 0 2 Ssy)) x := rfl
+    _ = ContinuousMultilinearMap.domDomCongr
+          (Equiv.Perm.decomposeFin.symm
+            (0, Equiv.Perm.decomposeFin.symm (0, Equiv.swap (0 : Fin 2) 1)))
+          (unitModel (I := I) (M := M) g₀ 4
+            (covGrad (I := I) (M := M) g₀ 0 3 (covGrad (I := I) (M := M) g₀ 0 2 Ssy)) x) := h2
+    _ = ContinuousMultilinearMap.domDomCongr (Equiv.swap (2 : Fin 4) 3)
+          (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 Ssy) x) := by
+        rw [hperm]; rfl
+
+/-- **(The trailing-pair symmetry of the symmetric covariant Hessian read-off.)**
+
+The covariant Hessian read-off `Φ = unitModel g₀ 4 (∇₀²(symmS S)) x` is symmetric in its TWO TRAILING
+slots: the slots `2, 3` of the order-`4` model tensor are the original `(0, 2)`-tensor slots of the
+SYMMETRIC section `symmS S`, and the covariant gradient `∇₀²` only prepends two derivative slots, so the
+order-`0` trailing-slot symmetry of `symmS S` is carried up unchanged.  Hence feeding the trailing pair
+in either order gives the same value: `Φ ![a, b, u, w] = Φ ![a, b, w, u]`.
+
+Proved from `unitModel_symmHessian_swap23` (the explicit `swap 2 3`-invariance, two applications of the
+single-order covariant-gradient naturality on top of the order-`0` slot-symmetry of `symmS S`) by
+reading off the trailing-pair swap on the model tuple. -/
 theorem symmHessian_trailingPair_symm
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
     (a b u w : E) :
     unitModel (I := I) (M := M) g₀ 4
         (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ S)) x ![a, b, u, w] =
       unitModel (I := I) (M := M) g₀ 4
-        (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ S)) x ![a, b, w, u] :=
-  sorry
+        (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ S)) x ![a, b, w, u] := by
+  conv_rhs => rw [unitModel_symmHessian_swap23 (I := I) (M := M) g₀ S x]
+  rw [ContinuousMultilinearMap.domDomCongr_apply]
+  congr 1
+  funext k
+  fin_cases k
+  · change _ = ![a, b, w, u] ((Equiv.swap (2 : Fin 4) 3) 0)
+    rw [show (Equiv.swap (2 : Fin 4) 3) 0 = 0 from by decide]; rfl
+  · change _ = ![a, b, w, u] ((Equiv.swap (2 : Fin 4) 3) 1)
+    rw [show (Equiv.swap (2 : Fin 4) 3) 1 = 1 from by decide]; rfl
+  · change _ = ![a, b, w, u] ((Equiv.swap (2 : Fin 4) 3) 2)
+    rw [show (Equiv.swap (2 : Fin 4) 3) 2 = 3 from by decide]; rfl
+  · change _ = ![a, b, w, u] ((Equiv.swap (2 : Fin 4) 3) 3)
+    rw [show (Equiv.swap (2 : Fin 4) 3) 3 = 2 from by decide]; rfl
 
 /-- **(Posited deep sub-child of bridge 1 — the cometric double-trace ↔ chart-inverse-Gram read-off on
 the trailing-symmetric covariant Hessian.)**
