@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.MaxRegInteriorTimeSmoothing
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ForcingCoordinateTimeRegularity
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Plancherel
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.TimeL2InterpolationLimit
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
@@ -65,11 +66,19 @@ forcing-pinned honest input (PINNED to `hforce`, so neither is vacuous):
 * `deTurckForcing_smoothTimeCoordinateField` — the **`C∞`-in-time forcing coordinate field**
   with the all-order time-jet spectral-mass majorant on the closed slab `[0,T]` and an
   everywhere representative `F` realizing the smooth coordinates (`(F t).coeff i = f i t`).
-  This is the genuine quasilinear parabolic interior-time smoothing of the engine forcing
-  carried up to the smooth (zero) initial datum: the Nemytskii forcing is `C∞`-in-time on
-  `[0,T]` because the datum is smooth and the maximal-regularity solution is `C∞`-up-to-`0`,
-  and its time-jets couple all modes (the nonlinear coupling), so this control does not
-  reduce to the per-mode linear-heat ODE recursion.
+  This is now itself GLUE over the single genuinely-irreducible deep parabolic leaf
+  `deTurckForcing_smoothCoordinate_aeTimeJet` (`ForcingCoordinateTimeRegularity.lean`),
+  which supplies the smooth coordinate field `f`, the all-order time-jet majorant, and the
+  per-mode a.e. agreement `(fun t => (gforce t).coeff i) =ᵐ f i`; the everywhere `Hᵃ`
+  representative `F` is ASSEMBLED here from `f` (its slab coordinates are `f`, summable
+  across modes by the `j = 0, τ = a` instance of the majorant), the `=ᵐ` representative is
+  the per-mode a.e. agreement combined across the countable eigen-index, and the coordinate
+  realization is by construction.  The deep leaf is the genuine quasilinear parabolic
+  interior-time smoothing of the engine forcing carried up to the smooth (zero) initial
+  datum: the Nemytskii forcing is `C∞`-in-time on `[0,T]` because the datum is smooth and
+  the maximal-regularity solution is `C∞`-up-to-`0`, and its time-jets couple all modes (the
+  nonlinear coupling), so this control does not reduce to the per-mode linear-heat ODE
+  recursion nor to the integrated-in-time spatial forcing mass.
 
 * `deTurckForcing_allOrderForcingMass` — the **all-order spatial forcing-mass summability**
   `∀ c ≥ 0, Summable (forcingMass gforce c)`.  This is the `+2`/small-data interior-smoothing
@@ -84,8 +93,12 @@ come straight from `deTurckForcing_smoothTimeCoordinateField`; the per-mode coor
 continuity of `F` is the smoothness of `f` transported across the coordinate realization;
 and the all-order forcing-mass summability is `deTurckForcing_allOrderForcingMass`.
 
-Both leaves are honest `sorry`s (the deep parabolic prerequisites); consumers transitively
-depend on their `sorryAx`.
+`deTurckForcing_smoothTimeCoordinateField` is now sorry-free GLUE over the single deep leaf
+`deTurckForcing_smoothCoordinate_aeTimeJet`; `deTurckForcing_allOrderForcingMass` is
+sorry-free GLUE over the deep contractive factored bound
+`deTurckForcing_smallness_factored_spectral_remainder_bound`.  Both rest on a single deep
+parabolic prerequisite each (the honest `sorry`s); consumers transitively depend on their
+`sorryAx`.
 -/
 
 noncomputable section
@@ -149,7 +162,17 @@ PINNED to the forcing by `hforce` (so it is not vacuous): the conjuncts `gforce 
 itself fixed by `hforce` to the genuine second-order Nemytskii image of its own Duhamel
 solution field.
 
-DEFERRED (honest `sorry`; consumers transitively depend on `sorryAx`). -/
+GLUE over the single genuinely-irreducible deep parabolic leaf
+`deTurckForcing_smoothCoordinate_aeTimeJet` (`ForcingCoordinateTimeRegularity.lean`): that
+leaf supplies the `C∞`-in-time per-mode coordinate field `f`, the all-order time-jet
+spectral-mass majorant, and the per-mode a.e. coordinate agreement
+`(fun t => (gforce t).coeff i) =ᵐ f i`.  The everywhere `Hᵃ`-representative `F` is then
+ASSEMBLED here from `f` (its slab coordinates are `f`, summable across modes by the
+`j = 0, τ = a` instance of the majorant), the `=ᵐ` representative is the per-mode a.e.
+agreement combined across the countable eigen-index (`MeasureTheory.ae_all_iff`) and
+`tensorHs.ext`, and the coordinate realization is by construction.  The smoothness and the
+majorant pass straight through.  Consumers transitively depend on the `sorryAx` of that one
+deep leaf. -/
 theorem deTurckForcing_smoothTimeCoordinateField
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -168,8 +191,44 @@ theorem deTurckForcing_smoothTimeCoordinateField
             tensorSobolevWeight (I := I) (M := M) i τ *
                 (iteratedDeriv j (f i) t) ^ 2 ≤ B i) ∧
       (⇑gforce =ᵐ[timeMeasure T] F) ∧
-      (∀ t ∈ Set.Icc (0 : ℝ) T, ∀ i, (F t).coeff i = f i t) :=
-  sorry
+      (∀ t ∈ Set.Icc (0 : ℝ) T, ∀ i, (F t).coeff i = f i t) := by
+  classical
+  obtain ⟨f, hf_smooth, hf_mass, hf_ae⟩ :=
+    deTurckForcing_smoothCoordinate_aeTimeJet (I := I) (M := M) g₀ g_bg a ha_super hT hT1
+      gforce hforce
+  haveI : Countable (TensorEigenIdx (I := I) (M := M) g₀ 0 2) :=
+    countable_tensorEigenIdx (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+  obtain ⟨B, hB_sum, hB_le⟩ := hf_mass 0 (a : ℝ) (Nat.cast_nonneg a)
+  -- The slab summability of the order-`a` weighted coordinate squares, uniform in `t`,
+  -- from the `j = 0, τ = a` time-jet majorant (`iteratedDeriv 0 (f i) = f i`).
+  have hslab_sum : ∀ t ∈ Set.Icc (0 : ℝ) T,
+      Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (a : ℝ) * (f i t) ^ 2) := by
+    intro t ht
+    refine Summable.of_nonneg_of_le (fun i => ?_) (fun i => ?_) hB_sum
+    · exact mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i (a : ℝ)) (sq_nonneg _)
+    · have := hB_le i t ht
+      rwa [iteratedDeriv_zero] at this
+  -- The everywhere `Hᵃ`-representative `F`: on the slab its `i`-th coordinate is the smooth
+  -- `f i`; off the slab it is `0` (irrelevant to `=ᵐ[timeMeasure T]`).
+  set F : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ) :=
+    fun t => if ht : t ∈ Set.Icc (0 : ℝ) T then
+      ⟨fun i => f i t, hslab_sum t ht⟩ else 0 with hF_def
+  have hF_coeff : ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ i, (F t).coeff i = f i t := by
+    intro t ht i
+    simp only [hF_def, dif_pos ht]
+  refine ⟨f, F, hf_smooth, hf_mass, ?_, hF_coeff⟩
+  -- The representative `=ᵐ`: the per-mode a.e. agreements `(gforce ·).coeff i =ᵐ f i`
+  -- combine across the countable eigen-index to a single a.e.-in-`t` joint agreement, then
+  -- `tensorHs.ext` upgrades it to `gforce t = F t` a.e.
+  have hjoint : ∀ᵐ t ∂timeMeasure T, ∀ i, (gforce t).coeff i = f i t :=
+    (MeasureTheory.ae_all_iff).2 hf_ae
+  have hrestrict : ∀ᵐ t ∂timeMeasure T, t ∈ Set.Icc (0 : ℝ) T := by
+    rw [show timeMeasure T = MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) T) from rfl]
+    exact MeasureTheory.ae_restrict_mem measurableSet_Icc
+  filter_upwards [hjoint, hrestrict] with t ht_eq ht_mem
+  refine tensorHs.ext ?_
+  funext i
+  rw [ht_eq i, hF_coeff t ht_mem i]
 
 /-- **DEEP PARABOLIC LEAF — the small-data fibre-smallness factored Nemytskii spectral
 remainder bound (the genuine `θ < 1` contraction).**
