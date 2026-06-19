@@ -15,6 +15,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralPo
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.DenseSubset
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.PointwiseSpectralCoordinate
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SmallTimeSmoothness
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.PointwiseDeriv
 
 /-! # Jointly-smooth representative of the maximal-regularity DeTurck–Ricci solution
@@ -852,12 +853,23 @@ element admits an `H^a`-bounded high-frequency spike train accumulating at `t = 
 has unbounded `H^{a+2}` norm arbitrarily close to `0`, so the bound would be FALSE — the
 Duhamel structure is load-bearing.
 
-DEFERRED (honest `sorry`; consumers transitively depend on `sorryAx`).  The remaining
-content is the classical parabolic order-`(a+2)` interior-time smoothing of the Duhamel
-solution up to `t = 0` (Amann maximal regularity / Ladyzhenskaya–Solonnikov–Uraltseva), the
-order-`(a+2)` analogue of the order-`a` time-continuity `timeH1.continuousOn_toFun`. -/
+This is now PROVEN sorry-free by reduction to the per-mode-convolution small-time norm
+foundation `tensorHs_smallTime_norm_le_of_perModeConv`: the smooth forcing eigen-coordinate
+family `f` (from `forcingSmoothCoordsRealize`) realizes the solution-value coordinate as the
+per-mode Duhamel convolution `tensorL2Coeff (tensorHsToL2 (u.toFun t)) i = perModeConv λᵢ
+(f i) t`, the order-`(a+2)` spectral-mass majorant is the `(j, τ) = (0, a+2)` instance of the
+all-order time-jet majorant supplied with those coordinates, and the pinned smooth
+representative `W = smoothCcToTensorHs g₀ (a+2) S` (with `W.coeff i = perModeConv λᵢ (f i) t`
+via `smoothCcToTensorHs_coeff` + the order-`a` pin) realizes the spectral element whose norm
+the foundation bounds by `R₀` on the small-time horizon.  The remaining deferred content is
+isolated in `forcingSmoothCoordsRealize`'s forcing-time-bootstrap inputs (the classical
+parabolic order-`(a+2)` interior-time smoothing of the Duhamel forcing, Amann maximal
+regularity / Ladyzhenskaya–Solonnikov–Uraltseva); consumers transitively depend only on
+those inputs' `sorryAx`. -/
 private theorem realizedSol_solField_smallnessHorizon_Ha2
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
@@ -874,8 +886,40 @@ private theorem realizedSol_solField_smallnessHorizon_Ha2
           tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
             (Nat.cast_nonneg a) (timeH1.toFun u t) →
-          ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) S‖ ≤ R₀ :=
-  sorry
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) S‖ ≤ R₀ := by
+  classical
+  -- The smooth forcing eigen-coordinate family `f` realizing the solution value, with each
+  -- `f i` `C∞`, the all-order time-jet mass majorant `hf_mass`, and the coordinate identity
+  -- `tensorL2Coeff (tensorHsToL2 (u.toFun t)) i = perModeConv λᵢ (f i) t` on `[0,T]`.
+  obtain ⟨f, hf_smooth, hf_mass, hf_id⟩ :=
+    forcingSmoothCoordsRealize (I := I) (M := M) g₀ g_bg a ha_super hT hT1 u gforce
+      hduh hforce htrace
+  -- The order-`(a+2)` mass majorant: the `(j, τ) = (0, a+2)` instance of `hf_mass`.
+  obtain ⟨B, hB_sum, hB_le⟩ := hf_mass 0 ((a : ℝ) + 2) (by positivity)
+  -- Apply the per-mode-convolution small-time norm foundation at base order `a`.
+  obtain ⟨d₂, hd₂_pos, hd₂_le, hbound⟩ :=
+    tensorHs_smallTime_norm_le_of_perModeConv (I := I) (M := M)
+      (g := g₀) (r := 0) (s := 2) (a := (a : ℝ)) hT f
+      (fun i => (hf_smooth i).continuous)
+      (B := B) hB_sum
+      (fun i s hs => by
+        have h := hB_le i s hs
+        rwa [iteratedDeriv_zero] at h)
+      hR₀
+  refine ⟨d₂, hd₂_pos, hd₂_le, ?_⟩
+  intro t ht S hS
+  have ht_icc : t ∈ Set.Icc (0 : ℝ) T := ⟨ht.1, le_trans ht.2 hd₂_le⟩
+  -- The pinned smooth representative as an order-`(a+2)` spectral element.
+  set W : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) :=
+    smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) S with hW_def
+  -- Its coordinates are the per-mode Duhamel convolutions of the smooth forcing family.
+  have hWcoeff : ∀ i, W.coeff i =
+      perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (f i) t := by
+    intro i
+    rw [hW_def, smoothCcToTensorHs_coeff, hS, ← hf_id t ht_icc i]
+  -- Conclude from the foundation's bound.
+  have := hbound t ht W hWcoeff
+  rwa [hW_def] at this
 
 set_option linter.unusedVariables false in
 /-- **Jointly-smooth representative of the maximal-regularity DeTurck–Ricci solution
@@ -1049,8 +1093,8 @@ theorem maxreg_solution_jointly_smooth_representative
       (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a (by omega))).1
   -- The order-`(a+2)` smallness horizon `d₂` (deep parabolic input).
   obtain ⟨d₂, hd₂_pos, hd₂_le, hd₂⟩ :=
-    realizedSol_solField_smallnessHorizon_Ha2 (I := I) (M := M) g₀ g_bg a hT hT1 u gforce
-      hduh hforce htrace hR₀_pos
+    realizedSol_solField_smallnessHorizon_Ha2 (I := I) (M := M) g₀ g_bg a ha_super hT hT1 u
+      gforce hduh hforce htrace hR₀_pos
   set T₁ : ℝ := min (min T (d / 2)) d₂ with hT₁_def
   have hT₁_pos : 0 < T₁ := lt_min (lt_min hT (by positivity)) hd₂_pos
   have hT₁_le : T₁ ≤ T := le_trans (min_le_left _ _) (min_le_left _ _)
