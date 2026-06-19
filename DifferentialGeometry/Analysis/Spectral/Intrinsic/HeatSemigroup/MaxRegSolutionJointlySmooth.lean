@@ -155,7 +155,11 @@ spatial order by two per time-derivative.  The convolution identity tying these 
 solution value is the *separate* glue lemma `forcingSmoothCoordsRealize` below, which
 consumes only the representative data and the public every-time spectral-coordinate bridge.
 
-DEFERRED (honest `sorry`; consumers transitively depend on `sorryAx`). -/
+Proven as glue over the accepted deferred existence-side forcing-regularity inputs
+`deTurckForcing_smoothTimeCoordinateFamily` and `deTurckForcing_firstOrderCoupling`
+(`ForcingTimeBootstrap.lean`, the realize-side's posited md4-side regularity leaves, the
+analogue of `realizedSol_forcing_continuousRepr_allOrderMass`); its body is `sorry`-free and
+consumers transitively depend only on those inputs' `sorryAx`. -/
 private theorem forcingSmoothTimeCoords
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
