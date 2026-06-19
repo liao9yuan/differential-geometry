@@ -2357,6 +2357,44 @@ private theorem jointTotalSpace_smul {d : ℕ} {S : Set ℝ} (a : ℝ)
   · exact ((e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_smul
       a (A p₀)).symm
 
+/-- Pointwise addition of two joint `(r, s)`-operator total-space maps over base `M` is jointly
+`C^∞` on the slab.  The `TensorRSModel` analog of `jointTotalSpace_add`, worked through the
+within-slab total-space characterization, adding trivialized fibre coordinates (a vector-bundle
+operation). -/
+private theorem jointTotalSpaceRS_add {r s : ℕ} {S : Set ℝ}
+    (A B : ∀ p : M × ℝ, Tensor0SBundle.TensorRSSpace r s I p.1)
+    (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) p.1 (A p)) ((Set.univ : Set M) ×ˢ S))
+    (hB : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) p.1 (B p)) ((Set.univ : Set M) ×ˢ S)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) p.1 (A p + B p))
+      ((Set.univ : Set M) ×ˢ S) := by
+  letI := Tensor0SBundle.tensorRSBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) r s
+  intro p₀ hp₀
+  rw [Bundle.contMDiffWithinAt_totalSpace]
+  refine ⟨contMDiffWithinAt_fst, ?_⟩
+  set x₀ := p₀.1 with hx₀
+  set e := trivializationAt (Tensor0SBundle.TensorRSModel r s ℝ E)
+    (fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x₀ with he
+  have hA' := (Bundle.contMDiffWithinAt_totalSpace (F := Tensor0SBundle.TensorRSModel r s ℝ E)
+    (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z)).mp (hA p₀ hp₀)
+  have hB' := (Bundle.contMDiffWithinAt_totalSpace (F := Tensor0SBundle.TensorRSModel r s ℝ E)
+    (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z)).mp (hB p₀ hp₀)
+  refine (hA'.2.add hB'.2).congr_of_eventuallyEq ?_ ?_
+  · have hbase : ∀ᶠ p : M × ℝ in nhdsWithin p₀ ((Set.univ : Set M) ×ˢ S), p.1 ∈ e.baseSet :=
+      (continuousWithinAt_fst (s := (Set.univ : Set M) ×ˢ S) (p := p₀))
+        (e.open_baseSet.mem_nhds (by rw [he]; exact mem_baseSet_trivializationAt _ _ x₀))
+    filter_upwards [hbase] with p hx
+    rw [Pi.add_apply]
+    exact (e.linear ℝ hx).map_add (A p) (B p)
+  · rw [Pi.add_apply]
+    exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_add
+      (A p₀) (B p₀)
+
 set_option backward.isDefEq.respectTransparency false in
 theorem ricciArmPrincipalCoeffFib_realizedFam_jointContMDiffOn [BoundarylessManifold I M]
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
@@ -2861,6 +2899,83 @@ theorem slotInsertEndo0Field_apply_jointContMDiffOn {d : ℕ} {S : Set ℝ}
   exact slotInsertEndoFib_zero (I := I) (M := M) d p.1 (Λ p) (A p)
 
 set_option backward.isDefEq.respectTransparency false in
+/-- **Joint trailing-slot (slot `1`) endomorphism insertion applied to a joint `(0, d + 2)`-section.**
+The slot-`1` mirror of `slotInsertEndo0Field_apply_jointContMDiffOn`.  For a joint-smooth endomorphism
+Hom-field `Λ` and a joint-smooth `(0, d + 2)`-tensor family `A` over `M × ℝ`, the trailing-slot
+insertion `(p ↦ ⟨p.1, slotInsertEndoFib (d + 2) 1 p.1 (Λ p) (A p)⟩)` is jointly `C^∞` on the slab
+`univ ×ˢ S`.  By `slotInsertEndoFib_succ` the slot-`1` insertion is the slot extension
+`slotExtendFib (d + 1) (d + 1) x (slotInsertEndoFib (d + 1) 0 x (Λ x))` of the slot-`0` insertion one
+rank below, i.e. the joint uncurry (`uncurriedField_jointContMDiffOn`) of the left-composition of the
+joint curried `(0, d + 1)`-section (`curriedField_jointContMDiffOn`) with the joint inner slot-`0`
+insertion operator, the latter applied per smooth tangent test field through the leading-slot bridge
+`slotInsertEndo0Field_apply_jointContMDiffOn` (at rank `d`) and the within-slab joint apply
+`ContMDiffOn.clm_bundle_apply`. -/
+theorem slotInsertEndo1Field_apply_jointContMDiffOn {d : ℕ} {S : Set ℝ}
+    (g : SmoothRiemannianMetric I M)
+    (Λ : ∀ p : M × ℝ, TangentSpace I p.1 →L[ℝ] TangentSpace I p.1)
+    (hΛ : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (E →L[ℝ] E)
+        (E := fun z : M => TangentSpace I z →L[ℝ] TangentSpace I z) p.1 (Λ p))
+      ((Set.univ : Set M) ×ˢ S))
+    (A : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace (d + 2) I p.1)
+    (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel (d + 2) ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel (d + 2) ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace (d + 2) I z) p.1 (A p))
+      ((Set.univ : Set M) ×ˢ S)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel (d + 2) ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel (d + 2) ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace (d + 2) I z) p.1
+        (slotInsertEndoFib (I := I) (M := M) (d + 2) 1 p.1 (Λ p) (A p)))
+      ((Set.univ : Set M) ×ˢ S) := by
+  -- the joint curried `Hom(TM, T^{(0, d + 1)})`-section of `A`.
+  have hcurry := curriedField_jointContMDiffOn (I := I) (M := M) (d := d + 1) (S := S) A hA
+  -- left-compose the joint curried section with the joint inner slot-`0` insertion operator,
+  -- per smooth tangent test field, through the leading-slot bridge at rank `d`.
+  have hcomp : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, E →L[ℝ] Tensor0SBundle.Tensor0SModel (d + 1) ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (E →L[ℝ] Tensor0SBundle.Tensor0SModel (d + 1) ℝ E)
+        (E := fun z : M => TangentSpace I z →L[ℝ] Tensor0SBundle.Tensor0SSpace (d + 1) I z) p.1
+        ((slotInsertEndoFib (I := I) (M := M) (d + 1) 0 p.1 (Λ p)).comp
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (d + 1) p.1 (A p))))
+      ((Set.univ : Set M) ×ˢ S) := by
+    apply contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+      (F₁ := E) (V₁ := fun x : M => TangentSpace I x)
+      (F₂ := Tensor0SBundle.Tensor0SModel (d + 1) ℝ E)
+      (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace (d + 1) I x)
+      (φ := fun p : M × ℝ => (slotInsertEndoFib (I := I) (M := M) (d + 1) 0 p.1 (Λ p)).comp
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (d + 1) p.1 (A p)))
+      (S := S)
+    intro Z
+    -- the joint `(0, d + 1)`-section `p ↦ tensor0S_curry (d + 1) p.1 (A p) (Z p.1)`.
+    have hcurryZ : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+        (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel (d + 1) ℝ E)) ∞
+        (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel (d + 1) ℝ E)
+          (E := fun z : M => Tensor0SBundle.Tensor0SSpace (d + 1) I z) p.1
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (d + 1) p.1 (A p) (Z p.1)))
+        ((Set.univ : Set M) ×ˢ S) := by
+      have hZjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
+          (fun p : M × ℝ => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1 (Z p.1))
+          ((Set.univ : Set M) ×ˢ S) :=
+        Z.contMDiff.comp_contMDiffOn contMDiffOn_fst
+      exact ContMDiffOn.clm_bundle_apply (b := Prod.fst) hcurry hZjoint
+    -- apply the joint inner slot-`0` insertion operator at rank `d` to that joint section.
+    have happ := slotInsertEndo0Field_apply_jointContMDiffOn (I := I) (M := M) (d := d) (S := S)
+      (Λ := Λ) hΛ
+      (A := fun p : M × ℝ =>
+        tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (d + 1) p.1 (A p) (Z p.1)) hcurryZ
+    refine happ.congr (fun p _ => ?_)
+    rfl
+  -- uncurry the joint Hom-section back to a joint `(0, d + 2)`-section.
+  have huncurry := uncurriedField_jointContMDiffOn (I := I) (M := M) (d := d + 1) (S := S)
+    (fun p : M × ℝ => (slotInsertEndoFib (I := I) (M := M) (d + 1) 0 p.1 (Λ p)).comp
+      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (d + 1) p.1 (A p))) hcomp
+  refine huncurry.congr (fun p _ => ?_)
+  congr 1
+  rw [show (1 : Fin (d + 2)) = (0 : Fin (d + 1)).succ from rfl,
+    slotInsertEndoFib_succ (I := I) (M := M) g (d + 1) 0 p.1 (Λ p),
+    slotExtendFib_apply (I := I) (M := M) g (d + 1) (d + 1) p.1]
+
+set_option backward.isDefEq.respectTransparency false in
 /-- **Joint `(x, s)`-smoothness of the leading-slot order-`0` curvature coefficient fibre operator along
 the realized family.**  The fibrewise joint analog of `ricciArmOrder0CurvCoeffFibSlot_contMDiff` at the
 leading slot: the leading-slot insertion `slotInsertEndoFib 2 0 x (ricEndoRaisedFib (g_s) x)` is jointly
@@ -2910,6 +3025,54 @@ theorem ricciArmOrder0CurvCoeffFibSlot0_realizedFam_jointContMDiffOn [Boundaryle
   rw [ricciArmOrder0CurvCoeffFibSlot]
 
 set_option backward.isDefEq.respectTransparency false in
+/-- **Joint `(x, s)`-smoothness of the trailing-slot order-`0` curvature coefficient fibre operator along
+the realized family.**  The slot-`1` mirror of `ricciArmOrder0CurvCoeffFibSlot0_realizedFam_jointContMDiffOn`:
+the trailing-slot insertion `slotInsertEndoFib 2 1 x (ricEndoRaisedFib (g_s) x)` is jointly `C^∞` in
+`(x, s)` as a `(2, 2)`-operator section, on the slab `univ ×ˢ realizedSmallSet`.  Via the within-slab
+CLM-section bridge `contMDiffOn_clm_section_of_pointwise_jointMR` it reduces, on each globally smooth
+`(0, 2)`-tensor field `Y`, to the joint `(0, 2)`-section `(x, s) ↦ Y x ∘ (id, ricEndoRaisedFib (g_s) x)`
+— the trailing covariant slot precomposed by the joint-smooth raised-Ricci endomorphism
+`ricEndoRaisedFib_realizedFam_jointContMDiffOn`, threaded through the trailing slot-insertion bridge
+`slotInsertEndo1Field_apply_jointContMDiffOn` (at `d = 0`).  This is the trailing slot of the two-slot
+Bochner order-`0` coefficient. -/
+theorem ricciArmOrder0CurvCoeffFibSlot1_realizedFam_jointContMDiffOn [BoundarylessManifold I M]
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1
+        (Tensor0SBundle.TensorRSSpace.ofCLM
+          (ricciArmOrder0CurvCoeffFibSlot (I := I)
+            (realizedFam (I := I) g₀ T T' hδ hδ' p.2) 1 p.1)))
+      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+  classical
+  apply contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+    (F₁ := Tensor0SBundle.Tensor0SModel 2 ℝ E) (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)
+    (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)
+    (φ := fun p : M × ℝ => ricciArmOrder0CurvCoeffFibSlot (I := I)
+      (realizedFam (I := I) g₀ T T' hδ hδ' p.2) 1 p.1)
+    (S := realizedSmallSet (δ := δ) (δ' := δ'))
+  intro Y
+  set g_s : ℝ → SmoothRiemannianMetric I M := fun s => realizedFam (I := I) g₀ T T' hδ hδ' s with hg_s
+  -- the joint-smooth raised-Ricci endomorphism Hom-section.
+  have hric := ricEndoRaisedFib_realizedFam_jointContMDiffOn (I := I) g₀ T T' hδ hδ'
+  -- the joint-smooth `(0, 2)`-section `Y` pulled back via `fst`.
+  have hYjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 2 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) p.1 (Y p.1))
+      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
+    Y.contMDiff.comp_contMDiffOn contMDiffOn_fst
+  -- the joint trailing-slot insertion of the joint raised-Ricci endomorphism applied to `Y`.
+  have happ := slotInsertEndo1Field_apply_jointContMDiffOn (I := I) (M := M) (d := 0) g₀
+    (S := realizedSmallSet (δ := δ) (δ' := δ'))
+    (Λ := fun p : M × ℝ => ricEndoRaisedFib (I := I) (g_s p.2) p.1) hric
+    (A := fun p : M × ℝ => Y p.1) hYjoint
+  refine happ.congr (fun p _ => ?_)
+  -- the fibre value `slotInsertEndoFib 2 1 x (ricEndo (g_s) x) (Y x) = ricciArmOrder0CurvCoeffFibSlot 1 x (Y x)`
+  rw [ricciArmOrder0CurvCoeffFibSlot]
+
+set_option backward.isDefEq.respectTransparency false in
 /-- **(Posited deep input — joint `(x, s)`-smoothness of the genuine TWO-SLOT order-`0` curvature
 coefficient fibre operator along the realized family.)**
 
@@ -2944,8 +3107,20 @@ theorem ricciArmOrder0CurvCoeffFib_realizedFam_jointContMDiffOn [BoundarylessMan
         (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1
         (Tensor0SBundle.TensorRSSpace.ofCLM
           (ricciArmOrder0CurvCoeffFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1)))
-      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
-  sorry
+      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+  have hslot0 := ricciArmOrder0CurvCoeffFibSlot0_realizedFam_jointContMDiffOn
+    (I := I) g₀ T T' hδ hδ'
+  have hslot1 := ricciArmOrder0CurvCoeffFibSlot1_realizedFam_jointContMDiffOn
+    (I := I) g₀ T T' hδ hδ'
+  have hadd := jointTotalSpaceRS_add (I := I) (r := 2) (s := 2)
+    (S := realizedSmallSet (δ := δ) (δ' := δ'))
+    (A := fun p : M × ℝ => Tensor0SBundle.TensorRSSpace.ofCLM
+      (ricciArmOrder0CurvCoeffFibSlot (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) 0 p.1))
+    (B := fun p : M × ℝ => Tensor0SBundle.TensorRSSpace.ofCLM
+      (ricciArmOrder0CurvCoeffFibSlot (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) 1 p.1))
+    hslot0 hslot1
+  refine hadd.congr (fun p _ => ?_)
+  rfl
 
 /-- **(Posited deep input — joint `(s, x)`-smoothness of the genuine order-`0` curvature coefficient
 along the realized path.)**
