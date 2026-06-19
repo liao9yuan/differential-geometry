@@ -14,6 +14,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.G
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckMetricArmCoeffField
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckCurvatureArmCoeffField
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.AppCcDropIteratedGrid
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckLinearization
 
 /-!
 # The two-arm covariant-`L²` ball-Lipschitz bound on the DeTurck–Ricci remainder difference
@@ -121,7 +122,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (covGrad)
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (covGrad unitModel smoothCcTensor_ext_of_unitModel)
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -4266,22 +4267,81 @@ private theorem deTurckRHSArmDiff_order0_pointwise_domination_ballUniform
     _ ≤ Ksum * Scol := mul_le_mul_of_nonneg_right hCα_le hScol_nn
 
 
-/-- **(POSITED deep bedrock — Route P (Moser-extremes): the intrinsic three-term mean-value SECTION
-IDENTITY of the Ricci–DeTurck RHS-arm difference on EXISTENTIAL endpoint-dependent coefficient fields,
-with the ball-uniform order-`0` `C⁰` operator fibre-norm sups of those coefficients.)**
+/-- **(POSITED deep bedrock — the VALUE-LEVEL (`unitModel`) ball-uniform three-term mean-value
+section-arm grading of the Ricci–DeTurck RHS-arm difference, with the ball-uniform order-`0` `C⁰`
+operator fibre-norm sups.)**
 
-This is the corrected, deficit-free section-level core of the re-routed apex Moser tame.  It replaces the
-false-as-stated valence-dropping `dropKappa`/`coeffJetBound` envelope chain (whose ball-uniformity at
-order `a` required an order-`a` `L^∞` jet sup of the cometric that the order-`(a+2)` covariant-`L²` ball
-cannot supply — a torus counterexample for `finrank E ≥ 4`).  The Moser-extremes route never reads a
-high-order `L^∞` coefficient jet: at the order-`0` endpoint only the order-`0` `C⁰` operator fibre-norm
-sup of each coefficient field is consumed, and that sup IS ball-uniform.  The inverse-Gram value /
-Christoffel parts are operator-bounded by ellipticity alone (`δ < 1` keeps the realize-tie endpoint
-`g₁ = realize(g₀ + T)` uniformly positive-definite, so `g₁⁻¹` is operator-bounded with no covariant jet
-control); the endpoint-curvature part of the order-`0` symbol reads only the order-`≤ 2` pointwise jets
-of `T` (the `∂²g₁ = ∂²(g₀ + T)` of the curvature), which the supercritical `H^{a+2} ↪ C²` section
-embedding of the radius-`R` ball controls pointwise by `Cemb² · R²` — an order-`≤ 2` read, never the
-order-`a` `L^∞` cometric jet the false envelope demanded.
+This is the genuine deep differential-geometric content of the three-arm section identity, isolated at
+the `unitModel` (value, `∀ x v`) level — the natural output shape of the per-arm Palatini/Lie graded
+read-offs (`deTurckRicciArm_appCc_graded` for the curvature arm `−2 Ric`, its absent sibling
+`deTurckLieArm_appCc_graded` for the Lie arm `𝓛_W g`), here combined into the full RHS arm and made
+**ball-uniform** (the `ΛC` is hoisted outside the `∀ T T'` quantifier — the ellipticity / supercritical
+`H^{a+2} ↪ C²` compactness of the order-`0` symbol over the realize-tie metrics of the radius-`R` ball,
+NO covariant jet control).
+
+Fix `g₀`, `g_bg`, a supercritical order `a`, and a covariant-`L²` ball radius `R ≥ 0`.  Outside the
+`∀ T T'` quantifier there is one nonnegative ball-uniform order-`0` `C⁰` operator fibre-norm level `ΛC`.
+For any two `g₀`-fibre-small `T, T'` whose covariant-`L²` jets up to order `a + 2` lie in the radius-`R`
+ball, there are the three intrinsic `g₀`-built endpoint-dependent coefficient operator fields
+`C₀ : SmoothCcTensor g₀ 2 2`, `C₁ : SmoothCcTensor g₀ 3 2`, `C₂ : SmoothCcTensor g₀ 4 2` such that:
+
+* **(value identity)** for every base point `x` and tangent pair `v`, the unit-model `(0, 2)`-form value
+  of the RHS-arm difference equals the unit-model read-off of the order-graded `appCc` action on the
+  iterated covariant gradients `Wₘ = ∇₀^m (T − T')` of the perturbation difference:
+  ```
+  unitModel g₀ 2 (armG0 T − armG0 T') x v
+    = unitModel g₀ 2 (appCc C₀ W₀ + appCc C₁ W₁ + appCc C₂ W₂) x v ;
+  ```
+* **(order-`0` `C⁰` operator sups)** the three coefficient fields are operator-bounded ball-uniformly at
+  order `0`: `∀ x, rfns(C₀ x) ≤ ΛC²`, `∀ x, rfns(C₁ x) ≤ ΛC²`, `∀ x, rfns(C₂ x) ≤ ΛC²`.
+
+The genuine deep content is the existential mean-value linearization (the intrinsic Palatini
+`δRic = ∇·(δΓ) − ∇(tr δΓ)` with `δΓ = connDiff`, the inverse-Gram Neumann linearization in the order-`2`
+slot, telescoped through `g₀` along the realize-tie `g₁ − g₀ = ccTensorBilinSymm T`, read off the
+bedrock graded decomposition `covDerivConnDiff_diff_endpoint_graded`) plus the Lie-arm grading and the
+order-`0` ball-compactness of the symbol; it is stated at the `unitModel` value level, the natural shape
+of the per-arm graded read-offs.  Expressed entirely in `unitModel` / `appCc` / `iteratedCovGrad` /
+`riemannianFiberNormSq` — **never** a `chartGramOnE` / `HasChartJetLip` chart-jet chain, **never** an
+order-`a` `L^∞` cometric jet.  Consumers transitively depend on its `sorryAx`.
+
+**Non-vacuity.**  The realization is `ℝ`-linear in `T − T'` and its jets, so the value vanishes as
+`T − T' → 0`; a degenerate `C₀ = C₁ = C₂ = 0` is rejected by a nonvanishing `unitModel`-value of the RHS
+arm difference for a genuinely second-order, non-flat RHS difference; a `ΛC = 0` level is rejected by the
+nonvanishing genuine endpoint operator symbols on the supercritical ball.  The `(value identity)` clause
+genuinely constrains the triple to *reproduce the RHS-arm difference value*. -/
+private theorem deTurckRHSArmDiff_threeArm_unitModel_ballUniform
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
+    ∃ ΛC : ℝ, 0 ≤ ΛC ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_lt : δ' < 1)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∃ (C₀ : SmoothCcTensor g₀ 2 2) (C₁ : SmoothCcTensor g₀ 3 2) (C₂ : SmoothCcTensor g₀ 4 2),
+          (∀ (x : M) (v : Fin 2 → TangentSpace I x),
+            unitModel (I := I) (M := M) g₀ 2
+                (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+                  deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ') x v =
+            unitModel (I := I) (M := M) g₀ 2
+              (appCc (I := I) (M := M) g₀ 2 2 C₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
+                appCc (I := I) (M := M) g₀ 3 2 C₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
+                appCc (I := I) (M := M) g₀ 4 2 C₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x (C₀.toSection x) ≤ ΛC ^ 2) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x (C₁.toSection x) ≤ ΛC ^ 2) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (C₂.toSection x) ≤ ΛC ^ 2) :=
+  sorry
+
+/-- **(Route P (Moser-extremes): the intrinsic three-term mean-value SECTION IDENTITY of the
+Ricci–DeTurck RHS-arm difference on EXISTENTIAL endpoint-dependent coefficient fields, with the
+ball-uniform order-`0` `C⁰` operator fibre-norm sups of those coefficients.)**
+
+This is the section-level (`SmoothCcTensor` equality) core of the re-routed apex Moser tame.  It lifts the
+value-level (`unitModel`) ball-uniform grading `deTurckRHSArmDiff_threeArm_unitModel_ballUniform` to a
+genuine `SmoothCcTensor` equality through the unit-model extensionality bridge
+`smoothCcTensor_ext_of_unitModel` (`∀ x, unitModel S x = unitModel S' x ⟹ S = S'`).
 
 Fix `g₀`, `g_bg`, a supercritical order `a` (`2·finrank E + 10 ≤ a`), and a covariant-`L²` ball radius
 `R ≥ 0`.  Outside the `∀ T T'` quantifier there is one nonnegative ball-uniform order-`0` `C⁰` operator
@@ -4294,20 +4354,18 @@ symbol of the mean-value path `dF`), such that, with
 `N := deTurckRHSArmG0 g₀ g_bg T − deTurckRHSArmG0 g₀ g_bg T'`:
 
 * **(identity)** the intrinsic three-term mean-value section equality
-  `N = appCc C₀ (T − T') + appCc C₁ (∇(T − T')) + appCc C₂ (∇²(T − T'))` (Route P: the
-  endpoint-dependent curvature/inverse-Gram value arm at order `0`, the Christoffel arm at order `1`,
-  and the inverse-Gram principal symbol carried by `C₂` at order `2`);
+  `N = appCc C₀ (T − T') + appCc C₁ (∇(T − T')) + appCc C₂ (∇²(T − T'))`;
 * **(order-`0` `C⁰` operator sups)** the three coefficient fields are operator-bounded ball-uniformly at
   order `0`: `∀ x, rfns(C₀ x) ≤ ΛC²`, `∀ x, rfns(C₁ x) ≤ ΛC²`, `∀ x, rfns(C₂ x) ≤ ΛC²`.
 
-The genuine deep content is the existential mean-value linearization identity (the intrinsic Palatini
-`δRic = ∇·(δΓ) − ∇(tr δΓ)` with `δΓ = connDiff`, the inverse-Gram Neumann linearization in the
-principal order-`2` slot, telescoped through `g₀` along the realize-tie `g₁ − g₀ = ccTensorBilinSymm T`,
-read off the bedrock graded decomposition `covDerivConnDiff_diff_endpoint_graded`); the order-`0` `C⁰`
-operator sups are the ball-compactness of the order-`0` symbol over the realize-tie metrics of the ball
-(ellipticity, NO covariant jet control).  Expressed entirely in `appCc` / `iteratedCovGrad` /
-`riemannianFiberNormSq` — **never** a `chartGramOnE` / `chartInvGramOnE` / `HasChartJetLip` chart-jet
-chain, **never** an order-`a` `L^∞` cometric jet.  Consumers transitively depend on its `sorryAx`.
+The genuine deep content is the value-level grading posit (the intrinsic Palatini `δRic = ∇·(δΓ) −
+∇(tr δΓ)` with `δΓ = connDiff`, the inverse-Gram Neumann linearization in the principal order-`2` slot,
+telescoped through `g₀` along the realize-tie `g₁ − g₀ = ccTensorBilinSymm T`, read off the bedrock
+graded decomposition `covDerivConnDiff_diff_endpoint_graded`, plus the Lie-arm grading and the order-`0`
+ball-compactness); the section lift is the unit-model extensionality.  Expressed entirely in `appCc` /
+`iteratedCovGrad` / `riemannianFiberNormSq` — **never** a `chartGramOnE` / `chartInvGramOnE` /
+`HasChartJetLip` chart-jet chain, **never** an order-`a` `L^∞` cometric jet.  Consumers transitively
+depend on the value-level grading posit's `sorryAx`.
 
 **Non-vacuity.**  The realization is `ℝ`-linear in `T − T'` and its jets, so it vanishes as `T − T' → 0`
 (the Nemytskii Lipschitz character is preserved); a degenerate `C₀ = C₁ = C₂ = 0` is rejected by a
@@ -4332,8 +4390,24 @@ private theorem deTurckRHSArmDiff_threeArm_coeffC0_ballUniform
               appCc (I := I) (M := M) g₀ 4 2 C₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x (C₀.toSection x) ≤ ΛC ^ 2) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x (C₁.toSection x) ≤ ΛC ^ 2) ∧
-          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (C₂.toSection x) ≤ ΛC ^ 2) :=
-  sorry
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (C₂.toSection x) ≤ ΛC ^ 2) := by
+  classical
+  -- The value-level (`unitModel`) ball-uniform grading supplies `ΛC` and, per fibre-small `(T, T')`,
+  -- the three coefficient fields with the `∀ x v` value identity and the order-`0` `C⁰` sups.
+  obtain ⟨ΛC, hΛC_nn, hgrade⟩ :=
+    deTurckRHSArmDiff_threeArm_unitModel_ballUniform (I := I) g₀ g_bg a ha_super hR
+  refine ⟨ΛC, hΛC_nn, ?_⟩
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
+  obtain ⟨C₀, C₁, C₂, hval, hC₀, hC₁, hC₂⟩ :=
+    hgrade T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
+  refine ⟨C₀, C₁, C₂, ?_, hC₀, hC₁, hC₂⟩
+  -- Lift the `∀ x v` value identity (the section difference lives INSIDE `unitModel`) to the
+  -- `SmoothCcTensor` equality via the unit-model extensionality bridge.
+  apply smoothCcTensor_ext_of_unitModel
+  intro x
+  apply ContinuousMultilinearMap.ext
+  intro v
+  exact hval x v
 
 set_option maxHeartbeats 800000 in
 /-- **(POSITED deficit-free INTRINSIC order-`0` pointwise fibre-norm domination of the nonlinear
@@ -4475,9 +4549,8 @@ private theorem deTurckRHSArmDiff_order0_rfns_intrinsic_ballUniform
             mul_nonneg (sq_nonneg ΛC) (sq_nonneg Cemb)]
         linarith [this]
 
-/-- **(POSITED deficit-free INTRINSIC top-order-`a` integrated covariant-`L²` Moser–Nemytskii tame
-bound on the nonlinear Ricci–DeTurck RHS-arm difference — the irreducible curvature/Lie/inverse-Gram
-top-jet analytic leaf, chart-jet-free.)**
+/-- **(DEFICIT-FREE INTRINSIC top-order-`a` integrated covariant-`L²` Moser–Nemytskii tame
+bound on the nonlinear Ricci–DeTurck RHS-arm difference — PROVED, chart-jet-free.)**
 
 Fix `g₀`, the DeTurck background `g_bg`, a supercritical order `a` (`2·finrank E + 10 ≤ a`), and a
 covariant-`L²` ball radius `R ≥ 0`.  There is **one** nonnegative constant `Λc` — uniform over the
@@ -4489,36 +4562,32 @@ radius-`R` ball, the top-order-`a` covariant-`L²` norm of the nonlinear RHS-arm
 ‖∇^a N‖_{L²}  ≤  Λc · √(∑_{i ≤ a+2} ‖∇^i (T − T')‖²_{L²}) .
 ```
 
-**Why deficit-free, and why INTRINSIC (the top-order Moser EXTREME).**  This is the integrated
-**classical covariant Leibniz / Faà-di-Bruno** expansion of the second-order Nemytskii difference `N`.
-By the section identity `N = appCc C₀ (T − T') + appCc C₁ (∇(T − T')) + appCc C₂ (∇²(T − T'))` of
-`deTurckRHSArmDiff_threeArm_coeffC0_ballUniform`, the top covariant order `∇^a` of each arm
-`appCc Cₘ (∇^m S)` distributes by the covariant Leibniz diagonal product grid
-`rfns(∇^a (appCc Cₘ (∇^m S)))(x) ≤ const · ∑_{i ≤ a} rfns(∇^i Cₘ)(x) · ∑_{l ≤ a−i} rfns(∇^{l+m} S)(x)`,
-fed through the integrated Gagliardo–Nirenberg two-arm EXTREMES engine
-`exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le`, which redistributes the high
-covariant order by `Lᵖ` interpolation so that EACH arm carries one factor's full covariant-`L²` jet
-scale against the OTHER factor's order-`0` `C⁰` sup.  Only the coefficient's order-`0` `C⁰` operator
-sup (ball-uniform via ellipticity) and its order-`a` covariant-`L²` jet (ball-uniform via the
-Sobolev-algebra inverse-metric Moser estimate, an `L²` window — NO `L^∞`) ever enter, and the top
-covariant order always lands on the `T − T'` factor in `L²` (order `≤ a + 2`) — **never** an
-order-`(a + 2)` pointwise `C⁰` / `L^∞` coefficient sup (the false envelope the prior proof transited),
-**never** a `chartGramOnE` / `chartInvGramOnE` / `HasChartJetLip` chart-jet ball Lipschitz chain.
-
-This is the genuine deficit-free top-order analytic leaf; its irreducible missing prerequisite is the
-covariant Leibniz DIAGONAL product grid for `appCc` (the two-factor `rfns(∇^i Cₘ) · rfns(∇^l S)` shape,
-the diagonal companion of the single-sum `appCc_iteratedCovGrad_drop_singleSum_le` — the on-disk drop
-tower bundles the coefficient into a `gridWindowSum (dropKappa)` `L^∞` window, never the diagonal grid).
-Its body is therefore `sorry`.
+**Proof (single-column integration, no two-arm valence detour).**  The on-disk ball-uniform pointwise
+single-factor covariant-jet column `deTurckRHSArmDiff_iteratedCovGrad_riemannianFiberNormSq_jet_le_ballUniform`
+already domiantes, with a single ball-uniform `CR ≥ 0` outside `∀ T T'`,
+```
+rfns(∇^a N)(x) ≤ CR · ∑_{q ≤ a+2} rfns(∇^q (T − T'))(x)
+```
+(its left-hand tensor `(deTurckSmoothRemainder T − deTurckSmoothRemainder T') + Δ_∇(T − T')` is exactly
+`N` by the definitional split `deTurckSmoothRemainderDiff_eq_armDiff_sub_connLapDiff`, rearranged).
+The genuinely quasilinear order content (the `∇^{a+2}(T − T')` top jet, carried by the curvature/Lie
+principal symbol and the rough-Laplacian arm) lives entirely in that column.  Integrating the pointwise
+column over the closed manifold via the sorry-free `l2RootSum_of_pointwise_iteratedCovGrad_jet`
+(`‖∇^a P‖ ≤ √C · √(∑_{i ≤ N} ‖∇^i W‖²)`, the fibre-norm/`tensorL2Norm` bridge plus integral
+monotonicity) yields the displayed `L²` root-sum bound with `Λc := √CR`.  The route reads **only**
+`iteratedCovGrad` / `riemannianFiberNormSq` / `tensorL2Norm` — **never** an order-`(a + 2)` pointwise
+`L^∞` coefficient sup, **never** a `chartGramOnE` / `HasChartJetLip` chart-jet ball Lipschitz chain.
+It depends transitively only on the `sorryAx` of the ball-uniform raw-component domination posit
+underneath the pointwise column (the genuine chart→intrinsic Nemytskii content), not on the refuted
+two-arm valence detour.
 
 **Non-vacuity / order self-check.**  The bound reads `∇^{≤ a+2}(T − T')`; the genuine `∂²(T − T')`
 Ricci principal symbol forces a top jet at the `i = a + 2` term of the root-sum, so a window-`a`
 weakening is rejected.  A `Λc = 0` witness is rejected by a nonvanishing `∇^a N` for a non-flat,
-genuinely second-order RHS difference.  This is a posited deficit-free analytic leaf; consumers
-transitively depend on its `sorryAx`. -/
+genuinely second-order RHS difference (`CR = 0` forces the whole column to vanish). -/
 private theorem deTurckRHSArmDiff_topOrder_l2_intrinsic_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
+    (_ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
     ∃ Λc : ℝ, 0 ≤ Λc ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_lt : δ < 1)
@@ -4531,8 +4600,43 @@ private theorem deTurckRHSArmDiff_topOrder_l2_intrinsic_ballUniform
             (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
               deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ')‖ ≤
           Λc * Real.sqrt (∑ i ∈ Finset.range (a + 2 + 1),
-            ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2) :=
-  sorry
+            ‖iteratedCovGrad (I := I) g₀ 0 2 i (T - T')‖ ^ 2) := by
+  classical
+  -- The ball-uniform pointwise single-factor covariant-jet column of the RHS-arm difference:
+  -- `rfns(∇^a [(remainder T − remainder T') + Δ_∇(T − T')])(x) ≤ CR · ∑_{q ≤ a+2} rfns(∇^q (T − T'))(x)`.
+  obtain ⟨CR, hCR_nn, hCR⟩ :=
+    deTurckRHSArmDiff_iteratedCovGrad_riemannianFiberNormSq_jet_le_ballUniform
+      (I := I) g₀ g_bg a hR
+  refine ⟨Real.sqrt CR, Real.sqrt_nonneg _, ?_⟩
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
+  -- The RHS-arm difference IS the column's left-hand tensor: rearrange the definitional split.
+  have hN_eq :
+      deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+          deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ' =
+        (deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
+            deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ') +
+          rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T') := by
+    have hsplit :=
+      deTurckSmoothRemainderDiff_eq_armDiff_sub_connLapDiff (I := I) g₀ g_bg T T'
+        hδ_lt hδ hδ'_lt hδ'
+    -- `remainder diff = armDiff − connLapDiff`, so `armDiff = remainder diff + connLapDiff`.
+    rw [hsplit]; abel
+  -- The pointwise column for `N`, after rewriting `N` to the column's left-hand tensor.
+  have hpt : ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + a) x
+          ((iteratedCovGrad (I := I) g₀ 0 2 a
+            (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+              deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ')).toSection x) ≤
+        CR * ∑ q ∈ Finset.range (a + 2 + 1),
+          riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
+            ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection x) := by
+    intro x
+    rw [hN_eq]
+    exact hCR T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball x
+  -- Integrate the pointwise column to the top-order `L²` root-sum bound.
+  exact l2RootSum_of_pointwise_iteratedCovGrad_jet (I := I) g₀ a (a + 2)
+    (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
+      deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ') (T - T') CR hCR_nn hpt
 
 /-- **(The deficit-free integrated-`L²` Moser–Nemytskii endpoint data of the nonlinear
 Ricci–DeTurck RHS-arm difference: the order-`0` `C⁰` sup and the order-`0` / top-order-`a` integrated
