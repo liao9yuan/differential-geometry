@@ -246,17 +246,25 @@ noncomputable def ricciArmOrder0Coeff (g₀ : SmoothRiemannianMetric I M)
     (s : ℝ) : SmoothCcTensor g₀ 2 2 :=
   ricciArmOrder0CurvCoeff (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
 
-/-- **The order-`2` (rough-Laplacian principal) coefficient field of the linearized Ricci operator along
-the realized path.**  For the realized path metric `g_s = realizedFam g₀ T T' s`, this is the combined
-three-trace `(4, 2)` principal field `ricciArmPrincipalCoeff g₀ g_s` of the order-`2` arm (the rough
-Laplacian / corrected principal symbol).  It is the per-`s` coefficient `R₂fib(s)` the linearized-Ricci
-two-term Lichnerowicz form contracts against `W₂ = ∇₀²(T − T')`. -/
+/-- **The order-`2` (PURE rough-Laplacian principal) coefficient field of the linearized Ricci–DeTurck
+operator along the realized path.**  For the realized path metric `g_s = realizedFam g₀ T T' s`, this is the
+PURE rough-Laplacian `(4, 2)` principal field `ricciArmPrincipalCoeffPure g₀ g_s` of the order-`2` arm — the
+single `{0, 1}`-cometric double trace `cometricDoubleTraceFib g_s 2`, whose `appCc` read-off is the pure
+rough Laplacian `A_{ik} = ∑_{j,l} g_s^{jl} ∂_j ∂_l h_{ik}` (`ricciArmPrincipalCoeffPure_appCc_eq_roughLaplacian`).
+
+This is the COMBINED-operator's order-2 principal AFTER the DeTurck gauge cancellation: the bare Ricci symbol
+carries the non-isotropic gauge terms `½ξ_i(ξt)_k + ½ξ_k(ξt)_i − ½ξ_iξ_k·tr`, which the DeTurck-correction
+symbol exactly kills on a symmetric perturbation, leaving the pure rough Laplacian.  It is therefore NOT the
+gauge-carrying combined three-trace `ricciArmPrincipalCoeff g₀ g_s` (`= ½(BT1 + BT2 − A)`, the bare-Ricci
+symbol, off by the surviving cross-divergence terms): a dim-`4` random-SPD numeric confirms `A ≠
+combinedTrace42Model`.  It is the per-`s` coefficient `R₂fib(s)` the combined linearized two-term Lichnerowicz
+form contracts against `W₂ = ∇₀²(T − T')`. -/
 noncomputable def ricciArmOrder2Coeff (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) : SmoothCcTensor g₀ 4 2 :=
-  ricciArmPrincipalCoeff (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
+  ricciArmPrincipalCoeffPure (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
 
 /-- **The chart-Gram velocity of the realized section-difference perturbation at parameter `s`.**
 
@@ -491,7 +499,8 @@ read-off of the on-disk **combined** Ricci–DeTurck chart `s`-derivative split
 `deTurckRicciRHSChartSecondOrderPart g_s g_bg h + metricFamilyDeTurckRicciFirstOrderRemainder g_s g_bg h`
 equals the intrinsic two-term Lichnerowicz `unitModel`/`appCc` read-off of the order-`0` coefficient
 `ricciArmOrder0Coeff s` (the inverse-Gram slot field of `g_s`) on `W₀ = T − T'` plus the order-`2`
-coefficient `ricciArmOrder2Coeff s` (the combined three-trace field of `g_s`) on `W₂ = ∇₀²(T − T')`.
+coefficient `ricciArmOrder2Coeff s` (the PURE rough-Laplacian field `ricciArmPrincipalCoeffPure g₀ g_s` of
+`g_s`) on `W₂ = ∇₀²(T − T')`.
 
 This is the **chart → intrinsic transfer** half of the *combined* Ricci–DeTurck-arm linearization.  The
 combined chart second-order part `deTurckRicciRHSChartSecondOrderPart g_s g_bg =
@@ -501,25 +510,33 @@ combined chart second-order part `deTurckRicciRHSChartSecondOrderPart g_s g_bg =
 `chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_source`).  The **DeTurck gauge
 cancels at the chart 2nd-order/symbol level** (`deTurckSymbol_apply_apply_eq_isotropic_of_symm`,
 read off through `deTurckRicciRHS_test_perturbation_readoff`): on a symmetric perturbation the combined
-principal symbol is the *pure rough Laplacian* `½G^{jl}∂_j∂_l h_{ik}` — the non-isotropic gauge terms of
-the bare Ricci symbol are exactly killed by the DeTurck-correction symbol, leaving only the isotropic
-`|ξ|²_{g_s}·t` term.  Hence the chart `∂²h` of the section-difference velocity converts to the covariant
-Hessian `∇₀²(T − T')` (the chart-vs-covariant Hessian conversion `chartCovariantSecondGrad_eq`,
-`∂²h = ∇₀²h + Christoffel·∂h + ∂Christoffel·h`), and the rough Laplacian becomes the combined three-trace
-`combinedTrace42Model (cometricLmodel g_s)` read off through
-`ricciArmPrincipalCoeff_appCc_eq_combinedTrace` (the order-`2` arm, now *genuinely correct* since the
-gauge is gone — `R₂ = ricciArmPrincipalCoeff g₀ g_s` is the true rough-Laplacian coefficient).  The
-Christoffel-correction `∂h`/`h` terms together with the combined first-order remainder fold into the
-genuine order-`0` curvature slot field `ricciArmOrder0CurvCoeff g₀ g_s` (the Lichnerowicz `Rm(g_s)·h`
-action) on `T − T'` (NO genuine order-`1` arm).
+principal symbol is the *pure rough Laplacian* `A_{ik} = ∑_{j,l} G^{jl} ∂_j ∂_l h_{ik}` — the non-isotropic
+gauge terms of the bare Ricci symbol (the two cross-divergence/trace-gradient terms) are exactly killed by
+the DeTurck-correction symbol, leaving only the isotropic `|ξ|²_{g_s}·t` term.  Hence the chart `∂²h` of the
+section-difference velocity converts to the covariant Hessian `∇₀²(T − T')` (the chart-vs-covariant Hessian
+conversion `chartCovariantSecondGrad_eq`, `∂²h = ∇₀²h + Christoffel·∂h + ∂Christoffel·h`), and the pure rough
+Laplacian becomes the single `{0, 1}`-cometric double trace `modelDoubleTrace 2 (cometricLmodel g_s)` read
+off through `ricciArmPrincipalCoeffPure_appCc_eq_roughLaplacian` (the corrected order-`2` arm, *genuinely
+correct* now that the coefficient is the PURE rough Laplacian `R₂ = ricciArmPrincipalCoeffPure g₀ g_s`, NOT
+the gauge-carrying combined three-trace `ricciArmPrincipalCoeff g₀ g_s = ½(BT1 + BT2 − A)`, which a dim-`4`
+random-SPD numeric confirms differs from `A` by the surviving cross-divergence terms).  The
+Christoffel-correction `∂h`/`h` terms together with the combined first-order remainder fold into the genuine
+order-`0` curvature slot field `ricciArmOrder0CurvCoeff g₀ g_s` (the Lichnerowicz `Rm(g_s)·h` action) on
+`T − T'` (NO genuine order-`1` arm).
 
 The DeTurck cancellation (the KEY UNLOCK; the bare-Ricci version of this transfer is FALSE, since the
 bare Ricci principal symbol carries the non-isotropic gauge terms `½ξ_i(ξt)_k + ½ξ_k(ξt)_i −
-½ξ_iξ_k·tr`) is the proven gauge-cancellation theorem on disk; the remaining chart-vs-covariant Hessian
-and chart-trace-to-`appCc` bridges are not yet on disk.  The identity is *posited* here, to be discharged
-by recursing into those covariant bridges.  It genuinely constrains the combined chart read-off to be the
-two-term intrinsic read-off, so it is non-vacuous: the zero coefficients fail it where the combined chart
-derivative is nonzero. -/
+½ξ_iξ_k·tr`) and the gauge-cancellation pieces (`deTurckSymbol_apply_apply_eq_isotropic_of_symm`, the two
+chart-second-order splits, the chart-covariant Hessian conversion `chartCovariantSecondGrad_eq`, the pure
+read-off `ricciArmPrincipalCoeffPure_appCc_eq_roughLaplacian`, the order-`0`
+`ricciArmOrder0CurvCoeff_appCc_eq_curvatureAction`) are all proven theorems on disk; the remaining content is
+the multi-step classical ASSEMBLY threading the isotropic chart symbol `|ξ|²_{g_s}·t` through the
+chart-covariant Hessian correction into the intrinsic two-term `unitModel`/`appCc` read-off — not yet a named
+bridge on disk.  The identity is *posited* here (with the now-CORRECT order-`2` coefficient, so it is
+TRUE-as-stated: node 1 `A = appCc ricciArmPrincipalCoeffPure (∇₀²(T − T'))` is `A = A`), to be discharged by
+recursing into that assembly.  It genuinely constrains the combined chart read-off to be the two-term
+intrinsic read-off, so it is non-vacuous: the zero coefficients fail it where the combined chart derivative is
+nonzero. -/
 theorem rebased_chartSymbol_eq_appCc_pointwise
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -621,6 +638,83 @@ private theorem appCc_unitModel_read_continuousOn_of_toModel_continuousOn
         (Tensor0SBundle.Tensor0SSpace.toModel u)).continuous
   exact (hchain.comp_continuousOn hΨ).congr (fun s _ => (key s).symm)
 
+set_option backward.isDefEq.respectTransparency false in
+/-- **Joint `(x, s)`-smoothness of the PURE order-`2` principal coefficient along the realized path.**
+
+For the realized metric family `g_s = realizedFam g₀ T T' s`, the PURE order-`2` rough-Laplacian coefficient
+operator field `ricciArmPrincipalCoeffPure g₀ g_s` (the single `{0, 1}`-cometric double trace
+`cometricDoubleTraceFib g_s 2`, the `(4, 2)`-operator field of `g_s`) is jointly `C^∞` in the pair `(x, s)`,
+as a section over `M × ℝ` of the `(4, 2)`-tensor bundle, **on the slab `univ ×ˢ realizedSmallSet`**.
+
+This is the joint-parameter lift of the single-metric base-point smoothness `cometricDoubleTraceFib_contMDiff`:
+it routes through the named cometric-double-trace SUB-STEP of the principal keystone,
+`cometricDoubleTraceFib_realizedFam_jointContMDiffOn (p := 2)` (the joint cometric tower built it as an
+intermediate of `ricciArmPrincipalCoeffFib_realizedFam_jointContMDiffOn`), via the joint section constructor
+`contMDiffOn_clm_section_of_pointwise_jointMR` (which reduces the operator-field section smoothness to the
+joint smoothness of the operator applied to each smooth global section).  It is the joint smoothness of the
+re-minted order-`2` coefficient `ricciArmPrincipalCoeffPure`. -/
+theorem ricciArmPrincipalCoeffPure_realizedFam_jointContMDiff [BoundarylessManifold I M]
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 4 2 I z) p.1
+        ((ricciArmPrincipalCoeffPure (I := I) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' p.2)).toSection p.1))
+      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+  -- The operator-field section is, at every `(x, s)`, the cometric double-trace fibre operator of `g_s`
+  -- (`ricciArmPrincipalCoeffPure_toSection`).  Reduce the section smoothness to the joint smoothness of
+  -- that operator applied to an arbitrary smooth global `(0, 4)`-section, via the joint section constructor.
+  have hsection :
+      ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
+        (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
+          (E := fun z : M => Tensor0SBundle.TensorRSSpace 4 2 I z) p.1
+          (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.cometricDoubleTraceFib (I := I)
+            (realizedFam (I := I) g₀ T T' hδ hδ' p.2) 2 p.1))
+        ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+    apply contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+      (F₁ := Tensor0SBundle.Tensor0SModel 4 ℝ E) (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace 4 I x)
+      (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)
+      (φ := fun p : M × ℝ =>
+        DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.cometricDoubleTraceFib (I := I)
+          (realizedFam (I := I) g₀ T T' hδ hδ' p.2) 2 p.1)
+      (S := realizedSmallSet (δ := δ) (δ' := δ'))
+    intro Y
+    -- joint smoothness of `Y` pulled back via `fst`.
+    have hYjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 4 ℝ E)) ∞
+        (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 4 ℝ E)
+          (E := fun z : M => Tensor0SBundle.Tensor0SSpace 4 I z) p.1 (Y p.1))
+        ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
+      Y.contMDiff.comp_contMDiffOn contMDiffOn_fst
+    -- the joint `{0, 1}`-double trace of `Y` (the named cometric-double-trace keystone, `p = 2`).
+    exact cometricDoubleTraceFib_realizedFam_jointContMDiffOn (I := I) (p := 2) g₀ T T' hδ hδ'
+      (fun p : M × ℝ => Y p.1) hYjoint
+  refine hsection.congr (fun p _ => ?_)
+  rw [ricciArmPrincipalCoeffPure_toSection]
+
+/-- **Continuity-in-`s` slice of the PURE order-`2` principal coefficient along the realized path.**
+
+The continuity slice of the joint `(s, x)`-smoothness `ricciArmPrincipalCoeffPure_realizedFam_jointContMDiff`:
+at every fixed base point `x`, the model-fibre value
+`s ↦ (ricciArmPrincipalCoeffPure g₀ g_s).toSection x |>.toModel` is continuous on the realized small set.
+Obtained by `jointContMDiff_toModel_continuous_slice`, the same slice extraction used for the combined
+coefficient. -/
+theorem ricciArmPrincipalCoeffPure_realizedFam_toModel_continuous [BoundarylessManifold I M]
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) :
+    ContinuousOn (fun t : ℝ =>
+      Tensor0SBundle.TensorRSSpace.toModel
+        ((ricciArmPrincipalCoeffPure (I := I) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' t)).toSection x))
+      (realizedSmallSet (δ := δ) (δ' := δ')) := by
+  have hjoint := ricciArmPrincipalCoeffPure_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ'
+  exact jointContMDiff_toModel_continuous_slice (I := I) g₀ 4 2
+    (fun t => ricciArmPrincipalCoeffPure (I := I) g₀
+      (realizedFam (I := I) g₀ T T' hδ hδ' t)) (realizedSmallSet (δ := δ) (δ' := δ')) hjoint x
+
 /-- **Continuity in `s` of the per-arm `unitModel`/`appCc` read-offs of the linearized-Ricci
 coefficient families (the deep mean-value continuity input).**
 
@@ -670,11 +764,12 @@ theorem ricciArmCoeff_appCc_read_continuousOn
       (fun s => ricciArmOrder0Coeff (I := I) g₀ T T' hδ hδ' s)
       (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
       (ricciArmOrder0CurvCoeff_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x) v).mono hIcc
-  · -- Order-`2` arm: same, via the order-`2` continuity slice of the keystone.
+  · -- Order-`2` arm: same, via the PURE order-`2` continuity slice (`ricciArmOrder2Coeff` is now the pure
+    -- rough-Laplacian coefficient `ricciArmPrincipalCoeffPure`).
     exact (appCc_unitModel_read_continuousOn_of_toModel_continuousOn (I := I) g₀ 4
       (fun s => ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ' s)
       (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))
-      (ricciArmPrincipalCoeff_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x) v).mono hIcc
+      (ricciArmPrincipalCoeffPure_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x) v).mono hIcc
 
 /-- **The pointwise-in-`s` Lichnerowicz `appCc` coefficient families of the linearized Ricci
 operator (with `s`-continuous read-offs).**
@@ -944,8 +1039,8 @@ theorem integratedLinearizedRicci_appCc_eq
     exists_pathIntegralCoeffField (I := I) (M := M) g₀ 4 R₂fib
       (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))
       (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI
-      (ricciArmPrincipalCoeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ')
-      (fun x => ricciArmPrincipalCoeff_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x)
+      (ricciArmPrincipalCoeffPure_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ')
+      (fun x => ricciArmPrincipalCoeffPure_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x)
   -- The integrated coefficient fields are the fibre path integrals (the combined operator already
   -- carries the `−2` Ricci scaling, so no extra scaling is needed here).
   refine ⟨IΦ₀, IΦ₂, fun x v => ?_⟩

@@ -952,6 +952,90 @@ theorem ricciArmPrincipalCoeff_appCc_eq_combinedTrace
     combinedTrace42Model_apply (E := E) (cometricLmodel (I := I) g₁ x)]
   rfl
 
+/-! ## The PURE rough-Laplacian order-2 coefficient field `R₂_pure`
+
+The DeTurck gauge cancellation makes the COMBINED principal symbol of the Ricci–DeTurck right-hand side
+the *pure* rough Laplacian `A_{ik} = ∑_{j,l} g₁^{jl} ∂_j ∂_l h_{ik}` on a symmetric perturbation: the two
+`{0, 3}`-cross Koszul terms of the bare Ricci symbol are exactly killed by the DeTurck-correction symbol,
+leaving only the `{0, 1}`-cometric double trace of the two leading covariant slots of `∇₀² S`.  Numerically
+(dim-`4` random SPD), `A = +1 · modelDoubleTrace 2 (cometricLmodel g₁ x)`, with NO `½` scaling and NO sign
+flip — the single third Koszul summand of `combinedTrace42Model` taken with coefficient `+1`.
+
+So the corrected order-2 PRINCIPAL coefficient of the *combined* operator is the SINGLE cometric
+double-trace field `cometricDoubleTraceFib g₁ 2` (the `(4, 2)`-operator field whose `appCc` read-off is the
+`{0, 1}`-cometric double trace `∑ₖ D(♯b^k, b_k, Z, Y)`), NOT the gauge-carrying combined three-trace
+`ricciArmPrincipalCoeff`.  This section mints it as a `g₀`-tagged smooth `(4, 2)`-tensor (the cometric raise
+is `g₁`'s, the `SmoothCcTensor` metric tag is the phantom `g₀`, exactly mirroring `ricciArmPrincipalCoeff`).
+-/
+
+set_option linter.unusedSectionVars false in
+/-- **The PURE rough-Laplacian order-2 coefficient field `R₂_pure` as a smooth compactly-supported
+`(4, 2)`-tensor.**  The fibre value at `x` is the single cometric double-trace operator
+`cometricDoubleTraceFib g₁ 2 x` (smooth by `cometricDoubleTraceFib_contMDiff`); on the closed manifold it
+has compact support.  This is the corrected order-2 PRINCIPAL coefficient of the *combined* Ricci–DeTurck
+operator (after the DeTurck gauge cancellation): the genuine pure rough Laplacian
+`A_{ik} = ∑_{j,l} g₁^{jl} ∂_j ∂_l h_{ik}`, whose `appCc`-action on `D = ∇₀² S` reproduces the gauge-cancelled
+principal `∑ₖ D(♯b^k, b_k, v 0, v 1)` (`ricciArmPrincipalCoeffPure_appCc_eq_roughLaplacian`), NOT the
+gauge-carrying combined three-trace `ricciArmPrincipalCoeff`.  Mirrors `ricciArmPrincipalCoeff g₀ g₁` (the
+`g₀` slot is a phantom tag), but reads the SINGLE `{0, 1}`-double trace, so it is non-vacuous (the genuine
+cometric double-trace field, smooth, not the zero field). -/
+noncomputable def ricciArmPrincipalCoeffPure (g₀ g₁ : SmoothRiemannianMetric I M) :
+    SmoothCcTensor g₀ 4 2 where
+  toSection :=
+    { toFun := fun x : M =>
+        (show Tensor0SBundle.TensorRSSpace 4 2 I x from cometricDoubleTraceFib (I := I) g₁ 2 x)
+      contMDiff_toFun := cometricDoubleTraceFib_contMDiff (I := I) g₁ 2 }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+set_option linter.unusedSectionVars false in
+/-- The underlying section value of `ricciArmPrincipalCoeffPure g₀ g₁` at `x` is the cometric double-trace
+fibre operator `cometricDoubleTraceFib g₁ 2 x`.  Definitional. -/
+@[simp] theorem ricciArmPrincipalCoeffPure_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+    (ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁).toSection x =
+      (show Tensor0SBundle.TensorRSSpace 4 2 I x from cometricDoubleTraceFib (I := I) g₁ 2 x) := rfl
+
+set_option linter.unusedSectionVars false in
+/-- **The `appCc`/`unitModel` read-off of the PURE order-2 coefficient `R₂_pure` is the pure rough
+Laplacian (the single `{0, 1}`-cometric double trace).**
+
+For any smooth `(0, 4)`-tensor field `W` (in the consumer `W = iteratedCovGrad g₀ 0 2 2 (T − T')` the second
+covariant gradient of the metric-difference section), the `unitModel` read-off of the operator-field action
+`appCc g₀ 4 2 R₂_pure W` at `x` on a tangent pair `v` is the pure `g₁⁻¹`-double trace of the unit-form
+`D = unitModel g₀ 4 W x`:
+```
+unitModel g₀ 2 (appCc g₀ 4 2 R₂_pure W) x v
+  = ∑ₖ D(♯b^k, b_k, v 0, v 1),   ♯ = cometricLmodel g₁ x,  D = unitModel g₀ 4 W x.
+```
+This is the gauge-cancelled order-2 PRINCIPAL building block `A = appCc R₂_pure (∇₀² S)`: the rough
+Laplacian `A_{ik} = ∑_{j,l} g₁^{jl} ∂_j ∂_l h_{ik}` realised as the single `{0, 1}`-cometric double trace of
+`∇₀² S` (slots `(deriv2, deriv1, S1, S2)`), with NO `½` and NO sign flip.  It composes `appCc_toSection`
+(`(R₂_pure x).comp (W x)`), the definitional identity `R₂_pure x = cometricDoubleTraceFib g₁ 2 x` with model
+image `modelDoubleTrace 2 (cometricLmodel g₁ x)` (`cometricDoubleTraceFib_toModel`), and the read-off
+`modelDoubleTrace_apply`. -/
+theorem ricciArmPrincipalCoeffPure_appCc_eq_roughLaplacian
+    (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 4)
+    (x : M) (v : Fin 2 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁) W) x v =
+      ∑ k : Fin (Module.finrank ℝ E),
+        unitModel (I := I) (M := M) g₀ 4 W x
+          (Fin.cons (cometricLmodel (I := I) g₁ x
+              (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                ((Module.finBasis ℝ E).cDualBasis k)))
+            (Fin.cons ((Module.finBasis ℝ E) k) v)) := by
+  rw [unitModel, appCc_toSection]
+  rw [show ((show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+        (ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁).toSection x).comp
+        (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I x from
+          W.toSection x)) (unitTensor (I := I) (M := M) x) =
+      (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+        (ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁).toSection x)
+        ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I x from
+          W.toSection x) (unitTensor (I := I) (M := M) x)) from rfl]
+  rw [ricciArmPrincipalCoeffPure_toSection, cometricDoubleTraceFib_toModel,
+    modelDoubleTrace_apply (E := E) 2 (cometricLmodel (I := I) g₁ x)]
+  rfl
+
 /-! ## The corrected order-2 match (the building block the Ricci arm consumes)
 
 The corrected order-2 PRINCIPAL building block: the traced principal `P` (the `{0, 3}`-cross plus the
