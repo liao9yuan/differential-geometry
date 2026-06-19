@@ -268,35 +268,83 @@ def IsRealizedChartVelocity (g₀ : SmoothRiemannianMetric I M)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (α : M) (s : ℝ) (h : ChartMetricPerturbation E) : Prop :=
-  ∀ (i j : Fin (Module.finrank ℝ E)) {y : E}, y ∈ interior (extChartAt I α).target →
-    HasDerivAt
-      (fun σ : ℝ => chartGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' σ) α i j y)
-      (h i j y) s
+  ∀ (i j : Fin (Module.finrank ℝ E)),
+    ∀ᶠ y in nhds (extChartAt I α α),
+      HasDerivAt
+        (fun σ : ℝ => chartGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' σ) α i j y)
+        (h i j y) s
 
-/-- **(Posited deep input — re-basing of the chart-Ricci `s`-derivative at an interior parameter.)**
+/-- **(Posited deep input — the cutoff metric-perturbation family of the re-base metric `g_s`,
+with the locality agreement to the realized family near `x`.)**
 
-For the realized metric path `g_s = realizedFam g₀ T T' s` and every interior parameter `s ∈ (0,1)`, the
-`s`-derivative of the realized chart-Ricci sum `deriv (realizedRicciChartSum) s` equals the
+For the realized re-base metric `g_s = realizedFam g₀ T T' s` at an interior parameter `s ∈ (0,1)`
+and a base point `x`, there are a chart perturbation `h : ChartMetricPerturbation E` (the chart
+section-difference velocity `χ · V`, with `V` the convex chart-Gram velocity and `χ` a smooth bump
+`≡ 1` near `extChartAt I x x`, `tsupport χ ⊆ interior (extChartAt I x).target`) and a smooth
+one-parameter family `gfam` of positive-definite metrics such that:
+
+* `gfam` is a `g_s`-metric-perturbation family along `h` (`IsMetricPerturbationFamily g_s x h gfam`),
+  built as the realized metric of the cutoff chart-Gram perturbation `g_s ⊕ σ · χ · V`: it passes
+  through `g_s` at `σ = 0`, its chart-Gram value/first-jet/second-jet `σ`-derivatives at `0` are
+  exactly the corresponding jets of `h = χ · V` (affine in `σ`, with all `∂χ`-factors absorbed into
+  `h` itself), and the chart Gram is jointly `(σ, y)`-`C^∞`;
+* `h` is the realized section-difference chart velocity at `(x, s)` (`IsRealizedChartVelocity`): near
+  `extChartAt I x x` the cutoff `χ ≡ 1`, so `h = V`, and there `V` is the constant `σ`-derivative of
+  the affine realized chart Gram (`realizedFam_chartGramOnE`);
+* (locality) for every pair `(i, k)`, the chart-Ricci read-off at the single chart point
+  `extChartAt I x x` of the *translated* cutoff family `gfam` agrees, on a whole neighbourhood of
+  `σ = 0`, with that of the *re-based realized* family `σ ↦ realizedFam (s + σ)`, because near `x`
+  the cutoff `χ ≡ 1` makes `gfam σ` and `realizedFam (s + σ)` have the *same chart Gram on a
+  neighbourhood of `extChartAt I x x`*, hence the same chart Christoffel/Riemann/Ricci jet there.
+
+This is the classical "extend a local chart-Gram perturbation to a global positive-definite metric
+family" construction (the cutoff realiser, parallel to `realize`/`realizedMetricPathOpen`), packaged
+together with its base-point chart-Ricci locality; it is not yet on disk and is *posited* here, to be
+discharged by recursing into it.  It genuinely constrains `(h, gfam)` to be the cutoff perturbation
+family of `g_s` with velocity `h` matching the realized chart velocity near `x`, so it is non-vacuous:
+the zero perturbation (`h = 0`, `gfam ≡ g_s`) fails it wherever the realized chart velocity `V` is
+nonzero near `x`. -/
+theorem exists_rebased_cutoffMetricPerturbationFamily
+    (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {s : ℝ} (hs : s ∈ Set.Ioo (0 : ℝ) 1) (x : M) :
+    ∃ (h : ChartMetricPerturbation E) (gfam : ℝ → SmoothRiemannianMetric I M),
+      IsMetricPerturbationFamily (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x h gfam ∧
+        IsRealizedChartVelocity (I := I) g₀ T T' hδ hδ' x s h ∧
+        (∀ (i k : Fin (Module.finrank ℝ E)),
+          (fun σ : ℝ => chartRicciTensor (I := I) (gfam σ) x i k (extChartAt I x x))
+            =ᶠ[nhds (0 : ℝ)]
+              (fun σ : ℝ => chartRicciTensor (I := I)
+                (realizedFam (I := I) g₀ T T' hδ hδ' (s + σ)) x i k (extChartAt I x x))) :=
+  sorry
+
+/-- **The re-basing of the chart-Ricci `s`-derivative at an interior parameter.**
+
+For the realized metric path `g_s = realizedFam g₀ T T' s` and every interior parameter `s ∈ (0,1)`,
+the `s`-derivative of the realized chart-Ricci sum `deriv (realizedRicciChartSum) s` equals the
 `chartModelBasis`-trace read-off, at the re-base metric `g_s`, of the on-disk chart Ricci-tensor
-`s`-derivative split `chartRicciSecondOrderPart g_s h + ricciDerivFirstOrderRemainder g_s h`, where `h` is
-the section-difference chart velocity (`IsRealizedChartVelocity`).
+`s`-derivative split `chartRicciSecondOrderPart g_s h + ricciDerivFirstOrderRemainder g_s h`, where `h`
+is the section-difference chart velocity (`IsRealizedChartVelocity`).
 
-This is the **re-basing** half of the Ricci-arm linearization: the public chart Ricci-tensor split
-`hasDerivAt_chartRicciTensor` (`MetricFamilyChartLinearization`) computes the `s`-derivative of
-`s ↦ chartRicciTensor (gfam s) α i k y` at `s = 0` for any `IsMetricPerturbationFamily g₀ α h gfam`; here
-the realized family `realizedFam` translated to base `s₀` (`gfam σ = realizedFam (s₀ + σ)`) is a
-metric-perturbation family of `g_{s₀}` with the affine section-difference velocity `h`
-(`realizedFam_chartGramOnE` is affine in `s`, so every chart-Gram jet pin holds), and `HasDerivAt.deriv`
-re-bases the derivative from `s = 0` of the translated family to `s = s₀` of `realizedRicciChartSum`.  The
-re-basing infrastructure (`realizedFam` as a translated `IsMetricPerturbationFamily` of `g_{s₀}`) is not
-yet on disk; it is *posited* here, to be discharged by recursing into it.  It genuinely constrains the
-derivative to be the re-based chart-symbol read-off, so it is non-vacuous: a wrong velocity field fails it
-where the chart Ricci derivative is nonzero. -/
+This is the **re-basing** half of the Ricci-arm linearization, assembled from the cutoff
+metric-perturbation family `exists_rebased_cutoffMetricPerturbationFamily`: the public chart
+Ricci-tensor split `hasDerivAt_chartRicciTensor` (`MetricFamilyChartLinearization`) computes the
+`σ`-derivative at `σ = 0` of `σ ↦ chartRicciTensor (gfam σ) x i k y` for the cutoff family `gfam` of
+`g_s`; by the family's base-point locality this transfers (`HasDerivAt.congr_of_eventuallyEq`) to the
+re-based realized family `σ ↦ chartRicciTensor (realizedFam (s + σ))`, and the translation invariance
+of the derivative (`deriv_comp_const_add`) re-bases it from `σ = 0` of the translated family to `s` of
+`realizedRicciChartSum`. -/
 theorem deriv_realizedRicciChartSum_eq_rebased_chartSymbol
     (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s : ℝ} (hs : s ∈ Set.Ioo (0 : ℝ) 1) (x : M) (v w : TangentSpace I x) :
     ∃ h : ChartMetricPerturbation E,
       IsRealizedChartVelocity (I := I) g₀ T T' hδ hδ' x s h ∧
@@ -306,8 +354,72 @@ theorem deriv_realizedRicciChartSum_eq_rebased_chartSymbol
               (chartRicciSecondOrderPart (I := I)
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x) +
                 ricciDerivFirstOrderRemainder (I := I)
-                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x)) :=
-  sorry
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x)) := by
+  classical
+  -- The cutoff metric-perturbation family of `g_s`, its velocity-pin, and its base-point locality.
+  obtain ⟨h, gfam, hfam, hvel, hloc⟩ :=
+    exists_rebased_cutoffMetricPerturbationFamily (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' hs x
+  refine ⟨h, hvel, ?_⟩
+  -- Abbreviate the re-base metric and the fixed chart-evaluation point.
+  set gs : SmoothRiemannianMetric I M := realizedFam (I := I) g₀ T T' hδ hδ' s with hgs
+  set y₀ : E := extChartAt I x x with hy₀
+  -- The chart-interior membership of the base chart point (boundaryless atlas).
+  have hy : y₀ ∈ interior (extChartAt I x).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) x (mem_extChartAt_target x)
+  -- Per-summand: `t ↦ chartRicciTensor (realizedFam t) x i k y₀` has, at `s`, the chart-symbol split.
+  have hper : ∀ i k : Fin (Module.finrank ℝ E),
+      HasDerivAt (fun t : ℝ => chartRicciTensor (I := I)
+          (realizedFam (I := I) g₀ T T' hδ hδ' t) x i k y₀)
+        (chartRicciSecondOrderPart (I := I) gs x h i k y₀ +
+          ricciDerivFirstOrderRemainder (I := I) gs x h i k y₀) s := by
+    intro i k
+    -- The chart-Ricci `σ`-derivative split at `σ = 0` for the cutoff family `gfam` of `g_s`.
+    have hsplit : HasDerivAt
+        (fun σ : ℝ => chartRicciTensor (I := I) (gfam σ) x i k y₀)
+        (chartRicciSecondOrderPart (I := I) gs x h i k y₀ +
+          ricciDerivFirstOrderRemainder (I := I) gs x h i k y₀) 0 :=
+      hasDerivAt_chartRicciTensor (I := I) hfam i k hy
+    -- Transfer to the re-based realized family by the family's base-point locality.
+    have htrans : HasDerivAt
+        (fun σ : ℝ => chartRicciTensor (I := I)
+          (realizedFam (I := I) g₀ T T' hδ hδ' (s + σ)) x i k y₀)
+        (chartRicciSecondOrderPart (I := I) gs x h i k y₀ +
+          ricciDerivFirstOrderRemainder (I := I) gs x h i k y₀) 0 :=
+      hsplit.congr_of_eventuallyEq (hloc i k).symm
+    -- Re-base from `σ = 0` of the translated family to `s` of the original via `(· - s)` translation:
+    -- `(σ ↦ G (s + σ)) ∘ (· - s) = G` since `s + (t - s) = t`.
+    have htrans' : HasDerivAt
+        (fun σ : ℝ => chartRicciTensor (I := I)
+          (realizedFam (I := I) g₀ T T' hδ hδ' (s + σ)) x i k y₀)
+        (chartRicciSecondOrderPart (I := I) gs x h i k y₀ +
+          ricciDerivFirstOrderRemainder (I := I) gs x h i k y₀) (s - s) := by
+      rwa [sub_self]
+    have hsub := htrans'.comp_sub_const s s
+    have hcongr : (fun t : ℝ => chartRicciTensor (I := I)
+          (realizedFam (I := I) g₀ T T' hδ hδ' (s + (t - s))) x i k y₀) =
+        (fun t : ℝ => chartRicciTensor (I := I)
+          (realizedFam (I := I) g₀ T T' hδ hδ' t) x i k y₀) := by
+      funext t; rw [add_sub_cancel]
+    rwa [hcongr] at hsub
+  -- Differentiate the chart-Ricci sum term by term (`HasDerivAt` of the double sum), then read off
+  -- the derivative; each term is `c · (the per-summand chart-Ricci function)` with derivative `hper`.
+  have hsum : HasDerivAt
+      (fun t : ℝ => ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
+          chartRicciTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' t) x i k y₀)
+      (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
+          (chartRicciSecondOrderPart (I := I) gs x h i k y₀ +
+            ricciDerivFirstOrderRemainder (I := I) gs x h i k y₀)) s := by
+    refine HasDerivAt.fun_sum (fun i _ => HasDerivAt.fun_sum (fun k _ => ?_))
+    exact (hper i k).const_mul _
+  have hfun : realizedRicciChartSum (I := I) g₀ T T' hδ hδ' x v w =
+      (fun t : ℝ => ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
+          chartRicciTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' t) x i k y₀) := by
+    funext t; rw [realizedRicciChartSum, hy₀]
+  rw [hfun]
+  exact hsum.deriv
 
 /-- **(Posited deep input — chart-symbol/remainder → intrinsic two-term `appCc` transfer.)**
 
@@ -381,8 +493,10 @@ coefficients fail it where the linearized Ricci is nonzero. -/
 theorem deriv_realizedRicciChartSum_eq_appCc_pointwise
     (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s : ℝ} (hs : s ∈ Set.Ioo (0 : ℝ) 1) (x : M) (v : Fin 2 → TangentSpace I x) :
     deriv (realizedRicciChartSum (I := I) g₀ T T' hδ hδ' x (v 0) (v 1)) s =
       unitModel (I := I) (M := M) g₀ 2
@@ -393,7 +507,8 @@ theorem deriv_realizedRicciChartSum_eq_appCc_pointwise
               (ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ' s)
               (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
   obtain ⟨h, hh, hderiv⟩ :=
-    deriv_realizedRicciChartSum_eq_rebased_chartSymbol (I := I) g₀ T T' hδ hδ' hs x (v 0) (v 1)
+    deriv_realizedRicciChartSum_eq_rebased_chartSymbol (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' hs x
+      (v 0) (v 1)
   rw [hderiv]
   exact rebased_chartSymbol_eq_appCc_pointwise (I := I) g₀ T T' hδ hδ' s x h hh v
 
@@ -542,7 +657,7 @@ theorem exists_linearizedRicci_pointwise_appCc_families
     intro s hs x v
     rw [linearizedRicciAt_eq_deriv_chartSum_on_Ioo (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x
       (v 0) (v 1) hs]
-    exact deriv_realizedRicciChartSum_eq_appCc_pointwise (I := I) g₀ T T' hδ hδ' hs x v
+    exact deriv_realizedRicciChartSum_eq_appCc_pointwise (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' hs x v
   · -- The order-`0` read-off continuity (first conjunct of the posited continuity bridge).
     intro x v
     exact (ricciArmCoeff_appCc_read_continuousOn (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x v).1
@@ -726,7 +841,7 @@ theorem integratedLinearizedRicci_appCc_eq
     intro s hs x v
     rw [linearizedRicciAt_eq_deriv_chartSum_on_Ioo (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x
       (v 0) (v 1) hs]
-    exact deriv_realizedRicciChartSum_eq_appCc_pointwise (I := I) g₀ T T' hδ hδ' hs x v
+    exact deriv_realizedRicciChartSum_eq_appCc_pointwise (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' hs x v
   -- Per-arm read-off interval-integrability from the keystone's continuity slices on `[0,1]`.
   have hcontRead := ricciArmCoeff_appCc_read_continuousOn (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
   have hint₀ : ∀ (x : M) (v : Fin 2 → TangentSpace I x), IntervalIntegrable
