@@ -5,6 +5,8 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenc
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckMetricArmCoeffField
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SmoothParametricCoeffIntegral
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSStrictParabolic
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChartGramRealizeDiffJet
+import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.CovGrad.SecondCovGradChartHessian
 
 /-!
 # The Ricci-tensor difference of two realized metrics: the Palatini telescope and its `appCc` grading
@@ -102,6 +104,9 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
+open DifferentialGeometry.Analysis.Sobolev.Chart
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -720,6 +725,258 @@ private noncomputable def chartChristoffelCorrFib
             (covGrad (I := I) (M := M) g₀ 0 2 S) x j Fin.elim0 ![l, i, k]
             (toEuclidean (extChartAt I x x)))
 
+/-- **The model-space partial derivative as a Euclidean partial through the isometry `toEuclidean`.** For any scalar `u : E → ℝ`, the `m`-th `chartModelBasis`-direction partial of `u` at `y` equals the `m`-th Euclidean partial of the `toEuclidean.symm`-pullback `u ∘ toEuclidean.symm` at `toEuclidean y` (the chain rule through the linear isometry `toEuclidean.symm`). -/
+private lemma partialDeriv_eq_euclidPartial_toEuclidean (m : Fin (Module.finrank ℝ E)) (u : E → ℝ) (y : E) :
+    partialDeriv (E := E) m u y =
+      euclidPartial (E := E) m (u ∘ (toEuclidean (E := E)).symm) (toEuclidean (E := E) y) := by
+  rw [euclidPartial_def, partialDeriv]
+  rw [(toEuclidean (E := E)).symm.comp_right_fderiv (f := u) (x := toEuclidean (E := E) y)]
+  rw [ContinuousLinearMap.comp_apply]
+  rw [show (toEuclidean (E := E)).symm.toContinuousLinearMap (EuclideanSpace.single m (1:ℝ))
+      = (chartModelBasis E) m from by rw [chartModelBasis_apply]; rfl]
+  rw [(toEuclidean (E := E)).symm_apply_apply y]
+
+/-- **The iterated (double) model-space partial derivative as the iterated Euclidean partial through `toEuclidean`: applying `partialDeriv_eq_euclidPartial_toEuclidean` twice.** -/
+private lemma partialDeriv_iterate_eq_euclidPartial_iterate_toEuclidean (j l : Fin (Module.finrank ℝ E)) (u : E → ℝ) (y : E) :
+    partialDeriv (E := E) j (partialDeriv (E := E) l u) y =
+      euclidPartial (E := E) j
+        (euclidPartial (E := E) l (u ∘ (toEuclidean (E := E)).symm)) (toEuclidean (E := E) y) := by
+  rw [partialDeriv_eq_euclidPartial_toEuclidean (E := E) j (partialDeriv (E := E) l u) y]
+  congr 1
+  funext Y
+  rw [Function.comp_apply]
+  rw [partialDeriv_eq_euclidPartial_toEuclidean (E := E) l u ((toEuclidean (E := E)).symm Y)]
+  rw [(toEuclidean (E := E)).apply_symm_apply Y]
+
+
+/-- **The raw chart `(0,2)`-component of the slot-`{0,1}`-swapped section transposes the index pair: `tcr (domDomCongrSection (swap 0 1) S) [a,c] = tcr S [c,a]` (through the chart-frame read-off and `domDomCongrSection_unitModel`).** -/
+private lemma tensorChartComponentRaw_domDomCongrSwap_eq_transpose (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (α : M)
+    {b : M} (hb : b ∈ (chartAt H α).source) (a c : Fin (Module.finrank ℝ E)) :
+    tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+        (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) S) α ![] ![a, c] b =
+      tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S α ![] ![c, a] b := by
+  rw [tensorChartComponentRaw_eq_chartFrame (I := I) (M := M) g₀ 0 2 _ α hb ![] ![a, c],
+    tensorChartComponentRaw_eq_chartFrame (I := I) (M := M) g₀ 0 2 S α hb ![] ![c, a]]
+  change (Tensor0SSpace.toModel
+        ((domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) S).toSection b
+          (unitTensor (I := I) (M := M) b)))
+      (fun jj => chartBasisVecFiber (I := I) α (![a,c] jj) b) = _
+  have hdd : Tensor0SSpace.toModel
+        ((domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) S).toSection b
+          (unitTensor (I := I) (M := M) b)) =
+      ContinuousMultilinearMap.domDomCongr (Equiv.swap (0 : Fin 2) 1)
+        (unitModel (I := I) (M := M) g₀ 2 S b) :=
+    domDomCongrSection_unitModel (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) S b
+  rw [hdd, ContinuousMultilinearMap.domDomCongr_apply]
+  change _ = (Tensor0SSpace.toModel (S.toSection b (unitTensor (I := I) (M := M) b)))
+      (fun jj => chartBasisVecFiber (I := I) α (![c,a] jj) b)
+  congr 1
+  funext jj
+  fin_cases jj <;> simp [Equiv.swap_apply_left, Equiv.swap_apply_right]
+
+/-- **The raw chart `(0,2)`-component of the symmetrisation `symmS g₀ S` is the symmetrised raw component: `tcr (symmS g₀ S) [a,c] = ½ (tcr S [a,c] + tcr S [c,a])` (linearity of `tcr` in the section plus the swap-transpose identity).** -/
+private lemma tensorChartComponentRaw_symmS_eq_half_add_transpose (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (α : M)
+    {b : M} (hb : b ∈ (chartAt H α).source) (a c : Fin (Module.finrank ℝ E)) :
+    tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 (symmS (I := I) (M := M) g₀ S) α ![] ![a, c] b =
+      (1 / 2 : ℝ) * (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S α ![] ![a, c] b +
+        tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S α ![] ![c, a] b) := by
+  rw [symmS, tensorChartComponentRaw_smul, tensorChartComponentRaw_add,
+    tensorChartComponentRaw_domDomCongrSwap_eq_transpose (I := I) (M := M) g₀ S α hb a c, smul_eq_mul]
+
+
+/-- **The realized section-difference chart velocity `h i k` is, on a neighbourhood of `extChartAt I x x`, the chart-pushed symmetrised raw `(i,k)`-component of `T − T'`.** Under the smallness `δ, δ' < 1` and `s ∈ Ioo 0 1` the family chart Gram is affine in `σ` (`realizedFam_chartGramOnE`), so the velocity-pin derivative of `IsRealizedChartVelocity` is the constant chart-Gram difference, which by `chartGramOnE_realize_sub_eqOn_symm_rawComponent` and the symmetrisation identity equals the symmetrised raw component near the base point. -/
+-- chart-pushed raw component of the symmetrised section difference.
+private lemma isRealizedChartVelocity_eventuallyEq_symm_rawComponent
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1) (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {s : ℝ} (hs : s ∈ Set.Ioo (0:ℝ) 1) (x : M) (h : ChartMetricPerturbation E)
+    (hh : IsRealizedChartVelocity (I := I) g₀ T T' hδ hδ' x s h)
+    (i k : Fin (Module.finrank ℝ E)) :
+    (fun y : E => h i k y) =ᶠ[nhds (extChartAt I x x)]
+      (fun y : E => tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+        (symmS (I := I) (M := M) g₀ (T - T')) x ![] ![i, k] ((extChartAt I x).symm y)) := by
+  have hmem : s ∈ realizedSmallSet (δ := δ) (δ' := δ') :=
+    Icc_subset_realizedSmallSet hδ_lt hδ'_lt (Set.mem_Icc_of_Ioo hs)
+  have hSopen : IsOpen (realizedSmallSet (δ := δ) (δ' := δ')) := realizedSmallSet_isOpen
+  -- the affine-derivative HasDerivAt for each fixed y
+  have hdaff : ∀ y : E, HasDerivAt
+      (fun σ : ℝ => chartGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' σ) x i k y)
+      (chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x i k y -
+        chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x i k y) s := by
+    intro y
+    have heq : (fun σ : ℝ => chartGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' σ) x i k y)
+        =ᶠ[nhds s] (fun σ : ℝ =>
+          (1 - σ) * chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x i k y +
+          σ * chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x i k y) := by
+      filter_upwards [hSopen.mem_nhds hmem] with σ hσ
+      exact realizedFam_chartGramOnE (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' hσ x i k y
+    apply HasDerivAt.congr_of_eventuallyEq _ heq
+    have h1 : HasDerivAt (fun σ : ℝ =>
+        (1 - σ) * chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x i k y +
+        σ * chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x i k y)
+        ((0 - 1) * chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x i k y +
+          1 * chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x i k y) s := by
+      apply HasDerivAt.add
+      · exact (((hasDerivAt_const s (1:ℝ)).sub (hasDerivAt_id s)).mul_const _)
+      · exact (hasDerivAt_id s).mul_const _
+    convert h1 using 1
+    ring
+  -- velocity tie gives the same derivative value pointwise, near base
+  have htie := hh i k
+  -- on a nbhd of base, h i k y = G_T - G_T'
+  have hpt : (fun y : E => h i k y) =ᶠ[nhds (extChartAt I x x)]
+      (fun y : E => chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x i k y -
+        chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x i k y) := by
+    filter_upwards [htie] with y hy
+    exact hy.unique (hdaff y)
+  -- on the chart-target interior, that difference equals the symmetrized raw component
+  have hint : extChartAt I x x ∈ interior (extChartAt I x).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) x (mem_extChartAt_target x)
+  have hEqOn := chartGramOnE_realize_sub_eqOn_symm_rawComponent (I := I) (M := M)
+    g₀ T T' hδ_lt hδ hδ'_lt hδ' x i k
+  have hgram_eq : (fun y : E => chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x i k y -
+        chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x i k y)
+      =ᶠ[nhds (extChartAt I x x)]
+      (fun y : E => tensorChartComponentRaw (I := I) (M := M) g₀ 0 2
+        (symmS (I := I) (M := M) g₀ (T - T')) x ![] ![i, k] ((extChartAt I x).symm y)) := by
+    filter_upwards [(isOpen_interior).mem_nhds hint] with y hy
+    have hy_src : (extChartAt I x).symm y ∈ (chartAt H x).source := by
+      have hy_t : y ∈ (extChartAt I x).target := interior_subset hy
+      have := (extChartAt I x).map_target hy_t
+      rwa [extChartAt_source] at this
+    have hpair := hEqOn hy
+    simp only at hpair
+    rw [hpair, tensorChartComponentRaw_symmS_eq_half_add_transpose (I := I) (M := M) g₀ (T - T') x hy_src i k]
+  exact hpt.trans hgram_eq
+
+
+/-- **The base-point iterated (double) model-space partial derivative depends only on the germ of the function: if `u =ᶠ[𝓝 y₀] w` then `∂_j ∂_l u (y₀) = ∂_j ∂_l w (y₀)` (transferring through both Fréchet derivatives).** -/
+private lemma partialDeriv_iterate_congr_of_eventuallyEq {u w : E → ℝ} {y₀ : E}
+    (huw : u =ᶠ[nhds y₀] w) (j l : Fin (Module.finrank ℝ E)) :
+    partialDeriv (E := E) j (partialDeriv (E := E) l u) y₀ =
+      partialDeriv (E := E) j (partialDeriv (E := E) l w) y₀ := by
+  have hinner : (fun y => partialDeriv (E := E) l u y) =ᶠ[nhds y₀]
+      (fun y => partialDeriv (E := E) l w y) := by
+    have : ∀ᶠ y in nhds y₀, u =ᶠ[nhds y] w := huw.eventually_nhds
+    filter_upwards [this] with y hy
+    simp only [partialDeriv]
+    rw [hy.fderiv_eq]
+  simp only [partialDeriv]
+  rw [hinner.fderiv_eq]
+
+
+/-- **The per-`(j,l)` chart Hessian of the symmetrised section's raw `(i,k)`-component equals the raw chart component of the covariant Hessian `∇₀²S` minus the per-`(j,l)` Christoffel correction.** The translation of the landed `chartCovariantSecondGrad_chartHessian_sub_correction` into model-space `partialDeriv` form: the double `partialDeriv ↔ euclidPartial` translation, the `chartPushedRaw`/`toEuclidean.symm` identification on the chart target, and splitting the outer Euclidean partial over the Hessian and Christoffel summands. -/
+private lemma chartHessian_symm_rawComponent_eq_covariantHessian_sub_christoffel
+    (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
+    (i k j l : Fin (Module.finrank ℝ E)) :
+    partialDeriv (E := E) j
+        (partialDeriv (E := E) l
+          (fun y : E => tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![i, k]
+            ((extChartAt I x).symm y)))
+        (extChartAt I x x) =
+      tensorChartComponentRaw (I := I) (M := M) g₀ 0 (2 + 2)
+          (iteratedCovGrad (I := I) g₀ 0 2 2 S) x Fin.elim0 ![j, l, i, k] x -
+        (euclidPartial (E := E) j
+            (fun y' => covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 2 S x l Fin.elim0 ![i, k] y')
+            (toEuclidean (E := E) (extChartAt I x x))
+          + covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 3
+              (covGrad (I := I) (M := M) g₀ 0 2 S) x j Fin.elim0 ![l, i, k]
+              (toEuclidean (E := E) (extChartAt I x x))) := by
+  set y₀ : E := extChartAt I x x with hy₀
+  set Y₀ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) := toEuclidean (E := E) y₀ with hY₀
+  have hxmem : x ∈ (chartAt H x).source := mem_chart_source H x
+  have hY₀mem : Y₀ ∈ chartTargetEuclid (I := I) (M := M) x := by
+    rw [hY₀, hy₀]
+    exact toEuclidean_extChartAt_mem_chartTargetEuclid (I := I) (M := M) x hxmem
+  -- translate the double partialDeriv to a double euclidPartial via Helper B
+  rw [partialDeriv_iterate_eq_euclidPartial_iterate_toEuclidean (E := E) j l
+    (fun y : E => tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![i, k]
+      ((extChartAt I x).symm y)) y₀]
+  -- the toEuclidean.symm-pullback equals chartPushedRaw on chartTargetEuclid
+  have hpull : ((fun y : E => tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![i, k]
+        ((extChartAt I x).symm y)) ∘ (toEuclidean (E := E)).symm)
+      =ᶠ[nhds Y₀]
+      chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![i, k]) := by
+    filter_upwards [(chartTargetEuclid_isOpen (I := I) (M := M) x).mem_nhds hY₀mem] with Z hZ
+    rw [Function.comp_apply,
+      chartPushedRaw_apply_of_mem (I := I) (M := M) x _ hZ]
+  -- transfer the outer/inner euclidPartial through hpull, evaluate at the landed lemma
+  rw [show euclidPartial (E := E) j
+        (euclidPartial (E := E) l
+          ((fun y : E => tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![i, k]
+            ((extChartAt I x).symm y)) ∘ (toEuclidean (E := E)).symm)) Y₀ =
+      euclidPartial (E := E) j
+        (euclidPartial (E := E) l
+          (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![i, k]))) Y₀
+      from by
+    apply euclidPartial_congr_of_eqOn_open (E := E) (chartTargetEuclid_isOpen (I := I) (M := M) x) ?_ j hY₀mem
+    intro Z hZ
+    exact euclidPartial_congr_of_eqOn_open (E := E) (chartTargetEuclid_isOpen (I := I) (M := M) x)
+      (fun W hW => by
+        rw [Function.comp_apply, chartPushedRaw_apply_of_mem (I := I) (M := M) x _ hW]) l hZ]
+  -- now apply the landed covariant-vs-chart Hessian decomposition
+  have hland := chartCovariantSecondGrad_chartHessian_sub_correction (I := I) (M := M) g₀ S x
+    Fin.elim0 ![j, l, i, k] (y := Y₀) hY₀mem
+  -- the landed lemma's LHS evaluates tcr at symm(toEuclidean.symm Y₀) = x
+  have hbase : (extChartAt I x).symm ((toEuclidean (E := E)).symm Y₀) = x := by
+    rw [hY₀, hy₀, (toEuclidean (E := E)).symm_apply_apply]
+    exact (extChartAt I x).left_inv (by rw [extChartAt_source]; exact hxmem)
+  rw [hbase] at hland
+  simp only [Matrix.cons_val_zero, Matrix.vecTail] at hland
+  rw [show ((![j, l, i, k] ∘ Fin.succ) ∘ Fin.succ) = ![i, k] from by
+      funext z; fin_cases z <;> rfl,
+    show (![j, l, i, k] ∘ Fin.succ) = ![l, i, k] from by
+      funext z; fin_cases z <;> rfl] at hland
+  simp only [Matrix.cons_val_zero] at hland
+  -- Split the outer euclidPartial over the sum (Hessian part + first-order Christoffel).
+  set A : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ := euclidPartial (E := E) l
+      (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x Fin.elim0 ![i, k])) with hA
+  set B : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ := fun y' =>
+      covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 2 S x l Fin.elim0 ![i, k] y' with hB
+  -- both A and B are differentiable at Y₀ (within the open chart target)
+  have hAcd : ContDiffOn ℝ ∞ A (chartTargetEuclid (I := I) (M := M) x) := by
+    rw [hA]
+    have hcd := (chartPushedRaw_tensorChartComponentRaw_contDiffOn (I := I) (M := M) g₀ 0 2 S x
+      (![] : Fin 0 → Fin (Module.finrank ℝ E)) ![i, k])
+    -- the l-euclidPartial of a C∞ function is C∞ (one fewer order, but ∞ - 1 = ∞)
+    have : ContDiffOn ℝ ∞ (fun y => fderiv ℝ
+        (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![i, k])) y
+        (EuclideanSpace.single l (1:ℝ)))
+        (chartTargetEuclid (I := I) (M := M) x) := by
+      have hopen := chartTargetEuclid_isOpen (I := I) (M := M) x
+      have hfd : ContDiffOn ℝ ∞ (fderiv ℝ
+          (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x ![] ![i, k])))
+          (chartTargetEuclid (I := I) (M := M) x) := by
+        have := hcd.fderiv_of_isOpen hopen (m := ∞) (by simp)
+        simpa using this
+      exact hfd.clm_apply contDiffOn_const
+    simpa [euclidPartial_def] using this
+  have hBcd : ContDiffOn ℝ ∞ B (chartTargetEuclid (I := I) (M := M) x) :=
+    covDerivComponent_lowerOrder_contDiffOn (I := I) (M := M) g₀ 0 2 S x l Fin.elim0 ![i, k]
+      (fun Idx' Jdx' => chartPushedRaw_tensorChartComponentRaw_contDiffOn
+        (I := I) (M := M) g₀ 0 2 S x Idx' Jdx')
+  have hopen := chartTargetEuclid_isOpen (I := I) (M := M) x
+  have hAdiff : DifferentiableAt ℝ A Y₀ :=
+    ((hAcd.differentiableOn (by simp)).differentiableAt (hopen.mem_nhds hY₀mem))
+  have hBdiff : DifferentiableAt ℝ B Y₀ :=
+    ((hBcd.differentiableOn (by simp)).differentiableAt (hopen.mem_nhds hY₀mem))
+  have hsplit : euclidPartial (E := E) j (fun y' => A y' + B y') Y₀ =
+      euclidPartial (E := E) j A Y₀ + euclidPartial (E := E) j B Y₀ := by
+    rw [euclidPartial_def, euclidPartial_def, euclidPartial_def]
+    rw [show (fun y' => A y' + B y') = A + B from rfl]
+    rw [fderiv_add hAdiff hBdiff, ContinuousLinearMap.add_apply]
+  -- rewrite hland to the split form and conclude
+  rw [show (fun y' => euclidPartial (E := E) l
+        (chartPushedRaw I x (tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 S x Fin.elim0 ![i, k])) y'
+        + covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 2 S x l Fin.elim0 ![i, k] y') =
+      (fun y' => A y' + B y') from rfl] at hland
+  rw [hsplit] at hland
+  rw [hA, hB] at hland
+  rw [hB]
+  simp only [Matrix.empty_eq] at hland ⊢
+  linarith [hland]
+
 /-- **(Posited deep covariant bridge 1 — the chart cometric double-trace read-off.)**
 
 The `chartModelBasis`-trace + cometric-double-trace read-off of the **chart components of the covariant
@@ -764,7 +1021,7 @@ theorem chart_cometricDoubleTrace_readoff
             (Fin.cons ((Module.finBasis ℝ E) k) v)) :=
   sorry
 
-/-- **(Posited deep covariant bridge 2 — the chart Hessian = covariant-Hessian read-off minus the chart
+/-- **(Covariant bridge 2 — the chart Hessian = covariant-Hessian read-off minus the chart
 Christoffel correction.)**
 
 The translation of the landed covariant-vs-chart Hessian decomposition
@@ -787,14 +1044,19 @@ Hessian** conversion: the chart second partial `∂²h` is the covariant Hessian
 connection's Christoffel corrections; subtracting the corrections recovers `∂²h`.  It genuinely constrains
 the chart Hessian to be the covariant Hessian read-off corrected by the on-disk Christoffel terms, so it is
 non-vacuous: on a curved metric where `chartChristoffelCorrFib ≠ 0` the bare covariant read-off does not
-equal `∂²h`.  Posited here, to be discharged by recursing into the coordinate translation of
-`chartCovariantSecondGrad_chartHessian_sub_correction` plus the `IsRealizedChartVelocity` realize-tie. -/
+equal `∂²h`.  Proved by the coordinate translation of
+`chartCovariantSecondGrad_chartHessian_sub_correction` (the double `partialDeriv ↔ euclidPartial`
+translation through `toEuclidean`) plus the `IsRealizedChartVelocity` realize-tie
+(`isRealizedChartVelocity_eventuallyEq_symm_rawComponent`, valid under the smallness `δ, δ' < 1`,
+`s ∈ Ioo 0 1`). -/
 theorem chartCovariantSecondGrad_partialDeriv_form
     (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-    (s : ℝ) (x : M) (h : ChartMetricPerturbation E)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {s : ℝ} (hs : s ∈ Set.Ioo (0 : ℝ) 1) (x : M) (h : ChartMetricPerturbation E)
     (hh : IsRealizedChartVelocity (I := I) g₀ T T' hδ hδ' x s h)
     (i k : Fin (Module.finrank ℝ E)) :
     (∑ j : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
@@ -808,8 +1070,43 @@ theorem chartCovariantSecondGrad_partialDeriv_form
               (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ (T - T'))) x
               Fin.elim0 ![j, l, i, k] x) -
         chartChristoffelCorrFib (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
-          (symmS (I := I) (M := M) g₀ (T - T')) x i k :=
-  sorry
+          (symmS (I := I) (M := M) g₀ (T - T')) x i k := by
+  classical
+  set S : SmoothCcTensor g₀ 0 2 := symmS (I := I) (M := M) g₀ (T - T') with hS
+  set G : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun j l => chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x j l
+      (extChartAt I x x) with hG
+  -- the velocity is eventually equal to the symmetrised raw component near the base point
+  have hvel := isRealizedChartVelocity_eventuallyEq_symm_rawComponent (I := I) (M := M) g₀ T T' hδ_lt hδ hδ'_lt hδ' hs x h hh i k
+  -- per (j,l) chart-Hessian identity
+  have hper : ∀ j l : Fin (Module.finrank ℝ E),
+      partialDeriv (E := E) j (partialDeriv (E := E) l (h i k)) (extChartAt I x x) =
+        tensorChartComponentRaw (I := I) (M := M) g₀ 0 (2 + 2)
+            (iteratedCovGrad (I := I) g₀ 0 2 2 S) x Fin.elim0 ![j, l, i, k] x -
+          (euclidPartial (E := E) j
+              (fun y' => covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 2 S x l Fin.elim0 ![i, k] y')
+              (toEuclidean (E := E) (extChartAt I x x))
+            + covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 3
+                (covGrad (I := I) (M := M) g₀ 0 2 S) x j Fin.elim0 ![l, i, k]
+                (toEuclidean (E := E) (extChartAt I x x))) := by
+    intro j l
+    rw [partialDeriv_iterate_congr_of_eventuallyEq (E := E) hvel j l]
+    exact chartHessian_symm_rawComponent_eq_covariantHessian_sub_christoffel (I := I) (M := M) g₀ S x i k j l
+  -- substitute per (j,l), distribute, and collapse the correction sum into chartChristoffelCorrFib
+  rw [show chartChristoffelCorrFib (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) S x i k =
+        ∑ j : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+          G j l * (euclidPartial (E := E) j
+              (fun y' => covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 2 S x l Fin.elim0 ![i, k] y')
+              (toEuclidean (E := E) (extChartAt I x x))
+            + covDerivLowerOrderTerm (I := I) (M := M) g₀ 0 3
+                (covGrad (I := I) (M := M) g₀ 0 2 S) x j Fin.elim0 ![l, i, k]
+                (toEuclidean (E := E) (extChartAt I x x))) from rfl]
+  rw [← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl (fun j _ => ?_)
+  rw [← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl (fun l _ => ?_)
+  rw [hper j l]
+  ring
 
 /-- **(Posited deep covariant bridge 3 — the chart Christoffel + remainder fold to the two-slot Ricci.)**
 
@@ -840,9 +1137,11 @@ contracted-Christoffel-derivative Ricci identity and the on-disk remainder close
 theorem chart_twoSlotRicci_readoff
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-    (s : ℝ) (x : M) (h : ChartMetricPerturbation E)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {s : ℝ} (hs : s ∈ Set.Ioo (0 : ℝ) 1) (x : M) (h : ChartMetricPerturbation E)
     (hh : IsRealizedChartVelocity (I := I) g₀ T T' hδ hδ' x s h)
     (v : Fin 2 → TangentSpace I x) :
     (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
@@ -904,9 +1203,11 @@ read-off is nonzero. -/
 theorem rebased_chartSymbol_covariantWeitzenbockFold
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-    (s : ℝ) (x : M) (h : ChartMetricPerturbation E)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {s : ℝ} (hs : s ∈ Set.Ioo (0 : ℝ) 1) (x : M) (h : ChartMetricPerturbation E)
     (hh : IsRealizedChartVelocity (I := I) g₀ T T' hδ hδ' x s h)
     (v : Fin 2 → TangentSpace I x) :
     (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
@@ -976,13 +1277,13 @@ theorem rebased_chartSymbol_covariantWeitzenbockFold
     refine Finset.sum_congr rfl (fun i _ => ?_)
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl (fun k _ => ?_)
-    rw [chartCovariantSecondGrad_partialDeriv_form (I := I) g₀ T T' hδ hδ' s x h hh i k]
+    rw [chartCovariantSecondGrad_partialDeriv_form (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' hs x h hh i k]
     ring
   rw [hinner]
   -- Step 2: the principal half is bridge 1 (the cometric double-trace read-off, order `2`); the
   -- correction-plus-remainder half is bridge 3 (the two-slot Ricci read-off, order `0`).
   rw [chart_cometricDoubleTrace_readoff (I := I) g₀ T T' hδ hδ' s x v,
-    chart_twoSlotRicci_readoff (I := I) g₀ g_bg T T' hδ hδ' s x h hh v]
+    chart_twoSlotRicci_readoff (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' hs x h hh v]
 
 /-- **(The covariant Lichnerowicz/Weitzenböck bridge, gauge cancellation already factored out.)**
 
@@ -1007,9 +1308,11 @@ side of the posited fold `rebased_chartSymbol_covariantWeitzenbockFold`. -/
 theorem rebased_chartSymbol_covariantBridge
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-    (s : ℝ) (x : M) (h : ChartMetricPerturbation E)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {s : ℝ} (hs : s ∈ Set.Ioo (0 : ℝ) 1) (x : M) (h : ChartMetricPerturbation E)
     (hh : IsRealizedChartVelocity (I := I) g₀ T T' hδ hδ' x s h)
     (v : Fin 2 → TangentSpace I x) :
     (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
@@ -1059,7 +1362,7 @@ theorem rebased_chartSymbol_covariantBridge
   -- The remaining identity is the posited covariant Weitzenböck fold (the two arms are now in the
   -- exact read-off shape the fold delivers, on the symmetrised section), commuting the two summands.
   rw [add_comm]
-  exact rebased_chartSymbol_covariantWeitzenbockFold (I := I) g₀ g_bg T T' hδ hδ' s x h hh v
+  exact rebased_chartSymbol_covariantWeitzenbockFold (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' hs x h hh v
 
 /-- **The combined chart-derivative split → intrinsic two-term `appCc` transfer.**
 
@@ -1080,9 +1383,11 @@ two-term `unitModel`/`appCc` read-off. -/
 theorem rebased_chartSymbol_eq_appCc_pointwise
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-    (s : ℝ) (x : M) (h : ChartMetricPerturbation E)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {s : ℝ} (hs : s ∈ Set.Ioo (0 : ℝ) 1) (x : M) (h : ChartMetricPerturbation E)
     (hh : IsRealizedChartVelocity (I := I) g₀ T T' hδ hδ' x s h)
     (v : Fin 2 → TangentSpace I x) :
     (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
@@ -1161,7 +1466,7 @@ theorem rebased_chartSymbol_eq_appCc_pointwise
                 (I := I) gs g_bg x h i k y₀)) from by
     refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun k _ => ?_))
     rw [hsplit i k]; ring]
-  exact rebased_chartSymbol_covariantBridge (I := I) g₀ g_bg T T' hδ hδ' s x h hh v
+  exact rebased_chartSymbol_covariantBridge (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' hs x h hh v
 
 /-- **The pointwise combined chart-derivative → intrinsic two-term `appCc` identity (the deep covariant
 bridge, gauge cancelled).**
@@ -1206,7 +1511,7 @@ theorem deriv_realizedDeTurckRicciChartSum_eq_appCc_pointwise
     deriv_realizedDeTurckRicciChartSum_eq_rebased_chartSymbol (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
       hs x (v 0) (v 1)
   rw [hderiv]
-  exact rebased_chartSymbol_eq_appCc_pointwise (I := I) g₀ g_bg T T' hδ hδ' s x h hh v
+  exact rebased_chartSymbol_eq_appCc_pointwise (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' hs x h hh v
 
 /-- **The per-arm `unitModel`/`appCc` read-off is continuous in `s` whenever the model-fibre value
 of the coefficient family is.**  At a fixed base point `x`, contracted tensor `W`, and tangent
