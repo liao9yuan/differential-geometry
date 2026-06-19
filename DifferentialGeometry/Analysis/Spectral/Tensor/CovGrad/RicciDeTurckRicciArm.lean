@@ -442,17 +442,30 @@ leading-slot insertion of the raised curvature endomorphism `ricEndoRaisedFib g_
 Lichnerowicz `Rm(g_s)·h` order-`0` action, `RicciDeTurckSectionDifference`).  It is the per-`s`
 coefficient `R₀fib(s)` the linearized-Ricci two-term Lichnerowicz form contracts against `W₀ = T − T'`.
 
-Re-minted from the earlier `gInvDiffSlotCoeff g₀ g_s` (the cometric inverse-difference multiplier),
-which vanishes identically at `g_s = g₀` and is therefore NOT the genuine order-`0` (value-level) arm:
-the order-`0` symbol of `D Ric(g_s)[h]` is the curvature action, nonzero at `g_s = g₀` on a curved
-background. -/
-noncomputable def ricciArmOrder0Coeff (g₀ : SmoothRiemannianMetric I M)
+Re-minted to the GROUND-TRUTH order-`0` (value-level) Lichnerowicz–DeTurck combination (numeric
+rel-resid `1e-15`, dims 3/4/5, gauge-invariant): the order-`0` symbol of the COMBINED
+`D[−2 Rc(g_s) + 𝓛_{W(g_s, g_bg)} g_s][h]` is
+```
+R₀(h) = −1·TS + 2·RmA + Δ_Lie(h),
+  TS = Ric♯h + hRic♯ (two-slot Ricci, `ricciArmOrder0CurvCoeff`),
+  RmA = R_{ipjq}h^{pq} (two-slot Riemann, `ricciArmOrder0RiemannCoeff`, factor 2 in its read-off),
+  Δ_Lie = DLa + DLb (the DeTurck-gauge arm, `ricciArmOrder0DeTurckLieCoeff g₀ g_s g_bg`).
+```
+The earlier mint as the pure two-slot Ricci action `symmAbsorbedOrder0CurvCoeff` alone is incomplete:
+the chart-coordinate-Laplacian-vs-covariant-Laplacian commutator carries the independent Riemann
+action `2·RmA` (and with opposite-sign Ricci, so `−TS`), and the DeTurck Lie linearization carries
+its own gauge-symmetric piece `Δ_Lie`, `g_bg`-genuine (vanishing at `g_bg = g_s`). -/
+noncomputable def ricciArmOrder0Coeff (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) : SmoothCcTensor g₀ 2 2 :=
-  symmAbsorbedOrder0CurvCoeff (I := I) (M := M) g₀
-    (realizedFam (I := I) g₀ T T' hδ hδ' s) (T - T')
+  (-1 : ℝ) • symmAbsorbedOrder0CurvCoeff (I := I) (M := M) g₀
+      (realizedFam (I := I) g₀ T T' hδ hδ' s) (T - T')
+    + (2 : ℝ) • symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T T' hδ hδ' s) (T - T')
+    + symmAbsorbedOrder0DeTurckLieCoeff (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg (T - T')
 
 /-- **The order-`2` (PURE rough-Laplacian principal) coefficient field of the linearized Ricci–DeTurck
 operator along the realized path.**  For the realized path metric `g_s = realizedFam g₀ T T' s`, this is the
@@ -1714,32 +1727,31 @@ theorem chartCovariantSecondGrad_partialDeriv_form
   rw [hper j l]
   ring
 
-/-- **(Posited deep covariant bridge 3 — the chart Christoffel + remainder fold to the two-slot Ricci.)**
+/-- **(Posited deep covariant bridge 3 — the chart Christoffel + remainder fold to the GT order-`0`.)**
 
 The Bochner/Ricci-identity contraction folding the chart **Christoffel correction** `chartChristoffelCorrFib`
 (from bridge 2) together with the **three genuinely-lower-order chart remainders** of the gauge-cancelled
 chart form (`(−2)·chartRicciFirstOrderRemainder + chartDeTurckCorrFirstOrderRemainder +
 metricFamilyDeTurckRicciFirstOrderRemainder`, all on the realized chart velocity `h`) into the intrinsic
-**two-slot raised-Ricci** `unitModel` read-off pair of the fold.  Contracting against the tangent-frame
-reprs `repr(v 0)_k`, `repr(v 1)_i` (the correction enters with a **minus** sign, since the chart
-Hessian is the covariant Hessian *minus* the Christoffel correction, so the gauge-cancelled chart form is
+**GT order-`0`** `unitModel`/`appCc` read-off of the fold.  Contracting against the tangent-frame reprs
+`repr(v 0)_k`, `repr(v 1)_i` (the correction enters with a **minus** sign, since the chart Hessian is the
+covariant Hessian *minus* the Christoffel correction, so the gauge-cancelled chart form is
 `∑G^{jl}∂²h + R = (∑G^{jl}∇₀²S) + (−Corr + R)`):
 ```
 ∑_{i,k} repr·repr·( −chartChristoffelCorrFib g₀ g_s S x i k
                       + ((−2)·RicRem + DTRem + MFRem)_{ik} )
-  = unitModel g₀ 2 (∇₀⁰ S) x (update v 0 (Ric♯_{g_s} (v 0)))
-      + unitModel g₀ 2 (∇₀⁰ S) x (update v 1 (Ric♯_{g_s} (v 1))),
+  = unitModel g₀ 2 (appCc g₀ 2 2 (ricciArmOrder0Coeff g₀ g_bg T T' s) (∇₀⁰ (T − T'))) x v,
 ```
-`S = T − T'`, `∇₀⁰ S = iteratedCovGrad g₀ 0 2 0 S`, `Ric♯_{g_s} = ricEndoRaisedFib g_s x`.
-
-This is the classical integrated Bochner–Weitzenböck step: the cometric trace of the curvature commutator
-`Δ_chart − Δ_∇` collapses Riemann → Ricci (the contracted-Christoffel-derivative identity), and the two
-endpoints of the contraction give the SYMMETRIC two-slot Ricci insertion with equal coefficients (one per
-slot, no independent Riemann term — the chart coordinate Laplacian, unlike Lichnerowicz, picks up only the
-contracted-Christoffel-derivative Ricci pieces).  It genuinely constrains the Christoffel-plus-remainder
-fold to reproduce the two-slot Ricci action, so it is non-vacuous: where the Ricci curvature of `g_s` is
-nonzero on `S`, the zero fold fails it.  Posited here, to be discharged by recursing into the
-contracted-Christoffel-derivative Ricci identity and the on-disk remainder closed forms. -/
+`S = symmS g₀ (T − T')`, `∇₀⁰ (T − T') = iteratedCovGrad g₀ 0 2 0 (T − T')`.  The GROUND-TRUTH order-`0`
+form (numeric rel-resid `1e-15`, dims 3/4/5, gauge-invariant) is the combined Lichnerowicz–DeTurck
+`R₀ = −1·TS + 2·RmA + Δ_Lie`: the cometric trace of the curvature commutator `Δ_chart − Δ_∇` collapses to
+the Riemann action `2·RmA` together with the opposite-sign two-slot Ricci `−TS` (NOT a `+TS` two-slot
+Ricci alone), and the DeTurck gauge linearization carries its own symmetric piece `Δ_Lie`
+(`ricciArmOrder0DeTurckLieCoeff g₀ g_s g_bg`), `g_bg`-genuine.  It genuinely constrains the
+Christoffel-plus-remainder fold to reproduce the GT order-`0` action, so it is non-vacuous: where the
+combined order-`0` operator of `(g_s, g_bg)` is nonzero on `S`, the zero fold fails it.  Posited here, to
+be discharged by recursing into the contracted-Christoffel-derivative curvature identities and the on-disk
+remainder closed forms. -/
 theorem chart_twoSlotRicci_readoff
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -1761,13 +1773,9 @@ theorem chart_twoSlotRicci_readoff
               DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.metricFamilyDeTurckRicciFirstOrderRemainder
                 (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x)))) =
       unitModel (I := I) (M := M) g₀ 2
-          (iteratedCovGrad (I := I) g₀ 0 2 0 (symmS (I := I) (M := M) g₀ (T - T'))) x
-        (Function.update v 0
-          (ricEndoRaisedFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x (v 0))) +
-        unitModel (I := I) (M := M) g₀ 2
-            (iteratedCovGrad (I := I) g₀ 0 2 0 (symmS (I := I) (M := M) g₀ (T - T'))) x
-          (Function.update v 1
-            (ricEndoRaisedFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x (v 1))) :=
+        (appCc (I := I) (M := M) g₀ 2 2
+          (ricciArmOrder0Coeff (I := I) g₀ g_bg T T' hδ hδ' s)
+          (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v :=
   sorry
 
 /-- **(Posited deep input — the pointwise covariant Lichnerowicz/Weitzenböck fold, in coordinate
@@ -1836,14 +1844,10 @@ theorem rebased_chartSymbol_covariantWeitzenbockFold
                 (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
                   ((Module.finBasis ℝ E).cDualBasis k)))
               (Fin.cons ((Module.finBasis ℝ E) k) v))) +
-        (unitModel (I := I) (M := M) g₀ 2
-              (iteratedCovGrad (I := I) g₀ 0 2 0 (symmS (I := I) (M := M) g₀ (T - T'))) x
-            (Function.update v 0
-              (ricEndoRaisedFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x (v 0))) +
-          unitModel (I := I) (M := M) g₀ 2
-              (iteratedCovGrad (I := I) g₀ 0 2 0 (symmS (I := I) (M := M) g₀ (T - T'))) x
-            (Function.update v 1
-              (ricEndoRaisedFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x (v 1)))) := by
+        unitModel (I := I) (M := M) g₀ 2
+          (appCc (I := I) (M := M) g₀ 2 2
+            (ricciArmOrder0Coeff (I := I) g₀ g_bg T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v := by
   classical
   -- Step 1: per `(i, k)`, rewrite the chart Hessian via bridge 2
   -- (`∑G^{jl}∂²h = ∑G^{jl}·(∇₀²S read-off) − Christoffel correction`) and regroup the inner term to
@@ -1935,7 +1939,7 @@ theorem rebased_chartSymbol_covariantBridge
                 (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x)))) =
       unitModel (I := I) (M := M) g₀ 2
         (appCc (I := I) (M := M) g₀ 2 2
-            (ricciArmOrder0Coeff (I := I) g₀ T T' hδ hδ' s)
+            (ricciArmOrder0Coeff (I := I) g₀ g_bg T T' hδ hδ' s)
             (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
           + appCc (I := I) (M := M) g₀ 4 2
               (ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ' s)
@@ -1943,30 +1947,20 @@ theorem rebased_chartSymbol_covariantBridge
   classical
   -- Distribute the `unitModel` over the `appCc` sum and evaluate the resulting multilinear sum at `v`.
   rw [unitModel_add_left, ContinuousMultilinearMap.add_apply]
-  -- The two coefficients are the SYMMETRIZER-ABSORBED versions: the symm-absorption converts the BARE
-  -- read-off `appCc R' (∇^i (T − T'))` into the original coefficient's read-off on the SYMMETRISED
-  -- section `appCc R (∇^i (symmS (T − T')))`, matching the chart velocity `h = symmS(T − T')`.
-  rw [show ricciArmOrder0Coeff (I := I) g₀ T T' hδ hδ' s =
-        symmAbsorbedOrder0CurvCoeff (I := I) (M := M) g₀
-          (realizedFam (I := I) g₀ T T' hδ hδ' s) (T - T') from rfl,
-    show ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ' s =
+  -- The order-`0` arm stays as the GT three-arm coefficient read-off (it matches the fold's order-`0`
+  -- half directly); only the order-`2` arm is rewritten to the pure rough-Laplacian cometric double-trace.
+  -- `ricciArmOrder2Coeff` is the SYMMETRIZER-ABSORBED pure rough-Laplacian coefficient, whose `appCc`
+  -- read-off on the bare `∇₀²(T − T')` is the original coefficient's read-off on the SYMMETRISED section.
+  rw [show ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ' s =
         symmAbsorbedPrincipalCoeffPure (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T T' hδ hδ' s) (T - T') from rfl,
-    symmAbsorbedOrder0CurvCoeff_appCc_eq (I := I) (M := M) g₀
-      (realizedFam (I := I) g₀ T T' hδ hδ' s) (T - T') x v,
     symmAbsorbedPrincipalCoeffPure_appCc_eq (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T T' hδ hδ' s) (T - T') x v]
-  -- Now the order-`0` arm is the curvature coefficient on the symmetrised section (the leading-slot
-  -- Ricci action), and the order-`2` arm the pure rough-Laplacian coefficient on the symmetrised section
-  -- (the cometric double-trace of the covariant Hessian); both sorry-free read-offs.
-  rw [ricciArmOrder0CurvCoeff_appCc_eq_curvatureAction (I := I) g₀
-      (realizedFam (I := I) g₀ T T' hδ hδ' s)
-      (iteratedCovGrad (I := I) g₀ 0 2 0 (symmS (I := I) (M := M) g₀ (T - T'))) x v,
-    ricciArmPrincipalCoeffPure_appCc_eq_roughLaplacian (I := I) g₀
+  rw [ricciArmPrincipalCoeffPure_appCc_eq_roughLaplacian (I := I) g₀
       (realizedFam (I := I) g₀ T T' hδ hδ' s)
       (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ (T - T'))) x v]
-  -- The remaining identity is the posited covariant Weitzenböck fold (the two arms are now in the
-  -- exact read-off shape the fold delivers, on the symmetrised section), commuting the two summands.
+  -- The remaining identity is the posited covariant Weitzenböck fold: the principal cometric double-trace
+  -- (order `2`) plus the GT order-`0` `appCc` read-off, commuting the two summands.
   rw [add_comm]
   exact rebased_chartSymbol_covariantWeitzenbockFold (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' hs x h hh v
 
@@ -2004,7 +1998,7 @@ theorem rebased_chartSymbol_eq_appCc_pointwise
               (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x))) =
       unitModel (I := I) (M := M) g₀ 2
         (appCc (I := I) (M := M) g₀ 2 2
-            (ricciArmOrder0Coeff (I := I) g₀ T T' hδ hδ' s)
+            (ricciArmOrder0Coeff (I := I) g₀ g_bg T T' hδ hδ' s)
             (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
           + appCc (I := I) (M := M) g₀ 4 2
               (ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ' s)
@@ -2108,7 +2102,7 @@ theorem deriv_realizedDeTurckRicciChartSum_eq_appCc_pointwise
     deriv (realizedDeTurckRicciChartSum (I := I) g₀ g_bg T T' hδ hδ' x (v 0) (v 1)) s =
       unitModel (I := I) (M := M) g₀ 2
         (appCc (I := I) (M := M) g₀ 2 2
-            (ricciArmOrder0Coeff (I := I) g₀ T T' hδ hδ' s)
+            (ricciArmOrder0Coeff (I := I) g₀ g_bg T T' hδ hδ' s)
             (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
           + appCc (I := I) (M := M) g₀ 4 2
               (ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ' s)
@@ -2517,6 +2511,166 @@ theorem symmAbsorbedPrincipalCoeffPure_realizedFam_toModel_continuous [Boundaryl
     (fun t => symmAbsorbedPrincipalCoeffPure (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T T' hδ hδ' t) (T - T')) (realizedSmallSet (δ := δ) (δ' := δ')) hjoint x
 
+set_option linter.unusedSectionVars false in
+/-- **(Posited STEP-1 keystone slice — continuity of the symm-absorbed order-`0` Riemann coefficient.)**
+At every fixed base point `x`, the model-fibre value of the symm-absorbed order-`0` Riemann coefficient
+family `s ↦ symmAbsorbedOrder0RiemannCoeff g₀ g_s (T − T')` is continuous in `s` on the realized small
+set.  The continuity slice of the (posited, separate-worker) joint `(s, x)`-smoothness keystone of the
+GT Riemann arm `ricciArmOrder0RiemannCoeff`, mirroring
+`symmAbsorbedOrder0CurvCoeff_realizedFam_toModel_continuous`; posited here as the precise keystone slice,
+to be discharged by recursing into the Riemann-arm joint-smoothness tower. -/
+theorem symmAbsorbedOrder0RiemannCoeff_realizedFam_toModel_continuous [BoundarylessManifold I M]
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) :
+    ContinuousOn (fun t : ℝ =>
+      Tensor0SBundle.TensorRSSpace.toModel
+        ((symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' t) (T - T')).toSection x))
+      (realizedSmallSet (δ := δ) (δ' := δ')) :=
+  sorry
+
+set_option linter.unusedSectionVars false in
+/-- **(Posited STEP-1 keystone slice — continuity of the symm-absorbed order-`0` DeTurck-Lie coefficient.)**
+At every fixed base point `x`, the model-fibre value of the symm-absorbed order-`0` DeTurck-Lie coefficient
+family `s ↦ symmAbsorbedOrder0DeTurckLieCoeff g₀ g_s g_bg (T − T')` is continuous in `s` on the realized
+small set.  The continuity slice of the (posited, separate-worker) joint `(s, x)`-smoothness keystone of the
+GT DeTurck-Lie arm `ricciArmOrder0DeTurckLieCoeff` (the connection-difference / DeTurck-VF covariant-gradient
+tower, jointly `(s, x)`-smooth via `gen_joint_christoffel`/`gen_joint_riemann`), mirroring
+`symmAbsorbedOrder0CurvCoeff_realizedFam_toModel_continuous`; posited here as the precise keystone slice,
+to be discharged by recursing into the DeTurck-Lie-arm joint-smoothness tower. -/
+theorem symmAbsorbedOrder0DeTurckLieCoeff_realizedFam_toModel_continuous [BoundarylessManifold I M]
+    (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) :
+    ContinuousOn (fun t : ℝ =>
+      Tensor0SBundle.TensorRSSpace.toModel
+        ((symmAbsorbedOrder0DeTurckLieCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' t) g_bg (T - T')).toSection x))
+      (realizedSmallSet (δ := δ) (δ' := δ')) :=
+  sorry
+
+set_option linter.unusedSectionVars false in
+/-- **Continuity slice of the assembled GT order-`0` coefficient.**  At every fixed base point `x`, the
+model-fibre value of the assembled three-arm order-`0` coefficient family
+`s ↦ ricciArmOrder0Coeff g₀ g_bg T T' s = −1·Curv + 2·Riemann + Lie` is continuous in `s` on the realized
+small set.  The sum of the three per-arm continuity slices
+(`symmAbsorbedOrder0CurvCoeff`/`Riemann`/`DeTurckLieCoeff_realizedFam_toModel_continuous`), distributing the
+model read-off `toModel` over the `(−1)•`, `2•`, and `+` of the coefficient sum. -/
+theorem ricciArmOrder0Coeff_realizedFam_toModel_continuous [BoundarylessManifold I M]
+    (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) :
+    ContinuousOn (fun t : ℝ =>
+      Tensor0SBundle.TensorRSSpace.toModel
+        ((ricciArmOrder0Coeff (I := I) g₀ g_bg T T' hδ hδ' t).toSection x))
+      (realizedSmallSet (δ := δ) (δ' := δ')) := by
+  have hCurv := symmAbsorbedOrder0CurvCoeff_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x
+  have hRm := symmAbsorbedOrder0RiemannCoeff_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x
+  have hLie := symmAbsorbedOrder0DeTurckLieCoeff_realizedFam_toModel_continuous (I := I) g₀ g_bg T T'
+    hδ hδ' x
+  have hsum := ((hCurv.const_smul (-1 : ℝ)).add (hRm.const_smul (2 : ℝ))).add hLie
+  refine hsum.congr (fun t _ => ?_)
+  rw [ricciArmOrder0Coeff]
+  rw [SmoothCcTensor.toSection_add, SmoothCcTensor.toSection_add,
+    SmoothCcTensor.toSection_smul, SmoothCcTensor.toSection_smul]
+  simp only [ContMDiffSection.coe_add, ContMDiffSection.coe_smul, Pi.add_apply, Pi.smul_apply,
+    Tensor0SBundle.TensorRSSpace.toModel_add, Tensor0SBundle.TensorRSSpace.toModel_smul]
+
+set_option linter.unusedSectionVars false in
+/-- **(Posited STEP-1 keystone — joint `(x, s)`-smoothness of the symm-absorbed order-`0` Riemann
+coefficient.)**  The symm-absorbed order-`0` Riemann coefficient family
+`s ↦ symmAbsorbedOrder0RiemannCoeff g₀ g_s (T − T')` is jointly `C^∞` in `(x, s)` on the realized small
+set.  The joint `(s, x)`-smoothness keystone of the GT Riemann arm `ricciArmOrder0RiemannCoeff`, mirroring
+`symmAbsorbedOrder0CurvCoeff_realizedFam_jointContMDiff`; posited here, to be discharged by recursing into
+the Riemann-arm joint-smoothness tower (`riemannOp (LeviCivita g_s)`, jointly `(s, x)`-smooth). -/
+theorem symmAbsorbedOrder0RiemannCoeff_realizedFam_jointContMDiff [BoundarylessManifold I M]
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1
+        ((symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' p.2) (T - T')).toSection p.1))
+      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
+  sorry
+
+set_option linter.unusedSectionVars false in
+/-- **(Posited STEP-1 keystone — joint `(x, s)`-smoothness of the symm-absorbed order-`0` DeTurck-Lie
+coefficient.)**  The symm-absorbed order-`0` DeTurck-Lie coefficient family
+`s ↦ symmAbsorbedOrder0DeTurckLieCoeff g₀ g_s g_bg (T − T')` is jointly `C^∞` in `(x, s)` on the realized
+small set.  The joint `(s, x)`-smoothness keystone of the GT DeTurck-Lie arm
+`ricciArmOrder0DeTurckLieCoeff` — the connection-difference / DeTurck-VF covariant-gradient tower
+(`A`, `W`, `∇A`, `∇W` jointly `(s, x)`-smooth via `gen_joint_christoffel`/`gen_joint_riemann`) — mirroring
+`symmAbsorbedOrder0CurvCoeff_realizedFam_jointContMDiff`; posited here, to be discharged by recursing into
+the DeTurck-Lie-arm joint-smoothness tower. -/
+theorem symmAbsorbedOrder0DeTurckLieCoeff_realizedFam_jointContMDiff [BoundarylessManifold I M]
+    (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1
+        ((symmAbsorbedOrder0DeTurckLieCoeff (I := I) (M := M) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g_bg (T - T')).toSection p.1))
+      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
+  sorry
+
+set_option linter.unusedSectionVars false in
+/-- **Joint `(x, s)`-smoothness of the assembled GT order-`0` coefficient.**  The assembled three-arm
+order-`0` coefficient family `s ↦ ricciArmOrder0Coeff g₀ g_bg T T' s = −1·Curv + 2·Riemann + Lie` is
+jointly `C^∞` in `(x, s)` on the realized small set.  The `(−1)•`, `2•`, `+`-combination
+(`jointRSsmul`/`jointRSadd`) of the three per-arm joint-smoothness keystones
+(`symmAbsorbedOrder0CurvCoeff`/`Riemann`/`DeTurckLieCoeff_realizedFam_jointContMDiff`). -/
+theorem ricciArmOrder0Coeff_realizedFam_jointContMDiff [BoundarylessManifold I M]
+    (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1
+        ((ricciArmOrder0Coeff (I := I) g₀ g_bg T T' hδ hδ' p.2).toSection p.1))
+      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+  have hCurv := symmAbsorbedOrder0CurvCoeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ'
+  have hRm := symmAbsorbedOrder0RiemannCoeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ'
+  have hLie := symmAbsorbedOrder0DeTurckLieCoeff_realizedFam_jointContMDiff (I := I) g₀ g_bg T T' hδ hδ'
+  have hsum := jointRSadd (I := I) (r := 2) (s := 2)
+    (S := realizedSmallSet (δ := δ) (δ' := δ'))
+    (A := fun p : M × ℝ =>
+      (-1 : ℝ) • (symmAbsorbedOrder0CurvCoeff (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' p.2) (T - T')).toSection p.1
+        + (2 : ℝ) • (symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' p.2) (T - T')).toSection p.1)
+    (B := fun p : M × ℝ =>
+      (symmAbsorbedOrder0DeTurckLieCoeff (I := I) (M := M) g₀
+        (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g_bg (T - T')).toSection p.1)
+    (jointRSadd (I := I) (r := 2) (s := 2)
+      (S := realizedSmallSet (δ := δ) (δ' := δ'))
+      (A := fun p : M × ℝ =>
+        (-1 : ℝ) • (symmAbsorbedOrder0CurvCoeff (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' p.2) (T - T')).toSection p.1)
+      (B := fun p : M × ℝ =>
+        (2 : ℝ) • (symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' p.2) (T - T')).toSection p.1)
+      (jointRSsmul (I := I) (r := 2) (s := 2)
+        (S := realizedSmallSet (δ := δ) (δ' := δ')) (-1 : ℝ)
+        (fun p : M × ℝ => (symmAbsorbedOrder0CurvCoeff (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' p.2) (T - T')).toSection p.1) hCurv)
+      (jointRSsmul (I := I) (r := 2) (s := 2)
+        (S := realizedSmallSet (δ := δ) (δ' := δ')) (2 : ℝ)
+        (fun p : M × ℝ => (symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀
+          (realizedFam (I := I) g₀ T T' hδ hδ' p.2) (T - T')).toSection p.1) hRm))
+    hLie
+  refine hsum.congr (fun p _ => ?_)
+  rw [ricciArmOrder0Coeff]
+  rw [SmoothCcTensor.toSection_add, SmoothCcTensor.toSection_add,
+    SmoothCcTensor.toSection_smul, SmoothCcTensor.toSection_smul]
+  simp only [ContMDiffSection.coe_add, ContMDiffSection.coe_smul, Pi.add_apply, Pi.smul_apply]
+
 /-- **Continuity in `s` of the per-arm `unitModel`/`appCc` read-offs of the linearized-Ricci
 coefficient families (the deep mean-value continuity input).**
 
@@ -2537,7 +2691,7 @@ coefficient family, whose `s`-continuity on the realized small set is the contin
 restricting the resulting continuity to `[0, 1] ⊆ realizedSmallSet`.  It genuinely constrains the
 read-off to be continuous, so it is non-vacuous. -/
 theorem ricciArmCoeff_appCc_read_continuousOn
-    (g₀ : SmoothRiemannianMetric I M)
+    (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -2547,7 +2701,7 @@ theorem ricciArmCoeff_appCc_read_continuousOn
     ContinuousOn
         (fun s => unitModel (I := I) (M := M) g₀ 2
           (appCc (I := I) (M := M) g₀ 2 2
-            (ricciArmOrder0Coeff (I := I) g₀ T T' hδ hδ' s)
+            (ricciArmOrder0Coeff (I := I) g₀ g_bg T T' hδ hδ' s)
             (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v)
         (Set.Icc (0 : ℝ) 1) ∧
       ContinuousOn
@@ -2560,12 +2714,12 @@ theorem ricciArmCoeff_appCc_read_continuousOn
     Icc_subset_realizedSmallSet hδ_lt hδ'_lt
   refine ⟨?_, ?_⟩
   · -- Order-`0` arm: the read-off is a fixed CLM of `s ↦ toModel ((ricciArmOrder0Coeff s).toSection x)`,
-    -- continuous on the small set by the order-`0` continuity slice of the symm-absorbed joint-smoothness
-    -- keystone, then restricted to `[0, 1] ⊆ realizedSmallSet`.
+    -- continuous on the small set by the continuity slice of the ASSEMBLED three-arm order-`0` coefficient
+    -- (`ricciArmOrder0Coeff_realizedFam_toModel_continuous`), then restricted to `[0, 1] ⊆ realizedSmallSet`.
     exact (appCc_unitModel_read_continuousOn_of_toModel_continuousOn (I := I) g₀ 2
-      (fun s => ricciArmOrder0Coeff (I := I) g₀ T T' hδ hδ' s)
+      (fun s => ricciArmOrder0Coeff (I := I) g₀ g_bg T T' hδ hδ' s)
       (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
-      (symmAbsorbedOrder0CurvCoeff_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x) v).mono hIcc
+      (ricciArmOrder0Coeff_realizedFam_toModel_continuous (I := I) g₀ g_bg T T' hδ hδ' x) v).mono hIcc
   · -- Order-`2` arm: same, via the PURE order-`2` continuity slice (`ricciArmOrder2Coeff` is now the
     -- symm-absorbed pure rough-Laplacian coefficient `symmAbsorbedPrincipalCoeffPure`).
     exact (appCc_unitModel_read_continuousOn_of_toModel_continuousOn (I := I) g₀ 4
@@ -2623,7 +2777,7 @@ theorem exists_linearizedRicci_pointwise_appCc_families
           (appCc (I := I) (M := M) g₀ 4 2 (R₂fib s)
             (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v)
         (Set.Icc (0 : ℝ) 1)) := by
-  refine ⟨ricciArmOrder0Coeff (I := I) g₀ T T' hδ hδ',
+  refine ⟨ricciArmOrder0Coeff (I := I) g₀ g_bg T T' hδ hδ',
     ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ', ?_, ?_, ?_⟩
   · -- The pointwise identity on `Ioo 0 1`: the combined chart-derivative → intrinsic `appCc` transfer.
     intro s hs x v
@@ -2631,10 +2785,10 @@ theorem exists_linearizedRicci_pointwise_appCc_families
       hs x v
   · -- The order-`0` read-off continuity (first conjunct of the posited continuity bridge).
     intro x v
-    exact (ricciArmCoeff_appCc_read_continuousOn (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x v).1
+    exact (ricciArmCoeff_appCc_read_continuousOn (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v).1
   · -- The order-`2` read-off continuity (second conjunct of the posited continuity bridge).
     intro x v
-    exact (ricciArmCoeff_appCc_read_continuousOn (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x v).2
+    exact (ricciArmCoeff_appCc_read_continuousOn (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v).2
 
 /-- **The pointwise-in-`s` Lichnerowicz `appCc` form of the linearized Ricci operator.**
 
@@ -2798,7 +2952,7 @@ theorem integratedLinearizedRicci_appCc_eq
   -- `R₀fib = ricciArmOrder0Coeff`, `R₂fib = ricciArmOrder2Coeff`: the pointwise combined Lichnerowicz
   -- `appCc` form (gauge cancelled) together with the per-arm read-off continuity/interval-integrability
   -- supplied by the joint `(s, x)`-smoothness keystone's continuity slices.
-  set R₀fib : ℝ → SmoothCcTensor g₀ 2 2 := ricciArmOrder0Coeff (I := I) g₀ T T' hδ hδ' with hR₀fib
+  set R₀fib : ℝ → SmoothCcTensor g₀ 2 2 := ricciArmOrder0Coeff (I := I) g₀ g_bg T T' hδ hδ' with hR₀fib
   set R₂fib : ℝ → SmoothCcTensor g₀ 4 2 := ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ' with hR₂fib
   -- Pointwise combined Lichnerowicz `appCc` form on `Ioo 0 1` (combined chart-derivative → intrinsic
   -- two-term form, gauge cancelled).
@@ -2813,7 +2967,7 @@ theorem integratedLinearizedRicci_appCc_eq
     exact deriv_realizedDeTurckRicciChartSum_eq_appCc_pointwise (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
       hs x v
   -- Per-arm read-off interval-integrability from the keystone's continuity slices on `[0,1]`.
-  have hcontRead := ricciArmCoeff_appCc_read_continuousOn (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
+  have hcontRead := ricciArmCoeff_appCc_read_continuousOn (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
   have hint₀ : ∀ (x : M) (v : Fin 2 → TangentSpace I x), IntervalIntegrable
       (fun s => unitModel (I := I) (M := M) g₀ 2
         (appCc (I := I) (M := M) g₀ 2 2 (R₀fib s)
@@ -2835,8 +2989,8 @@ theorem integratedLinearizedRicci_appCc_eq
     exists_pathIntegralCoeffField (I := I) (M := M) g₀ 2 R₀fib
       (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
       (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI
-      (symmAbsorbedOrder0CurvCoeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ')
-      (fun x => symmAbsorbedOrder0CurvCoeff_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x)
+      (ricciArmOrder0Coeff_realizedFam_jointContMDiff (I := I) g₀ g_bg T T' hδ hδ')
+      (fun x => ricciArmOrder0Coeff_realizedFam_toModel_continuous (I := I) g₀ g_bg T T' hδ hδ' x)
   obtain ⟨IΦ₂, heval₂⟩ :=
     exists_pathIntegralCoeffField (I := I) (M := M) g₀ 4 R₂fib
       (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))

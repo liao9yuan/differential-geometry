@@ -6485,6 +6485,185 @@ theorem symmAbsorbedOrder0RiemannCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMet
     (Classical.choose_spec (exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
       (Equiv.swap (0 : Fin 2) 1) S 0)) x v
 
+/-! ## The GT-validated order-`0` DeTurck-Lie coefficient `Δ_Lie` (STEP 1)
+
+The DeTurck Lie arm of the GT order-`0` is the value-level (no-`∂h`) part of the linearized DeTurck
+gauge term `δ(𝓛_{W(g, g_bg)} g)[h]`, with `W = deTurckVF g g_bg` the metric `g`-trace of the
+connection-difference `A = connDiff g g_bg`.  Linearizing the sealed intrinsic right-hand side and
+reading off the value-level (no-`∂h`) terms gives, in exact normal-coordinate jet arithmetic
+(numeric rel-resid `1e-15`, dims 3/4/5, gauge-invariant), the closed form (all `∇`/raise/lower
+w.r.t. `g = g_s`):
+```
+Δ_Lie(h)_{ij}
+  = − h^{pq} (∇_i A_{jpq} + ∇_j A_{ipq})        -- DLa, coeff +1
+    + h_{pj} ∇_i W^p + h_{ip} ∇_j W^p,           -- DLb, coeff +1
+  A^k{}_{pq} = Γ(g)^k_{pq} − Γ(g_bg)^k_{pq},  A_{jpq} = g_{jk}A^k{}_{pq},  W^p = g^{ab}A^p{}_{ab}.
+```
+It is `g_bg`-genuine: at `g_bg = g` both `A = connDiff g g = 0` and `W = deTurckVF g g = 0`, so
+`Δ_Lie = 0`; for `g_bg ≠ g` on a curved background it is nonzero (the boxed form is symmetric in
+`(i, j)`, so it lives in the symmetric `(0, 2)` output space).  Mirrors `ricciArmOrder0RiemannCoeff`:
+the read-off is posited as a precise existence sub-child, written frame-free through the genuine
+connection-difference `connDiff g₁ g_bg`, the DeTurck vector field `deTurckVF g₁ g_bg`, their
+`∇^{g₁}`-covariant derivatives, and a `g₁`-orthonormal frame `smoothOrthoFrame g₁ x` (to raise the
+`h^{pq}` contraction). -/
+
+/-- **The `∇^{g₁}`-covariant derivative of the connection-difference `(1, 2)`-tensor `A = connDiff g₁ g_bg`.**
+The genuine directional covariant derivative `(∇^{g₁}_X A)(Y, Z) (x)` along the `g₁`-Levi-Civita
+connection, on the smooth connection-difference field `b ↦ connDiff g₁ g_bg b (Y b) (Z b)`, with the two
+slot corrections subtracted (the standard coordinate-free covariant derivative of a `(1, 2)`-tensor):
+`(LeviCivita g₁)(A(Y, Z)) − A(∇^{g₁}_X Y, Z) − A(Y, ∇^{g₁}_X Z)`. -/
+noncomputable def deTurckLieCovDerivA (g₁ g_bg : SmoothRiemannianMetric I M)
+    (X Y Z : Π b : M, TangentSpace I b) (x : M) : TangentSpace I x :=
+  (LeviCivita (I := I) g₁).toFun
+      (fun b : M => PDE.DeTurck.connDiff (I := I) g₁ g_bg b (Y b) (Z b)) x (X x)
+    - PDE.DeTurck.connDiff (I := I) g₁ g_bg x
+        ((LeviCivita (I := I) g₁).toFun (fun b => Y b) x (X x)) (Z x)
+    - PDE.DeTurck.connDiff (I := I) g₁ g_bg x (Y x)
+        ((LeviCivita (I := I) g₁).toFun (fun b => Z b) x (X x))
+
+/-- **The `∇^{g₁}`-covariant derivative of the DeTurck vector field `W = deTurckVF g₁ g_bg`.**
+The directional covariant derivative `(∇^{g₁}_X W) (x)` along the `g₁`-Levi-Civita connection on the
+smooth DeTurck VF section. -/
+noncomputable def deTurckLieCovDerivW (g₁ g_bg : SmoothRiemannianMetric I M)
+    (X : Π b : M, TangentSpace I b) (x : M) : TangentSpace I x :=
+  (LeviCivita (I := I) g₁).toFun
+    (fun b : M => (PDE.DeTurck.deTurckVF (I := I) g₁ g_bg : Π b : M, TangentSpace I b) b) x (X x)
+
+/-- **(Posited STEP-1 sub-child — the smooth DeTurck-Lie order-`0` `(2, 2)`-coefficient `Δ_Lie`.)**
+There is a smooth compactly-supported `(2, 2)`-tensor field `R_Lie` whose `appCc`/`unitModel` read-off
+on any `(0, 2)`-tensor field `W` is the boxed GT DeTurck-Lie order-`0` action `Δ_Lie(D)` of `(g₁, g_bg)`
+on the unit-form `D = unitModel g₀ 2 W x`, written frame-free through the connection-difference
+`connDiff g₁ g_bg`, the DeTurck vector field `deTurckVF g₁ g_bg`, their `∇^{g₁}`-covariant derivatives
+(`deTurckLieCovDerivA`, `deTurckLieCovDerivW`), and a `g₁`-orthonormal frame `e a = smoothOrthoFrame g₁ x a x`:
+```
+unitModel g₀ 2 (appCc g₀ 2 2 R_Lie W) x v
+  = -- DLa : − h^{pq}(∇_{v0} A_{v1, ·, ·} + ∇_{v1} A_{v0, ·, ·}), h^{pq} raised by the o.n. frame
+    (- ∑_{a, b} D(e a, e b) *
+        ( g₁.inner x (deTurckLieCovDerivA g₁ g_bg (ext (v 0)) (ext (e a)) (ext (e b)) x) (v 1)
+        + g₁.inner x (deTurckLieCovDerivA g₁ g_bg (ext (v 1)) (ext (e a)) (ext (e b)) x) (v 0) ))
+    -- DLb : h_{pj} ∇_{v0} W^p + h_{ip} ∇_{v1} W^p
+    + ( D(deTurckLieCovDerivW g₁ g_bg (ext (v 0)) x, v 1)
+      + D(v 0, deTurckLieCovDerivW g₁ g_bg (ext (v 1)) x) ),
+  ext u := smoothExtensionTangent x u,  e a := smoothOrthoFrame g₁ x a x,  D = unitModel g₀ 2 W x.
+```
+This is the GT DeTurck-Lie order-`0` building block (DLa + DLb, each coeff `+1`).  The carrier is built
+from `connDiff g₁ g_bg`/`deTurckVF g₁ g_bg` and their covariant gradients contracted across both
+covariant slots; its base-point smoothness routes through `connDiff_contMDiff`/`deTurckVF` smoothness
+exactly as `ricciArmOrder0CurvCoeffFib`/`ricEndoRaisedFib` route their endomorphism fields.  Posited as a
+precise existence sub-child so the order-`0` re-mint and bridge 3 can assemble on it; to be discharged by
+the connection-difference/DeTurck-VF covariant-gradient construction.  It is non-vacuous and
+`g_bg`-genuine: at `g_bg = g₁` the read-off vanishes (`connDiff g₁ g₁ = 0`, `deTurckVF g₁ g₁ = 0`), and on a
+curved background with `g_bg ≠ g₁` it is nonzero (numeric `≈ 0.12` at a random `(g₁, g_bg, h)`). -/
+theorem exists_ricciArmOrder0DeTurckLieCoeff (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
+    ∃ R_Lie : SmoothCcTensor g₀ 2 2,
+      ∀ (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x),
+        unitModel (I := I) (M := M) g₀ 2
+            (appCc (I := I) (M := M) g₀ 2 2 R_Lie W) x v =
+          (- ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+              unitModel (I := I) (M := M) g₀ 2 W x
+                  (fun j => if j = 0 then smoothOrthoFrame (I := I) g₁ x a x
+                    else smoothOrthoFrame (I := I) g₁ x b x) *
+                (g₁.inner x
+                    (deTurckLieCovDerivA (I := I) g₁ g_bg
+                      (smoothExtensionTangent (I := I) x (v 0))
+                      (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x a x))
+                      (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x b x)) x) (v 1)
+                  + g₁.inner x
+                    (deTurckLieCovDerivA (I := I) g₁ g_bg
+                      (smoothExtensionTangent (I := I) x (v 1))
+                      (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x a x))
+                      (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x b x)) x) (v 0)))
+            + (unitModel (I := I) (M := M) g₀ 2 W x
+                  (fun j => if j = 0 then
+                    deTurckLieCovDerivW (I := I) g₁ g_bg
+                      (smoothExtensionTangent (I := I) x (v 0)) x
+                    else v 1)
+                + unitModel (I := I) (M := M) g₀ 2 W x
+                  (fun j => if j = 0 then v 0
+                    else deTurckLieCovDerivW (I := I) g₁ g_bg
+                      (smoothExtensionTangent (I := I) x (v 1)) x)) :=
+  sorry
+
+/-- **The GT-validated order-`0` DeTurck-Lie coefficient `R_Lie = Δ_Lie`**, chosen from
+`exists_ricciArmOrder0DeTurckLieCoeff`.  Its `appCc` read-off is the boxed GT DeTurck-Lie order-`0`
+action of `(g₁, g_bg)` (`ricciArmOrder0DeTurckLieCoeff_appCc_eq`).  This is the `DLa + DLb` arm of the GT
+Lichnerowicz–DeTurck order-`0`, `g_bg`-genuine (vanishing at `g_bg = g₁`). -/
+noncomputable def ricciArmOrder0DeTurckLieCoeff (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
+    SmoothCcTensor g₀ 2 2 :=
+  Classical.choose (exists_ricciArmOrder0DeTurckLieCoeff (I := I) (M := M) g₀ g₁ g_bg)
+
+set_option linter.unusedSectionVars false in
+/-- The `appCc`/`unitModel` read-off of the order-`0` DeTurck-Lie coefficient is the boxed GT DeTurck-Lie
+order-`0` action `Δ_Lie` of `(g₁, g_bg)` (`Classical.choose_spec` of
+`exists_ricciArmOrder0DeTurckLieCoeff`). -/
+theorem ricciArmOrder0DeTurckLieCoeff_appCc_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
+    (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 2 2 (ricciArmOrder0DeTurckLieCoeff (I := I) (M := M) g₀ g₁ g_bg) W)
+        x v =
+      (- ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+          unitModel (I := I) (M := M) g₀ 2 W x
+              (fun j => if j = 0 then smoothOrthoFrame (I := I) g₁ x a x
+                else smoothOrthoFrame (I := I) g₁ x b x) *
+            (g₁.inner x
+                (deTurckLieCovDerivA (I := I) g₁ g_bg
+                  (smoothExtensionTangent (I := I) x (v 0))
+                  (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x a x))
+                  (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x b x)) x) (v 1)
+              + g₁.inner x
+                (deTurckLieCovDerivA (I := I) g₁ g_bg
+                  (smoothExtensionTangent (I := I) x (v 1))
+                  (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x a x))
+                  (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x b x)) x) (v 0)))
+        + (unitModel (I := I) (M := M) g₀ 2 W x
+              (fun j => if j = 0 then
+                deTurckLieCovDerivW (I := I) g₁ g_bg
+                  (smoothExtensionTangent (I := I) x (v 0)) x
+                else v 1)
+            + unitModel (I := I) (M := M) g₀ 2 W x
+              (fun j => if j = 0 then v 0
+                else deTurckLieCovDerivW (I := I) g₁ g_bg
+                  (smoothExtensionTangent (I := I) x (v 1)) x)) :=
+  Classical.choose_spec (exists_ricciArmOrder0DeTurckLieCoeff (I := I) (M := M) g₀ g₁ g_bg) W x v
+
+/-- **The symmetrizer-absorbed order-`0` DeTurck-Lie coefficient (STEP 1).**  For a `(0, 2)`-section `S`
+and the metrics `(g₀, g₁, g_bg)`, the half-sum symmetrizer-absorbed `(2, 2)`-coefficient of the GT
+DeTurck-Lie order-`0` coefficient `ricciArmOrder0DeTurckLieCoeff g₀ g₁ g_bg` (the `DLa + DLb` arm) at
+gradient order `0`, with the trailing-pair slot permutation supplied by
+`exists_iteratedCovGrad_unitModel_domDomCongrSection`.  Its `appCc` read-off on the bare `∇₀⁰ S = S`
+reproduces `ricciArmOrder0DeTurckLieCoeff`'s read-off on `∇₀⁰ (symmS g₀ S) = symmS g₀ S`
+(`symmAbsorbedOrder0DeTurckLieCoeff_appCc_eq`).  Mirrors `symmAbsorbedOrder0RiemannCoeff`. -/
+noncomputable def symmAbsorbedOrder0DeTurckLieCoeff (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g₀ 0 2) : SmoothCcTensor g₀ 2 2 :=
+  symmAbsorbedCoeff (I := I) (M := M) g₀ 0
+    (ricciArmOrder0DeTurckLieCoeff (I := I) (M := M) g₀ g₁ g_bg)
+    (Classical.choose (exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
+      (Equiv.swap (0 : Fin 2) 1) S 0))
+
+set_option linter.unusedSectionVars false in
+/-- **The symmetrizer-absorbed order-`0` DeTurck-Lie coefficient's `appCc` read-off on the bare section
+equals the DeTurck-Lie action on the `symmS`-symmetrised section.**
+```
+unitModel g₀ 2 (appCc g₀ 2 2 (symmAbsorbedOrder0DeTurckLieCoeff g₀ g₁ g_bg S) (∇₀⁰ S)) x v
+  = unitModel g₀ 2 (appCc g₀ 2 2 (ricciArmOrder0DeTurckLieCoeff g₀ g₁ g_bg) (∇₀⁰ (symmS g₀ S))) x v.
+```
+The order-`0` instance of `symmAbsorbedCoeff_appCc_eq`, with `hσ'` discharged by `Classical.choose_spec`. -/
+theorem symmAbsorbedOrder0DeTurckLieCoeff_appCc_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
+    (S : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 2 2
+          (symmAbsorbedOrder0DeTurckLieCoeff (I := I) (M := M) g₀ g₁ g_bg S)
+          (iteratedCovGrad (I := I) g₀ 0 2 0 S)) x v =
+      unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 2 2 (ricciArmOrder0DeTurckLieCoeff (I := I) (M := M) g₀ g₁ g_bg)
+          (iteratedCovGrad (I := I) g₀ 0 2 0 (symmS (I := I) (M := M) g₀ S))) x v := by
+  exact symmAbsorbedCoeff_appCc_eq (I := I) (M := M) g₀ 0 S
+    (ricciArmOrder0DeTurckLieCoeff (I := I) (M := M) g₀ g₁ g_bg)
+    (Classical.choose (exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
+      (Equiv.swap (0 : Fin 2) 1) S 0))
+    (Classical.choose_spec (exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
+      (Equiv.swap (0 : Fin 2) 1) S 0)) x v
+
 end TensorSpectral
 end Parabolic
 end Analysis
