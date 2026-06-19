@@ -9,6 +9,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralSm
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralSmoothing
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.DuhamelSmoothing
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.MaxRegInteriorTimeSmoothing
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ForcingTimeBootstrap
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralEigenSeriesJointGram
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.DenseSubset
@@ -173,8 +174,34 @@ private theorem forcingSmoothTimeCoords
       (⇑gforce =ᵐ[timeMeasure T] F) ∧
       (∀ i, ContinuousOn (fun t => (F t).coeff i) (Set.Icc (0 : ℝ) T)) ∧
       (∀ c : ℝ, 0 ≤ c → Summable (forcingMass (I := I) (M := M) gforce c)) ∧
-      (∀ t ∈ Set.Icc (0 : ℝ) T, ∀ i, (F t).coeff i = f i t) :=
-  sorry
+      (∀ t ∈ Set.Icc (0 : ℝ) T, ∀ i, (F t).coeff i = f i t) := by
+  classical
+  -- The `C∞`-in-time forcing coordinate family `f` and its time-continuous `Hᵃ`
+  -- representative `F`, with the all-order time-jet spectral-mass majorant (deep input).
+  obtain ⟨f, F, hf_smooth, hf_mass, hF_rep, hF_coord_cont, hF_coeff⟩ :=
+    deTurckForcing_smoothTimeCoordinateFamily (I := I) (M := M) g₀ g_bg a ha_super hT hT1
+      gforce hforce
+  refine ⟨f, F, hf_smooth, hf_mass, hF_rep, hF_coord_cont, ?_, hF_coeff⟩
+  -- The forcing-mass summability at every order, from the in-tree spatial bootstrap
+  -- `solFieldMass_summable_all` fed the Nemytskii first-order coupling
+  -- `deTurckForcing_firstOrderCoupling`.
+  set h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc
+  -- The first-order spectral coupling `hcouple` of the engine forcing.
+  have hcouple := deTurckForcing_firstOrderCoupling (I := I) (M := M) g₀ g_bg a ha_super
+    hT hT1 gforce hforce
+  -- Base regularity: the forcing lies in `L²(Hᵃ)` by construction.
+  have hbase_forcing : Summable (forcingMass (I := I) (M := M) gforce (a : ℝ)) :=
+    summable_weight_mul_norm_timeModeCoeff_sq (I := I) (M := M) (f := gforce) h_compact
+  -- Two-derivative gain: the solution-field masses are summable at order `a + 2`.
+  have hbase_sol : Summable (solFieldMass (I := I) (M := M) hT.le gforce ((a : ℝ) + 2)) :=
+    solFieldMass_summable_of_forcingMass_summable (I := I) (M := M) hT.le gforce (a : ℝ)
+      hbase_forcing
+  -- The all-order spatial bootstrap: solution masses are summable at every order.
+  have hsol_all : ∀ σ : ℝ, Summable (solFieldMass (I := I) (M := M) hT.le gforce σ) :=
+    solFieldMass_summable_all (I := I) (M := M) hT.le gforce hcouple hbase_sol
+  -- The forcing masses are then summable at every order via the coupling.
+  intro c _hc
+  exact hcouple c (hsol_all (c + 1))
 
 set_option linter.unusedVariables false in
 /-- **DEEP ANALYTIC INPUT (1/2) — the smooth forcing eigen-coordinate family
@@ -259,28 +286,52 @@ flow (the soundness core).**
 
 For the genuine maximal-regularity Duhamel solution `u` and a time-regular representative
 family `F` — pinned to `u` by the zero initial value `h_zero`, the interior `L²` pin
-`h_pin` on the closed interval `Icc 0 T₁`, and the `L²`-time-continuity `h_cont` — the
-realized metric family `g_DT t = tensorSectionRealizeMetric g₀ (F t) hδ_lt (hδ t)` solves
-the TRUE Ricci–DeTurck flow: at every `t ∈ Ico 0 T₁`, base point `x`, tangent pair
-`(v, w)`, the pointwise `[0,∞)`-derivative of the perturbation part of the realized inner
-product `s ↦ ccTensorBilinSymm g₀ (F s) x v w` equals the intrinsic Ricci–DeTurck
-right-hand side `deTurckRicciRHS g_bg (g_DT t) x v w`.
+`h_pin` on the closed interval `Icc 0 T₁`, the `L²`-time-continuity `h_cont`, and the
+order-`(a+2)` forcing-ball bound `hball` — the realized metric family
+`g_DT t = tensorSectionRealizeMetric g₀ (F t) hδ_lt (hδ t)` solves the TRUE Ricci–DeTurck
+flow: at every `t ∈ Ico 0 T₁`, base point `x`, tangent pair `(v, w)`, the pointwise
+`[0,∞)`-derivative of the perturbation part of the realized inner product
+`s ↦ ccTensorBilinSymm g₀ (F s) x v w` equals the intrinsic Ricci–DeTurck right-hand side
+`deTurckRicciRHS g_bg (g_DT t) x v w`.
 
-The classical chain: the maximal-regularity `L²`-time-derivative of `u`
-(`maxRegDuhamelMap_timeDeriv_eq`) is the connection Laplacian plus the forcing,
-transported to the pointwise right-derivative of `u.toFun` by
-`maxreg_l2deriv_to_pointwise_hasderivwithinat`, composed with the
-supercritical-order-bounded chart-evaluation functional, realized pointwise to the
-intrinsic Ricci–DeTurck remainder on the realized metric `g_DT t`.
+The `hball` hypothesis (order-`(a+2)` smallness on the forcing horizon) is genuinely
+required, not cosmetic: `deTurckSobolevNHa2` applies a `recenteredBallRetraction` of radius
+`R₀ = (Classical.choose (deTurckSobolevNHa2_exists_of_super …)).1` BEFORE forming the
+forcing, so OFF that ball the forcing value is the retracted nonlinearity, and the
+identification `deTurckSobolevNHa2 (solField t) = deTurckSmoothN g₀ g_bg a (F t)` (via
+`deTurckSobolevNHa2_eq_smoothN`) — hence the right-hand side value
+`deTurckRicciRHS g_bg (g_DT t)` — fails.  `hball` keeps the realized family inside the ball
+so the forcing reproduces the genuine smooth Ricci–DeTurck remainder.
+
+The intended classical chain is the term-by-term differentiation of the chart-evaluated
+solution value through the supercritical-order-bounded chart-evaluation functional
+`L = (smoothCcToTensorHs g₀ a)-extension of (T ↦ ccTensorBilinSymm g₀ T x v w)` (continuous
+by `ccTensorBilinSymm_gFibreOpBound_le_spectral_lossy` + `LinearMap.extendOfNorm`): the
+solution coordinate `t ↦ tensorL2Coeff (u.toFun t) i` is the per-mode Duhamel convolution
+`perModeConv λᵢ (f i)` of the `C∞`-in-time smooth forcing coordinate `f i`
+(`forcingSmoothCoordsRealize`, re-derived internally from `u`/`gforce`/`hduh`/`hforce`),
+each with the continuous per-mode time-derivative `f i t − λᵢ · perModeConv λᵢ (f i) t`
+(`perModeConv_hasDerivAt`); the differentiated spectral series converges uniformly by the
+all-order time-jet spectral-mass majorant (`hf_mass`), so `hasDerivAt_tsum` gives the
+pointwise derivative, whose value — by `hball ⟹ deTurckSobolevNHa2_eq_smoothN`, the
+connection-Laplacian/forcing cancellation (`tensorL2Coeff_ofCompact_rawTensorConnLapSmooth`,
+`tensorScaleLaplacian_coeff`), and `deTurckRHSSection_ccTensorBilinSymm_eq_deTurckRicciRHS`
+— is `deTurckRicciRHS g_bg (g_DT t) x v w`.  (The dispatch's route through
+`maxreg_l2deriv_to_pointwise_hasderivwithinat` is NOT viable: that bridge needs a
+time-CONTINUOUS `Hᵃ`-representative of `u.deriv`, but `u.deriv =ᵐ timeScaleLaplacian a
+solField + gforce` with `gforce` only `L²`-class is genuinely discontinuous; the
+differentiability is term-by-term spectral, not via a continuous derivative class.)
 
 PINNED to the solution AND time-regular: `h_pin` (on `Icc 0 T₁`, fixing the boundary value
 `F 0 = 0` too) and `h_cont` fix the time-variation a within-`[0,∞)` derivative requires, so
 the conclusion is not satisfiable by an arbitrary family.
 
-DEFERRED (honest `sorry`; consumers transitively depend on `sorryAx`). -/
+DEFERRED (honest `sorry`; consumers transitively depend on `sorryAx`).  The remaining
+content is the genuine deep parabolic-regularity core (the term-by-term spectral
+differentiation through the chart functional). -/
 private theorem realizedFamily_flowDeriv
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     {T₁ : ℝ} (hT₁_pos : 0 < T₁) (hT₁_le : T₁ ≤ T)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
@@ -303,7 +354,11 @@ private theorem realizedFamily_flowDeriv
           (Nat.cast_nonneg a) (timeH1.toFun u t))
     (h_cont : ContinuousOn
       (fun t : ℝ => (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t)))
-      (Set.Icc (0 : ℝ) T₁)) :
+      (Set.Icc (0 : ℝ) T₁))
+    (hball : ∀ t ∈ Set.Ico (0 : ℝ) T₁,
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t)‖ ≤
+        (Classical.choose (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a
+          (by omega))).1) :
     ∀ t ∈ Set.Ico (0 : ℝ) T₁, ∀ x : M, ∀ v w : TangentSpace I x,
       HasDerivWithinAt
         (fun s : ℝ => ccTensorBilinSymm (I := I) g₀ (F s) x v w)
@@ -321,17 +376,16 @@ relativized from the global `∀ t` to the closed time slab `∀ t ∈ Icc 0 T`.
 relativization is sound: inside `jointChartGramSmooth_of_spectralSmooth_timeSmooth`,
 `hcoeff` is consumed only through `realizedChartGramIncrement_eigenSeries_eq`, which is
 applied at points `q ∈ Icc 0 T ×ˢ …`, so only the slab values of `hcoeff` are used; the
-global quantification in the sibling's signature is over-stated.  (See the dispatch return
-SIGNATURE-DEFECT note: the canonical fix is to relativize the sibling's `hcoeff` to
-`Icc 0 T`, after which this lemma is a direct citation rather than a posited child.)
+global quantification in the sibling's signature is over-stated.  The sibling's `hcoeff`
+has since been relativized to `Icc 0 T`, so this lemma is now a **direct citation** of
+`jointChartGramSmooth_of_spectralSmooth_timeSmooth` (which is proved sorry-free:
+`#print axioms` is `[propext, Classical.choice, Quot.sound]`), not a posited child.
 
 The cutoff representative families produced by `maxreg_solution_jointly_smooth_representative`
 are globally fibre-small (`hδ : ∀ t`) and so necessarily differ from the genuine spectral
 family off the horizon; their eigen-coordinates therefore agree with the time-smooth
 `φ = perModeConv λ f` only on the slab, which is exactly what this relativized form
-consumes.
-
-DEFERRED (honest `sorry`; consumers transitively depend on `sorryAx`). -/
+consumes. -/
 private theorem realizedFamily_jointChartGramSmooth
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
     (T_rep : ℝ → SmoothCcTensor g 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -351,6 +405,61 @@ private theorem realizedFamily_jointChartGramSmooth
               (iteratedDeriv k (φ i) t) ^ 2 ≤ Cmaj i) :
     JointChartGramSmooth (I := I) T
       (fun t : ℝ => tensorSectionRealizeMetric (I := I) g (T_rep t) hδ_lt (hδ t)) :=
+  jointChartGramSmooth_of_spectralSmooth_timeSmooth (I := I) (M := M)
+    g hT T_rep hδ_lt hδ φ hφ_smooth hcoeff hmodemass
+
+/-- **DEEP ANALYTIC INPUT (horizon) — the order-`(a+2)` smallness horizon of the realized
+solution field about the zero initial datum.**
+
+For the maximal-regularity Duhamel solution `u` with zero trace at `t = 0` (`htrace`), and
+any positive radius `R₀`, there is a positive **order-`(a+2)` smallness horizon** `d₂ ≤ T`
+on which every order-`a`-pinned smooth representative `S` of the solution value
+`u.toFun t`  (`toL2 S = tensorHsToL2 (u.toFun t)`) has order-`(a+2)` Sobolev norm at most
+`R₀`:  `‖smoothCcToTensorHs g₀ (a+2) S‖ ≤ R₀`.
+
+This is the genuine parabolic interior gain carried up to the smooth (zero) initial datum:
+the maximal-regularity solution lies, for `t > 0`, in every spatial Sobolev order, and its
+order-`(a+2)` Sobolev norm is time-continuous up to `t = 0` with value `0` at `t = 0`
+(zero initial perturbation), so it stays inside the radius-`R₀` ball on a short horizon.
+The bound is genuinely about the SOLUTION (not vacuous): at a time `t` where the solution's
+order-`(a+2)` norm exceeds `R₀`, the pinned smooth representative — whose order-`(a+2)` norm
+is determined by the order-`a` pin via the shared eigenbasis coordinates of `u.toFun t` —
+violates the conclusion, so the horizon is genuinely short-time content, not a tautology.
+
+The order-`(a+2)` gain is GENUINELY a property of the Duhamel/heat structure, not of bare
+`timeH1`-in-time membership: `u` is bound to the maximal-regularity Duhamel map by `hduh`
+(its image of its own order-`(a+2)`-regular forcing `gforce`, reproducing
+`deTurckSobolevNHa2` a.e. along the order-`(a+2)` Duhamel field via `hforce`), under which
+`u.toFun t` lies in `H^{a+2}` for interior `t` (`duhamel_into_all_tensorHs`) with the
+order-`(a+2)` Sobolev norm time-continuous up to `t = 0` and vanishing at `t = 0` (zero
+initial datum, `htrace`).  Without the Duhamel binders a generic zero-trace `timeH1`
+element admits an `H^a`-bounded high-frequency spike train accumulating at `t = 0`, which
+has unbounded `H^{a+2}` norm arbitrarily close to `0`, so the bound would be FALSE — the
+Duhamel structure is load-bearing.
+
+DEFERRED (honest `sorry`; consumers transitively depend on `sorryAx`).  The remaining
+content is the classical parabolic order-`(a+2)` interior-time smoothing of the Duhamel
+solution up to `t = 0` (Amann maximal regularity / Ladyzhenskaya–Solonnikov–Uraltseva), the
+order-`(a+2)` analogue of the order-`a` time-continuity `timeH1.continuousOn_toFun`. -/
+private theorem realizedSol_solField_smallnessHorizon_Ha2
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce)
+    (hforce : gforce =ᵐ[timeMeasure T]
+      (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (htrace : timeH1.trace0 _ T u = 0)
+    {R₀ : ℝ} (hR₀ : 0 < R₀) :
+    ∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
+      ∀ t ∈ Set.Icc (0 : ℝ) d₂, ∀ S : SmoothCcTensor g₀ 0 2,
+        SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) S =
+          tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (Nat.cast_nonneg a) (timeH1.toFun u t) →
+          ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) S‖ ≤ R₀ :=
   sorry
 
 set_option linter.unusedVariables false in
@@ -517,9 +626,21 @@ theorem maxreg_solution_jointly_smooth_representative
     hcontU.continuousWithinAt ⟨le_refl 0, hT.le⟩
   rw [Metric.continuousWithinAt_iff] at hwithin
   obtain ⟨d, hd_pos, hd⟩ := hwithin (1 / (2 * C)) (by positivity)
-  set T₁ : ℝ := min T (d / 2) with hT₁_def
-  have hT₁_pos : 0 < T₁ := lt_min hT (by positivity)
-  have hT₁_le : T₁ ≤ T := min_le_left _ _
+  -- The order-`(a+2)` forcing ball radius `R₀ > 0`.
+  set R₀ : ℝ := (Classical.choose
+    (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a (by omega))).1 with hR₀_def
+  have hR₀_pos : 0 < R₀ :=
+    (Classical.choose_spec
+      (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a (by omega))).1
+  -- The order-`(a+2)` smallness horizon `d₂` (deep parabolic input).
+  obtain ⟨d₂, hd₂_pos, hd₂_le, hd₂⟩ :=
+    realizedSol_solField_smallnessHorizon_Ha2 (I := I) (M := M) g₀ g_bg a hT hT1 u gforce
+      hduh hforce htrace hR₀_pos
+  set T₁ : ℝ := min (min T (d / 2)) d₂ with hT₁_def
+  have hT₁_pos : 0 < T₁ := lt_min (lt_min hT (by positivity)) hd₂_pos
+  have hT₁_le : T₁ ≤ T := le_trans (min_le_left _ _) (min_le_left _ _)
+  have hT₁_le_d2 : T₁ ≤ d₂ := min_le_right _ _
+  have hT₁_le_d : T₁ ≤ d / 2 := le_trans (min_le_left _ _) (min_le_right _ _)
   -- The final family: the chosen representative on `(0, T₁]`, zero elsewhere.
   set F : ℝ → SmoothCcTensor g₀ 0 2 :=
     fun t => if t ∈ Set.Ioc (0 : ℝ) T₁ then Fdef t else 0 with hF_def
@@ -544,7 +665,7 @@ theorem maxreg_solution_jointly_smooth_representative
         rw [smoothCcToTensorHs_coeff, hpin, tensorHsToL2_tensorL2Coeff]
       have hdist : dist t (0 : ℝ) < d := by
         rw [Real.dist_eq, sub_zero, abs_of_pos ht.1]
-        exact lt_of_le_of_lt (le_trans ht.2 (min_le_right _ _)) (by linarith)
+        exact lt_of_le_of_lt (le_trans ht.2 hT₁_le_d) (by linarith)
       have hnorm_lt : dist (timeH1.toFun u t) (timeH1.toFun u 0) < 1 / (2 * C) :=
         hd ht_icc hdist
       have hnorm_le : ‖smoothCcToTensorHs (I := I) (M := M) g₀ (a : ℝ) (Fdef t)‖ ≤
@@ -610,9 +731,18 @@ theorem maxreg_solution_jointly_smooth_representative
     exact hF_pin t ht
   -- The smallness constant `δ = 1/2 < 1`.
   have hδ_lt : (1 / 2 : ℝ) < 1 := by norm_num
+  -- The order-`(a+2)` forcing-ball bound on the horizon `Ico 0 T₁ ⊆ Icc 0 d₂`, from the
+  -- smallness horizon `hd₂` fed the order-`a` `L²` pin `hF_pin`.
+  have hball : ∀ t ∈ Set.Ico (0 : ℝ) T₁,
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t)‖ ≤ R₀ := by
+    intro t ht
+    have ht_d2 : t ∈ Set.Icc (0 : ℝ) d₂ :=
+      ⟨ht.1, le_trans ht.2.le hT₁_le_d2⟩
+    have ht_icc₁ : t ∈ Set.Icc (0 : ℝ) T₁ := ⟨ht.1, ht.2.le⟩
+    exact hd₂ t ht_d2 (F t) (hF_pin t ht_icc₁)
   -- CONJUNCT (3): the Ricci–DeTurck flow derivative (deep input 2).
-  have hF_flow := realizedFamily_flowDeriv (I := I) (M := M) g₀ g_bg a ha_super hT hT1
-    hT₁_pos hT₁_le u gforce hduh hforce htrace F hδ_lt hF_small hF_zero hF_pin hF_cont
+  have hF_flow := realizedFamily_flowDeriv (I := I) (M := M) g₀ g_bg a ha_super ha_even hT hT1
+    hT₁_pos hT₁_le u gforce hduh hforce htrace F hδ_lt hF_small hF_zero hF_pin hF_cont hball
   -- CONJUNCT (4): the joint chart-Gram smoothness from the time-smooth eigen-coordinates.
   -- The eigen-coordinate identity for the cutoff family `F` on the slab `Icc 0 T₁`:
   -- `tensorL2Coeff (toL2 (F t)) i = φ i t` (at `t = 0` both sides vanish; on `(0,T₁]`
