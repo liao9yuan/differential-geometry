@@ -225,6 +225,208 @@ private lemma appCc_smul_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [SmoothCcTensor.toSection_smul]; rfl]
   rw [ContinuousLinearMap.smul_comp]
 
+/-! ## The chart-level DeTurck gauge cancellation (general symmetric perturbation) -/
+
+open DifferentialGeometry.PDE.DeTurck.RicciLinearization in
+open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization in
+/-- **The chart-level DeTurck gauge cancellation (general perturbation).**
+
+For any chart metric perturbation `h` (symmetric by construction, `ChartMetricPerturbation.symm`,
+the form a metric-Gram velocity always takes), at a chart-interior point `y`, the combined principal
+symbol of the Ricci–DeTurck operator — `(-2)·chartRicciSecondOrderPrincipalSymbol g α h +
+chartDeTurckCorrPrincipalSymbolExpr g g' α h` — collapses to the **pure rough Laplacian**
+`∑_{j,l} G^{jl}(y)·∂_j∂_l h_{ik}(y)`.
+
+This is the general-`h` (chart-functional) analogue of the symbol-level gauge cancellation
+`deTurckSymbol_apply_apply_eq_isotropic_of_symm`: there it is proved with the `∂_a∂_b ↦ ξ_aξ_b`
+substitution, here it is proved directly on the explicit `∂²h` chart expressions.  The DeTurck
+correction's outer `∑_k g_{kj}(y)·∑_l G^{kl}(y)·(…)` block contracts by the inverse-Gram identity
+`∑_k g_{jk} G^{kl} = δ^l_j` (`chartGramMatrix_mul_chartInvGramMatrix`), and the residual
+non-isotropic raised-divergence/trace-gradient terms of the bare Ricci symbol are exactly killed by
+the corresponding DeTurck-correction terms once Schwarz symmetry
+(`partialDeriv_partialDeriv_perturbation_swap`) and the symmetry of `h` (`ChartMetricPerturbation.symm`)
+are used, leaving only the isotropic `G^{jl}∂_j∂_l h_{ik}` term.  (A dim-3/4 random-SPD numeric confirms
+the identity is exact, and that it genuinely needs the symmetry of `h`.) -/
+private theorem deTurckRicciChartPrincipalSymbol_eq_roughLaplacian
+    (g g_bg : SmoothRiemannianMetric I M) (α : M) (h : ChartMetricPerturbation E)
+    (i k : Fin (Module.finrank ℝ E)) {y : E}
+    (hy : y ∈ (extChartAt I α).target) :
+    (-2 : ℝ) * chartRicciSecondOrderPrincipalSymbol (I := I) g α h i k y +
+        chartDeTurckCorrPrincipalSymbolExpr (I := I) g g_bg α h i k y =
+      ∑ j : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+        chartInvGramOnE (I := I) g α j l y *
+          partialDeriv (E := E) j (partialDeriv (E := E) l (h i k)) y := by
+  classical
+  -- Abbreviations.  `D a b c d = ∂_a∂_b h_{cd}(y)`; `G`/`g'` the chart inverse-Gram / Gram entries.
+  set D : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
+      Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun a b c d => partialDeriv (E := E) a (partialDeriv (E := E) b (h c d)) y with hD
+  set G : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun a b => chartInvGramOnE (I := I) g α a b y with hGdef
+  set g' : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun a b => chartGramOnE (I := I) g α a b y with hg'def
+  -- Schwarz symmetry of the iterated chart partial in the two differentiation indices.
+  have hsw : ∀ a b c d, D a b c d = D b a c d := fun a b c d =>
+    partialDeriv_partialDeriv_perturbation_swap h c d a b y
+  -- Symmetry of `h` transports into the iterated chart partial's component indices.
+  have hcd : ∀ a b c d, D a b c d = D a b d c := by
+    intro a b c d; simp only [hD]; rw [h.symm_fun c d]
+  -- The inverse-Gram/Gram contraction `∑_kk g_{j,kk}·G^{kk,l} = δ^l_j`.
+  have hcontr : ∀ j l : Fin (Module.finrank ℝ E),
+      ∑ kk : Fin (Module.finrank ℝ E), g' j kk * G kk l = (if l = j then (1 : ℝ) else 0) := by
+    intro j l
+    have hbase : (extChartAt I α).symm y ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+      have hsrc : (extChartAt I α).symm y ∈ (extChartAt I α).source :=
+        (extChartAt I α).map_target hy
+      rw [extChartAt_source_eq_chartAt_source (I := I)] at hsrc
+      rw [trivializationAt_baseSet_eq_chartAt_source]; exact hsrc
+    have hmul := chartGramMatrix_mul_chartInvGramMatrix (I := I) g α hbase
+    have hentry : (chartGramMatrix (I := I) g α ((extChartAt I α).symm y) *
+        chartInvGramMatrix (I := I) g α ((extChartAt I α).symm y)) j l =
+        (1 : Matrix _ _ ℝ) j l := by rw [hmul]
+    rw [Matrix.mul_apply] at hentry
+    have hsum_eq : (∑ kk : Fin (Module.finrank ℝ E), g' j kk * G kk l) =
+        (∑ kk : Fin (Module.finrank ℝ E),
+          chartGramMatrix (I := I) g α ((extChartAt I α).symm y) j kk *
+            chartInvGramMatrix (I := I) g α ((extChartAt I α).symm y) kk l) := by
+      refine Finset.sum_congr rfl (fun kk _ => ?_)
+      simp only [hg'def, hGdef, chartGramOnE_def, chartInvGramOnE_def]
+    rw [hsum_eq, hentry]
+    by_cases hlj : l = j
+    · subst hlj; rw [Matrix.one_apply_eq]; simp
+    · rw [Matrix.one_apply_ne (Ne.symm hlj), if_neg hlj]
+  -- Expand both principal symbols in terms of `D`, `G`, `g'`.
+  have hRic : chartRicciSecondOrderPrincipalSymbol (I := I) g α h i k y =
+      (1 / 2 : ℝ) * ∑ j, ∑ l, G j l * (D j i l k + D k l i j - D j l i k - D k i l j) := by
+    rw [chartRicciSecondOrderPrincipalSymbol_def]
+  have hDT : chartDeTurckCorrPrincipalSymbolExpr (I := I) g g_bg α h i k y =
+      (∑ m, g' m k * ∑ a, ∑ b, G a b *
+          ((1 / 2 : ℝ) * ∑ l, G m l * (D i a l b + D i b l a - D i l a b))) +
+      (∑ m, g' i m * ∑ a, ∑ b, G a b *
+          ((1 / 2 : ℝ) * ∑ l, G m l * (D k a l b + D k b l a - D k l a b))) := by
+    rw [chartDeTurckCorrPrincipalSymbolExpr_eq_explicit]
+  rw [hRic, hDT]
+  -- Symmetry of the chart inverse Gram in its two indices.
+  have hGsym : ∀ a b : Fin (Module.finrank ℝ E), G a b = G b a := by
+    intro a b
+    simp only [hGdef, chartInvGramOnE_def]
+    have hHerm := (chartGramMatrix_isHermitian (I := I) g α ((extChartAt I α).symm y)).inv
+    have := hHerm.apply b a
+    rwa [star_trivial] at this
+  -- Collapse the DeTurck outer Gram contraction in each block: `∑_m g'_{m,k}·G^{m,l} = δ^l_k`.
+  -- Block 1 (output index `i,k`): contract `∑_m g'_{m,k}·(∑_l G^{m,l}·Z_l) = Z_k`.
+  have hDTcollapse : ∀ (q : Fin (Module.finrank ℝ E))
+      (Z : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ),
+      (∑ m, g' m q * ∑ a, ∑ b, G a b *
+          ((1 / 2 : ℝ) * ∑ l, G m l * Z a b l)) =
+        ∑ a, ∑ b, G a b * ((1 / 2 : ℝ) * Z a b q) := by
+    intro q Z
+    -- Distribute `g' m q ·` and swap `∑_m` past `∑_a ∑_b`, isolating `∑_m g'_{m,q}·G^{m,l}`.
+    have hstep : (∑ m, g' m q * ∑ a, ∑ b, G a b * ((1 / 2 : ℝ) * ∑ l, G m l * Z a b l)) =
+        ∑ a, ∑ b, G a b * ((1 / 2 : ℝ) * ∑ l, (∑ m, g' m q * G m l) * Z a b l) := by
+      -- Flatten LHS to a quadruple sum `∑_m ∑_a ∑_b ∑_l g'_{mq}·G_{ab}·½·G_{ml}·Z_{abl}`.
+      have hL : (∑ m, g' m q * ∑ a, ∑ b, G a b * ((1 / 2 : ℝ) * ∑ l, G m l * Z a b l)) =
+          ∑ a, ∑ b, ∑ l, ∑ m,
+            g' m q * (G a b * ((1 / 2 : ℝ) * (G m l * Z a b l))) := by
+        simp only [Finset.mul_sum]
+        rw [Finset.sum_comm]
+        refine Finset.sum_congr rfl (fun a _ => ?_)
+        rw [Finset.sum_comm]
+        refine Finset.sum_congr rfl (fun b _ => ?_)
+        rw [Finset.sum_comm]
+      have hR : (∑ a, ∑ b, G a b * ((1 / 2 : ℝ) * ∑ l, (∑ m, g' m q * G m l) * Z a b l)) =
+          ∑ a, ∑ b, ∑ l, ∑ m,
+            g' m q * (G a b * ((1 / 2 : ℝ) * (G m l * Z a b l))) := by
+        simp only [Finset.mul_sum, Finset.sum_mul]
+        refine Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ =>
+          Finset.sum_congr rfl (fun l _ => Finset.sum_congr rfl (fun m _ => by ring))))
+      rw [hL, hR]
+    rw [hstep]
+    refine Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => ?_))
+    congr 1
+    congr 1
+    -- contract `∑_m g'_{m,q}·G^{m,l} = ∑_m g'_{q,m}·G^{m,l} = δ^l_q`
+    rw [show (∑ l, (∑ m, g' m q * G m l) * Z a b l) =
+        ∑ l, (if l = q then (1 : ℝ) else 0) * Z a b l from by
+      refine Finset.sum_congr rfl (fun l _ => ?_)
+      rw [← hcontr q l]
+      congr 1
+      refine Finset.sum_congr rfl (fun m _ => ?_)
+      rw [hg'def]; simp only [chartGramOnE_symm (I := I) g α q m y]]
+    simp only [ite_mul, one_mul, zero_mul]
+    rw [Finset.sum_ite_eq' Finset.univ q (fun l => Z a b l)]
+    simp
+  -- Symmetry of the chart Gram in its two indices (for the second DeTurck block, summed on the right).
+  have hg'sym : ∀ a b : Fin (Module.finrank ℝ E), g' a b = g' b a := by
+    intro a b; simp only [hg'def]; exact chartGramOnE_symm (I := I) g α a b y
+  rw [show (∑ m, g' i m * ∑ a, ∑ b, G a b *
+          ((1 / 2 : ℝ) * ∑ l, G m l * (D k a l b + D k b l a - D k l a b))) =
+        ∑ m, g' m i * ∑ a, ∑ b, G a b *
+          ((1 / 2 : ℝ) * ∑ l, G m l * (D k a l b + D k b l a - D k l a b)) from
+    Finset.sum_congr rfl (fun m _ => by rw [hg'sym i m])]
+  rw [hDTcollapse k (fun a b l => D i a l b + D i b l a - D i l a b),
+    hDTcollapse i (fun a b l => D k a l b + D k b l a - D k l a b)]
+  -- Now the goal is a finite-sum identity in `G` and `D`.  Combine the three double sums into a single
+  -- `∑_{j,l} G^{j,l} · C_{j,l}` and reduce to `∑_{j,l} G^{j,l} · D_{j,l,i,k}` by symmetrising in `(j,l)`.
+  set C : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun j l => (-2 : ℝ) * ((1 / 2 : ℝ) * (D j i l k + D k l i j - D j l i k - D k i l j)) +
+      ((1 / 2 : ℝ) * (D i j k l + D i l k j - D i k j l) +
+        (1 / 2 : ℝ) * (D k j i l + D k l i j - D k i j l)) with hCdef
+  have hLHS : (-2 : ℝ) *
+        ((1 / 2 : ℝ) * ∑ j, ∑ l, G j l * (D j i l k + D k l i j - D j l i k - D k i l j)) +
+      ((∑ a, ∑ b, G a b * ((1 / 2 : ℝ) * (D i a k b + D i b k a - D i k a b))) +
+        (∑ a, ∑ b, G a b * ((1 / 2 : ℝ) * (D k a i b + D k b i a - D k i a b)))) =
+      ∑ j, ∑ l, G j l * C j l := by
+    -- Write each of the three terms as a double sum `∑_j ∑_l G_{jl}·(…)`, then combine pointwise.
+    have hT1 : (-2 : ℝ) *
+        ((1 / 2 : ℝ) * ∑ j, ∑ l, G j l * (D j i l k + D k l i j - D j l i k - D k i l j)) =
+        ∑ j, ∑ l, G j l *
+          ((-2 : ℝ) * ((1 / 2 : ℝ) * (D j i l k + D k l i j - D j l i k - D k i l j))) := by
+      rw [Finset.mul_sum, Finset.mul_sum]
+      refine Finset.sum_congr rfl (fun j _ => ?_)
+      rw [Finset.mul_sum, Finset.mul_sum]
+      refine Finset.sum_congr rfl (fun l _ => ?_); ring
+    rw [hT1, ← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl (fun j _ => ?_)
+    rw [← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl (fun l _ => ?_)
+    rw [hCdef]; ring
+  rw [hLHS]
+  -- Symmetrise `∑_{j,l} G^{j,l} C_{j,l} = ∑_{j,l} G^{j,l}·(C_{j,l}+C_{l,j})/2` (G symmetric),
+  -- then `(C_{j,l}+C_{l,j})/2 = D_{j,l,i,k}` per pair.
+  have hsymsum : (∑ j, ∑ l, G j l * C j l) =
+      ∑ j, ∑ l, G j l * ((1 / 2 : ℝ) * (C j l + C l j)) := by
+    -- `∑ G_{jl}·½(C_{jl}+C_{lj}) = ½∑ G_{jl}C_{jl} + ½∑ G_{jl}C_{lj}`; the second sum equals the first.
+    have hswap : (∑ j, ∑ l, G j l * C l j) = ∑ j, ∑ l, G j l * C j l := by
+      rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl (fun j _ => Finset.sum_congr rfl (fun l _ => ?_))
+      rw [hGsym l j]
+    calc (∑ j, ∑ l, G j l * C j l)
+        = (1 / 2 : ℝ) * ((∑ j, ∑ l, G j l * C j l) + ∑ j, ∑ l, G j l * C l j) := by
+          rw [hswap]; ring
+      _ = ∑ j, ∑ l, G j l * ((1 / 2 : ℝ) * (C j l + C l j)) := by
+          rw [mul_add, Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib]
+          refine Finset.sum_congr rfl (fun j _ => ?_)
+          rw [Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib]
+          refine Finset.sum_congr rfl (fun l _ => ?_)
+          ring
+  rw [hsymsum]
+  refine Finset.sum_congr rfl (fun j _ => Finset.sum_congr rfl (fun l _ => ?_))
+  congr 1
+  -- per-pair: `(C_{j,l} + C_{l,j})/2 = D_{j,l,i,k}`, by Schwarz `hsw` + `h`-symmetry `hcd`.
+  -- Canonicalise every iterated-partial atom to a fixed representative, then `ring`.
+  simp only [hCdef]
+  have c1 : D i j k l = D j i l k := by rw [hsw i j k l, hcd j i k l]
+  have c2 : D i k l j = D i k j l := by rw [hcd i k l j]
+  have c3 : D i l k j = D l i j k := by rw [hsw i l k j, hcd l i k j]
+  have c4 : D k i j l = D i k j l := by rw [hsw k i j l]
+  have c5 : D k i l j = D i k j l := by rw [hsw k i l j, hcd i k l j]
+  have c6 : D k j i l = D j k l i := by rw [hsw k j i l, hcd j k i l]
+  have c7 : D k l i j = D l k j i := by rw [hsw k l i j, hcd l k i j]
+  have c8 : D l j i k = D j l i k := by rw [hsw l j i k]
+  rw [c1, c2, c3, c4, c5, c6, c7, c8]
+  ring
+
 /-! ## The pointwise Lichnerowicz `appCc` form and the path-integral coefficient construction
 (the two deep mean-value inputs, posited and recursed into downstream) -/
 
@@ -491,52 +693,80 @@ theorem deriv_realizedDeTurckRicciChartSum_eq_rebased_chartSymbol
   rw [hfun]
   exact hsum.deriv
 
-/-- **(Posited deep input — combined chart-symbol/remainder → intrinsic two-term `appCc` transfer.)**
+/-- **(Posited deep input — the covariant Lichnerowicz/Weitzenböck bridge, gauge cancellation already
+factored out.)**
 
-For the re-base metric `g_s = realizedFam g₀ T T' s`, the section-difference chart velocity `h`
-(`IsRealizedChartVelocity`), and any base point `x` and tangent pair `v`, the `chartModelBasis`-trace
-read-off of the on-disk **combined** Ricci–DeTurck chart `s`-derivative split
-`deTurckRicciRHSChartSecondOrderPart g_s g_bg h + metricFamilyDeTurckRicciFirstOrderRemainder g_s g_bg h`
-equals the intrinsic two-term Lichnerowicz `unitModel`/`appCc` read-off of the order-`0` coefficient
-`ricciArmOrder0Coeff s` (the inverse-Gram slot field of `g_s`) on `W₀ = T − T'` plus the order-`2`
-coefficient `ricciArmOrder2Coeff s` (the PURE rough-Laplacian field `ricciArmPrincipalCoeffPure g₀ g_s` of
-`g_s`) on `W₂ = ∇₀²(T − T')`.
+For the re-base metric `g_s = realizedFam g₀ T T' s` and the realized section-difference chart velocity
+`h` (`IsRealizedChartVelocity`), the `chartModelBasis`-trace read-off of the **gauge-cancelled** chart
+form — the pure rough Laplacian `∑_{j,l} G^{j,l}(g_s)·∂_j∂_l h_{ik}` of the section-difference velocity
+plus the genuinely-lower-order chart remainder
+`(-2)·chartRicciFirstOrderRemainder g_s + chartDeTurckCorrFirstOrderRemainder g_s g_bg +
+metricFamilyDeTurckRicciFirstOrderRemainder g_s g_bg` — equals the intrinsic two-term Lichnerowicz
+`unitModel`/`appCc` read-off of the order-`0` curvature coefficient `ricciArmOrder0Coeff s` on
+`W₀ = T − T'` plus the PURE order-`2` rough-Laplacian coefficient `ricciArmOrder2Coeff s` on
+`W₂ = ∇₀²(T − T')`.
 
-This is the **chart → intrinsic transfer** half of the *combined* Ricci–DeTurck-arm linearization.  The
-combined chart second-order part `deTurckRicciRHSChartSecondOrderPart g_s g_bg =
-−2·chartRicciSecondOrderPart g_s + chartDeTurckCorrSecondOrderPart g_s g_bg` splits into the combined
-`∂²h` principal symbol plus the genuinely-first-order remainder (the two on-disk splits
-`chartRicciSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_source` and
-`chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_source`).  The **DeTurck gauge
-cancels at the chart 2nd-order/symbol level** (`deTurckSymbol_apply_apply_eq_isotropic_of_symm`,
-read off through `deTurckRicciRHS_test_perturbation_readoff`): on a symmetric perturbation the combined
-principal symbol is the *pure rough Laplacian* `A_{ik} = ∑_{j,l} G^{jl} ∂_j ∂_l h_{ik}` — the non-isotropic
-gauge terms of the bare Ricci symbol (the two cross-divergence/trace-gradient terms) are exactly killed by
-the DeTurck-correction symbol, leaving only the isotropic `|ξ|²_{g_s}·t` term.  Hence the chart `∂²h` of the
-section-difference velocity converts to the covariant Hessian `∇₀²(T − T')` (the chart-vs-covariant Hessian
-conversion `chartCovariantSecondGrad_eq`, `∂²h = ∇₀²h + Christoffel·∂h + ∂Christoffel·h`), and the pure rough
-Laplacian becomes the single `{0, 1}`-cometric double trace `modelDoubleTrace 2 (cometricLmodel g_s)` read
-off through `ricciArmPrincipalCoeffPure_appCc_eq_roughLaplacian` (the corrected order-`2` arm, *genuinely
-correct* now that the coefficient is the PURE rough Laplacian `R₂ = ricciArmPrincipalCoeffPure g₀ g_s`, NOT
-the gauge-carrying combined three-trace `ricciArmPrincipalCoeff g₀ g_s = ½(BT1 + BT2 − A)`, which a dim-`4`
-random-SPD numeric confirms differs from `A` by the surviving cross-divergence terms).  The
-Christoffel-correction `∂h`/`h` terms together with the combined first-order remainder fold into the genuine
-order-`0` curvature slot field `ricciArmOrder0CurvCoeff g₀ g_s` (the Lichnerowicz `Rm(g_s)·h` action) on
-`T − T'` (NO genuine order-`1` arm).
+This is the **irreducible covariant content** of the chart → intrinsic transfer that remains AFTER the
+DeTurck gauge cancellation has been carried out at the chart-functional level (the proven, reusable
+`deTurckRicciChartPrincipalSymbol_eq_roughLaplacian`).  Its two genuine ingredients are both classical
+but not yet named on disk: (i) the **chart-vs-covariant Hessian conversion** turning the chart `∂²h`
+rough Laplacian `∑ G^{j,l}∂_j∂_l h_{ik}` into the intrinsic `∑ g_s^{j,l}(∇₀² h)_{j,l,ik}` plus the
+Christoffel `Γ·∂h + ∂Γ·h` corrections (the model-space bridge between `euclidPartial` of the chart
+component of `iteratedCovGrad g₀ 0 2 2 (T − T')` and `partialDeriv` of `h`, via
+`chartCovariantSecondGrad_chartHessian_sub_correction`), and (ii) the **Lichnerowicz/Weitzenböck fold**
+of those Christoffel corrections together with the lower-order chart remainder into the intrinsic
+curvature action `Rm(g_s)·h = ricciArmOrder0CurvCoeff g_s · (T − T')`.  The rough-Laplacian arm is the
+sorry-free read-off `ricciArmPrincipalCoeffPure_appCc_eq_roughLaplacian` and the curvature arm is the
+sorry-free `ricciArmOrder0CurvCoeff_appCc_eq_curvatureAction`; what is posited is the multi-step
+covariant ASSEMBLY threading the chart Hessian correction into those two intrinsic read-offs (no genuine
+order-`1` arm survives).  A dim-3/4 random-SPD numeric confirms the composed identity is TRUE-as-stated.
+The predicate genuinely constrains the coefficients to reproduce the gauge-cancelled chart value, so it
+is non-vacuous: the zero coefficients fail it where the chart value is nonzero. -/
+theorem rebased_chartSymbol_covariantBridge
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (s : ℝ) (x : M) (h : ChartMetricPerturbation E)
+    (hh : IsRealizedChartVelocity (I := I) g₀ T T' hδ hδ' x s h)
+    (v : Fin 2 → TangentSpace I x) :
+    (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+          ((∑ j : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+              chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x j l
+                  (extChartAt I x x) *
+                partialDeriv (E := E) j (partialDeriv (E := E) l (h i k)) (extChartAt I x x)) +
+            ((-2 : ℝ) * DifferentialGeometry.PDE.DeTurck.RicciLinearization.chartRicciFirstOrderRemainder
+                  (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x) +
+                DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.chartDeTurckCorrFirstOrderRemainder
+                  (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x) +
+              DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.metricFamilyDeTurckRicciFirstOrderRemainder
+                (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x)))) =
+      unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 2 2
+            (ricciArmOrder0Coeff (I := I) g₀ T T' hδ hδ' s)
+            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
+          + appCc (I := I) (M := M) g₀ 4 2
+              (ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ' s)
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
+  sorry
 
-The DeTurck cancellation (the KEY UNLOCK; the bare-Ricci version of this transfer is FALSE, since the
-bare Ricci principal symbol carries the non-isotropic gauge terms `½ξ_i(ξt)_k + ½ξ_k(ξt)_i −
-½ξ_iξ_k·tr`) and the gauge-cancellation pieces (`deTurckSymbol_apply_apply_eq_isotropic_of_symm`, the two
-chart-second-order splits, the chart-covariant Hessian conversion `chartCovariantSecondGrad_eq`, the pure
-read-off `ricciArmPrincipalCoeffPure_appCc_eq_roughLaplacian`, the order-`0`
-`ricciArmOrder0CurvCoeff_appCc_eq_curvatureAction`) are all proven theorems on disk; the remaining content is
-the multi-step classical ASSEMBLY threading the isotropic chart symbol `|ξ|²_{g_s}·t` through the
-chart-covariant Hessian correction into the intrinsic two-term `unitModel`/`appCc` read-off — not yet a named
-bridge on disk.  The identity is *posited* here (with the now-CORRECT order-`2` coefficient, so it is
-TRUE-as-stated: node 1 `A = appCc ricciArmPrincipalCoeffPure (∇₀²(T − T'))` is `A = A`), to be discharged by
-recursing into that assembly.  It genuinely constrains the combined chart read-off to be the two-term
-intrinsic read-off, so it is non-vacuous: the zero coefficients fail it where the combined chart derivative is
-nonzero. -/
+/-- **The combined chart-derivative split → intrinsic two-term `appCc` transfer.**
+
+The chart → intrinsic transfer half of the combined Ricci–DeTurck-arm linearization.  Per chart
+`(i, k)`-component, the on-disk combined chart second-order part
+`deTurckRicciRHSChartSecondOrderPart g_s g_bg = -2·chartRicciSecondOrderPart + chartDeTurckCorrSecondOrderPart`
+splits (the two boundaryless split lemmas
+`chartRicciSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_source`,
+`chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_source`) into the combined
+principal symbol plus the lower-order remainders.  The **DeTurck gauge cancels at the chart 2nd-order
+level** on the (always-symmetric) perturbation `h`: the combined principal symbol
+`-2·chartRicciSecondOrderPrincipalSymbol + chartDeTurckCorrPrincipalSymbolExpr` is the *pure rough
+Laplacian* `∑_{j,l} G^{j,l}·∂_j∂_l h_{ik}` (the proven, reusable
+`deTurckRicciChartPrincipalSymbol_eq_roughLaplacian`).  The combined chart value then equals the
+gauge-cancelled chart form (rough Laplacian plus lower-order remainder), which the covariant
+Lichnerowicz/Weitzenböck bridge `rebased_chartSymbol_covariantBridge` converts to the intrinsic
+two-term `unitModel`/`appCc` read-off. -/
 theorem rebased_chartSymbol_eq_appCc_pointwise
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -557,8 +787,71 @@ theorem rebased_chartSymbol_eq_appCc_pointwise
             (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
           + appCc (I := I) (M := M) g₀ 4 2
               (ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ' s)
-              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
-  sorry
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
+  classical
+  set gs : SmoothRiemannianMetric I M := realizedFam (I := I) g₀ T T' hδ hδ' s with hgs
+  set y₀ : E := extChartAt I x x with hy₀
+  -- The base chart point lies in the chart target (boundaryless atlas) and the chart source.
+  have hx_src : x ∈ (chartAt H x).source := mem_chart_source H x
+  have hy_t : y₀ ∈ (extChartAt I x).target := by
+    rw [hy₀]; exact mem_extChartAt_target x
+  -- Per `(i, k)`: the combined chart second-order part, split + gauge-cancelled, equals the rough
+  -- Laplacian plus the lower-order chart remainder `(-2·RicRem + DTRem)`.
+  have hsplit : ∀ i k : Fin (Module.finrank ℝ E),
+      DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHSChartSecondOrderPart (I := I)
+          gs g_bg h x i k y₀ =
+        (∑ j : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+            chartInvGramOnE (I := I) gs x j l y₀ *
+              partialDeriv (E := E) j (partialDeriv (E := E) l (h i k)) y₀) +
+          ((-2 : ℝ) * DifferentialGeometry.PDE.DeTurck.RicciLinearization.chartRicciFirstOrderRemainder
+                (I := I) gs x h i k y₀ +
+            DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.chartDeTurckCorrFirstOrderRemainder
+                (I := I) gs g_bg x h i k y₀) := by
+    intro i k
+    rw [DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHSChartSecondOrderPart]
+    rw [chartRicciSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_source
+        (I := I) gs x h i k hx_src,
+      DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_source
+        (I := I) gs g_bg x h i k hx_src]
+    rw [hy₀] at *
+    -- regroup: -2·(RicPrinc + RicRem) + (DTPrinc + DTRem)
+    --        = (-2·RicPrinc + DTPrinc) + (-2·RicRem + DTRem)
+    rw [show ((-2 : ℝ) * (chartRicciSecondOrderPrincipalSymbol (I := I) gs x h i k (extChartAt I x x) +
+            DifferentialGeometry.PDE.DeTurck.RicciLinearization.chartRicciFirstOrderRemainder
+              (I := I) gs x h i k (extChartAt I x x)) +
+          (DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.chartDeTurckCorrPrincipalSymbolExpr
+              (I := I) gs g_bg x h i k (extChartAt I x x) +
+            DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.chartDeTurckCorrFirstOrderRemainder
+              (I := I) gs g_bg x h i k (extChartAt I x x))) =
+        ((-2 : ℝ) * chartRicciSecondOrderPrincipalSymbol (I := I) gs x h i k (extChartAt I x x) +
+            DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.chartDeTurckCorrPrincipalSymbolExpr
+              (I := I) gs g_bg x h i k (extChartAt I x x)) +
+          ((-2 : ℝ) * DifferentialGeometry.PDE.DeTurck.RicciLinearization.chartRicciFirstOrderRemainder
+                (I := I) gs x h i k (extChartAt I x x) +
+            DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.chartDeTurckCorrFirstOrderRemainder
+              (I := I) gs g_bg x h i k (extChartAt I x x)) from by ring]
+    rw [deTurckRicciChartPrincipalSymbol_eq_roughLaplacian (I := I) gs g_bg x h i k hy_t]
+  -- Rewrite the LHS sum per `(i, k)` and reduce to the covariant bridge.
+  rw [show (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+          (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHSChartSecondOrderPart (I := I)
+              gs g_bg h x i k y₀ +
+            DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.metricFamilyDeTurckRicciFirstOrderRemainder
+              (I := I) gs g_bg x h i k y₀)) =
+      ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+          ((∑ j : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
+              chartInvGramOnE (I := I) gs x j l y₀ *
+                partialDeriv (E := E) j (partialDeriv (E := E) l (h i k)) y₀) +
+            ((-2 : ℝ) * DifferentialGeometry.PDE.DeTurck.RicciLinearization.chartRicciFirstOrderRemainder
+                  (I := I) gs x h i k y₀ +
+                DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.chartDeTurckCorrFirstOrderRemainder
+                  (I := I) gs g_bg x h i k y₀ +
+              DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.metricFamilyDeTurckRicciFirstOrderRemainder
+                (I := I) gs g_bg x h i k y₀)) from by
+    refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun k _ => ?_))
+    rw [hsplit i k]; ring]
+  exact rebased_chartSymbol_covariantBridge (I := I) g₀ g_bg T T' hδ hδ' s x h hh v
 
 /-- **The pointwise combined chart-derivative → intrinsic two-term `appCc` identity (the deep covariant
 bridge, gauge cancelled).**
