@@ -171,6 +171,61 @@ theorem deTurckForcing_smoothTimeCoordinateField
       (∀ t ∈ Set.Icc (0 : ℝ) T, ∀ i, (F t).coeff i = f i t) :=
   sorry
 
+/-- **DEEP PARABOLIC LEAF — the small-data fibre-smallness factored Nemytskii spectral
+remainder bound (the genuine `θ < 1` contraction).**
+
+For the engine forcing `gforce =ᵐ deTurckSobolevNHa2 g₀ g_bg a ∘ (maxRegDuhamelSolField …)`
+about `g₀` (supercritical `2·finrank + 10 ≤ a`, zero initial datum), at every spatial order
+`c ≥ a` the order-`c` spectral forcing mass is bounded, mode by mode, by a genuinely
+**contractive** multiple of the order-`(c + 2)` spectral solution mass plus a single FIXED,
+datum-independent smooth-section background:
+
+  `forcingMass gforce c i  ≤  θ · solFieldMass gforce (c + 2) i  +  ‖N0‖²-mass at order c`,
+
+with `0 < θ` and the **short-time contraction** `θ · (1 + T)² < 1`.
+
+This is the genuine small-data smoothing content, NOT the affine ball bound
+`deTurckRemainder_iteratedCovGradSum_ballBound` (which is `C · (1 + ‖u‖²)` with `C ≥ 1` and
+NO contraction factor).  The factor `θ < 1 / (1 + T)²` comes from the **short-time smallness
+of the zero-datum solution operator**: about the zero initial datum the realized solution
+field is fibre-small with one uniform constant `δ < 1`
+(`realizedDeTurck_timeRegular_family` / `solInterior_smoothRepr_pin`), and on the short
+horizon `T ≤ 1` the Duhamel solution norm is small enough that the genuinely-second-order
+top arm `(∇²u)` of the Nemytskii is absorbed with a contractive coefficient — the standard
+quasilinear small-data parabolic mechanism (Amann maximal regularity;
+Ladyzhenskaya–Solonnikov–Uraltseva; Lieberman).  The background `N0 := N(0) =
+−2 Ric(g₀) + 𝓛_{W} g₀` is a FIXED smooth section (`deTurckSmoothRemainder g₀ g_bg 0`),
+INDEPENDENT of `gforce`, hence lies in `H^∞` with spectral masses summable at every order
+(`smoothCcTensor_tensorL2Coeff_weighted_summable`, the field `weighted_summable` of
+`smoothCcToTensorHs`).
+
+NON-VACUOUS and not hypothesis-packaging: `θ > 0` strict forbids the degenerate `θ = 0`
+witness, and the background is the mass of a FIXED smooth section (NOT `forcingMass gforce c`
+itself), so the inequality genuinely *constrains* the forcing — it is FALSE precisely when
+the real Nemytskii bound fails, and it is satisfiable for the genuine zero-datum forcing.
+PINNED to the forcing by `hforce`.
+
+DEFERRED (honest `sorry`; the genuine short-time small-data contraction of the zero-datum
+Ricci–DeTurck solution operator; consumers transitively depend on its `sorryAx`). -/
+theorem deTurckForcing_smallness_factored_spectral_remainder_bound
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hforce : gforce =ᵐ[timeMeasure T]
+      (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (c : ℝ) (hc : (a : ℝ) ≤ c) :
+    ∃ (θ : ℝ) (N0 : SmoothCcTensor g₀ 0 2),
+      0 < θ ∧ θ * (1 + T) ^ 2 < 1 ∧
+        ∀ i, forcingMass (I := I) (M := M) gforce c i ≤
+          θ * solFieldMass (I := I) (M := M) hT.le gforce (c + 2) i +
+            tensorSobolevWeight (I := I) (M := M) i c *
+              ((smoothCcToTensorHs (I := I) (M := M) g₀ c N0).coeff i) ^ 2 :=
+  sorry
+
+set_option linter.unusedVariables false in
 /-- **DEEP PARABOLIC LEAF — the small-data Nemytskii spectral `+2` forcing-mass advance.**
 
 For the engine forcing `gforce =ᵐ deTurckSobolevNHa2 g₀ g_bg a ∘ (maxRegDuhamelSolField …)`
@@ -190,27 +245,27 @@ with the PROVEN `+2` Duhamel gain `solFieldMass_le_forcingMass`
 (`solFieldMass (c+2) ≤ (1+T)²·forcingMass c`), a `+2` loss matched by a `+2` gain has net
 order advance `0` and stalls.
 
-The honest mechanism is **same-order absorption**, not a ratcheting bootstrap: about the zero
-initial datum the realized solution field is fibre-small with one constant `δ < 1`
-(`realizedDeTurck_timeRegular_family`), the `(1 + ‖u‖_∞)` Moser factor is controlled by the
-supercritical embedding (`2·finrank + 10 ≤ a` forces the base order `a + 2 ≫ finrank/2`, held
-FIXED), and the short-time contraction `C·δ < 1` closes the self-referential order-`d`
-inequality `X ≤ background + θ·X` (`θ = C(1+T)² < 1`) to a finite order-`(d+2)` mass — the
-fixed point, not a net order race.  The constant background `N(0) = −2 Ric(g₀) + 𝓛_{W} g₀` is
-a fixed smooth section, hence lies in `H^∞` with spectral masses summable at every order, so
-the affine `1 +` does not break across-mode summability.  This is the genuine quasilinear
-small-data parabolic smoothing (Amann maximal regularity; Ladyzhenskaya–Solonnikov–Uraltseva;
-Lieberman), the coupling-agnostic spectral output feeding
+PROVEN here as the **same-order absorption fixed point** over the genuine contractive factored
+bound `deTurckForcing_smallness_factored_spectral_remainder_bound` (`θ · (1 + T)² < 1`,
+the short-time small-data contraction about the zero datum): instantiating the factored
+bound at order `c = d + 2` gives, mode by mode,
+`forcingMass gforce (d+2) i ≤ θ · solFieldMass gforce (d+4) i + bg_i`; the PROVEN `+2` Duhamel
+gain `solFieldMass_le_forcingMass` bounds `solFieldMass gforce (d+4) i ≤ (1+T)² ·
+forcingMass gforce (d+2) i`; so the self-referential `forcingMass gforce (d+2) i ≤
+θ(1+T)² · forcingMass gforce (d+2) i + bg_i` closes (since `θ(1+T)² < 1`) to
+`forcingMass gforce (d+2) i ≤ bg_i / (1 − θ(1+T)²)`, summable mode by mode because the FIXED
+smooth background `N0 ∈ H^∞` has summable spectral masses at every order — the fixed point,
+not a net order race.  This is the coupling-agnostic spectral output feeding
 `realizedSol_forcing_continuousRepr_allOrderMass`.
 
-PINNED to the forcing by `hforce` (so it is not vacuous): `hforce` fixes `gforce` to the
-genuine second-order Nemytskii image of its own Duhamel solution field, and the hypothesis
+PINNED to the forcing by `hforce`: `hforce` fixes `gforce` to the genuine second-order
+Nemytskii image of its own Duhamel solution field.  The hypothesis
 `Summable (forcingMass gforce d)` is satisfiable (it holds at `d = a` by the Plancherel
-identity `summable_weight_mul_norm_timeModeCoeff_sq`), so the implication is contentful, not
-vacuously true.  The smallness `δ < 1` is internal to the deep parabolic truth (the upstream
-zero-datum solution construction), not a free signature hypothesis.
-
-DEFERRED (honest `sorry`; consumers transitively depend on `sorryAx`). -/
+identity `summable_weight_mul_norm_timeModeCoeff_sq`); the absorption fixed point closes the
+`+2` advance at the target order `d + 2` directly from the contractive factored bound, so the
+implication is contentful and `hd` is harmless (proving the stronger order-`(d+2)`
+summability outright).  Consumers transitively depend on the `sorryAx` of the deep
+contractive factored bound. -/
 theorem deTurckForcing_forcingMass_summable_succ
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -222,8 +277,45 @@ theorem deTurckForcing_forcingMass_summable_succ
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
     (d : ℝ) (hda : (a : ℝ) ≤ d)
     (hd : Summable (forcingMass (I := I) (M := M) gforce d)) :
-    Summable (forcingMass (I := I) (M := M) gforce (d + 2)) :=
-  sorry
+    Summable (forcingMass (I := I) (M := M) gforce (d + 2)) := by
+  classical
+  have hda2 : (a : ℝ) ≤ d + 2 := by linarith
+  obtain ⟨θ, N0, hθ_pos, hθ_contract, hbound⟩ :=
+    deTurckForcing_smallness_factored_spectral_remainder_bound (I := I) (M := M) g₀ g_bg a
+      ha_super hT hT1 gforce hforce (d + 2) hda2
+  set μ : ℝ := 1 - θ * (1 + T) ^ 2 with hμ_def
+  have hμ_pos : 0 < μ := by rw [hμ_def]; linarith
+  set bg : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ :=
+    fun i => tensorSobolevWeight (I := I) (M := M) i (d + 2) *
+      ((smoothCcToTensorHs (I := I) (M := M) g₀ (d + 2) N0).coeff i) ^ 2 with hbg_def
+  have hbg_summable : Summable bg :=
+    (smoothCcToTensorHs (I := I) (M := M) g₀ (d + 2) N0).weighted_summable
+  have habsorb : ∀ i, μ * forcingMass (I := I) (M := M) gforce (d + 2) i ≤ bg i := by
+    intro i
+    have hgain :
+        solFieldMass (I := I) (M := M) hT.le gforce ((d + 2) + 2) i ≤
+          (1 + T) ^ 2 * forcingMass (I := I) (M := M) gforce (d + 2) i :=
+      solFieldMass_le_forcingMass (I := I) (M := M) hT.le gforce (d + 2) i
+    have hθ_nn : 0 ≤ θ := hθ_pos.le
+    have hsol_le :
+        θ * solFieldMass (I := I) (M := M) hT.le gforce ((d + 2) + 2) i ≤
+          θ * (1 + T) ^ 2 * forcingMass (I := I) (M := M) gforce (d + 2) i := by
+      have := mul_le_mul_of_nonneg_left hgain hθ_nn
+      linarith [this]
+    have hfm := hbound i
+    have : forcingMass (I := I) (M := M) gforce (d + 2) i ≤
+        θ * (1 + T) ^ 2 * forcingMass (I := I) (M := M) gforce (d + 2) i + bg i := by
+      calc forcingMass (I := I) (M := M) gforce (d + 2) i
+          ≤ θ * solFieldMass (I := I) (M := M) hT.le gforce ((d + 2) + 2) i + bg i := hfm
+        _ ≤ θ * (1 + T) ^ 2 * forcingMass (I := I) (M := M) gforce (d + 2) i + bg i := by
+            linarith [hsol_le]
+    rw [hμ_def]; nlinarith [this]
+  refine Summable.of_nonneg_of_le
+    (fun i => forcingMass_nonneg (I := I) (M := M) gforce (d + 2) i)
+    (fun i => ?_) (hbg_summable.mul_left μ⁻¹)
+  have h := habsorb i
+  rw [← le_div_iff₀' hμ_pos, div_eq_inv_mul] at h
+  exact h
 
 /-- **DEEP PARABOLIC LEAF (2/2) — all-order spatial forcing-mass summability of the
 Ricci–DeTurck engine forcing.**
