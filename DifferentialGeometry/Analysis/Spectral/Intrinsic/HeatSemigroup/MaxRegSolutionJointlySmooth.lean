@@ -149,18 +149,23 @@ time-continuous everywhere `Hᵃ`-representative `F` with:
 
 This is the genuine parabolic interior-time smoothing of the engine forcing: beyond the
 *continuity* of the forcing's mode coordinates (`maxRegDuhamel_toFun_tensorL2Coeff_eq_perModeConv`),
-the bootstrap supplies the all-order time-derivative spectral-mass control by
-differentiating through the Nemytskii first-order coupling
-`‖N(u)‖_{Hᵈ} ≲ ‖u‖_{H^{d+1}}` and the maximal-regularity gain, recursively raising the
-spatial order by two per time-derivative.  The convolution identity tying these to the
-solution value is the *separate* glue lemma `forcingSmoothCoordsRealize` below, which
-consumes only the representative data and the public every-time spectral-coordinate bridge.
+the smoothing supplies the all-order time-derivative spectral-mass control AND the all-order
+forcing-mass summability `∀ c ≥ 0, Summable (forcingMass gforce c)`.  The Ricci–DeTurck
+remainder loses exactly **two** spatial derivatives (`‖N(u)‖_{Hᵈ} ≲ 1 + ‖u‖_{H^{d+2}}`, the
+AFFINE ball bound `deTurckRemainder_iteratedCovGradSum_ballBound`, window `d + 2`), so the
+all-order forcing-mass summability is NOT obtained by a one-order
+(`solFieldMass (d+1) → forcingMass d`) coupling bootstrap — that net advance is `0` for a
+`+2` nonlinearity — but is the genuine small-data parabolic interior-smoothing output about
+the zero initial datum.  The convolution identity tying these to the solution value is the
+*separate* glue lemma `forcingSmoothCoordsRealize` below, which consumes only the
+representative data and the public every-time spectral-coordinate bridge.
 
-Proven as glue over the accepted deferred existence-side forcing-regularity inputs
-`deTurckForcing_smoothTimeCoordinateFamily` and `deTurckForcing_firstOrderCoupling`
-(`ForcingTimeBootstrap.lean`, the realize-side's posited md4-side regularity leaves, the
-analogue of `realizedSol_forcing_continuousRepr_allOrderMass`); its body is `sorry`-free and
-consumers transitively depend only on those inputs' `sorryAx`. -/
+Proven as glue over the accepted deferred existence-side forcing-regularity input
+`deTurckForcing_smoothTimeCoordinateFamily` (`ForcingTimeBootstrap.lean`, the realize-side's
+posited regularity leaf, the analogue of `realizedSol_forcing_continuousRepr_allOrderMass`,
+delivering both the `C∞`-in-time coordinate family and the all-order forcing-mass
+summability); its body is `sorry`-free and consumers transitively depend only on that input's
+`sorryAx`. -/
 private theorem forcingSmoothTimeCoords
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -183,32 +188,17 @@ private theorem forcingSmoothTimeCoords
       (∀ c : ℝ, 0 ≤ c → Summable (forcingMass (I := I) (M := M) gforce c)) ∧
       (∀ t ∈ Set.Icc (0 : ℝ) T, ∀ i, (F t).coeff i = f i t) := by
   classical
-  -- The `C∞`-in-time forcing coordinate family `f` and its time-continuous `Hᵃ`
-  -- representative `F`, with the all-order time-jet spectral-mass majorant (deep input).
-  obtain ⟨f, F, hf_smooth, hf_mass, hF_rep, hF_coord_cont, hF_coeff⟩ :=
+  -- The `C∞`-in-time forcing coordinate family `f`, its time-continuous `Hᵃ`
+  -- representative `F` with the all-order time-jet spectral-mass majorant, AND the all-order
+  -- forcing-mass summability — all delivered by the deep `+2`/small-data parabolic
+  -- interior-smoothing input.  Because the Ricci–DeTurck remainder loses `+2` spatial
+  -- orders, the all-order forcing-mass summability is the genuine small-data interior-
+  -- smoothing output (NOT a one-order coupling bootstrap, whose net advance is `0`), so it
+  -- is carried by the input directly rather than re-derived here.
+  obtain ⟨f, F, hf_smooth, hf_mass, hF_rep, hF_coord_cont, hF_sum, hF_coeff⟩ :=
     deTurckForcing_smoothTimeCoordinateFamily (I := I) (M := M) g₀ g_bg a ha_super hT hT1
       gforce hforce
-  refine ⟨f, F, hf_smooth, hf_mass, hF_rep, hF_coord_cont, ?_, hF_coeff⟩
-  -- The forcing-mass summability at every order, from the in-tree spatial bootstrap
-  -- `solFieldMass_summable_all` fed the Nemytskii first-order coupling
-  -- `deTurckForcing_firstOrderCoupling`.
-  set h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc
-  -- The first-order spectral coupling `hcouple` of the engine forcing.
-  have hcouple := deTurckForcing_firstOrderCoupling (I := I) (M := M) g₀ g_bg a ha_super
-    hT hT1 gforce hforce
-  -- Base regularity: the forcing lies in `L²(Hᵃ)` by construction.
-  have hbase_forcing : Summable (forcingMass (I := I) (M := M) gforce (a : ℝ)) :=
-    summable_weight_mul_norm_timeModeCoeff_sq (I := I) (M := M) (f := gforce) h_compact
-  -- Two-derivative gain: the solution-field masses are summable at order `a + 2`.
-  have hbase_sol : Summable (solFieldMass (I := I) (M := M) hT.le gforce ((a : ℝ) + 2)) :=
-    solFieldMass_summable_of_forcingMass_summable (I := I) (M := M) hT.le gforce (a : ℝ)
-      hbase_forcing
-  -- The all-order spatial bootstrap: solution masses are summable at every order.
-  have hsol_all : ∀ σ : ℝ, Summable (solFieldMass (I := I) (M := M) hT.le gforce σ) :=
-    solFieldMass_summable_all (I := I) (M := M) hT.le gforce hcouple hbase_sol
-  -- The forcing masses are then summable at every order via the coupling.
-  intro c _hc
-  exact hcouple c (hsol_all (c + 1))
+  exact ⟨f, F, hf_smooth, hf_mass, hF_rep, hF_coord_cont, hF_sum, hF_coeff⟩
 
 set_option linter.unusedVariables false in
 /-- **DEEP ANALYTIC INPUT (1/2) — the smooth forcing eigen-coordinate family
