@@ -5,6 +5,8 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.InverseMetri
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTraceField
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradSlotPermutationNaturality
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnDiffPalatini
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RicciTraceCarrier
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatureOperatorField
 
 /-!
 # The connection-difference vector as the inverse-Gram raise of the metric-difference covariant gradient
@@ -5712,6 +5714,137 @@ theorem combinedLowerArm_appCc_eq
     sorry
   obtain ⟨R₀, R₂lower, hrep'⟩ := hrep
   exact ⟨R₀, R₂lower, fun x v => (hef x v).trans (hrep' x v)⟩
+
+/-! ## The genuine order-`0` (curvature) coefficient field `R₀` as a smooth `(2, 2)`-operator field
+
+The order-`0` (value-level) arm of the linearized Ricci operator `D Ric(g_s)[h]` is the classical
+**Lichnerowicz curvature action** `Rm(g_s)·h`, NOT the inverse-Gram-difference multiplier `(g_s⁻¹ − g₀⁻¹)·h`
+(which vanishes identically at `g_s = g₀`).  This section mints the genuine curvature coefficient as a
+single smooth `g_s`-built `(2, 2)`-operator field — exactly mirroring the order-`2` principal coefficient
+`ricciArmPrincipalCoeff g₀ g₁` (the `SmoothCcTensor` metric is a phantom `g₀`-tag), but with the
+`g_s`-curvature endomorphism `ricEndoRaisedFib g_s` (`RicciTraceCarrier`) inserted into the leading
+covariant slot.  Its fibre operator depends on `g_s` only through the smooth raised-Ricci endomorphism
+field, so it carries genuine `s`-dependence and is nonzero at `g_s = g₀` on a curved (non-Ricci-flat)
+background — the precise defect the previous `gInvDiffSlotCoeff`-based coefficient suffered. -/
+
+/-- **The fibrewise genuine order-`0` curvature operator.**  At a base point `x`, the leading-slot
+insertion `slotInsertEndoFib 2 0 x (ricEndoRaisedFib g₁ x)` of the raised curvature (Ricci)
+endomorphism of `g₁` — the `(0, 2)`-tensor fibre operator that precomposes the leading covariant slot
+with the raised endomorphism `ricEndoRaisedFib g₁ x : T_x M →L T_x M`.  This is the order-`0` curvature
+coefficient: it contracts the `(0, 2)`-tensor `D = T − T'` by the curvature `2`-jet of `g₁`
+(`Rm(g₁)·` reading), so it is NONZERO at `g₁ = g₀` on a curved background.  It depends on `g₁` only
+through the SMOOTH raised-Ricci endomorphism Hom-section `ricEndoRaisedFib`; NO chart-selected ambient
+frame. -/
+noncomputable def ricciArmOrder0CurvCoeffFib (g₁ : SmoothRiemannianMetric I M) (x : M) :
+    Tensor0SBundle.Tensor0SSpace 2 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x :=
+  slotInsertEndoFib (I := I) (M := M) 2 0 x (ricEndoRaisedFib (I := I) g₁ x)
+
+set_option linter.unusedSectionVars false in
+/-- The fibre value of `ricciArmOrder0CurvCoeffFib`, read on a tuple `v`, is the unit-form `D` evaluated
+on the tuple with its leading entry replaced by `ricEndoRaisedFib g₁ x (v 0)`.  This is the leading-slot
+read-off `slotInsertEndoFib_apply_eval`. -/
+@[simp] theorem ricciArmOrder0CurvCoeffFib_toModel (g₁ : SmoothRiemannianMetric I M) (x : M)
+    (D : Tensor0SBundle.Tensor0SSpace 2 I x) (v : Fin 2 → E) :
+    Tensor0SBundle.Tensor0SSpace.toModel (ricciArmOrder0CurvCoeffFib (I := I) g₁ x D) v =
+      Tensor0SBundle.Tensor0SSpace.toModel D
+        (Function.update v 0 (ricEndoRaisedFib (I := I) g₁ x (v 0))) := by
+  rw [ricciArmOrder0CurvCoeffFib]
+  exact slotInsertEndoFib_apply_eval (I := I) (M := M) 2 0 x
+    (ricEndoRaisedFib (I := I) g₁ x) D v
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+/-- **Base-point smoothness of the genuine order-`0` curvature coefficient field.**  The fibre field
+`x ↦ ricciArmOrder0CurvCoeffFib g₁ x` is a smooth section of the `(2, 2)`-tensor (operator) bundle.  Its
+smoothness routes through the globally-smooth raised-Ricci Hom-section `ricEndoRaisedFib g₁`
+(`ricEndoRaisedFib_contMDiff`) and the slot-insertion smoothness `slotInsertEndoFib_contMDiff` (the
+exact tower of `ricBackgroundSlotCoeff`).  NO chart-selected, non-`∇₀`-parallel ambient frame enters.
+Non-vacuous (the genuine raised-Ricci slot-insertion field, smooth, not the zero field on a curved
+background). -/
+theorem ricciArmOrder0CurvCoeffFib_contMDiff (g₁ : SmoothRiemannianMetric I M) :
+    ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) x
+        (TensorRSSpace.ofCLM (ricciArmOrder0CurvCoeffFib (I := I) g₁ x))) := by
+  exact slotInsertEndoFib_contMDiff (I := I) (M := M) g₁ 2 0
+    (fun x : M => ricEndoRaisedFib (I := I) g₁ x)
+    (ricEndoRaisedFib_contMDiff (I := I) g₁)
+
+/-- **The genuine order-`0` curvature coefficient field `R₀` as a smooth compactly-supported
+`(2, 2)`-tensor.**  The fibre value at `x` is `ricciArmOrder0CurvCoeffFib g₁ x` (smooth by
+`ricciArmOrder0CurvCoeffFib_contMDiff`); on the closed manifold it has compact support.  This is the
+order-`0` (value-level) curvature coefficient operator field of the Ricci–DeTurck linearization: the
+leading-slot insertion of the raised curvature endomorphism `ricEndoRaisedFib g₁` (the classical
+Lichnerowicz `Rm(g₁)·h` order-`0` action), whose `appCc`-action on `D = T − T'` reproduces the curvature
+contraction (`ricciArmOrder0CurvCoeff_appCc_eq_curvatureAction`).  Exactly mirrors
+`ricciArmPrincipalCoeff g₀ g₁` (the `g₀` slot is a phantom tag), but is `g₁`-curvature-built — so it is
+NONZERO at `g₁ = g₀` on a curved background, unlike the inverse-Gram-difference multiplier. -/
+noncomputable def ricciArmOrder0CurvCoeff (g₀ g₁ : SmoothRiemannianMetric I M) :
+    SmoothCcTensor g₀ 2 2 where
+  toSection :=
+    { toFun := fun x : M =>
+        (show Tensor0SBundle.TensorRSSpace 2 2 I x from
+          TensorRSSpace.ofCLM (ricciArmOrder0CurvCoeffFib (I := I) g₁ x))
+      contMDiff_toFun := ricciArmOrder0CurvCoeffFib_contMDiff (I := I) g₁ }
+  hasCompactSupport := HasCompactSupport.of_compactSpace _
+
+set_option linter.unusedSectionVars false in
+/-- The underlying section value of `ricciArmOrder0CurvCoeff g₀ g₁` at `x` is the fibre operator
+`ricciArmOrder0CurvCoeffFib g₁ x`.  Definitional. -/
+@[simp] theorem ricciArmOrder0CurvCoeff_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+    (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁).toSection x =
+      (show Tensor0SBundle.TensorRSSpace 2 2 I x from
+        TensorRSSpace.ofCLM (ricciArmOrder0CurvCoeffFib (I := I) g₁ x)) := rfl
+
+/-! ## The order-`0` connector: the `appCc`-action of `R₀` is the curvature action `Rm(g₁)·h` -/
+
+set_option linter.unusedSectionVars false in
+/-- **The `appCc`/`unitModel` read-off of the genuine order-`0` curvature coefficient `R₀` is the
+curvature action `Rm(g₁)·h`.**
+
+For any smooth `(0, 2)`-tensor field `W` (in the consumer `W = iteratedCovGrad g₀ 0 2 0 (T − T') = T − T'`
+the order-`0` metric-difference section), the `unitModel` read-off of the operator-field action
+`appCc g₀ 2 2 R₀ W` at `x` on a tangent pair `v` is the leading-slot curvature contraction of the
+unit-form `D = unitModel g₀ 2 W x` against the raised curvature endomorphism `ricEndoRaisedFib g₁ x` of
+`g₁`:
+```
+unitModel g₀ 2 (appCc g₀ 2 2 R₀ W) x v
+  = D(ricEndoRaisedFib g₁ x (v 0), v 1),   D = unitModel g₀ 2 W x.
+```
+This is the genuine order-`0` (value-level) curvature building block: the curvature coefficient `R₀`
+realises the classical Lichnerowicz `Rm(g₁)·h` order-`0` action (the raised-Ricci endomorphism in the
+leading covariant slot), NOT the inverse-Gram-difference multiplier (which vanishes at `g₁ = g₀`).  It
+composes `appCc_toSection` (`(R₀ x).comp (W x)`), the definitional identity
+`R₀ x = TensorRSSpace.ofCLM (ricciArmOrder0CurvCoeffFib g₁ x)`, and the leading-slot read-off
+`ricciArmOrder0CurvCoeffFib_toModel` (`slotInsertEndoFib_apply_eval`).  Mirrors
+`ricciArmPrincipalCoeff_appCc_eq_combinedTrace`. -/
+theorem ricciArmOrder0CurvCoeff_appCc_eq_curvatureAction
+    (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 2)
+    (x : M) (v : Fin 2 → TangentSpace I x) :
+    unitModel (I := I) (M := M) g₀ 2
+        (appCc (I := I) (M := M) g₀ 2 2 (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁) W) x v =
+      unitModel (I := I) (M := M) g₀ 2 W x
+        (Function.update v 0 (ricEndoRaisedFib (I := I) g₁ x (v 0))) := by
+  rw [unitModel, appCc_toSection]
+  rw [show ((show Tensor0SBundle.Tensor0SSpace 2 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+        (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁).toSection x).comp
+        (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+          W.toSection x)) (unitTensor (I := I) (M := M) x) =
+      (show Tensor0SBundle.Tensor0SSpace 2 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+        (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁).toSection x)
+        ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+          W.toSection x) (unitTensor (I := I) (M := M) x)) from rfl]
+  rw [ricciArmOrder0CurvCoeff_toSection]
+  rw [show (show Tensor0SBundle.Tensor0SSpace 2 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+        (show Tensor0SBundle.TensorRSSpace 2 2 I x from
+          TensorRSSpace.ofCLM (ricciArmOrder0CurvCoeffFib (I := I) g₁ x)))
+        ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+          W.toSection x) (unitTensor (I := I) (M := M) x)) =
+      ricciArmOrder0CurvCoeffFib (I := I) g₁ x
+        ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
+          W.toSection x) (unitTensor (I := I) (M := M) x)) from rfl]
+  rw [ricciArmOrder0CurvCoeffFib_toModel]
+  rfl
 
 end TensorSpectral
 end Parabolic

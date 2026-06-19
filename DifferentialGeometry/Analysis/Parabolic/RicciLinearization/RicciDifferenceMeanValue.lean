@@ -2558,6 +2558,67 @@ theorem gInvDiffSlotCoeff_realizedFam_toModel_continuous [BoundarylessManifold I
     (fun t => gInvDiffSlotCoeff (I := I) g₀
       (realizedFam (I := I) g₀ T T' hδ hδ' t)) (realizedSmallSet (δ := δ) (δ' := δ')) hjoint x
 
+/-- **(Posited deep input — joint `(s, x)`-smoothness of the genuine order-`0` curvature coefficient
+along the realized path.)**
+
+For the realized metric family `g_s = realizedFam g₀ T T' s`, the genuine order-`0` **curvature**
+coefficient operator field `ricciArmOrder0CurvCoeff g₀ g_s` (the leading-slot insertion of the raised
+curvature endomorphism `ricEndoRaisedFib g_s`, `RicciDeTurckSectionDifference`) is jointly `C^∞` in the
+pair `(x, s)`, as a section over `M × ℝ` of the `(2, 2)`-tensor bundle, **on the slab
+`univ ×ˢ realizedSmallSet`** (the realized family is junk-extended to `g₀` off the small set and jumps at
+the boundary, so the joint smoothness is `ContMDiffOn` over `realizedSmallSet ⊇ [0, 1]`, not global).
+
+This is the joint-parameter lift of the single-metric base-point smoothness
+`ricciArmOrder0CurvCoeffFib_contMDiff`: the operator depends on `g_s` *only* through the smooth raised
+curvature (Ricci) endomorphism Hom-section `ricEndoRaisedFib g_s` (in the leading slot, through
+`slotInsertEndoFib`), and the chart Christoffel/Riemann/Ricci jet of `g_s` is jointly `(s, y)`-`C^∞` by
+the joint-Gram tower (`realizedFam_genJointGram` / `gen_joint_riemann`).  Through the chart-coordinate
+form of the Ricci tensor and the metric sharp (`ricciTensor`/`metricSharp`, whose chart coefficients are
+the curvature `2`-jet of `g_s` contracted/raised by `G^{ij}(g_s)`) the joint chart curvature smoothness
+lifts the single-metric `slotInsertEndoFib_contMDiff`/`ricEndoRaisedFib_contMDiff` construction to the
+product base `M × ℝ` via `Bundle.contMDiffAt_totalSpace` (the `cutoffField_contMDiff` product-base
+section pattern).  This irreducible joint manifold-section lift over the product base `M × ℝ` (a complete
+joint analog of the `ricEndoRaisedFib_contMDiff` → `slotInsertEndoFib_contMDiff` →
+`ricciArmOrder0CurvCoeffFib_contMDiff` tower, threaded through the joint-Gram/Riemann tower
+`gen_joint_riemann`) is *posited* here as the single joint-fibre-smoothness keystone, to be discharged
+by recursing into it.  It genuinely constrains the section to the realized-family curvature coefficient
+(it is consumed only as the joint smoothness of that exact fibre operator), so it is non-vacuous. -/
+theorem ricciArmOrder0CurvCoeff_realizedFam_jointContMDiff [BoundarylessManifold I M]
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1
+        ((ricciArmOrder0CurvCoeff (I := I) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' p.2)).toSection p.1))
+      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
+  sorry
+
+/-- **Continuity-in-`s` slice of the genuine order-`0` curvature coefficient along the realized path.**
+
+The continuity slice of the joint `(s, x)`-smoothness keystone
+`ricciArmOrder0CurvCoeff_realizedFam_jointContMDiff`: at every fixed base point `x`, the model-fibre
+value `s ↦ (ricciArmOrder0CurvCoeff g₀ g_s).toSection x |>.toModel` is continuous in `s`.  Obtained by
+restricting the joint section to the slice `t ↦ (x, t)` (smooth), reading the fibre coordinate through
+the trivialization at the constant base `x`, and post-composing with the continuous model coercion
+`TensorRSSpace.toModel`. -/
+theorem ricciArmOrder0CurvCoeff_realizedFam_toModel_continuous [BoundarylessManifold I M]
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) :
+    ContinuousOn (fun t : ℝ =>
+      Tensor0SBundle.TensorRSSpace.toModel
+        ((ricciArmOrder0CurvCoeff (I := I) g₀
+            (realizedFam (I := I) g₀ T T' hδ hδ' t)).toSection x))
+      (realizedSmallSet (δ := δ) (δ' := δ')) := by
+  have hjoint := ricciArmOrder0CurvCoeff_realizedFam_jointContMDiff
+    (I := I) g₀ T T' hδ hδ'
+  exact jointContMDiff_toModel_continuous_slice (I := I) g₀ 2 2
+    (fun t => ricciArmOrder0CurvCoeff (I := I) g₀
+      (realizedFam (I := I) g₀ T T' hδ hδ' t)) (realizedSmallSet (δ := δ) (δ' := δ')) hjoint x
+
 end RicciLinearization
 end DeTurck
 end PDE

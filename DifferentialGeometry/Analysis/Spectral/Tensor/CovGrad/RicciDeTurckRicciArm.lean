@@ -228,17 +228,23 @@ private lemma appCc_smul_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
 /-! ## The pointwise Lichnerowicz `appCc` form and the path-integral coefficient construction
 (the two deep mean-value inputs, posited and recursed into downstream) -/
 
-/-- **The order-`0` (curvature/inverse-Gram) coefficient field of the linearized Ricci operator along
-the realized path.**  For the realized path metric `g_s = realizedFam g₀ T T' s`, this is the `(2, 2)`
-inverse-Gram slot-insertion field `gInvDiffSlotCoeff g₀ g_s` of the order-`0` arm (the curvature/
-inverse-Gram-difference multiplier).  It is the per-`s` coefficient `R₀fib(s)` the linearized-Ricci
-two-term Lichnerowicz form contracts against `W₀ = T − T'`. -/
+/-- **The order-`0` (curvature) coefficient field of the linearized Ricci operator along the realized
+path.**  For the realized path metric `g_s = realizedFam g₀ T T' s`, this is the genuine `(2, 2)`
+**curvature** slot-insertion field `ricciArmOrder0CurvCoeff g₀ g_s` of the order-`0` arm — the
+leading-slot insertion of the raised curvature endomorphism `ricEndoRaisedFib g_s` (the classical
+Lichnerowicz `Rm(g_s)·h` order-`0` action, `RicciDeTurckSectionDifference`).  It is the per-`s`
+coefficient `R₀fib(s)` the linearized-Ricci two-term Lichnerowicz form contracts against `W₀ = T − T'`.
+
+Re-minted from the earlier `gInvDiffSlotCoeff g₀ g_s` (the cometric inverse-difference multiplier),
+which vanishes identically at `g_s = g₀` and is therefore NOT the genuine order-`0` (value-level) arm:
+the order-`0` symbol of `D Ric(g_s)[h]` is the curvature action, nonzero at `g_s = g₀` on a curved
+background. -/
 noncomputable def ricciArmOrder0Coeff (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) : SmoothCcTensor g₀ 2 2 :=
-  gInvDiffSlotCoeff (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
+  ricciArmOrder0CurvCoeff (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
 
 /-- **The order-`2` (rough-Laplacian principal) coefficient field of the linearized Ricci operator along
 the realized path.**  For the realized path metric `g_s = realizedFam g₀ T T' s`, this is the combined
@@ -504,7 +510,8 @@ Hessian `∇₀²(T − T')` (the chart-vs-covariant Hessian conversion `chartCo
 `ricciArmPrincipalCoeff_appCc_eq_combinedTrace` (the order-`2` arm, now *genuinely correct* since the
 gauge is gone — `R₂ = ricciArmPrincipalCoeff g₀ g_s` is the true rough-Laplacian coefficient).  The
 Christoffel-correction `∂h`/`h` terms together with the combined first-order remainder fold into the
-order-`0` inverse-Gram slot field `gInvDiffSlotCoeff g₀ g_s` on `T − T'` (NO genuine order-`1` arm).
+genuine order-`0` curvature slot field `ricciArmOrder0CurvCoeff g₀ g_s` (the Lichnerowicz `Rm(g_s)·h`
+action) on `T − T'` (NO genuine order-`1` arm).
 
 The DeTurck cancellation (the KEY UNLOCK; the bare-Ricci version of this transfer is FALSE, since the
 bare Ricci principal symbol carries the non-isotropic gauge terms `½ξ_i(ξt)_k + ½ξ_k(ξt)_i −
@@ -624,12 +631,12 @@ continuous on the closed interval `[0, 1]`.
 
 This is the analytic half of the deep mean-value input: the chart Gram of `g_s` is a convex combination
 of the two endpoint Grams (`realizedFam_chartGramOnE`), hence smooth — indeed real-analytic — in `s`, so
-its inverse-Gram, Christoffel, curvature and cometric jets (which build the two coefficient fibre
-operators `gInvDiffSlotCoeff` and `ricciArmPrincipalCoeff`) are continuous in `s`.  This is proved here
+its Christoffel, Riemann/Ricci, and cometric jets (which build the two coefficient fibre operators
+`ricciArmOrder0CurvCoeff` and `ricciArmPrincipalCoeff`) are continuous in `s`.  This is proved here
 by reducing each read-off to the fixed continuous-linear chain `T ↦ ((T) (toModel u)) v`
 (`appCc_unitModel_read_continuousOn_of_toModel_continuousOn`) applied to the model-fibre value of the
 coefficient family, whose `s`-continuity on the realized small set is the continuity slice of the joint
-`(s, x)`-smoothness keystone (`gInvDiffSlotCoeff_realizedFam_toModel_continuous` /
+`(s, x)`-smoothness keystone (`ricciArmOrder0CurvCoeff_realizedFam_toModel_continuous` /
 `ricciArmPrincipalCoeff_realizedFam_toModel_continuous`, each `ContinuousOn realizedSmallSet`), then
 restricting the resulting continuity to `[0, 1] ⊆ realizedSmallSet`.  It genuinely constrains the
 read-off to be continuous, so it is non-vacuous. -/
@@ -662,7 +669,7 @@ theorem ricciArmCoeff_appCc_read_continuousOn
     exact (appCc_unitModel_read_continuousOn_of_toModel_continuousOn (I := I) g₀ 2
       (fun s => ricciArmOrder0Coeff (I := I) g₀ T T' hδ hδ' s)
       (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
-      (gInvDiffSlotCoeff_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x) v).mono hIcc
+      (ricciArmOrder0CurvCoeff_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x) v).mono hIcc
   · -- Order-`2` arm: same, via the order-`2` continuity slice of the keystone.
     exact (appCc_unitModel_read_continuousOn_of_toModel_continuousOn (I := I) g₀ 4
       (fun s => ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ' s)
@@ -931,8 +938,8 @@ theorem integratedLinearizedRicci_appCc_eq
     exists_pathIntegralCoeffField (I := I) (M := M) g₀ 2 R₀fib
       (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
       (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI
-      (gInvDiffSlotCoeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ')
-      (fun x => gInvDiffSlotCoeff_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x)
+      (ricciArmOrder0CurvCoeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ')
+      (fun x => ricciArmOrder0CurvCoeff_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x)
   obtain ⟨IΦ₂, heval₂⟩ :=
     exists_pathIntegralCoeffField (I := I) (M := M) g₀ 4 R₂fib
       (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))
