@@ -15,6 +15,8 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckMetricA
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckCurvatureArmCoeffField
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.AppCcDropIteratedGrid
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckLinearization
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckLieArm
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRHSSectionRealizeUnitModel
 
 /-!
 # The two-arm covariant-`L²` ball-Lipschitz bound on the DeTurck–Ricci remainder difference
@@ -122,7 +124,8 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
-open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (covGrad unitModel smoothCcTensor_ext_of_unitModel)
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (covGrad unitModel smoothCcTensor_ext_of_unitModel unitTensor)
+open DifferentialGeometry.PDE.DeTurck (deTurckVF)
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -4266,6 +4269,167 @@ private theorem deTurckRHSArmDiff_order0_pointwise_domination_ballUniform
         exact hCα α T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball hx_tsupport
     _ ≤ Ksum * Scol := mul_le_mul_of_nonneg_right hCα_le hScol_nn
 
+/-- The unit read-off `unitModel` is subtractive in the `(0, s)`-tensor argument: `unitModel (S − S') =
+unitModel S − unitModel S'`.  Re-derived locally (the `RicciDeTurckLinearization` version is `private`)
+from `SmoothCcTensor.toSection_sub`, `ContinuousLinearMap.sub_apply` and `Tensor0SSpace.toModel_sub`. -/
+private lemma unitModel_sub_local (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (S S' : SmoothCcTensor g 0 s) (x : M) :
+    unitModel (I := I) (M := M) g s (S - S') x =
+      unitModel (I := I) (M := M) g s S x - unitModel (I := I) (M := M) g s S' x := by
+  rw [unitModel, unitModel, unitModel]
+  have hsec : (S - S').toSection x = S.toSection x - S'.toSection x := by
+    rw [SmoothCcTensor.toSection_sub]; rfl
+  rw [show ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from (S - S').toSection x)
+        (unitTensor (I := I) (M := M) x)) =
+      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from S.toSection x)
+          (unitTensor (I := I) (M := M) x) -
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from S'.toSection x)
+          (unitTensor (I := I) (M := M) x) from by
+    rw [hsec]; rfl]
+  rw [Tensor0SSpace.toModel_sub]
+
+/-- The unit read-off `unitModel` is additive in the `(0, s)`-tensor argument: `unitModel (S + S') =
+unitModel S + unitModel S'`.  Re-derived locally (the `RicciDeTurckLinearization` version is `private`). -/
+private lemma unitModel_add_local (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (S S' : SmoothCcTensor g 0 s) (x : M) :
+    unitModel (I := I) (M := M) g s (S + S') x =
+      unitModel (I := I) (M := M) g s S x + unitModel (I := I) (M := M) g s S' x := by
+  rw [unitModel, unitModel, unitModel]
+  have hsec : (S + S').toSection x = S.toSection x + S'.toSection x := by
+    rw [SmoothCcTensor.toSection_add]; rfl
+  rw [show ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from (S + S').toSection x)
+        (unitTensor (I := I) (M := M) x)) =
+      (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from S.toSection x)
+          (unitTensor (I := I) (M := M) x) +
+        (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from S'.toSection x)
+          (unitTensor (I := I) (M := M) x) from by
+    rw [hsec]; rfl]
+  rw [Tensor0SSpace.toModel_add]
+
+/-- The squared fibre norm of a summed `(r, s)` coefficient field `R + L` at `x` is bounded by the
+combined ball-uniform level `(√(2 ΛR² + 2 ΛL²))² = 2 ΛR² + 2 ΛL²`, from the per-arm `C⁰` sups
+`rfns(R x) ≤ ΛR²`, `rfns(L x) ≤ ΛL²` and the `2`-sub-additivity of the squared fibre norm
+(`riemannianFiberNormSq_add_le`). -/
+private lemma threeArmCoeffSum_rfns_le (g₀ : SmoothRiemannianMetric I M) {r s : ℕ}
+    (R L : SmoothCcTensor g₀ r s) (ΛR ΛL : ℝ) (x : M)
+    (hR : riemannianFiberNormSq (I := I) (M := M) g₀ r s x (R.toSection x) ≤ ΛR ^ 2)
+    (hL : riemannianFiberNormSq (I := I) (M := M) g₀ r s x (L.toSection x) ≤ ΛL ^ 2) :
+    riemannianFiberNormSq (I := I) (M := M) g₀ r s x ((R + L).toSection x) ≤
+      Real.sqrt (2 * ΛR ^ 2 + 2 * ΛL ^ 2) ^ 2 := by
+  have hsqrt : Real.sqrt (2 * ΛR ^ 2 + 2 * ΛL ^ 2) ^ 2 = 2 * ΛR ^ 2 + 2 * ΛL ^ 2 := by
+    refine Real.sq_sqrt ?_
+    have := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ r s x (R.toSection x)
+    have := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ r s x (L.toSection x)
+    nlinarith [hR, hL]
+  rw [hsqrt]
+  have hsec : (R + L).toSection x = R.toSection x + L.toSection x := by
+    rw [SmoothCcTensor.toSection_add]; rfl
+  rw [hsec]
+  have hadd := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ r s x
+    (R.toSection x) (L.toSection x)
+  nlinarith [hadd, hR, hL]
+
+/-- **(POSITED deep bedrock — the VALUE-LEVEL (`unitModel`) ball-uniform order-graded Ricci-arm
+linearization of the realized `(−2)`-scaled Ricci tensor difference, with order-`0` `C⁰` operator
+fibre-norm sups.)**
+
+The ball-uniform (`ΛR` outside the `∀ T T'` quantifier) form of the per-pair Ricci-arm grading
+`deTurckRicciArm_appCc_graded` (`CovGrad/RicciDeTurckRicciArm.lean`): one nonnegative ball-uniform
+order-`0` `C⁰` operator level `ΛR`, and for any two `g₀`-fibre-small `T, T'` whose covariant-`L²` jets up
+to order `a + 2` lie in the radius-`R` ball, the three endpoint coefficient fields with the `∀ x v`
+value identity and the order-`0` `C⁰` sups `rfns(Rₘ x) ≤ ΛR²`.
+
+The deep content beyond the on-disk per-pair grading is the **Moser ball-uniformity** of the realized
+Ricci-arm coefficient symbol: the coefficient fields read only the order-`≤ 2` jets of the endpoint
+metrics through the `g₁⁻¹`/`∇g₁⁻¹`/`connDiff`/inverse-Gram structure, and over the fibre-small radius-`R`
+ball the realized metrics stay uniformly positive-definite (the `δ < 1` fibre bound keeps `det` bounded
+away from `0`) with metric jets bounded by `R`, so the fibre-norm sups of the rational-with-nonvanishing-
+denominator coefficient fields are uniform over the ball (the standard Moser ball-uniformity of the
+inverse-Gram / Christoffel / Ricci jet towers).  The per-pair eval-matching half is the on-disk
+`deTurckRicciArm_appCc_eval`; this node hoists its coefficient sups to a single ball-uniform `ΛR`.
+
+**Non-vacuity.**  The `(value identity)` clause genuinely constrains the triple to *reproduce the
+`(−2)`-scaled Ricci-arm difference value*; the zero triple fails it whenever the realized Ricci arm is
+nonzero, and a `ΛR = 0` level is rejected by the nonvanishing genuine endpoint operator symbols on the
+supercritical ball. -/
+private theorem deTurckRicciArm_appCc_graded_ballUniform
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
+    ∃ ΛR : ℝ, 0 ≤ ΛR ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_lt : δ' < 1)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∃ (R₀ : SmoothCcTensor g₀ 2 2) (R₁ : SmoothCcTensor g₀ 3 2) (R₂ : SmoothCcTensor g₀ 4 2),
+          (∀ (x : M) (v : Fin 2 → TangentSpace I x),
+            (-2 : ℝ) •
+                (ricciTensor (I := I)
+                    (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x (v 0) (v 1)
+                  - ricciTensor (I := I)
+                    (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x (v 0) (v 1)) =
+            unitModel (I := I) (M := M) g₀ 2
+              (appCc (I := I) (M := M) g₀ 2 2 R₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
+                appCc (I := I) (M := M) g₀ 3 2 R₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
+                appCc (I := I) (M := M) g₀ 4 2 R₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x (R₀.toSection x) ≤ ΛR ^ 2) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x (R₁.toSection x) ≤ ΛR ^ 2) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (R₂.toSection x) ≤ ΛR ^ 2) :=
+  sorry
+
+/-- **(POSITED deep bedrock — the VALUE-LEVEL (`unitModel`) ball-uniform order-graded Lie-arm
+linearization of the realized Lie-derivative-metric difference, with order-`0` `C⁰` operator fibre-norm
+sups.)**
+
+The ball-uniform (`ΛL` outside the `∀ T T'` quantifier) form of the per-pair Lie-arm grading
+`deTurckLieArm_appCc_graded` (`CovGrad/RicciDeTurckLieArm.lean`).  Same shape as the Ricci-arm
+ball-uniform node, for the Lie arm `𝓛_{W(g₁)} g₁ − 𝓛_{W(g₁')} g₁'` (`W(g) = deTurckVF g g_bg`).
+
+The deep content is the **Moser ball-uniformity** of the realized Lie-arm (DeTurck vector-field) symbol:
+the coefficient fields read the order-`≤ 2` jets of the endpoint metrics through the chart
+Lie-derivative-metric symbol `½g⁻¹∂` and `W = g⁻¹·(∇g − ∇g_bg)`, uniformly bounded over the fibre-small
+radius-`R` ball (the same Moser inverse-Gram / Christoffel uniformity as the Ricci arm).  The per-pair
+eval-matching half is `deTurckLieArm_appCc_eval`; this node hoists its coefficient sups to a single
+ball-uniform `ΛL`.
+
+**Non-vacuity.**  The `(value identity)` clause genuinely constrains the triple to *reproduce the Lie-arm
+difference value*; the zero triple fails it whenever the realized Lie arm is nonzero, and `ΛL = 0` is
+rejected by the nonvanishing genuine Lie-arm endpoint symbols on the supercritical ball. -/
+private theorem deTurckLieArm_appCc_graded_ballUniform
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
+    ∃ ΛL : ℝ, 0 ≤ ΛL ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_lt : δ' < 1)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∃ (L₀ : SmoothCcTensor g₀ 2 2) (L₁ : SmoothCcTensor g₀ 3 2) (L₂ : SmoothCcTensor g₀ 4 2),
+          (∀ (x : M) (v : Fin 2 → TangentSpace I x),
+            lieDerivMetricClm (I := I)
+                  (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ)
+                  (deTurckVF (I := I)
+                    (smoothRiemannianMetricToInfty (I := I)
+                      (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ))
+                    (smoothRiemannianMetricToInfty (I := I) g_bg)) x (v 0) (v 1) -
+                lieDerivMetricClm (I := I)
+                  (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ')
+                  (deTurckVF (I := I)
+                    (smoothRiemannianMetricToInfty (I := I)
+                      (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ'))
+                    (smoothRiemannianMetricToInfty (I := I) g_bg)) x (v 0) (v 1) =
+            unitModel (I := I) (M := M) g₀ 2
+              (appCc (I := I) (M := M) g₀ 2 2 L₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
+                appCc (I := I) (M := M) g₀ 3 2 L₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
+                appCc (I := I) (M := M) g₀ 4 2 L₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x (L₀.toSection x) ≤ ΛL ^ 2) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x (L₁.toSection x) ≤ ΛL ^ 2) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (L₂.toSection x) ≤ ΛL ^ 2) :=
+  sorry
 
 /-- **(POSITED deep bedrock — the VALUE-LEVEL (`unitModel`) ball-uniform three-term mean-value
 section-arm grading of the Ricci–DeTurck RHS-arm difference, with the ball-uniform order-`0` `C⁰`
@@ -4331,8 +4495,101 @@ private theorem deTurckRHSArmDiff_threeArm_unitModel_ballUniform
                 appCc (I := I) (M := M) g₀ 4 2 C₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x (C₀.toSection x) ≤ ΛC ^ 2) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x (C₁.toSection x) ≤ ΛC ^ 2) ∧
-          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (C₂.toSection x) ≤ ΛC ^ 2) :=
-  sorry
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (C₂.toSection x) ≤ ΛC ^ 2) := by
+  classical
+  -- The two ball-uniform arm gradings: the Ricci arm `−2 Ric` and the Lie arm `𝓛_{W} g`.  Each supplies
+  -- a single ball-uniform order-`0` `C⁰` level (`ΛR`, `ΛL`) outside `∀ T T'`, and per fibre-small
+  -- `(T, T')` the three endpoint coefficient fields with the `∀ x v` value identity and the `C⁰` sups.
+  obtain ⟨ΛR, hΛR_nn, hRicci⟩ :=
+    deTurckRicciArm_appCc_graded_ballUniform (I := I) g₀ g_bg a ha_super hR
+  obtain ⟨ΛL, hΛL_nn, hLie⟩ :=
+    deTurckLieArm_appCc_graded_ballUniform (I := I) g₀ g_bg a ha_super hR
+  -- The combined ball-uniform `C⁰` level, accommodating the `2`-sub-additivity of the fibre norm on the
+  -- summed coefficient fields `Cₘ = Rₘ + Lₘ`: `rfns(Rₘ + Lₘ) ≤ 2·ΛR² + 2·ΛL² = ΛC²`.
+  refine ⟨Real.sqrt (2 * ΛR ^ 2 + 2 * ΛL ^ 2), Real.sqrt_nonneg _, ?_⟩
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
+  obtain ⟨R₀, R₁, R₂, hRval, hR₀, hR₁, hR₂⟩ :=
+    hRicci T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
+  obtain ⟨L₀, L₁, L₂, hLval, hL₀, hL₁, hL₂⟩ :=
+    hLie T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
+  -- The summed coefficient fields.
+  refine ⟨R₀ + L₀, R₁ + L₁, R₂ + L₂, ?_, ?_, ?_, ?_⟩
+  · -- The value identity: the RHS-arm difference unit-model value splits into the Ricci-arm value and the
+    -- Lie-arm value (the `deTurckRicciRHS` definition `−2 Ric + 𝓛_W g`), each rebuilt by its arm grading,
+    -- then re-aggregated by `appCc`/`unitModel` additivity into the summed-coefficient read-off.
+    intro x v
+    set g₁ := tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ with hg₁
+    set g₁' := tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ' with hg₁'
+    -- `unitModel(armG0 T − armG0 T') x v = unitModel(armG0 T) x v − unitModel(armG0 T') x v`, and each
+    -- unit-model arm value is the `deTurckRicciRHS` bilinear value at the realized metric (the bridge).
+    rw [unitModel_sub_local (I := I) g₀ 2 _ _ x, ContinuousMultilinearMap.sub_apply]
+    rw [show (unitModel (I := I) (M := M) g₀ 2 (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ) x) v =
+          deTurckRicciRHS (I := I) g_bg g₁ x (v 0) (v 1) from
+      unitModel_of_deTurckRHSSection_realize (I := I) g₀ g_bg T hδ_lt hδ
+        (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ) rfl x v]
+    rw [show (unitModel (I := I) (M := M) g₀ 2 (deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ') x) v =
+          deTurckRicciRHS (I := I) g_bg g₁' x (v 0) (v 1) from
+      unitModel_of_deTurckRHSSection_realize (I := I) g₀ g_bg T' hδ'_lt hδ'
+        (deTurckRHSArmG0 (I := I) g₀ g_bg T' hδ'_lt hδ') rfl x v]
+    -- Split each `deTurckRicciRHS` into its Ricci arm `−2 Ric(toInfty g)` and its Lie arm
+    -- `lieDerivMetricClm g (deTurckVF (toInfty g) (toInfty g_bg))`, evaluated at the tangent pair.
+    have hsplit : ∀ (g : SmoothRiemannianMetric I M),
+        deTurckRicciRHS (I := I) g_bg g x (v 0) (v 1) =
+          ((-2 : ℝ) • ricciTensor (I := I) g x (v 0) (v 1)) +
+            lieDerivMetricClm (I := I) g
+              (deTurckVF (I := I) (smoothRiemannianMetricToInfty (I := I) g)
+                (smoothRiemannianMetricToInfty (I := I) g_bg)) x (v 0) (v 1) := by
+      intro g
+      rw [deTurckRicciRHS, ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply,
+        ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply]
+      rfl
+    rw [hsplit g₁, hsplit g₁']
+    -- Regroup the difference into the Ricci-arm difference plus the Lie-arm difference.
+    rw [show ((-2 : ℝ) • ricciTensor (I := I) g₁ x (v 0) (v 1) +
+            lieDerivMetricClm (I := I) g₁
+              (deTurckVF (I := I) (smoothRiemannianMetricToInfty (I := I) g₁)
+                (smoothRiemannianMetricToInfty (I := I) g_bg)) x (v 0) (v 1)) -
+          ((-2 : ℝ) • ricciTensor (I := I) g₁' x (v 0) (v 1) +
+            lieDerivMetricClm (I := I) g₁'
+              (deTurckVF (I := I) (smoothRiemannianMetricToInfty (I := I) g₁')
+                (smoothRiemannianMetricToInfty (I := I) g_bg)) x (v 0) (v 1)) =
+        ((-2 : ℝ) • (ricciTensor (I := I) g₁ x (v 0) (v 1) -
+            ricciTensor (I := I) g₁' x (v 0) (v 1))) +
+          (lieDerivMetricClm (I := I) g₁
+              (deTurckVF (I := I) (smoothRiemannianMetricToInfty (I := I) g₁)
+                (smoothRiemannianMetricToInfty (I := I) g_bg)) x (v 0) (v 1) -
+            lieDerivMetricClm (I := I) g₁'
+              (deTurckVF (I := I) (smoothRiemannianMetricToInfty (I := I) g₁')
+                (smoothRiemannianMetricToInfty (I := I) g_bg)) x (v 0) (v 1)) from by
+      simp only [smul_sub]; ring]
+    -- Rebuild each arm difference by its arm grading's value identity.
+    rw [hRval x v, hLval x v]
+    -- Re-aggregate the two graded read-offs into the summed-coefficient read-off by `appCc`/`unitModel`
+    -- additivity.  Name the per-arm graded sections, rewrite the summed-coefficient section as their sum
+    -- (`appCc_add_left` on each order slot, then `abel`), and split the unit-model read-off additively.
+    set Rblk : SmoothCcTensor g₀ 0 2 :=
+      appCc (I := I) (M := M) g₀ 2 2 R₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
+        appCc (I := I) (M := M) g₀ 3 2 R₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
+        appCc (I := I) (M := M) g₀ 4 2 R₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) with hRblk
+    set Lblk : SmoothCcTensor g₀ 0 2 :=
+      appCc (I := I) (M := M) g₀ 2 2 L₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
+        appCc (I := I) (M := M) g₀ 3 2 L₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
+        appCc (I := I) (M := M) g₀ 4 2 L₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) with hLblk
+    have hcoeffSum :
+        appCc (I := I) (M := M) g₀ 2 2 (R₀ + L₀) (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
+          appCc (I := I) (M := M) g₀ 3 2 (R₁ + L₁) (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
+          appCc (I := I) (M := M) g₀ 4 2 (R₂ + L₂) (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) =
+        Rblk + Lblk := by
+      rw [appCc_add_left (I := I) (M := M) g₀ 2 2 R₀ L₀,
+        appCc_add_left (I := I) (M := M) g₀ 3 2 R₁ L₁,
+        appCc_add_left (I := I) (M := M) g₀ 4 2 R₂ L₂, hRblk, hLblk]
+      abel
+    rw [hcoeffSum, unitModel_add_local (I := I) g₀ 2 Rblk Lblk x,
+      ContinuousMultilinearMap.add_apply]
+  · -- The order-`0` `C⁰` sup for the summed `(2, 2)` coefficient `C₀ = R₀ + L₀`.
+    exact fun x => threeArmCoeffSum_rfns_le (I := I) g₀ R₀ L₀ ΛR ΛL x (hR₀ x) (hL₀ x)
+  · exact fun x => threeArmCoeffSum_rfns_le (I := I) g₀ R₁ L₁ ΛR ΛL x (hR₁ x) (hL₁ x)
+  · exact fun x => threeArmCoeffSum_rfns_le (I := I) g₀ R₂ L₂ ΛR ΛL x (hR₂ x) (hL₂ x)
 
 /-- **(Route P (Moser-extremes): the intrinsic three-term mean-value SECTION IDENTITY of the
 Ricci–DeTurck RHS-arm difference on EXISTENTIAL endpoint-dependent coefficient fields, with the
@@ -5229,7 +5486,8 @@ private theorem deTurckRHSArmDiff_iteratedCovGrad_riemannianFiberNormSq_jet_le_b
             CR * ∑ q ∈ Finset.range (d + 2 + 1),
               riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + q) x
                 ((iteratedCovGrad (I := I) g₀ 0 2 q (T - T')).toSection x) :=
-  sorry
+  deTurckRHSArmDiff_iteratedCovGrad_riemannianFiberNormSq_jet_le_ballUniform
+    (I := I) (M := M) g₀ g_bg d hR
 
 /-- **(DEFICIT-FREE INTRINSIC top-order-`d` integrated covariant-`L²` Moser–Nemytskii tame
 bound on the nonlinear Ricci–DeTurck RHS-arm difference — PROVED from the order-`d` jet column.)**
