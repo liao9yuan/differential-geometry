@@ -2861,16 +2861,18 @@ theorem slotInsertEndo0Field_apply_jointContMDiffOn {d : ℕ} {S : Set ℝ}
   exact slotInsertEndoFib_zero (I := I) (M := M) d p.1 (Λ p) (A p)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **Joint `(x, s)`-smoothness of the order-`0` curvature coefficient fibre operator along the
-realized family.**  The fibrewise joint analog of `ricciArmOrder0CurvCoeffFib_contMDiff`: the
-leading-slot insertion `slotInsertEndoFib 2 0 x (ricEndoRaisedFib (g_s) x)` is jointly `C^∞` in
-`(x, s)` as a `(2, 2)`-operator section, on the slab `univ ×ˢ realizedSmallSet`.  Via the within-slab
-CLM-section bridge `contMDiffOn_clm_section_of_pointwise_jointMR` it reduces, on each globally smooth
-`(0, 2)`-tensor field `Y`, to the joint `(0, 2)`-section
-`(x, s) ↦ Y x ∘ (id, …, ricEndoRaisedFib (g_s) x, …)` — the leading covariant slot precomposed by the
+/-- **Joint `(x, s)`-smoothness of the leading-slot order-`0` curvature coefficient fibre operator along
+the realized family.**  The fibrewise joint analog of `ricciArmOrder0CurvCoeffFibSlot_contMDiff` at the
+leading slot: the leading-slot insertion `slotInsertEndoFib 2 0 x (ricEndoRaisedFib (g_s) x)` is jointly
+`C^∞` in `(x, s)` as a `(2, 2)`-operator section, on the slab `univ ×ˢ realizedSmallSet`.  Via the
+within-slab CLM-section bridge `contMDiffOn_clm_section_of_pointwise_jointMR` it reduces, on each globally
+smooth `(0, 2)`-tensor field `Y`, to the joint `(0, 2)`-section
+`(x, s) ↦ Y x ∘ (ricEndoRaisedFib (g_s) x, id)` — the leading covariant slot precomposed by the
 joint-smooth raised-Ricci endomorphism `ricEndoRaisedFib_realizedFam_jointContMDiffOn`, threaded
-through the fixed smooth slot-insertion `slotInsertEndoFib`. -/
-theorem ricciArmOrder0CurvCoeffFib_realizedFam_jointContMDiffOn [BoundarylessManifold I M]
+through the fixed smooth slot-insertion `slotInsertEndoFib`.  This is the leading slot of the two-slot
+Bochner order-`0` coefficient; the trailing slot is the posited
+`ricciArmOrder0CurvCoeffFib_realizedFam_jointContMDiffOn`. -/
+theorem ricciArmOrder0CurvCoeffFibSlot0_realizedFam_jointContMDiffOn [BoundarylessManifold I M]
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
@@ -2878,14 +2880,15 @@ theorem ricciArmOrder0CurvCoeffFib_realizedFam_jointContMDiffOn [BoundarylessMan
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
         (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1
         (Tensor0SBundle.TensorRSSpace.ofCLM
-          (ricciArmOrder0CurvCoeffFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1)))
+          (ricciArmOrder0CurvCoeffFibSlot (I := I)
+            (realizedFam (I := I) g₀ T T' hδ hδ' p.2) 0 p.1)))
       ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
   classical
   apply contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
     (F₁ := Tensor0SBundle.Tensor0SModel 2 ℝ E) (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)
     (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)
-    (φ := fun p : M × ℝ => ricciArmOrder0CurvCoeffFib (I := I)
-      (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1)
+    (φ := fun p : M × ℝ => ricciArmOrder0CurvCoeffFibSlot (I := I)
+      (realizedFam (I := I) g₀ T T' hδ hδ' p.2) 0 p.1)
     (S := realizedSmallSet (δ := δ) (δ' := δ'))
   intro Y
   set g_s : ℝ → SmoothRiemannianMetric I M := fun s => realizedFam (I := I) g₀ T T' hδ hδ' s with hg_s
@@ -2903,8 +2906,46 @@ theorem ricciArmOrder0CurvCoeffFib_realizedFam_jointContMDiffOn [BoundarylessMan
     (Λ := fun p : M × ℝ => ricEndoRaisedFib (I := I) (g_s p.2) p.1) hric
     (A := fun p : M × ℝ => Y p.1) hYjoint
   refine happ.congr (fun p _ => ?_)
-  -- the fibre value `slotInsertEndoFib 2 0 x (ricEndo (g_s) x) (Y x) = ricciArmOrder0CurvCoeffFib (g_s) x (Y x)`
-  rw [ricciArmOrder0CurvCoeffFib]
+  -- the fibre value `slotInsertEndoFib 2 0 x (ricEndo (g_s) x) (Y x) = ricciArmOrder0CurvCoeffFibSlot 0 x (Y x)`
+  rw [ricciArmOrder0CurvCoeffFibSlot]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(Posited deep input — joint `(x, s)`-smoothness of the genuine TWO-SLOT order-`0` curvature
+coefficient fibre operator along the realized family.)**
+
+The fibrewise joint analog of `ricciArmOrder0CurvCoeffFib_contMDiff`: the SUM of the leading-slot and
+trailing-slot insertions of the joint-smooth raised-Ricci endomorphism `ricEndoRaisedFib (g_s) x` is
+jointly `C^∞` in `(x, s)` as a `(2, 2)`-operator section, on the slab `univ ×ˢ realizedSmallSet`.
+
+The order-`0` of the Weitzenböck fold is the SYMMETRIC two-slot Bochner Ricci action
+`D(Ric♯·, ·) + D(·, Ric♯·)` (`RicciDeTurckSectionDifference.ricciArmOrder0CurvCoeff`), i.e.
+`ricciArmOrder0CurvCoeffFib = slotInsertEndoFib 2 0 (ricEndoRaisedFib g_s) + slotInsertEndoFib 2 1
+(ricEndoRaisedFib g_s)`.  Its joint smoothness is the sum of the leading-slot joint smoothness — the
+PROVED, sorry-free `ricciArmOrder0CurvCoeffFibSlot0_realizedFam_jointContMDiffOn` (above, via
+`slotInsertEndo0Field_apply_jointContMDiffOn`) — and the trailing-slot (`slot 1`) joint smoothness.  The
+trailing slot needs the slot-`1` analog of `slotInsertEndo0Field_apply_jointContMDiffOn` (a slot-`1`
+joint curry/uncurry insertion bridge — the slot-`1` mirror of `slotInsertEndoFib_zero`'s leading-slot
+uncurry), which is not yet on disk; together with the joint additivity of the two bundle sections into the
+normed `(2, 2)`-operator fibre.
+
+This irreducible joint manifold-section lift over the product base `M × ℝ` — the two-slot analog of the
+`ricEndoRaisedFib_contMDiff` → `slotInsertEndoFib_contMDiff` → `ricciArmOrder0CurvCoeffFib_contMDiff`
+tower, threaded through the joint-Gram/Riemann tower `gen_joint_riemann` for both slots — is *posited*
+here as the single joint-fibre-smoothness keystone, to be discharged by recursing into the slot-`1` joint
+currying tower (a complete mirror of the proved leading-slot tower) plus the bundle-section sum.  It
+genuinely constrains the section to the realized-family two-slot curvature coefficient (consumed only as
+the joint smoothness of that exact fibre operator), so it is non-vacuous. -/
+theorem ricciArmOrder0CurvCoeffFib_realizedFam_jointContMDiffOn [BoundarylessManifold I M]
+    (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1
+        (Tensor0SBundle.TensorRSSpace.ofCLM
+          (ricciArmOrder0CurvCoeffFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1)))
+      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
+  sorry
 
 /-- **(Posited deep input — joint `(s, x)`-smoothness of the genuine order-`0` curvature coefficient
 along the realized path.)**

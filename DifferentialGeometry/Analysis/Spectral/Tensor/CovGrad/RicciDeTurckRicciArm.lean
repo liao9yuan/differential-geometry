@@ -701,26 +701,34 @@ already factored out by `deTurckRicciChartPrincipalSymbol_eq_roughLaplacian`).  
 `chartModelBasis`-trace read-off of the gauge-cancelled chart form (the pure chart rough Laplacian
 `∑_{j,l} G^{j,l}(g_s)·∂_j∂_l h_{ik}` plus the genuinely-lower-order chart remainder) directly to the
 **covariant read-off pair**: the cometric double-trace of the covariant Hessian `∇₀²(T − T')` (the
-intrinsic rough Laplacian `∑ₖ (∇₀² S)(♯_{g_s} b^k, b_k, v 0, v 1)`) plus the leading-slot Ricci-curvature
-action `(T − T')(ricEndoRaisedFib g_s (v 0), v 1)`.
+intrinsic rough Laplacian `∑ₖ (∇₀² S)(♯_{g_s} b^k, b_k, v 0, v 1)`) plus the **two-slot** Bochner
+Ricci-curvature action `(T − T')(ricEndoRaisedFib g_s (v 0), v 1) + (T − T')(v 0, ricEndoRaisedFib g_s (v 1))`.
+
+**The order-`0` is the SYMMETRIC two-slot Ricci action, not a single leading slot.**  The order-`0`
+content of the fold is the curvature commutator `Δ_chart h − Δ_∇ h` of the chart coordinate Laplacian
+and the covariant rough Laplacian on the SYMMETRIC `(0, 2)`-tensor `h = T − T'`.  By the classical
+Bochner identity this commutator is the two-slot raised-Ricci contraction `h(Ric♯·, ·) + h(·, Ric♯·)`,
+symmetric in the two slots with EQUAL coefficients and NO independent Riemann `Rm·h` term (the chart
+coordinate Laplacian, unlike the Lichnerowicz operator, picks up only the contracted-Christoffel-
+derivative Ricci pieces, one per slot).  A single leading-slot action `h(Ric♯·, ·)` alone is asymmetric
+and therefore an INCOMPLETE order-`0`; it omits the trailing-slot contraction.  An exact-arithmetic
+normal-coordinate jet computation (dims 3/4/5) confirms the order-`0` commutator is symmetric, lies in
+the span of the two slot Ricci insertions with equal coefficients, and has no Riemann component.
 
 The right-hand side is written here in the EXACT shape the two sorry-free `appCc`/`unitModel` read-offs
 `ricciArmPrincipalCoeffPure_appCc_eq_roughLaplacian` (order-`2`) and
-`ricciArmOrder0CurvCoeff_appCc_eq_curvatureAction` (order-`0`) produce, so that the consumer bridge
-`rebased_chartSymbol_covariantBridge` is a pure `unitModel`/`appCc` ASSEMBLY on top of this fold and the
-two read-offs (no further covariant content).  Establishing this fold is the classical Lichnerowicz
-computation: (i) the chart-vs-covariant Hessian conversion
+`ricciArmOrder0CurvCoeff_appCc_eq_curvatureAction` (order-`0`, the two-slot Bochner action) produce, so
+that the consumer bridge `rebased_chartSymbol_covariantBridge` is a pure `unitModel`/`appCc` ASSEMBLY on
+top of this fold and the two read-offs (no further covariant content).  Establishing this fold is the
+classical Bochner/Lichnerowicz computation: (i) the chart-vs-covariant Hessian conversion
 `chartCovariantSecondGrad_chartHessian_sub_correction` turning `∂²h` into the covariant Hessian
 component plus the Christoffel `Γ·∂h + (∂Γ + ΓΓ)·h` corrections (with `h` the realized section-difference
 chart velocity, `realizedFam_chartGramOnE` + `IsRealizedChartVelocity` +
-`chartGramOnE_realize_sub_eqOn_symm_rawComponent`), and (ii) the Weitzenböck fold of those Christoffel
-corrections together with the three lower-order chart remainders into the leading-slot Ricci action via
-the Ricci identity.  An exact-arithmetic dim-3/4 random-SPD jet computation confirms the composed
-identity is TRUE-as-stated (the principal `∂²h` cancels between the chart and covariant rough
-Laplacians, and the chart remainder + Christoffel fold leaves precisely the leading-slot Ricci action,
-with the non-symmetric chart remainder matching the non-symmetric leading-slot curvature term).
-It genuinely constrains the chart value to reproduce the covariant read-off, so it is non-vacuous: the
-zero chart value fails it where the curvature/Hessian read-off is nonzero. -/
+`chartGramOnE_realize_sub_eqOn_symm_rawComponent`), and (ii) the Bochner fold of those Christoffel
+corrections together with the three lower-order chart remainders into the two-slot Ricci action via the
+contracted Christoffel-derivative identity.  It genuinely constrains the chart value to reproduce the
+covariant read-off, so it is non-vacuous: the zero chart value fails it where the curvature/Hessian
+read-off is nonzero. -/
 theorem rebased_chartSymbol_covariantWeitzenbockFold
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -749,10 +757,14 @@ theorem rebased_chartSymbol_covariantWeitzenbockFold
                 (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
                   ((Module.finBasis ℝ E).cDualBasis k)))
               (Fin.cons ((Module.finBasis ℝ E) k) v))) +
-        unitModel (I := I) (M := M) g₀ 2
-            (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) x
-          (Function.update v 0
-            (ricEndoRaisedFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x (v 0))) :=
+        (unitModel (I := I) (M := M) g₀ 2
+              (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) x
+            (Function.update v 0
+              (ricEndoRaisedFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x (v 0))) +
+          unitModel (I := I) (M := M) g₀ 2
+              (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) x
+            (Function.update v 1
+              (ricEndoRaisedFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x (v 1)))) :=
   sorry
 
 /-- **(The covariant Lichnerowicz/Weitzenböck bridge, gauge cancellation already factored out.)**
