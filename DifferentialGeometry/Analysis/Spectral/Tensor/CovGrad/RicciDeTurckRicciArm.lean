@@ -1018,6 +1018,185 @@ private lemma tensorChartComponentRaw_self_eq_unitModel_chartModelBasis
   funext m
   exact chartBasisVecFiber_self (I := I) x (Jdx m)
 
+/-- **The chart-`x` coordinate matrix of a tangent family at the centre `x`.**  The `m`-th
+`chartModelBasis`-component of the trivialisation extraction of `F i`.  (Local copy of the private
+`famCoord` of `DeTurckVFConnDiffVariation`.) -/
+private def ricciArmFamCoord (x : M) (F : Fin (Module.finrank ℝ E) → TangentSpace I x) :
+    Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
+  Matrix.of fun i m =>
+    ((chartModelBasis E).repr
+      ((trivializationAt E (TangentSpace I) x).continuousLinearMapAt ℝ x (F i))) m
+
+set_option linter.unusedSectionVars false in
+/-- **The coordinate-matrix Gram identity** `(Cᵀ · C)ₘₙ = G^{mn}` at the chart centre `x`.  For a
+`g_x`-orthonormal tangent family `F` at `x` with chart-`x` coordinate matrix `C = ricciArmFamCoord x F`,
+the column inner product `∑ᵢ Cᵢₘ Cᵢₙ` equals the inverse Gram matrix `chartInvGramMatrix g x x m n`
+(`C G Cᵀ = 1 ⟹ Cᵀ C = G⁻¹`).  (Inline re-derivation of the private `sum_famCoord_eq_chartInvGram`.) -/
+private theorem ricciArm_sum_famCoord_eq_chartInvGram (g : SmoothRiemannianMetric I M) (x : M)
+    (F : Fin (Module.finrank ℝ E) → TangentSpace I x)
+    (hF : ∀ i j, g.inner x (F i) (F j) = if i = j then (1 : ℝ) else 0)
+    (m n : Fin (Module.finrank ℝ E)) :
+    (∑ i : Fin (Module.finrank ℝ E),
+        ricciArmFamCoord (I := I) x F i m * ricciArmFamCoord (I := I) x F i n) =
+      chartInvGramMatrix (I := I) g x x m n := by
+  classical
+  have hx : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt' x
+  have hxsrc : x ∈ (extChartAt I x).source := mem_extChartAt_source x
+  -- `C · G · Cᵀ = 1` from the chart-Gram bilinear expansion of the orthonormality.
+  have hCGCt : ricciArmFamCoord (I := I) x F *
+      DifferentialGeometry.Integral.Measure.chartGramMatrix (I := I) g x x *
+        (ricciArmFamCoord (I := I) x F)ᵀ = 1 := by
+    ext i j
+    rw [Matrix.one_apply]
+    have hexp := DifferentialGeometry.Integral.Connection.g_inner_eq_chart_sum
+      (I := I) g x hx hxsrc (F i) (F j)
+    rw [hF i j] at hexp
+    have hchart : ∀ a b : Fin (Module.finrank ℝ E),
+        chartGramOnE (I := I) g x a b (extChartAt I x x) =
+          DifferentialGeometry.Integral.Measure.chartGramMatrix (I := I) g x x a b := by
+      intro a b; unfold chartGramOnE; rw [(extChartAt I x).left_inv hxsrc]
+    rw [Matrix.mul_apply]
+    rw [show (∑ a, (ricciArmFamCoord (I := I) x F *
+          DifferentialGeometry.Integral.Measure.chartGramMatrix (I := I) g x x) i a *
+          (ricciArmFamCoord (I := I) x F)ᵀ a j) =
+        ∑ a, ∑ b, ricciArmFamCoord (I := I) x F i a * ricciArmFamCoord (I := I) x F j b *
+          DifferentialGeometry.Integral.Measure.chartGramMatrix (I := I) g x x a b from by
+      rw [Finset.sum_comm]
+      refine Finset.sum_congr rfl (fun a _ => ?_)
+      rw [Matrix.mul_apply, Finset.sum_mul]
+      refine Finset.sum_congr rfl (fun b _ => ?_)
+      rw [Matrix.transpose_apply]; ring]
+    rw [hexp]
+    refine Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => ?_))
+    rw [hchart a b]; rfl
+  -- `C G Cᵀ = 1 ⟹ Cᵀ C = G⁻¹` by right-inverse uniqueness.
+  have hC : ricciArmFamCoord (I := I) x F *
+        (DifferentialGeometry.Integral.Measure.chartGramMatrix (I := I) g x x *
+          (ricciArmFamCoord (I := I) x F)ᵀ) = 1 := by rw [← Matrix.mul_assoc]; exact hCGCt
+  have h2 : (DifferentialGeometry.Integral.Measure.chartGramMatrix (I := I) g x x *
+        (ricciArmFamCoord (I := I) x F)ᵀ) * ricciArmFamCoord (I := I) x F = 1 :=
+    mul_eq_one_comm.mp hC
+  rw [Matrix.mul_assoc] at h2
+  have hinv : (ricciArmFamCoord (I := I) x F)ᵀ * ricciArmFamCoord (I := I) x F =
+      (DifferentialGeometry.Integral.Measure.chartGramMatrix (I := I) g x x)⁻¹ :=
+    (Matrix.inv_eq_right_inv h2).symm
+  have hmn := congrFun (congrFun hinv m) n
+  rw [Matrix.mul_apply] at hmn
+  rw [chartInvGramMatrix, ← hmn]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [Matrix.transpose_apply]
+
+set_option linter.unusedSectionVars false in
+/-- **The model-basis coordinate expansion of a vector recomposed in the chart-centre frame.**  At the
+chart centre `x`, any `v : TangentSpace I x` equals `∑ₘ Cₘ • cmb_m` where `Cₘ = ricciArmFamCoord` of the
+singleton `v` and `cmb = chartModelBasis E`. -/
+private lemma ricciArm_recompose (x : M) (v : TangentSpace I x) :
+    v = ∑ m : Fin (Module.finrank ℝ E),
+      ((chartModelBasis E).repr
+        ((trivializationAt E (TangentSpace I) x).continuousLinearMapAt ℝ x v)) m •
+        (chartModelBasis E) m := by
+  classical
+  have hx : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt' x
+  have h := DifferentialGeometry.Integral.Connection.chartBasisVecFiber_recompose (I := I) x hx v
+  conv_lhs => rw [h]
+  refine Finset.sum_congr rfl (fun m _ => ?_)
+  rw [chartBasisVecFiber_self (I := I) x m]
+
+set_option linter.unusedSectionVars false in
+/-- **Scalar orthonormal-frame diagonal trace equals the chart-inverse-Gram trace at the centre.**
+For a `g_x`-orthonormal tangent family `F` at the chart centre `x` and a scalar bilinear `A : E → E → ℝ`
+(additive and `ℝ`-homogeneous in each slot), the diagonal frame sum `∑ᵢ A(F i, F i)` equals the
+inverse-Gram chart trace `∑_{m,n} G^{mn} · A(cmb_m, cmb_n)`, where `cmb = chartModelBasis E`
+(= `chartBasisVecFiber x · x` at the centre).  (Scalar inline re-derivation of the private
+`bilin_ortho_family_diag_eq_chartGram_trace`.) -/
+private theorem ricciArm_scalarBilin_ortho_diag_eq_chartInvGram_trace
+    (g : SmoothRiemannianMetric I M) (x : M)
+    (F : Fin (Module.finrank ℝ E) → TangentSpace I x)
+    (hF : ∀ i j, g.inner x (F i) (F j) = if i = j then (1 : ℝ) else 0)
+    (A : E → E → ℝ)
+    (hAl : ∀ (c : ℝ) (a b w : E), A (c • a + b) w = c * A a w + A b w)
+    (hAr : ∀ (c : ℝ) (a w w' : E), A a (c • w + w') = c * A a w + A a w') :
+    (∑ i : Fin (Module.finrank ℝ E), A (F i) (F i)) =
+      ∑ m : Fin (Module.finrank ℝ E), ∑ n : Fin (Module.finrank ℝ E),
+        chartInvGramMatrix (I := I) g x x m n *
+          A ((chartModelBasis E) m) ((chartModelBasis E) n) := by
+  classical
+  -- `A` vanishes when either slot is zero (from the per-slot additivity at `c = 1, a = 0`).
+  have hAl0 : ∀ w : E, A (0 : E) w = 0 := by
+    intro w
+    have h := hAl 1 0 0 w
+    rw [smul_zero, add_zero, one_mul] at h
+    linarith
+  have hAr0 : ∀ a : E, A a (0 : E) = 0 := by
+    intro a
+    have h := hAr 1 a 0 0
+    rw [smul_zero, add_zero, one_mul] at h
+    linarith
+  -- Expand `A` over a finite-sum first argument.
+  have hAl_sum : ∀ (cs : Fin (Module.finrank ℝ E) → ℝ) (w : E),
+      A (∑ m, cs m • (chartModelBasis E) m) w =
+        ∑ m, cs m * A ((chartModelBasis E) m) w := by
+    intro cs w
+    induction (Finset.univ : Finset (Fin (Module.finrank ℝ E))) using Finset.induction with
+    | empty => rw [Finset.sum_empty, Finset.sum_empty, hAl0]
+    | insert a s ha ih =>
+      rw [Finset.sum_insert ha, Finset.sum_insert ha, hAl, ih]
+  have hAr_sum : ∀ (a : E) (cs : Fin (Module.finrank ℝ E) → ℝ),
+      A a (∑ n, cs n • (chartModelBasis E) n) =
+        ∑ n, cs n * A a ((chartModelBasis E) n) := by
+    intro a cs
+    induction (Finset.univ : Finset (Fin (Module.finrank ℝ E))) using Finset.induction with
+    | empty => rw [Finset.sum_empty, Finset.sum_empty, hAr0]
+    | insert b s hb ih =>
+      rw [Finset.sum_insert hb, Finset.sum_insert hb, hAr, ih]
+  -- Coordinate-matrix recomposition of each `F i`.
+  have hrec : ∀ i, (F i : E) =
+      ∑ m, ricciArmFamCoord (I := I) x F i m • (chartModelBasis E) m := by
+    intro i; exact ricciArm_recompose (I := I) x (F i)
+  have hsummand : ∀ i, A (F i) (F i) =
+      ∑ m, ∑ n, (ricciArmFamCoord (I := I) x F i m * ricciArmFamCoord (I := I) x F i n) *
+        A ((chartModelBasis E) m) ((chartModelBasis E) n) := by
+    intro i
+    rw [hrec i, hAl_sum]
+    refine Finset.sum_congr rfl (fun m _ => ?_)
+    rw [hAr_sum, Finset.mul_sum]
+    refine Finset.sum_congr rfl (fun n _ => ?_)
+    rw [mul_assoc]
+  rw [Finset.sum_congr rfl (fun i _ => hsummand i)]
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl (fun m _ => ?_)
+  rw [Finset.sum_comm]
+  refine Finset.sum_congr rfl (fun n _ => ?_)
+  rw [← Finset.sum_mul]
+  congr 1
+  rw [← ricciArm_sum_famCoord_eq_chartInvGram (I := I) g x F hF m n]
+
+/-- **(Posited precise sub-child of bridge 1 — the trailing-pair symmetry of the symmetric covariant
+Hessian read-off.)**
+
+The covariant Hessian read-off `Φ = unitModel g₀ 4 (∇₀²(symmS (T − T'))) x` is symmetric in its TWO
+TRAILING slots: the slots `2, 3` of the order-`4` model tensor are the original `(0, 2)`-tensor slots of
+the SYMMETRIC section `symmS (T − T')`, and the covariant gradient `∇₀²` only prepends two derivative
+slots — the Christoffel corrections `−Γ·S − Γ·S` preserve the trailing symmetry of a symmetric `S` at
+every order.  Hence feeding the trailing pair in either order gives the same value:
+`Φ ![a, b, u, w] = Φ ![a, b, w, u]`.
+
+This is the classical fact that the iterated covariant gradient of a symmetric `(0, 2)`-tensor is
+symmetric in its trailing pair.  It genuinely constrains the read-off (a non-symmetric Hessian fails it),
+so it is non-vacuous.  Posited here as the single precise sub-child; to be discharged by the explicit
+trailing-slot-swap specialisation of the iterated-covariant-gradient slot-permutation naturality
+(`exists_iteratedCovGrad_unit_toModel_domDomCongr`, with `σ = swap 0 1` carried to `swap 2 3`). -/
+theorem symmHessian_trailingPair_symm
+    (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
+    (a b u w : E) :
+    unitModel (I := I) (M := M) g₀ 4
+        (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ S)) x ![a, b, u, w] =
+      unitModel (I := I) (M := M) g₀ 4
+        (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ S)) x ![a, b, w, u] :=
+  sorry
+
 /-- **(Posited deep sub-child of bridge 1 — the cometric double-trace ↔ chart-inverse-Gram read-off on
 the trailing-symmetric covariant Hessian.)**
 
@@ -1059,8 +1238,180 @@ theorem chart_cometricDoubleTrace_symmHessian_readoff
               (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
               (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
                 ((Module.finBasis ℝ E).cDualBasis k)))
-            (Fin.cons ((Module.finBasis ℝ E) k) v)) :=
-  sorry
+            (Fin.cons ((Module.finBasis ℝ E) k) v)) := by
+  classical
+  set gs : SmoothRiemannianMetric I M := realizedFam (I := I) g₀ T T' hδ hδ' s with hgs
+  set d : ℕ := Module.finrank ℝ E with hd
+  -- The `gs`-orthonormal smooth frame attached at `x`, read at its own centre.
+  set B : Fin d → TangentSpace I x := fun i => smoothOrthoFrame (I := I) gs x i x with hB
+  have hxnbhd : x ∈ smoothOrthoFrameNbhd (I := I) (M := M) x :=
+    mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x
+  have hBortho : ∀ i j : Fin d, gs.inner x (B i) (B j) = if i = j then (1 : ℝ) else 0 :=
+    fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) gs x i j
+  -- The model fibre as a `(0, 4)`-multilinear map; evaluation on an `![·, ·, ·, ·]` tuple.
+  -- (1) RHS: the cometric double-trace is the `gs`-orthonormal diagonal sum.
+  have hRHS :
+      (∑ k : Fin d,
+          Φ (Fin.cons (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.cometricLmodel
+                (I := I) gs x
+                (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
+                  ((Module.finBasis ℝ E).cDualBasis k)))
+              (Fin.cons ((Module.finBasis ℝ E) k) v))) =
+        ∑ i : Fin d, Φ ![(B i : E), (B i : E), (v 0 : E), (v 1 : E)] := by
+    rw [DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck.cometric_dualTrace_eq_orthoFrame_diag
+      (I := I) gs (s := 2) x hxnbhd Φ (fun m : Fin 2 => (v m : E))]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    congr 1
+    funext m
+    refine Fin.cases ?_ (fun m => ?_) m
+    · rfl
+    · refine Fin.cases ?_ (fun m => ?_) m
+      · rfl
+      · fin_cases m <;> rfl
+  -- (2) LHS: collapse the trailing two slots (`i, k`) into `(v 1, v 0)` by multilinearity, then apply
+  -- the scalar ortho-frame ↔ inverse-Gram trace to the leading two slots.
+  -- The leading-slot scalar bilinear (trailing pair fixed to `(v 1, v 0)`).
+  set Ajl : E → E → ℝ := fun u w => Φ ![u, w, (v 1 : E), (v 0 : E)] with hAjl
+  have hAl : ∀ (c : ℝ) (a b w : E), Ajl (c • a + b) w = c * Ajl a w + Ajl b w := by
+    intro c a b w
+    simp only [hAjl]
+    rw [show (![c • a + b, w, (v 1 : E), (v 0 : E)] : Fin 4 → E) =
+        Function.update ![a, w, (v 1 : E), (v 0 : E)] 0 (c • a + b) from by
+      funext z; fin_cases z <;> rfl]
+    rw [Φ.map_update_add, Φ.map_update_smul, smul_eq_mul]
+    rw [show Function.update ![a, w, (v 1 : E), (v 0 : E)] 0 a = ![a, w, (v 1 : E), (v 0 : E)] from by
+      funext z; fin_cases z <;> rfl]
+    rw [show Function.update ![a, w, (v 1 : E), (v 0 : E)] 0 b = ![b, w, (v 1 : E), (v 0 : E)] from by
+      funext z; fin_cases z <;> rfl]
+  have hAr : ∀ (c : ℝ) (a w w' : E), Ajl a (c • w + w') = c * Ajl a w + Ajl a w' := by
+    intro c a w w'
+    simp only [hAjl]
+    rw [show (![a, c • w + w', (v 1 : E), (v 0 : E)] : Fin 4 → E) =
+        Function.update ![a, w, (v 1 : E), (v 0 : E)] 1 (c • w + w') from by
+      funext z; fin_cases z <;> rfl]
+    rw [Φ.map_update_add, Φ.map_update_smul, smul_eq_mul]
+    rw [show Function.update ![a, w, (v 1 : E), (v 0 : E)] 1 w = ![a, w, (v 1 : E), (v 0 : E)] from by
+      funext z; fin_cases z <;> rfl]
+    rw [show Function.update ![a, w, (v 1 : E), (v 0 : E)] 1 w' = ![a, w', (v 1 : E), (v 0 : E)] from by
+      funext z; fin_cases z <;> rfl]
+  -- Collapse the `(i, k)` sums per fixed `(j, l)` into `Ajl (cmb_j) (cmb_l) = Φ ![cmb_j, cmb_l, v1, v0]`.
+  have hcollapse : ∀ j l : Fin d,
+      (∑ i : Fin d, ∑ k : Fin d,
+          ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+            Φ (fun m : Fin 4 => (chartModelBasis E) (![j, l, i, k] m))) =
+        Φ ![(chartModelBasis E) j, (chartModelBasis E) l, (v 1 : E), (v 0 : E)] := by
+    intro j l
+    -- recompose `(v 1 : E)` and `(v 0 : E)` in the model basis at the centre
+    have hv0 : (v 0 : E) = ∑ k : Fin d,
+        ((chartModelBasis E).repr (v 0 : E)) k • (chartModelBasis E) k :=
+      ((chartModelBasis E).sum_repr (v 0 : E)).symm
+    have hv1 : (v 1 : E) = ∑ i : Fin d,
+        ((chartModelBasis E).repr (v 1 : E)) i • (chartModelBasis E) i :=
+      ((chartModelBasis E).sum_repr (v 1 : E)).symm
+    rw [show Φ ![(chartModelBasis E) j, (chartModelBasis E) l, (v 1 : E), (v 0 : E)] =
+        Φ (Function.update ![(chartModelBasis E) j, (chartModelBasis E) l, (0 : E), (v 0 : E)] 2
+          (∑ i : Fin d, ((chartModelBasis E).repr (v 1 : E)) i • (chartModelBasis E) i)) from by
+      conv_lhs => rw [hv1]
+      congr 1; funext z; fin_cases z <;> rfl]
+    rw [show Φ (Function.update ![(chartModelBasis E) j, (chartModelBasis E) l, (0 : E), (v 0 : E)] 2
+          (∑ i : Fin d, ((chartModelBasis E).repr (v 1 : E)) i • (chartModelBasis E) i)) =
+        ∑ i : Fin d, Φ (Function.update
+            ![(chartModelBasis E) j, (chartModelBasis E) l, (0 : E), (v 0 : E)] 2
+          (((chartModelBasis E).repr (v 1 : E)) i • (chartModelBasis E) i)) from
+      Φ.toMultilinearMap.map_update_sum Finset.univ 2
+        (fun i => ((chartModelBasis E).repr (v 1 : E)) i • (chartModelBasis E) i)
+        ![(chartModelBasis E) j, (chartModelBasis E) l, (0 : E), (v 0 : E)]]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [Φ.map_update_smul, smul_eq_mul]
+    rw [show Function.update ![(chartModelBasis E) j, (chartModelBasis E) l, (0 : E), (v 0 : E)] 2
+          ((chartModelBasis E) i) =
+        Function.update ![(chartModelBasis E) j, (chartModelBasis E) l,
+            (chartModelBasis E) i, (0 : E)] 3 (v 0 : E) from by
+      funext z; fin_cases z <;> rfl]
+    rw [show ((chartModelBasis E).repr (v 1 : E)) i = ((chartModelBasis E).repr (v 1)) i from rfl]
+    rw [show Φ (Function.update ![(chartModelBasis E) j, (chartModelBasis E) l,
+            (chartModelBasis E) i, (0 : E)] 3 (v 0 : E)) =
+        Φ (Function.update ![(chartModelBasis E) j, (chartModelBasis E) l,
+            (chartModelBasis E) i, (0 : E)] 3
+          (∑ k : Fin d, ((chartModelBasis E).repr (v 0 : E)) k • (chartModelBasis E) k)) from by
+      conv_lhs => rw [hv0]]
+    rw [show Φ (Function.update ![(chartModelBasis E) j, (chartModelBasis E) l,
+            (chartModelBasis E) i, (0 : E)] 3
+          (∑ k : Fin d, ((chartModelBasis E).repr (v 0 : E)) k • (chartModelBasis E) k)) =
+        ∑ k : Fin d, Φ (Function.update
+            ![(chartModelBasis E) j, (chartModelBasis E) l, (chartModelBasis E) i, (0 : E)] 3
+          (((chartModelBasis E).repr (v 0 : E)) k • (chartModelBasis E) k)) from
+      Φ.toMultilinearMap.map_update_sum Finset.univ 3
+        (fun k => ((chartModelBasis E).repr (v 0 : E)) k • (chartModelBasis E) k)
+        ![(chartModelBasis E) j, (chartModelBasis E) l, (chartModelBasis E) i, (0 : E)]]
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    rw [Φ.map_update_smul, smul_eq_mul]
+    rw [show Function.update ![(chartModelBasis E) j, (chartModelBasis E) l,
+            (chartModelBasis E) i, (0 : E)] 3 ((chartModelBasis E) k) =
+        (fun m : Fin 4 => (chartModelBasis E) (![j, l, i, k] m)) from by
+      funext z; fin_cases z <;> rfl]
+    rw [show ((chartModelBasis E).repr (v 0 : E)) k = ((chartModelBasis E).repr (v 0)) k from rfl]
+    ring
+  -- Reduce the LHS to the leading-slot inverse-Gram contraction of `Ajl`, via the common
+  -- quadruple sum `F i k j l := G^{jl} · (repr·repr · Φ ![cmb_j, cmb_l, cmb_i, cmb_k])`.
+  set F : Fin d → Fin d → Fin d → Fin d → ℝ :=
+    fun i k j l => chartInvGramMatrix (I := I) gs x x j l *
+      (((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+        Φ (fun m : Fin 4 => (chartModelBasis E) (![j, l, i, k] m))) with hF
+  have hLHS_reduce :
+      (∑ i : Fin d, ∑ k : Fin d,
+          ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+            (∑ j : Fin d, ∑ l : Fin d,
+              chartInvGramMatrix (I := I) gs x x j l *
+                Φ (fun m : Fin 4 => (chartModelBasis E) (![j, l, i, k] m)))) =
+        ∑ j : Fin d, ∑ l : Fin d,
+          chartInvGramMatrix (I := I) gs x x j l *
+            Ajl ((chartModelBasis E) j) ((chartModelBasis E) l) := by
+    have hLeft : (∑ i : Fin d, ∑ k : Fin d,
+          ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
+            (∑ j : Fin d, ∑ l : Fin d,
+              chartInvGramMatrix (I := I) gs x x j l *
+                Φ (fun m : Fin 4 => (chartModelBasis E) (![j, l, i, k] m)))) =
+        ∑ i : Fin d, ∑ k : Fin d, ∑ j : Fin d, ∑ l : Fin d, F i k j l := by
+      refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun k _ => ?_))
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl (fun j _ => ?_)
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl (fun l _ => ?_)
+      rw [hF]; ring
+    have hRight : (∑ j : Fin d, ∑ l : Fin d,
+          chartInvGramMatrix (I := I) gs x x j l *
+            Ajl ((chartModelBasis E) j) ((chartModelBasis E) l)) =
+        ∑ j : Fin d, ∑ l : Fin d, ∑ i : Fin d, ∑ k : Fin d, F i k j l := by
+      refine Finset.sum_congr rfl (fun j _ => Finset.sum_congr rfl (fun l _ => ?_))
+      simp only [hAjl]
+      rw [← hcollapse j l, Finset.mul_sum]
+      refine Finset.sum_congr rfl (fun i _ => ?_)
+      rw [Finset.mul_sum]
+    rw [hLeft, hRight]
+    -- `∑ᵢ∑ₖ∑ⱼ∑ₗ F = ∑ⱼ∑ₗ∑ᵢ∑ₖ F`: bundle each double into a product sum and `Finset.sum_comm`.
+    rw [show (∑ i : Fin d, ∑ k : Fin d, ∑ j : Fin d, ∑ l : Fin d, F i k j l) =
+        ∑ ik : Fin d × Fin d, ∑ jl : Fin d × Fin d, F ik.1 ik.2 jl.1 jl.2 from by
+      rw [Fintype.sum_prod_type]
+      refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun k _ => ?_))
+      rw [Fintype.sum_prod_type]]
+    rw [show (∑ j : Fin d, ∑ l : Fin d, ∑ i : Fin d, ∑ k : Fin d, F i k j l) =
+        ∑ jl : Fin d × Fin d, ∑ ik : Fin d × Fin d, F ik.1 ik.2 jl.1 jl.2 from by
+      rw [Fintype.sum_prod_type]
+      refine Finset.sum_congr rfl (fun j _ => Finset.sum_congr rfl (fun l _ => ?_))
+      rw [Fintype.sum_prod_type]]
+    rw [Finset.sum_comm]
+  rw [hLHS_reduce]
+  -- Apply the scalar ortho-frame ↔ inverse-Gram trace (in reverse) to the leading slots.
+  rw [← ricciArm_scalarBilin_ortho_diag_eq_chartInvGram_trace (I := I) gs x B hBortho Ajl hAl hAr]
+  -- Now both sides are `gs`-orthonormal diagonal sums; the trailing pair is `(v 1, v 0)` on the left
+  -- and `(v 0, v 1)` on the right, equated by the symmetric-Hessian trailing-pair symmetry.
+  rw [hRHS]
+  refine Finset.sum_congr rfl (fun i _ => ?_)
+  rw [hAjl]
+  rw [hΦ]
+  exact symmHessian_trailingPair_symm (I := I) g₀ (T - T') x (B i : E) (B i : E) (v 1 : E) (v 0 : E)
 
 /-- **(Posited deep covariant bridge 1 — the chart cometric double-trace read-off.)**
 
