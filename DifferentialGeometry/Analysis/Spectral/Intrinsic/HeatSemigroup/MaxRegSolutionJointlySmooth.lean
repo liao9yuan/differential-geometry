@@ -247,14 +247,26 @@ private theorem forcingSmoothCoordsRealize
             (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
               (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
               (Nat.cast_nonneg a) (timeH1.toFun u t)) i =
-          perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (f i) t) := by
+          perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (f i) t) ∧
+      (∀ i, (fun t => (gforce t).coeff i) =ᵐ[timeMeasure T] f i) := by
   classical
   -- The deep parabolic time-bootstrap: a `C∞`-in-time forcing-coordinate family `f`,
   -- a time-continuous `Hᵃ`-representative `F` of `gforce` whose `i`-th mode coordinate is
   -- the smooth `f i` on `[0,T]`, and the all-order time-jet spectral-mass majorant.
   obtain ⟨f, F, hf_smooth, hf_mass, hF_rep, hF_coord_cont, hF_sum, hF_coeff⟩ :=
     forcingSmoothTimeCoords (I := I) (M := M) g₀ g_bg a ha_super hT hT1 gforce hforce
-  refine ⟨f, hf_smooth, hf_mass, ?_⟩
+  -- The forcing-coordinate a.e. link: `(gforce t).coeff i = f i t` a.e., from the
+  -- everywhere representative `gforce =ᵐ F` and the slab coordinate identity
+  -- `(F t).coeff i = f i t`.
+  have hforce_coord : ∀ i, (fun t => (gforce t).coeff i) =ᵐ[timeMeasure T] f i := by
+    intro i
+    have hrep_coeff : (fun t => (gforce t).coeff i) =ᵐ[timeMeasure T]
+        (fun t => (F t).coeff i) := hF_rep.fun_comp (fun S => S.coeff i)
+    refine hrep_coeff.trans ?_
+    filter_upwards [MeasureTheory.ae_restrict_mem (μ := MeasureTheory.volume)
+      (measurableSet_Icc (a := (0 : ℝ)) (b := T))] with s hs
+    exact hF_coeff s hs i
+  refine ⟨f, hf_smooth, hf_mass, ?_, hforce_coord⟩
   set h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc
   -- The public every-time spectral-coordinate bridge with the continuous representative
   -- `F`: it realizes the solution-value coordinate as `perModeConv λᵢ φᵢ`, with `φᵢ` the
@@ -278,6 +290,47 @@ private theorem forcingSmoothCoordsRealize
     (measurableSet_Icc (a := (0 : ℝ)) (b := T))] with s hs
   rw [Set.IccExtend_of_mem hT.le _ hs, hF_coeff s hs i]
 
+/-- **DEEP ANALYTIC INPUT (horizon, continuity) — the order-`(a+2)` time-continuity of
+the realized smooth-representative field.**
+
+For a time-smooth spectral family whose order-`0` `L²` eigen-coordinates of the smooth
+representative `F t` are the `C∞`-in-time scalars `φ i t` on the closed slab (`hcoeff`),
+with the all-order time-jet spectral-mass majorant (`hmodemass`), the order-`(a+2)`
+spectral-embedding field `t ↦ smoothCcToTensorHs g₀ (a+2) (F t)` is continuous in time on
+the closed slab `Icc 0 T₁`.
+
+This is the **continuity analogue** of the joint chart-Gram interior regularity
+`realizedFamily_jointChartGramSmooth` (and of the order-`(a+2)` smallness horizon
+`realizedSol_solField_smallnessHorizon_Ha2`): both are the Weierstrass `M`-test on the
+order-`(a+2)` `Hˢ`-norm series `∑ᵢ tensorSobolevWeight i (a+2) · (φ i t)²` fed the
+continuity of each mode `φ i` and the single uniform-in-`t` summable square-majorant
+`hmodemass 0 (a+2)`.  The order-`(a+2)` topology is genuinely stronger than the `L²`
+topology of the file's existing `hF_cont`, so this is the genuine parabolic order-`(a+2)`
+time-regularity of the realized field, not a consequence of the `L²`-continuity.
+
+DEFERRED (honest `sorry`; consumers transitively depend on `sorryAx`).  This is the
+order-`(a+2)` parabolic time-regularity content (the time-continuity of the realized field
+up to `t = 0` in the full quasilinear order). -/
+private theorem realizedSol_solField_continuousOn_Ha2
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T₁ : ℝ} (hT₁_pos : 0 < T₁)
+    (F : ℝ → SmoothCcTensor g₀ 0 2)
+    (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
+    (hφ_smooth : ∀ i, ContDiff ℝ ∞ (φ i))
+    (hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T₁,
+      ∀ (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2),
+        tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t)) i = φ i t)
+    (hmodemass : ∀ (k : ℕ) (σ : ℝ), 0 ≤ σ →
+      ∃ Cmaj : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable Cmaj ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T₁,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv k (φ i) t) ^ 2 ≤ Cmaj i) :
+    ContinuousOn
+      (fun t : ℝ => smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t))
+      (Set.Icc (0 : ℝ) T₁) :=
+  sorry
+
 set_option linter.unusedVariables false in
 /-- **DEEP ANALYTIC INPUT (2/2a) — the pointwise forcing-coordinate identification.**
 
@@ -298,16 +351,24 @@ representative of `gforce`'s `i`-th coordinate, agrees a.e. with the `i`-th coor
 `deTurckSmoothN (F t)` (`deTurckSobolevNHa2_eq_smoothN`), whose coordinate is exactly the
 remainder coordinate (`deTurckSmoothN_coeff`).  Upgrading the a.e. agreement to the
 everywhere-on-interior identity uses the order-`(a+2)` time-continuity of the realized
-solution field up to `t = 0` (the same classical parabolic interior smoothing carried up to
-the smooth datum that supplies `realizedSol_solField_smallnessHorizon_Ha2`); the smooth
-`f i` is continuous, and `t ↦ deTurckSmoothN (F t).coeff i` is continuous on the interior
-through the continuity of the realized field, so the two continuous functions agreeing a.e.
-agree everywhere on the open interior, hence at every `t ∈ Ico 0 T₁`.
+solution field up to `t = 0`; the smooth `f i` is continuous, and
+`t ↦ deTurckSmoothN (F t).coeff i` is continuous on the slab through the continuity of the
+realized field, so the two continuous functions agreeing a.e. agree everywhere on the open
+interior, hence at every `t ∈ Ico 0 T₁` (`MeasureTheory.Measure.eqOn_Ico_of_ae_eq`).
 
-DEFERRED (honest `sorry`; consumers transitively depend on `sorryAx`).  This is the genuine
-deep parabolic-regularity content (the order-`(a+2)` time-continuity of the Duhamel solution
-field up to `t = 0`), the soundness-side analogue of the smoothness horizon
-`realizedSol_solField_smallnessHorizon_Ha2`. -/
+PROVEN as glue: the a.e. forcing-coordinate identity is the forcing-coordinate link
+`hforce_coord` (`f i =ᵐ (gforce).coeff i`) composed with `hforce`
+(`gforce =ᵐ deTurckSobolevNHa2 ∘ solField`) and the slab order-`(a+2)` field identity
+`solField t =ᵐ smoothCcToTensorHs g₀ (a+2) (F t)` (classical-stacking of the per-mode
+structural integral identities `maxRegDuhamelSolField_coeff_ae` (`u₀ = 0`) and
+`recentredCarrier_toFun_coeff`, pinned through `h_pin`), then `deTurckSobolevNHa2_eq_smoothN`
+on the ball; the right-side continuity is the order-`(a+2)` field continuity
+`realizedSol_solField_continuousOn_Ha2` composed with the `deTurckSobolevNHa2` Lipschitz
+(`deTurckSobolevNHa2_lipschitzWith`) and the continuous coordinate functional `coeffCLM`.  The
+only deep input transited is the posited order-`(a+2)` field continuity leaf
+`realizedSol_solField_continuousOn_Ha2` (the soundness-side analogue of the smoothness
+horizon `realizedSol_solField_smallnessHorizon_Ha2`); consumers transitively depend on its
+`sorryAx`. -/
 private theorem realizedForcingCoord_eq_smoothN
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
@@ -333,6 +394,13 @@ private theorem realizedForcingCoord_eq_smoothN
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
             (Nat.cast_nonneg a) (timeH1.toFun u t)) i =
         perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (f i) t)
+    (hf_smooth : ∀ i, ContDiff ℝ ∞ (f i))
+    (hf_mass : ∀ (j : ℕ) (τ : ℝ), 0 ≤ τ →
+      ∃ B : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable B ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i τ *
+              (iteratedDeriv j (f i) t) ^ 2 ≤ B i)
+    (hforce_coord : ∀ i, (fun t => (gforce t).coeff i) =ᵐ[timeMeasure T] f i)
     (h_pin : ∀ t ∈ Set.Icc (0 : ℝ) T₁,
       SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t) =
         tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
@@ -346,8 +414,180 @@ private theorem realizedForcingCoord_eq_smoothN
       f i t = tensorL2Coeff (I := I) (M := M)
           (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
           (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
-            (deTurckSmoothRemainder (I := I) (M := M) g₀ g_bg (F t) hδ_lt (hδ t))) i :=
-  sorry
+            (deTurckSmoothRemainder (I := I) (M := M) g₀ g_bg (F t) hδ_lt (hδ t))) i := by
+  classical
+  set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc
+  haveI : Countable (TensorEigenIdx (I := I) (M := M) g₀ 0 2) :=
+    countable_tensorEigenIdx (I := I) (M := M)
+      (g := g₀) (r := 0) (s := 2) hc
+  -- The time-smooth eigen-coordinate family `φ i = perModeConv λᵢ (f i)` of the solution.
+  set φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ :=
+    fun i => perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (f i) with hφ_def
+  have hφ_smooth : ∀ i, ContDiff ℝ ∞ (φ i) := fun i =>
+    perModeConv_contDiff_of_contDiff ⊤ _ (f i) (hf_smooth i)
+  -- The eigen-coordinate identity on the closed slab `Icc 0 T₁`:
+  -- `tensorL2Coeff (toL2 (F t)) i = φ i t` (from `h_pin` + `hf_id`).
+  have hcoeff : ∀ t ∈ Set.Icc (0 : ℝ) T₁,
+      ∀ i, tensorL2Coeff (I := I) (M := M) hc
+          (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t)) i = φ i t := by
+    intro t ht i
+    rw [h_pin t ht, tensorHsToL2_tensorL2Coeff]
+    have ht_icc : t ∈ Set.Icc (0 : ℝ) T := ⟨ht.1, le_trans ht.2 hT₁_le⟩
+    have hid := hf_id t ht_icc i
+    rw [tensorHsToL2_tensorL2Coeff] at hid
+    rw [hid]
+  -- The all-order time-jet mode mass of `φ`, on the slab `Icc 0 T₁` (restricted from `[0,T]`).
+  have hmodemass : ∀ (k : ℕ) (σ : ℝ), 0 ≤ σ →
+      ∃ Cmaj : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable Cmaj ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T₁,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv k (φ i) t) ^ 2 ≤ Cmaj i := by
+    intro k σ hσ
+    obtain ⟨Cmaj, hCmaj_sum, hCmaj_le⟩ :=
+      perModeConv_allOrder_timeDeriv_spectralMass_le (I := I) (M := M)
+        (g := g₀) (r := 0) (s := 2) (T := T) hT.le f hf_smooth hf_mass k σ hσ
+    refine ⟨Cmaj, hCmaj_sum, fun i t ht => ?_⟩
+    exact hCmaj_le i t ⟨ht.1, le_trans ht.2 hT₁_le⟩
+  -- DEEP INPUT (continuity): the order-`(a+2)` time-continuity of the smooth-representative
+  -- field `t ↦ smoothCcToTensorHs g₀ (a+2) (F t)` on the closed slab.
+  have hfield_cont : ContinuousOn
+      (fun t : ℝ => smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t))
+      (Set.Icc (0 : ℝ) T₁) :=
+    realizedSol_solField_continuousOn_Ha2 (I := I) (M := M) g₀ a hT₁_pos F φ hφ_smooth
+      hcoeff hmodemass
+  -- The order-`(a+2)` field identity on the slab: the genuine Duhamel solution field
+  -- equals (a.e.) the order-`(a+2)` embedding of the smooth representative `F t`.  This is
+  -- the classical-stacking consequence of the per-mode structural integral identities
+  -- `maxRegDuhamelSolField_coeff_ae` (`u₀ = 0`) and `recentredCarrier_toFun_coeff`, pinned
+  -- through `h_pin`/`hf_id`.
+  have hu_eq : u = recentredCarrier (I := I) (M := M) hT hT1
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce := by
+    refine timeH1.ext ?_ ?_
+    · have hinit : u.init = 0 := by
+        rw [← timeH1.trace0_apply (X := tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) (T := T) u]
+        exact htrace
+      rw [hinit]
+      simp only [recentredCarrier, timeH1.init_mk]
+    · rw [hduh]
+      simp only [recentredCarrier, timeH1.deriv_mk]
+  have hfield_ae : (fun t => maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+        (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)
+      =ᵐ[(MeasureTheory.volume : MeasureTheory.Measure ℝ).restrict (Set.Icc (0 : ℝ) T₁)]
+      (fun t => smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t)) := by
+    -- Per-mode a.e. identity on the slab, assembled across the countable eigen-index.
+    have hper : ∀ i, ∀ᵐ t ∂((MeasureTheory.volume : MeasureTheory.Measure ℝ).restrict
+          (Set.Icc (0 : ℝ) T₁)),
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t).coeff i =
+          (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t)).coeff i := by
+      intro i
+      -- `(solField t).coeff i =ᵐ ∫₀ᵗ deriv.coeff i` (the `u₀ = 0` structural identity),
+      -- restricted from `Icc 0 T` to the slab `Icc 0 T₁`.
+      have hsub : Set.Icc (0 : ℝ) T₁ ⊆ Set.Icc (0 : ℝ) T :=
+        Set.Icc_subset_Icc le_rfl hT₁_le
+      have hsol := MeasureTheory.ae_restrict_of_ae_restrict_of_subset (μ := MeasureTheory.volume) hsub
+        (maxRegDuhamelSolField_coeff_ae (I := I) (M := M)
+          (h_compact := hc) (a := (a : ℝ)) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce i)
+      filter_upwards [hsol, MeasureTheory.ae_restrict_mem (μ := MeasureTheory.volume) measurableSet_Icc]
+        with t htsol htmem
+      have htmem' : t ∈ Set.Icc (0 : ℝ) T := hsub htmem
+      rw [htsol, tensorHs.zero_coeff, zero_add]
+      -- `(u.toFun t).coeff i = ∫₀ᵗ deriv.coeff i` (the carrier integral identity).
+      have hcarr : (timeH1.toFun u t).coeff i =
+          ∫ s in (0 : ℝ)..t, ((maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce).deriv s).coeff i := by
+        rw [hu_eq]
+        exact recentredCarrier_toFun_coeff (I := I) (M := M) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce i htmem'
+      rw [← hcarr, smoothCcToTensorHs_coeff, h_pin t htmem, tensorHsToL2_tensorL2Coeff]
+    rw [← MeasureTheory.ae_all_iff] at hper
+    filter_upwards [hper] with t ht
+    exact tensorHs.ext (funext fun i => ht i)
+  -- Assemble: the a.e. forcing-coordinate identity, then the a.e.→everywhere upgrade.
+  -- Fix the eigen-index and prove `EqOn (f i) RHS` on `Ico 0 T₁`.
+  intro t₀ ht₀ i
+  set RHS : ℝ → ℝ := fun t => tensorL2Coeff (I := I) (M := M) hc
+      (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+        (deTurckSmoothRemainder (I := I) (M := M) g₀ g_bg (F t) hδ_lt (hδ t))) i
+    with hRHS_def
+  -- RHS equals the eigen-coordinate of `deTurckSmoothN g₀ g_bg a (F t)`.
+  have hRHS_smoothN : ∀ t, RHS t =
+      (deTurckSmoothN (I := I) (M := M) g₀ g_bg a (F t) hδ_lt (hδ t)).coeff i := by
+    intro t; rw [hRHS_def, deTurckSmoothN_coeff]
+  -- On the slab the smooth nonlinearity coincides with `deTurckSobolevNHa2` of the embedding.
+  have heqN : ∀ t ∈ Set.Ico (0 : ℝ) T₁,
+      (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t))).coeff i = RHS t := by
+    intro t ht
+    rw [hRHS_smoothN t,
+      deTurckSobolevNHa2_eq_smoothN (I := I) (M := M) g₀ g_bg a ha_super ha_even (F t)
+        hδ_lt (hδ t) (hball t ht)]
+  -- RHS continuity on `Ico 0 T₁`: via the field continuity and the `deTurckSobolevNHa2`
+  -- Lipschitz, read off through the continuous coordinate functional `coeffCLM`.
+  obtain ⟨KN, hKN⟩ := deTurckSobolevNHa2_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super ha_even
+  have hRHS_cont : ContinuousOn RHS (Set.Ico (0 : ℝ) T₁) := by
+    have hcomp : ContinuousOn
+        (fun t => (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+          (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t))).coeff i)
+        (Set.Icc (0 : ℝ) T₁) := by
+      have hN_cont : ContinuousOn
+          (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+            (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t)))
+          (Set.Icc (0 : ℝ) T₁) :=
+        hKN.continuous.comp_continuousOn hfield_cont
+      exact (coeffCLM (I := I) (M := M) (g := g₀) (r := 0) (s := 2) (σ := (a : ℝ)) i).continuous
+        |>.comp_continuousOn hN_cont
+    refine (hcomp.mono Set.Ico_subset_Icc_self).congr (fun t ht => ?_)
+    exact (heqN t ht).symm
+  -- LHS continuity: `f i` is `C∞`, hence continuous.
+  have hLHS_cont : ContinuousOn (f i) (Set.Ico (0 : ℝ) T₁) :=
+    (hf_smooth i).continuous.continuousOn
+  -- The a.e. agreement of `f i` with `RHS` on `Ico 0 T₁`, from the forcing chain + field id.
+  have hae : (f i) =ᵐ[(MeasureTheory.volume : MeasureTheory.Measure ℝ).restrict (Set.Ico (0 : ℝ) T₁)] RHS := by
+    -- `f i =ᵐ (gforce).coeff i` (forcing link, on `timeMeasure T`).
+    have h1 : f i =ᵐ[timeMeasure T] (fun t => (gforce t).coeff i) := (hforce_coord i).symm
+    -- `(gforce).coeff i =ᵐ (deTurckSobolevNHa2 (solField)).coeff i` (from `hforce`).
+    have h2 : (fun t => (gforce t).coeff i) =ᵐ[timeMeasure T]
+        (fun t => (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+          (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)).coeff i) :=
+      hforce.fun_comp (fun S => S.coeff i)
+    -- Restrict `f i =ᵐ (deTurckSobolevNHa2 (solField)).coeff i` from `timeMeasure T =
+    -- volume.restrict (Icc 0 T)` down to the slab `Icc 0 T₁`.
+    have hsub₁ : Set.Icc (0 : ℝ) T₁ ⊆ Set.Icc (0 : ℝ) T :=
+      Set.Icc_subset_Icc le_rfl hT₁_le
+    have h12 : f i =ᵐ[(MeasureTheory.volume : MeasureTheory.Measure ℝ).restrict (Set.Icc (0 : ℝ) T₁)]
+        (fun t => (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+          (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)).coeff i) :=
+      MeasureTheory.ae_restrict_of_ae_restrict_of_subset (μ := MeasureTheory.volume) hsub₁ (h1.trans h2)
+    -- `(deTurckSobolevNHa2 (solField)).coeff i =ᵐ (deTurckSobolevNHa2 (embedding)).coeff i`
+    -- on the slab (from the field a.e.-identity `hfield_ae`).
+    have h3 : (fun t => (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+          (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+            (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)).coeff i)
+        =ᵐ[(MeasureTheory.volume : MeasureTheory.Measure ℝ).restrict (Set.Icc (0 : ℝ) T₁)]
+        (fun t => (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+          (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t))).coeff i) :=
+      hfield_ae.fun_comp (fun S =>
+        (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a S).coeff i)
+    have hchain : f i =ᵐ[(MeasureTheory.volume : MeasureTheory.Measure ℝ).restrict (Set.Icc (0 : ℝ) T₁)]
+        (fun t => (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+          (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t))).coeff i) :=
+      h12.trans h3
+    -- Restrict from `Icc 0 T₁` to `Ico 0 T₁`, then use `heqN` to replace by `RHS`.
+    have hchain' : f i =ᵐ[(MeasureTheory.volume : MeasureTheory.Measure ℝ).restrict (Set.Ico (0 : ℝ) T₁)]
+        (fun t => (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+          (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t))).coeff i) :=
+      MeasureTheory.ae_restrict_of_ae_restrict_of_subset (μ := MeasureTheory.volume) Set.Ico_subset_Icc_self hchain
+    refine hchain'.trans ?_
+    filter_upwards [MeasureTheory.ae_restrict_mem (μ := MeasureTheory.volume) measurableSet_Ico] with t ht
+    exact heqN t ht
+  -- The a.e.→everywhere upgrade on the `Ico 0 T₁` slab.
+  have heqOn : Set.EqOn (f i) RHS (Set.Ico (0 : ℝ) T₁) :=
+    MeasureTheory.Measure.eqOn_Ico_of_ae_eq (μ := (MeasureTheory.volume : MeasureTheory.Measure ℝ)) hae hLHS_cont hRHS_cont
+  exact heqOn ht₀
 
 set_option linter.unusedVariables false in
 /-- **DEEP ANALYTIC INPUT (2/2) — the realized perturbation solves the Ricci–DeTurck
@@ -448,7 +688,7 @@ private theorem realizedFamily_flowDeriv
   classical
   set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc
   -- DEEP INPUT 1: the smooth forcing eigen-coordinate family realizing the solution value.
-  obtain ⟨f, hf_smooth, hf_mass, hf_id⟩ :=
+  obtain ⟨f, hf_smooth, hf_mass, hf_id, hforce_coord⟩ :=
     forcingSmoothCoordsRealize (I := I) (M := M) g₀ g_bg a ha_super hT hT1 u gforce
       hduh hforce htrace
   -- The smooth eigen-coordinate family `φ i = perModeConv λᵢ (f i)` of the solution.
@@ -502,7 +742,8 @@ private theorem realizedFamily_flowDeriv
       exact h
   -- The forcing-coordinate identification (deep input 2a).
   have hforcing := realizedForcingCoord_eq_smoothN (I := I) (M := M) g₀ g_bg a ha_super
-    ha_even hT hT1 hT₁_pos hT₁_le u gforce hduh hforce htrace F hδ_lt hδ f hf_id h_pin hball
+    ha_even hT hT1 hT₁_pos hT₁_le u gforce hduh hforce htrace F hδ_lt hδ f hf_id hf_smooth
+    hf_mass hforce_coord h_pin hball
   -- The lossy `C⁰`-control constant `C` (for the per-mode scalar bound at order `a`).
   have ha_lossy : 2 * Module.finrank ℝ E + 4 ≤ a := by omega
   -- The Weyl tail exponent: a single fixed even order `sW` strictly above `weylSobolevExp`.
@@ -881,7 +1122,7 @@ private theorem realizedSol_solField_smallnessHorizon_Ha2
   -- The smooth forcing eigen-coordinate family `f` realizing the solution value, with each
   -- `f i` `C∞`, the all-order time-jet mass majorant `hf_mass`, and the coordinate identity
   -- `tensorL2Coeff (tensorHsToL2 (u.toFun t)) i = perModeConv λᵢ (f i) t` on `[0,T]`.
-  obtain ⟨f, hf_smooth, hf_mass, hf_id⟩ :=
+  obtain ⟨f, hf_smooth, hf_mass, hf_id, _⟩ :=
     forcingSmoothCoordsRealize (I := I) (M := M) g₀ g_bg a ha_super hT hT1 u gforce
       hduh hforce htrace
   -- The order-`(a+2)` mass majorant: the `(j, τ) = (0, a+2)` instance of `hf_mass`.
@@ -971,7 +1212,7 @@ theorem maxreg_solution_jointly_smooth_representative
   have hinit : u.init = 0 := by have := htrace; rwa [timeH1.trace0_apply] at this
   have hu0 : timeH1.toFun u 0 = 0 := by rw [timeH1.toFun_zero, hinit]
   -- DEEP INPUT 1: the smooth forcing eigen-coordinate family realizing the solution value.
-  obtain ⟨f, hf_smooth, hf_mass, hf_id⟩ :=
+  obtain ⟨f, hf_smooth, hf_mass, hf_id, _⟩ :=
     forcingSmoothCoordsRealize (I := I) (M := M) g₀ g_bg a ha_super hT hT1 u gforce
       hduh hforce htrace
   -- The smooth eigen-coordinate family `φ i = perModeConv λᵢ (f i)` of the solution.
