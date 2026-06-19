@@ -4,6 +4,7 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnDiffPa
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValue
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckMetricArmCoeffField
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SmoothParametricCoeffIntegral
+import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSStrictParabolic
 
 /-!
 # The Ricci-tensor difference of two realized metrics: the Palatini telescope and its `appCc` grading
@@ -291,21 +292,24 @@ one-parameter family `gfam` of positive-definite metrics such that:
 * `h` is the realized section-difference chart velocity at `(x, s)` (`IsRealizedChartVelocity`): near
   `extChartAt I x x` the cutoff `χ ≡ 1`, so `h = V`, and there `V` is the constant `σ`-derivative of
   the affine realized chart Gram (`realizedFam_chartGramOnE`);
-* (locality) for every pair `(i, k)`, the chart-Ricci read-off at the single chart point
-  `extChartAt I x x` of the *translated* cutoff family `gfam` agrees, on a whole neighbourhood of
-  `σ = 0`, with that of the *re-based realized* family `σ ↦ realizedFam (s + σ)`, because near `x`
-  the cutoff `χ ≡ 1` makes `gfam σ` and `realizedFam (s + σ)` have the *same chart Gram on a
-  neighbourhood of `extChartAt I x x`*, hence the same chart Christoffel/Riemann/Ricci jet there.
+* (locality) for every pair `(i, k)`, the chart-Ricci read-off **and** the combined Ricci–DeTurck
+  chart read-off `chartDeTurckRicciRHS (· ) g_bg` at the single chart point `extChartAt I x x` of the
+  *translated* cutoff family `gfam` agree, on a whole neighbourhood of `σ = 0`, with those of the
+  *re-based realized* family `σ ↦ realizedFam (s + σ)`, because near `x` the cutoff `χ ≡ 1` makes
+  `gfam σ` and `realizedFam (s + σ)` have the *same chart Gram on a neighbourhood of `extChartAt I x x`*,
+  hence the same chart Christoffel/Riemann/Ricci jet AND the same chart DeTurck-vector-field jet there
+  (both `chartRicciTensor` and `chartDeTurckRicciRHS = −2·chartRicciTensor + chartLieDeTurckComp` read
+  only the chart-Gram jet near `x`, so the chart-Gram agreement transfers both).
 
 This is the classical "extend a local chart-Gram perturbation to a global positive-definite metric
 family" construction (the cutoff realiser, parallel to `realize`/`realizedMetricPathOpen`), packaged
-together with its base-point chart-Ricci locality; it is not yet on disk and is *posited* here, to be
-discharged by recursing into it.  It genuinely constrains `(h, gfam)` to be the cutoff perturbation
-family of `g_s` with velocity `h` matching the realized chart velocity near `x`, so it is non-vacuous:
-the zero perturbation (`h = 0`, `gfam ≡ g_s`) fails it wherever the realized chart velocity `V` is
-nonzero near `x`. -/
+together with its base-point chart-Ricci/Ricci–DeTurck locality; it is not yet on disk and is *posited*
+here, to be discharged by recursing into it.  It genuinely constrains `(h, gfam)` to be the cutoff
+perturbation family of `g_s` with velocity `h` matching the realized chart velocity near `x`, so it is
+non-vacuous: the zero perturbation (`h = 0`, `gfam ≡ g_s`) fails it wherever the realized chart velocity
+`V` is nonzero near `x`. -/
 theorem exists_rebased_cutoffMetricPerturbationFamily
-    (g₀ : SmoothRiemannianMetric I M)
+    (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -319,27 +323,57 @@ theorem exists_rebased_cutoffMetricPerturbationFamily
           (fun σ : ℝ => chartRicciTensor (I := I) (gfam σ) x i k (extChartAt I x x))
             =ᶠ[nhds (0 : ℝ)]
               (fun σ : ℝ => chartRicciTensor (I := I)
+                (realizedFam (I := I) g₀ T T' hδ hδ' (s + σ)) x i k (extChartAt I x x))) ∧
+        (∀ (i k : Fin (Module.finrank ℝ E)),
+          (fun σ : ℝ => DifferentialGeometry.PDE.RicciFlow.chartFComponentOnE (I := I)
+              (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg) (gfam σ) x i k
+              (extChartAt I x x))
+            =ᶠ[nhds (0 : ℝ)]
+              (fun σ : ℝ => DifferentialGeometry.PDE.RicciFlow.chartFComponentOnE (I := I)
+                (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg)
                 (realizedFam (I := I) g₀ T T' hδ hδ' (s + σ)) x i k (extChartAt I x x))) :=
   sorry
 
-/-- **The re-basing of the chart-Ricci `s`-derivative at an interior parameter.**
+/-- **The realized combined Ricci–DeTurck chart sum along the metric path.**
+
+For the realized metric path `g_s = realizedFam g₀ T T' s`, the `chartModelBasis`-trace read-off, at the
+single chart point `extChartAt I x x`, of the chart `(i, k)`-components of the **combined** Ricci–DeTurck
+right-hand side `deTurckRicciRHS g_bg (g_s)` (the operator `g ↦ −2 Rc(g) + 𝓛_{W(g, g_bg)} g`), weighted
+by the chart components of the tangent pair `(v, w)`.  This is the combined-operator analogue of
+`realizedRicciChartSum` (the bare `−2 Rc` arm), whose `s`-derivative the re-basing reads off as the
+gauge-cancelled rough Laplacian. -/
+def realizedDeTurckRicciChartSum (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (v w : TangentSpace I x) (s : ℝ) : ℝ :=
+  ∑ i, ∑ k,
+    ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
+      DifferentialGeometry.PDE.RicciFlow.chartFComponentOnE (I := I)
+        (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg)
+        (realizedFam (I := I) g₀ T T' hδ hδ' s) x i k (extChartAt I x x)
+
+/-- **The re-basing of the combined Ricci–DeTurck chart `s`-derivative at an interior parameter.**
 
 For the realized metric path `g_s = realizedFam g₀ T T' s` and every interior parameter `s ∈ (0,1)`,
-the `s`-derivative of the realized chart-Ricci sum `deriv (realizedRicciChartSum) s` equals the
-`chartModelBasis`-trace read-off, at the re-base metric `g_s`, of the on-disk chart Ricci-tensor
-`s`-derivative split `chartRicciSecondOrderPart g_s h + ricciDerivFirstOrderRemainder g_s h`, where `h`
-is the section-difference chart velocity (`IsRealizedChartVelocity`).
+the `s`-derivative of the realized combined chart sum `deriv (realizedDeTurckRicciChartSum) s` equals the
+`chartModelBasis`-trace read-off, at the re-base metric `g_s`, of the on-disk **combined** chart
+second-order split `deTurckRicciRHSChartSecondOrderPart g_s g_bg h +
+metricFamilyDeTurckRicciFirstOrderRemainder g_s g_bg h`, where `h` is the section-difference chart
+velocity (`IsRealizedChartVelocity`).
 
-This is the **re-basing** half of the Ricci-arm linearization, assembled from the cutoff
-metric-perturbation family `exists_rebased_cutoffMetricPerturbationFamily`: the public chart
-Ricci-tensor split `hasDerivAt_chartRicciTensor` (`MetricFamilyChartLinearization`) computes the
-`σ`-derivative at `σ = 0` of `σ ↦ chartRicciTensor (gfam σ) x i k y` for the cutoff family `gfam` of
-`g_s`; by the family's base-point locality this transfers (`HasDerivAt.congr_of_eventuallyEq`) to the
-re-based realized family `σ ↦ chartRicciTensor (realizedFam (s + σ))`, and the translation invariance
-of the derivative (`deriv_comp_const_add`) re-bases it from `σ = 0` of the translated family to `s` of
-`realizedRicciChartSum`. -/
-theorem deriv_realizedRicciChartSum_eq_rebased_chartSymbol
-    (g₀ : SmoothRiemannianMetric I M)
+This is the **re-basing** half of the combined Ricci–DeTurck-arm linearization, assembled from the cutoff
+metric-perturbation family `exists_rebased_cutoffMetricPerturbationFamily`: the metric-family
+chart-linearization keystone `hasDerivAt_chartFComponentOnE_deTurckRicciRHS`
+(`MetricFamilyChartLinearization`) computes the `σ`-derivative at `σ = 0` of
+`σ ↦ chartFComponentOnE (deTurckRicciRHS g_bg) (gfam σ) x i k y` for the cutoff family `gfam` of `g_s`,
+giving the combined second-order part `−2·chartRicciSecondOrderPart + chartDeTurckCorrSecondOrderPart`
+(definitionally `deTurckRicciRHSChartSecondOrderPart`) plus the genuinely-first-order
+`metricFamilyDeTurckRicciFirstOrderRemainder`; by the family's base-point combined locality this transfers
+(`HasDerivAt.congr_of_eventuallyEq`) to the re-based realized family, and the translation invariance of
+the derivative (`HasDerivAt.comp_sub_const`) re-bases it from `σ = 0` of the translated family to `s`. -/
+theorem deriv_realizedDeTurckRicciChartSum_eq_rebased_chartSymbol
+    (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -348,17 +382,17 @@ theorem deriv_realizedRicciChartSum_eq_rebased_chartSymbol
     {s : ℝ} (hs : s ∈ Set.Ioo (0 : ℝ) 1) (x : M) (v w : TangentSpace I x) :
     ∃ h : ChartMetricPerturbation E,
       IsRealizedChartVelocity (I := I) g₀ T T' hδ hδ' x s h ∧
-        deriv (realizedRicciChartSum (I := I) g₀ T T' hδ hδ' x v w) s =
+        deriv (realizedDeTurckRicciChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w) s =
           ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
             ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
-              (chartRicciSecondOrderPart (I := I)
-                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x) +
-                ricciDerivFirstOrderRemainder (I := I)
-                  (realizedFam (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x)) := by
+              (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHSChartSecondOrderPart (I := I)
+                  (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg h x i k (extChartAt I x x) +
+                DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.metricFamilyDeTurckRicciFirstOrderRemainder
+                  (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x)) := by
   classical
-  -- The cutoff metric-perturbation family of `g_s`, its velocity-pin, and its base-point locality.
-  obtain ⟨h, gfam, hfam, hvel, hloc⟩ :=
-    exists_rebased_cutoffMetricPerturbationFamily (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' hs x
+  -- The cutoff metric-perturbation family of `g_s`, its velocity-pin, and its base-point combined locality.
+  obtain ⟨h, gfam, hfam, hvel, _hlocRic, hloc⟩ :=
+    exists_rebased_cutoffMetricPerturbationFamily (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' hs x
   refine ⟨h, hvel, ?_⟩
   -- Abbreviate the re-base metric and the fixed chart-evaluation point.
   set gs : SmoothRiemannianMetric I M := realizedFam (I := I) g₀ T T' hδ hδ' s with hgs
@@ -366,86 +400,121 @@ theorem deriv_realizedRicciChartSum_eq_rebased_chartSymbol
   -- The chart-interior membership of the base chart point (boundaryless atlas).
   have hy : y₀ ∈ interior (extChartAt I x).target :=
     extChartAt_target_subset_interior_of_boundaryless (I := I) x (mem_extChartAt_target x)
-  -- Per-summand: `t ↦ chartRicciTensor (realizedFam t) x i k y₀` has, at `s`, the chart-symbol split.
+  -- The combined second-order part value, as the keystone derivative target.
+  set Pval : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ :=
+    fun i k => DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHSChartSecondOrderPart (I := I)
+        gs g_bg h x i k y₀ +
+      DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.metricFamilyDeTurckRicciFirstOrderRemainder
+        (I := I) gs g_bg x h i k y₀ with hPval
+  -- Per-summand: `t ↦ chartFComponentOnE (deTurckRicciRHS g_bg) (realizedFam t) x i k y₀` has, at `s`,
+  -- the combined chart second-order split.
   have hper : ∀ i k : Fin (Module.finrank ℝ E),
-      HasDerivAt (fun t : ℝ => chartRicciTensor (I := I)
+      HasDerivAt (fun t : ℝ => DifferentialGeometry.PDE.RicciFlow.chartFComponentOnE (I := I)
+          (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg)
           (realizedFam (I := I) g₀ T T' hδ hδ' t) x i k y₀)
-        (chartRicciSecondOrderPart (I := I) gs x h i k y₀ +
-          ricciDerivFirstOrderRemainder (I := I) gs x h i k y₀) s := by
+        (Pval i k) s := by
     intro i k
-    -- The chart-Ricci `σ`-derivative split at `σ = 0` for the cutoff family `gfam` of `g_s`.
+    -- The combined chart `σ`-derivative split at `σ = 0` for the cutoff family `gfam` of `g_s`.
     have hsplit : HasDerivAt
-        (fun σ : ℝ => chartRicciTensor (I := I) (gfam σ) x i k y₀)
-        (chartRicciSecondOrderPart (I := I) gs x h i k y₀ +
-          ricciDerivFirstOrderRemainder (I := I) gs x h i k y₀) 0 :=
-      hasDerivAt_chartRicciTensor (I := I) hfam i k hy
-    -- Transfer to the re-based realized family by the family's base-point locality.
+        (fun σ : ℝ => DifferentialGeometry.PDE.RicciFlow.chartFComponentOnE (I := I)
+          (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg) (gfam σ) x i k y₀)
+        (((-2 : ℝ) * chartRicciSecondOrderPart (I := I) gs x h i k y₀ +
+            DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.chartDeTurckCorrSecondOrderPart
+              (I := I) gs g_bg x h i k y₀) +
+          DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.metricFamilyDeTurckRicciFirstOrderRemainder
+            (I := I) gs g_bg x h i k y₀) 0 :=
+      DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.hasDerivAt_chartFComponentOnE_deTurckRicciRHS
+        (I := I) hfam g_bg i k hy
+    -- The keystone derivative is exactly `Pval i k` (unfold the combined second-order part).
+    have hsplit' : HasDerivAt
+        (fun σ : ℝ => DifferentialGeometry.PDE.RicciFlow.chartFComponentOnE (I := I)
+          (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg) (gfam σ) x i k y₀)
+        (Pval i k) 0 := by
+      rw [hPval]
+      simp only [DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHSChartSecondOrderPart]
+      exact hsplit
+    -- Transfer to the re-based realized family by the family's base-point combined locality.
     have htrans : HasDerivAt
-        (fun σ : ℝ => chartRicciTensor (I := I)
+        (fun σ : ℝ => DifferentialGeometry.PDE.RicciFlow.chartFComponentOnE (I := I)
+          (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg)
           (realizedFam (I := I) g₀ T T' hδ hδ' (s + σ)) x i k y₀)
-        (chartRicciSecondOrderPart (I := I) gs x h i k y₀ +
-          ricciDerivFirstOrderRemainder (I := I) gs x h i k y₀) 0 :=
-      hsplit.congr_of_eventuallyEq (hloc i k).symm
-    -- Re-base from `σ = 0` of the translated family to `s` of the original via `(· - s)` translation:
-    -- `(σ ↦ G (s + σ)) ∘ (· - s) = G` since `s + (t - s) = t`.
+        (Pval i k) 0 :=
+      hsplit'.congr_of_eventuallyEq (hloc i k).symm
+    -- Re-base from `σ = 0` of the translated family to `s` of the original via `(· - s)` translation.
     have htrans' : HasDerivAt
-        (fun σ : ℝ => chartRicciTensor (I := I)
+        (fun σ : ℝ => DifferentialGeometry.PDE.RicciFlow.chartFComponentOnE (I := I)
+          (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg)
           (realizedFam (I := I) g₀ T T' hδ hδ' (s + σ)) x i k y₀)
-        (chartRicciSecondOrderPart (I := I) gs x h i k y₀ +
-          ricciDerivFirstOrderRemainder (I := I) gs x h i k y₀) (s - s) := by
+        (Pval i k) (s - s) := by
       rwa [sub_self]
     have hsub := htrans'.comp_sub_const s s
-    have hcongr : (fun t : ℝ => chartRicciTensor (I := I)
+    have hcongr : (fun t : ℝ => DifferentialGeometry.PDE.RicciFlow.chartFComponentOnE (I := I)
+          (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg)
           (realizedFam (I := I) g₀ T T' hδ hδ' (s + (t - s))) x i k y₀) =
-        (fun t : ℝ => chartRicciTensor (I := I)
+        (fun t : ℝ => DifferentialGeometry.PDE.RicciFlow.chartFComponentOnE (I := I)
+          (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg)
           (realizedFam (I := I) g₀ T T' hδ hδ' t) x i k y₀) := by
       funext t; rw [add_sub_cancel]
     rwa [hcongr] at hsub
-  -- Differentiate the chart-Ricci sum term by term (`HasDerivAt` of the double sum), then read off
-  -- the derivative; each term is `c · (the per-summand chart-Ricci function)` with derivative `hper`.
+  -- Differentiate the combined chart sum term by term, then read off the derivative.
   have hsum : HasDerivAt
       (fun t : ℝ => ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
         ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
-          chartRicciTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' t) x i k y₀)
+          DifferentialGeometry.PDE.RicciFlow.chartFComponentOnE (I := I)
+            (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg)
+            (realizedFam (I := I) g₀ T T' hδ hδ' t) x i k y₀)
       (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
-        ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
-          (chartRicciSecondOrderPart (I := I) gs x h i k y₀ +
-            ricciDerivFirstOrderRemainder (I := I) gs x h i k y₀)) s := by
+        ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i * (Pval i k)) s := by
     refine HasDerivAt.fun_sum (fun i _ => HasDerivAt.fun_sum (fun k _ => ?_))
     exact (hper i k).const_mul _
-  have hfun : realizedRicciChartSum (I := I) g₀ T T' hδ hδ' x v w =
+  have hfun : realizedDeTurckRicciChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w =
       (fun t : ℝ => ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
         ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
-          chartRicciTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' t) x i k y₀) := by
-    funext t; rw [realizedRicciChartSum, hy₀]
+          DifferentialGeometry.PDE.RicciFlow.chartFComponentOnE (I := I)
+            (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg)
+            (realizedFam (I := I) g₀ T T' hδ hδ' t) x i k y₀) := by
+    funext t; rw [realizedDeTurckRicciChartSum, hy₀]
   rw [hfun]
   exact hsum.deriv
 
-/-- **(Posited deep input — chart-symbol/remainder → intrinsic two-term `appCc` transfer.)**
+/-- **(Posited deep input — combined chart-symbol/remainder → intrinsic two-term `appCc` transfer.)**
 
 For the re-base metric `g_s = realizedFam g₀ T T' s`, the section-difference chart velocity `h`
 (`IsRealizedChartVelocity`), and any base point `x` and tangent pair `v`, the `chartModelBasis`-trace
-read-off of the on-disk chart Ricci-tensor `s`-derivative split `chartRicciSecondOrderPart g_s h +
-ricciDerivFirstOrderRemainder g_s h` equals the intrinsic two-term Lichnerowicz `unitModel`/`appCc`
-read-off of the order-`0` coefficient `ricciArmOrder0Coeff s` (the inverse-Gram slot field of `g_s`) on
-`W₀ = T − T'` plus the order-`2` coefficient `ricciArmOrder2Coeff s` (the combined three-trace field of
-`g_s`) on `W₂ = ∇₀²(T − T')`.
+read-off of the on-disk **combined** Ricci–DeTurck chart `s`-derivative split
+`deTurckRicciRHSChartSecondOrderPart g_s g_bg h + metricFamilyDeTurckRicciFirstOrderRemainder g_s g_bg h`
+equals the intrinsic two-term Lichnerowicz `unitModel`/`appCc` read-off of the order-`0` coefficient
+`ricciArmOrder0Coeff s` (the inverse-Gram slot field of `g_s`) on `W₀ = T − T'` plus the order-`2`
+coefficient `ricciArmOrder2Coeff s` (the combined three-trace field of `g_s`) on `W₂ = ∇₀²(T − T')`.
 
-This is the **chart → intrinsic transfer** half of the Ricci-arm linearization: the chart second-order
-part `chartRicciSecondOrderPart` splits into the four-term `∂²h` principal symbol
-`chartRicciSecondOrderPrincipalSymbol` plus the genuinely-first-order `chartRicciFirstOrderRemainder`
-(`chartRicciSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_source`); the chart `∂²h` of the
-section-difference velocity converts to the covariant Hessian `∇₀²(T − T')` (the chart-vs-covariant
-Hessian conversion `∂²h = ∇₀²h + Christoffel·∂h + ∂Christoffel·h`), so the `½G^{jl}∂²h` symbol becomes the
-combined three-trace `combinedTrace42Model (cometricLmodel g_s)` read off through
-`ricciArmPrincipalCoeff_appCc_eq_combinedTrace` (the order-`2` arm), and the Christoffel-correction `∂h`/`h`
-terms together with `chartRicciFirstOrderRemainder` and `ricciDerivFirstOrderRemainder` fold into the
+This is the **chart → intrinsic transfer** half of the *combined* Ricci–DeTurck-arm linearization.  The
+combined chart second-order part `deTurckRicciRHSChartSecondOrderPart g_s g_bg =
+−2·chartRicciSecondOrderPart g_s + chartDeTurckCorrSecondOrderPart g_s g_bg` splits into the combined
+`∂²h` principal symbol plus the genuinely-first-order remainder (the two on-disk splits
+`chartRicciSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_source` and
+`chartDeTurckCorrSecondOrderPart_eq_principalSymbol_add_remainder_of_mem_source`).  The **DeTurck gauge
+cancels at the chart 2nd-order/symbol level** (`deTurckSymbol_apply_apply_eq_isotropic_of_symm`,
+read off through `deTurckRicciRHS_test_perturbation_readoff`): on a symmetric perturbation the combined
+principal symbol is the *pure rough Laplacian* `½G^{jl}∂_j∂_l h_{ik}` — the non-isotropic gauge terms of
+the bare Ricci symbol are exactly killed by the DeTurck-correction symbol, leaving only the isotropic
+`|ξ|²_{g_s}·t` term.  Hence the chart `∂²h` of the section-difference velocity converts to the covariant
+Hessian `∇₀²(T − T')` (the chart-vs-covariant Hessian conversion `chartCovariantSecondGrad_eq`,
+`∂²h = ∇₀²h + Christoffel·∂h + ∂Christoffel·h`), and the rough Laplacian becomes the combined three-trace
+`combinedTrace42Model (cometricLmodel g_s)` read off through
+`ricciArmPrincipalCoeff_appCc_eq_combinedTrace` (the order-`2` arm, now *genuinely correct* since the
+gauge is gone — `R₂ = ricciArmPrincipalCoeff g₀ g_s` is the true rough-Laplacian coefficient).  The
+Christoffel-correction `∂h`/`h` terms together with the combined first-order remainder fold into the
 order-`0` inverse-Gram slot field `gInvDiffSlotCoeff g₀ g_s` on `T − T'` (NO genuine order-`1` arm).
-These covariant bridges are not yet on disk; the identity is *posited* here, to be discharged by recursing
-into them.  It genuinely constrains the chart read-off to be the two-term intrinsic read-off, so it is
-non-vacuous: the zero coefficients fail it where the chart Ricci derivative is nonzero. -/
+
+The DeTurck cancellation (the KEY UNLOCK; the bare-Ricci version of this transfer is FALSE, since the
+bare Ricci principal symbol carries the non-isotropic gauge terms `½ξ_i(ξt)_k + ½ξ_k(ξt)_i −
+½ξ_iξ_k·tr`) is the proven gauge-cancellation theorem on disk; the remaining chart-vs-covariant Hessian
+and chart-trace-to-`appCc` bridges are not yet on disk.  The identity is *posited* here, to be discharged
+by recursing into those covariant bridges.  It genuinely constrains the combined chart read-off to be the
+two-term intrinsic read-off, so it is non-vacuous: the zero coefficients fail it where the combined chart
+derivative is nonzero. -/
 theorem rebased_chartSymbol_eq_appCc_pointwise
-    (g₀ : SmoothRiemannianMetric I M)
+    (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
@@ -454,10 +523,10 @@ theorem rebased_chartSymbol_eq_appCc_pointwise
     (v : Fin 2 → TangentSpace I x) :
     (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
         ((chartModelBasis E).repr (v 0)) k * ((chartModelBasis E).repr (v 1)) i *
-          (chartRicciSecondOrderPart (I := I)
-              (realizedFam (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x) +
-            ricciDerivFirstOrderRemainder (I := I)
-              (realizedFam (I := I) g₀ T T' hδ hδ' s) x h i k (extChartAt I x x))) =
+          (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHSChartSecondOrderPart (I := I)
+              (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg h x i k (extChartAt I x x) +
+            DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.metricFamilyDeTurckRicciFirstOrderRemainder
+              (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x h i k (extChartAt I x x))) =
       unitModel (I := I) (M := M) g₀ 2
         (appCc (I := I) (M := M) g₀ 2 2
             (ricciArmOrder0Coeff (I := I) g₀ T T' hδ hδ' s)
@@ -467,38 +536,38 @@ theorem rebased_chartSymbol_eq_appCc_pointwise
               (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
   sorry
 
-/-- **The pointwise chart-derivative → intrinsic two-term `appCc` identity of the linearized Ricci
-operator (the deep covariant bridge).**
+/-- **The pointwise combined chart-derivative → intrinsic two-term `appCc` identity (the deep covariant
+bridge, gauge cancelled).**
 
 For the realized metric path `g_s = realizedFam g₀ T T' s` and every interior parameter `s ∈ (0,1)`, the
-`s`-derivative of the realized chart-Ricci sum `deriv (realizedRicciChartSum) s` (which is the chart form
-of the linearized Ricci value `linearizedRicciAt g_s`, `linearizedRicciAt_eq_deriv_chartSum_on_Ioo`)
+`s`-derivative of the realized **combined** Ricci–DeTurck chart sum `deriv (realizedDeTurckRicciChartSum)`
 equals the intrinsic two-term Lichnerowicz `unitModel`/`appCc` read-off of the order-`0` coefficient
 `ricciArmOrder0Coeff s` acting on `W₀ = T − T'` plus the order-`2` coefficient `ricciArmOrder2Coeff s`
 acting on `W₂ = ∇₀²(T − T')`.
 
-This is the irreducible deep mean-value/covariant content of the Ricci-arm linearization, assembled from
-the two posited covariant halves: the **re-basing**
-`deriv_realizedRicciChartSum_eq_rebased_chartSymbol` (the public chart Ricci-tensor split
-`hasDerivAt_chartRicciTensor` re-based to the interior parameter `s` via the translated
-`IsMetricPerturbationFamily` of `g_s`, yielding `deriv = ∑ repr·repr·(chartRicciSecondOrderPart g_s h +
-ricciDerivFirstOrderRemainder g_s h)` with `h` the section-difference chart velocity) and the **chart →
-intrinsic transfer** `rebased_chartSymbol_eq_appCc_pointwise` (the chart principal-symbol closed form
-`ricciSymbolComp_eq_closedForm` and the chart-vs-covariant Hessian conversion folding `½G^{jl}∂²h` into the
-combined three-trace `ricciArmPrincipalCoeff_appCc_eq_combinedTrace` on `∇₀²(T − T')` and the order-`0`
-inverse-Gram slot field `gInvDiffSlotCoeff` on `T − T'`, NO genuine order-`1` arm).  These covariant
-bridges are posited in the two halves, to be discharged by recursing into them.  It genuinely constrains
-the linearized-Ricci value to be the two-term read-off pointwise, so it is non-vacuous: the zero
-coefficients fail it where the linearized Ricci is nonzero. -/
-theorem deriv_realizedRicciChartSum_eq_appCc_pointwise
-    (g₀ : SmoothRiemannianMetric I M)
+This is the irreducible deep mean-value/covariant content of the *combined* Ricci–DeTurck-arm
+linearization, assembled from the two halves: the **re-basing**
+`deriv_realizedDeTurckRicciChartSum_eq_rebased_chartSymbol` (the metric-family chart-linearization
+keystone `hasDerivAt_chartFComponentOnE_deTurckRicciRHS` re-based to the interior parameter `s` via the
+translated `IsMetricPerturbationFamily` of `g_s`, yielding `deriv = ∑ repr·repr·(combined chart
+second-order part + first-order remainder)` with `h` the section-difference chart velocity) and the
+**combined chart → intrinsic transfer** `rebased_chartSymbol_eq_appCc_pointwise` (the DeTurck gauge
+cancels at the chart 2nd-order/symbol level, so the combined principal symbol is the pure rough Laplacian,
+and the chart-vs-covariant Hessian conversion folds `½G^{jl}∂²h` into the combined three-trace
+`ricciArmPrincipalCoeff_appCc_eq_combinedTrace` on `∇₀²(T − T')`, the lower-order terms into the order-`0`
+inverse-Gram slot field on `T − T'`, NO genuine order-`1` arm).  These covariant bridges are posited in
+the transfer half, to be discharged by recursing into them.  It genuinely constrains the combined
+linearized value to be the two-term read-off pointwise, so it is non-vacuous: the zero coefficients fail
+it where the combined linearized operator is nonzero. -/
+theorem deriv_realizedDeTurckRicciChartSum_eq_appCc_pointwise
+    (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
     (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s : ℝ} (hs : s ∈ Set.Ioo (0 : ℝ) 1) (x : M) (v : Fin 2 → TangentSpace I x) :
-    deriv (realizedRicciChartSum (I := I) g₀ T T' hδ hδ' x (v 0) (v 1)) s =
+    deriv (realizedDeTurckRicciChartSum (I := I) g₀ g_bg T T' hδ hδ' x (v 0) (v 1)) s =
       unitModel (I := I) (M := M) g₀ 2
         (appCc (I := I) (M := M) g₀ 2 2
             (ricciArmOrder0Coeff (I := I) g₀ T T' hδ hδ' s)
@@ -507,10 +576,10 @@ theorem deriv_realizedRicciChartSum_eq_appCc_pointwise
               (ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ' s)
               (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
   obtain ⟨h, hh, hderiv⟩ :=
-    deriv_realizedRicciChartSum_eq_rebased_chartSymbol (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' hs x
-      (v 0) (v 1)
+    deriv_realizedDeTurckRicciChartSum_eq_rebased_chartSymbol (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
+      hs x (v 0) (v 1)
   rw [hderiv]
-  exact rebased_chartSymbol_eq_appCc_pointwise (I := I) g₀ T T' hδ hδ' s x h hh v
+  exact rebased_chartSymbol_eq_appCc_pointwise (I := I) g₀ g_bg T T' hδ hδ' s x h hh v
 
 /-- **The per-arm `unitModel`/`appCc` read-off is continuous in `s` whenever the model-fibre value
 of the coefficient family is.**  At a fixed base point `x`, contracted tensor `W`, and tangent
@@ -626,7 +695,7 @@ to be discharged by recursing into them.  The predicate genuinely constrains the
 the actual linearized-Ricci value pointwise, so it is non-vacuous: the zero families fail it where the
 linearized Ricci is nonzero. -/
 theorem exists_linearizedRicci_pointwise_appCc_families
-    (g₀ : SmoothRiemannianMetric I M)
+    (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -634,7 +703,7 @@ theorem exists_linearizedRicci_pointwise_appCc_families
     (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     ∃ (R₀fib : ℝ → SmoothCcTensor g₀ 2 2) (R₂fib : ℝ → SmoothCcTensor g₀ 4 2),
       (∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 → ∀ (x : M) (v : Fin 2 → TangentSpace I x),
-        linearizedRicciAt (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s =
+        deriv (realizedDeTurckRicciChartSum (I := I) g₀ g_bg T T' hδ hδ' x (v 0) (v 1)) s =
           unitModel (I := I) (M := M) g₀ 2
             (appCc (I := I) (M := M) g₀ 2 2 (R₀fib s)
                 (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
@@ -652,12 +721,10 @@ theorem exists_linearizedRicci_pointwise_appCc_families
         (Set.Icc (0 : ℝ) 1)) := by
   refine ⟨ricciArmOrder0Coeff (I := I) g₀ T T' hδ hδ',
     ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ', ?_, ?_, ?_⟩
-  · -- The pointwise identity on `Ioo 0 1`: rewrite the linearized Ricci to the chart-derivative
-    -- (`linearizedRicciAt_eq_deriv_chartSum_on_Ioo`), then apply the posited covariant bridge.
+  · -- The pointwise identity on `Ioo 0 1`: the combined chart-derivative → intrinsic `appCc` transfer.
     intro s hs x v
-    rw [linearizedRicciAt_eq_deriv_chartSum_on_Ioo (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x
-      (v 0) (v 1) hs]
-    exact deriv_realizedRicciChartSum_eq_appCc_pointwise (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' hs x v
+    exact deriv_realizedDeTurckRicciChartSum_eq_appCc_pointwise (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
+      hs x v
   · -- The order-`0` read-off continuity (first conjunct of the posited continuity bridge).
     intro x v
     exact (ricciArmCoeff_appCc_read_continuousOn (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x v).1
@@ -693,7 +760,7 @@ bridges.  The predicate genuinely constrains the families to reproduce the actua
 value pointwise, so it is non-vacuous: the zero families fail it where the linearized Ricci is
 nonzero. -/
 theorem linearizedRicci_pointwise_appCc
-    (g₀ : SmoothRiemannianMetric I M)
+    (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -701,7 +768,7 @@ theorem linearizedRicci_pointwise_appCc
     (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     ∃ (R₀fib : ℝ → SmoothCcTensor g₀ 2 2) (R₂fib : ℝ → SmoothCcTensor g₀ 4 2),
       (∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 → ∀ (x : M) (v : Fin 2 → TangentSpace I x),
-        linearizedRicciAt (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s =
+        deriv (realizedDeTurckRicciChartSum (I := I) g₀ g_bg T T' hδ hδ' x (v 0) (v 1)) s =
           unitModel (I := I) (M := M) g₀ 2
             (appCc (I := I) (M := M) g₀ 2 2 (R₀fib s)
                 (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
@@ -721,7 +788,7 @@ theorem linearizedRicci_pointwise_appCc
   -- coefficient families together with the pointwise identity; the two per-arm interval-integrabilities
   -- are then the `ContinuousOn`-on-`[0,1]` read-offs integrated (`intervalIntegrable_of_Icc`).
   obtain ⟨R₀fib, R₂fib, hpt, hcont₀, hcont₂⟩ :=
-    exists_linearizedRicci_pointwise_appCc_families (I := I) (M := M) g₀ T T'
+    exists_linearizedRicci_pointwise_appCc_families (I := I) (M := M) g₀ g_bg T T'
       hδ_lt hδ hδ'_lt hδ'
   refine ⟨R₀fib, R₂fib, hpt, fun x v => ?_, fun x v => ?_⟩
   · exact (hcont₀ x v).intervalIntegrable_of_Icc (zero_le_one)
@@ -807,7 +874,7 @@ constrains `(R₀, R₂)` to *reproduce the actual `(-2)`-scaled integrated line
 it is non-vacuous: the zero pair fails it on any background where the integrated linearized Ricci is
 nonzero. -/
 theorem integratedLinearizedRicci_appCc_eq
-    (g₀ : SmoothRiemannianMetric I M)
+    (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -815,9 +882,8 @@ theorem integratedLinearizedRicci_appCc_eq
     (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     ∃ (R₀ : SmoothCcTensor g₀ 2 2) (R₂ : SmoothCcTensor g₀ 4 2),
       ∀ (x : M) (v : Fin 2 → TangentSpace I x),
-        (-2 : ℝ) •
-            (∫ s in (0 : ℝ)..1,
-              linearizedRicciAt (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s) =
+        (∫ s in (0 : ℝ)..1,
+              deriv (realizedDeTurckRicciChartSum (I := I) g₀ g_bg T T' hδ hδ' x (v 0) (v 1)) s) =
           unitModel (I := I) (M := M) g₀ 2
             (appCc (I := I) (M := M) g₀ 2 2 R₀
                 (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
@@ -825,23 +891,23 @@ theorem integratedLinearizedRicci_appCc_eq
                   (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
   classical
   -- The deep mean-value inputs, on the CONCRETE order-`0`/order-`2` coefficient families
-  -- `R₀fib = ricciArmOrder0Coeff`, `R₂fib = ricciArmOrder2Coeff`: the pointwise Lichnerowicz `appCc`
-  -- form together with the per-arm read-off continuity/interval-integrability supplied by the joint
-  -- `(s, x)`-smoothness keystone's continuity slices.
+  -- `R₀fib = ricciArmOrder0Coeff`, `R₂fib = ricciArmOrder2Coeff`: the pointwise combined Lichnerowicz
+  -- `appCc` form (gauge cancelled) together with the per-arm read-off continuity/interval-integrability
+  -- supplied by the joint `(s, x)`-smoothness keystone's continuity slices.
   set R₀fib : ℝ → SmoothCcTensor g₀ 2 2 := ricciArmOrder0Coeff (I := I) g₀ T T' hδ hδ' with hR₀fib
   set R₂fib : ℝ → SmoothCcTensor g₀ 4 2 := ricciArmOrder2Coeff (I := I) g₀ T T' hδ hδ' with hR₂fib
-  -- Pointwise Lichnerowicz `appCc` form on `Ioo 0 1` (chart-derivative → intrinsic two-term form).
+  -- Pointwise combined Lichnerowicz `appCc` form on `Ioo 0 1` (combined chart-derivative → intrinsic
+  -- two-term form, gauge cancelled).
   have hpt : ∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 → ∀ (x : M) (v : Fin 2 → TangentSpace I x),
-      linearizedRicciAt (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s =
+      deriv (realizedDeTurckRicciChartSum (I := I) g₀ g_bg T T' hδ hδ' x (v 0) (v 1)) s =
         unitModel (I := I) (M := M) g₀ 2
           (appCc (I := I) (M := M) g₀ 2 2 (R₀fib s)
               (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
             + appCc (I := I) (M := M) g₀ 4 2 (R₂fib s)
                 (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
     intro s hs x v
-    rw [linearizedRicciAt_eq_deriv_chartSum_on_Ioo (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x
-      (v 0) (v 1) hs]
-    exact deriv_realizedRicciChartSum_eq_appCc_pointwise (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' hs x v
+    exact deriv_realizedDeTurckRicciChartSum_eq_appCc_pointwise (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
+      hs x v
   -- Per-arm read-off interval-integrability from the keystone's continuity slices on `[0,1]`.
   have hcontRead := ricciArmCoeff_appCc_read_continuousOn (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
   have hint₀ : ∀ (x : M) (v : Fin 2 → TangentSpace I x), IntervalIntegrable
@@ -873,29 +939,25 @@ theorem integratedLinearizedRicci_appCc_eq
       (realizedSmallSet (δ := δ) (δ' := δ')) hSopen hSI
       (ricciArmPrincipalCoeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ')
       (fun x => ricciArmPrincipalCoeff_realizedFam_toModel_continuous (I := I) g₀ T T' hδ hδ' x)
-  -- The integrated coefficient fields are the `(-2)`-scaled fibre path integrals.
-  refine ⟨(-2 : ℝ) • IΦ₀, (-2 : ℝ) • IΦ₂, fun x v => ?_⟩
+  -- The integrated coefficient fields are the fibre path integrals (the combined operator already
+  -- carries the `−2` Ricci scaling, so no extra scaling is needed here).
+  refine ⟨IΦ₀, IΦ₂, fun x v => ?_⟩
   set W₀ : SmoothCcTensor g₀ 0 2 := iteratedCovGrad (I := I) g₀ 0 2 0 (T - T') with hW₀
   set W₂ : SmoothCcTensor g₀ 0 4 := iteratedCovGrad (I := I) g₀ 0 2 2 (T - T') with hW₂
-  -- Push the `(-2)`-scaling and the `unitModel`/`appCc` additivity/homogeneity through the RHS,
-  -- distributing the evaluation at the tuple `v`, reducing it to
-  -- `(-2) • [unitModel (appCc IΦ₀ W₀) x v + unitModel (appCc IΦ₂ W₂) x v]`.
+  -- Push the `unitModel`/`appCc` additivity through the RHS, distributing the evaluation at the tuple
+  -- `v`, reducing it to `unitModel (appCc IΦ₀ W₀) x v + unitModel (appCc IΦ₂ W₂) x v`.
   have hrhs :
       unitModel (I := I) (M := M) g₀ 2
-          (appCc (I := I) (M := M) g₀ 2 2 ((-2 : ℝ) • IΦ₀) W₀
-            + appCc (I := I) (M := M) g₀ 4 2 ((-2 : ℝ) • IΦ₂) W₂) x v =
-        (-2 : ℝ) •
-          (unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 2 2 IΦ₀ W₀) x v +
-            unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2 IΦ₂ W₂) x v) := by
-    rw [unitModel_add_left, appCc_smul_left, appCc_smul_left, unitModel_smul_left,
-      unitModel_smul_left, ← smul_add, ContinuousMultilinearMap.smul_apply,
-      ContinuousMultilinearMap.add_apply]
+          (appCc (I := I) (M := M) g₀ 2 2 IΦ₀ W₀
+            + appCc (I := I) (M := M) g₀ 4 2 IΦ₂ W₂) x v =
+        unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 2 2 IΦ₀ W₀) x v +
+          unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2 IΦ₂ W₂) x v := by
+    rw [unitModel_add_left, ContinuousMultilinearMap.add_apply]
   rw [hrhs]
   -- The two per-term path-integral swaps (`unitModel ∘ appCc` commutes with the `s`-integral).
   rw [heval₀ x v, heval₂ x v]
   -- The integrand splits as the sum of the two per-order read-offs; combine via `intervalIntegral`
   -- additivity and the a.e. pointwise Lichnerowicz form on `Ioo 0 1` (= `Ioc 0 1` up to a null set).
-  congr 1
   have hii₀ : IntervalIntegrable
       (fun s => unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 2 2 (R₀fib s) W₀) x v)
       MeasureTheory.volume 0 1 := hint₀ x v
@@ -923,10 +985,56 @@ theorem integratedLinearizedRicci_appCc_eq
   · -- `s ∈ Ioc 1 0` is empty (would need `1 < s` and `s ≤ 0`).
     exact absurd (lt_of_lt_of_le hs1 hs0) (by norm_num)
 
+/-! ## The combined-operator mean-value (FTC) foundation -/
+
+/-- **(Posited deep input — the mean-value (FTC) reduction of the combined Ricci–DeTurck-operator
+difference.)**
+
+For two endpoint perturbation tensor sections `T, T'`, both `g₀`-fibre small with constant `< 1`, the
+chart read-off of the difference of the two realized **combined** Ricci–DeTurck right-hand sides
+`deTurckRicciRHS g_bg g₁ − deTurckRicciRHS g_bg g₁'` (with `g₁ = realize(g₀ + T)`,
+`g₁' = realize(g₀ + T')`) at the base chart point equals the `s`-integral over `[0,1]` of the
+`s`-derivative of the realized combined chart sum `realizedDeTurckRicciChartSum`:
+```
+(deTurckRicciRHS g_bg g₁ − deTurckRicciRHS g_bg g₁')_x(v 0, v 1)
+  = ∫₀¹ (d/ds) realizedDeTurckRicciChartSum g_s x(v0, v1) ds.
+```
+
+This is the combined-operator analogue of the on-disk bare-Ricci mean-value FTC
+`ricciTensor_realized_sub_eq_integral_linearizedRicci`: the realized combined chart sum
+`realizedDeTurckRicciChartSum` is jointly `C^∞` in `(s, x)` on a neighbourhood of `[0,1]` (the chart
+Gram of `g_s` is a convex combination of the two endpoint Grams, hence smooth in `s`, and
+`deTurckRicciRHS = −2 Rc + 𝓛_W` is a chart-jet polynomial of it), so it is continuous on `[0,1]`,
+differentiable on `(0,1)`, with derivative interval-integrable; the fundamental theorem of calculus then
+equates the integral to the endpoint difference `realizedDeTurckRicciChartSum 1 −
+realizedDeTurckRicciChartSum 0`, and the chart-Riemann-basis read-off
+(`deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS`) identifies the two endpoints with the
+genuine intrinsic combined operator values at `g₁`, `g₁'`.  This analytic FTC-with-endpoint-readoff
+content (the joint-Gram smoothness of the combined chart sum + the intrinsic↔chart-sum endpoint bridge
+for the combined operator) is the same kind of analytic input as the on-disk bare-Ricci FTC; it is
+*posited* here, to be discharged by recursing into the combined joint-Gram smoothness tower.  It
+genuinely constrains the chart integral to reproduce the combined operator difference, so it is
+non-vacuous: it fails wherever the combined operator difference is nonzero. -/
+theorem deTurckRicciRHS_realized_sub_eq_integral_chartDeriv
+    (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (v w : TangentSpace I x) :
+    DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg
+          (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x v w -
+        DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg
+          (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x v w =
+      ∫ s in (0 : ℝ)..1,
+        deriv (realizedDeTurckRicciChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w) s :=
+  sorry
+
 /-! ## The order-graded `appCc` decomposition (Ricci arm) -/
 
-/-- **The Ricci–DeTurck Ricci-arm order-graded `appCc` eval-matching (via the mean-value
-Lichnerowicz integration).**
+/-- **The Ricci–DeTurck combined-arm order-graded `appCc` eval-matching (via the mean-value
+Lichnerowicz integration, gauge cancelled).**
 
 There exist endpoint-dependent operator coefficient fields
 ```
@@ -948,17 +1056,18 @@ Ric(g₁)_x(v 0, v 1) − Ric(g₁')_x(v 0, v 1) = ∫₀¹ DRic(g_s)[T − T']_
 ```
 The integrated linearized Ricci is the single-arm Lichnerowicz form
 `integratedLinearizedRicci_appCc_eq`: a *two-term* (order-`0` curvature, order-`2` rough Laplacian)
-`appCc` read-off, with **no genuine order-`1` arm** (the connection part integrates away — its chart
-principal symbol is the closed form `−½|ξ|²h + curvature`).  So the eval holds with `R₁ = 0`: the FTC
-rewrites the LHS to the integral, the Lichnerowicz integration supplies `R₀, R₂`, and the order-`1`
-read-off `appCc 0 W₁` vanishes (`appCc_zero_left`).  The deep mean-value/Leibniz content (the
-pointwise-in-`s` Lichnerowicz `appCc` form together with the operator-field path integration producing
-`R₀, R₂` as smooth fields) is *posited* in `integratedLinearizedRicci_appCc_eq` (the single deferred
-input, recursed into downstream); this node combines it with the FTC.  The predicate genuinely
-constrains `(R₀, R₁, R₂)` to *reproduce the `(−2)`-scaled Ricci-arm value*, so it is non-vacuous: it
-fails for the zero triple whenever the realized Ricci arm is nonzero. -/
+`appCc` read-off, with **no genuine order-`1` arm** (the connection part integrates away — the combined
+chart principal symbol is the gauge-cancelled rough Laplacian `|ξ|²h`).  So the eval holds with `R₁ = 0`:
+the combined FTC rewrites the LHS to the integral, the Lichnerowicz integration supplies `R₀, R₂`, and the
+order-`1` read-off `appCc 0 W₁` vanishes (`appCc_zero_left`).  The deep mean-value/Leibniz content (the
+combined pointwise-in-`s` Lichnerowicz `appCc` form together with the operator-field path integration
+producing `R₀, R₂` as smooth fields) is *posited* in `integratedLinearizedRicci_appCc_eq` and the combined
+FTC `deTurckRicciRHS_realized_sub_eq_integral_chartDeriv` (the deferred inputs, recursed into downstream);
+this node combines them.  The predicate genuinely constrains `(R₀, R₁, R₂)` to *reproduce the combined
+Ricci–DeTurck-arm value*, so it is non-vacuous: it fails for the zero triple whenever the realized combined
+arm is nonzero. -/
 theorem deTurckRicciArm_appCc_eval
-    (g₀ : SmoothRiemannianMetric I M)
+    (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -966,10 +1075,10 @@ theorem deTurckRicciArm_appCc_eval
     (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     ∃ (R₀ : SmoothCcTensor g₀ 2 2) (R₁ : SmoothCcTensor g₀ 3 2) (R₂ : SmoothCcTensor g₀ 4 2),
       ∀ (x : M) (v : Fin 2 → TangentSpace I x),
-        (-2 : ℝ) •
-            (ricciTensor (I := I) (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x (v 0) (v 1)
-              - ricciTensor (I := I) (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ')
-                  x (v 0) (v 1)) =
+        (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg
+              (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x (v 0) (v 1)
+            - DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg
+                (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x (v 0) (v 1)) =
           unitModel (I := I) (M := M) g₀ 2
             (appCc (I := I) (M := M) g₀ 2 2 R₀
                 (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
@@ -978,16 +1087,16 @@ theorem deTurckRicciArm_appCc_eval
               + appCc (I := I) (M := M) g₀ 4 2 R₂
                   (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
   classical
-  -- The integrated linearized-Ricci Lichnerowicz `appCc` form supplies the order-`0`/order-`2`
-  -- coefficient fields; the order-`1` arm is absent (`R₁ = 0`).
+  -- The integrated combined Lichnerowicz `appCc` form supplies the order-`0`/order-`2` coefficient
+  -- fields; the order-`1` arm is absent (`R₁ = 0`).
   obtain ⟨R₀, R₂, heval⟩ :=
-    integratedLinearizedRicci_appCc_eq (I := I) (M := M) g₀ T T' hδ_lt hδ hδ'_lt hδ'
+    integratedLinearizedRicci_appCc_eq (I := I) (M := M) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
   refine ⟨R₀, 0, R₂, fun x v => ?_⟩
-  -- Rewrite the realized Ricci-arm difference as the FTC integral of the linearized Ricci.
-  rw [ricciTensor_realized_sub_eq_integral_linearizedRicci (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
+  -- Rewrite the realized combined-operator difference as the FTC integral of the combined chart deriv.
+  rw [deTurckRicciRHS_realized_sub_eq_integral_chartDeriv (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
     x (v 0) (v 1)]
   -- The order-`1` read-off `appCc 0 W₁` vanishes, collapsing the three-term sum to the two-term
-  -- Lichnerowicz read-off matched by the integrated-linearized-Ricci identity.
+  -- Lichnerowicz read-off matched by the integrated combined identity.
   rw [appCc_zero_left, add_zero]
   exact heval x v
 
@@ -1044,7 +1153,7 @@ difference grading.  The order-2 PRINCIPAL coefficient is closed
 Palatini principal `palatini_tracedPrincipal_eq_combinedTrace`); the order-`0`/`1` eval-matching is the
 single posited prerequisite. -/
 theorem deTurckRicciArm_appCc_graded
-    (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -1053,10 +1162,10 @@ theorem deTurckRicciArm_appCc_graded
     ∃ (Λ : ℝ), 0 ≤ Λ ∧
       ∃ (R₀ : SmoothCcTensor g₀ 2 2) (R₁ : SmoothCcTensor g₀ 3 2) (R₂ : SmoothCcTensor g₀ 4 2),
         (∀ (x : M) (v : Fin 2 → TangentSpace I x),
-          (-2 : ℝ) •
-              (ricciTensor (I := I) (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x (v 0) (v 1)
-                - ricciTensor (I := I) (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ')
-                    x (v 0) (v 1)) =
+          (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg
+                (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x (v 0) (v 1)
+              - DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg
+                  (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x (v 0) (v 1)) =
             unitModel (I := I) (M := M) g₀ 2
               (appCc (I := I) (M := M) g₀ 2 2 R₀
                   (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
@@ -1077,7 +1186,7 @@ theorem deTurckRicciArm_appCc_graded
               ((iteratedCovGrad (I := I) g₀ 4 2 a R₂).toSection x) ≤ Λ ^ 2) := by
   -- The eval-matching prerequisite supplies the concrete order-graded coefficient fields.
   obtain ⟨R₀, R₁, R₂, heval⟩ :=
-    deTurckRicciArm_appCc_eval (I := I) (M := M) g₀ T T' hδ_lt hδ hδ'_lt hδ'
+    deTurckRicciArm_appCc_eval (I := I) (M := M) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
   -- The order-`0` `C⁰` control: each fixed smooth coefficient field has a uniform fibre-norm sup on the
   -- closed manifold (`exists_bound_riemannianFiberNormSq_smoothCcTensor`).
   obtain ⟨K₀, hK₀_nn, hK₀⟩ :=
