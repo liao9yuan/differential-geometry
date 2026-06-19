@@ -346,3 +346,15 @@ spatial star-sum membership file.  The proof remains under the standard smooth
 manifold context.
 
 Verification passed for the edited file.
+
+## 2026-06-14 — component-eval transparency sweep (item 4): 2 → 1 blocks
+
+Removed the `set_option backward.isDefEq.respectTransparency false` from **`curvactReduce`** (the private
+CURVACT helper) — it was **STALE**.  The proof is pure pointwise component reduction
+(`curvatureAction0SAt_eq_rm04` at `identityInvMetric` + `Finset.sum_eq_single`/`sum_neg_distrib`/`sum_comm`
++ `Fin.cons`/`Function.update`/`vec4` slot algebra), no `StarSum2` structure / `ContMDiffAt` / section ext.
+
+**Kept `spatialCommStarSum`** (the P2 deliverable): tested removal → `synthInstanceFailed` at the `StarSum2`
+membership proofs (`starSum2_sum`/`StarSum2.base`, lines ~521–533).  The transparency option is **load-bearing**
+for the `StarSum2` structure instance synthesis — this is the bundle/structural class, not pure component-eval.
+Restored.  Focused-check **green** (55.4s).  See `Tensor/RSTensor/ComponentEvalApiPlan.md` (8th pass).

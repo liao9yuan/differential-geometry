@@ -284,3 +284,83 @@ components.
 **Running total (item-4 component-eval removals): 5 blocks** — `ApplyInput.constInChart_basisTensor0S_coordFrame`,
 `ModelBridge.tensorRSModelAt_coordComponentRSAt`, `NablaTraceGen.metricTraceFirstTwoField_eq_sum`,
 `RicBoundGoodFrame.{compL2_tower_le, sqrt_tower_le_compL2}` + 1 new API lemma (`constInChart_apply`).
+
+## 2026-06-14 — Sixth pass: `Claim1Wiring.compL2_tower_eq` removed (1) + clean inventory EXHAUSTED
+
+**Block removed:** `Claim1Wiring.compL2_tower_eq` (B5) — the orthonormal sibling of `compL2_tower_le`.
+Identical proof shape (`rw [compL2]; … normSq0S_identity_eq_sum_sq; simp [compL2Sq]; … component0S_apply; …
+IsLocalFrameOn.toBasisAt_coe; rfl`), hack **stale**, removed, focused-check green (54.2s).  `Claim1Wiring` 4 → 3.
+
+**Comprehensive triage this pass (~25+ blocks inspected, all non-removable):**
+- `MetricTrace/NablaTrace02.lean` (3): `freeze{Head03,Tail04,Middle04}Field` smooth-section `def`s → bundle.
+- `MetricTrace/Trace04.lean` (1): `trace04Field` smooth-section `def` → bundle.
+- `HCGCompactness/Claim1Wiring.lean` other 3: `gCompField_mdiffOn` (`ContMDiffOn`), `koszulComp_at`
+  (`ContMDiffSection.exists_eq_at_gen` section construction), `claim1_geom` (assembly wiring `ContMDiffOn` bricks).
+- `HCGCompactness/Claim2Mixed.lean` (1): `claim2_geom` assembly (`ContMDiffOn` brick wiring).
+- `HCGCompactness/RicBound.lean` (3): `perDomain` (engine), `hevComp_of_solutions` (`HasDerivAt`/`IsSolutionOn`),
+  `covOrderBound_of_soln` (**Lemma 3.11 / eq-3.4 capstone — OFF-LIMITS this pass**).
+- `NablaOnTensors/Regularity/Tensor0S.lean` (10): all `contMDiffAt`/derivation/`nabla0S_reg` smoothness.
+- `Metric/TensorInner/{Tensor0S,TensorRS}RiemannianBundle.lean` (3): model-fibre `IsBounded`/`IsVonNBounded`
+  (model normed-space/topology).
+- `Tensor/Product/Bundle.lean` (1, bundle `TopologicalSpace ⊗`), `Bundle/PartialMfderiv/Basic.lean`
+  (1, `vderiv_mlieBracket` mfderiv), `Exponential/ChartFlow/InverseManifoldChain.lean` (1, integral-curve derivative).
+
+**EXHAUSTION EVIDENCE (frame-component family):** cross-referencing the 42 option-files against the 36
+`IsLocalFrameOn.toBasisAt_coe` users (the marker of the productive stale pattern), the only intersection beyond
+the already-done `RicBoundGoodFrame`/`Claim1Wiring` is `Connection/Chart/NablaComponents/Basic.lean`
+(`modelDeriv_eq_coordDeriv0SAt`, a `mfderiv` derivative bridge with `letI tensor0SBundle_topology` → keep) and
+the active-frontier `Evolution/StarSum/{TimeRecursion,TowerHeat}.lean`.  The clean, non-active, non-off-limits
+component-eval inventory is **exhausted**.
+
+**Running total: 6 blocks removed** (+ `Claim1Wiring.compL2_tower_eq`) + 1 API lemma (`constInChart_apply`).
+
+**Next recommended workstreams (separate passes):**
+1. **StarSum/Evolution star-algebra component blocks** (`Evolution/StarSum/*`, `Evolution/Ricci/*`,
+   `Evolution/Scalar/*` — many use `toBasisAt_coe`/`component0S`).  These are likely genuine component-eval but
+   sit in the ACTIVE BBS frontier (in-progress tasks); do this only once that frontier settles, to avoid churn.
+2. **Bundle/model-topology workstream** for all the KEPT blocks: a `Tensor0SModel`/`TensorRSModel` instance +
+   `toModel`-eval + `tensor*Bundle_topology` exposure layer that lets `ContMDiffAt`/section/`DFunLike.ext`
+   proofs drop the option.  This is the larger remaining backlog (most of the ~142 blocks) and is a distinct
+   bundle-topology project, not component-eval.
+
+## 2026-06-14 — Seventh pass: workstream #1 started — `Evolution/StarSum/StarRouting.lean` (7 → 0)
+
+User opted into workstream #1 (StarSum/Evolution star-algebra).  `lake-locked status` = no active locks (no
+concurrent agent), so safe.  `StarRouting.lean` `.md` says it is settled ("no further StarRouting work planned").
+
+**All 7 blocks removed (component-eval, all STALE):** `curvactStarPos`, `curvactStar0`, `slotdiffStarA`,
+`slotdiffStarB`, `slotRic1`, `slotRic2`, `slotRic3` — pointwise star-base evaluations
+(`starBaseProd_eq` + `wRoute_val` + `Function.update`/`Fin.cons` slot routing + `split_ifs`/`omega`), no
+`ContMDiffAt`/`letI bundle_topology`/section ext.  Each paired `respectTransparency false` with
+`maxHeartbeats 1000000`; only the transparency line was removed (kept `maxHeartbeats`), file checks **green**
+(465s — the 7 heavy proofs dominate).  Confirms: heavy slot-routing star-base proofs do NOT need the
+transparency option, just the heartbeat budget.
+
+**Running total: 13 blocks removed** (`ApplyInput`, `ModelBridge`, `NablaTraceGen`, `RicBoundGoodFrame ×2`,
+`Claim1Wiring`, `StarRouting ×7`) + 1 API lemma (`constInChart_apply`).
+
+## 2026-06-14 — Eighth pass: `Evolution/StarSum/SpatialMember.lean` (2 → 1) + StarSum structural boundary
+
+**Block removed:** `SpatialMember.curvactReduce` (private CURVACT helper) — pure pointwise component reduction
+(`curvatureAction0SAt_eq_rm04` + `identityInvMetric` + `Finset.sum_*` + `Fin.cons`/`Function.update`/`vec4`),
+hack **stale**, removed, focused-check green (55.4s).
+
+**KEY STRUCTURAL BOUNDARY found in StarSum** — `spatialCommStarSum` tested: removing its hack gives
+`synthInstanceFailed` at the `StarSum2` membership proofs (`starSum2_sum`/`StarSum2.base`).  So within StarSum the
+transparency blocks split cleanly:
+- **pure pointwise star/component identities** (`StarRouting ×7`, `curvactReduce`): `respectTransparency false`
+  is STALE → removable (this sweep).
+- **`StarSum2`-membership / structure theorems** (`spatialCommStarSum`; `TimeRecursion`'s `gamma`/`resStarLFU`
+  "is a `StarSum2` element"; `TowerHeat` composing `StarSum2.bound`; the 37 `StarSum2.lean` `.nabla`/`.add`/`.base`
+  closures): the option is LOAD-BEARING for `StarSum2` structure instance synthesis → these are the
+  bundle/structural workstream (#2), NOT component-eval.
+
+**Triaged this pass (kept, structural/bundle):** `TimeRecursion.lean` (2, `StarSum2` membership + `HasDerivWithinAt`),
+`TowerHeat.lean` (1, `StarSum2.bound`), `NablaReactionAllK.lean` (1, `ContMDiffOn`), `FrozenSlotAllK.lean`
+(1, `freezeAllBut0SField` smooth-field def), `StarSum2.lean` (37, the structure file itself — active task 41).
+
+**Running total: 14 blocks removed** (+ `SpatialMember.curvactReduce`) + 1 API lemma.
+
+**Workstream #1 status: the pure-pointwise StarSum component-eval inventory is now done** (StarRouting + curvactReduce
+= 8 this session).  The remaining StarSum blocks are `StarSum2`-structural (load-bearing, confirmed by the
+`spatialCommStarSum` test) and fold into workstream #2 (the `StarSum2`/bundle-topology instance-exposure project).

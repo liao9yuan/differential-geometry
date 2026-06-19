@@ -889,7 +889,7 @@ theorem coordMetricDeriv
   · intro t ht x hx
     exact
       (coordMetricSmoothAt (I := I) S hS x₀ ⟨t, ht⟩ x hx a b).of_le
-        (by simp)
+        (WithTop.coe_le_coe.mpr le_top)
   · intro s hs x hx
     exact coordMetricMdiffOn (I := I) S x₀ s x hx a b
   · intro t ht x hx
@@ -1140,7 +1140,7 @@ private theorem coordDgSmAt
   have hF :
       ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real)
         (3 : WithTop ℕ∞) F ((t : Real), x) :=
-    (coordMetricSmoothAt (I := I) S hS x₀ t x hx i j).of_le (by simp)
+    (coordMetricSmoothAt (I := I) S hS x₀ t x hx i j).of_le (WithTop.coe_le_coe.mpr le_top)
   have hX :
       ContMDiffAt I (I.prod 𝓘(Real, E))
         (∞ : WithTop ℕ∞) (T% X) x :=
@@ -1196,7 +1196,7 @@ private theorem gammaRhsSm
       ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) 2
         (fun p : Real × M =>
           coordInv (I := I) S x₀ p.1 p.2 k l) ((t : Real), x) :=
-    (coordInvSmoothAt (I := I) S hS x₀ t x hx k l).of_le (by simp)
+    (coordInvSmoothAt (I := I) S hS x₀ t x hx k l).of_le (WithTop.coe_le_coe.mpr le_top)
   have hInv' :
       ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) 2
         (fun p : Real × M =>

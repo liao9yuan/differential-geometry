@@ -15,6 +15,7 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.C
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFromJointC1
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.RicciFlowPdeAtZero
+import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 
 /-!
 # Time-continuity of the Ricci tensor along a metric family
@@ -1281,5 +1282,82 @@ theorem ricciChartFrameComp_jointContinuousOn [I.Boundaryless]
         (chartBasisVecFiber (I := I) α j q.2)) Sp :=
   (chartRicci_jointContinuousOn g_DT α Sp hgood h0 h1 h2 i j).congr
     (fun q hq => ricciTensor_chartBasisVec_alpha_eq (I := I) (g_DT q.1) α i j (hgood q hq))
+
+/-- **Chart-frame trace expansion of scalar curvature.**  On the good set, the scalar curvature is
+the chart-Gram-inverse contraction of the Ricci tensor evaluated on the chart-`α` basis frame:
+`R = ∑_{ij} (chartGram⁻¹)^{ij} · Ric(e^α_i, e^α_j)`.  The metric trace `metricScalarAt` is by
+definition `metricTracePair0SAt g (metricRicciAt g x)`; expand via `metricTracePair0SAt_eq_sum_basis`
+in the chart-basis (`chartBasisFamily`, with the matrix inverse `chartInvGramMatrix` as its
+`MetricInverseInBasis`) and convert `metricRicciAt → ricciTensor`. -/
+theorem metricScalar_chartTrace_eq [I.Boundaryless]
+    (g : SmoothRiemannianMetric I M) (α : M) {x : M}
+    (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
+    metricScalarAt (I := I) g x =
+      ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        chartInvGramOnE (I := I) g α i j (extChartAt I α x) *
+          ricciTensor (I := I) g x
+            (chartBasisVecFiber (I := I) α i x) (chartBasisVecFiber (I := I) α j x) := by
+  have hbase : x ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    chartLeviCivitaGoodSet_mem_baseSet (I := I) hx
+  have hxsrc : x ∈ (extChartAt I α).source :=
+    chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hx
+  have hgram : ∀ k l : Fin (Module.finrank ℝ E),
+      g.inner x (chartBasisFamily (I := I) α hbase k) (chartBasisFamily (I := I) α hbase l)
+        = chartGramMatrix (I := I) g α x k l := by
+    intro k l
+    rw [chartBasisFamily_apply, chartBasisFamily_apply]
+    exact (chartGramMatrix_apply (I := I) g α x k l).symm
+  have hinv : Tensor0SBundle.MetricInverseInBasis_gen (I := I) g x
+      (chartBasisFamily (I := I) α hbase)
+      (fun k l => chartInvGramMatrix (I := I) g α x k l) := by
+    intro i j
+    refine ⟨?_, ?_⟩
+    · simp only [hgram]
+      rw [← Matrix.mul_apply, chartInvGramMatrix_mul_chartGramMatrix (I := I) g α hbase,
+        Matrix.one_apply]
+    · simp only [hgram]
+      rw [← Matrix.mul_apply, chartGramMatrix_mul_chartInvGramMatrix (I := I) g α hbase,
+        Matrix.one_apply]
+  have htrace := DifferentialGeometry.Integral.Connection.metricTracePair0SAt_eq_sum_basis
+    (I := I) g (chartBasisFamily (I := I) α hbase)
+    (fun k l => chartInvGramMatrix (I := I) g α x k l) hinv (metricRicciAt (I := I) g x)
+  unfold metricScalarAt
+  rw [htrace]
+  refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
+  rw [chartInvGramOnE_def, (extChartAt I α).left_inv hxsrc, chartBasisFamily_apply,
+    chartBasisFamily_apply]
+  congr 1
+  exact metricRicciAt_apply_eq_ricciTensor (I := I) g x
+    (chartBasisVecFiber (I := I) α i x) (chartBasisVecFiber (I := I) α j x)
+
+/-- **Joint `(t, x)` continuity of scalar curvature in the chart-`α` frame.**  From the chart-Gram
+jets (orders 0,1,2) the scalar curvature `(t, x) ↦ metricScalarAt (g_DT t) x` is jointly continuous
+on a good-set domain `Sp`.  Sums the chart-frame trace `metricScalar_chartTrace_eq` over the frame:
+chart-Gram-inverse joint continuity (`jointInvGram_continuousOn`) times Ricci-frame joint continuity
+(`ricciChartFrameComp_jointContinuousOn`).  The scalar analogue of `ricciChartFrameComp_jointContinuousOn`. -/
+theorem chartScalar_jointContinuousOn [I.Boundaryless]
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (Sp : Set (ℝ × M))
+    (hgood : ∀ q ∈ Sp, q.2 ∈ chartLeviCivitaGoodSet (I := I) α)
+    (h0 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 0
+        (chartGramOnE (I := I) (g_DT q.1) α a b) (extChartAt I α q.2)) Sp)
+    (h1 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 1
+        (chartGramOnE (I := I) (g_DT q.1) α a b) (extChartAt I α q.2)) Sp)
+    (h2 : ∀ a b : Fin (Module.finrank ℝ E),
+      ContinuousOn (fun q : ℝ × M => iteratedFDeriv ℝ 2
+        (chartGramOnE (I := I) (g_DT q.1) α a b) (extChartAt I α q.2)) Sp) :
+    ContinuousOn (fun q : ℝ × M => metricScalarAt (I := I) (g_DT q.1) q.2) Sp := by
+  refine (?_ : ContinuousOn (fun q : ℝ × M =>
+      ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
+        chartInvGramOnE (I := I) (g_DT q.1) α i j (extChartAt I α q.2) *
+          ricciTensor (I := I) (g_DT q.1) q.2
+            (chartBasisVecFiber (I := I) α i q.2)
+            (chartBasisVecFiber (I := I) α j q.2)) Sp).congr
+    (fun q hq => metricScalar_chartTrace_eq (I := I) (g_DT q.1) α (hgood q hq))
+  refine continuousOn_finset_sum _ (fun i _ => continuousOn_finset_sum _ (fun j _ => ?_))
+  exact (RicciContJointAux.jointInvGram_continuousOn g_DT α Sp hgood
+      (fun a b => RicciContJointAux.jointGram_continuousOn g_DT α Sp h0 a b) i j).mul
+    (ricciChartFrameComp_jointContinuousOn (I := I) g_DT α Sp hgood h0 h1 h2 i j)
 
 end DifferentialGeometry.PDE.RicciFlow

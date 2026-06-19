@@ -49,3 +49,19 @@ all-time limit-family construction; it does not discharge those Ricci-flow
 producer assumptions. Whole HCG compactness estimate: this closes the dedicated
 `gInf` blocker, while the broader Chapter 4/HCG pipeline still depends on the
 upstream bound producers and later compactness assembly.
+
+## 2026-06-17
+
+Added the named abstract output wrapper needed by the solution-level P3
+assembler:
+- `WindowGInfOut`, a Prop-valued package around the final window convergence
+  existential;
+- `windowGInfOut`, a thin checked wrapper around the existing `windowGInf`.
+
+This is an API/performance boundary only.  It does not change the mathematics
+inside `windowGInf`; it gives downstream files a stable named conclusion so
+they do not repeatedly normalize the expanded `metricDerivNormSupOn`
+existential.
+
+Verification passed: focused check and targeted module build succeeded.  The
+new wrapper is axiom-clean with the expected project axioms only.

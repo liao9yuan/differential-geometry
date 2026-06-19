@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Comparison.ExpBallDiffeo
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.PointedRiemannian
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.GoodCoveringSeq
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.GoodCoveringSeq
 
 set_option autoImplicit false
 set_option linter.unusedSectionVars false

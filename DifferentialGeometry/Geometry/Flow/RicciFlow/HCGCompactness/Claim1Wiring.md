@@ -322,3 +322,18 @@ Claim 1 estimate (component form): **proven**.  Geometric instantiation: 0%
 (this plan).  After B1–B6: Claim 1 fully geometric ⇒ ric_bound's Claim-1
 input done; ric_bound itself still needs Claim 2 + Steps 4–5 (larger).  Whole
 HCG project ~15–20% (theorem-weighted), unchanged until those land.
+
+## 2026-06-14 — component-eval transparency sweep (item 4): 4 → 3 blocks
+
+Removed the `set_option backward.isDefEq.respectTransparency false` from **B5 `compL2_tower_eq`** — it was
+**STALE**.  The proof is pure component-eval (`rw [compL2]; congr 1; normSq0S_identity_eq_sum_sq; simp only
+[compL2Sq]; Finset.sum_congr; iterCovComp_eq_iterCov; component0S_apply; IsLocalFrameOn.toBasisAt_coe; rfl`) —
+no bundle topology / `ContMDiffAt` / section ext — so the option was unnecessary.  Same shape as the already-
+removed `RicBoundGoodFrame.{compL2_tower_le, sqrt_tower_le_compL2}`.  Focused-check green (54.2s),
+statement-preserving (no consumer of B5 is affected).
+
+**Kept (still need the option, correctly):** `gCompField_mdiffOn` (B2, `ContMDiffOn` — and note the B2 `hg`
+`Tensor0SModel` instance-synthesis gotcha recorded above is genuine bundle/model-topology), `koszulComp_at`
+(B1, builds smooth sections via `ContMDiffSection.exists_eq_at_gen`), `claim1_geom` (B6 assembly wiring
+`ContMDiffOn` bricks).  These belong to the bundle/model-topology workstream, not component-eval.  See
+`Tensor/RSTensor/ComponentEvalApiPlan.md` (6th pass).

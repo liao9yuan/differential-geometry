@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.IsometryCompactness
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.IsometryCompactness
 
 set_option autoImplicit false
 

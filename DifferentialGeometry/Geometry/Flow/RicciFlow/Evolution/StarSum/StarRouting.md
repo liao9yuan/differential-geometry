@@ -101,3 +101,14 @@ Planner source inspection accepted the route/sign alignment:
 
 No further StarRouting work is currently planned for P3 unless the final `residualStarSumLF` succ
 assembly exposes a new component-order mismatch.
+
+## 2026-06-14 — component-eval transparency sweep (item 4): 7 → 0 blocks
+
+Removed the `set_option backward.isDefEq.respectTransparency false in` from **all 7** theorems
+(`curvactStarPos`, `curvactStar0`, `slotdiffStarA`, `slotdiffStarB`, `slotRic1`, `slotRic2`, `slotRic3`).
+All were **STALE** — the `set_option maxHeartbeats 1000000 in` was kept; only the transparency line was
+unnecessary. These are pure pointwise star-base/component evaluations (`starBaseProd_eq` + `wRoute_val` +
+`Function.update`/`Fin.cons` slot routing + `split_ifs`/`omega`), with no `ContMDiffAt`/`letI bundle_topology`/
+section ext, so the transparency option was not load-bearing. Full-file focused check **green** (465s — heavy
+but passes; the 7 `maxHeartbeats 1000000` proofs dominate). Statement-preserving; no consumer affected.
+See `Tensor/RSTensor/ComponentEvalApiPlan.md` (7th pass).

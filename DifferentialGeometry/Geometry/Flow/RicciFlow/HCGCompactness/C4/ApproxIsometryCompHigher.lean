@@ -1,6 +1,6 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Lemma45F4
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.Lemma45F4
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ProductMFoldNorm
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ApproxIsometryComp
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.ApproxIsometryComp
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 
 set_option autoImplicit false

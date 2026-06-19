@@ -22,6 +22,7 @@ import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import Mathlib.Analysis.InnerProductSpace.Basic
 
 set_option autoImplicit false
+set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -30,8 +31,8 @@ namespace DifferentialGeometry
 open Bundle
 open scoped Manifold ContDiff
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
-  [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [FiniteDimensional ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable {N : Type*} [TopologicalSpace N] [ChartedSpace H N] [IsManifold I ∞ N]
@@ -164,7 +165,7 @@ private theorem mfderiv_apply_section_smooth_along_diffeo
 /-- The pullback of a smooth Riemannian metric on `N` along a diffeomorphism `Φ : M ≃ₘ⟮I,I⟯ N`,
 a smooth Riemannian metric on `M`. -/
 noncomputable def Diffeomorph.pullbackMetric
-    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [BoundarylessManifold I N]
+    [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I N) (Φ : M ≃ₘ⟮I, I⟯ N) :
     SmoothRiemannianMetric I M where
   inner x := Diffeomorph.pullbackInner g Φ x
@@ -230,7 +231,7 @@ noncomputable def Diffeomorph.pullbackMetric
 
 /-- The pullback metric exists: it is `Diffeomorph.pullbackMetric g Φ`. -/
 theorem diffeomorph_pullback_metric_exists
-    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [BoundarylessManifold I N]
+    [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I N) (Φ : M ≃ₘ⟮I, I⟯ N) :
     ∃ g' : SmoothRiemannianMetric I M, g' = Diffeomorph.pullbackMetric g Φ :=
   ⟨Diffeomorph.pullbackMetric g Φ, rfl⟩
@@ -239,7 +240,7 @@ theorem diffeomorph_pullback_metric_exists
 `Φ x` on the pushed-forward vectors. This exhibits `dΦ_x` as a linear isometry
 `(T_x M, pullback) → (T_{Φ x} N, g)`. -/
 theorem Diffeomorph.pullbackMetric_inner
-    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [BoundarylessManifold I N]
+    [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I N) (Φ : M ≃ₘ⟮I, I⟯ N) (x : M) (v w : TangentSpace I x) :
     (Diffeomorph.pullbackMetric g Φ).inner x v w
       = g.inner (Φ x) (mfderiv I I Φ x v) (mfderiv I I Φ x w) :=
@@ -247,7 +248,7 @@ theorem Diffeomorph.pullbackMetric_inner
 
 /-- Pullback by the identity diffeomorphism is the identity operation. -/
 theorem Diffeomorph.pullbackMetric_refl
-    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
+    [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M) :
     Diffeomorph.pullbackMetric g (_root_.Diffeomorph.refl I M ∞) = g := by
   rcases g with ⟨inner_g, symm_g, pos_g, isVonN_g, contMDiff_g⟩
@@ -278,7 +279,7 @@ theorem Diffeomorph.pullbackMetric_refl
 /-- Smoothness of the pullback inner-product section over `M`.
 This is exactly the `contMDiff` field of `Diffeomorph.pullbackMetric g Φ`. -/
 theorem Diffeomorph.pullbackInner_contMDiff
-    [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [BoundarylessManifold I N]
+    [SigmaCompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I N) (Φ : M ≃ₘ⟮I, I⟯ N) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
       (fun x => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) x

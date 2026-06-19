@@ -25,7 +25,7 @@ open DifferentialGeometry.PDE.RicciFlow
 
 noncomputable section
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
 variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -130,6 +130,33 @@ def SolLowData
   forall rho : Nat -> Nat, StrictMono rho -> forall t, t ∈ Set.Icc beta psiT ->
     exists c : Real, 0 < c /\ forall (k : Nat) (x : M) (v : TangentSpace I x),
       c * gRef.inner x v v <= (gSeq (rho k) t).inner x v v
+
+/-- The honest solution-window inputs needed to feed the abstract `windowGInf`
+endpoint. -/
+inductive SolWindowData : Type _ where
+  | mk
+      (K : Set M) (hK : IsCompact K)
+      (beta psiT t0 : Real) (hbeta : beta <= psiT) (p : Nat)
+      (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
+      (gRef : SmoothRiemannianMetric I M)
+      (D : Nat -> RealTimeInterval)
+      (S : (i : Nat) -> SolutionOn (I := I) (M := M) (D i))
+      (hS : forall i : Nat, IsSolutionOn (I := I) (S i))
+      (hmet : forall (i : Nat) (r : Real), (S i).family.metric r = gSeq i r)
+      (hreg : forall i : Nat, Set.Icc beta psiT ⊆ (D i).regular)
+      (H0 : SolLip0Data (I := I) K beta psiT gSeq gRef)
+      (hswap : SolSwapData (I := I) gRef D S)
+      (Hcov : SolCovData (I := I) beta psiT t0 gSeq gRef D S)
+      (Hlip : SolLipData (I := I) K beta psiT p gSeq gRef D S)
+      (hlow : SolLowData (I := I) beta psiT gSeq gRef)
+
+/-- Compact conclusion package for the flow-instantiated P3 window endpoint. -/
+inductive WindowMetricPreconvConclusion : Type _ where
+  | intro
+      (K : Set M) (beta psiT : Real) (p : Nat)
+      (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
+      (gRef : SmoothRiemannianMetric I M)
+      (out : WindowGInfOut (E := E) (H := H) (I := I) (M := M) K beta psiT p gSeq gRef)
 
 private lemma metricTensorField_eq_metricTensor0S
     (g : SmoothRiemannianMetric I M) (x : M) :
@@ -371,9 +398,8 @@ theorem denseIccSeq {beta psiT : Real} (hbeta : beta <= psiT) :
     refine ⟨n, ?_⟩
     simpa [tx, eX, X, Subtype.dist_eq, Real.dist_eq] using hn
 
-set_option maxHeartbeats 2000000
 /-- Flow-instantiated P3 window endpoint obtained by feeding the honest
-solution producers into the abstract `windowGInf`. -/
+solution producers into the named-output abstract `windowGInfOut`. -/
 theorem winGInfOfSol (hne : Nonempty M)
     (K : Set M) (hK : IsCompact K) (beta psiT t0 : Real) (hbeta : beta <= psiT)
     (p : Nat)
@@ -389,11 +415,7 @@ theorem winGInfOfSol (hne : Nonempty M)
     (Hcov : SolCovData (I := I) beta psiT t0 gSeq gRef D S)
     (Hlip : SolLipData (I := I) K beta psiT p gSeq gRef D S)
     (hlow : SolLowData (I := I) beta psiT gSeq gRef) :
-    exists phi : Nat -> Nat, StrictMono phi /\
-      exists gInf : Real -> SmoothRiemannianMetric I M,
-        forall eps : Real, 0 < eps -> exists k0 : Nat, forall k : Nat, k0 <= k ->
-          forall t, t ∈ Set.Icc beta psiT ->
-            metricDerivNormSupOn (I := I) K p (gSeq (phi k) t) (gInf t) gRef < eps := by
+    WindowGInfOut (E := E) (H := H) (I := I) (M := M) K beta psiT p gSeq gRef := by
   classical
   obtain ⟨e, he, hdense⟩ := denseIccSeq hbeta
   have h0 := hgLip0Sol (I := I) H0.hKU0 H0.B0 H0.hequiv0 H0.Bmax0 H0.hBmax01
@@ -405,8 +427,20 @@ theorem winGInfOfSol (hne : Nonempty M)
         exists c : Real, 0 < c /\ forall (k : Nat) (x : M) (v : TangentSpace I x),
           c * gRef.inner x v v <= (gSeq (rho k) t).inner x v v := by
     simpa [SolLowData] using hlow
-  exact windowGInf (I := I) hne K hK beta psiT p gSeq gRef e he hdense
+  exact windowGInfOut (E := E) (H := H) (I := I) (M := M)
+    hne K hK beta psiT p gSeq gRef e he hdense
     L hL hgLip (covBddAllSol (I := I) hS hmet hreg Hcov) hlow'
+
+/-- Compact-data version of `winGInfOfSol`. -/
+noncomputable def winGInfOfData (hne : Nonempty M)
+    (W : SolWindowData (I := I) (M := M)) :
+    WindowMetricPreconvConclusion (E := E) (H := H) (I := I) (M := M) := by
+  classical
+  cases W with
+  | mk K hK beta psiT t0 hbeta p gSeq gRef D S hS hmet hreg H0 hswap Hcov Hlip hlow =>
+      exact WindowMetricPreconvConclusion.intro K beta psiT p gSeq gRef
+        (winGInfOfSol (I := I) hne K hK beta psiT t0 hbeta p gSeq gRef D S hS hmet
+          hreg H0 hswap Hcov Hlip hlow)
 
 end
 

@@ -531,15 +531,6 @@ structure IsSolutionOn
   rm04Cont :
     DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 4 D.carrier
       (fun t x => S.base.rm04 t x)
-  /-- Interior continuity of the canonical `∇ Ric` family.  `∇Ric` is a
-  ≤3rd-order differential expression in the metric, so this follows from the
-  interior metric smoothness; it is stated on `D.regular` (not the closed-at-`0`
-  carrier) because nothing consumes `∇Ric` continuity up to `t = 0`. -/
-  nablaRicCont :
-    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 3 D.regular
-      (fun t x =>
-        totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-          2 (S.family.connection t) (S.ricci t) x)
   /-- Fixed-time spatial differentiability of the canonical Ricci norm. -/
   ricciNormSpace :
     ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
@@ -687,11 +678,6 @@ structure CanonicalRicciRegularOn
   rm04_cont :
     DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 4 D.carrier
       (fun t x => S.base.rm04 t x)
-  nablaRic_cont :
-    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 3 D.regular
-      (fun t x =>
-        totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-          2 (S.family.connection t) (S.ricci t) x)
   ricci_norm_space :
     ∀ t : Real, t ∈ D.carrier -> ∀ x : M,
       MDifferentiableAt I 𝓘(Real, Real) (ricciNorm (I := I) S t) x
@@ -721,18 +707,6 @@ theorem rm04FamilyContinuousOnSet
     DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 4 D.carrier
       (fun t x => S.base.rm04 t x) :=
   hreg.rm04_cont
-
-/-- Canonical total covariant derivative of Ricci is continuous as a
-time-dependent `(0,3)` tensor family over the solution interval. -/
-theorem nablaRicFamilyContinuousOnSet
-    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
-    {S : SolutionOn (I := I) (M := M) D}
-    (hreg : CanonicalRicciRegularOn (I := I) (M := M) S) :
-    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 3 D.regular
-      (fun t x =>
-        totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
-          2 (S.family.connection t) (S.ricci t) x) :=
-  hreg.nablaRic_cont
 
 end CanonicalRicciRegularOn
 
@@ -769,14 +743,14 @@ theorem isSolutionOn_timeShift
     · -- coeff: interior `C∞`, on `D.regular`
       intro x X Y
       have hOld := hS.smoothMetric.coeff x X Y
-      have haff : ContDiff Real ⊤ (fun s : Real => s + τ) :=
+      have haff : ContDiff Real ∞ (fun s : Real => s + τ) :=
         contDiff_id.add contDiff_const
       have hmaps :
           Set.MapsTo (fun s : Real => s + τ) (D.timeShift τ).regular D.regular := by
         intro s hs
         exact hs
       have hcomp :
-          ContDiffOn Real ⊤
+          ContDiffOn Real ∞
             (fun s : Real => (S.family.metric (s + τ)).inner x X Y)
             (D.timeShift τ).regular := by
         simpa [Function.comp_def] using hOld.comp haff.contDiffOn hmaps
@@ -809,13 +783,13 @@ theorem isSolutionOn_timeShift
         using hcont
     · intro Idx _ frame u hframe i j
       have hOld :
-          ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+          ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
             (fun p : Real × M =>
               (S.family.metric p.1).inner p.2 (frame i p.2) (frame j p.2))
             (D.regular ×ˢ u) :=
         hS.smoothMetric.frameCompSmooth frame hframe i j
       have hmapSmooth :
-          ContMDiff (𝓘(Real, Real).prod I) (𝓘(Real, Real).prod I) ⊤
+          ContMDiff (𝓘(Real, Real).prod I) (𝓘(Real, Real).prod I) ∞
             (fun p : Real × M => (p.1 + τ, p.2)) := by
         exact (contMDiff_fst.add contMDiff_const).prodMk contMDiff_snd
       have hmaps :
@@ -824,7 +798,7 @@ theorem isSolutionOn_timeShift
         intro p hp
         exact ⟨hp.1, hp.2⟩
       have hcomp :
-          ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+          ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
             (fun p : Real × M =>
               (S.family.metric (p.1 + τ)).inner p.2
                 (frame i p.2) (frame j p.2))
@@ -907,18 +881,6 @@ theorem isSolutionOn_timeShift
       DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.comp_time (I := I) (M := M)
         hS.rm04Cont htime hmaps
     simpa [SolutionOn.timeShift, SolutionFamily.timeShift] using hcont
-  nablaRicCont := by
-    have hmaps :
-        Set.MapsTo (fun s : Real => s + τ) (D.timeShift τ).regular D.regular := by
-      intro s hs
-      exact hs
-    have htime : Continuous (fun s : Real => s + τ) :=
-      continuous_id.add continuous_const
-    have hcont :=
-      DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.comp_time (I := I) (M := M)
-        hS.nablaRicCont htime hmaps
-    simpa [SolutionOn.family, SolutionOn.ricci, SolutionOn.timeShift,
-      SolutionFamily.timeShift] using hcont
   ricciNormSpace := by
     intro t ht x
     have h := hS.ricciNormSpace (t + τ) ht x

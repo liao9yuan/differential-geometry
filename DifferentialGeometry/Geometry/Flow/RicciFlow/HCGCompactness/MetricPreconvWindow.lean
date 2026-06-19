@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.WindowPreconv
 set_option autoImplicit false
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
-set_option backward.isDefEq.respectTransparency false
 
 /-!
 # Window-uniform metric preconvergence — flow-data inputs (P3 C-II-final, in progress)
@@ -73,11 +72,7 @@ theorem evolNorm_bound_of_ricBound
     (hBprev : forall r : Nat, 1 <= r -> r < N ->
       MetricCovDerivOrderBoundOnWindow (I := I) U β ψ gSeq gRef r (Cg r))
     (KShi : Real) (hKShi0 : 0 ≤ KShi)
-    (hShi : forall s : Nat, s <= N -> forall i : Nat,
-      forall t : Real, t ∈ Set.Icc β ψ -> forall x : M, x ∈ U ->
-        Real.sqrt
-          (Tensor0SBundle.normSq0S (I := I) (gSeq i t) x (2 + s)
-            (ricCovTower (I := I) (gSeq i t) (gSeq i t) s x)) <= KShi)
+    (hShi : MovingShiBoundOn (I := I) U β ψ gSeq N KShi)
     (CN : Real) (hCN0 : 0 ≤ CN)
     (hboundN : MetricCovDerivOrderBoundOnWindow (I := I) K β ψ gSeq gRef N CN) :
     ∃ L : Real, 0 ≤ L ∧
@@ -121,11 +116,7 @@ theorem hgLip_orderN_of_solutions
     (hBprev : forall r : Nat, 1 <= r -> r < N ->
       MetricCovDerivOrderBoundOnWindow (I := I) U β ψ gSeq gRef r (Cg r))
     (KShi : Real) (hKShi0 : 0 ≤ KShi)
-    (hShi : forall s : Nat, s <= N -> forall i : Nat,
-      forall t : Real, t ∈ Set.Icc β ψ -> forall x : M, x ∈ U ->
-        Real.sqrt
-          (Tensor0SBundle.normSq0S (I := I) (gSeq i t) x (2 + s)
-            (ricCovTower (I := I) (gSeq i t) (gSeq i t) s x)) <= KShi)
+    (hShi : MovingShiBoundOn (I := I) U β ψ gSeq N KShi)
     (CN : Real) (hCN0 : 0 ≤ CN)
     (hboundN : MetricCovDerivOrderBoundOnWindow (I := I) K β ψ gSeq gRef N CN)
     (D : Nat -> RealTimeInterval)

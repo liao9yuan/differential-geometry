@@ -105,11 +105,12 @@ noncomputable def matrixCLM
 
 theorem contMDiffOn_finset_sum
     {ι V : Type*} [NormedAddCommGroup V] [NormedSpace Real V]
+    {n : WithTop ℕ∞}
     {t : Set (Real × M)}
     {s : Finset ι} {f : ι -> Real × M -> V}
     (hf : forall a, a ∈ s ->
-      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, V) ⊤ (f a) t) :
-    ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, V) ⊤
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, V) n (f a) t) :
+    ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, V) n
       (fun p => s.sum (fun a => f a p)) t := by
   classical
   revert hf
@@ -118,12 +119,12 @@ theorem contMDiffOn_finset_sum
     simpa using
       (contMDiffOn_const
         (I := 𝓘(Real, Real).prod I) (I' := 𝓘(Real, V))
-        (n := ⊤) (s := t) (c := 0))
+        (n := n) (s := t) (c := 0))
   · intro a s ha ih hf
-    have hfa : ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, V) ⊤
+    have hfa : ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, V) n
         (f a) t := by
       exact hf a (Finset.mem_insert_self a s)
-    have hsum : ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, V) ⊤
+    have hsum : ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, V) n
         (fun p => s.sum (fun x => f x p)) t := by
       exact ih (fun x hx => hf x (Finset.mem_insert_of_mem hx))
     simpa [Finset.sum_insert ha] using hfa.add hsum
@@ -487,7 +488,7 @@ theorem coordFrameGramCLM_spacetimeSmooth
     ContMDiffOn (𝓘(Real, Real).prod I)
       𝓘(Real,
         (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E -> Real) →L[Real]
-          (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)) ⊤
+          (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)) ∞
       (fun p : Real × M =>
         frameGramCLM (I := I) S (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0) p)
       (D.regular ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0) := by
@@ -507,7 +508,7 @@ theorem coordFrameGInvCLM_spacetimeSmooth
     ContMDiffOn (𝓘(Real, Real).prod I)
       𝓘(Real,
         (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E -> Real) →L[Real]
-          (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)) ⊤
+          (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)) ∞
       (fun p : Real × M =>
         frameGInvCLM (Idx := DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E)
           (coordInv (I := I) S x0) p)
@@ -547,13 +548,13 @@ theorem coordFrameGInvCLM_spacetimeSmooth
       ContMDiffWithinAt (𝓘(Real, Real).prod I)
         𝓘(Real,
           (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E -> Real) →L[Real]
-            (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)) ⊤
+            (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E -> Real)) ∞
         (fun q : Real × M =>
           ContinuousLinearMap.inverse
             (frameGramCLM (I := I) S
               (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x0) q))
         (D.regular ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0) p := by
-    simpa [Function.comp_def] using hinvAt.comp_contMDiffWithinAt hgram
+    simpa [Function.comp_def] using (hinvAt.of_le le_top).comp_contMDiffWithinAt hgram
   refine hcomp.congr_of_eventuallyEq_of_mem ?_ hp
   filter_upwards [self_mem_nhdsWithin] with q hq
   exact
@@ -566,7 +567,7 @@ theorem coordInvSmooth
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
     (x0 : M) (i j : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E) :
-    ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+    ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
       (fun p : Real × M => coordInv (I := I) S x0 p.1 p.2 i j)
       (D.regular ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0) := by
   classical
@@ -574,7 +575,7 @@ theorem coordInvSmooth
     coordFrameGInvCLM_spacetimeSmooth (I := I) S hS x0
   have happ :
       ContMDiffOn (𝓘(Real, Real).prod I)
-        𝓘(Real, DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E -> Real) ⊤
+        𝓘(Real, DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E -> Real) ∞
         (fun p : Real × M =>
           frameGInvCLM (Idx := DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E)
             (coordInv (I := I) S x0) p
@@ -582,7 +583,7 @@ theorem coordInvSmooth
         (D.regular ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0) := by
     exact hsmooth.clm_apply contMDiffOn_const
   have hcoord :
-      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun p : Real × M =>
           frameGInvCLM (Idx := DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E)
             (coordInv (I := I) S x0) p
@@ -591,7 +592,7 @@ theorem coordInvSmooth
     exact (contMDiffOn_const
       (I := 𝓘(Real, Real).prod I)
       (I' := 𝓘(Real, (DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E -> Real) →L[Real] Real))
-      (n := ⊤) (s := D.regular ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0)
+      (n := ∞) (s := D.regular ×ˢ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0)
       (c := LinearMap.toContinuousLinearMap
         (LinearMap.proj (R := Real)
           (φ := fun _ : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E => Real) i))).clm_apply happ
@@ -730,7 +731,7 @@ theorem coordInvSmoothAt
     (x0 : M) (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
     (hx : x ∈ DifferentialGeometry.Tensor.Coordinates.coordinateFrameSet (I := I) x0)
     (i j : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E) :
-    ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+    ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
       (fun p : Real × M => coordInv (I := I) S x0 p.1 p.2 i j)
       ((t : Real), x) := by
   exact

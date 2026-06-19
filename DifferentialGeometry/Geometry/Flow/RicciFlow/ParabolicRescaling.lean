@@ -404,7 +404,7 @@ theorem metricFamilySmooth_para
   refine ⟨?_, ?_, ?_, ?_⟩
   · intro x X Y
     have hOld := hS.smoothMetric.coeff x X Y
-    have haff_global : ContDiff Real ⊤ (fun s : Real => paraTime τ R s) := by
+    have haff_global : ContDiff Real ∞ (fun s : Real => paraTime τ R s) := by
       unfold paraTime
       exact contDiff_const.add (contDiff_id.div_const R)
     have hmaps :
@@ -413,7 +413,7 @@ theorem metricFamilySmooth_para
       intro s hs
       exact hs
     have hcomp :
-        ContDiffOn Real ⊤
+        ContDiffOn Real ∞
           (fun s : Real => (S.base.metric (paraTime τ R s)).inner x X Y)
           (paraInterval D τ R hR hτ).regular := by
       simpa [Function.comp_def] using
@@ -456,18 +456,18 @@ theorem metricFamilySmooth_para
       using hscale
   · intro Idx _ frame u hframe i j
     have hOld :
-        ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+        ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
           (fun p : Real × M =>
             (S.family.metric p.1).inner p.2 (frame i p.2) (frame j p.2))
           (D.regular ×ˢ u) :=
       hS.smoothMetric.frameCompSmooth frame hframe i j
     have htime :
-        ContMDiff (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+        ContMDiff (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
           (fun p : Real × M => paraTime τ R p.1) := by
       unfold paraTime
       exact contMDiff_const.add (contMDiff_fst.div_const R)
     have hmapSmooth :
-        ContMDiff (𝓘(Real, Real).prod I) (𝓘(Real, Real).prod I) ⊤
+        ContMDiff (𝓘(Real, Real).prod I) (𝓘(Real, Real).prod I) ∞
           (fun p : Real × M => (paraTime τ R p.1, p.2)) :=
       htime.prodMk contMDiff_snd
     have hmaps :
@@ -476,7 +476,7 @@ theorem metricFamilySmooth_para
       intro p hp
       exact ⟨hp.1, hp.2⟩
     have hcomp :
-        ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+        ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
           (fun p : Real × M =>
             (S.base.metric (paraTime τ R p.1)).inner p.2
               (frame i p.2) (frame j p.2))
@@ -484,7 +484,7 @@ theorem metricFamilySmooth_para
       simpa [SolutionOn.family, Function.comp_def] using
         hOld.comp hmapSmooth.contMDiffOn hmaps
     have hscale :
-        ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+        ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
           (fun p : Real × M =>
             R * (S.base.metric (paraTime τ R p.1)).inner p.2
               (frame i p.2) (frame j p.2))
@@ -656,19 +656,6 @@ theorem paraSol
       DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.const_smul (I := I) (M := M)
         R hcomp
     simpa [paraSolution_rm04 (I := I) S τ R hR hτ] using hscale
-  nablaRicCont := by
-    have hmaps :
-        Set.MapsTo (fun s : Real => paraTime τ R s)
-          (paraInterval D τ R hR hτ).regular D.regular := by
-      intro s hs
-      exact hs
-    have htime : Continuous (fun s : Real => paraTime τ R s) := by
-      unfold paraTime
-      exact continuous_const.add (continuous_id.div_const R)
-    have hcont :=
-      DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.comp_time (I := I) (M := M)
-        hS.nablaRicCont htime hmaps
-    simpa [paraNablaRic_eq (I := I) S τ R hR hτ] using hcont
   ricciNormSpace := by
     intro t ht x
     have hOld :

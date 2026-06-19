@@ -28,6 +28,23 @@ theorem extDerivFun_real_eq_mfderiv
       mfderiv I 𝓘(Real, Real) f x V := by
   simp [extDerivFun, NormedSpace.fromTangentSpace]
 
+/-- Scalar directional derivative chain rule through a diffeomorphism. -/
+theorem extDerivFun_comp_diffeomorph
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+    {M N : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [TopologicalSpace N] [ChartedSpace H N] [IsManifold I ∞ M]
+    (f : N -> Real) (Phi : M ≃ₘ⟮I, I⟯ N) (x : M)
+    (v : TangentSpace I x)
+    (hf : MDifferentiableAt I 𝓘(Real, Real) f (Phi x)) :
+    extDerivFun (I := I) (fun y : M => f (Phi y)) x v =
+      extDerivFun (I := I) f (Phi x) (mfderiv I I (Phi : M -> N) x v) := by
+  have hPhi : MDifferentiableAt I I (Phi : M -> N) x :=
+    Phi.mdifferentiable (by decide : (∞ : WithTop ℕ∞) ≠ 0) x
+  rw [extDerivFun_real_eq_mfderiv, extDerivFun_real_eq_mfderiv]
+  simpa [Function.comp_def] using
+    mfderiv_comp_apply (I := I) (I' := I) (I'' := 𝓘(Real, Real)) x hf hPhi v
+
 /-- A scalar chart expression is differentiable at a target point whenever the
 original scalar is manifold-differentiable at the corresponding source point.
 

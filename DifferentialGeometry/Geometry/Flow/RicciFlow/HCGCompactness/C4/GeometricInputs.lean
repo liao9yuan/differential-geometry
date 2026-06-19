@@ -7,5 +7,5 @@
 --     section referenced the nonexistent `RicciFlower.Coordinates.NormalChartData`
 --     and never compiled; it was removed on 2026-06-09.)
 -- This file remains as the umbrella import path for older callers.
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.StepAInputs
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.StepBInputs
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepAInputs
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepBInputs

@@ -11,3 +11,15 @@ Honest frontier: `metricCompactness` is the single HCG compactness `sorry`. It r
 2026-05-27 injectivity update: `metricCompactness` now carries `[I.Boundaryless]` because its `BaseInjBound` hypothesis is the HCG wrapper around the normal-coordinate injectivity-radius backend.
 
 Verification: passed with the expected single `sorry` at `metricCompactness`.
+
+2026-06-17 P4 metric-domain backend update: corrected the
+`MetricSourceData.compact_preimage` shape so compact restriction now requires
+the honest eventual-domain hypothesis `K ⊆ Φ.source k`. Added the matching
+`metricSourceCompactSet_isCompact` lemma, canonical open source/target domain
+structures, `metricSourceTargetDiff`, `MetricSourceData.ofCanonical`,
+`MetricSourceData.ofRestrictPullback`, and the metric/pointed
+`ofRestrictPullback` convergence constructors. The metric-only source-domain
+packaging now builds from real open-subtype restriction and pullback metrics;
+the remaining input is the analytic seminorm convergence for those constructed
+metrics, plus the existing global `metricCompactness` compactness `sorry`.
+Verification passed with the expected single `metricCompactness` `sorry`.

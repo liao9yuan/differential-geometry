@@ -15,6 +15,25 @@ Legend: `[x]` done & verified · `[~]` honest-input (book-external) · `[ ]` tod
 > `→ file:decl` pointer; full build history lives in each file's same-name `.md`.
 > The old `ApproximateIsometry.lean` monolith was deleted — its green interface is
 > in `ApproxIsometryDefs.lean`, its broken proofs in `ApproximateIsometryArchive.md`.
+>
+> **Relocation (2026-06-17):** the 21 Ch4-exclusive modules now live in
+> `…/HCGCompactness/C4/` (git renames; targeted-build-only, as before — the umbrella
+> imports none of them). **Stay in the parent `HCGCompactness/`** (Ch4-content but
+> shared with the active Ch3 chain, so not moved): `MapConvergence`, `ArzelaAscoli`,
+> `Lemma45Engine`(+`CovariantAbstract`/`SumLemmas`/`Constants`), `MetricCompactness`,
+> plus the foundational layer (`Basic`, `PointedRiemannian`, `PointedConvergence`,
+> `BoundedGeometry`, `InjectivityRadius`) and the Ch3 P-track. `C4/` is therefore not
+> self-contained: it imports up to the parent for those shared engines.
+>
+> **Dependency-graph fact (2026-06-17):** item-3a is **UNCONDITIONAL** — proved via
+> normal coordinates (`Comparison/ExpBallDiffeo.lean:exp_isLocalDiffeomorphOn_ball` →
+> `exists_expBall_diffeo_of_lt`), NOT via the Jacobi/Grönwall route. So the
+> nonsingularity tower (`Comparison/Variation/CovariantGronwall.lean:covGronwall_ne_zero`,
+> `Comparison/ExpNonsingular.lean`, `Metric/InnerExpansion.lean`, and the ∞→finite-order
+> parallel-transport refactor in `Comparison/Variation/ParallelTransport.lean`) is **OFF
+> the Theorem 3.9 critical path** — reusable global-geometry analysis (no-conjugate-points
+> Grönwall), the natural native route to Step B `lbl395` metric bounds, NOT an item-3
+> dependency. Do not re-couple it to item-3.
 
 ---
 
@@ -180,9 +199,36 @@ A0 `lbl384` CGT decay, A0' PackingBound/ratio-ballMult (Bishop–Gromov), Realiz
       **⟹ STEP A (faithful, book-benchmark) = COMPLETE modulo the declared black boxes**
       (Hopf–Rinow, A0/A0' decay+volume, §5 `lbl413`/`lbl416` convexity + C²-radius scale).
 
+## Convergence spine — canonical analytic interface (RULING 2026-06-17)
+
+One convergence API across Steps B/C/D; do NOT spawn a parallel hierarchy.
+
+- **State every new Step B/C/D convergence/limit fact `U`-relative** on
+  `MapConvergence.MapCInfConvOnCompacts U` (the maps/metrics live on bounded Euclidean
+  balls, not `Set.univ`), produced by the localized engine
+  `MapConvergence.exists_cInf_subseq_on` (B-loc). Use the global
+  `exists_cInf_subseq`/`MapCInfConvOnCompacts Set.univ` only for genuinely total maps.
+- **Diffeomorphism limits** (transition maps, gluing) go through
+  `IsometryCompactness.isometry_seq_diffeo` — its output (`PartialDiffeomorph` + the
+  `Ψ∘Φ=id` cocycle) IS the `lbl394` transition-limit shape. No new isometry-compactness
+  machinery.
+- **Metric limits**: a metric in chart coords is a `MapCInfConvOnCompacts U` of the
+  Gram-form-valued map `E → (E →L E →L ℝ)`; reuse the map engine, no metric-AA.
+- **The pointed-CG-source vocabulary** (`MetricCompactness.lean`'s `MetricSourceCPConvOn`/
+  `MetricCGConvergenceData`) appears ONLY at the **D5 endpoint**, reached by ONE bridge
+  from the assembled local Map-convergence. The metric-side (`MetricCPConvOn`, LC
+  covariant deriv) and map-side (`MapCInfConvOnCompacts`, Euclidean `iteratedFDeriv`)
+  stay **parallel + bridged**, never unified (CLAUDE.md variant rule: different concept).
+- Reusable Euclidean-analysis engines (`MapConvergence`, `MapConvergenceDeriv`,
+  `ArzelaAscoli`, `DiagonalSubseq`) are promotion candidates to `Analysis/` post-completion
+  (principle 1, "liberate buried byproducts"); deferred while Step B/C/D are in flight.
+
 ## §3 Step B — local metrics & transition maps (`L1370–1882`)
 
-B0 stages 1–2 done (above); B0 stages 3–5 (x-derivative Grönwall) remain.
+B0 stages 1–2 done (above); B0 stages 3–5 (x-derivative Grönwall) remain. **Spine:** use
+the convergence-spine ruling above (B-loc `exists_cInf_subseq_on` + `isometry_seq_diffeo`).
+`lbl395` (normal-coord metric bounds) is honest-input (book cites [H6] Cor 4.12); the
+Jacobi/Grönwall tower (now off the item-3 path) is the native-discharge candidate for it.
 
 - [ ] B1 `lbl397` approx-iso on a large ball ⟸ A14, S6/A0', B0', F1 · B2 `lbl399` ·
       B3 `lbl402` · B4 `lbl403` · B5 `lbl404` · B6 `lbl405` (`F_{kℓ,r}` is (ε,p)-pre-approx). ⟸ F1–F6.
@@ -199,12 +245,29 @@ B0 stages 1–2 done (above); B0 stages 3–5 (x-derivative Grönwall) remain.
 
 ---
 
-## Critical path
+## Critical path (updated 2026-06-17)
 
-`F4 (wire lift) → F5 → F6` ; F8: engine DONE, only F8-input left (F7 done) ; then `A1→…→A14` ; `B1→…→B6` ;
-`C1→…→C4` ; `D1→D2→D3→D4→D5`. §5 PARKED (await external geometry merge).
-Honest-input boundary (total): A0 `lbl384`, A0' Rauch/volume, S3 `lbl413`, S6 `lbl418`,
-F8 `lbl375`/[H6] §5 (`IsometryDerivBounds`).
+**DONE:** Step A (metric core + item 3, modulo black boxes) ; F-track F1/F2/F3/F5/F6 green,
+F7/F8 done (F8 needs only the honest-input `IsometryDerivBounds`), F4 carries one mechanical
+assembly-`sorry`. **LIVE frontier:** `B1→…→B6  →  C1→…→C4  →  D1→D2→D3→D4→D5` (D5 = discharge
+`metricCompactness`), all on the convergence-spine ruling above. Remaining non-B/C/D todo:
+F2-book, F4-assembly.
+
+**Off the critical path (reusable analysis, do NOT re-couple to Thm 3.9):** the
+Jacobi/Grönwall nonsingularity tower (`CovariantGronwall`/`ExpNonsingular`/`InnerExpansion`
+/∞→finite parallel-transport) — item-3a is unconditional without it; it is instead the
+native-discharge candidate for Step B `lbl395`.
+
+**§5 status:** item-3's §5 dependence collapsed (item-3a unconditional via normal coords).
+The remaining §5 surface is honest-input only.
+
+Honest-input boundary (total): A0 `lbl384`, A0' Rauch/volume, `lbl395` ([H6] Cor 4.12
+normal-coord metric bounds), S3 `lbl413` / `lbl416` (convexity + C²-radius scale), S6
+`lbl418` (`ExpInverseDerivBoundInput`), F8 `lbl375`/[H6] §5 (`IsometryDerivBounds`), Step A
+Hopf–Rinow (`exists_proper_realization`). *(Open question for Step B: whether S6 is
+derivable from `lbl395` + the F8 bound-propagation, shrinking this set.)*
 
 **Shared with Chapter 3:** the good-frame producer (`RicBoundGoodFrame.lean`) is the
-same gate as ric_bound's R4 (`RicBound.lean` endpoint, `RicBoundAssembly.aN_intrinsic_point`).
+same gate as ric_bound's R4 (`RicBound.lean` endpoint, `RicBoundAssembly.aN_intrinsic_point`);
+and the convergence spine (`MapConvergence`/`exists_cInf_subseq`/`isometry_seq_diffeo`) is
+consumed by Ch3's P3 metric-preconvergence too.

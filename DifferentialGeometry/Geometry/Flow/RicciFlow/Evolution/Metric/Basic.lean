@@ -79,7 +79,7 @@ theorem coordMetricSmooth
     (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S)
     (x₀ : M) (i j : CoordinateIdx (𝕜 := Real) E) :
-    ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+    ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
       (fun p : Real × M =>
         metricCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀)
           p.1 p.2 i j)
@@ -98,7 +98,7 @@ theorem coordMetricSmoothAt
     (x₀ : M) (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
     (hx : x ∈ coordinateFrameSet (I := I) x₀)
     (i j : CoordinateIdx (𝕜 := Real) E) :
-    ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+    ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
       (fun p : Real × M =>
         metricCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀)
           p.1 p.2 i j)

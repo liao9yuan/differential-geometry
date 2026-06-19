@@ -1,5 +1,5 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.StepAInputs
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.PointedEmetric
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepAInputs
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.PointedEmetric
 
 set_option autoImplicit false
 set_option linter.style.longLine false

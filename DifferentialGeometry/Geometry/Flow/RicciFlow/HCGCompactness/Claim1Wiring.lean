@@ -555,7 +555,6 @@ theorem ginv_compL2_le
 
 /-! ## B5: the pointwise norm bridge (component tower ↔ geometric tower) -/
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **B5**: at a point where the frame is `gRef`-orthonormal (the pointwise
 `MetricInverseInBasis … identityInvMetric` condition), the `compL2` of the component
 tower equals the geometric `√normSq0S` of the `iterCov` tower — both sides of `claim1`'s

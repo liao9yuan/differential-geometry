@@ -1,5 +1,5 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.GoodCoveringOrdered
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.DiagonalSubseq
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.GoodCoveringOrdered
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.DiagonalSubseq
 
 set_option autoImplicit false
 set_option linter.style.longLine false

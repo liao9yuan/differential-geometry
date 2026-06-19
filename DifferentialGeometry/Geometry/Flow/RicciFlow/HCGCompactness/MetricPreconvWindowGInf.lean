@@ -501,6 +501,20 @@ theorem windowOfNet
   · rintro tau ⟨n, rfl⟩ _ eps heps
     exact hnet n eps heps
 
+/-- Named output predicate for the abstract all-window metric precompactness
+endpoint.  This keeps downstream solution-level assemblers from repeatedly
+normalizing the expanded final existential. -/
+structure WindowGInfOut
+    (K : Set M) (beta psiT : Real) (p : Nat)
+    (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
+    (gRef : SmoothRiemannianMetric I M) : Prop where
+  out :
+    exists phi : Nat -> Nat, StrictMono phi /\
+      exists gInf : Real -> SmoothRiemannianMetric I M,
+        forall eps : Real, 0 < eps -> exists k0 : Nat, forall k : Nat, k0 <= k ->
+          forall t, t ∈ Set.Icc beta psiT ->
+            metricDerivNormSupOn (I := I) K p (gSeq (phi k) t) (gInf t) gRef < eps
+
 /-- Construct an all-time limit family on the window from dense-time fixed-time
 limits, uniform time-Lipschitz control, and the fixed-time spatial
 precompactness hypotheses. -/
@@ -600,6 +614,29 @@ theorem windowGInf (hne : Nonempty M)
     windowOfNet (I := I) K beta psiT p gSeq gInf gRef phi hphi L hL hgLip hInfLip e he
       hdense (fun n eps heps => hfull (e n) (he n) eps heps)
   exact ⟨phi', hphi', gInf, hwin⟩
+
+/-- Named-output wrapper for `windowGInf`. -/
+theorem windowGInfOut (hne : Nonempty M)
+    (K : Set M) (hK : IsCompact K) (beta psiT : Real) (p : Nat)
+    (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
+    (gRef : SmoothRiemannianMetric I M)
+    (e : Nat -> Real) (he : forall n : Nat, e n ∈ Set.Icc beta psiT)
+    (hdense : forall t, t ∈ Set.Icc beta psiT -> forall delta : Real, 0 < delta ->
+      exists n : Nat, |t - e n| < delta)
+    (L : Real) (hL : 0 <= L)
+    (hgLip : forall k : Nat, forall s, s ∈ Set.Icc beta psiT -> forall t, t ∈ Set.Icc beta psiT ->
+      forall a : Nat, a <= p -> forall x, x ∈ K ->
+        metricDerivNorm (I := I) a (gSeq k s) (gSeq k t) gRef x <= L * |s - t|)
+    (hbdd : forall rho : Nat -> Nat, StrictMono rho -> forall t, t ∈ Set.Icc beta psiT ->
+      forall q : Nat, forall K' : Set M, IsCompact K' -> exists C : Real,
+        forall k : Nat, forall z, z ∈ K' ->
+          metricCovDerivNorm (I := I) q (gSeq (rho k) t) gRef z <= C)
+    (hlow : forall rho : Nat -> Nat, StrictMono rho -> forall t, t ∈ Set.Icc beta psiT ->
+      exists c : Real, 0 < c /\ forall (k : Nat) (x : M) (v : TangentSpace I x),
+        c * gRef.inner x v v <= (gSeq (rho k) t).inner x v v) :
+    WindowGInfOut (I := I) K beta psiT p gSeq gRef := by
+  exact
+    ⟨windowGInf (I := I) hne K hK beta psiT p gSeq gRef e he hdense L hL hgLip hbdd hlow⟩
 
 end HCGCompactness
 end DifferentialGeometry

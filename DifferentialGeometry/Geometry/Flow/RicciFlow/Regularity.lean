@@ -186,7 +186,6 @@ theorem ricciRegOfSol
   exact
     { ricci_cont := hS.ricciCont
       rm04_cont := hS.rm04Cont
-      nablaRic_cont := hS.nablaRicCont
       ricci_norm_space := hS.ricciNormSpace
       ricci_norm_grad := hS.ricciNormGrad }
 

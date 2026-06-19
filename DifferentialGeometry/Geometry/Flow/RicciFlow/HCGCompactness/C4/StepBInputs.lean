@@ -4,7 +4,7 @@ import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 import DifferentialGeometry.Geometry.Exponential.Smoothness.OffZero
 import DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.StepAInputs
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepAInputs
 
 set_option autoImplicit false
 set_option linter.style.longLine false

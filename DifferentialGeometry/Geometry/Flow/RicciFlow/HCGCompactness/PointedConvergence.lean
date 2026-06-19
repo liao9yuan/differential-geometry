@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.Basic
+import DifferentialGeometry.Geometry.Metric.OpenSubtype
+import DifferentialGeometry.Geometry.Metric.Pullback
 import DifferentialGeometry.Tensor.RSTensor.MetricCompatibility
 import DifferentialGeometry.Tensor.RSTensor.NablaOnTensors.Regularity.TotalNabla0S
 import DifferentialGeometry.Bundle.Frame
@@ -634,16 +636,332 @@ theorem source_subset
 
 end PointedCGHMaps
 
-/-- The source domain of the `k`th comparison map as a subtype.  The manifold
-structure and restricted/pulled-back metrics on this subtype are supplied by
-`SourceDomainMetricData`; this keeps the missing open-domain backend explicit
-instead of silently extending metrics to all of the limit manifold. -/
+/-- The source of the `k`th comparison map as a bundled open subset of the
+limit manifold. -/
+def sourceOpen
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X L subseq) (k : Nat) :
+    letI : TopologicalSpace L.M := L.topology
+    TopologicalSpace.Opens L.M := by
+  letI : TopologicalSpace L.M := L.topology
+  exact ⟨Φ.source k, Φ.source_open k⟩
+
+/-- The target of the `k`th comparison map as a bundled open subset of the
+corresponding sequence manifold. -/
+def targetOpen
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X L subseq) (k : Nat) :
+    letI : TopologicalSpace (X.term (subseq k)).M :=
+      (X.term (subseq k)).topology
+    TopologicalSpace.Opens ((X.term (subseq k)).M) := by
+  letI : TopologicalSpace (X.term (subseq k)).M :=
+    (X.term (subseq k)).topology
+  exact ⟨Φ.target k, Φ.target_open k⟩
+
+/-- The source domain of the `k`th comparison map as the bundled open source.
+The restricted/pulled-back metrics on this open domain are supplied by
+`SourceDomainMetricData`; this keeps the missing metric backend explicit instead
+of silently extending metrics to all of the limit manifold. -/
 abbrev SourceDomain
     {X : PointedFlowSeq (I := I)}
     {L : PointedFlowData (I := I) X.D}
     {subseq : Nat -> Nat}
     (Φ : PointedCGHMaps (I := I) X L subseq) (k : Nat) :=
-  {x : L.M // x ∈ Φ.source k}
+  letI : TopologicalSpace L.M := L.topology
+  (sourceOpen (I := I) Φ k : Type _)
+
+/-- The target domain of the `k`th comparison map as the bundled open image. -/
+abbrev TargetDomain
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X L subseq) (k : Nat) :=
+  letI : TopologicalSpace (X.term (subseq k)).M :=
+    (X.term (subseq k)).topology
+  (targetOpen (I := I) Φ k : Type _)
+
+/-- The canonical topology on a comparison-map source domain. -/
+@[implicit_reducible]
+noncomputable def sourceDomTop
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X L subseq) (k : Nat) :
+    TopologicalSpace (SourceDomain (I := I) Φ k) := by
+  letI : TopologicalSpace L.M := L.topology
+  change TopologicalSpace (sourceOpen (I := I) Φ k)
+  infer_instance
+
+/-- The canonical charted-space structure on a comparison-map source domain. -/
+@[implicit_reducible]
+noncomputable def sourceDomCharted
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X L subseq) (k : Nat) :
+    letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+    ChartedSpace H (SourceDomain (I := I) Φ k) := by
+  letI : TopologicalSpace L.M := L.topology
+  letI : ChartedSpace H L.M := L.charted
+  letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+  change ChartedSpace H (sourceOpen (I := I) Φ k)
+  exact TopologicalSpace.Opens.instChartedSpace (H := H) (M := L.M)
+    (s := sourceOpen (I := I) Φ k)
+
+/-- The canonical Hausdorff structure on a comparison-map source domain. -/
+@[implicit_reducible]
+noncomputable def sourceDomT2
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X L subseq) (k : Nat) :
+    letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+    T2Space (SourceDomain (I := I) Φ k) := by
+  letI : TopologicalSpace L.M := L.topology
+  letI : T2Space L.M := L.t2
+  letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+  change T2Space {x : L.M // x ∈ Φ.source k}
+  infer_instance
+
+/-- The canonical smooth-manifold structure on a comparison-map source domain. -/
+@[implicit_reducible]
+noncomputable def sourceDomSmooth
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X L subseq) (k : Nat) :
+    letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+    letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
+    IsManifold I ∞ (SourceDomain (I := I) Φ k) := by
+  letI : TopologicalSpace L.M := L.topology
+  letI : ChartedSpace H L.M := L.charted
+  letI : IsManifold I ∞ L.M := L.smooth
+  letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+  letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
+  change IsManifold I ∞ (sourceOpen (I := I) Φ k)
+  exact { (sourceOpen (I := I) Φ k).instHasGroupoid (contDiffGroupoid ∞ I) with }
+
+/-- A source domain is sigma-compact once its underlying open source is
+sigma-compact as a subset of the limit manifold.  The source-set
+sigma-compactness is kept explicit; it is not part of the comparison-map data. -/
+theorem sourceDomSigmaOf
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X L subseq) (k : Nat)
+    (hσ : letI : TopologicalSpace L.M := L.topology; IsSigmaCompact (Φ.source k)) :
+    letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+    SigmaCompactSpace (SourceDomain (I := I) Φ k) := by
+  letI : TopologicalSpace L.M := L.topology
+  letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+  change SigmaCompactSpace {x : L.M // x ∈ Φ.source k}
+  exact isSigmaCompact_iff_sigmaCompactSpace.mp hσ
+
+/-- The canonical topology on a comparison-map target domain. -/
+@[implicit_reducible]
+noncomputable def targetDomTop
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X L subseq) (k : Nat) :
+    TopologicalSpace (TargetDomain (I := I) Φ k) := by
+  letI : TopologicalSpace (X.term (subseq k)).M :=
+    (X.term (subseq k)).topology
+  change TopologicalSpace (targetOpen (I := I) Φ k)
+  infer_instance
+
+/-- The canonical charted-space structure on a comparison-map target domain. -/
+@[implicit_reducible]
+noncomputable def targetDomCharted
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X L subseq) (k : Nat) :
+    letI : TopologicalSpace (TargetDomain (I := I) Φ k) := targetDomTop (I := I) Φ k
+    ChartedSpace H (TargetDomain (I := I) Φ k) := by
+  letI : TopologicalSpace (X.term (subseq k)).M :=
+    (X.term (subseq k)).topology
+  letI : ChartedSpace H (X.term (subseq k)).M :=
+    (X.term (subseq k)).charted
+  letI : TopologicalSpace (TargetDomain (I := I) Φ k) := targetDomTop (I := I) Φ k
+  change ChartedSpace H (targetOpen (I := I) Φ k)
+  exact TopologicalSpace.Opens.instChartedSpace (H := H)
+    (M := (X.term (subseq k)).M) (s := targetOpen (I := I) Φ k)
+
+/-- The canonical Hausdorff structure on a comparison-map target domain. -/
+@[implicit_reducible]
+noncomputable def targetDomT2
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X L subseq) (k : Nat) :
+    letI : TopologicalSpace (TargetDomain (I := I) Φ k) := targetDomTop (I := I) Φ k
+    T2Space (TargetDomain (I := I) Φ k) := by
+  letI : TopologicalSpace (X.term (subseq k)).M :=
+    (X.term (subseq k)).topology
+  letI : T2Space (X.term (subseq k)).M :=
+    (X.term (subseq k)).t2
+  letI : TopologicalSpace (TargetDomain (I := I) Φ k) := targetDomTop (I := I) Φ k
+  change T2Space {x : (X.term (subseq k)).M // x ∈ Φ.target k}
+  infer_instance
+
+/-- The canonical smooth-manifold structure on a comparison-map target domain. -/
+@[implicit_reducible]
+noncomputable def targetDomSmooth
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X L subseq) (k : Nat) :
+    letI : TopologicalSpace (TargetDomain (I := I) Φ k) := targetDomTop (I := I) Φ k
+    letI : ChartedSpace H (TargetDomain (I := I) Φ k) := targetDomCharted (I := I) Φ k
+    IsManifold I ∞ (TargetDomain (I := I) Φ k) := by
+  letI : TopologicalSpace (X.term (subseq k)).M :=
+    (X.term (subseq k)).topology
+  letI : ChartedSpace H (X.term (subseq k)).M :=
+    (X.term (subseq k)).charted
+  letI : IsManifold I ∞ (X.term (subseq k)).M :=
+    (X.term (subseq k)).smooth
+  letI : TopologicalSpace (TargetDomain (I := I) Φ k) := targetDomTop (I := I) Φ k
+  letI : ChartedSpace H (TargetDomain (I := I) Φ k) := targetDomCharted (I := I) Φ k
+  change IsManifold I ∞ (targetOpen (I := I) Φ k)
+  exact { (targetOpen (I := I) Φ k).instHasGroupoid (contDiffGroupoid ∞ I) with }
+
+/-- A target domain is sigma-compact once its underlying open target is
+sigma-compact as a subset of the sequence manifold. -/
+theorem targetDomSigmaOf
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X L subseq) (k : Nat)
+    (hσ :
+      letI : TopologicalSpace (X.term (subseq k)).M :=
+        (X.term (subseq k)).topology
+      IsSigmaCompact (Φ.target k)) :
+    letI : TopologicalSpace (TargetDomain (I := I) Φ k) := targetDomTop (I := I) Φ k
+    SigmaCompactSpace (TargetDomain (I := I) Φ k) := by
+  letI : TopologicalSpace (X.term (subseq k)).M :=
+    (X.term (subseq k)).topology
+  letI : TopologicalSpace (TargetDomain (I := I) Φ k) := targetDomTop (I := I) Φ k
+  change SigmaCompactSpace {x : (X.term (subseq k)).M // x ∈ Φ.target k}
+  exact isSigmaCompact_iff_sigmaCompactSpace.mp hσ
+
+private theorem contMDiff_openCod
+    {M N : Type*} [TopologicalSpace M] [ChartedSpace H M]
+    [TopologicalSpace N] [ChartedSpace H N]
+    [IsManifold I ∞ M] [IsManifold I ∞ N]
+    {U : TopologicalSpace.Opens N}
+    {f : M -> U}
+    (hf : ContMDiff I I (∞ : WithTop ℕ∞) (fun x : M => (f x : N))) :
+    ContMDiff I I (∞ : WithTop ℕ∞) f := by
+  haveI : IsManifold I ∞ U :=
+    { U.instHasGroupoid (contDiffGroupoid ∞ I) with }
+  rw [contMDiff_iff_target] at hf ⊢
+  constructor
+  · exact Continuous.subtype_mk hf.1 (fun x => (f x).2)
+  · intro y
+    have hy := hf.2 (y : N)
+    simpa [Function.comp_def, extChartAt, TopologicalSpace.Opens.chartAt_eq] using hy
+
+/-- The comparison partial diffeomorphism, restricted to its open source and
+open target, is an honest diffeomorphism of the bundled domains. -/
+noncomputable def sourceTargetDiff
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X L subseq) (k : Nat) :
+    letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+    letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
+    letI : TopologicalSpace (TargetDomain (I := I) Φ k) := targetDomTop (I := I) Φ k
+    letI : ChartedSpace H (TargetDomain (I := I) Φ k) := targetDomCharted (I := I) Φ k
+    Diffeomorph I I (SourceDomain (I := I) Φ k) (TargetDomain (I := I) Φ k)
+      (∞ : WithTop ℕ∞) := by
+  letI : TopologicalSpace L.M := L.topology
+  letI : ChartedSpace H L.M := L.charted
+  letI : IsManifold I ∞ L.M := L.smooth
+  letI : TopologicalSpace (X.term (subseq k)).M :=
+    (X.term (subseq k)).topology
+  letI : ChartedSpace H (X.term (subseq k)).M :=
+    (X.term (subseq k)).charted
+  letI : IsManifold I ∞ (X.term (subseq k)).M :=
+    (X.term (subseq k)).smooth
+  letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+  letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
+  letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
+  letI : TopologicalSpace (TargetDomain (I := I) Φ k) := targetDomTop (I := I) Φ k
+  letI : ChartedSpace H (TargetDomain (I := I) Φ k) := targetDomCharted (I := I) Φ k
+  letI : IsManifold I ∞ (TargetDomain (I := I) Φ k) := targetDomSmooth (I := I) Φ k
+  let e := Φ.partialDiffeomorph k
+  refine
+    { toEquiv := e.toPartialEquiv.toEquiv
+      contMDiff_toFun := ?_
+      contMDiff_invFun := ?_ }
+  · have hbase :
+        ContMDiff I I (∞ : WithTop ℕ∞)
+          (fun x : SourceDomain (I := I) Φ k => e (x : L.M)) := by
+      intro x
+      have hx : (x : L.M) ∈ e.source := x.2
+      have hAt :
+          ContMDiffAt I I (∞ : WithTop ℕ∞) (fun y : L.M => e y) (x : L.M) :=
+        e.contMDiffOn_toFun.contMDiffAt (e.open_source.mem_nhds hx)
+      exact (contMDiffAt_subtype_iff
+        (U := sourceOpen (I := I) Φ k)
+        (f := fun y : L.M => e y) (x := x)).2 hAt
+    exact contMDiff_openCod (I := I) (U := targetOpen (I := I) Φ k) hbase
+  · have hbase :
+        ContMDiff I I (∞ : WithTop ℕ∞)
+          (fun y : TargetDomain (I := I) Φ k => e.toPartialEquiv.symm (y : (X.term (subseq k)).M)) := by
+      intro y
+      have hy : (y : (X.term (subseq k)).M) ∈ e.target := y.2
+      have hAt :
+          ContMDiffAt I I (∞ : WithTop ℕ∞)
+            (fun z : (X.term (subseq k)).M => e.toPartialEquiv.symm z)
+            (y : (X.term (subseq k)).M) :=
+        e.contMDiffOn_invFun.contMDiffAt (e.open_target.mem_nhds hy)
+      exact (contMDiffAt_subtype_iff
+        (U := targetOpen (I := I) Φ k)
+            (f := fun z : (X.term (subseq k)).M => e.toPartialEquiv.symm z) (x := y)).2 hAt
+    exact contMDiff_openCod (I := I) (U := sourceOpen (I := I) Φ k) hbase
+
+@[simp]
+theorem sourceTargetDiff_apply
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X L subseq) (k : Nat)
+    (x : SourceDomain (I := I) Φ k) :
+    letI : TopologicalSpace L.M := L.topology
+    letI : ChartedSpace H L.M := L.charted
+    letI : TopologicalSpace (X.term (subseq k)).M := (X.term (subseq k)).topology
+    letI : ChartedSpace H (X.term (subseq k)).M := (X.term (subseq k)).charted
+    letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+    letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
+    letI : TopologicalSpace (TargetDomain (I := I) Φ k) := targetDomTop (I := I) Φ k
+    letI : ChartedSpace H (TargetDomain (I := I) Φ k) := targetDomCharted (I := I) Φ k
+    (sourceTargetDiff (I := I) Φ k x : (X.term (subseq k)).M) = Φ.map k (x : L.M) := by
+  rfl
+
+@[simp]
+theorem sourceTargetDiff_symm_apply
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X L subseq) (k : Nat)
+    (y : TargetDomain (I := I) Φ k) :
+    letI : TopologicalSpace L.M := L.topology
+    letI : ChartedSpace H L.M := L.charted
+    letI : TopologicalSpace (X.term (subseq k)).M := (X.term (subseq k)).topology
+    letI : ChartedSpace H (X.term (subseq k)).M := (X.term (subseq k)).charted
+    letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+    letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
+    letI : TopologicalSpace (TargetDomain (I := I) Φ k) := targetDomTop (I := I) Φ k
+    letI : ChartedSpace H (TargetDomain (I := I) Φ k) := targetDomCharted (I := I) Φ k
+    ((sourceTargetDiff (I := I) Φ k).symm y : L.M) =
+      (Φ.partialDiffeomorph k).toPartialEquiv.symm (y : (X.term (subseq k)).M) := by
+  rfl
 
 def sourceCompactSet
     {X : PointedFlowSeq (I := I)}
@@ -652,6 +970,79 @@ def sourceCompactSet
     (Φ : PointedCGHMaps (I := I) X L subseq) (k : Nat)
     (K : Set L.M) : Set (SourceDomain (I := I) Φ k) :=
   {x | (x : L.M) ∈ K}
+
+/-- A compact set in the sequence manifold, viewed inside a comparison-map
+target domain. -/
+def targetCompactSet
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X L subseq) (k : Nat)
+    (K : Set (X.term (subseq k)).M) : Set (TargetDomain (I := I) Φ k) :=
+  {x | (x : (X.term (subseq k)).M) ∈ K}
+
+/-- Compact subsets of the limit manifold remain compact after restriction to a
+source domain once they are contained in that source.  Without the containment
+hypothesis this is false for general open sources. -/
+theorem sourceCompactSet_isCompact
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X L subseq) (k : Nat)
+    {K : Set L.M}
+    (hK : letI : TopologicalSpace L.M := L.topology; IsCompact K)
+    (hKsrc : letI : TopologicalSpace L.M := L.topology; K ⊆ Φ.source k) :
+    letI : TopologicalSpace L.M := L.topology
+    IsCompact (sourceCompactSet (I := I) Φ k K) := by
+  letI : TopologicalSpace L.M := L.topology
+  change IsCompact ((Subtype.val : SourceDomain (I := I) Φ k -> L.M) ⁻¹' K)
+  rw [Subtype.isCompact_iff]
+  have hImage :
+      Subtype.val '' ((Subtype.val : SourceDomain (I := I) Φ k -> L.M) ⁻¹' K) = K := by
+    ext x
+    constructor
+    · rintro ⟨y, hyK, rfl⟩
+      exact hyK
+    · intro hxK
+      exact ⟨⟨x, hKsrc hxK⟩, hxK, rfl⟩
+  rw [hImage]
+  exact hK
+
+/-- Compact subsets of the sequence manifold remain compact after restriction
+to a target domain once they are contained in that target. -/
+theorem targetCompactSet_isCompact
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X L subseq) (k : Nat)
+    {K : Set (X.term (subseq k)).M}
+    (hK :
+      letI : TopologicalSpace (X.term (subseq k)).M :=
+        (X.term (subseq k)).topology
+      IsCompact K)
+    (hKtgt :
+      letI : TopologicalSpace (X.term (subseq k)).M :=
+        (X.term (subseq k)).topology
+      K ⊆ Φ.target k) :
+    letI : TopologicalSpace (X.term (subseq k)).M :=
+      (X.term (subseq k)).topology
+    IsCompact (targetCompactSet (I := I) Φ k K) := by
+  letI : TopologicalSpace (X.term (subseq k)).M :=
+    (X.term (subseq k)).topology
+  change IsCompact ((Subtype.val : TargetDomain (I := I) Φ k ->
+      (X.term (subseq k)).M) ⁻¹' K)
+  rw [Subtype.isCompact_iff]
+  have hImage :
+      Subtype.val '' ((Subtype.val : TargetDomain (I := I) Φ k ->
+        (X.term (subseq k)).M) ⁻¹' K) = K := by
+    ext x
+    constructor
+    · rintro ⟨y, hyK, rfl⟩
+      exact hyK
+    · intro hxK
+      exact ⟨⟨x, hKtgt hxK⟩, hxK, rfl⟩
+  rw [hImage]
+  exact hK
 
 /-- Metrics on a source domain together with the formulas saying that they are
 the restricted limit metric and the pullback of the corresponding sequence
@@ -682,6 +1073,7 @@ structure SourceDomainMetricData
     letI : TopologicalSpace (SourceDomain (I := I) Φ k) := topology
     letI : TopologicalSpace L.M := L.topology
     forall K : Set L.M, IsCompact K ->
+      K ⊆ Φ.source k ->
       IsCompact (sourceCompactSet (I := I) Φ k K)
   limit_inner :
     letI : TopologicalSpace (SourceDomain (I := I) Φ k) := topology
@@ -737,6 +1129,298 @@ structure SourceDomainMetricData
 
 namespace SourceDomainMetricData
 
+/-- Build source-domain metric data from the canonical open-subtype
+topology/charted/manifold structures, leaving only sigma-compactness, the three
+metric families, and the two pullback/restriction formulas as inputs. -/
+noncomputable def ofCanonical
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    {Φ : PointedCGHMaps (I := I) X L subseq}
+    {k : Nat}
+    (sigmaCompact :
+      letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+      SigmaCompactSpace (SourceDomain (I := I) Φ k))
+    (limitMetric :
+      letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+      letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
+      letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
+      Real -> SmoothRiemannianMetric I (SourceDomain (I := I) Φ k))
+    (pullbackMetric :
+      letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+      letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
+      letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
+      Real -> SmoothRiemannianMetric I (SourceDomain (I := I) Φ k))
+    (referenceMetric :
+      letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+      letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
+      letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
+      Real -> SmoothRiemannianMetric I (SourceDomain (I := I) Φ k))
+    (limit_inner :
+      letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+      letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
+      letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
+      letI : TopologicalSpace L.M := L.topology
+      letI : ChartedSpace H L.M := L.charted
+      letI : T2Space L.M := L.t2
+      letI : IsManifold I ∞ L.M := L.smooth
+      letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.M := by
+        change IsManifold I ∞ L.M
+        infer_instance
+      letI : SigmaCompactSpace L.M := L.sigmaCompact
+      forall (t : Real) (x : SourceDomain (I := I) Φ k)
+        (v w : TangentSpace I x),
+          (limitMetric t).inner x v w =
+            (L.S.family.metric t).inner (x : L.M)
+              ((mfderiv I I (fun y : SourceDomain (I := I) Φ k => (y : L.M)) x) v)
+              ((mfderiv I I (fun y : SourceDomain (I := I) Φ k => (y : L.M)) x) w))
+    (pullback_inner :
+      letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+      letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
+      letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
+      letI : TopologicalSpace L.M := L.topology
+      letI : ChartedSpace H L.M := L.charted
+      letI : T2Space L.M := L.t2
+      letI : IsManifold I ∞ L.M := L.smooth
+      letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.M := by
+        change IsManifold I ∞ L.M
+        infer_instance
+      letI : SigmaCompactSpace L.M := L.sigmaCompact
+      letI : TopologicalSpace (X.term (subseq k)).M :=
+        (X.term (subseq k)).topology
+      letI : ChartedSpace H (X.term (subseq k)).M :=
+        (X.term (subseq k)).charted
+      letI : T2Space (X.term (subseq k)).M :=
+        (X.term (subseq k)).t2
+      letI : IsManifold I ∞ (X.term (subseq k)).M :=
+        (X.term (subseq k)).smooth
+      letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (X.term (subseq k)).M :=
+        by
+          change IsManifold I ∞ (X.term (subseq k)).M
+          infer_instance
+      letI : SigmaCompactSpace (X.term (subseq k)).M :=
+        (X.term (subseq k)).sigmaCompact
+      forall (t : Real) (x : SourceDomain (I := I) Φ k)
+        (v w : TangentSpace I x),
+          (pullbackMetric t).inner x v w =
+            ((X.term (subseq k)).S.family.metric t).inner
+              (Φ.map k (x : L.M))
+              ((mfderiv I I
+                (fun y : SourceDomain (I := I) Φ k => Φ.map k (y : L.M)) x) v)
+              ((mfderiv I I
+                (fun y : SourceDomain (I := I) Φ k => Φ.map k (y : L.M)) x) w)) :
+    SourceDomainMetricData (I := I) Φ k where
+  topology := sourceDomTop (I := I) Φ k
+  charted := sourceDomCharted (I := I) Φ k
+  t2 := sourceDomT2 (I := I) Φ k
+  smooth := sourceDomSmooth (I := I) Φ k
+  sigmaCompact := sigmaCompact
+  limitMetric := limitMetric
+  pullbackMetric := pullbackMetric
+  referenceMetric := referenceMetric
+  compact_preimage := by
+    intro K hK hKsrc
+    exact sourceCompactSet_isCompact (I := I) Φ k hK hKsrc
+  limit_inner := limit_inner
+  pullback_inner := pullback_inner
+
+/-- Build source-domain metric data from actual open-subtype metric
+restriction on the limit/source and sequence/target domains, then pull back the
+target metric along the checked source-target diffeomorphism.  The remaining
+inputs are exactly the sigma-compactness of the two open domains and the
+reference metric family used to measure covariant derivatives. -/
+noncomputable def ofRestrictPullback
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    {Φ : PointedCGHMaps (I := I) X L subseq}
+    {k : Nat}
+    (hσsrc : letI : TopologicalSpace L.M := L.topology; IsSigmaCompact (Φ.source k))
+    (hσtgt :
+      letI : TopologicalSpace (X.term (subseq k)).M :=
+        (X.term (subseq k)).topology
+      IsSigmaCompact (Φ.target k))
+    (referenceMetric :
+      letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+      letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
+      letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
+      Real -> SmoothRiemannianMetric I (SourceDomain (I := I) Φ k)) :
+    SourceDomainMetricData (I := I) Φ k := by
+  letI : TopologicalSpace L.M := L.topology
+  letI : ChartedSpace H L.M := L.charted
+  letI : T2Space L.M := L.t2
+  letI : IsManifold I ∞ L.M := L.smooth
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) L.M := by
+    change IsManifold I ∞ L.M
+    infer_instance
+  letI : SigmaCompactSpace L.M := L.sigmaCompact
+  letI : TopologicalSpace (X.term (subseq k)).M :=
+    (X.term (subseq k)).topology
+  letI : ChartedSpace H (X.term (subseq k)).M :=
+    (X.term (subseq k)).charted
+  letI : T2Space (X.term (subseq k)).M := (X.term (subseq k)).t2
+  letI : IsManifold I ∞ (X.term (subseq k)).M :=
+    (X.term (subseq k)).smooth
+  letI : IsManifold I ((∞ : WithTop ℕ∞) + 1) (X.term (subseq k)).M := by
+    change IsManifold I ∞ (X.term (subseq k)).M
+    infer_instance
+  letI : SigmaCompactSpace (X.term (subseq k)).M :=
+    (X.term (subseq k)).sigmaCompact
+  letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+  letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
+  letI : T2Space (SourceDomain (I := I) Φ k) := sourceDomT2 (I := I) Φ k
+  letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
+  letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
+    sourceDomSigmaOf (I := I) Φ k hσsrc
+  letI : TopologicalSpace (TargetDomain (I := I) Φ k) := targetDomTop (I := I) Φ k
+  letI : ChartedSpace H (TargetDomain (I := I) Φ k) := targetDomCharted (I := I) Φ k
+  letI : T2Space (TargetDomain (I := I) Φ k) := targetDomT2 (I := I) Φ k
+  letI : IsManifold I ∞ (TargetDomain (I := I) Φ k) := targetDomSmooth (I := I) Φ k
+  letI : SigmaCompactSpace (TargetDomain (I := I) Φ k) :=
+    targetDomSigmaOf (I := I) Φ k hσtgt
+  refine SourceDomainMetricData.ofCanonical (I := I)
+    (Φ := Φ) (k := k)
+    (sourceDomSigmaOf (I := I) Φ k hσsrc)
+    (fun t => by
+      let sourceSigma : SigmaCompactSpace (sourceOpen (I := I) Φ k) := by
+        change SigmaCompactSpace (SourceDomain (I := I) Φ k)
+        exact sourceDomSigmaOf (I := I) Φ k hσsrc
+      let sourceT2 : T2Space (sourceOpen (I := I) Φ k) := by
+        change T2Space (SourceDomain (I := I) Φ k)
+        exact sourceDomT2 (I := I) Φ k
+      exact
+        @SmoothRiemannianMetric.restrictOpen E inferInstance inferInstance H inferInstance I
+          L.M L.topology L.charted L.smooth inferInstance
+          (L.S.family.metric t) (sourceOpen (I := I) Φ k) sourceSigma sourceT2)
+    (fun t => by
+      let sourceSigma : SigmaCompactSpace (sourceOpen (I := I) Φ k) := by
+        change SigmaCompactSpace (SourceDomain (I := I) Φ k)
+        exact sourceDomSigmaOf (I := I) Φ k hσsrc
+      let sourceT2 : T2Space (sourceOpen (I := I) Φ k) := by
+        change T2Space (SourceDomain (I := I) Φ k)
+        exact sourceDomT2 (I := I) Φ k
+      let targetSigma : SigmaCompactSpace (targetOpen (I := I) Φ k) := by
+        change SigmaCompactSpace (TargetDomain (I := I) Φ k)
+        exact targetDomSigmaOf (I := I) Φ k hσtgt
+      let targetT2 : T2Space (targetOpen (I := I) Φ k) := by
+        change T2Space (TargetDomain (I := I) Φ k)
+        exact targetDomT2 (I := I) Φ k
+      let targetMetric : SmoothRiemannianMetric I (targetOpen (I := I) Φ k) :=
+        @SmoothRiemannianMetric.restrictOpen E inferInstance inferInstance H inferInstance I
+          (X.term (subseq k)).M (X.term (subseq k)).topology
+          (X.term (subseq k)).charted (X.term (subseq k)).smooth inferInstance
+          ((X.term (subseq k)).S.family.metric t) (targetOpen (I := I) Φ k)
+          targetSigma targetT2
+      exact
+        @Diffeomorph.pullbackMetric E inferInstance inferInstance inferInstance H inferInstance I
+          (SourceDomain (I := I) Φ k) (sourceDomTop (I := I) Φ k)
+          (sourceDomCharted (I := I) Φ k) (sourceDomSmooth (I := I) Φ k)
+          (TargetDomain (I := I) Φ k) (targetDomTop (I := I) Φ k)
+          (targetDomCharted (I := I) Φ k) (targetDomSmooth (I := I) Φ k)
+          sourceSigma sourceT2 targetMetric (sourceTargetDiff (I := I) Φ k))
+    referenceMetric
+    ?_ ?_
+  · intro t x v w
+    change (L.S.family.metric t).inner (x : L.M) v w =
+      (L.S.family.metric t).inner (x : L.M)
+        ((mfderiv I I (fun y : SourceDomain (I := I) Φ k => (y : L.M)) x) v)
+        ((mfderiv I I (fun y : SourceDomain (I := I) Φ k => (y : L.M)) x) w)
+    have hvinc :
+        (mfderiv I I (fun y : SourceDomain (I := I) Φ k => (y : L.M)) x) v = v := by
+      simpa only using
+        mfderiv_subtype_val_apply (I := I) (sourceOpen (I := I) Φ k) x v
+    have hwinc :
+        (mfderiv I I (fun y : SourceDomain (I := I) Φ k => (y : L.M)) x) w = w := by
+      simpa only using
+        mfderiv_subtype_val_apply (I := I) (sourceOpen (I := I) Φ k) x w
+    rw [hvinc, hwinc]
+  · intro t x v w
+    rw [Diffeomorph.pullbackMetric_inner]
+    change ((X.term (subseq k)).S.family.metric t).inner
+        ((sourceTargetDiff (I := I) Φ k x : TargetDomain (I := I) Φ k) :
+          (X.term (subseq k)).M)
+        ((mfderiv I I (sourceTargetDiff (I := I) Φ k) x) v)
+        ((mfderiv I I (sourceTargetDiff (I := I) Φ k) x) w) =
+      ((X.term (subseq k)).S.family.metric t).inner
+        (Φ.map k (x : L.M))
+        ((mfderiv I I
+          (fun y : SourceDomain (I := I) Φ k => Φ.map k (y : L.M)) x) v)
+        ((mfderiv I I
+          (fun y : SourceDomain (I := I) Φ k => Φ.map k (y : L.M)) x) w)
+    have hchain :
+        mfderiv I I
+            (fun y : SourceDomain (I := I) Φ k =>
+              ((sourceTargetDiff (I := I) Φ k y : TargetDomain (I := I) Φ k) :
+                (X.term (subseq k)).M)) x =
+          (mfderiv I I
+              (fun y : TargetDomain (I := I) Φ k => (y : (X.term (subseq k)).M))
+              (sourceTargetDiff (I := I) Φ k x)).comp
+            (mfderiv I I (sourceTargetDiff (I := I) Φ k) x) := by
+      have hval :
+          MDifferentiableAt I I
+            (fun y : TargetDomain (I := I) Φ k => (y : (X.term (subseq k)).M))
+            (sourceTargetDiff (I := I) Φ k x) := by
+        exact ContMDiffAt.mdifferentiableAt
+          ((contMDiff_subtype_val (I := I) (n := (∞ : WithTop ℕ∞))
+            (U := targetOpen (I := I) Φ k)).contMDiffAt)
+          (by simp)
+      have hdiff :
+          MDifferentiableAt I I (sourceTargetDiff (I := I) Φ k)
+            x :=
+        (sourceTargetDiff (I := I) Φ k).contMDiff.contMDiffAt.mdifferentiableAt
+          (by simp)
+      simpa [Function.comp_def] using
+        (mfderiv_comp (I := I) (I' := I) (I'' := I) x hval hdiff)
+    have hv :
+        mfderiv I I
+            (fun y : SourceDomain (I := I) Φ k =>
+              ((sourceTargetDiff (I := I) Φ k y : TargetDomain (I := I) Φ k) :
+                (X.term (subseq k)).M)) x v =
+          mfderiv I I (sourceTargetDiff (I := I) Φ k) x v := by
+      rw [hchain, ContinuousLinearMap.comp_apply]
+      have htarget :
+          (mfderiv I I
+              (fun y : TargetDomain (I := I) Φ k => (y : (X.term (subseq k)).M))
+              (sourceTargetDiff (I := I) Φ k x))
+            ((mfderiv I I (sourceTargetDiff (I := I) Φ k) x) v) =
+            (mfderiv I I (sourceTargetDiff (I := I) Φ k) x) v := by
+        simpa only using
+          mfderiv_subtype_val_apply (I := I) (targetOpen (I := I) Φ k)
+            (sourceTargetDiff (I := I) Φ k x)
+            ((mfderiv I I (sourceTargetDiff (I := I) Φ k) x) v)
+      exact htarget
+    have hw :
+        mfderiv I I
+            (fun y : SourceDomain (I := I) Φ k =>
+              ((sourceTargetDiff (I := I) Φ k y : TargetDomain (I := I) Φ k) :
+                (X.term (subseq k)).M)) x w =
+          mfderiv I I (sourceTargetDiff (I := I) Φ k) x w := by
+      rw [hchain, ContinuousLinearMap.comp_apply]
+      have htarget :
+          (mfderiv I I
+              (fun y : TargetDomain (I := I) Φ k => (y : (X.term (subseq k)).M))
+              (sourceTargetDiff (I := I) Φ k x))
+            ((mfderiv I I (sourceTargetDiff (I := I) Φ k) x) w) =
+            (mfderiv I I (sourceTargetDiff (I := I) Φ k) x) w := by
+        simpa only using
+          mfderiv_subtype_val_apply (I := I) (targetOpen (I := I) Φ k)
+            (sourceTargetDiff (I := I) Φ k x)
+            ((mfderiv I I (sourceTargetDiff (I := I) Φ k) x) w)
+      exact htarget
+    have hxmap :
+        ((sourceTargetDiff (I := I) Φ k x : TargetDomain (I := I) Φ k) :
+          (X.term (subseq k)).M) = Φ.map k (x : L.M) :=
+      sourceTargetDiff_apply (I := I) Φ k x
+    have hfun :
+        (fun y : SourceDomain (I := I) Φ k =>
+          ((sourceTargetDiff (I := I) Φ k y : TargetDomain (I := I) Φ k) :
+            (X.term (subseq k)).M)) =
+          fun y : SourceDomain (I := I) Φ k => Φ.map k (y : L.M) := by
+      funext y
+      exact sourceTargetDiff_apply (I := I) Φ k y
+    rw [hxmap, ← hv, ← hw, hfun]
+    rfl
+
 noncomputable def derivNormSupOn
     {X : PointedFlowSeq (I := I)}
     {L : PointedFlowData (I := I) X.D}
@@ -790,10 +1474,36 @@ def SourceMetricCPConvOnWindow
         forall t : Real, t ∈ Set.Icc a b ->
           (D k).derivNormSupOn (I := I) K p t < ε
 
+/-- Build the window source-domain convergence predicate from the two pieces
+that are logically separate in the open-domain layer: eventual containment of
+`K` in the comparison-map sources, and uniform convergence of the supplied
+source-domain metric seminorms.  This does not construct the source-domain
+metrics or their pullback formulas. -/
+theorem SourceMetricCPConvOnWindow.of_derivNormSupOn
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    {Φ : PointedCGHMaps (I := I) X L subseq}
+    {D : forall k : Nat, SourceDomainMetricData (I := I) Φ k}
+    {K : Set L.M}
+    (hK : letI : TopologicalSpace L.M := L.topology; IsCompact K)
+    {p : Nat} {a b : Real}
+    (hconv : forall ε : Real, 0 < ε ->
+      exists k0 : Nat, forall k : Nat, k0 <= k ->
+        forall t : Real, t ∈ Set.Icc a b ->
+          (D k).derivNormSupOn (I := I) K p t < ε) :
+    SourceMetricCPConvOnWindow (I := I) Φ D K hK p a b := by
+  intro ε hε
+  obtain ⟨kSrc, hSrc⟩ := Φ.source_subset hK
+  obtain ⟨kConv, hConv⟩ := hconv ε hε
+  refine ⟨max kSrc kConv, fun k hk => ?_⟩
+  refine ⟨hSrc k (le_trans (Nat.le_max_left kSrc kConv) hk), ?_⟩
+  exact hConv k (le_trans (Nat.le_max_right kSrc kConv) hk)
+
 /-- Compact-open smooth convergence of the pulled-back spatial metrics on the
-source domains.  This is theorem-facing data: constructing the source subtype
-manifold structures and proving the pullback formulas is the current
-open-domain metric frontier. -/
+source domains.  This is theorem-facing data: the canonical metric-data
+constructor is `SourceDomainMetricData.ofRestrictPullback`; the remaining
+analytic input is convergence of its source-domain seminorms. -/
 structure SourceMetricConvergenceData
     {X : PointedFlowSeq (I := I)}
     {L : PointedFlowData (I := I) X.D}
@@ -806,6 +1516,71 @@ structure SourceMetricConvergenceData
       forall p : Nat,
       forall t : Real, t ∈ X.D.carrier ->
         SourceMetricCPConvOn (I := I) Φ domain K hK p t
+
+namespace SourceMetricConvergenceData
+
+/-- Constructor for the spatial source-domain convergence record from raw
+per-time seminorm convergence of the supplied source-domain metrics.  The
+source-exhaustion condition is handled here; the analytic input remains exactly
+the `derivNormSupOn` convergence. -/
+noncomputable def of_derivNormSupOn
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    {Φ : PointedCGHMaps (I := I) X L subseq}
+    {D : forall k : Nat, SourceDomainMetricData (I := I) Φ k}
+    (hconv : forall K : Set L.M,
+      forall _hK : letI : TopologicalSpace L.M := L.topology; IsCompact K,
+      forall p : Nat,
+      forall t : Real, t ∈ X.D.carrier ->
+        forall ε : Real, 0 < ε ->
+          exists k0 : Nat, forall k : Nat, k0 <= k ->
+            (D k).derivNormSupOn (I := I) K p t < ε) :
+    SourceMetricConvergenceData (I := I) Φ where
+  domain := D
+  converges := by
+    intro K hK p t ht ε hε
+    obtain ⟨kSrc, hSrc⟩ := Φ.source_subset hK
+    obtain ⟨kConv, hConv⟩ := hconv K hK p t ht ε hε
+    refine ⟨max kSrc kConv, fun k hk => ?_⟩
+    refine ⟨hSrc k (le_trans (Nat.le_max_left kSrc kConv) hk), ?_⟩
+    exact hConv k (le_trans (Nat.le_max_right kSrc kConv) hk)
+
+/-- Spatial source-domain convergence built from the canonical restrict/pullback
+metric data, assuming the resulting seminorms converge at each time. -/
+noncomputable def ofRestrictPullback
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    {Φ : PointedCGHMaps (I := I) X L subseq}
+    (hσsrc : forall k : Nat,
+      letI : TopologicalSpace L.M := L.topology
+      IsSigmaCompact (Φ.source k))
+    (hσtgt : forall k : Nat,
+      letI : TopologicalSpace (X.term (subseq k)).M :=
+        (X.term (subseq k)).topology
+      IsSigmaCompact (Φ.target k))
+    (referenceMetric : forall k : Nat,
+      letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+      letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
+      letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
+      Real -> SmoothRiemannianMetric I (SourceDomain (I := I) Φ k))
+    (hconv : forall K : Set L.M,
+      forall _hK : letI : TopologicalSpace L.M := L.topology; IsCompact K,
+      forall p : Nat,
+      forall t : Real, t ∈ X.D.carrier ->
+        forall ε : Real, 0 < ε ->
+          exists k0 : Nat, forall k : Nat, k0 <= k ->
+            ((SourceDomainMetricData.ofRestrictPullback (I := I)
+              (Φ := Φ) (k := k) (hσsrc k) (hσtgt k)
+              (referenceMetric k)).derivNormSupOn (I := I) K p t) < ε) :
+    SourceMetricConvergenceData (I := I) Φ :=
+  SourceMetricConvergenceData.of_derivNormSupOn (I := I)
+    (D := fun k => SourceDomainMetricData.ofRestrictPullback (I := I)
+      (Φ := Φ) (k := k) (hσsrc k) (hσtgt k) (referenceMetric k))
+    hconv
+
+end SourceMetricConvergenceData
 
 /-- Compact-open smooth convergence on spacetime windows. -/
 structure SourceSpacetimeConvergenceData
@@ -820,6 +1595,92 @@ structure SourceSpacetimeConvergenceData
       forall p : Nat,
       forall a b : Real, Set.Icc a b ⊆ X.D.carrier ->
         SourceMetricCPConvOnWindow (I := I) Φ D K hK p a b
+
+namespace SourceSpacetimeConvergenceData
+
+/-- Spacetime window convergence implies the per-time spatial convergence by
+applying the window statement to the singleton interval `[t,t]`. -/
+noncomputable def toSpatial
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    {Φ : PointedCGHMaps (I := I) X L subseq}
+    {D : forall k : Nat, SourceDomainMetricData (I := I) Φ k}
+    (Hst : SourceSpacetimeConvergenceData (I := I) Φ D) :
+    SourceMetricConvergenceData (I := I) Φ where
+  domain := D
+  converges := by
+    intro K hK p t ht ε hε
+    have hwin : Set.Icc t t ⊆ X.D.carrier := by
+      intro s hs
+      have hst : s = t := le_antisymm hs.2 hs.1
+      simpa [hst] using ht
+    obtain ⟨k0, hk0⟩ := Hst.converges_on_windows K hK p t t hwin ε hε
+    refine ⟨k0, fun k hk => ?_⟩
+    obtain ⟨hsrc, hbound⟩ := hk0 k hk
+    exact ⟨hsrc, hbound t ⟨le_rfl, le_rfl⟩⟩
+
+/-- Constructor for the spacetime source-domain convergence record from raw
+uniform-on-window seminorm convergence of the supplied source-domain metrics.
+The source-exhaustion condition is handled by
+`SourceMetricCPConvOnWindow.of_derivNormSupOn`; the supplied hypothesis remains
+exactly the analytic/pullback convergence input. -/
+theorem of_derivNormSupOn
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    {Φ : PointedCGHMaps (I := I) X L subseq}
+    {D : forall k : Nat, SourceDomainMetricData (I := I) Φ k}
+    (hconv : forall K : Set L.M,
+      forall _hK : letI : TopologicalSpace L.M := L.topology; IsCompact K,
+      forall p : Nat,
+      forall a b : Real, Set.Icc a b ⊆ X.D.carrier ->
+        forall ε : Real, 0 < ε ->
+          exists k0 : Nat, forall k : Nat, k0 <= k ->
+            forall t : Real, t ∈ Set.Icc a b ->
+              (D k).derivNormSupOn (I := I) K p t < ε) :
+    SourceSpacetimeConvergenceData (I := I) Φ D where
+  converges_on_windows := by
+    intro K hK p a b hwin
+    exact SourceMetricCPConvOnWindow.of_derivNormSupOn (I := I) hK
+      (hconv K hK p a b hwin)
+
+/-- Spacetime source-domain convergence built from the canonical
+restrict/pullback metric data, assuming the resulting seminorms converge
+uniformly on compact time windows. -/
+theorem ofRestrictPullback
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    {Φ : PointedCGHMaps (I := I) X L subseq}
+    (hσsrc : forall k : Nat,
+      letI : TopologicalSpace L.M := L.topology
+      IsSigmaCompact (Φ.source k))
+    (hσtgt : forall k : Nat,
+      letI : TopologicalSpace (X.term (subseq k)).M :=
+        (X.term (subseq k)).topology
+      IsSigmaCompact (Φ.target k))
+    (referenceMetric : forall k : Nat,
+      letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+      letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
+      letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
+      Real -> SmoothRiemannianMetric I (SourceDomain (I := I) Φ k))
+    (hconv : forall K : Set L.M,
+      forall _hK : letI : TopologicalSpace L.M := L.topology; IsCompact K,
+      forall p : Nat,
+      forall a b : Real, Set.Icc a b ⊆ X.D.carrier ->
+        forall ε : Real, 0 < ε ->
+          exists k0 : Nat, forall k : Nat, k0 <= k ->
+            forall t : Real, t ∈ Set.Icc a b ->
+              ((SourceDomainMetricData.ofRestrictPullback (I := I)
+                (Φ := Φ) (k := k) (hσsrc k) (hσtgt k)
+                (referenceMetric k)).derivNormSupOn (I := I) K p t) < ε) :
+    SourceSpacetimeConvergenceData (I := I) Φ
+      (fun k => SourceDomainMetricData.ofRestrictPullback (I := I)
+        (Φ := Φ) (k := k) (hσsrc k) (hσtgt k) (referenceMetric k)) :=
+  SourceSpacetimeConvergenceData.of_derivNormSupOn (I := I) hconv
+
+end SourceSpacetimeConvergenceData
 
 /-- Pointwise pullback convergence for real-valued spacetime functions along
 the Cheeger--Gromov comparison maps.  This is the typed interface needed by
@@ -918,6 +1779,64 @@ structure SmoothCGHConverges
   spacetime :
     SourceSpacetimeConvergenceData (I := I) spatial.maps
       spatial.metrics.domain
+
+namespace SmoothCGHConverges
+
+/-- Build smooth CGH convergence from comparison maps, scalar pullback
+convergence, and source-domain spacetime metric convergence.  The spatial
+metric convergence is extracted from the singleton-window case. -/
+noncomputable def ofSpacetime
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X L subseq)
+    {D : forall k : Nat, SourceDomainMetricData (I := I) Φ k}
+    (hscalar : ScalarPullbackTendsto (I := I) Φ)
+    (Hst : SourceSpacetimeConvergenceData (I := I) Φ D) :
+    SmoothCGHConverges (I := I) X L subseq where
+  spatial := {
+    maps := Φ
+    metrics := Hst.toSpatial (I := I) }
+  scalar_converges := hscalar
+  spacetime := Hst
+
+/-- Build smooth CGH convergence from the canonical source-domain
+restrict/pullback metrics.  The remaining analytic input is exactly uniform
+window convergence of the seminorms of those constructed metrics. -/
+noncomputable def ofRestrictPullback
+    {X : PointedFlowSeq (I := I)}
+    {L : PointedFlowData (I := I) X.D}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X L subseq)
+    (hscalar : ScalarPullbackTendsto (I := I) Φ)
+    (hσsrc : forall k : Nat,
+      letI : TopologicalSpace L.M := L.topology
+      IsSigmaCompact (Φ.source k))
+    (hσtgt : forall k : Nat,
+      letI : TopologicalSpace (X.term (subseq k)).M :=
+        (X.term (subseq k)).topology
+      IsSigmaCompact (Φ.target k))
+    (referenceMetric : forall k : Nat,
+      letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
+      letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
+      letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
+      Real -> SmoothRiemannianMetric I (SourceDomain (I := I) Φ k))
+    (hconv : forall K : Set L.M,
+      forall _hK : letI : TopologicalSpace L.M := L.topology; IsCompact K,
+      forall p : Nat,
+      forall a b : Real, Set.Icc a b ⊆ X.D.carrier ->
+        forall ε : Real, 0 < ε ->
+          exists k0 : Nat, forall k : Nat, k0 <= k ->
+            forall t : Real, t ∈ Set.Icc a b ->
+              ((SourceDomainMetricData.ofRestrictPullback (I := I)
+                (Φ := Φ) (k := k) (hσsrc k) (hσtgt k)
+                (referenceMetric k)).derivNormSupOn (I := I) K p t) < ε) :
+    SmoothCGHConverges (I := I) X L subseq :=
+  SmoothCGHConverges.ofSpacetime (I := I) Φ hscalar
+    (SourceSpacetimeConvergenceData.ofRestrictPullback (I := I)
+      hσsrc hσtgt referenceMetric hconv)
+
+end SmoothCGHConverges
 
 end HCGCompactness
 end DifferentialGeometry

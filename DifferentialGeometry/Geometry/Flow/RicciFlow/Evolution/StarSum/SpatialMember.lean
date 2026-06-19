@@ -315,7 +315,6 @@ private theorem slotdiffBasisEq
 curvature term) expands by `curvatureAction0SAt_eq_rm04` (at `gInv = δ`) into a triple sum that,
 after the diagonal collapse and sum-swaps, is exactly `−∑_q` of the per-`q` curvature star terms
 (`curvactStar0`/`curvactStarPos`). -/
-set_option backward.isDefEq.respectTransparency false in
 private theorem curvactReduce
     (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) {x : M}
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]

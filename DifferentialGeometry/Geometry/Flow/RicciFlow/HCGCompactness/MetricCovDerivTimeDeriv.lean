@@ -624,7 +624,7 @@ theorem solnMetricJointAt
       (fun q : Real × M =>
         (S.family.metric q.1).inner q.2 (e.localFrame b i q.2) (e.localFrame b j q.2))
       (t, x) := fun i j =>
-    ((hcompOn i j).contMDiffAt hmemProd).of_le le_top
+    (hcompOn i j).contMDiffAt hmemProd
   -- smoothness of the frame coefficients of the slots
   have hcoeff : ∀ (a : Fin 2) i, ContMDiffAt I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
       (fun y : M => e.localFrame_coeff I b i y ((V a) y)) x := fun a i =>

@@ -122,7 +122,6 @@ theorem wRoute_val {Idx : Type*} [Fintype Idx] [DecidableEq Idx] {x : M}
 /-! ## The end-to-end identity (`q ≥ 1`)
 
 `base (k+1)(k+1) 0 0 σ_q`-components = the `update`-form `q`-term of the curvature action. -/
-set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1000000 in
 /-- **CURVACT `q`-term as a star base** (`q ≥ 1`): the validated generic-`k` identity. -/
 theorem curvactStarPos {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -254,7 +253,6 @@ theorem sigmaCurv0_nat_val (k : ℕ) (p : Fin (4 + 0)) :
   simp only [sigmaCurv0, Equiv.ofBijective_apply, tf0, Fin.val_natAdd]
   split_ifs <;> first | rfl | omega
 
-set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1000000 in
 /-- **CURVACT `q`-term as a star base** (`q = 0`): the validated generic-`k` identity. -/
 theorem curvactStar0 {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -384,7 +382,6 @@ theorem sigmaDiffA_nat_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + k)) :
   simp only [sigmaDiffA, Equiv.ofBijective_apply, tfDiffA, Fin.val_natAdd]
   split_ifs <;> first | rfl | omega
 
-set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1000000 in
 /-- Evaluation of the `(1,k)` slot-difference base route. -/
 theorem slotdiffStarA {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -533,7 +530,6 @@ theorem sigmaDiffB_nat_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + (k + 1))) :
   simp only [sigmaDiffB, Equiv.ofBijective_apply, tfDiffB, Fin.val_natAdd]
   split_ifs <;> first | rfl | omega
 
-set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1000000 in
 /-- Evaluation of the `(0,k+1)` slot-difference base route. -/
 theorem slotdiffStarB {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -700,7 +696,6 @@ theorem sigmaRic1_nat_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + k)) :
   simp only [sigmaRic1, Equiv.ofBijective_apply, tfRic1, Fin.val_natAdd]
   split_ifs <;> first | rfl | omega
 
-set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1000000 in
 /-- Evaluation of Ricci-trace route 1. -/
 theorem slotRic1 {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -836,7 +831,6 @@ theorem sigmaRic2_nat_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + k)) :
   simp only [sigmaRic2, Equiv.ofBijective_apply, tfRic2, Fin.val_natAdd]
   split_ifs <;> first | rfl | omega
 
-set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1000000 in
 /-- Evaluation of Ricci-trace route 2. -/
 theorem slotRic2 {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
@@ -972,7 +966,6 @@ theorem sigmaRic3_nat_val (k : ℕ) (q : Fin (4 + k)) (p : Fin (4 + k)) :
   simp only [sigmaRic3, Equiv.ofBijective_apply, tfRic3, Fin.val_natAdd]
   split_ifs <;> first | rfl | omega
 
-set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1000000 in
 /-- Evaluation of Ricci-trace route 3. -/
 theorem slotRic3 {Idx : Type*} [Fintype Idx] [DecidableEq Idx]

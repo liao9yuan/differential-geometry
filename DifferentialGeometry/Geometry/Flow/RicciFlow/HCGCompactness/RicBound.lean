@@ -125,6 +125,29 @@ noncomputable def ricCovTower
       (DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
         (I := I) (M := M) g)) s
 
+/-- **The moving-metric Shi bound** (MSM135 Lemma 3.11 hypothesis (3.5)): on the
+window `[β,ψ] × U`, the order-`≤ N` covariant-derivative towers of the Ricci
+tensor of each `gSeq i t`, measured in the *moving* metric `gSeq i t`, are
+uniformly bounded by `KShi`.
+
+This is the single honest analytic FRONTIER of the eq.(3.4) track: it is the
+Bernstein–Bando–Shi estimate, consumed as a hypothesis here and realized
+elsewhere by the BBS / iterated-`Rm`-tower producer (StarSum track).  It is
+named (rather than left as a raw `∀`-formula) so it is the one greppable target
+the BBS realization must discharge, and so every downstream consumer
+(`ric_bound_field`, `covOrderBound_of_soln`, the window-Lipschitz producers)
+shares one canonical interface.  Definitionally the underlying `∀`-bound, so
+callers supplying the raw formula and consumers applying it both work. -/
+def MovingShiBoundOn
+    (U : Set M) (β ψ : Real)
+    (gSeq : Nat -> Real -> SmoothRiemannianMetric I M)
+    (N : Nat) (KShi : Real) : Prop :=
+  forall s : Nat, s <= N -> forall i : Nat,
+    forall t : Real, t ∈ Set.Icc β ψ -> forall x : M, x ∈ U ->
+      Real.sqrt
+        (Tensor0SBundle.normSq0S (I := I) (gSeq i t) x (2 + s)
+          (ricCovTower (I := I) (gSeq i t) (gSeq i t) s x)) <= KShi
+
 set_option backward.isDefEq.respectTransparency false in
 /-- **The per-domain `(A_N)` engine** (constants-first).  On a good-frame
 domain `w` (inside a tangent trivialization, with the two-sided component
@@ -518,11 +541,7 @@ theorem ric_bound
     (hBprev : forall r : Nat, 1 <= r -> r < N ->
       MetricCovDerivOrderBoundOnWindow (I := I) U β ψ gSeq gRef r (Cg r))
     (KShi : Real) (hKShi0 : 0 ≤ KShi)
-    (hShi : forall s : Nat, s <= N -> forall i : Nat,
-      forall t : Real, t ∈ Set.Icc β ψ -> forall x : M, x ∈ U ->
-        Real.sqrt
-          (Tensor0SBundle.normSq0S (I := I) (gSeq i t) x (2 + s)
-            (ricCovTower (I := I) (gSeq i t) (gSeq i t) s x)) <= KShi) :
+    (hShi : MovingShiBoundOn (I := I) U β ψ gSeq N KShi) :
     exists Cpp Cppp : Real, 0 <= Cpp ∧ 0 <= Cppp ∧
       forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ ->
         forall x : M, x ∈ K ->
@@ -769,11 +788,7 @@ theorem ric_bound_field
     (hBprev : forall r : Nat, 1 <= r -> r < N ->
       MetricCovDerivOrderBoundOnWindow (I := I) U β ψ gSeq gRef r (Cg r))
     (KShi : Real) (hKShi0 : 0 ≤ KShi)
-    (hShi : forall s : Nat, s <= N -> forall i : Nat,
-      forall t : Real, t ∈ Set.Icc β ψ -> forall x : M, x ∈ U ->
-        Real.sqrt
-          (Tensor0SBundle.normSq0S (I := I) (gSeq i t) x (2 + s)
-            (ricCovTower (I := I) (gSeq i t) (gSeq i t) s x)) <= KShi) :
+    (hShi : MovingShiBoundOn (I := I) U β ψ gSeq N KShi) :
     exists Cpp Cppp : Real, 0 <= Cpp ∧ 0 <= Cppp ∧
       forall i : Nat, forall s : Real, s ∈ Set.Icc β ψ ->
         forall x : M, x ∈ K ->
@@ -1046,11 +1061,7 @@ theorem covOrderBound_stage
     (hBprev : forall r : Nat, 1 <= r -> r < N ->
       MetricCovDerivOrderBoundOnWindow (I := I) U β ψ gSeq gRef r (Cg r))
     (KShi : Real) (hKShi0 : 0 ≤ KShi)
-    (hShi : forall s : Nat, s <= N -> forall i : Nat,
-      forall t : Real, t ∈ Set.Icc β ψ -> forall x : M, x ∈ U ->
-        Real.sqrt
-          (Tensor0SBundle.normSq0S (I := I) (gSeq i t) x (2 + s)
-            (ricCovTower (I := I) (gSeq i t) (gSeq i t) s x)) <= KShi)
+    (hShi : MovingShiBoundOn (I := I) U β ψ gSeq N KShi)
     (ht0 : t0 ∈ Set.Icc β ψ)
     (hevComp : ∀ i : Nat, ∀ x ∈ K, ∀ s ∈ Set.Icc β ψ,
       ∀ v : Fin (N + 2) → TangentSpace I x,
@@ -1101,11 +1112,7 @@ theorem covOrderBound_tower
     (Bmax : Real) (hBmax1 : 1 ≤ Bmax)
     (hBmax : ∀ t ∈ Set.Icc β ψ, B t ≤ Bmax)
     (KShi : Real) (hKShi0 : 0 ≤ KShi)
-    (hShi : forall s : Nat, s <= N -> forall i : Nat,
-      forall t : Real, t ∈ Set.Icc β ψ -> forall x : M, x ∈ U ->
-        Real.sqrt
-          (Tensor0SBundle.normSq0S (I := I) (gSeq i t) x (2 + s)
-            (ricCovTower (I := I) (gSeq i t) (gSeq i t) s x)) <= KShi)
+    (hShi : MovingShiBoundOn (I := I) U β ψ gSeq N KShi)
     (ht0 : t0 ∈ Set.Icc β ψ)
     (hev : ∀ r : Nat, 1 ≤ r → r ≤ N → ∀ i : Nat, ∀ x ∈ U, ∀ s ∈ Set.Icc β ψ,
       ∀ v : Fin (r + 2) → TangentSpace I x,
@@ -1185,11 +1192,7 @@ theorem covOrderBound_of_soln
     (Bmax : Real) (hBmax1 : 1 ≤ Bmax)
     (hBmax : ∀ t ∈ Set.Icc β ψ, B t ≤ Bmax)
     (KShi : Real) (hKShi0 : 0 ≤ KShi)
-    (hShi : forall s : Nat, s <= N -> forall i : Nat,
-      forall t : Real, t ∈ Set.Icc β ψ -> forall x : M, x ∈ U ->
-        Real.sqrt
-          (Tensor0SBundle.normSq0S (I := I) (gSeq i t) x (2 + s)
-            (ricCovTower (I := I) (gSeq i t) (gSeq i t) s x)) <= KShi)
+    (hShi : MovingShiBoundOn (I := I) U β ψ gSeq N KShi)
     (ht0 : t0 ∈ Set.Icc β ψ)
     (hDreg : ∀ i : Nat, ∀ {t : Real}, t ∈ (D i).regular → (D i).regular ∈ 𝓝 t)
     (initC : Nat -> Real) (hinitC0 : ∀ r : Nat, 0 ≤ initC r)

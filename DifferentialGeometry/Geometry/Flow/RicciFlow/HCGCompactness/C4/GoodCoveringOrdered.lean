@@ -1,6 +1,6 @@
 import Mathlib.Topology.MetricSpace.HausdorffDistance
 import Mathlib.Topology.MetricSpace.ProperSpace
-import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.GoodCovering
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.GoodCovering
 
 set_option autoImplicit false
 set_option linter.style.longLine false
