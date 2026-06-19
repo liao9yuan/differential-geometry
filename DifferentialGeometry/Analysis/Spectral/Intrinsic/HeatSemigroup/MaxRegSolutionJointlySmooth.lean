@@ -11,6 +11,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.DuhamelSmo
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.MaxRegInteriorTimeSmoothing
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ForcingTimeBootstrap
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralEigenSeriesJointGram
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralPointwiseFlowDeriv
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.DenseSubset
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.PointwiseSpectralCoordinate
@@ -80,6 +81,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
 open DifferentialGeometry.Analysis.Parabolic.QuasiLinear
@@ -281,6 +283,78 @@ private theorem forcingSmoothCoordsRealize
     (measurableSet_Icc (a := (0 : ℝ)) (b := T))] with s hs
   rw [Set.IccExtend_of_mem hT.le _ hs, hF_coeff s hs i]
 
+set_option linter.unusedVariables false in
+/-- **DEEP ANALYTIC INPUT (2/2a) — the pointwise forcing-coordinate identification.**
+
+For the genuine maximal-regularity Duhamel solution `u` and a smooth representative family
+`F` pinned to `u` on the closed slab `Icc 0 T₁` (`h_pin`), with the order-`(a+2)` forcing
+ball bound `hball`, the `C∞`-in-time smooth forcing coordinate `f i` (from
+`forcingSmoothCoordsRealize`) equals, at every interior time `t ∈ Ico 0 T₁` and eigen-index
+`i`, the `i`-th eigen-coordinate of the genuine smooth Ricci–DeTurck remainder
+`deTurckSmoothRemainder g₀ g_bg (F t)`:
+
+  `f i t = tensorL2Coeff (toL2 (deTurckSmoothRemainder g₀ g_bg (F t) hδ_lt (hδ t))) i`.
+
+This is the soundness link tying the forcing coordinate to the realized nonlinearity.  It
+is the **pointwise** (every interior `t`) reading of the a.e. forcing identity `hforce`
+(`gforce =ᵐ deTurckSobolevNHa2 ∘ solField`): the forcing coordinate `f i`, a continuous
+representative of `gforce`'s `i`-th coordinate, agrees a.e. with the `i`-th coordinate of
+`deTurckSobolevNHa2 (solField t)`, which on the ball (`hball`) reproduces
+`deTurckSmoothN (F t)` (`deTurckSobolevNHa2_eq_smoothN`), whose coordinate is exactly the
+remainder coordinate (`deTurckSmoothN_coeff`).  Upgrading the a.e. agreement to the
+everywhere-on-interior identity uses the order-`(a+2)` time-continuity of the realized
+solution field up to `t = 0` (the same classical parabolic interior smoothing carried up to
+the smooth datum that supplies `realizedSol_solField_smallnessHorizon_Ha2`); the smooth
+`f i` is continuous, and `t ↦ deTurckSmoothN (F t).coeff i` is continuous on the interior
+through the continuity of the realized field, so the two continuous functions agreeing a.e.
+agree everywhere on the open interior, hence at every `t ∈ Ico 0 T₁`.
+
+DEFERRED (honest `sorry`; consumers transitively depend on `sorryAx`).  This is the genuine
+deep parabolic-regularity content (the order-`(a+2)` time-continuity of the Duhamel solution
+field up to `t = 0`), the soundness-side analogue of the smoothness horizon
+`realizedSol_solField_smallnessHorizon_Ha2`. -/
+private theorem realizedForcingCoord_eq_smoothN
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
+    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
+    {T₁ : ℝ} (hT₁_pos : 0 < T₁) (hT₁_le : T₁ ≤ T)
+    (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
+    (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
+      (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce)
+    (hforce : gforce =ᵐ[timeMeasure T]
+      (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
+          (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
+    (htrace : timeH1.trace0 _ T u = 0)
+    (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (F t)) δ)
+    (f : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
+    (hf_id : ∀ t ∈ Set.Icc (0 : ℝ) T, ∀ i,
+      tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (Nat.cast_nonneg a) (timeH1.toFun u t)) i =
+        perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (f i) t)
+    (h_pin : ∀ t ∈ Set.Icc (0 : ℝ) T₁,
+      SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t) =
+        tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (Nat.cast_nonneg a) (timeH1.toFun u t))
+    (hball : ∀ t ∈ Set.Ico (0 : ℝ) T₁,
+      ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t)‖ ≤
+        (Classical.choose (deTurckSobolevNHa2_exists_of_super (I := I) (M := M) g₀ a
+          (by omega))).1) :
+    ∀ t ∈ Set.Ico (0 : ℝ) T₁, ∀ i,
+      f i t = tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+            (deTurckSmoothRemainder (I := I) (M := M) g₀ g_bg (F t) hδ_lt (hδ t))) i :=
+  sorry
+
+set_option linter.unusedVariables false in
 /-- **DEEP ANALYTIC INPUT (2/2) — the realized perturbation solves the Ricci–DeTurck
 flow (the soundness core).**
 
@@ -326,9 +400,20 @@ PINNED to the solution AND time-regular: `h_pin` (on `Icc 0 T₁`, fixing the bo
 `F 0 = 0` too) and `h_cont` fix the time-variation a within-`[0,∞)` derivative requires, so
 the conclusion is not satisfiable by an arbitrary family.
 
-DEFERRED (honest `sorry`; consumers transitively depend on `sorryAx`).  The remaining
-content is the genuine deep parabolic-regularity core (the term-by-term spectral
-differentiation through the chart functional). -/
+This is now PROVEN by the term-by-term spectral differentiation outlined above: the
+arbitrary-`(x, v, w)` eigen-series identity `ccTensorBilinSymm_eigenSeries_eq`
+(`SpectralPointwiseFlowDeriv.lean`, the public arbitrary-pair re-derivation of the chart-`C⁰`
+spectral convergence), the per-mode derivative `perModeConv_hasDerivAt`, the closed-set
+`tsum` within-derivative `hasDerivWithinAt_tsum` (fed the uniform-in-time order-`1` time-jet
+mode-mass majorant `perModeConv_allOrder_timeDeriv_spectralMass_le` and the supercritical
+Weyl tail `tensorEigen_summable_negpow` through AM–GM), the within-set congruence onto
+`Ici 0`, and the value identity via the forcing-coordinate input
+`realizedForcingCoord_eq_smoothN`, the connection-Laplacian eigen-coordinate scaling
+`tensorL2Coeff_ofCompact_rawTensorConnLapSmooth`, the metric-tag transport
+`ccTensorBilinSymm_toSection_congr`, and
+`deTurckRHSSection_ccTensorBilinSymm_eq_deTurckRicciRHS`.  The only remaining deferred input
+is `realizedForcingCoord_eq_smoothN` (the pointwise a.e.→everywhere forcing-coordinate
+upgrade, honest `sorry`); consumers transitively depend on its `sorryAx`. -/
 private theorem realizedFamily_flowDeriv
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
@@ -364,8 +449,334 @@ private theorem realizedFamily_flowDeriv
         (fun s : ℝ => ccTensorBilinSymm (I := I) g₀ (F s) x v w)
         (deTurckRicciRHS (I := I) g_bg
           (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) x v w)
-        (Set.Ici 0) t :=
-  sorry
+        (Set.Ici 0) t := by
+  classical
+  set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2 with hhc
+  -- DEEP INPUT 1: the smooth forcing eigen-coordinate family realizing the solution value.
+  obtain ⟨f, hf_smooth, hf_mass, hf_id⟩ :=
+    forcingSmoothCoordsRealize (I := I) (M := M) g₀ g_bg a ha_super hT hT1 u gforce
+      hduh hforce htrace
+  -- The smooth eigen-coordinate family `φ i = perModeConv λᵢ (f i)` of the solution.
+  set φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ :=
+    fun i => perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (f i) with hφ_def
+  have hφ_smooth : ∀ i, ContDiff ℝ ∞ (φ i) := fun i =>
+    perModeConv_contDiff_of_contDiff ⊤ _ (f i) (hf_smooth i)
+  -- The per-mode time-derivative `φ i' s = f i s − λᵢ · φ i s` (`perModeConv_hasDerivAt`).
+  set φ' : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ :=
+    fun i s => f i s - TensorEigenIdx.lambda (I := I) (M := M) i * φ i s with hφ'_def
+  have hφ_deriv : ∀ i (s : ℝ), HasDerivAt (φ i) (φ' i s) s := by
+    intro i s
+    exact perModeConv_hasDerivAt (TensorEigenIdx.lambda (I := I) (M := M) i)
+      (hf_smooth i).continuous s
+  -- The all-order time-jet mode mass of `φ` on `[0,T]` (`L6`).
+  have hφ_mass : ∀ (k : ℕ) (σ : ℝ), 0 ≤ σ →
+      ∃ Cmaj : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ, Summable Cmaj ∧
+        ∀ i, ∀ t ∈ Set.Icc (0 : ℝ) T,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (iteratedDeriv k (φ i) t) ^ 2 ≤ Cmaj i := by
+    intro k σ hσ
+    exact perModeConv_allOrder_timeDeriv_spectralMass_le (I := I) (M := M)
+      (g := g₀) (r := 0) (s := 2) (T := T) hT.le f hf_smooth hf_mass k σ hσ
+  -- The eigen-coordinate identity on the closed slab `Icc 0 T₁`:
+  -- `tensorL2Coeff (toL2 (F s)) i = φ i s`.
+  have hcoeff : ∀ s ∈ Set.Icc (0 : ℝ) T₁, ∀ i,
+      tensorL2Coeff (I := I) (M := M) hc
+          (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F s)) i = φ i s := by
+    intro s hs i
+    rw [h_pin s hs, tensorHsToL2_tensorL2Coeff]
+    have hs_icc : s ∈ Set.Icc (0 : ℝ) T := ⟨hs.1, le_trans hs.2 hT₁_le⟩
+    have hid := hf_id s hs_icc i
+    rw [tensorHsToL2_tensorL2Coeff] at hid
+    rw [hid]
+  -- All-order `Hˢ` membership of `toL2 (F s)`, from the order-`0` time-jet mode-mass, on
+  -- the closed slab `Icc 0 T₁`.
+  have hu_mem : ∀ s ∈ Set.Icc (0 : ℝ) T₁, ∀ σ : ℝ, ∀ hσ : 0 ≤ σ,
+      ∃ vH : tensorHs (I := I) (M := M) g₀ 0 2 σ,
+        tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hc hσ vH =
+          SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F s) := by
+    intro s hs σ hσ
+    refine allHs_of_weighted_summable_pub (I := I) (M := M) g₀
+      (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F s)) (fun τ hτ => ?_) σ hσ
+    obtain ⟨Cmaj, hCmaj_sum, hCmaj⟩ := hφ_mass 0 τ hτ
+    refine Summable.of_nonneg_of_le (fun i => ?_) (fun i => ?_) hCmaj_sum
+    · exact mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i τ) (sq_nonneg _)
+    · have hs_icc : s ∈ Set.Icc (0 : ℝ) T := ⟨hs.1, le_trans hs.2 hT₁_le⟩
+      have h := hCmaj i s hs_icc
+      rw [iteratedDeriv_zero] at h
+      rw [hcoeff s hs i]
+      exact h
+  -- The forcing-coordinate identification (deep input 2a).
+  have hforcing := realizedForcingCoord_eq_smoothN (I := I) (M := M) g₀ g_bg a ha_super
+    ha_even hT hT1 hT₁_pos hT₁_le u gforce hduh hforce htrace F hδ_lt hδ f hf_id h_pin hball
+  -- The lossy `C⁰`-control constant `C` (for the per-mode scalar bound at order `a`).
+  have ha_lossy : 2 * Module.finrank ℝ E + 4 ≤ a := by omega
+  -- The Weyl tail exponent: a single fixed even order `sW` strictly above `weylSobolevExp`.
+  set sW : ℕ := weylSobolevExp (E := E) + 1 with hsW_def
+  have hsW_gt : ((weylSobolevExp (E := E) : ℕ) : ℝ) < (sW : ℝ) := by
+    rw [hsW_def]; push_cast; linarith
+  have hweyl : Summable (fun i : TensorEigenIdx (I := I) (M := M) g₀ 0 2 =>
+      tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))) :=
+    tensorEigen_summable_negpow (I := I) (M := M) g₀ (sW : ℝ) hsW_gt
+  -- Main work: fix the time `t` and the chart-evaluation data `(x, v, w)`.
+  intro t ht x v w
+  -- The fixed per-mode scalar `ψ i = ccTensorBilinSymm g₀ (eigenSmooth i) x v w` and its
+  -- spectral-`a` Sobolev-weight bound.
+  obtain ⟨C, hC_pos, hC_bd⟩ :=
+    abs_eigenBilinScalar_le (I := I) (M := M) g₀ a ha_even ha_lossy x v w
+  set K : ℝ := Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) with hK_def
+  have hK_nn : 0 ≤ K := mul_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
+  -- The per-mode scalar bound: `|ψ i| ≤ (C·K) · √(weight i a)`.
+  have hψ_bd : ∀ i, |eigenBilinScalar (I := I) g₀ x v w i| ≤
+      (C * K) * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (a : ℝ)) := by
+    intro i
+    have := hC_bd i
+    rw [hK_def]
+    calc |eigenBilinScalar (I := I) g₀ x v w i|
+        ≤ C * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (a : ℝ)) *
+            (Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w)) := this
+      _ = C * (Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w)) *
+            Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (a : ℝ)) := by ring
+  -- A summability engine: a `tensorSobolevWeight (a + sW)`-weighted square-summable
+  -- coordinate family `c`, paired with the per-mode scalar bound, yields a summable product
+  -- (AM–GM split of the order-`a` weight into `(a + sW)` and the `(-sW)` Weyl tail).
+  have hprod_summable : ∀ (c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ),
+      Summable (fun i => tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (sW : ℝ)) *
+          (c i) ^ 2) →
+      Summable (fun i => c i * eigenBilinScalar (I := I) g₀ x v w i) := by
+    intro c hc_sum
+    -- Dominate `|c i · ψ i|` by `½·((C·K)·(weight i (a+sW)·(c i)²) + (C·K)·weight i (-sW))`.
+    have hdom : Summable (fun i =>
+        (1 / 2 : ℝ) * ((C * K) * (tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (sW : ℝ)) *
+            (c i) ^ 2)) +
+          (1 / 2 : ℝ) * ((C * K) * tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ)))) :=
+      ((hc_sum.mul_left (C * K)).mul_left (1 / 2)).add
+        ((hweyl.mul_left (C * K)).mul_left (1 / 2))
+    refine Summable.of_norm_bounded hdom (fun i => ?_)
+    have hCK_nn : 0 ≤ C * K := mul_nonneg hC_pos.le hK_nn
+    have hwa_nn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i (a : ℝ) :=
+      tensorSobolevWeight_nonneg (I := I) (M := M) i (a : ℝ)
+    have hwasW_nn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (sW : ℝ)) :=
+      tensorSobolevWeight_nonneg (I := I) (M := M) i _
+    have hwneg_nn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ)) :=
+      tensorSobolevWeight_nonneg (I := I) (M := M) i _
+    -- `√(weight a) = √(weight (a+sW)) · √(weight (-sW))` (rpow additivity).
+    have hsqrt_split : Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (a : ℝ)) =
+        Real.sqrt (tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (sW : ℝ))) *
+          Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))) := by
+      rw [← Real.sqrt_mul hwasW_nn]
+      congr 1
+      unfold tensorSobolevWeight
+      rw [← Real.rpow_add (lt_of_lt_of_le one_pos (one_le_one_add_lambda (I := I) (M := M) i))]
+      congr 1; ring
+    rw [Real.norm_eq_abs, abs_mul]
+    calc |c i| * |eigenBilinScalar (I := I) g₀ x v w i|
+        ≤ |c i| * ((C * K) * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (a : ℝ))) :=
+          mul_le_mul_of_nonneg_left (hψ_bd i) (abs_nonneg _)
+      _ = (C * K) * (|c i| * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i
+            ((a : ℝ) + (sW : ℝ)))) *
+          Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))) := by
+          rw [hsqrt_split]; ring
+      _ ≤ (C * K) * ((1 / 2) * ((|c i| * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i
+              ((a : ℝ) + (sW : ℝ)))) ^ 2 +
+            (Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ)))) ^ 2)) := by
+          have hAB : (C * K) * (|c i| * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i
+                ((a : ℝ) + (sW : ℝ)))) *
+              Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))) =
+              (C * K) * ((|c i| * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i
+                ((a : ℝ) + (sW : ℝ)))) *
+                Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ)))) := by ring
+          rw [hAB]
+          refine mul_le_mul_of_nonneg_left ?_ hCK_nn
+          nlinarith [sq_nonneg (|c i| * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i
+              ((a : ℝ) + (sW : ℝ))) -
+            Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))))]
+      _ = (1 / 2 : ℝ) * ((C * K) * (tensorSobolevWeight (I := I) (M := M) i
+              ((a : ℝ) + (sW : ℝ)) * (c i) ^ 2)) +
+            (1 / 2 : ℝ) * ((C * K) * tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))) := by
+          rw [mul_pow, Real.sq_sqrt hwasW_nn, Real.sq_sqrt hwneg_nn, sq_abs]; ring
+  -- The eigen-series summability at any time `s ∈ [0,T₁]` (coordinate family `φ · s`).
+  have hsum_series : ∀ s ∈ Set.Icc (0 : ℝ) T₁,
+      Summable (fun i => φ i s * eigenBilinScalar (I := I) g₀ x v w i) := by
+    intro s hs
+    refine hprod_summable (fun i => φ i s) ?_
+    obtain ⟨B, hB_sum, hB_le⟩ := hφ_mass 0 ((a : ℝ) + (sW : ℝ)) (by positivity)
+    refine Summable.of_nonneg_of_le (fun i => ?_) (fun i => ?_) hB_sum
+    · exact mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i _) (sq_nonneg _)
+    · have hs_icc : s ∈ Set.Icc (0 : ℝ) T := ⟨hs.1, le_trans hs.2 hT₁_le⟩
+      have h := hB_le i s hs_icc
+      rwa [iteratedDeriv_zero] at h
+  -- The derivative-series summability bound, UNIFORM over `s ∈ [0,T₁]` (coordinate family
+  -- `φ' · s`): the order-`1` time-jet mode-mass gives a single `t`-independent majorant.
+  obtain ⟨Bφ', hBφ'_sum, hBφ'_le⟩ := hφ_mass 1 ((a : ℝ) + (sW : ℝ)) (by positivity)
+  -- Package the within-derivative on `Ici 0` of the smooth eigen-series `G s = ∑' φ i s · ψ i`.
+  -- The per-term within-derivative and its uniform summable bound on `Ici 0 ∩ Icc 0 T₁`.
+  set u_bd : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ :=
+    fun i => (1 / 2 : ℝ) * ((C * K) * Bφ' i) +
+      (1 / 2 : ℝ) * ((C * K) * tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ)))
+    with hu_bd_def
+  have hu_bd_sum : Summable u_bd :=
+    ((hBφ'_sum.mul_left (C * K)).mul_left (1 / 2)).add
+      ((hweyl.mul_left (C * K)).mul_left (1 / 2))
+  -- For `s ∈ Icc 0 T₁`, `|φ' i s · ψ i| ≤ u_bd i`.
+  have hφ'_term_bd : ∀ i, ∀ s ∈ Set.Icc (0 : ℝ) T₁,
+      ‖φ' i s * eigenBilinScalar (I := I) g₀ x v w i‖ ≤ u_bd i := by
+    intro i s hs
+    have hs_icc : s ∈ Set.Icc (0 : ℝ) T := ⟨hs.1, le_trans hs.2 hT₁_le⟩
+    have hCK_nn : 0 ≤ C * K := mul_nonneg hC_pos.le hK_nn
+    have hwasW_nn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (sW : ℝ)) :=
+      tensorSobolevWeight_nonneg (I := I) (M := M) i _
+    have hwneg_nn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ)) :=
+      tensorSobolevWeight_nonneg (I := I) (M := M) i _
+    have hsqrt_split : Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (a : ℝ)) =
+        Real.sqrt (tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (sW : ℝ))) *
+          Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))) := by
+      rw [← Real.sqrt_mul hwasW_nn]
+      congr 1
+      unfold tensorSobolevWeight
+      rw [← Real.rpow_add (lt_of_lt_of_le one_pos (one_le_one_add_lambda (I := I) (M := M) i))]
+      congr 1; ring
+    have hbd1 : tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (sW : ℝ)) *
+        (φ' i s) ^ 2 ≤ Bφ' i := by
+      have h := hBφ'_le i s hs_icc
+      rwa [iteratedDeriv_one, show deriv (φ i) s = φ' i s from (hφ_deriv i s).deriv] at h
+    rw [Real.norm_eq_abs, abs_mul]
+    calc |φ' i s| * |eigenBilinScalar (I := I) g₀ x v w i|
+        ≤ |φ' i s| * ((C * K) * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (a : ℝ))) :=
+          mul_le_mul_of_nonneg_left (hψ_bd i) (abs_nonneg _)
+      _ = (C * K) * ((|φ' i s| * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i
+            ((a : ℝ) + (sW : ℝ)))) *
+            Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ)))) := by
+          rw [hsqrt_split]; ring
+      _ ≤ (C * K) * ((1 / 2) * ((|φ' i s| * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i
+            ((a : ℝ) + (sW : ℝ)))) ^ 2 +
+            (Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ)))) ^ 2)) := by
+          refine mul_le_mul_of_nonneg_left ?_ hCK_nn
+          nlinarith [sq_nonneg (|φ' i s| * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i
+              ((a : ℝ) + (sW : ℝ))) -
+            Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))))]
+      _ = (1 / 2 : ℝ) * ((C * K) * (tensorSobolevWeight (I := I) (M := M) i
+            ((a : ℝ) + (sW : ℝ)) * (φ' i s) ^ 2)) +
+            (1 / 2 : ℝ) * ((C * K) * tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))) := by
+          rw [mul_pow, Real.sq_sqrt hwasW_nn, Real.sq_sqrt hwneg_nn, sq_abs]; ring
+      _ ≤ (1 / 2 : ℝ) * ((C * K) * Bφ' i) +
+            (1 / 2 : ℝ) * ((C * K) * tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))) := by
+          refine add_le_add (mul_le_mul_of_nonneg_left ?_ (by norm_num)) (le_refl _)
+          exact mul_le_mul_of_nonneg_left hbd1 hCK_nn
+  -- The within-derivative of `G s = ∑' φ i s · ψ i` on the convex set `Icc 0 T₁`.
+  have hG_deriv : HasDerivWithinAt
+      (fun s : ℝ => ∑' i, φ i s * eigenBilinScalar (I := I) g₀ x v w i)
+      (∑' i, φ' i t * eigenBilinScalar (I := I) g₀ x v w i) (Set.Icc (0 : ℝ) T₁) t := by
+    have ht_icc : t ∈ Set.Icc (0 : ℝ) T₁ := ⟨ht.1, le_of_lt ht.2⟩
+    refine hasDerivWithinAt_tsum
+      (f := fun i s => φ i s * eigenBilinScalar (I := I) g₀ x v w i)
+      (f' := fun i s => φ' i s * eigenBilinScalar (I := I) g₀ x v w i)
+      (u := u_bd) (s := Set.Icc (0 : ℝ) T₁)
+      (fun i z _hz => ?_) (fun i z hz => hφ'_term_bd i z hz) hu_bd_sum
+      (convex_Icc 0 T₁) ht_icc (hsum_series t ht_icc) ht_icc
+    exact ((hφ_deriv i z).hasDerivWithinAt).mul_const _
+  -- The eigen-series identity: `ccTensorBilinSymm g₀ (F s) x v w = ∑' φ i s · ψ i` on the slab.
+  have hG_eq : ∀ s ∈ Set.Icc (0 : ℝ) T₁,
+      ccTensorBilinSymm (I := I) g₀ (F s) x v w =
+        ∑' i, φ i s * eigenBilinScalar (I := I) g₀ x v w i := by
+    intro s hs
+    have heig := ccTensorBilinSymm_eigenSeries_eq (I := I) (M := M) g₀
+      (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F s)) (hu_mem s hs) (F s)
+      (SmoothCcTensor.toL2_apply (F s)) x v w ?_
+    · rw [heig]
+      exact tsum_congr (fun i => by rw [hcoeff s hs i])
+    · -- summability of the coordinate eigen-series at `s`
+      refine (hsum_series s hs).congr (fun i => ?_)
+      rw [hcoeff s hs i]
+  -- Transfer the within-`Icc 0 T₁` derivative of `G` to `ccTensorBilinSymm g₀ (F ·) x v w`,
+  -- then enlarge the set from `Icc 0 T₁` to `Ici 0` (they agree on `Icc 0 T₁`, which is a
+  -- `nhdsWithin (Ici 0) t`-neighborhood of `t ∈ Ico 0 T₁`).
+  have hG_deriv' : HasDerivWithinAt
+      (fun s : ℝ => ccTensorBilinSymm (I := I) g₀ (F s) x v w)
+      (∑' i, φ' i t * eigenBilinScalar (I := I) g₀ x v w i) (Set.Icc (0 : ℝ) T₁) t := by
+    refine hG_deriv.congr (fun s hs => hG_eq s hs) ?_
+    exact hG_eq t ⟨ht.1, le_of_lt ht.2⟩
+  have hIci : HasDerivWithinAt
+      (fun s : ℝ => ccTensorBilinSymm (I := I) g₀ (F s) x v w)
+      (∑' i, φ' i t * eigenBilinScalar (I := I) g₀ x v w i) (Set.Ici (0 : ℝ)) t := by
+    have hmem : Set.Icc (0 : ℝ) T₁ ∈ nhdsWithin t (Set.Ici (0 : ℝ)) := by
+      have hsub : Set.Ici (0 : ℝ) ∩ Set.Iio T₁ ⊆ Set.Icc (0 : ℝ) T₁ :=
+        fun s hs => ⟨hs.1, le_of_lt hs.2⟩
+      exact Filter.mem_of_superset
+        (inter_mem_nhdsWithin _ (Iio_mem_nhds ht.2)) hsub
+    exact (hG_deriv'.mono_of_mem_nhdsWithin hmem)
+  -- The value identity: the differentiated series equals the intrinsic Ricci–DeTurck RHS.
+  -- `φ' i t = tensorL2Coeff (toL2 R) i`, where `R` is the (re-`g₀`-tagged) Ricci–DeTurck
+  -- section of the realized metric: `f i t` is the remainder coordinate (`hforcing`) and
+  -- `−λᵢ · φ i t` is the connection-Laplacian coordinate (`rawTensorConnLapSmooth`); their
+  -- sum is the un-cancelled RHS-section coordinate.
+  have hval : (∑' i, φ' i t * eigenBilinScalar (I := I) g₀ x v w i) =
+      deTurckRicciRHS (I := I) g_bg
+        (tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t)) x v w := by
+    set gDT := tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t) with hgDT_def
+    -- The un-cancelled RHS section, re-tagged to `g₀`: `R.toSection = (deTurckRHSSection
+    -- g_bg gDT).toSection`.
+    set R : SmoothCcTensor g₀ 0 2 :=
+      { toSection := (deTurckRHSSection (I := I) g_bg gDT).toSection
+        hasCompactSupport := (deTurckRHSSection (I := I) g_bg gDT).hasCompactSupport }
+      with hR_def
+    -- `R = deTurckSmoothRemainder g₀ g_bg (F t) + rawTensorConnLapSmooth g₀ 0 2 (F t)`
+    -- (the connection Laplacian `sub_add_cancel`s the remainder's subtracted term).
+    have hR_split : R = deTurckSmoothRemainder (I := I) (M := M) g₀ g_bg (F t) hδ_lt (hδ t) +
+        rawTensorConnLapSmooth (I := I) g₀ 0 2 (F t) := by
+      rw [deTurckSmoothRemainder]
+      rw [sub_add_cancel]
+    -- Coordinate identity: `φ' i t = tensorL2Coeff (toL2 R) i`.
+    have hcoord : ∀ i, φ' i t =
+        tensorL2Coeff (I := I) (M := M) hc
+          (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) R) i := by
+      intro i
+      have ht_icc : t ∈ Set.Icc (0 : ℝ) T₁ := ⟨ht.1, le_of_lt ht.2⟩
+      -- `f i t = tensorL2Coeff (toL2 (deTurckSmoothRemainder …)) i` (forcing input).
+      have hf_coord := hforcing t ht i
+      -- `−λᵢ · φ i t = tensorL2Coeff (toL2 (rawTensorConnLapSmooth (F t))) i`.
+      have hraw : tensorL2Coeff (I := I) (M := M) hc
+          (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2)
+            (rawTensorConnLapSmooth (I := I) g₀ 0 2 (F t))) i =
+          -(TensorEigenIdx.lambda (I := I) (M := M) i) *
+            tensorL2Coeff (I := I) (M := M) hc
+              (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t)) i :=
+        tensorL2Coeff_ofCompact_rawTensorConnLapSmooth (I := I) (M := M) g₀ hc (F t) i
+      rw [hcoeff t ht_icc i] at hraw
+      rw [hR_split, ContinuousLinearMap.map_add, tensorL2Coeff_add, ← hf_coord, hraw, hφ'_def]
+      ring
+    -- The eigen-series of `R` realizes the RHS value (`R` is a smooth tensor, in all `Hˢ`).
+    have hR_mem : ∀ σ : ℝ, ∀ hσ : 0 ≤ σ,
+        ∃ vH : tensorHs (I := I) (M := M) g₀ 0 2 σ,
+          tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2) hc hσ vH =
+            SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) R := by
+      intro σ hσ
+      refine allHs_of_weighted_summable_pub (I := I) (M := M) g₀
+        (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) R) (fun τ _hτ => ?_) σ hσ
+      exact smoothCcTensor_tensorL2Coeff_weighted_summable (I := I) (M := M) g₀ τ R hc
+    -- The eigen-series summability for `R`'s coordinates: they are `φ' · t`.
+    have hR_sum : Summable (fun i => tensorL2Coeff (I := I) (M := M) hc
+        (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) R) i *
+        eigenBilinScalar (I := I) g₀ x v w i) := by
+      refine (hprod_summable (fun i => tensorL2Coeff (I := I) (M := M) hc
+        (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) R) i) ?_)
+      exact smoothCcTensor_tensorL2Coeff_weighted_summable (I := I) (M := M) g₀
+        ((a : ℝ) + (sW : ℝ)) R hc
+    have heig := ccTensorBilinSymm_eigenSeries_eq (I := I) (M := M) g₀
+      (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) R) hR_mem R
+      (SmoothCcTensor.toL2_apply R) x v w hR_sum
+    -- `∑' φ' i t · ψ i = ∑' (coord_R i) · ψ i = ccTensorBilinSymm g₀ R x v w`.
+    rw [show (∑' i, φ' i t * eigenBilinScalar (I := I) g₀ x v w i) =
+        ∑' i, tensorL2Coeff (I := I) (M := M) hc
+          (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) R) i *
+            eigenBilinScalar (I := I) g₀ x v w i from
+      tsum_congr (fun i => by rw [hcoord i])]
+    rw [← heig]
+    -- `ccTensorBilinSymm g₀ R x v w = ccTensorBilinSymm g_bg (deTurckRHSSectionBg …) = RHS`.
+    rw [ccTensorBilinSymm_toSection_congr R (deTurckRHSSectionBg (I := I) g_bg gDT)
+      (by rw [hR_def, deTurckRHSSectionBg_toSection]) x v w]
+    exact deTurckRHSSection_ccTensorBilinSymm_eq_deTurckRicciRHS (I := I) g_bg gDT x v w
+  rw [← hval]
+  exact hIci
 
 /-- **Joint chart-Gram smoothness of a realized time-smooth spectral family, with the
 eigen-coordinate identity relativized to the closed time slab.**
