@@ -1335,6 +1335,156 @@ POSITED here as the precise children a separate worker discharges (the keystone 
 adjustment is purely the smoothness of a fixed-CLM half-sum of the bare keystone, no new covariant content. -/
 
 set_option linter.unusedSectionVars false in
+/-- Pointwise addition of two joint `(r, s)`-operator total-space maps over base `M` is jointly `C^∞`
+on the slab.  A local copy of the `RicciDifferenceMeanValue` private combinator (added trivialized fibre
+coordinates), needed here to assemble the half-sum symm-absorbed coefficient. -/
+private theorem jointRSadd {r s : ℕ} {S : Set ℝ}
+    (A B : ∀ p : M × ℝ, Tensor0SBundle.TensorRSSpace r s I p.1)
+    (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) p.1 (A p)) ((Set.univ : Set M) ×ˢ S))
+    (hB : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) p.1 (B p)) ((Set.univ : Set M) ×ˢ S)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) p.1 (A p + B p))
+      ((Set.univ : Set M) ×ˢ S) := by
+  letI := Tensor0SBundle.tensorRSBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) r s
+  intro p₀ hp₀
+  rw [Bundle.contMDiffWithinAt_totalSpace]
+  refine ⟨contMDiffWithinAt_fst, ?_⟩
+  set x₀ := p₀.1 with hx₀
+  set e := trivializationAt (Tensor0SBundle.TensorRSModel r s ℝ E)
+    (fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x₀ with he
+  have hA' := (Bundle.contMDiffWithinAt_totalSpace (F := Tensor0SBundle.TensorRSModel r s ℝ E)
+    (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z)).mp (hA p₀ hp₀)
+  have hB' := (Bundle.contMDiffWithinAt_totalSpace (F := Tensor0SBundle.TensorRSModel r s ℝ E)
+    (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z)).mp (hB p₀ hp₀)
+  refine (hA'.2.add hB'.2).congr_of_eventuallyEq ?_ ?_
+  · have hbase : ∀ᶠ p : M × ℝ in nhdsWithin p₀ ((Set.univ : Set M) ×ˢ S), p.1 ∈ e.baseSet :=
+      (continuousWithinAt_fst (s := (Set.univ : Set M) ×ˢ S) (p := p₀))
+        (e.open_baseSet.mem_nhds (by rw [he]; exact mem_baseSet_trivializationAt _ _ x₀))
+    filter_upwards [hbase] with p hx
+    rw [Pi.add_apply]
+    exact (e.linear ℝ hx).map_add (A p) (B p)
+  · rw [Pi.add_apply]
+    exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_add
+      (A p₀) (B p₀)
+
+set_option linter.unusedSectionVars false in
+/-- Pointwise constant scaling of a joint `(r, s)`-operator total-space map over base `M`.  A local copy
+of the `RicciDifferenceMeanValue` scaling combinator at `(r, s)`-rank, needed to assemble the half-sum
+symm-absorbed coefficient. -/
+private theorem jointRSsmul {r s : ℕ} {S : Set ℝ} (a : ℝ)
+    (A : ∀ p : M × ℝ, Tensor0SBundle.TensorRSSpace r s I p.1)
+    (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) p.1 (A p)) ((Set.univ : Set M) ×ˢ S)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r s ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z) p.1 (a • A p))
+      ((Set.univ : Set M) ×ˢ S) := by
+  letI := Tensor0SBundle.tensorRSBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) r s
+  intro p₀ hp₀
+  rw [Bundle.contMDiffWithinAt_totalSpace]
+  refine ⟨contMDiffWithinAt_fst, ?_⟩
+  set x₀ := p₀.1 with hx₀
+  set e := trivializationAt (Tensor0SBundle.TensorRSModel r s ℝ E)
+    (fun z : M => Tensor0SBundle.TensorRSSpace r s I z) x₀ with he
+  have hA' := (Bundle.contMDiffWithinAt_totalSpace (F := Tensor0SBundle.TensorRSModel r s ℝ E)
+    (E := fun z : M => Tensor0SBundle.TensorRSSpace r s I z)).mp (hA p₀ hp₀)
+  refine ((contMDiffWithinAt_const (c := a)).smul hA'.2).congr_of_eventuallyEq ?_ ?_
+  · have hbase : ∀ᶠ p : M × ℝ in nhdsWithin p₀ ((Set.univ : Set M) ×ˢ S), p.1 ∈ e.baseSet :=
+      (continuousWithinAt_fst (s := (Set.univ : Set M) ×ˢ S) (p := p₀))
+        (e.open_baseSet.mem_nhds (by rw [he]; exact mem_baseSet_trivializationAt _ _ x₀))
+    filter_upwards [hbase] with p hx
+    exact (e.linear ℝ hx).map_smul a (A p)
+  · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_smul
+      a (A p₀)
+
+set_option backward.isDefEq.respectTransparency false in
+set_option linter.unusedSectionVars false in
+/-- **Joint `(s, x)`-smoothness of the source-slot reindex of a jointly-smooth coefficient family.**
+For a fixed permutation `σ'` and a family of `(r, 2)`-coefficient fields `s ↦ R_s` whose section
+`p ↦ R_{p.2}.toSection p.1` is jointly `C^∞` on the slab, the source-slot reindexed family
+`p ↦ (reindexCoeffGen g₀ r 2 R_{p.2} σ').toSection p.1` is jointly `C^∞`.  The joint product-base mirror
+of `reindexCoeffFibGen_contMDiff`: the reindex is the bundle CLM `R_{p.2}.toSection p.1` (the supplied
+joint keystone) applied to the fixed-`σ'` `domDomCongr`-reindexed input section. -/
+private theorem reindexCoeffGen_jointContMDiffOn {r : ℕ} {S : Set ℝ}
+    (g₀ : SmoothRiemannianMetric I M) (R : ℝ → SmoothCcTensor g₀ r 2) (σ' : Equiv.Perm (Fin r))
+    (hR : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r 2 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace r 2 I z) p.1
+        ((R p.2).toSection p.1)) ((Set.univ : Set M) ×ˢ S)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r 2 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel r 2 ℝ E)
+        (E := fun z : M => Tensor0SBundle.TensorRSSpace r 2 I z) p.1
+        ((reindexCoeffGen (I := I) (M := M) g₀ r 2 (R p.2) σ').toSection p.1))
+      ((Set.univ : Set M) ×ˢ S) := by
+  classical
+  apply contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+    (F₁ := Tensor0SBundle.Tensor0SModel r ℝ E) (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace r I x)
+    (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)
+    (φ := fun p : M × ℝ => reindexCoeffFibGen (I := I) r 2 σ' p.1
+      (show Tensor0SBundle.Tensor0SSpace r I p.1 →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I p.1 from
+        (R p.2).toSection p.1))
+    (S := S)
+  intro Y
+  -- the fixed-`σ'` `domDomCongr`-reindex of `Y` is a smooth global `(0, r)`-section over `M`.
+  have hYσ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel r ℝ E)) ∞
+      (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel r ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace r I z) x
+        (Tensor0SBundle.Tensor0SSpace.ofModel
+          (ContinuousMultilinearMap.domDomCongr σ'
+            (Tensor0SBundle.Tensor0SSpace.toModel (Y x))))) := by
+    refine (contMDiff_multilinearSection_iff_coord (𝕜 := ℝ) (F := E)
+      (E := (TangentSpace I : M → Type _)) (IB := I) (n := (∞ : WithTop ℕ∞)) (Module.finBasis ℝ E)
+      (fun x => (Tensor0SBundle.Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
+          (ContinuousMultilinearMap.domDomCongr σ'
+            (Tensor0SBundle.Tensor0SSpace.toModel (Y x))) :
+            Tensor0SBundle.Tensor0SSpace r I x))).mpr ?_
+    have hYcoord := (contMDiff_multilinearSection_iff_coord (𝕜 := ℝ) (F := E)
+      (E := (TangentSpace I : M → Type _)) (IB := I) (n := (∞ : WithTop ℕ∞)) (Module.finBasis ℝ E)
+      (fun x => Y x)).mp Y.contMDiff
+    intro τ x₀
+    refine (hYcoord (τ ∘ σ') x₀).congr_of_eventuallyEq ?_
+    filter_upwards [Filter.univ_mem] with x _
+    rw [continuousMultilinearMap_basis_repr, continuousMultilinearMap_basis_repr]
+    change (ContinuousMultilinearMap.domDomCongr σ'
+        (Tensor0SBundle.Tensor0SSpace.toModel (Y x)))
+        (fun j => (Bundle.Trivialization.symmL ℝ (trivializationAt E (TangentSpace I) x₀) x)
+          ((Module.finBasis ℝ E) (τ j))) = _
+    rw [ContinuousMultilinearMap.domDomCongr_apply]
+    rfl
+  -- pull the reindexed input section back to the slab (constant in `s`) and apply the joint keystone CLM.
+  have hYσjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel r ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel r ℝ E)
+        (E := fun z : M => Tensor0SBundle.Tensor0SSpace r I z) p.1
+        (Tensor0SBundle.Tensor0SSpace.ofModel
+          (ContinuousMultilinearMap.domDomCongr σ'
+            (Tensor0SBundle.Tensor0SSpace.toModel (Y p.1)))))
+      ((Set.univ : Set M) ×ˢ S) :=
+    hYσ.comp_contMDiffOn contMDiffOn_fst
+  have happ := ContMDiffOn.clm_bundle_apply (n := ∞) (IB := I) (IM := I.prod 𝓘(ℝ, ℝ))
+    (F₁ := Tensor0SBundle.Tensor0SModel r ℝ E) (E₁ := fun x : M => Tensor0SBundle.Tensor0SSpace r I x)
+    (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E) (E₂ := fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)
+    (b := Prod.fst) (s := (Set.univ : Set M) ×ˢ S)
+    (ϕ := fun p : M × ℝ =>
+      (show Tensor0SBundle.Tensor0SSpace r I p.1 →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I p.1 from
+        (R p.2).toSection p.1))
+    (v := fun p : M × ℝ => Tensor0SBundle.Tensor0SSpace.ofModel
+      (ContinuousMultilinearMap.domDomCongr σ'
+        (Tensor0SBundle.Tensor0SSpace.toModel (Y p.1))))
+    hR hYσjoint
+  refine happ.congr (fun p _ => ?_)
+  exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
+    (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) p.1 t)
+    (reindexCoeffFibGen_apply (I := I) r 2 σ' p.1
+      (show Tensor0SBundle.Tensor0SSpace r I p.1 →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I p.1 from
+        (R p.2).toSection p.1) (Y p.1)).symm
+
+set_option linter.unusedSectionVars false in
 /-- **(Posited keystone adjustment — joint smoothness of the symm-absorbed order-`0` coefficient.)**
 The symm-absorbed order-`0` curvature coefficient family `s ↦ symmAbsorbedOrder0CurvCoeff g₀ g_s (T − T')`
 is jointly `C^∞` in `(x, s)` on the realized small set.  Follows from the bare keystone
@@ -1349,8 +1499,30 @@ theorem symmAbsorbedOrder0CurvCoeff_realizedFam_jointContMDiff [BoundarylessMani
         (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1
         ((symmAbsorbedOrder0CurvCoeff (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' p.2) (T - T')).toSection p.1))
-      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
-  sorry
+      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+  classical
+  set σ' : Equiv.Perm (Fin (2 + 0)) :=
+    Classical.choose (exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
+      (Equiv.swap (0 : Fin 2) 1) (T - T') 0) with hσ'
+  set R : ℝ → SmoothCcTensor g₀ (2 + 0) 2 := fun s =>
+    ricciArmOrder0CurvCoeff (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) with hR
+  have hbare := ricciArmOrder0CurvCoeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ'
+  have hReind := reindexCoeffGen_jointContMDiffOn (I := I) (M := M) (r := 2 + 0)
+    (S := realizedSmallSet (δ := δ) (δ' := δ')) g₀ R σ' hbare
+  have hsum := jointRSadd (I := I) (r := 2 + 0) (s := 2)
+    (S := realizedSmallSet (δ := δ) (δ' := δ'))
+    (A := fun p : M × ℝ => (1 / 2 : ℝ) • (R p.2).toSection p.1)
+    (B := fun p : M × ℝ =>
+      (1 / 2 : ℝ) • (reindexCoeffGen (I := I) (M := M) g₀ (2 + 0) 2 (R p.2) σ').toSection p.1)
+    (jointRSsmul (I := I) (r := 2 + 0) (s := 2)
+      (S := realizedSmallSet (δ := δ) (δ' := δ')) (1 / 2 : ℝ)
+      (fun p : M × ℝ => (R p.2).toSection p.1) hbare)
+    (jointRSsmul (I := I) (r := 2 + 0) (s := 2)
+      (S := realizedSmallSet (δ := δ) (δ' := δ')) (1 / 2 : ℝ)
+      (fun p : M × ℝ => (reindexCoeffGen (I := I) (M := M) g₀ (2 + 0) 2 (R p.2) σ').toSection p.1)
+      hReind)
+  refine hsum.congr (fun p _ => ?_)
+  rfl
 
 set_option linter.unusedSectionVars false in
 /-- **(Posited keystone adjustment — continuity slice of the symm-absorbed order-`0` coefficient.)**
@@ -1388,8 +1560,30 @@ theorem symmAbsorbedPrincipalCoeffPure_realizedFam_jointContMDiff [BoundarylessM
         (E := fun z : M => Tensor0SBundle.TensorRSSpace 4 2 I z) p.1
         ((symmAbsorbedPrincipalCoeffPure (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' p.2) (T - T')).toSection p.1))
-      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) :=
-  sorry
+      ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
+  classical
+  set σ' : Equiv.Perm (Fin (2 + 2)) :=
+    Classical.choose (exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
+      (Equiv.swap (0 : Fin 2) 1) (T - T') 2) with hσ'
+  set R : ℝ → SmoothCcTensor g₀ (2 + 2) 2 := fun s =>
+    ricciArmPrincipalCoeffPure (I := I) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s) with hR
+  have hbare := ricciArmPrincipalCoeffPure_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ'
+  have hReind := reindexCoeffGen_jointContMDiffOn (I := I) (M := M) (r := 2 + 2)
+    (S := realizedSmallSet (δ := δ) (δ' := δ')) g₀ R σ' hbare
+  have hsum := jointRSadd (I := I) (r := 2 + 2) (s := 2)
+    (S := realizedSmallSet (δ := δ) (δ' := δ'))
+    (A := fun p : M × ℝ => (1 / 2 : ℝ) • (R p.2).toSection p.1)
+    (B := fun p : M × ℝ =>
+      (1 / 2 : ℝ) • (reindexCoeffGen (I := I) (M := M) g₀ (2 + 2) 2 (R p.2) σ').toSection p.1)
+    (jointRSsmul (I := I) (r := 2 + 2) (s := 2)
+      (S := realizedSmallSet (δ := δ) (δ' := δ')) (1 / 2 : ℝ)
+      (fun p : M × ℝ => (R p.2).toSection p.1) hbare)
+    (jointRSsmul (I := I) (r := 2 + 2) (s := 2)
+      (S := realizedSmallSet (δ := δ) (δ' := δ')) (1 / 2 : ℝ)
+      (fun p : M × ℝ => (reindexCoeffGen (I := I) (M := M) g₀ (2 + 2) 2 (R p.2) σ').toSection p.1)
+      hReind)
+  refine hsum.congr (fun p _ => ?_)
+  rfl
 
 set_option linter.unusedSectionVars false in
 /-- **(Posited keystone adjustment — continuity slice of the symm-absorbed order-`2` coefficient.)**
