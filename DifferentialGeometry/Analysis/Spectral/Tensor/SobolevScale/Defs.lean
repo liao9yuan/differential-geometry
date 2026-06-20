@@ -228,6 +228,34 @@ structure tensorHs (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : ℝ) where
     Summable (fun i => tensorSobolevWeight (I := I) (M := M) i σ *
       (coeff i) ^ 2)
 
+/-- **The Sobolev-scale assembler from a spectral-mass majorant.**  A
+coordinate family `c : TensorEigenIdx g r s → ℝ` whose weighted squares
+`(1 + λᵢ)^σ · (c i)²` are dominated mode-by-mode by a single summable
+majorant `B` defines an element of `Hˢ` with `.coeff = c`.  The
+weighted-summability witness is obtained by the comparison test
+`Summable.of_nonneg_of_le` (the weighted squares are non-negative, since
+the Sobolev weight is non-negative). -/
+def tensorHs_of_spectralMass_majorant {g : SmoothRiemannianMetric I M}
+    {r s : ℕ} {σ : ℝ}
+    (c : TensorEigenIdx (I := I) (M := M) g r s → ℝ)
+    (B : TensorEigenIdx (I := I) (M := M) g r s → ℝ) (hB : Summable B)
+    (hle : ∀ i, tensorSobolevWeight (I := I) (M := M) i σ * (c i) ^ 2 ≤ B i) :
+    tensorHs (I := I) (M := M) g r s σ where
+  coeff := c
+  weighted_summable :=
+    Summable.of_nonneg_of_le
+      (fun i => mul_nonneg
+        (tensorSobolevWeight_nonneg (I := I) (M := M) i σ) (sq_nonneg _))
+      hle hB
+
+@[simp] lemma tensorHs_of_spectralMass_majorant_coeff
+    {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ : ℝ}
+    (c : TensorEigenIdx (I := I) (M := M) g r s → ℝ)
+    (B : TensorEigenIdx (I := I) (M := M) g r s → ℝ) (hB : Summable B)
+    (hle : ∀ i, tensorSobolevWeight (I := I) (M := M) i σ * (c i) ^ 2 ≤ B i) :
+    (tensorHs_of_spectralMass_majorant (I := I) (M := M) c B hB hle).coeff = c :=
+  rfl
+
 namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ : ℝ}

@@ -264,6 +264,53 @@ private theorem carrier_toFun_coeff_eq_perModeConv_IccExtend (hT : 0 < T) (hT1 :
     MeasureTheory.Measure.eqOn_of_ae_eq hae_full hLHS_cont hRHS_cont hsub_clo
   exact heqOn ht
 
+/-- **The per-mode zero-datum Duhamel coordinate identity.**  For the
+`H^{a+2}`-valued Duhamel solution FIELD with zero initial datum
+`u = maxRegDuhamelSolField a hT hT1 0 gforce`, the `i`-th eigenbasis coordinate of
+`u(t)` is, a.e. in `t`, the scalar per-mode Duhamel convolution of the forcing's
+time-mode coordinate:
+
+  `(maxRegDuhamelSolField a hT hT1 0 gforce t).coeff i =ᵐ
+      perModeConv λᵢ (timeModeCoeff gforce i) t`.
+
+This is the solution-field grain of `carrier_coeff_ae_perModeConv` (which lives on
+the `H¹` carrier `(maxRegDuhamelMap … 0 gforce).toFun`).  Both reduce to the same
+indefinite integral `∫₀ᵗ ((maxRegDuhamelMap … 0 gforce).deriv s).coeff i`: the field
+coordinate by `maxRegDuhamelSolField_coeff_ae` (the homogeneous term vanishes at the
+zero datum, `tensorHs.zero_coeff`), and the carrier coordinate by
+`recentredCarrier_toFun_coeff` through
+`maxRegDuhamelMap_zero_eq_recentredCarrier`. -/
+theorem timeModeCoeff_eq_perModeConv_forcing (hT : 0 < T) (hT1 : T ≤ 1)
+    (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
+    (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    (fun t => (maxRegDuhamelSolField (I := I) (M := M) a hT hT1
+          (0 : tensorHs (I := I) (M := M) g r s (a + 2)) gforce t).coeff i)
+        =ᵐ[timeMeasure T]
+      fun t => perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)
+        (fun s => (timeModeCoeff (I := I) (M := M) gforce i) s) t := by
+  have hfield := maxRegDuhamelSolField_coeff_ae (I := I) (M := M)
+    (h_compact := h_compact) (a := a) hT hT1
+    (0 : tensorHs (I := I) (M := M) g r s (a + 2)) gforce i
+  have hcarr := carrier_coeff_ae_perModeConv (I := I) (M := M)
+    (h_compact := h_compact) (a := a) hT hT1 gforce i
+  have hrec := maxRegDuhamelMap_zero_eq_recentredCarrier (I := I) (M := M)
+    (a := a) (T := T) hT hT1 gforce
+  filter_upwards [hfield, hcarr, ae_restrict_mem (μ := volume) measurableSet_Icc]
+    with t htfield htcarr htmem
+  have htmem' : t ∈ Set.Icc (0 : ℝ) T := htmem
+  have hcarr_int : ((maxRegDuhamelMap (I := I) (M := M) a hT hT1
+        (0 : tensorHs (I := I) (M := M) g r s (a + 2)) gforce).toFun t).coeff i =
+      ∫ τ in (0 : ℝ)..t,
+        ((maxRegDuhamelMap (I := I) (M := M) a hT hT1
+          (0 : tensorHs (I := I) (M := M) g r s (a + 2)) gforce).deriv τ).coeff i := by
+    rw [hrec]
+    exact recentredCarrier_toFun_coeff (I := I) (M := M) hT hT1
+      (0 : tensorHs (I := I) (M := M) g r s (a + 2)) gforce i htmem'
+  have hzero : (0 : tensorHs (I := I) (M := M) g r s (a + 2)).coeff i = 0 := by
+    rw [tensorHs.zero_coeff]
+  rw [htfield, hzero, zero_add, ← hcarr_int, htcarr]
+
 /-- **The every-time spectral-coordinate representation of the Duhamel solution.**
 Let `u = maxRegDuhamelMap a hT hT1 0 gforce` be the affine Duhamel map with zero
 initial datum, and let `F : ℝ → Hᵃ` be an everywhere representative of the forcing
