@@ -70,6 +70,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
+open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -375,7 +376,7 @@ theorem realizedMetricPathOpen_inner (g₀ : SmoothRiemannianMetric I M)
 
 /-! ### Generic joint `(s,y)`-smoothness tower -/
 
-private lemma gen_joint_partialDeriv
+lemma gen_joint_partialDeriv
     (Ψ : ℝ → E → ℝ) (q : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E}
     (hΨ : ContDiffAt ℝ ∞ (fun r : ℝ × E => Ψ r.1 r.2) (s₀, y₀)) :
     ContDiffAt ℝ ∞
@@ -405,7 +406,7 @@ def GenJointGram (S : Set ℝ) : Prop :=
       ∀ {x : M}, x ∈ (trivializationAt E (TangentSpace I) α).baseSet →
       0 < (chartGramMatrix (I := I) (gfam s₀) α x).det)
 
-private lemma gen_joint_invGram {S : Set ℝ} (hG : GenJointGram (I := I) gfam α S)
+lemma gen_joint_invGram {S : Set ℝ} (hG : GenJointGram (I := I) gfam α S)
     (k l : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :
     ContDiffAt ℝ ∞
@@ -485,7 +486,7 @@ private lemma gen_joint_invGram {S : Set ℝ} (hG : GenJointGram (I := I) gfam �
   rw [hcongr]
   exact ((contDiffAt_inv _ hdet_ne).comp (s₀, y₀) hdet).mul (hadj k l)
 
-private lemma gen_joint_gramBracket {S : Set ℝ} (hG : GenJointGram (I := I) gfam α S)
+lemma gen_joint_gramBracket {S : Set ℝ} (hG : GenJointGram (I := I) gfam α S)
     (i j l : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :
     ContDiffAt ℝ ∞
@@ -504,7 +505,7 @@ private lemma gen_joint_gramBracket {S : Set ℝ} (hG : GenJointGram (I := I) gf
     (gen_joint_partialDeriv (fun s y => chartGramOnE (I := I) (gfam s) α i j y) l
       (hG.1 i j hs hy))
 
-private lemma gen_joint_christoffel {S : Set ℝ} (hG : GenJointGram (I := I) gfam α S)
+lemma gen_joint_christoffel {S : Set ℝ} (hG : GenJointGram (I := I) gfam α S)
     (i j k : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :
     ContDiffAt ℝ ∞
@@ -519,7 +520,7 @@ private lemma gen_joint_christoffel {S : Set ℝ} (hG : GenJointGram (I := I) gf
   exact (gen_joint_invGram (I := I) gfam α hG k l hs hy).mul
     (gen_joint_gramBracket (I := I) gfam α hG i j l hs hy)
 
-private lemma gen_joint_partial_christoffel {S : Set ℝ} (hG : GenJointGram (I := I) gfam α S)
+lemma gen_joint_partial_christoffel {S : Set ℝ} (hG : GenJointGram (I := I) gfam α S)
     (m i j k : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :
     ContDiffAt ℝ ∞
@@ -529,7 +530,7 @@ private lemma gen_joint_partial_christoffel {S : Set ℝ} (hG : GenJointGram (I 
   gen_joint_partialDeriv (fun s y => chartChristoffel (I := I) (gfam s) α i j k y) m
     (gen_joint_christoffel (I := I) gfam α hG i j k hs hy)
 
-private lemma gen_joint_riemann {S : Set ℝ} (hG : GenJointGram (I := I) gfam α S)
+lemma gen_joint_riemann {S : Set ℝ} (hG : GenJointGram (I := I) gfam α S)
     (i j k l : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :
     ContDiffAt ℝ ∞
@@ -564,6 +565,110 @@ private lemma gen_joint_ricci {S : Set ℝ} (hG : GenJointGram (I := I) gfam α 
     funext r; rw [chartRicciTensor_def]
   rw [heq]
   exact ContDiffAt.sum (fun j _ => gen_joint_riemann (I := I) gfam α hG i j k j hs hy)
+
+/-! ### Generic joint smoothness of the DeTurck chart polynomials
+
+The DeTurck (gauge) chart scalars `chartDeTurckVFComp`, `chartLieDeTurckComp` and the combined
+`chartDeTurckRicciRHS` are finite chart polynomials in the inverse Gram, the Christoffel symbols (of
+both the family metric `gfam s` and a fixed background `g_bg`) and their first chart partials.  Each
+is therefore jointly `(s, y)`-`C^∞` over the joint-Gram set, by combining the generic joint bricks
+above with the fixed-background Christoffel smoothness `chartChristoffel_contDiffOn_interior`. -/
+
+/-- The chart DeTurck-vector-field component `W^k(gfam s) = ∑_{a,b} G^{ab}·(Γ^k_{ab}(gfam s) −
+Γ^k_{ab}(g_bg))` is jointly `(s, y)`-`C^∞`.  The fixed-background Christoffel `Γ(g_bg)` is
+`s`-independent (joint smooth via `chartChristoffel_contDiffOn_interior` composed with the `y`
+projection); the family parts come from `gen_joint_invGram` and `gen_joint_christoffel`. -/
+lemma gen_joint_chartDeTurckVFComp {S : Set ℝ} (hG : GenJointGram (I := I) gfam α S)
+    (g_bg : SmoothRiemannianMetric I M) (k : Fin (Module.finrank ℝ E))
+    {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
+    (hy : y₀ ∈ interior (extChartAt I α).target) :
+    ContDiffAt ℝ ∞
+      (fun r : ℝ × E => chartDeTurckVFComp (I := I) (gfam r.1) g_bg α k r.2) (s₀, y₀) := by
+  have hbg : ∀ a b : Fin (Module.finrank ℝ E),
+      ContDiffAt ℝ ∞
+        (fun r : ℝ × E => chartChristoffel (I := I) g_bg α a b k r.2) (s₀, y₀) := by
+    intro a b
+    have hbase : ContDiffAt ℝ ∞ (chartChristoffel (I := I) g_bg α a b k) y₀ :=
+      (chartChristoffel_contDiffOn_interior (I := I) g_bg α a b k).contDiffAt
+        (isOpen_interior.mem_nhds hy)
+    have hcomp : (fun r : ℝ × E => chartChristoffel (I := I) g_bg α a b k r.2) =
+        (chartChristoffel (I := I) g_bg α a b k) ∘ (fun r : ℝ × E => r.2) := rfl
+    rw [hcomp]
+    exact ContDiffAt.comp (s₀, y₀) hbase contDiffAt_snd
+  have heq : (fun r : ℝ × E => chartDeTurckVFComp (I := I) (gfam r.1) g_bg α k r.2) =
+      (fun r : ℝ × E => ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
+        chartInvGramOnE (I := I) (gfam r.1) α a b r.2 *
+          (chartChristoffel (I := I) (gfam r.1) α a b k r.2 -
+            chartChristoffel (I := I) g_bg α a b k r.2)) := by
+    funext r; rw [chartDeTurckVFComp_def]
+  rw [heq]
+  refine ContDiffAt.sum (fun a _ => ContDiffAt.sum (fun b _ => ?_))
+  exact (gen_joint_invGram (I := I) gfam α hG a b hs hy).mul
+    ((gen_joint_christoffel (I := I) gfam α hG a b k hs hy).sub (hbg a b))
+
+/-- The chart partial `∂_m W^k(gfam s)` of the DeTurck-vector-field component is jointly
+`(s, y)`-`C^∞`, by `gen_joint_partialDeriv` applied to `gen_joint_chartDeTurckVFComp`. -/
+lemma gen_joint_partial_chartDeTurckVFComp {S : Set ℝ} (hG : GenJointGram (I := I) gfam α S)
+    (g_bg : SmoothRiemannianMetric I M) (m k : Fin (Module.finrank ℝ E))
+    {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
+    (hy : y₀ ∈ interior (extChartAt I α).target) :
+    ContDiffAt ℝ ∞
+      (fun r : ℝ × E =>
+        partialDeriv (E := E) m (fun y => chartDeTurckVFComp (I := I) (gfam r.1) g_bg α k y) r.2)
+      (s₀, y₀) :=
+  gen_joint_partialDeriv (fun s y => chartDeTurckVFComp (I := I) (gfam s) g_bg α k y) m
+    (gen_joint_chartDeTurckVFComp (I := I) gfam α hG g_bg k hs hy)
+
+/-- The chart DeTurck-Lie summand `(𝓛_{W(gfam s)} gfam s)_{ij}` is jointly `(s, y)`-`C^∞`, by
+expanding `chartLieDeTurckComp` into the three Leibniz groups and combining the joint
+DeTurck-VF component / chart Gram / their partials. -/
+lemma gen_joint_chartLieDeTurckComp {S : Set ℝ} (hG : GenJointGram (I := I) gfam α S)
+    (g_bg : SmoothRiemannianMetric I M) (i j : Fin (Module.finrank ℝ E))
+    {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
+    (hy : y₀ ∈ interior (extChartAt I α).target) :
+    ContDiffAt ℝ ∞
+      (fun r : ℝ × E => chartLieDeTurckComp (I := I) (gfam r.1) g_bg α i j r.2) (s₀, y₀) := by
+  have heq : (fun r : ℝ × E => chartLieDeTurckComp (I := I) (gfam r.1) g_bg α i j r.2) =
+      (fun r : ℝ × E =>
+        (∑ k : Fin (Module.finrank ℝ E),
+            chartDeTurckVFComp (I := I) (gfam r.1) g_bg α k r.2 *
+              partialDeriv (E := E) k (fun y => chartGramOnE (I := I) (gfam r.1) α i j y) r.2)
+        + (∑ k : Fin (Module.finrank ℝ E),
+            chartGramOnE (I := I) (gfam r.1) α k j r.2 *
+              partialDeriv (E := E) i
+                (fun y => chartDeTurckVFComp (I := I) (gfam r.1) g_bg α k y) r.2)
+        + (∑ k : Fin (Module.finrank ℝ E),
+            chartGramOnE (I := I) (gfam r.1) α i k r.2 *
+              partialDeriv (E := E) j
+                (fun y => chartDeTurckVFComp (I := I) (gfam r.1) g_bg α k y) r.2)) := by
+    funext r; rw [chartLieDeTurckComp_def]
+  rw [heq]
+  refine ((ContDiffAt.sum (fun k _ => ?_)).add (ContDiffAt.sum (fun k _ => ?_))).add
+    (ContDiffAt.sum (fun k _ => ?_))
+  · exact (gen_joint_chartDeTurckVFComp (I := I) gfam α hG g_bg k hs hy).mul
+      (gen_joint_partialDeriv (fun s y => chartGramOnE (I := I) (gfam s) α i j y) k
+        (hG.1 i j hs hy))
+  · exact (hG.1 k j hs hy).mul
+      (gen_joint_partial_chartDeTurckVFComp (I := I) gfam α hG g_bg i k hs hy)
+  · exact (hG.1 i k hs hy).mul
+      (gen_joint_partial_chartDeTurckVFComp (I := I) gfam α hG g_bg j k hs hy)
+
+/-- The combined chart DeTurck–Ricci right-hand side `−2·Rc(gfam s) + (𝓛_{W} gfam s)` is jointly
+`(s, y)`-`C^∞`, by `chartDeTurckRicciRHS_def` over `gen_joint_ricci` and
+`gen_joint_chartLieDeTurckComp`. -/
+lemma gen_joint_chartDeTurckRicciRHS {S : Set ℝ} (hG : GenJointGram (I := I) gfam α S)
+    (g_bg : SmoothRiemannianMetric I M) (i k : Fin (Module.finrank ℝ E))
+    {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
+    (hy : y₀ ∈ interior (extChartAt I α).target) :
+    ContDiffAt ℝ ∞
+      (fun r : ℝ × E => chartDeTurckRicciRHS (I := I) (gfam r.1) g_bg α i k r.2) (s₀, y₀) := by
+  have heq : (fun r : ℝ × E => chartDeTurckRicciRHS (I := I) (gfam r.1) g_bg α i k r.2) =
+      (fun r : ℝ × E => -2 * chartRicciTensor (I := I) (gfam r.1) α i k r.2 +
+        chartLieDeTurckComp (I := I) (gfam r.1) g_bg α i k r.2) := by
+    funext r; rw [chartDeTurckRicciRHS_def]
+  rw [heq]
+  exact (contDiffAt_const.mul (gen_joint_ricci (I := I) gfam α hG i k hs hy)).add
+    (gen_joint_chartLieDeTurckComp (I := I) gfam α hG g_bg i k hs hy)
 
 /-! ### The keystone: GenJointGram for the realized open family -/
 
@@ -1382,6 +1487,21 @@ private lemma gen_s_contDiffAt_ricci (gfam : ℝ → SmoothRiemannianMetric I M)
   rw [hcomp]
   exact hjoint.comp s₀ ((contDiffAt_id).prodMk contDiffAt_const)
 
+/-- The `s`-slice of the joint DeTurck–Ricci chart smoothness: at a fixed chart-interior point `y₀`,
+the scalar `s ↦ chartDeTurckRicciRHS (gfam s) g_bg α i k y₀` is `C^∞` in `s`.  The DeTurck analog of
+`gen_s_contDiffAt_ricci`, threaded through `gen_joint_chartDeTurckRicciRHS`. -/
+private lemma gen_s_contDiffAt_deTurckRicciRHS (gfam : ℝ → SmoothRiemannianMetric I M) (α : M)
+    {S : Set ℝ} (hG : GenJointGram (I := I) gfam α S) (g_bg : SmoothRiemannianMetric I M)
+    (i k : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
+    (hy : y₀ ∈ interior (extChartAt I α).target) :
+    ContDiffAt ℝ ∞ (fun s : ℝ => chartDeTurckRicciRHS (I := I) (gfam s) g_bg α i k y₀) s₀ := by
+  have hjoint := gen_joint_chartDeTurckRicciRHS (I := I) gfam α hG g_bg i k hs hy
+  have hcomp : (fun s : ℝ => chartDeTurckRicciRHS (I := I) (gfam s) g_bg α i k y₀) =
+      (fun p : ℝ × E => chartDeTurckRicciRHS (I := I) (gfam p.1) g_bg α i k p.2) ∘
+        (fun s : ℝ => (s, y₀)) := by funext s; rfl
+  rw [hcomp]
+  exact hjoint.comp s₀ ((contDiffAt_id).prodMk contDiffAt_const)
+
 /-- For `s` in the small set, the realized family metric equals the genuine realized metric
 path metric (same fibre inner product). -/
 theorem realizedMetricPath_eq_realizedFam (g₀ : SmoothRiemannianMetric I M)
@@ -1426,6 +1546,50 @@ theorem realizedRicciChartSum_contDiffAt (g₀ : SmoothRiemannianMetric I M)
   unfold realizedRicciChartSum
   refine ContDiffAt.sum (fun i _ => ContDiffAt.sum (fun k _ => ?_))
   exact contDiffAt_const.mul (gen_s_contDiffAt_ricci (I := I) _ x hG i k hs hy)
+
+/-- **The combined DeTurck–Ricci realized chart sum is `C^∞` in `s` on the small set.**
+The DeTurck analog of `realizedRicciChartSum_contDiffAt`: the coordinate sum of the chart
+components of `deTurckRicciRHS g_bg (realizedFam s)` is `C^∞` in `s` at every `s₀` of the
+realized small set, since each chart component equals the chart scalar `chartDeTurckRicciRHS`
+(`chartFComponentOnE_deTurckRicciRHS_eq` at the chart-centre interior point) which is `C^∞` in
+`s` by `gen_s_contDiffAt_deTurckRicciRHS`.  This is the FTC differentiability input for the
+combined Ricci–DeTurck mean-value arm (it matches the body of the downstream
+`realizedDeTurckRicciChartSum`, which must live downstream because it carries the `g_bg`
+background but is otherwise the same coordinate sum). -/
+theorem realizedDeTurckRicciChartSum_contDiffAt (g₀ g_bg : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (v w : TangentSpace I x) {s₀ : ℝ}
+    (hs : s₀ ∈ realizedSmallSet (δ := δ) (δ' := δ')) :
+    ContDiffAt ℝ ∞
+      (fun s : ℝ => ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
+          DifferentialGeometry.PDE.RicciFlow.chartFComponentOnE (I := I)
+            (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg)
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) x i k (extChartAt I x x)) s₀ := by
+  have hG := realizedFam_genJointGram (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x
+  have hy : (extChartAt I x x) ∈ interior (extChartAt I x).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) x (mem_extChartAt_target x)
+  have heq : (fun s : ℝ => ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
+          DifferentialGeometry.PDE.RicciFlow.chartFComponentOnE (I := I)
+            (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg)
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) x i k (extChartAt I x x)) =
+      (fun s : ℝ => ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
+          chartDeTurckRicciRHS (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x i k
+            (extChartAt I x x)) := by
+    funext s
+    refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun k _ => ?_))
+    rw [DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.chartFComponentOnE_deTurckRicciRHS_eq
+      (I := I) g_bg (realizedFam (I := I) g₀ T T' hδ hδ' s) x i k hy]
+  rw [heq]
+  refine ContDiffAt.sum (fun i _ => ContDiffAt.sum (fun k _ => ?_))
+  exact contDiffAt_const.mul
+    (gen_s_contDiffAt_deTurckRicciRHS (I := I) _ x hG g_bg i k hs hy)
 
 /-- On `Icc 0 1`, the (clamped) realized Ricci path value equals the chart-sum form. -/
 theorem realizedRicciPathValue_eq_chartSum_on_Icc (g₀ : SmoothRiemannianMetric I M)

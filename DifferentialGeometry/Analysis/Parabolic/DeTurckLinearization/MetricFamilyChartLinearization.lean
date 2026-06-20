@@ -1411,7 +1411,7 @@ private lemma chartPushforwardFrameVec_eq_chartBasisVecFiber
 `chartDeTurckRicciRHS`** at chart-interior points.  Combines the on-disk good-set
 identity `deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS` with the
 frame-vector bridge and the `extChartAt` right-inverse. -/
-private lemma chartFComponentOnE_deTurckRicciRHS_eq
+lemma chartFComponentOnE_deTurckRicciRHS_eq
     (g_bg g : SmoothRiemannianMetric I M) (α : M) (i j : Fin (Module.finrank ℝ E))
     {y : E} (hy : y ∈ interior (extChartAt I α).target) :
     DifferentialGeometry.PDE.RicciFlow.chartFComponentOnE (I := I)
