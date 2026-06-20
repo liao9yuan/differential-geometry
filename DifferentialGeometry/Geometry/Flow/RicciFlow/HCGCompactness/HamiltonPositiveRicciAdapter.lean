@@ -74,12 +74,8 @@ def HamCGHConclusion (X : PointedFlowSeq.{u, uE, uH} (I := I)) : Prop :=
        letI : IsManifold I ∞ L.M := L.smooth
        I.Boundaryless)
 
-/-- Upstream topology transfer package for Hamilton compactness.
-
-Future work should prove this from the connected/boundaryless source manifold
-and the CGH construction.  The adapter only consumes this package; it no longer
-pretends connectedness or boundarylessness are scalar/tensor convergence
-consequences. -/
+/-- Upstream topology transfer package for Hamilton compactness.  The adapter
+only consumes this package; its producer belongs to the CGH construction layer. -/
 structure HamCGHTopology (X : PointedFlowSeq.{u, uE, uH} (I := I)) : Prop where
   lift : CompactnessConclusion (I := I) X -> HamCGHConclusion (I := I) X
 
@@ -107,13 +103,7 @@ def Ham3BaseScalarSeq
       ham3RescaledScalar (I := I) P Q i 0 (Q.point i)
 
 /-- Hamilton's geometric noncollapsing package supplies the legacy HCG
-`NoncollapseInput` volume slot.
-
-The Hamilton package is eventually true after discarding finitely many selected
-points.  Since the current HCG `NoncollapseInput` stores only a numeric lower
-bound sequence and does not yet encode actual geodesic balls, the finite prefix
-is saturated by the lower-bound value itself.  The real geometric frontier
-remains the noncollapse-to-injectivity-radius bridge used by Theorem 3.10. -/
+`NoncollapseInput` volume slot. -/
 noncomputable def noncollapseInput_of_ham3
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -192,15 +182,7 @@ theorem baseScalarConv_of_smoothCGH
           simpa using hseq (subseq k)
 
 /-- A compactness conclusion from the new HCG interface supplies the old
-Hamilton Section 12 black-box conclusion.
-
-The current `Ham3CGHLimitExists` proposition stores limit-flow data,
-subsequence monotonicity, the fixed time window, regularity on the open fixed
-window, connectedness, boundarylessness, the Ricci-flow predicate, the Ricci
-nonnegativity transfer datum, the narrow scalar convergence at the selected
-basepoints, and the pinching-transfer datum.  Connectedness and boundarylessness
-are supplied by the Hamilton-specific compactness conclusion, not by late
-per-limit adapter assumptions. -/
+Hamilton Section 12 black-box conclusion. -/
 theorem toHam3Exists
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -246,13 +228,7 @@ theorem toHam3Exists
 
 /-- The Hamilton Section 12 CGH output follows from the Theorem 3.10
 injectivity-radius compactness interface plus the Hamilton-specific transfer
-producers.
-
-This is the preferred replacement shape for the current `ham3_cgh_limit`
-black box: future work should construct the pointed rescaled-flow sequence `X`,
-prove the legacy Hamilton inputs, the time-zero metric compactness inputs, and
-the explicit derivative/smooth-flow upgrade inputs, and then prove the listed
-convergence-transfer producers from the smooth CGH convergence data. -/
+producers. -/
 theorem ham3OfCompactSol
     [I.Boundaryless]
     {g0 : SmoothRiemannianMetric I M}

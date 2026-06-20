@@ -239,10 +239,16 @@ with the original solution at `omega`. -/
 
 /-- **Stage 2 (restart), raw short-time output.**  The short-time existence
 theorem produces, for the limit metric `g(omega)`, a positive time `T` and a metric
-family `r` on `[0, T)` with `r 0 = g(omega)`, jointly `C∞` chart-Gram on the open
-slab, `C⁰` chart-Gram up to `t = 0`, and solving `∂ₜ r = -2 Ric(r)` on `[0, T)`.
-This is a direct restatement of `ricci_flow_short_time_existence`; it isolates
-the restart so the glue can shift it to start at `omega`. -/
+family `r` on `[0, T)` with `r 0 = g(omega)`, jointly `C∞` chart-Gram up to the
+CLOSED initial endpoint (the half-open slab `[0, T)`), `C⁰` chart-Gram up to
+`t = 0`, and solving `∂ₜ r = -2 Ric(r)` on `[0, T)`.
+
+The closed-endpoint chart-Gram `C∞` (`Set.Ico 0 T`) is **Gate-R**: it is strictly
+stronger than the interior `Ioo 0 T` smoothness that `ricci_flow_short_time_existence`
+currently exposes, and is supplied here as an explicit DeTurck closed-endpoint
+regularity obligation (one labeled `sorry`), not inferred from interior smoothness.
+The remaining fields are a direct restatement of `ricci_flow_short_time_existence`;
+this isolates the restart so the glue can shift it to start at `omega`. -/
 theorem restart_short_time (gomega : SmoothRiemannianMetric I M) :
     ∃ T : ℝ, 0 < T ∧ ∃ r : ℝ → SmoothRiemannianMetric I M,
       r 0 = gomega ∧
@@ -250,7 +256,7 @@ theorem restart_short_time (gomega : SmoothRiemannianMetric I M) :
         ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
           (fun p : ℝ × M =>
             Integral.Measure.chartGramMatrix (I := I) (r p.1) x₀ p.2 i j)
-          (Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
+          (Set.Ico (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
       (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
         ContinuousOn
           (fun p : ℝ × M =>
@@ -260,8 +266,21 @@ theorem restart_short_time (gomega : SmoothRiemannianMetric I M) :
         HasDerivWithinAt (fun s : ℝ => (r s).inner x v w)
           ((-2 : ℝ) *
             DifferentialGeometry.Integral.Connection.ricciTensor (I := I) (r t) x v w)
-          (Set.Ici 0) t) :=
-  ricci_flow_short_time_existence (I := I) (M := M) gomega
+          (Set.Ici 0) t) := by
+  obtain ⟨T, hT, r, hr0, _hsmooth_ioo, hcont, hpde⟩ :=
+    ricci_flow_short_time_existence (I := I) (M := M) gomega
+  refine ⟨T, hT, r, hr0, ?_, hcont, hpde⟩
+  -- **Gate-R (DeTurck closed-endpoint obligation).**  Joint chart-Gram `C∞` of the restart flow up
+  -- to the CLOSED initial endpoint (the half-open slab `[0, T)`).  This is true — a short-time
+  -- Ricci flow from `C∞` initial data is `C∞` up to its initial time — but it is genuinely
+  -- stronger than the interior-only field `_hsmooth_ioo` (`Ioo 0 T`) that
+  -- `ricci_flow_short_time_existence` currently exposes, and is NOT derivable from it (the
+  -- `g_DT → g_fam` conjugating-flow conversion only carries interior `C∞` plus `C⁰`-up-to-`0`).
+  -- It is therefore stated here as an explicit DeTurck closed-endpoint regularity obligation,
+  -- to be discharged by strengthening the conjugating-flow endpoint regularity
+  -- (`conjugating_flow_jointContMDiffOn_interior` → an up-to-`0` variant).  See
+  -- `Analysis/Calculus/SmoothExtension/JetGlueParam.md` (Gate-R).
+  sorry
 
 /-! ## Stage 3: the smooth glue
 
@@ -626,9 +645,11 @@ and discharges everything else sorry-free:
   derivative.
 
 The Stage-3 interface is supplied as a producer `glue` taking the restart family
-`r`, its existence time `T`, the identification `r 0 = g(omega)`, and the
-restart's own PDE; it returns the chosen extension length `ε ≤ T` together with
-the cross-`omega` regularity for that specific restart. -/
+`r`, its existence time `T`, the identification `r 0 = g(omega)`, the restart's
+**closed-endpoint joint chart-Gram `C∞` on `[0, T)`** (Gate-R — the right-hand
+closed-half-slab smoothness the seam splice consumes), and the restart's own PDE;
+it returns the chosen extension length `ε ≤ T` together with the cross-`omega`
+regularity for that specific restart. -/
 theorem ricci_flow_extends_construction
     (g_fam : ℝ → SmoothRiemannianMetric I M) {α omega : ℝ} (hαomega : α < omega)
     (hleft : ∀ t ∈ Set.Ico α omega, ∀ x : M, ∀ v w : TangentSpace I x,
@@ -639,6 +660,11 @@ theorem ricci_flow_extends_construction
     (limit : CinftyLimitData (I := I) g_fam α omega hαomega)
     (glue : ∀ (r : ℝ → SmoothRiemannianMetric I M) (T : ℝ),
       r 0 = limit.limitMetric → 0 < T →
+      (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+        ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+          (fun p : ℝ × M =>
+            Integral.Measure.chartGramMatrix (I := I) (r p.1) x₀ p.2 i j)
+          (Set.Ico (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) →
       (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
         HasDerivWithinAt (fun u : ℝ => (r u).inner x v w)
           ((-2 : ℝ) *
@@ -664,10 +690,11 @@ theorem ricci_flow_extends_construction
               (g_ext t) x v w)
           (Set.Ici α) t) := by
   -- Stage 2: restart from the C∞ limit metric.
-  obtain ⟨T, hT, r, hr0, _hr_smooth, _hr_cont, hr_pde⟩ :=
+  obtain ⟨T, hT, r, hr0, hr_smooth_closed, _hr_cont, hr_pde⟩ :=
     restart_short_time (I := I) (M := M) limit.limitMetric
-  -- Stage 3: the cross-omega glue data for this restart.
-  obtain ⟨ε, hε, hεT, hglue⟩ := glue r T hr0 hT hr_pde
+  -- Stage 3: the cross-omega glue data for this restart (now also fed the closed-endpoint
+  -- chart-Gram `C∞` of the restart on `[0, T)` — Gate-R).
+  obtain ⟨ε, hε, hεT, hglue⟩ := glue r T hr0 hT hr_smooth_closed hr_pde
   -- derive the left one-sided crossing derivative from the C⁰ metric matching
   -- (`metric_match`) and the endpoint Ricci continuity (`ricci_match`)
   have hcont : ∀ x : M, ∀ v w : TangentSpace I x,

@@ -525,32 +525,12 @@ theorem ham3_short_solution_candidate
   · intro t ht x v w
     exact hpde t ht x v w
 
-/-- **Short-time Ricci-flow regularity (classical parabolic black box).**
+/-- Short-time Ricci-flow solution package.
 
-From a smooth initial metric `g0` on a closed three-manifold, the
-Hamilton–DeTurck short-time flow is a genuine folder-level Ricci-flow solution:
-there are `T > 0` and a `SolutionOn (closedOpen 0 T)` with initial metric `g0`
-that is an `IsSolutionOn`.
-
-The existence / interior-`C∞` / `C⁰`-up-to-`0` / first-order-PDE scaffolding is
-supplied (checked) by `ham3_short_solution_candidate`.  The remaining
-`IsSolutionOn` fields are the genuine short-time *parabolic-regularity* content
-that this project black-boxes, exactly as it already does for the existence
-headline `ricci_flow_short_time_existence`:
-
-* `C∞`-up-to-`t = 0` metric-coefficient time regularity
-  (`MetricFamilySmoothOn.coeff`/`frameCompSmooth`); the short-time layer exposes
-  joint `C∞` only on the *open* `Ioo 0 T` plus `C²` up to the endpoints
-  (`deturck_solution_c2_continuous_icc0`).
-* joint continuity of the 3rd-order `∇Ric` on the carrier (`nablaRicCont`); only
-  2nd-order chart continuity is exposed (`ricci_continuous_in_metric_time`).
-* the scalar curvature heat equation `∂_t R = Δ R + 2 |Ric|²` (`scalarEvolution`).
-
-Unlike a raw-chart-data consumer (whose hypotheses are too weak to *imply*
-`IsSolutionOn` — they pin only the 1st time derivative and the open-interval
-smoothness), this statement is about the *actual* short-time solution, so it is
-mathematically true; the single `sorry` is the labeled parabolic-regularity
-input.  Downstream, `smoothOfSol` promotes the result to `IsSmoothSolutionOn`. -/
+`ham3_short_solution_candidate` supplies the current checked short-time
+candidate data.  This theorem is the remaining package/regularity handoff from
+that candidate to the folder-level `IsSolutionOn` predicate; the detailed
+construction status is tracked in the same-name markdown note. -/
 theorem ham3_short_isSolution
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M) :
@@ -565,20 +545,12 @@ theorem ham3_short_isSolution
   obtain ⟨T, hT, S, hstart, _hSmooth, _hCont, _hPDE⟩ :=
     ham3_short_solution_candidate (I := I) (M := M) hM g0
   refine ⟨T, hT, S, hstart, ?_⟩
-  -- The genuine short-time parabolic-regularity black box (see the docstring):
-  -- `C∞`-up-to-`0` metric regularity, `∇Ric` continuity, and the scalar heat
-  -- equation.  The statement is true of this specific short-time solution `S`.
+  -- Short-time package/regularity handoff; see `HamiltonPositiveRicci.md`.
   sorry
 
 /-- Short-time *smooth* normalized existence, assembled from the short-time
-solution producer `ham3_short_isSolution` and the *checked* regularity promotion
-`smoothOfSol` (`IsSolutionOn → IsSmoothSolutionOn`).
-
-This is the natural building block for the normalized maximal-flow setup: it
-produces a genuine folder-level smooth Ricci-flow solution on `[0, T)` with the
-prescribed initial metric.  Its only gap flows through `ham3_short_isSolution`
-(the labeled short-time parabolic-regularity black box); the
-`IsSolutionOn → IsSmoothSolutionOn` step is fully proved by `smoothOfSol`. -/
+solution producer `ham3_short_isSolution` and the checked regularity promotion
+`smoothOfSol` (`IsSolutionOn → IsSmoothSolutionOn`). -/
 theorem ham3_short_smooth_solution
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M) :
@@ -595,24 +567,13 @@ theorem ham3_short_smooth_solution
   exact ⟨T, hT, S, hstart,
     DifferentialGeometry.PDE.RicciFlow.smoothOfSol (I := I) S hSol⟩
 
-/-- Global analytic black box for Hamilton's normalized maximal-flow setup.
+/-- Global analytic input for Hamilton's normalized maximal-flow setup.
 
-This is only the Ricci-flow existence/setup stage: short-time existence,
-maximal-time construction, normalization of the initial time to `0`, and the
-verified Ricci-flow equation package.
-
-The short-time *smooth* stage is now a genuine cite: `ham3_short_smooth_solution`
-(built from the checked bridge `ham3_short_solution_candidate`, the short-time
-solution producer `ham3_short_isSolution`, and the checked `smoothOfSol`
-promotion) produces a smooth folder-level Ricci-flow solution on `[0, T)` with
-`S.family.metric 0 = g0`.
-
-The remaining gap in this theorem is the *maximal continuation*: extending that
-short-time smooth flow to a maximal normalized interval `[0, ω)` and reading off
-endpoint curvature blow-up.  `MaximalTime.lean` supplies blow-up *from*
-maximality (`formsSing_of_maximal_metric`/`rmUnbounded_of_maximal`) but not the
-maximal continuation itself (its `extends_of_rmBounded` Black Box 11.2 is the
-unproved extension criterion), so the closure is left as `sorry`. -/
+The source-level theorem records the endpoint needed by Section 12: a normalized
+maximal interval starting at `0`, the initial metric, smooth Ricci-flow data, and
+the blow-up package.  The short-time stage is cited through
+`ham3_short_smooth_solution`; the maximal-continuation status is tracked in the
+same-name markdown note. -/
 theorem ham3_flow_exists_normalized
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
@@ -620,11 +581,8 @@ theorem ham3_flow_exists_normalized
     exists omega : Real, exists h0ω : 0 < omega,
       exists P : Ham3FlowPackage (I := I) (M := M) g0,
         P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 omega h0ω := by
-  -- Genuine cite of the short-time smooth headline; the short-time stage is no
-  -- longer part of this `sorry`.
+  -- Keep the short-time dependency explicit for the eventual maximal package.
   have _hshort := ham3_short_smooth_solution (I := I) (M := M) hM g0
-  -- Remaining frontier: maximal continuation of `_hshort` plus endpoint blow-up
-  -- assembly into `Ham3FlowPackage` (see the docstring).
   sorry
 
 /-- Compatibility nonempty form of the normalized maximal-flow setup. -/
@@ -885,11 +843,7 @@ theorem nested_of_le {B : Ham3BallPair M}
 end Ham3BallPair
 
 /-- The lower volume bound supplied by Perelman's noncollapsing theorem at the
-fixed radius, recorded with actual small/unit ball witnesses.
-
-The future real geodesic-ball volume producer should prove `volume_mono` from
-Riemannian measure monotonicity and the metric inclusion supplied by
-`DifferentialGeometry.ball_subset_of_le r0_le_one`. -/
+fixed radius, recorded with small/unit ball witnesses. -/
 def Ham3Noncollapse
     {g0 : SmoothRiemannianMetric I M}
     (_P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -902,8 +856,8 @@ def Ham3Noncollapse
         (balls i).small.curvatureControlled /\
         DifferentialGeometry.PDE.RicciFlow.Perelman.KappaNoncollapsedAtBall 3 kappa (balls i).small
 
-/-- Projection of the geometric noncollapsing package to the old unit-ball
-volume lower-bound shape used by compactness statements. -/
+/-- Projection of the geometric noncollapsing package to the unit-ball volume
+lower-bound shape used by compactness statements. -/
 theorem Ham3Noncollapse.unitVolLower
     {g0 : SmoothRiemannianMetric I M}
     {P : Ham3FlowPackage (I := I) (M := M) g0}
@@ -1310,12 +1264,7 @@ theorem ham3_lip74
   exact Classical.choose_spec (hExists T hT hTω hPole) t ht
 
 /-- Section 11/7 producer: extract the scalar package needed by Corollary 7.4
-from Hamilton's normalized maximal Ricci-flow package.
-
-This is now the precise remaining frontier behind Lemma 11.1: it must identify
-the maximal interval with `[0, omega)`, choose the scalar trace and its
-Laplacian/Ricci-norm data, and supply scalar evolution, WMP regularity, the
-Laplacian realization, and the three-dimensional Ricci-norm lower bound. -/
+from Hamilton's normalized maximal Ricci-flow package. -/
 theorem ham3_scalar74
     {omega : Real} (h0ω : 0 < omega)
     (hM : Closed3Manifold (I := I) (M := M))
@@ -2319,12 +2268,8 @@ theorem limit_mid_regular
   have hsq : 0 < ham3_r0 ^ 2 := sq_pos_of_ne_zero ham3_r0_pos.ne'
   constructor <;> nlinarith
 
-/-- CGH convergence transfers Ricci nonnegativity from the selected rescaled
-flows to the smooth limit.
-
-This is a genuine convergence-transfer frontier: the proof should pull back
-the Ricci tensors by the CGH maps and pass the pointwise nonnegative quadratic
-form inequality to the limit. -/
+/-- Consume the CGH Ricci-nonnegativity transfer package for the selected
+rescaled flows and the smooth limit. -/
 theorem limit_ric_nonneg
     (_hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M)
@@ -2482,10 +2427,8 @@ theorem limit_inherit
   exact ⟨L, hsubseq, hwindow, hregwin, hconn, hbdry, hflow,
     hricTransfer, hpinchTransfer, hnonneg, hbase, hscalarPos⟩
 
-/-- The CGH/pinching decay statement is an exact convergence frontier: prove it
-from smooth pointed convergence of the rescaled flows, the rescaling rule for
-Hamilton's improved pinching estimate, and scalar positivity on compact limit
-sets. -/
+/-- Consume the CGH/pinching transfer package to obtain trace-free Ricci decay
+on the smooth limit. -/
 theorem limit_tf_decay
     {g0 : SmoothRiemannianMetric I M}
     (P : Ham3FlowPackage (I := I) (M := M) g0)
@@ -2502,9 +2445,6 @@ theorem limit_tf_decay
         Ham3LimitFlow (I := I) L)
     (hscalarPos : LimitScalarPos (I := I) L) :
     LimitTfDecay (I := I) L := by
-  -- This is the remaining analytic CGH-transfer step: pull back the
-  -- scale-invariant trace-free ratio, use the rescaled estimate
-  -- `C * R_i^{-ε} * R(g_i)^{-ε}`, and let `i -> ∞`.
   exact htransfer hpinch hscalarPos
 
 /-- Once the pinching estimate has been transferred to arbitrary-small upper
@@ -2669,14 +2609,9 @@ theorem limitEinstein_of_tf0
     _ = (L.S.scalar t0 x / 3) * (L.S.base.metric t0).inner x v w := by
           rw [hscalar_l1]
 
-/-- Static Schur/space-form frontier for the Section 12 limit: a connected
-three-dimensional limit metric whose Ricci tensor satisfies `Ric = (R / 3) g`
-and whose scalar is positive at the selected time has constant positive
-sectional curvature.
-
-The remaining proof should use the static metric Bianchi package to prove the
-Einstein factor is constant, then the three-dimensional Riemann-from-Ricci
-component bridge with the project's slot convention. -/
+/-- Static Schur/space-form step for the Section 12 limit: a connected
+three-dimensional limit metric with `Ric = (R / 3) g` and positive scalar at
+the selected time has constant positive sectional curvature. -/
 theorem limit_const_sec_of_einstein
     {L : Ham3CGHLimitData (I := I) M}
     (hdim : Module.finrank Real E = 3)
@@ -2786,9 +2721,8 @@ theorem limit_const_sec_of_einstein
           rw [hscalar_x]
           ring
 
-/-- Pointwise 3D algebra/geometric frontier behind the final constant-curvature
-step: at one regular time, positive scalar plus vanishing trace-free Ricci
-forces a constant positive sectional-curvature metric. -/
+/-- At one regular time, positive scalar plus vanishing trace-free Ricci gives a
+constant positive sectional-curvature metric. -/
 theorem const_pos_of_tf0
     {L : Ham3CGHLimitData (I := I) M}
     (hdim : Module.finrank Real E = 3)

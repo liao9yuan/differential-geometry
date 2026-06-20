@@ -330,9 +330,26 @@ mirror of `chartInvGramOnE_continuous_in_metric_at`).
 identities, `ContinuousOn.*` → `ContDiffOn.*`). Lives in ESR (consumer); the `gramBracket`/`gramBracketDeriv`/
 `partialDeriv_chartChristoffel_eq` identifiers needed `open …IntrinsicSpectral.DeTurckCoefficients`.
 
-**STATUS (2026-06-18): `isSolutionOn_of_extendData` — all 10 fields wired, 9 fully proven, 1 isolated
-frontier-sorry** (`nablaRicCont` per-component = order-3 `∇Ric` chart-frame joint continuity). File green
-(`lake env lean succeeded`), 1 sorry.
+## 2026-06-19 — `nablaRicCont` FIELD REMOVED → `isSolutionOn_of_extendData` SORRY-FREE
+
+The remaining `nablaRicCont` sorry was NOT filled — the **field was deleted** from `IsSolutionOn`. Rationale
+(user-prompted): `nablaRicCont` is `D.regular` (interior-only) continuity of `∇Ric`, a ≤3rd-order
+differential expression in the metric — so it is *implied by* `smoothMetric` (interior C∞) AND a prior audit
+confirmed it is **never consumed** (its only extractor `nablaRicFamilyContinuousOnSet` had no call sites; all
+other uses were transport rebuilds / a `ricciRegOfSol` pass-through). It was a vestigial eager-bundled field.
+Three `lake build`-confirmed attempts to *fill* it first established there is no `totalNabla0SFun` chart-frame
+continuity API (see the nablaRicCont row); removal is the correct fix, not building that layer.
+
+Clean removal (no compat shims), all 4 sites: `IsSolutionOn.nablaRicCont` (struct field),
+`CanonicalRicciRegularOn.nablaRic_cont` (struct field) + `nablaRicFamilyContinuousOnSet` (extractor) +
+`Regularity.lean` builder line; and the 3 producer supplies (`isSolutionOn_timeShift` in `Core`, `paraSol`
+in `ParabolicRescaling`, `isSolutionOn_of_extendData` here). Full `lake build` green.
+
+**STATUS (2026-06-19): `isSolutionOn_of_extendData` is COMPLETE and SORRY-FREE** (9 fields, all proven —
+`IsSolutionOn` is now a 9-field structure). `IsSolutionOn Shat` is fully constructible. The only remaining
+step for the `MaximalTime.lean:291` sorry is the 1-line call-site wiring
+`exact isSolutionOn_of_extendData g_ext S _hS hagree _hsmooth _hcont hpde`. The twin `ham3_short_isSolution`
+sorry is also unblocked (its `nablaRicCont` obligation is gone).
 
 **Next:** (1) discharge `nablaRicCont` — the per-component order-3 `∇Ric` chart-frame joint *continuity*
 (`totalNabla0SFun 2 (conn)(ricci)(cbv tuple)` on the good set). Needs (a) a `∇Ric` chart-frame bridge identity

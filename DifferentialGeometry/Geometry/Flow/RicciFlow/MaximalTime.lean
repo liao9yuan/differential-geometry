@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CinftyLimitGlue
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BBSLimitProducer
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRegularity
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Basic
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Coordinate
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
@@ -269,6 +270,11 @@ theorem extends_of_rmBounded
   -- Leaf 3: short-time glue (DeTurck — collaborator's work)
   have hglue : ∀ (r : ℝ → SmoothRiemannianMetric I M) (T : ℝ),
       r 0 = hLimit.limitMetric → 0 < T →
+      (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+        ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+          (fun p : ℝ × M =>
+            Integral.Measure.chartGramMatrix (I := I) (r p.1) x₀ p.2 i j)
+          (Set.Ico (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) →
       (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ (x : M) (v w : TangentSpace I x),
         HasDerivWithinAt (fun u : ℝ => (r u).inner x v w)
           ((-2 : ℝ) *
@@ -276,6 +282,13 @@ theorem extends_of_rmBounded
           (Set.Ici 0) t) →
       ∃ ε : ℝ, 0 < ε ∧ ε ≤ T ∧
         DifferentialGeometry.PDE.RicciFlow.CinftyGlueData (I := I) g_fam r alpha omega ε := by
+    -- Gate-R is now AVAILABLE as `hr_smooth_closed`: the restart `r`'s joint chart-Gram `C∞`
+    -- up to the CLOSED initial endpoint, on `[0, T)`.  The remaining obstructions for the
+    -- `gram_smooth` field of `CinftyGlueData` are **Gate-L** (the left family's `C∞`-up-to-`ω`
+    -- from BBS, via a strengthened `CinftyLimitData`) and the **jet compatibility** (Lemma 2/3)
+    -- feeding the frozen splice `Analysis.…SmoothExtension.contDiffOn_glue_of_jet_param`.
+    -- These are left as explicit obstructions temporarily.
+    intro r T hr0 hT hr_smooth_closed hr_pde
     sorry
   -- Leaf 4: apply the banked construction
   obtain ⟨ε, hε, g_ext, hagree, _hsmooth, _hcont, hpde⟩ :=
@@ -287,8 +300,9 @@ theorem extends_of_rmBounded
       (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen alpha (omega + ε) hwide) :=
     { base := { metric := g_ext } }
   refine ⟨ε, hε, hwide, Shat, ?_, ?_⟩
-  · -- IsSolutionOn for the extended solution
-    sorry
+  · -- IsSolutionOn for the extended solution (banked builder; nablaRicCont field removed as vestigial)
+    exact DifferentialGeometry.PDE.RicciFlow.isSolutionOn_of_extendData
+      hwide hαω g_ext S _hS hagree _hsmooth _hcont hpde
   · -- SolutionAgreesOn on [α, ω)
     intro t ht
     have htlt : t < omega := ht.2

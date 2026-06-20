@@ -101,3 +101,33 @@ last four slots ordered differently from the wrapper theorem input.
 2026-05-27 alias cleanup: removed the HCG `LimitFlowData` abbrev and rewrote
 the adapter directly over `PointedFlowData`.  The old namespace helper
 `LimitFlowData.toHam3` is now the standalone adapter `pointedFlowToHam3`.
+
+## 2026-06-19 comment cleanup
+
+Moved source-comment lessons from `HamiltonPositiveRicciAdapter.lean` into this
+same-name note.  The Lean comments now describe adapter interfaces without
+embedding dated implementation plans.
+
+Lessons preserved from the source comments:
+
+- `HamCGHTopology` is consumed by the adapter.  Its producer belongs upstream in
+  the CGH construction/source-topology transfer layer; connectedness and
+  boundarylessness should not be treated as scalar or tensor convergence
+  consequences.
+- `noncollapseInput_of_ham3` only projects Hamilton's geometric noncollapse
+  package into the legacy numeric `NoncollapseInput` slot.  Because the legacy
+  record is all-index numeric data while the Hamilton package is eventual in the
+  selected index, the finite prefix is saturated by the lower-bound value.  The
+  real geometric producer remains the noncollapse-to-injectivity-radius bridge
+  used by the Theorem 3.10 compactness interface.
+- `toHam3Exists` forgets the strengthened HCG conclusion down to
+  `Ham3CGHLimitExists`, including the fixed time window, regularity on the open
+  window, topology facts, Ricci-flow predicate, Ricci nonnegativity transfer,
+  basepoint scalar convergence, and pinching transfer.
+- `ham3OfCompactSol` remains the intended replacement shape for the old
+  `ham3_cgh_limit` black box: construct the pointed rescaled-flow sequence,
+  prove the compactness inputs and smooth-flow upgrade inputs, then supply the
+  Hamilton-specific scalar/tensor transfer producers from smooth CGH
+  convergence.
+
+Verification: focused checking passed for this cleanup pass.

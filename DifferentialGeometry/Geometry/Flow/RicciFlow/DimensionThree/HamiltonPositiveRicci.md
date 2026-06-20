@@ -1339,3 +1339,46 @@ frame-BUILDERS that currently make `IsLocalFrameOn I E 1` (`Regularity.lean:323`
 `Tensor/RSTensor/Tensor0SRiemannian/Smooth.lean:378,831`) must build `⊤`-frames (mechanical — their
 underlying `e.localFrame b` is C∞). Until this is decided, treat `ham3_short_isSolution`'s `smoothMetric`
 as blocked-on-design, not blocked-on-proof.
+
+## 2026-06-19 comment cleanup
+
+Moved stale lesson-style source comments out of
+`HamiltonPositiveRicci.lean`.  The Lean comments now state only the local
+interface role of each theorem/definition; the durable status notes remain here.
+
+Lessons preserved from the source comments:
+
+- `ham3_short_isSolution` is the short-time candidate-to-`IsSolutionOn` handoff.
+  Older source comments described this as a pure parabolic-regularity black box,
+  but the current note above records the sharper blocker: `frameCompSmooth` is
+  not constructible as stated for arbitrary `C¹` local frames.  Treat this as a
+  package/design issue until the smooth-frame hypothesis is fixed or an
+  equivalent constructible field is introduced.
+- `ham3_flow_exists_normalized` should continue to cite
+  `ham3_short_smooth_solution` explicitly.  The source theorem remains the
+  normalized maximal-continuation endpoint: build the maximal interval starting
+  at `0`, package the smooth solution, and read off the endpoint blow-up.
+  `MaximalTime.lean` supplies consumers from maximality, but not the full
+  continuation producer.
+- `Ham3Noncollapse` records small/unit ball witnesses and volume monotonicity.
+  The real geodesic-ball producer should eventually prove that monotonicity
+  from metric ball inclusion and Riemannian volume monotonicity; the source
+  definition should not carry that implementation lesson inline.
+- `ham3_scalar74` is now the checked Section 11/7 scalar-package extraction
+  from `Ham3FlowPackage`, not a remaining source-code frontier.  The historical
+  frontier was to identify the maximal interval with `[0, omega)`, choose the
+  scalar trace and its Laplacian/Ricci-norm data, and supply scalar evolution,
+  WMP regularity, the Laplacian realization, and the 3D Ricci-norm lower bound.
+- `limit_ric_nonneg` and `limit_tf_decay` are now consumers of explicit CGH
+  transfer packages.  The actual producer work is to construct
+  `Ham3RicNonnegTransfer` and `Ham3PinchTransfer` from smooth pointed
+  convergence, pullback of Ricci/trace-free data, the rescaled improved
+  pinching estimate, and scalar positivity on compact limit sets.
+- `limit_const_sec_of_einstein` and `const_pos_of_tf0` are checked static
+  three-dimensional algebra/geometric steps, not live source-code frontiers.
+  The proof route uses the static Schur/Bianchi package to make the Einstein
+  factor constant, then the 3D Riemann-from-Ricci component bridge in the
+  project slot convention.
+
+Verification: focused checking passed for this cleanup pass.  The only
+diagnostics were the existing theorem-shaped `sorry` warnings in this file.

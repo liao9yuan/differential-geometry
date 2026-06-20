@@ -789,6 +789,8 @@ components by another use of
 The proof then closes by congruence of finite sums and elementary simplification
 of \texttt{Function.update} on the upper and lower index tuples.
 
+
+
 \section{Main goal and global conventions}
 
 \begin{theorem}[Hamilton's theorem in dimension three]
@@ -802,46 +804,6 @@ then $M$ admits a Riemannian metric of constant positive sectional curvature.
 Equivalently, $M$ is diffeomorphic to a spherical space form.
 \end{theorem}
 
-\begin{remark}[Lean status of the theorem statement]
-\emph{File paths in this remark and in the final status proof refer to the live
-\textnormal{\texttt{DifferentialGeometry/}} repository tree.  When a Ricci-flow
-file is abbreviated, it is relative to
-\textnormal{\texttt{DifferentialGeometry/Geometry/Flow/RicciFlow/}}.}
-
-The Lean-facing theorem-shaped endpoint is
-\leanref{ham3_main} in
-\rffile{DimensionThree/HamiltonPositiveRicci.lean}, in the namespace
-\leanref{DifferentialGeometry.PDE.RicciFlow.HamiltonPositiveRicci}.  Its
-hypotheses are expressed through the
-predicates \leanref{Closed3Manifold} and \leanref{AdmitsPosRicci}, and its
-conclusion is expressed through \leanref{AdmitsConstPosSec} together with
-\leanref{SphericalSpaceForm}.  The metric part of the conclusion is routed
-through \leanref{ham3_const_metric}.  The spherical-space-form conclusion still
-passes through the global and topological interfaces \leanref{ham3_space_box}
-and \leanref{spaceForm_const_metric}.
-
-Thus the endpoint has the shape of Hamilton's theorem and is useful as a
-machine-checked assembly target, but it is not yet a closed, assumption-free
-formalization of Theorem~\ref{thm:main-hamilton-3d}.  In the live endpoint the
-direct proof frontiers are the short-time regularity bridge
-\leanref{ham3_short_isSolution}, the normalized maximal-flow package
-\leanref{ham3_flow_exists_normalized}, Perelman noncollapsing
-\leanref{ham3_noncollapse}, Cheeger--Gromov--Hamilton compactness
-\leanref{ham3_cgh_limit}, compact-limit transfer \leanref{limit_to_orig}, and
-the two space-form handoff directions \leanref{ham3_space_box} and
-\leanref{spaceForm_const_metric}.  The final assembly theorems
-\leanref{ham3_const_metric} and \leanref{ham3_main} are checked consumers over
-those named frontiers.
-
-The constant-sectional-curvature predicate uses the lowered curvature
-convention
-\[
-  \Rm_{04}(X,Y,Z,W)=\langle R(X,Y)Z,W\rangle,
-\]
-with sectional numerator \(\Rm_{04}(X,Y,Y,X)\).  The convention checks live in
-\rffile{Curvature/Convention.lean} and
-\rffile{Realized/CurvatureTensor.lean}.
-\end{remark}
 
 Hamilton's proof route runs Ricci flow from the initial metric \(g_0\), proves
 preservation and improvement of Ricci pinching, and then performs a blow-up
@@ -861,16 +823,234 @@ The rough Laplacian is
 Indices are raised and lowered using the evolving metric $g(t)$, and repeated
 indices are summed unless otherwise stated.
 
+\subsection{Ground geometric definitions needed by the endpoint}
+\label{subsec:ground-definitions-for-endpoint}
+
+The final Hamilton endpoint is stated using project-local Lean predicates, as many corresponding definitions not yet exists in Mathlib.
+Before stating that endpoint, we record the mathematical content of the
+underlying geometric objects.
+
+The ambient smooth manifold is represented by a model with corners
+\[
+  I : \mathrm{ModelWithCorners}\ \mathbb{R}\ E\ H
+\]
+together with a type \(M\), a topology on \(M\), a charted-space structure, and
+smooth-manifold instances.  Thus the formal theorem is not stated about a bare
+topological space.  It is stated about a charted smooth manifold modeled on a
+finite-dimensional real inner product space \(E\).  Tangent vectors at a point
+\(x\in M\) live in the Lean type \texttt{TangentSpace I x}.
+
+A smooth Riemannian metric is represented by
+\begin{center}
+\texttt{\detokenize{SmoothRiemannianMetric I M}}.
+\end{center}
+For such a metric \(g\), the pointwise inner product of tangent vectors
+\(X,Y\in T_xM\) is written in Lean as
+\begin{center}
+\texttt{\detokenize{g.inner x X Y}}.
+\end{center}
+The metric determines its Levi-Civita connection, and hence its curvature,
+Ricci tensor, and scalar curvature.  These are not independent fields in the
+main theorem statement.  They are canonical objects produced from the metric.
+
+The lowered Riemann curvature convention used by the endpoint is
+\[
+  \operatorname{Rm}_{04}(X,Y,Z,W)=\langle R(X,Y)Z,W\rangle .
+\]
+With this convention, the sectional numerator of the plane spanned by \(X\) and
+\(Y\) is
+\[
+  \operatorname{Rm}_{04}(X,Y,Y,X).
+\]
+This convention is important because the constant-positive-sectional-curvature
+predicate is stated directly in terms of this lowered four-tensor.
+
+For a smooth metric \(g\), the Ricci tensor is represented pointwise by the
+canonical tensor
+\begin{center}
+\texttt{\detokenize{metricRicciAt g x}}.
+\end{center}
+The positive-Ricci predicate says that this tensor is positive definite:
+\[
+  \operatorname{Ric}_g(v,v)>0
+  \qquad
+  \text{for every }x\in M\text{ and every nonzero }v\in T_xM .
+\]
+In Lean, the pair of tensor arguments \((v,v)\) is supplied by the constructor
+\texttt{vec2}.  Thus the formal expression
+\begin{center}
+\texttt{\detokenize{metricRicciAt g x (vec2 v v)}}
+\end{center}
+is the Lean-facing version of \(\operatorname{Ric}_g(v,v)\).
+
+Constant positive sectional curvature is also stated as a metric predicate.
+For a smooth metric \(g\), it means that there exists a real constant \(c>0\)
+such that, for every point \(x\in M\) and all tangent vectors
+\(X,Y\in T_xM\),
+\[
+  \operatorname{Rm}_{04}(X,Y,Y,X)
+  =
+  c\bigl(
+    g(X,X)g(Y,Y)-g(X,Y)^2
+  \bigr).
+\]
+Equivalently, every nondegenerate two-plane has sectional curvature \(c\).
+The Lean endpoint uses the numerator form above because it avoids separately
+dividing by the Gram determinant.
+
+Finally, the topological conclusion uses the predicate
+\begin{center}
+\texttt{SphericalSpaceForm}.
+\end{center}
+This is not a Ricci-flow analytic predicate.  It means that \(M\) is smoothly
+presented as a finite free isometric quotient of the round three-sphere.  More
+concretely, the witness data consist of a finite group \(\Gamma\), an isometric
+free action of \(\Gamma\) on the round unit sphere
+\[
+  S^3=\{x\in \mathbb{R}^4:|x|=1\},
+\]
+a smooth structure on the orbit quotient \(S^3/\Gamma\), and a smooth
+homeomorphism between \(M\) and that quotient.
+
+These definitions are the ground layer needed to read the theorem in
+Section~\ref{subsec:main-lean-endpoint}.  The Ricci-flow proof produces the metric
+conclusion, namely the existence of a constant-positive-sectional-curvature
+metric.  The spherical-space-form conclusion is a separate global
+geometry/topology handoff.
+
+\subsection{The main Lean endpoint}
+\label{subsec:main-lean-endpoint}
+
+The formal endpoint of the project is the following Lean theorem in
+\texttt{DimensionThree/HamiltonPositiveRicci.lean}.  We state it before giving
+the corresponding textbook sentence, because the formal theorem is the object
+whose hypotheses and conclusions the rest of the paper must explain.
+
+\begin{verbatim}
+theorem ham3_main
+    (hM : Closed3Manifold (I := I) (M := M))
+    (hpos : AdmitsPosRicci (I := I) (M := M)) :
+    AdmitsConstPosSec (I := I) (M := M) /\
+      SphericalSpaceForm (I := I) (M := M) := by
+  have hconst : AdmitsConstPosSec (I := I) (M := M) :=
+    ham3_const_metric (I := I) (M := M) hM hpos
+  exact And.intro hconst ((ham3_equiv (I := I) (M := M) hM).1 hconst)
+\end{verbatim}
+
+
+
+There are two hypotheses.
+
+First,
+\begin{center}
+\texttt{\detokenize{Closed3Manifold (I := I) (M := M)}}
+\end{center}
+is the Lean package for a closed connected smooth three-manifold.  In the
+current endpoint it expands to
+\[
+  \mathrm{CompactSpace}\ M
+  \quad\wedge\quad
+  \mathrm{ConnectedSpace}\ M
+  \quad\wedge\quad
+  I.\mathrm{Boundaryless}
+  \quad\wedge\quad
+  \operatorname{finrank}_{\mathbb{R}} E = 3.
+\]
+Thus compactness, connectedness, boundarylessness, and dimension three are all
+explicit data.  The dimension is attached to the model vector space \(E\), not
+to an informal superscript on \(M\).
+
+Second,
+\begin{center}
+\texttt{\detokenize{AdmitsPosRicci (I := I) (M := M)}}
+\end{center}
+says that \(M\) admits a smooth Riemannian metric with positive Ricci
+curvature.  More explicitly, it is the existence of a metric
+\[
+  g_0 : \mathtt{SmoothRiemannianMetric}\ I\ M
+\]
+such that
+\[
+  \operatorname{Ric}_{g_0}(v,v)>0
+\]
+for every point \(x\in M\) and every nonzero tangent vector
+\(v\in T_xM\).  In Lean this positivity is expressed using the canonical
+pointwise Ricci tensor of \(g_0\):
+\[
+  0 <
+  \mathtt{metricRicciAt}\ g_0\ x\ (\mathtt{vec2}\ v\ v).
+\]
+This is important: the initial Ricci tensor is not separately supplied.  It is
+computed from the Levi-Civita curvature of the chosen initial metric.
+
+The proof is just conjunction.  The first component to justify is
+\begin{center}
+\texttt{\detokenize{AdmitsConstPosSec (I := I) (M := M)}}.
+\end{center}
+This is done by the metric conclusion of Hamilton's theorem.  It says that there exists a
+smooth Riemannian metric \(g_\infty\) on \(M\) and a real constant \(c>0\)
+such that
+\[
+  \operatorname{Rm}_{04}^{g_\infty}(X,Y,Y,X)
+  =
+  c\bigl(
+    g_\infty(X,X)g_\infty(Y,Y)
+    -
+    g_\infty(X,Y)^2
+  \bigr)
+\]
+for every point \(x\in M\) and every pair \(X,Y\in T_xM\).  The curvature
+convention is
+\[
+  \operatorname{Rm}_{04}(X,Y,Z,W)=\langle R(X,Y)Z,W\rangle,
+\]
+so the displayed identity is exactly the constant-positive-sectional-curvature
+condition in lowered-curvature form.
+
+The second component,
+\begin{center}
+\texttt{\detokenize{SphericalSpaceForm (I := I) (M := M)}},
+\end{center}
+is the topological consequence of a constant-positive-sectional-curvature three manifold.
+
+In ordinary mathematical language, the theorem says:
+
+\begin{theorem}[Hamilton's positive-Ricci theorem, Lean-facing endpoint]
+\label{thm:main-hamilton-3d-lean-facing}
+Let \(M\) be a compact, connected, boundaryless smooth three-manifold.  If
+\(M\) admits a smooth Riemannian metric with positive Ricci curvature, then
+\(M\) admits a smooth Riemannian metric of constant positive sectional
+curvature.  Consequently, \(M\) is diffeomorphic to a spherical space form.
+\end{theorem}
+
+The Lean theorem is stronger as a status marker than this prose theorem,
+because it identifies the exact formal predicates used at the endpoint.  Later
+sections explain the proof of \texttt{\detokenize{ham3_const_metric}} and list
+the remaining analytic, compactness, transfer, and topological interfaces on
+which the current theorem-shaped endpoint depends.
+
+
 \begin{remark}[Lean-facing division of labor]
+\label{rem:lean-division-of-labor}
 The remaining proof uses three kinds of formal objects.  First, tensor-calculus
 identities are local-coordinate, local-frame, or invariant differential-
 geometric calculations.  Second, maximum-principle and parabolic-existence
 statements are analytic inputs or consumer theorems, depending on the section.
 Third, compactness, noncollapsing, convergence transfer, and the final
 topological handoff are represented by explicitly named global interfaces.
+For the following three sections, we will describe our status in each of these directions.
 \end{remark}
 
-\section{Foundational geometric assumptions}
+\section{Local tensor-calculus and differential-geometric calculations}
+\label{sec:local-tensor-geometry}
+
+This section records the project-local geometric calculations: the standing
+Riemannian conventions, the Ricci-flow evolution identities, and the
+three-dimensional curvature algebra.  These are the tensor-calculus and
+coordinate/local-frame components in the division of labor from
+Remark~\ref{rem:lean-division-of-labor}.
+
+\subsection{Foundational geometric conventions}
 
 For basic Riemannian geometry, see \S\ \ref{subsec:BasicRiemGeom}.  For basic
 tensor calculus, see \S\ \ref{subsec:TensorCalculus}.
@@ -929,128 +1109,7 @@ $g$.
 \end{enumerate}
 \end{assumption}
 
-\section{Ricci flow and short-time existence}
-
-\begin{definition}[Ricci flow]
-\label{def:ricci-flow}
-A Ricci flow on $M$ is a smooth one-parameter family of metrics $g(t)$,
-$t\in[0,T)$, satisfying
-\[
-  \partial_tg=-2\Ric(g(t)).
-\]
-\end{definition}
-
-The current Lean development separates the short-time headline from the
-regularity package consumed by the Hamilton endpoint.  Mathematically, the
-standard proof uses DeTurck's trick to replace the diffeomorphism-invariant
-Ricci-flow equation by a strictly parabolic Ricci--DeTurck equation, solves
-that equation for a short time, and then pulls back by the DeTurck
-diffeomorphisms.  In the live Lean tree, the headline theorem
-\leanref{ricci_flow_short_time_existence} is cited through
-\leanref{ham3_short_exists}; the checked adapter
-\leanref{ham3_short_solution_candidate} packages the raw short-time output as a
-candidate \leanref{SolutionOn}.  The remaining short-time frontier for the
-Hamilton endpoint is \leanref{ham3_short_isSolution}, which promotes that raw
-chart/PDE output to the project predicate \leanref{IsSolutionOn}.  The later
-promotion \leanref{smoothOfSol} from \leanref{IsSolutionOn} to
-\leanref{IsSmoothSolutionOn} is already reused by
-\leanref{ham3_short_smooth_solution}.
-
-\begin{blackbox}[Short-time existence for strictly parabolic systems]
-\label{bb:strictly-parabolic-short-time}
-A smooth strictly parabolic system on a closed manifold with smooth initial data
-has a smooth solution for a short time, and the solution is unique in the
-appropriate parabolic class.
-\end{blackbox}
-
-\begin{theorem}[Short-time existence for Ricci flow]
-\label{thm:rf-short-time-existence}
-Let $g_0$ be a smooth Riemannian metric on a closed manifold $M$. Then there
-exists $T>0$ and a smooth Ricci flow $g(t)$ on $[0,T)$ with $g(0)=g_0$.
-\end{theorem}
-
-For the textbook proof, assuming short-time existence for strictly parabolic
-systems, see \S\ \ref{subsec:ShortTimeExistence}.
-
-\begin{proof}[Mathematical proof route over a global analytic input]
-Ricci flow is diffeomorphism-invariant and hence not strictly parabolic.  One
-fixes a background metric $\bar g$ and introduces the DeTurck vector field
-\[
-W^k
-=
-g^{ij}\left(\Gamma^k_{ij}(g)-\Gamma^k_{ij}(\bar g)\right).
-\]
-The Ricci--DeTurck equation is
-\[
-\partial_t\tilde g
-=
--2\Ric(\tilde g)+\Lie_W\tilde g.
-\]
-This equation is a strictly parabolic system.  Black
-Box~\ref{bb:strictly-parabolic-short-time} gives a short-time solution of the
-Ricci--DeTurck equation.  Pulling this solution back by the diffeomorphisms
-generated by $-W$ gives a genuine Ricci flow.  The live Lean endpoint now cites
-this headline through \leanref{ham3_short_exists} and
-\leanref{ham3_short_solution_candidate}; the remaining short-time work is the
-regularity bridge \leanref{ham3_short_isSolution}, not the bare mathematical
-existence statement itself.
-\end{proof}
-
-\section{Maximal Ricci flow interval}
-
-\begin{blackbox}[Normalized maximal Ricci-flow data]
-\label{bb:maximal-rf-interval}
-For the closed three-manifold and positive-Ricci initial metric \(g_0\) in the
-Hamilton theorem, there is a positive real number \(\omega\) and a smooth
-Ricci flow
-\[
-  g(t),\qquad t\in[0,\omega),
-\]
-with
-\[
-  g(0)=g_0,
-\]
-which satisfies the Ricci-flow equation and the smoothness hypotheses needed by
-the later evolution-equation calculations.  We also assume the maximal-end
-curvature blow-up property: for every \(K\in\mathbb R\), there are
-\(t\in[0,\omega)\) and \(x\in M\) such that
-\[
-  K<\norm{\Rm(g(t))}^{2}_{x}.
-\]
-\end{blackbox}
-
-For the textbook maximal-flow theorem, see \S\
-\ref{subsec:MaxRicciFlowInterval}.  In the current Lean organization, the
-Hamilton proof does not separately consume short-time existence, uniqueness,
-maximal extension, and bounded-curvature continuation.  Instead it consumes the
-theorem-shaped interface \leanref{ham3_flow_exists_normalized} in
-\rffile{DimensionThree/HamiltonPositiveRicci.lean}.  That theorem now explicitly
-cites the short-time smooth solution producer \leanref{ham3_short_smooth_solution};
-its remaining frontier is the normalized maximal-continuation package and the
-endpoint blow-up assembly.
-
-\begin{remark}[Formal interface used in the current Lean tree]
-The interface \leanref{ham3_flow_exists_normalized} packages the data needed by
-the downstream Hamilton argument: a flow on the closed-open interval
-\([0,\omega)\), the initial condition \(g(0)=g_0\), the Ricci-flow equation,
-the smoothness and evolution-equation regularity hypotheses used later, and the
-maximal-end curvature blow-up proxy in Black
-Box~\ref{bb:maximal-rf-interval}.
-
-The construction of this package from a short-time smooth solution, uniqueness,
-maximal extension, and the bounded-curvature continuation criterion remains a
-global analytic frontier for the current endpoint.  The short-time smooth
-solution stage has been factored: \leanref{ham3_short_smooth_solution} reuses
-the checked \leanref{smoothOfSol} promotion, while
-\leanref{ham3_short_isSolution} remains the precise raw-data-to-\leanref{IsSolutionOn}
-regularity bridge.  Once the normalized maximal-flow package is supplied, the
-later development consumes it directly and proves downstream statements such as
-\leanref{ham3_finite_time} and \leanref{ham3_scalar_blowup}, together with the
-later evolution and pinching
-consumers.
-\end{remark}
-
-\section{Evolution equations}
+\subsection{Evolution equations}
 
 \paragraph{Lean scope note.}
 The formulas in this section are displayed in standard tensor notation.  In the
@@ -1063,7 +1122,7 @@ extra analytic assumption: \leanref{IsSmoothSolutionOn} extends
 this view from the metric Ricci-flow solution predicate under the standing
 boundaryless coordinate hypothesis.
 
-\subsection{Evolution of the connection}
+\subsubsection{Evolution of the connection}
 
 \begin{lemma}[Evolution of the inverse metric]
 \label{lem:evol-inverse-metric}
@@ -1074,7 +1133,7 @@ Along Ricci flow,
 \end{lemma}
 
 \begin{proof}[Lean-facing calculation]
-The \texttt{RicciFlower} proof is the fixed-frame component theorem
+The proof is the fixed-frame component theorem
 \leanref{RicciFlow.evol_inverse_metric_inFrame} in
 \rffile{RicciFlow/Evolution/Metric/Evolution.lean}.  The proof does not treat
 \(g^{ij}\) as an independent formal symbol.  Instead, it works with a local
@@ -1178,7 +1237,7 @@ but the Lean proof factors the calculation through the lower-index variation
 and the explicit raising step.
 \end{proof}
 
-\subsection{Evolution of Ricci and scalar curvature}
+\subsubsection{Evolution of Ricci and scalar curvature}
 
 \begin{lemma}[Evolution of Ricci]
 \label{lem:evol-ricci}
@@ -1391,8 +1450,211 @@ the canonical functions \leanref{ricciNorm}, \leanref{ricciNormLap},
 \leanref{ricciGradSq}, and \leanref{ricciReact}.
 \end{proof}
 
+\subsection{Three-dimensional curvature algebra}
 
-\section{Maximum principles}
+In dimension three, the Ricci tensor controls the full Riemann curvature tensor.
+This is one of the special algebraic facts that makes Hamilton's proof work:
+the tensor maximum-principle calculations and the Ricci pinching estimates can
+be reduced to explicit eigenvalue algebra.  In the Lean development, this part
+of the proof is also a useful separation point.  The purely finite-dimensional
+curvature algebra is checked independently, and the Ricci-flow preservation
+arguments then consume that algebra through pointwise and solution-level
+interfaces.
+
+\begin{lemma}[Three-dimensional curvature identities]
+\label{lem:3d-curvature-identities}
+In dimension $3$, the Riemann tensor is determined algebraically by the Ricci
+tensor and scalar curvature:
+\[
+R_{ijkl}
+=
+g_{ik}\Ric_{j\ell}-g_{i\ell}\Ric_{jk}
+-g_{jk}\Ric_{i\ell}+g_{j\ell}\Ric_{ik}
+-\frac R2\left(g_{ik}g_{j\ell}-g_{i\ell}g_{jk}\right).
+\]
+If $\Ric$ is diagonal with eigenvalues $\lambda_1,\lambda_2,\lambda_3$, then
+\[
+K_{ij}=R_{ijij}=\frac{\lambda_i+\lambda_j-\lambda_k}{2},
+\]
+where $\{i,j,k\}=\{1,2,3\}$.
+\end{lemma}
+
+\begin{proof}[Lean-facing algebra]
+The dimension-three curvature algebra is native and finite-dimensional.  The
+pure algebra lives in \rffile{DimensionThree/CurvatureAlgebra.lean}.  Lean
+works with an abstract four-index array
+\[
+  R_{ijkl},\qquad i,j,k,l\in \operatorname{Fin} 3,
+\]
+assuming only the algebraic curvature symmetries: skewness in the first pair,
+skewness in the second pair, and pair symmetry.  It defines Ricci and scalar
+traces by explicit finite sums over the three basis vectors and then forms the
+residual obtained by subtracting the displayed Riemann-from-Ricci expression.
+
+The proof does not use a Weyl decomposition.  Instead, Lean proves that this
+residual has the same skew/skew and pair symmetries as the original curvature
+array.  In dimension three, these symmetries reduce the verification to the six
+ordered block components
+\[
+  (01,01),\ (01,02),\ (01,12),\ (02,02),\ (02,12),\ (12,12).
+\]
+Each of these six components is checked directly by expanding the Ricci and
+scalar traces and using the curvature symmetries.  The theorem
+\leanref{displayedRiemannFromRicci3D_of_algebraic_curvature_symmetries}
+then promotes those six component checks to the full four-index identity.
+
+The realized bridge lives in \rffile{DimensionThree/RiemannFromRicci.lean}.  It
+transfers the finite \(\operatorname{Fin} 3\) component identity to a pointwise
+orthonormal-frame statement for the lowered curvature tensor
+\[
+  Rm04(X,Y,Z,W)=\langle R(X,Y)Z,W\rangle .
+\]
+The bridge records the necessary trace and slot-convention data through
+\leanref{RiemannFromRicci3DTraceDataAt} and
+\leanref{rm04Comp_displayedRiemannFromRicci3D_at}.  Finally,
+\rffile{DimensionThree/RicciControlsRm.lean} handles the Ricci-eigenbasis
+sectional-curvature consequence: after diagonalizing Ricci with eigenvalues
+\(\lambda_1,\lambda_2,\lambda_3\), substituting into the realized formula gives
+\[
+  K_{12}=\frac{\lambda_1+\lambda_2-\lambda_3}{2},
+  \quad
+  K_{13}=\frac{\lambda_1+\lambda_3-\lambda_2}{2},
+  \quad
+  K_{23}=\frac{\lambda_2+\lambda_3-\lambda_1}{2}.
+\]
+\end{proof}
+
+\section{Analytic inputs and maximum-principle consumers}
+\label{sec:analytic-consumers}
+
+This section records the analytic side of the formalization: short-time and
+maximal-flow interfaces, scalar and tensor maximum-principle arguments, and the
+Ricci-preservation and pinching estimates that consume those analytic packages.
+The local tensor identities from Section~\ref{sec:local-tensor-geometry} supply
+the differential-geometric inputs for these consumers.
+
+\subsection{Ricci flow and short-time existence}
+
+\begin{definition}[Ricci flow]
+\label{def:ricci-flow}
+A Ricci flow on $M$ is a smooth one-parameter family of metrics $g(t)$,
+$t\in[0,T)$, satisfying
+\[
+  \partial_tg=-2\Ric(g(t)).
+\]
+\end{definition}
+
+The current Lean development separates the short-time headline from the
+regularity package consumed by the Hamilton endpoint.  Mathematically, the
+standard proof uses DeTurck's trick to replace the diffeomorphism-invariant
+Ricci-flow equation by a strictly parabolic Ricci--DeTurck equation, solves
+that equation for a short time, and then pulls back by the DeTurck
+diffeomorphisms.  In the live Lean tree, the headline theorem
+\leanref{ricci_flow_short_time_existence} is cited through
+\leanref{ham3_short_exists}; the checked adapter
+\leanref{ham3_short_solution_candidate} packages the raw short-time output as a
+candidate \leanref{SolutionOn}.  The remaining short-time frontier for the
+Hamilton endpoint is \leanref{ham3_short_isSolution}, which promotes that raw
+chart/PDE output to the project predicate \leanref{IsSolutionOn}.  The later
+promotion \leanref{smoothOfSol} from \leanref{IsSolutionOn} to
+\leanref{IsSmoothSolutionOn} is already reused by
+\leanref{ham3_short_smooth_solution}.
+
+\begin{blackbox}[Short-time existence for strictly parabolic systems]
+\label{bb:strictly-parabolic-short-time}
+A smooth strictly parabolic system on a closed manifold with smooth initial data
+has a smooth solution for a short time, and the solution is unique in the
+appropriate parabolic class.
+\end{blackbox}
+
+\begin{theorem}[Short-time existence for Ricci flow]
+\label{thm:rf-short-time-existence}
+Let $g_0$ be a smooth Riemannian metric on a closed manifold $M$. Then there
+exists $T>0$ and a smooth Ricci flow $g(t)$ on $[0,T)$ with $g(0)=g_0$.
+\end{theorem}
+
+For the textbook proof, assuming short-time existence for strictly parabolic
+systems, see \S\ \ref{subsec:ShortTimeExistence}.
+
+\begin{proof}[Mathematical proof route over a global analytic input]
+Ricci flow is diffeomorphism-invariant and hence not strictly parabolic.  One
+fixes a background metric $\bar g$ and introduces the DeTurck vector field
+\[
+W^k
+=
+g^{ij}\left(\Gamma^k_{ij}(g)-\Gamma^k_{ij}(\bar g)\right).
+\]
+The Ricci--DeTurck equation is
+\[
+\partial_t\tilde g
+=
+-2\Ric(\tilde g)+\Lie_W\tilde g.
+\]
+This equation is a strictly parabolic system.  Black
+Box~\ref{bb:strictly-parabolic-short-time} gives a short-time solution of the
+Ricci--DeTurck equation.  Pulling this solution back by the diffeomorphisms
+generated by $-W$ gives a genuine Ricci flow.  The live Lean endpoint now cites
+this headline through \leanref{ham3_short_exists} and
+\leanref{ham3_short_solution_candidate}; the remaining short-time work is the
+regularity bridge \leanref{ham3_short_isSolution}, not the bare mathematical
+existence statement itself.
+\end{proof}
+
+\subsection{Maximal Ricci flow interval}
+
+\begin{blackbox}[Normalized maximal Ricci-flow data]
+\label{bb:maximal-rf-interval}
+For the closed three-manifold and positive-Ricci initial metric \(g_0\) in the
+Hamilton theorem, there is a positive real number \(\omega\) and a smooth
+Ricci flow
+\[
+  g(t),\qquad t\in[0,\omega),
+\]
+with
+\[
+  g(0)=g_0,
+\]
+which satisfies the Ricci-flow equation and the smoothness hypotheses needed by
+the later evolution-equation calculations.  We also assume the maximal-end
+curvature blow-up property: for every \(K\in\mathbb R\), there are
+\(t\in[0,\omega)\) and \(x\in M\) such that
+\[
+  K<\norm{\Rm(g(t))}^{2}_{x}.
+\]
+\end{blackbox}
+
+For the textbook maximal-flow theorem, see \S\
+\ref{subsec:MaxRicciFlowInterval}.  In the current Lean organization, the
+Hamilton proof does not separately consume short-time existence, uniqueness,
+maximal extension, and bounded-curvature continuation.  Instead it consumes the
+theorem-shaped interface \leanref{ham3_flow_exists_normalized} in
+\rffile{DimensionThree/HamiltonPositiveRicci.lean}.  That theorem now explicitly
+cites the short-time smooth solution producer \leanref{ham3_short_smooth_solution};
+its remaining frontier is the normalized maximal-continuation package and the
+endpoint blow-up assembly.
+
+\begin{remark}[Formal interface used in the current Lean tree]
+The interface \leanref{ham3_flow_exists_normalized} packages the data needed by
+the downstream Hamilton argument: a flow on the closed-open interval
+\([0,\omega)\), the initial condition \(g(0)=g_0\), the Ricci-flow equation,
+the smoothness and evolution-equation regularity hypotheses used later, and the
+maximal-end curvature blow-up proxy in Black
+Box~\ref{bb:maximal-rf-interval}.
+
+The construction of this package from a short-time smooth solution, uniqueness,
+maximal extension, and the bounded-curvature continuation criterion remains a
+global analytic frontier for the current endpoint.  The short-time smooth
+solution stage has been factored: \leanref{ham3_short_smooth_solution} reuses
+the checked \leanref{smoothOfSol} promotion, while
+\leanref{ham3_short_isSolution} remains the precise raw-data-to-\leanref{IsSolutionOn}
+regularity bridge.  Once the normalized maximal-flow package is supplied, the
+later development consumes it directly and proves downstream statements such as
+\leanref{ham3_finite_time} and \leanref{ham3_scalar_blowup}, together with the
+later evolution and pinching
+consumers.
+\end{remark}
+
+\subsection{Maximum principles}
 
 This section records the maximum-principle layer used by the later Ricci-flow
 arguments.  The scalar weak maximum principle is formalized as a native
@@ -1728,82 +1990,7 @@ on $N\times(\tau,0]$.  Varying $\tau$ over $(\alpha,0)$ gives positivity on
 $N\times(\alpha,0]$.
 \end{proof}
 
-
-\section{Three-dimensional curvature algebra}
-
-In dimension three, the Ricci tensor controls the full Riemann curvature tensor.
-This is one of the special algebraic facts that makes Hamilton's proof work:
-the tensor maximum-principle calculations and the Ricci pinching estimates can
-be reduced to explicit eigenvalue algebra.  In the Lean development, this part
-of the proof is also a useful separation point.  The purely finite-dimensional
-curvature algebra is checked independently, and the Ricci-flow preservation
-arguments then consume that algebra through pointwise and solution-level
-interfaces.
-
-\begin{lemma}[Three-dimensional curvature identities]
-\label{lem:3d-curvature-identities}
-In dimension $3$, the Riemann tensor is determined algebraically by the Ricci
-tensor and scalar curvature:
-\[
-R_{ijkl}
-=
-g_{ik}\Ric_{j\ell}-g_{i\ell}\Ric_{jk}
--g_{jk}\Ric_{i\ell}+g_{j\ell}\Ric_{ik}
--\frac R2\left(g_{ik}g_{j\ell}-g_{i\ell}g_{jk}\right).
-\]
-If $\Ric$ is diagonal with eigenvalues $\lambda_1,\lambda_2,\lambda_3$, then
-\[
-K_{ij}=R_{ijij}=\frac{\lambda_i+\lambda_j-\lambda_k}{2},
-\]
-where $\{i,j,k\}=\{1,2,3\}$.
-\end{lemma}
-
-\begin{proof}[Lean-facing algebra]
-The dimension-three curvature algebra is native and finite-dimensional.  The
-pure algebra lives in \rffile{DimensionThree/CurvatureAlgebra.lean}.  Lean
-works with an abstract four-index array
-\[
-  R_{ijkl},\qquad i,j,k,l\in \operatorname{Fin} 3,
-\]
-assuming only the algebraic curvature symmetries: skewness in the first pair,
-skewness in the second pair, and pair symmetry.  It defines Ricci and scalar
-traces by explicit finite sums over the three basis vectors and then forms the
-residual obtained by subtracting the displayed Riemann-from-Ricci expression.
-
-The proof does not use a Weyl decomposition.  Instead, Lean proves that this
-residual has the same skew/skew and pair symmetries as the original curvature
-array.  In dimension three, these symmetries reduce the verification to the six
-ordered block components
-\[
-  (01,01),\ (01,02),\ (01,12),\ (02,02),\ (02,12),\ (12,12).
-\]
-Each of these six components is checked directly by expanding the Ricci and
-scalar traces and using the curvature symmetries.  The theorem
-\leanref{displayedRiemannFromRicci3D_of_algebraic_curvature_symmetries}
-then promotes those six component checks to the full four-index identity.
-
-The realized bridge lives in \rffile{DimensionThree/RiemannFromRicci.lean}.  It
-transfers the finite \(\operatorname{Fin} 3\) component identity to a pointwise
-orthonormal-frame statement for the lowered curvature tensor
-\[
-  Rm04(X,Y,Z,W)=\langle R(X,Y)Z,W\rangle .
-\]
-The bridge records the necessary trace and slot-convention data through
-\leanref{RiemannFromRicci3DTraceDataAt} and
-\leanref{rm04Comp_displayedRiemannFromRicci3D_at}.  Finally,
-\rffile{DimensionThree/RicciControlsRm.lean} handles the Ricci-eigenbasis
-sectional-curvature consequence: after diagonalizing Ricci with eigenvalues
-\(\lambda_1,\lambda_2,\lambda_3\), substituting into the realized formula gives
-\[
-  K_{12}=\frac{\lambda_1+\lambda_2-\lambda_3}{2},
-  \quad
-  K_{13}=\frac{\lambda_1+\lambda_3-\lambda_2}{2},
-  \quad
-  K_{23}=\frac{\lambda_2+\lambda_3-\lambda_1}{2}.
-\]
-\end{proof}
-
-\section{Preservation of Ricci positivity and Ricci pinching}
+\subsection{Preservation of Ricci positivity and Ricci pinching}
 
 The next step applies the maximum-principle layer to the three-dimensional
 curvature algebra.  There are two related but distinct preservation statements.
@@ -1958,7 +2145,7 @@ In Lean, the initial pinching selector is represented by the
 to the shifted WMP endpoint.
 \end{proof}
 
-\section{The improved Ricci pinching quantity}
+\subsection{The improved Ricci pinching quantity}
 
 Hamilton's preserved lower pinching inequality \(\Ric \ge \delta Rg\) is not
 by itself enough to force the blow-up limit to be Einstein.  The improved
@@ -1971,7 +2158,7 @@ quantity
 so that after parabolic rescaling at points where \(R\to\infty\), the
 trace-free Ricci tensor disappears in the limit.
 
-\subsection{Definition and evolution of the pinching quantity}
+\subsubsection{Definition and evolution of the pinching quantity}
 
 \begin{definition}[Trace-free Ricci tensor]
 \label{def:tracefree-ricci}
@@ -2175,7 +2362,7 @@ these gradient rewrites, the remaining zero-order reaction is the last line of
 producer, not an additional maximum-principle argument.
 \end{proof}
 
-\subsection{The algebraic estimate for \texorpdfstring{$Q$}{Q}}
+\subsubsection{The algebraic estimate for \texorpdfstring{$Q$}{Q}}
 
 \begin{lemma}[Factorization of \texorpdfstring{$Q$}{Q} in Ricci eigenvalues]
 \label{lem:Q-factorization}
@@ -2354,8 +2541,16 @@ regularity inputs for the quotient are \leanref{pinchQuotient_space_pos},
 which is the displayed improved pinching inequality.
 \end{proof}
 
+\section{Compactness, transfer, and topological interfaces}
+\label{sec:global-interfaces}
 
-\section{Auxiliary estimates and black-box interfaces for the blow-up argument}
+This section records the nonlocal interfaces in the final Hamilton argument:
+finite-time blow-up data, parabolic rescaling, noncollapsing,
+Cheeger--Gromov--Hamilton compactness, convergence transfer, and the global
+handoff from the limiting constant-curvature metric back to the original
+manifold.
+
+\subsection{Auxiliary estimates and black-box interfaces for the blow-up argument}
 
 The preceding sections supply the local evolution equations, maximum-principle
 consumers, three-dimensional algebra, and improved pinching estimates.  The
