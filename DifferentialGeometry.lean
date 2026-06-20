@@ -726,6 +726,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenComboGardin
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.FaithfulH1Embedding
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.SobolevScaleSummable
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.BoundedC0Intrinsic
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.DeTurckRemainderPathTimeJet
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.DuhamelSmoothing
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.Intrinsic
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.MaxRegInteriorTimeSmoothing

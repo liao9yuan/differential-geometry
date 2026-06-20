@@ -6,6 +6,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckQuasiline
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralPointwiseFlowDeriv
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralSmoothRepresentativeRealize
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SeriesContinuous
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.DeTurckRemainderPathTimeJet
 
 /-!
 # The smooth per-mode time-coordinate of the Ricci–DeTurck engine forcing
@@ -204,6 +205,7 @@ private theorem deTurckForcing_solCoeff_jetSpectralMass
             =ᵐ[timeMeasure T] φ i :=
   sorry
 
+set_option linter.unusedVariables false in
 private theorem deTurckRemainder_path_timeJet_section
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) (ha_even : Even a)
@@ -239,8 +241,51 @@ private theorem deTurckRemainder_path_timeJet_section
                 (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
                 (SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (Rjet j t)) i) ∧
         (∀ (j q : ℕ), ∃ K : ℝ, 0 ≤ K ∧ ∀ t ∈ Set.Icc (0 : ℝ) T,
-          ‖iteratedCovGrad (I := I) g₀ 0 2 q (Rjet j t)‖ ≤ K) :=
-  sorry
+          ‖iteratedCovGrad (I := I) g₀ 0 2 q (Rjet j t)‖ ≤ K) := by
+  classical
+  obtain ⟨Rjet, hsmooth, hjet, hmass⟩ :=
+    deTurckRemainder_path_coeff_timeJet_withMass (I := I) (M := M)
+      g₀ g_bg hT F hδ_lt hδ φ hφ_smooth hcoeff hmodemass
+  refine ⟨Rjet, hsmooth, hjet, ?_⟩
+  intro j q
+  obtain ⟨k, hk⟩ : ∃ k : ℕ, q ≤ 2 * k := ⟨q, by omega⟩
+  set σ' : ℝ := ((2 * k : ℕ) : ℝ) with hσ'_def
+  have hσ'_nn : (0 : ℝ) ≤ σ' := by rw [hσ'_def]; positivity
+  obtain ⟨B, hB_sum, hBle⟩ := hmass j σ' hσ'_nn
+  obtain ⟨Csum, hCsum_nn, hCsum⟩ :=
+    exists_iteratedCovGrad_sum_le_smoothCcToTensorHs (I := I) (M := M) g₀ k
+  have hBtsum_nn : 0 ≤ ∑' i, B i :=
+    tsum_nonneg (fun i =>
+      le_trans (mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i σ') (sq_nonneg _))
+        (hBle i 0 ⟨le_rfl, hT.le⟩))
+  refine ⟨Csum * Real.sqrt (∑' i, B i), by positivity, ?_⟩
+  intro t ht
+  set N : ℝ := ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ' (Rjet j t)‖ with hN_def
+  have hN_nn : 0 ≤ N := norm_nonneg _
+  have hNsq_le : N ^ 2 ≤ ∑' i, B i := by
+    have heq : N ^ 2 = ∑' i, tensorSobolevWeight (I := I) (M := M) i σ' *
+        ((smoothCcToTensorHs (I := I) (M := M) g₀ σ' (Rjet j t)).coeff i) ^ 2 := by
+      rw [hN_def, tensorHs.norm_sq_eq_tsum]
+    rw [heq]
+    refine Summable.tsum_le_tsum (fun i => ?_)
+      ((smoothCcToTensorHs (I := I) (M := M) g₀ σ' (Rjet j t)).weighted_summable) hB_sum
+    rw [smoothCcToTensorHs_coeff]
+    exact hBle i t ht
+  have hN_le : N ≤ Real.sqrt (∑' i, B i) := by
+    rw [← Real.sqrt_sq hN_nn]
+    exact Real.sqrt_le_sqrt hNsq_le
+  have hcovsum := hCsum (Rjet j t)
+  have hsingle : ‖iteratedCovGrad (I := I) g₀ 0 2 q (Rjet j t)‖ ≤
+      ∑ j' ∈ Finset.range (2 * k + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j' (Rjet j t)‖ :=
+    Finset.single_le_sum
+      (f := fun j' => ‖iteratedCovGrad (I := I) g₀ 0 2 j' (Rjet j t)‖)
+      (fun j' _ => norm_nonneg _) (Finset.mem_range.mpr (by omega))
+  calc ‖iteratedCovGrad (I := I) g₀ 0 2 q (Rjet j t)‖
+      ≤ ∑ j' ∈ Finset.range (2 * k + 1),
+          ‖iteratedCovGrad (I := I) g₀ 0 2 j' (Rjet j t)‖ := hsingle
+    _ ≤ Csum * N := by rw [hN_def]; exact hcovsum
+    _ ≤ Csum * Real.sqrt (∑' i, B i) :=
+        mul_le_mul_of_nonneg_left hN_le hCsum_nn
 
 private theorem deTurckSmoothN_path_coeff_jetSpectralMass
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
