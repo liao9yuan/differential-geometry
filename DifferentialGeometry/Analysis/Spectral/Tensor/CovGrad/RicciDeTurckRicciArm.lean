@@ -781,8 +781,533 @@ theorem exists_rebased_cutoffMetricPerturbationFamily
             =ᶠ[nhds (0 : ℝ)]
               (fun σ : ℝ => DifferentialGeometry.PDE.RicciFlow.chartFComponentOnE (I := I)
                 (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg)
-                (realizedFam (I := I) g₀ T T' hδ hδ' (s + σ)) x i k (extChartAt I x x))) :=
-  sorry
+                (realizedFam (I := I) g₀ T T' hδ hδ' (s + σ)) x i k (extChartAt I x x))) := by
+  classical
+  -- Abbreviations.
+  set n := Module.finrank ℝ E
+  set y₀ : E := extChartAt I x x with hy₀
+  have hs0 : (0 : ℝ) ≤ s := le_of_lt hs.1
+  have hs1 : s ≤ 1 := le_of_lt hs.2
+  -- The two `g₀`-perturbation fields: the convex re-base `Psec` and the section-difference `Bsec`.
+  set Psec : ∀ b : M, TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ :=
+    fun b => ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s) b with hPsec
+  set Bsec : ∀ b : M, TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ :=
+    fun b => ccTensorBilinSymm (I := I) g₀ (T - T') b with hBsec
+  -- `g₀`-fibre bounds (all measured against the common base `g₀`).
+  have hPbound : gFibreOpBound (I := I) (M := M) g₀ Psec ((1 - s) * δ' + s * δ) :=
+    convexPerturbation_gFibreOpBound (I := I) g₀ T T' hδ hδ' hs0 hs1
+  set cP : ℝ := (1 - s) * δ' + s * δ with hcP
+  have hcP_lt : cP < 1 := convex_smallConstant_lt_one hδ_lt hδ'_lt hs0 hs1
+  have hBsec_sub : ∀ (b : M) (v w : TangentSpace I b),
+      Bsec b v w = ccTensorBilinSymm (I := I) g₀ T b v w -
+        ccTensorBilinSymm (I := I) g₀ T' b v w := by
+    intro b v w
+    have h0 : T - T' = T + (-1 : ℝ) • T' := by rw [neg_one_smul, ← sub_eq_add_neg]
+    change ccTensorBilinSymm (I := I) g₀ (T - T') b v w = _
+    rw [h0, DifferentialGeometry.PDE.DeTurck.RicciLinearization.ccTensorBilinSymm_add,
+      ccTensorBilinSymm_smul]; ring
+  set cB : ℝ := |δ| + |δ'| with hcB
+  have hcB_nonneg : (0 : ℝ) ≤ cB := by positivity
+  have hBbound : gFibreOpBound (I := I) (M := M) g₀ Bsec cB := by
+    intro b v w
+    have hsv : (0 : ℝ) ≤ Real.sqrt (g₀.inner b v v) := Real.sqrt_nonneg _
+    have hsw : (0 : ℝ) ≤ Real.sqrt (g₀.inner b w w) := Real.sqrt_nonneg _
+    have hbT := hδ b v w
+    have hbT' := hδ' b v w
+    rw [hBsec_sub b v w]
+    calc |ccTensorBilinSymm (I := I) g₀ T b v w - ccTensorBilinSymm (I := I) g₀ T' b v w|
+          ≤ |ccTensorBilinSymm (I := I) g₀ T b v w| +
+              |ccTensorBilinSymm (I := I) g₀ T' b v w| := abs_sub _ _
+      _ ≤ |δ| * Real.sqrt (g₀.inner b v v) * Real.sqrt (g₀.inner b w w) +
+            |δ'| * Real.sqrt (g₀.inner b v v) * Real.sqrt (g₀.inner b w w) := by
+          gcongr
+          · exact le_trans hbT (by gcongr; exact le_abs_self δ)
+          · exact le_trans hbT' (by gcongr; exact le_abs_self δ')
+      _ = cB * Real.sqrt (g₀.inner b v v) * Real.sqrt (g₀.inner b w w) := by rw [hcB]; ring
+  -- The re-base metric `g_s` and its `perturbedMetric`-presentation over `g₀`.
+  set gs : SmoothRiemannianMetric I M := realizedFam (I := I) g₀ T T' hδ hδ' s with hgs
+  have hsmem : s ∈ realizedSmallSet (δ := δ) (δ' := δ') :=
+    Icc_subset_realizedSmallSet hδ_lt hδ'_lt (Set.mem_Icc_of_Ioo hs)
+  -- The chart cutoff: a smooth bump `≡ 1` near the base, with closed support inside the chart target.
+  obtain ⟨bumpFn⟩ : Nonempty (SmoothBumpFunction I x) := inferInstance
+  set χE : E → ℝ := (bumpFn.toContDiffBump : E → ℝ) with hχE
+  have hχE_closedBall : Metric.closedBall y₀ bumpFn.rOut ⊆ (extChartAt I x).target := by
+    have hsub := bumpFn.closedBall_subset
+    rw [I.range_eq_univ] at hsub
+    simpa [hy₀] using hsub
+  have hχE_one_near : χE =ᶠ[nhds y₀] (fun _ => (1 : ℝ)) := bumpFn.toContDiffBump.eventuallyEq_one
+  have hχE_le_one : ∀ z : E, |χE z| ≤ 1 := by
+    intro z
+    rw [abs_of_nonneg bumpFn.toContDiffBump.nonneg]
+    exact bumpFn.toContDiffBump.le_one
+  have hχE_smooth : ContDiff ℝ ∞ χE := bumpFn.toContDiffBump.contDiff
+  -- `χ_M : M → ℝ`, the bump as a global smooth scalar on `M` (`χE ∘ extChartAt` near `x`, `0` away).
+  set χM : M → ℝ := (bumpFn : M → ℝ) with hχM
+  have hχM_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ χM := bumpFn.contMDiff
+  have hχM_le_one : ∀ b : M, |χM b| ≤ 1 := by
+    intro b
+    rw [abs_of_nonneg bumpFn.nonneg]
+    exact bumpFn.le_one
+  -- `χ_M` and `χE` agree (via the chart) on the chart source / target.
+  have hχM_eq_χE : ∀ {y : E}, y ∈ (extChartAt I x).target →
+      χM ((extChartAt I x).symm y) = χE y := by
+    intro y hy
+    have hsrc : (extChartAt I x).symm y ∈ (chartAt H x).source := by
+      rw [← extChartAt_source (I := I)]; exact (extChartAt I x).map_target hy
+    rw [hχM, bumpFn.eqOn_source hsrc]
+    simp only [Function.comp_apply, hχE]
+    rw [(extChartAt I x).right_inv hy]
+  -- The chart velocity `h_ij(y) = χE(y) · (Bsec on the chart frame at the chart preimage of y)`.
+  set Bframe : Fin n → Fin n → E → ℝ :=
+    fun i j y => Bsec ((extChartAt I x).symm y)
+      (chartBasisVecFiber (I := I) x i ((extChartAt I x).symm y))
+      (chartBasisVecFiber (I := I) x j ((extChartAt I x).symm y)) with hBframe
+  -- The chart-frame value of `Bsec` is the difference of the two realized-metric chart Grams
+  -- (the common `g₀` part cancels), hence `C^∞` on the chart target.
+  have hBframe_eq : ∀ (i j : Fin n) (y : E),
+      Bframe i j y =
+        chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x i j y -
+          chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x i j y := by
+    intro i j y
+    simp only [hBframe]
+    rw [hBsec_sub, chartGramOnE_def, chartGramMatrix_apply, tensorSectionRealizeMetric_inner,
+      chartGramOnE_def, chartGramMatrix_apply, tensorSectionRealizeMetric_inner]
+    ring
+  have hBframe_contDiffOn : ∀ i j : Fin n, ContDiffOn ℝ ∞ (Bframe i j) (extChartAt I x).target := by
+    intro i j
+    have hcd : ContDiffOn ℝ ∞
+        (fun y => chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x i j y -
+          chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x i j y)
+        (extChartAt I x).target :=
+      (chartGramOnE_contDiffOn (I := I) _ x i j).sub (chartGramOnE_contDiffOn (I := I) _ x i j)
+    exact hcd.congr (fun y _ => hBframe_eq i j y)
+  set hcomp : Fin n → Fin n → E → ℝ := fun i j y => χE y * Bframe i j y with hhcomp
+  -- Global smoothness of each chart-velocity component (bump times target-smooth, junk-zeroed off support).
+  have hcomp_smooth : ∀ i j : Fin n, ContDiff ℝ ∞ (hcomp i j) := by
+    intro i j
+    rw [contDiff_iff_contDiffAt]
+    intro c
+    by_cases hc : c ∈ Metric.closedBall y₀ bumpFn.rOut
+    · have hc_t : c ∈ (extChartAt I x).target := hχE_closedBall hc
+      have hb_at : ContDiffAt ℝ ∞ χE c := hχE_smooth.contDiffAt
+      have hB_at : ContDiffAt ℝ ∞ (Bframe i j) c :=
+        (hBframe_contDiffOn i j).contDiffAt ((isOpen_extChartAt_target (I := I) x).mem_nhds hc_t)
+      exact hb_at.mul hB_at
+    · rw [Metric.mem_closedBall] at hc
+      have hdist : bumpFn.rOut < dist c y₀ := not_le.mp hc
+      have hopen : IsOpen {z : E | bumpFn.rOut < dist z y₀} :=
+        (continuous_dist.comp₂ continuous_id continuous_const).isOpen_preimage _ isOpen_Ioi
+      refine ContDiffAt.congr_of_eventuallyEq (f := fun _ : E => (0 : ℝ)) contDiffAt_const ?_
+      refine Filter.eventuallyEq_of_mem (hopen.mem_nhds hdist) ?_
+      intro z hz
+      have hz0 : χE z = 0 := bumpFn.toContDiffBump.zero_of_le_dist (le_of_lt hz)
+      change χE z * Bframe i j z = 0
+      rw [hz0, zero_mul]
+  have hcomp_symm : ∀ (i j : Fin n) (y : E), hcomp i j y = hcomp j i y := by
+    intro i j y
+    simp only [hhcomp, hBframe]
+    rw [ccTensorBilinSymm_symm]
+  -- The chart-metric-perturbation packaging of the velocity.
+  set h : ChartMetricPerturbation E :=
+    { toFun := hcomp
+      symm' := hcomp_symm
+      smooth' := hcomp_smooth } with hh
+  -- The total perturbation field `P σ = Psec + (σ·χ_M)·Bsec` (over `g₀`), and its fibre bound.
+  set Pfield : ℝ → ∀ b : M, TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ :=
+    fun σ b => Psec b + ((σ * χM b) • Bsec b) with hPfield
+  have hPfield_symm : ∀ (σ : ℝ) (b : M) (v w : TangentSpace I b),
+      Pfield σ b v w = Pfield σ b w v := by
+    intro σ b v w
+    simp only [hPfield, ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply, smul_eq_mul]
+    rw [hPsec, hBsec, ccTensorBilinSymm_symm (I := I) g₀ _ b v w,
+      ccTensorBilinSymm_symm (I := I) g₀ _ b v w]
+  have hPfield_smooth : ∀ σ : ℝ, ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+      (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun b : M => TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ)
+        b (Pfield σ b)) := by
+    intro σ
+    have hP : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+        (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+          (E := fun b : M => TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ) b (Psec b)) :=
+      ccTensorBilinSymm_contMDiff (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s)
+    have hBsmooth : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+        (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+          (E := fun b : M => TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ) b (Bsec b)) :=
+      ccTensorBilinSymm_contMDiff (I := I) g₀ (T - T')
+    have hscalar : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun b : M => σ * χM b) := contMDiff_const.mul hχM_smooth
+    have hdiff : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+        (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+          (E := fun b : M => TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ)
+          b ((fun b' => (σ * χM b') • Bsec b') b)) := ContMDiff.smul_section hscalar hBsmooth
+    exact ContMDiff.add_section hP hdiff
+  have hPfield_bound : ∀ σ : ℝ,
+      gFibreOpBound (I := I) (M := M) g₀ (Pfield σ) (cP + |σ| * cB) := by
+    intro σ
+    have hscaled : gFibreOpBound (I := I) (M := M) g₀
+        (fun b => (σ * χM b) • Bsec b) (|σ| * cB) := by
+      intro b v w
+      simp only [ContinuousLinearMap.smul_apply, smul_eq_mul, abs_mul]
+      have hσ : (0 : ℝ) ≤ |σ| := abs_nonneg _
+      have hχb : |χM b| ≤ 1 := hχM_le_one b
+      have hBb : |Bsec b v w| ≤ cB * Real.sqrt (g₀.inner b v v) * Real.sqrt (g₀.inner b w w) :=
+        hBbound b v w
+      have hsv : (0 : ℝ) ≤ Real.sqrt (g₀.inner b v v) := Real.sqrt_nonneg _
+      have hsw : (0 : ℝ) ≤ Real.sqrt (g₀.inner b w w) := Real.sqrt_nonneg _
+      calc |σ| * |χM b| * |Bsec b v w|
+            ≤ |σ| * 1 * (cB * Real.sqrt (g₀.inner b v v) * Real.sqrt (g₀.inner b w w)) := by
+              gcongr
+        _ = |σ| * cB * Real.sqrt (g₀.inner b v v) * Real.sqrt (g₀.inner b w w) := by ring
+    intro b v w
+    simp only [hPfield, ContinuousLinearMap.add_apply]
+    have hsv : (0 : ℝ) ≤ Real.sqrt (g₀.inner b v v) := Real.sqrt_nonneg _
+    have hsw : (0 : ℝ) ≤ Real.sqrt (g₀.inner b w w) := Real.sqrt_nonneg _
+    have hb1 := hPbound b v w
+    have hb2 := hscaled b v w
+    calc |Psec b v w + ((σ * χM b) • Bsec b) v w|
+          ≤ |Psec b v w| + |((σ * χM b) • Bsec b) v w| := abs_add_le _ _
+      _ ≤ cP * Real.sqrt (g₀.inner b v v) * Real.sqrt (g₀.inner b w w) +
+            |σ| * cB * Real.sqrt (g₀.inner b v v) * Real.sqrt (g₀.inner b w w) := by
+          refine add_le_add ?_ ?_
+          · simpa [hcP] using hb1
+          · simpa using hb2
+      _ = (cP + |σ| * cB) * Real.sqrt (g₀.inner b v v) * Real.sqrt (g₀.inner b w w) := by ring
+  -- The window radius `ε`: for `|σ| < ε` the field stays fibre-small with constant `< 1`.
+  set ε : ℝ := (1 - cP) / (1 + cB) with hε
+  have hε_pos : 0 < ε := by
+    rw [hε]; apply div_pos (by linarith) (by linarith)
+  have hwindow : ∀ σ : ℝ, |σ| < ε → cP + |σ| * cB < 1 := by
+    intro σ hσ
+    have hden : (0 : ℝ) < 1 + cB := by linarith
+    have h1 : |σ| * cB ≤ ε * cB := mul_le_mul_of_nonneg_right (le_of_lt hσ) hcB_nonneg
+    have h2 : ε * cB < 1 - cP := by
+      rw [hε, div_mul_eq_mul_div, div_lt_iff₀ hden]
+      nlinarith [hcP_lt, hcB_nonneg]
+    linarith
+  -- The one-parameter family `gfam` (cutoff in `σ`; junk-extended by `g_s` outside the window).
+  set gfam : ℝ → SmoothRiemannianMetric I M := fun σ =>
+    if hσ : |σ| < ε then
+      perturbedMetric (I := I) (M := M) g₀ (Pfield σ) (hPfield_symm σ) (hPfield_smooth σ)
+        (hwindow σ hσ) (hPfield_bound σ)
+    else gs with hgfam
+  -- The chart-Gram of `gfam σ` (window branch) reads off the perturbation on the chart frame.
+  have hgfam_chartGram : ∀ (σ : ℝ), |σ| < ε → ∀ (i j : Fin n) (y : E),
+      chartGramOnE (I := I) (gfam σ) x i j y =
+        chartGramOnE (I := I) g₀ x i j y +
+          Pfield σ ((extChartAt I x).symm y)
+            (chartBasisVecFiber (I := I) x i ((extChartAt I x).symm y))
+            (chartBasisVecFiber (I := I) x j ((extChartAt I x).symm y)) := by
+    intro σ hσ i j y
+    simp only [hgfam, dif_pos hσ]
+    rw [chartGramOnE_def, chartGramMatrix_apply, perturbedMetric_inner, perturbedInner_apply,
+      chartGramOnE_def, chartGramMatrix_apply]
+  -- `gfam 0 = g_s`.
+  -- Equality of metrics by their inner field (the other structure fields are `Prop`-valued).
+  have hmetric_ext : ∀ {g g' : SmoothRiemannianMetric I M},
+      (∀ (b : M) (v w : TangentSpace I b), g.inner b v w = g'.inner b v w) → g = g' := by
+    intro g g' hi
+    have hinner : g.inner = g'.inner := by funext b; ext v w; exact hi b v w
+    cases g with
+    | mk gi gsymm gpos gvon gcont =>
+      cases g' with
+      | mk gi' gsymm' gpos' gvon' gcont' => cases hinner; rfl
+  have hgfam_zero : gfam 0 = gs := by
+    have h0 : |(0 : ℝ)| < ε := by rwa [abs_zero]
+    simp only [hgfam, dif_pos h0]
+    apply hmetric_ext
+    intro b v w
+    rw [perturbedMetric_inner, perturbedInner_apply, hgs,
+      realizedFam_inner_of_mem (I := I) g₀ T T' hδ hδ' hsmem]
+    simp only [hPfield, hPsec, zero_mul, add_zero, zero_smul]
+  -- The pointwise affine identity for the chart-Gram entry, on the chart-target interior
+  -- (where `χ_M (symm y) = χE y`), valid for `|σ| < ε`.
+  have haffine : ∀ (σ : ℝ), |σ| < ε → ∀ (i j : Fin n) {y : E},
+      y ∈ (extChartAt I x).target →
+      chartGramOnE (I := I) (gfam σ) x i j y =
+        chartGramOnE (I := I) (gfam 0) x i j y + σ * hcomp i j y := by
+    intro σ hσ i j y hy
+    have h0 : |(0 : ℝ)| < ε := by rwa [abs_zero]
+    rw [hgfam_chartGram σ hσ i j y, hgfam_chartGram 0 h0 i j y]
+    simp only [hPfield, ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply, smul_eq_mul,
+      zero_mul, zero_smul, add_zero]
+    rw [hhcomp, hBframe]
+    have hχ := hχM_eq_χE hy
+    rw [hχ]
+    ring
+  -- Differentiability of the affine summands at chart-interior points.
+  have hA_diff : ∀ (i j : Fin n) {y : E}, y ∈ interior (extChartAt I x).target →
+      DifferentiableAt ℝ (fun z => chartGramOnE (I := I) (gfam 0) x i j z) y := by
+    intro i j y hy
+    rw [hgfam_zero]
+    have hcd : ContDiffOn ℝ ∞ (chartGramOnE (I := I) gs x i j) (extChartAt I x).target :=
+      chartGramOnE_contDiffOn (I := I) gs x i j
+    exact ((hcd.mono interior_subset).contDiffAt
+      (isOpen_interior.mem_nhds hy)).differentiableAt (by norm_num)
+  have hB_diff : ∀ (i j : Fin n) (y : E),
+      DifferentiableAt ℝ (fun z => hcomp i j z) y :=
+    fun i j y => ((hcomp_smooth i j).differentiable (by norm_num)).differentiableAt
+  -- The window membership of `σ` together with `s + σ ∈ realizedSmallSet`, near `σ = 0`.
+  have hSopen : IsOpen (realizedSmallSet (δ := δ) (δ' := δ')) := realizedSmallSet_isOpen
+  set Wσ : Set ℝ := {σ : ℝ | |σ| < ε} ∩ {σ : ℝ | s + σ ∈ realizedSmallSet (δ := δ) (δ' := δ')}
+    with hWσ
+  have hWσ_open : IsOpen Wσ := by
+    refine IsOpen.inter ?_ ?_
+    · exact isOpen_lt continuous_abs continuous_const
+    · exact hSopen.preimage (by fun_prop)
+  have hWσ_mem : (0 : ℝ) ∈ Wσ := by
+    refine ⟨?_, ?_⟩
+    · simp only [Set.mem_setOf_eq, abs_zero]; exact hε_pos
+    · simp only [Set.mem_setOf_eq, add_zero]; exact hsmem
+  have hWσ_nhds : Wσ ∈ nhds (0 : ℝ) := hWσ_open.mem_nhds hWσ_mem
+  -- The chart-Gram germ agreement between the cutoff family and the re-based realized family, near base.
+  have hloc_gram : ∀ σ : ℝ, σ ∈ Wσ → ∀ a b : Fin n,
+      chartGramOnE (I := I) (gfam σ) x a b =ᶠ[nhds y₀]
+        chartGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' (s + σ)) x a b := by
+    intro σ hσW a b
+    obtain ⟨hσε, hσs⟩ := hσW
+    simp only [Set.mem_setOf_eq] at hσε hσs
+    -- on a nbhd of base where `χE ≡ 1` and inside the chart target, both Grams agree.
+    have hbase_t : y₀ ∈ (extChartAt I x).target := by
+      rw [hy₀]; exact mem_extChartAt_target x
+    filter_upwards [hχE_one_near,
+      (isOpen_extChartAt_target (I := I) x).mem_nhds hbase_t] with y hy1 hyt
+    have hsσ_mem : s + σ ∈ realizedSmallSet (δ := δ) (δ' := δ') := hσs
+    set yp : M := (extChartAt I x).symm y with hyp
+    set fa : TangentSpace I yp := chartBasisVecFiber (I := I) x a yp with hfa
+    set fb : TangentSpace I yp := chartBasisVecFiber (I := I) x b yp with hfb
+    have hχ1 : χM yp = 1 := by rw [hyp, hχM_eq_χE hyt]; exact hy1
+    -- RHS chart Gram, via inner of mem, with the telescoping of the convex perturbation.
+    have hRHS : chartGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' (s + σ)) x a b y =
+        chartGramOnE (I := I) g₀ x a b y +
+          (Psec yp fa fb + σ * Bsec yp fa fb) := by
+      rw [chartGramOnE_def, chartGramMatrix_apply,
+        realizedFam_inner_of_mem (I := I) g₀ T T' hδ hδ' hsσ_mem, chartGramOnE_def,
+        chartGramMatrix_apply]
+      congr 1
+      have hcsplit : convexPerturbation (I := I) g₀ T T' (s + σ) =
+          convexPerturbation (I := I) g₀ T T' s + σ • (T - T') := by
+        simp only [convexPerturbation]
+        module
+      rw [hcsplit, DifferentialGeometry.PDE.DeTurck.RicciLinearization.ccTensorBilinSymm_add,
+        ccTensorBilinSymm_smul]
+    -- LHS chart Gram, with `χE y = 1`.
+    rw [hgfam_chartGram σ hσε a b y, hRHS]
+    simp only [hPfield, ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply, smul_eq_mul,
+      ← hyp, hχ1, mul_one]
+    ring
+  refine ⟨h, gfam, ?_, ?_, ?_, ?_⟩
+  · -- IsMetricPerturbationFamily
+    refine ⟨?_, ?_, ?_, ?_, ?_⟩
+    · -- `gfam 0 = g_s`
+      rw [hgfam_zero]
+    · -- value pin
+      intro i j y hy
+      have hyt : y ∈ (extChartAt I x).target := interior_subset hy
+      have heq : (fun σ : ℝ => chartGramOnE (I := I) (gfam σ) x i j y) =ᶠ[nhds 0]
+          (fun σ : ℝ => chartGramOnE (I := I) (gfam 0) x i j y + σ * h i j y) := by
+        filter_upwards [Metric.ball_mem_nhds (0 : ℝ) hε_pos] with σ hσ
+        exact haffine σ (by simpa [Real.dist_eq] using hσ) i j hyt
+      apply HasDerivAt.congr_of_eventuallyEq _ heq
+      have h1 : HasDerivAt
+          (fun σ : ℝ => chartGramOnE (I := I) (gfam 0) x i j y + σ * h i j y)
+          (0 + 1 * h i j y) 0 := (hasDerivAt_const _ _).add ((hasDerivAt_id _).mul_const _)
+      simpa using h1
+    · -- joint smoothness
+      intro i j y hy
+      have hcd : ContDiffOn ℝ ∞ (chartGramOnE (I := I) gs x i j) (extChartAt I x).target :=
+        chartGramOnE_contDiffOn (I := I) gs x i j
+      have hyt : y ∈ (extChartAt I x).target := interior_subset hy
+      -- chart Gram of `gfam σ` is, on `Wσ ×ˢ target`, the joint-smooth affine field.
+      have heq : (fun p : ℝ × E => chartGramOnE (I := I) (gfam p.1) x i j p.2)
+          =ᶠ[nhds (0, y)]
+          (fun p : ℝ × E => chartGramOnE (I := I) gs x i j p.2 + p.1 * hcomp i j p.2) := by
+        have hmem : Wσ ×ˢ (extChartAt I x).target ∈ nhds ((0 : ℝ), y) :=
+          (hWσ_open.prod (isOpen_extChartAt_target (I := I) x)).mem_nhds ⟨hWσ_mem, hyt⟩
+        filter_upwards [hmem] with p hp
+        have hp1 : |p.1| < ε := hp.1.1
+        rw [haffine p.1 hp1 i j hp.2, hgfam_zero]
+      apply ContDiffAt.congr_of_eventuallyEq _ heq
+      have hAc : ContDiffAt ℝ ∞ (fun p : ℝ × E => chartGramOnE (I := I) gs x i j p.2) (0, y) :=
+        ((hcd.contDiffAt ((isOpen_extChartAt_target (I := I) x).mem_nhds hyt)).comp (0, y)
+          contDiffAt_snd)
+      have hBc : ContDiffAt ℝ ∞ (fun p : ℝ × E => hcomp i j p.2) (0, y) :=
+        ((hcomp_smooth i j).contDiffAt).comp (0, y) contDiffAt_snd
+      exact hAc.add (contDiffAt_fst.mul hBc)
+    · -- first jet pin
+      intro i j p y hy
+      have hyt : y ∈ (extChartAt I x).target := interior_subset hy
+      have hpart : ∀ σ : ℝ, |σ| < ε →
+          partialDeriv (E := E) p (chartGramOnE (I := I) (gfam σ) x i j) y =
+            partialDeriv (E := E) p (chartGramOnE (I := I) (gfam 0) x i j) y +
+              σ * partialDeriv (E := E) p (h i j) y := by
+        intro σ hσ
+        have hgerm : chartGramOnE (I := I) (gfam σ) x i j =ᶠ[nhds y]
+            (fun z => chartGramOnE (I := I) (gfam 0) x i j z + σ * h i j z) := by
+          filter_upwards [(isOpen_extChartAt_target (I := I) x).mem_nhds hyt] with z hz
+          exact haffine σ hσ i j hz
+        simp only [partialDeriv]
+        rw [hgerm.fderiv_eq]
+        have hBσ : HasFDerivAt (fun z => σ * h i j z)
+            (σ • fderiv ℝ (fun z => h i j z) y) y := (hB_diff i j y).hasFDerivAt.const_mul σ
+        have hsum : HasFDerivAt (fun z => chartGramOnE (I := I) (gfam 0) x i j z + σ * h i j z)
+            (fderiv ℝ (fun z => chartGramOnE (I := I) (gfam 0) x i j z) y +
+              σ • fderiv ℝ (fun z => h i j z) y) y := (hA_diff i j hy).hasFDerivAt.add hBσ
+        rw [hsum.fderiv, ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply, smul_eq_mul]
+      have heq : (fun σ : ℝ => partialDeriv (E := E) p (chartGramOnE (I := I) (gfam σ) x i j) y)
+          =ᶠ[nhds 0]
+          (fun σ : ℝ => partialDeriv (E := E) p (chartGramOnE (I := I) (gfam 0) x i j) y +
+            σ * partialDeriv (E := E) p (h i j) y) := by
+        filter_upwards [Metric.ball_mem_nhds (0 : ℝ) hε_pos] with σ hσ
+        exact hpart σ (by simpa [Real.dist_eq] using hσ)
+      apply HasDerivAt.congr_of_eventuallyEq _ heq
+      have h1 : HasDerivAt
+          (fun σ : ℝ => partialDeriv (E := E) p (chartGramOnE (I := I) (gfam 0) x i j) y +
+            σ * partialDeriv (E := E) p (h i j) y)
+          (0 + 1 * partialDeriv (E := E) p (h i j) y) 0 :=
+        (hasDerivAt_const _ _).add ((hasDerivAt_id _).mul_const _)
+      simpa using h1
+    · -- second jet pin
+      intro i j p q y hy
+      have hyt : y ∈ (extChartAt I x).target := interior_subset hy
+      -- inner germ identity on a neighbourhood of `y`: `∂_q (gfam σ)` is affine in `σ`.
+      have hinner : ∀ σ : ℝ, |σ| < ε →
+          (fun z => partialDeriv (E := E) q (chartGramOnE (I := I) (gfam σ) x i j) z) =ᶠ[nhds y]
+            (fun z => partialDeriv (E := E) q (chartGramOnE (I := I) (gfam 0) x i j) z +
+              σ * partialDeriv (E := E) q (h i j) z) := by
+        intro σ hσ
+        filter_upwards [(isOpen_extChartAt_target (I := I) x).mem_nhds hyt] with z hz
+        have hgerm : chartGramOnE (I := I) (gfam σ) x i j =ᶠ[nhds z]
+            (fun z' => chartGramOnE (I := I) (gfam 0) x i j z' + σ * h i j z') := by
+          filter_upwards [(isOpen_extChartAt_target (I := I) x).mem_nhds hz] with z' hz'
+          exact haffine σ hσ i j hz'
+        have hzint : z ∈ interior (extChartAt I x).target :=
+          extChartAt_target_subset_interior_of_boundaryless (I := I) x hz
+        simp only [partialDeriv]
+        rw [hgerm.fderiv_eq]
+        have hBσ : HasFDerivAt (fun z' => σ * h i j z')
+            (σ • fderiv ℝ (fun z' => h i j z') z) z := (hB_diff i j z).hasFDerivAt.const_mul σ
+        have hsum : HasFDerivAt (fun z' => chartGramOnE (I := I) (gfam 0) x i j z' + σ * h i j z')
+            (fderiv ℝ (fun z' => chartGramOnE (I := I) (gfam 0) x i j z') z +
+              σ • fderiv ℝ (fun z' => h i j z') z) z := (hA_diff i j hzint).hasFDerivAt.add hBσ
+        rw [hsum.fderiv, ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply, smul_eq_mul]
+      -- differentiability of the outer summands `∂_q A`, `∂_q B` at `y`.
+      have hAq_diff : DifferentiableAt ℝ
+          (fun z => partialDeriv (E := E) q (chartGramOnE (I := I) (gfam 0) x i j) z) y := by
+        rw [hgfam_zero]
+        have hcd : ContDiffOn ℝ ∞ (chartGramOnE (I := I) gs x i j) (extChartAt I x).target :=
+          chartGramOnE_contDiffOn (I := I) gs x i j
+        have hopen : IsOpen ((extChartAt I x).target : Set E) := isOpen_extChartAt_target (I := I) x
+        have hfderiv : ContDiffOn ℝ ∞ (fderiv ℝ (chartGramOnE (I := I) gs x i j))
+            (extChartAt I x).target :=
+          hcd.fderiv_of_isOpen hopen (by rw [ENat.coe_top_add_one])
+        have hcd2 : ContDiffOn ℝ ∞
+            (fun z => partialDeriv (E := E) q (chartGramOnE (I := I) gs x i j) z)
+            (extChartAt I x).target := by
+          simp only [partialDeriv]
+          exact hfderiv.clm_apply contDiffOn_const
+        exact (hcd2.contDiffAt (hopen.mem_nhds (interior_subset hy))).differentiableAt (by norm_num)
+      have hBq_diff : DifferentiableAt ℝ
+          (fun z => partialDeriv (E := E) q (h i j) z) y :=
+        ((DifferentialGeometry.PDE.DeTurck.RicciLinearization.partialDeriv_contDiff_of_contDiff
+          (hcomp_smooth i j) q).differentiable (by norm_num)).differentiableAt
+      have hpt : ∀ σ : ℝ, |σ| < ε →
+          partialDeriv (E := E) p (partialDeriv (E := E) q (chartGramOnE (I := I) (gfam σ) x i j)) y =
+            partialDeriv (E := E) p
+              (fun z => partialDeriv (E := E) q (chartGramOnE (I := I) (gfam 0) x i j) z) y +
+            σ * partialDeriv (E := E) p
+              (fun z => partialDeriv (E := E) q (h i j) z) y := by
+        intro σ hσ
+        have hgerm := hinner σ hσ
+        set U : E → ℝ := fun z => partialDeriv (E := E) q (chartGramOnE (I := I) (gfam 0) x i j) z
+          with hU
+        set V : E → ℝ := fun z => partialDeriv (E := E) q (h i j) z with hV
+        have hpartcongr : partialDeriv (E := E) p
+            (partialDeriv (E := E) q (chartGramOnE (I := I) (gfam σ) x i j)) y =
+            partialDeriv (E := E) p (fun z => U z + σ * V z) y := by
+          simp only [partialDeriv]; rw [hgerm.fderiv_eq]
+        rw [hpartcongr]
+        simp only [partialDeriv]
+        have hBσ : HasFDerivAt (fun z => σ * V z) (σ • fderiv ℝ V y) y :=
+          hBq_diff.hasFDerivAt.const_mul σ
+        have hsum : HasFDerivAt (fun z => U z + σ * V z)
+            (fderiv ℝ U y + σ • fderiv ℝ V y) y := hAq_diff.hasFDerivAt.add hBσ
+        rw [hsum.fderiv, ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply, smul_eq_mul]
+      have heq : (fun σ : ℝ =>
+          partialDeriv (E := E) p (partialDeriv (E := E) q (chartGramOnE (I := I) (gfam σ) x i j)) y)
+          =ᶠ[nhds 0] (fun σ : ℝ =>
+            partialDeriv (E := E) p
+              (fun z => partialDeriv (E := E) q (chartGramOnE (I := I) (gfam 0) x i j) z) y +
+            σ * partialDeriv (E := E) p (fun z => partialDeriv (E := E) q (h i j) z) y) := by
+        filter_upwards [Metric.ball_mem_nhds (0 : ℝ) hε_pos] with σ hσ
+        exact hpt σ (by simpa [Real.dist_eq] using hσ)
+      apply HasDerivAt.congr_of_eventuallyEq _ heq
+      have h1 : HasDerivAt (fun σ : ℝ =>
+          partialDeriv (E := E) p
+            (fun z => partialDeriv (E := E) q (chartGramOnE (I := I) (gfam 0) x i j) z) y +
+          σ * partialDeriv (E := E) p (fun z => partialDeriv (E := E) q (h i j) z) y)
+          (0 + 1 * partialDeriv (E := E) p
+            (fun z => partialDeriv (E := E) q (h i j) z) y) 0 :=
+        (hasDerivAt_const _ _).add ((hasDerivAt_id _).mul_const _)
+      simpa using h1
+  · -- IsRealizedChartVelocity: near base, `χE ≡ 1`, so `h = V`, the affine velocity of `realizedFam`.
+    intro i j
+    have hbase_t : y₀ ∈ (extChartAt I x).target := by rw [hy₀]; exact mem_extChartAt_target x
+    have hgs_eq : gs = realizedFam (I := I) g₀ T T' hδ hδ' s := hgs
+    filter_upwards [hχE_one_near,
+      (isOpen_extChartAt_target (I := I) x).mem_nhds hbase_t,
+      (isOpen_extChartAt_target (I := I) x).mem_nhds hbase_t] with y hy1 hyt _
+    -- the realized-family chart-Gram σ-derivative at `s` equals the constant chart-Gram difference
+    have hdaff : HasDerivAt
+        (fun σ : ℝ => chartGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' σ) x i j y)
+        (chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x i j y -
+          chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x i j y) s := by
+      have heq2 : (fun σ : ℝ => chartGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' σ) x i j y)
+          =ᶠ[nhds s] (fun σ : ℝ =>
+            (1 - σ) * chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x i j y +
+            σ * chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x i j y) := by
+        filter_upwards [hSopen.mem_nhds hsmem] with σ hσ
+        exact realizedFam_chartGramOnE (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' hσ x i j y
+      apply HasDerivAt.congr_of_eventuallyEq _ heq2
+      have h1 : HasDerivAt (fun σ : ℝ =>
+          (1 - σ) * chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x i j y +
+          σ * chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x i j y)
+          ((0 - 1) * chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x i j y +
+            1 * chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x i j y) s := by
+        apply HasDerivAt.add
+        · exact (((hasDerivAt_const s (1:ℝ)).sub (hasDerivAt_id s)).mul_const _)
+        · exact (hasDerivAt_id s).mul_const _
+      convert h1 using 1
+      ring
+    -- show `h i j y` equals this derivative value.
+    have hhval : h i j y =
+        chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x i j y -
+          chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x i j y := by
+      change hcomp i j y = _
+      simp only [hhcomp]
+      have hχ1 : χE y = 1 := hy1
+      rw [hχ1, one_mul, hBframe_eq i j y]
+    rw [hhval]
+    exact hdaff
+  · -- locality (chart Ricci): both families have equal chart Gram germ near base, for `σ` near 0.
+    intro i k
+    filter_upwards [hWσ_nhds] with σ hσW
+    refine chartRicciTensor_congr_of_chartGramOnE_eventuallyEq (g := gfam σ)
+      (g' := realizedFam (I := I) g₀ T T' hδ hδ' (s + σ)) (α := x) (y := y₀) ?_ i k
+    intro a b
+    exact hloc_gram σ hσW a b
+  · -- locality (combined Ricci–DeTurck RHS): same chart-Gram germ ⟹ same `chartFComponentOnE` RHS.
+    intro i k
+    have hbase_int : y₀ ∈ interior (extChartAt I x).target :=
+      extChartAt_target_subset_interior_of_boundaryless (I := I) x (by rw [hy₀]; exact mem_extChartAt_target x)
+    filter_upwards [hWσ_nhds] with σ hσW
+    -- convert both sides to `chartDeTurckRicciRHS`, then use the congruence lemma.
+    rw [DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.chartFComponentOnE_deTurckRicciRHS_eq
+        (I := I) g_bg (gfam σ) x i k hbase_int,
+      DifferentialGeometry.PDE.DeTurck.DeTurckLinearization.chartFComponentOnE_deTurckRicciRHS_eq
+        (I := I) g_bg (realizedFam (I := I) g₀ T T' hδ hδ' (s + σ)) x i k hbase_int]
+    refine chartDeTurckRicciRHS_congr_of_chartGramOnE_eventuallyEq (g := gfam σ)
+      (g' := realizedFam (I := I) g₀ T T' hδ hδ' (s + σ)) (g_bg := g_bg) (α := x) (y := y₀) ?_ i k
+    intro a b
+    exact hloc_gram σ hσW a b
 
 /-- **The realized combined Ricci–DeTurck chart sum along the metric path.**
 
