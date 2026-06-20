@@ -4329,6 +4329,59 @@ private lemma threeArmCoeffSum_rfns_le (g₀ : SmoothRiemannianMetric I M) {r s 
     (R.toSection x) (L.toSection x)
   nlinarith [hadd, hR, hL]
 
+/-- **(POSITED deep bedrock — the Moser ball-uniform `C⁰` operator fibre-norm sup of the per-pair
+Ricci-arm linearization coefficient fields.)**
+
+Fix `g₀`, `g_bg`, a supercritical order `a` (`2·finrank E + 10 ≤ a`) and a covariant-`L²` ball radius
+`R ≥ 0`.  There is **one** nonnegative ball-uniform order-`0` `C⁰` operator level `ΛR` — outside the
+`∀ T T'` quantifier — such that for any two `g₀`-fibre-small `T, T'` whose covariant-`L²` jets up to order
+`a + 2` lie in the radius-`R` ball there exist three endpoint coefficient fields `R₀, R₁, R₂` with both the
+per-pair Ricci-arm value identity (the `negTwoRicciArm_appCc_eval` form, `(−2)·Ric` arm) AND the
+order-`0` `C⁰` sups `rfns(Rₘ x) ≤ ΛR²`.
+
+This is the genuine deep content beyond the per-pair eval-matching `negTwoRicciArm_appCc_eval`
+(`CovGrad/RicciDeTurckLieArm.lean`): the coefficient fields are the path-averaged
+`ricciArmOrder0Coeff`/`ricciArmOrder2Coeff` (rational in the order-`≤ 2` jets of the realize-tie metrics
+with inverse-Gram denominators bounded below by `δ < 1`), and the supercritical `H^{a+2} ↪ C²` section
+embedding (`ha_super`) turns the `a + 2` covariant-`L²` ball constraint on `T, T'` into a uniform `C⁰`
+control of their order-`≤ 2` jets, so the fibre-norm sups of those rational coefficient fields are uniform
+over the ball (the same Moser inverse-Gram / Christoffel / Ricci jet ball-uniformity that
+`deTurckRHSArmDiff_order0_pointwise_domination_ballUniform` runs at the value level; `δ < 1` ALONE is
+insufficient — it bounds the denominators but not the second-derivative numerators a concentrating common
+part would blow up, so `ha_super` is genuinely load-bearing).
+
+**Non-vacuity.**  The triple is an *existential output* (NOT a `∀`-over-all-triples claim — no `appCc`
+kernel-bloat); the `(value identity)` clause constrains it to *reproduce the `(−2)`-scaled Ricci-arm
+value*, the zero triple fails it whenever the realized Ricci arm is nonzero (`appCc_zero_left`), and a
+`ΛR = 0` level is rejected by the nonvanishing genuine endpoint symbols on the supercritical ball. -/
+private theorem exists_ricciArmCoeff_ballUniform_C0_sup
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
+    ∃ ΛR : ℝ, 0 ≤ ΛR ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_lt : δ' < 1)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∃ (R₀ : SmoothCcTensor g₀ 2 2) (R₁ : SmoothCcTensor g₀ 3 2) (R₂ : SmoothCcTensor g₀ 4 2),
+          (∀ (x : M) (v : Fin 2 → TangentSpace I x),
+            ((-2 : ℝ) * ricciTensor (I := I)
+                  (smoothRiemannianMetricToInfty (I := I)
+                    (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ)) x (v 0) (v 1)
+                - (-2 : ℝ) * ricciTensor (I := I)
+                    (smoothRiemannianMetricToInfty (I := I)
+                      (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ')) x (v 0) (v 1)) =
+            unitModel (I := I) (M := M) g₀ 2
+              (appCc (I := I) (M := M) g₀ 2 2 R₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
+                appCc (I := I) (M := M) g₀ 3 2 R₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
+                appCc (I := I) (M := M) g₀ 4 2 R₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x (R₀.toSection x) ≤ ΛR ^ 2) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x (R₁.toSection x) ≤ ΛR ^ 2) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (R₂.toSection x) ≤ ΛR ^ 2) :=
+  sorry
+
 /-- **(POSITED deep bedrock — the VALUE-LEVEL (`unitModel`) ball-uniform order-graded Ricci-arm
 linearization of the realized `(−2)`-scaled Ricci tensor difference, with order-`0` `C⁰` operator
 fibre-norm sups.)**
@@ -4339,14 +4392,12 @@ order-`0` `C⁰` operator level `ΛR`, and for any two `g₀`-fibre-small `T, T'
 to order `a + 2` lie in the radius-`R` ball, the three endpoint coefficient fields with the `∀ x v`
 value identity and the order-`0` `C⁰` sups `rfns(Rₘ x) ≤ ΛR²`.
 
-The deep content beyond the on-disk per-pair grading is the **Moser ball-uniformity** of the realized
-Ricci-arm coefficient symbol: the coefficient fields read only the order-`≤ 2` jets of the endpoint
-metrics through the `g₁⁻¹`/`∇g₁⁻¹`/`connDiff`/inverse-Gram structure, and over the fibre-small radius-`R`
-ball the realized metrics stay uniformly positive-definite (the `δ < 1` fibre bound keeps `det` bounded
-away from `0`) with metric jets bounded by `R`, so the fibre-norm sups of the rational-with-nonvanishing-
-denominator coefficient fields are uniform over the ball (the standard Moser ball-uniformity of the
-inverse-Gram / Christoffel / Ricci jet towers).  The per-pair eval-matching half is the on-disk
-`deTurckRicciArm_appCc_eval`; this node hoists its coefficient sups to a single ball-uniform `ΛR`.
+The genuine deep content (the Moser ball-uniformity of the realized Ricci-arm coefficient symbol over the
+supercritical ball) is isolated in the child `exists_ricciArmCoeff_ballUniform_C0_sup`, which supplies the
+ball-uniform `ΛR` together with, per fibre-small `(T, T')`, the three coefficient fields satisfying the
+per-pair `negTwoRicciArm_appCc_eval` value identity AND the `C⁰` sups.  This node only bridges that
+mul-form `(−2)·Ric`-arm value identity to the `smul`-form stated here (`smul_sub` / `smul_eq_mul` and the
+transparency of `smoothRiemannianMetricToInfty := g` to `ricciTensor`).
 
 **Non-vacuity.**  The `(value identity)` clause genuinely constrains the triple to *reproduce the
 `(−2)`-scaled Ricci-arm difference value*; the zero triple fails it whenever the realized Ricci arm is
@@ -4376,7 +4427,74 @@ private theorem deTurckRicciArm_appCc_graded_ballUniform
                 appCc (I := I) (M := M) g₀ 4 2 R₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x (R₀.toSection x) ≤ ΛR ^ 2) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x (R₁.toSection x) ≤ ΛR ^ 2) ∧
-          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (R₂.toSection x) ≤ ΛR ^ 2) :=
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (R₂.toSection x) ≤ ΛR ^ 2) := by
+  classical
+  obtain ⟨ΛR, hΛR_nn, hsup⟩ :=
+    exists_ricciArmCoeff_ballUniform_C0_sup (I := I) g₀ g_bg a ha_super hR
+  refine ⟨ΛR, hΛR_nn, ?_⟩
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
+  obtain ⟨R₀, R₁, R₂, hval, hR₀, hR₁, hR₂⟩ :=
+    hsup T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
+  refine ⟨R₀, R₁, R₂, fun x v => ?_, hR₀, hR₁, hR₂⟩
+  -- Bridge the `smul`-form `(−2)·(Ric − Ric)` value to the child's `mul`-form `(−2)·Ric − (−2)·Ric`
+  -- value (`smul_sub` / `smul_eq_mul`), with `smoothRiemannianMetricToInfty := g` transparent to
+  -- `ricciTensor`.
+  rw [smul_sub, smul_eq_mul, smul_eq_mul]
+  exact hval x v
+
+/-- **(POSITED deep bedrock — the Moser ball-uniform `C⁰` operator fibre-norm sup of the per-pair
+Lie-arm linearization coefficient fields.)**
+
+The Lie-arm analogue of `exists_ricciArmCoeff_ballUniform_C0_sup`.  Fix `g₀`, `g_bg`, a supercritical
+order `a` and a ball radius `R ≥ 0`.  There is one nonnegative ball-uniform order-`0` `C⁰` level `ΛL` —
+outside the `∀ T T'` quantifier — such that for any two `g₀`-fibre-small `T, T'` whose covariant-`L²`
+jets up to order `a + 2` lie in the radius-`R` ball there exist three endpoint coefficient fields
+`L₀, L₁, L₂` with both the per-pair Lie-arm value identity (the `deTurckLieArm_appCc_eval` form) AND the
+order-`0` `C⁰` sups `rfns(Lₘ x) ≤ ΛL²`.
+
+The genuine deep content beyond the per-pair eval-matching `deTurckLieArm_appCc_eval`
+(`CovGrad/RicciDeTurckLieArm.lean`): the coefficient fields read the order-`≤ 2` jets of the realize-tie
+metrics through the chart Lie-derivative-metric symbol `½g⁻¹∂` and `W = g⁻¹·(∇g − ∇g_bg)` (rational with
+`δ < 1` denominators), and the supercritical `H^{a+2} ↪ C²` section embedding (`ha_super`) makes their
+fibre-norm sups uniform over the ball (the same Moser inverse-Gram / Christoffel ball-uniformity as the
+Ricci arm; `δ < 1` ALONE is insufficient, so `ha_super` is load-bearing).
+
+**Non-vacuity.**  The triple is an *existential output* (no `appCc` kernel-bloat); the `(value identity)`
+clause constrains it to *reproduce the Lie-arm difference value*, the zero triple fails it whenever the
+realized Lie arm is nonzero, and a `ΛL = 0` level is rejected by the nonvanishing genuine Lie-arm endpoint
+symbols on the supercritical ball. -/
+private theorem exists_lieArmCoeff_ballUniform_C0_sup
+    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
+    ∃ ΛL : ℝ, 0 ≤ ΛL ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_lt : δ' < 1)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
+        (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
+        ∃ (L₀ : SmoothCcTensor g₀ 2 2) (L₁ : SmoothCcTensor g₀ 3 2) (L₂ : SmoothCcTensor g₀ 4 2),
+          (∀ (x : M) (v : Fin 2 → TangentSpace I x),
+            lieDerivMetricClm (I := I)
+                  (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ)
+                  (deTurckVF (I := I)
+                    (smoothRiemannianMetricToInfty (I := I)
+                      (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ))
+                    (smoothRiemannianMetricToInfty (I := I) g_bg)) x (v 0) (v 1) -
+                lieDerivMetricClm (I := I)
+                  (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ')
+                  (deTurckVF (I := I)
+                    (smoothRiemannianMetricToInfty (I := I)
+                      (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ'))
+                    (smoothRiemannianMetricToInfty (I := I) g_bg)) x (v 0) (v 1) =
+            unitModel (I := I) (M := M) g₀ 2
+              (appCc (I := I) (M := M) g₀ 2 2 L₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
+                appCc (I := I) (M := M) g₀ 3 2 L₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
+                appCc (I := I) (M := M) g₀ 4 2 L₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x (L₀.toSection x) ≤ ΛL ^ 2) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x (L₁.toSection x) ≤ ΛL ^ 2) ∧
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (L₂.toSection x) ≤ ΛL ^ 2) :=
   sorry
 
 /-- **(POSITED deep bedrock — the VALUE-LEVEL (`unitModel`) ball-uniform order-graded Lie-arm
@@ -4387,12 +4505,11 @@ The ball-uniform (`ΛL` outside the `∀ T T'` quantifier) form of the per-pair 
 `deTurckLieArm_appCc_graded` (`CovGrad/RicciDeTurckLieArm.lean`).  Same shape as the Ricci-arm
 ball-uniform node, for the Lie arm `𝓛_{W(g₁)} g₁ − 𝓛_{W(g₁')} g₁'` (`W(g) = deTurckVF g g_bg`).
 
-The deep content is the **Moser ball-uniformity** of the realized Lie-arm (DeTurck vector-field) symbol:
-the coefficient fields read the order-`≤ 2` jets of the endpoint metrics through the chart
-Lie-derivative-metric symbol `½g⁻¹∂` and `W = g⁻¹·(∇g − ∇g_bg)`, uniformly bounded over the fibre-small
-radius-`R` ball (the same Moser inverse-Gram / Christoffel uniformity as the Ricci arm).  The per-pair
-eval-matching half is `deTurckLieArm_appCc_eval`; this node hoists its coefficient sups to a single
-ball-uniform `ΛL`.
+The genuine deep content (the Moser ball-uniformity of the realized Lie-arm DeTurck-vector-field symbol
+over the supercritical ball) is isolated in the child `exists_lieArmCoeff_ballUniform_C0_sup`, which
+supplies the ball-uniform `ΛL` together with, per fibre-small `(T, T')`, the three coefficient fields
+satisfying the per-pair `deTurckLieArm_appCc_eval` value identity (verbatim the shape stated here) AND
+the `C⁰` sups.  This node is the trivial re-quantifier-shaping of that child.
 
 **Non-vacuity.**  The `(value identity)` clause genuinely constrains the triple to *reproduce the Lie-arm
 difference value*; the zero triple fails it whenever the realized Lie arm is nonzero, and `ΛL = 0` is
@@ -4428,8 +4545,15 @@ private theorem deTurckLieArm_appCc_graded_ballUniform
                 appCc (I := I) (M := M) g₀ 4 2 L₂ (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x (L₀.toSection x) ≤ ΛL ^ 2) ∧
           (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x (L₁.toSection x) ≤ ΛL ^ 2) ∧
-          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (L₂.toSection x) ≤ ΛL ^ 2) :=
-  sorry
+          (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (L₂.toSection x) ≤ ΛL ^ 2) := by
+  classical
+  obtain ⟨ΛL, hΛL_nn, hsup⟩ :=
+    exists_lieArmCoeff_ballUniform_C0_sup (I := I) g₀ g_bg a ha_super hR
+  refine ⟨ΛL, hΛL_nn, ?_⟩
+  intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' hTball hT'ball
+  obtain ⟨L₀, L₁, L₂, hval, hL₀, hL₁, hL₂⟩ :=
+    hsup T T' hδ_lt hδ hδ'_lt hδ' hTball hT'ball
+  exact ⟨L₀, L₁, L₂, hval, hL₀, hL₁, hL₂⟩
 
 /-- **(POSITED deep bedrock — the VALUE-LEVEL (`unitModel`) ball-uniform three-term mean-value
 section-arm grading of the Ricci–DeTurck RHS-arm difference, with the ball-uniform order-`0` `C⁰`
