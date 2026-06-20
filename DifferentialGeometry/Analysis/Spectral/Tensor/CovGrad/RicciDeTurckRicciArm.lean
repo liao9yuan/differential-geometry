@@ -3265,34 +3265,109 @@ theorem integratedLinearizedRicci_appCc_eq
 
 /-! ## The combined-operator mean-value (FTC) foundation -/
 
-/-- **(Posited deep input — the mean-value (FTC) reduction of the combined Ricci–DeTurck-operator
-difference.)**
+/-- **The realized family at the path endpoint `s = 1` is the `T`-realized metric.**  Both
+metrics have inner product `g₀ + ccBilin(T)`, so they coincide by `riemannianMetric_eq_of_inner`. -/
+private theorem realizedFam_one_eq_realize (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    realizedFam (I := I) g₀ T T' hδ hδ' 1 = tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ := by
+  have hmem : (1 : ℝ) ∈ realizedSmallSet (δ := δ) (δ' := δ') :=
+    Icc_subset_realizedSmallSet hδ_lt hδ'_lt ⟨zero_le_one, le_refl 1⟩
+  refine riemannianMetric_eq_of_inner _ _ (fun b u z => ?_)
+  rw [realizedFam_inner_of_mem (I := I) g₀ T T' hδ hδ' hmem, tensorSectionRealizeMetric_inner,
+    convexPerturbation_one]
+
+/-- **The realized family at the path endpoint `s = 0` is the `T'`-realized metric.** -/
+private theorem realizedFam_zero_eq_realize (g₀ : SmoothRiemannianMetric I M)
+    (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ_lt : δ < 1)
+    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    realizedFam (I := I) g₀ T T' hδ hδ' 0 = tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ' := by
+  have hmem : (0 : ℝ) ∈ realizedSmallSet (δ := δ) (δ' := δ') :=
+    Icc_subset_realizedSmallSet hδ_lt hδ'_lt ⟨le_refl 0, zero_le_one⟩
+  refine riemannianMetric_eq_of_inner _ _ (fun b u z => ?_)
+  rw [realizedFam_inner_of_mem (I := I) g₀ T T' hδ hδ' hmem, tensorSectionRealizeMetric_inner,
+    convexPerturbation_zero]
+
+/-- **The intrinsic↔chart-sum endpoint read-off for the combined operator.**  At the base chart
+point `extChartAt I x x`, the `chartModelBasis`-weighted trace read-off of the chart components of
+the combined Ricci–DeTurck right-hand side equals the genuine intrinsic combined-operator value
+`deTurckRicciRHS g_bg g x v w`.  Expand each tangent argument in the chart basis
+(`Module.Basis.sum_repr`), distribute the bilinear `deTurckRicciRHS g_bg g x` over the sum
+(`map_sum`/`map_smul`), and identify `chartFComponentOnE (deTurckRicciRHS g_bg) g x i k
+(extChartAt I x x)` with `deTurckRicciRHS g_bg g x (e_i) (e_k)` via the chart frame at the base point
+(`chartBasisVecFiber_self`, `extChartAt` left-inverse); the index-pairing swap is absorbed by the
+value-symmetry `deTurckRicciRHS_symm`. -/
+private theorem realizedDeTurckRicciChartSum_endpoint_eq
+    (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (x : M) (v w : TangentSpace I x) (s : ℝ) :
+    realizedDeTurckRicciChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w s =
+      DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg
+        (realizedFam (I := I) g₀ T T' hδ hδ' s) x v w := by
+  classical
+  set b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E := chartModelBasis E with hb
+  set g : SmoothRiemannianMetric I M := realizedFam (I := I) g₀ T T' hδ hδ' s with hg
+  set F : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
+    DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg g x with hF
+  -- The chart-component value at the base point is `F` on the chart-basis pair.
+  have hcomp : ∀ i k : Fin (Module.finrank ℝ E),
+      DifferentialGeometry.PDE.RicciFlow.chartFComponentOnE (I := I)
+          (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg) g x i k
+          (extChartAt I x x) = F (b i) (b k) := by
+    intro i k
+    rw [DifferentialGeometry.PDE.RicciFlow.chartFComponentOnE]
+    have hleft : (extChartAt I x).symm (extChartAt I x x) = x :=
+      (extChartAt I x).left_inv (mem_extChartAt_source x)
+    rw [hleft]
+    rw [show DifferentialGeometry.PDE.RicciFlow.chartPushforwardFrameVec (I := I) x i x = b i from
+        chartBasisVecFiber_self (I := I) x i,
+      show DifferentialGeometry.PDE.RicciFlow.chartPushforwardFrameVec (I := I) x k x = b k from
+        chartBasisVecFiber_self (I := I) x k]
+  -- Expand `F w v` in the chart basis: `F w v = ∑ i k, repr w i * repr v k * F (b i) (b k)`.
+  -- (`F` is applied with `w` in the first slot, `v` in the second.)
+  have hExpand : F w v =
+      ∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
+        (b.repr w) i * (b.repr v) k * F (b i) (b k) := by
+    conv_lhs => rw [show w = ∑ i, (b.repr w) i • b i from (b.sum_repr w).symm,
+      show v = ∑ k, (b.repr v) k • b k from (b.sum_repr v).symm]
+    rw [map_sum F, ContinuousLinearMap.sum_apply]
+    refine Finset.sum_congr rfl (fun i _ => ?_)
+    rw [map_smul, ContinuousLinearMap.smul_apply, map_sum (F (b i))]
+    rw [smul_eq_mul, Finset.mul_sum]
+    refine Finset.sum_congr rfl (fun k _ => ?_)
+    rw [map_smul, smul_eq_mul]
+    ring
+  rw [realizedDeTurckRicciChartSum, show
+      DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg
+        (realizedFam (I := I) g₀ T T' hδ hδ' s) x v w = F v w from rfl,
+    show F v w = F w v from deTurckRicciRHS_isPointwiseSymm (I := I) g_bg g x v w,
+    hExpand]
+  -- Match termwise: chart-sum index `(i, k)` with weights `repr v k * repr w i` and
+  -- `chartFComponentOnE ... i k = F (b i) (b k)` against `repr w i * repr v k * F (b i) (b k)`.
+  refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun k _ => ?_))
+  rw [hcomp i k]
+  ring
+
+/-- **The combined-operator mean-value (FTC) reduction of the realized Ricci–DeTurck difference.**
 
 For two endpoint perturbation tensor sections `T, T'`, both `g₀`-fibre small with constant `< 1`, the
-chart read-off of the difference of the two realized **combined** Ricci–DeTurck right-hand sides
-`deTurckRicciRHS g_bg g₁ − deTurckRicciRHS g_bg g₁'` (with `g₁ = realize(g₀ + T)`,
-`g₁' = realize(g₀ + T')`) at the base chart point equals the `s`-integral over `[0,1]` of the
-`s`-derivative of the realized combined chart sum `realizedDeTurckRicciChartSum`:
-```
-(deTurckRicciRHS g_bg g₁ − deTurckRicciRHS g_bg g₁')_x(v 0, v 1)
-  = ∫₀¹ (d/ds) realizedDeTurckRicciChartSum g_s x(v0, v1) ds.
-```
+difference of the two realized **combined** Ricci–DeTurck right-hand sides equals the `s`-integral over
+`[0,1]` of the `s`-derivative of the realized combined chart sum `realizedDeTurckRicciChartSum`.
 
-This is the combined-operator analogue of the on-disk bare-Ricci mean-value FTC
-`ricciTensor_realized_sub_eq_integral_linearizedRicci`: the realized combined chart sum
-`realizedDeTurckRicciChartSum` is jointly `C^∞` in `(s, x)` on a neighbourhood of `[0,1]` (the chart
-Gram of `g_s` is a convex combination of the two endpoint Grams, hence smooth in `s`, and
-`deTurckRicciRHS = −2 Rc + 𝓛_W` is a chart-jet polynomial of it), so it is continuous on `[0,1]`,
-differentiable on `(0,1)`, with derivative interval-integrable; the fundamental theorem of calculus then
-equates the integral to the endpoint difference `realizedDeTurckRicciChartSum 1 −
-realizedDeTurckRicciChartSum 0`, and the chart-Riemann-basis read-off
-(`deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS`) identifies the two endpoints with the
-genuine intrinsic combined operator values at `g₁`, `g₁'`.  This analytic FTC-with-endpoint-readoff
-content (the joint-Gram smoothness of the combined chart sum + the intrinsic↔chart-sum endpoint bridge
-for the combined operator) is the same kind of analytic input as the on-disk bare-Ricci FTC; it is
-*posited* here, to be discharged by recursing into the combined joint-Gram smoothness tower.  It
-genuinely constrains the chart integral to reproduce the combined operator difference, so it is
-non-vacuous: it fails wherever the combined operator difference is nonzero. -/
+The realized combined chart sum is jointly `C^∞` in `(s, x)` on the open small set
+(`realizedDeTurckRicciChartSum_contDiffAt`), so it is continuous on `[0,1]`, differentiable on `(0,1)`,
+with interval-integrable derivative; the fundamental theorem of calculus
+(`intervalIntegral.integral_eq_sub_of_hasDerivAt`) equates the integral to the endpoint difference
+`realizedDeTurckRicciChartSum 1 − realizedDeTurckRicciChartSum 0`, and the intrinsic↔chart-sum endpoint
+read-off (`realizedDeTurckRicciChartSum_endpoint_eq` + `realizedFam_one/zero_eq_realize`) identifies the
+two endpoints with the genuine intrinsic combined-operator values at `realize(g₀, T)`, `realize(g₀, T')`. -/
 theorem deTurckRicciRHS_realized_sub_eq_integral_chartDeriv
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -3306,8 +3381,48 @@ theorem deTurckRicciRHS_realized_sub_eq_integral_chartDeriv
         DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg
           (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x v w =
       ∫ s in (0 : ℝ)..1,
-        deriv (realizedDeTurckRicciChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w) s :=
-  sorry
+        deriv (realizedDeTurckRicciChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w) s := by
+  classical
+  set f : ℝ → ℝ := realizedDeTurckRicciChartSum (I := I) g₀ g_bg T T' hδ hδ' x v w with hf
+  -- `f` agrees with the chart-`F`-component sum form of `realizedDeTurckRicciChartSum_contDiffAt`.
+  have hfeq : f = (fun s : ℝ => ∑ i : Fin (Module.finrank ℝ E),
+      ∑ k : Fin (Module.finrank ℝ E),
+        ((chartModelBasis E).repr v) k * ((chartModelBasis E).repr w) i *
+          DifferentialGeometry.PDE.RicciFlow.chartFComponentOnE (I := I)
+            (DifferentialGeometry.PDE.RicciFlow.deTurckRicciRHS (I := I) g_bg)
+            (realizedFam (I := I) g₀ T T' hδ hδ' s) x i k (extChartAt I x x)) := by
+    funext s; rw [hf, realizedDeTurckRicciChartSum]
+  -- `f` is `C^∞` at every point of the open small set.
+  have hcd : ∀ s ∈ realizedSmallSet (δ := δ) (δ' := δ'), ContDiffAt ℝ ∞ f s := by
+    intro s hs
+    rw [hfeq]
+    exact realizedDeTurckRicciChartSum_contDiffAt (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x v w hs
+  -- Continuity on `[0,1]`.
+  have hsub : Set.Icc (0:ℝ) 1 ⊆ realizedSmallSet (δ := δ) (δ' := δ') :=
+    Icc_subset_realizedSmallSet hδ_lt hδ'_lt
+  have hcont : ContinuousOn f (Set.Icc (0:ℝ) 1) := fun s hs =>
+    (hcd s (hsub hs)).continuousAt.continuousWithinAt
+  -- `HasDerivAt f (deriv f s) s` for every interior `s ∈ (0,1)`.
+  have hderiv : ∀ s ∈ Set.Ioo (0:ℝ) 1, HasDerivAt f (deriv f s) s := by
+    intro s hs
+    exact (hcd s (hsub (Set.mem_Icc_of_Ioo hs))).differentiableAt (by simp) |>.hasDerivAt
+  -- The derivative is interval-integrable on `[0,1]` (continuous on `[0,1]`).
+  have hderiv_cont : ContinuousOn (deriv f) (Set.Icc (0:ℝ) 1) := by
+    have hcdOn : ContDiffOn ℝ ∞ f (realizedSmallSet (δ := δ) (δ' := δ')) := fun s hs =>
+      (hcd s hs).contDiffWithinAt
+    exact (hcdOn.continuousOn_deriv_of_isOpen realizedSmallSet_isOpen
+      (by exact_mod_cast le_top)).mono hsub
+  have hint : IntervalIntegrable (deriv f) MeasureTheory.volume 0 1 :=
+    hderiv_cont.intervalIntegrable_of_Icc zero_le_one
+  -- FTC: the integral equals the endpoint difference of `f`.
+  have hFTC : ∫ s in (0:ℝ)..1, deriv f s = f 1 - f 0 :=
+    intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le zero_le_one hcont hderiv hint
+  rw [hFTC]
+  -- Identify the two endpoints with the intrinsic combined-operator values.
+  rw [hf, realizedDeTurckRicciChartSum_endpoint_eq (I := I) g₀ g_bg T T' hδ hδ' x v w 1,
+    realizedDeTurckRicciChartSum_endpoint_eq (I := I) g₀ g_bg T T' hδ hδ' x v w 0,
+    realizedFam_one_eq_realize (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ',
+    realizedFam_zero_eq_realize (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ']
 
 /-! ## The order-graded `appCc` decomposition (Ricci arm) -/
 
