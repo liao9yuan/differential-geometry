@@ -5,6 +5,31 @@ planning session.  Written 2026-06-11 by the planning (Fable) session.**
 
 ---
 
+## ✅✅✅✅ P3 FLOW-INSTANTIATED ENDPOINT COMPLETE — winGInfOfSol/winGInfOfData (2026-06-17, planner-verified)
+
+`winGInfOfSol` + `winGInfOfData` (MetricPreconvWindowSolutions.lean) discharge
+ALL of `windowGInf`'s hypotheses from a flow-solution sequence + the bundled
+P1/P2 inputs: `hgLip0Sol`+`hgLipFinSol` (uniform-`a≤p` time-Lipschitz, incl.
+the order-0 base), `covBddAllSol` (the all-order/all-compact `hbdd`),
+`SolLowData` (global lower bound), `denseIccSeq` (the time net). The inputs are
+bundled as `SolWindowData` (+ `SolLip0Data`/`SolSwapData`/`SolCovData`/
+`SolLipData`/`SolLowData`) — so cleanup #2 (SolWindowData consolidation) is
+effectively done too. **P3 is COMPLETE** modulo the honest bundled frontiers.
+
+PLANNER-VERIFIED (own build + axioms + deep read): build green 3883 jobs;
+`winGInfOfSol`/`winGInfOfData`/`covBddAllSol`/`hgLipFinSol` all AXIOM-CLEAN,
+file sorry-free. NON-VACUOUS: output `WindowGInfOut` is the real window-uniform
+`metricDerivNormSupOn` conclusion; `hShi` lives as honest fields in `SolCovData`
++ `SolLip0Data` (the BBS frontier, bundled as INPUT, not smuggled). Compatible
+with the `MovingShiBoundOn` refactor (the raw-formula bundle fields feed the
+predicate-typed `covOrderBound_of_soln` by defeq).
+
+REMAINING for Lemma 3.11: (a) `hShi` realization on the BBS/StarSum track
+(bundled here as honest input); (b) P4 — the `SourceMetricCPConvOnWindow`
+pullback layer (undesigned, no producer) + the Thm 3.10 assembly. Follow-up:
+the `SolCovData`/`SolLip0Data` hShi fields could adopt `MovingShiBoundOn` for
+full #1 consistency (defeq; non-urgent).
+
 ## ✅✅✅ P3 ABSTRACT WINDOW ENDPOINT PROVED — windowGInf (2026-06-13, Codex; planner-verified DEEP)
 
 `windowGInf` (MetricPreconvWindowGInf.lean:507, commit 36a059a5) — the genuine
